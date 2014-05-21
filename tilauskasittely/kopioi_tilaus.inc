@@ -5,7 +5,7 @@ if (!function_exists("kopioi_tilaus")) {
   // otetaan parametriksi tunnus
   function kopioi_tilaus($tunnus, $muokkaa_lasku = "", $muokkaa_rivi = "", $tapahtumapvm = "") {
 
-    // tarvitaan yhtiˆrowta ja kukarowta
+    // tarvitaan yhti√∂rowta ja kukarowta
     global $yhtiorow, $kukarow;
 
     $query = "SELECT *
@@ -20,10 +20,10 @@ if (!function_exists("kopioi_tilaus")) {
               AND yhtio     = '{$kukarow["yhtio"]}'";
     $lisatiedotres = pupe_query($query);
 
-    // Katsotaan, ett‰ tilausrivi on voimassa $tapahtumapvm == sopimuksen t‰m‰ laskutusp‰iv‰
+    // Katsotaan, ett√§ tilausrivi on voimassa $tapahtumapvm == sopimuksen t√§m√§ laskutusp√§iv√§
     if ($tapahtumapvm != "") {
-      // tilausrivi.kerayspvm => poikkeava alkup‰iv‰ on syˆtetty ja se on pienempi kuin t‰m‰ laskutusp‰iv‰
-      // tilausrivi.toimaika => poikkeava loppup‰iv‰ on syˆtetty ja se suurempi kuin t‰m‰ laskutusp‰iv‰
+      // tilausrivi.kerayspvm => poikkeava alkup√§iv√§ on sy√∂tetty ja se on pienempi kuin t√§m√§ laskutusp√§iv√§
+      // tilausrivi.toimaika => poikkeava loppup√§iv√§ on sy√∂tetty ja se suurempi kuin t√§m√§ laskutusp√§iv√§
       $lisaehto = "  AND (tilausrivi.kerayspvm = '0000-00-00' or (tilausrivi.kerayspvm != '0000-00-00' and tilausrivi.kerayspvm <= '$tapahtumapvm'))
               AND (tilausrivi.toimaika = '0000-00-00' or (tilausrivi.toimaika != '0000-00-00' and tilausrivi.toimaika >= '$tapahtumapvm'))";
     }
@@ -166,7 +166,7 @@ if (!function_exists("kopioi_tilaus")) {
       }
     }
 
-    //Korjataan perheid:t uusilla riveill‰
+    //Korjataan perheid:t uusilla riveill√§
     $query = "SELECT perheid, min(tunnus) uusiperheid
               FROM tilausrivi
               WHERE yhtio  = '{$kukarow["yhtio"]}'
@@ -184,7 +184,7 @@ if (!function_exists("kopioi_tilaus")) {
       $cores = pupe_query($query);
     }
 
-    //Korjataan perheid2:t uusilla riveill‰
+    //Korjataan perheid2:t uusilla riveill√§
     $query = "SELECT perheid2, min(tunnus) uusiperheid2
               FROM tilausrivi
               WHERE yhtio   = '{$kukarow["yhtio"]}'

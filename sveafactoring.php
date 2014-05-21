@@ -69,7 +69,7 @@ if ($tee == 'TARKISTA') {
 }
 
 if ($tee == '') {
-  //K‰yttˆliittym‰
+  //K√§ytt√∂liittym√§
   echo "<br>";
   echo "<form method='post'>";
   echo "Luo uusi siirtotiedosto<br>";
@@ -123,11 +123,11 @@ if ($tee == '') {
   echo "</select></td></tr>";
 
   echo "<tr>
-      <th>Syˆt‰ laskuv‰lin alku:</th>
+      <th>Sy√∂t√§ laskuv√§lin alku:</th>
       <td><input type='text' name='ppa' value='$arow[eka]' size='10'></td>
       </tr>
       <tr>
-      <th>Syˆt‰ laskuv‰lin loppu:</th>
+      <th>Sy√∂t√§ laskuv√§lin loppu:</th>
       <td><input type='text' name='ppl' value='$arow[vika]' size='10'></td>
       </tr>";
 
@@ -147,7 +147,7 @@ if ($tee == '') {
   echo "<td class='back'><input type='submit' value='Luo siirtoaineisto'></td></tr></form></table><br><br>";
 
 
-  //K‰yttˆliittym‰
+  //K√§ytt√∂liittym√§
   echo "<br>";
   echo "<form method='post'>";
   echo "Uudelleenluo siirtotiedosto<br>";
@@ -219,7 +219,7 @@ if ($tee == 'TULOSTA') {
   }
 
   if ($tee_u != 'UUDELLEENLUO' and ($ppa == '' or $ppl == '' or $ppl < $ppa)) {
-    echo "Huono laskunumerov‰li!";
+    echo "Huono laskunumerov√§li!";
     exit;
   }
 
@@ -244,7 +244,7 @@ if ($tee == 'TULOSTA') {
   $dresult = mysql_query ($dquery) or pupe_error($dquery);
 
   if (mysql_num_rows($dresult) == 0) {
-    echo "Huono laskunumerov‰li! Yht‰‰n siirett‰v‰‰ laskua ei lˆytynyt!";
+    echo "Huono laskunumerov√§li! Yht√§√§n siirett√§v√§√§ laskua ei l√∂ytynyt!";
     exit;
   }
 
@@ -349,12 +349,12 @@ if ($tee == 'TULOSTA') {
       $oma_viite .= $laskurow["sisviesti1"];
       $oma_viite = str_replace("\r", "\n", $oma_viite);
       $oma_viite = str_replace("\n", " ", $oma_viite);
-      $ulos .= sprintf ('%-32.32s', $oma_viite); // Meid‰n viitteemme, t‰ss‰ siis kohde + sisviesti1
+      $ulos .= sprintf ('%-32.32s', $oma_viite); // Meid√§n viitteemme, t√§ss√§ siis kohde + sisviesti1
 
       $laskun_viite = $laskurow["viesti"];
       $laskun_viite = str_replace("\r", "\n", $laskun_viite);
       $laskun_viite = str_replace("\n", ";", $laskun_viite);
-      $ulos .= sprintf ('%-32.32s', $laskun_viite); // Teid‰n viitteenne
+      $ulos .= sprintf ('%-32.32s', $laskun_viite); // Teid√§n viitteenne
 
       $tilausnumero = $laskurow["asiakkaan_tilausnumero"];
       $tilausnumero = str_replace("\r", "\n", $tilausnumero);
@@ -397,7 +397,7 @@ if ($tee == 'TULOSTA') {
         $ulos .= "01";
       }
 
-      // Jos kyseess‰ on yksityishenkilˆ, ei laiteta Y-tunnusta
+      // Jos kyseess√§ on yksityishenkil√∂, ei laiteta Y-tunnusta
       if ($asirow['laji'] == "H") {
         $ytunnus = "";
       }
@@ -452,7 +452,7 @@ if ($tee == 'TULOSTA') {
           }
 
           $ulos .= sprintf ('%04.4s', $laskurivi['alv'] * 100); // VAT percentage
-          $ulos .= sprintf ('%011.11s', round($laskurivi['alv'] * abs($laskurivi['rivihinta']))); // VAT amount // Korjaus poistettiin 100 * ja lis‰ttiin round
+          $ulos .= sprintf ('%011.11s', round($laskurivi['alv'] * abs($laskurivi['rivihinta']))); // VAT amount // Korjaus poistettiin 100 * ja lis√§ttiin round
 
           if ($laskurivi['alv'] * $laskurivi['rivihinta'] < 0) {
             $ulos .= "-";
@@ -464,7 +464,7 @@ if ($tee == 'TULOSTA') {
           $ulos .= sprintf ('%-4.4s', $laskurivi['yksikko']); // Units
           $ulos .= "\r\n";
 
-          // Jos kyseess‰ on kommentti...
+          // Jos kyseess√§ on kommentti...
           if ($laskurivi['kommentti'] != "") {
 
             $kommentti = $laskurivi['kommentti'];
@@ -530,7 +530,7 @@ if ($tee == 'TULOSTA') {
     if ($laskuvirh > 0) {
       echo "</table>";
       echo "<br><br>";
-      echo "Aineistossa oli virheit‰! Korjaa ne ja aja uudestaan!";
+      echo "Aineistossa oli virheit√§! Korjaa ne ja aja uudestaan!";
     }
     else {
       if ($tee_u != 'UUDELLEENLUO') {
@@ -594,13 +594,13 @@ if ($tee == 'TULOSTA') {
       //kirjoitetaan faili levylle..
       $filenimi = $svea_filename;
       $fh = fopen("dataout/".$filenimi, "w");
-      if (fwrite($fh, $ulos) === FALSE) die("Kirjoitus ep‰onnistui $filenimi");
+      if (fwrite($fh, $ulos) === FALSE) die("Kirjoitus ep√§onnistui $filenimi");
       fclose($fh);
 
       echo "<tr><td class='back'><br></td></tr>";
 
-      echo "<tr><td class='back' colspan='2'></td><th>Yhteens‰ $vlaskukpl veloituslaskua</th><td align='right'>".sprintf('%.2f', $vlaskusum/100)."</td><td>$laskurow[valkoodi]</td></tr>";
-      echo "<tr><td class='back' colspan='2'></td><th>Yhteens‰ $hlaskukpl hyvityslaskua</th><td align='right'> ".sprintf('%.2f', $hlaskusum/100)."</td><td>$laskurow[valkoodi]</td></tr>";
+      echo "<tr><td class='back' colspan='2'></td><th>Yhteens√§ $vlaskukpl veloituslaskua</th><td align='right'>".sprintf('%.2f', $vlaskusum/100)."</td><td>$laskurow[valkoodi]</td></tr>";
+      echo "<tr><td class='back' colspan='2'></td><th>Yhteens√§ $hlaskukpl hyvityslaskua</th><td align='right'> ".sprintf('%.2f', $hlaskusum/100)."</td><td>$laskurow[valkoodi]</td></tr>";
 
       echo "</table>";
       echo "<br><br>";
@@ -616,7 +616,7 @@ if ($tee == 'TULOSTA') {
       echo "<input type='hidden' name='toim' value='$toim'>";
       echo "<td><input type='submit' value='Tallenna'></td></form>";
       echo "</tr>";
-      echo "<tr><th>Siirr‰ siirtoaineisto SVEA:lle ftp:ll‰:</th>";
+      echo "<tr><th>Siirr√§ siirtoaineisto SVEA:lle ftp:ll√§:</th>";
       echo "<form method='post'>";
       echo "<input type='hidden' name='tee' value='siirra_tiedosto'>";
 
@@ -631,7 +631,7 @@ if ($tee == 'TULOSTA') {
     }
   }
   else {
-    echo "<br><br>Yht‰‰n siirrett‰v‰‰ laskua ei ole!<br>";
+    echo "<br><br>Yht√§√§n siirrett√§v√§√§ laskua ei ole!<br>";
     $tee = "";
   }
 }

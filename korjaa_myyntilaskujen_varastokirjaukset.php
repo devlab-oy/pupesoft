@@ -13,14 +13,14 @@ require("inc/functions.inc");
 $pupe_root_polku = dirname(dirname(__FILE__));
 
 if (!isset($argv[1]) or !isset($argv[2]) or !isset($argv[3])) {
-  echo utf8_encode("VIRHE: pakollisia parametreja puuttu!")."\n";
+  echo "VIRHE: pakollisia parametreja puuttu!"."\n";
   exit;
 }
 
-// Yhtiˆ
+// Yhti√∂
 $yhtio = $argv[1];
 
-// T‰st‰ eteenp‰in tapahtumia korjataan
+// T√§st√§ eteenp√§in tapahtumia korjataan
 $accident_date     = $argv[2];
 $accident_date_end = $argv[3];
 
@@ -30,7 +30,7 @@ if (isset($argv[4]) and $argv[4] != "") {
   $korjaa = TRUE;
 }
 
-// Kirjanputokauden ensimm‰inen avoin p‰iv‰. Jos laskun tapvm on t‰t‰ pienempi, niin siiret‰‰n korjaus kpitokauden ekalle p‰iv‰lle.
+// Kirjanputokauden ensimm√§inen avoin p√§iv√§. Jos laskun tapvm on t√§t√§ pienempi, niin siiret√§√§n korjaus kpitokauden ekalle p√§iv√§lle.
 $kpitokausi_auki = 00000000;
 $kpitokausi_auki_pvm = "0000-00-00";
 
@@ -38,7 +38,7 @@ if (isset($argv[5]) and $argv[5] != "") {
   $kpitokausi_auki = $argv[5];
 
   if (strlen($kpitokausi_auki) != 8) {
-    die("P‰iv‰m‰‰r‰ muodossa vvvvkkpp");
+    die("P√§iv√§m√§√§r√§ muodossa vvvvkkpp");
   }
 
   $kpitokausi_auki_pvm = substr($kpitokausi_auki, 0, 4)."-".substr($kpitokausi_auki, 4, 2)."-".substr($kpitokausi_auki, 6, 2);
@@ -53,7 +53,7 @@ $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
 
 if (!isset($kukarow)) {
-  echo utf8_encode("VIRHE: admin-k‰ytt‰j‰‰ ei lˆydy!")."\n";
+  echo "VIRHE: admin-k√§ytt√§j√§√§ ei l√∂ydy!"."\n";
   exit;
 }
 
@@ -150,7 +150,7 @@ if (mysql_num_rows($result) > 0) {
 
           $varmuutun = array_pop($maxmuutos);
 
-          // Tehd‰‰n uusi varastonmuutostiliˆinti
+          // Tehd√§√§n uusi varastonmuutostili√∂inti
           $params = array(
             'summa'     => round($tilirow["varmuutos"] * -1, 2),
             'tapvm'      => $tapvm,
@@ -161,10 +161,10 @@ if (mysql_num_rows($result) > 0) {
             'laadittu'     => date('Y-m-d H:i:s'),
           );
 
-          // Tehd‰‰n vastakirjaus alkuper‰iselle varastonmuutostiliˆinnille
+          // Tehd√§√§n vastakirjaus alkuper√§iselle varastonmuutostili√∂innille
           kopioitiliointi($varmuutun, "", $params);
 
-          // Tehd‰‰n uusi varastonmuutostiliˆinti
+          // Tehd√§√§n uusi varastonmuutostili√∂inti
           $params = array(
             'summa'     => round($rivirow["varmuutos"], 2),
             'tapvm'      => $tapvm,
@@ -175,7 +175,7 @@ if (mysql_num_rows($result) > 0) {
             'laadittu'     => date('Y-m-d H:i:s'),
           );
 
-          // Tehd‰‰n vastakirjaus alkuper‰iselle varastonmuutostiliˆinnille
+          // Tehd√§√§n vastakirjaus alkuper√§iselle varastonmuutostili√∂innille
           kopioitiliointi($varmuutun, "", $params);
 
           ################################################################################################
@@ -195,7 +195,7 @@ if (mysql_num_rows($result) > 0) {
 
           $vartun = array_pop($maxmuutos);
 
-          // Tehd‰‰n uusi varastonmuutostiliˆinti
+          // Tehd√§√§n uusi varastonmuutostili√∂inti
           $params = array(
             'summa'     => round($vararow["varasto"] * -1, 2),
             'tapvm'      => $tapvm,
@@ -206,10 +206,10 @@ if (mysql_num_rows($result) > 0) {
             'laadittu'     => date('Y-m-d H:i:s'),
           );
 
-          // Tehd‰‰n vastakirjaus alkuper‰iselle varastonmuutostiliˆinnille
+          // Tehd√§√§n vastakirjaus alkuper√§iselle varastonmuutostili√∂innille
           kopioitiliointi($vartun, "", $params);
 
-          // Tehd‰‰n uusi varastonmuutostiliˆinti
+          // Tehd√§√§n uusi varastonmuutostili√∂inti
           $params = array(
             'summa'     => round($rivirow["varmuutos"]*-1, 2),
             'tapvm'      => $tapvm,
@@ -220,14 +220,14 @@ if (mysql_num_rows($result) > 0) {
             'laadittu'     => date('Y-m-d H:i:s'),
           );
 
-          // Tehd‰‰n vastakirjaus alkuper‰iselle varastonmuutostiliˆinnille
+          // Tehd√§√§n vastakirjaus alkuper√§iselle varastonmuutostili√∂innille
           kopioitiliointi($vartun, "", $params);
         }
         elseif ($korjaa) {
           // Korjataan tositteet
           if ($tilirow['varmuutokset'] != "") {
 
-            // Tehd‰‰n uusi varastonmuutostiliˆinti
+            // Tehd√§√§n uusi varastonmuutostili√∂inti
             $params = array(
               'summa'     => round($rivirow["varmuutos"], 2),
               'korjattu'     => '',
@@ -239,10 +239,10 @@ if (mysql_num_rows($result) > 0) {
 
             $ekamuutos = explode(",", $tilirow['varmuutokset']);
 
-            // Tehd‰‰n vastakirjaus alkuper‰iselle varastonmuutostiliˆinnille
+            // Tehd√§√§n vastakirjaus alkuper√§iselle varastonmuutostili√∂innille
             kopioitiliointi($ekamuutos[0], "", $params);
 
-            // Yliviivataan alkuper‰iset varastonmuutostiliˆinnit
+            // Yliviivataan alkuper√§iset varastonmuutostili√∂innit
             $query = "UPDATE tiliointi
                       SET korjattu = '{$kukarow['kuka']}', korjausaika = now()
                       WHERE yhtio  = '$kukarow[yhtio]'
@@ -255,7 +255,7 @@ if (mysql_num_rows($result) > 0) {
 
           if ($vararow['varastot'] != "") {
 
-            // Tehd‰‰n uusi varastonmuutostiliˆinti
+            // Tehd√§√§n uusi varastonmuutostili√∂inti
             $params = array(
               'summa'     => round($rivirow["varmuutos"] * -1, 2),
               'korjattu'     => '',
@@ -267,10 +267,10 @@ if (mysql_num_rows($result) > 0) {
 
             $ekamuutos = explode(",", $vararow['varastot']);
 
-            // Tehd‰‰n vastakirjaus alkuper‰iselle varastonmuutostiliˆinnille
+            // Tehd√§√§n vastakirjaus alkuper√§iselle varastonmuutostili√∂innille
             kopioitiliointi($ekamuutos[0], "", $params);
 
-            // Yliviivataan alkuper‰iset varastonmuutostiliˆinnit
+            // Yliviivataan alkuper√§iset varastonmuutostili√∂innit
             $query = "UPDATE tiliointi
                       SET korjattu = '{$kukarow['kuka']}', korjausaika = now()
                       WHERE yhtio  = '$kukarow[yhtio]'
@@ -287,7 +287,7 @@ if (mysql_num_rows($result) > 0) {
     }
 
     if ($laskurow["KUUKAUSI"] != $edkuukausi and $edkuukausi != 0) {
-      if ($eroyht != 0) echo utf8_encode("$yhtiorow[nimi] / $edkuukausi ero yhteens‰: $eroyht")."\n";
+      if ($eroyht != 0) echo "$yhtiorow[nimi] / $edkuukausi ero yhteens√§: $eroyht"."\n";
       flush();
       $eroyht = 0;
     }
@@ -295,7 +295,7 @@ if (mysql_num_rows($result) > 0) {
     $edkuukausi = $laskurow["KUUKAUSI"];
   }
 
-  if ($eroyht != 0) echo utf8_encode("$yhtiorow[nimi] / $edkuukausi ero yhteens‰: $eroyht")."\n";
+  if ($eroyht != 0) echo "$yhtiorow[nimi] / $edkuukausi ero yhteens√§: $eroyht"."\n";
   echo "\n";
   flush();
 }

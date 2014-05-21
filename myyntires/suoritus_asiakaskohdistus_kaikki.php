@@ -14,7 +14,7 @@ while ($suoritus = mysql_fetch_assoc($result)) {
 
   $ok = 0;
 
-  // Kokeillaan ensin suoraan viitteellä
+  // Kokeillaan ensin suoraan viitteellÃ¤
   if ($suoritus['viite'] != '') {
     $query  = "SELECT DISTINCT liitostunnus
                FROM lasku USE INDEX (yhtio_tila_mapvm)
@@ -25,11 +25,11 @@ while ($suoritus = mysql_fetch_assoc($result)) {
                AND viite   = '$suoritus[viite]'";
     $laresult = pupe_query($query);
 
-    // Viitteellä löytyi lasku!
+    // ViitteellÃ¤ lÃ¶ytyi lasku!
     if (mysql_num_rows($laresult) == 1) {
       $lasku = mysql_fetch_assoc($laresult);
 
-      //Etsitään vastaava asiakas
+      //EtsitÃ¤Ã¤n vastaava asiakas
       $query = "SELECT nimi, konserniyhtio, tunnus
                 FROM asiakas
                 WHERE yhtio = '$kukarow[yhtio]'
@@ -60,11 +60,11 @@ while ($suoritus = mysql_fetch_assoc($result)) {
     }
   }
 
-  // Kokeillaan kohdistaa nimellä
+  // Kokeillaan kohdistaa nimellÃ¤
   if ($ok == 0) {
 
     $old   = array("[","{","\\","|","]","}");
-    $new   = array("Ä","ä", "Ö","ö","Å","å");
+    $new   = array("Ã„","Ã¤", "Ã–","Ã¶","Ã…","Ã¥");
     $unimi = trim(preg_replace('/\b(oy|ab)\b/i', '', strtolower($suoritus['nimi_maksaja'])));
     $unimi = str_replace($old, $new, $unimi);
 

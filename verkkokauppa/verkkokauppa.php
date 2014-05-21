@@ -63,7 +63,7 @@ if ($_REQUEST["tee"] == "login") {
     }
   }
 
-  $errormsg = "<br /><br /><font class='error'>K‰ytt‰j‰tunnusta ei lˆydy ja/tai salasana on virheellinen!</font><br />";
+  $errormsg = "<br /><br /><font class='error'>K√§ytt√§j√§tunnusta ei l√∂ydy ja/tai salasana on virheellinen!</font><br />";
   $tee = "";
 
   unset($user);
@@ -87,7 +87,7 @@ if (!isset($osasto)) $osasto = '';
 if (!isset($try)) $try = '';
 if (!isset($tuotemerkki)) $tuotemerkki = '';
 
-if ($verkkokauppa == "") die("Verkkokauppayhtiˆ m‰‰rittelem‰tt‰");
+if ($verkkokauppa == "") die("Verkkokauppayhti√∂ m√§√§rittelem√§tt√§");
 
 if (!function_exists("tilaus")) {
   function tilaus($tunnus, $muokkaa = "") {
@@ -102,7 +102,7 @@ if (!function_exists("tilaus")) {
     $laskurow = mysql_fetch_array($result);
 
     if ($muokkaa != "" and ($laskurow["tila"] != "N" or $laskurow["alatila"] != "" or $kukarow["kesken"] != $tunnus)) {
-      $ulos .= "<font class='error'>".t("Tilausta ei voi en‰‰ muokata")."!</font><br>";
+      $ulos .= "<font class='error'>".t("Tilausta ei voi en√§√§ muokata")."!</font><br>";
       $muokkaa = "";
     }
 
@@ -127,15 +127,6 @@ if (!function_exists("menu")) {
   function menu($osasto = "", $try = "") {
     global $yhtiorow, $kukarow, $verkkokauppa, $verkkokauppa_tuotemerkit, $verkkokauppa_saldotsk, $verkkokauppa_anon, $verkkokauppa_hakualkuun, $palvelin2;
 
-
-    if (isset($osasto) and mb_detect_encoding($osasto, mb_detect_order(), TRUE) == "UTF-8") {
-      $osasto = iconv("UTF-8", "latin1//TRANSLIT", $osasto);
-    }
-
-    if (isset($try) and mb_detect_encoding($try, mb_detect_order(), TRUE) == "UTF-8") {
-      $try = iconv("UTF-8", "latin1//TRANSLIT", $try);
-    }
-
     $val = "";
 
     if ($kukarow["kuka"] != "www") {
@@ -152,10 +143,10 @@ if (!function_exists("menu")) {
       $tuotemerkkilis = "";
     }
 
-    // vientikieltok‰sittely:
-    // +maa tarkoittaa ett‰ myynti on kielletty t‰h‰n maahan ja sallittu kaikkiin muihin
-    // -maa tarkoittaa ett‰ ainoastaan t‰h‰n maahan saa myyd‰
-    // eli n‰ytet‰‰n vaan tuotteet jossa vienti kent‰ss‰ on tyhj‰‰ tai -maa.. ja se ei saa olla +maa
+    // vientikieltok√§sittely:
+    // +maa tarkoittaa ett√§ myynti on kielletty t√§h√§n maahan ja sallittu kaikkiin muihin
+    // -maa tarkoittaa ett√§ ainoastaan t√§h√§n maahan saa myyd√§
+    // eli n√§ytet√§√§n vaan tuotteet jossa vienti kent√§ss√§ on tyhj√§√§ tai -maa.. ja se ei saa olla +maa
     $kieltolisa = "";
     unset($vierow);
 
@@ -209,7 +200,7 @@ if (!function_exists("menu")) {
       $verkkokauppa_tuotehaku = "<tr><td class='back'><br><font class='info'>".t("Tuotehaku").":</font><br><hr></td></tr>
              <form id = 'tuotehaku' name='tuotehaku'  action = \"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, false);\" method = 'post'>
             <tr><td class='back'><input type = 'text' size='12' name = 'tuotehaku'></td></tr>
-            <tr><td class='back'>&raquo; <a onclick=\"self.scrollTo(0,0);\" href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, false);\">".t("Nimityksell‰")."</a></td></tr>
+            <tr><td class='back'>&raquo; <a onclick=\"self.scrollTo(0,0);\" href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, false);\">".t("Nimityksell√§")."</a></td></tr>
             <tr><td class='back'>&raquo; <a onclick=\"self.scrollTo(0,0);\" href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=koodilla', 'selain', false, false);\">".t("Tuotekoodilla")."</a></td></tr>
             {$toimlisa}
             </form>";
@@ -266,10 +257,10 @@ if (!function_exists("menu")) {
 
       while ($tryrow = mysql_fetch_array($tryres)) {
 
-        //  Oletuksena pimitet‰‰n kaikki..
+        //  Oletuksena pimitet√§√§n kaikki..
         $ok = 0;
 
-        //  Tarkastetaan onko t‰‰ll‰ sopivia tuotteita
+        //  Tarkastetaan onko t√§√§ll√§ sopivia tuotteita
         $query = "SELECT *
                   FROM tuote
                   WHERE yhtio      = '{$kukarow['yhtio']}'
@@ -284,7 +275,7 @@ if (!function_exists("menu")) {
 
         while ($trow = mysql_fetch_array($res) and $ok == 0) {
 
-          // Jos tuote n‰ytet‰‰n vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei lˆydy
+          // Jos tuote n√§ytet√§√§n vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei l√∂ydy
           if ($trow["hinnastoon"] == "V" or $kukarow["naytetaan_tuotteet"] == "A") {
 
             if (!is_array($asiakasrow)) {
@@ -360,10 +351,10 @@ if (!function_exists("menu")) {
 
       while ($merow = mysql_fetch_array($meres)) {
 
-        //  Oletuksena pimitet‰‰n kaikki..
+        //  Oletuksena pimitet√§√§n kaikki..
         $ok = 0;
 
-        //  Tarkastetaan onko t‰‰ll‰ sopivia tuotteita
+        //  Tarkastetaan onko t√§√§ll√§ sopivia tuotteita
         $query = "SELECT *
                   FROM tuote
                   WHERE yhtio      = '{$kukarow['yhtio']}'
@@ -378,7 +369,7 @@ if (!function_exists("menu")) {
 
         while ($trow = mysql_fetch_array($res) and $ok == 0) {
 
-          // Jos tuote n‰ytet‰‰n vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei lˆydy
+          // Jos tuote n√§ytet√§√§n vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei l√∂ydy
           if ($trow["hinnastoon"] == "V" or $kukarow["naytetaan_tuotteet"] == "A") {
 
             if (!is_array($asiakasrow)) {
@@ -488,7 +479,7 @@ if (!function_exists("uutiset")) {
                       AND hinnastoon   IN ('W', 'V')";
             $tres = pupe_query($query);
 
-            //  T‰m‰ me korvataan aina!
+            //  T√§m√§ me korvataan aina!
             $search[] = "/$m[0]/";
 
             if (mysql_num_rows($tres) <> 1) {
@@ -524,7 +515,7 @@ if ($tee == "menu") {
 }
 
 if ($tee == "monistalasku") {
-  //  Tehd‰‰n t‰m‰ funktiossa niin ei saada v‰‰ri‰ muuttujia injisoitua
+  //  Tehd√§√§n t√§m√§ funktiossa niin ei saada v√§√§ri√§ muuttujia injisoitua
   function monistalasku($laskunro) {
     global $yhtiorow, $kukarow;
 
@@ -552,7 +543,7 @@ if ($tee == "monistalasku") {
 
   $tilaus = monistalasku($laskunro);
   if ($tilaus===false) {
-    echo "<font class='error'>".t("Tilauksen monistaminen ep‰onnistui")."!!</font><br>";
+    echo "<font class='error'>".t("Tilauksen monistaminen ep√§onnistui")."!!</font><br>";
   }
 }
 
@@ -574,7 +565,7 @@ if ($tee == "keskeytatilaus") {
     $query = "  UPDATE kuka SET kesken = 0 WHERE yhtio ='$kukarow[yhtio]' and kuka = '$kukarow[kuka]'";
     $result = pupe_query($query);
 
-    echo "<font class='message'>".t("J‰tettiin tilaus %s kesken", $kieli, $tilaus)."</font><br>";
+    echo "<font class='message'>".t("J√§tettiin tilaus %s kesken", $kieli, $tilaus)."</font><br>";
   }
 }
 
@@ -596,7 +587,7 @@ if ($tee == "tuotteen_lisatiedot") {
 
   //  Eka rivi aina head
   if (trim($row["kuvaus"]) == "" and trim($row["lyhytkuvaus"]) == "") {
-    $row["tekstit"] = t("Tuotteestamme ei ole t‰ll‰hetkell‰ lis‰tietoja..");
+    $row["tekstit"] = t("Tuotteestamme ei ole t√§ll√§hetkell√§ lis√§tietoja..");
   }
   else {
     $row["tekstit"] = $row["lyhytkuvaus"]."\n<br>".$row["kuvaus"];
@@ -605,7 +596,7 @@ if ($tee == "tuotteen_lisatiedot") {
 
   if ($row["tekstit"] != "") {
     $search = $replace = array();
-    // Shit! joudutaan tutkimaan mille v‰lille tehd‰‰n li
+    // Shit! joudutaan tutkimaan mille v√§lille tehd√§√§n li
     $search[]   = "/#{2}\+/";
     $replace[]   = "<ul class='ruutu'>";
     $search[]   = "/#{2}\-/";
@@ -682,7 +673,7 @@ if ($tee == "tuotteen_lisatiedot") {
     $liitetiedostot = "Tuotteesta ei ole kuvia";
   }
 
-  //  Vasemmalla meill‰ on kaikki tekstit
+  //  Vasemmalla meill√§ on kaikki tekstit
   if (stripos($_SERVER["HTTP_USER_AGENT"], "MSIE") !== FALSE) {
     echo "<table width='100%'><tr><td class='back' style='width:50px;'></td><td class='back'>$tekstit</td><td class='back' style='text-align:right;'>$liitetiedostot</td></tr><tr><td class='back'><br></td></tr></table>";
   }
@@ -701,13 +692,13 @@ if ($tee == "poistakori") {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 1) {
-    // lˆyty vaan yks dellataan se
+    // l√∂yty vaan yks dellataan se
     //$ostoskori = mysql_fetch_array($result);
     $kalakori = mysql_fetch_array($result);
 
     $query = "UPDATE tilausrivi SET
               tyyppi      = 'D',
-              kommentti   = trim(concat(kommentti, ' K‰ytt‰j‰ $kukarow[kuka] mit‰tˆi tilausrivin laskulta $kalakori[tunnus].'))
+              kommentti   = trim(concat(kommentti, ' K√§ytt√§j√§ $kukarow[kuka] mit√§t√∂i tilausrivin laskulta $kalakori[tunnus].'))
               where yhtio = '$kukarow[yhtio]' and
               tyyppi      = 'L' and
               otunnus     = '$kalakori[tunnus]'";
@@ -716,7 +707,7 @@ if ($tee == "poistakori") {
     $query = "UPDATE lasku SET
               alatila     = tila,
               tila        = 'D',
-              comments    = trim(concat(comments, ' K‰ytt‰j‰ $kukarow[kuka] mit‰tˆi laskun $kalakori[tunnus].'))
+              comments    = trim(concat(comments, ' K√§ytt√§j√§ $kukarow[kuka] mit√§t√∂i laskun $kalakori[tunnus].'))
               where yhtio = '$kukarow[yhtio]' and
               tila        = 'N' and
               tunnus      = '$kalakori[tunnus]'";
@@ -725,7 +716,7 @@ if ($tee == "poistakori") {
     $query = "  UPDATE kuka SET kesken = '' WHERE yhtio ='$kukarow[yhtio]' and kuka = '$kukarow[kuka]'";
     $result = pupe_query($query);
 
-    echo "<center><font class ='message'>".t("Tilaus %s mit‰tˆity", $kieli, $kukarow["kesken"])."</font></center>";
+    echo "<center><font class ='message'>".t("Tilaus %s mit√§t√∂ity", $kieli, $kukarow["kesken"])."</font></center>";
     $kukarow["kesken"] = 0;
   }
 }
@@ -740,13 +731,13 @@ if ($tee == "poistarivi") {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 1) {
-    // lˆyty vaan yks dellataan siit‰ rivi
+    // l√∂yty vaan yks dellataan siit√§ rivi
     //$ostoskori = mysql_fetch_array($result);
     $kalakori = mysql_fetch_array($result);
 
     $query = "UPDATE tilausrivi SET
               tyyppi      = 'D',
-              kommentti   = trim(concat(kommentti, ' K‰ytt‰j‰ $kukarow[kuka] mit‰tˆi tilausrivin laskulta $kukarow[kesken].'))
+              kommentti   = trim(concat(kommentti, ' K√§ytt√§j√§ $kukarow[kuka] mit√§t√∂i tilausrivin laskulta $kukarow[kesken].'))
               WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'L' and tunnus = '$rivitunnus' LIMIT 1";
     $result = pupe_query($query);
   }
@@ -802,7 +793,7 @@ if ($tee == "tilaa") {
 
     $laskurow = mysql_fetch_array($result);
 
-    //  Hyv‰ksynn‰n kautta
+    //  Hyv√§ksynn√§n kautta
     if ($kukarow["tilaus_valmis"] == 2) {
       $query  = "UPDATE lasku set
                  tila        = 'N',
@@ -814,7 +805,7 @@ if ($tee == "tilaa") {
       $result = pupe_query($query);
     }
     else {
-      // tulostetaan l‰hetteet ja tilausvahvistukset tai sis‰inen lasku..
+      // tulostetaan l√§hetteet ja tilausvahvistukset tai sis√§inen lasku..
       $silent = "JOO";
       $tilausvalmiskutsuja = "VERKKOKAUPPA";
 
@@ -824,7 +815,7 @@ if ($tee == "tilaa") {
     $ulos = "<font class='head'>".t("Kiitos tilauksesta")."</font><br><br><font class='message'>".t("Tilauksesi numero on").": $kukarow[kesken]</font><br>";
 
 
-    // tilaus ei en‰‰ kesken...
+    // tilaus ei en√§√§ kesken...
     $query  = "UPDATE kuka SET kesken=0 WHERE yhtio='$kukarow[yhtio]' AND kuka='$kukarow[kuka]'";
     $result = pupe_query($query);
   }
@@ -860,13 +851,13 @@ if ($tee == "tilatut") {
     $result = pupe_query($query);
     $row = mysql_fetch_array($result);
 
-    $ulos .= "<br><input type='button' onclick=\"if (confirm('".t("Oletko varma, ett‰ haluat j‰tt‰‰ tilauksen %s kesken?", $kieli, $laskurow["tunnus"])."')) { sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=keskeytatilaus&tilaus=$laskurow[tunnus]', false, false); }\" value='".t("J‰t‰ kesken")."'>&nbsp;&nbsp;";
+    $ulos .= "<br><input type='button' onclick=\"if (confirm('".t("Oletko varma, ett√§ haluat j√§tt√§√§ tilauksen %s kesken?", $kieli, $laskurow["tunnus"])."')) { sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=keskeytatilaus&tilaus=$laskurow[tunnus]', false, false); }\" value='".t("J√§t√§ kesken")."'>&nbsp;&nbsp;";
 
     if ($row["rivei"] > 0) {
-      $ulos .= "<input type='button' onclick=\"if (confirm('".t("Oletko varma, ett‰ haluat l‰hett‰‰ tilauksen eteenp‰in?")."')) { sndReq('selain', 'verkkokauppa.php?tee=tilaa'); }\" value='".t("Tilaa tuotteet")."'>&nbsp;&nbsp;";
+      $ulos .= "<input type='button' onclick=\"if (confirm('".t("Oletko varma, ett√§ haluat l√§hett√§√§ tilauksen eteenp√§in?")."')) { sndReq('selain', 'verkkokauppa.php?tee=tilaa'); }\" value='".t("Tilaa tuotteet")."'>&nbsp;&nbsp;";
     }
 
-    $ulos .= "<input type='button' onclick=\"if (confirm('".t("Oletko varma, ett‰ haluat mit‰tˆid‰ tilauksen?")."')) { sndReq('selain', 'verkkokauppa.php?tee=poistakori&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki'); }\" value='".t("Mit‰tˆi tilaus")."'>";
+    $ulos .= "<input type='button' onclick=\"if (confirm('".t("Oletko varma, ett√§ haluat mit√§t√∂id√§ tilauksen?")."')) { sndReq('selain', 'verkkokauppa.php?tee=poistakori&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki'); }\" value='".t("Mit√§t√∂i tilaus")."'>";
 
     $ulos .= "<br><br>";
 
@@ -910,8 +901,8 @@ if ($tee == "asiakastiedot") {
       $vainoomat = "<div>
         <form id = 'vainoma' name='tilaushaku' action = \"javascript:ajaxPost('vainoma', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&hakutapa=$hakutapa&tilaushaku=$tilaushaku&tila=$tila', 'selain', false, false);\" method = 'post'>
           <select name='vainomat' onchange='submit();'>
-            <option value=''>".t("N‰yt‰ kaikkien tilaukset")."</option>
-            <option value='x' $selv[x]>".t("N‰yt‰ vain omat tilaukset")."</option>
+            <option value=''>".t("N√§yt√§ kaikkien tilaukset")."</option>
+            <option value='x' $selv[x]>".t("N√§yt√§ vain omat tilaukset")."</option>
           </select>
         </form>
         </div>";
@@ -932,7 +923,7 @@ if ($tee == "asiakastiedot") {
           <form id = 'tilaushaku' name='tilaushaku' action = \"javascript:ajaxPost('tilaushaku', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&hakutapa=viitteet', 'selain', false, false);\" method = 'post'>
           <input type = 'text' size='50' name = 'tilaushaku' value='$tilaushaku'>
           <br>
-          <input type='submit' onclick=\"javascript:ajaxPost('tilaushaku', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=haku&hakutapa=viitteet', 'selain', false, false);\" value='".t("Hae laskun viitteist‰")."'><br>
+          <input type='submit' onclick=\"javascript:ajaxPost('tilaushaku', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=haku&hakutapa=viitteet', 'selain', false, false);\" value='".t("Hae laskun viitteist√§")."'><br>
           <input type='submit' onclick=\"javascript:ajaxPost('tilaushaku', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=haku&hakutapa=toimitusosoite', 'selain', false, false);\" value='".t("Hae laskun toimitusosoitteesta")."'><br>
           </form>
           <br>
@@ -969,7 +960,7 @@ if ($tee == "asiakastiedot") {
         }
       }
       else {
-        echo "<tr><td class='back' colspan='5'><font class='error'>".t("Haussa on oltava v‰hint‰‰n 3 merkki‰")."</font></td></tr>";
+        echo "<tr><td class='back' colspan='5'><font class='error'>".t("Haussa on oltava v√§hint√§√§n 3 merkki√§")."</font></td></tr>";
       }
     }
     elseif ($tila == "kesken") {
@@ -1021,7 +1012,7 @@ if ($tee == "asiakastiedot") {
           $aika = "Tilattu";
         }
         elseif ($tila == "toimituksessa") {
-          $aika = "Ker‰tty";
+          $aika = "Ker√§tty";
         }
         elseif ($tila == "toimitettu") {
           $aika = "Toimitettu";
@@ -1045,12 +1036,12 @@ if ($tee == "asiakastiedot") {
           $monista = $jatka ="";
 
           if ($laskurow["laskunro"] > 0) {
-            $monista = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=monistalasku&laskunro=$laskurow[laskunro]', false, false);\" onclick=\"return confirm('".t("Oletko varma, ett‰ haluat monistaa tilauksen?")."');\">".t("Monista")."</a>";
+            $monista = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=monistalasku&laskunro=$laskurow[laskunro]', false, false);\" onclick=\"return confirm('".t("Oletko varma, ett√§ haluat monistaa tilauksen?")."');\">".t("Monista")."</a>";
           }
 
           if ($laskurow["tila"] == "N" and $laskurow["alatila"] == "") {
             if ($laskurow["tunnus"] != $kukarow["kesken"]) {
-              $jatka = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=jatkatilausta&tilaus=$laskurow[tunnus]', false, false);\" onclick=\"return confirm('".t("Oletko varma, ett‰ haluat jatkaa tilausta %s?", $kieli, $laskurow["tunnus"])."');\">".t("Aktivoi")."</a>";
+              $jatka = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=jatkatilausta&tilaus=$laskurow[tunnus]', false, false);\" onclick=\"return confirm('".t("Oletko varma, ett√§ haluat jatkaa tilausta %s?", $kieli, $laskurow["tunnus"])."');\">".t("Aktivoi")."</a>";
             }
             else {
               $jatka = t("Akviivinen");
@@ -1062,7 +1053,7 @@ if ($tee == "asiakastiedot") {
                       <td>$laskurow[aika]</td>
                       <td>$laskurow[viesti]</td>
                       <td>".number_format($laskurow["summa"], 2, ',', ' ')."</td>
-                      <td class='back'><a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=$tila&hakutapa=$hakutapa&tilaustila=$tilaustila&tilaus=$laskurow[tunnus]', false, false);\">".t("N‰yt‰")."</a> $jatka $monista</td>
+                      <td class='back'><a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=$tila&hakutapa=$hakutapa&tilaustila=$tilaustila&tilaus=$laskurow[tunnus]', false, false);\">".t("N√§yt√§")."</a> $jatka $monista</td>
                       </tr>$lisa";
         }
       }
@@ -1077,7 +1068,7 @@ if ($tee == "asiakastiedot") {
     if ($tilaustila != "kesken") {
       echo "<tr>
           <td class='back' colspan='5'>
-            <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=kesken', false, false);\">".t("Keskener‰iset tilaukset")."</a>
+            <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=kesken', false, false);\">".t("Keskener√§iset tilaukset")."</a>
           </td>
         </tr>
         <tr>
@@ -1087,7 +1078,7 @@ if ($tee == "asiakastiedot") {
 
         <tr>
           <td class='back' colspan='5'>
-            <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=kasittely', false, false);\">".t("Tilaukset jotka odottaa k‰sittely‰")."</a>
+            <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=kasittely', false, false);\">".t("Tilaukset jotka odottaa k√§sittely√§")."</a>
           </td>
         </tr>
         <tr>
@@ -1133,22 +1124,6 @@ if ($tee == "asiakastiedot") {
 if ($tee == "selaa") {
 
   $tuoteno = $toim_tuoteno = $nimitys = $alkukoodilla = "";
-
-  if (isset($tuotehaku) and mb_detect_encoding($tuotehaku, mb_detect_order(), TRUE) == "UTF-8") {
-    $tuotehaku = iconv("UTF-8", "latin1//TRANSLIT", $tuotehaku);
-
-    $_GET["tuotehaku"]    = $tuotehaku;
-    $_POST["tuotehaku"]    = $tuotehaku;
-    $_REQUEST["tuotehaku"]  = $tuotehaku;
-  }
-
-  if (isset($tuotemerkki) and mb_detect_encoding($tuotemerkki, mb_detect_order(), TRUE) == "UTF-8") {
-    $tuotemerkki = iconv("UTF-8", "latin1//TRANSLIT", $tuotemerkki);
-
-    $_GET["tuotemerkki"]    = $tuotemerkki;
-    $_POST["tuotemerkki"]    = $tuotemerkki;
-    $_REQUEST["tuotemerkki"]  = $tuotemerkki;
-  }
 
   if ($hakutapa != "" and $tuotehaku == "") {
     die ("<font class='error'>".t("Anna jokin hakukriteeri")."</font>");
@@ -1290,11 +1265,11 @@ if ($tee == "") {
     $login_screen = "<form name='login' id= 'loginform' method='post'>
             <input type='hidden' name='tee' value='login'>
             <input type='hidden' id = 'location' name='location' value='$palvelin2'>
-            <font class='login'>".t("K‰ytt‰j‰tunnus",$browkieli).":</font>
+            <font class='login'>".t("K√§ytt√§j√§tunnus",$browkieli).":</font>
             <input type='text' value='' name='user' size='15' maxlength='30'>
             <font class='login'>".t("Salasana", $browkieli).":</font>
             <input type='password' name='salasana' size='15' maxlength='30'>
-            <input type='submit' onclick='submit()' value='".t("Kirjaudu sis‰‰n", $browkieli)."'>
+            <input type='submit' onclick='submit()' value='".t("Kirjaudu sis√§√§n", $browkieli)."'>
             </form>
             $errormsg
             ";
@@ -1344,7 +1319,7 @@ if ($tee == "") {
     echo str_replace("<verkkokauppa>", $verkkokauppa_ulos, file_get_contents("verkkokauppa.template"));
   }
   else {
-    echo "Verkkokauppapohjan m‰‰rittely puuttuu..<br>";
+    echo "Verkkokauppapohjan m√§√§rittely puuttuu..<br>";
   }
 
   echo "</body></html>";

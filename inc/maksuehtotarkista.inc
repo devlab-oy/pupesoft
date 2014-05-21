@@ -10,7 +10,7 @@ if(!function_exists("maksuehtotarkista")) {
       $prossa = (int) $t[$i];
 
       if ($yhtiorow["maksuehto_tuotenumero"] == "" and $prossa != 0) {
-        $virhe[$i] = t("Et voi tehd‰ moniehto-maksuehtoa koska yhtiˆlt‰ puuttuu maksuehto_tuotenumero!");
+        $virhe[$i] = t("Et voi tehd√§ moniehto-maksuehtoa koska yhti√∂lt√§ puuttuu maksuehto_tuotenumero!");
       }
       if ($prossa!= 0) {
           $moniehto = 1;
@@ -19,13 +19,13 @@ if(!function_exists("maksuehtotarkista")) {
 
     if (mysql_field_name($result, $i) == "jv") {
       if (trim($t[$i]) != "" and $moniehto != 0) {
-        $virhe[$i] = t("Et voi tehd‰ t‰st‰ jv-maksuehtoa koska t‰m‰ on moniehto-maksuehto!");
+        $virhe[$i] = t("Et voi tehd√§ t√§st√§ jv-maksuehtoa koska t√§m√§ on moniehto-maksuehto!");
       }
     }
 
     if (mysql_field_name($result, $i) == "kateinen") {
       if (trim($t[$i]) != "" and $moniehto != 0) {
-        $virhe[$i] = t("Et voi tehd‰ t‰st‰ k‰teismaksuehtoa koska t‰m‰ on moniehto-maksuehto!");
+        $virhe[$i] = t("Et voi tehd√§ t√§st√§ k√§teismaksuehtoa koska t√§m√§ on moniehto-maksuehto!");
       }
     }
   }

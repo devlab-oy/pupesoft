@@ -4,7 +4,7 @@ require('../inc/parametrit.inc');
 
 echo "<font class='head'>".t("Saapumisen varastopaikat")."</font><hr>";
 
-if ($otunnus != "") {  //toimittaja ja lasku on valittu. Nyt kohdistetaan, muutetaan ja lis‰t‰‰n rivej‰.
+if ($otunnus != "") {  //toimittaja ja lasku on valittu. Nyt kohdistetaan, muutetaan ja lis√§t√§√§n rivej√§.
   require('ostorivienvarastopaikat.inc');
   if ($tee == "valmis") $tee = "";
   else $tee = "dummy";
@@ -57,10 +57,10 @@ if ($tee == '') {  //valitaan keikka
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) == 0) {
-    echo "<font class='message'>".t("Yht‰‰n sopivaa saapumista ei lˆytynyt").".</font><br><br>";
+    echo "<font class='message'>".t("Yht√§√§n sopivaa saapumista ei l√∂ytynyt").".</font><br><br>";
   }
   elseif (mysql_num_rows($result) > 100) {
-    echo "<font class='message'>".t("Haulla lˆytyi liikaa saapumisia")." (>100). ".t("Tarkenna hakua").".</font><br><br>";
+    echo "<font class='message'>".t("Haulla l√∂ytyi liikaa saapumisia")." (>100). ".t("Tarkenna hakua").".</font><br><br>";
   }
   else {
     echo "<table>";

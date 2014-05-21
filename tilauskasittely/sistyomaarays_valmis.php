@@ -2,7 +2,7 @@
 
 require ("../inc/parametrit.inc");
 
-echo "<font class='head'>".t("Kuittaa sis‰inen tyˆm‰‰r‰ys valmiiksi").":<hr></font>";
+echo "<font class='head'>".t("Kuittaa sis√§inen ty√∂m√§√§r√§ys valmiiksi").":<hr></font>";
 
 if ($tee == "VALMIS") {
   // katsotaan onko muilla aktiivisena
@@ -16,9 +16,9 @@ if ($tee == "VALMIS") {
   }
 
   if (isset($row) and $row['kuka'] != $kukarow['kuka']) {
-    echo "<font class='error'>".t("Tilaus on aktiivisena k‰ytt‰j‰ll‰")." $row[nimi]. ".t("Tilausta ei voi t‰ll‰ hetkell‰ muokata").".</font><br>";
+    echo "<font class='error'>".t("Tilaus on aktiivisena k√§ytt√§j√§ll√§")." $row[nimi]. ".t("Tilausta ei voi t√§ll√§ hetkell√§ muokata").".</font><br>";
 
-    // poistetaan aktiiviset tilaukset jota t‰ll‰ k‰ytt‰j‰ll‰ oli
+    // poistetaan aktiiviset tilaukset jota t√§ll√§ k√§ytt√§j√§ll√§ oli
     $query = "update kuka set kesken='' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
     $result = pupe_query($query);
 
@@ -26,20 +26,20 @@ if ($tee == "VALMIS") {
   }
   else {
     // lock tables
-    $query = "  LOCK TABLES lasku WRITE,
-          tapahtuma WRITE,
-          tiliointi WRITE,
-          tilausrivi WRITE,
-          tilausrivi as tilausrivi2 WRITE,
-          sanakirja WRITE,
-          tilausrivi as tilausrivi_osto READ,
-          tuote READ,
-          sarjanumeroseuranta WRITE,
-          sarjanumeroseuranta_arvomuutos READ,
-          tuotepaikat WRITE,
-          tilausrivin_lisatiedot WRITE,
-          avainsana as avainsana_kieli READ,
-          tili WRITE";
+    $query = "LOCK TABLES lasku WRITE,
+              tapahtuma WRITE,
+              tiliointi WRITE,
+              tilausrivi WRITE,
+              tilausrivi as tilausrivi2 WRITE,
+              sanakirja WRITE,
+              tilausrivi as tilausrivi_osto READ,
+              tuote READ,
+              sarjanumeroseuranta WRITE,
+              sarjanumeroseuranta_arvomuutos READ,
+              tuotepaikat WRITE,
+              tilausrivin_lisatiedot WRITE,
+              avainsana as avainsana_kieli READ,
+              tili WRITE";
     $locre = pupe_query($query);
 
     $query = "SELECT *
@@ -105,7 +105,7 @@ if ($tee == "VALMIS") {
         $sarjares = pupe_query($query);
         $sarjarow = mysql_fetch_assoc($sarjares);
 
-        // Jos samalla ostorivill‰ on useita kappaleita niin meid‰n on splitattava ostorivi osiin
+        // Jos samalla ostorivill√§ on useita kappaleita niin meid√§n on splitattava ostorivi osiin
         $query = "SELECT *
                   FROM tilausrivi
                   WHERE yhtio = '$kukarow[yhtio]'
@@ -114,7 +114,7 @@ if ($tee == "VALMIS") {
         $ostorow = mysql_fetch_assoc($monista);
 
         if ($ostorow["kpl"] > 1) {
-          //Haetaan alkuper‰inen ostorivi ja sen tehdaslis‰varusteet
+          //Haetaan alkuper√§inen ostorivi ja sen tehdaslis√§varusteet
           $query = "(SELECT *
                      FROM tilausrivi
                      WHERE tilausrivi.yhtio    = '$kukarow[yhtio]'
@@ -139,7 +139,7 @@ if ($tee == "VALMIS") {
               $rivihinta     = round(($ostokokorow["kpl"]-$maara) * $kplhinta, $yhtiorow['hintapyoristys']);
               $koprivihinta   = round($maara * $kplhinta, $yhtiorow['hintapyoristys']);
 
-              // V‰hennet‰‰n alkuper‰isen ostorivin m‰‰r‰‰ yhdell‰
+              // V√§hennet√§√§n alkuper√§isen ostorivin m√§√§r√§√§ yhdell√§
               $query = "UPDATE tilausrivi
                         SET kpl=kpl-$maara, tilkpl=tilkpl-$maara, rivihinta=$rivihinta
                         WHERE yhtio = '$kukarow[yhtio]'
@@ -173,7 +173,7 @@ if ($tee == "VALMIS") {
               $insres2 = pupe_query($kysely);
               $insid   = mysql_insert_id();
 
-              //Haetaan alkuper‰isen ostorivin tapahtuma
+              //Haetaan alkuper√§isen ostorivin tapahtuma
               $query = "SELECT *
                         FROM tapahtuma
                         WHERE yhtio    = '$kukarow[yhtio]'
@@ -183,7 +183,7 @@ if ($tee == "VALMIS") {
               if (mysql_num_rows($tapares) == 1) {
                 $taparow = mysql_fetch_assoc($tapares);
 
-                // V‰hennet‰‰n alkuper‰isen ostorivin tapahtuman m‰‰r‰‰ yhdell‰
+                // V√§hennet√§√§n alkuper√§isen ostorivin tapahtuman m√§√§r√§√§ yhdell√§
                 $query = "UPDATE tapahtuma
                           SET kpl=kpl-$maara
                           WHERE yhtio    = '$kukarow[yhtio]'
@@ -228,7 +228,7 @@ if ($tee == "VALMIS") {
                 $insres2 = pupe_query($query);
               }
 
-              // Siirret‰‰n jatkojalostettavan tuotteen sarjanumero uudelle tilausriville
+              // Siirret√§√§n jatkojalostettavan tuotteen sarjanumero uudelle tilausriville
               if ($ostokokorow["tunnus"] == $ostorow["tunnus"]) {
                 $query = "UPDATE sarjanumeroseuranta
                           SET ostorivitunnus = $insid
@@ -242,7 +242,7 @@ if ($tee == "VALMIS") {
           }
         }
 
-        // Haetaan liitetyt lis‰varusteet ja tyˆkulut
+        // Haetaan liitetyt lis√§varusteet ja ty√∂kulut
         $query    = "SELECT tilausrivi.*, tuote.ei_saldoa, tuote.kehahin, tuote.myyntihinta, tuote.alv, tuote.sarjanumeroseuranta, tilausrivi.tunnus as rivitunnus
                      FROM tilausrivi
                      JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
@@ -257,7 +257,7 @@ if ($tee == "VALMIS") {
           $ostorivinsarjanumero = 0;
 
           if ($lisarow["sarjanumeroseuranta"] == "S") {
-            //Hateaan lis‰varusteen ostohinta
+            //Hateaan lis√§varusteen ostohinta
             $query = "SELECT round(sum(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl),2) ostohinta, group_concat(sarjanumeroseuranta.tunnus) tunnus
                       FROM sarjanumeroseuranta
                       JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
@@ -271,15 +271,15 @@ if ($tee == "VALMIS") {
             $ostorivinsarjanumero  = $sarjarow2["tunnus"];
           }
           else {
-            // Lis‰varuste on bulkkikamaa
+            // Lis√§varuste on bulkkikamaa
             $ostohinta = $lisarow["kehahin"];
           }
 
           $ostohinta = (float) $ostohinta;
 
-          // Ruuvataan liitetyt lis‰varusteet kiinni laitteen alkuper‰iseen ostoriviin
-          // Jos lis‰varuste on sarjanumeroitava, niin sarjanumeron tunnus menee
-          // lis‰varusterivin sistyomaarays_sarjatunnus-kent‰ss‰
+          // Ruuvataan liitetyt lis√§varusteet kiinni laitteen alkuper√§iseen ostoriviin
+          // Jos lis√§varuste on sarjanumeroitava, niin sarjanumeron tunnus menee
+          // lis√§varusterivin sistyomaarays_sarjatunnus-kent√§ss√§
           $query = "UPDATE tilausrivi
                     SET perheid2  = '$sarjarow[ostorivitunnus]',
                     rivihinta      = round(varattu*$ostohinta,2),
@@ -298,11 +298,11 @@ if ($tee == "VALMIS") {
           $sarjares = pupe_query($query);
 
           if ($lisarow["ei_saldoa"] == '') {
-            //Siirret‰‰n lis‰varuste samaan paikkaan ku is‰tuote ja varataan lis‰varusteen saldoa
+            //Siirret√§√§n lis√§varuste samaan paikkaan ku is√§tuote ja varataan lis√§varusteen saldoa
             if($lisarow["hyllyalue"] != $srow["hyllyalue"] or $lisarow["hyllynro"] != $srow["hyllynro"] or $lisarow["hyllyvali"] != $srow["hyllyvali"] or $lisarow["hyllytaso"] != $srow["hyllytaso"]) {
-              // Tehd‰‰n saldosiirto
+              // Tehd√§√§n saldosiirto
 
-              // Katsotaan lˆytyykˆ jatkojalostettavan tuotteen paikka myˆs lis‰varusteelta
+              // Katsotaan l√∂ytyyk√∂ jatkojalostettavan tuotteen paikka my√∂s lis√§varusteelta
               $query = "SELECT *
                         FROM tuotepaikat
                         WHERE tuoteno = '$lisarow[tuoteno]'
@@ -314,7 +314,7 @@ if ($tee == "VALMIS") {
               $sarjares = pupe_query($query);
 
               if (mysql_num_rows($sarjares) == 0) {
-                // Lis‰t‰‰n tuotepaikkoja
+                // Lis√§t√§√§n tuotepaikkoja
                 $query = "INSERT INTO tuotepaikat
                           SET tuoteno = '$lisarow[tuoteno]',
                           yhtio     = '$kukarow[yhtio]',
@@ -344,7 +344,7 @@ if ($tee == "VALMIS") {
                           hyllyvali = '$srow[hyllyvali]',
                           hyllytaso = '$srow[hyllytaso]',
                           laji      = 'uusipaikka',
-                          selite    = '".t("Lis‰ttiin tuotepaikka")." $srow[hyllyalue] $srow[hyllynro] $srow[hyllyvali] $srow[hyllytaso]. ".t("Sis‰inen tyˆm‰‰r‰ys")."',
+                          selite    = '".t("Lis√§ttiin tuotepaikka")." $srow[hyllyalue] $srow[hyllynro] $srow[hyllyvali] $srow[hyllytaso]. ".t("Sis√§inen ty√∂m√§√§r√§ys")."',
                           laatija   = '$kukarow[kuka]',
                           laadittu  = now()";
                 $sarjares = pupe_query($query);
@@ -370,7 +370,7 @@ if ($tee == "VALMIS") {
               $kehahin_result = pupe_query($kehahin_query);
               $kehahin_row = mysql_fetch_assoc($kehahin_result);
 
-              // V‰hennet‰‰n
+              // V√§hennet√§√§n
               $query = "UPDATE tuotepaikat
                         SET saldo = saldo - $lisarow[varattu]
                         WHERE yhtio   = '$kukarow[yhtio]'
@@ -392,12 +392,12 @@ if ($tee == "VALMIS") {
                         hyllynro  = '$lisarow[hyllynro]',
                         hyllyvali = '$lisarow[hyllyvali]',
                         hyllytaso = '$lisarow[hyllytaso]',
-                        selite    = '".t("Paikasta")." $lisarow[hyllyalue] $lisarow[hyllynro] $lisarow[hyllyvali] $lisarow[hyllytaso] ".t("v‰hennettiin")." $lisarow[varattu]. ".t("Sis‰inen tyˆm‰‰r‰ys")."',
+                        selite    = '".t("Paikasta")." $lisarow[hyllyalue] $lisarow[hyllynro] $lisarow[hyllyvali] $lisarow[hyllytaso] ".t("v√§hennettiin")." $lisarow[varattu]. ".t("Sis√§inen ty√∂m√§√§r√§ys")."',
                         laatija   = '$kukarow[kuka]',
                         laadittu  = now()";
               $sarjares = pupe_query($query);
 
-              //Lis‰t‰‰n
+              //Lis√§t√§√§n
               $query = "UPDATE tuotepaikat
                         SET saldo = saldo + $lisarow[varattu]
                         WHERE yhtio   = '$kukarow[yhtio]'
@@ -419,12 +419,12 @@ if ($tee == "VALMIS") {
                         hyllynro  = '$minnerow[hyllynro]',
                         hyllyvali = '$minnerow[hyllyvali]',
                         hyllytaso = '$minnerow[hyllytaso]',
-                        selite    = '".t("Paikalle")." $minnerow[hyllyalue] $minnerow[hyllynro] $minnerow[hyllyvali] $minnerow[hyllytaso] ".t("lis‰ttiin")." $lisarow[varattu]. ".t("Sis‰inen tyˆm‰‰r‰ys")."',
+                        selite    = '".t("Paikalle")." $minnerow[hyllyalue] $minnerow[hyllynro] $minnerow[hyllyvali] $minnerow[hyllytaso] ".t("lis√§ttiin")." $lisarow[varattu]. ".t("Sis√§inen ty√∂m√§√§r√§ys")."',
                         laatija   = '$kukarow[kuka]',
                         laadittu  = now()";
               $sarjares = pupe_query($query);
 
-              // Varataan lis‰varusteet
+              // Varataan lis√§varusteet
               $query = "UPDATE tuotepaikat
                         SET saldo_varattu = saldo_varattu + $lisarow[varattu]
                         WHERE yhtio   = '$kukarow[yhtio]'
@@ -437,7 +437,7 @@ if ($tee == "VALMIS") {
               $sarjares = pupe_query($query);
             }
             else {
-              // Varataan lis‰varusteet
+              // Varataan lis√§varusteet
               $query = "UPDATE tuotepaikat
                         SET saldo_varattu = saldo_varattu + $lisarow[varattu]
                         WHERE yhtio   = '$kukarow[yhtio]'
@@ -451,7 +451,7 @@ if ($tee == "VALMIS") {
             }
 
             if ($lisarow["sarjanumeroseuranta"] == "S") {
-              //P‰ivitet‰‰n sarjanumeroiden varastopaikkatiedot
+              //P√§ivitet√§√§n sarjanumeroiden varastopaikkatiedot
               $query = "UPDATE sarjanumeroseuranta
                         SET hyllyalue  = '$srow[hyllyalue]',
                         hyllynro             = '$srow[hyllynro]',
@@ -464,10 +464,10 @@ if ($tee == "VALMIS") {
             }
           }
           else {
-            // Lis‰varuste on tyˆkulu
+            // Lis√§varuste on ty√∂kulu
 
-            // Tyˆkulujen arvo
-            // Alvihinta korjataan vain jos yhtiˆlla on verolliset myyntihinnat
+            // Ty√∂kulujen arvo
+            // Alvihinta korjataan vain jos yhti√∂lla on verolliset myyntihinnat
             if ($lisarow["alv"] != '' and $yhtiorow["alv_kasittely"] == "" ) {
               $tyokulut = round($lisarow["varattu"] * $lisarow["myyntihinta"] / (1+$lisarow['alv']/100), 2);
             }
@@ -491,7 +491,7 @@ if ($tee == "VALMIS") {
                           yhtio        = '$kukarow[yhtio]',
                           laskunro     = '$id',
                           ytunnus      = '$sarjarow[tunnus]',
-                          nimi         = 'Sis‰inen tyˆm‰‰r‰ys: $tilausnumero',
+                          nimi         = 'Sis√§inen ty√∂m√§√§r√§ys: $tilausnumero',
                           liitostunnus = '$sarjarow[tunnus]',
                           tila         = 'K',
                           alatila      = 'S',
@@ -530,7 +530,7 @@ if ($tee == "VALMIS") {
                         summa    = '$tyokulut',
                         vero     = 0,
                         lukko    = '',
-                        selite   = 'Varastonmuutos sis‰inen tyˆm‰‰r‰ys $tilausnumero: $srow[tuoteno] ($sarjarow[sarjanumero])',
+                        selite   = 'Varastonmuutos sis√§inen ty√∂m√§√§r√§ys $tilausnumero: $srow[tuoteno] ($sarjarow[sarjanumero])',
                         laatija  = '$kukarow[kuka]',
                         laadittu = now()";
               $result = pupe_query($query);
@@ -548,14 +548,14 @@ if ($tee == "VALMIS") {
                         summa    = $tyokulut * -1,
                         vero     = 0,
                         lukko    = '',
-                        selite   = 'Varastonmuutos sis‰inen tyˆm‰‰r‰ys $tilausnumero: $srow[tuoteno] ($sarjarow[sarjanumero])',
+                        selite   = 'Varastonmuutos sis√§inen ty√∂m√§√§r√§ys $tilausnumero: $srow[tuoteno] ($sarjarow[sarjanumero])',
                         laatija  = '$kukarow[kuka]',
                         laadittu = now()";
               $result = pupe_query($query);
             }
           }
 
-          //P‰ivitet‰‰n varmuuden vuoksi alkuper‰isen ostorivin perheid2 (se voi olla nolla)
+          //P√§ivitet√§√§n varmuuden vuoksi alkuper√§isen ostorivin perheid2 (se voi olla nolla)
           $query = "UPDATE tilausrivi
                     SET perheid2 = '$sarjarow[ostorivitunnus]'
                     WHERE yhtio = '$kukarow[yhtio]'
@@ -579,18 +579,18 @@ if ($tee == "VALMIS") {
                   WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and siirtorivitunnus='$srow[tunnus]'";
         $sarjares = pupe_query($query);
 
-        //P‰ivitet‰‰n jatkojalostettava rivi valmiiksi
+        //P√§ivitet√§√§n jatkojalostettava rivi valmiiksi
         $query = "UPDATE tilausrivi
                   SET toimitettu='$kukarow[kuka]', toimitettuaika = now(), tilkpl=varattu, varattu = 0
                   WHERE yhtio='$kukarow[yhtio]' and otunnus='$tilausnumero' and tunnus='$srow[tunnus]'";
         $sarjares = pupe_query($query);
       }
 
-      echo "<font class='message'>".t("Sis‰inen tyˆm‰‰r‰ys merkattiin valmiiksi")."!</font><br><br>";
+      echo "<font class='message'>".t("Sis√§inen ty√∂m√§√§r√§ys merkattiin valmiiksi")."!</font><br><br>";
       $tee = "";
     }
     else {
-      echo "<font class='error'>".t("VIRHE: Sis‰inen tyˆm‰‰r‰ys on v‰‰r‰ss‰ tilassa")."!</font><br><br>";
+      echo "<font class='error'>".t("VIRHE: Sis√§inen ty√∂m√§√§r√§ys on v√§√§r√§ss√§ tilassa")."!</font><br><br>";
       $tee = "";
     }
 
@@ -602,16 +602,16 @@ if ($tee == "VALMIS") {
 
 if ($tee == "") {
 
-  // N‰ytet‰‰n muuten vaan sopivia tilauksia
+  // N√§ytet√§√§n muuten vaan sopivia tilauksia
   echo "<br><form method='post'>
       <input type='hidden' name='toim' value='$toim'>
-      <font class='head'>".t("Etsi sis‰inen tyˆm‰‰r‰ys").":<hr></font>
-      ".t("Syˆt‰ tilausnumero, nimen tai laatijan osa").":
+      <font class='head'>".t("Etsi sis√§inen ty√∂m√§√§r√§ys").":<hr></font>
+      ".t("Sy√∂t√§ tilausnumero, nimen tai laatijan osa").":
       <input type='text' name='etsi'>
       <input type='Submit' value = '".t("Etsi")."'>
       </form>";
 
-  // pvm 30 pv taaksep‰in
+  // pvm 30 pv taaksep√§in
   $dd = date("d",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
   $mm = date("m",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
   $yy = date("Y",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
@@ -651,7 +651,7 @@ if ($tee == "") {
       $laskutyyppi = $row["tila"];
       $alatila   = $row["alatila"];
 
-      //tehd‰‰n selv‰kielinen tila/alatila
+      //tehd√§√§n selv√§kielinen tila/alatila
       require ("inc/laskutyyppi.inc");
 
       echo "<td>".t("$laskutyyppi")." ".t("$alatila")."</td>";
@@ -679,7 +679,7 @@ if ($tee == "") {
 
     if (is_array($sumrow)) {
       echo "<br><table cellpadding='5'><tr>";
-      echo "<th>".t("Tilausten arvo yhteens‰")." ($sumrow[kpl] ".t("kpl")."): </th>";
+      echo "<th>".t("Tilausten arvo yhteens√§")." ($sumrow[kpl] ".t("kpl")."): </th>";
       echo "<td>$sumrow[arvo] $yhtiorow[valkoodi]</td>";
       echo "</tr></table>";
     }

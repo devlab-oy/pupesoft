@@ -2,7 +2,7 @@
 
 require ("inc/parametrit.inc");
 
-echo "<font class='head'>Tekstiviestien l‰hett‰minen</font><hr>";
+echo "<font class='head'>Tekstiviestien l√§hett√§minen</font><hr>";
 
 if ($tee == 'laheta') {
 
@@ -39,19 +39,19 @@ if ($tee == 'laheta') {
     }
 
     if ($ok == 1) {
-      echo "<font class='error'>VIRHE: Tekstiviestin l‰hetys ep‰onnistui! $retval</font>";
+      echo "<font class='error'>VIRHE: Tekstiviestin l√§hetys ep√§onnistui! $retval</font>";
       echo " ".$kotinum;
       echo "<br>";
     }
 
     if ($ok == 0) {
-      echo "<font class='message'>Tekstiviesti l‰hetetty!</font>";
+      echo "<font class='message'>Tekstiviesti l√§hetetty!</font>";
       echo " ".$kotinum;
       echo "<br>";
     }
 
     if ($ok == 2) {
-      echo "<font class='message'>Samaa tekstiviestia ei l‰hetetty uudestaan samaan numeroon!</font>";
+      echo "<font class='message'>Samaa tekstiviestia ei l√§hetetty uudestaan samaan numeroon!</font>";
       echo " ".$kotinum;
       echo "<br>";
     }
@@ -101,7 +101,7 @@ if ($tee == "") {
       </tr>
     </table>
 
-    <br><input type='submit' value = 'L‰het‰'>
+    <br><input type='submit' value = 'L√§het√§'>
 
     </form>";
 
@@ -133,7 +133,7 @@ function SendSms($sms_palvelintyyppi, $yhtio, $kuka, $vastaanottaja, $viesti) {
 
   if ($tee_lokimerkinta) {
     $credits = floor(strlen($viesti) / 159) + 1;
-    // Lis‰t‰‰n viesti sms-tauluun
+    // Lis√§t√§√§n viesti sms-tauluun
     $query = "INSERT INTO sms SET
               yhtio         = '".$yhtio."',
               viesteja      = '".$credits."',
@@ -151,7 +151,7 @@ function SendSms($sms_palvelintyyppi, $yhtio, $kuka, $vastaanottaja, $viesti) {
 function SendPupesoftSms($vastaanottaja, $viesti) {
 
   if (strlen($viesti) > 160) {
-    echo "<font class='error'>VIRHE: Tekstiviestin maksimipituus on 160 merkki‰!</font><br><br>";
+    echo "<font class='error'>VIRHE: Tekstiviestin maksimipituus on 160 merkki√§!</font><br><br>";
     return false;
   }
 
@@ -160,7 +160,7 @@ function SendPupesoftSms($vastaanottaja, $viesti) {
   global $sms_pass;
 
   if ($sms_palvelin == "" or $sms_user == "" or $sms_pass == "") {
-    echo "<font class='error'>VIRHE: Tarkista tekstiviestipalvelimen m‰‰ritykset asetustiedostossa!</font><br><br>";
+    echo "<font class='error'>VIRHE: Tarkista tekstiviestipalvelimen m√§√§ritykset asetustiedostossa!</font><br><br>";
     return false;
   }
 
@@ -181,15 +181,15 @@ function SendClickatellSms($vastaanottaja, $viesti) {
 
   $continue = true;
   if ($clickatell_api_id == "") {
-    echo "<font class='error'>VIRHE: Tarkista asetukset! \$clickatell_api_id ei ole m‰‰ritelty.</font><br/>";
+    echo "<font class='error'>VIRHE: Tarkista asetukset! \$clickatell_api_id ei ole m√§√§ritelty.</font><br/>";
     $continue = false;
   }
   if ($clickatell_username == "") {
-    echo "<font class='error'>VIRHE: Tarkista asetukset! \$clickatell_username ei ole m‰‰ritelty.</font><br/>";
+    echo "<font class='error'>VIRHE: Tarkista asetukset! \$clickatell_username ei ole m√§√§ritelty.</font><br/>";
     $continue = false;
   }
   if ($clickatell_password == "") {
-    echo "<font class='error'>VIRHE: Tarkista asetukset! \$clickatell_password ei ole m‰‰ritelty.</font><br/>";
+    echo "<font class='error'>VIRHE: Tarkista asetukset! \$clickatell_password ei ole m√§√§ritelty.</font><br/>";
     $continue = false;
   }
   if (!$continue) {
@@ -207,7 +207,7 @@ function SendClickatellSms($vastaanottaja, $viesti) {
   }
 
   $credits = floor(strlen($viesti) / 159) + 1;
-  // Lis‰t‰‰n viesti sms-tauluun
+  // Lis√§t√§√§n viesti sms-tauluun
   $query = "INSERT INTO sms SET
             yhtio         = '".$yhtio."',
             viesteja      = '".$credits."',
@@ -228,15 +228,15 @@ function SendKannelSms($receiver_number, $message) {
 
   $continue = true;
   if ($kannel_host_url == "") {
-    echo "<font class='error'>VIRHE: Tarkista asetukset! \$kannel_host_url ei ole m‰‰ritelty.</font><br/>";
+    echo "<font class='error'>VIRHE: Tarkista asetukset! \$kannel_host_url ei ole m√§√§ritelty.</font><br/>";
     $continue = false;
   }
   if ($kannel_username == "") {
-    echo "<font class='error'>VIRHE: Tarkista asetukset! \$kannel_username ei ole m‰‰ritelty.</font><br/>";
+    echo "<font class='error'>VIRHE: Tarkista asetukset! \$kannel_username ei ole m√§√§ritelty.</font><br/>";
     $continue = false;
   }
   if ($kannel_password == "") {
-    echo "<font class='error'>VIRHE: Tarkista asetukset! \$kannel_password ei ole m‰‰ritelty.</font><br/>";
+    echo "<font class='error'>VIRHE: Tarkista asetukset! \$kannel_password ei ole m√§√§ritelty.</font><br/>";
     $continue = false;
   }
   if (!$continue) {
@@ -264,7 +264,7 @@ function SendKannelSms($receiver_number, $message) {
   return(false);
 
   $credits = floor(strlen($viesti) / 159) + 1;
-  // Lis‰t‰‰n viesti sms-tauluun
+  // Lis√§t√§√§n viesti sms-tauluun
   $query = "INSERT INTO sms SET
             yhtio         = '".$yhtio."',
             viesteja      = '".$credits."',

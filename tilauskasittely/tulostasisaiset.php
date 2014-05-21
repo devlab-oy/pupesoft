@@ -2,7 +2,7 @@
 
 require('../inc/parametrit.inc');
 
- echo "<font class='head'>".t("Tulosta sis‰isi‰ laskuja").":</font><hr><br>";
+ echo "<font class='head'>".t("Tulosta sis√§isi√§ laskuja").":</font><hr><br>";
 
 if (isset($tee) and $tee == 'TULOSTA') {
 
@@ -18,12 +18,12 @@ if (isset($tee) and $tee == 'TULOSTA') {
     }
   }
   else {
-    echo t("Ilman hakukriteerej‰ ei voida jatkaa")."!";
+    echo t("Ilman hakukriteerej√§ ei voida jatkaa")."!";
     exit;
   }
 
   if ($where == '') {
-    echo t("Et syˆtt‰nyt mit‰‰n j‰rkev‰‰")."!<br>";
+    echo t("Et sy√∂tt√§nyt mit√§√§n j√§rkev√§√§")."!<br>";
     exit;
   }
 
@@ -49,7 +49,7 @@ if (isset($tee) and $tee == 'TULOSTA') {
 
   while ($sislaskrow = mysql_fetch_array($laskurrrresult)) {
 
-    echo t("Tulostetaan sis‰inen lasku").": $sislaskrow[laskunro]<br>";
+    echo t("Tulostetaan sis√§inen lasku").": $sislaskrow[laskunro]<br>";
 
     tulosta_lasku($sislaskrow["tunnus"], "", "", "", $valittu_tulostin, "", "");
   }
@@ -59,13 +59,13 @@ if (isset($tee) and $tee == 'TULOSTA') {
 }
 
 if (!isset($tee) or $tee == '') {
-  //syˆtet‰‰n tilausnumero
+  //sy√∂tet√§√§n tilausnumero
   echo "<form method = 'post'>";
   echo "<input type='hidden' name='tee' value='TULOSTA'>";
   echo "<input type='hidden' name='tila' value='yksi'>";
 
   echo "<table>";
-  echo "<tr><th colspan='2'>".t("Tulosta yksitt‰inen lasku")."</th></tr>";
+  echo "<tr><th colspan='2'>".t("Tulosta yksitt√§inen lasku")."</th></tr>";
   echo "<tr><th>".t("Laskunumero")."</th><td><input type='text' size='10' name='laskunro'></td></tr>";
   echo "<tr><th>".t("Tulosta lasku").":</th><td colspan='3'><select name='valittu_tulostin'>";
   echo "<option value=''>".t("Ei kirjoitinta")."</option>";
@@ -111,12 +111,12 @@ if (!isset($tee) or $tee == '') {
   echo "<form method = 'post'>";
   echo "<input type='hidden' name='tee' value='TULOSTA'>";
   echo "<input type='hidden' name='tila' value='monta'>";
-  echo "<tr><th colspan='4'>".t("Tulosta sis‰iset laskut p‰iv‰m‰‰r‰rajauksella")."</th></tr>";
-  echo "<tr><th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+  echo "<tr><th colspan='4'>".t("Tulosta sis√§iset laskut p√§iv√§m√§√§r√§rajauksella")."</th></tr>";
+  echo "<tr><th>".t("Sy√∂t√§ alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
       <td><input type='text' name='ppa' value='$ppa' size='3'></td>
       <td><input type='text' name='kka' value='$kka' size='3'></td>
       <td><input type='text' name='vva' value='$vva' size='5'></td></tr>
-      <tr><th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+      <tr><th>".t("Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
       <td><input type='text' name='ppl' value='$ppl' size='3'></td>
       <td><input type='text' name='kkl' value='$kkl' size='3'></td>
       <td><input type='text' name='vvl' value='$vvl' size='5'></td></tr>";

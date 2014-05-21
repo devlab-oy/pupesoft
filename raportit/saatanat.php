@@ -6,7 +6,7 @@ if (!isset($eiliittymaa) or $eiliittymaa != 'ON') {
     if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
   }
 
-  //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+  //* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
   $useslave = 1;
 
   $pupe_DataTables = "saatanat_taulu";
@@ -56,10 +56,10 @@ if ($eiliittymaa != 'ON') {
   $yli = (float) $yli;
 
   echo "<table>";
-  echo "<tr><th>".t("N‰yt‰ vain t‰m‰ ytunnus").":</th><td valign='top'><input type='text' name='sytunnus' size ='15' value='$sytunnus'></td><td valign='top' class='back'>".t("J‰t‰ kaikki hakukent‰t tyhj‰ksi jos haluat listata kaikki saatavat").".</td></tr>";
-  echo "<tr><th>".t("N‰yt‰ vain t‰m‰ nimi").":</th><td valign='top'><input type='text' name='sanimi' size ='15' value='$sanimi'></td></tr>";
-  echo "<tr><th>".t("N‰yt‰ vain ne joilla saatavaa on yli").":</th><td valign='top'><input type='text' name='yli' size ='15' value='$yli'></td></tr>";
-  echo "<tr><th>".t("Anna p‰iv‰m‰‰r‰, muodossa pp-kk-vvvv:")."</th><td><input type = 'text' name = 'sappl' value='$sappl' size=2><input type = 'text' name = 'sakkl' value='$sakkl' size=2><input type = 'text' name = 'savvl' value='$savvl' size=4></td></tr>";
+  echo "<tr><th>".t("N√§yt√§ vain t√§m√§ ytunnus").":</th><td valign='top'><input type='text' name='sytunnus' size ='15' value='$sytunnus'></td><td valign='top' class='back'>".t("J√§t√§ kaikki hakukent√§t tyhj√§ksi jos haluat listata kaikki saatavat").".</td></tr>";
+  echo "<tr><th>".t("N√§yt√§ vain t√§m√§ nimi").":</th><td valign='top'><input type='text' name='sanimi' size ='15' value='$sanimi'></td></tr>";
+  echo "<tr><th>".t("N√§yt√§ vain ne joilla saatavaa on yli").":</th><td valign='top'><input type='text' name='yli' size ='15' value='$yli'></td></tr>";
+  echo "<tr><th>".t("Anna p√§iv√§m√§√§r√§, muodossa pp-kk-vvvv:")."</th><td><input type = 'text' name = 'sappl' value='$sappl' size=2><input type = 'text' name = 'sakkl' value='$sakkl' size=2><input type = 'text' name = 'savvl' value='$savvl' size=4></td></tr>";
 
   $query = "SELECT tunnus
             FROM kustannuspaikka
@@ -90,7 +90,7 @@ if ($eiliittymaa != 'ON') {
   echo "<option value = 'ytunnus' $sel[ytunnus]>".t("Ytunnus")."</option>";
   echo "<option value = 'nimi'    $sel[nimi]>".t("Nimi")."</option>";
   echo "<option value = 'kustannuspaikka'    $sel[kustannuspaikka]>".t("Kustannuspaikka")."</option>";
-  echo "</select></td><td class='back'>".t("Kaatotilin saldo voidaan n‰ytt‰‰ vain jos summaustaso on Asiakas tai Ytunnus").".</td></tr>";
+  echo "</select></td><td class='back'>".t("Kaatotilin saldo voidaan n√§ytt√§√§ vain jos summaustaso on Asiakas tai Ytunnus").".</td></tr>";
 
   $query = "SELECT nimi, tunnus
             FROM valuu
@@ -126,7 +126,7 @@ if ($eiliittymaa != 'ON') {
 
   $sel[$laji] = " selected ";
 
-  echo "<th>".t("Mitk‰ Laskut Listataan").":</th>";
+  echo "<th>".t("Mitk√§ Laskut Listataan").":</th>";
   echo "<td><select name='laji'>
       <option value='M'   $sel[M]>".t("myyntisaamiset")."</option>
       <option value='MF'  $sel[MF]>".t("factoringmyyntisaamiset")."</option>
@@ -142,7 +142,7 @@ if ($eiliittymaa != 'ON') {
     $chk = "CHECKED";
   }
 
-  echo "<tr><th>".t("N‰yt‰ vain ne joilla luottoraja on ylitetty").":</th><td valign='top'><input type='checkbox' name='ylilimiitin' value='ON' $chk></td>";
+  echo "<tr><th>".t("N√§yt√§ vain ne joilla luottoraja on ylitetty").":</th><td valign='top'><input type='checkbox' name='ylilimiitin' value='ON' $chk></td>";
 
   echo "<tr>";
 
@@ -153,7 +153,7 @@ if ($eiliittymaa != 'ON') {
     $checked = "CHECKED";
   }
 
-  echo "<th>".t("N‰yt‰ vain luottovakuutetut asiakkaat").":</th>";
+  echo "<th>".t("N√§yt√§ vain luottovakuutetut asiakkaat").":</th>";
   echo "<td><input type='checkbox' name='luottovakuutettu' value='K' $checked></td>";
   echo "</tr>";
   echo "</table><br>";
@@ -267,7 +267,7 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
     $grouppauslisa .= ",tiliointi.kustp";
   }
 
-  // Rapparin sarakkeet voidaan m‰‰ritell‰ myˆs salasanat.php:ss‰
+  // Rapparin sarakkeet voidaan m√§√§ritell√§ my√∂s salasanat.php:ss√§
   if (!isset($saatavat_array)) {
     $saatavat_array = array(0,15,30,60,90,120);
   }
@@ -364,7 +364,7 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
       $excelsarake++;
       $worksheet->write($excelrivi, $excelsarake, t("Kaatotili"), $format_bold);
       $excelsarake++;
-      $worksheet->write($excelrivi, $excelsarake, t("Yhteens‰"), $format_bold);
+      $worksheet->write($excelrivi, $excelsarake, t("Yhteens√§"), $format_bold);
       $excelsarake++;
       $worksheet->write($excelrivi, $excelsarake, t("Luottotilanne nyt"), $format_bold);
       $excelsarake++;
@@ -422,7 +422,7 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
     echo "<th align='right'>".t("Avoimet")."<br>".t("laskut")."</th>";
     echo "<th align='right'>".t("Avoimet")."<br>".t("tilaukset")."</th>";
     echo "<th align='right'>".t("Kaatotili")."</th>";
-    echo "<th align='right'>".t("Yhteens‰")."</th>";
+    echo "<th align='right'>".t("Yhteens√§")."</th>";
     echo "<th align='right'>".t("Luottotilanne nyt")."</th>";
     echo "<th align='right'>".t("Luottoraja")."</th>";
     echo "</tr>";
@@ -464,13 +464,13 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
         }
 
         if (isset($luottoraja) and $luottoraja > 0 and $luottotilanne_nyt < 0) {
-          $luottorajavirhe = 'kyll‰';
+          $luottorajavirhe = 'kyll√§';
         }
         else {
           $luottorajavirhe = '';
         }
 
-        // Ei n‰ytet‰ nollia ruudulla
+        // Ei n√§ytet√§ nollia ruudulla
         if (isset($luottoraja) and $luottoraja == 0) $luottoraja = '';
         if ($row["alle_{$saatavat_array[0]}"] == 0) $row["alle_{$saatavat_array[0]}"] = "";
 
@@ -645,7 +645,7 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
         $sumlask++;
       }
 
-      echo "<td valign='top' class='tumma' align='right' colspan='$colspan'>".t("Yhteens‰").":</td>";
+      echo "<td valign='top' class='tumma' align='right' colspan='$colspan'>".t("Yhteens√§").":</td>";
 
       echo "<td valign='top' class='tumma' name='saatavat_yhteensa' id='saatavat_yhteensa_$sumlask' align='right' nowrap>".$saatavat_yhteensa["alle_$saatavat_array[0]"]."</td>";
       $sumlask++;
@@ -700,11 +700,11 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
       $maksuehto_chk_row = mysql_fetch_assoc($maksuehto_chk_res);
 
       if ($maksuehto_chk_row['jv'] != '') {
-        $jvvirhe = 'kyll‰';
+        $jvvirhe = 'kyll√§';
 
         if ($eiliittymaa != 'ON') {
           echo "<br/>";
-          echo "<font class='error'>",t("HUOM! T‰m‰ on j‰lkivaatimusasiakas"),"</font>";
+          echo "<font class='error'>",t("HUOM! T√§m√§ on j√§lkivaatimusasiakas"),"</font>";
           echo "<br/>";
         }
       }
@@ -715,7 +715,7 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
         echo "<br/>";
       }
 
-      //katsotaan onko asiakkaalla maksamattomia trattoja, jos on niin ei anneta tehd‰ tilausta
+      //katsotaan onko asiakkaalla maksamattomia trattoja, jos on niin ei anneta tehd√§ tilausta
       $query = "SELECT count(lasku.tunnus) kpl
                 FROM lasku USE INDEX (yhtio_tila_mapvm)
                 JOIN karhu_lasku ON (lasku.tunnus = karhu_lasku.ltunnus)
@@ -730,7 +730,7 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
       $tratat = mysql_fetch_assoc($trattares);
 
       if ($tratat['kpl'] > 0) {
-        $trattavirhe = 'kyll‰';
+        $trattavirhe = 'kyll√§';
 
         if ($eiliittymaa != 'ON') {
           echo "<br/>";
@@ -741,7 +741,7 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
 
       if ($ylivito > 0 and $eiliittymaa != 'ON') {
         echo "<br/>";
-        echo "<font class='error'>".t("HUOM! Asiakkaalla on yli %s p‰iv‰‰ sitten er‰‰ntyneit‰ laskuja, olkaa yst‰v‰llinen ja ottakaa yhteytt‰ myyntireskontran hoitajaan", $kukarow['kieli'], $pvmraja)."</font>";
+        echo "<font class='error'>".t("HUOM! Asiakkaalla on yli %s p√§iv√§√§ sitten er√§√§ntyneit√§ laskuja, olkaa yst√§v√§llinen ja ottakaa yhteytt√§ myyntireskontran hoitajaan", $kukarow['kieli'], $pvmraja)."</font>";
         echo "<br/>";
       }
     }
@@ -770,7 +770,7 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
       $liitoslisa1 = "AND asiakas.tunnus='{$sliitostunnus}' ";
     }
 
-    // Voi olla, ett‰ asiakkaalla on avoimia tilauksia, mutta ei avoimia laskuja, huomioidaan n‰m‰ luottorajassa
+    // Voi olla, ett√§ asiakkaalla on avoimia tilauksia, mutta ei avoimia laskuja, huomioidaan n√§m√§ luottorajassa
     $query = "SELECT ifnull(group_concat(tunnus), 0) liitostunnus
               FROM asiakas
               WHERE yhtio  = '$saatavat_yhtio'
@@ -786,7 +786,7 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
       $luottotilanne_nyt = round($luottoraja+$kaatotilisumma-$avoimettilaukset, 2);
 
       if (isset($luottoraja) and $luottoraja > 0 and $luottotilanne_nyt < 0) {
-        $luottorajavirhe = 'kyll‰';
+        $luottorajavirhe = 'kyll√§';
       }
       else {
         $luottorajavirhe = '';

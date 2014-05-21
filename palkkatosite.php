@@ -4,15 +4,15 @@ require ("inc/parametrit.inc");
 
 if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
-  // T‰m‰ on Pretaxin palkkaohjelmiston normaali siirtomuoto ver 2
-  // Tuetaan myˆs M2 matkalaskuohjelmista
-  // Tuetaan myˆs M2 matkalaskuohjelmista
+  // T√§m√§ on Pretaxin palkkaohjelmiston normaali siirtomuoto ver 2
+  // Tuetaan my√∂s M2 matkalaskuohjelmista
+  // Tuetaan my√∂s M2 matkalaskuohjelmista
 
   if ($_FILES['userfile']['size'] == 0){
-    die ("<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font>");
+    die ("<font class='error'><br>".t("Tiedosto on tyhj√§")."!</font>");
   }
 
-  $file  = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
+  $file  = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep√§onnistui")."!");
   $maara = 1;
   $flip  = 0;
 
@@ -26,7 +26,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
         $tpp=substr($rivi,645,2);
       }
 
-      if ($flip == 1) { // Seuraavalla rivill‰ tulee veronm‰‰r‰. Lis‰t‰‰n se!
+      if ($flip == 1) { // Seuraavalla rivill√§ tulee veronm√§√§r√§. Lis√§t√§√§n se!
           $maara--;
           $alv = (float) substr($rivi,24,12);
           if (substr($rivi,23,1) == 'K') $alv *= -1;
@@ -39,7 +39,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
         $itili[$maara]  = (int) substr($rivi,13,4);
         $ikustp[$maara] = (int) substr($rivi,228,5);
 
-        // Etsit‰‰‰n vastaava kustannuspaikka
+        // Etsit√§√§√§n vastaava kustannuspaikka
         $query = "SELECT tunnus
                   FROM kustannuspaikka
                   WHERE yhtio   = '$kukarow[yhtio]'
@@ -58,7 +58,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
         if ($ivero[$maara] != 0.0) $flip = 1;
       }
     }
-    // T‰m‰ on Pretaxin palkkaohjelmiston normaali siirtomuoto ver 2 (Major Blue Palkat)
+    // T√§m√§ on Pretaxin palkkaohjelmiston normaali siirtomuoto ver 2 (Major Blue Palkat)
     elseif ($tiedostomuoto == "PRETAX") {
       if (!isset($tpv)) {
         $tpv=substr($rivi,39,4);
@@ -133,7 +133,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
         4 summa 2
         5 tositepvm
         6 projekti
-        7 henkilˆ
+        7 henkil√∂
       */
 
       $kentat = explode("\t", $rivi);
@@ -163,7 +163,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
             $tsk_tyyppinimi = "Projekti";
           }
 
-          //  tarkastetaan lˆytyykˆ oikea tsk!
+          //  tarkastetaan l√∂ytyyk√∂ oikea tsk!
           $tsk = "";
 
           if ($tsk_nimi != "") {
@@ -215,7 +215,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
           }
 
           if ($tsk == 0) {
-            echo "<font class='error'>".t("Kustannuspaikkaa ei lˆydy").": $tsk_nimi</font><br>";
+            echo "<font class='error'>".t("Kustannuspaikkaa ei l√∂ydy").": $tsk_nimi</font><br>";
           }
           else {
             if ($tsk_tyyppi == "K") {
@@ -246,7 +246,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
       // Selite
       $iselite[$maara] = "Palkkatosite $tpp.$tpk.$tpv / ".$kentat[2];
 
-      // Liitet‰‰n t‰h‰n henkilˆnumero jos se haluttiin aineistoon
+      // Liitet√§√§n t√§h√§n henkil√∂numero jos se haluttiin aineistoon
       if ($kentat[7] != "") {
         $iselite[$maara] .= " / #".$kentat[7];
       }
@@ -268,7 +268,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
   exit;
 }
 
-echo "<font class='head'>".t("Palkka- ja matkalaskuaineiston sis‰‰nluku")."</font><hr>";
+echo "<font class='head'>".t("Palkka- ja matkalaskuaineiston sis√§√§nluku")."</font><hr>";
 echo "<form method='post' name='sendfile' enctype='multipart/form-data'>
     <table>
     <tr><th>".t("Valitse tiedostomuoto")."</th><td>
@@ -280,7 +280,7 @@ echo "<form method='post' name='sendfile' enctype='multipart/form-data'>
     </td></tr>
     <tr><th>".t("Valitse tiedosto").":</th>
       <td><input name='userfile' type='file'></td>
-      <td class='back'><input type='submit' value='".t("L‰het‰")."'></td>
+      <td class='back'><input type='submit' value='".t("L√§het√§")."'></td>
     </tr>
     </table>
     </form>";

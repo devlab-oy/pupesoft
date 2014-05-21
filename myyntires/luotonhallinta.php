@@ -17,11 +17,11 @@ echo "<script>
     </script>";
 
 if ($yhtiorow["myyntitilaus_saatavat"] == "Y") {
-  // k‰sitell‰‰n luottorajoja per ytunnus
+  // k√§sitell√§√§n luottorajoja per ytunnus
   $kasittely_periaate = "asiakas.ytunnus";
 }
 else {
-  // k‰sitell‰‰n luottorajoja per asiakas
+  // k√§sitell√§√§n luottorajoja per asiakas
   $kasittely_periaate = "asiakas.tunnus";
 }
 
@@ -121,16 +121,16 @@ echo "</tr>";
 echo "<tr>";
 echo "<th>".t("Luottoraja rajauksia")."</th>";
 echo "<td><select name='luottorajauksia'>";
-echo "<option value='A' $raja_select[A]>".t("N‰yt‰ asiakkaat, joiden luottoraja eroaa myynnist‰ yli muutosprosentin")."</option>";
-echo "<option value='B' $raja_select[B]>".t("N‰yt‰ asiakkaat, jotka ovat ylitt‰neet luottorajan")."</option>";
-echo "<option value='C' $raja_select[C]>".t("N‰yt‰ asiakkaat, joilla ei ole luottorajaa, mutta myynti‰")."</option>";
-echo "<option value='D' $raja_select[D]>".t("N‰yt‰ asiakkaat, joilla on luottoraja, mutta ei myynti‰")."</option>";
-echo "<option value='E' $raja_select[E]>".t("N‰yt‰ asiakkaat, jotka ovat myyntikiellossa")."</option>";
-echo "<option value='F' $raja_select[F]>".t("N‰yt‰ asiakkaat, jotka ovat ylitt‰neet luottorajan, mutta eiv‰t ole myyntikiellossa")."</option>";
-echo "<option value='G' $raja_select[G]>".t("N‰yt‰ asiakkaat, joilla on avoimia maksukehotuksia, joita on kehotettu maksamaan ainakin kerran")."</option>";
-echo "<option value='H' $raja_select[H]>".t("N‰yt‰ asiakkaat, joilla on avoimia maksukehotuksia, joita on kehotettu maksamaan ainakin kaksi kertaa")."</option>";
-echo "<option value='I' $raja_select[I]>".t("N‰yt‰ asiakkaat, joilla on avoimia maksukehotuksia, joita on kehotettu maksamaan ainakin kolme kertaa")."</option>";
-echo "<option value='Z' $raja_select[Z]>".t("N‰yt‰ kaikki asiakkaat")."</option>";
+echo "<option value='A' $raja_select[A]>".t("N√§yt√§ asiakkaat, joiden luottoraja eroaa myynnist√§ yli muutosprosentin")."</option>";
+echo "<option value='B' $raja_select[B]>".t("N√§yt√§ asiakkaat, jotka ovat ylitt√§neet luottorajan")."</option>";
+echo "<option value='C' $raja_select[C]>".t("N√§yt√§ asiakkaat, joilla ei ole luottorajaa, mutta myynti√§")."</option>";
+echo "<option value='D' $raja_select[D]>".t("N√§yt√§ asiakkaat, joilla on luottoraja, mutta ei myynti√§")."</option>";
+echo "<option value='E' $raja_select[E]>".t("N√§yt√§ asiakkaat, jotka ovat myyntikiellossa")."</option>";
+echo "<option value='F' $raja_select[F]>".t("N√§yt√§ asiakkaat, jotka ovat ylitt√§neet luottorajan, mutta eiv√§t ole myyntikiellossa")."</option>";
+echo "<option value='G' $raja_select[G]>".t("N√§yt√§ asiakkaat, joilla on avoimia maksukehotuksia, joita on kehotettu maksamaan ainakin kerran")."</option>";
+echo "<option value='H' $raja_select[H]>".t("N√§yt√§ asiakkaat, joilla on avoimia maksukehotuksia, joita on kehotettu maksamaan ainakin kaksi kertaa")."</option>";
+echo "<option value='I' $raja_select[I]>".t("N√§yt√§ asiakkaat, joilla on avoimia maksukehotuksia, joita on kehotettu maksamaan ainakin kolme kertaa")."</option>";
+echo "<option value='Z' $raja_select[Z]>".t("N√§yt√§ kaikki asiakkaat")."</option>";
 echo "</select></td>";
 echo "</tr>";
 
@@ -155,7 +155,7 @@ echo "</tr>";
 
 echo "<br>";
 
-echo "<input type='submit' value='".t("N‰yt‰")."'>";
+echo "<input type='submit' value='".t("N√§yt√§")."'>";
 echo "</form>";
 
 echo "<br />";
@@ -168,10 +168,10 @@ echo t("tai"),"...";
 echo "<br />";
 echo "<br />";
 
-echo "<font class='message'>",t("P‰ivit‰ asiakkaiden luottotietoja tiedostosta"),"</font><br />";
+echo "<font class='message'>",t("P√§ivit√§ asiakkaiden luottotietoja tiedostosta"),"</font><br />";
 echo "<font class='info'>",t("Otsikot: ytunnus, asiakasnro, luottoraja"),"</font><br />";
 echo "<table>";
-echo "<tr><th>",t("Valitse tiedosto"),"</th><td><input type='file' name='userfile' /></td><td class='back'><input type='submit' value='",t("L‰het‰"),"' /></td></tr>";
+echo "<tr><th>",t("Valitse tiedosto"),"</th><td><input type='file' name='userfile' /></td><td class='back'><input type='submit' value='",t("L√§het√§"),"' /></td></tr>";
 echo "</table>";
 echo "</form>";
 
@@ -188,7 +188,7 @@ if ($tee == "3") {
 
     $excelrivit = pupeFileReader($kasiteltava_tiedoto_path, $ext);
 
-    echo "<font class='message'>".t("Luetaan l‰hetetty tiedosto")."...<br><br></font>";
+    echo "<font class='message'>".t("Luetaan l√§hetetty tiedosto")."...<br><br></font>";
 
     // Otetaan otsikot pois
     array_shift($excelrivit);
@@ -215,14 +215,14 @@ if ($tee == "3") {
       $cnt++;
     }
 
-    $plural = $cnt == 1 ? "rivi" : "rivi‰";
+    $plural = $cnt == 1 ? "rivi" : "rivi√§";
     $classi = $cnt > 0 ? "ok" : "error";
 
-    echo "<font class='{$classi}'>",t("P‰ivitettiin %d %s", '', $cnt, $plural),".</font><br />";
+    echo "<font class='{$classi}'>",t("P√§ivitettiin %d %s", '', $cnt, $plural),".</font><br />";
   }
 }
 
-// p‰ivitet‰‰n asiakkaat
+// p√§ivitet√§√§n asiakkaat
 if ($tee == "2") {
 
   foreach ($luottoraja as $ytunnus => $summa) {
@@ -234,7 +234,7 @@ if ($tee == "2") {
       continue;
     }
 
-    // Katsotaan, ett‰ tiedot ovat oikein
+    // Katsotaan, ett√§ tiedot ovat oikein
     if (!is_numeric($summa)) {
       continue;
     }
@@ -255,7 +255,7 @@ if ($tee == "2") {
     $asiakasres = mysql_query($query) or pupe_error($query);
 
     if (mysql_affected_rows() != 0) {
-      $update_message[$ytunnus] = t("Asiakastiedot p‰ivitetty!");
+      $update_message[$ytunnus] = t("Asiakastiedot p√§ivitetty!");
     }
   }
 
@@ -263,7 +263,7 @@ if ($tee == "2") {
 
 }
 
-// n‰ytet‰‰n asiakkaat
+// n√§ytet√§√§n asiakkaat
 if ($tee == "1") {
 
   // haetaan kaikki yrityksen asiakkaat
@@ -328,37 +328,37 @@ if ($tee == "1") {
     $myyntires = mysql_query($query) or pupe_error($query);
     $myyntirow = mysql_fetch_array($myyntires);
 
-    // Ei n‰ytet‰ jos ei olla yli minimi myynnin
+    // Ei n√§ytet√§ jos ei olla yli minimi myynnin
     if (($luottorajauksia != "D" and $luottorajauksia != "Z" and $myyntirow["summa"] == 0) or ($myyntirow["summa"] < $minimi_myynti)) {
       continue;
     }
 
-    // N‰yt‰ asiakkaat, joiden luottorajaa tulisi tarkistaa (myynnin/luottorajan ero yli muutosprosentin)
+    // N√§yt√§ asiakkaat, joiden luottorajaa tulisi tarkistaa (myynnin/luottorajan ero yli muutosprosentin)
     if ($luottorajauksia == "A" and (abs(100 - ($myyntirow["summa"] / $asiakasrow["luottoraja"] * 100)) < $muutosprosentti or $asiakasrow["luottoraja"] == 0)) {
       continue;
     }
 
-    // N‰yt‰ asiakkaat, jotka ovat ylitt‰neet luottorajan
+    // N√§yt√§ asiakkaat, jotka ovat ylitt√§neet luottorajan
     if ($luottorajauksia == "B" and ($myyntirow["summa"] < $asiakasrow["luottoraja"] or $asiakasrow["luottoraja"] == 0)) {
       continue;
     }
 
-    // N‰yt‰ asiakkaat, joilla ei ole luottorajaa, mutta myynti‰
+    // N√§yt√§ asiakkaat, joilla ei ole luottorajaa, mutta myynti√§
     if ($luottorajauksia == "C" and ($asiakasrow['luottoraja'] != 0 or $myyntirow["summa"] == 0)) {
       continue;
     }
 
-    // N‰yt‰ asiakkaat, joilla on luottoraja, mutta ei myynti‰
+    // N√§yt√§ asiakkaat, joilla on luottoraja, mutta ei myynti√§
     if ($luottorajauksia == "D" and ($asiakasrow['luottoraja'] == 0 or $myyntirow["summa"] != 0)) {
       continue;
     }
 
-    // N‰yt‰ asiakkaat, jotka ovat myyntikiellossa
+    // N√§yt√§ asiakkaat, jotka ovat myyntikiellossa
     if ($luottorajauksia == "E" and $asiakasrow['myyntikielto'] != "K") {
       continue;
     }
 
-    // N‰yt‰ asiakkaat, jotka ovat ylitt‰neet luottorajan, mutta eiv‰t ole myyntikiellossa
+    // N√§yt√§ asiakkaat, jotka ovat ylitt√§neet luottorajan, mutta eiv√§t ole myyntikiellossa
     if ($luottorajauksia == "F" and ($myyntirow["summa"] < $asiakasrow["luottoraja"] or $asiakasrow['myyntikielto'] == "K" or $asiakasrow["luottoraja"] == 0)) {
       continue;
     }
@@ -366,11 +366,11 @@ if ($tee == "1") {
     if ($luottorajauksia == 'G' or $luottorajauksia == 'H' or $luottorajauksia == 'I') {
 
       if ($yhtiorow["myyntitilaus_saatavat"] == "Y") {
-        // k‰sitell‰‰n luottorajoja per ytunnus
+        // k√§sitell√§√§n luottorajoja per ytunnus
         $extraehto = " AND lasku.ytunnus = '$asiakasrow[ytunnus]'";
       }
       else {
-        // k‰sitell‰‰n luottorajoja per asiakas
+        // k√§sitell√§√§n luottorajoja per asiakas
         $extraehto = " AND lasku.liitostunnus = '$asiakasrow[tunnus]'";
       }
 
@@ -475,7 +475,7 @@ if ($tee == "1") {
     echo "<td class='back'><font class='error'>".$update_message[$asiakasrow["ytunnus"]]."</font></td>";
     echo "</tr>";
 
-    // V‰litet‰‰n alkuper‰iset arvot, ettei p‰ivitet‰ asiakasta suotta
+    // V√§litet√§√§n alkuper√§iset arvot, ettei p√§ivitet√§ asiakasta suotta
     echo "<input type='hidden' name='alkuperainen_luottoraja[$asiakasrow[ytunnus]]' value='$asiakasrow[luottoraja]'>";
     echo "<input type='hidden' name='alkuperainen_myyntikielto[$asiakasrow[ytunnus]]' value='$asiakasrow[myyntikielto]'>";
   }
@@ -483,7 +483,7 @@ if ($tee == "1") {
   echo "<tr><td class='back' colspan='9' align='right'>".t("Ruksaa kaikki")." &raquo; <input type='checkbox' name='ruksaakaikki' onclick='toggleAll(this)'></td></tr>";
   echo "</table>";
 
-  echo "<input type='submit' value='".t("P‰ivit‰ luottorajat")."'>";
+  echo "<input type='submit' value='".t("P√§ivit√§ luottorajat")."'>";
 
   echo "</form>";
 }

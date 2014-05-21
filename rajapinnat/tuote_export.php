@@ -1,6 +1,6 @@
 <?php
 
-// Kutsutaanko CLI:st‰
+// Kutsutaanko CLI:st√§
 $php_cli = FALSE;
 
 if (php_sapi_name() == 'cli') {
@@ -9,9 +9,9 @@ if (php_sapi_name() == 'cli') {
 
 date_default_timezone_set('Europe/Helsinki');
 
-// Kutsutaanko CLI:st‰
+// Kutsutaanko CLI:st√§
 if (!$php_cli) {
-  die ("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!");
+  die ("T√§t√§ scripti√§ voi ajaa vain komentorivilt√§!");
 }
 
 $pupe_root_polku = dirname(dirname(__FILE__));
@@ -24,7 +24,7 @@ $lock_params = array(
   "lockfile" => '##tuote-export-flock.lock',
 );
 
-// Sallitaan vain yksi instanssi t‰st‰ skriptist‰ kerrallaan
+// Sallitaan vain yksi instanssi t√§st√§ skriptist√§ kerrallaan
 pupesoft_flock($lock_params);
 
 require ("{$pupe_root_polku}/rajapinnat/magento_client.php");
@@ -42,20 +42,20 @@ if (trim($argv[1]) != '') {
   }
 }
 else {
-  die ("Et antanut yhtiˆt‰.\n");
+  die ("Et antanut yhti√∂t√§.\n");
 }
 
 $verkkokauppatyyppi = isset($argv[2]) ? trim($argv[2]) : "";
 
 if ($verkkokauppatyyppi != "magento" and $verkkokauppatyyppi != "anvia") {
-  die ("Et antanut verkkokaupan tyyppi‰.\n");
+  die ("Et antanut verkkokaupan tyyppi√§.\n");
 }
 
 if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
 
-  // Varmistetaan, ett‰ kaikki muuttujat on kunnossa
+  // Varmistetaan, ett√§ kaikki muuttujat on kunnossa
   if (empty($magento_api_ana_url) or empty($magento_api_ana_usr) or empty($magento_api_ana_pas) or empty($magento_tax_class_id)) {
-    echo "Magento parametrit puuttuu, p‰ivityst‰ ei voida ajaa.";
+    echo "Magento parametrit puuttuu, p√§ivityst√§ ei voida ajaa.";
     exit;
   }
 }
@@ -64,7 +64,7 @@ $ajetaanko_kaikki = (isset($argv[3]) and trim($argv[3]) != '') ? "YES" : "NO";
 if (!isset($verkkokauppa_saldo_varasto)) $verkkokauppa_saldo_varasto = array();
 
 if (!is_array($verkkokauppa_saldo_varasto)) {
-  echo "verkkokauppa_saldo_varasto pit‰‰ olla array!";
+  echo "verkkokauppa_saldo_varasto pit√§√§ olla array!";
   exit;
 }
 
@@ -72,11 +72,11 @@ if (!is_array($verkkokauppa_saldo_varasto)) {
 $datetime_checkpoint_res = t_avainsana("TUOTE_EXP_CRON");
 
 if (mysql_num_rows($datetime_checkpoint_res) != 1) {
-  exit("VIRHE: Timestamp ei lˆydy avainsanoista!\n");
+  exit("VIRHE: Timestamp ei l√∂ydy avainsanoista!\n");
 }
 
 $datetime_checkpoint_row = mysql_fetch_assoc($datetime_checkpoint_res);
-$datetime_checkpoint = $datetime_checkpoint_row['selite']; // Mik‰ tilanne on jo k‰sitelty
+$datetime_checkpoint = $datetime_checkpoint_row['selite']; // Mik√§ tilanne on jo k√§sitelty
 $datetime_checkpoint_uusi = date('Y-m-d H:i:s'); // Timestamp nyt
 
 // alustetaan arrayt
@@ -140,10 +140,10 @@ $query = "SELECT tuote.tuoteno,
           ORDER BY tuote.tuoteno";
 $res = pupe_query($query);
 
-// Pyˆr‰ytet‰‰n muuttuneet tuotteet l‰pi
+// Py√∂r√§ytet√§√§n muuttuneet tuotteet l√§pi
 while ($row = mysql_fetch_array($res)) {
 
-  // Jos yhtiˆn hinnat eiv‰t sis‰ll‰ alv:t‰
+  // Jos yhti√∂n hinnat eiv√§t sis√§ll√§ alv:t√§
   if ($yhtiorow["alv_kasittely"] != "" and $verkkokauppatyyppi != 'magento') {
     $myyntihinta          = hintapyoristys($row["myyntihinta"] * (1+($row["alv"]/100)));
     $myyntihinta_veroton       = $row["myyntihinta"];
@@ -214,12 +214,12 @@ while ($row = mysql_fetch_array($res)) {
                       );
 }
 
-// Magentoa varten pit‰‰ hakea kaikki tuotteet, jotta voidaan poistaa ne jota ei ole olemassa
+// Magentoa varten pit√§√§ hakea kaikki tuotteet, jotta voidaan poistaa ne jota ei ole olemassa
 if ($verkkokauppatyyppi == 'magento') {
 
   echo date("d.m.Y @ G:i:s")." - Haetaan poistettavat tuotteet.\n";
 
-  // Haetaan pupesta kaikki tuotteet (ja configurable-tuotteet), jotka pit‰‰ olla Magentossa
+  // Haetaan pupesta kaikki tuotteet (ja configurable-tuotteet), jotka pit√§√§ olla Magentossa
   $query = "SELECT DISTINCT tuote.tuoteno, tuotteen_avainsanat.selite configurable_tuoteno
             FROM tuote
             LEFT JOIN tuotteen_avainsanat ON (tuote.yhtio = tuotteen_avainsanat.yhtio
@@ -257,7 +257,7 @@ else {
   $muutoslisa3 = "";
 }
 
-// Haetaan saldot tuotteille, joille on tehty tunnin sis‰ll‰ tilausrivi tai tapahtuma
+// Haetaan saldot tuotteille, joille on tehty tunnin sis√§ll√§ tilausrivi tai tapahtuma
 $query =  "(SELECT tapahtuma.tuoteno,
             tuote.eankoodi
             FROM tapahtuma
@@ -321,7 +321,7 @@ else {
   $muutoslisa = "";
 }
 
-echo date("d.m.Y @ G:i:s")." - Haetaan osastot/tuoteryhm‰t.\n";
+echo date("d.m.Y @ G:i:s")." - Haetaan osastot/tuoteryhm√§t.\n";
 
 // Haetaan kaikki TRY ja OSASTO:t, niiden muutokset.
 $query = "SELECT DISTINCT  tuote.osasto,
@@ -368,7 +368,7 @@ $try_result = pupe_query($query);
 
 while ($row = mysql_fetch_assoc($try_result)) {
 
-  // Osasto/tuoteryhm‰ array
+  // Osasto/tuoteryhm√§ array
   $dnsryhma[$row["osasto"]][$row["try"]] = array(  'osasto'  => $row["osasto"],
                           'try'    => $row["try"],
                           'osasto_fi'  => $row["osasto_fi_nimi"],
@@ -379,7 +379,7 @@ while ($row = mysql_fetch_assoc($try_result)) {
                           'try_en'  => $row["try_en_nimi"],
                           );
 
-  // Ker‰t‰‰n myˆs pelk‰t tuotenumerot Magentoa varten
+  // Ker√§t√§√§n my√∂s pelk√§t tuotenumerot Magentoa varten
   $dnstuoteryhma[$row["try"]] = array(  'try'    => $row["try"],
                       'try_fi'  => $row["try_fi_nimi"],
                       'try_se'  => $row["try_se_nimi"],
@@ -408,7 +408,7 @@ $query = "SELECT asiakas.nimi,
           $muutoslisa";
 $res = pupe_query($query);
 
-// pyˆr‰ytet‰‰n asiakkaat l‰pi
+// py√∂r√§ytet√§√§n asiakkaat l√§pi
 while ($row = mysql_fetch_array($res)) {
   $dnsasiakas[] = array(  
                         'nimi'    => $row["nimi"],
@@ -450,10 +450,10 @@ $query = "SELECT hinnasto.tuoteno,
           $muutoslisa";
 $res = pupe_query($query);
 
-// Tehd‰‰n hinnastot l‰pi
+// Tehd√§√§n hinnastot l√§pi
 while ($row = mysql_fetch_array($res)) {
 
-  // Jos yhtiˆn hinnat eiv‰t sis‰ll‰ alv:t‰
+  // Jos yhti√∂n hinnat eiv√§t sis√§ll√§ alv:t√§
   if ($yhtiorow["alv_kasittely"] != "" and $verkkokauppatyyppi != 'magento') {
     $hinta          = hintapyoristys($row["hinta"] * (1+($row["alv"]/100)));
     $hinta_veroton       = $row["hinta"];
@@ -474,7 +474,7 @@ while ($row = mysql_fetch_array($res)) {
 
 echo date("d.m.Y @ G:i:s")." - Haetaan tuotteiden variaatiot.\n";
 
-// Magentoon vain tuotteet joiden n‰kyvyys != ''
+// Magentoon vain tuotteet joiden n√§kyvyys != ''
 $nakyvyys_lisa = ($verkkokauppatyyppi == 'magento') ? "AND tuote.nakyvyys != ''" : "";
 
 // haetaan kaikki tuotteen variaatiot, jotka on menossa verkkokauppaan
@@ -505,7 +505,7 @@ else {
 // loopataan variaatio-nimitykset
 while ($rowselite = mysql_fetch_assoc($resselite)) {
 
-  // Haetaan kaikki tuotteet, jotka kuuluu t‰h‰n variaatioon ja on muuttunut
+  // Haetaan kaikki tuotteet, jotka kuuluu t‚Ä∞h‚Ä∞n variaatioon ja on muuttunut
   $aliselect = "SELECT
                 tuotteen_avainsanat.tuoteno,
                 tuotteen_avainsanat.jarjestys,
@@ -580,7 +580,7 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
                    "arvo" => $syvinrow["selite"]);
     }
 
-    // Jos yhtiˆn hinnat eiv‰t sis‰ll‰ alv:t‰
+    // Jos yhti√∂n hinnat eiv√§t sis√§ll√§ alv:t√§
     if ($yhtiorow["alv_kasittely"] != "" and $verkkokauppatyyppi != 'magento') {
       $myyntihinta          = hintapyoristys($alirow["myyntihinta"] * (1+($alirow["alv"]/100)));
       $myyntihinta_veroton       = $alirow["myyntihinta"];
@@ -624,7 +624,7 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
 
 $tuote_export_error_count = 0;
 
-echo date("d.m.Y @ G:i:s")." - Aloitetaan p‰ivitys verkkokauppaan.\n";
+echo date("d.m.Y @ G:i:s")." - Aloitetaan p√§ivitys verkkokauppaan.\n";
 
 if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
 
@@ -636,53 +636,53 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
     exit;
   }
 
-  // tax_class_id, magenton API ei anna hakea t‰t‰ mist‰‰n. Pit‰‰ k‰yd‰ katsomassa magentosta
+  // tax_class_id, magenton API ei anna hakea t√§t√§ mist√§√§n. Pit√§√§ k√§yd√§ katsomassa magentosta
   $magento_client->setTaxClassID($magento_tax_class_id);
 
-  // Verkkokaupan "root" kategorian tunnus, magenton API ei anna hakea t‰t‰ mist‰‰n. Pit‰‰ k‰yd‰ katsomassa magentosta
+  // Verkkokaupan "root" kategorian tunnus, magenton API ei anna hakea t√§t√§ mist√§√§n. Pit√§√§ k√§yd√§ katsomassa magentosta
   if (isset($magento_parent_id)) $magento_client->setParentID($magento_parent_id);
 
-  // Verkkokaupanhintakentt‰, joko myyntihinta tai myymalahinta
+  // Verkkokaupanhintakentt√§, joko myyntihinta tai myymalahinta
   if (isset($magento_hintakentta)) $magento_client->setHintakentta($magento_hintakentta);
 
   // Onko "Category access control"-moduli on asennettu
   if (isset($categoryaccesscontrol)) $magento_client->setCategoryaccesscontrol($categoryaccesscontrol);
   
-  // Mit‰ tuotteen kentt‰‰ k‰ytet‰‰n configurable-tuotteen nimityksen‰
+  // Mit‚Ä∞ tuotteen kentt‚Ä∞‚Ä∞ k‚Ä∞ytet‚Ä∞‚Ä∞n configurable-tuotteen nimityksen‚Ä∞
   if (isset($magento_configurable_tuote_nimityskentta)) $magento_client->setConfigurableNimityskentta($magento_configurable_tuote_nimityskentta);
 
   // lisaa_kategoriat
   if (count($dnstuoteryhma) > 0) {
-    echo date("d.m.Y @ G:i:s")." - P‰ivitet‰‰n tuotekategoriat\n";
+    echo date("d.m.Y @ G:i:s")." - P√§ivitet√§√§n tuotekategoriat\n";
     $count = $magento_client->lisaa_kategoriat($dnstuoteryhma);
-    echo date("d.m.Y @ G:i:s")." - P‰ivitettiin $count kategoriaa\n";
+    echo date("d.m.Y @ G:i:s")." - P√§ivitettiin $count kategoriaa\n";
   }
 
   // Tuotteet (Simple)
   if (count($dnstuote) > 0) {
-    echo date("d.m.Y @ G:i:s")." - P‰ivitet‰‰n simple tuotteet\n";
+    echo date("d.m.Y @ G:i:s")." - P√§ivitet√§√§n simple tuotteet\n";
     $count = $magento_client->lisaa_simple_tuotteet($dnstuote, $individual_tuotteet);
-    echo date("d.m.Y @ G:i:s")." - P‰ivitettiin $count tuotetta (simple)\n";
+    echo date("d.m.Y @ G:i:s")." - P√§ivitettiin $count tuotetta (simple)\n";
   }
 
   // Tuotteet (Configurable)
   if (count($dnslajitelma) > 0) {
-    echo date("d.m.Y @ G:i:s")." - P‰ivitet‰‰n configurable tuotteet\n";
+    echo date("d.m.Y @ G:i:s")." - P√§ivitet√§√§n configurable tuotteet\n";
     $count = $magento_client->lisaa_configurable_tuotteet($dnslajitelma);
-    echo date("d.m.Y @ G:i:s")." - P‰ivitettiin $count tuotetta (configurable)\n";
+    echo date("d.m.Y @ G:i:s")." - P√§ivitettiin $count tuotetta (configurable)\n";
   }
 
   // Saldot
   if (count($dnstock) > 0) {
-    echo date("d.m.Y @ G:i:s")." - P‰ivitet‰‰n tuotteiden saldot\n";
+    echo date("d.m.Y @ G:i:s")." - P√§ivitet√§√§n tuotteiden saldot\n";
     $count = $magento_client->paivita_saldot($dnstock);
-    echo date("d.m.Y @ G:i:s")." - P‰ivitettiin $count tuotteen saldot\n";
+    echo date("d.m.Y @ G:i:s")." - P√§ivitettiin $count tuotteen saldot\n";
   }
 
   // Poistetaan tuotteet jota ei ole kaupassa
   if (count($kaikki_tuotteet) > 0) {
-    echo date("d.m.Y @ G:i:s")." - Poistetaan ylim‰‰r‰iset tuotteet\n";
-    // HUOM, t‰h‰n passataan **KAIKKI** verkkokauppatuotteet, methodi katsoo ett‰ kaikki n‰m‰ on kaupassa, muut paitsi gifcard-tuotteet dellataan!
+    echo date("d.m.Y @ G:i:s")." - Poistetaan ylim√§√§r√§iset tuotteet\n";
+    // HUOM, t√§h√§n passataan **KAIKKI** verkkokauppatuotteet, methodi katsoo ett√§ kaikki n√§m√§ on kaupassa, muut paitsi gifcard-tuotteet dellataan!
     $count = $magento_client->poista_poistetut($kaikki_tuotteet, true);
     echo date("d.m.Y @ G:i:s")." - Poistettiin $count tuotetta\n";
   }
@@ -690,7 +690,7 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
   $tuote_export_error_count = $magento_client->getErrorCount();
 
   if ($tuote_export_error_count != 0) {
-    echo date("d.m.Y @ G:i:s")." - P‰ivityksess‰ tapahtui {$tuote_export_error_count} virhett‰!\n";
+    echo date("d.m.Y @ G:i:s")." - P√§ivityksess√§ tapahtui {$tuote_export_error_count} virhett√§!\n";
   }
 
   $time_end = microtime(true);
@@ -743,10 +743,10 @@ elseif (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "anvia") {
 // Otetaan tietokantayhteys uudestaan (voi olla timeoutannu)
 unset($link);
 $link = mysql_connect($dbhost, $dbuser, $dbpass, true) or die ("Ongelma tietokantapalvelimessa $dbhost (tuote_export)");
-mysql_select_db($dbkanta, $link) or die ("Tietokantaa $dbkanta ei lˆydy palvelimelta $dbhost! (tuote_export)");
-mysql_set_charset("latin1", $link);
+mysql_select_db($dbkanta, $link) or die ("Tietokantaa $dbkanta ei l√∂ydy palvelimelta $dbhost! (tuote_export)");
+mysql_set_charset("utf8", $link);
 
-// Kun kaikki onnistui, p‰ivitet‰‰n lopuksi timestamppi talteen
+// Kun kaikki onnistui, p√§ivitet√§√§n lopuksi timestamppi talteen
 $query = "UPDATE avainsana SET
           selite      = '{$datetime_checkpoint_uusi}'
           WHERE yhtio = '{$kukarow['yhtio']}'
@@ -754,5 +754,5 @@ $query = "UPDATE avainsana SET
 pupe_query($query);
 
 if (mysql_affected_rows() != 1) {
-  echo "Timestamp p‰ivitys ep‰onnistui!\n";
+  echo "Timestamp p√§ivitys ep√§onnistui!\n";
 }

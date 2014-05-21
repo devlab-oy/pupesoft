@@ -3,7 +3,7 @@
 function hinnastorivi($tuote) {
     global $kukarow;
 
-    //haetaan aleryhm‰n tunnus
+    //haetaan aleryhm√§n tunnus
   $query = "SELECT b.tunnus, b.ryhma
             FROM tuote a
             LEFT JOIN perusalennus b use index (yhtio_ryhma) ON a.yhtio = b.yhtio and a.aleryhma = b.ryhma
@@ -47,7 +47,7 @@ function hinnastorivi($tuote) {
       }
       $lask++;
     }
-    //t‰ss‰ listan viimeinen indeksi
+    //t√§ss√§ listan viimeinen indeksi
     $lask--;
 
     //edellinen ja seuraava korvaava
@@ -65,7 +65,7 @@ function hinnastorivi($tuote) {
     }
   }
 
-    // tehd‰‰n tietuetta
+    // tehd√§√§n tietuetta
   $out  = sprintf('%-20.20s'  ,$tuote["tuoteno"]);
   $out .= sprintf('%-60.60s'  ,t_tuotteen_avainsanat($tuote, 'nimitys'));
   $out .= sprintf('%-10.10s'  ,t_avainsana("Y", "", "and avainsana.selite='$tuote[yksikko]'", "", "", "selite"));

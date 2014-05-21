@@ -1,13 +1,13 @@
 <?php
 
 // Nollataan keksit inventoinni alkuvalikossa
-// jos $tee muuttujaa ei oo setattu getissä tai postissa
+// jos $tee muuttujaa ei oo setattu getissÃ¤ tai postissa
 if (!isset($_GET['tee']) AND !isset($_POST['tee'])) {
   setcookie("_tuotepaikka", null);
   setcookie("_varmistuskoodi", null);
 }
-// Talletetaan tuotepaikka ja varmistuskoodi keksiin, jolloin niitä ei tarvitse joka kerta syöttää.
-// Molemmat pitää olla setattu että ne talletetaan!
+// Talletetaan tuotepaikka ja varmistuskoodi keksiin, jolloin niitÃ¤ ei tarvitse joka kerta syÃ¶ttÃ¤Ã¤.
+// Molemmat pitÃ¤Ã¤ olla setattu ettÃ¤ ne talletetaan!
 elseif (!empty($_POST['tuotepaikka']) AND !empty($_POST['varmistuskoodi'])) {
   setcookie("_tuotepaikka", $_POST['tuotepaikka']);
   setcookie("_varmistuskoodi", $_POST['varmistuskoodi']);
@@ -26,8 +26,8 @@ $errors = array();
 function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
   global $kukarow;
 
-  // Poistetaan tuotepaikasta välimerkit
-  $hylly = preg_replace("/[^a-zA-ZåäöÅÄÖ0-9]/", "", $tuotepaikka);
+  // Poistetaan tuotepaikasta vÃ¤limerkit
+  $hylly = preg_replace("/[^a-zA-ZÃ¥Ã¤Ã¶Ã…Ã„Ã–0-9]/", "", $tuotepaikka);
 
   // Hakuehdot
   if ($tuoteno != '')    $params['tuoteno'] = "tuote.tuoteno = '{$tuoteno}'";
@@ -79,26 +79,26 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
   return $osumat;
 }
 
-/** Tarkistaa varmistuskoodin syötetyn tuotepaikan ja koodin mukaan.
- *  jos varmistuskoodia ei annettu yritetään käyttää keksissä olevaa varmistuskoodia.
+/** Tarkistaa varmistuskoodin syÃ¶tetyn tuotepaikan ja koodin mukaan.
+ *  jos varmistuskoodia ei annettu yritetÃ¤Ã¤n kÃ¤yttÃ¤Ã¤ keksissÃ¤ olevaa varmistuskoodia.
  */
 function tarkista_varmistuskoodi($tuotepaikka, $varmistuskoodi = '', $haettu_tuotepaikalla = '') {
   // Muutetaan saatuo tuotepaikka arrayksi
   $hylly = explode('-', $tuotepaikka);
 
-  // Jos haettu vajaalla tuotepaikalla, eli hyllyalue-hyllynro, niin tarkistetaan että jos
-  // keksissä oleva tuotepaikka täsmää kyseistä aluetta. Jos täsmää niin varmistuskoodi tarkistetaan suoraan.
+  // Jos haettu vajaalla tuotepaikalla, eli hyllyalue-hyllynro, niin tarkistetaan ettÃ¤ jos
+  // keksissÃ¤ oleva tuotepaikka tÃ¤smÃ¤Ã¤ kyseistÃ¤ aluetta. Jos tÃ¤smÃ¤Ã¤ niin varmistuskoodi tarkistetaan suoraan.
   $tuotealue = false;
   if (stripos(str_replace('-', '', $_COOKIE['_tuotepaikka']), $haettu_tuotepaikalla) === 0) {
     $tuotealue = true;
   }
 
-  // Jos varmistuskoodia ei saatu parametrissa, yritetään keksissä olevalla koodilla.
+  // Jos varmistuskoodia ei saatu parametrissa, yritetÃ¤Ã¤n keksissÃ¤ olevalla koodilla.
   if ($varmistuskoodi == '' and isset($_COOKIE['_varmistuskoodi']) and ($tuotepaikka == $_COOKIE['_tuotepaikka'] or $tuotealue == true)) {
     $varmistuskoodi = $_COOKIE['_varmistuskoodi'];
   }
 
-  // Jos varmistuskoodi on edelleen tyhjä niin hylätään
+  // Jos varmistuskoodi on edelleen tyhjÃ¤ niin hylÃ¤tÃ¤Ã¤n
   if ($varmistuskoodi == '') {
     return false;
   }
@@ -125,11 +125,11 @@ if ($tee == 'haku') {
   # Haettu jollain
   if (isset($viivakoodi) or isset($tuoteno) or isset($tuotepaikka)) {
     if (!empty($tuotepaikka) and strlen($tuotepaikka) < 2) {
-      $errors[] = t("Tuotepaikka haun on oltava vähintään 2 merkkiä");
+      $errors[] = t("Tuotepaikka haun on oltava vÃ¤hintÃ¤Ã¤n 2 merkkiÃ¤");
     }
     else {
       $tuotteet = hae($viivakoodi,$tuoteno,$tuotepaikka);
-      if(count($tuotteet) == 0) $errors[] = "Ei löytynyt";
+      if(count($tuotteet) == 0) $errors[] = "Ei lÃ¶ytynyt";
     }
   }
 
@@ -145,7 +145,7 @@ if ($tee == 'haku') {
     exit();
   }
 
-  # Löydetyt osumat
+  # LÃ¶ydetyt osumat
   if (isset($tuotteet) and count($tuotteet) > 0) {
     include('views/inventointi/hakutulokset.php');
   }
@@ -184,7 +184,7 @@ if ($tee == 'listat') {
   }
 
   if (count($listat) == 1) {
-    # Jos löytyi vain yksi lista, inventoidaan suoraan sitä
+    # Jos lÃ¶ytyi vain yksi lista, inventoidaan suoraan sitÃ¤
     echo "<META HTTP-EQUIV='Refresh'CONTENT='0; URL=inventointi.php{$listat[0]['url']}'>";
   }
   elseif (count($listat) > 1) {
@@ -192,18 +192,18 @@ if ($tee == 'listat') {
     include('views/inventointi/listat.php');
   }
   else {
-    $errors[] =  t("Inventoitavia eriä ei ole");
+    $errors[] =  t("Inventoitavia eriÃ¤ ei ole");
     $title = t("Inventointi");
     include('views/inventointi/index.php');  }
 }
 
 # Lasketaan tuotteet
 if ($tee == 'laske' or $tee == 'inventoi') {
-  # Mitä parametrejä tarvitaan (tuoteno tai lista)
+  # MitÃ¤ parametrejÃ¤ tarvitaan (tuoteno tai lista)
   assert(!empty($tuoteno) or !empty($lista));
 
   if (!isset($maara)) $maara = 0;
-  if (!is_numeric($maara)) $errors[] = t("Määrän on oltava numero");
+  if (!is_numeric($maara)) $errors[] = t("MÃ¤Ã¤rÃ¤n on oltava numero");
 
   # Inventoidaan listaa
   if (!empty($lista)) {
@@ -211,7 +211,7 @@ if ($tee == 'laske' or $tee == 'inventoi') {
     # Hybridilistat, reservipaikka voi olla K tai E
     if (!isset($reservipaikka)) $reservipaikka = 'E';
 
-    # Haetaan listan 'ensimmäinen' tuote
+    # Haetaan listan 'ensimmÃ¤inen' tuote
     $query = "SELECT
               tuote.nimitys,
               tuote.tuoteno,
@@ -266,7 +266,7 @@ if ($tee == 'laske' or $tee == 'inventoi') {
 
   # Haetaan sscc jos tyyppi
   if ($tuote['tyyppi'] == 'S') {
-    # etsitään suuntalavan sscc
+    # etsitÃ¤Ã¤n suuntalavan sscc
     $suuntalava_query = "SELECT group_concat(sscc) as sscc
                          FROM tilausrivi
                          JOIN suuntalavat on (suuntalavat.yhtio=tilausrivi.yhtio AND suuntalavat.tunnus=tilausrivi.suuntalava)
@@ -281,7 +281,7 @@ if ($tee == 'laske' or $tee == 'inventoi') {
     $sscc = $suuntalava_sscc['sscc'];
   }
 
-  # Näytetäänkö apulaskuri
+  # NÃ¤ytetÃ¤Ã¤nkÃ¶ apulaskuri
   $query = "SELECT
             count(tunnus) as monta
             FROM tuotteen_avainsanat
@@ -292,7 +292,7 @@ if ($tee == 'laske' or $tee == 'inventoi') {
   $pakkaukset = mysql_fetch_assoc($pakkaukset);
 
   $apulaskuri_url = '';
-  # Jos pakkauksia ei löytynyt, ei näytetä apulaskuria
+  # Jos pakkauksia ei lÃ¶ytynyt, ei nÃ¤ytetÃ¤ apulaskuria
   if ($pakkaukset['monta'] > 0) {
     $apulaskuri_url = http_build_query(array('tee' => 'apulaskuri',
                   'tuotepaikka' => $tuotepaikka,
@@ -301,9 +301,9 @@ if ($tee == 'laske' or $tee == 'inventoi') {
                   'reservipaikka' => $reservipaikka));
   }
 
-  // Jos varmistuskoodi kelpaa tai on keksissä tallessa
+  // Jos varmistuskoodi kelpaa tai on keksissÃ¤ tallessa
   if (tarkista_varmistuskoodi($tuote['tuotepaikka'], $varmistuskoodi, $tuotepaikalla)) {
-    $title = t("Laske määrä");
+    $title = t("Laske mÃ¤Ã¤rÃ¤");
     $query = "SELECT *
               FROM avainsana
               WHERE yhtio = '{$kukarow['yhtio']}'
@@ -317,10 +317,10 @@ if ($tee == 'laske' or $tee == 'inventoi') {
 
   }
   else {
-    # Tarkistetaan että varaston_hyllypaikka on perustettu
+    # Tarkistetaan ettÃ¤ varaston_hyllypaikka on perustettu
     $hylly = explode('-', $tuotepaikka);
     if (isset($varmistuskoodi) and !tarkista_varaston_hyllypaikka($hylly[0], $hylly[1], $hylly[2], $hylly[3])) {
-      $errors[] = "Tuotteen tietoja ei ole määritelty varaston hyllypaikoissa!";
+      $errors[] = "Tuotteen tietoja ei ole mÃ¤Ã¤ritelty varaston hyllypaikoissa!";
     }
     # Tarkistetaan varmistuskoodi
     elseif (isset($varmistuskoodi)) $errors[] = "Virheellinen varmistuskoodi";
@@ -413,7 +413,7 @@ if ($tee == 'inventoidaan') {
     $row = mysql_fetch_assoc($result);
 
     $inven_laji = $row['selite'];
-    $lisaselite = t("Käsipääte").": " . $row['selitetark_4'];
+    $lisaselite = t("KÃ¤sipÃ¤Ã¤te").": " . $row['selitetark_4'];
     $mobiili = 'YES';
 
     require('../inventoi.php');
@@ -422,7 +422,7 @@ if ($tee == 'inventoidaan') {
     if($lista != 0) {
       $paluu_url = http_build_query(array('tee' => 'laske', 'lista' => $lista, 'reservipaikka' => $reservipaikka));
     }
-    # Jos inventoitu tuotepaikalla, palataan takaisin hakuun kyseisellä tuotepaikalla
+    # Jos inventoitu tuotepaikalla, palataan takaisin hakuun kyseisellÃ¤ tuotepaikalla
     elseif(!empty($tuotepaikalla)) {
       $paluu_url = http_build_query(array('tee' => 'haku', 'viivakoodi' => '', 'tuoteno' => '', 'tuotepaikka' => $tuotepaikalla));
     }

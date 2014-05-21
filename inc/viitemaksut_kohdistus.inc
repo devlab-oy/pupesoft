@@ -6,7 +6,7 @@
 #
 ######################################
 
-// Oletuksena asiakkaan maksama summa on oltava t‰sm‰lleen oikein
+// Oletuksena asiakkaan maksama summa on oltava t√§sm√§lleen oikein
 $Viitemaksujen_kohdistus_sallittu_heitto = 0.01;
 
 if ($yhtiorow["viitemaksujen_kohdistus_sallittu_heitto"] > 0 and $yhtiorow["viitemaksujen_kohdistus_sallittu_heitto"] <= 1.00) {
@@ -69,7 +69,7 @@ $suorires = pupe_query($query);
 
 while ($row = mysql_fetch_assoc($suorires)) {
 
-  // Setataan kukarow-yhtiˆ
+  // Setataan kukarow-yhti√∂
   $kukarow["yhtio"] = $row["suoriyhtio"];
 
   if (strtoupper($row["suoritusvaluutta"]) != strtoupper($row['yhtiovaluutta'])) {
@@ -81,7 +81,7 @@ while ($row = mysql_fetch_assoc($suorires)) {
     $alennus_valuutassa = round($row["laskutettu"] - $row["suoritettu"], 2);
   }
 
-  # Katsotaan ensin, ettei t‰t‰ laskua ole jo suoritettu/maksettu
+  # Katsotaan ensin, ettei t√§t√§ laskua ole jo suoritettu/maksettu
   # Eli keissi jossa asiakas maksaa saman laskun kahteen kertaan samassa viiteaineistossa
   $query = "SELECT tunnus, liitostunnus, maksuehto
             FROM lasku
@@ -93,7 +93,7 @@ while ($row = mysql_fetch_assoc($suorires)) {
   if (mysql_num_rows($lasresult) == 1 and ($row["ftilino"] == $row["stilino"] or $row["ftilino"] == "")) {
     $malaskurow = mysql_fetch_assoc($lasresult);
 
-    # Etsit‰‰n asiakas, jos se olisi konsernin j‰sen
+    # Etsit√§√§n asiakas, jos se olisi konsernin j√§sen
     $query = "SELECT konserniyhtio
               FROM asiakas
               WHERE yhtio        = '$kukarow[yhtio]'
@@ -105,12 +105,12 @@ while ($row = mysql_fetch_assoc($suorires)) {
       $row["myyntisaamiset"] = $row["konsernimyyntisaamiset"];
     }
 
-    # Onko t‰m‰ sittenkin factoringia
+    # Onko t√§m√§ sittenkin factoringia
     if ($row["factoring"] != "") {
       $row["myyntisaamiset"] = $row["factoringsaamiset"];
     }
 
-    # Haetaan myyntisaamistiliˆinnin kustannuspaikka
+    # Haetaan myyntisaamistili√∂innin kustannuspaikka
     $query = "SELECT kustp, kohde, projekti
               FROM tiliointi
               WHERE yhtio  = '$kukarow[yhtio]'
@@ -120,7 +120,7 @@ while ($row = mysql_fetch_assoc($suorires)) {
     $asresult = pupe_query($query);
     $mskustprow = mysql_fetch_assoc($asresult);
 
-    // Tarkenteet kopsataan alkuper‰iselt‰ tiliˆinnilt‰, mutta jos alkuper‰inen tiliˆinti on ilman tarkenteita, niin menn‰‰n tilin defaulteilla
+    // Tarkenteet kopsataan alkuper√§iselt√§ tili√∂innilt√§, mutta jos alkuper√§inen tili√∂inti on ilman tarkenteita, niin menn√§√§n tilin defaulteilla
     list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($row["myyntisaamiset"], $mskustprow["kustp"], $mskustprow["kohde"], $mskustprow["projekti"]);
 
     # Myyntisaamiset
@@ -171,11 +171,11 @@ while ($row = mysql_fetch_assoc($suorires)) {
     // Mahdollinen kassa-alennus
     if ($alennus != 0) {
 
-      // Kassa-alessa on huomioitava alv, joka voi olla useita vientej‰
+      // Kassa-alessa on huomioitava alv, joka voi olla useita vientej√§
       $totkasumma = 0;
       $totkasumma_valuutassa = 0;
 
-      // Etsit‰‰n myynti-tiliˆinnit
+      // Etsit√§√§n myynti-tili√∂innit
       $query = "SELECT tiliointi.summa, tiliointi.vero, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti, tiliointi.summa_valuutassa, tiliointi.valkoodi
                 FROM tiliointi use index (tositerivit_index)
                 JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)
@@ -232,14 +232,14 @@ while ($row = mysql_fetch_assoc($suorires)) {
             $summa_valuutassa -= $alv_valuutassa;
           }
 
-          // Kuinka paljon olemme kumulatiivisesti tiliˆineet
+          // Kuinka paljon olemme kumulatiivisesti tili√∂ineet
           $totkasumma += $summa + $alv;
           $totkasumma_valuutassa += $summa_valuutassa + $alv_valuutassa;
 
-          // Tarkenteet kopsataan alkuper‰iselt‰ tiliˆinnilt‰, mutta jos alkuper‰inen tiliˆinti on ilman tarkenteita, niin menn‰‰n tilin defaulteilla
+          // Tarkenteet kopsataan alkuper√§iselt√§ tili√∂innilt√§, mutta jos alkuper√§inen tili√∂inti on ilman tarkenteita, niin menn√§√§n tilin defaulteilla
           list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($row["alennustili"], $tiliointirow["kustp"], $tiliointirow["kohde"], $tiliointirow["projekti"]);
 
-          # Lis‰t‰‰n myynnin kassa-alennuskirjaus ilman veroa
+          # Lis√§t√§√§n myynnin kassa-alennuskirjaus ilman veroa
           $query = "INSERT INTO tiliointi
                     SET yhtio      = '$kukarow[yhtio]',
                     laatija          = 'automaatti',
@@ -258,9 +258,9 @@ while ($row = mysql_fetch_assoc($suorires)) {
           $insres = pupe_query($query);
           $aputunnus = mysql_insert_id();
 
-          # Etsit‰‰n korjattava vienti
+          # Etsit√§√§n korjattava vienti
           if ($alv != 0) {
-            #Kirjataan myˆs kassa-alennuksen arvonlis‰verot
+            #Kirjataan my√∂s kassa-alennuksen arvonlis√§verot
             $query = "INSERT into tiliointi
                       SET yhtio       = '$kukarow[yhtio]',
                       ltunnus          = '$row[laskutunnus]',
@@ -282,7 +282,7 @@ while ($row = mysql_fetch_assoc($suorires)) {
           }
         }
 
-        //Hoidetaan mahdolliset pyˆristykset
+        //Hoidetaan mahdolliset py√∂ristykset
         $heitto = round($totkasumma - $alennus, 2);
         $heitto_valuutassa = round($totkasumma_valuutassa - $alennus_valuutassa, 2);
 
@@ -308,7 +308,7 @@ while ($row = mysql_fetch_assoc($suorires)) {
 
         $totvesumma = 0;
 
-        // Etsit‰‰n myynti-tiliˆinnit
+        // Etsit√§√§n myynti-tili√∂innit
         $query = "SELECT tiliointi.summa, tiliointi.vero, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti, tiliointi.summa_valuutassa, tiliointi.valkoodi
                   FROM tiliointi use index (tositerivit_index)
                   JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)
@@ -343,10 +343,10 @@ while ($row = mysql_fetch_assoc($suorires)) {
         else {
           while ($tiliointirow = mysql_fetch_assoc($tilres)) {
 
-            // Kuinka paljon on t‰m‰n viennin osuus
+            // Kuinka paljon on t√§m√§n viennin osuus
             $summa = round($tiliointirow['summa'] * (1+$tiliointirow['vero']/100) / $row["laskutettu"] * $vesumma, 2);
 
-            // Tarkenteet kopsataan alkuper‰iselt‰ tiliˆinnilt‰, mutta jos alkuper‰inen tiliˆinti on ilman tarkenteita, niin menn‰‰n tilin defaulteilla
+            // Tarkenteet kopsataan alkuper√§iselt√§ tili√∂innilt√§, mutta jos alkuper√§inen tili√∂inti on ilman tarkenteita, niin menn√§√§n tilin defaulteilla
             list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($row["valuuttaerotili"], $tiliointirow["kustp"], $tiliointirow["kohde"], $tiliointirow["projekti"]);
 
             $query = "INSERT INTO tiliointi SET
@@ -367,7 +367,7 @@ while ($row = mysql_fetch_assoc($suorires)) {
             $totvesumma += $summa;
           }
 
-          //Hoidetaan mahdolliset pyˆristykset
+          //Hoidetaan mahdolliset py√∂ristykset
           if ($totvesumma != $vesumma) {
             $query = "UPDATE tiliointi
                       SET summa = summa - $totvesumma + $vesumma
@@ -379,7 +379,7 @@ while ($row = mysql_fetch_assoc($suorires)) {
       }
     }
 
-    #Merkit‰‰n lasku maksetuksi
+    #Merkit√§√§n lasku maksetuksi
     $query = "UPDATE lasku
               SET mapvm = '$row[kirjpvm]'
               WHERE yhtio = '$kukarow[yhtio]'
@@ -400,11 +400,11 @@ while ($row = mysql_fetch_assoc($suorires)) {
 
 #####################################
 #
-# siirret‰‰n feilanneet laskuiksi...
+# siirret√§√§n feilanneet laskuiksi...
 #
 #####################################
 
-echo "<font class='message'>".t("Tehd‰‰n kohdistamattomista laskuja").": $yhtiorow[nimi]</font><br>\n";
+echo "<font class='message'>".t("Tehd√§√§n kohdistamattomista laskuja").": $yhtiorow[nimi]</font><br>\n";
 
 $query = "SELECT
           suoritus.tunnus tunnus,
@@ -454,12 +454,12 @@ while ($row = mysql_fetch_assoc($suorires)) {
 
   if ($laskut[$row["yhtio"]] > 0) {
 
-    # Onko t‰m‰ sittenkin factoringia
+    # Onko t√§m√§ sittenkin factoringia
     if ($row["factoring"] != "") {
       $row["myyntisaamiset"] = $row["factoringsaamiset"];
     }
 
-    # Jos meill‰ on oletus selvittelytili niin pistet‰‰n aina sinne tilille
+    # Jos meill√§ on oletus selvittelytili niin pistet√§√§n aina sinne tilille
     if ($row["oletus_selvittelytili"] != "") {
       $row["myyntisaamiset"] = $row["oletus_selvittelytili"];
     }
@@ -482,7 +482,7 @@ while ($row = mysql_fetch_assoc($suorires)) {
               summa            = -$summa,
               summa_valuutassa = -$summa_valuutassa,
               valkoodi         = '$row[suoritusvaluutta]',
-              selite           = '$maksaja_espattu maksoi viitteell‰ v‰‰rin',
+              selite           = '$maksaja_espattu maksoi viitteell√§ v√§√§rin',
               lukko            = '1'";
     $insres = pupe_query($query);
     $tlast_id = mysql_insert_id();
@@ -503,7 +503,7 @@ while ($row = mysql_fetch_assoc($suorires)) {
               summa            = $summa,
               summa_valuutassa = $summa_valuutassa,
               valkoodi         = '$row[suoritusvaluutta]',
-              selite           = '$maksaja_espattu maksoi viitteell‰ v‰‰rin',
+              selite           = '$maksaja_espattu maksoi viitteell√§ v√§√§rin',
               aputunnus        = '$tlast_id',
               lukko            = '1'";
     $insres = pupe_query($query);

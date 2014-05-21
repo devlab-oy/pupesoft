@@ -85,11 +85,11 @@ if (!function_exists("luo_myyntitilausotsikko")) {
       $maksuehto = $asiakasrow["maksuehto"];
 
       if ($myyjanro != "") {
-        $apuqu = "  SELECT *
-              from kuka use index (yhtio_myyja)
-              where yhtio = '$kukarow[yhtio]'
-              and myyja = '$myyjanro'
-              AND myyja > 0";
+        $apuqu = "SELECT *
+                  from kuka use index (yhtio_myyja)
+                  where yhtio = '$kukarow[yhtio]'
+                  and myyja   = '$myyjanro'
+                  AND myyja   > 0";
         $meapu = pupe_query($apuqu);
 
         if (mysql_num_rows($meapu)==1) {
@@ -97,11 +97,11 @@ if (!function_exists("luo_myyntitilausotsikko")) {
           $myyja = $apuro['tunnus'];
         }
         elseif (mysql_num_rows($meapu)>1) {
-          echo "<font class='error'>".t("Syˆtt‰m‰si myyj‰numero")." $myyjanro ".t("lˆytyi usealla k‰ytt‰j‰ll‰")."!</font><br><br>";
+          echo "<font class='error'>".t("Sy√∂tt√§m√§si myyj√§numero")." $myyjanro ".t("l√∂ytyi usealla k√§ytt√§j√§ll√§")."!</font><br><br>";
           $myyja = 0;
         }
         else {
-          echo "<font class='error'>".t("Syˆtt‰m‰si myyj‰numero")." $myyjanro ".t("ei lˆytynyt")."!</font><br><br>";
+          echo "<font class='error'>".t("Sy√∂tt√§m√§si myyj√§numero")." $myyjanro ".t("ei l√∂ytynyt")."!</font><br><br>";
           $myyja = 0;
         }
       }
@@ -135,7 +135,7 @@ if (!function_exists("luo_myyntitilausotsikko")) {
         $comments = $asiakasrow["myynti_kommentti1"];
       }
 
-      //annetaan extranet-tilaukselle aina paras prioriteetti, t‰m‰ on hyv‰ porkkana.
+      //annetaan extranet-tilaukselle aina paras prioriteetti, t√§m√§ on hyv√§ porkkana.
       if ($kukarow["extranet"] != '') {
         $query  = "SELECT distinct selite
                    FROM avainsana
@@ -155,7 +155,7 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 
       $erikoisale  = $asiakasrow["erikoisale"];
 
-      // Jos on varasto setattuna, p‰ss‰t‰‰n eteenp‰in
+      // Jos on varasto setattuna, p√§ss√§t√§√§n eteenp√§in
       $varasto = 0;
 
       if ($toim == "REKLAMAATIO" and $tilaustyyppi == 'U' and $yhtiorow['takuuvarasto'] != 0) {
@@ -165,9 +165,9 @@ if (!function_exists("luo_myyntitilausotsikko")) {
         // Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan $kukarow['varasto']
         $varasto = $kukarow['varasto'];
       }
-      // valitaan k‰ytt‰j‰n oletus varasto
+      // valitaan k√§ytt√§j√§n oletus varasto
       elseif ($yhtiorow['oletusvarasto_tilaukselle'] == 'O' and (int) $kukarow["oletus_varasto"] > 0) {
-        // jos kukarow['oletus_varasto'] valittu ja myyntitilauksella ei ole varastoa valittuna, valitaan k‰ytt‰j‰n oletus varasto
+        // jos kukarow['oletus_varasto'] valittu ja myyntitilauksella ei ole varastoa valittuna, valitaan k√§ytt√§j√§n oletus varasto
         $varasto = $kukarow['oletus_varasto'];
       }
 
@@ -192,11 +192,11 @@ if (!function_exists("luo_myyntitilausotsikko")) {
       $toimitusehto2 = substr($yhtiorow['oletus_toimitusehto2'], 0, 3);
       $kasitoimehto2 = substr($yhtiorow['oletus_toimitusehto2'], 4);
 
-      // K‰ytet‰‰nkˆ l‰hett‰j‰n vai vastaanottajan rahtisopparia
-      $apuqu = "  SELECT *
-            from toimitustapa
-            where yhtio  = '$kukarow[yhtio]'
-            and selite  = '$toimitustapa'";
+      // K√§ytet√§√§nk√∂ l√§hett√§j√§n vai vastaanottajan rahtisopparia
+      $apuqu = "SELECT *
+                from toimitustapa
+                where yhtio = '$kukarow[yhtio]'
+                and selite  = '$toimitustapa'";
       $meapu = pupe_query($apuqu);
       $apuro = mysql_fetch_assoc($meapu);
 
@@ -206,7 +206,7 @@ if (!function_exists("luo_myyntitilausotsikko")) {
         $eilahe = 'o';
       }
 
-      // Onko toimitusehdon takana m‰‰ritelty rahdinmaksaja? T‰m‰ yliajaa toimitustavan takana olevan.
+      // Onko toimitusehdon takana m√§√§ritelty rahdinmaksaja? T√§m√§ yliajaa toimitustavan takana olevan.
       $toimehto_tresult = t_avainsana("TOIMEHTO", "", " and trim(concat_ws(' ', selite, selitetark)) = trim('$yhtiorow[oletus_toimitusehto]') ");
 
       if (mysql_num_rows($toimehto_tresult) > 0) {
@@ -244,7 +244,7 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 
         if (mysql_num_rows($myynnista_osto_avainsanat) > 0) {
 
-          // Yhtiˆn toimipaikka yliajaa t‰m‰n parametrin
+          // Yhti√∂n toimipaikka yliajaa t√§m√§n parametrin
           $query_x = "SELECT ostotilauksen_kasittely
                       FROM yhtion_parametrit
                       WHERE yhtio = '{$kukarow['yhtio']}'";
@@ -271,7 +271,7 @@ if (!function_exists("luo_myyntitilausotsikko")) {
       }
     }
     else {
-      //yhtiˆn oletusalvi!
+      //yhti√∂n oletusalvi!
       $xwquery = "SELECT selite from avainsana where yhtio='$kukarow[yhtio]' and laji='alv' and selitetark!=''";
       $xwtres  = pupe_query($xwquery);
       $xwtrow  = mysql_fetch_assoc($xwtres);
@@ -280,16 +280,16 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 
       $ytunnus = "*";
 
-      // Jos on varasto setattuna, p‰ss‰t‰‰n eteenp‰in
+      // Jos on varasto setattuna, p√§ss√§t√§√§n eteenp√§in
       $varasto = 0;
 
       if (strpos($kukarow["varasto"], ',') === FALSE and (int) $kukarow["varasto"] > 0) {
         // Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan $kukarow['varasto']
         $varasto = $kukarow['varasto'];
       }
-      // valitaan k‰ytt‰j‰n oletus varasto
+      // valitaan k√§ytt√§j√§n oletus varasto
       elseif ($yhtiorow['oletusvarasto_tilaukselle'] == 'O' and (int) $kukarow["oletus_varasto"] > 0) {
-        // jos kukarow['oletus_varasto'] valittu ja myyntitilauksella ei ole varastoa valittuna, valitaan k‰ytt‰j‰n oletus varasto
+        // jos kukarow['oletus_varasto'] valittu ja myyntitilauksella ei ole varastoa valittuna, valitaan k√§ytt√§j√§n oletus varasto
         $varasto = $kukarow['oletus_varasto'];
       }
     }
@@ -324,17 +324,17 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 
     $alv_velvollisuus = "";
 
-    // jos meill‰ on lasku menossa ulkomaille
+    // jos meill√§ on lasku menossa ulkomaille
     if ($maa != "" and $maa != $yhtiorow["maa"]) {
-      // tutkitaan ollaanko siell‰ alv-rekisterˆity
-      $alhqur = "  SELECT *
-            FROM yhtion_toimipaikat
-            WHERE yhtio    = '$kukarow[yhtio]'
-            AND maa      = '$maa'
-            AND vat_numero != ''";
+      // tutkitaan ollaanko siell√§ alv-rekister√∂ity
+      $alhqur = "SELECT *
+                 FROM yhtion_toimipaikat
+                 WHERE yhtio     = '$kukarow[yhtio]'
+                 AND maa         = '$maa'
+                 AND vat_numero != ''";
       $alhire = pupe_query($alhqur);
 
-      // ollaan alv-rekisterˆity, aina kotimaa myynti ja alvillista
+      // ollaan alv-rekister√∂ity, aina kotimaa myynti ja alvillista
       if (mysql_num_rows($alhire) == 1) {
 
         $alhiro  = mysql_fetch_assoc($alhire);
@@ -343,14 +343,14 @@ if (!function_exists("luo_myyntitilausotsikko")) {
         $query = "SELECT selite from avainsana where yhtio='$kukarow[yhtio]' and laji='ALVULK' and selitetark!='' and selitetark_2='$maa' limit 1";
         $alhire = pupe_query($query);
 
-        // jos ei lˆydy niin menn‰‰n erroriin
+        // jos ei l√∂ydy niin menn√§√§n erroriin
         if (mysql_num_rows($alhire) == 0) {
-          echo "<font class='error'>Oletus ALV-kantaa ei lˆydy asiakkaan maahan $maa! Ei voida jatkaa!</font><br>";
+          echo "<font class='error'>Oletus ALV-kantaa ei l√∂ydy asiakkaan maahan $maa! Ei voida jatkaa!</font><br>";
           exit;
         }
         else {
           $apuro  = mysql_fetch_assoc($alhire);
-          // n‰m‰ t‰ss‰ keisiss‰ aina n‰in
+          // n√§m√§ t√§ss√§ keisiss√§ aina n√§in
           $alv = $apuro["selite"];
           $vienti = "";
           $alv_velvollisuus = $alhiro["vat_numero"];
@@ -377,7 +377,7 @@ if (!function_exists("luo_myyntitilausotsikko")) {
       $tilaustyyppi = "A";
     }
     elseif ($toim == "EXTENNAKKO") {
-      // Kun asiakas tekee ext-ennakkotilausta extranetiss‰
+      // Kun asiakas tekee ext-ennakkotilausta extranetiss√§
       $tilaustyyppi = "E";
       $clearing  = "EXTENNAKKO";
     }
@@ -402,8 +402,8 @@ if (!function_exists("luo_tarjouspohja")) {
   function luo_tarjouspohja($params) {
     global $kukarow, $yhtiorow, $session;
 
-    // valitut_asiakastunnukset on special case tapaus. valitut_asiakastunnukset on setattu ainoastaan silloin kun dummytarjoukselle halutaan liitt‰‰ asiakkaita.
-    // clearing on special case, kun dummy tarjoukselta halutaan luoda asiakkaille oikeat tarjoukset, niin clearing pit‰‰ setata n‰ihin tarjouksiin
+    // valitut_asiakastunnukset on special case tapaus. valitut_asiakastunnukset on setattu ainoastaan silloin kun dummytarjoukselle halutaan liitt√§√§ asiakkaita.
+    // clearing on special case, kun dummy tarjoukselta halutaan luoda asiakkaille oikeat tarjoukset, niin clearing pit√§√§ setata n√§ihin tarjouksiin
     $toim = $params['toim'];
     $asiakasid = $params['asiakasid'];
     $tilausnumero = $params['tilausnumero'];
@@ -411,7 +411,7 @@ if (!function_exists("luo_tarjouspohja")) {
     $alv = $params['alv'];
     $viesti = $params['viesti'];
 
-    //Jos asiakasid < 0 niin kyseess‰ on special case. T‰ss‰ tapauksessa luodaan Extranet Dummytarjousta.
+    //Jos asiakasid < 0 niin kyseess√§ on special case. T√§ss√§ tapauksessa luodaan Extranet Dummytarjousta.
     $query = "SELECT *
               FROM kuka
               WHERE yhtio = '$kukarow[yhtio]'

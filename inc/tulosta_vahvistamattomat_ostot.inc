@@ -15,7 +15,7 @@ if (!function_exists('tulosta_ostotilaus')) {
     }
 
     // Haetaan laskun tiedot
-    $query = "SELECT lasku.*, lasku.tunnus tunnus, lasku.nimi nimi, lasku.luontiaika päiväys, lasku.tunnusnippu projekti, lasku.tunnus tilaus, lasku.tunnus toimitus, viesti viite, comments lisätiedot,
+    $query = "SELECT lasku.*, lasku.tunnus tunnus, lasku.nimi nimi, lasku.luontiaika pÃ¤ivÃ¤ys, lasku.tunnusnippu projekti, lasku.tunnus tilaus, lasku.tunnus toimitus, viesti viite, comments lisÃ¤tiedot,
               concat_ws(' ', postino, postitp) postiosoite,
               concat_ws(' ', toim_postino, toim_postitp) toim_postiosoite,
               SUBSTRING(lasku_maa.nimi FROM 5) maa,
@@ -43,7 +43,7 @@ if (!function_exists('tulosta_ostotilaus')) {
       $kieli = strtolower($kielrow['kieli']);
     }
 
-    //  Aloitellaan piirtelyä
+    //  Aloitellaan piirtelyÃ¤
     $pdf = new pdf;
 
     $pdf->set_default('margin-top',   mm_pt(10));
@@ -68,18 +68,18 @@ if (!function_exists('tulosta_ostotilaus')) {
     function alku ($pdf, $laskurow, $kieli) {
       global $yhtiorow;
 
-      //  Tehdään uusi sivu
+      //  TehdÃ¤Ã¤n uusi sivu
       $pdf->addPage("a4");
       $h=265;
 
-      //  Liitetään kuva
+      //  LiitetÃ¤Ã¤n kuva
       $yhtiorow["lasku_logo"] = "../pics/RTEC_laskulogo.png";
       if($yhtiorow["lasku_logo"] != "" and file_exists($yhtiorow["lasku_logo"])) {
         $pdf->placeImage(260,0,$yhtiorow["lasku_logo"]);
       }
 
       //  Kirjoitetaan otsikko
-      $pdf->write($h, 2, 0, 0, t("TOIMITUKSEN VAHVISTUSPYYNTÖ", $kieli), "BIG", "C", "B");
+      $pdf->write($h, 2, 0, 0, t("TOIMITUKSEN VAHVISTUSPYYNTÃ–", $kieli), "BIG", "C", "B");
 
       //  Laitetaan perustiedot oikealle
       $h=250;
@@ -115,7 +115,7 @@ if (!function_exists('tulosta_ostotilaus')) {
 
       $h-=$pdf->ln(1.5);
 
-      $pdf->write($h, 1, 0, 0, t("HUOM: Tämä ei ole ostotilaus.", $kieli), "norm", "L", "B");
+      $pdf->write($h, 1, 0, 0, t("HUOM: TÃ¤mÃ¤ ei ole ostotilaus.", $kieli), "norm", "L", "B");
 
       return $pdf;
     }
@@ -133,7 +133,7 @@ if (!function_exists('tulosta_ostotilaus')) {
     $query_ale_lisa = generoi_alekentta('O');
     $ale_select_lisa = generoi_alekentta_select('erikseen', 'O');
 
-    //  Käsitellään tilausrivit
+    //  KÃ¤sitellÃ¤Ã¤n tilausrivit
     $query = "SELECT otunnus, toim_tuoteno, toim_nimitys, tuote.tuoteno, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu, toimaika,
               tilausrivi.hinta, {$ale_select_lisa} round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta, kommentti
               FROM tilausrivi
@@ -160,7 +160,7 @@ if (!function_exists('tulosta_ostotilaus')) {
       $s=$pdf->teeSarakkeet(array(100,20,25));
       $pdf->write($h, 1, 0, $s[0], t("Tuote", $kieli), "norm", "L", "B");
       $pdf->write($h, 1, $s[0], $s[1], t("Tilaus", $kieli), "norm", "R", "B");
-      $pdf->write($h, 1, $s[2], 0, t("Määrä", $kieli), "norm", "R", "B");
+      $pdf->write($h, 1, $s[2], 0, t("MÃ¤Ã¤rÃ¤", $kieli), "norm", "R", "B");
 
       $h-=$pdf->ln();
       $pdf->write($h, 1, 0, $s[0], t("Kommentti", $kieli), "norm", "L", "B");
@@ -221,7 +221,7 @@ if (!function_exists('tulosta_ostotilaus')) {
           $s=$pdf->teeSarakkeet(array(100,20,25));
           $pdf->write($h, 1, 0, $s[0], t("Tuote", $kieli), "norm", "L", "B");
           $pdf->write($h, 1, $s[0], $s[1], t("Tilaus", $kieli), "norm", "R", "B");
-          $pdf->write($h, 1, $s[2], 0, t("Määrä", $kieli), "norm", "R", "B");
+          $pdf->write($h, 1, $s[2], 0, t("MÃ¤Ã¤rÃ¤", $kieli), "norm", "R", "B");
 
           $h-=$pdf->ln();
           $pdf->write($h, 1, 0, $s[0], t("Kommentti", $kieli), "norm", "L", "B");
@@ -229,7 +229,7 @@ if (!function_exists('tulosta_ostotilaus')) {
           $h-=$pdf->ln(1.5);
         }
 
-        //  Tarkastetaan olisiko toimittajalla yksikkö!
+        //  Tarkastetaan olisiko toimittajalla yksikkÃ¶!
         $query = "SELECT toim_yksikko
                   FROM tuotteen_toimittajat
                   WHERE yhtio      = '$kukarow[yhtio]'
@@ -239,7 +239,7 @@ if (!function_exists('tulosta_ostotilaus')) {
         $rarres = mysql_query($query) or pupe_error($query);
         $rarrow   = mysql_fetch_array($rarres);
 
-        //  Jos toimittajalla on yksikkö ohitetaan tuotteen yksikkö
+        //  Jos toimittajalla on yksikkÃ¶ ohitetaan tuotteen yksikkÃ¶
         if($rarrow["toim_yksikko"]!= "") {
           $row["yksikko"] = $rarrow["toim_yksikko"];
         }
@@ -335,7 +335,7 @@ if (!function_exists('tulosta_ostotilaus')) {
     $pdf->write($h, 1, $s[0], $s[1],   t("Email", $kieli).":", "norm", "L", "");
     $pdf->write($h, 1, $s[1], $s[2],   $yhtiorow["email"], "norm", "L", "");
     // Tulostetaan sivu
-    //keksitään uudelle failille joku varmasti uniikki nimi:
+    //keksitÃ¤Ã¤n uudelle failille joku varmasti uniikki nimi:
     list($usec, $sec) = explode(' ', microtime());
     mt_srand((float) $sec + ((float) $usec * 100000));
     $pdf_ostofilenimi = "/tmp/Osto-".md5(uniqid(mt_rand(), true)).".pdf";
@@ -360,13 +360,13 @@ if (!function_exists('tulosta_ostotilaus')) {
     if ($komento == 'email' or substr($komento,0,12) == 'asiakasemail') {
       $liite = $pdf_ostofilenimi;
       if($laskurow["tunnusnippu"] > 0) {
-        $kutsu = "Toimituksen vahvistuspyyntö $laskurow[tunnusnippu]/$laskurow[tunnus]";
+        $kutsu = "Toimituksen vahvistuspyyntÃ¶ $laskurow[tunnusnippu]/$laskurow[tunnus]";
       }
       else {
-        $kutsu = "Toimituksen vahvistuspyyntö $laskurow[tunnus]";
+        $kutsu = "Toimituksen vahvistuspyyntÃ¶ $laskurow[tunnus]";
       }
 
-      $tulosta_ostotilaus_ulos .= t("Toimituksen vahvistuspyyntö lähetetään osoitteeseen")." $kukarow[eposti]...<br>";
+      $tulosta_ostotilaus_ulos .= t("Toimituksen vahvistuspyyntÃ¶ lÃ¤hetetÃ¤Ã¤n osoitteeseen")." $kukarow[eposti]...<br>";
 
       if ($kukarow["extranet"] == '') {
         require("../inc/sahkoposti.inc");

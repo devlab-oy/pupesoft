@@ -1,26 +1,26 @@
 <?php
-//Kun tullaan t‰nne tarvitaan $komento joka on se komento jolla tulostetaan esim. lpr -P tarrakirjoitin
-//ja tarvitaan myˆs $tuoteno
+//Kun tullaan t√§nne tarvitaan $komento joka on se komento jolla tulostetaan esim. lpr -P tarrakirjoitin
+//ja tarvitaan my√∂s $tuoteno
 $query = "select * from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
 $tarrares = mysql_query($query) or pupe_error($query);
-//tuote pit‰‰ lˆyty‰
+//tuote pit√§√§ l√∂yty√§
 if (mysql_num_rows($tarrares) == 1) {
   $tarrarow = mysql_fetch_array($tarrares);
-  //jos tullaan yksinkertaisesta n‰kym‰st‰ tulostetaan tuoteno eankoodin sijaan
+  //jos tullaan yksinkertaisesta n√§kym√§st√§ tulostetaan tuoteno eankoodin sijaan
   if ($toim== 'YKS') {
     $tarrarow['eankoodi'] = $tarrarow['tuoteno'];
   }
-  //jos eankoodi kentt‰ on tyhj‰ ei viittit‰ edes l‰hte‰ tulostelemaan
+  //jos eankoodi kentt√§ on tyhj√§ ei viittit√§ edes l√§hte√§ tulostelemaan
   if ($tarrarow['eankoodi']!= '0') {
     $eankoodi = trim($tarrarow['eankoodi']);
     $nimitys = $tarrarow['nimitys'];
     $nimitys2 = '';
-    //jos nimitys on pidempi kuin 22 merkki‰ niin se ei mahdu yhdelle riville vaan pit‰‰ jakaa kahtia
+    //jos nimitys on pidempi kuin 22 merkki√§ niin se ei mahdu yhdelle riville vaan pit√§√§ jakaa kahtia
     if (strlen($nimitys) > 30) {
       $nimitys = substr($tarrarow['nimitys'],0,30);
     }
     $tuoteno = $tarrarow['tuoteno'];
-    //t‰ss‰ arvataan merkkim‰‰r‰n perusteella mink‰lainen viivakoodi pit‰‰ tehd‰
+    //t√§ss√§ arvataan merkkim√§√§r√§n perusteella mink√§lainen viivakoodi pit√§√§ tehd√§
     $countti = strlen($eankoodi);
     if ($countti== 13) {
       $laji = 'EAN13';
@@ -33,7 +33,7 @@ if (mysql_num_rows($tarrares) == 1) {
     }
 
     $tulos = false;
-    //t‰ss‰ lasketaan koodin virallisuus  vaan positiivinen numeerinen tietue
+    //t√§ss√§ lasketaan koodin virallisuus  vaan positiivinen numeerinen tietue
     if (is_numeric($eankoodi) and $eankoodi >= 0) {
       $pit  = strlen($eankoodi);
       $factor    = 3;
@@ -78,7 +78,7 @@ if (mysql_num_rows($tarrares) == 1) {
       $koodi = 'CODE128';
       //echo "ei ole MIKAAN $laji<br>";
     }
-    //t‰ss‰ tehd‰‰n aineisto jota Intermec tulostin tajuaa
+    //t√§ss√§ tehd√§√§n aineisto jota Intermec tulostin tajuaa
 $sivu = '
 BF ON
 BF \"Swiss 721 BT\",10,0
@@ -102,9 +102,9 @@ PF
     $line = exec(" echo \"$sivu\" | $komento");
   }
   else {
-    echo "<font class='error'>".t("Tuotteella")." $tuoteno ".t("ei ole viivakoodia j‰rjestelm‰ss‰ joten tarrojen tulostus taitaa olla turhaa")."!!!<br></font>";
+    echo "<font class='error'>".t("Tuotteella")." $tuoteno ".t("ei ole viivakoodia j√§rjestelm√§ss√§ joten tarrojen tulostus taitaa olla turhaa")."!!!<br></font>";
   }
 }
 else {
-  echo "<font class='error'>".t("Tuotetta")." $tuoteno ".t("ei lˆydy j‰rjestelm‰st‰")."!!!<br></font>";
+  echo "<font class='error'>".t("Tuotetta")." $tuoteno ".t("ei l√∂ydy j√§rjestelm√§st√§")."!!!<br></font>";
 }

@@ -6,7 +6,7 @@ if (!function_exists("pakkaustarkista")) {
 
     if (mysql_field_name($result, $i) == "pakkaus") {
       if (trim($t[$i]) == '') {
-        $virhe[$i] .= t("Pakkaus ei saa olla tyhj‰")."!";
+        $virhe[$i] .= t("Pakkaus ei saa olla tyhj√§")."!";
       }
       else {
         $t[$i] = trim(mysql_real_escape_string($t[$i]));
@@ -15,7 +15,7 @@ if (!function_exists("pakkaustarkista")) {
 
     if (mysql_field_name($result, $i) == "pakkauskuvaus") {
       if (trim($t[$i]) == '') {
-        $virhe[$i] .= t("Pakkauskuvaus ei saa olla tyhj‰")."!";
+        $virhe[$i] .= t("Pakkauskuvaus ei saa olla tyhj√§")."!";
       }
       else {
         $t[$i] = trim(mysql_real_escape_string($t[$i]));
@@ -26,7 +26,7 @@ if (!function_exists("pakkaustarkista")) {
       $t[$i] = trim(str_replace(",", ".", $t[$i]));
 
       if ($yhtiorow['varastopaikkojen_maarittely'] == 'M' and ($t[$i] == '' or !is_numeric($t[$i]) or $t[$i] == 0)) {
-        $virhe[$i] .= t("Mitta- ja painotiedot eiv‰t saa olla tyhji‰")."!";
+        $virhe[$i] .= t("Mitta- ja painotiedot eiv√§t saa olla tyhji√§")."!";
       }
       elseif ($t[$i] != '') {
         $t[$i] = mysql_real_escape_string($t[$i]);

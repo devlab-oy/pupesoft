@@ -18,18 +18,18 @@ if($tee == 'B') {
 
     $viesti = $kukarow["nimi"]." ".t("kuittasi").": ".$muuta;
 
-    $kysely = "  INSERT INTO kalenteri
-          SET asiakas    = '$prow[asiakas]',
-          liitostunnus   = '$prow[liitostunnus]',
-          henkilo      = '$prow[yhenkilo]',
-          kuka         = '$kukarow[kuka]',
-          yhtio        = '$kukarow[yhtio]',
-          tyyppi       = 'Kuittaus',
-          tapa         = '$prow[tapa]',
-          kentta01     = '$viesti',
-          kuittaus     = '',
-          pvmalku      = now(),
-          perheid     = '$kaletunnus'";
+    $kysely = "INSERT INTO kalenteri
+               SET asiakas    = '$prow[asiakas]',
+               liitostunnus = '$prow[liitostunnus]',
+               henkilo      = '$prow[yhenkilo]',
+               kuka         = '$kukarow[kuka]',
+               yhtio        = '$kukarow[yhtio]',
+               tyyppi       = 'Kuittaus',
+               tapa         = '$prow[tapa]',
+               kentta01     = '$viesti',
+               kuittaus     = '',
+               pvmalku      = now(),
+               perheid      = '$kaletunnus'";
     $result = mysql_query($kysely) or pupe_error($kysely);
 
     $query = "UPDATE kalenteri
@@ -56,11 +56,11 @@ if($tee == 'A') {
   echo "<table>";
 
   echo "<tr>";
-  echo "<th>".t("P‰iv‰m‰‰r‰")."</th>";
+  echo "<th>".t("P√§iv√§m√§√§r√§")."</th>";
   echo "<th>".t("Viesti")."</th>";
   echo "<th>".t("Tapa")."</th>";
   echo "<th>".t("Asiakas")."</th>";
-  echo "<th>".t("Yhteyshenkilˆ")."</th>";
+  echo "<th>".t("Yhteyshenkil√∂")."</th>";
   echo "</tr>";
 
   $prow = mysql_fetch_array ($result);
@@ -112,18 +112,18 @@ if($tee == "LISAAMUISTUTUS") {
       $pvmalku  = "now()";
     }
 
-    $kysely = "  INSERT INTO kalenteri
-          SET kuka = '$kuka',
-          yhtio    = '$kukarow[yhtio]',
-          tyyppi   = 'Muistutus',
-          tapa     = '$tapa',
-          kentta01 = '$viesti',
-          kuittaus = '$kuittaus',
-          pvmalku  = $pvmalku";
+    $kysely = "INSERT INTO kalenteri
+               SET kuka = '$kuka',
+               yhtio    = '$kukarow[yhtio]',
+               tyyppi   = 'Muistutus',
+               tapa     = '$tapa',
+               kentta01 = '$viesti',
+               kuittaus = '$kuittaus',
+               pvmalku  = $pvmalku";
     $result = mysql_query($kysely) or pupe_error($kysely);
     $muist = mysql_insert_id();
 
-    echo t("Lis‰tty muistutus p‰iv‰lle:")."  <b>$pvmalku</b><br><br>";
+    echo t("Lis√§tty muistutus p√§iv√§lle:")."  <b>$pvmalku</b><br><br>";
 
     $query = "SELECT *
               FROM kuka
@@ -132,7 +132,7 @@ if($tee == "LISAAMUISTUTUS") {
     $result = mysql_query($query) or pupe_error($query);
     $row = mysql_fetch_array($result);
 
-    // K‰yt‰j‰lle l‰hetet‰‰n tekstiviestimuistutus
+    // K√§yt√§j√§lle l√§hetet√§√§n tekstiviestimuistutus
     if ($row["puhno"] != '' and strlen($viesti) > 0 and $sms_palvelin != "" and $sms_user != "" and $sms_pass != "") {
       $ok = 1;
 
@@ -144,11 +144,11 @@ if($tee == "LISAAMUISTUTUS") {
       if (trim($retval) == "0") $ok = 0;
 
       if ($ok == 1) {
-        echo "<font class='error'>VIRHE: Tekstiviestin l‰hetys ep‰onnistui! $retval</font><br><br>";
+        echo "<font class='error'>VIRHE: Tekstiviestin l√§hetys ep√§onnistui! $retval</font><br><br>";
       }
 
       if ($ok == 0) {
-        echo "<font class='message'>Tekstiviestimuistutus lehetet‰‰n!</font><br><br>";
+        echo "<font class='message'>Tekstiviestimuistutus lehetet√§√§n!</font><br><br>";
       }
     }
 
@@ -171,7 +171,7 @@ if($tee == "MUISTUTUS") {
 
   echo "<table width='620'>";
 
-  echo "<tr><th colspan='3'>".t("Lis‰‰ muistutus")."</th>";
+  echo "<tr><th colspan='3'>".t("Lis√§√§ muistutus")."</th>";
   echo "<tr><td colspan='3'><textarea cols='83' rows='3' name='viesti' wrap='hard'>$viesti</textarea></td></tr>";
 
   echo "  <tr>
@@ -212,7 +212,7 @@ if($tee == "MUISTUTUS") {
   if (!isset($mmm))
     $mmm = "00";
 
-  echo "<tr><th>".t("Muistutusp‰iv‰m‰‰r‰ (pp-kk-vvvv tt:mm)")."</th>
+  echo "<tr><th>".t("Muistutusp√§iv√§m√§√§r√§ (pp-kk-vvvv tt:mm)")."</th>
       <td colspan='2'><input type='text' name='mppa' value='$mppa' size='3'>-
       <input type='text' name='mkka' value='$mkka' size='3'>-
       <input type='text' name='mvva' value='$mvva' size='5'>
@@ -260,14 +260,14 @@ if($tee == "MUISTUTUS") {
 if ($tee == "") {
 
   if (strpos($_SERVER['SCRIPT_NAME'], "kuittaamattomat.php") !== FALSE) {
-    echo "<a href='".$palvelin2."crm/kuittaamattomat.php?tee=MUISTUTUS&ytunnus=$ytunnus&yhtunnus=$yhtunnus'>".t("Lis‰‰ muistutus")."</a><br><br>";
+    echo "<a href='".$palvelin2."crm/kuittaamattomat.php?tee=MUISTUTUS&ytunnus=$ytunnus&yhtunnus=$yhtunnus'>".t("Lis√§√§ muistutus")."</a><br><br>";
   }
 
   echo "<table>";
 
   if (strpos($_SERVER['SCRIPT_NAME'], "kuittaamattomat.php") !== FALSE) {
     echo "<tr>";
-    echo "<td>N‰yt‰ henkilˆn </td>";
+    echo "<td>N√§yt√§ henkil√∂n </td>";
 
     echo "  <form action='".$palvelin2."crm/kuittaamattomat.php' method='POST'>
 
@@ -327,11 +327,11 @@ if ($tee == "") {
 
     echo "<tr>";
     echo "<th valign='top'>".t("Asiaa hoitaa")."</th>";
-    echo "<th valign='top'>".t("P‰iv‰m‰‰r‰")."<br>".t("Muistutus")."</th>";
+    echo "<th valign='top'>".t("P√§iv√§m√§√§r√§")."<br>".t("Muistutus")."</th>";
     echo "<th valign='top'>".t("Viesti")."</th>";
     echo "<th valign='top'>".t("Tyyppi")."<br>".t("Tapa")."</th>";
     echo "<th valign='top'>".t("Asiakas")."</th>";
-    echo "<th valign='top'>".t("Yhteyshenkilˆ")."</th>";
+    echo "<th valign='top'>".t("Yhteyshenkil√∂")."</th>";
     echo "</tr>";
 
     while ($prow = mysql_fetch_array ($result)) {
@@ -371,7 +371,7 @@ if ($tee == "") {
         $laskutyyppi = $prow["laskutila"];
         $alatila   = $prow["laskualatila"];
 
-        //tehd‰‰n selv‰kielinen tila/alatila
+        //tehd√§√§n selv√§kielinen tila/alatila
         require "inc/laskutyyppi.inc";
 
         echo "<br><br>".t("$laskutyyppi")." ".t("$alatila").":  <a href='../raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]'>$prow[laskutunnus]</a> / ".tv1dateconv($prow["laskumpvm"])." ($prow[laskumyyja])";
@@ -397,7 +397,7 @@ if ($tee == "") {
     echo "</table>";
   }
   else {
-    echo "<font class='message'>".t("Yht‰‰n kuitattavaa muistutusta ei lˆydy")."!</font>";
+    echo "<font class='message'>".t("Yht√§√§n kuitattavaa muistutusta ei l√∂ydy")."!</font>";
   }
 }
 

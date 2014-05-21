@@ -4,16 +4,16 @@
   Tunnistetaan pankki tilinumeron perusteella palautetaan
   $pankki Jossa pankin tietoja arrayssa
 
-  et  = er‰tietue
+  et  = er√§tietue
   mt  = maksutapahtumatietue
   st  = summatietue
 
-  $lum_eumaksu       = "jos pankki vaatii erillisen eumaksun eik‰ osaa k‰‰nt‰‰ maksum‰‰r‰yst‰ eumaksuksi vaikka sen kuuluisi se tehd‰..."
+  $lum_eumaksu       = "jos pankki vaatii erillisen eumaksun eik√§ osaa k√§√§nt√§√§ maksum√§√§r√§yst√§ eumaksuksi vaikka sen kuuluisi se tehd√§..."
   $lum_maksutapa      = "ulkomaan maksutavan tunnus"
   $pankki["pankkilaitos"] = "Pankin nimi"
   $pankki["rahalaitos"]  = "Pankin rahalaitostunnus"
-  $lmp_st_4kentt      = LM03 summatietueen kentt‰ 4
-  $lmp_mt_4kentt      = LM03 maksutietueen kentt‰ 4
+  $lmp_st_4kentt      = LM03 summatietueen kentt√§ 4
+  $lmp_mt_4kentt      = LM03 maksutietueen kentt√§ 4
   $swift          = Pankin swift-koodi
 
 */
@@ -34,7 +34,7 @@ if(!function_exists("pankkitiedot")) {
     }
 
     //  oletuksia
-    //v‰liviivallinen ytunnus 11 merkki‰
+    //v√§liviivallinen ytunnus 11 merkki√§
     $ytunnus         = sprintf("%08.8s",str_replace('-', '', $yhtiorow["ytunnus"]));
     $ytunnus         = substr($ytunnus,0,7)."-".substr($ytunnus,-1);
     $ytunnus_valiviivalla   = sprintf ('%-11.11s', $ytunnus);
@@ -42,7 +42,7 @@ if(!function_exists("pankkitiedot")) {
 
     $pankki = array();
 
-    $pankki["lum_maksutapa"]  = "M";  //maksum‰‰r‰ys
+    $pankki["lum_maksutapa"]  = "M";  //maksum√§√§r√§ys
     $pankki["ytunnus"]       = $ytunnus;
     $pankki["lmp_mt_4kentta"]  = "$tilino";
     $pankki["lmp_st_4kentta"]  = "$tilino";
@@ -101,9 +101,9 @@ if(!function_exists("pankkitiedot")) {
             break;
         }
         break;
-      case (4) : //Aktia Pankki, S‰‰stˆpankit (Sp) ja Paikallisosuuspankit (POP)
+      case (4) : //Aktia Pankki, S√§√§st√∂pankit (Sp) ja Paikallisosuuspankit (POP)
         $pankki["rahalaitos"]    = '4 ';
-        $pankki["pankkilaitos"]   = "Aktia, S‰‰stˆpankit ja Paikallisosuuspankit";
+        $pankki["pankkilaitos"]   = "Aktia, S√§√§st√∂pankit ja Paikallisosuuspankit";
         $pankki["tiedostonimilum2"]  = "XXXXLUM2.DAT";
         $pankki["ytunnus"]      = sprintf("%010.10s",$yhtiorow["ytunnus"])." ";
         $pankki["swift"]      = "HELSFIHH";
@@ -120,9 +120,9 @@ if(!function_exists("pankkitiedot")) {
         $pankki["tiedostonimi"]   = "OKOMP.DAT";
         $pankki["swift"]      = "OKOYFIHH";
         break;
-      case (6) : //≈landsbanken
+      case (6) : //√Ölandsbanken
         $pankki["rahalaitos"]    = '  ';
-        $pankki["pankkilaitos"]   = "≈landsbanken";
+        $pankki["pankkilaitos"]   = "√Ölandsbanken";
         $pankki["swift"]      = "AABAFI22";
         break;
       case (7) :
@@ -152,7 +152,7 @@ if(!function_exists("pankkitiedot")) {
         $pankki["swift"]      = "DABAFIHH";
         break;
       default :
-        if (trim($tmp_tilino) != "" and !is_numeric($tmp_tilino)) { //Maksetaan kassasta tai selvittelytililt‰
+        if (trim($tmp_tilino) != "" and !is_numeric($tmp_tilino)) { //Maksetaan kassasta tai selvittelytililt√§
           $pankki["rahalaitos"]    = '  ';
           $pankki["pankkilaitos"]   = "Kassa_Selivittely";
           $pankki["tiedostonimi"]   = "Kassa_Selivittely.DAT";

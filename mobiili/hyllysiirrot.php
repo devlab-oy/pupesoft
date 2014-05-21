@@ -21,9 +21,9 @@ if (isset($submit)) {
       $tuotenumero = $data['tuotenumero'];
       $hyllypaikka = $data['hyllypaikka'];
 
-      # Haettu v‰hint‰‰n yhdell‰ kent‰ll‰
+      # Haettu v√§hint√§√§n yhdell√§ kent√§ll√§
       if (empty($data['viivakoodi']) and empty($data['tuotenumero']) and empty($data['hyllypaikka'])) {
-        $errors[] = t("V‰hint‰‰n yksi kentt‰ on syˆtett‰v‰");
+        $errors[] = t("V√§hint√§√§n yksi kentt√§ on sy√∂tett√§v√§");
         break;
       }
 
@@ -31,12 +31,12 @@ if (isset($submit)) {
 
         // Parsitaan uusi tuotepaikka
         // Jos tuotepaikka on luettu viivakoodina, muotoa (C21 045) tai (21C 03V)
-        if (preg_match('/^([a-zÂ‰ˆ#0-9]{2,4} [a-zÂ‰ˆ#0-9]{2,4})/i', $data['hyllypaikka'])) {
+        if (preg_match('/^([a-z√•√§√∂#0-9]{2,4} [a-z√•√§√∂#0-9]{2,4})/i', $data['hyllypaikka'])) {
 
-          // Pilkotaan viivakoodilla luettu tuotepaikka v‰lilyˆnnist‰
+          // Pilkotaan viivakoodilla luettu tuotepaikka v√§lily√∂nnist√§
           list($alku, $loppu) = explode(' ', $data['hyllypaikka']);
 
-          // M‰ts‰t‰‰n numerot ja kirjaimet erilleen
+          // M√§ts√§t√§√§n numerot ja kirjaimet erilleen
           preg_match_all('/([0-9]+)|([a-z]+)/i', $alku, $alku);
           preg_match_all('/([0-9]+)|([a-z]+)/i', $loppu, $loppu);
 
@@ -46,32 +46,32 @@ if (isset($submit)) {
           $hyllyvali = $loppu[0][0];
           $hyllytaso = $loppu[0][1];
 
-          // Kaikkia tuotepaikkoja ei pystyt‰ parsimaan
+          // Kaikkia tuotepaikkoja ei pystyt√§ parsimaan
           if ($hyllyalue == '' or $hyllynro == '' or $hyllyvali == '' or $hyllytaso == '') {
-            $errors[] = t("Tuotepaikan haussa virhe, yrit‰ syˆtt‰‰ tuotepaikka k‰sin") . " ({$data['hyllypaikka']})";
+            $errors[] = t("Tuotepaikan haussa virhe, yrit√§ sy√∂tt√§√§ tuotepaikka k√§sin") . " ({$data['hyllypaikka']})";
           }
         }
-        // Tuotepaikka syˆtetty manuaalisesti (C-21-04-5) tai (C 21 04 5) tai (E 14 21 5)
+        // Tuotepaikka sy√∂tetty manuaalisesti (C-21-04-5) tai (C 21 04 5) tai (E 14 21 5)
         elseif (strstr($data['hyllypaikka'], '-') or strstr($data['hyllypaikka'], ' ')) {
-          // Parsitaan tuotepaikka omiin muuttujiin (erotelto v‰lilyˆnnill‰)
+          // Parsitaan tuotepaikka omiin muuttujiin (erotelto v√§lily√∂nnill√§)
           if (preg_match('/\w+\s\w+\s\w+\s\w+/i', $data['hyllypaikka'])) {
             list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode(' ', $data['hyllypaikka']);
           }
-          // (erotelto v‰liviivalla)
+          // (erotelto v√§liviivalla)
           elseif (preg_match('/\w+-\w+-\w+-\w+/i', $data['hyllypaikka'])) {
             list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode('-', $data['hyllypaikka']);
           }
 
-          // Ei saa olla tyhji‰ kentti‰
+          // Ei saa olla tyhji√§ kentti√§
           if ($hyllyalue == '' or $hyllynro == '' or $hyllyvali == '' or $hyllytaso == '') {
             $errors[] = t("Virheellinen tuotepaikka") . ". ({$data['hyllypaikka']})";
           }
         }
         else {
-          $errors[] = t("Virheellinen tuotepaikka, yrit‰ syˆtt‰‰ tuotepaikka k‰sin") . " ({$data['hyllypaikka']})";
+          $errors[] = t("Virheellinen tuotepaikka, yrit√§ sy√∂tt√§√§ tuotepaikka k√§sin") . " ({$data['hyllypaikka']})";
         }
 
-        // Tarkistetaan ett‰ tuotepaikka on olemassa
+        // Tarkistetaan ett√§ tuotepaikka on olemassa
         if (count($errors) == 0 and !tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso)) {
           $errors[] = t("Varaston tuotepaikkaa (%s-%s-%s-%s) ei ole perustettu", "", $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso).'.';
         }
@@ -86,7 +86,7 @@ if (isset($submit)) {
 
       if (count($errors) == 0) {
 
-        # Rakennetaan parametrit kentist‰
+        # Rakennetaan parametrit kentist√§
         $url = http_build_query($data);
 
         echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tuotteella_useita_tuotepaikkoja.php?{$url}'>"; exit();
@@ -94,7 +94,7 @@ if (isset($submit)) {
 
       break;
     default:
-      $errors[] = t("Yll‰tt‰v‰ virhe");
+      $errors[] = t("Yll√§tt√§v√§ virhe");
       break;
   }
 }
@@ -143,7 +143,7 @@ echo "<script type='text/javascript'>
 
     $(document).ready(function() {
       $('#viivakoodi').on('keyup', function() {
-        // Autosubmit vain jos on syˆtetty tarpeeksi pitk‰ viivakoodi
+        // Autosubmit vain jos on sy√∂tetty tarpeeksi pitk√§ viivakoodi
         if ($('#viivakoodi').val().length > 8) {
           document.getElementById('haku_nappi').click();
         }

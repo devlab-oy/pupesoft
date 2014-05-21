@@ -1,11 +1,11 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("../inc/parametrit.inc");
 
-echo "<font class='head'>".t("Laskutuksen tiliˆinnit")."</font><hr>";
+echo "<font class='head'>".t("Laskutuksen tili√∂innit")."</font><hr>";
 
 // tutkaillaan saadut muuttujat
 
@@ -20,18 +20,18 @@ $vv1   = sprintf("%04d", trim($vv1));
 if ($osasto == "") $osasto = trim($osasto2);
 if ($try    == "")    $try = trim($try2);
 
-// h‰rski oikeellisuustzekki
+// h√§rski oikeellisuustzekki
 if ($pp == "00" or $kk == "00" or $vv == "0000") $tee = $pp = $kk = $vv = "";
 if ($pp1 == "00" or $kk1 == "00" or $vv1 == "0000") $tee = $pp1 = $kk1 = $vv1 = "";
-// piirrell‰‰n formi
+// piirrell√§√§n formi
 echo "<form method='post' autocomplete='OFF'>";
 echo "<table>";
 echo "<tr>";
-echo "<th>".t('Syˆt‰ alku pp-kk-vvvv')."</th>";
+echo "<th>".t('Sy√∂t√§ alku pp-kk-vvvv')."</th>";
 echo "<td><input type='text' name='pp' size='5' value='$pp'><input type='text' name='kk' size='5' value='$kk'><input type='text' name='vv' size='7' value='$vv'></td>";
 echo "</tr>";
 echo "<tr>";
-echo "<th>".t('Syˆt‰ loppu pp-kk-vvvv')."</th>";
+echo "<th>".t('Sy√∂t√§ loppu pp-kk-vvvv')."</th>";
 echo "<td><input type='text' name='pp1' size='5' value='$pp1'><input type='text' name='kk1' size='5' value='$kk1'><input type='text' name='vv1' size='7' value='$vv1'></td>";
 echo "</tr>";
 echo "<tr>";
@@ -42,7 +42,7 @@ echo "</table>";
 
 echo "<br>";
 echo "<input type='hidden' name='tee' value='tee'>";
-echo "<input type='submit' value='".t('N‰yt‰ tiliˆinnit')."'>";
+echo "<input type='submit' value='".t('N√§yt√§ tili√∂innit')."'>";
 echo "</form>";
 
 if ($tee == "tee") {
@@ -52,7 +52,7 @@ if ($tee == "tee") {
   else
     $valinta = "='U')";
 
-  // haetaan halutut tiliˆinnit
+  // haetaan halutut tili√∂innit
   $query  = "SELECT  concat_ws('/',t.tilino,ti.nimi) tili,
              concat_ws('/',t.kustp,k.nimi) kustp,
              concat_ws('/',t.kohde,ko.nimi) kohde,

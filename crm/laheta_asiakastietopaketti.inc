@@ -1,5 +1,5 @@
 <?php
-//Haetaan viikon p‰iv‰t
+//Haetaan viikon p√§iv√§t
 viikonpaivat($kausi);
 
 $query = "SELECT asiakas.ytunnus, asiakas.asiakasnro, kalenteri.yhtio, left(kalenteri.pvmalku,10) pvmalku,
@@ -38,7 +38,7 @@ while ($row = mysql_fetch_assoc($aresult)) {
 
   $viesti .= "Puhelin:     $row[puhelin]\r\n";
   $viesti .= "Fax:         $row[fax]\r\n";
-  $viesti .= "S‰hkˆposti:  $row[email]\r\n\r\n";
+  $viesti .= "S√§hk√∂posti:  $row[email]\r\n\r\n";
 
   $query = "SELECT *
             FROM yhteyshenkilo
@@ -48,7 +48,7 @@ while ($row = mysql_fetch_assoc($aresult)) {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
-    $viesti .= "Asiakkaan yhteyshenkilˆt:\r\n";
+    $viesti .= "Asiakkaan yhteyshenkil√∂t:\r\n";
 
     while ($arow = mysql_fetch_assoc($result)) {
       $viesti .= "Nimi:       $arow[nimi]\r\n";
@@ -56,7 +56,7 @@ while ($row = mysql_fetch_assoc($aresult)) {
       $viesti .= "Puhelin:    $arow[puh]\r\n";
       $viesti .= "GSM:        $arow[gsm]\r\n";
       $viesti .= "Fax:        $arow[fax]\r\n";
-      $viesti .= "S‰hkˆposti: $arow[email]\r\n";
+      $viesti .= "S√§hk√∂posti: $arow[email]\r\n";
       $viesti .= "Kotisivut:  $arow[www]\r\n\r\n";
     }
   }
@@ -83,13 +83,13 @@ while ($row = mysql_fetch_assoc($aresult)) {
 
     while ($brow=mysql_fetch_assoc($bresult)) {
       $viesti .= "Laatija:    $brow[kukanimi]\r\n";
-      $viesti .= "P‰iv‰m‰‰r‰: $brow[pvmalku]\r\n";
+      $viesti .= "P√§iv√§m√§√§r√§: $brow[pvmalku]\r\n";
       $viesti .= "Tapa:       $brow[tapa]\r\n";
       $viesti .= "Laatija:    $brow[kentta01]\r\n\r\n";
     }
   }
 
-  //Tehd‰‰n raportit
+  //Tehd√§√§n raportit
   if (!isset($kka))
     $kka = date("m",mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
   if (!isset($vva))
@@ -135,7 +135,7 @@ while ($row = mysql_fetch_assoc($aresult)) {
 
   if (mysql_num_rows($yhtresulta) != 0) {
 
-    //tehd‰‰n ensin summamuuttujat
+    //tehd√§√§n ensin summamuuttujat
     while ($yhtrow = mysql_fetch_assoc ($yhtresulta)) {
 
       if ($yhtrow["osasto"] != $edosasto) {
@@ -169,13 +169,13 @@ while ($row = mysql_fetch_assoc($aresult)) {
     //kelataan alkuun
     mysql_data_seek($yhtresulta,0);
 
-    $raportti .= "Tuoteryhm‰\tMyynti\tIndeksi Myynti\tKpl\tIndeksi Kpl\r\n";
+    $raportti .= "Tuoteryhm√§\tMyynti\tIndeksi Myynti\tKpl\tIndeksi Kpl\r\n";
     $osraportti .= "Osasto\tMyynti\tIndeksi Myynti\tKpl\tIndeksi Kpl\r\n";
 
     //ja tulostetaan kaikki rivit ruudulle
     while ($yhtrow = mysql_fetch_assoc ($yhtresulta)) {
 
-      //t‰ss‰ tulee yhteens‰rivi
+      //t√§ss√§ tulee yhteens√§rivi
       if ($yhtrow["osasto"] != $edosasto) {
         $i = $yhtrow["osasto"];
 
@@ -187,11 +187,11 @@ while ($row = mysql_fetch_assoc($aresult)) {
           $indkpltot = sprintf('%.2f',$osastokplcuryht[$i] / $osastokpledyht[$i]);
         else $indkpltot = "n/a";
 
-        // tehd‰‰n avainsana query
+        // tehd√§√§n avainsana query
         $sresult = t_avainsana("OSASTO", "", "and avainsana.selite ='$yhtrow[osasto]'");
         $srow = mysql_fetch_assoc($sresult);
 
-        $raportti .= "$yhtrow[osasto] $srow[selitetark] yhteens‰\t";
+        $raportti .= "$yhtrow[osasto] $srow[selitetark] yhteens√§\t";
         $raportti .= str_replace(".",",",$osastomyynticuryht[$i])."\t";
         $raportti .= str_replace(".",",",$indlvtot)."\t";
         $raportti .= str_replace(".",",",$osastokplcuryht[$i])."\t";
@@ -199,7 +199,7 @@ while ($row = mysql_fetch_assoc($aresult)) {
         $raportti .= "\r\n";
 
 
-        $osraportti .= "$yhtrow[osasto] $srow[selitetark] yhteens‰\t";
+        $osraportti .= "$yhtrow[osasto] $srow[selitetark] yhteens√§\t";
         $osraportti .= str_replace(".",",",$osastomyynticuryht[$i])."\t";
         $osraportti .= str_replace(".",",",$indlvtot)."\t";
         $osraportti .= str_replace(".",",",$osastokplcuryht[$i])."\t";
@@ -216,11 +216,11 @@ while ($row = mysql_fetch_assoc($aresult)) {
         $indkpl = sprintf('%.2f',$yhtrow['kplcuryht'] / $yhtrow['kpledyht']);
       else $indkpl = "n/a";
 
-      // tehd‰‰n avainsana query
+      // tehd√§√§n avainsana query
       $sresult = t_avainsana("TRY", "", "and avainsana.selite ='$yhtrow[try]'");
       $srow = mysql_fetch_assoc($sresult);
 
-      $raportti .= "Tuoteryhm‰ $yhtrow[try] $srow[selitetark]\t";
+      $raportti .= "Tuoteryhm√§ $yhtrow[try] $srow[selitetark]\t";
       $raportti .= str_replace(".",",",$yhtrow["myynticuryht"])."\t";
       $raportti .= str_replace(".",",",$indlv)."\t";
       $raportti .= str_replace(".",",",$yhtrow["kplcuryht"])."\t";
@@ -233,13 +233,13 @@ while ($row = mysql_fetch_assoc($aresult)) {
 
   $bound = uniqid(time()."_") ;
 
-  $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\r\n";
+  $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\r\n";
   $header .= "MIME-Version: 1.0\r\n" ;
   $header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\r\n" ;
 
   $content = "--$bound\r\n" ;
 
-  $content .= "Content-Type: text/plain; charset=\"iso-8859-1\"\r\n";
+  $content .= "Content-Type: text/plain; charset=\"utf-8\"\r\n";
   $content .= "Content-Transfer-Encoding: quoted-printable\r\n\r\n";
   $content .= "$viesti\r\n\r\n";
 
@@ -258,12 +258,12 @@ while ($row = mysql_fetch_assoc($aresult)) {
 
     $content .= "Content-Type: application/vnd.ms-excel\r\n" ;
     $content .= "Content-Transfer-Encoding: base64\r\n" ;
-    $content .= "Content-Disposition: attachment; filename=\"tuoteryhm‰seuranta.xls\"\r\n\r\n";
+    $content .= "Content-Disposition: attachment; filename=\"tuoteryhm√§seuranta.xls\"\r\n\r\n";
     $content .= chunk_split(base64_encode($raportti));
     $content .= "\r\n";
   }
 
   $to = $kukarow['eposti'];
 
-  mail($to, mb_encode_mimeheader(t("Asiakkaan tietopaketti")." $row[ytunnus] $row[nimi]", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+  mail($to, mb_encode_mimeheader(t("Asiakkaan tietopaketti")." $row[ytunnus] $row[nimi]", "UTF-8", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 }

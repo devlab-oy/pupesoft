@@ -65,12 +65,12 @@ if ($tee == "") {
   echo "<form method='post'>";
   echo "<table>";
   echo "<tr>
-    <th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+    <th>".t("Sy√∂t√§ alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
     <td valign='top'><input type='text' name='ppa' value='$ppa' size='3'></td>
     <td valign='top'><input type='text' name='kka' value='$kka' size='3'></td>
     <td valign='top'><input type='text' name='vva' value='$vva' size='5'></td>
     </tr>\n
-    <tr><th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+    <tr><th>".t("Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
     <td valign='top'><input type='text' name='ppl' value='$ppl' size='3'></td>
     <td valign='top'><input type='text' name='kkl' value='$kkl' size='3'></td>
     <td valign='top'><input type='text' name='vvl' value='$vvl' size='5'></td>
@@ -106,7 +106,7 @@ if ($tee == "") {
   echo "</table><br>";
 
   echo "<table>";
-  echo "<tr><th colspan='7'>Hakukent‰t</th></tr>";
+  echo "<tr><th colspan='7'>Hakukent√§t</th></tr>";
   echo "<tr><th>Myyntitilaus<br></th><th>Tuoteno</th><th>Nimitys</th><th>Myyntihinta<br>Ostohinta</th><th>Myyntikate<br>Ostokate</th><th>O/H</th><th>Sarjanumero</th></tr>";
 
   echo "<tr>";
@@ -139,7 +139,7 @@ if (($jarjestys_1 != '' or $jarjestys_2 != '' or $jarjestys_3 != '' or $jarjesty
                 if(ostorivi.tyyppi IN ('O'), ostorivi.uusiotunnus, ostorivi.otunnus) ostotilaus,
                 sarjanumeroseuranta.sarjanumero sarjanumero, sarjanumeroseuranta.tunnus sarjatunnus,
                 tilausrivi.kpl, myyntilasku.viesti, tilausrivin_lisatiedot.osto_vai_hyvitys,
-                if(sarjanumeroseuranta.kaytetty='' or sarjanumeroseuranta.kaytetty is null, 'Uusi', 'K‰ytetty') kaytetty,
+                if(sarjanumeroseuranta.kaytetty='' or sarjanumeroseuranta.kaytetty is null, 'Uusi', 'K√§ytetty') kaytetty,
                 tuote.kehahin,
                 (select count(distinct sarjanumero) from sarjanumeroseuranta css where css.yhtio=tilausrivi.yhtio and css.tuoteno=tilausrivi.tuoteno and css.myyntirivitunnus=tilausrivi.tunnus) css
                 FROM tilausrivi
@@ -164,7 +164,7 @@ if (($jarjestys_1 != '' or $jarjestys_2 != '' or $jarjestys_3 != '' or $jarjesty
                 if(tilausrivi.tyyppi IN ('O'), tilausrivi.uusiotunnus, tilausrivi.otunnus) ostotilaus,
                 sarjanumeroseuranta.sarjanumero sarjanumero, sarjanumeroseuranta.tunnus sarjatunnus,
                 tilausrivi.kpl, ostolasku.viesti, tilausrivin_lisatiedot.osto_vai_hyvitys,
-                if(sarjanumeroseuranta.kaytetty='' or sarjanumeroseuranta.kaytetty is null, 'Uusi', 'K‰ytetty') kaytetty,
+                if(sarjanumeroseuranta.kaytetty='' or sarjanumeroseuranta.kaytetty is null, 'Uusi', 'K√§ytetty') kaytetty,
                 tuote.kehahin,
                 (select count(distinct sarjanumero) from sarjanumeroseuranta css where css.yhtio=tilausrivi.yhtio and css.tuoteno=tilausrivi.tuoteno and css.ostorivitunnus=tilausrivi.tunnus) css
                 FROM tilausrivi

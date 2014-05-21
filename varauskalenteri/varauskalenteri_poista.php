@@ -29,10 +29,10 @@ if ($row["kuka"] == $kukarow["kuka"]) {
 
   if($row[1] == "Sauna") {
     $meili = "$kukarow[nimi] on PERUNUT  saunavarauksen ajalta:\n\n##################################################\n$row[4].$row[3].$row[2] Klo: $row[5] --> Klo: $row[6]\n##################################################\n";
-    $tulos = mail("$yhtiorow[varauskalenteri_email]", mb_encode_mimeheader("Saunavarauksen peruutus", "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$kukarow["eposti"].">\nReply-To: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$row["eposti"].">\n", "-f $yhtiorow[postittaja_email]");
+    $tulos = mail("$yhtiorow[varauskalenteri_email]", mb_encode_mimeheader("Saunavarauksen peruutus", "UTF-8", "Q"), $meili, "From: ".mb_encode_mimeheader($kukarow["nimi"], "UTF-8", "Q")." <".$kukarow["eposti"].">\nReply-To: ".mb_encode_mimeheader($kukarow["nimi"], "UTF-8", "Q")." <".$row["eposti"].">\n", "-f $yhtiorow[postittaja_email]");
   }
 }
 else {
-  echo "<br><br>".t("Eth‰n poista muitten varauksia")."!";
+  echo "<br><br>".t("Eth√§n poista muitten varauksia")."!";
   $jatko = 0;
 }

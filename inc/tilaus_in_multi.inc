@@ -2,7 +2,7 @@
 
 require_once("tilauskasittely/luo_myyntitilausotsikko.inc");
 
-if (!$fd = fopen($filename, "r")) die("Filen '$filename' avaus ep‰onnistui!");
+if (!$fd = fopen($filename, "r")) die("Filen '$filename' avaus ep√§onnistui!");
 
 $edytunnus = "luuppiinmeno_ekalla";
 
@@ -65,15 +65,15 @@ while ($rivi = fgets($fd)) {
        $result = pupe_query($query);
 
        if (mysql_num_rows($result) == 0) {
-         echo t("VIRHE: Tiedoilla ei lˆydy yht‰‰n asiakasta").": ytunnus = '$ytunnus' $toim_lis!<br>";
+         echo t("VIRHE: Tiedoilla ei l√∂ydy yht√§√§n asiakasta").": ytunnus = '$ytunnus' $toim_lis!<br>";
 
-        // Skipataan t‰m‰ rivi.....
+        // Skipataan t√§m√§ rivi.....
         continue;
       }
       elseif (mysql_num_rows($result) > 1) {
-         echo t("VIRHE: Tiedoilla lˆytyy useita asiakkaita").": ytunnus = '$ytunnus' $toim_lis!<br>";
+         echo t("VIRHE: Tiedoilla l√∂ytyy useita asiakkaita").": ytunnus = '$ytunnus' $toim_lis!<br>";
 
-        // Skipataan t‰m‰ rivi.....
+        // Skipataan t√§m√§ rivi.....
         continue;
        }
 
@@ -128,7 +128,7 @@ while ($rivi = fgets($fd)) {
          $hinta = "";
        }
 
-       //lis‰t‰‰n rivi
+       //lis√§t√§√§n rivi
        require ("lisaarivi.inc");
      }
 

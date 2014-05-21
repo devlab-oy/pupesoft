@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 if (isset($_POST["tee"])) {
@@ -39,7 +39,7 @@ else {
       //-->
       </script>";
 
-  echo "<font class='head'>",t("S‰hkˆinen markkinointi"),"</font><hr>";
+  echo "<font class='head'>",t("S√§hk√∂inen markkinointi"),"</font><hr>";
   echo "<table>";
   echo "<form method='post'>";
 
@@ -82,16 +82,16 @@ else {
 
   echo "</select></td>";
   echo "</tr>";
-  echo "<tr><td>",t("S‰hkˆpostiosoite"),"</td>";
+  echo "<tr><td>",t("S√§hk√∂postiosoite"),"</td>";
   echo "<td><input type='text' name='email' id='email' value='$email'></td>";
   echo "</tr>";
   echo "<tr><td colspan='2' class='back'>&nbsp;</td></tr>";
   echo "<tr><th colspan='2'>".t("Myynnintiedot")."</th></tr>";
   echo "<tr>";
-  echo "<td>".t("Veroton myynti v‰hint‰‰n")."</td>";
+  echo "<td>".t("Veroton myynti v√§hint√§√§n")."</td>";
   echo "<td><input type='text' name='myynti' id='myynti' value='$myynti'></td>";
 
-  // laitetaan oletusp‰ivi‰
+  // laitetaan oletusp√§ivi√§
   if (!isset($pvm1))     $pvm1 = '01';
   if (!isset($kk1))    $kk1 = date("m");
   if (!isset($vuosi1))  $vuosi1 = date("Y");
@@ -101,9 +101,9 @@ else {
   if (!isset($vuosi2))  $vuosi2 = date("Y");
 
   echo "<tr>";
-  echo "<td>".t("Alkup‰iv‰m‰‰r‰")."</td><td><input type='text' name='pvm1' value='$pvm1' size='2'> <input type='text' name='kk1' value='$kk1' size='2'> <input type='text' name='vuosi1' value='$vuosi1' size='4'></td>";
+  echo "<td>".t("Alkup√§iv√§m√§√§r√§")."</td><td><input type='text' name='pvm1' value='$pvm1' size='2'> <input type='text' name='kk1' value='$kk1' size='2'> <input type='text' name='vuosi1' value='$vuosi1' size='4'></td>";
   echo "</tr><tr>";
-  echo "<td>".t("Loppup‰iv‰m‰‰r‰")."</td><td><input type='text' name='pvm2' value='$pvm2' size='2'> <input type='text' name='kk2' value='$kk2' size='2'> <input type='text' name='vuosi2' value='$vuosi2' size='4'></td>";
+  echo "<td>".t("Loppup√§iv√§m√§√§r√§")."</td><td><input type='text' name='pvm2' value='$pvm2' size='2'> <input type='text' name='kk2' value='$kk2' size='2'> <input type='text' name='vuosi2' value='$vuosi2' size='4'></td>";
   echo "</tr>";
 
   echo "<tr><td>".t("Kategoria")."</th><td>";
@@ -317,9 +317,9 @@ else {
     echo "Excel <input type='radio' name='paate' id='paate' value='xls' onclick='nimi(this.value);'></td>";
     echo "</tr>";
 
-    echo "<tr><td>",t("Tallenna tiedosto nimell‰ (ilman p‰‰tett‰)"),"</td>";
+    echo "<tr><td>",t("Tallenna tiedosto nimell√§ (ilman p√§√§tett√§)"),"</td>";
     echo "<td colspan='3'><input type='text' name='tiedostonimi' id='tiedostonimi' value='$tiedostonimi' onkeyup='nimi2(this.value);'>";
-    echo "&nbsp;<font class='info'>(",t("Tyhj‰ nimi on muotoa postituslista-pvmkellonaika.p‰‰te"),")</font></td>";
+    echo "&nbsp;<font class='info'>(",t("Tyhj√§ nimi on muotoa postituslista-pvmkellonaika.p√§√§te"),")</font></td>";
 
     echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
     echo "<input type='hidden' name='kaunisnimi' id='kaunisnimi' value=''>";
@@ -336,7 +336,7 @@ else {
     echo "<tr>";
     echo "<th>",t("Ytunnus"),"</th>";
     echo "<th>",t("Nimi"),"</th>";
-    echo "<th>",t("S‰hkˆpostiosoite"),"</th>";
+    echo "<th>",t("S√§hk√∂postiosoite"),"</th>";
     echo "<th>",t("Postino")." ".t("Postitp"),"</th>";
     echo "<th>",t("Toim.Postino")." ".t("Toim.Postitp"),"</th>";
     echo "<th>",t("Myyntisumma"),"</th>";
@@ -367,7 +367,7 @@ else {
       $excelsarake++;
       $worksheet->writeString($excelrivi, $excelsarake, t("Nimi"), $format_bold);
       $excelsarake++;
-      $worksheet->writeString($excelrivi, $excelsarake, t("S‰hkˆpostiosoite"), $format_bold);
+      $worksheet->writeString($excelrivi, $excelsarake, t("S√§hk√∂postiosoite"), $format_bold);
       $excelsarake++;
       $worksheet->writeString($excelrivi, $excelsarake, t("Postitp"), $format_bold);
       $excelsarake++;
@@ -377,7 +377,7 @@ else {
       $excelsarake++;
       $worksheet->writeString($excelrivi, $excelsarake, t("Toim.Postino"), $format_bold);
       $excelsarake++;
-      $worksheet->writeString($excelrivi, $excelsarake, t("Myynti aikav‰lill‰"), $format_bold);
+      $worksheet->writeString($excelrivi, $excelsarake, t("Myynti aikav√§lill√§"), $format_bold);
       $excelsarake++;
 
 
@@ -418,7 +418,7 @@ else {
         $mlisa = " HAVING rivin_summa >= {$myynti} ";
       }
 
-      // Subquery. Haetaan riveilt‰ yhteissummia
+      // Subquery. Haetaan riveilt√§ yhteissummia
       $query = "SELECT sum(tilausrivi.rivihinta) rivin_summa
                 FROM lasku USE INDEX (yhtio_tila_liitostunnus_tapvm)
                 JOIN tilausrivi on (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi != 'D')
@@ -504,7 +504,7 @@ else {
     $info = pathinfo($tmptiedostonimi);
 
     file_put_contents("/tmp/$info[filename].csv", $rivi);
-    echo "<tr><th colspan='10' id='riveja'>",t("Rivej‰")," $rows ",t("kappaletta"),"</th></tr>";
+    echo "<tr><th colspan='10' id='riveja'>",t("Rivej√§")," $rows ",t("kappaletta"),"</th></tr>";
   }
   echo "</form>";
   echo "</table>";

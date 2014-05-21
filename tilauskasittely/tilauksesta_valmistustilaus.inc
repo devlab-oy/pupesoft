@@ -1,6 +1,6 @@
 <?php
 
-// jos halutaan generoida ostotilaus t‰m‰n tilauksen riveist‰
+// jos halutaan generoida ostotilaus t√§m√§n tilauksen riveist√§
 // tarvitaan myyntitilauksen tunnus muuttujassa $otunnus
 
 if (!function_exists("tilauksesta_valmistustilaus")) {
@@ -18,7 +18,7 @@ if (!function_exists("tilauksesta_valmistustilaus")) {
     $result = mysql_query($query) or pupe_error($query);
     $myytilrow = mysql_fetch_array($result);
 
-    //otetaan ensin vain lis‰varusteettomat tuotteet tai lis‰varusteperheiden is‰t
+    //otetaan ensin vain lis√§varusteettomat tuotteet tai lis√§varusteperheiden is√§t
     $query = "SELECT tilausrivin_lisatiedot.*, tilausrivi.*, jt+varattu kpl, tilausrivi.tunnus rivitunnus
               FROM tilausrivi
               LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
@@ -36,7 +36,7 @@ if (!function_exists("tilauksesta_valmistustilaus")) {
 
         $viesti = trim($myytilrow["tunnusnippu"]." ".$myytilrow["toim_nimi"]);
 
-        // Tarkistetaan onko meill‰ jo otsikko
+        // Tarkistetaan onko meill√§ jo otsikko
         $query = "SELECT tunnus
                   from lasku
                   where yhtio       = '$kukarow[yhtio]'
@@ -57,7 +57,7 @@ if (!function_exists("tilauksesta_valmistustilaus")) {
                   and laatija       = '$kukarow[kuka]'";
         $jtsre = mysql_query($query) or pupe_error($query);
 
-        // ei lˆydy, tehd‰‰n uus otsikko
+        // ei l√∂ydy, tehd√§√§n uus otsikko
         if (mysql_num_rows($jtsre) == 0) {
 
           $query = "SELECT *
@@ -105,7 +105,7 @@ if (!function_exists("tilauksesta_valmistustilaus")) {
           $tilauksesta_valmistustilaus = "<font class='message'>".t("Perustettiin valmistus %s", $kukarow["kieli"], $tunnus)."</font><br>";
         }
         else {
-          // tilaus lˆyty, otetaan tunnus
+          // tilaus l√∂yty, otetaan tunnus
           $jtsro = mysql_fetch_array($jtsre);
           $tunnus = $jtsro["tunnus"];
         }
@@ -153,10 +153,10 @@ if (!function_exists("tilauksesta_valmistustilaus")) {
           require('lisaarivi.inc');
         }
 
-        // Ainoastaan asiakkaalle valmistetut j‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti valmistuksen yhteydess‰
+        // Ainoastaan asiakkaalle valmistetut j√§lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti valmistuksen yhteydess√§
         $suoraan_laskutukseen_lisa = $yhtiorow['automaattinen_jt_toimitus_valmistus'] == 'S' ? 'o' : '';
 
-        //  P‰ivitet‰‰n tilausrivin lisatietoihin tilausrivitunnus
+        //  P√§ivitet√§√§n tilausrivin lisatietoihin tilausrivitunnus
         $query = "UPDATE tilausrivin_lisatiedot SET
                   tilausrivilinkki     = '$perheid_lisaarivi',
                   suoraan_laskutukseen = '{$suoraan_laskutukseen_lisa}',
@@ -193,7 +193,7 @@ if (!function_exists("tilauksesta_valmistustilaus")) {
           $tehtiin_uusi_otsikko = false;
         }
 
-        //  P‰ivitet‰‰n myˆs tilausriville oikeammat tiedot!
+        //  P√§ivitet√§√§n my√∂s tilausriville oikeammat tiedot!
         $query = "SELECT *
                   FROM tilausrivin_lisatiedot
                   WHERE tilausrivitunnus='$valmlisaarivi[tunnus]' and yhtio ='$kukarow[yhtio]'";
@@ -224,7 +224,7 @@ if (!function_exists("tilauksesta_valmistustilaus")) {
         $kysely  = "UPDATE tilausrivin_lisatiedot SET $values WHERE yhtio='$kukarow[yhtio]' and tilausrivitunnus = '$perheid_lisaarivi'";
         $insres2 = mysql_query($kysely) or pupe_error($kysely);
 
-        //  Tehd‰‰n rivist‰ normi JT
+        //  Tehd√§√§n rivist√§ normi JT
         $query = "UPDATE tilausrivi set var='J' where yhtio='$kukarow[yhtio]' and tunnus='$valmlisaarivi[tunnus]'";
         $updre = mysql_query($query) or pupe_error($query);
       }

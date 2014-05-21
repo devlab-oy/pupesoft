@@ -11,12 +11,12 @@ if ($trow['tila'] == 'U') {
     $lisavarattu = "";
   }
 
-  $query = "SELECT nimitys, tuoteno, tilkpl tilattu, kpl toimitettu, if(var='J', jt $lisavarattu, 0) j‰lkitoimitus, hinta, {$ale_select_lisa} rivihinta, if(alv>=600, '".t("K.V.")."', if(alv>=500, '".t("M.V.")."', alv)) alv, toimaika, kerayspvm
+  $query = "SELECT nimitys, tuoteno, tilkpl tilattu, kpl toimitettu, if(var='J', jt $lisavarattu, 0) j√§lkitoimitus, hinta, {$ale_select_lisa} rivihinta, if(alv>=600, '".t("K.V.")."', if(alv>=500, '".t("M.V.")."', alv)) alv, toimaika, kerayspvm
             FROM tilausrivi
             WHERE uusiotunnus = '$tunnus' and yhtio='$kukarow[yhtio]'
             ORDER BY toimaika, tunnus";
 }
-//n‰m‰ ovat ostoreskontran laskuja ja sillon pit‰‰ lˆyt‰‰ keikan perusteella rivit
+//n√§m√§ ovat ostoreskontran laskuja ja sillon pit√§√§ l√∂yt√§√§ keikan perusteella rivit
 elseif (in_array($trow['tila'], array('H','Y','M','P','Q')) and (int) $laskrow["laskunro"] > 0) {
   $query = "SELECT laskunro
             FROM lasku
@@ -24,7 +24,7 @@ elseif (in_array($trow['tila'], array('H','Y','M','P','Q')) and (int) $laskrow["
   $laskresult = mysql_query($query) or pupe_error($query);
   $laskrow = mysql_fetch_array($laskresult);
 
-  $query = "SELECT nimitys Nimitys, tuoteno Tuotenumero, kpl, yksikko Yksikkˆ, tilausrivi.hinta Hinta, rivihinta Rivihinta, tilausrivi.laatija Laatija, otunnus Tilaukselta
+  $query = "SELECT nimitys Nimitys, tuoteno Tuotenumero, kpl, yksikko Yksikk√∂, tilausrivi.hinta Hinta, rivihinta Rivihinta, tilausrivi.laatija Laatija, otunnus Tilaukselta
             FROM lasku, tilausrivi
             WHERE lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus and lasku.yhtio = '$kukarow[yhtio]'
             and lasku.tila    = 'K' and lasku.vanhatunnus = 0 and laskunro = '$laskrow[laskunro]'
@@ -41,7 +41,7 @@ else {
 
   $query_ale_lisa = generoi_alekentta('M');
 
-  $query = "SELECT nimitys, tuoteno, tilkpl tilattu, varattu toimitettu, if(var='J', jt $lisavarattu, 0) j‰lkitoimitus, hinta, {$ale_select_lisa} round((varattu+jt)*hinta * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta, if(alv>=600, '".t("K.V.")."', if(alv>=500, '".t("M.V.")."', alv)) alv, toimaika, kerayspvm
+  $query = "SELECT nimitys, tuoteno, tilkpl tilattu, varattu toimitettu, if(var='J', jt $lisavarattu, 0) j√§lkitoimitus, hinta, {$ale_select_lisa} round((varattu+jt)*hinta * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta, if(alv>=600, '".t("K.V.")."', if(alv>=500, '".t("M.V.")."', alv)) alv, toimaika, kerayspvm
             FROM tilausrivi
             WHERE otunnus = '$tunnus'
             and yhtio='$kukarow[yhtio]'
@@ -68,5 +68,5 @@ if (mysql_num_rows($result) > 0) {
   echo "</table><br><br>";
 }
 else {
-  echo "<br><br><b>".t("Laskulla ei ole (viel‰) tuoterivej‰")."</b><br><br>";
+  echo "<br><br><b>".t("Laskulla ei ole (viel√§) tuoterivej√§")."</b><br><br>";
 }

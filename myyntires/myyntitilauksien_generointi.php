@@ -19,7 +19,7 @@ if (php_sapi_name() == 'cli') {
   $yhtio = $argv[1];
   $email = $argv[2];
 
-  //yhtiˆt‰ tai s‰hkˆpostia ei ole annettu
+  //yhti√∂t√§ tai s√§hk√∂postia ei ole annettu
   if (empty($yhtio) or empty($email)) {
     echo "\nUsage: php ".basename($argv[0])." yhtio to@example.com\n\n";
     die;
@@ -27,7 +27,7 @@ if (php_sapi_name() == 'cli') {
 
   $yhtiorow = hae_yhtion_parametrit($yhtio);
 
-  // Haetaan k‰ytt‰j‰n tiedot
+  // Haetaan k√§ytt√§j√§n tiedot
   $query = "SELECT *
             FROM kuka
             WHERE yhtio = '$yhtio'
@@ -48,9 +48,9 @@ if (php_sapi_name() == 'cli') {
 else {
   require("../inc/parametrit.inc");
 
-  echo "<font class='head'>".t('Ker‰ysaineiston generointi')."</font><hr>";
+  echo "<font class='head'>".t('Ker√§ysaineiston generointi')."</font><hr>";
 
-  // Vastaanottajan email k‰yttˆliittym‰st‰
+  // Vastaanottajan email k√§ytt√∂liittym√§st√§
   if (!empty($vastaanottava_email)) {
     $email = $vastaanottava_email;
   }
@@ -73,14 +73,14 @@ if ($tee == 'hae_keraysaineisto') {
 
     if ($email_ok) {
       merkkaa_myyntitilaukset_lahetetyksi($myyntitilaukset);
-      echo "<font class='message'>".t("S‰hkˆposti l‰hetetty onnistuneesti")."</font>";
+      echo "<font class='message'>".t("S√§hk√∂posti l√§hetetty onnistuneesti")."</font>";
     }
     else {
-      echo "<font class='error'>".t("S‰hkˆpostia ei voitu l‰hett‰‰")."! $email</font>";
+      echo "<font class='error'>".t("S√§hk√∂postia ei voitu l√§hett√§√§")."! $email</font>";
     }
   }
   else {
-    echo t("Myyntitilauksia ei lˆytynyt t‰lle p‰iv‰lle");
+    echo t("Myyntitilauksia ei l√∂ytynyt t√§lle p√§iv√§lle");
   }
 }
 
@@ -187,14 +187,14 @@ function merkkaa_myyntitilaukset_lahetetyksi($myyntitilaukset) {
 function echo_kayttoliittyma() {
   echo "<form method='POST' action=''>";
   echo "<table>";
-  echo "<th>".t("Vastaanottava s‰hkˆposti")."</th>";
+  echo "<th>".t("Vastaanottava s√§hk√∂posti")."</th>";
   echo "<td>";
   echo "<input type='hidden' name='tee' value='hae_keraysaineisto' />";
   echo "<input type='text' name='vastaanottava_email' />";
   echo "</td>";
   echo "</table>";
   echo "<br/>";
-  echo "<input type='submit' value='".t("L‰het‰")."'/>";
+  echo "<input type='submit' value='".t("L√§het√§")."'/>";
   echo "</form>";
 }
 

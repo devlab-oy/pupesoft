@@ -11,7 +11,7 @@ if (isset($tee) and $tee == 'I') {
   $tilires = pupe_query($query);
 
   if (mysql_num_rows($tilires) != 1) {
-    echo  "<br><font class='error'>\n".t("VIRHE: Tili‰ ei lˆydy").": $yhtiorow[tilikauden_tulos]</font><br>\n<br>\n";
+    echo  "<br><font class='error'>\n".t("VIRHE: Tili√§ ei l√∂ydy").": $yhtiorow[tilikauden_tulos]</font><br>\n<br>\n";
     $tee = "go";
   }
   else {
@@ -25,7 +25,7 @@ if (isset($tee) and $tee == 'I') {
   $tilires = pupe_query($query);
 
   if (mysql_num_rows($tilires) != 1) {
-    echo  "<br><font class='error'>\n".t("VIRHE: Tili‰ ei lˆydy").": $edellisten_tilikausien_voitto_tappio</font><br>\n<br>\n";
+    echo  "<br><font class='error'>\n".t("VIRHE: Tili√§ ei l√∂ydy").": $edellisten_tilikausien_voitto_tappio</font><br>\n<br>\n";
     $tee = "go";
   }
 
@@ -36,7 +36,7 @@ if (isset($tee) and $tee == 'I') {
   $tilires = pupe_query($query);
 
   if (mysql_num_rows($tilires) != 1) {
-    echo  "<br><font class='error'>\n".t("VIRHE: Tili‰ ei lˆydy").": $tilikauden_tulos_siirto</font><br>\n<br>\n";
+    echo  "<br><font class='error'>\n".t("VIRHE: Tili√§ ei l√∂ydy").": $tilikauden_tulos_siirto</font><br>\n<br>\n";
     $tee = "go";
   }
 
@@ -61,7 +61,7 @@ if (isset($tee) and $tee == 'I') {
     list($vv4,$kk4,$pp4) = explode("-", date('Y-m-d', mktime(0,0,0,$kk3,$pp3+1,$vv3)));
 
     if ($syotetty < $tilialku or $syotetty > $tililoppu) {
-      echo  "<br><font class='error'>\n".t("VIRHE: Valitun tilikauden viimeinen p‰iv‰ ei sis‰lly avoimeen tilikauteen!")."</font><br>\n<br>\n";
+      echo  "<br><font class='error'>\n".t("VIRHE: Valitun tilikauden viimeinen p√§iv√§ ei sis√§lly avoimeen tilikauteen!")."</font><br>\n<br>\n";
       $tee = "go";
     }
   }
@@ -161,10 +161,10 @@ if (isset($tee) and $tee == 'I') {
   // Kirjataan avaava tase
   unset($tunnus);
 
-  // Jos kirjataan tase uudestaan, niin t‰ss‰ on tositteen tunnus
+  // Jos kirjataan tase uudestaan, niin t√§ss√§ on tositteen tunnus
   if (isset($tilikausi_alku_loppu_row["avaava_tase"]) and $tilikausi_alku_loppu_row["avaava_tase"] > 0) {
 
-    // Onko t‰m‰ varmasti oikea tosite?
+    // Onko t√§m√§ varmasti oikea tosite?
     $query = "SELECT tunnus
               FROM lasku
               WHERE yhtio = '{$kukarow['yhtio']}'
@@ -190,15 +190,15 @@ if (isset($tee) and $tee == 'I') {
   $valkoodi       = '';
 
   // Korjataan tulossiirron kommentti
-  $iselite[$maara]  = $iselite[1]." / ".t("Siirret‰‰n")." ".t("Tilikauden tulos");
+  $iselite[$maara]  = $iselite[1]." / ".t("Siirret√§√§n")." ".t("Tilikauden tulos");
 
-  // Siirret‰‰n tulos
+  // Siirret√§√§n tulos
   $itili[$maara+1]  = $itili[$maara];
   $iselite[$maara+1]  = $iselite[$maara];
   $isumma[$maara+1]   = $isumma[$maara]*-1;
   $ivero[$maara+1]   = $ivero[$maara];
 
-  // Ja lis‰t‰‰n summa myˆs edellisten tilikausien voitto tilille
+  // Ja lis√§t√§√§n summa my√∂s edellisten tilikausien voitto tilille
   $itili[$maara+2]  = $edellisten_tilikausien_voitto_tappio;
   $iselite[$maara+2]   = $iselite[$maara];
   $isumma[$maara+2]   = $isumma[$maara];
@@ -267,7 +267,7 @@ if (trim($tee) == 'go') {
   if ((!isset($edellisten_tilikausien_voitto_tappio) or !isset($tilikauden_tulos_siirto)) or trim($edellisten_tilikausien_voitto_tappio) == '' or trim($tilikauden_tulos_siirto) == '') {
     echo "<form method='post' name='tilisyotto'>";
     echo "<table>";
-    echo "<tr><th colspan='2'>",t("Syˆt‰ seuraavat pakolliset tilit"),"</th><td class='back'>&nbsp;</td></tr>";
+    echo "<tr><th colspan='2'>",t("Sy√∂t√§ seuraavat pakolliset tilit"),"</th><td class='back'>&nbsp;</td></tr>";
     echo "<tr><th>",t("Tilikauden voitto/tappio"),"</th><td>$tilirow[tilino]</td><td class='back'>&nbsp;</td></tr>";
     echo "<tr><th>",t("Edellisten tilikausien voitto/tappio"),"</th><td>";
 
@@ -347,7 +347,7 @@ if (trim($tee) == 'go') {
   $tulosres = pupe_query($query);
   $tulosrow = mysql_fetch_assoc($tulosres);
 
-  $query = "SELECT tiliointi.tilino, count(*) vientej‰, sum(tiliointi.summa) saldo
+  $query = "SELECT tiliointi.tilino, count(*) vientej√§, sum(tiliointi.summa) saldo
             FROM tiliointi use index (yhtio_tilino_tapvm)
             WHERE tiliointi.yhtio   = '{$kukarow['yhtio']}'
             and tiliointi.korjattu  = ''
@@ -372,7 +372,7 @@ if (trim($tee) == 'go') {
   echo "<table><tr>";
   echo "<th>",t("Tili"),"</font></th>";
   echo "<th>",t("Nimi"),"</font></th>";
-  echo "<th>",t("Vientej‰"),"</font></th>";
+  echo "<th>",t("Vientej√§"),"</font></th>";
   echo "<th>",t("Saldo"),"</font></th>";
   echo "</tr>";
 
@@ -390,7 +390,7 @@ if (trim($tee) == 'go') {
 
   while ($trow = mysql_fetch_assoc($result)) {
 
-    if ($trow['saldo'] == 0 or $trow['vientej‰'] == 0) continue;
+    if ($trow['saldo'] == 0 or $trow['vientej√§'] == 0) continue;
 
     $summa2 += $trow['saldo'];
 
@@ -409,7 +409,7 @@ if (trim($tee) == 'go') {
     echo "<tr class='aktiivi'>";
     echo "<td><a name='tili2_{$trow['tilino']}' href='raportit.php?toim=paakirja&tee=K&tili={$trow['tilino']}{$linkkilisa}{$lopelink}///tili2_{$trow['tilino']}'>{$trow['tilino']}</a></td>";
     echo "<td>{$tilinimirow['nimi']}</td>";
-    echo "<td>{$trow['vientej‰']}</td>";
+    echo "<td>{$trow['vientej√§']}</td>";
     echo "<td align='right'>{$trow['saldo']}</td>";
     echo "</tr>";
 
@@ -441,7 +441,7 @@ if (trim($tee) == 'go') {
 
   if ($tilikausi_alku_loppu_row['avaava_tase'] == 0) {
     if (round($summa2, 2) != 0) {
-      echo "<tr><td class='back' colspan='5'><font class='message'>",t("Summat eiv‰t t‰sm‰‰"),"!</font>$summa2</td></tr>";
+      echo "<tr><td class='back' colspan='5'><font class='message'>",t("Summat eiv√§t t√§sm√§√§"),"!</font>$summa2</td></tr>";
     }
     else {
       echo "<tr><th colspan='5'><input type='submit' value='",t("Jatka"),"' /></th></tr>";
@@ -450,7 +450,7 @@ if (trim($tee) == 'go') {
   else {
     echo "  <SCRIPT LANGUAGE=JAVASCRIPT>
           function verify(){
-            msg = '".t("HUOM: Avaa tase on jo kirjattu! Oletko varma, ett‰ halua kirjata sen uudestaan?")."';
+            msg = '".t("HUOM: Avaa tase on jo kirjattu! Oletko varma, ett√§ halua kirjata sen uudestaan?")."';
 
             if (confirm(msg)) {
               return true;
@@ -466,7 +466,7 @@ if (trim($tee) == 'go') {
     echo "<tr><td colspan='5'><font class='error'>",t("HUOM: Avaava tase on jo kirjattu"),"!</font></td></tr>";
 
     if (round($summa2, 2) != 0) {
-      echo "<tr><td class='back' colspan='5'><font class='message'>",t("Summat eiv‰t t‰sm‰‰"),"!</font>$summa2</td></tr>";
+      echo "<tr><td class='back' colspan='5'><font class='message'>",t("Summat eiv√§t t√§sm√§√§"),"!</font>$summa2</td></tr>";
     }
     else {
       echo "<tr><th colspan='5'><input type='submit' value='",t("Jatka"),"' onClick='return verify();'/></th></tr>";

@@ -20,7 +20,7 @@ $iso["font"]       = "Helvetica-Bold";
 $rectparam["width"]   = 0.3;
 $lineparam["width"]   = 1;
 $rivinkorkeus      = 17;
-// t‰‰ t‰ss‰ kusee
+// t√§√§ t√§ss√§ kusee
 if (!function_exists('tyomaarays_alku')) {
   function tyomaarays_alku($params) {
     global $yhtiorow, $kukarow;
@@ -69,16 +69,16 @@ if (!function_exists('tyomaarays_alku')) {
     $masresult = pupe_query($query);
     $masrow = mysql_fetch_array($masresult);
 
-    //maksuehto tekstin‰
+    //maksuehto tekstin√§
     $maksuehto = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli);
 
     $pdf->draw_text(410, 815, $laskurow["hyvaksynnanmuutos"],     $thispage, $iso);
 
     if ($tyyppi == "SISAINEN") {
-      $pdf->draw_text(300,815, t("Sis‰inen tyˆm‰‰r‰ys", $kieli),   $thispage, $iso);
+      $pdf->draw_text(300,815, t("Sis√§inen ty√∂m√§√§r√§ys", $kieli),   $thispage, $iso);
     }
     else {
-      $pdf->draw_text(310,815, t("Tyˆm‰‰r‰ys", $kieli),       $thispage, $iso);
+      $pdf->draw_text(310,815, t("Ty√∂m√§√§r√§ys", $kieli),       $thispage, $iso);
     }
 
     $pdf->draw_text(310, 803, t("Sivu", $kieli),           $thispage, $norm);
@@ -109,7 +109,7 @@ if (!function_exists('tyomaarays_alku')) {
 
     $pdf->draw_rectangle(779, 300, 758, 580, $thispage, $rectparam);
     $pdf->draw_rectangle(779, 420, 758, 580, $thispage, $rectparam);
-    $pdf->draw_text(310, 771, t("Ker‰ysaika", $kieli),           $thispage, $pieni);
+    $pdf->draw_text(310, 771, t("Ker√§ysaika", $kieli),           $thispage, $pieni);
 
     if ($laskurow["keraysvko"] != '') {
       $taika = t("Vko", $kieli)." ".date("W", strtotime($laskurow["kerayspvm"]));
@@ -145,15 +145,15 @@ if (!function_exists('tyomaarays_alku')) {
     $pdf->draw_rectangle(758, 420, 737, 580, $thispage, $rectparam);
     $pdf->draw_text(310, 750, t("Asiakasnumero", $kieli),     $thispage, $pieni);
     $pdf->draw_text(310, 740, $asrow["asiakasnro"],       $thispage, $norm);
-    $pdf->draw_text(430, 750, t("P‰iv‰ys", $kieli),        $thispage, $pieni);
+    $pdf->draw_text(430, 750, t("P√§iv√§ys", $kieli),        $thispage, $pieni);
     $pdf->draw_text(430, 740, tv1dateconv(date("Y-m-d")),     $thispage, $norm);
 
 
     $pdf->draw_rectangle(737, 300, 716, 580, $thispage, $rectparam);
     $pdf->draw_rectangle(737, 420, 716, 580, $thispage, $rectparam);
-    $pdf->draw_text(310, 729, t("Myyj‰", $kieli),     $thispage, $pieni);
+    $pdf->draw_text(310, 729, t("Myyj√§", $kieli),     $thispage, $pieni);
 
-    //etsit‰‰n myyj‰n nimi
+    //etsit√§√§n myyj√§n nimi
     $query  = "SELECT nimi
                FROM kuka
                WHERE tunnus = '$laskurow[myyja]'
@@ -189,14 +189,14 @@ if (!function_exists('tyomaarays_alku')) {
     $pdf->draw_text(550, 635, date("Y"), $thispage, $norm);
 
     $pdf->draw_rectangle(632, 300, 611, 580, $thispage, $rectparam);
-    $pdf->draw_text(310, 624, t("Hyv‰ksyn allamainitut tyˆt suoritettavaksi", $kieli),   $thispage, $pieni);
+    $pdf->draw_text(310, 624, t("Hyv√§ksyn allamainitut ty√∂t suoritettavaksi", $kieli),   $thispage, $pieni);
     $pdf->draw_text(520, 614, "/", $thispage, $norm);
     $pdf->draw_text(540, 614, "/", $thispage, $norm);
     $pdf->draw_text(550, 614, date("Y"), $thispage, $norm);
 
     $kala  = 575;
 
-    //T‰ysin dynaaminen osio
+    //T√§ysin dynaaminen osio
     $al_res = t_avainsana("TYOM_TYOKENTAT", $kieli, "and avainsana.selitetark != '' and avainsana.nakyvyys in ('','K','L')");
 
     $al_lask = 35;
@@ -378,10 +378,10 @@ if (!function_exists('tyomaarays_uusi_sivu')) {
     $pdf->draw_text(410, 815, $laskurow["hyvaksynnanmuutos"],     $thispage, $iso);
 
     if ($tyyppi == "SISAINEN") {
-      $pdf->draw_text(300,815, t("Sis‰inen tyˆm‰‰r‰ys", $kieli),   $thispage, $iso);
+      $pdf->draw_text(300,815, t("Sis√§inen ty√∂m√§√§r√§ys", $kieli),   $thispage, $iso);
     }
     else {
-      $pdf->draw_text(310,815, t("Tyˆm‰‰r‰ys", $kieli),       $thispage, $iso);
+      $pdf->draw_text(310,815, t("Ty√∂m√§√§r√§ys", $kieli),       $thispage, $iso);
     }
 
     $pdf->draw_text(310, 803, t("Sivu", $kieli),           $thispage, $norm);
@@ -393,7 +393,7 @@ if (!function_exists('tyomaarays_uusi_sivu')) {
 
     $pdf->draw_rectangle(779, 300, 758, 580, $thispage, $rectparam);
     $pdf->draw_rectangle(779, 420, 758, 580, $thispage, $rectparam);
-    $pdf->draw_text(310, 771, t("Ker‰ysaika", $kieli),           $thispage, $pieni);
+    $pdf->draw_text(310, 771, t("Ker√§ysaika", $kieli),           $thispage, $pieni);
 
     if ($laskurow["keraysvko"] != '') {
       $taika = t("Vko", $kieli)." ".date("W", strtotime($laskurow["kerayspvm"]));
@@ -447,8 +447,8 @@ if (!function_exists('tyomaarays_rivi_otsikot')) {
     $pdf->draw_rectangle($kala+30, 20, 20, 580, $thispage, $rectparam);
 
     if ($yhtiorow["tyomaarayksen_palvelutjatuottet"] == "E") {
-      if ($tuotetyyppi == "2 Tyˆt") {
-        $pdf->draw_text(25,  $kala+35, t("Tyˆt ja palvelut", $kieli),      $thispage, $boldi);
+      if ($tuotetyyppi == "2 Ty√∂t") {
+        $pdf->draw_text(25,  $kala+35, t("Ty√∂t ja palvelut", $kieli),      $thispage, $boldi);
       }
       else {
         $pdf->draw_text(25,  $kala+35, t("Osat ja tarvikkeet", $kieli),    $thispage, $boldi);
@@ -512,7 +512,7 @@ if (!function_exists('tyomaarays_rivi')) {
     // Luodaan muuttujat
     extract($params);
 
-    // viivat rivien v‰liin...
+    // viivat rivien v√§liin...
     $x[0] = 20;
     $x[1] = 580;
     $y[0] = $y[1] = $kala + $rivinkorkeus - 4;
@@ -521,7 +521,7 @@ if (!function_exists('tyomaarays_rivi')) {
       $pdf->draw_line($x, $y, $thispage, $rectparam);
     }
 
-    // jos ollaan liian pitk‰ll‰ tehd‰‰n uusi otsikko...
+    // jos ollaan liian pitk√§ll√§ tehd√§√§n uusi otsikko...
     if ($kala < 95) {
       $sivu++;
       $uudehko = "ON";
@@ -576,7 +576,7 @@ if (!function_exists('tyomaarays_rivi')) {
 
     $row["perhe_kommentti"] = "";
 
-    // Info tuoteperheest‰
+    // Info tuoteperheest√§
     if ($row["perheid"] > 0 and $perheid != $row["perheid"]) {
       $numrows = 0;
 
@@ -620,7 +620,7 @@ if (!function_exists('tyomaarays_rivi')) {
           while ($perherow = mysql_fetch_array($perheresult)) {
             if ($row["perhe_kommentti"] == "") {
               $row["perhe_kommentti"] .= t("Tuoteperhe", $kieli).": ";
-              $row["perhe_kommentti"] .= $perherow["tuoteno"]." (".$row["varattu"].") ".$perherow["nimitys"].".\n".t("Sis‰lt‰‰ tuotteet", $kieli).": ";
+              $row["perhe_kommentti"] .= $perherow["tuoteno"]." (".$row["varattu"].") ".$perherow["nimitys"].".\n".t("Sis√§lt√§√§ tuotteet", $kieli).": ";
             }
             else {
               $row["perhe_kommentti"] .= strtoupper($perherow["tuoteno"]).", ";
@@ -642,7 +642,7 @@ if (!function_exists('tyomaarays_rivi')) {
       $row['varattu'] = ($row['varattu']+$row['kpl'])." ".t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
     }
     else {
-      if ($row["var"] == 'J') { // j‰lkitoimitus
+      if ($row["var"] == 'J') { // j√§lkitoimitus
         $row['varattu'] = t("**JT**", $kieli);
       }
       elseif ($row["var"] == 'P') { // puute
@@ -856,7 +856,7 @@ if (!function_exists('tyomaarays_loppu')) {
     // Luodaan muuttujat
     extract($params);
 
-    //Alimmat kolme laatikkoa, yhtiˆtietoja
+    //Alimmat kolme laatikkoa, yhti√∂tietoja
     $pdf->draw_rectangle(70, 20, 20, 580,  $thispage, $rectparam);
     $pdf->draw_rectangle(70, 207, 20, 580,  $thispage, $rectparam);
     $pdf->draw_rectangle(70, 394, 20, 580,  $thispage, $rectparam);
@@ -870,12 +870,12 @@ if (!function_exists('tyomaarays_loppu')) {
     $pdf->draw_text(257, 55, $yhtiorow["puhelin"],        $thispage, $pieni);
     $pdf->draw_text(217, 45, t("Telefax", $kieli).":",      $thispage, $pieni);
     $pdf->draw_text(257, 45, $yhtiorow["fax"],          $thispage, $pieni);
-    $pdf->draw_text(217, 35, t("S‰hkˆposti", $kieli).":",    $thispage, $pieni);
+    $pdf->draw_text(217, 35, t("S√§hk√∂posti", $kieli).":",    $thispage, $pieni);
     $pdf->draw_text(257, 35, $yhtiorow["email"],        $thispage, $pieni);
 
-    //jos on suomalainen yritys tehd‰‰n ytunnus n‰tiks
+    //jos on suomalainen yritys tehd√§√§n ytunnus n√§tiks
     if (strtoupper($yhtiorow["maa"])== 'FI') {
-      //muutetaan ytunnus takas oikean n‰kˆseks
+      //muutetaan ytunnus takas oikean n√§k√∂seks
       $ytunpit = 8-strlen($yhtiorow["ytunnus"]);
 
       if ($ytunpit > 0) {
@@ -911,7 +911,7 @@ if (!function_exists('tyomaarays_loppu')) {
     }
 
     if ($tots == 1) {
-      // viivat rivien v‰liin...
+      // viivat rivien v√§liin...
       $x[0] = 20;
       $x[1] = 580;
       $y[0] = $y[1] = $kala + $rivinkorkeus - 4;
@@ -937,7 +937,7 @@ if (!function_exists('tyomaarays_loppu_lisarivit')) {
     // Luodaan muuttujat
     extract($params);
 
-    //Alimmat kolme laatikkoa, yhtiˆtietoja
+    //Alimmat kolme laatikkoa, yhti√∂tietoja
     $pdf->draw_rectangle(70, 20, 20, 580,  $thispage, $rectparam);
     $pdf->draw_rectangle(70, 207, 20, 580,  $thispage, $rectparam);
     $pdf->draw_rectangle(70, 394, 20, 580,  $thispage, $rectparam);
@@ -951,12 +951,12 @@ if (!function_exists('tyomaarays_loppu_lisarivit')) {
     $pdf->draw_text(257, 55, $yhtiorow["puhelin"],        $thispage, $pieni);
     $pdf->draw_text(217, 45, t("Telefax", $kieli).":",      $thispage, $pieni);
     $pdf->draw_text(257, 45, $yhtiorow["fax"],          $thispage, $pieni);
-    $pdf->draw_text(217, 35, t("S‰hkˆposti", $kieli).":",    $thispage, $pieni);
+    $pdf->draw_text(217, 35, t("S√§hk√∂posti", $kieli).":",    $thispage, $pieni);
     $pdf->draw_text(257, 35, $yhtiorow["email"],        $thispage, $pieni);
 
-    //jos on suomalainen yritys tehd‰‰n ytunnus n‰tiks
+    //jos on suomalainen yritys tehd√§√§n ytunnus n√§tiks
     if (strtoupper($yhtiorow["maa"])== 'FI') {
-      //muutetaan ytunnus takas oikean n‰kˆseks
+      //muutetaan ytunnus takas oikean n√§k√∂seks
       $ytunpit = 8-strlen($yhtiorow["ytunnus"]);
 
       if ($ytunpit > 0) {
@@ -992,7 +992,7 @@ if (!function_exists('tyomaarays_loppu_lisarivit')) {
     }
 
     if ($tots == 1) {
-      // viivat rivien v‰liin...
+      // viivat rivien v√§liin...
       $x[0] = 20;
       $x[1] = 580;
       $y[0] = $y[1] = $kala + $rivinkorkeus - 4;
@@ -1028,7 +1028,7 @@ if (!function_exists('tyomaarays_loppu_lisarivit')) {
       $pdf->draw_line($x, $y, $thispage, $lineparam);
 
       $pdf->draw_rectangle($kala, 225, $kala-10, 235, $thispage, $rectparam);
-      $pdf->draw_text(240, $kala-10, t("K‰ytˆnopastus", $kieli), $thispage, $norm);
+      $pdf->draw_text(240, $kala-10, t("K√§yt√∂nopastus", $kieli), $thispage, $norm);
 
       $x[0] = 305;
       $x[1] = 385;
@@ -1077,7 +1077,7 @@ if (!function_exists('tyomaarays_print_pdf')) {
     // Luodaan muuttujat
     extract($params);
 
-    //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+    //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
     list($usec, $sec) = explode(' ', microtime());
     mt_srand((float) $sec + ((float) $usec * 100000));
     $pdffilenimi = "/tmp/Kerayslista-".md5(uniqid(mt_rand(), true)).".pdf";
@@ -1091,13 +1091,13 @@ if (!function_exists('tyomaarays_print_pdf')) {
     if ($komento == 'email') {
       $liite = $pdffilenimi;
 
-      $kutsu = t("Tyˆm‰‰r‰ys", $kieli)." $laskurow[tunnus]";
+      $kutsu = t("Ty√∂m√§√§r√§ys", $kieli)." $laskurow[tunnus]";
 
       if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
         $kutsu .= ", ".trim($laskurow["nimi"]);
       }
 
-      echo t("Tyˆm‰‰r‰ys tulostuu")."...<br>";
+      echo t("Ty√∂m√§√§r√§ys tulostuu")."...<br>";
 
       if ($kukarow["extranet"] == '') {
         require("../inc/sahkoposti.inc");
@@ -1107,11 +1107,11 @@ if (!function_exists('tyomaarays_print_pdf')) {
       }
     }
     elseif ($tee == 'NAYTATILAUS') {
-      //Tyˆnnet‰‰n tuo pdf vaan putkeen!
+      //Ty√∂nnet√§√§n tuo pdf vaan putkeen!
       echo file_get_contents($pdffilenimi);
     }
     elseif ($komento != '' and $komento != 'edi') {
-      echo t("Tyˆm‰‰r‰ys tulostuu")."...<br>";
+      echo t("Ty√∂m√§√§r√§ys tulostuu")."...<br>";
       $line = exec("$komento $pdffilenimi", $output, $returnvalue);
     }
 
@@ -1125,13 +1125,13 @@ if (!function_exists('tulosta_tyomaaraystarra_zebra')) {
 
     global $kukarow;
 
-    //Kun tullaan t‰nne tarvitaan $komento joka on se komento jolla tulostetaan esim. lpr -P tarrakirjoitin
-    //ja tarvitaan myˆs $laskurow ja $tkpl
+    //Kun tullaan t√§nne tarvitaan $komento joka on se komento jolla tulostetaan esim. lpr -P tarrakirjoitin
+    //ja tarvitaan my√∂s $laskurow ja $tkpl
 
     $nimitys = trim($laskurow['toim_nimi'].' '.$laskurow['toim_nimitark']);
     $nimitys2 = "";
 
-    // t‰ss‰ tehd‰‰n aineisto jota Zebra tulostin tajuaa
+    // t√§ss√§ tehd√§√§n aineisto jota Zebra tulostin tajuaa
     /* Esimerkki
     D15
     N
@@ -1144,7 +1144,7 @@ if (!function_exists('tulosta_tyomaaraystarra_zebra')) {
 
     // Toimii ja suunniteltu mallille GX420t
     // Tarrakoko 76 mm x 25 mm
-    $pituus = 50; // voidaan m‰‰ritt‰‰ mist‰ kohdasta katkaistaan teksti.
+    $pituus = 50; // voidaan m√§√§ritt√§√§ mist√§ kohdasta katkaistaan teksti.
 
     if (strlen($nimitys) > $pituus ) {
       if (strpos($nimitys, " ")) {
@@ -1170,17 +1170,17 @@ if (!function_exists('tulosta_tyomaaraystarra_zebra')) {
 
     $sivu  = "^XA\n";    // vakio alku, pakollinen
     $sivu .= "^LH50\n";  // offset vasemmasta
-    $sivu .= "^LT000\n";  // offset ylh‰‰lt‰
-    $sivu .= "^FO85,20\n^ASN,20,12\n^FDTyˆm‰‰r‰in: {$laskurow['tunnus']}\n^FS";
+    $sivu .= "^LT000\n";  // offset ylh√§√§lt√§
+    $sivu .= "^FO85,20\n^ASN,20,12\n^FDTy√∂m√§√§r√§in: {$laskurow['tunnus']}\n^FS";
     $sivu .= "^FO85,65\n^AQN,18,8\n^FD$nimitys\n^FS";
     $sivu .= "^FO85,88\n^AQN,18,8\n^FD$nimitys2\n^FS";
-    $sivu .= "^MD10";                        // TUMMUUS, vakio on 8 mutta se ei riit‰ viivakoodille.
-    $sivu .= "^PQ$tkpl";                    // Tulostettavien lukum‰‰r‰
+    $sivu .= "^MD10";                        // TUMMUUS, vakio on 8 mutta se ei riit√§ viivakoodille.
+    $sivu .= "^PQ$tkpl";                    // Tulostettavien lukum√§√§r√§
     $sivu .= "^FO80,120\n^BCN,40,Y,N,N\n^FD{$laskurow['tunnus']}\n^FS";    // viivakoodi CODE-128
 
     $sivu .= "\n^XZ";  // pakollinen lopetus
 
-    //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+    //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
     list($usec, $sec) = explode(' ', microtime());
     mt_srand((float) $sec + ((float) $usec * 100000));
     $filenimi = "/tmp/Zebra-tyomaaraystarra-".md5(uniqid(mt_rand(), true)).".txt";

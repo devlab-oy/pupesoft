@@ -70,7 +70,7 @@ if ($tee == "write") {
       $tee = "";
     }
     else {
-      echo "<font class='error'>",t("Asiakasta ei lˆydy"),"!</font><br /><br />";
+      echo "<font class='error'>",t("Asiakasta ei l√∂ydy"),"!</font><br /><br />";
       $tee = 'edit';
     }
   }
@@ -109,11 +109,11 @@ if ($tee == "edit") {
 
     echo "<table>";
     echo "<tr>";
-    echo "<th>",t("Syˆt‰ ytunnus"),"</th>";
+    echo "<th>",t("Sy√∂t√§ ytunnus"),"</th>";
     echo "<td><input type = 'text' size='15' name = 'uusiytunnus'></td>";
     echo "</tr>";
     echo "<tr>";
-    echo "<th>",t("tai")," ",t("Syˆt‰ Asiakastunnus"),"</th>";
+    echo "<th>",t("tai")," ",t("Sy√∂t√§ Asiakastunnus"),"</th>";
     echo "<td><input type = 'text' size='15' name = 'uusitunnus'></td>";
     echo "</tr>";
     echo "</table><br>";
@@ -152,7 +152,7 @@ if ($tee == "edit") {
 
   }
   else {
-    echo "<br /><br />",t("T‰ll‰ asiakaalla ei ole yht‰‰n asiakasalennusta"),"!<br /><br />";
+    echo "<br /><br />",t("T√§ll√§ asiakaalla ei ole yht√§√§n asiakasalennusta"),"!<br /><br />";
     $tee = '';
   }
 }

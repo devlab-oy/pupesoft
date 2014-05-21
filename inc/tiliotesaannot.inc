@@ -6,7 +6,7 @@ $tiliointisaantorow['tilino'] = $yhtiorow['selvittelytili'];
 
 $loydettiinko_sopiva_tili = '';
 
-// Jos pankkitilill‰ on oletus selvittelytili k‰ytet‰‰n sit‰
+// Jos pankkitilill√§ on oletus selvittelytili k√§ytet√§√§n sit√§
 if ($yritirow["oletus_selvittelytili"] != "") {
   $tiliotesaantotilino = $yritirow["oletus_selvittelytili"];
   $tiliointisaantorow['tilino'] = $yritirow["oletus_selvittelytili"];
@@ -22,18 +22,18 @@ $query = "SELECT * FROM tiliotesaanto
           locate(selite, '$vientiselite') > 0";
 $tiliotesaantoresult = mysql_query($query) or pupe_error($query);
 
-// Jotain lˆytyy
+// Jotain l√∂ytyy
 if (mysql_num_rows($tiliotesaantoresult) > 0) {
   if (mysql_num_rows($tiliotesaantoresult) == 1) {
     $tiliointisaantorow = mysql_fetch_array ($tiliotesaantoresult);
     $tiliotesaantotilino = $tiliointisaantorow['tilino'];
   }
   else {
-    echo t("Monta sopivaa s‰‰ntˆ‰, k‰ytet‰‰n oletustili‰")."!";
+    echo t("Monta sopivaa s√§√§nt√∂√§, k√§ytet√§√§n oletustili√§")."!";
   }
 }
 else {
-  // Ei lˆytynyt hˆll‰t‰‰n
+  // Ei l√∂ytynyt h√∂ll√§t√§√§n
   $query = "SELECT * FROM tiliotesaanto
             WHERE yhtio = '$yritirow[yhtio]' and
             erittely    = '' and
@@ -44,14 +44,14 @@ else {
             selite      = ''";
   $tiliotesaantoresult = mysql_query($query) or pupe_error($query);
 
-  // Jotain lˆytyy
+  // Jotain l√∂ytyy
   if (mysql_num_rows($tiliotesaantoresult) > 0) {
     if (mysql_num_rows($tiliotesaantoresult) == 1) {
       $tiliointisaantorow = mysql_fetch_array ($tiliotesaantoresult);
       $tiliotesaantotilino = $tiliointisaantorow['tilino'];
     }
     else {
-      echo t("Monta sopivaa s‰‰ntˆ‰, k‰ytet‰‰n oletustili‰")."!";
+      echo t("Monta sopivaa s√§√§nt√∂√§, k√§ytet√§√§n oletustili√§")."!";
     }
   }
   else {
@@ -65,14 +65,14 @@ else {
               selite      = ''";
     $tiliotesaantoresult = mysql_query($query) or pupe_error($query);
 
-    // Jotain lˆytyy
+    // Jotain l√∂ytyy
     if (mysql_num_rows($tiliotesaantoresult) > 0) {
       if (mysql_num_rows($tiliotesaantoresult) == 1) {
         $tiliointisaantorow = mysql_fetch_array ($tiliotesaantoresult);
         $tiliotesaantotilino = $tiliointisaantorow['tilino'];
       }
       else {
-        echo t("Monta sopivaa s‰‰ntˆ‰, k‰ytet‰‰n oletustili‰")."!";
+        echo t("Monta sopivaa s√§√§nt√∂√§, k√§ytet√§√§n oletustili√§")."!";
       }
     }
     else {
@@ -86,18 +86,18 @@ else {
                 selite      = ''";
       $tiliotesaantoresult = mysql_query($query) or pupe_error($query);
 
-      // Jotain lˆytyy
+      // Jotain l√∂ytyy
       if (mysql_num_rows($tiliotesaantoresult) > 0) {
         if (mysql_num_rows($tiliotesaantoresult) == 1) {
           $tiliointisaantorow = mysql_fetch_array ($tiliotesaantoresult);
           $tiliotesaantotilino = $tiliointisaantorow['tilino'];
         }
         else {
-          echo t("Monta sopivaa s‰‰ntˆ‰, k‰ytet‰‰n oletustili‰")."!";
+          echo t("Monta sopivaa s√§√§nt√∂√§, k√§ytet√§√§n oletustili√§")."!";
         }
       }
       else {
-        // kokeillaan viel‰ ekalla queryll‰ mutta ilman nimitietoa!
+        // kokeillaan viel√§ ekalla queryll√§ mutta ilman nimitietoa!
         $query = "SELECT * FROM tiliotesaanto
                   WHERE yhtio = '$yritirow[yhtio]' and
                   erittely    = '' and
@@ -108,14 +108,14 @@ else {
                   locate(selite, '$vientiselite') > 0";
         $tiliotesaantoresult = mysql_query($query) or pupe_error($query);
 
-        // Jotain lˆytyy
+        // Jotain l√∂ytyy
         if (mysql_num_rows($tiliotesaantoresult) > 0) {
           if (mysql_num_rows($tiliotesaantoresult) == 1) {
             $tiliointisaantorow = mysql_fetch_array ($tiliotesaantoresult);
             $tiliotesaantotilino = $tiliointisaantorow['tilino'];
           }
           else {
-            echo t("Monta sopivaa s‰‰ntˆ‰, k‰ytet‰‰n oletustili‰")."!";
+            echo t("Monta sopivaa s√§√§nt√∂√§, k√§ytet√§√§n oletustili√§")."!";
           }
         }
       }

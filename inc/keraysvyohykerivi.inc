@@ -1,8 +1,8 @@
 <?php
 
 $ulos = "";
-$jatko = 1; // oletetaan normaali k‰sittely
-$tyyppi = 1; // oletetaan rivin n‰kyvyys
+$jatko = 1; // oletetaan normaali k√§sittely
+$tyyppi = 1; // oletetaan rivin n√§kyvyys
 
 if (mysql_field_name($result, $i) == "tunnus" or
     mysql_field_name($result, $i) == "yhtio") {
@@ -73,7 +73,7 @@ if (mysql_field_name($result, $i) == "ulkoinen_jarjestelma") {
   $sel = array_merge(array('K' => '', 'V' => ''), array_fill_keys(explode(",", $trow[$i]), " selected"));
 
   $ulos .= "<select name='{$nimi}'>";
-  $ulos .= "<option value=''>".t("Ei k‰ytˆss‰")."</option>";
+  $ulos .= "<option value=''>".t("Ei k√§yt√∂ss√§")."</option>";
   $ulos .= "<option value='K'{$sel['K']}>".t("Kardex")."</option>";
   $ulos .= "<option value='V'{$sel['V']}>".t("Vocollect")."</option>";
   $ulos .= "</select>";
@@ -90,8 +90,8 @@ if (mysql_field_name($result, $i) == "yhdistelysaanto") {
   $ulos .= "<input type='hidden' name='{$nimi}[]' value='default' />";
 
   $ulos .= "<input type='checkbox' name='{$nimi}[]' value='S'{$sel['S']}>".t("Saa olla useita asiakkaita")."<br />";
-  $ulos .= "<input type='checkbox' name='{$nimi}[]' value='K'{$sel['K']}>".t("Ker‰yser‰n alustoja voi olla useista l‰hdˆist‰")."<br />";
-  $ulos .= "<input type='checkbox' name='{$nimi}[]' value='P'{$sel['P']}>".t("Ker‰yser‰ss‰ voi olla useita prioriteettej‰")."<br />";
+  $ulos .= "<input type='checkbox' name='{$nimi}[]' value='K'{$sel['K']}>".t("Ker√§yser√§n alustoja voi olla useista l√§hd√∂ist√§")."<br />";
+  $ulos .= "<input type='checkbox' name='{$nimi}[]' value='P'{$sel['P']}>".t("Ker√§yser√§ss√§ voi olla useita prioriteettej√§")."<br />";
 
   $ulos .= "</td>";
   $jatko = 0;

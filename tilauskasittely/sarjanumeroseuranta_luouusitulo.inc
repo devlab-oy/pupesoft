@@ -1,6 +1,6 @@
 <?php
 
-//Kysyt‰‰n k‰ytt‰j‰lt‰ sopiva ostohinta tuotteelle
+//Kysyt√§√§n k√§ytt√§j√§lt√§ sopiva ostohinta tuotteelle
 if ($luousitee == "") {
   $kehahin = 0;
 
@@ -12,7 +12,7 @@ if ($luousitee == "") {
   $tuoterow = mysql_fetch_array($result);
 
   if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "G" or $tuoterow["sarjanumeroseuranta"] == "U") {
-    // Jos tuote on sarjanumeroseurannassa niin kehahinta lasketaan yksilˆiden ostohinnoista (ostetut yksilˆt jotka eiv‰t viel‰ ole myyty(=laskutettu)
+    // Jos tuote on sarjanumeroseurannassa niin kehahinta lasketaan yksil√∂iden ostohinnoista (ostetut yksil√∂t jotka eiv√§t viel√§ ole myyty(=laskutettu)
     $query  = "SELECT avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl) kehahin
                FROM sarjanumeroseuranta
                LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
@@ -39,7 +39,7 @@ if ($luousitee == "") {
   }
 
   if ($tuoterow["sarjanumeroseuranta"] == "G" or $tuoterow["sarjanumeroseuranta"] == "E" or $tuoterow["sarjanumeroseuranta"] == "F") {
-    echo "<font class='head'>",t("Er‰numeroseuranta"),"</font><hr>";
+    echo "<font class='head'>",t("Er√§numeroseuranta"),"</font><hr>";
   }
   else {
     echo "<font class='head'>".t("Sarjanumeroseuranta")."</font><hr>";
@@ -65,21 +65,21 @@ if ($luousitee == "") {
   // T = Sarjanumeroseuranta. Myynti / Keskihinta-varastonarvo
   // U = Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo. Automaattinen sarjanumerointi
   // V = Sarjanumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo
-  // E = Er‰numeroseuranta. Osto-Myynti / Keskihinta-varastonarvo
-  // F = Er‰numeroseuranta parasta-ennen p‰iv‰ll‰. Osto-Myynti / Keskihinta-varastonarvo
-  // G = Er‰numeroseuranta. Osto-Myynti / In-Out varastonarvo
+  // E = Er√§numeroseuranta. Osto-Myynti / Keskihinta-varastonarvo
+  // F = Er√§numeroseuranta parasta-ennen p√§iv√§ll√§. Osto-Myynti / Keskihinta-varastonarvo
+  // G = Er√§numeroseuranta. Osto-Myynti / In-Out varastonarvo
 
   if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U") {
-    echo "<tr><th>",t("Tuotteen keskim‰‰r‰inen hankintahinta"),":</th><td>$kehahin</td></tr>";
-    echo "<tr><th>".t("Inventoitavan yksilˆn hankintahinta").":</th><td><input type='text' name='kehahin' size='10'  value='$kehahin'></td></tr>";
+    echo "<tr><th>",t("Tuotteen keskim√§√§r√§inen hankintahinta"),":</th><td>$kehahin</td></tr>";
+    echo "<tr><th>".t("Inventoitavan yksil√∂n hankintahinta").":</th><td><input type='text' name='kehahin' size='10'  value='$kehahin'></td></tr>";
   }
   elseif ($tuoterow["sarjanumeroseuranta"] == "G") {
-    echo "<tr><th>".t("Tuotteen keskim‰‰r‰inen hankintahinta").":</th><td>$kehahin</td></tr>";
-    echo "<tr><th>".t("Inventoitavan er‰n hankintahinta").":</th><td><input type='text' name='kehahin' size='10'  value='$kehahin'></td></tr>";
-    echo "<tr><th>".t("Er‰n suuruus").":</th><td><input type='text' name='era_kpl' size='10'></td></tr>";
+    echo "<tr><th>".t("Tuotteen keskim√§√§r√§inen hankintahinta").":</th><td>$kehahin</td></tr>";
+    echo "<tr><th>".t("Inventoitavan er√§n hankintahinta").":</th><td><input type='text' name='kehahin' size='10'  value='$kehahin'></td></tr>";
+    echo "<tr><th>".t("Er√§n suuruus").":</th><td><input type='text' name='era_kpl' size='10'></td></tr>";
   }
   elseif ($tuoterow['sarjanumeroseuranta'] == 'E' or $tuoterow['sarjanumeroseuranta'] == 'F') {
-    echo "<tr><th>".t("Er‰n suuruus").":</th><td><input type='text' name='era_kpl' size='10'></td></tr>";
+    echo "<tr><th>".t("Er√§n suuruus").":</th><td><input type='text' name='era_kpl' size='10'></td></tr>";
   }
 
   echo "</table>";
@@ -94,7 +94,7 @@ else {
 
   $tanaan = date("Y-m-d");
 
-  // Inventoiduille sarjanumerotuotteille luodaan K I otsikko per p‰iv‰
+  // Inventoiduille sarjanumerotuotteille luodaan K I otsikko per p√§iv√§
   $query  = "SELECT *
              FROM lasku
              WHERE yhtio = '$kukarow[yhtio]' and tila='K' and alatila='I' and tapvm='$tanaan'";
@@ -190,7 +190,7 @@ else {
             alv            = '0',
             nimitys        = '$trow[nimitys]',
             tyyppi         = 'O',
-            kommentti      = '$kukarow[nimi] lis‰si inventoimalla.'";
+            kommentti      = '$kukarow[nimi] lis√§si inventoimalla.'";
   $result = mysql_query($query) or pupe_error($query);
   $lid = mysql_insert_id();
 

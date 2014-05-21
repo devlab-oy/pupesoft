@@ -18,10 +18,10 @@ echo "<tr><th>Kuka:</th><td>$row[kuka]</td></tr>";
 echo "<tr><th>Yhtio:</th><td>$row[kentta01]</td></tr>";
 echo "<tr><th>Osasto:</th><td>$row[kentta02]</td></tr>";
 echo "<tr><th>Tilaisuus:</th><td>$row[kentta03] $row[kentta04]</td></tr>";
-echo "<tr><th>Lis‰tiedot:</th><td><pre>$row[kentta05]</pre></td></tr>";
-echo "<tr><th>Is‰nn‰t:</th><td><pre>$row[kentta06]</pre></td></tr>";
+echo "<tr><th>Lis√§tiedot:</th><td><pre>$row[kentta05]</pre></td></tr>";
+echo "<tr><th>Is√§nn√§t:</th><td><pre>$row[kentta06]</pre></td></tr>";
 echo "<tr><th>Vieraat:</th><td><pre>$row[kentta07]</pre></td></tr>";
-echo "<tr><th>Vieraslukum‰‰r‰:</th><td><pre>$row[kentta08]</pre></td></tr>";
+echo "<tr><th>Vieraslukum√§√§r√§:</th><td><pre>$row[kentta08]</pre></td></tr>";
 echo "<tr><th>Juomatoivomus:</th><td><pre>$row[kentta10]</pre></td></tr>";
 echo "</table>";
 

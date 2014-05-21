@@ -1,11 +1,11 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require("../inc/parametrit.inc");
 
-echo "<font class='head'>".t("Factioringt‰sm‰ytys")."</font><hr>";
+echo "<font class='head'>".t("Factioringt√§sm√§ytys")."</font><hr>";
 
 if (!$vva) {
   $vva = date('Y');
@@ -38,8 +38,8 @@ if (isset($ppa) and $ppa != '' and $ppl=='') {
   $vvl = $vva;
 }
 
-echo "<tr><th>".t("Aloitusp‰iv‰")."</th><td><input type='text' name='ppa' value='$ppa' size='3'><td><input type='text' name='kka' value='$kka' size='3'></td><td><input type='text' name='vva' value='$vva' size='5'></td></tr>";
-echo "<tr><th>".t("Lopetusp‰iv‰")."</th><td><input type='text' name='ppl' value='$ppl' size='3'><td><input type='text' name='kkl' value='$kkl' size='3'></td><td><input type='text' name='vvl' value='$vvl' size='5'></td></tr>";
+echo "<tr><th>".t("Aloitusp√§iv√§")."</th><td><input type='text' name='ppa' value='$ppa' size='3'><td><input type='text' name='kka' value='$kka' size='3'></td><td><input type='text' name='vva' value='$vva' size='5'></td></tr>";
+echo "<tr><th>".t("Lopetusp√§iv√§")."</th><td><input type='text' name='ppl' value='$ppl' size='3'><td><input type='text' name='kkl' value='$kkl' size='3'></td><td><input type='text' name='vvl' value='$vvl' size='5'></td></tr>";
 echo "<tr><td class='back' colspan='4'><input type='submit' name='submit' value='Stemmuuta'></td></tr>";
 echo "</form>";
 echo "</table>";
@@ -66,11 +66,11 @@ if (isset($submit)) {
   $laskures = pupe_query($query);
   $laskurow = mysql_fetch_assoc($laskures);
 
-  echo "<tr><th>",t("L‰hteneet veloituslaskut"),"</th><td>$laskurow[possumma]</td></tr>";
+  echo "<tr><th>",t("L√§hteneet veloituslaskut"),"</th><td>$laskurow[possumma]</td></tr>";
   $lahteneet=$laskurow['possumma'];
-  echo "<tr><th>",t("L‰hteneet hyvityslaskut"),"</th><td>$laskurow[negsumma]</td></tr>";
+  echo "<tr><th>",t("L√§hteneet hyvityslaskut"),"</th><td>$laskurow[negsumma]</td></tr>";
   $lahteneet+=$laskurow['negsumma'];
-  echo "<tr><th>",t("L‰hteneet yhteens‰"),"</th><td>$lahteneet</td></tr>";
+  echo "<tr><th>",t("L√§hteneet yhteens√§"),"</th><td>$lahteneet</td></tr>";
 
   $query = "SELECT tiliointi.tilino, SUM(tiliointi.summa) summa, sum(if(lasku.tapvm=tiliointi.tapvm,tiliointi.summa,0)) summa2
             FROM tiliointi, lasku
@@ -106,10 +106,10 @@ if (isset($submit)) {
   }
 
   echo "<tr><th>",t("Suoritukset"),"</th><td>",$factoringsaamiset-$lahteneet-$kateisalennukset-$suoritustenalv,"</td></tr>";
-  echo "<tr><th>",t("K‰teisalennukset"),"</th><td>$kateisalennukset</td></tr>";
+  echo "<tr><th>",t("K√§teisalennukset"),"</th><td>$kateisalennukset</td></tr>";
   echo "<tr><th>",t("Alv"),"</th><td>$suoritustenalv</td></tr>";
   echo "<tr><th>",t("Luottotappiot"),"</th><td>$luottotappiot</td></tr>";
-  echo "<tr><th>",t("Kohdistetut yhteens‰"),"</th><td>$suoritukset</td></tr>";
+  echo "<tr><th>",t("Kohdistetut yhteens√§"),"</th><td>$suoritukset</td></tr>";
 
 
   $query = "SELECT *
@@ -146,15 +146,15 @@ if (isset($submit)) {
 
       $laskurow['summa'] = $laskurow['summa'] * -1;
 
-      echo "<tr><th>",t("Kohdistamattomat suoritukset rahatilill‰"),"</th><td>$laskurow[summa]</td></tr>";
+      echo "<tr><th>",t("Kohdistamattomat suoritukset rahatilill√§"),"</th><td>$laskurow[summa]</td></tr>";
 
       $suoritukset += $laskurow['summa'];
     }
-    else echo "<font class='error'>".t('Factoringpankkitili ei lˆydy')."</font>$factoringrow[pankki_tili]<br>";
+    else echo "<font class='error'>".t('Factoringpankkitili ei l√∂ydy')."</font>$factoringrow[pankki_tili]<br>";
   }
-  else echo "<font class='error'>".t('Factoringsopimus ei lˆydy')."</font>$sopimus<br>";
+  else echo "<font class='error'>".t('Factoringsopimus ei l√∂ydy')."</font>$sopimus<br>";
 
-  echo "<tr><th>",t("Suoritukset yhteens‰ ennen korjauksia"),"</th><td>$suoritukset</td></tr>";
+  echo "<tr><th>",t("Suoritukset yhteens√§ ennen korjauksia"),"</th><td>$suoritukset</td></tr>";
 
   $erotus = round($kplahteneet - $lahteneet,2);
 
@@ -162,7 +162,7 @@ if (isset($submit)) {
 
   $suoritukset -= $erotus;
 
-  echo "<tr><th>",t("Suoritukset yhteens‰"),"</th><td>$suoritukset</td></tr>";
+  echo "<tr><th>",t("Suoritukset yhteens√§"),"</th><td>$suoritukset</td></tr>";
 
   if ($kplahteneet!=$lahteneet) {
     $query = "SELECT tiliointi.summa summa, lasku.summa summa2, lasku.nimi, lasku.laskunro

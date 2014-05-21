@@ -1,6 +1,6 @@
 <?php
 
-// Kutsutaanko CLI:st‰
+// Kutsutaanko CLI:st√§
 $php_cli = FALSE;
 
 if (php_sapi_name() == 'cli') {
@@ -9,11 +9,11 @@ if (php_sapi_name() == 'cli') {
 
 $ok = 0;
 
-// tehd‰‰n t‰ll‰nen h‰kkyr‰ niin voidaan scripti‰ kutsua vaikka perlist‰..
+// tehd√§√§n t√§ll√§nen h√§kkyr√§ niin voidaan scripti√§ kutsua vaikka perlist√§..
 if ($php_cli) {
 
   if (!isset($argv[1]) or $argv[1] != 'perl') {
-    echo "Parametri v‰‰rin!!!\n";
+    echo "Parametri v√§√§rin!!!\n";
     die;
   }
 
@@ -38,14 +38,14 @@ if ($php_cli) {
 else {
   require ("inc/parametrit.inc");
 
-  echo "<font class='head'>Tiliotteen, LMP:n, kurssien, verkkolaskujen ja viitemaksujen k‰sittely</font><hr><br>\n<br>\n";
+  echo "<font class='head'>Tiliotteen, LMP:n, kurssien, verkkolaskujen ja viitemaksujen k√§sittely</font><hr><br>\n<br>\n";
 
   echo "<form enctype='multipart/form-data' name='sendfile' method='post'>";
   echo "<table>";
   echo "  <tr>
         <th>".t("Pankin aineisto").":</th>
         <td><input type='file' name='userfile'></td>
-        <td class='back'><input type='submit' value='".t("K‰sittele tiedosto")."'></td>
+        <td class='back'><input type='submit' value='".t("K√§sittele tiedosto")."'></td>
       </tr>";
   echo "</table>";
   echo "</form><br>\n<br>\n";
@@ -70,7 +70,7 @@ else {
 
 $forceta = FALSE;
 
-// Napataan alkuper‰inen kukarow
+// Napataan alkuper√§inen kukarow
 $tiliote_kukarow = $kukarow;
 
 // katotaan onko faili uploadattu
@@ -88,7 +88,7 @@ elseif (isset($virhe_file) and file_exists("/tmp/".basename($virhe_file))) {
 
 if ($ok == 1) {
 
-  // Otetaan koko aineisto muuttujaan jotta voidaan vertailla onko t‰m‰ jo koneella (koska joskus voi tulla esim kaksi LMP aineistoa samalle p‰iv‰lle mutta eri sis‰llˆll‰)
+  // Otetaan koko aineisto muuttujaan jotta voidaan vertailla onko t√§m√§ jo koneella (koska joskus voi tulla esim kaksi LMP aineistoa samalle p√§iv√§lle mutta eri sis√§ll√∂ll√§)
   $kokoaineisto = file_get_contents($filenimi);
 
   $fd = fopen($filenimi, "r");
@@ -119,11 +119,11 @@ if ($ok == 1) {
     fclose($fd);
   }
   else {
-    // T‰m‰ oli tiliote tai viiteaineisto
+    // T√§m√§ oli tiliote tai viiteaineisto
     $query= "LOCK TABLE tiliotedata WRITE, yriti READ, yhtio READ, sanakirja WRITE";
     $tiliotedataresult = pupe_query($query);
 
-    // Etsit‰‰n aineistonumero
+    // Etsit√§√§n aineistonumero
     $query = "SELECT max(aineisto)+1 aineisto FROM tiliotedata";
     $aineistores = pupe_query($query);
     $aineistorow = mysql_fetch_assoc($aineistores);
@@ -133,7 +133,7 @@ if ($ok == 1) {
     $virhe     = 0;
     $td_perheid = 0;
     $serc     = array("{", "|", "}", "[", "\\", "]", "'");
-    $repl     = array("‰", "ˆ", "Â", "ƒ", "÷" , "≈", " ");
+    $repl     = array("√§", "√∂", "√•", "√Ñ", "√ñ" , "√Ö", " ");
 
     while (!feof($fd)) {
       $tietue = str_replace($serc, $repl, $tietue);
@@ -155,7 +155,7 @@ if ($ok == 1) {
           $loppupvm   = $alkupvm;
           $tilino   = substr($tietue, 9, 14);
 
-          // LMP aineistojen m‰‰r‰ tiedostossa
+          // LMP aineistojen m√§√§r√§ tiedostossa
           $xlmpmaa++;
         }
 
@@ -165,7 +165,7 @@ if ($ok == 1) {
           $alkupvm  = "20".dateconv(substr($tietue,1,6));
           $loppupvm   = $alkupvm;
 
-          //Luetaan tilinumero seuraavalta rivilt‰ ja siirret‰‰n pointteri takaisin nykypaikkaan
+          //Luetaan tilinumero seuraavalta rivilt√§ ja siirret√§√§n pointteri takaisin nykypaikkaan
           $pointterin_paikka = ftell($fd);
           $tilino   = fgets($fd);
                       $onko_vipn  = (substr($tilino,0,1) == 'S') ? 1 : 0;    # tunnistetaan Danske Bankin VIPN-factoringaineisto, koska tiedostossa ei tule tilinumeroa
@@ -183,7 +183,7 @@ if ($ok == 1) {
                           if (mysql_num_rows($f_result) === 1) {
                               $f_row = mysql_fetch_assoc($f_result);
                               $tilino = $f_row['tilino'];
-                          } # jos t‰m‰ ep‰onnistuu, virheilmoitus tulee alempana kun tilinumeroa ei lˆydy
+                          } # jos t√§m√§ ep√§onnistuu, virheilmoitus tulee alempana kun tilinumeroa ei l√∂ydy
                       }
         }
 
@@ -194,7 +194,7 @@ if ($ok == 1) {
         $yritiresult = pupe_query($query);
 
         if (mysql_num_rows($yritiresult) != 1) {
-          // Kokeillaan 14 vikalla merkill‰ (Virossa esim on 18 merkkisi‰ tilinumeroita)
+          // Kokeillaan 14 vikalla merkill√§ (Virossa esim on 18 merkkisi√§ tilinumeroita)
           $query = "SELECT *
                     FROM yriti
                     WHERE right(tilino,14) = '$tilino'
@@ -203,17 +203,17 @@ if ($ok == 1) {
         }
 
         if (mysql_num_rows($yritiresult) != 1) {
-          echo "<font class='error'>".t("Tili‰ %s ei lˆytynyt", "", $tilino)."!</font><br>\n";
+          echo "<font class='error'>".t("Tili√§ %s ei l√∂ytynyt", "", $tilino)."!</font><br>\n";
           $xtyyppi = 0;
           $virhe++;
         }
         else {
           $yritirow = mysql_fetch_assoc($yritiresult);
 
-          // Korjataan viel‰ t‰m‰ jos ne jostain syyst‰ on eri
+          // Korjataan viel√§ t√§m√§ jos ne jostain syyst√§ on eri
           $tilino = $yritirow['tilino'];
 
-          // Setataan kukarow-yhtiˆ
+          // Setataan kukarow-yhti√∂
           $kukarow["yhtio"] = $yritirow["yhtio"];
         }
 
@@ -242,7 +242,7 @@ if ($ok == 1) {
         $tikaalku  = (int) date('Ymd', mktime(0,0,0,$kk1,$pp1,$vv1));
         $tikaloppu = (int) date('Ymd', mktime(0,0,0,$kk2,$pp2,$vv2));
 
-        // Onko t‰m‰ aineisto jo ajettu?
+        // Onko t√§m√§ aineisto jo ajettu?
         $query = "SELECT *
                   FROM tiliotedata
                   WHERE tilino = '$tilino'
@@ -254,10 +254,10 @@ if ($ok == 1) {
         if (mysql_num_rows($tiliotedatares) > 0) {
           $tiliotedatarow = mysql_fetch_assoc($tiliotedatares);
 
-          // OP-pankki toimittaa useita LMP aineistoja per p‰iv‰, eli tarkistetaan onko juuri t‰m‰ aineisto ajettu koneelle
-          // Koodataan t‰ss‰ vaiheessa vain LMP:lle, mutta mik‰‰n ei est‰ etteikˆ saman tsekin vois tehd‰ myˆs vaikka tiliotteille jos joku pankki toimittaisi yhden p‰iv‰n otteet useassa osassa.
+          // OP-pankki toimittaa useita LMP aineistoja per p√§iv√§, eli tarkistetaan onko juuri t√§m√§ aineisto ajettu koneelle
+          // Koodataan t√§ss√§ vaiheessa vain LMP:lle, mutta mik√§√§n ei est√§ etteik√∂ saman tsekin vois tehd√§ my√∂s vaikka tiliotteille jos joku pankki toimittaisi yhden p√§iv√§n otteet useassa osassa.
           if ($xtyyppi == 2) {
-            // Group concatissa tulee kaikki t‰n p‰iv‰n LMP:t
+            // Group concatissa tulee kaikki t√§n p√§iv√§n LMP:t
             $query = "SELECT group_concat(tieto SEPARATOR '') kantaaineisto
                       FROM tiliotedata
                       WHERE tilino = '$tilino'
@@ -267,13 +267,13 @@ if ($ok == 1) {
             $tiliotedatares = pupe_query($query);
             $tiliotedatarow = mysql_fetch_assoc($tiliotedatares);
 
-            // Otetaan kaikki failissa olevat LMP:t arrayseen. (Nollaindeksiss‰ tyhj‰‰...)
+            // Otetaan kaikki failissa olevat LMP:t arrayseen. (Nollaindeksiss√§ tyhj√§√§...)
             $distinct_aineistot = explode("T03", str_replace($serc, $repl, $kokoaineisto));
 
             if (trim($tiliotedatarow["kantaaineisto"]) != "") {
               for ($xlmpmaa_i = $xlmpmaa; $xlmpmaa_i < count($distinct_aineistot); $xlmpmaa_i++) {
                 if (trim($distinct_aineistot[$xlmpmaa_i]) != "" and strpos(trim($tiliotedatarow["kantaaineisto"]), trim($distinct_aineistot[$xlmpmaa_i])) !== FALSE) {
-                  echo "<font class='error'>VIRHE: T‰m‰ aineisto on jo aiemmin k‰sitelty!<br>\n<br>\nTili: $tilino<br>\nAjalta: $alkupvm - $loppupvm<br>\nYritys: $yritirow[yhtio]</font><br>\n<br>\n";
+                  echo "<font class='error'>VIRHE: T√§m√§ aineisto on jo aiemmin k√§sitelty!<br>\n<br>\nTili: $tilino<br>\nAjalta: $alkupvm - $loppupvm<br>\nYritys: $yritirow[yhtio]</font><br>\n<br>\n";
 
                   $xtyyppi=0;
                   $virhe++;
@@ -281,9 +281,9 @@ if ($ok == 1) {
               }
             }
 
-            // Tutkitaan, ettei sama aineisto ole montaa kertaa t‰ss‰ failissa
+            // Tutkitaan, ettei sama aineisto ole montaa kertaa t√§ss√§ failissa
             if (count($distinct_aineistot) != count(array_unique($distinct_aineistot))) {
-              echo "<font class='error'>VIRHE: Aineisto esiintyy tiedostossa moneen kertaan.<br>\nTiedosto viallinen, ei voida jatkaa, ota yhteytt‰ helpdeskiin! (Tili: $tilino / Pvm: $alkupvm / Yhtiˆ: $yritirow[yhtio])</font><br>\n<br>\n";
+              echo "<font class='error'>VIRHE: Aineisto esiintyy tiedostossa moneen kertaan.<br>\nTiedosto viallinen, ei voida jatkaa, ota yhteytt√§ helpdeskiin! (Tili: $tilino / Pvm: $alkupvm / Yhti√∂: $yritirow[yhtio])</font><br>\n<br>\n";
 
               $xtyyppi=0;
               $virhe++;
@@ -291,13 +291,13 @@ if ($ok == 1) {
           }
           else {
             if ($tiliotedatarow["aineisto"] == $aineistorow["aineisto"]) {
-              echo "<font class='error'>VIRHE: Aineisto esiintyy tiedostossa moneen kertaan.<br>\nTiedosto viallinen, ei voida jatkaa, ota yhteytt‰ helpdeskiin! (Tili: $tilino / Pvm: $alkupvm / Yhtiˆ: $yritirow[yhtio])</font><br>\n";
+              echo "<font class='error'>VIRHE: Aineisto esiintyy tiedostossa moneen kertaan.<br>\nTiedosto viallinen, ei voida jatkaa, ota yhteytt√§ helpdeskiin! (Tili: $tilino / Pvm: $alkupvm / Yhti√∂: $yritirow[yhtio])</font><br>\n";
 
               $xtyyppi=0;
               $virhe++;
             }
             elseif (!$forceta)  {
-              echo "<font class='error'>VIRHE: T‰m‰ aineisto on jo aiemmin k‰sitelty! (Tili: $tilino / Pvm: $alkupvm / Yhtiˆ: $yritirow[yhtio])</font><br>\n<br>\n";
+              echo "<font class='error'>VIRHE: T√§m√§ aineisto on jo aiemmin k√§sitelty! (Tili: $tilino / Pvm: $alkupvm / Yhti√∂: $yritirow[yhtio])</font><br>\n<br>\n";
 
               if (!$php_cli) {
                 list($usec, $sec) = explode(' ', microtime());
@@ -308,7 +308,7 @@ if ($ok == 1) {
 
                 echo "<form method='post' onSubmit='return verify();'>";
                 echo "<input type='hidden' name='virhe_file' value='$tmpfile'>
-                    <input type='submit' value='".t("K‰sittele aineisto vaikka kyseisen p‰iv‰n/tilin aineisto on jo k‰sitelty")."'>";
+                    <input type='submit' value='".t("K√§sittele aineisto vaikka kyseisen p√§iv√§n/tilin aineisto on jo k√§sitelty")."'>";
                 echo "</form><br>\n<br>\n";
               }
 
@@ -326,7 +326,7 @@ if ($ok == 1) {
         $tsekpvm = (int) "20".substr($tietue, 30, 6);
 
         if ($tsekpvm < $oresalku or $tsekpvm > $oresloppu or $tsekpvm < $myrealku or $tsekpvm > $myreloppu or $tsekpvm < $tikaalku or $tsekpvm > $tikaloppu) {
-          echo "<font class='error'>VIRHE: Aineistossa on tapahtuma suljetulle kaudelle! (Tili: $tilino / Pvm: $tsekpvm / Yhtiˆ: $yritirow[yhtio])</font><br>\n";
+          echo "<font class='error'>VIRHE: Aineistossa on tapahtuma suljetulle kaudelle! (Tili: $tilino / Pvm: $tsekpvm / Yhti√∂: $yritirow[yhtio])</font><br>\n";
 
           $xtyyppi=0;
           $virhe++;
@@ -336,7 +336,7 @@ if ($ok == 1) {
         $taso = substr($tietue, 187, 1);
 
         if (($taso == ' ') and ((!is_numeric($arkistotunnari) and trim($arkistotunnari) != "") or (is_numeric($arkistotunnari) and (int) $arkistotunnari != 0))) {
-          // Katsotaan lˆytyykˆ t‰ll‰ tunnuksella suoritus
+          // Katsotaan l√∂ytyyk√∂ t√§ll√§ tunnuksella suoritus
           $query = "SELECT alku
                     FROM tiliotedata
                     WHERE yhtio = '$yritirow[yhtio]'
@@ -349,7 +349,7 @@ if ($ok == 1) {
           if (mysql_num_rows($vchkres) > 0) {
             $vchkrow = mysql_fetch_assoc($vchkres);
 
-            echo "<font class='error'>VIRHE: Tiliotetapahtuma arkistointitunnuksella: '$arkistotunnari' lˆytyy jo j‰rjestelm‰st‰! (Tili: $tilino / Pvm: $vchkrow[alku] / Yhtiˆ: $yritirow[yhtio])</font><br>\n";
+            echo "<font class='error'>VIRHE: Tiliotetapahtuma arkistointitunnuksella: '$arkistotunnari' l√∂ytyy jo j√§rjestelm√§st√§! (Tili: $tilino / Pvm: $vchkrow[alku] / Yhti√∂: $yritirow[yhtio])</font><br>\n";
 
             $xtyyppi=0;
             $virhe++;
@@ -363,11 +363,11 @@ if ($ok == 1) {
         $taso = substr($tietue, 187, 1);
         $tsekpvm = substr($tietue, 42, 6);
 
-        if ($taso == '0') $turvapvm = $tsekpvm; // Osuuspankki ei l‰het‰ p‰iv‰yst‰ kuin t‰‰ll‰
+        if ($taso == '0') $turvapvm = $tsekpvm; // Osuuspankki ei l√§het√§ p√§iv√§yst√§ kuin t√§√§ll√§
         if ($pvm == '000000') $tsekpvm = $turvapvm;
 
         if ($tsekpvm < $oresalku or $tsekpvm > $oresloppu) {
-          echo "<font class='error'>VIRHE: Aineistossa on tapahtuma suljetulle kaudelle! (Tili: $tilino / Pvm: $tsekpvm / Yhtiˆ: $yritirow[yhtio])</font><br>\n";
+          echo "<font class='error'>VIRHE: Aineistossa on tapahtuma suljetulle kaudelle! (Tili: $tilino / Pvm: $tsekpvm / Yhti√∂: $yritirow[yhtio])</font><br>\n";
 
           $xtyyppi=0;
           $virhe++;
@@ -381,7 +381,7 @@ if ($ok == 1) {
         $tsekpvm = (int) "20".substr($tietue, 15, 6);
 
         if ($tsekpvm < $myrealku or $tsekpvm > $myreloppu) {
-          echo "<font class='error'>VIRHE: Aineistossa on viitesuoritus suljetulle kaudelle! (Tili: $tilino / Pvm: $tsekpvm / Yhtiˆ: $yritirow[yhtio])</font><br>\n";
+          echo "<font class='error'>VIRHE: Aineistossa on viitesuoritus suljetulle kaudelle! (Tili: $tilino / Pvm: $tsekpvm / Yhti√∂: $yritirow[yhtio])</font><br>\n";
 
           $xtyyppi=0;
           $virhe++;
@@ -390,7 +390,7 @@ if ($ok == 1) {
         $arkistotunnari = substr($tietue, 27, 16);
 
         if ((!is_numeric($arkistotunnari) and trim($arkistotunnari) != "") or (is_numeric($arkistotunnari) and (int) $arkistotunnari != 0)) {
-          // Katsotaan lˆytyykˆ t‰ll‰ tunnuksella suoritus
+          // Katsotaan l√∂ytyyk√∂ t√§ll√§ tunnuksella suoritus
           $query = "SELECT alku
                     FROM tiliotedata
                     WHERE yhtio = '$yritirow[yhtio]'
@@ -403,7 +403,7 @@ if ($ok == 1) {
           if (mysql_num_rows($vchkres) > 0) {
             $vchkrow = mysql_fetch_assoc($vchkres);
 
-            echo "<font class='error'>VIRHE: Viitesuoritus arkistointitunnuksella: '$arkistotunnari' lˆytyy jo j‰rjestelm‰st‰! (Tili: $tilino / Pvm: $vchkrow[alku] / Yhtiˆ: $yritirow[yhtio])</font><br>\n";
+            echo "<font class='error'>VIRHE: Viitesuoritus arkistointitunnuksella: '$arkistotunnari' l√∂ytyy jo j√§rjestelm√§st√§! (Tili: $tilino / Pvm: $vchkrow[alku] / Yhti√∂: $yritirow[yhtio])</font><br>\n";
 
             $xtyyppi=0;
             $virhe++;
@@ -417,7 +417,7 @@ if ($ok == 1) {
         $tiliotedataresult = pupe_query($query);
         $tiliote_id = mysql_insert_id();
 
-        // P‰ivitet‰‰n perheid
+        // P√§ivitet√§√§n perheid
         if (substr($tietue, 0, 3) != "T11" and substr($tietue, 0, 3) != "T81") {
           $td_perheid = $tiliote_id;
         }
@@ -435,9 +435,9 @@ if ($ok == 1) {
 
     fclose($fd);
 
-    //Jos meill‰ tuli virheit‰
+    //Jos meill√§ tuli virheit√§
     if ($virhe > 0) {
-      echo "<br>\n<font class='error'>".t("Aineistoa ei tallennettu j‰rjestelm‰‰n").".</font>";
+      echo "<br>\n<font class='error'>".t("Aineistoa ei tallennettu j√§rjestelm√§√§n").".</font>";
 
       //Poistetaan aineistot tiliotedatasta
       $query = "DELETE FROM tiliotedata WHERE aineisto ='$aineistorow[aineisto]'";
@@ -453,7 +453,7 @@ if ($ok == 1) {
     $query = "UNLOCK TABLES";
     $tiliotedataresult = pupe_query($query);
 
-    // K‰sitell‰‰n uudet tietueet
+    // K√§sitell√§√§n uudet tietueet
     $query = "SELECT *
               FROM tiliotedata
               WHERE aineisto = '$aineistorow[aineisto]'
@@ -464,7 +464,7 @@ if ($ok == 1) {
     $tilioterivimaara  = mysql_num_rows($tiliotedataresult);
 
 
-    // Haetaan kannan isoin lasku.tunnus, nin voidaan tehd‰n sanity-checki EndToEndId:lle.
+    // Haetaan kannan isoin lasku.tunnus, nin voidaan tehd√§n sanity-checki EndToEndId:lle.
     $query = "SELECT max(tunnus) maxEndToEndId
               FROM lasku";
     $meteidres = pupe_query($query);
@@ -483,7 +483,7 @@ if ($ok == 1) {
         require("inc/viitemaksut.inc");
       }
 
-      // merkataan t‰m‰ tiliotedatarivi k‰sitellyksi
+      // merkataan t√§m√§ tiliotedatarivi k√§sitellyksi
       $query = "UPDATE tiliotedata
                 SET kasitelty = now()
                 WHERE tunnus = '$tiliotedatarow[tunnus]'";
@@ -514,7 +514,7 @@ if ($ok == 1) {
 
     if ($xtyyppi == 3) {
 
-      # T‰ss‰ tarvitaan kukarow[yhtio], joten ajetaan t‰m‰ kaikille firmoille
+      # T√§ss√§ tarvitaan kukarow[yhtio], joten ajetaan t√§m√§ kaikille firmoille
       $query    = "SELECT yhtio from yhtio";
       $yhtiores = pupe_query($query);
 
@@ -523,7 +523,7 @@ if ($ok == 1) {
         // Setataan yhtiorow
         $yhtiorow = hae_yhtion_parametrit($yhtiorow['yhtio']);
 
-        // Setataan kukarow-yhtiˆ
+        // Setataan kukarow-yhti√∂
         $kukarow["yhtio"] = $yhtiorow["yhtio"];
 
         require("inc/viitemaksut_kohdistus.inc");
@@ -536,7 +536,7 @@ if ($ok == 1) {
 }
 
 if (!$php_cli) {
-  // Palautetaan alkuper‰inen kukarow
+  // Palautetaan alkuper√§inen kukarow
   $kukarow = $tiliote_kukarow;
 
   require("inc/footer.inc");

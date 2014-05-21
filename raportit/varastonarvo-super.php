@@ -1,9 +1,9 @@
 <?php
 
-// Ei k‰ytet‰ pakkausta
+// Ei k√§ytet√§ pakkausta
 $compression = FALSE;
 
-// Kutsutaanko CLI:st‰
+// Kutsutaanko CLI:st√§
 $php_cli = FALSE;
 
 if (php_sapi_name() == 'cli') {
@@ -15,7 +15,7 @@ if (isset($_POST["tee"])) {
   if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 }
 
-// T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta
+// T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta
 $useslave = 1;
 
 if (!$php_cli) {
@@ -70,7 +70,7 @@ $lisa = "";
 
 if (!$php_cli) {
 
-  echo "   <!-- Enabloidaan shiftill‰ checkboxien chekkaus //-->
+  echo "   <!-- Enabloidaan shiftill√§ checkboxien chekkaus //-->
       <script src='../inc/checkboxrange.js'></script>
 
       <script language='javascript' type='text/javascript'>
@@ -90,7 +90,7 @@ if (!$php_cli) {
 
   echo "<font class='head'>".t("Varastonarvo tuotteittain")."</font><hr>";
 
-  // piirrell‰‰n formi
+  // piirrell√§√§n formi
   echo "<form name='formi' action='varastonarvo-super.php' method='post' autocomplete='OFF'>";
   echo "<input type='hidden' name='supertee' value='RAPORTOI'>";
 
@@ -120,11 +120,11 @@ if (!$php_cli) {
 
   echo "<br><table>
     <tr>
-    <th>".t("Listaa vain tuotteet, jotka ei kuulu mihink‰‰n osastoon")."</th>
+    <th>".t("Listaa vain tuotteet, jotka ei kuulu mihink√§√§n osastoon")."</th>
     <td><input type='checkbox' name='osasto_tyhjat' value='tyhjat' $rukOchk></td>
     </tr>
     <tr>
-    <th>".t("Listaa vain tuotteet, jotka ei kuulu mihink‰‰n tuoteryhm‰‰n")."</th>
+    <th>".t("Listaa vain tuotteet, jotka ei kuulu mihink√§√§n tuoteryhm√§√§n")."</th>
     <td><input type='checkbox' name='tuoteryhma_tyhjat' value='tyhjat' $rukTchk></td>
     </tr>
     <tr>
@@ -151,9 +151,9 @@ if (!$php_cli) {
   echo "<tr>";
   echo "<th valign=top>",t("Tuoterajaus"),":</th><td>";
   echo "<select name='epakur'>";
-  echo "<option value='kaikki'$epakur_chk1>",t("N‰yt‰ kaikki tuotteet"),"</option>";
-  echo "<option value='epakur'$epakur_chk2>",t("N‰yt‰ vain ep‰kurantit tuotteet"),"</option>";
-  echo "<option value='ei_epakur'$epakur_chk3>",t("N‰yt‰ varastonarvoon vaikuttavat tuotteet"),"</option>";
+  echo "<option value='kaikki'$epakur_chk1>",t("N√§yt√§ kaikki tuotteet"),"</option>";
+  echo "<option value='epakur'$epakur_chk2>",t("N√§yt√§ vain ep√§kurantit tuotteet"),"</option>";
+  echo "<option value='ei_epakur'$epakur_chk3>",t("N√§yt√§ varastonarvoon vaikuttavat tuotteet"),"</option>";
   echo "</select>";
   echo "</td></tr>";
 
@@ -180,10 +180,10 @@ if (!$php_cli) {
   echo "<th valign=top>",t("Saldorajaus"),":</th>";
   echo "<td>
       <select name='tyyppi'>
-      <option value='A' $sel1>".t("N‰ytet‰‰n tuotteet joilla on saldoa")."</option>
-      <option value='B' $sel2>".t("N‰ytet‰‰n tuotteet joilla ei ole saldoa")."</option>
-      <option value='C' $sel3>".t("N‰ytet‰‰n kaikki tuotteet")."</option>
-      <option value='D' $sel4>".t("N‰ytet‰‰n miinus-saldolliset tuotteet")."</option>
+      <option value='A' $sel1>".t("N√§ytet√§√§n tuotteet joilla on saldoa")."</option>
+      <option value='B' $sel2>".t("N√§ytet√§√§n tuotteet joilla ei ole saldoa")."</option>
+      <option value='C' $sel3>".t("N√§ytet√§√§n kaikki tuotteet")."</option>
+      <option value='D' $sel4>".t("N√§ytet√§√§n miinus-saldolliset tuotteet")."</option>
       </select>
       </td>";
   echo "</tr>";
@@ -204,8 +204,8 @@ if (!$php_cli) {
   echo "<td>
       <select name='varatturajaus'>
       <option value=''>".t("Ei rajausta")."</option>
-      <option value='O' $sel1>".t("N‰ytet‰‰n tuotteet joilla on varauksia")."</option>
-      <option value='E' $sel2>".t("N‰ytet‰‰n tuotteet joilla ei ole varauksia")."</option>
+      <option value='O' $sel1>".t("N√§ytet√§√§n tuotteet joilla on varauksia")."</option>
+      <option value='E' $sel2>".t("N√§ytet√§√§n tuotteet joilla ei ole varauksia")."</option>
       </select>
       </td>";
   echo "</tr>";
@@ -236,7 +236,7 @@ if (!$php_cli) {
       <option value='S'   $sel1>".t("Varastonarvo varastoittain/tuotteittain")."</option>
       <option value='P'   $sel2>".t("Varastonarvo varastopaikoittain")."</option>
       <option value='T'   $sel3>".t("Varastonarvo tuotteittain")."</option>
-      <option value='TRY' $sel4>".t("Varastonarvo tuoteryhmitt‰in")."</option>
+      <option value='TRY' $sel4>".t("Varastonarvo tuoteryhmitt√§in")."</option>
       </select>";
 
   if ($yhtiorow['tuotteiden_jarjestys_raportoinnissa'] == 'V') {
@@ -246,7 +246,7 @@ if (!$php_cli) {
       $sel = 'checked';
     }
 
-    echo "<br><br><input type='checkbox' name='variaatiosummaus' value='ON' $sel/>".t("N‰yt‰ tuotteet variaation, v‰rin ja koon mukaan");
+    echo "<br><br><input type='checkbox' name='variaatiosummaus' value='ON' $sel/>".t("N√§yt√§ tuotteet variaation, v√§rin ja koon mukaan");
   }
 
   echo "</td>";
@@ -267,7 +267,7 @@ if (!$php_cli) {
 
   echo "</select></td></tr>";
 
-  echo "<tr><th>",t("N‰yt‰ kiertonopeus sek‰ viimeisin myynti ja kulutus"),":</th>";
+  echo "<tr><th>",t("N√§yt√§ kiertonopeus sek√§ viimeisin myynti ja kulutus"),":</th>";
 
   echo "<td>";
 
@@ -314,11 +314,11 @@ if (!$php_cli) {
     $piilotetut_select = "";
   }
 
-  echo "<br><input type='checkbox' {$piilotetut_select} name='piilotetut_varastot' onclick='submit();' /> ".t('N‰yt‰ poistetut varastot');
-  echo "</td><td class='back' valign='top'>".t('Saat kaikki varastot jos et valitse mit‰‰n').".</td></tr>";
+  echo "<br><input type='checkbox' {$piilotetut_select} name='piilotetut_varastot' onclick='submit();' /> ".t('N√§yt√§ poistetut varastot');
+  echo "</td><td class='back' valign='top'>".t('Saat kaikki varastot jos et valitse mit√§√§n').".</td></tr>";
 
   echo "<tr>";
-  echo "<th>".t("Syˆt‰ vvvv-kk-pp").":</th>";
+  echo "<th>".t("Sy√∂t√§ vvvv-kk-pp").":</th>";
   echo "<td><input type='text' name='vv' size='7' value='$vv'><input type='text' name='kk' size='5' value='$kk'><input type='text' name='pp' size='5' value='$pp'></td>";
   echo "</tr>";
 
@@ -327,7 +327,7 @@ if (!$php_cli) {
 
   echo "<tr>";
   echo "<th valign='top'>".t("Varastonarvorajaus").":</th>";
-  echo "<td>".t("Alaraja").": <input type='text' name='alaraja' size='7' value='$alaraja'><br>".t("Yl‰raja").": <input type='text' name='ylaraja' size='7' value='$ylaraja'></td>";
+  echo "<td>".t("Alaraja").": <input type='text' name='alaraja' size='7' value='$alaraja'><br>".t("Yl√§raja").": <input type='text' name='ylaraja' size='7' value='$ylaraja'></td>";
   echo "</tr>";
 
   if (!isset($tuotteet_lista)) $tuotteet_lista = "";
@@ -341,7 +341,7 @@ if (!$php_cli) {
   echo "</form><br><br>";
 }
 
-// h‰rski oikeellisuustzekki
+// h√§rski oikeellisuustzekki
 if ($pp == "00" or $kk == "00" or $vv == "0000") $tee = $pp = $kk = $vv = "";
 
 $varastot2 = array();
@@ -358,7 +358,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
     $result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
 
     if (mysql_num_rows($result) == 0) {
-      echo "<b>".t("K‰ytt‰j‰n yritys ei lˆydy")."! ($kukarow[yhtio])";
+      echo "<b>".t("K√§ytt√§j√§n yritys ei l√∂ydy")."! ($kukarow[yhtio])";
       exit;
     }
 
@@ -376,7 +376,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
         $yhtion_parametritrow['hintapyoristys'] = 2;
       }
 
-      // lis‰t‰‰n kaikki yhtiorow arrayseen
+      // lis√§t√§√§n kaikki yhtiorow arrayseen
       foreach ($yhtion_parametritrow as $parametrit_nimi => $parametrit_arvo) {
         $yhtiorow[$parametrit_nimi] = $parametrit_arvo;
       }
@@ -412,7 +412,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
                 tuotepaikat.hyllytaso";
   }
 
-  ##################  Sorttausj‰rjestykset ##################
+  ##################  Sorttausj√§rjestykset ##################
   $order_lisa    = "";
   $jarjestys_sel  = "";
   $jarjestys_join = "";
@@ -422,7 +422,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
     // Order by lisa
     $order_extra = 'variaatio, vari, koko';
 
-    // queryyn muutoksia jos lajitellaan n‰in
+    // queryyn muutoksia jos lajitellaan n√§in
     $jarjestys_sel = ",   ifnull(t1.selite, tuote.tuoteno) as variaatio,
                 t2.selite as vari,
                 if(t3.selite is null OR t3.selite='', 'NOSIZE', t3.selite) kokonimi,
@@ -502,18 +502,18 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       $varatut_tuotteet = $vararow["varatut_tuotteet"];
     }
 
-    // N‰ytet‰‰n vain varatut tuotteet
+    // N√§ytet√§√§n vain varatut tuotteet
     if ($varatturajaus == "O") {
       $tuote_lisa .= " and tuote.tuoteno in ($varatut_tuotteet) ";
     }
 
-    // N‰ytet‰‰n vain EI varatut tuotteet
+    // N√§ytet√§√§n vain EI varatut tuotteet
     if ($varatturajaus == "E") {
       $tuote_lisa .= " and tuote.tuoteno not in ($varatut_tuotteet) ";
     }
   }
 
-  ################## lis‰ehtoja ##################
+  ################## lis√§ehtoja ##################
   $where_lisa  = "";
 
   if (isset($tuoteryhma_tyhjat) and $tuoteryhma_tyhjat == "tyhjat" and isset($osasto_tyhjat) and $osasto_tyhjat == "tyhjat") {
@@ -534,12 +534,12 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
   }
 
   if (!$php_cli) {
-    force_echo("Haetaan k‰sitelt‰vien tuotteiden varastopaikat historiasta.");
+    force_echo("Haetaan k√§sitelt√§vien tuotteiden varastopaikat historiasta.");
   }
 
   $query = "";
 
-  // Jos haetaan t‰m‰n p‰iv‰n varastonarvoa, tehd‰‰n hommat v‰h‰n kevyemmin (ei tarvii tutkia historiasta mit‰‰n)
+  // Jos haetaan t√§m√§n p√§iv√§n varastonarvoa, tehd√§√§n hommat v√§h√§n kevyemmin (ei tarvii tutkia historiasta mit√§√§n)
   if (date("Y-m-d") != $vv."-".$kk."-".$pp) {
     // haetaan kaikki distinct tapahtumat
     $query = "(SELECT DISTINCT
@@ -629,7 +629,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
     $try_result = pupe_query($query);
 
     $try_array = array();
-    $try_array[0] = t("Ei tuoteryhm‰‰");
+    $try_array[0] = t("Ei tuoteryhm√§√§");
 
     while ($row = mysql_fetch_assoc($try_result)) {
       $try_array[$row["selite"]] = $row["selitetark"];
@@ -651,7 +651,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
   }
 
   $lask   = 0;
-  $varvo  = 0; // t‰h‰n summaillaan
+  $varvo  = 0; // t√§h√§n summaillaan
   $bvarvo = 0; // bruttovarastonarvo
 
   if ($variaatiosummaus != "") {
@@ -707,7 +707,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
 
   $worksheet->writeString($excelrivi, $excelsarake, t("Osasto"),         $format_bold);
   $excelsarake++;
-  $worksheet->writeString($excelrivi, $excelsarake, t("Tuoteryhm‰"),       $format_bold);
+  $worksheet->writeString($excelrivi, $excelsarake, t("Tuoteryhm√§"),       $format_bold);
   $excelsarake++;
   $worksheet->writeString($excelrivi, $excelsarake, t("Tuoteno"),       $format_bold);
   $excelsarake++;
@@ -746,15 +746,15 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       $excelsarake++;
     }
 
-    $worksheet->writeString($excelrivi, $excelsarake, t("Ep‰kurantti 25%"),   $format_bold);
+    $worksheet->writeString($excelrivi, $excelsarake, t("Ep√§kurantti 25%"),   $format_bold);
     $excelsarake++;
-    $worksheet->writeString($excelrivi, $excelsarake, t("Ep‰kurantti 50%"),   $format_bold);
+    $worksheet->writeString($excelrivi, $excelsarake, t("Ep√§kurantti 50%"),   $format_bold);
     $excelsarake++;
-    $worksheet->writeString($excelrivi, $excelsarake, t("Ep‰kurantti 75%"),   $format_bold);
+    $worksheet->writeString($excelrivi, $excelsarake, t("Ep√§kurantti 75%"),   $format_bold);
     $excelsarake++;
-    $worksheet->writeString($excelrivi, $excelsarake, t("Ep‰kurantti 100%"),   $format_bold);
+    $worksheet->writeString($excelrivi, $excelsarake, t("Ep√§kurantti 100%"),   $format_bold);
     $excelsarake++;
-    $worksheet->writeString($excelrivi, $excelsarake, t("Viimeinen hankintap‰iv‰"),   $format_bold);
+    $worksheet->writeString($excelrivi, $excelsarake, t("Viimeinen hankintap√§iv√§"),   $format_bold);
   }
 
   $excelrivi++;
@@ -771,7 +771,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
     }
   }
 
-  // Loopataan jos t‰‰ on true
+  // Loopataan jos t√§√§ on true
   $do = TRUE;
 
   do {
@@ -799,10 +799,10 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       $mistavarastosta = " and varastopaikat.tunnus = '$row[varastotunnus]' ";
     }
 
-    // Jos tuote on sarjanumeroseurannassa niin varastonarvo lasketaan yksilˆiden ostohinnoista (ostetut yksilˆt jotka eiv‰t viel‰ ole laskutettu)
+    // Jos tuote on sarjanumeroseurannassa niin varastonarvo lasketaan yksil√∂iden ostohinnoista (ostetut yksil√∂t jotka eiv√§t viel√§ ole laskutettu)
     if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "G") {
 
-      // jos summaustaso on per paikka, otetaan varastonarvo vain silt‰ paikalta
+      // jos summaustaso on per paikka, otetaan varastonarvo vain silt√§ paikalta
       if ($summaustaso == "P") {
         $summaus_lisa = "  and sarjanumeroseuranta.hyllyalue = '$row[hyllyalue]'
                   and sarjanumeroseuranta.hyllynro  = '$row[hyllynro]'
@@ -833,7 +833,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
 
       while ($vararvorow = mysql_fetch_assoc($vararvores)) {
 
-        // Jos meill‰ on er‰numeroseuranta, niin otetaan er‰n koko sarjanumeroseurannan takaa. Sarjanumeroseurannassa aina yksi.
+        // Jos meill√§ on er√§numeroseuranta, niin otetaan er√§n koko sarjanumeroseurannan takaa. Sarjanumeroseurannassa aina yksi.
         if ($row["sarjanumeroseuranta"] == "G") {
           $sarjanumeroseuranta_kpl = $vararvorow["era_kpl"];
         }
@@ -841,7 +841,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
           $sarjanumeroseuranta_kpl = 1;
         }
 
-        // Jos meill‰ in-out arvoinen tuote, meid‰n pit‰‰ laskea varastonarvo ostohinnan mukaan
+        // Jos meill√§ in-out arvoinen tuote, meid√§n pit√§√§ laskea varastonarvo ostohinnan mukaan
         $varaston_arvo += sarjanumeron_ostohinta("tunnus", $vararvorow["tunnus"], "", "$vv-$kk-$pp 23:59:59") * $sarjanumeroseuranta_kpl;
         $bruttovaraston_arvo = $varaston_arvo;
         $kpl += $sarjanumeroseuranta_kpl; // saldo
@@ -849,7 +849,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
     }
     else {
 
-      // jos summaustaso on per paikka, otetaan varastonarvo vain silt‰ paikalta
+      // jos summaustaso on per paikka, otetaan varastonarvo vain silt√§ paikalta
       if ($summaustaso == "P") {
         $summaus_lisa = "  and tuotepaikat.hyllyalue = '$row[hyllyalue]'
                   and tuotepaikat.hyllynro = '$row[hyllynro]'
@@ -882,7 +882,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       $bruttovaraston_arvo = (float) $vararvorow["bruttovarasto"];
     }
 
-    // jos summaustaso on per paikka, otetaan varastonmuutos vain silt‰ paikalta
+    // jos summaustaso on per paikka, otetaan varastonmuutos vain silt√§ paikalta
     if ($summaustaso == "P") {
       $summaus_lisa = "  and tapahtuma.hyllyalue = '$row[hyllyalue]'
                 and tapahtuma.hyllynro  = '$row[hyllynro]'
@@ -898,8 +898,8 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
     $bmuutoshinta   = $bruttovaraston_arvo;
     $edlaadittu   = '';
 
-    // tuotteen muutos varastossa annetun p‰iv‰n j‰lkeen
-    // jos samalle p‰iv‰lle on ep‰kuranttitapahtumia ja muita tapahtumia (esim. inventointi), niin bruttovarastonarvo heitt‰‰, koska ep‰kuranttitapahtuma on t‰llˆin p‰iv‰n eka tapahtuma (huom. 00:00:00)
+    // tuotteen muutos varastossa annetun p√§iv√§n j√§lkeen
+    // jos samalle p√§iv√§lle on ep√§kuranttitapahtumia ja muita tapahtumia (esim. inventointi), niin bruttovarastonarvo heitt√§√§, koska ep√§kuranttitapahtuma on t√§ll√∂in p√§iv√§n eka tapahtuma (huom. 00:00:00)
     if (date("Y-m-d") != $vv."-".$kk."-".$pp) {
       $query = "SELECT
                 sum(kpl * if(laji in ('tulo', 'valmistus'), kplhinta, hinta)) muutoshinta,
@@ -920,7 +920,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
                  and tapahtuma.laadittu  > '$vv-$kk-$pp 23:59:59'
                 and tapahtuma.hyllyalue != ''
                 and tapahtuma.hyllynro  != ''
-                and tapahtuma.laji      != 'Ep‰kurantti'
+                and tapahtuma.laji      != 'Ep√§kurantti'
                 $summaus_lisa
                 GROUP BY tapahtuma.laadittu
                 ORDER BY tapahtuma.laadittu DESC, tapahtuma.tunnus desc";
@@ -937,19 +937,19 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
         mysql_data_seek($muutosres, 0);
       }
 
-      // Ep‰kurantit haetaan tapahtumista erikseen, koska niill‰ on hyllyalue, hyllynro, hyllytaso ja hyllyvali tyhj‰‰
+      // Ep√§kurantit haetaan tapahtumista erikseen, koska niill√§ on hyllyalue, hyllynro, hyllytaso ja hyllyvali tyhj√§√§
       $query = "SELECT sum($muutoskpl * hinta) muutoshinta
                 FROM tapahtuma use index (yhtio_tuote_laadittu)
                 WHERE tapahtuma.yhtio  = '$kukarow[yhtio]'
                 and tapahtuma.tuoteno  = '{$row['tuoteno']}'
                 and tapahtuma.laadittu >= '$uusintapahtuma'
-                and tapahtuma.laji     = 'Ep‰kurantti'";
+                and tapahtuma.laji     = 'Ep√§kurantti'";
       $epares = pupe_query($query);
 
       if (mysql_num_rows($epares) > 0) {
         $eparow = mysql_fetch_assoc($epares);
 
-        // Ep‰kuranteissa saldo ei muutu!!! eli ei v‰hennet‰ $muutoskpl
+        // Ep√§kuranteissa saldo ei muutu!!! eli ei v√§hennet√§ $muutoskpl
         $muutoshinta += $eparow['muutoshinta'];
       }
 
@@ -957,20 +957,20 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
         while ($muutosrow = mysql_fetch_assoc($muutosres)) {
 
           if ($edlaadittu != '') {
-            // Ep‰kurantit haetaan tapahtumista erikseen, koska niill‰ on hyllyalue, hyllynro, hyllytaso ja hyllyvali tyhj‰‰
+            // Ep√§kurantit haetaan tapahtumista erikseen, koska niill√§ on hyllyalue, hyllynro, hyllytaso ja hyllyvali tyhj√§√§
             $query = "SELECT sum($muutoskpl * hinta) muutoshinta
                       FROM tapahtuma use index (yhtio_tuote_laadittu)
                       WHERE tapahtuma.yhtio  = '$kukarow[yhtio]'
                       and tapahtuma.tuoteno  = '{$row['tuoteno']}'
                       and tapahtuma.laadittu >= '$muutosrow[laadittu]'
                       and tapahtuma.laadittu < '$edlaadittu'
-                      and tapahtuma.laji     = 'Ep‰kurantti'";
+                      and tapahtuma.laji     = 'Ep√§kurantti'";
             $epares = pupe_query($query);
 
             if (mysql_num_rows($epares) > 0) {
               $eparow = mysql_fetch_assoc($epares);
 
-              // Ep‰kuranteissa saldo ei muutu!!! eli ei v‰hennet‰ $muutoskpl
+              // Ep√§kuranteissa saldo ei muutu!!! eli ei v√§hennet√§ $muutoskpl
               $muutoshinta += $eparow['muutoshinta'];
             }
           }
@@ -1093,12 +1093,12 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
           }
         }
         else {
-          // arvioidaan sen hetkinen kehahin jos se halutaan kerran n‰hd‰
+          // arvioidaan sen hetkinen kehahin jos se halutaan kerran n√§hd√§
           $kehasilloin  = round($muutoshinta / $muutoskpl, 6);
           $bkehasilloin = round($bmuutoshinta / $muutoskpl, 6);
         }
 
-        // jos summaustaso on per paikka, otetaan myynti ja kulutus vain silt‰ paikalta
+        // jos summaustaso on per paikka, otetaan myynti ja kulutus vain silt√§ paikalta
         if ($summaustaso == "P") {
           $summaus_lisa = "  and tilausrivi.hyllyalue = '$row[hyllyalue]'
                     and tilausrivi.hyllynro = '$row[hyllynro]'
@@ -1138,7 +1138,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
           $xmyyres = pupe_query($query);
           $xmyyrow = mysql_fetch_assoc($xmyyres);
 
-          // Viimeisin laskutusp‰iv‰m‰‰r‰
+          // Viimeisin laskutusp√§iv√§m√§√§r√§
           $query = "SELECT ifnull(date_format(max(laadittu), '%Y%m%d'), 0) laskutettuaika
                     FROM tapahtuma use index (yhtio_tuote_laadittu)
                     $varastorajausjoini
@@ -1149,7 +1149,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
           $xmyyres = pupe_query($query);
           $xmyypvmrow = mysql_fetch_assoc($xmyyres);
 
-          // Viimeisin kulutusp‰iv‰m‰‰r‰
+          // Viimeisin kulutusp√§iv√§m√§√§r√§
           $query = "SELECT ifnull(date_format(max(laadittu), '%Y%m%d'), 0) kulutettuaika
                     FROM tapahtuma use index (yhtio_tuote_laadittu)
                     $varastorajausjoini
@@ -1354,7 +1354,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
 
     if ($summaustaso == 'TRY') {
       echo "<th>".t("Osasto")."</th>";
-      echo "<th>".t("Ryhm‰")."</th>";
+      echo "<th>".t("Ryhm√§")."</th>";
     }
     else {
       echo "<th>".t("Varasto")."</th>";
@@ -1397,7 +1397,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       $cspan = 3;
     }
 
-    echo "<tr><th>".t("Pvm")."</th><th colspan='$cspan'>".t("Yhteens‰")."</th></tr>";
+    echo "<tr><th>".t("Pvm")."</th><th colspan='$cspan'>".t("Yhteens√§")."</th></tr>";
     echo "<tr><td colspan='".($cspan-1)."'>$vv-$kk-$pp</td><td align='right'>".sprintf("%.2f",$varvo)."</td>";
     echo "<td align='right'>".sprintf("%.2f",$bvarvo)."</td></tr>";
     echo "</table><br>";
@@ -1410,10 +1410,10 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
         echo "<font class='error'>",t("Huom. Varastonarvo historiassa on arvio, jos rajaat raporttia varastoittain.")," ",t("Aja raportti ilman varastorajauksia."),"</font><br/>";
       }
       elseif ($summaustaso == "S") {
-        echo "<font class='error'>",t("Huom. Varastonarvo yhteens‰ on oikein, mutta varastokohtainen varastonarvo historiasta on arvio.")," ",t("Aja raportti tuotteittain/tuoteryhmitt‰in."),"</font><br/>";
+        echo "<font class='error'>",t("Huom. Varastonarvo yhteens√§ on oikein, mutta varastokohtainen varastonarvo historiasta on arvio.")," ",t("Aja raportti tuotteittain/tuoteryhmitt√§in."),"</font><br/>";
       }
       elseif ($summaustaso == "P") {
-        echo "<font class='error'>",t("Huom. Varastonarvo yhteens‰ on oikein, mutta varastopaikkakohtainen varastonarvo historiasta on arvio.")," ",t("Aja raportti tuotteittain/tuoteryhmitt‰in."),"</font><br/>";
+        echo "<font class='error'>",t("Huom. Varastonarvo yhteens√§ on oikein, mutta varastopaikkakohtainen varastonarvo historiasta on arvio.")," ",t("Aja raportti tuotteittain/tuoteryhmitt√§in."),"</font><br/>";
       }
 
       echo "<br/>";

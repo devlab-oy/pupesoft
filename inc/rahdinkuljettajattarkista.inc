@@ -5,7 +5,7 @@ if (!function_exists("rahdinkuljettajattarkista")) {
 
     if (mysql_field_name($result, $i) == "koodi" or mysql_field_name($result, $i) == "nimi") {
       if (trim($t[$i]) == '') {
-        $virhe[$i] .= t("Tietue ei saa olla tyhjä")."!";
+        $virhe[$i] .= t("Tietue ei saa olla tyhjÃ¤")."!";
       }
       else {
         $t[$i] = trim(mysql_real_escape_string($t[$i]));
@@ -19,7 +19,7 @@ if (!function_exists("rahdinkuljettajattarkista")) {
     if (mysql_field_name($result, $i) == 'pakkauksen_sarman_minimimitta') {
       $t[$i] = str_replace(',', '.', $t[$i]);
       if(!is_numeric($t[$i])) {
-        $virhe[$i] = t("Tietue pit�� olla numero");
+        $virhe[$i] = t("Tietue pitää olla numero");
       }
     }
   }

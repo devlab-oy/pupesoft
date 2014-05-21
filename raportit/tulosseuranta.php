@@ -12,9 +12,9 @@ if (!isset($ppl)) $ppl = date("d", mktime(0, 0, 0, date("m"), 0, date("Y")));
 if (!isset($kkl)) $kkl = date("m", mktime(0, 0, 0, date("m"), 0, date("Y")));
 if (!isset($vvl)) $vvl = date("Y", mktime(0, 0, 0, date("m"), 0, date("Y")));
 
-// P‰iv‰m‰‰r‰tarkistus
+// P√§iv√§m√§√§r√§tarkistus
 if (!checkdate($kka, $ppa, $vva)) {
-  echo "<font class='error'>".t("Virheellinen alkup‰iv‰!")."</font><br><br>";
+  echo "<font class='error'>".t("Virheellinen alkup√§iv√§!")."</font><br><br>";
   $tee = "";
 }
 else {
@@ -22,7 +22,7 @@ else {
 }
 
 if (!checkdate($kkl, $ppl, $vvl)) {
-  echo "<font class='error'>".t("Virheellinen loppup‰iv‰!")."</font><br><br>";
+  echo "<font class='error'>".t("Virheellinen loppup√§iv√§!")."</font><br><br>";
   $tee = "";
 }
 else {
@@ -43,7 +43,7 @@ else {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 1) {
-    echo "<font class='error'>".t("Valitulle ajanjaksolle ei lˆydy tilikautta!")." $alku_pvm - $loppu_pvm</font><br><br>";
+    echo "<font class='error'>".t("Valitulle ajanjaksolle ei l√∂ydy tilikautta!")." $alku_pvm - $loppu_pvm</font><br><br>";
     $tee = "";
   }
   else {
@@ -52,14 +52,14 @@ else {
   }
 }
 
-// K‰yttˆliittym‰
+// K√§ytt√∂liittym√§
 echo "<form method='post' autocomplete='off'>";
 echo "<input type='hidden' name='tee' value='raportoi'>";
 
 echo "<table>";
 
 echo "<tr>";
-echo "<th>".t("Alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>";
+echo "<th>".t("Alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>";
 echo "<td>";
 echo "<input type='text' name='ppa' value='$ppa' size='5'>";
 echo "<input type='text' name='kka' value='$kka' size='5'>";
@@ -68,7 +68,7 @@ echo "</td>";
 echo "</tr>";
 
 echo "<tr>";
-echo "<th>".t("Loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>";
+echo "<th>".t("Loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>";
 echo "<td>";
 echo "<input type='text' name='ppl' value='$ppl' size='5'>";
 echo "<input type='text' name='kkl' value='$kkl' size='5'>";
@@ -98,10 +98,10 @@ echo "<input type='submit' value='".t("Aja raportti")."'>";
 
 echo "</form>";
 
-// Tehd‰‰n raportti
+// Tehd√§√§n raportti
 if ($tee == "raportoi") {
 
-  // T‰h‰n arrayseen ker‰t‰‰n raportti
+  // T√§h√§n arrayseen ker√§t√§√§n raportti
   $tulosseuranta = array();
 
   echo "<br><br>";
@@ -116,7 +116,7 @@ if ($tee == "raportoi") {
 
   if (mysql_num_rows($result) != 0) {
 
-    // Haetaan myynti/kate tilausriveilt‰
+    // Haetaan myynti/kate tilausriveilt√§
     $query = "SELECT tuote.yhtio, sum(if(tilausrivi.laskutettuaika >= '$alku_pvm'
               AND tilausrivi.laskutettuaika  <= '$loppu_pvm', tilausrivi.rivihinta, 0)) myyntinyt, sum(if(tilausrivi.laskutettuaika >= '$alku_pvm'
               AND tilausrivi.laskutettuaika  <= '$loppu_pvm', tilausrivi.kate - (tilausrivi.rivihinta * IFNULL(asiakas.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(toimitustapa.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(tuote.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(yhtio.kuluprosentti, 0)/100), 0)) nettokatenyt
@@ -138,7 +138,7 @@ if ($tee == "raportoi") {
               AND lasku.tapvm                >= '$alku_pvm'
               AND lasku.tapvm                <= '$loppu_pvm'
               AND tuote.myynninseuranta      = ''
-              AND tilausrivi.tuoteno        != 'MAKSUERƒ'
+              AND tilausrivi.tuoteno        != 'MAKSUER√Ñ'
               $lisa_haku_kustp";
 
     $result = pupe_query($query);
@@ -150,7 +150,7 @@ if ($tee == "raportoi") {
     $tulosseuranta["nettokate"]["nimi"]  = "Nettokate";
   }
 
-  // Haetaan kaikki tulosseurannan tasot sek‰ katsotaan lˆytyykˆ niille kirjauksia
+  // Haetaan kaikki tulosseurannan tasot sek√§ katsotaan l√∂ytyyk√∂ niille kirjauksia
   $query = "SELECT taso.taso,
             taso.nimi,
             taso.summattava_taso,
@@ -232,13 +232,13 @@ if ($tee == "raportoi") {
         $summa /= $row["jakaja"];
       }
 
-      // Pyˆristet‰‰n summasta desimaalit pois
+      // Py√∂ristet√§√§n summasta desimaalit pois
       $summa = round($summa);
 
-      // Laitetaan summa alkuper‰iseen arrayseen mukaan, jos t‰t‰ halutaan summailla viel‰ seuraavilla tasoilla
+      // Laitetaan summa alkuper√§iseen arrayseen mukaan, jos t√§t√§ halutaan summailla viel√§ seuraavilla tasoilla
       $tulosseuranta[$taso]["summa"] = $summa;
 
-      // Jos meill‰ on summattava taso, laitetaan speciaali riviv‰ri
+      // Jos meill√§ on summattava taso, laitetaan speciaali riviv√§ri
       $rivi_class = ($row["summattava_taso"] != "") ? "spec" : "";
 
       echo "<tr class='aktiivi $rivi_class'>";
@@ -251,7 +251,7 @@ if ($tee == "raportoi") {
 
   }
   else {
-    echo "<font class='error'>".t("Ei lˆytynyt yht‰‰n tulosseuranta-tasoa!")."</font>";
+    echo "<font class='error'>".t("Ei l√∂ytynyt yht√§√§n tulosseuranta-tasoa!")."</font>";
   }
 }
 

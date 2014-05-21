@@ -1,11 +1,11 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require('../inc/parametrit.inc');
 
-echo "<font class='head'>".t("Tuoteryhm‰vertailu").": ";
+echo "<font class='head'>".t("Tuoteryhm√§vertailu").": ";
 
 if ($kausi1!='' and $kausi2!='' and $osasto!='' and $try!='') {
   echo t("Kausi")." 1 ($kausi1-$kausi1l) vs. ".t("Kausi")." 2 ($kausi2-$kausi2l)";
@@ -52,7 +52,7 @@ if ($kausi1!='' and $kausi2!='' and $osasto!='' and $try!='') {
     echo "<table>\n";
     echo "<tr>
       <th><br>".t("Os")."</th>
-      <th><br>".t("Tuoteryhm‰")."</th>
+      <th><br>".t("Tuoteryhm√§")."</th>
 
       <th>".t("Kausi 1")."<br>".t("Myynti")."</th>
       <th>".t("Kausi 2")."<br>".t("Myynti")."</th>
@@ -148,7 +148,7 @@ if ($kausi1!='' and $kausi2!='' and $osasto!='' and $try!='') {
       $row["kate2"]   = sprintf("%.2f", $row["kate2"]);
       $row["kpl2"]   = sprintf("%.2f", $row["kpl2"]);
 
-      // jos joku tieto lˆytyy niin tulostetaan rivi..
+      // jos joku tieto l√∂ytyy niin tulostetaan rivi..
       if ($row["myynti1"]!='' or $row["kate1"]!='' or $row["kpl1"]!='' or $row["myynti2"]!='' or $row["kate2"]!='' or $row["kpl2"]!='') {
 
         echo "<tr class='aktiivi'>
@@ -208,7 +208,7 @@ if ($kausi1!='' and $kausi2!='' and $osasto!='' and $try!='') {
     if ($yhtkateproero<0)  $kuva4 = "class='red'";
 
     echo "
-      <tr class='spec'><td colspan='2'>".t("Yhteens‰")."</th>
+      <tr class='spec'><td colspan='2'>".t("Yhteens√§")."</th>
 
       <td align='right' nowrap>$yhtmyynti1</td>
       <td align='right' nowrap>$yhtmyynti2</td>
@@ -233,7 +233,7 @@ if ($kausi1!='' and $kausi2!='' and $osasto!='' and $try!='') {
     echo "</table><br><br>\n";
   }
   else {
-    echo "<font class='error'>".t("Yht‰‰n osastoa tai tuoteryhm‰‰ ei lˆytynyt")."</font><br><br>";
+    echo "<font class='error'>".t("Yht√§√§n osastoa tai tuoteryhm√§√§ ei l√∂ytynyt")."</font><br><br>";
   }
 }
 
@@ -273,7 +273,7 @@ echo "<table>
     <td><input maxlength='6' size='10' value='$osastol' name='osastol' type='text'></td>
   </tr>
   <tr>
-    <td nowrap>".t("Tuoteryhm‰ Alku").":</td>
+    <td nowrap>".t("Tuoteryhm√§ Alku").":</td>
     <td><input maxlength='6' size='10' value='$try' name='try' type='text'></td>
     <td nowrap>".t("Loppu").":</td>
     <td><input maxlength='6' size='10' value='$tryl' name='tryl' type='text'></td>

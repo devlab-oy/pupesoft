@@ -1,21 +1,21 @@
 <?php
 
 $ulos = "";
-$jatko = 1; // oletetaan normaali k‰sittely
-$tyyppi = 1; // oletetaan rivin n‰kyvyys
+$jatko = 1; // oletetaan normaali k√§sittely
+$tyyppi = 1; // oletetaan rivin n√§kyvyys
 
-if ($i == 0) { //yhtiˆt‰ ei n‰ytet‰
+if ($i == 0) { //yhti√∂t√§ ei n√§ytet√§
   $tyyppi = 0;
 }
 
 if (mysql_field_name($result, $i) == "piiri") {
-  $preq = "  SELECT avainsana.selite piiri, avainsana.selitetark selitetark
-        FROM avainsana
-        WHERE  avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='piiri'";
+  $preq = "SELECT avainsana.selite piiri, avainsana.selitetark selitetark
+           FROM avainsana
+           WHERE  avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='piiri'";
   $preres = mysql_query($preq) or pupe_error($preq);
 
   $ulos = "<td><select id='piiri' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
-  $ulos .= "<option value = ''>".t("Ei piiri‰")."</option>";
+  $ulos .= "<option value = ''>".t("Ei piiri√§")."</option>";
 
   while ($srow = mysql_fetch_array($preres)) {
     $sel = '';
@@ -31,18 +31,18 @@ if (mysql_field_name($result, $i) == "piiri") {
 
 if (mysql_field_name($result, $i) == "asiakas_segmentti") {
 
-  $preq = "  SELECT CONCAT(REPEAT('&raquo;', COUNT(parent.tunnus) - 1), ' ', ifnull(node.koodi, ''), ' ', node.nimi) AS name, node.koodi koodi, node.tunnus
-        FROM dynaaminen_puu AS node
-        JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft)
-        WHERE node.yhtio = '$kukarow[yhtio]'
-        AND node.lft > 0
-        AND node.laji = 'asiakas'
-        GROUP BY node.tunnus
-        ORDER BY node.lft";
+  $preq = "SELECT CONCAT(REPEAT('&raquo;', COUNT(parent.tunnus) - 1), ' ', ifnull(node.koodi, ''), ' ', node.nimi) AS name, node.koodi koodi, node.tunnus
+           FROM dynaaminen_puu AS node
+           JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft)
+           WHERE node.yhtio = '$kukarow[yhtio]'
+           AND node.lft     > 0
+           AND node.laji    = 'asiakas'
+           GROUP BY node.tunnus
+           ORDER BY node.lft";
   $preres = mysql_query($preq) or pupe_error($preq);
 
   $ulos = "<td><select id='asiakas_segmentti' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
-  $ulos .= "<option value=''>".t("Ei asiakassegmentti‰")."</option>";
+  $ulos .= "<option value=''>".t("Ei asiakassegmentti√§")."</option>";
 
   while ($prerow = mysql_fetch_array($preres)) {
     $sel = '';
@@ -64,7 +64,7 @@ if (mysql_field_name($result, $i) == "ryhma") {
   $sresult = mysql_query($query) or pupe_error($query);
 
   $ulos = "<td><select id='ryhma' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
-  $ulos .= "<option value = ''>".t("Ei ryhm‰‰")."</option>";
+  $ulos .= "<option value = ''>".t("Ei ryhm√§√§")."</option>";
 
   while ($srow = mysql_fetch_array($sresult)) {
     $sel = '';
@@ -75,7 +75,7 @@ if (mysql_field_name($result, $i) == "ryhma") {
   }
 
   $ulos .= "</select>\n";
-  $ulos .= " <a href='#' onclick=\"js_open_yllapito('ryhma','toim=perusalennus');\"><img src='pics/lullacons/add.png'>".t("Uusi ryhm‰")."</a></td>\n";
+  $ulos .= " <a href='#' onclick=\"js_open_yllapito('ryhma','toim=perusalennus');\"><img src='pics/lullacons/add.png'>".t("Uusi ryhm√§")."</a></td>\n";
   $jatko = 0;
 }
 
@@ -87,7 +87,7 @@ elseif (mysql_field_name($result, $i) == "asiakas_ryhma") {
   $vresult = t_avainsana("ASIAKASRYHMA");
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
-  $ulos .= "<option value = '' >".t("Ei ryhm‰‰")."</option>";
+  $ulos .= "<option value = '' >".t("Ei ryhm√§√§")."</option>";
 
   while ($vrow=mysql_fetch_array($vresult)) {
     $sel="";
@@ -102,7 +102,7 @@ elseif (mysql_field_name($result, $i) == "asiakas_ryhma") {
 }
 
 if (mysql_field_name($result, $i) == "ytunnus" and $lukitse_avaimeen != "") {
-  // Jos t‰m‰ on liitetty ytunnuksella:
+  // Jos t√§m√§ on liitetty ytunnuksella:
   if ($trow[$i] != "" and $trow[$i] != "0") {
     $ulos = "<input type='hidden' name='$nimi' value='$trow[$i]'>";
   }
@@ -115,17 +115,17 @@ elseif (mysql_field_name($result, $i) == "ytunnus" and isset($alasveto[$i])) {
   $jatko = 0;
 }
 elseif (mysql_field_name($result, $i) == "ytunnus") {
-  // Ei maxlength:i‰ koska silloin hakutoiminto ei v‰ltt‰m‰tt‰ toimi
+  // Ei maxlength:i√§ koska silloin hakutoiminto ei v√§ltt√§m√§tt√§ toimi
   $ulos = "<td nowrap><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size'></td>";
   $jatko = 0;
 }
 
 if (mysql_field_name($result, $i) == "asiakas" and $lukitse_avaimeen != "") {
-  // Jos t‰m‰ on liitetty tunnuksella:
+  // Jos t√§m√§ on liitetty tunnuksella:
   if ($trow[$i] > 0) {
     $ulos = "<input type='hidden' name='$nimi' value='$trow[$i]'>";
   }
-  // Jos t‰‰ on uusi itemi
+  // Jos t√§√§ on uusi itemi
   elseif ((int) $tunnus == 0) {
     $ulos = "<input type='hidden' name='$nimi' value='$lukitse_avaimeen'>";
   }
@@ -152,7 +152,7 @@ elseif (mysql_field_name($result, $i) == "asiakas") {
   else {
     if ($trow[$i] == 0) $trow[$i] = "";
 
-    // Ei maxlength:i‰ koska silloin hakutoiminto ei v‰ltt‰m‰tt‰ toimi
+    // Ei maxlength:i√§ koska silloin hakutoiminto ei v√§ltt√§m√§tt√§ toimi
     $ulos = "<td nowrap><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size'></td>";
     $jatko = 0;
   }
@@ -172,8 +172,8 @@ if (mysql_field_name($result, $i) == "monikerta") {
   if ($trow[$i] != "") $sel = "SELECTED";
 
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
-  $ulos .= "<option value = ''>".t("Ei. Alennus on voimassa kun tilataan v‰hintaan minkpl verran")."</option>";
-  $ulos .= "<option value = 'K' $sel>".t("Kyll‰. Alennus on voimassa kun tilataan minkpl verran, tai mink‰ tahansa minkpl monikerran verran")."</option>";
+  $ulos .= "<option value = ''>".t("Ei. Alennus on voimassa kun tilataan v√§hintaan minkpl verran")."</option>";
+  $ulos .= "<option value = 'K' $sel>".t("Kyll√§. Alennus on voimassa kun tilataan minkpl verran, tai mink√§ tahansa minkpl monikerran verran")."</option>";
   $ulos .= "</select></td>\n";
   $jatko = 0;
 }

@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 if ($filenimi != '' and file_exists($filenimi)) {
@@ -100,7 +100,7 @@ if ($tee != '') {
     $filenimi = "$kukarow[yhtio]-hindisk-".md5(uniqid(rand(),true)).".txt";
 
     if (!$fh = fopen("/tmp/".$filenimi, "w+"))
-        die("".t("filen luonti ep‰onnistui")."!");
+        die("".t("filen luonti ep√§onnistui")."!");
 
     while ($row = mysql_fetch_array($result)) {
       //korvaavat tuotteet
@@ -121,7 +121,7 @@ if ($tee != '') {
           }
           $lask++;
         }
-        //t‰ss‰ listan viimeinen indeksi
+        //t√§ss√§ listan viimeinen indeksi
         $lask--;
 
         //edellinen ja seuraava korvaava
@@ -165,17 +165,17 @@ if ($tee != '') {
     echo "<td><input type='submit' value='".t("Tallenna")."'></td></tr>";
     echo "</form></table>";
 
-    //lopetetaan t‰h‰n
+    //lopetetaan t√§h√§n
     exit;
   }
 }
 
-//K‰yttˆliittym‰
+//K√§ytt√∂liittym√§
 echo "<br>";
 echo "<table><form method='post'>";
 
 echo "<input type='hidden' name='tee' value='kaikki'>";
-echo "<tr><th>".t("Syˆt‰ osastot ja tuoteryhm‰t").":</th>
+echo "<tr><th>".t("Sy√∂t√§ osastot ja tuoteryhm√§t").":</th>
     <td><input type='text' name='osasto' value='$osasto' size='15'></td>
     <td><input type='text' name='try' value='$try' size='15'></td>";
 echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td></tr></table>";

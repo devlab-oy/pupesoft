@@ -9,11 +9,11 @@ require 'valmistus.class.php';
 echo "<font class='head'>".t("Tarkastettavat valmistukset")."</font>";
 echo "<hr>";
 
-/** P‰ivitet‰‰n valmistuksen tila */
+/** P√§ivitet√§√§n valmistuksen tila */
 if ($tee == 'paivita' and isset($tunnus)) {
   $valmistus = Valmistus::find($tunnus);
 
-  // Yritet‰‰n muuttaa valmistuksen tilaa
+  // Yritet√§√§n muuttaa valmistuksen tilaa
   try {
     $valmistus->setTila(Valmistus::TARKASTETTU);
   } catch (Exception $e) {
@@ -21,7 +21,7 @@ if ($tee == 'paivita' and isset($tunnus)) {
   }
 }
 
-// Jos valmistus on valittu, listataan yksitt‰isen valmistuksen tiedot
+// Jos valmistus on valittu, listataan yksitt√§isen valmistuksen tiedot
 if ($tee == 'nayta' and isset($tunnus)) {
   // Haetaan valmistus
   $valmistus = Valmistus::find($tunnus);
@@ -96,8 +96,8 @@ else {
           <th>" . t("Tila") . "</th>
           <th>" . t("Nimitys") . "</th>
           <th>" . t("Viite") . "</th>
-          <th>" . t("M‰‰r‰") . "</th>
-          <th>" . t("Ylityˆtunnit") . "</th>
+          <th>" . t("M√§√§r√§") . "</th>
+          <th>" . t("Ylity√∂tunnit") . "</th>
           <th>" . t("Kommentti") . "</th>
           <th colspan=2></th>
         </tr>";

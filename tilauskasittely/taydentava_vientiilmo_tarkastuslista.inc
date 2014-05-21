@@ -1,7 +1,7 @@
 <?php
 
 function tark_dateconv ($date) {
-  //kääntää mysqln vvvv-kk-mm muodon muotoon pp.kk.vvvv
+  //kÃ¤Ã¤ntÃ¤Ã¤ mysqln vvvv-kk-mm muodon muotoon pp.kk.vvvv
   return substr($date,8,2).".".substr($date,5,2).".".substr($date,0,4);
 }
 
@@ -10,12 +10,12 @@ function tark_otsikko () {
 
   $tark .= sprintf ('%-38.38s',  $yhtiorow["nimi"]);
   $tark .= sprintf ('%-44.44s',  "Tulliselvitystietojen Tarkastuslista");
-  $tark .= sprintf ('%-40.40s',   "Ajopäivämäärä: $ajopvm");
+  $tark .= sprintf ('%-40.40s',   "AjopÃ¤ivÃ¤mÃ¤Ã¤rÃ¤: $ajopvm");
   $tark .= "\r\n";
 
   $tark .= sprintf ('%-38.38s',  " ");
   $tark .= sprintf ('%-20.20s',   "Tullikamari: ".$yhtiorow["tullikamari"]);
-  $tark .= sprintf ('%-20.20s',   "Pääte: ".$yhtiorow["tullipaate"]);
+  $tark .= sprintf ('%-20.20s',   "PÃ¤Ã¤te: ".$yhtiorow["tullipaate"]);
   $tark .= "\r\n";
 
   $tark .= sprintf ('%-38.38s',   "Pvm: ".tark_dateconv($laskurow["tapvm"]));

@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 if (isset($_POST['tee'])) {
@@ -27,7 +27,7 @@ if ($tee == 'lataa_tiedosto') {
   exit;
 }
 
-//t‰nne t‰m‰n tiedoston ajax_requestit
+//t√§nne t√§m√§n tiedoston ajax_requestit
 if ($ajax_request) {
 
 }
@@ -59,7 +59,7 @@ echo '<font class="head">'.t('Palautuneet tuotteet').'</font><hr>';
 
 $alku_pvm = $vva.'-'.$kka.'-'.$ppa;
 $loppu_pvm = $vvl.'-'.$kkl.'-'.$ppl;
-//lis‰t‰‰n loppu_pvm:n +1d koska queryss‰ k‰ytet‰‰n between
+//lis√§t√§√§n loppu_pvm:n +1d koska queryss√§ k√§ytet√§√§n between
 $loppu_pvm = date('Y-m-d', strtotime($loppu_pvm.' + 1 day'));
 $request = array(
   'ppa'           => $ppa,
@@ -221,7 +221,7 @@ function echo_kayttoliittyma($request) {
   echo '<table>';
 
   echo '<tr>';
-  echo '<th>'.t('Aikav‰li').'</th>';
+  echo '<th>'.t('Aikav√§li').'</th>';
   echo '<td>';
   echo "<input type='text' class='digit2_aika_input' name='ppa' value='{$request['ppa']}' /> ";
   echo "<input type='text' class='digit2_aika_input' name='kka' value='{$request['kka']}' /> ";
@@ -234,7 +234,7 @@ function echo_kayttoliittyma($request) {
   echo '</tr>';
 
   echo "<tr>";
-  echo "<th>".t("Osumien m‰‰r‰n rajaus")."</th>";
+  echo "<th>".t("Osumien m√§√§r√§n rajaus")."</th>";
   echo "<td>";
   echo "<input type='text' name='osumien_maara_rajaus' value='{$request['osumien_maara_rajaus']}' />";
   echo "</td>";

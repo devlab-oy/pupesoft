@@ -2,14 +2,14 @@
 
 require ("inc/parametrit.inc");
 
-echo "<font class='head'>".t("Poista er‰‰ntyneet hinnastohinnat, asiakashinnat ja asiakasalennukset").":</font><hr>";
+echo "<font class='head'>".t("Poista er√§√§ntyneet hinnastohinnat, asiakashinnat ja asiakasalennukset").":</font><hr>";
 
 
 echo "<br><form method='post'>";
 echo "<input type='hidden' name='tee' value='AJA'>";
 echo "<table>";
 echo "<tr>
-  <th>".t("Poista er‰‰ntyneet ja duplikaatit hinnastohinnat, asiakashinnat ja asiakasalennukset")."</th>
+  <th>".t("Poista er√§√§ntyneet ja duplikaatit hinnastohinnat, asiakashinnat ja asiakasalennukset")."</th>
   </tr>\n";
 echo "</table>";
 echo "<br><input type='submit' value='".t("Poista")."'>";
@@ -25,11 +25,11 @@ if ($tee == "AJA") {
   #HINNAT:
   #############################################################################################
 
-  // 1. k‰ytt‰j‰n syˆtt‰m‰ hinta/nettohinta
+  // 1. k√§ytt√§j√§n sy√∂tt√§m√§ hinta/nettohinta
   # Ei siivottavaa
 
   // 2A. asiakas.tunnus/asiakas.ytunnus tuote.tuotenumero nettohinta (asiakkaan tuotteen hinta) laskun valuutassa
-  // 2B. asiakas.tunnus/asiakas.ytunnus tuote.tuotenumero nettohinta (asiakkaan tuotteen hinta) yhtiˆn valuutassa
+  // 2B. asiakas.tunnus/asiakas.ytunnus tuote.tuotenumero nettohinta (asiakkaan tuotteen hinta) yhti√∂n valuutassa
   $query = "SELECT group_concat(tunnus ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), tunnus desc) tunnukset
             FROM asiakashinta
             WHERE yhtio  = '$kukarow[yhtio]'
@@ -80,8 +80,8 @@ if ($tee == "AJA") {
     $asiakashinta += count($tunnukset);
   }
 
-  // 3A. asiakas.tunnus/asiakas.ytunnus tuote.aleryhm‰ nettohinta (asiakkaan tuotealeryhm‰n hinta) laskun valuutassa
-  // 3B. asiakas.tunnus/asiakas.ytunnus tuote.aleryhm‰ nettohinta (asiakkaan tuotealeryhm‰n hinta) yhtiˆn valuutassa
+  // 3A. asiakas.tunnus/asiakas.ytunnus tuote.aleryhm√§ nettohinta (asiakkaan tuotealeryhm√§n hinta) laskun valuutassa
+  // 3B. asiakas.tunnus/asiakas.ytunnus tuote.aleryhm√§ nettohinta (asiakkaan tuotealeryhm√§n hinta) yhti√∂n valuutassa
   $query = "SELECT group_concat(tunnus ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), tunnus desc) tunnukset
             FROM asiakashinta
             WHERE yhtio  = '$kukarow[yhtio]'
@@ -133,7 +133,7 @@ if ($tee == "AJA") {
   }
 
   // 4A. asiakas.segmentti tuote.tuoteno nettohinta (asiakassegmentin tuotteen hinta) laskun valuutassa
-  // 4B. asiakas.segmentti tuote.tuoteno nettohinta (asiakassegmentin tuotteen hinta) yhtiˆn valuutassa
+  // 4B. asiakas.segmentti tuote.tuoteno nettohinta (asiakassegmentin tuotteen hinta) yhti√∂n valuutassa
   $query = "SELECT group_concat(tunnus ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), hinta asc, tunnus desc) tunnukset
             FROM asiakashinta
             WHERE yhtio            = '$kukarow[yhtio]'
@@ -161,8 +161,8 @@ if ($tee == "AJA") {
     $asiakashinta += count($tunnukset);
   }
 
-  // 5A. asiakas.ryhm‰ tuote.tuoteno nettohinta (asiakasaleryhm‰n tuotteen hinta) laskun valuutassa
-  // 5B. asiakas.ryhm‰ tuote.tuoteno nettohinta (asiakasaleryhm‰n tuotteen hinta) yhtiˆn valuutassa
+  // 5A. asiakas.ryhm√§ tuote.tuoteno nettohinta (asiakasaleryhm√§n tuotteen hinta) laskun valuutassa
+  // 5B. asiakas.ryhm√§ tuote.tuoteno nettohinta (asiakasaleryhm√§n tuotteen hinta) yhti√∂n valuutassa
   $query = "SELECT group_concat(tunnus ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), tunnus desc) tunnukset
             FROM asiakashinta
             WHERE yhtio        = '$kukarow[yhtio]'
@@ -191,7 +191,7 @@ if ($tee == "AJA") {
   }
 
      // 6A. asiakas.piiri tuote.tuoteno nettohinta (asiakaspiirin tuotteen hinta) laskun valuutassa
-  // 6B. asiakas.piiri tuote.tuoteno nettohinta (asiakaspiirin tuotteen hinta) yhtiˆn valuutassa
+  // 6B. asiakas.piiri tuote.tuoteno nettohinta (asiakaspiirin tuotteen hinta) yhti√∂n valuutassa
   $query = "SELECT group_concat(tunnus ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), hinta asc, tunnus desc) tunnukset
             FROM asiakashinta
             WHERE yhtio  = '$kukarow[yhtio]'
@@ -219,8 +219,8 @@ if ($tee == "AJA") {
     $asiakashinta += count($tunnukset);
   }
 
-   // 7A. asiakas.segmentti tuote.aleryhma nettohinta (asiakassegmentin tuotealeryhm‰n hinta) laskun valuutassa
-  // 7B. asiakas.segmentti tuote.aleryhma nettohinta (asiakassegmentin tuotealeryhm‰n hinta) yhtiˆn valuutassa
+   // 7A. asiakas.segmentti tuote.aleryhma nettohinta (asiakassegmentin tuotealeryhm√§n hinta) laskun valuutassa
+  // 7B. asiakas.segmentti tuote.aleryhma nettohinta (asiakassegmentin tuotealeryhm√§n hinta) yhti√∂n valuutassa
   $query = "SELECT group_concat(tunnus ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), hinta asc, tunnus desc) tunnukset
             FROM asiakashinta
             WHERE yhtio            = '$kukarow[yhtio]'
@@ -248,8 +248,8 @@ if ($tee == "AJA") {
     $asiakashinta += count($tunnukset);
   }
 
-  // 8A. asiakas.ryhm‰ tuote.aleryhm‰ nettohinta (asiakasaleryhm‰n tuotealeryhm‰n hinta) laskun valuutassa
-  // 8B. asiakas.ryhm‰ tuote.aleryhm‰ nettohinta (asiakasaleryhm‰n tuotealeryhm‰n hinta) yhtiˆn valuutassa
+  // 8A. asiakas.ryhm√§ tuote.aleryhm√§ nettohinta (asiakasaleryhm√§n tuotealeryhm√§n hinta) laskun valuutassa
+  // 8B. asiakas.ryhm√§ tuote.aleryhm√§ nettohinta (asiakasaleryhm√§n tuotealeryhm√§n hinta) yhti√∂n valuutassa
   $query = "SELECT group_concat(tunnus ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), tunnus desc) tunnukset
             FROM asiakashinta
             WHERE yhtio        = '$kukarow[yhtio]'
@@ -277,8 +277,8 @@ if ($tee == "AJA") {
     $asiakashinta += count($tunnukset);
   }
 
-  // 9A. asiakas.piiri tuote.aleryhma nettohinta (asiakaspiirin tuotealeryhm‰n hinta) laskun valuutassa
-  // 9B. asiakas.piiri tuote.aleryhma nettohinta (asiakaspiirin tuotealeryhm‰n hinta) yhtiˆn valuutassa
+  // 9A. asiakas.piiri tuote.aleryhma nettohinta (asiakaspiirin tuotealeryhm√§n hinta) laskun valuutassa
+  // 9B. asiakas.piiri tuote.aleryhma nettohinta (asiakaspiirin tuotealeryhm√§n hinta) yhti√∂n valuutassa
   $query = "SELECT group_concat(tunnus ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), hinta asc, tunnus desc) tunnukset
             FROM asiakashinta
             WHERE yhtio  = '$kukarow[yhtio]'
@@ -306,7 +306,7 @@ if ($tee == "AJA") {
     $asiakashinta += count($tunnukset);
   }
 
-  // 10. asiakas.tunnus/asiakas.ytunnus tuote.aleryhm‰ negatiivinen-aleprosentti (asiakkaan katemyyntihinta netto)
+  // 10. asiakas.tunnus/asiakas.ytunnus tuote.aleryhm√§ negatiivinen-aleprosentti (asiakkaan katemyyntihinta netto)
   $query = "SELECT group_concat(tunnus ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), tunnus desc) tunnukset
             FROM asiakasalennus
             WHERE yhtio        = '$kukarow[yhtio]'
@@ -361,7 +361,7 @@ if ($tee == "AJA") {
     $asiakasale += count($tunnukset);
   }
 
-  // 11. asiakas.segmentti tuote.aleryhm‰ negatiivinen-aleprosentti (asiakassegmentin katemyyntihinta netto)
+  // 11. asiakas.segmentti tuote.aleryhm√§ negatiivinen-aleprosentti (asiakassegmentin katemyyntihinta netto)
   $query = "SELECT group_concat(tunnus ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), alennus desc, tunnus desc) tunnukset
             FROM asiakasalennus
             WHERE yhtio            = '$kukarow[yhtio]'
@@ -390,7 +390,7 @@ if ($tee == "AJA") {
     $asiakasale += count($tunnukset);
   }
 
-  // 12. asiakas.ryhm‰ tuote.aleryhm‰ negatiivinen-aleprosentti (asiakkaan katemyyntihinta netto)
+  // 12. asiakas.ryhm√§ tuote.aleryhm√§ negatiivinen-aleprosentti (asiakkaan katemyyntihinta netto)
   $query = "SELECT group_concat(tunnus ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), tunnus desc) tunnukset
             FROM asiakasalennus
             WHERE yhtio        = '$kukarow[yhtio]'
@@ -419,7 +419,7 @@ if ($tee == "AJA") {
     $asiakasale += count($tunnukset);
   }
 
-  // 13. asiakas.piiri tuote.aleryhm‰ negatiivinen-aleprosentti (asiakaspiirin katemyyntihinta netto)
+  // 13. asiakas.piiri tuote.aleryhm√§ negatiivinen-aleprosentti (asiakaspiirin katemyyntihinta netto)
   $query = "SELECT group_concat(tunnus ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),alennus desc, tunnus desc) tunnukset
             FROM asiakasalennus
             WHERE yhtio  = '$kukarow[yhtio]'
@@ -448,7 +448,7 @@ if ($tee == "AJA") {
     $asiakasale += count($tunnukset);
   }
 
-  // 14. asiakas.tunnus/asiakas.ytunnus tuote.aleryhm‰ aleprosentti == 999.99 (asiakkaan myym‰l‰hinta)
+  // 14. asiakas.tunnus/asiakas.ytunnus tuote.aleryhm√§ aleprosentti == 999.99 (asiakkaan myym√§l√§hinta)
   $query = "SELECT group_concat(tunnus ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), tunnus desc) tunnukset
             FROM asiakasalennus
             WHERE yhtio  = '$kukarow[yhtio]'
@@ -502,7 +502,7 @@ if ($tee == "AJA") {
   }
 
   // 15A. hinnasto.hinta tuotteen nettohinta hinnastosta laskun valuutassa
-  // 15B. hinnasto.hinta tuotteen nettohinta hinnastosta yhtiˆn valuutassa
+  // 15B. hinnasto.hinta tuotteen nettohinta hinnastosta yhti√∂n valuutassa
   $query = "SELECT group_concat(tunnus ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), tunnus desc) tunnukset
             FROM hinnasto
             WHERE yhtio  = '$kukarow[yhtio]'
@@ -532,7 +532,7 @@ if ($tee == "AJA") {
   # Ei siivottavaa
 
   // 17A. hinnasto.hinta tuotteen bruttohinta hinnastosta laskun valuutassa
-  // 17B. hinnasto.hinta tuotteen bruttohinta hinnastosta yhtiˆn valuutassa
+  // 17B. hinnasto.hinta tuotteen bruttohinta hinnastosta yhti√∂n valuutassa
   $query = "SELECT group_concat(tunnus ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), tunnus desc) tunnukset
             FROM hinnasto
             WHERE yhtio  = '$kukarow[yhtio]'
@@ -558,7 +558,7 @@ if ($tee == "AJA") {
     $hinnasto += count($tunnukset);
   }
 
-  // 18. tuote.myyntihinta (tuotteen bruttohinta) yhtiˆn valuutassa
+  // 18. tuote.myyntihinta (tuotteen bruttohinta) yhti√∂n valuutassa
   # Ei siivottavaa
 
 
@@ -566,19 +566,19 @@ if ($tee == "AJA") {
   #ALENNUKSET:
   #############################################################################################
 
-  // 1. k‰ytt‰j‰n syˆtt‰m‰ EURO-m‰‰r‰inen alennus
+  // 1. k√§ytt√§j√§n sy√∂tt√§m√§ EURO-m√§√§r√§inen alennus
   # Ei siivottavaa
 
-  // 2. k‰ytt‰j‰n syˆtt‰m‰ EURO-m‰‰r‰inen alennus
+  // 2. k√§ytt√§j√§n sy√∂tt√§m√§ EURO-m√§√§r√§inen alennus
   # Ei siivottavaa
 
-  // 3. k‰ytt‰j‰n syˆtt‰m‰ alennus
+  // 3. k√§ytt√§j√§n sy√∂tt√§m√§ alennus
   # Ei siivottavaa
 
-  // 4. k‰ytt‰j‰n syˆtt‰m‰ alennus
+  // 4. k√§ytt√§j√§n sy√∂tt√§m√§ alennus
   # Ei siivottavaa
 
-  // 5. k‰ytt‰j‰n syˆtt‰m‰ katejuttu
+  // 5. k√§ytt√§j√§n sy√∂tt√§m√§ katejuttu
   # Ei siivottavaa
 
   // 5. asiakas.tunnus/asiakas.ytunnus tuote.tuotenumero aleprosentti (asiakkaan tuotteen alennus)
@@ -636,7 +636,7 @@ if ($tee == "AJA") {
     $asiakasale += count($tunnukset);
   }
 
-  // 6. asiakas.tunnus/asiakas.ytunnus tuote.aleryhm‰ aleprosentti (asiakkaan tuotealeryhm‰n alennus)
+  // 6. asiakas.tunnus/asiakas.ytunnus tuote.aleryhm√§ aleprosentti (asiakkaan tuotealeryhm√§n alennus)
   $query = "SELECT group_concat(tunnus ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), alennus desc, tunnus desc) tunnukset
             FROM asiakasalennus
             WHERE yhtio  = '$kukarow[yhtio]'
@@ -721,7 +721,7 @@ if ($tee == "AJA") {
     $asiakasale += count($tunnukset);
   }
 
-  // 8. asiakas.ryhm‰ tuote.tuoteno aleprosentti (asiakasryhm‰n tuotteen alennus)
+  // 8. asiakas.ryhm√§ tuote.tuoteno aleprosentti (asiakasryhm√§n tuotteen alennus)
   $query = "SELECT group_concat(tunnus ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), alennus desc, tunnus desc) tunnukset
             FROM asiakasalennus
             WHERE yhtio        = '$kukarow[yhtio]'
@@ -781,7 +781,7 @@ if ($tee == "AJA") {
     $asiakasale += count($tunnukset);
   }
 
-  // 10. asiakas.segmentti tuote.aleryhm‰ aleprosentti (asiakassegmentin tuotealeryhm‰n alennus)
+  // 10. asiakas.segmentti tuote.aleryhm√§ aleprosentti (asiakassegmentin tuotealeryhm√§n alennus)
   $query = "SELECT group_concat(tunnus ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), alennus desc, tunnus desc) tunnukset
             FROM asiakasalennus
             WHERE yhtio            = '$kukarow[yhtio]'
@@ -811,7 +811,7 @@ if ($tee == "AJA") {
     $asiakasale += count($tunnukset);
   }
 
-  // 11. asiakas.ryhm‰ tuote.aleryhm‰ aleprosentti (asiakasryhm‰n tuotealeryhm‰n alennus)
+  // 11. asiakas.ryhm√§ tuote.aleryhm√§ aleprosentti (asiakasryhm√§n tuotealeryhm√§n alennus)
   $query = "SELECT group_concat(tunnus ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), alennus desc, tunnus desc) tunnukset
             FROM asiakasalennus
             WHERE yhtio        = '$kukarow[yhtio]'
@@ -841,7 +841,7 @@ if ($tee == "AJA") {
     $asiakasale += count($tunnukset);
   }
 
-  // 12. asiakas.piiri tuote.aleryhm‰ aleprosentti (asiakaspiirin tuotealeryhm‰n alennus)
+  // 12. asiakas.piiri tuote.aleryhm√§ aleprosentti (asiakaspiirin tuotealeryhm√§n alennus)
   $query = "SELECT group_concat(tunnus ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), alennus desc, tunnus desc) tunnukset
             FROM asiakasalennus
             WHERE yhtio  = '$kukarow[yhtio]'
@@ -871,12 +871,12 @@ if ($tee == "AJA") {
     $asiakasale += count($tunnukset);
   }
 
-  // 13. tuote.aleryhm‰ aleprosentti (tuotealeryhm‰n perusalennus) (Vain ykkˆstason alennus voidaan tallentaa t‰h‰n)
+  // 13. tuote.aleryhm√§ aleprosentti (tuotealeryhm√§n perusalennus) (Vain ykk√∂stason alennus voidaan tallentaa t√§h√§n)
   # Ei siivottavaa
 
 
   #############################################################################################
-  #POISTETAAN ERƒƒNTYNEET:
+  #POISTETAAN ER√Ñ√ÑNTYNEET:
   #############################################################################################
 
   $query = "DELETE FROM asiakashinta
@@ -904,9 +904,9 @@ if ($tee == "AJA") {
   $asiakasale += mysql_affected_rows();
 
   echo "<br><br>";
-  echo t("Poistettiin %s er‰‰ntynytt‰ tai duplikaatti hinnastohintaa", "", $hinnasto).".<br>";
-  echo t("Poistettiin %s er‰‰ntynytt‰ tai duplikaatti asiakasalennusta", "", $asiakasale).".<br>";
-  echo t("Poistettiin %s er‰‰ntynytt‰ tai duplikaatti asiakashintaa", "", $asiakashinta).".<br>";
+  echo t("Poistettiin %s er√§√§ntynytt√§ tai duplikaatti hinnastohintaa", "", $hinnasto).".<br>";
+  echo t("Poistettiin %s er√§√§ntynytt√§ tai duplikaatti asiakasalennusta", "", $asiakasale).".<br>";
+  echo t("Poistettiin %s er√§√§ntynytt√§ tai duplikaatti asiakashintaa", "", $asiakashinta).".<br>";
 }
 
 require ("inc/footer.inc");

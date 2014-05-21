@@ -157,7 +157,7 @@ define("BCD_C128_BAR_4"              ,   4);
 
     function FlushObject () {
 
-      //keksit‰‰n failille joku varmasti uniikki nimi:
+      //keksit√§√§n failille joku varmasti uniikki nimi:
       list($usec, $sec) = explode(' ', microtime());
       mt_srand((float) $sec + ((float) $usec * 100000));
       $nimi = "/tmp/".md5(uniqid(mt_rand(), true)).".png";

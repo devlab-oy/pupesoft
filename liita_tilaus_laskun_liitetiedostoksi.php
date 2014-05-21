@@ -2,7 +2,7 @@
 
 require ("inc/parametrit.inc");
 
-echo "<font class='head'>",t("Liit‰ tilaus laskun liitetiedostoksi"),"</font><hr>";
+echo "<font class='head'>",t("Liit√§ tilaus laskun liitetiedostoksi"),"</font><hr>";
 
 if (!isset($laskunro)) $laskunro = '';
 
@@ -26,8 +26,8 @@ if (trim($laskunro) != '' and is_numeric($laskunro)) {
 
     $onnistuiko = liita_tilaus_laskun_liitetiedostoksi($kukarow, $yhtiorow, $liitetaanko_editilaus_laskulle_hakemisto, $lasku_row['tunnus'], $lasku_row['asiakkaan_tilausnumero']);
 
-    if ($onnistuiko) echo "<br/>",t("Laskun")," {$laskunro} ",t("liitetiedostoksi lis‰ttin tilaus")," {$lasku_row['asiakkaan_tilausnumero']}.<br/>";
-    else echo "<br/>",t("Liitetiedoston lis‰‰minen ep‰onnistui"),". ",t("Tilausta ei lˆytynyt"),"!<br/>";
+    if ($onnistuiko) echo "<br/>",t("Laskun")," {$laskunro} ",t("liitetiedostoksi lis√§ttin tilaus")," {$lasku_row['asiakkaan_tilausnumero']}.<br/>";
+    else echo "<br/>",t("Liitetiedoston lis√§√§minen ep√§onnistui"),". ",t("Tilausta ei l√∂ytynyt"),"!<br/>";
 
   }
   elseif (mysql_num_rows($lasku_res) == 2) {

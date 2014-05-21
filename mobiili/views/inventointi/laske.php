@@ -12,7 +12,7 @@
   <input type='hidden' name='reservipaikka' value='<?php echo $reservipaikka ?>'>
   <table>
     <tr>
-      <th>M‰‰r‰</th>
+      <th>M√§√§r√§</th>
       <td>
         <input type='text' name='maara' value='<?php echo $maara ?>' size='6' autofocus>
         <b><?php echo $tuote['yksikko'] ?><b>

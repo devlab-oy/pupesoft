@@ -116,7 +116,7 @@ if (!file_exists($tilvahvfilenimi)) {
     $ulos .= "TILVAHV.TLV_SISALTOKOODI:29\n";
     $ulos .= "*RE TILVAHV " . $tulostettava_tunnus . "\n";
 
-    $rivino = 1; // dummy rivino, kun elma ei handlaa pitki‰
+    $rivino = 1; // dummy rivino, kun elma ei handlaa pitki√§
 
     while ($tvtilausrivirow = mysql_fetch_array($tilvahresult)) {
 
@@ -160,7 +160,7 @@ if (!file_exists($tilvahvfilenimi)) {
     fputs ($toot,$ulos);
     fclose ($toot);
 
-    // l‰hetet‰‰n ftpll‰
+    // l√§hetet√§√§n ftpll√§
     if ($laskurow["toim_ovttunnus"] == "") $laskurow["toim_ovttunnus"] = $laskurow["ovttunnus"];
 
     $ftpnimi = $kukarow["yhtio"].$laskurow["toim_ovttunnus"]."-".basename($tilvahvfilenimi);
@@ -183,18 +183,18 @@ if (!file_exists($tilvahvfilenimi)) {
         ftp_close($conn_id);
       }
 
-      // jos mik‰tahansa feilas niin palautetaan yks
+      // jos mik√§tahansa feilas niin palautetaan yks
       if ($conn_id === FALSE or $login_result === FALSE or $upload === FALSE) {
         $palautus = 1;
-        echo "Ongelma Futursoft tilausvahvistuksen l‰hetyksess‰!<br/><br/>";
+        echo "Ongelma Futursoft tilausvahvistuksen l√§hetyksess√§!<br/><br/>";
       }
     }
     else {
       $palautus = 1;
-      echo "Ongelma Futursoft tilausvahvistuksen l‰hetyksess‰!<br/><br/>";
+      echo "Ongelma Futursoft tilausvahvistuksen l√§hetyksess√§!<br/><br/>";
     }
 
-  } // end rivej‰ lˆytyi
+  } // end rivej√§ l√∂ytyi
 }
 
 if (strpos($_SERVER['SCRIPT_NAME'], "tulostakopio.php") === FALSE and $yhtiorow['tilausvahvistus_tallenna'] == 'K') {

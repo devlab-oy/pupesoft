@@ -5,7 +5,7 @@ if (isset($_POST["tee"])) {
   if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 }
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("../inc/parametrit.inc");
@@ -17,7 +17,7 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
 
 echo "<font class=head>".t("Piiritilasto")."</font><hr>";
 
-// k‰yttis
+// k√§yttis
 echo "<form method='POST'>";
 echo "<table>";
 
@@ -47,12 +47,12 @@ echo "<option value='PIMY' $sel[PIMY]>".t("Piirimyynnit")."</option>";
 echo "<option value='PIMYAS' $sel[PIMYAS]>".t("Piirimyynnit asiakkaittain")."</option>";
 echo "</select></td></tr>";
 
-echo "<tr><th>".t("Alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+echo "<tr><th>".t("Alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
     <td><input type='text' name='ppa' value='$ppa' size='3'></td>
     <td><input type='text' name='kka' value='$kka' size='3'></td>
     <td><input type='text' name='vva' value='$vva' size='5'></td></tr>";
 
-echo "<tr><th>".t("Loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+echo "<tr><th>".t("Loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
     <td><input type='text' name='ppl' value='$ppl' size='3'></td>
     <td><input type='text' name='kkl' value='$kkl' size='3'></td>
     <td><input type='text' name='vvl' value='$vvl' size='5'></td></tr>";
@@ -68,7 +68,7 @@ if ($yhtiorow["konserni"] != "") {
   $chk = "";
   if ($konserni != "") $chk = "CHECKED";
 
-  echo "<tr><th>".t("N‰yt‰ kaikki konserniyhtiˆt")."</th><td colspan='3'><input type='checkbox' name='konserni' $chk></td></tr>";
+  echo "<tr><th>".t("N√§yt√§ kaikki konserniyhti√∂t")."</th><td colspan='3'><input type='checkbox' name='konserni' $chk></td></tr>";
 }
 
 echo "</table>";
@@ -82,7 +82,7 @@ if ($tee != '' and isset($painoinnappia)) {
   $q_yhtio = "";
 
   if ($konserni != "") {
-    // Haetaan konsernin kaikki yhtiot ja tehd‰‰n mysql lauseke muuttujaan yhtiot
+    // Haetaan konsernin kaikki yhtiot ja tehd√§√§n mysql lauseke muuttujaan yhtiot
     $query = "SELECT group_concat(concat('\'',yhtio,'\'')) yhtiot
               from yhtio
               where konserni  = '$yhtiorow[konserni]'
@@ -112,17 +112,17 @@ if ($tee != '' and isset($painoinnappia)) {
   $q_osatry  = "";
   $osatry    = FALSE;
 
-  // Korjataan hieman monivalintalaatikon paluttamaa muuttujaa, koska t‰ss‰ tiedot luetaan laskulta ja tilausrivilt‰
+  // Korjataan hieman monivalintalaatikon paluttamaa muuttujaa, koska t√§ss√§ tiedot luetaan laskulta ja tilausrivilt√§
   $lisa = str_ireplace("asiakas.", "lasku.", $lisa);
   $lisa = str_ireplace("tuote.", "tilausrivi.", $lisa);
 
-  // N‰ytet‰‰nkˆ osasto ja try
+  // N√§ytet√§√§nk√∂ osasto ja try
   if ($rappari == "PITIBU" or stripos($lisa, "tilausrivi.osasto") !== FALSE or stripos($lisa, "tilausrivi.try") !== FALSE) {
     $osatry = TRUE;
   }
 
   if (@include('Spreadsheet/Excel/Writer.php')) {
-    // Keksit‰‰n failille joku varmasti uniikki nimi:
+    // Keksit√§√§n failille joku varmasti uniikki nimi:
     list($usec, $sec) = explode(' ', microtime());
     mt_srand((float) $sec + ((float) $usec * 100000));
     $excelnimi = md5(uniqid(mt_rand(), true)).".xls";
@@ -237,7 +237,7 @@ if ($tee != '' and isset($painoinnappia)) {
   $rivilimitti = 1000;
 
   echo "<table><tr>
-    <th>",t("Valittu aikav‰li"),"</th>
+    <th>",t("Valittu aikav√§li"),"</th>
     <td>{$ppa}</td>
     <td>{$kka}</td>
     <td>{$vva}</td>
@@ -249,7 +249,7 @@ if ($tee != '' and isset($painoinnappia)) {
 
   if ($rivimaara > $rivilimitti) {
     echo "<br><font class='error'>",t("Hakutulos oli liian suuri"),"!</font><br>";
-    echo "<font class='error'>",t("Tallenna/avaa tulos exceliss‰"),"!</font><br><br>";
+    echo "<font class='error'>",t("Tallenna/avaa tulos exceliss√§"),"!</font><br><br>";
   }
   else {
 
@@ -257,26 +257,26 @@ if ($tee != '' and isset($painoinnappia)) {
     echo "<tr>";
 
     if ($konserni != "") {
-      echo "<th>".t("Yhtiˆ")."</th>";
+      echo "<th>".t("Yhti√∂")."</th>";
     }
 
     if ($rappari == "PITIBU") {
       echo "<th>".t("Piiri")."</th>";
       echo "<th>".t("Osasto")."</th>";
-      echo "<th>".t("Tuoteryhm‰")."</th>";
+      echo "<th>".t("Tuoteryhm√§")."</th>";
       echo "<th>".t("Myynti")."<br>$toissavuosi</th>";
       echo "<th>".t("Kate")."<br>$toissavuosi</th>";
       echo "<th>".t("Myynti")."<br>$edellisvuosi</th>";
       echo "<th>".t("Kate")."<br>$edellisvuosi</th>";
-      echo "<th>".t("Myynti")."<br>".t("aikav‰lill‰")."</th>";
-      echo "<th>".t("Kate")."<br>".t("aikav‰lill‰")."</th>";
+      echo "<th>".t("Myynti")."<br>".t("aikav√§lill√§")."</th>";
+      echo "<th>".t("Kate")."<br>".t("aikav√§lill√§")."</th>";
       echo "<th>".t("Myynti")."<br>$vvl</th>";
       echo "<th>".t("Kate")."<br>$vvl</th>";
     }
     elseif ($rappari == "PIMY") {
       if ($osatry) {
         echo "<th>".t("Osasto")."</th>";
-        echo "<th>".t("Tuoteryhm‰")."</th>";
+        echo "<th>".t("Tuoteryhm√§")."</th>";
       }
       echo "<th>".t("Piiri")."</th>";
       echo "<th>".t("Myyntinyt")."</th>";
@@ -289,7 +289,7 @@ if ($tee != '' and isset($painoinnappia)) {
     elseif ($rappari == "PIMYAS") {
       if ($osatry) {
         echo "<th>".t("Osasto")."</th>";
-        echo "<th>".t("Tuoteryhm‰")."</th>";
+        echo "<th>".t("Tuoteryhm√§")."</th>";
       }
       echo "<th>".t("Piiri")."</th>";
       echo "<th>".t("Ytunnus")."</th>";
@@ -306,19 +306,19 @@ if ($tee != '' and isset($painoinnappia)) {
 
   if (isset($workbook)) {
     if ($konserni != "") {
-      $worksheet->writeString($excelrivi, $excelsarake++, t("Yhtiˆ"));
+      $worksheet->writeString($excelrivi, $excelsarake++, t("Yhti√∂"));
     }
 
     if ($rappari == "PITIBU") {
       $worksheet->writeString($excelrivi, $excelsarake++, t("Piiri"));
       $worksheet->writeString($excelrivi, $excelsarake++, t("Osasto"));
-      $worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteryhm‰"));
+      $worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteryhm√§"));
       $worksheet->writeString($excelrivi, $excelsarake++, t("Myynti")." $toissavuosi");
       $worksheet->writeString($excelrivi, $excelsarake++, t("Kate")." $toissavuosi");
       $worksheet->writeString($excelrivi, $excelsarake++, t("Myynti")." $edellisvuosi");
       $worksheet->writeString($excelrivi, $excelsarake++, t("Kate")." $edellisvuosi");
-      $worksheet->writeString($excelrivi, $excelsarake++, t("Myynti")." ".t("aikav‰lill‰"));
-      $worksheet->writeString($excelrivi, $excelsarake++, t("Kate")." ".t("aikav‰lill‰"));
+      $worksheet->writeString($excelrivi, $excelsarake++, t("Myynti")." ".t("aikav√§lill√§"));
+      $worksheet->writeString($excelrivi, $excelsarake++, t("Kate")." ".t("aikav√§lill√§"));
       $worksheet->writeString($excelrivi, $excelsarake++, t("Myynti")." $vvl");
       $worksheet->writeString($excelrivi, $excelsarake++, t("Kate")." $vvl");
 
@@ -326,7 +326,7 @@ if ($tee != '' and isset($painoinnappia)) {
     }
     elseif ($rappari == "PIMY") {
       if ($osatry) $worksheet->writeString($excelrivi, $excelsarake++, t("Osasto"));
-      if ($osatry) $worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteryhm‰"));
+      if ($osatry) $worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteryhm√§"));
       $worksheet->writeString($excelrivi, $excelsarake++, t("Piiri"));
       $worksheet->writeString($excelrivi, $excelsarake++, t("Myyntinyt"));
       $worksheet->writeString($excelrivi, $excelsarake++, t("Myyntied"));
@@ -339,7 +339,7 @@ if ($tee != '' and isset($painoinnappia)) {
     }
     elseif ($rappari == "PIMYAS") {
       if ($osatry) $worksheet->writeString($excelrivi, $excelsarake++, t("Osasto"));
-      if ($osatry) $worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteryhm‰"));
+      if ($osatry) $worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteryhm√§"));
       $worksheet->writeString($excelrivi, $excelsarake++, t("Piiri"));
       $worksheet->writeString($excelrivi, $excelsarake++, t("Ytunnus"));
       $worksheet->writeString($excelrivi, $excelsarake++, t("Nimi"));
@@ -356,7 +356,7 @@ if ($tee != '' and isset($painoinnappia)) {
   }
 
   while ($row = mysql_fetch_assoc($eresult)) {
-    // Tarvitaanko osaston ja tuoteryhm‰n nimet
+    // Tarvitaanko osaston ja tuoteryhm√§n nimet
     if ($osatry) {
       $osastores = t_avainsana("OSASTO", "", "and avainsana.selite ='$row[osasto]'");
       $osastorow = mysql_fetch_assoc($osastores);
@@ -369,7 +369,7 @@ if ($tee != '' and isset($painoinnappia)) {
       if ($tryrow['selitetark'] != "") $row['try'] = $row['try']." - ".$tryrow['selitetark'];
     }
 
-    // Yhteens‰summa per piiri
+    // Yhteens√§summa per piiri
     if ($rivimaara <= $rivilimitti and !$osatry and $rappari == "PIMYAS" and $row["piiri"] != $edpiiri and $edpiiri != "") {
 
       $myyntiind = 0;
@@ -530,7 +530,7 @@ if ($tee != '' and isset($painoinnappia)) {
 
   }
 
-  // vikan rivin kaikkiyhteens‰
+  // vikan rivin kaikkiyhteens√§
   if ($rivimaara <= $rivilimitti and $rappari == "PIMYAS" or $rappari == "PIMY") {
     $myyntiind = 0;
     if ($myyntied != 0) $myyntiind = round($kaikki_myyntinyt / $kaikki_myyntied, 1);

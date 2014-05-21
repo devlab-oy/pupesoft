@@ -10,7 +10,7 @@ class pupeExcel {
 
     $this->_exceldblink = $temporarylink;
 
-    // Tehdään Excel dataa varten temporary tietokantataulu
+    // TehdÃ¤Ã¤n Excel dataa varten temporary tietokantataulu
     $query = "  CREATE temporary table temporary_excel_data (
           excelrivi int(11) default null,
           excelsarake int(11) default null,
@@ -20,7 +20,7 @@ class pupeExcel {
           style text default null)";
     $result = pupe_query($query, $this->_exceldblink);
 
-    // Tehdään Excel stringejä varten temporary tietokantataulu
+    // TehdÃ¤Ã¤n Excel stringejÃ¤ varten temporary tietokantataulu
     $query = "  CREATE temporary table temporary_excel_sharedstrings (
           string_key varchar(100) not null,
           string text default null,
@@ -43,7 +43,7 @@ class pupeExcel {
 
   function setStyle($cell, $style) {
     if (isset($style["date"]) and $style["date"]) {
-      // s=1 viittaa styles.zml failin ykkös-styleen
+      // s=1 viittaa styles.zml failin ykkÃ¶s-styleen
       $cell->addAttribute('s', '1');
     }
 
@@ -59,7 +59,7 @@ class pupeExcel {
       return;
     }
 
-    // Indeksit juoksee tässä maailmassa ykkösestä
+    // Indeksit juoksee tÃ¤ssÃ¤ maailmassa ykkÃ¶sestÃ¤
     $excelrivi++;
     $excelsarake++;
 
@@ -81,7 +81,7 @@ class pupeExcel {
       return;
     }
 
-    // Indeksit juoksee tässä maailmassa ykkösestä
+    // Indeksit juoksee tÃ¤ssÃ¤ maailmassa ykkÃ¶sestÃ¤
     $excelrivi++;
     $excelsarake++;
 
@@ -100,7 +100,7 @@ class pupeExcel {
       return;
     }
 
-    // Indeksit juoksee tässä maailmassa ykkösestä
+    // Indeksit juoksee tÃ¤ssÃ¤ maailmassa ykkÃ¶sestÃ¤
     $excelrivi++;
     $excelsarake++;
 
@@ -115,7 +115,7 @@ class pupeExcel {
 
   function writeString($excelrivi, $excelsarake, $string, $style = array()) {
 
-    // Indeksit juoksee tässä maailmassa ykkösestä
+    // Indeksit juoksee tÃ¤ssÃ¤ maailmassa ykkÃ¶sestÃ¤
     $excelrivi++;
     $excelsarake++;
 
@@ -158,14 +158,14 @@ class pupeExcel {
     $sheetData      = simplexml_load_file($sheetDataFile);
     $sharedStrings = simplexml_load_file($sharedStringsFile);
 
-    // Päivitetään excel dataan string_id:t
+    // PÃ¤ivitetÃ¤Ã¤n excel dataan string_id:t
     $query = "UPDATE temporary_excel_data
               JOIN temporary_excel_sharedstrings ON (temporary_excel_sharedstrings.string_key = temporary_excel_data.value)
               SET temporary_excel_data.string_id = (temporary_excel_sharedstrings.id-1)
               WHERE temporary_excel_data.type = 'S'";
     $result = pupe_query($query, $this->_exceldblink);
 
-    // Tehdään Shared Strings XML
+    // TehdÃ¤Ã¤n Shared Strings XML
     $query = "SELECT *
               FROM temporary_excel_sharedstrings";
     $result = pupe_query($query, $this->_exceldblink);
@@ -175,12 +175,12 @@ class pupeExcel {
 
     while ($shared_row = mysql_fetch_assoc($result)) {
       $si = $sharedStrings->addChild("si", "");
-      $si->addChild("t", utf8_encode($shared_row["string"]));
+      $si->addChild("t", $shared_row["string"]);
 
       $stringCount += $shared_row["times_used"];
     }
 
-    // Tehdään Excel taulukko XML
+    // TehdÃ¤Ã¤n Excel taulukko XML
     $query = "SELECT *
               FROM temporary_excel_data
               ORDER BY excelrivi, excelsarake";
@@ -191,7 +191,7 @@ class pupeExcel {
 
     $edellinen_excelrivi = -1;
 
-    // Kirjoitetaan itse xml:ä
+    // Kirjoitetaan itse xml:Ã¤
     while ($data_row = mysql_fetch_assoc($result)) {
 
       if ($data_row["excelrivi"] != $edellinen_excelrivi) {
@@ -254,8 +254,8 @@ class pupeExcel {
       if ($data_row["type"] == "D") {
         list($vv, $kk, $pp) = explode("-", substr($data_row["value"], 0, 10));
 
-        // Excelissä päivämäärät lasketaan päivissä päivästä 1.1.1900
-        // 25569 päivää -> 1.1.1900 - 1.1.1970
+        // ExcelissÃ¤ pÃ¤ivÃ¤mÃ¤Ã¤rÃ¤t lasketaan pÃ¤ivissÃ¤ pÃ¤ivÃ¤stÃ¤ 1.1.1900
+        // 25569 pÃ¤ivÃ¤Ã¤ -> 1.1.1900 - 1.1.1970
         $dateExcel = (mktime(0, 0, 0, $kk, $pp, $vv)/86400)+25569+1;
 
         // Set cell value

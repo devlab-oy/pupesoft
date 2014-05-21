@@ -52,7 +52,7 @@ else {
     $laskurow = mysql_fetch_array($result);
   }
   else {
-    echo "<font style='error'>".t("VIRHE: Saapumista ei en‰‰ lˆydy")."!</font>";
+    echo "<font style='error'>".t("VIRHE: Saapumista ei en√§√§ l√∂ydy")."!</font>";
     exit;
   }
 }
@@ -62,9 +62,9 @@ if ($keikanalatila == "T") {
   $res = pupe_query($query);
 
   if (mysql_num_rows($res) > 0) {
-    echo "<font class='message'>".t("Syˆt‰ uusi lasku")." <form method='POST' action='".$palvelin2."ulask.php'>
-        <input type='hidden' name='lopetus' value='$lopetus/SPLIT/$PHP_SELF////toim=$toim//tee=kululaskut//toiminto=kululaskut//projektilla=$projektilla//from=VALITSETOIMITUS//tilausnumero=$tilausnumero//keikanalatila=T//otunnus=$otunnus/NIMILISA=Liit‰ kululasku/'>
-        <input type='submit' value='" . t('Syˆt‰ lasku')."'>
+    echo "<font class='message'>".t("Sy√∂t√§ uusi lasku")." <form method='POST' action='".$palvelin2."ulask.php'>
+        <input type='hidden' name='lopetus' value='$lopetus/SPLIT/$PHP_SELF////toim=$toim//tee=kululaskut//toiminto=kululaskut//projektilla=$projektilla//from=VALITSETOIMITUS//tilausnumero=$tilausnumero//keikanalatila=T//otunnus=$otunnus/NIMILISA=Liit√§ kululasku/'>
+        <input type='submit' value='" . t('Sy√∂t√§ lasku')."'>
         </form><br><br>";
   }
 
@@ -72,9 +72,9 @@ if ($keikanalatila == "T") {
   $res = pupe_query($query);
 
   if (mysql_num_rows($res) > 0) {
-    echo "<font class='message'>".t("Syˆt‰ uusi matkalasku")." <form method='POST' action='".$palvelin2."matkalasku.php'>
-        <input type='hidden' name='lopetus' value='$lopetus/SPLIT/$PHP_SELF////toim=$toim//tee=kululaskut//toiminto=kululaskut//projektilla=$projektilla//from=VALITSETOIMITUS//tilausnumero=$tilausnumero//keikanalatila=T//otunnus=$otunnus/NIMILISA=Liit‰ kululasku/'>
-        <input type='submit' value='" . t('Syˆt‰ lasku')."'>
+    echo "<font class='message'>".t("Sy√∂t√§ uusi matkalasku")." <form method='POST' action='".$palvelin2."matkalasku.php'>
+        <input type='hidden' name='lopetus' value='$lopetus/SPLIT/$PHP_SELF////toim=$toim//tee=kululaskut//toiminto=kululaskut//projektilla=$projektilla//from=VALITSETOIMITUS//tilausnumero=$tilausnumero//keikanalatila=T//otunnus=$otunnus/NIMILISA=Liit√§ kululasku/'>
+        <input type='submit' value='" . t('Sy√∂t√§ lasku')."'>
         </form><br><br>";
   }
 }
@@ -89,7 +89,7 @@ if ($tee_kululaskut == "liita") {
   $result = pupe_query($query);
   $oslasrow = mysql_fetch_array($result);
 
-  // jos meill‰ on hyvityslasku niin haetaan vaan negatiivisi‰ alvikirjauksia (en tied‰ ollenkaan onko t‰m‰ futureprooof) :(
+  // jos meill√§ on hyvityslasku niin haetaan vaan negatiivisi√§ alvikirjauksia (en tied√§ ollenkaan onko t√§m√§ futureprooof) :(
   if ($oslasrow["summa"] < 0) {
     $alvilisa = "and summa < 0";
   }
@@ -97,7 +97,7 @@ if ($tee_kululaskut == "liita") {
     $alvilisa = "and summa > 0";
   }
 
-  // Haetaan kululaskun kaikki verotiliˆinnit jotta voidaan tallentaa myˆs veroton summa
+  // Haetaan kululaskun kaikki verotili√∂innit jotta voidaan tallentaa my√∂s veroton summa
   $query = "SELECT sum(summa) summa
             from tiliointi
             where yhtio  = '$kukarow[yhtio]'
@@ -128,12 +128,12 @@ if ($tee_kululaskut == "liita") {
   $apure = pupe_query($query);
   $apurow = mysql_fetch_array($apure);
 
-  // T‰m‰n kululaskun k‰ytett‰viss‰ oleva summa
+  // T√§m√§n kululaskun k√§ytett√§viss√§ oleva summa
   $summa_kaytettavissa = round((float) $oslasrow["arvo"] - (float) $apurow["arvo"], 2);
 
-  // Jos k‰ytt‰j‰ on syˆtt‰nyt osasumman kululaskulta
+  // Jos k√§ytt√§j√§ on sy√∂tt√§nyt osasumman kululaskulta
   if ($liitasumma != 0) {
-    //jos t‰m‰ on hyvityslasku k‰‰nnet‰‰n k‰ytt‰j‰n syˆtt‰m‰ summa aina negatiiviseksi
+    //jos t√§m√§ on hyvityslasku k√§√§nnet√§√§n k√§ytt√§j√§n sy√∂tt√§m√§ summa aina negatiiviseksi
     if ($oslasrow["arvo"] < 0) {
       $liitasumma = -1 * abs($liitasumma);
     }
@@ -149,26 +149,26 @@ if ($tee_kululaskut == "liita") {
     $verotonsumma  = (float) $liitasumma;
   }
   else {
-    //T‰ss‰ on ostolaskun verollinen summa (Tarvitaan alvillisissa vaihto-omaisuuslaskuissa)
+    //T√§ss√§ on ostolaskun verollinen summa (Tarvitaan alvillisissa vaihto-omaisuuslaskuissa)
     $verosumma     = (float) $oslasrow["summa"];
     //Ja veroton summa
     $verotonsumma   = (float) $oslasrow["arvo"];
   }
 
   if ($summa_kaytettavissa > 0 and $verotonsumma > 0 and $summa_kaytettavissa < $verotonsumma) {
-    echo "<font class='error'>".t("VIRHE: Yritit liitt‰‰ liian suuren summan. Laskun saldo ei riitt‰nyt")."!</font><br>";
+    echo "<font class='error'>".t("VIRHE: Yritit liitt√§√§ liian suuren summan. Laskun saldo ei riitt√§nyt")."!</font><br>";
     $tee_kululaskut  = "haku";
     $verosumma     = 0;
     $verotonsumma   = 0;
   }
   elseif ($summa_kaytettavissa < 0 and $verotonsumma < 0 and $summa_kaytettavissa > $verotonsumma) {
-    echo "<font class='error'>".t("VIRHE: Yritit liitt‰‰ liian suuren summan. Laskun saldo ei riitt‰nyt")."!</font><br>";
+    echo "<font class='error'>".t("VIRHE: Yritit liitt√§√§ liian suuren summan. Laskun saldo ei riitt√§nyt")."!</font><br>";
     $tee_kululaskut  = "haku";
     $verosumma     = 0;
     $verotonsumma   = 0;
   }
 
-  //lis‰t‰‰n lasku
+  //lis√§t√§√§n lasku
   if ($verotonsumma != 0 and $verosumma != 0) {
 
     $osto_kulu = (!isset($osto_kulu) or trim($osto_kulu) == '') ? 0 : (float) $osto_kulu;
@@ -179,7 +179,7 @@ if ($tee_kululaskut == "liita") {
     $osto_rahti_alv = (!isset($osto_rahti_alv) or trim($osto_rahti_alv) == '') ? 0 : (float) $osto_rahti_alv;
     $osto_rivi_kulu_alv = (!isset($osto_rivi_kulu_alv) or trim($osto_rivi_kulu_alv) == '') ? 0 : (float) $osto_rivi_kulu_alv;
 
-    // meill‰ on laskurow haettuna ylh‰‰ll‰, tehd‰‰n liitosotsikko
+    // meill√§ on laskurow haettuna ylh√§√§ll√§, tehd√§√§n liitosotsikko
     $query = "INSERT into lasku set
               yhtio              = '$kukarow[yhtio]',
               laskunro           = '$laskurow[laskunro]',
@@ -225,10 +225,10 @@ if ($tee_kululaskut == "liita") {
 
     if ($silent == "") echo "<font class='message'>".t("Lasku")." ($oslasrow[nimi] $oslasrow[summa] $oslasrow[valkoodi]) ".t("liitettiin saapumiseen")." $laskurow[laskunro].</font><br><br>";
 
-    // jos kyseess‰ on vaihto-omaisuuslasku, niin p‰ivitet‰‰n laskun tapvm keikalla ja vientikent‰n info keikan otsikolle (jos jostain syyst‰ toimittajan oletus onkin v‰‰rin)
+    // jos kyseess√§ on vaihto-omaisuuslasku, niin p√§ivitet√§√§n laskun tapvm keikalla ja vientikent√§n info keikan otsikolle (jos jostain syyst√§ toimittajan oletus onkin v√§√§rin)
     if ($oslasrow["vienti"] == "C" or $oslasrow["vienti"] == "F" or $oslasrow["vienti"] == "I" or $oslasrow["vienti"] == "J" or $oslasrow["vienti"] == "K" or $oslasrow["vienti"] == "L") {
 
-      // Jos keikka on jo loppulaskettu (eli t‰ss‰ vain jaetaan lasku osiin, niin ei nollata kohdistettu-kentt‰‰)
+      // Jos keikka on jo loppulaskettu (eli t√§ss√§ vain jaetaan lasku osiin, niin ei nollata kohdistettu-kentt√§√§)
       if ($keikanalatila == "X") {
         $upd_kohdistettu = "X";
       }
@@ -286,13 +286,13 @@ if ($tee_kululaskut == "poista") {
                 and tunnus  = '$laskurow[tunnus]'";
       $result = pupe_query($query);
 
-      //katotaan j‰ikˆ keikalle en‰‰ yht‰‰n vaihto-omaisuuslaskua
+      //katotaan j√§ik√∂ keikalle en√§√§ yht√§√§n vaihto-omaisuuslaskua
       $query  = "SELECT tunnus
                  from lasku
                  where yhtio='$kukarow[yhtio]' and tila='K' and alatila = '$keikanalatila' and vanhatunnus<>0 and laskunro='$laskurow[laskunro]' and vienti in ('C','F','I','J','K','L')";
       $result = pupe_query($query);
 
-      //vaihto-omaisuuslasku/laskuja ei lˆytynyt
+      //vaihto-omaisuuslasku/laskuja ei l√∂ytynyt
       if (mysql_num_rows($result) == 0) {
         // haetaan toimittajan tiedot uusiks
         $query = "SELECT * from toimi where yhtio='$kukarow[yhtio]' and tunnus='$toimittajaid'";
@@ -326,7 +326,7 @@ if ($keikanalatila == "T" and $tee_kululaskut == "lisaa_rivit" and $kukarow["kes
   $tuoteres = pupe_query($query);
 
   if (mysql_num_rows($tuoteres) != 1) {
-    echo t("VIRHE: Yhtiˆn laskutuslisa_tuotenumero ei ole m‰‰ritelty")."!!<br>";
+    echo t("VIRHE: Yhti√∂n laskutuslisa_tuotenumero ei ole m√§√§ritelty")."!!<br>";
     $tee_kululaskut = "";
   }
 }
@@ -335,7 +335,7 @@ if ($keikanalatila == "T" and $tee_kululaskut == "lisaa_rivit" and $kukarow["kes
 
   $laskurow_save["alv"] = $laskurow["alv"];
 
-  //yhtiˆn oletusalvi!
+  //yhti√∂n oletusalvi!
   $wquery = "SELECT selite from avainsana where yhtio='$kukarow[yhtio]' and laji='alv' and selitetark!=''";
   $wtres  = pupe_query($wquery);
   $wtrow  = mysql_fetch_array($wtres);
@@ -363,7 +363,7 @@ if ($keikanalatila == "T" and $tee_kululaskut == "lisaa_rivit" and $kukarow["kes
 
   while ($keikkarow = mysql_fetch_array($keikkares)) {
 
-    // Tutkitaan lˆyt‰‰kˆ t‰m‰ rivi jo tyˆm‰‰r‰yksell‰
+    // Tutkitaan l√∂yt√§√§k√∂ t√§m√§ rivi jo ty√∂m√§√§r√§yksell√§
     $query = "SELECT tilausrivi.tunnus
               FROM tilausrivi
               JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus
@@ -374,7 +374,7 @@ if ($keikanalatila == "T" and $tee_kululaskut == "lisaa_rivit" and $kukarow["kes
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
-      // tuote lˆytyi ok, lis‰t‰‰n rivi
+      // tuote l√∂ytyi ok, lis√§t√§√§n rivi
       $trow = mysql_fetch_array($tuoteres);
 
       $tilausrivilinkki  = $keikkarow["tunnus"];
@@ -392,7 +392,7 @@ if ($keikanalatila == "T" and $tee_kululaskut == "lisaa_rivit" and $kukarow["kes
     }
   }
 
-  echo t("Matkalaskun rivit lis‰ttiin tilaukselle")."!<br>";
+  echo t("Matkalaskun rivit lis√§ttiin tilaukselle")."!<br>";
 
   $tyhjenna     = "OK";
   $laskurow["alv"] = $laskurow_save["alv"];
@@ -401,7 +401,7 @@ if ($keikanalatila == "T" and $tee_kululaskut == "lisaa_rivit" and $kukarow["kes
 if ($silent == "") {
   if ($toiminto == "kululaskut") {
 
-    // katotaan onko liitettyj‰ laskuja
+    // katotaan onko liitettyj√§ laskuja
     $query  = "SELECT lasku.*, l2.comments
                FROM lasku
                LEFT JOIN lasku l2 ON l2.yhtio=lasku.yhtio and l2.tunnus = lasku.vanhatunnus
@@ -459,7 +459,7 @@ if ($silent == "") {
         $osresres = pupe_query($query);
         $osresrow = mysql_fetch_array($osresres);
 
-        // tehd‰‰n lasku linkki
+        // tehd√§√§n lasku linkki
         echo "<td valign='top'>" . ebid($osresrow['tunnus']) . "</td>";
 
         $vienti_teksti = "";
@@ -535,7 +535,7 @@ if ($silent == "") {
                 <input type='hidden' name='tilausnumero' value='$tilausnumero'>
                 <input type='hidden' name='toim' value='$toim'>
                 <input type='hidden' name='projektilla' value='$projektilla'>
-                <input type='submit' value='" . t('Lis‰‰ matkalaskun rivit tilaukselle')."'></form>
+                <input type='submit' value='" . t('Lis√§√§ matkalaskun rivit tilaukselle')."'></form>
                 </form></td>";
           }
         }
@@ -590,8 +590,8 @@ if ($silent == "") {
     echo "<th>".t("Etsi lasku")."</th>";
     echo "<th><SELECT name='hakutapa'>";
     echo "<option value='S' $sel1>".t("verollisella summalla")."</option>";
-    echo "<option value='N' $sel2>".t("nimell‰")."</option>";
-    echo "<option value='V' $sel3>".t("viitteell‰")."</option>";
+    echo "<option value='N' $sel2>".t("nimell√§")."</option>";
+    echo "<option value='V' $sel3>".t("viitteell√§")."</option>";
     echo "</SELECT></th>";
     echo "<td><input type='text' name='haku' value='$haku'></td>";
     echo "<td class='back'><input type='submit' value='".t("Hae")."'></td>";
@@ -615,11 +615,11 @@ if ($silent == "") {
     }
 
     echo "<tr>";
-    echo "<th align='left'>".t("N‰yt‰ laskut")."</th>";
+    echo "<th align='left'>".t("N√§yt√§ laskut")."</th>";
     echo "<th align='left'><select name='listaustapa'>";
-    echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";
-    echo "<option value='liittamattomat' $sel1>".t("N‰yt‰ vain liitt‰m‰ttˆm‰t")."</option>";
-    echo "<option value='liitetyt' $sel2>".t("N‰yt‰ vain liitetyt")."</option>";
+    echo "<option value=''>".t("N√§yt√§ kaikki")."</option>";
+    echo "<option value='liittamattomat' $sel1>".t("N√§yt√§ vain liitt√§m√§tt√∂m√§t")."</option>";
+    echo "<option value='liitetyt' $sel2>".t("N√§yt√§ vain liitetyt")."</option>";
     echo "</select></th>";
     echo "<td>&nbsp;</td>";
     echo "<td class='back'><input type='submit' value='".t("Hae")."'></td>";
@@ -712,7 +712,7 @@ if ($silent == "") {
 //      $lisa .= " and lasku.ytunnus = '$laskurow[ytunnus]'";
 //    }
 
-    // katsotaan aluksi, ollaanko t‰h‰n saapumiseen liitetty jo vaihto-omaisuuslasku
+    // katsotaan aluksi, ollaanko t√§h√§n saapumiseen liitetty jo vaihto-omaisuuslasku
     $query  = "SELECT *
                from lasku
                where yhtio='$kukarow[yhtio]' and tila='K' and alatila = '$keikanalatila' and vanhatunnus<>0 and laskunro='$laskurow[laskunro]' and vienti in ('C','F','I','J','K','L')";
@@ -721,11 +721,11 @@ if ($silent == "") {
     $vienti   = "";
     $valuutta   = "";
 
-    //vaihto-omaisuuslasku/laskuja lˆytyi
+    //vaihto-omaisuuslasku/laskuja l√∂ytyi
     if (mysql_num_rows($result) != 0) {
       $vaihtrow = mysql_fetch_array($result);
 
-      //n‰it‰ tarvitaan jos haluamme liitt‰‰ lis‰‰ vaihto-omaisuuslaskuja keikalle
+      //n√§it√§ tarvitaan jos haluamme liitt√§√§ lis√§√§ vaihto-omaisuuslaskuja keikalle
       $valuutta   = $vaihtrow["valkoodi"];
       $vienti    = $vaihtrow["vienti"];
     }
@@ -764,7 +764,7 @@ if ($silent == "") {
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
-      echo "<font class='error'>".t("Yht‰‰n sopivaa laskua ei lˆytynyt!")."</font><br><br>";
+      echo "<font class='error'>".t("Yht√§√§n sopivaa laskua ei l√∂ytynyt!")."</font><br><br>";
       $tee_kululaskut = "";
     }
     else {
@@ -784,7 +784,7 @@ if ($silent == "") {
           <th>".t("Viite")."</th>
           <th>".t("Kuva")."</th>
           <th>".t("Vienti")."</th>
-          <th>".t("Liitett‰viss‰")."</th>
+          <th>".t("Liitett√§viss√§")."</th>
           <th>".t("Summa")."</th>";
 
       if ($yhtiorow['ostolaskun_kulutilit'] != '' and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '')) {
@@ -797,7 +797,7 @@ if ($silent == "") {
 
       while ($llrow = mysql_fetch_array($result)) {
 
-        // jos meill‰ on hyvityslasku niin haetaan vaan negatiivisi‰ alvikirjauksia (en tied‰ ollenkaan onko t‰m‰ futureprooof) :(
+        // jos meill√§ on hyvityslasku niin haetaan vaan negatiivisi√§ alvikirjauksia (en tied√§ ollenkaan onko t√§m√§ futureprooof) :(
         if ($llrow["summa"] < 0) {
           $alvilisa = "and summa < 0";
         }
@@ -805,7 +805,7 @@ if ($silent == "") {
           $alvilisa = "and summa > 0";
         }
 
-        // Haetaan kululaskun kaikki verotiliˆinnit jotta voidaan tallentaa myˆs veroton summa
+        // Haetaan kululaskun kaikki verotili√∂innit jotta voidaan tallentaa my√∂s veroton summa
         $query = "SELECT sum(summa) summa
                   from tiliointi
                   where yhtio  = '$kukarow[yhtio]'
@@ -816,7 +816,7 @@ if ($silent == "") {
         $alvires = pupe_query($query);
         $alvirow = mysql_fetch_array($alvires);
 
-        //T‰ss‰ on ostolasku verollinen summa
+        //T√§ss√§ on ostolasku verollinen summa
         $verosumma = $llrow["summa"];
 
         // Ostoreskontralaskun veroton arvo
@@ -826,7 +826,7 @@ if ($silent == "") {
           $alvisumma = $alvirow["summa"] / $llrow["vienti_kurssi"];
         }
 
-        //Ja lopuksi viel‰ veroton summa
+        //Ja lopuksi viel√§ veroton summa
         $verotonsumma = $verosumma - $alvisumma;
 
         $query = "SELECT sum(arvo) arvo, GROUP_CONCAT(DISTINCT laskunro ORDER BY laskunro SEPARATOR ', ') laskunrot
@@ -841,14 +841,14 @@ if ($silent == "") {
 
         if ($summa_kaytettavissa > 0) {
           if ($listaustapa == "liittamattomat" or $listaustapa == "") {
-            // checkkaus t‰ss‰ ettei piiret‰ turhaan
+            // checkkaus t√§ss√§ ettei piiret√§ turhaan
             $voikolisata = "";
 
-            //kululaskut voidaan aina lis‰t‰
+            //kululaskut voidaan aina lis√§t√§
             if ($llrow["vienti"] != "C" and $llrow["vienti"] != "F" and $llrow["vienti"] != "I" and $llrow["vienti"] != "J" and $llrow["vienti"] != "K" and $llrow["vienti"] != "L") {
               $voikolisata = "OK";
             }
-            //jos t‰m‰ on vahto-omaisuuslasku pit‰‰ viel‰ tarkistaa vienti ja valuutta
+            //jos t√§m√§ on vahto-omaisuuslasku pit√§√§ viel√§ tarkistaa vienti ja valuutta
             elseif ($laskurow["alatila"] != "T" and $laskurow["alatila"] != "S" and $llrow["valkoodi"] == $valuutta and $llrow["vienti"] == $vienti and ($llrow["vienti"] == "C" or $llrow["vienti"] == "F" or $llrow["vienti"] == "I" or $llrow["vienti"] == "J" or $llrow["vienti"] == "K" or $llrow["vienti"] == "L")) {
               $voikolisata = "OK";
             }
@@ -866,7 +866,7 @@ if ($silent == "") {
           }
         }
         elseif ($listaustapa == "liitetyt" or $listaustapa =="") {
-          // annetaan menn‰ l‰pi
+          // annetaan menn√§ l√§pi
         }
         else {
           continue;
@@ -901,7 +901,7 @@ if ($silent == "") {
             <td valign='top'>$llrow[valkoodi]</td>
             <td valign='top'>$llrow[viite]</td>";
 
-        // tehd‰‰n lasku linkki
+        // tehd√§√§n lasku linkki
         echo "<td valign='top'>".ebid($llrow['tunnus']) ."</td>";
 
         $vienti_teksti = "";
@@ -1036,13 +1036,13 @@ if ($silent == "") {
           }
           else {
             echo "<td class='spec' valign='top'>";
-            echo t("T‰t‰ vaihto-omaisuuslaskua ei voida lis‰t‰ t‰lle saapumiselle")."!";
+            echo t("T√§t√§ vaihto-omaisuuslaskua ei voida lis√§t√§ t√§lle saapumiselle")."!";
             echo "</td></tr>";
           }
         }
         elseif ($listaustapa == "liitetyt" or $listaustapa == "") {
           echo "<td valign='top' colspan='2'>";
-          echo t("Laskun summa on jo k‰ytetty saapumisella/keikoilla")." $apurow[laskunrot]!";
+          echo t("Laskun summa on jo k√§ytetty saapumisella/keikoilla")." $apurow[laskunrot]!";
           echo "</td></tr>";
         }
         else {

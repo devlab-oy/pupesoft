@@ -29,14 +29,14 @@ $tilausrivi = mysql_fetch_assoc($result);
 
 $alkuperainen_saapuminen = $saapuminen;
 
-# K‰sitell‰‰n eri saapumista
+# K√§sitell√§√§n eri saapumista
 if (!empty($tilausrivi['uusiotunnus'])) {
     $saapuminen = $tilausrivi['uusiotunnus'];
 }
 
 if (empty($tullaan)) $tullaan = '';
 
-# Etsit‰‰n sopivat suuntalavat
+# Etsit√§√§n sopivat suuntalavat
 $query = "(SELECT DISTINCT suuntalavat.tunnus, suuntalavat.sscc, suuntalavat.tila, suuntalavat.kaytettavyys, suuntalavat.keraysvyohyke, suuntalavat.tyyppi
            FROM suuntalavat
            JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = '{$saapuminen}')
@@ -78,11 +78,11 @@ if (isset($submit) and $tullaan != 'pre_vahvista_kerayspaikka') {
         $result   = pupe_query($query);
         $laskurow = mysql_fetch_array($result);
 
-        require("../inc/keikan_toiminnot.inc"); # T‰‰ koittaa heti hakea uudelleen $laskurown ja nollaa siis edellisen haun??!?
+        require("../inc/keikan_toiminnot.inc"); # T√§√§ koittaa heti hakea uudelleen $laskurown ja nollaa siis edellisen haun??!?
 
-        # Tarkistetaan m‰‰r‰ ja splittaillaan jos tarvetta
+        # Tarkistetaan m√§√§r√§ ja splittaillaan jos tarvetta
         if ($hyllytetty < $tilausrivi['varattu']) {
-            # P‰ivitet‰‰n alkuper‰isen rivin kpl
+            # P√§ivitet√§√§n alkuper√§isen rivin kpl
             $ok = paivita_tilausrivin_kpl($tilausrivi['tunnus'], ($tilausrivi['varattu'] - $hyllytetty));
             $uusi_tilausrivi = splittaa_tilausrivi($tilausrivi['tunnus'], $hyllytetty, TRUE, FALSE);
 
@@ -104,9 +104,9 @@ if (isset($submit) and $tullaan != 'pre_vahvista_kerayspaikka') {
         if ($submit == 'siirtovalmis' or $submit == 'suoraan_hyllyyn') {
             echo "Suuntalava $suuntalava siirtovalmiiksi<br>";
 
-            # Suuntalavan k‰sittelytapa (Suoraan (H)yllyyn)
+            # Suuntalavan k√§sittelytapa (Suoraan (H)yllyyn)
             if ($submit == 'suoraan_hyllyyn') {
-                echo "K‰sittelytapa suoraan hyllyyn";
+                echo "K√§sittelytapa suoraan hyllyyn";
                 $query = "UPDATE suuntalavat SET kasittelytapa='H' WHERE tunnus='{$suuntalava}'";
                 $result = pupe_query($query);
             }
@@ -185,8 +185,8 @@ echo "<div class='main'>
     <tr>
         <th></th>
         <th>",t("SSCC"),"</th>
-        <th>",t("Ker.vyˆhyk."),"</th>
-        <th>",t("Rivej‰"),"</th>
+        <th>",t("Ker.vy√∂hyk."),"</th>
+        <th>",t("Rivej√§"),"</th>
         <th>",t("Tyyppi"),"</th>
     </tr>";
 
@@ -223,7 +223,7 @@ while($row = mysql_fetch_assoc($suuntalavat_res)) {
     </tr>";
 }
 
-if (!$loytyiko) $errors[] = t("Suuntalavaa ei lˆytynyt");
+if (!$loytyiko) $errors[] = t("Suuntalavaa ei l√∂ytynyt");
 
 echo "</table></div>";
 echo "<div class='controls'>

@@ -20,7 +20,7 @@ if(!function_exists("extranet_kayttajan_lisatiedottarkista")) {
         $sresult = pupe_query($query);
 
         if (mysql_num_rows($sresult) == 0) {
-          $virhe[$i] = t("Extranet-käyttäjää ei löydy");
+          $virhe[$i] = t("Extranet-kÃ¤yttÃ¤jÃ¤Ã¤ ei lÃ¶ydy");
         }
       }
     }

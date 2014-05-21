@@ -9,7 +9,7 @@ $dateloppu2 = $lyear.sprintf('%02d',$lmonth).sprintf('%02d',$lday);
 $mylmonth   = sprintf('%02d',$lmonth);
 $mylday   = sprintf('%02d',$lday);
 
-// en jaksa muuttaa idiootteja formeja, joten vertailu nyt n‰ill‰ muuttujulla uusiks
+// en jaksa muuttaa idiootteja formeja, joten vertailu nyt n√§ill√§ muuttujulla uusiks
 list($vertailu_alkutunti, $vertailu_alkuminuutti) = explode(":", $kello);
 list($vertailu_lopputunti, $vertailu_loppuminuutti) = explode(":", $lkello);
 
@@ -18,11 +18,11 @@ $vertailu_loppuaika = mktime($vertailu_lopputunti, $vertailu_loppuminuutti, 0, $
 
 //tarkistetaan, etta alku ja loppu ovat eri..
 if ($vertailu_alkuaika >= $vertailu_loppuaika) {
-  echo "<br><br>".t("VIRHE: P‰‰ttymisjankohta on aikaisempi kuin alkamisajankohta")."!";
+  echo "<br><br>".t("VIRHE: P√§√§ttymisjankohta on aikaisempi kuin alkamisajankohta")."!";
   exit;
 }
 
-//Tarkisetetaan p‰‰llekk‰isyys konsernikohtaisesti
+//Tarkisetetaan p√§√§llekk√§isyys konsernikohtaisesti
 $query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
 $result = mysql_query($query) or pupe_error($query);
 $konsernit = "";
@@ -42,23 +42,23 @@ $query = "  select tunnus
 $result = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($result) > 0) {
-  echo "<br><br>".t("VIRHE: P‰‰llekk‰isi‰ tapahtumia")."!";
+  echo "<br><br>".t("VIRHE: P√§√§llekk√§isi√§ tapahtumia")."!";
   exit;
 }
 
 if ($toim == "Sauna") {
   if ($kentta03 != '') {
     $meili = "\n\n\n$kukarow[nimi] on varannut saunan ajalle:\n\n##################################################\n$day-$month-$year   Klo: $kello --> Klo: $lkello\n##################################################\n\n\n";
-    $meili .= "Yhtiˆ:\n$kentta01\n";
+    $meili .= "Yhti√∂:\n$kentta01\n";
     $meili .= "Osasto:\n$kentta02\n\n";
-    $meili .= "Lis‰tiedot:\n$kentta05\n\n";
+    $meili .= "Lis√§tiedot:\n$kentta05\n\n";
     $meili .= "Tilaisuus:\n$kentta03 $kentta04\n\n";
-    $meili .= "Is‰nt‰:\n$kentta06\n\n";
+    $meili .= "Is√§nt√§:\n$kentta06\n\n";
     $meili .= "Vieraat:\n$kentta07\n\n";
-    $meili .= "Vieraslukum‰‰r‰:\n$kentta08\n\n\n";
+    $meili .= "Vieraslukum√§√§r√§:\n$kentta08\n\n\n";
     $meili .= "Juomatoivomus:\n$kentta10\n";
 
-    $tulos = mail("$yhtiorow[varauskalenteri_email]", mb_encode_mimeheader("Saunavaraus", "ISO-8859-1", "Q"), $meili,"From: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$kukarow["eposti"].">\nReply-To: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$row["eposti"].">\n", "-f $yhtiorow[postittaja_email]");
+    $tulos = mail("$yhtiorow[varauskalenteri_email]", mb_encode_mimeheader("Saunavaraus", "UTF-8", "Q"), $meili,"From: ".mb_encode_mimeheader($kukarow["nimi"], "UTF-8", "Q")." <".$kukarow["eposti"].">\nReply-To: ".mb_encode_mimeheader($kukarow["nimi"], "UTF-8", "Q")." <".$row["eposti"].">\n", "-f $yhtiorow[postittaja_email]");
   }
   else{
     echo "<br><br>Tarkista, ett&auml; kaikki tiedot on sy&ouml;tetty!";
@@ -85,7 +85,7 @@ $query = "INSERT into kalenteri SET
           tyyppi   = 'varauskalenteri'";
 $result = mysql_query($query) or pupe_error($query);
 
-echo "<br><br>".t("Tapahtuma lis‰tty varauskalenteriin")."!";
+echo "<br><br>".t("Tapahtuma lis√§tty varauskalenteriin")."!";
 
 if($lopetus != "") {
   lopetus($lopetus, "META");

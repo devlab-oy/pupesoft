@@ -1,11 +1,11 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require("../inc/parametrit.inc");
 
-echo "<font class='head'>".t("Tulosta t‰ydent‰v‰ vienti-ilmoitus")."</font><hr><br>";
+echo "<font class='head'>".t("Tulosta t√§ydent√§v√§ vienti-ilmoitus")."</font><hr><br>";
 
 if ($tee == 'TULOSTA') {
 
@@ -16,13 +16,13 @@ if ($tee == 'TULOSTA') {
 
   if (isset($kka) or isset($ppa) or isset($vva)) {
     if (!checkdate($kka, $ppa, $vva)) {
-      echo "<font class='error'>".t("P‰iv‰m‰‰r‰ virheellinen")."!</font><br>";
+      echo "<font class='error'>".t("P√§iv√§m√§√§r√§ virheellinen")."!</font><br>";
       exit;
     }
   }
   if (isset($kkl) or isset($ppl) or isset($vvl)) {
     if (!checkdate($kkl, $ppl, $vvl)) {
-      echo "<font class='error'>".t("P‰iv‰m‰‰r‰ virheellinen")."!</font><br>";
+      echo "<font class='error'>".t("P√§iv√§m√§√§r√§ virheellinen")."!</font><br>";
       exit;
     }
   }
@@ -51,7 +51,7 @@ if ($tee == 'TULOSTA') {
   $laskuresult = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($laskuresult) == 0)  {
-    echo t("VIRHE: Aineisto on tyhj‰, t‰ydent‰v‰‰ vienti-ilmoitusta ei voida l‰hett‰‰")."!";
+    echo t("VIRHE: Aineisto on tyhj√§, t√§ydent√§v√§√§ vienti-ilmoitusta ei voida l√§hett√§√§")."!";
     exit;
   }
 
@@ -61,7 +61,7 @@ if ($tee == 'TULOSTA') {
   list($usec, $sec) = explode(' ', microtime());
   mt_srand((float) $sec + ((float) $usec * 100000));
 
-  //mik‰ pdffaili kyseess‰
+  //mik√§ pdffaili kyseess√§
   //$pdfnro = 1;
   //$laskufaili = array();
 
@@ -78,7 +78,7 @@ if ($tee == 'TULOSTA') {
   //$laskufaili[$pdfnro] = "/tmp/".$pdfnro.".TVI_Vientilaskut-".md5(uniqid(mt_rand(), true)).".pdf";
   //$fhpdf = fopen($laskufaili[$pdfnro], "w+");
 
-  //aloitellaan ekan sivun tekemist‰
+  //aloitellaan ekan sivun tekemist√§
   $tarksivu   = 0;
   $tarkrivi   = 1;
   $atkrivi   = 1;
@@ -86,19 +86,19 @@ if ($tee == 'TULOSTA') {
   $paperisivu = 1;
   $paperirivi = 1;
 
-  //m‰‰ritel‰‰n muuttujat
+  //m√§√§ritel√§√§n muuttujat
   $tark   = '';
   $paperi = '';
   $atk   = '';
 
-  //piirret‰‰n ekat otsikot
+  //piirret√§√§n ekat otsikot
   paperi_otsikko();
 
   $paperirivi += 10;
 
   //koko aineiston laskutusarvo
   $laskutusarvo = 0;
-  //koko aineiston tietuem‰‰r‰
+  //koko aineiston tietuem√§√§r√§
   $tietuemaara = 0;
   //summa per pvm
   $pvmyht = 0;
@@ -106,14 +106,14 @@ if ($tee == 'TULOSTA') {
   //speciaalilaskuri laskujen kopioille
   $speclask = 0;
 
-  //Katsomme tapahtuiko virheit‰
+  //Katsomme tapahtuiko virheit√§
   $virhe = 0;
 
   while($laskurow = mysql_fetch_array($laskuresult)) {
 
     ///* Laskun tietoja tarkistetaan*///
     if ($laskurow["maa_maara"] == '') {
-      echo t("Laskunumero").": $laskurow[laskunro]. ".t("M‰‰r‰maa puuttuu")."!<br>";
+      echo t("Laskunumero").": $laskurow[laskunro]. ".t("M√§√§r√§maa puuttuu")."!<br>";
       $virhe++;
     }
     else {
@@ -123,7 +123,7 @@ if ($tee == 'TULOSTA') {
       $maaresult = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($maaresult) == 0) {
-        echo t("Laskunumero").": $laskurow[laskunro]. ".t("M‰‰r‰maa on virheellinen")."!<br>";
+        echo t("Laskunumero").": $laskurow[laskunro]. ".t("M√§√§r√§maa on virheellinen")."!<br>";
         $virhe++;
       }
     }
@@ -139,17 +139,17 @@ if ($tee == 'TULOSTA') {
     }
 
     if ($laskurow["sisamaan_kuljetus"] == '') {
-        echo t("Laskunumero").": $laskurow[laskunro]. ".t("Sis‰maan kuljetus puuttuu")."!<br>";
+        echo t("Laskunumero").": $laskurow[laskunro]. ".t("Sis√§maan kuljetus puuttuu")."!<br>";
       $virhe++;
     }
 
     if ($laskurow["sisamaan_kuljetusmuoto"] == '') {
-         echo t("Laskunumero").": $laskurow[laskunro]. ".t("Sis‰maan kuljetusmuoto puuttuu")."!<br>";
+         echo t("Laskunumero").": $laskurow[laskunro]. ".t("Sis√§maan kuljetusmuoto puuttuu")."!<br>";
       $virhe++;
     }
 
     if ($laskurow["sisamaan_kuljetus_kansallisuus"] == '') {
-        //echo "Laskunumero: $laskurow[laskunro]. Sis‰maan kuljetuksen kansallisuus puuttuu!<br>";
+        //echo "Laskunumero: $laskurow[laskunro]. Sis√§maan kuljetuksen kansallisuus puuttuu!<br>";
       //$virhe++;
     }
     else {
@@ -159,7 +159,7 @@ if ($tee == 'TULOSTA') {
       $maaresult = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($maaresult) == 0) {
-        echo t("Laskunumero").": $laskurow[laskunro]. ".t("Sis‰maan kuljetuksen kansallisuus on virheellinen")."!<br>";
+        echo t("Laskunumero").": $laskurow[laskunro]. ".t("Sis√§maan kuljetuksen kansallisuus on virheellinen")."!<br>";
         $virhe++;
       }
     }
@@ -197,7 +197,7 @@ if ($tee == 'TULOSTA') {
     ///* Laskun tietojen tarkistus loppuu*///
 
 
-    ///* katsotaan, ett‰ laskulla on rivej‰, hyvitysrivej‰ ei huolita mukaan vienti-ilmoitukseen, silloin er‰ hyl‰t‰‰n tullissa *///
+    ///* katsotaan, ett√§ laskulla on rivej√§, hyvitysrivej√§ ei huolita mukaan vienti-ilmoitukseen, silloin er√§ hyl√§t√§√§n tullissa *///
     $cquery = "SELECT
                tuote.tullinimike1,
                tuote.tullinimike2,
@@ -214,15 +214,15 @@ if ($tee == 'TULOSTA') {
     $cresult = mysql_query($cquery) or pupe_error($cquery);
 
     if (mysql_num_rows($cresult) == 0) {
-      ///* Tarkistetaan, ett‰ tilausrivej‰ lˆytyy*///
-      echo "Laskunumero: $laskurow[laskunro], ".t("VIRHE: Laskulla ei ole yht‰‰n tilausrivi‰ tai laskun summa oli nolla")."!<br>";
+      ///* Tarkistetaan, ett√§ tilausrivej√§ l√∂ytyy*///
+      echo "Laskunumero: $laskurow[laskunro], ".t("VIRHE: Laskulla ei ole yht√§√§n tilausrivi√§ tai laskun summa oli nolla")."!<br>";
     }
     else {
 
-      ///* Ylim‰‰r‰isten erien vaikutus *///
+      ///* Ylim√§√§r√§isten erien vaikutus *///
       $extrat = abs($laskurow["lisattava_era"])-abs($laskurow["vahennettava_era"]);
 
-      ///* Rivien summasta ja ylim‰‰r‰isist‰ erist‰ tulee laskun vientiarvo *///
+      ///* Rivien summasta ja ylim√§√§r√§isist√§ erist√§ tulee laskun vientiarvo *///
 
       $vientiarvo = 0;
       $laskunarvo = 0;
@@ -237,8 +237,8 @@ if ($tee == 'TULOSTA') {
       $laskunarvo  = sprintf('%.2f', $laskunarvo);
 
 
-      /* Ei viel‰ tehd‰ laskunkopioita t‰ss‰...
-      //laitetaan koostesivu laskupinkan v‰liin
+      /* Ei viel√§ tehd√§ laskunkopioita t√§ss√§...
+      //laitetaan koostesivu laskupinkan v√§liin
       if ($tapvm != $laskurow["tapvm"] && $speclask > 0) {
           $firstpage = $pdf->new_page("a4");
           $pdf->enable('template');
@@ -253,7 +253,7 @@ if ($tee == 'TULOSTA') {
 
           $pdf->draw_text(50,  810, $yhtiorow["nimi"], $firstpage);
 
-          $pdf->draw_text(50,  790, t("P‰iv‰m‰‰r‰").":", $firstpage);
+          $pdf->draw_text(50,  790, t("P√§iv√§m√§√§r√§").":", $firstpage);
           $pdf->draw_text(150, 790, $tapvm, $firstpage);
           $pdf->draw_text(50,  770, t("Laskunumerot").":", $firstpage);
           $pdf->draw_text(150, 770, $csrow[0]."-".$csrow[1], $firstpage);
@@ -302,7 +302,7 @@ if ($tee == 'TULOSTA') {
       }
 
       ///* Lasketaan laskun kokonaispaino *///
-      //hetaan kaikki otunnukset jotka lˆytyv‰t t‰n uusiotunnuksen alta
+      //hetaan kaikki otunnukset jotka l√∂ytyv√§t t√§n uusiotunnuksen alta
       $query = "SELECT distinct otunnus
                 FROM tilausrivi
                 WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]'
@@ -317,7 +317,7 @@ if ($tee == 'TULOSTA') {
 
       $tunnukset = substr($tunnukset,0,-1);
 
-      //haetaan kollim‰‰r‰ ja bruttopaino
+      //haetaan kollim√§√§r√§ ja bruttopaino
       $query = "SELECT *
                 FROM rahtikirjat
                 WHERE otsikkonro in ($tunnukset)
@@ -353,19 +353,19 @@ if ($tee == 'TULOSTA') {
                 GROUP BY tuote.tullinimike1, tuote.tullinimike2, tuote.tullikohtelu, alkuperamaa";
       $riviresult = mysql_query($query) or pupe_error($query);
 
-      //piirret‰‰n rivi tarkastuslistaan
+      //piirret√§√§n rivi tarkastuslistaan
       tark_rivi();
 
       $tarkrivi++;
-      //ja lasketaan summa per p‰iv‰
+      //ja lasketaan summa per p√§iv√§
       $pvmyht += $vientiarvo;
 
-      //piirret‰‰n otsikorivi paperilistaan
+      //piirret√§√§n otsikorivi paperilistaan
       paperi_otsikkorivi();
 
       $paperirivi += 4;
 
-      //piirret‰‰n atktullauksen er‰tietue
+      //piirret√§√§n atktullauksen er√§tietue
       $atkrivi = 1;
       $vtietue = 2 + mysql_num_rows($riviresult);
       atk_eratietue();
@@ -373,13 +373,13 @@ if ($tee == 'TULOSTA') {
       $atk .= "\n";
       $atkrivi++;
 
-      //piirret‰‰n atktullauksen arvotietue
+      //piirret√§√§n atktullauksen arvotietue
       atk_arvotietue();
       $atk .= "\n";
       $atkrivi++;
 
       while($rivirow = mysql_fetch_array($riviresult)) {
-        //v‰h‰n tarkistuksia
+        //v√§h√§n tarkistuksia
         if ($rivirow["tullinimike1"] == '') {
           echo t("1. Rivin tunnus").":$rivirow[tunnus]. ".t("Tuoteno").": $rivirow[tuoteno]. ".t("Tullinimike puuttuu")."!<br>";
           $virhe++;
@@ -414,7 +414,7 @@ if ($tee == 'TULOSTA') {
         //$row = $rivirow;
         //rivi($firstpage);
 
-        //tullausarvo lis‰erineen
+        //tullausarvo lis√§erineen
         $tullarvo = round(($rivirow["rivihinta"] / $laskunarvo * $extrat) + $rivirow["rivihinta"],2);
         $tullarvo = sprintf('%.2f', $tullarvo);
 
@@ -437,12 +437,12 @@ if ($tee == 'TULOSTA') {
           $paperirivi += 10;
         }
 
-        //piirret‰‰n paperille nimikerivi
+        //piirret√§√§n paperille nimikerivi
         paperi_nimikerivi();
 
         $paperirivi++;
 
-        //piirret‰‰n atktullaukseen nimikerivi
+        //piirret√§√§n atktullaukseen nimikerivi
         atk_nimiketietue();
         $atk .= "\n";
 
@@ -454,7 +454,7 @@ if ($tee == 'TULOSTA') {
       //alvierittely ($firstpage, $kala);
 
 
-      //kirjoitetaan  muuttujat failiin, s‰‰stet‰‰n muistia nollaamalla muuttujat
+      //kirjoitetaan  muuttujat failiin, s√§√§stet√§√§n muistia nollaamalla muuttujat
       fwrite($fhtark,$tark);
       $tark = '';
 
@@ -482,7 +482,7 @@ if ($tee == 'TULOSTA') {
       $pdf->set_default('margin-bottom',   0);
       $pdf->set_default('margin-left',   0);
       $pdf->set_default('margin-right',   0);
-      //* PDF-kikkailut loppuu t‰h‰n*///
+      //* PDF-kikkailut loppuu t√§h√§n*///
     }
   }
 
@@ -500,7 +500,7 @@ if ($tee == 'TULOSTA') {
   $csrow = mysql_fetch_array($csresult);
 
   $pdf->draw_text(50,  810, $yhtiorow["nimi"], $firstpage);
-  $pdf->draw_text(50,  790, t("P‰iv‰m‰‰r‰").":", $firstpage);
+  $pdf->draw_text(50,  790, t("P√§iv√§m√§√§r√§").":", $firstpage);
   $pdf->draw_text(150, 790, $tapvm, $firstpage);
   $pdf->draw_text(50,  770, t("Laskunumerot").":", $firstpage);
   $pdf->draw_text(150, 770, $csrow[0]."-".$csrow[1], $firstpage);
@@ -509,7 +509,7 @@ if ($tee == 'TULOSTA') {
 
   */
 
-  //viel‰ vikalle sivulle piirrett‰v‰t
+  //viel√§ vikalle sivulle piirrett√§v√§t
   $paperisivu++;
 
   tark_yht();
@@ -533,25 +533,25 @@ if ($tee == 'TULOSTA') {
   //fclose($fhpdf);
   fclose($fhtark);
 
-  //paperilista pit‰‰ saada kauniiksi
+  //paperilista pit√§√§ saada kauniiksi
   $line1 = exec("a2ps -o ".$paperifaili.".ps --no-header -r --columns=1 --chars-per-line=169 --margin=0 --borders=0 $paperifaili");
 
   //tarkastuslistalle sama juttu
   $line2 = exec("a2ps -o ".$tarkfaili.".ps --no-header -r --columns=1 --chars-per-line=121 --margin=0 --borders=0 $tarkfaili");
 
-    //lopuks k‰‰nnet‰‰n viel‰ pdf:iks ja l‰hetet‰‰n s‰hkˆpostiin, voi sitten tulostella kun silt‰ tuntuu
+    //lopuks k√§√§nnet√§√§n viel√§ pdf:iks ja l√§hetet√§√§n s√§hk√∂postiin, voi sitten tulostella kun silt√§ tuntuu
   $line3 = exec("ps2pdf -sPAPERSIZE=a4 ".$paperifaili.".ps ".$paperifaili.".pdf");
 
   //tarkastuslistalle sama juttu
   $line4 = exec("ps2pdf -sPAPERSIZE=a4 ".$tarkfaili.".ps ".$tarkfaili.".pdf");
 
-  //mergataan pdf-‰t yhdeksi failiksi joka sit l‰hetet‰‰n k‰ytt‰j‰lle
+  //mergataan pdf-√§t yhdeksi failiksi joka sit l√§hetet√§√§n k√§ytt√§j√§lle
   //$kaikkilaskut = "/tmp/TVI_Kaikki_Vientilaskut-".md5(uniqid(mt_rand(), true)).".pdf";
 
-  ///* Katsotaan voidaanko rappari l‰hett‰‰ tulliin *///
+  ///* Katsotaan voidaanko rappari l√§hett√§√§ tulliin *///
 
   if ($virhe > 0) {
-    //virheit‰ on sattunut
+    //virheit√§ on sattunut
     echo "<br><br>".t("Korjaa ensin kaikki virheet. Ja kokeile sitten uudestaan").".<br><br>";
     system("rm -f $tarkfaili");
     system("rm -f ".$tarkfaili.".ps");
@@ -563,11 +563,11 @@ if ($tee == 'TULOSTA') {
     exit;
   }
 
-  ///*Kasataan k‰ytt‰j‰lle l‰hetett‰v‰ meili *///
-  //t‰ssa on kaikki failit jotka tarvitaan
+  ///*Kasataan k√§ytt√§j√§lle l√§hetett√§v√§ meili *///
+  //t√§ssa on kaikki failit jotka tarvitaan
    $bound = uniqid(time()."_") ;
 
-  $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+  $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n";
   $header .= "MIME-Version: 1.0\n" ;
   $header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
@@ -612,34 +612,34 @@ if ($tee == 'TULOSTA') {
 
   $content .= "--$bound--\n";
 
-  mail($kukarow["eposti"], mb_encode_mimeheader(t("T‰ydent‰v‰ vienti-ilmoitus"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+  mail($kukarow["eposti"], mb_encode_mimeheader(t("T√§ydent√§v√§ vienti-ilmoitus"), "UTF-8", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 
-  ///* T‰ss‰ teh‰‰n t‰ydent‰v‰ ilmoitus s‰hkˆiseen muotoon *///
+  ///* T√§ss√§ teh√§√§n t√§ydent√§v√§ ilmoitus s√§hk√∂iseen muotoon *///
   //PGP-encryptaus atklabeli
   $label  = '';
-  $label .= t("l‰hett‰j‰").": $yhtiorow[nimi]\n";
-  $label .= t("sis‰ltˆ").": vientitullaus/sis‰kaupantilasto\n";
+  $label .= t("l√§hett√§j√§").": $yhtiorow[nimi]\n";
+  $label .= t("sis√§lt√∂").": vientitullaus/sis√§kaupantilasto\n";
   $label .= t("kieli").": ASCII\n";
   $label .= t("jakso").": $alku - $loppu\n";
-  $label .= t("koko aineiston tietuem‰‰r‰").": $tietuemaara\n";
+  $label .= t("koko aineiston tietuem√§√§r√§").": $tietuemaara\n";
   $label .= t("koko aineiston vienti-, verotus- tai laskutusarvo").": $laskutusarvo\n";
 
   $message = '';
 
-  $recipient = "pgp-key Customs Finland <ascii.vienti@tulli.fi>";         // t‰m‰ on tullin virallinen avain
+  $recipient = "pgp-key Customs Finland <ascii.vienti@tulli.fi>";         // t√§m√§ on tullin virallinen avain
 
   if ($lahetys == "test") {
-    $recipient = "pgp-testkey Customs Finland <test.ascii.vienti@tulli.fi>";   // t‰m‰ on tullin testiavain
+    $recipient = "pgp-testkey Customs Finland <test.ascii.vienti@tulli.fi>";   // t√§m√§ on tullin testiavain
   }
 
   $message = $label;
   require("../inc/gpg.inc");
   $label = $encrypted_message;
 
-  $recipient = "pgp-key Customs Finland <ascii.vienti@tulli.fi>";         // t‰m‰ on tullin virallinen avain
+  $recipient = "pgp-key Customs Finland <ascii.vienti@tulli.fi>";         // t√§m√§ on tullin virallinen avain
 
   if ($lahetys == "test") {
-    $recipient = "pgp-testkey Customs Finland <test.ascii.vienti@tulli.fi>";   // t‰m‰ on tullin testiavain
+    $recipient = "pgp-testkey Customs Finland <test.ascii.vienti@tulli.fi>";   // t√§m√§ on tullin testiavain
   }
 
   $nimi   = $atkfaili;
@@ -650,10 +650,10 @@ if ($tee == 'TULOSTA') {
   require("../inc/gpg.inc");
   $atk = $encrypted_message;
 
-  //Kasataan tulliin l‰hetett‰v‰ meili
+  //Kasataan tulliin l√§hetett√§v√§ meili
    $bound = uniqid(time()."_") ;
 
-  $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+  $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n";
   $header .= "MIME-Version: 1.0\n" ;
   $header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
@@ -676,24 +676,24 @@ if ($tee == 'TULOSTA') {
   $content .= "--$bound--\n" ;
 
   if ($lahetys == "tuli") {
-    // l‰hetet‰‰n meili tulliin
-    $to = 'ascii.vienti@tulli.fi';      // t‰m‰ on tullin virallinen osoite
+    // l√§hetet√§√§n meili tulliin
+    $to = 'ascii.vienti@tulli.fi';      // t√§m√§ on tullin virallinen osoite
     mail($to, "", $content, $header, "-f $yhtiorow[postittaja_email]");
-    echo "<font class='message'>".t("Tiedot l‰hetettiin tulliin").".</font><br><br>";
+    echo "<font class='message'>".t("Tiedot l√§hetettiin tulliin").".</font><br><br>";
   }
   elseif ($lahetys == "test") {
-    // l‰hetet‰‰n TESTI meili tulliin
-    $to = 'test.ascii.vienti@tulli.fi';    // t‰m‰ on tullin testiosoite
+    // l√§hetet√§√§n TESTI meili tulliin
+    $to = 'test.ascii.vienti@tulli.fi';    // t√§m√§ on tullin testiosoite
     mail($to, "", $content, $header, "-f $yhtiorow[postittaja_email]");
-    echo "<font class='message'>".t("Testitiedosto l‰hetettiin tullin testipalvelimelle").".</font><br><br>";
+    echo "<font class='message'>".t("Testitiedosto l√§hetettiin tullin testipalvelimelle").".</font><br><br>";
   }
   else {
-    echo "<font class='message'>".t("Tietoja EI l‰hetetty tulliin").".</font><br><br>";
+    echo "<font class='message'>".t("Tietoja EI l√§hetetty tulliin").".</font><br><br>";
   }
 
-  echo "<br><br>".t("S‰hkˆpostit l‰hetetty! Kaikki on valmista")."!";
+  echo "<br><br>".t("S√§hk√∂postit l√§hetetty! Kaikki on valmista")."!";
 
-  //Dellataan viel‰ viimeiset failit
+  //Dellataan viel√§ viimeiset failit
   system("rm -f $tarkfaili");
   system("rm -f ".$tarkfaili.".ps");
   system("rm -f ".$tarkfaili.".pdf");
@@ -719,7 +719,7 @@ if ($tee == '') {
   if (!isset($ppl))
     $ppl = date("d");
 
-  //syˆtet‰‰n ajanjakso
+  //sy√∂tet√§√§n ajanjakso
   echo "<table>";
   echo "<form method = 'post'>";
   echo "<input type='hidden' name='tee' value='TULOSTA'>
@@ -727,11 +727,11 @@ if ($tee == '') {
 
   echo "<tr><td class='back'></td><th>".t("pp")."</th><th>".t("kk")."</th><th>".t("vvvv")."</th></tr>";
 
-  echo "<tr><th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰")." </th>
+  echo "<tr><th>".t("Sy√∂t√§ alkup√§iv√§m√§√§r√§")." </th>
     <td><input type='text' name='ppa' value='$ppa' size='5'></td>
     <td><input type='text' name='kka' value='$kka' size='5'></td>
     <td><input type='text' name='vva' value='$vva' size='7'></td>
-    </tr><tr><th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰")." </th>
+    </tr><tr><th>".t("Sy√∂t√§ loppup√§iv√§m√§√§r√§")." </th>
     <td><input type='text' name='ppl' value='$ppl' size='5'></td>
     <td><input type='text' name='kkl' value='$kkl' size='5'></td>
     <td><input type='text' name='vvl' value='$vvl' size='7'></td></tr>";
@@ -740,12 +740,12 @@ if ($tee == '') {
 
   echo "
     <tr>
-      <th>".t("Tietojen l‰hetys s‰hkˆpostilla")."</th>
+      <th>".t("Tietojen l√§hetys s√§hk√∂postilla")."</th>
       <td colspan='3'>
       <select name='lahetys'>
-      <option value='tuli' $sel[tuli]>".t("L‰het‰ aineisto tulliin")."</option>
-      <option value='test' $sel[test]>".t("L‰het‰ testiaineisto tullin testipalvelimelle")."</option>
-      <option value=''>".t("ƒl‰ l‰het‰ aineistoa tulliin")."</option>
+      <option value='tuli' $sel[tuli]>".t("L√§het√§ aineisto tulliin")."</option>
+      <option value='test' $sel[test]>".t("L√§het√§ testiaineisto tullin testipalvelimelle")."</option>
+      <option value=''>".t("√Ñl√§ l√§het√§ aineistoa tulliin")."</option>
       </select>
     </tr>
   ";

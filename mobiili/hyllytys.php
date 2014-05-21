@@ -44,20 +44,20 @@ $result = pupe_query($query);
 $row = mysql_fetch_assoc($result);
 
 if (!$row) {
-    exit("Virhe, rivi‰ ei lˆydy");
+    exit("Virhe, rivi√§ ei l√∂ydy");
 }
 
 // Haetaan toimittajan tiedot
 $toimittaja_query = "SELECT * FROM toimi WHERE tunnus='{$row['liitostunnus']}'";
 $toimittaja = mysql_fetch_assoc(pupe_query($toimittaja_query));
 
-// Jos saapumista ei ole setattu, tehd‰‰n uusi saapuminen haetulle toimittajalle
+// Jos saapumista ei ole setattu, tehd√§√§n uusi saapuminen haetulle toimittajalle
 if (empty($saapuminen)) {
     $saapuminen = uusi_saapuminen($toimittaja, $kukarow['toimipaikka']);
     $update_kuka = "UPDATE kuka SET kesken={$saapuminen} WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
     $updated = pupe_query($update_kuka);
 }
-// Jos saapuminen on niin tarkistetaan ett‰ se on samalle toimittajalle
+// Jos saapuminen on niin tarkistetaan ett√§ se on samalle toimittajalle
 else {
     // Haetaan saapumisen toimittaja tunnus
     $saapuminen_query = "SELECT liitostunnus
@@ -65,18 +65,18 @@ else {
                          WHERE tunnus='{$saapuminen}'";
     $saapumisen_toimittaja = mysql_fetch_assoc(pupe_query($saapuminen_query));
 
-    // jos toimittaja ei ole sama kuin tilausrivin niin tehd‰‰n uusi saapuminen
+    // jos toimittaja ei ole sama kuin tilausrivin niin tehd√§√§n uusi saapuminen
     if ($saapumisen_toimittaja['liitostunnus'] != $row['liitostunnus']) {
 
-        // Haetaan toimittajan tiedot uudestaan ja tehd‰‰n uudelle toimittajalle saapuminen
+        // Haetaan toimittajan tiedot uudestaan ja tehd√§√§n uudelle toimittajalle saapuminen
         $toimittaja_query = "SELECT * FROM toimi WHERE tunnus='{$row['liitostunnus']}'";
         $toimittaja = mysql_fetch_assoc(pupe_query($toimittaja_query));
         $saapuminen = uusi_saapuminen($toimittaja, $kukarow['toimipaikka']);
     }
 
-    //jos ollaan ennaltakohdistetussa (mutta ei tuloutetussa) riviss‰, niin se on poikkeustapaus, jolloin kukarow.kesken tietoa ei tule p‰ivitt‰‰ -> muuten seuraavien rivien p‰ivitys menee sekaisin ja tuloutetaan rivej‰ v‰‰r‰lle saapumiselle
+    //jos ollaan ennaltakohdistetussa (mutta ei tuloutetussa) riviss√§, niin se on poikkeustapaus, jolloin kukarow.kesken tietoa ei tule p√§ivitt√§√§ -> muuten seuraavien rivien p√§ivitys menee sekaisin ja tuloutetaan rivej√§ v√§√§r√§lle saapumiselle
   if (!isset($ennaltakohdistettu) OR !$ennaltakohdistettu) {
-      // P‰ivitet‰‰n kuka.kesken
+      // P√§ivitet√§√§n kuka.kesken
       $update_kuka = "UPDATE kuka SET kesken={$saapuminen} WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
       $updated = pupe_query($update_kuka);
   }
@@ -89,16 +89,16 @@ if (isset($submit)) {
 
     switch($submit) {
         case 'ok':
-            # Vahvista ker‰yspaikka
+            # Vahvista ker√§yspaikka
             echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=vahvista_kerayspaikka.php?hyllytys&".http_build_query($url_array)."{$url}&saapuminen={$saapuminen}&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}'>"; exit();
             break;
         case 'suuntalavalle':
             if (!is_numeric($hyllytetty) or $hyllytetty < 0) {
-                $errors[] = t("Hyllytetyn m‰‰r‰n on oltava numero");
+                $errors[] = t("Hyllytetyn m√§√§r√§n on oltava numero");
                 break;
             }
 
-            # Lis‰t‰‰n rivi suuntalavalle
+            # Lis√§t√§√§n rivi suuntalavalle
             echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavalle.php?tilausrivi={$tilausrivi}&saapuminen={$saapuminen}{$url}'>"; exit();
 
             break;
@@ -145,12 +145,12 @@ echo "<div class='main'>
 <input type='hidden' name='tuotenumero' value='{$tuotenumero}' />
 <table>
     <tr>
-        <th>",t("Tilattu m‰‰r‰"),"</th>
+        <th>",t("Tilattu m√§√§r√§"),"</th>
         <td>{$row['siskpl']}</td>
         <td>({$row['ulkkpl']})</td>
     </tr>
     <tr>
-        <th>",t("Hyllytetty m‰‰r‰"), "</th>
+        <th>",t("Hyllytetty m√§√§r√§"), "</th>
         <td><input id='numero' class='numero' type='text' name='hyllytetty' value='{$row['siskpl']}' onchange='update_label()'></input> {$row['tilausrivi_tyyppi']}</td>
         <td><span id='hylytetty_label'>{$row['ulkkpl']}</span></td>
     </tr>
@@ -172,7 +172,7 @@ echo "<td>{$row['toim_tuoteno']}</td>";
 echo "</tr>";
 
 echo "<tr>
-        <th>",t("Ker‰yspaikka"),"</th>
+        <th>",t("Ker√§yspaikka"),"</th>
         <td>{$row['kerayspaikka']}</td>
         <td>({$row['varattu']} {$row['yksikko']})</td>
     </tr>";
@@ -209,7 +209,7 @@ $url = "&viivakoodi={$viivakoodi}&tilausten_lukumaara={$tilausten_lukumaara}&man
 # Napit
 echo "<div class='controls'>";
 echo "<button type='submit' class='button left' onclick=\"f1.action='vahvista_kerayspaikka.php?hyllytys{$url}&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}&tilausrivi={$tilausrivi}&ostotilaus={$ostotilaus}&ennaltakohdistettu={$ennaltakohdistettu}'\">",t("OK"),"</button>";
-echo "<button name='submit' class='button right' id='submit' value='kerayspaikka' onclick='submit();'>",t("UUSI KERƒYSPAIKKA"),"</button>";
+echo "<button name='submit' class='button right' id='submit' value='kerayspaikka' onclick='submit();'>",t("UUSI KER√ÑYSPAIKKA"),"</button>";
 
 if ($yhtiorow['suuntalavat'] != "") {
     echo "<button type='submit' class='button right' onclick=\"f1.action='suuntalavalle.php?tilausrivi={$tilausrivi}{$url}&saapuminen={$saapuminen}&ennaltakohdistettu={$ennaltakohdistettu}'\">",t("SUUNTALAVALLE"),"</button>";

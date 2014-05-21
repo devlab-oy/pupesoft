@@ -1,6 +1,6 @@
 <?php
 
-echo "<font class='head'>".t("Konsernit‰sm‰ytys")."</font><hr>";
+echo "<font class='head'>".t("Konsernit√§sm√§ytys")."</font><hr>";
 
 if ($yhtiorow["konserni"] == "") {
   echo "<font class = 'error'>".t("Yritys ei ole osa konsernia")."</font>";
@@ -159,12 +159,12 @@ else {
 // oikeellisuustarkistuksia
 if ($tee != "") {
   if (!checkdate($plvk, $plvp, $plvv)) {
-    echo "<font class='error'>".t("VIRHE: Alkup‰iv‰m‰‰r‰ on virheellinen")."!</font><br>";
+    echo "<font class='error'>".t("VIRHE: Alkup√§iv√§m√§√§r√§ on virheellinen")."!</font><br>";
     $tee = "";
   }
 
   if (!checkdate($alvk, $alvp, $alvv)) {
-    echo "<font class='error'>".t("VIRHE: Loppup‰iv‰m‰‰r‰ on virheellinen")."!</font><br>";
+    echo "<font class='error'>".t("VIRHE: Loppup√§iv√§m√§√§r√§ on virheellinen")."!</font><br>";
     $tee = "";
   }
 }
@@ -252,7 +252,7 @@ if ($tee != "") {
         }
 
         echo "<tr>";
-        echo "<th colspan='2'>Yhteens‰</th>";
+        echo "<th colspan='2'>Yhteens√§</th>";
         echo "<th>".sprintf("%.02f", $myyntisaamiset_yhteensa)."</th>";
         echo "<th>".sprintf("%.02f", $ostovelat_yhteensa)."</th>";
         echo "<th>".sprintf("%.02f", $erotus_yhteensa)."</th>";
@@ -263,6 +263,6 @@ if ($tee != "") {
       echo "</table><br>";
   }
   else {
-    echo "<font class = 'error'>".t("Konserniyrityksi‰ ei lˆydy!")."</font>";
+    echo "<font class = 'error'>".t("Konserniyrityksi√§ ei l√∂ydy!")."</font>";
   }
 }

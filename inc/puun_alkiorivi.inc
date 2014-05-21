@@ -2,14 +2,14 @@
 // puun_alkiorivi.inc
 
 $ulos = "";
-$jatko = 1; // oletetaan normaali k‰sittely
-$tyyppi = 1; // oletetaan rivin n‰kyvyys
+$jatko = 1; // oletetaan normaali k√§sittely
+$tyyppi = 1; // oletetaan rivin n√§kyvyys
 
 if (!isset($apu)) {
   $apu = array();
 }
 
-//yhtiˆt‰ ei n‰ytet‰
+//yhti√∂t√§ ei n√§ytet√§
 if (mysql_field_name($result, $i) == "yhtio") {
   $tyyppi = 0;
 }

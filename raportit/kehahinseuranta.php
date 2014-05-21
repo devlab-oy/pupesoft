@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("../inc/parametrit.inc");
@@ -84,7 +84,7 @@ if ($tee != '') {
 }
 
 
-//K‰yttˆliittym‰
+//K√§ytt√∂liittym√§
 echo "<table><form name='piiri' method='post'>";
 echo "<input type='hidden' name='tee' value='kaikki'>";
 
@@ -99,16 +99,16 @@ if (!isset($ppl)) $ppl = date("d");
 if (!isset($pros1)) $pros1 = 50;
 if (!isset($pros2)) $pros2 = 5;
 
-echo "<tr><th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+echo "<tr><th>".t("Sy√∂t√§ alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
     <td><input type='text' name='ppa' value='$ppa' size='3'></td>
     <td><input type='text' name='kka' value='$kka' size='3'></td>
     <td><input type='text' name='vva' value='$vva' size='5'></td>
-    </tr><tr><th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+    </tr><tr><th>".t("Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
     <td><input type='text' name='ppl' value='$ppl' size='3'></td>
     <td><input type='text' name='kkl' value='$kkl' size='3'></td>
     <td><input type='text' name='vvl' value='$vvl' size='5'></td></tr>";
 
-echo "<tr><th>".t("Muutosprosentin yl‰raja").":</th>
+echo "<tr><th>".t("Muutosprosentin yl√§raja").":</th>
     <td colspan='3'><input type='text' name='pros1' value='$pros1' size='15'></td></tr>";
 
 echo "<tr><th>".t("Muutosprosentin alaraja").":</th>
@@ -116,11 +116,11 @@ echo "<tr><th>".t("Muutosprosentin alaraja").":</th>
 
 echo "<tr><th>".t("Osasto")."</th><td colspan='3'>";
 
-// tehd‰‰n avainsana query
+// tehd√§√§n avainsana query
 $sresult = t_avainsana("OSASTO");
 
 echo "<select name='osasto'>";
-echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";
+echo "<option value=''>".t("N√§yt√§ kaikki")."</option>";
 
 while ($srow = mysql_fetch_array($sresult)) {
   $sel = '';
@@ -132,13 +132,13 @@ while ($srow = mysql_fetch_array($sresult)) {
 echo "</select>";
 
 echo "</td></tr>
-    <tr><th>".t("Tuoteryhm‰")."</th><td colspan='3'>";
+    <tr><th>".t("Tuoteryhm√§")."</th><td colspan='3'>";
 
-// tehd‰‰n avainsana query
+// tehd√§√§n avainsana query
 $sresult = t_avainsana("TRY");
 
 echo "<select name='tuoryh'>";
-echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";
+echo "<option value=''>".t("N√§yt√§ kaikki")."</option>";
 
 while ($srow = mysql_fetch_array($sresult)) {
   $sel = '';

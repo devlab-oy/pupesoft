@@ -28,14 +28,14 @@ if(substr($tuoteno,0,1) == '*') { // Nyt me selataan
 
   if (mysql_num_rows($tresult) >  100) {
     $kentta='tuoteno';
-    $varaosavirhe = t("VIRHE: Hakuehdolla lˆytyi liikaa tuotteita!");
+    $varaosavirhe = t("VIRHE: Hakuehdolla l√∂ytyi liikaa tuotteita!");
     $tuoteno='';
     $tee = 'Y';
   }
   else {
     if (mysql_num_rows($tresult) == 0) {
       $kentta='tuoteno';
-      $varaosavirhe = t("VIRHE: Hakuehdolla ei lˆytynyt yht‰‰n tuotetta")."!";
+      $varaosavirhe = t("VIRHE: Hakuehdolla ei l√∂ytynyt yht√§√§n tuotetta")."!";
       $tuoteno='';
       $tee = 'Y';
     }
@@ -62,14 +62,14 @@ elseif (substr($tuoteno,-1) == '*') {
 
   if (mysql_num_rows($tresult) >  100) {
     $kentta='tuoteno';
-    $varaosavirhe = t("VIRHE: Hakuehdolla lˆytyi liikaa tuotteita")."!";
+    $varaosavirhe = t("VIRHE: Hakuehdolla l√∂ytyi liikaa tuotteita")."!";
     $tuoteno='';
     $tee = 'Y';
   }
   else {
     if (mysql_num_rows($tresult) == 0) {
       $kentta='tuoteno';
-      $varaosavirhe = t("VIRHE: Hakuehdolla ei lˆytynyt yht‰‰n tuotetta")."!";
+      $varaosavirhe = t("VIRHE: Hakuehdolla ei l√∂ytynyt yht√§√§n tuotetta")."!";
       $tuoteno='';
       $tee = 'Y';
     }
@@ -104,12 +104,12 @@ else  {
       else {
         if (mysql_num_rows($tresult) == 0) {
           $kentta='tuoteno';
-          $varaosavirhe = t("VIRHE: Hakuehdolla ei lˆytynyt yht‰‰n tuotetta")."!";
+          $varaosavirhe = t("VIRHE: Hakuehdolla ei l√∂ytynyt yht√§√§n tuotetta")."!";
           $tuoteno='';
           $tee = 'Y';
         }
         else {
-          //Tehd‰‰n tuotenumero ja kpl
+          //Tehd√§√§n tuotenumero ja kpl
           $trivi = mysql_fetch_array($tresult);
           $tuoteno = $trivi['tuoteno'];
         }
@@ -123,7 +123,7 @@ else  {
 
     if (mysql_num_rows($result) == 0) {
       $kentta = 'tuoteno';
-      $varaosavirhe .= t("VIRHE: Tuotenumeroa")." $tuoteno ".t("ei lˆydy j‰rjestelm‰st‰")."!<br>";
+      $varaosavirhe .= t("VIRHE: Tuotenumeroa")." $tuoteno ".t("ei l√∂ydy j√§rjestelm√§st√§")."!<br>";
       $tuoteno = '';
       $tee = "Y";
     }
@@ -135,13 +135,13 @@ else  {
     if ($atil == 0) {
       if ($kentta == '') $kentta = 'atil'; // Kursori
 
-      $varaosavirhe .= t("VIRHE: Syˆt‰ tilattava m‰‰r‰")."!<br>";
+      $varaosavirhe .= t("VIRHE: Sy√∂t√§ tilattava m√§√§r√§")."!<br>";
       $tee = "Y";
     }
 }
 
 if ($tee == 'UV') {
-  //etsit‰‰n tuotteelle varastopaikka
+  //etsit√§√§n tuotteelle varastopaikka
   $query = "SELECT *, varastopaikat.tunnus varasto, tuotepaikat.tunnus tuotepaikka
             FROM tuotepaikat
             LEFT JOIN varastopaikat
@@ -152,9 +152,9 @@ if ($tee == 'UV') {
             and tuotepaikat.yhtio     = '$kukarow[yhtio]'";
   $qvresult = mysql_query($query) or pupe_error($query);
 
-  while ($zrow = mysql_fetch_array($qvresult)) { // K‰yd‰‰n kaikki varastopaikat l‰pi
+  while ($zrow = mysql_fetch_array($qvresult)) { // K√§yd√§√§n kaikki varastopaikat l√§pi
 
-    ///* Huomioidaan vain normaalivarastojen paikkoja, paitsi jos erikoisvarastok‰sittely on triggerˆity *///
+    ///* Huomioidaan vain normaalivarastojen paikkoja, paitsi jos erikoisvarastok√§sittely on trigger√∂ity *///
     if ($zrow["tyyppi"] == '' or ($laskurow['varasto'] == $zrow["varasto"]) or ($naytakaikkipaikat == "ON")) {
       $hyllyalue[$i]     = $zrow['hyllyalue'];
       $hyllynro[$i]      = $zrow['hyllynro'];
@@ -174,14 +174,14 @@ if ($tee == 'UV') {
     }
   }
 
-  //Ei lˆytynyt optimoitua paikkaa, otetaan silloin oletuspaikka
+  //Ei l√∂ytynyt optimoitua paikkaa, otetaan silloin oletuspaikka
   if ($varasto == 0) {
     $varasto = $oletuspaikka;
   }
 
-  //poistotuotek‰sittely
+  //poistotuotek√§sittely
   if (in_array($trow["status"], array('P','X'))) {
-    $varaosavirhe .= t("VIRHE: T‰m‰ on poistotuote, sit‰ ei voi valmistaa")."!<br>";
+    $varaosavirhe .= t("VIRHE: T√§m√§ on poistotuote, sit√§ ei voi valmistaa")."!<br>";
     $tee = "Y";
   }
 }

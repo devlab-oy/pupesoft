@@ -1,13 +1,13 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 include "inc/parametrit.inc";
 
-echo "$headerfont<b>".t("Sis‰iset tyˆt").":<hr>";
+echo "$headerfont<b>".t("Sis√§iset ty√∂t").":<hr>";
 
-$MonthNames = array(1=> t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kes‰kuu'),t('Hein‰kuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
+$MonthNames = array(1=> t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kes√§kuu'),t('Hein√§kuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
 $CurDate = getdate();
 
 if ($month == NULL) {
@@ -58,7 +58,7 @@ $query = "SELECT id, maksuaika, maksutapa, maksutapa
 $result = mysql_query ($query)
   or die ("Kysely ei onnistu $query");
 
-echo "  <tr><td>$thfont Tyˆm‰‰r‰ys: </td>
+echo "  <tr><td>$thfont Ty√∂m√§√§r√§ys: </td>
       <td>$thfont Tunnit (EUR): </td><td>$thfont Maksuaika:</td></tr>";
 $yhteensa = 0;
 
@@ -87,6 +87,6 @@ while ($row = mysql_fetch_array($result)){
   }
 }
 echo "<tr><td colspan='5'><hr size='1'></td></tr>";
-echo "<tr><td>$thfont Yhteens‰: </td>
+echo "<tr><td>$thfont Yhteens√§: </td>
       <td align='center'>$thfont $yhteensa</td><td>$thfont  EUR</td><td>$thfont </td></tr>";
 echo "</table>";

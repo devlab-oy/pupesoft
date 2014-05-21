@@ -2,39 +2,39 @@
 
 // Tarvitsemme:
 // $trow        --> jossa on tuotteen kaikki tiedot
-// $rivinumero      --> kent‰ss‰ on joko tilaajan rivinumero tai konserninsis‰isiss‰ kaupoissa sis‰inen toimittajanumero
+// $rivinumero      --> kent√§ss√§ on joko tilaajan rivinumero tai konserninsis√§isiss√§ kaupoissa sis√§inen toimittajanumero
 // $laskurow      --> jossa on laskun kaikki tiedot
-// $kukarow[kesken]    --> jossa on k‰ytt‰j‰ll‰ keskenoleva tilausnumero
-// $kpl          --> jossa on tilattu kappalem‰‰r‰
+// $kukarow[kesken]    --> jossa on k√§ytt√§j√§ll√§ keskenoleva tilausnumero
+// $kpl          --> jossa on tilattu kappalem√§√§r√§
 // $tuoteno        --> jossa on tilattava tuotenumero
 // $toimaika      --> arvioitu toimitusaika
-// $kerayspvm      --> toivottu ker‰ysaika
-// $hinta        --> k‰ytt‰j‰n syˆtt‰m‰ hinta
-// $netto        --> k‰ytt‰j‰n syˆtt‰m‰ netto
-// $ale1,2,3,4,5...    --> k‰ytt‰j‰n syˆtt‰m‰ ale
+// $kerayspvm      --> toivottu ker√§ysaika
+// $hinta        --> k√§ytt√§j√§n sy√∂tt√§m√§ hinta
+// $netto        --> k√§ytt√§j√§n sy√∂tt√§m√§ netto
+// $ale1,2,3,4,5...    --> k√§ytt√§j√§n sy√∂tt√§m√§ ale
 // $var          --> H,J,P varrit
-// $varasto        --> myyd‰‰n vain t‰st‰/n‰ist‰ varastosta
-// $paikka        --> myyd‰‰n vain t‰lt‰ paikalta
-// $rivitunnus      --> tietokannan tunnus jolle rivi lis‰t‰‰n
-// $rivilaadittu    --> vanhan rivin laadittuaika, s‰ilytet‰‰n se
-// $korvaavakielto    --> Jos erisuuri kuin tyhj‰ niin ei myyd‰ korvaavia
-// $jtkielto      --> Jos erisuuri kuin tyhj‰ niin ei laiteta JT:Seen
-// $perhekielto      --> Jos erisuuri kuin tyhj‰ niin ei etsit‰ ollenkaan perheit‰
-// $varataan_saldoa    --> Jos == EI niin ei varata saldoa (tietyiss‰ keisseiss‰), tai siis ei ainakan tehd‰ saldotsekki‰
-// $kutsuja        --> Kuka t‰t‰ skripti‰ kutsuu
+// $varasto        --> myyd√§√§n vain t√§st√§/n√§ist√§ varastosta
+// $paikka        --> myyd√§√§n vain t√§lt√§ paikalta
+// $rivitunnus      --> tietokannan tunnus jolle rivi lis√§t√§√§n
+// $rivilaadittu    --> vanhan rivin laadittuaika, s√§ilytet√§√§n se
+// $korvaavakielto    --> Jos erisuuri kuin tyhj√§ niin ei myyd√§ korvaavia
+// $jtkielto      --> Jos erisuuri kuin tyhj√§ niin ei laiteta JT:Seen
+// $perhekielto      --> Jos erisuuri kuin tyhj√§ niin ei etsit√§ ollenkaan perheit√§
+// $varataan_saldoa    --> Jos == EI niin ei varata saldoa (tietyiss√§ keisseiss√§), tai siis ei ainakan tehd√§ saldotsekki√§
+// $kutsuja        --> Kuka t√§t√§ skripti√§ kutsuu
 // $myy_sarjatunnus    --> Jos halutaan automaattisesti linkata joku sarjanumero-olio tilausriviin
 // $osto_sarjatunnus  --> Jos halutaan automaattisesti linkata joku sarjanumero-olio tilausriviin
 // $jaksotettu      --> Kuuluuko tilausrivi mukaan jaksotukseen
 // $perheid        --> Tuoteperheen perheid
-// $perheid2      --> Lis‰varusteryhm‰n perheid2
-// $orvoteikiinnosta  --> Meit‰ ei kiinnosta orvot jos t‰m‰ ei ole tyhj‰.
-// $osatoimkielto    --> Jos saldo ei riit‰ koko riville niin ei lis‰t‰ rivi‰ ollenkaan
-// $olpaikalta      --> pakotetaan myym‰‰n oletuspaikalta
-// $tuotenimitys    --> tuotteen nimitys jos nimityksen syˆtˆ on yhtiˆll‰ sallittu
+// $perheid2      --> Lis√§varusteryhm√§n perheid2
+// $orvoteikiinnosta  --> Meit√§ ei kiinnosta orvot jos t√§m√§ ei ole tyhj√§.
+// $osatoimkielto    --> Jos saldo ei riit√§ koko riville niin ei lis√§t√§ rivi√§ ollenkaan
+// $olpaikalta      --> pakotetaan myym√§√§n oletuspaikalta
+// $tuotenimitys    --> tuotteen nimitys jos nimityksen sy√∂t√∂ on yhti√∂ll√§ sallittu
 // $tuotenimitys_force  --> tuotteen nimitys muutetaan systemitasolla
 
-// Palauttaa arrayn $lisatyt_rivit1 jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si myyntihaarassa
-// Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si puute-jt-osto-haarassa
+// Palauttaa arrayn $lisatyt_rivit1 jossa on kaikkien rivien tunnukset jotka t√§√§ systeemi lis√§si myyntihaarassa
+// Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka t√§√§ systeemi lis√§si puute-jt-osto-haarassa
 
 // debuggia varten, laita 1 jos haluut messuja
 $lisaarivi_debug = 0;
@@ -64,8 +64,8 @@ if (!isset($jo_syotetty_rekisterinumero)) $jo_syotetty_rekisterinumero = "";
 $reklamaatiohyvitys = false;
 
 if ($rekisterinumero == '') {
-  //Kun yhtion_parametri myyntitilausrivi_rekisterinumero == K, k‰yttˆliittym‰st‰ on mahdollisuus syˆtt‰‰ tilausriville rekisterinumero.
-  //K‰yttˆliittym‰ss‰ on 2 valintaa. input rekisterinumero ja dropdown jo_syotetty_rekisterinumero. Jos rekisterinumero on syˆtetty, yliajaa se dropdownin
+  //Kun yhtion_parametri myyntitilausrivi_rekisterinumero == K, k√§ytt√∂liittym√§st√§ on mahdollisuus sy√∂tt√§√§ tilausriville rekisterinumero.
+  //K√§ytt√∂liittym√§ss√§ on 2 valintaa. input rekisterinumero ja dropdown jo_syotetty_rekisterinumero. Jos rekisterinumero on sy√∂tetty, yliajaa se dropdownin
   $rekisterinumero = $jo_syotetty_rekisterinumero;
 }
 
@@ -75,7 +75,7 @@ if ($toim == "REKLAMAATIO" and $yhtiorow['reklamaation_kasittely_tuoteperhe'] ==
   $perhekielto = "Y";
 }
 
-// Jos valmistuksien_kasittely on Y, voidaan k‰yttˆliittym‰st‰ antaa valmistuslinja
+// Jos valmistuksien_kasittely on Y, voidaan k√§ytt√∂liittym√§st√§ antaa valmistuslinja
 if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y' and $valmistuslinja == '') {
   // Jos ei olla pakotettu valmistuslinjaa, otetaan default tuotteelta tai sitten otsikolta
   $valmistuslinja = $laskurow['kohde'] == "" ? $trow['valmistuslinja'] : $laskurow['kohde'];
@@ -87,7 +87,7 @@ unset($korvaavan_hinta_ylaraja_halvin_ale);
 unset($korvaavan_hinta_ylaraja_halvin_netto);
 
 if ($toim == 'EXTENNAKKO' or $toim_kutsu == 'EXTENNAKKO') {
-  // Tarkistetaan onko hinta annettu k‰sin, jos on niin k‰ytet‰‰n sit‰, muussa tapauksessa haetaan ennakkohinta
+  // Tarkistetaan onko hinta annettu k√§sin, jos on niin k√§ytet√§√§n sit√§, muussa tapauksessa haetaan ennakkohinta
   $hinta = (empty($hinta)) ? laske_ext_ennakko_hinta($trow, $laskurow) : $hinta;
 
   if (!empty($kukarow['extranet']) and $hinta == '') {
@@ -105,7 +105,7 @@ if (!function_exists("tuoteperhe_reku")) {
   function tuoteperhe_reku($esiisatuoteno, $isatuoteno, $tuoteperhe, $kaikkituotteet, $perhelisa, $kieltolisa, $lisaarivi_debug) {
     global $yhtiorow, $kukarow;
 
-    //Haetaan tuoteperheen lapset ja lis‰t‰‰n ne $tuoteperhe ja $kaikkituotteet arraysiin
+    //Haetaan tuoteperheen lapset ja lis√§t√§√§n ne $tuoteperhe ja $kaikkituotteet arraysiin
     $query = "SELECT tuoteperhe.*
               FROM tuoteperhe
               JOIN tuote ON tuoteperhe.yhtio = tuote.yhtio and tuoteperhe.tuoteno = tuote.tuoteno
@@ -122,9 +122,9 @@ if (!function_exists("tuoteperhe_reku")) {
 
       if ($lisaarivi_debug==1) echo "Tuoteperheen lapsi: $perherow[tuoteno]<br>";
 
-      //T‰t‰ tuoteperhett‰ halutaan myyd‰
-      if (!in_array($perherow["tuoteno"], $tuoteperhe)) $tuoteperhe[] = $perherow["tuoteno"]; // lis‰t‰‰n tuoteno arrayseen
-      if (!in_array($perherow["tuoteno"], $kaikkituotteet)) $kaikkituotteet[] = $perherow["tuoteno"]; // lis‰t‰‰n tuoteno arrayseen
+      //T√§t√§ tuoteperhett√§ halutaan myyd√§
+      if (!in_array($perherow["tuoteno"], $tuoteperhe)) $tuoteperhe[] = $perherow["tuoteno"]; // lis√§t√§√§n tuoteno arrayseen
+      if (!in_array($perherow["tuoteno"], $kaikkituotteet)) $kaikkituotteet[] = $perherow["tuoteno"]; // lis√§t√§√§n tuoteno arrayseen
     }
 
     return array($tuoteperhe, $kaikkituotteet);
@@ -141,7 +141,7 @@ if (!function_exists("tuoteperhe_reku2")) {
     if (!in_array($tuoteno, $isat_array)) {
       $isat_array[] = $tuoteno;
 
-      // Haetaan tuoteperheen lapset ja lis‰t‰‰n ne $isa_array arrayseen
+      // Haetaan tuoteperheen lapset ja lis√§t√§√§n ne $isa_array arrayseen
       $query = "SELECT tuoteperhe.*
                 FROM tuoteperhe
                 JOIN tuote ON tuoteperhe.yhtio = tuote.yhtio and tuoteperhe.tuoteno = tuote.tuoteno
@@ -155,8 +155,8 @@ if (!function_exists("tuoteperhe_reku2")) {
       while ($perherow = mysql_fetch_assoc($perheresult)) {
         $perherow["tuoteno"] = strtoupper($perherow["tuoteno"]);
 
-        $kaikki_array[]      = $perherow["tuoteno"]; // lis‰t‰‰n tuoteno arrayseen
-        $kerroin_array[]    = $tuoteno."#!°!#".$perherow["kerroin"];
+        $kaikki_array[]      = $perherow["tuoteno"]; // lis√§t√§√§n tuoteno arrayseen
+        $kerroin_array[]    = $tuoteno."#!¬°!#".$perherow["kerroin"];
         $ohita_kerays_array[] = $perherow['ohita_kerays'];
 
         $mikaisa = $perherow["tuoteno"];
@@ -168,9 +168,9 @@ if (!function_exists("tuoteperhe_reku2")) {
 
         $perherow["kerroin"] = 1;
 
-        // Lasketaan kerroin rekursiivisesti taaksep‰in
+        // Lasketaan kerroin rekursiivisesti taaksep√§in
         foreach ($tmp_kerroin_array as $ke_ind => $ke_kerr) {
-          list($ker_isa, $ke_ker) = explode("#!°!#", $ke_kerr);
+          list($ker_isa, $ke_ker) = explode("#!¬°!#", $ke_kerr);
 
           if ($ke_ker <= 0) {
             $ke_ker = 1;
@@ -189,7 +189,7 @@ if (!function_exists("tuoteperhe_reku2")) {
   }
 }
 
-// Onko p‰‰ss‰tty varasto josta myyd‰‰n
+// Onko p√§√§ss√§tty varasto josta myyd√§√§n
 if (isset($varasto) and is_array($varasto) and count($varasto) > 0) {
   $varasto = $varasto;
 }
@@ -206,11 +206,11 @@ else {
   unset($varasto);
 }
 
-if (isset($varasto) and $lisaarivi_debug == 1) echo "Myyd‰‰n varastoista: ",var_dump($varasto),"<br>";
+if (isset($varasto) and $lisaarivi_debug == 1) echo "Myyd√§√§n varastoista: ",var_dump($varasto),"<br>";
 
-// katotaan oletuspaikka ja myyd‰‰n tietenkin sielt‰ jos niin halutaan
+// katotaan oletuspaikka ja myyd√§√§n tietenkin sielt√§ jos niin halutaan
 if ($olpaikalta != '') {
-  $olquery = "SELECT concat_ws('#!°!#',hyllyalue,hyllynro,hyllyvali,hyllytaso) olpaikka
+  $olquery = "SELECT concat_ws('#!¬°!#',hyllyalue,hyllynro,hyllyvali,hyllytaso) olpaikka
               FROM tuotepaikat
               WHERE yhtio  = '$kukarow[yhtio]'
               AND tuoteno  = '$trow[tuoteno]'
@@ -222,7 +222,7 @@ if ($olpaikalta != '') {
   $paikka  = $olparow["olpaikka"];
 }
 
-// P‰iv‰m‰‰rien oikeellisuustsekki
+// P√§iv√§m√§√§rien oikeellisuustsekki
 list($aikatsk_v, $aikatsk_k , $aikatsk_p) = explode("-", $toimaika);
 
 $aikatsk_k = (int) $aikatsk_k;
@@ -232,7 +232,7 @@ $aikatsk_v = (int) $aikatsk_v;
 if ($toimaika != "0000-00-00" and !checkdate($aikatsk_k, $aikatsk_p, $aikatsk_v)) {
   $toimaika = date("Y-m-d");
   if ($toim == "YLLAPITO") {
-    $toimaika = "0000-00-00"; // Yll‰pitosoppareissa toimaika tarkoittaa sopimuksen poikkeavaa alkup‰iv‰‰ ja nolla on default
+    $toimaika = "0000-00-00"; // Yll√§pitosoppareissa toimaika tarkoittaa sopimuksen poikkeavaa alkup√§iv√§√§ ja nolla on default
   }
 }
 
@@ -245,11 +245,11 @@ $aikatsk_v = (int) $aikatsk_v;
 if ($kerayspvm != "0000-00-00" and !checkdate($aikatsk_k, $aikatsk_p, $aikatsk_v)) {
   $kerayspvm = date("Y-m-d");
   if ($toim == "YLLAPITO") {
-    $kerayspvm = "0000-00-00"; // Yll‰pitosoppareissa kerayspvm tarkoittaa sopimuksen poikkeavaa loppup‰iv‰‰ ja nolla on default
+    $kerayspvm = "0000-00-00"; // Yll√§pitosoppareissa kerayspvm tarkoittaa sopimuksen poikkeavaa loppup√§iv√§√§ ja nolla on default
   }
 }
 
-// Jos yhtiˆn saldok‰sittely on ajasta riippuvainen
+// Jos yhti√∂n saldok√§sittely on ajasta riippuvainen
 if ($yhtiorow["saldo_kasittely"] == "T") {
   $saldoaikalisa = $kerayspvm;
 }
@@ -261,12 +261,12 @@ else {
 $kpl  = str_replace(',', '.', $kpl);
 $hinta  = str_replace(',', '.', $hinta);
 
-// lis‰t‰‰n alvit (jos hintamuunnos p‰‰ll‰)
+// lis√§t√§√§n alvit (jos hintamuunnos p√§√§ll√§)
 if (isset($tilausrivi_alvillisuus) and $tilausrivi_alvillisuus == "E" and $yhtiorow["alv_kasittely"] == '' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o' and !is_array($hyvityssaanto_hinta_array)) {
   if (!isset($alv) or $alv == '') $alv = $trow['alv'];
   $hinta = round($hinta * (1+$alv/100), $yhtiorow['hintapyoristys']);
 }
-// poistetaan alvit (jos hintamuunnos p‰‰ll‰)
+// poistetaan alvit (jos hintamuunnos p√§√§ll√§)
 if (isset($tilausrivi_alvillisuus) and $tilausrivi_alvillisuus == "K" and $yhtiorow["alv_kasittely"] == 'o' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o' and !is_array($hyvityssaanto_hinta_array)) {
   if (!isset($alv) or $alv == '') $alv = $trow['alv'];
   $hinta = round($hinta / (1+$alv/100), $yhtiorow['hintapyoristys']);
@@ -285,20 +285,20 @@ else {
   }
 }
 
-// Alkuper‰iset tiedot talteen
+// Alkuper√§iset tiedot talteen
 $alkupera_trow  = $trow;
 $alkupera_kpl   = $kpl;
 $alkupera_hinta = $hinta;
 $alkupera_netto = $netto;
 $alkupera_alv   = $alv;
 
-$saldoyhteensa       = 0;                // t‰h‰n summaillaan saldoa yhteens‰
+$saldoyhteensa       = 0;                // t√§h√§n summaillaan saldoa yhteens√§
 $lapsiyhteensa       = 0;
 $korvaavan_isaa_myyty   = 0;
 $perheid_lisaarivi     = 0;
 $lop           = "";
-$tuoteperhe         = array();            // Tuoteperheiden lapset menev‰t t‰nne
-$kaikkituotteet       = array(strtoupper($tuoteno)); // t‰h‰n arrayseen lis‰t‰‰n kaikki tuotteet ketjusta
+$tuoteperhe         = array();            // Tuoteperheiden lapset menev√§t t√§nne
+$kaikkituotteet       = array(strtoupper($tuoteno)); // t√§h√§n arrayseen lis√§t√§√§n kaikki tuotteet ketjusta
 $isa_array          = array();
 $var           = strtoupper($var);        // varri isoks
 $netto           = strtoupper($netto);        // netto isoks
@@ -309,7 +309,7 @@ $org_kpl         = "";
 $suoratoimitus_splittaus = FALSE;
 $tlisatied_lisa       = "";
 
-// n‰ihin arraysiin tulee sitten myyt‰viss‰ olevat tuotteet, kappaleet ja varastopaikat
+// n√§ihin arraysiin tulee sitten myyt√§viss√§ olevat tuotteet, kappaleet ja varastopaikat
 $myy_tuoteno   = array();
 $myy_kpl     = array();
 $myy_hyllyalue   = array();
@@ -345,7 +345,7 @@ elseif ($laskurow["tila"] == 'G') {
   $rivityyppi = 'G';  // Siirtolistatilausrivi
 }
 elseif ($laskurow["tila"] == 'S') {
-  $rivityyppi = 'G';  // Sis‰inen tyˆm‰‰r‰ysrivi
+  $rivityyppi = 'G';  // Sis√§inen ty√∂m√§√§r√§ysrivi
 }
 elseif ($laskurow["tila"] == 'V' and $perheid2 == -100) {
   $rivityyppi = 'W';  // Valmistustilausrivi (Valmiste)
@@ -422,7 +422,7 @@ if ($kpl > 0 and $rivityyppi == 'O' and $yhtiorow['ostoera_pyoristys'] == 'K') {
 
     $ttrow["pakkaus3"] !="" ? $pakkausarray[] = $ttrow["pakkaus3"] : "";
     $ttrow["pakkaus2"] !="" ? $pakkausarray[] = $ttrow["pakkaus2"] : "";
-    $pakkausarray[] = $ttrow["osto_era"]; // Oletus jos ei muuta lˆydy.
+    $pakkausarray[] = $ttrow["osto_era"]; // Oletus jos ei muuta l√∂ydy.
 
     foreach ($pakkausarray as $pak) {
       (float) $jaannos = fmod($kpl,$pak);
@@ -435,7 +435,7 @@ if ($kpl > 0 and $rivityyppi == 'O' and $yhtiorow['ostoera_pyoristys'] == 'K') {
     }
 
     if ($jaannos != 0) {
-      // pyˆristet‰‰n pakkauskokokoon
+      // py√∂ristet√§√§n pakkauskokokoon
       $kpl = ceil($kpl / $pakkauskoko) * $pakkauskoko;
     }
 
@@ -444,17 +444,17 @@ if ($kpl > 0 and $rivityyppi == 'O' and $yhtiorow['ostoera_pyoristys'] == 'K') {
   if ($org_kpl != $kpl) $ostoerahuomatus = TRUE;
 }
 
-$toimittamatta = $kpl; //N‰in paljon ollaan toimittamassa
+$toimittamatta = $kpl; //N√§in paljon ollaan toimittamassa
 
-if ($lisaarivi_debug == 1) echo "Tilattu m‰‰r‰: $toimittamatta<br>";
+if ($lisaarivi_debug == 1) echo "Tilattu m√§√§r√§: $toimittamatta<br>";
 
-// Jos kyseess‰ on rivi joka halutaan tilata ihan normaalisti joltain toimittajalta
-if (substr($paikka,0,3) == "°°°") {
+// Jos kyseess√§ on rivi joka halutaan tilata ihan normaalisti joltain toimittajalta
+if (substr($paikka,0,3) == "¬°¬°¬°") {
   $var          = "T";
   $toimittajan_tunnus  = substr($paikka, 3);
-  $paikka         = "#!°!#";
+  $paikka         = "#!¬°!#";
 }
-elseif ($var == "T" and substr($paikka,0,3) != "°°°" and substr($paikka,0,3) != "!!!") {
+elseif ($var == "T" and substr($paikka,0,3) != "¬°¬°¬°" and substr($paikka,0,3) != "!!!") {
   $var         = "";
   $toimittajan_tunnus  = "";
 }
@@ -469,24 +469,24 @@ elseif ($var == "U" and substr($paikka,0,3) != "!!!") {
   $toimittajan_tunnus  = "";
 }
 
-// Jos kyseess‰ on rivi joka halutaan tilata ihan normaalisti joltain toimittajalta
-if (substr($paikka,0,3) == "°°V") {
+// Jos kyseess√§ on rivi joka halutaan tilata ihan normaalisti joltain toimittajalta
+if (substr($paikka,0,3) == "¬°¬°V") {
   $var          = "R";
   $paikka         = substr($paikka, 3);
 }
-elseif ($var == "R" and substr($paikka,0,3) != "°°V" and substr($paikka,0,3) != "°°V") {
+elseif ($var == "R" and substr($paikka,0,3) != "¬°¬°V" and substr($paikka,0,3) != "¬°¬°V") {
   $var         = "";
   $toimittajan_tunnus  = "";
 }
 
 $perhelisa = "";
 
-//Haetaan myˆs tuoteperheet tai reseptit, t‰ss‰ parametrit niille.
+//Haetaan my√∂s tuoteperheet tai reseptit, t√§ss√§ parametrit niille.
 if ($laskurow['tila'] == 'V' and $var != "W") {
   $perhelisa = " and tuoteperhe.tyyppi='R' ";
 }
 elseif ($var == "W" and $laskurow["tila"] == 'V' and $laskurow["tilaustyyppi"] == 'V') {
-  // Asiaakkaallevalmistus ja halutaan myyd‰ rivi varastosta
+  // Asiaakkaallevalmistus ja halutaan myyd√§ rivi varastosta
   $perhelisa = " and tuoteperhe.tyyppi in ('P','') ";
   $var     = "";
 
@@ -498,10 +498,10 @@ else {
   $perhelisa = " and tuoteperhe.tyyppi in ('P','') ";
 }
 
-// vientikieltok‰sittely:
-// +maa tarkoittaa ett‰ myynti on kielletty t‰h‰n maahan ja sallittu kaikkiin muihin
-// -maa tarkoittaa ett‰ ainoastaan t‰h‰n maahan saa myyd‰
-// eli n‰ytet‰‰n vaan tuotteet jossa vienti kent‰ss‰ on tyhj‰‰ tai -maa.. ja se ei saa olla +maa
+// vientikieltok√§sittely:
+// +maa tarkoittaa ett√§ myynti on kielletty t√§h√§n maahan ja sallittu kaikkiin muihin
+// -maa tarkoittaa ett√§ ainoastaan t√§h√§n maahan saa myyd√§
+// eli n√§ytet√§√§n vaan tuotteet jossa vienti kent√§ss√§ on tyhj√§√§ tai -maa.. ja se ei saa olla +maa
 $kieltolisa = "";
 $uusin_korvaava_tuote = '';
 
@@ -509,13 +509,13 @@ if ($laskurow["toim_maa"] != "" and $laskurow["tila"] != 'V') {
   $kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$laskurow[toim_maa]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$laskurow[toim_maa]%' ";
 }
 
-//Tutkitaan onko t‰m‰ hyvitysrivi
+//Tutkitaan onko t√§m√§ hyvitysrivi
 if ((float) $kpl < 0 and trim($var) == "") {
-  //Laitetaan varriksi Y jotta ei tarvitse menn‰ myyntihaaraan
+  //Laitetaan varriksi Y jotta ei tarvitse menn√§ myyntihaaraan
   $var = "Y";
 }
 
-// Jos varastosiirto tehd‰‰n saman varaston sis‰ll‰, niin siiret‰‰n aina oletupaikalle
+// Jos varastosiirto tehd√§√§n saman varaston sis√§ll√§, niin siiret√§√§n aina oletupaikalle
 // Eli otetaan tuote joltain muulta paikalta kuin oletuspaikalta
 if ($laskurow["tila"] == 'G' and $laskurow["clearing"] == $laskurow["varasto"]) {
   $notfromvarasto = " and tuotepaikat.oletus = '' ";
@@ -524,20 +524,20 @@ else {
   $notfromvarasto = "";
 }
 
-// Jos skripti (kululaskut.inc) p‰‰ss‰‰ tilausrivilinkin, niin laitetaan se mukaan kyselyyn
+// Jos skripti (kululaskut.inc) p√§√§ss√§√§ tilausrivilinkin, niin laitetaan se mukaan kyselyyn
 if ($tilausrivilinkki > 0) {
   $tlisatied_lisa = " , tilausrivilinkki = '".mysql_real_escape_string($tilausrivilinkki)."' ";
 }
 
 if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
-  // Katsotaan onko maksuehto j‰lkivaatimus, koska silloin ei toimiteta erikoisvarastoista vaikka erikoistoimitus_alarajasumma ylittyisi
+  // Katsotaan onko maksuehto j√§lkivaatimus, koska silloin ei toimiteta erikoisvarastoista vaikka erikoistoimitus_alarajasumma ylittyisi
   if (!isset($jvtsekres)) {
-    $apuqu = "  SELECT tunnus
-          FROM maksuehto
-          WHERE yhtio  = '$kukarow[yhtio]'
-          AND tunnus  = '$laskurow[maksuehto]'
-          AND jv      != ''";
+    $apuqu = "SELECT tunnus
+              FROM maksuehto
+              WHERE yhtio  = '$kukarow[yhtio]'
+              AND tunnus   = '$laskurow[maksuehto]'
+              AND jv      != ''";
     $jvtsekres = pupe_query($apuqu);
 
     if (mysql_num_rows($jvtsekres) > 0) {
@@ -545,13 +545,13 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
     }
   }
 
-  // Vientiasiakkaille ei myyd‰ erikoisvarastoista jos toimitustapa on nouto
+  // Vientiasiakkaille ei myyd√§ erikoisvarastoista jos toimitustapa on nouto
   if (!isset($tntsekres)) {
-    $apuqu = "  SELECT tunnus
-          FROM toimitustapa
-          WHERE yhtio  = '$kukarow[yhtio]'
-          AND selite  = '$laskurow[toimitustapa]'
-          AND nouto  != ''";
+    $apuqu = "SELECT tunnus
+              FROM toimitustapa
+              WHERE yhtio  = '$kukarow[yhtio]'
+              AND selite   = '$laskurow[toimitustapa]'
+              AND nouto   != ''";
     $tntsekres = pupe_query($apuqu);
 
     if (mysql_num_rows($tntsekres) > 0) {
@@ -559,55 +559,55 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
     }
   }
 
-  if ($lisaarivi_debug==1) echo "Menn‰‰n myyntihaaraan: $tuoteno<br>";
+  if ($lisaarivi_debug==1) echo "Menn√§√§n myyntihaaraan: $tuoteno<br>";
 
   $kvkasittely = in_array($yhtiorow["tee_automaattinen_osto_myyntitilaukselta"], array('H', 'W')) ? false : true;
 
-  // Etsit‰‰n korvaavia tuotteita
+  // Etsit√§√§n korvaavia tuotteita
   if ($tuoteno != "" and $trow["ei_saldoa"] == "" and $korvaavakielto == "" and $rivityyppi == 'L' and $tapa != "MYYVASTAAVA" and $laskurow['tilaustyyppi'] != '9' and $kvkasittely) {
-    $korvaavat_kiellot   = ""; // Korvaavia tuotteita myyd‰‰n, vastaavia ei
+    $korvaavat_kiellot   = ""; // Korvaavia tuotteita myyd√§√§n, vastaavia ei
     $krkaikkimyytavissa  = 0;
 
-    // Tutkitaan ensin saako t‰lle asiakkaalle myyd‰ korvaavia t‰st‰ tuoteryhm‰st‰
+    // Tutkitaan ensin saako t√§lle asiakkaalle myyd√§ korvaavia t√§st√§ tuoteryhm√§st√§
     $kk_laji = korvaavat_kiellot($laskurow['ytunnus'], $trow['osasto'], $trow['try']);
 
-    // Ei myyd‰ mit‰‰n korvaavia
+    // Ei myyd√§ mit√§√§n korvaavia
     if ($kk_laji == 'K') {
       $korvaavat_kiellot = "KIELTO";
     }
-    // Korvaavia tuotteita myyd‰‰n, mik‰li korvaavuusketjusta lˆytyy tilattu m‰‰r‰
+    // Korvaavia tuotteita myyd√§√§n, mik√§li korvaavuusketjusta l√∂ytyy tilattu m√§√§r√§
     elseif ($kk_laji == 'O') {
       $korvaavat_kiellot = "KORVAAVAT";
     }
-    // Korvaavia ja Vastaavia tuotteita myyd‰‰n
+    // Korvaavia ja Vastaavia tuotteita myyd√§√§n
     elseif ($kk_laji == 'X') {
       $korvaavat_kiellot = "VASTAAVAT";
     }
-    // Korvaavia ja Vastaavuusketjun p‰‰tuotetta myyd‰‰n
+    // Korvaavia ja Vastaavuusketjun p√§√§tuotetta myyd√§√§n
     elseif ($kk_laji == 'Y') {
       $korvaavat_kiellot = "PAA_VASTAAVA";
     }
 
-    // Otetaan alkuper‰isen tuotteen hinta talteen
+    // Otetaan alkuper√§isen tuotteen hinta talteen
     list($korva_isa_hinta, , $korva_isa_ale_kaikki, , ) = alehinta($laskurow, $trow, $kpl, '', '', '', '', '', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
 
-    // Tehd‰‰n homma siten, ett‰ etsit‰‰n kaikki korvaavat jo t‰ss‰ vaiheessa arrayseen
+    // Tehd√§√§n homma siten, ett√§ etsit√§√§n kaikki korvaavat jo t√§ss√§ vaiheessa arrayseen
     // Haetaan korvaavuusketju tuotteelle
     require_once 'korvaavat.class.php';
     $korvaavat = new Korvaavat($tuoteno);
 
-    // Korvaavuusketjun j‰rjestyksess‰ pienemp‰‰n p‰in, eli p‰‰tuotetta kohden
+    // Korvaavuusketjun j√§rjestyksess√§ pienemp√§√§n p√§in, eli p√§√§tuotetta kohden
     $options = array('korvaavuusketjun_jarjestys' => $yhtiorow['korvaavuusketjun_jarjestys']);
     $korvaavat_tuotteet = $korvaavat->tuotteet($options);
 
-    // Vastaavien automaattinen myynti, eli haetaanko vastaavat tai Vastaavuusketjun p‰‰tuotteen automaattinen myynti
+    // Vastaavien automaattinen myynti, eli haetaanko vastaavat tai Vastaavuusketjun p√§√§tuotteen automaattinen myynti
     if ($korvaavat_kiellot == "VASTAAVAT" or $korvaavat_kiellot == "PAA_VASTAAVA") {
 
-      // Haetaan vastaavuusketjut korvaavat ketjun p‰‰tuotteella
+      // Haetaan vastaavuusketjut korvaavat ketjun p√§√§tuotteella
       require_once 'vastaavat.class.php';
 
-      // Jos tilatulla tuotteella ei korvaavia lˆydy, haetaan vastaavat myyt‰v‰ll‰ tuotteella.
-      // Muulloin etsit‰‰n vastaavat lˆydetyn korvaavuusketjun p‰‰tuotteen mukaan.
+      // Jos tilatulla tuotteella ei korvaavia l√∂ydy, haetaan vastaavat myyt√§v√§ll√§ tuotteella.
+      // Muulloin etsit√§√§n vastaavat l√∂ydetyn korvaavuusketjun p√§√§tuotteen mukaan.
       $options = array('skippaa_vaihtoehtoiset' => TRUE);
 
       if (empty($korvaavat_tuotteet)) {
@@ -627,7 +627,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
           // Haetaan tuotteet ketjukohtaisesti
           $_tuotteet = $vastaavat->tuotteet($ketju, $options);
 
-          // Lis‰t‰‰n lˆydetyt vastaavat mahdollisten myyt‰vien joukkoon
+          // Lis√§t√§√§n l√∂ydetyt vastaavat mahdollisten myyt√§vien joukkoon
           foreach ($_tuotteet as $_tuote) {
 
             if (!isset($korvaavat_tuotteet[$_tuote['tuoteno']])) {
@@ -643,7 +643,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
       }
     }
 
-    // Tuotteen korvaavat ja vastaavat ketju, tsekataan paljonko on myyt‰viss‰ ja yhteens‰ myyt‰viss‰
+    // Tuotteen korvaavat ja vastaavat ketju, tsekataan paljonko on myyt√§viss√§ ja yhteens√§ myyt√§viss√§
     foreach ($korvaavat_tuotteet as $kindeksi => $krow2) {
 
       list(, , $krmyytavissa) = saldo_myytavissa($krow2["tuoteno"], $jtspec, '', '', '', '', '', '', '', $saldoaikalisa);
@@ -652,7 +652,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
       $krkaikkimyytavissa += $krmyytavissa;
     }
 
-    // Korvaavia tuotteita myyd‰‰n, mik‰li korvaavuusketjusta lˆytyy tilattu m‰‰r‰
+    // Korvaavia tuotteita myyd√§√§n, mik√§li korvaavuusketjusta l√∂ytyy tilattu m√§√§r√§
     if ($korvaavat_kiellot == "KORVAAVAT" and $krkaikkimyytavissa < $kpl) {
       // Skipataan kaikki korvaavat
       $korvaavat_tuotteet = array();
@@ -661,7 +661,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
     // Tuotteen korvaavat ja vastaavat ketju
     foreach ($korvaavat_tuotteet as $krow2) {
 
-      //katotaan t‰ss‰ v‰liss‰ saako tuotetta myyd‰ asiakkaalle - eli jos ei saa myyd‰ siirryt‰‰n seuraavaan tuotteeseen (jos on)...
+      //katotaan t√§ss√§ v√§liss√§ saako tuotetta myyd√§ asiakkaalle - eli jos ei saa myyd√§ siirryt√§√§n seuraavaan tuotteeseen (jos on)...
       if (!saako_myyda_private_label($laskurow["liitostunnus"], $krow2["tuoteno"])) {
         continue;
       }
@@ -679,7 +679,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
       $korva_ale_kaikki['erikoisale'] = $laskurow['erikoisale'];
       $if_ale_korva_isa_chk2 *= generoi_alekentta_php($korva_ale_kaikki, 'M', 'kerto');
 
-      // Ei saa myyd‰ korvaavia tuotteita eik‰ vastaavia
+      // Ei saa myyd√§ korvaavia tuotteita eik√§ vastaavia
       if ($korvaavat_kiellot == "KIELTO") {
         if ($krow2["myytavissa"] > 0 and strtoupper($krow2["tuoteno"]) != strtoupper($tuoteno)) {
           $korkieltokommi[] = strtoupper($krow2["tuoteno"]." (".sprintf("%.2f", $krow2["myyntihinta"]).")");
@@ -687,11 +687,11 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
       }
       else {
 
-        // Myyd‰‰nkˆ aina halvin tuote
-        // Asiakas saa aina halvemman hinnan mukaan tuotteen, mik‰li alkuper‰inen tuote on P toistuva tai puute.
+        // Myyd√§√§nk√∂ aina halvin tuote
+        // Asiakas saa aina halvemman hinnan mukaan tuotteen, mik√§li alkuper√§inen tuote on P toistuva tai puute.
         if ($yhtiorow["korvaavan_hinta_ylaraja"] == 'MIN') {
 
-          // T‰h‰n hintaan asiakas saisi tuotteen
+          // T√§h√§n hintaan asiakas saisi tuotteen
           if ($korva_hinta > 0) {
             $korvaavan_hinta_ylaraja_hinta = $korva_hinta * generoi_alekentta_php($korva_ale_kaikki, 'M', 'kerto');
           }
@@ -708,8 +708,8 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
           }
 
            if ($krow2["myytavissa"] > 0 and !in_array(strtoupper($krow2["tuoteno"]), $kaikkituotteet)) {
-            $kaikkituotteet[] = strtoupper($krow2["tuoteno"]); // lis‰t‰‰n tuoteno arrayseen
-            if ($krow2["tyyppi"] == "vastaava") $korlisakommi[strtoupper($krow2["tuoteno"])] = t("HUOM: Tuote %s on tilap‰isesti loppu. Toimitetaan vastaava tuote.", "", $trow["tuoteno"]);
+            $kaikkituotteet[] = strtoupper($krow2["tuoteno"]); // lis√§t√§√§n tuoteno arrayseen
+            if ($krow2["tyyppi"] == "vastaava") $korlisakommi[strtoupper($krow2["tuoteno"])] = t("HUOM: Tuote %s on tilap√§isesti loppu. Toimitetaan vastaava tuote.", "", $trow["tuoteno"]);
             else $korlisakommi[strtoupper($krow2["tuoteno"])] = t("HUOM: Korvaa tuotteen")." $alkupera_trow[tuoteno]";
           }
         }
@@ -720,13 +720,13 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
           }
         }
         else {
-          //Yritet‰‰n myyd‰ korvaava tuote
+          //Yritet√§√§n myyd√§ korvaava tuote
           $korvattiin_korvaavalla = "HIIOHEI!";
 
           if (!in_array(strtoupper($krow2["tuoteno"]), $kaikkituotteet)) {
-            $kaikkituotteet[]=strtoupper($krow2["tuoteno"]); // lis‰t‰‰n tuoteno arrayseen
+            $kaikkituotteet[]=strtoupper($krow2["tuoteno"]); // lis√§t√§√§n tuoteno arrayseen
 
-            if ($krow2["tyyppi"] == "vastaava") $korlisakommi[strtoupper($krow2["tuoteno"])] = t("HUOM: Tuote %s on tilap‰isesti loppu. Toimitetaan vastaava tuote.", "", $trow["tuoteno"]);
+            if ($krow2["tyyppi"] == "vastaava") $korlisakommi[strtoupper($krow2["tuoteno"])] = t("HUOM: Tuote %s on tilap√§isesti loppu. Toimitetaan vastaava tuote.", "", $trow["tuoteno"]);
             else $korlisakommi[strtoupper($krow2["tuoteno"])] = t("HUOM: Korvaa tuotteen")." $alkupera_trow[tuoteno]";
           }
         }
@@ -743,8 +743,8 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
     }
   }
 
-  // Haetaan tuoteperheet, jos $paikka on erisuuri kuin tyhj‰ niin vaihdetaan vain jonkun tuotteen paikkaa eik‰ p‰ivitet‰ tuoteperheit‰
-  // Tai jos muokataan tuoteperheen lasta ei menn‰ uudestaan t‰h‰n haaraan
+  // Haetaan tuoteperheet, jos $paikka on erisuuri kuin tyhj√§ niin vaihdetaan vain jonkun tuotteen paikkaa eik√§ p√§ivitet√§ tuoteperheit√§
+  // Tai jos muokataan tuoteperheen lasta ei menn√§ uudestaan t√§h√§n haaraan
   if ($perheid == 0 and $perhekielto == "") {
 
     foreach ($kaikkituotteet as $isatuoteno) {
@@ -763,16 +763,16 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
       }
 
       if (count($tuoteperhe) == 0 and $laskurow["tila"] == 'V' and $laskurow["tilaustyyppi"] == 'V' and $rivityyppi == "V") {
-        // Asiakkaallevalmistuskeissi, resepit‰ ei lˆydy joten teemme t‰st‰ myyntirivin
+        // Asiakkaallevalmistuskeissi, resepit√§ ei l√∂ydy joten teemme t√§st√§ myyntirivin
         $rivityyppi = 'L'; // Myyntitilausrivi
       }
     }
   }
 
-  //Kaikkien arrayden indeksien ‰iti
+  //Kaikkien arrayden indeksien √§iti
   $i = 0;
 
-  // Sitten k‰yd‰‰n kaikkien tuotteiden saldot l‰pi kaikilta varastopaikoilta
+  // Sitten k√§yd√§√§n kaikkien tuotteiden saldot l√§pi kaikilta varastopaikoilta
   foreach ($kaikkituotteet as $tuoteno) {
 
     $query = "SELECT ei_saldoa, status
@@ -788,14 +788,14 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
         $orvot = 0;
       }
       else {
-        // katotaan jos meill‰ on tuotteita varaamassa saldoa joiden varastopaikkaa ei en‰‰ ole olemassa...
+        // katotaan jos meill√§ on tuotteita varaamassa saldoa joiden varastopaikkaa ei en√§√§ ole olemassa...
         list($saldo, $hyllyssa, $orvot) = saldo_myytavissa($tuoteno, 'ORVOT', '', '', '', '', '', '', $laskurow["toim_maa"], $saldoaikalisa);
 
         $orvot *= -1;
       }
 
-      // K‰yd‰‰n l‰pi tuotepaikat
-      if (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") and $paikka != "EIERAAVIELA#!°!#EIEI" AND $rivityyppi != 'W' AND ($laskurow["tila"] != 'V' or $paikka != "")) {
+      // K√§yd√§√§n l√§pi tuotepaikat
+      if (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") and $paikka != "EIERAAVIELA#!¬°!#EIEI" AND $rivityyppi != 'W' AND ($laskurow["tila"] != 'V' or $paikka != "")) {
         $query = "SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
                   tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
                   sarjanumeroseuranta.sarjanumero era,
@@ -846,7 +846,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
       $zres = pupe_query($query);
 
-      //N‰hd‰‰n vaivaa jottaa saadaan paikat sortattua oletuspaikka ensin ja sitten myyt‰viss‰olevan m‰‰r‰n mukaan laskevassa j‰rjestyksess‰
+      //N√§hd√§√§n vaivaa jottaa saadaan paikat sortattua oletuspaikka ensin ja sitten myyt√§viss√§olevan m√§√§r√§n mukaan laskevassa j√§rjestyksess√§
       $zzrow     = array();
       $zzrowlask   = 0;
 
@@ -855,17 +855,17 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
         // Saldolliset tuotteet
         list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, $jtspec, '', '', $zrow["hyllyalue"], $zrow["hyllynro"], $zrow["hyllyvali"], $zrow["hyllytaso"], $laskurow["toim_maa"], $saldoaikalisa, $zrow["era"]);
 
-        if ($lisaarivi_debug==1) echo "Saldo_myyt‰viss‰ funktio sanoo $tuoteno: $zrow[hyllyalue]-$zrow[hyllynro]-$zrow[hyllyvali]-$zrow[hyllytaso]: $saldo, $hyllyssa, $myytavissa kappaletta (Er‰: $zrow[era]) PVM: $saldoaikalisa<br>";
+        if ($lisaarivi_debug==1) echo "Saldo_myyt√§viss√§ funktio sanoo $tuoteno: $zrow[hyllyalue]-$zrow[hyllynro]-$zrow[hyllyvali]-$zrow[hyllytaso]: $saldo, $hyllyssa, $myytavissa kappaletta (Er√§: $zrow[era]) PVM: $saldoaikalisa<br>";
 
-        // Tutkitaan myyd‰‰nkˆ tietty‰ jo varattua lis‰varustetta, silloin annetaan AINA riitt‰v‰ saldo
-        if ($perheid2 > 0 and $perheid2 != $rivitunnus and strtoupper($zrow["hyllyalue"]."#!°!#".$zrow["hyllynro"]."#!°!#".$zrow["hyllyvali"]."#!°!#".$zrow["hyllytaso"]) == strtoupper($paikka)) {
+        // Tutkitaan myyd√§√§nk√∂ tietty√§ jo varattua lis√§varustetta, silloin annetaan AINA riitt√§v√§ saldo
+        if ($perheid2 > 0 and $perheid2 != $rivitunnus and strtoupper($zrow["hyllyalue"]."#!¬°!#".$zrow["hyllynro"]."#!¬°!#".$zrow["hyllyvali"]."#!¬°!#".$zrow["hyllytaso"]) == strtoupper($paikka)) {
           $myytavissa = $toimittamatta;
         }
 
-        // hoidetaan pois problematiikka jos meill‰ on orpoja (tuotepaikattomia) tuotteita varaamassa saldoa
+        // hoidetaan pois problematiikka jos meill√§ on orpoja (tuotepaikattomia) tuotteita varaamassa saldoa
         if ($orvot > 0) {
           if ($myytavissa >= $orvot) {
-             // poistaan orpojen varaamat tuotteet t‰lt‰ paikalta
+             // poistaan orpojen varaamat tuotteet t√§lt√§ paikalta
              $myytavissa = $myytavissa - $orvot;
              $orvot = 0;
           }
@@ -877,15 +877,15 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
         }
 
         if ($zrow['varasto'] == $kukarow['oletus_varasto'] and $zrow['oletus'] != '') {
-          // K‰ytt‰j‰n oletusvarasto ja oletuspaikka, prio 1
+          // K√§ytt√§j√§n oletusvarasto ja oletuspaikka, prio 1
           $zrow['oletus'] = 3;
         }
         elseif ($zrow['varasto'] == $kukarow['oletus_varasto']) {
-          // K‰ytt‰j‰n oletusvarasto ja oletuspaikka, prio 2
+          // K√§ytt√§j√§n oletusvarasto ja oletuspaikka, prio 2
           $zrow['oletus'] = 2;
         }
         elseif ($zrow['oletus'] != '') {
-          // K‰ytt‰j‰n oletusvarasto ja oletuspaikka, prio 1 jos k‰ytt‰j‰lle ei oo oletusvarastoa, muuten prio 3
+          // K√§ytt√§j√§n oletusvarasto ja oletuspaikka, prio 1 jos k√§ytt√§j√§lle ei oo oletusvarastoa, muuten prio 3
           $zrow['oletus'] = 1;
         }
 
@@ -903,17 +903,17 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
         $zzrow[$zzrowlask]["prio"]      = $zrow["prio"] == 0 ? PHP_INT_MAX : $zrow["prio"];
         $zzrow[$zzrowlask]['erikoistoimitus_alarajasumma']  = $zrow['erikoistoimitus_alarajasumma'];
 
-        if ($lisaarivi_debug==1) echo "Myyt‰viss‰ $tuoteno paikalta $zrow[hyllyalue]-$zrow[hyllynro]-$zrow[hyllyvali]-$zrow[hyllytaso]: $myytavissa kappaletta<br>";
+        if ($lisaarivi_debug==1) echo "Myyt√§viss√§ $tuoteno paikalta $zrow[hyllyalue]-$zrow[hyllynro]-$zrow[hyllyvali]-$zrow[hyllytaso]: $myytavissa kappaletta<br>";
 
-        // tilatulla tuotteella oli saldoa.. laitetaan lippu p‰‰lle, ett‰ huomataan osatoimituskeisi oikein..
+        // tilatulla tuotteella oli saldoa.. laitetaan lippu p√§√§lle, ett√§ huomataan osatoimituskeisi oikein..
         if ($tuoteno == $alkupera_trow["tuoteno"]) {
-          $korvaavan_isaa_myyty = 1; // laitetaan lippu p‰‰lle ett‰ tiedet‰‰n ett‰ meneekˆ tilattua tuotetta ja korvaavaa tuotetetta samalla tilauksella
+          $korvaavan_isaa_myyty = 1; // laitetaan lippu p√§√§lle ett√§ tiedet√§√§n ett√§ meneek√∂ tilattua tuotetta ja korvaavaa tuotetetta samalla tilauksella
         }
 
         $zzrowlask++;
       }
 
-      // Sortataan varastopaikat prio, myyt‰viss‰ j‰rkk‰‰n
+      // Sortataan varastopaikat prio, myyt√§viss√§ j√§rkk√§√§n
       if (!function_exists('zzrowprio')) {
         function zzrowprio($a, $b) {
           if ($a["prio"] < $b["prio"]) {
@@ -934,7 +934,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
         }
       }
 
-      // Sortataan varastopaikat oletus, prio, myyt‰viss‰ j‰rkk‰‰n
+      // Sortataan varastopaikat oletus, prio, myyt√§viss√§ j√§rkk√§√§n
       if (!function_exists('zzrowcmp')) {
         function zzrowcmp($a, $b) {
           if (strcmp($a["oletus"], $b["oletus"]) < 0) {
@@ -967,15 +967,15 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
           //jos $varasto on asetettu ja se ei ole array niin asetetaan se arrayksi
           //koska if ($chk_row['varasto'] == $chk_oletus_var and (!isset($varasto) or in_array($chk_row['varasto'], $varasto))) {
-          //heitt‰‰ noticea jos in_array param 2 on jotain muuta kuin array
+          //heitt√§√§ noticea jos in_array param 2 on jotain muuta kuin array
           if (isset($varasto) and !is_array($varasto)) {
             $varasto = array();
           }
 
           reset($arr);
 
-          // Katotaan miss‰ varastossa "oletuspaikka" on.
-          // T‰ss‰ tulee zzrowcmp funkkarin sorttauksen mukaan eka paikka
+          // Katotaan miss√§ varastossa "oletuspaikka" on.
+          // T√§ss√§ tulee zzrowcmp funkkarin sorttauksen mukaan eka paikka
           $chk_oletus_var = $arr[0]['varasto'];
 
           $chk_saldo      = 0;
@@ -984,7 +984,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
           // Loopataaan tuotepaikat
           foreach ($arr as $indx => $chk_row) {
 
-            // riitt‰‰kˆ "parhaimman" varaston saldo (K‰ytet‰‰n vain jos "paras" varasto on sallittu)
+            // riitt√§√§k√∂ "parhaimman" varaston saldo (K√§ytet√§√§n vain jos "paras" varasto on sallittu)
             if ($chk_row['varasto'] == $chk_oletus_var and (!isset($varasto) or in_array($chk_row['varasto'], $varasto))) {
               $chk_saldo += $chk_row['myytavissa'];
 
@@ -997,13 +997,13 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
           reset($arr);
 
-          // "Parhaassa" varastossa oli yhteens‰ riitt‰v‰sti saldoa
+          // "Parhaassa" varastossa oli yhteens√§ riitt√§v√§sti saldoa
           if ($checked_saldo) {
 
             $var_paras = array();
 
             foreach ($arr as $indx => $chk_row) {
-              // Otetaan "parhaimman" varaston sis‰ll‰ olevat tuotepaikat talteen
+              // Otetaan "parhaimman" varaston sis√§ll√§ olevat tuotepaikat talteen
               if ($chk_row['varasto'] == $chk_oletus_var and (!isset($varasto) or in_array($chk_row['varasto'], $varasto))) {
                 $var_paras[] = $chk_row;
                 unset($arr[$indx]);
@@ -1012,10 +1012,10 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
             $chk_yksi_paikka = FALSE;
 
-            // koitetaan lˆyt‰‰ onko kaikki myyt‰viss‰ yhdelt‰ paikalta
+            // koitetaan l√∂yt√§√§ onko kaikki myyt√§viss√§ yhdelt√§ paikalta
             foreach ($var_paras as $indx => $chk_row) {
 
-              // Jos oli tarpeeksi myyt‰viss‰ kappaleita, siirret‰‰n se jonon ensimm‰iseksi
+              // Jos oli tarpeeksi myyt√§viss√§ kappaleita, siirret√§√§n se jonon ensimm√§iseksi
               if ($chk_row['myytavissa'] >= $kpl) {
                 unset($var_paras[$indx]);
                 array_unshift($var_paras, $chk_row);
@@ -1024,23 +1024,23 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               }
             }
 
-            // jos ei lˆydy vain yht‰ paikkaa miss‰ riitt‰‰ saldo, sortataan varastopaikat prioriteetti j‰rkk‰‰n
+            // jos ei l√∂ydy vain yht√§ paikkaa miss√§ riitt√§√§ saldo, sortataan varastopaikat prioriteetti j√§rkk√§√§n
             if (!$chk_yksi_paikka) {
-              // Sortataan varastopaikat prioriteetti j‰rkk‰‰n
+              // Sortataan varastopaikat prioriteetti j√§rkk√§√§n
               usort($var_paras, "zzrowprio");
             }
 
-            // Laitetaan parhaimman varaston paikat k‰rkeen
+            // Laitetaan parhaimman varaston paikat k√§rkeen
             $arr = array_merge($var_paras, $arr);
           }
           else {
 
-            // Riitt‰‰kˆ jonkun toisen varaston saldo?
+            // Riitt√§√§k√∂ jonkun toisen varaston saldo?
             $chk_distinct_varasto = array();
 
             // loopataan distinct varasto
             foreach ($arr as $indx => $chk_row) {
-              // Ei oteta "parasta" varastoa mukaan, koska tid‰mme, ett‰ siin‰ ei t‰ss‰ tapauksessa ole riitt‰v‰sti kamaa
+              // Ei oteta "parasta" varastoa mukaan, koska tid√§mme, ett√§ siin√§ ei t√§ss√§ tapauksessa ole riitt√§v√§sti kamaa
               if (!isset($chk_distinct_varasto[$chk_row['varasto']]) and $chk_row['varasto'] != $chk_oletus_var) {
                 $chk_distinct_varasto[$chk_row['varasto']] = $chk_row['varasto'];
               }
@@ -1055,7 +1055,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
               foreach ($arr as $indx => $chk_row) {
 
-                // Onko loopattavassa varastossa tarpeeksi myyt‰viss‰ olevia kappaleita
+                // Onko loopattavassa varastossa tarpeeksi myyt√§viss√§ olevia kappaleita
                 if ($varastosta == $chk_row['varasto'] and (!isset($varasto) or in_array($chk_row['varasto'], $varasto))) {
                   $varaston_saldo += $chk_row['myytavissa'];
 
@@ -1066,7 +1066,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 }
               }
 
-              // Jos lˆytyi jokin varasto miss‰ on tarpeeksi myyt‰viss‰ olevia kappaleita
+              // Jos l√∂ytyi jokin varasto miss√§ on tarpeeksi myyt√§viss√§ olevia kappaleita
               if ($varasto_set != '') {
                 reset($arr);
 
@@ -1074,7 +1074,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
                 foreach ($arr as $indx => $chk_row) {
 
-                  // Otetaan kaikki varastopaikat talteen mitk‰ kuuluvat varastoon jossa on tarpeeksi myyt‰viss‰ olevia kappaleita
+                  // Otetaan kaikki varastopaikat talteen mitk√§ kuuluvat varastoon jossa on tarpeeksi myyt√§viss√§ olevia kappaleita
                   if ($chk_row['varasto'] == $varasto_set) {
                     $var_varasto[] = $chk_row;
                     unset($arr[$indx]);
@@ -1083,7 +1083,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
                 $chk_yksi_paikka = FALSE;
 
-                // koitetaan lˆyt‰‰ onko kaikki myyt‰viss‰ yhdelt‰ paikalta
+                // koitetaan l√∂yt√§√§ onko kaikki myyt√§viss√§ yhdelt√§ paikalta
                 foreach ($var_varasto as $indx => $chk_row) {
                   if ($chk_row['myytavissa'] >= $kpl) {
                     unset($var_varasto[$indx]);
@@ -1093,9 +1093,9 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                   }
                 }
 
-                // Jos ei lˆytynyt yht‰ paikkaa mist‰ oltaisiin voitu myyd‰ kaikki
+                // Jos ei l√∂ytynyt yht√§ paikkaa mist√§ oltaisiin voitu myyd√§ kaikki
                 if (!$chk_yksi_paikka) {
-                  // Sortataan varastopaikat prioriteetti j‰rkk‰‰n
+                  // Sortataan varastopaikat prioriteetti j√§rkk√§√§n
                   usort($var_varasto, "zzrowprio");
                 }
 
@@ -1114,7 +1114,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
       $muu_maa = array();
 
       foreach ($zzrow as $zzrow_rivi) {
-        // jos lˆydet‰‰n varasto toimitusosoitteen maasta, k‰ytet‰‰n sit‰ eka
+        // jos l√∂ydet√§√§n varasto toimitusosoitteen maasta, k√§ytet√§√§n sit√§ eka
         if ($laskurow["toim_maa"] == $zzrow_rivi["varastomaa"] and $laskurow["toim_maa"] != "" and $zzrow_rivi["varastomaa"] != "") {
           $oma_maa[] = $zzrow_rivi;
         }
@@ -1123,17 +1123,17 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
         }
       }
 
-      // sortataan ostajan maan varastopaikat "oletus, prio, myyt‰viss‰"-j‰rkk‰‰n
+      // sortataan ostajan maan varastopaikat "oletus, prio, myyt√§viss√§"-j√§rkk√§√§n
       if (count($oma_maa) > 0) usort($oma_maa, "zzrowcmp");
 
-      // sortataan muiden maiden varastopaikat "oletus, prio, myyt‰viss‰"-j‰rkk‰‰n
+      // sortataan muiden maiden varastopaikat "oletus, prio, myyt√§viss√§"-j√§rkk√§√§n
       if (count($muu_maa) > 0) usort($muu_maa, "zzrowcmp");
 
       if ($yhtiorow['varaston_splittaus'] == 'K') {
         /*
-        Jos $yhtiorow['varaston_splittaus'] parametri on 'K' (yritet‰‰nkˆ myyd‰ p‰‰asiassa yhdest‰ varastosta tuotetta)
-        a) Katotaan miss‰ oletuspaikka, riitt‰‰kˆ oletuspaikan varaston saldo (jos on oikeus varastoon jossa oletus on). Jos, katotaan ensin lˆytyykˆ tarvittava m‰‰r‰ joltain yhdelt‰ tietylt‰ paikalta.
-        b) Riitt‰‰kˆ jonkun toisen varaston saldo (ne mihin on oikeus). Jos, katotaan ensin lˆytyykˆ tarvittava m‰‰r‰ joltain yhdelt‰ tietylt‰ paikalta.
+        Jos $yhtiorow['varaston_splittaus'] parametri on 'K' (yritet√§√§nk√∂ myyd√§ p√§√§asiassa yhdest√§ varastosta tuotetta)
+        a) Katotaan miss√§ oletuspaikka, riitt√§√§k√∂ oletuspaikan varaston saldo (jos on oikeus varastoon jossa oletus on). Jos, katotaan ensin l√∂ytyyk√∂ tarvittava m√§√§r√§ joltain yhdelt√§ tietylt√§ paikalta.
+        b) Riitt√§√§k√∂ jonkun toisen varaston saldo (ne mihin on oikeus). Jos, katotaan ensin l√∂ytyyk√∂ tarvittava m√§√§r√§ joltain yhdelt√§ tietylt√§ paikalta.
         c) Jos a) tai b) ei natsaa niin palautetaan paikat saman kaavan mukaan kuin tapauksessa 1.
         */
 
@@ -1144,7 +1144,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
         if (count($muu_maa) > 0) $muu_maa = chk_varaston_saldo($muu_maa, $kpl);
       }
 
-      // yhdistet‰‰n arrayt
+      // yhdistet√§√§n arrayt
       $zzrow = array_merge($oma_maa, $muu_maa);
 
       if (count($zzrow) > 0) {
@@ -1167,9 +1167,9 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
           if ($yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI" or ($zrow["myytavissa"] > 0 and (($rivityyppi == 'L' and $kukarow['kassamyyja'] == '' and $myy_erikoistoim_ok and $zrow['varastotyyppi'] == 'E' and $zrow['erikoistoimitus_alarajasumma'] > 0 and (float) $trow['myyntihinta'] >= (float) $zrow['erikoistoimitus_alarajasumma']) or $zrow["varastotyyppi"] == '' or $zrow["varastotyyppi"] == 'V' or (is_array($varasto) and in_array($zrow["varasto"], $varasto) and $laskurow["varasto"] == 0) or $laskurow["varasto"] == $zrow["varasto"]))) {
 
-            if ($lisaarivi_debug == 1) echo "Myyd‰‰n $tuoteno paikalta $zrow[hyllyalue]-$zrow[hyllynro]-$zrow[hyllyvali]-$zrow[hyllytaso]: $zrow[myytavissa] kappaletta<br>";
+            if ($lisaarivi_debug == 1) echo "Myyd√§√§n $tuoteno paikalta $zrow[hyllyalue]-$zrow[hyllynro]-$zrow[hyllyvali]-$zrow[hyllytaso]: $zrow[myytavissa] kappaletta<br>";
 
-            // lis‰t‰‰n tuotteen tiedot arrayseen, koska t‰m‰n tuotteen voi myyd‰
+            // lis√§t√§√§n tuotteen tiedot arrayseen, koska t√§m√§n tuotteen voi myyd√§
             $myy_tuoteno[$i]   = strtoupper($tuoteno);
             $myy_kpl[$i]       = $zrow["myytavissa"];
             $myy_hyllyalue[$i] = $zrow["hyllyalue"];
@@ -1181,7 +1181,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
             if (!in_array(strtoupper($tuoteno), $tuoteperhe)) {
 
-              // Sis‰‰ntulevissa EDI-tilauksissa tehdastilaustuotteita ei saa tilata
+              // Sis√§√§ntulevissa EDI-tilauksissa tehdastilaustuotteita ei saa tilata
               if (isset($kutsuja) and $kutsuja == "EDITILAUS" and $zrow['status'] == 'T') {
                 $myy_tyyppi[$i] = "TEHDASTILAUSTUOTE";
               }
@@ -1189,14 +1189,14 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 $myy_tyyppi[$i] = "NORMAALI";
               }
 
-              $saldoyhteensa += $zrow["myytavissa"]; // summaillaan kaikkien isien saldoa yhteens‰.
+              $saldoyhteensa += $zrow["myytavissa"]; // summaillaan kaikkien isien saldoa yhteens√§.
             }
             else {
               $myy_tyyppi[$i] = "LAPSITUOTE";
-              $lapsiyhteensa += $zrow["myytavissa"]; // summaillaan kaikkien lapsien saldoa yhteens‰.
+              $lapsiyhteensa += $zrow["myytavissa"]; // summaillaan kaikkien lapsien saldoa yhteens√§.
             }
 
-            // jos halutaan myyd‰ erikoisvarastosta ja alarajasumma on syˆtetty ja tuotteen myyntihinta ylitt‰‰ alarajasumman
+            // jos halutaan myyd√§ erikoisvarastosta ja alarajasumma on sy√∂tetty ja tuotteen myyntihinta ylitt√§√§ alarajasumman
             if ($rivityyppi == 'L' and $kukarow['kassamyyja'] == '' and $myy_erikoistoim_ok and $zrow['varastotyyppi'] == 'E' and $zrow['erikoistoimitus_alarajasumma'] > 0 and (float) $trow['myyntihinta'] >= (float) $zrow['erikoistoimitus_alarajasumma']) {
               $myy_erikoistoimitus[$i] = true;
             }
@@ -1204,15 +1204,15 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               $myy_erikoistoimitus[$i] = false;
             }
 
-            //Kasvatetaan indeksi‰
+            //Kasvatetaan indeksi√§
             $i++;
           }
         } // end foreach tuotepaikat
       }
       elseif ($yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI") {
-        // Jos tuotteella taas ei ole ollenkaan tuotepaikkoja ja myyd‰‰n kuitenkin (eli ei piitata saldoista)
+        // Jos tuotteella taas ei ole ollenkaan tuotepaikkoja ja myyd√§√§n kuitenkin (eli ei piitata saldoista)
 
-        if ($lisaarivi_debug==1) echo "Tuotteella $tuoteno ei ole yht‰‰n tuotepaikkaa! Myyd‰‰n silti koska saldoista ei nyt piitata!<br>";
+        if ($lisaarivi_debug==1) echo "Tuotteella $tuoteno ei ole yht√§√§n tuotepaikkaa! Myyd√§√§n silti koska saldoista ei nyt piitata!<br>";
 
         $myy_tuoteno[$i]   = strtoupper($tuoteno);
         $myy_kpl[$i]       = 99999999;
@@ -1224,7 +1224,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
         $myy_era[$i]      = "";
 
         if (!in_array(strtoupper($tuoteno),$tuoteperhe)) {
-          // Sis‰‰ntulevissa EDI-tilauksissa tehdastilaustuotteita ei saa tilata
+          // Sis√§√§ntulevissa EDI-tilauksissa tehdastilaustuotteita ei saa tilata
           if (isset($kutsuja) and $kutsuja == "EDITILAUS" and $zrow['status'] == 'T') {
             $myy_tyyppi[$i] = "TEHDASTILAUSTUOTE";
           }
@@ -1232,20 +1232,20 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
             $myy_tyyppi[$i] = "NORMAALI";
           }
 
-          $saldoyhteensa += $toimittamatta; // summaillaan kaikkien isien saldoa yhteens‰.
+          $saldoyhteensa += $toimittamatta; // summaillaan kaikkien isien saldoa yhteens√§.
         }
         else {
           $myy_tyyppi[$i] = "LAPSITUOTE";
-          $lapsiyhteensa += $toimittamatta; // summaillaan kaikkien lapsien saldoa yhteens‰.
+          $lapsiyhteensa += $toimittamatta; // summaillaan kaikkien lapsien saldoa yhteens√§.
         }
 
-        //Kasvatetaan ‰iti-indeksi‰
+        //Kasvatetaan √§iti-indeksi√§
         $i++;
       }
     }
     else {
       // Saldottomat tuotteet
-      // lis‰t‰‰n tuotteen tiedot arrayseen, koska t‰m‰n tuotteen voi myyd‰
+      // lis√§t√§√§n tuotteen tiedot arrayseen, koska t√§m√§n tuotteen voi myyd√§
       $myy_tuoteno[$i]   = strtoupper($tuoteno);
       $myy_kpl[$i]       = 99999999;
       $myy_hyllyalue[$i] = "";
@@ -1257,38 +1257,38 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
       if (!in_array(strtoupper($tuoteno),$tuoteperhe)) {
         $myy_tyyppi[$i] = "NORMAALI";
-        $saldoyhteensa += $toimittamatta; // summaillaan kaikkien isien saldoa yhteens‰.
-        if ($lisaarivi_debug==1) echo "$tuoteno on is‰tuote/normituote<br>";
+        $saldoyhteensa += $toimittamatta; // summaillaan kaikkien isien saldoa yhteens√§.
+        if ($lisaarivi_debug==1) echo "$tuoteno on is√§tuote/normituote<br>";
       }
       else {
         $myy_tyyppi[$i] = "LAPSITUOTE";
-        $lapsiyhteensa += $toimittamatta; // summaillaan kaikkien lapsien saldoa yhteens‰.
+        $lapsiyhteensa += $toimittamatta; // summaillaan kaikkien lapsien saldoa yhteens√§.
         if ($lisaarivi_debug==1) echo "$tuoteno on lapsituote<br>";
       }
 
-      //Kasvatetaan ‰iti-indeksi‰
+      //Kasvatetaan √§iti-indeksi√§
       $i++;
     }
-  } // end foreach myyt‰v‰t tuotteet
+  } // end foreach myyt√§v√§t tuotteet
 
-  if ($lisaarivi_debug==1) echo "Kaikkiaan myyt‰viss‰: $saldoyhteensa kappaletta<br>";
+  if ($lisaarivi_debug==1) echo "Kaikkiaan myyt√§viss√§: $saldoyhteensa kappaletta<br>";
 
-  //tutkitaan ensin saako t‰lle asiakkaalle myyd‰ osatoimituksen t‰st‰ tuoteryhm‰st‰
+  //tutkitaan ensin saako t√§lle asiakkaalle myyd√§ osatoimituksen t√§st√§ tuoteryhm√§st√§
   $kko_laji = korvaavat_kiellot($laskurow['ytunnus'], $trow['osasto'], $trow['try'], "Q");
 
-  // jos result on nolla, saadaan myyd‰ osatoimitus tai jos meill‰ on saldoa tarpeeksi
+  // jos result on nolla, saadaan myyd√§ osatoimitus tai jos meill√§ on saldoa tarpeeksi
   if ($yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI" or ($kko_laji == "" and $osatoimkielto == "") or $saldoyhteensa >= $toimittamatta) {
 
-    if ($lisaarivi_debug==1) echo "Saadaan myyd‰ osatoimitus tai jos meill‰ on saldoa tarpeeksi. Saldoa $saldoyhteensa Toimittamatta $toimittamatta<br>";
+    if ($lisaarivi_debug==1) echo "Saadaan myyd√§ osatoimitus tai jos meill√§ on saldoa tarpeeksi. Saldoa $saldoyhteensa Toimittamatta $toimittamatta<br>";
 
-    // nyt meill‰ on $myy_ arrayperheess‰ kaikki tuotteet ja varastopaikat jolta voidaan myyd‰ jotain..
-    // loopataan kaikki tuotteet l‰pi
+    // nyt meill√§ on $myy_ arrayperheess√§ kaikki tuotteet ja varastopaikat jolta voidaan myyd√§ jotain..
+    // loopataan kaikki tuotteet l√§pi
 
-    // Myyd‰‰n tietylt‰ paikalta
+    // Myyd√§√§n tietylt√§ paikalta
     if ($paikka != '') {
-      $paikat = explode('#!°!#',$paikka);
+      $paikat = explode('#!¬°!#',$paikka);
 
-      if ($lisaarivi_debug == 1) echo "Halutaan myyd‰ paikalta: $paikat[0]-$paikat[1]-$paikat[2]-$paikat[3]<br>";
+      if ($lisaarivi_debug == 1) echo "Halutaan myyd√§ paikalta: $paikat[0]-$paikat[1]-$paikat[2]-$paikat[3]<br>";
       $paikkakelpasi = FALSE;
 
       foreach ($myy_tuoteno as $i => $tuoteno) {
@@ -1296,7 +1296,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
           ($trow["sarjanumeroseuranta"] != "E" and $trow["sarjanumeroseuranta"] != "F" and $trow["sarjanumeroseuranta"] != "G" and ($myy_kpl[$i] >= $toimittamatta or $varataan_saldoa == "EI") and $paikat[0] == $myy_hyllyalue[$i] and $paikat[1] == $myy_hyllynro[$i] and $paikat[2] == $myy_hyllyvali[$i] and $paikat[3] == $myy_hyllytaso[$i]) or
           (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") and $myy_era[$i] == $paikat[4] and ($myy_kpl[$i] >= $toimittamatta or $varataan_saldoa == "EI") and $paikat[0] == $myy_hyllyalue[$i] and $paikat[1] == $myy_hyllynro[$i] and $paikat[2] == $myy_hyllyvali[$i] and $paikat[3] == $myy_hyllytaso[$i])) {
 
-          //Otetaan t‰m‰
+          //Otetaan t√§m√§
           $myy_tuoteno   = array();
           $myy_kpl     = array();
           $myy_hyllyalue   = array();
@@ -1320,20 +1320,20 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
         }
       }
 
-      // Jos paikkaa ei lˆytynytk‰‰n tai jos sen saldo ei riitt‰nyt, niin forgetaboutit.
+      // Jos paikkaa ei l√∂ytynytk√§√§n tai jos sen saldo ei riitt√§nyt, niin forgetaboutit.
       if (!$paikkakelpasi) $paikka = "";
 
     }
 
-    // Myyd‰‰n tietyst‰ varastosta
+    // Myyd√§√§n tietyst√§ varastosta
     if (isset($varasto) and is_array($varasto) and $paikka == '') {
 
-      if ($lisaarivi_debug == 1) echo "Halutaan myyd‰ varastoista ", var_dump($varasto).".<br>";
+      if ($lisaarivi_debug == 1) echo "Halutaan myyd√§ varastoista ", var_dump($varasto).".<br>";
 
       foreach ($myy_tuoteno as $i => $tuoteno) {
         if (!in_array($myy_varasto[$i], $varasto) and $myy_varasto[$i] != "") {
 
-          // jos halutaan myyd‰ erikoisvarastosta (josta ei myyd‰ automaattisesti eli tyyppi E), niin ei poisteta sit‰ arraysta
+          // jos halutaan myyd√§ erikoisvarastosta (josta ei myyd√§ automaattisesti eli tyyppi E), niin ei poisteta sit√§ arraysta
           if ($myy_erikoistoimitus[$i]) {
             continue;
           }
@@ -1359,27 +1359,27 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
     }
 
     foreach ($myy_tuoteno as $i => $tuoteno) {
-      //T‰ss‰ loopataan vain is‰/normaleja tuotteita
+      //T√§ss√§ loopataan vain is√§/normaleja tuotteita
       if ($lisaarivi_debug==1) echo "Loopataan $tuoteno, {$myy_tyyppi[$i]}, $toimittamatta<br>";
 
       if ($myy_tyyppi[$i] == "NORMAALI") {
-        // jos ei olla viel‰ toimitettu kaikkea, niin lis‰t‰‰n tilausrivi
+        // jos ei olla viel√§ toimitettu kaikkea, niin lis√§t√§√§n tilausrivi
         if ($toimittamatta > 0) {
 
           if ($lisaarivi_debug==1) echo "Normaalituote $tuoteno, toimittamatta $toimittamatta<br>";
 
           if ($yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI" or $myy_kpl[$i] >= $toimittamatta) {
-            $myy_kpl[$i] = $toimittamatta; // jos t‰ll‰ paikalla on saldoa enemm‰n kun tarvitaan, otetaan sitten vaan tarvittava m‰‰r‰
+            $myy_kpl[$i] = $toimittamatta; // jos t√§ll√§ paikalla on saldoa enemm√§n kun tarvitaan, otetaan sitten vaan tarvittava m√§√§r√§
           }
 
           if (isset($myy_kpl_myyty[$i]) and $myy_kpl[$i]) {
             $myy_kpl_myyty[$i] += $myy_kpl[$i];
           }
 
-          // Status on lis‰t‰‰n is‰ ja perhe jos virheit‰ ei tule
+          // Status on lis√§t√§√§n is√§ ja perhe jos virheit√§ ei tule
           $perheok   = 0;
 
-          // Is‰ halutaan nyt ainakin myyd‰
+          // Is√§ halutaan nyt ainakin myyd√§
           $myynama   = array();
           $myynama[]   = $i;
 
@@ -1388,7 +1388,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
             $riikoko       = 1;
             $isat_array     = array();
             $kaikki_array     = array($tuoteno);
-            $kerroin_array     = array($tuoteno."#!°!#1");
+            $kerroin_array     = array($tuoteno."#!¬°!#1");
             $perhearray     = array();
             $ohita_kerays_array = array();
 
@@ -1406,7 +1406,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               $lapsitoimittamatta = $perherow["kerroin"]*$myy_kpl[$i];
 
               foreach ($myy_tuoteno as $j => $lapsituoteno) {
-                // Tuoteperheiss‰ voi olla samaa tuotetta monta kertaa, siksi and !isset($myy_hintakerr[$j]), muuten tuote on jo k‰sitelty...
+                // Tuoteperheiss√§ voi olla samaa tuotetta monta kertaa, siksi and !isset($myy_hintakerr[$j]), muuten tuote on jo k√§sitelty...
                 if (strtoupper($lapsituoteno) == strtoupper($perherow["tuoteno"]) and $myy_tyyppi[$j] == "LAPSITUOTE" and !isset($myy_hintakerr[$j])) {
 
                   // laitetaan lasten kertoimet kuntoon
@@ -1415,12 +1415,12 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                   $myy_lapsi_ein[$j] = $perherow["ei_nayteta"];
                   $myy_ohita_kerays[$j] = $perherow['ohita_kerays'];
 
-                  // jos ei olla viel‰ toimitettu kaikkea, niin lis‰t‰‰n tilausrivi
+                  // jos ei olla viel√§ toimitettu kaikkea, niin lis√§t√§√§n tilausrivi
                   if ($lapsitoimittamatta > 0 and (($myy_kpl[$j] - $myy_kpl_myyty[$j]) > 0 or $yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI")) {
 
                     if (($myy_kpl[$j] - $myy_kpl_myyty[$j] >= $lapsitoimittamatta) or $yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI") {
-                      // jos t‰ll‰ paikalla on saldoa enemm‰n kun tarvitaan, otetaan sitten vaan tarvittava m‰‰r‰
-                      // ja splitataan loput omaan paikaan arrayhin jotta voidaan sit myyd‰ ne seuraavalla kiekalla jos on tarvis
+                      // jos t√§ll√§ paikalla on saldoa enemm√§n kun tarvitaan, otetaan sitten vaan tarvittava m√§√§r√§
+                      // ja splitataan loput omaan paikaan arrayhin jotta voidaan sit myyd√§ ne seuraavalla kiekalla jos on tarvis
                       $myy_tuoteno[]   = $myy_tuoteno[$j];
                       $myy_kpl[]     = $myy_kpl[$j] - $lapsitoimittamatta;
                       $myy_hyllyalue[] = $myy_hyllyalue[$j];
@@ -1445,16 +1445,16 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               }
 
               if ($lapsitoimittamatta > 0) {
-                //t‰m‰n lapsen saldo ei riit‰
+                //t√§m√§n lapsen saldo ei riit√§
                 $perheok++;
               }
             }
           }
 
-          // Jos homma on ok niin lis‰t‰‰n rivi
+          // Jos homma on ok niin lis√§t√§√§n rivi
           if ($perheok == 0) {
             foreach ($myynama as $indeksi) {
-              //K‰sinsyˆtetyt hinnat ja alennukset eiv‰t p‰de korvaaviin tuotteisiin, eik‰ tuoteperheiden lapsiin
+              //K√§sinsy√∂tetyt hinnat ja alennukset eiv√§t p√§de korvaaviin tuotteisiin, eik√§ tuoteperheiden lapsiin
               if (strtoupper($myy_tuoteno[$indeksi]) != strtoupper($alkupera_trow["tuoteno"])) {
                 $hinta  = "";
 
@@ -1466,7 +1466,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 $alv   = "";
               }
 
-              // Haetaan k‰sitelt‰v‰n tuotteen tiedot
+              // Haetaan k√§sitelt√§v√§n tuotteen tiedot
               $query = "SELECT *
                         FROM tuote
                         WHERE yhtio='$kukarow[yhtio]' and tuoteno='$myy_tuoteno[$indeksi]'";
@@ -1483,10 +1483,10 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
               list($lis_hinta, $lis_alv) = alv($laskurow, $trow, $lis_hinta, $alv, $alehinta_alv);
 
-              // jos ollaan laittamassa muuta tuotetta kun mit‰ tilattiin, lis‰t‰‰n rivikommentti
+              // jos ollaan laittamassa muuta tuotetta kun mit√§ tilattiin, lis√§t√§√§n rivikommentti
               if (strtoupper($myy_tuoteno[$indeksi]) != strtoupper($alkupera_trow["tuoteno"]) and $myy_tyyppi[$indeksi] == "NORMAALI") {
 
-                // Haluan tarkistaa alkuper‰isen hinnan ennen korvausta, niin saadaan se halvempi hinta k‰yttˆˆn.
+                // Haluan tarkistaa alkuper√§isen hinnan ennen korvausta, niin saadaan se halvempi hinta k√§ytt√∂√∂n.
                 if ($yhtiorow['korvaavan_hinta_ylaraja'] == 'MIN') {
                   $lis_hinta = $korvaavan_hinta_ylaraja_halvin_hinta;
                   $lis_ale_kaikki = $korvaavan_hinta_ylaraja_halvin_ale;
@@ -1498,9 +1498,9 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                   $kommentti .= " ".$korlisakommi[strtoupper($myy_tuoteno[$indeksi])];
                 }
 
-                // oletetaan, ett‰ meill‰ on $edi_tyyppi muuttuja viritetty editilaus_in.inc failista
+                // oletetaan, ett√§ meill√§ on $edi_tyyppi muuttuja viritetty editilaus_in.inc failista
                 if ((int) $rivinumero != 0 and $edi_tyyppi != "" and $korvaavan_isaa_myyty == 1) {
-                  $rivinumero = 0; // jos myyd‰‰n korvaava tuote ja ollaan myyty jo tilattuakin tuotetta, niin ei pistet‰ samaa rivinumeroa..
+                  $rivinumero = 0; // jos myyd√§√§n korvaava tuote ja ollaan myyty jo tilattuakin tuotetta, niin ei pistet√§ samaa rivinumeroa..
                 }
               }
 
@@ -1512,7 +1512,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               }
 
               if ($kutsuja == "EDITILAUS" or $lisaarivi_debug == 1) {
-                $edi_ulos .= " --> ".t("Myyd‰‰n")." $myy_tuoteno[$indeksi] ".t("paikalta")." $myy_hyllyalue[$indeksi]-$myy_hyllynro[$indeksi]-$myy_hyllyvali[$indeksi]-$myy_hyllytaso[$indeksi]: $myy_kpl[$indeksi] ".t_avainsana("Y", "", "and avainsana.selite='$trow[yksikko]'", "", "", "selite")." ";
+                $edi_ulos .= " --> ".t("Myyd√§√§n")." $myy_tuoteno[$indeksi] ".t("paikalta")." $myy_hyllyalue[$indeksi]-$myy_hyllynro[$indeksi]-$myy_hyllyvali[$indeksi]-$myy_hyllytaso[$indeksi]: $myy_kpl[$indeksi] ".t_avainsana("Y", "", "and avainsana.selite='$trow[yksikko]'", "", "", "selite")." ";
 
                 for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
                   $edi_ulos .= t("Ale")."$alepostfix ".$lis_ale_kaikki['ale'.$alepostfix]."% ";
@@ -1527,8 +1527,8 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               $varattu = $myy_kpl[$indeksi];
 
               if ($yhtiorow['myyntiera_pyoristys'] == 'K' and $kutsuja == "EDITILAUS" and $edi_tyyppi != "magento" and $myyntierahuomatus) {
-                if (strpos($kommentti, t("HUOM: Rivin m‰‰r‰ on pyˆristetty t‰yteen myyntier‰‰n! Myyntier‰ on")) === FALSE) {
-                  $kommentti .= " ".t("HUOM: Rivin m‰‰r‰ on pyˆristetty t‰yteen myyntier‰‰n! Myyntier‰ on").": $trow[myynti_era]";
+                if (strpos($kommentti, t("HUOM: Rivin m√§√§r√§ on py√∂ristetty t√§yteen myyntier√§√§n! Myyntier√§ on")) === FALSE) {
+                  $kommentti .= " ".t("HUOM: Rivin m√§√§r√§ on py√∂ristetty t√§yteen myyntier√§√§n! Myyntier√§ on").": $trow[myynti_era]";
                 }
               }
 
@@ -1576,12 +1576,12 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 }
               }
 
-              // jos olemme saaneet tuotenimityksen syotarivist‰ ja sallimme nimityksen muutoksen
+              // jos olemme saaneet tuotenimityksen syotarivist√§ ja sallimme nimityksen muutoksen
               if (trim($tuotenimitys_force) != "") {
                 $trow["nimitys"] = addslashes($tuotenimitys_force);
               }
               elseif (!empty($yhtiorow["nimityksen_muutos_tilauksella"]) and trim($tuotenimitys) != "") {
-                // lis‰t‰‰n saatu nimitys kaikille tuotteille
+                // lis√§t√§√§n saatu nimitys kaikille tuotteille
                 $trow["nimitys"] = addslashes($tuotenimitys);
               }
 
@@ -1594,7 +1594,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 }
               }
 
-              // jos meill‰ on vanha laadittuaika, niin k‰ytet‰‰ sit‰
+              // jos meill√§ on vanha laadittuaika, niin k√§ytet√§√§ sit√§
               if ($rivilaadittu != "" and $rivitunnus != 0) {
                 $vanharivilaadittu = "'$rivilaadittu'";
               }
@@ -1667,9 +1667,9 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
               @include("trivityyppivalinta.inc");
 
-              //special case: Kun yhtiˆparametri Valmistuksien_kasittely on asennossa, "valmistuksella voi olla vain yksi valmiste...",
-              //excelist‰ sis‰‰nluettavissa valmistusriveiss‰ voi antaa valmistuslinjan ja toivotut p‰iv‰m‰‰r‰t (mikrotilaus.inc)
-              //N‰m‰ tiedot tallennetaan v‰liaikaisesti tilausriveille, joista ne sitten kopioidaan omille otsikoilleen.
+              //special case: Kun yhti√∂parametri Valmistuksien_kasittely on asennossa, "valmistuksella voi olla vain yksi valmiste...",
+              //excelist√§ sis√§√§nluettavissa valmistusriveiss√§ voi antaa valmistuslinjan ja toivotut p√§iv√§m√§√§r√§t (mikrotilaus.inc)
+              //N√§m√§ tiedot tallennetaan v√§liaikaisesti tilausriveille, joista ne sitten kopioidaan omille otsikoilleen.
               if ($valmistuslinja != '') {
                 $positio = $valmistuslinja;
               }
@@ -1856,7 +1856,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               }
 
               if ($myy_tyyppi[$indeksi] == "LAPSITUOTE") {
-                //P‰ivitet‰‰n is‰n perhetunnus
+                //P√§ivitet√§√§n is√§n perhetunnus
                 if ($rivityyppi == 'V') {
 
                   $query = "SELECT tuoteno
@@ -1880,7 +1880,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                     $valmistetyyppi = "W";
                   }
 
-                  //jos on valmistusprosessi kyseess‰ niin is‰n tyyppi vaihdetaan W:ksi koska sen ei pid‰ varata saldoa!
+                  //jos on valmistusprosessi kyseess√§ niin is√§n tyyppi vaihdetaan W:ksi koska sen ei pid√§ varata saldoa!
                   $query = "UPDATE tilausrivi SET perheid='$perheid_lisaarivi', tyyppi='$valmistetyyppi' where yhtio='$kukarow[yhtio]' and tunnus=$perheid_lisaarivi and tyyppi='V'";
                   $result = pupe_query($query);
 
@@ -1888,7 +1888,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                   $result = pupe_query($query);
                 }
                 else {
-                  //Hoidetaan saldottomat is‰t samaan varastoon kuin lapsetkin jotta varastosplittaukset eiv‰t menisi hassusti
+                  //Hoidetaan saldottomat is√§t samaan varastoon kuin lapsetkin jotta varastosplittaukset eiv√§t menisi hassusti
                   $query = "UPDATE tilausrivi SET hyllyalue='$myy_hyllyalue[$indeksi]' where yhtio='$kukarow[yhtio]' and tunnus=$perheid_lisaarivi and hyllyalue=''";
                   $result = pupe_query($query);
 
@@ -1904,21 +1904,21 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               $omalle_tilaukselle = "";
               $ale_peruste    = "";
 
-            } // T‰ll‰ rundilla myydyt
-          } // Jos tuoteperhett‰ lˆytyi riitt‰v‰sti tai myytiin pelk‰‰ is‰‰
-        } // Jos vil‰ on toimittamatta kappaleita
+            } // T√§ll√§ rundilla myydyt
+          } // Jos tuoteperhett√§ l√∂ytyi riitt√§v√§sti tai myytiin pelk√§√§ is√§√§
+        } // Jos vil√§ on toimittamatta kappaleita
       } // end if toimittamatta > 0
     } // end foreach myy_tuoteno
-  } // end saadaanko myyd‰ osatoimitus
+  } // end saadaanko myyd√§ osatoimitus
 }
 
-// jos tultiin ulos loopista, ett‰ meill‰ on toimittamattomia rivej‰, tehd‰‰n niist‰ puuterivi
-// tai jos tullaan niin, ett‰ var-kent‰ss‰ on J tai P tai jotain
+// jos tultiin ulos loopista, ett√§ meill√§ on toimittamattomia rivej√§, tehd√§√§n niist√§ puuterivi
+// tai jos tullaan niin, ett√§ var-kent√§ss√§ on J tai P tai jotain
 if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
-  if ($lisaarivi_debug==1) echo "<br>Menn‰‰n puutehaaraan: $tuoteno hinta $hinta toimittamatta: $toimittamatta var: $var laskuntila: $laskurow[tila]<br>";
+  if ($lisaarivi_debug==1) echo "<br>Menn√§√§n puutehaaraan: $tuoteno hinta $hinta toimittamatta: $toimittamatta var: $var laskuntila: $laskurow[tila]<br>";
 
-  //Tyhjennet‰‰n apumuuttuja
+  //Tyhjennet√§√§n apumuuttuja
   if ($var == "Y")  {
     $var = "";
   }
@@ -1932,23 +1932,23 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
   $puu_var    = array();
 
   if ($rivityyppi == 'O' and $rivitunnus > 0 and isset($suoratoimitus_rivitun) and $suoratoimitus_rivitun > 0) {
-    // Kappalem‰‰r‰‰ ei voida lis‰t‰
+    // Kappalem√§√§r√§√§ ei voida lis√§t√§
     if ($toimittamatta >= $suoratoimitus_rivikpl) {
       $toimittamatta = $suoratoimitus_rivikpl;
     }
     else {
-      // Pienennt‰‰n suoratoimitusostorivin m‰‰r‰‰, eli joudumme splittaamaan myyntirivin samassa suhteessa
+      // Pienennt√§√§n suoratoimitusostorivin m√§√§r√§√§, eli joudumme splittaamaan myyntirivin samassa suhteessa
       $suoratoimitus_splittaus = TRUE;
       // Pakotetaan loput omalle riville
-      $var = "LOJ#!°!#$suoratoimitus_rivikpl";
+      $var = "LOJ#!¬°!#$suoratoimitus_rivikpl";
     }
   }
 
-  if (substr($var,0,8) == "LOJ#!°!#" or substr($var,0,8) == "LOP#!°!#" or substr($lop,0,8) == "LOP#!°!#") {
+  if (substr($var,0,8) == "LOJ#!¬°!#" or substr($var,0,8) == "LOP#!¬°!#" or substr($lop,0,8) == "LOP#!¬°!#") {
 
     if ($lisaarivi_debug == 1) echo "Laitetaan loput rivit jtksi tai puutteeksi (".substr($var,0,4).") (".substr($lop,0,4).")<br>";
 
-    // Lis‰t‰‰n syˆtetyt ja laitetaan loput JT:seen tai puutteiksi
+    // Lis√§t√§√§n sy√∂tetyt ja laitetaan loput JT:seen tai puutteiksi
     $puu_tuoteno[]   = (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? $uusin_korvaava_tuote : $alkupera_trow['tuoteno'];
     $puu_kpl[]     = $toimittamatta;
     $puu_hintake[]  = "X";
@@ -1957,7 +1957,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     $puu_ohiker[]  = "";
     $puu_var[]    = $var;
 
-    if (substr($var,0,8) == "LOJ#!°!#" and substr($var, 8) - $toimittamatta > 0) {
+    if (substr($var,0,8) == "LOJ#!¬°!#" and substr($var, 8) - $toimittamatta > 0) {
       $puu_tuoteno[]   = (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? $uusin_korvaava_tuote : $alkupera_trow['tuoteno'];
       $puu_kpl[]     = substr($var, 8) - $toimittamatta;
       $puu_hintake[]  = "X";
@@ -1966,7 +1966,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       $puu_ohiker[]  = "";
       $puu_var[]    = "";
     }
-    elseif (substr($lop,0,8) == "LOP#!°!#" and substr($lop, 8) - $toimittamatta > 0) {
+    elseif (substr($lop,0,8) == "LOP#!¬°!#" and substr($lop, 8) - $toimittamatta > 0) {
       $puu_tuoteno[]   = (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? $uusin_korvaava_tuote : $alkupera_trow['tuoteno'];
       $puu_kpl[]     = substr($lop, 8) - $toimittamatta;
       $puu_hintake[]  = "X";
@@ -1993,7 +1993,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     $riikoko       = 1;
     $isat_array     = array();
     $kaikki_array     = (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? array($uusin_korvaava_tuote) : array($alkupera_trow["tuoteno"]);
-    $kerroin_array     = (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? array($uusin_korvaava_tuote."#!°!#1") : array($alkupera_trow["tuoteno"]."#!°!#1");
+    $kerroin_array     = (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? array($uusin_korvaava_tuote."#!¬°!#1") : array($alkupera_trow["tuoteno"]."#!¬°!#1");
     $perhearray     = array();
     $ohita_kerays_array = array();
 
@@ -2008,7 +2008,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     }
 
     if (count($perhearray) == 0 and $laskurow["tila"] == 'V' and $laskurow["tilaustyyppi"] == 'V' and $rivityyppi == "V") {
-      // Asiakkaallevalmistuskeissi, resepit‰ ei lˆydy joten teemme t‰st‰ myyntirivin
+      // Asiakkaallevalmistuskeissi, resepit√§ ei l√∂ydy joten teemme t√§st√§ myyntirivin
       $rivityyppi = 'L'; // Myyntitilausrivi
     }
 
@@ -2056,7 +2056,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       if ($_myytavissa > 0) $kaannetaan_tuote = false;
     }
 
-    // Korvaavuusketjun puutek‰sittely, lis‰t‰‰n ketjun p‰‰tuote puutteeksi
+    // Korvaavuusketjun puutek√§sittely, lis√§t√§√§n ketjun p√§√§tuote puutteeksi
     if ($kaannetaan_tuote and $puu_hintake[$i] != "X" and $tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "K" and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS') and $laskurow['tilaustyyppi'] != '9' and (empty($rivitunnus) and (!isset($mista_tullaan) or (isset($mista_tullaan) and $mista_tullaan != 'TULOUTUS'))) and $kvkasittely) {
       require_once 'korvaavat.class.php';
       $korvaavat = new Korvaavat($tuoteno);
@@ -2072,9 +2072,9 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
         $tuoteno = $paatuote;
       }
     }
-    // Vastaavuusketjun puutek‰sittely, lis‰t‰‰n ketjun p‰‰tuote puutteeksi
+    // Vastaavuusketjun puutek√§sittely, lis√§t√§√§n ketjun p√§√§tuote puutteeksi
     elseif ($kaannetaan_tuote and $puu_hintake[$i] != "X" and $tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "V" and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS') and $laskurow['tilaustyyppi'] != '9' and (empty($rivitunnus) and (!isset($mista_tullaan) or (isset($mista_tullaan) and $mista_tullaan != 'TULOUTUS'))) and $kvkasittely) {
-      // Haetaan korvaavuusketju tuotteelle, jotta saadaan ketjun p‰‰tuote
+      // Haetaan korvaavuusketju tuotteelle, jotta saadaan ketjun p√§√§tuote
       require_once 'korvaavat.class.php';
       $korvaavat = new Korvaavat($tuoteno);
 
@@ -2098,7 +2098,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           // Haetaan tuotteet ketjukohtaisesti
           $_tuotteet = $vastaavat->tuotteet($ketju, $options);
 
-          // Lis‰t‰‰n lˆydetyt vastaavat mahdollisten myyt‰vien joukkoon
+          // Lis√§t√§√§n l√∂ydetyt vastaavat mahdollisten myyt√§vien joukkoon
           foreach ($_tuotteet as $_tuote) {
             if (strtoupper($_tuote['tuoteno']) != strtoupper($tuoteno)) {
               if (stripos($kommentti, t("HUOM: Korvaa tuotteen")." $tuoteno") === FALSE and empty($korlisakommi[$_tuote['tuoteno']])) {
@@ -2111,7 +2111,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
               $tuoteno = $_tuote['tuoteno'];
             }
 
-            // Breakataan aina ekan j‰lkeen
+            // Breakataan aina ekan j√§lkeen
             break 2;
           }
         }
@@ -2125,14 +2125,14 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     $tuoteresult = pupe_query($query);
 
     if (mysql_num_rows($tuoteresult) == 0) {
-      // tuotetta ei lˆydy, lis‰t‰‰n silti tuoteno kantaan?
+      // tuotetta ei l√∂ydy, lis√§t√§√§n silti tuoteno kantaan?
       $trow["tuoteno"] = $kaikkituotteet[0];
     }
     else {
       $trow = mysql_fetch_assoc($tuoteresult);
     }
 
-    // Tehd‰‰nkˆ puute- tai jt-rivist‰ automaattisesti osto/suoratoimitus?
+    // Tehd√§√§nk√∂ puute- tai jt-rivist√§ automaattisesti osto/suoratoimitus?
     if ((int) $rivitunnus == 0 and $yhtiorow["tee_automaattinen_osto_myyntitilaukselta"] != "" and ($kukarow["extranet"] == "" or $yhtiorow['tuoteperhe_suoratoimitus'] == 'E') and ($toim == "TARJOUS" or ($yhtiorow["tee_osto_myyntitilaukselta"] != '' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS'))) and $var != 'V' and $var != 'H') {
 
       if ((
@@ -2149,7 +2149,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       ) {
 
         if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('A', 'B', 'C', 'I', 'J'))) {
-          // Katsotaan onko t‰lle tuotteelle toimittajaa ja oletusvienti on jotain vaihto-omaisuutta (Tilaa-toimittajalta drop-downiin mukaan)
+          // Katsotaan onko t√§lle tuotteelle toimittajaa ja oletusvienti on jotain vaihto-omaisuutta (Tilaa-toimittajalta drop-downiin mukaan)
           $query = "SELECT tilausrivin_lisatiedot.toimittajan_tunnus
                     FROM tilausrivi
                     JOIN tilausrivin_lisatiedot
@@ -2199,25 +2199,25 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           $tmp_varastoon   = 1;
           $tmp_asiakkaalle = 1;
 
-          // ...kiellet‰‰n tilaamasta varastoon jos yhtiˆparametri ohjaa katsomaan tuotteelta ja siell‰ ei ole sallittu...
+          // ...kiellet√§√§n tilaamasta varastoon jos yhti√∂parametri ohjaa katsomaan tuotteelta ja siell√§ ei ole sallittu...
           if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('V', 'W', 'I', 'J'))
             and !in_array($trow['suoratoimitus'], array('S', 'X'))) {         // vain S ja X sallivat tilauksen varastoon
             $tmp_varastoon = 0;
           }
 
-          // ...kiellet‰‰n tilaamasta asiakkaalle jos yhtiˆparametri ohjaa katsomaan tuotteelta ja siell‰ ei ole sallittu...
+          // ...kiellet√§√§n tilaamasta asiakkaalle jos yhti√∂parametri ohjaa katsomaan tuotteelta ja siell√§ ei ole sallittu...
           if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('W', 'J'))
              and !in_array($trow['suoratoimitus'], array('S', 'U'))) {        // vain S ja U sallivat tilauksen asiakkaalle
             $tmp_asiakkaalle = 0;
           }
 
-          // katsotaan onko tuote suoratoimituskelpoinen (vain ei tuoteperheet, tai tuoteperheiden saldolliset is‰t tai jos yhtiˆll‰ suoratoimitetaan perheet per tuote)
-          if ((   // jos on tuoteperheen lapsi, pit‰‰ lapsien suoratoimitus olla sallittu
+          // katsotaan onko tuote suoratoimituskelpoinen (vain ei tuoteperheet, tai tuoteperheiden saldolliset is√§t tai jos yhti√∂ll√§ suoratoimitetaan perheet per tuote)
+          if ((   // jos on tuoteperheen lapsi, pit√§√§ lapsien suoratoimitus olla sallittu
               $yhtiorow['tuoteperhe_suoratoimitus'] == ''
               or $perheid == 0
               or $perheid == $rivitunnus
             )
-            and ( // onko suoratoimitus yleens‰k‰‰n sallittu
+            and ( // onko suoratoimitus yleens√§k√§√§n sallittu
               in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'X', 'Y', 'A', 'B', 'C'))
               or (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('V', 'W', 'I', 'J')) and ($tmp_varastoon == 1 or $tmp_asiakkaalle == 1))
             )
@@ -2268,7 +2268,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       }
     }
 
-    // Jos ollaan lis‰‰m‰ss‰ alkuper‰ist‰ tuotetta niin otetaan takaisin k‰ytt‰j‰n syˆtetyt alkuper‰iset hinnat
+    // Jos ollaan lis√§√§m√§ss√§ alkuper√§ist√§ tuotetta niin otetaan takaisin k√§ytt√§j√§n sy√∂tetyt alkuper√§iset hinnat
     if ($rivityyppi != 'O' and strtoupper($trow["tuoteno"]) == strtoupper($alkupera_trow["tuoteno"])) {
       $hinta  = $alkupera_hinta;
 
@@ -2280,7 +2280,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       $alv  = $alkupera_alv;
     }
     elseif ($rivityyppi != 'O' and $i > 0) {
-      //K‰sinsyˆteyt hinnat nollataan kun lis‰t‰‰n tuoteperheiden lapsia
+      //K√§sinsy√∂teyt hinnat nollataan kun lis√§t√§√§n tuoteperheiden lapsia
       $hinta  = "";
 
       for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
@@ -2305,7 +2305,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_val) = alehinta_osto($laskurow, $trow, $kpl, "", $hinta, $ale_kaikki_array);
     }
 
-    // jos k‰ytˆss‰ on hintakertoimet, niin muutetaan yksikkˆ kuntoon
+    // jos k√§yt√∂ss√§ on hintakertoimet, niin muutetaan yksikk√∂ kuntoon
     if ($rivityyppi == 'O' and $trow["myyntihinta_maara"] != 0 and $lis_hinta != 0) {
       $lis_hinta = round($lis_hinta / $trow["myyntihinta_maara"], $yhtiorow["hintapyoristys"]);
     }
@@ -2330,9 +2330,9 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
     if ($rivityyppi != 'O') {
       switch ($var) {
-        case 'J' : // J‰lkitoimitukseen
-          // Ollaan painettu JT-muiden mukana nappia, tai meill‰ on parametrit siten, ett‰ se halutaan defaulttina p‰‰lle
-          // (Jt_automatiikka = "kohdistetaan.." ja Automaattinen_jt_toimitus = "J‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydess‰ ker‰ysp‰iv‰n mukaisesti")
+        case 'J' : // J√§lkitoimitukseen
+          // Ollaan painettu JT-muiden mukana nappia, tai meill√§ on parametrit siten, ett√§ se halutaan defaulttina p√§√§lle
+          // (Jt_automatiikka = "kohdistetaan.." ja Automaattinen_jt_toimitus = "J√§lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydess√§ ker√§ysp√§iv√§n mukaisesti")
           if (isset($jt_manual) and $jt_manual != '' and !empty($yhtiorow['jt_manual'])) {
             $kerayspvm = date('Y-m-d', strtotime('now'));
           }
@@ -2345,7 +2345,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
         case 'R' : // Valmistetaan asiakkaalle
         case 'U' : // Tilataan toimittajalta asiakkaalle
         case 'T' : // Tilataan toimittajalta
-          // Yhtiˆn parametri: varaako JT-rivi saldoja
+          // Yhti√∂n parametri: varaako JT-rivi saldoja
           if ($yhtiorow["varaako_jt_saldoa"] == "") {
             $varattu   = 0;
             $jt     = $kpl;
@@ -2359,15 +2359,15 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           $varattu   = 0;
           $jt     = 0;
           break;
-        case 'H' : // Pakkohyv‰ksynt‰
+        case 'H' : // Pakkohyv√§ksynt√§
           $varattu   = $kpl;
           $jt     = 0;
           break;
-        case 'O' : // Ookooaus-hyv‰ksynt‰
+        case 'O' : // Ookooaus-hyv√§ksynt√§
           $varattu   = $kpl;
           $jt     = 0;
           break;
-        case 'V' : // Tehdaslis‰varuste
+        case 'V' : // Tehdaslis√§varuste
           $varattu   = $kpl;
           $jt     = 0;
           break;
@@ -2375,9 +2375,9 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           $varattu   = 0;
           $jt     = 0;
 
-          // Sirtolistoissa defaultti on JT jos saldo ei riit‰. (jos yhtio ei v‰lit‰ saldoista ei v‰litet‰ t‰‰ll‰k‰‰n..)
-          // Tai jos yhtiˆlle on konffattu, ett‰ se haluaa ylimemen‰t jteiksi
-          // Sis‰isiss‰ tyˆm‰‰r‰ykiss‰ ei haluta JT-rivej‰
+          // Sirtolistoissa defaultti on JT jos saldo ei riit√§. (jos yhtio ei v√§lit√§ saldoista ei v√§litet√§ t√§√§ll√§k√§√§n..)
+          // Tai jos yhti√∂lle on konffattu, ett√§ se haluaa ylimemen√§t jteiksi
+          // Sis√§isiss√§ ty√∂m√§√§r√§ykiss√§ ei haluta JT-rivej√§
           if ((($rivityyppi == 'G' and $yhtiorow["puute_jt_oletus"] != "H") or (($yhtiorow["puute_jt_oletus"] == "J" or $yhtiorow["puute_jt_oletus"] == "B") and $kpl > 0)) and $laskurow["tila"] != 'S' and $jtkielto != "o") {
             if ($yhtiorow["varaako_jt_saldoa"] == "") {
               $varattu   = 0;
@@ -2390,12 +2390,12 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
             $var  = "J";
           }
-          // Terminaalitoimitukset tai ostoskorit; var tyhj‰‰ ja varattu normisti
+          // Terminaalitoimitukset tai ostoskorit; var tyhj√§√§ ja varattu normisti
           elseif ($rivityyppi == 'Z' or $rivityyppi == 'B' or $rivityyppi == 'E' or $rivityyppi == 'F') {
             $var   = "";
             $varattu = $kpl;
           }
-          // Halutaan myyd‰ saldoista juurikaan mit‰‰n v‰litt‰m‰tt‰!
+          // Halutaan myyd√§ saldoista juurikaan mit√§√§n v√§litt√§m√§tt√§!
           elseif ($yhtiorow["puute_jt_oletus"] == "H") {
             $var   = "";
             $varattu = $kpl;
@@ -2415,7 +2415,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           }
           break;
         default :
-          echo t("VIRHE: Virheellinen arvo kent‰ss‰ hyvaksy")." '$var'";
+          echo t("VIRHE: Virheellinen arvo kent√§ss√§ hyvaksy")." '$var'";
       }
 
       if (trim($var) == 'P') {
@@ -2457,8 +2457,8 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     $p_hyllytaso  = "";
 
     if ($paikka != '') {
-      //K‰ytt‰j‰n syˆtt‰m‰ paikka
-      $paikat = explode('#!°!#',$paikka);
+      //K√§ytt√§j√§n sy√∂tt√§m√§ paikka
+      $paikat = explode('#!¬°!#',$paikka);
 
       $p_hyllyalue  = $paikat[0];
       $p_hyllynro    = $paikat[1];
@@ -2466,8 +2466,8 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       $p_hyllytaso  = $paikat[3];
     }
     else {
-      // haetaan viel‰ tuotteen oletuspaikka puuteriville, jotta seuranta ois helpompaa
-      //jos laskurow[varasto] on setattu niin yritet‰‰n lˆyt‰‰ paikka siit‰ varastosta
+      // haetaan viel√§ tuotteen oletuspaikka puuteriville, jotta seuranta ois helpompaa
+      //jos laskurow[varasto] on setattu niin yritet√§√§n l√∂yt√§√§ paikka siit√§ varastosta
       $query = "SELECT tuotepaikat.*, varastopaikat.tunnus varastotunnus
                 FROM tuotepaikat
                 LEFT JOIN varastopaikat ON tuotepaikat.yhtio = varastopaikat.yhtio
@@ -2480,10 +2480,10 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
       if (mysql_num_rows($result) > 0) {
 
-        // Yritet‰‰n lˆyt‰‰ paras varastopaikka
+        // Yritet√§√§n l√∂yt√§√§ paras varastopaikka
         $loydetytpaikat = FALSE;
 
-        // lˆytyykˆ syˆtetty $varasto (muttujassa tulee myˆs $laskurow[varasto] tai $kukarow["varasto"] jos $varastoa ei olla eksplisiittisesti syˆtetty)?
+        // l√∂ytyyk√∂ sy√∂tetty $varasto (muttujassa tulee my√∂s $laskurow[varasto] tai $kukarow["varasto"] jos $varastoa ei olla eksplisiittisesti sy√∂tetty)?
         if (isset($varasto) and is_array($varasto)) {
           while ($olerow = mysql_fetch_assoc($result)) {
             if (in_array($olerow["varastotunnus"], $varasto)) {
@@ -2506,7 +2506,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
             $oletus_tuotepaikka_res = pupe_query($query);
             $oletus_tuotepaikka_row = mysql_fetch_assoc($oletus_tuotepaikka_res);
 
-            lisaa_tuotepaikka($trow['tuoteno'], $oletus_tuotepaikka_row['alkuhyllyalue'], $oletus_tuotepaikka_row['alkuhyllynro'], '0', '0', 'Tuotetta lis‰tt‰ess‰');
+            lisaa_tuotepaikka($trow['tuoteno'], $oletus_tuotepaikka_row['alkuhyllyalue'], $oletus_tuotepaikka_row['alkuhyllynro'], '0', '0', 'Tuotetta lis√§tt√§ess√§');
 
             $p_hyllyalue  = $oletus_tuotepaikka_row["alkuhyllyalue"];
             $p_hyllynro    = $oletus_tuotepaikka_row["alkuhyllynro"];
@@ -2518,8 +2518,8 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
         }
 
         // ostotilaus
-        // jos otsikolle on setattu $varasto ja tuotepaikkaa ei lˆydy kyseisest‰ varastosta
-        // ostetaan tyhj‰lt‰ paikalta, koska ostotilauksen valmiiksi laittaminen perustaa kyseiseen varastoon uuden tuotepaikan
+        // jos otsikolle on setattu $varasto ja tuotepaikkaa ei l√∂ydy kyseisest√§ varastosta
+        // ostetaan tyhj√§lt√§ paikalta, koska ostotilauksen valmiiksi laittaminen perustaa kyseiseen varastoon uuden tuotepaikan
 
         // keissit:
         // jos $rivityyppi = 'O' ja setattu $varasto ja is_array($varasto)
@@ -2530,7 +2530,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           $p_hyllytaso  = "";
         }
         else {
-          // lˆytyykˆ $kukarow["oletus_varasto"]?
+          // l√∂ytyyk√∂ $kukarow["oletus_varasto"]?
           if (!$loydetytpaikat and $kukarow["oletus_varasto"] > 0) {
             mysql_data_seek($result,0);
 
@@ -2547,7 +2547,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
             }
           }
 
-          //Jos ei lˆytynyt niin myyd‰‰n oletuspaikalta
+          //Jos ei l√∂ytynyt niin myyd√§√§n oletuspaikalta
           if (!$loydetytpaikat) {
             mysql_data_seek($result,0);
             $olerow = mysql_fetch_assoc($result);
@@ -2618,12 +2618,12 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
     $trow["tuoteno"] = strtoupper($trow["tuoteno"]);
 
-    // jos olemme saaneet tuotenimityksen syotarivist‰ ja sallimme nimityksen muutoksen
+    // jos olemme saaneet tuotenimityksen syotarivist√§ ja sallimme nimityksen muutoksen
     if (trim($tuotenimitys_force) != "") {
       $trow["nimitys"] = addslashes($tuotenimitys_force);
     }
     elseif (($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" or $toim == "HAAMU" or $trow["tuoteno"] == "99") and trim($tuotenimitys) != "") {
-      // lis‰t‰‰n saatu nimitys kaikille tuotteille
+      // lis√§t√§√§n saatu nimitys kaikille tuotteille
       $trow["nimitys"] = addslashes($tuotenimitys);
     }
 
@@ -2644,7 +2644,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       }
     }
 
-    // Jos ollaan tultu editilauksesta ja meill‰ on puute/jt, katsotaan onko t‰lle tuotteelle vastaavia ja pistet‰‰n ne kommenttiin
+    // Jos ollaan tultu editilauksesta ja meill√§ on puute/jt, katsotaan onko t√§lle tuotteelle vastaavia ja pistet√§√§n ne kommenttiin
     if ($kutsuja == "EDITILAUS" and ($var == "J" or $var == "P")) {
       //vastaavat tuotteet
       $query  = "SELECT *
@@ -2674,10 +2674,10 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           list(, , $vmyytavissa) = saldo_myytavissa($edirow["tuoteno"]);
 
           if ($vmyytavissa > 0) {
-            $tvsql = "  SELECT *
-                  FROM tuote
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  AND tuoteno = '$edirow[tuoteno]'";
+            $tvsql = "SELECT *
+                      FROM tuote
+                      WHERE yhtio = '$kukarow[yhtio]'
+                      AND tuoteno = '$edirow[tuoteno]'";
             $tvresult = pupe_query($tvsql);
             $tvrow = mysql_fetch_assoc($tvresult);
 
@@ -2691,13 +2691,13 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           }
         }
 
-        // Jos vastaavia lˆytyi, lis‰t‰‰n kommentit
+        // Jos vastaavia l√∂ytyi, lis√§t√§√§n kommentit
         if (!empty($edi_vastaavat_tuotteet)) {
           if ($kommentti != "") $kommentti .= "\n";
           $kommentti .= t("Voit tilata vastaavaa tuotetta")." ".implode(", ", $edi_vastaavat_tuotteet).".";
         }
 
-        // Jos vaihtoehtoisia lˆyty lis‰t‰‰n nekin kommentteihin
+        // Jos vaihtoehtoisia l√∂yty lis√§t√§√§n nekin kommentteihin
         if (!empty($edi_vaihtoehtoiset_tuotteet)) {
           if ($kommentti != "") $kommentti .= "\n";
           $kommentti .= t("Voit tilata vaihtoehtoista tuotetta")." ".implode(", ", $edi_vaihtoehtoiset_tuotteet).".";
@@ -2707,12 +2707,12 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     }
 
     if ($yhtiorow['myyntiera_pyoristys'] == 'K' and $kutsuja == "EDITILAUS" and $edi_tyyppi != "magento" and $myyntierahuomatus) {
-      if (strpos($kommentti, t("HUOM: Rivin m‰‰r‰ on pyˆristetty t‰yteen myyntier‰‰n! Myyntier‰ on")) === FALSE) {
-        $kommentti .= " ".t("HUOM: Rivin m‰‰r‰ on pyˆristetty t‰yteen myyntier‰‰n! Myyntier‰ on").": $trow[myynti_era]";
+      if (strpos($kommentti, t("HUOM: Rivin m√§√§r√§ on py√∂ristetty t√§yteen myyntier√§√§n! Myyntier√§ on")) === FALSE) {
+        $kommentti .= " ".t("HUOM: Rivin m√§√§r√§ on py√∂ristetty t√§yteen myyntier√§√§n! Myyntier√§ on").": $trow[myynti_era]";
       }
     }
 
-    // jos meill‰ on vanha laadittuaikaa, niin k‰ytet‰‰ sit‰
+    // jos meill√§ on vanha laadittuaikaa, niin k√§ytet√§√§ sit√§
     if ($rivilaadittu != "" and $rivitunnus != 0) {
       $vanharivilaadittu = "'$rivilaadittu'";
     }
@@ -2727,7 +2727,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       $p_hyllytaso  = "";
     }
 
-    // jos tuote on poistettu niin sit‰ ei voi laittaa j‰lkitoimitukseen
+    // jos tuote on poistettu niin sit√§ ei voi laittaa j√§lkitoimitukseen
     if ($var == 'J' and ($trow["status"] == "P" or $trow["status"] == "X")) {
       $var = 'P';
       $varattu = 0;
@@ -2785,7 +2785,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       $var2 = 'PK';
     }
 
-    // lis‰t‰‰n puuterivi
+    // lis√§t√§√§n puuterivi
     $query = "INSERT into tilausrivi set
               hyllyalue       = '$p_hyllyalue',
               hyllynro        = '$p_hyllynro',
@@ -2832,7 +2832,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     $lisatty_tun = mysql_insert_id();
 
     if ($suoratoimitus_splittaus and $rivitunnus == $lisatty_tun) {
-      // P‰ivitet‰‰n suoratoimitus-myyntitilausrivin m‰‰r‰t
+      // P√§ivitet√§√§n suoratoimitus-myyntitilausrivin m√§√§r√§t
       $query = "UPDATE tilausrivi
                 JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.tilausrivilinkki > 0 and tilausrivin_lisatiedot.tilausrivilinkki = '$lisatty_tun')
                 SET tilausrivi.tilkpl  = '$varattu',
@@ -2865,9 +2865,9 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     $trivtyrow = array("selite" => "");
     @include("trivityyppivalinta.inc");
 
-    //special case: Kun yhtiˆparametri Valmistuksien_kasittely on asennossa, "valmistuksella voi olla vain yksi valmiste...",
-    //excelist‰ sis‰‰nluettavissa valmistusriveiss‰ voi antaa valmistuslinjan ja toivotut p‰iv‰m‰‰r‰t (mikrotilaus.inc)
-    //N‰m‰ tiedot tallennetaan v‰liaikaisesti tilausriveille, joista ne sitten kopioidaan omille otsikoilleen.
+    //special case: Kun yhti√∂parametri Valmistuksien_kasittely on asennossa, "valmistuksella voi olla vain yksi valmiste...",
+    //excelist√§ sis√§√§nluettavissa valmistusriveiss√§ voi antaa valmistuslinjan ja toivotut p√§iv√§m√§√§r√§t (mikrotilaus.inc)
+    //N√§m√§ tiedot tallennetaan v√§liaikaisesti tilausriveille, joista ne sitten kopioidaan omille otsikoilleen.
     if ($valmistuslinja != '') {
       $positio = $valmistuslinja;
     }
@@ -2985,12 +2985,12 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
         while ($srow = mysql_fetch_assoc($sres)) {
           if ($var == "S") {
-            // jos syˆtet‰‰n sarjanumertollinen tuote suoratoimitukseen niin liitet‰‰n t‰m‰ myyntirivi siihen kiinni
+            // jos sy√∂tet√§√§n sarjanumertollinen tuote suoratoimitukseen niin liitet√§√§n t√§m√§ myyntirivi siihen kiinni
             $query = "INSERT INTO sarjanumeroseuranta
                       SET
                       yhtio            = '$kukarow[yhtio]',
                       tuoteno          = '$trow[tuoteno]',
-                      lisatieto        = 'Suoratoimitetaan yhtiˆst‰: $srow[yhtio]. $srow[lisatieto]',
+                      lisatieto        = 'Suoratoimitetaan yhti√∂st√§: $srow[yhtio]. $srow[lisatieto]',
                       sarjanumero      = '$srow[sarjanumero]',
                       kaytetty         = '$srow[kaytetty]',
                       myyntirivitunnus = '$lisatty_tun'";
@@ -3023,7 +3023,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     }
 
     if (count($puu_tuoteno) > 1 and $rivityyppi != 'O' and $lop == "") {
-      //P‰ivitet‰‰n is‰n perhetunnus
+      //P√§ivitet√§√§n is√§n perhetunnus
       if ($rivityyppi == 'V') {
         $query = "SELECT tuoteno
                   FROM tilausrivi
@@ -3046,7 +3046,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           $valmistetyyppi = "W";
         }
 
-        //jos on valmistusprosessi kyseess‰ niin is‰n tyyppi vaihdetaan W:ksi koska sen ei pid‰ varata saldoa!
+        //jos on valmistusprosessi kyseess√§ niin is√§n tyyppi vaihdetaan W:ksi koska sen ei pid√§ varata saldoa!
         $query = "UPDATE tilausrivi SET perheid='$perheid_lisaarivi', tyyppi='$valmistetyyppi' where yhtio='$kukarow[yhtio]' and tunnus=$perheid_lisaarivi";
         $result = pupe_query($query);
 
@@ -3054,7 +3054,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
         $result = pupe_query($query);
       }
       else {
-        //Hoidetaan saldottomat is‰t samaan varastoon kuin lapsetkin jotta varastosplittaukset eiv‰t menisi hassusti
+        //Hoidetaan saldottomat is√§t samaan varastoon kuin lapsetkin jotta varastosplittaukset eiv√§t menisi hassusti
         $query = "UPDATE tilausrivi SET hyllyalue='$p_hyllyalue' where yhtio='$kukarow[yhtio]' and tunnus=$perheid_lisaarivi and hyllyalue=''";
         $result = pupe_query($query);
 

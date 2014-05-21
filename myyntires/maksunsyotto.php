@@ -11,10 +11,10 @@ js_popup();
 enable_ajax();
 
 if ($tee != "CHECK" or $tiliote != 'Z') {
-  echo "<font class='head'>".t("Suorituksen k‰sinsyˆttˆ")."</font><hr>";
+  echo "<font class='head'>".t("Suorituksen k√§sinsy√∂tt√∂")."</font><hr>";
 }
 
-// Tultiinko tiliotteelta ja olisiko t‰m‰ jo viety?
+// Tultiinko tiliotteelta ja olisiko t√§m√§ jo viety?
 if ($tiliote == 'Z' and $ytunnus != '' and $asiakasid != '') {
   $query = "SELECT tunnus
             FROM suoritus
@@ -56,7 +56,7 @@ if ($tee == "CHECK") {
   if ($vva < 1000) $vva += 2000;
 
   if (!checkdate($kka, $ppa, $vva)) {
-    $error[] = t("Tarkista maksup‰iv‰! Anna maksup‰iv‰ muodossa PP.KK.VVVV");
+    $error[] = t("Tarkista maksup√§iv√§! Anna maksup√§iv√§ muodossa PP.KK.VVVV");
   }
 
   $errors = count($error);
@@ -67,7 +67,7 @@ if ($tee == "CHECK") {
       echo "<li>$err</li>\n";
     }
     echo "</ul>";
-    // menn‰‰n takasin selaukseen
+    // menn√§√§n takasin selaukseen
     $tee = "";
   }
   else {
@@ -96,7 +96,7 @@ if ($tee == "SYOTTO") {
   }
 
   if ($myyntisaamiset == 0) {
-    echo t("Myyntisaamiset-tilin selvittely ep‰onnistui");
+    echo t("Myyntisaamiset-tilin selvittely ep√§onnistui");
     exit;
   }
 
@@ -116,7 +116,7 @@ if ($tee == "SYOTTO") {
     $tilikurssi    = $row["kurssi"];
 
     if ($row["valkoodi"] != $yhtiorow['valkoodi']) {
-      // koitetaan hakea maksup‰iv‰n kurssi
+      // koitetaan hakea maksup√§iv√§n kurssi
       $query = "SELECT *
                 FROM valuu_historia
                 WHERE kotivaluutta = '$yhtiorow[valkoodi]'
@@ -129,10 +129,10 @@ if ($tee == "SYOTTO") {
       if (mysql_num_rows($result) == 1) {
         $row = mysql_fetch_assoc($result);
         $tilikurssi = $row["kurssi"];
-        echo "<font class='message'>".t("K‰ytettiin kurssia")." $row[kurssipvm] = $tilikurssi</font><br>";
+        echo "<font class='message'>".t("K√§ytettiin kurssia")." $row[kurssipvm] = $tilikurssi</font><br>";
       }
       else {
-        echo "<font class='message'>".t("Ei lˆydetty maksup‰iv‰n kurssia, k‰ytt‰‰n t‰m‰nhetkist‰ kurssia")." $tilikurssi</font><br>";
+        echo "<font class='message'>".t("Ei l√∂ydetty maksup√§iv√§n kurssia, k√§ytt√§√§n t√§m√§nhetkist√§ kurssia")." $tilikurssi</font><br>";
       }
     }
 
@@ -144,7 +144,7 @@ if ($tee == "SYOTTO") {
     exit;
   }
 
-  if (substr($ytunnus, 0, 1) == "£") {
+  if (substr($ytunnus, 0, 1) == "¬£") {
     $query = "SELECT nimi, liitostunnus
               FROM lasku
               WHERE ytunnus = '".substr($ytunnus, 1)."'
@@ -162,12 +162,12 @@ if ($tee == "SYOTTO") {
     $asiakas_nimi = pupesoft_cleanstring($row["nimi"]);
     $asiakasstr = substr($row["nimi"], 0, 12);
 
-    if (substr($ytunnus, 0, 1) == "£") {
+    if (substr($ytunnus, 0, 1) == "¬£") {
       $asiakasid = $row['liitostunnus'];
     }
   }
 
-  // tehd‰‰n dummy-lasku johon liitet‰‰n kirjaukset
+  // tehd√§√§n dummy-lasku johon liitet√§√§n kirjaukset
   $tapvm = $vva."-".$kka."-".$ppa;
 
   $query = "INSERT into lasku
@@ -194,7 +194,7 @@ if ($tee == "SYOTTO") {
             summa            = $omasumma * -1,
             summa_valuutassa = $pistesumma * -1,
             valkoodi         = '$tilivaluutta',
-            selite           = 'K‰sin syˆtetty suoritus $asiakas_nimi $selite',
+            selite           = 'K√§sin sy√∂tetty suoritus $asiakas_nimi $selite',
             lukko            = '1',
             kustp            = '{$kustp_ins}',
             kohde            = '{$kohde_ins}',
@@ -215,7 +215,7 @@ if ($tee == "SYOTTO") {
             summa            = '$omasumma',
             summa_valuutassa = '$pistesumma',
             valkoodi         = '$tilivaluutta',
-            selite           = 'K‰sin syˆtetty suoritus $asiakas_nimi $selite',
+            selite           = 'K√§sin sy√∂tetty suoritus $asiakas_nimi $selite',
             aputunnus        = '$ttunnus',
             lukko            = '1',
             kustp            = '{$kustp_ins}',
@@ -223,7 +223,7 @@ if ($tee == "SYOTTO") {
             projekti         = '{$projekti_ins}'";
   $result = pupe_query($query);
 
-  // N‰in kaikki tiliˆinnit ovat kauniisti linkitetty toisiinsa
+  // N√§in kaikki tili√∂innit ovat kauniisti linkitetty toisiinsa
   $query = "INSERT INTO suoritus SET
             yhtio          = '$kukarow[yhtio]',
             tilino         = '$tilistr',
@@ -255,7 +255,7 @@ if ($tee == "SYOTTO") {
 
     require ("tilauskasittely/tulosta_kuitti.inc");
 
-    // pdff‰n piirto
+    // pdff√§n piirto
     $firstpage = alku();
     rivi($firstpage);
     loppu($firstpage);
@@ -264,7 +264,7 @@ if ($tee == "SYOTTO") {
 
     //kirjoitetaan pdf faili levylle..
     $fh = fopen($pdffilenimi, "w");
-    if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
+    if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep√§onnistui $pdffilenimi");
     fclose($fh);
 
     // itse print komento...
@@ -301,7 +301,7 @@ if ($asiakasid != "" and $tee == "ETSI") {
 
   $laskunro = $asiakasid; // haku talteen
 
-  // jos meill‰ on IE k‰ytˆss‰ (eli ei livesearchia) tai ollaan submitattu jotain teksti‰, niin tehd‰‰n YTUNNUS haku, muuten asiakasid haku
+  // jos meill√§ on IE k√§yt√∂ss√§ (eli ei livesearchia) tai ollaan submitattu jotain teksti√§, niin tehd√§√§n YTUNNUS haku, muuten asiakasid haku
   if ($ytunnus == "" and stripos($_SERVER['HTTP_USER_AGENT'], "MSIE") !== FALSE or stripos($_SERVER['HTTP_USER_AGENT'], "EXPLORER") !== FALSE or !is_numeric($asiakasid)) {
     $ytunnus = $asiakasid;
     $asiakasid = "";
@@ -310,7 +310,7 @@ if ($asiakasid != "" and $tee == "ETSI") {
   require ("inc/asiakashaku.inc");
   $tee = "";
 
-  // jos ei lˆytynyt ytunnuksella kokeillaan laskunumerolla
+  // jos ei l√∂ytynyt ytunnuksella kokeillaan laskunumerolla
   if ($ytunnus == "" and is_numeric($laskunro)) {
     $query = "SELECT liitostunnus
               FROM lasku
@@ -321,7 +321,7 @@ if ($asiakasid != "" and $tee == "ETSI") {
     $result  = pupe_query($query);
 
     if ($asiakas = mysql_fetch_assoc($result)) {
-      echo "<font class='message'>".t("Maksaja lˆytyi laskunumerolla")." $laskunro:</font><br><br>";
+      echo "<font class='message'>".t("Maksaja l√∂ytyi laskunumerolla")." $laskunro:</font><br><br>";
       $asiakasid = $asiakas["liitostunnus"];
       require ("inc/asiakashaku.inc");
     }
@@ -331,10 +331,10 @@ if ($asiakasid != "" and $tee == "ETSI") {
   list ($summa,$ppa,$kka,$vva,$mtili, $selite) = explode("#", $muutparametrit);
 }
 
-// meill‰ on ytunnus, tehd‰‰n syˆttˆruutu
+// meill√§ on ytunnus, tehd√§√§n sy√∂tt√∂ruutu
 if ($ytunnus != '' and $tee == "") {
 
-  //p‰iv‰m‰‰r‰n tarkistus
+  //p√§iv√§m√§√§r√§n tarkistus
   $tilalk = explode("-", $yhtiorow["myyntireskontrakausi_alku"]);
   $tillop = explode("-", $yhtiorow["myyntireskontrakausi_loppu"]);
 
@@ -381,7 +381,7 @@ if ($ytunnus != '' and $tee == "") {
         dateSyotetty = dateSyotetty.getTime();
 
         if(dateSyotetty < dateTiliAlku || dateSyotetty > dateTiliLoppu) {
-          var msg = '".t("VIRHE: Syˆtetty p‰iv‰m‰‰r‰ ei sis‰lly kuluvaan tilikauteen")."!';
+          var msg = '".t("VIRHE: Sy√∂tetty p√§iv√§m√§√§r√§ ei sis√§lly kuluvaan tilikauteen")."!';
           alert(msg);
 
           skippaa_tama_submitti = true;
@@ -389,7 +389,7 @@ if ($ytunnus != '' and $tee == "") {
         }
 
         if(ero >= 30) {
-          var msg = '".t("Oletko varma, ett‰ haluat p‰iv‰t‰ laskun yli 30pv menneisyyteen")."?';
+          var msg = '".t("Oletko varma, ett√§ haluat p√§iv√§t√§ laskun yli 30pv menneisyyteen")."?';
 
           if (confirm(msg)) {
             return true;
@@ -400,7 +400,7 @@ if ($ytunnus != '' and $tee == "") {
           }
         }
         if(ero <= -14) {
-          var msg = '".t("Oletko varma, ett‰ haluat p‰iv‰t‰ laskun yli 14pv tulevaisuuteen")."?';
+          var msg = '".t("Oletko varma, ett√§ haluat p√§iv√§t√§ laskun yli 14pv tulevaisuuteen")."?';
 
           if (confirm(msg)) {
             return true;
@@ -413,7 +413,7 @@ if ($ytunnus != '' and $tee == "") {
 
         if (vv < dateTallaHet.getFullYear()) {
           if (5 < dateTallaHet.getDate()) {
-            var msg = '".t("Oletko varma, ett‰ haluat p‰iv‰t‰ laskun menneisyyteen")."?';
+            var msg = '".t("Oletko varma, ett√§ haluat p√§iv√§t√§ laskun menneisyyteen")."?';
 
             if (confirm(msg)) {
               return true;
@@ -426,7 +426,7 @@ if ($ytunnus != '' and $tee == "") {
         }
         else if (vv == dateTallaHet.getFullYear()) {
           if (kk < dateTallaHet.getMonth() && 5 < dateTallaHet.getDate()) {
-            var msg = '".t("Oletko varma, ett‰ haluat p‰iv‰t‰ laskun menneisyyteen")."?';
+            var msg = '".t("Oletko varma, ett√§ haluat p√§iv√§t√§ laskun menneisyyteen")."?';
 
             if (confirm(msg)) {
               return true;
@@ -445,8 +445,8 @@ if ($ytunnus != '' and $tee == "") {
   echo "<input type='hidden' name='tee' value='CHECK'/>\n";
   echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 
-  if (substr($ytunnus, 0, 1) == "£") {
-    $query = "SELECT concat('£',tunnus) tunnus, nimi, ytunnus
+  if (substr($ytunnus, 0, 1) == "¬£") {
+    $query = "SELECT concat('¬£',tunnus) tunnus, nimi, ytunnus
               FROM lasku
               WHERE ytunnus='".substr($ytunnus, 1)."'
               and yhtio = '$kukarow[yhtio]'";
@@ -517,7 +517,7 @@ if ($ytunnus != '' and $tee == "") {
   }
   echo "</select>";
 
-  // Tehd‰‰n kustannuspaikkapopup
+  // Tehd√§√§n kustannuspaikkapopup
   $query = "SELECT tunnus, nimi
             FROM kustannuspaikka
             WHERE yhtio   = '$kukarow[yhtio]'
@@ -552,7 +552,7 @@ if ($ytunnus != '' and $tee == "") {
   }
   echo "
   <tr>
-    <th>".t("Maksup‰iv‰ (pp kk vvvv)")."</th>";
+    <th>".t("Maksup√§iv√§ (pp kk vvvv)")."</th>";
 
     if ($kka == "")
       $kka = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));

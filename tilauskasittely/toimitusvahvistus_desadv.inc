@@ -11,7 +11,7 @@
 // Tarvitaan $tunnukset jossa on rahtikirjojen tunnukset
 // Tarvitaan $rahtikirjanro jossa on rahtikirjan numero
 // Tarvitaan $toitarow jossa on laskun toimitustavan tiedot
-// Passataan $desadv_version, mik‰li se on "una", niin tulostetaan uudet headerit
+// Passataan $desadv_version, mik√§li se on "una", niin tulostetaan uudet headerit
 
 if (!function_exists('desadv_header')) {
   function desadv_header($params) {
@@ -23,21 +23,21 @@ if (!function_exists('desadv_header')) {
     if ($desadv_version == "una" or $desadv_version == 'fi0089') {
 
       if ($desadv_version == "una") {
-        $kuljetustunnus = "PS".sprintf("%012.12s",$desadv_laskurow["laskutunnus"]); // t‰m‰ voi olla yhteens‰ max 14 merkki‰pitk‰ stringjono
+        $kuljetustunnus = "PS".sprintf("%012.12s",$desadv_laskurow["laskutunnus"]); // t√§m√§ voi olla yhteens√§ max 14 merkki√§pitk√§ stringjono
 
         // ED2 ja UNA kehykset.
-        // NRQ:0 = Ei CON kuittauspyyntˆ‰, NRQ:1 = CON kuittauspyyntˆ
+        // NRQ:0 = Ei CON kuittauspyynt√∂√§, NRQ:1 = CON kuittauspyynt√∂
         $desadv_message  = "'''ED2''':{$desadv_laskurow["asiakasovttunnus"]}:OVT':{$desadv_laskurow["yhtio_ovttunnus"]}:OVT'{$kuljetustunnus}'1'STX:EDIFACT'TYP:EDI'NRQ:0'''";
         $desadv_message .= "\nUNA:+.? '";
       }
 
-      // Valmistelup‰iv‰ys ja valmisteluaika on now(), jollei parempaa tietoa tule.
+      // Valmistelup√§iv√§ys ja valmisteluaika on now(), jollei parempaa tietoa tule.
       $valpvm = date("ymd");
       $valaika = date("Hi");
       $lahtunniste = $valpvm.$valaika.$rajaus;
 
       // UNB ja UNOC kehys
-      // Ton DESADVD00A per‰ss‰ on 4 plusmerkki‰, mik‰li sinne viimeiseksi merkiksi laitetaan ennen hipsua 1 niin se on testisanoma
+      // Ton DESADVD00A per√§ss√§ on 4 plusmerkki√§, mik√§li sinne viimeiseksi merkiksi laitetaan ennen hipsua 1 niin se on testisanoma
       $desadv_message .= "UNB+UNOC:1+{$desadv_laskurow["yhtio_ovttunnus"]}:30+{$desadv_laskurow["asiakasovttunnus"]}:30+{$valpvm}:{$valaika}+{$lahtunniste}++DESADVD00A++++'";
     }
 
@@ -51,7 +51,7 @@ if (!function_exists('desadv_header')) {
 
     // BGM (beginning of message) - identification data of despatch advice
     // 351 = despatch advice
-    // document identifier? onko t‰m‰ laskun tunnus myˆs?
+    // document identifier? onko t√§m√§ laskun tunnus my√∂s?
     $desadv_message .= "BGM+351+{$desadv_laskurow['laskutunnus']}+9'";
     $x++;
 
@@ -89,7 +89,7 @@ if (!function_exists('desadv_header')) {
       $desadv_message .= "DTM+11:".substr($year, 2, 2).$month.$day.$hour.$minute.$second.":202'";
       $x++;
       // DTM - despatch and/or delivery date/time
-      // 171 = tilausp‰iv‰
+      // 171 = tilausp√§iv√§
       list($date, $time) = explode(" ", $desadv_laskurow['luontiaika']);
       list($year, $month, $day) = explode("-", $date);
       list($hour, $minute, $second) = explode(":", $time);
@@ -97,7 +97,7 @@ if (!function_exists('desadv_header')) {
       $x++;
 
       // DTM - despatch and/or delivery date/time
-      // 171 = tilausp‰iv‰
+      // 171 = tilausp√§iv√§
       list($date, $time) = explode(" ", $desadv_laskurow['toimaika']);
       list($year, $month, $day) = explode("-", $date);
       $desadv_message .= "DTM+69:{$year}{$month}{$day}:102'";
@@ -215,7 +215,7 @@ if (!function_exists('desadv_header')) {
         $x++;
       }
       else {
-        $yhteyshenkilo_puh = $desadv_laskurow['puhelin'] != '' ? $desadv_laskurow['puhelin'] : ($desadv_laskurow['gsm'] != '' ? $desadv_laskurow['gsm'] : ($desadv_laskurow['tyopuhelin'] != '' ? $desadv_laskurow['tyopuhelin'] : '')); // max 15 merkki‰, C
+        $yhteyshenkilo_puh = $desadv_laskurow['puhelin'] != '' ? $desadv_laskurow['puhelin'] : ($desadv_laskurow['gsm'] != '' ? $desadv_laskurow['gsm'] : ($desadv_laskurow['tyopuhelin'] != '' ? $desadv_laskurow['tyopuhelin'] : '')); // max 15 merkki√§, C
 
         if ($yhteyshenkilo_puh != '') {
           $desadv_message .= "COM+".substr($yhteyshenkilo_puh, 0, 512).":TE'";
@@ -248,7 +248,7 @@ if (!function_exists('desadv_row')) {
     // Luodaan muuttujat
     extract($params);
 
-    // Katsotaan lˆytyykˆ tilaukselle ker‰yser‰
+    // Katsotaan l√∂ytyyk√∂ tilaukselle ker√§yser√§
     $query = "SELECT sscc, sscc_ulkoinen, pakkaus, GROUP_CONCAT(tilausrivi) AS tilausrivit
               FROM kerayserat
               WHERE yhtio = '{$kukarow['yhtio']}'
@@ -342,12 +342,12 @@ if (!function_exists('desadv_row')) {
           $x++;
 
           // PIA - additional product identification
-          $tuotenumero = preg_replace("/[^a-zA-ZÂ‰ˆ≈ƒ÷0-9]/", " ", $tuotteet_row['tuoteno']);
+          $tuotenumero = preg_replace("/[^a-zA-Z√•√§√∂√Ö√Ñ√ñ0-9]/", " ", $tuotteet_row['tuoteno']);
           $desadv_message .= "PIA+5+".substr($tuotenumero, 0, 35).":SA'";
           $x++;
 
           // IMD - additional information of the article
-          $tuotteen_nimitys = preg_replace("/[^a-zA-ZÂ‰ˆ≈ƒ÷0-9]/", " ", $tuotteet_row['nimitys']);
+          $tuotteen_nimitys = preg_replace("/[^a-zA-Z√•√§√∂√Ö√Ñ√ñ0-9]/", " ", $tuotteet_row['nimitys']);
           $desadv_message .= "IMD+F+8+:::".substr($tuotteen_nimitys, 0, 256)."'";
           $x++;
 
@@ -368,7 +368,7 @@ if (!function_exists('desadv_row')) {
             }
 
             // DTM - despatch and/or delivery date/time
-            // 171 = tilausp‰iv‰
+            // 171 = tilausp√§iv√§
             list($date, $time) = explode(" ", $desadv_laskurow['luontiaika']);
             list($year, $month, $day) = explode("-", $date);
             $desadv_message .= "DTM+171:{$year}{$month}{$day}:102'";
@@ -462,12 +462,12 @@ if (!function_exists('desadv_row')) {
         $x++;
 
         // PIA - additional product identification
-        $tuotenumero = preg_replace("/[^a-zA-ZÂ‰ˆ≈ƒ÷0-9]/", " ", $tuotteet_row['tuoteno']);
+        $tuotenumero = preg_replace("/[^a-zA-Z√•√§√∂√Ö√Ñ√ñ0-9]/", " ", $tuotteet_row['tuoteno']);
         $desadv_message .= "PIA+5+".substr($tuotenumero, 0, 35).":SA'";
         $x++;
 
         // IMD - additional information of the article
-        $tuotteen_nimitys = preg_replace("/[^a-zA-ZÂ‰ˆ≈ƒ÷0-9]/", " ", $tuotteet_row['nimitys']);
+        $tuotteen_nimitys = preg_replace("/[^a-zA-Z√•√§√∂√Ö√Ñ√ñ0-9]/", " ", $tuotteet_row['nimitys']);
         $desadv_message .= "IMD+F+8+:::".substr($tuotteen_nimitys, 0, 256)."'";
         $x++;
 
@@ -488,7 +488,7 @@ if (!function_exists('desadv_row')) {
           }
 
           // DTM - despatch and/or delivery date/time
-          // 171 = tilausp‰iv‰
+          // 171 = tilausp√§iv√§
           list($date, $time) = explode(" ", $desadv_laskurow['luontiaika']);
           list($year, $month, $day) = explode("-", $date);
           $desadv_message .= "DTM+171:{$year}{$month}{$day}:102'";
@@ -509,7 +509,7 @@ if (!function_exists('desadv_row')) {
 
 $toimitusvahvistus_desadv_lahetys = FALSE;
 
-//jos on laitettu kollikentt‰‰n 0 niin ei yritet‰ luoda siirtotiedostoa
+//jos on laitettu kollikentt√§√§n 0 niin ei yritet√§ luoda siirtotiedostoa
 if ($desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv_path != '') {
 
   //  Haetaan otsikkotiedot pohjalle
@@ -596,13 +596,13 @@ if ($desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv
       $yhteyshenkilo_tekninen_res = pupe_query($query);
       $yhteyshenkilo_tekninen_row = mysql_fetch_assoc($yhteyshenkilo_tekninen_res);
 
-      $yhteyshenkilo = $yhteyshenkilo_tekninen_row['nimi']; // max 35 merkki‰, R (riippuu maasta)
+      $yhteyshenkilo = $yhteyshenkilo_tekninen_row['nimi']; // max 35 merkki√§, R (riippuu maasta)
       $yhteyshenkilo_puh = $yhteyshenkilo_tekninen_row['puh'] != '' ? $yhteyshenkilo_tekninen_row['puh'] : ($yhteyshenkilo_tekninen_row['gsm'] != '' ? $yhteyshenkilo_tekninen_row['gsm'] : '');
     }
 
     $desadv_message = '';
     $error       = '';
-    $x         = 0; // yhteens‰ rivej‰ koko filess‰
+    $x         = 0; // yhteens√§ rivej√§ koko filess√§
 
     $params = array(
       'desadv_laskurow'   => $desadv_laskurow,
@@ -636,7 +636,7 @@ if ($desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv
     $desadv_message .= "UNT+{$x}+{$desadv_laskurow['laskutunnus']}'";
 
     if ($desadv_version == "una" or $desadv_version == 'fi0089') {
-      // loppuun pakollinen UNZ ja EOF. HUOM: UNZ ja EOF pit‰‰ olla erillisill‰ riveill‰ !!!
+      // loppuun pakollinen UNZ ja EOF. HUOM: UNZ ja EOF pit√§√§ olla erillisill√§ riveill√§ !!!
       $desadv_message .= "\nUNZ+1+{$lahtunniste}'";
 
       if ($desadv_version == "una") {
@@ -648,7 +648,7 @@ if ($desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv
 
     //kirjoitetaan faili levylle..
     if (file_put_contents($filenimi, $desadv_message) === FALSE) {
-      echo "<br/><font class='error'>",t("tiedoston kirjoitus EPƒONNISTUI")," ({$filenimi})</font><br/>";
+      echo "<br/><font class='error'>",t("tiedoston kirjoitus EP√ÑONNISTUI")," ({$filenimi})</font><br/>";
     }
 
     if ($error == '') {
@@ -667,12 +667,12 @@ if ($desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv
       }
     }
     else {
-      echo "<br/><font class='error'><br><hr>",t("Aineistoa ei voida l‰hett‰‰"),"!<br>",t("Aineistossa virheit‰"),":<br>{$error}</font><hr><br>";
+      echo "<br/><font class='error'><br><hr>",t("Aineistoa ei voida l√§hett√§√§"),"!<br>",t("Aineistossa virheit√§"),":<br>{$error}</font><hr><br>";
     }
 
     $rajaus++;
   }
 }
 else {
-  echo "<br/><font class='error'><br><hr>",t("Toimitusvahvistusta ei voida l‰hett‰‰"),"!<br>",t("L‰hetystiedot puuttuu"),".<br></font><hr><br>";
+  echo "<br/><font class='error'><br><hr>",t("Toimitusvahvistusta ei voida l√§hett√§√§"),"!<br>",t("L√§hetystiedot puuttuu"),".<br></font><hr><br>";
 }

@@ -1,10 +1,10 @@
 <?php
 
 $ulos = "";
-$jatko = 1; // oletetaan normaali käsittely
-$tyyppi = 1; // oletetaan rivin näkyvyys
+$jatko = 1; // oletetaan normaali kÃ¤sittely
+$tyyppi = 1; // oletetaan rivin nÃ¤kyvyys
 
-if ($i == 0) { //yhtiötä ei näytetä
+if ($i == 0) { //yhtiÃ¶tÃ¤ ei nÃ¤ytetÃ¤
   $tyyppi = 0;
 }
 
@@ -93,7 +93,7 @@ if (mysql_field_name($result, $i) == "kayttotarkoitus") {
       $ulos .= "<option value='MU'>".t("Yleinen")."</option>";
     }
 
-    // Jos LITETY-avainsanaa ei ollut mutta kannassa on kuitenkin jokin tieto jo niin pidetään se selectöitynä
+    // Jos LITETY-avainsanaa ei ollut mutta kannassa on kuitenkin jokin tieto jo niin pidetÃ¤Ã¤n se selectÃ¶itynÃ¤
     if (!$natsasko and $trow[$i] != "") {
       $ulos .= "<option value= '$trow[$i]' SELECTED>$trow[$i]</option>";
     }

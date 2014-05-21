@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require('../inc/parametrit.inc');
@@ -9,7 +9,7 @@ echo "<font class='head'>",t("Toimitustapaseuranta"),"</font><hr>";
 
 echo "<br /><table><form method='post'>";
 
-// ehdotetaan 7 p‰iv‰‰ taaksep‰in
+// ehdotetaan 7 p√§iv√§√§ taaksep√§in
 if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
 if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
 if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
@@ -23,18 +23,18 @@ if (!isset($tee)) $tee = "";
 $sel = array_fill_keys(array($tee), ' selected') + array_fill_keys(array('kaikki', 'paivittain'), '');
 
 echo "<input type='hidden' name='tee' value='kaikki'>";
-echo "<tr><th>",t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)"),"</th>
+echo "<tr><th>",t("Sy√∂t√§ alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)"),"</th>
     <td><input type='text' name='ppa' value='{$ppa}' size='3'></td>
     <td><input type='text' name='kka' value='{$kka}' size='3'></td>
     <td><input type='text' name='vva' value='{$vva}' size='5'></td>
-    </tr><tr><th>",t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)"),"</th>
+    </tr><tr><th>",t("Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)"),"</th>
     <td><input type='text' name='ppl' value='{$ppl}' size='3'></td>
     <td><input type='text' name='kkl' value='{$kkl}' size='3'></td>
     <td><input type='text' name='vvl' value='{$vvl}' size='5'></td><td class='back'></td></tr>";
 echo "<tr><th>",t("Valitse seurantatapa"),"</th>";
 echo "<td colspan='3'><select name='tee'>";
-echo "<option value='kaikki'{$sel['kaikki']}>",t("N‰yt‰ summattuna"),"</option>";
-echo "<option value='paivittain'{$sel['paivittain']}>",t("N‰yt‰ p‰ivitt‰in"),"</option>";
+echo "<option value='kaikki'{$sel['kaikki']}>",t("N√§yt√§ summattuna"),"</option>";
+echo "<option value='paivittain'{$sel['paivittain']}>",t("N√§yt√§ p√§ivitt√§in"),"</option>";
 echo "</td></select>";
 echo "<td class='back'><input type='submit' value='",t("Aja raportti"),"'></td></tr></table>";
 
@@ -75,20 +75,20 @@ if ($tee != '') {
 
   if ($tee == 'kaikki') {
     $otsikot .= "<th>".t("Tilauksia")."</th>";
-    $otsikot .= "<th>".t("Tilauksia/P‰iv‰")."</th>";
+    $otsikot .= "<th>".t("Tilauksia/P√§iv√§")."</th>";
   }
   else {
-    $otsikot .= "<th>".t("Ker‰yslistoja")."</th>";
+    $otsikot .= "<th>".t("Ker√§yslistoja")."</th>";
     $otsikot .= "<th>".t("Tilauksia")."</th>";
-    $otsikot .= "<th>".t("Tilausrivej‰")."</th>";
-    $otsikot .= "<th>".t("M‰‰r‰")."</th>";
+    $otsikot .= "<th>".t("Tilausrivej√§")."</th>";
+    $otsikot .= "<th>".t("M√§√§r√§")."</th>";
   }
 
   $otsikot .= "<th>".t("Myynti")."</th></tr>";
 
   if ($tee == 'kaikki') echo $otsikot;
 
-  //p‰ivi‰ aikajaksossa
+  //p√§ivi√§ aikajaksossa
   $epa1 = (int) date('U',mktime(0,0,0,$kka,$ppa,$vva));
   $epa2 = (int) date('U',mktime(0,0,0,$kkl,$ppl,$vvl));
 
@@ -117,7 +117,7 @@ if ($tee != '') {
 
       if ($paivamaara != "") {
         echo "<tr>
-            <td class='spec' colspan='2'>".t("Yhteens‰").":</td>
+            <td class='spec' colspan='2'>".t("Yhteens√§").":</td>
             <td class='spec'>{$kerayslistoja}</td>
             <td class='spec'>{$tilauksia}</td>
             <td class='spec'>{$tilausriveja}</td>
@@ -175,7 +175,7 @@ if ($tee != '') {
 
   if ($tee == 'paivittain') {
     echo "<tr>
-        <td class='spec' colspan='2'>".t("Yhteens‰").":</td>
+        <td class='spec' colspan='2'>".t("Yhteens√§").":</td>
         <td class='spec'>{$kerayslistoja}</td>
         <td class='spec'>{$tilauksia}</td>
         <td class='spec'>{$tilausriveja}</td>
@@ -184,7 +184,7 @@ if ($tee != '') {
     echo "<tr><td class='back' colspan='7'>&nbsp;</td></tr>";
 
     echo "<tr>
-        <td class='spec' colspan='2'>",t("Kaikki yhteens‰"),"</td>
+        <td class='spec' colspan='2'>",t("Kaikki yhteens√§"),"</td>
         <td class='spec'>{$kerayslistoja_kaikki}</td>
         <td class='spec'>{$tilauksia_kaikki}</td>
         <td class='spec'>{$tilausriveja_kaikki}</td>
@@ -193,7 +193,7 @@ if ($tee != '') {
   }
   else {
     echo "<tr>
-        <td class='spec' colspan='2'>",t("Kaikki yhteens‰"),"</td>
+        <td class='spec' colspan='2'>",t("Kaikki yhteens√§"),"</td>
         <td class='spec'>{$tilauksia_kaikki}</td>
         <td class='spec'>{$kplperpva_kaikki}</td>
         <td class='spec'>{$myynti_kaikki}</td></tr>";

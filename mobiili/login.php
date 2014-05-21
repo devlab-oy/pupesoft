@@ -44,7 +44,7 @@ $formi = "login"; // Kursorin ohjaus
 $kentta = "user";
 
 if (!headers_sent()) {
-  header("Content-Type: text/html; charset=iso-8859-1");
+  header("Content-Type: text/html; charset=utf-8");
   header("Pragma: public");
   header("Expires: 0");
   header("Last-Modified: ".gmdate("D, d M Y H:i:s")." GMT");
@@ -61,19 +61,19 @@ echo "
   <title>Login</title>
   <meta name='viewport' content='width=250,height=246, user-scalable=no, maximum-scale=1'>
   <meta http-equiv='Pragma' content='no-cache'>
-  <meta http-equiv='Content-Type' content='text/html; charset=iso-8859-1'>
+  <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
   <link rel='stylesheet' type='text/css' href='kasipaate.css' />
   </head>
 ";
 
 echo "
 <body>
-<div class='header'><h1>",t("SISÄÄNKIRJAUTUMINEN", $browkieli),"</h1></div>";
+<div class='header'><h1>",t("SISÃ„Ã„NKIRJAUTUMINEN", $browkieli),"</h1></div>";
 
 if (isset($return['usea_yhtio']) and $return['usea_yhtio'] == 1) {
 
   if (count($return['usea']) == 0) {
-    echo t("Sinulle löytyi monta käyttäjätunnusta, muttei yhtään yritystä", $browkieli),"!";
+    echo t("Sinulle lÃ¶ytyi monta kÃ¤yttÃ¤jÃ¤tunnusta, muttei yhtÃ¤Ã¤n yritystÃ¤", $browkieli),"!";
     exit;
   }
 
@@ -112,7 +112,7 @@ else {
   echo "<table class='login'>
       <form name='login' target='_top' action='' method='post'>
 
-      <tr><th>",t("Käyttäjätunnus",$browkieli),":</th><td><input type='text' value='' name='user' size='15' maxlength='30'></td></tr>
+      <tr><th>",t("KÃ¤yttÃ¤jÃ¤tunnus",$browkieli),":</th><td><input type='text' value='' name='user' size='15' maxlength='30'></td></tr>
       <tr><th>",t("Salasana",$browkieli),":</th><td><input type='password' name='salasana' size='15' maxlength='30'></td></tr>
     </table>";
 
@@ -120,7 +120,7 @@ else {
       echo "<br /><font class='error'>{$return['error']}</font><br />";
   }
 
-  echo "  <br /><input type='submit' class='button' value='",t("Sisään",$browkieli),"'>
+  echo "  <br /><input type='submit' class='button' value='",t("SisÃ¤Ã¤n",$browkieli),"'>
       </form>";
 
   echo "<script LANGUAGE='JavaScript'>window.document.{$formi}.{$kentta}.focus();</script>";

@@ -1,8 +1,8 @@
 <?php
 
 $ulos = "";
-$jatko = 1; // oletetaan normaali k‰sittely
-$tyyppi = 1; // oletetaan rivin n‰kyvyys
+$jatko = 1; // oletetaan normaali k√§sittely
+$tyyppi = 1; // oletetaan rivin n√§kyvyys
 
 if (mysql_field_name($result, $i) == "tunnus" or
     mysql_field_name($result, $i) == "yhtio") {
@@ -15,11 +15,11 @@ if (mysql_field_type($result, $i) == "blob") {
 }
 
 if (mysql_field_name($result, $i) == "asiakas" and $lukitse_avaimeen != "") {
-  // Jos t‰m‰ on liitetty tunnuksella:
+  // Jos t√§m√§ on liitetty tunnuksella:
   if ($trow[$i] > 0) {
     $ulos = "<input type='hidden' name='$nimi' value='$trow[$i]'>";
   }
-  // Jos t‰‰ on uusi itemi
+  // Jos t√§√§ on uusi itemi
   elseif ((int) $tunnus == 0) {
     $ulos = "<input type='hidden' name='$nimi' value='$lukitse_avaimeen'>";
   }
@@ -46,20 +46,20 @@ elseif (mysql_field_name($result, $i) == "asiakas") {
   else {
     if ($trow[$i] == 0) $trow[$i] = "";
 
-    // Ei maxlength:i‰ koska silloin hakutoiminto ei v‰ltt‰m‰tt‰ toimi
+    // Ei maxlength:i√§ koska silloin hakutoiminto ei v√§ltt√§m√§tt√§ toimi
     $ulos = "<td nowrap><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size'></td>";
     $jatko = 0;
   }
 }
    if (mysql_field_name($result, $i) == "tyyppi") {
-      $preq = "  SELECT avainsana.selite tyyppi, avainsana.selitetark selitetark
-        FROM avainsana
-        WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='kohde_tyyppi'";
+      $preq = "SELECT avainsana.selite tyyppi, avainsana.selitetark selitetark
+               FROM avainsana
+               WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='kohde_tyyppi'";
   $preres = mysql_query($preq) or pupe_error($preq);
 
       if (mysql_num_rows($preres) > 0) {
           $ulos = "<td><select id='tyyppi' name='$nimi'>";
-          $ulos .= "<option value = ''>".t("Ei tyyppi‰")."</option>";
+          $ulos .= "<option value = ''>".t("Ei tyyppi√§")."</option>";
 
           while ($srow = mysql_fetch_array($preres)) {
               $sel = (strtoupper($trow[$i]) == strtoupper($srow["tyyppi"])) ? "selected" : "";

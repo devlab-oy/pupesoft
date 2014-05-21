@@ -14,7 +14,7 @@ if(!function_exists("tilikaudettarkista")) {
                   AND tunnus  = '{$t[$i]}'";
         $res = pupe_query($query);
 
-        // jos t‰m‰ on v‰‰r‰nlainen tosite, niin nollataan tieto
+        // jos t√§m√§ on v√§√§r√§nlainen tosite, niin nollataan tieto
         if (mysql_num_rows($res) != 1) {
           $t[$i] = 0;
         }

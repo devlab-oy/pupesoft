@@ -1,5 +1,5 @@
 <?php
-//Kun tullaan tänne tarvitaan $komento joka on se komento jolla tulostetaan esim. lpr -P tarrakirjoitin
+//Kun tullaan tÃ¤nne tarvitaan $komento joka on se komento jolla tulostetaan esim. lpr -P tarrakirjoitin
 
 $paikka = strtoupper($paikka);
 
@@ -48,5 +48,5 @@ $sivu = "
 ".chr(12);
 }
 
-// Käytetään lpr funktiota
+// KÃ¤ytetÃ¤Ã¤n lpr funktiota
 lpr($sivu, 0, $komento);

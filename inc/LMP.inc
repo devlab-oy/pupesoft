@@ -24,19 +24,19 @@ switch ($tunnus) {
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) != 1) {
-      echo "<font class='message'>".t("Tili‰")." '$pankkitilino' ".t("ei lˆytynyt")."!</font><br>\n";
+      echo "<font class='message'>".t("Tili√§")." '$pankkitilino' ".t("ei l√∂ytynyt")."!</font><br>\n";
       $toim = 'E';
     }
     else {
       $yritirow = mysql_fetch_assoc($result);
 
-      // Setataan kukarow-yhtiˆ
+      // Setataan kukarow-yhti√∂
       $kukarow["yhtio"] = $yritirow["yhtio"];
 
-      echo "<tr><td colspan='5'><font class='message'>".t("tili lˆytyi")." $yritirow[yhtio] ".t("vastuussa")." '$yritirow[hyvak]'</font><br>\n";
+      echo "<tr><td colspan='5'><font class='message'>".t("tili l√∂ytyi")." $yritirow[yhtio] ".t("vastuussa")." '$yritirow[hyvak]'</font><br>\n";
 
       if (strlen($yritirow["oletus_rahatili"]) == 0) { // Tarkistetaan tilit
-        echo "<font class='message'>".t("Tililt‰ puuttuu kulu tai rahatili")."</font>";
+        echo "<font class='message'>".t("Tililt√§ puuttuu kulu tai rahatili")."</font>";
         $toim = 'E';
       }
       else {
@@ -49,7 +49,7 @@ switch ($tunnus) {
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) != 1) {
-        echo "<font class='message'>".t("Yrityst‰")." '$yritirow[yhtio]' ".t("ei lˆytynyt")."!</font><br>\n";
+        echo "<font class='message'>".t("Yrityst√§")." '$yritirow[yhtio]' ".t("ei l√∂ytynyt")."!</font><br>\n";
         $toim = 'E';
       }
       else {
@@ -63,18 +63,18 @@ switch ($tunnus) {
         if (mysql_num_rows($result) == 1) {
           $yhtion_parametritrow = mysql_fetch_assoc($result);
 
-          // lis‰t‰‰n kaikki yhtiorow arrayseen, niin ollaan taaksep‰inyhteensopivia
+          // lis√§t√§√§n kaikki yhtiorow arrayseen, niin ollaan taaksep√§inyhteensopivia
           foreach ($yhtion_parametritrow as $parametrit_nimi => $parametrit_arvo) {
             $yhtiorow[$parametrit_nimi] = $parametrit_arvo;
           }
         }
 
-        echo "<font class='message'>".t("Yritys lˆytyi")." $yhtiorow[nimi] ".t("ostovelat")." '$yhtiorow[ostovelat]'</font><br>\n";
+        echo "<font class='message'>".t("Yritys l√∂ytyi")." $yhtiorow[nimi] ".t("ostovelat")." '$yhtiorow[ostovelat]'</font><br>\n";
         $toim = "K";
       }
     }
 
-    // Jos perustietoja ei lˆydy lopetetaan heti!
+    // Jos perustietoja ei l√∂ydy lopetetaan heti!
     if ($toim != 'K') {
       exit;
     }
@@ -96,7 +96,7 @@ switch ($tunnus) {
     $taso = substr($tietue, 187, 1);
     $pvm = substr($tietue, 42, 6);
 
-    if ($taso == '0') $turvapvm = $pvm; // Osuuspankki ei l‰het‰ p‰iv‰yst‰ kuin t‰‰ll‰
+    if ($taso == '0') $turvapvm = $pvm; // Osuuspankki ei l√§het√§ p√§iv√§yst√§ kuin t√§√§ll√§
 
     if ($pvm == '000000') {
       $pvm = $turvapvm;
@@ -109,7 +109,7 @@ switch ($tunnus) {
     //echo "Etumerkki: '" .  $etumerkki . "'<br>\n";
     $etumerkki = substr($tietue, 87, 1);
     $maara = substr($tietue, 88, 18) / 100;
-    $kohdm = 0; // m‰‰r‰ valuutassa
+    $kohdm = 0; // m√§√§r√§ valuutassa
 
     if ($etumerkki == '-') {
       $maara *= -1;
@@ -145,7 +145,7 @@ switch ($tunnus) {
         $result = pupe_query($query);
 
         if (mysql_num_rows($result) != 1) {
-            echo "<font class='message'>Pupesoft: ".t("Sopivaa maksua viitteella")." '$viite' ".t("ei lˆytynyt")."!</font><br>\n";
+            echo "<font class='message'>Pupesoft: ".t("Sopivaa maksua viitteella")." '$viite' ".t("ei l√∂ytynyt")."!</font><br>\n";
         }
         else {
           $loytyi = 1;
@@ -153,9 +153,9 @@ switch ($tunnus) {
       }
 
       if ($loytyi == 0) {
-        echo "<font class='message'>Pupesoft: ".t("Maksukandidaatti nimi & m‰‰r‰")."</font><br>\n";
+        echo "<font class='message'>Pupesoft: ".t("Maksukandidaatti nimi & m√§√§r√§")."</font><br>\n";
 
-        // tarkka 35 merkki‰ <-> 35 merkki‰ nimihaku
+        // tarkka 35 merkki√§ <-> 35 merkki√§ nimihaku
         $query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
                   FROM lasku
                   WHERE left(nimi, 35) = left('$maksaa', 35)
@@ -165,7 +165,7 @@ switch ($tunnus) {
         $result = pupe_query($query);
 
         if (mysql_num_rows($result) != 1) {
-          // tarkka 35 merkki‰ <-> 35 merkki‰ NIMI ja NIMITARK haku
+          // tarkka 35 merkki√§ <-> 35 merkki√§ NIMI ja NIMITARK haku
           $query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
                     FROM lasku
                     WHERE left(concat_ws(' ', nimi, nimitark), 35) = left('$maksaa', 35)
@@ -176,7 +176,7 @@ switch ($tunnus) {
         }
 
         if (mysql_num_rows($result) != 1) {
-          // kokeillaan samalla kaavalla kun lum2 riviss‰
+          // kokeillaan samalla kaavalla kun lum2 riviss√§
           $query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
                     FROM lasku
                     WHERE replace(left(concat_ws(' ', if(pankki_haltija != '', pankki_haltija, concat_ws(' ', nimi, if(nimitark!='', nimitark, NULL))), osoite, postitp), 30), '&', ' ') = left('$maksaa', 30)
@@ -200,17 +200,17 @@ switch ($tunnus) {
         }
 
         if (mysql_num_rows($result) != 1) {
-          // konvertoidaan ‰‰kkˆset
-          $maksaa = str_replace ("Â", "a", $maksaa);
-          $maksaa = str_replace ("‰", "a", $maksaa);
-          $maksaa = str_replace ("ˆ", "o", $maksaa);
-          $maksaa = str_replace ("≈", "A", $maksaa);
-          $maksaa = str_replace ("ƒ", "A", $maksaa);
-          $maksaa = str_replace ("÷", "O", $maksaa);
+          // konvertoidaan √§√§kk√∂set
+          $maksaa = str_replace ("√•", "a", $maksaa);
+          $maksaa = str_replace ("√§", "a", $maksaa);
+          $maksaa = str_replace ("√∂", "o", $maksaa);
+          $maksaa = str_replace ("√Ö", "A", $maksaa);
+          $maksaa = str_replace ("√Ñ", "A", $maksaa);
+          $maksaa = str_replace ("√ñ", "O", $maksaa);
 
           $query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
                     FROM lasku
-                    WHERE replace(replace(replace(replace(replace(replace(left(nimi,35),'Â','a'), '‰','a'), 'ˆ','o'), '≈','A'), 'ƒ','A'), '÷','O') LIKE '%$maksaa%'
+                    WHERE replace(replace(replace(replace(replace(replace(left(nimi,35),'√•','a'), '√§','a'), '√∂','o'), '√Ö','A'), '√Ñ','A'), '√ñ','O') LIKE '%$maksaa%'
                     and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01))
                     and yhtio = '$yritirow[yhtio]'
                     and tila  = 'Q'";
@@ -218,7 +218,7 @@ switch ($tunnus) {
         }
 
         if (mysql_num_rows($result) != 1) {
-          echo "<font class='message'>Pupesoft: ".t("Sopivaa maksua")." '$maksaa' & '$maara' ".t("ei lˆytynyt")."</font><br>\n";
+          echo "<font class='message'>Pupesoft: ".t("Sopivaa maksua")." '$maksaa' & '$maara' ".t("ei l√∂ytynyt")."</font><br>\n";
         }
         else {
           $loytyi = 1;
@@ -227,11 +227,11 @@ switch ($tunnus) {
 
       if ($loytyi == 1) {
         $trow = mysql_fetch_assoc ($result);
-        echo "<font class='message'>Pupesoft: ".t("maksu lˆytyi")." '$trow[tunnus]' '$trow[nimi]'</font><br>\n";
+        echo "<font class='message'>Pupesoft: ".t("maksu l√∂ytyi")." '$trow[tunnus]' '$trow[nimi]'</font><br>\n";
         require "inc/teemaksutosite.inc";
       }
       else {
-        echo "<font class='message'>Pupesoft: ".t("maksu ei lˆydy")."!</font><br>\n";
+        echo "<font class='message'>Pupesoft: ".t("maksu ei l√∂ydy")."!</font><br>\n";
         require "inc/teeselvittely.inc";
       }
       echo "</td></tr>";
@@ -240,7 +240,7 @@ switch ($tunnus) {
       echo "<td>";
 
       if ($taso != '1') {
-        echo "<font class='message'>".t("Tapahtumat yhteens‰")."</font><br>\n";
+        echo "<font class='message'>".t("Tapahtumat yhteens√§")."</font><br>\n";
       }
 
       if ($tiliotedataka != '0000-00-00') {
@@ -251,11 +251,11 @@ switch ($tunnus) {
         $tiliointiresult = pupe_query($query);
 
         if ($tiliointirow = mysql_fetch_assoc($tiliointiresult)) {
-          echo "<font class='message'>".t("Tapahtuma on k‰sitelty"). " ". tv1dateconv($tiliotedataka) ."<br>\n";
-          echo t("Alkuper‰inen tiliˆinti on")." <a href='muutosite.php?tee=E&tunnus=$tiliointirow[ltunnus]'>$tiliointirow[tilino]/$tiliointirow[nimi]</a></font><br>\n";
+          echo "<font class='message'>".t("Tapahtuma on k√§sitelty"). " ". tv1dateconv($tiliotedataka) ."<br>\n";
+          echo t("Alkuper√§inen tili√∂inti on")." <a href='muutosite.php?tee=E&tunnus=$tiliointirow[ltunnus]'>$tiliointirow[tilino]/$tiliointirow[nimi]</a></font><br>\n";
 
           if ($tiliointirow['korjattu'] != "0000-00-00 00:00:00" and $tiliointirow['korjattu'] != "@0000-00-00 00:00:00") {
-            echo "<font class='message'>".t("Tiliˆinti korjattu")." $tiliointirow[korjattu]</font><br>\n";
+            echo "<font class='message'>".t("Tili√∂inti korjattu")." $tiliointirow[korjattu]</font><br>\n";
           }
         }
 

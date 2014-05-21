@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 if (isset($_POST["tee"])) {
@@ -88,8 +88,8 @@ if ($tee == '') {
 
   $asosresult = t_avainsana("ASIAKASRYHMA");
 
-  echo "<tr><th>",t("Valitse asiakkaan ryhm‰"),":</th><td colspan='3'><select name='asryhma'>";
-  echo "<option value=''>",t("Kaikki ryhm‰t"),"</option>";
+  echo "<tr><th>",t("Valitse asiakkaan ryhm√§"),":</th><td colspan='3'><select name='asryhma'>";
+  echo "<option value=''>",t("Kaikki ryhm√§t"),"</option>";
 
   while ($asosrow = mysql_fetch_assoc($asosresult)) {
     $sel = $asryhma == $asosrow["selite"] ? "selected" : "";
@@ -101,13 +101,13 @@ if ($tee == '') {
 
   if ($yhtiorow['konserni'] != "") {
     $chk = trim($konserni) != '' ? "CHECKED" : "";
-    echo "<tr><th>",t("N‰yt‰ konsernin kaikki asiakkaat"),":</th><td colspan='3'><input type='checkbox' name='konserni' {$chk}></td></tr>";
+    echo "<tr><th>",t("N√§yt√§ konsernin kaikki asiakkaat"),":</th><td colspan='3'><input type='checkbox' name='konserni' {$chk}></td></tr>";
   }
   $chk = trim($piilota_matkasarakkeet) != '' ? "CHECKED" : "";
   echo "<tr><th>",t("Piilota matkasarakkeet"),":</th><td colspan='3'><input type='checkbox' id='piilota_matkasarakkeet' name='piilota_matkasarakkeet' {$chk}></td></tr>";
 
   $chk = trim($nayta_yhteenveto) != '' ? "CHECKED" : "";
-  echo "<tr><th>".t("N‰yt‰ yhteenveto")."</th><td colspan='3'><input type='checkbox' name='nayta_yhteenveto' {$chk}></td></tr>";
+  echo "<tr><th>".t("N√§yt√§ yhteenveto")."</th><td colspan='3'><input type='checkbox' name='nayta_yhteenveto' {$chk}></td></tr>";
 
   if (!isset($kka))
     $kka = date("m",mktime(0, 0, 0, date("m"), date("d")-7, date("Y")));
@@ -123,11 +123,11 @@ if ($tee == '') {
   if (!isset($ppl))
     $ppl = date("d");
 
-  echo "<tr><th>Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)</th>
+  echo "<tr><th>Sy√∂t√§ alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)</th>
       <td><input type='text' name='ppa' value='{$ppa}' size='3'></td>
       <td><input type='text' name='kka' value='{$kka}' size='3'></td>
       <td><input type='text' name='vva' value='{$vva}' size='5'></td>
-      </tr><tr><th>Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)</th>
+      </tr><tr><th>Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)</th>
       <td><input type='text' name='ppl' value='{$ppl}' size='3'></td>
       <td><input type='text' name='kkl' value='{$kkl}' size='3'></td>
       <td><input type='text' name='vvl' value='{$vvl}' size='5'></td></tr>";
@@ -190,7 +190,7 @@ if ($tee == '') {
 
   $ruksatut   = explode(",", $valitut);          //tata kaytetaan ihan lopussa
   $ruksattuja = count($ruksatut);             //taman avulla pohditaan tarvitaanko tarkenteita
-  $vertaa     = "'".implode("','", $ruksatut)."'";  // tehd‰‰n mysql:n ymm‰rt‰m‰ muoto
+  $vertaa     = "'".implode("','", $ruksatut)."'";  // tehd√§√§n mysql:n ymm√§rt√§m√§ muoto
 
   if (in_array("$kukarow[kuka]", $ruksatut)) { // Oletko valinnut itsesi
     $checked = 'checked';
@@ -299,13 +299,13 @@ if ($tee == '') {
         # yhteenveto alkuun
         echo "<tr>";
         echo "<th>".t("Edustaja")."</th>";
-        echo "<th>".t("Yhtiˆ")."</th>";
+        echo "<th>".t("Yhti√∂")."</th>";
         echo "<th>".t("Tapa")."</th>";
         echo "<th>".t("Tapahtumia")."</th>";
         echo "</tr>";
 
         $worksheet->write($excelrivi, $excelsarake++, t("Edustaja"),  $format_bold);
-        $worksheet->write($excelrivi, $excelsarake++, t("Yhtiˆ"),  $format_bold);
+        $worksheet->write($excelrivi, $excelsarake++, t("Yhti√∂"),  $format_bold);
         $worksheet->write($excelrivi, $excelsarake++, t("Tapa"),  $format_bold);
         $worksheet->write($excelrivi, $excelsarake++, t("Tapahtumia"),  $format_bold);
         $excelrivi++;
@@ -368,9 +368,9 @@ if ($tee == '') {
           echo "<th>",t("Nimi"),"</th>";
           if ($nayta_sarake) echo "<th>",t("Pvm"),"</th>";
           if ($nayta_sarake) echo "<th>",t("Kampanjat"),"</th>";
-          echo "<th>",t("PvmK‰yty"),"</th>";
+          echo "<th>",t("PvmK√§yty"),"</th>";
           if ($nayta_sarake) echo "<th>",t("Km"),"</th>";
-          echo "<th>",t("L‰htˆ"),"</th>";
+          echo "<th>",t("L√§ht√∂"),"</th>";
           echo "<th>",t("Paluu"),"</th>";
           if ($nayta_sarake) echo "<th>",t("PvRaha"),"</th>";
           echo "<th>",t("Kommentit"),"</th>";
@@ -419,9 +419,9 @@ if ($tee == '') {
       $worksheet->write($excelrivi, $excelsarake++, t("Nimi"),    $format_bold);
       if ($nayta_sarake) $worksheet->write($excelrivi, $excelsarake++, t("Pvm"),     $format_bold);
       if ($nayta_sarake) $worksheet->write($excelrivi, $excelsarake++, t("Kampanjat"),  $format_bold);
-      $worksheet->write($excelrivi, $excelsarake++, t("PvmK‰yty"),  $format_bold);
+      $worksheet->write($excelrivi, $excelsarake++, t("PvmK√§yty"),  $format_bold);
       if ($nayta_sarake) $worksheet->write($excelrivi, $excelsarake++, t("Km"),      $format_bold);
-      $worksheet->write($excelrivi, $excelsarake++, t("L‰htˆ"),    $format_bold);
+      $worksheet->write($excelrivi, $excelsarake++, t("L√§ht√∂"),    $format_bold);
       $worksheet->write($excelrivi, $excelsarake++, t("Paluu"),    $format_bold);
       if ($nayta_sarake) $worksheet->write($excelrivi, $excelsarake++, t("PvRaha"),    $format_bold);
       $worksheet->write($excelrivi, $excelsarake++, t("Kommentit"),  $format_bold);
@@ -441,9 +441,9 @@ if ($tee == '') {
         echo "<th>".t("Nimi")."</th>";
         if ($nayta_sarake) echo "<th>".t("Pvm")."</th>";
         if ($nayta_sarake) echo "<th>".t("Kampanjat")."</th>";
-        echo "<th>".t("PvmK‰yty")."</th>";
+        echo "<th>".t("PvmK√§yty")."</th>";
         if ($nayta_sarake) echo "<th>".t("Km")."</th>";
-        echo "<th>".t("L‰htˆ")."</th>";
+        echo "<th>".t("L√§ht√∂")."</th>";
         echo "<th>".t("Paluu")."</th>";
         if ($nayta_sarake) echo "<th>".t("PvRaha")."</th>";
         echo "<th>".t("Kommentit")."</th>";

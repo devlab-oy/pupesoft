@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 if (isset($_REQUEST["komento"]) and in_array("PDF_RUUDULLE", $_REQUEST["komento"])) {
@@ -59,17 +59,17 @@ else {
   echo "<font class='head'>",t("Tulosta koontitarjous"),":</font><hr /><br />";
 
   if (isset($teekoontitarjous)) {
-    echo "<font class='error'>",t("Valitse v‰hint‰‰n kaksi tarjousta"),"!</font><br /><br />";
+    echo "<font class='error'>",t("Valitse v√§hint√§√§n kaksi tarjousta"),"!</font><br /><br />";
   }
 
   echo "<form method='post'>";
   echo "<table>";
-  echo "<tr><th>",t("Hae asiakas nimell‰"),"</th><td><input type='text' name='asiakasnimi' value='{$asiakasnimi}' /></td><td class='back'>&nbsp;</td></tr>";
+  echo "<tr><th>",t("Hae asiakas nimell√§"),"</th><td><input type='text' name='asiakasnimi' value='{$asiakasnimi}' /></td><td class='back'>&nbsp;</td></tr>";
   echo "<tr><th>",t("Hae asiakas ytunnuksella"),"</th><td><input type='text' name='asiakasytunnus' value='{$asiakasytunnus}' /></td><td class='back'>&nbsp;</td></tr>";
   echo "<tr><th>",t("Hae asiakas asiakasnumerolla"),"</th><td><input type='text' name='asiakasnro' value='{$asiakasnro}' /></td><td class='back'>&nbsp;</td></tr>";
-  echo "<tr><th>",t("Alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)"),"</th>
+  echo "<tr><th>",t("Alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)"),"</th>
       <td><input type='text' name='ppa' value='{$ppa}' size='3' />&nbsp;<input type='text' name='kka' value='{$kka}' size='3' />&nbsp;<input type='text' name='vva' value='{$vva}' size='5' /></td>
-      </tr><tr><th>",t("loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)"),"</th>
+      </tr><tr><th>",t("loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)"),"</th>
       <td><input type='text' name='ppl' value='{$ppl}' size='3' />&nbsp;<input type='text' name='kkl' value='{$kkl}' size='3' />&nbsp;<input type='text' name='vvl' value='{$vvl}' size='5' /></td>
       <td class='back'><input type='submit' name='submit' value='",t("Etsi"),"'></td>";
   echo "</table>";
@@ -154,7 +154,7 @@ if ($submit and (trim($asiakasnimi) != '' or trim($asiakasytunnus) != '' or trim
 
     if (mysql_num_rows($tarjousres) > 0) {
 
-      echo "<font class='message'>",t("Tarjouksia lˆytyi")," ",mysql_num_rows($tarjousres)," ",t("kappaletta"),"! ",t("Vain ensimm‰iset 100 tarjousta n‰ytet‰‰n"),".</font><br /><br />";
+      echo "<font class='message'>",t("Tarjouksia l√∂ytyi")," ",mysql_num_rows($tarjousres)," ",t("kappaletta"),"! ",t("Vain ensimm√§iset 100 tarjousta n√§ytet√§√§n"),".</font><br /><br />";
 
       echo "<form method='post'>";
       echo "<table>";
@@ -181,7 +181,7 @@ if ($submit and (trim($asiakasnimi) != '' or trim($asiakasytunnus) != '' or trim
 
     }
     else {
-      echo "<font class='message'>",t("Yht‰‰n tarjousta ei lˆytynyt"),".</font><br />";
+      echo "<font class='message'>",t("Yht√§√§n tarjousta ei l√∂ytynyt"),".</font><br />";
     }
   }
 }

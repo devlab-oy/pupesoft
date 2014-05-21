@@ -2,7 +2,7 @@
 
 require('inc/parametrit.inc');
 
-echo "<font class='head'>".t("Korjaa sarjanumeromyyyntej‰").":</font><hr><br>";
+echo "<font class='head'>".t("Korjaa sarjanumeromyyyntej√§").":</font><hr><br>";
 
 if ($tee == "PAIVITA" and (checkdate(substr($paivamaara,5,2), substr($paivamaara,8,2), substr($paivamaara,0,4)) or $sarjanumero != "")) {
 
@@ -40,16 +40,16 @@ if ($tee == "PAIVITA" and (checkdate(substr($paivamaara,5,2), substr($paivamaara
 
     // Tarvitaan
     // $tuoteno   = korjattava tuote
-    // $pvm     = mihin p‰iv‰‰n asti korjataan
-    // $uusihinta   = mik‰ on tuon pvm:n oikea ostohinta
-    // $rivitunnus   = mik‰ on tapahtuman tehneen rivin tunnus
+    // $pvm     = mihin p√§iv√§√§n asti korjataan
+    // $uusihinta   = mik√§ on tuon pvm:n oikea ostohinta
+    // $rivitunnus   = mik√§ on tapahtuman tehneen rivin tunnus
 
     $tuoteno    = $korjaarow["tuoteno"];
     $uusihinta     = jalkilaskentafunktiolle_ostohinta($korjaarow["keikka"], $korjaarow["rivitun"]);
 
     if ($uusihinta) {
-      $pvm      = $korjaarow["laskutettuaika"]; // koska t‰m‰ tuote oli viety varastoon
-      $rivitunnus   = $korjaarow["rivitun"];     // rivin tunnus, t‰ll‰ lˆydet‰‰n varmasti oikea tapahtuma
+      $pvm      = $korjaarow["laskutettuaika"]; // koska t√§m√§ tuote oli viety varastoon
+      $rivitunnus   = $korjaarow["rivitun"];     // rivin tunnus, t√§ll√§ l√∂ydet√§√§n varmasti oikea tapahtuma
 
       $sarjahin     = sarjanumeron_ostohinta("ostorivitunnus", $korjaarow["ostorivitunnus"], "EIKULULASKUJA");
 
@@ -89,16 +89,16 @@ if ($tee == "PAIVITA" and (checkdate(substr($paivamaara,5,2), substr($paivamaara
 
     // Tarvitaan
     // $tuoteno   = korjattava tuote
-    // $pvm     = mihin p‰iv‰‰n asti korjataan
-    // $uusihinta   = mik‰ on tuon pvm:n oikea ostohinta
-    // $rivitunnus   = mik‰ on tapahtuman tehneen rivin tunnus
+    // $pvm     = mihin p√§iv√§√§n asti korjataan
+    // $uusihinta   = mik√§ on tuon pvm:n oikea ostohinta
+    // $rivitunnus   = mik√§ on tapahtuman tehneen rivin tunnus
 
     $tuoteno    = $korjaarow["tuoteno"];
     $uusihinta     = jalkilaskentafunktiolle_ostohinta($korjaarow["keikka"], $korjaarow["rivitun"]);
 
     if ($uusihinta) {
-      $pvm      = $korjaarow["laskutettuaika"]; // koska t‰m‰ tuote oli viety varastoon
-      $rivitunnus   = $korjaarow["rivitun"];     // rivin tunnus, t‰ll‰ lˆydet‰‰n varmasti oikea tapahtuma
+      $pvm      = $korjaarow["laskutettuaika"]; // koska t√§m√§ tuote oli viety varastoon
+      $rivitunnus   = $korjaarow["rivitun"];     // rivin tunnus, t√§ll√§ l√∂ydet√§√§n varmasti oikea tapahtuma
 
       $sarjahin     = sarjanumeron_ostohinta("ostorivitunnus", $korjaarow["ostorivitunnus"]);
 
@@ -122,11 +122,11 @@ if ($tee == "") {
   echo "<form method='post'>";
   echo "<input type='hidden' name='tee' value='PAIVITA'>";
 
-  echo t("Syˆt‰ p‰iv‰m‰‰r‰ josta korjataan").":<br>";
+  echo t("Sy√∂t√§ p√§iv√§m√§√§r√§ josta korjataan").":<br>";
   echo "<input type='text' name='paivamaara' size='15'><br><br>";
 
 
-  echo t("Syˆt‰ sarjanumero joka korjataan").":<br>";
+  echo t("Sy√∂t√§ sarjanumero joka korjataan").":<br>";
   echo "<input type='text' name='sarjanumero' size='15'>";
   echo "<br><br><input type='submit' value='Korjaa'>";
   echo "</form>";

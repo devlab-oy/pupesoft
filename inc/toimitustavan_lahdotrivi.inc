@@ -1,14 +1,14 @@
 <?php
 
 $ulos = "";
-$jatko = 1; // oletetaan normaali k‰sittely
-$tyyppi = 1; // oletetaan rivin n‰kyvyys
+$jatko = 1; // oletetaan normaali k√§sittely
+$tyyppi = 1; // oletetaan rivin n√§kyvyys
 
 if (!isset($apu)) {
   $apu = array();
 }
 
-// yhtiˆt‰ ei n‰ytet‰
+// yhti√∂t√§ ei n√§ytet√§
 if (mysql_field_name($result, $i) == "yhtio") {
   $tyyppi = 0;
 }
@@ -33,7 +33,7 @@ if (mysql_field_name($result, $i) == "lahdon_viikonpvm") {
   if($trow[$i] == 6) $sel7 = "SELECTED";
 
   $ulos = "<td><select name='$nimi'>";
-  $ulos .= "<option value='' >".t("Ei valittua p‰iv‰‰")."</option>";
+  $ulos .= "<option value='' >".t("Ei valittua p√§iv√§√§")."</option>";
   $ulos .= "<option value='1' $sel1>".t("Maanantai")."</option>";
   $ulos .= "<option value='2' $sel2>".t("Tiistai")."</option>";
   $ulos .= "<option value='3' $sel3>".t("Keskiviikko")."</option>";
@@ -59,8 +59,8 @@ if (mysql_field_name($result, $i) == "aktiivi") {
   }
 
   $ulos = "<td><select name='$nimi'>";
-  $ulos .= "<option value='' $sel1>".t("K‰ytˆss‰")."</option>";
-  $ulos .= "<option value='E' $sel2>".t("Ei k‰ytˆss‰")."</option>";
+  $ulos .= "<option value='' $sel1>".t("K√§yt√∂ss√§")."</option>";
+  $ulos .= "<option value='E' $sel2>".t("Ei k√§yt√∂ss√§")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

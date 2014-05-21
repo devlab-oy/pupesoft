@@ -17,32 +17,32 @@ $laskun_erapaiva    = $xml->EpiDetails->EpiPaymentInstructionDetails->EpiDateOpt
 $laskun_kapvm       = "";
 $laskun_kasumma     = "";
 $laskuttajan_ovt    = $xml->SellerOrganisationUnitNumber;
-$laskuttajan_nimi    = utf8_decode($xml->SellerPartyDetails->SellerOrganisationName);
+$laskuttajan_nimi    = $xml->SellerPartyDetails->SellerOrganisationName;
 $laskuttajan_vat    = $xml->SellerPartyDetails->SellerOrganisationTaxCode;
 $laskuttajan_valkoodi   = $xml->EpiDetails->EpiPaymentInstructionDetails->EpiInstructedAmount->attributes()->AmountCurrencyIdentifier;
 $laskun_pankkiviite   = $xml->EpiDetails->EpiPaymentInstructionDetails->EpiRemittanceInfoIdentifier;
 $laskun_asiakastunnus  = $xml->BuyerPartyDetails->BuyerPartyIdentifier;
 $laskun_summa_eur    = (float) str_replace(",", ".", $xml->EpiDetails->EpiPaymentInstructionDetails->EpiInstructedAmount);
-$laskun_tilausviite   = utf8_decode($xml->InvoiceDetails->AgreementIdentifier);
-$laskun_asiakkaan_tilausnumero = utf8_decode($xml->InvoiceDetails->OrderIdentifier);
-$kauttalaskutus     = utf8_decode($xml->DeliveryDetails->TerminalAddressText);
+$laskun_tilausviite   = $xml->InvoiceDetails->AgreementIdentifier;
+$laskun_asiakkaan_tilausnumero = $xml->InvoiceDetails->OrderIdentifier;
+$kauttalaskutus     = $xml->DeliveryDetails->TerminalAddressText;
 $laskun_toimitunnus    = $xml->SellerPartyDetails->SellerPupesoftId;
 
 $toim_asiakkaantiedot = array();
 $toim_asiakkaantiedot["toim_ovttunnus"] = trim($xml->DeliveryOrganisationUnitNumber);
 $toim_asiakkaantiedot["ytunnus"]     = trim($xml->DeliveryPartyDetails->DeliveryPartyIdentifier);
-$toim_asiakkaantiedot["nimi"]       = trim(utf8_decode($xml->DeliveryPartyDetails->DeliveryOrganisationName));
-$toim_asiakkaantiedot["osoite"]     = trim(utf8_decode($xml->DeliveryPartyDetails->DeliveryPostalAddressDetails->DeliveryStreetName));
-$toim_asiakkaantiedot["postino"]     = trim(utf8_decode($xml->DeliveryPartyDetails->DeliveryPostalAddressDetails->DeliveryPostCodeIdentifier));
-$toim_asiakkaantiedot["postitp"]     = trim(utf8_decode($xml->DeliveryPartyDetails->DeliveryPostalAddressDetails->DeliveryTownName));
+$toim_asiakkaantiedot["nimi"]       = trim($xml->DeliveryPartyDetails->DeliveryOrganisationName);
+$toim_asiakkaantiedot["osoite"]     = trim($xml->DeliveryPartyDetails->DeliveryPostalAddressDetails->DeliveryStreetName);
+$toim_asiakkaantiedot["postino"]     = trim($xml->DeliveryPartyDetails->DeliveryPostalAddressDetails->DeliveryPostCodeIdentifier);
+$toim_asiakkaantiedot["postitp"]     = trim($xml->DeliveryPartyDetails->DeliveryPostalAddressDetails->DeliveryTownName);
 
 $ostaja_asiakkaantiedot = array();
 $ostaja_asiakkaantiedot["toim_ovttunnus"]   = trim($xml->BuyerOrganisationUnitNumber);
 $ostaja_asiakkaantiedot["ytunnus"]       = trim($xml->BuyerPartyDetails->BuyerPartyIdentifier);
-$ostaja_asiakkaantiedot["nimi"]       = trim(utf8_decode($xml->BuyerPartyDetails->BuyerOrganisationName));
-$ostaja_asiakkaantiedot["osoite"]       = trim(utf8_decode($xml->BuyerPartyDetails->BuyerPostalAddressDetails->BuyerStreetName));
-$ostaja_asiakkaantiedot["postino"]       = trim(utf8_decode($xml->BuyerPartyDetails->BuyerPostalAddressDetails->BuyerPostCodeIdentifier));
-$ostaja_asiakkaantiedot["postitp"]       = trim(utf8_decode($xml->BuyerPartyDetails->BuyerPostalAddressDetails->BuyerTownName));
+$ostaja_asiakkaantiedot["nimi"]       = trim($xml->BuyerPartyDetails->BuyerOrganisationName);
+$ostaja_asiakkaantiedot["osoite"]       = trim($xml->BuyerPartyDetails->BuyerPostalAddressDetails->BuyerStreetName);
+$ostaja_asiakkaantiedot["postino"]       = trim($xml->BuyerPartyDetails->BuyerPostalAddressDetails->BuyerPostCodeIdentifier);
+$ostaja_asiakkaantiedot["postitp"]       = trim($xml->BuyerPartyDetails->BuyerPostalAddressDetails->BuyerTownName);
 
 if (trim($laskuttajan_vat) == "" and trim($xml->SellerPartyDetails->SellerPartyIdentifier) != "") $laskuttajan_vat = $xml->SellerPartyDetails->SellerPartyIdentifier;
 
@@ -60,9 +60,9 @@ if ($yhtio == "") {
   $yhtio = $xml->BuyerPartyDetails->BuyerOrganisationTaxCode;
 }
 
-// Onko tunnus IBAN-muodossa, jos ei niin varmistetaan, ett‰ se on ovtmuodossa
+// Onko tunnus IBAN-muodossa, jos ei niin varmistetaan, ett√§ se on ovtmuodossa
 if (strlen($yhtio) != 18 or strtoupper(substr($yhtio,0,2)) != "FI") {
-  // Varmistetaan, ett‰ tunnus on ovtunnus muodossa
+  // Varmistetaan, ett√§ tunnus on ovtunnus muodossa
   $yhtio = preg_replace("/[^0-9]/", "", $yhtio);
 
   if (strpos($yhtio, "0037") === FALSE) {
@@ -86,11 +86,11 @@ if ($laskun_summa_eur == 0) {
   $laskun_summa_eur = (float) str_replace(",", ".", $xml->InvoiceDetails->InvoiceTotalVatIncludedAmount);
 }
 
-// Varmistetaan, ett‰ tunnus on ytunnus muodossa (Finvoicessa t‰‰ll‰ tulee siis vastanottajan ytunnus FI etuliitteell‰)
+// Varmistetaan, ett√§ tunnus on ytunnus muodossa (Finvoicessa t√§√§ll√§ tulee siis vastanottajan ytunnus FI etuliitteell√§)
 $verkkotunnus_vas = preg_replace("/[^0-9]/", "", $verkkotunnus_vas);
 
 if ($laskun_tyyppi == "INV02") {
-  // Hyvityslaskut pit‰‰ merkata hyvitykseksi jotta ne osataan k‰sitell‰ oikein
+  // Hyvityslaskut pit√§√§ merkata hyvitykseksi jotta ne osataan k√§sitell√§ oikein
   $laskun_tyyppi = "381";
 }
 
@@ -113,14 +113,14 @@ $rivien_summa_yhteensa  = 0;
 if (count($tuotetiedot) > 0) {
   foreach ($tuotetiedot as $tuotetieto) {
     // tuotekoodi
-    $rtuoteno[$i]["tuoteno"]  = empty($tuotetieto->ArticleIdentifier) ? pupesoft_cleanstring(utf8_decode($tuotetieto->ArticleName)) : pupesoft_cleanstring(utf8_decode($tuotetieto->ArticleIdentifier));
+    $rtuoteno[$i]["tuoteno"]  = empty($tuotetieto->ArticleIdentifier) ? pupesoft_cleanstring($tuotetieto->ArticleName) : pupesoft_cleanstring($tuotetieto->ArticleIdentifier);
 
     if ($rtuoteno[$i]["tuoteno"] != "") {
 
       // maventa-case
       $rtuoteno[$i]['ostotilausnro'] = $laskun_asiakkaan_tilausnumero;
 
-      // Tallennetaan riville jos t‰m‰ on kauttalaskutusta
+      // Tallennetaan riville jos t√§m√§ on kauttalaskutusta
       if ($kauttalaskutus == "KAUTTALASKUTUS") {
         $rtuoteno[$i]["kauttalaskutus"] = "KAUTTALASKUTUS";
       }
@@ -128,7 +128,7 @@ if (count($tuotetiedot) > 0) {
         $rtuoteno[$i]["kauttalaskutus"] = "";
       }
 
-      $rtuoteno[$i]["nimitys"]       = pupesoft_cleanstring(utf8_decode($tuotetieto->ArticleName));
+      $rtuoteno[$i]["nimitys"]       = pupesoft_cleanstring($tuotetieto->ArticleName);
       $rtuoteno[$i]["rivihinta"]       = round((float) str_replace(",", ".", $tuotetieto->RowVatExcludedAmount), 2);
       $rtuoteno[$i]["rivihinta_verolli"]  = round((float) str_replace(",", ".", $tuotetieto->RowAmount), 2);
 
@@ -143,7 +143,7 @@ if (count($tuotetiedot) > 0) {
       $rtuoteno[$i]["hinta"] = round((float) str_replace(",", ".", $tuotetieto->UnitPriceAmount), 2);
 
       // rivikommentti
-      $xrinfo = utf8_decode($tuotetieto->RowFreeText);
+      $xrinfo = $tuotetieto->RowFreeText;
 
       if (is_array($xrinfo)) {
         foreach ($xrinfo as $xln) {
@@ -155,7 +155,7 @@ if (count($tuotetiedot) > 0) {
       }
 
       if ($tuotetieto->RowIdentifierUrlText != "") {
-        $rtuoteno[$i]["kommentti"] = "Tilausnumero: ".$tuotetieto->RowIdentifierUrlText."\n".$rtuoteno[$i]["kommentti"]; // alkuper‰inen tilausnumero rivikommenttiin mukaan
+        $rtuoteno[$i]["kommentti"] = "Tilausnumero: ".$tuotetieto->RowIdentifierUrlText."\n".$rtuoteno[$i]["kommentti"]; // alkuper√§inen tilausnumero rivikommenttiin mukaan
       }
 
       $rtuoteno[$i]["kommentti"] = trim(pupesoft_cleanstring($rtuoteno[$i]["kommentti"]));
@@ -167,7 +167,7 @@ if (count($tuotetiedot) > 0) {
       $rtuoteno[$i]["lapsi"] = "";
     }
     else {
-      //  Poistetaan t‰m‰ tietue
+      //  Poistetaan t√§m√§ tietue
       unset($rtuoteno[$i]);
       $i--;
     }

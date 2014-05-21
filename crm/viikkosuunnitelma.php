@@ -14,12 +14,12 @@ if ($vstk == '') {
 if ($vstk == 'Viikkosuunnitelma') {
   $sel1 = "CHECKED";
 }
-if ($vstk == 'Asiakask‰ynti') {
+if ($vstk == 'Asiakask√§ynti') {
   $sel2 = "CHECKED";
 }
 
-echo "<li><a href='$PHP_SELF?kausi=$kausi&tee=VALITSE_TIEDOSTO&vstk=$vstk'>".t("Sis‰‰nlue suunnitelma-/asiakask‰yntitiedosto")."</a>";
-echo "<br><li><a href='$PHP_SELF?tee=laheta&kausi=$kausi&vstk=$vstk'>".t("Vie asiakastietopaketti s‰hkˆpostiisi")."</a><br><br>";
+echo "<li><a href='$PHP_SELF?kausi=$kausi&tee=VALITSE_TIEDOSTO&vstk=$vstk'>".t("Sis√§√§nlue suunnitelma-/asiakask√§yntitiedosto")."</a>";
+echo "<br><li><a href='$PHP_SELF?tee=laheta&kausi=$kausi&vstk=$vstk'>".t("Vie asiakastietopaketti s√§hk√∂postiisi")."</a><br><br>";
 
 function viikonpaivat($kausi) {
   global $viikkoalku, $viikkoloppu;
@@ -49,7 +49,7 @@ function viikonpaivat($kausi) {
 
 if ($tee == 'laheta') {
 
-  echo "<br><br><font class='message'>".t("Asiakastietopakettit l‰hetetty s‰hkˆpostiisi")."!</font><br><br><br>";
+  echo "<br><br><font class='message'>".t("Asiakastietopakettit l√§hetetty s√§hk√∂postiisi")."!</font><br><br><br>";
 
   require("laheta_asiakastietopaketti.inc");
 
@@ -69,7 +69,7 @@ if ($tee == '') {
 
   echo "<table>";
   echo "<form method='POST' action='$PHP_SELF'>";
-  echo "<tr><th colspan='3'>".t("Valitse viikko").":</th><th colspan='2'>".t("N‰yt‰").":</th></tr>";
+  echo "<tr><th colspan='3'>".t("Valitse viikko").":</th><th colspan='2'>".t("N√§yt√§").":</th></tr>";
 
   $edviikko = substr($kausi,4,2)-1;
   $edvuosi  = substr($kausi,0,4);
@@ -112,12 +112,12 @@ if ($tee == '') {
   echo "<td><a href='$PHP_SELF?kausi=$sevuosi$seviikko&vstk=$vstk'>".t("Seuraava")."</a></td>";
 
   echo "  <td>".t("Viikkosuunnitelma")." <input type='radio' name='vstk' value='Viikkosuunnitelma' $sel1 onclick='submit()'></td>
-      <td>".t("Asiakask‰ynnit")." <input type='radio' name='vstk' value='Asiakask‰ynti' $sel2 onclick='submit()'></td></tr>";
+      <td>".t("Asiakask√§ynnit")." <input type='radio' name='vstk' value='Asiakask√§ynti' $sel2 onclick='submit()'></td></tr>";
 
   echo "</form>";
   echo "</table><br>";
 
-  //Haetaan viikon p‰iv‰t
+  //Haetaan viikon p√§iv√§t
   viikonpaivat($kausi);
 
   $query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
@@ -130,11 +130,11 @@ if ($tee == '') {
   $konsernit = " and kalenteri.yhtio in (".substr($konsernit, 0, -1).") ";
 
   $tapahaku = '';
-  if ($vstk == 'Asiakask‰ynti') {
-    $tapahaku = "'Asiakask‰ynti', 'Kliendik¸lastus'";
+  if ($vstk == 'Asiakask√§ynti') {
+    $tapahaku = "'Asiakask√§ynti', 'Kliendik√ºlastus'";
   }
   elseif ($vstk == 'Viikkosuunnitelma') {
-    $tapahaku = "'Viikkosuunnitelma', 'N‰dalaplaan'";
+    $tapahaku = "'Viikkosuunnitelma', 'N√§dalaplaan'";
   }
 
   $query = "SELECT asiakas.postitp, asiakas.postino, asiakas.ytunnus, asiakas.asiakasnro, kalenteri.yhtio, asiakas.nimi,
@@ -160,14 +160,14 @@ if ($tee == '') {
     <th>".t("Ytunnus")."</th>
     <th>".t("Postitp")."</th>
     <th>".t("Postino")."</th>
-    <th>".t("Yhtiˆt")."</th>
-    <th>".t("Myyj‰")."</th>
+    <th>".t("Yhti√∂t")."</th>
+    <th>".t("Myyj√§")."</th>
     <th>".t("Email")."</th>
     <th>".t("Puhelin")."</th>
     <th>".t("Pvm")."</th>";
 
-  if ($vstk == "Asiakask‰ynti") {
-    echo "<th>".t("Kampanjat")."</th><th>".t("PvmK‰yty")."</th><th>".t("Km")."</th><th>".t("L‰htˆ")."</th><th>".t("Paluu")."</th><th>".t("PvRaha")."</th><th>".t("Kommentit")."</th></tr>";
+  if ($vstk == "Asiakask√§ynti") {
+    echo "<th>".t("Kampanjat")."</th><th>".t("PvmK√§yty")."</th><th>".t("Km")."</th><th>".t("L√§ht√∂")."</th><th>".t("Paluu")."</th><th>".t("PvRaha")."</th><th>".t("Kommentit")."</th></tr>";
   }
 
   while ($row = mysql_fetch_assoc($result)) {
@@ -183,7 +183,7 @@ if ($tee == '') {
         <td>$row[puhelin]</td>
         <td>$row[pvmalku]</td>";
 
-    if ($vstk == "Asiakask‰ynti") {
+    if ($vstk == "Asiakask√§ynti") {
       echo "  <td>$row[kentta02]</td>
           <td>$row[pvmalku]</td>
           <td>$row[kentta03]</td>

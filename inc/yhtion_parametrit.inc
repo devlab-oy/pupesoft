@@ -1,6 +1,6 @@
 <?php
-$otsikko = 'Yhtiön parametrit';
-$otsikko_nappi = 'yhtiön parametrit';
+$otsikko = 'YhtiÃ¶n parametrit';
+$otsikko_nappi = 'yhtiÃ¶n parametrit';
 
 $kentat = 'tunnus, yhtio, alert_email';
 $jarjestys = 'yhtio';

@@ -1,10 +1,10 @@
 <?php
 
-// jos tullaan t‰‰lt‰ itsest‰ niin tarvitaan paramertit
+// jos tullaan t√§√§lt√§ itsest√§ niin tarvitaan paramertit
 if (strpos($_SERVER['SCRIPT_NAME'], "yllapitosopimukset.php") !== FALSE) {
   require("../inc/parametrit.inc");
 
-  echo "<font class='head'>".t("Yll‰pitosopimukset")."</font><hr>";
+  echo "<font class='head'>".t("Yll√§pitosopimukset")."</font><hr>";
 
   js_popup();
 
@@ -28,7 +28,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "yllapitosopimukset.php") !== FALSE) {
     </script>";
 }
 else {
-  ob_start(); // ei echota mit‰‰‰n jos kutsutaan muualta!
+  ob_start(); // ei echota mit√§√§√§n jos kutsutaan muualta!
 }
 
 if ($tee == "laskuta" and count($laskutapvm) > 0) {
@@ -65,7 +65,7 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
     $laskutus_kk = explode(",", $soprow["sopimus_kk"]);
     $laskutus_pp = explode(",", $soprow["sopimus_pp"]);
 
-    // Luodaan array jossa on sopimuksen t‰n vuoden kaikki laskutukset
+    // Luodaan array jossa on sopimuksen t√§n vuoden kaikki laskutukset
     $laskutuspaivat = array();
 
     foreach ($laskutus_kk as $laskk) {
@@ -87,14 +87,14 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
     $soplaskmaara = count($laskutuspaivat)-1;
 
 
-    // Onko t‰m‰ t‰n vuoden eka ja vika sopparilasku
+    // Onko t√§m√§ t√§n vuoden eka ja vika sopparilasku
     if ($tama_laskutus == 0 and $tama_laskutus == $soplaskmaara) {
       list($vv,$kk,$pp) = explode("-", $laskutuspaivat[$tama_laskutus]);
 
       $ed_alku = date("Y-m-d", mktime(0, 0, 0, $kk, $pp+1, $vv-1));
       $se_lopp  = date("Y-m-d", mktime(0, 0, 0, $kk, $pp-1, $vv+1));
     }
-    // Jos t‰m‰ t‰n vuoden eka sopparilasku, niin edellinen on viime vuoden vika
+    // Jos t√§m√§ t√§n vuoden eka sopparilasku, niin edellinen on viime vuoden vika
     elseif ($tama_laskutus == 0) {
       list($vv,$kk,$pp) = explode("-", $laskutuspaivat[$soplaskmaara]);
       $ed_alku = date("Y-m-d", mktime(0, 0, 0, $kk, $pp+1, $vv-1));
@@ -102,7 +102,7 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
       list($vv,$kk,$pp) = explode("-", $laskutuspaivat[$tama_laskutus+1]);
       $se_lopp  = date("Y-m-d", mktime(0, 0, 0, $kk, $pp-1, $vv));
     }
-    // Jos t‰m‰ t‰n vuoden vika sopparilasku, niin seuraava on ens vuoden eka
+    // Jos t√§m√§ t√§n vuoden vika sopparilasku, niin seuraava on ens vuoden eka
     elseif ($tama_laskutus == $soplaskmaara) {
       list($vv,$kk,$pp) = explode("-", $laskutuspaivat[$tama_laskutus-1]);
       $ed_alku = date("Y-m-d",mktime(0, 0, 0, $kk, $pp+1, $vv));
@@ -110,7 +110,7 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
       list($vv,$kk,$pp) = explode("-", $laskutuspaivat[0]);
       $se_lopp = date("Y-m-d",mktime(0, 0, 0, $kk, $pp-1, $vv+1));
     }
-    // T‰m‰ ei ole t‰n vuoden eka eik‰ vika sopparilasku
+    // T√§m√§ ei ole t√§n vuoden eka eik√§ vika sopparilasku
     else {
       list($vv,$kk,$pp) = explode("-", $laskutuspaivat[$tama_laskutus-1]);
       $ed_alku = date("Y-m-d",mktime(0, 0, 0, $kk, $pp+1, $vv));
@@ -165,7 +165,7 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
 
       $laskuta_message .= "<font class='message'>".t("Monistetaan sopimus")." $tilausnumero ($tapvmpp.$tapvmkk.$tapvmvv)";
 
-      // p‰ivitet‰‰n sopparipohjalle, ett‰ sit‰ on jo k‰yettty
+      // p√§ivitet√§√§n sopparipohjalle, ett√§ sit√§ on jo k√§yettty
       $query  = "UPDATE lasku
                  SET alatila = 'X'
                  WHERE yhtio = '$kukarow[yhtio]'
@@ -173,7 +173,7 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
                  and tila    = '0'";
       $result = pupe_query($query);
 
-      // p‰ivitet‰‰n tila myyntitilaus valmis, suoraan laskutukseen (clearing on sopimus ja swift kent‰ss‰ on mik‰ soppari on kopsattu)
+      // p√§ivitet√§√§n tila myyntitilaus valmis, suoraan laskutukseen (clearing on sopimus ja swift kent√§ss√§ on mik√§ soppari on kopsattu)
       $query  = "UPDATE lasku
                  SET tila     = 'N',
                  alatila      = '',
@@ -186,7 +186,7 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
                  and tila     = '0'";
       $result = pupe_query($query);
 
-      // tyyppi takasin L, merkataan rivit ker‰tyks ja toimitetuks
+      // tyyppi takasin L, merkataan rivit ker√§tyks ja toimitetuks
       $query = "UPDATE tilausrivi
                 SET tyyppi     = 'L'
                 WHERE yhtio = '$kukarow[yhtio]'
@@ -208,7 +208,7 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
       // tilaus valmis
       require("tilaus-valmis.inc");
 
-      // p‰ivitet‰‰n tila myyntitilaus valmis, suoraan laskutukseen (clearing on sopimus ja swift kent‰ss‰ on mik‰ soppari on kopsattu)
+      // p√§ivitet√§√§n tila myyntitilaus valmis, suoraan laskutukseen (clearing on sopimus ja swift kent√§ss√§ on mik√§ soppari on kopsattu)
       $query  = "UPDATE lasku
                  SET tila   = 'L',
                  alatila     = 'D',
@@ -218,7 +218,7 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
                  and tila    = 'L'";
       $result = pupe_query($query);
 
-      // tyyppi takasin L, merkataan rivit ker‰tyks ja toimitetuks
+      // tyyppi takasin L, merkataan rivit ker√§tyks ja toimitetuks
       $query = "UPDATE tilausrivi
                 SET tyyppi     = 'L',
                 toimitettu     = '$kukarow[kuka]',
@@ -236,16 +236,16 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
         $silent       = "KYLLA";
 
         if ($poikkeus == "joo") {
-          $laskuta_message .= ", ".t("laskutetaan tilaus")." $ok ".t("p‰iv‰lle")." ".$poikkeuspvm.".</font><br>";
+          $laskuta_message .= ", ".t("laskutetaan tilaus")." $ok ".t("p√§iv√§lle")." ".$poikkeuspvm.".</font><br>";
         }
         else {
-          $laskuta_message .= ", ".t("laskutetaan tilaus")." $ok ".t("p‰iv‰lle")." ".date("d.m.Y").".</font><br>";
+          $laskuta_message .= ", ".t("laskutetaan tilaus")." $ok ".t("p√§iv√§lle")." ".date("d.m.Y").".</font><br>";
         }
 
         require("verkkolasku.php");
       }
       else {
-        $laskuta_message .= ", ".t("lasku j‰tettiin avoimeksi").".</font><br>";
+        $laskuta_message .= ", ".t("lasku j√§tettiin avoimeksi").".</font><br>";
       }
     }
   }
@@ -256,7 +256,7 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
 
 $query_ale_lisa = generoi_alekentta('M');
 
-// n‰ytet‰‰n sopparit
+// n√§ytet√§√§n sopparit
 $query = "SELECT *,
           concat_ws('<br>', lasku.ytunnus, concat_ws(' ',lasku.nimi,lasku.nimitark), if (lasku.nimi!=lasku.toim_nimi, concat_ws(' ',lasku.toim_nimi,lasku.toim_nimitark), NULL), if (lasku.postitp!=lasku.toim_postitp, lasku.toim_postitp, NULL)) nimi,
           lasku.tunnus laskutunnus,
@@ -360,7 +360,7 @@ if (mysql_num_rows($result) > 0) {
     echo "</td>";
     echo "<td valign='top'>$row[arvo] $row[valkoodi]</td>";
 
-    // katotaan montakertaa t‰‰ on laskutettu tai laskuttamatta
+    // katotaan montakertaa t√§√§ on laskutettu tai laskuttamatta
     $laskutettu = "";
     $laskutettu_vika = "";
     $laskuttamatta = "";
@@ -369,11 +369,11 @@ if (mysql_num_rows($result) > 0) {
     list($pvmloop_vv, $pvmloop_kk, $pvmloop_pp) = explode('-', $row["sopimus_alkupvm"]);
     list($yllapito_loppuvv, $yllapito_loppukk, $yllapito_loppupp) = explode('-', $row["sopimus_loppupvm"]);
 
-    // p‰iv‰m‰‰r‰t inteiks
+    // p√§iv√§m√§√§r√§t inteiks
     $pvmalku  = (int) date('Ymd',mktime(0,0,0,$pvmloop_kk,$pvmloop_pp,$pvmloop_vv));
     $pvmloppu = (int) date('Ymd',mktime(0,0,0,$yllapito_loppukk,$yllapito_loppupp,$yllapito_loppuvv));
 
-    // n‰ytt‰‰n vaan t‰h‰n p‰iv‰‰n asti
+    // n√§ytt√§√§n vaan t√§h√§n p√§iv√§√§n asti
     if ($pvmloppu > date('Ymd') or $row["sopimus_loppupvm"] == '0000-00-00') {
       $pvmloppu = date('Ymd');
     }
@@ -381,15 +381,15 @@ if (mysql_num_rows($result) > 0) {
     // Nollataan
     unset($ruksatut_paivat);
 
-    // for looppi k‰yd‰‰n l‰pi kaikki p‰iv‰t
+    // for looppi k√§yd√§√§n l√§pi kaikki p√§iv√§t
     for ($pvm = $pvmalku; $pvm <= $pvmloppu; $pvm = (int) date('Ymd',mktime(0,0,0,$pvmloop_kk,$pvmloop_pp+1,$pvmloop_vv))) {
 
-      // otetaan n‰‰ taas erikseen
+      // otetaan n√§√§ taas erikseen
       $pvmloop_pp = substr($pvm,6,2);
       $pvmloop_kk = substr($pvm,4,2);
       $pvmloop_vv = substr($pvm,0,4);
 
-      // Jos sopparille on valittu liian iso p‰iv‰:
+      // Jos sopparille on valittu liian iso p√§iv√§:
       if (!isset($ruksatut_paivat[$pvmloop_kk])) {
         $ruksatut_paivat[$pvmloop_kk] = array();
         $kkvikapva = date("t",mktime(0, 0, 0, $pvmloop_kk, 1, $pvmloop_vv));
@@ -406,7 +406,7 @@ if (mysql_num_rows($result) > 0) {
 
       if (in_array($pvmloop_kk, explode(',', $row["sopimus_kk"])) and in_array($pvmloop_pp, $ruksatut_paivat[$pvmloop_kk])) {
 
-        // katotaan ollaanko t‰m‰ lasku laskutettu
+        // katotaan ollaanko t√§m√§ lasku laskutettu
         $query = "SELECT *
                   FROM lasku
                   WHERE yhtio      = '$kukarow[yhtio]'
@@ -423,7 +423,7 @@ if (mysql_num_rows($result) > 0) {
                     <input type='hidden' name='laskutatun[$pointteri]' value='$row[laskutunnus]'>
                     $pvmloop_pp.$pvmloop_kk.$pvmloop_vv<br>";
 
-          // tehd‰‰n arrayt‰ cronijobia varten
+          // tehd√§√§n arrayt√§ cronijobia varten
           $cron_pvm[$pointteri] = "$pvmloop_vv-$pvmloop_kk-$pvmloop_pp";
           $cron_tun[$pointteri] = "$row[laskutunnus]";
 
@@ -463,8 +463,8 @@ if (mysql_num_rows($result) > 0) {
 
   if ($arvoyhteensa != 0) {
     echo "<br><table>";
-    echo "<tr><th>".t("Laskuttamatta arvo yhteens‰").": </th><td align='right'>$arvoyhteensa $yhtiorow[valkoodi]</td></tr>";
-    echo "<tr><th>".t("Laskuttamatta summa yhteens‰").": </th><td align='right'>$summayhteensa $yhtiorow[valkoodi]</td></tr>";
+    echo "<tr><th>".t("Laskuttamatta arvo yhteens√§").": </th><td align='right'>$arvoyhteensa $yhtiorow[valkoodi]</td></tr>";
+    echo "<tr><th>".t("Laskuttamatta summa yhteens√§").": </th><td align='right'>$summayhteensa $yhtiorow[valkoodi]</td></tr>";
     echo "<tr>";
     echo "</table>";
   }
@@ -472,20 +472,20 @@ if (mysql_num_rows($result) > 0) {
   echo "<br>";
   echo "<table>";
   echo "<tr>";
-  echo "<th>".t("Syˆt‰ Poikkeava Laskutusp‰iv‰m‰‰r‰ (Pp-Kk-Vvvv)")."</th>";
+  echo "<th>".t("Sy√∂t√§ Poikkeava Laskutusp√§iv√§m√§√§r√§ (Pp-Kk-Vvvv)")."</th>";
   echo "<td>  <input type='text' name='laskpp' value='' size='3'>
         <input type='text' name='laskkk' value='' size='3'>
         <input type='text' name='laskvv' value='' size='5'>";
   echo "</td>";
   echo "</tr>";
   echo "<tr>";
-  echo "<th>".t("ƒl‰ aja laskutusta").":</th>";
+  echo "<th>".t("√Ñl√§ aja laskutusta").":</th>";
   echo "<td><input type='checkbox' name='jatakesken' value='JOO'></td>";
   echo "</tr>";
   echo "<tr><td class='back'></td><td class='back'><input type='submit' value='".t("Laskuta")."'></td></tr>";
   echo "</table>";
 
-  //p‰iv‰m‰‰r‰n tarkistus
+  //p√§iv√§m√§√§r√§n tarkistus
   $tilalk = explode("-", $yhtiorow["tilikausi_alku"]);
   $tillop = explode("-", $yhtiorow["tilikausi_loppu"]);
 
@@ -520,7 +520,7 @@ if (mysql_num_rows($result) > 0) {
           kk = Number(kk.value);
           vv = Number(vv.value);
 
-          // Mik‰li ei syˆtet‰ mit‰‰n 3 kentt‰‰n niin oletetaan t‰t‰p‰iv‰‰ maksup‰iv‰ksi
+          // Mik√§li ei sy√∂tet√§ mit√§√§n 3 kentt√§√§n niin oletetaan t√§t√§p√§iv√§√§ maksup√§iv√§ksi
           if (vv == 0 && pp == 0 && kk == 0) {
             var tanaanpp = $tanaanpp;
             var tanaankk = $tanaankk;
@@ -531,7 +531,7 @@ if (mysql_num_rows($result) > 0) {
 
           }
           else {
-            // voidaan syˆtt‰‰ kentt‰‰ 2 pituinen vuosiarvo esim. 11 = 2011
+            // voidaan sy√∂tt√§√§ kentt√§√§ 2 pituinen vuosiarvo esim. 11 = 2011
             if (vv > 0 && vv < 1000) {
               vv = vv+2000;
             }
@@ -559,12 +559,12 @@ if (mysql_num_rows($result) > 0) {
           dateSyotetty = dateSyotetty.getTime();
 
           if (dateSyotetty < dateTiliAlku || dateSyotetty > dateTiliLoppu) {
-            var msg = msg+'".t("VIRHE: Syˆtetty p‰iv‰m‰‰r‰ ei sis‰lly kuluvaan tilikauteen!")." ';
+            var msg = msg+'".t("VIRHE: Sy√∂tetty p√§iv√§m√§√§r√§ ei sis√§lly kuluvaan tilikauteen!")." ';
           }
 
-          // ALERT errorit ennen confirmi‰, n‰in estet‰‰n ettei vahingossakaan p‰‰st‰ l‰pi.
+          // ALERT errorit ennen confirmi√§, n√§in estet√§√§n ettei vahingossakaan p√§√§st√§ l√§pi.
           if (ero < 0) {
-            var msg = msg+'".t("VIRHE: Laskua ei voi p‰iv‰t‰ tulevaisuuteen!")."';
+            var msg = msg+'".t("VIRHE: Laskua ei voi p√§iv√§t√§ tulevaisuuteen!")."';
           }
 
           if (msg != '') {
@@ -575,7 +575,7 @@ if (mysql_num_rows($result) > 0) {
           }
 
           if (ero >= 2) {
-            var msg = msg+'".t("Oletko varma, ett‰ haluat p‰iv‰t‰ laskun yli 2pv menneisyyteen?")." ';
+            var msg = msg+'".t("Oletko varma, ett√§ haluat p√§iv√§t√§ laskun yli 2pv menneisyyteen?")." ';
             naytetaanko_herja = true;
           }
 
@@ -593,13 +593,13 @@ if (mysql_num_rows($result) > 0) {
 
 }
 else {
-  echo t("Ei yll‰pitosopimuksia").".";
+  echo t("Ei yll√§pitosopimuksia").".";
 }
 
-// jos tullaan t‰‰lt‰ itsest‰ niin n‰ytet‰‰n footer
+// jos tullaan t√§√§lt√§ itsest√§ niin n√§ytet√§√§n footer
 if (strpos($_SERVER['SCRIPT_NAME'], "yllapitosopimukset.php") !== FALSE) {
   require ("inc/footer.inc");
 }
 else {
-  ob_end_clean(); // ei echota mit‰‰‰n jos kutsutaan muualta!
+  ob_end_clean(); // ei echota mit√§√§√§n jos kutsutaan muualta!
 }

@@ -1,11 +1,11 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require('../inc/parametrit.inc');
 
-echo "<font class='head'>".t("Myynnit p‰ivitt‰in asiakasosastoittain")."</font><hr>";
+echo "<font class='head'>".t("Myynnit p√§ivitt√§in asiakasosastoittain")."</font><hr>";
 
 if (!isset($vuosi)) $vuosi = date("Y");
 

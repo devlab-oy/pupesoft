@@ -1,11 +1,11 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-// Kutsutaanko CLI:st‰
+// Kutsutaanko CLI:st√§
 if (php_sapi_name() != 'cli') {
-  die ("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!");
+  die ("T√§t√§ scripti√§ voi ajaa vain komentorivilt√§!");
 }
 
 if (!isset($argv[1]) or $argv[1] == '') {
@@ -26,12 +26,12 @@ if ((int) $ajalta == 0) $ajalta = 1;
 
 $query    = "SELECT * from kuka where kuka='$argv[1]' limit 1";
 $kukares = mysql_query($query) or pupe_error($query);
-if (mysql_num_rows($kukares) == 0) die("Karhuajaa ei lˆyry!\n$query\n");
+if (mysql_num_rows($kukares) == 0) die("Karhuajaa ei l√∂yry!\n$query\n");
 $kukarow = mysql_fetch_array($kukares);
 
 $query    = "SELECT * from yhtio where yhtio='$kukarow[yhtio]'";
 $yhtiores = mysql_query($query) or pupe_error($query);
-if (mysql_num_rows($yhtiores) == 0) die("Firmaa ei lˆyry!\n");
+if (mysql_num_rows($yhtiores) == 0) die("Firmaa ei l√∂yry!\n");
 $yhtiorow = mysql_fetch_array($yhtiores);
 
 $query = "SELECT *
@@ -42,7 +42,7 @@ $result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
 if (mysql_num_rows($result) == 1) {
   $yhtion_parametritrow = mysql_fetch_array($result);
 
-  // lis‰t‰‰n kaikki yhtiorow arrayseen
+  // lis√§t√§√§n kaikki yhtiorow arrayseen
   foreach ($yhtion_parametritrow as $parametrit_nimi => $parametrit_arvo) {
     $yhtiorow[$parametrit_nimi] = $parametrit_arvo;
   }
@@ -69,7 +69,7 @@ $result = mysql_query($query) or pupe_error($query);
 
 while ($trow=mysql_fetch_array($result)) {
   $muistuta = 0;
-  //  Kandeeko t‰st‰ muistuttaa?
+  //  Kandeeko t√§st√§ muistuttaa?
   for($i=1;$i<=5;$i++) {
     if ($trow["hyvak$i"] == $trow["hyvaksyja_nyt"]) {
 
@@ -79,7 +79,7 @@ while ($trow=mysql_fetch_array($result)) {
           $muistuta = 1;
         }
       }
-      //  Verrataan edelliseen hyv‰ksynt‰‰n
+      //  Verrataan edelliseen hyv√§ksynt√§√§n
       else {
         $e = $i-1;
         if ($trow["h{$e}time"]>=strtotime("00:00:00 -$ajalta days")) {
@@ -93,21 +93,21 @@ while ($trow=mysql_fetch_array($result)) {
 
     if ($trow['eposti'] != $veposti) {
       if ($veposti != '') {
-        $meili = t("Sinulla on seuraavat uudet laskut hyv‰ksytt‰v‰n‰").":\n\n" . $meili;
-        $tulos = mail($veposti, mb_encode_mimeheader(t("Uudet hyv‰ksytt‰v‰t laskusi"), "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+        $meili = t("Sinulla on seuraavat uudet laskut hyv√§ksytt√§v√§n√§").":\n\n" . $meili;
+        $tulos = mail($veposti, mb_encode_mimeheader(t("Uudet hyv√§ksytt√§v√§t laskusi"), "UTF-8", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
       }
       $meili = '';
       $veposti = $trow['eposti'];
     }
 
     $meili .= "Laskuttaja: " . $trow['nimi'] . "\n";
-    $meili .= "Laskutusp‰iv‰: " . $trow['tapvm'] . "\n";
-    $meili .= "Er‰p‰iv‰: " . $trow['erpcm'] . "\n";
+    $meili .= "Laskutusp√§iv√§: " . $trow['tapvm'] . "\n";
+    $meili .= "Er√§p√§iv√§: " . $trow['erpcm'] . "\n";
     $meili .= "Summa: " .$yhtiorow["valkoodi"]." ".$trow['summa'] . "\n\n";
   }
 }
 
 if ($meili != '') {
-  $meili = t("Sinulla on seuraavat uudet laskut hyv‰ksytt‰v‰n‰").":\n\n" . $meili;
-  $tulos = mail($veposti, mb_encode_mimeheader(t("Uudet hyv‰ksytt‰v‰t laskusi"), "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+  $meili = t("Sinulla on seuraavat uudet laskut hyv√§ksytt√§v√§n√§").":\n\n" . $meili;
+  $tulos = mail($veposti, mb_encode_mimeheader(t("Uudet hyv√§ksytt√§v√§t laskusi"), "UTF-8", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 }

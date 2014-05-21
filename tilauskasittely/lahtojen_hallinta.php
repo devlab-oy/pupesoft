@@ -22,7 +22,7 @@ if ($ajax_request == 1) {
   }
 }
 
-echo "<font class='head'>",t("L‰htˆjen hallinta"),"</font><hr>";
+echo "<font class='head'>",t("L√§ht√∂jen hallinta"),"</font><hr>";
 
 if (isset($man_aloitus) and $onko_paivitysoikeuksia_ohjelmaan) {
 
@@ -37,10 +37,10 @@ if (isset($man_aloitus) and $onko_paivitysoikeuksia_ohjelmaan) {
     }
   }
   else {
-    echo "<font class='error'>",t("Et valinnut yht‰‰n tilausta"),"!</font><br /><br />";
+    echo "<font class='error'>",t("Et valinnut yht√§√§n tilausta"),"!</font><br /><br />";
   }
 
-  // Unsetataan t‰ss‰ KAIKKI postatut muuttujat paitsi valittu varasto
+  // Unsetataan t√§ss√§ KAIKKI postatut muuttujat paitsi valittu varasto
   if (isset($_REQUEST)) {
     foreach($_REQUEST as $a => $b) {
       if ($a != "select_varasto") unset(${$a});
@@ -96,10 +96,10 @@ if (isset($vaihda_prio) and $onko_paivitysoikeuksia_ohjelmaan) {
     }
   }
   else {
-    echo "<font class='error'>",t("Et valinnut yht‰‰n tilausta"),"!</font><br /><br />";
+    echo "<font class='error'>",t("Et valinnut yht√§√§n tilausta"),"!</font><br /><br />";
   }
 
-  // Unsetataan t‰ss‰ KAIKKI postatut muuttujat paitsi valittu varasto
+  // Unsetataan t√§ss√§ KAIKKI postatut muuttujat paitsi valittu varasto
   if (isset($_REQUEST)) {
     foreach($_REQUEST as $a => $b) {
       if ($a != "select_varasto") unset(${$a});
@@ -121,7 +121,7 @@ if (isset($siirra_lahtoon) and $onko_paivitysoikeuksia_ohjelmaan) {
         list($valittu_lahto, $buu) = explode("__", $valittu_lahto);
       }
 
-      // haetaan vanhan l‰hdˆn toimitustapa
+      // haetaan vanhan l√§hd√∂n toimitustapa
       $query = "SELECT lahdot.liitostunnus, toimitustapa.selite, toimitustapa.tulostustapa
                 FROM lahdot
                 JOIN toimitustapa ON (toimitustapa.yhtio = lahdot.yhtio AND toimitustapa.tunnus = lahdot.liitostunnus)
@@ -130,7 +130,7 @@ if (isset($siirra_lahtoon) and $onko_paivitysoikeuksia_ohjelmaan) {
       $old_res = pupe_query($query);
       $old_row = mysql_fetch_assoc($old_res);
 
-      // haetaan uuden l‰hdˆn toimitustapa
+      // haetaan uuden l√§hd√∂n toimitustapa
       $query = "SELECT lahdot.liitostunnus, toimitustapa.selite, toimitustapa.tulostustapa
                 FROM lahdot
                 JOIN toimitustapa ON (toimitustapa.yhtio = lahdot.yhtio AND toimitustapa.tunnus = lahdot.liitostunnus)
@@ -163,7 +163,7 @@ if (isset($siirra_lahtoon) and $onko_paivitysoikeuksia_ohjelmaan) {
         $tila_chk_res = pupe_query($query);
         $tila_chk_row = mysql_fetch_assoc($tila_chk_res);
 
-        // jos ker‰ys on aloitettu tai ker‰tty
+        // jos ker√§ys on aloitettu tai ker√§tty
         if ($tila_chk_row['tila'] == 'K' or $tila_chk_row['tila'] == 'T') {
 
           mysql_data_seek($tila_chk_res, 0);
@@ -390,7 +390,7 @@ if (isset($siirra_lahtoon) and $onko_paivitysoikeuksia_ohjelmaan) {
                   'pakkaus_kirjain' => excel_column_name($keraysera_row['pakkausnro']),
                   'sscc' => $keraysera_row['sscc'],
                   'toimitustapa' => $row['toimitustapa'],
-                  'rivit' => $keraysera_row['maara'],//tilausrivien m‰‰r‰
+                  'rivit' => $keraysera_row['maara'],//tilausrivien m√§√§r√§
                   'paino' => $pakkaus_info_row['tuotemassa'],
                   'tilavuus' => $pakkaus_info_row['kuutiot'],
                   'lask_nimi' => $rakir_row['toim_nimi'],
@@ -414,7 +414,7 @@ if (isset($siirra_lahtoon) and $onko_paivitysoikeuksia_ohjelmaan) {
     else {
 
       if (isset($uusi_lahto) and !is_numeric(trim($uusi_lahto))) {
-        echo "<font class='error'>",t("Virheellinen l‰htˆ"),"!</font><br />";
+        echo "<font class='error'>",t("Virheellinen l√§ht√∂"),"!</font><br />";
 
         $checkbox_child = unserialize(urldecode($checkbox_child));
       }
@@ -429,14 +429,14 @@ if (isset($siirra_lahtoon) and $onko_paivitysoikeuksia_ohjelmaan) {
       $chk_res = pupe_query($query);
       $chk_row = mysql_fetch_assoc($chk_res);
 
-      echo "<br><font class='head'>",t("Nykyinen l‰htˆ"),": ",tv1dateconv($chk_row['pvm'])," {$chk_row['lahdon_kellonaika']} - {$chk_row['asiakasluokka']} - {$chk_row['selite']}</font><br /><br>";
+      echo "<br><font class='head'>",t("Nykyinen l√§ht√∂"),": ",tv1dateconv($chk_row['pvm'])," {$chk_row['lahdon_kellonaika']} - {$chk_row['asiakasluokka']} - {$chk_row['selite']}</font><br /><br>";
 
       echo "<form method='post'>";
       echo "<input type='hidden' name='siirra_lahtoon' value='X' />";
       echo "<input type='hidden' name='valittu_lahto' value='{$valittu_lahto}' />";
       echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
       echo "<input type='hidden' name='checkbox_child' value='",urlencode(serialize($checkbox_child)),"' />";
-      echo "<table><tr><th>",t("Siirr‰ l‰htˆˆn"),"</th><td>";
+      echo "<table><tr><th>",t("Siirr√§ l√§ht√∂√∂n"),"</th><td>";
 
       $query = "SELECT asiakasluokka FROM lahdot WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$valittu_lahto}'";
       $asluok_res = pupe_query($query);
@@ -480,7 +480,7 @@ if (isset($siirra_lahtoon) and $onko_paivitysoikeuksia_ohjelmaan) {
         echo "<option value='{$kirow['tunnus']}'{$sel}>{$kirow['kirjoitin']}</option>";
       }
 
-      echo "</select>&nbsp;<input type='submit' value='",t("Siirr‰"),"' />";
+      echo "</select>&nbsp;<input type='submit' value='",t("Siirr√§"),"' />";
       echo "</td></tr></table></form>";
 
       require ("inc/footer.inc");
@@ -488,10 +488,10 @@ if (isset($siirra_lahtoon) and $onko_paivitysoikeuksia_ohjelmaan) {
     }
   }
   else {
-    echo "<font class='error'>",t("Et valinnut yht‰‰n tilausta"),"!</font><br /><br />";
+    echo "<font class='error'>",t("Et valinnut yht√§√§n tilausta"),"!</font><br /><br />";
   }
 
-  // Unsetataan t‰ss‰ KAIKKI postatut muuttujat paitsi valittu varasto
+  // Unsetataan t√§ss√§ KAIKKI postatut muuttujat paitsi valittu varasto
   if (isset($_REQUEST)) {
     foreach($_REQUEST as $a => $b) {
       if ($a != "select_varasto") unset(${$a});
@@ -549,7 +549,7 @@ if (isset($muokkaa_lahto) and $onko_paivitysoikeuksia_ohjelmaan) {
             $chk_res = pupe_query($query);
 
             if (mysql_num_rows($chk_res) > 0) {
-              echo "<font class='error'>",t("Virhe l‰hdˆss‰")," {$lahto}! ",t("L‰htˆ sis‰lt‰‰ tilauksia"),". ",t("Sallitut tilat ovat aktiivi ja pys‰ytetty"),".</font><br />";
+              echo "<font class='error'>",t("Virhe l√§hd√∂ss√§")," {$lahto}! ",t("L√§ht√∂ sis√§lt√§√§ tilauksia"),". ",t("Sallitut tilat ovat aktiivi ja pys√§ytetty"),".</font><br />";
 
               continue;
             }
@@ -566,7 +566,7 @@ if (isset($muokkaa_lahto) and $onko_paivitysoikeuksia_ohjelmaan) {
         }
       }
       else {
-        echo "<font class='error'>",t("Virhe l‰hdˆn tallentamisessa"),"!</font><br /><br />";
+        echo "<font class='error'>",t("Virhe l√§hd√∂n tallentamisessa"),"!</font><br /><br />";
       }
     }
     else {
@@ -594,21 +594,21 @@ if (isset($muokkaa_lahto) and $onko_paivitysoikeuksia_ohjelmaan) {
       echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
       echo "<input type='hidden' name='checkbox_parent' value='",urlencode(serialize($checkbox_parent)),"' />";
       echo "<table>";
-      echo "<tr><th>",t("L‰htˆ"),"</th><td>",implode(", ", $checkbox_parent),"</td></tr>";
+      echo "<tr><th>",t("L√§ht√∂"),"</th><td>",implode(", ", $checkbox_parent),"</td></tr>";
       echo "<tr><th>",t("Aktiivi"),"</th><td>";
       echo "<select name='lahto_muokkaus_aktiivi'>";
 
       $sel = array_fill_keys(array($lahto_row['aktiivi']), " selected") + array('' => '', 'P' => '', 'E' => '');
 
       echo "<option value=''>",t("Aktiivi"),"</option>";
-      echo "<option value='P'{$sel['P']}>",t("Pys‰ytetty"),"</option>";
+      echo "<option value='P'{$sel['P']}>",t("Pys√§ytetty"),"</option>";
       echo "<option value='E'{$sel['E']}>",t("Ei aktiivi"),"</option>";
-      echo "<option value='T'{$sel['T']}>",t("Aktiivi, ei oteta lis‰‰ tilauksia"),"</option>";
+      echo "<option value='T'{$sel['T']}>",t("Aktiivi, ei oteta lis√§√§ tilauksia"),"</option>";
       echo "</select>";
       echo "</td></tr>";
-      echo "<tr><th>",t("L‰hdˆn kellonaika"),"</th><td><input type='text' name='lahto_muokkaus_kellonaika' value='{$lahto_row['lahdon_kellonaika']}' /></td></tr>";
+      echo "<tr><th>",t("L√§hd√∂n kellonaika"),"</th><td><input type='text' name='lahto_muokkaus_kellonaika' value='{$lahto_row['lahdon_kellonaika']}' /></td></tr>";
       echo "<tr><th>",t("Viimeinen tilausaika"),"</th><td><input type='text' name='lahto_muokkaus_tilausaika' value='{$lahto_row['viimeinen_tilausaika']}' /></td></tr>";
-      echo "<tr><th>",t("Ker‰ilyn aloitusaika"),"</th><td><input type='text' name='lahto_muokkaus_aloitusaika' value='{$lahto_row['kerailyn_aloitusaika']}' /></td></tr>";
+      echo "<tr><th>",t("Ker√§ilyn aloitusaika"),"</th><td><input type='text' name='lahto_muokkaus_aloitusaika' value='{$lahto_row['kerailyn_aloitusaika']}' /></td></tr>";
       echo "<tr><td colspan='2' class='back'><input type='submit' value='",t("Tallenna"),"' /></td></tr>";
       echo "</table>";
       echo "</form>";
@@ -618,10 +618,10 @@ if (isset($muokkaa_lahto) and $onko_paivitysoikeuksia_ohjelmaan) {
     }
   }
   else {
-    echo "<font class='error'>",t("Et valinnut yht‰‰n l‰htˆ‰"),"!</font><br /><br />";
+    echo "<font class='error'>",t("Et valinnut yht√§√§n l√§ht√∂√§"),"!</font><br /><br />";
   }
 
-  // Unsetataan t‰ss‰ KAIKKI postatut muuttujat paitsi valittu varasto
+  // Unsetataan t√§ss√§ KAIKKI postatut muuttujat paitsi valittu varasto
   if (isset($_REQUEST)) {
     foreach($_REQUEST as $a => $b) {
       if ($a != "select_varasto") unset(${$a});
@@ -638,7 +638,7 @@ if (isset($tulosta_rahtikirjat) and isset($select_varasto) and $select_varasto >
 
       $select_varasto = (int) $select_varasto;
 
-      // Tarkistetaan onko l‰hdˆt kyseisen varaston l‰htˆj‰
+      // Tarkistetaan onko l√§hd√∂t kyseisen varaston l√§ht√∂j√§
       $varasto_lahto_conflict = false;
       $varasto_lahto_conflict_array = array();
 
@@ -660,7 +660,7 @@ if (isset($tulosta_rahtikirjat) and isset($select_varasto) and $select_varasto >
       require("inc/unifaun_send.inc");
 
       if ($varasto_lahto_conflict) {
-        echo "<font class='error'>",t("VIRHE: valitut l‰hdˆt eiv‰t kuulu valittuun varastoon"),"!</font><br />";
+        echo "<font class='error'>",t("VIRHE: valitut l√§hd√∂t eiv√§t kuulu valittuun varastoon"),"!</font><br />";
       }
       else {
 
@@ -694,7 +694,7 @@ if (isset($tulosta_rahtikirjat) and isset($select_varasto) and $select_varasto >
             $toimitustapa_res = pupe_query($query);
             $toimitustapa_row = mysql_fetch_assoc($toimitustapa_res);
 
-            // Er‰tulostus
+            // Er√§tulostus
             if (($toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') and $toimitustapa_row['tulostustapa'] == 'E') {
               $lahetetaanko_unifaun_era = $toimitustapa_row["rahtikirja"];
 
@@ -746,12 +746,12 @@ if (isset($tulosta_rahtikirjat) and isset($select_varasto) and $select_varasto >
             $tee = "";
           }
           else {
-            echo "<font class='error'>",t("L‰hdˆss‰")," {$lahto} ",t("ei ole tulostettavia rahtikirjoja"),"!</font><br /><br />";
+            echo "<font class='error'>",t("L√§hd√∂ss√§")," {$lahto} ",t("ei ole tulostettavia rahtikirjoja"),"!</font><br /><br />";
           }
         }
 
         foreach ($checkbox_parent as $lahto) {
-          // Siirret‰‰n ne tilaukset toiseen l‰htˆˆn jotka oli t‰ss‰ l‰hdˆss‰, mutta joiden rahtikirjat ei viel‰ tulostunu.
+          // Siirret√§√§n ne tilaukset toiseen l√§ht√∂√∂n jotka oli t√§ss√§ l√§hd√∂ss√§, mutta joiden rahtikirjat ei viel√§ tulostunu.
           $lahto = (int) $lahto;
 
           $query = "(SELECT lasku.tunnus, lasku.varasto, lasku.prioriteettinro, lasku.toimitustapa
@@ -773,7 +773,7 @@ if (isset($tulosta_rahtikirjat) and isset($select_varasto) and $select_varasto >
             $lahdot = seuraavat_lahtoajat($row['toimitustapa'], $row['prioriteettinro'], $row['varasto'], $lahto);
 
             if ($lahdot !== FALSE) {
-              // Otetaan eka l‰htˆ
+              // Otetaan eka l√§ht√∂
               $valitu_lahto = array_shift($lahdot);
 
               $query = "UPDATE rahtikirjat
@@ -875,20 +875,20 @@ return return_data;
       echo "<tr><th>",t("Tulosta kaikki rahtikirjat"),":</th>";
       echo "<td><input type='radio' name='jv' value='' checked></td></tr>";
 
-      echo "<tr><th>",t("Tulosta vain j‰lkivaatimukset"),":</th>";
+      echo "<tr><th>",t("Tulosta vain j√§lkivaatimukset"),":</th>";
       echo "<td><input type='radio' name='jv' value='vainjv'></td></tr>";
 
-      echo "<tr><th>",t("ƒl‰ tulosta j‰lkivaatimuksia"),":</th>";
+      echo "<tr><th>",t("√Ñl√§ tulosta j√§lkivaatimuksia"),":</th>";
       echo "<td><input type='radio' name='jv' value='eijv'></td></tr>";
 
       echo "<tr><th>",t("Tulosta vain rahtikirjoja joilla on VAK-koodeja"),":</th>";
       echo "<td><input type='radio' name='jv' id='jv' value='vainvak'></td></tr>";
 
-      echo "<tr><th>",t("Valitse j‰lkivaatimuslaskujen tulostuspaikka"),":</th>";
+      echo "<tr><th>",t("Valitse j√§lkivaatimuslaskujen tulostuspaikka"),":</th>";
       echo "<td><select id='kirjoitin' name='rakirsyotto_laskutulostin'>";
       echo "<option value=''>",t("Ei kirjoitinta"),"</option>";
 
-      // Oletustulostin rahtikirjojen ja tulostukseen. K‰ytet‰‰n oletustulostimena varaston takana olevaa Rahtikirja A4 -tulostinta eli printteri6-kentt‰‰.
+      // Oletustulostin rahtikirjojen ja tulostukseen. K√§ytet√§√§n oletustulostimena varaston takana olevaa Rahtikirja A4 -tulostinta eli printteri6-kentt√§√§.
       // Haetaan varaston JV-kuittitulostin printteri7:sta
       $query = "SELECT printteri6, printteri7
                 FROM varastopaikat
@@ -948,7 +948,7 @@ return return_data;
       echo "</select></td></tr>";
 
       //tarkistetaan jos lahdon toimitustavan rahtikirjaerittely != ''
-      //t‰llˆin n‰ytet‰‰n liitett‰vien l‰htˆjen dropdownit
+      //t√§ll√∂in n√§ytet√§√§n liitett√§vien l√§ht√∂jen dropdownit
       $lahdot_temp = implode(',', $checkbox_parent);
       $query = "SELECT
                 lahdot.tunnus,
@@ -975,20 +975,20 @@ return return_data;
       }
 
       if(!empty($lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty)) {
-        array_unshift($lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty, array('lahdon_tilauksien_tunnukset' => 0 ,'dropdown_text' => t('Valitse l‰htˆ')));
-        //t‰llˆin voidaan n‰ytt‰‰ mahdolliset liitett‰v‰t rahtikirjat
-        //haetaanlistaus suljetuista l‰hdˆist‰
+        array_unshift($lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty, array('lahdon_tilauksien_tunnukset' => 0 ,'dropdown_text' => t('Valitse l√§ht√∂')));
+        //t√§ll√∂in voidaan n√§ytt√§√§ mahdolliset liitett√§v√§t rahtikirjat
+        //haetaanlistaus suljetuista l√§hd√∂ist√§
         $suljetut_lahdot = hae_suljetut_lahdot($toimitustavan_tunnukset, 0);
 
         echo "<tr>";
-        echo "<th>".t("Yhdistet‰‰n l‰htˆˆn")."</th>";
+        echo "<th>".t("Yhdistet√§√§n l√§ht√∂√∂n")."</th>";
         echo "<td>";
         echo "<select name='yhdistetaan_lahtoon'>";
         $indeksi = 1;
         $sel = "";
         foreach($lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty as $lahto) {
           if(count($lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty) == 2) {
-            //kun array:ssa --> valitse l‰htˆ + 1 l‰htˆ, esi selectoidaan se l‰htˆ
+            //kun array:ssa --> valitse l√§ht√∂ + 1 l√§ht√∂, esi selectoidaan se l√§ht√∂
             if($indeksi == 2) {
               $sel = "selected='SELECTED'";
             }
@@ -1003,9 +1003,9 @@ return return_data;
         echo "</tr>";
 
         echo "<tr>";
-        echo "<th>".t("Yhdistett‰v‰ l‰htˆ")."</th>";
+        echo "<th>".t("Yhdistett√§v√§ l√§ht√∂")."</th>";
         echo "<td id ='yhdistettavan_lahdot_td'>";
-        echo "<button id='lisaa_yhdistettava_lahto' type='button'>".t("Lis‰‰ l‰htˆ")."</button>";
+        echo "<button id='lisaa_yhdistettava_lahto' type='button'>".t("Lis√§√§ l√§ht√∂")."</button>";
         echo "<br/>";
         echo "<br/>";
         echo "<div class='yhdistettava_lahto_wrapper'>";
@@ -1036,10 +1036,10 @@ return return_data;
     }
   }
   else {
-    echo "<font class='error'>",t("Et valinnut yht‰‰n l‰htˆ‰"),"!</font><br /><br />";
+    echo "<font class='error'>",t("Et valinnut yht√§√§n l√§ht√∂√§"),"!</font><br /><br />";
   }
 
-  // Unsetataan t‰ss‰ KAIKKI postatut muuttujat paitsi valittu varasto
+  // Unsetataan t√§ss√§ KAIKKI postatut muuttujat paitsi valittu varasto
   if (isset($_REQUEST)) {
     foreach($_REQUEST as $a => $b) {
       if ($a != "select_varasto") unset(${$a});
@@ -1126,13 +1126,13 @@ echo "  <script type='text/javascript' language='JavaScript'>
 
         var profiler = profilerWrapper();
 
-        // laitetaan jokaiselle TD:lle padding 0, jotta saadaan mahdollisimman paljon tietoa n‰kyviin samaan aikaan, nowrap kuitenkin jotta tekstit olisivat luettavammassa muodossa
+        // laitetaan jokaiselle TD:lle padding 0, jotta saadaan mahdollisimman paljon tietoa n√§kyviin samaan aikaan, nowrap kuitenkin jotta tekstit olisivat luettavammassa muodossa
         $('td').css({'padding': '0px', 'white-space': 'nowrap'});
 
-        // tilaustyyppi-kent‰ss‰ halutaan wrapata teksti, koska ne voivat olla tosi pitki‰
+        // tilaustyyppi-kent√§ss√§ halutaan wrapata teksti, koska ne voivat olla tosi pitki√§
         $('td.toggleable_row_type').css({'white-space': 'pre-wrap'});
 
-        // jos asiakkaan nimi on yli 30 merkki‰ pitk‰, wrapataan TD
+        // jos asiakkaan nimi on yli 30 merkki√§ pitk√§, wrapataan TD
         $('td.toggleable_row_client').each(function() {
           if ($(this).html().length > 30) {
             $(this).css({'white-space': 'pre-wrap'});
@@ -1143,10 +1143,10 @@ echo "  <script type='text/javascript' language='JavaScript'>
         $('td.center').css({'text-align': 'center', 'padding-left': '7px', 'padding-right': '7px'});
         $('td.data').css({'padding-left': '7px', 'padding-right': '7px', 'padding-bottom': '0px', 'padding-top': '0px'});
 
-        // oletuksena ollaan sortattu 2. tason rivit nousevaan j‰rjestykseen tilausnumeron mukaan
+        // oletuksena ollaan sortattu 2. tason rivit nousevaan j√§rjestykseen tilausnumeron mukaan
         $('img.row_direction_order').attr('src', '{$palvelin2}pics/lullacons/arrow-double-up-green.png');
 
-        // tehd‰‰n 2. tason sorttausnuolista globaalit muuttujat dynaamisesti, jotta muistetaan miss‰ asennoissa ne oli
+        // tehd√§√§n 2. tason sorttausnuolista globaalit muuttujat dynaamisesti, jotta muistetaan miss√§ asennoissa ne oli
         $('th.sort_row_by').each(function() {
           var title_sort = this.id.substring(4);
 
@@ -1154,7 +1154,7 @@ echo "  <script type='text/javascript' language='JavaScript'>
 
         });
 
-        // tehd‰‰n 1. tason sorttausnuolista globaalit muuttujat dynaamisesti, jotta muistetaan miss‰ asennoissa ne oli
+        // tehd√§√§n 1. tason sorttausnuolista globaalit muuttujat dynaamisesti, jotta muistetaan miss√§ asennoissa ne oli
         $('th.sort_parent_row_by').each(function() {
           var title_sort = this.id.substring(11);
           window['sort_parent_row_direction_'+title_sort] = false;
@@ -1451,7 +1451,7 @@ echo "  <script type='text/javascript' language='JavaScript'>
         $('th.sort_parent_row_by').live('click', column_sort);
         $('th.sort_row_by').on('click', column_sort);
 
-        // 2. tason alasvetovalikolla filterˆinti
+        // 2. tason alasvetovalikolla filter√∂inti
         $('select.filter_row_by_select').live('change', function(event) {
 
           event.stopPropagation();
@@ -1486,10 +1486,10 @@ echo "  <script type='text/javascript' language='JavaScript'>
           }
         });
 
-        // 2. tason tekstikent‰ll‰ rajaaminen
+        // 2. tason tekstikent√§ll√§ rajaaminen
         $('input.filter_row_by_text').live('keyup', function(event) {
 
-          // ei ajeta listaa jos painetaan nuolin‰pp‰imi‰
+          // ei ajeta listaa jos painetaan nuolin√§pp√§imi√§
           if (event.keyCode == 37 || event.keyCode == 38 || event.keyCode == 39 || event.keyCode == 40) {
             event.preventDefault();
             return false;
@@ -1557,7 +1557,7 @@ echo "  <script type='text/javascript' language='JavaScript'>
 
         $('#uni_client_search, #uni_order_search, #uni_locality_search').keyup(function(event) {
 
-          // ei ajeta listaa jos painetaan nuolin‰pp‰imi‰
+          // ei ajeta listaa jos painetaan nuolin√§pp√§imi√§
           if (event.keyCode == 9 || event.keyCode == 37 || event.keyCode == 38 || event.keyCode == 39 || event.keyCode == 40 || event.keyCode == 16) {
             event.preventDefault();
             return false;
@@ -1789,7 +1789,7 @@ echo "  <script type='text/javascript' language='JavaScript'>
 
         });
 
-        // 1. tason alasvetovalikolla filterˆinti
+        // 1. tason alasvetovalikolla filter√∂inti
         $('select.filter_parent_row_by').live('change', function(event) {
 
           event.stopPropagation();
@@ -1848,10 +1848,10 @@ echo "  <script type='text/javascript' language='JavaScript'>
         $('#muokkaa_kolleja').on('click', function() {
 
           if ($('input[name^=\"checkbox_parent\"]:checked').length > 1) {
-            alert('",t("Voit muokata vain yhden l‰hdˆn kolleja kerrallaan"),".');
+            alert('",t("Voit muokata vain yhden l√§hd√∂n kolleja kerrallaan"),".');
           }
           else if ($('input[name^=\"checkbox_parent\"]:checked').length == 0) {
-            alert('",t("L‰htˆ t‰ytyy valita"),".');
+            alert('",t("L√§ht√∂ t√§ytyy valita"),".');
           }
           else {
             $('input[name^=\"checkbox_parent\"]:checked').each(function() {
@@ -1898,18 +1898,18 @@ echo "  <script type='text/javascript' language='JavaScript'>
           if(!$.isEmptyObject(tarkista_lahdot['keraamatta']) || !$.isEmptyObject(tarkista_lahdot['aikaa_jaljella']) ) {
             var error_message = '';
             if(tarkista_lahdot['keraamatta'].length > 0) {
-              error_message += '".t("L‰hdˆill‰ rivej‰ ker‰‰m‰tt‰").":' + '\\n';
+              error_message += '".t("L√§hd√∂ill√§ rivej√§ ker√§√§m√§tt√§").":' + '\\n';
               $.each(tarkista_lahdot['keraamatta'], function(index,value){
                 error_message += value['lahdon_tunnus'] + ', ' + value['keraamatta'] + ' ".t("kappaletta")."\\n';
               });
             }
             if (tarkista_lahdot['aikaa_jaljella'].length > 0) {
-            error_message += '\\n".t("L‰hdˆill‰ tilausaikaa j‰ljell‰").":';
+            error_message += '\\n".t("L√§hd√∂ill√§ tilausaikaa j√§ljell√§").":';
               $.each(tarkista_lahdot['aikaa_jaljella'], function(index,value){
                 error_message += value['tunnus'] + ', ';
               });
             }
-            error_message += '\\n".t("Haluatko sulkea l‰hdˆt")."';
+            error_message += '\\n".t("Haluatko sulkea l√§hd√∂t")."';
 
             if (confirm(error_message)) $('#napitformi').submit();
           }
@@ -2054,10 +2054,10 @@ if ($select_varasto > 0) {
     if ($tee == 'lahto' and trim($tilaukset) != '') {
       echo "<button type='button' id='man_aloitus'>",t("Man. aloitus"),"</button>&nbsp;";
       echo "<button type='button' id='vaihda_prio'>",t("Vaihda prio"),"</button>&nbsp;";
-      echo "<button type='button' id='siirra_lahtoon'>",t("Siirr‰ l‰htˆˆn"),"</button>";
+      echo "<button type='button' id='siirra_lahtoon'>",t("Siirr√§ l√§ht√∂√∂n"),"</button>";
     }
     else {
-      echo "<button type='button' id='muokkaa_lahto'>",t("Muokkaa l‰htˆ"),"</button>&nbsp;";
+      echo "<button type='button' id='muokkaa_lahto'>",t("Muokkaa l√§ht√∂"),"</button>&nbsp;";
       echo "<button type='button' id='tulosta_rahtikirjat'>",t("Tulosta rahtikirjat"),"</button>&nbsp;";
 
       if (tarkista_oikeus('tilauskasittely/muokkaa_kolleja.php')) {
@@ -2171,7 +2171,7 @@ if ($select_varasto > 0) {
     echo "<th class='sort_parent_row_by' id='parent_row_transfer'>S <img class='parent_row_direction_transfer' /></th>";
     echo "<th class='sort_parent_row_by' id='parent_row_stopped'>P <img class='parent_row_direction_stopped' /><br>T</th>";
     echo "<th></th>";
-    echo "<th class='sort_parent_row_by' id='parent_row_departure'>",t("L‰htˆ")," <img class='parent_row_direction_departure' /></th>";
+    echo "<th class='sort_parent_row_by' id='parent_row_departure'>",t("L√§ht√∂")," <img class='parent_row_direction_departure' /></th>";
 
     echo "<th class='sort_parent_row_by' id='parent_row_prio'>",t("Prio")," <img class='parent_row_direction_prio' />";
     echo "<br />";
@@ -2244,7 +2244,7 @@ if ($select_varasto > 0) {
     echo "</th>";
 
     echo "<th class='sort_parent_row_by' id='parent_row_time1'>",t("Viim til klo")," <img class='parent_row_direction_time1' /></th>";
-    echo "<th class='sort_parent_row_by' id='parent_row_time2'>",t("L‰htˆaika")," <img class='parent_row_direction_time2' /></th>";
+    echo "<th class='sort_parent_row_by' id='parent_row_time2'>",t("L√§ht√∂aika")," <img class='parent_row_direction_time2' /></th>";
     echo "<th class='sort_parent_row_by' id='parent_row_time3'>",t("Ker. alku klo")," <img class='parent_row_direction_time3' /></th>";
     echo "<th class='sort_parent_row_by' id='parent_row_orders'>",t("Til / valm")," <img class='parent_row_direction_orders' /></th>";
     echo "<th class='sort_parent_row_by' id='parent_row_rows'>",t("Rivit suun / ker")," <img class='parent_row_direction_rows' /></th>";
@@ -2418,8 +2418,8 @@ if ($select_varasto > 0) {
     echo "<input type='hidden' name='nayta_valinnat[]' value='default' />";
     echo "<input type='checkbox' class='nayta_valinnat' name='nayta_valinnat[]' value='aloittamatta' {$chk['aloittamatta']} /> ",t("Aloittamatta"),"&nbsp;&nbsp;";
     echo "<input type='checkbox' class='nayta_valinnat' name='nayta_valinnat[]' value='aloitettu' {$chk['aloitettu']} /> ",t("Aloitettu"),"&nbsp;&nbsp;";
-    echo "<input type='checkbox' class='nayta_valinnat' name='nayta_valinnat[]' value='keratty' {$chk['keratty']} /> ",t("Ker‰tty"),"&nbsp;&nbsp;";
-    echo "<input type='submit' value='",t("N‰yt‰"),"' />";
+    echo "<input type='checkbox' class='nayta_valinnat' name='nayta_valinnat[]' value='keratty' {$chk['keratty']} /> ",t("Ker√§tty"),"&nbsp;&nbsp;";
+    echo "<input type='submit' value='",t("N√§yt√§"),"' />";
     echo "</td>";
     echo "</tr>";
     echo "</table>";
@@ -2483,7 +2483,7 @@ if ($select_varasto > 0) {
               JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('','P','T'))
               JOIN avainsana ON (avainsana.yhtio = lahdot.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selitetark_3 = lahdot.asiakasluokka)
               JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
-              LEFT JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio AND kerayserat.otunnus = lasku.tunnus and kerayserat.tila != '÷')
+              LEFT JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio AND kerayserat.otunnus = lasku.tunnus and kerayserat.tila != '√ñ')
               LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
               WHERE lasku.yhtio = '{$kukarow['yhtio']}'
               AND lasku.tunnus  IN ({$tilaukset})
@@ -2504,13 +2504,13 @@ if ($select_varasto > 0) {
     echo "<tr><td class='back'>&nbsp;</td></tr>";
 
     echo "<tr>";
-    echo "<th>",t("L‰htˆ"),"</th>";
+    echo "<th>",t("L√§ht√∂"),"</th>";
     echo "<th>",t("Prio"),"</th>";
     echo "<th>",t("Rahdinkuljettaja"),"</th>";
     echo "<th>",t("Toimitustapa"),"</th>";
     echo "<th>",t("Pvm"),"</th>";
     echo "<th>",t("Viim Til Klo"),"</th>";
-    echo "<th>",t("L‰htˆaika"),"</th>";
+    echo "<th>",t("L√§ht√∂aika"),"</th>";
     echo "<th>",t("Ker. Alku Klo"),"</th>";
     echo "</tr>";
 
@@ -2558,7 +2558,7 @@ if ($select_varasto > 0) {
     echo "<option value=''>",t("Valitse"),"</option>";
     if (in_array("aloittamatta", $nayta_valinnat)) echo "<option value='1'{$sel[1]}>",t("Aloittamatta"),"</option>";
     if (in_array("aloitettu", $nayta_valinnat)) echo "<option value='2'{$sel[2]}>",t("Aloitettu"),"</option>";
-    if (in_array("keratty", $nayta_valinnat)) echo "<option value='3'{$sel[3]}>",t("Ker‰tty"),"</option>";
+    if (in_array("keratty", $nayta_valinnat)) echo "<option value='3'{$sel[3]}>",t("Ker√§tty"),"</option>";
     echo "</select>";
     echo "</th>";
 
@@ -2606,7 +2606,7 @@ if ($select_varasto > 0) {
               WHERE yhtio = '{$kukarow['yhtio']}'";
     $keraysvyohyke_result = pupe_query($query);
 
-    echo "<th class='sort_row_by' id='row_picking_zone__{$row['lahdon_tunnus']}__{$y}'>",t("Vyˆhyke")," <img class='row_direction_picking_zone' />";
+    echo "<th class='sort_row_by' id='row_picking_zone__{$row['lahdon_tunnus']}__{$y}'>",t("Vy√∂hyke")," <img class='row_direction_picking_zone' />";
     echo "<br />";
     echo "<select class='filter_row_by_select' id='child_row_select_picking_zone'>";
     echo "<option value=''>",t("Valitse"),"</option>";
@@ -2618,7 +2618,7 @@ if ($select_varasto > 0) {
     echo "</select>";
     echo "</th>";
 
-    echo "<th class='sort_row_by' id='row_batch__{$row['lahdon_tunnus']}__{$y}'>",t("Er‰")," <img class='row_direction_batch' />";
+    echo "<th class='sort_row_by' id='row_batch__{$row['lahdon_tunnus']}__{$y}'>",t("Er√§")," <img class='row_direction_batch' />";
     echo "<br />";
     echo "<input type='text' class='filter_row_by_text' id='child_row_text_batch__{$row['lahdon_tunnus']}__{$y}' value='' size='3' />";
     echo "</th>";
@@ -2637,10 +2637,10 @@ if ($select_varasto > 0) {
       "N" => t("Normaalitilaus"),
       "E" => t("Ennakkotilaus"),
       "T" => t("Tarjoustilaus"),
-      "2" => t("Varastot‰ydennys"),
+      "2" => t("Varastot√§ydennys"),
       "7" => t("Tehdastilaus"),
       "8" => t("Muiden mukana"),
-      "A" => t("Tyˆm‰‰r‰ys"),
+      "A" => t("Ty√∂m√§√§r√§ys"),
       "S" => t("Sarjatilaus")
     );
 
@@ -2663,7 +2663,7 @@ if ($select_varasto > 0) {
         $status = 2;
       }
       elseif ($lahto_row['keraysera_rivi_count'] > 0 and $lahto_row['keraysera_rivi_count'] == $lahto_row['keraysera_rivi_valmis']) {
-        $status_text = t("Ker‰tty");
+        $status_text = t("Ker√§tty");
         $status = 3;
       }
       else {
@@ -2803,7 +2803,7 @@ if ($select_varasto > 0) {
                 #IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', kerayserat.kpl, 0) AS 'keratyt'
                 ROUND(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', IFNULL(kerayserat.kpl_keratty, tilausrivi.varattu), 0), 0) AS 'keratyt'
                 FROM tilausrivi
-                LEFT JOIN kerayserat ON (kerayserat.yhtio = tilausrivi.yhtio AND kerayserat.tilausrivi = tilausrivi.tunnus and kerayserat.tila != '÷')
+                LEFT JOIN kerayserat ON (kerayserat.yhtio = tilausrivi.yhtio AND kerayserat.tilausrivi = tilausrivi.tunnus and kerayserat.tila != '√ñ')
                 JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
                 WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
                 AND tilausrivi.otunnus  = '{$lahto_row['tilauksen_tunnus']}'
@@ -2823,12 +2823,12 @@ if ($select_varasto > 0) {
       echo "<th>",t("SSCC"),"</th>";
       echo "<th>",t("Tuotenumero"),"</th>";
       echo "<th>",t("Nimitys"),"</th>";
-      echo "<th>",t("Suunniteltu m‰‰r‰"),"</th>";
-      echo "<th>",t("Ker‰tty m‰‰r‰"),"</th>";
-      echo "<th>",t("Poikkeava m‰‰r‰"),"</th>";
-      echo "<th>",t("Yksikkˆ"),"</th>";
+      echo "<th>",t("Suunniteltu m√§√§r√§"),"</th>";
+      echo "<th>",t("Ker√§tty m√§√§r√§"),"</th>";
+      echo "<th>",t("Poikkeava m√§√§r√§"),"</th>";
+      echo "<th>",t("Yksikk√∂"),"</th>";
       echo "<th>",t("Hyllypaikka"),"</th>";
-      echo "<th>",t("Ker‰‰j‰"),"</th>";
+      echo "<th>",t("Ker√§√§j√§"),"</th>";
       echo "</tr>";
 
       $lopetus_url = trim($lopetus) != '' ? $lopetus."/SPLIT/{$palvelin2}tilauskasittely/lahtojen_hallinta.php////select_varasto={$select_varasto}//tee=lahto//tilaukset={$tilaukset}" : "{$palvelin2}tilauskasittely/lahtojen_hallinta.php////select_varasto={$select_varasto}//tee=lahto//tilaukset={$tilaukset}";
@@ -2889,12 +2889,12 @@ if ($select_varasto > 0) {
         echo "<th>",t("Tilausnumero"),"</th>";
         echo "<th>",t("Tuotenumero"),"</th>";
         echo "<th>",t("Nimitys"),"</th>";
-        echo "<th>",t("Suunniteltu m‰‰r‰"),"</th>";
-        echo "<th>",t("Ker‰tty m‰‰r‰"),"</th>";
-        echo "<th>",t("Poikkeava m‰‰r‰"),"</th>";
-        echo "<th>",t("Yksikkˆ"),"</th>";
+        echo "<th>",t("Suunniteltu m√§√§r√§"),"</th>";
+        echo "<th>",t("Ker√§tty m√§√§r√§"),"</th>";
+        echo "<th>",t("Poikkeava m√§√§r√§"),"</th>";
+        echo "<th>",t("Yksikk√∂"),"</th>";
         echo "<th>",t("Hyllypaikka"),"</th>";
-        echo "<th>",t("Ker‰‰j‰"),"</th>";
+        echo "<th>",t("Ker√§√§j√§"),"</th>";
         echo "</tr>";
 
         $lopetus_url = trim($lopetus) != '' ? $lopetus."/SPLIT/{$palvelin2}tilauskasittely/lahtojen_hallinta.php////select_varasto={$select_varasto}//tee=lahto//tilaukset={$tilaukset}" : "{$palvelin2}tilauskasittely/lahtojen_hallinta.php////select_varasto={$select_varasto}//tee=lahto//tilaukset={$tilaukset}";
@@ -2969,11 +2969,11 @@ function hae_suljetut_lahdot($toimitustavan_tunnukset, $ajax_request) {
 
   $suljetut_lahdot = array();
   $suljetut_lahdot[] = array(
-    'dropdown_text' => ($ajax_request == 1 ? utf8_encode(t("Valitse liitett‰v‰ l‰htˆ")) : t("Valitse liitett‰v‰ l‰htˆ")),
+    'dropdown_text' => ($ajax_request == 1 ? t("Valitse liitett√§v√§ l√§ht√∂") : t("Valitse liitett√§v√§ l√§ht√∂")),
     'tilaukset' => 0,
   );
   while ($suljetut_lahdot_row = mysql_fetch_assoc($suljetut_lahdot_result)) {
-    $suljetut_lahdot_row['dropdown_text'] = ($ajax_request == 1 ? utf8_encode($suljetut_lahdot_row['dropdown_text']) : $suljetut_lahdot_row['dropdown_text']);
+    $suljetut_lahdot_row['dropdown_text'] = ($ajax_request == 1 ? $suljetut_lahdot_row['dropdown_text'] : $suljetut_lahdot_row['dropdown_text']);
     $suljetut_lahdot[] = $suljetut_lahdot_row;
   }
 

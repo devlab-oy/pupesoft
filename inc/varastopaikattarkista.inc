@@ -11,7 +11,7 @@ if(!function_exists("varastopaikattarkista")) {
       $alkuhyllyalue = $t[$i];
 
       if (trim($t[$i]) == '') {
-        $virhe[$i] .= t("Alkuhyllyalue ei saa olla tyhji‰")."!";
+        $virhe[$i] .= t("Alkuhyllyalue ei saa olla tyhji√§")."!";
       }
     }
 
@@ -20,7 +20,7 @@ if(!function_exists("varastopaikattarkista")) {
       $alkuhyllynro = $t[$i];
 
       if (trim($t[$i]) == '') {
-        $virhe[$i] .= t("Alkuhyllynro ei saa olla tyhji‰")."!";
+        $virhe[$i] .= t("Alkuhyllynro ei saa olla tyhji√§")."!";
       }
     }
 
@@ -29,7 +29,7 @@ if(!function_exists("varastopaikattarkista")) {
       $loppuhyllyalue = $t[$i];
 
       if (trim($t[$i]) == '') {
-        $virhe[$i] .= t("Loppuhyllyalue ei saa olla tyhji‰")."!";
+        $virhe[$i] .= t("Loppuhyllyalue ei saa olla tyhji√§")."!";
       }
     }
 
@@ -38,7 +38,7 @@ if(!function_exists("varastopaikattarkista")) {
       $loppuhyllynro = $t[$i];
 
       if (trim($t[$i]) == '') {
-        $virhe[$i] .= t("Loppuhyllynro ei saa olla tyhji‰")."!";
+        $virhe[$i] .= t("Loppuhyllynro ei saa olla tyhji√§")."!";
       }
 
       //Katotaan osuuko alkuhyllyalue johonkin varastoon
@@ -63,7 +63,7 @@ if(!function_exists("varastopaikattarkista")) {
           $vares = mysql_query($query) or pupe_error($query);
 
           if (mysql_num_rows($vares) == 0) {
-            //Katotaan onko jo joku varasto syˆtetyn alueen sis‰ll‰
+            //Katotaan onko jo joku varasto sy√∂tetyn alueen sis√§ll√§
             $query = "SELECT tunnus
                       FROM varastopaikat
                       WHERE
@@ -76,23 +76,23 @@ if(!function_exists("varastopaikattarkista")) {
       }
 
       if (mysql_num_rows($vares) != 0) {
-        $virhe[$i] .= t("P‰‰llekk‰isi‰ varastoalueita")."!";
+        $virhe[$i] .= t("P√§√§llekk√§isi√§ varastoalueita")."!";
       }
     }
 
     if (mysql_field_name($result, $i) == "printteri2") {
       if (trim($t[$i]) == '') {
-        $virhe[$i] .= t("Rahtikirjatulostimet ei saa olla tyhji‰")."!";
+        $virhe[$i] .= t("Rahtikirjatulostimet ei saa olla tyhji√§")."!";
       }
     }
     if (mysql_field_name($result, $i) == "printteri4") {
       if (trim($t[$i]) == '') {
-        $virhe[$i] .= t("Rahtikirjatulostimet ei saa olla tyhji‰")."!";
+        $virhe[$i] .= t("Rahtikirjatulostimet ei saa olla tyhji√§")."!";
       }
     }
     if (mysql_field_name($result, $i) == "printteri5") {
       if (trim($t[$i]) == '') {
-        $virhe[$i] .= t("Rahtikirjatulostimet ei saa olla tyhji‰")."!";
+        $virhe[$i] .= t("Rahtikirjatulostimet ei saa olla tyhji√§")."!";
       }
     }
   }

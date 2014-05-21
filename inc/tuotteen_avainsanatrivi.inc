@@ -1,10 +1,10 @@
 <?php
 
 $ulos = "";
-$jatko = 1; // oletetaan normaali k‰sittely
-$tyyppi = 1; // oletetaan rivin n‰kyvyys
+$jatko = 1; // oletetaan normaali k√§sittely
+$tyyppi = 1; // oletetaan rivin n√§kyvyys
 
-//yhtiˆt‰ ei n‰ytet‰
+//yhti√∂t√§ ei n√§ytet√§
 if (mysql_field_name($result, $i) == "yhtio") {
   $tyyppi = 0;
 }
@@ -21,13 +21,13 @@ if (mysql_field_name($result, $i) == "laji") {
   $ulos .= "<option value='kuvaus' $sel[kuvaus]>".t("Tuotteen kuvaus")."</option>";
   $ulos .= "<option value='mainosteksti' $sel[mainosteksti]>".t("Tuotteen mainosteksti")."</option>";
   $ulos .= "<option value='tarratyyppi' $sel[tarratyyppi]>".t("Tuotteen tarratyyppi")."</option>";
-  $ulos .= "<option value='sistoimittaja' $sel[sistoimittaja]>".t("Tuotteen sis‰inen toimittaja")."</option>";
+  $ulos .= "<option value='sistoimittaja' $sel[sistoimittaja]>".t("Tuotteen sis√§inen toimittaja")."</option>";
   $ulos .= "<option value='oletusvalinta' $sel[oletusvalinta]>".t("Tuotteen tilauksen oletusvalinta")."</option>";
   $ulos .= "<option value='osasto' $sel[osasto]>".t("Tuotteen osasto")."</option>";
-  $ulos .= "<option value='try' $sel[try]>".t("Tuotteen tuoteryhm‰")."</option>";
+  $ulos .= "<option value='try' $sel[try]>".t("Tuotteen tuoteryhm√§")."</option>";
   $ulos .= "<option value='pakkauskoko2' $sel[pakkauskoko2]>".t("Tuotteen pakkauskoko 2")."</option>";
   $ulos .= "<option value='pakkauskoko3' $sel[pakkauskoko3]>".t("Tuotteen pakkauskoko 3")."</option>";
-  $ulos .= "<option value='ei_edi_ostotilaukseen' {$sel['ei_edi_ostotilaukseen']}>".t("Tuotetta ei lis‰t‰ EDI-ostotilaukselle")."</option>";
+  $ulos .= "<option value='ei_edi_ostotilaukseen' {$sel['ei_edi_ostotilaukseen']}>".t("Tuotetta ei lis√§t√§ EDI-ostotilaukselle")."</option>";
   $ulos .= "<option value='hammastus' $sel[hammastus]>".t("Tuotteen hammastus")."</option>";
   $ulos .= "<option value='laatuluokka' {$sel['laatuluokka']}>".t("Tuotteen laatuluokka")."</option>";
   $ulos .= "<option value='synkronointi' {$sel['synkronointi']}>".t("Tuotteen synkronointi")."</option>";
@@ -48,7 +48,7 @@ if (mysql_field_name($result, $i) == "laji") {
   $lresult = t_avainsana("LISATIETO");
 
   while ($lrow = mysql_fetch_assoc($lresult)) {
-    $ulos .= "<option value='lisatieto_$lrow[selite]' ".$sel["lisatieto_".$lrow["selite"]].">".t("Tuotteen lis‰tieto").": $lrow[selitetark]</option>";
+    $ulos .= "<option value='lisatieto_$lrow[selite]' ".$sel["lisatieto_".$lrow["selite"]].">".t("Tuotteen lis√§tieto").": $lrow[selitetark]</option>";
   }
 
   $ulos .= "</select></td>";
@@ -74,7 +74,7 @@ if (mysql_field_name($result, $i) == "selite") {
 
     if (mysql_num_rows($vresult) > 0) {
       $ulos = "<td><select name='{$nimi}'>";
-      $ulos .= "<option value=''>".t("Ei elinkaarityyppi‰")."</option>";
+      $ulos .= "<option value=''>".t("Ei elinkaarityyppi√§")."</option>";
 
       while ($vrow = mysql_fetch_assoc($vresult)) {
         $sel = $trow[$i] == $vrow['selite'] ? "selected" : "";
@@ -135,7 +135,7 @@ if (mysql_field_name($result, $i) == "selite") {
       while ($olrow = mysql_fetch_array($oltarkres)) {
         $ulos .= "
           <option value='!!!{$olrow["tunnus"]}' ".$sel["!!!{$olrow["tunnus"]}"].">$olrow[nimi] --> ".t("Tilataan asiakkaalle")."</option>
-          <option value='°°°{$olrow["tunnus"]}' ".$sel["°°°{$olrow["tunnus"]}"].">$olrow[nimi] --> ".t("Tilataan varastoon")."</option>";
+          <option value='¬°¬°¬°{$olrow["tunnus"]}' ".$sel["¬°¬°¬°{$olrow["tunnus"]}"].">$olrow[nimi] --> ".t("Tilataan varastoon")."</option>";
       }
     }
 
@@ -149,7 +149,7 @@ if (mysql_field_name($result, $i) == "selite") {
 
     if (mysql_num_rows($oltarkres) > 0) {
       while ($olrow = mysql_fetch_array($oltarkres)) {
-        $ulos .= "<option value='°°V' ".$sel["°°V"].">".t("Valmistetaan varastoon (oletuspaikka)")."</option>";
+        $ulos .= "<option value='¬°¬°V' ".$sel["¬°¬°V"].">".t("Valmistetaan varastoon (oletuspaikka)")."</option>";
       }
     }
 
@@ -224,8 +224,8 @@ if (mysql_field_name($result, $i) == 'nakyvyys') {
      $sel = array_fill_keys(array($trow[$i]), " selected") + array('o' => '', 'K' => '');
 
     $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
-    $ulos .= "<option value=''>".t("Kyll‰")."</option>";
-    $ulos .= "<option value='K'>".t("Kyll‰")." (".t("ei otsikkoa").")</option>";
+    $ulos .= "<option value=''>".t("Kyll√§")."</option>";
+    $ulos .= "<option value='K'>".t("Kyll√§")." (".t("ei otsikkoa").")</option>";
     $ulos .= "<option value='o'{$sel['o']}>".t("Ei")."</option>";
     $ulos .= "</select></td>";
 

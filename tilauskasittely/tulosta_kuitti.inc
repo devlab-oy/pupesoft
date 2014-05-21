@@ -41,7 +41,7 @@ if (!function_exists('alku')) {
     //Otsikko
     $pdf->draw_text(30, 815, $yhtiorow["nimi"], $firstpage);
 
-    $pdf->draw_text(310, 815, t("Käteiskuitti", $kieli),  $firstpage);
+    $pdf->draw_text(310, 815, t("KÃ¤teiskuitti", $kieli),  $firstpage);
     $pdf->draw_text(430, 815, t("Sivu", $kieli)." ".$sivu, $firstpage, $norm);
 
     $pdf->draw_text(50, 729, t("Asiakas", $kieli),       $firstpage, $pieni);
@@ -53,7 +53,7 @@ if (!function_exists('alku')) {
     //Oikea sarake
     $pdf->draw_rectangle(758, 300, 737, 580,         $firstpage, $rectparam);
     $pdf->draw_rectangle(758, 420, 737, 580,         $firstpage, $rectparam);
-    $pdf->draw_text(310, 750, t("Maksupäivä", $kieli),     $firstpage, $pieni);
+    $pdf->draw_text(310, 750, t("MaksupÃ¤ivÃ¤", $kieli),     $firstpage, $pieni);
     $pdf->draw_text(310, 740, date('Y-m-d'),         $firstpage, $norm);
     $pdf->draw_text(430, 750, t("Valuutta", $kieli),     $firstpage, $pieni);
     $pdf->draw_text(430, 740, $yhtiorow["valkoodi"],     $firstpage, $norm);
@@ -90,15 +90,15 @@ if (!function_exists('loppu')) {
   function loppu ($firstpage) {
     global $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $summa, $arvo, $kutsuja, $kieli;
 
-    //yhteensärivi
+    //yhteensÃ¤rivi
     $pdf->draw_rectangle(110, 394, 90, 580,  $firstpage, $rectparam);
     $pdf->draw_rectangle(110, 540, 90, 580,  $firstpage, $rectparam);
 
-    $pdf->draw_text(404, 92, t("Yhteensä", $kieli).":",  $firstpage, $norm);
+    $pdf->draw_text(404, 92, t("YhteensÃ¤", $kieli).":",  $firstpage, $norm);
     $pdf->draw_text(464, 92, sprintf('%-1.2f',$summa),  $firstpage, $norm);
     $pdf->draw_text(550, 92, $yhtiorow["valkoodi"],  $firstpage, $norm);
 
-    //Alimmat kolme laatikkoa, yhtiötietoja
+    //Alimmat kolme laatikkoa, yhtiÃ¶tietoja
     $pdf->draw_rectangle(55, 20, 20, 580,              $firstpage, $rectparam);
     $pdf->draw_rectangle(55, 207, 20, 580,              $firstpage, $rectparam);
     $pdf->draw_rectangle(55, 394, 20, 580,              $firstpage, $rectparam);
@@ -111,7 +111,7 @@ if (!function_exists('loppu')) {
     $pdf->draw_text(247, 45, $yhtiorow["puhelin"],          $firstpage, $pieni);
     $pdf->draw_text(217, 35, t("Telefax", $kieli).":",        $firstpage, $pieni);
     $pdf->draw_text(247, 35, $yhtiorow["fax"],            $firstpage, $pieni);
-    $pdf->draw_text(217, 25, t("Sähköposti", $kieli).":",      $firstpage, $pieni);
+    $pdf->draw_text(217, 25, t("SÃ¤hkÃ¶posti", $kieli).":",      $firstpage, $pieni);
     $pdf->draw_text(247, 25, $yhtiorow["email"],          $firstpage, $pieni);
 
     $pdf->draw_text(404, 45, t("Y-tunnus", $kieli).":",        $firstpage, $pieni);

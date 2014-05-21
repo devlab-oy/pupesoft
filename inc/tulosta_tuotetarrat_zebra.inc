@@ -1,7 +1,7 @@
 <?php
 
-//Kun tullaan t‰nne tarvitaan $komento joka on se komento jolla tulostetaan esim. lpr -P tarrakirjoitin
-//ja tarvitaan myˆs $tuoteno
+//Kun tullaan t√§nne tarvitaan $komento joka on se komento jolla tulostetaan esim. lpr -P tarrakirjoitin
+//ja tarvitaan my√∂s $tuoteno
 
 if ($malli == 'Zebra_hylly') {
   $query = "SELECT tuote.*, concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) tuotepaikka
@@ -19,24 +19,24 @@ else {
 
 $tarrares = pupe_query($query);
 
-// haetaan yhtiˆtiedot Pupesta
+// haetaan yhti√∂tiedot Pupesta
 $yhtiorow = hae_yhtion_parametrit($kukarow["yhtio"]);
 
 if (mysql_num_rows($tarrares) == 1) {
   $tarrarow = mysql_fetch_array($tarrares);
 
-  // jos tullaan yksinkertaisesta n‰kym‰st‰ tulostetaan tuoteno eankoodin sijaan
+  // jos tullaan yksinkertaisesta n√§kym√§st√§ tulostetaan tuoteno eankoodin sijaan
   if ($toim == 'YKS') {
     $tarrarow['eankoodi'] = $tarrarow['tuoteno'];
   }
 
-  // jos eankoodi kentt‰ on tyhj‰ ei viittit‰ edes l‰hte‰ tulostelemaan
+  // jos eankoodi kentt√§ on tyhj√§ ei viittit√§ edes l√§hte√§ tulostelemaan
   if (($tarrarow['eankoodi'] != 0 or $tarrarow['eankoodi'] != "0") and $tarrarow['eankoodi'] != '') {
     $eankoodi = trim($tarrarow['eankoodi']);
     $nimitys = $tarrarow['nimitys'];
     $nimitys2 = '';
 
-    // jos nimitys on pidempi kuin 25 merkki‰ niin se ei mahdu yhdelle riville vaan pit‰‰ jakaa kahtia
+    // jos nimitys on pidempi kuin 25 merkki√§ niin se ei mahdu yhdelle riville vaan pit√§√§ jakaa kahtia
     if (strlen($nimitys) > 25 and $malli == 'Zebra') {
       if (strpos($nimitys, " ")) {
         $nimipalat = explode(' ',$nimitys);
@@ -61,7 +61,7 @@ if (mysql_num_rows($tarrares) == 1) {
     }
     $tuoteno = $tarrarow['tuoteno'];
 
-    // t‰ss‰ tehd‰‰n aineisto jota Zebra tulostin tajuaa
+    // t√§ss√§ tehd√§√§n aineisto jota Zebra tulostin tajuaa
     /* Esimerkki
     D15
     N
@@ -99,22 +99,22 @@ if (mysql_num_rows($tarrares) == 1) {
       $sivu .= "P".$tkpl;
       $sivu .= "\n";
 
-      //konvertoidaan ‰‰kkˆset printterin ymm‰rt‰m‰‰n muotoon
-      $from = array ('‰','Â','ˆ','ƒ','≈','÷');
+      //konvertoidaan √§√§kk√∂set printterin ymm√§rt√§m√§√§n muotoon
+      $from = array ('√§','√•','√∂','√Ñ','√Ö','√ñ');
       $to   = array (chr(132),chr(134),chr(148),chr(142),chr(143),chr(153));   // DOS charset
-      $sivu = str_replace($from, $to, $sivu);                  // Tehd‰‰n k‰‰nnˆs
+      $sivu = str_replace($from, $to, $sivu);                  // Tehd√§√§n k√§√§nn√∂s
 
       $sivu = escapeshellarg($sivu);
     }
     elseif ($malli == 'Zebra_hylly') {
-      // t‰m‰ haara on Zebra_hyllytarra, joka liimataan hyllyyn
+      // t√§m√§ haara on Zebra_hyllytarra, joka liimataan hyllyyn
       // Toimii ja suunniteltu mallille GX20t
       // Tarrankoko 57 mm x 51 mm
 
-      // Ohjelmointimanuaali lˆytyy : http://www.zebra.com/id/zebra/na/en/index/products/printers/desktop/gx420t.4.tabs.html
+      // Ohjelmointimanuaali l√∂ytyy : http://www.zebra.com/id/zebra/na/en/index/products/printers/desktop/gx420t.4.tabs.html
       // "Programmin guide"
 
-      $pituus_nimitys = 40; // voidaan m‰‰ritt‰‰ mist‰ kohdasta katkaistaan nimitys.
+      $pituus_nimitys = 40; // voidaan m√§√§ritt√§√§ mist√§ kohdasta katkaistaan nimitys.
 
       if (strlen($nimitys) > $pituus_nimitys ) {
         if (strpos($nimitys, " ")) {
@@ -139,7 +139,7 @@ if (mysql_num_rows($tarrares) == 1) {
         $nimitys2 = substr($nimitys2,0,$pituus_nimitys);
       }
 
-      $pituus_tuoteno = 25; // voidaan m‰‰ritt‰‰ mist‰ kohdasta katkaistaan tuoteno.
+      $pituus_tuoteno = 25; // voidaan m√§√§ritt√§√§ mist√§ kohdasta katkaistaan tuoteno.
 
       if (strlen($tuoteno) > $pituus_tuoteno ) {
         if (strpos($tuoteno, " ")) {
@@ -166,15 +166,15 @@ if (mysql_num_rows($tarrares) == 1) {
 
       $sivu  = "^XA\n";    // vakio alku, pakollinen
       $sivu .= "^LH100\n";  // offset vasemmasta
-      $sivu .= "^LT000\n";  // offset ylh‰‰lt‰
+      $sivu .= "^LT000\n";  // offset ylh√§√§lt√§
       $sivu .= "^FO100,40\n^AQN,18,8\n^FD$nimitys\n^FS";
       $sivu .= "^FO100,63\n^AQN,18,8\n^FD$nimitys2\n^FS";
       $sivu .= "^FO100,100\n^ASN,20,10\n^FDTuoteno:\n^FS";
       $sivu .= "^FO100,130\n^ARN,20,10\n^FD$tuoteno\n^FS";
       $sivu .= "^FO100,160\n^ARN,20,10\n^FD$tuoteno2\n^FS";
 
-      $sivu .= "^MD10";                        // TUMMUUS, , vakio on 8 mutta se ei riit‰ viivakoodille.
-      $sivu .= "^PQ$tkpl";                    // Tulostettavien lukum‰‰r‰
+      $sivu .= "^MD10";                        // TUMMUUS, , vakio on 8 mutta se ei riit√§ viivakoodille.
+      $sivu .= "^PQ$tkpl";                    // Tulostettavien lukum√§√§r√§
       //$sivu .= "^FO200,200\n^BEN,100,Y,N^FD$eankoodi\n^FS";    // viivakoodi EAN-13
       $sivu .= "^BY1,3,100\n";                  // kutistaa viivakoodia. Vakioasetus olisi ^BY2,2
       $sivu .= "^FO150,200\n^BCN,100,Y,N,N\n^FD$eankoodi\n^FS";    // Code 128
@@ -186,11 +186,11 @@ if (mysql_num_rows($tarrares) == 1) {
 
     }
     else {
-      // t‰m‰ haara on Zebra_tuote, joka liimataan tuotteeseen
+      // t√§m√§ haara on Zebra_tuote, joka liimataan tuotteeseen
       // Toimii ja suunniteltu mallille GX420t
       // Tarrakoko 76 mm x 25 mm
 
-      $pituus = 50; // voidaan m‰‰ritt‰‰ mist‰ kohdasta katkaistaan teksti.
+      $pituus = 50; // voidaan m√§√§ritt√§√§ mist√§ kohdasta katkaistaan teksti.
 
       if (strlen($nimitys) > $pituus ) {
         if (strpos($nimitys, " ")) {
@@ -218,19 +218,19 @@ if (mysql_num_rows($tarrares) == 1) {
 
       $sivu  = "^XA\n";    // vakio alku, pakollinen
       $sivu .= "^LH50\n";  // offset vasemmasta
-      $sivu .= "^LT000\n";  // offset ylh‰‰lt‰
+      $sivu .= "^LT000\n";  // offset ylh√§√§lt√§
       $sivu .= "^FO85,20\n^ASN,20,12\n^FDTuoteno: $tuoteno\n^FS";
       $sivu .= "^FO85,65\n^AQN,18,8\n^FD$nimitys\n^FS";
       $sivu .= "^FO85,88\n^AQN,18,8\n^FD$nimitys2\n^FS";
-      $sivu .= "^MD10";                        // TUMMUUS, vakio on 8 mutta se ei riit‰ viivakoodille.
-      $sivu .= "^PQ$tkpl";                    // Tulostettavien lukum‰‰r‰
+      $sivu .= "^MD10";                        // TUMMUUS, vakio on 8 mutta se ei riit√§ viivakoodille.
+      $sivu .= "^PQ$tkpl";                    // Tulostettavien lukum√§√§r√§
       $sivu .= "^FO80,120\n^BCN,40,Y,N,N\n^FD$eankoodi\n^FS";    // viivakoodi CODE-128
       $sivu .= "^FO260,180\n^AQN,18,8\n^FD$yhtiorow[nimi]\n^FS";  // Tulostetaan Firma
 
       $sivu .= "\n^XZ";  // pakollinen lopetus
     }
 
-    //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+    //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
     list($usec, $sec) = explode(' ', microtime());
     mt_srand((float) $sec + ((float) $usec * 100000));
     $filenimi = "/tmp/Zebra-tarrat-".md5(uniqid(mt_rand(), true)).".txt";
@@ -240,9 +240,9 @@ if (mysql_num_rows($tarrares) == 1) {
     system("rm -f $filenimi");
   }
   else {
-    echo "<font class='error'>".t("Tuotteella")." $tuoteno ".t("ei ole viivakoodia j‰rjestelm‰ss‰ joten tarrojen tulostus taitaa olla turhaa")."!!!<br></font>";
+    echo "<font class='error'>".t("Tuotteella")." $tuoteno ".t("ei ole viivakoodia j√§rjestelm√§ss√§ joten tarrojen tulostus taitaa olla turhaa")."!!!<br></font>";
   }
 }
 else {
-  echo "<font class='error'>".t("Tuotetta")." $tuoteno ".t("ei lˆydy j‰rjestelm‰st‰")."!!!<br></font>";
+  echo "<font class='error'>".t("Tuotetta")." $tuoteno ".t("ei l√∂ydy j√§rjestelm√§st√§")."!!!<br></font>";
 }

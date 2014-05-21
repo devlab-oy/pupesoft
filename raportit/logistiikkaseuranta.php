@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("../inc/parametrit.inc");
@@ -12,7 +12,7 @@ echo "<table><form method='post'>";
 echo "<input type='hidden' name='tee' value='nayta'>";
 echo "<tr><th>Tilausnumero:</th><td><input type='text' name='tilaus' value='$tilaus' size='15'></td></tr>";
 echo "<tr><th>Laskunumero:</th><td><input type='text' name='lasku' value='$lasku' size='15'></td></tr>";
-echo "<tr><th>Valitse p‰iv‰:</th>";
+echo "<tr><th>Valitse p√§iv√§:</th>";
 echo "<td><select name='paiva'>";
 
 for ($y = 20120401; $y <= date("Ymd"); $y++) {
@@ -38,11 +38,11 @@ if ($virhelaji == "lahtosuljettueilaskutettu")   $sel4 = "SELECTED";
 if ($virhelaji == "lahtosuljettueikeratty")   $sel5 = "SELECTED";
 
 echo "<option value='' >Valitse</option>";
-#echo "<option value='rahtiveloitus' $sel1>V‰‰r‰ rahtimaksu</option>";
-echo "<option value='laskeiker' $sel2>Rivi laskutettu mutta ei ker‰tty</option>";
-echo "<option value='nollarivit' $sel3>Ker‰tt‰v‰ m‰‰r‰ nolla</option>";
-echo "<option value='lahtosuljettueilaskutettu' $sel4>Laskuttamaton tilaus suljetussa l‰hdˆss‰ (ei p‰iv‰rajausta)</option>";
-echo "<option value='lahtosuljettueikeratty' $sel5>Ker‰‰m‰tˆn tilaus suljetussa l‰hdˆss‰ (ei p‰iv‰rajausta)</option>";
+#echo "<option value='rahtiveloitus' $sel1>V√§√§r√§ rahtimaksu</option>";
+echo "<option value='laskeiker' $sel2>Rivi laskutettu mutta ei ker√§tty</option>";
+echo "<option value='nollarivit' $sel3>Ker√§tt√§v√§ m√§√§r√§ nolla</option>";
+echo "<option value='lahtosuljettueilaskutettu' $sel4>Laskuttamaton tilaus suljetussa l√§hd√∂ss√§ (ei p√§iv√§rajausta)</option>";
+echo "<option value='lahtosuljettueikeratty' $sel5>Ker√§√§m√§t√∂n tilaus suljetussa l√§hd√∂ss√§ (ei p√§iv√§rajausta)</option>";
 echo "</select></td>";
 
 echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td></tr></table></form><br><br>";
@@ -50,7 +50,7 @@ echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td><
 
 echo "<table><form method='post'>";
 echo "<input type='hidden' name='tee' value='rahtisopparitilanne'>";
-echo "<td class='back'><input type='submit' value='".t("N‰yt‰ asiakkaat/toimitustavat joilta puuttuu rahtisopimus")."'></td></tr></table></form><br><br>";
+echo "<td class='back'><input type='submit' value='".t("N√§yt√§ asiakkaat/toimitustavat joilta puuttuu rahtisopimus")."'></td></tr></table></form><br><br>";
 
 
 if ($tee == "rahtisopparitilanne") {
@@ -89,7 +89,7 @@ if ($tee == "rahtisopparitilanne") {
       if ($toimtaparow["merahti"] == "K") $rahsoprow = hae_rahtisopimusnumero($asiakasrow["toimitustapa"], "", "");
       else $rahsoprow = hae_rahtisopimusnumero($asiakasrow["toimitustapa"], $asiakasrow["ytunnus"], $asiakasrow["tunnus"], false, "");
 
-      $kumman = ($toimtaparow["merahti"] == "") ? "Vastaanottajan" : "L‰hett‰j‰n";
+      $kumman = ($toimtaparow["merahti"] == "") ? "Vastaanottajan" : "L√§hett√§j√§n";
 
       $pitvirh = FALSE;
 
@@ -253,7 +253,7 @@ if ($tee == "nayta") {
     $rivi .= "<tr>";
     $rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Lasku/Tilaus</th>";
     $rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Asiakas</th>";
-    $rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Toimitustapa / L‰htˆ</th>";
+    $rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Toimitustapa / L√§ht√∂</th>";
     $rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Tila</th>";
     $rivi .= "</tr>";
 
@@ -264,7 +264,7 @@ if ($tee == "nayta") {
       $laskutyyppi = $tilausrow["tila"];
       $alatila   = $tilausrow["alatila"];
 
-      //tehd‰‰n selv‰kielinen tila/alatila
+      //tehd√§√§n selv√§kielinen tila/alatila
       require "inc/laskutyyppi.inc";
 
       $tarkenne = " ";
@@ -279,7 +279,7 @@ if ($tee == "nayta") {
         $tarkenne = " (".t("Reklamaatio").") ";
       }
       elseif(($tilausrow["tila"] == "N" or $tilausrow["tila"] == "L") and $tilausrow["tilaustyyppi"] == "A") {
-        $laskutyyppi = "Tyˆm‰‰r‰ys";
+        $laskutyyppi = "Ty√∂m√§√§r√§ys";
       }
       elseif($tilausrow["tila"] == "N" and $tilausrow["tilaustyyppi"] == "E") {
         $laskutyyppi = "Ennakkotilaus kesken";
@@ -330,15 +330,15 @@ if ($tee == "nayta") {
     $rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Tilkpl</th>";
     $rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Kpl</th>";
     $rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Var</th>";
-    $rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Ker‰yser‰</th>";
+    $rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Ker√§yser√§</th>";
     $rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Pakkaus</th>";
-    $rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Vyˆhyke</th>";
+    $rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Vy√∂hyke</th>";
     $rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Tilrivi laadittu</th>";
-    $rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Kerer‰ laadittu</th>";
-    $rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Ker‰‰j‰</th>";
-    $rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Ker‰ttyaika</th>";
-    $rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Kerer‰ kpl</th>";
-    $rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Kerer‰ ker‰tty</th>";
+    $rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Kerer√§ laadittu</th>";
+    $rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Ker√§√§j√§</th>";
+    $rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Ker√§ttyaika</th>";
+    $rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Kerer√§ kpl</th>";
+    $rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Kerer√§ ker√§tty</th>";
     $rivi .= "</tr>";
 
     $ohita_kerays = array();
@@ -358,7 +358,7 @@ if ($tee == "nayta") {
 
       $edotunnus = $tilausrivirow["otunnus"];
 
-      // Kerayser‰/er‰t
+      // Kerayser√§/er√§t
       $query = "SELECT group_concat(luontiaika) luontiaika,
                 group_concat(distinct nro) nro,
                 group_concat(pakkausnro) pakkausnro,
@@ -373,10 +373,10 @@ if ($tee == "nayta") {
 
       $pakkaus_kirjain = ($kerayserarow["pakkausnro"] > 0) ? chr(64+$kerayserarow["pakkausnro"]) : "";
 
-      // Tsekataan viel‰ ohita_kerays jutut!
+      // Tsekataan viel√§ ohita_kerays jutut!
       if ($tilausrivirow['perheid'] > 0 and $tilausrivirow['tunnus'] != $tilausrivirow['perheid']) {
 
-        // haetaan is‰
+        // haetaan is√§
         $query_isa = "SELECT tuoteno
                       FROM tilausrivi
                       WHERE yhtio = '{$kukarow['yhtio']}'
@@ -399,7 +399,7 @@ if ($tee == "nayta") {
         }
       }
 
-      $kereraekotus = (isset($ohita_kerays[$tilausrivirow['tunnus']])) ? "KERƒYS OHITETEAAN" : $kerayserarow["nro"];
+      $kereraekotus = (isset($ohita_kerays[$tilausrivirow['tunnus']])) ? "KER√ÑYS OHITETEAAN" : $kerayserarow["nro"];
 
       $rivi .= "<tr>";
       $rivi .= "<td>$tilausrivirow[otunnus]</td>";
@@ -458,7 +458,7 @@ if ($tee == "nayta") {
     }
 
     /*
-    // Rahtikirjan  tiedot, nii ku ne pit‰is olla
+    // Rahtikirjan  tiedot, nii ku ne pit√§is olla
     $rivi .= "<tr>";
     $rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Rahtikirja</th>";
     $rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Kollit</th>";
@@ -554,8 +554,8 @@ if ($tee == "nayta") {
     $rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Hinta</th>";
     $rivi .= "</tr>";
 
-    // haetaan laskutettavista tilauksista kaikki distinct toimitustavat per asiakas per p‰iv‰ miss‰ merahti (eli kohdistettu) = K (K‰ytet‰‰n l‰hett‰j‰n rahtisopimusnumeroa)
-    // j‰lkivaatimukset omalle riville
+    // haetaan laskutettavista tilauksista kaikki distinct toimitustavat per asiakas per p√§iv√§ miss√§ merahti (eli kohdistettu) = K (K√§ytet√§√§n l√§hett√§j√§n rahtisopimusnumeroa)
+    // j√§lkivaatimukset omalle riville
     $query = "SELECT group_concat(distinct lasku.tunnus) tunnukset
               FROM lasku, rahtikirjat, maksuehto
               WHERE lasku.yhtio     = '$kukarow[yhtio]'
@@ -579,7 +579,7 @@ if ($tee == "nayta") {
 
     foreach ($yhdista as $otsikot) {
 
-      // lis‰t‰‰n n‰ille tilauksille rahtikulut
+      // lis√§t√§√§n n√§ille tilauksille rahtikulut
       $virhe = 0;
       $pvm = "";
 
@@ -606,7 +606,7 @@ if ($tee == "nayta") {
       $pakka = mysql_fetch_assoc($pakre);
       if (mysql_num_rows($pakre)!=1) $virhe++;
 
-      // haetaan v‰h‰n infoa rahtikirjoista
+      // haetaan v√§h√§n infoa rahtikirjoista
       $query = "SELECT distinct date_format(tulostettu, '%d.%m.%Y') pvm, rahtikirjanro
                 from rahtikirjat
                 where yhtio    = '$kukarow[yhtio]'
@@ -616,7 +616,7 @@ if ($tee == "nayta") {
 
       $rahtikirjanrot = "";
       while ($rahrow = mysql_fetch_assoc($rahre)) {
-        if ($rahrow["pvm"]!='') $pvm = $rahrow["pvm"]; // pit‰s olla kyll‰ aina sama
+        if ($rahrow["pvm"]!='') $pvm = $rahrow["pvm"]; // pit√§s olla kyll√§ aina sama
         $rahtikirjanrot .= "$rahrow[rahtikirjanro] ";
       }
 
@@ -628,7 +628,7 @@ if ($tee == "nayta") {
 
       $rahtihinta_ale = array();
 
-      // rahtihinta tulee rahtimatriisista yhtiˆn kotivaluutassa ja on verollinen, jos myyntihinnat ovat verollisia, tai veroton, jos myyntihinnat ovat verottomia (huom. yhtiˆn parametri alv_kasittely)
+      // rahtihinta tulee rahtimatriisista yhti√∂n kotivaluutassa ja on verollinen, jos myyntihinnat ovat verollisia, tai veroton, jos myyntihinnat ovat verottomia (huom. yhti√∂n parametri alv_kasittely)
       if (is_array($rahtihinta_array)) {
         $rahtihinta = $rahtihinta_array['rahtihinta'];
 
@@ -680,7 +680,7 @@ if ($tee == "nayta") {
     }
     */
 
-    // V‰lirivi
+    // V√§lirivi
     $rivi .= "<tr>";
     $rivi .= "<td class='back' colspan='4' style='height:10px;'></td>";
     $rivi .= "</tr>";

@@ -217,7 +217,7 @@ if (isset($tee) and $tee == "hae_raportti") {
           $row['varapaikat'] = $varapaikat;
         }
 
-        //tyhj‰ rivi ennen jokaista oletuspaikkaa
+        //tyhj√§ rivi ennen jokaista oletuspaikkaa
         echo '<tr>';
         echo '<td colspan="12" style="background:#cbd9e1; padding:4px;"></td>';
         echo '</tr>';
@@ -261,7 +261,7 @@ if (isset($tee) and $tee == "hae_raportti") {
 if( $tee != 'lataa_pdf' and $tee != 'hae_raportti') {
 
   if( $ei_varastoa === true ){
-    echo "<font class='error'>" . t("V‰hint‰‰n yksi varasto on valittava") . "</font>";
+    echo "<font class='error'>" . t("V√§hint√§√§n yksi varasto on valittava") . "</font>";
   }
 
   if( $ei_osumia === true ){
@@ -270,7 +270,7 @@ if( $tee != 'lataa_pdf' and $tee != 'hae_raportti') {
 
   echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
   echo "<table>";
-  echo "<tr><th align='left'>" . t("Varasto") . ": <br /><br /><span style='text-transform: none;'>" . t("Valitse v‰hint‰‰n <br /> yksi varasto") . "</span></td>";
+  echo "<tr><th align='left'>" . t("Varasto") . ": <br /><br /><span style='text-transform: none;'>" . t("Valitse v√§hint√§√§n <br /> yksi varasto") . "</span></td>";
   echo "<td>";
 
   $query  = "SELECT *
@@ -293,7 +293,7 @@ if( $tee != 'lataa_pdf' and $tee != 'hae_raportti') {
   $keraysvyohyke_result = pupe_query($query);
 
   if (mysql_num_rows($keraysvyohyke_result) > 0) {
-    echo "<tr><th align='left'>" . t("Ker‰ysvyˆhyke") . ":</th><td>";
+    echo "<tr><th align='left'>" . t("Ker√§ysvy√∂hyke") . ":</th><td>";
     //echo "<input type='hidden' name='keraysvyohyke[]' value='default' />";
 
     while ($keraysvyohyke_row = mysql_fetch_assoc($keraysvyohyke_result)) {
@@ -320,10 +320,10 @@ function aja_ruby($json_data_filepath, $ruby_tiedosto_nimi) {
   $return = exec($cmd, $output, $return_code);
   //poistetaan json tiedosto
   unlink($json_data_filepath);
-  // Palautetaan ensimm‰inen rivi outputista, siin‰ on filenimet
+  // Palautetaan ensimm√§inen rivi outputista, siin√§ on filenimet
   return $output[0];
 }
 
-function array_utf8_encode(&$item, $key) {
-  $item = utf8_encode($item);
+function array_&$item, $key {
+  $item = $item;
 }

@@ -1,9 +1,9 @@
 <?php
 
-// tarvitaan $laskurow array, jossa on meid‰n keikan otsikko
+// tarvitaan $laskurow array, jossa on meid√§n keikan otsikko
 $debug = 0; // 0 = ei echoilla debug koodia, 1 = ehchoillaa infoa, 2 = echoillaan infoa plus queryt
 
-# Muuttuja kun vied‰‰n tilausrivi kerrallaan.
+# Muuttuja kun vied√§√§n tilausrivi kerrallaan.
 $varastoon_tilausrivirajaus = "";
 if (!isset($tullaan_automaattikohdistuksesta)) $tullaan_automaattikohdistuksesta = false;
 
@@ -65,7 +65,7 @@ if ($kauttalaskutus == '' and !$tullaan_automaattikohdistuksesta) {
 
   $varastoon_msg .= "  <table><tr>
             <th valign='top'>".t("Varastoon")."</th>
-            <th valign='top'>".t("Varastoonvientip‰iv‰")."</th>";
+            <th valign='top'>".t("Varastoonvientip√§iv√§")."</th>";
 
   if ($toiminto == "kalkyyli" and ($tee == '' or $tee == 'varastoon') and $yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
     $varastoon_msg .= "<th valign='top'>".t("Saapuminen")."</th>";
@@ -73,7 +73,7 @@ if ($kauttalaskutus == '' and !$tullaan_automaattikohdistuksesta) {
   }
 
   $varastoon_msg .= "  <th valign='top'>".t("Tuoteno")."</th>
-            <th valign='top'>".t("M‰‰r‰")." ".t("sis").".<br>".t("M‰‰r‰")." ".t("ulk").".</th>";
+            <th valign='top'>".t("M√§√§r√§")." ".t("sis").".<br>".t("M√§√§r√§")." ".t("ulk").".</th>";
   $varastoon_msg .= "  <th valign='top'>".t("Ostohinta")." ".t("ulk").".<br>".t("Ostohinta")." ".t("sis").".</th>
             <th valign='top'>".t("Alennukset")."</th>
             <th valign='top'>".t("Osuus")."<br>".t("rahdista")."<br>".t("ja")." ".t("kuluista")."</th>
@@ -99,7 +99,7 @@ if ($kauttalaskutus == '' and !$tullaan_automaattikohdistuksesta) {
 $ale_query_select_lisa = generoi_alekentta_select('yhteen', 'O');
 
 if (($toiminto == "kaikkiok" and $tee == "varma") or ($toiminto == "kaikkiok" and $tee == "")) {
-  // virallinen laskenta, heetaan ihan kaikki rivit uudestaan (varattu=0) kaikki pit‰‰ olla viety varastoon jo ennen t‰t‰..
+  // virallinen laskenta, heetaan ihan kaikki rivit uudestaan (varattu=0) kaikki pit√§√§ olla viety varastoon jo ennen t√§t√§..
   $query = "SELECT tilausrivi.*, tilausrivi.kpl varattu, {$ale_query_select_lisa} alennuksetyht, tilausrivin_lisatiedot.poikkeava_tulliprosentti, tuote.tullinimike1, tuote.tullinimike2
             FROM tilausrivi
             JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
@@ -119,7 +119,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
   $suuntalavajoin = "";
   $runkotunnukset = "";
 
-  # Jos tilausrivi ei ole nolla, vied‰‰n vain yksi rivi varastoon.
+  # Jos tilausrivi ei ole nolla, vied√§√§n vain yksi rivi varastoon.
   if ($tilausrivi > 0) {
     $varastoon_tilausrivirajaus = "AND tilausrivi.tunnus = $tilausrivi";
   }
@@ -180,34 +180,34 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 
         list($chk_hinta,,$chk_ale,) = alehinta_osto($laskurow, $chk_row, $chk_row["varattu"]);
 
-        $lisainsert = "  INSERT INTO tilausrivi SET
-                yhtio      = '{$chk_row['yhtio']}',
-                tyyppi      = '{$chk_row['tyyppi']}',
-                toimaika    = '{$chk_row['toimaika']}',
-                kerayspvm    = '{$chk_row['kerayspvm']}',
-                otunnus      = '{$chk_row['otunnus']}',
-                tuoteno      = '{$chk_row['tuoteno']}',
-                try        = '{$chk_row['try']}',
-                osasto      = '{$chk_row['osasto']}',
-                nimitys      = '{$chk_row['nimitys']}',
-                yksikko      = '{$chk_row['yksikko']}',
-                tilkpl      = '{$chk_row['tilkpl']}',
-                varattu      = '{$chk_row['varattu']}',
-                kpl       = '{$chk_row['kpl']}',
-                ale1      = '{$chk_ale['ale1']}',
-                ale2      = '{$chk_ale['ale2']}',
-                ale3      = '{$chk_ale['ale3']}',
-                hinta      = '{$chk_hinta}',
-                laatija      = 'tuloutus',
-                kommentti    = '',
-                laadittu    =  now(),
-                hyllyalue    = '{$chk_row['hyllyalue']}',
-                hyllynro    = '{$chk_row['hyllynro']}',
-                hyllytaso    = '{$chk_row['hyllytaso']}',
-                hyllyvali    = '{$chk_row['hyllyvali']}',
-                perheid      = '{$chk_row['tunnus']}',
-                suuntalava    = '{$chk_row['suuntalava']}',
-                uusiotunnus    = '{$chk_row['uusiotunnus']}'";
+        $lisainsert = "INSERT INTO tilausrivi SET
+             yhtio       = '{$chk_row['yhtio']}',
+             tyyppi      = '{$chk_row['tyyppi']}',
+             toimaika    = '{$chk_row['toimaika']}',
+             kerayspvm   = '{$chk_row['kerayspvm']}',
+             otunnus     = '{$chk_row['otunnus']}',
+             tuoteno     = '{$chk_row['tuoteno']}',
+             try         = '{$chk_row['try']}',
+             osasto      = '{$chk_row['osasto']}',
+             nimitys     = '{$chk_row['nimitys']}',
+             yksikko     = '{$chk_row['yksikko']}',
+             tilkpl      = '{$chk_row['tilkpl']}',
+             varattu     = '{$chk_row['varattu']}',
+             kpl         = '{$chk_row['kpl']}',
+             ale1        = '{$chk_ale['ale1']}',
+             ale2        = '{$chk_ale['ale2']}',
+             ale3        = '{$chk_ale['ale3']}',
+             hinta       = '{$chk_hinta}',
+             laatija     = 'tuloutus',
+             kommentti   = '',
+             laadittu    =  now(),
+             hyllyalue   = '{$chk_row['hyllyalue']}',
+             hyllynro    = '{$chk_row['hyllynro']}',
+             hyllytaso   = '{$chk_row['hyllytaso']}',
+             hyllyvali   = '{$chk_row['hyllyvali']}',
+             perheid     = '{$chk_row['tunnus']}',
+             suuntalava  = '{$chk_row['suuntalava']}',
+             uusiotunnus = '{$chk_row['uusiotunnus']}'";
         $inskres = pupe_query($lisainsert);
 
         if (!empty($varastoon_tilausrivirajaus)) {
@@ -215,7 +215,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
           $runkotunnukset .= $runkoinsert . ",";
         }
 
-        // p‰ivitet‰‰n is‰
+        // p√§ivitet√§√§n is√§
         $updateisa = "UPDATE tilausrivi SET perheid = tunnus WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$chk_row['tunnus']}'";
         $updateres = pupe_query($updateisa);
       }
@@ -267,7 +267,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
           $oletuspaikka_lapsi = 'X';
         }
 
-        // lis‰t‰‰n paikka
+        // lis√§t√§√§n paikka
         $query = "INSERT INTO tuotepaikat SET
                   yhtio      = '{$kukarow['yhtio']}',
                   tuoteno    = '{$chk_row['tuoteno']}',
@@ -281,7 +281,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
                   luontiaika = now()";
         $result = pupe_query($query);
 
-        // Varastoonvientip‰iv‰
+        // Varastoonvientip√§iv√§
         if ($chk_row["toimitettuaika"] == "0000-00-00 00:00:00") {
           $varastoonvientipva = date("Y-m-d H:i:s");
         }
@@ -289,7 +289,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
           $varastoonvientipva = $chk_row["toimitettuaika"];
         }
 
-        // tehd‰‰n tapahtuma
+        // tehd√§√§n tapahtuma
         $query = "INSERT into tapahtuma set
                   yhtio     = '{$kukarow['yhtio']}',
                   tuoteno   = '{$chk_row['tuoteno']}',
@@ -301,13 +301,13 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
                   hyllynro  = '{$chk_row['hyllynro']}',
                   hyllytaso = '{$chk_row['hyllytaso']}',
                   hyllyvali = '{$chk_row['hyllyvali']}',
-                  selite    = '".t("Lis‰ttiin tuotepaikka")." {$chk_row['hyllyalue']} {$chk_row['hyllynro']} {$chk_row['hyllyvali']} {$chk_row['hyllytaso']}',
+                  selite    = '".t("Lis√§ttiin tuotepaikka")." {$chk_row['hyllyalue']} {$chk_row['hyllynro']} {$chk_row['hyllyvali']} {$chk_row['hyllytaso']}',
                   laatija   = '{$kukarow['kuka']}',
                   laadittu  = date_sub('{$varastoonvientipva}', interval 1 SECOND)";
         $result = pupe_query($query);
       }
 
-      // Katsotaan onko t‰m‰ tuotepaikka is‰tuotteen oletuspaikka
+      // Katsotaan onko t√§m√§ tuotepaikka is√§tuotteen oletuspaikka
       $query = "SELECT *
                 FROM tuotepaikat
                 WHERE yhtio    = '{$kukarow['yhtio']}'
@@ -346,8 +346,8 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
     $varastoon_tilausrivirajaus = "AND tilausrivi.tunnus in ($tilausrivi,$runkotunnukset)";
   }
 
-  // tavallinen laskenta.. VARATTU PITƒƒ OLLA != 0 ja varastoon-kentt‰ 1!
-  // jos varastoon-kent‰ss‰ on 0 niin t‰t‰ rivi‰ ei haluttu viel‰ vied‰ varastoon
+  // tavallinen laskenta.. VARATTU PIT√Ñ√Ñ OLLA != 0 ja varastoon-kentt√§ 1!
+  // jos varastoon-kent√§ss√§ on 0 niin t√§t√§ rivi√§ ei haluttu viel√§ vied√§ varastoon
   $query = "SELECT tilausrivi.*, {$ale_query_select_lisa} alennuksetyht, tilausrivin_lisatiedot.poikkeava_tulliprosentti, tuote.tullinimike1, tuote.tullinimike2
             FROM tilausrivi
             JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
@@ -383,7 +383,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "") {
               JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus) ";
   }
 
-  // N‰ytet‰‰n ruudulla
+  // N√§ytet√§√§n ruudulla
   $query = "SELECT tilausrivi.*, {$ale_query_select_lisa} alennuksetyht, tilausrivin_lisatiedot.poikkeava_tulliprosentti, tuote.tullinimike1, tuote.tullinimike2
             FROM tilausrivi
             JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
@@ -400,7 +400,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "") {
 
 $presult = pupe_query($query);
 
-// jos meill‰ on valuuttakeikka, lasketaan keskikurssi kaikille vaihto-omaisuuslaskuille ja otetaan valuutta mukaan
+// jos meill√§ on valuuttakeikka, lasketaan keskikurssi kaikille vaihto-omaisuuslaskuille ja otetaan valuutta mukaan
 $query  = "SELECT max(valkoodi) valkoodi, sum(summa) summa, sum(arvo) arvo, ifnull(round(sum(summa * vienti_kurssi) / sum(summa), 6), 0) vientikurssi
            FROM lasku
            WHERE yhtio     = '$kukarow[yhtio]'
@@ -421,7 +421,7 @@ $laskurow["valkoodi"] = $kurssirow["valkoodi"];
 if ($kurssirow["arvo"] != 0) $simualv = round(100 * (($kurssirow["summa"]/$kurssirow["arvo"])-1),2);
 else $simualv = 0;
 
-// Onko miell‰ oletuksista poikkeava alvi. Verokantoja ennen viimeisint‰ alv-muutosta.
+// Onko miell√§ oletuksista poikkeava alvi. Verokantoja ennen viimeisint√§ alv-muutosta.
 if (in_array($simualv, array(23, 13, 9))) {
   $simualv = (float) $simualv;
 }
@@ -429,7 +429,7 @@ else {
   $simualv = 0;
 }
 
-// tsekataan viel‰
+// tsekataan viel√§
 if ($laskurow["vienti_kurssi"] == 0) {
   echo t("Kurssi uupuu! Jossain on iso ongelma ,8,1");
 
@@ -440,16 +440,16 @@ if ($laskurow["vienti_kurssi"] == 0) {
 
 if ((($toiminto == "kaikkiok" and $tee == "varma") or ($toiminto == "kaikkiok" and $tee == "")) and ($yhtiorow["jalkilaskenta_kuluperuste"] == "" or ($yhtiorow["jalkilaskenta_kuluperuste"] == "PX" and $laskurow["saldo_maksettu"] != 0))) {
   // Jos lasketaan virallista varastonarvoa, otetaan keikan summa huomioon (kululaskujen yhteenlaskettu summa OLETUSVALUUTASSA on laskurow.saldo_maksettu)
-  // jalkilaskenta_kuluperuste == "PX" --> Virallisen varastonarvon laskentaan k‰ytet‰‰n kululaskujen summaa, mik‰li kululaskut on syˆtetty, muuten kulusummaa/kuluprosenttia
+  // jalkilaskenta_kuluperuste == "PX" --> Virallisen varastonarvon laskentaan k√§ytet√§√§n kululaskujen summaa, mik√§li kululaskut on sy√∂tetty, muuten kulusummaa/kuluprosenttia
 
   $rahtikulut = $laskurow['saldo_maksettu'] + round(($laskurow['rahti_etu'] + $laskurow['pyoristys_erot']) * $laskurow['vienti_kurssi'], 6);
   $rahtitapa  = t("Virallinen");
 }
 else {
   // muuten rahtikulut valuutassa laskettuna kuluprosentin mukaan (laskurow.rahti on kuluprosentti, laskurow.summa on kohdistettujen rivien summa)
-  // jalkilaskenta_kuluperuste == "KP" --> Virallisen varastonarvon laskentaan k‰ytet‰‰n saapumiselle syˆtetty‰ kulusummaa/kuluprosenttia
+  // jalkilaskenta_kuluperuste == "KP" --> Virallisen varastonarvon laskentaan k√§ytet√§√§n saapumiselle sy√∂tetty√§ kulusummaa/kuluprosenttia
 
-  // jos ollaan annettu t‰lle batchille kulusumma, k‰ytet‰‰nkin vaan sit‰!
+  // jos ollaan annettu t√§lle batchille kulusumma, k√§ytet√§√§nkin vaan sit√§!
   if ($laskurow["rahti_huolinta"] != 0) {
     $rahtikulut = $laskurow["rahti_huolinta"] + (($laskurow['pyoristys_erot'] + $laskurow['rahti_etu']) * $laskurow['vienti_kurssi']);
     $rahtitapa  = t("Kulusumma");
@@ -464,7 +464,7 @@ else {
       $maara_peruste = "and tilausrivi.varattu != 0";
     }
 
-    // lasketaan nyt varastoon viet‰vien rivien summa yhteens‰
+    // lasketaan nyt varastoon viet√§vien rivien summa yhteens√§
     $query    = "SELECT sum((tilausrivi.varattu + tilausrivi.kpl) * if(tuotteen_toimittajat.tuotekerroin <= 0 or tuotteen_toimittajat.tuotekerroin is null, 1, tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * {$query_ale_lisa}) summa
                  FROM tilausrivi use index (uusiotunnus_index)
                  LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.liitostunnus = '{$laskurow["liitostunnus"]}' and tuotteen_toimittajat.yhtio = tilausrivi.yhtio and tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno)
@@ -479,7 +479,7 @@ else {
     $laskurow['summa'] = $hintarow['summa'];
 
     // lasketaan itse rahtikulut
-    // Lasketaan kuluprosentti rivien summasta + pyˆristyseroista, ja lis‰t‰‰n lopuksi pyˆristysero + rahtietu rahtikuluihin mukaan
+    // Lasketaan kuluprosentti rivien summasta + py√∂ristyseroista, ja lis√§t√§√§n lopuksi py√∂ristysero + rahtietu rahtikuluihin mukaan
     $rahtikulut = ($laskurow['summa'] + $laskurow['pyoristys_erot']) * $laskurow['vienti_kurssi'];
     $rahtikulut =  $rahtikulut * ($laskurow['rahti'] / 100);
     $rahtikulut += ($laskurow['rahti_etu'] + $laskurow['pyoristys_erot']) * $laskurow['vienti_kurssi'];
@@ -495,9 +495,9 @@ if ($mobiili_keikka != "yes" and $kauttalaskutus == '' and !$tullaan_automaattik
     echo "<font class='message'>".t("Eturahti").": ". $laskurow['rahti_etu'] * $laskurow['vienti_kurssi'] ." $yhtiorow[valkoodi] </font><br>";
   }
   if ($laskurow['pyoristys_erot'] <> 0) {
-    echo "<font class='message'>".t("Pyˆristyserot").": ". $laskurow['pyoristys_erot'] * $laskurow['vienti_kurssi'] ." $yhtiorow[valkoodi] </font><br>";
+    echo "<font class='message'>".t("Py√∂ristyserot").": ". $laskurow['pyoristys_erot'] * $laskurow['vienti_kurssi'] ." $yhtiorow[valkoodi] </font><br>";
   }
-  echo "<font class='message'>".t("Rahdin ja kulujen m‰‰r‰ yhteens‰").": $rahtikulut $yhtiorow[valkoodi] (".t("Peruste").": $rahtitapa)<br><hr></font>";
+  echo "<font class='message'>".t("Rahdin ja kulujen m√§√§r√§ yhteens√§").": $rahtikulut $yhtiorow[valkoodi] (".t("Peruste").": $rahtitapa)<br><hr></font>";
 }
 
 $summa        = 0;
@@ -513,7 +513,7 @@ if ($yhtiorow['automaattinen_jt_toimitus'] == 'S') {
   $suoralisa = "AND tilausrivin_lisatiedot.suoraan_laskutukseen = 'o'";
 }
 
-// Oletusvarastoonvientip‰iv‰
+// Oletusvarastoonvientip√§iv√§
 $ovpppa = date("d");
 $ovpkka = date("m");
 $ovpvva = date("Y");
@@ -525,12 +525,12 @@ list($tklvv,$tklkk,$tklpp) = explode("-", $yhtiorow["tilikausi_loppu"]);
 $tilikausi_alku  = (int) date('Ymd',mktime(0,0,0, $tkakk, $tkapp, $tkavv));
 $tilikausi_loppu = (int) date('Ymd',mktime(0,0,0, $tklkk, $tklpp, $tklvv));
 
-// jos kyseess‰ on ihan virallinen varastonarvonlaskenta, tehd‰‰n n‰in
+// jos kyseess√§ on ihan virallinen varastonarvonlaskenta, tehd√§√§n n√§in
 if ($toiminto == "kaikkiok" and $tee == "varma" and $kauttalaskutus == '' and !$tullaan_automaattikohdistuksesta) {
-  echo "<font class='message'>".t("Suoritetaan j‰lkilaskentaa %s tuotteelle", "", mysql_num_rows($presult)).":<br></font>";
+  echo "<font class='message'>".t("Suoritetaan j√§lkilaskentaa %s tuotteelle", "", mysql_num_rows($presult)).":<br></font>";
 }
 elseif ($mobiili_keikka != "yes" and $kauttalaskutus == '' and !$tullaan_automaattikohdistuksesta) {
-  echo "<font class='message'>".t("Vied‰‰n varastoon %s tuotetta", "", mysql_num_rows($presult)).":<br></font>";
+  echo "<font class='message'>".t("Vied√§√§n varastoon %s tuotetta", "", mysql_num_rows($presult)).":<br></font>";
 }
 
 if ($tee != "" and $mobiili_keikka != "yes" and $kauttalaskutus == '' and !$tullaan_automaattikohdistuksesta) {
@@ -569,7 +569,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
   if ((float) $tuorow['tuotekerroin'] <= 0) $tuorow['tuotekerroin'] = 1;
 
-  // jos kysess‰ on kotimainen vaihto-omaisuuslasku, pit‰‰ lis‰t‰ tuotteen hintaan alvi
+  // jos kysess√§ on kotimainen vaihto-omaisuuslasku, pit√§√§ lis√§t√§ tuotteen hintaan alvi
   if ($laskurow['vienti'] == 'C' or $laskurow['vienti'] == 'J') {
     if ($simualv > 0) {
       $alvit = 1 + $simualv / 100;
@@ -590,8 +590,8 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
   // jos keikan arvo on muuta kuin nolla ja rivin hinta on pienempi kuin keikan hinta, lasketaan rahtiosuus. muuten nollaa
   if ($laskurow['summa'] != 0 and $osuus_apu_hinta <= $laskurow["summa"] + 0.01) {
     // rivin hinta
-    $osuus   = $osuus_apu_hinta / $laskurow['summa'];  // kuinka paljon t‰m‰ rivi on koko keikasta
-    $rahtios = $osuus*$rahtikulut;            // lasketaan sama osuus rahtikuluista t‰lle riville
+    $osuus   = $osuus_apu_hinta / $laskurow['summa'];  // kuinka paljon t√§m√§ rivi on koko keikasta
+    $rahtios = $osuus*$rahtikulut;            // lasketaan sama osuus rahtikuluista t√§lle riville
   }
   else {
     $rahtios = 0;
@@ -602,10 +602,10 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
     $rahtios = $rahtios * -1;
   }
 
-  // t‰m‰ on miinusta hyvitysrivill‰
+  // t√§m√§ on miinusta hyvitysrivill√§
   $ohinta = round($tilrivirow['hinta']*$ale_lisa_apu_kala*$tuorow['tuotekerroin']*$laskurow['vienti_kurssi']*$tilrivirow['varattu'], 6); // tuotteen rivihinta OLETUSVALUUTASSA
 
-  // ennen varastoon vienti‰ tallennetaan alkuper‰inen ostohinta talteen
+  // ennen varastoon vienti√§ tallennetaan alkuper√§inen ostohinta talteen
   if ($toiminto == "kalkyyli" and $tee == "varastoon" and $tilrivirow['hinta_alkuperainen'] == 0) {
     $query  = "UPDATE tilausrivi SET
                hinta_alkuperainen = '{$ohinta}'
@@ -627,7 +627,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
     // Tulliprosentti
     $oletus_tulliprosentti = hae_oletus_tulliprosentti($laskurow, $tilrivirow);
 
-    //jos ostotilausrivin lis‰tietoihin on tallennettu poikkeava_tullipronsetti niin k‰ytet‰‰n sit‰. Muuten k‰ytet‰‰n taric_veroperusteet oletusta.
+    //jos ostotilausrivin lis√§tietoihin on tallennettu poikkeava_tullipronsetti niin k√§ytet√§√§n sit√§. Muuten k√§ytet√§√§n taric_veroperusteet oletusta.
     if (!empty($tilrivirow['poikkeava_tulliprosentti']) and $tilrivirow['poikkeava_tulliprosentti'] != (int) $oletus_tulliprosentti) {
       $tulliprossa = $tilrivirow['poikkeava_tulliprosentti'];
     }
@@ -637,20 +637,20 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
     $aputullimaara = $ohinta * ($tulliprossa/100);
     $ohinta = $ohinta * (1 + ($tulliprossa/100));
-    $tv_nimrow["maara"] = $tv_nimrow["maara"] * 1; // teh‰‰n numero, ett‰ lista n‰ytt‰‰ kivemmalta
+    $tv_nimrow["maara"] = $tv_nimrow["maara"] * 1; // teh√§√§n numero, ett√§ lista n√§ytt√§√§ kivemmalta
   }
 
-  // Tulli% # Aputullim‰‰r‰
+  // Tulli% # Aputullim√§√§r√§
   $hankintakulut .= "#".sprintf('%.02f',$tulliprossa)."#".sprintf('%.02f',$aputullimaara);
   $kuluteksti = "";
 
-  // lis‰t‰‰n riville extra kulu, jos sellanen oli annettu
+  // lis√§t√§√§n riville extra kulu, jos sellanen oli annettu
   if ($tilrivirow["kate"] != 0) {
     $kuluteksti = "($ohinta + $tilrivirow[kate])";
     $ohinta = $ohinta + $tilrivirow['kate'];
   }
 
-  // Varastoonvientip‰iv‰
+  // Varastoonvientip√§iv√§
   if ($tilrivirow["toimitettuaika"] == "0000-00-00 00:00:00") {
     $varastoonvientipva = date("Y-m-d H:i:s");
   }
@@ -658,7 +658,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
     $varastoonvientipva = $tilrivirow["toimitettuaika"];
   }
 
-  // Tsekataan, ett‰ varastoonvientip‰iv‰ on avoimella kaudella
+  // Tsekataan, ett√§ varastoonvientip√§iv√§ on avoimella kaudella
   //Avoimen kauden tiedot
   list($tkvpvv,$tkvpkk,$tkvppp) = explode("-", substr($varastoonvientipva,0,10));
 
@@ -673,27 +673,27 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
     $varastoon_msg .= "<td></td>";
     $varastoon_msg .= "<td>".tv1dateconv($varastoonvientipva)."</td>";
     $varastoon_msg .= "<td>$tilrivirow[tuoteno]</td>";
-    $varastoon_msg .= "<td colspan='$vcspan'>".t("VIRHE: Varastoonvientip‰iv‰ ei kuulu avoimeen kauteen. Rivi‰ ei viety varastoon.")."</td>";
+    $varastoon_msg .= "<td colspan='$vcspan'>".t("VIRHE: Varastoonvientip√§iv√§ ei kuulu avoimeen kauteen. Rivi√§ ei viety varastoon.")."</td>";
     $varastoon_msg .= "</tr>";
     continue;
   }
 
-  // Rivinlis‰kulu
+  // Rivinlis√§kulu
   $hankintakulut .= "#$tilrivirow[kate]";
 
   $rivihin = round($ohinta, $yhtiorow['hintapyoristys']);  // tilausrivin rivihinta talteen
 
-  // t‰m‰ muuttaa hinnan plussaksi hyvityskeikalla (jolloin kehahin matikka menee oikein)
+  // t√§m√§ muuttaa hinnan plussaksi hyvityskeikalla (jolloin kehahin matikka menee oikein)
   $ohinta  = round($ohinta / $tilrivirow['varattu'], 6); // yhden tuotteen hinta kaikkine kuluineen
 
-  //Keskihankintahintaa yll‰pidet‰‰n vain jos tuotteella ei ole sarjanumeroseurantaa tai marginaaliverostusta
+  //Keskihankintahintaa yll√§pidet√§√§n vain jos tuotteella ei ole sarjanumeroseurantaa tai marginaaliverostusta
   if ($tuorow["sarjanumeroseuranta"] == "S" or $tuorow["sarjanumeroseuranta"] == "U") {
-    //Laitetaan kehahintamuuttujaan t‰m‰n keikan ostohinta jotta tapahtumat n‰ytt‰isiv‰t fiksuja lukuja
+    //Laitetaan kehahintamuuttujaan t√§m√§n keikan ostohinta jotta tapahtumat n√§ytt√§isiv√§t fiksuja lukuja
     $kehahin = $ohinta;
   }
   else {
     if ($salrow['saldo'] + $tilrivirow['varattu'] != 0 and $salrow['saldo'] != 0 and $salrow['saldo'] * $tuorow['kehahin'] + $ohinta * $tilrivirow['varattu'] != 0) {
-      // kehahin matikka, tuotteella pit‰‰ olla saldoa ennen ja j‰lkeen ett‰ edes tehd‰‰n matikkaa, sek‰ jakolaskun osoittaja pit‰‰ olla positiivinen
+      // kehahin matikka, tuotteella pit√§√§ olla saldoa ennen ja j√§lkeen ett√§ edes tehd√§√§n matikkaa, sek√§ jakolaskun osoittaja pit√§√§ olla positiivinen
       $kehahin = round(($salrow['saldo'] * $tuorow['kehahin'] + $ohinta * $tilrivirow['varattu']) / ($salrow['saldo'] + $tilrivirow['varattu']), 6);
 
       if ($debug >= 1) {
@@ -701,11 +701,11 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
       }
     }
     else {
-      // Jos j‰‰d‰‰n saldossa t‰m‰nkin tulon j‰lkeen miinukselle tai nollille, laitetaan kehahin suoraan t‰m‰n keikan hinnasta
+      // Jos j√§√§d√§√§n saldossa t√§m√§nkin tulon j√§lkeen miinukselle tai nollille, laitetaan kehahin suoraan t√§m√§n keikan hinnasta
       $kehahin = round($ohinta, 6);
 
       if ($debug >= 1) {
-        $varastoon_msg .= "<font class='message'>Tuote: $tuorow[tuoteno] Saldo j‰i nollaan tai miinukselle. Kehahin = ostohinta = $kehahin</font><br>";
+        $varastoon_msg .= "<font class='message'>Tuote: $tuorow[tuoteno] Saldo j√§i nollaan tai miinukselle. Kehahin = ostohinta = $kehahin</font><br>";
       }
     }
   }
@@ -715,14 +715,14 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
   if ($toiminto == "kaikkiok" and $tee == "varma") {
     // tarvitaan
     // $tuoteno =  korjattava tuote
-    // $pvm = mihin p‰iv‰‰n asti korjataan
-    // $uusihinta = mik‰ on tuon pvm:n oikea ostohinta
-    // $rivitunnus = mik‰ on tapahtuman tehneen rivin tunnus
+    // $pvm = mihin p√§iv√§√§n asti korjataan
+    // $uusihinta = mik√§ on tuon pvm:n oikea ostohinta
+    // $rivitunnus = mik√§ on tapahtuman tehneen rivin tunnus
 
     $tuoteno  = $tilrivirow["tuoteno"];
     $uusihinta  = $ohinta;
-    $pvm    = $tilrivirow["laskutettuaika"]; // koska t‰m‰ tuote oli viety varastoon
-    $rivitunnus = $tilrivirow["tunnus"];     // rivin tunnus, t‰ll‰ lˆydet‰‰n varmasti oikea tapahtuma
+    $pvm    = $tilrivirow["laskutettuaika"]; // koska t√§m√§ tuote oli viety varastoon
+    $rivitunnus = $tilrivirow["tunnus"];     // rivin tunnus, t√§ll√§ l√∂ydet√§√§n varmasti oikea tapahtuma
 
     $uusikehahin = jalkilaskentafunktio($tuoteno, $pvm, $uusihinta, $rivitunnus);
     $uusikehahin = sprintf('%.6f', $uusikehahin);
@@ -743,7 +743,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
   }
   elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 
-    // p‰ivitet‰‰n tilausrivin rivihintaa
+    // p√§ivitet√§√§n tilausrivin rivihintaa
     $query  = "UPDATE tilausrivi set
                rivihinta   = '$rivihin'
                WHERE yhtio = '$kukarow[yhtio]'
@@ -757,7 +757,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
       $kehalis = " kehahin = '$kehahin', ";
     }
 
-    // p‰ivitet‰‰n tuote
+    // p√§ivitet√§√§n tuote
     $query = "UPDATE tuote set
               $kehalis
               vihahin     = round('$ohinta','$yhtiorow[hintapyoristys]'),
@@ -787,7 +787,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
       }
     }
 
-    // muuten t‰ss‰ ollaan sitten viem‰ss‰ kamaa ihan oikeesti saldoille.. tehd‰‰n siihen liittyv‰t hommat.
+    // muuten t√§ss√§ ollaan sitten viem√§ss√§ kamaa ihan oikeesti saldoille.. tehd√§√§n siihen liittyv√§t hommat.
     $uusikehahin = "";
 
     if ($tilrivirow["tunnus"] != $tilrivirow["perheid2"] and $tilrivirow["perheid2"] > 0) {
@@ -797,7 +797,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
       $lisavartlisa = "";
     }
 
-    // lis‰t‰‰n tapahtuma
+    // lis√§t√§√§n tapahtuma
     $query = "INSERT into tapahtuma set
               yhtio      = '$kukarow[yhtio]',
               tuoteno    = '$tilrivirow[tuoteno]',
@@ -816,7 +816,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
     $result = pupe_query($query);
     $tapahtumaid = mysql_insert_id();
 
-    // Vied‰‰n koko suuntalava varastoon. Eli kaikille suuntalavalla oleville tuotteille p‰ivitet‰‰n sama tuotepaikka
+    // Vied√§√§n koko suuntalava varastoon. Eli kaikille suuntalavalla oleville tuotteille p√§ivitet√§√§n sama tuotepaikka
     if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus) and trim($koko_suuntalava) == 'X') {
 
       $query = "SELECT *
@@ -831,7 +831,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
       $paikka_chk_res = pupe_query($query);
 
       if (mysql_num_rows($paikka_chk_res) == 0) {
-        // lis‰t‰‰n paikka
+        // lis√§t√§√§n paikka
         $query = "INSERT INTO tuotepaikat SET
                   yhtio         = '{$kukarow['yhtio']}',
                   tuoteno       = '{$tilrivirow['tuoteno']}',
@@ -848,7 +848,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
                   luontiaika    = now()";
         $result = pupe_query($query);
 
-        // tehd‰‰n tapahtuma
+        // tehd√§√§n tapahtuma
         $query = "INSERT into tapahtuma set
                   yhtio     = '$kukarow[yhtio]',
                   tuoteno   = '$tilrivirow[tuoteno]',
@@ -860,13 +860,13 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
                   hyllynro  = '{$tilrivirow['hyllynro']}',
                   hyllytaso = '{$tilrivirow['hyllytaso']}',
                   hyllyvali = '{$tilrivirow['hyllyvali']}',
-                  selite    = '".t("Lis‰ttiin tuotepaikka")." {$tilrivirow['hyllyalue']} {$tilrivirow['hyllynro']} {$tilrivirow['hyllyvali']} {$tilrivirow['hyllytaso']}',
+                  selite    = '".t("Lis√§ttiin tuotepaikka")." {$tilrivirow['hyllyalue']} {$tilrivirow['hyllynro']} {$tilrivirow['hyllyvali']} {$tilrivirow['hyllytaso']}',
                   laatija   = '$kukarow[kuka]',
                   laadittu  = date_sub('$varastoonvientipva', interval 1 SECOND)";
         $result = pupe_query($query);
       }
       else {
-        // p‰ivitet‰‰n saldo tuoterivill‰ olevalle paikalle
+        // p√§ivitet√§√§n saldo tuoterivill√§ olevalle paikalle
         $query = "UPDATE tuotepaikat SET
                   saldo         = saldo+{$tilrivirow['varattu']},
                   saldo_varattu = saldo_varattu + if({$tilrivirow['tunnus']} != {$tilrivirow['perheid2']} and {$tilrivirow['perheid2']} > 0, {$tilrivirow['varattu']}, 0),
@@ -883,7 +883,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
       }
     }
     else {
-      // p‰ivitet‰‰n saldo tuoterivill‰ olevalle paikalle
+      // p√§ivitet√§√§n saldo tuoterivill√§ olevalle paikalle
       $query = "UPDATE tuotepaikat set
                 saldo         = saldo+$tilrivirow[varattu],
                 saldo_varattu = saldo_varattu + if($tilrivirow[tunnus] != $tilrivirow[perheid2] and $tilrivirow[perheid2]>0, $tilrivirow[varattu], 0),
@@ -902,7 +902,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
     $millepakallemeni = "";
 
     if (mysql_affected_rows() == 0) {
-      $varastoon_msg .= "<font class='error'>".t("Varastopaikka")." $tilrivirow[hyllyalue]-$tilrivirow[hyllynro]-$tilrivirow[hyllytaso]-$tilrivirow[hyllyvali] ".t("ei lˆydy vaikka se on syˆtetty tilausriville! Koitetaan p‰ivitt‰‰ oletustapaikkaa!")."</font>";
+      $varastoon_msg .= "<font class='error'>".t("Varastopaikka")." $tilrivirow[hyllyalue]-$tilrivirow[hyllynro]-$tilrivirow[hyllytaso]-$tilrivirow[hyllyvali] ".t("ei l√∂ydy vaikka se on sy√∂tetty tilausriville! Koitetaan p√§ivitt√§√§ oletustapaikkaa!")."</font>";
 
       $query = "UPDATE tuotepaikat
                 SET saldo        = saldo+$tilrivirow[varattu],
@@ -930,7 +930,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
            $varastoon_msg .= "<br><font class='error'>".t("Tuotteella")." $tilrivirow[tuoteno] ".t("ei ole oletuspaikkaa")."!!!</font><br><br>";
 
-        // haetaan firman eka varasto, tˆk‰t‰‰n kama sinne ja tehd‰‰n siit‰ oletuspaikka
+        // haetaan firman eka varasto, t√∂k√§t√§√§n kama sinne ja tehd√§√§n siit√§ oletuspaikka
         $query = "SELECT alkuhyllyalue, alkuhyllynro
                   FROM varastopaikat
                   WHERE yhtio = '$kukarow[yhtio]'
@@ -940,7 +940,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
         $result = pupe_query($query);
 
         if (mysql_num_rows($result) != 1) {
-          // haetaan firman eka varasto, tˆk‰t‰‰n kama sinne ja tehd‰‰n siit‰ oletuspaikka
+          // haetaan firman eka varasto, t√∂k√§t√§√§n kama sinne ja tehd√§√§n siit√§ oletuspaikka
           $query = "SELECT alkuhyllyalue, alkuhyllynro
                     FROM varastopaikat
                     WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
@@ -960,7 +960,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
            $varastoon_msg .= "<br><font class='error'>".t("Tehtiin oletuspaikka")." $tilrivirow[tuoteno]: $hyllyrow[alkuhyllyalue] $hyllyrow[alkuhyllynro] 0 0</font><br><br>";
 
-        // lis‰t‰‰n paikka
+        // lis√§t√§√§n paikka
         $query = "INSERT INTO tuotepaikat set
                   yhtio         = '$kukarow[yhtio]',
                   tuoteno       = '$tilrivirow[tuoteno]',
@@ -977,7 +977,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
         $jtvarastot[$tilrivirow["tunnus"]] = array($hyllyrow["alkuhyllyalue"], $hyllyrow["alkuhyllynro"]);
         $millepakallemeni = "hyllyalue = '$hyllyrow[alkuhyllyalue]', hyllynro = '$hyllyrow[alkuhyllynro]', hyllyvali = '0', hyllytaso = '0' ";
 
-        // tehd‰‰n tapahtuma
+        // tehd√§√§n tapahtuma
         $query = "INSERT into tapahtuma set
                   yhtio     = '$kukarow[yhtio]',
                   tuoteno   = '$tilrivirow[tuoteno]',
@@ -989,7 +989,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
                   hyllynro  = '$hyllyrow[alkuhyllynro]',
                   hyllytaso = '0',
                   hyllyvali = '0',
-                  selite    = '".t("Lis‰ttiin tuotepaikka")." $hyllyrow[alkuhyllyalue] $hyllyrow[alkuhyllynro] 0 0',
+                  selite    = '".t("Lis√§ttiin tuotepaikka")." $hyllyrow[alkuhyllyalue] $hyllyrow[alkuhyllynro] 0 0',
                   laatija   = '$kukarow[kuka]',
                   laadittu  = date_sub('$varastoonvientipva', interval 1 SECOND)";
         $result = pupe_query($query);
@@ -999,7 +999,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
       }
     }
 
-    // Saldo ei mennytk‰‰n ostorivin osoittamalle paikalle, p‰ivitet‰‰n riville ja tapahtumalle kuitenkin paikat jolle saldo loppupeleiss‰ meni
+    // Saldo ei mennytk√§√§n ostorivin osoittamalle paikalle, p√§ivitet√§√§n riville ja tapahtumalle kuitenkin paikat jolle saldo loppupeleiss√§ meni
     if ($millepakallemeni != "") {
       $query  = "UPDATE tapahtuma set
                  $millepakallemeni
@@ -1010,9 +1010,9 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
       $millepakallemeni = " ,".$millepakallemeni;
     }
 
-    // p‰ivitet‰‰n tilaus saapuneeksi varastoon
-    // p‰ivitet‰‰n myˆs tehdaslis‰varusteet saapuneiksi
-    // p‰ivitet‰‰n riville paikat jolle saldo loppupeleiss‰ meni (jos meni ok niin $millepakallemeni on tyhj‰)
+    // p√§ivitet√§√§n tilaus saapuneeksi varastoon
+    // p√§ivitet√§√§n my√∂s tehdaslis√§varusteet saapuneiksi
+    // p√§ivitet√§√§n riville paikat jolle saldo loppupeleiss√§ meni (jos meni ok niin $millepakallemeni on tyhj√§)
 
     // and (tunnus = '$tilrivirow[tunnus]' or perheid2 = '$tilrivirow[tunnus]')";
     $query  = "UPDATE tilausrivi set
@@ -1029,9 +1029,9 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
     $rivia++;
 
-    //  Kohdistetaan vain oikeille asiakkaille n‰iss‰ caseissa
+    //  Kohdistetaan vain oikeille asiakkaille n√§iss√§ caseissa
     if ($yhtiorow["automaattinen_jt_toimitus"] != "") {
-      //Tutkitaan lˆytyykˆ JT-rivi joka m‰pp‰ytyy t‰h‰n ostoriviin
+      //Tutkitaan l√∂ytyyk√∂ JT-rivi joka m√§pp√§ytyy t√§h√§n ostoriviin
          $query = "SELECT ifnull(if((tilausrivi.perheid != 0 and tilausrivi.tunnus != tilausrivi.perheid), tilausrivi.perheid, tilausrivi.tunnus), 0) jtrivi
                    FROM tilausrivin_lisatiedot
                    JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
@@ -1041,15 +1041,15 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
       $varastoon_result = pupe_query($query);
 
       while ($varastoon_row = mysql_fetch_assoc($varastoon_result)) {
-        // Mitk‰ suoratoimitukset tuloutettiin t‰ll‰ keikalla
+        // Mitk√§ suoratoimitukset tuloutettiin t√§ll√§ keikalla
         $jtrivit[$varastoon_row["jtrivi"]] = $varastoon_row["jtrivi"];
-        // Katotaan mille paikalle n‰‰ meni, jotta suoratoimitus voidaan laukasta t‰lt‰ paikalta
+        // Katotaan mille paikalle n√§√§ meni, jotta suoratoimitus voidaan laukasta t√§lt√§ paikalta
         $jtrivit_paikat[$varastoon_row["jtrivi"]] = $tapahtumaid;
       }
     }
   }
 
-  // n‰ytet‰‰n ruudulla
+  // n√§ytet√§√§n ruudulla
   $varastoon_msg .= "  <tr>";
 
   if ($tilrivirow["toimitettuaika"] == "0000-00-00 00:00:00") {
@@ -1070,7 +1070,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
     $varastoon_msg .= "<td align='center' valign='top'><input type='checkbox' name='varastoonko[]' value='$tilrivirow[tunnus]' $chk>";
 
     if (!$tilrivirow['varastoon']) {
-      $varastoon_msg .= "<br /><img src='../pics/lullacons/alert.png' alt='".t("Huomio")."' title='".t("HUOM: Rivi‰ ei vied‰ automaattisesti varastoon.")."' />";
+      $varastoon_msg .= "<br /><img src='../pics/lullacons/alert.png' alt='".t("Huomio")."' title='".t("HUOM: Rivi√§ ei vied√§ automaattisesti varastoon.")."' />";
     }
 
     $varastoon_msg .= "</td>";
@@ -1101,7 +1101,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
       $sscc_res = pupe_query($query);
       $sscc_row = mysql_fetch_assoc($sscc_res);
 
-      // n‰ytet‰‰n listauksessa SSCC-koodi ja otetaan mukaan suuntalavan tunnus
+      // n√§ytet√§√§n listauksessa SSCC-koodi ja otetaan mukaan suuntalavan tunnus
       $varastoon_msg .= "<td>{$sscc_row['sscc']}</td>";
     }
   }
@@ -1131,7 +1131,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
       $sscc_res = pupe_query($query);
       $sscc_row = mysql_fetch_assoc($sscc_res);
 
-      // n‰ytet‰‰n listauksessa SSCC-koodi ja otetaan mukaan suuntalavan tunnus
+      // n√§ytet√§√§n listauksessa SSCC-koodi ja otetaan mukaan suuntalavan tunnus
       $varastoon_msg .= "<td>{$sscc_row['sscc']}</td>";
     }
   }
@@ -1147,7 +1147,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
     // Tulliprosentti
     $oletus_tulliprosentti = hae_oletus_tulliprosentti($laskurow, $tilrivirow);
 
-    //jos ostotilausrivin lis‰tietoihin on tallennettu poikkeava_tullipronsetti niin k‰ytet‰‰n sit‰. Muuten k‰ytet‰‰n taric_veroperusteet oletusta.
+    //jos ostotilausrivin lis√§tietoihin on tallennettu poikkeava_tullipronsetti niin k√§ytet√§√§n sit√§. Muuten k√§ytet√§√§n taric_veroperusteet oletusta.
     if (!empty($tilrivirow['poikkeava_tulliprosentti']) and $tilrivirow['poikkeava_tulliprosentti'] != (int) $oletus_tulliprosentti) {
       $tulliprosentti = $tilrivirow['poikkeava_tulliprosentti'];
     }
@@ -1195,7 +1195,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
     if ($varastoon_saldo_uusi <= 0) {
       $varastoon_fontti = "error";
-      $varastoon_saldo_viesti = "<br>".t("HUOM: Saldo j‰‰ negatiiviseksi!");
+      $varastoon_saldo_viesti = "<br>".t("HUOM: Saldo j√§√§ negatiiviseksi!");
     }
 
     $varastoon_msg .= "<td align='right'>$varastoon_saldo<br><font class='$varastoon_fontti'>$varastoon_saldo_uusi$varastoon_saldo_viesti</font></td>";
@@ -1227,7 +1227,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
       if ($varastoon_saldo_uusi <= 0) {
         $varastoon_fontti = "error";
-        $varastoon_saldo_viesti = "<br>".t("HUOM: Saldo j‰‰ negatiiviseksi!");
+        $varastoon_saldo_viesti = "<br>".t("HUOM: Saldo j√§√§ negatiiviseksi!");
       }
 
       $varastoon_msg .= "{$toimipaikan_saldo}<br><font class='{$varastoon_fontti}'>{$varastoon_saldo_uusi}{$varastoon_saldo_viesti}</font>";
@@ -1249,15 +1249,15 @@ if ($mobiili_keikka != "yes" and $kauttalaskutus == '' and !$tullaan_automaattik
   echo $jalkilaskenta_debug_text;
 }
 
-// jos kyseess‰ on ihan virallinen varastonarvonlaskenta, tehd‰‰n n‰in
+// jos kyseess√§ on ihan virallinen varastonarvonlaskenta, tehd√§√§n n√§in
 if ($toiminto == "kaikkiok" and $tee == "varma") {
 
-  $rivia = mysql_num_rows($presult); // kaunistelua vaan loppua varten... t‰‰ tehd‰‰n elsess‰ affected rowssilla..
+  $rivia = mysql_num_rows($presult); // kaunistelua vaan loppua varten... t√§√§ tehd√§√§n elsess√§ affected rowssilla..
 
   // laitetaan kohdistettu X kun lasku on viety varastoon...
-  // laitetaan MAPVM kentt‰‰n t‰m‰ p‰iv‰ niin tiedet‰‰n koska viety varastoon
-  // MAPVM p‰vittyy jos keikka loppulasketaan uudestaan ja se nolllataan jos/kun keikka avataan (avaa_keikka.php)
-  // P‰ivitet‰‰n samalla saapumisotsikolle vaihto-omaisuuslaskun valuutta kuntoon
+  // laitetaan MAPVM kentt√§√§n t√§m√§ p√§iv√§ niin tiedet√§√§n koska viety varastoon
+  // MAPVM p√§vittyy jos keikka loppulasketaan uudestaan ja se nolllataan jos/kun keikka avataan (avaa_keikka.php)
+  // P√§ivitet√§√§n samalla saapumisotsikolle vaihto-omaisuuslaskun valuutta kuntoon
   $query = "UPDATE lasku set
             kohdistettu   = 'X',
             alatila       = 'X',
@@ -1284,13 +1284,13 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 
     while ($llrow = mysql_fetch_assoc($result)) {
 
-      //T‰m‰ on ostoreskontran lasku
+      //T√§m√§ on ostoreskontran lasku
       $query   = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$llrow[vanhatunnus]'";
       $llres   = pupe_query($query);
       $kulurow = mysql_fetch_assoc($llres);
 
-      // tehd‰‰n viel‰ kirjapitoa...
-      // p‰ivitet‰‰n tilaus saapuneeksi varastoon kirjanpitoon
+      // tehd√§√§n viel√§ kirjapitoa...
+      // p√§ivitet√§√§n tilaus saapuneeksi varastoon kirjanpitoon
       $query = "SELECT tunnus, summa, kustp, kohde, projekti
                 FROM tiliointi
                 WHERE yhtio  = '$kukarow[yhtio]'
@@ -1299,10 +1299,10 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
                 and korjattu = ''";
       $result1 = pupe_query($query);
 
-      if (mysql_num_rows($result1) > 0) { // Tiliointi lˆytyi
+      if (mysql_num_rows($result1) > 0) { // Tiliointi l√∂ytyi
         while ($tiliointirow = mysql_fetch_assoc($result1)) {
 
-          // Tarkenteet kopsataan alkuper‰iselt‰ tiliˆinnilt‰, mutta jos alkuper‰inen tiliˆinti on ilman tarkenteita, niin menn‰‰n tilin defaulteilla
+          // Tarkenteet kopsataan alkuper√§iselt√§ tili√∂innilt√§, mutta jos alkuper√§inen tili√∂inti on ilman tarkenteita, niin menn√§√§n tilin defaulteilla
           list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["matkalla_olevat"], $tiliointirow["kustp"], $tiliointirow["kohde"], $tiliointirow["projekti"]);
 
           // Kumotaan, matkallaolevat
@@ -1327,7 +1327,7 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
             $varastotili = $yhtiorow["raaka_ainevarasto"];
           }
 
-          // Tarkenteet kopsataan alkuper‰iselt‰ tiliˆinnilt‰, mutta jos alkuper‰inen tiliˆinti on ilman tarkenteita, niin menn‰‰n tilin defaulteilla
+          // Tarkenteet kopsataan alkuper√§iselt√§ tili√∂innilt√§, mutta jos alkuper√§inen tili√∂inti on ilman tarkenteita, niin menn√§√§n tilin defaulteilla
           list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastotili, $tiliointirow["kustp"], $tiliointirow["kohde"], $tiliointirow["projekti"]);
 
           // Kirjataan varastonarvo
@@ -1348,12 +1348,12 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
         }
       }
       else {
-        if (!$tullaan_automaattikohdistuksesta) echo "<font class='error'>".t("En lˆyt‰nyt matkallaolevat kirjausta!")." $kulurow[tunnus] $yhtiorow[matkalla_olevat]</font><br>";
+        if (!$tullaan_automaattikohdistuksesta) echo "<font class='error'>".t("En l√∂yt√§nyt matkallaolevat kirjausta!")." $kulurow[tunnus] $yhtiorow[matkalla_olevat]</font><br>";
       }
 
-      // tarkistetaan onko lasku Teccom-lasku ja onko laskulla asn_sanomat -taulussa rivej‰, joita ei ole k‰sitelty
+      // tarkistetaan onko lasku Teccom-lasku ja onko laskulla asn_sanomat -taulussa rivej√§, joita ei ole k√§sitelty
       if ($kulurow['ebid'] == 'TECCOM-INVOICE') {
-        // katotaa onko k‰sittelem‰ttˆmi‰ rivej‰
+        // katotaa onko k√§sittelem√§tt√∂mi√§ rivej√§
         $query = "SELECT toimittajanro
                   FROM toimi
                   WHERE yhtio = '$kukarow[yhtio]'
@@ -1383,7 +1383,7 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
   }
   else {
     if ($yhtiorow['jalkilaskenta_kuluperuste'] != 'VS') {
-      echo "<font class='error'>".t("HUOM: Saapumiseen ei ole liitetty yht‰‰n vaihto-omaisuuslaskua!")."<br><br></font>";
+      echo "<font class='error'>".t("HUOM: Saapumiseen ei ole liitetty yht√§√§n vaihto-omaisuuslaskua!")."<br><br></font>";
     }
   }
 }
@@ -1414,14 +1414,14 @@ if ($toiminto == "kalkyyli" and $tee == "") {
   echo "<td colspan='$cspani' class='tumma'>&larr; ".t("Ruksaa kaikki");
 
   if ($yhtiorow["varastoonvientipaiva"] == "K") {
-    echo " / ".t("Muuta kaikki p‰iv‰m‰‰r‰t");
+    echo " / ".t("Muuta kaikki p√§iv√§m√§√§r√§t");
 
-    echo ". ".t("HUOM").":<img src='../pics/lullacons/alert.png' alt='",t("Huomio"),"' title='",t("HUOM: Rivi‰ ei vied‰ automaattisesti varastoon."),"' /> = ",t("Rivi‰ ei vied‰ automaattisesti varastoon");
-    echo "<br />",t("HUOM: Jos muutit varastoonviet‰vi‰ m‰‰ri‰, muista p‰ivitt‰‰ rivit ennen varastoonvienti‰");
+    echo ". ".t("HUOM").":<img src='../pics/lullacons/alert.png' alt='",t("Huomio"),"' title='",t("HUOM: Rivi√§ ei vied√§ automaattisesti varastoon."),"' /> = ",t("Rivi√§ ei vied√§ automaattisesti varastoon");
+    echo "<br />",t("HUOM: Jos muutit varastoonviet√§vi√§ m√§√§ri√§, muista p√§ivitt√§√§ rivit ennen varastoonvienti√§");
   }
   else {
-    echo ". ".t("HUOM").":<img src='../pics/lullacons/alert.png' alt='",t("Huomio"),"' title='",t("HUOM: Rivi‰ ei vied‰ automaattisesti varastoon."),"' /> = ",t("Rivi‰ ei vied‰ automaattisesti varastoon");
-    echo "<br />",t("HUOM: Jos muutit varastoonviet‰vi‰ m‰‰ri‰, muista p‰ivitt‰‰ rivit ennen varastoonvienti‰");
+    echo ". ".t("HUOM").":<img src='../pics/lullacons/alert.png' alt='",t("Huomio"),"' title='",t("HUOM: Rivi√§ ei vied√§ automaattisesti varastoon."),"' /> = ",t("Rivi√§ ei vied√§ automaattisesti varastoon");
+    echo "<br />",t("HUOM: Jos muutit varastoonviet√§vi√§ m√§√§ri√§, muista p√§ivitt√§√§ rivit ennen varastoonvienti√§");
   }
 
   echo "</td></tr>";
@@ -1452,7 +1452,7 @@ if ($tee == "") {
     echo "<input type='hidden' name='vietiinko_koko_suuntalava' value='{$vietiinko_koko_suuntalava}' />";
   }
 
-  echo "<td class='back' colspan='2'><input type='submit' value='".t("P‰ivit‰")."'></td>";
+  echo "<td class='back' colspan='2'><input type='submit' value='".t("P√§ivit√§")."'></td>";
 }
 elseif ($mobiili_keikka != "yes" and $kauttalaskutus == '' and !$tullaan_automaattikohdistuksesta) {
   echo "<td class='back' colspan='2'></td>";
@@ -1468,11 +1468,11 @@ if ($mobiili_keikka != "yes" and $kauttalaskutus == '' and !$tullaan_automaattik
 
   if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) $cspani += 2;
 
-  echo "<td colspan='$cspani' class='back' align='right'>".t("Yhteens‰").":</th><td align='right'>".sprintf("%.2f", $summa)."</td>";
+  echo "<td colspan='$cspani' class='back' align='right'>".t("Yhteens√§").":</th><td align='right'>".sprintf("%.2f", $summa)."</td>";
 }
 
 if ($tv_kaytossa and $tee == "") {
-  echo "<th><input type='submit' value='".t("P‰ivit‰")."'></th>";
+  echo "<th><input type='submit' value='".t("P√§ivit√§")."'></th>";
 }
 elseif ($tv_kaytossa and $kauttalaskutus == '' and !$tullaan_automaattikohdistuksesta) {
   echo "<th></th>";
@@ -1483,7 +1483,7 @@ if ($mobiili_keikka != "yes" and $kauttalaskutus == '' and !$tullaan_automaattik
   echo "</table></form><br>";
 }
 
-// Jos varastoonvienti vaikuttaa tehtyihin valmistuksiin, niin j‰lkilasketaan myˆs ne
+// Jos varastoonvienti vaikuttaa tehtyihin valmistuksiin, niin j√§lkilasketaan my√∂s ne
 if ($toiminto == "kaikkiok" and $tee == "varma" and count($korjattavat_valmistukset) > 0) {
   $rekurkoko = count($korjattavat_valmistukset);
 
@@ -1491,12 +1491,12 @@ if ($toiminto == "kaikkiok" and $tee == "varma" and count($korjattavat_valmistuk
     echo "<table>";
 
     echo "<tr>";
-    echo "<th colspan='6'>".t("Korjataan valmistukset joihin t‰m‰ varastoonvienti vaikuttaa")."</td>";
+    echo "<th colspan='6'>".t("Korjataan valmistukset joihin t√§m√§ varastoonvienti vaikuttaa")."</td>";
     echo "</tr>";
   }
 
 
-  // T‰ss‰ on rekursiivista toimintaa $korjattavat_valmistukset-array voi kasvaa matkan varrella
+  // T√§ss√§ on rekursiivista toimintaa $korjattavat_valmistukset-array voi kasvaa matkan varrella
   for ($korjattavat_valmistukset_ind=0; $korjattavat_valmistukset_ind < $rekurkoko; $korjattavat_valmistukset_ind++) {
     jalkilaske_valmistus($korjattavat_valmistukset[$korjattavat_valmistukset_ind]);
 
@@ -1509,11 +1509,11 @@ if ($toiminto == "kaikkiok" and $tee == "varma" and count($korjattavat_valmistuk
 }
 
 if ($toiminto == "kaikkiok" and $tee == "varma" and $kauttalaskutus == '' and !$tullaan_automaattikohdistuksesta) {
-  echo "<br><font class='message'>".t("Vietiin saapuminen")." $laskurow[laskunro] ".t("varastoon")."! ".t("Virallinen varastonarvo laskettu").": $rivia ".t("rivi‰").".</font><br><br>";
+  echo "<br><font class='message'>".t("Vietiin saapuminen")." $laskurow[laskunro] ".t("varastoon")."! ".t("Virallinen varastonarvo laskettu").": $rivia ".t("rivi√§").".</font><br><br>";
 }
 elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '') {
   if ($mobiili_keikka != "yes" and !$tullaan_automaattikohdistuksesta) {
-    echo "<font class='message'>".t("Vietiin saapuminen")." $laskurow[laskunro] ".t("varastoon").": $rivia ".t("rivi‰").".</font><br><br>";
+    echo "<font class='message'>".t("Vietiin saapuminen")." $laskurow[laskunro] ".t("varastoon").": $rivia ".t("rivi√§").".</font><br><br>";
   }
 
   if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
@@ -1525,10 +1525,10 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '
     $uusiotunnus_chk_res = pupe_query($query);
     $uusiotunnus_chk_row = mysql_fetch_assoc($uusiotunnus_chk_res);
 
-    # Ei merkata lavaa puretuksi jos vied‰‰n rivi kerrallaan
+    # Ei merkata lavaa puretuksi jos vied√§√§n rivi kerrallaan
     if ($tilausrivi == 0) {
 
-      // p‰ivitet‰‰n suuntalava puretuksi
+      // p√§ivitet√§√§n suuntalava puretuksi
       $query = "UPDATE tilausrivi
                 JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava)
                 JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus)
@@ -1542,9 +1542,9 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '
       $varastoon_suuntalava_result = pupe_query($query);
     }
 
-    // AINA EI SIIS OSUTA TƒHƒN, JOS JƒMƒRIVEJƒ EI OLE
-    // JOS JƒMƒRIVEJƒ (= SPLITTAANTUNEET) Jƒƒ SUUNTALAVALLE
-    // JƒMƒRIVEILTƒ p‰ivitet‰‰n varastoon-kentt‰, jotta tuotteet menev‰t seuraavalla kerralla varastoon.
+    // AINA EI SIIS OSUTA T√ÑH√ÑN, JOS J√ÑM√ÑRIVEJ√Ñ EI OLE
+    // JOS J√ÑM√ÑRIVEJ√Ñ (= SPLITTAANTUNEET) J√Ñ√Ñ SUUNTALAVALLE
+    // J√ÑM√ÑRIVEILT√Ñ p√§ivitet√§√§n varastoon-kentt√§, jotta tuotteet menev√§t seuraavalla kerralla varastoon.
     $query = "UPDATE tilausrivi
               JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava)
               JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus)
@@ -1560,10 +1560,10 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '
     $varastoon_suuntalava_result = pupe_query($query);
 
     // Jos suuntalava on purettu ja rivi virty normaalisti hyllyyn niin nollataan linkki suuntalavalle
-    // jos ollaan viety koko lava purkamatta varastoon niin silloin s‰ilytet‰‰n tilausrivin linkki suuntalavalle
+    // jos ollaan viety koko lava purkamatta varastoon niin silloin s√§ilytet√§√§n tilausrivin linkki suuntalavalle
     if ($yhtiorow['suuntalavat'] == 'S' and (!isset($koko_suuntalava) or trim($koko_suuntalava) != 'X')) {
 
-      // p‰ivitet‰‰n suuntalava puretuksi
+      // p√§ivitet√§√§n suuntalava puretuksi
       $query = "UPDATE tilausrivi
                 JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava)
                 JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus)
@@ -1578,7 +1578,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '
     }
   }
 
-  //  Halutaanko toimittaa j‰lkk‰reit‰ automaattisesti ja saako k‰ytt‰j‰ ylip‰‰t‰‰n k‰sitell‰ j‰lkk‰reit‰..
+  //  Halutaanko toimittaa j√§lkk√§reit√§ automaattisesti ja saako k√§ytt√§j√§ ylip√§√§t√§√§n k√§sitell√§ j√§lkk√§reit√§..
   $query = "SELECT paivitys
             FROM oikeu
             WHERE yhtio = '$kukarow[yhtio]'
@@ -1602,7 +1602,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '
       }
     }
 
-    // Jos JT-rivej‰ saa toimittaa vain, mik‰li ker‰ysp‰iv‰ on vanhempi kuin t‰m‰ p‰iv‰
+    // Jos JT-rivej√§ saa toimittaa vain, mik√§li ker√§ysp√§iv√§ on vanhempi kuin t√§m√§ p√§iv√§
     if ($yhtiorow['automaattinen_jt_toimitus'] == "A") {
       $jt_huomioi_pvm = "X";
     }

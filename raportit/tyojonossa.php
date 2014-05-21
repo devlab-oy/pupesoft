@@ -1,11 +1,11 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require('../inc/parametrit.inc');
 
-echo "<font class='head'>".t("Tyˆjono-raportti")."</font><hr>";
+echo "<font class='head'>".t("Ty√∂jono-raportti")."</font><hr>";
 
 // Hoidetaan parametri kuntoon
 $peruste = isset($peruste) ? $peruste : "tyojono";
@@ -14,9 +14,9 @@ $sel = ($peruste == "suorittaja") ? "SELECTED" : "";
 echo "<form name='vaihdaPeruste' method='POST'>";
 echo "<table>";
 echo "<tr>";
-echo "<th>".t("N‰yt‰ tyˆm‰‰r‰ykset")."</th>";
+echo "<th>".t("N√§yt√§ ty√∂m√§√§r√§ykset")."</th>";
 echo "<td><select name='peruste' onchange='submit()'>";
-echo "<option value='tyojono'>".t("Tyˆjonottain")."</option>";
+echo "<option value='tyojono'>".t("Ty√∂jonottain")."</option>";
 echo "<option value='suorittaja' $sel>".t("Suorittajittain")."</option>";
 echo "</select></td>";
 echo "</tr>";
@@ -67,14 +67,14 @@ $jonosumma = 0;
 
 echo "<tr>";
 echo "<th>".t($peruste)."</th>";
-echo "<th>".t("Tyˆstatus")."</th>";
-echo "<th>".t("M‰‰r‰")."</th>";
+echo "<th>".t("Ty√∂status")."</th>";
+echo "<th>".t("M√§√§r√§")."</th>";
 echo "</tr>";
 
 while ($rivit = mysql_fetch_assoc($ekares)) {
 
   if ($vaihdajono != $rivit["tyojono1"] and $vaihdajono != "") {
-    echo "<tr><td class='tumma' colspan='2'>".t("Yhteens‰").":</td><td class='tumma' align='right'>$jonosumma</td></tr>";
+    echo "<tr><td class='tumma' colspan='2'>".t("Yhteens√§").":</td><td class='tumma' align='right'>$jonosumma</td></tr>";
     echo "<tr><td class='back' colspan='3'><br></td></tr>";
     $jonosumma = 0;
   }
@@ -104,7 +104,7 @@ while ($rivit = mysql_fetch_assoc($ekares)) {
   $vaihdajono = $rivit["tyojono1"];
 }
 
-echo "<tr><td class='tumma' colspan='2'>".t("Yhteens‰").":</td><td class='tumma' align='right'>$jonosumma</td></tr>";
+echo "<tr><td class='tumma' colspan='2'>".t("Yhteens√§").":</td><td class='tumma' align='right'>$jonosumma</td></tr>";
 echo "</table>";
 
 require ("inc/footer.inc");

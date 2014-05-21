@@ -33,12 +33,12 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $tee == "file
   }
 
   if ($_FILES['userfile']['size']==0) {
-    die ("<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font>");
+    die ("<font class='error'><br>".t("Tiedosto on tyhj√§")."!</font>");
   }
 
-  $file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
+  $file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep√§onnistui")."!");
 
-  echo "<font class='message'>".t("Tutkaillaan mit‰ olet l‰hett‰nyt").".<br></font>";
+  echo "<font class='message'>".t("Tutkaillaan mit√§ olet l√§hett√§nyt").".<br></font>";
   flush();
 
   while ($rivi = fgets($file)) {
@@ -59,22 +59,22 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $tee == "file
 
         if (mysql_num_rows($tuoteuresult) != '0') {
           $error++;
-          echo "<font class='message'>".t("UUSI TUOTENUMERO L÷YTYY JO").": $uustuoteno</font><br>";
+          echo "<font class='message'>".t("UUSI TUOTENUMERO L√ñYTYY JO").": $uustuoteno</font><br>";
         }
       }
       else {
         $error++;
-        echo "<font class='message'>".t("VANHAA TUOTENUMEROA EI L÷YDY").": $vantuoteno</font><br>";
+        echo "<font class='message'>".t("VANHAA TUOTENUMEROA EI L√ñYDY").": $vantuoteno</font><br>";
       }
     }
     else {
       if (trim($rivi[0]) == '' and trim($rivi[1]) != '') {
         $error++;
-        echo "<font class='message'>".t("Vanha tuotenumero puuttuu tiedostosta").": (tyhj‰) --> $rivi[1]</font><br>";
+        echo "<font class='message'>".t("Vanha tuotenumero puuttuu tiedostosta").": (tyhj√§) --> $rivi[1]</font><br>";
       }
       elseif (trim($rivi[1]) == '' and trim($rivi[0]) != '') {
         $error++;
-        echo "<font class='message'>".t("Uusi tuotenumero puuttuu tiedostosta").": $rivi[0] --> (tyhj‰)</font><br>";
+        echo "<font class='message'>".t("Uusi tuotenumero puuttuu tiedostosta").": $rivi[0] --> (tyhj√§)</font><br>";
       }
     }
   }
@@ -87,7 +87,7 @@ elseif (is_uploaded_file($_FILES['userfile']['tmp_name']) !== TRUE and $tee == "
   $vantuoteno = strtoupper(trim($vantuoteno));
   $uustuoteno = strtoupper(trim($uustuoteno));
 
-  //Tuotenumerot tulevat k‰yttˆliittym‰st‰
+  //Tuotenumerot tulevat k√§ytt√∂liittym√§st√§
   $query1  = "SELECT tunnus, kehahin, tuoteno from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$vantuoteno'";
   $tuoteresult = pupe_query($query1);
 
@@ -100,14 +100,14 @@ elseif (is_uploaded_file($_FILES['userfile']['tmp_name']) !== TRUE and $tee == "
     if (mysql_num_rows($tuoteuresult) != 0) {
       $uustuoterow = mysql_fetch_array($tuoteuresult);
 
-      echo "<font class='message'>".t("UUSI TUOTENUMERO L÷YTYY JO").": $uustuoteno</font><br>";
+      echo "<font class='message'>".t("UUSI TUOTENUMERO L√ñYTYY JO").": $uustuoteno</font><br>";
 
       if (strtoupper(trim($vantuoterow["tuoteno"])) == strtoupper(trim($uustuoterow["tuoteno"]))) {
-        //sallitaan myˆs se, ett‰ uusi tuote ja vanhatuote ovat samat (silloin vain strtoupperataan tuoteno)
+        //sallitaan my√∂s se, ett√§ uusi tuote ja vanhatuote ovat samat (silloin vain strtoupperataan tuoteno)
         $uusi_on_jo = "SAMA";
       }
       else {
-        //Jos molempien tuotteiden varastonarvo on nolla niin ei haittaa vaikka uusi tuote lˆytyy jo
+        //Jos molempien tuotteiden varastonarvo on nolla niin ei haittaa vaikka uusi tuote l√∂ytyy jo
         $query = "SELECT sum(saldo) saldo
                   FROM tuotepaikat
                   WHERE yhtio = '$kukarow[yhtio]'
@@ -133,7 +133,7 @@ elseif (is_uploaded_file($_FILES['userfile']['tmp_name']) !== TRUE and $tee == "
   }
   else {
     $error++;
-    echo "<font class='message'>".t("VANHAA TUOTENUMEROA EI L÷YDY").": $vantuoteno</font><br>";
+    echo "<font class='message'>".t("VANHAA TUOTENUMEROA EI L√ñYDY").": $vantuoteno</font><br>";
   }
 
   $failista   = "EI";
@@ -141,10 +141,10 @@ elseif (is_uploaded_file($_FILES['userfile']['tmp_name']) !== TRUE and $tee == "
 
 if ($error == 0 and $tee == "file") {
 
-  echo "<font class='message'>".t("Syˆtetyt tiedot ovat ok")."</font><br><br>";
+  echo "<font class='message'>".t("Sy√∂tetyt tiedot ovat ok")."</font><br><br>";
   flush();
 
-  echo "<font class='message'>".t("Aloitellaan p‰ivitys, t‰m‰ voi kest‰‰ hetken").".  <br></font>";
+  echo "<font class='message'>".t("Aloitellaan p√§ivitys, t√§m√§ voi kest√§√§ hetken").".  <br></font>";
   flush();
 
   $tulos = array();
@@ -154,7 +154,7 @@ if ($error == 0 and $tee == "file") {
   $locktables['sanakirja'] = "sanakirja";
   $locktables['avainsana'] = "avainsana";
 
-  //$dbkanta --> tulee salasanat.php:st‰
+  //$dbkanta --> tulee salasanat.php:st√§
   $query  = "SHOW TABLES FROM $dbkanta";
   $tabresult = pupe_query($query);
 
@@ -168,7 +168,7 @@ if ($error == 0 and $tee == "file") {
         $tulos[] = $tables[0]."##".$fields[0];
       }
     }
-    // puun_alkioissa on liitos-kent‰ss‰ tuotenumeroita, huomioidaan nekin
+    // puun_alkioissa on liitos-kent√§ss√§ tuotenumeroita, huomioidaan nekin
     if ($tables[0] == 'puun_alkio') {
       $locktables[$tables[0]] = $tables[0];
       $tulos[] = $tables[0]."##liitos";
@@ -184,11 +184,11 @@ if ($error == 0 and $tee == "file") {
   $montako = count($tulos);
 
   if ($montako > 0) {
-    echo "<font class='message'>".t("Lˆydettiin paikat joita pit‰‰ muuttaa").": $montako kappaletta.</font><br>";
+    echo "<font class='message'>".t("L√∂ydettiin paikat joita pit√§√§ muuttaa").": $montako kappaletta.</font><br>";
     flush();
   }
   else {
-    die ("<font class='error'><br>".t("Ei lˆydetty muutettavia paikkoja, ei uskalleta tehd‰ mit‰‰n")."!</font>");
+    die ("<font class='error'><br>".t("Ei l√∂ydetty muutettavia paikkoja, ei uskalleta tehd√§ mit√§√§n")."!</font>");
   }
 
   // Haetaan tilausrivien kaikki tyypit
@@ -222,16 +222,16 @@ if ($error == 0 and $tee == "file") {
   if ($perhetyyppi == "") $perhetyyppi = "''";
   if ($kielet == "") $kielet = "''";
 
-  echo "<font class='message'>".t("Nyt ollan ker‰tty tietokannasta kaikki tarpeellinen")."<br>".t("Aloitellaan muutos")."...</font><br>";
+  echo "<font class='message'>".t("Nyt ollan ker√§tty tietokannasta kaikki tarpeellinen")."<br>".t("Aloitellaan muutos")."...</font><br>";
   flush();
 
   if ($failista == "JOO") {
-    $file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
+    $file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep√§onnistui")."!");
   }
   else {
     $tmpfname = tempnam("/tmp", "Vaihdatuoteno");
     file_put_contents($tmpfname, "$vantuoteno\t$uustuoteno");
-    $file = fopen($tmpfname,"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
+    $file = fopen($tmpfname,"r") or die (t("Tiedoston avaus ep√§onnistui")."!");
   }
 
   while ($rivi = fgets($file)) {
@@ -281,7 +281,7 @@ if ($error == 0 and $tee == "file") {
                     kuka          = '$kukarow[kuka]'";
           $result2 = pupe_query($query);
 
-          echo "<font class='message'>".t("Vaihdetaan tuotenumero ja siirret‰‰n historiatiedot").": $vantuoteno --> $uustuoteno.</font><br>";
+          echo "<font class='message'>".t("Vaihdetaan tuotenumero ja siirret√§√§n historiatiedot").": $vantuoteno --> $uustuoteno.</font><br>";
           flush();
 
           foreach ($tulos as $saraketaulu) {
@@ -299,7 +299,7 @@ if ($error == 0 and $tee == "file") {
               $result2 = pupe_query($query);
             }
             elseif ($taulu == 'tuotepaikat' and $uusi_on_jo != "SAMA") {
-              // Tuotepaikat k‰sitell‰‰n hieman eri lailla
+              // Tuotepaikat k√§sitell√§√§n hieman eri lailla
               $query = "SELECT *
                         FROM tuotepaikat
                         WHERE yhtio = '$kukarow[yhtio]'
@@ -308,7 +308,7 @@ if ($error == 0 and $tee == "file") {
 
               while ($pairow = mysql_fetch_array($paires)) {
 
-                // Tutkitaan lˆytyykˆ vanhan tuotteen paikka uudella tuoteella
+                // Tutkitaan l√∂ytyyk√∂ vanhan tuotteen paikka uudella tuoteella
                 $query = "SELECT *
                           FROM tuotepaikat
                           WHERE yhtio   = '$kukarow[yhtio]'
@@ -353,7 +353,7 @@ if ($error == 0 and $tee == "file") {
                 }
               }
 
-              // Fixaataan jottei meille j‰isi useita oletuspaikkoja
+              // Fixaataan jottei meille j√§isi useita oletuspaikkoja
               $query = "SELECT *
                         FROM tuotepaikat
                         WHERE yhtio  = '$kukarow[yhtio]'
@@ -432,12 +432,12 @@ if ($error == 0 and $tee == "file") {
                 while ($ahrow = mysql_fetch_assoc($hresult)) {
 
                   $tarksql = "SELECT *
-                        FROM puun_alkio
-                        where yhtio    = '$kukarow[yhtio]'
-                        and liitos     = '$uustuoteno'
-                        and kieli     = '$ahrow[kieli]'
-                        and laji     = '$ahrow[laji]'
-                        and puun_tunnus = '$ahrow[puun_tunnus]'";
+                              FROM puun_alkio
+                              where yhtio     = '$kukarow[yhtio]'
+                              and liitos      = '$uustuoteno'
+                              and kieli       = '$ahrow[kieli]'
+                              and laji        = '$ahrow[laji]'
+                              and puun_tunnus = '$ahrow[puun_tunnus]'";
                   $tarkesult = pupe_query($tarksql);
 
                   if (mysql_num_rows($tarkesult) == 0) {
@@ -511,7 +511,7 @@ if ($error == 0 and $tee == "file") {
 
             if (mysql_num_rows($korvvresult) != '0') {
               $korvid = mysql_fetch_array($korvvresult);
-              //echo "lˆytyi korvid"."$korvid[maxi]"." $vantuoteno --> $uustuoteno<br>";
+              //echo "l√∂ytyi korvid"."$korvid[maxi]"." $vantuoteno --> $uustuoteno<br>";
               $loytyikorv = '1';
               $jarjestys = $korvid['jarjestys'] + 1;
             }
@@ -542,7 +542,7 @@ if ($error == 0 and $tee == "file") {
               $result4 = pupe_query($query);
             }
 
-            // p‰ivitet‰‰n j‰rjestykset muille paitsi "p‰‰tuotteelle", "vanhatuotteelle", nollille ja isommille j‰rjestyksille kuin mik‰ on "vanhatuotteella"
+            // p√§ivitet√§√§n j√§rjestykset muille paitsi "p√§√§tuotteelle", "vanhatuotteelle", nollille ja isommille j√§rjestyksille kuin mik√§ on "vanhatuotteella"
             $query = "UPDATE korvaavat
                       SET jarjestys = jarjestys + 1
                       WHERE id       = '$korvid[maxi]'
@@ -556,11 +556,11 @@ if ($error == 0 and $tee == "file") {
           $lask++;
         }
         else {
-          echo t("UUSI TUOTENUMERO L÷YTYY JO")." $uustuoteno<br>";
+          echo t("UUSI TUOTENUMERO L√ñYTYY JO")." $uustuoteno<br>";
         }
       }
       else {
-        echo t("VANHAA TUOTENUMEROA EI L÷YDY")." $vantuoteno<br>";
+        echo t("VANHAA TUOTENUMEROA EI L√ñYDY")." $vantuoteno<br>";
       }
     }
 
@@ -584,19 +584,19 @@ if ($error == 0 and $tee == "file") {
         $lista  .= "\n Linkki tuotteen myynninseurantaan: {$palvelin2}raportit/myyntiseuranta.php?ruksit[70]=checked&ruksit[80]=checked&nimitykset=checked&ppa=$ppa&kka=$kka&vva=$vva&tuotteet_lista=$apu[0]\n";
       }
 
-      // Haetaan tuotep‰‰llikˆiden s‰hkˆpostiosoitteet esille.
-      $postisql  = "  SELECT kuka, nimi, eposti
-              FROM kuka
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND myyja = '$key'";
+      // Haetaan tuotep√§√§llik√∂iden s√§hk√∂postiosoitteet esille.
+      $postisql  = "SELECT kuka, nimi, eposti
+                    FROM kuka
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    AND myyja   = '$key'";
       $resuposti = pupe_query($postisql);
 
       while ($posti = mysql_fetch_assoc($resuposti)) {
 
         $meili = t("Tuotteiden tuotenumerot on vaihtuneet")."\n";
         $meili .= "\nTervehdys $posti[nimi] \n";
-        $meili .= "\nK‰ytt‰j‰ $kukarow[nimi] on vaihtanut tuotteiden tuotenumeroita\n";
-        $meili .= t("Pyyntˆ").":\n".str_replace("\r\n","\n","Tarkista seuraavilta tuotteilta hinnat ja asiakasalennukset\n");
+        $meili .= "\nK√§ytt√§j√§ $kukarow[nimi] on vaihtanut tuotteiden tuotenumeroita\n";
+        $meili .= t("Pyynt√∂").":\n".str_replace("\r\n","\n","Tarkista seuraavilta tuotteilta hinnat ja asiakasalennukset\n");
         $meili .= $lista;
 
         if ($posti['eposti'] == "") {
@@ -606,7 +606,7 @@ if ($error == 0 and $tee == "file") {
           $email_osoite = $posti['eposti'];
         }
 
-        $tulos = mail($email_osoite, mb_encode_mimeheader(t("Tuotteiden tuotenumerot on vaihtuneet")." $yhtiorow[nimi]", "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["postittaja_email"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+        $tulos = mail($email_osoite, mb_encode_mimeheader(t("Tuotteiden tuotenumerot on vaihtuneet")." $yhtiorow[nimi]", "UTF-8", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["postittaja_email"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
       }
     }
   }
@@ -617,7 +617,7 @@ if ($error == 0 and $tee == "file") {
   $tee = "";
 }
 elseif ($tee == "file") {
-  echo "<font class='error'>".t("Edell‰mainitut viat pit‰‰ korjata ennenkuin voidaan jatkaa")."!!!<br>".t("Mit‰‰n ei p‰ivitetty")."!!!<br><br>";
+  echo "<font class='error'>".t("Edell√§mainitut viat pit√§√§ korjata ennenkuin voidaan jatkaa")."!!!<br>".t("Mit√§√§n ei p√§ivitetty")."!!!<br><br>";
   $tee = "";
 }
 
@@ -629,7 +629,7 @@ if ($tee == "") {
       <table>
 
       <tr>
-        <td class='back' colspan='2'><br><font class='message'>".t("Sis‰‰nlue tiedostosta")."</font><hr></td>
+        <td class='back' colspan='2'><br><font class='message'>".t("Sis√§√§nlue tiedostosta")."</font><hr></td>
       </tr>
 
       <tr>
@@ -647,7 +647,7 @@ if ($tee == "") {
       </tr>
 
       <tr>
-        <td class='back' colspan='2'><br><font class='message'>".t("Tai syˆta tuotenumerot")."</font><hr></td>
+        <td class='back' colspan='2'><br><font class='message'>".t("Tai sy√∂ta tuotenumerot")."</font><hr></td>
       </tr>
 
       <tr>
@@ -661,11 +661,11 @@ if ($tee == "") {
       </tr>
 
       <tr>
-        <td class='back' colspan='2'><br><font class='message'>".t("Lis‰valinnat")."</font><hr></td>
+        <td class='back' colspan='2'><br><font class='message'>".t("Lis√§valinnat")."</font><hr></td>
       </tr>
 
       <tr>
-        <th>".t("J‰t‰ vanha tuotenumero uuden tuotteen korvaavaksi tuotteeksi")."</th>
+        <th>".t("J√§t√§ vanha tuotenumero uuden tuotteen korvaavaksi tuotteeksi")."</th>
         <td><input type='checkbox' name='jatavanha' value='jatavanha'</td>
       </tr>
 
@@ -688,12 +688,12 @@ if ($tee == "") {
   echo "</select></td>";
   echo "</tr>";
 
-  echo "  <tr><th>".t("Valitse vanhan tuotteen n‰kyvyys")."</th>";
+  echo "  <tr><th>".t("Valitse vanhan tuotteen n√§kyvyys")."</th>";
   echo "<td><select name='hinnastoon' ".js_alasvetoMaxWidth("hinnastoon", 200).">";
-  echo "  <option value='E'>".t("Tuotetta ei n‰ytet‰ hinnastossa, eik‰ verkkokaupassa")."</option>
-         <option value=''>".t("Tuote n‰ytet‰‰n hinnastossa, mutta ei verkkokaupassa")."</option>
-         <option value='W'>".t("Tuote n‰kyy hinnastossa ja verkkokaupassa")."</option>
-         <option value='V'>".t("Tuote n‰kyy hinnastossa sek‰ verkkokaupassa jos asiakkaalla asiakasalennus tai asiakashinta")."</option>";
+  echo "  <option value='E'>".t("Tuotetta ei n√§ytet√§ hinnastossa, eik√§ verkkokaupassa")."</option>
+         <option value=''>".t("Tuote n√§ytet√§√§n hinnastossa, mutta ei verkkokaupassa")."</option>
+         <option value='W'>".t("Tuote n√§kyy hinnastossa ja verkkokaupassa")."</option>
+         <option value='V'>".t("Tuote n√§kyy hinnastossa sek√§ verkkokaupassa jos asiakkaalla asiakasalennus tai asiakashinta")."</option>";
 
   echo "  </select></td></tr>";
 
@@ -705,14 +705,14 @@ if ($tee == "") {
   echo "  </select></td></tr>";
 
   echo "  <tr>
-      <th>".t("L‰het‰ s‰hkˆposti tuotep‰‰llikkˆille muutoksista")."</th>";
+      <th>".t("L√§het√§ s√§hk√∂posti tuotep√§√§llikk√∂ille muutoksista")."</th>";
   echo "  <td><input type='checkbox' name='muistutus' value='KYLLA'></td>";
   echo "  </tr>";
 
   echo "  </table>
       <br>
       <input type='hidden' name='tee' value='file'>
-      <input type='submit' value='".t("Siirr‰ tuotteen historia")."'>
+      <input type='submit' value='".t("Siirr√§ tuotteen historia")."'>
       </form>";
 }
 

@@ -16,12 +16,12 @@ if ($tee != 'PERUSTA') {
 }
 
 if ($tee == 'PERUSTA') {
-  //  Trimmataan tyhj‰t merkit
+  //  Trimmataan tyhj√§t merkit
   $uustuoteno = trim($uustuoteno);
 
   if ($uustuoteno == '') {
     $tee = 'AVALITTU';
-    $varaosavirhe = t("VIRHE: Uusi tuotenumero ei saa olla tyhj‰")."!";
+    $varaosavirhe = t("VIRHE: Uusi tuotenumero ei saa olla tyhj√§")."!";
   }
 }
 
@@ -43,7 +43,7 @@ if ($tee == 'PERUSTA') {
 
   if (mysql_num_rows($result) != 0 ) {
     $tee = 'HAKU';
-    $varaosavirhe = t("VIRHE: Uudella tuotenumerolla")." $uustuoteno ".t("lˆytyy jo tuote, ei voida perustaa")."!";
+    $varaosavirhe = t("VIRHE: Uudella tuotenumerolla")." $uustuoteno ".t("l√∂ytyy jo tuote, ei voida perustaa")."!";
   }
   else {
     $query = "SELECT *
@@ -54,14 +54,14 @@ if ($tee == 'PERUSTA') {
 
     if (mysql_num_rows($stresult) == 0) {
       $tee = 'HAKU';
-      $varaosavirhe = t("VIRHE: Vanha tuote")." $tuoteno ".t("on kadonnut, ei uskalleta tehd‰ mit‰‰n")."!";
+      $varaosavirhe = t("VIRHE: Vanha tuote")." $tuoteno ".t("on kadonnut, ei uskalleta tehd√§ mit√§√§n")."!";
     }
     else {
       $otsikkorivi = mysql_fetch_array($stresult);
 
-      // tuotepaikat perustetan tuotetarkista.inciss‰, ei tehd‰ niit‰ t‰ss‰
+      // tuotepaikat perustetan tuotetarkista.inciss√§, ei tehd√§ niit√§ t√§ss√§
 
-      // tehd‰‰n vanhasta tuotteesta 1:1 kopio...
+      // tehd√§√§n vanhasta tuotteesta 1:1 kopio...
       $query = "INSERT into tuote set ";
 
       for ($i = 0; $i < mysql_num_fields($stresult); $i++) {
@@ -85,7 +85,7 @@ if ($tee == 'PERUSTA') {
         elseif (mysql_field_name($stresult,$i) == 'luontiaika' or mysql_field_name($stresult,$i) == 'muutospvm') {
           $query .= mysql_field_name($stresult,$i)."=now(),";
         }
-        // n‰m‰ kent‰t tyhjennet‰‰n
+        // n√§m√§ kent√§t tyhjennet√§√§n
         elseif (mysql_field_name($stresult,$i) == 'kehahin' or
             mysql_field_name($stresult,$i) == 'vihahin' or
             mysql_field_name($stresult,$i) == 'vihapvm' or
@@ -106,7 +106,7 @@ if ($tee == 'PERUSTA') {
 
       $tuote_id = mysql_insert_id();
 
-      //  T‰m‰ funktio tekee myˆs oikeustarkistukset!
+      //  T√§m√§ funktio tekee my√∂s oikeustarkistukset!
       synkronoi($kukarow["yhtio"], "tuote", $tuote_id, "", "");
 
       $query = "SELECT *
@@ -147,7 +147,7 @@ if ($tee == 'PERUSTA') {
             }
           }
 
-          // Tehd‰‰n vanhoista tuotteen_toimittajista 1:1 kopio...
+          // Tehd√§√§n vanhoista tuotteen_toimittajista 1:1 kopio...
           $query  = "INSERT into tuotteen_toimittajat set ";
           $query .= substr($query_fields, 0, -1);
           $query .= " ON DUPLICATE KEY UPDATE ";
@@ -201,7 +201,7 @@ if ($tee == 'PERUSTA') {
             }
           }
 
-          // Tehd‰‰n vanhasta alkiosta kopio...
+          // Tehd√§√§n vanhasta alkiosta kopio...
           $query = "INSERT into puun_alkio set ";
           $query .= substr($query_fields, 0, -1);
           $query .= " ON DUPLICATE KEY UPDATE ";
@@ -215,9 +215,9 @@ if ($tee == 'PERUSTA') {
         }
       }
 
-      //  L‰hetet‰‰n mailia t‰st‰ eteenp‰in jos meill‰ on vastaanottajia
+      //  L√§hetet√§√§n mailia t√§st√§ eteenp√§in jos meill√§ on vastaanottajia
       if ($yhtiorow["tuotekopio_email"] != "") {
-        $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+        $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n";
         $header .= "MIME-Version: 1.0\n" ;
 
         $query = "SELECT *
@@ -226,9 +226,9 @@ if ($tee == 'PERUSTA') {
         $yres = pupe_query($query);
         $yrow = mysql_fetch_array($yres);
 
-        $content = $kukarow["nimi"]." ".t("kopioi yhtiˆn")." $yrow[nimi] ".t("tuotteen")." '$tuoteno' ".t("yhtiˆn")." $yhtiorow[nimi] ".t("tuotteeksi")." '$uustuoteno'\n\n";
+        $content = $kukarow["nimi"]." ".t("kopioi yhti√∂n")." $yrow[nimi] ".t("tuotteen")." '$tuoteno' ".t("yhti√∂n")." $yhtiorow[nimi] ".t("tuotteeksi")." '$uustuoteno'\n\n";
 
-        mail($yhtiorow["tuotekopio_email"], mb_encode_mimeheader(t("Tuotteita kopioitu"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+        mail($yhtiorow["tuotekopio_email"], mb_encode_mimeheader(t("Tuotteita kopioitu"), "UTF-8", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
       }
 
       $toim   = 'tuote';
@@ -263,7 +263,7 @@ if ($tee == 'HAKU') {
 
     require("inc/tuotehaku.inc");
 
-    //on vaan lˆytynyt 1 muuten tulis virhett‰ ja ulosta
+    //on vaan l√∂ytynyt 1 muuten tulis virhett√§ ja ulosta
     if ($tee == 'HAKU' and $ulos == '' and $varaosavirhe == '' and $tuoteno != '') {
       $tee = 'AVALITTU';
     }

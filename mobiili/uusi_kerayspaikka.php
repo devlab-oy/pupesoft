@@ -90,12 +90,12 @@ if (isset($submit) and trim($submit) != '') {
 
       // Parsitaan uusi tuotepaikka
       // Jos tuotepaikka on luettu viivakoodina, muotoa (C21 045) tai (21C 03V)
-      if (preg_match('/^([a-zÂ‰ˆ#0-9]{2,4} [a-zÂ‰ˆ#0-9]{2,4})/i', $tuotepaikka)) {
+      if (preg_match('/^([a-z√•√§√∂#0-9]{2,4} [a-z√•√§√∂#0-9]{2,4})/i', $tuotepaikka)) {
 
-        // Pilkotaan viivakoodilla luettu tuotepaikka v‰lilyˆnnist‰
+        // Pilkotaan viivakoodilla luettu tuotepaikka v√§lily√∂nnist√§
         list($alku, $loppu) = explode(' ', $tuotepaikka);
 
-        // M‰ts‰t‰‰n numerot ja kirjaimet erilleen
+        // M√§ts√§t√§√§n numerot ja kirjaimet erilleen
         preg_match_all('/([0-9]+)|([a-z]+)/i', $alku, $alku);
         preg_match_all('/([0-9]+)|([a-z]+)/i', $loppu, $loppu);
 
@@ -105,32 +105,32 @@ if (isset($submit) and trim($submit) != '') {
         $hyllyvali = $loppu[0][0];
         $hyllytaso = $loppu[0][1];
 
-        // Kaikkia tuotepaikkoja ei pystyt‰ parsimaan
+        // Kaikkia tuotepaikkoja ei pystyt√§ parsimaan
         if ($hyllyalue == '' or $hyllynro == '' or $hyllyvali == '' or $hyllytaso == '') {
-          $errors[] = t("Tuotepaikan haussa virhe, yrit‰ syˆtt‰‰ tuotepaikka k‰sin") . " ($tuotepaikka)";
+          $errors[] = t("Tuotepaikan haussa virhe, yrit√§ sy√∂tt√§√§ tuotepaikka k√§sin") . " ($tuotepaikka)";
         }
       }
-      // Tuotepaikka syˆtetty manuaalisesti (C-21-04-5) tai (C 21 04 5)
+      // Tuotepaikka sy√∂tetty manuaalisesti (C-21-04-5) tai (C 21 04 5)
       elseif (strstr($tuotepaikka, '-') or strstr($tuotepaikka, ' ')) {
-        // Parsitaan tuotepaikka omiin muuttujiin (erotelto v‰lilyˆnnill‰)
+        // Parsitaan tuotepaikka omiin muuttujiin (erotelto v√§lily√∂nnill√§)
         if (preg_match('/\w+\s\w+\s\w+\s\w+/i', $tuotepaikka)) {
           list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode(' ', $tuotepaikka);
         }
-        // (erotelto v‰liviivalla)
+        // (erotelto v√§liviivalla)
         elseif (preg_match('/\w+-\w+-\w+-\w+/i', $tuotepaikka)) {
           list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode('-', $tuotepaikka);
         }
 
-        // Ei saa olla tyhji‰ kentti‰
+        // Ei saa olla tyhji√§ kentti√§
         if ($hyllyalue == '' or $hyllynro == '' or $hyllyvali == '' or $hyllytaso == '') {
           $errors[] = t("Virheellinen tuotepaikka") . ". ($tuotepaikka)";
         }
       }
       else {
-        $errors[] = t("Virheellinen tuotepaikka, yrit‰ syˆtt‰‰ tuotepaikka k‰sin") . " ($tuotepaikka)";
+        $errors[] = t("Virheellinen tuotepaikka, yrit√§ sy√∂tt√§√§ tuotepaikka k√§sin") . " ($tuotepaikka)";
       }
 
-      // Tarkistetaan ett‰ tuotepaikka on olemassa
+      // Tarkistetaan ett√§ tuotepaikka on olemassa
       if ($onko_varaston_hyllypaikat_kaytossa and count($errors) == 0 and !tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso)) {
         $errors[] = t("Varaston tuotepaikkaa ($hyllyalue-$hyllynro-$hyllyvali-$hyllytaso) ei ole perustettu").'.';
       }
@@ -188,17 +188,17 @@ if (isset($submit) and trim($submit) != '') {
             "hyllytaso" => $hyllytaso
           );
 
-        // Tarkistetaan onko syˆtetty hyllypaikka jo t‰lle tuotteelle
-        $tuotteen_oma_hyllypaikka = "  SELECT * FROM tuotepaikat
-                        WHERE tuoteno = '$row[tuoteno]'
-                        AND yhtio     = '{$kukarow['yhtio']}'
-                        AND hyllyalue = '$hyllyalue'
-                        AND hyllynro  = '$hyllynro'
-                        AND hyllyvali = '$hyllyvali'
-                        AND hyllytaso = '$hyllytaso'";
+        // Tarkistetaan onko sy√∂tetty hyllypaikka jo t√§lle tuotteelle
+        $tuotteen_oma_hyllypaikka = "SELECT * FROM tuotepaikat
+                                     WHERE tuoteno = '$row[tuoteno]'
+                                     AND yhtio     = '{$kukarow['yhtio']}'
+                                     AND hyllyalue = '$hyllyalue'
+                                     AND hyllynro  = '$hyllynro'
+                                     AND hyllyvali = '$hyllyvali'
+                                     AND hyllytaso = '$hyllytaso'";
         $oma_paikka = mysql_query($tuotteen_oma_hyllypaikka);
 
-        // Jos syˆtetty‰ paikkaa ei ole t‰m‰n tuotteen, lis‰t‰‰n uusi tuotepaikka
+        // Jos sy√∂tetty√§ paikkaa ei ole t√§m√§n tuotteen, lis√§t√§√§n uusi tuotepaikka
         if (mysql_num_rows($oma_paikka) == 0) {
 
           if (isset($tullaan) and $tullaan == 'tuotteen_hyllypaikan_muutos') {
@@ -211,7 +211,7 @@ if (isset($submit) and trim($submit) != '') {
           lisaa_tuotepaikka($row['tuoteno'], $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $_viesti, '', $halytysraja, $tilausmaara);
         }
         else {
-          // Nollataan poistettava kentt‰ varmuuden vuoksi
+          // Nollataan poistettava kentt√§ varmuuden vuoksi
           $query = "UPDATE tuotepaikat SET
                     poistettava   = ''
                     WHERE tuoteno = '{$row['tuoteno']}'
@@ -223,7 +223,7 @@ if (isset($submit) and trim($submit) != '') {
           pupe_query($query);
         }
 
-        // P‰ivitet‰‰n oletuspaikat jos tehd‰‰n t‰st‰ oletuspaikka
+        // P√§ivitet√§√§n oletuspaikat jos tehd√§√§n t√§st√§ oletuspaikka
         if ($oletus == 'X') {
           // Asetetaan oletuspaikka uusiksi
           paivita_oletuspaikka($row['tuoteno'], $hylly, true);
@@ -232,7 +232,7 @@ if (isset($submit) and trim($submit) != '') {
 
             // Lukitaan taulut saldojen siirtoa varten
             $query = "LOCK TABLE
-                  tuotepaikat WRITE";
+                      tuotepaikat WRITE";
             $result = pupe_query($query);
 
             $query = "UPDATE tuotepaikat SET
@@ -253,18 +253,18 @@ if (isset($submit) and trim($submit) != '') {
 
           }
 
-          // Siirret‰‰n saldot jos on siirrett‰v‰‰
+          // Siirret√§√§n saldot jos on siirrett√§v√§√§
           if ($siirra_saldot == 'on' and isset($saldo) and $saldo['myytavissa'] > 0 and $tuote['sarjanumeroseuranta'] == '') {
 
             // Lukitaan taulut saldojen siirtoa varten
             $query = "LOCK TABLE
-                  tuotepaikat WRITE,
-                  tapahtuma WRITE,
-                  tuote READ,
-                  tilausrivi WRITE";
+                      tuotepaikat WRITE,
+                      tapahtuma WRITE,
+                      tuote READ,
+                      tilausrivi WRITE";
             $result = pupe_query($query);
 
-            // Tarkistetaan lˆytyykˆ tuotepaikka MISTƒ saldot siirret‰‰n
+            // Tarkistetaan l√∂ytyyk√∂ tuotepaikka MIST√Ñ saldot siirret√§√§n
             $query = "SELECT *
                       FROM tuotepaikat
                       WHERE yhtio='{$kukarow['yhtio']}'
@@ -276,11 +276,11 @@ if (isset($submit) and trim($submit) != '') {
             $result = pupe_query($query);
 
             if (mysql_num_rows($result) == 0) {
-              echo "<font class='error'>". t("Tuotepaikkaa josta siirret‰‰n ei lˆydy") . "</font><br>";
+              echo "<font class='error'>". t("Tuotepaikkaa josta siirret√§√§n ei l√∂ydy") . "</font><br>";
               exit();
             }
 
-            // Tarkistetaan lˆytyykˆ tuotepaikka MIHIN saldot siirret‰‰n
+            // Tarkistetaan l√∂ytyyk√∂ tuotepaikka MIHIN saldot siirret√§√§n
             $query = "SELECT *
                       FROM tuotepaikat
                       WHERE yhtio='{$kukarow['yhtio']}'
@@ -292,12 +292,12 @@ if (isset($submit) and trim($submit) != '') {
             $result = pupe_query($query);
 
             if (mysql_num_rows($result) == 0) {
-              echo "<font class='error'>". t("Tuotepaikkaa johon siirret‰‰n ei lˆydy") . "</font><br>";
+              echo "<font class='error'>". t("Tuotepaikkaa johon siirret√§√§n ei l√∂ydy") . "</font><br>";
               exit();
             }
 
-            // Siirret‰‰n saldot vanhasta oletuspaikasta uuteen oletuspaikkaan
-            // Poistetaan VANHALTA tuotepaikalta siirrett‰v‰ m‰‰r‰
+            // Siirret√§√§n saldot vanhasta oletuspaikasta uuteen oletuspaikkaan
+            // Poistetaan VANHALTA tuotepaikalta siirrett√§v√§ m√§√§r√§
             // Saldojen siirroissa vanha tuotepaikka merkataan aina poistettavaksi
             $query = "UPDATE tuotepaikat SET
                       saldo         = saldo - {$saldo['myytavissa']},
@@ -313,7 +313,7 @@ if (isset($submit) and trim($submit) != '') {
                       AND hyllytaso = '{$row['hyllytaso']}'";
             $result = pupe_query($query);
 
-            // Lis‰t‰‰n UUTEEN tuotepaikkaan siirrett‰v‰ m‰‰r‰
+            // Lis√§t√§√§n UUTEEN tuotepaikkaan siirrett√§v√§ m√§√§r√§
             $query = "UPDATE tuotepaikat SET
                       saldo         = saldo + {$saldo['myytavissa']},
                       saldoaika     = now(),
@@ -351,7 +351,7 @@ if (isset($submit) and trim($submit) != '') {
             $keskihankintahinta = $kehahin_row['kehahin'];
 
             // Tapahtumat
-            // insert into tapahtumat "v‰hennettiin"
+            // insert into tapahtumat "v√§hennettiin"
             $tapahtuma_query = "INSERT INTO tapahtuma SET
                                 yhtio      = '{$kukarow['yhtio']}',
                                 tuoteno    = '{$row['tuoteno']}',
@@ -363,12 +363,12 @@ if (isset($submit) and trim($submit) != '') {
                                 hyllyvali  = '{$row['hyllyvali']}',
                                 hyllytaso  = '{$row['hyllytaso']}',
                                 rivitunnus = '0',
-                                selite     = '".t("Paikasta")." $mista ".t("v‰hennettiin")." {$saldo['myytavissa']}',
+                                selite     = '".t("Paikasta")." $mista ".t("v√§hennettiin")." {$saldo['myytavissa']}',
                                 laatija    = '$kukarow[kuka]',
                                 laadittu   = now()";
             $result = pupe_query($tapahtuma_query);
 
-            // insert into tapahtumat "lis‰ttiin"
+            // insert into tapahtumat "lis√§ttiin"
             $tapahtuma_query = "INSERT INTO tapahtuma SET
                                 yhtio      = '{$kukarow['yhtio']}',
                                 tuoteno    = '{$row['tuoteno']}',
@@ -380,12 +380,12 @@ if (isset($submit) and trim($submit) != '') {
                                 hyllyvali  = '$hyllyvali',
                                 hyllytaso  = '$hyllytaso',
                                 rivitunnus = '0',
-                                selite     = '".t("Paikalle")." $minne ".t("lis‰ttiin")." {$saldo['myytavissa']}',
+                                selite     = '".t("Paikalle")." $minne ".t("lis√§ttiin")." {$saldo['myytavissa']}',
                                 laatija    = '$kukarow[kuka]',
                                 laadittu   = now()";
             $result = pupe_query($tapahtuma_query);
 
-            // P‰ivitet‰‰n vanhan tuotepaikan avoimet tulouttamattomat ostot uudelle paikalle
+            // P√§ivitet√§√§n vanhan tuotepaikan avoimet tulouttamattomat ostot uudelle paikalle
             $ostot_query = "UPDATE tilausrivi SET
                             hyllyalue     = '$hyllyalue',
                             hyllynro      = '$hyllynro',
@@ -461,7 +461,7 @@ elseif (isset($tullaan) and $tullaan == 'tuotteen_hyllypaikan_muutos') {
 // View
 echo "<div class='header'>";
 echo "<button onclick='window.location.href=\"$paluu_url\"' class='button left'><img src='back2.png'></button>";
-echo "<h1>",t("UUSI KERƒYSPAIKKA"),"</h1></div>";
+echo "<h1>",t("UUSI KER√ÑYSPAIKKA"),"</h1></div>";
 
 // Virheet
 if (isset($errors)) {
@@ -488,7 +488,7 @@ if (!isset($tullaan) or $tullaan != 'tuotteen_hyllypaikan_muutos') {
 }
 
 echo "  <tr>
-      <th>",t("Ker‰yspaikka"),"</th>
+      <th>",t("Ker√§yspaikka"),"</th>
       <td colspan='3'>{$row['hyllyalue']} {$row['hyllynro']} {$row['hyllyvali']} {$row['hyllytaso']}</td>
     </tr>
     <tr>
@@ -496,31 +496,31 @@ echo "  <tr>
       <td><input type='text' name='tuotepaikka' value='{$tuotepaikka}' /></td>
     </tr>
     <tr>
-      <th>",t("H‰lytysraja"),"</td>
+      <th>",t("H√§lytysraja"),"</td>
       <td><input type='text' name='halytysraja' value='' /></th>
     </tr>
     <tr>
-      <th>",t("Tilausm‰‰r‰"),"</td>
+      <th>",t("Tilausm√§√§r√§"),"</td>
       <td><input type='text' name='tilausmaara' value='' /></th>
     </tr>";
 
 /*
-Jos yhtiˆll‰ ei ole ns. oletuspaikka-k‰sitett‰ (varastoja on paljon ja ei ole "p‰‰varastoa", joten ei tiedet‰ miss‰ on oletuspaikka),
-niin ei anneta siirt‰‰ saldoja tai vaihtaa oletuspaikkaa
+Jos yhti√∂ll√§ ei ole ns. oletuspaikka-k√§sitett√§ (varastoja on paljon ja ei ole "p√§√§varastoa", joten ei tiedet√§ miss√§ on oletuspaikka),
+niin ei anneta siirt√§√§ saldoja tai vaihtaa oletuspaikkaa
 */
 $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
 
 if (mysql_num_rows($toimipaikat_res) == 0) {
 
   echo "  <tr>
-        <td colspan='2'>",t("Tee t‰st‰ oletuspaikka"),"
+        <td colspan='2'>",t("Tee t√§st√§ oletuspaikka"),"
         <input type='hidden' name='oletuspaikka[]' value='default' />
         <input type='checkbox' id='oletuspaikka' name='oletuspaikka[]' {$oletuspaikka_chk} /></td>
       </tr>";
 
   if (!isset($tullaan) or $tullaan != 'tuotteen_hyllypaikan_muutos') {
     echo "  <tr>
-          <td colspan='2'>",t("Siirr‰ saldo")," ({$saldo['myytavissa']})
+          <td colspan='2'>",t("Siirr√§ saldo")," ({$saldo['myytavissa']})
           <input type='hidden' name='siirra_saldot[]' value='default' />
           <input type='checkbox' id='siirra_saldot' name='siirra_saldot[]' {$siirra_saldot_chk}/>
           </td>
@@ -574,12 +574,12 @@ $(document).ready(function() {
     }
     else {
       if ($('#poista_vanha_tuotepaikka')) {
-        // Tyhjennet‰‰n ja disabloidaan poista vanha tuotepaikka checkbox
+        // Tyhjennet√§√§n ja disabloidaan poista vanha tuotepaikka checkbox
         $('#poista_vanha_tuotepaikka').attr('disabled', 'disabled');
         $('#poista_vanha_tuotepaikka').removeAttr('checked');
       }
       else {
-        // Tyhjennet‰‰n ja disabloidaan siirra saldot checkbox
+        // Tyhjennet√§√§n ja disabloidaan siirra saldot checkbox
         $('#siirra_saldot').attr('disabled', 'disabled');
         $('#siirra_saldot').removeAttr('checked');
       }

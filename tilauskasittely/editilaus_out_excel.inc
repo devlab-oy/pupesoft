@@ -4,7 +4,7 @@
 # toimittajanumero
 # tilausnumero
 # tuotekoodi
-# m‰‰r‰
+# m√§√§r√§
 
 $query_ale_lisa = generoi_alekentta("O");
 
@@ -27,7 +27,7 @@ $query = "SELECT tilausrivi.tunnus,
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) == 0) {
-  echo "<font class='error'>".t("L‰hetett‰vi‰ tilausrivej‰ ei lˆydy")."</font>";
+  echo "<font class='error'>".t("L√§hetett√§vi√§ tilausrivej√§ ei l√∂ydy")."</font>";
 }
 else {
 

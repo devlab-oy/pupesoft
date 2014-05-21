@@ -4,7 +4,7 @@ $ostotilaus = hae_lasku($laskurow['tunnus']);
 $ostotilaus['tilausrivit'] = hae_laskun_tilausrivit($laskurow['tunnus'], array('O'), generoi_sorttauskentta($yhtiorow["ostotilauksen_jarjestys"]), $yhtiorow['ostotilauksen_jarjestys_suunta']);
 
 if (empty($ostotilaus['tilausrivit'])) {
-  echo "<font class='error'>".t("L‰hetett‰vi‰ tilausrivej‰ ei lˆydy")."</font><br/>";
+  echo "<font class='error'>".t("L√§hetett√§vi√§ tilausrivej√§ ei l√∂ydy")."</font><br/>";
 }
 else {
   $xml_editilaus = $pupe_root_polku."/dataout/xml-order-$laskurow[tunnus].xml";

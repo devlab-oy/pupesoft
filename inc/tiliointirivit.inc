@@ -1,6 +1,6 @@
 <?php
 
-// Annetaan mahdollisuus tehd‰ uusi tiliˆinti, jos siihen on oikeus
+// Annetaan mahdollisuus tehd√§ uusi tili√∂inti, jos siihen on oikeus
 
 // Onko tosite liitetty saapumiseen
 $query = "SELECT nimi, laskunro
@@ -13,7 +13,7 @@ $keikres = pupe_query($query);
 if (mysql_num_rows($keikres) > 0) {
   $keikrow = mysql_fetch_assoc($keikres);
 
-  echo "<br><br><font class='message'>".t("Lasku on liitetty saapumiseen, alv tiliˆintej‰ ei voi muuttaa")."! ".t("Saapuminen").": $keikrow[nimi] / $keikrow[laskunro]</font>";
+  echo "<br><br><font class='message'>".t("Lasku on liitetty saapumiseen, alv tili√∂intej√§ ei voi muuttaa")."! ".t("Saapuminen").": $keikrow[nimi] / $keikrow[laskunro]</font>";
 }
 
 if (!isset($alv_tili))      $alv_tili = "";
@@ -39,7 +39,7 @@ if (!isset($liitostunnus))     $liitostunnus = 0;
 if (!isset($tapahtumatunnus))   $tapahtumatunnus = 0;
 if (!isset($summa_valuutassa))  $summa_valuutassa = "";
 
-// Otetaan yhtiˆn oletus jos ei olla submitattu....
+// Otetaan yhti√∂n oletus jos ei olla submitattu....
 if (!isset($tilirivformi))    $grouppaa = $yhtiorow["tositteen_tilioinnit"];
 
 echo "<br>";
@@ -62,7 +62,7 @@ echo "</tr>";
 if ($oikeurow['paivitys'] == 1 and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3)) {
 
   if ($ok != 1) {
-    // Annetaan tyhj‰t tiedot, jos rivi oli virheetˆn
+    // Annetaan tyhj√§t tiedot, jos rivi oli virheet√∂n
     $tili = '';
     $kustp = '';
     $kohde = '';
@@ -181,7 +181,7 @@ if ($oikeurow['paivitys'] == 1 and ($kukarow['taso'] == 2 or $kukarow['taso'] ==
 
   echo "<td valign='top'>";
 
-  // haetaan kaikki tiliˆintien tapahtumap‰iv‰t plus unionilla t‰m‰ p‰iv‰ mukaan
+  // haetaan kaikki tili√∂intien tapahtumap√§iv√§t plus unionilla t√§m√§ p√§iv√§ mukaan
   $query = "(SELECT distinct(tapvm) pvm
              FROM tiliointi
              WHERE yhtio = '$kukarow[yhtio]' and ltunnus = '$tunnus' and tapvm >= '$yhtiorow[tilikausi_alku]')
@@ -204,7 +204,7 @@ if ($oikeurow['paivitys'] == 1 and ($kukarow['taso'] == 2 or $kukarow['taso'] ==
   }
   else {
     $tiliointirow = mysql_fetch_assoc($result);
-    // tapahtumap‰iv‰ on vanhalla tilikaudella, ei anneta lis‰t‰ kun t‰lle p‰iv‰lle
+    // tapahtumap√§iv√§ on vanhalla tilikaudella, ei anneta lis√§t√§ kun t√§lle p√§iv√§lle
     if (strtotime($tiliointirow["pvm"]) < strtotime($yhtiorow['tilikausi_alku'])) {
       $tiliointirow["pvm"] = date("Y-m-d");
     }
@@ -279,7 +279,7 @@ if ($oikeurow['paivitys'] == 1 and ($kukarow['taso'] == 2 or $kukarow['taso'] ==
 
   if ($virhe != "") $virhe .= "<br>";
   echo "<input type = 'hidden' name = 'lisaselite' class='lisaselite' value='' />";
-  echo "<td valign='top'><input type='Submit' class='hae_lisaselite' value = '".t("Lis‰‰")."'></td>";
+  echo "<td valign='top'><input type='Submit' class='hae_lisaselite' value = '".t("Lis√§√§")."'></td>";
 
   if (strpos($_SERVER['SCRIPT_NAME'], "hyvak.php") === FALSE and strpos($_SERVER['SCRIPT_NAME'], "selaajamuuta.php") === FALSE) {
     echo "<td valign='top' class='back' nowrap><font class='error'>$virhe</font><input type='checkbox' name = 'jaksota'> ".t("Jaksota")."</td>";
@@ -300,7 +300,7 @@ if ($viivatut != 'on') {
   $lisa = " and tiliointi.korjattu = ''";
 }
 
-// tarkistetaan mik‰ tila otsikolla on
+// tarkistetaan mik√§ tila otsikolla on
 $query = "SELECT tila
           FROM lasku
           WHERE yhtio = '{$kukarow['yhtio']}'
@@ -360,7 +360,7 @@ $query = "SELECT
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) == 0) {
-  echo "<br><br><font class='message'>".t("Laskulla ei ole viel‰ tiliˆintirivej‰")."</font><br><br>";
+  echo "<br><br><font class='message'>".t("Laskulla ei ole viel√§ tili√∂intirivej√§")."</font><br><br>";
 }
 
 $maara = mysql_num_rows($result);
@@ -417,9 +417,9 @@ while ($trow = mysql_fetch_assoc($result)) {
   echo "</td>";
 
   if ($viivatut == "on") {
-    echo "<td class='$class' valign='top'>".tv1dateconv($trow["laadittu"], "pitk‰")." &raquo; $trow[laatija_nimi]";
+    echo "<td class='$class' valign='top'>".tv1dateconv($trow["laadittu"], "pitk√§")." &raquo; $trow[laatija_nimi]";
     if ($trow["korjattu"] != "") {
-      echo "<br>".tv1dateconv($trow["korjausaika"], "pitk‰")." &raquo; $trow[korjattu_nimi]";
+      echo "<br>".tv1dateconv($trow["korjausaika"], "pitk√§")." &raquo; $trow[korjattu_nimi]";
     }
     echo "</td>";
   }
@@ -440,10 +440,10 @@ while ($trow = mysql_fetch_assoc($result)) {
     and $oikeurow["paivitys"] == 1
     and ($kukarow["taso"] == 2 or $kukarow["taso"] == 3)
       and $trow["manuaali_esto"] == '') {
-    //Eli ei n‰ytet‰ muuta-nappia, jos ei oikeuksia,
-    //jos rivi on poistettu TAI se on tiliˆinnin viimeinen TAI se on lukittu,
-    //jos lasku on liitetty saapumiseen ja rivill‰ on veroa
-    //jos sen saa poistaa niin on hankalaa lˆyt‰‰ heitt‰v‰t tositteet...
+    //Eli ei n√§ytet√§ muuta-nappia, jos ei oikeuksia,
+    //jos rivi on poistettu TAI se on tili√∂innin viimeinen TAI se on lukittu,
+    //jos lasku on liitetty saapumiseen ja rivill√§ on veroa
+    //jos sen saa poistaa niin on hankalaa l√∂yt√§√§ heitt√§v√§t tositteet...
     //tai rivilla on manuaali_esto
     echo "<td>
         <form action = '$PHP_SELF#$tunnus' method='post'>
@@ -495,16 +495,16 @@ while ($trow = mysql_fetch_assoc($result)) {
   }
 
   if ($trow['korjattu'] == '') {
-    $yhtsum += $trow['summa']; //Rivi‰ ei ole poistettu
+    $yhtsum += $trow['summa']; //Rivi√§ ei ole poistettu
   }
 }
 
-$yhtok = t("Tiliˆinti kesken");
+$yhtok = t("Tili√∂inti kesken");
 $class = "error";
 $ok    = 0;
 
 if (round($yhtsum, 2) == 0) {
-  $yhtok = t("Tiliˆinti ok");
+  $yhtok = t("Tili√∂inti ok");
   $class = "ok";
   $ok    = 1;
 }
@@ -543,8 +543,8 @@ echo "<form action = '$PHP_SELF#$tunnus' method='post'>
     <input type='hidden' name = 'iframe_id' value = '$iframe_id'>
     <input type='hidden' name = 'jarj' value = '$jarj'>";
 
-echo "<input type='checkbox' name='viivatut' onclick='submit();' $viivatut> ".t('N‰yt‰ poistetut')."<br>";
-echo "<input type='checkbox' name='grouppaa' onclick='submit();' $grouppaa> ".t('Tiivistetty n‰kym‰');
+echo "<input type='checkbox' name='viivatut' onclick='submit();' $viivatut> ".t('N√§yt√§ poistetut')."<br>";
+echo "<input type='checkbox' name='grouppaa' onclick='submit();' $grouppaa> ".t('Tiivistetty n√§kym√§');
 echo "</form>";
 echo "</td>";
 

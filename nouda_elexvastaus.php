@@ -4,14 +4,14 @@ require('inc/parametrit.inc');
 
 echo "<font class='head'>".t("Nouda ELEX vastaussanoma").":</font><hr><br>";
 
-$responseFunction = array(  "TDE" => "Hylkäys",
-              "TEP" => "Menettelyyn luovutuksen epääminen",
+$responseFunction = array(  "TDE" => "HylkÃ¤ys",
+              "TEP" => "Menettelyyn luovutuksen epÃ¤Ã¤minen",
               "TER" => "Virhe",
-              "THY" => "Hyväksyminen",
-              "TLP" => "Lisäselvityspyyntö ",
+              "THY" => "HyvÃ¤ksyminen",
+              "TLP" => "LisÃ¤selvityspyyntÃ¶ ",
               "TLU" => "Vientimenettelyyn luovutus",
-              "TMI" => "Mitätöinti",
-              "TOI" => "Oikaisupäätös",
+              "TMI" => "MitÃ¤tÃ¶inti",
+              "TOI" => "OikaisupÃ¤Ã¤tÃ¶s",
               "TPV" => "Poistumisvahvistus ",
               "TTI" => "Tullin ilmoitus",
               "TVA" => "Vastaanotto");
@@ -34,7 +34,7 @@ $xmlstring = "        <FIExportResponse>
                                 <identification>FI002000</identification>
                             </Location>
                             <Party>
-                <name1>FI002000 Sähköinen tullauskeskus</name1>
+                <name1>FI002000 SÃ¤hkÃ¶inen tullauskeskus</name1>
                 <name2>Tulli</name2>
             <Contact>
             <name>ELEX</name>
@@ -57,12 +57,12 @@ $xmlstring = "        <FIExportResponse>
                             </UCR>
                         </GoodsShipment>
                     </Declaration>
-                    <Error> <!-- näitä voi olla usieita -->
+                    <Error> <!-- nÃ¤itÃ¤ voi olla usieita -->
                         <Pointer>
                             <documentSection>10</documentSection>
                             <sequence>1</sequence>
                         </Pointer>
-                        <additionalDescription>Asiakirjan koodi (N952)  ei löydy tietokannasta</additionalDescription>
+                        <additionalDescription>Asiakirjan koodi (N952)  ei lÃ¶ydy tietokannasta</additionalDescription>
                         <validation>12</validation>
                     </Error>
                 </Response>

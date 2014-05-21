@@ -5,9 +5,9 @@ echo "<font class='head'>Danskebank Factoring</font><hr><br>";
 
 if ($tee == "") {
 
-  echo "<font class='message'>Luodaan Danskebank Factoring siirtolista kaikista l‰hett‰m‰ttˆmist‰ factoring laskuista.</font><br><br>";
+  echo "<font class='message'>Luodaan Danskebank Factoring siirtolista kaikista l√§hett√§m√§tt√∂mist√§ factoring laskuista.</font><br><br>";
 
-  // haetaan kaikki sampo factoroidut laskut jota ei ole viel‰ liitetty mihink‰‰n siirtolistalle
+  // haetaan kaikki sampo factoroidut laskut jota ei ole viel√§ liitetty mihink√§√§n siirtolistalle
   $query = "SELECT count(*) kpl, sum(arvo) arvo, sum(summa) summa
             FROM lasku USE INDEX (factoring)
             JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto and maksuehto.factoring = 'SAMPO')
@@ -23,7 +23,7 @@ if ($tee == "") {
   echo "<table>";
 
   echo "<tr>";
-  echo "<th colspan='2'>Laskuja l‰hett‰m‰tt‰</th>";
+  echo "<th colspan='2'>Laskuja l√§hett√§m√§tt√§</th>";
   echo "</tr>";
 
   echo "<tr>";
@@ -50,7 +50,7 @@ if ($tee == "") {
   echo "<tr>";
   echo "<th>Tulosta uudestaan siirtolista numero</th>";
   echo "<td><input type='text' name='numero' size='10'></td>";
-  echo "<td class='back'> (j‰tt‰m‰ll‰ t‰m‰ tyhj‰ksi luodaan aina uusi aineisto l‰hett‰m‰ttˆmist‰ laskuista)</td>";
+  echo "<td class='back'> (j√§tt√§m√§ll√§ t√§m√§ tyhj√§ksi luodaan aina uusi aineisto l√§hett√§m√§tt√∂mist√§ laskuista)</td>";
   echo "</tr>";
   echo "</table><br>";
 
@@ -85,7 +85,7 @@ if ($tee == 'TULOSTA') {
 
   $numero = (int) $numero;
 
-  // haetaan kaikki sampo factoroidut laskut jota ei ole viel‰ liitetty mihink‰‰n siirtolistalle
+  // haetaan kaikki sampo factoroidut laskut jota ei ole viel√§ liitetty mihink√§√§n siirtolistalle
   $query = "SELECT ifnull(group_concat(lasku.tunnus),0) tunnukset
             FROM lasku USE INDEX (factoring)
             JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto and maksuehto.factoring = 'SAMPO')
@@ -99,12 +99,12 @@ if ($tee == 'TULOSTA') {
   $result = mysql_query ($query) or pupe_error($query);
   $laskurow = mysql_fetch_array($result);
 
-  // jos lˆytyi jotain factoroitavaa tallennetaan ni siirtonumero ekaks laskuille, minimoidaan aikaikkunat ja tablejen lukitusaika
+  // jos l√∂ytyi jotain factoroitavaa tallennetaan ni siirtonumero ekaks laskuille, minimoidaan aikaikkunat ja tablejen lukitusaika
   if ($laskurow["tunnukset"] != 0) {
 
     // ei olla tulostamassa kopiota
     if ($numero == 0) {
-      // lukitaan, ettei muut p‰‰se sˆrkkim‰‰n v‰liin
+      // lukitaan, ettei muut p√§√§se s√∂rkkim√§√§n v√§liin
       $query  = "  LOCK TABLES lasku WRITE";
       $result = mysql_query ($query) or pupe_error($query);
 
@@ -115,7 +115,7 @@ if ($tee == 'TULOSTA') {
       $result = mysql_query ($query) or pupe_error($query);
       $facrow = mysql_fetch_array($result);
 
-      // p‰ivitet‰‰n se laskuille
+      // p√§ivitet√§√§n se laskuille
       $query = "UPDATE lasku
                 SET factoringsiirtonumero = '$facrow[0]'
                 WHERE yhtio = '$kukarow[yhtio]' and tunnus in ($laskurow[tunnukset])";
@@ -128,7 +128,7 @@ if ($tee == 'TULOSTA') {
       $result = mysql_query ($query) or pupe_error($query);
     }
 
-    // sitte k‰yd‰‰n vasta laskut l‰pi..
+    // sitte k√§yd√§√§n vasta laskut l√§pi..
     $query = "SELECT *
               FROM lasku
               WHERE yhtio = '$kukarow[yhtio]' and tunnus in ($laskurow[tunnukset])";
@@ -193,7 +193,7 @@ if ($tee == 'TULOSTA') {
       $kaikki_kpl++;
     }
 
-    // sitte k‰yd‰‰n vasta laskut l‰pi..
+    // sitte k√§yd√§√§n vasta laskut l√§pi..
     $query  = "SELECT *
                from factoring
                where yhtio        = '$kukarow[yhtio]'
@@ -202,7 +202,7 @@ if ($tee == 'TULOSTA') {
     $result = mysql_query ($query) or pupe_error($query);
     $soprow = mysql_fetch_array($result);
 
-    // v‰h‰n siirtolistainfoa ruudulle
+    // v√§h√§n siirtolistainfoa ruudulle
     echo "<table>";
 
     echo "<tr>";
@@ -222,7 +222,7 @@ if ($tee == 'TULOSTA') {
 
     echo "<tr>";
     echo "<th></th>";
-    echo "<th>Lukum‰‰r‰</th>";
+    echo "<th>Lukum√§√§r√§</th>";
     echo "<th>Summa</th>";
     echo "</tr>";
 
@@ -239,7 +239,7 @@ if ($tee == 'TULOSTA') {
     echo "</tr>";
 
     echo "<tr>";
-    echo "<th>Yhteens‰</th>";
+    echo "<th>Yhteens√§</th>";
     echo "<th>$kaikki_kpl</th>";
     echo "<th>$kaikki</th>";
     echo "</tr>";
@@ -256,7 +256,7 @@ if ($tee == 'TULOSTA') {
     $otsikkoulos .= sprintf("%-15.15s", "Hyvityslaskut");
     $otsikkoulos .= sprintf("%10.10s",  "$hyvitys_kpl kpl");
     $otsikkoulos .= sprintf("%20.20s",  "$hyvitys eur\n");
-    $otsikkoulos .= sprintf("%-15.15s", "Yhteens‰");
+    $otsikkoulos .= sprintf("%-15.15s", "Yhteens√§");
     $otsikkoulos .= sprintf("%10.10s",  "$kaikki_kpl kpl");
     $otsikkoulos .= sprintf("%20.20s",  "$kaikki eur\n");
     $otsikkoulos .= "\n\n";
@@ -315,7 +315,7 @@ if ($tee == 'TULOSTA') {
     unlink($tempfile2.".ps");
   }
   else {
-    echo "<font class='message'>Yht‰‰n factoroitavaa laskua ei lˆytynyt.</font><br><br>";
+    echo "<font class='message'>Yht√§√§n factoroitavaa laskua ei l√∂ytynyt.</font><br><br>";
   }
 }
 

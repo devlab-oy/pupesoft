@@ -1,6 +1,6 @@
 <?php
 
-// k‰sitt‰m‰tˆn juttu, mutta ei voi muuta
+// k√§sitt√§m√§t√∂n juttu, mutta ei voi muuta
 if ($_POST["voipcall"] != "") $_GET["voipcall"]  = "";
 
 require ("../inc/parametrit.inc");
@@ -14,7 +14,7 @@ if ($voipcall == "call" and $o != "" and $d != "") {
   $retval = @readfile($VOIPURL."&o=$o&d=$d");
   $retval = ob_get_contents();
   ob_end_clean();
-  if ($retval != "OK") echo "<font class='error'>Soitto $o -&gt; $d ep‰onnistui!</font><br><br>";
+  if ($retval != "OK") echo "<font class='error'>Soitto $o -&gt; $d ep√§onnistui!</font><br><br>";
 }
 
 echo "<font class='head'>".t("Asiakaslista")."</font><hr>";
@@ -34,7 +34,7 @@ if ($yhtiorow['konserni'] != "") {
     $chk = "CHECKED";
   }
 
-  echo "<br>".t("N‰yt‰ konsernin kaikki asiakkaat").": <input type='checkbox' name='konserni' $chk onclick='submit();'><br>";
+  echo "<br>".t("N√§yt√§ konsernin kaikki asiakkaat").": <input type='checkbox' name='konserni' $chk onclick='submit();'><br>";
 }
 
 if ($yhtiorow['viikkosuunnitelma'] == '') {
@@ -123,7 +123,7 @@ $query .= "$ryhma ORDER BY $jarjestys $limit";
 $result = pupe_query($query);
 
 if ($oper == t("Vaihda listan kaikkien asiakkaiden tila")) {
-  // K‰yd‰‰n lista l‰pi kertaalleen
+  // K√§yd√§√§n lista l√§pi kertaalleen
   while ($trow = mysql_fetch_array ($result)) {
     $query_update = "UPDATE asiakas
            SET tila = '$astila_vaihto'
@@ -138,7 +138,7 @@ if ($tee == 'laheta' or $tee == 'lahetalista') {
 
   if ($tee == "lahetalista") {
     if (@include('Spreadsheet/Excel/Writer.php')) {
-      //keksit‰‰n failille joku varmasti uniikki nimi:
+      //keksit√§√§n failille joku varmasti uniikki nimi:
       list($usec, $sec) = explode(' ', microtime());
       mt_srand((float) $sec + ((float) $usec * 100000));
       $excelnimi = md5(uniqid(mt_rand(), true)).".xls";
@@ -169,7 +169,7 @@ if ($tee == 'laheta' or $tee == 'lahetalista') {
   }
   else {
     if (@include('Spreadsheet/Excel/Writer.php')) {
-      //keksit‰‰n failille joku varmasti uniikki nimi:
+      //keksit√§√§n failille joku varmasti uniikki nimi:
       list($usec, $sec) = explode(' ', microtime());
       mt_srand((float) $sec + ((float) $usec * 100000));
       $excelnimi = md5(uniqid(mt_rand(), true)).".xls";
@@ -198,11 +198,11 @@ if ($tee == 'laheta' or $tee == 'lahetalista') {
         $excelsarake++;
         $worksheet->write($excelrivi, $excelsarake, t("kampanjat") , $format_bold);
         $excelsarake++;
-        $worksheet->write($excelrivi, $excelsarake, t("pvm k‰yty") , $format_bold);
+        $worksheet->write($excelrivi, $excelsarake, t("pvm k√§yty") , $format_bold);
         $excelsarake++;
         $worksheet->write($excelrivi, $excelsarake, t("km") , $format_bold);
         $excelsarake++;
-        $worksheet->write($excelrivi, $excelsarake, t("l‰htˆ") , $format_bold);
+        $worksheet->write($excelrivi, $excelsarake, t("l√§ht√∂") , $format_bold);
         $excelsarake++;
         $worksheet->write($excelrivi, $excelsarake, t("paluu") , $format_bold);
         $excelsarake++;
@@ -236,7 +236,7 @@ if ($tee == 'laheta' or $tee == 'lahetalista') {
 
   $bound = uniqid(time()."_") ;
 
-  $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+  $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n";
   $header .= "MIME-Version: 1.0\n" ;
   $header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
@@ -254,12 +254,12 @@ if ($tee == 'laheta' or $tee == 'lahetalista') {
   $content .= "\n" ;
 
   if ($tee == "lahetalista") {
-    mail($kukarow['eposti'], mb_encode_mimeheader("Asiakkaiden tiedot", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
-    echo "<br><br><font class='message'>".t("Asiakkaiden tiedot s‰hkˆpostiisi")."!</font><br><br><br>";
+    mail($kukarow['eposti'], mb_encode_mimeheader("Asiakkaiden tiedot", "UTF-8", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+    echo "<br><br><font class='message'>".t("Asiakkaiden tiedot s√§hk√∂postiisi")."!</font><br><br><br>";
   }
   else {
-    mail($kukarow['eposti'], mb_encode_mimeheader("Viikkosunnitelmapohja", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
-    echo "<br><br><font class='message'>".t("Suunnitelmapohja l‰hetetty s‰hkˆpostiisi")."!</font><br><br><br>";
+    mail($kukarow['eposti'], mb_encode_mimeheader("Viikkosunnitelmapohja", "UTF-8", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+    echo "<br><br><font class='message'>".t("Suunnitelmapohja l√§hetetty s√§hk√∂postiisi")."!</font><br><br><br>";
   }
 
   mysql_data_seek($result,0);
@@ -290,7 +290,7 @@ while ($trow=mysql_fetch_array ($result)) {
 
   for ($i=1; $i<mysql_num_fields($result)-1; $i++) {
     if ($i == 1) {
-      if (trim($trow[1]) == '') $trow[1] = t("*tyhj‰*");
+      if (trim($trow[1]) == '') $trow[1] = t("*tyhj√§*");
       echo "<td><a name='1_$kalalask' href='".$palvelin2."crm/asiakasmemo.php?ytunnus=$trow[ytunnus]&asiakasid=$trow[tunnus]&lopetus=".$palvelin2."crm/asiakaslista.php////konserni=$konserni//ojarj=$ojarj".str_replace("&", "//", $ulisa)."///1_$kalalask'>$trow[1]</a></td>";
     }
     elseif (mysql_field_name($result,$i) == 'ytunnus') {
@@ -318,8 +318,8 @@ echo "</table>";
 
 if ($yhtiorow['viikkosuunnitelma'] == '') {
   echo "<br><br>";
-  echo "<li><a href='$PHP_SELF?tee=laheta&konserni=$konserni".$ulisa."'>".t("L‰het‰ viikkosuunnitelmapohja s‰hkˆpostiisi")."</a><br>";
-  echo "<li><a href='$PHP_SELF?tee=lahetalista&konserni=$konserni".$ulisa."'>".t("L‰het‰ asiakaslista s‰hkˆpostiisi")."</a><br>";
+  echo "<li><a href='$PHP_SELF?tee=laheta&konserni=$konserni".$ulisa."'>".t("L√§het√§ viikkosuunnitelmapohja s√§hk√∂postiisi")."</a><br>";
+  echo "<li><a href='$PHP_SELF?tee=lahetalista&konserni=$konserni".$ulisa."'>".t("L√§het√§ asiakaslista s√§hk√∂postiisi")."</a><br>";
 }
 
 $asosresult = t_avainsana("ASIAKASTILA");

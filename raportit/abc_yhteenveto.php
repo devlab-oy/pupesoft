@@ -1,6 +1,6 @@
 <?php
 
-echo "<font class='head'>".t("ABC-Analyysi‰: ABC-Luokkayhteenveto")." $yhtiorow[nimi]<hr></font>";
+echo "<font class='head'>".t("ABC-Analyysi√§: ABC-Luokkayhteenveto")." $yhtiorow[nimi]<hr></font>";
 
 if ($toim == "kulutus") {
   $myykusana = t("Kulutus");
@@ -28,13 +28,13 @@ elseif (trim($saapumispvm) != '') {
 if ($ed == 'on')  $chk = "CHECKED";
 else        $chk = "";
 
-// piirrell‰‰n formi
+// piirrell√§√§n formi
 echo "<form method='post' autocomplete='OFF' id='abc_yhteenveto_form'>";
 echo "<input type='hidden' name='tee' value='YHTEENVETO'>";
 echo "<input type='hidden' name='toim' value='$toim'>";
 
 // Monivalintalaatikot (osasto, try tuotemerkki...)
-// M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
+// M√§√§ritell√§√§n mitk√§ latikot halutaan mukaan
 $abc_lisa  = "";
 $ulisa = "";
 $mulselprefix = "abc_aputaulu";
@@ -51,7 +51,7 @@ require ("tilauskasittely/monivalintalaatikot.inc");
 echo "<br>";
 echo "<table style='display:inline;'>";
 echo "<tr>";
-echo "<th>",t("N‰yt‰"),":</th>";
+echo "<th>",t("N√§yt√§"),":</th>";
 echo "<td nowrap>";
 
 $nayta_select1 = $nayta_select2 = $nayta_select3 = $nayta_select4 = $nayta_select5 = '';
@@ -73,15 +73,15 @@ elseif ($nayta_valinta == 'tuoteostajittain') {
 
 if ($asiakasanalyysi) {
   echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='osastoittain' $nayta_select1>",t("Asiakasosastoittain"),"<br/>";
-  echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuoteryhmittain' $nayta_select2>",t("Asiakasryhmitt‰in"),"<br/>";
+  echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuoteryhmittain' $nayta_select2>",t("Asiakasryhmitt√§in"),"<br/>";
 }
 else {
   echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='osastoittain' $nayta_select1>",t("Tuoteosastoittain"),"<br/>";
-  echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuoteryhmittain' $nayta_select2>",t("Tuoteryhmitt‰in"),"<br/>";
+  echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuoteryhmittain' $nayta_select2>",t("Tuoteryhmitt√§in"),"<br/>";
 }
 
-if (!$asiakasanalyysi) echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuotemerkeittain' $nayta_select3>",t("Tuotemerkeitt‰in"),"<br/>";
-if (!$asiakasanalyysi) echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuotemyyjittain' $nayta_select4>",t("Tuotemyyjitt‰in"),"<br/>";
+if (!$asiakasanalyysi) echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuotemerkeittain' $nayta_select3>",t("Tuotemerkeitt√§in"),"<br/>";
+if (!$asiakasanalyysi) echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuotemyyjittain' $nayta_select4>",t("Tuotemyyjitt√§in"),"<br/>";
 if (!$asiakasanalyysi) echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuoteostajittain' $nayta_select5>",t("Tuoteostajittain");
 echo "</td>";
 echo "</tr>";
@@ -104,7 +104,7 @@ if (!$asiakasanalyysi) {
   echo "</select></td>";
   echo "</tr>";
   echo "<tr>";
-  echo "<th>".t("Viimeinen saapumisp‰iv‰").":</th>";
+  echo "<th>".t("Viimeinen saapumisp√§iv√§").":</th>";
   echo "<td nowrap><input type='text' name='saapumispp' value='$saapumispp' size='2'>
       <input type='text' name='saapumiskk' value='$saapumiskk' size='2'>
       <input type='text' name='saapumisvv' value='$saapumisvv'size='4'></td></tr>";
@@ -128,8 +128,8 @@ else {
 
 echo "<td><select name='lisatiedot'>";
 echo "<option value=''>".t("Normaalitiedot")."</option>";
-echo "<option value='TARK' $sel1>".t("N‰ytet‰‰n kaikki sarakkeet")."</option>";
-if (!$asiakasanalyysi) echo "<option value='OSTONOHJ' $sel2>".t("N‰yt‰ simulointin‰kym‰")."</option>";
+echo "<option value='TARK' $sel1>".t("N√§ytet√§√§n kaikki sarakkeet")."</option>";
+if (!$asiakasanalyysi) echo "<option value='OSTONOHJ' $sel2>".t("N√§yt√§ simulointin√§kym√§")."</option>";
 echo "</select></td>";
 echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td>";
 echo "</tr>";
@@ -174,7 +174,7 @@ if ($tee == "YHTEENVETO") {
   }
 
   if ($try == 'KAIKKI') {
-    echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&nayta_valinta=$nayta_valinta&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot$ulisa&order=".$orderurl."try&status=$status'>".t("Ryhm‰")."</a><br>&nbsp;</th>";
+    echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&nayta_valinta=$nayta_valinta&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot$ulisa&order=".$orderurl."try&status=$status'>".t("Ryhm√§")."</a><br>&nbsp;</th>";
   }
 
   if ($tuotemerkki == 'KAIKKI') {
@@ -182,7 +182,7 @@ if ($tee == "YHTEENVETO") {
   }
 
   if ($tuotemyyja == 'KAIKKI') {
-    echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&nayta_valinta=$nayta_valinta&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot$ulisa&order=".$orderurl."myyjanro&status=$status'>".t("Tuotemyyj‰")."</a><br>&nbsp;</th>";
+    echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&nayta_valinta=$nayta_valinta&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot$ulisa&order=".$orderurl."myyjanro&status=$status'>".t("Tuotemyyj√§")."</a><br>&nbsp;</th>";
   }
 
   if ($tuoteostaja == 'KAIKKI') {
@@ -213,7 +213,7 @@ if ($tee == "YHTEENVETO") {
     if ($lisatiedot == "TARK") {
       echo "<th nowrap>".t("Osuus")." %<br>".t("kat").".</th>";
     }
-    echo "<th nowrap>$astusana<br>".t("m‰‰r‰")."</th>";
+    echo "<th nowrap>$astusana<br>".t("m√§√§r√§")."</th>";
   }
 
   if (!$asiakasanalyysi) echo "<th nowrap>".t("Varast").".<br>".t("arvo")."<br>".t("nyt")."</th>";
@@ -234,19 +234,19 @@ if ($tee == "YHTEENVETO") {
 
   if (!$asiakasanalyysi and $lisatiedot != "OSTONOHJ") {
     echo "<th nowrap>".t("Kate")."% x<br>".t("kiert").".</th>";
-    echo "<th nowrap>$myykusana<br>".t("m‰‰r‰")."</th>";
+    echo "<th nowrap>$myykusana<br>".t("m√§√§r√§")."</th>";
   }
 
   if (!$asiakasanalyysi and ($lisatiedot == "TARK" or $lisatiedot == "OSTONOHJ")) {
     if ($lisatiedot == "TARK") {
-      echo "<th nowrap>$myykusana".t("er‰")."<br>".t("m‰‰r‰")."</th>";
-      echo "<th nowrap>$myykusana".t("er‰")."<br>$yhtiorow[valkoodi]</th>";
-      echo "<th nowrap>$myykusana<br>".t("rivej‰")."</th>";
+      echo "<th nowrap>$myykusana".t("er√§")."<br>".t("m√§√§r√§")."</th>";
+      echo "<th nowrap>$myykusana".t("er√§")."<br>$yhtiorow[valkoodi]</th>";
+      echo "<th nowrap>$myykusana<br>".t("rivej√§")."</th>";
     }
-    echo "<th nowrap>".t("Puute")."<br>".t("rivej‰")."<br>".t("nyt")."</th>";
+    echo "<th nowrap>".t("Puute")."<br>".t("rivej√§")."<br>".t("nyt")."</th>";
 
     if ($lisatiedot == "OSTONOHJ") {
-      echo "<th nowrap>".t("Puute")."<br>".t("rivej‰")."<br>".t("tavoite")."</th>";
+      echo "<th nowrap>".t("Puute")."<br>".t("rivej√§")."<br>".t("tavoite")."</th>";
     }
   }
 
@@ -258,16 +258,16 @@ if ($tee == "YHTEENVETO") {
     echo "<th nowrap>".t("Hankinta")."-<br>".t("aika")."</th>";
     echo "<th nowrap>".t("Tilaus")."-<br>".t("piste")."</th>";
     echo "<th nowrap>".t("Keskiv").".</th>";
-    echo "<th nowrap>".t("Ostoer‰")."<br>".t("pv")."</th>";
+    echo "<th nowrap>".t("Ostoer√§")."<br>".t("pv")."</th>";
     echo "<th nowrap>".t("Saap").".<br>".t("lkm")."<br>".t("nyt")."</th>";
     echo "<th nowrap>".t("Saap").".<br>".t("lkm")."<br>".t("tavoite")."</th>";
     echo "<th nowrap>".t("Otot").".<br>".t("lkm")."</th>";
   }
 
   if (!$asiakasanalyysi and $lisatiedot == "TARK") {
-    echo "<th nowrap>".t("Ostoer‰")."<br>".t("m‰‰r‰")."</th>";
-    echo "<th nowrap>".t("Ostoer‰")."<br>$yhtiorow[valkoodi]</th>";
-    echo "<th nowrap>".t("Ostettu")."<br>".t("rivej‰")."</th>";
+    echo "<th nowrap>".t("Ostoer√§")."<br>".t("m√§√§r√§")."</th>";
+    echo "<th nowrap>".t("Ostoer√§")."<br>$yhtiorow[valkoodi]</th>";
+    echo "<th nowrap>".t("Ostettu")."<br>".t("rivej√§")."</th>";
     echo "<th nowrap>".t("Myynn").".<br>".t("kustan").".</th>";
     echo "<th nowrap>".t("Oston")."<br>".t("kustan").".</th>";
     echo "<th nowrap>".t("Kustan").".<br>".t("yht")."</th>";
@@ -324,7 +324,7 @@ if ($tee == "YHTEENVETO") {
     $orderby .= " $abcwhat desc";
   }
 
-  // n‰m‰ m‰‰ritt‰‰ kumpaan tauluun Joinataan, asiakas vai tuote
+  // n√§m√§ m√§√§ritt√§√§ kumpaan tauluun Joinataan, asiakas vai tuote
   $asiakas_join_array = array('AK','AM','AP','AR');
   $tuote_join_array = array('TK','TM','TP','TR','TV');
 
@@ -401,7 +401,7 @@ if ($tee == "YHTEENVETO") {
     echo "<tr>";
 
     if ($osasto == 'KAIKKI') {
-      // tehd‰‰n avainsana query
+      // tehd√§√§n avainsana query
       if ($asiakasanalyysi) {
         $keyres = t_avainsana("ASIAKASOSASTO", "", "and avainsana.selite ='$row[osasto]'");
       }
@@ -415,7 +415,7 @@ if ($tee == "YHTEENVETO") {
     }
 
     if ($try == 'KAIKKI') {
-      // tehd‰‰n avainsana query
+      // tehd√§√§n avainsana query
       if ($asiakasanalyysi) {
         $keyres = t_avainsana("ASIAKASRYHMA", $kukarow['kieli'], "and avainsana.selite ='$row[try]'");
       }
@@ -433,11 +433,11 @@ if ($tee == "YHTEENVETO") {
     }
 
     if ($tuotemyyja == 'KAIKKI') {
-      $keymyyja = "  SELECT nimi
-              FROM kuka
-              WHERE yhtio = '$kukarow[yhtio]'
-              and myyja = '$row[myyjanro]'
-              AND myyja > 0";
+      $keymyyja = "SELECT nimi
+                   FROM kuka
+                   WHERE yhtio = '$kukarow[yhtio]'
+                   and myyja   = '$row[myyjanro]'
+                   AND myyja   > 0";
       $myyjares = pupe_query($keymyyja);
       $keytuotemyyja = mysql_fetch_assoc($myyjares);
 
@@ -445,11 +445,11 @@ if ($tee == "YHTEENVETO") {
     }
 
     if ($tuoteostaja == 'KAIKKI') {
-      $keyostaja = "  SELECT nimi
-              FROM kuka
-              WHERE yhtio = '$kukarow[yhtio]'
-              and myyja = '$row[ostajanro]'
-              AND myyja > 0";
+      $keyostaja = "SELECT nimi
+                    FROM kuka
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    and myyja   = '$row[ostajanro]'
+                    AND myyja   > 0";
       $ostajares = pupe_query($keyostaja);
       $keytuoteostaja = mysql_fetch_assoc($ostajares);
 
@@ -535,24 +535,24 @@ if ($tee == "YHTEENVETO") {
       $ostoera_paivissa = 0;
 
       /*
-      365 p‰iv‰‰ /(( vuosimyynti yht kpl/(ostot yht kp/ ostokerrat ))
+      365 p√§iv√§√§ /(( vuosimyynti yht kpl/(ostot yht kp/ ostokerrat ))
 
       Jos vuosimyyti on 500 kpl
-      ostettu tuotetta 20 kertaa eli yhteens‰ 600 kpl
+      ostettu tuotetta 20 kertaa eli yhteens√§ 600 kpl
 
-      kertaosto keskim‰‰rin 30 kpl
-      eli noin 22 p‰iv‰‰ suosimyyntiin n‰hden.
+      kertaosto keskim√§√§rin 30 kpl
+      eli noin 22 p√§iv√§√§ suosimyyntiin n√§hden.
 
-      Vuosimyynti m‰‰r‰ = 500
-      Vuosiostot m‰‰r‰ = 600
+      Vuosimyynti m√§√§r√§ = 500
+      Vuosiostot m√§√§r√§ = 600
       Vuosiostot 20 kertaa
 
-      T‰st‰ alla olevalla kaavalla tulisi noin 22 (21,9) p‰iv‰‰ riit‰isi ostoer‰.
+      T√§st√§ alla olevalla kaavalla tulisi noin 22 (21,9) p√§iv√§√§ riit√§isi ostoer√§.
 
-      Keskim‰‰r‰inen ostoer‰ on 30 kpl.
-      Keskim‰‰rin myyd‰‰n 1,37 ( 500(365) kappaletta p‰iv‰ss‰ eli 30 kpl antaa
-      n‰in tuon  noin 22 (21,9) p‰iv‰‰ (30/1,37).
-      T‰ss‰ t‰m‰ viimeinen vai tarkistuslaskenta.
+      Keskim√§√§r√§inen ostoer√§ on 30 kpl.
+      Keskim√§√§rin myyd√§√§n 1,37 ( 500(365) kappaletta p√§iv√§ss√§ eli 30 kpl antaa
+      n√§in tuon  noin 22 (21,9) p√§iv√§√§ (30/1,37).
+      T√§ss√§ t√§m√§ viimeinen vai tarkistuslaskenta.
       */
 
       //$ostoera_paivissa = round(($row["osto_kpl"] / $row["osto_kerrat"]) / ($row["kpl"] / 365), 2);
@@ -561,14 +561,14 @@ if ($tee == "YHTEENVETO") {
         echo "<pre>";
         echo "365 / ($row[kpl] / ($row[osto_kpl] / $row[osto_kerrat]))<br>";
         echo $ryhmanimet[$row["luokka"]]."<br>";
-        echo "Vuosimyynti m‰‰r‰ = $row[kpl]<br>";
-        echo "Vuosiostot m‰‰r‰ = $row[osto_kpl]<br>";
+        echo "Vuosimyynti m√§√§r√§ = $row[kpl]<br>";
+        echo "Vuosiostot m√§√§r√§ = $row[osto_kpl]<br>";
         echo "Vuosiostot $row[osto_kerrat] kertaa<br><br>";
 
-        echo "Keskim‰‰r‰inen ostoer‰ on ".round(($row["osto_kpl"] / $row["osto_kerrat"]), 0)." kpl. (".round($row["osto_kpl"],0)." / $row[osto_kerrat])<br>";
-        echo "Keskim‰‰rin myyd‰‰n ".round(($row["kpl"] / 365), 2)." ($row[kpl] / 365) kappaletta p‰iv‰ss‰<br>";
-        echo "Vuodessa myyd‰‰n rivi‰: $row[rivia]<br>";
-        echo "eli ".round(($row["osto_kpl"] / $row["osto_kerrat"]), 0)." antaa n‰in tuon noin ".round(($row["osto_kpl"] / $row["osto_kerrat"]) / ($row["kpl"] / 365), 2)." p‰iv‰‰ (".round(($row["osto_kpl"] / $row["osto_kerrat"]),2)." / ".round(($row["kpl"] / 365),2).")<br><br>";
+        echo "Keskim√§√§r√§inen ostoer√§ on ".round(($row["osto_kpl"] / $row["osto_kerrat"]), 0)." kpl. (".round($row["osto_kpl"],0)." / $row[osto_kerrat])<br>";
+        echo "Keskim√§√§rin myyd√§√§n ".round(($row["kpl"] / 365), 2)." ($row[kpl] / 365) kappaletta p√§iv√§ss√§<br>";
+        echo "Vuodessa myyd√§√§n rivi√§: $row[rivia]<br>";
+        echo "eli ".round(($row["osto_kpl"] / $row["osto_kerrat"]), 0)." antaa n√§in tuon noin ".round(($row["osto_kpl"] / $row["osto_kerrat"]) / ($row["kpl"] / 365), 2)." p√§iv√§√§ (".round(($row["osto_kpl"] / $row["osto_kerrat"]),2)." / ".round(($row["kpl"] / 365),2).")<br><br>";
 
         echo "$row[tuotenumerot]<br>";
         echo "KPL: $row[kpl] &#09; OSTO_KPL: $row[osto_kpl] &#09; OSTO_KERRAT: $row[osto_kerrat] &#09; OSTO_RIVIT: $row[osto_rivia]<br>";
@@ -649,7 +649,7 @@ if ($tee == "YHTEENVETO") {
     $saldoyht        += $row["saldo"];
   }
 
-  //yhteens‰rivi
+  //yhteens√§rivi
   if ($ryhmamyyntiyht != 0) $kateprosenttiyht = round($ryhmakateyht / $ryhmamyyntiyht * 100,2);
   else $kateprosenttiyht = 0;
 
@@ -713,7 +713,7 @@ if ($tee == "YHTEENVETO") {
     $colspan++;
   }
 
-  echo "<td colspan='$colspan'>".t("Yhteens‰").":</td>";
+  echo "<td colspan='$colspan'>".t("Yhteens√§").":</td>";
   echo "<td align='right' class='spec' nowrap>".str_replace(".",",",sprintf('%.1f',$ryhmamyyntiyht));
   echo "<input type='hidden' name='summa_yht' id='summa_yht' value='$ryhmamyyntiyht'>";
   echo "<input type='hidden' name='kate_yht' id='kate_yht' value='$ryhmakateyht'>";

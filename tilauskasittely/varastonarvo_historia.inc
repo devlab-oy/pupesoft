@@ -47,7 +47,7 @@ if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
       $tee = "";
     }
 
-    // katotaan onko liitettyj‰ laskuja, mutta ei vaihto-omaisuuslaskuja
+    // katotaan onko liitettyj√§ laskuja, mutta ei vaihto-omaisuuslaskuja
     $query  = "SELECT *
                from lasku
                where yhtio     = '$kukarow[yhtio]'
@@ -75,7 +75,7 @@ if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
 
       while ($llrow = mysql_fetch_array($result)) {
 
-        // tsekataan viel‰
+        // tsekataan viel√§
         if ($llrow["vienti_kurssi"] == 0) {
           echo t("Kurssi uupuu! Jossain on iso ongelma ,8,1");
           exit;
@@ -94,7 +94,7 @@ if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
             <td>$llrow[vienti]</td></tr>";
       }
 
-      // pyˆristet‰‰n kahteen desimaaliin vasta lopuksi...
+      // py√∂ristet√§√§n kahteen desimaaliin vasta lopuksi...
       $summa = round($summa,2);
 
       echo "</table><br>";
@@ -102,16 +102,16 @@ if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
 
     if ($yhtiorow["jalkilaskenta_kuluperuste"] == "") {
       echo "<font class='message'>";
-      echo t("Kululaskuja yhteens‰").": ".$summa." $yhtiorow[valkoodi]";
+      echo t("Kululaskuja yhteens√§").": ".$summa." $yhtiorow[valkoodi]";
       echo "</font><br>";
 
-      // yht‰‰n kululaskua ei ole liitetty
+      // yht√§√§n kululaskua ei ole liitetty
       if ($summa == 0) {
-        echo "<font class='error'>".t("Yht‰‰n kululaskua ei ole liitetty saapumiseen!")."<br>";
+        echo "<font class='error'>".t("Yht√§√§n kululaskua ei ole liitetty saapumiseen!")."<br>";
       }
     }
 
-    // p‰ivitet‰‰n kululaskujen summa kentt‰‰n saldo_maksettu keikan otsikolle
+    // p√§ivitet√§√§n kululaskujen summa kentt√§√§n saldo_maksettu keikan otsikolle
     $query  = "UPDATE lasku set saldo_maksettu='$summa', valkoodi='$yhtiorow[valkoodi]'
                where yhtio='$kukarow[yhtio]' and tila='K' and alatila='' and vanhatunnus=0 and laskunro='$laskurow[laskunro]'";
     $result = pupe_query($query);
@@ -144,5 +144,5 @@ if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
   }
 }
 else {
-  echo "<br><br><font class='error'>".t("Saapumisen tiedot eiv‰t t‰sm‰‰! Korjaa asia")."!</font><br>";
+  echo "<br><br><font class='error'>".t("Saapumisen tiedot eiv√§t t√§sm√§√§! Korjaa asia")."!</font><br>";
 }

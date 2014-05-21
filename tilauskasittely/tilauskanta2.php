@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require('../inc/parametrit.inc');
@@ -35,11 +35,11 @@ if ($tee == 'aja' and $atoimvko != '' and ($ltoimvko == '' or $ltoimvko >= $atoi
   //echo "aaika $aaika<br>";
 
   $alkuaika = viikonpaiva("Monday","$aaika weeks");
-  //echo "p‰iv‰m‰‰r‰ $alkuaika<br>";
+  //echo "p√§iv√§m√§√§r√§ $alkuaika<br>";
 
   if ($ltoimvko == '') {
     $loppuaika = viikonpaiva("Sunday","$aaika weeks");
-    //echo "p‰iv‰m‰‰r‰ $loppuaika<br>";
+    //echo "p√§iv√§m√§√§r√§ $loppuaika<br>";
   }
   else {
     if ($ltoimvko < $nyviikko) {
@@ -53,7 +53,7 @@ if ($tee == 'aja' and $atoimvko != '' and ($ltoimvko == '' or $ltoimvko >= $atoi
     }
 
     $loppuaika = date("Y-m-d",strtotime("Sunday", strtotime("$laika weeks")));
-    //echo "p‰iv‰m‰‰r‰ $loppuaika<br>";
+    //echo "p√§iv√§m√§√§r√§ $loppuaika<br>";
   }
 
   $jarjestys = " lasku.toimaika, tuoteno ";
@@ -66,7 +66,7 @@ if ($tee == 'aja' and $atoimvko != '' and ($ltoimvko == '' or $ltoimvko >= $atoi
     $alkuaika = "0000-00-00";
   }
 
-  $query =  "SELECT if(lasku.toimvko>0,concat_ws('@@',lasku.toimvko,lasku.toimaika),lasku.toimaika) as 'Toimitusaika', tuoteno as 'Tuotenumero', if(jt>0,jt,varattu) as 'M‰‰r‰',
+  $query =  "SELECT if(lasku.toimvko>0,concat_ws('@@',lasku.toimvko,lasku.toimaika),lasku.toimaika) as 'Toimitusaika', tuoteno as 'Tuotenumero', if(jt>0,jt,varattu) as 'M√§√§r√§',
              concat(concat(nimi,'<br>'),if(nimitark!='',concat(nimitark,'<br>'),''),if(toim_nimi!='',if(toim_nimi!=nimi,concat(toim_nimi,'<br>'),''),''),if(toim_nimitark!='',if(toim_nimitark!=nimitark,concat(toim_nimitark,'<br>'),''),'')) as 'Nimi/Toim. nimi',
              lasku.tunnus as 'Tilausnro', lasku.tila, lasku.alatila, tilausrivi.tunnus
              FROM tilausrivi
@@ -114,7 +114,7 @@ if ($tee == 'aja' and $atoimvko != '' and ($ltoimvko == '' or $ltoimvko >= $atoi
 
     list(, , $myyta) = saldo_myytavissa($prow["Tuotenumero"], "KAIKKI", '', '', '', '', '', '', '', $pvmma);
 
-    if ($myyta < $prow["M‰‰r‰"]) {
+    if ($myyta < $prow["M√§√§r√§"]) {
       $rivit[] = $prow["tunnus"];
     }
   }
@@ -161,7 +161,7 @@ if ($tee == 'aja' and $atoimvko != '' and ($ltoimvko == '' or $ltoimvko >= $atoi
       $laskutyyppi=$prow["tila"];
       $alatila=$prow["alatila"];
 
-      //tehd‰‰n selv‰kielinen tila/alatila
+      //tehd√§√§n selv√§kielinen tila/alatila
       require "inc/laskutyyppi.inc";
 
       $tarkenne = " ";
@@ -193,7 +193,7 @@ if ($vanhat == '1') {
   $chekkis = "CHECKED";
 }
 
-echo "<tr><td colspan='2'>Huomioi myˆs vanhemmat: <input type='checkbox' name='vanhat' value='1' $chekkis></td></tr>";
+echo "<tr><td colspan='2'>Huomioi my√∂s vanhemmat: <input type='checkbox' name='vanhat' value='1' $chekkis></td></tr>";
 
 echo "</table>";
 

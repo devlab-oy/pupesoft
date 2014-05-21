@@ -1,7 +1,7 @@
 <?php
 require('../inc/parametrit.inc');
 
-echo "<font class='head'>".t("Lis‰tietojen syˆttˆ")."</font><hr>";
+echo "<font class='head'>".t("Lis√§tietojen sy√∂tt√∂")."</font><hr>";
 
 if (isset($bruttopaino)) $bruttopaino = str_replace(",", ".", $bruttopaino);
 if (isset($lisattava_era)) $lisattava_era = str_replace(",", ".", $lisattava_era);
@@ -16,7 +16,7 @@ if ($tapa == "tuonti" and $tee != "") {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
-    echo "laskua ei lˆydy";
+    echo "laskua ei l√∂ydy";
     exit;
   }
   else {
@@ -57,7 +57,7 @@ if ($tapa == "tuonti" and $tee != "") {
 
   if ($tee == "K") {
 
-    // n‰ytet‰‰n viel‰ laskun tiedot, ettei kohdisteta p‰in berberi‰
+    // n√§ytet√§√§n viel√§ laskun tiedot, ettei kohdisteta p√§in berberi√§
     echo "<table>";
     echo "<tr>";
     echo "<th>".t("Ytunnus")."</th>";
@@ -111,7 +111,7 @@ if ($tapa == "tuonti" and $tee != "") {
     echo "</tr>";
 
     echo "<tr>";
-    echo "<th>".t("L‰hetysmaa").":</th>";
+    echo "<th>".t("L√§hetysmaa").":</th>";
     echo "<td>";
     echo "<select name='maa_lahetys' style='width:300px;'>";
 
@@ -134,7 +134,7 @@ if ($tapa == "tuonti" and $tee != "") {
     echo "</tr>";
 
     echo "<tr>";
-    echo "<th>".t("M‰‰r‰maan koodi").":</th>";
+    echo "<th>".t("M√§√§r√§maan koodi").":</th>";
     echo "<td>";
     echo "<select name='maa_maara' style='width:300px;'>";
 
@@ -206,7 +206,7 @@ if ($tapa == "tuonti" and $tee != "") {
     echo "</table>";
 
     echo "<input type='hidden' name='tapa' value='$tapa'";
-    echo "<br><input type='submit' value='".t("P‰ivit‰ tiedot")."'>";
+    echo "<br><input type='submit' value='".t("P√§ivit√§ tiedot")."'>";
     echo "</form>";
 
     echo "<br><br>";
@@ -232,7 +232,7 @@ elseif ($tee != "") {
 
     foreach($otunnukset as $otun) {
 
-      // lasketaan rahtikirjalta jos miell‰ on nippu tilauksia tai jos bruttopainoa ei ole annettu k‰yttˆliittym‰st‰
+      // lasketaan rahtikirjalta jos miell√§ on nippu tilauksia tai jos bruttopainoa ei ole annettu k√§ytt√∂liittym√§st√§
       if (count($otunnukset) > 1 or !isset($bruttopaino) or (int) $bruttopaino == 0) {
         $query = "SELECT sum(kilot) kilot
                   FROM rahtikirjat
@@ -273,7 +273,7 @@ elseif ($tee != "") {
                 WHERE tunnus                   = '$otun' and yhtio = '$kukarow[yhtio]'";
       $result = pupe_query($query);
 
-      //p‰ivitet‰‰n alatila vain jos tilaus ei viel‰ ole laskutettu
+      //p√§ivitet√§√§n alatila vain jos tilaus ei viel√§ ole laskutettu
       $query = "UPDATE lasku
                 SET alatila = 'E'
                 WHERE yhtio = '$kukarow[yhtio]'
@@ -331,7 +331,7 @@ elseif ($tee != "") {
       $osumapros = "N/A";
     }
 
-    // otetaan defaultit asiakkaalta jos laskulla ei ole mit‰‰n
+    // otetaan defaultit asiakkaalta jos laskulla ei ole mit√§√§n
     if ($laskurow["poistumistoimipaikka_koodi"]       == "") $laskurow["poistumistoimipaikka_koodi"]       = $asiakasrow["poistumistoimipaikka_koodi"];
     if ($laskurow["kuljetusmuoto"]                    ==  0) $laskurow["kuljetusmuoto"]                    = $asiakasrow["kuljetusmuoto"];
     if ($laskurow["kauppatapahtuman_luonne"]          ==  0) $laskurow["kauppatapahtuman_luonne"]          = $asiakasrow["kauppatapahtuman_luonne"];
@@ -345,13 +345,13 @@ elseif ($tee != "") {
 
     echo "<tr>";
     echo "<th>6.</th>";
-    echo "<th>".t("Kollim‰‰r‰")."</th>";
+    echo "<th>".t("Kollim√§√§r√§")."</th>";
     echo "<td>$rahtirow[kollit]</td>";
     echo "</tr>";
 
     echo "<tr>";
     echo "<th>17.</th>";
-    echo "<th>".t("M‰‰r‰maan koodi").":</th>";
+    echo "<th>".t("M√§√§r√§maan koodi").":</th>";
     echo "<td>";
 
     $query = "SELECT distinct koodi, nimi
@@ -373,12 +373,12 @@ elseif ($tee != "") {
     echo "</select>";
     echo "</td>";
 
-    echo "<td class='back'>".t("Pakollinen kentt‰")."</td></tr>";
+    echo "<td class='back'>".t("Pakollinen kentt√§")."</td></tr>";
 
     if ($laskurow["vienti"] == "K") {
       echo "<tr>";
       echo "<th>18.</th>";
-      echo "<th>".t("Sis‰maan kuljetusv‰line").":</th>";
+      echo "<th>".t("Sis√§maan kuljetusv√§line").":</th>";
       echo "<td>";
       echo "<input type='text' name='sisamaan_kuljetus' style='width:200px;' value='$laskurow[sisamaan_kuljetus]'>";
 
@@ -397,12 +397,12 @@ elseif ($tee != "") {
       echo "</select>";
 
       echo "</td>";
-      echo "<td class='back'>".t("Pakollinen kentt‰")."</td>";
+      echo "<td class='back'>".t("Pakollinen kentt√§")."</td>";
       echo "</tr>";
 
       echo "<tr>";
       echo "<th>26.</th>";
-      echo "<th>".t("Sis‰maan kuljetusmuoto").":</th>";
+      echo "<th>".t("Sis√§maan kuljetusmuoto").":</th>";
       echo "<td>";
       echo "<select name='sisamaan_kuljetusmuoto' style='width:300px;'>";
 
@@ -418,7 +418,7 @@ elseif ($tee != "") {
         echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
       }
       echo "</select></td>";
-      echo "<td class='back'>".t("Pakollinen kentt‰")."</td>";
+      echo "<td class='back'>".t("Pakollinen kentt√§")."</td>";
       echo "</tr>";
 
       $chk1 = '';
@@ -433,13 +433,13 @@ elseif ($tee != "") {
       echo "<tr>";
       echo "<th>19.</th>";
       echo "<th>".t("Kulkeeko tavara kontissa").":</th>";
-      echo "<td>Kyll‰ <input type='radio' name='kontti' value='1' $chk1> Ei <input type='radio' name='kontti' value='0' $chk2></td>";
-      echo "<td class='back'>".t("Pakollinen kentt‰")."</td>";
+      echo "<td>Kyll√§ <input type='radio' name='kontti' value='1' $chk1> Ei <input type='radio' name='kontti' value='0' $chk2></td>";
+      echo "<td class='back'>".t("Pakollinen kentt√§")."</td>";
       echo "</tr>";
 
       echo "<tr>";
       echo "<th>21.</th>";
-      echo "<th>".t("Aktiivisen kuljetusv‰lineen tunnus ja kansalaisuus").":</th>";
+      echo "<th>".t("Aktiivisen kuljetusv√§lineen tunnus ja kansalaisuus").":</th>";
       echo "<td>";
       echo "<input type='text' name='aktiivinen_kuljetus' style='width:200px;' value='$laskurow[aktiivinen_kuljetus]'>";
       echo "<select name='aktiivinen_kuljetus_kansallisuus' style='width:100px;'>";
@@ -457,7 +457,7 @@ elseif ($tee != "") {
       echo "</select>";
 
       echo "</td>";
-      echo "<td class='back'>Voidaan j‰tt‰‰ tyhj‰ksi jos asiakas t‰ytt‰‰</td>";
+      echo "<td class='back'>Voidaan j√§tt√§√§ tyhj√§ksi jos asiakas t√§ytt√§√§</td>";
       echo "</tr>";
     }
 
@@ -480,7 +480,7 @@ elseif ($tee != "") {
     }
 
     echo "</select></td>";
-    echo "<td class='back'>".t("Pakollinen kentt‰")."</td>";
+    echo "<td class='back'>".t("Pakollinen kentt√§")."</td>";
     echo "</tr>";
 
     echo "<tr>";
@@ -501,7 +501,7 @@ elseif ($tee != "") {
       echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
     }
     echo "</select></td>";
-    echo "<td class='back'>".t("Pakollinen kentt‰")."</td>";
+    echo "<td class='back'>".t("Pakollinen kentt√§")."</td>";
     echo "</tr>";
 
     if ($laskurow["vienti"] == "K") {
@@ -523,7 +523,7 @@ elseif ($tee != "") {
       }
 
       echo "</select></td>";
-      echo "<td class='back'>".t("Pakollinen kentt‰")."</td>";
+      echo "<td class='back'>".t("Pakollinen kentt√§")."</td>";
       echo "</tr>";
 
       if ($laskurow["lisattava_era"] == 0) {
@@ -535,13 +535,13 @@ elseif ($tee != "") {
 
       echo "<tr>";
       echo "<th>28.</th>";
-      echo "<th>".t("V‰hennett‰v‰ er‰, ulkomaiset kustannukset")."</th>";
+      echo "<th>".t("V√§hennett√§v√§ er√§, ulkomaiset kustannukset")."</th>";
       echo "<td><input type='text' name='vahennettava_era' style='width:300px;' value='$laskurow[vahennettava_era]'></td>";
       echo "</tr>";
 
       echo "<tr>";
       echo "<th>28.</th>";
-      echo "<th>".t("Toimitusehdon mukainen lis‰tt‰v‰ er‰")."</th>";
+      echo "<th>".t("Toimitusehdon mukainen lis√§tt√§v√§ er√§")."</th>";
       echo "<td><input type='text' name='lisattava_era' style='width:300px;' value='$laskurow[lisattava_era]'></td>";
       echo "</tr>";
     }
@@ -555,13 +555,13 @@ elseif ($tee != "") {
     if ($laskurow["vienti"] == "K") {
       echo "<tr>";
       echo "<th>44.</th>";
-      echo "<th>".t("Lis‰tiedot")."</th>";
+      echo "<th>".t("Lis√§tiedot")."</th>";
       echo "<td><input type='text' name='lomake_lisatiedot' style='width:300px;' value='$laskurow[comments]'></td>";
       echo "</tr>";
     }
 
     echo "</table>";
-    echo "<br><input type='submit' value='".t("P‰ivit‰ tiedot")."'>";
+    echo "<br><input type='submit' value='".t("P√§ivit√§ tiedot")."'>";
     echo "</form>";
 
     echo "<br><br><font class='message'>".sprintf(t("Tilauksen paino tuoterekisterin tietojen mukaan on: %s KG, %s %%:lle kappaleista on annettu paino."),$painorow["massa"],$osumapros)."</font><br><br>";
@@ -571,13 +571,13 @@ elseif ($tee != "") {
   }
 }
 
-// meill‰ ei ole valittua tilausta
+// meill√§ ei ole valittua tilausta
 if ($tee == '' and $toim == "MUOKKAA") {
 
   $formi  = "find";
   $kentta = "etsi";
 
-  // tehd‰‰n etsi valinta
+  // tehd√§√§n etsi valinta
   echo "<form name='find' method='post'>";
   echo "<input type='hidden' name='toim' value='$toim'>";
 
@@ -602,7 +602,7 @@ if ($tee == '' and $toim == "MUOKKAA") {
   echo "</tr>";
   echo "<tr>";
   echo "<th>";
-  echo t("Syˆt‰ nimi")." / ".t("Laskunumero")." / ".t("Saapumisnumero");
+  echo t("Sy√∂t√§ nimi")." / ".t("Laskunumero")." / ".t("Saapumisnumero");
   echo "</th>";
   echo "<td>";
   echo "<input type='text' name='etsi' value='$etsi'>";
@@ -673,7 +673,7 @@ if ($tee == '' and $toim == "MUOKKAA") {
     }
     else {
       echo "<tr>";
-      echo "<th colspan='5'>".t("Yht‰‰n laskua ei lˆytynyt")."!</th>";
+      echo "<th colspan='5'>".t("Yht√§√§n laskua ei l√∂ytynyt")."!</th>";
       echo "</tr>";
     }
 
@@ -685,10 +685,10 @@ elseif ($tee == '') {
   $formi="find";
   $kentta="etsi";
 
-  // tehd‰‰n etsi valinta
+  // tehd√§√§n etsi valinta
   echo "<form name='find' method='post'>";
   echo "<input type='hidden' name='toim' value='$toim'>";
-  echo t("Etsi tilausta (asiakkaan nimell‰ / tilausnumerolla)").": <input type='text' name='etsi'><input type='Submit' value='".t("Etsi")."'></form>";
+  echo t("Etsi tilausta (asiakkaan nimell√§ / tilausnumerolla)").": <input type='text' name='etsi'><input type='Submit' value='".t("Etsi")."'></form>";
 
   $haku='';
   if (is_string($etsi))  $haku="and nimi LIKE '%$etsi%'";
@@ -716,7 +716,7 @@ elseif ($tee == '') {
       echo "<th align='left'>".t(mysql_field_name($tilre,$i))."</th>";
 
     echo "<th>".t("Tyyppi")."</th>";
-    echo "<th>".t("Lis‰tiedot")."</th>";
+    echo "<th>".t("Lis√§tiedot")."</th>";
     echo "</tr>";
 
     $lask = -1;
@@ -753,7 +753,7 @@ elseif ($tee == '') {
               <input type='hidden' name='toim' value='$toim'>
               <input type='hidden' name='otunnus' value='$tunnukset'>
               <input type='hidden' name='tee' value='K'>
-              <input type='submit' name='tila' value='".t("Ketjuta lis‰tiedot")."'></form></td>";
+              <input type='submit' name='tila' value='".t("Ketjuta lis√§tiedot")."'></form></td>";
         }
 
         $tunnukset = $tilrow["tilaus"].",";
@@ -776,7 +776,7 @@ elseif ($tee == '') {
         $teksti = "Veloitus";
       }
       if ($hyvrow["veloitus"] > 0 and $hyvrow["hyvitys"] > 0) {
-        $teksti = "Veloitusta ja hyvityst‰";
+        $teksti = "Veloitusta ja hyvityst√§";
       }
       if ($hyvrow["hyvitys"] > 0  and $hyvrow["veloitus"] == 0) {
         $teksti = "Hyvitys";
@@ -821,7 +821,7 @@ elseif ($tee == '') {
           <input type='hidden' name='otunnus' value='$tunnukset'>
           <input type='hidden' name='tee' value='K'>
           <input type='hidden' name='extra' value='K'>
-          <input type='submit' name='tila' value='".t("Ketjuta lis‰tiedot")."'></form></td>";
+          <input type='submit' name='tila' value='".t("Ketjuta lis√§tiedot")."'></form></td>";
       $tunnukset = '';
     }
     echo "</tr>";

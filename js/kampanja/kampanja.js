@@ -45,7 +45,7 @@ function bind_ehto_kohde_change() {
       //piilotetaan uusi aliehto-nappi
       $(this).parent().parent().find('.uusi_aliehto').hide();
 
-      //poistetaan aliehdot jos niit‰ on
+      //poistetaan aliehdot jos niit√§ on
 
       poista_aliehto_rivit($(this).parent().parent());
     }
@@ -65,7 +65,7 @@ function poista_aliehto_rivit($ehto_rivi) {
 }
 
 function filteroi_aliehdon_kohteet($aliehto_rivit) {
-  //haetaan jokainen aliehdon kohde dropdown ja looptaan ne l‰pi
+  //haetaan jokainen aliehdon kohde dropdown ja looptaan ne l√§pi
   if ($aliehto_rivit.length > 0) {
     $aliehto_rivit.each(function(index, aliehto_rivi) {
       //poistetaan kaikki muut paitsi arvo ja kappaleet
@@ -123,7 +123,7 @@ function hae_arvo_input(rivi) {
     url: 'kampanja.php'
   }).done(function(data) {
     if (console && console.log) {
-      console.log('Input kent‰n haku onnistui');
+      console.log('Input kent√§n haku onnistui');
       //console.log(data);
     }
     if (data.length !== 0) {
@@ -213,13 +213,13 @@ function bind_aliehto_kohde_change() {
 }
 
 function bind_uusi_aliehto_button() {
-  //K‰ytet‰‰n live‰, koska kyseess‰ on dynaaminen elementti.
+  //K√§ytet√§√§n live√§, koska kyseess√§ on dynaaminen elementti.
   $('.uusi_aliehto').live('click', function(event) {
     event.preventDefault();
 
-    //parametrin‰ tr.ehto_rivi
+    //parametrin√§ tr.ehto_rivi
     var aliehto_id = generoi_aliehto_id($(this).parent().parent());
-    //parametrin‰ tr.ehto_rivi
+    //parametrin√§ tr.ehto_rivi
     populoi_aliehto_rivi($(this).parent().parent(), aliehto_id);
   });
 }

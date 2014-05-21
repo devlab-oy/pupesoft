@@ -34,7 +34,7 @@ if (mysql_num_rows($kardex_res) > 0) {
     if (($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") OR
       ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "")) {
 
-      // Jos Unifaun on k‰ytˆss‰ niin ulkoinen SSCC ei saa olla tyhj‰
+      // Jos Unifaun on k√§yt√∂ss√§ niin ulkoinen SSCC ei saa olla tyhj√§
       if ((is_numeric($kardex_row['sscc_ulkoinen']) and (int) $kardex_row['sscc_ulkoinen'] == 0) or (!is_numeric($kardex_row['sscc_ulkoinen']) and (string) $kardex_row['sscc_ulkoinen'] == "")) {
         $kardex_ok = FALSE;
         break;
@@ -56,7 +56,7 @@ if (mysql_num_rows($kardex_res) > 0) {
     // index 3, nimitys
     // index 4, kpl
     // index 5, hyllypaikka
-    // index 6, ker‰yser‰rivin tunnus
+    // index 6, ker√§yser√§rivin tunnus
 
     $kardex_row['kpl'] = str_replace(".", ",", $kardex_row['kpl']);
 
@@ -67,7 +67,7 @@ if (mysql_num_rows($kardex_res) > 0) {
 
   if ($kardex_ok) {
 
-    // Remmataan faili $kardex_sscc-kansiosta jos se on siell‰
+    // Remmataan faili $kardex_sscc-kansiosta jos se on siell√§
     if (file_exists($kardex_sscc."/".$kerayseran_numero.".txt")) {
       rename($kardex_sscc."/".$kerayseran_numero.".txt", $kardex_sscc."/ok/".$kerayseran_numero.".txt");
     }
@@ -89,9 +89,9 @@ if (mysql_num_rows($kardex_res) > 0) {
     require('inc/ftp-send.inc');
   }
   elseif ($kardex_sscc != "") {
-    // Katotaan, ettei t‰t‰ ole jo siirretty uudelleenk‰sitelt‰vien joukkoon
+    // Katotaan, ettei t√§t√§ ole jo siirretty uudelleenk√§sitelt√§vien joukkoon
     if (!file_exists($kardex_sscc."/".$kerayseran_numero.".txt")) {
-      // Tyˆnnet‰‰n uudelleenk‰sitelt‰vien joukkoon jos ulkoinen SSCC puuttuu
+      // Ty√∂nnet√§√§n uudelleenk√§sitelt√§vien joukkoon jos ulkoinen SSCC puuttuu
       $kardexnimi = $kardex_sscc."/".$kerayseran_numero.".txt";
       $fh = fopen($kardexnimi, "w+");
       fputs($fh, $kerayseran_numero);

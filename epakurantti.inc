@@ -4,22 +4,22 @@
 // $kukarow
 // $tuoteno
 // $tee jossa tulee olla:
-// - paalle (t‰ysep‰kurantti)
+// - paalle (t√§ysep√§kurantti)
 // - 75paalle
 // - puolipaalle
 // - 25paalle
 // - pois (kurantiksi ja keskihankintahinta nostetaan takaisin)
-// - peru (kurantiksi ja keskihankintahinta j‰‰ alas nykyiselle tasolle)
-// $epakurpvm - p‰iv‰m‰‰r‰ jolloin ep‰kurantoidaan
+// - peru (kurantiksi ja keskihankintahinta j√§√§ alas nykyiselle tasolle)
+// $epakurpvm - p√§iv√§m√§√§r√§ jolloin ep√§kurantoidaan
 
 $tuoteno = isset($tuoteno) ? mysql_real_escape_string(trim($tuoteno)) : "";
 $tee = isset($tee) ? trim($tee) : "";
 $varaston_muutos = 0;
 
-// Tehd‰‰n oletuksena kaikki muutokset nykyhetkeen
+// Tehd√§√§n oletuksena kaikki muutokset nykyhetkeen
 $updatepvm = "now()";
 
-// Katsotaan lˆytyykˆ tuote
+// Katsotaan l√∂ytyyk√∂ tuote
 if ($tuoteno != "") {
 
   $query = "SELECT tuote.tunnus,
@@ -54,7 +54,7 @@ if ($tuoteno != "") {
   $tuoterow = mysql_fetch_assoc($result);
 
   if (mysql_num_rows($result) != 1) {
-    echo "<font class='error'>".t("Tuote %s ei lˆydy!", "", $tuoteno)."</font><br>";
+    echo "<font class='error'>".t("Tuote %s ei l√∂ydy!", "", $tuoteno)."</font><br>";
     $tee = "";
   }
   elseif (in_array($tuoterow["sarjanumeroseuranta"], array('S', 'U', 'G'))) {
@@ -116,10 +116,10 @@ if ($tuoteno != "") {
 
           if ($siirow["tyyppi"] == "O") {
             // pultattu kiinni johonkin
-            $fnlina1 = " <font class='message'>(".t("Varattu lis‰varusteena").": $siirow[tuoteno] <a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($siirow["tuoteno"])."&sarjanumero_haku=".urlencode($siirow["sarjanumero"])."'>$siirow[sarjanumero]</a>)</font>";
+            $fnlina1 = " <font class='message'>(".t("Varattu lis√§varusteena").": $siirow[tuoteno] <a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($siirow["tuoteno"])."&sarjanumero_haku=".urlencode($siirow["sarjanumero"])."'>$siirow[sarjanumero]</a>)</font>";
           }
           elseif ($siirow["tyyppi"] == "G") {
-            // jos t‰m‰ on jollain siirtolistalla
+            // jos t√§m√§ on jollain siirtolistalla
             $fnlina1 = " <font class='message'>(".t("Kesken siirtolistalla").": $siirow[otunnus])</font>";
           }
         }
@@ -158,25 +158,25 @@ if ($tuoteno != "") {
     $brutto_varastonarvo      = $tuotteen_saldo * $tuoterow["kehahin"];
     $brutto_keskihankintahinta    = $tuoterow["kehahin"];
 
-    // Tehd‰‰n selkokielinen selite
-    $epakurantti_selite = t("Ep‰kuranttimuutos") . ": ".t("Tuote")." {$tuoterow["tuoteno"]} ".t("p‰ivitet‰‰n")." ";
+    // Tehd√§√§n selkokielinen selite
+    $epakurantti_selite = t("Ep√§kuranttimuutos") . ": ".t("Tuote")." {$tuoterow["tuoteno"]} ".t("p√§ivitet√§√§n")." ";
 
     // Lasketaan uusi keskihankintahinta
     if ($tee == "paalle") {
       $uusi_keskihankintahinta = 0;
-      $epakurantti_selite .= "100% ".t("ep‰kurantiksi");
+      $epakurantti_selite .= "100% ".t("ep√§kurantiksi");
     }
     elseif ($tee == "25paalle") {
       $uusi_keskihankintahinta = $tuoterow["kehahin"] * 0.75;
-      $epakurantti_selite .= "25% ".t("ep‰kurantiksi");
+      $epakurantti_selite .= "25% ".t("ep√§kurantiksi");
     }
     elseif ($tee == "puolipaalle") {
       $uusi_keskihankintahinta = $tuoterow["kehahin"] * 0.5;
-      $epakurantti_selite .= "50% ".t("ep‰kurantiksi");
+      $epakurantti_selite .= "50% ".t("ep√§kurantiksi");
     }
     elseif ($tee == "75paalle") {
       $uusi_keskihankintahinta = $tuoterow["kehahin"] * 0.25;
-      $epakurantti_selite .= "75% ".t("ep‰kurantiksi");
+      $epakurantti_selite .= "75% ".t("ep√§kurantiksi");
     }
     elseif ($tee == "pois") {
       $uusi_keskihankintahinta = $tuoterow["kehahin"];
@@ -208,7 +208,7 @@ if ($tuoteno != "") {
   }
 }
 
-// Tehd‰‰n oikeellisuustarkistukset
+// Tehd√§√§n oikeellisuustarkistukset
 if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "75paalle" or $tee == "pois" or $tee == "peru") {
 
   // katotaan onko tilauksessa
@@ -222,7 +222,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
   $tilro = mysql_fetch_assoc($tilre);
 
   if ($tilro["varattu"] != 0 and $tee != "pois" and $tee != "peru") {
-    echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuotetta on tilauksessa!")." ".t("Ei voida laittaa ep‰kurantiksi!")."</font><br>";
+    echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuotetta on tilauksessa!")." ".t("Ei voida laittaa ep√§kurantiksi!")."</font><br>";
     $tee = "";
   }
 
@@ -241,7 +241,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 
   if (mysql_num_rows($tilre) != 0 and $tee != "pois" and $tee != "peru") {
     $tilro = mysql_fetch_assoc($tilre);
-    echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuotetta on viem‰tt‰ varastoon saapumisella")." $tilro[laskunro]. ".t("Ei voida laittaa ep‰kurantiksi!")."</font><br>";
+    echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuotetta on viem√§tt√§ varastoon saapumisella")." $tilro[laskunro]. ".t("Ei voida laittaa ep√§kurantiksi!")."</font><br>";
     $tee = "";
   }
 
@@ -252,31 +252,31 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 
   // ei voida aktivoida tuotetta kurantiksi jos se on jo kurantti
   if (($tee == 'pois' or $tee == "peru") and ($tuoterow['epakurantti25pvm'] == '0000-00-00') and ($tuoterow['epakurantti50pvm'] == '0000-00-00') and ($tuoterow['epakurantti75pvm'] == '0000-00-00') and ($tuoterow['epakurantti100pvm'] == '0000-00-00')) {
-    echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuote v‰‰r‰ss‰ tilassa!")." ".t("Ei voida laittaa kurantiksi!")."</font><br>";
+    echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuote v√§√§r√§ss√§ tilassa!")." ".t("Ei voida laittaa kurantiksi!")."</font><br>";
     $tee = "";
   }
 
-  // ei voida laittaa puoliep‰kurantiksi jos tuote on puoliep‰kurantti tai t‰ysep‰kurantti
+  // ei voida laittaa puoliep√§kurantiksi jos tuote on puoliep√§kurantti tai t√§ysep√§kurantti
   if (($tee == '25paalle') and (($tuoterow['epakurantti25pvm'] != '0000-00-00') or ($tuoterow['epakurantti50pvm'] != '0000-00-00') or ($tuoterow['epakurantti75pvm'] != '0000-00-00') or ($tuoterow['epakurantti100pvm'] != '0000-00-00'))) {
-    echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuote v‰‰r‰ss‰ tilassa!")." ".t("Ei voida laittaa 25% ep‰kurantiksi!")."</font><br>";
+    echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuote v√§√§r√§ss√§ tilassa!")." ".t("Ei voida laittaa 25% ep√§kurantiksi!")."</font><br>";
     $tee = "";
   }
 
-  // ei voida laittaa puoliep‰kurantiksi jos tuote on puoliep‰kurantti tai t‰ysep‰kurantti
+  // ei voida laittaa puoliep√§kurantiksi jos tuote on puoliep√§kurantti tai t√§ysep√§kurantti
   if (($tee == 'puolipaalle') and (($tuoterow['epakurantti50pvm'] != '0000-00-00') or ($tuoterow['epakurantti75pvm'] != '0000-00-00') or ($tuoterow['epakurantti100pvm'] != '0000-00-00'))) {
-    echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuote v‰‰r‰ss‰ tilassa!")." ".t("Ei voida laittaa puoliep‰kurantiksi!")."</font><br>";
+    echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuote v√§√§r√§ss√§ tilassa!")." ".t("Ei voida laittaa puoliep√§kurantiksi!")."</font><br>";
     $tee = "";
   }
 
-  // ei voida laittaa puoliep‰kurantiksi jos tuote on puoliep‰kurantti tai t‰ysep‰kurantti
+  // ei voida laittaa puoliep√§kurantiksi jos tuote on puoliep√§kurantti tai t√§ysep√§kurantti
   if (($tee == '75paalle') and (($tuoterow['epakurantti75pvm'] != '0000-00-00') or ($tuoterow['epakurantti100pvm'] != '0000-00-00'))) {
-    echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuote v‰‰r‰ss‰ tilassa!")." ".t("Ei voida laittaa 75% ep‰kurantiksi!")."</font><br>";
+    echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuote v√§√§r√§ss√§ tilassa!")." ".t("Ei voida laittaa 75% ep√§kurantiksi!")."</font><br>";
     $tee = "";
   }
 
-  // ei voida laittaa t‰ysep‰kurantiksi jos tuote on jo t‰ysep‰kurantti
+  // ei voida laittaa t√§ysep√§kurantiksi jos tuote on jo t√§ysep√§kurantti
   if (($tee == 'paalle') and ($tuoterow['epakurantti100pvm'] != '0000-00-00')) {
-    echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuote v‰‰r‰ss‰ tilassa!")." ".t("Ei voida laittaa t‰ysiep‰kurantiksi!")."</font><br>";
+    echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuote v√§√§r√§ss√§ tilassa!")." ".t("Ei voida laittaa t√§ysiep√§kurantiksi!")."</font><br>";
     $tee = "";
   }
 
@@ -287,7 +287,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
     $chkvv = substr($epakurpvm, 0, 4);
 
     if (!checkdate($chkkk, $chkpp, $chkvv)) {
-      echo "<font class='error'>$tuoterow[tuoteno] ".t("VIRHE: Syˆtetty p‰iv‰m‰‰r‰ on virheellinen")."!</font><br>";
+      echo "<font class='error'>$tuoterow[tuoteno] ".t("VIRHE: Sy√∂tetty p√§iv√§m√§√§r√§ on virheellinen")."!</font><br>";
       $tee = "";
     }
     else {
@@ -295,12 +295,12 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
     }
   }
   elseif (isset($epakurpvm) and $epakurpvm != "") {
-    echo "<font class='error'>$tuoterow[tuoteno] ".t("VIRHE: Syˆtetty p‰iv‰m‰‰r‰ ei sis‰lly kuluvaan tilikauteen")."!</font><br>";
+    echo "<font class='error'>$tuoterow[tuoteno] ".t("VIRHE: Sy√∂tetty p√§iv√§m√§√§r√§ ei sis√§lly kuluvaan tilikauteen")."!</font><br>";
     $tee = "";
   }
 }
 
-// P‰ivitet‰‰n tuote
+// P√§ivitet√§√§n tuote
 if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "75paalle" or $tee == "pois" or $tee == "peru") {
 
   $pvm25  = $tuoterow['epakurantti25pvm'];
@@ -329,7 +329,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
       if ($pvm100 == "0000-00-00") {
         $pvm100 = $updatepvm;
       }
-      // 100% ep‰kurantiksi tulevalle asetetaan 75% mukainen hinta, siksi ei jaettavaa v‰hennet‰
+      // 100% ep√§kurantiksi tulevalle asetetaan 75% mukainen hinta, siksi ei jaettavaa v√§hennet√§
     case "75paalle" :
       if ($pvm75 == "0000-00-00") {
         $pvm75 = $updatepvm;
@@ -353,7 +353,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 
   if ($yhtiorow["epakurantoinnin_myyntihintaleikkuri"] == 'Z') {
 
-    if ($tuoterow["epakurantti25pvm"] == "0000-00-00") { // oltiin nollassa, eka ep‰kurantoituminen
+    if ($tuoterow["epakurantti25pvm"] == "0000-00-00") { // oltiin nollassa, eka ep√§kurantoituminen
       $zenior_jakaja = 4;
       $on_jo_epakurantti = 0;
     }
@@ -384,7 +384,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 
     if (mysql_num_rows($z_result) == 0) {
       $z_row_found = 0;
-      $on_jo_epakurantti = 0;  // T‰m‰ on ep‰kurantoitu ennen zeniorparts-toiminnon k‰yttˆˆnottoa. Poistetaan hinnastot mutta talteen otettava tuote.myyntihinta saattaa olla k‰sin muutettu
+      $on_jo_epakurantti = 0;  // T√§m√§ on ep√§kurantoitu ennen zeniorparts-toiminnon k√§ytt√∂√∂nottoa. Poistetaan hinnastot mutta talteen otettava tuote.myyntihinta saattaa olla k√§sin muutettu
     }
     else {
       $z_row_found = 1;
@@ -450,11 +450,11 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
             AND  tuoteno      = '{$tuoterow["tuoteno"]}'";
   $result = pupe_query($query);
 
-  ///* Tehd‰‰n tapahtuma *///
+  ///* Tehd√§√§n tapahtuma *///
   $query = "INSERT into tapahtuma set
             yhtio    = '{$kukarow["yhtio"]}',
             tuoteno  = '{$tuoterow["tuoteno"]}',
-            laji     = 'Ep‰kurantti',
+            laji     = 'Ep√§kurantti',
             kpl      = '$tuotteen_saldo',
             hinta    = round($keskihankintahinta_muutos, 6),
             kplhinta = round($keskihankintahinta_muutos, 6),
@@ -463,7 +463,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
             laadittu = $updatepvm";
   $result = pupe_query($query);
 
-  // otetaan tapahtuman tunnus, laitetaan se tiliˆinnin otsikolle
+  // otetaan tapahtuman tunnus, laitetaan se tili√∂innin otsikolle
   $tapahtumaid = mysql_insert_id();
 
   if (!isset($php_cli) or !$php_cli) {
@@ -478,13 +478,13 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
   }
 }
 
-  // Tehd‰‰n oikeellisuustarkistukset
+  // Tehd√§√§n oikeellisuustarkistukset
   if ($toim == "VAIHDAKEHAHIN" and $tee == "vaihda_kehahin") {
       // Pilkut pisteiks
     $uusiarvo = str_replace(",", ".", $uusiarvo);
 
     if ($tuoterow['epakurantti25pvm'] != '0000-00-00' or $tuoterow['epakurantti50pvm'] != '0000-00-00' or $tuoterow['epakurantti75pvm'] != '0000-00-00' or $tuoterow['epakurantti100pvm'] != '0000-00-00') {
-          echo "<font class='error'>".t("VIRHE: Tuote on ep‰kurantti. Keskihankintahintaa ei voida vaihtaa")."!</font><br>";
+          echo "<font class='error'>".t("VIRHE: Tuote on ep√§kurantti. Keskihankintahintaa ei voida vaihtaa")."!</font><br>";
           $tee = "vahvista";
   }
 
@@ -501,20 +501,20 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
   }
 
   if (trim($oma_selite) == "") {
-    echo "<font class='error'>".t("VIRHE: Selite on syˆtett‰v‰")."!</font><br>";
+    echo "<font class='error'>".t("VIRHE: Selite on sy√∂tett√§v√§")."!</font><br>";
     $tee = "vahvista";
   }
 
   if (is_numeric($uusiarvo) and $uusiarvo == $tuoterow["kehahin"]) {
-    echo "<font class='error'>".t("VIRHE: Tuotteella on jo t‰m‰ keskihankintahinta")."!</font><br>";
+    echo "<font class='error'>".t("VIRHE: Tuotteella on jo t√§m√§ keskihankintahinta")."!</font><br>";
     $tee = "vahvista";
   }
 
       $nykyinen_keskihankintahinta = $tuoterow["kehahin"];
   $tuotteen_saldo = $tuoterow["saldo"];
 
-  // Tehd‰‰n selkokielinen selite
-  $epakurantti_selite = t("Keskihankintahinnan muutos").": ".t("Tuote")." {$tuoterow["tuoteno"]} ".t("p‰ivitet‰‰n")." ";
+  // Tehd√§√§n selkokielinen selite
+  $epakurantti_selite = t("Keskihankintahinnan muutos").": ".t("Tuote")." {$tuoterow["tuoteno"]} ".t("p√§ivitet√§√§n")." ";
 
       $uusi_keskihankintahinta = round($uusiarvo, 6);
 
@@ -582,7 +582,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
             and tuoteno = '$tuoterow[tuoteno]'";
   $result = pupe_query($query);
 
-      // Lis‰t‰‰n keharinmuutostapahtuma
+      // Lis√§t√§√§n keharinmuutostapahtuma
     $query = "INSERT into tapahtuma set
               yhtio    = '$kukarow[yhtio]',
               tuoteno  = '$tuoterow[tuoteno]',
@@ -595,7 +595,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
               laadittu = '$luontiaika1'";
   $result = pupe_query($query);
 
-      // otetaan tapahtuman tunnus, laitetaan se tiliˆinnin otsikolle
+      // otetaan tapahtuman tunnus, laitetaan se tili√∂innin otsikolle
   $tapahtumaid = mysql_insert_id();
 
   mysql_data_seek($paikatres, 0);
@@ -604,7 +604,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 
       $plussa = $paikatrow['saldo'];
 
-      // Lis‰t‰‰n saldo uudella keharilla
+      // Lis√§t√§√§n saldo uudella keharilla
       $query = "INSERT into tapahtuma set
                 yhtio     = '$kukarow[yhtio]',
                 tuoteno   = '$tuoterow[tuoteno]',
@@ -637,13 +637,13 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
     $lock = pupe_query($query);
   }
 
-// Tehd‰‰n oikeellisuustarkistukset
+// Tehd√§√§n oikeellisuustarkistukset
 if ($tee == "sarjanro_paalle") {
       // Pilkut pisteiks
     $uusiarvo = str_replace(",", ".", $uusiarvo);
 
   if ($sarjarow["osto_rivitunnus"] == 0) {
-    echo "<font class='error'>".t("VIRHE: Sarjanumeroa ei lˆydy!")."</font><br>";
+    echo "<font class='error'>".t("VIRHE: Sarjanumeroa ei l√∂ydy!")."</font><br>";
     $tee = "";
   }
 
@@ -655,7 +655,7 @@ if ($tee == "sarjanro_paalle") {
   }
 
   if (trim($oma_selite)) {
-    echo "<font class='error'>".t("VIRHE: Selite on syˆtett‰v‰")."!</font><br>";
+    echo "<font class='error'>".t("VIRHE: Selite on sy√∂tett√§v√§")."!</font><br>";
     $tee = "";
   }
 
@@ -669,14 +669,14 @@ if ($tee == "sarjanro_paalle") {
   $keskihankintahinta_muutos = round($uusiarvo-$nykyinenarvo, 6);
   $varaston_muutos = round($keskihankintahinta_muutos, 2);
 
-  // Tehd‰‰n selkokielinen selite
-  $epakurantti_selite = mysql_real_escape_string("Ep‰kuranttimuutos: ".t("Tuote")." {$tuoterow["tuoteno"]} ".t("Selite").": ".$oma_selite);
+  // Tehd√§√§n selkokielinen selite
+  $epakurantti_selite = mysql_real_escape_string("Ep√§kuranttimuutos: ".t("Tuote")." {$tuoterow["tuoteno"]} ".t("Selite").": ".$oma_selite);
 }
 
-// P‰ivitet‰‰n sarjanumero
+// P√§ivitet√§√§n sarjanumero
 if ($tee == "sarjanro_paalle") {
 
-  ///* Tehd‰‰n tapahtuma *///
+  ///* Tehd√§√§n tapahtuma *///
   $query = "INSERT into sarjanumeroseuranta_arvomuutos set
             yhtio             = '$kukarow[yhtio]',
             sarjanumerotunnus = '$sarjatunnus',
@@ -686,7 +686,7 @@ if ($tee == "sarjanro_paalle") {
             luontiaika        = now()";
   $result = pupe_query($query);
 
-  // otetaan tapahtuman tunnus, laitetaan se tiliˆinnin otsikolle
+  // otetaan tapahtuman tunnus, laitetaan se tili√∂innin otsikolle
   $tapahtumaid = mysql_insert_id();
 
   if (!isset($php_cli) or !$php_cli) {
@@ -701,7 +701,7 @@ if ($tee == "sarjanro_paalle") {
   }
 }
 
-  //Tehd‰‰nkˆ kirjaus kirjanpitoon?
+  //Tehd√§√§nk√∂ kirjaus kirjanpitoon?
 if ($varaston_muutos != 0 and (in_array($tee, array("paalle", "25paalle", "puolipaalle", "75paalle", "pois", "peru", "vaihda_kehahin", "sarjanro_paalle")))) {
 
       ///* Kirjanpito *///
@@ -725,7 +725,7 @@ if ($varaston_muutos != 0 and (in_array($tee, array("paalle", "25paalle", "puoli
     $varastonmuutos_tili = $yhtiorow["varastonmuutos"];
   }
 
-  // tehd‰‰n kirjaukset per toimipaikka, kustannuspaikka tulee ensisijaisesti toimipaikan takaa
+  // tehd√§√§n kirjaukset per toimipaikka, kustannuspaikka tulee ensisijaisesti toimipaikan takaa
   if ($yhtiorow["tarkenteiden_prioriteetti"] == "T") {
     $query = "SELECT varastopaikat.tunnus, varastopaikat.toimipaikka, sum(tuotepaikat.saldo) saldo
               FROM tuotepaikat
@@ -745,7 +745,7 @@ if ($varaston_muutos != 0 and (in_array($tee, array("paalle", "25paalle", "puoli
     while ($vpaikkarow = mysql_fetch_assoc($vpresult)) {
 
       if ($vpmaara == $vplask) {
-        // vikalla rundilla laitetaan kaikki mit‰ ei olla viel‰ kirjattu
+        // vikalla rundilla laitetaan kaikki mit√§ ei olla viel√§ kirjattu
         $varaston_muutos_vp = $varaston_muutos-$vpkirjattu;
       }
       else {
@@ -766,10 +766,10 @@ if ($varaston_muutos != 0 and (in_array($tee, array("paalle", "25paalle", "puoli
       $kohde_ins     = $toimipaikkarow["kohde"] > 0 ? $toimipaikkarow["kohde"] : $tuoterow["kohde"];
       $projekti_ins   = $toimipaikkarow["projekti"] > 0 ? $toimipaikkarow["projekti"] : $tuoterow["projekti"];
 
-      // Tiliˆid‰‰n ensisijaisesti varastonmuutos tilin oletuskustannuspaikalle
+      // Tili√∂id√§√§n ensisijaisesti varastonmuutos tilin oletuskustannuspaikalle
       list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutos_tili, $kustp_ins, $kohde_ins, $projekti_ins);
 
-      // Toissijaisesti kokeillaan viel‰ varasto-tilin oletuskustannuspaikkaa
+      // Toissijaisesti kokeillaan viel√§ varasto-tilin oletuskustannuspaikkaa
       list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"], $kustp_ins, $kohde_ins, $projekti_ins);
 
       $query = "INSERT into tiliointi set
@@ -811,10 +811,10 @@ if ($varaston_muutos != 0 and (in_array($tee, array("paalle", "25paalle", "puoli
     $kohde_ins     = $tuoterow["kohde"];
     $projekti_ins   = $tuoterow["projekti"];
 
-    // Tiliˆid‰‰n ensisijaisesti varastonmuutos tilin oletuskustannuspaikalle
+    // Tili√∂id√§√§n ensisijaisesti varastonmuutos tilin oletuskustannuspaikalle
     list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutos_tili, $kustp_ins, $kohde_ins, $projekti_ins);
 
-    // Toissijaisesti kokeillaan viel‰ varasto-tilin oletuskustannuspaikkaa
+    // Toissijaisesti kokeillaan viel√§ varasto-tilin oletuskustannuspaikkaa
     list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"], $kustp_ins, $kohde_ins, $projekti_ins);
 
     $query = "INSERT into tiliointi set

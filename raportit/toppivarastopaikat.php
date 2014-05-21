@@ -1,13 +1,13 @@
 <?php
 
-// Enabloidaan, ett‰ Apache flushaa kaiken mahdollisen ruudulle kokoajan.
+// Enabloidaan, ett√§ Apache flushaa kaiken mahdollisen ruudulle kokoajan.
 ini_set('implicit_flush', 1);
 ob_implicit_flush(1);
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-// Ei k‰ytet‰ pakkausta
+// Ei k√§ytet√§ pakkausta
 $compression = FALSE;
 
 if (isset($_POST["tee"])) {
@@ -70,7 +70,7 @@ ini_set("memory_limit", "5G");
 
 echo "<div id='valitse_varasto' style='display:none;'>".t("Valitse varasto tai rajaa varastopaikalla")."</div>";
 
-echo "<font class='head'>".t("Varastopaikkojen ker‰ysseuranta")."</font><hr>";
+echo "<font class='head'>".t("Varastopaikkojen ker√§ysseuranta")."</font><hr>";
 
 $kaikki_lisa_kentat = array(
   0   => array(
@@ -120,7 +120,7 @@ $kaikki_lisa_kentat = array(
   ),
 );
 
-//for looppi vain sen takia, ett‰ saadaan synkattua formista valitut kent‰t, mahdollisien kenttien kanssa
+//for looppi vain sen takia, ett√§ saadaan synkattua formista valitut kent√§t, mahdollisien kenttien kanssa
 foreach ($kaikki_lisa_kentat as $kentat_index => &$kentat_value) {
   if ((isset($lisa_kentat) and in_array($kentat_index, $lisa_kentat)) or (!empty($kentat_value['checked']))) {
     $kentat_value['checked'] = "checked='checked'";
@@ -166,7 +166,7 @@ if ($tee != '') {
       'order'   => 20
     ),
     'keraysvyohykkeen_nimitys'   => array(
-      'header' => t('Ker‰ysvyˆhyke'),
+      'header' => t('Ker√§ysvy√∂hyke'),
       'order'   => 30
     ),
     'hylly'             => array(
@@ -178,23 +178,23 @@ if ($tee != '') {
       'order' => 50
     ),
     'kpl_valittu_aika'       => array(
-      'header' => t('Ker‰yst‰'),
+      'header' => t('Ker√§yst√§'),
       'order'   => 60
     ),
     'kpl_valittu_aika_pvm'     => array(
-      'header' => t('Ker‰yst‰/P‰iv‰'),
+      'header' => t('Ker√§yst√§/P√§iv√§'),
       'order'   => 70
     ),
     'kpl_kerays'         => array(
-      'header' => t('Kpl/Ker‰ys'),
+      'header' => t('Kpl/Ker√§ys'),
       'order'   => 80
     ),
     'kpl_6'             => array(
-      'header' => t('Ker‰yst‰ t‰st‰ p‰iv‰st‰ 6kk'),
+      'header' => t('Ker√§yst√§ t√§st√§ p√§iv√§st√§ 6kk'),
       'order'   => 90
     ),
     'kpl_12'           => array(
-      'header' => t('Ker‰yst‰ t‰st‰ p‰iv‰st‰ 12kk'),
+      'header' => t('Ker√§yst√§ t√§st√§ p√§iv√§st√§ 12kk'),
       'order'   => 100
     ),
     'poistettu'           => array(
@@ -251,7 +251,7 @@ if ($tee != '') {
     nayta_ruudulla($rivit, $header_values, $force_to_string, $ppa, $kka, $vva, $ppl, $kkl, $vvl, 'right_align_numbers');
   }
   else {
-    echo "<br><font class='error'>".t("Yht‰‰n ker‰yst‰ ei lˆytynyt")."</font><br><br>";
+    echo "<br><font class='error'>".t("Yht√§√§n ker√§yst√§ ei l√∂ytynyt")."</font><br><br>";
   }
 
   if (count($saldolliset) > 0) {
@@ -261,10 +261,10 @@ if ($tee != '') {
   $tee = "";
 }
 
-// K‰yttˆliittym‰
+// K√§ytt√∂liittym√§
 if ($tee == '') {
 
-  // ehdotetaan 7 p‰iv‰‰ taaksep‰in
+  // ehdotetaan 7 p√§iv√§√§ taaksep√§in
   if (!isset($kka))                     $kka = date("m", mktime(0, 0, 0, date("m") - 3, date("d"), date("Y")));
   if (!isset($vva))                     $vva = date("Y", mktime(0, 0, 0, date("m") - 3, date("d"), date("Y")));
   if (!isset($ppa))                     $ppa = date("d", mktime(0, 0, 0, date("m") - 3, date("d"), date("Y")));
@@ -339,22 +339,22 @@ if ($tee == '') {
   $checked = empty($summaa_varastopaikalle) ? '' : 'checked = "checked"';
 
   echo "<tr>";
-  echo "<th>".t('Summaa per varasto')."/".t('ker‰ysvyˆhyke')."</th>";
+  echo "<th>".t('Summaa per varasto')."/".t('ker√§ysvy√∂hyke')."</th>";
   echo "<td><input type='checkbox' name='summaa_varastopaikalle' $checked /></td>";
   echo "</tr>";
 
   $checked = empty($kerayksettomat_tuotepaikat) ? '' : 'checked = "checked"';
 
   echo "<tr>";
-  echo "<th>".t("N‰yt‰ myˆs ne tuotepaikat joilta ei ole ker‰yksi‰")."</th>";
-  echo "<td><input type='checkbox' name='kerayksettomat_tuotepaikat' {$checked}/> (".t("Lasketaan ker‰ykset vain aktiivisilta tuotepaikoilta").")</td>";
+  echo "<th>".t("N√§yt√§ my√∂s ne tuotepaikat joilta ei ole ker√§yksi√§")."</th>";
+  echo "<td><input type='checkbox' name='kerayksettomat_tuotepaikat' {$checked}/> (".t("Lasketaan ker√§ykset vain aktiivisilta tuotepaikoilta").")</td>";
   echo "</tr>";
 
-  echo "<tr><th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+  echo "<tr><th>".t("Sy√∂t√§ alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
       <td><input type='text' name='ppa' value='$ppa' size='3'>
       <input type='text' name='kka' value='$kka' size='3' />
       <input type='text' name='vva' value='$vva' size='5' /></td>
-      </tr><tr><th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+      </tr><tr><th>".t("Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
       <td><input type='text' name='ppl' value='$ppl' size='3' />
       <input type='text' name='kkl' value='$kkl' size='3' />
       <input type='text' name='vvl' value='$vvl' size='5' /></td>";
@@ -373,7 +373,7 @@ if ($tee == '') {
       <input class='lhylly' type='text' size='6' name='lhyllytaso' value='$lhyllytaso' />
       </td></tr>";
 
-  echo "<tr><th>".t("Listaa vain n‰in monta ker‰tyint‰ tuotetta").":</th>
+  echo "<tr><th>".t("Listaa vain n√§in monta ker√§tyint√§ tuotetta").":</th>
       <td><input type='text' size='6' name='toppi' value='$toppi' /></td>";
 
   echo "<tr>";
@@ -390,7 +390,7 @@ if ($tee == '') {
 
   if ($yhtiorow['kerayserat'] == "K" and !empty($kaikki_keraysvyohykkeet)) {
     echo "<tr>";
-    echo "<th>".t("Ker‰ysvyˆhykkeet")."</th>";
+    echo "<th>".t("Ker√§ysvy√∂hykkeet")."</th>";
 
     echo "<td>";
     foreach ($kaikki_keraysvyohykkeet as $keraysvyohykkeet_index => $keraysvyohykkeet) {
@@ -404,7 +404,7 @@ if ($tee == '') {
   }
 
   echo "<tr>";
-  echo "<th>".t("Lis‰kent‰t")."</th>";
+  echo "<th>".t("Lis√§kent√§t")."</th>";
 
   echo "<td>";
 
@@ -414,7 +414,7 @@ if ($tee == '') {
     echo "<br/>";
   }
   echo "</td>";
-  echo "<td class='back'>".t("Ei k‰ytˆss‰ jos summataan per varasto/ker‰ysvyˆhyke")."</td>";
+  echo "<td class='back'>".t("Ei k√§yt√∂ss√§ jos summataan per varasto/ker√§ysvy√∂hyke")."</td>";
   echo "</tr>";
 
   $checked = empty($tee_excel) ? '' : 'checked = "checked"';
@@ -516,7 +516,7 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
         }
       }
 
-      // Ruksattiin jotain lis‰valintoita (tuotekohtaisia), voidaan n‰ytt‰‰ saldo
+      // Ruksattiin jotain lis√§valintoita (tuotekohtaisia), voidaan n√§ytt√§√§ saldo
       if ($checked_count > 0) {
         $tuote_select .= "tuotepaikat.saldo,";
         $group .= "tuotepaikat.saldo,";
@@ -614,7 +614,7 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 
   $result = pupe_query($query);
 
-  //p‰ivi‰ aikajaksossa
+  //p√§ivi√§ aikajaksossa
   $epa1 = (int)date('U', mktime(0, 0, 0, $kka, $ppa, $vva));
   $epa2 = (int)date('U', mktime(0, 0, 0, $kkl, $ppl, $vvl));
 

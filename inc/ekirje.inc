@@ -1,11 +1,11 @@
 <?php
 /**
  *
- * Kirjasto PDF eKirjeen l‰hetykseen
+ * Kirjasto PDF eKirjeen l√§hetykseen
  *
- * Luo Itellan vaatiman XML filen jossa kirjeen tiedot. Lƒhetett‰v‰
- * tiedosto (PDF) sek‰ XML file pistet‰‰n ZIP fileen joka l‰hetet‰‰n
- * FTP:ll‰ Itellaan.
+ * Luo Itellan vaatiman XML filen jossa kirjeen tiedot. L√Ñhetett√§v√§
+ * tiedosto (PDF) sek√§ XML file pistet√§√§n ZIP fileen joka l√§hetet√§√§n
+ * FTP:ll√§ Itellaan.
  *
  * Esim:
  *
@@ -26,7 +26,7 @@
  *     'ftp_user'              => 'username',      // ftp palvelimen username
  *     'ftp_pass'              => 'password',      // ftp palvelimen passwd
  *     'ftp_path'              => 'PDFekirje/',      // vakiopolku ftp-palvelimella
- *     'is_test'               => false,        // true/false l‰hetet‰‰nkˆ kirje postitse asiakkaalle asti
+ *     'is_test'               => false,        // true/false l√§hetet√§√§nk√∂ kirje postitse asiakkaalle asti
  *     'asiakas_tunnus'        => 'userid',        // asiakkaan itella tunnus
  *     'salasana'              => 'passwd',        // asiakkaan itella passwd
  * );
@@ -54,7 +54,7 @@ class Pupe_Pdfekirje {
         'salasana'              => 'XXXX',
         'kirjeluokka'           => '1',             // 1 = priority, 2 = economy
         'osasto'                => '',              // osastokohtainen erittely
-        'file_id'               => null,            // l‰hett‰j‰n tunniste tiedostolle
+        'file_id'               => null,            // l√§hett√§j√§n tunniste tiedostolle
         'kirje_id'              => null,            // kirjeen id
     'contact_name'          => null,
     'contact_email'         => null,
@@ -84,7 +84,7 @@ class Pupe_Pdfekirje {
 
   /**
    *
-   * PDF tiedoston nimi ZIP tiedoston sis‰ll‰
+   * PDF tiedoston nimi ZIP tiedoston sis√§ll√§
    *
    * @var string
    *
@@ -104,7 +104,7 @@ class Pupe_Pdfekirje {
   {
     $this->_info = array_merge($this->_info, (array) $config);
 
-    // jos viimeinen merkki pathiss‰ ei ole kauttaviiva lis‰t‰‰n kauttaviiva...
+    // jos viimeinen merkki pathiss√§ ei ole kauttaviiva lis√§t√§√§n kauttaviiva...
     if (substr($this->_info['ftp_path'], -1) != "/") {
       $this->_info['ftp_path'] .= '/';
     }
@@ -113,13 +113,13 @@ class Pupe_Pdfekirje {
       $this->_info['tmp_dir'] .= '/';
     }
 
-    // is_test pit‰‰ olla (string) 'true' tai 'false'
+    // is_test pit√§√§ olla (string) 'true' tai 'false'
     $this->_info['is_test'] = ($this->_info['is_test'] == true) ? 'true' : 'false';
   }
 
   /**
    *
-   * L‰hett‰‰ filen FTP:n avulla
+   * L√§hett√§√§ filen FTP:n avulla
    *
    * @return void
    *
@@ -142,13 +142,13 @@ class Pupe_Pdfekirje {
     // asetetaan pdf tiedoston nimi
     $this->_pdf_filename = $pdf_file;
 
-    // tehd‰‰n XML file
+    // tehd√§√§n XML file
     $this->_generateXmlFile();
 
-    // tehd‰‰n zip jossa XML file sek‰ PDF file
+    // tehd√§√§n zip jossa XML file sek√§ PDF file
     $this->_zip();
 
-    // l‰hetet‰‰n FTP:ll‰ zippi
+    // l√§hetet√§√§n FTP:ll√§ zippi
     $this->_ftpSend();
   }
 
@@ -179,11 +179,11 @@ class Pupe_Pdfekirje {
     $xml = $this->_getXml();
 
     $o = array(
-      // tiedoston nimi zipin sis‰ll‰
+      // tiedoston nimi zipin sis√§ll√§
       'file_nimi' => basename($this->_pdf_filename),
     );
 
-    // lis‰t‰‰n PDF filen nimi joka on ZIPin sis‰ll‰
+    // lis√§t√§√§n PDF filen nimi joka on ZIPin sis√§ll√§
     $info = array_merge($this->_info, $o);
 
     // korvataan placeholderit oikeilla tiedoilla
@@ -218,7 +218,7 @@ class Pupe_Pdfekirje {
 
   /**
    *
-   * Tekee ZIPin jossa xml- sek‰ pdf file
+   * Tekee ZIPin jossa xml- sek√§ pdf file
    *
    * @return string Zip filen polku
    *
@@ -235,13 +235,13 @@ class Pupe_Pdfekirje {
     // asetetaan zip filenimi
     $this->_zip_filename = $zipfile;
 
-    // palautetaan myˆs
+    // palautetaan my√∂s
     return $this->_zip_filename;
   }
 
   /**
    *
-   * L‰hett‰‰ itse zip tiedoston FTP:ll‰
+   * L√§hett√§√§ itse zip tiedoston FTP:ll√§
    *
    * @return bool true
    *
@@ -303,7 +303,7 @@ class Pupe_Pdfekirje {
   private function _getXml()
   {
       return <<<XML
-<?xml version="1.0" encoding="ISO-8859-15"?>
+<?xml version="1.0" encoding="utf-8"?>
 <lb:LetterBundle xmlns:lb="urn:itella-letterbundle-v0x3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:itella-letterbundle-v0x3 LetterBundle_V0x3.xsd" lb:schemaVersion="v0x3">
   <lb:Bundle lb:senderBundleId=":tunniste">
     <lb:BundleCommon lb:isTest=":is_test">

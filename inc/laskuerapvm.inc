@@ -1,6 +1,6 @@
 <?php
 
-echo "<font class='head'>".t("Avoimet laskut per er‰pvm")."</font><hr>";
+echo "<font class='head'>".t("Avoimet laskut per er√§pvm")."</font><hr>";
 
 $sel1 = $sel2 = $sel3 = "";
 
@@ -18,13 +18,13 @@ echo "<form action = 'raportit.php' method='post'>
     <input type = 'hidden' name = 'toim' value = 'laskuerapvm'>
     <input type = 'hidden' name = 'tee' value = '1'>
     <table><tr>
-    <td>".t("Laskut per er‰p‰iv‰")."</td>
+    <td>".t("Laskut per er√§p√§iv√§")."</td>
     <td><select name='aika'>
-    <option value = 'pv' $sel1>".t("P‰iv‰")."
+    <option value = 'pv' $sel1>".t("P√§iv√§")."
     <option value = 'vi' $sel2>".t("Viikko")."
     <option value = 'kk' $sel3>".t("Kuukausi")."
     </select></td>
-    <td class='back'><input type = 'submit' value = '".t("N‰yt‰")."'></td>
+    <td class='back'><input type = 'submit' value = '".t("N√§yt√§")."'></td>
     </tr></table></form><br>";
 
 
@@ -50,14 +50,14 @@ if ($aika != '') {
   $result = mysql_query($query) or pupe_error($query);
 
   echo "<table>";
-  echo "<tr><th>".t("Jakso")."</th><th>".t("Er‰pvm")."</th><th>".t("Summa")."</th><th>".t("Kpl")."</th></tr>";
+  echo "<tr><th>".t("Jakso")."</th><th>".t("Er√§pvm")."</th><th>".t("Summa")."</th><th>".t("Kpl")."</th></tr>";
 
   while ($trow=mysql_fetch_array ($result)) {
     echo "<tr>";
 
 
     if ($aika == 'pv') {
-      echo "<td>".t("P‰iv‰").": ";
+      echo "<td>".t("P√§iv√§").": ";
       echo "<td align='right'><a href = raportit.php?toim=laskuhaku&tee=E&pvm=$trow[aika]&lopetus=$PHP_SELF////toim=$toim//tee=$tee//aika=$aika>".tv1dateconv($trow["aika"])."</td>";
     }
     if ($aika == 'vi') {

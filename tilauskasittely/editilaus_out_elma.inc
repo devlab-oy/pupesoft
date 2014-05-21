@@ -2,7 +2,7 @@
 
 $nimi = "../dataout/elma-order-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
 
-if (!$toot = fopen($nimi, "w")) die("Filen $nimi luonti ep‰onnistui!");
+if (!$toot = fopen($nimi, "w")) die("Filen $nimi luonti ep√§onnistui!");
 
 $query = "SELECT tilausrivi.tunnus,
           toim_tuoteno,
@@ -23,7 +23,7 @@ $query = "SELECT tilausrivi.tunnus,
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) == 0) {
-  echo "<font class='error'>L‰hetett‰vi‰ tilausrivej‰ ei lˆydy</font>";
+  echo "<font class='error'>L√§hetett√§vi√§ tilausrivej√§ ei l√∂ydy</font>";
 }
 else {
   $ulos  = "ICHGSTART:" . $yhtiorow['yhtio'] . $laskurow['tunnus'] . "\n";
@@ -54,7 +54,7 @@ else {
   $ulos .= "OHDR__END:" . $yhtiorow['yhtio'] . $laskurow['tunnus'] . "\n";
   fputs($toot,$ulos);
 
-  $rivino=1; // joudumme tekem‰‰n dummy rivinumerot, kun elma ei salli yli kuusimerkkisi‰ rivinumeroita
+  $rivino=1; // joudumme tekem√§√§n dummy rivinumerot, kun elma ei salli yli kuusimerkkisi√§ rivinumeroita
 
   while ($tilausrivirow=mysql_fetch_array ($result)) {
     if ($tilausrivirow['yksikko'] == '') $tilausrivirow['yksikko'] = "PCE";
@@ -95,7 +95,7 @@ else {
   require ("inc/ftp-send.inc");
 
   if ($palautus == 0) {
-    echo "<font class='message'>".t("Tilaus l‰hetettiin onnistuneesti")."!</font><br>";
+    echo "<font class='message'>".t("Tilaus l√§hetettiin onnistuneesti")."!</font><br>";
 
     $sqlquery = "UPDATE lasku
                  SET kirjoitin = 'edi'
@@ -104,7 +104,7 @@ else {
     $result = pupe_query($sqlquery);
   }
   else {
-    echo "<font class='error'>".t("Tilauksen l‰hetys ep‰onnistui")."!</font><br>";
+    echo "<font class='error'>".t("Tilauksen l√§hetys ep√§onnistui")."!</font><br>";
   }
 }
 

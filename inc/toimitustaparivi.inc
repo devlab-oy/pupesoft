@@ -1,8 +1,8 @@
 <?php
 
 $ulos = "";
-$jatko = 1; // oletetaan normaali k‰sittely
-$tyyppi = 1; // oletetaan rivin n‰kyvyys
+$jatko = 1; // oletetaan normaali k√§sittely
+$tyyppi = 1; // oletetaan rivin n√§kyvyys
 
 if (mysql_field_name($result, $i) == "tunnus" or
     mysql_field_name($result, $i) == "yhtio") {
@@ -28,7 +28,7 @@ if (mysql_field_name($result, $i) == "lauantai") {
 
   $ulos  = "<td><select name='$nimi'>";
   $ulos .= "<option value=''>".t("Ei lauantaijakelua")."</option>";
-  $ulos .= "<option value='o' $sel>".t("Itella lis‰palvelu: Lauantaijakelu")."</option>";
+  $ulos .= "<option value='o' $sel>".t("Itella lis√§palvelu: Lauantaijakelu")."</option>";
   $ulos .= "</select></td>";
   $jatko = 0;
 }
@@ -39,8 +39,8 @@ if (mysql_field_name($result, $i) == "kuljyksikko") {
   if ($trow[$i]!='') $sel = 'SELECTED';
 
   $ulos  = "<td><select name='$nimi'>";
-  $ulos .= "<option value=''>".t("Ei kuljetusyksikkˆkuljetusta")."</option>";
-  $ulos .= "<option value='o' $sel>".t("Itella lis‰palvelu: Kuljetusyksikkˆkuljetus")."</option>";
+  $ulos .= "<option value=''>".t("Ei kuljetusyksikk√∂kuljetusta")."</option>";
+  $ulos .= "<option value='o' $sel>".t("Itella lis√§palvelu: Kuljetusyksikk√∂kuljetus")."</option>";
   $ulos .= "</select></td>";
   $jatko = 0;
 }
@@ -62,8 +62,8 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos .= "<option value='Economy 16' {$sel["Economy 16"]}>Itella Economy 16</option>";
   $ulos .= "<option value='Customer Return' {$sel["Customer Return"]}>Itella Customer Return</option>";
   $ulos .= "<option value='Undelivered Shipment' {$sel["Undelivered Shipment"]}>Itella Undelivered Shipment</option>";
-  $ulos .= "<option value='Lis‰arvokuljetus' {$sel["Lis‰arvokuljetus"]}>Itella Lis‰arvokuljetus</option>";
-  $ulos .= "<option value='Priority Ulkomaa' {$sel["Priority Ulkomaa"]}>Itella Priority Ulkomaan l‰hetys</option>";
+  $ulos .= "<option value='Lis√§arvokuljetus' {$sel["Lis√§arvokuljetus"]}>Itella Lis√§arvokuljetus</option>";
+  $ulos .= "<option value='Priority Ulkomaa' {$sel["Priority Ulkomaa"]}>Itella Priority Ulkomaan l√§hetys</option>";
   $ulos .= "</optgroup>";
 
   $ulos .= "<optgroup label='Unifaun / Itella'>";
@@ -74,23 +74,23 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos .= "<option value='IT21' {$sel["IT21"]}>Express Flex 21</option>";
   $ulos .= "<option value='ITAP' {$sel["ITAP"]}>Asiakaspalautus</option>";
   $ulos .= "<option value='ITEXPC' {$sel["ITEXPC"]}>Express City 00</option>";
-  $ulos .= "<option value='ITKY14' {$sel["ITKY14"]}>Business Day 14 kuljetusyksikkˆ</option>";
+  $ulos .= "<option value='ITKY14' {$sel["ITKY14"]}>Business Day 14 kuljetusyksikk√∂</option>";
   $ulos .= "<option value='ITKY14I' {$sel["ITKY14I"]}>Itella Express Business Day pallet (int.)</option>";
-  $ulos .= "<option value='ITKY21' {$sel["ITKY21"]}>Express Flex kuljetusyksikkˆ 21</option>";
-  $ulos .= "<option value='ITKYEXPC' {$sel["ITKYEXPC"]}>Express City 00 kuljetusyksikkˆ</option>";
-  $ulos .= "<option value='Priority Ulkomaa' {$sel["Priority"]}>Itella Priority Ulkomaan l‰hetys</option>";
+  $ulos .= "<option value='ITKY21' {$sel["ITKY21"]}>Express Flex kuljetusyksikk√∂ 21</option>";
+  $ulos .= "<option value='ITKYEXPC' {$sel["ITKYEXPC"]}>Express City 00 kuljetusyksikk√∂</option>";
+  $ulos .= "<option value='Priority Ulkomaa' {$sel["Priority"]}>Itella Priority Ulkomaan l√§hetys</option>";
   $ulos .= "</optgroup>";
 
   $ulos .= "<optgroup label='Unifaun / Posten Logistik AB'>";
   $ulos .= "<option value='P13' {$sel["P13"]}>Postorderpaket</option>";
-  $ulos .= "<option value='P14' {$sel["P14"]}>DPD Fˆretagspaket 12.00</option>";
-  $ulos .= "<option value='P15' {$sel["P15"]}>DPD Fˆretagspaket 16.00</option>";
+  $ulos .= "<option value='P14' {$sel["P14"]}>DPD F√∂retagspaket 12.00</option>";
+  $ulos .= "<option value='P15' {$sel["P15"]}>DPD F√∂retagspaket 16.00</option>";
   $ulos .= "<option value='P19' {$sel["P19"]}>MyPack</option>";
   $ulos .= "<option value='P24' {$sel["P24"]}>MyPack Return</option>";
   $ulos .= "<option value='P25' {$sel["P25"]}>Postpaket Inrikes</option>";
   $ulos .= "<option value='P26' {$sel["P26"]}>Paket utan Kvittens</option>";
   $ulos .= "<option value='P29' {$sel["P29"]}>Kundretur</option>";
-  $ulos .= "<option value='P31' {$sel["P31"]}>DPD Fˆretagspaket 09.00</option>";
+  $ulos .= "<option value='P31' {$sel["P31"]}>DPD F√∂retagspaket 09.00</option>";
   $ulos .= "<option value='P32' {$sel["P32"]}>Hempaket</option>";
   $ulos .= "<option value='P42' {$sel["P42"]}>Expresspaket</option>";
   $ulos .= "<option value='P44' {$sel["P44"]}>Express - P.EX. Distribution</option>";
@@ -100,15 +100,15 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos .= "<option value='P52S' {$sel["P52S"]}>PALL.ETT Split Shipment</option>";
   $ulos .= "<option value='P53' {$sel["P53"]}>PALL.ETT Special</option>";
   $ulos .= "<option value='P54' {$sel["P54"]}>PALL.ETT+</option>";
-  $ulos .= "<option value='P55' {$sel["P55"]}>DPD Fˆretagspaket Lokalt</option>";
-  $ulos .= "<option value='P57' {$sel["P57"]}>DPD Fˆretagspaket Special</option>";
+  $ulos .= "<option value='P55' {$sel["P55"]}>DPD F√∂retagspaket Lokalt</option>";
+  $ulos .= "<option value='P57' {$sel["P57"]}>DPD F√∂retagspaket Special</option>";
   $ulos .= "<option value='P59' {$sel["P59"]}>Posten Retail Delivery</option>";
   $ulos .= "<option value='P91' {$sel["P91"]}>Postpaket Utrikes</option>";
   $ulos .= "<option value='DPD' {$sel["DPD"]}>DPD Utrikes</option>";
   $ulos .= "<option value='EMSD' {$sel["EMSD"]}>Express Global (brev)</option>";
   $ulos .= "<option value='EMSP' {$sel["EMSP"]}>Express Global (paket)</option>";
   $ulos .= "<option value='BAGR' {$sel["BAGR"]}>Avtalsbrev</option>";
-  $ulos .= "<option value='PAF' {$sel["PAF"]}>Brevpostfˆrskott</option>";
+  $ulos .= "<option value='PAF' {$sel["PAF"]}>Brevpostf√∂rskott</option>";
   $ulos .= "<option value='BEXPD' {$sel["BEXPD"]}>Brev - Express (inrikes)</option>";
   $ulos .= "<option value='BEXPI' {$sel["BEXPI"]}>Brev - Express (utrikes)</option>";
   $ulos .= "<option value='BREV' {$sel["BREV"]}>Brev - Normal</option>";
@@ -119,7 +119,7 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos .= "<option value='PAG' {$sel["PAG"]}>Brev - Varubrev Klimatekonomisk</option>";
   $ulos .= "<option value='PAH' {$sel["PAH"]}>Brev - Varubrev Ekonomi</option>";
   $ulos .= "<option value='PAE' {$sel["PAE"]}>Brev - Varubrev 1:a klass</option>";
-  $ulos .= "<option value='BVAL' {$sel["BVAL"]}>Brev - V‰rde</option>";
+  $ulos .= "<option value='BVAL' {$sel["BVAL"]}>Brev - V√§rde</option>";
   $ulos .= "</optgroup>";
 
   $ulos .= "<optgroup label='Unifaun / Bring Parcels AB (PNL) (SE and DK)'>";
@@ -140,7 +140,7 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos .= "</optgroup>";
 
   $ulos .= "<optgroup label='Unifaun / Bring Parcels Norge (BP) (domestic)'>";
-  $ulos .= "<option value='BPBDD' {$sel['BPBDD']}>Bedriftspakke D¯r - D¯r</option>";
+  $ulos .= "<option value='BPBDD' {$sel['BPBDD']}>Bedriftspakke D√∏r - D√∏r</option>";
   $ulos .= "<option value='BPBE07' {$sel['BPBE07']}>Bedriftspakke Ekspress over Natt - 07.00</option>";
   $ulos .= "<option value='BPBE09' {$sel['BPBE09']}>Bedriftspakke Ekspress over Natt - 09.00</option>";
   $ulos .= "<option value='BPPL' {$sel['BPPL']}>Postens Pallelaster</option>";
@@ -189,7 +189,7 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos .= "<option value='BPHDAG' {$sel['BPHDAG']}>DB SCHENKERprivpak Hem Dag med avisering (gods)</option>";
   $ulos .= "<option value='BPHDAP' {$sel['BPHDAP']}>DB SCHENKERprivpak Hem Dag med avisering (paket)</option>";
   $ulos .= "<option value='BPHDP' {$sel['BPHDP']}>DB SCHENKERprivpak Hem Dag</option>";
-  $ulos .= "<option value='BPHKAP' {$sel['BPHKAP']}>DB SCHENKERprivpak Hem Kv‰ll med avisering</option>";
+  $ulos .= "<option value='BPHKAP' {$sel['BPHKAP']}>DB SCHENKERprivpak Hem Kv√§ll med avisering</option>";
   $ulos .= "<option value='BPOEP' {$sel['BPOEP']}>DB SCHENKERprivpak Ombud Ekonomi</option>";
   $ulos .= "<option value='BPTJP' {$sel['BPTJP']}>DB SCHENKERprivpak Till Jobbet</option>";
   $ulos .= "</optgroup>";
@@ -242,7 +242,7 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos .= "<option value='DATDL' {$sel['DATDL']}>DHL Express 10:30 (utan tulldeklaration)</option>";
   $ulos .= "<option value='DATDM' {$sel['DATDM']}>DHL Express 10:30 (med tulldeklaration)</option>";
   $ulos .= "<option value='DAXPD' {$sel['DAXPD']}>DHL Express Envelope (utan tulldeklaration)</option>";
-  $ulos .= "<option value='DADOM†' {$sel['DADOM†']}>DHL Express Worldwide (Inrikes) </option>";
+  $ulos .= "<option value='DADOM¬†' {$sel['DADOM¬†']}>DHL Express Worldwide (Inrikes) </option>";
   $ulos .= "</optgroup>";
 
   $ulos .= "<optgroup label='Unifaun / DHL Global Forwarding'>";
@@ -274,15 +274,15 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos .= "</optgroup>";
 
   $ulos .= "<optgroup label='Unifaun / Bussgods (CG)'>";
-  $ulos .= "<option value='CGB' {$sel['CGB']}>Fˆretag / Privat </option>";
+  $ulos .= "<option value='CGB' {$sel['CGB']}>F√∂retag / Privat </option>";
   $ulos .= "<option value='CGG' {$sel['CGG']}>Garanti</option>";
   $ulos .= "<option value='CGP' {$sel['CGP']}>Prio</option>";
   $ulos .= "</optgroup>";
 
   $ulos .= "<optgroup label='Unifaun / Consignment (CS)'>";
-  $ulos .= "<option value='CSB' {$sel['CSB']}>Consignment BlÂ</option>";
-  $ulos .= "<option value='CSG' {$sel['CSG']}>Consignment Grˆn</option>";
-  $ulos .= "<option value='CSR' {$sel['CSR']}>Consignment Rˆd</option>";
+  $ulos .= "<option value='CSB' {$sel['CSB']}>Consignment Bl√•</option>";
+  $ulos .= "<option value='CSG' {$sel['CSG']}>Consignment Gr√∂n</option>";
+  $ulos .= "<option value='CSR' {$sel['CSR']}>Consignment R√∂d</option>";
   $ulos .= "</optgroup>";
 
   $ulos .= "<optgroup label='Unifaun / DACHSER'>";
@@ -348,7 +348,7 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos .= "<option value='MH42' {$sel['MH42']}>Matkahuolto Rahtipussi jakopaketti </option>";
   $ulos .= "<option value='MH43' {$sel['MH43']}>Matkahuolto Dokumenttikuori</option>";
   $ulos .= "<option value='MH57' {$sel['MH57']}>Matkahuolto Lavarahti</option>";
-  $ulos .= "<option value='MH80' {$sel['MH80']}>Matkahuolto L‰hell‰-paketti </option>";
+  $ulos .= "<option value='MH80' {$sel['MH80']}>Matkahuolto L√§hell√§-paketti </option>";
   $ulos .= "<option value='MH30' {$sel['MH30']}>Matkahuolto Jakopaketti/Paikallispaketti</option>";
   $ulos .= "<option value='MH63' {$sel['MH63']}>Baltian Paketti</option>";
   $ulos .= "</optgroup>";
@@ -370,21 +370,21 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos .= "</optgroup>";
 
   $ulos .= "<optgroup label='Unifaun / Posten Norge (PNO)'>";
-  $ulos .= "<option value='PN1000E' {$sel['PN1000E']}>Bedriftspakke D¯r - D¯r</option>";
+  $ulos .= "<option value='PN1000E' {$sel['PN1000E']}>Bedriftspakke D√∏r - D√∏r</option>";
   $ulos .= "<option value='PN1002E' {$sel['PN1002E']}>Bedriftspakke Ekspress over natt 09.00</option>";
   $ulos .= "<option value='PN1202E' {$sel['PN1202E']}>Servicepakke</option>";
   $ulos .= "<option value='PN1312E' {$sel['PN1312E']}>Hjemlevering Prosjekt</option>";
-  $ulos .= "<option value='PN1736E' {$sel['PN1736E']}>PÂ d¯ren</option>";
+  $ulos .= "<option value='PN1736E' {$sel['PN1736E']}>P√• d√∏ren</option>";
   $ulos .= "<option value='PN2758E' {$sel['PN2758E']}>Home Delivery</option>";
   $ulos .= "</optgroup>";
 
-  $ulos .= "<optgroup label='Unifaun / Posten ≈land (PAX)'>";
+  $ulos .= "<optgroup label='Unifaun / Posten √Öland (PAX)'>";
   $ulos .= "<option value='PAXMH82' {$sel['PAXMH82']}>Postaalipaketti</option>";
   $ulos .= "<option value='PAXPO16' {$sel['PAXPO16']}>PAX Keltainen Kuljetus 16</option>";
   $ulos .= "<option value='PAXPO21' {$sel['PAXPO21']}>PAX Keltainen Kuljetus 21</option>";
   $ulos .= "</optgroup>";
 
-  $ulos .= "<optgroup label='Unifaun / SmÂfrakt'>";
+  $ulos .= "<optgroup label='Unifaun / Sm√•frakt'>";
   $ulos .= "<option value='SFECO' {$sel['SFECO']}>Ekonomi</option>";
   $ulos .= "<option value='SFDIR' {$sel['SFDIR']}>Fyratimmars</option>";
   $ulos .= "<option value='SF4H' {$sel['SF4H']}>Direkt</option>";
@@ -484,8 +484,8 @@ if (mysql_field_name($result, $i) == "logy_rahtikirjanumerot") {
     $sel1 = 'SELECTED';
 
   $ulos  = "<td><select name='$nimi'>";
-  $ulos .= "<option value='' $sel1>".t("Ei k‰ytet‰ LOGY:n rahtikirjanumeroita")."</option>";
-  $ulos .= "<option value='K' $sel2>".t("K‰ytet‰‰n LOGY:n rahtikirjanumeroita")."</option>";
+  $ulos .= "<option value='' $sel1>".t("Ei k√§ytet√§ LOGY:n rahtikirjanumeroita")."</option>";
+  $ulos .= "<option value='K' $sel2>".t("K√§ytet√§√§n LOGY:n rahtikirjanumeroita")."</option>";
   $ulos .= "</select></td>";
   $jatko = 0;
 }
@@ -500,8 +500,8 @@ if (mysql_field_name($result, $i) == "merahti") {
     $sel2 = 'SELECTED';
 
   $ulos  = "<td><select name='$nimi'>";
-  $ulos .= "<option value='K' $sel1>".t("K‰ytet‰‰n l‰hett‰j‰n rahtisopimusta")."</option>";
-  $ulos .= "<option value=''  $sel2>".t("K‰ytet‰‰n vastaanottajan rahtisopimusta")."</option>";
+  $ulos .= "<option value='K' $sel1>".t("K√§ytet√§√§n l√§hett√§j√§n rahtisopimusta")."</option>";
+  $ulos .= "<option value=''  $sel2>".t("K√§ytet√§√§n vastaanottajan rahtisopimusta")."</option>";
   $ulos .= "</select></td>";
   $jatko = 0;
 }
@@ -512,11 +512,11 @@ if (mysql_field_name($result, $i) == "tulostustapa") {
 
     $ulos = "<td>
       <select name='$nimi'>
-      <option value='E' $sel[E]>".t("Er‰tulostus")."</option>
+      <option value='E' $sel[E]>".t("Er√§tulostus")."</option>
       <option value='H' $sel[H]>".t("Hetitulostus")."</option>
       <option value='K' $sel[K]>".t("Koonti-hetitulostus")."</option>
-      <option value='L' $sel[L]>".t("Koonti-er‰tulostus")."</option>
-      <option value='X' $sel[X]>".t("Rahtikirjansyˆttˆ ja -tulostus ohitetaan")."</option>
+      <option value='L' $sel[L]>".t("Koonti-er√§tulostus")."</option>
+      <option value='X' $sel[X]>".t("Rahtikirjansy√∂tt√∂ ja -tulostus ohitetaan")."</option>
       </select></td>";
     $jatko = 0;
 }
@@ -526,9 +526,9 @@ if (mysql_field_name($result, $i) == "extranet") {
   $sel[$trow[$i]]  = " selected";
 
   $ulos  = "<td><select name='$nimi'>";
-  $ulos .= "<option value=''>".t("Toimitustapa n‰ytet‰‰n vain myynniss‰")."</option>";
-  $ulos .= "<option value='K' $sel[K]>".t("Toimitustapa n‰ytet‰‰n vain extranetiss‰")."</option>";
-  $ulos .= "<option value='M' $sel[M]>".t("Toimitustapa n‰ytet‰‰n molemmissa")."</option>";
+  $ulos .= "<option value=''>".t("Toimitustapa n√§ytet√§√§n vain myynniss√§")."</option>";
+  $ulos .= "<option value='K' $sel[K]>".t("Toimitustapa n√§ytet√§√§n vain extranetiss√§")."</option>";
+  $ulos .= "<option value='M' $sel[M]>".t("Toimitustapa n√§ytet√§√§n molemmissa")."</option>";
   $ulos .= "</select></td>";
   $jatko = 0;
 }
@@ -666,7 +666,7 @@ if (mysql_field_name($result, $i) == "kontti") {
     $chk2 = 'selected';
   }
 
-  $ulos .= "<option value='1' $chk1>".t("Kyll‰")."</option>";
+  $ulos .= "<option value='1' $chk1>".t("Kyll√§")."</option>";
   $ulos .= "<option value='0' $chk2>".t("Ei")."</option>";
 
   $ulos .= "</select></td>";
@@ -680,8 +680,8 @@ if (mysql_field_name($result, $i) == "jvkielto") {
   else $sela = 'SELECTED';
 
   $ulos  = "<td><select name='$nimi'>";
-  $ulos .= "<option value='' $sela>".t("Toimitustavalla saa toimittaa j‰lkivaatimuksia")."</option>";
-  $ulos .= "<option value='o' $sel>".t("Toimitustavalla ei saa toimittaa j‰lkivaatimuksia")."</option>";
+  $ulos .= "<option value='' $sela>".t("Toimitustavalla saa toimittaa j√§lkivaatimuksia")."</option>";
+  $ulos .= "<option value='o' $sel>".t("Toimitustavalla ei saa toimittaa j√§lkivaatimuksia")."</option>";
   $ulos .= "</select></td>";
   $jatko = 0;
 }
@@ -741,7 +741,7 @@ if (mysql_field_name($result, $i) == "ei_pakkaamoa") {
   }
 
   $ulos .= "<option value='0' $chk2>".t("Toimitustavan tilaukset varaavat pakkaamolokeron")."</option>";
-  $ulos .= "<option value='1' $chk1>".t("Toimitustavan tilaukaset eiv‰t varaa pakkaamolokeroa")."</option>";
+  $ulos .= "<option value='1' $chk1>".t("Toimitustavan tilaukaset eiv√§t varaa pakkaamolokeroa")."</option>";
 
   $ulos .= "</select></td>";
   $jatko = 0;
@@ -764,7 +764,7 @@ if (mysql_field_name($result, $i) == "erittely") {
     $chk3 = 'selected';
   }
 
-  $ulos .= "<option value='' $chk2>".t("Toimitustavalle ei tulosteta rahtikirjaerittely‰")."</option>";
+  $ulos .= "<option value='' $chk2>".t("Toimitustavalle ei tulosteta rahtikirjaerittely√§")."</option>";
   $ulos .= "<option value='t' $chk3>".t("Toimitustavalle tulostetaan rahtikirjaerittely")."</option>";
   $ulos .= "<option value='k' $chk1>".t("Toimitustavalle tulostetaan rahtikirjaerittely per asiakas")."</option>";
 
@@ -779,8 +779,8 @@ if (mysql_field_name($result, $i) == "uudet_pakkaustiedot") {
   $sel      = array();
   $sel[$trow[$i]]  = " selected";
 
-  $ulos .= "<option value=''>".t("Koonti-er‰tulostuksessa ei voi syˆtt‰‰ uusia pakkaustietoja ennen tulostusta")."</option>";
-  $ulos .= "<option value='K' $sel[K]>".t("Koonti-er‰tulostuksessa voi syˆtt‰‰ uudet pakkaustiedot ennen tulostusta")."</option>";
+  $ulos .= "<option value=''>".t("Koonti-er√§tulostuksessa ei voi sy√∂tt√§√§ uusia pakkaustietoja ennen tulostusta")."</option>";
+  $ulos .= "<option value='K' $sel[K]>".t("Koonti-er√§tulostuksessa voi sy√∂tt√§√§ uudet pakkaustiedot ennen tulostusta")."</option>";
 
   $ulos .= "</select></td>";
   $jatko = 0;
@@ -827,12 +827,12 @@ if (mysql_field_name($result, $i) == "kuljetusvakuutus_tyyppi") {
   $apu = $trow[$i];
   $sel[$apu] = "selected";
 
-  $ulos .= "<option value = ''>".t("Yhtiˆn oletus")."</option>";
+  $ulos .= "<option value = ''>".t("Yhti√∂n oletus")."</option>";
   $ulos .= "<option value = 'E' $sel[E]>".t("Ei kuljetusvakuutusta")."</option>";
-  $ulos .= "<option value = 'A' $sel[A]>".t("Valuuttam‰‰r‰inen kuljetusvakuutus lis‰t‰‰n")."</option>";
-  $ulos .= "<option value = 'B' $sel[B]>".t("Prosentuaalinen kuljetusvakuutus lis‰t‰‰n")."</option>";
-  $ulos .= "<option value = 'F' $sel[F]>".t("Valuuttam‰‰r‰inen kuljetusvakuutus lis‰t‰‰n. K‰ytet‰‰n kuljetusvakuutustuotteen asiakashintaa ja alennusta")."</option>";
-  $ulos .= "<option value = 'G' $sel[G]>".t("Prosentuaalinen kuljetusvakuutus lis‰t‰‰n. K‰ytet‰‰n kuljetusvakuutustuotteen asiakasalennusta")."</option>";
+  $ulos .= "<option value = 'A' $sel[A]>".t("Valuuttam√§√§r√§inen kuljetusvakuutus lis√§t√§√§n")."</option>";
+  $ulos .= "<option value = 'B' $sel[B]>".t("Prosentuaalinen kuljetusvakuutus lis√§t√§√§n")."</option>";
+  $ulos .= "<option value = 'F' $sel[F]>".t("Valuuttam√§√§r√§inen kuljetusvakuutus lis√§t√§√§n. K√§ytet√§√§n kuljetusvakuutustuotteen asiakashintaa ja alennusta")."</option>";
+  $ulos .= "<option value = 'G' $sel[G]>".t("Prosentuaalinen kuljetusvakuutus lis√§t√§√§n. K√§ytet√§√§n kuljetusvakuutustuotteen asiakasalennusta")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

@@ -1,14 +1,14 @@
 <?php
 
-// Kutsutaanko CLI:st‰
+// Kutsutaanko CLI:st√§
 if (php_sapi_name() != 'cli') {
-  die ("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!\n");
+  die ("T√§t√§ scripti√§ voi ajaa vain komentorivilt√§!\n");
 }
 
 date_default_timezone_set('Europe/Helsinki');
 
 if (trim($argv[1]) == '') {
-  die ("Et antanut l‰hett‰v‰‰ yhtiˆt‰!\n");
+  die ("Et antanut l√§hett√§v√§√§ yhti√∂t√§!\n");
 }
 
 if (trim($argv[2]) == '') {
@@ -16,17 +16,17 @@ if (trim($argv[2]) == '') {
 }
 
 if (trim($argv[3]) == '') {
-  die ("Et antanut s‰hkˆpostiosoitetta!\n");
+  die ("Et antanut s√§hk√∂postiosoitetta!\n");
 }
 
-// lis‰t‰‰n includepathiin pupe-root
+// lis√§t√§√§n includepathiin pupe-root
 ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__));
 
 // otetaan tietokanta connect ja funktiot
 require("inc/connect.inc");
 require("inc/functions.inc");
 
-// Sallitaan vain yksi instanssi t‰st‰ skriptist‰ kerrallaan
+// Sallitaan vain yksi instanssi t√§st√§ skriptist√§ kerrallaan
 pupesoft_flock();
 
 $yhtio = mysql_real_escape_string(trim($argv[1]));
@@ -40,7 +40,7 @@ $query = "SELECT *
 $kukares = pupe_query($query);
 
 if (mysql_num_rows($kukares) != 1) {
-  exit("VIRHE: Admin k‰ytt‰j‰ ei lˆydy!\n");
+  exit("VIRHE: Admin k√§ytt√§j√§ ei l√∂ydy!\n");
 }
 
 $kukarow = mysql_fetch_assoc($kukares);
@@ -105,7 +105,7 @@ if ($handle = opendir($path)) {
 
             $varattuupdate = "";
 
-            # Verkkokaupassa etuk‰teen maksettu tuote!
+            # Verkkokaupassa etuk√§teen maksettu tuote!
             if ($laskurow["mapvm"] != '' and $laskurow["mapvm"] != '0000-00-00') {
               $a = (int) ($tilausrivi_row['tilkpl'] * 10000);
               $b = (int) ($keratty * 10000);
@@ -116,7 +116,7 @@ if ($handle = opendir($path)) {
               }
             }
             else {
-              // Jos ei oo etuk‰teen maksettu, niin tehd‰‰b ker‰yspoikkeama
+              // Jos ei oo etuk√§teen maksettu, niin tehd√§√§b ker√§yspoikkeama
               $varattuupdate = ", tilausrivi.varattu = '{$keratty}' ";
             }
 
@@ -163,9 +163,9 @@ if ($handle = opendir($path)) {
 
           if (count($kerayspoikkeama) != 0) {
 
-            $body = t("Tilauksen %d ker‰yksess‰ on havaittu poikkeamia", "", $otunnus).":<br><br>\n\n";
+            $body = t("Tilauksen %d ker√§yksess√§ on havaittu poikkeamia", "", $otunnus).":<br><br>\n\n";
 
-            $body .= t("Tuoteno")." ".t("Ker‰tty")." ".t("Tilauksella")."<br>\n";
+            $body .= t("Tuoteno")." ".t("Ker√§tty")." ".t("Tilauksella")."<br>\n";
 
             foreach ($kerayspoikkeama as $tuoteno => $_arr) {
               $body .= "{$tuoteno} {$_arr['keratty']} {$_arr['tilauksella']}<br>\n";
@@ -174,7 +174,7 @@ if ($handle = opendir($path)) {
             $params = array(
               'to' => $error_email,
               'cc' => '',
-              'subject' => t("Posten ker‰yspoikkeama")." - {$otunnus}",
+              'subject' => t("Posten ker√§yspoikkeama")." - {$otunnus}",
               'ctype' => 'html',
               'body' => $body,
             );
@@ -182,7 +182,7 @@ if ($handle = opendir($path)) {
             pupesoft_sahkoposti($params);
           }
 
-          // siirret‰‰n tiedosto done-kansioon
+          // siirret√§√§n tiedosto done-kansioon
           rename($path.$file, $path.'done/'.$file);
         }
       }

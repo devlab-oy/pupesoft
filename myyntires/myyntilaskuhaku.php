@@ -1,9 +1,9 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-// DataTables p‰‰lle
+// DataTables p√§√§lle
 $pupe_DataTables = "myyntilaskuhaku";
 
 require ("../inc/parametrit.inc");
@@ -48,11 +48,11 @@ echo "<th>",t("Etsi lasku"),"</th>";
 echo "<td><select name = 'tee'>";
 echo "<option value = 'S'  {$seldr["S"]}>",t("summalla"),"</option>";
 echo "<option value = 'VS' {$seldr["VS"]}>",t("valuuttasummalla"),"</option>";
-echo "<option value = 'N'  {$seldr["N"]}>",t("nimell‰"),"</option>";
-echo "<option value = 'V'  {$seldr["V"]}>",t("viitteell‰"),"</option>";
+echo "<option value = 'N'  {$seldr["N"]}>",t("nimell√§"),"</option>";
+echo "<option value = 'V'  {$seldr["V"]}>",t("viitteell√§"),"</option>";
 echo "<option value = 'L'  {$seldr["L"]}>",t("laskunnumerolla"),"</option>";
 echo "<option value = 'A'  {$seldr["A"]}>",t("asiakasnumerolla"),"</option>";
-echo "<option value = 'LN'  {$seldr["LN"]}>",t("Laatijan/myyj‰n nimell‰"),"</option>";
+echo "<option value = 'LN'  {$seldr["LN"]}>",t("Laatijan/myyj√§n nimell√§"),"</option>";
 echo "</select></td>";
 echo "<td><input type = 'text' name = 'summa1' size='13'> - <input type = 'text' name = 'summa2' size='13'></td>";
 echo "<td class='back'><input type = 'submit' value = '",t("Hae"),"'></td>";
@@ -68,9 +68,9 @@ if (trim($summa1) == "") {
   $tee = "";
 }
 
-// LN = Etsit‰‰n myyj‰n tai laatijan nimell‰
+// LN = Etsit√§√§n myyj√§n tai laatijan nimell√§
 if ($tee == 'LN') {
-  // haetaan vain aktiivisia k‰ytt‰ji‰
+  // haetaan vain aktiivisia k√§ytt√§ji√§
   $query = "SELECT
             group_concat(concat('\'',kuka.kuka,'\'')) kuka,
             group_concat(concat(if(kuka.myyja=0, null, kuka.myyja))) myyja
@@ -86,7 +86,7 @@ if ($tee == 'LN') {
     $myyja = " or myyja in ({$row["myyja"]})";
   }
 
-  // Jos ei lˆytynyt k‰ytt‰jist‰ niin kokeillaan hakusanalla
+  // Jos ei l√∂ytynyt k√§ytt√§jist√§ niin kokeillaan hakusanalla
   if ($row["kuka"] == "") {
     $row["kuka"] = "'".$summa1."'";
   }
@@ -96,7 +96,7 @@ if ($tee == 'LN') {
   $jarj = "nimi, tapvm desc";
 }
 
-// VS = Etsit‰‰n valuuttasummaa laskulta
+// VS = Etsit√§√§n valuuttasummaa laskulta
 if ($tee == 'VS') {
 
   if (strlen($summa2) == 0) {
@@ -119,7 +119,7 @@ if ($tee == 'VS') {
   }
 }
 
-// S = Etsit‰‰n summaa laskulta
+// S = Etsit√§√§n summaa laskulta
 if ($tee == 'S') {
 
   if (strlen($summa2) == 0) {
@@ -142,14 +142,14 @@ if ($tee == 'S') {
   }
 }
 
-// N = Etsit‰‰n nime‰ laskulta
+// N = Etsit√§√§n nime√§ laskulta
 if ($tee == 'N') {
   $index = " use index (asiakasnimi) ";
   $ehto = "tila = 'U' and nimi like '%".$summa1."%'";
   $jarj = "nimi, tapvm desc";
 }
 
-// A = Etsit‰‰n asiakannumeroa laskulta
+// A = Etsit√§√§n asiakannumeroa laskulta
 if ($tee == 'A') {
   $query  = "SELECT group_concat(tunnus) asiakkaat
              FROM asiakas
@@ -170,7 +170,7 @@ if ($tee == 'A') {
   $jarj = "nimi, tapvm desc";
 }
 
-// V = viitteell‰
+// V = viitteell√§
 if ($tee == 'V') {
   $ehto = "tila = 'U' and viite = '{$summa1}'";
   $jarj = "nimi, summa";
@@ -193,7 +193,7 @@ if ($tee != '') {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
-    echo "<b>",t("Haulla ei lˆytynyt yht‰‰n laskua"),"</b>";
+    echo "<b>",t("Haulla ei l√∂ytynyt yht√§√§n laskua"),"</b>";
     $tee = '';
   }
   else {
@@ -205,7 +205,7 @@ if ($tee != '') {
     echo "<thead>
         <tr>
         <th>",t("Pvm"),"</th>
-        <th>",t("Er‰p‰iv‰"),"</th>
+        <th>",t("Er√§p√§iv√§"),"</th>
         <th>",t("Laskunro"),"</th>
         <th>",t("Nimi"),"</th>
         <th>",t("Summa"),"</th>
@@ -245,7 +245,7 @@ if ($tee != '') {
       echo "<td valign='top' align='right'>{$trow['summa']}</td>";
       echo "<td valign='top'>{$trow['valkoodi']}</td>";
 
-      // tehd‰‰n lasku linkki
+      // tehd√§√§n lasku linkki
       echo "<td>",ebid($trow['tunnus']),"</td>";
 
       $maksuviesti = "";
@@ -257,11 +257,11 @@ if ($tee != '') {
         $maksuviesti = t("Osasuoritettu");
 
         if ($trow['mapvm'] == "0000-00-00" and str_replace("-", "", $trow['erpcm']) < date("Ymd")) {
-          $maksuviesti .= " / ".t("Er‰‰ntynyt");
+          $maksuviesti .= " / ".t("Er√§√§ntynyt");
         }
       }
       elseif ($trow['mapvm'] == "0000-00-00" and str_replace("-", "", $trow['erpcm']) < date("Ymd")) {
-        $maksuviesti = " ".t("Er‰‰ntynyt");
+        $maksuviesti = " ".t("Er√§√§ntynyt");
       }
       else {
         $maksuviesti = t("Avoin");

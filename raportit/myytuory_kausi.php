@@ -1,9 +1,9 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-// Ei k‰ytet‰ pakkausta
+// Ei k√§ytet√§ pakkausta
 $compression = FALSE;
 
 if (isset($_POST["tee"])) {
@@ -13,7 +13,7 @@ if (isset($_POST["tee"])) {
 
 require("../inc/parametrit.inc");
 
-//Ja t‰ss‰ laitetaan ne takas
+//Ja t√§ss√§ laitetaan ne takas
 $sqlhaku = $sqlapu;
 
 if (isset($tee)) {
@@ -24,7 +24,7 @@ if (isset($tee)) {
 }
 else {
 
-  echo "<font class='head'>".t("Myynnit tuoteryhmitt‰in")."</font><hr>";
+  echo "<font class='head'>".t("Myynnit tuoteryhmitt√§in")."</font><hr>";
 
   flush();
 
@@ -97,11 +97,11 @@ else {
 
       $varastonarvo = $rowarvo["varasto"];
 
-      // jos osasto vaihtuu ja ei olla ekalla rundilla, tulostetaan yhteens‰rivi
+      // jos osasto vaihtuu ja ei olla ekalla rundilla, tulostetaan yhteens√§rivi
       if ($trow["osasto"] != $edosasto and $edosasto != 'X') {
 
-        // jos ei haluta turhia ryhmi‰ ja kaikki summat on nollaa ei tulosteta
-        // tai jos ei haluta yhteens‰rivej‰ ollenkaan
+        // jos ei haluta turhia ryhmi√§ ja kaikki summat on nollaa ei tulosteta
+        // tai jos ei haluta yhteens√§rivej√§ ollenkaan
         if (($turhatpois != 1 or $myyn30 != 0 or $kate30 != 0 or $varTOT != 0) and ($eiyhteensa != 1)) {
 
           if ($myyn30 > 0)
@@ -109,7 +109,7 @@ else {
           else
             $kate30pros="0.00";
 
-          $ulos .= "Osasto $edosasto yhteens‰:\t\t";
+          $ulos .= "Osasto $edosasto yhteens√§:\t\t";
           $ulos .= "$myyn30\t";
           $ulos .= "$kate30\t";
           $ulos .= "$kate30pros\t";
@@ -141,7 +141,7 @@ else {
       else
         $kate30pros = "0.00";
 
-      // jos ei haluta turhia tuoteryhmi‰ ja kaikki summat on nollaa niin ei tulosteta rivi‰
+      // jos ei haluta turhia tuoteryhmi√§ ja kaikki summat on nollaa niin ei tulosteta rivi√§
       if ($turhatpois != 1 or $row['summa30'] != 0 or $row['kate30'] != 0 or $varastonarvo != 0) {
         $ulos .= "$trow[osasto]\t$trow[try]\t";
         $ulos .= "$row[summa30]\t";
@@ -156,10 +156,10 @@ else {
 
     } // end while
 
-    // viel‰ vikan ryhm‰n yhteens‰rivit jos ne halutaan
+    // viel√§ vikan ryhm√§n yhteens√§rivit jos ne halutaan
     if ($eiyhteensa != 1) {
 
-      // jos ei haluta turhia ryhmi‰ ja kaikki summat on nollaa ei tulosteta
+      // jos ei haluta turhia ryhmi√§ ja kaikki summat on nollaa ei tulosteta
       if ($turhatpois != 1 or $myyn30 != 0 or $kate30 != 0 or $varTOT != 0) {
 
         if ($myyn30 > 0)
@@ -167,7 +167,7 @@ else {
         else
           $kate30pros="0.00";
 
-        $ulos .= "Osasto $edosasto yhteens‰:\t\t";
+        $ulos .= "Osasto $edosasto yhteens√§:\t\t";
         $ulos .= "$myyn30\t";
         $ulos .= "$kate30\t";
         $ulos .= "$kate30pros\t";
@@ -182,8 +182,8 @@ else {
       else
         $yhtkatepros="0.00";
 
-      ///* Kaikkiyhteens‰ *///
-      $ulos .= "Kaikki yhteens‰:\t\t";
+      ///* Kaikkiyhteens√§ *///
+      $ulos .= "Kaikki yhteens√§:\t\t";
       $ulos .= "$yhtmyyn30\t";
       $ulos .= "$yhtkate30\t";
       $ulos .= "$yhtkatepros\t";
@@ -194,14 +194,14 @@ else {
 
     if(include('Spreadsheet/Excel/Writer.php')) {
 
-      //keksit‰‰n failille joku varmasti uniikki nimi:
+      //keksit√§√§n failille joku varmasti uniikki nimi:
       list($usec, $sec) = explode(' ', microtime());
       mt_srand((float) $sec + ((float) $usec * 100000));
       $excelnimi = md5(uniqid(mt_rand(), true)).".xls";
 
       $workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
       $workbook->setVersion(8);
-      $worksheet = $workbook->addWorksheet('Myynnit tuoteryhmitt‰in');
+      $worksheet = $workbook->addWorksheet('Myynnit tuoteryhmitt√§in');
 
       $format_bold = $workbook->addFormat();
       $format_bold->setBold();
@@ -264,7 +264,7 @@ else {
   }
 
 
-  //K‰yttˆliittym‰
+  //K√§ytt√∂liittym√§
   echo "<br>";
   echo "<table><form method='post'>";
 
@@ -283,11 +283,11 @@ else {
     $ppl = date("d");
 
   echo "<input type='hidden' name='myytuorytee' value='kaikki'>";
-  echo "<tr><th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+  echo "<tr><th>".t("Sy√∂t√§ alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
     <td><input type='text' name='ppa' value='$ppa' size='3'></td>
     <td><input type='text' name='kka' value='$kka' size='3'></td>
     <td><input type='text' name='vva' value='$vva' size='5'></td>
-    </tr><tr><th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+    </tr><tr><th>".t("Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
     <td><input type='text' name='ppl' value='$ppl' size='3'></td>
     <td><input type='text' name='kkl' value='$kkl' size='3'></td>
     <td><input type='text' name='vvl' value='$vvl' size='5'></td>";
@@ -295,12 +295,12 @@ else {
   if ($turhatpois == 1)
     $chk = "CHECKED";
 
-  echo "<tr><th>".t("Piilota turhat tuoteryhm‰t")."</th>
+  echo "<tr><th>".t("Piilota turhat tuoteryhm√§t")."</th>
       <td><input type='checkbox' name='turhatpois' value='1' $chk></td></tr>";
   if ($eiyhteensa == 1)
     $chk2 = "CHECKED";
 
-  echo "<tr><th>".t("Piilota yhteens‰rivit")."</th>
+  echo "<tr><th>".t("Piilota yhteens√§rivit")."</th>
       <td><input type='checkbox' name='eiyhteensa' value='1' $chk2></td>";
 
   echo "<td class='back' colspan='2'><input type='submit' value='".t("Aja raportti")."'></td></tr></table>";

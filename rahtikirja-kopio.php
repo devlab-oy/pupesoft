@@ -30,7 +30,7 @@ else {
 if (!isset($nayta_pdf)) echo "<font class='head'>".t("Rahtikirjakopio")."</font><hr>";
 
 if ($yhtiorow['kerayserat'] == 'K' and $real_submit != "" and $tee == 'valitse' and $toimitustapa == "" and $lahto == "") {
-  echo "<font class='error'>",t("Valitse toimitustapa tai l‰htˆ"),"</font><br />";
+  echo "<font class='error'>",t("Valitse toimitustapa tai l√§ht√∂"),"</font><br />";
   $real_submit = $tee = "";
 }
 
@@ -71,14 +71,14 @@ if ($tee == 'erittelykopsu') {
     }
   }
   else {
-    echo t("VIRHE: L‰htˆ‰ ei lˆydy")."!";
+    echo t("VIRHE: L√§ht√∂√§ ei l√∂ydy")."!";
   }
 
   $tee = "";
 }
 
 if ($tee == 'tulosta' and (!isset($rtunnukset) or count($rtunnukset) == 0)) {
-  if (!isset($nayta_pdf)) echo "<font class='error'>",t("Et valinnut yht‰‰n rahtikirjaa"),"!</font><br>";
+  if (!isset($nayta_pdf)) echo "<font class='error'>",t("Et valinnut yht√§√§n rahtikirjaa"),"!</font><br>";
   $tee = "";
 }
 
@@ -86,7 +86,7 @@ if ($tee == 'tulosta') {
 
   // rahtikirjojen tulostus vaatii seuraavat muuttujat:
   // $toimitustapa_varasto  toimitustavan selite!!!!varastopaikan tunnus
-  // $tee            t‰ss‰ pit‰‰ olla teksti tulosta
+  // $tee            t√§ss√§ pit√§√§ olla teksti tulosta
 
   $loopattavat_tunnukset = array();
   $pakkaustieto_rahtikirjanro_array = array();
@@ -104,7 +104,7 @@ if ($tee == 'tulosta') {
       unset($tultiin);
     }
 
-    //T‰ss‰ on haettava tulostettavan tilauksen tiedot
+    //T√§ss√§ on haettava tulostettavan tilauksen tiedot
     $query = "SELECT toimitustapa, tulostuspaikka, group_concat(otsikkonro) otsikkonro
               FROM rahtikirjat
               WHERE yhtio = '$kukarow[yhtio]'
@@ -140,7 +140,7 @@ if ($tee == 'tulosta') {
       }
     }
     else {
-      //T‰ss‰ on haettava tulostettavien tilausten tunnukset
+      //T√§ss√§ on haettava tulostettavien tilausten tunnukset
       $query = "SELECT group_concat(otsikkonro) otsikkonro
                 FROM rahtikirjat
                 WHERE yhtio       = '$kukarow[yhtio]'
@@ -242,7 +242,7 @@ if ($tee == 'valitse' and $real_submit != '') {
 
     echo $toimitustapa != "" ? $toimitustapa.": " : "";
 
-    echo "{$vv}-{$kk}-{$pp}<br><br>".t("Yht‰‰n rahtikirjaa ei lˆytynyt")."!</font><br><br>";
+    echo "{$vv}-{$kk}-{$pp}<br><br>".t("Yht√§√§n rahtikirjaa ei l√∂ytynyt")."!</font><br><br>";
     $tee = "";
   }
   else {
@@ -267,7 +267,7 @@ if ($tee == 'valitse' and $real_submit != '') {
 
     echo "<table>";
     echo "<tr>";
-    if ($logistiikka_yhtio != '') echo "<th>",t("Yhtiˆ"),"</th>";
+    if ($logistiikka_yhtio != '') echo "<th>",t("Yhti√∂"),"</th>";
     echo "<th>".t("Rahtikirjanro")."</th>";
     echo "<th>".t("Tilausnumero")."</th>";
     echo "<th>".t("Tulostettu")."</th>";
@@ -356,7 +356,7 @@ if ($tee == 'valitse' and $real_submit != '') {
 }
 
 if ($tee == '') {
-  // mit‰ etsit‰‰n
+  // mit√§ etsit√§√§n
   if (!isset($vv)) $vv = date("Y");
   if (!isset($kk)) $kk = date("m");
   if (!isset($pp)) $pp = date("d");
@@ -366,21 +366,21 @@ if ($tee == '') {
   echo "<br><form action='rahtikirja-kopio.php' method='post'>";
   echo "<input type='hidden' name='tee' value='valitse'>";
 
-  echo t("Tulosta yksitt‰inen rahtikirjakopio").":";
+  echo t("Tulosta yksitt√§inen rahtikirjakopio").":";
   echo "<table><tr>
-    <th>".t("Syˆt‰ tilausnumero").":</th>
+    <th>".t("Sy√∂t√§ tilausnumero").":</th>
     <td><input type='text' name='otunnus' size='15'></td>
     </tr>";
   echo "</table><br>";
 
-  echo t("Tulosta kopiot er‰ajosta").":";
+  echo t("Tulosta kopiot er√§ajosta").":";
   echo "<table><tr>
-    <th>".t("Syˆt‰ p‰iv‰m‰‰r‰ (pp-kk-vvvv)").":</th>
+    <th>".t("Sy√∂t√§ p√§iv√§m√§√§r√§ (pp-kk-vvvv)").":</th>
     <td><input type='text' name='pp' value='$pp' size='3'>
     <input type='text' name='kk' value='$kk' size='3'>
     <input type='text' name='vv' value='$vv' size='5'>";
 
-  if ($yhtiorow['kerayserat'] == 'K') echo "<input type='submit' name='dummy_submit' value='",t("P‰ivit‰ l‰hdˆt"),"' />";
+  if ($yhtiorow['kerayserat'] == 'K') echo "<input type='submit' name='dummy_submit' value='",t("P√§ivit√§ l√§hd√∂t"),"' />";
 
   echo "</td></tr>";
 
@@ -423,7 +423,7 @@ if ($tee == '') {
              ORDER BY yhtio, tyyppi, nimitys";
   $result = mysql_query($query) or pupe_error($query);
 
-  // jos lˆytyy enemm‰n kuin yksi, tehd‰‰n varasto popup..
+  // jos l√∂ytyy enemm√§n kuin yksi, tehd√§√§n varasto popup..
   if (mysql_num_rows($result)>1) {
     echo "<tr><th>".t("Valitse varasto").":</th>";
     echo "<td><select name='varasto' {$onchange}>";
@@ -459,7 +459,7 @@ if ($tee == '') {
   if ($yhtiorow['kerayserat'] == 'K') {
 
     echo "<tr>";
-    echo "<th>",t("Valitse l‰htˆ"),"</th>";
+    echo "<th>",t("Valitse l√§ht√∂"),"</th>";
     echo "<td>";
     echo "<select name='lahto'>";
     echo "<option value=''>",t("Kaikki"),"</option>";
@@ -512,7 +512,7 @@ if ($tee == '') {
   echo "</form><br><br><hr>";
 
   if ($yhtiorow['kerayserat'] == 'K') {
-    echo t("Tulosta kopiot rahtikirjaerittelyst‰").":";
+    echo t("Tulosta kopiot rahtikirjaerittelyst√§").":";
     echo "<br><form action='rahtikirja-kopio.php' method='post'>";
     echo "<input type='hidden' name='tee' value='erittelykopsu'>";
     echo "<input type='hidden' name='real_submit' value='joo'>";
@@ -538,7 +538,7 @@ if ($tee == '') {
                ORDER BY lahdot.lahdon_kellonaika, toimitustapa.selite";
     $result = mysql_query($query) or pupe_error($query);
 
-    echo "<tr><th>".t("Valitse l‰hto").":</th>";
+    echo "<tr><th>".t("Valitse l√§hto").":</th>";
     echo "<td><select name='lahto'>";
 
     while ($row = mysql_fetch_array($result)) {

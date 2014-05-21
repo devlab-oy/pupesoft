@@ -17,7 +17,7 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
     echo "</td><td name='td_{$td_perheid}' class='$class'>";
   }
 
-  // Jossain erityistapauksissa t‰ytyy erittely k‰sitell‰. Niille lˆytyy syˆtetyt s‰‰nnˆt
+  // Jossain erityistapauksissa t√§ytyy erittely k√§sitell√§. Niille l√∂ytyy sy√∂tetyt s√§√§nn√∂t
   if ($kuittikoodi == 'E') {
     require "inc/kasitteleerittelysaanto.inc";
   }
@@ -34,23 +34,23 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
       $kurssi = 1;
     }
 
-    //Muutetaan m‰‰r‰t oikeaan valuuttaan
+    //Muutetaan m√§√§r√§t oikeaan valuuttaan
     if ($valuuttatili == "" and $kurssi != 1) {
-      // M‰‰r‰ valuutassa
+      // M√§√§r√§ valuutassa
       $kohdm = round($maara / $kurssi, 2);
       $kohdm_valkoodilisa = "";
     }
     elseif ($valuuttatili == "ON" and $kurssi != 1) {
-      // M‰‰r‰ valuutassa
+      // M√§√§r√§ valuutassa
       $kohdm = $maara;
       $kohdm_valkoodilisa = "";
 
       if ($vasta_arvo != 0) {
-        // M‰‰r‰ yhtiˆn valuutassa
+        // M√§√§r√§ yhti√∂n valuutassa
         $maara = $vasta_arvo;
       }
       else {
-        // Ei saatu summaa yhtiˆn valuutassa tiliotteelta, k‰‰nnet‰‰n se kurssilla
+        // Ei saatu summaa yhti√∂n valuutassa tiliotteelta, k√§√§nnet√§√§n se kurssilla
         $maara = round($kohdm * $kurssi, 2);
       }
     }
@@ -62,7 +62,7 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
     $maksutositetehty = FALSE;
 
     if ($sisviite != 0) {
-      echo "<font class='message'> ".t("Maksukandidaatti sis‰inen viite & m‰‰r‰")."</font><br>\n";
+      echo "<font class='message'> ".t("Maksukandidaatti sis√§inen viite & m√§√§r√§")."</font><br>\n";
 
       $query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
                 FROM lasku
@@ -89,7 +89,7 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
       if (mysql_num_rows($result) == 1) {
         $trow = mysql_fetch_assoc($result);
 
-        echo "<font class='ok'>".t("Maksu lˆytyi")." $trow[nimi] $trow[summa] $trow[valkoodi]</font><br>\n";
+        echo "<font class='ok'>".t("Maksu l√∂ytyi")." $trow[nimi] $trow[summa] $trow[valkoodi]</font><br>\n";
         require "inc/teemaksutosite.inc";
 
         $maksutositetehty = TRUE;
@@ -98,14 +98,14 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
 
     if (!$maksutositetehty) {
       switch ($koodi) {
-        case '702' : // Maksettu jotain tililt‰, etsit‰‰n tilinolla ja summalla....
-        case '720' : // Maksum‰‰r‰ys maksettu jotain tililt‰, etsit‰‰n nimell‰ ja summalla....
+        case '702' : // Maksettu jotain tililt√§, etsit√§√§n tilinolla ja summalla....
+        case '720' : // Maksum√§√§r√§ys maksettu jotain tililt√§, etsit√§√§n nimell√§ ja summalla....
 
           $tehdaanselvittelytosite = TRUE;
           unset($result);
 
           if (strlen(trim($maksuviite)) > 0 and (int) $maksuviite != 0) {
-            echo "<font class='message'> ".t("Maksukandidaatti maksuviite & m‰‰r‰")."</font><br>\n";
+            echo "<font class='message'> ".t("Maksukandidaatti maksuviite & m√§√§r√§")."</font><br>\n";
 
             // etunollat pois
             $maksuviite = ltrim($maksuviite, 0);
@@ -138,7 +138,7 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
           }
 
           if ((!isset($result) or mysql_num_rows($result) != 1) and strlen(trim($tilino)) > 0) {
-            echo "<font class='message'> ".t("Maksukandidaatti tilino & m‰‰r‰")."</font><br>\n";
+            echo "<font class='message'> ".t("Maksukandidaatti tilino & m√§√§r√§")."</font><br>\n";
 
             $tmpiban = luoiban($tilino);
 
@@ -177,7 +177,7 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
           }
 
           if ((!isset($result) or mysql_num_rows($result) != 1) and strlen(trim($iban)) > 0) {
-            echo "<font class='message'> ".t("Maksukandidaatti IBAN & m‰‰r‰")."</font><br>\n";
+            echo "<font class='message'> ".t("Maksukandidaatti IBAN & m√§√§r√§")."</font><br>\n";
 
             $query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
                       FROM lasku
@@ -207,9 +207,9 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
           }
 
           if ((!isset($result) or mysql_num_rows($result) != 1) and strlen(trim($maksaa)) > 0) {
-            echo "<font class='message'>".t("Maksukandidaatti nimi & m‰‰r‰")."</font><br>\n";
+            echo "<font class='message'>".t("Maksukandidaatti nimi & m√§√§r√§")."</font><br>\n";
 
-            // tarkka 35 merkki‰ <-> 35 merkki‰ nimihaku k‰teisalennuksella
+            // tarkka 35 merkki√§ <-> 35 merkki√§ nimihaku k√§teisalennuksella
             $query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
                       FROM lasku
                       WHERE left(nimi, 35) = left('$maksaa', 35)
@@ -220,7 +220,7 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
                       $kohdm_valkoodilisa";
             $result = pupe_query($query);
 
-            // tarkka 35 merkki‰ <-> 35 merkki‰ nimihaku ilman k‰teisalennusta
+            // tarkka 35 merkki√§ <-> 35 merkki√§ nimihaku ilman k√§teisalennusta
             if (mysql_num_rows($result) != 1) {
               $query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma'
                         FROM lasku
@@ -234,7 +234,7 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
             }
 
             if (mysql_num_rows($result) != 1) {
-              // tarkka 35 merkki‰ <-> 35 merkki‰ NIMI ja NIMITARK haku k‰teisalennuksella
+              // tarkka 35 merkki√§ <-> 35 merkki√§ NIMI ja NIMITARK haku k√§teisalennuksella
               $query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
                         FROM lasku
                         WHERE left(concat_ws(' ', nimi, nimitark), 35) = left('$maksaa', 35)
@@ -246,7 +246,7 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
               $result = pupe_query($query);
 
               if (mysql_num_rows($result) != 1) {
-                // tarkka 35 merkki‰ <-> 35 merkki‰ NIMI ja NIMITARK haku ilman k‰teisalennusta
+                // tarkka 35 merkki√§ <-> 35 merkki√§ NIMI ja NIMITARK haku ilman k√§teisalennusta
                 $query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma'
                           FROM lasku
                           WHERE left(concat_ws(' ', nimi, nimitark), 35) = left('$maksaa', 35)
@@ -260,7 +260,7 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
             }
 
             if (mysql_num_rows($result) != 1) {
-              // kokeillaan samalla kaavalla kun lum2 riviss‰ k‰teisalennuksella
+              // kokeillaan samalla kaavalla kun lum2 riviss√§ k√§teisalennuksella
               $query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
                         FROM lasku
                         WHERE replace(left(concat_ws(' ', if(pankki_haltija != '', pankki_haltija, concat_ws(' ', nimi, if(nimitark!='', nimitark, NULL))), osoite, postitp), 30), '&', ' ') = left('$maksaa', 30)
@@ -272,7 +272,7 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
               $result = pupe_query($query);
 
               if (mysql_num_rows($result) != 1) {
-                // kokeillaan samalla kaavalla kun lum2 riviss‰ ilman k‰teisalennusta
+                // kokeillaan samalla kaavalla kun lum2 riviss√§ ilman k√§teisalennusta
                 $query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma'
                           FROM lasku
                           WHERE replace(left(concat_ws(' ', if(pankki_haltija != '', pankki_haltija, concat_ws(' ', nimi, if(nimitark!='', nimitark, NULL))), osoite, postitp), 30), '&', ' ') = left('$maksaa', 30)
@@ -313,12 +313,12 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
             }
 
             if (mysql_num_rows($result) != 1) {
-              // konvertoidaan ‰‰kkˆset
-              $maksaatemp = str_replace (array("Â", "‰", "ˆ", "≈", "ƒ", "÷"), array("a", "a", "o", "A", "A", "O"), $maksaa);
+              // konvertoidaan √§√§kk√∂set
+              $maksaatemp = str_replace (array("√•", "√§", "√∂", "√Ö", "√Ñ", "√ñ"), array("a", "a", "o", "A", "A", "O"), $maksaa);
 
               $query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
                         FROM lasku
-                        WHERE replace(replace(replace(replace(replace(replace(left(nimi,35),'Â','a'), '‰','a'), 'ˆ','o'), '≈','A'), 'ƒ','A'), '÷','O') LIKE '%$maksaatemp%'
+                        WHERE replace(replace(replace(replace(replace(replace(left(nimi,35),'√•','a'), '√§','a'), '√∂','o'), '√Ö','A'), '√Ñ','A'), '√ñ','O') LIKE '%$maksaatemp%'
                         and ((summa = $kohdm * -1) or (abs(summa + $kohdm - kasumma) < 0.01))
                         and yhtio   = '$yritirow[yhtio]'
                         and tila    = 'Q'
@@ -329,7 +329,7 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
               if (mysql_num_rows($result) != 1) {
                 $query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma'
                           FROM lasku
-                          WHERE replace(replace(replace(replace(replace(replace(left(nimi,35),'Â','a'), '‰','a'), 'ˆ','o'), '≈','A'), 'ƒ','A'), '÷','O') LIKE '%$maksaatemp%'
+                          WHERE replace(replace(replace(replace(replace(replace(left(nimi,35),'√•','a'), '√§','a'), '√∂','o'), '√Ö','A'), '√Ñ','A'), '√ñ','O') LIKE '%$maksaatemp%'
                           and ((summa = $kohdm * -1) or (abs(summa + $kohdm) < 0.01))
                           and yhtio   = '$yritirow[yhtio]'
                           and tila    = 'Q'
@@ -342,7 +342,7 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
 
           if (isset($result) and mysql_num_rows($result) == 1) {
             $trow = mysql_fetch_assoc($result);
-            echo "<font class='ok'>".t("Maksu lˆytyi")." $trow[nimi] $trow[summa] $trow[valkoodi]</font><br>\n";
+            echo "<font class='ok'>".t("Maksu l√∂ytyi")." $trow[nimi] $trow[summa] $trow[valkoodi]</font><br>\n";
 
             $tehdaanselvittelytosite = FALSE;
 
@@ -350,8 +350,8 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
           }
 
           if ($tehdaanselvittelytosite) {
-            echo "<font class='error'>".t("Meill‰ ei ole tietoa mill‰ t‰m‰ tapahtuma voidaan kohdistaa")."</font><br>\n";
-            echo "<font class='message'>".t("Tiliˆid‰‰n tiliotes‰‰ntˆjen mukaan")."</font><br>\n";
+            echo "<font class='error'>".t("Meill√§ ei ole tietoa mill√§ t√§m√§ tapahtuma voidaan kohdistaa")."</font><br>\n";
+            echo "<font class='message'>".t("Tili√∂id√§√§n tiliotes√§√§nt√∂jen mukaan")."</font><br>\n";
             require "inc/teeselvittely.inc";
           }
 
@@ -363,15 +363,15 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
           require "inc/teekulutosite.inc";
           break;
         default :
-          echo "<font class='message'>".t("Tiliˆid‰‰n tiliotes‰‰ntˆjen mukaan")."</font><br>\n";
+          echo "<font class='message'>".t("Tili√∂id√§√§n tiliotes√§√§nt√∂jen mukaan")."</font><br>\n";
           require "inc/teeselvittely.inc";
       }
     }
   }
   else {
-    // Miksi ei tiliˆity?
+    // Miksi ei tili√∂ity?
     if ($kuittikoodi != ' ') {
-      echo "<font class='message'>".t("Hyl‰tty, koska erittely tulossa")." ($kuittikoodi) </font><br>\n";
+      echo "<font class='message'>".t("Hyl√§tty, koska erittely tulossa")." ($kuittikoodi) </font><br>\n";
 
       if ($erialla == "E") {
         echo "<font class='message'>".t("Erittely alla").".</font><br>\n";
@@ -433,24 +433,24 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
       $tiliointiresult = pupe_query($query);
 
       if ($tiliointirow = mysql_fetch_assoc($tiliointiresult)) {
-        echo "<font class='message'>".t("Tapahtuma on k‰sitelty")." ".tv1dateconv($tiliotedataka)."<br>\n";
-        echo t("Alkuper‰inen tiliˆinti on")."</font> <a href=\"javascript:lataaiframe('{$tiliotedatarow['tunnus']}', '{$palvelin2}muutosite.php?tee=E&tunnus=$tiliointirow[ltunnus]&ohje=off');\">$tiliointirow[tilino]/$tiliointirow[nimi]</a><br>\n";
+        echo "<font class='message'>".t("Tapahtuma on k√§sitelty")." ".tv1dateconv($tiliotedataka)."<br>\n";
+        echo t("Alkuper√§inen tili√∂inti on")."</font> <a href=\"javascript:lataaiframe('{$tiliotedatarow['tunnus']}', '{$palvelin2}muutosite.php?tee=E&tunnus=$tiliointirow[ltunnus]&ohje=off');\">$tiliointirow[tilino]/$tiliointirow[nimi]</a><br>\n";
 
         if (($tiliointirow['korjattu'] != "0000-00-00 00:00:00") and ($tiliointirow['korjattu'] != "@0000-00-00 00:00:00")) {
-          echo "<font class='message'>".t("Tiliˆinti korjattu")." $tiliointirow[korjattu]</font>";
+          echo "<font class='message'>".t("Tili√∂inti korjattu")." $tiliointirow[korjattu]</font>";
         }
       }
       elseif ($kuittikoodi == ' ') {
-        echo "<font class='error'>".t("VIRHE: Tiliˆinti puuttuu")."!</font>";
+        echo "<font class='error'>".t("VIRHE: Tili√∂inti puuttuu")."!</font>";
       }
     }
   }
 
   echo "<td name='td_{$td_perheid}' class='$class'></td><td name='td_{$td_perheid}' class='$class'>";
 
-  //Jos t‰m‰ on selvittelyss‰, niin annetaan mahdollisuus suorittaa!
+  //Jos t√§m√§ on selvittelyss√§, niin annetaan mahdollisuus suorittaa!
   if (isset($tiliointirow) and $kuitattu_checked == '' and ($tiliointirow['korjattu'] == "0000-00-00 00:00:00" or $tiliointirow['korjattu'] == "@0000-00-00 00:00:00") and ($tiliointirow['tilino'] == $yhtiorow['selvittelytili'] or $tiliointirow['tilino'] == $yritirow['oletus_selvittelytili']) and $kuittikoodi == ' ') {
-    //Olisiko t‰m‰ meid‰n toimittaja
+    //Olisiko t√§m√§ meid√§n toimittaja
     $tpv = substr($pvm,0,2);
     $tpk = substr($pvm,2,2);
     $tpp = substr($pvm,4,2);
@@ -465,7 +465,7 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
       $boob = 1;
     }
 
-    //Olisiko t‰m‰ meid‰n asiakas
+    //Olisiko t√§m√§ meid√§n asiakas
     $query = "SELECT * FROM asiakas WHERE yhtio = '$yritirow[yhtio]' and nimi LIKE '%$maksaa%'";
     $suoasiresult = pupe_query($query);
 
@@ -493,12 +493,12 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
     $koodiselite = urlencode($koodiselite);
     $maksaa = urlencode($maksaa);
 
-    echo "<a href=\"javascript:lataaiframe('{$tiliotedatarow['tunnus']}', '{$palvelin2}tiliotesaannot.php?tee=U&pankkitili=$yritirow[tilino]&tiliote=Z&koodi=$koodi&koodiselite=$koodiselite&nimitieto=$maksaa&selite=$selite&pvm=$pvm&ohje=off');\">".t("Tee tiliotes‰‰ntˆ")."</a>";
+    echo "<a href=\"javascript:lataaiframe('{$tiliotedatarow['tunnus']}', '{$palvelin2}tiliotesaannot.php?tee=U&pankkitili=$yritirow[tilino]&tiliote=Z&koodi=$koodi&koodiselite=$koodiselite&nimitieto=$maksaa&selite=$selite&pvm=$pvm&ohje=off');\">".t("Tee tiliotes√§√§nt√∂")."</a>";
   }
 
   echo "</td><td class='back' style='width:200px;'></td></tr>";
 
-  $maksu = 0; // Maksu on k‰sitelty
+  $maksu = 0; // Maksu on k√§sitelty
   $maara = 0;
   $eiselitetta = 0;
 }
@@ -510,7 +510,7 @@ switch ($tunnus) {
     /*
     // Tiliotteen perustietue (00)
 
-    Kentt‰ Tieto                             Pakollisuus Muoto Pituus    Sis‰ltˆ
+    Kentt√§ Tieto                             Pakollisuus Muoto Pituus    Sis√§lt√∂
     1      Aineistotunnus                    P              AN      1    T
     2      Tietuetunnus                      P              AN      2    00
     3      Tietueen pituus                   P               N      3
@@ -518,17 +518,17 @@ switch ($tunnus) {
     5      Tilinumero                        P              AN     14
     6      Tiliotteen numero                 P               N      3
     7      Tiliotekausi
-    7.1      Alkup‰iv‰                       P               N      6    VVKKPP
-    7.2      Loppup‰iv‰                      P               N      6    VVKKPP
+    7.1      Alkup√§iv√§                       P               N      6    VVKKPP
+    7.2      Loppup√§iv√§                      P               N      6    VVKKPP
     8      Muodostumisaika
-    8.1      P‰iv‰                                             N      6    VVKKPP
+    8.1      P√§iv√§                                             N      6    VVKKPP
     8.2      Kellonaika                                        N      4    HHMM
     9      Asiakastunnus                     P              AN     17
     10     Alkusaldon pvm                    P               N      6
     11     Tiliotteen alkusaldo
     11.1     Etumerkki                       P              AN      1
-    11.2     M‰‰r‰                           P               N     18    16 kok + 2 desim
-    12     Tiliotteen tietueiden lukum‰‰r‰   P               N      6
+    11.2     M√§√§r√§                           P               N     18    16 kok + 2 desim
+    12     Tiliotteen tietueiden lukum√§√§r√§   P               N      6
     13     Tilin valuutan tunnus                            AN      3
     14     Tilin nimi                                       AN     30
     15     Tilin limiitti                    P               N     18    16 kok + 2 desim
@@ -537,12 +537,12 @@ switch ($tunnus) {
     18     Yhteydenottotieto-2                              AN     40    Konttorin nro ja nimi
     19     Pankkikohtaista tietoa-1                         AN     30    Konsernitili ja nro
     20     Pankkikohtaista tietoa-2                         AN     30    Iban ja swif-tunnus
-           YHTEENSƒ                                               322
+           YHTEENS√Ñ                                               322
     */
 
-    // Meill‰ on entinen tili auki
+    // Meill√§ on entinen tili auki
     if ($tkesken == 1) {
-      // Tehd‰‰n vastakirjaus
+      // Tehd√§√§n vastakirjaus
       $maara     = $vastavienti;
       $kohdm    = $vastavienti_valuutassa;
       $tkesken   = 0;
@@ -576,7 +576,7 @@ switch ($tunnus) {
         echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 
         echo "<select name='tiliotejarjestys' onchange='submit();'>
-            <option value=''>".t("Oletusj‰rjestys")."</option>
+            <option value=''>".t("Oletusj√§rjestys")."</option>
             <option value='K' $seltiliotejarjestys>".t("Kuitattaamattomat ensin")."</option>
             </select>
             </form>";
@@ -627,7 +627,7 @@ switch ($tunnus) {
         $tililimiitti =  "<br>\n";
       }
 
-      echo "<td>".t("Myˆnnetty m‰‰r‰")."<br>\n". $tililimiitti."</td>";
+      echo "<td>".t("My√∂nnetty m√§√§r√§")."<br>\n". $tililimiitti."</td>";
       echo "</tr>";
     }
 
@@ -642,7 +642,7 @@ switch ($tunnus) {
     }
 
     if (mysql_num_rows($result) != 1) {
-      // Kokeillaan 14 vikalla merkill‰ (Virossa esim on 18 merkkisi‰ tilinumeroita)
+      // Kokeillaan 14 vikalla merkill√§ (Virossa esim on 18 merkkisi√§ tilinumeroita)
       $query = "SELECT *
                 FROM yriti
                 WHERE right(tilino,14) = '$pankkitilino'
@@ -651,7 +651,7 @@ switch ($tunnus) {
     }
 
     if (mysql_num_rows($result) != 1) {
-      echo "<font class='error'> ".t("Tili‰")." '$pankkitilino' ".t("ei lˆytynyt")."!</font><br>\n";
+      echo "<font class='error'> ".t("Tili√§")." '$pankkitilino' ".t("ei l√∂ytynyt")."!</font><br>\n";
       $toim = 'E';
     }
     else {
@@ -659,7 +659,7 @@ switch ($tunnus) {
 
       $yhtiorow =  hae_yhtion_parametrit($yritirow["yhtio"]);
 
-      // Setataan kukarow-yhtiˆ
+      // Setataan kukarow-yhti√∂
       $kukarow["yhtio"] = $yritirow["yhtio"];
 
       if ($silent == "") {
@@ -678,7 +678,7 @@ switch ($tunnus) {
 
        // Tarkistetaan tilit
       if (strlen($yritirow['oletus_rahatili']) == 0 or strlen($yritirow['oletus_kulutili']) == 0) {
-        echo "<font class='error'>".t("Tililt‰ puuttuu kulu tai rahatili")."</font>";
+        echo "<font class='error'>".t("Tililt√§ puuttuu kulu tai rahatili")."</font>";
         $toim = 'E';
       }
       else {
@@ -695,7 +695,7 @@ switch ($tunnus) {
 
       $tilinvaluutta = substr($tietue,96,3);
 
-      // Onko t‰m‰ valuuttatili
+      // Onko t√§m√§ valuuttatili
       if ($tilinvaluutta != '' and trim(strtoupper($tilinvaluutta)) != trim(strtoupper($yhtiorow["valkoodi"]))) {
         $valuuttatili = "ON";
       }
@@ -709,7 +709,7 @@ switch ($tunnus) {
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) != 1) {
-        echo "<font class='error'>".t("Valuuttaa")." '$tilinvaluutta' ".t("ei lˆytynyt")."!</font><br>\n";
+        echo "<font class='error'>".t("Valuuttaa")." '$tilinvaluutta' ".t("ei l√∂ytynyt")."!</font><br>\n";
         $toim = 'E';
       }
       else {
@@ -729,7 +729,7 @@ switch ($tunnus) {
     }
 
     if ($silent == "") {
-      echo "</td></tr></table>";   // T‰m‰ p‰‰tt‰‰ otsikon
+      echo "</td></tr></table>";   // T√§m√§ p√§√§tt√§√§ otsikon
       echo "<br>\n<table>";     // Aloitetaan tapahtumat
     }
 
@@ -739,8 +739,8 @@ switch ($tunnus) {
     echo "<th>".t("Maksup.")."<br>\n".t("Arvop.")."</th>";
     echo "<th>".t("Saaja/Maksaja")."<br>\n".t("Viesti")."</th>";
     echo "<th>".t("Tap.")."<br>\n".t("n:o")."</th>";
-    echo "<th>".t("Tiliˆinti")."</th>";
-    echo "<th>".t("M‰‰r‰")."</th>";
+    echo "<th>".t("Tili√∂inti")."</th>";
+    echo "<th>".t("M√§√§r√§")."</th>";
     echo "<td class='back' style='width:200px;'></td></tr>";
 
     echo "<tr><td></td><td></td><td></td><td></td>";
@@ -752,7 +752,7 @@ switch ($tunnus) {
     if ($tililimiitti != "") {
       echo "<tr><td></td><td></td><td></td><td></td>";
       if ($tee == 'S') echo "<td></td>";
-      echo "<td>".t("K‰yttˆvara")."</td>";
+      echo "<td>".t("K√§ytt√∂vara")."</td>";
       echo "<td style='text-align:right;'>".(substr($tietue,71,19) / 100)."</td>";
       echo "<td class='back' style='width:200px;'></td></tr>";
     }
@@ -764,34 +764,34 @@ switch ($tunnus) {
     /*
     // Tapahtuman perustietue (10, 80)
 
-    Kentt‰  Tieto                  Pakollisuus Muoto Pituus   Sis‰ltˆ
+    Kentt√§  Tieto                  Pakollisuus Muoto Pituus   Sis√§lt√∂
     1       Aineistotunnus         P              AN      1   T
     2       Tietuetunnus           P              AN      2   10, 80
     3       Tietueen pituus        P               N      3
     4       Tapahtuman numero      P               N      6   Juokseva nro
     5       Arkistointitunnus                     AN     18
-    6       Kirjausp‰iv‰           P               N      6   VVKKPP
-    7       Arvop‰iv‰                              N      6   VVKKPP
-    8       Maksup‰iv‰                             N      6   VVKKPP
+    6       Kirjausp√§iv√§           P               N      6   VVKKPP
+    7       Arvop√§iv√§                              N      6   VVKKPP
+    8       Maksup√§iv√§                             N      6   VVKKPP
     9       Tapahtumatunnus        P              AN      1   1, 2, 3, 4
     10      Kirjausselite
     10,1    Koodi                  P              AN      3
     10,2    Seliteteksti           P              AN     35
-    11      Tapahtuman raham‰‰r‰
+    11      Tapahtuman raham√§√§r√§
     11,1    Etumerkki              P              AN      1
-    11,2    M‰‰r‰                  P               N     18   16kok+ 2desim
+    11,2    M√§√§r√§                  P               N     18   16kok+ 2desim
     12      Kuittikoodi            P              AN      1
-    13      V‰litystapa            P              AN      1
+    13      V√§litystapa            P              AN      1
     14      Saaja/Maksaja
     14,1    Nimi                                  AN     35
-    14,2    Nimen l‰hde                           AN      1
+    14,2    Nimen l√§hde                           AN      1
     15      Saajan tili
     15,1    Tilinumero                            AN     14
-    15,2    Tili muuttunut -tieto                 AN      1   tyhj‰merkki, *
+    15,2    Tili muuttunut -tieto                 AN      1   tyhj√§merkki, *
     16      Viite                                  N     20
     17      Lomakkeen numero                      AN      8
     18      Tasotunnus                            AN      1
-            YHTEENSƒ                                    188
+            YHTEENS√Ñ                                    188
     */
 
     $maksu      = 1;
@@ -799,7 +799,7 @@ switch ($tunnus) {
     $vasta_arvo    = 0;
     $vasta_kurssi  = 1;
 
-    // Nollataan t‰m‰ t‰ss‰
+    // Nollataan t√§m√§ t√§ss√§
     $selite_maksuavarten = "";
 
     $tiliotedataid = $tiliotedatarow['tunnus'];
@@ -809,12 +809,12 @@ switch ($tunnus) {
 
     $koodi = substr($tietue, 49, 3);
 
-    // Sampo h‰kki
+    // Sampo h√§kki
     if ($koodi == '700') {
       $koodi = '702';
     }
 
-    // Suoraveloitukset kohdistetaan kuin maksum‰‰r‰ykset
+    // Suoraveloitukset kohdistetaan kuin maksum√§√§r√§ykset
     if ($koodi == '704') {
       $koodi = '720';
     }
@@ -823,10 +823,10 @@ switch ($tunnus) {
     $kirjpvm = substr($tietue, 30, 6);
     $pvm    = substr($tietue, 36, 6);
 
-    // Tiliˆid‰‰n kuitenkin loppupeleiss‰ kaikki kirjauspvm:lle.
+    // Tili√∂id√§√§n kuitenkin loppupeleiss√§ kaikki kirjauspvm:lle.
     $pvm = $kirjpvm;
 
-    if ($pvm == "000000") { // Haa, pankki ei antanutkaan arvopvm‰‰, joten otetaan k‰yttˆˆn tapahtumapvm
+    if ($pvm == "000000") { // Haa, pankki ei antanutkaan arvopvm√§√§, joten otetaan k√§ytt√∂√∂n tapahtumapvm
       $pvm = $kirjpvm;
     }
 
@@ -849,14 +849,14 @@ switch ($tunnus) {
     $maksuviite  = trim(substr($tietue, 159, 20));
 
     // Tutkitaan seuraava maksu ja sen avulla laitetaan kuittikoodi ja erialla arvot kuntoon
-    $tdq = "  SELECT tiliotedata.*
-          FROM tiliotedata
-          WHERE yhtio = '$tiliotedatarow[yhtio]'
-          and alku   = '$tiliotedatarow[alku]'
-          and tilino  = '$tiliotedatarow[tilino]'
-          and tyyppi  = '$tiliotedatarow[tyyppi]'
-          and tunnus  > '$tiliotedatarow[tunnus]'
-          ORDER BY perheid, tunnus";
+    $tdq = "SELECT tiliotedata.*
+            FROM tiliotedata
+            WHERE yhtio = '$tiliotedatarow[yhtio]'
+            and alku    = '$tiliotedatarow[alku]'
+            and tilino  = '$tiliotedatarow[tilino]'
+            and tyyppi  = '$tiliotedatarow[tyyppi]'
+            and tunnus  > '$tiliotedatarow[tunnus]'
+            ORDER BY perheid, tunnus";
     $tdres2peek = pupe_query($tdq);
 
     while ($tdrow2peek = mysql_fetch_assoc($tdres2peek)) {
@@ -864,8 +864,8 @@ switch ($tunnus) {
 
       if ($tdr2tunn != 'T11' and $tdr2tunn != 'T81') {
 
-        // T‰m‰ on case Sampo ja erittelyt onkin ilmoitettu tasoissa!
-        // eli jos valmista maksua seuraava tapahuma on suurempitasoinen T10 ei t‰t‰ edelt‰v‰‰ maksua k‰sitell‰
+        // T√§m√§ on case Sampo ja erittelyt onkin ilmoitettu tasoissa!
+        // eli jos valmista maksua seuraava tapahuma on suurempitasoinen T10 ei t√§t√§ edelt√§v√§√§ maksua k√§sitell√§
         if (substr($tdrow2peek['tieto'], 187, 1) > $omataso and $tdr2tunn == 'T10') {
           $kuittikoodi   = "E";
           $erialla     = "E";
@@ -887,7 +887,7 @@ switch ($tunnus) {
                 and tunnus  != '$tiliotedatarow[tunnus]'";
       $tdres2peek = mysql_query($query) or pupe_error($query);
 
-      # Jos koodi on 710 ja koodiselite on PANO ja kuittikoodi on "E", mutta samalla arkistointitunnuksella EI lˆydy toista tapahtumaa, niin nollataan kuittikoodi.
+      # Jos koodi on 710 ja koodiselite on PANO ja kuittikoodi on "E", mutta samalla arkistointitunnuksella EI l√∂ydy toista tapahtumaa, niin nollataan kuittikoodi.
       if (mysql_num_rows($tdres2peek) == 0) {
         $kuittikoodi = " ";
       }
@@ -912,7 +912,7 @@ switch ($tunnus) {
 
     if ($tee == 'S') {
 
-      //Pidet‰‰n tallessa
+      //Pidet√§√§n tallessa
       $tiliotedatarowtunnus = $tiliotedatarow["tunnus"];
 
       $lopetuslisa = "/SPLIT/${palvelin2}tilioteselailu.php////tee=T//tyyppi=$lopp_tyyppi//tilino=$lopp_tilino//pvm=$lopp_pvm//tiliotejarjestys=$tiliotejarjestys///kuitattu_$tiliotedatarowtunnus";
@@ -956,7 +956,7 @@ switch ($tunnus) {
     echo "<td name='td_{$td_perheid}' id='kuitattu_{$td_perheid}' class='$class'>";
 
     if ($kuitattu_checked != '') {
-      echo "<font class='ok'>",t("Kuitattu"),": $tiliotedatarow[kukanimi] @ ",tv1dateconv($tiliotedatarow['kuitattuaika'], "pitk‰"),"</font>";
+      echo "<font class='ok'>",t("Kuitattu"),": $tiliotedatarow[kukanimi] @ ",tv1dateconv($tiliotedatarow['kuitattuaika'], "pitk√§"),"</font>";
     }
 
     echo "</td>";
@@ -979,87 +979,87 @@ switch ($tunnus) {
   case 'T11' :
 
     /*
-    // Tapahtuman lis‰tietue (11, 81)
+    // Tapahtuman lis√§tietue (11, 81)
 
-    Kentt‰     Tieto                                        Pakollisuus Muoto Pituus  Sis‰ltˆ
+    Kentt√§     Tieto                                        Pakollisuus Muoto Pituus  Sis√§lt√∂
     1          Aineistotunnus                               P           AN    1       T
     2          Tietuetunnus                                 P           AN    2       11, 81
     3          Tietueen pituus                              N           3
-    4          Lis‰tiedon tyyppi                            P           AN    2
-    5          Lis‰tieto                                    P           AN    nnn
-    YHTEENSƒ                                                                  8 + nnn
+    4          Lis√§tiedon tyyppi                            P           AN    2
+    5          Lis√§tieto                                    P           AN    nnn
+    YHTEENS√Ñ                                                                  8 + nnn
 
-    Vapaa viesti, lis‰tiedon tyyppi = 00
+    Vapaa viesti, lis√§tiedon tyyppi = 00
     5.1        Viesti-1                                     P           AN    35
     5.2        Viesti-2                                                 AN    35
     ...
     5.12       Viesti-12                                                AN    35
-    YHTEENSƒ                                                                  max 420
+    YHTEENS√Ñ                                                                  max 420
 
-    Kappalem‰‰r‰tiedot, lis‰tiedon tyyppi = 01
-    5.1        Tapahtumien kappalem‰‰r‰                     P           N     8
-    YHTEENSƒ                                                                  8
+    Kappalem√§√§r√§tiedot, lis√§tiedon tyyppi = 01
+    5.1        Tapahtumien kappalem√§√§r√§                     P           N     8
+    YHTEENS√Ñ                                                                  8
 
-    Laskutapahtuman tiedot, lis‰tiedon tyyppi = 02
+    Laskutapahtuman tiedot, lis√§tiedon tyyppi = 02
     5.1        Asiakasnumero                                P           AN    10
-    5.2        Tyhj‰‰                                       P           AN    1
+    5.2        Tyhj√§√§                                       P           AN    1
     5.3        Laskun numero                                P           AN    15
-    5.4        Tyhj‰‰                                       P           AN    1
-    5.5        Laskun p‰iv‰ys                               P           AN    6       VVKKPP
-    YHTEENSƒ                                                                  33
+    5.4        Tyhj√§√§                                       P           AN    1
+    5.5        Laskun p√§iv√§ys                               P           AN    6       VVKKPP
+    YHTEENS√Ñ                                                                  33
 
-    Korttitapahtuman tiedot, lis‰tiedon tyyppi = 03
+    Korttitapahtuman tiedot, lis√§tiedon tyyppi = 03
     5.1        Kortin numero                                P           AN    19
-    5.2        Tyhj‰‰                                                   AN    1
+    5.2        Tyhj√§√§                                                   AN    1
     5.3        Kaupan arkistoviite                                      AN    14
-    YHTEENSƒ                                                                  34
+    YHTEENS√Ñ                                                                  34
 
-    Korjaustapahtuman tiedot, lis‰tiedon tyyppi = 04
+    Korjaustapahtuman tiedot, lis√§tiedon tyyppi = 04
     5.1        Korjattavan tapahtuman alkup.arkistointitun. P           AN    18
-    YHTEENSƒ                                                                  18
+    YHTEENS√Ñ                                                                  18
 
-    Valuuttatapahtuman tiedot, lis‰tiedon tyyppi = 05
+    Valuuttatapahtuman tiedot, lis√§tiedon tyyppi = 05
     5.1        Vasta-arvo
     .1         Etumerkki                                    P           AN    1
-    .2         M‰‰r‰                                        P           N     18      16 kok + 2 desim
-    5.2        Tyhj‰‰                                       P           AN    1
+    .2         M√§√§r√§                                        P           N     18      16 kok + 2 desim
+    5.2        Tyhj√§√§                                       P           AN    1
     5.3        Valuutan ISO-koodi                           P           AN    3
-    5.4        Tyhj‰‰                                       P           AN    1
+    5.4        Tyhj√§√§                                       P           AN    1
     5.5        Valuuttakurssi                               P           N     11      4 kok + 7 desim
     5.6        Kurssiviite                                              AN    6
-    YHTEENSƒ                                                                  41
+    YHTEENS√Ñ                                                                  41
 
-    Toimeksiantajan tiedot, lis‰tiedon tyyppi = 06
+    Toimeksiantajan tiedot, lis√§tiedon tyyppi = 06
     5.1        Toimeksiantajan tieto-1                      P           AN    35
     5.2        Toimeksiantajan tieto-2                                  AN    35
-    YHTEENSƒ                                                                  70
+    YHTEENS√Ñ                                                                  70
 
-    Pankin antamat lis‰tiedot, lis‰tiedon tyyppi = 07
-    5.1        Lis‰tieto-1                                  P           AN    35
-    5.2        Lis‰tieto-2                                              AN    35
+    Pankin antamat lis√§tiedot, lis√§tiedon tyyppi = 07
+    5.1        Lis√§tieto-1                                  P           AN    35
+    5.2        Lis√§tieto-2                                              AN    35
     ...
-    5.12       Lis‰tieto-12                                             AN    35
-    YHTEENSƒ                                                                  max 420
+    5.12       Lis√§tieto-12                                             AN    35
+    YHTEENS√Ñ                                                                  max 420
 
-    Maksunaiheen tiedot, lis‰tiedon tyyppi = 08
+    Maksunaiheen tiedot, lis√§tiedon tyyppi = 08
     5.1        Maksunaihekoodi                              P           N     3
-    5.2        Tyhj‰‰                                       P           AN    1
+    5.2        Tyhj√§√§                                       P           AN    1
     5.3        Maksunaiheen selite                          P           AN    31
-    YHTEENSƒ                                                                  35
+    YHTEENS√Ñ                                                                  35
 
-    Nimitarkenteen tiedot, lis‰tiedon tyyppi = 09
+    Nimitarkenteen tiedot, lis√§tiedon tyyppi = 09
     5.1        Saajan/maksajan nimen tarkenne               P           AN    35
-    YHTEENSƒ                                                                  35
+    YHTEENS√Ñ                                                                  35
 
-    Euromaksualueen tilisiirron lis‰tyyppi, lis‰tiedon tyyppi = 11
-    5.1        Maksajan viite                               V           AN    35      Maksajan tapahtumalle antama yksilˆiv‰ viite (end-to-end ID), joka n‰kyy sek‰ ,maksajan ett‰ saajan tiliotteella
+    Euromaksualueen tilisiirron lis√§tyyppi, lis√§tiedon tyyppi = 11
+    5.1        Maksajan viite                               V           AN    35      Maksajan tapahtumalle antama yksil√∂iv√§ viite (end-to-end ID), joka n√§kyy sek√§ ,maksajan ett√§ saajan tiliotteella
     5.2        IBAN tilinumero                              V           AN    35      Saajan IBAN tilinumero maksajan tiliotteella
     5.3        BIC-koodi                                    V           AN    35      Saajan pankin BIC- koodi maksajan tiliotteella
-    5.4        Saajan nimitarkenne                          V           AN    70      Maksajan antama saajan nimitarkenne sek‰ saajan ett‰ maksajan tiliotteella
-    5.5        Maksajan nimitarkenne                        V           AN    70      Maksajan antama maksajan nimitarkenne sek‰ saajan ett‰ maksajan tiliotteella
+    5.4        Saajan nimitarkenne                          V           AN    70      Maksajan antama saajan nimitarkenne sek√§ saajan ett√§ maksajan tiliotteella
+    5.5        Maksajan nimitarkenne                        V           AN    70      Maksajan antama maksajan nimitarkenne sek√§ saajan ett√§ maksajan tiliotteella
     5.6        Maksajan tunniste                            V           AN    35      Maksajan tunnisteen selite (BIC, IBEI, BEI, EANGLN, UNSCHU, DUNS, BkPtyId, TaxIdNb, PrtyId) ja tunnisteen arvo.
-    5.7        Arkistointitunnus                            V           AN    35      SEPA arkistointitunnus t‰ysimittaisena. Tieto on myˆs tapahtuman perustietueella (T10) kent‰ss‰ Arkistointitunnus, mutta pituuserosta johtuen se on k
-    YHTEENSƒ   315
+    5.7        Arkistointitunnus                            V           AN    35      SEPA arkistointitunnus t√§ysimittaisena. Tieto on my√∂s tapahtuman perustietueella (T10) kent√§ss√§ Arkistointitunnus, mutta pituuserosta johtuen se on k
+    YHTEENS√Ñ   315
 
     */
 
@@ -1067,7 +1067,7 @@ switch ($tunnus) {
     $tyyppi   = substr($tietue, 6, 2);
     $arvo     = substr($tietue, 8, substr($tietue, 3, 3));
 
-    // Nordea Viro h‰kki
+    // Nordea Viro h√§kki
     if ($yhtiorow['maa'] == "EE" and $koodi == '705' and $kuittikoodi != "E" and stripos($arvo, "REFERENCE PAYMENT") !== FALSE) {
       $kuittikoodi = "E";
     }
@@ -1090,15 +1090,15 @@ switch ($tunnus) {
           if (strlen($osa) > 0) {
                $selite .= $osa."<br>\n";
              }
-          // Luottokunnan k‰sittely‰ varten
+          // Luottokunnan k√§sittely√§ varten
           if ($i == 1) $luottokuntatieto = $osa;
            }
         break;
 
-      // Kappalem‰‰r‰tiedot
+      // Kappalem√§√§r√§tiedot
       case '01' :
         $selite = t("Tapahtumia").": ".substr($arvo, 0, 8) * 1;
-        //T‰ll‰ taklataan Aktian virhett‰, jossa tuo E puuttuu aineistosta
+        //T√§ll√§ taklataan Aktian virhett√§, jossa tuo E puuttuu aineistosta
         if ((substr($pankkitilino,0,1) == '4') and ($kuittikoodi == ' ')) $kuittikoodi='Z';
         break;
 
@@ -1116,7 +1116,7 @@ switch ($tunnus) {
           $selite .= t("Laskun numero").": $osa_osa2<br>\n";
         }
         if ($osa_osa3 != "" and $osa_osa3 != 0) {
-          $selite .= t("Laskun p‰iv‰ys").": $osa_osa3";
+          $selite .= t("Laskun p√§iv√§ys").": $osa_osa3";
         }
         break;
 
@@ -1132,19 +1132,19 @@ switch ($tunnus) {
 
       // Toimeksiantajan tiedot itselleen
       case '06' :
-        $selite = t("Oma sis‰inen viite").": ";
+        $selite = t("Oma sis√§inen viite").": ";
         $selite .= trim(substr($arvo, 0, 35))."<br>\n";
         $selite .= trim(substr($arvo, 35, 35));
         $sisviite = trim(substr($arvo, 0, 35));
 
-        //T‰m‰ on (kai) ongelma Analysten pankkisoftassa. Lis‰‰v‰t joskus oman tunnuksen
-        //ekaan sis‰inenviite kentt‰‰n, silloin meid‰n onkin toisessa.
+        //T√§m√§ on (kai) ongelma Analysten pankkisoftassa. Lis√§√§v√§t joskus oman tunnuksen
+        //ekaan sis√§inenviite kentt√§√§n, silloin meid√§n onkin toisessa.
         if ((trim(substr($arvo, 35, 35))*1 != 0) and (trim(substr($arvo, 0, 35))*1 != 0)) {
           $sisviite = trim(substr($arvo, 35, 35));
         }
 
-        // sepa-aineistoon lisat‰‰n t‰h‰n kentt‰‰n merkill‰ '-' erotettuna timestamp,
-        // jotta saadaan uniikki EndToEndId. T‰ss‰ timestamp poistetaan.
+        // sepa-aineistoon lisat√§√§n t√§h√§n kentt√§√§n merkill√§ '-' erotettuna timestamp,
+        // jotta saadaan uniikki EndToEndId. T√§ss√§ timestamp poistetaan.
         $dash_pos = strpos($sisviite, "-");
 
         if ($dash_pos !== FALSE) {
@@ -1153,14 +1153,14 @@ switch ($tunnus) {
 
         $sisviite = (int) $sisviite;
 
-         // Jos EndToEndId on isompi ku isoin laskun tunnus, niin hyl‰t‰‰n se, koska se ei voi olla oikein
+         // Jos EndToEndId on isompi ku isoin laskun tunnus, niin hyl√§t√§√§n se, koska se ei voi olla oikein
         if ($sisviite > $meteidrow['maxEndToEndId']) {
           $sisviite = "";
         }
 
         break;
 
-      // Pankin antamat lis‰tiedot
+      // Pankin antamat lis√§tiedot
       case '07' :
         for ($i = 0; $i < 13; $i++) {
           $osa = trim(substr($arvo, $i*35, 35));
@@ -1181,7 +1181,7 @@ switch ($tunnus) {
         $selite = t("Nimen tarkenne").": ".trim(substr($arvo, 0, 35));
         break;
 
-      // Euromaksualueen tilisiirron lis‰tyyppi
+      // Euromaksualueen tilisiirron lis√§tyyppi
       case '11' :
         $selite = "";
 
@@ -1203,7 +1203,7 @@ switch ($tunnus) {
 
       // Oletus
       default :
-        $selite = t("Tuntematon lis‰tieto")." '$tyyppi': $arvo";
+        $selite = t("Tuntematon lis√§tieto")." '$tyyppi': $arvo";
         $eiselitetta = 1;
     }
 
@@ -1217,18 +1217,18 @@ switch ($tunnus) {
     /*
     // Saldotietue (40)
 
-    Kentt‰     Tieto                PakollisuuMuoto Pituus  Sis‰ltˆ
+    Kentt√§     Tieto                PakollisuuMuoto Pituus  Sis√§lt√∂
     1          Aineistotunnus       P         AN    1       T
     2          Tietuetunnus         P         AN    2       40
     3          Tietueen pituus      P         N     3
-    4          Kirjausp‰iv‰         P         N     6       VVKKPP
-    5          Kirjausp‰iv‰n loppusaldo
+    4          Kirjausp√§iv√§         P         N     6       VVKKPP
+    5          Kirjausp√§iv√§n loppusaldo
     .1         Etumerkki            P         AN    1
-    .2         M‰‰r‰                P         N     18      16 kok + 2 desi
-    6          K‰ytett‰viss‰ oleva saldo
+    .2         M√§√§r√§                P         N     18      16 kok + 2 desi
+    6          K√§ytett√§viss√§ oleva saldo
     .1         Etumerkki            P         AN    1
-    .2         M‰‰r‰                P         N     18      16 kok + 2 desi
-    YHTEENSƒ                                        50
+    .2         M√§√§r√§                P         N     18      16 kok + 2 desi
+    YHTEENS√Ñ                                        50
     */
 
     echo "<tr><td colspan='8' class='back' style='width:100%; padding:0; margin:0;'><div id = 'ifd_{$tiliotedatarow['tunnus']}' style='width:100%; border:1px solid; display:none'></div><br></td></tr>";
@@ -1245,11 +1245,11 @@ switch ($tunnus) {
 
       if ($tee == 'S') echo "<td></td>";
 
-      echo "<td></td><td></td><td></td><td></td><td>".t("K‰yttˆvara")."</td>";
+      echo "<td></td><td></td><td></td><td></td><td>".t("K√§ytt√∂vara")."</td>";
       echo "<td style='text-align:right;'>".sprintf("%01.2f",substr($tietue,31,19) / 100)."</td><td class='back' style='width:200px;'></td></tr>";
     }
 
-    // P‰ivitet‰‰n saldo yriti-tauluun, jos sellainen lˆytyi
+    // P√§ivitet√§√§n saldo yriti-tauluun, jos sellainen l√∂ytyi
     if ($toim == 'K' and $tiliotedatarow['kasitelty'] == '0000-00-00') {
 
       $tilisaldo = substr($tietue,31,19);
@@ -1267,7 +1267,7 @@ switch ($tunnus) {
 
       if ($tee == 'S') echo "</td><td>";
 
-      echo "<font class='message'>".t("Tilin saldo p‰ivitettiin")."</font>";
+      echo "<font class='message'>".t("Tilin saldo p√§ivitettiin")."</font>";
       echo "</td><td></td><td></td><td></td><td class='back' style='width:200px;'></td></tr>";
     }
     break;
@@ -1276,27 +1276,27 @@ switch ($tunnus) {
     /*
     // Kumulatiivinen perustietue (50)
 
-    Kentt‰     Tieto             Pakollisuus Muoto PituusSis‰ltˆ
+    Kentt√§     Tieto             Pakollisuus Muoto PituusSis√§lt√∂
     1          Aineistotunnus    P           AN    1     T
     2          Tietuetunnus      P           AN    2     50
     3          Tietueen pituus   P           N     3
     4          Jakson tunnus     P           AN    1     1, 2, 3, 4
-    5          Jaksop‰iv‰        P           N     6     VVKKPP
+    5          Jaksop√§iv√§        P           N     6     VVKKPP
     6          Tapahtumat
     6.1        Panot
-    6.1.1      Kappalem‰‰r‰      P           N     8
+    6.1.1      Kappalem√§√§r√§      P           N     8
     6.1.2      Summa
     6.1.2.1    Etumerkki         P           AN    1
-    6.1.2.2    M‰‰r‰             P           N     18    16 kok + 2 desi
+    6.1.2.2    M√§√§r√§             P           N     18    16 kok + 2 desi
     6.2        Otot
-    6.2.1      Kappalem‰‰r‰      P           N     8
+    6.2.1      Kappalem√§√§r√§      P           N     8
     6.2.2      Summa
     6.2.2.1    Etumerkki         P           AN    1
-    6.2.2.2    M‰‰r‰             P           N     18    16 kok + 2 desi
-    YHTEENSƒ                                       67
+    6.2.2.2    M√§√§r√§             P           N     18    16 kok + 2 desi
+    YHTEENS√Ñ                                       67
     */
 
-    if (substr($tietue,6,1) == 1) $jakso = "p‰iv‰n";
+    if (substr($tietue,6,1) == 1) $jakso = "p√§iv√§n";
     if (substr($tietue,6,1) == 2) $jakso = "tiliotteen";
     if (substr($tietue,6,1) == 3) $jakso = "kuukauden";
     if (substr($tietue,6,1) == 4) $jakso = "vuoden";
@@ -1314,7 +1314,7 @@ switch ($tunnus) {
       Pankkikohtainen tieto!
     */
 
-    // T‰ss‰ kuvataan Nordea
+    // T√§ss√§ kuvataan Nordea
     if (substr($tietue,6,3) == '200') {
 
       $colspan = $tee == 'S' ? 7 : 6;
@@ -1335,10 +1335,10 @@ switch ($tunnus) {
         echo "<tr><th colspan='$colspan'>".t("Luottokorko")." ".(substr($tietue,73,7) / 1000)."</th><td class='back' style='width:200px;'></td></tr>";
       }
       if (substr($tietue,80,1) == '1') {
-        echo "<tr><th colspan='$colspan'>".t("Limiitink‰yttˆaste")." ".(substr($tietue,81,7) / 1000)."</th><td class='back' style='width:200px;'></td></tr>";
+        echo "<tr><th colspan='$colspan'>".t("Limiitink√§ytt√∂aste")." ".(substr($tietue,81,7) / 1000)."</th><td class='back' style='width:200px;'></td></tr>";
       }
       if (substr($tietue,88,1) == '1') {
-        echo "<tr><th colspan='$colspan'>".t("Pysyv‰saldo")." ".(substr($tietue,89,1).substr($tietue,90,18) / 100)."</th><td class='back' style='width:200px;'></td></tr>";
+        echo "<tr><th colspan='$colspan'>".t("Pysyv√§saldo")." ".(substr($tietue,89,1).substr($tietue,90,18) / 100)."</th><td class='back' style='width:200px;'></td></tr>";
       }
       if (substr($tietue,108,1) == '1') {
         echo "<tr><th colspan='$colspan'>".t("Talletusviitekorko")." ".substr($tietue,109,35)." ".(substr($tietue,144,7) / 1000)."</th><td class='back' style='width:200px;'></td></tr>";
@@ -1349,7 +1349,7 @@ switch ($tunnus) {
     }
     else {
       echo "<tr><td colspan='$colspan'>";
-      echo t("Tietue T60 ei ole tunnistettu pankkiryhm‰lle").": ". substr($tietue,6,3)."</td><td class='back' style='width:200px;'></td></tr>";
+      echo t("Tietue T60 ei ole tunnistettu pankkiryhm√§lle").": ". substr($tietue,6,3)."</td><td class='back' style='width:200px;'></td></tr>";
     }
     break;
   case 'T70':
@@ -1357,21 +1357,21 @@ switch ($tunnus) {
     /*
     // Tiedotetietue (70)
 
-    Kentt‰     Tieto                   Pakollisuus Muoto Pituus  Sis‰ltˆ
+    Kentt√§     Tieto                   Pakollisuus Muoto Pituus  Sis√§lt√∂
     1          Aineistotunnus          P           AN    1       T
     2          Tietuetunnus            P           AN    2       70
     3          Tietueen pituus         P           N     3
-    4          Pankkiryhm‰n tunnus     P           AN    3
+    4          Pankkiryhm√§n tunnus     P           AN    3
     5          Tiedote
     .1         Rivi-1                  P           AN    80
     .2         Rivi-2                              AN    80
     ...
     .6         Rivi-6                              AN    80
-    YHTEENSƒ                                             max 489
+    YHTEENS√Ñ                                             max 489
 
     */
 
-    if ($silent == "") { // Tietue sis‰lt‰‰ tiliotteeseen liittyvi‰ tiedotteita
+    if ($silent == "") { // Tietue sis√§lt√§√§ tiliotteeseen liittyvi√§ tiedotteita
       echo "<tr><td class='back'></td><td class='back' style='width:200px;'></td></tr>";
 
       echo "<tr>";

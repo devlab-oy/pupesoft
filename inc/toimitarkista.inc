@@ -50,7 +50,7 @@ if (!function_exists("toimitarkista")) {
       $sresult = pupe_query($query);
 
       if (mysql_num_rows($sresult) != 1) {
-        $virhe[$i] = t("Tiliä ei löydy");
+        $virhe[$i] = t("TiliÃ¤ ei lÃ¶ydy");
       }
     }
 
@@ -89,7 +89,7 @@ if (!function_exists("toimitarkista")) {
         $virhe[$i] = t("Tieto puuttuu");
       }
 
-      // Luodaan swift, jos sitä ei olla syötetty ja tili on suomalainen
+      // Luodaan swift, jos sitÃ¤ ei olla syÃ¶tetty ja tili on suomalainen
       if (substr($t[$i], 0, 2) == "FI" and $tmp_swift == "") {
         include ("inc/pankkitiedot.inc");
         $vastaus = pankkitiedot($t[$i],'');
@@ -138,26 +138,26 @@ if (!function_exists("toimitarkista")) {
         if (strlen($ytunnus) == 11) {
           $hetu = $ytunnus;
 
-          // katotaan oliko kyseessä hetu
+          // katotaan oliko kyseessÃ¤ hetu
           require ("tarkistahetu.inc");
 
           // ei ollu oikee hetukaan
           if ($hetuok == 1) {
-            $virhe[$i] = t("Virheellinen henkilötunnus!");
+            $virhe[$i] = t("Virheellinen henkilÃ¶tunnus!");
           }
         }
         else {
           require ("tarkistaytunnus.inc");
 
           if ($ok == 0) {
-            $virhe[$i] = t("Virheellinen ytunnus!")." $t[$i] -> $ytunnus. ".t("Voit tarkistaa ytunnuksen")." <a target='uusiytj' href='http://www.ytj.fi/yrit_sel2.asp?kielikoodi=1'>".t("täältä")."</a>.";
+            $virhe[$i] = t("Virheellinen ytunnus!")." $t[$i] -> $ytunnus. ".t("Voit tarkistaa ytunnuksen")." <a target='uusiytj' href='http://www.ytj.fi/yrit_sel2.asp?kielikoodi=1'>".t("tÃ¤Ã¤ltÃ¤")."</a>.";
           }
           else {
             $t[$i] = $ytunnus;
           }
         }
       }
-      else { // ulkomaalainen saa olla mitä se haluaa
+      else { // ulkomaalainen saa olla mitÃ¤ se haluaa
         $t[$i] = $ytunnus;
       }
 
@@ -167,12 +167,12 @@ if (!function_exists("toimitarkista")) {
     if ($fieldname == "ohjeitapankille") {
 
       if ($tmp_maakoodi=='FI' and strlen($t[$i]) != '') {
-        $virhe[$i] = t("Käytössä vain ulkomaisille toimittajille");
+        $virhe[$i] = t("KÃ¤ytÃ¶ssÃ¤ vain ulkomaisille toimittajille");
       }
       else {
         $t[$i]=trim($t[$i]);
         if (strlen($t[$i]) > 350) {
-          $virhe[$i] = t("Maksimipituus on 350 merkkiä");
+          $virhe[$i] = t("Maksimipituus on 350 merkkiÃ¤");
         }
       }
     }
@@ -181,7 +181,7 @@ if (!function_exists("toimitarkista")) {
       if ($tmp_maakoodi == 'FI') {
 
         if (trim($t[$i]) == '' and !isset($hetuok)) {
-          // täytetään ovttunnus jos sitä ei ole, eikä ytunnus oo henkilötunnus
+          // tÃ¤ytetÃ¤Ã¤n ovttunnus jos sitÃ¤ ei ole, eikÃ¤ ytunnus oo henkilÃ¶tunnus
           $t[$i] = "0037".sprintf("%08d", preg_replace("/[^0-9]/", "", $tmp_ytunnus));
         }
 
@@ -195,17 +195,17 @@ if (!function_exists("toimitarkista")) {
         $sresult = pupe_query($query);
 
         if (mysql_num_rows($sresult) > 0) {
-          $virhe[$i] = t("Samalla ytunnuksella %s on useita toimittajia! Lisää tarkenne ovt-tunnukseen.", "", $tmp_ytunnus);
+          $virhe[$i] = t("Samalla ytunnuksella %s on useita toimittajia! LisÃ¤Ã¤ tarkenne ovt-tunnukseen.", "", $tmp_ytunnus);
         }
       }
     }
 
     if ($fieldname == "email" and trim($t[$i]) != '') {
-      // Tarkistetaan sähköpostiosoite
+      // Tarkistetaan sÃ¤hkÃ¶postiosoite
       $email_virhe = tarkista_email($t[$i]);
 
       if ($email_virhe != "") {
-        $virhe[$i] = t("Sähköpostin domain ei löydy")."! ($email_virhe)";
+        $virhe[$i] = t("SÃ¤hkÃ¶postin domain ei lÃ¶ydy")."! ($email_virhe)";
       }
     }
 
@@ -214,7 +214,7 @@ if (!function_exists("toimitarkista")) {
     }
 
     if ($fieldname == "tyyppi") {
-      $toimtyyppi = $t[$i]; // otetaan tää talteen
+      $toimtyyppi = $t[$i]; // otetaan tÃ¤Ã¤ talteen
 
       if ($toimtyyppi == "K") {
         $query = "SELECT ytunnus
@@ -226,7 +226,7 @@ if (!function_exists("toimitarkista")) {
         $vres = pupe_query($query);
 
         if (mysql_num_rows($vres) > 0)  {
-          $virhe[$i] = $virhe[$ytunnus_ind] = t("Henkilö on jo olemassa!");
+          $virhe[$i] = $virhe[$ytunnus_ind] = t("HenkilÃ¶ on jo olemassa!");
         }
       }
     }
@@ -238,7 +238,7 @@ if (!function_exists("toimitarkista")) {
         $tyychkre = pupe_query($query);
 
         if (mysql_num_rows($tyychkre) == 0) {
-          $virhe[$i] = "Väärä yhtiötunnus: $t[$i]!";
+          $virhe[$i] = "VÃ¤Ã¤rÃ¤ yhtiÃ¶tunnus: $t[$i]!";
         }
       }
 
@@ -295,7 +295,7 @@ if (!function_exists("toimitarkista")) {
       $tmp_edi_polku = trim($t[$i]);
 
       if ($tmp_edi_kuvaus == 'editilaus_out_wabco.inc' or $tmp_edi_kuvaus == 'editilaus_out_excel.inc' or $tmp_edi_kuvaus == 'editilaus_out_xml.inc' or $tmp_edi_kuvaus == 'sendorder_out_futur') {
-        // Näissä tyypeissä ei tartte olle mitään kenttiä syötetty
+        // NÃ¤issÃ¤ tyypeissÃ¤ ei tartte olle mitÃ¤Ã¤n kenttiÃ¤ syÃ¶tetty
       }
       elseif ($tmp_edi_kuvaus != "" and $tmp_edi_palvelin == "localhost" and ($tmp_edi_polku == "" or !is_writable($tmp_edi_polku))) {
         $tmp_virhe = t("Paikallinen siirto ei onnistu, koska hakemistoon ei ole kirjoitusoikeutta")."!";
@@ -303,7 +303,7 @@ if (!function_exists("toimitarkista")) {
         $virhe[$tmp_edi_palvelin_i] = $tmp_virhe;
       }
       elseif ($tmp_edi_kuvaus != "" and $tmp_edi_palvelin != "localhost" and ($tmp_edi_palvelin == "" or $tmp_edi_kayttaja == "" or $tmp_edi_salasana == "" or $tmp_edi_polku == "")) {
-        $tmp_virhe = t("Edi-kuvaus valittu, mutta lähettämiseen tarvittavia kenttiä ei syötetty")."!";
+        $tmp_virhe = t("Edi-kuvaus valittu, mutta lÃ¤hettÃ¤miseen tarvittavia kenttiÃ¤ ei syÃ¶tetty")."!";
         $virhe[$i] = $tmp_virhe;
         $virhe[$tmp_edi_palvelin_i] = $tmp_virhe;
         $virhe[$tmp_edi_kayttaja_i] = $tmp_virhe;

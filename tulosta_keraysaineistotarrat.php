@@ -1,11 +1,11 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require("inc/parametrit.inc");
 
-echo "<font class='head'>".t("Tulosta ker‰yser‰tarroja")."</font><hr>";
+echo "<font class='head'>".t("Tulosta ker√§yser√§tarroja")."</font><hr>";
 
 if ($tee == 'uudet') {
   $komento = $kirjoitin;
@@ -33,7 +33,7 @@ if ($tee == '') {
     echo "<form method='post'>";
     echo "<input type='hidden' name='tee' value='uudet'>";
     echo "<table>";
-    echo "<tr><th>".t("Ytunnus")."</th><th>".t("Nimi")."</th><th>".t("Toim.Nimi")."</th><th>".t("Rivej‰")."</th><th>".t("Myyntieri‰")."</th></tr>";
+    echo "<tr><th>".t("Ytunnus")."</th><th>".t("Nimi")."</th><th>".t("Toim.Nimi")."</th><th>".t("Rivej√§")."</th><th>".t("Myyntieri√§")."</th></tr>";
 
     $yhtriveja  = 0;
     $yhteria  = 0;
@@ -45,7 +45,7 @@ if ($tee == '') {
       $yhteria += $tarrarow['myyntieria'];
 
     }
-    echo "<tr><td colspan='3'>".t("Yhteens‰").":</td><td>$yhtriveja</td><td>$yhteria</td></tr>";
+    echo "<tr><td colspan='3'>".t("Yhteens√§").":</td><td>$yhtriveja</td><td>$yhteria</td></tr>";
     echo "</table><br>";
 
     $query = "SELECT *
@@ -63,14 +63,14 @@ if ($tee == '') {
       echo "<option value='$kirow[komento]' $select>$kirow[kirjoitin]</option>";
     }
 
-    echo "</select><input type='Submit' value='".t("Tulosta n‰m‰")."'>";
+    echo "</select><input type='Submit' value='".t("Tulosta n√§m√§")."'>";
     echo "</form><br>";
   }
   else {
-    echo t("Ei tulostamattomia ker‰yser‰tarroja");
+    echo t("Ei tulostamattomia ker√§yser√§tarroja");
   }
 
-  echo "<br><br><font class='head'>".t("Tulostetut ker‰yser‰tarrat")."</font><hr>";
+  echo "<br><br><font class='head'>".t("Tulostetut ker√§yser√§tarrat")."</font><hr>";
 
   $query = "SELECT DATE_FORMAT(lasku.luontiaika, '%Y-%m-%d %H:%i') luontiaika, lasku.toimaika, lasku.ytunnus, lasku.nimi, lasku.toim_nimi, group_concat(lasku.tunnus) laskutunnukset, count(tilausrivi.tunnus) riveja, sum(tilausrivi.tilkpl) myyntieria
             FROM lasku
@@ -89,7 +89,7 @@ if ($tee == '') {
     echo "<input type='hidden' name='tee' value='vanhat'>";
 
     echo "<table>";
-    echo "<tr><th>".t("Vastaanotettu")."</th><th>".t("Toimitusaika")."</th><th>".t("Ytunnus")."</th><th>".t("Nimi")."</th><th>".t("Toim.Nimi")."</th><th>".t("Rivej‰")."</th><th>".t("Myyntieri‰")."</th><th>".t("Tulosta")."</th></tr>";
+    echo "<tr><th>".t("Vastaanotettu")."</th><th>".t("Toimitusaika")."</th><th>".t("Ytunnus")."</th><th>".t("Nimi")."</th><th>".t("Toim.Nimi")."</th><th>".t("Rivej√§")."</th><th>".t("Myyntieri√§")."</th><th>".t("Tulosta")."</th></tr>";
 
     $yhtriveja  = 0;
     $yhteria  = 0;
@@ -121,7 +121,7 @@ if ($tee == '') {
     echo "</form>";
   }
   else {
-    echo t("Ei tulostettuja ker‰yser‰tarroja");
+    echo t("Ei tulostettuja ker√§yser√§tarroja");
   }
 }
 

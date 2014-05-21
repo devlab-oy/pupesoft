@@ -22,10 +22,10 @@ else {
 
   echo "<form method='post'>";
   echo "<select name='factoringyhtio' onchange='submit();'>";
-  echo "<option value='Nordeasii' $selNOR>N‰yt‰ Nordea Factoring siirtotiedostot</option>";
-  echo "<option value='OKOsiirto' $selOKO>N‰yt‰ OKO Saatavarahoitus siirtotiedosto</option>";
+  echo "<option value='Nordeasii' $selNOR>N√§yt√§ Nordea Factoring siirtotiedostot</option>";
+  echo "<option value='OKOsiirto' $selOKO>N√§yt√§ OKO Saatavarahoitus siirtotiedosto</option>";
   echo "</select>";
-  echo "<input type='submit' value='N‰yt‰'>";
+  echo "<input type='submit' value='N√§yt√§'>";
   echo "</form><br><br>";
 
   echo "<form method='post' class='multisubmit'>";

@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("../inc/parametrit.inc");
@@ -12,7 +12,7 @@ if ($tee != '') {
   $rivi = "Tullinimike\tTullinimitys\tMaa\tTuotenumero\tNimitys\r\n";
   $virtu = "";
 
-  // tehd‰‰n tullin aineisto
+  // tehd√§√§n tullin aineisto
   $query = "SELECT tuote.tullinimike1, ifnull(tuotteen_toimittajat.alkuperamaa, '') alkuperamaa, tuote.tuoteno, tuote.nimitys
             FROM tuote
             LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno)
@@ -44,7 +44,7 @@ if ($tee != '') {
 
     $bound     = uniqid(time()."_") ;
 
-    $headeri   = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+    $headeri   = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n";
     $headeri  .= "MIME-Version: 1.0\n" ;
     $headeri  .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
@@ -57,9 +57,9 @@ if ($tee != '') {
     $content .= "\n" ;
     $content .= "--$bound\n";
 
-    $boob     = mail($kukarow["eposti"], mb_encode_mimeheader(t("Tavarakatelista"), "ISO-8859-1", "Q"), $content, $headeri, "-f $yhtiorow[postittaja_email]");
+    $boob     = mail($kukarow["eposti"], mb_encode_mimeheader(t("Tavarakatelista"), "UTF-8", "Q"), $content, $headeri, "-f $yhtiorow[postittaja_email]");
 
-    echo t("Tavarakatelista l‰hetettiin osoitteeseen"). " $kukarow[eposti].<br><br>";
+    echo t("Tavarakatelista l√§hetettiin osoitteeseen"). " $kukarow[eposti].<br><br>";
   }
   else {
 
@@ -67,7 +67,7 @@ if ($tee != '') {
     $query = "SELECT tuoteno, osasto, try, nimitys, tullinimike1 FROM tuote WHERE yhtio = '$kukarow[yhtio]' AND tullinimike1 IN ($virtu) ORDER BY osasto, try, tuoteno";
     $virre = mysql_query($query) or pupe_error($query);
 
-    echo "<font class='message'>".t("Virheellisi‰ tullinimikkeit‰ seuraavilla tuotteilla. N‰m‰ on korjattava ennen l‰hetyst‰.")."</font><hr>";
+    echo "<font class='message'>".t("Virheellisi√§ tullinimikkeit√§ seuraavilla tuotteilla. N√§m√§ on korjattava ennen l√§hetyst√§.")."</font><hr>";
 
     echo "<table>";
     echo "<tr>";

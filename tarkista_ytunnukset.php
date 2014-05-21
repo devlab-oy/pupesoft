@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("inc/parametrit.inc");
@@ -10,18 +10,18 @@ enable_ajax();
 
 echo "<font class='head'>".t("Tarkista asiakkaiden ja toimittajien ytunnukset")."</font><hr><br>";
 
-//  Mik‰li asiakkaalla on jokin y-tunnustarkistus voimassa, tarkistetaan, ett‰ asiakkaiden ytunnukset ovat sit‰ mit‰ pit‰isi..
+//  Mik√§li asiakkaalla on jokin y-tunnustarkistus voimassa, tarkistetaan, ett√§ asiakkaiden ytunnukset ovat sit√§ mit√§ pit√§isi..
 if ($yhtiorow["ytunnus_tarkistukset"] != "E") {
 
   $rajaus = "";
 
-  $asiakasQuery = "  SELECT 'asiakas' taulu, ytunnus, nimi, tunnus
-            FROM asiakas
-            WHERE yhtio = '{$kukarow["yhtio"]}' and laji = ''";
+  $asiakasQuery = "SELECT 'asiakas' taulu, ytunnus, nimi, tunnus
+                   FROM asiakas
+                   WHERE yhtio = '{$kukarow["yhtio"]}' and laji = ''";
 
-  $toimittajaQuery = "  SELECT 'toimi' taulu, ytunnus, nimi, tunnus
-              FROM toimi
-              WHERE yhtio = '{$kukarow["yhtio"]}'";
+  $toimittajaQuery = "SELECT 'toimi' taulu, ytunnus, nimi, tunnus
+                      FROM toimi
+                      WHERE yhtio = '{$kukarow["yhtio"]}'";
 
   if ($yhtiorow["ytunnus_tarkistukset"] == "") {
     $query = "  (
@@ -40,7 +40,7 @@ if ($yhtiorow["ytunnus_tarkistukset"] != "E") {
     $query = $asiakasQuery;
   }
 
-  echo "<font class='info'>".t("Tarkistetaan yritysasiakkaiden ja toimittajien ytunnukset yhtiˆn parametrien mukaisesti.")."</font><br><br>";
+  echo "<font class='info'>".t("Tarkistetaan yritysasiakkaiden ja toimittajien ytunnukset yhti√∂n parametrien mukaisesti.")."</font><br><br>";
 
   $result = pupe_query($query) or pupe_error($query);
 
@@ -99,7 +99,7 @@ if ($yhtiorow["ytunnus_tarkistukset"] != "E") {
   }
 }
 else {
-  echo "<font class='message'>".t("Yrityksell‰ ei ole y-tunnusten tarkistus k‰ytˆss‰.")."</font>";
+  echo "<font class='message'>".t("Yrityksell√§ ei ole y-tunnusten tarkistus k√§yt√∂ss√§.")."</font>";
 }
 
 require("inc/footer.inc");

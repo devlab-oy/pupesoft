@@ -24,7 +24,7 @@ if (isset($kukarow['resoluutio']) and $kukarow['resoluutio'] == 'P') {
 }
 
 if (!headers_sent()) {
-  header("Content-Type: text/html; charset=iso-8859-1");
+  header("Content-Type: text/html; charset=utf-8");
   header("Pragma: public");
   header("Expires: 0");
   header("Last-Modified: ".gmdate("D, d M Y H:i:s")." GMT");
@@ -40,7 +40,7 @@ echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Frameset//EN\"\n\"http://www
     <meta http-equiv=\"Cache-Control\" Content=\"no-cache\">\n
     <meta http-equiv=\"Pragma\" Content=\"no-cache\">\n
     <meta http-equiv=\"Expires\" Content=\"-1\">\n
-    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n";
+    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\n";
 
 if (file_exists("pics/pupeicon.gif")) {
   echo "  <link rel='shortcut icon' href='pics/pupeicon.gif'>\n";

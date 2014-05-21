@@ -1,6 +1,6 @@
 <?php
 
-// Kutsutaanko CLI:st‰
+// Kutsutaanko CLI:st√§
 $php_cli = FALSE;
 
 if (php_sapi_name() == 'cli') {
@@ -12,7 +12,7 @@ date_default_timezone_set('Europe/Helsinki');
 if ($php_cli) {
 
   if (!isset($argv[1]) or $argv[1] == '') {
-    echo "Anna yhtiˆ!!!\n";
+    echo "Anna yhti√∂!!!\n";
     die;
   }
 
@@ -29,10 +29,10 @@ if ($php_cli) {
       "locktime" => 900,
   );
 
-  // Sallitaan vain yksi instanssi t‰st‰ skriptist‰ kerrallaan
+  // Sallitaan vain yksi instanssi t√§st√§ skriptist√§ kerrallaan
   pupesoft_flock($lock_params);
 
-  // hmm.. j‰nn‰‰
+  // hmm.. j√§nn√§√§
   $kukarow['yhtio'] = $argv[1];
 
   //Pupeasennuksen root
@@ -41,7 +41,7 @@ if ($php_cli) {
   $yhtiorow = hae_yhtion_parametrit($kukarow["yhtio"]);
 
   if ($yhtiorow["yhtio"] == "") {
-    die ("Yhtiˆ $kukarow[yhtio] ei lˆydy!");
+    die ("Yhti√∂ $kukarow[yhtio] ei l√∂ydy!");
   }
 
   if (!isset($e3_params[$yhtiorow["yhtio"]]["ekansio"]) or !is_dir($e3_params[$yhtiorow["yhtio"]]["ekansio"])) {
@@ -74,7 +74,7 @@ if ($php_cli) {
 else {
   require('../inc/parametrit.inc');
 
-  echo "<font class='head'>".t("E3-ostoehdotuksen sis‰‰nluku")."</font><hr>";
+  echo "<font class='head'>".t("E3-ostoehdotuksen sis√§√§nluku")."</font><hr>";
 }
 
 function datansisalto_e3($e3_ehdotuskansio, $dfile, $otunnus, $toimituspaiva) {
@@ -119,7 +119,7 @@ function datansisalto_e3($e3_ehdotuskansio, $dfile, $otunnus, $toimituspaiva) {
 
     if ($tuote_row['tuoteno'] == '') {
       echo "<br>";
-      echo "<font class='error'>".t("Tiedostosta %s tuotetietoja tuotteelle %s ei lˆydy tuotehallinnasta. Tuotetta ei lis‰tty ostoehdotukseen.", "", $file,$tuoteno)."</font>";
+      echo "<font class='error'>".t("Tiedostosta %s tuotetietoja tuotteelle %s ei l√∂ydy tuotehallinnasta. Tuotetta ei lis√§tty ostoehdotukseen.", "", $file,$tuoteno)."</font>";
       echo "<br>";
     }
     else {
@@ -157,7 +157,7 @@ function datansisalto_e3($e3_ehdotuskansio, $dfile, $otunnus, $toimituspaiva) {
   echo "<font class='message'>".t("Ostoehdotus %s siirretty ostotilaukseksi %s.", "", $filunloppu, $otunnus)."</font>";
   echo "<br><br>";
 
-  // Siirret‰‰n done kansioon
+  // Siirret√§√§n done kansioon
   rename($e3_ehdotuskansio."/".$dfile, $e3_ehdotuskansio."/done/".$dfile);
 }
 
@@ -183,7 +183,7 @@ if (isset($tee) and trim($tee) == 'aja') {
       foreach ($lines as $line) {
 
         $toimittajaytunnus     = pupesoft_cleanstring(substr($line, 0, 7));
-        //$toimittajaytunnus  = '06806400';                     // <<== POISTA TOI TOSTA ETTEI MENE SITTEN SISƒREISILLE
+        //$toimittajaytunnus  = '06806400';                     // <<== POISTA TOI TOSTA ETTEI MENE SITTEN SIS√ÑREISILLE
         $varasto         = pupesoft_cleanstring(substr($line, 12, 3));
         $e3ostotilausnumero   = pupesoft_cleanstring(substr($line, 15, 7));
         $toimituspaiva       = pupesoft_cleanstring(substr($line, 31, 8));
@@ -226,7 +226,7 @@ if (isset($tee) and trim($tee) == 'aja') {
 
       if (mysql_num_rows($result) == 0) {
         echo "<br>";
-        echo "<font class='error'>".t("Tiedostosta %s oleva toimittajan Y-tunnus on v‰‰r‰ tai puuttuu", "", $filu)."</font>";
+        echo "<font class='error'>".t("Tiedostosta %s oleva toimittajan Y-tunnus on v√§√§r√§ tai puuttuu", "", $filu)."</font>";
         echo "<br><br>";
       }
       else {
@@ -272,12 +272,12 @@ if (isset($tee) and trim($tee) == 'aja') {
         datansisalto_e3($e3_ehdotuskansio, $dfile, $id, $toimituspaiva);
       }
 
-      // Siirret‰‰n valmis tilaustiedosto VALMIS-kansioon talteen.
+      // Siirret√§√§n valmis tilaustiedosto VALMIS-kansioon talteen.
       rename($e3_ehdotuskansio."/".$hfile, $e3_ehdotuskansio."/done/".$hfile);
     }
     else {
       echo "<br>";
-      echo "<font class='error'>".t("Ostoehdotus %s ei lˆydy palvelimelta tai tilausrivitiedostoa %s ei lˆydy palvelimelta", "", $filu, $dfile)."</font>";
+      echo "<font class='error'>".t("Ostoehdotus %s ei l√∂ydy palvelimelta tai tilausrivitiedostoa %s ei l√∂ydy palvelimelta", "", $filu, $dfile)."</font>";
       echo "<br><br>";
      }
   }
@@ -290,7 +290,7 @@ if (!$php_cli) {
   echo "<tr>";
   echo "<th>Anna E3-ostoehdotuksen numero</th>";
   echo "<td><input type='text' name='filet[]' autocomplete='off' /></td>";
-  echo "<td class='back'><input type='submit' value='".t("Sis‰‰nlue")."' /></td>";
+  echo "<td class='back'><input type='submit' value='".t("Sis√§√§nlue")."' /></td>";
   echo "</tr>";
   echo "</table>";
   echo "</form>";

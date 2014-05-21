@@ -4,18 +4,18 @@ require ("inc/parametrit.inc");
 
 echo "<font class='head'>".t("Sarjanumeroidun tuotteen varastonarvomuutos")."</font><hr>";
 
-if ($oikeurow["paivitys"] != '1') { // Saako p‰ivitt‰‰
+if ($oikeurow["paivitys"] != '1') { // Saako p√§ivitt√§√§
   if ($uusi == 1) {
-    echo "<b>".t("Sinulla ei ole oikeutta lis‰t‰ t‰t‰ tietoa")."</b><br>";
+    echo "<b>".t("Sinulla ei ole oikeutta lis√§t√§ t√§t√§ tietoa")."</b><br>";
     $uusi = '';
   }
   if ($del == 1) {
-    echo "<b>".t("Sinulla ei ole oikeutta poistaa t‰t‰ tietoa")."</b><br>";
+    echo "<b>".t("Sinulla ei ole oikeutta poistaa t√§t√§ tietoa")."</b><br>";
     $del = '';
     $tunnus = 0;
   }
   if ($upd == 1) {
-    echo "<b>".t("Sinulla ei ole oikeutta muuttaa t‰t‰ tietoa")."</b><br>";
+    echo "<b>".t("Sinulla ei ole oikeutta muuttaa t√§t√§ tietoa")."</b><br>";
     $upd = '';
     $uusi = 0;
     $tunnus = 0;
@@ -25,22 +25,22 @@ if ($oikeurow["paivitys"] != '1') { // Saako p‰ivitt‰‰
 
 
 // lukitaan tableja
-$query = "  LOCK TABLES tuotepaikat WRITE,
-      tapahtuma WRITE,
-      lasku WRITE,
-      tiliointi WRITE,
-      sanakirja WRITE,
-      tilausrivi as tilausrivi_upd WRITE,
-      tuote READ,
-      tilausrivi READ,
-      tuotteen_avainsanat READ,
-      sarjanumeroseuranta WRITE,
-      sarjanumeroseuranta_arvomuutos READ,
-      tilausrivi as tilausrivi_myynti READ,
-      tilausrivi as tilausrivi_osto READ,
-      tuotepaikat as tt READ,
-      avainsana as avainsana_kieli READ,
-      tili READ";
+$query = "LOCK TABLES tuotepaikat WRITE,
+          tapahtuma WRITE,
+          lasku WRITE,
+          tiliointi WRITE,
+          sanakirja WRITE,
+          tilausrivi as tilausrivi_upd WRITE,
+          tuote READ,
+          tilausrivi READ,
+          tuotteen_avainsanat READ,
+          sarjanumeroseuranta WRITE,
+          sarjanumeroseuranta_arvomuutos READ,
+          tilausrivi as tilausrivi_myynti READ,
+          tilausrivi as tilausrivi_osto READ,
+          tuotepaikat as tt READ,
+          avainsana as avainsana_kieli READ,
+          tili READ";
 $result = pupe_query($query);
 
 //tuotteen varastostatus
@@ -114,7 +114,7 @@ if ($tee == 'VALMIS') {
                 $query = "INSERT into tapahtuma set
                           yhtio     = '$kukarow[yhtio]',
                           tuoteno   = '$tuoteno',
-                          laji      = 'Ep‰kurantti',
+                          laji      = 'Ep√§kurantti',
                           kpl       = '$tkpl',
                           hinta     = '$tero',
                           kplhinta  = '$tero',
@@ -168,10 +168,10 @@ if ($tee == 'VALMIS') {
                   $projekti_ins   = $sarjarow["projekti"];
                 }
 
-                // Tiliˆid‰‰n ensisijaisesti varastonmuutos tilin oletuskustannuspaikalle
+                // Tili√∂id√§√§n ensisijaisesti varastonmuutos tilin oletuskustannuspaikalle
                 list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varastonmuutos"], $kustp_ins, $kohde_ins, $projekti_ins);
 
-                // Toissijaisesti kokeillaan viel‰ varasto-tilin oletuskustannuspaikkaa
+                // Toissijaisesti kokeillaan viel√§ varasto-tilin oletuskustannuspaikkaa
                 list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"], $kustp_ins, $kohde_ins, $projekti_ins);
 
                 $query = "INSERT into tiliointi set
@@ -221,7 +221,7 @@ if ($tee == 'VALMIS') {
 
 if ($tee == 'INVENTOI') {
 
-  //hakulause, t‰m‰ on sama kaikilla vaihtoehdoilla
+  //hakulause, t√§m√§ on sama kaikilla vaihtoehdoilla
   $select = " tuote.sarjanumeroseuranta, tuotepaikat.oletus, tuotepaikat.tunnus tptunnus, tuote.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka, inventointiaika, tuotepaikat.saldo, tuotepaikat.inventointilista, tuotepaikat.inventointilista_aika, concat(lpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta";
 
   if ($tuoteno != "") {
@@ -239,12 +239,12 @@ if ($tee == 'INVENTOI') {
     $saldoresult = pupe_query($query);
 
     if (mysql_num_rows($saldoresult) == 0) {
-      echo "<font class='error'>".t("Tuote")." '$tuoteno' ".t("ei lˆydy!")." ".t("Onko tuote saldoton tuote")."? ".t("Onko tuotteella varastopaikka")."?</font><br><br>";
+      echo "<font class='error'>".t("Tuote")." '$tuoteno' ".t("ei l√∂ydy!")." ".t("Onko tuote saldoton tuote")."? ".t("Onko tuotteella varastopaikka")."?</font><br><br>";
       $tee = '';
     }
   }
   else {
-    echo "<font class='error'>".t("VIRHE: Tarkista syˆtetyt tiedot")."!</font><br><br>";
+    echo "<font class='error'>".t("VIRHE: Tarkista sy√∂tetyt tiedot")."!</font><br><br>";
     $tee = '';
   }
 
@@ -305,7 +305,7 @@ if ($tee == 'INVENTOI') {
     }
 
     echo "</table>";
-    echo "<br><font class='message'>".t("Syˆt‰ selite:")."</font><br>";
+    echo "<br><font class='message'>".t("Sy√∂t√§ selite:")."</font><br>";
     echo "<input type='text' size='50' name='lisaselite' value='$lisaselite'><br><br>";
     echo "<input type='submit' name='valmis' value='".t("Muuta varastonarvoa")."'>";
     echo "</form>";

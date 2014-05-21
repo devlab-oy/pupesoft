@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("../inc/parametrit.inc");
@@ -37,8 +37,8 @@ if (($ytunnus != '' or $ytunnus == 'TULKAIKKI') and $komento == '') {
   echo "<th>",t("ytunnus"),"</th>";
   echo "<th>",t("nimi"),"</th>";
   echo "<th>",t("saapumispvm"),"</th>";
-  echo "<th>",t("rivim‰‰r‰"),"</th>";
-  echo "<th>",t("m‰‰r‰"),"</th>";
+  echo "<th>",t("rivim√§√§r√§"),"</th>";
+  echo "<th>",t("m√§√§r√§"),"</th>";
   echo "<th>",t("arvo"),"</th>";
   echo "<th>",t("valuutta"),"</th>";
   echo "</tr>";
@@ -112,7 +112,7 @@ if (($ytunnus != '' or $ytunnus == 'TULKAIKKI') and $komento == '') {
     echo "<td><input type='hidden' name='otunnus' value='{$lastunnus}'></td>";
     echo "<td><input type='hidden' name='komento' value='email'></td>";
     echo "<td><input type='hidden' name='tee' value='TULOSTA'></td>";
-    echo "<tr><td class='back'><input type='submit' value='",t("L‰het‰"),"'></td></tr>";
+    echo "<tr><td class='back'><input type='submit' value='",t("L√§het√§"),"'></td></tr>";
     echo "</form>";
   }
 
@@ -127,7 +127,7 @@ if ($tee == 'TULOSTA') {
 
 echo "<br><form name=asiakas method='post' autocomplete='off'>";
 echo "<table><tr>";
-echo "<th>",t("Anna ytunnus tai osa nimest‰"),"</th>";
+echo "<th>",t("Anna ytunnus tai osa nimest√§"),"</th>";
 echo "<td><input type='text' name='ytunnus' value='{$ytunnus}'></td>";
 echo "</tr><tr>";
 
@@ -139,11 +139,11 @@ echo "<option value='1'>",t("Vahvistetut"),"</option>";
 echo "</select></td>";
 echo "</tr><tr>";
 
-echo "<th>",t("Myˆh‰ss‰ olevat"),"</th>";
+echo "<th>",t("My√∂h√§ss√§ olevat"),"</th>";
 echo "<td><select name='myohassa'>";
 echo "<option value=''>",t("Kaikki"),"</option>";
-echo "<option value='0'>",t("Ei Myˆh‰ss‰"),"</option>";
-echo "<option value='1'>",t("Myˆh‰ss‰"),"</option>";
+echo "<option value='0'>",t("Ei My√∂h√§ss√§"),"</option>";
+echo "<option value='1'>",t("My√∂h√§ss√§"),"</option>";
 echo "</select></td>";
 echo "<td class='back'><input type='submit' value='",t("Hae"),"'></td>";
 echo "</tr>";
@@ -164,11 +164,11 @@ echo "<option value='1'>",t("Vahvistetut"),"</option>";
 echo "</select></td>";
 echo "</tr><tr>";
 
-echo "<th>",t("Myˆh‰ss‰ olevat"),"</th>";
+echo "<th>",t("My√∂h√§ss√§ olevat"),"</th>";
 echo "<td><select name='myohassa'>";
 echo "<option value=''>",t("Kaikki"),"</option>";
-echo "<option value='0'>",t("Ei Myˆh‰ss‰"),"</option>";
-echo "<option value='1'>",t("Myˆh‰ss‰"),"</option>";
+echo "<option value='0'>",t("Ei My√∂h√§ss√§"),"</option>";
+echo "<option value='1'>",t("My√∂h√§ss√§"),"</option>";
 echo "</select></td>";
 echo "<td class='back'><input type='submit' value='",t("Listaa"),"'></td>";
 echo "</tr>";

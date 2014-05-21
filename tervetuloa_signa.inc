@@ -10,7 +10,7 @@ function echo_myyntiseuranta_table() {
   $tulos_ja_liikevaihto = hae_tulos_ja_liikevaihto($nykyinen_kvartaali);
   $avoimet_tilaukset = hae_avoimet_tilaukset($kukarow['tunnus']);
 
-  if (stristr($kukarow['asema'], 'myyj‰')) {
+  if (stristr($kukarow['asema'], 'myyj√§')) {
     $tilikausi = array(
       'start_date' => $yhtiorow['tilikausi_alku'],
       'end_date' => $yhtiorow['tilikausi_loppu'],
@@ -63,7 +63,7 @@ function echo_myyntiseuranta_table() {
 
   echo "</td>";
 
-  if (stristr($kukarow['asema'], 'myyj‰')) {
+  if (stristr($kukarow['asema'], 'myyj√§')) {
 
     echo "<td class='back'>";
 
@@ -199,7 +199,7 @@ function paata_kvartaali() {
     ),
   );
 
-  //tarkisteaan mik‰ kvartaali on menossa.
+  //tarkisteaan mik√§ kvartaali on menossa.
   foreach ($kvartaalit as $kvartaali) {
     $now = date('Y-m-d');
     if ($now >= $kvartaali['start_date'] and $now <= $kvartaali['end_date']) {

@@ -1,9 +1,9 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-echo "<font class='head'>".t("ABC-Analyysi‰: ABC-pitk‰listaus")."<hr></font>";
+echo "<font class='head'>".t("ABC-Analyysi√§: ABC-pitk√§listaus")."<hr></font>";
 
 if ($toim == "kulutus") {
   $myykusana = t("Kulutus");
@@ -28,14 +28,14 @@ elseif (trim($saapumispvm) != '') {
   list($saapumisvv, $saapumiskk, $saapumispp) = explode('-', $saapumispvm);
 }
 
-// piirrell‰‰n formi
+// piirrell√§√§n formi
 echo "<form method='post' autocomplete='OFF'>";
 echo "<input type='hidden' name='aja' value='AJA'>";
 echo "<input type='hidden' name='tee' value='PITKALISTA'>";
 echo "<input type='hidden' name='toim' value='$toim'>";
 
 // Monivalintalaatikot (osasto, try tuotemerkki...)
-// M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
+// M√§√§ritell√§√§n mitk√§ latikot halutaan mukaan
 $abc_lisa  = "";
 $ulisa = "";
 $mulselprefix = "abc_aputaulu";
@@ -71,7 +71,7 @@ if (!$asiakasanalyysi) {
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>".t("Syˆt‰ viimeinen saapumisp‰iv‰").":</th>";
+  echo "<th>".t("Sy√∂t√§ viimeinen saapumisp√§iv√§").":</th>";
   echo "  <td><input type='text' name='saapumispp' value='$saapumispp' size='2'>
       <input type='text' name='saapumiskk' value='$saapumiskk' size='2'>
       <input type='text' name='saapumisvv' value='$saapumisvv'size='4'></td></tr>";
@@ -102,16 +102,16 @@ if ($aja == "AJA" and isset($ajoon)) {
 
   $worksheet->writeString($excelrivi, $excelsarake++, t("ABC"));
   $worksheet->writeString($excelrivi, $excelsarake++, t("Osaston luokka"));
-  $worksheet->writeString($excelrivi, $excelsarake++, t("Ryhm‰n luokka"));
+  $worksheet->writeString($excelrivi, $excelsarake++, t("Ryhm√§n luokka"));
   $worksheet->writeString($excelrivi, $excelsarake++, $astusana);
   if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Toim_tuoteno"));
   $worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
   $worksheet->writeString($excelrivi, $excelsarake++, t("Osasto"));
-  $worksheet->writeString($excelrivi, $excelsarake++, t("Ryhm‰"));
+  $worksheet->writeString($excelrivi, $excelsarake++, t("Ryhm√§"));
   if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Merkki"));
   if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Malli"));
   if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Mallitarkenne"));
-  if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Myyj‰"));
+  if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Myyj√§"));
   if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Ostaja"));
   if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Viim. saapumispvm"));
   if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Saldo"));
@@ -123,14 +123,14 @@ if ($aja == "AJA" and isset($ajoon)) {
   if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Vararvo"));
   if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Kierto"));
   if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Kate")."% x ".t("Kierto"));
-  $worksheet->writeString($excelrivi, $excelsarake++, $myykusana.t("m‰‰r‰"));
-  $worksheet->writeString($excelrivi, $excelsarake++, $myykusana.t("er‰").t("m‰‰r‰"));
-  $worksheet->writeString($excelrivi, $excelsarake++, $myykusana.t("er‰").$yhtiorow["valkoodi"]);
+  $worksheet->writeString($excelrivi, $excelsarake++, $myykusana.t("m√§√§r√§"));
+  $worksheet->writeString($excelrivi, $excelsarake++, $myykusana.t("er√§").t("m√§√§r√§"));
+  $worksheet->writeString($excelrivi, $excelsarake++, $myykusana.t("er√§").$yhtiorow["valkoodi"]);
   $worksheet->writeString($excelrivi, $excelsarake++, $myykusana.t("rivit"));
   $worksheet->writeString($excelrivi, $excelsarake++, t("Puuterivit"));
   $worksheet->writeString($excelrivi, $excelsarake++, t("Palvelutaso"));
-  if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Ostoer‰").t("m‰‰r‰"));
-  if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Ostoer‰").$yhtiorow["valkoodi"]);
+  if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Ostoer√§").t("m√§√§r√§"));
+  if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Ostoer√§").$yhtiorow["valkoodi"]);
   if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Ostorivit"));
   if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("KustannusMyynti"));
   if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("KustannusOsto"));
@@ -174,7 +174,7 @@ if ($aja == "AJA" and isset($ajoon)) {
             ORDER BY luokka";
   $luokkares = pupe_query($query);
 
-  // n‰m‰ m‰‰ritt‰‰ kumpaan tauluun Joinataan, asiakas vai tuote
+  // n√§m√§ m√§√§ritt√§√§ kumpaan tauluun Joinataan, asiakas vai tuote
   $asiakas_join_array = array('AK','AM','AP','AR');
   $tuote_join_array = array('TK','TM','TP','TR','TV');
 
@@ -285,7 +285,7 @@ if ($aja == "AJA" and isset($ajoon)) {
           $row["nimitys"] = t_tuotteen_avainsanat($row, 'nimitys');
         }
 
-        // Lis‰t‰‰n rivi exceltiedostoon
+        // Lis√§t√§√§n rivi exceltiedostoon
         $excelsarake = 0;
 
         $worksheet->writeString($excelrivi, $excelsarake++,  $ryhmanimet[$row["luokka"]]);

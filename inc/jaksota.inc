@@ -29,20 +29,20 @@ $tiliointirow = mysql_fetch_assoc($tresult);
 
 if ($tiliointirow['vero'] != 0) {
   echo "<br>";
-  echo "<font class='error'>".t("ALV:n sis‰lt‰v‰‰ rivi‰ ei voida jaksottaa")."!</font><br>";
+  echo "<font class='error'>".t("ALV:n sis√§lt√§v√§√§ rivi√§ ei voida jaksottaa")."!</font><br>";
   echo "<br>";
   $tee = 'E';
 }
 
-// Jaksotetaan tehty‰ rivi‰
+// Jaksotetaan tehty√§ rivi√§
 if ($tee == 'U') {
 
   echo "<br>";
-  echo "<font class='head'>".t("Tiliˆinnin jaksotus")."</font><hr>";
+  echo "<font class='head'>".t("Tili√∂innin jaksotus")."</font><hr>";
 
   echo "<font class='message'>".t("Jaksotettava summa")." $tiliointirow[summa] $yhtiorow[valkoodi]</font><br><br>";
 
-  echo "<font class='message'>".t("Valitse jaksotuksen p‰iv‰t").":</font><br><br>";
+  echo "<font class='message'>".t("Valitse jaksotuksen p√§iv√§t").":</font><br><br>";
 
   echo "<form method = 'post'>";
   echo "<input type = 'hidden' name = 'tunnus' value = '$tunnus'>";
@@ -53,8 +53,8 @@ if ($tee == 'U') {
   echo "<tr>";
   echo "<td><input type='checkbox' name='kausi[]' value='1'> ".tv1dateconv($tiliointirow["tapvm"])."</td>";
 
-  $kk = substr($tiliointirow['tapvm'], 5, 2); // T‰m‰ on kausi
-  $vv = substr($tiliointirow['tapvm'], 0, 4); // T‰m‰ on vuosi
+  $kk = substr($tiliointirow['tapvm'], 5, 2); // T√§m√§ on kausi
+  $vv = substr($tiliointirow['tapvm'], 0, 4); // T√§m√§ on vuosi
 
   for ($i = 2; $i <= 30; $i++) {
 
@@ -63,7 +63,7 @@ if ($tee == 'U') {
     echo date("d.m.Y", mktime (0, 0, 0, $kk+$i-1, 1, $vv));
     echo "</td>";
 
-    // Tehd‰‰n v‰h‰n sarakkeita
+    // Tehd√§√§n v√§h√§n sarakkeita
     if ($i % 6 == 0) {
       echo "</tr><tr>";
     }
@@ -79,21 +79,21 @@ if ($tee == 'U') {
 }
 elseif (count($kausi) > 0) {
 
-  $pkk = substr($tiliointirow['tapvm'], 5,2); // T‰m‰ on kausi
-  $pvv = substr($tiliointirow['tapvm'], 0,4); // T‰m‰ on vuosi
+  $pkk = substr($tiliointirow['tapvm'], 5,2); // T√§m√§ on kausi
+  $pvv = substr($tiliointirow['tapvm'], 0,4); // T√§m√§ on vuosi
   $kpl = count($kausi);
 
   $summa = round($tiliointirow['summa']/$kpl,2);
 
   $tsumma = 0;
 
-  $eka = 0; // T‰ll‰ katsotaan ollaanko ensimm‰isell‰ kierroksella
+  $eka = 0; // T√§ll√§ katsotaan ollaanko ensimm√§isell√§ kierroksella
 
   foreach ($kausi as $mille) {
 
-    // mik‰ on jaksotuksen vastatili
+    // mik√§ on jaksotuksen vastatili
     if ($laskurow["tila"] == "U") {
-      // jos kyseess‰ on myyntilasku niin
+      // jos kyseess√§ on myyntilasku niin
       $jaksotilino = $yhtiorow['siirtovelka'];
     }
     else {
@@ -101,12 +101,12 @@ elseif (count($kausi) > 0) {
       $jaksotilino = $yhtiorow['siirtosaamiset'];
     }
 
-    // Mit‰ tapahtuu alkuper‰iselle tiliˆinnille
+    // Mit√§ tapahtuu alkuper√§iselle tili√∂innille
     if ($ok == 0) {
 
       $tapvm = $tiliointirow['tapvm'];
 
-      // Varsinainen tiliˆinti j‰‰ voimaan
+      // Varsinainen tili√∂inti j√§√§ voimaan
       if ($mille == 1) {
         $asumma = $summa;
       }
@@ -132,7 +132,7 @@ elseif (count($kausi) > 0) {
       $jisa = mysql_insert_id($link);
       $viimeinen1 = $jisa;
 
-      // Tehd‰‰n vastaava siirtosaaminen
+      // Tehd√§√§n vastaava siirtosaaminen
       $ssumma = $tiliointirow['summa'] - $asumma;
       $query = "INSERT INTO tiliointi SET
                 yhtio     = '$kukarow[yhtio]',
@@ -152,21 +152,21 @@ elseif (count($kausi) > 0) {
       $result = pupe_query($query);
       $viimeinen2 = mysql_insert_id($link);
 
-      $ok = 1; // Ensimm‰inen on k‰sitelty
-      $tsumma += $asumma; // Kuinka paljon olemme tiliˆinneet
+      $ok = 1; // Ensimm√§inen on k√§sitelty
+      $tsumma += $asumma; // Kuinka paljon olemme tili√∂inneet
     }
 
-    // Emme k‰sittele varsinaista tapahtumaa
+    // Emme k√§sittele varsinaista tapahtumaa
     if ($mille != 1) {
 
-      // Jossain on jotain m‰t‰‰, ei is‰-tiliˆinti‰!
+      // Jossain on jotain m√§t√§√§, ei is√§-tili√∂inti√§!
       if ($jisa == 0) {
         echo "jisa = 0, system error<br>";
         exit;
       }
 
-      $pkk = substr($tiliointirow['tapvm'], 5, 2); // T‰m‰ on kausi
-      $pvv = substr($tiliointirow['tapvm'], 0, 4); // T‰m‰ on vuosi
+      $pkk = substr($tiliointirow['tapvm'], 5, 2); // T√§m√§ on kausi
+      $pvv = substr($tiliointirow['tapvm'], 0, 4); // T√§m√§ on vuosi
       $tapvm = date("Y-m-d", mktime (0, 0, 0, $pkk+$mille-1, 1, $pvv));
 
       $query = "INSERT INTO tiliointi SET
@@ -209,13 +209,13 @@ elseif (count($kausi) > 0) {
     }
   }
 
-  // Jossain on jotain m‰t‰‰, ei viimeist‰ tiliˆinti‰!
+  // Jossain on jotain m√§t√§√§, ei viimeist√§ tili√∂inti√§!
   if ($viimeinen1 == 0 or $viimeinen2 == 0) {
     echo "viimeinen1 tai viimeinen2 = 0 system error<br>";
     exit;
   }
 
-  // Jossain on jotain m‰t‰‰, perustiliˆinti katosi!
+  // Jossain on jotain m√§t√§√§, perustili√∂inti katosi!
   if ($isa == 0) {
     echo "isa = 0 system error<br>";
     exit;
@@ -238,7 +238,7 @@ elseif (count($kausi) > 0) {
   $tee = 'E';
 }
 elseif ($tee != "E") {
-  echo "<font class='error'>".t("Et valinnut mit‰‰n jaksotettavaa")."!</font><br>";
+  echo "<font class='error'>".t("Et valinnut mit√§√§n jaksotettavaa")."!</font><br>";
   echo "<br>";
   $tee = 'E';
 }

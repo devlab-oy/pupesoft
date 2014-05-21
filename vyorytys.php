@@ -9,7 +9,7 @@ if (isset($livesearch_tee) and $livesearch_tee == "TILIHAKU") {
   exit;
 }
 
-$MONTH_ARRAY = array(1=>t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kes‰kuu'),t('Hein‰kuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
+$MONTH_ARRAY = array(1=>t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kes√§kuu'),t('Hein√§kuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
 
 if (!isset($tilinimi)) $tilinimi = "";
 if (!isset($vyorytyksen_tili)) $vyorytyksen_tili = "";
@@ -58,7 +58,7 @@ if ($tee == 'uusiraportti') {
     $mul_kustp = unserialize(urldecode($mul_kustp));
   }
   else {
-    echo "<font class='error'>",t("Tallennettavan raportin nimi ei saa olla tyhj‰"),"!</font><br/>";
+    echo "<font class='error'>",t("Tallennettavan raportin nimi ei saa olla tyhj√§"),"!</font><br/>";
     $tee = '';
   }
 }
@@ -96,7 +96,7 @@ if ($tee == 'I') {
   }
 }
 
-echo "<font class='head'>".t("Tilisaldon vyˆrytys")."</font><hr>\n";
+echo "<font class='head'>".t("Tilisaldon vy√∂rytys")."</font><hr>\n";
 
 $formi = 'tosite';
 $kentta = 'tpp';
@@ -173,7 +173,7 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
 
 echo "</select></td></tr>";
 
-echo "<tr><th>".t("Vyˆrytyksen tili")."</th><td width='200' valign='top'>".livesearch_kentta("tosite", "TILIHAKU", "vyorytyksen_tili", 170, $vyorytyksen_tili, "EISUBMIT")." $tilinimi</td></tr>";
+echo "<tr><th>".t("Vy√∂rytyksen tili")."</th><td width='200' valign='top'>".livesearch_kentta("tosite", "TILIHAKU", "vyorytyksen_tili", 170, $vyorytyksen_tili, "EISUBMIT")." $tilinimi</td></tr>";
 echo "<tr><th>".t("Tilin alku")."</th><td width='200' valign='top'>".livesearch_kentta("tosite", "TILIHAKU", "tilinalku", 170, $tilinalku, "EISUBMIT")." $tilinimi</td></tr>";
 echo "<tr><th>".t("Tilin loppu")."</th><td width='200' valign='top'>".livesearch_kentta("tosite", "TILIHAKU", "tilinloppu", 170, $tilinloppu, "EISUBMIT")." $tilinimi</td></tr>";
 
@@ -185,7 +185,7 @@ $noautosubmit = TRUE;
 require ("tilauskasittely/monivalintalaatikot.inc");
 
 echo "</td></tr></table>\n";
-echo "<br><input type = 'submit' value = '".t("N‰yt‰")."'>";
+echo "<br><input type = 'submit' value = '".t("N√§yt√§")."'>";
 echo "</form><br><br>";
 
 if ($tee == "TARKISTA") {
@@ -231,10 +231,10 @@ if ($tee == "TARKISTA") {
   echo "<font class='head'>".t("Kumulatiivinen saldo")." ".tv1dateconv($tilikausirow["tilikausi_alku"])." - ".tv1dateconv($tilikausirow["tilikausi_loppu"])."</font><hr>";
 
   if ($tilinalku == '' and $tilinloppu == '') {
-    echo "<font class='error'>".t("Pit‰‰ syˆtt‰‰ ainakin yksi tili")."</font>";
+    echo "<font class='error'>".t("Pit√§√§ sy√∂tt√§√§ ainakin yksi tili")."</font>";
   }
   elseif ($vyorytyksen_tili == "") {
-    echo "<font class='error'>",t("Syˆt‰ vyˆrytyksen tili"),"</font>";
+    echo "<font class='error'>",t("Sy√∂t√§ vy√∂rytyksen tili"),"</font>";
   }
   else {
 
@@ -385,7 +385,7 @@ if ($tee == "TARKISTA") {
 
     $i = 1;
 
-    // Tehd‰‰n p‰‰taulu
+    // Tehd√§√§n p√§√§taulu
     echo "<table>";
     echo "<tr>";
     echo "<td class='back'>";
@@ -440,7 +440,7 @@ if ($tee == "TARKISTA") {
 
     foreach ($saldo_per_kp as $kp_tunn => $saldo_kum) {
       echo "<tr>";
-      echo "<th>",t("Yhteens‰"),"</th>";
+      echo "<th>",t("Yhteens√§"),"</th>";
       echo "<td>{$saldo_kum}</td>";
 
       $query2 = "SELECT nimi, koodi
@@ -496,7 +496,7 @@ if ($tee == "TARKISTA") {
       echo "<input type='hidden' name='itili[{$i}]' value='{$vyorytyksen_tili}'>\n";
       echo "<input type='hidden' name='isumma[{$i}]' id='isumma[{$i}]' value='{$isumma[$i]}'>\n";
       echo "<input type='hidden' name='ikustp[{$i}]' value='{$row['tunnus']}'>\n";
-      echo "<input type='hidden' name='iselite[{$i}]' value='",t("Vyˆrytys"),"'>\n";
+      echo "<input type='hidden' name='iselite[{$i}]' value='",t("Vy√∂rytys"),"'>\n";
       echo "</td>";
       echo "</tr>";
 
@@ -508,7 +508,7 @@ if ($tee == "TARKISTA") {
     echo "<input type='hidden' name='tpv' value='",date("Y"),"'>\n";
 
     echo "<tr>";
-    echo "<th>",t("Yhteens‰"),"</th>";
+    echo "<th>",t("Yhteens√§"),"</th>";
     echo "<td id='vyorytyksen_kaytettava_saldo'>{$kumulus}</td>";
     echo "<td>{$vyorytyksen_tili}</td>";
     echo "<td id='vyorytys_pros_total'></td>";
@@ -546,7 +546,7 @@ if ($tee == "TARKISTA") {
       echo "<input type='hidden' name='itili[{$i}]' value='{$vyorytyksen_tili}'>\n";
       echo "<input type='hidden' name='isumma[{$i}]' id='isumma[{$i}]' value='{$saldo_kum}'>\n";
       echo "<input type='hidden' name='ikustp[{$i}]' value='{$kp_tunn}'>\n";
-      echo "<input type='hidden' name='iselite[{$i}]' value='",t("Vyˆrytys"),"'>\n";
+      echo "<input type='hidden' name='iselite[{$i}]' value='",t("Vy√∂rytys"),"'>\n";
 
       $i++;
     }

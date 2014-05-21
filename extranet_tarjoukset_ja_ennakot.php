@@ -50,7 +50,7 @@ $(function() {
               modal: true,
               title: '<?php echo t("Vahvistus"); ?>',
               buttons: {
-                  "<?php echo t("L‰het‰"); ?>": function () {
+                  "<?php echo t("L√§het√§"); ?>": function () {
                       defer.resolve(true);
             $(this).dialog("close");
                   },
@@ -150,7 +150,7 @@ if ($action == "") {
   }
 
   if ($toim == "EXTENNAKKO") {
-    // Uuden ennakon luonti asiakkaan n‰kym‰st‰
+    // Uuden ennakon luonti asiakkaan n√§kym√§st√§
     echo "<br>";
     echo "<br>";
     echo "<form method='post' action=''>";
@@ -160,12 +160,12 @@ if ($action == "") {
     echo "</form>";
   }
 }
-// N‰ytet‰‰n yksitt‰inen ennakko/tarjous
+// N√§ytet√§√§n yksitt√§inen ennakko/tarjous
 if ($action == 'nayta_tarjous') {
   nayta_tarjous($request['valittu_tarjous_tunnus'], $request['toim']);
 }
 
-// Hyv‰ksyt‰‰n/hyl‰t‰‰n/p‰ivitet‰‰n yksi ennakko/tarjous
+// Hyv√§ksyt√§√§n/hyl√§t√§√§n/p√§ivitet√§√§n yksi ennakko/tarjous
 if ($action == 'hyvaksy_hylkaa_paivita') {
   if (isset($request['paivita']) and $toim == 'EXTENNAKKO') {
     unset($request['paivita']);
@@ -203,13 +203,13 @@ if ($action == 'hyvaksy_hylkaa_paivita') {
     $onnistuiko_toiminto = hylkaa($request['valittu_tarjous_tunnus']);
   }
   else {
-    //T‰nne ei pit‰isi ikin‰ menn‰
-    echo "<font class='error'>".t("K‰sittelyss‰ tapahtui virhe")."</font>";
+    //T√§nne ei pit√§isi ikin√§ menn√§
+    echo "<font class='error'>".t("K√§sittelyss√§ tapahtui virhe")."</font>";
     exit;
   }
 
   if (!$onnistuiko_toiminto) {
-    echo "<font class='error'>".t("Toiminto ep‰onnistui")."</font>";
+    echo "<font class='error'>".t("Toiminto ep√§onnistui")."</font>";
   }
 
   echo "<br>";
@@ -226,7 +226,7 @@ if ($action == 'luo_uusi_ennakko') {
 
   $uusi_tilausnumero = luo_myyntitilausotsikko($toim, $ennakko_asiakas['tunnus'], '', '', '', '', '', '');
 
-  $uusi_saate_teksti = t("T‰m‰ on Extranet-asiakkaan luoma ennakkotilaus");
+  $uusi_saate_teksti = t("T√§m√§ on Extranet-asiakkaan luoma ennakkotilaus");
 
   $tilaustyyppi = 'E';
 
@@ -282,7 +282,7 @@ function hyvaksy_ennakko($parametrit) {
 
   $onnistuiko_toiminto = paivita_ennakko($parametrit);
 
-  // Vaihdetaan tila/alatila Ennakko/Lep‰‰m‰ss‰
+  // Vaihdetaan tila/alatila Ennakko/Lep√§√§m√§ss√§
   if ($onnistuiko_toiminto) {
 
     $query = "UPDATE lasku
@@ -355,7 +355,7 @@ function paivita_ennakko($params) {
   $kappalemaarat = $params['kappalemaarat'];
   $toim = $params['toim'];
 
-  // Siisti‰‰n parametrit tietokantaqueryj‰ varten
+  // Siisti√§√§n parametrit tietokantaqueryj√§ varten
   $syotetyt_lisatiedot = pupesoft_cleanstring($syotetyt_lisatiedot);
   $valittu_tarjous_tunnus = pupesoft_cleanstring($valittu_tarjous_tunnus);
 
@@ -364,30 +364,30 @@ function paivita_ennakko($params) {
 
   foreach ($kappalemaarat as $key => $value) {
 
-    // Kappalem‰‰r‰ k‰yttˆliittym‰st‰, pilkut pisteiksi ja round 2
+    // Kappalem√§√§r√§ k√§ytt√∂liittym√§st√§, pilkut pisteiksi ja round 2
     $value = round(str_replace(",", ".", pupesoft_cleanstring($value)), 2);
 
-    // Etsit‰‰n tilausrivitunnuksen perusteella tuotteen kannassa oleva kappalem‰‰r‰
+    // Etsit√§√§n tilausrivitunnuksen perusteella tuotteen kannassa oleva kappalem√§√§r√§
     $loytynyt_tilausrivi = search_array_key_for_value_recursive($muokkaamaton_ennakko['tilausrivit'], 'tunnus', $key);
 
-    // Tarkistetaan lˆytyikˆ tilausrivi, jos ei lˆydy, ei tehd‰ mit‰‰n
+    // Tarkistetaan l√∂ytyik√∂ tilausrivi, jos ei l√∂ydy, ei tehd√§ mit√§√§n
     if (empty($loytynyt_tilausrivi[0])) {
       continue;
     }
 
-    // Kappalem‰‰r‰ kannasta
+    // Kappalem√§√§r√§ kannasta
     $kplmaara = $loytynyt_tilausrivi[0]['kpl'];
 
-    // jos Optio-rivi niin katsotaan onko syˆtetty arvo muutettu tyhj‰st‰ joksikin muuksi, jos ei niin toimenpiteit‰ riville ei vaadita
+    // jos Optio-rivi niin katsotaan onko sy√∂tetty arvo muutettu tyhj√§st√§ joksikin muuksi, jos ei niin toimenpiteit√§ riville ei vaadita
     if ($loytynyt_tilausrivi[0]['var'] == "O" and $value == '') {
       continue;
     }
-    // Tarkistetaan onko kappalem‰‰r‰‰ muutettu tai onko kplm‰‰r‰ tyhj‰, jos ei muutoksia niin toimenpiteit‰ riville ei vaadita
+    // Tarkistetaan onko kappalem√§√§r√§√§ muutettu tai onko kplm√§√§r√§ tyhj√§, jos ei muutoksia niin toimenpiteit√§ riville ei vaadita
     elseif ($kplmaara == $value and $loytynyt_tilausrivi[0]['var'] != "O") {
       continue;
     }
 
-    // Tuoteperheen tapauksessa p‰ivitet‰‰n/poistetaan kaikki tuoteperheen rivit, muuten vain ko. rivi
+    // Tuoteperheen tapauksessa p√§ivitet√§√§n/poistetaan kaikki tuoteperheen rivit, muuten vain ko. rivi
     if ($loytynyt_tilausrivi[0]['tunnus'] == $loytynyt_tilausrivi[0]['perheid_tunnus']) {
       $andy = "AND perheid = '{$loytynyt_tilausrivi[0]['tunnus']}'";
     }
@@ -395,7 +395,7 @@ function paivita_ennakko($params) {
       $andy = "AND tunnus = '{$loytynyt_tilausrivi[0]['tunnus']}'";
     }
 
-    // Jos ollaan nollattu kappaleet, p‰ivitet‰‰n rivi tilaan Optio
+    // Jos ollaan nollattu kappaleet, p√§ivitet√§√§n rivi tilaan Optio
     if ($value == 0) {
       $query = "UPDATE tilausrivi
                 SET var = 'O'
@@ -423,7 +423,7 @@ function paivita_ennakko($params) {
     }
   }
 
-  // P‰ivitet‰‰n k‰ytt‰j‰n lis‰‰m‰t kommentit
+  // P√§ivitet√§√§n k√§ytt√§j√§n lis√§√§m√§t kommentit
   $query = "UPDATE lasku
             SET sisviesti1 = '{$syotetyt_lisatiedot}'
             WHERE yhtio = '{$kukarow['yhtio']}'
@@ -474,7 +474,7 @@ function hylkaa($valittu_tarjous_tunnus) {
   else {
     $muuttuja = t("Ennakko");
   }
-  echo "<font class='message'>$muuttuja $kukarow[kesken] ".t("hyl‰tty")."!</font><br><br>";
+  echo "<font class='message'>$muuttuja $kukarow[kesken] ".t("hyl√§tty")."!</font><br><br>";
 
   $tee = '';
   $tilausnumero = '';
@@ -604,7 +604,7 @@ function nayta_tarjous($valittu_tarjous_tunnus, $toim) {
   echo_tarjouksen_otsikko($tarjous, $toim);
 
   if ($toim == 'EXTENNAKKO') {
-    echo "<font class='message'>".t("Tuotteiden lis‰ys")."</font>";
+    echo "<font class='message'>".t("Tuotteiden lis√§ys")."</font>";
 
     echo "  <form method='post' autocomplete='off'>";
     echo "  <input type='hidden' name='tee' value='LISAARIVI'>
@@ -704,9 +704,9 @@ function hae_tarjouksen_tilausrivit($valittu_tarjous_tunnus) {
 function echo_tarjouksen_otsikko($tarjous, $toim) {
   global $kukarow, $yhtiorow;
 
-  echo "<input type='hidden' id='hylkaa_tarjous_message' value='".t("Oletko varma, ett‰ haluat hyl‰t‰ tarjouksen?")."'/>";
-  echo "<input type='hidden' id='hyvaksy_tarjous_message' value='".t("Oletko varma, ett‰ haluat hyv‰ksy‰ tarjouksen?")."'/>";
-  echo "<input type='hidden' id='hylkaa_ennakko_message' value='".t("Oletko varma, ett‰ haluat hyl‰t‰ ennakon?")."'/>";
+  echo "<input type='hidden' id='hylkaa_tarjous_message' value='".t("Oletko varma, ett√§ haluat hyl√§t√§ tarjouksen?")."'/>";
+  echo "<input type='hidden' id='hyvaksy_tarjous_message' value='".t("Oletko varma, ett√§ haluat hyv√§ksy√§ tarjouksen?")."'/>";
+  echo "<input type='hidden' id='hylkaa_ennakko_message' value='".t("Oletko varma, ett√§ haluat hyl√§t√§ ennakon?")."'/>";
 
   echo "<a href=$_SERVER[PHP_SELF]?toim={$toim}>".t("Palaa takaisin")."</a>";
   echo "<br>";
@@ -726,8 +726,8 @@ function echo_tarjouksen_otsikko($tarjous, $toim) {
     echo "<th>".t("Voimassa")."</th>";
   }
   else {
-    echo "<th>".t("Toimitusp‰iv‰ / Viikko")."</th>";
-    echo "<th>".t("Toivottu toimitusp‰iv‰ / Viikko")."</th>";
+    echo "<th>".t("Toimitusp√§iv√§ / Viikko")."</th>";
+    echo "<th>".t("Toivottu toimitusp√§iv√§ / Viikko")."</th>";
   }
   echo "</tr>";
 
@@ -740,7 +740,7 @@ function echo_tarjouksen_otsikko($tarjous, $toim) {
     $toimviikko = date('W', strtotime($tarjous['toimaika']));
     echo "<td style='text-align: center;'>".tv1dateconv($tarjous['toimaika'])." / {$toimviikko}</td>";
     echo "<td style='text-align: right;'><input type='text' size='35' name='viesti' id='viesti' value='{$tarjous['viesti']}'></td>";
-    echo "<input type='hidden' id='viesti_puuttuu_message' value='".t("Toivottu toimitusp‰iv‰ / viikko tieto on pakollinen")."'>";
+    echo "<input type='hidden' id='viesti_puuttuu_message' value='".t("Toivottu toimitusp√§iv√§ / viikko tieto on pakollinen")."'>";
   }
   echo "</tr>";
 
@@ -806,7 +806,7 @@ function piirra_tarjouksen_tilausrivit($params) {
   echo "<th>".t("Tuoteno")."</th>";
   echo "<th>".t("Nimitys")."</th>";
   echo "<th>".t("Kpl")."</th>";
-  echo "<th>".t("Yksikkˆhinta")."</th>";
+  echo "<th>".t("Yksikk√∂hinta")."</th>";
   if ($toim == "EXTENNAKKO") {
     echo "<th>".t("Osh")."</th>";
     echo "<th>".t("Ale %")."</th>";
@@ -819,7 +819,7 @@ function piirra_tarjouksen_tilausrivit($params) {
 
     $liitteet = liite_popup("TH", $rivi['tuote_tunnus']);
 
-    // Katsotaan onko t‰m‰ tuoteperheen is‰ tai normituote
+    // Katsotaan onko t√§m√§ tuoteperheen is√§ tai normituote
     if ($rivi['tunnus'] == $rivi['perheid_tunnus'] or $rivi['perheid_tunnus'] == 0) {
       $nro++;
       $class = "tr_border_top";
@@ -865,25 +865,25 @@ function piirra_tarjouksen_tilausrivit($params) {
   echo "<br>";
 
   if ($toim == "EXTENNAKKO") {
-    echo "<input type='submit' name='paivita' value='".t("P‰ivit‰ rivit")."' />";
+    echo "<input type='submit' name='paivita' value='".t("P√§ivit√§ rivit")."' />";
     echo "<br>";
     echo "<br>";
   }
 
   echo "<br>";
-  echo "<textarea rows='5' cols='90' maxlength='1000' name='syotetyt_lisatiedot' placeholder='".t("Lis‰tietoja")."'>";
+  echo "<textarea rows='5' cols='90' maxlength='1000' name='syotetyt_lisatiedot' placeholder='".t("Lis√§tietoja")."'>";
   echo "</textarea>";
   echo "<br>";
   echo "<br>";
   if ($toim == "EXTENNAKKO") {
     echo "<input type='hidden' id='hyvaksytaankoennakko' name='hyvaksy' value='' />";
     echo "<input type='hidden' name='viestion' id='viestion' value=''>";
-    echo "<button type='button' id='hyvaksyennakko'>".t("Hyv‰ksy")."</button>";
+    echo "<button type='button' id='hyvaksyennakko'>".t("Hyv√§ksy")."</button>";
   }
   else {
-    echo "<input type='submit' name='hyvaksy' value='".t("Hyv‰ksy")."' onclick='return tarkista(\"hyvaksy\", \"$toim\");'/>";
+    echo "<input type='submit' name='hyvaksy' value='".t("Hyv√§ksy")."' onclick='return tarkista(\"hyvaksy\", \"$toim\");'/>";
   }
-  echo "<input type='submit' name='hylkaa' value='".t("Hylk‰‰")."' onclick='return tarkista(\"hylkaa\", \"$toim\");'/>";
+  echo "<input type='submit' name='hylkaa' value='".t("Hylk√§√§")."' onclick='return tarkista(\"hylkaa\", \"$toim\");'/>";
   echo "</form>";
 }
 
@@ -904,11 +904,11 @@ function lisaa_ennakkorivi($params) {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 1) {
-    echo t("Tuotetta ei lˆydy")."!<br>";
+    echo t("Tuotetta ei l√∂ydy")."!<br>";
     return;
   }
 
-  // Tuote lˆytyi
+  // Tuote l√∂ytyi
   $trow = mysql_fetch_assoc($result);
   $kukarow["kesken"] = $otunnus;
   $laskurow = hae_lasku($otunnus);

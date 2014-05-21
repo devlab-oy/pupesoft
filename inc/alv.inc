@@ -1,6 +1,6 @@
 <?php
 
-echo "<font class='head'>".t("Arvonlis‰veroraportti")."</font><hr>";
+echo "<font class='head'>".t("Arvonlis√§veroraportti")."</font><hr>";
 
 echo "<form action = 'raportit.php' method='post'>
     <input type = 'hidden' name = 'toim' value = 'alv'>
@@ -56,7 +56,7 @@ else {
 }
 
 echo "<td><input type = 'checkbox' name = 'ruotsi' $ched></td>";
-echo "<td class='back'><input type = 'submit' value = '".t("N‰yt‰")."'></td>";
+echo "<td class='back'><input type = 'submit' value = '".t("N√§yt√§")."'></td>";
 
 echo "</tr>";
 echo "</table>";
@@ -82,7 +82,7 @@ if ($tee == '1') {
 
   while ($trow = mysql_fetch_array ($result)) {
 
-    // Etsit‰‰n vastaava automaattitiliˆinti
+    // Etsit√§√§n vastaava automaattitili√∂inti
     $query = "SELECT summa, ltunnus
               FROM tiliointi USE INDEX (aputunnus_index)
               WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
@@ -96,16 +96,16 @@ if ($tee == '1') {
       $xrow = mysql_fetch_array($xresult);
       $heitto = abs(round($xrow["summa"] - $trow["verot"], 2));
       if ($heitto > 0.01) {
-        $error = t("Vienti heitt‰‰")." $heitto";
+        $error = t("Vienti heitt√§√§")." $heitto";
       }
     }
     else {
       if (abs($trow['summa']) <= 0.02) continue;
-      $error = t("Vastaavaa automaattivienti‰ ei ole tai niit‰ on liikaa")."!";
+      $error = t("Vastaavaa automaattivienti√§ ei ole tai niit√§ on liikaa")."!";
     }
 
     if ($trow["laskutunnus"] == NULL) {
-      $error .= " ".t("Tiliˆinnill‰ ei ole otsikkoa")."! $trow[tunnus]";
+      $error .= " ".t("Tili√∂innill√§ ei ole otsikkoa")."! $trow[tunnus]";
     }
 
     if ($error != '') {
@@ -130,7 +130,7 @@ if ($tee == '1') {
     }
   }
 
-  // k‰yd‰‰n l‰pi kaikki automaattitiliˆinnit
+  // k√§yd√§√§n l√§pi kaikki automaattitili√∂innit
   $query = "SELECT tiliointi.aputunnus, tiliointi.tunnus, tiliointi.ltunnus, tiliointi.tapvm, tiliointi.summa, tiliointi.selite, round(tiliointi.summa * tiliointi.vero / 100, 2) verot, tiliointi.tilino, tiliointi.vero
             FROM tiliointi USE INDEX (yhtio_tapvm_tilino)
             WHERE tiliointi.yhtio    = '$kukarow[yhtio]'
@@ -142,7 +142,7 @@ if ($tee == '1') {
 
   while ($trow = mysql_fetch_array ($result)) {
 
-    // Etsit‰‰n is‰tiliointi
+    // Etsit√§√§n is√§tiliointi
     $query = "SELECT tunnus
               FROM tiliointi USE INDEX (primary)
               WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
@@ -167,7 +167,7 @@ if ($tee == '1') {
       $errorit .= "<td valign='top'>$trow[selite]</td>";
       $errorit .= "<td valign='top'>$trow[vero]</td>";
       $errorit .= "<td valign='top'>$trow[verot]</td>";
-      $errorit .= "<td valign='top'>".t("Automaattitiliˆinnin is‰‰ ei lˆydy")."! $trow[tunnus]</td>";
+      $errorit .= "<td valign='top'>".t("Automaattitili√∂innin is√§√§ ei l√∂ydy")."! $trow[tunnus]</td>";
       $errorit .= "</tr>";
     }
   }
@@ -190,10 +190,10 @@ if ($tee == '1') {
   $alkupvm  = date("Y-m-d", mktime(0, 0, 0, $alvk,   1, $alvv));
   $loppupvm = date("Y-m-d", mktime(0, 0, 0, $alvk+1, 0, $alvv));
 
-  echo "<br><font class='head'>".t("Arvonlis‰veroraportti kaudelta")." $alvv-$alvk</font><hr>";
+  echo "<br><font class='head'>".t("Arvonlis√§veroraportti kaudelta")." $alvv-$alvk</font><hr>";
 
-  // Katotaan voisiko meill‰ olla t‰ss‰ joku toinen ALV tili
-  // tutkitaan ollaanko jossain toimipaikassa alv-rekisterˆity ja oteteaan niiden alv tilit
+  // Katotaan voisiko meill√§ olla t√§ss√§ joku toinen ALV tili
+  // tutkitaan ollaanko jossain toimipaikassa alv-rekister√∂ity ja oteteaan niiden alv tilit
   $query = "SELECT ifnull(group_concat(concat(\"'\",toim_alv,\"'\") SEPARATOR ','), '') toim_alv,
             ifnull(group_concat(toim_alv SEPARATOR ' '), '') alv_output
             FROM yhtion_toimipaikat
@@ -204,7 +204,7 @@ if ($tee == '1') {
   $result = pupe_query($query);
   $tilitrow = mysql_fetch_array($result);
 
-  echo "<br><font class='head'>".t("K‰siviennit").": ".t("Tilit")." $yhtiorow[alv] $tilitrow[alv_output]</font><br><br>";
+  echo "<br><font class='head'>".t("K√§siviennit").": ".t("Tilit")." $yhtiorow[alv] $tilitrow[alv_output]</font><br><br>";
 
   $alv_tilit = "'$yhtiorow[alv]'";
 
@@ -254,7 +254,7 @@ if ($tee == '1') {
     $kasiviennit_kpl++;
   }
 
-  echo "<tr><td colspan='2' class='spec' align='right'>".t("Yhteens‰").":</td><td align='right' class='spec'>$kasiviennit_summa</td><td class='spec'></td></tr>";
+  echo "<tr><td colspan='2' class='spec' align='right'>".t("Yhteens√§").":</td><td align='right' class='spec'>$kasiviennit_summa</td><td class='spec'></td></tr>";
 
   echo "</table><br>";
 
@@ -311,7 +311,7 @@ if ($tee == '1') {
 
     if (isset($edvero) and ((float) $edvero != (float) $trow["vero"] or $edmaa != $trow["maa"])) { // Vaihtuiko verokanta?
       echo "<tr>
-          <td colspan='6' class='spec' align='right'>".t("Yhteens‰").":</td>
+          <td colspan='6' class='spec' align='right'>".t("Yhteens√§").":</td>
           <td align = 'right' class='spec'>".sprintf('%.2f', $verosum)."</td>
           <td colspan='2' class='spec'></td>
           <td align = 'right' class='spec'>$kplsum</td></tr>";
@@ -350,14 +350,14 @@ if ($tee == '1') {
     $edmaa   = $trow["maa"];
   }
 
-  echo "<tr><td colspan='6' align='right' class='spec'>".t("Yhteens‰").":</td><td align = 'right' class='spec'>".sprintf('%.2f', $verosum)."</td><td colspan='2' class='spec'></td><td align = 'right' class='spec'>$kplsum</td></tr>";
-  echo "<tr><td colspan='6' align='right' class='spec'>".t("Verokannat yhteens‰").":</td><td align = 'right' class='spec'>".sprintf('%.2f', $verotot)."</td><td colspan='2' class='spec'></td><td align = 'right' class='spec'>$kpltot</td></tr>";
+  echo "<tr><td colspan='6' align='right' class='spec'>".t("Yhteens√§").":</td><td align = 'right' class='spec'>".sprintf('%.2f', $verosum)."</td><td colspan='2' class='spec'></td><td align = 'right' class='spec'>$kplsum</td></tr>";
+  echo "<tr><td colspan='6' align='right' class='spec'>".t("Verokannat yhteens√§").":</td><td align = 'right' class='spec'>".sprintf('%.2f', $verotot)."</td><td colspan='2' class='spec'></td><td align = 'right' class='spec'>$kpltot</td></tr>";
 
   $verotot += $kasiviennit_summa;
   $kpltot  += $kasiviennit_kpl;
 
-  echo "<tr><td colspan='6' align='right' class='spec'>".t("K‰siviennit").":</td><td align = 'right' class='spec'>".sprintf('%.2f', $kasiviennit_summa)."</td><td colspan='2' class='spec'></td><td align = 'right' class='spec'>$kasiviennit_kpl</td></tr>";
-  echo "<tr><td colspan='6' align='right' class='spec'>".t("Kaikki yhteens‰").":</td><td align = 'right' class='spec'>".sprintf('%.2f', $verotot)."</td><td colspan='2' class='spec'></td><td align = 'right' class='spec'>$kpltot</td></tr>";
+  echo "<tr><td colspan='6' align='right' class='spec'>".t("K√§siviennit").":</td><td align = 'right' class='spec'>".sprintf('%.2f', $kasiviennit_summa)."</td><td colspan='2' class='spec'></td><td align = 'right' class='spec'>$kasiviennit_kpl</td></tr>";
+  echo "<tr><td colspan='6' align='right' class='spec'>".t("Kaikki yhteens√§").":</td><td align = 'right' class='spec'>".sprintf('%.2f', $verotot)."</td><td colspan='2' class='spec'></td><td align = 'right' class='spec'>$kpltot</td></tr>";
   echo "</table><br>";
 }
 

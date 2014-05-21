@@ -13,7 +13,7 @@ if ($tee == "file") {
     }
 
     if ($_FILES['userfile']['size']==0) {
-      die ("<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font>");
+      die ("<font class='error'><br>".t("Tiedosto on tyhj√§")."!</font>");
     }
 
     if (strtoupper($ext)=="XLS") {
@@ -28,10 +28,10 @@ if ($tee == "file") {
       $data->read($_FILES['userfile']['tmp_name']);
     }
     else {
-      $file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
+      $file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep√§onnistui")."!");
     }
 
-    // luetaan tiedosto loppuun ja tehd‰‰n array koko datasta
+    // luetaan tiedosto loppuun ja tehd√§√§n array koko datasta
     $excelrivi = array();
 
     if (strtoupper($ext) == "XLS") {
@@ -68,7 +68,7 @@ if ($tee == "file") {
       $paikka    = $rivi[3];
 
       if (strtoupper($kpl) == "X") {
-        //tilataan kaikki paikalla olevat, ei kuitenkaan varata niit‰ viel‰
+        //tilataan kaikki paikalla olevat, ei kuitenkaan varata niit√§ viel√§
         $kpl  = 9999.99;
         $varataan_saldoa = "EI";
       }
@@ -110,7 +110,7 @@ if ($tee == "file") {
           }
         }
         else {
-          echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei lˆydy")."!</font><br>";
+          echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei l√∂ydy")."!</font><br>";
         }
       }
 
@@ -153,7 +153,7 @@ if ($tee == "file") {
         $aresult = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($aresult) == 0) {
-          echo "<font class='message'>".t("VIRHE: Tilausta ei lˆydy")."!<br><br></font>";
+          echo "<font class='message'>".t("VIRHE: Tilausta ei l√∂ydy")."!<br><br></font>";
           exit;
         }
 
@@ -161,10 +161,10 @@ if ($tee == "file") {
         $varres = mysql_query($query) or pupe_error($query);
         $varrow = mysql_fetch_array($varres);
 
-        //kutsutaan tilaus-valmis-siirtolista.inci‰ jotta saadaan tarvittaessa automaattisesti tulostettua siirtolistat kaikista luoduista siirtolistoista.
+        //kutsutaan tilaus-valmis-siirtolista.inci√§ jotta saadaan tarvittaessa automaattisesti tulostettua siirtolistat kaikista luoduista siirtolistoista.
         require ("tilaus-valmis-siirtolista.inc");
 
-        echo "<br><font class='message'>".t("Tehtiin uusi siirtolista! Siirtolistalle otsikko %s l‰hdevarasto on %s", $kieli, $kukarow["kesken"], $varrow["nimitys"])."</font><br>";
+        echo "<br><font class='message'>".t("Tehtiin uusi siirtolista! Siirtolistalle otsikko %s l√§hdevarasto on %s", $kieli, $kukarow["kesken"], $varrow["nimitys"])."</font><br>";
 
         $laskurow = mysql_fetch_array($aresult);
       }
@@ -206,28 +206,28 @@ if ($tee == 'mikrotila') {
 
       <table>
       <tr><th colspan='4'>".t("Sarkaineroteltu tekstitiedosto tai Excel-tiedosto").".</th></tr>
-      <tr><td>".t("Tuoteno")."</td><td>".t("M‰‰r‰")."*</td><td>".t("Kommentti")."</td><td>".t("L‰hett‰v‰ varastopaikka (#!°!#-eroteltu)")."</td></tr>
+      <tr><td>".t("Tuoteno")."</td><td>".t("M√§√§r√§")."*</td><td>".t("Kommentti")."</td><td>".t("L√§hett√§v√§ varastopaikka (#!¬°!#-eroteltu)")."</td></tr>
       </table>
       <br>
-      * ".t("Siirr‰ kaikki vapaana olevat laittamalla m‰‰r‰-kentt‰‰n X")."
+      * ".t("Siirr√§ kaikki vapaana olevat laittamalla m√§√§r√§-kentt√§√§n X")."
       <br><br>
       <table>";
 
-  echo "<tr><th>".t("Rivej‰ per siirtolista").":</th>
+  echo "<tr><th>".t("Rivej√§ per siirtolista").":</th>
       <td>
       <select name='olliriveja'>
       <option value=''>".t("Kaikki rivit nykyiselle siirtolistalle")."</option>
-      <option value='25'>25 ".t("rivi‰ per siirtolista")."</option>
-      <option value='50'>50 ".t("rivi‰ per siirtolista")."</option>
-      <option value='75'>75 ".t("rivi‰ per siirtolista")."</option>
-      <option value='100'>100 ".t("rivi‰ per siirtolista")."</option>
+      <option value='25'>25 ".t("rivi√§ per siirtolista")."</option>
+      <option value='50'>50 ".t("rivi√§ per siirtolista")."</option>
+      <option value='75'>75 ".t("rivi√§ per siirtolista")."</option>
+      <option value='100'>100 ".t("rivi√§ per siirtolista")."</option>
       </select>
       </td></tr>";
 
   echo "<tr>
       <th>".t("Valitse tiedosto").":</th>
       <td><input name='userfile' type='file'></td>
-      <td class='back'><input type='submit' value='".t("L‰heta")."'></td>
+      <td class='back'><input type='submit' value='".t("L√§heta")."'></td>
       </tr>
       </table>
       </form>";

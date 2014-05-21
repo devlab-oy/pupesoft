@@ -1,21 +1,21 @@
 <?php
 
-// Datatables p‰‰lle
+// Datatables p√§√§lle
 $pupe_DataTables = array("tyojono0", "tyojono1");
 
 require('../inc/parametrit.inc');
 
 if ($toim == "OMAJONO") {
-  echo "<font class='head'>".t("Omat tyˆm‰‰r‰ykset").":</font><hr><br>";
+  echo "<font class='head'>".t("Omat ty√∂m√§√§r√§ykset").":</font><hr><br>";
 }
  else {
-  echo "<font class='head'>".t("Tyˆjono").":</font><hr><br>";
+  echo "<font class='head'>".t("Ty√∂jono").":</font><hr><br>";
 }
 
 if (!isset($AIKA_ARRAY)) $AIKA_ARRAY = array("08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00");
 
-//kuukaudet ja p‰iv‰t ja ajat
-if (!isset($MONTH_ARRAY)) $MONTH_ARRAY = array(1=> t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kes‰kuu'),t('Hein‰kuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
+//kuukaudet ja p√§iv√§t ja ajat
+if (!isset($MONTH_ARRAY)) $MONTH_ARRAY = array(1=> t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kes√§kuu'),t('Hein√§kuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
 if (!isset($DAY_ARRAY)) $DAY_ARRAY = array(t("Maanantai"), t("Tiistai"), t("Keskiviikko"), t("Torstai"), t("Perjantai"), t("Lauantai"), t("Sunnuntai"));
 
 if (!function_exists("tunnit_minuutit")) {
@@ -62,7 +62,7 @@ if (trim($konserni) != '') {
 
 if ($yhtiorow["konserni"] != "") {
   echo "<form method='post'>";
-  echo t("N‰yt‰ konsernin tyˆm‰‰r‰ykset").":<input type='checkbox' name='konserni' $chk onclick='submit();'><br><br>";
+  echo t("N√§yt√§ konsernin ty√∂m√§√§r√§ykset").":<input type='checkbox' name='konserni' $chk onclick='submit();'><br><br>";
   echo "</form>";
 }
 
@@ -71,16 +71,16 @@ echo "<thead>";
 echo "<tr>";
 
 if (trim($konserni) != '') {
-  echo "<th>".t("Yhtiˆ")."</th>";
+  echo "<th>".t("Yhti√∂")."</th>";
 }
 
-echo "  <th>".t("Tyˆm").".<br>".t("Viite")."</th>
+echo "  <th>".t("Ty√∂m").".<br>".t("Viite")."</th>
     <th>".t("Prio")."</th>
     <th>".t("Ytunnus")."<br>".t("Asiakas")."</th>
-    <th>".t("Tyˆaika")."<br>".t("Tyˆn suorittaja")."</th>
+    <th>".t("Ty√∂aika")."<br>".t("Ty√∂n suorittaja")."</th>
     <th>".t("Toimitetaan")."</th>
-    <th>".t("Myyj‰")."<br>".t("Tyyppi")."</th>
-    <th>".t("Tyˆjono")."/<br>".t("Tyˆstatus")."</th>
+    <th>".t("Myyj√§")."<br>".t("Tyyppi")."</th>
+    <th>".t("Ty√∂jono")."/<br>".t("Ty√∂status")."</th>
     <th>".t("Muokkaa")."</th>
     <th style='visibility:hidden; display:none;'></th>
     </tr>";
@@ -253,7 +253,7 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
   $laskutyyppi = $vrow["tila"];
   $alatila   = $vrow["alatila"];
 
-  //tehd‰‰n selv‰kielinen tila/alatila
+  //tehd√§√§n selv√§kielinen tila/alatila
   require "inc/laskutyyppi.inc";
 
   if ($vrow['tilaustyyppi'] != '' and $vrow['tila'] != 'C') {
@@ -295,7 +295,7 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
 
   if (trim($vrow["komm1"]) != "") {
     echo "<div id='div_$vrow[tunnus]' class='popup' style='width:500px;'>";
-    echo t("Tyˆm‰‰r‰ys"),": $vrow[tunnus]<br><br>".str_replace("\n", "<br>", $vrow["komm1"]."<br>".$vrow["komm2"]);
+    echo t("Ty√∂m√§√§r√§ys"),": $vrow[tunnus]<br><br>".str_replace("\n", "<br>", $vrow["komm1"]."<br>".$vrow["komm2"]);
     echo "</div>";
     echo "<td valign='top' class='tooltip' id='$vrow[tunnus]'><span class='tyom_id'>$vrow[tunnus]</span><br>$vrow[viesti]</td>";
   }
@@ -303,7 +303,7 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
     echo "<td valign='top'><span class='tyom_id'>$vrow[tunnus]</span><br>$vrow[viesti]</td>";
   }
 
-  // Prioriteetti tyˆjonoon
+  // Prioriteetti ty√∂jonoon
   echo "<td>$vrow[tyom_prioriteetti]</td>";
 
   echo "<td valign='top'>$vrow[ytunnus]<br>$vrow[nimi]</td>";
@@ -314,7 +314,7 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
 
   if ($vrow["asennuskalenteri"] != "") {
 
-    // vrow.asennuskalenteri = kaikki tyˆnjohdon tekem‰t merkinn‰t t‰lle tyˆm‰‰r‰ykselle
+    // vrow.asennuskalenteri = kaikki ty√∂njohdon tekem√§t merkinn√§t t√§lle ty√∂m√§√§r√§ykselle
     foreach (explode(",", $vrow["asennuskalenteri"]) as $asekale) {
 
       list($pvmalku, $pvmloppu, $selitetark_2, $tunnus, $selitetark, $asennussekunnit) = explode("##", $asekale);
@@ -333,7 +333,7 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
         }
       }
 
-      // jos ollaan tyˆnjohto
+      // jos ollaan ty√∂njohto
       if ($toim != 'TYOMAARAYS_ASENTAJA') {
         $tyomaarays_tunti_yhteensa[$vrow['tunnus']][$selitetark_2] += $asennussekunnit;
 
@@ -350,7 +350,7 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
       }
     }
 
-    // lasketaan katotaan mit‰ asentajat on syˆtt‰nyt tunteja
+    // lasketaan katotaan mit√§ asentajat on sy√∂tt√§nyt tunteja
     $query = "SELECT kalenteri.kuka, if(a4.selitetark_2 is null or a4.selitetark_2 = '', kalenteri.kuka, a4.selitetark_2) nimi, left(kalenteri.pvmalku, 10) pvmalku, left(kalenteri.pvmloppu, 10) pvmloppu,
               sum(timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu)) sekunnit,
               SEC_TO_TIME(sum(timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu))) aika
@@ -493,7 +493,7 @@ if (count($tyomaarays_tunti_yhteensa) > 0 and $toim == 'TYOMAARAYS_ASENTAJA') {
 
   echo "<table class='display dataTable' id='$pupe_DataTables[1]'>";
   echo "<thead>";
-  echo "<tr><th>",t("Tyˆm‰‰r‰ys"),"</th><th>",t("Tyˆm‰‰r‰yksien tuntiyhteenveto"),"</th><th>",t("Tyˆm‰‰r‰yksien asentajien tuntiyhteenveto"),"</th></tr>";
+  echo "<tr><th>",t("Ty√∂m√§√§r√§ys"),"</th><th>",t("Ty√∂m√§√§r√§yksien tuntiyhteenveto"),"</th><th>",t("Ty√∂m√§√§r√§yksien asentajien tuntiyhteenveto"),"</th></tr>";
   echo "</thead>";
 
   echo "<tbody>";
@@ -516,7 +516,7 @@ if (count($tyomaarays_tunti_yhteensa) > 0 and $toim == 'TYOMAARAYS_ASENTAJA') {
       $yht += $tyom_sekunnit;
     }
 
-    echo "<tr><td class='tumma'>",t("Yhteens‰"),"</td><td class='tumma' align='right'><span class='yhteensa'>".tunnit_minuutit($yht)."</span></td></tr>";
+    echo "<tr><td class='tumma'>",t("Yhteens√§"),"</td><td class='tumma' align='right'><span class='yhteensa'>".tunnit_minuutit($yht)."</span></td></tr>";
     echo "</table>";
     echo "</td>";
 
@@ -532,7 +532,7 @@ if (count($tyomaarays_tunti_yhteensa) > 0 and $toim == 'TYOMAARAYS_ASENTAJA') {
       }
     }
 
-    echo "<tr><td class='tumma'>",t("Yhteens‰"),"</td><td class='tumma' align='right'><span class='yhteensa'>".tunnit_minuutit($yhtk)."</span></td></tr>";
+    echo "<tr><td class='tumma'>",t("Yhteens√§"),"</td><td class='tumma' align='right'><span class='yhteensa'>".tunnit_minuutit($yhtk)."</span></td></tr>";
     echo "</table>";
     echo "</td>";
     echo "</tr>";
@@ -543,7 +543,7 @@ if (count($tyomaarays_tunti_yhteensa) > 0 and $toim == 'TYOMAARAYS_ASENTAJA') {
   echo "</tbody>";
 
   echo "<tfoot>";
-  echo "<tr><td class='tumma'>",t("Kaikki yhteens‰"),"</td><td class='tumma' align='right' id='tyom_yhteensa1'>".tunnit_minuutit($total_yht)."</td><td class='tumma' align='right' id='tyom_yhteensa2'>".tunnit_minuutit($total_yhtk)."</td></tr>";
+  echo "<tr><td class='tumma'>",t("Kaikki yhteens√§"),"</td><td class='tumma' align='right' id='tyom_yhteensa1'>".tunnit_minuutit($total_yht)."</td><td class='tumma' align='right' id='tyom_yhteensa2'>".tunnit_minuutit($total_yhtk)."</td></tr>";
   echo "</tfoot>";
   echo "</table>";
 }
@@ -553,7 +553,7 @@ elseif (count($tyomaarays_kuitti_yhteensa) > 0) {
 
   echo "<table class='display dataTable' id='$pupe_DataTables[1]'>";
   echo "<thead>";
-  echo "<tr><th>",t("Tyˆm‰‰r‰ys"),"</th><th>",t("Tyˆm‰‰r‰yksien asentajien tuntiyhteenveto"),"</th></tr>";
+  echo "<tr><th>",t("Ty√∂m√§√§r√§ys"),"</th><th>",t("Ty√∂m√§√§r√§yksien asentajien tuntiyhteenveto"),"</th></tr>";
   echo "</thead>";
 
   echo "<tbody>";
@@ -578,7 +578,7 @@ elseif (count($tyomaarays_kuitti_yhteensa) > 0) {
       }
     }
 
-    echo "<tr><td class='tumma'>",t("Yhteens‰"),"</td><td class='tumma' align='right'><span class='yhteensa'>".tunnit_minuutit($yhtk)."</span></td></tr>";
+    echo "<tr><td class='tumma'>",t("Yhteens√§"),"</td><td class='tumma' align='right'><span class='yhteensa'>".tunnit_minuutit($yhtk)."</span></td></tr>";
     echo "</table>";
     echo "</td>";
     echo "</tr>";
@@ -589,7 +589,7 @@ elseif (count($tyomaarays_kuitti_yhteensa) > 0) {
   echo "</tbody>";
 
   echo "<tfoot>";
-  echo "<tr><td class='tumma'>",t("Kaikki yhteens‰"),"</td><td class='tumma' align='right' id='tyom_yhteensa1'>".tunnit_minuutit($total_yhtk)."&nbsp;</td></tr>";
+  echo "<tr><td class='tumma'>",t("Kaikki yhteens√§"),"</td><td class='tumma' align='right' id='tyom_yhteensa1'>".tunnit_minuutit($total_yhtk)."&nbsp;</td></tr>";
   echo "</tfoot>";
   echo "</table>";
 }

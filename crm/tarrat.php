@@ -136,7 +136,7 @@ if ($tee == "TULOSTA") {
     $excelsarake++;
 
     if ($as_yht_tiedot == 'on' or $asiakas_segmentin_yhteystiedot == 'on') {
-      $worksheet->writeString($excelrivi, $excelsarake, t("Yhteyshenkilˆ"), $format_bold);
+      $worksheet->writeString($excelrivi, $excelsarake, t("Yhteyshenkil√∂"), $format_bold);
       $excelsarake++;
       $worksheet->writeString($excelrivi, $excelsarake, t("Titteli"), $format_bold);
       $excelsarake++;
@@ -154,7 +154,7 @@ if ($tee == "TULOSTA") {
     $worksheet->writeString($excelrivi, $excelsarake, t("Maa"), $format_bold);
     $excelsarake++;
 
-    $worksheet->writeString($excelrivi, $excelsarake, t("S‰hkˆpostiosoite"), $format_bold);
+    $worksheet->writeString($excelrivi, $excelsarake, t("S√§hk√∂postiosoite"), $format_bold);
     $excelsarake++;
     $excelrivi++;
   }
@@ -162,21 +162,21 @@ if ($tee == "TULOSTA") {
   while ($row = mysql_fetch_array($res)) {
 
     if ($yhtiorow["kalenterimerkinnat"] == "") {
-      $kysely = "  INSERT INTO kalenteri
-            SET tapa     = '".t("Osoitetarrat")."',
-            asiakas      = '$row[ytunnus]',
-            liitostunnus   = '$row[tunnus]',
-            kuka         = '$kukarow[kuka]',
-            yhtio        = '$kukarow[yhtio]',
-            tyyppi       = 'Memo',
-            pvmalku      = now(),
-            kentta01     = '$kukarow[nimi] tulosti osoitetarrat.\n$asmemo_viesti',
-            laatija      = '$kukarow[kuka]',
-            luontiaika    = now()";
+      $kysely = "INSERT INTO kalenteri
+                 SET tapa     = '".t("Osoitetarrat")."',
+                 asiakas      = '$row[ytunnus]',
+                 liitostunnus = '$row[tunnus]',
+                 kuka         = '$kukarow[kuka]',
+                 yhtio        = '$kukarow[yhtio]',
+                 tyyppi       = 'Memo',
+                 pvmalku      = now(),
+                 kentta01     = '$kukarow[nimi] tulosti osoitetarrat.\n$asmemo_viesti',
+                 laatija      = '$kukarow[kuka]',
+                 luontiaika   = now()";
       $result = mysql_query($kysely) or pupe_error($kysely);
     }
 
-        // k‰ytet‰‰n toim_ tietoja jos niin halutaan
+        // k√§ytet√§√§n toim_ tietoja jos niin halutaan
       if ($_POST['toimas'] == 'on') {
 
       // tarkistetaan tiedot
@@ -301,7 +301,7 @@ if ($tee == "TULOSTA") {
     echo "</table></form><br>";
   }
   else {
-    //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+    //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
     list($usec, $sec) = explode(' ', microtime());
     mt_srand((float) $sec + ((float) $usec * 100000));
     $filenimi = "/tmp/CRM-Osoitetarrat-".md5(uniqid(mt_rand(), true)).".txt";
@@ -432,7 +432,7 @@ if ($tee == '') {
   $lim[$limitti] = "SELECTED";
 
   echo "<table>";
-  echo "<tr><th>".t("Rivim‰‰r‰rajaus").":</th>
+  echo "<tr><th>".t("Rivim√§√§r√§rajaus").":</th>
       <td><select name='limitti' onchange='submit();'>
       <option value='1000'   $lim[1000]>1000</option>
       <option value='5000'   $lim[5000]>5000</option>
@@ -458,8 +458,8 @@ if ($tee == '') {
     $asiakas_segmentin_yhteystiedot_chk = 'CHECKED';
   }
 
-  echo "<tr><th valign='bottom'>".t("N‰yt‰ lis‰rajaukset")."</th><td><input type='checkbox' name='lisaraj_haku' $lis_chk></td></tr>";
-  echo "<tr><th>".t("Luo aineisto vain valitun asiakaskategorian yhteyshenkilˆn osoitetiedoista").":</th><td><input type='checkbox' name='asiakas_segmentin_yhteystiedot' value='on' onclick='submit();' $asiakas_segmentin_yhteystiedot_chk /></td></tr>";
+  echo "<tr><th valign='bottom'>".t("N√§yt√§ lis√§rajaukset")."</th><td><input type='checkbox' name='lisaraj_haku' $lis_chk></td></tr>";
+  echo "<tr><th>".t("Luo aineisto vain valitun asiakaskategorian yhteyshenkil√∂n osoitetiedoista").":</th><td><input type='checkbox' name='asiakas_segmentin_yhteystiedot' value='on' onclick='submit();' $asiakas_segmentin_yhteystiedot_chk /></td></tr>";
 
   echo "</table><br>";
 
@@ -550,7 +550,7 @@ if ($tee == '') {
   }
 
   echo "<tr><th>".t("Tulosta toimitusosoitteen tiedot").":</th><td><input type='checkbox' name='toimas' value='on' $tck></td></tr>";
-  echo "<tr><th>".t("Luo aineisto yhteyshenkilˆn osoitetiedoista").":</th><td><input type='checkbox' name='as_yht_tiedot' value='on' $chk></td></tr>";
+  echo "<tr><th>".t("Luo aineisto yhteyshenkil√∂n osoitetiedoista").":</th><td><input type='checkbox' name='as_yht_tiedot' value='on' $chk></td></tr>";
   echo "<tr><th>".t("Valitse tarra-arkin tyyppi").":</th>
       <td><select name='raportti'>
       <option value='33' $sel[33]>33 ".t("Tarraa")."</option>

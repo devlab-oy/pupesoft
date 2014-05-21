@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("../inc/parametrit.inc");
@@ -9,12 +9,12 @@ echo "<font class='head'>".t("Tuotepaikkalistaus")."</font><hr>";
 
 if ($ahyllyalue == '' and $ahyllynro == '' and $ahyllyvali == '' and $ahyllytaso == '' and isset($tee)) {
   unset($tee);
-  echo "<font class='error'>Alkuhylly on m‰‰ritelt‰v‰!</font><br>";
+  echo "<font class='error'>Alkuhylly on m√§√§ritelt√§v√§!</font><br>";
 }
 
 if ($lhyllyalue == '' and $lhyllynro == '' and $lhyllyvali == '' and $lhyllytaso == '' and isset($tee)) {
   unset($tee);
-  echo "<font class='error'>Loppuhylly on m‰‰ritelt‰v‰!</font><br>";
+  echo "<font class='error'>Loppuhylly on m√§√§ritelt√§v√§!</font><br>";
 }
 
 if ($tee == "TULOSTA") {
@@ -62,14 +62,14 @@ if ($tee == "TULOSTA") {
   $tuotepaikka_result = mysql_query($tuotepaikka_query) or pupe_error($tuotepaikka_query);
 
   if (mysql_num_rows($tuotepaikka_result) == 0) {
-    echo "<font class='error'>".t("Ei lˆytynyt tuotteita")."</font><br><br>";
+    echo "<font class='error'>".t("Ei l√∂ytynyt tuotteita")."</font><br><br>";
     $tee='';
   }
 
   if ($tee == "TULOSTA") {
     if (mysql_num_rows($tuotepaikka_result) > 0 ) {
       //kirjoitetaan  faili levylle..
-      //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+      //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
       list($usec, $sec) = explode(' ', microtime());
       mt_srand((float) $sec + ((float) $usec * 100000));
       $filenimi = "/tmp/tpl-".md5(uniqid(mt_rand(), true)).".txt";
@@ -143,13 +143,13 @@ if (!isset($tee) or $tee == "") {
   echo "<form method='post'>";
   echo "<input type='hidden' name='tee' value='TULOSTA'>";
 
-  echo "<tr><th>".t("Alkuhylly")." (".t("alue-nro-v‰li-taso")."):</th>";
+  echo "<tr><th>".t("Alkuhylly")." (".t("alue-nro-v√§li-taso")."):</th>";
   echo "<td align='right'>",hyllyalue("ahyllyalue", $ahyllyalue),"</td>";
   echo "<td><input type='text' name='ahyllynro' value='$ahyllynro' size='4'></td>";
   echo "<td><input type='text' name='ahyllyvali' value='$ahyllyvali' size='4'></td>";
   echo "<td><input type='text' name='ahyllytaso' value='$ahyllytaso' size='4'></td></tr>";
 
-  echo "<tr><th>".t("Loppuhylly")." (".t("alue-nro-v‰li-taso")."):</th>";
+  echo "<tr><th>".t("Loppuhylly")." (".t("alue-nro-v√§li-taso")."):</th>";
   echo "<td align='right'>",hyllyalue("lhyllyalue", $lhyllyalue),"</td>";
   echo "<td><input type='text' name='lhyllynro' value='$lhyllynro' size='4'></td>";
   echo "<td><input type='text' name='lhyllyvali' value='$lhyllyvali' size='4'></td>";
@@ -157,7 +157,7 @@ if (!isset($tee) or $tee == "") {
 
   $sel = $jarjestys == "hylly" ? "hylly" : "tuoteno";
 
-  echo "<tr><th>".t("Valitse listausj‰rjestys")."</th><td align='right' colspan='4'><select name='jarjestys'>";
+  echo "<tr><th>".t("Valitse listausj√§rjestys")."</th><td align='right' colspan='4'><select name='jarjestys'>";
   echo "<option value='tuoteno' ";
     if ($sel == "tuoteno") { echo "selected"; }
   echo ">".t("Tuotenumero")."</option>";

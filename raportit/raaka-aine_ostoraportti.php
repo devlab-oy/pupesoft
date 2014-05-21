@@ -2,7 +2,7 @@
 
 require("../inc/parametrit.inc");
 
-// Salitaan vain numeroita ja piste/pilkku input kentiss‰
+// Salitaan vain numeroita ja piste/pilkku input kentiss√§
 echo '<script language="javascript">
 $(document).ready(function() {
     $("#vain_numeroita").keydown(function(event) {
@@ -11,7 +11,7 @@ $(document).ready(function() {
             // anna sen vaan tapahtua...
         }
         else {
-            // 48-57 on normin‰pp‰imistˆn numerot, numpad numerot on 96-105, piste on 190 ja pilkku 188
+            // 48-57 on normin√§pp√§imist√∂n numerot, numpad numerot on 96-105, piste on 190 ja pilkku 188
             if ((event.keyCode < 48 || event.keyCode > 57) && (event.keyCode < 96 || event.keyCode > 105 ) && event.keyCode != 188 && event.keyCode != 190) {
                 event.preventDefault();
             }
@@ -26,7 +26,7 @@ $(document).ready(function() {
 
 echo "<font class='head'>".t("Raaka-aineiden ostoraportti")."</font><hr>";
 
-// org_rajausta tarvitaan yhdess‰ selectiss‰ joka triggerˆi taas toisen asian.
+// org_rajausta tarvitaan yhdess√§ selectiss√§ joka trigger√∂i taas toisen asian.
 $org_rajaus = isset($abcrajaus) ? $abcrajaus : '';
 $abcrajaus = isset($abcrajaus) ? $abcrajaus : '';
 
@@ -38,7 +38,7 @@ if (!isset($abcrajaustapa)) $abcrajaustapa = "TK";
 
 list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcrajaustapa);
 
-// Ehdotetaan oletuksena ehdotusta ensikuun myynnille sek‰ siit‰ plus 3 kk
+// Ehdotetaan oletuksena ehdotusta ensikuun myynnille sek√§ siit√§ plus 3 kk
 if (!isset($ppa1)) $ppa1 = date("d", mktime(0, 0, 0, date("m")+1, 1, date("Y")));
 if (!isset($kka1)) $kka1 = date("m", mktime(0, 0, 0, date("m")+1, 1, date("Y")));
 if (!isset($vva1)) $vva1 = date("Y", mktime(0, 0, 0, date("m")+1, 1, date("Y")));
@@ -46,9 +46,9 @@ if (!isset($ppl1)) $ppl1 = date("d", mktime(0, 0, 0, date("m")+4, 0, date("Y")))
 if (!isset($kkl1)) $kkl1 = date("m", mktime(0, 0, 0, date("m")+4, 0, date("Y")));
 if (!isset($vvl1)) $vvl1 = date("Y", mktime(0, 0, 0, date("m")+4, 0, date("Y")));
 
-// P‰iv‰m‰‰r‰tarkistus
+// P√§iv√§m√§√§r√§tarkistus
 if (!checkdate($kka1, $ppa1, $vva1)) {
-  echo "<font class='error'>".t("Virheellinen alkup‰iv‰!")."</font><br>";
+  echo "<font class='error'>".t("Virheellinen alkup√§iv√§!")."</font><br>";
   $tee = "";
   $ehdotusnappi = "";
 }
@@ -57,7 +57,7 @@ else {
 }
 
 if (!checkdate($kkl1, $ppl1, $vvl1)) {
-  echo "<font class='error'>".t("Virheellinen loppup‰iv‰!")."</font><br>";
+  echo "<font class='error'>".t("Virheellinen loppup√§iv√§!")."</font><br>";
   $tee = "";
   $ehdotusnappi = "";
 }
@@ -77,13 +77,13 @@ $toimittajaid = isset($toimittajaid) ? trim($toimittajaid) : "";
 $tilaustuotteiden_kasittely = isset($tilaustuotteiden_kasittely) ? $tilaustuotteiden_kasittely : 'A';
 $multi_status = isset($multi_status) ? $multi_status : array();
 
-// T‰m‰ palauttaa yhden tuotteen ostosuosituksen tiedot
+// T√§m√§ palauttaa yhden tuotteen ostosuosituksen tiedot
 function teerivi($tuoteno, $valittu_toimittaja) {
 
-  // Kukarow ja p‰iv‰m‰‰r‰t globaaleina
+  // Kukarow ja p√§iv√§m√§√§r√§t globaaleina
   global $kukarow, $nykyinen_alku, $nykyinen_loppu, $tilaustuotteiden_kasittely, $multi_status;
 
-  // Tehd‰‰n kaudet p‰iv‰m‰‰rist‰
+  // Tehd√§√§n kaudet p√§iv√§m√§√§rist√§
   $alku_kausi = substr(str_replace("-", "", $nykyinen_alku), 0, 8);
   $loppu_kausi = substr(str_replace("-", "", $nykyinen_loppu), 0, 8);
 
@@ -107,7 +107,7 @@ function teerivi($tuoteno, $valittu_toimittaja) {
   $row = mysql_fetch_assoc($result);
   $lapsi_vuosikulutus = $row['vuosikulutus'];
 
-  // Haetaan raaka-aineen ostettu, varattu, ennakkotilattu sek‰ valmistuksessa oleva m‰‰r‰
+  // Haetaan raaka-aineen ostettu, varattu, ennakkotilattu sek√§ valmistuksessa oleva m√§√§r√§
   $query = "SELECT
             ifnull(sum(if(tilausrivi.tyyppi = 'O', tilausrivi.varattu, 0)), 0) tilattu,
             ifnull(sum(if(tilausrivi.tyyppi = 'L', tilausrivi.varattu, 0)), 0) varattu,
@@ -147,7 +147,7 @@ function teerivi($tuoteno, $valittu_toimittaja) {
     $toimittajarow = mysql_fetch_assoc($result);
   }
   else {
-    // Toimittajaa ei lˆydy -> alustetaan defaulttiarvot (lis‰‰ t‰h‰n jos muutat query‰)
+    // Toimittajaa ei l√∂ydy -> alustetaan defaulttiarvot (lis√§√§ t√§h√§n jos muutat query√§)
     $toimittajarow = array(
             "toimitusaika" => 0,
             "pakkauskoko" => 1,
@@ -167,7 +167,7 @@ function teerivi($tuoteno, $valittu_toimittaja) {
     $tuote_where = " ";
   }
 
-  // Loopataan l‰pi raaka-aineen is‰tuotteet ja lasketaan ostoehdotukset
+  // Loopataan l√§pi raaka-aineen is√§tuotteet ja lasketaan ostoehdotukset
   $query = "SELECT isatuoteno, kerroin
             FROM tuoteperhe
             JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio
@@ -178,13 +178,13 @@ function teerivi($tuoteno, $valittu_toimittaja) {
             AND tuoteperhe.tyyppi  = 'R'";
   $isatuote_result = pupe_query($query);
 
-  // While loopissa k‰ytett‰v‰t muuttujat
+  // While loopissa k√§ytett√§v√§t muuttujat
   $lapsi_kulutus = 0;
   $budjetin_peruste = array();
 
   while ($isatuote_row = mysql_fetch_assoc($isatuote_result)) {
 
-    // Haetaan is‰tuotteen budjetoitu myynti
+    // Haetaan is√§tuotteen budjetoitu myynti
     $params = array(
       'tuoteno'                    => $isatuote_row["isatuoteno"],
       'pvm_alku'                   => $nykyinen_alku,
@@ -194,7 +194,7 @@ function teerivi($tuoteno, $valittu_toimittaja) {
 
     list($isa_budjetoitu_myynti, $budjetin_peruste[]) = tuotteen_budjetoitu_myynti($params);
 
-    // Haetaan is‰tuotteiden varastosaldo
+    // Haetaan is√§tuotteiden varastosaldo
     $query = "SELECT ifnull(sum(saldo), 0) saldo
               FROM tuotepaikat
               WHERE tuotepaikat.yhtio = '{$kukarow["yhtio"]}'
@@ -203,7 +203,7 @@ function teerivi($tuoteno, $valittu_toimittaja) {
     $row = mysql_fetch_assoc($result);
     $isa_saldo = $row['saldo'];
 
-    // Haetaan is‰tuotteen ostettu, varattu, ennakkotilattu sek‰ valmistuksessa m‰‰r‰
+    // Haetaan is√§tuotteen ostettu, varattu, ennakkotilattu sek√§ valmistuksessa m√§√§r√§
     $query = "SELECT
               ifnull(sum(if(tilausrivi.tyyppi = 'O', tilausrivi.varattu, 0)), 0) tilattu,
               ifnull(sum(if(tilausrivi.tyyppi = 'L', tilausrivi.varattu, 0)), 0) varattu,
@@ -221,13 +221,13 @@ function teerivi($tuoteno, $valittu_toimittaja) {
     $isa_ennakko = $row['ennakko'];
     $isa_valmistuksessa = $row['valmistuksessa'];
 
-    // Is‰tuotteen reaalisaldo
+    // Is√§tuotteen reaalisaldo
     $isa_reaalisaldo = $isa_saldo + $isa_tilattu - $isa_varattu - $isa_ennakko - $isa_valmistuksessa;
 
-    // Is‰tuotteen myyntiennuste
+    // Is√§tuotteen myyntiennuste
     $isa_myyntiennuste = $isa_budjetoitu_myynti - $isa_reaalisaldo;
 
-    // Jos myyntiennuste on miinusta, nollataan ennuste, ettei se v‰henn‰ raaka-aine tarvetta (jo valmistetuista tuotteista ei voida k‰ytt‰‰ raaka-aineita)
+    // Jos myyntiennuste on miinusta, nollataan ennuste, ettei se v√§henn√§ raaka-aine tarvetta (jo valmistetuista tuotteista ei voida k√§ytt√§√§ raaka-aineita)
     $isa_myyntiennuste = ($isa_myyntiennuste < 0) ? 0 : $isa_myyntiennuste;
 
     // Lapsen kulutusennuste
@@ -238,10 +238,10 @@ function teerivi($tuoteno, $valittu_toimittaja) {
   // Lasketaan raaka-aineen reaalisaldo
   $lapsi_reaalisaldo = $lapsi_saldo + $lapsi_tilattu - $lapsi_varattu - $lapsi_ennakko - $lapsi_valmistuksessa;
 
-  // Lasketaan raaka-aineen p‰iv‰kulutus
+  // Lasketaan raaka-aineen p√§iv√§kulutus
   $lapsi_paivakulutus = round($lapsi_vuosikulutus / 240, 6);
 
-  // Lasketaan raaka-aineen riittop‰iv‰t
+  // Lasketaan raaka-aineen riittop√§iv√§t
   $lapsi_riittopv = ($lapsi_paivakulutus == 0) ? t("Ei tiedossa") : floor($lapsi_reaalisaldo / $lapsi_paivakulutus);
 
   // Lasketaan raaka-aineen kulutusennuste
@@ -250,7 +250,7 @@ function teerivi($tuoteno, $valittu_toimittaja) {
   // Lasketaan raaka-aineen ostosuositus
   $lapsi_ostosuositus = round($lapsi_kulutusennuste - $lapsi_reaalisaldo);
 
-  // Pyˆristet‰‰n raaka-aineen ostosuositus toimittajan pakkauskokoon
+  // Py√∂ristet√§√§n raaka-aineen ostosuositus toimittajan pakkauskokoon
   $lapsi_ostettavamaara = round($lapsi_ostosuositus / $toimittajarow['pakkauskoko']) * $toimittajarow['pakkauskoko'];
 
   // Palautettava array
@@ -282,7 +282,7 @@ function teerivi($tuoteno, $valittu_toimittaja) {
   return $tuoterivi;
 }
 
-// Jos saadaan muut parametrit tehd‰‰n niist‰ muuttujat
+// Jos saadaan muut parametrit tehd√§√§n niist√§ muuttujat
 if (isset($muutparametrit)) {
   foreach (explode("##", $muutparametrit) as $muutparametri) {
     list($a, $b) = explode("=", $muutparametri);
@@ -294,7 +294,7 @@ if (isset($muutparametrit)) {
 // Toimittajahaku
 if ($ytunnus != "" and $toimittajaid == "") {
 
-  // Tehd‰‰n muut parametrit
+  // Tehd√§√§n muut parametrit
   $muutparametrit = "";
   unset($_POST["toimittajaid"]);
 
@@ -305,7 +305,7 @@ if ($ytunnus != "" and $toimittajaid == "") {
   require ("inc/kevyt_toimittajahaku.inc");
 
   if ($toimittajaid == 0) {
-    $tee = "ƒLƒMEEMIHINKƒƒN";
+    $tee = "√ÑL√ÑMEEMIHINK√Ñ√ÑN";
     $ehdotusnappi = "";
   }
   else {
@@ -314,7 +314,7 @@ if ($ytunnus != "" and $toimittajaid == "") {
   }
 }
 
-// Tehd‰‰n ostotilaukset
+// Tehd√§√§n ostotilaukset
 if (isset($tee) and $tee == "TEE_OSTOTILAUKSET") {
 
   $rows = 0;
@@ -326,7 +326,7 @@ if (isset($tee) and $tee == "TEE_OSTOTILAUKSET") {
     $toimittaja = mysql_real_escape_string($ostettava_toimittaja[$index]);
     $tuoteno = mysql_real_escape_string($ostettava_tuoteno[$index]);
 
-    // Oikellisuustarkastus hoidetaan javascriptill‰, ei voi tulla kun numeroita!
+    // Oikellisuustarkastus hoidetaan javascriptill√§, ei voi tulla kun numeroita!
     if ($maara != 0) {
 
       if ($edellinen_toimittaja != $toimittaja) {
@@ -411,7 +411,7 @@ if (isset($tee) and $tee == "TEE_OSTOTILAUKSET") {
   $tee = "";
 }
 
-// Tehd‰‰n raportti
+// Tehd√§√§n raportti
 if (isset($ehdotusnappi) and $ehdotusnappi != "") {
 
   $tuote_where       = ""; // tuote-rajauksia
@@ -438,7 +438,7 @@ if (isset($ehdotusnappi) and $ehdotusnappi != "") {
     $toimittaja_select = "tuotteen_toimittajat.liitostunnus toimittaja";
   }
   else {
-    // Jos toimittajaa ei olla rajattu, haetaan tuotteen oletustoimittaja subqueryll‰
+    // Jos toimittajaa ei olla rajattu, haetaan tuotteen oletustoimittaja subqueryll√§
     $toimittaja_select = "(SELECT liitostunnus FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno ORDER BY if(jarjestys = 0, 9999, jarjestys), tunnus LIMIT 1) toimittaja";
   }
 
@@ -451,7 +451,7 @@ if (isset($ehdotusnappi) and $ehdotusnappi != "") {
       $lisavarattu = "";
     }
 
-    // katotaan JT:ss‰ olevat tuotteet ABC-analyysi‰ varten, koska ne pit‰‰ includata aina!
+    // katotaan JT:ss√§ olevat tuotteet ABC-analyysi√§ varten, koska ne pit√§√§ includata aina!
     $query = "SELECT group_concat(distinct concat(\"'\",tilausrivi.tuoteno,\"'\") separator ',')
               FROM tilausrivi USE INDEX (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
               JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio
@@ -498,7 +498,7 @@ if (isset($ehdotusnappi) and $ehdotusnappi != "") {
   $res = pupe_query($query);
 
   echo t("Tuotteita")." ".mysql_num_rows($res)." ".t("kpl").".<br>\n";
-  echo t("N‰ytet‰‰n ostotarve aikav‰lille").": $nykyinen_alku - $nykyinen_loppu";
+  echo t("N√§ytet√§√§n ostotarve aikav√§lille").": $nykyinen_alku - $nykyinen_loppu";
 
   $ostoehdotus_riveja = 0;
 
@@ -512,7 +512,7 @@ if (isset($ehdotusnappi) and $ehdotusnappi != "") {
     $toimittaja_header_piirretty = false;
     $formin_pointteri = 0;
 
-    // loopataan tuotteet l‰pi
+    // loopataan tuotteet l√§pi
     while ($row = mysql_fetch_assoc($res)) {
 
       // Haetaan tuotteen tiedot
@@ -536,7 +536,7 @@ if (isset($ehdotusnappi) and $ehdotusnappi != "") {
         $toimittaja_header .= "<th>".t("Ostosuosituksen paino")."</th>";
         $toimittaja_header .= "<th>".t("Ostosuosituksen tilavuus")."</th>";
         $toimittaja_header .= "<th></th>";
-        $toimittaja_header .= "<th>".t("Ostoer‰m‰‰r‰")."</th>";
+        $toimittaja_header .= "<th>".t("Ostoer√§m√§√§r√§")."</th>";
         $toimittaja_header .= "</tr>";
         $toimittaja_header_piirretty = false;
       }
@@ -545,14 +545,14 @@ if (isset($ehdotusnappi) and $ehdotusnappi != "") {
       $EDtoimittaja_ytunnus = $tuoterivi['toimittajan_ytunnus'];
       $EDtoimittaja_nimi = $tuoterivi['toimittajan_nimi'];
 
-      // Jos tuotetta ei tarvitse ostaa, ei n‰ytet‰ sit‰ ostoehdotuksessa
+      // Jos tuotetta ei tarvitse ostaa, ei n√§ytet√§ sit√§ ostoehdotuksessa
       if ($tuoterivi['ostoeramaara'] <= 0) {
         continue;
       }
 
       $ostoehdotus_riveja++;
 
-      // Pit‰‰ s‰ilytt‰‰ table-headeria muuttujassa, sill‰ voi olla ett‰ toimittajalle ei tule yht‰‰n tuoterivi‰ ehdotukseen (eik‰ haluta piirt‰‰ turhaa headeri‰)
+      // Pit√§√§ s√§ilytt√§√§ table-headeria muuttujassa, sill√§ voi olla ett√§ toimittajalle ei tule yht√§√§n tuoterivi√§ ehdotukseen (eik√§ haluta piirt√§√§ turhaa headeri√§)
       if ($toimittaja_header_piirretty == false) {
         echo $toimittaja_header;
         $toimittaja_header_piirretty = true;
@@ -571,7 +571,7 @@ if (isset($ehdotusnappi) and $ehdotusnappi != "") {
       echo "<td style='text-align: right;'>{$tuoterivi["ostosuosituksen_paino"]}</td>";
       echo "<td style='text-align: right;'>{$tuoterivi["ostosuosituksen_tilavuus"]}</td>";
 
-      // Tehd‰‰n Toggle-nappi, jolla voidaan n‰ytt‰‰ matikkainfo alla
+      // Tehd√§√§n Toggle-nappi, jolla voidaan n√§ytt√§√§ matikkainfo alla
       $toggle_counter++;
       echo "<td>";
       echo "<a href='#' style='text-decoration:none;' class='toggle_rivit' id='$toggle_counter'><img src='{$palvelin}pics/lullacons/info.png'></a>";
@@ -591,7 +591,7 @@ if (isset($ehdotusnappi) and $ehdotusnappi != "") {
       }
       echo "</tr>";
 
-      // Tehd‰‰n yks hidden rivi t‰h‰n alle, jossa on kaikki luvut ja kaavat, jota on tehty valmistustarpeen laskemiseksi
+      // Tehd√§√§n yks hidden rivi t√§h√§n alle, jossa on kaikki luvut ja kaavat, jota on tehty valmistustarpeen laskemiseksi
       echo "<tr class='togglettava_rivi_$toggle_counter' style='display: none;'>";
       echo "<td colspan='3'>";
 
@@ -602,14 +602,14 @@ if (isset($ehdotusnappi) and $ehdotusnappi != "") {
       echo "<tr><td>".t("Varattu")."        </td><td>{$tuoterivi['varattu']}      </td></tr>";
       echo "<tr><td>".t("Ennakkotilaukset")."    </td><td>{$tuoterivi['ennakko']}      </td></tr>";
       echo "<tr><td>".t("Valmistuksessa")."    </td><td>{$tuoterivi['valmistuksessa']}    </td></tr>";
-      echo "<tr><td>".t("P‰iv‰kulutus")."      </td><td>{$tuoterivi['paivakulutus']}    </td></tr>";
+      echo "<tr><td>".t("P√§iv√§kulutus")."      </td><td>{$tuoterivi['paivakulutus']}    </td></tr>";
       echo "<tr><td>".t("Vuosikulutus")."         </td><td>{$tuoterivi['vuosikulutus']} (".t("rullaava 12kk").")</td></tr>";
-      echo "<tr><td>".t("Riitto p‰iv‰t")."    </td><td>{$tuoterivi['riittopv']}      </td></tr>";
+      echo "<tr><td>".t("Riitto p√§iv√§t")."    </td><td>{$tuoterivi['riittopv']}      </td></tr>";
       echo "<tr><td>".t("Kulutusennuste")."    </td><td>{$tuoterivi['kulutusennuste']}    </td></tr>";
       echo "<tr><td>".t("Budjetoitu kulutus")."  </td><td>{$tuoterivi['kulutus']}      </td></tr>";
       echo "<tr><td>".t("Toimitusaika")."      </td><td>{$tuoterivi['toimitusaika']}    </td></tr>";
       echo "<tr><td>".t("Ostosuositus")."      </td><td>{$tuoterivi['ostosuositus']}    </td></tr>";
-      echo "<tr><td>".t("Ostoer‰m‰‰r‰")."      </td><td>{$tuoterivi['ostoeramaara']}    </td></tr>";
+      echo "<tr><td>".t("Ostoer√§m√§√§r√§")."      </td><td>{$tuoterivi['ostoeramaara']}    </td></tr>";
       echo "<tr><td>".t("Pakkauskoko")."      </td><td>{$tuoterivi['pakkauskoko']}    </td></tr>";
       echo "</table>";
 
@@ -617,9 +617,9 @@ if (isset($ehdotusnappi) and $ehdotusnappi != "") {
 
       echo t("Reaalisaldo")." = ".t("Varastosaldo")." + ".t("Tilattu")." - ".t("Varattu")." - ".t("Ennakkotilaukset")." - ".t("Valmistuksessa")."<br>";
       echo "{$tuoterivi["reaalisaldo"]} = {$tuoterivi["varastosaldo"]} + {$tuoterivi["tilattu"]} - {$tuoterivi["varattu"]} - {$tuoterivi["ennakko"]} - {$tuoterivi["valmistuksessa"]}<br><br>";
-      echo t("P‰iv‰kulutus")." = round(".t("Vuosikulutus")." / 240)<br>";
+      echo t("P√§iv√§kulutus")." = round(".t("Vuosikulutus")." / 240)<br>";
       echo "{$tuoterivi['paivakulutus']} = round({$tuoterivi['vuosikulutus']} / 240)<br><br>";
-      echo t("Riitto P‰iv‰t")." = floor(".t("Reaalisaldo")." / ".t("P‰iv‰kulutus").")<br>";
+      echo t("Riitto P√§iv√§t")." = floor(".t("Reaalisaldo")." / ".t("P√§iv√§kulutus").")<br>";
       echo "{$tuoterivi['riittopv']} = floor({$tuoterivi['reaalisaldo']} / {$tuoterivi['paivakulutus']})<br><br>";
 
       echo "<font class='info'>";
@@ -636,11 +636,11 @@ if (isset($ehdotusnappi) and $ehdotusnappi != "") {
 
       echo "</font>";
 
-      echo t("Kulutusennuste")." = ".t("Budjetoitu kulutus")." + (".t("P‰iv‰kulutus")." * ".t("Toimitusaika").")<br>";
+      echo t("Kulutusennuste")." = ".t("Budjetoitu kulutus")." + (".t("P√§iv√§kulutus")." * ".t("Toimitusaika").")<br>";
       echo "{$tuoterivi['kulutusennuste']} = {$tuoterivi['kulutus']} + ({$tuoterivi['paivakulutus']} * {$tuoterivi['toimitusaika']})<br><br>";
       echo t("Ostosuositus")." = round(".t("Kulutusennuste")." - ".t("Reaalisaldo").")<br>";
       echo "{$tuoterivi['ostosuositus']} = round({$tuoterivi['kulutusennuste']} - {$tuoterivi['reaalisaldo']})<br><br>";
-      echo t("Ostettava m‰‰r‰")." = round(".t("Ostosuositus")." / ".t("Pakkauskoko").") * ".t("Pakkauskoko")."<br>";
+      echo t("Ostettava m√§√§r√§")." = round(".t("Ostosuositus")." / ".t("Pakkauskoko").") * ".t("Pakkauskoko")."<br>";
       echo "{$tuoterivi['ostoeramaara']} = round({$tuoterivi['ostosuositus']} / {$tuoterivi['pakkauskoko']}) * {$tuoterivi['pakkauskoko']}<br><br>";
 
       echo "</td></tr>";
@@ -661,13 +661,13 @@ if (isset($ehdotusnappi) and $ehdotusnappi != "") {
 
   if ($ostoehdotus_riveja == 0) {
     echo "<br><br>";
-    echo "<font class='error'>Antamallasi rajauksella ei lˆydy yht‰‰n tuotetta ehdotukseen.</font><br>";
+    echo "<font class='error'>Antamallasi rajauksella ei l√∂ydy yht√§√§n tuotetta ehdotukseen.</font><br>";
     echo "<br>";
     $tee = "";
   }
 }
 
-// N‰ytet‰‰n k‰yttˆliittym‰
+// N√§ytet√§√§n k√§ytt√∂liittym√§
 if (!isset($tee) or $tee == "") {
 
   echo "<form method='post' autocomplete='off'>";
@@ -766,7 +766,7 @@ if (!isset($tee) or $tee == "") {
   echo "</td></tr>";
 
   echo "<tr>";
-  echo "<th>".t("Alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>";
+  echo "<th>".t("Alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>";
   echo "<td>";
   echo "<input type='text' name='ppa1' value='$ppa1' size='5'>";
   echo "<input type='text' name='kka1' value='$kka1' size='5'>";
@@ -775,7 +775,7 @@ if (!isset($tee) or $tee == "") {
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>".t("Loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>";
+  echo "<th>".t("Loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>";
   echo "<td>";
   echo "<input type='text' name='ppl1' value='$ppl1' size='5'>";
   echo "<input type='text' name='kkl1' value='$kkl1' size='5'>";
@@ -789,11 +789,11 @@ if (!isset($tee) or $tee == "") {
     'C' => $tilaustuotteiden_kasittely == 'C' ? 'SELECTED' : '',
   );
 
-  echo "<tr><th>".t("Tilaustuotteiden k‰sittely")."</th><td>";
+  echo "<tr><th>".t("Tilaustuotteiden k√§sittely")."</th><td>";
   echo "<select name='tilaustuotteiden_kasittely'>";
-      echo "<option value='A' {$sel['A']}>".t("Tilaustuotteiden kulutusennuste on j‰lkitoimitusrivit")."</option>";
+      echo "<option value='A' {$sel['A']}>".t("Tilaustuotteiden kulutusennuste on j√§lkitoimitusrivit")."</option>";
       echo "<option value='B' {$sel['B']}>".t("Tilaustuotteiden kulutusennuste on budjetti/myynti")."</option>";
-      echo "<option value='C' {$sel['C']}>".t("Tilaustuotteiden kulutusennuste on j‰lkitoimitusrivit + budjetti/myynti")."</option>";
+      echo "<option value='C' {$sel['C']}>".t("Tilaustuotteiden kulutusennuste on j√§lkitoimitusrivit + budjetti/myynti")."</option>";
   echo "</select>";
   echo "</td>";
   echo "</tr>";

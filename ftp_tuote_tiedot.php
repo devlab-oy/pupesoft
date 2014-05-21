@@ -1,9 +1,9 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-// Kutsutaanko CLI:st‰
+// Kutsutaanko CLI:st√§
 $php_cli = FALSE;
 
 if (php_sapi_name() == 'cli') {
@@ -16,7 +16,7 @@ if (!$php_cli) {
 }
 else {
   if ($argv[1] != "") $kyhtio = trim($argv[1]);
-  else die ("Yhtiˆ on annettava!");
+  else die ("Yhti√∂ on annettava!");
 
   require ("/var/www/html/pupesoft/inc/connect.inc");
   require ("/var/www/html/pupesoft/inc/functions.inc");
@@ -26,7 +26,7 @@ else {
 // palautetaan $syy
 function tee_file($result, $dirri, $tiedostonnimi, $ftpkuvahost, $ftpkuvauser, $ftpkuvapass) {
 
-  //l‰hetet‰‰n tiedosto
+  //l√§hetet√§√§n tiedosto
   $conn_id = ftp_connect($ftpkuvahost);
 
   // jos connectio ok, kokeillaan loginata
@@ -52,7 +52,7 @@ function tee_file($result, $dirri, $tiedostonnimi, $ftpkuvahost, $ftpkuvauser, $
       $handle = fopen("$kokonimi", "x");
 
       if ($handle === FALSE) {
-        $syy .= "Tiedoston $kokonimi luonti ep‰onnistui!\n";
+        $syy .= "Tiedoston $kokonimi luonti ep√§onnistui!\n";
       }
       else {
 
@@ -197,14 +197,14 @@ if ($tee == "aja") {
 
   // tarvitaan $ftpkuvahost $ftpkuvauser $ftpkuvapass
   if ($ftpkuvahost=='' or $ftpkuvauser=='' or $ftpkuvapass=='') {
-    $syy .= "L‰hetykseen tarvittavia tietoja puuttuu! (host, user, pass)";
+    $syy .= "L√§hetykseen tarvittavia tietoja puuttuu! (host, user, pass)";
   }
   else {
 
     $dirri = "/tmp";
 
     if (!is_writable($dirri)) {
-      die("$kokonimi ei ole m‰‰ritelty kirjoitusoikeutta. Ei voida jatkaa!<br>");
+      die("$kokonimi ei ole m√§√§ritelty kirjoitusoikeutta. Ei voida jatkaa!<br>");
     }
 
     /*tuotetieto haku*/
@@ -272,7 +272,7 @@ if ($tee == "aja") {
 
     $syy .= tee_file($result, $dirri, "osastot.csv",  $ftpkuvahost, $ftpkuvauser, $ftpkuvapass);
 
-    /*tuoteryhm‰t*/
+    /*tuoteryhm√§t*/
     $query = "SELECT avainsana.selite as try, avainsana.selitetark as nimitys,
               if(isnull(se.selitetark) or se.selitetark='', '', se.selitetark) as nimitys_se,
               avainsana.selitetark_3 as kuvaus, if(isnull(se.selitetark_3) or se.selitetark_3='', '', se.selitetark_3) as kuvaus_se,
@@ -311,7 +311,7 @@ if ($tee == "") {
 
   echo "<table><form name='uliuli' method='post'>";
   echo "<input type='hidden' name='tee' value='aja'>";
-  echo "<tr><td class='back' colspan='2'><br><input type='submit' value='".t("Siirr‰ tiedot")."'></td></tr>";
+  echo "<tr><td class='back' colspan='2'><br><input type='submit' value='".t("Siirr√§ tiedot")."'></td></tr>";
   echo "</table>";
   echo "</form>";
 

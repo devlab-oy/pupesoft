@@ -2,7 +2,7 @@
 
 require ("../inc/parametrit.inc");
 
-echo "<font class='head'>".t("Etsi ja poista p‰itt‰in menev‰t suoritukset")."</font><hr>";
+echo "<font class='head'>".t("Etsi ja poista p√§itt√§in menev√§t suoritukset")."</font><hr>";
 
 if ($toim == "SUPER") {
   $tilitselisa = "";
@@ -16,7 +16,7 @@ if ($tee == 'N') {
   $query  = "LOCK TABLES suoritus as a READ, suoritus as b READ, suoritus WRITE, tiliointi WRITE, sanakirja WRITE, avainsana as avainsana_kieli READ";
   $result = pupe_query($query);
 
-  //Etsit‰‰n nolla suoritukset
+  //Etsit√§√§n nolla suoritukset
   $query = "SELECT nimi_maksaja, kirjpvm, summa, ltunnus, tunnus
             FROM suoritus
             WHERE yhtio = '$kukarow[yhtio]'
@@ -31,7 +31,7 @@ if ($tee == 'N') {
 
       $tapvm = $suoritusrow['kirjpvm'];
 
-      //Kirjataan suoritukset k‰ytetyksi
+      //Kirjataan suoritukset k√§ytetyksi
       $query = "UPDATE suoritus
                 SET kohdpvm = '$tapvm'
                 WHERE tunnus = '$suoritusrow[tunnus]'";
@@ -66,7 +66,7 @@ if ($tee == 'T') {
 
     while ($suoritusrow = mysql_fetch_assoc ($paaresult)) {
 
-      // Onko tilioinnit veil‰ olemassa ja suoritus oikeassa tilassa
+      // Onko tilioinnit veil√§ olemassa ja suoritus oikeassa tilassa
       $query  = "SELECT tunnus, kirjpvm
                  FROM suoritus
                  WHERE yhtio = '$kukarow[yhtio]'
@@ -117,12 +117,12 @@ if ($tee == 'T') {
             $tsekpvm = str_replace("-", "", $tapvm);
 
             if ($tsekpvm < $myrealku or $tsekpvm > $myreloppu) {
-              echo "<br><font class='error'>".t("HUOM: Suorituksen p‰iv‰m‰‰r‰ oli suljetulla kaudella. Tiliˆinti tehtiin t‰lle p‰iv‰lle")."!</font><br><br>";
+              echo "<br><font class='error'>".t("HUOM: Suorituksen p√§iv√§m√§√§r√§ oli suljetulla kaudella. Tili√∂inti tehtiin t√§lle p√§iv√§lle")."!</font><br><br>";
 
               $tapvm  = date("Y-m-d");
             }
 
-            // Alkuper‰isen rahatiliˆinnin kustannuspaikka
+            // Alkuper√§isen rahatili√∂innin kustannuspaikka
             $query  = "SELECT kustp, kohde, projekti
                        FROM tiliointi
                        WHERE yhtio   = '$kukarow[yhtio]'
@@ -130,19 +130,19 @@ if ($tee == 'T') {
             $result = pupe_query($query);
             $raha1row = mysql_fetch_assoc($result);
 
-            // Tarkenteet kopsataan alkuper‰iselt‰ tiliˆinnilt‰, mutta jos alkuper‰inen tiliˆinti on ilman tarkenteita, niin menn‰‰n tilin defaulteilla
+            // Tarkenteet kopsataan alkuper√§iselt√§ tili√∂innilt√§, mutta jos alkuper√§inen tili√∂inti on ilman tarkenteita, niin menn√§√§n tilin defaulteilla
             list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["selvittelytili"], $raha1row["kustp"], $raha1row["kohde"], $raha1row["projekti"]);
 
-            // Nyt kaikki on hyvin ja voimme tehd‰ p‰ivitykset
-            // Kirjataan p‰itt‰inmeno selvittelytilin kautta
-            // Tiliˆinnilt‰ otetaan selvittelytilin vastatili
+            // Nyt kaikki on hyvin ja voimme tehd√§ p√§ivitykset
+            // Kirjataan p√§itt√§inmeno selvittelytilin kautta
+            // Tili√∂innilt√§ otetaan selvittelytilin vastatili
             $query = "INSERT INTO tiliointi SET
                       yhtio    = '$kukarow[yhtio]',
                       ltunnus  = '$tiliointi1row[ltunnus]',
                       tapvm    = '$tapvm',
                       summa    = $tiliointi1row[summa],
                       tilino   = '$yhtiorow[selvittelytili]',
-                      selite   = '".t('Suoritettu p‰itt‰in')."',
+                      selite   = '".t('Suoritettu p√§itt√§in')."',
                       lukko    = 1,
                       laatija  = '$kukarow[kuka]',
                       laadittu = now(),
@@ -152,7 +152,7 @@ if ($tee == 'T') {
             if ($debug == 1) echo "$query<br>";
             else $result = pupe_query($query);
 
-            // Tarkenteet kopsataan alkuper‰iselt‰ tiliˆinnilt‰, mutta jos alkuper‰inen tiliˆinti on ilman tarkenteita, niin menn‰‰n tilin defaulteilla
+            // Tarkenteet kopsataan alkuper√§iselt√§ tili√∂innilt√§, mutta jos alkuper√§inen tili√∂inti on ilman tarkenteita, niin menn√§√§n tilin defaulteilla
             list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tiliointi1row["tilino"], $tiliointi1row["kustp"], $tiliointi1row["kohde"], $tiliointi1row["projekti"]);
 
             $query = "INSERT INTO tiliointi SET
@@ -161,7 +161,7 @@ if ($tee == 'T') {
                       tapvm    = '$tapvm',
                       summa    = $tiliointi1row[summa] * -1,
                       tilino   = '$tiliointi1row[tilino]',
-                      selite   = '".t('Suoritettu p‰itt‰in')."',
+                      selite   = '".t('Suoritettu p√§itt√§in')."',
                       lukko    = 1,
                       laatija  = '$kukarow[kuka]',
                       laadittu = now(),
@@ -171,7 +171,7 @@ if ($tee == 'T') {
             if ($debug == 1) echo "$query<br>";
             else $result = pupe_query($query);
 
-            // Alkuper‰isen rahatiliˆinnin kustannuspaikka
+            // Alkuper√§isen rahatili√∂innin kustannuspaikka
             $query  = "SELECT kustp, kohde, projekti
                        FROM tiliointi
                        WHERE yhtio   = '$kukarow[yhtio]'
@@ -179,7 +179,7 @@ if ($tee == 'T') {
             $result = pupe_query($query);
             $raha2row = mysql_fetch_assoc($result);
 
-            // Tarkenteet kopsataan alkuper‰iselt‰ tiliˆinnilt‰, mutta jos alkuper‰inen tiliˆinti on ilman tarkenteita, niin menn‰‰n tilin defaulteilla
+            // Tarkenteet kopsataan alkuper√§iselt√§ tili√∂innilt√§, mutta jos alkuper√§inen tili√∂inti on ilman tarkenteita, niin menn√§√§n tilin defaulteilla
             list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["selvittelytili"], $raha2row["kustp"], $raha2row["kohde"], $raha2row["projekti"]);
 
             $query = "INSERT INTO tiliointi SET
@@ -188,7 +188,7 @@ if ($tee == 'T') {
                       tapvm    = '$tapvm',
                       summa    = $tiliointi2row[summa],
                       tilino   = '$yhtiorow[selvittelytili]',
-                      selite   = '".t('Suoritettu p‰itt‰in')."',
+                      selite   = '".t('Suoritettu p√§itt√§in')."',
                       lukko    = 1,
                       laatija  = '$kukarow[kuka]',
                       laadittu = now(),
@@ -198,7 +198,7 @@ if ($tee == 'T') {
             if ($debug == 1) echo "$query<br>";
             else $result = pupe_query($query);
 
-            // Tarkenteet kopsataan alkuper‰iselt‰ tiliˆinnilt‰, mutta jos alkuper‰inen tiliˆinti on ilman tarkenteita, niin menn‰‰n tilin defaulteilla
+            // Tarkenteet kopsataan alkuper√§iselt√§ tili√∂innilt√§, mutta jos alkuper√§inen tili√∂inti on ilman tarkenteita, niin menn√§√§n tilin defaulteilla
             list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tiliointi1row["tilino"], $tiliointi2row["kustp"], $tiliointi2row["kohde"], $tiliointi2row["projekti"]);
 
             $query = "INSERT INTO tiliointi SET
@@ -207,7 +207,7 @@ if ($tee == 'T') {
                       tapvm    = '$tapvm',
                       summa    = $tiliointi2row[summa] * -1,
                       tilino   = '$tiliointi1row[tilino]',
-                      selite   = '".t('Suoritettu p‰itt‰in')."',
+                      selite   = '".t('Suoritettu p√§itt√§in')."',
                       lukko    = 1,
                       laatija  = '$kukarow[kuka]',
                       laadittu = now(),
@@ -217,7 +217,7 @@ if ($tee == 'T') {
             if ($debug == 1) echo "$query<br>";
             else $result = pupe_query($query);
 
-            //Kirjataan suoritukset k‰ytetyksi
+            //Kirjataan suoritukset k√§ytetyksi
             $query = "UPDATE suoritus
                       SET kohdpvm = '$tapvm'
                       WHERE tunnus = '$suoritus1row[tunnus]'";
@@ -233,15 +233,15 @@ if ($tee == 'T') {
             echo "<font class='message'>".t("Kohdistus ok!")." $suoritusrow[nimi_maksaja] ".($tiliointi2row["summa"]*1)." / ".($tiliointi2row["summa"]*-1)."</font><br>";
           }
           else {
-            echo "J‰rjestelm‰virhe 1";
+            echo "J√§rjestelm√§virhe 1";
           }
         }
         else {
-          echo "J‰rjestelm‰virhe 2";
+          echo "J√§rjestelm√§virhe 2";
         }
       }
       else {
-        echo "<font class='error'>".t('Suoritus oli jo k‰ytetty')."<br>";
+        echo "<font class='error'>".t('Suoritus oli jo k√§ytetty')."<br>";
       }
     }
   }
@@ -252,7 +252,7 @@ if ($tee == 'T') {
 
 if ($tee == '') {
 
-  //Etsit‰‰n p‰itt‰in menev‰t suoritukset
+  //Etsit√§√§n p√§itt√§in menev√§t suoritukset
   $query = "SELECT a.nimi_maksaja nimi1, a.kirjpvm pvm1, a.summa summa1, b.nimi_maksaja nimi2, b.kirjpvm pvm2, b.summa summa2
             FROM suoritus a
             JOIN suoritus b ON (b.yhtio = a.yhtio and b.kohdpvm = a.kohdpvm and b.asiakas_tunnus = a.asiakas_tunnus and b.valkoodi = a.valkoodi and b.ltunnus > 0 and b.summa * -1 = a.summa $tilitselisa)
@@ -290,14 +290,14 @@ if ($tee == '') {
     echo "  <form method='post'>
         <input type='hidden' name = 'toim' value='$toim'>
         <input type='hidden' name = 'tee' value='T'>
-        <input type='Submit' value='".t('Kohdista n‰m‰ tapahtumat p‰itt‰in')."'>
+        <input type='Submit' value='".t('Kohdista n√§m√§ tapahtumat p√§itt√§in')."'>
         </form><br>";
   }
   else {
-    echo "<font class='message'>" . t("P‰itt‰in menevi‰ suorituksia ei lˆytynyt!") . "</font><br>";
+    echo "<font class='message'>" . t("P√§itt√§in menevi√§ suorituksia ei l√∂ytynyt!") . "</font><br>";
   }
 
-  //Etsit‰‰n nolla suoritukset
+  //Etsit√§√§n nolla suoritukset
   $query = "SELECT nimi_maksaja, kirjpvm, summa
             FROM suoritus
             WHERE yhtio = '$kukarow[yhtio]'
@@ -329,7 +329,7 @@ if ($tee == '') {
     echo "  <form method='post'>
         <input type='hidden' name = 'toim' value='$toim'>
         <input type='hidden' name = 'tee' value='N'>
-        <input type='Submit' value='".t('Poista n‰m‰ nollatapahtumat')."'>
+        <input type='Submit' value='".t('Poista n√§m√§ nollatapahtumat')."'>
         </form>";
   }
 

@@ -50,7 +50,7 @@ class vahvistamattomat_ostorivit_excel {
     $this->print_headers();
     $this->move_seuraavalle_riville();
     foreach ($this->rivit as $rivi) {
-      //countti tehdään sen takia, että arrayssä on myös total_rivihinta
+      //countti tehdÃ¤Ã¤n sen takia, ettÃ¤ arrayssÃ¤ on myÃ¶s total_rivihinta
       if(count($rivi) > 2) {
         $this->print_rivi($rivi);
         $this->move_seuraavalle_riville();
@@ -62,10 +62,10 @@ class vahvistamattomat_ostorivit_excel {
     $this->write_solu(t('Tilausnumero', $this->kieli));
     $this->write_solu(t('Tuotenumero', $this->kieli));
     $this->write_solu(t('Toimitusaika', $this->kieli));
-    $this->write_solu(t('Määrä', $this->kieli));
+    $this->write_solu(t('MÃ¤Ã¤rÃ¤', $this->kieli));
     $this->write_solu(t('Hinta', $this->kieli));
     $this->write_solu(t('Ale', $this->kieli));
-    $this->write_solu(t('Yhteensä', $this->kieli));
+    $this->write_solu(t('YhteensÃ¤', $this->kieli));
   }
 
   private function print_rivi($rivi) {
@@ -84,13 +84,13 @@ class vahvistamattomat_ostorivit_excel {
   }
 
   private function loppu() {
-    $this->write_solu(t('Yhteensä', $this->kieli));
+    $this->write_solu(t('YhteensÃ¤', $this->kieli));
     $this->add_tyhja_kolumni(5);
     $this->write_numero_solu($this->rivit['total_rivihinta']);
   }
 
   private function write_solu($data) {
-    //tämä funktio kirjoittaa tämän hetkiselle riville soluun datan ja siirtyy seuraavaan soluun samalla rivillä
+    //tÃ¤mÃ¤ funktio kirjoittaa tÃ¤mÃ¤n hetkiselle riville soluun datan ja siirtyy seuraavaan soluun samalla rivillÃ¤
     $this->excel->write($this->excel_rivi, $this->excel_sarake, $data);
     $this->excel_sarake++;
   }

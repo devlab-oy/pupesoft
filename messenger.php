@@ -38,7 +38,7 @@ echo "<table>";
 echo "<form method='post' name='messenger_form'>";
 echo "<input type='hidden' name='messenger' value='X'>";
 echo "<input type='hidden' name='status' value='X'>";
-echo "<tr><th>".t("L‰het‰ viesti")." --> ".t("Vastaanottaja").": <select name='vastaanottaja'>";
+echo "<tr><th>".t("L√§het√§ viesti")." --> ".t("Vastaanottaja").": <select name='vastaanottaja'>";
 
 $query = "SELECT DISTINCT kuka.nimi, kuka.kuka
           FROM kuka
@@ -61,7 +61,7 @@ echo "</select></th></tr>";
 echo "<tr><td><textarea rows='20' cols='80' name='message'>";
 echo "</textarea></td></tr>";
 
-echo "<tr><td class='back' align='right'><input type='submit' name='submit' value='".t("L‰het‰")."'></td></tr>";
+echo "<tr><td class='back' align='right'><input type='submit' name='submit' value='".t("L√§het√§")."'></td></tr>";
 
 echo "</form></table>";
 
@@ -86,7 +86,7 @@ $query = "SELECT messenger.tunnus, messenger.status, messenger.viesti, (SELECT n
           DESC LIMIT $kpl";
 $result = pupe_query($query);
 
-echo "<br>".t("N‰yt‰")." ";
+echo "<br>".t("N√§yt√§")." ";
 echo "  <form method='post'>
       <select name='kpl' onChange='javascript:submit()'>";
 
@@ -106,18 +106,18 @@ for ($i = 0; $i <= 3; $i++) {
   $y = $y * 2;
 }
 
- echo "    </select> ".t("viimeisint‰")."
+ echo "    </select> ".t("viimeisint√§")."
       <select name='kuka' onChange='javascript:submit()'>
         <option value='vastaanotettua' $sel2>".t("vastaanotettua")."</option>
-        <option value='l‰hetetty‰' $sel3>".t("l‰hetetty‰")."</option>
+        <option value='l√§hetetty√§' $sel3>".t("l√§hetetty√§")."</option>
       </select>
-    ".t("viesti‰").":
+    ".t("viesti√§").":
     </form><br><br>";
 
 echo "<table>";
 echo "<tr>";
-echo "<th>".t("K‰ytt‰j‰")."</th>";
-echo "<th>".t("P‰iv‰m‰‰r‰")."</th>";
+echo "<th>".t("K√§ytt√§j√§")."</th>";
+echo "<th>".t("P√§iv√§m√§√§r√§")."</th>";
 echo "<th>".t("Viesti")."</th>";
 
 echo "</tr>";

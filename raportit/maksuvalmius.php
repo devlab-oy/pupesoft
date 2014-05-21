@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require("../inc/parametrit.inc");
@@ -27,7 +27,7 @@ echo "<form method='post'>
     <tr>
     <th>".t("Maksuvalmius")."</th>
     <td><select name='aika'>
-      <option value = 'pv' $sel1>".t("P‰iv‰")."
+      <option value = 'pv' $sel1>".t("P√§iv√§")."
       <option value = 'vi' $sel2>".t("Viikko")."
       <option value = 'kk' $sel3>".t("Kuukausi")."
     </select></td>
@@ -39,7 +39,7 @@ if ($yhtiorow["konserni"] != "") {
     <td><input type = 'checkbox' name = 'konserni' $sel4></td>";
 }
 
-echo "<td class='back'><input type = 'submit' value = '".t("N‰yt‰")."'></td>
+echo "<td class='back'><input type = 'submit' value = '".t("N√§yt√§")."'></td>
     </tr>
     </table>
     </form><br>";
@@ -47,7 +47,7 @@ echo "<td class='back'><input type = 'submit' value = '".t("N‰yt‰")."'></td>
 if ($tee == "1") {
 
   if ($konserni == 'on') {
-    // haetaan konsernin kaikki yhtiot ja tehd‰‰n mysql lauseke
+    // haetaan konsernin kaikki yhtiot ja tehd√§√§n mysql lauseke
     $query = "SELECT yhtio from yhtio where konserni='$yhtiorow[konserni]' and konserni != ''";
     $result = mysql_query($query) or pupe_error($query);
 
@@ -57,12 +57,12 @@ if ($tee == "1") {
     }
     $yhtio = substr($yhtio, 0, -1); // vika pilkku pois
 
-    // jos ei lˆytynyt yht‰‰n konserniyhtiˆt‰ ni laitetaan kukarow[yhtio]
+    // jos ei l√∂ytynyt yht√§√§n konserniyhti√∂t√§ ni laitetaan kukarow[yhtio]
     if ($yhtio == "") {
       $yhtio = "'$kukarow[yhtio]'";
     }
 
-    // Tehd‰‰n alkusiivous!
+    // Tehd√§√§n alkusiivous!
     $query = "SELECT konserni
               FROM yhtio
               WHERE yhtio = '$kukarow[yhtio]'";
@@ -73,7 +73,7 @@ if ($tee == "1") {
       //echo "Konserni on '$trow[konserni]'<br>";
     }
     else {
-      echo t("Yhtiˆit‰ lˆytyi monta tai ei lainkaan! Virhe!");
+      echo t("Yhti√∂it√§ l√∂ytyi monta tai ei lainkaan! Virhe!");
       exit;
     }
 
@@ -83,7 +83,7 @@ if ($tee == "1") {
     $result = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($result) < 2) {
-      echo t("Pyysit konsernin‰kˆkulmaa, mutta yritys ei ole konsernin osa").".<br>";
+      echo t("Pyysit konsernin√§k√∂kulmaa, mutta yritys ei ole konsernin osa").".<br>";
       exit;
     }
     else {
@@ -100,7 +100,7 @@ if ($tee == "1") {
     $yhtio = "'$kukarow[yhtio]'";
   }
 
-  // pvm grouppaus h‰ss‰ss‰kk‰
+  // pvm grouppaus h√§ss√§ss√§kk√§
   $tapa = "if(lasku.tila = 'K', DATE_ADD(tilausrivi.toimaika, INTERVAL ifnull(toimi.oletus_erapvm,0) DAY), if(lasku.tila in ('H','M','P','Q','U'), if(kapvm > now(),kapvm,erpcm),olmapvm)) olmapvm";
 
   if ($aika == 'vi') {
@@ -124,13 +124,13 @@ if ($tee == "1") {
   $result = mysql_query($query) or pupe_error($query);
 
   echo "<table>";
-  echo "<tr><th>".t("Pvm")."</th><th>".t("Myyntireskontra")."</th><th>".t("Ostoreskontra")."</th><th>".t("Yhteens‰")."</th><th>".t("Kumulatiivinen")."</th><th>".t("Ostotilauksen arvo")."</th></tr>";
+  echo "<tr><th>".t("Pvm")."</th><th>".t("Myyntireskontra")."</th><th>".t("Ostoreskontra")."</th><th>".t("Yhteens√§")."</th><th>".t("Kumulatiivinen")."</th><th>".t("Ostotilauksen arvo")."</th></tr>";
 
   $kumu = 0;
 
   while ($rivi = mysql_fetch_array($result)) {
 
-    // summaillaan yhteens‰ ja kumulatiivinen
+    // summaillaan yhteens√§ ja kumulatiivinen
     $yht   = $rivi["myynti"] + $rivi["osto"];
     $kumu += $yht;
 

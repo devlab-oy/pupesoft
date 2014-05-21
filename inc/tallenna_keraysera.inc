@@ -1,7 +1,7 @@
 <?php
 
 if (!is_array($erat)) {
-  echo "<br /><font class='error'>",t("VIRHE: Ker‰yser‰‰ ei en‰‰ lˆydy"),"!</font><br />";
+  echo "<br /><font class='error'>",t("VIRHE: Ker√§yser√§√§ ei en√§√§ l√∂ydy"),"!</font><br />";
 
   require('inc/footer.inc');
   exit;
@@ -36,7 +36,7 @@ foreach ($erat as $era_key => $era_arr) {
         $sscc = uusi_sscc_nro();
 
         foreach ($pakkaus as $tilriv => $kpl) {
-          // varmistetaan, ett‰ ei ker‰ytet‰ nollakappaleita
+          // varmistetaan, ett√§ ei ker√§ytet√§ nollakappaleita
           if ((float) $kpl != 0) {
             $pakkaus_kirjaimet[$tilriv][$pakkaus_kirjain] = $kpl;
             $rivit += 1;
@@ -61,9 +61,9 @@ foreach ($erat as $era_key => $era_arr) {
             $res = pupe_query($query);
             $laskurow = mysql_fetch_assoc($res);
 
-            // jos ulkoinen j‰rjestelm‰
-            // tila = 'K' tarkoittaa "Ker‰yksess‰"-normivarastossa
-            // tila = 'X' tarkoittaa "Ker‰yksess‰"-kardexvarastossa
+            // jos ulkoinen j√§rjestelm√§
+            // tila = 'K' tarkoittaa "Ker√§yksess√§"-normivarastossa
+            // tila = 'X' tarkoittaa "Ker√§yksess√§"-kardexvarastossa
             $tilalisa = $erat['keraysvyohyketiedot']['ulkoinen_jarjestelma'] == "K" ? "X" : "K";
 
             $modulilisa = (isset($ohjelma_moduli) and $ohjelma_moduli != "") ? mysql_real_escape_string($ohjelma_moduli) : 'PUPESOFT';
@@ -88,7 +88,7 @@ foreach ($erat as $era_key => $era_arr) {
       }
     }
 
-    // Tsekataanko pit‰‰kˆ tilaukset/rivit splitata (eli keissi jossa koko tilaus ei ole mahtunut er‰‰n tai keissi jossa vain osa rivist‰ on mahtunut er‰‰n)
+    // Tsekataanko pit√§√§k√∂ tilaukset/rivit splitata (eli keissi jossa koko tilaus ei ole mahtunut er√§√§n tai keissi jossa vain osa rivist√§ on mahtunut er√§√§n)
     $query = "SELECT tilausrivi.otunnus, tilausrivi.tunnus, sum(ifnull(kerayserat.kpl,0)) kerkpl
               FROM tilausrivi
               JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.ohita_kerays = '')

@@ -9,7 +9,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
   $tunnus  = (int) $jaettavalasku;
   $vahennettavasumma_valuutassa = (float) str_replace(",", ".", $vahennettavasumma_valuutassa);
 
-  // Katsotaan, ett‰ lasku on hyv‰ksytt‰v‰n‰ tai valmiina maksatukseen
+  // Katsotaan, ett√§ lasku on hyv√§ksytt√§v√§n√§ tai valmiina maksatukseen
   $query = "SELECT *
             FROM lasku
             WHERE yhtio = '$kukarow[yhtio]'
@@ -18,21 +18,21 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
   $jaettavalaskures = pupe_query($query);
 
   if (mysql_num_rows($jaettavalaskures) != 1) {
-    echo "<font class='error'>",t("Laskua ei voida jakaa, koska se on v‰‰r‰ss‰ tilassa"),"!<br/>";
+    echo "<font class='error'>",t("Laskua ei voida jakaa, koska se on v√§√§r√§ss√§ tilassa"),"!<br/>";
     return FALSE;
   }
 
   $jaettavalaskurow = mysql_fetch_assoc($jaettavalaskures);
 
   if (($jaettavalaskurow['summa'] >= 0 and $vahennettavasumma_valuutassa <= 0) or ($jaettavalaskurow['summa'] <= 0 and $vahennettavasumma_valuutassa >= 0) or (abs($vahennettavasumma_valuutassa) >= abs($jaettavalaskurow['summa']))) {
-    echo "<font class='error'>",t("Syˆtetty summa on virheellinen"),"! $vahennettavasumma_valuutassa<br/>";
+    echo "<font class='error'>",t("Sy√∂tetty summa on virheellinen"),"! $vahennettavasumma_valuutassa<br/>";
     return false;
   }
 
-  // Lasketaan kerroin annetusta summasta ja alkuper‰isest‰ summasta
+  // Lasketaan kerroin annetusta summasta ja alkuper√§isest√§ summasta
   $kerroin = $vahennettavasumma_valuutassa / $jaettavalaskurow['summa'];
 
-  // Katsotaan voidaanko splitata vai meneekˆ tiliˆinnit nollaan
+  // Katsotaan voidaanko splitata vai meneek√∂ tili√∂innit nollaan
   $query = "SELECT round(summa * $kerroin, 2) summa
             FROM tiliointi
             WHERE yhtio   = '$kukarow[yhtio]'
@@ -43,7 +43,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
   $tiliointires = pupe_query($query);
 
   if (mysql_num_rows($tiliointires) > 0) {
-    echo "<font class='error'>",t("Laskua ei voida jakaa n‰in pieneen osaan"),"!<br/>";
+    echo "<font class='error'>",t("Laskua ei voida jakaa n√§in pieneen osaan"),"!<br/>";
     return false;
   }
 
@@ -62,7 +62,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 
   while ($keikkarow = mysql_fetch_assoc($keikkares)) {
 
-    // katsotaan onko j‰lkilaskettu
+    // katsotaan onko j√§lkilaskettu
     $query = "SELECT tunnus
               FROM lasku
               WHERE yhtio     = '$kukarow[yhtio]'
@@ -73,19 +73,19 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
               AND kohdistettu = 'X'";
     $check_res = pupe_query($query);
 
-    // katsotaan onko alkuper‰inen lasku liitetty kokonaan saapumiseen, jos on voidaan liitt‰‰ molemmat laskut uudestaan
+    // katsotaan onko alkuper√§inen lasku liitetty kokonaan saapumiseen, jos on voidaan liitt√§√§ molemmat laskut uudestaan
     if ($jaettavalaskurow['summa'] == $keikkarow['summa']) {
       $keikat[] = $keikkarow['laskunro'];
 
-      echo "<font class='error'>".t("Liitet‰‰n molemmat laskut uudestaan saapumiseen")." $keikkarow[laskunro]</font><br>";
+      echo "<font class='error'>".t("Liitet√§√§n molemmat laskut uudestaan saapumiseen")." $keikkarow[laskunro]</font><br>";
     }
     else {
       if (mysql_num_rows($check_res) > 0) {
-        echo "<font class='error'>".t("Laskua ei voida jakaa, koska se on liitetty vain osittain saapumiseen %s ja keikka on j‰lkilaskettu", "", $keikkarow["laskunro"])."!</font><br>";
+        echo "<font class='error'>".t("Laskua ei voida jakaa, koska se on liitetty vain osittain saapumiseen %s ja keikka on j√§lkilaskettu", "", $keikkarow["laskunro"])."!</font><br>";
         $keikatok = FALSE;
       }
       else {
-        echo "<font class='error'>".t("Lasku oli liitetty vain osittain saapumiseen %s, joten uusia laskuja ei voitu liitt‰‰. K‰y korjaamassa keikan laskut manuaalisesti", "", $keikkarow["laskunro"]).".</font><br>";
+        echo "<font class='error'>".t("Lasku oli liitetty vain osittain saapumiseen %s, joten uusia laskuja ei voitu liitt√§√§. K√§y korjaamassa keikan laskut manuaalisesti", "", $keikkarow["laskunro"]).".</font><br>";
       }
     }
   }
@@ -94,7 +94,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
     return FALSE;
   }
 
-  // Tehd‰‰n uusi lasku
+  // Tehd√§√§n uusi lasku
   for ($i=0; $i < mysql_num_fields($jaettavalaskures)-1; $i++) {
 
     $fields .= mysql_field_name($jaettavalaskures, $i).",";
@@ -118,7 +118,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
   $fields = substr($fields, 0, -1);
   $values = substr($values, 0, -1);
 
-  // Lis‰t‰‰n uusi lasku
+  // Lis√§t√§√§n uusi lasku
   $query = "INSERT into lasku ($fields) VALUES ($values)";
   $result = pupe_query($query);
   $utunnus = mysql_insert_id();
@@ -132,7 +132,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
     $alkuperainen_tunnus = $jaettavalaskurow["vanhatunnus"];
   }
 
-  // P‰ivitet‰‰n vanha lasku
+  // P√§ivitet√§√§n vanha lasku
   $query  = "UPDATE lasku SET
              summa       = $jaettavalaskurow[summa] - $vahennettavasumma_valuutassa,
              arvo        = $alkuperainen_summa,
@@ -141,7 +141,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
              AND tunnus  = '$jaettavalaskurow[tunnus]'";
   $result = pupe_query($query);
 
-  // P‰ivitet‰‰n uusi lasku
+  // P√§ivitet√§√§n uusi lasku
   $query  = "UPDATE lasku SET
              arvo        = $alkuperainen_summa,
              vanhatunnus = $alkuperainen_tunnus
@@ -149,7 +149,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
              AND tunnus  = '$utunnus'";
   $result = pupe_query($query);
 
-  // Lis‰t‰‰n tiliˆinnit
+  // Lis√§t√§√§n tili√∂innit
   $selite = t('Ostolaskun osasuoritus');
 
   $aputunnukset_vanha = array();
@@ -171,10 +171,10 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
     $vanha_summa = (float) $tiliointirow["summa"] - $uusi_summa;
     $vanha_summa_valuutassa = (float) $tiliointirow["summa_valuutassa"] - $uusi_summa_valuutassa;
 
-    // ei kopioida pyˆristystili‰
+    // ei kopioida py√∂ristystili√§
     if ($tiliointirow['tilino'] != $yhtiorow['pyoristys']) {
 
-      // tehd‰‰n uudet tiliˆnnit
+      // tehd√§√§n uudet tili√∂nnit
       $query = "INSERT INTO tiliointi SET
                 yhtio            = '$tiliointirow[yhtio]',
                 ltunnus          = '$jaettavalaskurow[tunnus]',
@@ -198,12 +198,12 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
       $result = pupe_query($query);
       $uusi_id = mysql_insert_id();
 
-      // jos aputunnus ei ole tyhj‰, otetaan se avaimeksi taulukkoon ja laitetaan uuden aputunnusrivin id sen alle
+      // jos aputunnus ei ole tyhj√§, otetaan se avaimeksi taulukkoon ja laitetaan uuden aputunnusrivin id sen alle
       if ($tiliointirow['aputunnus'] > 0) {
         $aputunnukset_vanha[$tiliointirow['aputunnus']] = $uusi_id;
       }
 
-      // jos tiliˆintirivi lˆytyy avaimena taulukosta
+      // jos tili√∂intirivi l√∂ytyy avaimena taulukosta
       if (isset($aputunnukset_vanha[$tiliointirow['tunnus']])) {
         $query = "UPDATE tiliointi SET
                   aputunnus    = $uusi_id
@@ -238,7 +238,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
         $aputunnukset_uusi[$tiliointirow['aputunnus']] = $uusi_id;
       }
 
-      // laitetaan aputunnus pointtaaman takaisin oikeeseen tiliˆintiin
+      // laitetaan aputunnus pointtaaman takaisin oikeeseen tili√∂intiin
       if (isset($aputunnukset_uusi[$tiliointirow['tunnus']])) {
         $query = "UPDATE tiliointi SET
                   aputunnus    = $uusi_id
@@ -247,7 +247,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
       }
     }
 
-    // yliviivataan vanhat tiliˆinnit
+    // yliviivataan vanhat tili√∂innit
     $query = "UPDATE tiliointi SET
               korjattu    = '$kukarow[kuka]',
               korjausaika = now()
@@ -256,7 +256,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
     $result = pupe_query($query);
   }
 
-  // tarkistetaan onko pyˆristyseroja
+  // tarkistetaan onko py√∂ristyseroja
   $query = "SELECT sum(summa) summa, sum(summa_valuutassa) summa_valuutassa
             FROM tiliointi
             WHERE yhtio  = '$kukarow[yhtio]'
@@ -286,7 +286,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
               summa_valuutassa = -1 * $check1[summa_valuutassa],
               valkoodi         = '$jaettavalaskurow[valkoodi]',
               vero             = 0,
-              selite           = '".t("Pyˆristysero")."',
+              selite           = '".t("Py√∂ristysero")."',
               lukko            = '',
               laatija          = '$kukarow[kuka]',
               laadittu         = now()";
@@ -306,7 +306,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
               summa_valuutassa = -1 * $check2[summa_valuutassa],
               valkoodi         = '$jaettavalaskurow[valkoodi]',
               vero             = 0,
-              selite           = '".t("Pyˆristysero")."',
+              selite           = '".t("Py√∂ristysero")."',
               lukko            = '',
               laatija          = '$kukarow[kuka]',
               laadittu         = now()";
@@ -347,7 +347,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
     }
   }
 
-  // T‰ss‰ kopioidaan laskun liitetiedostot uudelle laskulle
+  // T√§ss√§ kopioidaan laskun liitetiedostot uudelle laskulle
   $query = "INSERT INTO liitetiedostot
             (yhtio, data, filename, filesize, filetype, image_bits, image_channels, image_height, image_width, jarjestys, kayttotarkoitus, kieli, laatija, liitos, liitostunnus, luontiaika, muutospvm, muuttaja, selite)
             SELECT yhtio, data, filename, filesize, filetype, image_bits, image_channels, image_height, image_width, jarjestys, kayttotarkoitus, kieli, laatija, liitos, '$utunnus', luontiaika, muutospvm, muuttaja, selite

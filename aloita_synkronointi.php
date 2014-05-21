@@ -15,7 +15,7 @@ if ($tee == "SYNK") {
   //  Onko mahdollista synkronoida?
   if (substr($table, 0, 9) == "avainsana") {
     if (strpos($yhtiorow["synkronoi"], substr($table, 0, 9)) === false) {
-      echo "VIRHE: Pyydetty‰ taulua $table ei voida synkronoida, sit‰ ei ole m‰‰ritelty!";
+      echo "VIRHE: Pyydetty√§ taulua $table ei voida synkronoida, sit√§ ei ole m√§√§ritelty!";
       exit;
     }
 
@@ -38,7 +38,7 @@ if ($tee == "SYNK") {
   }
   else {
     if(strpos($yhtiorow["synkronoi"], $table) === false or $table == "") {
-      echo "VIRHE: Pyydetty‰ taulua $table ei voida synkronoida, sit‰ ei ole m‰‰ritelty!";
+      echo "VIRHE: Pyydetty√§ taulua $table ei voida synkronoida, sit√§ ei ole m√§√§ritelty!";
       exit;
     }
     $lajit = "";
@@ -49,11 +49,11 @@ if ($tee == "SYNK") {
   list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset) = pakolliset_sarakkeet($table);
 
   if(count($wherelliset) == 0 and count($pakolliset) == 0) {
-    echo "VIRHE: Pyydetty‰ taulua $table ei voida synkronoida, sit‰ ei ole m‰‰ritelty!<br>";
+    echo "VIRHE: Pyydetty√§ taulua $table ei voida synkronoida, sit√§ ei ole m√§√§ritelty!<br>";
     exit;
   }
   else {
-    //  Tehd‰‰n kysely
+    //  Tehd√§√§n kysely
     $query = "SELECT group_concat(concat('\'',yhtio.yhtio,'\'')) yhtiot
               FROM yhtio
               JOIN yhtion_parametrit ON (yhtion_parametrit.yhtio = yhtio.yhtio)
@@ -63,7 +63,7 @@ if ($tee == "SYNK") {
     $kohderow = mysql_fetch_array($kohderes);
 
     if (strlen($kohderow["yhtiot"]) == 0) {
-      echo "VIRHE: Pyydetty‰ taulua $table ei voida synkronoida, yhtiˆ ei lˆydy!<br>$query";
+      echo "VIRHE: Pyydetty√§ taulua $table ei voida synkronoida, yhti√∂ ei l√∂ydy!<br>$query";
       exit;
     }
 

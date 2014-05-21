@@ -22,7 +22,7 @@ echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
   //-->
   </script>";
 
-echo "<font class='head'>".t("Alennusten yll‰pito")."</font><hr>";
+echo "<font class='head'>".t("Alennusten yll√§pito")."</font><hr>";
 
 echo "<form name=asiakas method=post>";
 echo "<table>
@@ -52,7 +52,7 @@ if ($asiakasid != "") {
   $asiakas_result = pupe_query($asiakas_query);
 
   if (mysql_num_rows($asiakas_result) != 1) {
-    echo "<font class='error'>".t("Asiakasta ei lˆytynyt").".</font>";
+    echo "<font class='error'>".t("Asiakasta ei l√∂ytynyt").".</font>";
     exit;
   }
   $asiakas = mysql_fetch_assoc($asiakas_result);
@@ -96,7 +96,7 @@ if ($asiakasid != "") {
 }
 
 if ($oikeurow["paivitys"] != "1" and ($tee == 'uusi' or $tee == 'lisaa')) {
-  echo "<br><font class='error'>".t("Sinulla ei ole p‰ivitysoikeutta")."!</font><br/>";
+  echo "<br><font class='error'>".t("Sinulla ei ole p√§ivitysoikeutta")."!</font><br/>";
   $tee = "alennustaulukko";
 }
 
@@ -113,24 +113,24 @@ if ($tee == 'uusi') {
     $tee = "alennustaulukko";
   }
   if(empty($uusi_alkuryhma) or empty($uusi_loppuryhma)) {
-    echo "<br><font class='error'>".t("Alkuryhm‰ tai loppuryhm‰")." puuttuu</font><br/>";
+    echo "<br><font class='error'>".t("Alkuryhm√§ tai loppuryhm√§")." puuttuu</font><br/>";
     $tee = "alennustaulukko";
   }
   if (!is_numeric($uusi_alennus) and $uusi_alennus != "") {
-    echo "<br><font class='error'>".t("Alennuksen t‰ytyy olla numero").".</font><br/>";
+    echo "<br><font class='error'>".t("Alennuksen t√§ytyy olla numero").".</font><br/>";
     $tee = "alennustaulukko";
   }
   if ($uusi_alennus < 0 or $uusi_alennus > 100) {
-    echo "<br><font class='error'>".t("Alennuksen t‰ytyy olla v‰lill‰ 0-100").".</font><br/>";
+    echo "<br><font class='error'>".t("Alennuksen t√§ytyy olla v√§lill√§ 0-100").".</font><br/>";
     $tee = "alennustaulukko";
   }
   if (!is_numeric($uusi_minkpl) and $uusi_minkpl != "") {
-    echo "<br><font class='error'>".t("Minkpl t‰ytyy olla numero").".</font><br/>";
+    echo "<br><font class='error'>".t("Minkpl t√§ytyy olla numero").".</font><br/>";
     $tee = "alennustaulukko";
   }
 }
 
-# P‰ivit‰ kenttien tarkistus
+# P√§ivit√§ kenttien tarkistus
 if ($tee == 'lisaa') {
   foreach($alkuryhma as $i => $ryhma) {
     list($yyyy, $mm, $dd) = explode('-', $alkupvm[$i]);
@@ -144,25 +144,25 @@ if ($tee == 'lisaa') {
       $tee = "alennustaulukko";
     }
     if (empty($alkuryhma[$i]) or empty($loppuryhma[$i])) {
-      echo "<font class='error'>".t("Alkuryhm‰ tai loppuryhm‰ puuttuu")."</font><br/>";
+      echo "<font class='error'>".t("Alkuryhm√§ tai loppuryhm√§ puuttuu")."</font><br/>";
       $tee = "alennustaulukko";
     }
     if (!is_numeric($alennus[$i]) and $alennus[$i] != "") {
-      echo "<font class='error'>".t("Alennuksen t‰ytyy olla numero").".</font><br/>";
+      echo "<font class='error'>".t("Alennuksen t√§ytyy olla numero").".</font><br/>";
       $tee = "alennustaulukko";
     }
     if ($alennus[$i] < 0 or $alennus[$i] > 100) {
-      echo "<font class='error'>".t("Alennuksen t‰ytyy olla v‰lill‰ 0-100").".</font><br/>";
+      echo "<font class='error'>".t("Alennuksen t√§ytyy olla v√§lill√§ 0-100").".</font><br/>";
       $tee = "alennustaulukko";
     }
     if (!is_numeric($minkpl[$i]) and $minkpl[$i] != "") {
-      echo "<font class='error'>".t("Minkpl t‰ytyy olla numero").".</font><br/>";
+      echo "<font class='error'>".t("Minkpl t√§ytyy olla numero").".</font><br/>";
       $tee = "alennustaulukko";
     }
   }
 }
 
-# P‰ivitet‰‰n ryhm‰t
+# P√§ivitet√§√§n ryhm√§t
 if ($tee == 'lisaa' or $tee == 'uusi') {
 
   if ($tee == 'uusi') {
@@ -177,23 +177,23 @@ if ($tee == 'lisaa' or $tee == 'uusi') {
     $loppupvm[] = $uusi_loppupvm;
   }
 
-  # Query lis‰ ytunnuksen tai asiakasid:n mukaan
+  # Query lis√§ ytunnuksen tai asiakasid:n mukaan
   $query_lisa = ($tyyppi == 'ytunnus') ? "ytunnus = '$ytunnus'" : "asiakas = '$asiakasid'";
 
-  # Loopataan l‰pi ryhm‰v‰lit (rivit)
+  # Loopataan l√§pi ryhm√§v√§lit (rivit)
   for ($i = 0; $i < count($alkuryhma); $i++) {
 
-    # Haetaan ryhm‰t perusalennus-taulusta, between $alkuryhma and $loppuryhma
+    # Haetaan ryhm√§t perusalennus-taulusta, between $alkuryhma and $loppuryhma
     $ryhmat = hae_ryhmat($alkuryhma[$i], $loppuryhma[$i]);
 
-    # Jos ryhmi‰ ei lˆydy
+    # Jos ryhmi√§ ei l√∂ydy
     if (count($ryhmat) == 0) {
-      echo "<br><font class='error'>".t("Yht‰‰n ryhm‰‰ ei lˆytynyt v‰lilt‰")." $alkuryhma[$i] - $loppuryhma[$i]!</font><br>";
+      echo "<br><font class='error'>".t("Yht√§√§n ryhm√§√§ ei l√∂ytynyt v√§lilt√§")." $alkuryhma[$i] - $loppuryhma[$i]!</font><br>";
       $tee = "alennustaulukko";
       break;
     }
 
-    # Jos poistettava, loopataan ryhm‰v‰li ja poistetaan.
+    # Jos poistettava, loopataan ryhm√§v√§li ja poistetaan.
     if ($poista[$i] != "") {
       foreach ($ryhmat as $poistettava_ryhma) {
         if ($alkupvm[$i] == "") {
@@ -216,15 +216,15 @@ if ($tee == 'lisaa' or $tee == 'uusi') {
         $poista[$i] = NULL;
       }
     }
-    # Jos ei poistettava niin lis‰t‰‰n tai p‰ivitet‰‰n uudet alennukset
+    # Jos ei poistettava niin lis√§t√§√§n tai p√§ivitet√§√§n uudet alennukset
     else {
 
-      # Ryhm‰v‰lin tunnukset
+      # Ryhm√§v√§lin tunnukset
       $tunnus = explode(",", $tunnukset[$i]);
       $j = 0;
 
       foreach ($ryhmat as $ryhma) {
-        # P‰ivitet‰‰n jos tunnus on setattu
+        # P√§ivitet√§√§n jos tunnus on setattu
         if (!empty($tunnus[$j])) {
           $query = "UPDATE asiakasalennus SET
                     yhtio        = '{$kukarow['yhtio']}',
@@ -291,8 +291,8 @@ if ($tee == "alennustaulukko") {
   echo "<form name='paivita_alennukset' method='post'>";
   echo "<table>
     <tr>
-      <th>".t("Alkuryhm‰")."</th>
-      <th>".t("Loppuryhm‰")."</th>
+      <th>".t("Alkuryhm√§")."</th>
+      <th>".t("Loppuryhm√§")."</th>
       <th>".t("Alennus")."</th>
       <th>".t("Alennuslaji")."</th>
       <th>".t("Minkpl")."</th>
@@ -364,7 +364,7 @@ if ($tee == "alennustaulukko") {
         $edellinen_rivi['loppupvm'] = ($edellinen_rivi['loppupvm'] == $loppupvm[$i]) ? $edellinen_rivi['loppupvm'] : $loppupvm[$i];
       }
 
-      # Jos p‰iv‰m‰‰r‰ on 0000-00-00
+      # Jos p√§iv√§m√§√§r√§ on 0000-00-00
       $edellinen_rivi['alkupvm'] = ($edellinen_rivi['alkupvm'] == '0000-00-00') ? "" : $edellinen_rivi['alkupvm'];
       $edellinen_rivi['loppupvm'] = ($edellinen_rivi['loppupvm'] == '0000-00-00') ? "" : $edellinen_rivi['loppupvm'];
 
@@ -388,11 +388,11 @@ if ($tee == "alennustaulukko") {
       // Monikerta dropdown
       if(empty($edellinen_rivi['monikerta'])) {
         echo "<option value='' selected>".t("Ei")."</option>";
-        echo "<option value='K'>".t("Kyll‰")."</option>";
+        echo "<option value='K'>".t("Kyll√§")."</option>";
       }
       else {
         echo "<option value='' >".t("Ei")."</option>";
-        echo "<option value='K' selected>".t("Kyll‰")."</option>";
+        echo "<option value='K' selected>".t("Kyll√§")."</option>";
       }
       echo "</td>";
 
@@ -413,7 +413,7 @@ if ($tee == "alennustaulukko") {
   } while ($row);
 
   echo "<tr>";
-  echo "<td colspan='7' class='back'><input type='submit' value='".t("P‰ivit‰")."'></td>";
+  echo "<td colspan='7' class='back'><input type='submit' value='".t("P√§ivit√§")."'></td>";
   echo "<td colspan='2' class='back' style='text-align:right;'>".t("Ruksaa kaikki")." <input type='checkbox' name='poist' onclick='toggleAll(this);'></td>";
   echo "</tr>";
   echo "<input type='hidden' name='asiakasid' value='$asiakasid'>";
@@ -423,12 +423,12 @@ if ($tee == "alennustaulukko") {
   echo "</table>";
   echo "</form>";
 
-  # Uuden ryhm‰n luominen
+  # Uuden ryhm√§n luominen
   echo "<br/><font class='head'>".t("Uusi")."</font><hr>";
   echo "<form name='uusi_alennus' method='post'>";
   echo "<table><tr>
-      <th>".t("Alkuryhm‰")."</th>
-      <th>".t("Loppuryhm‰")."</th>
+      <th>".t("Alkuryhm√§")."</th>
+      <th>".t("Loppuryhm√§")."</th>
       <th>".t("Alennus")."</th>
       <th>".t("Alennuslaji")."</th>
       <th>".t("Minkpl")."</th>
@@ -453,7 +453,7 @@ if ($tee == "alennustaulukko") {
   $sel = ($uusi_monikerta != '') ? 'selected' : '';
   echo "<td><select name='uusi_monikerta'>
         <option value=''>".t("Ei")."</option>
-        <option value='K' $sel>".t("Kyll‰")."</option>
+        <option value='K' $sel>".t("Kyll√§")."</option>
     </td>
     <td><input type='text' name='uusi_alkupvm' value=$uusi_alkupvm></td>
     <td><input type='text' name='uusi_loppupvm' value=$uusi_loppupvm></td>
@@ -467,7 +467,7 @@ if ($tee == "alennustaulukko") {
   echo "</form>";
 }
 
-# Haetaan ryhm‰t perusalennus-taulusta, between $alkuryhma and $loppuryhma
+# Haetaan ryhm√§t perusalennus-taulusta, between $alkuryhma and $loppuryhma
 function hae_ryhmat($alkuryhma, $loppuryhma) {
   global $kukarow;
 

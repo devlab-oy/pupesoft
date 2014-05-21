@@ -10,14 +10,14 @@ if ($tila == "muokkaasuoritusta") {
     echo "<font class='error'>Virheellisesti valittu kassa-/saamistili!</font><br><br>";
   }
   else {
-    // laitetaan ensiksi kassatiliˆinti pointtaamaan saamistiliˆintiin
+    // laitetaan ensiksi kassatili√∂inti pointtaamaan saamistili√∂intiin
     $query = "UPDATE tiliointi
               set aputunnus = '$saamis'
               where yhtio = '$kukarow[yhtio]'
               and tunnus  = '$kassa'";
     $result = pupe_query($query);
 
-    // sitten laitetaan suoritus pointtaamaan saamistiliˆintiin
+    // sitten laitetaan suoritus pointtaamaan saamistili√∂intiin
     $query = "UPDATE suoritus
               SET ltunnus = '$saamis'
               WHERE yhtio = '$kukarow[yhtio]'
@@ -32,7 +32,7 @@ if ($tila == "muokkaasuoritusta") {
 if ($tila == "vaihdasuorituksentili") {
   $myyntisaamiset = 0;
 
-  // katotaan lˆytyykˆ tili
+  // katotaan l√∂ytyyk√∂ tili
   $query = "SELECT tilino
             from tili
             where yhtio = '$kukarow[yhtio]'
@@ -55,7 +55,7 @@ if ($tila == "vaihdasuorituksentili") {
 
     $suoritus = mysql_fetch_assoc($result);
 
-    // katotaan lˆytyykˆ tiliˆinti
+    // katotaan l√∂ytyyk√∂ tili√∂inti
     $query = "SELECT tunnus
               FROM tiliointi
               WHERE yhtio  = '$kukarow[yhtio]'
@@ -63,7 +63,7 @@ if ($tila == "vaihdasuorituksentili") {
               AND korjattu = ''";
     $result = pupe_query($query);
 
-    // tiliˆinti‰ ei lˆydy tai halutaan menn‰ runkslaamaan
+    // tili√∂inti√§ ei l√∂ydy tai halutaan menn√§ runkslaamaan
     if (mysql_affected_rows() == 0 or $vaihdasuorituksentiliointitunnuksia != "") {
 
       // katotaan onko se ylikirjattu
@@ -75,7 +75,7 @@ if ($tila == "vaihdasuorituksentili") {
 
       if ($rivi = mysql_fetch_assoc($result)) {
 
-        // lˆydettiin dellattu tiliˆinti, annetaan k‰ytt‰j‰n valita saamistili ja kassatili t‰lle suoritukselle...
+        // l√∂ydettiin dellattu tili√∂inti, annetaan k√§ytt√§j√§n valita saamistili ja kassatili t√§lle suoritukselle...
         // listataan kaikki tositteen validit tapahtumat
         $query = "SELECT tiliointi.*, tili.nimi
                   FROM tiliointi
@@ -86,12 +86,12 @@ if ($tila == "vaihdasuorituksentili") {
         $result = pupe_query($query);
 
         if (mysql_num_rows($result) == 0) {
-          echo "<font class='error'>T‰ll‰ suorituksella ei ole tiliˆintej‰! ($suoritus[nimi_maksaja] $suoritus[summa] $suoritus[valkoodi]) Lis‰‰ se tositteelle saamis- ja kassatili ja kokeile uudestaan!</font>";
+          echo "<font class='error'>T√§ll√§ suorituksella ei ole tili√∂intej√§! ($suoritus[nimi_maksaja] $suoritus[summa] $suoritus[valkoodi]) Lis√§√§ se tositteelle saamis- ja kassatili ja kokeile uudestaan!</font>";
           echo " (<a href='../muutosite.php?tee=E&tunnus=$rivi[ltunnus]&lopetus=$lopetus'>Muokkaa tositetta</a>)<br><br>";
         }
         else {
-          echo "<font class='message'>T‰ll‰ suorituksella ei ole saamis-/kassatili‰! ($suoritus[nimi_maksaja] $suoritus[summa] $suoritus[valkoodi])<br>";
-          echo "Valitse suorituksen tiliˆinnit listalta: </font>";
+          echo "<font class='message'>T√§ll√§ suorituksella ei ole saamis-/kassatili√§! ($suoritus[nimi_maksaja] $suoritus[summa] $suoritus[valkoodi])<br>";
+          echo "Valitse suorituksen tili√∂innit listalta: </font>";
           echo " (<a href='../muutosite.php?tee=E&tunnus=$rivi[ltunnus]&lopetus=$lopetus'>Muokkaa tositetta</a>)<br><br>";
 
           echo "<table>";
@@ -138,19 +138,19 @@ if ($tila == "vaihdasuorituksentili") {
           }
           echo "</table>";
 
-          echo "<br><input type='submit' value='".t("P‰ivit‰ suoritus")."'>";
+          echo "<br><input type='submit' value='".t("P√§ivit√§ suoritus")."'>";
           echo "</form>";
 
-          // t‰h‰n loppuu t‰m‰ rundi
+          // t√§h√§n loppuu t√§m√§ rundi
           exit;
         }
       }
       else {
-        echo "<font class='error'>".t("Emme lˆyd‰ t‰lle suoritukselle mit‰‰n kirjanpitotapahtumia. Ei voida jatkaa")."!</font><br><br>";
+        echo "<font class='error'>".t("Emme l√∂yd√§ t√§lle suoritukselle mit√§√§n kirjanpitotapahtumia. Ei voida jatkaa")."!</font><br><br>";
       }
     }
     else {
-      // Muutetaan tiliˆinti
+      // Muutetaan tili√∂inti
       $query = "UPDATE tiliointi
                 SET tilino = '$vastatili'
                 WHERE yhtio  = '$kukarow[yhtio]'
@@ -160,26 +160,26 @@ if ($tila == "vaihdasuorituksentili") {
     }
   }
   else {
-    echo "<font class='error'>".t("Suoritus kateissa, tili‰ ei voida vaihtaa")."!</font><br><br>";
+    echo "<font class='error'>".t("Suoritus kateissa, tili√§ ei voida vaihtaa")."!</font><br><br>";
   }
 
   $tila = "kohdistaminen";
 }
 
 if ($tila == 'tee_kohdistus') {
-  // Tehd‰‰n error tsekit
-  $query = "  LOCK TABLES
-        yriti READ,
-        yhtio READ,
-        tili READ,
-        taso READ,
-        lasku WRITE,
-        suoritus WRITE,
-        tiliointi WRITE,
-        tiliointi as tiliointi2 WRITE,
-        sanakirja WRITE,
-        yhtion_toimipaikat READ,
-        avainsana as avainsana_kieli READ";
+  // Tehd√§√§n error tsekit
+  $query = "LOCK TABLES
+            yriti READ,
+            yhtio READ,
+            tili READ,
+            taso READ,
+            lasku WRITE,
+            suoritus WRITE,
+            tiliointi WRITE,
+            tiliointi as tiliointi2 WRITE,
+            sanakirja WRITE,
+            yhtion_toimipaikat READ,
+            avainsana as avainsana_kieli READ";
   $result = pupe_query($query);
 
   // haetaan suorituksen tiedot
@@ -217,7 +217,7 @@ if ($tila == 'tee_kohdistus') {
             and suoritus.tunnus  = '$suoritus_tunnus'";
   $result = pupe_query($query);
 
-  // tehd‰‰n n‰timpi errorihandlaus
+  // tehd√§√§n n√§timpi errorihandlaus
   if (mysql_num_rows($result) == 0) {
 
     echo "<font class='error'>".t("Suoritus katosi")."!</font><br><br>";
@@ -229,12 +229,12 @@ if ($tila == 'tee_kohdistus') {
   else {
     $suoritus = mysql_fetch_assoc($result);
 
-    // Otetaan yhtiˆn tiedoista myyntireskontran sallittu tilikauden ajankohta
+    // Otetaan yhti√∂n tiedoista myyntireskontran sallittu tilikauden ajankohta
     $tilalk = explode("-", $yhtiorow["myyntireskontrakausi_alku"]);
     $tillop = explode("-", $yhtiorow["myyntireskontrakausi_loppu"]);
     $makpvm = explode("-", $suoritus['maksupvm']);
 
-    // Verrataan v‰h‰n p‰iv‰m‰‰ri‰.
+    // Verrataan v√§h√§n p√§iv√§m√§√§ri√§.
     $myyresktilalk = (int) date('Ymd', mktime(0,0,0, $tilalk[1], $tilalk[2], $tilalk[0]));
     $myyresktillop = (int) date('Ymd', mktime(0,0,0, $tillop[1], $tillop[2], $tillop[0]));
     $maksupvmint   = (int) date('Ymd', mktime(0,0,0, $makpvm[1], $makpvm[2], $makpvm[0]));
@@ -279,7 +279,7 @@ if ($tila == 'tee_kohdistus') {
 
     // Tarkistetaan muutama asia
     if ($laskutunnukset == 0 and $laskutunnuksetkale == 0) {
-      echo "<font class='error'>".t("Olet kohdistamassa, mutta et ole valinnut mit‰‰n kohdistettavaa")."!</font><br><br>";
+      echo "<font class='error'>".t("Olet kohdistamassa, mutta et ole valinnut mit√§√§n kohdistettavaa")."!</font><br><br>";
 
       $tila   = 'kohdistaminen';
       $query   = "UNLOCK TABLES";
@@ -288,7 +288,7 @@ if ($tila == 'tee_kohdistus') {
 
     if ($osasuoritus == 1) {
       if (count($lasku_tunnukset) != 1) {
-        echo "<font class='error'>".t("Jos osasuoritus, pit‰‰ valita vain ja ainoastaan yksi lasku")."</font><br><br>";
+        echo "<font class='error'>".t("Jos osasuoritus, pit√§√§ valita vain ja ainoastaan yksi lasku")."</font><br><br>";
 
         $tila   = 'kohdistaminen';
         $query   = "UNLOCK TABLES";
@@ -324,7 +324,7 @@ if ($tila == 'tee_kohdistus') {
       }
 
       if ($jaljella > 0) {
-        echo "<font class='error'>".t("Et voi osasuorittaa, jos j‰jell‰ on positiivinen summa")."!</font><br><br>";
+        echo "<font class='error'>".t("Et voi osasuorittaa, jos j√§jell√§ on positiivinen summa")."!</font><br><br>";
 
         $tila   = 'kohdistaminen';
         $query   = "UNLOCK TABLES";
@@ -358,7 +358,7 @@ if ($tila == 'tee_kohdistus') {
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
-      echo "<font class='error'>".t("Suorituksen tilinumero ei lˆydy! K‰y lis‰‰m‰ss‰ tili yhtiˆlle!")."</font><br><br>";
+      echo "<font class='error'>".t("Suorituksen tilinumero ei l√∂ydy! K√§y lis√§√§m√§ss√§ tili yhti√∂lle!")."</font><br><br>";
 
       $tila   = 'kohdistaminen';
       $query   = "UNLOCK TABLES";
@@ -373,7 +373,7 @@ if ($tila == 'tee_kohdistus') {
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
-      echo "<font class='error'>".t("Suorituksen saamiset-tiliˆinnit eiv‰t lˆydy! Vaihda suorituksen saamiset-tili‰!")."</font><br><br>";
+      echo "<font class='error'>".t("Suorituksen saamiset-tili√∂innit eiv√§t l√∂ydy! Vaihda suorituksen saamiset-tili√§!")."</font><br><br>";
 
       $tila   = 'kohdistaminen';
       $query   = "UNLOCK TABLES";
@@ -390,7 +390,7 @@ if ($tila == 'tee_kohdistus') {
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
-      echo "<font class='error'>".t("Suorituksen raha-tiliˆinnit eiv‰t lˆydy!")."</font><br><br>";
+      echo "<font class='error'>".t("Suorituksen raha-tili√∂innit eiv√§t l√∂ydy!")."</font><br><br>";
 
       $tila   = 'kohdistaminen';
       $query   = "UNLOCK TABLES";
@@ -406,7 +406,7 @@ if ($tila == 'tee_kohdistus') {
     }
 
     if ($osasuoritus != 1 and $pyoristys_virhe_ok != 1) {
-      // Jos ei osasuoriteta eik‰ kirjata erotusta kassa-aleen niin ei saa myˆsk‰‰n j‰‰d‰ erotusta
+      // Jos ei osasuoriteta eik√§ kirjata erotusta kassa-aleen niin ei saa my√∂sk√§√§n j√§√§d√§ erotusta
       if ($laskutunnukset != 0 or $laskutunnuksetkale != 0) {
         $query = "SELECT
                   sum(summa - saldo_maksettu) AS summa,
@@ -448,7 +448,7 @@ if ($tila == 'tee_kohdistus') {
   // Errortsekit on tehty, nyt kohdistetaan
   if (trim($suoritus["viesti"]) != "") $suoritus["viesti"] = " / $suoritus[viesti]";
 
-  // otetaan talteen, jos suorituksen kassatilill‰ on kustannuspaikka.. tarvitaan jos suoritukselle j‰‰ saldoa
+  // otetaan talteen, jos suorituksen kassatilill√§ on kustannuspaikka.. tarvitaan jos suoritukselle j√§√§ saldoa
   $query = "SELECT *
             FROM tiliointi
             WHERE aputunnus = '$suoritus[ltunnus]'
@@ -465,7 +465,7 @@ if ($tila == 'tee_kohdistus') {
   $laskut = array();
 
   if ($osasuoritus == 1) {
-    //*** T‰ss‰ hoidetaan osasuoritus ***
+    //*** T√§ss√§ hoidetaan osasuoritus ***
 
     // Haetaan osasuoritettava lasku
     $query = "SELECT summa - saldo_maksettu AS summa,
@@ -487,11 +487,11 @@ if ($tila == 'tee_kohdistus') {
 
     $lasku = mysql_fetch_assoc($result);
 
-    // Verrataan v‰h‰n p‰iv‰m‰‰ri‰.
+    // Verrataan v√§h√§n p√§iv√§m√§√§ri√§.
     $lapvm = explode("-", $lasku["tapvm"]);
     $lapvmint = (int) date('Ymd', mktime(0,0,0, $lapvm[1], $lapvm[2], $lapvm[0]));
 
-    // Jos suoritus on vanhempi kuin lasku, niin merkataan lasku maksetuksi laskun p‰iv‰m‰‰r‰ll‰
+    // Jos suoritus on vanhempi kuin lasku, niin merkataan lasku maksetuksi laskun p√§iv√§m√§√§r√§ll√§
     if ($maksupvmint < $lapvmint) {
       $laskun_maksupvm = $lasku["tapvm"];
     }
@@ -550,7 +550,7 @@ if ($tila == 'tee_kohdistus') {
     $asresult = pupe_query($query);
     $mskustprow = mysql_fetch_assoc($asresult);
 
-    // Tarkenteet kopsataan alkuper‰iselt‰ tiliˆinnilt‰, mutta jos alkuper‰inen tiliˆinti on ilman tarkenteita, niin menn‰‰n tilin defaulteilla
+    // Tarkenteet kopsataan alkuper√§iselt√§ tili√∂innilt√§, mutta jos alkuper√§inen tili√∂inti on ilman tarkenteita, niin menn√§√§n tilin defaulteilla
     list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($suoritus["myyntisaamiset_tilino"], $mskustprow["kustp"], $mskustprow["kohde"], $mskustprow["projekti"]);
 
     // Myyntisaamiset
@@ -579,7 +579,7 @@ if ($tila == 'tee_kohdistus') {
 
         $totvesumma = 0;
 
-        // jos yhtiˆn toimipaikka lˆytyy, otetaan alvtilinumero t‰m‰n takaa jos se lˆytyy
+        // jos yhti√∂n toimipaikka l√∂ytyy, otetaan alvtilinumero t√§m√§n takaa jos se l√∂ytyy
         if ($lasku["yhtio_toimipaikka"] != '') {
           $query = "SELECT toim_alv
                     FROM yhtion_toimipaikat
@@ -599,7 +599,7 @@ if ($tila == 'tee_kohdistus') {
           $alvtili = $yhtiorow["alv"];
         }
 
-        // Etsit‰‰n myynti-tiliˆinnit
+        // Etsit√§√§n myynti-tili√∂innit
         $query = "SELECT tiliointi.summa, tiliointi.vero, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti, tiliointi.summa_valuutassa, tiliointi.valkoodi
                   FROM tiliointi use index (tositerivit_index)
                   JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)
@@ -634,7 +634,7 @@ if ($tila == 'tee_kohdistus') {
         else {
           while ($tiliointirow = mysql_fetch_assoc($tilres)) {
 
-            // Kuinka paljon on t‰m‰n viennin osuus
+            // Kuinka paljon on t√§m√§n viennin osuus
             $summa = round($tiliointirow['summa'] * (1+$tiliointirow['vero']/100) / $suoritussumma * $valuuttaero, 2);
 
             // Valuuttaero
@@ -656,7 +656,7 @@ if ($tila == 'tee_kohdistus') {
             $totvesumma += $summa;
           }
 
-          // Hoidetaan mahdolliset pyˆristykset
+          // Hoidetaan mahdolliset py√∂ristykset
           if ($totvesumma != $valuuttaero) {
             $query = "UPDATE tiliointi
                       SET summa = summa - $totvesumma + $valuuttaero
@@ -672,13 +672,13 @@ if ($tila == 'tee_kohdistus') {
                 AND yhtio='$kukarow[yhtio]'";
       $result = pupe_query($query);
 
-      // Jos t‰m‰n suorituksen j‰lkeen ei en‰‰ j‰‰ maksettavaa valuutassa
+      // Jos t√§m√§n suorituksen j√§lkeen ei en√§√§ j√§√§ maksettavaa valuutassa
       if ($lasku["summa_valuutassa"] == $suoritus["summa"]) {
          $lisa = ", mapvm=now()";
       }
     }
     else {
-      //jos t‰m‰n suorituksen j‰lkeen ei en‰‰ j‰‰ maksettavaa niin merkataan lasku maksetuksi
+      //jos t√§m√§n suorituksen j√§lkeen ei en√§√§ j√§√§ maksettavaa niin merkataan lasku maksetuksi
       if ($lasku["summa"] == $suoritus["summa"]) {
          $lisa = ", mapvm=now()";
       }
@@ -690,7 +690,7 @@ if ($tila == 'tee_kohdistus') {
               AND yhtio    = '$kukarow[yhtio]'";
     $result = pupe_query($query);
 
-    //Merkataan suoritus k‰ytetyksi ja yliviivataan sen tiliˆinnit
+    //Merkataan suoritus k√§ytetyksi ja yliviivataan sen tili√∂innit
     $query = "UPDATE suoritus
               SET kohdpvm = '$laskun_maksupvm'
               WHERE tunnus = $suoritus[tunnus]
@@ -705,7 +705,7 @@ if ($tila == 'tee_kohdistus') {
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) != 1) {
-      die ("Tiliˆinti1 kateissa " . $suoritus["tunnus"]);
+      die ("Tili√∂inti1 kateissa " . $suoritus["tunnus"]);
     }
     $tiliointi1 = mysql_fetch_assoc($result);
 
@@ -716,12 +716,12 @@ if ($tila == 'tee_kohdistus') {
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) != 1) {
-      die ("Tiliˆinti2 kateissa " . $suoritus["tunnus"]);
+      die ("Tili√∂inti2 kateissa " . $suoritus["tunnus"]);
     }
 
     $tiliointi2 = mysql_fetch_assoc($result);
 
-    // Tehd‰‰n suorituksen tositteelle vastakirjaukset
+    // Tehd√§√§n suorituksen tositteelle vastakirjaukset
     $params = array(
       'summa'       => ($tiliointi1['summa'] * -1),
       'summa_valuutassa'   => ($tiliointi1['summa_valuutassa'] * -1),
@@ -747,7 +747,7 @@ if ($tila == 'tee_kohdistus') {
     kopioitiliointi($tiliointi2['tunnus'], "", $params);
   }
   else {
-    //*** T‰ss‰ k‰sitell‰‰n tavallinen suoritus ***/
+    //*** T√§ss√§ k√§sitell√§√§n tavallinen suoritus ***/
     $laskujen_summa = 0;
 
     if ($laskutunnukset != 0) {
@@ -831,15 +831,15 @@ if ($tila == 'tee_kohdistus') {
     if (strtoupper($suoritus["valkoodi"]) != strtoupper($yhtiorow['valkoodi'])) {
       $kaatosumma = round($suoritus["summa"] - $laskujen_summa_valuutassa,2);
 
-      echo "<font class='message'>".t("Tilitapahtumalle j‰‰ pyˆristyksen j‰lkeen")." $kaatosumma $suoritus[valkoodi]</font><br>";
+      echo "<font class='message'>".t("Tilitapahtumalle j√§√§ py√∂ristyksen j√§lkeen")." $kaatosumma $suoritus[valkoodi]</font><br>";
     }
     else {
       $kaatosumma = round($suoritus["summa"] - $laskujen_summa,2);
 
-      echo "<font class='message'>".t("Tilitapahtumalle j‰‰ pyˆristyksen j‰lkeen")." $kaatosumma $suoritus[valkoodi]</font><br>";
+      echo "<font class='message'>".t("Tilitapahtumalle j√§√§ py√∂ristyksen j√§lkeen")." $kaatosumma $suoritus[valkoodi]</font><br>";
     }
 
-    //Jos heittoa ja kirjataan kassa-alennuksiin etsit‰‰n joku sopiva lasku (=iso summa)
+    //Jos heittoa ja kirjataan kassa-alennuksiin etsit√§√§n joku sopiva lasku (=iso summa)
     if ($kaatosumma != 0 and $pyoristys_virhe_ok == 1) {
       echo "<font class='message'>".t("Kirjataan kassa-aleen")."</font> ";
 
@@ -860,7 +860,7 @@ if ($tila == 'tee_kohdistus') {
       }
     }
 
-    // Tiliˆid‰‰n myyntisaamiset
+    // Tili√∂id√§√§n myyntisaamiset
     if (is_array($laskut) and count($laskut) > 0) {
 
       $kassaan = 0;
@@ -868,11 +868,11 @@ if ($tila == 'tee_kohdistus') {
 
       foreach ($laskut as $lasku) {
 
-        // Verrataan v‰h‰n p‰iv‰m‰‰ri‰.
+        // Verrataan v√§h√§n p√§iv√§m√§√§ri√§.
         $lapvm = explode("-", $lasku["tapvm"]);
         $lapvmint = (int) date('Ymd', mktime(0,0,0, $lapvm[1], $lapvm[2], $lapvm[0]));
 
-        // Jos suoritus on vanhempi kuin lasku, niin merkataan lsaku maksetuksi laskun p‰iv‰m‰‰r‰ll‰
+        // Jos suoritus on vanhempi kuin lasku, niin merkataan lsaku maksetuksi laskun p√§iv√§m√§√§r√§ll√§
         if ($lapvmint > $maksupvmint) {
           $laskun_maksupvm = $lasku["tapvm"];
         }
@@ -898,9 +898,9 @@ if ($tila == 'tee_kohdistus') {
           $korkosumma = 0;
         }
 
-        //Kohdistammeko pyˆristykset ym:t t‰h‰n?
+        //Kohdistammeko py√∂ristykset ym:t t√§h√§n?
          if ($kaatosumma != 0 and $pyoristys_virhe_ok == 1 and $lasku["tunnus"] == $kohdistuslasku["tunnus"]) {
-           echo "<font class='message'>".t("Sijoitin lis‰kassa-alen laskulle").": $kohdistuslasku[laskunro]</font> ";
+           echo "<font class='message'>".t("Sijoitin lis√§kassa-alen laskulle").": $kohdistuslasku[laskunro]</font> ";
 
           if (strtoupper($suoritus["valkoodi"]) != strtoupper($yhtiorow['valkoodi'])) {
             $lasku["alennus_valuutassa"] = round($lasku["alennus_valuutassa"] - $kaatosumma,2);
@@ -916,18 +916,18 @@ if ($tila == 'tee_kohdistus') {
           $kaatosumma = 0;
          }
 
-        // Tehd‰‰n valuuttakonversio kassa-alennukselle
+        // Tehd√§√§n valuuttakonversio kassa-alennukselle
         if (strtoupper($suoritus["valkoodi"]) != strtoupper($yhtiorow['valkoodi'])) {
           $lasku["alennus"] = round($lasku["alennus_valuutassa"] * $suoritus["kurssi"], 2);
         }
 
         // Mahdollinen kassa-alennus
         if ($lasku["alennus"] != 0) {
-          // Kassa-alessa on huomioitava alv, joka voi olla useita vientej‰
+          // Kassa-alessa on huomioitava alv, joka voi olla useita vientej√§
           $totkasumma = 0;
           $totkasumma_valuutassa = 0;
 
-          // jos yhtiˆn toimipaikka lˆytyy, otetaan alvtilinumero t‰m‰n takaa jos se lˆytyy
+          // jos yhti√∂n toimipaikka l√∂ytyy, otetaan alvtilinumero t√§m√§n takaa jos se l√∂ytyy
           if ($lasku["yhtio_toimipaikka"] != '') {
             $query = "SELECT toim_alv
                       FROM yhtion_toimipaikat
@@ -947,7 +947,7 @@ if ($tila == 'tee_kohdistus') {
             $alvtili = $yhtiorow["alv"];
           }
 
-          // Etsit‰‰n myynti-tiliˆinnit
+          // Etsit√§√§n myynti-tili√∂innit
           $query = "SELECT tiliointi.summa, tiliointi.vero, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti, tiliointi.summa_valuutassa, tiliointi.valkoodi
                     FROM tiliointi use index (tositerivit_index)
                     JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)
@@ -962,7 +962,7 @@ if ($tila == 'tee_kohdistus') {
           $yresult = pupe_query($query);
 
           if (mysql_num_rows($yresult) == 0) {
-            echo "<font class='error'>".t("En lˆyt‰nyt laskun myynnin vientej‰! Alv varmaankin heitt‰‰")."</font> ";
+            echo "<font class='error'>".t("En l√∂yt√§nyt laskun myynnin vientej√§! Alv varmaankin heitt√§√§")."</font> ";
 
             list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($suoritus["kassa_ale_tilino"]);
 
@@ -989,7 +989,7 @@ if ($tila == 'tee_kohdistus') {
             $isa = 0;
 
             while ($tiliointirow = mysql_fetch_assoc($yresult)) {
-              // Kuinka paljon on t‰m‰n viennin osuus
+              // Kuinka paljon on t√§m√§n viennin osuus
               $summa = round($tiliointirow['summa'] * (1+$tiliointirow['vero']/100) * -1 / $lasku["alkup_summa"] * $lasku["alennus"], 2);
               $summa_valuutassa = round($tiliointirow['summa_valuutassa'] * (1+$tiliointirow['vero']/100) * -1 / $lasku["alkup_summa_valuutassa"] * $lasku["alennus_valuutassa"], 2);
 
@@ -1003,11 +1003,11 @@ if ($tila == 'tee_kohdistus') {
                 $summa_valuutassa -= $alv_valuutassa;
               }
 
-              // Kuinka paljon olemme kumulatiivisesti tiliˆineet
+              // Kuinka paljon olemme kumulatiivisesti tili√∂ineet
               $totkasumma += $summa + $alv;
               $totkasumma_valuutassa += $summa_valuutassa + $alv_valuutassa;
 
-              // Tarkenteet kopsataan alkuper‰iselt‰ tiliˆinnilt‰, mutta jos alkuper‰inen tiliˆinti on ilman tarkenteita, niin menn‰‰n tilin defaulteilla
+              // Tarkenteet kopsataan alkuper√§iselt√§ tili√∂innilt√§, mutta jos alkuper√§inen tili√∂inti on ilman tarkenteita, niin menn√§√§n tilin defaulteilla
               list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($suoritus["kassa_ale_tilino"], $tiliointirow["kustp"], $tiliointirow["kohde"], $tiliointirow["projekti"]);
 
               // Kassa-ale
@@ -1052,12 +1052,12 @@ if ($tila == 'tee_kohdistus') {
               }
             }
 
-            //Hoidetaan mahdolliset pyˆristykset
+            //Hoidetaan mahdolliset py√∂ristykset
             $heitto = round($totkasumma - $lasku["alennus"], 2);
             $heitto_valuutassa = round($totkasumma_valuutassa - $lasku["alennus_valuutassa"], 2);
 
             if (abs($heitto) >= 0.01) {
-              echo "<font class='message'>".t("Kassa-alvpyˆristys")." $heitto</font><br>";
+              echo "<font class='message'>".t("Kassa-alvpy√∂ristys")." $heitto</font><br>";
 
               $query = "UPDATE tiliointi SET
                         summa            = summa - $heitto,
@@ -1070,7 +1070,7 @@ if ($tila == 'tee_kohdistus') {
           }
         }
 
-        // Tehd‰‰n valuuttakonversio kassasuoritukselle
+        // Tehd√§√§n valuuttakonversio kassasuoritukselle
         if (strtoupper($suoritus["valkoodi"]) != strtoupper($yhtiorow['valkoodi'])) {
           $suoritettu_kassaan = round(($lasku["summa_valuutassa"] - $lasku["alennus_valuutassa"]) * $suoritus["kurssi"], 2);
           $suoritettu_kassaan_valuutassa = $lasku["summa_valuutassa"] - $lasku["alennus_valuutassa"];
@@ -1099,7 +1099,7 @@ if ($tila == 'tee_kohdistus') {
                   selite           = 'Manuaalisesti kohdistettu suoritus $suoritus[viesti]'";
         $result = pupe_query($query);
 
-        // Lasketaan summasummarum paljonko ollaan tiliˆity kassaan
+        // Lasketaan summasummarum paljonko ollaan tili√∂ity kassaan
         $kassaan += $suoritettu_kassaan;
         $kassaan_valuutassa += $suoritettu_kassaan_valuutassa;
 
@@ -1113,7 +1113,7 @@ if ($tila == 'tee_kohdistus') {
         $asresult = pupe_query($query);
         $mskustprow = mysql_fetch_assoc($asresult);
 
-        // Tarkenteet kopsataan alkuper‰iselt‰ tiliˆinnilt‰, mutta jos alkuper‰inen tiliˆinti on ilman tarkenteita, niin menn‰‰n tilin defaulteilla
+        // Tarkenteet kopsataan alkuper√§iselt√§ tili√∂innilt√§, mutta jos alkuper√§inen tili√∂inti on ilman tarkenteita, niin menn√§√§n tilin defaulteilla
         list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($suoritus["myyntisaamiset_tilino"], $mskustprow["kustp"], $mskustprow["kohde"], $mskustprow["projekti"]);
 
         // Myyntisaamiset
@@ -1142,7 +1142,7 @@ if ($tila == 'tee_kohdistus') {
 
             $totvesumma = 0;
 
-            // jos yhtiˆn toimipaikka lˆytyy, otetaan alvtilinumero t‰m‰n takaa jos se lˆytyy
+            // jos yhti√∂n toimipaikka l√∂ytyy, otetaan alvtilinumero t√§m√§n takaa jos se l√∂ytyy
             if ($lasku["yhtio_toimipaikka"] != '') {
               $query = "SELECT toim_alv
                         FROM yhtion_toimipaikat
@@ -1162,7 +1162,7 @@ if ($tila == 'tee_kohdistus') {
               $alvtili = $yhtiorow["alv"];
             }
 
-            // Etsit‰‰n myynti-tiliˆinnit
+            // Etsit√§√§n myynti-tili√∂innit
             $query = "SELECT tiliointi.summa, tiliointi.vero, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti, tiliointi.summa_valuutassa, tiliointi.valkoodi
                       FROM tiliointi use index (tositerivit_index)
                       JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)
@@ -1197,7 +1197,7 @@ if ($tila == 'tee_kohdistus') {
             else {
               while ($tiliointirow = mysql_fetch_assoc($tilres)) {
 
-                // Kuinka paljon on t‰m‰n viennin osuus
+                // Kuinka paljon on t√§m√§n viennin osuus
                 $summa = round($tiliointirow['summa'] * (1+$tiliointirow['vero']/100) / $lasku["summa"] * $valero, 2);
 
                 // Valuuttaero
@@ -1219,7 +1219,7 @@ if ($tila == 'tee_kohdistus') {
                 $totvesumma += $summa;
               }
 
-              // Hoidetaan mahdolliset pyˆristykset
+              // Hoidetaan mahdolliset py√∂ristykset
               if ($totvesumma != $valuuttaero) {
                 $query = "UPDATE tiliointi
                           SET summa = summa - $totvesumma + $valero
@@ -1230,9 +1230,9 @@ if ($tila == 'tee_kohdistus') {
           }
         }
 
-        //tarkistetaan viel‰ ett‰ jos ollaan tehty osasuorituksia laskulle jo aiemmin niin laitetaan viimeisen osasuorituksen maksup‰iv‰m‰‰r‰ laskun maksettup‰iv‰m‰‰r‰ksi
+        //tarkistetaan viel√§ ett√§ jos ollaan tehty osasuorituksia laskulle jo aiemmin niin laitetaan viimeisen osasuorituksen maksup√§iv√§m√§√§r√§ laskun maksettup√§iv√§m√§√§r√§ksi
         if ($lasku["summa"] != $lasku["alkup_summa"]) {
-          //jos kyseess‰ on ollut normaalilasku niin silloin haettavan myyntisaamistiliˆinnin summan tulee olla negatiivinen ja jos on kyseess‰ hyvityslasku niin silloin haettavan myyntisaamistiliˆinnin tulee olla positiivinen
+          //jos kyseess√§ on ollut normaalilasku niin silloin haettavan myyntisaamistili√∂innin summan tulee olla negatiivinen ja jos on kyseess√§ hyvityslasku niin silloin haettavan myyntisaamistili√∂innin tulee olla positiivinen
           if ($lasku["alkup_summa"] >= 0) {
             $wherelisa = "AND summa < 0";
           }
@@ -1240,10 +1240,10 @@ if ($tila == 'tee_kohdistus') {
             $wherelisa = "AND summa > 0";
           }
 
-          //sitten katsotaan milloin n‰m‰ osasuoritukset on tehty
+          //sitten katsotaan milloin n√§m√§ osasuoritukset on tehty
           $query = "SELECT tapvm
                     FROM tiliointi
-                    WHERE yhtio = '{$kukarow["yhtio"]}'
+                    WHERE yhtio  = '{$kukarow["yhtio"]}'
                     AND tilino   = '{$suoritus["myyntisaamiset_tilino"]}'
                     AND ltunnus  = {$lasku["tunnus"]}
                     AND korjattu = ''
@@ -1282,7 +1282,7 @@ if ($tila == 'tee_kohdistus') {
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) != 1) {
-        die ("Tiliˆinti1 kateissa " . $suoritus["tunnus"]);
+        die ("Tili√∂inti1 kateissa " . $suoritus["tunnus"]);
       }
       $tiliointi1 = mysql_fetch_assoc($result);
 
@@ -1294,16 +1294,16 @@ if ($tila == 'tee_kohdistus') {
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) != 1) {
-        die ("Tiliˆinti2 kateissa " . $suoritus["tunnus"]);
+        die ("Tili√∂inti2 kateissa " . $suoritus["tunnus"]);
       }
       $tiliointi2 = mysql_fetch_assoc($result);
 
-      // J‰‰kˆ suoritukselle viel‰ saldoa
+      // J√§√§k√∂ suoritukselle viel√§ saldoa
       $erotus = round($tiliointi1["summa"] + $kassaan, 2);
       $erotus_valuutassa = round($tiliointi1["summa_valuutassa"] + $kassaan_valuutassa, 2);
 
       if ($erotus != 0) {
-        // Suoritukselle j‰‰ viel‰ rahaa
+        // Suoritukselle j√§√§ viel√§ rahaa
         if (strtoupper($suoritus["valkoodi"]) != strtoupper($yhtiorow['valkoodi'])) {
           $ervains = round($erotus_valuutassa * -1, 2);
         }
@@ -1332,12 +1332,12 @@ if ($tila == 'tee_kohdistus') {
           'laatija'       => $kukarow['kuka'],
           'laadittu'       => date('Y-m-d H:i:s'),
           'aputunnus'      => 0,
-          'selite'       => $tiliointi1['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta k‰ytetiin osa.",
+          'selite'       => $tiliointi1['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta k√§ytetiin osa.",
         );
 
         $ttunnus = kopioitiliointi($tiliointi1['tunnus'], "", $params);
 
-        // Luodaan suoritus johon ylij‰‰nyt saldo laitetaan
+        // Luodaan suoritus johon ylij√§√§nyt saldo laitetaan
         $query = "INSERT INTO suoritus SET
                   yhtio          = '$suoritus[yhtio]',
                   tilino         = '$suoritus[tilino]',
@@ -1353,7 +1353,7 @@ if ($tila == 'tee_kohdistus') {
                   kurssi         = '$suoritus[kurssi]'";
         $result = pupe_query($query);
 
-        // Splitataan rahatiliˆinti
+        // Splitataan rahatili√∂inti
         $query = "UPDATE tiliointi
                   SET summa = $kassaan,
                   summa_valuutassa = $kassaan_valuutassa
@@ -1367,13 +1367,13 @@ if ($tila == 'tee_kohdistus') {
           'laatija'       => $kukarow['kuka'],
           'laadittu'       => date('Y-m-d H:i:s'),
           'aputunnus'      => $ttunnus,
-          'selite'       => $tiliointi2['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta k‰ytetiin osa.",
+          'selite'       => $tiliointi2['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta k√§ytetiin osa.",
         );
 
         kopioitiliointi($tiliointi2['tunnus'], "", $params);
 
 
-        // Tehd‰‰n suorituksen tositteelle vastakirjaukset
+        // Tehd√§√§n suorituksen tositteelle vastakirjaukset
         $params = array(
           'summa'       => $kassaan,
           'summa_valuutassa'   => round($kassaan / $suoritus['kurssi'], 2),
@@ -1381,7 +1381,7 @@ if ($tila == 'tee_kohdistus') {
           'laatija'       => $kukarow['kuka'],
           'laadittu'       => date('Y-m-d H:i:s'),
           'aputunnus'      => 0,
-          'selite'       => $tiliointi1['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta k‰ytetiin osa.",
+          'selite'       => $tiliointi1['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta k√§ytetiin osa.",
         );
 
         kopioitiliointi($tiliointi1['tunnus'], "", $params);
@@ -1393,13 +1393,13 @@ if ($tila == 'tee_kohdistus') {
           'laatija'       => $kukarow['kuka'],
           'laadittu'       => date('Y-m-d H:i:s'),
           'aputunnus'      => 0,
-          'selite'       => $tiliointi2['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta k‰ytetiin osa.",
+          'selite'       => $tiliointi2['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta k√§ytetiin osa.",
         );
 
         kopioitiliointi($tiliointi2['tunnus'], "", $params);
       }
       else {
-        // Suoritus on kokonaan k‰ytetty
+        // Suoritus on kokonaan k√§ytetty
         $query = "UPDATE suoritus
                   SET kohdpvm = '$laskun_maksupvm',
                   summa        = (summa-$kaatosumma)
@@ -1407,7 +1407,7 @@ if ($tila == 'tee_kohdistus') {
                   AND yhtio    = '$kukarow[yhtio]'";
         $result = pupe_query($query);
 
-        // Tehd‰‰n suorituksen tositteelle vastakirjaukset
+        // Tehd√§√§n suorituksen tositteelle vastakirjaukset
         $params = array(
           'summa'       => ($tiliointi1['summa'] * -1),
           'summa_valuutassa'   => ($tiliointi1['summa_valuutassa'] * -1),
@@ -1549,7 +1549,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
     $suoritus_ttilino   = $suoritus['ttilino'];
     $valkoodi       = $suoritus['valkoodi'];
 
-    //N‰ytet‰‰n suorituksen tiedot!
+    //N√§ytet√§√§n suorituksen tiedot!
     echo "<font class='message'>".t("Asiakas").": $suoritus[nimi] ($suoritus[ytunnus])</font><br>";
 
     echo "<table>";
@@ -1643,7 +1643,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
     echo "</table>";
     echo "</form>";
 
-    //N‰ytet‰‰n laskut!
+    //N√§ytet√§√§n laskut!
     $kentat = 'summa, kasumma, laskunro, erpcm, kapvm, viite, ytunnus';
     $kentankoko = array(10,10,15,10,10,15);
     $array   = explode(",", $kentat);
@@ -1652,7 +1652,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
     $ulisa  = '';
 
     for ($i=0; $i<=$count; $i++) {
-      // tarkastetaan onko hakukent‰ss‰ jotakin
+      // tarkastetaan onko hakukent√§ss√§ jotakin
       if (strlen($haku[$i]) > 0) {
         $lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
         $ulisa .= "&haku[" . $i . "]=" . $haku[$i];
@@ -1666,7 +1666,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
       $jarjestys = 'erpvm';
     }
 
-    // Etsit‰‰n ytunnuksella
+    // Etsit√§√§n ytunnuksella
     $query  = "SELECT ytunnus
                FROM asiakas
                WHERE tunnus  = '$asiakas_tunnus'
@@ -1678,7 +1678,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
       $ytunnus = $ytunnusrow["ytunnus"];
     }
     else {
-      echo "<font class='error'>".t("Asiakkaalta ei lˆydy y-tunnusta")."!</font>";
+      echo "<font class='error'>".t("Asiakkaalta ei l√∂ydy y-tunnusta")."!</font>";
       pupe_error($query);
     }
 
@@ -1751,7 +1751,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
       }
       else {
         echo "<tr><th></th><th></th>";
-        $errormessage = "<font class='message'>".t('V‰‰r‰ saamisettili')." ($suoritus_ttilino)</font>";
+        $errormessage = "<font class='message'>".t('V√§√§r√§ saamisettili')." ($suoritus_ttilino)</font>";
       }
 
       echo "<td align='right'>$maksurow[summa]</td>";
@@ -1863,7 +1863,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
       function osasuo(form) {
         if (document.forms[3].osasuoritus.checked) {
              if (document.forms[1].jaljella.value > 0) {
-               alert('".t("Et voi osasuorittaa, jos j‰jell‰ on positiivinen summa")."');
+               alert('".t("Et voi osasuorittaa, jos j√§jell√§ on positiivinen summa")."');
             document.forms[3].osasuoritus.checked = false;
                return false;
              }
@@ -1907,13 +1907,13 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
             return false;
           }
           if (maara!=1) {
-            alert ('".t("Jos osasuoritus, pit‰‰ valita vain ja ainoastaan yksi lasku")."! ' + maara + ' valittu');
+            alert ('".t("Jos osasuoritus, pit√§√§ valita vain ja ainoastaan yksi lasku")."! ' + maara + ' valittu');
             return false;
           }
         }
 
         if ((maara==0) == true) {
-          alert('".t("Jotta voit kohdistaa, on ainakin yksi lasku valittava. Jos mit‰‰n kohdistettavaa ei lˆydy, klikkaa menusta Manuaalikohdistus p‰‰st‰ksesi takaisin alkuun")."');
+          alert('".t("Jotta voit kohdistaa, on ainakin yksi lasku valittava. Jos mit√§√§n kohdistettavaa ei l√∂ydy, klikkaa menusta Manuaalikohdistus p√§√§st√§ksesi takaisin alkuun")."');
 
           skippaa_tama_submitti = true;
           return false;
@@ -1973,7 +1973,7 @@ if ($tila == '') {
   $result = pupe_query($query);
 
   echo "<table>";
-  echo "<tr><th>".t("N‰yt‰ vain suoritukset tililt‰")."</th>";
+  echo "<tr><th>".t("N√§yt√§ vain suoritukset tililt√§")."</th>";
   echo "<td><select name='tilino' onchange='submit()'>";
   echo "<option value=''>".t("Kaikki")."</option>\n";
 
@@ -1992,7 +1992,7 @@ if ($tila == '') {
             ORDER BY valkoodi";
   $vresult = pupe_query($query);
 
-  echo "<tr><th>".t("N‰yt‰ vain suoritukset valuutassa")."</th>";
+  echo "<tr><th>".t("N√§yt√§ vain suoritukset valuutassa")."</th>";
   echo "<td><select name='valuutta' onchange='submit()'>";
   echo "<option value=''>".t("Kaikki")."</option>\n";
 
@@ -2014,7 +2014,7 @@ if ($tila == '') {
             ORDER BY asiakas.maa";
   $vresult = pupe_query($query);
 
-  echo "<tr><th>".t("N‰yt‰ vain suoritukset maasta")."</th>";
+  echo "<tr><th>".t("N√§yt√§ vain suoritukset maasta")."</th>";
   echo "<td><select name='maa' onchange='submit()'>";
   echo "<option value='' >".t("Kaikki")."</option>";
 
@@ -2071,7 +2071,7 @@ if ($tila == '') {
       <th>".t("Nimi")."</th>
       <th>".t("Postitp")."</th>
       <th>".t("Suorituksia")."</th>
-      <th>".t("Viitteellisi‰")."<br>".t("suorituksia")."</th>
+      <th>".t("Viitteellisi√§")."<br>".t("suorituksia")."</th>
       <th>".t("Avoimia")."<br>".t("laskuja")."
       </tr>";
 

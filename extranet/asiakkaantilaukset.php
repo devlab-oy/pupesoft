@@ -14,7 +14,7 @@ if (mysql_num_rows($result) == 1) {
   $asiakastunnus = $asiakas["tunnus"];
 }
 else {
-  echo t("VIRHE: K‰ytt‰j‰tiedoissasi on virhe! Ota yhteys j‰rjestelm‰n yll‰pit‰j‰‰n.")."<br><br>";
+  echo t("VIRHE: K√§ytt√§j√§tiedoissasi on virhe! Ota yhteys j√§rjestelm√§n yll√§pit√§j√§√§n.")."<br><br>";
   exit;
 }
 
@@ -80,11 +80,11 @@ if (!isset($vvl))
 if (!isset($ppl))
   $ppl = date("d");
 
-echo "<tr><th>".t("Alkup‰iv‰m‰‰r‰")."</th>
+echo "<tr><th>".t("Alkup√§iv√§m√§√§r√§")."</th>
     <td><input type='text' name='ppa' value='$ppa' size='3'></td>
     <td><input type='text' name='kka' value='$kka' size='3'></td>
     <td><input type='text' name='vva' value='$vva' size='5'></td>
-    </tr><tr><th>".t("Loppup‰iv‰m‰‰r‰")."</th>
+    </tr><tr><th>".t("Loppup√§iv√§m√§√§r√§")."</th>
     <td><input type='text' name='ppl' value='$ppl' size='3'></td>
     <td><input type='text' name='kkl' value='$kkl' size='3'></td>
     <td><input type='text' name='vvl' value='$vvl' size='5'></td>";
@@ -150,7 +150,7 @@ if (mysql_num_rows($result)!=0) {
     $laskutyyppi=$row["tila"];
     $alatila=$row["alatila"];
 
-    //tehd‰‰n selv‰kielinen tila/alatila
+    //tehd√§√§n selv√§kielinen tila/alatila
     require ("laskutyyppi.inc");
 
     echo "<$ero>".t($laskutyyppi)." ".t($alatila)."</$ero>";
@@ -164,14 +164,14 @@ if (mysql_num_rows($result)!=0) {
         <input type='hidden' name='ppl' value='$ppl'>
         <input type='hidden' name='kkl' value='$kkl'>
         <input type='hidden' name='vvl' value='$vvl'>
-        <input type='submit' value='".t("N‰yt‰ tilaus")."'></td></form>";
+        <input type='submit' value='".t("N√§yt√§ tilaus")."'></td></form>";
 
     echo "</tr>";
   }
   echo "</table>";
 }
 else {
-  echo t("Yht‰‰n tilausta ei lˆytynyt")."...<br><br>";
+  echo t("Yht√§√§n tilausta ei l√∂ytynyt")."...<br><br>";
 }
 
 require ("footer.inc");

@@ -3,18 +3,18 @@
 $otsikko     = 'Liitetiedostot';
 $otsikko_nappi   = "liite";
 
-// HUOM HUOM: eth‰n muuta n‰it‰ ilman, ett‰ korjaat myˆs yllapito.php:ss‰ iframen lukitse_avaimeen muuttujat
-$kentat = "tunnus, filetype liitedata, concat('<a href=\'view.php?id=', tunnus,'\' target=\'Attachment\'>','".t("N‰yt‰ liite")."','</a>') liite, selite, filename nimi, filesize koko, kieli, (SELECT selitetark from avainsana where avainsana.yhtio=liitetiedostot.yhtio and avainsana.laji like '%litety' and avainsana.selite=liitetiedostot.kayttotarkoitus LIMIT 1) Tyyppi, liitos liitos_hidden, liitostunnus liitostunnus_hidden";
+// HUOM HUOM: eth√§n muuta n√§it√§ ilman, ett√§ korjaat my√∂s yllapito.php:ss√§ iframen lukitse_avaimeen muuttujat
+$kentat = "tunnus, filetype liitedata, concat('<a href=\'view.php?id=', tunnus,'\' target=\'Attachment\'>','".t("N√§yt√§ liite")."','</a>') liite, selite, filename nimi, filesize koko, kieli, (SELECT selitetark from avainsana where avainsana.yhtio=liitetiedostot.yhtio and avainsana.laji like '%litety' and avainsana.selite=liitetiedostot.kayttotarkoitus LIMIT 1) Tyyppi, liitos liitos_hidden, liitostunnus liitostunnus_hidden";
 $hakukentat = "tunnus, filetype, filetype, selite, filesize, kieli, kayttotarkoitus, liitos, liitostunnus";
 
 $jarjestys  = "liitos, liitostunnus, jarjestys, tunnus";
 
-//  Oletuksena emme salli mit‰‰n!
+//  Oletuksena emme salli mit√§√§n!
 $uusilukko   = "ON";
 $poistolukko = "ON";
 
 if ($lukitse_laji == "") {
-  // Ei n‰ytet‰ mit‰‰n
+  // Ei n√§ytet√§ mit√§√§n
   $rajauslisa = " and liitetiedostot.tunnus = -1 ";
 }
 
@@ -32,7 +32,7 @@ if ($lukitse_laji == "lasku" and $lukitse_avaimeen > 0) {
   $laskutyyppi = $lasrow["tila"];
   $alatila   = $lasrow["alatila"];
 
-  //tehd‰‰n selv‰kielinen tila/alatila
+  //tehd√§√§n selv√§kielinen tila/alatila
   require "inc/laskutyyppi.inc";
 
   $otsikko_lisatiedot =  "
@@ -44,7 +44,7 @@ if ($lukitse_laji == "lasku" and $lukitse_avaimeen > 0) {
     <tr><th>".t('Postitp')."</th><td>$lasrow[postitp]</td></tr>
     </table><br>";
 
-  /*  Tarkastetaan k‰ytt‰j‰oikeuksia hieman eri tavalla eri laskuilla  */
+  /*  Tarkastetaan k√§ytt√§j√§oikeuksia hieman eri tavalla eri laskuilla  */
   //  Ostoreskontran laskut
   if (in_array($lasrow['tila'], array('H','Y','M','P','Q','X'))) {
     $query = "SELECT * from oikeu where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and nimi LIKE '%ulask.php'";
@@ -54,7 +54,7 @@ if ($lukitse_laji == "lasku" and $lukitse_avaimeen > 0) {
       $uusilukko = "";
     }
   }
-  //  N‰m‰ ovat varmaankin sitten itse tilauksia?
+  //  N√§m√§ ovat varmaankin sitten itse tilauksia?
   elseif(in_array($lasrow['tila'], array("L","N","R","E","T","U","0","A","O","V"))) {
     $uusilukko = "";
   }
@@ -66,9 +66,9 @@ if ($lukitse_laji == "lasku" and $lukitse_avaimeen > 0) {
   if ($del == 1 or ($tunnus != "" and $_FILES["liite_data"]["size"] > 0)) {
     if (in_array($lasrow['tila'], array('H','M')) and $kukarow["taso"] != 3) {
 
-      $komm = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") ".t("Lasku palautettiin hyv‰ksynt‰‰n koska laskun liitteit‰ muutettiin.")."<br>";
+      $komm = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") ".t("Lasku palautettiin hyv√§ksynt√§√§n koska laskun liitteit√§ muutettiin.")."<br>";
 
-      // nollataan hyv‰ksyj‰t jos jokin n‰ist‰ tiloista
+      // nollataan hyv√§ksyj√§t jos jokin n√§ist√§ tiloista
       $query = "UPDATE lasku
                 SET h1time     = '',
                 h2time        = '',

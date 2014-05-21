@@ -19,7 +19,7 @@ else {
 
   if ($suunta == "LISAA") {
     $oper = "*";
-    $teksti = "Lis‰t‰‰n vero";
+    $teksti = "Lis√§t√§√§n vero";
     $yhtion_para = "";
   }
   else {
@@ -37,7 +37,7 @@ else {
              WHERE yhtio = '{$kukarow["yhtio"]}'";
   $result = pupe_query($query);
 
-  //yhtiˆn oletusalvi!
+  //yhti√∂n oletusalvi!
   $query = "SELECT selite
             FROM avainsana
             where yhtio     = '{$kukarow["yhtio"]}'
@@ -50,7 +50,7 @@ else {
     $wtrow = mysql_fetch_assoc($wtres);
     $alv = $wtrow["selite"];
 
-    echo "<br>".t("Yhtiˆn oletus ALV").": $alv%<br><br>";
+    echo "<br>".t("Yhti√∂n oletus ALV").": $alv%<br><br>";
 
     echo "<table>";
 

@@ -6,7 +6,7 @@ if ((!isset($variaatio_tuoteno) or $variaatio_tuoteno == "") and isset($tuoteno_
 $variaatio_hakulisa = "";
 $variaatio_i = 1;
 
-// poistetaan tyhj‰t arvot arrayst‰
+// poistetaan tyhj√§t arvot arrayst√§
 if (is_array($variaatio_valinta)) {
   foreach ($variaatio_valinta as $variaatio_key => $variaatio_val) {
     if (trim($variaatio_val) != "") {
@@ -20,7 +20,7 @@ if (is_array($variaatio_valinta)) {
 }
 
 if ($variaatio_tuoteno != "") {
-  // haetaan kaikki tuotteet, jotka kuuluu t‰h‰n rypp‰‰seen
+  // haetaan kaikki tuotteet, jotka kuuluu t√§h√§n rypp√§√§seen
   $query = "SELECT tuote.tuoteno,
             if(t2.jarjestys = 0 or t2.jarjestys is null, t2.selite, t2.jarjestys) t2j2,
             if(t3.jarjestys = 0 or t3.jarjestys is null, t3.selite, t3.jarjestys) t3j3
@@ -56,10 +56,10 @@ if (is_resource($variaatiores) and mysql_num_rows($variaatiores) > 0) {
     $variaatio_check[$parametririvi_key] = $parametririvi_val;
   }
 
-  //Onko meill‰ moniulotteinen variaatio esim. v‰ri ja koko...
+  //Onko meill√§ moniulotteinen variaatio esim. v√§ri ja koko...
   $variaatiot = explode(",", $variaatio_check["variaatio_jako"]);
 
-  // Syˆttˆrivi
+  // Sy√∂tt√∂rivi
   echo "<table>";
   echo "<tr><td class='back' colspan='6'><table><tr><th align='left'>".t("Tuote")."</th>";
 
@@ -99,7 +99,7 @@ if (is_resource($variaatiores) and mysql_num_rows($variaatiores) > 0) {
     }
 
     echo "<td><select name='variaatio_valinta[$variaatiot[$vi]]' onchange='submit();'>";
-    echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";
+    echo "<option value=''>".t("N√§yt√§ kaikki")."</option>";
 
     foreach ($thisvariaatio as $ekavar) {
       if ($ekavar == $variaatio_valinta[$variaatiot[$vi]]) $sel = "SELECTED";
@@ -115,7 +115,7 @@ if (is_resource($variaatiores) and mysql_num_rows($variaatiores) > 0) {
   echo "<tr><td class='back'><br></td></tr><tr>";
 
   echo "<th align='left'>".t("Tuotenumero")."</th>
-      <th align='left'>".t("M‰‰r‰")."</th>";
+      <th align='left'>".t("M√§√§r√§")."</th>";
 
   if ($variaaritorivi_osto !== TRUE) {
     echo "<th align='left'>".t("Var")."</th>";
@@ -175,7 +175,7 @@ if (is_resource($variaatiores) and mysql_num_rows($variaatiores) > 0) {
 
   $varilask = 0;
 
-  // haetaan kaikki tuotteet, jotka halutaan n‰h‰
+  // haetaan kaikki tuotteet, jotka halutaan n√§h√§
   $query = "SELECT distinct tuote.tuoteno, tuote.nimitys,
             if(t2.jarjestys = 0 or t2.jarjestys is null, t2.selite, t2.jarjestys) t2j2,
             if(t3.jarjestys = 0 or t3.jarjestys is null, t3.selite, t3.jarjestys) t3j3
@@ -221,7 +221,7 @@ if (is_resource($variaatiores) and mysql_num_rows($variaatiores) > 0) {
         echo "<td valign='top'><select name='var_array[$varirow[tuoteno]]'>";
         echo "<option value=''>".t("Oletus")."</option>";
         echo "<option value='J' $selj>".t("JT")."</option>";
-        echo "<option value='H' $selh>".t("Hyv‰ksy")."</option>";
+        echo "<option value='H' $selh>".t("Hyv√§ksy")."</option>";
         echo "<option value='P' $selp>".t("Puute")."</option>";
 
         if ($laskurow["tila"] == 'V' and $laskurow["tilaustyyppi"] == 'V') {
@@ -294,14 +294,14 @@ if (is_resource($variaatiores) and mysql_num_rows($variaatiores) > 0) {
   }
 
   if ($varilask > 0) {
-    echo "  <td valign='top' class='back'><input type='submit' value='".t("Lis‰‰")."'> <input type='submit' name='lisaa_jatka' value='".t("Lis‰‰/Jatka")."'></td>
+    echo "  <td valign='top' class='back'><input type='submit' value='".t("Lis√§√§")."'> <input type='submit' name='lisaa_jatka' value='".t("Lis√§√§/Jatka")."'></td>
         <td valign='top' class='back'>";
 
     if ($toim == "PIKATILAUS") {
       echo "  <input type='hidden' name='perheid' value = '$perheid'>
           <input type='hidden' name='perheid2' value = '$perheid2'>
           <input type='hidden' name='takaisin' value = '$takaisin'>
-          <input type='submit' name='tyhjenna' value='".t("Tyhjenn‰")."'> <font class='error'>$varaosavirhe</font></td>";
+          <input type='submit' name='tyhjenna' value='".t("Tyhjenn√§")."'> <font class='error'>$varaosavirhe</font></td>";
     }
   }
 
@@ -311,7 +311,7 @@ if (is_resource($variaatiores) and mysql_num_rows($variaatiores) > 0) {
     echo "<tr>";
 
     if ($variaaritorivi_osto !== TRUE) {
-      echo "<th align='left'>".t("Ker‰ysaika")."</th>";
+      echo "<th align='left'>".t("Ker√§ysaika")."</th>";
 
       $toimcspl = 2;
     }
@@ -379,7 +379,7 @@ if (is_resource($variaatiores) and mysql_num_rows($variaatiores) > 0) {
           <td valign='top' colspan='7'><input type='text' maxlength='100' size='75' name='tuotenimitys' value = '$tuotenimitys'></td>";
     }
 
-    echo "<td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjenn‰")."'>";
+    echo "<td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjenn√§")."'>";
   }
 
   echo "</table></form><br><br>";

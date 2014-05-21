@@ -1,7 +1,7 @@
 <?php
 
-// Tämä skripti käyttää slave-tietokantapalvelinta,
-// mutta katsotaan sessio aina masterilta, koska slave voi olla jäljessä ja sessio ei vielä voimassa.
+// TÃ¤mÃ¤ skripti kÃ¤yttÃ¤Ã¤ slave-tietokantapalvelinta,
+// mutta katsotaan sessio aina masterilta, koska slave voi olla jÃ¤ljessÃ¤ ja sessio ei vielÃ¤ voimassa.
 unset($useslave);
 
 if (file_exists("inc/connect.inc")) {

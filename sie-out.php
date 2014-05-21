@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 if (isset($_POST["tee"])) {
@@ -15,7 +15,7 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
   exit;
 }
 
-// poimitaan kuluva p‰iv‰, raportin timestampille
+// poimitaan kuluva p√§iv√§, raportin timestampille
 echo "<font class='head'>".t("SIE - Siirto ulkoiseen kirjanpitoon")."</font><hr>";
 
 if ($kausi != '') {
@@ -139,7 +139,7 @@ if ($kausi != '') {
 }
 
 
-//N‰ytet‰‰n k‰yttˆliittym‰
+//N√§ytet√§√§n k√§ytt√∂liittym√§
 echo "<form name = 'valinta' method='post'>
   <table><tr><th>".t("Anna kausi")."</th><td>";
 

@@ -1,12 +1,12 @@
 <?php
 
-// Kutsutaanko CLI:stä
+// Kutsutaanko CLI:stÃ¤
 if (php_sapi_name() != 'cli') {
-  die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+  die ("TÃ¤tÃ¤ scriptiÃ¤ voi ajaa vain komentoriviltÃ¤!");
 }
 
 if (!isset($argv[1]) or $argv[1] == '') {
-  echo "Anna yhtiö!!!\n";
+  echo "Anna yhtiÃ¶!!!\n";
   die;
 }
 

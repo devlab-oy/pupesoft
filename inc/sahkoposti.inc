@@ -1,17 +1,17 @@
 <?php
 
 ### !!! HUOMHUOM !!! ###
-### T‰m‰ ominaisuus on deprikoitu, k‰yt‰ functions.inc:ss‰ m‰‰ritelty‰ pupesoft_sahkoposti -funktiota s‰hkˆpostin l‰hett‰miseen!! ###
+### T√§m√§ ominaisuus on deprikoitu, k√§yt√§ functions.inc:ss√§ m√§√§ritelty√§ pupesoft_sahkoposti -funktiota s√§hk√∂postin l√§hett√§miseen!! ###
 
-// T‰m‰ ohjelma haluaa $liite muuttujan jossa on tiedostonnimi joka liitet‰‰n
-// Jos liite halutaan nimet‰ uudestaan annetaan uusi nimi $liitenimi muuttujassa
+// T√§m√§ ohjelma haluaa $liite muuttujan jossa on tiedostonnimi joka liitet√§√§n
+// Jos liite halutaan nimet√§ uudestaan annetaan uusi nimi $liitenimi muuttujassa
 // Ja $kutsu jossa on tiedoston kuvaus
-// $ctype muuttuja jossa on liitett‰v‰n tiedoston MIME tyyppi
+// $ctype muuttuja jossa on liitett√§v√§n tiedoston MIME tyyppi
 // $content_body on viestin body
 // $subject tai $content_subject on poikkeava subject
 
-///*Kasataan k‰ytt‰j‰lle l‰hetett‰v‰ meili *///
-//t‰ssa on kaikki failit jotka tarvitaan
+///*Kasataan k√§ytt√§j√§lle l√§hetett√§v√§ meili *///
+//t√§ssa on kaikki failit jotka tarvitaan
 
 $varaposti     = '';
 $varaposti_trig = FALSE;
@@ -32,7 +32,7 @@ if (substr($komento, 0, 12) == 'asiakasemail') {
 
 $bound = uniqid(time()."_") ;
 
-$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n";
 
 if (isset($sahkoposti_cc) and $sahkoposti_cc != "") {
   $header .= "Cc: $sahkoposti_cc\n";
@@ -44,10 +44,10 @@ $header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 if (isset($content_body) and $content_body != "") {
   $content .= "--$bound\n";
   if ($ctype == "html") {
-    $content .= "Content-type: text/html; charset=\"iso-8859-1\"\n";
+    $content .= "Content-type: text/html; charset=\"utf-8\"\n";
   }
   else {
-    $content .= "Content-type: text/plain; charset=iso-8859-1\n";
+    $content .= "Content-type: text/plain; charset=utf-8\n";
   }
   $content .= "Content-Transfer-Encoding: quoted-printable\n\n";
   $content .= "$content_body\n\n";
@@ -152,11 +152,11 @@ foreach ($liite as $key => $value) {
   }
 }
 
-$boob = mail($kukarow["eposti"], mb_encode_mimeheader($subject, "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+$boob = mail($kukarow["eposti"], mb_encode_mimeheader($subject, "UTF-8", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 
-if ($boob === FALSE) echo t("S‰hkˆpostin l‰hetys ep‰onnistui").": $kukarow[eposti]<br>";
+if ($boob === FALSE) echo t("S√§hk√∂postin l√§hetys ep√§onnistui").": $kukarow[eposti]<br>";
 
-//N‰‰ muuttujat voi olla aika isoja joten unsetataan ne
+//N√§√§ muuttujat voi olla aika isoja joten unsetataan ne
 unset($content);
 unset($content_body);
 unset($content_subject);

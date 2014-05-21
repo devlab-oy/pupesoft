@@ -70,22 +70,22 @@ if ($komento["Tuotetarrat"] == 'email') {
   $kutsu = "tuotetarrat-".date("Y-m-d").".txt";
   require("inc/sahkoposti.inc");
 
-  //p‰‰dyt‰‰n taas selailemaan toimittajia
+  //p√§√§dyt√§√§n taas selailemaan toimittajia
   echo t("Tuotetarrat tulostuu")."...<br>";
 }
 else {
-  //paperilista pit‰‰ saada kauniiksi
+  //paperilista pit√§√§ saada kauniiksi
   $line = exec("a2ps -o ".$filenimi.".ps --no-header -R --columns=1 --medium=a4 --chars-per-line=75 --margin=0 --borders=0 $filenimi");
 
   if ($tee == 'NAYTATILAUS') {
-    //Tyˆnnet‰‰n tuo pdf vaan putkeen!
+    //Ty√∂nnet√§√§n tuo pdf vaan putkeen!
     echo file_get_contents($filenimi.".ps");
   }
   else {
-    //itse print komento tulee valitse_tulosin.incilt‰...
+    //itse print komento tulee valitse_tulosin.incilt√§...
     $line = exec("$komento[Tuotetarrat] ".$filenimi.".ps");
 
-    //p‰‰dyt‰‰n taas selailemaan toimittajia
+    //p√§√§dyt√§√§n taas selailemaan toimittajia
     echo t("Tuotetarrat tulostuu")."...<br>";
   }
   system("rm -f ".$filenimi.".ps");

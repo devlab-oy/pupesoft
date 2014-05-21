@@ -12,7 +12,7 @@ if ($rakir_row['toimitusvahvistus'] != 'toimitusvahvistus_email.inc' or $rakir_r
 
 if ($toimitusvahvistus_email_lahetys) {
 
-  $body = t("Hei").",\n\n".t("Seuraavat tilaamanne tuotteet ovat toimituksessa").":\n\n".t("Tuotenumero")." ".t("Määrä")." ".t("Nimitys")." ".t("Hinta")."\n";
+  $body = t("Hei").",\n\n".t("Seuraavat tilaamanne tuotteet ovat toimituksessa").":\n\n".t("Tuotenumero")." ".t("MÃ¤Ã¤rÃ¤")." ".t("Nimitys")." ".t("Hinta")."\n";
 
   $query_ale_lisa = generoi_alekentta('M');
 
@@ -56,7 +56,7 @@ if ($toimitusvahvistus_email_lahetys) {
   $body .= "{$rakir_row['toim_postino']} {$rakir_row['toim_postitp']}\n";
   $body .= "{$maan_tiedot['nimi']}\n";
 
-  // Sähköpostin lähetykseen parametrit
+  // SÃ¤hkÃ¶postin lÃ¤hetykseen parametrit
   $parametri = array( "to"       => $rakir_row['asiakas_email'],
             "cc"       => "",
             "subject"    => t("Toimitusvahvistus"),
@@ -65,6 +65,6 @@ if ($toimitusvahvistus_email_lahetys) {
           );
 
   if (pupesoft_sahkoposti($parametri)) {
-    echo t("Sähköpostin lähetys onnistui").": {$rakir_row['asiakas_email']}<br />";
+    echo t("SÃ¤hkÃ¶postin lÃ¤hetys onnistui").": {$rakir_row['asiakas_email']}<br />";
   }
 }

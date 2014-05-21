@@ -2,7 +2,7 @@
 
 require ("../inc/parametrit.inc");
 
-// tehd‰‰n tiedostolle uniikki nimi
+// tehd√§√§n tiedostolle uniikki nimi
 $filename = "$pupe_root_polku/datain/$tyyppi-order-".md5(uniqid(rand(),true)).".txt";
 
 echo "<script type='text/javascript'>
@@ -29,11 +29,18 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
   $path_parts = pathinfo($filename);
 
   if ($path_parts["extension"] != "" and strtoupper($path_parts["extension"]) != "TXT") {
-    echo "<font class='error'>".t("Tiedosto")." $filename ".t("ei tunnu aineistolta")."!<br>".t("Pit‰‰ olla .txt (nyt")." $path_parts[extension]).<br>".t("Tarkista tiedosto")."!<br></font>";
+    echo "<font class='error'>".t("Tiedosto")." $filename ".t("ei tunnu aineistolta")."!<br>".t("Pit√§√§ olla .txt (nyt")." $path_parts[extension]).<br>".t("Tarkista tiedosto")."!<br></font>";
     exit;
   }
 
-  echo "<font class='message'>".t("K‰sittelen")." $tyyppi ".t("tiedoston")."</font><br><br>";
+  // Muutetaan UTF-8:ksi jos on jossain toisessa merkist√∂ss√§
+  $encoding = exec("file -b --mime-encoding $filename");
+
+  if ($encoding != "" and strtoupper($encoding) != 'UTF-8') {
+    exec("recode $encoding..UTF8 $filename");
+  }
+
+  echo "<font class='message'>".t("K√§sittelen")." $tyyppi ".t("tiedoston")."</font><br><br>";
 
   if ($tyyppi == 'multi') {
     // tarvitaan $filename
@@ -87,14 +94,14 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
       require ("sisaanlue_teccom_asn.php");
     }
     else {
-      echo "Kopiointi ep‰onnistui!";
+      echo "Kopiointi ep√§onnistui!";
     }
   }
 }
 
 else {
 
-  echo "<font class='head'>".t("Tilausten sis‰‰nluku")."</font><hr>";
+  echo "<font class='head'>".t("Tilausten sis√§√§nluku")."</font><hr>";
 
   echo "<form enctype='multipart/form-data' name='sendfile' method='post'>
 
@@ -109,7 +116,7 @@ else {
          <option value='edi'>".t("Editilaus")."</option>
          <option value='futursoft'>Futursoft</option>
          <option value='magento'>Magento</option>
-         <option value='pos'>".t("Kassap‰‰te")."</option>
+         <option value='pos'>".t("Kassap√§√§te")."</option>
          <option value='yct'>Yamaha Center</option>
         <option value='edifact911'>Orders 91.1</option>
          <option value='multi'>".t("Useita asiakkaita")."</option>
@@ -122,7 +129,7 @@ else {
   echo "</tr>";
   echo "</table>";
 
-  echo "<br><input type='submit' value='".t("K‰sittele tiedosto")."'>";
+  echo "<br><input type='submit' value='".t("K√§sittele tiedosto")."'>";
   echo "</form>";
 
 }

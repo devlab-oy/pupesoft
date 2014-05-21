@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 if (isset($_POST["supertee"])) {
@@ -17,7 +17,7 @@ if (isset($supertee)) {
   }
 }
 
-echo "<font class='head'>".t("Myˆh‰ss‰ olevat myyntitilaukset")."</font><hr>";
+echo "<font class='head'>".t("My√∂h√§ss√§ olevat myyntitilaukset")."</font><hr>";
 
 if ($ytunnus != '') {
   require ("inc/kevyt_toimittajahaku.inc");
@@ -32,7 +32,7 @@ if ($myovv == '') {
 echo "<form name=asiakas method='post' autocomplete='off'>";
 echo "<input type='hidden' name='tee' value = 'HAE'>";
 echo "<table><tr>";
-echo "<th>".t("Anna toimitusp‰iv‰")."</th>";
+echo "<th>".t("Anna toimitusp√§iv√§")."</th>";
 echo "<td><input type='text' name='myopp' value='$myopp' size='3'>";
 echo "<input type='text' name='myokk' value='$myokk' size='3'>";
 echo "<input type='text' name='myovv' value='$myovv' size='6'></td>";
@@ -40,7 +40,7 @@ echo "</tr>";
 
 $kayta_ostotilausta_check = isset($kayta_ostotilausta) ? " checked='checked'" : '';
 
-echo "<tr><th>",t("Vertaa ostotilauksen toimitusp‰iv‰m‰‰r‰‰n"),"</th><td><input type='checkbox' name='kayta_ostotilausta'{$kayta_ostotilausta_check}></td></tr>";
+echo "<tr><th>",t("Vertaa ostotilauksen toimitusp√§iv√§m√§√§r√§√§n"),"</th><td><input type='checkbox' name='kayta_ostotilausta'{$kayta_ostotilausta_check}></td></tr>";
 
 if (!isset($ytunnus)) {
   $ytunnus = '';
@@ -48,7 +48,7 @@ if (!isset($ytunnus)) {
 
 echo "<tr><th>".t("Toimittajan nimi")."</th><td><input type='text' size='10' name='ytunnus' value='$ytunnus'></td></tr>";
 
-echo "<tr><th>".t("Valitse tuoteryhm‰")."</th>";
+echo "<tr><th>".t("Valitse tuoteryhm√§")."</th>";
 
 $sresult = t_avainsana("TRY");
 
@@ -62,7 +62,7 @@ if ($mul_tuoteryhma!="") {
     $mul_check = 'SELECTED';
   }
 }
-echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei tuoteryhm‰‰")."</option>";
+echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei tuoteryhm√§√§")."</option>";
 
 while ($rivi = mysql_fetch_array($sresult)) {
   $mul_check = '';
@@ -187,10 +187,10 @@ if ($tee == "HAE") {
     echo "<th>".t("Tilaus")."</th>";
     echo "<th>".t("Tuoteno")."</th>";
     echo "<th>".t("Nimike")."</th>";
-    echo "<th>".t("M‰‰r‰")."</th>";
-    echo "<th>".t("Yksikkˆ")."</th>";
+    echo "<th>".t("M√§√§r√§")."</th>";
+    echo "<th>".t("Yksikk√∂")."</th>";
     echo "<th>".t("Arvo")."</th>";
-    echo "<th>".t("Myyt‰viss‰")."</th>";
+    echo "<th>".t("Myyt√§viss√§")."</th>";
     echo "<th><a href='?tee=JARJESTA&haku=toimaika&suunta=$suunta&tunnus=$tunnus&myovv=$myovv&myokk=$myokk&myopp=$myopp&se_tuoteryhma=$se_tuoteryhma&se_kustannuspaikka=$se_kustannuspaikka'>".t("Toimitusaika")."</a></th>";
     echo "<th>".t("Tila")."</th>";
   }
@@ -237,13 +237,13 @@ if ($tee == "HAE") {
         $excelsarake++;
         $worksheet->write($excelrivi, $excelsarake, t("Nimike"), $format_bold);
         $excelsarake++;
-        $worksheet->write($excelrivi, $excelsarake, t("M‰‰r‰"), $format_bold);
+        $worksheet->write($excelrivi, $excelsarake, t("M√§√§r√§"), $format_bold);
         $excelsarake++;
-        $worksheet->write($excelrivi, $excelsarake, t("Yksikkˆ"), $format_bold);
+        $worksheet->write($excelrivi, $excelsarake, t("Yksikk√∂"), $format_bold);
         $excelsarake++;
         $worksheet->write($excelrivi, $excelsarake, t("Arvo"), $format_bold);
         $excelsarake++;
-        $worksheet->write($excelrivi, $excelsarake, t("Myyt‰viss‰"), $format_bold);
+        $worksheet->write($excelrivi, $excelsarake, t("Myyt√§viss√§"), $format_bold);
         $excelsarake++;
         $worksheet->write($excelrivi, $excelsarake, t("Toimitusaika"), $format_bold);
         $excelsarake++;
@@ -298,7 +298,7 @@ if ($tee == "HAE") {
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) == 0) {
-    echo "<tr><td class='back'><font class='message'>",t("Yht‰‰n tilausta ei lˆytynyt"),"!</font></td></tr>";
+    echo "<tr><td class='back'><font class='message'>",t("Yht√§√§n tilausta ei l√∂ytynyt"),"!</font></td></tr>";
   }
 
   while ($tulrow = mysql_fetch_array($result)) {
@@ -442,7 +442,7 @@ if ($tee == "HAE") {
     else {
 
       if ($tulrow["alatila"] == 'X') {
-        $laskutyyppi = t("J‰lkitoimitus");
+        $laskutyyppi = t("J√§lkitoimitus");
         $alatila   = "";
       }
       else {

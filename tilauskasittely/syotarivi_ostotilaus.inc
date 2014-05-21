@@ -1,6 +1,6 @@
 <?php
 
-// Syˆtet‰‰n rivi
+// Sy√∂tet√§√§n rivi
 echo "  <tr>
     <form name='rivi' action = '$PHP_SELF#$rivitunnus' method='post' autocomplete='off'>
     <input type='hidden' name='toim'         value = '$toim'>
@@ -28,7 +28,7 @@ $variaaritorivi = FALSE;
 $suoratoimitusekko = "";
 
 if ($rivitunnus > 0) {
-  //Tutkitaan lˆytyykˆ JT-rivi joka m‰pp‰ytyy t‰h‰n ostoriviin
+  //Tutkitaan l√∂ytyyk√∂ JT-rivi joka m√§pp√§ytyy t√§h√§n ostoriviin
      $query = "SELECT tilausrivi.tunnus, tilausrivi.otunnus, lasku.nimi, tilausrivin_lisatiedot.suoraan_laskutukseen
                FROM tilausrivin_lisatiedot
                JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and (tilausrivi.varattu+tilausrivi.jt) > 0 and tilausrivi.laskutettuaika = '0000-00-00')
@@ -42,10 +42,10 @@ if ($rivitunnus > 0) {
     echo "<input type='hidden' name='suoratoimitus_rivikpl' value='$kpl'>";
 
     if ($varastoon_row["suoraan_laskutukseen"] != "") {
-      $suoratoimitusekko = "<tr><th colspan='7'>".t("HUOM").":</td></tr><tr><td colspan='7'>".t("Suoratoimitus asiakkaalle").": $varastoon_row[nimi], ".t("Tilaus").": $varastoon_row[otunnus]. Ostorivin muutokset tehd‰‰n myˆs myyntiriville!</td></tr>";
+      $suoratoimitusekko = "<tr><th colspan='7'>".t("HUOM").":</td></tr><tr><td colspan='7'>".t("Suoratoimitus asiakkaalle").": $varastoon_row[nimi], ".t("Tilaus").": $varastoon_row[otunnus]. Ostorivin muutokset tehd√§√§n my√∂s myyntiriville!</td></tr>";
     }
     else {
-      $suoratoimitusekko = "<tr><th colspan='7'>".t("HUOM").":</td></tr><tr><td colspan='7'>".t("Tilattu asiakkaalle").": $varastoon_row[nimi], ".t("Tilaus").": $varastoon_row[otunnus]. Ostorivin muutokset tehd‰‰n myˆs myyntiriville!</td></tr>";
+      $suoratoimitusekko = "<tr><th colspan='7'>".t("HUOM").":</td></tr><tr><td colspan='7'>".t("Tilattu asiakkaalle").": $varastoon_row[nimi], ".t("Tilaus").": $varastoon_row[otunnus]. Ostorivin muutokset tehd√§√§n my√∂s myyntiriville!</td></tr>";
     }
   }
 }
@@ -57,13 +57,13 @@ if ($yhtiorow['variaatiomyynti'] == "K" and $kukarow["extranet"] == '' and (is_a
 }
 
 if ($variaaritorivi === FALSE) {
-  // Annetaan mahdollisuus tehd‰ uusi tilausrivi tai n‰ytet‰‰n virhe
+  // Annetaan mahdollisuus tehd√§ uusi tilausrivi tai n√§ytet√§√§n virhe
   echo "<table>
       $suoratoimitusekko
       <tr>
       <th>".t("Tuoteno")."</th>
-      <th>".t("M‰‰r‰")."</th>
-      <th>".t("M‰‰r‰")."</th>
+      <th>".t("M√§√§r√§")."</th>
+      <th>".t("M√§√§r√§")."</th>
       <th>".t("Hinta")."</th>";
 
       for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
@@ -111,22 +111,22 @@ if ($variaaritorivi === FALSE) {
 
   if ($automatiikka == "ON" and $onjodropdowni != 'ON' and $laskurow['tila'] != 'O') {
     echo "  ".t("Valtse toiminto").": <select name='var'>";
-    echo "<option value='LOJ#!°!#$kpl'>".t("Lis‰‰ syˆtetyt ja merkkaa erotus JT:ksi")."</option>";
-#      echo "<option value='LOP#!°!#$kpl'>".t("Lis‰‰ syˆtetyt ja merkkaa erotus puutteeksi")."</option>";
-    echo "<option value=''>".t("P‰ivit‰ rivin m‰‰r‰")."</option>";
+    echo "<option value='LOJ#!¬°!#$kpl'>".t("Lis√§√§ sy√∂tetyt ja merkkaa erotus JT:ksi")."</option>";
+#      echo "<option value='LOP#!¬°!#$kpl'>".t("Lis√§√§ sy√∂tetyt ja merkkaa erotus puutteeksi")."</option>";
+    echo "<option value=''>".t("P√§ivit√§ rivin m√§√§r√§")."</option>";
     echo "</select>";
   }
 
-  // Ostohinnan p‰ivityskysely
+  // Ostohinnan p√§ivityskysely
   if ($paiv == 'X') {
-    echo "<input type='radio' name='paiv' value='K'>".t("P‰ivit‰")."<br>";
-    echo "<input type='radio' name='paiv' value='E' CHECKED>".t("ƒl‰ P‰ivit‰")."<br>";
+    echo "<input type='radio' name='paiv' value='K'>".t("P√§ivit√§")."<br>";
+    echo "<input type='radio' name='paiv' value='E' CHECKED>".t("√Ñl√§ P√§ivit√§")."<br>";
   }
 
   echo "$varaosavirhe</td>";
-  echo "<td class='back'><input type='Submit' name= 'kumpi' value = '".t("Lis‰‰")."'></td>";
+  echo "<td class='back'><input type='Submit' name= 'kumpi' value = '".t("Lis√§√§")."'></td>";
 
-  //n‰ytet‰‰n poista nappi vain kun ollaan navigoitu ostotilaus riville saapumisen kohdista rivin kautta ja kun tilausrivi on esit‰ytetty
+  //n√§ytet√§√§n poista nappi vain kun ollaan navigoitu ostotilaus riville saapumisen kohdista rivin kautta ja kun tilausrivi on esit√§ytetty
   if($saapuminen_ostorivin_muokkaus == 1 and !empty($rivitunnus)) {
     echo "<td class='back'><input type='submit' name='poista' value='".t("Poista")."'/></td>";
   }
@@ -166,8 +166,8 @@ if ($variaaritorivi === FALSE) {
       <td><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td>
       <td colspan='$backspan'><textarea name='kommentti' cols='50'>$kommentti</textarea></td>";
 
-  //Tyhjennet‰‰n kent‰t
-  echo "<td class='back'><input type='Submit' name= 'tyhjenna' value = '".t("Tyhjenn‰")."'></td></tr>";
+  //Tyhjennet√§√§n kent√§t
+  echo "<td class='back'><input type='Submit' name= 'tyhjenna' value = '".t("Tyhjenn√§")."'></td></tr>";
   echo "</form></table><br>";
 }
 

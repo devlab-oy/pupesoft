@@ -1,7 +1,7 @@
 <?php
 echo "<b>".t("Budjetti")."</b><hr>";
 
-if ($tee == '') { // T‰m‰ on k‰yttˆliittym‰
+if ($tee == '') { // T√§m√§ on k√§ytt√∂liittym√§
   echo "<form action = 'raportit.php' method='post'>
       <input type = 'hidden' name = 'toim' value = 'naytabudjetti'>
       <input type = 'hidden' name = 'tee' value = '1'>
@@ -82,7 +82,7 @@ if ($tee == '') { // T‰m‰ on k‰yttˆliittym‰
     echo "<option value = '$vrow[0]' $sel>$vrow[1]";
   }
   echo "</select></td></tr>";
-  echo "<tr><td></td><td><input type = 'submit' value = '".t("N‰yt‰")."'></form></td></table>";
+  echo "<tr><td></td><td><input type = 'submit' value = '".t("N√§yt√§")."'></form></td></table>";
   exit;
 }
 
@@ -90,7 +90,7 @@ $timeparts = explode(" ",microtime());
 $phptime = $timeparts[1].substr($timeparts[0],1);
 
 // Proto tase/tuloslaskelma problematiikkaan
-// Nyth‰n on kuitenkin niin, ett‰ tuo kausi rajoittaa meit‰ t‰t‰ tilikautta enemm‰n, eli
+// Nyth√§n on kuitenkin niin, ett√§ tuo kausi rajoittaa meit√§ t√§t√§ tilikautta enemm√§n, eli
 
 $aalvk = 1 + $alvk;
 $aalvv = $alvv;
@@ -102,7 +102,7 @@ if ($aalvk > 12) {
 
 $yhtiorow["tilikausi_loppu"] = $aalvv . "-" . sprintf("%02d",$aalvk) . "-01";
 
-// Luetaan sopivat budjettiluvut tarvittavassa j‰rjestyksess‰
+// Luetaan sopivat budjettiluvut tarvittavassa j√§rjestyksess√§
 if (strlen(trim($kustp)) > 0) {
   $lisa .= " and kustp = '$kustp'";
 }
@@ -153,7 +153,7 @@ while ($budjrow = mysql_fetch_array ($result)) {
             GROUP BY kausi";
   $aresult = mysql_query($query) or pupe_error($query);
 
-  // V‰h‰n otsikoita peliin...
+  // V√§h√§n otsikoita peliin...
   $query = "SELECT nimi
             FROM taso
             WHERE yhtio = '$kukarow[yhtio]'
@@ -182,4 +182,4 @@ $timeparts = explode(" ",microtime());
 $endtime = $timeparts[1].substr($timeparts[0],1);
 $aika2= round($endtime-$phptime,4);
 
-print "<br>".t("V‰liaika")." $aika1, ".t("kokoaika")." $aika2.";
+print "<br>".t("V√§liaika")." $aika1, ".t("kokoaika")." $aika2.";

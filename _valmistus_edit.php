@@ -15,7 +15,7 @@
     <td colspan='3'><input type='text' name='kommentti' size='40'></td>
   </tr>
   <tr>
-    <th><?php echo t("Ylityötunnit") ?></th>
+    <th><?php echo t("YlityÃ¶tunnit") ?></th>
     <td colspan='3'><input type='text' name='ylityotunnit'></td>
   </tr>
   <tr>
@@ -29,9 +29,9 @@
 
   <tr>
     <th><?php echo t("Valmiste") ?></th>
-    <th><?php echo t("Määrä") ?></th>
-    <th><?php echo t("Valmistettava määrä") ?></th>
-    <th><?php echo t("Ylityötunnit") ?></th>
+    <th><?php echo t("MÃ¤Ã¤rÃ¤") ?></th>
+    <th><?php echo t("Valmistettava mÃ¤Ã¤rÃ¤") ?></th>
+    <th><?php echo t("YlityÃ¶tunnit") ?></th>
   </tr>
 
   <?php foreach($valmistus->tuotteet() as $valmiste) { ?>

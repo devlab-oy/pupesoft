@@ -1,12 +1,12 @@
 <?php
 
 /*
-  Yll‰pidet‰‰n taulujen pakollisia saraketietoja
+  Yll√§pidet√§√§n taulujen pakollisia saraketietoja
 
   list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset) = pakolliset_sarakkeet($table);
 */
 
-// m‰‰ritell‰‰n pakolliset sarakkeet
+// m√§√§ritell√§√§n pakolliset sarakkeet
 if (!function_exists("pakolliset_sarakkeet")) {
   function pakolliset_sarakkeet($table, $otsikot = "", $synkronointi = '') {
     global $kukarow, $yhtiorow;
@@ -179,7 +179,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
       case "yhteensopivuus_tuote_lisatiedot" :
         $pakolliset  = array("YHTEENSOPIVUUS_TUOTE_TUNNUS", "OTSIKKO", "ARVO", "KIELI");
         $kielletyt   = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
-        // HUOM: t‰ss‰ hieman fuulataan joinattavia. Tsekkaa koodi lue_datassa, t‰m‰ on spessukeissi....
+        // HUOM: t√§ss√§ hieman fuulataan joinattavia. Tsekkaa koodi lue_datassa, t√§m√§ on spessukeissi....
         $joinattavat = array("TUOTENO" => "yhteensopivuus_tuote");
         $saakopoistaa = TRUE;
         break;
@@ -394,7 +394,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
     }
 
     if ($synkronointi != 'ALA_YHDISTA_MYSQLALIAKSIA') {
-      // Haetaan kenttien pakollisuudet sek‰ oletukset MySQL aliaksista. Selitetark_2 on profiilin nimi, joten haetaan vain "oletusprofiilista"
+      // Haetaan kenttien pakollisuudet sek√§ oletukset MySQL aliaksista. Selitetark_2 on profiilin nimi, joten haetaan vain "oletusprofiilista"
       $query = "SELECT selite, selitetark_3, selitetark_4
                 FROM avainsana use index (yhtio_laji_selite)
                 WHERE yhtio      = '{$kukarow["yhtio"]}'
@@ -404,7 +404,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
       $result = pupe_query($query);
 
       while ($row = mysql_fetch_assoc($result)) {
-        // Selitteess‰ on tietokannan sarakkeen nimi muodossa asiakas.luottoraja
+        // Selitteess√§ on tietokannan sarakkeen nimi muodossa asiakas.luottoraja
         if (strpos($row["selite"], ".") !== FALSE) {
           list($taulu, $sarake) = explode(".", $row["selite"]);
           $sarake = strtoupper(trim($sarake));

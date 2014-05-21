@@ -6,9 +6,9 @@ function paperi_otsikko () {
   $paperi .= sprintf ('%-25.25s',   "VIENNIN ATK-TULLAUS");
   $paperi .= "\r\n";
 
-  $paperi .= sprintf ('%-30.30s',    "Viej‰: ".$yhtiorow["nimi"]);
+  $paperi .= sprintf ('%-30.30s',    "Viej√§: ".$yhtiorow["nimi"]);
   $paperi .= sprintf ('%-40.40s',   "Jaksolta $alku - $loppu");
-  $paperi .= sprintf ('%-40.40s',   "TƒYDENTƒVƒ TULLI-ILMOITUS");
+  $paperi .= sprintf ('%-40.40s',   "T√ÑYDENT√ÑV√Ñ TULLI-ILMOITUS");
   $paperi .= sprintf ('%-22.22s',   "Ajopvm. $ajopvm");
   $paperi .= sprintf ('%-15.15s',   "Sivu nro ".$paperisivu);
   $paperi .= "\r\n";
@@ -22,7 +22,7 @@ function paperi_otsikko () {
 
   $paperi .= sprintf ('%-11.11s',    "Viite");
   $paperi .= sprintf ('%-25.25s',   "Vastaanottaja");
-  $paperi .= sprintf ('%-25.25s',   "Kuljetusv‰l. tunn.");
+  $paperi .= sprintf ('%-25.25s',   "Kuljetusv√§l. tunn.");
   $paperi .= sprintf ('%-10.10s',    "KM");
   $paperi .= sprintf ('%-13.13s',   "Kontti");
   $paperi .= sprintf ('%-16.16s',   "Akt.kulj. kans.");
@@ -36,9 +36,9 @@ function paperi_otsikko () {
   $paperi .= sprintf ('%-11.11s',    "Vientipvm");
   $paperi .= sprintf ('%-25.25s',   "");
   $paperi .= sprintf ('%-25.25s',   "Valuutta");
-  $paperi .= sprintf ('%-10.10s',   "Val.m‰‰r‰");
+  $paperi .= sprintf ('%-10.10s',   "Val.m√§√§r√§");
   $paperi .= sprintf ('%-13.13s',     "Muuntokurssi");
-  $paperi .= sprintf ('%-16.16s',   "Lis./V‰h. kust.");
+  $paperi .= sprintf ('%-16.16s',   "Lis./V√§h. kust.");
   $paperi .= sprintf ('%-14.14s',   "Vientiarvo");
   $paperi .= sprintf ('%-12.12s',    "EUR-ilmoitus");
   $paperi .= "\r\n";
@@ -54,7 +54,7 @@ function paperi_otsikko () {
   $paperi .= sprintf ('%-16.16s',   "2-palj.");
   $paperi .= sprintf ('%-14.14s',    "2-palj. laji");
   $paperi .= sprintf ('%-12.12s',    "Menettely");
-  $paperi .= sprintf ('%-11.11s',    "M‰‰r‰maa");
+  $paperi .= sprintf ('%-11.11s',    "M√§√§r√§maa");
   $paperi .= sprintf ('%-13.13s',   "Vientiarvo");
   $paperi .= sprintf ('%-15.15s',   "Lisenssit/luvat");
   $paperi .= "\r\n";
@@ -142,14 +142,14 @@ function paperi_loppu () {
   $paperi .= "\r\n";
   $paperi .= "\r\n";
 
-  $paperi .= sprintf ('%-60.60s',"Koko aineiston tietuem‰‰r‰").$tietuemaara." kpl\r\n";
+  $paperi .= sprintf ('%-60.60s',"Koko aineiston tietuem√§√§r√§").$tietuemaara." kpl\r\n";
   $paperi .= sprintf ('%-60.60s',"Koko aineiston vientiarvo").$laskutusarvo." EUR\r\n";
 
   $paperi .= "\r\n";
   $paperi .= "\r\n";
   $paperi .= "-------------------------------------------------------------------------------------------------------------------------------------------------------------------------";
   $paperi .= "\r\n";
-  $paperi .= sprintf ('%-60.60s',"P‰iv‰ys ja asiamiehen allekirjoitus")."| Tulliviranomaisen merkinnˆille\r\n";
+  $paperi .= sprintf ('%-60.60s',"P√§iv√§ys ja asiamiehen allekirjoitus")."| Tulliviranomaisen merkinn√∂ille\r\n";
   $paperi .= sprintf ('%-60.60s',$yhtiorow["kotipaikka"]."  ".$ajopvm)."|\r\n";
   $paperi .= sprintf ('%-60.60s',"")."|\r\n";
   $paperi .= sprintf ('%-60.60s',$yhtiorow["nimi"])."|\r\n";

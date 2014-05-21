@@ -1,15 +1,15 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("inc/parametrit.inc");
 
-echo "<font class='head'>".t("Maksettu ulkomaan arvonlis‰vero")."</font><hr><br>";
+echo "<font class='head'>".t("Maksettu ulkomaan arvonlis√§vero")."</font><hr><br>";
 
 if ($tee == 'aja') {
   if (($plvv == 0 and $plvk != 0) or ($plvv != 0 and $plvk == 0)) {
-    echo "<font class='error'>".t("Anna sek‰ kausi ett‰ vuosi")."</font><br>";
+    echo "<font class='error'>".t("Anna sek√§ kausi ett√§ vuosi")."</font><br>";
     $tee = '';
   }
 }
@@ -17,7 +17,7 @@ if ($tee == 'aja') {
 if($tee == "aja") {
   $tkausi = (int) $tkausi;
 
-  // Tutkitaan ensiksi, mille tilikaudelle pyydett‰v‰ lista lˆytyy, jos lista on sopiva
+  // Tutkitaan ensiksi, mille tilikaudelle pyydett√§v√§ lista l√∂ytyy, jos lista on sopiva
   if ($tkausi > 0) {
     $query = "SELECT *
               FROM tilikaudet
@@ -26,7 +26,7 @@ if($tee == "aja") {
     $result = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($result) != 1) {
-      echo "<font class='error'>".t("Sopivaa yrityksen tilikautta ei lˆytynyt")."</font>";
+      echo "<font class='error'>".t("Sopivaa yrityksen tilikautta ei l√∂ytynyt")."</font>";
       exit;
     }
 
@@ -92,11 +92,11 @@ if($tee == "aja") {
 
   echo "<hr>";
 
-  $kuluALV = "  SELECT if(tuotteen_alv.alv IS NULL, 0, tuotteen_alv.alv)
-          FROM tilausrivi
-          LEFT JOIN tuotteen_alv ON tuotteen_alv.yhtio=tilausrivi.yhtio and tuotteen_alv.tuoteno=tilausrivi.tuoteno
-          WHERE tilausrivi.yhtio=tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus=tilausrivin_lisatiedot.tilausrivitunnus
-          LIMIT 1";
+  $kuluALV = "SELECT if(tuotteen_alv.alv IS NULL, 0, tuotteen_alv.alv)
+              FROM tilausrivi
+              LEFT JOIN tuotteen_alv ON tuotteen_alv.yhtio=tilausrivi.yhtio and tuotteen_alv.tuoteno=tilausrivi.tuoteno
+              WHERE tilausrivi.yhtio=tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus=tilausrivin_lisatiedot.tilausrivitunnus
+              LIMIT 1";
 
   $query = "SELECT tiliointi.*,
             date_format(tiliointi.tapvm, '%d.%m.%Y') tapvm,
@@ -128,7 +128,7 @@ if($tee == "aja") {
           <th>".t("Kustannuspaikka")."</th>
           <th>".t("Kotisumma")."</th>
           <th>".t("Veroton summa")."</th>
-          <th>".t("Peritt‰v‰ vero")."</th>
+          <th>".t("Peritt√§v√§ vero")."</th>
           <th>".t("Selite")."</th>
         </tr>";
     while($row=mysql_fetch_array($result)) {
@@ -152,7 +152,7 @@ if($tee == "aja") {
     echo "</table><br><br>";
 
     if(is_array($summat)) {
-      echo "<font class='message'>".t("Takaisinperitt‰v‰‰ maittain")."</font><br>";
+      echo "<font class='message'>".t("Takaisinperitt√§v√§√§ maittain")."</font><br>";
       echo "<table><tr><th>".t("Maa")."</th><th>".t("Summa")."</th></tr>";
       foreach($summat as $kmaa => $summa) {
         echo "<tr><td>$kmaa</td><td>".number_format($summa ,2, '.', ' ')."</td></tr>";
@@ -161,7 +161,7 @@ if($tee == "aja") {
     }
   }
   else {
-    echo "<font class='message'>".t("Ei maksettua ulkomaanarvonlis‰veroa valitulla jaksolla")."</font><br>";
+    echo "<font class='message'>".t("Ei maksettua ulkomaanarvonlis√§veroa valitulla jaksolla")."</font><br>";
   }
   $tee='';
 }
@@ -180,7 +180,7 @@ if ($tee == '') {
         <th>".t("Ajalla")."</th>
         <td><select name='alvv'>";
 
-  //  Oletetaan ett‰ halutaan selata viimeist‰ 12kk jaksoa
+  //  Oletetaan ett√§ halutaan selata viimeist√§ 12kk jaksoa
   $oalku=mktime(0, 0, 0, date("m")  , date("d"), date("Y")-1);
   $sel = array();
   if ($alvv == "") $alvv = date("Y",$oalku);
@@ -351,7 +351,7 @@ if ($tee == '') {
   echo "</select></td></tr>";
 
   echo "</table><br>
-        <input type = 'submit' value = '".t("N‰yt‰")."'></form>";
+        <input type = 'submit' value = '".t("N√§yt√§")."'></form>";
 }
 
 require("inc/footer.inc");

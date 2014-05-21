@@ -6,7 +6,7 @@ $lisa = "";
 
 echo "  <script language=javascript>
     function verify1() {
-      msg = '".t("Haluatko todella poistaa suorituksen? Suorituksen summa siirret‰‰n yhtiˆn selvittelytilille").".';
+      msg = '".t("Haluatko todella poistaa suorituksen? Suorituksen summa siirret√§√§n yhti√∂n selvittelytilille").".';
 
       if (confirm(msg)) {
         return true;
@@ -17,7 +17,7 @@ echo "  <script language=javascript>
       }
     }
     function verify2() {
-      msg = '".t("Haluatko todella poistaa suorituksen? K‰sinsyˆtetyn suorituksen summa poistetaan kirjanpidosta").".';
+      msg = '".t("Haluatko todella poistaa suorituksen? K√§sinsy√∂tetyn suorituksen summa poistetaan kirjanpidosta").".';
 
       if (confirm(msg)) {
         return true;
@@ -28,7 +28,7 @@ echo "  <script language=javascript>
       }
     }
     function verify3(tili) {
-      msg = '".t("Haluatko todella poistaa suorituksen? Suorituksen summa siirret‰‰n tilille")." '+tili;
+      msg = '".t("Haluatko todella poistaa suorituksen? Suorituksen summa siirret√§√§n tilille")." '+tili;
 
       if (confirm(msg)) {
         return true;
@@ -77,7 +77,7 @@ if ($tila == 'poistasuoritus' or $tila == 'siirrasuoritus' or $tila == "siirrasu
     $yriti_res = pupe_query($query);
     $yriti_row = mysql_fetch_assoc($yriti_res);
 
-    // Haetaan suorituksen saamiset-tiliˆinti
+    // Haetaan suorituksen saamiset-tili√∂inti
     $query = "SELECT *
               FROM tiliointi
               WHERE yhtio  = '$kukarow[yhtio]'
@@ -87,7 +87,7 @@ if ($tila == 'poistasuoritus' or $tila == 'siirrasuoritus' or $tila == "siirrasu
     $tiliointi1_row = mysql_fetch_assoc($tiliointi1_res);
 
     if (mysql_num_rows($tiliointi1_res) == 1) {
-      // Haetaan suorituksen pankkitili-tiliˆinti
+      // Haetaan suorituksen pankkitili-tili√∂inti
       $query = "SELECT tilino
                 FROM tiliointi
                 WHERE yhtio  = '$kukarow[yhtio]'
@@ -100,7 +100,7 @@ if ($tila == 'poistasuoritus' or $tila == 'siirrasuoritus' or $tila == "siirrasu
       $tiliointi2_row = mysql_fetch_assoc($tiliointi2_res);
     }
 
-    // Jos kaikki lˆytyy, niin ok. Else majork‰k
+    // Jos kaikki l√∂ytyy, niin ok. Else majork√§k
     if (mysql_num_rows($yriti_res) == 1 and mysql_num_rows($tiliointi1_res) == 1 and mysql_num_rows($tiliointi2_res) == 1 and $tiliointi2_row["tilino"] != "" and (int) $tiliointi1_row["ltunnus"] > 0 and $yhtiorow["selvittelytili"] != "") {
 
       if ($tila == "siirrasuoritus_tilille") {
@@ -129,7 +129,7 @@ if ($tila == 'poistasuoritus' or $tila == 'siirrasuoritus' or $tila == "siirrasu
       $tsekpvm = str_replace("-", "", $tapvm);
 
       if ($tsekpvm < $myrealku or $tsekpvm > $myreloppu) {
-        echo "<br><font class='error'>".t("HUOM: Suorituksen p‰iv‰m‰‰r‰ oli suljetulla kaudella. Tiliˆinti tehtiin t‰lle p‰iv‰lle")."!</font><br><br>";
+        echo "<br><font class='error'>".t("HUOM: Suorituksen p√§iv√§m√§√§r√§ oli suljetulla kaudella. Tili√∂inti tehtiin t√§lle p√§iv√§lle")."!</font><br><br>";
 
         $tapvm  = date("Y-m-d");
       }
@@ -179,7 +179,7 @@ if ($tila == 'poistasuoritus' or $tila == 'siirrasuoritus' or $tila == "siirrasu
 }
 
 if ($tila == 'suoritus_asiakaskohdistus_kaikki') {
-  //kohdistetaan t‰st‰ kaikki helpot
+  //kohdistetaan t√§st√§ kaikki helpot
   require ("suoritus_asiakaskohdistus_kaikki.php");
   $tila = "";
 }
@@ -218,7 +218,7 @@ if ($tila == 'tulostakuitti') {
 
     require ("../tilauskasittely/tulosta_kuitti.inc");
 
-    // pdff‰n piirto
+    // pdff√§n piirto
     $firstpage = alku();
     rivi($firstpage);
     loppu($firstpage);
@@ -227,17 +227,17 @@ if ($tila == 'tulostakuitti') {
 
     //kirjoitetaan pdf faili levylle..
     $fh = fopen($pdffilenimi, "w");
-    if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
+    if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep√§onnistui $pdffilenimi");
     fclose($fh);
 
     if ($tulostakuitti == "email") {
       $liite = $pdffilenimi;
       $kutsu = "Suoritus $asiakasrow[nimi]";
       require ("inc/sahkoposti.inc");
-      echo "<font class='message'>".t("Kuittikopio l‰hetetty").".</font><br>";
+      echo "<font class='message'>".t("Kuittikopio l√§hetetty").".</font><br>";
     }
     else {
-      // itse print komento...Koska ei ole luotettavaa tapaa tehd‰ kahta kopiota, niin printataan kahdesti
+      // itse print komento...Koska ei ole luotettavaa tapaa tehd√§ kahta kopiota, niin printataan kahdesti
       $line = exec("$tulostakuitti $pdffilenimi");
         $line = exec("$tulostakuitti $pdffilenimi");
       echo "<font class='message'>".t("Kuittikopio (2 kpl) tulostettu").".</font><br>";
@@ -247,7 +247,7 @@ if ($tila == 'tulostakuitti') {
     $line = exec("rm -f $pdffilenimi");
   }
 
-  // nollataan muuttujat niin ei mene mik‰‰n sekasin
+  // nollataan muuttujat niin ei mene mik√§√§n sekasin
   $tila      = "";
   $summa      = "";
   $selite      = "";
@@ -257,7 +257,7 @@ if ($tila == 'tulostakuitti') {
 if ($tila == "kohdista") {
     $myyntisaamiset = 0;
 
-    // katotaan lˆytyykˆ tili
+    // katotaan l√∂ytyyk√∂ tili
     $query = "SELECT tilino
               from tili
               where yhtio = '$kukarow[yhtio]'
@@ -287,7 +287,7 @@ if ($tila == "kohdista") {
                 AND yhtio    = '$kukarow[yhtio]'";
       $result = pupe_query($query);
 
-      // Tiliˆinti on voinut muuttua
+      // Tili√∂inti on voinut muuttua
       $query = "UPDATE tiliointi
                 SET tilino = '$vastatili'
                 WHERE yhtio  = '$kukarow[yhtio]'
@@ -377,18 +377,18 @@ if ($tila == 'tarkenna') {
     echo "</tr>";
   }
 
-  // Mahdollisuus muuttaa viesti‰
+  // Mahdollisuus muuttaa viesti√§
   echo "<tr>
-    <th>".t("Lis‰‰ kommentti suoritukselle")."</th>
+    <th>".t("Lis√§√§ kommentti suoritukselle")."</th>
     <td colspan='4'><input type = 'text' name = 'komm' size='40' value = '$komm'></td>
-    <td class='back'><input type = 'submit' value = '".t("Lis‰‰")."'></td>
+    <td class='back'><input type = 'submit' value = '".t("Lis√§√§")."'></td>
     </tr>";
 
   echo "</table></form><br>";
 
   foreach ($haku as $key => $value) {
     $old   = array("[","{","\\","|","]","}");
-    $new   = array("‰","‰", "ˆ","ˆ","Â","Â");
+    $new   = array("√§","√§", "√∂","√∂","√•","√•");
     $siivottu = preg_replace('/\b(oy|ab)\b/i', '', strtolower($value));
     $siivottu = preg_replace('/^\s*/', '', $siivottu);
     $siivottu = preg_replace('/\s*$/', '', $siivottu);
@@ -429,7 +429,7 @@ if ($tila == 'tarkenna') {
   echo "<th valign='top'>".t("avoimia")."<br>".t("laskuja")."</th>";
   echo "<th valign='top'>".t("saamisettili")."</th>";
   echo "<td class='back'><input type='submit' value = '".t("Etsi")."'>";
-  echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type='checkbox' name='poisetsi' $petsichk> ".t("Etsi myˆs poistettuja asiakkaita");
+  echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type='checkbox' name='poisetsi' $petsichk> ".t("Etsi my√∂s poistettuja asiakkaita");
   echo "</td>";
   echo "</tr>";
 
@@ -502,7 +502,7 @@ if ($tila == 'tarkenna') {
     }
   }
   else {
-    echo "<tr><td colspan='6'>".t("Haulla ei lˆytynyt yht‰‰n asiakasta")."!</td></tr>";
+    echo "<tr><td colspan='6'>".t("Haulla ei l√∂ytynyt yht√§√§n asiakasta")."!</td></tr>";
   }
 
   echo "</table>";
@@ -524,7 +524,7 @@ if ($tila == '') {
   $result = pupe_query($query);
 
   echo "<table>";
-  echo "<tr><th>".t("N‰yt‰ vain tapahtumat tililt‰")."</th>";
+  echo "<tr><th>".t("N√§yt√§ vain tapahtumat tililt√§")."</th>";
   echo "<td><select name='tilino' onchange='submit()'>";
   echo "<option value=''>".t("Kaikki")."</option>\n";
 
@@ -543,7 +543,7 @@ if ($tila == '') {
             ORDER BY valkoodi";
   $vresult = pupe_query($query);
 
-  echo "<tr><th>".t("N‰yt‰ vain tapahtumat valuutassa")."</th>";
+  echo "<tr><th>".t("N√§yt√§ vain tapahtumat valuutassa")."</th>";
   echo "<td><select name='valuutta' onchange='submit()'>";
   echo "<option value=''>".t("Kaikki")."</option>\n";
 
@@ -556,7 +556,7 @@ if ($tila == '') {
   echo "</select></td></tr>";
   echo "</table>";
 
-  echo "<br><font class='message'>".t("Valitse x kohdistaaksesi suorituksia asiakkaisiin tai")." <a href='$PHP_SELF?tila=suoritus_asiakaskohdistus_kaikki'>".t("t‰st‰")."</a> ".t("kaikki helpot").".</font><br><br>";
+  echo "<br><font class='message'>".t("Valitse x kohdistaaksesi suorituksia asiakkaisiin tai")." <a href='$PHP_SELF?tila=suoritus_asiakaskohdistus_kaikki'>".t("t√§st√§")."</a> ".t("kaikki helpot").".</font><br><br>";
 
   $tila = '';
 
@@ -663,7 +663,7 @@ if ($tila == '') {
     echo "<td valign='top'>$maksurow[viite]<br>$maksurow[viesti]</td>";
     echo "<td valign='top'><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$maksurow[tltunnus]&lopetus=$PHP_SELF//////tila=$tila//tilino=$tilino//valuutta=$valuutta//haku[suoritus.nimi_maksaja]={$haku["suoritus.nimi_maksaja"]}//haku[suoritus.kirjpvm]={$haku["suoritus.kirjpvm"]}//haku[suoritus.summa]={$haku["suoritus.summa"]}//haku[suoritus.valkoodi]={$haku["suoritus.valkoodi"]}//haku[suoritus.tilino]={$haku["suoritus.tilino"]}//haku[suoritus.viite]={$haku["suoritus.viite"]}//haku[tiliointi.tilino]={$haku["tiliointi.tilino"]}'>$maksurow[ttilino]</a></td>";
 
-    // tehd‰‰n nappi kuitin tulostukseen
+    // tehd√§√§n nappi kuitin tulostukseen
     echo "<td valign='top' class='back'>";
     echo "<form method='post'>";
     echo "<input type='hidden' name='tila' value='tulostakuitti'>";
@@ -675,7 +675,7 @@ if ($tila == '') {
     echo "</td>";
 
     if ($kukarow['taso'] == 2 or $kukarow['taso'] == 3) {
-      // tehd‰‰n nappi suorituksen poistamiseen
+      // tehd√§√§n nappi suorituksen poistamiseen
       echo "<td valign='top' class='back'>";
 
       if (trim($maksurow["viite"]) != "") {
@@ -689,7 +689,7 @@ if ($tila == '') {
             echo "<input type='hidden' name='tila' value='siirrasuoritus_tilille'>";
             echo "<input type='hidden' name='siirtotili' value='$siirtotili'>";
             echo "<input type='hidden' name='suoritustunnukset' value='$maksurow[tunnus]'>";
-            echo "<input type='submit' value='Siirr‰ $siirtotili-tilille' onClick='return verify3($siirtotili);'>";
+            echo "<input type='submit' value='Siirr√§ $siirtotili-tilille' onClick='return verify3($siirtotili);'>";
             echo "</form>";
           }
         }
@@ -697,7 +697,7 @@ if ($tila == '') {
         echo "<form method='post' action = '?$ulisa'>";
         echo "<input type='hidden' name='tila' value='siirrasuoritus'>";
         echo "<input type='hidden' name='suoritustunnukset' value='$maksurow[tunnus]'>";
-        echo "<input type='submit' value='".t("Siirr‰ selvittelytilille")."' onClick='return verify1();'>";
+        echo "<input type='submit' value='".t("Siirr√§ selvittelytilille")."' onClick='return verify1();'>";
         echo "</form>";
       }
       else {
@@ -727,7 +727,7 @@ if ($tila == '') {
       echo "<input type='hidden' name='tila' value='siirrasuoritus_tilille'>";
       echo "<input type='hidden' name='siirtotili' value='$siirtotili'>";
       echo "<input type='hidden' name='suoritustunnukset_kaikki' value='".implode(",", $suoritustunnukset_kaikki)."'>";
-      echo "<input type='submit' value='Siirr‰ kaikki suoritukset $siirtotili-tilille' onClick='return verify3($siirtotili);'>";
+      echo "<input type='submit' value='Siirr√§ kaikki suoritukset $siirtotili-tilille' onClick='return verify3($siirtotili);'>";
       echo "</form><br>";
     }
   }

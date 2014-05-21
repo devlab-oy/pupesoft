@@ -2,7 +2,7 @@
 
 require ("../inc/parametrit.inc");
 
-echo "<font class='head'>".t("Korjaa ker‰ys").":</font><hr>";
+echo "<font class='head'>".t("Korjaa ker√§ys").":</font><hr>";
 
 $alatilalisa = "";
 
@@ -58,13 +58,13 @@ if ($tee == 'KORJAA') {
   $tee = '';
 }
 
-// meill‰ ei ole valittua tilausta
+// meill√§ ei ole valittua tilausta
 if ($tee == '') {
 
   $formi = "find";
   $kentta = "etsi";
 
-  // tehd‰‰n etsi valinta
+  // tehd√§√§n etsi valinta
   echo "<form name='find' method='post'>".t("Etsi tilausta").": <input type='text' name='etsi'><input type='Submit' value='".t("Etsi")."'></form><br><br>";
 
   $kka = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
@@ -123,7 +123,7 @@ if ($tee == '') {
           <input type='hidden' name='tee' value='KORJAA'>
           <input type='hidden' name='lasku_yhtio' value='$tilrow[yhtio]'>
             <input type='hidden' name='tunnus' value='$tilrow[tunnus]'>
-            <input type='submit' name='tila' value='".t("Palauta tilaus ker‰yslista tulostettu tilaan")."'>
+            <input type='submit' name='tila' value='".t("Palauta tilaus ker√§yslista tulostettu tilaan")."'>
           </form></td>";
       echo "</tr>";
     }
@@ -131,7 +131,7 @@ if ($tee == '') {
     echo "</table>";
   }
   else {
-    echo "<font class='message'>".t("Yht‰‰n korjattavaa tilausta ei lˆytynyt")."...</font>";
+    echo "<font class='message'>".t("Yht√§√§n korjattavaa tilausta ei l√∂ytynyt")."...</font>";
   }
 }
 

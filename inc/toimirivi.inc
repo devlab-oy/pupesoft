@@ -1,10 +1,10 @@
 <?php
 
 $ulos = "";
-$jatko = 1; // oletetaan normaali k‰sittely
-$tyyppi = 1; // oletetaan rivin n‰kyvyys
+$jatko = 1; // oletetaan normaali k√§sittely
+$tyyppi = 1; // oletetaan rivin n√§kyvyys
 
-if ($i == 0) { //yhtiˆt‰ ei n‰ytet‰
+if ($i == 0) { //yhti√∂t√§ ei n√§ytet√§
   $tyyppi = 0;
 }
 
@@ -61,7 +61,7 @@ if  ((mysql_field_name($result, $i) == "oletus_suoraveloitus") or
   }
 
   $ulos .= "<option value=''  $chk1>".t("Ei")."</option>";
-  $ulos .= "<option value='o' $chk2>".t("Kyll‰")."</option>";
+  $ulos .= "<option value='o' $chk2>".t("Kyll√§")."</option>";
 
   $ulos .= "</select></td>";
   $jatko = 0;
@@ -97,7 +97,7 @@ if (mysql_field_name($result, $i) == "oletus_hyvak1" and $alias_set == "KAYTTAJA
     (mysql_field_name($result, $i) == "oletus_hyvak2") or
     (mysql_field_name($result, $i) == "oletus_hyvak3") or
     (mysql_field_name($result, $i) == "oletus_hyvak4") or
-    (mysql_field_name($result, $i) == "oletus_hyvak5")) { //hyv‰ksyj‰t
+    (mysql_field_name($result, $i) == "oletus_hyvak5")) { //hyv√§ksyj√§t
 
   $query = "SELECT kuka, nimi
             FROM kuka
@@ -396,8 +396,8 @@ if (mysql_field_name($result, $i) == "laskun_erittely") {
   else $selo = "selected";
 
   $ulos  = "<td><select name='$nimi'>";
-  $ulos .= "<option value='' $selo>".t("Ostolaskua ei voi eritell‰")."</option>";
-  $ulos .= "<option value='S' $sels>".t("Ostolaskun voi eritell‰")."</option>";
+  $ulos .= "<option value='' $selo>".t("Ostolaskua ei voi eritell√§")."</option>";
+  $ulos .= "<option value='S' $sels>".t("Ostolaskun voi eritell√§")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -410,17 +410,17 @@ if (mysql_field_name($result, $i) == "tyyppi") {
 
   if ($laji == "K") {
     $ulos  = "<td><select name='$nimi'>";
-    $ulos .= "<option value='K'  $sel[K]>".t("Matkalaskuk‰ytt‰j‰")."</option>";
-    $ulos .= "<option value='P'  $sel[P]>".t("Poistettu / Ei k‰ytˆss‰")."</option>";
+    $ulos .= "<option value='K'  $sel[K]>".t("Matkalaskuk√§ytt√§j√§")."</option>";
+    $ulos .= "<option value='P'  $sel[P]>".t("Poistettu / Ei k√§yt√∂ss√§")."</option>";
     $ulos .= "</select></td>";
   }
   else {
     $ulos  = "<td><select name='$nimi'>";
     $ulos .= "<option value=''>".t("Normaali toimittaja")."</option>";
     $ulos .= "<option value='L'  $sel[L]>".t("Kaikkien tuotteiden toimittaja")."</option>";
-    $ulos .= "<option value='K'  $sel[K]>".t("Matkalaskuk‰ytt‰j‰")."</option>";
-    $ulos .= "<option value='P'  $sel[P]>".t("Poistettu / Ei k‰ytˆss‰")."</option>";
-    $ulos .= "<option value='PP' $sel[PP]>".t("Poistettu / Ei k‰ytˆss‰ (Poistetaan myˆs kaikki Tuotteen toimittajatiedot)")."</option>";
+    $ulos .= "<option value='K'  $sel[K]>".t("Matkalaskuk√§ytt√§j√§")."</option>";
+    $ulos .= "<option value='P'  $sel[P]>".t("Poistettu / Ei k√§yt√∂ss√§")."</option>";
+    $ulos .= "<option value='PP' $sel[PP]>".t("Poistettu / Ei k√§yt√∂ss√§ (Poistetaan my√∂s kaikki Tuotteen toimittajatiedot)")."</option>";
     $ulos .= "</select></td>";
   }
 
@@ -429,7 +429,7 @@ if (mysql_field_name($result, $i) == "tyyppi") {
 
 if (mysql_field_name($result, $i) == "tilino_alv") {
 
-  // tutkitaan ollaanko jossain toimipaikassa alv-rekisterˆity
+  // tutkitaan ollaanko jossain toimipaikassa alv-rekister√∂ity
   $query = "SELECT *
             FROM yhtion_toimipaikat
             WHERE yhtio     = '$kukarow[yhtio]'
@@ -438,7 +438,7 @@ if (mysql_field_name($result, $i) == "tilino_alv") {
             and toim_alv   != ''";
   $alhire = pupe_query($query);
 
-  // ollaan alv-rekisterˆity
+  // ollaan alv-rekister√∂ity
   if (mysql_num_rows($alhire) >= 1) {
 
     $ulos  = "<td><select name='$nimi'>";
@@ -501,17 +501,17 @@ if (mysql_field_name($result, $i) == "hintojenpaivityssykli") {
   $sel[$trow[$i]] = "selected";
 
   $ulos  = "<td><select name='$nimi'>";
-  $ulos .= "<option value='0'  $sel[0] >".t("Ei muistuteta tuotep‰‰llikˆit‰ hintap‰ivityksist‰")."</option>";
-  $ulos .= "<option value='1'  $sel[1] >".t("Tuotep‰‰llikˆit‰ muistutetaan hintap‰ivityksist‰ kerran vuodessa")."</option>";
-  $ulos .= "<option value='2'  $sel[2] >".t("Tuotep‰‰llikˆit‰ muistutetaan hintap‰ivityksist‰ 2 kertaa vuodessa")."</option>";
-  $ulos .= "<option value='3'  $sel[3] >".t("Tuotep‰‰llikˆit‰ muistutetaan hintap‰ivityksist‰ 3 kertaa vuodessa")."</option>";
-  $ulos .= "<option value='4'  $sel[4] >".t("Tuotep‰‰llikˆit‰ muistutetaan hintap‰ivityksist‰ 4 kertaa vuodessa")."</option>";
+  $ulos .= "<option value='0'  $sel[0] >".t("Ei muistuteta tuotep√§√§llik√∂it√§ hintap√§ivityksist√§")."</option>";
+  $ulos .= "<option value='1'  $sel[1] >".t("Tuotep√§√§llik√∂it√§ muistutetaan hintap√§ivityksist√§ kerran vuodessa")."</option>";
+  $ulos .= "<option value='2'  $sel[2] >".t("Tuotep√§√§llik√∂it√§ muistutetaan hintap√§ivityksist√§ 2 kertaa vuodessa")."</option>";
+  $ulos .= "<option value='3'  $sel[3] >".t("Tuotep√§√§llik√∂it√§ muistutetaan hintap√§ivityksist√§ 3 kertaa vuodessa")."</option>";
+  $ulos .= "<option value='4'  $sel[4] >".t("Tuotep√§√§llik√∂it√§ muistutetaan hintap√§ivityksist√§ 4 kertaa vuodessa")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
 }
 
-// ei n‰ytet‰ jos yhtiˆ ei suoratoimita mit‰‰n
+// ei n√§ytet√§ jos yhti√∂ ei suoratoimita mit√§√§n
 
 if (mysql_field_name($result, $i) == "suoratoimitus") {
   if ($yhtiorow["tee_osto_myyntitilaukselta"] != '') {
@@ -554,9 +554,9 @@ if (mysql_field_name($result, $i) == "edi_kuvaus") {
   $sel = array($path_parts['filename'] => 'selected') + array('editilaus_out_teccom.inc' => '', 'editilaus_out_wabco.inc' => '', 'editilaus_out_excel.inc' => '', 'editilaus_out_elma.inc' => '', 'editilaus_out_xml.inc' => '', 'editilaus_out_futur.inc' => '');
 
   $ulos  = "<td><select name='{$nimi}'>";
-  $ulos .= "<option value=''>".t("Ei k‰ytˆss‰")."</option>";
-  $ulos .= "<option value='editilaus_out_teccom.inc' {$sel['editilaus_out_teccom']}>".t("TecCom s‰hkˆinen tilaus")."</option>";
-  $ulos .= "<option value='editilaus_out_wabco.inc' {$sel['editilaus_out_wabco']}>".t("Wabco s‰hkˆinen tilaus")."</option>";
+  $ulos .= "<option value=''>".t("Ei k√§yt√∂ss√§")."</option>";
+  $ulos .= "<option value='editilaus_out_teccom.inc' {$sel['editilaus_out_teccom']}>".t("TecCom s√§hk√∂inen tilaus")."</option>";
+  $ulos .= "<option value='editilaus_out_wabco.inc' {$sel['editilaus_out_wabco']}>".t("Wabco s√§hk√∂inen tilaus")."</option>";
   $ulos .= "<option value='editilaus_out_excel.inc' {$sel['editilaus_out_excel']}>".t("Excel-ostotilaus")."</option>";
   $ulos .= "<option value='editilaus_out_elma.inc' {$sel['editilaus_out_elma']}>".t("Elma-editilaus")."</option>";
   $ulos .= "<option value='editilaus_out_xml.inc' {$sel['editilaus_out_xml']}>".t("Xml-ostotilaus")."</option>";
@@ -594,8 +594,8 @@ if (mysql_field_name($result, $i) == "tehdas_saldo_tarkistus") {
   $sel = $trow[$i] == 'K' ? " selected" : "";
 
   $ulos  = "<td><select name='{$nimi}'>";
-  $ulos .= "<option value=''>".t("Ei tarkisteta tehdassaldoja suoratoimitusta tehdess‰ myyntitilaukselta")."</option>";
-  $ulos .= "<option value='K' {$sel}>".t("Tarkistetaan tehdassaldot suoratoimitusta tehdess‰ myyntitilaukselta")."</option>";
+  $ulos .= "<option value=''>".t("Ei tarkisteta tehdassaldoja suoratoimitusta tehdess√§ myyntitilaukselta")."</option>";
+  $ulos .= "<option value='K' {$sel}>".t("Tarkistetaan tehdassaldot suoratoimitusta tehdess√§ myyntitilaukselta")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -619,10 +619,10 @@ if (mysql_field_name($result, $i) == "sahkoinen_automaattituloutus") {
   $sel = array($trow[$i] => 'selected') + array('E' => '', 'K' => '', 'J' => '');
 
   $ulos  = "<td><select name='{$nimi}'>";
-  $ulos .= "<option value=''>".t("K‰ytet‰‰n yhtiˆn toimipaikan oletusta")."</option>";
-  $ulos .= "<option value='E'{$sel['E']}>".t("S‰hkˆisen laskun sis‰‰nluvun yhteydess‰ ei tulouteta tuotteita varastoon")."</option>";
-  $ulos .= "<option value='K'{$sel["K"]}>".t("Tuotteet tuloutetaan varastoon automaattisesti s‰hkˆisen laskun sis‰‰nluvun yhteydess‰")."</option>";
-  $ulos .= "<option value='J'{$sel["J"]}>".t("Tuotteet tuloutetaan varastoon ja j‰lkilasketaan automaattisesti s‰hkˆisen laskun sis‰‰nluvun yhteydess‰")."</option>";
+  $ulos .= "<option value=''>".t("K√§ytet√§√§n yhti√∂n toimipaikan oletusta")."</option>";
+  $ulos .= "<option value='E'{$sel['E']}>".t("S√§hk√∂isen laskun sis√§√§nluvun yhteydess√§ ei tulouteta tuotteita varastoon")."</option>";
+  $ulos .= "<option value='K'{$sel["K"]}>".t("Tuotteet tuloutetaan varastoon automaattisesti s√§hk√∂isen laskun sis√§√§nluvun yhteydess√§")."</option>";
+  $ulos .= "<option value='J'{$sel["J"]}>".t("Tuotteet tuloutetaan varastoon ja j√§lkilasketaan automaattisesti s√§hk√∂isen laskun sis√§√§nluvun yhteydess√§")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -635,7 +635,7 @@ if (mysql_field_name($result, $i) == "ostotilauksen_kasittely") {
   if (mysql_num_rows($myynnista_osto_avainsanat) > 0) {
 
     $ulos  = "<td><select name='{$nimi}'>";
-    $ulos .= "<option value=''>".t("Yhtiˆn / toimipaikan oletus")."</option>";
+    $ulos .= "<option value=''>".t("Yhti√∂n / toimipaikan oletus")."</option>";
 
     while ($myynnista_osto_avainsanat_row = mysql_fetch_assoc($myynnista_osto_avainsanat)) {
 

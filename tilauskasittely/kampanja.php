@@ -33,7 +33,7 @@ if (isset($livesearch_tee) and $livesearch_tee == "TUOTEOSASTO") {
 }
 
 if ($ajax_request) {
-  //javascript l‰hett‰‰ kaiken stringin‰
+  //javascript l√§hett√§√§ kaiken stringin√§
   if ($palkinto_rivi == 'true') {
     $return = hae_liveseach_kentta($rivi_kohde, 'palkinto', $ehto_rivi_id);
   }
@@ -82,12 +82,12 @@ $request = array(
 );
 
 if ($request['tee'] == 'uusi_kampanja') {
-  //Purkka: Jos requestista tulee kampanjan nimi niin voidaan olettaa ett‰ halutaan luoda uusi kampanja
+  //Purkka: Jos requestista tulee kampanjan nimi niin voidaan olettaa ett√§ halutaan luoda uusi kampanja
   //TODO make some sense into this
   if (!empty($request['kampanja_nimi'])) {
     $onko_kampanja_ok = luo_uusi_kampanja($request);
 
-    //uudelleen piirret‰‰n formi
+    //uudelleen piirret√§√§n formi
     if (!$onko_kampanja_ok) {
       $kampanja = array();
       $kampanja['kampanja']['nimi'] = $request['kampanja_nimi'];
@@ -121,7 +121,7 @@ if ($request['tee'] == 'muokkaa_kampanjaa') {
   if ($request['kampanja_tunnus']) {
     $onko_kampanja_ok = muokkaa_kampanjaa($request);
 
-    //uudelleen piirret‰‰n formi
+    //uudelleen piirret√§√§n formi
     if (!$onko_kampanja_ok) {
       $kampanja = array();
       $kampanja['kampanja']['nimi'] = $request['kampanja_nimi'];
@@ -196,14 +196,14 @@ function validoi_kampanja_ehto_tai_aliehto($ehto) {
                 FROM asiakas
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tunnus  = '{$ehto['arvo']}'";
-      $echo = t('Asiakasta ei lˆydy');
+      $echo = t('Asiakasta ei l√∂ydy');
       break;
     case 'asiakas_ytunnus':
       $query = "SELECT *
                 FROM asiakas
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND ytunnus = '{$ehto['arvo']}'";
-      $echo = t('Asiakasta ei lˆydy');
+      $echo = t('Asiakasta ei l√∂ydy');
       break;
     case 'asiakaskategoria':
       $query = "SELECT *
@@ -211,14 +211,14 @@ function validoi_kampanja_ehto_tai_aliehto($ehto) {
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND laji    = 'Asiakas'
                 AND tunnus  = '{$ehto['arvo']}'";
-      $echo = t('Asiakaskategoriaa ei lˆydy');
+      $echo = t('Asiakaskategoriaa ei l√∂ydy');
       break;
     case 'tuote':
       $query = "SELECT *
                 FROM tuote
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tuoteno = '{$ehto['arvo']}'";
-      $echo = t('Tuotetta ei lˆydy');
+      $echo = t('Tuotetta ei l√∂ydy');
       break;
     case 'tuotekategoria':
       $query = "SELECT *
@@ -226,7 +226,7 @@ function validoi_kampanja_ehto_tai_aliehto($ehto) {
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND laji    = 'Tuote'
                 AND tunnus  = '{$ehto['arvo']}'";
-      $echo = t('Tuotekategoriaa ei lˆydy');
+      $echo = t('Tuotekategoriaa ei l√∂ydy');
       break;
     case 'tuoteosasto':
       $query = "SELECT *
@@ -234,7 +234,7 @@ function validoi_kampanja_ehto_tai_aliehto($ehto) {
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND laji    = 'OSASTO'
                 AND selite  = '{$ehto['arvo']}'";
-      $echo = t('Tuoteosastoa ei lˆydy');
+      $echo = t('Tuoteosastoa ei l√∂ydy');
       break;
     case 'tuoteryhma':
       $query = "SELECT *
@@ -242,7 +242,7 @@ function validoi_kampanja_ehto_tai_aliehto($ehto) {
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND laji    = 'TRY'
                 AND selite  = '{$ehto['arvo']}'";
-      $echo = t('Tuoteryhm‰‰ ei lˆydy');
+      $echo = t('Tuoteryhm√§√§ ei l√∂ydy');
       break;
     case 'kappaleet':
       if (!is_numeric($ehto['arvo'])) {
@@ -284,7 +284,7 @@ function validoi_palkinto_rivi($palkinto_rivi) {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
-    echo "<font class='error'>", t('Palkintorivin tuotetta ei lˆydy'), "!</font><br><br>";
+    echo "<font class='error'>", t('Palkintorivin tuotetta ei l√∂ydy'), "!</font><br><br>";
     return false;
   }
 
@@ -456,17 +456,17 @@ function poista_kampanja_palkinnot($kampanja_tunnus) {
 }
 
 function echo_kayttoliittyma($request = array()) {
-  //Templatet on javascripti‰ varten, ett‰ voidaan kutsua .clone()
+  //Templatet on javascripti√§ varten, ett√§ voidaan kutsua .clone()
   echo_ehto_rivi_template();
 
   echo_ehto_alirivi_template();
 
   echo_palkinto_rivi_template();
 
-  echo "<input type='hidden' id='ehto_arvo_tyhja_message' value='".t("Ehdon arvo on tyhj‰")."' />";
-  echo "<input type='hidden' id='aliehto_arvo_tyhja_message' value='".t("Aliehdon arvo on tyhj‰")."' />";
-  echo "<input type='hidden' id='ehto_minimi_message' value='".t("Ehtoja pit‰‰ olla v‰hint‰‰n yksi")."' />";
-  echo "<input type='hidden' id='nimi_tyhja_message' value='".t("Nimi on tyhj‰")."' />";
+  echo "<input type='hidden' id='ehto_arvo_tyhja_message' value='".t("Ehdon arvo on tyhj√§")."' />";
+  echo "<input type='hidden' id='aliehto_arvo_tyhja_message' value='".t("Aliehdon arvo on tyhj√§")."' />";
+  echo "<input type='hidden' id='ehto_minimi_message' value='".t("Ehtoja pit√§√§ olla v√§hint√§√§n yksi")."' />";
+  echo "<input type='hidden' id='nimi_tyhja_message' value='".t("Nimi on tyhj√§")."' />";
 
   echo "<form name='kampanja_form' method='POST' action='' class='multisubmit'>";
 
@@ -498,7 +498,7 @@ function echo_kayttoliittyma($request = array()) {
   echo "<th>".t("Kohde")."</th>";
   echo "<th>".t("Rajoitin")."</th>";
   echo "<th>".t("Arvo")."</th>";
-  echo "<th>".t("Lis‰‰ aliehto")."</th>";
+  echo "<th>".t("Lis√§√§ aliehto")."</th>";
   echo "<th>".t("Poista ehto/aliehto")."</th>";
   echo "</tr>";
   echo "</thead>";
@@ -855,7 +855,7 @@ function hae_ehdon_kohteet() {
       'value'   => 'tuoteosasto'
     ),
     array(
-      'text'   => t("Tuoteryhm‰"),
+      'text'   => t("Tuoteryhm√§"),
       'value'   => 'tuoteryhma'
     ),
     array(

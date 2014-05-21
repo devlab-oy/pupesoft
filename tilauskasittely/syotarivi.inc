@@ -24,7 +24,7 @@ if ($yhtiorow['variaatiomyynti'] == "K" and $kukarow["extranet"] == '' and (is_a
 }
 
 if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
-  // Pikatilauksen syˆttˆrivi
+  // Pikatilauksen sy√∂tt√∂rivi
   echo "<table><tr>$jarjlisa";
 
   if ($tila == "LISAAKERTARESEPTIIN" or $tila == "LISAAISAKERTARESEPTIIN" or $tila == "LISAARESEPTIIN") {
@@ -37,7 +37,7 @@ if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
   }
 
   echo "  <th align='left'>".t("Tuotenumero")."</th>
-      <th align='left'>".t("M‰‰r‰")."</th>
+      <th align='left'>".t("M√§√§r√§")."</th>
       <th align='left'>".t("Var")."</th>";
 
   if ($kukarow['hinnat'] == 0) echo "<th align='left'>".t("Hinta")."</th>";
@@ -129,22 +129,22 @@ if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
 
     echo "<td><select name='omalle_tilaukselle'>";
     echo "<option value=''>",t("Ei"),"</option>";
-    echo "<option value='K'{$sel}>",t("Kyll‰"),"</option>";
+    echo "<option value='K'{$sel}>",t("Kyll√§"),"</option>";
     echo "</select></td>";
   }
 
-  echo "  <td valign='top' class='back'><input type='submit' value='".t("Lis‰‰")."'></td>
+  echo "  <td valign='top' class='back'><input type='submit' value='".t("Lis√§√§")."'></td>
       <td valign='top' class='back'>
       <input type='hidden' name='perheid' value = '$perheid'>
       <input type='hidden' name='perheid2' value = '$perheid2'>
       <input type='hidden' name='takaisin' value = '$takaisin'>
-      <input type='submit' name='tyhjenna' value='".t("Tyhjenn‰")."'> <font class='error'>$varaosavirhe</font></td>
+      <input type='submit' name='tyhjenna' value='".t("Tyhjenn√§")."'> <font class='error'>$varaosavirhe</font></td>
     </tr>";
 
-  // jos meill‰ on rivi muuttuja t‰‰ll‰, niin ollaan muokkaamassa rivej‰..
+  // jos meill√§ on rivi muuttuja t√§√§ll√§, niin ollaan muokkaamassa rivej√§..
   if ($rivitunnus != '') {
 
-    // ALVimuutoksen takia: eli p‰‰ss‰t‰‰n rivin alvi jos sit‰ muokataan niin se ei automaattisesti vaihdu oletukseksi
+    // ALVimuutoksen takia: eli p√§√§ss√§t√§√§n rivin alvi jos sit√§ muokataan niin se ei automaattisesti vaihdu oletukseksi
     echo "<input type='hidden' name='alv' value = '$alv'>";
 
     $nrospanni = 6;
@@ -159,10 +159,10 @@ if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
       $nrospanni++;
     }
 
-    // Jos "Tilaukset jaetaan osiin ker‰ysp‰iv‰n mukaan" niin n‰ytet‰‰n p‰ivien syˆttˆkent‰t per tilaus
+    // Jos "Tilaukset jaetaan osiin ker√§ysp√§iv√§n mukaan" niin n√§ytet√§√§n p√§ivien sy√∂tt√∂kent√§t per tilaus
     if ($yhtiorow["splittauskielto"] == "K") {
       echo "<tr>$jarjlisa";
-      echo "<th align='left' colspan='".floor($nrospanni/2)."'>".t("Ker‰ysaika")."</th>";
+      echo "<th align='left' colspan='".floor($nrospanni/2)."'>".t("Ker√§ysaika")."</th>";
       echo "<th align='left' colspan='".ceil($nrospanni/2)."'>".t("Toimitusaika")."</th>";
       echo "</tr>";
     }
@@ -197,7 +197,7 @@ if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
       $keraysppa = substr($kerayspvm, 8, 2);
     }
 
-    // Jos "Tilaukset jaetaan osiin ker‰ysp‰iv‰n mukaan" niin n‰ytet‰‰n p‰ivien syˆttˆkent‰t per tilaus
+    // Jos "Tilaukset jaetaan osiin ker√§ysp√§iv√§n mukaan" niin n√§ytet√§√§n p√§ivien sy√∂tt√∂kent√§t per tilaus
     if ($yhtiorow["splittauskielto"] == "K") {
       echo "<tr>$jarjlisa";
       echo "<td valign='top' colspan='".floor($nrospanni/2)."'><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";
@@ -241,7 +241,7 @@ if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
           <td valign='top' colspan='{$nrospanni}'><input type='text' maxlength='100' size='50' name='tuotenimitys' value = '{$tuotenimitys}'></td></tr>";
     }
 
-    //Jos meill‰ on marginaalimyynti‰/k‰‰nteinen alv niin pit‰‰ muistaa ja kertoa se myˆs lis‰‰riville
+    //Jos meill√§ on marginaalimyynti√§/k√§√§nteinen alv niin pit√§√§ muistaa ja kertoa se my√∂s lis√§√§riville
     if (isset($alv) and $alv >= 500) {
       echo "<input type='hidden' name='alv' value='$alv'>";
     }
@@ -260,7 +260,7 @@ if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
   echo "</table></form>";
 }
 elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTTO" or $toim == "ENNAKKO" or $toim == "EXTENNAKKO" or $toim == "VALMISTAASIAKKAALLE" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or (isset($aputoim) and $aputoim == "RIVISYOTTO") or $toim == "YLLAPITO" or $toim == "TARJOUS" or $toim == "EXTTARJOUS" or $toim == "REKLAMAATIO")) {
-  // Rivisyˆtˆn syˆttˆrivi
+  // Rivisy√∂t√∂n sy√∂tt√∂rivi
   echo "<table>
       <tr>$jarjlisa";
 
@@ -274,7 +274,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
   }
 
   echo "  <th align='left'>".t("Tuoteno")."</th>
-      <th align='left'>".t("M‰‰r‰")."</th>
+      <th align='left'>".t("M√§√§r√§")."</th>
       <th align='left'>".t("Var")."</th>";
 
   if ($kukarow['hinnat'] == 0) echo "<th align='left'>".t("Hinta")."</th>";
@@ -331,7 +331,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
 
   if ($ulos == '') {
     if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
-      // Laitetaan $tila "submit" parametriin, joten jos siell‰ on jotain ei submitata (valmistuksessa)
+      // Laitetaan $tila "submit" parametriin, joten jos siell√§ on jotain ei submitata (valmistuksessa)
       echo "<td valign='top'>".livesearch_kentta("tilaus", "TUOTEHAKU", "tuoteno", 200, $tuoteno, $tila)."</td>";
     }
     else {
@@ -368,7 +368,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
   }
   echo "<option value=''>".t("Oletus")."</option>";
   echo "<option value='J' $selj>".t("JT")."</option>";
-  echo "<option value='H' $selh>".t("Hyv‰ksy")."</option>";
+  echo "<option value='H' $selh>".t("Hyv√§ksy")."</option>";
   echo "<option value='P' $selp>".t("Puute")."</option>";
 
   if($laskurow["tila"] == 'V' and $laskurow["tilaustyyppi"] == 'V') {
@@ -411,7 +411,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
   echo "<option value='E' $chke>".t("E-Netto")."</option>";
   echo "</select></td>";
 
-  // vaikka aluperin olisi marginaalimyynti‰/k‰‰nteinen alv (alv >= 500), saa alvia muuttaa rivill‰
+  // vaikka aluperin olisi marginaalimyynti√§/k√§√§nteinen alv (alv >= 500), saa alvia muuttaa rivill√§
   if (isset($alv) and $alv >= 500 and $alv < 600) {
     echo "<td valign='top'>";
     echo t("M.V.");
@@ -427,7 +427,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
 
     echo "<td><select name='omalle_tilaukselle'>";
     echo "<option value=''>",t("Ei"),"</option>";
-    echo "<option value='K'{$sel}>",t("Kyll‰"),"</option>";
+    echo "<option value='K'{$sel}>",t("Kyll√§"),"</option>";
     echo "</select></td>";
   }
 
@@ -437,7 +437,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
 
   echo "<td valign='top' class='back'>";
   echo "<input type='hidden' name='aputapa' value='$tapa'>";
-  echo "<input type='submit' value='".t("Lis‰‰")."'> <font class='error'>$varaosavirhe</font></td></tr>";
+  echo "<input type='submit' value='".t("Lis√§√§")."'> <font class='error'>$varaosavirhe</font></td></tr>";
 
   echo "<tr>$jarjlisa";
 
@@ -470,12 +470,12 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
   $nrospanni += $yhtiorow['myynnin_alekentat'] - 1;
 
   if ($toim == "YLLAPITO") {
-    echo "<th align='left'>".t("Poikkeava Alkup‰iv‰")."</th>";
-    echo "<th align='left' colspan='2'>".t("Poikkeava Loppup‰iv‰")."</th>";
+    echo "<th align='left'>".t("Poikkeava Alkup√§iv√§")."</th>";
+    echo "<th align='left' colspan='2'>".t("Poikkeava Loppup√§iv√§")."</th>";
     $nrospanni_vah += 3;
   }
   elseif ($yhtiorow["splittauskielto"] == "K") {
-    echo "<th align='left'>".t("Ker‰ysaika")."</th>";
+    echo "<th align='left'>".t("Ker√§ysaika")."</th>";
     echo "<th align='left' colspan='2'>".t("Toimitusaika")."</th>";
     $nrospanni_vah += 3;
   }
@@ -525,7 +525,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
     }
   }
   else {
-    // Yll‰pitosoppareissa toimaika tarkoittaa poikkeavaa sopimuksen alkup‰iv‰‰ ja ker‰yspvm poikkeavaa loppup‰iv‰‰
+    // Yll√§pitosoppareissa toimaika tarkoittaa poikkeavaa sopimuksen alkup√§iv√§√§ ja ker√§yspvm poikkeavaa loppup√§iv√§√§
     if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
       $kerayskka = "";
       $keraysvva = "";
@@ -549,7 +549,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
     }
   }
 
-  // Jos Yll‰pitosopimus tai "Tilaukset jaetaan osiin ker‰ysp‰iv‰n mukaan" niin n‰ytet‰‰n p‰ivien syˆttˆkent‰t per tilaus
+  // Jos Yll√§pitosopimus tai "Tilaukset jaetaan osiin ker√§ysp√§iv√§n mukaan" niin n√§ytet√§√§n p√§ivien sy√∂tt√∂kent√§t per tilaus
   if ($toim == "YLLAPITO" or $yhtiorow["splittauskielto"] == "K") {
     echo "<td valign='top'><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";
     echo "<td valign='top' colspan='2'><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td>";
@@ -580,11 +580,11 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
         <td valign='top' colspan='{$nrospanni}'><input type='text' maxlength='100' size='75' name='tuotenimitys' value = '$tuotenimitys'></td>";
   }
 
-  echo "<td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjenn‰")."'>";
+  echo "<td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjenn√§")."'>";
 
   if ($toim == "YLLAPITO") {
 
-    // Katsotaan halutaanko dynaamisia kentti‰ n‰kyviin
+    // Katsotaan halutaanko dynaamisia kentti√§ n√§kyviin
     $yllapito_dynamic_result = t_avainsana("SOPIMUS_KENTTA","", "and avainsana.selitetark != ''");
 
     if (mysql_num_rows($yllapito_dynamic_result) > 0) {
@@ -600,7 +600,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
     }
   }
 
-  // jos meill‰ on rivi muuttuja t‰‰ll‰, niin ollaan muokkaamassa rivej‰..
+  // jos meill√§ on rivi muuttuja t√§√§ll√§, niin ollaan muokkaamassa rivej√§..
   if ($rivitunnus!='') {
     echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";
     echo "<input type='hidden' name='ale_peruste' value='$ale_peruste'>";
@@ -619,7 +619,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
   echo "</td></tr></table></form>";
 }
 elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLISTA" or $toim == "MYYNTITILI" or $toim == "VALMISTAVARASTOON" or strpos($_SERVER['SCRIPT_NAME'], "valmista_tilaus.php") !== FALSE or $toim == "SIIRTOTYOMAARAYS")) {
-  // Rivisyˆtˆn syˆttˆrivi
+  // Rivisy√∂t√∂n sy√∂tt√∂rivi
   echo "<table>
       <tr>$jarjlisa";
 
@@ -628,7 +628,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLIS
   }
 
   echo "<th align='left'>".t("Tuoteno")."</th>";
-  echo "<th align='left'>".t("M‰‰r‰")."</th>";
+  echo "<th align='left'>".t("M√§√§r√§")."</th>";
 
   if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
     echo "<th align='left'>".t("Valmistuslinja")."</th>";
@@ -649,7 +649,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLIS
 
   if ($ulos == '') {
     if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
-      // Laitetaan $tila "submit" parametriin, joten jos siell‰ on jotain ei submitata (valmistuksessa)
+      // Laitetaan $tila "submit" parametriin, joten jos siell√§ on jotain ei submitata (valmistuksessa)
       echo "<td valign='top'>".livesearch_kentta("tilaus", "TUOTEHAKU", "tuoteno", 200, $tuoteno, $tila)."</td>";
     }
     else {
@@ -679,7 +679,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLIS
     echo "</td>";
   }
 
-  echo "<td valign='top' class='back'><input type='submit' value='".t("Lis‰‰")."'> <font class='error'>$varaosavirhe</font></td></tr>";
+  echo "<td valign='top' class='back'><input type='submit' value='".t("Lis√§√§")."'> <font class='error'>$varaosavirhe</font></td></tr>";
 
   echo "<tr>$jarjlisa";
 
@@ -688,12 +688,12 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLIS
   }
 
   if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
-    echo "<th align='left'>".t("Toivottu ker‰ysajankohta")."</th>";
+    echo "<th align='left'>".t("Toivottu ker√§ysajankohta")."</th>";
     echo "<th align='left' colspan='2'>".t("Toivottu valmistusajankohta")."</th>";
   }
-  // Jos "Tilaukset jaetaan osiin ker‰ysp‰iv‰n mukaan" niin n‰ytet‰‰n p‰ivien syˆttˆkent‰t per tilaus
+  // Jos "Tilaukset jaetaan osiin ker√§ysp√§iv√§n mukaan" niin n√§ytet√§√§n p√§ivien sy√∂tt√∂kent√§t per tilaus
   elseif ($yhtiorow["splittauskielto"] == "K") {
-    echo "  <th align='left'>".t("Ker‰ysaika")."</th>
+    echo "  <th align='left'>".t("Ker√§ysaika")."</th>
         <th align='left'>".t("Toimitusaika")."</th>";
   }
 
@@ -734,7 +734,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLIS
     $keraysppa = substr($kerayspvm, 8, 2);
   }
 
-  // Jos "Tilaukset jaetaan osiin ker‰ysp‰iv‰n mukaan" niin n‰ytet‰‰n p‰ivien syˆttˆkent‰t per tilaus
+  // Jos "Tilaukset jaetaan osiin ker√§ysp√§iv√§n mukaan" niin n√§ytet√§√§n p√§ivien sy√∂tt√∂kent√§t per tilaus
   if ($yhtiorow["splittauskielto"] == "K" or ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
     $colspan = $yhtiorow["splittauskielto"] == "K" ? 1 : 2;
     echo "<td valign='top'><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";
@@ -773,9 +773,9 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLIS
   }
 
   echo "<td valign='top' colspan='{$colspan}'><textarea name='kommentti' cols='40' rows='2' wrap='soft'>$kommentti</textarea></td>
-      <td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjenn‰")."'>";
+      <td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjenn√§")."'>";
 
-  // jos meill‰ on rivi muuttuja t‰‰ll‰, niin ollaan muokkaamassa rivej‰..
+  // jos meill√§ on rivi muuttuja t√§√§ll√§, niin ollaan muokkaamassa rivej√§..
   if ($rivitunnus!='') {
     echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";
     echo "<input type='hidden' name='ale_peruste' value='$ale_peruste'>";
@@ -810,7 +810,7 @@ elseif (!$variaaritorivi and $miniliittyma == "JOO") {
       <input type='hidden' name='malli' value = '$malli'>
       <input type='hidden' name='vm' value = '$vm'>";
 
-  // n‰ytet‰‰n tilauksen syˆttˆrivi... aina.
+  // n√§ytet√§√§n tilauksen sy√∂tt√∂rivi... aina.
   echo "<table>";
   echo "<tr>$jarjlisa";
   echo "<input type='hidden' name='tuoteno' value='$hi_tuoteno'>
@@ -818,13 +818,13 @@ elseif (!$variaaritorivi and $miniliittyma == "JOO") {
 
   echo "  <td valign='top'> $varaosavirhe </td> ";
 
-  echo "<td valign='top'><input type='submit' value='".t("Lis‰‰")."'>";
+  echo "<td valign='top'><input type='submit' value='".t("Lis√§√§")."'>";
 
   echo "</td></tr></table></form>";
 
 }
 elseif (!$variaaritorivi and $kukarow["extranet"] != '') {
-  // Extranetin syˆttˆrivi
+  // Extranetin sy√∂tt√∂rivi
 
   if ($toimaika == "" or $toimaika == "0000-00-00") {
     $toimkka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
@@ -842,7 +842,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] != '') {
   echo "<table>
       <tr>$jarjlisa
         <th align='left'>".t("Tuotenumero")."</th>
-        <th align='left'>".t("M‰‰r‰")."</th>
+        <th align='left'>".t("M√§√§r√§")."</th>
         <td valign='top' class='back'></td>
       </tr>
     <tr>$jarjlisa";
@@ -857,8 +857,8 @@ elseif (!$variaaritorivi and $kukarow["extranet"] != '') {
   }
 
   echo "  <td valign='top'><input type='text' name='kpl' size='5' maxlength='13' value='$kpl'></td>
-      <td valign='top' class='back'><input type='submit' value='".t("Lis‰‰")."'></td>
-      <td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjenn‰")."'> <font class='error'>$varaosavirhe</font></td>
+      <td valign='top' class='back'><input type='submit' value='".t("Lis√§√§")."'></td>
+      <td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjenn√§")."'> <font class='error'>$varaosavirhe</font></td>
     </tr>";
 
   echo "<tr colspan='4'><th colspan='2'>".t("Toimitusaika")."</th></tr>";

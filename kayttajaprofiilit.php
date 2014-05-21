@@ -1,7 +1,7 @@
 <?php
 require ("inc/parametrit.inc");
 
-echo " <!-- Enabloidaan shiftill‰ checkboxien chekkaus //-->
+echo " <!-- Enabloidaan shiftill√§ checkboxien chekkaus //-->
     <script src='inc/checkboxrange.js'></script>
 
     <script language='javascript' type='text/javascript'>
@@ -10,9 +10,9 @@ echo " <!-- Enabloidaan shiftill‰ checkboxien chekkaus //-->
       });
     </script>";
 
-echo "<font class='head'>".t("K‰ytt‰j‰profiilit").":</font><hr>";
+echo "<font class='head'>".t("K√§ytt√§j√§profiilit").":</font><hr>";
 
-//tehd‰‰n tsekki, ett‰ ei tehd‰ profiilia samannimiseksi kuin joku k‰ytt‰j‰
+//tehd√§√§n tsekki, ett√§ ei tehd√§ profiilia samannimiseksi kuin joku k√§ytt√§j√§
 if ($profiili != '') {
   $query = "SELECT nimi
             FROM kuka use index (kuka_index)
@@ -22,7 +22,7 @@ if ($profiili != '') {
   if (mysql_num_rows($result) > 0) {
     $tee = "";
     $profiili = "";
-    echo "<br><font class='error'>".t("VIRHE: Profiilin nimi on jo k‰ytˆss‰. Valitse toinen nimi")."</font><br><br>";
+    echo "<br><font class='error'>".t("VIRHE: Profiilin nimi on jo k√§yt√∂ss√§. Valitse toinen nimi")."</font><br><br>";
   }
 }
 
@@ -37,16 +37,16 @@ if ($tee == 'POISTA' and $profiili != "") {
   $result = pupe_query($query);
   $maara = mysql_affected_rows();
 
-  // p‰ivite‰‰n kuka-tauluun mitk‰ k‰ytt‰j‰t on aktiivisia ja mitk‰ poistettuja
+  // p√§ivite√§√§n kuka-tauluun mitk√§ k√§ytt√§j√§t on aktiivisia ja mitk√§ poistettuja
   paivita_aktiiviset_kayttajat();
 
-  echo "<font class='message'>".t("Poistettiin")." $maara ".t("rivi‰")."</font><br>";
+  echo "<font class='message'>".t("Poistettiin")." $maara ".t("rivi√§")."</font><br>";
 
   $profiili = "";
   $tee = '';
 }
 
-// tehd‰‰n oikeuksien p‰ivitys
+// tehd√§√§n oikeuksien p√§ivitys
 if ($tee == 'PAIVITA' and $profiili != "") {
 
   // poistetaan ihan aluksi kaikki.
@@ -64,7 +64,7 @@ if ($tee == 'PAIVITA' and $profiili != "") {
 
   // sitten tutkaillaan onko jotain ruksattu...
   if (count($valittu) != 0) {
-    foreach ($valittu as $inde => $rastit) { // Tehd‰‰n oikeudet
+    foreach ($valittu as $inde => $rastit) { // Tehd√§√§n oikeudet
       list ($nimi, $alanimi, $sov) = explode("#", $rastit);
 
       // haetaan menu itemi
@@ -103,10 +103,10 @@ if ($tee == 'PAIVITA' and $profiili != "") {
                 muuttaja   = '{$kukarow['kuka']}'";
       $result = pupe_query($query);
     }
-    echo "<font class='message'>".t("K‰yttˆoikeudet p‰ivitetty")."!</font><br>";
+    echo "<font class='message'>".t("K√§ytt√∂oikeudet p√§ivitetty")."!</font><br>";
   }
 
-  //p‰ivitet‰‰n k‰ytt‰jien profiilit (joilla on k‰ytˆss‰ t‰m‰ profiili)
+  //p√§ivitet√§√§n k√§ytt√§jien profiilit (joilla on k√§yt√∂ss√§ t√§m√§ profiili)
   $query = "SELECT *
             FROM kuka
              WHERE yhtio  = '$kukarow[yhtio]'
@@ -117,17 +117,17 @@ if ($tee == 'PAIVITA' and $profiili != "") {
     $profiilit = explode(',', $krow["profiilit"]);
 
     if (count($profiilit) > 0) {
-      //k‰yd‰‰n l‰pi k‰ytt‰j‰n kaikki profiilit
+      //k√§yd√§√§n l√§pi k√§ytt√§j√§n kaikki profiilit
       $triggeri = "";
       foreach ($profiilit as $prof) {
-        //jos t‰m‰ kyseinen profiili on ollut k‰ytt‰j‰ll‰ aikaisemmin, niin joudumme p‰ivitt‰m‰‰n oikeudet
+        //jos t√§m√§ kyseinen profiili on ollut k√§ytt√§j√§ll√§ aikaisemmin, niin joudumme p√§ivitt√§m√§√§n oikeudet
         if (strtoupper($prof) == strtoupper($profiili)) {
           $triggeri = "HAPPY";
         }
       }
 
       if ($triggeri == "HAPPY") {
-        // poistetaan k‰ytt‰j‰n vanhat
+        // poistetaan k√§ytt√§j√§n vanhat
         $query = "DELETE FROM oikeu
                   WHERE yhtio   = '$kukarow[yhtio]'
                   AND kuka      = '$krow[kuka]'
@@ -136,7 +136,7 @@ if ($tee == 'PAIVITA' and $profiili != "") {
                   AND lukittu   = ''";
         $pres = pupe_query($query);
 
-        // k‰yd‰‰n uudestaan profiili l‰pi
+        // k√§yd√§√§n uudestaan profiili l√§pi
         foreach ($profiilit as $prof) {
           $query = "SELECT *
                     FROM oikeu
@@ -146,7 +146,7 @@ if ($tee == 'PAIVITA' and $profiili != "") {
           $pres = pupe_query($query);
 
           while ($trow = mysql_fetch_assoc($pres)) {
-            // joudumme tarkistamaan ettei t‰t‰ oikeutta ole jo t‰ll‰ k‰ytt‰j‰ll‰.
+            // joudumme tarkistamaan ettei t√§t√§ oikeutta ole jo t√§ll√§ k√§ytt√§j√§ll√§.
             // voi olla esim jos se on lukittuna annettu
             $query = "SELECT yhtio, paivitys
                       FROM oikeu use index (sovellus_index)
@@ -179,7 +179,7 @@ if ($tee == 'PAIVITA' and $profiili != "") {
               $tarkrow = mysql_fetch_assoc($tarkesult);
 
               if ($trow["paivitys"] == 1 and $tarkrow["paivitys"] != 1) {
-                // Meill‰ ei v‰ltt‰m‰tt‰ ollut p‰ivitysoikeutta, koska aiempi checki ei huomio sit‰. Lis‰t‰‰n p‰ivitysoikeus.
+                // Meill√§ ei v√§ltt√§m√§tt√§ ollut p√§ivitysoikeutta, koska aiempi checki ei huomio sit√§. Lis√§t√§√§n p√§ivitysoikeus.
                 $query = "UPDATE oikeu
                           SET paivitys   = 1,
                           muutospvm    = now(),
@@ -198,13 +198,13 @@ if ($tee == 'PAIVITA' and $profiili != "") {
     }
   }
 
-  // p‰ivite‰‰n kuka-tauluun mitk‰ k‰ytt‰j‰t on aktiivisia ja mitk‰ poistettuja
+  // p√§ivite√§√§n kuka-tauluun mitk√§ k√§ytt√§j√§t on aktiivisia ja mitk√§ poistettuja
   paivita_aktiiviset_kayttajat();
 }
 
 echo "<SCRIPT LANGUAGE=JAVASCRIPT>
       function verify(){
-        msg = '".t("Haluatko todella poistaa t‰m‰n profiilin ja k‰ytt‰jilt‰ oikeudet t‰h‰n profiiliin?")."';
+        msg = '".t("Haluatko todella poistaa t√§m√§n profiilin ja k√§ytt√§jilt√§ oikeudet t√§h√§n profiiliin?")."';
 
         if (confirm(msg)) {
           return true;
@@ -262,7 +262,7 @@ if ($profiili != '') {
   echo "<form method='post' onSubmit = 'return verify()'>
       <input type='hidden' name='tee' value='POISTA'>
       <input type='hidden' name='profiili' value='$profiili'>
-      <td class='back'><input type='submit' value='".t("Poista t‰m‰ profiili")."'></td></form>";
+      <td class='back'><input type='submit' value='".t("Poista t√§m√§ profiili")."'></td></form>";
 }
 
 echo "</tr></table><br><br>";
@@ -317,7 +317,7 @@ if ($profiili != '') {
     $lisa = " kuka = '' and profiili = '' ";
   }
 
-  echo "<tr><th>".t("N‰yt‰ vain ruksatut")."</th><td><input type='checkbox' name='vainval' $chk onClick='submit();'></td></tr>";
+  echo "<tr><th>".t("N√§yt√§ vain ruksatut")."</th><td><input type='checkbox' name='vainval' $chk onClick='submit();'></td></tr>";
 
   echo "</table></form>";
 
@@ -326,7 +326,7 @@ if ($profiili != '') {
     exit;
   }
 
-  // n‰ytet‰‰n oikeuslista
+  // n√§ytet√§√§n oikeuslista
   echo "<table>";
 
   $query = "SELECT *
@@ -376,22 +376,22 @@ if ($profiili != '') {
       echo "<tr><td class='back colspan='5'><br></td></tr>";
       echo "<tr><th>".t("Sovellus")."</th>
         <th colspan='2'>".t("Toiminto")."</th>
-        <th>".t("K‰yttˆ")."</th>
-        <th>".t("P‰ivitys")."</th>
+        <th>".t("K√§ytt√∂")."</th>
+        <th>".t("P√§ivitys")."</th>
         </tr>";
     }
 
     $checked  = '';
     $paivit    = '';
 
-    $oq = "  SELECT *
-        FROM oikeu
-        WHERE yhtio    = '$kukarow[yhtio]'
-        and kuka    = '$profiili'
-        and profiili  = '$profiili'
-        and nimi    = '$orow[nimi]'
-        and alanimi    = '$orow[alanimi]'
-        and sovellus  = '$orow[sovellus]'";
+    $oq = "SELECT *
+           FROM oikeu
+           WHERE yhtio  = '$kukarow[yhtio]'
+           and kuka     = '$profiili'
+           and profiili = '$profiili'
+           and nimi     = '$orow[nimi]'
+           and alanimi  = '$orow[alanimi]'
+           and sovellus = '$orow[sovellus]'";
     $or = pupe_query($oq);
 
     if (mysql_num_rows($or) != 0) {
@@ -431,7 +431,7 @@ if ($profiili != '') {
   echo "</table>";
 
   echo "<br>";
-  echo "<input type='submit' value='".t("P‰ivit‰ tiedot")."'></form>";
+  echo "<input type='submit' value='".t("P√§ivit√§ tiedot")."'></form>";
 }
 
 require("inc/footer.inc");

@@ -24,7 +24,7 @@ if (!function_exists('text_alku')) {
     $sisalto .= "\r\n";
     $sisalto .= sprintf('%-35.35s', t("Ostaja", $kieli).":");
     $sisalto .= sprintf('%-25.25s', t("Laskun pvm", $kieli).":");
-    $sisalto .= sprintf('%-20.20s', t("Er‰p‰iv‰", $kieli).":");
+    $sisalto .= sprintf('%-20.20s', t("Er√§p√§iv√§", $kieli).":");
 
 
 
@@ -59,7 +59,7 @@ if (!function_exists('text_alku')) {
     $sisalto .= "\r\n";
     $sisalto .= sprintf('%-35.35s', t("Toimitusosoite", $kieli).":");
     $sisalto .= sprintf('%-25.25s', $maksuehto);
-    //etsit‰‰n myyj‰n nimi
+    //etsit√§√§n myyj√§n nimi
     $query  = "  select nimi
           from kuka
           where tunnus='$laskurow[myyja]' and yhtio='$kukarow[yhtio]'";
@@ -70,7 +70,7 @@ if (!function_exists('text_alku')) {
 
     $sisalto .= "\r\n";
     $sisalto .= sprintf('%-35.35s', $laskurow["toim_nimi"]." ".$laskurow["toim_nimitark"]);
-    $sisalto .= sprintf('%-25.25s', t("Viiv‰styskorko", $kieli).":");
+    $sisalto .= sprintf('%-25.25s', t("Viiv√§styskorko", $kieli).":");
     $sisalto .= sprintf('%-20.20s', t("Valuutta", $kieli).":");
 
 
@@ -130,7 +130,7 @@ if (!function_exists('text_alku')) {
     $sisalto .= sprintf('%-35.35s', '');
     $sisalto .= sprintf('%-25.25s', t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli));
 
-    //  Onko meill‰ monta toimitusp‰iv‰‰ vai ei?
+    //  Onko meill√§ monta toimitusp√§iv√§√§ vai ei?
     if ($laskurow["tila"] == 'U') {
       $where = " uusiotunnus='$laskurow[tunnus]' ";
     }
@@ -178,7 +178,7 @@ if (!function_exists('text_alku')) {
     //eka rivi
     $sisalto .= "\r\n";
     $sisalto .= sprintf('%-25.25s', t("Tuotenumero", $kieli));
-    $sisalto .= sprintf('%-8.8s',   t("M‰‰r‰", $kieli));
+    $sisalto .= sprintf('%-8.8s',   t("M√§√§r√§", $kieli));
     $sisalto .= sprintf('%-12.12s', t("A-hinta", $kieli));
 
     for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
@@ -189,11 +189,11 @@ if (!function_exists('text_alku')) {
     $sisalto .= "\r\n";
     $sisalto .= sprintf('%-25.25s', t("Tuotenimi", $kieli));
     $sisalto .= sprintf('%-8.8s',   t("Alv", $kieli)."-%");
-    $sisalto .= sprintf('%-12.12s', t("Yksikkˆ", $kieli));
+    $sisalto .= sprintf('%-12.12s', t("Yksikk√∂", $kieli));
     $sisalto .= sprintf('%-15.15s', t("Toimituspvm", $kieli));
     $sisalto .= sprintf('%-15.15s', t("Verollinen arvo", $kieli));
     $sisalto .= "\r\n";
-    $sisalto .= sprintf('%-25.25s', t("Tilausnumero", $kieli)."/".t("Lis‰tietoja", $kieli));
+    $sisalto .= sprintf('%-25.25s', t("Tilausnumero", $kieli)."/".t("Lis√§tietoja", $kieli));
     $sisalto .= "\r\n";
     $sisalto .= "\r\n";
 
@@ -260,10 +260,10 @@ if (!function_exists('text_loppu')) {
     $sisalto .= trim($frow["teksti_se"]);
     $sisalto .= "\r\n";
 
-    //Yhteens‰rivi
-    $sisalto .= sprintf('%-25.25s', t("Er‰p‰iv‰", $kieli).": ".$laskurow["erpcm"]);
+    //Yhteens√§rivi
+    $sisalto .= sprintf('%-25.25s', t("Er√§p√§iv√§", $kieli).": ".$laskurow["erpcm"]);
     $sisalto .= sprintf('%-25.25s', t("Viitenumero", $kieli).": ".$laskurow["viite"]);
-    $sisalto .= sprintf('%-25.25s', t("Yhteens‰", $kieli).": ".$laskurow["summa"]." ".$laskurow["valkoodi"]);
+    $sisalto .= sprintf('%-25.25s', t("Yhteens√§", $kieli).": ".$laskurow["summa"]." ".$laskurow["valkoodi"]);
     $sisalto .= "\r\n";
 
     //Pankkiyhteystiedot
@@ -272,7 +272,7 @@ if (!function_exists('text_loppu')) {
     $sisalto .= "\r\n";
     $sisalto .= "\r\n";
 
-    //Alimmat kolme laatikkoa, yhtiˆtietoja
+    //Alimmat kolme laatikkoa, yhti√∂tietoja
     $sisalto .= sprintf('%-25.25s', $yhtiorow["nimi"]);
     $sisalto .= sprintf('%-50.50s', t("Puhelin", $kieli).": ".$yhtiorow["puhelin"]);
 
@@ -281,7 +281,7 @@ if (!function_exists('text_loppu')) {
     $sisalto .= sprintf('%-50.50s', t("Telefax", $kieli).": ".$yhtiorow["fax"]);
     $sisalto .= "\r\n";
     $sisalto .= sprintf('%-25.25s', $yhtiorow["postino"]."  ".$yhtiorow["postitp"]);
-    $sisalto .= sprintf('%-50.50s', t("S‰hkˆposti", $kieli).": ".$yhtiorow["email"]);
+    $sisalto .= sprintf('%-50.50s', t("S√§hk√∂posti", $kieli).": ".$yhtiorow["email"]);
     $sisalto .= "\r\n";
 
     $sisalto .= sprintf('%-25.25s', $yhtiorow["maa"]);
@@ -297,7 +297,7 @@ if (!function_exists('text_alvierittely')) {
     //loppusummat vain vikalle sivulle
     $sisalto .= "\r\n";
     $sisalto .= sprintf('%-22.22s', '');
-    $sisalto .= sprintf('%-30.30s', t("Veroton arvo yhteens‰", $kieli).":");
+    $sisalto .= sprintf('%-30.30s', t("Veroton arvo yhteens√§", $kieli).":");
     $sisalto .= sprintf('%-15.15s', $laskurow["arvo"]);
     $sisalto .= sprintf('%-8.8s', $laskurow["valkoodi"]);
 
@@ -318,7 +318,7 @@ if (!function_exists('text_alvierittely')) {
       $arow = mysql_fetch_array($aresult);
       $sisalto .= "\r\n";
       $sisalto .= sprintf('%-22.22s', '');
-      $sisalto .= sprintf('%-30.30s', t("Arvonlis‰vero", $kieli)." (".$arow["rivihinta"]."): ");
+      $sisalto .= sprintf('%-30.30s', t("Arvonlis√§vero", $kieli)." (".$arow["rivihinta"]."): ");
       $sisalto .= sprintf('%-15.15s', $arow["alvrivihinta"]);
       $sisalto .= sprintf('%-8.8s', $alvrow["alv"]."%");
 
@@ -326,7 +326,7 @@ if (!function_exists('text_alvierittely')) {
     }
     $sisalto .= "\r\n";
     $sisalto .= sprintf('%-22.22s', '');
-    $sisalto .= sprintf('%-30.30s', t("Lasku Yhteens‰", $kieli).":");
+    $sisalto .= sprintf('%-30.30s', t("Lasku Yhteens√§", $kieli).":");
     $sisalto .= sprintf('%-15.15s', $laskurow["summa"]);
     $sisalto .= sprintf('%-8.8s', $laskurow["valkoodi"]);
 

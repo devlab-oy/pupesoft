@@ -4,8 +4,8 @@ require("../inc/parametrit.inc");
 
 echo "<font class='head'>".t("Korkolaskut")."</font><hr>";
 
-//laskun pit‰‰ olla v‰hint‰‰n n‰in monta p‰iv‰‰ myˆh‰ss‰ maksettu
-//laskut huomioidaan n‰kym‰sss‰
+//laskun pit√§√§ olla v√§hint√§√§n n√§in monta p√§iv√§√§ my√∂h√§ss√§ maksettu
+//laskut huomioidaan n√§kym√§sss√§
 $min_myoh = 3;
 
 $query = "SELECT tuoteno
@@ -15,14 +15,14 @@ $query = "SELECT tuoteno
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) != 1) {
-  echo "<font class='error'>".t("Tuoterekisterist‰ ei lˆydy KORKO-tuotetta")."!</font><br>";
+  echo "<font class='error'>".t("Tuoterekisterist√§ ei l√∂ydy KORKO-tuotetta")."!</font><br>";
   $tee = "";
 }
 
 $kasittelykulu = str_replace(',','.', $kasittelykulu);
 
 if (($yhtiorow["kasittelykulu_tuotenumero"] != '') and (!is_numeric($kasittelykulu) or $kasittelykulu < 0)) {
-  echo "<font class='error'>".t("K‰sittelykulu summa on syˆtett‰v‰")."!</font><br>";
+  echo "<font class='error'>".t("K√§sittelykulu summa on sy√∂tett√§v√§")."!</font><br>";
   $tee = "";
 }
 
@@ -31,10 +31,10 @@ if ($tee == 'LAHETA') {
   //tulostetaan korkoerittely
   require('tulosta_korkoerittely.inc');
 
-  //tehd‰‰n itse korkolasku (t‰m‰ skripti kutsuu tilaus-valmis ohjelmaa joka tekee melekin kaiken meille)
+  //tehd√§√§n itse korkolasku (t√§m√§ skripti kutsuu tilaus-valmis ohjelmaa joka tekee melekin kaiken meille)
   require('tee_korkolasku.inc');
 
-  //p‰ivitet‰‰n laskut l‰hetetyiksi
+  //p√§ivitet√§√§n laskut l√§hetetyiksi
   $query = "UPDATE lasku
             SET olmapvm = now()
             WHERE tunnus in ($xquery)
@@ -139,7 +139,7 @@ if ($tee == "KOROTA")  {
             ORDER BY lasku.erpcm";
   $result = pupe_query($query);
 
-  //Poistetaan arraysta k‰ytetyt tunnukset
+  //Poistetaan arraysta k√§ytetyt tunnukset
   unset($korotettavat[0]);
 
   //otetaan asiakastiedot ekalta laskulta
@@ -175,12 +175,12 @@ if ($tee == "KOROTA")  {
   echo "<th>".t("Laskunpvm")."</th>";
   echo "<th>".t("Laskunro")."</th>";
   echo "<th>".t("Summa")."</th>";
-  echo "<th>".t("Er‰p‰iv‰")."</th>";
-  echo "<th>".t("Maksup‰iv‰")."</th>";
-  echo "<th>".t("Maksettu myˆh").".</th>";
+  echo "<th>".t("Er√§p√§iv√§")."</th>";
+  echo "<th>".t("Maksup√§iv√§")."</th>";
+  echo "<th>".t("Maksettu my√∂h").".</th>";
   echo "<th>".t("Viikorko")."%</th>";
   echo "<th>".t("Korko")."</th>";
-  echo "<th>".t("Lis‰t‰‰n korkolaskuun")."</th></tr>";
+  echo "<th>".t("Lis√§t√§√§n korkolaskuun")."</th></tr>";
 
   $summmmma  = 0;
   $summmmma2 = 0;
@@ -224,7 +224,7 @@ if ($tee == "KOROTA")  {
     $summmmma2 += $lasku['korkosumma'];
   }
 
-  echo "<th colspan='2'>".t("Yhteens‰")."</th>";
+  echo "<th colspan='2'>".t("Yhteens√§")."</th>";
   echo "<th style='text-align:right;'>$summmmma</th>";
   echo "<th colspan='4'></th>";
   echo "<th style='text-align:right;'>$summmmma2</th>";
@@ -286,10 +286,10 @@ if ($tee == "") {
 
   echo "<form method='post'>";
   echo "<input name='tee' type='hidden' value='ALOITAKOROTUS'>";
-  echo t("Syˆt‰ ytunnus jos haluat l‰hett‰‰ korkolaskun tietylle asiakkaalle").".<br>";
-  echo t("J‰t‰ kentt‰ tyhj‰ksi jos haluat aloittaa ensimm‰isest‰ asiakkaasta").".<br>";
-  echo t("Minimi korkosumma on summa euroissa, jonka yli korkolaskun loppusumman on oltava, ett‰ sit‰ edes ehdotetaan. (tyhj‰=kaikki laskut)")."<br>";
-  echo t("Korkoa lasketaan laskuille jotka on maksettu alku- ja loppup‰iv‰m‰‰r‰n v‰lill‰").".<br><br>";
+  echo t("Sy√∂t√§ ytunnus jos haluat l√§hett√§√§ korkolaskun tietylle asiakkaalle").".<br>";
+  echo t("J√§t√§ kentt√§ tyhj√§ksi jos haluat aloittaa ensimm√§isest√§ asiakkaasta").".<br>";
+  echo t("Minimi korkosumma on summa euroissa, jonka yli korkolaskun loppusumman on oltava, ett√§ sit√§ edes ehdotetaan. (tyhj√§=kaikki laskut)")."<br>";
+  echo t("Korkoa lasketaan laskuille jotka on maksettu alku- ja loppup√§iv√§m√§√§r√§n v√§lill√§").".<br><br>";
   echo "<table>";
 
   if (!isset($kka))
@@ -324,11 +324,11 @@ if ($tee == "") {
   }
   $ulos .= "</select>";
 
-  echo "<tr><th>".t("Alkup‰iv‰m‰‰r‰").":</th>
+  echo "<tr><th>".t("Alkup√§iv√§m√§√§r√§").":</th>
       <td><input type='text' name='ppa' value='$ppa' size='3'></td>
       <td><input type='text' name='kka' value='$kka' size='3'></td>
       <td><input type='text' name='vva' value='$vva' size='5'></td>
-      </tr><tr><th>".t("Loppup‰iv‰m‰‰r‰").":</th>
+      </tr><tr><th>".t("Loppup√§iv√§m√§√§r√§").":</th>
       <td><input type='text' name='ppl' value='$ppl' size='3'></td>
       <td><input type='text' name='kkl' value='$kkl' size='3'></td>
       <td><input type='text' name='vvl' value='$vvl' size='5'></td>";
@@ -354,7 +354,7 @@ if ($tee == "") {
   echo "<tr><th>".t("Minimi korkosumma").":</th>";
   echo "<td colspan='3'><input type='text' name='korkosumma' value='$korkosumma'></td></tr>";
 
-  echo "<tr><th>".t("Minimi yksitt‰isen laskun korkosumma").":</th>";
+  echo "<tr><th>".t("Minimi yksitt√§isen laskun korkosumma").":</th>";
   echo "<td colspan='3'><input type='text' name='minimisumma' value='$minimisumma'></td></tr>";
 
   if ($yhtiorow["kasittelykulu_tuotenumero"] != '') {
@@ -366,7 +366,7 @@ if ($tee == "") {
       $valuutta = $yhtiorow["valkoodi"];
     }
 
-    echo "<tr><th>".t("K‰sittelykulu").":</th>";
+    echo "<tr><th>".t("K√§sittelykulu").":</th>";
     echo "<td colspan='3'><input type='text' name='kasittelykulu' value='$kasittelykulu'> $valuutta</td></tr>";
   }
 
@@ -387,17 +387,17 @@ if ($tee == "") {
 
   echo "</select></td></tr>";
 
-  $apuqu = "  SELECT kuka, nimi, puhno, eposti, tunnus
-        FROM kuka
-        WHERE yhtio    = '$kukarow[yhtio]'
-        AND aktiivinen = 1
-        AND nimi      != ''
-        AND puhno     != ''
-        AND eposti    != ''
-        AND extranet   = ''";
+  $apuqu = "SELECT kuka, nimi, puhno, eposti, tunnus
+            FROM kuka
+            WHERE yhtio     = '$kukarow[yhtio]'
+            AND aktiivinen  = 1
+            AND nimi       != ''
+            AND puhno      != ''
+            AND eposti     != ''
+            AND extranet    = ''";
   $meapu = pupe_query($apuqu);
 
-  echo "<tr><th>".t("Yhteyshenkilˆ").":</th>";
+  echo "<tr><th>".t("Yhteyshenkil√∂").":</th>";
   echo "<td colspan='3'><select name='yhteyshenkilo'>";
 
   while($row = mysql_fetch_assoc($meapu)) {

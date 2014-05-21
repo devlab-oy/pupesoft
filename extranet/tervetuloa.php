@@ -28,7 +28,7 @@ if ($tee == 'TUOTE' and $kukarow['extranet'] != "") {
     $laskurow = mysql_fetch_array($laskures);
   }
 
-  echo "<font class='message'>".t("Lis‰t‰‰n tuotteita tilaukselle")." $kukarow[kesken].</font><br>";
+  echo "<font class='message'>".t("Lis√§t√§√§n tuotteita tilaukselle")." $kukarow[kesken].</font><br>";
 
   $kpl = 1;
 
@@ -37,10 +37,10 @@ if ($tee == 'TUOTE' and $kukarow['extranet'] != "") {
   $tuoteres = pupe_query($query);
 
   if (mysql_num_rows($tuoteres) == 0) {
-    echo "<font class='error'>".t("Tuotetta")." $tuoteno ".t("ei lˆydy")."!</font><br>";
+    echo "<font class='error'>".t("Tuotetta")." $tuoteno ".t("ei l√∂ydy")."!</font><br>";
   }
   else {
-    // tuote lˆytyi ok, lis‰t‰‰n rivi
+    // tuote l√∂ytyi ok, lis√§t√§√§n rivi
     $trow = mysql_fetch_array($tuoteres);
 
     $ytunnus         = $laskurow["ytunnus"];
@@ -64,7 +64,7 @@ if ($tee == 'TUOTE' and $kukarow['extranet'] != "") {
       ${'ale'.$alepostfix} = "";
     }
 
-    // jos meill‰ on ostoskori muuttujassa numero, niin halutaan lis‰t‰ tuotteita siihen ostoskoriin
+    // jos meill√§ on ostoskori muuttujassa numero, niin halutaan lis√§t√§ tuotteita siihen ostoskoriin
     if (file_exists("../tilauskasittely/lisaarivi.inc")) {
       require ("../tilauskasittely/lisaarivi.inc");
     }
@@ -72,7 +72,7 @@ if ($tee == 'TUOTE' and $kukarow['extranet'] != "") {
       require ("lisaarivi.inc");
     }
 
-    echo "<font class='message'>".t("Lis‰ttiin")." $kpl_echo ".t_avainsana("Y", "", "and avainsana.selite='$trow[yksikko]'", "", "", "selite")." ".t("tuotetta")." $tuoteno.</font><br>";
+    echo "<font class='message'>".t("Lis√§ttiin")." $kpl_echo ".t_avainsana("Y", "", "and avainsana.selite='$trow[yksikko]'", "", "", "selite")." ".t("tuotetta")." $tuoteno.</font><br>";
 
 
   } // tuote ok else
@@ -133,7 +133,7 @@ if ($tee == '') {
   if ($exttarjousten_lukumaara > 0) {
     echo "<table border='1'>";
     echo "<tr>";
-    echo "<td style='padding:10px;'><font class='message'>".t("Sinulla on %s kappaletta hyv‰ksym‰ttˆmi‰ tarjouksia.", '', $exttarjousten_lukumaara)."</font></td>";
+    echo "<td style='padding:10px;'><font class='message'>".t("Sinulla on %s kappaletta hyv√§ksym√§tt√∂mi√§ tarjouksia.", '', $exttarjousten_lukumaara)."</font></td>";
     echo "</tr>";
     echo "</table>";
     echo "<br>";
@@ -144,7 +144,7 @@ if ($tee == '') {
   if ($extennakoiden_lukumaara > 0) {
     echo "<table border='1'>";
     echo "<tr>";
-    echo "<td style='padding:10px;'><font class='message'>".t("Sinulla on %s kappaletta hyv‰ksym‰ttˆmi‰ ennakkotilauksia.", '', $extennakoiden_lukumaara)."</font></td>";
+    echo "<td style='padding:10px;'><font class='message'>".t("Sinulla on %s kappaletta hyv√§ksym√§tt√∂mi√§ ennakkotilauksia.", '', $extennakoiden_lukumaara)."</font></td>";
     echo "</tr>";
     echo "</table>";
     echo "<br>";
@@ -172,7 +172,7 @@ if ($tee == '') {
     $lisa = " and kalenteri.kieli = '$kukarow[kieli]' ";
   }
 
-  //katsotaan saako uutista n‰ytt‰‰ asiakkaan asiakkaalle
+  //katsotaan saako uutista n√§ytt√§√§ asiakkaan asiakkaalle
   if ($kukarow['oletus_asiakas'] != $kukarow['oletus_asiakastiedot'] and $kukarow['oletus_asiakastiedot'] != "") {
     $ehto .= " and kentta08 != 'X' ";
   }
@@ -244,7 +244,7 @@ if ($tee == '') {
                     WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$m[1]'";
           $tres = pupe_query($query);
 
-          //  T‰m‰ me korvataan aina!
+          //  T√§m√§ me korvataan aina!
           $search[] = "/$m[0]/";
 
           if (mysql_num_rows($tres) <> 1) {
@@ -332,14 +332,14 @@ if ($tee == '') {
       <a href='$PHP_SELF?tee=PRINTTAA&tun=$uutinen[tun]'>".t("Tulosta")."</a>
       </font></td>
       </tr><tr>
-      <th colspan='2'>".t("Toimittaja").": $uutinen[nimi]<br>".t("P‰iv‰m‰‰r‰").": $uutinen[pvmalku]</th>
+      <th colspan='2'>".t("Toimittaja").": $uutinen[nimi]<br>".t("P√§iv√§m√§√§r√§").": $uutinen[pvmalku]</th>
       </tr>
       </table><br>\n";
     }
 
-    echo "<a href='tervetuloa.php?limit=10'>".t("N‰yt‰ viimeiset 10 uutista")."</a><br>";
-    echo "<a href='tervetuloa.php?limit=50'>".t("N‰yt‰ viimeiset 50 uutista")."</a><br>";
-    echo "<a href='tervetuloa.php?limit=all'>".t("N‰yt‰ kaikki uutiset")."</a><br>";
+    echo "<a href='tervetuloa.php?limit=10'>".t("N√§yt√§ viimeiset 10 uutista")."</a><br>";
+    echo "<a href='tervetuloa.php?limit=50'>".t("N√§yt√§ viimeiset 50 uutista")."</a><br>";
+    echo "<a href='tervetuloa.php?limit=all'>".t("N√§yt√§ kaikki uutiset")."</a><br>";
 
     echo "</td>";
   }
@@ -432,7 +432,7 @@ if ($tee == "PRINTTAA") {
     <TR><TD VALIGN=middle bgcolor='#000000'>
         <FONT FACE='Lucida,Verdana,Helvetica,Arial' COLOR='#FFFFFF'>
         <B><SMALL>&nbsp;".t("Toimittaja").": $toimittaja</SMALL></B><BR>
-        <B><SMALL>&nbsp;".t("P‰iv‰m‰‰r‰").": $paivays</SMALL></B>
+        <B><SMALL>&nbsp;".t("P√§iv√§m√§√§r√§").": $paivays</SMALL></B>
         </FONT>
     <!--
       </TD><TD ALIGN=right bgcolor='#000000'>

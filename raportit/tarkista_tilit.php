@@ -1,11 +1,11 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require("../inc/parametrit.inc");
 
-echo "<br><font class='head'>".t("Tiliˆintien tilit")."</font><hr><br>";
+echo "<br><font class='head'>".t("Tili√∂intien tilit")."</font><hr><br>";
 
 $query = "SELECT distinct tili.tilino t, tiliointi.tilino
           FROM tiliointi
@@ -27,7 +27,7 @@ while ($tili = mysql_fetch_array($result)) {
   $res = mysql_query($query) or pupe_error($query);
   $viimrow = mysql_fetch_array($res);
 
-  echo "<br><font class='error'>Tili‰ $tili[tilino] ei ole en‰‰ olemassa! Viimeisin tiliˆinti $viimrow[viimeisin], $viimrow[selite]</font><br>";
+  echo "<br><font class='error'>Tili√§ $tili[tilino] ei ole en√§√§ olemassa! Viimeisin tili√∂inti $viimrow[viimeisin], $viimrow[selite]</font><br>";
 }
 
 $tables  = array("asiakas", "tuote", "toimi");
@@ -61,7 +61,7 @@ while($table = mysql_fetch_array($result)) {
             $tarkresr = mysql_query($query) or pupe_error($query);
 
             if(mysql_num_rows($tarkresr) == 0) {
-              echo "<font class='error'>[$c] Tili‰ ei lˆydy '".$row[$c]."'</font><br>";
+              echo "<font class='error'>[$c] Tili√§ ei l√∂ydy '".$row[$c]."'</font><br>";
             }
           }
         }

@@ -39,7 +39,7 @@ if (!function_exists("cobolkikka")) {
 }
 
 if ($laskurow['alatila'] == 'K') {
-  // maksetaan k‰teisalennuksella
+  // maksetaan k√§teisalennuksella
   $laskusumma = $laskurow['summa'] - $laskurow['kasumma'];
 }
 else {
@@ -52,7 +52,7 @@ $ulos  = "2";
 $ulos .= sprintf ('%-7.7s', $laskurow['ytunnus']);
 
 $ulos .= sprintf ('%-65.65s', strtoupper($laskunimi1));
-$ulos .= '       '; // 7 tyhj‰‰
+$ulos .= '       '; // 7 tyhj√§√§
 fputs($toot,$ulos . "\r\n");
 
 $ulos  = "3";
@@ -61,7 +61,7 @@ $ulos .= sprintf ('%-30.30s', strtoupper($laskurow['osoite']));
 $ulos .= sprintf ('%-35.35s', strtoupper($laskurow['maa']. "-" . $laskurow['postino'] . " " . $laskurow['postitp']));
 $ulos .= '0';
 $ulos .= sprintf ('%-2.2s', $laskurow['maa']);
-$ulos .= " 010"; // Ei aavistustakaan, mutta n‰in oli esimerkiss‰
+$ulos .= " 010"; // Ei aavistustakaan, mutta n√§in oli esimerkiss√§
 fputs($toot,$ulos . "\r\n");
 
 $ulos  = "4";

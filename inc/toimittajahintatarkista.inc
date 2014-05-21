@@ -25,7 +25,7 @@ if(!function_exists("toimittajahintatarkista")) {
         $sresult = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($sresult) == 0) {
-          $virhe[$i] = t("Ytunnuksella ei lˆydy toimittajaa!");
+          $virhe[$i] = t("Ytunnuksella ei l√∂ydy toimittajaa!");
         }
       }
     }
@@ -63,10 +63,10 @@ if(!function_exists("toimittajahintatarkista")) {
           }
           elseif ($ytunnus != "" and $toimittajaid > 0) {
             $t[$i]  = $toimittajaid;
-            if (strpos($_SERVER['SCRIPT_NAME'], "lue_data.php") === FALSE) $virhe[$i] = t("toimittaja lˆytyi!");
+            if (strpos($_SERVER['SCRIPT_NAME'], "lue_data.php") === FALSE) $virhe[$i] = t("toimittaja l√∂ytyi!");
           }
           else {
-            $virhe[$i] = t("toimittaja puuttuu tai sit‰ ei lˆydy!");
+            $virhe[$i] = t("toimittaja puuttuu tai sit√§ ei l√∂ydy!");
           }
         }
       }
@@ -97,7 +97,7 @@ if(!function_exists("toimittajahintatarkista")) {
             $alasveto[$i] = "<select name='t[$i]'>".$ulos."</select>";
           }
 
-          $virhe[$i] = t("Tuotenumero puuttuu tai sit‰ ei lˆydy!");
+          $virhe[$i] = t("Tuotenumero puuttuu tai sit√§ ei l√∂ydy!");
         }
       }
     }
@@ -113,7 +113,7 @@ if(!function_exists("toimittajahintatarkista")) {
         $sresult = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($sresult) != 1) {
-          $virhe[$i] = t("Aleryhm‰ puuttuu tai sit‰ ei lˆydy!");
+          $virhe[$i] = t("Aleryhm√§ puuttuu tai sit√§ ei l√∂ydy!");
         }
       }
     }
@@ -131,7 +131,7 @@ if(!function_exists("toimittajahintatarkista")) {
     }
 
     if ($chryhma == '' and $chtuoteno == '' and mysql_field_name($result, $i) == 'ryhma') {
-      $virhe[$i] = t("Sinun on annettava joko tuote tai ryhm‰!");
+      $virhe[$i] = t("Sinun on annettava joko tuote tai ryhm√§!");
     }
 
     if (mysql_field_name($result, $i) == "minkpl") {
@@ -158,7 +158,7 @@ if(!function_exists("toimittajahintatarkista")) {
         $vv = substr($chalkupvm, 0, 4);
 
         if (!checkdate($kk, $pp, $vv)) {
-          $virhe[$i] = t("Alkup‰iv‰m‰‰r‰ virheellinen!");
+          $virhe[$i] = t("Alkup√§iv√§m√§√§r√§ virheellinen!");
         }
       }
     }
@@ -177,7 +177,7 @@ if(!function_exists("toimittajahintatarkista")) {
         $vv = substr($chloppupvm, 0, 4);
 
         if (!checkdate($kk, $pp, $vv)) {
-          $virhe[$i] = t("Loppup‰iv‰m‰‰r‰ virheellinen!");
+          $virhe[$i] = t("Loppup√§iv√§m√§√§r√§ virheellinen!");
         }
       }
     }
@@ -207,8 +207,8 @@ if(!function_exists("toimittajahintatarkista")) {
       $dsresult = mysql_query($aquery) OR pupe_error($aquery);
 
       if (mysql_num_rows($dsresult) > 0) {
-        // Pit‰‰ aina setata myˆs "t‰m‰n" kent‰n virhe, muuten luedata ei toimi
-        $virhe[$chtuoteno_ind] = $virhe[$i] = t("VIRHE: N‰ill‰ tiedoilla on jo toimittajahinta j‰rjestelm‰ss‰!");
+        // Pit√§√§ aina setata my√∂s "t√§m√§n" kent√§n virhe, muuten luedata ei toimi
+        $virhe[$chtuoteno_ind] = $virhe[$i] = t("VIRHE: N√§ill√§ tiedoilla on jo toimittajahinta j√§rjestelm√§ss√§!");
       }
     }
   }

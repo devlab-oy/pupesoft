@@ -5,7 +5,7 @@
 */
 class Valmistus {
 
-  // Pakolliset kent‰t
+  // Pakolliset kent√§t
   private $yhtio;
   private $tunnus;
 
@@ -73,9 +73,9 @@ class Valmistus {
   }
 
   /**
-   * Laskee valmistuksen raaka-aineiden saldot ja palauttaa riitt‰m‰tt‰mien tuotteiden tuotenumeron
+   * Laskee valmistuksen raaka-aineiden saldot ja palauttaa riitt√§m√§tt√§mien tuotteiden tuotenumeron
    * ja saldot. Huomio muiden valmistusten varaamat saldot ja mahdolliset ostotilaukset jotka saapuvat
-   * ennen kyseisen valmistuksen aloitushetke‰.
+   * ennen kyseisen valmistuksen aloitushetke√§.
    *
    * @return array puutteet Puuttuvat raaka-aineet ja niiden saldot.
   */
@@ -89,7 +89,7 @@ class Valmistus {
               FROM tilausrivi
               WHERE yhtio='{$kukarow['yhtio']}'
               AND otunnus='{$this->tunnus}'
-              AND tuoteno!='TY÷'
+              AND tuoteno!='TY√ñ'
               AND tyyppi='V'";
     $result = pupe_query($query);
 
@@ -102,7 +102,7 @@ class Valmistus {
 
       // Varatut kappaleet valmistuksilta jotka ovat jo valmistuslinjalla.
       // Valmistuslinjalla olevat valmistukset varaavat saldoa ja uuden valmistuksen on
-      // tarkistettava paljon ne v‰hent‰v‰t raaka-aineiden saldoa.
+      // tarkistettava paljon ne v√§hent√§v√§t raaka-aineiden saldoa.
       $muut_query = "SELECT tilausrivi.otunnus, COALESCE(sum(tilausrivi.varattu), 0) AS varattu
                      FROM kalenteri
                          JOIN lasku ON (kalenteri.yhtio=lasku.yhtio AND kalenteri.otunnus=lasku.tunnus)
@@ -191,7 +191,7 @@ class Valmistus {
   }
 
   /**
-   * Valmistukseen jo k‰ytetyt tunnit
+   * Valmistukseen jo k√§ytetyt tunnit
    */
   function kaytetty() {
     $query = "SELECT kentta03 as kaytetyttunnit
@@ -212,22 +212,22 @@ class Valmistus {
   }
 
   /**
-   * Keskeytt‰‰ valmistuksen
+   * Keskeytt√§√§ valmistuksen
    *
    */
   function keskeyta() {
     global $kukarow;
 
-    // Voidaan keskeytt‰‰ vain jos tyˆ on valmistuksessa
+    // Voidaan keskeytt√§√§ vain jos ty√∂ on valmistuksessa
     if($this->tila !== Valmistus::VALMISTUKSESSA) {
-      throw new Exception("Tyˆt‰ ei voida keskeytt‰‰");
+      throw new Exception("Ty√∂t√§ ei voida keskeytt√§√§");
     }
 
     if ($this->kaytetyttunnit > $this->kesto()) {
-      throw new Exception("K‰ytetty tunteja enemm‰n kuin valmistuksen kesto");
+      throw new Exception("K√§ytetty tunteja enemm√§n kuin valmistuksen kesto");
     }
 
-    // Keskeytet‰‰n tyˆ
+    // Keskeytet√§√§n ty√∂
     // Merkataan kalenteriin ylityotunnit, kommentit ja kaytetyttunnit
     $query = "UPDATE kalenteri SET
               kentta01='{$this->ylityotunnit}',
@@ -256,7 +256,7 @@ class Valmistus {
       );
 
     // Voidaanko uuteen tilaan vaihtaa,
-    // eli lˆytyykˆ nykyisen tilan vaihtoehdoista haluttu tila
+    // eli l√∂ytyyk√∂ nykyisen tilan vaihtoehdoista haluttu tila
     if (in_array($tila, $states[$this->tila])) {
 
       // Mihin tilaan vaihdetaan
@@ -265,16 +265,16 @@ class Valmistus {
         // Odottaa valmistusta
         case Valmistus::ODOTTAA:
 
-          // Jos tyˆ on keskeytetty ei sit‰ poisteta kalenterista!
+          // Jos ty√∂ on keskeytetty ei sit√§ poisteta kalenterista!
           if ($this->getTila() == 'OV') {
             // Poistetaan kalenterista vain tilassa ODOTTAA olevia valmistuksia (poistaa valmistuksen kalenteri taulusta)
             $query = "DELETE FROM kalenteri WHERE yhtio='{$kukarow['yhtio']}' AND otunnus={$this->tunnus}";
 
             if (! pupe_query($query)) {
-              throw new Exception("Kalenteri merkint‰‰ ei poistettu");
+              throw new Exception("Kalenteri merkint√§√§ ei poistettu");
             }
           }
-          // Jos tyˆ on keskeytetty ja siirret‰‰n takaisin parkkiin
+          // Jos ty√∂ on keskeytetty ja siirret√§√§n takaisin parkkiin
           // nollataan kalenterista valmistuslinja (kalenteri.henkilo)
           elseif($this->getTila() == 'TK') {
             $query = "UPDATE kalenteri SET
@@ -285,7 +285,7 @@ class Valmistus {
               throw new Exception("Tilan vaihtamisessa tapahtui virhe. (kalenteri)");
             }
 
-            // Valmistuksen keskeytys nollaa myˆs laskun ja tilausrivin ker‰ysp‰iv‰t,
+            // Valmistuksen keskeytys nollaa my√∂s laskun ja tilausrivin ker√§ysp√§iv√§t,
             // jolloin saldojen laskenta menee oikein.
             $update_lasku_query = "UPDATE lasku
              SET kerayspvm ='2099-01-01',
@@ -320,30 +320,30 @@ class Valmistus {
                     AND valmistuksen_tila = 'VA'";
           $result = pupe_query($query);
 
-          // Jos keskener‰inen valmistus lˆytyy
+          // Jos keskener√§inen valmistus l√∂ytyy
           if (mysql_num_rows($result) > 0) {
-            throw new Exception("Valmistuslinjalla on keskener‰inen valmistus");
+            throw new Exception("Valmistuslinjalla on keskener√§inen valmistus");
           }
 
-          // Pyˆristet‰‰n aloitusaika (aloitusaikana aikana nykyhetki)
+          // Py√∂ristet√§√§n aloitusaika (aloitusaikana aikana nykyhetki)
           $pvmalku = round_time(strtotime('now'));
           $kesto = valmistuksen_kesto(array('tunnus' => $this->tunnus));
           $pvmloppu = laske_loppuaika($pvmalku, $kesto*60, $this->valmistuslinja);
 
-          // P‰iv‰m‰‰r‰t oikeaan muotoon
+          // P√§iv√§m√§√§r√§t oikeaan muotoon
           $pvmalku = date('Y-m-d H:i:s', $pvmalku);
           $pvmloppu = date('Y-m-d H:i:s', $pvmloppu);
 
-          // P‰ivitet‰‰n valmistuksen uudet ajat
+          // P√§ivitet√§√§n valmistuksen uudet ajat
           $query = "UPDATE kalenteri
                     SET pvmalku='{$pvmalku}', pvmloppu='{$pvmloppu}'
                     WHERE yhtio='{$kukarow['yhtio']}'
                     AND otunnus='{$this->tunnus}'";
 
-          // P‰ivitet‰‰n laskun ja tilausrivin ker‰ysp‰iv‰t?
+          // P√§ivitet√§√§n laskun ja tilausrivin ker√§ysp√§iv√§t?
 
           if (! pupe_query($query)) {
-            throw new Exception("Valmistuksen aikoja ei p‰ivitetty");
+            throw new Exception("Valmistuksen aikoja ei p√§ivitetty");
           }
 
           break;
@@ -375,7 +375,7 @@ class Valmistus {
           break;
       }
 
-      // Jos kaikki on ok, p‰ivitet‰‰n valmistuksen tila
+      // Jos kaikki on ok, p√§ivitet√§√§n valmistuksen tila
       $query = "UPDATE lasku
                 SET valmistuksen_tila='$tila'
                 WHERE yhtio='{$kukarow['yhtio']}'
@@ -394,8 +394,8 @@ class Valmistus {
   static function all() {
     global $kukarow;
 
-    // Hakee kaikki keskener‰iset valmistukset (lasku/kalenteri)
-    // Vain valmistukset joiden tila on ker‰tty
+    // Hakee kaikki keskener√§iset valmistukset (lasku/kalenteri)
+    // Vain valmistukset joiden tila on ker√§tty
     $query = "SELECT
               lasku.yhtio,
               lasku.tunnus,
@@ -420,7 +420,7 @@ class Valmistus {
     return $valmistukset;
   }
 
-  /** Hakee yksitt‰isen valmistuksen */
+  /** Hakee yksitt√§isen valmistuksen */
   static function find($tunnus) {
     global $kukarow;
 

@@ -8,7 +8,7 @@ if(!function_exists("rahtikirjanumerotarkista")) {
       $t[$i] = trim($t[$i]);
 
       if ($t[$i] == '') {
-        $virhe[$i] = t("Tieto ei saa olla tyhj‰")."!";
+        $virhe[$i] = t("Tieto ei saa olla tyhj√§")."!";
       }
       else {
         $query  = "SELECT tunnus
@@ -19,14 +19,14 @@ if(!function_exists("rahtikirjanumerotarkista")) {
           $sresult = pupe_query($query);
 
         if (mysql_num_rows($sresult) != 0) {
-          // Pit‰‰ aina setata myˆs "t‰m‰n" kent‰n virhe, muuten luedata ei toimi
+          // Pit√§√§ aina setata my√∂s "t√§m√§n" kent√§n virhe, muuten luedata ei toimi
           $virhe[$i] = t("Rahtikirjanumero on jo perustettu")."!";
         }
         else {
           if (strtoupper($yhtiorow['maa']) == 'FI') {
             //Oikeellisuustarkistus LOGY
             if (strlen($t[$i]) != 12) {
-              $virhe[$i] = t("Rahtikirjanumero on oltava 12-merkki‰ pitk‰")."!";
+              $virhe[$i] = t("Rahtikirjanumero on oltava 12-merkki√§ pitk√§")."!";
             }
             elseif($t[$i] != mod10_tarkiste(substr($t[$i],0,-1))) {
               $virhe[$i] = t("Rahtikirjanumeron tarkiste on virheellinen")."!";

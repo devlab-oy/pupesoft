@@ -21,7 +21,7 @@ if ($tee == "lisaalisaa") {
   }
 
   if (substr($uusitaso, 0, strlen($taso)) != $taso) {
-    echo "<font class='error'>Uuden tason ".strlen($taso)." ensimm‰ist‰ merkki‰ on oltava: \"$taso\"!</font><br>";
+    echo "<font class='error'>Uuden tason ".strlen($taso)." ensimm√§ist√§ merkki√§ on oltava: \"$taso\"!</font><br>";
 
     $tee = "lisaa";
   }
@@ -40,7 +40,7 @@ if ($tee == "lisaalisaa") {
 
   if (substr($taso,0,1) != substr($uusitaso,0,1)) {
 
-    echo "<font class='error'>Uuden tason ensimm‰inen merkki on oltava: ".substr($taso,0,1)."!</font><br>";
+    echo "<font class='error'>Uuden tason ensimm√§inen merkki on oltava: ".substr($taso,0,1)."!</font><br>";
 
     $tee = "lisaa";
   }
@@ -52,7 +52,7 @@ if ($tee == "lisaalisaa") {
   $vresult = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($vresult) > 0) {
-    echo "<font class='error'>Taso $uusitaso lˆytyy jo j‰rjestelm‰st‰!</font><br>";
+    echo "<font class='error'>Taso $uusitaso l√∂ytyy jo j√§rjestelm√§st√§!</font><br>";
 
     $tee = "lisaa";
   }
@@ -113,7 +113,7 @@ if ($tee == "lisaalisaa") {
               yhtio           = '$kukarow[yhtio]'";
     $res = mysql_query($query) or pupe_error($query);
 
-    echo "Taso $uusitaso lis‰tty tilikartan rakenteeseen!<br>";
+    echo "Taso $uusitaso lis√§tty tilikartan rakenteeseen!<br>";
 
     $tee = "";
   }
@@ -122,7 +122,7 @@ if ($tee == "lisaalisaa") {
 if ($tee == "lisaa") {
 
   echo "<br><br>";
-  echo "Lis‰‰ taso v‰liin: $taso - $edtaso<br>";
+  echo "Lis√§√§ taso v√§liin: $taso - $edtaso<br>";
 
   echo "<br>";
   echo "  <form method='post'>
@@ -142,11 +142,11 @@ if ($tee == "lisaa") {
   }
   echo "
     <tr>
-      <th align='left'>Sisennet‰‰nkˆ ylemm‰t tasot</th>
+      <th align='left'>Sisennet√§√§nk√∂ ylemm√§t tasot</th>
       <td>
         <select name='sisennys'>
           <option value = 'E' >Ei</option>
-          <option value = 'K' >Kyll‰</option>
+          <option value = 'K' >Kyll√§</option>
         </select>
       </td>
     </tr>
@@ -155,7 +155,7 @@ if ($tee == "lisaa") {
       <th align='left'>Tyyppi</th>
       <td>
         <select name='tyyppi'>
-          <option value = 'S' >Sis‰inen taso</option>
+          <option value = 'S' >Sis√§inen taso</option>
           <option value = 'U' $valittuu>Ulkoinen taso</option>
         </select>
       </td>
@@ -166,21 +166,21 @@ if ($tee == "lisaa") {
     <tr><th align='left'>nimi</th><td><input type = 'text' name = 'nimi' value = '$nimi' size='35'></td></tr><tr>";
 
   echo "</table><br>
-        <input type = 'submit' value = '".t("Lis‰‰")."'></form>";
+        <input type = 'submit' value = '".t("Lis√§√§")."'></form>";
 
 }
 
 if ($tee == "muutamuuta") {
 
   if (strlen($uusitaso) < strlen($taso)) {
-    echo "<font class='error'>Uuden tason pituus on oltava v‰hint‰‰n: ".strlen($taso)." merkki‰ pitk‰!</font><br>";
+    echo "<font class='error'>Uuden tason pituus on oltava v√§hint√§√§n: ".strlen($taso)." merkki√§ pitk√§!</font><br>";
 
     $tee = "muuta";
   }
 
   if (substr($taso,0,1) != substr($uusitaso,0,1)) {
 
-    echo "<font class='error'>Uuden tason ensimm‰inen merkki on oltava: ".substr($taso,0,1)."!</font><br>";
+    echo "<font class='error'>Uuden tason ensimm√§inen merkki on oltava: ".substr($taso,0,1)."!</font><br>";
 
     $tee = "muuta";
   }
@@ -193,7 +193,7 @@ if ($tee == "muutamuuta") {
   $vresult = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($vresult) > 0) {
-    echo "<font class='error'>Taso $uusitaso lˆytyy jo j‰rjestelm‰st‰!</font><br>";
+    echo "<font class='error'>Taso $uusitaso l√∂ytyy jo j√§rjestelm√§st√§!</font><br>";
 
     $tee = "muuta";
   }

@@ -53,7 +53,7 @@ class vuosisopimus_asiakkaat_excel {
 
     $this->write_solu($this->asiakas['ytunnus']);
     $this->add_tyhja_kolumni(3);
-    $this->write_solu(t('Hyvä yhteistyökumppanimme,', $this->kieli));
+    $this->write_solu(t('HyvÃ¤ yhteistyÃ¶kumppanimme,', $this->kieli));
 
     $this->move_seuraavalle_riville();
 
@@ -63,7 +63,7 @@ class vuosisopimus_asiakkaat_excel {
 
     $this->write_solu($this->asiakas['nimitark']);
     $this->add_tyhja_kolumni(3);
-    $this->write_solu(t('Ohessa tämänhetkinen ostotilanteenne.', $this->kieli));
+    $this->write_solu(t('Ohessa tÃ¤mÃ¤nhetkinen ostotilanteenne.', $this->kieli));
 
     $this->move_seuraavalle_riville();
 
@@ -175,7 +175,7 @@ class vuosisopimus_asiakkaat_excel {
     }
 
     $this->add_tyhja_kolumni(2);
-    $this->write_solu(t('Yhteensä:', $this->kieli));
+    $this->write_solu(t('YhteensÃ¤:', $this->kieli));
     $this->write_numero_solu($temp['sumkplva']);
     $this->write_numero_solu($temp['sumkpled']);
     $this->write_numero_solu($temp['sumva']);
@@ -185,7 +185,7 @@ class vuosisopimus_asiakkaat_excel {
   }
 
   private function write_solu($data) {
-    //tämä funktio kirjoittaa tämän hetkiselle riville soluun datan ja siirtyy seuraavaan soluun samalla rivillä
+    //tÃ¤mÃ¤ funktio kirjoittaa tÃ¤mÃ¤n hetkiselle riville soluun datan ja siirtyy seuraavaan soluun samalla rivillÃ¤
     $this->excel->write($this->excel_rivi, $this->excel_sarake, $data);
     $this->excel_sarake++;
   }

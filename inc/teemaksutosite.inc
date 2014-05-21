@@ -1,6 +1,6 @@
 <?php
 
-// Kirjoitetaan laskulle maksutiliˆinti
+// Kirjoitetaan laskulle maksutili√∂inti
 $selite = str_replace ("'", " ", $vientiselite); // Poistaa SQL-virheen mahdollisuuden
 $tpv   = substr($pvm,0,2);
 $tpk   = substr($pvm,2,2);
@@ -24,11 +24,11 @@ if (mysql_num_rows($result) == 1) {
   $ostovelkarow = mysql_fetch_assoc($result);
 }
 else {
-  echo "<font class='error'>".t("VIRHE: Ostovelkatilin m‰‰rittely ep‰onnistui")."!<br>\n".t("Summaa ei kirjattu")."!</font><br>\n";
+  echo "<font class='error'>".t("VIRHE: Ostovelkatilin m√§√§rittely ep√§onnistui")."!<br>\n".t("Summaa ei kirjattu")."!</font><br>\n";
   $teemaksutosite = FALSE;
 }
 
-// Haetaan kulutiliˆnti
+// Haetaan kulutili√∂nti
 $query = "SELECT tiliointi.*
           FROM tiliointi
           JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)
@@ -43,7 +43,7 @@ $query = "SELECT tiliointi.*
 $yresult = pupe_query($query);
 
 if (mysql_num_rows($yresult) == 0) {
-  echo "<font class='error'>".t("VIRHE: Kulutilin m‰‰rittely ep‰onnistui")."!<br>\n".t("Summaa ei kirjattu")."!</font><br>\n";
+  echo "<font class='error'>".t("VIRHE: Kulutilin m√§√§rittely ep√§onnistui")."!<br>\n".t("Summaa ei kirjattu")."!</font><br>\n";
   $teemaksutosite = FALSE;
 }
 
@@ -52,8 +52,8 @@ if ($teemaksutosite) {
   // Kassa-ale
   if ($trow['alatila'] == 'K' and $trow['vietykasumma'] != 0) {
 
-    // Kassa-alessa on huomioitava alv, joka voi olla useita vientej‰
-    echo "<font class='message'>".t("Kirjaan kassa-alennusta yhteens‰")." $trow[vietykasumma]</font><br>\n";
+    // Kassa-alessa on huomioitava alv, joka voi olla useita vientej√§
+    echo "<font class='message'>".t("Kirjaan kassa-alennusta yhteens√§")." $trow[vietykasumma]</font><br>\n";
 
     $totkasumma = 0;
 
@@ -61,7 +61,7 @@ if ($teemaksutosite) {
 
     while ($tiliointirow = mysql_fetch_assoc($yresult)) {
 
-      // Kuinka paljon on t‰m‰n viennin osuus
+      // Kuinka paljon on t√§m√§n viennin osuus
       $summa = round(($tiliointirow['summa'] * (1+$tiliointirow['vero']/100) / $trow['vietysumma']) * $trow['vietykasumma'], 2);
       $alv = 0;
 
@@ -74,7 +74,7 @@ if ($teemaksutosite) {
 
       $totkasumma += $summa + $alv;
 
-      // Tarkenteet kopsataan alkuper‰iselt‰ tiliˆinnilt‰, mutta jos alkuper‰inen tiliˆinti on ilman tarkenteita, niin menn‰‰n tilin defaulteilla
+      // Tarkenteet kopsataan alkuper√§iselt√§ tili√∂innilt√§, mutta jos alkuper√§inen tili√∂inti on ilman tarkenteita, niin menn√§√§n tilin defaulteilla
       list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["kassaale"], $tiliointirow["kustp"], $tiliointirow["kohde"], $tiliointirow["projekti"]);
 
       // Kassa-ale
@@ -92,7 +92,7 @@ if ($teemaksutosite) {
                 laatija  = 'tiliote',
                 laadittu = now()";
       $xresult = pupe_query($query);
-      $isa = mysql_insert_id(); // N‰in lˆyd‰mme t‰h‰n liittyv‰t alvit....
+      $isa = mysql_insert_id(); // N√§in l√∂yd√§mme t√§h√§n liittyv√§t alvit....
 
       if ($tiliointirow['vero'] != 0) {
         // Kassa-alen alv
@@ -115,11 +115,11 @@ if ($teemaksutosite) {
       }
     }
 
-    //Hoidetaan mahdolliset pyˆristykset
+    //Hoidetaan mahdolliset py√∂ristykset
     $heitto = round($totkasumma - $trow["vietykasumma"], 2);
 
     if (abs($heitto) >= 0.01) {
-      echo "<font class='message'>".t("Joudun pyˆrist‰m‰‰n kassa-alennusta")."</font><br>\n";
+      echo "<font class='message'>".t("Joudun py√∂rist√§m√§√§n kassa-alennusta")."</font><br>\n";
 
       $query = "UPDATE tiliointi
                 SET summa = summa + $heitto
@@ -139,21 +139,21 @@ if ($teemaksutosite) {
     }
 
     if (round($vesumma, 2) != 0) {
-      echo "<font class='message'>".t("Kirjaan valuuttaeroa yhteens‰")." $vesumma</font><br>\n";
+      echo "<font class='message'>".t("Kirjaan valuuttaeroa yhteens√§")." $vesumma</font><br>\n";
 
       $totvesumma = 0;
 
       mysql_data_seek($yresult, 0);
 
       while ($tiliointirow = mysql_fetch_assoc($yresult)) {
-        // Kuinka paljon on t‰m‰n viennin osuus
+        // Kuinka paljon on t√§m√§n viennin osuus
         $summa = round($tiliointirow['summa'] * (1+$tiliointirow['vero']/100) / $trow['vietysumma'] * $vesumma, 2);
 
         echo "<font class='message'>".t("Kirjaan valuuttaeroa")." $summa</font><br>\n";
 
         if (round($summa, 2) != 0) {
 
-          // Tarkenteet kopsataan alkuper‰iselt‰ tiliˆinnilt‰, mutta jos alkuper‰inen tiliˆinti on ilman tarkenteita, niin menn‰‰n tilin defaulteilla
+          // Tarkenteet kopsataan alkuper√§iselt√§ tili√∂innilt√§, mutta jos alkuper√§inen tili√∂inti on ilman tarkenteita, niin menn√§√§n tilin defaulteilla
           list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["valuuttaero"], $tiliointirow["kustp"], $tiliointirow["kohde"], $tiliointirow["projekti"]);
 
           // Valuuttaero
@@ -177,9 +177,9 @@ if ($teemaksutosite) {
         }
       }
 
-      // Hoidetaan mahdolliset pyˆristykset
+      // Hoidetaan mahdolliset py√∂ristykset
       if ($totvesumma != $vesumma) {
-        echo "<font class='message'>".t("Joudun pyˆrist‰m‰‰n valuuttaeroa")."</font><br>\n";
+        echo "<font class='message'>".t("Joudun py√∂rist√§m√§√§n valuuttaeroa")."</font><br>\n";
 
         $query = "UPDATE tiliointi
                   SET summa = summa - $totvesumma + $vesumma
@@ -208,10 +208,10 @@ if ($teemaksutosite) {
   $result = pupe_query($query);
 
 
-  // Tarkenteet kopsataan alkuper‰iselt‰ tiliˆinnilt‰, mutta jos alkuper‰inen tiliˆinti on ilman tarkenteita, niin menn‰‰n tilin defaulteilla
+  // Tarkenteet kopsataan alkuper√§iselt√§ tili√∂innilt√§, mutta jos alkuper√§inen tili√∂inti on ilman tarkenteita, niin menn√§√§n tilin defaulteilla
   list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($ostovelkarow["tilino"], $ostovelkarow["kustp"], $ostovelkarow["kohde"], $ostovelkarow["projekti"]);
 
-  // Ostovelat, tarkenteet kopsataan alkuper‰iseslt‰ tiliˆinnilt‰
+  // Ostovelat, tarkenteet kopsataan alkuper√§iseslt√§ tili√∂innilt√§
   $query = "INSERT into tiliointi set
             yhtio    = '$yritirow[yhtio]',
             ltunnus  = '$trow[tunnus]',
@@ -240,8 +240,8 @@ if ($teemaksutosite) {
             and perheid  = '$tiliotedatape'";
   $dummyresult = pupe_query($query);
 
-  // Merkataan k‰sitellyiksi & lis‰t‰‰n linkki
-  echo "<font class='message'>*** ".t("laskuun lis‰tty maksutiliˆinti")." ***</font><br>\n";
+  // Merkataan k√§sitellyiksi & lis√§t√§√§n linkki
+  echo "<font class='message'>*** ".t("laskuun lis√§tty maksutili√∂inti")." ***</font><br>\n";
 
   //Lasku maksetuksi
   $kurssi += 0;
@@ -261,7 +261,7 @@ if ($teemaksutosite) {
 
 }
 else {
-  // P‰ivitet‰‰n virhetapauksissa kasitelty nollaksi jotta t‰m‰ k‰sitell‰‰n sit seuraavan kerran kun tiliotetta katsotaan!!!!
+  // P√§ivitet√§√§n virhetapauksissa kasitelty nollaksi jotta t√§m√§ k√§sitell√§√§n sit seuraavan kerran kun tiliotetta katsotaan!!!!
   $query = "UPDATE tiliotedata
             SET kasitelty = '0000-00-00 00:00:00'
             WHERE tunnus = '$tiliotedataid'";

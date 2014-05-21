@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 if (isset($_POST["tee"])) {
@@ -20,17 +20,17 @@ else {
   echo "<font class='head'>".t("Tilauskanta, Tilausten vastaanotto ja Laskutus")."</font><hr>";
 
 
-  // hehe, n‰in on helpompi verrata p‰iv‰m‰‰ri‰
+  // hehe, n√§in on helpompi verrata p√§iv√§m√§√§ri√§
   $query  = "SELECT TO_DAYS('$vvl-$kkl-$ppl')-TO_DAYS('$vva-$kka-$ppa') ero";
   $result = mysql_query($query) or pupe_error($query);
   $row    = mysql_fetch_array($result);
 
   if ($row["ero"] > 365) {
-    echo "<font class='error'>".t("Jotta homma ei menisi liian hitaaksi, niin vuosi on pisin mahdollinen laskentav‰li!")."</font><br>";
+    echo "<font class='error'>".t("Jotta homma ei menisi liian hitaaksi, niin vuosi on pisin mahdollinen laskentav√§li!")."</font><br>";
     $tee = "";
   }
 
-  // jos joku p‰iv‰kentt‰ on tyhj‰‰ ei tehd‰ mit‰‰n
+  // jos joku p√§iv√§kentt√§ on tyhj√§√§ ei tehd√§ mit√§√§n
   if ($ppa == "" or $kka == "" or $vva == "" or $ppl == "" or $kkl == "" or $vvl == "") {
     $tee = "";
   }
@@ -42,7 +42,7 @@ else {
 
     $query = " SELECT ";
 
-    $MONTH_ARRAY = array(1=> t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kes‰kuu'),t('Hein‰kuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
+    $MONTH_ARRAY = array(1=> t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kes√§kuu'),t('Hein√§kuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
 
     $start     = date("Y-m-d",mktime(0, 0, 0, $kka, $ppa,  $vva));
     $start_ed   = date("Y-m-d",mktime(0, 0, 0, $kka, $ppa,  $vvaa));
@@ -109,7 +109,7 @@ else {
     if (strpos($_SERVER['SCRIPT_NAME'], "tilauskanta_laskutus.php") !== FALSE) {
       if(@include('Spreadsheet/Excel/Writer.php')) {
 
-        //keksit‰‰n failille joku varmasti uniikki nimi:
+        //keksit√§√§n failille joku varmasti uniikki nimi:
         list($usec, $sec) = explode(' ', microtime());
         mt_srand((float) $sec + ((float) $usec * 100000));
         $excelnimi = md5(uniqid(mt_rand(), true)).".xls";
@@ -186,10 +186,10 @@ else {
 
     for ($ii=1; $ii <= 10; $ii++) {
       if ($ii == 3) {
-        echo "<tr><td class='back'>Tilauksia sis‰‰n</td></tr>";
+        echo "<tr><td class='back'>Tilauksia sis√§√§n</td></tr>";
 
         if(isset($workbook)) {
-          $worksheet->write($excelrivi, 0, "Tilauksia sis‰‰n");
+          $worksheet->write($excelrivi, 0, "Tilauksia sis√§√§n");
         }
         $excelrivi++;
       }
@@ -306,7 +306,7 @@ else {
   }
 
   if ($lopetus == "") {
-    //K‰yttˆliittym‰
+    //K√§ytt√∂liittym√§
     if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, 1, 1, date("Y")));
     if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, 1, 1, date("Y")));
     if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, 1, 1, date("Y")));
@@ -320,15 +320,15 @@ else {
     echo "<form method='post'>";
     echo "<input type='hidden' name='tee' value='go'>";
 
-    // p‰iv‰m‰‰r‰rajaus
+    // p√§iv√§m√§√§r√§rajaus
     echo "<table>";
     echo "<tr>
-      <th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+      <th>".t("Sy√∂t√§ alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
       <td><input type='text' name='ppa' value='$ppa' size='3'></td>
       <td><input type='text' name='kka' value='$kka' size='3'></td>
       <td><input type='text' name='vva' value='$vva' size='5'></td>
       </tr>\n
-      <tr><th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+      <tr><th>".t("Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
       <td><input type='text' name='ppl' value='$ppl' size='3'></td>
       <td><input type='text' name='kkl' value='$kkl' size='3'></td>
       <td><input type='text' name='vvl' value='$vvl' size='5'></td>

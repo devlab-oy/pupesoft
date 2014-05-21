@@ -5,7 +5,7 @@ $query    = "SELECT * FROM lasku WHERE tunnus='$otunnus' AND yhtio ='$kukarow[yh
 $result   = mysql_query($query) or pupe_error($query);
 $laskurow = mysql_fetch_array($result);
 
-// yhdistet‰‰n ruksatut keikat "is‰saapumiseen" $otunnus
+// yhdistet√§√§n ruksatut keikat "is√§saapumiseen" $otunnus
 if ($tee == "teeyhdistys") {
 
   if (count($yhdistakeikka) > 0) {
@@ -18,33 +18,33 @@ if ($tee == "teeyhdistys") {
       if (mysql_num_rows($result) == 1) {
         $keikkarow = mysql_fetch_array($result);
 
-        //p‰ivitet‰‰n otunnus jo kohdistetuille riveille jotta ne ev‰t j‰isi ilman otsikkoa
+        //p√§ivitet√§√§n otunnus jo kohdistetuille riveille jotta ne ev√§t j√§isi ilman otsikkoa
         $query = "update tilausrivi set otunnus='$otunnus' where yhtio='$kukarow[yhtio]' and tyyppi='O' and uusiotunnus='$keikkatunnus' and otunnus=uusiotunnus order by yhtio";
         $result = mysql_query($query) or pupe_error($query);
 
-        //p‰ivitet‰‰n otunnus niille riveille joiden otunnus pointtaa dellattavaan otsikkoon jotta ne ev‰t j‰isi ilman otsikkoa
+        //p√§ivitet√§√§n otunnus niille riveille joiden otunnus pointtaa dellattavaan otsikkoon jotta ne ev√§t j√§isi ilman otsikkoa
         $query = "update tilausrivi set otunnus='$otunnus' where yhtio='$kukarow[yhtio]' and tyyppi='O' and otunnus='$keikkatunnus' order by yhtio";
         $result = mysql_query($query) or pupe_error($query);
 
-        //liitet‰‰n jo liitetyt rivit uuteen otsikkoon
+        //liitet√§√§n jo liitetyt rivit uuteen otsikkoon
         $query = "update tilausrivi set uusiotunnus='$otunnus' where yhtio='$kukarow[yhtio]' and tyyppi='O' and uusiotunnus='$keikkatunnus' order by yhtio";
         $result = mysql_query($query) or pupe_error($query);
 
-        //poistetaan keikat, mutta ei en‰‰ sanota delete from
-        $komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mit‰tˆitiin ohjelmassa ostotilausten_rivien_yhdistys.inc (1)")."<br>";
+        //poistetaan keikat, mutta ei en√§√§ sanota delete from
+        $komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mit√§t√∂itiin ohjelmassa ostotilausten_rivien_yhdistys.inc (1)")."<br>";
         $query = "update lasku set alatila='K', tila='D',  comments = '$komm' where yhtio='$kukarow[yhtio]' and tila='K' and laskunro='$keikkarow[laskunro]' and vanhatunnus = 0";
         $result = mysql_query($query) or pupe_error($query);
 
-        //liitet‰‰n liitosotsikot uudestaan
+        //liitet√§√§n liitosotsikot uudestaan
         $query = "update lasku set laskunro = '$laskurow[laskunro]' where yhtio='$kukarow[yhtio]' and tila='K' and laskunro='$keikkarow[laskunro]' and vanhatunnus != 0";
         $result = mysql_query($query) or pupe_error($query);
 
-        //Varmistetaan ett‰ keikka ei ole merkitty kohdistetuks
+        //Varmistetaan ett√§ keikka ei ole merkitty kohdistetuks
         $query = "update lasku set kohdistettu = '' where yhtio='$kukarow[yhtio]' and tila='K' and tunnus = '$otunnus'";
         $result = mysql_query($query) or pupe_error($query);
       }
       else {
-        echo "<font class='error'>".t("Saapuminen katosi, mit‰‰n ei tehty")."!</font><br><br>";
+        echo "<font class='error'>".t("Saapuminen katosi, mit√§√§n ei tehty")."!</font><br><br>";
       }
     }
 
@@ -52,14 +52,14 @@ if ($tee == "teeyhdistys") {
     $toiminto = "";
   }
   else {
-    echo "<font class='error'>".t("Et valinnut yht‰‰n saapumista")."!</font><br><br>";
+    echo "<font class='error'>".t("Et valinnut yht√§√§n saapumista")."!</font><br><br>";
     $tee = "";
   }
 }
 
 if ($tee == "") {
 
-  // n‰ytet‰‰n v‰h‰ toimittajan tietoja
+  // n√§ytet√§√§n v√§h√§ toimittajan tietoja
   echo "<table>";
   echo "<tr>";
   echo "<th>".t("Saapuminen")."</th>";
@@ -73,7 +73,7 @@ if ($tee == "") {
   echo "<td>$laskurow[postitp]</td>";
   echo "</tr></table><br>";
 
-  // etsit‰‰n vanhoja keikkoja, vanhatunnus pit‰‰ olla tyhj‰‰ niin ei listata liitettyj‰ laskuja ja tunnus eri kun t‰‰ meid‰n nykynen
+  // etsit√§√§n vanhoja keikkoja, vanhatunnus pit√§√§ olla tyhj√§√§ niin ei listata liitettyj√§ laskuja ja tunnus eri kun t√§√§ meid√§n nykynen
   $query = "  select *
         from lasku
         where yhtio='$kukarow[yhtio]' and liitostunnus='$toimittajaid' and tila='K' and alatila='' and kohdistettu in ('', 'K') and vanhatunnus=0
@@ -101,7 +101,7 @@ if ($tee == "") {
     echo "<th>".t("varastossa")."</th>";
     echo "<th>".t("kululaskuja")."</th>";
     echo "<th>".t("ostolaskuja")."</th>";
-    echo "<th>".t("yhdist‰")."</th>";
+    echo "<th>".t("yhdist√§")."</th>";
     echo "</tr>";
 
     $keikkakesken = 0;
@@ -130,14 +130,14 @@ if ($tee == "") {
         $tuore = mysql_query($query) or pupe_error($query);
         $tuote = mysql_fetch_array($tuore);
 
-        $kplyhteensa++; // lasketaan montako tilausrivi‰ on kohdistettu
+        $kplyhteensa++; // lasketaan montako tilausrivi√§ on kohdistettu
 
         if ($rivirow["kpl"] != 0 and $rivirow["varattu"] == 0) {
-          $kplvarasto++; // lasketaan montako tilausrivi‰ on viety varastoon
+          $kplvarasto++; // lasketaan montako tilausrivi√§ on viety varastoon
         }
       }
 
-      // katotaan onko liitettyj‰ laskuja
+      // katotaan onko liitettyj√§ laskuja
       // ('C','F','I','J','K','L') // vaihto-omaisuus ja raaka-aine
       // ('B','C','J','E','F','K','H','I','L') // kaikki
 
@@ -153,8 +153,8 @@ if ($tee == "") {
 
       if ($llrow["vosumma"] != 0) $llrow["vosumma"] = "($llrow[vosumma])"; else $llrow["vosumma"]=""; // kaunistellaan summa sulkuihin
       if ($llrow["kusumma"] != 0) $llrow["kusumma"] = "($llrow[kusumma])"; else $llrow["kusumma"]=""; // kaunistellaan summa sulkuihin
-      if ($llrow["volasku"] == "") $llrow["volasku"] = 0; // kaunistellaan tyhj‰t nollaks
-      if ($llrow["kulasku"] == "") $llrow["kulasku"] = 0; // kaunistellaan tyhj‰t nollaks
+      if ($llrow["volasku"] == "") $llrow["volasku"] = 0; // kaunistellaan tyhj√§t nollaks
+      if ($llrow["kulasku"] == "") $llrow["kulasku"] = 0; // kaunistellaan tyhj√§t nollaks
 
       if ($row["tunnus"] == $otunnus) {
         echo "<tr>";
@@ -178,9 +178,9 @@ if ($tee == "") {
         echo "<td>$llrow[kulasku] $llrow[kusumma]</td>";
         echo "<td>$llrow[volasku] $llrow[vosumma]</td>";
 
-        // keikkaa ollaan viem‰ss‰ varastoon
+        // keikkaa ollaan viem√§ss√§ varastoon
         if ($keikkakesken == $row["tunnus"]) {
-          echo "<td>".t("Varastoonvienti kesken")." ".t("k‰ytt‰j‰ll‰")." {$_kuka} @ {$_timestamp}</td>";
+          echo "<td>".t("Varastoonvienti kesken")." ".t("k√§ytt√§j√§ll√§")." {$_kuka} @ {$_timestamp}</td>";
         }
         else {
           echo "<td><input type='checkbox' name='yhdistakeikka[]' value='$row[tunnus]'></td>";
@@ -191,7 +191,7 @@ if ($tee == "") {
 
     echo "</table>";
 
-    echo "<br><input type='submit' value='".t("Liit‰ valitut saapumiset")."'>";
+    echo "<br><input type='submit' value='".t("Liit√§ valitut saapumiset")."'>";
     echo "</form>";
 
     if ($toiminto != "") {
@@ -206,7 +206,7 @@ if ($tee == "") {
 
   }
   else {
-    echo "<font class='message'>".t("Ei yht‰‰n liitett‰v‰ksi sopivaa tilausta").".</font>";
+    echo "<font class='message'>".t("Ei yht√§√§n liitett√§v√§ksi sopivaa tilausta").".</font>";
   }
 
 }

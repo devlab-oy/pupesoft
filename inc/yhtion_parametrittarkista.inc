@@ -65,7 +65,7 @@ if(!function_exists("yhtion_parametrittarkista")) {
       ${"ind_".$fieldname} = $i;
 
       if ($tuote != "") {
-        // katotaan lˆytyykˆ t‰ll‰nen saldoton tuote
+        // katotaan l√∂ytyyk√∂ t√§ll√§nen saldoton tuote
         $query = "SELECT tunnus
                   FROM tuote
                   WHERE yhtio    = '$kukarow[yhtio]'
@@ -75,7 +75,7 @@ if(!function_exists("yhtion_parametrittarkista")) {
         $xyresult = pupe_query($query);
 
         if (mysql_num_rows($xyresult) == 0) {
-          $virhe[$i] = t("Tuotetta ei lˆydy!")." / ".t("Tuote pit‰‰ olla saldoton!");
+          $virhe[$i] = t("Tuotetta ei l√∂ydy!")." / ".t("Tuote pit√§√§ olla saldoton!");
         }
       }
     }
@@ -91,7 +91,7 @@ if(!function_exists("yhtion_parametrittarkista")) {
       $xyresult = pupe_query($query);
 
       if (mysql_num_rows($xyresult) != 0 and $tuote=='') {
-        $virhe[$i] = t("Yhtiˆlla on moniehto-maksuehtoja, maksuehto_tuotenumero on syˆtett‰v‰!");
+        $virhe[$i] = t("Yhti√∂lla on moniehto-maksuehtoja, maksuehto_tuotenumero on sy√∂tett√§v√§!");
       }
     }
 
@@ -134,7 +134,7 @@ if(!function_exists("yhtion_parametrittarkista")) {
                     if($virhe[$i]!="") {
                       $virhe[$i] .= "<br>";
                     }
-                    $virhe[$i] .= t("Lis‰tieto ei kelpaa")." '$lisa' ".t("sallitut lisat ovat")." ".implode("|", $sallitut_avainsana);
+                    $virhe[$i] .= t("Lis√§tieto ei kelpaa")." '$lisa' ".t("sallitut lisat ovat")." ".implode("|", $sallitut_avainsana);
                   }
                 }
               }
@@ -142,7 +142,7 @@ if(!function_exists("yhtion_parametrittarkista")) {
                 if($virhe[$i]!="") {
                   $virhe[$i] .= "<br>";
                 }
-                $virhe[$i] .= t("Lis‰tiedot vaaditaan")." '$lisa' ".t("sallitut lisat ovat")." ".implode("|", $sallitut_avainsana);
+                $virhe[$i] .= t("Lis√§tiedot vaaditaan")." '$lisa' ".t("sallitut lisat ovat")." ".implode("|", $sallitut_avainsana);
               }
             }
 
@@ -152,7 +152,7 @@ if(!function_exists("yhtion_parametrittarkista")) {
               if($virhe[$i]!="") {
                 $virhe[$i] .= "<br>";
               }
-              $virhe[$i] .= t("Taulu ei kelpaa")." '$taulu' ".t("sallitut kent‰t ovat")." ".implode(",", $sallitut);
+              $virhe[$i] .= t("Taulu ei kelpaa")." '$taulu' ".t("sallitut kent√§t ovat")." ".implode(",", $sallitut);
             }
           }
         }
@@ -204,28 +204,28 @@ if(!function_exists("yhtion_parametrittarkista")) {
         if ($fieldname == "erapaivan_ylityksen_raja") {
             $t[$i] = (int) trim($t[$i]);
       if ($t[$i] < 1) {
-        $virhe[$i] = t("Arvon oltava kokonaisluku ja v‰hint‰‰n 1") . "!";
+        $virhe[$i] = t("Arvon oltava kokonaisluku ja v√§hint√§√§n 1") . "!";
       }
         }
 
     if ($fieldname == "lahetteen_tulostustapa") {
             if (in_array($t[$i], array('B', 'I')) and !empty($t['kerayserat'])) {
         //jos lahetteen_tulostustapa on asennossa:
-        //"Myyntitilausten ker‰yslistat ja l‰hetteet tulostetaan automaattisesti"
-        //tai "Myyntitilausten ker‰yslistat ja l‰hetteet tulostetaan automaattisesti ja tilaus laitetaan toimitetuksi"
-        //ja kerayser‰t on p‰‰ll‰
-        $virhe[$i] = t("Ker‰yser‰t ei voi olla p‰‰ll‰ jos l‰hete halutaan tulostaa automaattisesti") . "!";
+        //"Myyntitilausten ker√§yslistat ja l√§hetteet tulostetaan automaattisesti"
+        //tai "Myyntitilausten ker√§yslistat ja l√§hetteet tulostetaan automaattisesti ja tilaus laitetaan toimitetuksi"
+        //ja kerayser√§t on p√§√§ll√§
+        $virhe[$i] = t("Ker√§yser√§t ei voi olla p√§√§ll√§ jos l√§hete halutaan tulostaa automaattisesti") . "!";
       }
         }
 
     if ($fieldname == "tunnus") {
-        // Tsekataan, ett‰ tietyt tuotteen ei oo samoja kesken‰‰n
+        // Tsekataan, ett√§ tietyt tuotteen ei oo samoja kesken√§√§n
       if ($rahti_tuotenumero != "" and $rahti_tuotenumero == $erilliskasiteltava_tuotenumero) {
-        $virhe[$i] = $virhe[$ind_erilliskasiteltava_tuotenumero] = t("Erillisk‰sitelt‰v‰kulun tuotenumero ei voi olla sama kuin Rahtikulun tuotenumero")."!";
+        $virhe[$i] = $virhe[$ind_erilliskasiteltava_tuotenumero] = t("Erillisk√§sitelt√§v√§kulun tuotenumero ei voi olla sama kuin Rahtikulun tuotenumero")."!";
       }
 
       if ($rahti_tuotenumero != "" and $rahti_tuotenumero == $lisakulu_tuotenumero) {
-        $virhe[$i] = $virhe[$ind_lisakulu_tuotenumero] = t("Lis‰rahtikulun tuotenumero ei voi olla sama kuin Rahtikulun tuotenumero")."!";
+        $virhe[$i] = $virhe[$ind_lisakulu_tuotenumero] = t("Lis√§rahtikulun tuotenumero ei voi olla sama kuin Rahtikulun tuotenumero")."!";
       }
 
       if ($rahti_tuotenumero != "" and $rahti_tuotenumero == $kuljetusvakuutus_tuotenumero) {

@@ -1,13 +1,13 @@
 <?php
 
-// Kutsutaanko CLI:st‰
+// Kutsutaanko CLI:st√§
 $php_cli = FALSE;
 
 if (php_sapi_name() == 'cli') {
   $php_cli = TRUE;
 }
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta JA master kantaa *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta JA master kantaa *//
 $useslave = 1;
 
 ini_set("memory_limit", "5G");
@@ -15,7 +15,7 @@ ini_set("memory_limit", "5G");
 if ($php_cli) {
 
   if (!isset($argv[1]) or $argv[1] == '') {
-    echo "Anna yhtiˆ!!!\n";
+    echo "Anna yhti√∂!!!\n";
     die;
   }
 
@@ -61,7 +61,7 @@ if (!isset($abclaji)) $abclaji = "";
 // rakennetaan tiedot
 if ($tee == 'YHTEENVETO') {
 
-  // katotaan halutaanko saldottomia mukaan.. default on ett‰ EI haluta
+  // katotaan halutaanko saldottomia mukaan.. default on ett√§ EI haluta
   if (!isset($saldottomatmukaan) or $saldottomatmukaan == "") {
     $tuotejoin = " JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa = '') ";
   }
@@ -71,7 +71,7 @@ if ($tee == 'YHTEENVETO') {
 
   if ($abclaji == "kulutus") {
 
-    // siivotaan ensin aputaulu tyhj‰ksi
+    // siivotaan ensin aputaulu tyhj√§ksi
     $query = "DELETE from abc_aputaulu
               WHERE yhtio = '$kukarow[yhtio]'
               and tyyppi  = 'TV'";
@@ -116,7 +116,7 @@ if ($tee == 'YHTEENVETO') {
     $abctyypit = array("kulutus");
   }
   else {
-    // siivotaan ensin aputaulu tyhj‰ksi
+    // siivotaan ensin aputaulu tyhj√§ksi
     $query = "DELETE from abc_aputaulu
               WHERE yhtio = '$kukarow[yhtio]'
               and tyyppi  in ('TK','TP','TR','TM')";
@@ -178,7 +178,7 @@ if ($tee == 'YHTEENVETO') {
   $rowarray    = array();
   $myydyttuotteet = "";
 
-  // K‰yd‰‰n l‰pi kaikki tuotteet joilla on tapahtumia
+  // K√§yd√§√§n l√§pi kaikki tuotteet joilla on tapahtumia
   while ($row = mysql_fetch_assoc($rivires)) {
 
     if ($row["kate"] > 0) {
@@ -248,7 +248,7 @@ if ($tee == 'YHTEENVETO') {
   $myydyttuotteet = substr($myydyttuotteet, 0, -1);
 
   if ($abclaji == "" and $myydyttuotteet != "") {
-    // K‰yd‰‰n l‰pi kaikki tuotteet joilla on saldoa mutta ei laskutusta/ostoja... ne kuuluu myˆs I-luokkaan
+    // K√§yd√§√§n l√§pi kaikki tuotteet joilla on saldoa mutta ei laskutusta/ostoja... ne kuuluu my√∂s I-luokkaan
     $query = "SELECT
               tuote.tuoteno,
               tuote.try,
@@ -312,11 +312,11 @@ if ($tee == 'YHTEENVETO') {
     }
   }
 
-  // t‰‰ on nyt hardcoodattu, eli milt‰ kirjanpidon tasolta otetaan kulut
+  // t√§√§ on nyt hardcoodattu, eli milt√§ kirjanpidon tasolta otetaan kulut
   $sisainen_taso = "34";
 
   if ($kustannuksetyht == "" and $sisainen_taso != "") {
-    // etsit‰‰n kirjanpidosta mitk‰ on meid‰n kulut samalta ajanjaksolta
+    // etsit√§√§n kirjanpidosta mitk√§ on meid√§n kulut samalta ajanjaksolta
     $query  = "SELECT sum(summa) summa
                FROM tiliointi use index (yhtio_tapvm_tilino)
                JOIN tili use index (tili_index) on (tili.yhtio=tiliointi.yhtio and tili.tilino=tiliointi.tilino and sisainen_taso like '$sisainen_taso%')
@@ -329,11 +329,11 @@ if ($tee == 'YHTEENVETO') {
     $kustannuksetyht = $kprow["summa"];
   }
 
-  // paljonko on rivej‰ kaikenkaikkiaan
+  // paljonko on rivej√§ kaikenkaikkiaan
   $rivityht = $kaudenmyyriviyht + $kaudenostriviyht;
 
   if ($rivityht != 0) {
-    // lasketaan myynti- ja ostorivien osuus kokonaisriveist‰
+    // lasketaan myynti- ja ostorivien osuus kokonaisriveist√§
     $myynti_osuus = $kaudenmyyriviyht / $rivityht;
     $osto_osuus   = $kaudenostriviyht / $rivityht;
   }
@@ -346,7 +346,7 @@ if ($tee == 'YHTEENVETO') {
   $myynninkustayht = $kustannuksetyht * $myynti_osuus;
   $ostojenkustayht = $kustannuksetyht * $osto_osuus;
 
-  // sitten lasketaan viel‰ yhden myyntirivin kulu
+  // sitten lasketaan viel√§ yhden myyntirivin kulu
   if ($kaudenmyyriviyht != 0) {
     $kustapermyyrivi = $myynninkustayht / $kaudenmyyriviyht;
   }
@@ -410,7 +410,7 @@ if ($tee == 'YHTEENVETO') {
 
     foreach ($looparray as $row) {
 
-      // ensimm‰inen tulo
+      // ensimm√§inen tulo
       $query = "SELECT laadittu tulopvm
                 FROM tapahtuma USE INDEX (yhtio_laji_tuoteno)
                 WHERE yhtio = '$kukarow[yhtio]'
@@ -421,7 +421,7 @@ if ($tee == 'YHTEENVETO') {
       $insres = pupe_query($query);
       $tulorow = mysql_fetch_assoc($insres);
 
-      // katotaan onko kelvollinen tuote, elikk‰ luokitteluperuste pit‰‰ olla > 0
+      // katotaan onko kelvollinen tuote, elikk√§ luokitteluperuste pit√§√§ olla > 0
       if ($row["${abcwhat}"] > 0) {
 
         // laitetaan oikeeseen luokkaan
@@ -431,7 +431,7 @@ if ($tee == 'YHTEENVETO') {
         if ($kausiyhteensa != 0) $tuoteprossa = ($row["${abcwhat}"] / $kausiyhteensa) * 100;
         else $tuoteprossa = 0;
 
-        //muodostetaan ABC-luokka ryhm‰prossan mukaan
+        //muodostetaan ABC-luokka ryhm√§prossan mukaan
         $ryhmaprossa += $tuoteprossa;
       }
       else {
@@ -510,7 +510,7 @@ if ($tee == 'YHTEENVETO') {
         $ryhmaprossa = 0;
         $i++;
 
-        // ei menn‰ ikin‰ tokavikaa-luokkaa pidemm‰lle
+        // ei menn√§ ikin√§ tokavikaa-luokkaa pidemm√§lle
         if ($i == $i_luokka) {
           $i = $i_luokka-1;
         }
@@ -525,10 +525,10 @@ if ($tee == 'YHTEENVETO') {
               order by osasto";
     $kaikres = pupe_query($query, $masterlink);
 
-    // tehd‰‰n osastokohtaiset luokat
+    // tehd√§√§n osastokohtaiset luokat
     while ($arow = mysql_fetch_assoc($kaikres)) {
 
-      //haetaan luokan myynti yhteens‰
+      //haetaan luokan myynti yhteens√§
       $query = "SELECT
                 sum(rivia) rivia,
                 sum(summa) summa,
@@ -566,7 +566,7 @@ if ($tee == 'YHTEENVETO') {
         if ($yhtrow["${abcwhat}"] != 0) $tuoteprossa = ($row["${abcwhat}"] / $yhtrow["${abcwhat}"]) * 100;
         else $tuoteprossa = 0;
 
-        //muodostetaan ABC-luokka ryhm‰prossan mukaan
+        //muodostetaan ABC-luokka ryhm√§prossan mukaan
         $ryhmaprossa += $tuoteprossa;
 
         $query = "UPDATE abc_aputaulu
@@ -581,7 +581,7 @@ if ($tee == 'YHTEENVETO') {
           $ryhmaprossa = 0;
           $i++;
 
-          // ei menn‰ ikin‰ tokavikaa-luokkaa pidemm‰lle
+          // ei menn√§ ikin√§ tokavikaa-luokkaa pidemm√§lle
           if ($i == $i_luokka) {
             $i = $i_luokka-1;
           }
@@ -597,10 +597,10 @@ if ($tee == 'YHTEENVETO') {
               order by try";
     $kaikres = pupe_query($query, $masterlink);
 
-    // tehd‰‰n try kohtaiset luokat
+    // tehd√§√§n try kohtaiset luokat
     while ($arow = mysql_fetch_assoc($kaikres)) {
 
-      //haetaan luokan myynti yhteens‰
+      //haetaan luokan myynti yhteens√§
       $query = "SELECT
                 sum(rivia) rivia,
                 sum(summa) summa,
@@ -638,7 +638,7 @@ if ($tee == 'YHTEENVETO') {
         if ($yhtrow["${abcwhat}"] != 0) $tuoteprossa = ($row["${abcwhat}"] / $yhtrow["${abcwhat}"]) * 100;
         else $tuoteprossa = 0;
 
-        //muodostetaan ABC-luokka ryhm‰prossan mukaan
+        //muodostetaan ABC-luokka ryhm√§prossan mukaan
         $ryhmaprossa += $tuoteprossa;
 
         $query = "UPDATE abc_aputaulu
@@ -653,7 +653,7 @@ if ($tee == 'YHTEENVETO') {
           $ryhmaprossa = 0;
           $i++;
 
-          // ei menn‰ ikin‰ tokavikaa-luokkaa pidemm‰lle
+          // ei menn√§ ikin√§ tokavikaa-luokkaa pidemm√§lle
           if ($i == $i_luokka) {
             $i = $i_luokka-1;
           }
@@ -669,10 +669,10 @@ if ($tee == 'YHTEENVETO') {
               ORDER BY tuotemerkki";
     $kaikres = pupe_query($query, $masterlink);
 
-    // tehd‰‰n try kohtaiset luokat
+    // tehd√§√§n try kohtaiset luokat
     while ($arow = mysql_fetch_assoc($kaikres)) {
 
-      //haetaan luokan myynti yhteens‰
+      //haetaan luokan myynti yhteens√§
       $query = "SELECT
                 sum(rivia) rivia,
                 sum(summa) summa,
@@ -710,7 +710,7 @@ if ($tee == 'YHTEENVETO') {
         if ($yhtrow["${abcwhat}"] != 0) $tuoteprossa = ($row["${abcwhat}"] / $yhtrow["${abcwhat}"]) * 100;
         else $tuoteprossa = 0;
 
-        //muodostetaan ABC-luokka ryhm‰prossan mukaan
+        //muodostetaan ABC-luokka ryhm√§prossan mukaan
         $ryhmaprossa += $tuoteprossa;
 
         $query = "UPDATE abc_aputaulu
@@ -725,7 +725,7 @@ if ($tee == 'YHTEENVETO') {
           $ryhmaprossa = 0;
           $i++;
 
-          // ei menn‰ ikin‰ tokavikaa-luokkaa pidemm‰lle
+          // ei menn√§ ikin√§ tokavikaa-luokkaa pidemm√§lle
           if ($i == $i_luokka) {
             $i = $i_luokka-1;
           }
@@ -744,19 +744,19 @@ if ($tee == 'YHTEENVETO') {
 
 if (!$php_cli) {
 
-  // piirrell‰‰n formi
+  // piirrell√§√§n formi
   echo "<form method='post' autocomplete='OFF'>";
   echo "<input type='hidden' name='tee' value='YHTEENVETO'>";
   echo "<table>";
 
   echo "<th colspan='4'>".t("Valitse kausi").":</th>";
 
-  echo "<tr><th>".t("Alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+  echo "<tr><th>".t("Alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
       <td><input type='text' name='ppa' value='$ppa' size='3'></td>
       <td><input type='text' name='kka' value='$kka' size='3'></td>
       <td><input type='text' name='vva' value='$vva' size='5'></td>
       </tr>";
-  echo "<tr><th>".t("Loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+  echo "<tr><th>".t("Loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
       <td><input type='text' name='ppl' value='$ppl' size='3'></td>
       <td><input type='text' name='kkl' value='$kkl' size='3'></td>
       <td><input type='text' name='vvl' value='$vvl' size='5'></td></tr>";
@@ -770,7 +770,7 @@ if (!$php_cli) {
   echo "<tr><td colspan='4' class='back'><br></td></tr>";
   echo "<tr><th colspan='1'>".t("Kustannukset valitulla kaudella")."</th>";
   echo "<td colspan='3'><input type='text' name='kustannuksetyht' value='$kustannuksetyht' size='15'></td></tr>";
-  echo "<tr><th colspan='1'>".t("Huomioi laskennassa myˆs saldottomat tuotteet")."</th>";
+  echo "<tr><th colspan='1'>".t("Huomioi laskennassa my√∂s saldottomat tuotteet")."</th>";
   echo "<td colspan='3'><input type='checkbox' name='saldottomatmukaan' value='kylla'></td></tr>";
 
   echo "</table>";

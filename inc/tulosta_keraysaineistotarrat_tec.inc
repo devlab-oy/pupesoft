@@ -1,6 +1,6 @@
 <?php
 
-//Kun tullaan t‰nne tarvitaan $komento joka on se komento jolla tulostetaan esim. lpr -P tarrakirjoitin
+//Kun tullaan t√§nne tarvitaan $komento joka on se komento jolla tulostetaan esim. lpr -P tarrakirjoitin
 $lasktarrat  = 0;
 $lisa      = '';
 $alatila    = '';
@@ -49,7 +49,7 @@ if (mysql_num_rows($tarrares) > 0) {
 
       $tukpl = "1/  ".round($kerroin,0);
 
-      //t‰ss‰ tehd‰‰n aineisto jota TEC tulostin tajuaa
+      //t√§ss√§ tehd√§√§n aineisto jota TEC tulostin tajuaa
       $sivu = "
   *** ETIKETIN KOKO ***
   {D0500,0900,0450|}
@@ -57,7 +57,7 @@ if (mysql_num_rows($tarrares) > 0) {
   {AY;+05,0|}
   {C|}
 
-  *** TƒSTƒ SE ALKAA ***
+  *** T√ÑST√Ñ SE ALKAA ***
   {PC000;0020,0050,10,10,G,00,B|}
   {RC000;$asnimi|}
   {PC001;0570,0050,10,10,G,00,B|}
@@ -82,10 +82,10 @@ if (mysql_num_rows($tarrares) > 0) {
 
   ".chr(12);
 
-      //konvertoidaan ‰‰kkˆset printterin ymm‰rt‰m‰‰n muotoon
-      $from = array ('‰','Â','ˆ','ƒ','≈','÷');
+      //konvertoidaan √§√§kk√∂set printterin ymm√§rt√§m√§√§n muotoon
+      $from = array ('√§','√•','√∂','√Ñ','√Ö','√ñ');
       $to   = array (chr(132),chr(134),chr(148),chr(142),chr(143),chr(153)); // DOS charset
-      $sivu = str_replace($from, $to, $sivu);                      // Tehd‰‰n k‰‰nnˆs
+      $sivu = str_replace($from, $to, $sivu);                      // Tehd√§√§n k√§√§nn√∂s
 
       $sivu = escapeshellarg($sivu);
 
@@ -108,10 +108,10 @@ if (mysql_num_rows($tarrares) > 0) {
 }
 else {
   if ($tee == 'uudet') {
-    echo "<font class='error'>".t("Tiedot katosivat, joku taisi jo keret‰ tulostaa tarrat").".<br></font>";
+    echo "<font class='error'>".t("Tiedot katosivat, joku taisi jo keret√§ tulostaa tarrat").".<br></font>";
   }
   elseif ($tee == 'vanhat') {
-    echo "<font class='error'>".t("Aikav‰lille ei lˆytynyt yht‰‰n tietuetta").".<br></font>";
+    echo "<font class='error'>".t("Aikav√§lille ei l√∂ytynyt yht√§√§n tietuetta").".<br></font>";
   }
 }
 

@@ -13,10 +13,10 @@ if(!function_exists("tasotarkista")) {
     if (mysql_field_name($result, $i) == "taso") {
 
       if (trim($t[$i]) == '') {
-        $virhe[$i] = t("Taso on syötettävä!");
+        $virhe[$i] = t("Taso on syÃ¶tettÃ¤vÃ¤!");
       }
-      elseif (strpos(trim($t[$i]), "Ö") !== FALSE ) {
-        $virhe[$i] = t("Ö ei ole sallittu kirjain tasossa!");
+      elseif (strpos(trim($t[$i]), "Ã–") !== FALSE ) {
+        $virhe[$i] = t("Ã– ei ole sallittu kirjain tasossa!");
       }
       elseif (in_array(strtoupper($tyyppitalteen), array('S','U')) and !in_array(substr(trim($t[$i]), 0, 1), array("1", "2", "3"))) {
         $virhe[$i] = t("Taso tulee alkaa numerolla 1, 2 tai 3!");
@@ -34,13 +34,13 @@ if(!function_exists("tasotarkista")) {
         $sresult = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($sresult) > 0) {
-          $virhe[$i] = t("Tämä taso on jo perustettu!");
+          $virhe[$i] = t("TÃ¤mÃ¤ taso on jo perustettu!");
         }
       }
     }
 
     if (mysql_field_name($result, $i) == "nimi" and trim($t[$i]) == '') {
-      $virhe[$i] = t("Syötä nimitys!");
+      $virhe[$i] = t("SyÃ¶tÃ¤ nimitys!");
     }
 
     if (mysql_field_name($result, $i) == "summattava_taso" and trim($t[$i]) != '' and $tyyppitalteen != "B") {

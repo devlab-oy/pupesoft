@@ -35,7 +35,7 @@ if (!function_exists('alku')) {
     $pdf->draw_text(30, 785, $asiakasrow["maa"],     $page, $p);
 
     if ($toimrow["nimi"] != "") {
-      // haetaan toimipaikan tiedot jos ne lˆytyv‰t, muuten laitetaan yhtiˆn tiedot
+      // haetaan toimipaikan tiedot jos ne l√∂ytyv√§t, muuten laitetaan yhti√∂n tiedot
       $pdf->draw_text(30, 760, $toimrow["nimi"],   $page, $p);
       $pdf->draw_text(30, 750, $toimrow["osoite"],   $page, $p);
       $pdf->draw_text(30, 740, $toimrow["postino"]." ".$toimrow["postitp"],   $page, $p);
@@ -48,8 +48,8 @@ if (!function_exists('alku')) {
       $pdf->draw_text(30, 730, $yhtiorow["maa"],     $page, $p);
     }
 
-    $title = t("JƒLKITOIMITUSRAPORTTI", $kieli);
-    $title = str_replace(array("‰", "ˆ", "Â"), array("ƒ", "÷", "≈"), $title);
+    $title = t("J√ÑLKITOIMITUSRAPORTTI", $kieli);
+    $title = str_replace(array("√§", "√∂", "√•"), array("√Ñ", "√ñ", "√Ö"), $title);
     $title_position = 360;
 
     $pdf->draw_text($title_position,815, t($title, $kieli),   $page);
@@ -78,12 +78,12 @@ if (!function_exists('rivi')) {
 
     $rivinkorkeus = 15;
 
-    //jos on paljon rivej‰ tehd‰‰n uusi otsikko...
+    //jos on paljon rivej√§ tehd√§√§n uusi otsikko...
     if ($kalakorkeus < 70) {
       list($page,$kalakorkeus) = alku($pdf);
     }
 
-    //K‰‰nnet‰‰n nimitys
+    //K√§√§nnet√§√§n nimitys
     $jtrow['nimitys'] = t_tuotteen_avainsanat($jtrow, 'nimitys', $kieli);
 
     if (strlen($jtrow["nimitys"]) > 60) {
@@ -102,7 +102,7 @@ if (!function_exists('rivi')) {
 
     $kalakorkeus = $kalakorkeus - $rivinkorkeus;
 
-    // viivat rivien v‰liin...
+    // viivat rivien v√§liin...
     $x[0] = 20;
     $x[1] = 580;
     $y[0] = $y[1] = $kalakorkeus;
@@ -121,7 +121,7 @@ if (!function_exists('print_pdf')) {
 
     $returnvalue=0;
 
-    //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+    //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
     list($usec, $sec) = explode(' ', microtime());
     mt_srand((float) $sec + ((float) $usec * 100000));
     $pdffilenimi = "/tmp/".$yhtiorow["yhtio"]."-".t("jtraportti", $kieli)."-".md5(uniqid(mt_rand(), true)).".pdf";
@@ -135,7 +135,7 @@ if (!function_exists('print_pdf')) {
     $kukarow = array();
     // itse print komento...
     $liite = $pdffilenimi;
-    $kutsu = t("J‰lkitoimitusraportti", $kieli);
+    $kutsu = t("J√§lkitoimitusraportti", $kieli);
 
 //    debuggaus-echo
 //    echo t("Luettelo tulostuu")."...$asiakasrow[nimi]\n";

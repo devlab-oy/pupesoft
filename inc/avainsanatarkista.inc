@@ -30,7 +30,7 @@ if(!function_exists("avainsanatarkista")) {
         $onko_input_ok = false;
         $sallitut_kentat = "";
         while($tyomaarays_kentat = mysql_fetch_assoc($tyomaarays_result)) {
-          //dynaaminen kenttä ei saa olla yhtio tai otunnus
+          //dynaaminen kenttÃ¤ ei saa olla yhtio tai otunnus
           if ($tyomaarays_kentat['Field'] != 'yhtio' and $tyomaarays_kentat['Field'] != 'otunnus') {
             $sallitut_kentat .= $tyomaarays_kentat['Field'] . ', ';
             if ($t['selite'] == $tyomaarays_kentat['Field']) {
@@ -41,7 +41,7 @@ if(!function_exists("avainsanatarkista")) {
         $sallitut_kentat = substr($sallitut_kentat, 0, -2);
 
         if (!$onko_input_ok) {
-          $virhe[$i] = t("Tyomääräyksen sallituja kenttiä on").":" . $sallitut_kentat;
+          $virhe[$i] = t("TyomÃ¤Ã¤rÃ¤yksen sallituja kenttiÃ¤ on").":" . $sallitut_kentat;
         }
       }
     }
@@ -60,7 +60,7 @@ if(!function_exists("avainsanatarkista")) {
 
       if ($tem_laji == 'INVASTEPAIKKA') {
 
-        if (preg_match("/\A[\w#äöåÄÖÅ!]{1,5}-[\w#äöåÄÖÅ!]{1,5}-[\w#äöåÄÖÅ!]{1,5}-[\w#äöåÄÖÅ!]{1,5}\z/", $t[$i]) == false) {
+        if (preg_match("/\A[\w#Ã¤Ã¶Ã¥Ã„Ã–Ã…!]{1,5}-[\w#Ã¤Ã¶Ã¥Ã„Ã–Ã…!]{1,5}-[\w#Ã¤Ã¶Ã¥Ã„Ã–Ã…!]{1,5}-[\w#Ã¤Ã¶Ã¥Ã„Ã–Ã…!]{1,5}\z/", $t[$i]) == false) {
           $virhe[$i] = t("Tuotepaikka on virheellinen");
         }
       }
@@ -69,21 +69,21 @@ if(!function_exists("avainsanatarkista")) {
 
         $date = $t[$i];
 
-        // Huom. preg_match tarkoituksella "== false", koska se palauttaa virheessä 0 tai false
+        // Huom. preg_match tarkoituksella "== false", koska se palauttaa virheessÃ¤ 0 tai false
         if (preg_match("/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/", $date) == false or strtotime($date) === false) {
-          $virhe[$i] = t("Selite on pakollinen ja se pitää olla muodossa vvvv-kk-pp tt:mm:ss");
+          $virhe[$i] = t("Selite on pakollinen ja se pitÃ¤Ã¤ olla muodossa vvvv-kk-pp tt:mm:ss");
         }
       }
 
       if ($tem_laji == 'LABEL') {
         if (trim($tem_selite) == '') {
-          $virhe[$i] = t("Selite on pakollinen ja se pitää olla muodossa #123 tai #112233");
+          $virhe[$i] = t("Selite on pakollinen ja se pitÃ¤Ã¤ olla muodossa #123 tai #112233");
         }
         elseif (substr($tem_selite, 0, 1) != '#') {
-          $virhe[$i] = t("Selitteen ensimmäinen kirjain pitää olla #");
+          $virhe[$i] = t("Selitteen ensimmÃ¤inen kirjain pitÃ¤Ã¤ olla #");
         }
         elseif (strlen($tem_selite) != 4 and strlen($tem_selite) != 7) {
-          $virhe[$i] = t("Selite täytyy olla 4 tai 7 merkkiä pitkä");
+          $virhe[$i] = t("Selite tÃ¤ytyy olla 4 tai 7 merkkiÃ¤ pitkÃ¤");
         }
       }
 
@@ -93,25 +93,25 @@ if(!function_exists("avainsanatarkista")) {
           $virhe[$i] = t("Selite on pakollinen");
         }
         elseif (strlen($tem_selite) > 1) {
-          $virhe[$i] = t("Selite on liian pitkä, maksimipituus on yksi merkki");
+          $virhe[$i] = t("Selite on liian pitkÃ¤, maksimipituus on yksi merkki");
         }
       }
 
       if (strtoupper($tem_laji) == "ALVULK") {
-        //  ALV pitää olla pisteellä, ei pilkulla
+        //  ALV pitÃ¤Ã¤ olla pisteellÃ¤, ei pilkulla
         $t[$i] = round((float) str_replace(",", ".", $tem_selite), 2);
       }
 
       if (strlen($tem_selite) > 3 and $tem_laji == 'Y') {
-        $virhe[$i] = t("Selite on liian pitkä, maksimipituus on kolme merkkiä")."!";
+        $virhe[$i] = t("Selite on liian pitkÃ¤, maksimipituus on kolme merkkiÃ¤")."!";
       }
 
       if (strlen($tem_selite) > 1 and $tem_laji == 'ASIAKASLUOKKA') {
-        $virhe[$i] = t("Selite on liian pitkä, maksimipituus on yksi merkki")."!";
+        $virhe[$i] = t("Selite on liian pitkÃ¤, maksimipituus on yksi merkki")."!";
       }
 
       if ($tem_laji == "TOIMEHTO" AND strlen($tem_selite) != 3){
-        $virhe[$i] = t("Selitteen tulee olla kolme merkkiä pitkä")."!";
+        $virhe[$i] = t("Selitteen tulee olla kolme merkkiÃ¤ pitkÃ¤")."!";
       }
 
       if (in_array($tem_laji, array("TRY", "OSASTO", "PIIRI", "VALMISTUSLINJA"))) {
@@ -131,7 +131,7 @@ if(!function_exists("avainsanatarkista")) {
         preg_match_all('/([a-zA-Z_])+/', $tem_selite, $match);
 
         if ($match[0][0] != $tem_selite) {
-          $virhe[$i] = t("Vain aakkoset ja alaviivat ovat sallittuja merkkejä");
+          $virhe[$i] = t("Vain aakkoset ja alaviivat ovat sallittuja merkkejÃ¤");
         }
       }
 
@@ -146,7 +146,7 @@ if(!function_exists("avainsanatarkista")) {
         $results = pupe_query($query);
 
         if (mysql_num_rows($results) > 0) {
-          $virhe[$seliteind] = $virhe[$i] = t("Avainsana annetuilla tiedoilla löytyy kannasta. Duplikaatit ovat kiellettyjä!");
+          $virhe[$seliteind] = $virhe[$i] = t("Avainsana annetuilla tiedoilla lÃ¶ytyy kannasta. Duplikaatit ovat kiellettyjÃ¤!");
         }
       }
 
@@ -160,7 +160,7 @@ if(!function_exists("avainsanatarkista")) {
         $result = pupe_query($query);
 
         if (mysql_num_rows($result) > 0) {
-          $virhe[$i] = t("Saldovahvistuksen nimi pitää olla uniikki");
+          $virhe[$i] = t("Saldovahvistuksen nimi pitÃ¤Ã¤ olla uniikki");
         }
       }
     }
@@ -168,7 +168,7 @@ if(!function_exists("avainsanatarkista")) {
     if (mysql_field_name($result, $i) == "selitetark") {
       $tem_selitetark = trim($t[$i]);
 
-      // Yritetään asettaa oletusverokanta
+      // YritetÃ¤Ã¤n asettaa oletusverokanta
       if (strtoupper($tem_laji) == "ALV" and trim($t[$i]) != "") {
         $query = "SELECT tunnus
                   FROM avainsana
@@ -184,11 +184,11 @@ if(!function_exists("avainsanatarkista")) {
       }
 
       if ($seliteerrori == 1 and trim($t[$i]) == '' and $tem_laji != 'VAKIOVIESTI' and $tem_laji != 'VAKIOVIESTI_TIL' and $tem_laji != 'HINNAT_CRON' and $tem_laji != 'TUOTE_EXP_CRON') {
-        $virhe[$i] = t("Selite ja selitetark ei voi olla tyhjiä")."!";
+        $virhe[$i] = t("Selite ja selitetark ei voi olla tyhjiÃ¤")."!";
       }
 
       if ($tem_laji == "VARASTORYHMA" and !is_array($varastot_array) and count($varastot_array) == 0) {
-        $virhe[$i] = t("Et valinnut yhtään varastoa")."!";
+        $virhe[$i] = t("Et valinnut yhtÃ¤Ã¤n varastoa")."!";
       }
       elseif ($tem_laji == 'VARASTORYHMA') {
         if (is_array($varastot_array) and count($varastot_array) > 0) {
@@ -218,7 +218,7 @@ if(!function_exists("avainsanatarkista")) {
 
       if (strtoupper($tem_laji) == 'VALMISTUSLINJA') {
         if (!is_numeric($tem_selitetark_2) or $tem_selitetark_2 < 0) {
-          $virhe[$i] = t("Valmistuslinjan päiväkapasiteetin (selitetark_2) on oltava suurempi tai yhtäsuuri kuin 0")."!";
+          $virhe[$i] = t("Valmistuslinjan pÃ¤ivÃ¤kapasiteetin (selitetark_2) on oltava suurempi tai yhtÃ¤suuri kuin 0")."!";
         }
       }
     }
@@ -256,7 +256,7 @@ if(!function_exists("avainsanatarkista")) {
       $results = pupe_query($query);
 
       if (mysql_num_rows($results) > 0) {
-        $virhe[$seliteind] = $virhe[$i] = t("Avainsana annetuilla tiedoilla löytyy kannasta. Duplikaatit ovat kiellettyjä!");
+        $virhe[$seliteind] = $virhe[$i] = t("Avainsana annetuilla tiedoilla lÃ¶ytyy kannasta. Duplikaatit ovat kiellettyjÃ¤!");
       }
     }
   }

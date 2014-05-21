@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("../inc/parametrit.inc");
@@ -22,19 +22,19 @@ echo "<form method = 'post'>
     <input type='hidden' name='tee' value='listaa'>";
 
 echo "<table>";
-echo "<tr><th>".t("Alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+echo "<tr><th>".t("Alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
     <td><input type='text' name='ppa' value='$ppa' size='3'></td>
     <td><input type='text' name='kka' value='$kka' size='3'></td>
     <td><input type='text' name='vva' value='$vva' size='5'></td>
     </tr>
-    <tr><th>".t("loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+    <tr><th>".t("loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
     <td><input type='text' name='ppl' value='$ppl' size='3'></td>
     <td><input type='text' name='kkl' value='$kkl' size='3'></td>
     <td><input type='text' name='vvl' value='$vvl' size='5'></td>
     </tr>";
 
-echo "<tr><th>".t("K‰ytt‰j‰")."</th>
-    <td colspan='3'><select name='kuka'><option value=''>".t("Valitse k‰ytt‰j‰")."</option>";
+echo "<tr><th>".t("K√§ytt√§j√§")."</th>
+    <td colspan='3'><select name='kuka'><option value=''>".t("Valitse k√§ytt√§j√§")."</option>";
 
 $query  = "SELECT kuka, nimi, eposti
            FROM kuka
@@ -100,7 +100,7 @@ if (isset($tee) and $tee == 'listaa') {
     }
   }
 
-  // Serverin polku, t‰st‰ saadaan prefixi suorituskykylokiin
+  // Serverin polku, t√§st√§ saadaan prefixi suorituskykylokiin
   $polku = str_ireplace("raportit/suorituskykyloki.php", "", $_SERVER['SCRIPT_NAME']);
   $polku = "/";
 
@@ -137,7 +137,7 @@ if (isset($tee) and $tee == 'listaa') {
   $res = mysql_query($query) or pupe_error($query);
 
   echo "<table>";
-  echo "<tr><th>".t("Pvm")."</th><th>".t("K‰ytt‰j‰")."</th><th>".t("Ohjelma")."</th><th>".t("Muuttujat")."</th></tr>";
+  echo "<tr><th>".t("Pvm")."</th><th>".t("K√§ytt√§j√§")."</th><th>".t("Ohjelma")."</th><th>".t("Muuttujat")."</th></tr>";
 
   while ($row = mysql_fetch_array($res)) {
 

@@ -1,6 +1,6 @@
 <?php
 
-//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+//* TÃ¤mÃ¤ skripti kÃ¤yttÃ¤Ã¤ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require('../inc/parametrit.inc');
@@ -73,7 +73,7 @@ if ($tee != '') {
   echo "</table>";
 }
 
-//Käyttöliittymä
+//KÃ¤yttÃ¶liittymÃ¤
 echo "<br>";
 echo "<form method='post'>";
 echo "<input type='hidden' name='tee' value='kaikki'>";
@@ -103,7 +103,7 @@ $sel = "";
 if ($nollat != '') {
   $sel = "CHECKED";
 }
-echo "<tr><th>".t("Näytä myös tuotteet joiden saldo on nolla kaikilla paikoilla:")."</th><td><input type='checkbox' name='nollat' $sel></td></tr>";
+echo "<tr><th>".t("NÃ¤ytÃ¤ myÃ¶s tuotteet joiden saldo on nolla kaikilla paikoilla:")."</th><td><input type='checkbox' name='nollat' $sel></td></tr>";
 
 echo "</table><br><input type='submit' value='Aja raportti'>";
 

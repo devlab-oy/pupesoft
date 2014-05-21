@@ -2,14 +2,14 @@
 
 if (!function_exists("check_ostoskori")) {
 
-  // otetetaan sis‰‰n ostoskorin numero ja asiakkaan tunnus
-  // palautetaan ostoskorin otsikko arrayn‰ tai virhetilanteissa FALSE
+  // otetetaan sis√§√§n ostoskorin numero ja asiakkaan tunnus
+  // palautetaan ostoskorin otsikko arrayn√§ tai virhetilanteissa FALSE
 
   function check_ostoskori($ostoskori, $liitostunnus) {
 
     global $kukarow, $yhtiorow;
 
-    // errˆr zheckit
+    // err√∂r zheckit
     if (!is_numeric($ostoskori)) {
       echo "<font class='error'>Ostoskori not numeric!</font><br>";
       return false;
@@ -19,7 +19,7 @@ if (!function_exists("check_ostoskori")) {
     $result = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($result) != 1) {
-      echo "<font class='error'>".t("Asiakasta ei lˆydy")."!</font><br>";
+      echo "<font class='error'>".t("Asiakasta ei l√∂ydy")."!</font><br>";
       return false;
     }
     else {
@@ -29,7 +29,7 @@ if (!function_exists("check_ostoskori")) {
     $query = "LOCK TABLE lasku WRITE, avainsana READ";
     $koriresult = mysql_query($query) or pupe_error($query);
 
-    // kaikki ok, etsit‰‰n kori
+    // kaikki ok, etsit√§√§n kori
     $query = "SELECT *
               FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
               WHERE yhtio  = '$kukarow[yhtio]' and
@@ -38,10 +38,10 @@ if (!function_exists("check_ostoskori")) {
               alatila      = '$ostoskori'";
     $koriresult = mysql_query($query) or pupe_error($query);
 
-    // koria ei lˆydy, tehd‰‰n sellanen
+    // koria ei l√∂ydy, tehd√§√§n sellanen
     if (mysql_num_rows($koriresult) == 0) {
 
-       //yhtiˆn oletusalvi!
+       //yhti√∂n oletusalvi!
       $wquery = "select selite from avainsana where yhtio='$kukarow[yhtio]' and laji='alv' and selitetark!=''";
       $wtres  = mysql_query($wquery) or pupe_error($wquery);
       $wtrow  = mysql_fetch_array($wtres);
@@ -65,7 +65,7 @@ if (!function_exists("check_ostoskori")) {
       $palautus = mysql_fetch_array($koriresult);
     }
     else {
-      echo "<font class='error'>Too many ostoskories lˆyty!</font><br>";
+      echo "<font class='error'>Too many ostoskories l√∂yty!</font><br>";
       $palautus = false;
     }
 
@@ -87,7 +87,7 @@ if (!function_exists("lisaa_ostoskoriin")) {
     $result = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($result) != 1) {
-      echo "<font class='error'>".t("Tuotetta ei lˆydy")."!</font><br>";
+      echo "<font class='error'>".t("Tuotetta ei l√∂ydy")."!</font><br>";
       return false;
     }
     else {
@@ -96,7 +96,7 @@ if (!function_exists("lisaa_ostoskoriin")) {
 
     if ($laskurow = check_ostoskori($ostoskori, $liitostunnus)) {
 
-      // lis‰t‰‰n rivi
+      // lis√§t√§√§n rivi
       $kukarow["kesken"]  = $laskurow["tunnus"];
       $ytunnus      = $laskurow["ytunnus"];
       $kpl        = (float) $kpl;

@@ -8,10 +8,10 @@ if (!isset($laskuno)) $laskuno = 0;
 if (!isset($tunnus)) $tunnus = 0;
 
 if ($toim == 'KATEINEN') {
-  echo "<font class='head'>",t("Lasku halutaankin maksaa k‰teisell‰"),"</font><hr />";
+  echo "<font class='head'>",t("Lasku halutaankin maksaa k√§teisell√§"),"</font><hr />";
 }
 else {
-  echo "<font class='head'>",t("Lasku ei ollutkaan k‰teist‰"),"</font><hr />";
+  echo "<font class='head'>",t("Lasku ei ollutkaan k√§teist√§"),"</font><hr />";
 }
 
 if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
@@ -56,7 +56,7 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
     );
 
     if ($toim == 'KATEINEN' and $kateinen != '') {
-      // Lasku oli ennest‰‰n k‰teinen ja nyt p‰ivitet‰‰n sille joku toinen k‰teismaksuehto
+      // Lasku oli ennest√§√§n k√§teinen ja nyt p√§ivitet√§√§n sille joku toinen k√§teismaksuehto
       list($myysaatili, $_tmp) = hae_kassalippaan_tiedot($laskurow['kassalipas'], hae_maksuehto($laskurow['maksuehto']), $laskurow);
       $_tmp = korjaa_erapaivat_ja_alet_ja_paivita_lasku($params);
     }
@@ -98,13 +98,13 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
     echo "<font class='error'>".t("VIRHE: Lasku on jo maksettu")."!</font>";
   }
   elseif ($laskupvmerror) {
-    echo "<font class='error'>".t("VIRHE: Syˆtetty p‰iv‰m‰‰r‰ on pienempi kuin laskun p‰iv‰m‰‰r‰ %s", "", $laskurow['tapvm'])."!</font>";
+    echo "<font class='error'>".t("VIRHE: Sy√∂tetty p√§iv√§m√§√§r√§ on pienempi kuin laskun p√§iv√§m√§√§r√§ %s", "", $laskurow['tapvm'])."!</font>";
   }
   elseif (!empty($tilikausi_lasku) and $toim != 'KATEINEN') {
-    echo "<font class='error'>".t("VIRHE: Tilikausi on p‰‰ttynyt %s. Et voi merkit‰ laskua maksetuksi p‰iv‰lle %s", "", $tilikausi_lasku, $laskurow['tapvm'])."!</font>";
+    echo "<font class='error'>".t("VIRHE: Tilikausi on p√§√§ttynyt %s. Et voi merkit√§ laskua maksetuksi p√§iv√§lle %s", "", $tilikausi_lasku, $laskurow['tapvm'])."!</font>";
   }
   else {
-    echo "<font class='error'>".t("VIRHE: Tilikausi on p‰‰ttynyt %s. Et voi merkit‰ laskua maksetuksi p‰iv‰lle %s", "", $tilikausi, $tapahtumapaiva)."!</font>";
+    echo "<font class='error'>".t("VIRHE: Tilikausi on p√§√§ttynyt %s. Et voi merkit√§ laskua maksetuksi p√§iv√§lle %s", "", $tilikausi, $tapahtumapaiva)."!</font>";
   }
 }
 
@@ -193,7 +193,7 @@ function korjaa_erapaivat_ja_alet_ja_paivita_lasku($params) {
 
   }
   else {
-    // korjaillaan er‰p‰iv‰t ja kassa-alet
+    // korjaillaan er√§p√§iv√§t ja kassa-alet
     if ($params['mehtorow']['abs_pvm'] == '0000-00-00') {
       $erapvm = "adddate('{$params['laskurow']['tapvm']}', interval {$params['mehtorow']['rel_pvm']} day)";
     }
@@ -215,7 +215,7 @@ function korjaa_erapaivat_ja_alet_ja_paivita_lasku($params) {
       $kassa_loppusumma = "";
     }
 
-    // p‰ivitet‰‰n lasku
+    // p√§ivitet√§√§n lasku
     $query = "UPDATE lasku set
               mapvm       = '',
               maksuehto   = '{$params['maksuehto']}',
@@ -287,7 +287,7 @@ function tee_kirjanpito_muutokset($params) {
   if (mysql_num_rows($result) == 1) {
     $vanharow = mysql_fetch_assoc($result);
 
-    // Tehd‰‰n vastakirjaus alkuper‰iselle tiliˆinnille
+    // Tehd√§√§n vastakirjaus alkuper√§iselle tili√∂innille
     $tilid = kopioitiliointi($vanharow['tunnus'], "");
 
     if ($params['toim'] == 'KATEINEN' and $params['laskurow']['saldo_maksettu'] != 0) {
@@ -306,7 +306,7 @@ function tee_kirjanpito_muutokset($params) {
               and tunnus  = '{$tilid}'";
     $result = pupe_query($query);
 
-    // Kopsataan alkuper‰inen ja p‰ivitet‰‰n siille uudet tiedot
+    // Kopsataan alkuper√§inen ja p√§ivitet√§√§n siille uudet tiedot
     $tilid = kopioitiliointi($vanharow['tunnus'], "");
 
     $kustplisa = $params['kustp'] != '' ? ", kustp = '{$params['kustp']}'" : "";
@@ -333,7 +333,7 @@ function tee_kirjanpito_muutokset($params) {
       echo "<font class='message'>".t("Korjattiin kirjanpitoviennit")." (".mysql_affected_rows()." ".t("kpl").").</font><br>";
     }
     else {
-      echo "<font class='error'>".t("Kirjanpitomuutoksia ei osattu tehd‰! Korjaa kirjanpito k‰sin")."!</font><br>";
+      echo "<font class='error'>".t("Kirjanpitomuutoksia ei osattu tehd√§! Korjaa kirjanpito k√§sin")."!</font><br>";
     }
     if ($params['laskurow']['summa'] > 0) {
       $summalisa = ($params['toim'] == 'KATEINEN' and $params['laskurow']['saldo_maksettu'] != 0) ? 0 : ($params['laskurow']['summa'] - $vanharow['summa']);
@@ -368,7 +368,7 @@ function yliviivaa_alet_ja_pyoristykset($tunnus) {
   $result = pupe_query($query);
 
   if (mysql_affected_rows() > 0) {
-    echo "<font class='message'>".t("Poistettiin pyˆristys- ja kassa-alekirjaukset")." (".mysql_affected_rows()." ".t("kpl").").</font><br>";
+    echo "<font class='message'>".t("Poistettiin py√∂ristys- ja kassa-alekirjaukset")." (".mysql_affected_rows()." ".t("kpl").").</font><br>";
   }
 }
 
@@ -396,7 +396,7 @@ function tarkista_pyoristys_erotukset($laskurow, $tunnus) {
               summa_valuutassa = -1 * $check1[summa_valuutassa],
               valkoodi         = '$laskurow[valkoodi]',
               vero             = 0,
-              selite           = '".t("Pyˆristysero")."',
+              selite           = '".t("Py√∂ristysero")."',
               lukko            = '',
               laatija          = '$kukarow[kuka]',
               laadittu         = now()";
@@ -467,7 +467,7 @@ function hae_lasku2($laskuno, $toim) {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
-    echo "<font class='error'>".t("Laskunumerolla")." '$laskuno' ".t("ei lˆydy sopivaa laskua")."!</font><br><br>";
+    echo "<font class='error'>".t("Laskunumerolla")." '$laskuno' ".t("ei l√∂ydy sopivaa laskua")."!</font><br><br>";
     return FALSE;
   }
 
@@ -476,7 +476,7 @@ function hae_lasku2($laskuno, $toim) {
   $tilikausi = tarkista_saako_laskua_muuttaa($row['tapvm']);
 
   if ($toim == 'KATEINEN' and $row['kateinen'] != '') {
-    echo "<font class='error'>".t("VIRHE: Lasku on jo k‰teislasku")."!</font><br><br>";
+    echo "<font class='error'>".t("VIRHE: Lasku on jo k√§teislasku")."!</font><br><br>";
     return FALSE;
   }
   elseif ($toim == 'KATEINEN' and $row['mapvm'] != '0000-00-00') {
@@ -484,7 +484,7 @@ function hae_lasku2($laskuno, $toim) {
     return FALSE;
   }
   elseif (!empty($tilikausi) and $toim != 'KATEINEN') {
-     echo "<font class='error'>".t("VIRHE: Tilikausi on p‰‰ttynyt %s. Et voi muuttaa k‰teist‰ laskuksi %s", "", $tilikausi, $row['tapvm'])."!</font>";
+     echo "<font class='error'>".t("VIRHE: Tilikausi on p√§√§ttynyt %s. Et voi muuttaa k√§teist√§ laskuksi %s", "", $tilikausi, $row['tapvm'])."!</font>";
      return FALSE;
   }
 
@@ -524,7 +524,7 @@ function echo_lasku_table($laskurow, $toim) {
   if ($toim == 'KATEINEN') {
     $now = date('Y-m-d');
     $now = explode('-' , $now);
-    // haetaan kaikki k‰teisen maksuehdot
+    // haetaan kaikki k√§teisen maksuehdot
     $query = "SELECT *
               FROM kassalipas
               WHERE yhtio = '{$kukarow['yhtio']}'";
@@ -546,7 +546,7 @@ function echo_lasku_table($laskurow, $toim) {
     echo '</td>';
     echo '</tr>';
 
-    echo "<tr><th>".t("Tapahtumap‰iv‰ (pp-kk-vvvv)")."</th><td><input name='tapahtumapaiva_pp' type='text' size='3' value='".$now[2]."'/>-<input name='tapahtumapaiva_kk' type='text' size='3' value='".$now[1]."'/>-<input name='tapahtumapaiva_vv' type='text' size='5' value='".$now[0]."'/></td></tr>";
+    echo "<tr><th>".t("Tapahtumap√§iv√§ (pp-kk-vvvv)")."</th><td><input name='tapahtumapaiva_pp' type='text' size='3' value='".$now[2]."'/>-<input name='tapahtumapaiva_kk' type='text' size='3' value='".$now[1]."'/>-<input name='tapahtumapaiva_vv' type='text' size='5' value='".$now[0]."'/></td></tr>";
 
     $query = "SELECT *
               FROM maksuehto
@@ -556,9 +556,9 @@ function echo_lasku_table($laskurow, $toim) {
               ORDER BY jarjestys, teksti";
   }
   else {
-    echo "<tr><th>".t("Tapahtumap‰iv‰")."</th><td>$laskurow[tapvm]</td></tr>";
+    echo "<tr><th>".t("Tapahtumap√§iv√§")."</th><td>$laskurow[tapvm]</td></tr>";
 
-    // haetaan kaikki maksuehdot (paitsi k‰teinen)
+    // haetaan kaikki maksuehdot (paitsi k√§teinen)
     $query = "SELECT *
               FROM maksuehto
               WHERE yhtio  = '$kukarow[yhtio]'
@@ -585,7 +585,7 @@ function echo_lasku_table($laskurow, $toim) {
 function echo_lasku_search() {
   echo "<form name='eikat' method='post' autocomplete='off'>";
   echo "<table><tr>";
-  echo "<th>".t("Syˆt‰ laskunumero")."</th>";
+  echo "<th>".t("Sy√∂t√§ laskunumero")."</th>";
   echo "<td><input type='text' name='laskuno'></td>";
   echo "<td class='back'><input name='subnappi' type='submit' value='".t("Etsi")."'></td>";
   echo "</tr></table>";

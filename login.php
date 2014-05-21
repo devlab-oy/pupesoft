@@ -35,7 +35,7 @@ $formi = "login"; // Kursorin ohjaus
 $kentta = "user";
 
 if (!headers_sent()) {
-  header("Content-Type: text/html; charset=iso-8859-1");
+  header("Content-Type: text/html; charset=utf-8");
   header("Pragma: public");
   header("Expires: 0");
   header("Last-Modified: ".gmdate("D, d M Y H:i:s")." GMT");
@@ -60,7 +60,7 @@ echo "
 
 echo "
   <meta http-equiv='Pragma' content='no-cache'>
-  <meta http-equiv='Content-Type' content='text/html; charset=iso-8859-1'>
+  <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
   </head>
 
 <style type='text/css'>
@@ -96,17 +96,17 @@ else {
   echo "<a target='_top' href='{$palvelin2}'><img src='{$pupesoft_scheme}api.devlab.fi/pupesoft_large.png' border='0' style='margin-top:30px;'>";
 }
 
-echo "</td><td><font class='head'>",t("Sisäänkirjautuminen", $browkieli),"</font><br><br>";
+echo "</td><td><font class='head'>",t("SisÃ¤Ã¤nkirjautuminen", $browkieli),"</font><br><br>";
 
 if (isset($return['usea_yhtio']) and $return['usea_yhtio'] == 1) {
 
   if (count($return['usea']) == 0) {
-    echo t("Sinulle löytyi monta käyttäjätunnusta, muttei yhtään yritystä", $browkieli),"!";
+    echo t("Sinulle lÃ¶ytyi monta kÃ¤yttÃ¤jÃ¤tunnusta, muttei yhtÃ¤Ã¤n yritystÃ¤", $browkieli),"!";
     exit;
   }
 
   echo "<table class='login'>";
-  echo "<tr><td colspan='2'><font class='menu'>",t("Valitse käsiteltävä yritys", $browkieli),":</font></td></tr>";
+  echo "<tr><td colspan='2'><font class='menu'>",t("Valitse kÃ¤siteltÃ¤vÃ¤ yritys", $browkieli),":</font></td></tr>";
   echo "<tr>";
 
   foreach ($return['usea'] as $_yhtio => $_yhtionimi) {
@@ -138,7 +138,7 @@ else {
   echo "<table class='login'>
       <form name='login' target='_top' action='index.php' method='post'>
 
-      <tr><td><font class='menu'>",t("Käyttäjätunnus",$browkieli),":</font></td><td><input type='text' value='' name='user' size='15' maxlength='30'></td></tr>
+      <tr><td><font class='menu'>",t("KÃ¤yttÃ¤jÃ¤tunnus",$browkieli),":</font></td><td><input type='text' value='' name='user' size='15' maxlength='30'></td></tr>
       <tr><td><font class='menu'>",t("Salasana",$browkieli),":</font></td><td><input type='password' name='salasana' size='15' maxlength='30'></td></tr>
 
       <tr><td colspan='2'><font class='menu'>",t("Jos haluat vaihtaa salasanasi",$browkieli),",<br>",t("anna se kahteen kertaan alla olevin kenttiin",$browkieli),"</font></td></tr>
@@ -151,7 +151,7 @@ else {
       echo "<br><font class='error'>{$return['error']}</font><br>";
   }
 
-  echo "  <br><input type='submit' value='",t("Sisään",$browkieli),"'>
+  echo "  <br><input type='submit' value='",t("SisÃ¤Ã¤n",$browkieli),"'>
       <br><br>
       <font class='info'>Copyright &copy; 2002-",date("Y")," <a href='http://www.devlab.fi/'>Devlab Oy</a> - <a href='license.php'>Licence Agreement</a></font>
       </form>";

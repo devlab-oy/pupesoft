@@ -10,10 +10,10 @@ if ($livesearch_tee == "TILIHAKU") {
   exit;
 }
 
-echo "<font class='head'>".t("Tiliˆinnin tarkastus")."</font><hr>";
+echo "<font class='head'>".t("Tili√∂innin tarkastus")."</font><hr>";
 
 if (($tee == 'U' or $tee == 'P' or $tee == 'M' or $tee == 'J') and $oikeurow['paivitys'] != 1) {
-  echo "<font class='errpr'>".t("Yritit p‰ivitt‰‰ vaikka sinulla ei ole siihen oikeuksia")."</font>";
+  echo "<font class='errpr'>".t("Yritit p√§ivitt√§√§ vaikka sinulla ei ole siihen oikeuksia")."</font>";
   exit;
 }
 
@@ -62,16 +62,16 @@ if ($laji == 'X') {
   $lajiv = "tila = 'X'";
 }
 
-// Mik‰ kuu/vuosi nyt on
+// Mik√§ kuu/vuosi nyt on
 $year = date("Y");
 $kuu  = date("n");
 
-// Poimitaan erikseen edellisen kuun viimeisen p‰iv‰n vv,kk,pp raportin oletusp‰iv‰m‰‰r‰ksi
+// Poimitaan erikseen edellisen kuun viimeisen p√§iv√§n vv,kk,pp raportin oletusp√§iv√§m√§√§r√§ksi
 if ($vv == '') $vv = date("Y",mktime(0,0,0,$kuu,0,$year));
 if ($kk == '') $kk = date("n",mktime(0,0,0,$kuu,0,$year));
 if (strlen($kk) == 1) $kk = "0" . $kk;
 
-// Ylˆs hakukriteerit
+// Yl√∂s hakukriteerit
 if ($viivatut != '') $viivacheck='checked';
 if ($iframe != '') $iframechk='checked';
 
@@ -80,7 +80,7 @@ echo "<form name = 'valinta' method='post'>
     <tr><th>".t("Anna kausi, muodossa kk-vvvv").":</th>
     <td><input type = 'text' name = 'kk' value='$kk' size=2></td>
     <td><input type = 'text' name = 'vv' value='$vv' size=4></td>
-    <th>".t("Mitk‰ tositteet listataan").":</th>
+    <th>".t("Mitk√§ tositteet listataan").":</th>
     <td><select name='laji'>
     <option value='M' $selm>".t("myyntilaskut")."
     <option value='O' $selo>".t("ostolaskut")."
@@ -88,7 +88,7 @@ echo "<form name = 'valinta' method='post'>
     <option value='OM' $selom>".t("ostolaskut maksettu")."
     <option value='X' $selx>".t("muut")."
     </select></td>
-    <td><input type='checkbox' name = 'iframe' $iframechk> ".t("N‰yt‰ laskut")."</td>
+    <td><input type='checkbox' name = 'iframe' $iframechk> ".t("N√§yt√§ laskut")."</td>
     <td><input type='checkbox' name='viivatut' $viivacheck> ".t("Korjatut")."</td>
     <td class='back'><input type = 'submit' value = '".t("Valitse")."'></td>
     </tr>
@@ -130,7 +130,7 @@ $result = pupe_query($query);
 $loppudiv ='';
 
 if (mysql_num_rows($result) == 0) {
-  echo "<font class='error'>".t("Haulla ei lˆytynyt yht‰‰n laskua")."</font><br><br>";
+  echo "<font class='error'>".t("Haulla ei l√∂ytynyt yht√§√§n laskua")."</font><br><br>";
 }
 else {
 
@@ -162,7 +162,7 @@ else {
     }
 
     if ($trow["nimi"] == "") {
-      $trow["nimi"] = t("Ei nime‰");
+      $trow["nimi"] = t("Ei nime√§");
     }
 
     echo "<$ero><a name='$trow[tunnus]' href='$PHP_SELF?tee=E&tunnus=$trow[tunnus]&iframe=$iframe&laji=$laji&vv=$vv&kk=$kk&viivatut=$viivatut&jarj=$jarj#$trow[tunnus]'>$trow[nimi]</a>$komm</$ero>";
@@ -180,7 +180,7 @@ else {
 if ($iframe != '') echo "<div style='height: 400px; overflow: auto; width: 100%;'>";
 
 if ($tee == 'P') {
-  // Olemassaolevaa tiliˆinti‰ muutetaan, joten poistetaan rivi ja annetaan perustettavaksi
+  // Olemassaolevaa tili√∂inti√§ muutetaan, joten poistetaan rivi ja annetaan perustettavaksi
   $query = "SELECT *
             FROM tiliointi
             WHERE tunnus = '$ptunnus' and
@@ -188,7 +188,7 @@ if ($tee == 'P') {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
-    echo t("Tiliˆinti‰ ei lˆydy")."! $query";
+    echo t("Tili√∂inti√§ ei l√∂ydy")."! $query";
 
     require ("inc/footer.inc");
     exit;
@@ -207,7 +207,7 @@ if ($tee == 'P') {
 
   $ok = 1;
 
-  // Etsit‰‰n kaikki tiliˆintirivit, jotka kuuluvat t‰h‰n tiliˆintiin ja lasketaan niiden summa
+  // Etsit√§√§n kaikki tili√∂intirivit, jotka kuuluvat t√§h√§n tili√∂intiin ja lasketaan niiden summa
   $query = "SELECT sum(summa) summa
             FROM tiliointi
             WHERE aputunnus = '$ptunnus'
@@ -240,7 +240,7 @@ if ($tee == 'P') {
 }
 
 if ($tee == 'U') {
-  // Lis‰t‰‰n tiliˆintirivi
+  // Lis√§t√§√§n tili√∂intirivi
   $query = "SELECT *
             FROM lasku
             WHERE yhtio = '$kukarow[yhtio]'
@@ -248,7 +248,7 @@ if ($tee == 'U') {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 1) {
-    echo t("Laskua ei en‰‰ lˆydy! Systeemivirhe!");
+    echo t("Laskua ei en√§√§ l√∂ydy! Systeemivirhe!");
 
     require ("inc/footer.inc");
     exit;
@@ -287,8 +287,8 @@ if ($tee == 'U') {
       }
     }
     else {
-      // T‰ll‰ ei viel‰ ole tositenroa. Yritet‰‰n jotain
-      // T‰lle saamme tositenron ostoveloista
+      // T√§ll√§ ei viel√§ ole tositenroa. Yritet√§√§n jotain
+      // T√§lle saamme tositenron ostoveloista
       if ($laskurow['tapvm'] == $tiliointipvm) {
 
         $query = "SELECT tosite
@@ -311,7 +311,7 @@ if ($tee == 'U') {
         $tositenro = $tositerow['tosite'];
       }
 
-       // T‰lle saamme tositenron ostoveloista
+       // T√§lle saamme tositenron ostoveloista
       if ($laskurow['mapvm'] == $tiliointipvm) {
 
         $query = "SELECT tosite
@@ -344,7 +344,7 @@ if ($tee == 'U') {
 }
 
 if ($tee == 'E') {
-  // Tositteen tiliˆintirivit...
+  // Tositteen tili√∂intirivit...
   require "inc/tiliointirivit.inc";
 }
 
@@ -365,7 +365,7 @@ if ($smlaskurow["tunnus"] > 0) {
   }
 
   if ($iframe != '') echo "<iframe src='$url' style='width:100%; height: 710px; border: 0px; display: block;'></iFrame>";
-  else echo "<br><br><a href='$url' target='Attachment'>".t("N‰yt‰ lasku")."</a>";
+  else echo "<br><br><a href='$url' target='Attachment'>".t("N√§yt√§ lasku")."</a>";
 }
 if ($iframe != '') echo "</div>";
 

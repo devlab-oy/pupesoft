@@ -13,7 +13,7 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
 }
 else {
 
-  echo "<font class='head'>",t("Budjetin yll‰pito"),"</font><hr>";
+  echo "<font class='head'>",t("Budjetin yll√§pito"),"</font><hr>";
 
   if (is_array($luvut)) {
     $paiv = 0;
@@ -99,7 +99,7 @@ else {
       }
     }
 
-    echo "<font class='message'>".t("P‰ivitin")." $paiv. ".t("Lis‰sin")." $lisaa</font><br><br>";
+    echo "<font class='message'>".t("P√§ivitin")." $paiv. ".t("Lis√§sin")." $lisaa</font><br><br>";
   }
 
   if (isset($tyyppi)) {
@@ -136,7 +136,7 @@ else {
   echo "  <tr>
       <th>".t("Tyyppi")."</th>
       <td><select name = 'tyyppi'>
-      <option value='4' $sel4>".t("Tuloslaskelma")." ".t("sis‰inen")."</option>
+      <option value='4' $sel4>".t("Tuloslaskelma")." ".t("sis√§inen")."</option>
       <option value='5' $sel5>".t("Tuloslaskelma")." ".t("ulkoinen")."</option>
       <option value='2' $sel2>".t("Vastattavaa")."</option>
       <option value='1' $sel1>".t("Vastaavaa")."</option>
@@ -249,7 +249,7 @@ else {
 
   echo "</table>";
   echo "<br>";
-  echo "<input type='submit' VALUE='".t("N‰yt‰/Tallenna")."'>";
+  echo "<input type='submit' VALUE='".t("N√§yt√§/Tallenna")."'>";
   echo "<br><br>";
 
   $excelsarake = 0;
@@ -259,7 +259,7 @@ else {
   $tilityyppi  = "ulkoinen_taso";
   $cleantyyppi = $tyyppi;
 
-  // Sis‰inen tuloslaskelma
+  // Sis√§inen tuloslaskelma
   if ($tyyppi == 4) {
     $tasotyyppi = "S";
     $tyyppi = 3;
@@ -271,7 +271,7 @@ else {
     $tyyppi = 3;
   }
 
-  // T‰m‰ tulee tallentaa kantaan
+  // T√§m√§ tulee tallentaa kantaan
   echo "<input type='hidden' name='tasotyyppi' value='$tasotyyppi'>";
 
   // Haetaan kaikki tasot ja rakennetaan tuloslaskelma-array
@@ -284,13 +284,13 @@ else {
             ORDER BY taso";
   $tasores = pupe_query($query);
 
-  // Jos meill‰ on tasoja piirret‰‰n taulukko
+  // Jos meill√§ on tasoja piirret√§√§n taulukko
   while ($tasorow = mysql_fetch_assoc($tasores)) {
-    // mill‰ tasolla ollaan (1,2,3,4,5,6)
+    // mill√§ tasolla ollaan (1,2,3,4,5,6)
     $tasoluku = strlen($tasorow["taso"]);
 
-    // tasonimi talteen (rightp‰dd‰t‰‰n ÷:ll‰, niin saadaan oikeaan j‰rjestykseen)
-    $apusort = str_pad($tasorow["taso"], 20, "÷");
+    // tasonimi talteen (rightp√§dd√§t√§√§n √ñ:ll√§, niin saadaan oikeaan j√§rjestykseen)
+    $apusort = str_pad($tasorow["taso"], 20, "√ñ");
     $tasonimi[$apusort] = $tasorow["nimi"];
 
     // pilkotaan taso osiin
@@ -322,15 +322,15 @@ else {
 
       $excelrivit = pupeFileReader($kasiteltava_tiedoto_path, $ext);
 
-      echo "<br /><br /><font class='message'>".t("Luetaan l‰hetetty tiedosto")."...<br><br></font>";
+      echo "<br /><br /><font class='message'>".t("Luetaan l√§hetetty tiedosto")."...<br><br></font>";
 
       $headers     = array();
       $taulunrivit = array();
 
-      // rivim‰‰r‰ exceliss‰
+      // rivim√§√§r√§ exceliss√§
       $excelrivimaara = count($excelrivit);
 
-      // sarakem‰‰r‰ exceliss‰
+      // sarakem√§√§r√§ exceliss√§
       $excelsarakemaara = count($headers);
 
       for ($excei = 1; $excei < $excelrivimaara; $excei++) {
@@ -364,9 +364,9 @@ else {
     $worksheet->writeString($excelrivi, $excelsarake, t("Nimi"), $format_bold);
     $excelsarake++;
 
-    echo t("Budjettiluvun voi poistaa huutomerkill‰ (!)")."<br><br>";
+    echo t("Budjettiluvun voi poistaa huutomerkill√§ (!)")."<br><br>";
 
-    //Parametrit mihin t‰m‰ taulukko liittyy
+    //Parametrit mihin t√§m√§ taulukko liittyy
     echo "<table>\n";
     echo "<tr>\n";
     echo "<td class='back'></td>\n";
@@ -421,17 +421,17 @@ else {
     // sortataan array indexin (tason) mukaan
     ksort($tasonimi);
 
-    // loopataan tasot l‰pi
+    // loopataan tasot l√§pi
     foreach ($tasonimi as $key_c => $value) {
 
-      $key = str_replace("÷", "", $key_c); // ÷-kirjaimet pois
+      $key = str_replace("√ñ", "", $key_c); // √ñ-kirjaimet pois
 
       // tulostaan rivi vain jos se kuuluu rajaukseen
       if (strlen($key) <= $rtaso or $rtaso == "TILI") {
 
         $class = "";
 
-        // laitetaan ykkˆs ja kakkostason rivit tummalla selkeyden vuoksi
+        // laitetaan ykk√∂s ja kakkostason rivit tummalla selkeyden vuoksi
         if (strlen($key) < 3 and $rtaso > 2) $class = "tumma";
 
         if ($rtaso == "TILI") {
@@ -515,7 +515,7 @@ else {
         $excelsarake = 0;
         $excelrivi++;
 
-        // kakkostason j‰lkeen aina yks tyhj‰ rivi.. paitsi jos otetaan vain kakkostason raportti
+        // kakkostason j√§lkeen aina yks tyhj√§ rivi.. paitsi jos otetaan vain kakkostason raportti
         if (strlen($key) == 2 and ($rtaso > 2 or $rtaso == "TILI")) {
           echo "<tr><td class='back'>&nbsp;</td></tr>\n";
         }
@@ -550,7 +550,7 @@ else {
     echo "<input type='hidden' name='tkausi' value = '$tkausi'>";
     echo "<input type='hidden' name='rtaso'  value = '$rtaso'>";
     echo "<table>";
-    echo "<tr><th>",t("Valitse tiedosto"),"</th><td><input type='file' name='userfile' /></td><td class='back'><input type='submit' value='",t("L‰het‰"),"' /></td></tr>";
+    echo "<tr><th>",t("Valitse tiedosto"),"</th><td><input type='file' name='userfile' /></td><td class='back'><input type='submit' value='",t("L√§het√§"),"' /></td></tr>";
     echo "</table>";
     echo "</form>";
 

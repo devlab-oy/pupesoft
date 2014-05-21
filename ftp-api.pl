@@ -2,7 +2,7 @@
 #
 # Haetaan kaikki uudet verkkolaskut elmasta kaikkille pupesoft yrityksille..
 #
-# K‰ytet‰‰n ftp apia..
+# K√§ytet√§√§n ftp apia..
 #
 # (c) joni 200309
 #
@@ -14,12 +14,12 @@ use DBI;
 #print "\npupesoft einvoice ftp-api v1.0\n------------------------------\n\n";
 
 $dbhost = 'localhost';          # pupesoft hosti
-$dbuser = 'pupesoft';          # pupesoft database k‰ytt‰j‰
+$dbuser = 'pupesoft';          # pupesoft database k√§ytt√§j√§
 $dbpass = 'pupe1';            # pupesoft database salasana
 $dbname = 'pupesoft';          # pupesoft databasen nimi
 $host   = "ftp.verkkolasku.net";    # elman ftp palvelimen osoite
-$path   = "/home/verkkolaskut";      # mihin hakemistoon haetut laskut siirret‰‰n
-$type   = "xml";            # mink‰ tyyppiset laskut haetaan
+$path   = "/home/verkkolaskut";      # mihin hakemistoon haetut laskut siirret√§√§n
+$type   = "xml";            # mink√§ tyyppiset laskut haetaan
 
 chdir($path) or die("Can't change to $path\n\n");
 

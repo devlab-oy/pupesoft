@@ -1,9 +1,9 @@
 #!/usr/bin/php
 <?php
 
-// Kutsutaanko CLI:stä
+// Kutsutaanko CLI:stÃ¤
 if (php_sapi_name() != 'cli') {
-  die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+  die ("TÃ¤tÃ¤ scriptiÃ¤ voi ajaa vain komentoriviltÃ¤!");
 }
 
 // Laitetaan Puperoot includepathiin
@@ -52,7 +52,7 @@ while ($row = mysql_fetch_array($result)) {
     decho("$query -> $chkro[Msg_text]");
   }
 
-  // varmistetaan vielä indexien käytössäolo
+  // varmistetaan vielÃ¤ indexien kÃ¤ytÃ¶ssÃ¤olo
   $query = "show index from $table";
   $chkre = pupe_query($query);
 

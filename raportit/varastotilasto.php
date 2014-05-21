@@ -5,13 +5,13 @@ if (isset($_POST["tee"])) {
   if(isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 }
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-// Ei k‰ytet‰ pakkausta
+// Ei k√§ytet√§ pakkausta
 $compression = FALSE;
 
-// DataTables p‰‰lle
+// DataTables p√§√§lle
 $pupe_DataTables = 'vartiltaul';
 
 require ("../inc/parametrit.inc");
@@ -31,7 +31,7 @@ if ($ytunnus != '') {
 
   require ("inc/kevyt_toimittajahaku.inc");
 
-  // Toimittaja lˆytyi
+  // Toimittaja l√∂ytyi
   if ($toimittajaid == 0) {
     $tee = "";
   }
@@ -41,7 +41,7 @@ else {
   $toimittajaid = "";
 }
 
-// k‰yttis
+// k√§yttis
 echo "<form method='POST'>";
 echo "<input type='hidden' name='tee' value='raportoi'>";
 
@@ -53,9 +53,9 @@ echo "<tr>";
 echo "<th>".t("Listaustyyppi")."</th>";
 echo "<td>";
 echo "<select name='listaustyyppi'>";
-echo "<option value = 'kappaleet'{$sel['kappaleet']}>".t("Listauksessa n‰ytet‰‰n myynti kappaleina")."</option>";
-echo "<option value = 'hinnat'{$sel['hinnat']}>".t("Listauksessa n‰ytet‰‰n myynti euroina")."</option>";
-echo "<option value = 'kappaleet2'{$sel['kappaleet2']}>".t("Listauksessa n‰ytet‰‰n myynti ja kulutus kappaleina")."</option>";
+echo "<option value = 'kappaleet'{$sel['kappaleet']}>".t("Listauksessa n√§ytet√§√§n myynti kappaleina")."</option>";
+echo "<option value = 'hinnat'{$sel['hinnat']}>".t("Listauksessa n√§ytet√§√§n myynti euroina")."</option>";
+echo "<option value = 'kappaleet2'{$sel['kappaleet2']}>".t("Listauksessa n√§ytet√§√§n myynti ja kulutus kappaleina")."</option>";
 echo "</select>";
 echo "</td>";
 echo "</tr>";
@@ -139,14 +139,14 @@ if ($tee != "" and isset($painoinnappia)) {
       $varastotilasto_table .= "<thead>";
       $varastotilasto_table .= "<tr>";
       $varastotilasto_table .= "<th>".t("Osasto")."</th>";
-      $varastotilasto_table .= "<th>".t("Tuoteryhm‰")."</th>";
+      $varastotilasto_table .= "<th>".t("Tuoteryhm√§")."</th>";
       $varastotilasto_table .= "<th>".t("Tuoteno")."</th>";
       $varastotilasto_table .= "<th>".t("Nimitys")."</th>";
       $varastotilasto_table .= "<th>".t("Varastosaldo")."</th>";
       $varastotilasto_table .= "<th>".t("Varastonarvo")."</th>";
       $varastotilasto_table .= "<th>".t("Myyntihinta")."</th>";
       $varastotilasto_table .= "<th>".t("Varmuusvarasto")."</th>";
-      $varastotilasto_table .= "<th>".t("Tilattu m‰‰r‰")."</th>";
+      $varastotilasto_table .= "<th>".t("Tilattu m√§√§r√§")."</th>";
       $varastotilasto_table .= "<th>".t("Toimitus aika")."</th>";
       $varastotilasto_table .= "<th>".t("Varattu saldo")."</th>";
       $varastotilasto_table .= "<th>".t("Myynti")."<br>$vvl</th>";
@@ -194,14 +194,14 @@ if ($tee != "" and isset($painoinnappia)) {
 
     $excelsarake = 0;
     $worksheet->writeString($excelrivi, $excelsarake++, t("Osasto"));
-    $worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteryhm‰"));
+    $worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteryhm√§"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteno"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("Varastosaldo"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("Varastonarvo"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("Myyntihinta"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("Varmuusvarasto"));
-    $worksheet->writeString($excelrivi, $excelsarake++, t("Tilattu m‰‰r‰"));
+    $worksheet->writeString($excelrivi, $excelsarake++, t("Tilattu m√§√§r√§"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("Toimitus aika"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("Varattu saldo"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("Myynti")." $vvl");
@@ -218,7 +218,7 @@ if ($tee != "" and isset($painoinnappia)) {
 
     $excelrivi++;
 
-    echo "<font class='message'>", t("K‰sitell‰‰n"), " $total_rows ", t("tuotetta"), ".</font>";
+    echo "<font class='message'>", t("K√§sitell√§√§n"), " $total_rows ", t("tuotetta"), ".</font>";
     require('inc/ProgressBar.class.php');
 
     $bar = new ProgressBar();
@@ -241,7 +241,7 @@ if ($tee != "" and isset($painoinnappia)) {
 
       $jalkitoimituksessa = 0;
 
-      // Jos j‰lkitoimitukset eiv‰t varaa saldoa, pit‰‰ ne ottaa mukaan
+      // Jos j√§lkitoimitukset eiv√§t varaa saldoa, pit√§√§ ne ottaa mukaan
       if ($yhtiorow["varaako_jt_saldoa"] == "") {
         $query = "SELECT ifnull(round(sum(jt)), 0) jt
                   FROM tilausrivi
@@ -404,7 +404,7 @@ if ($tee != "" and isset($painoinnappia)) {
     echo "</table><br>";
 
     if ($total_rows > 1000) {
-      echo "<font class='error'>", t("Hakutulos oli liian suuri"), ". " ,t("Tulos vain exceliss‰"), ".</font><br><br>";
+      echo "<font class='error'>", t("Hakutulos oli liian suuri"), ". " ,t("Tulos vain exceliss√§"), ".</font><br><br>";
     }
     else {
       if ($listaustyyppi == "kappaleet2"){
@@ -418,7 +418,7 @@ if ($tee != "" and isset($painoinnappia)) {
   }
 
   if ($total_rows == 0) {
-    echo "<font class='message'>", t("Yht‰‰n soveltuvaa tuotetta ei lˆytynyt"), ".</font>";
+    echo "<font class='message'>", t("Yht√§√§n soveltuvaa tuotetta ei l√∂ytynyt"), ".</font>";
   }
 }
 

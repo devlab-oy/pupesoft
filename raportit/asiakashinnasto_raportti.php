@@ -1,6 +1,6 @@
 <?php
 
-// Ei k‰ytet‰ pakkausta
+// Ei k√§ytet√§ pakkausta
 $compression = FALSE;
 
 $useslave = 1;
@@ -60,7 +60,7 @@ $request['aleryhmat'] = hae_aleryhmat();
 
 $valid = true;
 if (!empty($request['valittu_asiakas']) and !is_numeric($request['valittu_asiakas'])) {
-  echo "<font class='error'>".t('K‰yt‰ livesearch toiminnallisuutta')."</font>";
+  echo "<font class='error'>".t('K√§yt√§ livesearch toiminnallisuutta')."</font>";
   echo "<br/>";
   $valid = false;
 }
@@ -83,7 +83,7 @@ if ($request['action'] == 'aja_raportti' and $valid) {
     echo "<br/>";
   }
   else {
-    echo t('Asiakashinnaston tuotteita ei lˆytynyt');
+    echo t('Asiakashinnaston tuotteita ei l√∂ytynyt');
     echo "<br/>";
   }
 }
@@ -109,12 +109,12 @@ function echo_kayttoliittyma($request = array()) {
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>".t('Asiakasryhm‰').":</th>";
+  echo "<th>".t('Asiakasryhm√§').":</th>";
   echo "<td>";
   echo "<select id='valittu_asiakasryhma' name='valittu_asiakasryhma'>";
   foreach ($request['asiakasryhmat'] as $asiakasryhma) {
     $sel = "";
-    //absoluuttinen vertaus tarvitaan, koska asiakasryhm‰n tunnuksessa voi olla leading zero 005023 == 5023
+    //absoluuttinen vertaus tarvitaan, koska asiakasryhm√§n tunnuksessa voi olla leading zero 005023 == 5023
     if ($request['valittu_asiakasryhma'] === $asiakasryhma['selite']) {
       $sel = "SELECTED";
     }
@@ -147,7 +147,7 @@ function echo_kayttoliittyma($request = array()) {
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>".t('Listaa myˆs poistetut tuotteet')."</th>";
+  echo "<th>".t('Listaa my√∂s poistetut tuotteet')."</th>";
   echo "<td>";
   $chk = "";
   if (!empty($request['nayta_poistetut'])) {
@@ -365,12 +365,12 @@ function generoi_custom_excel($tuotteet) {
     'tuoteno'       => t('Tuoteno'),
     'tuote_nimi'     => t('Tuotteen nimi'),
     'kappalemaara'     => t('Kappalemaara'),
-    'yksikko'       => t('Yksikkˆ'),
-    'paivitys_pvm'     => t('P‰ivitys p‰iv‰m‰‰r‰'),
+    'yksikko'       => t('Yksikk√∂'),
+    'paivitys_pvm'     => t('P√§ivitys p√§iv√§m√§√§r√§'),
     'ostohinta'       => t('Ostohinta'),
     'kehahin'       => t('Keskihankintahinta'),
     'ovh_hinta'       => t('Ovh').'-'.t('Hinta'),
-    'ryhman_ale'     => t('Ryhm‰n ale'),
+    'ryhman_ale'     => t('Ryhm√§n ale'),
     'hinnasto_hinta'   => t('Hinnasto hinta'),
     'status'       => t('Status'),
     'ale_prosentti'     => t('Ale prosentti'),
@@ -388,7 +388,7 @@ function generoi_custom_excel($tuotteet) {
 
   foreach ($tuotteet as $tuote) {
     if ($tuote['aleryhma']['ryhma'] != $edellinen_ryhma) {
-      $xls->write($rivi, $sarake, t('Ryhm‰'), array('bold' => true));
+      $xls->write($rivi, $sarake, t('Ryhm√§'), array('bold' => true));
       $sarake++;
       $xls->write($rivi, $sarake, $tuote['aleryhma']['selite'], array('bold' => true));
 

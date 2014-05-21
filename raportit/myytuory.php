@@ -1,9 +1,9 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-// Ei k‰ytet‰ pakkausta
+// Ei k√§ytet√§ pakkausta
 $compression = FALSE;
 
 if (isset($_POST["tee"])) {
@@ -13,7 +13,7 @@ if (isset($_POST["tee"])) {
 
 require("../inc/parametrit.inc");
 
-//Ja t‰ss‰ laitetaan ne takas
+//Ja t√§ss√§ laitetaan ne takas
 $sqlhaku = $sqlapu;
 
 if (isset($tee)) {
@@ -24,7 +24,7 @@ if (isset($tee)) {
 }
 else {
 
-  echo "<font class='head'>".t("Myynnit tuoteryhmitt‰in")."</font><hr>";
+  echo "<font class='head'>".t("Myynnit tuoteryhmitt√§in")."</font><hr>";
 
   flush();
 
@@ -161,7 +161,7 @@ else {
             $kateVApros = sprintf("%.02f",round($kateVA/$myynVA*100,2));
 
 
-          $ulos .= t("Osasto")." $edosasto ".t("yhteens‰").":\t\t";
+          $ulos .= t("Osasto")." $edosasto ".t("yhteens√§").":\t\t";
           $ulos .= "$myyn30\t";
           $ulos .= "$kate30\t";
           $ulos .= "$kate30pros\t";
@@ -270,7 +270,7 @@ else {
       if ($myynVA > 0)
         $kateVApros = sprintf("%.02f",round($kateVA/$myynVA*100,2));
 
-      $ulos .= t("Osasto")." $edosasto ".t("yhteens‰").":\t\t";
+      $ulos .= t("Osasto")." $edosasto ".t("yhteens√§").":\t\t";
       $ulos .= "$myyn30\t";
       $ulos .= "$kate30\t";
       $ulos .= "$kate30pros\t";
@@ -297,8 +297,8 @@ else {
         $yhtkateVApros = sprintf("%.02f",round($yhtkateVA/$yhtmyynVA*100,2));
 
 
-      ///* Kaikkiyhteens‰ *///
-      $ulos .= t("Kaikki yhteens‰").":\t\t";
+      ///* Kaikkiyhteens√§ *///
+      $ulos .= t("Kaikki yhteens√§").":\t\t";
       $ulos .= "$yhtmyyn30\t";
       $ulos .= "$yhtkate30\t";
       $ulos .= "$yhtkate30pros\t";
@@ -317,14 +317,14 @@ else {
 
     if(include('Spreadsheet/Excel/Writer.php')) {
 
-      //keksit‰‰n failille joku varmasti uniikki nimi:
+      //keksit√§√§n failille joku varmasti uniikki nimi:
       list($usec, $sec) = explode(' ', microtime());
       mt_srand((float) $sec + ((float) $usec * 100000));
       $excelnimi = md5(uniqid(mt_rand(), true)).".xls";
 
       $workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
       $workbook->setVersion(8);
-      $worksheet = $workbook->addWorksheet('Myynnit tuoteryhmitt‰in');
+      $worksheet = $workbook->addWorksheet('Myynnit tuoteryhmitt√§in');
 
       $format_bold = $workbook->addFormat();
       $format_bold->setBold();
@@ -387,7 +387,7 @@ else {
   }
 
 
-  //K‰yttˆliittym‰
+  //K√§ytt√∂liittym√§
   echo "<br>";
   echo "<table><form method='post'>";
 
@@ -399,14 +399,14 @@ else {
     $pp = date("d");
 
   echo "<input type='hidden' name='teemyytuory' value='kaikki'>";
-  echo "<tr><th>".t("Syˆt‰ p‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+  echo "<tr><th>".t("Sy√∂t√§ p√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
       <td><input type='text' name='pp' value='$pp' size='3'></td>
       <td><input type='text' name='kk' value='$kk' size='3'></td>
       <td><input type='text' name='vv' value='$vv' size='5'></td>";
 
   if ($yht == 1) $chk2 = "CHECKED";
 
-  echo "<tr><th>".t("Piilota yhteens‰rivit")."</th>
+  echo "<tr><th>".t("Piilota yhteens√§rivit")."</th>
       <td colspan='3'><input type='checkbox' name='yht' value='1' $chk2></td>";
 
   echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td></tr></table>";

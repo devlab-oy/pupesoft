@@ -17,10 +17,10 @@ if ($faarao == 'TUTKHM') {
     }
 
     if ($_FILES['userfile']['size']==0) {
-      die ("<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font>");
+      die ("<font class='error'><br>".t("Tiedosto on tyhj√§")."!</font>");
     }
 
-    $file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
+    $file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep√§onnistui")."!");
     $rivi = fgets($file);
 
     while (!feof($file)) {
@@ -61,7 +61,7 @@ if ($faarao == 'TUTKHM') {
 
       if ($tuote_etsi != "") {
 
-        //Etsit‰‰n hyv‰‰ osumaa!
+        //Etsit√§√§n hyv√§√§ osumaa!
         $query = "SELECT tilausrivi.*
                   FROM tilausrivi, lasku, tuote
                   WHERE lasku.ytunnus        = '$laskurow[ytunnus]'
@@ -93,7 +93,7 @@ if ($faarao == 'TUTKHM') {
             $kerroinres = mysql_query($query) or pupe_error($query);
 
             if (mysql_num_rows($kerroinres) > 1) {
-              echo "<font class='error'>Samalle toimittajan tuotteelle lˆytyi useita tuotteita! K‰ytet‰‰n ensimm‰ist‰!</font><br>";
+              echo "<font class='error'>Samalle toimittajan tuotteelle l√∂ytyi useita tuotteita! K√§ytet√§√§n ensimm√§ist√§!</font><br>";
             }
 
             if (mysql_num_rows($kerroinres) > 0) {
@@ -107,7 +107,7 @@ if ($faarao == 'TUTKHM') {
               $apukpl = $kpl;
             }
 
-            ///* Testataan eka, lˆytyykˆ tilausnumero, tuotenumero, kpl m‰tchi‰ *///
+            ///* Testataan eka, l√∂ytyyk√∂ tilausnumero, tuotenumero, kpl m√§tchi√§ *///
             if ($rivirow['varattu'] == $apukpl and $rivirow['otunnus'] == $tilnro) {
               $ok = 1;
               break;
@@ -129,7 +129,7 @@ if ($faarao == 'TUTKHM') {
               $kerroinres = mysql_query($query) or pupe_error($query);
 
               if (mysql_num_rows($kerroinres) > 1) {
-                echo "<font class='error'>Samalle toimittajan tuotteelle lˆytyi useita tuotteita! K‰ytet‰‰n ensimm‰ist‰!</font><br>";
+                echo "<font class='error'>Samalle toimittajan tuotteelle l√∂ytyi useita tuotteita! K√§ytet√§√§n ensimm√§ist√§!</font><br>";
               }
 
               if (mysql_num_rows($kerroinres) > 0) {
@@ -143,7 +143,7 @@ if ($faarao == 'TUTKHM') {
                 $apukpl = $kpl;
               }
 
-              ///* Testataan toka, lˆytyykˆ tuotenumero, kpl m‰tchi‰ *///
+              ///* Testataan toka, l√∂ytyyk√∂ tuotenumero, kpl m√§tchi√§ *///
               if ($rivirow['varattu'] == $apukpl) {
                 $ok = 1;
                 break;
@@ -166,7 +166,7 @@ if ($faarao == 'TUTKHM') {
               $kerroinres = mysql_query($query) or pupe_error($query);
 
               if (mysql_num_rows($kerroinres) > 1) {
-                echo "<font class='error'>Samalle toimittajan tuotteelle lˆytyi useita tuotteita! K‰ytet‰‰n ensimm‰ist‰!</font><br>";
+                echo "<font class='error'>Samalle toimittajan tuotteelle l√∂ytyi useita tuotteita! K√§ytet√§√§n ensimm√§ist√§!</font><br>";
               }
 
               if (mysql_num_rows($kerroinres) > 0) {
@@ -180,7 +180,7 @@ if ($faarao == 'TUTKHM') {
                 $apukpl = $kpl;
               }
 
-              ///* Testataan kolmanneks, lˆytyykˆ edes tuotenumero ja kappale m‰tchi‰ jossa kpl:‰‰ on riitt‰v‰sti *///
+              ///* Testataan kolmanneks, l√∂ytyyk√∂ edes tuotenumero ja kappale m√§tchi√§ jossa kpl:√§√§ on riitt√§v√§sti *///
               if ($rivirow['varattu'] > $apukpl) {
 
                 $filehinta = $hinta;
@@ -193,7 +193,7 @@ if ($faarao == 'TUTKHM') {
                           and otunnus  = '$rivirow[otunnus]'";
                 $poistoresult = mysql_query($query) or pupe_error($query);
 
-                // Lis‰t‰‰n rivi ja splitataan se k‰ytt‰j‰n toiveita mukaillen
+                // Lis√§t√§√§n rivi ja splitataan se k√§ytt√§j√§n toiveita mukaillen
                 $kpl         = $apukpl;
                 $tuoteno      = $rivirow["tuoteno"];
                 $toimaika      = $rivirow["toimaika"];
@@ -210,7 +210,7 @@ if ($faarao == 'TUTKHM') {
                 }
 
                 $netto        = $rivirow["netto"];
-                $var         = $hyvaksy."#!°!#".$rivirow['varattu'];
+                $var         = $hyvaksy."#!¬°!#".$rivirow['varattu'];
                 $kukarow["kesken"]  = $rivirow["otunnus"];
                 $laskurow["tila"]   = "O";
                 $alv        = $rivirow["alv"];
@@ -237,7 +237,7 @@ if ($faarao == 'TUTKHM') {
             }
           }
 
-          //Nyt t‰m‰ merkataan valituksi
+          //Nyt t√§m√§ merkataan valituksi
           if ($ok == 1) {
 
             /*if ($kuluhinta != 0) {
@@ -254,7 +254,7 @@ if ($faarao == 'TUTKHM') {
               $hintalisa = '';
             }
 
-            //Tarksitetaan viel‰ ennen p‰ivityst‰, ettei saapumsita ole poistettu ja infotaan k‰ytt‰j‰‰, jos n‰in on k‰ynyt
+            //Tarksitetaan viel√§ ennen p√§ivityst√§, ettei saapumsita ole poistettu ja infotaan k√§ytt√§j√§√§, jos n√§in on k√§ynyt
             $query = "SELECT tila
                       FROM lasku
                       WHERE yhtio     = '{$kukarow[yhtio]}'
@@ -266,27 +266,27 @@ if ($faarao == 'TUTKHM') {
             if (mysql_num_rows($res) == 1){
               $query = "UPDATE tilausrivi SET uusiotunnus='$otunnus' $kululisa $hintalisa WHERE tunnus = '$rivirow[tunnus]' AND yhtio='$kukarow[yhtio]'";
               $result = mysql_query($query) or pupe_error($query);
-              echo "<font class='message'>".t("Rivi")." $rivino ".t("Tuotenumero").": $rivirow[tuoteno] ".t("M‰‰r‰").": $apukpl ".t("kohdistettu laskuun")."!</font><br>";
+              echo "<font class='message'>".t("Rivi")." $rivino ".t("Tuotenumero").": $rivirow[tuoteno] ".t("M√§√§r√§").": $apukpl ".t("kohdistettu laskuun")."!</font><br>";
 
               if ($hinta != 0 and $hinta != $rivirow["hinta"] and $paivi != 'JOO') {
-                echo "<font class='message'>".t("Rivi")." $rivino ".t("Tuotenumero").": $rivirow[tuoteno] ".t("Hinta on v‰‰r‰")."!</font><br>";
+                echo "<font class='message'>".t("Rivi")." $rivino ".t("Tuotenumero").": $rivirow[tuoteno] ".t("Hinta on v√§√§r√§")."!</font><br>";
               }
 
               if ($paivi == 'JOO') {
                 if ($hinta != 0) {
-                  echo "<font class='message'>".t("Rivi")." $rivino ".t("Tuotenumero").": $paivirow[tuoteno] ".t("P‰ivitettiin tiedostossa ollut hinta").": $hinta ".t("riville")."!</font><br>";
+                  echo "<font class='message'>".t("Rivi")." $rivino ".t("Tuotenumero").": $paivirow[tuoteno] ".t("P√§ivitettiin tiedostossa ollut hinta").": $hinta ".t("riville")."!</font><br>";
                 }
                 else {
-                  echo "<font class='message'>".t("Rivi")." $rivino ".t("Tuotenumero").": $paivirow[tuoteno] ".t("EI p‰ivitetty tiedostossa ollutta hintaa riville, koska se oli tyhj‰ tai nolla")."!</font><br>";
+                  echo "<font class='message'>".t("Rivi")." $rivino ".t("Tuotenumero").": $paivirow[tuoteno] ".t("EI p√§ivitetty tiedostossa ollutta hintaa riville, koska se oli tyhj√§ tai nolla")."!</font><br>";
                 }
               }
             } else {
-              echo "<font class='error'>".t("VIRHE: Saapumiselle ei voi liitt‰‰ rivej‰, koska se on poistettu")."!</font><br>";
+              echo "<font class='error'>".t("VIRHE: Saapumiselle ei voi liitt√§√§ rivej√§, koska se on poistettu")."!</font><br>";
             }
           }
         }
       }
-      if ($ok==0) echo "<font class='error'>".t("Rivi")." $rivino ".t("Tuotenumero").": $tuote_etsi ".t("M‰‰r‰").": $apukpl ".t("EI voitu kohdistaa laskuun")."!<br></font>";
+      if ($ok==0) echo "<font class='error'>".t("Rivi")." $rivino ".t("Tuotenumero").": $tuote_etsi ".t("M√§√§r√§").": $apukpl ".t("EI voitu kohdistaa laskuun")."!<br></font>";
 
       //haetaan seuraava rivi
       $rivi = fgets($file);
@@ -314,7 +314,7 @@ else {
       <td>".t("Tilausnumero")."</td>
       <td>".t("Toim_tuoteno")."</td>
       <td>".t("Tuoteno")."</td>
-      <td>".t("M‰‰r‰")."</td>
+      <td>".t("M√§√§r√§")."</td>
       <td>".t("Hinta")."</td>";
   //    <td>".t("Kuluhinta")."</td>
   echo "  </tr>
@@ -323,14 +323,14 @@ else {
       <br>
       <table>";
   echo "<tr><th>".t("Valitse kohdistustapa").": </th><td><select name='hyvaksy'>";
-  echo "<option value=''>".t("Tiedostossa oleva kpl on oltava sama kuin rivill‰ oleva kpl")."</option>";
+  echo "<option value=''>".t("Tiedostossa oleva kpl on oltava sama kuin rivill√§ oleva kpl")."</option>";
   echo "<option value='LOJ'>".t("Kohdista tiedostossa oleva kpl ja merkkaa erotus JT:ksi")."</option>";
-  echo "<option value='LOP'>".t("Kohdista tiedostossa oleva kpl ja poista ylij‰‰v‰t kpl:‰t")."</option>";
+  echo "<option value='LOP'>".t("Kohdista tiedostossa oleva kpl ja poista ylij√§√§v√§t kpl:√§t")."</option>";
   echo "  </select></td></tr>";
 
-  echo "<tr><th>".t("P‰ivitet‰‰nkˆ hinnat?").": </th><td><select name='paivi'>";
-  echo "<option value=''>".t("Tiedostossa oleva hinta EI PƒIVITETƒ riville")."</option>";
-  echo "<option value='JOO'>".t("Tiedostossa oleva hinta PƒIVITETƒƒN riville")."</option>";
+  echo "<tr><th>".t("P√§ivitet√§√§nk√∂ hinnat?").": </th><td><select name='paivi'>";
+  echo "<option value=''>".t("Tiedostossa oleva hinta EI P√ÑIVITET√Ñ riville")."</option>";
+  echo "<option value='JOO'>".t("Tiedostossa oleva hinta P√ÑIVITET√Ñ√ÑN riville")."</option>";
   echo "  </select></td></tr>";
 
   echo "<tr><th>".t("Valitse tiedosto").":</th>
@@ -340,6 +340,6 @@ else {
       </table>
 
       </form>";
-  //pys‰hdyt‰‰n t‰h‰n
+  //pys√§hdyt√§√§n t√§h√§n
   exit;
 }

@@ -1,13 +1,13 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 if (isset($_POST['tiliote']) and $_POST['tiliote'] == '1') {
   $nayta_pdf = 1;
 }
 
-// DataTables p‰‰lle
+// DataTables p√§√§lle
 $pupe_DataTables = "astilmyrerap";
 
 require ("../inc/parametrit.inc");
@@ -45,7 +45,7 @@ if ((isset($tiliote) and $tiliote == '1') or (!empty($tee) and $tee == 'TULOSTA_
     pupesoft_sahkoposti($params);
 
     echo "<font class='info'>";
-    echo t("Tiliote l‰hetettiin osoitteeseen").": {$asiakasrow['email']}<br><br>";
+    echo t("Tiliote l√§hetettiin osoitteeseen").": {$asiakasrow['email']}<br><br>";
     echo "</font>";
   }
 
@@ -65,8 +65,8 @@ if (!empty($tee) and $tee == 'TULOSTA_EMAIL_LASKUT' and !empty($laskunrot)) {
 
   echo "<font class='info'>";
 
-  if (strpos($laskunrot, ",") !== FALSE) echo t("Laskut l‰hetettiin osoitteeseen"),": {$asiakasemail}";
-  else echo t("Lasku l‰hetettiin osoitteeseen"),": {$asiakasemail}";
+  if (strpos($laskunrot, ",") !== FALSE) echo t("Laskut l√§hetettiin osoitteeseen"),": {$asiakasemail}";
+  else echo t("Lasku l√§hetettiin osoitteeseen"),": {$asiakasemail}";
 
   echo "</font><br /><br />";
 
@@ -84,8 +84,8 @@ if (!isset($valintra)) $valintra = "";
 if ($tee == "") {
 
   /* visuaalinen esitys maksunopeudesta (hymynaama) */
-  /* palauttaa listan arvoja, joissa ensimm‰isess‰ on
-   * pelkk‰ img-tagi oikeaan naamaan ja toisessa
+  /* palauttaa listan arvoja, joissa ensimm√§isess√§ on
+   * pelkk√§ img-tagi oikeaan naamaan ja toisessa
    * koko maksunopeus-HTML
    */
 
@@ -123,7 +123,7 @@ if ($tee == "") {
       $kuva = "asiakas_jee.gif";
     }
 
-    $html = t("Myˆh‰ss‰ maksettuja laskuja").": ".sprintf('%.0f', $maksunopeus)."%";
+    $html = t("My√∂h√§ss√§ maksettuja laskuja").": ".sprintf('%.0f', $maksunopeus)."%";
     $kuvaurl = "<img valign='bottom' src='${palvelin2}pics/$kuva'>";
 
     return array($kuvaurl, $html);
@@ -150,7 +150,7 @@ if ($tee == "") {
           var val = $('#valintra').val();
 
           if (val == 'eraantyneet') {
-            $('#infoteksti').html('",t("Er‰‰ntyneet laskut"),"');
+            $('#infoteksti').html('",t("Er√§√§ntyneet laskut"),"');
           }
           else if (val == 'maksetut') {
             $('#infoteksti').html('",t("Maksetut laskut"),"');
@@ -199,7 +199,7 @@ if ($tee == "") {
             event.preventDefault();
 
             if ($('#laskunrot').val() == '') {
-              alert('".t("Et valinnut yht‰‰n laskua")."!');
+              alert('".t("Et valinnut yht√§√§n laskua")."!');
               return false;
             }
 
@@ -229,7 +229,7 @@ if ($tee == "") {
 
       $asiakasrow = mysql_fetch_array($result);
 
-      // ekotetaan javascripti‰ jotta saadaan pdf:‰t uuteen ikkunaan
+      // ekotetaan javascripti√§ jotta saadaan pdf:√§t uuteen ikkunaan
       js_openFormInNewWindow();
 
       $asiakasid   = $asiakasrow['tunnus'];
@@ -314,7 +314,7 @@ if ($tee == "") {
       echo "<table>
         <tr>
         <th rowspan='$riveja'><a href='".$palvelin2."crm/asiakasmemo.php?ytunnus=$ytunnus&asiakasid=$asiakasid&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////tila=$tila//ytunnus=$ytunnus//asiakasid=$asiakasid//alatila=$alatila//lopetus=$lopetus//valintra=$valintra//savalkoodi=$savalkoodi//ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl'>$asiakasrow[nimi]</a></th>
-        <td rowspan='$riveja'>".t("Kaatotilill‰")."</td>";
+        <td rowspan='$riveja'>".t("Kaatotilill√§")."</td>";
 
       if (mysql_num_rows($kaatoresult) > 1) { // Valuuttasummia
         $kotisumma = 0;
@@ -351,7 +351,7 @@ if ($tee == "") {
 
       echo "<tr>
         <th rowspan='$riveja'>$ytunnus ($nimet)</th>
-        <td rowspan='$riveja'>".t("Myˆh‰ss‰ olevia laskuja yhteens‰")."</td>";
+        <td rowspan='$riveja'>".t("My√∂h√§ss√§ olevia laskuja yhteens√§")."</td>";
 
       if (mysql_num_rows($result) > 1) { // Valuuttasummia
         $kotisumma = 0;
@@ -379,7 +379,7 @@ if ($tee == "") {
       echo "
         <tr>
         <th rowspan='$riveja'>$asiakasrow[osoite]</th>
-        <td rowspan='$riveja'>".t("Avoimia laskuja yhteens‰")."</td>";
+        <td rowspan='$riveja'>".t("Avoimia laskuja yhteens√§")."</td>";
 
       if (mysql_num_rows($result) > 1) { // Valuuttasummia
         $kotisumma = 0;
@@ -412,7 +412,7 @@ if ($tee == "") {
 
       if ($asiakasrow['email'] != '') {
         echo "<tr>";
-        echo "<th>",t("S‰hkˆpostiosoite"),"</th>";
+        echo "<th>",t("S√§hk√∂postiosoite"),"</th>";
         echo "<td colspan='2'>{$asiakasrow['email']}</td>";
         echo "</tr>";
       }
@@ -439,7 +439,7 @@ if ($tee == "") {
       if (!isset($pp)) $pp = date("j");
 
       echo "<table>";
-      echo "<tr><th>",t("Tiliote p‰iv‰lle"),"</th>
+      echo "<tr><th>",t("Tiliote p√§iv√§lle"),"</th>
           <td>
           <form id='tulosta_tiliote' name='tulosta_tiliote' method='post'>
           <input type='hidden' name = 'tee' value = 'NAYTATILAUS'>
@@ -466,7 +466,7 @@ if ($tee == "") {
             <input type='hidden' name = 'pp' id='pp_hidden' value='{$pp}' size=2>
             <input type='hidden' name = 'kk' id='kk_hidden' value='{$kk}' size=2>
             <input type='hidden' name = 'vv' id='vv_hidden' value='{$vv}' size=4>
-            <input type='submit' value='",t("L‰het‰ tiliote asiakkaan s‰hkˆpostiin"),": {$asiakasrow['email']}' />
+            <input type='submit' value='",t("L√§het√§ tiliote asiakkaan s√§hk√∂postiin"),": {$asiakasrow['email']}' />
             </form>
           </td>";
       }
@@ -476,7 +476,7 @@ if ($tee == "") {
 
       echo "<table><tr><td class='back'>";
 
-      // ik‰analyysi
+      // ik√§analyysi
       echo "<br><table><tr><th>&lt; -2</th><th>-2 - -1</th><th>0 - 15</th><th>16 - 30</th><th>31 - 60</th><th>&gt; 60</th></tr>";
 
       $palkki_korkeus = 20;
@@ -521,7 +521,7 @@ if ($tee == "") {
       echo "<br>$naama<br>$nopeushtml</td>";
       echo "</tr></table><br>";
 
-      //n‰ytet‰‰nkˆ maksetut vai avoimet
+      //n√§ytet√§√§nk√∂ maksetut vai avoimet
       $chk1 = $chk2 = $chk3 = $chk4 = '';
 
       if ($valintra == 'maksetut') {
@@ -586,11 +586,11 @@ if ($tee == "") {
 
       echo "<table>";
       echo "<tr>
-          <th>".t("N‰yt‰").":</th>
+          <th>".t("N√§yt√§").":</th>
           <td>
           <select name='valintra' id='valintra'>
           <option value='' $chk1>".t("Avoimet laskut")."</option>
-          <option value='eraantyneet' $chk4>".t("Er‰‰ntyneet laskut")."</option>
+          <option value='eraantyneet' $chk4>".t("Er√§√§ntyneet laskut")."</option>
           <option value='maksetut' $chk2>".t("Maksetut laskut")."</option>
           <option value='kaikki' $chk3>".t("Kaikki laskut")."</option>
           </select>
@@ -623,7 +623,7 @@ if ($tee == "") {
       echo "</tr>";
 
       echo "<tr>";
-      echo "<th>".t('Alkup‰iv‰m‰‰r‰')."</th>";
+      echo "<th>".t('Alkup√§iv√§m√§√§r√§')."</th>";
       echo "<td>";
       echo "<input type='text' id='ppa' name='ppa' value='{$ppa}' size='3'/>";
       echo "<input type='text' id='kka' name='kka' value='{$kka}' size='3' />";
@@ -631,7 +631,7 @@ if ($tee == "") {
       echo "</td>";
       echo "<tr>";
       echo "<tr>";
-      echo "<th>".t('Loppup‰iv‰m‰‰r‰')."</th>";
+      echo "<th>".t('Loppup√§iv√§m√§√§r√§')."</th>";
       echo "<td>";
       echo "<input type='text' id='ppl' name='ppl' value='{$ppl}' size='3' />";
       echo "<input type='text' id='kkl' name='kkl' value='{$kkl}' size='3' />";
@@ -658,13 +658,13 @@ if ($tee == "") {
         echo "<tr>";
         echo "<th valign='top'>".t("Laskunro")."</th>";
         echo "<th valign='top'>".t("Pvm")."</th>";
-        echo "<th valign='top'>".t("Er‰p‰iv‰")."</th>";
+        echo "<th valign='top'>".t("Er√§p√§iv√§")."</th>";
         echo "<th valign='top'>".t("Summa")."</th>";
         echo "<th valign='top'>".t("Avoinsaldo")."</th>";
         echo "<th valign='top'>".t("Kassa-ale")."<br>".t("pvm")."</th>";
         echo "<th valign='top'>".t("Kassa-ale")."<br>".t("summa")."</th>";
         echo "<th valign='top'>".t("Maksu")."<br>".t("pvm")."</th>";
-        echo "<th valign='top'>".t("Ik‰")."</th>";
+        echo "<th valign='top'>".t("Ik√§")."</th>";
         echo "<th valign='top'>".t("Korko")."</th>";
         echo "<th valign='top'>".t("Korkolasku")."<br>".t("pvm")."</th>";
         echo "<th valign='top'>".t("Osasuoritukset")."</th>";
@@ -764,7 +764,7 @@ if ($tee == "") {
 
           echo "<td align='right'>";
 
-          // jos rahatilej‰ lˆytyy etsit‰‰n suoritukst
+          // jos rahatilej√§ l√∂ytyy etsit√§√§n suoritukst
           if ($ratiro["rahatilit"] != "") {
             $query = "SELECT *
                       FROM tiliointi USE INDEX (tositerivit_index)
@@ -774,7 +774,7 @@ if ($tee == "") {
                       korjattu    = ''";
             $lasktilitre = pupe_query($query);
 
-            // listataan osasuoritukset jos maksup‰iv‰ on nollaa tai jos niit‰ on oli yks
+            // listataan osasuoritukset jos maksup√§iv√§ on nollaa tai jos niit√§ on oli yks
             if ($maksurow["mapvm"] == "0000-00-00" or mysql_num_rows($lasktilitre) > 1) {
               while ($lasktilitro = mysql_fetch_array($lasktilitre)) {
                 if ($lasktilitro["summa_valuutassa"] != 0 and $lasktilitro["valkoodi"] != $yhtiorow["valkoodi"] and $lasktilitro["valkoodi"] != "") {
@@ -807,7 +807,7 @@ if ($tee == "") {
         echo "</tbody>";
 
         echo "<tfoot>";
-        echo "<tr><th colspan='3'>".t("Yhteens‰")."</th>";
+        echo "<tr><th colspan='3'>".t("Yhteens√§")."</th>";
         echo "<th style='text-align:right'>";
 
         if (count($totaali) > 0) {
@@ -853,7 +853,7 @@ if ($tee == "") {
               <input type='hidden' name = 'asiakasid' value='{$asiakasrow['tunnus']}' />
               <input type='hidden' name = 'ytunnus' value='{$ytunnus}' />
               <input type='hidden' name = 'valintra' value='{$valintra}' />
-              <input type='submit' id='laskunrot_submit' value='",t("L‰het‰ laskukopiot valituista laskuista asiakkaan s‰hkˆpostiin"),": {$asiakasrow['email']}' />
+              <input type='submit' id='laskunrot_submit' value='",t("L√§het√§ laskukopiot valituista laskuista asiakkaan s√§hk√∂postiin"),": {$asiakasrow['email']}' />
               </form>
               </td>
               </tr>";
@@ -885,7 +885,7 @@ if ($tee == "") {
             <input type='hidden' name = 'kk' id='kk_hidden' value='{$kk}' size=2>
             <input type='hidden' name = 'vv' id='vv_hidden' value='{$vv}' size=4>
             <input type='hidden' name = 'valintra' value='{$valintra}' />
-            <input type='submit' value='",t("L‰het‰ asiakkaan s‰hkˆpostiin"),": {$asiakasrow['email']}' />
+            <input type='submit' value='",t("L√§het√§ asiakkaan s√§hk√∂postiin"),": {$asiakasrow['email']}' />
             </form>
             </td>";
         }

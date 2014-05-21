@@ -1,7 +1,7 @@
 <?php
 
-$otsikko = 'Yhtiön toimipaikat';
-$otsikko_nappi   = 'yhtiön toimipaikka';
+$otsikko = 'YhtiÃ¶n toimipaikat';
+$otsikko_nappi   = 'yhtiÃ¶n toimipaikka';
 
 $kentat = 'tunnus, nimi, ovtlisa, postitp, yhtio HIDDEN_yhtio';
 $hakukentat = 'tunnus, nimi, ovtlisa, postitp, yhtio';

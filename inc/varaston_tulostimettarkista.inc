@@ -15,7 +15,7 @@ if(!function_exists("varaston_tulostimettarkista")) {
       $alkuhyllyalue = $t[$i];
 
       if (trim($t[$i]) == '') {
-        $virhe[$i] .= t("Alkuhyllyalue ei saa olla tyhji‰")."!";
+        $virhe[$i] .= t("Alkuhyllyalue ei saa olla tyhji√§")."!";
       }
     }
 
@@ -24,7 +24,7 @@ if(!function_exists("varaston_tulostimettarkista")) {
       $alkuhyllynro = $t[$i];
 
       if (trim($t[$i]) == '') {
-        $virhe[$i] .= t("Alkuhyllynro ei saa olla tyhji‰")."!";
+        $virhe[$i] .= t("Alkuhyllynro ei saa olla tyhji√§")."!";
       }
     }
 
@@ -33,7 +33,7 @@ if(!function_exists("varaston_tulostimettarkista")) {
       $loppuhyllyalue = $t[$i];
 
       if (trim($t[$i]) == '') {
-        $virhe[$i] .= t("Loppuhyllyalue ei saa olla tyhji‰")."!";
+        $virhe[$i] .= t("Loppuhyllyalue ei saa olla tyhji√§")."!";
       }
     }
 
@@ -42,7 +42,7 @@ if(!function_exists("varaston_tulostimettarkista")) {
       $loppuhyllynro = $t[$i];
 
       if (trim($t[$i]) == '') {
-        $virhe[$i] .= t("Loppuhyllynro ei saa olla tyhji‰")."!";
+        $virhe[$i] .= t("Loppuhyllynro ei saa olla tyhji√§")."!";
       }
 
       //Katotaan osuuko alkuhyllyalue johonkin tulostusalueeseen
@@ -67,7 +67,7 @@ if(!function_exists("varaston_tulostimettarkista")) {
           $vares = mysql_query($query) or pupe_error($query);
 
           if (mysql_num_rows($vares) == 0) {
-            //Katotaan onko jo jonkun tulostusalueen sis‰ll‰
+            //Katotaan onko jo jonkun tulostusalueen sis√§ll√§
             $query = "SELECT tunnus
                       FROM varaston_tulostimet
                       WHERE
@@ -80,14 +80,14 @@ if(!function_exists("varaston_tulostimettarkista")) {
       }
 
       if (mysql_num_rows($vares) != 0) {
-        $virhe[$i] .= t("P‰‰llekk‰isi‰ varastoalueita")."!";
+        $virhe[$i] .= t("P√§√§llekk√§isi√§ varastoalueita")."!";
       }
 
       $alku = kuuluukovarastoon($alkuhyllyalue, $alkuhyllynro, $varasto);
       $loppu = kuuluukovarastoon($loppuhyllyalue, $loppuhyllynro, $varasto);
 
       if ($alku == 0 or $loppu == 0) {
-        $virhe[$i] .= t("Tulostusalue ei ole varastonalueen sis‰ll‰")."!";
+        $virhe[$i] .= t("Tulostusalue ei ole varastonalueen sis√§ll√§")."!";
       }
     }
 

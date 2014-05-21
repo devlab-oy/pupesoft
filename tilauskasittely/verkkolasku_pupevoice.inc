@@ -7,7 +7,7 @@ if (!function_exists('pupevoice_otsik')) {
     $fstat = fstat($tootxml);
 
     if ($fstat["size"] == 0) {
-      //tehd‰‰n verkkolasku oliot
+      //tehd√§√§n verkkolasku oliot
       fputs($tootxml, "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n");
       fputs($tootxml, "<Pupevoice Version=\"0.99\">\n");
     }
@@ -31,7 +31,7 @@ if (!function_exists('pupevoice_otsik')) {
     fputs($tootxml, "</CHN>\n");
     fputs($tootxml, "<SellerPartyInformation>\n");
 
-    // yhtiˆtiedot
+    // yhti√∂tiedot
     $y_tiedot_ok  = FALSE;
     $y_nimi     = $lasrow["yhtio_nimi"];
     $y_osoite     = $lasrow["yhtio_osoite"];
@@ -39,7 +39,7 @@ if (!function_exists('pupevoice_otsik')) {
     $y_postitp     = $lasrow["yhtio_postitp"];
     $y_maa       = $lasrow["yhtio_maa"];
     $y_kotipaikka  = $lasrow["yhtio_kotipaikka"];
-    $y_vatnumero  = $lasrow["yhtio_ovttunnus"]; # Huom t‰t‰ ei tule muuttaa, Itella tunnustaa l‰hett‰j‰n t‰st‰ kent‰st‰.
+    $y_vatnumero  = $lasrow["yhtio_ovttunnus"]; # Huom t√§t√§ ei tule muuttaa, Itella tunnustaa l√§hett√§j√§n t√§st√§ kent√§st√§.
     $y_iban     = $yhtiorow['pankkiiban1'];
     $y_swift     = $yhtiorow['pankkiswift1'];
 
@@ -59,7 +59,7 @@ if (!function_exists('pupevoice_otsik')) {
       }
     }
 
-    // jos meill‰ on lasku menossa ulkomaille ja se laskutetaan eri ovttunnuksella
+    // jos meill√§ on lasku menossa ulkomaille ja se laskutetaan eri ovttunnuksella
     if ($lasrow["yhtio_ovttunnus"] != "" and $lasrow["yhtio_ovttunnus"] != $yhtiorow["ovttunnus"]) {
       // haetaan toimipaikan tiedot
       $alhqur = "SELECT puhelin, fax, email, www from yhtion_toimipaikat where yhtio='$lasrow[yhtio]' and vat_numero='$lasrow[yhtio_ovttunnus]'";
@@ -76,7 +76,7 @@ if (!function_exists('pupevoice_otsik')) {
       }
     }
 
-    // jos ei olla haettu muualta, niin haetaan tiedot yhtiˆlt‰
+    // jos ei olla haettu muualta, niin haetaan tiedot yhti√∂lt√§
     if (!$y_tiedot_ok) {
       // haetaan toimipaikan tiedot
       $alhqur = "SELECT puhelin, fax, email, www from yhtio where yhtio='$lasrow[yhtio]'";
@@ -167,7 +167,7 @@ if (!function_exists('pupevoice_otsik')) {
       xml_add("InvoiceRecipientCountryCode",    $lasosrow['laskutus_maa'],              $tootxml);
     }
 
-    // N‰m‰ solut lis‰t‰‰n vain jos pupevoice on l‰hdˆss‰ servinettiin
+    // N√§m√§ solut lis√§t√§√§n vain jos pupevoice on l√§hd√∂ss√§ servinettiin
     if ($yhtiorow['verkkolasku_lah'] == "servinet") {
 
       //haetaan toimitustavan tiedot
@@ -224,8 +224,8 @@ if (!function_exists('pupevoice_rivi')) {
     global $yhtiorow, $kukarow;
 
     fputs($tootxml, "<Row>\n");
-    xml_add("OrderIdentifier",          $tilrow['otunnus'],             $tootxml); // t‰m‰ on tilauksen numero meill‰, ei kuulu standardiin mutta se on pakko lis‰t‰
-    xml_add("RowDeliveryIdentifier",      $tilrow['otunnus'],             $tootxml); // t‰m‰ on tilauksen numero meill‰, t‰m‰ taas kuuluu standardiin
+    xml_add("OrderIdentifier",          $tilrow['otunnus'],             $tootxml); // t√§m√§ on tilauksen numero meill√§, ei kuulu standardiin mutta se on pakko lis√§t√§
+    xml_add("RowDeliveryIdentifier",      $tilrow['otunnus'],             $tootxml); // t√§m√§ on tilauksen numero meill√§, t√§m√§ taas kuuluu standardiin
     xml_add("ArticleIdentifier",        $tilrow['tuoteno'],             $tootxml);
     xml_add("ArticleEANIdentifier",        $tilrow['eankoodi'],             $tootxml);
     xml_add("ArticleName",            $tilrow['nimitys'],             $tootxml);
@@ -247,27 +247,27 @@ if (!function_exists('pupevoice_rivi')) {
     xml_add("DeliveredQuantityUnitCode",    $tilrow['yksikko'],              $tootxml);
     xml_add("DeliveryDate",            vlas_dateconv($tilrow['toimitettuaika']),  $tootxml);
     xml_add("UnitPrice",            $tilrow['hinta'],               $tootxml);
-    xml_add("RowIdentifier",          $tilrow['tilaajanrivinro'],         $tootxml); // t‰nne laitetaan asiakkaan rivinumero, niin saavat parseroida senkin laskuista
+    xml_add("RowIdentifier",          $tilrow['tilaajanrivinro'],         $tootxml); // t√§nne laitetaan asiakkaan rivinumero, niin saavat parseroida senkin laskuista
 
     $alennukset_yhteensa = generoi_alekentta_php($tilrow, 'M', 'plain');
 
     xml_add("RowDiscountPercent",        $alennukset_yhteensa,            $tootxml);
 
     xml_add("RowVatRatePercent",        $tilrow['alv'],               $tootxml);
-    xml_add("RowVatAmount",            $vatamount,                 $tootxml); // veron m‰‰r‰
+    xml_add("RowVatAmount",            $vatamount,                 $tootxml); // veron m√§√§r√§
     xml_add("RowTotalVatExcludedAmount",    $tilrow['rivihinta'],             $tootxml); // veroton rivihinta
     xml_add("RowTotalVatIncludedAmount",    $tilrow["rivihinta_verollinen"],       $tootxml); // verollinen rivihinta
 
-    // Jos t‰m‰ on t‰n tilauksen vika rivi
+    // Jos t√§m√§ on t√§n tilauksen vika rivi
     if ($tilrow['tuoteno'] != $yhtiorow["kuljetusvakuutus_tuotenumero"] and $tilrow['tuoteno'] != $yhtiorow["laskutuslisa_tuotenumero"] and $tilrow['seuraava_otunnus'] != $tilrow["otunnus"]) {
       $lisakomm = "";
 
-      // Laitetaan tilausviite t‰h‰n
+      // Laitetaan tilausviite t√§h√§n
       if ($tilrow["laskuviesti"] != "") {
         $lisakomm .= $tilrow["laskuviesti"];
       }
 
-      // T‰m‰ on tilauksen vika rivi, laitetaan tyˆm‰‰rystiedot t‰h‰n
+      // T√§m√§ on tilauksen vika rivi, laitetaan ty√∂m√§√§rystiedot t√§h√§n
       $query = "SELECT tyomaarays.*
                 FROM lasku
                 JOIN tyomaarays ON lasku.yhtio=tyomaarays.yhtio and lasku.tunnus=tyomaarays.otunnus
@@ -279,7 +279,7 @@ if (!function_exists('pupevoice_rivi')) {
       if (mysql_num_rows($tyomres) > 0) {
         while ($tyomrow = mysql_fetch_assoc($tyomres)) {
 
-          $lisakomm .= "|".t("Tyˆm‰‰r‰ys", $kieli). ": $tyomrow[otunnus]";
+          $lisakomm .= "|".t("Ty√∂m√§√§r√§ys", $kieli). ": $tyomrow[otunnus]";
 
           $al_res = t_avainsana("TYOM_TYOKENTAT", $kieli, "and avainsana.selitetark != '' and avainsana.nakyvyys in ('K','L')");
 
@@ -323,8 +323,8 @@ if (!function_exists('pupevoice_rivi')) {
       }
 
       if (trim($lisakomm) != "") {
-        // Siivotaan myˆs lis‰kommentti
-        $lisakomm = preg_replace("/[^A-Za-z0-9÷ˆƒ‰≈Â‹¸ ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $lisakomm);
+        // Siivotaan my√∂s lis√§kommentti
+        $lisakomm = preg_replace("/[^A-Za-z0-9√ñ√∂√Ñ√§√Ö√•√ú√º ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $lisakomm);
 
         $tilrow["kommentti"] = trim($lisakomm)."|".trim($tilrow["kommentti"]);
       }

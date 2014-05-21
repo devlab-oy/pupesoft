@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 if (isset($_POST["tee"])) {
@@ -27,7 +27,7 @@ if ($tee == 'lataa_tiedosto') {
   exit;
 }
 
-//ajax requestit t‰nne
+//ajax requestit t√§nne
 if ($ajax_request) {
 
 }
@@ -65,7 +65,7 @@ $request = array(
 $request['alku_pvm'] = $request['ppa'].'.'.$request['kka'].'.'.$request['vva'];
 $request['loppu_pvm'] = $request['ppl'].'.'.$request['kkl'].'.'.$request['vvl'];
 
-//jos requestista ei tule p‰iv‰‰ niin asetetaan t‰m‰p‰iv‰ - 30
+//jos requestista ei tule p√§iv√§√§ niin asetetaan t√§m√§p√§iv√§ - 30
 if (empty($request['ppa']) or empty($request['kka']) or empty($request['vva'])) {
   $request['alku_pvm'] = date('d.m.Y', strtotime('now - 30 day'));
   $pvm_array = explode('.', $request['alku_pvm']);
@@ -74,7 +74,7 @@ if (empty($request['ppa']) or empty($request['kka']) or empty($request['vva'])) 
   $request['vva'] = $pvm_array[2];
 }
 
-//jos requestista ei tule p‰iv‰‰ niin asetetaan t‰m‰p‰iv‰
+//jos requestista ei tule p√§iv√§√§ niin asetetaan t√§m√§p√§iv√§
 if (empty($request['ppl']) or empty($request['kkl']) or empty($request['vvl'])) {
   $request['loppu_pvm'] = date('d.m.Y', strtotime('now'));
   $pvm_array = explode('.', $request['loppu_pvm']);
@@ -104,11 +104,11 @@ else {
 
     if ($validator->validate($request)) {
       $tilaukset = hae_tilaukset($request);
-      //esitell‰‰n tilaus tyypit t‰ss‰ jotta validaatio luokka ei yrit‰ valitoida niit‰.
+      //esitell√§√§n tilaus tyypit t√§ss√§ jotta validaatio luokka ei yrit√§ valitoida niit√§.
       $request['tyypit'] = array(
         'L'   => t("Myyntitilaus"),
         'O'   => t("Ostotilaus"),
-        'A'   => t("Tyˆm‰‰r‰ys"),
+        'A'   => t("Ty√∂m√§√§r√§ys"),
       );
       echo_tilaukset_raportti($tilaukset, $request);
     }
@@ -143,12 +143,12 @@ function hae_tilaukset($request) {
 
   $lasku_where = "";
   if ($request['alku_pvm'] and $request['loppu_pvm']) {
-    //loppu_pvm + 1 day, koska queryss‰ between ja luontiaika on datetime
+    //loppu_pvm + 1 day, koska queryss√§ between ja luontiaika on datetime
     $lasku_where = " AND lasku.luontiaika BETWEEN '".date('Y-m-d', strtotime($request['alku_pvm']))."' AND '".date('Y-m-d', strtotime($request['loppu_pvm'].' + 1 day'))."'";
   }
 
   $queryt = array();
-  //jos haetaan asiakkaita haetaan vain myyntitilauksia ja tyˆm‰‰r‰yksi‰ koska ostotilauksilla ei ole asiakasta
+  //jos haetaan asiakkaita haetaan vain myyntitilauksia ja ty√∂m√§√§r√§yksi√§ koska ostotilauksilla ei ole asiakasta
   if (!empty($request['asiakas'])) {
     $queryt[] = "  (
             SELECT lasku.tunnus,
@@ -202,7 +202,7 @@ function hae_tilaukset($request) {
             )";
   }
 
-  //jos haetaan toimittajia haetaan vain ostotilauksia koska myyntitilauksia ja tyˆm‰‰r‰yksi‰ ei ole toimittajia
+  //jos haetaan toimittajia haetaan vain ostotilauksia koska myyntitilauksia ja ty√∂m√§√§r√§yksi√§ ei ole toimittajia
   if (!empty($request['toimittaja'])) {
     $queryt[] = "  (
             SELECT lasku.tunnus,
@@ -239,7 +239,7 @@ function hae_tilaukset($request) {
     $query = substr($query, 0, -6);
   }
   else {
-    //jos queryt on empty asiakkaaseen tai toimittajaan ei ole syˆtetty mit‰‰n. t‰llˆin haetaan kaikista tilaustyypeist‰
+    //jos queryt on empty asiakkaaseen tai toimittajaan ei ole sy√∂tetty mit√§√§n. t√§ll√∂in haetaan kaikista tilaustyypeist√§
     $query = "  (
             SELECT lasku.tunnus,
             asiakas.nimi as nimi,
@@ -398,7 +398,7 @@ function echo_kayttoliittyma($request) {
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>".t("P‰iv‰m‰‰r‰v‰li")."</th>";
+  echo "<th>".t("P√§iv√§m√§√§r√§v√§li")."</th>";
   echo "<td>";
   echo "<input type='text' class='date_input' name='ppa' value='{$request['ppa']}' />";
   echo " ";

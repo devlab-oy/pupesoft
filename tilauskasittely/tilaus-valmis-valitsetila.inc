@@ -8,10 +8,10 @@ $kerattavia   = 0;
 $ei_kerattavia   = 0;
 $tilaus_valmis_message = "";
 
-// Pamautetaan toimitusvahvistus asiakkaalle jos menn‰‰n haaraan jossa ei toimiteta mit‰‰n
+// Pamautetaan toimitusvahvistus asiakkaalle jos menn√§√§n haaraan jossa ei toimiteta mit√§√§n
 $toimitusvahvitus_laheta = FALSE;
 
-// etuk‰teen maksettu lasku, pit‰‰ huomioida myˆs kpl
+// etuk√§teen maksettu lasku, pit√§√§ huomioida my√∂s kpl
 if (($laskurow["tila"] == "L" or $laskurow["tila"] == "N") and $laskurow["mapvm"] != '0000-00-00' and $laskurow["mapvm"] != '') {
   $lis_plus_kpl = " + tilausrivi.kpl";
 }
@@ -42,31 +42,31 @@ $query = "SELECT count(*) riveja,
 $tresult = pupe_query($query);
 $rivirow = mysql_fetch_array($tresult);
 
-// Ker‰tt‰v‰t ja ei ker‰tt‰v‰ rivit
+// Ker√§tt√§v√§t ja ei ker√§tt√§v√§ rivit
 $kerattavia = $rivirow["normaalit_kerataan"];
 $ei_kerattavia = $rivirow["saldottomat"] + $rivirow["hyvitykset"];
 
-// Toimitettuja rivej‰ ei ker‰t‰ ikin‰
+// Toimitettuja rivej√§ ei ker√§t√§ ikin√§
 $ei_kerattavia += $rivirow["toimitetut"];
 $kerattavia -= $rivirow["toimitetut"];
 
 /*
 puute_jt_kerataanko
-''  Puuterivej‰ ja JT-rivej‰ EI ker‰t‰
-'P' Puuterivit ker‰t‰‰n
-'J' JT-rivit ker‰t‰‰n
-'Q' Puuterivit ja JT-rivit ker‰t‰‰n
+''  Puuterivej√§ ja JT-rivej√§ EI ker√§t√§
+'P' Puuterivit ker√§t√§√§n
+'J' JT-rivit ker√§t√§√§n
+'Q' Puuterivit ja JT-rivit ker√§t√§√§n
 
 kerataanko_jos_vain_puute_jt
-''  Tilausta EI ker‰t‰ jos listalla on vain Puuterivej‰ JA/TAI JT-rivej‰
-'P' Tilaus ker‰t‰‰n jos listalla on vain Puuterivej‰
-'J' Tilaus ker‰t‰‰n jos listalla on vain JT-rivej‰
-'Q' Tilaus ker‰t‰‰n jos listalla on vain Puuterivej‰ JA/TAI JT-rivej‰
+''  Tilausta EI ker√§t√§ jos listalla on vain Puuterivej√§ JA/TAI JT-rivej√§
+'P' Tilaus ker√§t√§√§n jos listalla on vain Puuterivej√§
+'J' Tilaus ker√§t√§√§n jos listalla on vain JT-rivej√§
+'Q' Tilaus ker√§t√§√§n jos listalla on vain Puuterivej√§ JA/TAI JT-rivej√§
 */
 
-// ei lasketa ker‰tt‰vi‰/eiker‰tt‰vi‰ m‰‰ri‰ jos ollaan ker‰‰.phpssa, koska silloin kaikki on varmasti ker‰tt‰vi‰ jos ne siell‰ n‰ky
+// ei lasketa ker√§tt√§vi√§/eiker√§tt√§vi√§ m√§√§ri√§ jos ollaan ker√§√§.phpssa, koska silloin kaikki on varmasti ker√§tt√§vi√§ jos ne siell√§ n√§ky
 if (($yhtiorow["puute_jt_kerataanko"] == "P" or $yhtiorow["puute_jt_kerataanko"] == "Q") and $kutsuja != 'keraa.php') {
-  // Jos yhtio haluaa ker‰t‰ Puuterivit
+  // Jos yhtio haluaa ker√§t√§ Puuterivit
   $kerattavia += $rivirow["puutteet"];
 }
 else {
@@ -74,27 +74,27 @@ else {
 }
 
 if (($yhtiorow["puute_jt_kerataanko"] == "J" or $yhtiorow["puute_jt_kerataanko"] == "Q") and $kutsuja != 'keraa.php') {
-  // Jos yhtiˆ haluaa ker‰t‰ JT-rivit
+  // Jos yhti√∂ haluaa ker√§t√§ JT-rivit
   $kerattavia += $rivirow["jteet"];
 }
 else {
   $ei_kerattavia += $rivirow["jteet"];
 }
 
-// jos yhtiˆ haluaa ker‰t‰ puuterivej‰ niin katotaan onko meill‰ pelk‰st‰‰n tilauksella jt/puuterivej‰
+// jos yhti√∂ haluaa ker√§t√§ puuterivej√§ niin katotaan onko meill√§ pelk√§st√§√§n tilauksella jt/puuterivej√§
 if ($yhtiorow["puute_jt_kerataanko"] != "" and $kutsuja != 'keraa.php') {
   if ($rivirow["puutteet"] == $kerattavia and ($yhtiorow["puute_jt_kerataanko"] == "P" or $yhtiorow["puute_jt_kerataanko"] == "Q") and ($yhtiorow["kerataanko_jos_vain_puute_jt"] == "" or $yhtiorow["kerataanko_jos_vain_puute_jt"] == "J")) {
-    // Meill‰ on pelk‰st‰‰n puutteita ker‰tt‰v‰n‰ ja niit‰ ei t‰ss‰ tapauksessa ker‰t‰
+    // Meill√§ on pelk√§st√§√§n puutteita ker√§tt√§v√§n√§ ja niit√§ ei t√§ss√§ tapauksessa ker√§t√§
     $ei_kerattavia += $rivirow["puutteet"];
     $kerattavia     -= $rivirow["puutteet"];
   }
   elseif ($rivirow["jteet"] == $kerattavia and ($yhtiorow["puute_jt_kerataanko"] == "J" or $yhtiorow["puute_jt_kerataanko"] == "Q") and ($yhtiorow["kerataanko_jos_vain_puute_jt"] == "" or $yhtiorow["kerataanko_jos_vain_puute_jt"] == "P")) {
-    // Meill‰ on pelk‰st‰‰n JT-rivej‰ ker‰tt‰v‰n‰ ja niit‰ ei t‰ss‰ tapauksessa ker‰t‰
+    // Meill√§ on pelk√§st√§√§n JT-rivej√§ ker√§tt√§v√§n√§ ja niit√§ ei t√§ss√§ tapauksessa ker√§t√§
     $ei_kerattavia += $rivirow["jteet"];
     $kerattavia     -= $rivirow["jteet"];
   }
   elseif ($rivirow["jteet"] + $rivirow["puutteet"] == $kerattavia and $yhtiorow["puute_jt_kerataanko"] == "Q" and $yhtiorow["kerataanko_jos_vain_puute_jt"] == "") {
-    // Meill‰ on pelk‰st‰‰n JT-rivej‰ + puutteita ker‰tt‰v‰n‰ ja niit‰ ei t‰ss‰ tapauksessa ker‰t‰
+    // Meill√§ on pelk√§st√§√§n JT-rivej√§ + puutteita ker√§tt√§v√§n√§ ja niit√§ ei t√§ss√§ tapauksessa ker√§t√§
     $ei_kerattavia += $rivirow["jteet"] + $rivirow["puutteet"];
     $kerattavia     -= $rivirow["jteet"] + $rivirow["puutteet"];
   }
@@ -114,15 +114,15 @@ echo "KER: $kerattavia<br>";
 echo "EIKER: $ei_kerattavia<br>";
 // */
 
-// Tutkitaan mit‰ tehd‰‰n tilaukselle
+// Tutkitaan mit√§ tehd√§√§n tilaukselle
 if ($rivirow["riveja"] == 0 or ($kerattavia == 0 and $ei_kerattavia == 0 and $kutsuja == 'keraa.php')) {
-  // Tilauksella ei ole mit‰‰n laskutettavaa eik‰ ker‰tt‰v‰‰
+  // Tilauksella ei ole mit√§√§n laskutettavaa eik√§ ker√§tt√§v√§√§
   $query  = "UPDATE tilausrivi
              SET tyyppi='D'
              WHERE otunnus = '$laskurow[tunnus]' and yhtio = '$kukarow[yhtio]'";
   $result = pupe_query($query);
 
-  $komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mit‰tˆi ohjelmassa tilaus-valmis-valitsetila.php (1)")."<br>";
+  $komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mit√§t√∂i ohjelmassa tilaus-valmis-valitsetila.php (1)")."<br>";
 
   $query  = "UPDATE lasku
              SET tila='D', alatila='$laskurow[tila]', comments = '$komm'
@@ -130,7 +130,7 @@ if ($rivirow["riveja"] == 0 or ($kerattavia == 0 and $ei_kerattavia == 0 and $ku
              and yhtio='$kukarow[yhtio]'";
   $result = pupe_query($query);
 
-  $tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilaus %s mit‰tˆitiin koska tilauksella ei ollut yht‰‰n ker‰tt‰v‰‰/laskutettavaa rivi‰."), $laskurow["tunnus"])."</font><br><br>\n";
+  $tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilaus %s mit√§t√∂itiin koska tilauksella ei ollut yht√§√§n ker√§tt√§v√§√§/laskutettavaa rivi√§."), $laskurow["tunnus"])."</font><br><br>\n";
   $toimitusvahvitus_laheta = TRUE;
 }
 elseif ($rivirow["jteet"] > 0 and $laskurow["osatoimitus"] != '') {
@@ -141,20 +141,20 @@ elseif ($rivirow["jteet"] > 0 and $laskurow["osatoimitus"] != '') {
              and yhtio='$kukarow[yhtio]'";
   $result = pupe_query($query);
 
-  $tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s oli JT-rivej‰ ja osatoimitusta ei tehd‰, eli se j‰tettiin odottamaan JT-tuotteita."), $laskurow["tunnus"])."</font><br><br>\n";
+  $tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s oli JT-rivej√§ ja osatoimitusta ei tehd√§, eli se j√§tettiin odottamaan JT-tuotteita."), $laskurow["tunnus"])."</font><br><br>\n";
 }
 elseif ($kerattavia == 0) {
-  // Tilauskella on pelk‰st‰‰n puuterivej‰ joita ei ker‰t‰
-  // merkataan otsikko mit‰tˆidyksi, mutta j‰tet‰‰n PUUTE rivit analyysej‰ varten...
+  // Tilauskella on pelk√§st√§√§n puuterivej√§ joita ei ker√§t√§
+  // merkataan otsikko mit√§t√∂idyksi, mutta j√§tet√§√§n PUUTE rivit analyysej√§ varten...
   if ($rivirow["riveja"] == $rivirow["puutteet"]) {
-    // Jos tilauksella oli vain puuterivej‰ niin poistetaan rahtikulurivi jos sellanen on
+    // Jos tilauksella oli vain puuterivej√§ niin poistetaan rahtikulurivi jos sellanen on
     $query  = "DELETE FROM tilausrivi
                WHERE otunnus = '$laskurow[tunnus]'
                AND yhtio     = '$kukarow[yhtio]'
                AND tuoteno   = '$yhtiorow[rahti_tuotenumero]'";
     $result = pupe_query($query);
 
-    $komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mit‰tˆi ohjelmassa tilaus-valmis-valitsetila.php (2)")."<br>";
+    $komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mit√§t√∂i ohjelmassa tilaus-valmis-valitsetila.php (2)")."<br>";
 
     $query  = "UPDATE lasku
                SET tila='D', alatila='$laskurow[tila]', comments = '$komm'
@@ -162,13 +162,13 @@ elseif ($kerattavia == 0) {
                AND yhtio    = '$kukarow[yhtio]'";
     $result = pupe_query($query);
 
-    $tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s  oli pelk‰st‰‰n Puuterivej‰. Otsikko mit‰tˆitiin."), $laskurow["tunnus"])."</font><br><br>\n";
+    $tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s  oli pelk√§st√§√§n Puuterivej√§. Otsikko mit√§t√∂itiin."), $laskurow["tunnus"])."</font><br><br>\n";
     $toimitusvahvitus_laheta = TRUE;
   }
   elseif ($rivirow["riveja"] == $rivirow["jteet"]) {
 
     if ($yhtiorow["rahti_hinnoittelu"] != 'K') {
-      // Jos tilauksella oli vain jt-rivej‰ niin poistetaan rahtikulurivi jos sellanen on
+      // Jos tilauksella oli vain jt-rivej√§ niin poistetaan rahtikulurivi jos sellanen on
       $query  = "DELETE FROM tilausrivi
                  WHERE otunnus = '$laskurow[tunnus]'
                  AND yhtio     = '$kukarow[yhtio]'
@@ -182,13 +182,13 @@ elseif ($kerattavia == 0) {
                AND yhtio='$kukarow[yhtio]'";
     $result = pupe_query($query);
 
-    $tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s oli pelk‰st‰‰n JT-rivej‰ ja se j‰tettiin odottamaan JT-tuotteita."), $laskurow["tunnus"])."</font><br><br>\n";
+    $tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s oli pelk√§st√§√§n JT-rivej√§ ja se j√§tettiin odottamaan JT-tuotteita."), $laskurow["tunnus"])."</font><br><br>\n";
   }
   elseif ($rivirow["riveja"] == $rivirow["jteet"] + $rivirow["puutteet"]) {
-    // Tilauskella on pelk‰st‰‰n jt-rivej‰ ja puutteita joita ei ker‰t‰
+    // Tilauskella on pelk√§st√§√§n jt-rivej√§ ja puutteita joita ei ker√§t√§
 
     if ($yhtiorow["rahti_hinnoittelu"] != 'K') {
-      // Jos tilauksella oli vain jt/puute-rivej‰ niin poistetaan rahtikulurivi jos sellanen on
+      // Jos tilauksella oli vain jt/puute-rivej√§ niin poistetaan rahtikulurivi jos sellanen on
       $query  = "DELETE FROM tilausrivi
                  WHERE otunnus = '$laskurow[tunnus]'
                  AND yhtio     = '$kukarow[yhtio]'
@@ -196,19 +196,19 @@ elseif ($kerattavia == 0) {
       $result = pupe_query($query);
     }
 
-    // P‰ivitet‰‰n tilaus tilaan 'odottaa jt-rivej‰'
+    // P√§ivitet√§√§n tilaus tilaan 'odottaa jt-rivej√§'
     $query  = "UPDATE lasku
                SET tila='N', alatila='T'
                WHERE tunnus = '$laskurow[tunnus]'
                AND yhtio    = '$kukarow[yhtio]'";
     $result = pupe_query($query);
 
-    $tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s oli pelk‰st‰‰n JT-rivej‰ ja Puuterivej‰ ja se j‰tettiin odottamaan JT-tuotteita."), $laskurow["tunnus"])."</font><br><br>\n";
+    $tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s oli pelk√§st√§√§n JT-rivej√§ ja Puuterivej√§ ja se j√§tettiin odottamaan JT-tuotteita."), $laskurow["tunnus"])."</font><br><br>\n";
   }
   elseif ($ei_kerattavia > 0) {
     if ($kateinen == 'X' or $itsetulostus == "X" or $laskurow["vienti"] != '') {
-      // jos on laskuettavia rivej‰ ja jos kyseess‰ on k‰teist‰, itsetulostus tai vienti‰
-      // merkataan rivit ker‰tyiksi, mutta ei toimitetuiksi ja laskulle alatila alatila C/B
+      // jos on laskuettavia rivej√§ ja jos kyseess√§ on k√§teist√§, itsetulostus tai vienti√§
+      // merkataan rivit ker√§tyiksi, mutta ei toimitetuiksi ja laskulle alatila alatila C/B
       $query  = "UPDATE tilausrivi
                  SET kerattyaika = now(), keratty = '$kukarow[kuka]'
                  WHERE otunnus   = '$laskurow[tunnus]'
@@ -219,10 +219,10 @@ elseif ($kerattavia == 0) {
                  and tyyppi     != 'D'";
       $result = pupe_query($query);
 
-      // Jos on vienti‰ ja vain saldottomia niin menn‰‰n suoraan toimitetuksi
+      // Jos on vienti√§ ja vain saldottomia niin menn√§√§n suoraan toimitetuksi
       if ($laskurow["vienti"] != '' and $rivirow["riveja"] == $rivirow["saldottomat"]) {
 
-        // Jos meill‰ on maksupositioita laskulla, tulee se siirt‰‰ alatilaan J
+        // Jos meill√§ on maksupositioita laskulla, tulee se siirt√§√§ alatilaan J
         if ($laskurow['jaksotettu'] != 0) {
           $alat = "J";
         }
@@ -230,7 +230,7 @@ elseif ($kerattavia == 0) {
           $alat = "D";
         }
 
-        $tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s ei ollut yht‰‰n ker‰tt‰v‰‰ rivi‰, se merkattiin toimitetuksi."), $laskurow["tunnus"])."</font><br><br>\n";
+        $tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s ei ollut yht√§√§n ker√§tt√§v√§√§ rivi√§, se merkattiin toimitetuksi."), $laskurow["tunnus"])."</font><br><br>\n";
 
         $query  = "UPDATE tilausrivi
                    SET toimitettuaika = now(), toimitettu = '$kukarow[kuka]'
@@ -244,7 +244,7 @@ elseif ($kerattavia == 0) {
       }
       elseif ($laskurow["vienti"] != '') {
         $alat = "B";
-        $tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s ei ollut yht‰‰n ker‰tt‰v‰‰ rivi‰, se merkattiin toimitetuksi. Viennin lis‰tiedot syˆtett‰v‰."), $laskurow["tunnus"])."</font><br><br>\n";
+        $tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s ei ollut yht√§√§n ker√§tt√§v√§√§ rivi√§, se merkattiin toimitetuksi. Viennin lis√§tiedot sy√∂tett√§v√§."), $laskurow["tunnus"])."</font><br><br>\n";
 
         $query  = "UPDATE tilausrivi
                    SET toimitettuaika = now(), toimitettu = '$kukarow[kuka]'
@@ -258,7 +258,7 @@ elseif ($kerattavia == 0) {
       }
       else {
         $alat = "C";
-        $tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s ei ollut yht‰‰n ker‰tt‰v‰‰ rivi‰, se merkattiin ker‰tyksi."), $laskurow["tunnus"])."</font><br><br>\n";
+        $tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s ei ollut yht√§√§n ker√§tt√§v√§√§ rivi√§, se merkattiin ker√§tyksi."), $laskurow["tunnus"])."</font><br><br>\n";
       }
 
       $query  = "UPDATE lasku SET
@@ -270,7 +270,7 @@ elseif ($kerattavia == 0) {
       $result = pupe_query($query);
     }
     else {
-      // Jos on laskuettavia rivej‰ ja jos kyseess‰ ei ole k‰teinen, merkataan tilaukset ker‰tyksi ja toimitetuksi ja alatila 'D'
+      // Jos on laskuettavia rivej√§ ja jos kyseess√§ ei ole k√§teinen, merkataan tilaukset ker√§tyksi ja toimitetuksi ja alatila 'D'
       $query  = "UPDATE tilausrivi
                  SET kerattyaika = now(), keratty = '$kukarow[kuka]'
                  WHERE otunnus  = '$laskurow[tunnus]'
@@ -290,7 +290,7 @@ elseif ($kerattavia == 0) {
                  and tyyppi     != 'D'";
       $result = pupe_query($query);
 
-      // Jos meill‰ on maksupositioita laskulla, tulee se siirt‰‰ alatilaan J
+      // Jos meill√§ on maksupositioita laskulla, tulee se siirt√§√§ alatilaan J
       if ($laskurow['jaksotettu'] != 0) {
         $tilaus_valmis_alataila = 'J';
       }
@@ -306,7 +306,7 @@ elseif ($kerattavia == 0) {
                  AND yhtio    = '$kukarow[yhtio]'";
       $result = pupe_query($query);
 
-      $tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s ei ollut yht‰‰n ker‰tt‰v‰‰ rivi‰, se merkattiin toimitetuksi."), $laskurow["tunnus"])."</font><br><br>\n";
+      $tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s ei ollut yht√§√§n ker√§tt√§v√§√§ rivi√§, se merkattiin toimitetuksi."), $laskurow["tunnus"])."</font><br><br>\n";
       $toimitusvahvitus_laheta = TRUE;
     }
   }
@@ -315,8 +315,8 @@ elseif ($kerattavia == 0) {
   }
 }
 elseif ($kerattavia > 0 and $kutsuja != 'keraa.php') {
-  // T‰ss‰ meill‰ ON jotain ker‰tt‰v‰‰
-  // laitetaan l‰hete tulostusjonoon
+  // T√§ss√§ meill√§ ON jotain ker√§tt√§v√§√§
+  // laitetaan l√§hete tulostusjonoon
   $tila = 'N';
   $alatila = 'A';
 
@@ -334,12 +334,12 @@ elseif ($kerattavia > 0 and $kutsuja != 'keraa.php') {
              and alatila in ('','A','F','U', 'G')";
   $result = pupe_query($query);
 
-  ///* T‰h‰n menn‰‰n jos l‰hete tosiaan tulostetaan *///
+  ///* T√§h√§n menn√§√§n jos l√§hete tosiaan tulostetaan *///
   if ($yhtiorow["lahetteen_tulostustapa"] == "A" or $yhtiorow["lahetteen_tulostustapa"] == "B") {
     $tilausnumeroita = $laskurow["tunnus"];
     require("tilaus-valmis-tulostus.inc");
 
-    // jos halutaan MY÷S l‰hete samantien
+    // jos halutaan MY√ñS l√§hete samantien
     if ($yhtiorow["lahetteen_tulostustapa"] == "B") {
       $params = array(
         'laskurow'          => $laskurow,
@@ -356,7 +356,7 @@ elseif ($kerattavia > 0 and $kutsuja != 'keraa.php') {
       pupesoft_tulosta_lahete($params);
     }
   }
-  ///* T‰h‰n menn‰‰n jos l‰hete vain siirret‰‰n tulostusjonoon *///
+  ///* T√§h√§n menn√§√§n jos l√§hete vain siirret√§√§n tulostusjonoon *///
   elseif (mysql_affected_rows() > 0) {
     $tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilaus %s siirretty tulostusjonoon"), $laskurow["tunnus"])."!</font><br><br>\n";
   }
@@ -399,7 +399,7 @@ if ($toimitusvahvitus_laheta) {
     @include("tilauskasittely/$asirow[toimitusvahvistus]");
 
     if ($toimitusvahvistus_desadv_lahetys === true) {
-      $tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksesta %s l‰hetettiin toimitusvahvistus."), $laskurow["tunnus"])."</font><br><br>\n";
+      $tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksesta %s l√§hetettiin toimitusvahvistus."), $laskurow["tunnus"])."</font><br><br>\n";
     }
   }
 }

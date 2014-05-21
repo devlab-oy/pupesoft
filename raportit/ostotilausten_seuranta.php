@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 if (file_exists("../inc/parametrit.inc")) {
@@ -8,7 +8,7 @@ if (file_exists("../inc/parametrit.inc")) {
 }
 
 // ajaxin kautta haetaan kommentti textareaan
-// t‰ytyy olla parametri no_head = yes
+// t√§ytyy olla parametri no_head = yes
 if ($_GET['tee'] == 'hae_kommentti') {
   $tun = (int) $_GET['tun'];
   $query = "SELECT comments
@@ -41,7 +41,7 @@ if ($_GET['tee'] == 'kommentti') {
       echo "<br><font class='message'>",t("Tyhjensit kommentin ostotilaukselta")," $tilaus</font><br>";
     }
     else {
-      echo "<br><font class='message'>",t("Lis‰sit kommentin")," $kommentti ",t("ostotilaukselle")," $tilaus</font><br>";
+      echo "<br><font class='message'>",t("Lis√§sit kommentin")," $kommentti ",t("ostotilaukselle")," $tilaus</font><br>";
     }
     exit;
   }
@@ -83,7 +83,7 @@ if ($toimittajaid != '') {
   $toimittajahaku = $ytunnus;
 }
 
-// Tarvittavat p‰iv‰m‰‰r‰t
+// Tarvittavat p√§iv√§m√§√§r√§t
 if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
@@ -96,7 +96,7 @@ echo "<form method='post' autocomplete='off' name='hakuform' id='hakuform'>";
 
 echo "<tr><th>",t("Toimittaja"),"</th><td colspan='2' nowrap><input type='text' name='toimittajahaku' value='$toimittajahaku'></td></tr>";
 
-echo "<tr><th>",t("P‰iv‰m‰‰r‰v‰li")," (",t("pp-kk-vvvv"),")</th>";
+echo "<tr><th>",t("P√§iv√§m√§√§r√§v√§li")," (",t("pp-kk-vvvv"),")</th>";
 
 echo "<td><input type='text' name='ppa' value='$ppa' size='3'>
 <input type='text' name='kka' value='$kka' size='3'>
@@ -111,12 +111,12 @@ echo "</form></table>";
 echo "<br/>";
 echo "<img src='".$palvelin2."pics/lullacons/bot-plain-green.png'/> = ",t("Saapumisen virallinen varastonarvo laskettu"),"<br/>";
 echo "<img src='".$palvelin2."pics/lullacons/bot-plain-yellow.png'/> = ",t("Saapumisen tuotteita viety varastoon"),"<br/>";
-echo "<img src='".$palvelin2."pics/lullacons/bot-plain-red.png'/> = ",t("Saapumisen tuotteita ei ole viety varastoon tai saapumiseen ei ole liitetty yht‰‰n rivi‰"),"<br/>";
-echo "<img src='".$palvelin2."pics/lullacons/bot-plain-white.png'/> = ",t("Ostotilauksen tuotteita ei ole liitetty mihink‰‰n saapumiseen"),"<br/>";
+echo "<img src='".$palvelin2."pics/lullacons/bot-plain-red.png'/> = ",t("Saapumisen tuotteita ei ole viety varastoon tai saapumiseen ei ole liitetty yht√§√§n rivi√§"),"<br/>";
+echo "<img src='".$palvelin2."pics/lullacons/bot-plain-white.png'/> = ",t("Ostotilauksen tuotteita ei ole liitetty mihink√§√§n saapumiseen"),"<br/>";
 echo "<img src='".$palvelin2."pics/lullacons/bot-plain-blue.png'/> = ",t("Toimittajan vaihto-omaisuuslasku, jota ei ole liitetty saapumiseen"),"<br/>";
 
 if (!is_numeric($ppa) or !is_numeric($kka) or !is_numeric($vva) or !is_numeric($ppl) or !is_numeric($kkl) or !is_numeric($vvl)) {
-  echo "<br/><font class='error'>",t("Virheellinen p‰iv‰m‰‰r‰"),"!</font>";
+  echo "<br/><font class='error'>",t("Virheellinen p√§iv√§m√§√§r√§"),"!</font>";
   $tee = '';
 }
 
@@ -239,8 +239,8 @@ if ($tee == 'aja') {
           echo "<th>",t("Tilvko"),"</th>";
           echo "<th>",t("Tilpvm"),"</th>";
           echo "<th>",t("Paino"),"</th>";
-          echo "<th>",t("M‰‰r‰"),"</th>";
-          echo "<th>",t("Rivim‰‰r‰"),"</th>";
+          echo "<th>",t("M√§√§r√§"),"</th>";
+          echo "<th>",t("Rivim√§√§r√§"),"</th>";
           echo "<th>",t("Tilauksen"),"<br/>",t("arvo"),"<br/>$tilrivi_row[valkoodi]</th>";
           echo "<th>",t("Saapuminen"),"</th>";
           echo "<th>",t("Tavaralaskun"),"<br/>",t("luontiaika"),"</th>";
@@ -502,7 +502,7 @@ if ($tee == 'aja') {
       $ei_liitetyt_res = pupe_query($query);
 
       while ($ei_liitetyt_row = mysql_fetch_assoc($ei_liitetyt_res)) {
-        // jos meill‰ on hyvityslasku niin haetaan vaan negatiivisi‰ alvikirjauksia (en tied‰ ollenkaan onko t‰m‰ futureprooof) :(
+        // jos meill√§ on hyvityslasku niin haetaan vaan negatiivisi√§ alvikirjauksia (en tied√§ ollenkaan onko t√§m√§ futureprooof) :(
         if ($ei_liitetyt_row["summa"] < 0) {
           $alvilisa = "and summa < 0";
         }
@@ -510,7 +510,7 @@ if ($tee == 'aja') {
           $alvilisa = "and summa > 0";
         }
 
-        // Haetaan kululaskun kaikki verotiliˆinnit jotta voidaan tallentaa myˆs veroton summa
+        // Haetaan kululaskun kaikki verotili√∂innit jotta voidaan tallentaa my√∂s veroton summa
         $query = "SELECT sum(summa) summa
                   from tiliointi
                   where yhtio  = '$kukarow[yhtio]'
@@ -521,7 +521,7 @@ if ($tee == 'aja') {
         $alvires = pupe_query($query);
         $alvirow = mysql_fetch_assoc($alvires);
 
-        // Ostoreskontralaskun veron m‰‰r‰
+        // Ostoreskontralaskun veron m√§√§r√§
         $alvisumma = $alvirow["summa"];
 
         if (strtoupper($ei_liitetyt_row["valkoodi"]) != strtoupper($yhtiorow["valkoodi"])) {
@@ -575,7 +575,7 @@ if ($tee == 'aja') {
       $yht_kuluprosentti = $yht_tavara_summa != 0 ? sprintf('%.02f', ($yht_kulu_summa + $yht_eturahti) / $yht_tavara_summa * 100) : 0;
       $yht_kuluprosentti = $yht_kuluprosentti != 0 ? $yht_kuluprosentti : '';
 
-      echo "<td class='spec'>",t("Yhteens‰"),"</td>";
+      echo "<td class='spec'>",t("Yhteens√§"),"</td>";
       echo "<td class='spec'>&nbsp;</td>";
       echo "<td class='spec'>&nbsp;</td>";
       echo "<td class='spec' style='text-align:right;'>$yht_paino</td>";
@@ -605,13 +605,13 @@ if ($tee == 'aja') {
           $('#tilaus').change(function(){
             if (this.value != '') {
               $.get('$_SERVER[SCRIPT_NAME]', { tee: 'hae_kommentti', tun: this.value, no_head: 'yes', ohje: 'off' }, function(data){
-                $('#message:font').text('Lis‰‰ kommentti');
+                $('#message:font').text('Lis√§√§ kommentti');
                 $('#kommentti').val(data);
               });
             }
             else {
               $('#kommentti').val('');
-              $('#message:font').text('Valitse tilausnumero ja syˆt‰ kommentti');
+              $('#message:font').text('Valitse tilausnumero ja sy√∂t√§ kommentti');
             }
           });
 
@@ -650,7 +650,7 @@ if ($tee == 'aja') {
 
     echo "<table>";
 
-    echo "<tr><td colspan='2'><div id='message'>",t("Valitse tilausnumero ja syˆt‰ kommentti"),"</div></td></tr>";
+    echo "<tr><td colspan='2'><div id='message'>",t("Valitse tilausnumero ja sy√∂t√§ kommentti"),"</div></td></tr>";
     echo "<tr>";
     echo "<td><select name='tilaus' id='tilaus'>";
     echo "<option value=''>",t("Valitse tilausnumero"),"</option>";

@@ -50,9 +50,9 @@ if ($tee == 'tarjous') {
               ORDER BY tunnus";
     $result = mysql_query($query) or pupe_error($query);
 
-    //kuollaan jos yht‰‰n rivi‰ ei lˆydy
+    //kuollaan jos yht√§√§n rivi√§ ei l√∂ydy
     if (mysql_num_rows($result) == 0) {
-      echo t("Laskurivej‰ ei lˆytynyt");
+      echo t("Laskurivej√§ ei l√∂ytynyt");
       exit;
     }
 
@@ -70,17 +70,17 @@ if ($tee == 'tarjous') {
     loppu($firstpage);
     alvierittely ($firstpage);
 
-    //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+    //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
     list($usec, $sec) = explode(' ', microtime());
     mt_srand((float) $sec + ((float) $usec * 100000));
     $pdffilenimi = "/tmp/tarjous-".md5(uniqid(mt_rand(), true)).".pdf";
 
     //kirjoitetaan pdf faili levylle..
     $fh = fopen($pdffilenimi, "w");
-    if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
+    if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep√§onnistui $pdffilenimi");
     fclose($fh);
 
-    //Tyˆnnet‰‰n tuo pdf vaan putkeen!
+    //Ty√∂nnet√§√§n tuo pdf vaan putkeen!
     echo file_get_contents($pdffilenimi);
 
     //poistetaan tmp file samantien kuleksimasta...
@@ -103,7 +103,7 @@ if ($tee == "poistakori") {
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) == 1) {
-    // lˆyty vaan yks dellataan se
+    // l√∂yty vaan yks dellataan se
     //$ostoskori = mysql_fetch_array($result);
     $kalakori = mysql_fetch_array($result);
 
@@ -122,7 +122,7 @@ if ($tee == "poistakori") {
     echo "<font class='message'>".t("Ostoskori tyhjennetty").".</font><br>";
   }
   else {
-    echo "<font class='message'>".t("Ostoskorin tyhjennys ep‰onnistui").".</font><br>";
+    echo "<font class='message'>".t("Ostoskorin tyhjennys ep√§onnistui").".</font><br>";
   }
 
   $tee = "";
@@ -137,7 +137,7 @@ if ($tee == "poistarivi") {
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) == 1) {
-    // lˆyty vaan yks dellataan siit‰ rivi
+    // l√∂yty vaan yks dellataan siit√§ rivi
     //$ostoskori = mysql_fetch_array($result);
     $kalakori = mysql_fetch_array($result);
 
@@ -148,7 +148,7 @@ if ($tee == "poistarivi") {
     $result = mysql_query($query) or pupe_error($query);
   }
   else {
-    echo "<font class='message'>".t("Rivin poisto ep‰onnistui").".</font><br>";
+    echo "<font class='message'>".t("Rivin poisto ep√§onnistui").".</font><br>";
   }
 
   $tee = "";
@@ -225,7 +225,7 @@ if ($tee == "") {
           <input type='hidden' name='ostoskori' value='$ostoskori[alatila]'>
           <input type='hidden' name='tultiin' value='$tultiin'>
           <input type='hidden' name='futur_toim' value='$futur_toim'>
-          <input type='submit' value='".t("Tyhjenn‰ ostoskori")."'>";
+          <input type='submit' value='".t("Tyhjenn√§ ostoskori")."'>";
       echo "</th>";
       echo "</form>";
       echo "<tr>";
@@ -233,8 +233,8 @@ if ($tee == "") {
       echo "<tr>";
       echo "<th>".t("Tuoteno")."</th>";
       echo "<th>".t("Nimitys")."</th>";
-      echo "<th>".t("M‰‰r‰")."</th>";
-      echo "<th>".t("Yksikkˆhinta")."</th>";
+      echo "<th>".t("M√§√§r√§")."</th>";
+      echo "<th>".t("Yksikk√∂hinta")."</th>";
       echo "<th>".t("Rivihinta")."</th>";
       echo "<th>".t("Poista")."</th>";
       echo "</tr>";
@@ -274,7 +274,7 @@ if ($tee == "") {
     }
   }
   else {
-    echo "<font class='message'>".t("Ostoskorisi on tyhj‰").".</font><br>";
+    echo "<font class='message'>".t("Ostoskorisi on tyhj√§").".</font><br>";
   }
 }
 

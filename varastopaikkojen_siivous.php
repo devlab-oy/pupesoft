@@ -22,7 +22,7 @@ if ($tee == 'CLEAN') {
                 and saldo=0";
       $result = pupe_query($query);
 
-      //Tehd‰‰n tapahtuma
+      //Tehd√§√§n tapahtuma
       $query = "INSERT into tapahtuma set
                 yhtio     = '$kukarow[yhtio]',
                 tuoteno   = '$tuoterow[tuoteno]',
@@ -63,7 +63,7 @@ if ($tee == 'CLEAN') {
     echo t("Valitut tuotepaikat poistettu")."!<br><br>";
   }
   else {
-    echo t("Et valinnut yht‰‰n paikkaa poistettavaksi")."!<br><br>";
+    echo t("Et valinnut yht√§√§n paikkaa poistettavaksi")."!<br><br>";
   }
 
   $tee = "";
@@ -103,7 +103,7 @@ if ($tee == 'CLEANRIKKINAISET') {
                 and tunnus  != '$lrow[mintunnus]'";
       $presult = pupe_query($query);
 
-      //Tehd‰‰n tapahtuma
+      //Tehd√§√§n tapahtuma
       $query = "INSERT into tapahtuma set
                 yhtio     = '$kukarow[yhtio]',
                 tuoteno   = '$lrow[tuoteno]',
@@ -200,7 +200,7 @@ if ($tee == 'CLEANTUNTEMATTOMAT') {
      $presult = pupe_query($query);
     $paikkarow = mysql_fetch_array($presult);
 
-    // katsotaan lˆytyykˆ paikka jo ennest‰‰n
+    // katsotaan l√∂ytyyk√∂ paikka jo ennest√§√§n
     $query = "SELECT *
               FROM tuotepaikat
               WHERE yhtio   = '$kukarow[yhtio]'
@@ -243,7 +243,7 @@ if ($tee == 'CLEANTUNTEMATTOMAT') {
        $presult = pupe_query($query);
     }
     else {
-      echo "Tuotteella on virheellisi‰ tuotepaikkoja! Korjaa ne ensin! Tuoteno: $paikkarow[tuoteno]<br>";
+      echo "Tuotteella on virheellisi√§ tuotepaikkoja! Korjaa ne ensin! Tuoteno: $paikkarow[tuoteno]<br>";
     }
 
   }
@@ -283,7 +283,7 @@ if ($tee == 'CLEANRIVIT') {
        $presult = pupe_query($query);
     }
     else {
-      echo "Tuotteelle $rivirow[tuoteno] ei lˆytynyt oletuspaikkaa!<br>";
+      echo "Tuotteelle $rivirow[tuoteno] ei l√∂ytynyt oletuspaikkaa!<br>";
     }
   }
 
@@ -322,7 +322,7 @@ if ($tee == 'CLEANTAPAHTUMAT') {
        $presult = pupe_query($query);
     }
     else {
-      echo "Tuotteelle $rivirow[tuoteno] ei lˆytynyt oletuspaikkaa!<br>";
+      echo "Tuotteelle $rivirow[tuoteno] ei l√∂ytynyt oletuspaikkaa!<br>";
     }
   }
 
@@ -348,7 +348,7 @@ if ($tee == 'LISTAAOLETUKSET') {
     if (mysql_num_rows($result) < 500) {
 
       echo "<tr><th>".t("Tuoteno")."</th>";
-      echo "<th>".t("Oletuspaikkojen m‰‰r‰")."</th></tr>";
+      echo "<th>".t("Oletuspaikkojen m√§√§r√§")."</th></tr>";
 
       $saldolliset = array();
 
@@ -359,7 +359,7 @@ if ($tee == 'LISTAAOLETUKSET') {
       echo "<tr><tdclass='back'><br><br></td></tr>";
     }
     else {
-      echo t("Virheellisi‰ oletuspaikkoja on yli %s. Niit‰ ei n‰ytet‰ ruudulla.", "", 500)."<br>";
+      echo t("Virheellisi√§ oletuspaikkoja on yli %s. Niit√§ ei n√§ytet√§ ruudulla.", "", 500)."<br>";
     }
 
     echo "</table><br><br>";
@@ -367,7 +367,7 @@ if ($tee == 'LISTAAOLETUKSET') {
     echo "</table><br><br>";
   }
   else {
-    echo t("Yht‰‰n tuotetta ei lˆytynyt")."!<br><br>";
+    echo t("Yht√§√§n tuotetta ei l√∂ytynyt")."!<br><br>";
     $tee = "";
   }
 }
@@ -389,7 +389,7 @@ if ($tee == 'LISTAARIKKINAISET') {
     echo "<th>".t("Nimitys")."</th>";
     echo "<th>".t("Saldo")."</th>";
     echo "<th>".t("Varastopaikka")."</th>";
-    echo "<th>".t("Duplikaattien m‰‰r‰")."</th></tr>";
+    echo "<th>".t("Duplikaattien m√§√§r√§")."</th></tr>";
 
     echo "<form method='POST'>";
     echo "<input type='hidden' name='tee' value='CLEANRIKKINAISET'>";
@@ -407,7 +407,7 @@ if ($tee == 'LISTAARIKKINAISET') {
     echo "</table><br><br>";
   }
   else {
-    echo t("Yht‰‰n tuotetta ei lˆytynyt")."!<br><br>";
+    echo t("Yht√§√§n tuotetta ei l√∂ytynyt")."!<br><br>";
     $tee = "";
   }
 }
@@ -445,11 +445,11 @@ if ($tee == 'LISTAATUNTEMATTOMAT') {
 
     echo "</table><br>";
 
-    echo "<table><tr><th>".t("Siirr‰ paikalle")."</th></tr>
+    echo "<table><tr><th>".t("Siirr√§ paikalle")."</th></tr>
     <tr><td>
     ".t("Alue")." ",hyllyalue("hyllyalue", ''),"
     ".t("Nro")."  <input type = 'text' name = 'hyllynro'  size = '5' maxlength='5' value = ''>
-    ".t("V‰li")." <input type = 'text' name = 'hyllyvali' size = '5' maxlength='5' value = ''>
+    ".t("V√§li")." <input type = 'text' name = 'hyllyvali' size = '5' maxlength='5' value = ''>
     ".t("Taso")." <input type = 'text' name = 'hyllytaso' size = '5' maxlength='5' value = ''>
     </td></tr>";
     echo "</table><br>";
@@ -458,7 +458,7 @@ if ($tee == 'LISTAATUNTEMATTOMAT') {
     echo "</table><br><br>";
   }
   else {
-    echo t("Yht‰‰n tuotetta ei lˆytynyt")."!<br><br>";
+    echo t("Yht√§√§n tuotetta ei l√∂ytynyt")."!<br><br>";
     $tee = "";
   }
 }
@@ -497,7 +497,7 @@ if ($tee == 'LISTAATUOTTEETTOMAT') {
 
   }
   else {
-    echo t("Yht‰‰n tuotetta ei lˆytynyt")."!<br><br>";
+    echo t("Yht√§√§n tuotetta ei l√∂ytynyt")."!<br><br>";
     $tee = "";
   }
 }
@@ -621,7 +621,7 @@ if ($tee == 'LISTAA') {
     echo "<tr><td><input type='checkbox' name='chbox' onclick='toggleAll(this)'></td><td colspan='6'>Ruksaa kaikki</td></tr>";
 
     echo "</table><br><br>";
-    echo "<input type='submit' value='".t("Mit‰tˆi valitut tuotepaikat")."'></form>";
+    echo "<input type='submit' value='".t("Mit√§t√∂i valitut tuotepaikat")."'></form>";
     echo "</table><br><br>";
 
     echo "<form method='POST' action='inventointi_listat.php'>";
@@ -638,7 +638,7 @@ if ($tee == 'LISTAA') {
     echo "<input type='submit' value='".t("Luo saldollisista inventointilista")."'></form>";
   }
   else {
-    echo t("Yht‰‰n tuotetta ei lˆytynyt")."!<br><br>";
+    echo t("Yht√§√§n tuotetta ei l√∂ytynyt")."!<br><br>";
     $tee = "";
   }
 }
@@ -678,7 +678,7 @@ if ($tee == "LISTAAVIRHEELLISETRIVIT") {
     $paikatres = mysql_query($query) or die($query);
 
      while ($paikatrow = mysql_fetch_array($paikatres)) {
-      // etsit‰‰n varatut kaikilta paikoilla jolla on joku muu varastopaikka (NOT IN)
+      // etsit√§√§n varatut kaikilta paikoilla jolla on joku muu varastopaikka (NOT IN)
       $query = "SELECT *, concat_ws('-', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka, jt+varattu varattu, var
                 FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
                 WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -705,10 +705,10 @@ if ($tee == "LISTAAVIRHEELLISETRIVIT") {
   echo "</table>";
 
   if ($laskuri > 0) {
-    echo "<br><input type='submit' value='".t("P‰ivit‰ tilausriveille oletuspaikka")."'>";
+    echo "<br><input type='submit' value='".t("P√§ivit√§ tilausriveille oletuspaikka")."'>";
   }
   else {
-    echo t("Yht‰‰n tuotetta ei lˆytynyt")."!<br><br>";
+    echo t("Yht√§√§n tuotetta ei l√∂ytynyt")."!<br><br>";
     $tee = "";
   }
   echo "</form>";
@@ -719,7 +719,7 @@ if ($tee == "LISTAATAPAHTUMATILMANPAIKKAA") {
 
   $laskuri = 0;
 
-  // haetaan kaikki tapahtumat, joilla ei ole tuotepaikkaa tai se ei kuulu mihink‰‰n varastoon
+  // haetaan kaikki tapahtumat, joilla ei ole tuotepaikkaa tai se ei kuulu mihink√§√§n varastoon
   $query = "SELECT tapahtuma.tuoteno, varastopaikat.alkuhyllyalue, tapahtuma.tunnus, concat_ws('-', tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso) paikka, tapahtuma.laadittu, tapahtuma.laji
             FROM tapahtuma
             JOIN tuote on (tuote.yhtio = tapahtuma.yhtio and tuote.tuoteno = tapahtuma.tuoteno and tuote.ei_saldoa = '')
@@ -727,7 +727,7 @@ if ($tee == "LISTAATAPAHTUMATILMANPAIKKAA") {
                           AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
                           AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0')))
             WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
-            AND tapahtuma.laji    not in ('ep‰kurantti', 'uusipaikka', 'poistettupaikka')
+            AND tapahtuma.laji    not in ('ep√§kurantti', 'uusipaikka', 'poistettupaikka')
             HAVING varastopaikat.alkuhyllyalue IS NULL
             ORDER BY tapahtuma.laadittu";
   $tapahtumares = pupe_query($query);
@@ -765,10 +765,10 @@ if ($tee == "LISTAATAPAHTUMATILMANPAIKKAA") {
   }
 
   if ($laskuri > 0) {
-    echo "<br><input type='submit' value='".t("P‰ivit‰ tapahtumille oletuspaikka")."'>";
+    echo "<br><input type='submit' value='".t("P√§ivit√§ tapahtumille oletuspaikka")."'>";
   }
   else {
-    echo t("Yht‰‰n tuotetta ei lˆytynyt")."!<br><br>";
+    echo t("Yht√§√§n tuotetta ei l√∂ytynyt")."!<br><br>";
     $tee = "";
   }
   echo "</form>";
@@ -776,7 +776,7 @@ if ($tee == "LISTAATAPAHTUMATILMANPAIKKAA") {
 }
 
 if ($tee == "") {
-  //K‰yttˆliittym‰
+  //K√§ytt√∂liittym√§
 
   echo "<table><form name='piiri' method='post'>";
   echo "<input type='hidden' name='tee' value='LISTAA'>";
@@ -795,14 +795,14 @@ if ($tee == "") {
       <input type='text' size='6' name='lhyllytaso'>
       </td></tr>";
 
-  echo "<tr><th>".t("N‰yt‰ vain paikat joiden saldo on muuttunut ennen p‰iv‰m‰‰r‰‰ (pp-kk-vvvv)")."</th>
+  echo "<tr><th>".t("N√§yt√§ vain paikat joiden saldo on muuttunut ennen p√§iv√§m√§√§r√§√§ (pp-kk-vvvv)")."</th>
       <td><input type='text' name='ppa' value='$ppa' size='3'>-<input type='text' name='kka' value='$kka' size='3'>-<input type='text' name='vva' value='$vva' size='6'></td>
       </tr>";
 
   echo "<tr><th>".t("Valitse varasto").":</th>";
   echo "<td><select name='varasto'>
-    <option value=''>".t("N‰yt‰ kaikki")."</option>
-    <option value='EI'>".t("N‰yt‰ paikat jotka ei kuulu mihink‰‰n varastoon")."</option>";
+    <option value=''>".t("N√§yt√§ kaikki")."</option>
+    <option value='EI'>".t("N√§yt√§ paikat jotka ei kuulu mihink√§√§n varastoon")."</option>";
 
   $query  = "SELECT *
              FROM varastopaikat
@@ -819,17 +819,17 @@ if ($tee == "") {
 
   echo "</select></td></tr>";
 
-  echo "<tr><th>".t("N‰yt‰ vain miinus-saldolliset")."</th><td><input type='checkbox' name='vainmiinus'></td>";
-  echo "<tr><th>".t("N‰yt‰ myˆs miinus-saldolliset")."</th><td><input type='checkbox' name='miinus'></td>";
-  echo "<tr><th>".t("N‰yt‰ myˆs plus-saldolliset")."</th><td><input type='checkbox' name='plus'></td>";
+  echo "<tr><th>".t("N√§yt√§ vain miinus-saldolliset")."</th><td><input type='checkbox' name='vainmiinus'></td>";
+  echo "<tr><th>".t("N√§yt√§ my√∂s miinus-saldolliset")."</th><td><input type='checkbox' name='miinus'></td>";
+  echo "<tr><th>".t("N√§yt√§ my√∂s plus-saldolliset")."</th><td><input type='checkbox' name='plus'></td>";
 
   echo "<tr><th>".t("Osasto")."</th><td>";
 
-  // tehd‰‰n avainsana query
+  // tehd√§√§n avainsana query
   $sresult = t_avainsana("OSASTO");
 
   echo "<select name='osasto'>";
-  echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";
+  echo "<option value=''>".t("N√§yt√§ kaikki")."</option>";
 
   while ($srow = mysql_fetch_array($sresult)) {
     $sel = '';
@@ -842,14 +842,14 @@ if ($tee == "") {
 
 
   echo "</td></tr>
-      <tr><th>".t("Tuoteryhm‰")."</th><td>";
+      <tr><th>".t("Tuoteryhm√§")."</th><td>";
 
-  //Tehd‰‰n osasto & tuoteryhm‰ pop-upit
-  // tehd‰‰n avainsana query
+  //Tehd√§√§n osasto & tuoteryhm√§ pop-upit
+  // tehd√§√§n avainsana query
   $sresult = t_avainsana("TRY");
 
   echo "<select name='tuoryh'>";
-  echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";
+  echo "<option value=''>".t("N√§yt√§ kaikki")."</option>";
 
   while ($srow = mysql_fetch_array($sresult)) {
     $sel = '';
@@ -864,44 +864,44 @@ if ($tee == "") {
   echo "<form method='post'>";
   echo "<tr><td class='back'><br></tr>";
   echo "<input type='hidden' name='tee' value='LISTAARIKKINAISET'>";
-  echo "<tr><th>".t("Listaa tuotteet joilla on virheellisi‰ varastopaikkoja")."</th><td></td>";
+  echo "<tr><th>".t("Listaa tuotteet joilla on virheellisi√§ varastopaikkoja")."</th><td></td>";
   echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr>";
   echo "</form>";
 
   echo "<form method='post'>";
   echo "<tr><td class='back'><br></tr>";
   echo "<input type='hidden' name='tee' value='LISTAAOLETUKSET'>";
-  echo "<tr><th>".t("Listaa tuotteet joilla on virheellisi‰ oletuspaikkoja")."</th><td></td>";
+  echo "<tr><th>".t("Listaa tuotteet joilla on virheellisi√§ oletuspaikkoja")."</th><td></td>";
   echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr>";
   echo "</form>";
 
   echo "<form method='post'>";
   echo "<tr><td class='back'><br></tr>";
   echo "<input type='hidden' name='tee' value='LISTAATUNTEMATTOMAT'>";
-  echo "<tr><th>".t("Listaa tuotteet joiden varastopaikka ei kuulu mihink‰‰n varastoon")."</th><td></td>";
+  echo "<tr><th>".t("Listaa tuotteet joiden varastopaikka ei kuulu mihink√§√§n varastoon")."</th><td></td>";
   echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr>";
   echo "</form>";
 
   echo "<form method='post'>";
   echo "<tr><td class='back'><br></tr>";
   echo "<input type='hidden' name='tee' value='LISTAATUOTTEETTOMAT'>";
-  echo "<tr><th>".t("Listaa tuotepaikat joiden tuotetta ei lˆydy")."</th><td></td>";
+  echo "<tr><th>".t("Listaa tuotepaikat joiden tuotetta ei l√∂ydy")."</th><td></td>";
   echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr>";
   echo "</form>";
 
   echo "<form method='post'>";
   echo "<tr><td class='back'><br></tr>";
   echo "<input type='hidden' name='tee' value='LISTAAVIRHEELLISETRIVIT'>";
-  echo "<tr><th>".t("Listaa tilausrivit joiden tuotepaikkoja ei lˆydy")."</th><td></td>";
+  echo "<tr><th>".t("Listaa tilausrivit joiden tuotepaikkoja ei l√∂ydy")."</th><td></td>";
   echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr>";
   echo "</form>";
 
   echo "<form method='post'>";
   echo "<tr><td class='back'><br></tr>";
   echo "<input type='hidden' name='tee' value='LISTAATAPAHTUMATILMANPAIKKAA'>";
-  echo "<tr><th>".t("Listaa tapahtumat, joiden tuotepaikkoja ei lˆydy")."</th><td></td>";
+  echo "<tr><th>".t("Listaa tapahtumat, joiden tuotepaikkoja ei l√∂ydy")."</th><td></td>";
   echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr>";
-  echo "<tr><td class='back'><input type='checkbox' name='ei_nayteta_riveja'> ",t("Rivej‰ ei n‰ytet‰"),"</td></tr>";
+  echo "<tr><td class='back'><input type='checkbox' name='ei_nayteta_riveja'> ",t("Rivej√§ ei n√§ytet√§"),"</td></tr>";
   echo "</form>";
 
   echo "</table>";

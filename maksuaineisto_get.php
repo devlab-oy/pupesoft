@@ -1,6 +1,6 @@
 <?php
 
-// Kutsutaanko CLI:stä
+// Kutsutaanko CLI:stÃ¤
 $php_cli = FALSE;
 
 if (php_sapi_name() == 'cli') {
@@ -10,7 +10,7 @@ if (php_sapi_name() == 'cli') {
 date_default_timezone_set('Europe/Helsinki');
 
 if (!$php_cli) {
-  echo "Vain komentoriviltä!";
+  echo "Vain komentoriviltÃ¤!";
   exit;
 }
 
@@ -21,7 +21,7 @@ ini_set("display_errors", 0);
 require("inc/salasanat.php");
 require("inc/functions.inc");
 
-// Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
+// Sallitaan vain yksi instanssi tÃ¤stÃ¤ skriptistÃ¤ kerrallaan
 pupesoft_flock();
 
 if (!isset(  $pankkiaineiston_haku["host"],

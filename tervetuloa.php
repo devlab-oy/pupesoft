@@ -4,7 +4,7 @@ $pupe_DataTables = array("etusivun_tyomaarays");
 
 require ("inc/parametrit.inc");
 
-echo "<font class='head'>".t("Tervetuloa pupesoft-j‰rjestelm‰‰n")."</font><hr><br>";
+echo "<font class='head'>".t("Tervetuloa pupesoft-j√§rjestelm√§√§n")."</font><hr><br>";
 
 if (!isset($tee) or $tee == '') {
 
@@ -24,11 +24,11 @@ if (!isset($tee) or $tee == '') {
   require("uutiset.php");
   echo "</td>";
 
-  ///* Hyv‰ksytt‰v‰t laskut*///
+  ///* Hyv√§ksytt√§v√§t laskut*///
   echo "<td class='back' width='10'></td>";
   echo "<td class='back' valign='top' width='450'>";
 
-  // haetaan kaikki yritykset, jonne t‰m‰ k‰ytt‰j‰ p‰‰see
+  // haetaan kaikki yritykset, jonne t√§m√§ k√§ytt√§j√§ p√§√§see
   $query  = "SELECT distinct yhtio.yhtio, yhtio.nimi
              FROM kuka
              JOIN yhtio using (yhtio)
@@ -54,17 +54,17 @@ if (!isset($tee) or $tee == '') {
 
       echo "<table width='100%'>";
 
-      // ei n‰ytet‰ suotta firman nime‰, jos k‰ytt‰j‰ kuuluu vaan yhteen firmaan
+      // ei n√§ytet√§ suotta firman nime√§, jos k√§ytt√§j√§ kuuluu vaan yhteen firmaan
       if (mysql_num_rows($kukres) == 1) $kukrow["nimi"] = "";
 
-      echo "<tr><td colspan='".mysql_num_fields($result)."' class='back'><font class='head'>".t("Hyv‰ksytt‰v‰t laskusi")." $kukrow[nimi]</font><hr></td></tr>";
+      echo "<tr><td colspan='".mysql_num_fields($result)."' class='back'><font class='head'>".t("Hyv√§ksytt√§v√§t laskusi")." $kukrow[nimi]</font><hr></td></tr>";
 
       if ($piilorow[0] > 0)
-        echo "<tr><td colspan='".mysql_num_fields($result)."' class='back'>". sprintf(t('Sinulla on %d pys‰ytetty‰ laskua'), $piilorow[0]) . "</tr>";
+        echo "<tr><td colspan='".mysql_num_fields($result)."' class='back'>". sprintf(t('Sinulla on %d pys√§ytetty√§ laskua'), $piilorow[0]) . "</tr>";
 
       if (mysql_num_rows($result) > 0) {
 
-        echo "<th>" . t("Er‰pvm")."</th>";
+        echo "<th>" . t("Er√§pvm")."</th>";
         echo "<th>" . t("Ytunnus")."</th>";
         echo "<th>" . t("Nimi")."</th>";
         echo "<th>" . t("Summa")."</th>";
@@ -111,7 +111,7 @@ if (!isset($tee) or $tee == '') {
     if (mysql_num_rows($result) > 0) {
       echo "<table width='100%'>";
 
-      // ei n‰ytet‰ suotta firman nime‰, jos k‰ytt‰j‰ kuuluu vaan yhteen firmaan
+      // ei n√§ytet√§ suotta firman nime√§, jos k√§ytt√§j√§ kuuluu vaan yhteen firmaan
       if (mysql_num_rows($kukres) == 1) $kukrow["nimi"] = "";
 
       echo "<tr>";
@@ -199,21 +199,21 @@ if (!isset($tee) or $tee == '') {
         echo "</table><br>";
   }
 
-  // N‰ytet‰‰n k‰ytt‰j‰kohtaiset tyˆm‰‰r‰ykset
-  $tyojonosql = "  SELECT lasku.tunnus,
-          lasku.nimi,
-          lasku.toimaika,
-          a2.selitetark tyostatus,
-          a2.selitetark_2 tyostatusvari,
-          a5.selitetark tyom_prioriteetti
-          FROM lasku
-          JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus AND tyomaarays.tyojono != '' AND tyomaarays.suorittaja = '{$kukarow["kuka"]}')
-          LEFT JOIN avainsana a2 ON (a2.yhtio=tyomaarays.yhtio and a2.laji='TYOM_TYOSTATUS' and a2.selite=tyomaarays.tyostatus)
-          LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti)
-          WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-          AND lasku.tila in ('A','L','N','S','C')
-          AND lasku.alatila != 'X'
-          ORDER BY ifnull(a5.jarjestys, 9999), ifnull(a2.jarjestys, 9999), lasku.toimaika asc, a2.selitetark";
+  // N√§ytet√§√§n k√§ytt√§j√§kohtaiset ty√∂m√§√§r√§ykset
+  $tyojonosql = "SELECT lasku.tunnus,
+                 lasku.nimi,
+                 lasku.toimaika,
+                 a2.selitetark tyostatus,
+                 a2.selitetark_2 tyostatusvari,
+                 a5.selitetark tyom_prioriteetti
+                 FROM lasku
+                 JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus AND tyomaarays.tyojono != '' AND tyomaarays.suorittaja = '{$kukarow["kuka"]}')
+                 LEFT JOIN avainsana a2 ON (a2.yhtio=tyomaarays.yhtio and a2.laji='TYOM_TYOSTATUS' and a2.selite=tyomaarays.tyostatus)
+                 LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti)
+                 WHERE lasku.yhtio  = '{$kukarow["yhtio"]}'
+                 AND lasku.tila     in ('A','L','N','S','C')
+                 AND lasku.alatila != 'X'
+                 ORDER BY ifnull(a5.jarjestys, 9999), ifnull(a2.jarjestys, 9999), lasku.toimaika asc, a2.selitetark";
   $tyoresult = pupe_query($tyojonosql);
 
   if (mysql_num_rows($tyoresult) > 0) {
@@ -226,22 +226,22 @@ if (!isset($tee) or $tee == '') {
     echo "<thead>";
 
     echo "<tr>";
-    echo "<td colspan='5' class='back'><font class='head'>".t("Omat Tyˆm‰‰r‰ykset")."</font><hr></td>";
+    echo "<td colspan='5' class='back'><font class='head'>".t("Omat Ty√∂m√§√§r√§ykset")."</font><hr></td>";
     echo "</tr>";
 
     echo "<tr>";
-    echo "<th $padding_muuttuja>".t("Tyˆnumero")."</th>";
+    echo "<th $padding_muuttuja>".t("Ty√∂numero")."</th>";
     echo "<th $padding_muuttuja>".t("Prioriteetti")."</th>";
     echo "<th $padding_muuttuja>".t("Status")."</th>";
     echo "<th $padding_muuttuja>".t("Asiakas")."</th>";
-    echo "<th $padding_muuttuja>".t("P‰iv‰m‰‰r‰")."</th>";
+    echo "<th $padding_muuttuja>".t("P√§iv√§m√§√§r√§")."</th>";
     echo "</tr>";
 
     echo "</thead>";
     echo "<tbody>";
 
      while ($tyorow = mysql_fetch_array($tyoresult)) {
-      // Laitetetaan taustav‰ri jos sellainen on syˆtetty
+      // Laitetetaan taustav√§ri jos sellainen on sy√∂tetty
       $varilisa = ($tyorow["tyostatusvari"] != "") ? " style='background-color: {$tyorow["tyostatusvari"]};'" : "";
 
       echo "<tr $varilisa>";
@@ -260,7 +260,7 @@ if (!isset($tee) or $tee == '') {
 
     $ulos = '';
 
-    // Katsotaan pienin tilikausi, josta l‰het‰‰n esitt‰m‰‰n
+    // Katsotaan pienin tilikausi, josta l√§het√§√§n esitt√§m√§√§n
     $min_query = "SELECT date_format(ifnull(min(tilikausi_alku), '9999-01-01'), '%Y%m') min
                   FROM tilikaudet
                   WHERE yhtio        = '{$kukarow["yhtio"]}'
@@ -291,7 +291,7 @@ if (!isset($tee) or $tee == '') {
 
         list($vv,$kk,$pp) = explode("-", $alvpvm);
 
-        $ulos .= "<tr><td><a href='{$palvelin2}raportit/alv_laskelma_uusi.php?kk=$kk&vv=$vv'>".t("ALV")." $kk $vv ".t("tosite tekem‰tt‰")."</a></td></tr>";
+        $ulos .= "<tr><td><a href='{$palvelin2}raportit/alv_laskelma_uusi.php?kk=$kk&vv=$vv'>".t("ALV")." $kk $vv ".t("tosite tekem√§tt√§")."</a></td></tr>";
       }
     }
 

@@ -1,9 +1,9 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-// Ei k‰ytet‰ pakkausta
+// Ei k√§ytet√§ pakkausta
 $compression = FALSE;
 
 if (isset($_POST['filenimi']) and $_POST['filenimi'] != '') {
@@ -27,7 +27,7 @@ echo "<font class='head'>".t("Hinnastoajo")."</font><hr>";
 echo "<form method='post'>";
 echo "<input type='hidden' name='tee' value='kaikki'>";
 
-// M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
+// M√§√§ritell√§√§n mitk√§ latikot halutaan mukaan
 $monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI");
 
 if (file_exists("tilauskasittely/monivalintalaatikot.inc")) {
@@ -42,11 +42,11 @@ echo "<table>";
 
 if ($kukarow['extranet'] == '') {
   echo "<tr><th>".t("Listaa kaikki tuotteet").":</th>
-      <td><input type='checkbox' name='kl_hinnastoon'> (".t("muuten hinnastoon fl‰gi eri kuin E ja V").")</td></tr>";
+      <td><input type='checkbox' name='kl_hinnastoon'> (".t("muuten hinnastoon fl√§gi eri kuin E ja V").")</td></tr>";
 
 
-  echo "<tr><th>".t("N‰yt‰ aleryhm‰n tunnus").":</th>
-      <td><input type='checkbox' name='kl_alenimi'> (".t("muuten n‰ytet‰‰n aleryhm‰n nimi").")</td></tr>";
+  echo "<tr><th>".t("N√§yt√§ aleryhm√§n tunnus").":</th>
+      <td><input type='checkbox' name='kl_alenimi'> (".t("muuten n√§ytet√§√§n aleryhm√§n nimi").")</td></tr>";
 }
 
 
@@ -55,7 +55,7 @@ $sel[$hinnasto] = "SELECTED";
 $saatavuus_select[$saatavuus] = "SELECTED";
 
 echo "<tr>
-  <th>" .t('Muutosp‰iv‰m‰‰r‰') . "</th>
+  <th>" .t('Muutosp√§iv√§m√§√§r√§') . "</th>
   <td>
     <input type='text' name='pp' value='$pp' size='3'>
     <input type='text' name='kk' value='$kk' size='3'>
@@ -75,11 +75,11 @@ echo "<tr>
   </td>
   </tr>
   <tr>
-  <th>" . t("N‰ytet‰‰n myˆs saatavuus") . "</th>
+  <th>" . t("N√§ytet√§√§n my√∂s saatavuus") . "</th>
   <td>
     <select name='saatavuus'>
       <option value='ei' {$saatavuus_select['ei']}>" . t("Ei") . "</option>
-      <option value='kylla' {$saatavuus_select['kylla']}>" . t("Kyll‰") . "</option>
+      <option value='kylla' {$saatavuus_select['kylla']}>" . t("Kyll√§") . "</option>
     </select>
     " . t("Toimii vain tab-erotellussa hinnastossa") . "
   </td>
@@ -87,22 +87,22 @@ echo "<tr>
 </table>";
 
 echo "<br>";
-echo "<input type='submit' name='submitnappi' value='".t("L‰het‰")."'>";
+echo "<input type='submit' name='submitnappi' value='".t("L√§het√§")."'>";
 echo "</form>";
 
-// jos ollaan painettu submittia, tehd‰‰n rappa
+// jos ollaan painettu submittia, tehd√§√§n rappa
 if (isset($submitnappi)) {
 
   // kirjoitetaan tmp file
   $filenimi = t("hinnasto")."-".date("ymdHis").".txt";
 
   if (!$fh = fopen("/tmp/" . $filenimi, "w+")) {
-    die("filen luonti ep‰onnistui!");
+    die("filen luonti ep√§onnistui!");
   }
 
   echo "<br><br><font class='message'>".t("Luodaan hinnastoa")."...</font>";
 
-  // katsotaan mik‰ hinnastoformaatti
+  // katsotaan mik√§ hinnastoformaatti
   if (file_exists("inc/hinnastorivi".basename($_POST["hinnasto"]).".inc")) {
     require("inc/hinnastorivi".basename($_POST["hinnasto"]).".inc");
   }
@@ -140,7 +140,7 @@ if (isset($submitnappi)) {
     $query = "SELECT maa, valkoodi, ytunnus from asiakas where tunnus='$kukarow[oletus_asiakas]' and yhtio ='$kukarow[yhtio]'";
     $res = pupe_query($query);
 
-    // k‰ytet‰‰n t‰t‰ laskurowna
+    // k√§ytet√§√§n t√§t√§ laskurowna
     $laskurowfake = mysql_fetch_assoc($res);
   }
 
@@ -163,11 +163,11 @@ if (isset($submitnappi)) {
     $kl_lisa = " and tuote.hinnastoon != 'E' ";
   }
 
-  // Poistettuja ei lis‰t‰ hinnastoon
+  // Poistettuja ei lis√§t√§ hinnastoon
   $poistetut = "'P',";
 
-  // Futurhinnastoon lis‰t‰‰n jatkossa myˆs ne tuotteet joiden status = P ja tuote.hinnastoon = KYLLƒ
-  // ja kyseinen tuote lˆytyy korvaavuusketjusta.
+  // Futurhinnastoon lis√§t√§√§n jatkossa my√∂s ne tuotteet joiden status = P ja tuote.hinnastoon = KYLL√Ñ
+  // ja kyseinen tuote l√∂ytyy korvaavuusketjusta.
   if ($_POST["hinnasto"] == 'futur') {
     $poistetut = '';
   }
@@ -186,7 +186,7 @@ if (isset($submitnappi)) {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
-    echo "<br><br><font class='message'>".t('Yht‰‰n tuotetta ei lˆytynyt hinnastoon.') . '</font><br />';
+    echo "<br><br><font class='message'>".t('Yht√§√§n tuotetta ei l√∂ytynyt hinnastoon.') . '</font><br />';
     exit;
   }
 
@@ -208,7 +208,7 @@ if (isset($submitnappi)) {
       }
     }
 
-    // tehd‰‰n yksi rivi
+    // tehd√§√§n yksi rivi
     if ($ohitus == 0) {
       $ulos = hinnastorivi($tuoterow, $laskurowfake);
       fwrite($fh, $ulos);

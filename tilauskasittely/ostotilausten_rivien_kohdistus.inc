@@ -12,7 +12,7 @@ if (mysql_num_rows($result) == 1) {
   $laskurow = mysql_fetch_assoc($result);
 }
 else {
-  echo "<font style='error'>".t("VIRHE: Saapumista ei en‰‰ lˆydy")."!</font>";
+  echo "<font style='error'>".t("VIRHE: Saapumista ei en√§√§ l√∂ydy")."!</font>";
   exit;
 }
 
@@ -32,7 +32,7 @@ echo "  <SCRIPT LANGUAGE=JAVASCRIPT>
 
     </SCRIPT>";
 
-//Kukarow kesken p‰ivitet‰‰n kohdistuksessa jotta kukaan ei voi samalla vied‰ varaston ja tehd‰ kohdistuksia
+//Kukarow kesken p√§ivitet√§√§n kohdistuksessa jotta kukaan ei voi samalla vied√§ varaston ja tehd√§ kohdistuksia
 if ($kukarow["kesken"] == 0 or $kukarow["kesken"] != $laskurow["tunnus"]) {
   $query = "UPDATE kuka
             SET kesken = '$laskurow[tunnus]'
@@ -42,7 +42,7 @@ if ($kukarow["kesken"] == 0 or $kukarow["kesken"] != $laskurow["tunnus"]) {
   $result = pupe_query($query);
 }
 
-// katsotaan onko t‰lle keikalle jo liitetty vaihto-omaisuuslaskuja (kotimaa, eu tai ei-eu)
+// katsotaan onko t√§lle keikalle jo liitetty vaihto-omaisuuslaskuja (kotimaa, eu tai ei-eu)
 $query = "SELECT sum(summa) summa, sum(arvo) arvo, sum(abs(summa)) abssumma, sum(osto_kulu + osto_rahti + osto_rivi_kulu) as osto_kulut, valkoodi, vienti
           FROM lasku
           WHERE yhtio     = '$kukarow[yhtio]'
@@ -58,13 +58,13 @@ if (mysql_num_rows($result) == 1) {
   $kulurow = mysql_fetch_assoc($result);
 }
 else {
-  $kulurow = array("vienti" => "", "summa" => 0, "arvo" => 0, "valkoodi" => "", "osto_kulut" => 0); // muuten tyhj‰‰
+  $kulurow = array("vienti" => "", "summa" => 0, "arvo" => 0, "valkoodi" => "", "osto_kulut" => 0); // muuten tyhj√§√§
 }
 
 //nyt kohdistus on onnistunut sentilleen. Ollan valmiita ja tulostetaan purkulistat
 if ($tila == 'valmis') {
 
-  // p‰ivitet‰‰n kohdistettu=K kun kohdistus on pennilleen ok...
+  // p√§ivitet√§√§n kohdistettu=K kun kohdistus on pennilleen ok...
   if ($laskunsumma == 0 and ($laskurow["summa"] == 0 or $kulurow["abssumma"] != 0)) {
     $query = "UPDATE lasku
               SET kohdistettu='K'
@@ -86,7 +86,7 @@ if ($tila == 'valmis') {
   $ytunnus  = $laskurow["ytunnus"];
 }
 
-//muokataan tilausrivi‰
+//muokataan tilausrivi√§
 if ($tila == 'muokkaa_rivi' and $tee != 'TI') {
 
   $query = "SELECT tilausrivi.*, tuote.sarjanumeroseuranta, tuote.myyntihinta_maara
@@ -97,7 +97,7 @@ if ($tila == 'muokkaa_rivi' and $tee != 'TI') {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
-    echo t("Tilausrivi‰ ei lˆydy")."! $query";
+    echo t("Tilausrivi√§ ei l√∂ydy")."! $query";
     exit;
   }
   $trow = mysql_fetch_assoc($result);
@@ -106,7 +106,7 @@ if ($tila == 'muokkaa_rivi' and $tee != 'TI') {
             WHERE tunnus = '$riviid' and yhtio='$kukarow[yhtio]'";
   $result = pupe_query($query);
 
-  // Tehd‰‰n pari juttua jos tuote on sarjanuerosaurannassa
+  // Tehd√§√§n pari juttua jos tuote on sarjanuerosaurannassa
   if ($trow["sarjanumeroseuranta"] != '') {
 
     //Nollataan sarjanumero
@@ -125,7 +125,7 @@ if ($tila == 'muokkaa_rivi' and $tee != 'TI') {
     $sarjares = pupe_query($query);
     $sarjarow = mysql_fetch_assoc($sarjares);
 
-    //Pidet‰‰n sarjatunnus muistissa
+    //Pidet√§√§n sarjatunnus muistissa
     $osto_sarjatunnus = $sarjarow["tunnukset"];
 
     $query = "UPDATE sarjanumeroseuranta
@@ -157,18 +157,18 @@ if ($tila == 'muokkaa_rivi' and $tee != 'TI') {
     ${'ale'.$alepostfix} = $trow["ale{$alepostfix}"];
   }
 
-  echo t("Muuta rivi‰").":<br>";
+  echo t("Muuta rivi√§").":<br>";
 
-  //pidet‰‰n kaikki muuttujat tallessa
-  $muut_siirrettavat = $alku."!°!".$nayta_kohdistetut."!°!".$ojarj."!°!".$nayta_kaikki."!°!".$toimittajaid;
+  //pidet√§√§n kaikki muuttujat tallessa
+  $muut_siirrettavat = $alku."!¬°!".$nayta_kohdistetut."!¬°!".$ojarj."!¬°!".$nayta_kaikki."!¬°!".$toimittajaid;
 
   for($i = 0; $i < 10; $i++) {
     if ($haku[$i] != '') {
-      $muut_siirrettavat .= "!°!$i#".$haku[$i];
+      $muut_siirrettavat .= "!¬°!$i#".$haku[$i];
     }
   }
 
-  //rivien splittausvaihtoehtot n‰kyviin
+  //rivien splittausvaihtoehtot n√§kyviin
   $automatiikka = 'ON';
 
   $saapuminen_ostorivin_muokkaus = 1;
@@ -178,14 +178,14 @@ if ($tila == 'muokkaa_rivi' and $tee != 'TI') {
   exit;
 }
 
-//Lis‰t‰‰n sarjanumeroita
+//Lis√§t√§√§n sarjanumeroita
 if ($tila == "sarjanumerot") {
-  //pidet‰‰n kaikki muuttujat tallessa
-  $muut_siirrettavat = $alku."!°!".$nayta_kohdistetut."!°!".$ojarj."!°!".$nayta_kaikki."!°!".$toimittajaid;
+  //pidet√§√§n kaikki muuttujat tallessa
+  $muut_siirrettavat = $alku."!¬°!".$nayta_kohdistetut."!¬°!".$ojarj."!¬°!".$nayta_kaikki."!¬°!".$toimittajaid;
 
   for($i = 0; $i < 10; $i++) {
     if ($haku[$i] != '') {
-      $muut_siirrettavat .= "!°!$i#".$haku[$i];
+      $muut_siirrettavat .= "!¬°!$i#".$haku[$i];
     }
   }
 
@@ -200,10 +200,10 @@ if ($tila == 'FAILISTA') {
   require('ostotilausten_rivien_kohdistus_tiedostosta.inc');
 }
 
-//annetaan mahis tehd‰ kokonaan uusi rivi
+//annetaan mahis tehd√§ kokonaan uusi rivi
 if ($tila == 'uusirivi') {
 
-  // Liitet‰‰n rivi t‰h‰n is‰riviin
+  // Liitet√§√§n rivi t√§h√§n is√§riviin
   if ($perheid2 > 0) {
     $query = "UPDATE tilausrivi SET perheid2='$perheid2' where yhtio='$kukarow[yhtio]' and tunnus='$perheid2' and tyyppi='O'";
     $result = pupe_query($query);
@@ -211,13 +211,13 @@ if ($tila == 'uusirivi') {
 
   echo t("Tee uusi rivi").":<br>";
 
-  //pidet‰‰n kaikki muuttujat tallessa
-  $muut_siirrettavat = $alku."!°!".$nayta_kohdistetut."!°!".$ojarj."!°!".$nayta_kaikki."!°!".$toimittajaid;
+  //pidet√§√§n kaikki muuttujat tallessa
+  $muut_siirrettavat = $alku."!¬°!".$nayta_kohdistetut."!¬°!".$ojarj."!¬°!".$nayta_kaikki."!¬°!".$toimittajaid;
 
   if (is_array($haku)) {
     foreach($haku as $i => $hakusana) {
       if ($haku[$i] != '') {
-        $muut_siirrettavat .= "!°!$i#".$haku[$i];
+        $muut_siirrettavat .= "!¬°!$i#".$haku[$i];
       }
     }
   }
@@ -230,7 +230,7 @@ if ($tila == 'uusirivi') {
   exit;
 }
 
-//poistetaan rivi, tyhjennet‰‰n muuttujat, n‰ytet‰‰n lista
+//poistetaan rivi, tyhjennet√§√§n muuttujat, n√§ytet√§√§n lista
 if ($tee == 'TI' and isset($tyhjenna)) {
 
   unset($tila);
@@ -329,13 +329,13 @@ if ($tee == 'TI' or $tee == "Y") {
 
   require('tarkistarivi_ostotilaus.inc');
 
-  //n‰ytet‰‰n virhe ja annetaan mahis korjata se
+  //n√§ytet√§√§n virhe ja annetaan mahis korjata se
   if ($varaosavirhe != '' or $tuoteno == "") {
 
-    //rivien splittausvaihtoehtot n‰kyviin
+    //rivien splittausvaihtoehtot n√§kyviin
     $automatiikka = 'ON';
 
-    echo t("Muuta rivi‰").":<br>";
+    echo t("Muuta rivi√§").":<br>";
     require('syotarivi_ostotilaus.inc');
     require('../inc/footer.inc');
     exit;
@@ -352,7 +352,7 @@ if ($varaosavirhe == '' and ($tee == "TI" or $tee == "Y") and $tuoteno != '') {
     $tuoteno_array[] = $tuoteno;
   }
 
-  //K‰ytt‰j‰n syˆtt‰m‰ hinta ja ale ja netto, pit‰‰ s‰ilˆ‰ jotta tuotehaussakin voidaan syˆtt‰‰ n‰m‰
+  //K√§ytt√§j√§n sy√∂tt√§m√§ hinta ja ale ja netto, pit√§√§ s√§il√∂√§ jotta tuotehaussakin voidaan sy√∂tt√§√§ n√§m√§
   for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
     ${'kayttajan_ale'.$alepostfix} = ${'ale'.$alepostfix};
   }
@@ -373,11 +373,11 @@ if ($varaosavirhe == '' and ($tee == "TI" or $tee == "Y") and $tuoteno != '') {
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) > 0) {
-      //Tuote lˆytyi
+      //Tuote l√∂ytyi
       $trow = mysql_fetch_assoc($result);
     }
     else {
-      //Tuotetta ei lˆydy, arvataan muutamia muuttujia
+      //Tuotetta ei l√∂ydy, arvataan muutamia muuttujia
       $trow["alv"] = $laskurow["alv"];
     }
 
@@ -404,7 +404,7 @@ if ($varaosavirhe == '' and ($tee == "TI" or $tee == "Y") and $tuoteno != '') {
       $varasto = $laskurow["varasto"];
     }
 
-    //Tehd‰‰n muuttujaswitchit
+    //Tehd√§√§n muuttujaswitchit
     if (is_array($hinta_array)) {
       $hinta = $hinta_array[$tuoteno];
     }
@@ -466,7 +466,7 @@ if ($varaosavirhe == '' and ($tee == "TI" or $tee == "Y") and $tuoteno != '') {
   }
 
   if ($lisavarusteita == "ON" and $perheid2 > 0) {
-    //P‰ivitet‰‰n is‰lle perheid jotta tiedet‰‰n, ett‰ lis‰varusteet on nyt lis‰tty
+    //P√§ivitet√§√§n is√§lle perheid jotta tiedet√§√§n, ett√§ lis√§varusteet on nyt lis√§tty
     $query = "UPDATE tilausrivi set
               perheid2    = '$perheid2'
               where yhtio = '$kukarow[yhtio]'
@@ -513,9 +513,9 @@ if ($varaosavirhe == '' and ($tee == "TI" or $tee == "Y") and $tuoteno != '') {
   unset($var_array);
 }
 
-//korjataan siirrett‰v‰t muuttujat taas talteen
+//korjataan siirrett√§v√§t muuttujat taas talteen
 if (isset($muut_siirrettavat)) {
-  $muut = explode('!°!',$muut_siirrettavat);
+  $muut = explode('!¬°!',$muut_siirrettavat);
 
   $alku         = $muut[0];
   $nayta_kohdistetut   = $muut[1];
@@ -529,7 +529,7 @@ if (isset($muut_siirrettavat)) {
   }
 }
 
-//kohdistetaan rivej‰ laskulle
+//kohdistetaan rivej√§ laskulle
 if ($tila == 'tee_siirto') {
 
   if ($ala_kohdista_mitaan != "") {
@@ -540,7 +540,7 @@ if ($tila == 'tee_siirto') {
     $rivi_siirrettavat_tunnukset = $rivi_kaikki_tunnukset;
   }
 
-  //Tarksitetaan viel‰ ennen p‰ivityst‰, ettei saapumsita ole poistettu ja infotaan k‰ytt‰j‰‰, jos n‰in on k‰ynyt
+  //Tarksitetaan viel√§ ennen p√§ivityst√§, ettei saapumsita ole poistettu ja infotaan k√§ytt√§j√§√§, jos n√§in on k√§ynyt
   $query = "SELECT tila
             FROM lasku
             WHERE yhtio     = '{$kukarow[yhtio]}'
@@ -551,7 +551,7 @@ if ($tila == 'tee_siirto') {
   $res = pupe_query($query);
 
   if (mysql_num_rows($res) == 1){
-    //Siirret‰‰n rivit
+    //Siirret√§√§n rivit
     if (is_array($rivi_siirrettavat_tunnukset)) {
 
       $q1 = "LOCK TABLE lasku WRITE, tilausrivi WRITE, tilausrivin_lisatiedot WRITE";
@@ -574,7 +574,7 @@ if ($tila == 'tee_siirto') {
         list($valittutunnus, $valittuuusiotunnus) = explode("###", $valittu);
 
         if ($valittuuusiotunnus != $keikkakesken) {
-          // Katostaan, ett‰ keikka jolta rivi siirret‰‰n ei ole loppuunlaskettu
+          // Katostaan, ett√§ keikka jolta rivi siirret√§√§n ei ole loppuunlaskettu
           $query  = "SELECT tunnus
                      FROM lasku USE INDEX (PRIMARY)
                      WHERE tunnus    = '$valittuuusiotunnus'
@@ -588,7 +588,7 @@ if ($tila == 'tee_siirto') {
 
             $kpl_lisa = "";
 
-            // Ollaanko syˆtetty siirrett‰v‰ m‰‰r‰?
+            // Ollaanko sy√∂tetty siirrett√§v√§ m√§√§r√§?
             if (isset($siirrettavat_kpl[$valittutunnus])) {
               $query = "SELECT *
                         FROM tilausrivi
@@ -599,13 +599,13 @@ if ($tila == 'tee_siirto') {
 
               $siirrettavat_kpl[$valittutunnus] = (float) str_replace(',', '.', $siirrettavat_kpl[$valittutunnus]);
 
-              // Jos luku ei ole ok niin unsetataan se ja siirret‰‰n koko rivi
+              // Jos luku ei ole ok niin unsetataan se ja siirret√§√§n koko rivi
               if ($siirrettavat_kpl[$valittutunnus] > 0 and $siirrettavat_kpl[$valittutunnus] < $rivirow["kpl"]) {
 
                 $jaljelle_jaa = $rivirow["kpl"] - $siirrettavat_kpl[$valittutunnus];
                 $kpl_lisa = ", tilkpl='".$siirrettavat_kpl[$valittutunnus]."', kpl='".$siirrettavat_kpl[$valittutunnus]."' ";
 
-                // Splitataan rivi, uusi rivi j‰‰ vanhalle keikalle
+                // Splitataan rivi, uusi rivi j√§√§ vanhalle keikalle
                 $rfields = "yhtio";
                 $rvalues = "'$kukarow[yhtio]'";
 
@@ -647,7 +647,7 @@ if ($tila == 'tee_siirto') {
                 if (mysql_num_rows($rivires) > 0) {
                   $rivirow = mysql_fetch_assoc($rivires);
 
-                  // Splitataan rivin lis‰tiedot, uusi rivi j‰‰ vanhalle keikalle
+                  // Splitataan rivin lis√§tiedot, uusi rivi j√§√§ vanhalle keikalle
                   $rfields = "yhtio";
                   $rvalues = "'$kukarow[yhtio]'";
 
@@ -679,7 +679,7 @@ if ($tila == 'tee_siirto') {
             }
 
 
-            // Siiret‰‰n rivi t‰lle keikalle
+            // Siiret√§√§n rivi t√§lle keikalle
             $query = "UPDATE tilausrivi USE INDEX (uusiotunnus_index)
                       SET uusiotunnus     = '$otunnus',
                       erikoisale_saapuminen = '$laskurow[erikoisale_saapuminen]',
@@ -692,7 +692,7 @@ if ($tila == 'tee_siirto') {
                       and (tunnus = '$valittutunnus' or perheid2 = '$valittutunnus')";
             $result = pupe_query($query);
 
-            // Nollataan kohdistus keikalta jolta rivi siirret‰‰n
+            // Nollataan kohdistus keikalta jolta rivi siirret√§√§n
             $query = "UPDATE lasku USE INDEX (PRIMARY)
                       SET kohdistettu = ''
                       WHERE yhtio = '$kukarow[yhtio]'
@@ -701,11 +701,11 @@ if ($tila == 'tee_siirto') {
             $result = pupe_query($query);
           }
           else {
-            echo "<font class='error'>".t("VIRHE: Saapuminen jolta rivi siirret‰‰n ei lˆydy")."</font><br>!";
+            echo "<font class='error'>".t("VIRHE: Saapuminen jolta rivi siirret√§√§n ei l√∂ydy")."</font><br>!";
           }
         }
         else {
-          echo "<font class='error'>".t("VIRHE: Saapuminen jolta rivi siirret‰‰n on lukittu")."</font><br>!";
+          echo "<font class='error'>".t("VIRHE: Saapuminen jolta rivi siirret√§√§n on lukittu")."</font><br>!";
         }
       }
 
@@ -713,7 +713,7 @@ if ($tila == 'tee_siirto') {
       $r = pupe_query($q6);
       }
     } else {
-      echo "<font class='error'>".t("VIRHE: Saapumiselle ei voi liitt‰‰ rivej‰, koska se on poistettu")."!</font><br>";
+      echo "<font class='error'>".t("VIRHE: Saapumiselle ei voi liitt√§√§ rivej√§, koska se on poistettu")."!</font><br>";
     }
 
   $tila = '';
@@ -753,7 +753,7 @@ if ($tila == 'tee_kohdistus' and is_array($rivi_hinta) !== FALSE and is_array($r
   }
 }
 
-//kohdistetaan rivej‰ laskulle
+//kohdistetaan rivej√§ laskulle
 if ($tila == 'tee_kohdistus') {
 
   if ($ala_kohdista_mitaan != "") {
@@ -764,7 +764,7 @@ if ($tila == 'tee_kohdistus') {
     $rivi_valitut_tunnukset = $rivi_kaikki_tunnukset;
   }
 
-  //Tehd‰‰n uusia lis‰varusterivej‰
+  //Tehd√§√§n uusia lis√§varusterivej√§
   if (is_array($lisavarusterivi_kpl)) {
 
     foreach ($lisavarusterivi_kpl as $tunnus => $kpl) {
@@ -834,7 +834,7 @@ if ($tila == 'tee_kohdistus') {
       $tunnukset2[$valittutunnus] = $valittutunnus;
     }
 
-    //Tarksitetaan viel‰ ennen p‰ivityst‰, ettei saapumsita ole poistettu ja infotaan k‰ytt‰j‰‰, jos n‰in on k‰ynyt
+    //Tarksitetaan viel√§ ennen p√§ivityst√§, ettei saapumsita ole poistettu ja infotaan k√§ytt√§j√§√§, jos n√§in on k√§ynyt
     $query = "SELECT tila
               FROM lasku
               WHERE yhtio     = '{$kukarow[yhtio]}'
@@ -864,12 +864,12 @@ if ($tila == 'tee_kohdistus') {
                 AND perheid2          > 0";
     $result = pupe_query($query);
     } else {
-      echo "<font class='error'>".t("VIRHE: Saapumiselle ei voi liitt‰‰ rivej‰, koska se on poistettu")."!</font><br>";
+      echo "<font class='error'>".t("VIRHE: Saapumiselle ei voi liitt√§√§ rivej√§, koska se on poistettu")."!</font><br>";
     }
   }
   $tila = '';
 
-  // katotaan ollaanko muutettunimityksi‰ ja p‰ivitet‰‰n ne
+  // katotaan ollaanko muutettunimityksi√§ ja p√§ivitet√§√§n ne
   if (is_array($rivi_nimitys)) {
     foreach ($rivi_nimitys as $tunnus => $nimitys) {
       $query  = "UPDATE tilausrivi set nimitys='$nimitys' where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
@@ -877,7 +877,7 @@ if ($tila == 'tee_kohdistus') {
     }
   }
 
-  // katotaan ollaanko muutettu hintaa tai kappaleita ja p‰ivitet‰‰n ne
+  // katotaan ollaanko muutettu hintaa tai kappaleita ja p√§ivitet√§√§n ne
   if (is_array($rivi_hinta)) {
     foreach ($rivi_hinta as $tunnus => $hinta) {
       $hinta  = str_replace(",",".", $hinta);
@@ -886,7 +886,7 @@ if ($tila == 'tee_kohdistus') {
     }
   }
 
-  // katotaan ollaanko muutettualeja ja p‰ivitet‰‰n ne
+  // katotaan ollaanko muutettualeja ja p√§ivitet√§√§n ne
   // siirretty!
   if (is_array($rivi_ale1)) {
     // ale1
@@ -942,7 +942,7 @@ if ($tila == 'tee_kohdistus') {
 
         $chk_row = mysql_fetch_assoc($chk_res);
 
-        // Tarkistetaan onko myyntihinta muuttunut alkuper‰iseen verrattuna
+        // Tarkistetaan onko myyntihinta muuttunut alkuper√§iseen verrattuna
         $query = "SELECT myyntihinta
                   FROM tuote
                   WHERE yhtio = '{$kukarow['yhtio']}'
@@ -973,7 +973,7 @@ if ($tila == 'tee_kohdistus') {
     }
   }
 
-  // katotaan p‰ivitet‰‰nkˆ toimitettuaikoja
+  // katotaan p√§ivitet√§√§nk√∂ toimitettuaikoja
   if (is_array($rivi_toimitettuaika_vv)) {
     foreach ($rivi_toimitettuaika_vv as $tunnus => $toimitettuvv) {
 
@@ -986,7 +986,7 @@ if ($tila == 'tee_kohdistus') {
   }
 
   if (is_array($rivi_kuluhinta)) {
-    // katotaan ollaanko muutettu kuluhintaa tai kappaleita ja p‰ivitet‰‰n ne
+    // katotaan ollaanko muutettu kuluhintaa tai kappaleita ja p√§ivitet√§√§n ne
     foreach ($rivi_kuluhinta as $tunnus => $kulu) {
       $kulu   = str_replace(",",".", $kulu);
       $query  = "UPDATE tilausrivi set kate='$kulu' where yhtio='$kukarow[yhtio]' and tunnus='$tunnus' and kate<>'$kulu'";
@@ -1004,7 +1004,7 @@ if ($tila == 'tee_kohdistus') {
       $result = pupe_query($query);
       $rivi  = mysql_fetch_assoc($result);
 
-      // jos t‰t‰ rivi‰ ei ole viel‰ viety varastoon ni p‰ivitet‰‰n varattu kentt‰‰
+      // jos t√§t√§ rivi√§ ei ole viel√§ viety varastoon ni p√§ivitet√§√§n varattu kentt√§√§
       if ($rivi["kpl"] == 0 and $rivi["varattu"] != 0 and $kpl != 0) {
         $query = "UPDATE tilausrivi
                   set varattu='$kpl'
@@ -1017,7 +1017,7 @@ if ($tila == 'tee_kohdistus') {
 
         // Kopioidaan rivin erotus uudelle tilausriville
         if ($yhtiorow["saapumisen_jt_kasittely"] == "K" and $jalkitoimitukseen_kpl > 0 and $kpl > 0 and $rivi_kpl_alkuperainen[$tunnus] > 0) {
-          // J‰tet‰‰n loppurivi JT:seen
+          // J√§tet√§√§n loppurivi JT:seen
           $parametrit = array (
             "method" => "POST",
             "url" => "{$palvelin2}tilauskasittely/keikka.php",
@@ -1064,15 +1064,15 @@ if ($tila == 'tee_kohdistus') {
   }
 }
 
-//n‰ytet‰‰n rivilista ja ruksataan kohdistettavia rivej‰
+//n√§ytet√§√§n rivilista ja ruksataan kohdistettavia rivej√§
 if ($tila == '') {
 
-  // jos ollaan liitetty jo vaihto-omaisuuslasku, k‰ytet‰‰n sen vientikentt‰‰
+  // jos ollaan liitetty jo vaihto-omaisuuslasku, k√§ytet√§√§n sen vientikentt√§√§
   if ($kulurow["vienti"] != "") $laskurow["vienti"] = $kulurow["vienti"];
 
   $alvti = " if(tuotteen_toimittajat.osto_alv >= 0, tuotteen_toimittajat.osto_alv, tuote.alv) ";
 
-  // jos kysess‰ on kotimainen vaihto-omaisuuslasku, pit‰‰ lis‰t‰ tuotteen hintaan alvi, jos ostolaskuilla on alvia!
+  // jos kysess√§ on kotimainen vaihto-omaisuuslasku, pit√§√§ lis√§t√§ tuotteen hintaan alvi, jos ostolaskuilla on alvia!
   if ($laskurow['vienti'] == 'C' or $laskurow['vienti'] == 'J') {
 
     // Lasketaan verokanta
@@ -1083,7 +1083,7 @@ if ($tila == '') {
       $alvti = 0;
       $alvit = 0;
     }
-    // Onko miell‰ oletuksista poikkeava alvi. Verokantoja ennen viimeisint‰ alv-muutosta.
+    // Onko miell√§ oletuksista poikkeava alvi. Verokantoja ennen viimeisint√§ alv-muutosta.
     elseif (in_array($simualv, array(23, 13, 9))) {
       $alvti = $simualv;
       $alvit = $simualv;
@@ -1093,15 +1093,15 @@ if ($tila == '') {
     }
 
     if ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"]) {
-      // tutkitaan ollaanko siell‰ alv-rekisterˆity
-      $alhqur = "  SELECT *
-            FROM yhtion_toimipaikat
-            WHERE yhtio   = '$kukarow[yhtio]'
-            AND maa     = '$laskurow[maa]'
-            AND vat_numero != ''";
+      // tutkitaan ollaanko siell√§ alv-rekister√∂ity
+      $alhqur = "SELECT *
+                 FROM yhtion_toimipaikat
+                 WHERE yhtio     = '$kukarow[yhtio]'
+                 AND maa         = '$laskurow[maa]'
+                 AND vat_numero != ''";
       $alhire = pupe_query($alhqur);
 
-      // ollaan alv-rekisterˆity
+      // ollaan alv-rekister√∂ity
       if (mysql_num_rows($alhire) == 1) {
         $alvit = "tuotteen_alv.alv";
         $alvti = " ifnull(tuotteen_alv.alv, 0) ";
@@ -1131,16 +1131,16 @@ if ($tila == '') {
   $result   = pupe_query($query);
   $hintarow = mysql_fetch_assoc($result);
 
-  // p‰ivitet‰‰n samantien t‰m‰ tieto laskulle
+  // p√§ivitet√§√§n samantien t√§m√§ tieto laskulle
   $query   = "UPDATE lasku set summa='$hintarow[hinta]', kohdistettu='' where yhtio ='$kukarow[yhtio]' and tunnus='$otunnus'";
   $hinresu = pupe_query($query);
 
-  // Jos k‰ytt‰j‰ on syˆtt‰nyt alvillisen hinnan niin lis‰t‰‰n alvi
+  // Jos k√§ytt√§j√§ on sy√∂tt√§nyt alvillisen hinnan niin lis√§t√§√§n alvi
   if ((int) $laskurow["rahti_etu_alv"] != 0) {
     $laskurow["rahti_etu"] = round($laskurow["rahti_etu"] * (1 + ($laskurow["rahti_etu_alv"] / 100)), 6);
   }
 
-  // Jos k‰ytt‰j‰ on syˆtt‰nyt alvillisen pyˆristyksen niin lis‰t‰‰n alvi
+  // Jos k√§ytt√§j√§ on sy√∂tt√§nyt alvillisen py√∂ristyksen niin lis√§t√§√§n alvi
   if ((int) $laskurow["pyoristys_erot_alv"] != 0) {
     $laskurow["pyoristys_erot"] = round($laskurow["pyoristys_erot"] * (1 + ($laskurow["pyoristys_erot_alv"] / 100)), 6);
   }
@@ -1155,7 +1155,7 @@ if ($tila == '') {
     $laskunsumma = 0.00;
   }
 
-  // Tietokannan kent‰t on m‰‰ritelt‰v‰ n‰in jotta meid‰n dynaamiset haut toimisivat
+  // Tietokannan kent√§t on m√§√§ritelt√§v√§ n√§in jotta meid√§n dynaamiset haut toimisivat
   $kentat_array = array();
   $kentat_array[] = "tilausrivi.otunnus otunnus";
   $kentat_array[] = "tilausrivi.tuoteno tuoteno";
@@ -1166,7 +1166,7 @@ if ($tila == '') {
   $kentat_array[] = "tilausrivi.hinta hinta";
   $kentat_array[] = "tuotteen_toimittajat.valuutta valuutta";
 
-  // niin monta alekentt‰‰ haetaan kun on myynnin_alekentti‰, muutetaab jossain vaiheessa oston_alekentiksi.
+  // niin monta alekentt√§√§ haetaan kun on myynnin_alekentti√§, muutetaab jossain vaiheessa oston_alekentiksi.
   for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
     $kentat_array[] = "tilausrivi.ale$alepostfix ale$alepostfix"; // 8,9,10
   }
@@ -1194,8 +1194,8 @@ if ($tila == '') {
   $kennim_array[] = t('Tuoteno');
   $kennim_array[] = t('Toim_tuoteno');
   $kennim_array[] = t('Nimitys');
-  $kennim_array[] = t('M‰‰r‰');
-  $kennim_array[] = t('M‰‰r‰/Ulk');
+  $kennim_array[] = t('M√§√§r√§');
+  $kennim_array[] = t('M√§√§r√§/Ulk');
   $kennim_array[] = t('Hinta');
   $kennim_array[] = t('Valuutta');
 
@@ -1280,14 +1280,14 @@ if ($tila == '') {
   }
 
   foreach ($kenhak_array as $i => $kentta) {
-    // tarkastetaan onko hakukent‰ss‰ jotakin
+    // tarkastetaan onko hakukent√§ss√§ jotakin
     if (strlen($haku[$i]) > 0) {
       $lisa1 .= " $kentta like '%$haku[$i]%' and";
 
-      //pidet‰‰n muistissa linkkej‰ varten
+      //pidet√§√§n muistissa linkkej√§ varten
       $ulisa .= "&haku[$i]=$haku[$i]";
 
-      //pidet‰‰n muistissa formeja varten
+      //pidet√§√§n muistissa formeja varten
       $hiddenit .= "<input type='hidden' name='haku[$i]' value='$haku[$i]'>\n";
     }
   }
@@ -1401,7 +1401,7 @@ if ($tila == '') {
             and lasku.liitostunnus = '$laskurow[liitostunnus]'
             {$toimipaikkalisa}";
 
-  // Tehd‰‰n unionilla niin saadaan sek‰ keikat ett‰ osotilaukset nopsasti haettua suoraan indeksist‰
+  // Tehd√§√§n unionilla niin saadaan sek√§ keikat ett√§ osotilaukset nopsasti haettua suoraan indeksist√§
   if ($unionwhere2 != "") {
     $query = "($query $unionwhere1 GROUP BY tilausrivi.tunnus $lisa1) UNION ($query $unionwhere2 GROUP BY tilausrivi.tunnus $lisa1) ORDER BY $jarjestys $limit";
   }
@@ -1446,14 +1446,14 @@ if ($tila == '') {
     $okend = "";
   }
 
-  // jos kululaskua ei ole viel‰ liitetty, oletetaan ett‰ k‰ytet‰‰n toimittajan oletus valuuttaa
+  // jos kululaskua ei ole viel√§ liitetty, oletetaan ett√§ k√§ytet√§√§n toimittajan oletus valuuttaa
   if ($kulurow["valkoodi"] == "") $kulurow["valkoodi"] = $laskurow["valkoodi"];
 
   $query  = "SELECT sum(kpl+varattu) kappaleet, count(*) rivit from tilausrivi where yhtio='$kukarow[yhtio]' and uusiotunnus='$laskurow[tunnus]' and tyyppi='O'";
   $kappaleetres = pupe_query($query);
   $kappaleetrow = mysql_fetch_assoc($kappaleetres);
 
-  //n‰ytet‰‰n mitk‰ n‰ytet‰‰n
+  //n√§ytet√§√§n mitk√§ n√§ytet√§√§n
   echo "<form name='formi' method='post'>";
   echo "<input type='hidden' name='toiminto' value='kohdista'>";
   echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
@@ -1467,15 +1467,15 @@ if ($tila == '') {
   <tr>
     <th>".t("Saapuminen").":</th><td>$laskurow[laskunro]</td>
     <th>".t("Laskun summa").":</th><td style='text-align:right'>$kulurow[summa] $kulurow[valkoodi]</td>
-    <th>".t("Perusn‰kym‰").":</th><td><INPUT type='radio' $chk4 name='nayta_kohdistetut' value='' onclick='submit()'></td>
+    <th>".t("Perusn√§kym√§").":</th><td><INPUT type='radio' $chk4 name='nayta_kohdistetut' value='' onclick='submit()'></td>
   </tr>
   <tr>
     <th>".t("Toimittaja").":</th><td>$laskurow[nimi]</td>
     <th>".t("Laskun kulut").":</th><td style='text-align:right'><span id='laskun_kulut'>".sprintf("%.2f", $kulurow['osto_kulut'])."</span> $kulurow[valkoodi]</td>
-    <th>".t("N‰yt‰ kaikki kohdistetut").":</th><td><INPUT type='radio' $chk1 name='nayta_kohdistetut' value='jees' onclick='submit()'></td>
+    <th>".t("N√§yt√§ kaikki kohdistetut").":</th><td><INPUT type='radio' $chk1 name='nayta_kohdistetut' value='jees' onclick='submit()'></td>
   </tr>
   <tr>
-    <th>".t("N‰yt‰ lasku").":</th><td>";
+    <th>".t("N√§yt√§ lasku").":</th><td>";
 
   js_popup();
 
@@ -1494,16 +1494,16 @@ if ($tila == '') {
 
   echo "</td>
     <th>".t("Eturahti").":</th><td style='text-align:right'>".sprintf("%.2f", $laskurow["rahti_etu"])." $kulurow[valkoodi]</td>
-    <th>".t("N‰yt‰ vain kohdistamattomat").":</th><td><INPUT type='radio' $chk2 name='nayta_kohdistetut' value='eitod' onclick='submit()'></td>
+    <th>".t("N√§yt√§ vain kohdistamattomat").":</th><td><INPUT type='radio' $chk2 name='nayta_kohdistetut' value='eitod' onclick='submit()'></td>
     </tr>
     <tr>
     <th>".t("Saapumisen erikoisale").":</th><td><span id='keikan_erikoisale'>".($laskurow["erikoisale_saapuminen"]*1)."</span>%</td>
-    <th>".t("Pyˆristyserot").":</th><td style='text-align:right'>".sprintf("%.2f", $laskurow["pyoristys_erot"])." $kulurow[valkoodi]</td>
-    <th>".t("N‰yt‰ kaikki yhdell‰ sivulla").":</th><td><INPUT type='checkbox' $chk3 name='nayta_kaikki' value='kaikki' onclick='submit()'></td>
+    <th>".t("Py√∂ristyserot").":</th><td style='text-align:right'>".sprintf("%.2f", $laskurow["pyoristys_erot"])." $kulurow[valkoodi]</td>
+    <th>".t("N√§yt√§ kaikki yhdell√§ sivulla").":</th><td><INPUT type='checkbox' $chk3 name='nayta_kaikki' value='kaikki' onclick='submit()'></td>
     </tr>
     <tr>";
 
-  echo "<th>",t("N‰ytet‰‰n rivit"),":</th>";
+  echo "<th>",t("N√§ytet√§√§n rivit"),":</th>";
 
   if ($chk3 == "checked"){
       $sivu  = 1;
@@ -1520,7 +1520,7 @@ if ($tila == '') {
 
   if ($onkolaajattoimipaikat) {
 
-    echo "<th>",t("N‰yt‰ toimipaikan rivej‰"),"</th>";
+    echo "<th>",t("N√§yt√§ toimipaikan rivej√§"),"</th>";
     echo "<td>";
 
     $sel = (isset($toimipaikka) and is_numeric($toimipaikka) and $toimipaikka == 0) ? "selected" : "";
@@ -1561,12 +1561,12 @@ if ($tila == '') {
   echo "<tr>";
   echo "<th></th><td></td>";
   echo "<th>".t("Kohdistettu summa").":</th><td id='kohdistettu_summa_td' style='text-align:right'>$ok <span id='kohdistettu_summa'>$valittusumma</span> $kulurow[valkoodi]$okend</td>";
-  echo "<th>".t("Rivej‰").":</th><td style='text-align:right'><span id='kohdistettu_rivit'>$kappaleetrow[rivit]</span></td>";
+  echo "<th>".t("Rivej√§").":</th><td style='text-align:right'><span id='kohdistettu_rivit'>$kappaleetrow[rivit]</span></td>";
   echo "</tr>";
 
   echo "<tr>";
   echo "<th></th><td></td>";
-  echo "<th>".t("J‰ljell‰").":</th><td style='text-align:right'>$ok $laskunsumma $kulurow[valkoodi]$okend</td>";
+  echo "<th>".t("J√§ljell√§").":</th><td style='text-align:right'>$ok $laskunsumma $kulurow[valkoodi]$okend</td>";
   echo "<th>".t("Kappaleita").":</th><td style='text-align:right'><span id='kohdistettu_kpl'>".(float) $kappaleetrow['kappaleet']."</span></td>";
   echo "</tr>";
 
@@ -1624,7 +1624,7 @@ if ($tila == '') {
     echo "<input type='hidden' name='ojarj' value=\"$ojarj\">";
     echo "<input type='hidden' name='otunnus' value='$otunnus'>";
     echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>";
-    echo "<input type='submit' value='".t("Siirr‰ rivej‰ toiselta saapumiselta")."'></form>";
+    echo "<input type='submit' value='".t("Siirr√§ rivej√§ toiselta saapumiselta")."'></form>";
 
     echo "<form method='post'>";
     echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
@@ -1666,7 +1666,7 @@ if ($tila == '') {
 
   echo "<tr></tr><tr><th>x</th>";
 
-  //hakukent‰t
+  //hakukent√§t
   echo "<form method='post' autocomplete='off'>";
   echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
   echo "<input type='hidden' name='otunnus' value='$otunnus'>";
@@ -1737,7 +1737,7 @@ if ($tila == '') {
   echo "<th></th>";
   echo "</tr>";
 
-  // hakukent‰t alkaa t‰st‰
+  // hakukent√§t alkaa t√§st√§
   echo "<tr><td></td>";
 
   echo "<td nowrap valign='top'>";
@@ -1793,9 +1793,9 @@ if ($tila == '') {
   echo "<td class='back'><input type='submit' value='".t("Etsi")."'></td>";
   echo "</tr></form>";
 
-  // Katsotaan lˆytyikˆ yht‰‰n tilausrivi‰
+  // Katsotaan l√∂ytyik√∂ yht√§√§n tilausrivi√§
   if (mysql_num_rows($result) == 0) {
-    echo "<tr><td colspan='5' class='back'>".t("Yht‰‰n kohdistettavaa rivi‰ ei lˆydy")."!</td></tr>";
+    echo "<tr><td colspan='5' class='back'>".t("Yht√§√§n kohdistettavaa rivi√§ ei l√∂ydy")."!</td></tr>";
   }
 
   //itse rivit
@@ -1867,7 +1867,7 @@ if ($tila == '') {
 
     $onko_suoratoimitus_res = onko_suoratoimitus($rivirow['rivitunnus']);
 
-    //Tutkitaan lˆytyykˆ JT-rivi joka m‰pp‰ytyy t‰h‰n ostoriviin
+    //Tutkitaan l√∂ytyyk√∂ JT-rivi joka m√§pp√§ytyy t√§h√§n ostoriviin
     if ($varastoon_row = mysql_fetch_assoc($onko_suoratoimitus_res)) {
       $onkosuoratoimitus = TRUE;
 
@@ -1880,7 +1880,7 @@ if ($tila == '') {
       }
     }
     else {
-      // katsotaan onko tuotetta j‰lkitoimituksessa
+      // katsotaan onko tuotetta j√§lkitoimituksessa
       $query = "SELECT sum(varattu+jt) kpl
                 FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika)
                 WHERE yhtio        = '{$kukarow['yhtio']}'
@@ -1892,13 +1892,13 @@ if ($tila == '') {
       $jt_check_row = mysql_fetch_assoc($jt_check_res);
 
       if ($jt_check_row['kpl'] > 0) {
-        $rivirow['kommentti'] .= "<br/>".t("J‰lkitoimituksessa")." {$jt_check_row['kpl']} ".t_avainsana("Y", "", "and avainsana.selite='$rivirow[tilyksikko]'", "", "", "selite");
+        $rivirow['kommentti'] .= "<br/>".t("J√§lkitoimituksessa")." {$jt_check_row['kpl']} ".t_avainsana("Y", "", "and avainsana.selite='$rivirow[tilyksikko]'", "", "", "selite");
       }
     }
 
     $rivilask++;
 
-    // Tuoteperheiden lapsille ei n‰ytet‰ rivinumeroa
+    // Tuoteperheiden lapsille ei n√§ytet√§ rivinumeroa
     if ($rivirow["perheid"] == $rivirow["rivitunnus"] or ($rivirow["perheid2"] == $rivirow["rivitunnus"] and $rivirow["perheid"] == 0)) {
       $query = "SELECT count(*) kpl
                 from tilausrivi
@@ -1955,7 +1955,7 @@ if ($tila == '') {
       $borderlask--;
     }
 
-    // n‰ytet‰‰n vaan tsekpoksi jos rivi‰ saa viel‰ ru(n)kata...
+    // n√§ytet√§√§n vaan tsekpoksi jos rivi√§ saa viel√§ ru(n)kata...
     if (isset($nayta_siirrettavat) and $nayta_siirrettavat == "YES") {
       echo "<$td $classeka valign='top'>";
       echo "<input type='checkbox' name='rivi_siirrettavat_tunnukset[]' value='$rivirow[rivitunnus]###$rivirow[uusiotunnus]' onclick='submit_juppe($rivirow[rivitunnus])'>";
@@ -1965,7 +1965,7 @@ if ($tila == '') {
       echo "<$td $classeka valign='top'>";
       echo "<a name='$rivirow[rivitunnus]'>";
 
-      //tsekataan is‰n status
+      //tsekataan is√§n status
       $query = "SELECT kpl
                 from tilausrivi
                 where yhtio = '$kukarow[yhtio]'
@@ -2005,13 +2005,13 @@ if ($tila == '') {
     }
     echo "<$td $class valign='top' nowrap>";
 
-    // tehd‰‰n pop-up divi jos keikalla on kommentti...
+    // tehd√§√§n pop-up divi jos keikalla on kommentti...
     list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($rivirow["tuoteno"]);
     $pop_yks = t_avainsana("Y", "", "and avainsana.selite='$rivirow[tilyksikko]'", "", "", "selite");
 
     echo "<div id='div_$rivirow[rivitunnus]' class='popup' style='width: 400px;'>";
     echo "<ul>";
-    echo "<li>".t("Saldo").": $saldo $pop_yks</li><li>".t("Hyllyss‰").": $hyllyssa $pop_yks</li><li>".t("Myyt‰viss‰").": $myytavissa $pop_yks</li>";
+    echo "<li>".t("Saldo").": $saldo $pop_yks</li><li>".t("Hyllyss√§").": $hyllyssa $pop_yks</li><li>".t("Myyt√§viss√§").": $myytavissa $pop_yks</li>";
     echo "<li>".t("Tilattu").": $rivirow[tilattu] $pop_yks</li><li>".t("Varattu").": $rivirow[varattu] $pop_yks</li>";
     echo "<li>".t("Keskihinta").": $rivirow[keskihinta] $rivirow[valuutta]</li><li>".t("Ostohinta").": $rivirow[ostohinta] $rivirow[valuutta]</li>";
     echo "</ul>";
@@ -2085,7 +2085,7 @@ if ($tila == '') {
       echo "</{$td}>";
     }
 
-    // jos rivi‰ ei ole viel‰ viety varastoon, voidaan muuttaa kappaleita
+    // jos rivi√§ ei ole viel√§ viety varastoon, voidaan muuttaa kappaleita
     if (isset($nayta_siirrettavat) and $nayta_siirrettavat == "YES" and $sarjarow["sarjanumeroseuranta"] == "" and !$onkosuoratoimitus) {
       echo "<$td $class valign='top' align='right'><input size='5' type='text' name='siirrettavat_kpl[$rivirow[rivitunnus]]' value='". (float) $rivirow["siskpl"]."' style='text-align:right'> ".t_avainsana("Y", "", "and avainsana.selite='$rivirow[tilyksikko]'", "", "", "selite")."<br>". (float) $rivirow["ulkkpl"]."&nbsp;&nbsp;".t_avainsana("Y", "", "and avainsana.selite='$rivirow[toimyksikko]'", "", "", "selite")."</$td>";
     }
@@ -2189,7 +2189,7 @@ if ($tila == '') {
 
     echo "</$td>";
 
-    //Tutkitaan tuotteiden lis‰varusteita
+    //Tutkitaan tuotteiden lis√§varusteita
     $query  = "SELECT tuote.tuoteno, tuote.nimitys, tuotteen_toimittajat.toim_tuoteno
                FROM tuoteperhe
                JOIN tuote ON (tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tuoteno=tuote.tuoteno and tuote.ei_saldoa = '')
@@ -2207,11 +2207,11 @@ if ($tila == '') {
     }
 
     if ((!isset($nayta_siirrettavat) or $nayta_siirrettavat == "") and $rivirow["rivitunnus"] == $rivirow["perheid2"] and mysql_num_rows($lisaresult) > 0) {
-      echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&ojarj=$ojarj$ulisa&lisaa_lisavarusteita=$rivirow[rivitunnus]'>".t("Lis‰varusteet")."</a><br>";
+      echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&ojarj=$ojarj$ulisa&lisaa_lisavarusteita=$rivirow[rivitunnus]'>".t("Lis√§varusteet")."</a><br>";
     }
 
     if ((!isset($nayta_siirrettavat) or $nayta_siirrettavat == "") and ($sarjarow["sarjanumeroseuranta"] == "S" or $sarjarow["sarjanumeroseuranta"] == "U" or $sarjarow["sarjanumeroseuranta"] == "V") and ($rivirow["rivitunnus"] == $rivirow["perheid2"] or $rivirow["perheid2"] == 0)) {
-      echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&ojarj=$ojarj$ulisa&riviid=$rivirow[rivitunnus]&tila=uusirivi&perheid2=$rivirow[rivitunnus]'>".t("Liit‰ rivi")."</a>";
+      echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&ojarj=$ojarj$ulisa&riviid=$rivirow[rivitunnus]&tila=uusirivi&perheid2=$rivirow[rivitunnus]'>".t("Liit√§ rivi")."</a>";
     }
 
     echo "</$td>";
@@ -2298,7 +2298,7 @@ if ($tila == '') {
         <input type='hidden' name='ojarj' value=\"$ojarj\">
         <input type='hidden' name='otunnus' value='$otunnus'>
         <input type='hidden' name='toimipaikka' value='{$toimipaikka}'>
-        <input type='submit' value='".t("Siirr‰ rivej‰ toiselta saapumiselta")."'>
+        <input type='submit' value='".t("Siirr√§ rivej√§ toiselta saapumiselta")."'>
         </form>";
 
     echo "<form method='post'>

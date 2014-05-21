@@ -1,6 +1,6 @@
 <?php
 
-//Tänne tarvitaan:
+//TÃ¤nne tarvitaan:
 //$jysum joka on kokonaiskate joka tilaukselle halutaan
 //$tilausnumero TAI $valitut_tilausrivi_tunnukset
 
@@ -46,14 +46,14 @@ function laske_tilausriveille_uudet_hinnat($uusi_kate, $tilausnumero = 0, $tilau
 
     $rivin_alennus = generoi_alekentta_php($tilausrivi, 'M', 'kerto');
 
-    //Jos rivillä on alennuksia, niin kahahinnan päälle pitää laskea rivin alennukset, jotta uuden katteen laskenta menee oikein.
+    //Jos rivillÃ¤ on alennuksia, niin kahahinnan pÃ¤Ã¤lle pitÃ¤Ã¤ laskea rivin alennukset, jotta uuden katteen laskenta menee oikein.
     $kehahin_plus_alennus = $tilausrivi['kehahin'] / $rivin_alennus;
     $uusi_hinta = $kehahin_plus_alennus / ( 1 - ( $uusi_kate / 100 ));
 
-    //Jos alv_kasittely on päällä, tarkoittaa se,
-    //että myyntihinnoissa on alv laskettuna myyntihinnan sisälle.
+    //Jos alv_kasittely on pÃ¤Ã¤llÃ¤, tarkoittaa se,
+    //ettÃ¤ myyntihinnoissa on alv laskettuna myyntihinnan sisÃ¤lle.
     //Verrattuna verottomaan myyntihintaan,
-    //hinnan pitää siis olla tilausrivi.alv verran suurempi, jotta katteen lasku on oikein.
+    //hinnan pitÃ¤Ã¤ siis olla tilausrivi.alv verran suurempi, jotta katteen lasku on oikein.
     if ($yhtiorow['alv_kasittely'] == '') {
       $uusi_hinta = $uusi_hinta * (1 + ($tilausrivi['alv'] / 100));
     }

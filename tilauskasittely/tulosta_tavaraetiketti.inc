@@ -7,18 +7,18 @@ if (mysql_num_rows($result) == 1) {
   $laskurow = mysql_fetch_assoc($result);
 }
 else {
-  echo "<font class='error'>",t("VIRHE: Tilausta ei enää löydy"),"!</font>";
+  echo "<font class='error'>",t("VIRHE: Tilausta ei enÃ¤Ã¤ lÃ¶ydy"),"!</font>";
   require('../inc/footer.inc');
   exit;
 }
 
 $tavaraetiketti_res = suuntalavan_tuotteet($suuntalavat, $laskurow['liitostunnus']);
 
-$nimi = str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), $yhtiorow['nimi']);
+$nimi = str_replace(array('Ã„','Ã¤','Ã–','Ã¶'), array('A','a','O','o'), $yhtiorow['nimi']);
 
 while ($row = mysql_fetch_assoc($tavaraetiketti_res)) {
 
-  $row['nimitys'] = str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), $row['nimitys']);
+  $row['nimitys'] = str_replace(array('Ã„','Ã¤','Ã–','Ã¶'), array('A','a','O','o'), $row['nimitys']);
 
   if (strlen($row['eankoodi']) < 14) {
     $viivakoodi1  = ">6";
@@ -27,7 +27,7 @@ while ($row = mysql_fetch_assoc($tavaraetiketti_res)) {
     $viivakoodi1 .= substr($row['eankoodi'],1);
   }
   else {
-    // yli 13 merkkiä pitkät EAN-koodit ovat virheellisiä.
+    // yli 13 merkkiÃ¤ pitkÃ¤t EAN-koodit ovat virheellisiÃ¤.
     $viivakoodi1  = ">6";
     $viivakoodi1 .= substr($row['eankoodi'],0,2);
     $viivakoodi1 .= ">5";
@@ -40,7 +40,7 @@ while ($row = mysql_fetch_assoc($tavaraetiketti_res)) {
                {AY;+05,0|}
                {C|}
 
-       *** YHTIÖN NIMI ***
+       *** YHTIÃ–N NIMI ***
        {PC001;0100,0100,1,1,J,00,B|}
              {RC001;$nimi|}
 

@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 if (isset($_POST["tee"])) {
@@ -123,7 +123,7 @@ if ($tee != '') {
 
   $worksheet->writeString($excelrivi, $excelsarake, t("Osasto"));
   $excelsarake++;
-  $worksheet->writeString($excelrivi, $excelsarake, t("Tuoteryhm‰"));
+  $worksheet->writeString($excelrivi, $excelsarake, t("Tuoteryhm√§"));
   $excelsarake++;
 
   if ($raportointitaso == 'tuote') {
@@ -160,13 +160,13 @@ if ($tee != '') {
     $excelsarake++;
 
     if (table_exists("yhteensopivuus_tuote")) {
-      $worksheet->writeString($excelrivi, $excelsarake, t("Rekisterˆidyt"));
+      $worksheet->writeString($excelrivi, $excelsarake, t("Rekister√∂idyt"));
       $excelsarake++;
     }
 
     $worksheet->writeString($excelrivi, $excelsarake, t("Korvaava (saldo)"));
     $excelsarake++;
-    $worksheet->writeString($excelrivi, $excelsarake, t("T‰htituote"));
+    $worksheet->writeString($excelrivi, $excelsarake, t("T√§htituote"));
     $excelsarake++;
     $worksheet->writeString($excelrivi, $excelsarake, t("Hinnastoon"));
     $excelsarake++;
@@ -184,7 +184,7 @@ if ($tee != '') {
 
   echo "<table><tr>
       <th>".t("Osasto")."</th>
-      <th>".t("Tuoteryhm‰")."</th>";
+      <th>".t("Tuoteryhm√§")."</th>";
 
   if ($raportointitaso == 'tuote') {
     echo "<th>".t("Tuotenumero")."</th>
@@ -206,11 +206,11 @@ if ($tee != '') {
     echo "<th>".t("Tilkpl")."</th>";
 
     if (table_exists("yhteensopivuus_tuote")) {
-      echo "<th>".t("Rekisterˆidyt")."</th>";
+      echo "<th>".t("Rekister√∂idyt")."</th>";
     }
 
     echo "<th>".t("Korvaava (saldo)")."</th>";
-    echo "<th>".t("T‰htituote")."</th>";
+    echo "<th>".t("T√§htituote")."</th>";
     echo "<th>".t("Hinnastoon")."</th>";
     echo "<th>".t("Status")."</th>";
     echo "<th>".t("Ostoehdotus")."</th>";
@@ -251,14 +251,14 @@ if ($tee != '') {
       }
 
       echo "<tr>
-          <th colspan='$cspan'>".t("Osasto")." $edosasto ".t("yhteens‰").":</th>
+          <th colspan='$cspan'>".t("Osasto")." $edosasto ".t("yhteens√§").":</th>
           <th style='text-align:right'>".sprintf("%.2f",$ospuutekpl)."</th>
           <th style='text-align:right'>".sprintf("%.2f",$ospuute)."</th>
           <th style='text-align:right'>".sprintf("%.2f",$osmyynti)."</th>
           <th style='text-align:right'>".sprintf("%.2f",$ospuutepros)."</th>
           </tr>";
 
-      $worksheet->writeString($excelrivi, $excelsarake, t("Osasto")." $edosasto ".t("yhteens‰").":");
+      $worksheet->writeString($excelrivi, $excelsarake, t("Osasto")." $edosasto ".t("yhteens√§").":");
       $excelsarake+=$cspan;
       $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$ospuutekpl));
       $excelsarake++;
@@ -395,7 +395,7 @@ if ($tee != '') {
       $tuoteresult = mysql_query($query) or pupe_error($query);
       $tuoterow = mysql_fetch_array($tuoteresult);
 
-      //Rekisterˆidyt kpl
+      //Rekister√∂idyt kpl
       if (table_exists("yhteensopivuus_tuote")) {
         $query = "SELECT count(yhteensopivuus_rekisteri.tunnus)
                   FROM yhteensopivuus_tuote, yhteensopivuus_rekisteri
@@ -418,7 +418,7 @@ if ($tee != '') {
       $korvaresult = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($korvaresult) > 0) {
-        // tuote lˆytyi, joten haetaan sen id...
+        // tuote l√∂ytyi, joten haetaan sen id...
         $korvarow = mysql_fetch_array($korvaresult);
 
         $query = "SELECT * from korvaavat where id='$korvarow[id]' and tuoteno<>'$row[tuoteno]' and yhtio='$kukarow[yhtio]' order by jarjestys, tuoteno";
@@ -430,7 +430,7 @@ if ($tee != '') {
 
         if (mysql_num_rows($korva2result) > 0) {
           while ($krow2row = mysql_fetch_array($korva2result)) {
-            //hateaan viel‰ korvaaville niiden saldot.
+            //hateaan viel√§ korvaaville niiden saldot.
             //saldot per varastopaikka
             $query = "SELECT sum(saldo) alkusaldo from tuotepaikat where tuoteno='$krow2row[tuoteno]' and yhtio='$kukarow[yhtio]'";
             $alkuresult = mysql_query($query) or pupe_error($query);
@@ -466,8 +466,8 @@ if ($tee != '') {
         $excelsarake++;
       }
 
-      // N‰ytet‰‰n ostoehdotus sarakkeessa kyll‰ / ei
-      $ostoehdotus = ($tuoterow['ostoehdotus'] == 'E') ? t("Ei") : t("Kyll‰");
+      // N√§ytet√§√§n ostoehdotus sarakkeessa kyll√§ / ei
+      $ostoehdotus = ($tuoterow['ostoehdotus'] == 'E') ? t("Ei") : t("Kyll√§");
 
       echo "<td class='$vari' style='vertical-align:top'>$tuoterow[tahtituote]</td>";
       echo "<td class='$vari' style='vertical-align:top'>$tuoterow[hinnastoon]</td>";
@@ -514,14 +514,14 @@ if ($tee != '') {
   }
 
   if ($try == '') {
-    // vika osasto yhteens‰
+    // vika osasto yhteens√§
     if ($osmyynti > 0)
       $ospuutepros = round($ospuute/($ospuute+$osmyynti)*100,2);
     else
       $ospuutepros = 100;
 
     echo "<tr>
-        <th colspan='$cspan'>".t("Osasto")." $edosasto ".t("yhteens‰").":</th>
+        <th colspan='$cspan'>".t("Osasto")." $edosasto ".t("yhteens√§").":</th>
         <th style='text-align:right'>".sprintf("%.2f", $ospuutekpl)."</th>
         <th style='text-align:right'>".sprintf("%.2f", $ospuute)."</th>
         <th style='text-align:right'>".sprintf("%.2f", $osmyynti)."</th>
@@ -529,7 +529,7 @@ if ($tee != '') {
         </tr>";
 
     $excelsarake = 0;
-    $worksheet->writeString($excelrivi, $excelsarake, t("Osasto")." $edosasto ".t("yhteens‰").":");
+    $worksheet->writeString($excelrivi, $excelsarake, t("Osasto")." $edosasto ".t("yhteens√§").":");
     $excelsarake++;
     $excelsarake++;
     $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$ospuutekpl));
@@ -542,11 +542,11 @@ if ($tee != '') {
     $excelsarake = 0;
     $excelrivi++;
 
-    //t‰h‰n tullee nyt keskiarvo
+    //t√§h√§n tullee nyt keskiarvo
     $puuteprosyht = round($puuteyht/($puuteyht+$myyntiyht)*100,2);
 
     echo "<tr>
-        <th colspan='$cspan'>".t("Kaikki yhteens‰").":</th>
+        <th colspan='$cspan'>".t("Kaikki yhteens√§").":</th>
         <th style='text-align:right'>".sprintf("%.2f",$puutekplyht)."</th>
         <th style='text-align:right'>".sprintf("%.2f",$puuteyht)."</th>
         <th style='text-align:right'>".sprintf("%.2f",$myyntiyht)."</th>
@@ -554,7 +554,7 @@ if ($tee != '') {
         </tr>";
 
     $excelsarake = 0;
-    $worksheet->writeString($excelrivi, $excelsarake, t("Kaikki yhteens‰").":");
+    $worksheet->writeString($excelrivi, $excelsarake, t("Kaikki yhteens√§").":");
     $excelsarake++;
     $excelsarake++;
     $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$puutekplyht));
@@ -574,7 +574,7 @@ if ($tee != '') {
 
   $niminimi = date("Ymd")."-".t("Puutelistaus").".xlsx";
 
-  echo "<br><font class='message'>".t("Luotiin aineisto")." ($niminimi) ".t("joka sis‰lt‰‰")." ".($excelrivi-2)." ".t("rivi‰")."</font><br>";
+  echo "<br><font class='message'>".t("Luotiin aineisto")." ($niminimi) ".t("joka sis√§lt√§√§")." ".($excelrivi-2)." ".t("rivi√§")."</font><br>";
 
   echo "<table>";
   echo "<tr><th>".t("Tallenna excel").":</th>";
@@ -586,11 +586,11 @@ if ($tee != '') {
   echo "</table>";
 }
 
-//K‰yttˆliittym‰
+//K√§ytt√∂liittym√§
 echo "<br><form method='post'>";
 echo "<table>";
 
-// ehdotetaan 7 p‰iv‰‰ taaksep‰in
+// ehdotetaan 7 p√§iv√§√§ taaksep√§in
 if (!isset($kka))
   $kka = date("m",mktime(0, 0, 0, date("m"), date("d")-7, date("Y")));
 if (!isset($vva))
@@ -606,11 +606,11 @@ if (!isset($ppl))
   $ppl = date("d");
 
 echo "<input type='hidden' name='tee' value='kaikki'>";
-echo "<tr><th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+echo "<tr><th>".t("Sy√∂t√§ alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
     <td><input type='text' name='ppa' value='$ppa' size='3'></td>
     <td><input type='text' name='kka' value='$kka' size='3'></td>
     <td><input type='text' name='vva' value='$vva' size='5'></td>
-    </tr><tr><th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+    </tr><tr><th>".t("Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
     <td><input type='text' name='ppl' value='$ppl' size='3'></td>
     <td><input type='text' name='kkl' value='$kkl' size='3'></td>
     <td><input type='text' name='vvl' value='$vvl' size='5'></td></tr>";
@@ -628,13 +628,13 @@ echo "<select name='raportointitaso'>";
 $sel = array();
 $sel[$raportointitaso] = "selected";
 
-echo "<option value = 'ostry' $sel[ostry]>".t("Osasto")." / ".t("Tuoteryhm‰")."</option>";
+echo "<option value = 'ostry' $sel[ostry]>".t("Osasto")." / ".t("Tuoteryhm√§")."</option>";
 echo "<option value = 'tuote' $sel[tuote]>".t("Tuote")."</option>";
 echo "</select>";
 echo "</td></tr>";
 
 
-echo "<tr><th>".t("N‰yt‰ rivit")."</th><td colspan='3'>";
+echo "<tr><th>".t("N√§yt√§ rivit")."</th><td colspan='3'>";
 echo "<select name='rivit'>";
 
 $sel = array();

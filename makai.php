@@ -35,7 +35,7 @@ if ($tee == "") {
 
 }
 
-// Onko maksuaineistoille annettu salasanat.php:ss‰ oma polku jonne tallennetaan
+// Onko maksuaineistoille annettu salasanat.php:ss√§ oma polku jonne tallennetaan
 if (isset($pankkitiedostot_polku) and trim($pankkitiedostot_polku) != "") {
   $pankkitiedostot_polku = trim($pankkitiedostot_polku);
   if (substr($pankkitiedostot_polku, -1) != "/") {
@@ -107,7 +107,7 @@ if ($tee == "KIRJOITA") {
       elseif ($row["tilino"] != $pankkitili) {
         $query = "UPDATE yriti SET tilino = '$pankkitili' WHERE tunnus = $row[tunnus]";
         $xresult = mysql_query($query) or pupe_error($query);
-        echo "P‰ivitin tilin $row[nimi]<br><br>";
+        echo "P√§ivitin tilin $row[nimi]<br><br>";
       }
 
       //Haetaan tilinumeron perusteella pankin tiedot
@@ -116,7 +116,7 @@ if ($tee == "KIRJOITA") {
   }
 
   // --- LM03/Eli kotimaan maksujen aineisto
-  // Tutkitaan onko kotimaan aineistossa monta maksup‰iv‰‰?
+  // Tutkitaan onko kotimaan aineistossa monta maksup√§iv√§√§?
   $query = "SELECT distinct(olmapvm)
             FROM lasku
             WHERE yhtio = '$kukarow[yhtio]'
@@ -127,7 +127,7 @@ if ($tee == "KIRJOITA") {
   $pvmresult = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($pvmresult) == 0) {
-    echo "<font class='message'>".t("Sopivia laskuja ei lˆydy")."</font>";
+    echo "<font class='message'>".t("Sopivia laskuja ei l√∂ydy")."</font>";
   }
   else {
     echo "<table>";
@@ -155,7 +155,7 @@ if ($tee == "KIRJOITA") {
               GROUP BY maksu_tili, tilinumero";
     $result = mysql_query($query) or pupe_error($query);
 
-    //Lˆytyykˆ hyvityksi‰?
+    //L√∂ytyyk√∂ hyvityksi√§?
     while ($laskurow = mysql_fetch_array ($result)) {
       $query = "SELECT *
                 FROM lasku
@@ -170,9 +170,9 @@ if ($tee == "KIRJOITA") {
 
       $hyvityssumma = 0;
 
-      // Tarkistetaan meneekˆ tilitys plussalle??
+      // Tarkistetaan meneek√∂ tilitys plussalle??
       while ($hyvitysrow = mysql_fetch_array($xresult)) {
-        // maksetaan k‰teisalennuksella
+        // maksetaan k√§teisalennuksella
         if ($hyvitysrow['alatila'] == 'K') {
           $hyvityssumma += $hyvitysrow['summa'] - $hyvitysrow['kasumma'];
         }
@@ -186,7 +186,7 @@ if ($tee == "KIRJOITA") {
       $tilinoarray[$laskurow['maksu_tili']][$laskurow['tilinumero']] = $laskurow['tilinumero'];
 
       if ($hyvityssumma < 0.01) {
-        echo "<tr><th>".t("Virhe hyvityslaskuissa")."</th><td><font class='error'>$laskurow[nimi] ($laskurow[tilinumero]) ".t("tililt‰")." $laskurow[maksu_tili] ".t("hyvitykset suuremmat kuin veloitukset. Koko aineisto hyl‰t‰‰n")."!</font></td></tr>";
+        echo "<tr><th>".t("Virhe hyvityslaskuissa")."</th><td><font class='error'>$laskurow[nimi] ($laskurow[tilinumero]) ".t("tililt√§")." $laskurow[maksu_tili] ".t("hyvitykset suuremmat kuin veloitukset. Koko aineisto hyl√§t√§√§n")."!</font></td></tr>";
         echo "</table>";
         require ("inc/footer.inc");
         exit;
@@ -240,26 +240,26 @@ if ($tee == "KIRJOITA") {
 
         if ($kotimaa == "FI") {
 
-          // haetaan t‰m‰n tilin tiedot
+          // haetaan t√§m√§n tilin tiedot
           if (isset($pankkitiedot[$yritystilino])) {
             foreach($pankkitiedot[$yritystilino] as $key => $value) {
               ${$key} = $value;
             }
           }
           else {
-            die(t("Kadotin t‰m‰n pankin maksuaineistotiedot!"));
+            die(t("Kadotin t√§m√§n pankin maksuaineistotiedot!"));
           }
 
           require("inc/lm03otsik.inc");
 
-          // k‰sitell‰‰n hyvityksien netotus
+          // k√§sitell√§√§n hyvityksien netotus
           require("inc/lm03hyvitykset.inc");
         }
         else {
           require("inc/bginotsik.inc");
         }
 
-        // Yrit‰mme nyt v‰litt‰‰ maksupointterin $laskusis1:ss‰ --> $laskurow[9] --> lasku.tunnus
+        // Yrit√§mme nyt v√§litt√§√§ maksupointterin $laskusis1:ss√§ --> $laskurow[9] --> lasku.tunnus
         $query = "SELECT maksu_tili,
                   lasku.nimi, lasku.nimitark, lasku.pankki_haltija,
                   left(concat_ws(' ', osoite, osoitetark),20) osoite,
@@ -285,7 +285,7 @@ if ($tee == "KIRJOITA") {
           $laskutapahtuma  = '10';
           $yritystilino   = $laskurow["ytilino"];
 
-          // jos pankkihaltijan nimi on syˆtetty, laitetaan se nimen tilalle
+          // jos pankkihaltijan nimi on sy√∂tetty, laitetaan se nimen tilalle
           if (trim($laskurow['pankki_haltija']) != '') {
             $laskunimi1 = trim($laskurow["pankki_haltija"]);
           }
@@ -299,7 +299,7 @@ if ($tee == "KIRJOITA") {
           $laskunimi2   = $laskurow["osoite"];
           $laskunimi3   = $laskurow["postitp"];
 
-          if ($laskurow["alatila"] == 'K') { // maksetaan k‰teisalennuksella
+          if ($laskurow["alatila"] == 'K') { // maksetaan k√§teisalennuksella
             $laskusumma = $laskurow["summa"] - $laskurow["kasumma"];
           }
           else {
@@ -320,7 +320,7 @@ if ($tee == "KIRJOITA") {
           if (substr($laskurow['ytilino'], 0, 1) == '8' and strlen(trim($laskuviesti)) == 0) $laskuviesti = ';';
 
           if (strlen($laskurow["viite"]) > 0) {
-            $laskuviesti = sprintf ('%020s', $laskurow["viite"]); //Etunollat‰yttˆ
+            $laskuviesti = sprintf ('%020s', $laskurow["viite"]); //Etunollat√§ytt√∂
                $laskutyyppi = 1;
              }
 
@@ -346,12 +346,12 @@ if ($tee == "KIRJOITA") {
         }
 
         echo "<tr><td class='back'><br></td></tr>";
-        echo "<tr><th>".t("Maksup‰iv‰")."</th><td>".tv1dateconv($pvmrow["olmapvm"])."</td></tr>";
+        echo "<tr><th>".t("Maksup√§iv√§")."</th><td>".tv1dateconv($pvmrow["olmapvm"])."</td></tr>";
         echo "<tr><th>".t("Maksutili")."</th><td>$yritirow[nimi] $yritirow[tilino]</td></tr>";
         echo "<tr><th>".t("Summa")."</th><td>".sprintf('%.2f', $makssumma)."</td></tr>";
         echo "<tr><th>".t("Tapahtumia")."</td><td>$makskpl ".t("kpl")."</td></tr>";
 
-        // Jokainen pankki ja p‰iv‰ omaan tiedostoon
+        // Jokainen pankki ja p√§iv√§ omaan tiedostoon
         if ($yhtiorow['pankkitiedostot'] == 'E') {
           if (is_resource($toot)) {
             fclose($toot);
@@ -389,7 +389,7 @@ if ($tee == "KIRJOITA") {
       $makssumma = 0;
     }
     else {
-      echo "<font class='message'>".t("Sopivia laskuja ei lˆydy")."!</font>";
+      echo "<font class='message'>".t("Sopivia laskuja ei l√∂ydy")."!</font>";
     }
   }
 
@@ -399,7 +399,7 @@ if ($tee == "KIRJOITA") {
     echo "<tr><th>".t("Tapahtumia")."</th><td>$totkpl ".t("kpl")."</td></tr>";
   }
 
-  // Pankit ja p‰iv‰t yhdistet‰‰n
+  // Pankit ja p√§iv√§t yhdistet√§√§n
   if ($yhtiorow['pankkitiedostot'] == '' or $yhtiorow['pankkitiedostot'] == 'F') {
     if (is_resource($toot)) {
       fclose($toot);
@@ -439,7 +439,7 @@ if ($tee == "KIRJOITA") {
   $totsumma   = 0;
   $generaatio = 1;
 
-  //Etsit‰‰n aineistot
+  //Etsit√§√§n aineistot
   $query = "SELECT maksu_tili, lasku.valkoodi, yriti.tilino ytilino, yriti.nimi tilinimi
             FROM lasku, yriti
             WHERE lasku.yhtio  = '$kukarow[yhtio]'
@@ -484,7 +484,7 @@ if ($tee == "KIRJOITA") {
       echo "<tr><th>".t("Maksutili")."<td>$pvmrow[tilinimi] $pvmrow[ytilino]</td></tr>";
       echo "<tr><th>".t("Valuutta")."</th><td>$pvmrow[valkoodi]</td></tr>";
 
-      //Maksetaan hyvityslaskut alta pois, jos niit‰ on
+      //Maksetaan hyvityslaskut alta pois, jos niit√§ on
       $query = "SELECT maksu_tili, valkoodi, olmapvm, ultilno, swift, pankki1, pankki2, pankki3, pankki4, sisviesti1, sum(if(alatila='K', summa-kasumma, summa)) summa
                 FROM lasku
                 WHERE lasku.yhtio = '$kukarow[yhtio]'
@@ -551,14 +551,14 @@ if ($tee == "KIRJOITA") {
                 }
 
                 if ($kotimaa == "FI") {
-                  //haetaan t‰m‰n tilin tiedot
+                  //haetaan t√§m√§n tilin tiedot
                   if(isset($pankkitiedot[$yritystilino])) {
                     foreach($pankkitiedot[$yritystilino] as $key => $value) {
                       ${$key} = $value;
                     }
                   }
                   else {
-                    die(t("Kadotin t‰m‰n pankin maksuaineistotiedot!"));
+                    die(t("Kadotin t√§m√§n pankin maksuaineistotiedot!"));
                   }
                   require("inc/lum2otsik.inc");
                 }
@@ -576,7 +576,7 @@ if ($tee == "KIRJOITA") {
               $yritysosoite  = strtoupper($yhtiorow["osoite"]);
               $yritystilino  = $laskurow["ytilino"];
 
-              // jos pankkihaltijan nimi on syˆtetty, laitetaan se nimen tilalle
+              // jos pankkihaltijan nimi on sy√∂tetty, laitetaan se nimen tilalle
               if ($laskurow['pankki_haltija'] != '') {
                 $laskunimi1 = $laskurow["pankki_haltija"];
               }
@@ -615,7 +615,7 @@ if ($tee == "KIRJOITA") {
 
               $makskpl += 1;
               $makssumma += $laskusumma;
-              $maksulk += $ulklaskusumma;  //viritet‰‰n bgutrivi.inc-failissa
+              $maksulk += $ulklaskusumma;  //viritet√§√§n bgutrivi.inc-failissa
             }
 
             $query = "UPDATE lasku SET
@@ -638,13 +638,13 @@ if ($tee == "KIRJOITA") {
             $result = mysql_query($query) or pupe_error($query);
           }
           else {
-            echo "Meill‰ oli hyvityksi‰, mutta ne kaikki katosivat yhdistelyss‰!";
+            echo "Meill√§ oli hyvityksi√§, mutta ne kaikki katosivat yhdistelyss√§!";
             exit;
           }
         }
       }
 
-      // Yrit‰mme nyt v‰litt‰‰ maksupointterin $laskusis1:ss‰ --> $laskurow[9] --> tunnus
+      // Yrit√§mme nyt v√§litt√§√§ maksupointterin $laskusis1:ss√§ --> $laskurow[9] --> tunnus
       $query = "SELECT maksu_tili,
                 lasku.nimi, lasku.nimitark, lasku.pankki_haltija,
                 left(concat_ws(' ', osoite, osoitetark),45) osoite,
@@ -677,7 +677,7 @@ if ($tee == "KIRJOITA") {
           $yritysosoite   = strtoupper($yhtiorow["osoite"]);
           $yritystilino   = $laskurow["ytilino"];
 
-          // jos pankkihaltijan nimi on syˆtetty, laitetaan se nimen tilalle
+          // jos pankkihaltijan nimi on sy√∂tetty, laitetaan se nimen tilalle
           if ($laskurow['pankki_haltija'] != '') {
             $laskunimi1 = $laskurow["pankki_haltija"];
           }
@@ -699,7 +699,7 @@ if ($tee == "KIRJOITA") {
             $maksupvm  = $laskurow["olmapvm"];
           }
 
-          if ($laskurow["alatila"] == 'K') { // maksetaan k‰teisalennuksella
+          if ($laskurow["alatila"] == 'K') { // maksetaan k√§teisalennuksella
             $laskusumma = $laskurow["summa"] - $laskurow["kasumma"];
           }
           else {
@@ -722,7 +722,7 @@ if ($tee == "KIRJOITA") {
                     $laskuaihe = (trim($laskuaihe) == "") ? $laskurow['laskunro'] : $laskuaihe." ".$laskurow['laskunro'];
                 }
 
-          //haetaan t‰m‰n tilin tiedot
+          //haetaan t√§m√§n tilin tiedot
           if ($kotimaa == "FI") {
             if(isset($pankkitiedot[$yritystilino])) {
               foreach($pankkitiedot[$yritystilino] as $key => $value) {
@@ -730,15 +730,15 @@ if ($tee == "KIRJOITA") {
               }
             }
             else {
-              die(t("Kadotin t‰m‰n pankin maksuaineistotiedot!"));
+              die(t("Kadotin t√§m√§n pankin maksuaineistotiedot!"));
             }
 
-            // haetaan automaagisesti EU maksu jos ehdot t‰yttyv‰t, muuten normaalilla maksum‰‰r‰kysen‰
-            // T‰m‰ siis siksi ett‰ myˆs OP osaa ottaa laskut maksuun...
+            // haetaan automaagisesti EU maksu jos ehdot t√§yttyv√§t, muuten normaalilla maksum√§√§r√§kysen√§
+            // T√§m√§ siis siksi ett√§ my√∂s OP osaa ottaa laskut maksuun...
             if ($lum_eumaksu != "") {
-              //onko t‰m‰ laskun eurom‰‰r‰ alle 50 000 eur?
+              //onko t√§m√§ laskun eurom√§√§r√§ alle 50 000 eur?
               if ($laskusumma < 50000 and strtoupper($laskuvaluutta) == 'EUR') {
-                // t‰sm‰‰kˆ maatunnukset
+                // t√§sm√§√§k√∂ maatunnukset
                 $tinoalut = substr($laskutilino, 0, 1).substr($laskutilino, 1, 1);
                 $swiftmaa = substr($laskuswift, 4, 1).substr($laskuswift, 5, 1);
 
@@ -752,28 +752,28 @@ if ($tee == "KIRJOITA") {
                   $aburesult = mysql_query($query) or pupe_error($query);
 
                   if (mysql_num_rows($aburesult) == 1) {
-                    // meill‰ on siis EU maksukelpoinen lasku
-                    // t‰m‰ vaatii seuraavat tiedot pois
+                    // meill√§ on siis EU maksukelpoinen lasku
+                    // t√§m√§ vaatii seuraavat tiedot pois
                     $laskupankki1 ='';
                     $laskupankki2 ='';
                     $laskupankki3 ='';
                     $laskupankki4 ='';
 
-                    // eli t‰m‰ on kelpo eumaksu joten se me myˆs tehd‰‰n
+                    // eli t√§m√§ on kelpo eumaksu joten se me my√∂s tehd√§√§n
                     $lum_maksutapa = $lum_eumaksu;
 
                     //echo "$laskunimi oli EU-maksu<br>";
                   }
                   else {
-                    //echo "$laskunimi ei EU-maksu, maa ei EU alueella. Tehtiin maksum‰‰r‰ys.<br>";
+                    //echo "$laskunimi ei EU-maksu, maa ei EU alueella. Tehtiin maksum√§√§r√§ys.<br>";
                   }
                 }
                 else {
-                  //echo "$laskunimi ei EU-maksu SWIFT maatunnus ($swiftmaa) ja IBAN maatunnus ($tinoalut) eiv‰t t‰sm‰‰. Tehtiin maksum‰‰r‰ys.<br>";
+                  //echo "$laskunimi ei EU-maksu SWIFT maatunnus ($swiftmaa) ja IBAN maatunnus ($tinoalut) eiv√§t t√§sm√§√§. Tehtiin maksum√§√§r√§ys.<br>";
                 }
               }
               else {
-                //echo "$laskunimi ei EU-maksu laskusumma on yli 50 000 eur tai valuutta ei ole EUR. Tehtiin maksum‰‰r‰ys.<br>";
+                //echo "$laskunimi ei EU-maksu laskusumma on yli 50 000 eur tai valuutta ei ole EUR. Tehtiin maksum√§√§r√§ys.<br>";
               }
             }
           }
@@ -804,7 +804,7 @@ if ($tee == "KIRJOITA") {
 
           $makskpl += 1;
           $makssumma += $laskusumma;
-          $maksulk += $ulklaskusumma;  //viritet‰‰n bgutrivi.inc-failissa
+          $maksulk += $ulklaskusumma;  //viritet√§√§n bgutrivi.inc-failissa
         }
       }
 
@@ -826,7 +826,7 @@ if ($tee == "KIRJOITA") {
         $makssumma = 0;
         unset($edmaksu_tili);
 
-        // Jokainen pankki ja p‰iv‰ omaan tiedostoon
+        // Jokainen pankki ja p√§iv√§ omaan tiedostoon
         if ($yhtiorow['pankkitiedostot'] == 'E') {
           if (is_resource($toot)) {
             fclose($toot);
@@ -864,7 +864,7 @@ if ($tee == "KIRJOITA") {
     echo "<tr><th>".t("Aineiston kokonaissumma")."</th><td>".sprintf('%.2f',$totsumma)."</td></tr>";
     echo "<tr><th>".t("Tapahtumia")."</th><td>$totkpl ".t("kpl")."</td></tr>";
 
-    // Pankit ja p‰iv‰t yhdistet‰‰n
+    // Pankit ja p√§iv√§t yhdistet√§√§n
     if ($yhtiorow['pankkitiedostot'] == '' or $yhtiorow['pankkitiedostot'] == 'F') {
       if (is_resource($toot)) {
         fclose($toot);
@@ -888,7 +888,7 @@ if ($tee == "KIRJOITA") {
 
   }
   else {
-    echo "<font class='message'>".t("Sopivia laskuja ei lˆydy")."</font>";
+    echo "<font class='message'>".t("Sopivia laskuja ei l√∂ydy")."</font>";
   }
 
 }

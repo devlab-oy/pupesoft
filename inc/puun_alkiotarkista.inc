@@ -14,7 +14,7 @@ if (!function_exists("puun_alkiotarkista")) {
       $tem_laji = !empty($trow['laji']) ? $trow['laji'] : $t[$i];
 
       if ($t[$i] == '') {
-        $virhe[$i] = t("Lajia ei voi j‰tt‰‰ tyhj‰ksi")."!";
+        $virhe[$i] = t("Lajia ei voi j√§tt√§√§ tyhj√§ksi")."!";
       }
     }
 
@@ -24,7 +24,7 @@ if (!function_exists("puun_alkiotarkista")) {
 
     if (mysql_field_name($result, $i) == "puun_tunnus") {
       if ($t[$i] == '') {
-        $virhe[$i] = t("Puun tunnusta ei voi j‰tt‰‰ tyhj‰ksi")."!";
+        $virhe[$i] = t("Puun tunnusta ei voi j√§tt√§√§ tyhj√§ksi")."!";
       }
     }
 
@@ -39,7 +39,7 @@ if (!function_exists("puun_alkiotarkista")) {
         $asiakkaan_haku_res = pupe_query($query);
 
         if (mysql_num_rows($asiakkaan_haku_res) == 0) {
-          $virhe[$i] = $virhe[$liitos_ind] = t("Asiakasta ei lˆydy")."!";
+          $virhe[$i] = $virhe[$liitos_ind] = t("Asiakasta ei l√∂ydy")."!";
         }
       }
       elseif ((!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA") and ((strtoupper($tem_laji) == "ASIAKAS" and strtoupper($tem_kutsuja) == "TUOTE") or strtoupper($tem_laji) == 'TUOTE' or strtoupper($table_tarkenne) == 'TUOTE')) {
@@ -51,7 +51,7 @@ if (!function_exists("puun_alkiotarkista")) {
         $asiakkaan_haku_res = pupe_query($query);
 
         if (mysql_num_rows($asiakkaan_haku_res) == 0) {
-          $virhe[$i] = $virhe[$liitos_ind] = t("Tuotetta ei lˆydy $tem_laji $tem_kutsuja")."!";
+          $virhe[$i] = $virhe[$liitos_ind] = t("Tuotetta ei l√∂ydy $tem_laji $tem_kutsuja")."!";
         }
       }
     }

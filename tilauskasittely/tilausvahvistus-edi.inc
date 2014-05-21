@@ -87,7 +87,7 @@ if (!file_exists($tilvahvfilenimi)) {
             ORDER BY tilausrivi.tunnus";
   $tilvahresult = pupe_query($query);
 
-  //Myyj‰n email
+  //Myyj√§n email
   $query = "SELECT * FROM kuka WHERE tunnus='$laskurow[myyja]' and yhtio='$kukarow[yhtio]'";
   $kukaresult = pupe_query($query);
   $myyjarow = mysql_fetch_array($kukaresult);
@@ -129,7 +129,7 @@ if (!file_exists($tilvahvfilenimi)) {
     #$ulos .= "RNADBY_DO:" . $laskurow['tilausvahvistus'] . "\n"; // mimmosen tilausvahvistuksen asiakas haluaa... F = fax, E = edi
     $ulos .= "RNADBY_DO:E\n"; // mimmosen tilausvahvistuksen asiakas haluaa... aina edi ni ei tule ongelmia
     $ulos .= "RNADDP_RF:" . "ZZ /".preg_replace("/[^0-9]/", "", $laskurow['ytunnus'])."\n";
-    // jos tyhj‰‰ ni ei saa l‰hett‰‰‰.. weird.
+    // jos tyhj√§√§ ni ei saa l√§hett√§√§√§.. weird.
     if (trim($laskurow['toim_ovttunnus']) != '') {
       $ulos .= "RNADDP_PC:".sprintf ("%-18.18s", $laskurow['toim_ovttunnus']) . "100 91". "\n";
     }
@@ -160,7 +160,7 @@ if (!file_exists($tilvahvfilenimi)) {
     $ulos .= "RHDR__END:" . $yhtiorow['yhtio'] . $tulostettava_tunnus . "\n";
     fputs($toot,$ulos);
 
-    $rivino = 1; // dummy rivino, kun elma ei handlaa pitki‰
+    $rivino = 1; // dummy rivino, kun elma ei handlaa pitki√§
 
     while ($tvtilausrivirow = mysql_fetch_array($tilvahresult)) {
       if ($tvtilausrivirow['yksikko'] == '') $tvtilausrivirow['yksikko'] = "PCE";
@@ -181,7 +181,7 @@ if (!file_exists($tilvahvfilenimi)) {
       $ulos .= "RLIN2__DT:" . tv2dateconv($tvtilausrivirow['toimaika']) . "\n";
       $ulos .= "RLINVATTX:" . $tvtilausrivirow['alv'] . " S" . "\n";
       $ulos .= "RLINLINFC:" . str_replace("\n", " ", $tvtilausrivirow['kommentti']) . "\n";
-      //$ulos .= "RLINLINFC:" . $tvtilausrivirow['kommentti'] . "\n"; // J‰lkitoimitusrivitiedot
+      //$ulos .= "RLINLINFC:" . $tvtilausrivirow['kommentti'] . "\n"; // J√§lkitoimitusrivitiedot
       $ulos .= "RLIN__END:" . $rivino . "\n";
       fputs($toot,$ulos);
       $rivino++;

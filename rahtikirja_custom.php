@@ -2,7 +2,7 @@
 
 require ("inc/parametrit.inc");
 
-echo "<font class='head'>".t("Tyhj‰ rahtikirja").":</font><hr><br>";
+echo "<font class='head'>".t("Tyhj√§ rahtikirja").":</font><hr><br>";
 
 if (isset($_POST['valmis']) and $_POST['valmis'] != '') {
 
@@ -21,10 +21,10 @@ if (isset($_POST['valmis']) and $_POST['valmis'] != '') {
 
   $count = 0;
 
-  // k‰yd‰‰n jokainen pakkaustyyppi l‰pi (yksi rivi rahtikirjassa)
+  // k√§yd√§√§n jokainen pakkaustyyppi l√§pi (yksi rivi rahtikirjassa)
   for ($i = 0; $i < count($pakkaus); $i++) {
 
-    // jotain syˆtettiin
+    // jotain sy√∂tettiin
     $_POST['kilot'][$i]    = str_replace(',', '.', $_POST['kilot'][$i]);
     $_POST['kollit'][$i]  = str_replace(',', '.', $_POST['kollit'][$i]);
     $_POST['kuutiot'][$i]  = str_replace(',', '.', $_POST['kuutiot'][$i]);
@@ -60,7 +60,7 @@ if (isset($_POST['valmis']) and $_POST['valmis'] != '') {
     }
   }
 
-  // korjataan ensimm‰inen rivi jossa on v‰‰r‰ otsikkonro sek‰ rahtikirjanro
+  // korjataan ensimm√§inen rivi jossa on v√§√§r√§ otsikkonro sek√§ rahtikirjanro
   $query = sprintf(
     "UPDATE rahtikirjat set otsikkonro = '%s', rahtikirjanro = '%s' where tunnus = '%s'",
     (int) $otsikkonro * -1,
@@ -93,14 +93,14 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
 
   $GLOBALS['rtunnus']   = abs($otsikkonro);
 
-  // pistet‰‰n kaikki globaaleiksi
+  // pistet√§√§n kaikki globaaleiksi
   $GLOBALS = array_merge($GLOBALS, $data);
 
-  // kerrotaan ett‰ t‰m‰ on custom rahtikirja == ei haeta laskulta mit‰‰n
+  // kerrotaan ett√§ t√§m√§ on custom rahtikirja == ei haeta laskulta mit√§√§n
   $GLOBALS['tyhja'] = 1;
 
   if ($data['merahti'] == 'K') {
-    $rahdinmaksaja = 'L‰hett‰j‰';
+    $rahdinmaksaja = 'L√§hett√§j√§';
     $toitarow = array(
         'sopimusnro'       => $data['rahtisopimus'],
         'selite'           => $data['toimitustapa'],
@@ -203,7 +203,7 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
     $osoitelappurow["laatija"]       = $kukarow['kuka'];
     $osoitelappurow["tunnus"]       = $otsikkonro;
 
-    // yhtiˆn tiedot
+    // yhti√∂n tiedot
     $osoitelappurow['yhtio']      = $yhtiorow["yhtio"];
     $osoitelappurow['yhtio_nimi']     = $yhtiorow["nimi"];
     $osoitelappurow['yhtio_osoite']    = $yhtiorow["osoite"];
@@ -211,10 +211,10 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
     $osoitelappurow['yhtio_postitp']  = $yhtiorow["postitp"];
 
     // poikkeava toimipaikka,otetaan sen osoitetiedot
-    $alhqur = "  SELECT *
-          FROM yhtion_toimipaikat
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND tunnus = '$kukarow[toimipaikka]'";
+    $alhqur = "SELECT *
+               FROM yhtion_toimipaikat
+               WHERE yhtio = '$kukarow[yhtio]'
+               AND tunnus  = '$kukarow[toimipaikka]'";
     $alhire = pupe_query($alhqur);
 
     if (mysql_num_rows($alhire) == 1) {
@@ -230,7 +230,7 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
     }
   }
 
-  // haetaan varaston osoitetiedot, k‰ytet‰‰n niit‰ l‰hetystietoina
+  // haetaan varaston osoitetiedot, k√§ytet√§√§n niit√§ l√§hetystietoina
   $query = "SELECT nimi, nimitark, osoite, postino, postitp, maa
             FROM varastopaikat
             WHERE yhtio = '$kukarow[yhtio]'
@@ -238,7 +238,7 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
   $tempr = pupe_query($query);
   $postirow_varasto = mysql_fetch_assoc($tempr);
 
-  // jos varastolle on annettu joku osoite, k‰ytet‰‰n sit‰
+  // jos varastolle on annettu joku osoite, k√§ytet√§√§n sit√§
   if ($postirow_varasto["nimi"] != "") {
     $postirow["yhtio_nimi"]     = $postirow_varasto["nimi"];
     $postirow['yhtio_nimitark']  = $postirow_varasto["nimitark"];
@@ -274,7 +274,7 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
     echo "<p>".t("Tulostetaan rahtikirja")."...</p><br>";
   }
 
-  // Tallennetaan customrahtikirjan tiedot j‰rjestelm‰‰n
+  // Tallennetaan customrahtikirjan tiedot j√§rjestelm√§√§n
   if (!isset($tulostakopio) and (int) $otsikkonro != 0) {
     $query  = "UPDATE rahtikirjat
                SET rahtikirjanro = '$rahtikirjanro',
@@ -330,7 +330,7 @@ if (!$asiakasid and !$rahtikirja_ilman_asiakasta) {
   echo "<br/>";
   echo "<form method='POST' name='ilman_asiakasta'>";
   echo "<input type='hidden' name='rahtikirja_ilman_asiakasta' value='1' />";
-  echo "<button onclick='document.ilman_asiakasta.submit()'>".t("Syˆta rahtikirja ilman asiakastietoja")."</button>";
+  echo "<button onclick='document.ilman_asiakasta.submit()'>".t("Sy√∂ta rahtikirja ilman asiakastietoja")."</button>";
   echo "</form>";
 
   $formi  = "haku";
@@ -354,7 +354,7 @@ if (!$asiakasid and !$rahtikirja_ilman_asiakasta) {
               ORDER BY kirjoitin";
     $kirre = pupe_query($query);
 
-    echo "<br><br>".t("Uusimmat tyhj‰t rahtikirjat").":<br>";
+    echo "<br><br>".t("Uusimmat tyhj√§t rahtikirjat").":<br>";
     echo "<table>";
     echo "<tr>";
     echo "<th>".t("Rahtikirjanro")."</th>";
@@ -499,7 +499,7 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
         foreach ($toimtavat as $toimt): ?>
           <?php
 
-          // onko t‰m‰ valittu
+          // onko t√§m√§ valittu
           $sel = '';
           if ((isset($_POST['toimitustapa']) and $_POST['toimitustapa'] == $toimt['selite'])
           or (!isset($_POST['toimitustapa']) and $asiakasrow['toimitustapa'] == $toimt['selite'])) {
@@ -524,10 +524,10 @@ if (!isset($_POST['toimitustapa'])) {
     $sel    = '';
 
     // haetaan toimitustavan tiedot tarkastuksia varten
-    $apuqu2 = "  SELECT *
-        from toimitustapa
-        where yhtio  = '$kukarow[yhtio]'
-        and selite  = '$toimitustapa_val'";
+    $apuqu2 = "SELECT *
+               from toimitustapa
+               where yhtio = '$kukarow[yhtio]'
+               and selite  = '$toimitustapa_val'";
     $meapu2 = pupe_query($apuqu2);
     $meapu2row = mysql_fetch_assoc($meapu2);
 
@@ -546,7 +546,7 @@ else {
 ?>
 
 <tr><th><?php echo t('Rahti') ?></th><td><select name='merahti' onChange='document.rahtikirja.submit();'>
-  <option value='1'>L‰hett‰j‰</option>
+  <option value='1'>L√§hett√§j√§</option>
   <option <?php echo $sel ?> value='0'>Vastaanottaja</option>
   </select></td>
 </tr>
@@ -562,7 +562,7 @@ else {
 </tr>
 
 <?php
-  echo "<tr><th>".t('L‰hett‰j‰n viite')."</th><td><input type=hidden name='asiakas' value='$asiakasrow[ytunnus]'><input type='text' name='viitelah'></td></tr>";
+  echo "<tr><th>".t('L√§hett√§j√§n viite')."</th><td><input type=hidden name='asiakas' value='$asiakasrow[ytunnus]'><input type='text' name='viitelah'></td></tr>";
   echo "<tr><th>".t('Vastaanottajan viite')."</th><td><input type='text' name='viitevas'></td></tr>";
   echo "<tr><th>".t('Viesti')."</th><td><input type='text' name='viesti' value='{$asiakasrow['kuljetusohje']}'></td></tr>";
     echo "<tr><th>".t('Rahtikirja')."</th><td><select name='tulostin'>";
@@ -616,7 +616,7 @@ else {
 
   if (!isset($oslappkpl)) $oslappkpl = 1;
 
-  echo "<tr><th>".t("Tulostusm‰‰r‰").":</th>";
+  echo "<tr><th>".t("Tulostusm√§√§r√§").":</th>";
   echo "<td><input type='text' size='4' name='oslappkpl' value='$oslappkpl'></td>";
 
   echo "</tr></table><br><br>";
@@ -656,9 +656,9 @@ else {
 
 /**
  *
- * Lis‰‰ uuden rahtikirjan
+ * Lis√§√§ uuden rahtikirjan
  *
- * @param array $data Kent‰t arrayn keyn‰
+ * @param array $data Kent√§t arrayn keyn√§
  *
  * @return void
  *
@@ -707,12 +707,12 @@ function pupe_rahtikirja_insert($data) {
  *
  * arrayt:
  * toitarow, lotsikot, pakkaus, kilot, kollit, kuutiot, lavametri, vakit
- * $rakir_row:sta lˆytyy asiakkaan tiedot
+ * $rakir_row:sta l√∂ytyy asiakkaan tiedot
  *
  * muuttujat:
  * otunnukset, rahdinmaksaja, pvm, toimitustapa, kollityht, kilotyht, kuutiotyht, kirjoitin
- * mehto sis‰lt‰‰ maksuehdon tiedot
- * jv tapauksissa on myˆs yhteensa, summa, jvhinta, lasno ja viite muuttujat
+ * mehto sis√§lt√§√§ maksuehdon tiedot
+ * jv tapauksissa on my√∂s yhteensa, summa, jvhinta, lasno ja viite muuttujat
  *
  * @return void
  *
@@ -756,7 +756,7 @@ function pupe_rahtikirja_fetch($otsikkonro) {
     $data['toimitustapa'][$i]   = $rahtikirja['toimitustapa'];
     $data['tyhjanrahtikirjan_otsikkotiedot'][$i] = $rahtikirja['tyhjanrahtikirjan_otsikkotiedot'];
 
-    // lis‰t‰‰n totaaleja
+    // lis√§t√§√§n totaaleja
     $data['kilotyht']     += $rahtikirja['kilot'];
     $data['kollityht']    += $rahtikirja['kollit'];
     $data['kuutiotyht']   += $rahtikirja['kuutiot'];
@@ -835,7 +835,7 @@ function pupe_rahtisopimus($merahti, $toimitustapa, $ytunnus = null) {
   }
 
 
-  // kokeillaan lˆytyykˆ rahtisopimusta asiakkaalle sek‰ toimitustavalle
+  // kokeillaan l√∂ytyyk√∂ rahtisopimusta asiakkaalle sek√§ toimitustavalle
   $query = "SELECT * from rahtisopimukset where toimitustapa='$toimitustapa' and ytunnus='$ytunnus' and yhtio='{$GLOBALS['kukarow']['yhtio']}'";
   $res = pupe_query($query);
 

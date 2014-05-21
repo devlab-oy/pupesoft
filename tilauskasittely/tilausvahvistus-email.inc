@@ -15,7 +15,7 @@ $kieli = strtolower($tilvahasiakas['kieli']);
 $virexx = 0;
 $komento = array();
 
-// asiakkaan s‰hkˆpostiin
+// asiakkaan s√§hk√∂postiin
 if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
 
   $query = "SELECT *
@@ -37,7 +37,7 @@ if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
       $tilvah_nimi .= " / ".$tilvahasiakas["toim_nimi"];
     }
     if ($silent == "") {
-      echo "<font class='error'>".t("TILAUSVAHVISTUS: Asiakkaalla ei ole s‰hkˆpostiosoitetta")."! $tilvah_nimi ($tilvahasiakas[ytunnus])</font><br><br>";
+      echo "<font class='error'>".t("TILAUSVAHVISTUS: Asiakkaalla ei ole s√§hk√∂postiosoitetta")."! $tilvah_nimi ($tilvahasiakas[ytunnus])</font><br><br>";
     }
     $virexx++;
   }
@@ -47,12 +47,12 @@ if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
   }
 }
 
-// omaan s‰hkˆpostiin
+// omaan s√§hk√∂postiin
 if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
 
   if ($kukarow['eposti'] == '') {
     if ($silent == "") {
-      echo "<font class='error'>".t("TILAUSVAHVISTUS: Sinulla ei ole s‰hkˆpostiosoitetta")."!</font><br><br>";
+      echo "<font class='error'>".t("TILAUSVAHVISTUS: Sinulla ei ole s√§hk√∂postiosoitetta")."!</font><br><br>";
     }
     $virexx++;
   }
@@ -62,7 +62,7 @@ if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
   }
 }
 
-// l‰hetet‰‰n PDF vahvistus jos meill‰ on P kirjain vahvistuksessa
+// l√§hetet√§√§n PDF vahvistus jos meill√§ on P kirjain vahvistuksessa
 if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') !== FALSE) {
   $toim_save = $toim;
   if ($toim != "YLLAPITOSOPIMUS") $toim = "TILAUSVAHVISTUS";
@@ -71,7 +71,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') !== FALSE) {
   $toim = $toim_save;
 }
 
-// l‰hetet‰‰n textimuotoinen tilausvahvistusmeili jos miell‰ _EI OLE_ P kirjainta vahvistuksessa
+// l√§hetet√§√§n textimuotoinen tilausvahvistusmeili jos miell√§ _EI OLE_ P kirjainta vahvistuksessa
 if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 
   if ($yhtiorow["tilausvahvistus_lahetys"] == 1 and $laskurow["vanhatunnus"] > 0) {
@@ -214,7 +214,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
     $ulos .= sprintf("%-50.s",t("Toimitustapa", $kieli).": ".t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli))    .t("Toimitusaika", $kieli).": ".$taika."\n";
     $ulos .= sprintf("%-50.s",t("Tilausnumero", $kieli).": ". $tulostettava_tunnus)      .t("Tilausviite", $kieli).": ".$laskurow['viesti']."\n";
     $ulos .= sprintf("%-50.s",t("Tilaaja", $kieli).": ".$laskurow['tilausyhteyshenkilo'])  .t("Tilaajan tilausnumero", $kieli).": ".$laskurow['asiakkaan_tilausnumero']."\n";
-    $ulos .= sprintf("%-50.s",t("Kohde", $kieli).": ".$laskurow['kohde'])          .t("Myyj‰", $kieli).": ".$krow['nimi']."\n";
+    $ulos .= sprintf("%-50.s",t("Kohde", $kieli).": ".$laskurow['kohde'])          .t("Myyj√§", $kieli).": ".$krow['nimi']."\n";
 
     $toimehto = t_avainsana("TOIMEHTO", $kieli, " and concat(selite,' ',selitetark) = '{$laskurow["toimitusehto"]}'", "", "", "selitetark");
     if ($toimehto == "") $toimehto = $laskurow["toimitusehto"];
@@ -230,7 +230,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
       $ulos .= sprintf("%-50.s",t("Hinnat ovat verottomia.", $kieli)."\n");
     }
     else {
-      $ulos .= sprintf("%-50.s",t("Hinnat sis‰lt‰v‰t arvonlis‰veron.", $kieli)."\n");
+      $ulos .= sprintf("%-50.s",t("Hinnat sis√§lt√§v√§t arvonlis√§veron.", $kieli)."\n");
     }
 
     if ($laskurow['comments']!='')
@@ -243,7 +243,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
     $ulos .= sprintf("%-30.30s", t("Nimitys", $kieli));
     $ulos .= sprintf("%-20.20s", t("Tuotenumero", $kieli));
     $ulos .= sprintf("%-12.12s", t("EAN", $kieli));
-    $ulos .= sprintf("%9.9s",    t("M‰‰r‰", $kieli));
+    $ulos .= sprintf("%9.9s",    t("M√§√§r√§", $kieli));
 
     if ($naytatvale != 3) {
       $hinta_pituus = (8 + $yhtiorow['hintapyoristys'] - 2);
@@ -262,7 +262,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
     $rivino = 0;
     $liite  = t("Rivino", $kieli)."\t".t("Nimitys", $kieli)."\t".t("Tuoteno", $kieli)."\t".t("Varattu", $kieli);
 
-    // kaikilla muilla paitsi kolmosella n‰ytet‰‰n n‰m‰
+    // kaikilla muilla paitsi kolmosella n√§ytet√§√§n n√§m√§
     if ($naytatvale != 3) {
       $liite .= "\t".t("Hinta", $kieli);
       if ($naytatvale != 4) {
@@ -296,11 +296,11 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
         $ulos .= sprintf("%8.s"  ,$tvtilausrivirow['varattu']);
       }
       else {
-        $ulos .= sprintf("%8.s"  ,$tvtilausrivirow['jt'])." ".t("J‰lkitoimitukseen", $kieli);
+        $ulos .= sprintf("%8.s"  ,$tvtilausrivirow['jt'])." ".t("J√§lkitoimitukseen", $kieli);
       }
 
       if ($naytatvale==3) {
-        // menn‰‰n ohi koska ei haluta n‰hd‰ hintoja
+        // menn√§√§n ohi koska ei haluta n√§hd√§ hintoja
       }
       elseif ($naytatvale==2) {
         $ulos .= sprintf("%".(8+$yhtiorow['hintapyoristys']-2).".s"  ,round(laskuval($tvtilausrivirow['myyntihinta'], $laskurow['vienti_kurssi']),$yhtiorow['hintapyoristys']))." ";
@@ -309,13 +309,13 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
         $ulos .= sprintf("%".(8+$yhtiorow['hintapyoristys']-2).".s"  ,round(laskuval($tvtilausrivirow['hinta'], $laskurow['vienti_kurssi']),$yhtiorow['hintapyoristys']))." ";
       }
 
-      // n‰ytet‰‰n valkoodi kaikilla muilla paitsi kolmosella, koska kolmosella ei n‰ytet‰ mit‰‰n hintoja
+      // n√§ytet√§√§n valkoodi kaikilla muilla paitsi kolmosella, koska kolmosella ei n√§ytet√§ mit√§√§n hintoja
       if ($naytatvale != 3) {
         $ulos .= sprintf("%3.s", $laskurow['valkoodi'])." ";
       }
 
       if ($naytatvale == 3 or $naytatvale == 4) {
-        // kolmosella ei haluta n‰ytt‰‰ myˆsk‰‰n ale:a
+        // kolmosella ei haluta n√§ytt√§√§ my√∂sk√§√§n ale:a
       }
       elseif ($naytatvale==2) {
         $ulos .= sprintf("%6.s"  ,$tvtilausrivirow['aleryhma']);
@@ -336,7 +336,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
         $ulos .= "     * ".sprintf("%-75.75s",$tvtilausrivirow['kommentti'])."\n";
       }
 
-      // Tehr‰‰n liitetiedosto
+      // Tehr√§√§n liitetiedosto
       $liite .= $rivino."\t".$tvtilausrivirow['nimitys']."\t".$tvtilausrivirow['tuoteno']."\t".$tvtilausrivirow['varattu']."\t";
 
       if ($naytatvale==3) {
@@ -350,7 +350,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
       }
 
       if ($naytatvale == 3 or $naytatvale == 4) {
-        // kolmosella ei haluta n‰ytt‰‰ myˆsk‰‰n ale:a
+        // kolmosella ei haluta n√§ytt√§√§ my√∂sk√§√§n ale:a
       }
       elseif ($naytatvale == 2) {
         $liite .= $tvtilausrivirow['aleryhma'];
@@ -364,7 +364,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
     }
 
     $ulos .= "\n\n";
-    $ulos .= t("T‰m‰ on automaattinen viesti. T‰h‰n s‰hkˆpostiin ei tarvitse vastata.", $kieli)."\n";
+    $ulos .= t("T√§m√§ on automaattinen viesti. T√§h√§n s√§hk√∂postiin ei tarvitse vastata.", $kieli)."\n";
 
     if (strpos($_SERVER['SCRIPT_NAME'], "tulostakopio.php") === FALSE and $yhtiorow['tilausvahvistus_tallenna'] == 'K') {
       $tilausvahvistus_tallenna = "/tmp/Tilausvahvistus-".md5(uniqid(mt_rand(), true)).".txt";
@@ -374,12 +374,12 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
       $tilausvahvistus_tallenna = "";
     }
 
-  } // end rivej‰ lˆytyi
+  } // end rivej√§ l√∂ytyi
 
   // Kompostoidaan meili
   $bound = uniqid(time()."_") ;
 
-  $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+  $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n";
   $header .= "MIME-Version: 1.0\n";
   $header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n";
 
@@ -400,14 +400,14 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 
   if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
     unset($boob);
-    $boob = mail($tilvahasiakas['email'], mb_encode_mimeheader($yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $tulostettava_tunnus", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
-    if ($boob===FALSE) echo t("S‰hkˆpostin l‰hetys ep‰onnistui")."!<br>";
+    $boob = mail($tilvahasiakas['email'], mb_encode_mimeheader($yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $tulostettava_tunnus", "UTF-8", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+    if ($boob===FALSE) echo t("S√§hk√∂postin l√§hetys ep√§onnistui")."!<br>";
   }
 
   if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
     unset($boob);
-    $boob = mail($kukarow['eposti'], mb_encode_mimeheader($yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $tulostettava_tunnus", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
-    if ($boob===FALSE) echo t("S‰hkˆpostin l‰hetys ep‰onnistui")."!<br>";
+    $boob = mail($kukarow['eposti'], mb_encode_mimeheader($yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $tulostettava_tunnus", "UTF-8", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+    if ($boob===FALSE) echo t("S√§hk√∂postin l√§hetys ep√§onnistui")."!<br>";
   }
 }
 

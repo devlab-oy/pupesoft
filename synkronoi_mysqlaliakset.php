@@ -4,9 +4,9 @@ require ("inc/parametrit.inc");
 
 echo "<font class='head'>".t("Mysqlaliaksien synkronointi")."</font><hr>";
 
-if ($oikeurow['paivitys'] != '1') { // Saako p‰ivitt‰‰
+if ($oikeurow['paivitys'] != '1') { // Saako p√§ivitt√§√§
   if ($uusi == 1) {
-    echo "<b>".t("Sinulla ei ole oikeutta lis‰t‰")."</b><br>";
+    echo "<b>".t("Sinulla ei ole oikeutta lis√§t√§")."</b><br>";
     $uusi = '';
   }
   if ($del == 1) {
@@ -79,7 +79,7 @@ if ($tee == "TEE") {
     $sanakirjaresult = mysql_query($sanakirjaquery) or pupe_error($sanakirjaquery);
 
     if (mysql_num_rows($sanakirjaresult) > 0) {
-      echo "<tr><th>".t("Ei lis‰t‰ mysqlaliasta")."</th><td>$selite</td><td>".htmlentities($selitetark)."</td><td>$selitetark_2</td></tr>";
+      echo "<tr><th>".t("Ei lis√§t√§ mysqlaliasta")."</th><td>$selite</td><td>".htmlentities($selitetark)."</td><td>$selitetark_2</td></tr>";
     }
     else {
       $sanakirjaquery  = "INSERT INTO avainsana SET
@@ -98,7 +98,7 @@ if ($tee == "TEE") {
                           luontiaika   = now()";
       $sanakirjaresult = mysql_query($sanakirjaquery, $link) or pupe_error($sanakirjaquery);
 
-      echo "<tr><th>".t("Lis‰t‰‰n mysqlalias")."</th><td>$selite</td><td>".htmlentities($selitetark)."</td><td>$selitetark_2</td></tr>";
+      echo "<tr><th>".t("Lis√§t√§√§n mysqlalias")."</th><td>$selite</td><td>".htmlentities($selitetark)."</td><td>$selitetark_2</td></tr>";
     }
   }
 

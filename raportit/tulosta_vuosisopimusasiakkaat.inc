@@ -24,15 +24,15 @@ $sivu = 1;
 function alku ($laji = '') {
   global $pdf, $asiakasrow, $yhtiorow, $sivu, $norm, $pieni, $pvm, $alkuvv, $alkukk, $alkupp, $loppuvv, $loppukk, $loppupp;
 
-  // jos ollaan syˆtetty poikkeava p‰iv‰, k‰ytet‰‰n sit‰
+  // jos ollaan sy√∂tetty poikkeava p√§iv√§, k√§ytet√§√§n sit√§
   if ($pvm != '') {
-    // t‰m‰vuosi ja viimevuosi
+    // t√§m√§vuosi ja viimevuosi
     $vvt = substr($pvm, 0, 4);
     $vvv = substr($pvm, 0, 4) - 1;
     $now = $pvm;
   }
   else {
-    // t‰m‰vuosi ja viimevuosi
+    // t√§m√§vuosi ja viimevuosi
     $vvt = date("Y");
     $vvv = date("Y") - 1;
     $now = date("Y-m-d");
@@ -59,8 +59,8 @@ function alku ($laji = '') {
   $pdf->draw_text(50, 677, $asiakasrow["maa"],             $firstpage, $norm);
 
   //oikea sarake
-  $pdf->draw_text(300, 727, "Hyv‰ yhteistyˆkumppanimme,",    $firstpage, $norm);
-  $pdf->draw_text(300, 707, "Ohessa t‰m‰nhetkinen ostotilanteenne.",    $firstpage, $norm);
+  $pdf->draw_text(300, 727, "Hyv√§ yhteisty√∂kumppanimme,",    $firstpage, $norm);
+  $pdf->draw_text(300, 707, "Ohessa t√§m√§nhetkinen ostotilanteenne.",    $firstpage, $norm);
   $pdf->draw_text(300, 687, "Kunnioittaen,",          $firstpage, $norm);
   $pdf->draw_text(300, 677, $yhtiorow["nimi"],        $firstpage, $norm);
 
@@ -78,7 +78,7 @@ function alku ($laji = '') {
   }
   else {
     //otsikkotiedot
-    $pdf->draw_text(30,  600, "Tuoteryhm‰",      $firstpage, $pieni);
+    $pdf->draw_text(30,  600, "Tuoteryhm√§",      $firstpage, $pieni);
   }
 
   $oikpos = $pdf->strlen("Kpl Nyt", $pieni);
@@ -104,7 +104,7 @@ function rivi_kaikki($firstpage, $laji = '', $rows = array()) {
 
   foreach ($rows as $row) {
     if ($lask >= 34) {
-      // rivej‰ on tarpeeks, teh‰‰n uus headeri
+      // rivej√§ on tarpeeks, teh√§√§n uus headeri
       $sivu++;
       $kala = 575;
       $lask = 1;
@@ -169,7 +169,7 @@ function rivi ($firstpage, $laji = '') {
   global $firstpage, $pdf, $row, $kala, $sivu, $lask, $norm, $lask, $edosasto;
 
   if ($lask >= 34) {
-    // rivej‰ on tarpeeks, teh‰‰n uus headeri
+    // rivej√§ on tarpeeks, teh√§√§n uus headeri
     $sivu++;
     $kala = 575;
     $lask = 1;
@@ -184,13 +184,13 @@ function rivi ($firstpage, $laji = '') {
   }
 
   if ($laji == 'osasto') {
-    // tehd‰‰n avainsana query
+    // tehd√§√§n avainsana query
     $tryre = t_avainsana("OSASTO", "", "and avainsana.selite ='$row[osasto]'");
     $tryro = mysql_fetch_array($tryre);
     $asananumero = $row["osasto"];
   }
   else {
-    // tehd‰‰n avainsana query
+    // tehd√§√§n avainsana query
     $tryre = t_avainsana("TRY", "", "and avainsana.selite ='$row[try]'");
     $tryro = mysql_fetch_array($tryre);
     $asananumero = $row["try"];
@@ -236,10 +236,10 @@ function rivi ($firstpage, $laji = '') {
 function loppu ($firstpage, $sendemail = '') {
   global $pdf, $kala, $norm, $sumkpled, $sumkplva, $sumed, $sumva, $sumindexi, $asiakas_numero;
 
-  //kirjoitetaan yhteens‰rivit loppuun
+  //kirjoitetaan yhteens√§rivit loppuun
   $kala -= 15;
 
-  $pdf->draw_text(250, $kala, "Yhteens‰:",   $firstpage, $norm);
+  $pdf->draw_text(250, $kala, "Yhteens√§:",   $firstpage, $norm);
 
   $oikpos = $pdf->strlen(sprintf("%.0f", $sumkplva), $norm);
   $pdf->draw_text(330-$oikpos, $kala, sprintf("%.0f", $sumkplva),     $firstpage, $norm);
@@ -274,12 +274,12 @@ function loppu ($firstpage, $sendemail = '') {
     return;
   }
 
-  //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+  //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
   $pdffilenimi = $GLOBALS['tmpdir']."Ostoseuranta_".$asiakas_numero.".pdf";
 
   //kirjoitetaan pdf faili levylle..
   $fh = fopen($pdffilenimi, "w");
-  if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
+  if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep√§onnistui $pdffilenimi");
   fclose($fh);
 
   return $pdffilenimi;

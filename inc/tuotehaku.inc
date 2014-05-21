@@ -7,7 +7,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "tuote.php") !== FALSE and $kukarow["extrane
   $poistetulisa = "";
 }
 
-// Etsit‰n enarilla jos kappaleita ei ole syˆtetty eik‰ hakuja k‰ytetty
+// Etsit√§n enarilla jos kappaleita ei ole sy√∂tetty eik√§ hakuja k√§ytetty
 if ((!isset($kpl) or $kpl == "") and !is_array($kpl_array) and substr($tuoteno,0,1) != '*' and substr($tuoteno,-1) != '*' and substr($tuoteno,0,1) != '?' and substr($tuoteno,0,1) != '#' and substr($tuoteno,0,1) != '@') {
 
   $query = "SELECT *
@@ -18,7 +18,7 @@ if ((!isset($kpl) or $kpl == "") and !is_array($kpl_array) and substr($tuoteno,0
   $tresult = pupe_query($query);
 
   if (mysql_num_rows($tresult) == 1) {
-    //Tehd‰‰n tuotenumero ja kpl
+    //Tehd√§√§n tuotenumero ja kpl
     $trow = mysql_fetch_assoc($tresult);
     $tuoteno = $trow['tuoteno'];
     $kpl = 1;
@@ -79,11 +79,11 @@ if (!$enarimatch) {
       }
     }
     elseif (substr($tuoteno, -2) == '**') {
-      // Tuoteryhm‰
+      // Tuoteryhm√§
       $th_lisa1 = " and tuote.try = '$tuoteno' ";
     }
     elseif (substr($tuoteno,0,1) == '*') {
-      // Jos eka merkki on t‰hti etsit‰‰n teksteist‰
+      // Jos eka merkki on t√§hti etsit√§√§n teksteist√§
       $tuoteno = substr($tuoteno, 1);
       $sanat = explode(" ", $tuoteno);
 
@@ -92,12 +92,12 @@ if (!$enarimatch) {
       }
     }
     elseif (substr($tuoteno,-1) == '*') {
-      // Jos vika merkki on t‰hti niin etsit‰‰n osittainen tuotenumero
+      // Jos vika merkki on t√§hti niin etsit√§√§n osittainen tuotenumero
       $tuoteno = substr($tuoteno,0,-1);
 
       $th_lisa1 = " and tuote.tuoteno like '" . $tuoteno . "%' ";
 
-      //Kun kyseess‰ on ostotilaus ja haetaan tuotelistausta esim. "+1*" haetaan vain ostotilauksen toimittajan tuotteita.
+      //Kun kyseess√§ on ostotilaus ja haetaan tuotelistausta esim. "+1*" haetaan vain ostotilauksen toimittajan tuotteita.
       $tuotteen_toimittajat_join = "";
       if (isset($laskurow) and $laskurow['tila'] == 'O') {
         $tuotteen_toimittajat_join = "  JOIN tuotteen_toimittajat
@@ -107,7 +107,7 @@ if (!$enarimatch) {
       }
     }
     elseif (substr($tuoteno,0,1) == '@') {
-      // Jos ensimm‰inen merkki on AT-merkki niin etsit‰‰n kyseisell‰ tuotenumero
+      // Jos ensimm√§inen merkki on AT-merkki niin etsit√§√§n kyseisell√§ tuotenumero
       $tuoteno = substr($tuoteno,1);
       $th_lisa1 = " and tuote.tuoteno = '".$tuoteno."' ";
     }
@@ -115,13 +115,13 @@ if (!$enarimatch) {
     $yhtiot   = "";
     $konsyhtiot = array();
 
-    //Voidaan hakea myˆs koko konsernin tuotteista
+    //Voidaan hakea my√∂s koko konsernin tuotteista
     if ($konsernihaku != "KYLLA") {
       $yhtiot     = "yhtio = '$kukarow[yhtio]' ";
       $konsyhtiot[] = $kukarow["yhtio"];
     }
     else {
-      //Yhtiˆvalinnat
+      //Yhti√∂valinnat
       $query  = "SELECT distinct yhtio, nimi
                  from yhtio
                  where konserni  = '$yhtiorow[konserni]'
@@ -182,7 +182,7 @@ if (!$enarimatch) {
       }
     }
 
-    // Poistettuja tuotteita ei n‰ytet‰ paitsi jos niill‰ on saldoa
+    // Poistettuja tuotteita ei n√§ytet√§ paitsi jos niill√§ on saldoa
     // Joinataan korvaavat mukaan
     $query = "SELECT
               tuote.yhtio,
@@ -280,14 +280,14 @@ if (!$enarimatch) {
 
     if (count($rows) >  200) {
       $kentta      = 'tuoteno';
-      $varaosavirhe   = t("VIRHE: Hakuehdolla lˆytyi liikaa tuotteita!");
-      $varaosavirhe   .= t("N‰ytet‰‰n 200 ensimm‰ist‰").".";
+      $varaosavirhe   = t("VIRHE: Hakuehdolla l√∂ytyi liikaa tuotteita!");
+      $varaosavirhe   .= t("N√§ytet√§√§n 200 ensimm√§ist√§").".";
       $tee       = 'Y';
     }
 
     if (count($rows) == 0) {
       $kentta      = 'tuoteno';
-      $varaosavirhe   = t("VIRHE: Hakuehdolla ei lˆytynyt yht‰‰n tuotetta")."!";
+      $varaosavirhe   = t("VIRHE: Hakuehdolla ei l√∂ytynyt yht√§√§n tuotetta")."!";
       $tuoteno    = '';
       $tee       = 'Y';
     }
@@ -322,7 +322,7 @@ if (!$enarimatch) {
 
       $ulos .= "<option value=''>".t("Valitse tuote")."</option>";
 
-      // Loopataan tuotteet l‰pi
+      // Loopataan tuotteet l√§pi
       foreach ($rows as $trow) {
 
         $lisakala1 = "";
@@ -334,7 +334,7 @@ if (!$enarimatch) {
         $kokonaismyytavissa = 0;
 
         if ($trow["tuoteperhe"] == $trow["tuoteno"]) {
-          // Tuoteperheen is‰
+          // Tuoteperheen is√§
           $saldot = tuoteperhe_myytavissa($trow["tuoteno"], "", "", $laskurow["varasto"], "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
 
           foreach ($saldot as $varasto => $myytavissa) {
@@ -366,7 +366,7 @@ if (!$enarimatch) {
           $lisakala3 = "####$trow[yhtio]";
         }
 
-        // katotaan onko t‰ll‰ tuotteella joku variaatioryp‰s
+        // katotaan onko t√§ll√§ tuotteella joku variaatioryp√§s
         $query = "SELECT *
                   FROM tuotteen_avainsanat
                   WHERE yhtio = '$trow[yhtio]'
@@ -381,7 +381,7 @@ if (!$enarimatch) {
           $ulos .= "<option value='$parametritrivi[selite]'> ** $parametritrivi[selite] ** </option>";
         }
 
-        $epakuranttiteksti = $trow['epakurantti'] != '' ? " ({$trow['epakurantti']}% ".t("ep‰kurantti").")" : "";
+        $epakuranttiteksti = $trow['epakurantti'] != '' ? " ({$trow['epakurantti']}% ".t("ep√§kurantti").")" : "";
 
         $ulos .= "<option value='{$trow['tuoteno']}{$lisakala3}'>{$lisakala2} {$lisakala1} {$trow['tuoteno']} ".t_tuotteen_avainsanat($trow, 'nimitys')." ({$kokonaismyytavissa}){$epakuranttiteksti}</option>";
 
@@ -397,7 +397,7 @@ if (!$enarimatch) {
   }
   elseif ((substr($tuoteno,0,1) == '*' or substr($tuoteno,-1) == '*' or substr($tuoteno,0,1) == '?' or substr($tuoteno,0,1) == '@') and trim(strlen($tuoteno)) < 2) {
     $kentta      = 'tuoteno';
-    $varaosavirhe   = t("VIRHE: Hakusanan on sis‰llett‰v‰ v‰hint‰‰n kaksi merkki‰")."!<br>";
+    $varaosavirhe   = t("VIRHE: Hakusanan on sis√§llett√§v√§ v√§hint√§√§n kaksi merkki√§")."!<br>";
     $tuoteno    = '';
     $tee       = 'Y';
   }
@@ -405,7 +405,7 @@ if (!$enarimatch) {
   if ($ulos == '' and $tee != 'Y') {
 
     ///* Viivakoodinlukija-special *///
-    ///* Konffaa lukija n‰in: prefiksiksi #-merkki ja suffiksiksi RETURN*///
+    ///* Konffaa lukija n√§in: prefiksiksi #-merkki ja suffiksiksi RETURN*///
     if (substr($tuoteno,0,1) == '#') {
 
       $th_lisa1 = "and tuote.eankoodi='".substr($tuoteno,1)."'";
@@ -425,12 +425,12 @@ if (!$enarimatch) {
       }
       elseif (mysql_num_rows($tresult) == 0) {
         $kentta='tuoteno';
-        $varaosavirhe = t("VIRHE: Hakuehdolla ei lˆytynyt yht‰‰n tuotetta")."!<br>";
+        $varaosavirhe = t("VIRHE: Hakuehdolla ei l√∂ytynyt yht√§√§n tuotetta")."!<br>";
         $tuoteno='';
         $tee = 'Y';
       }
       elseif (mysql_num_rows($tresult) == 1) {
-        //Tehd‰‰n tuotenumero ja kpl
+        //Tehd√§√§n tuotenumero ja kpl
         $trivi = mysql_fetch_assoc($tresult);
         $tuoteno = $trivi['tuoteno'];
       }
@@ -455,7 +455,7 @@ if (!$enarimatch) {
       $kentta = 'tuoteno';
 
       if (strpos($_SERVER['SCRIPT_NAME'], "tilaus_myynti.php") === FALSE or $kukarow['extranet'] != '') {
-        $varaosavirhe .= t("VIRHE: Tuotenumeroa")." $tuoteno ".t("ei lˆydy j‰rjestelm‰st‰")."!<br>";
+        $varaosavirhe .= t("VIRHE: Tuotenumeroa")." $tuoteno ".t("ei l√∂ydy j√§rjestelm√§st√§")."!<br>";
       }
 
       $tee = "Y";

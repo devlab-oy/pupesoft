@@ -1,6 +1,6 @@
 <?php
 
-// Kutsutaanko CLI:stä
+// Kutsutaanko CLI:stÃ¤
 $php_cli = FALSE;
 
 if (php_sapi_name() == 'cli') {
@@ -12,7 +12,7 @@ date_default_timezone_set('Europe/Helsinki');
 if ($php_cli) {
 
   if (trim($argv[1]) == '') {
-    echo "Et antanut yhtiötä!\n";
+    echo "Et antanut yhtiÃ¶tÃ¤!\n";
     exit;
   }
 
@@ -33,7 +33,7 @@ if ($php_cli) {
   $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 }
 
-// Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
+// Sallitaan vain yksi instanssi tÃ¤stÃ¤ skriptistÃ¤ kerrallaan
 pupesoft_flock();
 
 if (trim($operaattori) == '') {
@@ -51,7 +51,7 @@ if (!is_dir($ftpget_dest[$operaattori])) {
   exit;
 }
 
-// Setataan tämä, niin ftp-get.php toimii niin kuin pitäisikin
+// Setataan tÃ¤mÃ¤, niin ftp-get.php toimii niin kuin pitÃ¤isikin
 $argv[1] = $operaattori;
 
 require('ftp-get.php');
@@ -73,9 +73,9 @@ if ($kardex_handle = opendir($ftpget_dest[$operaattori])) {
         // index 1, sscc ulkoinen
         // index 2, tuoteno
         // index 3, kpl
-        // index 4, keräyserän rivin tunnus
+        // index 4, kerÃ¤yserÃ¤n rivin tunnus
         // index 5, hyllypaikka
-        // index 6, kerääjä
+        // index 6, kerÃ¤Ã¤jÃ¤
 
         $_content[4] = (int) $_content[4];
 
@@ -179,7 +179,7 @@ if ($kardex_handle = opendir($ftpget_dest[$operaattori])) {
             $id     = $keraysera_nro;
             $keraajanro = "";
 
-            // vakadr-tulostin on aina sama kuin lähete-tulostin
+            // vakadr-tulostin on aina sama kuin lÃ¤hete-tulostin
             $valittu_tulostin = $vakadr_tulostin = $printteri_row['printteri1'];
             $valittu_oslapp_tulostin = $printteri_row['printteri3'];
 
@@ -187,7 +187,7 @@ if ($kardex_handle = opendir($ftpget_dest[$operaattori])) {
             $oslappkpl = $yhtiorow["oletus_oslappkpl"];
 
             $lasku_yhtio = "";
-            $real_submit = "Merkkaa kerätyksi";
+            $real_submit = "Merkkaa kerÃ¤tyksi";
 
             require('tilauskasittely/keraa.php');
           }

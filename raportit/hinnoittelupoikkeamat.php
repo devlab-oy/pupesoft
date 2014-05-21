@@ -5,10 +5,10 @@ if (isset($_POST["tee"])) {
   if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 }
 
-// Ei k‰ytet‰ pakkausta
+// Ei k√§ytet√§ pakkausta
 $compression = FALSE;
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("../inc/parametrit.inc");
@@ -33,19 +33,19 @@ else {
   if (!isset($tee)) $tee = '';
   if (!isset($eropros_vahintaan)) $eropros_vahintaan = 3;
 
-  // Tarkistetaan viel‰ p‰iv‰m‰‰r‰t
+  // Tarkistetaan viel√§ p√§iv√§m√§√§r√§t
   if (!checkdate($akk, $app, $avv)) {
-    echo "<font class='error'>",t("VIRHE: Alkup‰iv‰m‰‰r‰ on virheellinen"),"!</font><br />";
+    echo "<font class='error'>",t("VIRHE: Alkup√§iv√§m√§√§r√§ on virheellinen"),"!</font><br />";
     $tee = "";
   }
 
   if (!checkdate($lkk, $lpp, $lvv)) {
-    echo "<font class='error'>",t("VIRHE: Loppup‰iv‰m‰‰r‰ on virheellinen"),"!</font><br />";
+    echo "<font class='error'>",t("VIRHE: Loppup√§iv√§m√§√§r√§ on virheellinen"),"!</font><br />";
     $tee = "";
   }
 
   if ($tee != "" and strtotime("{$avv}-{$akk}-{$app}") > strtotime("{$lvv}-{$lkk}-{$lpp}")) {
-    echo "<font class='error'>",t("VIRHE: Alkup‰iv‰m‰‰r‰ on suurempi kuin loppup‰iv‰m‰‰r‰"),"!</font><br />";
+    echo "<font class='error'>",t("VIRHE: Alkup√§iv√§m√§√§r√§ on suurempi kuin loppup√§iv√§m√§√§r√§"),"!</font><br />";
     $tee = "";
   }
 
@@ -53,21 +53,21 @@ else {
   echo "<table>";
 
   echo "<tr>";
-  echo "<th>",t("Alkup‰iv‰m‰‰r‰"),"</th>";
+  echo "<th>",t("Alkup√§iv√§m√§√§r√§"),"</th>";
   echo "<td><input type='text' name='app' value='{$app}' size='5' />";
   echo "<input type='text' name='akk' value='{$akk}' size='5' />";
   echo "<input type='text' name='avv' value='{$avv}' size='5' /></td>";
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>",t("Loppup‰iv‰m‰‰r‰"),"</th>";
+  echo "<th>",t("Loppup√§iv√§m√§√§r√§"),"</th>";
   echo "<td><input type='text' name='lpp' value='{$lpp}' size='5' />";
   echo "<input type='text' name='lkk' value='{$lkk}' size='5' />";
   echo "<input type='text' name='lvv' value='{$lvv}' size='5' /></td>";
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>",t("Myyj‰")."</th>";
+  echo "<th>",t("Myyj√§")."</th>";
   echo "<td><select name='myyja'>";
   echo "<option value='0'>",t("Valitse"),"</option>";
 
@@ -91,7 +91,7 @@ else {
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>",t("Ero % v‰hint‰‰n"),"</th>";
+  echo "<th>",t("Ero % v√§hint√§√§n"),"</th>";
   echo "<td style='vertical-align: middle;'><input type='text' name='eropros_vahintaan' value='{$eropros_vahintaan}' maxlength='6' size='7' /> %</td>";
   echo "</tr>";
 
@@ -111,7 +111,7 @@ else {
     $myyjalisa = $myyja != 0 ? "AND lasku.myyja = '{$myyja}'" : "";
 
     // Haetaan laskutetut tilaukset
-    $query = "SELECT lasku.*, IFNULL(kuka.nimi, '".t("Ei myyj‰‰")."') AS myyja, TRIM(CONCAT(lasku.ytunnus, ' ', lasku.nimi, ' ', lasku.nimitark)) AS nimi
+    $query = "SELECT lasku.*, IFNULL(kuka.nimi, '".t("Ei myyj√§√§")."') AS myyja, TRIM(CONCAT(lasku.ytunnus, ' ', lasku.nimi, ' ', lasku.nimitark)) AS nimi
               FROM lasku
               LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.tunnus = lasku.myyja)
               WHERE lasku.yhtio = '{$kukarow['yhtio']}'
@@ -125,7 +125,7 @@ else {
 
     if (mysql_num_rows($laskures) == 0) {
 
-      echo "<br /><font class='info'>",t("Yht‰‰n tilausta ei lˆytynyt"),"!</font><br />";
+      echo "<br /><font class='info'>",t("Yht√§√§n tilausta ei l√∂ytynyt"),"!</font><br />";
 
       require("inc/footer.inc");
       exit;
@@ -215,11 +215,11 @@ else {
 
         if ($eropros_vahintaan > $eropros) continue;
 
-        $data[$i]['myyj‰'] = $laskurow['myyja'];
+        $data[$i]['myyj√§'] = $laskurow['myyja'];
         $data[$i]['tilaus'] = $laskurow['tunnus'];
-        $data[$i]['rivej‰'] = $num_rows;
+        $data[$i]['rivej√§'] = $num_rows;
         $data[$i]['asiakas'] = $laskurow['nimi'];
-        $data[$i]['sis‰inen_kommentti'] = $laskurow['sisviesti3'];
+        $data[$i]['sis√§inen_kommentti'] = $laskurow['sisviesti3'];
 
         $lis_hinta = hintapyoristys($lis_hinta);
         $tilausrivirow['hinta'] = hintapyoristys($tilausrivirow['hinta']);
@@ -252,8 +252,8 @@ else {
           case 'eropros':
             $otsikko = "ero %";
             break;
-          case 'sis‰inen_kommentti':
-            $otsikko = "sis‰inen kommentti";
+          case 'sis√§inen_kommentti':
+            $otsikko = "sis√§inen kommentti";
             break;
           case 'koneen_hinta':
             $otsikko = "koneen hinta";
@@ -300,9 +300,9 @@ else {
 
         foreach($set as $k => $v) {
 
-          if ($k == 'myyj‰' and $user != '' and $v != '' and $user != $v) {
+          if ($k == 'myyj√§' and $user != '' and $v != '' and $user != $v) {
             echo "<tr>";
-            echo "<th>{$user} ",t("Yhteens‰"),"</th>";
+            echo "<th>{$user} ",t("Yhteens√§"),"</th>";
             echo "<th colspan='11' style='text-align: right;'>{$total_user}</th>";
             echo "<th></th>";
             echo "</tr>";
@@ -324,7 +324,7 @@ else {
 
           echo "<td class='{$odd}' {$stylelisa}>{$v}</td>";
 
-          if ($k == 'myyj‰' and $v != '') $user = $v;
+          if ($k == 'myyj√§' and $v != '') $user = $v;
           if ($k == 'ero' and $user != '') {
             $total_user += $v;
             $total += $v;
@@ -338,13 +338,13 @@ else {
       }
 
       echo "<tr>";
-      echo "<th>{$user} ",t("Yhteens‰"),"</th>";
+      echo "<th>{$user} ",t("Yhteens√§"),"</th>";
       echo "<th colspan='11' style='text-align: right;'>{$total_user}</th>";
       echo "<th></th>";
       echo "</tr>";
 
       echo "<tr>";
-      echo "<th>",t("Kaikki yhteens‰"),"</th>";
+      echo "<th>",t("Kaikki yhteens√§"),"</th>";
       echo "<th colspan='11' style='text-align: right;'>{$total}</th>";
       echo "<th></th>";
       echo "</tr>";

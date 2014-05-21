@@ -67,7 +67,7 @@ if ($tee == 'Z' or $tiliote == 'Z') {
 if ($tee == 'X' or $tee == 'XX' or $tee == "XS" or $tee == "XXS") {
 
   if ($tee == 'X') {
-    // Pyyntˆ seuraavasta tiliotteesta
+    // Pyynt√∂ seuraavasta tiliotteesta
     $query = "SELECT *
               FROM tiliotedata use index (yhtio_tilino_alku)
               WHERE yhtio = '{$kukarow['yhtio']}'
@@ -79,7 +79,7 @@ if ($tee == 'X' or $tee == 'XX' or $tee == "XS" or $tee == "XXS") {
     $tyyppi = 1;
   }
   elseif ($tee == 'XX') {
-    // Pyyntˆ edellisest‰ tiliotteesta
+    // Pyynt√∂ edellisest√§ tiliotteesta
     $query = "SELECT *
               FROM tiliotedata use index (yhtio_tilino_alku)
               WHERE yhtio = '{$kukarow['yhtio']}'
@@ -91,7 +91,7 @@ if ($tee == 'X' or $tee == 'XX' or $tee == "XS" or $tee == "XXS") {
     $tyyppi = 1;
   }
   elseif ($tee == 'XS') {
-    // Pyyntˆ seuraavasta viiteaineistosta
+    // Pyynt√∂ seuraavasta viiteaineistosta
     $query = "SELECT *
               FROM tiliotedata use index (yhtio_tilino_alku)
               WHERE yhtio = '{$kukarow['yhtio']}'
@@ -103,7 +103,7 @@ if ($tee == 'X' or $tee == 'XX' or $tee == "XS" or $tee == "XXS") {
     $tyyppi = 3;
   }
   elseif ($tee == 'XXS') {
-    // Pyyntˆ seuraavasta viiteaineistosta
+    // Pyynt√∂ seuraavasta viiteaineistosta
     $query = "SELECT *
               FROM tiliotedata use index (yhtio_tilino_alku)
               WHERE yhtio = '{$kukarow['yhtio']}'
@@ -160,7 +160,7 @@ if ($tee == 'S') {
       );
 
       if ($('#kuitattu_'+solut).hasClass('spec')) {
-        $('#kuitattu_'+solut).html('<font class=\"ok\">".t("Kuitattu").": {$kukarow['nimi']} @ ".tv1dateconv(date("Y-m-d H:i:s"),"pitk‰")."</font>');
+        $('#kuitattu_'+solut).html('<font class=\"ok\">".t("Kuitattu").": {$kukarow['nimi']} @ ".tv1dateconv(date("Y-m-d H:i:s"),"pitk√§")."</font>');
       }
       else {
         $('#kuitattu_'+solut).html('');
@@ -239,7 +239,7 @@ if ($tee == 'S') {
   $tilioterivimaara  = mysql_num_rows($tiliotedataresult);
 
   if ($tilioterivimaara == 0) {
-    echo "<font class='message'>".t("Tuollaista aineistoa ei lˆytynyt")."! $query</font><br>";
+    echo "<font class='message'>".t("Tuollaista aineistoa ei l√∂ytynyt")."! $query</font><br>";
     $tee = '';
   }
   else {
@@ -283,7 +283,7 @@ if ($tee == '') {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
-    echo "<font class='error'>".t("Sinulla ei ole yht‰‰n pankkitili‰")."</font><hr>";
+    echo "<font class='error'>".t("Sinulla ei ole yht√§√§n pankkitili√§")."</font><hr>";
     require ("inc/footer.inc");
     exit;
   }
@@ -309,7 +309,7 @@ if ($tee == '') {
       <th>".t("Pankkitili")."</th>
       <td><select name='tilino'>";
 
-  echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";
+  echo "<option value=''>".t("N√§yt√§ kaikki")."</option>";
 
   while ($yritirow = mysql_fetch_array ($result)) {
     $chk = "";
@@ -323,7 +323,7 @@ if ($tee == '') {
       <tr>
       <th>".t("Laji")."</th>
       <td><select name='tyyppi'>
-        <option value=''>".t("N‰yt‰ kaikki")."
+        <option value=''>".t("N√§yt√§ kaikki")."
         <option value='1' $chk[1]>".t("Tiliote")."
         <option value='2' $chk[2]>".t("Lmp")."
         <option value='3' $chk[3]>".t("Viitesiirrot")."
@@ -345,7 +345,7 @@ if ($tee == '') {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
-    echo "<font class='error'>".t("Sopivia pankkiainestoja ei lˆytynyt")."</font><hr>";
+    echo "<font class='error'>".t("Sopivia pankkiainestoja ei l√∂ytynyt")."</font><hr>";
     require ("inc/footer.inc");
     exit;
   }

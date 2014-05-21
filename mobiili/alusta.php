@@ -16,7 +16,7 @@ $error = array(
 if (!isset($alusta)) $alusta = '';
 
 if (isset($submit) and trim($submit) == 'submit' and trim($alusta) == '') {
-  $error['alusta'] = "<font class='error'>".t("Syˆt‰ alustan SSCC").".</font>";
+  $error['alusta'] = "<font class='error'>".t("Sy√∂t√§ alustan SSCC").".</font>";
 }
 
 if (isset($submit) and trim($submit) != '' and $error['alusta'] == '') {
@@ -41,7 +41,7 @@ if (isset($submit) and trim($submit) != '' and $error['alusta'] == '') {
       $return2 = etsi_kasittelemattomat_asn_sanomat(trim($alusta));
 
       if(!empty($return2)) {
-        $error['alusta'] = "<font class='error'>".t("Alustaa ei voida viel‰ ottaa k‰sittelyyn (k‰sittelem‰tˆn ASN-sanoma). Hae uudestaan.").".</font>";
+        $error['alusta'] = "<font class='error'>".t("Alustaa ei voida viel√§ ottaa k√§sittelyyn (k√§sittelem√§t√∂n ASN-sanoma). Hae uudestaan.").".</font>";
       }
       else {
         $error['alusta'] = "<font class='error'>".t("Alustaa ei ole olemassa.")."</font>";
@@ -53,7 +53,7 @@ if (isset($submit) and trim($submit) != '' and $error['alusta'] == '') {
       $valinta = "Valitse";
 
       if (count($return) == 0) {
-        $error['alusta'] = "<font class='error'>".t("Alustaa ei voida viel‰ ottaa k‰sittelyyn. Hae uudestaan.").".</font>";
+        $error['alusta'] = "<font class='error'>".t("Alustaa ei voida viel√§ ottaa k√§sittelyyn. Hae uudestaan.").".</font>";
       }
     }
   }
@@ -119,7 +119,7 @@ echo "<script type='text/javascript'>
 
   $(document).ready(function() {
     $('#alusta').on('keyup', function() {
-      // Autosubmit vain jos on syˆtetty tarpeeksi pitk‰ viivakoodi
+      // Autosubmit vain jos on sy√∂tetty tarpeeksi pitk√§ viivakoodi
       if ($('#alusta').val().length > 6) {
         document.getElementById('haku_nappi').click();
       }

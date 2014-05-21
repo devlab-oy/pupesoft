@@ -112,7 +112,7 @@ if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' or $_SERVER['REMOTE_ADDR'] == '::1' o
     function tsekkaa_verkkolaskufile ($kansio) {
       if ($handle = opendir($kansio)) {
         while (($lasku = readdir($handle)) !== FALSE) {
-          // Yli vuorokauden vanha laskufile, laitetaan tästä erroria
+          // Yli vuorokauden vanha laskufile, laitetaan tÃ¤stÃ¤ erroria
           if ((substr(strtoupper($lasku), -4) == '.XML' or substr(strtoupper($lasku), -4) == '.EDI') and mktime()-filemtime($kansio.$lasku) > 86400) {
             echo "CRITICAL - Verkkolaskujen FTP-lahetys jumissa $STATE_CRITICAL";
             exit;

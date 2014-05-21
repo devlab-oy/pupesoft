@@ -3,9 +3,9 @@
 echo "<font class='head'>".t("Toimittajan laskut")."</font><hr>";
 
 if ($tee == 'A') {
-  // N‰ytet‰‰n toimittajan laskuja
-  //Jos k‰ytet‰‰n $tunnusta niin k‰ytet‰‰n liitostunnusta
-  //Jos taas p‰‰ss‰t‰‰n $ytunnusta niin haetaan sen perusteella
+  // N√§ytet√§√§n toimittajan laskuja
+  //Jos k√§ytet√§√§n $tunnusta niin k√§ytet√§√§n liitostunnusta
+  //Jos taas p√§√§ss√§t√§√§n $ytunnusta niin haetaan sen perusteella
 
   if (!isset($kausi)) $kausi = '';
   if (strlen($kausi) == 10) $laji = 'o';
@@ -20,7 +20,7 @@ if ($tee == 'A') {
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
-       echo "<b>".t("Haulla ei lˆytynyt yht‰‰n toimittajaa")."</b>";
+       echo "<b>".t("Haulla ei l√∂ytynyt yht√§√§n toimittajaa")."</b>";
     }
      $trow = mysql_fetch_array ($result);
 
@@ -50,13 +50,13 @@ if ($tee == 'A') {
     echo "<th>".t("Laskuntyyppi")."</th>";
     echo "<td><select name = 'laji'>
         <option $sel[K] value = 'K'>".t("Kaikki")."
-        <option $sel[H] value = 'H'>".t("Hyv‰ksytt‰v‰n‰")."
+        <option $sel[H] value = 'H'>".t("Hyv√§ksytt√§v√§n√§")."
         <option $sel[M] value = 'M'>".t("Maksamatta")."
         <option $sel[Q] value = 'Q'>".t("Odottaa suoritusta")."
         <option $sel[Y] value = 'Y'>".t("Maksettu")."
         <option $sel[O] value = 'O'>".t("Ostoraportti")."
         </select></td>
-        <td class='back'><input type='Submit' value='".t("N‰yt‰")."'></td>
+        <td class='back'><input type='Submit' value='".t("N√§yt√§")."'></td>
         </tr></form>";
     echo "</table>";
 
@@ -104,7 +104,7 @@ if ($tee == 'A') {
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
-       echo "<font class='error'>".t("Haulla ei lˆytynyt yht‰‰n laskua")."</font>";
+       echo "<font class='error'>".t("Haulla ei l√∂ytynyt yht√§√§n laskua")."</font>";
     }
 
     echo "<table><tr>";
@@ -133,7 +133,7 @@ if ($tee == 'A') {
   elseif ($laji == 'K' or $laji == 'H' or $laji == 'M' or $laji == 'Y' or $laji == 'Q' or $laji == 'o') {
 
     if ($ytunnus != "") {
-      //Jos taas p‰‰ss‰t‰‰n $ytunnusta niin haetaan sen perusteella
+      //Jos taas p√§√§ss√§t√§√§n $ytunnusta niin haetaan sen perusteella
       $query = "SELECT toimi.ytunnus, concat_ws(' ', if(toimi.tyyppi='K' and kuka.nimi is not null, kuka.nimi, toimi.nimi), toimi.nimitark) nimi, toimi.postitp
                 FROM toimi
                 LEFT JOIN kuka ON (kuka.yhtio = toimi.yhtio and kuka.kuka = toimi.nimi and toimi.tyyppi='K')
@@ -144,7 +144,7 @@ if ($tee == 'A') {
       $toimiliilisa = " and lasku.ytunnus = '$ytunnus' ";
     }
     else {
-      //Jos k‰ytet‰‰n $tunnusta niin k‰ytet‰‰n liitostunnusta
+      //Jos k√§ytet√§√§n $tunnusta niin k√§ytet√§√§n liitostunnusta
       $query = "SELECT toimi.ytunnus, concat_ws(' ', if(toimi.tyyppi='K' and kuka.nimi is not null, kuka.nimi, toimi.nimi), toimi.nimitark) nimi, toimi.postitp
                 FROM toimi
                 LEFT JOIN kuka ON (kuka.yhtio = toimi.yhtio and kuka.kuka = toimi.nimi and toimi.tyyppi='K')
@@ -157,7 +157,7 @@ if ($tee == 'A') {
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
-       echo "<b>".t("Haulla ei lˆytynyt yht‰‰n toimittajaa")."</b>";
+       echo "<b>".t("Haulla ei l√∂ytynyt yht√§√§n toimittajaa")."</b>";
     }
     else {
       echo "<table>";
@@ -193,7 +193,7 @@ if ($tee == 'A') {
       echo "<tr><th>".t("Laskuntyyppi")."</th>";
       echo "<td><select name = 'laji'>
           <option $sel[K] value = 'K'>".t("Kaikki")."
-          <option $sel[H] value = 'H'>".t("Hyv‰ksytt‰v‰n‰")."
+          <option $sel[H] value = 'H'>".t("Hyv√§ksytt√§v√§n√§")."
           <option $sel[M] value = 'M'>".t("Maksamatta")."
           <option $sel[Q] value = 'Q'>".t("Odottaa suoritusta")."
           <option $sel[Y] value = 'Y'>".t("Maksettu")."
@@ -202,7 +202,7 @@ if ($tee == 'A') {
           </tr>";
 
       echo "<tr>";
-      echo "<th>".t("Alkup‰iv‰m‰‰r‰")."</th>";
+      echo "<th>".t("Alkup√§iv√§m√§√§r√§")."</th>";
       echo "<td>";
       echo "<input type='text' name='pp1' value='$pp1' size='4'>";
       echo "<input type='text' name='kk1' value='$kk1' size='4'>";
@@ -210,7 +210,7 @@ if ($tee == 'A') {
       echo "</td>";
       echo "</tr>";
       echo "<tr>";
-      echo "<th>".t("Loppup‰iv‰m‰‰r‰")."</th>";
+      echo "<th>".t("Loppup√§iv√§m√§√§r√§")."</th>";
       echo "<td>";
       echo "<input type='text' name='pp2' value='$pp2' size='4'>";
       echo "<input type='text' name='kk2' value='$kk2' size='4'>";
@@ -238,11 +238,11 @@ if ($tee == 'A') {
         echo "</td>";
       }
 
-      echo "<td class='back' style='vertical-align:bottom;'><input type='Submit' value='".t("N‰yt‰")."'></td></tr>";
+      echo "<td class='back' style='vertical-align:bottom;'><input type='Submit' value='".t("N√§yt√§")."'></td></tr>";
       echo "</table>";
       echo "</form>";
 
-      echo "<br><a href='$PHP_SELF?toim=toimittajahaku&tee=A&laji=$laji&tunnus=$tunnus&limit=NO&lopetus=$lopetus'>".t("N‰yt‰ kaikki laskut")."</a><br><br>";
+      echo "<br><a href='$PHP_SELF?toim=toimittajahaku&tee=A&laji=$laji&tunnus=$tunnus&limit=NO&lopetus=$lopetus'>".t("N√§yt√§ kaikki laskut")."</a><br><br>";
 
       $th_lisa = '';
 
@@ -262,7 +262,7 @@ if ($tee == 'A') {
         $limit = "NO";
       }
       elseif ($kk1 != '' or $pp1 != '' or $vv1 != '') {
-        echo "<p><font class='error'>".t("Alkup‰iv‰m‰‰r‰ virheellinen!")."</font></p>";
+        echo "<p><font class='error'>".t("Alkup√§iv√§m√§√§r√§ virheellinen!")."</font></p>";
       }
 
               if (@checkdate($kk2, $pp2, $vv2)) {
@@ -270,7 +270,7 @@ if ($tee == 'A') {
         $limit = "NO";
       }
       elseif ($kk2 != '' or $pp2 != '' or $vv2 != '') {
-        echo "<p><font class='error'>".t("Loppup‰iv‰m‰‰r‰ virheellinen!")."</font></p>";
+        echo "<p><font class='error'>".t("Loppup√§iv√§m√§√§r√§ virheellinen!")."</font></p>";
       }
 
       if ($limit != "NO") {
@@ -302,7 +302,7 @@ if ($tee == 'A') {
       $seraavako = mysql_num_rows($result);
 
       if (mysql_num_rows($result) == 0) {
-         echo "<font class='error'>".t("Haulla ei lˆytynyt yht‰‰n laskua")."</font>";
+         echo "<font class='error'>".t("Haulla ei l√∂ytynyt yht√§√§n laskua")."</font>";
       }
 
       pupe_DataTables(array(array($pupe_DataTables, 8, 8)));
@@ -360,7 +360,7 @@ if ($tee == 'A') {
         echo "<td valign='top'>$trow[laskunro]</td>";
         echo "<td valign='top'>".$trow["viite/viesti"]."</td>";
 
-        //tehd‰‰n keikka linkki
+        //tehd√§√§n keikka linkki
         echo "<td valign='top'>";
 
         if ($trow["vienti"] != "A" and $trow["vienti"] != "D" and $trow["vienti"] != "G") {
@@ -381,7 +381,7 @@ if ($tee == 'A') {
         }
         echo "</td>";
 
-        // tehd‰‰n lasku linkki
+        // tehd√§√§n lasku linkki
         echo "<td valign='top'>".ebid($trow['tunnus']) ."</td>";
 
         $laskutyyppi = $trow["tila"];
@@ -407,7 +407,7 @@ if ($tee == 'A') {
         if ($val == "ZZ_".$yhtiorow["valkoodi"]) $val = $yhtiorow["valkoodi"];
 
         echo "<tr>
-            <td class='tumma'>".t("Yhteens‰:")."</td>
+            <td class='tumma'>".t("Yhteens√§:")."</td>
             <td class='tumma' align='right' name='yhteensa' id='yhteensa_$val'>".sprintf("%.2f", $sum)."</td>
             <td class='tumma'>$val</td>
             <td class='tumma' colspan='5'></td></tr>";
@@ -473,11 +473,11 @@ if ($th_lisat != '') {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
-    echo "<font class='error'>".t("Haulla ei lˆytynyt yht‰‰n toimittajaa")."</font><br>";
+    echo "<font class='error'>".t("Haulla ei l√∂ytynyt yht√§√§n toimittajaa")."</font><br>";
     $tee = '';
   }
   elseif (mysql_num_rows($result) > 40) {
-    echo "<font class='error'>".t("Haulla lˆytyi liikaa toimittajia. Tarkenna hakua")."</font><br>";
+    echo "<font class='error'>".t("Haulla l√∂ytyi liikaa toimittajia. Tarkenna hakua")."</font><br>";
     $tee = '';
   }
   else {
@@ -502,13 +502,13 @@ if ($th_lisat != '') {
 
       echo "<td><select name = 'laji'>
           <option value = 'K'>".t("Kaikki")."
-          <option value = 'H'>".t("Hyv‰ksytt‰v‰n‰")."
+          <option value = 'H'>".t("Hyv√§ksytt√§v√§n√§")."
           <option value = 'M'>".t("Maksamatta")."
           <option value = 'Q'>".t("Odottaa suoritusta")."
           <option value = 'Y'>".t("Maksettu")."
           <option value = 'O'>".t("Ostoraportti")."
           </select></td>
-          <td><input type='Submit' value='".t("N‰yt‰")."'></td>
+          <td><input type='Submit' value='".t("N√§yt√§")."'></td>
           </tr></form>";
     }
     echo "</table>";

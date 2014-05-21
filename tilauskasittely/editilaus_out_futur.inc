@@ -59,7 +59,7 @@ if ($luodaan_aineisto) {
      else $_toimitustapa = $laskurow['toimitustapa'];
 
      $edi_order .= "OSTOTIL.OT_NRO:{$laskurow['tunnus']}\n";
-  // 0 = ÷rum
+  // 0 = √ñrum
      $edi_order .= "OSTOTIL.OT_TOIMITTAJANRO:0\n";
   $edi_order .= "OSTOTIL.OT_TILAUSTYYPPI:{$laskurow['tilaustyyppi']}\n";
   $edi_order .= "OSTOTIL.OT_TILAUSAIKA:\n";
@@ -70,7 +70,7 @@ if ($luodaan_aineisto) {
   $edi_order .= "OSTOTIL.OT_MAKSUEHTO:{$laskurow['maksuehto']}\n";
   $edi_order .= "OSTOTIL.OT_VIITTEEMME:{$laskurow['viesti']}\n";
 
-  // Onko asiakkaan takana hyllypaikka jossa tavarat s‰ilytet‰‰n
+  // Onko asiakkaan takana hyllypaikka jossa tavarat s√§ilytet√§√§n
   if ($myynti_vai_osto == 'M') {
 
     $query = "SELECT avainsana
@@ -110,7 +110,7 @@ if ($luodaan_aineisto) {
 
   $asiakasnumero = $yhtiorow['ovttunnus'];
 
-  // Generoidaan asiakasnumeroon ovtlis‰, jos k‰ytˆss‰ on toimipaikka
+  // Generoidaan asiakasnumeroon ovtlis√§, jos k√§yt√∂ss√§ on toimipaikka
   if (($myynti_vai_osto == 'O' and $laskurow['vanhatunnus'] != 0) or ($myynti_vai_osto == 'M' and $laskurow['yhtio_toimipaikka'] != 0)) {
 
     $wherelisa = $myynti_vai_osto == 'O' ? $laskurow['vanhatunnus'] : $laskurow['yhtio_toimipaikka'];
@@ -157,9 +157,9 @@ if ($luodaan_aineisto) {
     $toim_postino = '';
     $toim_maa    = '';
   }
-  // jos toimitusosoite eroaa asiakkaan toimitusosoitteesta (tai jos toimitusosoite on tyhj‰ niin asiakkaan osoitteesta), niin silloin se lis‰t‰‰n aineistoon
+  // jos toimitusosoite eroaa asiakkaan toimitusosoitteesta (tai jos toimitusosoite on tyhj√§ niin asiakkaan osoitteesta), niin silloin se lis√§t√§√§n aineistoon
   elseif ($myynti_vai_osto == 'M' and isset($asiakasrow) and trim($asiakasrow['toim_osoite']) != '') {
-    // Kauttalaskutusasiakkaille ei tyhjennet‰
+    // Kauttalaskutusasiakkaille ei tyhjennet√§
     if ($asiakasrow["osasto"] != "6" and $toim_yritys == substr(trim($asiakasrow['toim_nimi'].' '.$asiakasrow['toim_nimitark']), 0, 30) and $toim_osoite == substr(trim($asiakasrow['toim_osoite']), 0, 25) and $toim_postitp == substr(trim($asiakasrow['toim_postitp']), 0, 25) and $toim_postino == trim($asiakasrow['toim_postino'])) {
       $toim_yritys   = '';
       $toim_osoite   = '';
@@ -208,7 +208,7 @@ if ($luodaan_aineisto) {
       $kpl = $tilausrivi_row['tilkpl'] * 1;
     }
 
-    // HUOM: Reklamaatioissa laitetaan nettohyvitysyksikkˆhinta
+    // HUOM: Reklamaatioissa laitetaan nettohyvitysyksikk√∂hinta
     $hinta = $tilausrivi_row['hinta'] * generoi_alekentta_php($tilausrivi_row, $myynti_vai_osto, 'kerto');
 
     // nettorivihinta

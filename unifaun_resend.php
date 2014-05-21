@@ -1,6 +1,6 @@
 <?php
 
-// Kutsutaanko CLI:stä
+// Kutsutaanko CLI:stÃ¤
 $php_cli = FALSE;
 
 if (php_sapi_name() == 'cli') {
@@ -12,7 +12,7 @@ date_default_timezone_set('Europe/Helsinki');
 if ($php_cli) {
 
   if (trim($argv[1]) == '') {
-    echo "Et antanut yhtiötä!\n";
+    echo "Et antanut yhtiÃ¶tÃ¤!\n";
     exit;
   }
 
@@ -32,11 +32,11 @@ if ($php_cli) {
   $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 }
 
-// Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
+// Sallitaan vain yksi instanssi tÃ¤stÃ¤ skriptistÃ¤ kerrallaan
 pupesoft_flock();
 
 // PrintServer
-// koitetaan uudelleen lähettää unifaun-tiedosto, jos FTP-siirto on feilannut aikaisemmin
+// koitetaan uudelleen lÃ¤hettÃ¤Ã¤ unifaun-tiedosto, jos FTP-siirto on feilannut aikaisemmin
 if ($unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "" and $unifaun_ps_fail != "") {
   $ftphost = $unifaun_ps_host;
   $ftpuser = $unifaun_ps_user;
@@ -67,7 +67,7 @@ if ($unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != ""
 }
 
 // UnifaunOnline
-// koitetaan uudelleen lähettää unifaun-tiedosto, jos FTP-siirto on feilannut aikaisemmin
+// koitetaan uudelleen lÃ¤hettÃ¤Ã¤ unifaun-tiedosto, jos FTP-siirto on feilannut aikaisemmin
 if ($unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "" and $unifaun_uo_fail != "") {
   $ftphost = $unifaun_uo_host;
   $ftpuser = $unifaun_uo_user;

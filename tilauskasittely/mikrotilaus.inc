@@ -2,10 +2,10 @@
 
 /* FILEFORMAATTI: (ilman sarakeotsikoita)
 Tuoteno (pakollinen)
-M‰‰r‰ (pakollinen)
-Arvioitu toimitusp‰iv‰ vvvv-kk-pp
+M√§√§r√§ (pakollinen)
+Arvioitu toimitusp√§iv√§ vvvv-kk-pp
 Hinta
-Ale1 - Ale3 (lasketaan yhtiˆn parametreist‰ monta myynnin alekentt‰‰ on k‰ytˆss‰)
+Ale1 - Ale3 (lasketaan yhti√∂n parametreist√§ monta myynnin alekentt√§√§ on k√§yt√∂ss√§)
 Netto
 Var
 Kommentti
@@ -13,11 +13,11 @@ Kommentti
 
 /* VAIHTOEHTOINEN FILEFORMAATTI: (sarakeotsikoilla)
 Tuoteno (pakollinen)
-M‰‰r‰ (pakollinen)
-Arvioitu toimitusp‰iv‰ vvvv-kk-pp
+M√§√§r√§ (pakollinen)
+Arvioitu toimitusp√§iv√§ vvvv-kk-pp
 Nimitys
 Hinta
-Ale1 - Ale3 (lasketaan yhtiˆn parametreist‰ monta myynnin alekentt‰‰ on k‰ytˆss‰)
+Ale1 - Ale3 (lasketaan yhti√∂n parametreist√§ monta myynnin alekentt√§√§ on k√§yt√∂ss√§)
 Netto
 Var
 Kommentti
@@ -25,16 +25,16 @@ Kommentti
 
 /* VAIHTOEHTOINEN FILEFORMAATTI (VALMISTUS) $yhtiorow['Valmistuksien_kasittely'] == Y: (sarakeotsikoilla)
 Tuoteno (pakollinen)
-M‰‰r‰ (pakollinen)
-Arvioitu toimitusp‰iv‰ vvvv-kk-pp
+M√§√§r√§ (pakollinen)
+Arvioitu toimitusp√§iv√§ vvvv-kk-pp
 Nimitys
 Hinta
-Ale1 - Ale3 (lasketaan yhtiˆn parametreist‰ monta myynnin alekentt‰‰ on k‰ytˆss‰)
+Ale1 - Ale3 (lasketaan yhti√∂n parametreist√§ monta myynnin alekentt√§√§ on k√§yt√∂ss√§)
 Netto
 Var
 Kommentti
 Valmistuslinja
-Toivottu ker‰ysajankohta
+Toivottu ker√§ysajankohta
 Toivottu valmistusajankohta
 */
 
@@ -45,21 +45,21 @@ function choose_correct_date($date) {
     return '';
   }
 
-  // P‰iv‰m‰‰r‰ oli ymm‰rrett‰v‰ss‰ muodossa
+  // P√§iv√§m√§√§r√§ oli ymm√§rrett√§v√§ss√§ muodossa
   if (strtotime($date) !== false) {
     // Palautetaan Y-m-d
     return date('Y-m-d', strtotime($date));
   }
 
-  // Exceliss‰ date voi tulla integerin‰
+  // Exceliss√§ date voi tulla integerin√§
   if (is_numeric($date)) {
     /*  the date fields have integers that are the amount of days from 1900-00-00 */
     return date('Y-m-d', mktime(0, 0, 0, 1, $date - 1, 1900));
   }
 
-  // Ei osattu valita sopivaa p‰iv‰‰
+  // Ei osattu valita sopivaa p√§iv√§√§
   echo "<font class='error'>";
-  echo t("Virheellinen p‰iv‰m‰‰r‰");
+  echo t("Virheellinen p√§iv√§m√§√§r√§");
   echo " \"{$date}\"";
   echo "</font><br>";
 
@@ -80,7 +80,7 @@ if ($tee == "file") {
     }
 
     if ($_FILES['userfile']['size']==0) {
-      die ("<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font>");
+      die ("<font class='error'><br>".t("Tiedosto on tyhj√§")."!</font>");
     }
 
     if (!empty($lue_useammalta_valilehdelta)) {
@@ -98,7 +98,7 @@ if ($tee == "file") {
     if (!empty($lue_useammalta_valilehdelta)) {
       foreach ($excelrivi as $sheet) {
 
-        # Tiedostosta p‰ivitys
+        # Tiedostosta p√§ivitys
         foreach ($sheet as $rivi) {
           $rivilask1++;
 
@@ -111,7 +111,7 @@ if ($tee == "file") {
 
             # Tarkistukset, var ja kpl
             if ($var != 'A' and $var != 'B'  ) {
-              echo "<font class='error'>".t("V‰‰r‰ arvo kent‰ss‰ var! Sallitut arvot ovat: A tai B").". ".t("Rivill‰").": $rivilask1. '$var'"."</font><br><br>";
+              echo "<font class='error'>".t("V√§√§r√§ arvo kent√§ss√§ var! Sallitut arvot ovat: A tai B").". ".t("Rivill√§").": $rivilask1. '$var'"."</font><br><br>";
               continue;
             }
 
@@ -163,7 +163,7 @@ if ($tee == "file") {
 
             // Detektoidaan tiedostomuoto
             if ($filetyyppi == "" and $laskurow["tila"] == "V") {
-              // Valmistukset aina tyyppi‰ kolme
+              // Valmistukset aina tyyppi√§ kolme
               $filetyyppi = "KOLMONE";
 
               $ind_Tuoteno                 = 0;
@@ -197,7 +197,7 @@ if ($tee == "file") {
               $_indx++;
               $ind_ToivottuKeraysajankohta = $_indx;
 
-              // Jos ensimm‰isest‰ solusta lˆytyy sana "tuote", niin k‰ytt‰j‰ on antanu sarakeotsikot
+              // Jos ensimm√§isest√§ solusta l√∂ytyy sana "tuote", niin k√§ytt√§j√§ on antanu sarakeotsikot
               if (stripos($rivi[0], "tuote") !== FALSE) {
                 // Skipataan otsikot
                 continue;
@@ -205,8 +205,8 @@ if ($tee == "file") {
             }
             elseif ($filetyyppi == ""
               and stripos($rivi[0], "tuote") !== FALSE
-              and (stripos($rivi[1], "kpl") !== FALSE or stripos($rivi[1], "m‰‰r‰") !== FALSE)
-              and stripos($rivi[2], "p‰iv‰") !== FALSE
+              and (stripos($rivi[1], "kpl") !== FALSE or stripos($rivi[1], "m√§√§r√§") !== FALSE)
+              and stripos($rivi[2], "p√§iv√§") !== FALSE
               and stripos($rivi[3], "nimi") !== FALSE) {
 
               $filetyyppi = "KAKKONEN";
@@ -243,8 +243,8 @@ if ($tee == "file") {
             }
             elseif ($filetyyppi == ""
               and stripos($rivi[0], "tuote") !== FALSE
-              and (stripos($rivi[1], "kpl") !== FALSE or stripos($rivi[1], "m‰‰r‰") !== FALSE)
-              and stripos($rivi[2], "p‰iv‰") !== FALSE
+              and (stripos($rivi[1], "kpl") !== FALSE or stripos($rivi[1], "m√§√§r√§") !== FALSE)
+              and stripos($rivi[2], "p√§iv√§") !== FALSE
               and stripos($rivi[3], "hinta") !== FALSE) {
 
               $filetyyppi = "YKSPISTEVITONEN";
@@ -281,7 +281,7 @@ if ($tee == "file") {
             }
             elseif ($filetyyppi == "") {
 
-              $filetyyppi = "YKK÷NEN";
+              $filetyyppi = "YKK√ñNEN";
 
               $ind_Tuoteno   = 0;
               $ind_Maara     = 1;
@@ -342,7 +342,7 @@ if ($tee == "file") {
                 $toimaika = "";
               }
 
-              //Ker‰ysp‰iv‰m‰‰r‰
+              //Ker√§ysp√§iv√§m√§√§r√§
               if (($toim == 'VALMISTAVARASTOON' or $toim == 'VALMISTAASIAKKAALLE') and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
                 $kerayspvm  = choose_correct_date($rivi[$ind_ToivottuKeraysajankohta]);
               }
@@ -362,16 +362,16 @@ if ($tee == "file") {
               $valmistuslinja  = trim($rivi[$ind_Valmistuslinja]);
 
               if ($toim == "EXTENNAKKO" and $var != '' and $var != 'O') {
-                echo t("V‰‰r‰ arvo kent‰ss‰ var! Sallitut arvot ovat").": 'O'. ".t("Rivill‰").": $rivilask1. $var<br>";
+                echo t("V√§√§r√§ arvo kent√§ss√§ var! Sallitut arvot ovat").": 'O'. ".t("Rivill√§").": $rivilask1. $var<br>";
                 $var = '';
               }
               elseif ($toim != "EXTENNAKKO" and $var != '' and $var != 'P' and $var != 'H' and $var != 'J') {
-                echo t("V‰‰r‰ arvo kent‰ss‰ var! Sallitut arvot ovat").": 'P','H','J'. ".t("Rivill‰").": $rivilask1. $var<br>";
+                echo t("V√§√§r√§ arvo kent√§ss√§ var! Sallitut arvot ovat").": 'P','H','J'. ".t("Rivill√§").": $rivilask1. $var<br>";
                 $var = '';
               }
 
               if ($netto != '' and $netto != 'N') {
-                echo t("V‰‰r‰ arvo kent‰ss‰ netto! Sallitut arvot ovat: tyhj‰ tai N").". ".t("Rivill‰").": $rivilask1. $netto<br>";
+                echo t("V√§√§r√§ arvo kent√§ss√§ netto! Sallitut arvot ovat: tyhj√§ tai N").". ".t("Rivill√§").": $rivilask1. $netto<br>";
                 $netto = '';
               }
             }
@@ -423,7 +423,7 @@ if ($tee == "file") {
                     $hinta = "";
                   }
 
-                  // Ennakkotilaukset, Tarjoukset, Yll‰pitosopimukset ja Valmistukset eiv‰t tee saldotsekki‰
+                  // Ennakkotilaukset, Tarjoukset, Yll√§pitosopimukset ja Valmistukset eiv√§t tee saldotsekki√§
                   if ($laskurow["tilaustyyppi"] == "E" or $laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "0" or $laskurow["tila"] == "V") {
                     $varataan_saldoa = "EI";
                   }
@@ -431,13 +431,13 @@ if ($tee == "file") {
                     $varataan_saldoa = "";
                   }
 
-                  //lis‰t‰‰n rivi
+                  //lis√§t√§√§n rivi
                   if ($kukarow["extranet"] == "" and $tila == "MYYNTITILIRIVI") {
                     $tilatapa = "PAIVITA";
                     require("laskuta_myyntitilirivi.inc");
                   }
                   elseif ($laskurow["tila"] == "V") {
-                    // Valmistuksilla pit‰‰ huomioida rekursiiviset reseptit
+                    // Valmistuksilla pit√§√§ huomioida rekursiiviset reseptit
                     // funktio populoi globaalit muuttujat $tuoteno_array $kpl_array $kommentti_array $lapsenlap_array
                     $tuoteno_array   = array($tuoteno);
                     $kpl_array       = array($tuoteno => $kpl);
@@ -475,7 +475,7 @@ if ($tee == "file") {
                       lisaa_rivi($params);
                     }
 
-                    // N‰m‰ pit‰‰ unsetata, muuten tilaus_myynti lis‰‰ rivit uudestaan
+                    // N√§m√§ pit√§√§ unsetata, muuten tilaus_myynti lis√§√§ rivit uudestaan
                     unset($tuoteno_array, $kpl_array, $kommentti_array, $lapsenlap_array);
                   }
                   else {
@@ -509,12 +509,12 @@ if ($tee == "file") {
                   }
                 }
                 else {
-                  echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei lˆydy")."!</font><br>";
+                  echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei l√∂ydy")."!</font><br>";
                 }
 
               }
               else {
-                echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei lˆydy")."!</font><br>";
+                echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei l√∂ydy")."!</font><br>";
               }
             }
           }
@@ -522,7 +522,7 @@ if ($tee == "file") {
       }
     }
     else {
-      # Tiedostosta p‰ivitys
+      # Tiedostosta p√§ivitys
       foreach ($excelrivi as $rivi) {
         $rivilask1++;
 
@@ -535,7 +535,7 @@ if ($tee == "file") {
 
           # Tarkistukset, var ja kpl
           if ($var != 'A' and $var != 'B'  ) {
-            echo "<font class='error'>".t("V‰‰r‰ arvo kent‰ss‰ var! Sallitut arvot ovat: A tai B").". ".t("Rivill‰").": $rivilask1. '$var'"."</font><br><br>";
+            echo "<font class='error'>".t("V√§√§r√§ arvo kent√§ss√§ var! Sallitut arvot ovat: A tai B").". ".t("Rivill√§").": $rivilask1. '$var'"."</font><br><br>";
             continue;
           }
 
@@ -587,7 +587,7 @@ if ($tee == "file") {
 
           // Detektoidaan tiedostomuoto
           if ($filetyyppi == "" and $laskurow["tila"] == "V") {
-            // Valmistukset aina tyyppi‰ kolme
+            // Valmistukset aina tyyppi√§ kolme
             $filetyyppi = "KOLMONE";
 
             $ind_Tuoteno = 0;
@@ -621,7 +621,7 @@ if ($tee == "file") {
             $_indx++;
             $ind_ToivottuKeraysajankohta = 9;
 
-            // Jos ensimm‰isest‰ solusta lˆytyy sana "tuote", niin k‰ytt‰j‰ on antanu sarakeotsikot
+            // Jos ensimm√§isest√§ solusta l√∂ytyy sana "tuote", niin k√§ytt√§j√§ on antanu sarakeotsikot
             if (stripos($rivi[0], "tuote") !== FALSE) {
               // Skipataan otsikot
               continue;
@@ -629,8 +629,8 @@ if ($tee == "file") {
           }
           elseif ($filetyyppi == ""
             and stripos($rivi[0], "tuote") !== FALSE
-            and (stripos($rivi[1], "kpl") !== FALSE or stripos($rivi[1], "m‰‰r‰") !== FALSE)
-            and stripos($rivi[2], "p‰iv‰") !== FALSE
+            and (stripos($rivi[1], "kpl") !== FALSE or stripos($rivi[1], "m√§√§r√§") !== FALSE)
+            and stripos($rivi[2], "p√§iv√§") !== FALSE
             and stripos($rivi[3], "nimi") !== FALSE) {
 
             $filetyyppi = "KAKKONEN";
@@ -667,8 +667,8 @@ if ($tee == "file") {
           }
           elseif ($filetyyppi == ""
             and stripos($rivi[0], "tuote") !== FALSE
-            and (stripos($rivi[1], "kpl") !== FALSE or stripos($rivi[1], "m‰‰r‰") !== FALSE)
-            and stripos($rivi[2], "p‰iv‰") !== FALSE
+            and (stripos($rivi[1], "kpl") !== FALSE or stripos($rivi[1], "m√§√§r√§") !== FALSE)
+            and stripos($rivi[2], "p√§iv√§") !== FALSE
             and stripos($rivi[3], "hinta") !== FALSE) {
 
             $filetyyppi = "YKSPISTEVITONEN";
@@ -705,7 +705,7 @@ if ($tee == "file") {
           }
           elseif ($filetyyppi == "") {
 
-            $filetyyppi = "YKK÷NEN";
+            $filetyyppi = "YKK√ñNEN";
 
             $ind_Tuoteno   = 0;
             $ind_Maara     = 1;
@@ -766,7 +766,7 @@ if ($tee == "file") {
               $toimaika = "";
             }
 
-            //Ker‰ysp‰iv‰m‰‰r‰
+            //Ker√§ysp√§iv√§m√§√§r√§
             if (($toim == 'VALMISTAVARASTOON' or $toim == 'VALMISTAASIAKKAALLE') and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
               $kerayspvm = choose_correct_date($rivi[$ind_ToivottuKeraysajankohta]);
             }
@@ -786,16 +786,16 @@ if ($tee == "file") {
             $valmistuslinja  = trim($rivi[$ind_Valmistuslinja]);
 
             if ($toim == "EXTENNAKKO" and $var != '' and $var != 'O') {
-              echo t("V‰‰r‰ arvo kent‰ss‰ var! Sallitut arvot ovat").": 'O'. ".t("Rivill‰").": $rivilask1. $var<br>";
+              echo t("V√§√§r√§ arvo kent√§ss√§ var! Sallitut arvot ovat").": 'O'. ".t("Rivill√§").": $rivilask1. $var<br>";
               $var = '';
             }
             elseif ($toim != "EXTENNAKKO" and $var != '' and $var != 'P' and $var != 'H' and $var != 'J') {
-              echo t("V‰‰r‰ arvo kent‰ss‰ var! Sallitut arvot ovat").": 'P','H','J'. ".t("Rivill‰").": $rivilask1. $var<br>";
+              echo t("V√§√§r√§ arvo kent√§ss√§ var! Sallitut arvot ovat").": 'P','H','J'. ".t("Rivill√§").": $rivilask1. $var<br>";
               $var = '';
             }
 
             if ($netto != '' and $netto != 'N') {
-              echo t("V‰‰r‰ arvo kent‰ss‰ netto! Sallitut arvot ovat: tyhj‰ tai N").". ".t("Rivill‰").": $rivilask1. $netto<br>";
+              echo t("V√§√§r√§ arvo kent√§ss√§ netto! Sallitut arvot ovat: tyhj√§ tai N").". ".t("Rivill√§").": $rivilask1. $netto<br>";
               $netto = '';
             }
           }
@@ -847,7 +847,7 @@ if ($tee == "file") {
                   $hinta = "";
                 }
 
-                // Ennakkotilaukset, Tarjoukset, Yll‰pitosopimukset ja Valmistukset eiv‰t tee saldotsekki‰
+                // Ennakkotilaukset, Tarjoukset, Yll√§pitosopimukset ja Valmistukset eiv√§t tee saldotsekki√§
                 if ($laskurow["tilaustyyppi"] == "E" or $laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "0" or $laskurow["tila"] == "V") {
                   $varataan_saldoa = "EI";
                 }
@@ -855,13 +855,13 @@ if ($tee == "file") {
                   $varataan_saldoa = "";
                 }
 
-                //lis‰t‰‰n rivi
+                //lis√§t√§√§n rivi
                 if ($kukarow["extranet"] == "" and $tila == "MYYNTITILIRIVI") {
                   $tilatapa = "PAIVITA";
                   require("laskuta_myyntitilirivi.inc");
                 }
                 elseif ($laskurow["tila"] == "V") {
-                  // Valmistuksilla pit‰‰ huomioida rekursiiviset reseptit
+                  // Valmistuksilla pit√§√§ huomioida rekursiiviset reseptit
                   // funktio populoi globaalit muuttujat $tuoteno_array $kpl_array $kommentti_array $lapsenlap_array
                   $tuoteno_array   = array($tuoteno);
                   $kpl_array       = array($tuoteno => $kpl);
@@ -899,7 +899,7 @@ if ($tee == "file") {
                     lisaa_rivi($params);
                   }
 
-                  // N‰m‰ pit‰‰ unsetata, muuten tilaus_myynti lis‰‰ rivit uudestaan
+                  // N√§m√§ pit√§√§ unsetata, muuten tilaus_myynti lis√§√§ rivit uudestaan
                   unset($tuoteno_array, $kpl_array, $kommentti_array, $lapsenlap_array);
                 }
                 else {
@@ -933,12 +933,12 @@ if ($tee == "file") {
                 }
               }
               else {
-                echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei lˆydy")."!</font><br>";
+                echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei l√∂ydy")."!</font><br>";
               }
 
             }
             else {
-              echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei lˆydy")."!</font><br>";
+              echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei l√∂ydy")."!</font><br>";
             }
           }
         }
@@ -1013,7 +1013,7 @@ if ($tee == 'mikrotila') {
       <tr><th colspan='{$colspan}'>".t("Sarkaineroteltu tekstitiedosto tai Excel-tiedosto").".</th></tr>
       <tr>";
 
-  echo "  <td>".t("Tuoteno")."</td><td>".t("M‰‰r‰")."</td>";
+  echo "  <td>".t("Tuoteno")."</td><td>".t("M√§√§r√§")."</td>";
 
   if ($kukarow["extranet"] == "") {
 
@@ -1029,11 +1029,11 @@ if ($tee == 'mikrotila') {
       echo "<td>".t("Var")."</td>";
       echo "<td>".t("Kommentti")."</td>";
       echo "<td>".t('Valmistuslinja')."</td>";
-      echo "<td>".t('Ker‰ysajankohta')." ".t("(vvvv-kk-pp)")."</td>";
+      echo "<td>".t('Ker√§ysajankohta')." ".t("(vvvv-kk-pp)")."</td>";
     }
     else {
       if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO") {
-        echo "<td>".t("Arvioitu toimitusp‰iv‰")." ".t("(vvvv-kk-pp)")."</td>";
+        echo "<td>".t("Arvioitu toimitusp√§iv√§")." ".t("(vvvv-kk-pp)")."</td>";
       }
 
       echo "<td>".t("Hinta")."</td>";
@@ -1073,7 +1073,7 @@ if ($tee == 'mikrotila') {
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>".t('Lue excel useammalta v‰lilehdelt‰')."</th>";
+  echo "<th>".t('Lue excel useammalta v√§lilehdelt√§')."</th>";
   echo "<td>";
   echo "<input type='checkbox' name='lue_useammalta_valilehdelta' />";
   echo "</td>";
@@ -1081,7 +1081,7 @@ if ($tee == 'mikrotila') {
 
   echo "<tr>";
   echo "<td colspan='2' class='back'>";
-  echo "<input type='submit' value='".t("L‰heta")."' />";
+  echo "<input type='submit' value='".t("L√§heta")."' />";
   echo "</td>";
   echo "</tr>";
 

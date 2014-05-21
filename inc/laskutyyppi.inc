@@ -1,35 +1,35 @@
 <?php
-// Katsotaan tyyppi $laskutyyppi kentästä ja annetaan se selväkielisenä takaisin
+// Katsotaan tyyppi $laskutyyppi kentÃ¤stÃ¤ ja annetaan se selvÃ¤kielisenÃ¤ takaisin
 switch ($laskutyyppi) {
   case "H":
-    $laskutyyppi = "Hyväksyttävänä";
+    $laskutyyppi = "HyvÃ¤ksyttÃ¤vÃ¤nÃ¤";
     switch($alatila) {
       case "H":
-        $alatila = "Pysäytetty";
+        $alatila = "PysÃ¤ytetty";
     }
     break;
   case "M":
     $laskutyyppi = "Valmis maksatukseen";
     break;
   case "P":
-    $laskutyyppi = "Lähdössä pankkiin";
+    $laskutyyppi = "LÃ¤hdÃ¶ssÃ¤ pankkiin";
     switch($alatila) {
       case "K":
-        $alatila = "maksettu käteisalennuksella";
+        $alatila = "maksettu kÃ¤teisalennuksella";
     }
     break;
   case "Q":
     $laskutyyppi = "Odottaa suoritusta";
     switch($alatila) {
       case "K":
-        $alatila = "maksettu käteisalennuksella";
+        $alatila = "maksettu kÃ¤teisalennuksella";
     }
     break;
   case "Y":
     $laskutyyppi = "Maksettu";
     switch($alatila) {
       case "K":
-        $alatila = "käteisalennuksella";
+        $alatila = "kÃ¤teisalennuksella";
     }
     break;
   case "K":
@@ -47,7 +47,7 @@ switch ($laskutyyppi) {
     $laskutyyppi = "Muu tosite";
     switch($alatila) {
       case "E":
-        $alatila = "Epäkurantointi";
+        $alatila = "EpÃ¤kurantointi";
         break;
       case "I":
         $alatila = "Inventointi";
@@ -56,10 +56,10 @@ switch ($laskutyyppi) {
         $alatila = "Varastosiirto";
         break;
       case "K":
-        $alatila = "Kassalippaan täsmäytys";
+        $alatila = "Kassalippaan tÃ¤smÃ¤ytys";
         break;
       case "O":
-        $alatila = "Käteisotto";
+        $alatila = "KÃ¤teisotto";
         break;
       case "T":
         $alatila = "Tilikauden tulos";
@@ -73,13 +73,13 @@ switch ($laskutyyppi) {
     $laskutyyppi = "Myyntitilaus";
     switch($alatila) {
       case "A":
-        $alatila = "Keräyslista tulostettu";
+        $alatila = "KerÃ¤yslista tulostettu";
         break;
       case "B":
-        $alatila = "Rahtikirjatiedot syötetty";
+        $alatila = "Rahtikirjatiedot syÃ¶tetty";
         break;
       case "C":
-        $alatila = "Kerätty";
+        $alatila = "KerÃ¤tty";
         break;
       case "D":
         $alatila = "Toimitettu";
@@ -91,7 +91,7 @@ switch ($laskutyyppi) {
         $alatila = "korjaus kesken";
         break;
       case "E":
-        $alatila = "Vientitiedot syötetty";
+        $alatila = "Vientitiedot syÃ¶tetty";
         break;
       case "V":
         $alatila = "Laskutusvalmis";
@@ -114,7 +114,7 @@ switch ($laskutyyppi) {
         $alatila = "Ennakko poiminnassa";
         break;
       case "F":
-        $alatila = "Odottaa hyväksyntää";
+        $alatila = "Odottaa hyvÃ¤ksyntÃ¤Ã¤";
         break;
       case "G":
         $alatila = "Odottaa asiakkaan suoritusta";
@@ -148,32 +148,32 @@ switch ($laskutyyppi) {
         $alatila = "tulostettu";
         break;
       case "C":
-        $alatila = "kerätty";
+        $alatila = "kerÃ¤tty";
         break;
       case "V":
         $alatila = "valmistettu";
         break;
       case "E":
-        $alatila = "ei kerättävää";
+        $alatila = "ei kerÃ¤ttÃ¤vÃ¤Ã¤";
       case "Y":
         $alatila = "rivit valmistuksessa toisella otsikolla";
         break;
     }
     break;
   case "A":
-    $laskutyyppi = "Työmääräys";
+    $laskutyyppi = "TyÃ¶mÃ¤Ã¤rÃ¤ys";
     break;
   case "E":
     $laskutyyppi = "Ennakkotilaus";
     switch($alatila) {
       case "H":
-        $alatila = "hylätty";
+        $alatila = "hylÃ¤tty";
         break;
       case "J":
         $alatila = "";
         break;
       case "A":
-        $alatila = "lepäämässä";
+        $alatila = "lepÃ¤Ã¤mÃ¤ssÃ¤";
         break;
       case "":
         $alatila = "kesken";
@@ -207,13 +207,13 @@ switch ($laskutyyppi) {
         $alatila = "Tulostettu";
         break;
       case "B":
-        $alatila = "Hyväksytty";
+        $alatila = "HyvÃ¤ksytty";
         break;
       case "T":
         $alatila = "Tilaus tehty";
         break;
       case "X":
-        $alatila = "Hylätty";
+        $alatila = "HylÃ¤tty";
         break;
     }
     break;
@@ -230,10 +230,10 @@ switch ($laskutyyppi) {
         $alatila = "tulostettu";
         break;
       case "B":
-        $alatila = "Rahtikirjatiedot syötetty";
+        $alatila = "Rahtikirjatiedot syÃ¶tetty";
         break;
       case "C":
-        $alatila = "kerätty";
+        $alatila = "kerÃ¤tty";
         break;
       case "D":
         $alatila = "toimitettu";
@@ -243,7 +243,7 @@ switch ($laskutyyppi) {
         $alatila = "vastaanotettu";
         break;
       case "E":
-        $alatila = "ei kerättävää";
+        $alatila = "ei kerÃ¤ttÃ¤vÃ¤Ã¤";
         break;
       case "T":
         $alatila = "odottaa JT tuotteita";
@@ -254,7 +254,7 @@ switch ($laskutyyppi) {
     }
     break;
   case "S":
-    $laskutyyppi = "Sisäinen työmääräys";
+    $laskutyyppi = "SisÃ¤inen tyÃ¶mÃ¤Ã¤rÃ¤ys";
     switch($alatila) {
       case "":
         $alatila = "kesken";
@@ -266,13 +266,13 @@ switch ($laskutyyppi) {
         $alatila = "tulostettu";
         break;
       case "C":
-        $alatila = "kerätty";
+        $alatila = "kerÃ¤tty";
         break;
       case "V":
         $alatila = "vastaanotettu";
         break;
       case "E":
-        $alatila = "ei kerättävää";
+        $alatila = "ei kerÃ¤ttÃ¤vÃ¤Ã¤";
         break;
       case "T":
         $alatila = "odottaa JT tuotteita";
@@ -289,10 +289,10 @@ switch ($laskutyyppi) {
     $laskutyyppi = "Myyntilasku";
     switch($alatila) {
       case "X":
-        $alatila = "Lähetetty";
+        $alatila = "LÃ¤hetetty";
         break;
       case "V":
-        $alatila = "Odottaa lähetystä";
+        $alatila = "Odottaa lÃ¤hetystÃ¤";
         break;
     }
     break;
@@ -303,7 +303,7 @@ switch ($laskutyyppi) {
         $alatila = "kesken";
         break;
       case "A":
-        $alatila = "lähetetty/tulostettu";
+        $alatila = "lÃ¤hetetty/tulostettu";
         break;
       case "B":
         $alatila = "";
@@ -317,7 +317,7 @@ switch ($laskutyyppi) {
     }
     break;
   case "D":
-    $laskutyyppi = "Mitätöity";
+    $laskutyyppi = "MitÃ¤tÃ¶ity";
     switch($alatila) {
       case "L":
         $alatila = "Myyntitilaus";
@@ -329,7 +329,7 @@ switch ($laskutyyppi) {
         $alatila = "Valmistus";
         break;
       case "A":
-        $alatila = "Työmääräys";
+        $alatila = "TyÃ¶mÃ¤Ã¤rÃ¤ys";
         break;
       case "E":
         $alatila = "Ennakkotilaus";
@@ -344,7 +344,7 @@ switch ($laskutyyppi) {
         $alatila = "Siirtolista";
         break;
       case "S":
-        $alatila = "Sisäinen työmääräys";
+        $alatila = "SisÃ¤inen tyÃ¶mÃ¤Ã¤rÃ¤ys";
         break;
       case "O":
         $alatila = "Ostotilaus";
@@ -359,7 +359,7 @@ switch ($laskutyyppi) {
         $alatila = "Reklamaatio";
         break;
       case "0":
-        $alatila = "Ylläpitosopimus";
+        $alatila = "YllÃ¤pitosopimus";
         break;
       case "F":
         $alatila = "Tallennettu web-tilaus/tarjous";
@@ -393,12 +393,12 @@ switch ($laskutyyppi) {
         $alatila = "Reklamaatio vastaanotettu";
         break;
       case "C":
-        $alatila = "Reklamaatio hyllytetään";
+        $alatila = "Reklamaatio hyllytetÃ¤Ã¤n";
         break;
     }
     break;
   case "0":
-    $laskutyyppi = "Ylläpitosopimus";
+    $laskutyyppi = "YllÃ¤pitosopimus";
     switch($alatila) {
       case "D":
         $alatila = "poistettu";
@@ -415,13 +415,13 @@ switch ($laskutyyppi) {
     $laskutyyppi = "Tallennettu web-tilaus/tarjous";
     switch($alatila) {
       case "D":
-        $alatila = "hylätty";
+        $alatila = "hylÃ¤tty";
         break;
       case "A":
-        $alatila = "hyväksytty työmääräys";
+        $alatila = "hyvÃ¤ksytty tyÃ¶mÃ¤Ã¤rÃ¤ys";
         break;
       case "X":
-        $alatila = "valmis työmääräys";
+        $alatila = "valmis tyÃ¶mÃ¤Ã¤rÃ¤ys";
         break;
     }
     break;

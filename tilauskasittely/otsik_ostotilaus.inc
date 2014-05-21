@@ -1,8 +1,8 @@
 <?php
 
-//t‰ss‰ joko tehd‰‰n uutta otsikkoa tai muutetaan olemassa olevaa
+//t√§ss√§ joko tehd√§√§n uutta otsikkoa tai muutetaan olemassa olevaa
 if ($tee == '') {
-  //p‰ivitet‰‰n kukarow[kesken] kun k‰ytt‰j‰ tekee uutta tilausta
+  //p√§ivitet√§√§n kukarow[kesken] kun k√§ytt√§j√§ tekee uutta tilausta
   if ($tila == '' and !isset($jatka)) {
     $query = "UPDATE kuka
               SET kesken=0
@@ -14,9 +14,9 @@ if ($tee == '') {
   }
 }
 
-//katsotaan ett‰ kukarow kesken ja $tilausnumero stemmaavat kesken‰‰n
+//katsotaan ett√§ kukarow kesken ja $tilausnumero stemmaavat kesken√§√§n
 if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero!='' or $kukarow["kesken"] != 0) and $aktivoinnista != 'true') {
-  echo "<br><br><br>".t("VIRHE: Tilaus ei ole aktiivisena")."! ".t("K‰y aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";
+  echo "<br><br><br>".t("VIRHE: Tilaus ei ole aktiivisena")."! ".t("K√§y aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";
   exit;
 }
 
@@ -27,27 +27,27 @@ if (!isset($alatila)) $alatila = "";
 if (!isset($ylatila)) $ylatila = "";
 if (!isset($toimittajaid)) $toimittajaid = 0;
 
-///* Etsit‰‰n toimittajaa *///
+///* Etsit√§√§n toimittajaa *///
 if ($nimi == '' and $ytunnus == '' and $tila == '' and !isset($jatka)) {
   $tila = 'Muuta';
 }
 elseif ($nimi != '' and (($tila == '' or $tila == 'vaihdaasiakas') and !isset($jatka))) {
-  //tehd‰‰n asiakas- ja toimittajahaku yhteensopivuus
+  //tehd√§√§n asiakas- ja toimittajahaku yhteensopivuus
   $ytunnus = $nimi;
 
   $lause = "<font class='head'>".t("Valitse toimittaja").":</font><hr><br>";
   require ("../inc/kevyt_toimittajahaku.inc");
 
   if ($ytunnus == '' and $monta > 1) {
-    //Lˆytyi monta sopivaa, n‰ytet‰‰n formi, mutta ei otsikkoa
+    //L√∂ytyi monta sopivaa, n√§ytet√§√§n formi, mutta ei otsikkoa
     $tila = '';
   }
   elseif ($ytunnus == '' and $monta < 1) {
-    //yht‰‰n asiakasta ei lˆytynyt, n‰ytet‰‰n otsikko
+    //yht√§√§n asiakasta ei l√∂ytynyt, n√§ytet√§√§n otsikko
     $tila = 'Muuta';
   }
   else {
-    //oikea asiakas on lˆytynyt
+    //oikea asiakas on l√∂ytynyt
     $tunnus = $toimittajaid;
     $tila = 'Muuta';
   }
@@ -58,7 +58,7 @@ elseif ($ytunnus != '' and (($kukarow['kesken'] == 0 and $tila == '') or $tila =
 }
 
 if (isset($jatka) AND !checkdate($toimkk, $toimpp, $toimvv)) {
-  echo "<font class='error'>".t("VIRHE: Syˆtetty toimitusp‰iv‰ on virheellinen")."!</font><br><br>";
+  echo "<font class='error'>".t("VIRHE: Sy√∂tetty toimitusp√§iv√§ on virheellinen")."!</font><br><br>";
   $tee = "otsik_ostotilaus";
   unset($jatka);
   $tila = "Muuta";
@@ -66,7 +66,7 @@ if (isset($jatka) AND !checkdate($toimkk, $toimpp, $toimvv)) {
 
 if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
   if($toim == "HAAMU") {
-    echo "<font class='head'>".t("Tyˆ/tarvikeoston otsikko").":</font><hr><br>";
+    echo "<font class='head'>".t("Ty√∂/tarvikeoston otsikko").":</font><hr><br>";
   }
   else {
     echo "<font class='head'>".t("Ostotilauksen otsikko").":</font><hr><br>";
@@ -126,7 +126,7 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
     );
   }
 
-  // jos meill‰ on jo alatila ja tila ei muokkailla niit‰!
+  // jos meill√§ on jo alatila ja tila ei muokkailla niit√§!
   if ($alatila == '' and $srow['alatila'] != '') {
     $alatila = $srow['alatila'];
   }
@@ -322,7 +322,7 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
       echo "<tr><td></td><td></td><td>".t("Tilaava toimipiste").":</td>";
       echo "<td valign='middle'>";
       echo "<select name='toimipiste'>";
-      echo "<option value=''>".t("Ei poikkeavaa toimipistett‰")."</option>";
+      echo "<option value=''>".t("Ei poikkeavaa toimipistett√§")."</option>";
 
       while($row = mysql_fetch_array($yresult)) {
         $sel = "";
@@ -354,7 +354,7 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
         $sel = array($srow['tilaustyyppi'] => "selected") + array(1 => '', 2 => '');
 
         echo "<option value='2' {$sel[2]}>",t("Normaalitilaus"),"</option>";
-        echo "<option value='1' {$sel[1]}>",t("Pikal‰hetys"),"</option>";
+        echo "<option value='1' {$sel[1]}>",t("Pikal√§hetys"),"</option>";
       }
 
       echo "</select></td>";
@@ -420,7 +420,7 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
 
     echo "</select></td></tr>";
 
-    echo "<tr><td>".t("Tilausyhteyshenkilˆ").":</td>";
+    echo "<tr><td>".t("Tilausyhteyshenkil√∂").":</td>";
 
     $yhteysquery = "SELECT *
                     FROM yhteyshenkilo
@@ -478,8 +478,8 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
       <input type='text' size='61' name='viesti' value='$srow[viesti]'> (".t("Ostotilaus").")</td>";
     echo "</tr>";
     echo "<tr><td>".t("Viesti").":</td><td colspan='3'><textarea name='sisviesti1' rows='2' cols='60'>$srow[sisviesti1]</textarea> (".t("Ostotilaus").")</td></tr>";
-    echo "<tr><td>".t("Kommentit").":</td><td colspan='3'><textarea name='comments' rows='2' cols='60'>$srow[comments]</textarea> (".t("Sis‰inen").")</td></tr>";
-    echo "<tr><td>".t("Ohjausmerkki").":</td><td colspan='3'><input type='text' size='61' name='ohjausmerkki' value='$srow[ohjausmerkki]'>(".t("S‰hkˆinen ostotilaus").")</td></tr>";
+    echo "<tr><td>".t("Kommentit").":</td><td colspan='3'><textarea name='comments' rows='2' cols='60'>$srow[comments]</textarea> (".t("Sis√§inen").")</td></tr>";
+    echo "<tr><td>".t("Ohjausmerkki").":</td><td colspan='3'><input type='text' size='61' name='ohjausmerkki' value='$srow[ohjausmerkki]'>(".t("S√§hk√∂inen ostotilaus").")</td></tr>";
     echo "</table>";
     echo "<input type='hidden' name='from' value='$from'><br>";
     echo "<br><br>";
@@ -531,7 +531,7 @@ if (isset($jatka)) {
     $postquery = ", vienti_kurssi = '$vrow[kurssi]', laatija = '$kukarow[kuka]', luontiaika=now()";
   }
   else {
-    // Pidet‰‰n huolta tilausrivien toimitusp‰ivist‰ ja kerayspaivasta
+    // Pidet√§√§n huolta tilausrivien toimitusp√§ivist√§ ja kerayspaivasta
     $query = "UPDATE tilausrivi
               SET kerayspvm = '".$kervv."-".$kerkk."-".$kerpp."'
               WHERE otunnus = '$kukarow[kesken]'
@@ -553,9 +553,9 @@ if (isset($jatka)) {
   // katotaan ollaanko valittu tietty varasto johon kamat tilataan
   if ($varasto > 0) {
     $edique  = "SELECT *
-          FROM varastopaikat
-          WHERE yhtio  = '$kukarow[yhtio]'
-          and tunnus   = '$varasto'";
+                FROM varastopaikat
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tunnus  = '$varasto'";
     $vares = mysql_query($edique) or pupe_error($edique);
     $varow = mysql_fetch_array($vares);
 
@@ -578,13 +578,13 @@ if (isset($jatka)) {
   // katotaan ollaanko valittu tilaajaksi joku muu toimipiste
   if ($toimipiste > 0 and strlen(trim($tnimi)) == 0) {
     $edique  = "SELECT *
-          from yhtion_toimipaikat
-          where yhtio  = '$kukarow[yhtio]'
-          and tunnus  = '$toimipiste'";
+                from yhtion_toimipaikat
+                where yhtio = '$kukarow[yhtio]'
+                and tunnus  = '$toimipiste'";
     $ediotr = mysql_query($edique) or pupe_error($edique);
     $edioro = mysql_fetch_array($ediotr);
 
-    // laitetaan toimipisteen tiedot toimitusosoitteeseen jos siell‰ ei viel‰ muuta ole
+    // laitetaan toimipisteen tiedot toimitusosoitteeseen jos siell√§ ei viel√§ muuta ole
     if ($edioro["nimi"] != "" and $edioro["osoite"] != "") {
       $tnimi       = $edioro["nimi"];
       $tnimitark   = $edioro["nimitark"];
@@ -595,7 +595,7 @@ if (isset($jatka)) {
     }
   }
 
-  // varmistellaan, ett‰ meill‰ menee jotain toimitusosoite kentt‰‰n
+  // varmistellaan, ett√§ meill√§ menee jotain toimitusosoite kentt√§√§n
   if (strlen(trim($tnimi)) == 0) {
     $tnimi     = $yhtiorow["nimi"];
     $tnimitark = $yhtiorow["nimitark"];
@@ -667,7 +667,7 @@ if (isset($jatka)) {
 
   // Jos erikoisalennus muuttuu
   if ($laskurow["erikoisale"] != $erikoisale) {
-    // p‰ivitet‰‰n erikoisale tilausriveille
+    // p√§ivitet√§√§n erikoisale tilausriveille
     $erikoisale_query_otunnus = (int) $kukarow['kesken'] != 0 ? $kukarow['kesken'] : $id;
 
     $query_erikoisale = "UPDATE tilausrivi
@@ -692,6 +692,6 @@ if (isset($jatka)) {
     $tilausnumero = $id;
   }
 
-  //menn‰‰n tilaukselle
+  //menn√§√§n tilaukselle
   $tee = "Y";
 }

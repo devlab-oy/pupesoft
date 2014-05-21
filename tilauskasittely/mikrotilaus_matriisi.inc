@@ -3,11 +3,11 @@
 /* FILEFORMAATTI (pupe_ennakkotilaustensyotto.xls):
 Tuoteno
 Nimitys
-Koko/M‰‰r‰ 1
-Koko/M‰‰r‰ 2
-Koko/M‰‰r‰ 3
-Koko/M‰‰r‰ ...
-Koko/M‰‰r‰ N
+Koko/M√§√§r√§ 1
+Koko/M√§√§r√§ 2
+Koko/M√§√§r√§ 3
+Koko/M√§√§r√§ ...
+Koko/M√§√§r√§ N
 */
 
 if ($tee == "file_matriisi") {
@@ -24,7 +24,7 @@ if ($tee == "file_matriisi") {
     }
 
     if ($_FILES['userfile']['size']==0) {
-      die ("<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font>");
+      die ("<font class='error'><br>".t("Tiedosto on tyhj√§")."!</font>");
     }
 
     if (strtoupper($ext) == "XLS") {
@@ -39,10 +39,10 @@ if ($tee == "file_matriisi") {
       $data->read($_FILES['userfile']['tmp_name']);
     }
     else {
-      $file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
+      $file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep√§onnistui")."!");
     }
 
-    // luetaan tiedosto loppuun ja tehd‰‰n array koko datasta
+    // luetaan tiedosto loppuun ja tehd√§√§n array koko datasta
     $excelrivi = array();
 
     if (strtoupper($ext) == "XLS") {
@@ -81,7 +81,7 @@ if ($tee == "file_matriisi") {
         #echo "<td>$excelrivi[$er1][$er2]</td>";
       }
 
-      // T‰m‰ taitaa olla tuoterivi
+      // T√§m√§ taitaa olla tuoterivi
       if (trim($excelrivi[$er1][0]) != "" and trim($excelrivi[$er1][1]) != "") {
 
         $tuokoodi = trim($excelrivi[$er1][0]);
@@ -94,10 +94,10 @@ if ($tee == "file_matriisi") {
           }
         }
 
-        // K‰yd‰‰n l‰pi k‰ytt‰j‰n syˆtt‰m‰t m‰‰r‰t, sarakkeesta "C" eteenp‰in
+        // K√§yd√§√§n l√§pi k√§ytt√§j√§n sy√∂tt√§m√§t m√§√§r√§t, sarakkeesta "C" eteenp√§in
         for ($er4 = 2; $er4 < count($excelrivi[$er1]); $er4++) {
 
-          // M‰‰r‰
+          // M√§√§r√§
           $kpl = (float) str_replace(",", ".", $excelrivi[$er1][$er4]);
 
           if ($kpl != 0) {
@@ -171,7 +171,7 @@ if ($tee == "file_matriisi") {
             }
 
             if (!$tyoteloyty) {
-              echo "<font class='message'>VIRHE: Rivill‰ $rivilask1: ".t("Tuotetta")." $mikrotila_sesonki $tuokoodi $koko ".t("ei lˆydy")."!</font><br>";
+              echo "<font class='message'>VIRHE: Rivill√§ $rivilask1: ".t("Tuotetta")." $mikrotila_sesonki $tuokoodi $koko ".t("ei l√∂ydy")."!</font><br>";
               $ohitus = 1;
             }
 
@@ -194,7 +194,7 @@ if ($tee == "file_matriisi") {
               $perhekielto    = "";
               $jtkielto        = $laskurow['jtkielto'];
 
-                  // Ennakkotilaukset, Tarjoukset, Yll‰pitosopimukset ja Valmistukset eiv‰t tee saldotsekki‰
+                  // Ennakkotilaukset, Tarjoukset, Yll√§pitosopimukset ja Valmistukset eiv√§t tee saldotsekki√§
               if ($laskurow["tilaustyyppi"] == "E" or $laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "0" or $laskurow["tila"] == "V") {
                 $varataan_saldoa = "EI";
               }
@@ -202,7 +202,7 @@ if ($tee == "file_matriisi") {
                 $varataan_saldoa = "";
               }
 
-                  //lis‰t‰‰n rivi
+                  //lis√§t√§√§n rivi
                   require ("lisaarivi.inc");
 
               if ($rivilask1 % 10 == 0) flush();
@@ -261,6 +261,6 @@ if ($tee == 'mikrotila_matriisi') {
       <option value='SS13'>SS13</option>
       <option value='FW13'>FW13</option>
       </select></td></tr>";
-  echo "<tr><td colspan='2' class='back'><input type='submit' value='".t("Lis‰‰ tuotteet")."'></td></tr>";
+  echo "<tr><td colspan='2' class='back'><input type='submit' value='".t("Lis√§√§ tuotteet")."'></td></tr>";
   echo "</table></form>";
 }

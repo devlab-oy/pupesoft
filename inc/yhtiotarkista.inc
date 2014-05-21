@@ -104,7 +104,7 @@ if(!function_exists("yhtiotarkista")) {
       $sresult = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($sresult) != 1) {
-        //Olisiko siell‰ nimi
+        //Olisiko siell√§ nimi
         if ($t[$i] != '') {
           $query = "SELECT nimi, tilino
                     FROM tili
@@ -126,7 +126,7 @@ if(!function_exists("yhtiotarkista")) {
             $virhe[$i] = t("Valitse tili");
           }
         }
-        if ($virhe[$i] == '') $virhe[$i] = t("Tili‰ ei lˆydy");
+        if ($virhe[$i] == '') $virhe[$i] = t("Tili√§ ei l√∂ydy");
       }
     }
 

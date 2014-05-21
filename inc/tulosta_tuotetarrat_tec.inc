@@ -1,27 +1,27 @@
 <?php
-//Kun tullaan t‰nne tarvitaan $komento joka on se komento jolla tulostetaan esim. lpr -P tarrakirjoitin
-//ja tarvitaan myˆs $tuoteno
+//Kun tullaan t√§nne tarvitaan $komento joka on se komento jolla tulostetaan esim. lpr -P tarrakirjoitin
+//ja tarvitaan my√∂s $tuoteno
 $query = "select * from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
 $tarrares = mysql_query($query) or pupe_error($query);
-//tuote pit‰‰ lˆyty‰
+//tuote pit√§√§ l√∂yty√§
 if (mysql_num_rows($tarrares) == 1) {
   $tarrarow = mysql_fetch_array($tarrares);
-  //jos tullaan yksinkertaisesta n‰kym‰st‰ tulostetaan tuoteno eankoodin sijaan
+  //jos tullaan yksinkertaisesta n√§kym√§st√§ tulostetaan tuoteno eankoodin sijaan
   if ($toim== 'YKS') {
     $tarrarow['eankoodi'] = $tarrarow['tuoteno'];
   }
-  //jos eankoodi kentt‰ on tyhj‰ ei viittit‰ edes l‰hte‰ tulostelemaan
+  //jos eankoodi kentt√§ on tyhj√§ ei viittit√§ edes l√§hte√§ tulostelemaan
   if ($tarrarow['eankoodi']!= '0') {
     $eankoodi = trim($tarrarow['eankoodi']);
     $nimitys = $tarrarow['nimitys'];
     $nimitys2 = '';
-    //jos nimitys on pidempi kuin 22 merkki‰ niin se ei mahdu yhdelle riville vaan pit‰‰ jakaa kahtia
+    //jos nimitys on pidempi kuin 22 merkki√§ niin se ei mahdu yhdelle riville vaan pit√§√§ jakaa kahtia
     if (strlen($nimitys) > 22) {
       $nimitys = substr($tarrarow['nimitys'],0,22);
       $nimitys2 = substr($tarrarow['nimitys'],22,22);
     }
     $tuoteno = $tarrarow['tuoteno'];
-    //t‰ss‰ arvataan merkkim‰‰r‰n perusteella mink‰lainen viivakoodi pit‰‰ tehd‰
+    //t√§ss√§ arvataan merkkim√§√§r√§n perusteella mink√§lainen viivakoodi pit√§√§ tehd√§
     $countti = strlen($eankoodi);
     if ($countti== 13) {
       $laji = 'EAN13';
@@ -34,7 +34,7 @@ if (mysql_num_rows($tarrares) == 1) {
     }
 
     $tulos = false;
-    //t‰ss‰ lasketaan koodin virallisuus
+    //t√§ss√§ lasketaan koodin virallisuus
     if (is_numeric($eankoodi) and $eankoodi >= 0) // vaan positiivinen numeerinen tietue
     {
       $pit  = strlen($eankoodi);
@@ -78,19 +78,19 @@ if (mysql_num_rows($tarrares) == 1) {
       $koodi = '9,4';
       //echo "ei ole MIKAAN $laji<br>";
     }
-    //tarvittaessa tehd‰‰n toinen nimitysrivi
+    //tarvittaessa tehd√§√§n toinen nimitysrivi
     $nimity2sots = '';
     $nimity2sriv = '';
     if ($nimitys2 != '') {
       $nimity2sots = '{PC002;0040,0130,10,10,G,00,B|}';
       $nimity2sriv = '{RC002;'.$nimitys2.'|}';
     }
-    //jos tuoteno on yli 14 merkki‰ piennenet‰‰n fonttia
+    //jos tuoteno on yli 14 merkki√§ piennenet√§√§n fonttia
     $tuotekoko = '15,15';
     if (strlen($tuoteno) > 14) {
       $tuotekoko = '10,10';
     }
-    //t‰ss‰ tehd‰‰n aineisto jota TEC tulostin tajuaa
+    //t√§ss√§ tehd√§√§n aineisto jota TEC tulostin tajuaa
     $sivu = "
 *** ETIKETIN KOKO ***
 {D0300,0500,0300|}
@@ -98,7 +98,7 @@ if (mysql_num_rows($tarrares) == 1) {
 {AY;+05,0|}
 {C|}
 
-*** TƒSTƒ SE ALKAA ***
+*** T√ÑST√Ñ SE ALKAA ***
 {PC000;0040,0050,$tuotekoko,G,00,B|}
 {RC000;$tuoteno|}
 {PC001;0040,0090,10,10,G,00,B|}
@@ -114,18 +114,18 @@ $nimity2sriv
 {XS;I,0001,0002C3210|}
 
 ".chr(12);
-    //konvertoidaan ‰‰kkˆset printterin ymm‰rt‰m‰‰n muotoon
-    $from = array ('‰','Â','ˆ','ƒ','≈','÷');
+    //konvertoidaan √§√§kk√∂set printterin ymm√§rt√§m√§√§n muotoon
+    $from = array ('√§','√•','√∂','√Ñ','√Ö','√ñ');
     $to   = array (chr(132),chr(134),chr(148),chr(142),chr(143),chr(153)); // DOS charset
-    $sivu = str_replace($from, $to, $sivu);                      // Tehd‰‰n k‰‰nnˆs
+    $sivu = str_replace($from, $to, $sivu);                      // Tehd√§√§n k√§√§nn√∂s
 
     $sivu = escapeshellarg($sivu);
     $line = exec(" echo \"$sivu\" | $komento");
   }
   else {
-    echo "<font class='error'>".t("Tuotteella")." $tuoteno ".t("ei ole viivakoodia j‰rjestelm‰ss‰ joten tarrojen tulostus taitaa olla turhaa")."!!!<br></font>";
+    echo "<font class='error'>".t("Tuotteella")." $tuoteno ".t("ei ole viivakoodia j√§rjestelm√§ss√§ joten tarrojen tulostus taitaa olla turhaa")."!!!<br></font>";
   }
 }
 else {
-  echo "<font class='error'>".t("Tuotetta")." $tuoteno ".t("ei lˆydy j‰rjestelm‰st‰")."!!!<br></font>";
+  echo "<font class='error'>".t("Tuotetta")." $tuoteno ".t("ei l√∂ydy j√§rjestelm√§st√§")."!!!<br></font>";
 }

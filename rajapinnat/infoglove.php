@@ -1,15 +1,15 @@
 <?php
 
-//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+//* TÃ¤mÃ¤ skripti kÃ¤yttÃ¤Ã¤ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-// Kutsutaanko CLI:stä
+// Kutsutaanko CLI:stÃ¤
 if (php_sapi_name() != 'cli') {
-  die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+  die ("TÃ¤tÃ¤ scriptiÃ¤ voi ajaa vain komentoriviltÃ¤!");
 }
 
 if (!isset($argv[1]) or $argv[1] == '') {
-  die("Yhtiö on annettava!!");
+  die("YhtiÃ¶ on annettava!!");
 }
 
 $kukarow['yhtio'] = $argv[1];
@@ -162,11 +162,11 @@ foreach ($keissit as $keissi) {
                  ORDER BY lasku.tunnus, tilausrivi.tunnus";
       break;
     default :
-      die("$keissi luonti epäonnistui!");
+      die("$keissi luonti epÃ¤onnistui!");
   }
 
   $filenimi = "/tmp/infoglove/$keissi.txt";
-  if (!$handle = fopen($filenimi, "w")) die("Filen $filenimi luonti epäonnistui!");
+  if (!$handle = fopen($filenimi, "w")) die("Filen $filenimi luonti epÃ¤onnistui!");
 
   $result = mysql_query($query) or pupe_error($query);
 
@@ -179,7 +179,7 @@ foreach ($keissit as $keissi) {
 
     $ulos .="\n";
 
-    if (fwrite($handle, $ulos) === FALSE) die ("failin kirjoitus epäonnistui");
+    if (fwrite($handle, $ulos) === FALSE) die ("failin kirjoitus epÃ¤onnistui");
   }
 
   fclose($handle);
@@ -190,12 +190,12 @@ foreach ($keissit as $keissi) {
 $cmd = "cd /tmp/infoglove/;/usr/bin/zip ".$kukarow['yhtio']."-infoglove.zip *";
 $palautus = exec($cmd);
 
-// sit pitäis siirtää ssh:lla jonnekki
+// sit pitÃ¤is siirtÃ¤Ã¤ ssh:lla jonnekki
 // tarvitaan $infoglove_host $infoglove_user
 $cmd = "cd /tmp/infoglove/;scp -i /home/$infoglove_user/.ssh/id_dsa ".$kukarow['yhtio']."-infoglove.zip ".$infoglove_user."@".$infoglove_host.":.";
 $palautus = exec($cmd);
 //echo "$cmd\n";
 
-//sit pitää dellata koko dirikka
+//sit pitÃ¤Ã¤ dellata koko dirikka
 $cmd = "cd /tmp/;rm -rf infoglove/";
 $palautus = exec($cmd);

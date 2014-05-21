@@ -1,9 +1,9 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-// Ei k‰ytet‰ pakkausta
+// Ei k√§ytet√§ pakkausta
 $compression = FALSE;
 
 if (isset($_REQUEST["tee"])) {
@@ -19,7 +19,7 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
 }
 else {
 
-  echo "<font class='head'>".t("Ep‰kuranttiehdotus")."</font><hr>";
+  echo "<font class='head'>".t("Ep√§kuranttiehdotus")."</font><hr>";
 
   // nollataan muuttujat
   $epakuranttipvm = "";
@@ -48,19 +48,19 @@ else {
   if (!isset($taysraja)) $taysraja = date("Y-m-d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
   if (!isset($raja))     $raja = "0.5";
 
-  // errorcheckej‰
+  // errorcheckej√§
   if (!checkdate(substr($alkupvm,5,2), substr($alkupvm,8,2), substr($alkupvm,0,4))) {
-    echo "<font class='error'>".t("Virheellinen p‰iv‰m‰‰r‰")." $alkupvm!</font><br><br>";
+    echo "<font class='error'>".t("Virheellinen p√§iv√§m√§√§r√§")." $alkupvm!</font><br><br>";
     unset($subnappi);
   }
 
   if (!checkdate(substr($loppupvm,5,2), substr($loppupvm,8,2), substr($loppupvm,0,4))) {
-    echo "<font class='error'>".t("Virheellinen p‰iv‰m‰‰r‰")." $loppupvm!</font><br><br>";
+    echo "<font class='error'>".t("Virheellinen p√§iv√§m√§√§r√§")." $loppupvm!</font><br><br>";
     unset($subnappi);
   }
 
   if (!checkdate(substr($taysraja,5,2), substr($taysraja,8,2), substr($taysraja,0,4))) {
-    echo "<font class='error'>".t("Virheellinen p‰iv‰m‰‰r‰")." $taysraja!</font><br><br>";
+    echo "<font class='error'>".t("Virheellinen p√§iv√§m√§√§r√§")." $taysraja!</font><br><br>";
     unset($subnappi);
   }
 
@@ -84,10 +84,10 @@ else {
   echo "<th>".t("Valitse ehdotus").":</th>";
   echo "<td>";
   echo "<select name='tyyppi'>";
-  echo "<option $chk1 value='25'>25% ".t("ep‰kuranttiehdotus")."</option>";
-  echo "<option $chk2 value='puoli'>".t("Puoliep‰kuranttiehdotus")."</option>";
-  echo "<option $chk3 value='75'>75% ".t("ep‰kuranttiehdotus")."</option>";
-  echo "<option $chk4 value='taysi'>".t("T‰ysep‰kuranttiehdotus")."</option>";
+  echo "<option $chk1 value='25'>25% ".t("ep√§kuranttiehdotus")."</option>";
+  echo "<option $chk2 value='puoli'>".t("Puoliep√§kuranttiehdotus")."</option>";
+  echo "<option $chk3 value='75'>75% ".t("ep√§kuranttiehdotus")."</option>";
+  echo "<option $chk4 value='taysi'>".t("T√§ysep√§kuranttiehdotus")."</option>";
   echo "</select>";
   echo "</td>";
   echo "</tr>";
@@ -96,32 +96,32 @@ else {
   echo "<th>".t("Tuoterajaus").":</th>";
   echo "<td>";
   echo "<select name='tuotetyyppi'>";
-  echo "<option value=''>".t("N‰yt‰ kaikki tuotteet")."</option>";
-  echo "<option $tchk1 value='25'>".t("N‰yt‰ vain 25% ep‰kurantit")."</option>";
-  echo "<option $tchk2 value='puoli'>".t("N‰yt‰ vain puoliep‰kurantit")."</option>";
-  echo "<option $tchk3 value='75'>".t("N‰yt‰ vain 75% ep‰kurantit")."</option>";
-  echo "<option $tchk4 value='taysi'>".t("N‰yt‰ vain t‰ysep‰kurantit")."</option>";
+  echo "<option value=''>".t("N√§yt√§ kaikki tuotteet")."</option>";
+  echo "<option $tchk1 value='25'>".t("N√§yt√§ vain 25% ep√§kurantit")."</option>";
+  echo "<option $tchk2 value='puoli'>".t("N√§yt√§ vain puoliep√§kurantit")."</option>";
+  echo "<option $tchk3 value='75'>".t("N√§yt√§ vain 75% ep√§kurantit")."</option>";
+  echo "<option $tchk4 value='taysi'>".t("N√§yt√§ vain t√§ysep√§kurantit")."</option>";
   echo "</select>";
   echo "</td>";
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>".t("Valitse alku- ja loppup‰iv‰").":</th>";
+  echo "<th>".t("Valitse alku- ja loppup√§iv√§").":</th>";
   echo "<td><input type='text' name='alkupvm'  value='$alkupvm'> - <input type='text' name='loppupvm' value='$loppupvm'></td>";
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>".t("Anna ep‰kuranttiusraja (kierto)").":</th>";
+  echo "<th>".t("Anna ep√§kuranttiusraja (kierto)").":</th>";
   echo "<td><input type='text' name='raja' value='$raja'></td>";
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>".t("Anna ep‰kuranttitason alaraja pvm").":</th>";
-  echo "<td><input type='text' name='taysraja' value='$taysraja'><br>".t("Tuote on pit‰nyt laittaa edelliselle ep‰kuranttiustasolle ennen t‰t‰ p‰iv‰‰, jotta ehdotetaan seuraavaan ep‰kuranttitasoon")."<br>".t("Rajaus ei koske 25% ep‰kuranttiehdotusta")."</td>";
+  echo "<th>".t("Anna ep√§kuranttitason alaraja pvm").":</th>";
+  echo "<td><input type='text' name='taysraja' value='$taysraja'><br>".t("Tuote on pit√§nyt laittaa edelliselle ep√§kuranttiustasolle ennen t√§t√§ p√§iv√§√§, jotta ehdotetaan seuraavaan ep√§kuranttitasoon")."<br>".t("Rajaus ei koske 25% ep√§kuranttiehdotusta")."</td>";
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>".t("Anna osasto ja/tai tuoteryhm‰").":</th>";
+  echo "<th>".t("Anna osasto ja/tai tuoteryhm√§").":</th>";
   echo "<td nowrap>";
 
   $monivalintalaatikot = array("OSASTO", "TRY");
@@ -152,7 +152,7 @@ else {
       }
 
       if (count($mul_try) > 0) {
-        $msg .= " ".t("Tuoteryhm‰").": ";
+        $msg .= " ".t("Tuoteryhm√§").": ";
 
         foreach ($mul_try as $try) {
           $msg .= "$try, ";
@@ -163,27 +163,27 @@ else {
     }
 
     if ($tyyppi == '25') {
-      // 25ep‰kurantteja etsitt‰ess‰ tuote ei saa olla puoli eik‰ t‰ysiep‰kurantti
+      // 25ep√§kurantteja etsitt√§ess√§ tuote ei saa olla puoli eik√§ t√§ysiep√§kurantti
       $epakuranttipvm = "and epakurantti25pvm='0000-00-00' and epakurantti50pvm='0000-00-00' and epakurantti75pvm='0000-00-00' and epakurantti100pvm='0000-00-00'";
-      echo "<font class='message'>".t("25% ep‰kuranttiehdotus, myydyt kappaleet")." $alkupvm - $loppupvm, ".t("kiertoraja")." $raja$msg. ".t("Viimeinen saapuminen ennen")." $alkupvm.</font><br><br>";
+      echo "<font class='message'>".t("25% ep√§kuranttiehdotus, myydyt kappaleet")." $alkupvm - $loppupvm, ".t("kiertoraja")." $raja$msg. ".t("Viimeinen saapuminen ennen")." $alkupvm.</font><br><br>";
     }
 
     if ($tyyppi == 'puoli') {
-      // puoliep‰kurantteja etsitt‰ess‰ tuote ei saa olla puoli eik‰ t‰ysiep‰kurantti
+      // puoliep√§kurantteja etsitt√§ess√§ tuote ei saa olla puoli eik√§ t√§ysiep√§kurantti
       $epakuranttipvm = "and epakurantti50pvm='0000-00-00' and epakurantti75pvm='0000-00-00' and epakurantti100pvm='0000-00-00'";
-      echo "<font class='message'>".t("Puoliep‰kuranttiehdotus, myydyt kappaleet")." $alkupvm - $loppupvm, ".t("kiertoraja")." $raja$msg. ".t("Viimeinen saapuminen ennen")." $alkupvm.</font><br><br>";
+      echo "<font class='message'>".t("Puoliep√§kuranttiehdotus, myydyt kappaleet")." $alkupvm - $loppupvm, ".t("kiertoraja")." $raja$msg. ".t("Viimeinen saapuminen ennen")." $alkupvm.</font><br><br>";
     }
 
     if ($tyyppi == '75') {
-      // 75ep‰kurantteja etsitt‰ess‰ tuote ei saa olla puoli eik‰ t‰ysiep‰kurantti
+      // 75ep√§kurantteja etsitt√§ess√§ tuote ei saa olla puoli eik√§ t√§ysiep√§kurantti
       $epakuranttipvm = "and epakurantti75pvm='0000-00-00' and epakurantti100pvm='0000-00-00'";
-      echo "<font class='message'>".t("75% ep‰kuranttiehdotus, myydyt kappaleet")." $alkupvm - $loppupvm, ".t("kiertoraja")." $raja$msg. ".t("Viimeinen saapuminen ennen")." $alkupvm.</font><br><br>";
+      echo "<font class='message'>".t("75% ep√§kuranttiehdotus, myydyt kappaleet")." $alkupvm - $loppupvm, ".t("kiertoraja")." $raja$msg. ".t("Viimeinen saapuminen ennen")." $alkupvm.</font><br><br>";
     }
 
     if ($tyyppi == 'taysi') {
-      // t‰ysiep‰kurantteja etsitt‰ess‰ tuotteen pit‰‰ olla puoliep‰kurantti mutta ei t‰ysep‰kurantti
+      // t√§ysiep√§kurantteja etsitt√§ess√§ tuotteen pit√§√§ olla puoliep√§kurantti mutta ei t√§ysep√§kurantti
       $epakuranttipvm = "and epakurantti100pvm='0000-00-00'";
-      echo "<font class='message'>".t("T‰ysiep‰kuranttiehdotus, myydyt kappaleet")." $alkupvm - $loppupvm, ".t("kiertoraja")." $raja$msg. ".t("Viimeinen saapuminen ennen")." $alkupvm.</font><br><br>";
+      echo "<font class='message'>".t("T√§ysiep√§kuranttiehdotus, myydyt kappaleet")." $alkupvm - $loppupvm, ".t("kiertoraja")." $raja$msg. ".t("Viimeinen saapuminen ennen")." $alkupvm.</font><br><br>";
     }
 
     if ($tuotetyyppi == "25") {
@@ -202,7 +202,7 @@ else {
       $tuote_epa_rajaus = "and epakurantti25pvm != '0000-00-00' and epakurantti50pvm != '0000-00-00' and epakurantti75pvm != '0000-00-00' and epakurantti100pvm != '0000-00-00'";
     }
 
-    // etsit‰‰n saldolliset tuotteet
+    // etsit√§√§n saldolliset tuotteet
     $query  = "SELECT tuote.tuoteno,
                tuote.osasto,
                tuote.try,
@@ -234,7 +234,7 @@ else {
                ORDER BY tuote.tuoteno";
     $result = mysql_query($query) or pupe_error($query);
 
-    echo "<br><font class='message'>".t("Lˆytyi")." ".mysql_num_rows($result)." ".t("sopivaa tuotetta. Lasketaan ehdotus.")."</font><br>";
+    echo "<br><font class='message'>".t("L√∂ytyi")." ".mysql_num_rows($result)." ".t("sopivaa tuotetta. Lasketaan ehdotus.")."</font><br>";
 
     flush();
 
@@ -255,9 +255,9 @@ else {
     $excelsarake++;
     $worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("tuotemerkki")), $format_bold);
     $excelsarake++;
-    $worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("m‰‰r‰")), $format_bold);
+    $worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("m√§√§r√§")), $format_bold);
     $excelsarake++;
-    $worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("myyt‰viss‰")), $format_bold);
+    $worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("myyt√§viss√§")), $format_bold);
     $excelsarake++;
     $worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("kierto")), $format_bold);
     $excelsarake++;
@@ -324,7 +324,7 @@ else {
     }
 
     list($vv2,$kk2,$pp2) = explode("-", $alkupvm);  // $alaraja (myyntirajauksen alku pvm)
-    list($vv4,$kk4,$pp4) = explode("-", $taysraja);  // $epa2raja (pvm jolloin tuote on laitettu edelliselle ep‰kurtasolle)
+    list($vv4,$kk4,$pp4) = explode("-", $taysraja);  // $epa2raja (pvm jolloin tuote on laitettu edelliselle ep√§kurtasolle)
 
     $alaraja  = (int) date('Ymd',mktime(0,0,0,$kk2,$pp2,$vv2));
     $epa2raja = (int) date('Ymd',mktime(0,0,0,$kk4,$pp4,$vv4));
@@ -345,10 +345,10 @@ else {
         $epispvm = $row["epakurantti25pvm"];
       }
 
-      // jos meill‰ on tuotteen vihapvm k‰ytet‰‰n sit‰, muuten eka from 70s...
+      // jos meill√§ on tuotteen vihapvm k√§ytet√§√§n sit√§, muuten eka from 70s...
       if ($row["vihapvm"] == "0000-00-00") $row["vihapvm"] = '1970-01-01';
 
-      // haetaan eka ja vika saapumisp‰iv‰
+      // haetaan eka ja vika saapumisp√§iv√§
       $query  = "SELECT
                  date_format(ifnull(min(laadittu),'1970-01-01'),'%Y-%m-%d') min,
                  date_format(ifnull(max(laadittu),'1970-01-01'),'%Y-%m-%d') max
@@ -360,15 +360,15 @@ else {
       $tapres = mysql_query($query) or pupe_error($query);
       $taprow = mysql_fetch_assoc($tapres);
 
-      // verrataan v‰h‰n p‰iv‰m‰‰ri‰. onpa ik‰v‰‰ PHP:ss‰!
+      // verrataan v√§h√§n p√§iv√§m√§√§ri√§. onpa ik√§v√§√§ PHP:ss√§!
       list($vv1,$kk1,$pp1) = explode("-", $taprow["max"]);  // $saapunut (viimeisen tulon pvm)
       $saapunut = (int) date('Ymd',mktime(0,0,0,$kk1,$pp1,$vv1));
 
-      list($vv3,$kk3,$pp3) = explode("-", $epispvm);      // $epaku1pv (viimeisin ep‰kurantti pvm)
+      list($vv3,$kk3,$pp3) = explode("-", $epispvm);      // $epaku1pv (viimeisin ep√§kurantti pvm)
       $epaku1pv = (int) date('Ymd',mktime(0,0,0,$kk3,$pp3,$vv3));
 
-      // Jos tuotetta on tullut myyntirajauksen aikana, ei ehdota sit‰ ep‰kurantiksi.
-      // Lis‰ksi jos kyseess‰ on joku muu kuin 25% ep‰kuranttiajo, pit‰‰ viimeisin ep‰kuranttipvm olla pienempi kuin t‰ysep‰kuranttisuuden alaraja pvm
+      // Jos tuotetta on tullut myyntirajauksen aikana, ei ehdota sit√§ ep√§kurantiksi.
+      // Lis√§ksi jos kyseess√§ on joku muu kuin 25% ep√§kuranttiajo, pit√§√§ viimeisin ep√§kuranttipvm olla pienempi kuin t√§ysep√§kuranttisuuden alaraja pvm
        if (($saapunut < $alaraja) and ($epaku1pv < $epa2raja or $tyyppi == '25')) {
 
         $query = "SELECT group_concat(distinct toimi.ytunnus separator '/') toimittaja
@@ -411,7 +411,7 @@ else {
         $ennres = mysql_query($query) or pupe_error($query);
         $ennrow = mysql_fetch_assoc($ennres);
 
-        // lasketaan saldo (myyt‰viss‰)
+        // lasketaan saldo (myyt√§viss√§)
         $saldo = $row["saldo"] - $ennrow["ennpois"];
 
         // lasketaan varaston kiertonopeus
@@ -508,7 +508,7 @@ else {
           $excelsarake = 0;
           $excelrivi++;
 
-          // N‰ytet‰‰n varastossa olevat er‰t/sarjanumerot
+          // N√§ytet√§√§n varastossa olevat er√§t/sarjanumerot
           if ($row["sarjanumeroseuranta"] == "V" or $row['sarjanumeroseuranta'] == 'T') {
 
             $query  = "SELECT sarjanumeroseuranta.*, sarjanumeroseuranta.tunnus sarjatunnus,

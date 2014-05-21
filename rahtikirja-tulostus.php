@@ -49,8 +49,8 @@ if ($tee == 'tulosta') {
   $toitares = pupe_query($query);
   $toitarow = mysql_fetch_assoc($toitares);
 
-  // Ollaan t‰ss‰ skriptiss‰ tulostamassa er‰rahtikirjoja
-  // Unifaun keississ‰ t‰m‰ tarkoittaa, ett‰ kutsutaan _closeWithPrinter() metodia
+  // Ollaan t√§ss√§ skriptiss√§ tulostamassa er√§rahtikirjoja
+  // Unifaun keississ√§ t√§m√§ tarkoittaa, ett√§ kutsutaan _closeWithPrinter() metodia
   if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and isset($tulosta_rahtikirjat_nappulatsukka) and ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {
     $tee = "close_with_printer";
   }
@@ -186,18 +186,18 @@ if ($tee == 'tulosta' or $tee == 'close_with_printer') {
     $dgdkomento = "";
   }
 
-  if ($kirjoitin == '') die (t("Valitsemallesi varastolle ole ole m‰‰ritelty tarvittavaa rahtikirja-tulostinta")." ($mika)!");
+  if ($kirjoitin == '') die (t("Valitsemallesi varastolle ole ole m√§√§ritelty tarvittavaa rahtikirja-tulostinta")." ($mika)!");
 
   if (!isset($nayta_pdf)) echo "<font class='message'>".t("Tulostetaan rahtikirjat toimitustavalle").": $toimitustapa<br>".t("Kirjoitin").": $print[kirjoitin]</font><hr>";
 
   if (isset($vain_tulostus) and $vain_tulostus != '') $vain_tulostus = $print['kirjoitin'];
 
   if ($jv == 'vainjv') {
-    if (!isset($nayta_pdf)) echo t("Vain j‰lkivaatimukset").".";
+    if (!isset($nayta_pdf)) echo t("Vain j√§lkivaatimukset").".";
     $jvehto = " having jv!='' ";
   }
   elseif ($jv == 'eivj') {
-    if (!isset($nayta_pdf)) echo t("Ei j‰lkivaatimuksia").".";
+    if (!isset($nayta_pdf)) echo t("Ei j√§lkivaatimuksia").".";
     $jvehto = " having jv='' ";
   }
   elseif ($jv == 'vainvak') {
@@ -220,13 +220,13 @@ if ($tee == 'tulosta' or $tee == 'close_with_printer') {
 if ($tee == 'close_with_printer') {
 
   if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
-    $query = "  LOCK TABLES
-          asiakas READ,
-          lasku WRITE,
-          maksuehto READ,
-          rahtikirjat WRITE,
-          rahtisopimukset READ,
-          tilausrivi WRITE";
+    $query = "LOCK TABLES
+              asiakas READ,
+              lasku WRITE,
+              maksuehto READ,
+              rahtikirjat WRITE,
+              rahtisopimukset READ,
+              tilausrivi WRITE";
     $res = pupe_query($query);
   }
 
@@ -254,7 +254,7 @@ if ($tee == 'close_with_printer') {
 
     echo t("Suljetaan rahtikirja").": $row[tunnus] $row[toim_osoite] $row[toim_postino] $row[toim_postitp]<br>";
 
-    // merkataan tilausrivit toimitetuiksi, paitsi kun tulostetaan Unifaun er‰tulostuksen kollitarra
+    // merkataan tilausrivit toimitetuiksi, paitsi kun tulostetaan Unifaun er√§tulostuksen kollitarra
     if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
       $query = "UPDATE tilausrivi
                 SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
@@ -285,7 +285,7 @@ if ($tee == 'close_with_printer') {
       $query = "UPDATE lasku set alatila = 'J' where tunnus = '{$row['tunnus']}' and jaksotettu != 0 and yhtio='$kukarow[yhtio]'";
       $ures  = pupe_query($query);
 
-      // verkkolaskutettavat EU-viennit menee alatilaan D, jos niill‰ on tarpeeksi lis‰tietoja
+      // verkkolaskutettavat EU-viennit menee alatilaan D, jos niill√§ on tarpeeksi lis√§tietoja
       $query = "UPDATE lasku set
                 alatila                      = 'D',
                 bruttopaino                  = '{$row['kilot']}'
@@ -298,7 +298,7 @@ if ($tee == 'close_with_printer') {
                 and kuljetusmuoto           != ''";
       $ures  = pupe_query($query);
 
-      // Etuk‰teen maksetut tilaukset pit‰‰ muuttaa takaisin "maksettu"-tilaan
+      // Etuk√§teen maksetut tilaukset pit√§√§ muuttaa takaisin "maksettu"-tilaan
       $query = "UPDATE lasku SET
                 alatila      = 'X'
                 WHERE yhtio  = '$kukarow[yhtio]'
@@ -347,13 +347,13 @@ if ($tee == 'close_with_printer') {
 if ($tee == 'tulosta') {
 
   if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
-    $query = "  LOCK TABLES
-          asiakas READ,
-          lasku WRITE,
-          maksuehto READ,
-          rahtikirjat WRITE,
-          rahtisopimukset READ,
-          tilausrivi WRITE";
+    $query = "LOCK TABLES
+              asiakas READ,
+              lasku WRITE,
+              maksuehto READ,
+              rahtikirjat WRITE,
+              rahtisopimukset READ,
+              tilausrivi WRITE";
     $res = pupe_query($query);
   }
 
@@ -376,7 +376,7 @@ if ($tee == 'tulosta') {
         LEFT JOIN rahtisopimukset on lasku.ytunnus = rahtisopimukset.ytunnus and rahtikirjat.toimitustapa = rahtisopimukset.toimitustapa and rahtikirjat.rahtisopimus = rahtisopimukset.rahtisopimus
         WHERE rahtikirjat.yhtio  = '$kukarow[yhtio]' ";
 
-  // Jos ker‰yser‰t ja l‰hdˆt on p‰‰ll‰, niin Unifaun 'hetitulostus' tilaukset merkataan t‰ss‰ toimitetuiksi ja siksi n‰in
+  // Jos ker√§yser√§t ja l√§hd√∂t on p√§√§ll√§, niin Unifaun 'hetitulostus' tilaukset merkataan t√§ss√§ toimitetuiksi ja siksi n√§in
   if (isset($lahetetaanko_unifaun_heti) and $lahetetaanko_unifaun_heti !== FALSE) {
     $query .= " and rahtikirjat.tulostettu  != '0000-00-00 00:00:00' ";
   }
@@ -397,7 +397,7 @@ if ($tee == 'tulosta') {
       $res   = pupe_query($query);
     }
 
-    if (!isset($nayta_pdf)) echo "<font class='message'>".t("Yht‰‰n tulostettavaa rahtikirjaa ei lˆytynyt").".</font><br><br>";
+    if (!isset($nayta_pdf)) echo "<font class='message'>".t("Yht√§√§n tulostettavaa rahtikirjaa ei l√∂ytynyt").".</font><br><br>";
   }
   else {
 
@@ -407,13 +407,13 @@ if ($tee == 'tulosta') {
     // Haetaan tulostettavat rahtikirjat
     while ($mysql_rakir_row = mysql_fetch_assoc($rakir_res)) {
 
-      // Katsotaan onko t‰m‰ koontikuljetus
+      // Katsotaan onko t√§m√§ koontikuljetus
       if ($toitarow["tulostustapa"] == "L" or $toitarow["tulostustapa"] == "K") {
         // Monen asiakkaan rahtikirjat tulostuu aina samalle paperille
         $asiakaslisa = " ";
       }
       else {
-        // Normaalissa keississ‰ ainoastaan saman toimitusasiakkaan kirjat menee samalle paperille
+        // Normaalissa keississ√§ ainoastaan saman toimitusasiakkaan kirjat menee samalle paperille
         $asiakaslisa = "and lasku.ytunnus      = '$mysql_rakir_row[ytunnus]'
                 and lasku.toim_maa      = '$mysql_rakir_row[toim_maa]'
                 and lasku.toim_nimi      = '$mysql_rakir_row[toim_nimi]'
@@ -431,7 +431,7 @@ if ($tee == 'tulosta') {
         $jvehto = " having jv='' ";
       }
 
-      // haetaan t‰lle rahtikirjalle kuuluvat tunnukset
+      // haetaan t√§lle rahtikirjalle kuuluvat tunnukset
       $query = "SELECT rahtikirjat.rahtikirjanro, rahtikirjat.tunnus rtunnus, lasku.tunnus otunnus, merahti, lasku.ytunnus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.asiakkaan_tilausnumero
                 FROM rahtikirjat
                 JOIN lasku USE INDEX (PRIMARY) on (lasku.tunnus=rahtikirjat.otsikkonro and lasku.yhtio=rahtikirjat.yhtio and lasku.tila in ('L','G') ";
@@ -444,16 +444,16 @@ if ($tee == 'tulosta') {
             LEFT JOIN maksuehto on lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
             WHERE rahtikirjat.yhtio      = '$kukarow[yhtio]' ";
 
-      // Jos ker‰yser‰t ja l‰hdˆt on p‰‰ll‰, niin Unifaun 'hetitulostus' tilaukset merkataan t‰ss‰ toimitetuiksi ja siksi n‰in
+      // Jos ker√§yser√§t ja l√§hd√∂t on p√§√§ll√§, niin Unifaun 'hetitulostus' tilaukset merkataan t√§ss√§ toimitetuiksi ja siksi n√§in
       if (isset($lahetetaanko_unifaun_heti) and $lahetetaanko_unifaun_heti !== FALSE) {
         $query .= " and rahtikirjat.tulostettu  != '0000-00-00 00:00:00' ";
       }
       elseif (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
-        // Normaalisti t‰m‰ ehto est‰‰ sen, ett‰ koontirahtikirjasta ei tuu yht‰ monta kopiota kuin tilausten m‰‰r‰ koontirahtikirjalla.
+        // Normaalisti t√§m√§ ehto est√§√§ sen, ett√§ koontirahtikirjasta ei tuu yht√§ monta kopiota kuin tilausten m√§√§r√§ koontirahtikirjalla.
         $query .= " and rahtikirjat.tulostettu  = '0000-00-00 00:00:00' ";
       }
       else {
-        // Kopiotulostuksessa joudumme tekee sen n‰in
+        // Kopiotulostuksessa joudumme tekee sen n√§in
         if (count($kopiotulostuksen_otsikot) > 0) {
           $query .= " and lasku.tunnus not in (".implode(",", $kopiotulostuksen_otsikot).") ";
         }
@@ -470,7 +470,7 @@ if ($tee == 'tulosta') {
 
       if (mysql_num_rows($res) > 0) {
 
-        // Laitetaan t‰m‰ mukaan arrayseen
+        // Laitetaan t√§m√§ mukaan arrayseen
         $mysql_rakir_row["tunnukset_res"] = $res;
 
         while ($rivi = mysql_fetch_assoc($res)) {
@@ -478,7 +478,7 @@ if ($tee == 'tulosta') {
           $kopiotulostuksen_otsikot[$rivi["otunnus"]] = $rivi["otunnus"];
 
           if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and !$unifaun_era_vainkollitarra) {
-            // P‰ivitet‰‰n tilausket "tulostetaan alatilaan".
+            // P√§ivitet√§√§n tilausket "tulostetaan alatilaan".
             $query = "UPDATE lasku
                       SET alatila  = 'BD'
                       WHERE tunnus = $rivi[otunnus]
@@ -525,15 +525,15 @@ if ($tee == 'tulosta') {
       $kaikki_lotsikot   = "";
 
       if ($rakir_row['merahti'] == 'K') {
-        $rahdinmaksaja = "L‰hett‰j‰";
+        $rahdinmaksaja = "L√§hett√§j√§";
       }
       else {
-        $rahdinmaksaja = "Vastaanottaja"; //t‰m‰ on defaultti
+        $rahdinmaksaja = "Vastaanottaja"; //t√§m√§ on defaultti
       }
 
-      // Katsotaan onko t‰m‰ koontikuljetus
+      // Katsotaan onko t√§m√§ koontikuljetus
       if ($toitarow["tulostustapa"] == "L" or $toitarow["tulostustapa"] == "K") {
-        //Toimitusosoitteeksi halutaan t‰ss‰ tapauksessa toimitustavan takaa lˆytyv‰t
+        //Toimitusosoitteeksi halutaan t√§ss√§ tapauksessa toimitustavan takaa l√∂ytyv√§t
         $rakir_row["toim_maa"]    = $toitarow["toim_maa"];
         $rakir_row["toim_nimi"]    = $toitarow["toim_nimi"];
         $rakir_row["toim_nimitark"]  = $toitarow["toim_nimitark"];
@@ -549,11 +549,11 @@ if ($tee == 'tulosta') {
 
       while ($rivi = mysql_fetch_assoc($res)) {
 
-        // otetaan kaikki otsikkonumerot ja rahtikirjanumerot talteen... tarvitaan myˆhemmin hauissa
+        // otetaan kaikki otsikkonumerot ja rahtikirjanumerot talteen... tarvitaan my√∂hemmin hauissa
         $otunnukset   .= "'$rivi[otunnus]',";
         $tunnukset    .= "'$rivi[rtunnus]',";
 
-        // otsikkonumerot talteen, n‰m‰ printataan paperille
+        // otsikkonumerot talteen, n√§m√§ printataan paperille
         if (!in_array($rivi['otunnus'], $lotsikot)) {
           $lotsikot[]   = $rivi['otunnus'];
           $astilnrot[]  = $rivi['asiakkaan_tilausnumero'];
@@ -649,11 +649,11 @@ if ($tee == 'tulosta') {
           $ures  = pupe_query($query);
         }
 
-        // k‰ytet‰‰n t‰st‰ alasp‰in vanhoja tunnuksia
+        // k√§ytet√§√§n t√§st√§ alasp√§in vanhoja tunnuksia
         $tunnukset = $vanhat_tunnukset;
       }
 
-      // merkataan tilausrivit toimitetuiksi, paitsi kun tulostetaan Unifaun er‰tulostuksen kollitarra
+      // merkataan tilausrivit toimitetuiksi, paitsi kun tulostetaan Unifaun er√§tulostuksen kollitarra
       if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and !$unifaun_era_vainkollitarra) {
         $query = "UPDATE tilausrivi
                   SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
@@ -666,7 +666,7 @@ if ($tee == 'tulosta') {
         $ures  = pupe_query($query);
       }
 
-      // K‰ytet‰‰nkˆ VAK-tietokantaa
+      // K√§ytet√§√§nk√∂ VAK-tietokantaa
       if ($yhtiorow["vak_kasittely"] != "") {
         $vakselect = "concat_ws(', ', concat('UN',yk_nro), nimi_ja_kuvaus, if(trim(lipukkeet)='', NULL, lipukkeet), if(trim(pakkausryhma)='', NULL, pakkausryhma), if(trim(luokituskoodi)='', NULL, luokituskoodi), if(trim(Rajoitetut_maarat_ja_poikkeusmaarat_1)='', NULL, Rajoitetut_maarat_ja_poikkeusmaarat_1))";
         $vakjoin   = "JOIN vak ON tuote.yhtio = vak.yhtio and tuote.vakkoodi = vak.tunnus";
@@ -706,13 +706,13 @@ if ($tee == 'tulosta') {
       //
       // arrayt:
       // toitarow, otsikot, pakkaus, kilot, kollit, kuutiot, lavametri, vakit
-      // $rakir_row:sta lˆytyy asiakkaan tiedot
+      // $rakir_row:sta l√∂ytyy asiakkaan tiedot
       //
-      ////ja $rivi:st‰ ytunnus
+      ////ja $rivi:st√§ ytunnus
       //
       // muuttujat:
       // otunnukset, pvm, rahdinmaksaja, toimitustapa, kollityht, kilotyht, kuutiotyht, kirjoitin
-      // jv tapauksissa on myˆs aputeksti, rahtihinta, rahdinhinta, yhteensa, summa, jvhinta, jvtext, lasno ja viite muuttujat
+      // jv tapauksissa on my√∂s aputeksti, rahtihinta, rahdinhinta, yhteensa, summa, jvhinta, jvtext, lasno ja viite muuttujat
       // rtunnus jossa on uniikki numero
       //
       // tulostetaan rahtikirja
@@ -727,7 +727,7 @@ if ($tee == 'tulosta') {
         $ures  = pupe_query($query);
       }
 
-      // n‰it‰ tarvitaan vain JV-keiseissa, mutta pit‰‰ nollata tietty joka luupilla
+      // n√§it√§ tarvitaan vain JV-keiseissa, mutta pit√§√§ nollata tietty joka luupilla
       $lasno    = "";
       $viite    = "";
       $summa    = "";
@@ -737,7 +737,7 @@ if ($tee == 'tulosta') {
       $aputeksti  = "";
       $rahinta   = "";
 
-      // jos kyseess‰ on j‰lkivaatimus
+      // jos kyseess√§ on j√§lkivaatimus
       if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and $rakir_row['jv'] != '') {
         $tee       = "TARKISTA";
         $laskutakaikki   = "KYLLA";
@@ -768,8 +768,8 @@ if ($tee == 'tulosta') {
         chdir('../');
         $tunnukset = $rivitunnukset;
 
-        // N‰m‰ muuttujat tulevat toivottavasti ulos verkkolasku.php:st‰
-        // $jvhinta jossa on j‰lkivaatimuskulut
+        // N√§m√§ muuttujat tulevat toivottavasti ulos verkkolasku.php:st√§
+        // $jvhinta jossa on j√§lkivaatimuskulut
         // $rahinta jossa on rahtikulut
         // $laskurow jossa on laskutetun laskun tiedot
         // $viite jossa on viitenumero
@@ -777,15 +777,15 @@ if ($tee == 'tulosta') {
         $yhteensa = $laskurow['summa'];
         $summa    = $laskurow['summa'] - $jvhinta - $rahinta;
 
-        $jvtext  = "<li>".t("J‰lkivaatimuskulu").": $jvhinta $yhtiorow[valkoodi]";
-        $jvtext .= "<li>".t("Loppusumma yhteens‰").": $yhteensa $yhtiorow[valkoodi]";
+        $jvtext  = "<li>".t("J√§lkivaatimuskulu").": $jvhinta $yhtiorow[valkoodi]";
+        $jvtext .= "<li>".t("Loppusumma yhteens√§").": $yhteensa $yhtiorow[valkoodi]";
 
-        $aputeksti = t("JƒLKIVAATIMUS");
+        $aputeksti = t("J√ÑLKIVAATIMUS");
       }
       elseif (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") !== FALSE and $rakir_row['jv'] != '') {
 
-        // N‰m‰ muuttujat tulevat toivottavasti ulos verkkolasku.php:st‰
-        // $jvhinta jossa on j‰lkivaatimuskulut
+        // N√§m√§ muuttujat tulevat toivottavasti ulos verkkolasku.php:st√§
+        // $jvhinta jossa on j√§lkivaatimuskulut
         // $rahinta jossa on rahtikulut
         // $laskurow jossa on laskutetun laskun tiedot
 
@@ -801,13 +801,13 @@ if ($tee == 'tulosta') {
         $yhteensa = $laskurow['summa'];
         $summa    = $laskurow['summa'] - $jvhinta - $rahinta;
 
-        $jvtext  = "<li>".t("J‰lkivaatimuskulu").": $jvhinta $yhtiorow[valkoodi]";
-        $jvtext .= "<li>".t("Loppusumma yhteens‰").": $yhteensa $yhtiorow[valkoodi]";
+        $jvtext  = "<li>".t("J√§lkivaatimuskulu").": $jvhinta $yhtiorow[valkoodi]";
+        $jvtext .= "<li>".t("Loppusumma yhteens√§").": $yhteensa $yhtiorow[valkoodi]";
 
-        $aputeksti = t("JƒLKIVAATIMUS");
+        $aputeksti = t("J√ÑLKIVAATIMUS");
       }
 
-      if (!isset($nayta_pdf)) echo "<font class='message'>".t("Asiakas")." $rakir_row[toim_nimi]</font><li>".t("Yhdistet‰‰n tilaukset").": ";
+      if (!isset($nayta_pdf)) echo "<font class='message'>".t("Asiakas")." $rakir_row[toim_nimi]</font><li>".t("Yhdistet√§√§n tilaukset").": ";
 
       foreach ($lotsikot as $doit) {
         if (!isset($nayta_pdf)) echo "$doit ";
@@ -819,18 +819,18 @@ if ($tee == 'tulosta') {
 
       if (!isset($nayta_pdf)) echo "$rahinta $jvtext<br>";
 
-      // Kopsutulostus toistaiseksi vain A4-paperille unifaun keississ‰
+      // Kopsutulostus toistaiseksi vain A4-paperille unifaun keississ√§
       if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") !== FALSE and ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {
         $toitarow["rahtikirja"] = "rahtikirja_pdf.inc";
       }
 
-      // Jos ker‰yser‰t ja l‰hdˆt on p‰‰ll‰, niin t‰ss‰ ei tulosteta rahtikirjaa jos Unifaun on k‰ytˆss‰
+      // Jos ker√§yser√§t ja l√§hd√∂t on p√§√§ll√§, niin t√§ss√§ ei tulosteta rahtikirjaa jos Unifaun on k√§yt√∂ss√§
       if (!isset($tee_varsinainen_tulostus) or (isset($tee_varsinainen_tulostus) and $tee_varsinainen_tulostus)) {
 
-        // tulostetaan toimitustavan m‰‰rittelem‰ rahtikirja
+        // tulostetaan toimitustavan m√§√§rittelem√§ rahtikirja
         if (@include("tilauskasittely/$toitarow[rahtikirja]")) {
 
-          // Otetaan talteen t‰ss‰ $rahtikirjanro talteen
+          // Otetaan talteen t√§ss√§ $rahtikirjanro talteen
           $rahtikirjanro_alkuperainen = $rahtikirjanro;
 
           if ($tulosta_vak_yleisrahtikirja != '') {
@@ -841,14 +841,14 @@ if ($tee == 'tulosta') {
             require("tilauskasittely/rahtikirja_erittely_pdf.inc");
           }
 
-          // palautetaan alkuper‰inen $rahtikirjanro takaisin
+          // palautetaan alkuper√§inen $rahtikirjanro takaisin
           $rahtikirjanro = $rahtikirjanro_alkuperainen;
         }
         else {
-          if (!isset($nayta_pdf)) echo "<li><font class='error'>".t("VIRHE: Rahtikirja-tiedostoa")." 'tilauskasittely/$toitarow[rahtikirja]' ".t("ei lˆydy")."!</font>";
+          if (!isset($nayta_pdf)) echo "<li><font class='error'>".t("VIRHE: Rahtikirja-tiedostoa")." 'tilauskasittely/$toitarow[rahtikirja]' ".t("ei l√∂ydy")."!</font>";
         }
 
-        // Kopsuille ei p‰ivitet‰ eik‰ kun muokataan rahtikirjan tietoja!
+        // Kopsuille ei p√§ivitet√§ eik√§ kun muokataan rahtikirjan tietoja!
         if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
           $query = "UPDATE rahtikirjat
                     set rahtikirjanro = '$rahtikirjanro'
@@ -884,7 +884,7 @@ if ($tee == 'tulosta') {
 
           if ($rakir_row["toimitusvahvistus"] == "editilaus_out_futur.inc") {
 
-            // jos $laskurow on jo populoitu, otetaan se talteen ja palautetaan t‰m‰n j‰lkeen
+            // jos $laskurow on jo populoitu, otetaan se talteen ja palautetaan t√§m√§n j√§lkeen
             $tmp_laskurow = $laskurow;
 
             $query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$rivi['otunnus']}'";
@@ -907,7 +907,7 @@ if ($tee == 'tulosta') {
         paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi(array('otunnukset' => $otunnukset, 'kilotyht' => $kilotyht));
       }
 
-      // Katsotaan onko magento-API konffattu, eli verkkokauppa k‰ytˆss‰, silloin merkataan tilaus toimitetuksi Magentossa kun rahtikirja tulostetaan
+      // Katsotaan onko magento-API konffattu, eli verkkokauppa k√§yt√∂ss√§, silloin merkataan tilaus toimitetuksi Magentossa kun rahtikirja tulostetaan
       if (isset($magento_api_url) and $magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "") {
         $query = "SELECT asiakkaan_tilausnumero
                   FROM lasku
@@ -955,7 +955,7 @@ if ($tee == 'tulosta') {
         'otunnukset'   => $otunnukset,
         );
 
-        // Aloitellaan l‰hetteen teko
+        // Aloitellaan l√§hetteen teko
         $params_dgd = alku_dgd($params_dgd);
         $params_dgd = rivi_dgd($params_dgd);
         $params_dgd = loppu_dgd($params_dgd);
@@ -1040,7 +1040,7 @@ if ($tee == 'tulosta') {
     }
 
     if ($toitarow['erittely'] == 't' and $kaikki_lotsikot_per_toimitus != "" and $toitarow['rahtikirja'] != 'rahtikirja_hrx_siirto.inc') {
-      $kaikki_lotsikot_per_toimitus = substr($kaikki_lotsikot_per_toimitus ,0 ,-2); //poistetaan pilkku ja v‰lilyˆnti viimosen per‰st‰
+      $kaikki_lotsikot_per_toimitus = substr($kaikki_lotsikot_per_toimitus ,0 ,-2); //poistetaan pilkku ja v√§lily√∂nti viimosen per√§st√§
       $otunnukset_temp = $otunnukset;
       $otunnukset = $kaikki_lotsikot_per_toimitus;
       require("tilauskasittely/rahtikirja_erittely_pdf.inc");
@@ -1185,7 +1185,7 @@ if ($tee == '') {
     $wherelisa = " and lasku.tunnus = $etsi_nro2 ";
   }
 
-  // haetaan kaikki distinct toimitustavat joille meill‰ on rahtikirjoja tulostettavana..
+  // haetaan kaikki distinct toimitustavat joille meill√§ on rahtikirjoja tulostettavana..
   $query = "SELECT lasku.yhtio yhtio, lasku.toimitustapa, varastopaikat.tunnus, varastopaikat.nimitys, varastopaikat.printteri7, group_concat(distinct lasku.tunnus ORDER BY lasku.tunnus ASC) ltunnus
             FROM rahtikirjat
             JOIN lasku USE INDEX (PRIMARY) on (lasku.tunnus=rahtikirjat.otsikkonro and lasku.yhtio=rahtikirjat.yhtio and lasku.tila in ('L','G') and lasku.alatila = 'B')
@@ -1207,7 +1207,7 @@ if ($tee == '') {
 
     echo "<table><tr><th valign='top'>",t("Etsi numerolla"),":</th>";
     echo "<form method='post'>"; // document.getElementById('sel_rahtikirjat').style.display='inline';document.getElementById('sel_td').className='';
-    echo "<td valign='top'><input type='text' value='$etsi_nro2' name='etsi_nro2' id='etsi_nro2'>&nbsp;<input type='submit' id='etsi_button2' name='etsi_button2' value='",t("Etsi"),"'>&nbsp;<input type='submit' id='resetti' name='resetti' value='",t("Tyhjenn‰"),"'></td>";
+    echo "<td valign='top'><input type='text' value='$etsi_nro2' name='etsi_nro2' id='etsi_nro2'>&nbsp;<input type='submit' id='etsi_button2' name='etsi_button2' value='",t("Etsi"),"'>&nbsp;<input type='submit' id='resetti' name='resetti' value='",t("Tyhjenn√§"),"'></td>";
     echo "</form>";
     echo "</tr>";
 
@@ -1245,16 +1245,16 @@ if ($tee == '') {
     echo "<tr><th>".t("Tulosta kaikki rahtikirjat").":</th>";
     echo "<td><input type='radio' name='jv' value='' checked></td></tr>";
 
-    echo "<tr><th>".t("Tulosta vain j‰lkivaatimukset").":</th>";
+    echo "<tr><th>".t("Tulosta vain j√§lkivaatimukset").":</th>";
     echo "<td><input type='radio' name='jv' value='vainjv'></td></tr>";
 
-    echo "<tr><th>".t("ƒl‰ tulosta j‰lkivaatimuksia").":</th>";
+    echo "<tr><th>".t("√Ñl√§ tulosta j√§lkivaatimuksia").":</th>";
     echo "<td><input type='radio' name='jv' value='eijv'></td></tr>";
 
     echo "<tr><th>".t("Tulosta vain rahtikirjoja joilla on VAK-koodeja").":</th>";
     echo "<td><input type='radio' name='jv' id='jv' value='vainvak'></td></tr>";
 
-    echo "<tr><th>".t("Valitse j‰lkivaatimuslaskujen tulostuspaikka").":</th>";
+    echo "<tr><th>".t("Valitse j√§lkivaatimuslaskujen tulostuspaikka").":</th>";
     echo "<td><select id='kirjoitin' name='laskukomento'>";
     echo "<option value=''>",t("Ei kirjoitinta"),"</option>";
 
@@ -1357,7 +1357,7 @@ if ($tee == '') {
 
     echo "</tr><tr>";
     echo "<td valign='top' class='$class' id='sel_td'><div id='sel_rahtikirjat' $nayta_div>";
-    echo "<table id='toim_table' name='toim_table'><tr><td valign='top'>",t("Etsi numerolla"),": <input type='input' name='etsi_nro' id='etsi_nro' onkeypress=\"return disableEnterKey(event);\"> <input type='button' name='etsi_button' id='etsi_button' value='",t("Etsi"),"' onclick='untoggleAll(this);document.getElementById(\"nayta_rahtikirjat\").checked=true;showNumber(this);'> <input type='button' name='etsi_kaikki' id='etsi_kaikki' value='",t("N‰yt‰ kaikki"),"' onclick='untoggleAll(this);document.getElementById(\"nayta_rahtikirjat\").checked=true;showNumbers(this);'></td></tr>";
+    echo "<table id='toim_table' name='toim_table'><tr><td valign='top'>",t("Etsi numerolla"),": <input type='input' name='etsi_nro' id='etsi_nro' onkeypress=\"return disableEnterKey(event);\"> <input type='button' name='etsi_button' id='etsi_button' value='",t("Etsi"),"' onclick='untoggleAll(this);document.getElementById(\"nayta_rahtikirjat\").checked=true;showNumber(this);'> <input type='button' name='etsi_kaikki' id='etsi_kaikki' value='",t("N√§yt√§ kaikki"),"' onclick='untoggleAll(this);document.getElementById(\"nayta_rahtikirjat\").checked=true;showNumbers(this);'></td></tr>";
 
     mysql_data_seek($result, 0);
 
@@ -1405,7 +1405,7 @@ if ($tee == '') {
     echo "</form>";
   }
   else {
-    echo "<br><br><br><font class='message'>",t("Yht‰‰n tulostettavaa rahtikirjaa ei lˆytynyt"),".</font><br><br>";
+    echo "<br><br><br><font class='message'>",t("Yht√§√§n tulostettavaa rahtikirjaa ei l√∂ytynyt"),".</font><br><br>";
   }
 
   require("inc/footer.inc");

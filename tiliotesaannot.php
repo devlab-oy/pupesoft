@@ -2,12 +2,12 @@
 
 require "inc/parametrit.inc";
 
-if (!isset($tiliote) and $tiliote != "Z") echo "<font class='head'>".t("Tiliotteen tiliˆintis‰‰nnˆt")."</font><hr>";
+if (!isset($tiliote) and $tiliote != "Z") echo "<font class='head'>".t("Tiliotteen tili√∂intis√§√§nn√∂t")."</font><hr>";
 
-// Jos $pankkitili = 'x' niin kyseess‰ on viiteaineiston s‰‰ntˆ
+// Jos $pankkitili = 'x' niin kyseess√§ on viiteaineiston s√§√§nt√∂
 
 if ($tee == 'P') {
-  // Olemassaolevaa s‰‰ntˆ‰ muutetaan, joten poistetaan rivi ja annetaan perustettavaksi
+  // Olemassaolevaa s√§√§nt√∂√§ muutetaan, joten poistetaan rivi ja annetaan perustettavaksi
   $query = "SELECT *
             FROM tiliotesaanto
             WHERE tunnus = '$tunnus'
@@ -15,7 +15,7 @@ if ($tee == 'P') {
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) == 0) {
-    echo t("S‰‰ntˆ‰ ei lˆydy")."! $query";
+    echo t("S√§√§nt√∂√§ ei l√∂ydy")."! $query";
     exit;
   }
 
@@ -37,7 +37,7 @@ if ($tee == 'P') {
 }
 
 if ($tee == 'U') {
-  // Tarkistetaan s‰‰ntˆ
+  // Tarkistetaan s√§√§nt√∂
   if ($erittely == '') {
     $virhe="";
     $query = "SELECT tilino
@@ -46,7 +46,7 @@ if ($tee == 'U') {
     $result = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($result) == 0) {
-      $virhe .= t("Tili‰ ei lˆydy")."<br>";
+      $virhe .= t("Tili√§ ei l√∂ydy")."<br>";
       $ok = 1;
       $tee = '';
     }
@@ -60,7 +60,7 @@ if ($tee == 'U') {
       $result = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($result) == 0) {
-        $virhe .= t("Palkkiotili‰ ei lˆydy")."<br>";
+        $virhe .= t("Palkkiotili√§ ei l√∂ydy")."<br>";
         $ok = 1;
         $tee = '';
       }
@@ -75,7 +75,7 @@ if ($tee == 'U') {
         $result = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($result) == 0) {
-          $virhe.= t("Kustannuspaikkaa ei lˆydy")."<br>";
+          $virhe.= t("Kustannuspaikkaa ei l√∂ydy")."<br>";
           $ok = 1;
           $tee = '';
         }
@@ -111,7 +111,7 @@ if ($tee == 'U') {
     $result = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($result) == 0) {
-      $virhe.= t("Pankkitili‰ ei en‰‰ lˆydy")."<br>";
+      $virhe.= t("Pankkitili√§ ei en√§√§ l√∂ydy")."<br>";
       $ok = 1;
       $tee = '';
     }
@@ -119,7 +119,7 @@ if ($tee == 'U') {
 }
 
 if ($tee == 'U') {
-  // Lis‰t‰‰n s‰‰ntˆ
+  // Lis√§t√§√§n s√§√§nt√∂
   $query = "INSERT into tiliotesaanto
             (yhtio, pankkitili, koodi, koodiselite, nimitieto, selite,  tilino, tilino2, kustp, kustp2, erittely)
             VALUES ('$kukarow[yhtio]', '$pankkitili', '$koodi', '$koodiselite', '$nimitieto', '$selite', '$tilino', '$tilino2', '$kustp', '$kustp2', '$erittely')";
@@ -127,7 +127,7 @@ if ($tee == 'U') {
 }
 
 if (strlen($pankkitili) != 0) {
-  // Pankkitili on valittu ja sille annetaan s‰‰ntˆj‰
+  // Pankkitili on valittu ja sille annetaan s√§√§nt√∂j√§
   if ($pankkitili != 'x') {
     $query = "SELECT nimi, tilino, tunnus
               FROM yriti
@@ -157,12 +157,12 @@ if (strlen($pankkitili) != 0) {
     }
   }
   else {
-    echo "<font class='message'>".t("Viiteaineistos‰‰nnˆt")."</font><br>";
+    echo "<font class='message'>".t("Viiteaineistos√§√§nn√∂t")."</font><br>";
   }
 
-  echo "<font class='head'>".t("S‰‰nnˆt")."</font><hr><table>";
+  echo "<font class='head'>".t("S√§√§nn√∂t")."</font><hr><table>";
 
-  // N‰ytet‰‰n vanhat s‰‰nnˆt muutosta varten (viites‰‰nnˆille himan eri pohja)
+  // N√§ytet√§√§n vanhat s√§√§nn√∂t muutosta varten (viites√§√§nn√∂ille himan eri pohja)
   if ($pankkitili != 'x') {
     $query = "SELECT tunnus, koodi, koodiselite, nimitieto, selite, erittely, tilino, kustp, tilino2, kustp2
               FROM tiliotesaanto
@@ -190,7 +190,7 @@ if (strlen($pankkitili) != 0) {
     for ($i = 1; $i<mysql_num_fields($result); $i++) {
       if (mysql_field_name($result,$i) == 'kustp') {
         echo "<td>";
-        if ($tiliointirow[$i] != 0) { // Meill‰ on kustannuspaikka
+        if ($tiliointirow[$i] != 0) { // Meill√§ on kustannuspaikka
           $query = "SELECT nimi
                     FROM kustannuspaikka
                     WHERE yhtio   = '$kukarow[yhtio]'
@@ -205,7 +205,7 @@ if (strlen($pankkitili) != 0) {
       }
       elseif (mysql_field_name($result,$i) == 'kustp2') {
         echo "<td>";
-        if ($tiliointirow[$i] != 0) { // Meill‰ on kustannuspaikka
+        if ($tiliointirow[$i] != 0) { // Meill√§ on kustannuspaikka
           $query = "SELECT nimi
                     FROM kustannuspaikka
                     WHERE yhtio   = '$kukarow[yhtio]'
@@ -233,9 +233,9 @@ if (strlen($pankkitili) != 0) {
       </td></tr></form>";
   }
 
-  // Annetaan mahdollisuus tehd‰ uusi s‰‰ntˆ
+  // Annetaan mahdollisuus tehd√§ uusi s√§√§nt√∂
   if ($ok != 1) {
-    // Annetaan tyhj‰t tiedot, jos rivi oli virheetˆn
+    // Annetaan tyhj√§t tiedot, jos rivi oli virheet√∂n
     $koodi = '';
     $koodiselite= '';
     $nimitieto = '';
@@ -298,7 +298,7 @@ if (strlen($pankkitili) != 0) {
         <td>$ulos</td>
         <td><input type='text' name='tilino2' size='6' value = '$tilino2'></td>
         <td>$ulos2</td>
-        <td class='back'>$virhe <input type='Submit' value = '".t("Lis‰‰")."'>
+        <td class='back'>$virhe <input type='Submit' value = '".t("Lis√§√§")."'>
         </form>
         </td>
       </tr></table>";
@@ -311,14 +311,14 @@ if (strlen($pankkitili) != 0) {
           <input type='hidden' name='pankkitili' value = '$pankkitili'>
           <input type='text' name='selite' size='15' value = '$selite'></td>
         <td><input type='text' name='tilino' size='6' value = '$tilino'></td>
-        <td>$virhe <input type='Submit' value = '".t("Lis‰‰")."'>
+        <td>$virhe <input type='Submit' value = '".t("Lis√§√§")."'>
         </form>
         </td>
       </tr></table>";
   }
 }
 else {
-  // T‰ll‰ ollaan, jos olemme vasta valitsemassa pankkitili‰
+  // T√§ll√§ ollaan, jos olemme vasta valitsemassa pankkitili√§
   $query = "SELECT *
             FROM yriti
             WHERE yhtio  = '$kukarow[yhtio]'

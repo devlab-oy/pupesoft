@@ -1,8 +1,8 @@
 <?php
 
-//katsotaan ett‰ kukarow kesken ja $tilausnumero stemmaavat kesken‰‰n
+//katsotaan ett√§ kukarow kesken ja $tilausnumero stemmaavat kesken√§√§n
 if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero!='' or $kukarow["kesken"] != 0)) {
-  echo "<br><br><br>".t("VIRHE: Tilaus ei ole aktiivisena")."! ".t("K‰y aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";
+  echo "<br><br><br>".t("VIRHE: Tilaus ei ole aktiivisena")."! ".t("K√§y aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";
   exit;
 }
 
@@ -10,9 +10,9 @@ if ($tila == '') {
   $tila = 'Muuta';
 }
 
-//  Tehd‰‰n hieman oikeellisuustarkistuksia valmistuksesta.. "ei viel‰ hanskaa k‰yt‰ kaikista valintaa"
+//  Tehd√§√§n hieman oikeellisuustarkistuksia valmistuksesta.. "ei viel√§ hanskaa k√§yt√§ kaikista valintaa"
 if ($toim == "VALMISTAVARASTOON" and isset($jatka) and $clearing != "" and $varasto != "") {
-  //  Valmistuksia voi tehd‰ vain saman maan sis‰ll‰!
+  //  Valmistuksia voi tehd√§ vain saman maan sis√§ll√§!
   $query  = "SELECT maa from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$clearing'";
   $abures = mysql_query($query) or pupe_error($query);
   $kohdev = mysql_fetch_array($abures);
@@ -22,7 +22,7 @@ if ($toim == "VALMISTAVARASTOON" and isset($jatka) and $clearing != "" and $vara
   $lahdev = mysql_fetch_array($abures);
 
   if ($lahdev["maa"] != $kohdev["maa"]) {
-    echo "<font class='error'>".t("Valmistus on mahdollista vain saman maan sis‰ll‰")."!!!</font><br><br>";
+    echo "<font class='error'>".t("Valmistus on mahdollista vain saman maan sis√§ll√§")."!!!</font><br><br>";
     $tila == "Muuta";
     unset($jatka);
   }
@@ -37,7 +37,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
     echo "<font class='head'>".t("Valmistuksen otsikko")."</font><hr><br>";
   }
   elseif ($toim == "SIIRTOTYOMAARAYS") {
-    echo "<font class='head'>".t("Sis‰inen tyˆm‰‰r‰ys")."</font><hr><br>";
+    echo "<font class='head'>".t("Sis√§inen ty√∂m√§√§r√§ys")."</font><hr><br>";
   }
 
   $qlisa = "";
@@ -53,7 +53,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
                  LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
                  WHERE lasku.tunnus = '$kopioitava_otsikko'";
 
-      //  T‰m‰ on teht‰v‰, jottemme vain p‰ivit‰ vanhaa!
+      //  T√§m√§ on teht√§v√§, jottemme vain p√§ivit√§ vanhaa!
       $query = "UPDATE kuka
                 SET kesken = 0
                 WHERE session = '$session'";
@@ -72,11 +72,11 @@ if ($tila == 'Muuta' and !isset($jatka)) {
     $sresult = mysql_query($squery) or pupe_error($squery);
     $srow = mysql_fetch_array($sresult);
 
-    // jos meill‰ on jo alatila ja tila ei muokkailla niit‰!
+    // jos meill√§ on jo alatila ja tila ei muokkailla niit√§!
     $alatila="";
     $ylatila="";
 
-    //  Jos meill‰ on kopioitu otsikko, ei kopioida alatilaa!
+    //  Jos meill√§ on kopioitu otsikko, ei kopioida alatilaa!
     if($kopioitava_otsikko == 0 and $srow['alatila'] != '') {
       $alatila=$srow['alatila'];
     }
@@ -86,13 +86,13 @@ if ($tila == 'Muuta' and !isset($jatka)) {
   echo "<table>";
 
   if ($toim == "SIIRTOLISTA") {
-    echo "<tr><th>".t("Valitse l‰hdevarasto").":</th>";
+    echo "<tr><th>".t("Valitse l√§hdevarasto").":</th>";
   }
   elseif ($toim == "VALMISTAVARASTOON") {
-    echo "<tr><th>".t("K‰yt‰ raaka-aineita varastosta").":</th>";
+    echo "<tr><th>".t("K√§yt√§ raaka-aineita varastosta").":</th>";
   }
   elseif ($toim == "SIIRTOTYOMAARAYS") {
-    echo "<tr><th>".t("Valitse l‰hdevarasto").":</th>";
+    echo "<tr><th>".t("Valitse l√§hdevarasto").":</th>";
   }
 
   $query = "SELECT *
@@ -113,13 +113,13 @@ if ($tila == 'Muuta' and !isset($jatka)) {
   echo "<td><select name='varasto'>";
 
   if ($toim == "SIIRTOLISTA") {
-    echo "<option value=''>".t("Siirr‰ kaikista")."</option>";
+    echo "<option value=''>".t("Siirr√§ kaikista")."</option>";
   }
   elseif ($toim == "VALMISTAVARASTOON") {
-    echo "<option value=''>".t("K‰yt‰ kaikista")."</option>";
+    echo "<option value=''>".t("K√§yt√§ kaikista")."</option>";
   }
   elseif ($toim == "SIIRTOTYOMAARAYS") {
-    echo "<option value=''>".t("K‰yt‰ kaikista")."</option>";
+    echo "<option value=''>".t("K√§yt√§ kaikista")."</option>";
   }
 
   while ($vrow = mysql_fetch_array($vtresult)) {
@@ -211,8 +211,8 @@ if ($tila == 'Muuta' and !isset($jatka)) {
 
   }
 
-  // Jos valmistuksessa k‰ytet‰‰n tilakoodeja asetetaan ker‰ysajankohta tulevaisuuteen.
-  // Valmistus ei varaa saldoja ennenkuin tyˆ on valmistuslinjalla.
+  // Jos valmistuksessa k√§ytet√§√§n tilakoodeja asetetaan ker√§ysajankohta tulevaisuuteen.
+  // Valmistus ei varaa saldoja ennenkuin ty√∂ on valmistuslinjalla.
   if ($yhtiorow['valmistuksessa_kaytetaan_tilakoodeja'] == 'K' AND $toim == 'VALMISTAVARASTOON') {
     $kerpp = '1';
     $kerkk = '1';
@@ -223,7 +223,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
     $toimvv = '2099';
   }
 
-  echo "<tr><th>".t("Toivottu ker‰ysajankohta").": </th><td valign='middle'>
+  echo "<tr><th>".t("Toivottu ker√§ysajankohta").": </th><td valign='middle'>
       <input type='text' name='kerpp' value='$kerpp' size='3'>
       <input type='text' name='kerkk' value='$kerkk' size='3'>
       <input type='text' name='kervv' value='$kervv' size='6'>
@@ -251,14 +251,14 @@ if ($tila == 'Muuta' and !isset($jatka)) {
     }
     else {
       if ($srow['eilahetetta'] != '') $eilah = 'CHECKED';
-      echo "<tr><th>".t("Ohita ker‰ys")."</th><td><input type='checkbox' name='eilahe' $eilah></td></tr>";
+      echo "<tr><th>".t("Ohita ker√§ys")."</th><td><input type='checkbox' name='eilahe' $eilah></td></tr>";
     }
   }
 
   echo "<tr>";
 
   if ($toim == "SIIRTOLISTA") {
-    echo "<th>".t("Ker‰ysprioriteetti")."</th><td>";
+    echo "<th>".t("Ker√§ysprioriteetti")."</th><td>";
   }
   elseif ($toim == "VALMISTAVARASTOON") {
     echo "<th>".t("Valmistusprioriteetti")."</th><td>";
@@ -318,7 +318,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
 
   if ($toim == "SIIRTOTYOMAARAYS") {
     echo "<br><table>";
-    echo "<tr><th colspan='4'>".t("Tyˆm‰‰r‰yksen tiedot")."</th></tr>";
+    echo "<tr><th colspan='4'>".t("Ty√∂m√§√§r√§yksen tiedot")."</th></tr>";
 
     if ($srow["luvattu"] == "" or $srow["luvattu"] == "0000-00-00") {
       $luvattupp = date("d");
@@ -334,9 +334,9 @@ if ($tila == 'Muuta' and !isset($jatka)) {
         <input type='text' name='luvattukk' size='3' value='$luvattukk'>-
         <input type='text' name='luvattuvv' size='6' value='$luvattuvv'>
         </td>
-        <td>Tyˆn suorittaja:</td><td><input type='text' name='suorittaja' size='35' maxlengtd='15' value='$srow[suorittaja]'></td></tr>";
-    echo "<tr><td>".t("Tyˆn kuvaus").":</td><td colspan='3'><textarea name='komm1' rows='4' cols='40'>$srow[komm1]</textarea></td></tr>";
-    echo "<tr><td>".t("Sis‰iset kommentit").":</td><td colspan='3'><textarea name='komm2' rows='4' cols='40'>$srow[komm2]</textarea></td></tr>";
+        <td>Ty√∂n suorittaja:</td><td><input type='text' name='suorittaja' size='35' maxlengtd='15' value='$srow[suorittaja]'></td></tr>";
+    echo "<tr><td>".t("Ty√∂n kuvaus").":</td><td colspan='3'><textarea name='komm1' rows='4' cols='40'>$srow[komm1]</textarea></td></tr>";
+    echo "<tr><td>".t("Sis√§iset kommentit").":</td><td colspan='3'><textarea name='komm2' rows='4' cols='40'>$srow[komm2]</textarea></td></tr>";
     echo "</table><br>";
   }
 
@@ -349,7 +349,7 @@ if (isset($jatka)) {
     $query = "INSERT into ";
     $postquery = ",laatija = '$kukarow[kuka]', luontiaika=NOW()";
 
-    // Jos valmistuksessa k‰ytet‰‰n tilakoodeja, setataan valmistuksen_tila oletusarvoksi
+    // Jos valmistuksessa k√§ytet√§√§n tilakoodeja, setataan valmistuksen_tila oletusarvoksi
     // OV = Odottaa Valmistusta
     if ($yhtiorow['valmistuksessa_kaytetaan_tilakoodeja'] == 'K') $postquery .= ", valmistuksen_tila = 'OV'";
 
@@ -357,7 +357,7 @@ if (isset($jatka)) {
     $postquery2 = ",laatija = '$kukarow[kuka]', luontiaika=NOW()";
   }
   else {
-    // Pidet‰‰n huolta tilausrivien toimitusp‰ivist‰ ja kerayspaivasta
+    // Pidet√§√§n huolta tilausrivien toimitusp√§ivist√§ ja kerayspaivasta
     $query = "UPDATE tilausrivi
               SET kerayspvm = '$kervv-$kerkk-$kerpp'
               WHERE otunnus = '$kukarow[kesken]' and kerayspvm='$vkerayspvm' and yhtio='$kukarow[yhtio]'";
@@ -464,11 +464,11 @@ if (isset($jatka)) {
   elseif ($toim == "SIIRTOLISTA") {
     $query .= ",tilaustyyppi = 'G', tila='G', ytunnus='SIIRTO', liitostunnus='999999999'";
 
-    // Siirtolistat aina l‰hett‰j‰n rahtisopparilla
+    // Siirtolistat aina l√§hett√§j√§n rahtisopparilla
     $query .= ",kohdistettu = 'K'";
 
     if (isset($chn) and $chn == 'GEN') {
-      $query .= ",chn = 'GEN'"; // t‰ll‰ erotellaan "tulosta siirtolista"-kohdassa generoidut ja k‰sin tehdyt siirtolistat
+      $query .= ",chn = 'GEN'"; // t√§ll√§ erotellaan "tulosta siirtolista"-kohdassa generoidut ja k√§sin tehdyt siirtolistat
     }
 
     $tee = "";
@@ -495,13 +495,13 @@ if (isset($jatka)) {
     $tilausnumero = $id;
   }
   elseif ($php_cli and strpos($_SERVER['SCRIPT_NAME'], "generoi_siirtolista.php") !== FALSE) {
-    // generoidaan siirtolistoja komentorivilt‰
+    // generoidaan siirtolistoja komentorivilt√§
     $kukarow["kesken"] = $id;
     $tilausnumero = $id;
   }
 
   if ($toim == "SIIRTOTYOMAARAYS" and (int) $kukarow["kesken"] != 0) {
-    //otetaan kantaa pyˆr‰n malliin
+    //otetaan kantaa py√∂r√§n malliin
     if($merkki2 != 'eimenu'){
       $merkki = $merkki2;
     }
@@ -529,9 +529,9 @@ if (isset($jatka)) {
   }
 
   if ($toim == 'SIIRTOLISTA' and $tilausnumero != '' and $varasto != '' and $clearing != '') {
-    //t‰ss‰ joko tehd‰‰n uutta otsikkoa tai muutetaan olemassa olevaa
+    //t√§ss√§ joko tehd√§√§n uutta otsikkoa tai muutetaan olemassa olevaa
     if ($tee == '' or $kopioitava_otsikko != 0) {
-      //p‰ivitet‰‰n kukarow[kesken] kun k‰ytt‰j‰ tekee uutta tilausta
+      //p√§ivitet√§√§n kukarow[kesken] kun k√§ytt√§j√§ tekee uutta tilausta
       if ($tila == '' and !isset($jatka)) {
         $query = "UPDATE kuka
                   SET kesken=0

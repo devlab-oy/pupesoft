@@ -2,7 +2,7 @@
 
 require("inc/parametrit.inc");
 
-echo "<font class='head'>".t("Kohdista eri riveilt‰ myydyt sarjanumerot")."</font><hr>";
+echo "<font class='head'>".t("Kohdista eri riveilt√§ myydyt sarjanumerot")."</font><hr>";
 
 // Haetaan sarjanumerot jotka on liitetty myyntiriviin mutta ei ostoriviin
 $query = "SELECT *

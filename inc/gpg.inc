@@ -2,7 +2,7 @@
 
 // PGP enkoodaa viesti
 //
-// otetaan sis‰‰n $recipient ja $message
+// otetaan sis√§√§n $recipient ja $message
 // palautetaan $encrypted_message
 
 $gpg       = "/usr/bin/gpg";
@@ -12,10 +12,10 @@ $msgfile1   = "/tmp/$kukarow[yhtio]".md5(uniqid(rand(),true)).".txt";
 $msgfile2   = "/tmp/$kukarow[yhtio]".md5(uniqid(rand(),true)).".gpg";
 
 if (!$handle = fopen($msgfile1, "w"))
-  die("filen luonti ep‰onnistui!");
+  die("filen luonti ep√§onnistui!");
 
 if (fwrite($handle, $message) === FALSE)
-  die("failin kirjoitus ep‰onnistui");
+  die("failin kirjoitus ep√§onnistui");
 
 fclose($handle);
 
@@ -36,14 +36,14 @@ else {
 
   if (strpos($test,"error")) {
     echo "<font class='error'>";
-    echo "GPG salaus ep‰onnistui!<br><br>";
+    echo "GPG salaus ep√§onnistui!<br><br>";
     echo "$gpg --homedir /root/.gnupg -e -r ".htmlentities($recipient)." -o $msgfile2 $msgfile1<br><br>";
     echo "$test<br><br>";
     echo "</font>";
   }
 
   if (!$handle = fopen($msgfile2, "rb"))
-    die("failin $msgfile2 avaus ep‰onnistui!");
+    die("failin $msgfile2 avaus ep√§onnistui!");
 
   $encrypted_message = fread($handle, filesize($msgfile2));
 

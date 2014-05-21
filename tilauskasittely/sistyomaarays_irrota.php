@@ -2,7 +2,7 @@
 
 require ("../inc/parametrit.inc");
 
-echo "<font class='head'>".t("Irrota lis‰varuste laitteesta").":<hr></font>";
+echo "<font class='head'>".t("Irrota lis√§varuste laitteesta").":<hr></font>";
 
 if ($tee == "VALMIS") {
 
@@ -19,7 +19,7 @@ if ($tee == "VALMIS") {
   $sarjares = mysql_query($query) or pupe_error($query);
 
 
-  // P‰ivitet‰‰n saldo_varattu-kentt‰‰
+  // P√§ivitet√§√§n saldo_varattu-kentt√§√§
   $query = "SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso, tilkpl
             FROM tilausrivi
             WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno' and tunnus='$rivitunnus'";
@@ -37,7 +37,7 @@ if ($tee == "VALMIS") {
             LIMIT 1";
   $sarjares = mysql_query($query) or pupe_error($query);
 
-  echo t("Lis‰varuste irrotettu laitteesta")."!<br><br>";
+  echo t("Lis√§varuste irrotettu laitteesta")."!<br><br>";
 
   $tee = "";
 }
@@ -45,11 +45,11 @@ if ($tee == "VALMIS") {
 
 if ($tee == "") {
 
-  // N‰ytet‰‰n muuten vaan sopivia tilauksia
+  // N√§ytet√§√§n muuten vaan sopivia tilauksia
   echo "<br><form method='post'>
       <input type='hidden' name='toim' value='$toim'>
       <font class='message'>".t("Etsi laite").":<hr></font>
-      ".t("Syˆt‰ sarjanumero").":
+      ".t("Sy√∂t√§ sarjanumero").":
       <input type='text' name='etsi' value='$etsi'>
       <input type='Submit' value = '".t("Etsi")."'>
       </form>";
@@ -57,7 +57,7 @@ if ($tee == "") {
 
   if ($etsi != '') {
 
-    //Tutkitaan lis‰varusteita
+    //Tutkitaan lis√§varusteita
     $query = "SELECT tilausrivi_osto.perheid2, sarjanumeroseuranta.tuoteno, sarjanumeroseuranta.sarjanumero
               FROM sarjanumeroseuranta
               JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus and tilausrivi_osto.tunnus=tilausrivi_osto.perheid2
@@ -68,7 +68,7 @@ if ($tee == "") {
     echo "<br><br><table>";
 
     while($sarjarow = mysql_fetch_array($sarjares)) {
-      // Haetaan muut lis‰varusteet
+      // Haetaan muut lis√§varusteet
       $query = "SELECT tuoteno, perheid2, tilkpl, tyyppi, tunnus
                 FROM tilausrivi use index (yhtio_perheid2)
                 WHERE yhtio   = '$kukarow[yhtio]'
@@ -92,12 +92,12 @@ if ($tee == "") {
                 <input type='hidden' name='tuoteno' value='$sarjarow1[tuoteno]'>
                 <input type='hidden' name='siirtorivitunnus' value='$sarjarow[perheid2]'>
                 <input type='hidden' name='rivitunnus' value='$sarjarow1[tunnus]'>
-                <input type='submit' value='".t("Irrota lis‰varuste")."'>
+                <input type='submit' value='".t("Irrota lis√§varuste")."'>
                 </form>
                 </td>";
           }
           else {
-            echo "<td class='back'>".t("Tehdaslis‰varustetta ei voida irrottaa")."</td>";
+            echo "<td class='back'>".t("Tehdaslis√§varustetta ei voida irrottaa")."</td>";
           }
 
           echo "</tr>";
@@ -109,7 +109,7 @@ if ($tee == "") {
 }
 
 /*
-// N‰ytet‰‰n kaikki
+// N√§ytet√§√§n kaikki
 $query  = "SELECT sarjanumeroseuranta.*,
            if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys) nimitys,
            tuote.myyntihinta                   tuotemyyntihinta,
@@ -147,7 +147,7 @@ $sarjares = mysql_query($query) or pupe_error($query);
 
 while ($sarjarow = mysql_fetch_array($sarjares)) {
 
-  // Haetaan muut lis‰varusteet
+  // Haetaan muut lis√§varusteet
   $query = "SELECT tuoteno, perheid2, tilkpl, tyyppi, tunnus
             FROM tilausrivi use index (yhtio_perheid2)
             WHERE yhtio   = '$kukarow[yhtio]'

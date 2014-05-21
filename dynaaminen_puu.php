@@ -80,17 +80,17 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
   }
 
   // tarvii romplata tekstimuuttujia kun tehdaan jQuery.ajaxin kanssa
-  $uusi_nimi  = (isset($uusi_nimi)) ? utf8_decode($uusi_nimi): "";
-  $uusi_koodi  = (isset($uusi_koodi)) ? utf8_decode($uusi_koodi): "";
+  $uusi_nimi  = (isset($uusi_nimi)) ? $uusi_nimi: "";
+  $uusi_koodi  = (isset($uusi_koodi)) ? $uusi_koodi: "";
 
   function getnoderow ($toim, $nodeid) {
     global $yhtiorow, $kukarow;
 
-    $qu = "  SELECT *
-        FROM dynaaminen_puu
-        WHERE dynaaminen_puu.yhtio   = '{$yhtiorow['yhtio']}'
-        AND dynaaminen_puu.laji   = '{$toim}'
-        AND dynaaminen_puu.tunnus   = '{$nodeid}'";
+    $qu = "SELECT *
+           FROM dynaaminen_puu
+           WHERE dynaaminen_puu.yhtio = '{$yhtiorow['yhtio']}'
+           AND dynaaminen_puu.laji    = '{$toim}'
+           AND dynaaminen_puu.tunnus  = '{$nodeid}'";
     $re = pupe_query($qu);
     $numres = mysql_num_rows($re);
 
@@ -113,12 +113,12 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
 
       if ($saamuokata and !in_array($tee, array('addtotree','removefromtree'))) {
 
-        // Siirret‰‰n haaraa j‰rjestyksess‰ ylˆs tai alas
+        // Siirret√§√§n haaraa j√§rjestyksess√§ yl√∂s tai alas
         if ($tee == 'ylos' or $tee == 'alas') {
           $src['lft'] = $noderow['lft'];
           $src['rgt'] = $noderow['rgt'];
 
-          // $tee:ssa on suunta mihin siirret‰‰n
+          // $tee:ssa on suunta mihin siirret√§√§n
           $kohde = SiirraTaso($toim, $src, $tee);
         }
         elseif ($tee == 'lisaa' and isset($uusi_nimi) and trim($uusi_nimi) != "") {
@@ -206,11 +206,11 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
           TuotteenAlkiot($toim, $liitos, $nodeid, $kieli, $mista);
         }
         elseif ($tee == 'removefromtree') {
-          $qu = "  DELETE FROM puun_alkio
-              WHERE yhtio = '{$yhtiorow["yhtio"]}'
-              AND laji = '{$toim}'
-              AND liitos ='{$liitos}'
-              AND puun_tunnus = {$nodeid}";
+          $qu = "DELETE FROM puun_alkio
+                 WHERE yhtio     = '{$yhtiorow["yhtio"]}'
+                 AND laji        = '{$toim}'
+                 AND liitos ='{$liitos}'
+                 AND puun_tunnus = {$nodeid}";
           $re = pupe_query($qu);
         }
       }
@@ -232,23 +232,23 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
     // " <font class='message'>".t("Toimittajan koodi").":</font> ".$noderow['toimittajan_koodi'].
 
     // tuotteet
-    $qu = "  SELECT count(*) lkm
-        FROM puun_alkio
-        WHERE yhtio = '{$yhtiorow['yhtio']}'
-        AND laji = '{$toim}'
-        AND puun_tunnus = '{$nodeid}'";
+    $qu = "SELECT count(*) lkm
+           FROM puun_alkio
+           WHERE yhtio     = '{$yhtiorow['yhtio']}'
+           AND laji        = '{$toim}'
+           AND puun_tunnus = '{$nodeid}'";
     $re = pupe_query($qu);
     $row = mysql_fetch_assoc($re);
     $own_items = $row['lkm'];
 
     // lapsitasojen tuotteet
-    $qu = "  SELECT count(*) lkm
-        FROM dynaaminen_puu puu
-        JOIN puun_alkio alkio ON (puu.yhtio = alkio.yhtio AND puu.tunnus = alkio.puun_tunnus)
-        WHERE puu.yhtio = '{$yhtiorow['yhtio']}'
-        AND puu.laji = '{$toim}'
-        AND puu.lft > {$noderow['lft']}
-        AND puu.rgt < {$noderow['rgt']}";
+    $qu = "SELECT count(*) lkm
+           FROM dynaaminen_puu puu
+           JOIN puun_alkio alkio ON (puu.yhtio = alkio.yhtio AND puu.tunnus = alkio.puun_tunnus)
+           WHERE puu.yhtio = '{$yhtiorow['yhtio']}'
+           AND puu.laji    = '{$toim}'
+           AND puu.lft     > {$noderow['lft']}
+           AND puu.rgt     < {$noderow['rgt']}";
     $re = pupe_query($qu);
     $row = mysql_fetch_assoc($re);
 
@@ -264,10 +264,10 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
     echo "<hr /><div id='editbuttons'>";
     if ($saamuokata) {
       echo "  <a href='#' id='showeditbox' id='muokkaa'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='",t('Muokkaa lapsikategoriaa'),"'/> ".t('Muokkaa tason tietoja')."</a><br /><br />
-          <a href='#' class='editbtn' id='ylos'><img src='{$palvelin2}pics/lullacons/arrow-single-up-green.png' alt='",t('Siirr‰ ylˆsp‰in'),"'/> ".t('Siirr‰ tasoa ylˆsp‰in')."</a><br />
-          <a href='#' class='editbtn' id='alas'><img src='{$palvelin2}pics/lullacons/arrow-single-down-green.png' alt='",t('Siirr‰ alasp‰in'),"'/> ".t('Siirr‰ tasoa alasp‰in')."</a><br /><br />
-          <a href='#' id='showmovebox'> <img src='{$palvelin2}pics/lullacons/arrow-single-right-green.png' alt='",t('Siirr‰ alatasoksi'),"'/> ".t('Siirr‰ oksa alatasoksi')."</a><br /><br />
-          <a href='#' id='showaddbox'><img src='{$palvelin2}pics/lullacons/add.png' alt='",t('Lis‰‰'),"'/>".t('Lis‰‰ uusi lapsitaso')."</a><br /><br />";
+          <a href='#' class='editbtn' id='ylos'><img src='{$palvelin2}pics/lullacons/arrow-single-up-green.png' alt='",t('Siirr√§ yl√∂sp√§in'),"'/> ".t('Siirr√§ tasoa yl√∂sp√§in')."</a><br />
+          <a href='#' class='editbtn' id='alas'><img src='{$palvelin2}pics/lullacons/arrow-single-down-green.png' alt='",t('Siirr√§ alasp√§in'),"'/> ".t('Siirr√§ tasoa alasp√§in')."</a><br /><br />
+          <a href='#' id='showmovebox'> <img src='{$palvelin2}pics/lullacons/arrow-single-right-green.png' alt='",t('Siirr√§ alatasoksi'),"'/> ".t('Siirr√§ oksa alatasoksi')."</a><br /><br />
+          <a href='#' id='showaddbox'><img src='{$palvelin2}pics/lullacons/add.png' alt='",t('Lis√§√§'),"'/>".t('Lis√§√§ uusi lapsitaso')."</a><br /><br />";
 
       // poistonappi aktiivinen vain jos ei ole liitoksia
       if ($own_items > 0 or $child_items > 0) {
@@ -281,11 +281,11 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
     if ($saamuokataliitoksia) {
       // tarkistetaan onko jo liitetty
       $qu = "SELECT *
-          FROM puun_alkio
-          WHERE yhtio = '{$yhtiorow["yhtio"]}'
-          AND laji = '{$toim}'
-          AND liitos = '{$liitos}'
-          AND puun_tunnus = {$noderow["tunnus"]}";
+             FROM puun_alkio
+             WHERE yhtio     = '{$yhtiorow["yhtio"]}'
+             AND laji        = '{$toim}'
+             AND liitos      = '{$liitos}'
+             AND puun_tunnus = {$noderow["tunnus"]}";
       $re = pupe_query($qu);
 
       echo "<br /><br />";
@@ -304,14 +304,14 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
     echo "<div id='movebox' style='display: none'>
         <form id='moveform'>
         <fieldset>
-          <legend style='font-weight: bold'>".t("Siirr‰ valitun tason alatasoksi")."</legend>
+          <legend style='font-weight: bold'>".t("Siirr√§ valitun tason alatasoksi")."</legend>
           <ul style='list-style:none; padding: 5px'>
             <li style='padding: 3px'>
               <label style='display: inline-block; width: 125px'>".t("Kohdetason tunnus")." <font class='error'>*</font></label>
               <input size='5' id='kohdetaso' autocomplete='off' />
             </li>
           </ul>
-          <input type='submit' id='movesubmitbtn' value='".t("Siirr‰")."' />
+          <input type='submit' id='movesubmitbtn' value='".t("Siirr√§")."' />
           </form>
         </div>
         ";
@@ -332,7 +332,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
           </li>
         </ul>
         <input type='hidden' id='tee' />
-        <p style='display: none; color: red' id='nodeboxerr'>".t("Nimi tai koodi ei saa olla tyhj‰").".</p>
+        <p style='display: none; color: red' id='nodeboxerr'>".t("Nimi tai koodi ei saa olla tyhj√§").".</p>
         <input type='submit' id='editsubmitbtn' value='".t("Tallenna")."' />
       </fieldset>
       </form>
@@ -384,7 +384,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
 
       addboxbutton.click(function() {
         tee.val("lisaa");
-        nodeboxtitle.html("Lis‰‰ taso");
+        nodeboxtitle.html("Lis√§√§ taso");
         addboxbutton.replaceWith(nodebox);
         nodeboxname.val("").focus();
         nodebox.show();
@@ -393,7 +393,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
       });
 
       addboxbutton_keywords.click(function() {
-        nodebox_keywords_title.html("Lis‰‰ avainsana");
+        nodebox_keywords_title.html("Lis√§√§ avainsana");
         addboxbutton_keywords.hide();
         addboxbutton_keywords.after(nodebox_keywords);
         jQuery('#keywords_value').hide();
@@ -540,12 +540,12 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
     echo "<div id='editbuttons_keywords'>";
 
     if ($saamuokata) {
-      echo "<a href='#' id='showaddbox_keywords'><img src='{$palvelin2}pics/lullacons/add.png' alt='",t('Lis‰‰'),"'/>",t('Lis‰‰ uusi avainsana'),"</a><br /><br />";
+      echo "<a href='#' id='showaddbox_keywords'><img src='{$palvelin2}pics/lullacons/add.png' alt='",t('Lis√§√§'),"'/>",t('Lis√§√§ uusi avainsana'),"</a><br /><br />";
     }
 
     echo "</div>";
 
-    # tason avainsana lis‰yslaatikko
+    # tason avainsana lis√§yslaatikko
     echo "<div id='nodebox_keywords' style='display: none'>
       <form id='keywordsform'>
       <fieldset>
@@ -573,7 +573,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
         </ul>
         <input type='hidden' id='tee' value='' />
         <input type='hidden' id='toim' value='{$toim}' />
-        <p style='display: none; color: red' id='nodebox_keywords_err'>".t("Laji ja avainsana ei saa olla tyhji‰").".</p>
+        <p style='display: none; color: red' id='nodebox_keywords_err'>".t("Laji ja avainsana ei saa olla tyhji√§").".</p>
         <input type='submit' id='editsubmitbtn' value='".t("Tallenna")."' />
       </fieldset>
       </form>
@@ -607,11 +607,11 @@ if (isset($tee) and isset($toim)) {
 
   if ($tee == 'valitsesegmentti') {
     // haetaan valitut segmentit ja enabloidaan valintaominaisuudet yms
-    $qu = "  SELECT puun_tunnus
-        FROM puun_alkio
-        WHERE yhtio = '{$yhtiorow['yhtio']}'
-        AND laji = '{$toim}'
-        AND liitos = '{$liitos}'";
+    $qu = "SELECT puun_tunnus
+           FROM puun_alkio
+           WHERE yhtio = '{$yhtiorow['yhtio']}'
+           AND laji    = '{$toim}'
+           AND liitos  = '{$liitos}'";
     $re = pupe_query($qu);
     // haetaan tiedot arrayhin myohempaa kayttoa varten
     while($row = mysql_fetch_assoc($re)) {
@@ -627,20 +627,20 @@ if (isset($tee) and isset($toim)) {
 }
 
 /* html list */
-$qu = "  SELECT
-    node.lft AS lft,
-    node.rgt AS rgt,
-    node.nimi AS node_nimi,
-    node.koodi AS node_koodi,
-    node.tunnus AS node_tunnus,
-    node.syvyys as node_syvyys,
-    (COUNT(node.tunnus) - 1) AS syvyys
-    FROM dynaaminen_puu AS node
-    JOIN dynaaminen_puu AS parent ON node.yhtio=parent.yhtio and node.laji=parent.laji AND node.lft BETWEEN parent.lft AND parent.rgt
-    WHERE node.yhtio = '{$kukarow["yhtio"]}'
-    AND node.laji = '{$toim}'
-    GROUP BY node.lft
-    ORDER BY node.lft";
+$qu = "SELECT
+       node.lft AS lft,
+       node.rgt AS rgt,
+       node.nimi AS node_nimi,
+       node.koodi AS node_koodi,
+       node.tunnus AS node_tunnus,
+       node.syvyys as node_syvyys,
+       (COUNT(node.tunnus) - 1) AS syvyys
+       FROM dynaaminen_puu AS node
+       JOIN dynaaminen_puu AS parent ON node.yhtio=parent.yhtio and node.laji=parent.laji AND node.lft BETWEEN parent.lft AND parent.rgt
+       WHERE node.yhtio = '{$kukarow["yhtio"]}'
+       AND node.laji    = '{$toim}'
+       GROUP BY node.lft
+       ORDER BY node.lft";
 $re = pupe_query($qu);
 
 // handlataan tilanne kun ei ole viela puun root nodea

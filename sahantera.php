@@ -66,14 +66,14 @@ if ($tee == "hae") {
     $tee = "jatka";
   }
   else {
-    echo "<font class='error'>".t("VIRHE: Tuotetta ei lˆydy")."</font><br>";
+    echo "<font class='error'>".t("VIRHE: Tuotetta ei l√∂ydy")."</font><br>";
     $tee = "";
   }
 
   $tulostakappale = (int) $tulostakappale;
 
   if ($tulostakappale <= 0) {
-    echo "<font class='error'>".t("VIRHE: Syˆt‰ kappalem‰‰r‰")."</font><br>";
+    echo "<font class='error'>".t("VIRHE: Sy√∂t√§ kappalem√§√§r√§")."</font><br>";
     $tee = "";
   }
 
@@ -88,7 +88,7 @@ if ($tee == "jatka") {
   $filenimi = "/tmp/sahantera_tulostus.txt";
   $hammastus = t_tuotteen_avainsanat($trow, 'HAMMASTUS');
 
-  // Mitat tulee olla millimetrej‰, metrein‰ kannassa. Syvyys yhdell‰ desimaalilla, muut ilman desimaalia.
+  // Mitat tulee olla millimetrej√§, metrein√§ kannassa. Syvyys yhdell√§ desimaalilla, muut ilman desimaalia.
   $mitat = round($trow["tuotekorkeus"] * 1000, 0)." x ".round($trow["tuoteleveys"] * 1000, 0)." x ".round($trow["tuotesyvyys"] * 1000, 1);
 
   // Splitataan tuotteen nimitys spacesta
@@ -96,14 +96,14 @@ if ($tee == "jatka") {
 
   $out = chr(10).chr(10).chr(10).chr(10);     // 5 rivinvaihtoa (Line feed)
   $out .= sprintf ('%6s', ' ');          // 6 spacea
-  $out .= sprintf ('%-9.9s', $nimitys[1]);     // Nimityksest‰ toka sana, max 9 merkki‰
+  $out .= sprintf ('%-9.9s', $nimitys[1]);     // Nimityksest√§ toka sana, max 9 merkki√§
   $out .= sprintf ('%1s', ' ');          // 1 space
-  $out .= sprintf ('%-25.25s', $mitat);       // Pituus x leveys x paksuus, max 25 merkki‰
+  $out .= sprintf ('%-25.25s', $mitat);       // Pituus x leveys x paksuus, max 25 merkki√§
   $out .= sprintf ('%1s', ' ');          // 1 space
-  $out .= sprintf ('%-12.12s', $hammastus);    // Hammastus, max 12 merkki‰
-  $out .= chr(10).chr(10).chr(13);        // 2 rivinvaihtoa (Line feed) + 1 Carriage return (= siirret‰‰n kirjoitusp‰‰ rivin alkuun)
+  $out .= sprintf ('%-12.12s', $hammastus);    // Hammastus, max 12 merkki√§
+  $out .= chr(10).chr(10).chr(13);        // 2 rivinvaihtoa (Line feed) + 1 Carriage return (= siirret√§√§n kirjoitusp√§√§ rivin alkuun)
   $out .= sprintf ('%16s', ' ');          // 16 spacea
-  $out .= sprintf ('%-40.40s', $trow["tuoteno"]);  // Tuotenumero, max 40 merkki‰
+  $out .= sprintf ('%-40.40s', $trow["tuoteno"]);  // Tuotenumero, max 40 merkki√§
   $out .= chr(13).chr(12);            // Carriage return + Form feed
 
   $boob = file_put_contents($filenimi, $out);

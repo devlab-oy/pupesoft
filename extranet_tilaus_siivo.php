@@ -1,14 +1,14 @@
 <?php
 
-// Kutsutaanko CLI:st‰
+// Kutsutaanko CLI:st√§
 if (php_sapi_name() != 'cli') {
-  echo "T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!";
+  echo "T√§t√§ scripti√§ voi ajaa vain komentorivilt√§!";
   exit(1);
 }
 
-// komentorivilt‰ pit‰‰ tulla parametrin‰ yhtio
+// komentorivilt√§ pit√§√§ tulla parametrin√§ yhtio
 if (!isset($argv[1]) or trim($argv[1]) == '') {
-  echo "Ensimm‰inen parametri yhtio!";
+  echo "Ensimm√§inen parametri yhtio!";
   exit(1);
 }
 
@@ -18,13 +18,13 @@ date_default_timezone_set('Europe/Helsinki');
 require ("inc/connect.inc");
 require ("inc/functions.inc");
 
-// Yhtiˆ komentorivilt‰
+// Yhti√∂ komentorivilt√§
 $yhtio = mysql_real_escape_string($argv[1]);
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
 
 if (!isset($yhtiorow['extranet_tilaus_varaa_saldoa'])) {
-  die ("Yhtiˆll‰ ei ole parametria extranet_tilaus_varaa_saldoa!\n");
+  die ("Yhti√∂ll√§ ei ole parametria extranet_tilaus_varaa_saldoa!\n");
 }
 
 $laskuri_jt = 0;
@@ -47,16 +47,16 @@ while ($row = mysql_fetch_assoc($result)) {
 
   $aikaraja = 0;
 
-  // tyhj‰ = Yhtiˆn oletus
+  // tyhj√§ = Yhti√∂n oletus
   // X = Extranet-tilaus varaa saldoa
   // numero = Extranet-tilaus varaa saldoa x tuntia
   // E = Extranet-tilaus ei varaa saldoa
   if ($row['extranet_tilaus_varaa_saldoa'] != 'X') {
 
-    // tyhj‰ on yhtiˆn oletus
+    // tyhj√§ on yhti√∂n oletus
     if ($row['extranet_tilaus_varaa_saldoa'] == '') {
 
-      // jos yhtiˆn oletus ei ole tyhj‰‰, otetaan aikaraja tunteina
+      // jos yhti√∂n oletus ei ole tyhj√§√§, otetaan aikaraja tunteina
       if ($yhtiorow['extranet_tilaus_varaa_saldoa'] != '') {
         $aikaraja = (int) $yhtiorow['extranet_tilaus_varaa_saldoa'];
       }
@@ -77,7 +77,7 @@ while ($row = mysql_fetch_assoc($result)) {
   }
 
   // laitetaan kaikki poimitut extranet jt-rivit takaisin omille vanhoille tilauksille
-  // laitetaan myˆs ei poimitut extranet jt-rivit varattu = 0
+  // laitetaan my√∂s ei poimitut extranet jt-rivit varattu = 0
   $query = "SELECT tilausrivi.tunnus,
             tilausrivin_lisatiedot.vanha_otunnus,
             tilausrivin_lisatiedot.positio,
@@ -126,6 +126,6 @@ while ($row = mysql_fetch_assoc($result)) {
 
 if ($laskuri_jt > 0 or $laskuri_norm > 0) {
   echo date("Y-m-d H:i:s");
-  echo ": Palautettiin $laskuri_jt jt-rivi‰ alkuper‰isille extranet-tilauksille";
-  echo " ja $laskuri_norm tilausrivi‰ ei en‰‰ varaa saldoa.\n";
+  echo ": Palautettiin $laskuri_jt jt-rivi√§ alkuper√§isille extranet-tilauksille";
+  echo " ja $laskuri_norm tilausrivi√§ ei en√§√§ varaa saldoa.\n";
 }

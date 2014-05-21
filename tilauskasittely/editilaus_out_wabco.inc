@@ -2,10 +2,10 @@
 
 # Formaatti on:
 # toimittajanumero "999999"
-# tyhj‰‰ x(4)
+# tyhj√§√§ x(4)
 # tilausnumero x(13)
 # tuotekoodi x(18)
-# m‰‰r‰ 9999
+# m√§√§r√§ 9999
 
 $query = "SELECT tilausrivi.tunnus,
           tilausrivi.otunnus,
@@ -24,7 +24,7 @@ $query = "SELECT tilausrivi.tunnus,
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) == 0) {
-  echo "<font class='error'>".t("L‰hetett‰vi‰ tilausrivej‰ ei lˆydy")."</font>";
+  echo "<font class='error'>".t("L√§hetett√§vi√§ tilausrivej√§ ei l√∂ydy")."</font>";
 }
 else {
 
@@ -35,10 +35,10 @@ else {
   while ($tilausrivirow = mysql_fetch_assoc($result)) {
 
     $out  = sprintf("%-6.6s",   $toimirow['edi_kayttaja']);      // toimittajanro
-    $out .= sprintf("%-4.4s",   "");                // tyhj‰‰
+    $out .= sprintf("%-4.4s",   "");                // tyhj√§√§
     $out .= sprintf("%-13.13s", $tilausrivirow['otunnus']);      // tilausnumero
     $out .= sprintf("%-18.18s", $tilausrivirow['toim_tuoteno']);  // tuotekoodi
-    $out .= sprintf("%04d",   round($tilausrivirow['varattu']));  // m‰‰r‰
+    $out .= sprintf("%04d",   round($tilausrivirow['varattu']));  // m√§√§r√§
     fwrite($toot, $out . "\n");
   }
 

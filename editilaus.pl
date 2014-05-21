@@ -6,16 +6,16 @@ use Fcntl qw(:flock);
 use Cwd 'abs_path';
 use File::Basename;
 
-# Kutsu t‰t‰ crontabista esimerkiksi:
+# Kutsu t√§t√§ crontabista esimerkiksi:
 # */5 * * * * root /usr/bin/perl /home/devlab/pupesoft/editilaus.pl "/home/editilaus/" "/home/editilaus/done/" "/home/editilaus/error/" "user@example.com" "pupesoft@example.com"
 
-$dirri1    = $ARGV[0]; # mist‰ haetaan
-$dirri2    = $ARGV[1]; # minne siirret‰‰n
-$dirri3    = $ARGV[2]; # minne siirret‰‰n kun erroroi
+$dirri1    = $ARGV[0]; # mist√§ haetaan
+$dirri2    = $ARGV[1]; # minne siirret√§√§n
+$dirri3    = $ARGV[2]; # minne siirret√§√§n kun erroroi
 $email     = $ARGV[3]; # kenelle meilataan jos on ongelma
-$emailfrom = $ARGV[4]; # mill‰ osoitteella meili l‰hetet‰‰n
+$emailfrom = $ARGV[4]; # mill√§ osoitteella meili l√§hetet√§√§n
 
-$pupedir = abs_path(dirname($0)) . "/tilauskasittely/"; # pupesoftin tilausk‰sittely hakemisto
+$pupedir = abs_path(dirname($0)) . "/tilauskasittely/"; # pupesoftin tilausk√§sittely hakemisto
 $komento = "/usr/bin/php";                              # polku php -komentoon
 $tmpfile = "/tmp/##pupesoft-edi-tmp";                   # lukkotiedosto
 
@@ -39,7 +39,7 @@ if (! -d $dirri3) {
   exit;
 }
 
-sysopen("tmpfaili", $tmpfile, O_CREAT) or die("Failin $tmpfile avaus ep‰onnistui!");
+sysopen("tmpfaili", $tmpfile, O_CREAT) or die("Failin $tmpfile avaus ep√§onnistui!");
 flock("tmpfaili", LOCK_EX) or die("Lukkoa ei saatu fileen: $tmpfile");
 
 opendir($hakemisto, $dirri1);
@@ -53,7 +53,7 @@ while ($file = readdir($hakemisto)) {
 
   if (-f $nimi && $extchk ne '.tmp') {
 
-    # loopataan t‰t‰ failia kunnes ok
+    # loopataan t√§t√§ failia kunnes ok
     while ($ok < 1) {
 
       if ($vnimi eq $nimi) {
@@ -65,7 +65,7 @@ while ($file = readdir($hakemisto)) {
 
       $vnimi=$nimi;
 
-      open("faili", $nimi) or die("Failin $nimi avaus ep‰onnistui.");
+      open("faili", $nimi) or die("Failin $nimi avaus ep√§onnistui.");
       @rivit = <faili>;
       $ok=0;
 
@@ -77,28 +77,28 @@ while ($file = readdir($hakemisto)) {
 
         if ($rivi=~m"ICHG__END") {
           $laskuri=0;
-          $ok=1;  # loppumerkki lˆytyi file on ok!
+          $ok=1;  # loppumerkki l√∂ytyi file on ok!
           $edi_tyyppi="";
           last;
         }
         if ($rivi=~m"\*IE") {
           $laskuri=0;
-          $ok=1;  # loppumerkki lˆytyi file on ok!
-          $edi_tyyppi=" futursoft";  # t‰‰ on futurifaili, (huom. space t‰rke‰)
+          $ok=1;  # loppumerkki l√∂ytyi file on ok!
+          $edi_tyyppi=" futursoft";  # t√§√§ on futurifaili, (huom. space t√§rke√§)
           last;
         }
         if ($rivi=~m"UNS\+S") {
           $laskuri=0;
-          $ok=1;  # loppumerkki lˆytyi file on ok!
-          $edi_tyyppi=" edifact911";  # t‰‰ on orderfaili, (huom. space t‰rke‰)
+          $ok=1;  # loppumerkki l√∂ytyi file on ok!
+          $edi_tyyppi=" edifact911";  # t√§√§ on orderfaili, (huom. space t√§rke√§)
           last;
         }
       }
 
       close("faili");
 
-      # edifact911 failit tulee 80 merkki‰ pitkill‰ rivill‰, joten 'UNS\+S'-t‰gi voi olla kahdella rivill‰
-      # otetaan t‰ss‰ koko faili stringiin ja katotaan lˆytyykˆ haettu t‰gi
+      # edifact911 failit tulee 80 merkki√§ pitkill√§ rivill√§, joten 'UNS\+S'-t√§gi voi olla kahdella rivill√§
+      # otetaan t√§ss√§ koko faili stringiin ja katotaan l√∂ytyyk√∂ haettu t√§gi
       if ($ok < 1) {
 
         $whole_file =~ s/\n//g;
@@ -107,8 +107,8 @@ while ($file = readdir($hakemisto)) {
 
         if ($result >= 0) {
           $laskuri=0;
-          $ok=1;  # loppumerkki lˆytyi file on ok!
-          $edi_tyyppi=" edifact911";  # t‰‰ on orderfaili, (huom. space t‰rke‰)
+          $ok=1;  # loppumerkki l√∂ytyi file on ok!
+          $edi_tyyppi=" edifact911";  # t√§√§ on orderfaili, (huom. space t√§rke√§)
         }
       }
 
@@ -126,7 +126,7 @@ while ($file = readdir($hakemisto)) {
         $ok=1;
       }
 
-      # jos ollaan luupattu samaa failia 10 kertaa, ni siirre‰t‰n se pois...
+      # jos ollaan luupattu samaa failia 10 kertaa, ni siirre√§t√§n se pois...
       if ($laskuri > 10) {
         $smtp = Net::SMTP->new('localhost');
         $smtp->mail($emailfrom);
@@ -144,7 +144,7 @@ while ($file = readdir($hakemisto)) {
         $ok=1;
       }
 
-      # jos file ei ollu t‰ll‰ loopilla ok, odotetaan 1 sec
+      # jos file ei ollu t√§ll√§ loopilla ok, odotetaan 1 sec
       if ($ok < 1) {
         sleep(1);
       }
@@ -152,5 +152,5 @@ while ($file = readdir($hakemisto)) {
   }
 }
 
-# siivotaan yli 90 p‰iv‰‰ vanhat aineistot
+# siivotaan yli 90 p√§iv√§√§ vanhat aineistot
 system("find $dirri2 -type f -mtime +90 -delete");

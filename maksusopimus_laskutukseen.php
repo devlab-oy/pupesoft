@@ -2,7 +2,7 @@
 
 if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) {
 
-  // DataTables p‰‰lle
+  // DataTables p√§√§lle
   $pupe_DataTables = "maksusopparit";
 
   require("inc/parametrit.inc");
@@ -12,7 +12,7 @@ if (!function_exists("ennakkolaskuta")) {
   function ennakkolaskuta($tunnus) {
     global $kukarow, $yhtiorow;
 
-    ///* Etsit‰‰n laskun kaikki tiedot jolle maksusopimus on tehty *///
+    ///* Etsit√§√§n laskun kaikki tiedot jolle maksusopimus on tehty *///
     $query = "SELECT *
               FROM lasku
               WHERE yhtio  = '$kukarow[yhtio]'
@@ -22,20 +22,20 @@ if (!function_exists("ennakkolaskuta")) {
     $stresult = pupe_query($query);
 
     if (mysql_num_rows($stresult) == 0) {
-      echo "Otsikkoa '$tunnus' ei lˆytynyt, tai se on v‰‰r‰ss‰ tilassa.";
+      echo "Otsikkoa '$tunnus' ei l√∂ytynyt, tai se on v√§√§r√§ss√§ tilassa.";
       return 0;
     }
 
     $laskurow = mysql_fetch_assoc($stresult);
 
-    //  Lasku voi menn‰ myˆs kaukomaille, joten haetaan t‰m‰n asiakkaan kieli..
+    //  Lasku voi menn√§ my√∂s kaukomaille, joten haetaan t√§m√§n asiakkaan kieli..
     $query = "SELECT kieli from asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
     $kielires = pupe_query($query);
     $kielirow = mysql_fetch_assoc($kielires);
 
-    if ($debug==1) echo t("Perusotsikko lˆytyi")." $laskurow[nimi]<br>";
+    if ($debug==1) echo t("Perusotsikko l√∂ytyi")." $laskurow[nimi]<br>";
 
-    // Onko sopimuksella viel‰ jotain ennakkolaskutettavaa
+    // Onko sopimuksella viel√§ jotain ennakkolaskutettavaa
     $query = "SELECT yhtio
               FROM maksupositio
               WHERE yhtio     = '$kukarow[yhtio]'
@@ -48,7 +48,7 @@ if (!function_exists("ennakkolaskuta")) {
       return 0;
     }
 
-    //  tarkistetaan ett‰ meill‰ on jotain j‰rkev‰‰ laskutettavaa
+    //  tarkistetaan ett√§ meill√§ on jotain j√§rkev√§√§ laskutettavaa
     $query = "SELECT *
               FROM maksupositio
               WHERE yhtio     = '$kukarow[yhtio]'
@@ -59,14 +59,14 @@ if (!function_exists("ennakkolaskuta")) {
     $posres = pupe_query($query);
     $posrow = mysql_fetch_assoc($posres);
 
-    if ($debug==1) echo t("Lˆydettiin maksupositio")." $posrow[tunnus], $posrow[osuus] %, $posrow[maksuehto]<br>";
+    if ($debug==1) echo t("L√∂ydettiin maksupositio")." $posrow[tunnus], $posrow[osuus] %, $posrow[maksuehto]<br>";
 
     if ($posrow["summa"] <= 0 or $posrow["maksuehto"] == 0 or (int) $posrow["tunnus"] == 0) {
-      echo t("VIRHE: laskutusposition summa on nolla tai sen alle. Korjaa t‰m‰!")."<br>";
+      echo t("VIRHE: laskutusposition summa on nolla tai sen alle. Korjaa t√§m√§!")."<br>";
       return 0;
     }
 
-    // Tilausrivin kommentti-kentt‰‰n menev‰ kommentti
+    // Tilausrivin kommentti-kentt√§√§n menev√§ kommentti
     $query = "SELECT
               sum(if (uusiotunnus > 0, 1, 0)) laskutettu,
               count(*) yhteensa
@@ -78,7 +78,7 @@ if (!function_exists("ennakkolaskuta")) {
 
     $lahteva_lasku = ($aburow["laskutettu"] + 1)."/".$aburow["yhteensa"];
 
-    // tehd‰‰n vanhasta laskusta 1:1 kopio...
+    // tehd√§√§n vanhasta laskusta 1:1 kopio...
     $query = "INSERT INTO lasku SET ";
     for ($i=0; $i<mysql_num_fields($stresult); $i++) {
 
@@ -109,13 +109,13 @@ if (!function_exists("ennakkolaskuta")) {
       elseif ($fieldname == 'eilahetetta') {
         $query .= "eilahetetta='',";
       }
-      // ker‰ysaika, luontiaika ja toimitusaikaan now
+      // ker√§ysaika, luontiaika ja toimitusaikaan now
       elseif ($fieldname == 'kerayspvm' or
           $fieldname == 'luontiaika' or
           $fieldname == 'toimaika') {
         $query .= $fieldname."=now(),";
       }
-      // n‰m‰ kent‰t tyhjennet‰‰n
+      // n√§m√§ kent√§t tyhjennet√§√§n
       elseif ($fieldname == 'kapvm' or
           $fieldname == 'tapvm' or
           $fieldname == 'olmapvm' or
@@ -151,11 +151,11 @@ if (!function_exists("ennakkolaskuta")) {
       elseif ($fieldname == 'kate_korjattu') {
         $query .= $fieldname." = NULL,";
       }
-      // maksuehto tulee t‰lt‰ positiolta
+      // maksuehto tulee t√§lt√§ positiolta
       elseif ($fieldname == 'maksuehto') {
         $query .= "maksuehto = '$posrow[maksuehto]',";
       }
-      // erpcm voi tulla t‰lt‰ positiolta
+      // erpcm voi tulla t√§lt√§ positiolta
       elseif ($fieldname == 'erpcm') {
         if ($posrow["erpcm"] != '0000-00-00') {
           $query .= "erpcm = '$posrow[erpcm]',";
@@ -168,8 +168,8 @@ if (!function_exists("ennakkolaskuta")) {
         $query .= "clearing = 'ENNAKKOLASKU',";
       }
       elseif ($fieldname == 'jaksotettu') {
-        // K‰‰nnet‰n ennakkolaskun jaksotettukentt‰ negatiiviseksi jotta me lˆydet‰‰n ne yksiselitteisesti,
-        // mutta kuitenkin niin, etteiv‰t ne sekoitu maksusopimuksen alkuper‰isiin tilauksiin
+        // K√§√§nnet√§n ennakkolaskun jaksotettukentt√§ negatiiviseksi jotta me l√∂ydet√§√§n ne yksiselitteisesti,
+        // mutta kuitenkin niin, etteiv√§t ne sekoitu maksusopimuksen alkuper√§isiin tilauksiin
         $query .= "jaksotettu = '".($laskurow['jaksotettu'] * -1)."',";
       }
       elseif ($fieldname == 'viesti' and !empty($yhtiorow['ennakkolaskun_tyyppi'])) {
@@ -186,7 +186,7 @@ if (!function_exists("ennakkolaskuta")) {
     $stresult = pupe_query($query);
     $id = mysql_insert_id();
 
-    // tehd‰‰n vanhan laskun lis‰tiedoista 1:1 kopio...
+    // tehd√§√§n vanhan laskun lis√§tiedoista 1:1 kopio...
     $query = "SELECT *
               FROM laskun_lisatiedot
               WHERE yhtio = '$kukarow[yhtio]'
@@ -217,7 +217,7 @@ if (!function_exists("ennakkolaskuta")) {
     $query = substr($query, 0, -1);
     $lisatiedot_result = pupe_query($query);
 
-    // tehd‰‰n vanhan laskun tyˆm‰‰r‰ystidoista 1:1 kopio...
+    // tehd√§√§n vanhan laskun ty√∂m√§√§r√§ystidoista 1:1 kopio...
     $query = "SELECT *
               FROM tyomaarays
               WHERE yhtio = '$kukarow[yhtio]'
@@ -253,7 +253,7 @@ if (!function_exists("ennakkolaskuta")) {
     $query_ale_lisa = generoi_alekentta('M');
 
     // Lasketaan maksusopimuksen arvo verokannoittain jotta voidaan laskuttaa ennakot oikeissa alveissa
-    // ja lis‰t‰‰n ennakkolaskutusrivi laskulle, vain jaksotetut rivit!
+    // ja lis√§t√§√§n ennakkolaskutusrivi laskulle, vain jaksotetut rivit!
     $query = "SELECT
               sum(if (tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)) jaksotettavaa
               FROM lasku
@@ -307,8 +307,8 @@ if (!function_exists("ennakkolaskuta")) {
         $rivikommentti .= "\n ".$posrow["lisatiedot"];
       }
 
-      echo "<font class = 'error'>".t("VIRHE: Ennakkolaskulla ei ole yht‰‰n jaksotettua tilausrivi‰!")." $tunnus</font><br>";
-      echo "<font class = 'message'>".t("K‰y tekem‰ss‰ ennakkolasku manuaalisesti. Ennakkolaskulle perustetun laskun tunnus on")." $id</font><br>";
+      echo "<font class = 'error'>".t("VIRHE: Ennakkolaskulla ei ole yht√§√§n jaksotettua tilausrivi√§!")." $tunnus</font><br>";
+      echo "<font class = 'message'>".t("K√§y tekem√§ss√§ ennakkolasku manuaalisesti. Ennakkolaskulle perustetun laskun tunnus on")." $id</font><br>";
       echo "<font class = 'message'>".t("Ennakkolaskutuksen tuotenumero on")." $yhtiorow[ennakkomaksu_tuotenumero]</font><br><br>";
 
       $query  = "INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, laatija, laadittu) values
@@ -317,7 +317,7 @@ if (!function_exists("ennakkolaskuta")) {
     }
     else {
       while ($row = mysql_fetch_assoc($sresult)) {
-        // $summa on verollinen tai veroton riippuen yhtiˆn myyntihinnoista
+        // $summa on verollinen tai veroton riippuen yhti√∂n myyntihinnoista
         $summa = $row["summa"]/$sumrow["jaksotettavaa"] * $posrow["summa"];
 
         if (!empty($yhtiorow['ennakkolaskun_tyyppi'])) {
@@ -354,7 +354,7 @@ if (!function_exists("ennakkolaskuta")) {
                    ('$summa', '{$laitetaanko_netto}', '{$varattu}', '{$tilkpl}', '$id', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '$rivikommentti', '$kukarow[kuka]', now() {$ale_arvot})";
         $addtil = pupe_query($query);
 
-        if ($debug==1) echo t("Lis‰ttiin ennakkolaskuun rivi")." $summa $row[alv] otunnus $id<br>";
+        if ($debug==1) echo t("Lis√§ttiin ennakkolaskuun rivi")." $summa $row[alv] otunnus $id<br>";
 
         $tot += $summa;
       }
@@ -362,18 +362,18 @@ if (!function_exists("ennakkolaskuta")) {
       echo "<font class = 'message'>".t("Tehtiin ennakkolasku tilaukselle")." $tunnus ".t("tunnus").": $id ".t("osuus").": $posrow[osuus]% ".t("summa").": $tot</font><br>";
     }
 
-    // P‰ivitet‰‰n positiolle t‰m‰n laskun tunnus
+    // P√§ivitet√§√§n positiolle t√§m√§n laskun tunnus
     $query = "UPDATE maksupositio set uusiotunnus='$id' where tunnus='$posrow[tunnus]'";
     $result = pupe_query($query);
 
-    // merkataan t‰ss‰ vaiheessa luotu ennakkomaksu-tilaus toimitetuksi
+    // merkataan t√§ss√§ vaiheessa luotu ennakkomaksu-tilaus toimitetuksi
     $query = "UPDATE tilausrivi
               SET toimitettu = '$kukarow[kuka]', toimitettuaika=now(), kerattyaika=now()
               WHERE yhtio = '$kukarow[yhtio]'
               and otunnus = '$id'";
     $result = pupe_query($query);
 
-    // ja p‰ivitet‰‰n luotu ennakkomaksu-tilaus laskutusjonoon
+    // ja p√§ivitet√§√§n luotu ennakkomaksu-tilaus laskutusjonoon
     $query = "UPDATE lasku
               set tila='L', alatila='D'
               WHERE yhtio = '$kukarow[yhtio]'
@@ -388,7 +388,7 @@ if (!function_exists("loppulaskuta")) {
   function loppulaskuta($tunnus) {
     global $kukarow, $yhtiorow;
 
-    ///* Tutkitaan alkuper‰isten tilausten tiloja *///
+    ///* Tutkitaan alkuper√§isten tilausten tiloja *///
     $query = "SELECT sum(if(tila='L' and alatila = 'J',1,0)) toimitus_valmis, sum(if (tila='R',1,0)) rojekti, count(*) kaikki, max(tunnus) vikatunnus
               FROM lasku
               WHERE yhtio    = '$kukarow[yhtio]'
@@ -397,7 +397,7 @@ if (!function_exists("loppulaskuta")) {
     $stresult = pupe_query($query);
 
     if (mysql_num_rows($stresult) == 0) {
-      echo "<font class='error'>Otsikkoa '$tunnus' ei lˆytynyt, tai se on v‰‰r‰ss‰ tilassa.</font><br><br>";
+      echo "<font class='error'>Otsikkoa '$tunnus' ei l√∂ytynyt, tai se on v√§√§r√§ss√§ tilassa.</font><br><br>";
       return 0;
     }
     else {
@@ -411,7 +411,7 @@ if (!function_exists("loppulaskuta")) {
       $vikatunnus = $row["vikatunnus"];
     }
 
-    // tarkistetaan ett‰ meill‰ on jotain j‰rkev‰‰ laskutettavaa
+    // tarkistetaan ett√§ meill√§ on jotain j√§rkev√§√§ laskutettavaa
     $query = "SELECT *
               FROM maksupositio
               WHERE yhtio     = '$kukarow[yhtio]'
@@ -429,9 +429,9 @@ if (!function_exists("loppulaskuta")) {
       return 0;
     }
 
-    if ($debug==1) echo t("Lˆydettiin maksupositio")." $posrow[tunnus], $posrow[osuus] %, $posrow[maksuehto]<br>";
+    if ($debug==1) echo t("L√∂ydettiin maksupositio")." $posrow[tunnus], $posrow[osuus] %, $posrow[maksuehto]<br>";
 
-    // Tilausrivin kommentti-kentt‰‰n menev‰ kommentti
+    // Tilausrivin kommentti-kentt√§√§n menev√§ kommentti
     $query = "SELECT
               sum(if (uusiotunnus > 0, 1, 0)) laskutettu,
               count(*) yhteensa
@@ -443,18 +443,18 @@ if (!function_exists("loppulaskuta")) {
 
     $lahteva_lasku = ($aburow["laskutettu"] + 1)."/".$aburow["yhteensa"];
 
-    // varmistetaan ett‰ laskutus n‰ytt‰isi olevan OK!!
+    // varmistetaan ett√§ laskutus n√§ytt√§isi olevan OK!!
     if ($aburow["yhteensa"] - $aburow["laskutettu"] > 1) {
-      echo "<font class='error'>".t("VIRHE: Loppulaskutus ei onnistu koska positioita on j‰ljell‰ enemm‰n kuin yksi!")."</font><br><br>";
+      echo "<font class='error'>".t("VIRHE: Loppulaskutus ei onnistu koska positioita on j√§ljell√§ enemm√§n kuin yksi!")."</font><br><br>";
       return 0;
     }
 
-    //  Tarkastetaan ett‰ meill‰ on ok maksuehto loppulaskutukseen!!!
-    $apuqu = "  SELECT *
-          from maksuehto
-          where yhtio    = '$kukarow[yhtio]'
-          and tunnus     = '$posrow[maksuehto]'
-          and jaksotettu = ''";
+    //  Tarkastetaan ett√§ meill√§ on ok maksuehto loppulaskutukseen!!!
+    $apuqu = "SELECT *
+              from maksuehto
+              where yhtio    = '$kukarow[yhtio]'
+              and tunnus     = '$posrow[maksuehto]'
+              and jaksotettu = ''";
     $meapu = pupe_query($apuqu);
 
     $erlisa = "";
@@ -468,7 +468,7 @@ if (!function_exists("loppulaskuta")) {
     }
 
     if ($meapurow["erapvmkasin"] != "" and $posrow["erpcm"] == "0000-00-00") {
-      echo "<font class='error'>".t("VIRHE: Loppulaskun maksuehdon er‰p‰iv‰ puuttuu")."!!!</font><br><br>";
+      echo "<font class='error'>".t("VIRHE: Loppulaskun maksuehdon er√§p√§iv√§ puuttuu")."!!!</font><br><br>";
       return 0;
     }
     elseif ($meapurow["erapvmkasin"] != "") {
@@ -477,7 +477,7 @@ if (!function_exists("loppulaskuta")) {
 
     echo "<font class = 'message'>".t("Loppulaskutetaan tilaus")." $tunnus<br></font><br>";
 
-    //Lasketaan paljonko ollaan jo laskutettu ja mill‰ verokannoilla
+    //Lasketaan paljonko ollaan jo laskutettu ja mill√§ verokannoilla
     $query = "SELECT round(sum(rivihinta * if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),2) laskutettu, tilausrivi.alv
               FROM lasku
               JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and kpl <> 0 and uusiotunnus > 0 and tilausrivi.tuoteno='$yhtiorow[ennakkomaksu_tuotenumero]'
@@ -486,7 +486,7 @@ if (!function_exists("loppulaskuta")) {
               GROUP BY alv";
     $sresult = pupe_query($query);
 
-    //  Haetaan asiakkaan kieli niin hekin ymm‰rt‰v‰t..
+    //  Haetaan asiakkaan kieli niin hekin ymm√§rt√§v√§t..
     $query = "SELECT kieli from asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
     $kielires = pupe_query($query);
     $kielirow = mysql_fetch_assoc($kielires);
@@ -508,14 +508,14 @@ if (!function_exists("loppulaskuta")) {
                  values  ('$row[laskutettu]', 'N', '-1', '-1', '$vikatunnus', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '$rivikommentti', '$kukarow[kuka]', now(), '$kukarow[kuka]', now(), '$kukarow[kuka]', now())";
       $addtil = pupe_query($query);
 
-      if ($debug == 1) echo t("Loppulaskuun lis‰ttiin ennakkolaskun hyvitys")." -$row[laskutettu] alv $row[alv]% otunnus $vimppa<br>";
+      if ($debug == 1) echo t("Loppulaskuun lis√§ttiin ennakkolaskun hyvitys")." -$row[laskutettu] alv $row[alv]% otunnus $vimppa<br>";
     }
 
-    // P‰ivitet‰‰n positiolle laskutustunnus
+    // P√§ivitet√§√§n positiolle laskutustunnus
     $query = "UPDATE maksupositio set uusiotunnus='$vikatunnus' where tunnus = '$posrow[tunnus]'";
     $result = pupe_query($query);
 
-    // Alkuper‰inen tilaus/tilaukset menee laskutukseen
+    // Alkuper√§inen tilaus/tilaukset menee laskutukseen
     $query = "UPDATE lasku
               SET maksuehto   = '$posrow[maksuehto]',
               clearing        = 'loppulasku',
@@ -546,14 +546,14 @@ if (!function_exists("loppulaskuta")) {
   }
 }
 
-//K‰yttˆliittym‰
+//K√§ytt√∂liittym√§
 if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) {
   $query = "SELECT nimitys
             FROM tuote
             WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'";
   $tresult = pupe_query($query);
 
-  if (mysql_num_rows($tresult) == 0) die(t("VIRHE: Yhtiˆll‰ EI OLE ennakkolaskutustuotetta, sopimuslaskutusta ei voida toteuttaa!"));
+  if (mysql_num_rows($tresult) == 0) die(t("VIRHE: Yhti√∂ll√§ EI OLE ennakkolaskutustuotetta, sopimuslaskutusta ei voida toteuttaa!"));
   echo "<font class='head'>".t("Sopimuslaskutus").":</font><hr><br>";
 
 
@@ -563,7 +563,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
   }
 
   if ($tee == "ennakkolaskuta_kaikki") {
-    // seuraava positio on t‰m‰ siis
+    // seuraava positio on t√§m√§ siis
     $query = "SELECT count(*)-1 as ennakko_kpl
               FROM maksupositio
               JOIN maksuehto on maksupositio.yhtio = maksupositio.yhtio and maksupositio.maksuehto = maksuehto.tunnus
@@ -575,7 +575,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
     $posrow = mysql_fetch_assoc($rahres);
 
     for($ie=0; $ie < $posrow["ennakko_kpl"]; $ie++) {
-      //tehd‰‰n ennakklasku
+      //tehd√§√§n ennakklasku
       ennakkolaskuta($tunnus);
     }
     $tee = "";
@@ -657,10 +657,10 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
     echo "<tr>
         <th>".t("Tilaus")."</th>
         <th>".t("Asiakas")."</th>
-        <th>".t("Er‰")."</th>
+        <th>".t("Er√§")."</th>
         <th>".t("Laskuttamatta")."</th>
         <th>".t("Laskutettu")."</th>
-        <th>".t("Yhteens‰")."</th>
+        <th>".t("Yhteens√§")."</th>
         <th>".t("Seuraava positio")."</th>
         <th style='visibility:hidden;'></th>
       </tr>";
@@ -696,7 +696,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
         }
       }
 
-      // seuraava positio on t‰m‰ siis
+      // seuraava positio on t√§m√§ siis
       $query = "SELECT maksupositio.*, maksuehto.teksti, maksuehto.teksti
                 FROM maksupositio
                 JOIN maksuehto on maksupositio.yhtio = maksupositio.yhtio and maksupositio.maksuehto = maksuehto.tunnus
@@ -742,7 +742,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
           <table>
           <tr><td>".t("Osuus").":</td><td>$posrow[osuus]%</td></tr>
           <tr><td>".t("Summa").":</td><td>$posrow[summa] $laskurow[valkoodi]</td></tr>
-          <tr><td>".t("Lis‰tiedot").":</td><td>$posrow[lisatiedot]</td></tr>
+          <tr><td>".t("Lis√§tiedot").":</td><td>$posrow[lisatiedot]</td></tr>
           <tr><td>".t("Ohje").":</td><td>$posrow[ohje]</td></tr>
           </table>
           </td>";
@@ -757,7 +757,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
 
       // loppulaskutetaan maksusopimus
       if ($row["yhteensa_kpl"] - $row["laskutettu_kpl"] <= 1) {
-        // tarkastetaan onko kaikki jo toimitettu ja t‰m‰ on good to go
+        // tarkastetaan onko kaikki jo toimitettu ja t√§m√§ on good to go
         $query = "SELECT
                   sum(if (lasku.tila='L' and lasku.alatila IN ('J','X'),1,0)) tilaok,
                   sum(if (tilausrivi.toimitettu='',1,0)) toimittamatta,
@@ -772,25 +772,25 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
 
         if (mysql_num_rows($tarkres) == 0 or $tarkrow["tilaok"] <> $tarkrow["toimituksia"] or $tarkrow["toimittamatta"] > 0) {
           echo "<td class='back'>";
-          echo "<font class='error'>".t("Ei valmis loppulaskutettavaksi, koska tilausta ei ole viel‰ toimitettu").".</font>";
+          echo "<font class='error'>".t("Ei valmis loppulaskutettavaksi, koska tilausta ei ole viel√§ toimitettu").".</font>";
 
           if (mysql_num_rows($tila_chk_res) > 0) {
             echo "<br />";
 
-            $msg = t("Oletko varma, ett‰ haluat vapauttaa tilauksen ker‰ykseen")."? {$row['jaksotettu']}";
+            $msg = t("Oletko varma, ett√§ haluat vapauttaa tilauksen ker√§ykseen")."? {$row['jaksotettu']}";
 
             echo "<form method='post' name='case' enctype='multipart/form-data'  autocomplete='off' onSubmit = 'return verify(\"{$msg}\");'>
                 <input type='hidden' name='toim' value='{$toim}'>
                 <input type='hidden' name='tunnus' value='{$row['jaksotettu']}'>
                 <input type='hidden' name='tee' value='vapauta_tilaus_keraykseen'>
-                <input type='submit' name = 'submit' value='",t("Vapauta tilaus ker‰ykseen"),"'>
+                <input type='submit' name = 'submit' value='",t("Vapauta tilaus ker√§ykseen"),"'>
                 </form>";
           }
 
           echo "</td>";
         }
         else {
-          $msg = t("Oletko varma, ett‰ haluat LOPPULASKUTTAA tilauksen")." $row[jaksotettu]\\n\\nOsuus: $posrow[osuus]%\\nSumma: $posrow[summa] $laskurow[valkoodi]\\nMaksuehto: ".t_tunnus_avainsanat($posrow, "teksti", "MAKSUEHTOKV");
+          $msg = t("Oletko varma, ett√§ haluat LOPPULASKUTTAA tilauksen")." $row[jaksotettu]\\n\\nOsuus: $posrow[osuus]%\\nSumma: $posrow[summa] $laskurow[valkoodi]\\nMaksuehto: ".t_tunnus_avainsanat($posrow, "teksti", "MAKSUEHTOKV");
 
           echo "  <td class='back'>
               <form method='post' onSubmit='return verify(\"$msg\");'>
@@ -803,8 +803,8 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
         }
       }
       elseif ($row["tekematta_kpl"] > 1) {
-        // muuten t‰m‰ on vain ennakkolaskutusta
-        $msg = t("Oletko varma, ett‰ haluat tehd‰ ennakkolaskun tilaukselle").": $row[jaksotettu]\\n\\nOsuus: $posrow[osuus]%\\nSumma: $posrow[summa] $laskurow[valkoodi]\\nMaksuehto: ".t_tunnus_avainsanat($posrow, "teksti", "MAKSUEHTOKV");
+        // muuten t√§m√§ on vain ennakkolaskutusta
+        $msg = t("Oletko varma, ett√§ haluat tehd√§ ennakkolaskun tilaukselle").": $row[jaksotettu]\\n\\nOsuus: $posrow[osuus]%\\nSumma: $posrow[summa] $laskurow[valkoodi]\\nMaksuehto: ".t_tunnus_avainsanat($posrow, "teksti", "MAKSUEHTOKV");
 
         echo "<td class='back'>";
 
@@ -815,8 +815,8 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
             <input type='submit' name = 'submit' value='".t("Laskuta")."'>
             </form><br>";
 
-        // muuten t‰m‰ on vain ennakkolaskutusta
-        $msg = t("Oletko varma, ett‰ haluat tehd‰ kaikki ennakkolaskut tilaukselle").": $row[jaksotettu]";
+        // muuten t√§m√§ on vain ennakkolaskutusta
+        $msg = t("Oletko varma, ett√§ haluat tehd√§ kaikki ennakkolaskut tilaukselle").": $row[jaksotettu]";
 
         echo "<form method='post' name='case' enctype='multipart/form-data'  autocomplete='off' onSubmit = 'return verify(\"$msg\");'>
             <input type='hidden' name='toim' value='$toim'>
@@ -829,32 +829,32 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
 
           echo "<br />";
 
-          $msg = t("Oletko varma, ett‰ haluat vapauttaa tilauksen ker‰ykseen")."? {$row['jaksotettu']}";
+          $msg = t("Oletko varma, ett√§ haluat vapauttaa tilauksen ker√§ykseen")."? {$row['jaksotettu']}";
 
           echo "<form method='post' name='case' enctype='multipart/form-data'  autocomplete='off' onSubmit = 'return verify(\"{$msg}\");'>
               <input type='hidden' name='toim' value='{$toim}'>
               <input type='hidden' name='tunnus' value='{$row['jaksotettu']}'>
               <input type='hidden' name='tee' value='vapauta_tilaus_keraykseen'>
-              <input type='submit' name = 'submit' value='",t("Vapauta tilaus ker‰ykseen"),"'>
+              <input type='submit' name = 'submit' value='",t("Vapauta tilaus ker√§ykseen"),"'>
               </form>";
         }
 
         echo "</td>";
       }
       else {
-        echo "<td class='back'><font class='error'>".t("Ei valmis loppulaskutettavaksi, koska tilausta ei ole viel‰ toimitettu").".</font>";
+        echo "<td class='back'><font class='error'>".t("Ei valmis loppulaskutettavaksi, koska tilausta ei ole viel√§ toimitettu").".</font>";
 
         if (mysql_num_rows($tila_chk_res) > 0) {
 
           echo "<br />";
 
-          $msg = t("Oletko varma, ett‰ haluat vapauttaa tilauksen ker‰ykseen")."? {$row['jaksotettu']}";
+          $msg = t("Oletko varma, ett√§ haluat vapauttaa tilauksen ker√§ykseen")."? {$row['jaksotettu']}";
 
           echo "<form method='post' name='case' enctype='multipart/form-data'  autocomplete='off' onSubmit = 'return verify(\"{$msg}\");'>
               <input type='hidden' name='toim' value='{$toim}'>
               <input type='hidden' name='tunnus' value='{$row['jaksotettu']}'>
               <input type='hidden' name='tee' value='vapauta_tilaus_keraykseen'>
-              <input type='submit' name = 'submit' value='",t("Vapauta tilaus ker‰ykseen"),"'>
+              <input type='submit' name = 'submit' value='",t("Vapauta tilaus ker√§ykseen"),"'>
               </form>";
         }
 

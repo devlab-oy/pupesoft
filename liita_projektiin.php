@@ -4,19 +4,19 @@ require ("inc/parametrit.inc");
 
 
 /*
-  Ty‰kalu laskujen/tilausten liitt‰miseksi osaksi projekti
+  Ty√§kalu laskujen/tilausten liitt√§miseksi osaksi projekti
 
-  N‰in esim erilliset rahtilaskut,hyvitykset voidaan liitt‰‰ osaksi projektia myˆs j‰lkik‰teen
+  N√§in esim erilliset rahtilaskut,hyvitykset voidaan liitt√§√§ osaksi projektia my√∂s j√§lkik√§teen
 
-  T‰st‰ on apua kun laskemme koko projektin arvoa.
+  T√§st√§ on apua kun laskemme koko projektin arvoa.
 
 */
 
-echo "<font class='head'>".t("Liit‰ tilaus projektiin")."</font><hr><br><br>";
+echo "<font class='head'>".t("Liit√§ tilaus projektiin")."</font><hr><br><br>";
 
 
 if($tee=="KORJAA" or $tee=="LIITA") {
-  //  tarkastetaan ett‰ tunnusnippu on edelleen ok
+  //  tarkastetaan ett√§ tunnusnippu on edelleen ok
   $query = "  SELECT nimi, nimitark, tila, alatila, tunnusnippu, tunnus from lasku where yhtio='$kukarow[yhtio]' and tila IN ('R', 'L','N') and tunnusnippu>0 and tunnus='$tunnusnippu'";
   $result = mysql_query($query) or pupe_error($query);
   if(mysql_num_rows($result)>0) {
@@ -39,12 +39,12 @@ if($tee=="KORJAA" or $tee=="LIITA") {
         $laskutyyppi=$laskurow["tila"];
         $alatila=$laskurow["alatila"];
 
-        //tehd‰‰n selv‰kielinen tila/alatila
+        //tehd√§√§n selv√§kielinen tila/alatila
         require "inc/laskutyyppi.inc";
 
         echo "<table>
             <tr>
-              <th>".t("Tilaus johon liitet‰‰n")."</th>
+              <th>".t("Tilaus johon liitet√§√§n")."</th>
             </tr>
             <tr>
               <td>$laskurow[tunnusnippu] $laskurow[nimi] - ".t("$laskutyyppi")." ".t("$alatila")."</td>
@@ -56,11 +56,11 @@ if($tee=="KORJAA" or $tee=="LIITA") {
         $laskutyyppi=$row["tila"];
         $alatila=$row["alatila"];
 
-        //tehd‰‰n selv‰kielinen tila/alatila
+        //tehd√§√§n selv√§kielinen tila/alatila
         require "inc/laskutyyppi.inc";
 
         if($row["tunnusnippu"]>0) {
-          $lisa="<td class='back'><font class='message'>".t("HUOM: tilaus on jo liitettyn‰ projektiin")." $row[tunnusnippu]</font></td>";
+          $lisa="<td class='back'><font class='message'>".t("HUOM: tilaus on jo liitettyn√§ projektiin")." $row[tunnusnippu]</font></td>";
         }
         else {
           $lisa = "";
@@ -68,7 +68,7 @@ if($tee=="KORJAA" or $tee=="LIITA") {
 
         echo "<table>
             <tr>
-              <th>".t("Tilaus joka liitet‰‰n")."</th>
+              <th>".t("Tilaus joka liitet√§√§n")."</th>
             </tr>
             <tr>
               <td>$row[tunnus] $row[nimi] - ".t("$laskutyyppi")." ".t("$alatila")."</td>$lisa
@@ -83,19 +83,19 @@ if($tee=="KORJAA" or $tee=="LIITA") {
               <input type='hidden' name='tee' value='LIITA'>
               <input type='hidden' name='tunnusnippu' value='$tunnusnippu'>
               <input type='hidden' name='tunnus' value='$tunnus'>
-              <td class='back' align='right'><input type='Submit' value='".t("liit‰")."'></td>
+              <td class='back' align='right'><input type='Submit' value='".t("liit√§")."'></td>
               </form>
             </tr>
           </table>";
       }
     }
     else {
-      $tunnusvirhe = "<font class='error'>".("Tilausta ei voida liitt‰‰. Tilausnumero voi olla v‰‰r‰ tai tilaus on p‰‰tilaus")."</font><br>";
+      $tunnusvirhe = "<font class='error'>".("Tilausta ei voida liitt√§√§. Tilausnumero voi olla v√§√§r√§ tai tilaus on p√§√§tilaus")."</font><br>";
       $tee="HAE";
     }
   }
   else {
-    $tunnusnippuvirhe = "Sopivaa tilausta ei lˆydy. Tilauksen pit‰‰ olla normaali tilaus tai projekti.";
+    $tunnusnippuvirhe = "Sopivaa tilausta ei l√∂ydy. Tilauksen pit√§√§ olla normaali tilaus tai projekti.";
     $tee="";
   }
 }
@@ -109,12 +109,12 @@ if($tee == "HAE") {
       $laskutyyppi=$laskurow["tila"];
       $alatila=$laskurow["alatila"];
 
-      //tehd‰‰n selv‰kielinen tila/alatila
+      //tehd√§√§n selv√§kielinen tila/alatila
       require "inc/laskutyyppi.inc";
 
       echo "<table>
           <tr>
-            <th>".t("Tilaus johon liitet‰‰n")."</th>
+            <th>".t("Tilaus johon liitet√§√§n")."</th>
           </tr>
           <tr>
             <td>$laskurow[tunnusnippu] $laskurow[nimi] - ".t("$laskutyyppi")." ".t("$alatila")."</td>
@@ -123,7 +123,7 @@ if($tee == "HAE") {
             <td class='back'><br></td>
           </tr>
           <tr>
-            <th>".t("Anna tilausnumero jonka haluat liitt‰‰")."</th>
+            <th>".t("Anna tilausnumero jonka haluat liitt√§√§")."</th>
           </tr>
           <tr>
             <form method='post' name='projekti' autocomplete='off'>
@@ -137,13 +137,13 @@ if($tee == "HAE") {
         </table>";
     }
     else {
-      //  pit‰isikˆ sallia sellainen tehd‰?
+      //  pit√§isik√∂ sallia sellainen tehd√§?
       $tunnusnippuvirhe =  "Tilauksella ei ole tunnusnippua";
       $tee="";
     }
   }
   else {
-    $tunnusnippuvirhe = "Sopivaa tilausta ei lˆydy. Tilauksen pit‰‰ olla projekti.";
+    $tunnusnippuvirhe = "Sopivaa tilausta ei l√∂ydy. Tilauksen pit√§√§ olla projekti.";
     $tee="";
   }
 }
@@ -152,7 +152,7 @@ if($tee == "HAE") {
 if($tee == "") {
   echo "<table>
       <tr>
-        <th>".t("Anna projekti/tilausnumero")."<br>".t("johon haluat liitt‰‰ tilauksen")."</th>
+        <th>".t("Anna projekti/tilausnumero")."<br>".t("johon haluat liitt√§√§ tilauksen")."</th>
       </tr>
       <tr>
         <form method='post' name='projekti' autocomplete='off'>

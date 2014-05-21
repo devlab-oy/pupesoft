@@ -1,9 +1,9 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-// Ei k‰ytet‰ pakkausta
+// Ei k√§ytet√§ pakkausta
 $compression = FALSE;
 
 if (isset($_POST["tee"])) {
@@ -27,23 +27,23 @@ else {
     $logistiikka_yhtiolisa = "yhtio = '$kukarow[yhtio]'";
   }
 
-  //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+  //* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
   $useslave = 1;
   require ("inc/connect.inc");
 
   if (count($_POST) > 0) {
 
-    // hehe, n‰in on helpompi verrata p‰iv‰m‰‰ri‰
+    // hehe, n√§in on helpompi verrata p√§iv√§m√§√§ri√§
     $query  = "SELECT TO_DAYS('$vvl-$kkl-$ppl')-TO_DAYS('$vva-$kka-$ppa') ero";
     $result = mysql_query($query) or pupe_error($query);
     $row    = mysql_fetch_array($result);
 
     if ($row["ero"] > 365 and $ajotapa != 'tilausauki') {
-      echo "<font class='error'>".t("Jotta homma ei menisi liian hitaaksi, niin vuosi on pisin mahdollinen laskentav‰li!")."</font><br>";
+      echo "<font class='error'>".t("Jotta homma ei menisi liian hitaaksi, niin vuosi on pisin mahdollinen laskentav√§li!")."</font><br>";
       $tee = "";
     }
 
-    // jos ei ole mit‰‰n yrityst‰ valittuna ei tehd‰ mit‰‰n
+    // jos ei ole mit√§√§n yrityst√§ valittuna ei tehd√§ mit√§√§n
     if (count($yhtiot) == 0) {
       $tee = "";
     }
@@ -55,7 +55,7 @@ else {
       $yhtio = substr($yhtio,0,-1);
     }
 
-    // jos joku p‰iv‰kentt‰ on tyhj‰‰ ei tehd‰ mit‰‰n
+    // jos joku p√§iv√§kentt√§ on tyhj√§√§ ei tehd√§ mit√§√§n
     if ($ppa == "" or $kka == "" or $vva == "" or $ppl == "" or $kkl == "" or $vvl == "") {
       $tee = "";
     }
@@ -70,7 +70,7 @@ else {
       $select = "";
       $gluku  = 0;
 
-      // n‰it‰ k‰ytet‰‰n queryss‰
+      // n√§it√§ k√§ytet√§√§n queryss√§
       $sel_osasto    = "";
       $sel_tuoteryhma  = "";
       $sel_tuotemerkki = "";
@@ -120,7 +120,7 @@ else {
         if ($mukaan == "tuoteryhma") {
           if ($group!="") $group .= ",tuote.try";
           else $group .= "tuote.try";
-          $select .= "tuote.try 'tuoteryhm‰', ";
+          $select .= "tuote.try 'tuoteryhm√§', ";
           $order  .= "tuote.try,";
           $gluku++;
         }
@@ -136,7 +136,7 @@ else {
         if ($mukaan == "tuotemyyja") {
           if ($group!="") $group .= ",tuote.myyjanro";
           else $group  .= "tuote.myyjanro";
-          $select .= "tuote.myyjanro 'tuotemyyj‰', ";
+          $select .= "tuote.myyjanro 'tuotemyyj√§', ";
           $order  .= "tuote.myyjanro,";
           $gluku++;
         }
@@ -176,7 +176,7 @@ else {
         if ($mukaan == "invaaja") {
           if ($group!="") $group .= ",tapahtuma.laatija";
           else $group  .= "tapahtuma.laatija";
-          $select .= "kuka.nimi as 'henkilˆ', ";
+          $select .= "kuka.nimi as 'henkil√∂', ";
           $order  .= "kuka.nimi,";
           $gluku++;
         }
@@ -273,7 +273,7 @@ else {
         $select .= "tapahtuma.hinta 'vararvoennen', ";
       }
 
-      // Jos ei olla valittu mit‰‰n
+      // Jos ei olla valittu mit√§√§n
       if ($group == "") {
         $select = "tuote.yhtio, ";
         $group = "tuote.yhtio";
@@ -281,7 +281,7 @@ else {
 
       $query = "  SELECT $select";
 
-      // Katotaan mist‰ kohtaa query‰ alkaa varsinaiset numerosarakkeet (HUOM: toi ', ' pilkkuspace erottaa sarakket toisistaan)
+      // Katotaan mist√§ kohtaa query√§ alkaa varsinaiset numerosarakkeet (HUOM: toi ', ' pilkkuspace erottaa sarakket toisistaan)
       $data_start_index = substr_count($select, ", ");
 
       $query .= " sum(tapahtuma.kpl) kpl, round(sum(tapahtuma.kpl*tapahtuma.hinta),2) varastonmuutos ";
@@ -311,13 +311,13 @@ else {
         $rivilimitti = 1000;
 
         if ($vain_excel != "") {
-          echo "<font class='error'>".t("Tallenna/avaa tulos exceliss‰")."!</font><br><br>";
+          echo "<font class='error'>".t("Tallenna/avaa tulos exceliss√§")."!</font><br><br>";
           $rivilimitti = 0;
         }
         else {
           if (mysql_num_rows($result) > $rivilimitti) {
             echo "<br><font class='error'>".t("Hakutulos oli liian suuri")."!</font><br>";
-            echo "<font class='error'>".t("Tallenna/avaa tulos exceliss‰")."!</font><br><br>";
+            echo "<font class='error'>".t("Tallenna/avaa tulos exceliss√§")."!</font><br><br>";
           }
         }
       }
@@ -326,7 +326,7 @@ else {
         if (strpos($_SERVER['SCRIPT_NAME'], "inventointiraportti.php") !== FALSE) {
           if(@include('Spreadsheet/Excel/Writer.php')) {
 
-            //keksit‰‰n failille joku varmasti uniikki nimi:
+            //keksit√§√§n failille joku varmasti uniikki nimi:
             list($usec, $sec) = explode(' ', microtime());
             mt_srand((float) $sec + ((float) $usec * 100000));
             $excelnimi = md5(uniqid(mt_rand(), true)).".xls";
@@ -393,7 +393,7 @@ else {
             }
           }
 
-          // N‰ytet‰‰n vain jos halutaan n‰hd‰ kaikki rivit tai summa on > 0
+          // N√§ytet√§√§n vain jos halutaan n√§hd√§ kaikki rivit tai summa on > 0
           if ($piilotanollarivit == "" or (float) $piilosumma != 0) {
             if ($osoitetarrat != "" and $row["astunnus"] > 0) {
               $tarra_aineisto .= $row["astunnus"].",";
@@ -401,7 +401,7 @@ else {
 
             if (mysql_num_rows($result) <= $rivilimitti) echo "<tr>";
 
-            // echotaan kenttien sis‰ltˆ
+            // echotaan kenttien sis√§lt√∂
             for ($i=0; $i < mysql_num_fields($result); $i++) {
 
               // jos kyseessa on tuote
@@ -420,7 +420,7 @@ else {
               }
 
               // jos kyseessa on tuoteosasto, haetaan sen nimi
-              if (mysql_field_name($result, $i) == "tuoteryhm‰") {
+              if (mysql_field_name($result, $i) == "tuoteryhm√§") {
                 $osre = t_avainsana("TRY", "", "and avainsana.selite  = '$row[$i]'", $yhtio);
                 $osrow = mysql_fetch_array($osre);
 
@@ -429,8 +429,8 @@ else {
                 }
               }
 
-              // jos kyseessa on myyj‰, haetaan sen nimi
-              if (mysql_field_name($result, $i) == "tuotemyyj‰") {
+              // jos kyseessa on myyj√§, haetaan sen nimi
+              if (mysql_field_name($result, $i) == "tuotemyyj√§") {
                 $query = "SELECT nimi
                           FROM kuka
                           WHERE yhtio in ($yhtio)
@@ -462,7 +462,7 @@ else {
 
               // kustannuspaikka
               if (mysql_field_name($result, $i) == "kustannuspaikka") {
-                // n‰ytet‰‰n soveltuvat kustannuspaikka
+                // n√§ytet√§√§n soveltuvat kustannuspaikka
                 $query = "SELECT nimi
                           FROM kustannuspaikka
                           WHERE yhtio = '$kukarow[yhtio]'
@@ -482,7 +482,7 @@ else {
                 $row[$i] = round((float) $invkpl[1] * $row[$i],2);
               }
 
-              // Jos gruupataan enemm‰n kuin yksi taso niin tehd‰‰n v‰lisumma
+              // Jos gruupataan enemm√§n kuin yksi taso niin tehd√§√§n v√§lisumma
               if ($gluku > 1 and $edluku != $row[0] and $edluku != 'x' and $piiyhteensa == '' and strpos($group, ',') !== FALSE and substr($group, 0, 13) != "tuote.tuoteno") {
                 $excelsarake = $myyntiind = $kateind = $nettokateind = $myykplind = 0;
 
@@ -550,7 +550,7 @@ else {
 
         $apu = mysql_num_fields($result)-11;
 
-        // jos gruupataan enemm‰n kuin yksi taso niin tehd‰‰n v‰lisumma
+        // jos gruupataan enemm√§n kuin yksi taso niin tehd√§√§n v√§lisumma
         if ($gluku > 1 and $mukaan != 'tuote' and $piiyhteensa == '') {
 
           if (mysql_num_rows($result) <= $rivilimitti) echo "<tr>";
@@ -617,7 +617,7 @@ else {
 
   if ($lopetus == "") {
 
-    //K‰yttˆliittym‰
+    //K√§ytt√∂liittym√§
     if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
     if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
     if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
@@ -635,11 +635,11 @@ else {
               WHERE $logistiikka_yhtiolisa";
     $result = mysql_query($query) or pupe_error($query);
 
-    // voidaan valita listaukseen useita konserniyhtiˆit‰, jos k‰ytt‰j‰ll‰ on "PƒIVITYS" oikeus t‰h‰n raporttiin
+    // voidaan valita listaukseen useita konserniyhti√∂it√§, jos k√§ytt√§j√§ll√§ on "P√ÑIVITYS" oikeus t√§h√§n raporttiin
     if (mysql_num_rows($result) > 0 and $oikeurow['paivitys'] != "") {
       echo "<table>";
       echo "<tr>";
-      echo "<th>".t("Valitse yhtiˆ")."</th>";
+      echo "<th>".t("Valitse yhti√∂")."</th>";
 
       if (!isset($yhtiot)) $yhtiot = array();
 
@@ -671,13 +671,13 @@ else {
 
     echo "<table><tr>";
     echo "<th>".t("Valitse tuoteosastot").":</th>";
-    echo "<th>".t("Valitse tuoteryhm‰t").":</th>";
+    echo "<th>".t("Valitse tuoteryhm√§t").":</th>";
     echo "<th>".t("Valitse tuotemerkit").":</th></tr>";
 
     echo "<tr>";
     echo "<td valign='top'>";
 
-    // tehd‰‰n avainsana query
+    // tehd√§√§n avainsana query
     $res2 = t_avainsana("OSASTO");
 
     echo "<select name='mul_osasto[]' multiple='TRUE' size='10' style='width:100%;'>";
@@ -706,7 +706,7 @@ else {
     echo "</td>";
     echo "<td valign='top'>";
 
-    // tehd‰‰n avainsana query
+    // tehd√§√§n avainsana query
     $res2 = t_avainsana("TRY");
 
     echo "<select name='mul_try[]' multiple='TRUE' size='10' style='width:100%;'>";
@@ -717,7 +717,7 @@ else {
         $mul_check = 'SELECTED';
       }
     }
-    echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei tuoteryhm‰‰")."</option>";
+    echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei tuoteryhm√§√§")."</option>";
 
     while ($rivi = mysql_fetch_array($res2)) {
       $mul_check = '';
@@ -735,7 +735,7 @@ else {
 
     echo "<td valign='top'>";
 
-    // tehd‰‰n avainsana query
+    // tehd√§√§n avainsana query
     $res2 = t_avainsana("TUOTEMERKKI");
 
     echo "<select name='mul_tme[]' multiple='TRUE' size='10' style='width:100%;'>";
@@ -746,7 +746,7 @@ else {
         $mul_check = 'SELECTED';
       }
     }
-    echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei tuotemerkki‰")."</option>";
+    echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei tuotemerkki√§")."</option>";
 
     while ($rivi = mysql_fetch_array($res2)) {
       $mul_check = '';
@@ -767,21 +767,21 @@ else {
 
     echo "<tr>";
     echo "<th>".t("Prio").": <input type='text' name='jarjestys[10]' size='2' value='$jarjestys[10]'> ".t("Osastoittain")." <input type='checkbox' name='ruksit[10]' value='osasto' $ruk10chk></th>";
-    echo "<th>".t("Prio").": <input type='text' name='jarjestys[20]' size='2' value='$jarjestys[20]'> ".t("Tuoteryhmitt‰in")." <input type='checkbox' name='ruksit[20]' value='tuoteryhma' $ruk20chk></th>";
-    echo "<th>".t("Prio").": <input type='text' name='jarjestys[30]' size='2' value='$jarjestys[30]'> ".t("Tuotemerkeitt‰in")." <input type='checkbox' name='ruksit[30]' value='tuotemerkki' $ruk30chk></th></tr>";
+    echo "<th>".t("Prio").": <input type='text' name='jarjestys[20]' size='2' value='$jarjestys[20]'> ".t("Tuoteryhmitt√§in")." <input type='checkbox' name='ruksit[20]' value='tuoteryhma' $ruk20chk></th>";
+    echo "<th>".t("Prio").": <input type='text' name='jarjestys[30]' size='2' value='$jarjestys[30]'> ".t("Tuotemerkeitt√§in")." <input type='checkbox' name='ruksit[30]' value='tuotemerkki' $ruk30chk></th></tr>";
 
     echo "</table><br>\n";
 
 
     echo "<table><tr>";
-    echo "<th>".t("Valitse tuotemyyj‰t").":</th>";
+    echo "<th>".t("Valitse tuotemyyj√§t").":</th>";
     echo "<th>".t("Valitse tuoteostajat").":</th>";
     echo "<th>".t("Valitse kustannuspaikat").":</th></tr>";
 
     echo "<tr>";
     echo "<td valign='top'>";
 
-    // tehd‰‰n query
+    // tehd√§√§n query
     $query = "SELECT DISTINCT myyja, nimi
               FROM kuka
               WHERE yhtio = '$kukarow[yhtio]'
@@ -883,7 +883,7 @@ else {
     echo "</tr>";
 
     echo "<tr>";
-    echo "<th>".t("Prio").": <input type='text' name='jarjestys[40]' size='2' value='$jarjestys[40]'> ".t("Tuotemyyjitt‰in")." <input type='checkbox' name='ruksit[40]' value='tuotemyyja' $ruk40chk></th>";
+    echo "<th>".t("Prio").": <input type='text' name='jarjestys[40]' size='2' value='$jarjestys[40]'> ".t("Tuotemyyjitt√§in")." <input type='checkbox' name='ruksit[40]' value='tuotemyyja' $ruk40chk></th>";
     echo "<th>".t("Prio").": <input type='text' name='jarjestys[50]' size='2' value='$jarjestys[50]'> ".t("Tuoteostajittain")." <input type='checkbox' name='ruksit[50]' value='tuoteostaja' $ruk50chk></th>";
     echo "<th>".t("Prio").": <input type='text' name='jarjestys[60]' size='2' value='$jarjestys[60]'> ".t("Kustannuspaikoittain")." <input type='checkbox' name='ruksit[60]' value='kustannuspaikka' $ruk60chk></th></tr>";
     echo "</table><br>\n";
@@ -891,7 +891,7 @@ else {
     echo "<table><tr>";
     echo "<th>".t("Valitse varastot").":</th>";
     echo "<th>".t("Valitse lajit").":</th>";
-    echo "<th>".t("Valitse henkilˆt").":</th></tr>";
+    echo "<th>".t("Valitse henkil√∂t").":</th></tr>";
 
     echo "<tr>";
     echo "<td valign='top'>";
@@ -920,7 +920,7 @@ else {
 
     echo "<td valign='top'>";
 
-    // tehd‰‰n avainsana query
+    // tehd√§√§n avainsana query
     $res2 = t_avainsana("INVEN_LAJI");
 
     echo "<select name='mul_invenlaji[]' multiple='TRUE' size='10' style='width:100%;'>";
@@ -985,11 +985,11 @@ else {
     echo "<tr>";
     echo "<th>".t("Prio").": <input type='text' name='jarjestys[70]' size='2' value='$jarjestys[70]'> ".t("Varastoittain")." <input type='checkbox' name='ruksit[70]' value='varasto' $ruk70chk></th>";
     echo "<th>".t("Prio").": <input type='text' name='jarjestys[80]' size='2' value='$jarjestys[80]'> ".t("Lajeittain")." <input type='checkbox' name='ruksit[80]' value='invenlaji' $ruk80chk></th>";
-    echo "<th>".t("Prio").": <input type='text' name='jarjestys[85]' size='2' value='$jarjestys[85]'> ".t("Henkilˆitt‰in")." <input type='checkbox' name='ruksit[85]' value='invaaja' $ruk85chk></th></tr>";
+    echo "<th>".t("Prio").": <input type='text' name='jarjestys[85]' size='2' value='$jarjestys[85]'> ".t("Henkil√∂itt√§in")." <input type='checkbox' name='ruksit[85]' value='invaaja' $ruk85chk></th></tr>";
 
     echo "</table><br>\n";
 
-    // lis‰rajaukset n‰kym‰..
+    // lis√§rajaukset n√§kym√§..
     if ($ruksit[90]  != '') $ruk90chk       = "CHECKED";
     if ($nimitykset != '')  $nimchk         = "CHECKED";
     if ($kaikkirivit != '')  $kaikkirivitchk  = "CHECKED";
@@ -997,7 +997,7 @@ else {
 
     echo "<table>
       <tr>
-      <th>".t("Lis‰rajaus")."</th>
+      <th>".t("Lis√§rajaus")."</th>
       <th>".t("Prio")."</th>
       <th> x</th>
       <th>".t("Rajaus")."</th>
@@ -1012,34 +1012,34 @@ else {
       <td class='back'><br></td>
       </tr>
       <tr>
-      <th>".t("N‰yt‰ tuotteiden nimitykset")."</th>
+      <th>".t("N√§yt√§ tuotteiden nimitykset")."</th>
       <td><input type='checkbox' name='nimitykset' $nimchk></td>
       <td></td>
       <td class='back'>".t("(Toimii vain jos listaat tuotteittain)")."</td>
       </tr>
       <tr>
-      <th>".t("N‰yt‰ jokainen inventointi ja sen selite")."</th>
+      <th>".t("N√§yt√§ jokainen inventointi ja sen selite")."</th>
       <td><input type='checkbox' name='kaikkirivit' $kaikkirivitchk></td>
       <td></td>
       <td class='back'></td>
       </tr>
       <tr>
-      <th>".t("N‰yt‰ varastonarvo ennen inventointia")."</th>
+      <th>".t("N√§yt√§ varastonarvo ennen inventointia")."</th>
       <td><input type='checkbox' name='vararvoennen' $vararvoennenchk></td>
       <td></td>
       <td class='back'>".t("(Toimii vain kun listataan jokainen inventointi ja sen selite)")."</td>
       </tr>";
     echo "</table><br>";
 
-    // p‰iv‰m‰‰r‰rajaus
+    // p√§iv√§m√§√§r√§rajaus
     echo "<table>";
     echo "<tr>
-      <th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+      <th>".t("Sy√∂t√§ alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
       <td><input type='text' name='ppa' value='$ppa' size='3'></td>
       <td><input type='text' name='kka' value='$kka' size='3'></td>
       <td><input type='text' name='vva' value='$vva' size='5'></td>
       </tr>\n
-      <tr><th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+      <tr><th>".t("Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
       <td><input type='text' name='ppl' value='$ppl' size='3'></td>
       <td><input type='text' name='kkl' value='$kkl' size='3'></td>
       <td><input type='text' name='vvl' value='$vvl' size='5'></td>

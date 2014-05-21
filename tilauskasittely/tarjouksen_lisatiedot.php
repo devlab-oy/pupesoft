@@ -3,15 +3,15 @@
 require ("../inc/parametrit.inc");
 
 if ($tee != 'osamaksusoppari' and $tee != 'vakuutushakemus') {
-  echo "<font class='head'>".t("Lis‰tietojen korjaus").":</font><hr><br>";
+  echo "<font class='head'>".t("Lis√§tietojen korjaus").":</font><hr><br>";
 }
 
 if ($tee == 'osamaksusoppari') {
-  // Tehd‰‰n rahoituslaskuelma
+  // Tehd√§√§n rahoituslaskuelma
   require('osamaksusoppari.inc');
 }
 elseif ($tee == 'vakuutushakemus') {
-  // Tehd‰‰n vakuutushakemus
+  // Tehd√§√§n vakuutushakemus
   require('vakuutushakemus.inc');
 }
 
@@ -42,9 +42,9 @@ if ($tee == "TULOSTA") {
     $komento["Vakuutushakemus"] .= " -# $kappaleet ";
   }
 
-  $tulostimet[5] = 'Rekisterˆinti_ilmoitus';
-  if ($kappaleet > 0 and $komento["Rekisterˆinti_ilmoitus"] != '' and $komento["Rekisterˆinti_ilmoitus"] != 'email') {
-    $komento["Rekisterˆinti_ilmoitus"] .= " -# $kappaleet ";
+  $tulostimet[5] = 'Rekister√∂inti_ilmoitus';
+  if ($kappaleet > 0 and $komento["Rekister√∂inti_ilmoitus"] != '' and $komento["Rekister√∂inti_ilmoitus"] != 'email') {
+    $komento["Rekister√∂inti_ilmoitus"] .= " -# $kappaleet ";
   }
 
   if (count($komento) == 0 and $tee == 'TULOSTA') {
@@ -78,9 +78,9 @@ if ($tee == "TULOSTA") {
     tulosta_vakuutushakemus($otunnus, $komento["Vakuutushakemus"], $kieli, $tee);
   }
 
-  if ($komento["Rekisterˆinti_ilmoitus"] != "") {
+  if ($komento["Rekister√∂inti_ilmoitus"] != "") {
     require_once ("tulosta_rekisteriilmoitus.inc");
-    tulosta_rekisteriilmoitus($otunnus, $komento["Rekisterˆinti_ilmoitus"], $kieli, $tee);
+    tulosta_rekisteriilmoitus($otunnus, $komento["Rekister√∂inti_ilmoitus"], $kieli, $tee);
   }
   $otunnus  = "";
   $tee     = "";
@@ -136,11 +136,11 @@ if ($tee == "ETSILASKU") {
   if (!isset($ppl))
     $ppl = date("d");
 
-  echo "<tr><th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+  echo "<tr><th>".t("Sy√∂t√§ alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
       <td><input type='text' name='ppa' value='$ppa' size='3'></td>
       <td><input type='text' name='kka' value='$kka' size='3'></td>
       <td><input type='text' name='vva' value='$vva' size='5'></td>
-      </tr><tr><th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+      </tr><tr><th>".t("Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
       <td><input type='text' name='ppl' value='$ppl' size='3'></td>
       <td><input type='text' name='kkl' value='$kkl' size='3'></td>
       <td><input type='text' name='vvl' value='$vvl' size='5'></td>";
@@ -149,10 +149,10 @@ if ($tee == "ETSILASKU") {
   $where1 = "";
   $where2 = "";
 
-  //myyntilasku. T‰lle oliolle voidaan tulostaa laskun kopio
+  //myyntilasku. T√§lle oliolle voidaan tulostaa laskun kopio
   $where1 = " lasku.tila in ('L','N') ";
 
-  if (substr($ytunnus, 0, 1) == '£') {
+  if (substr($ytunnus, 0, 1) == '¬£') {
     $where2 = " and lasku.nimi      = '$asiakasrow[nimi]'
           and lasku.nimitark  = '$asiakasrow[nimitark]'
           and lasku.osoite    = '$asiakasrow[osoite]'
@@ -177,7 +177,7 @@ if ($tee == "ETSILASKU") {
   }
 
   if ($otunnus > 0) {
-    //katotaan lˆytyykˆ lasku ja sen kaikki tilaukset
+    //katotaan l√∂ytyyk√∂ lasku ja sen kaikki tilaukset
     $query = "SELECT laskunro
               FROM lasku
               WHERE tunnus = '$otunnus' and lasku.yhtio = '$kukarow[yhtio]'";
@@ -199,7 +199,7 @@ if ($tee == "ETSILASKU") {
 
   $query_ale_lisa = generoi_alekentta('M');
 
-  // Etsit‰‰n muutettavaa tilausta
+  // Etsit√§√§n muutettavaa tilausta
   $query = "SELECT lasku.tunnus Tilaus, if(lasku.laskunro=0, '', laskunro) Laskunro,
             concat_ws(' ', lasku.nimi, lasku.nimitark) Asiakas, lasku.ytunnus Ytunnus,
             if(lasku.tapvm='0000-00-00', DATE_FORMAT(lasku.luontiaika, '%e.%c.%Y'), DATE_FORMAT(lasku.tapvm, '%e.%c.%Y')) Pvm,
@@ -244,7 +244,7 @@ if ($tee == "ETSILASKU") {
       $laskutyyppi = $row["tila"];
       $alatila     = $row["alatila"];
 
-      //tehd‰‰n selv‰kielinen tila/alatila
+      //tehd√§√§n selv√§kielinen tila/alatila
       require "../inc/laskutyyppi.inc";
 
       echo "<$ero>".t("$laskutyyppi")." ".t("$alatila")."</$ero>";
@@ -263,7 +263,7 @@ if ($tee == "ETSILASKU") {
           <input type='hidden' name='ppl' value='$ppl'>
           <input type='hidden' name='kkl' value='$kkl'>
           <input type='hidden' name='vvl' value='$vvl'>
-          <input type='submit' value='".t("N‰yt‰ ruudulla")."'></form>
+          <input type='submit' value='".t("N√§yt√§ ruudulla")."'></form>
           <form method='post'>
           <input type='hidden' name='tee' value='osamaksusoppari'>
           <input type='hidden' name='tilausnumero' value='$row[Tilaus]'>
@@ -289,7 +289,7 @@ if ($tee == "ETSILASKU") {
 }
 
 if ($tee == '') {
-  //syˆtet‰‰n tilausnumero
+  //sy√∂tet√§√§n tilausnumero
   echo "<br><table>";
   echo "<form method = 'post' name='hakuformi'>";
 

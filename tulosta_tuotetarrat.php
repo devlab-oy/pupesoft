@@ -6,7 +6,7 @@ if ($_REQUEST['malli'] == 'PDF24' or $_REQUEST['malli'] == 'PDF40') {
 
 require("inc/parametrit.inc");
 
-//$toim='YKS' tarkottaa yksinkertainen ja silloin ei v‰litet‰ onko tuotteella eankoodia vaan tulostetaan suoraan tuoteno viivakoodiin
+//$toim='YKS' tarkottaa yksinkertainen ja silloin ei v√§litet√§ onko tuotteella eankoodia vaan tulostetaan suoraan tuoteno viivakoodiin
 
 if (!isset($nayta_pdf)) echo "<font class='head'>",t("Tulosta tuotetarroja"),"</font><hr>";
 
@@ -43,7 +43,7 @@ if ($tee == 'H') {
 
   if ($ahyllyalue == '' or $ahyllynro == '' or $ahyllyvali == '' or $ahyllytaso == '' or $lhyllyalue == '' or $lhyllynro == '' or $lhyllyvali == '' or $lhyllytaso == '') {
     $tee = 'Y';
-    $varaosavirhe =  t("Sinun on annettava t‰ydellinen osoitev‰li")."<br>";
+    $varaosavirhe =  t("Sinun on annettava t√§ydellinen osoitev√§li")."<br>";
   }
 
   $lisa = "";
@@ -55,12 +55,12 @@ if ($tee == 'H') {
   if ($tee == 'H') {
 
     $sql = "SELECT tuotepaikat.tuoteno tuoteno
-        FROM tuotepaikat
-        WHERE tuotepaikat.yhtio = '$kukarow[yhtio]' and
-        concat(rpad(upper(hyllyalue),  5, '0'),lpad(upper(hyllynro),  5, '0'),lpad(upper(hyllyvali),  5, '0'),lpad(upper(hyllytaso),  5, '0')) >= concat(rpad(upper('$ahyllyalue'), 5, '0'),lpad(upper('$ahyllynro'), 5, '0'),lpad(upper('$ahyllyvali'), 5, '0'),lpad(upper('$ahyllytaso'), 5, '0')) and
-        concat(rpad(upper(hyllyalue),  5, '0'),lpad(upper(hyllynro),  5, '0'),lpad(upper(hyllyvali),  5, '0'),lpad(upper(hyllytaso),  5, '0')) <= concat(rpad(upper('$lhyllyalue'), 5, '0'),lpad(upper('$lhyllynro'), 5, '0'),lpad(upper('$lhyllyvali'), 5, '0'),lpad(upper('$lhyllytaso'), 5, '0'))
-        $lisa
-        ORDER BY 1";
+            FROM tuotepaikat
+            WHERE tuotepaikat.yhtio = '$kukarow[yhtio]' and
+            concat(rpad(upper(hyllyalue),  5, '0'),lpad(upper(hyllynro),  5, '0'),lpad(upper(hyllyvali),  5, '0'),lpad(upper(hyllytaso),  5, '0')) >= concat(rpad(upper('$ahyllyalue'), 5, '0'),lpad(upper('$ahyllynro'), 5, '0'),lpad(upper('$ahyllyvali'), 5, '0'),lpad(upper('$ahyllytaso'), 5, '0')) and
+            concat(rpad(upper(hyllyalue),  5, '0'),lpad(upper(hyllynro),  5, '0'),lpad(upper(hyllyvali),  5, '0'),lpad(upper(hyllytaso),  5, '0')) <= concat(rpad(upper('$lhyllyalue'), 5, '0'),lpad(upper('$lhyllynro'), 5, '0'),lpad(upper('$lhyllyvali'), 5, '0'),lpad(upper('$lhyllytaso'), 5, '0'))
+            $lisa
+            ORDER BY 1";
     $res = mysql_query($sql) or pupe_error($sql);
 
     $tuotteet = array();
@@ -108,7 +108,7 @@ if ($tee != 'H') {
     }
     else {
       $tee = 'Y';
-      $varaosavirhe = t("Tuotteella ei ole eankoodia. Anna se nyt niin se p‰ivitet‰‰n tuotteen tietoihin");
+      $varaosavirhe = t("Tuotteella ei ole eankoodia. Anna se nyt niin se p√§ivitet√§√§n tuotteen tietoihin");
       $uusean = 'jeppis';
     }
   }
@@ -172,17 +172,17 @@ if (($tee == 'Z' or $tee == 'H') and $ulos == '') {
     }
 
     if ($malli == 'PDF24' or $malli == 'PDF40') {
-      //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+      //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
       list($usec, $sec) = explode(' ', microtime());
       mt_srand((float) $sec + ((float) $usec * 100000));
       $pdffilenimi = "/tmp/tuotetarrat_ean_pdf-".md5(uniqid(mt_rand(), true)).".pdf";
 
       //kirjoitetaan pdf faili levylle..
       $fh = fopen($pdffilenimi, "w");
-      if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
+      if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep√§onnistui $pdffilenimi");
       fclose($fh);
 
-      //Tyˆnnet‰‰n tuo pdf vaan putkeen!
+      //Ty√∂nnet√§√§n tuo pdf vaan putkeen!
       echo file_get_contents($pdffilenimi);
 
       //poistetaan tmp file samantien kuleksimasta...
@@ -193,7 +193,7 @@ if (($tee == 'Z' or $tee == 'H') and $ulos == '') {
     $tee = '';
   }
   else {
-    echo t("nyt on jotain m‰t‰‰!!!!");
+    echo t("nyt on jotain m√§t√§√§!!!!");
   }
 }
 
@@ -237,7 +237,7 @@ if (!isset($nayta_pdf)) {
 
   echo "</select></td>";
 
-  //t‰h‰n arrayhin pit‰‰ lis‰t‰ uusia malleja jos tehd‰‰n uusia inccej‰ ja ylemp‰n‰ tehd‰ iffej‰.
+  //t√§h√§n arrayhin pit√§√§ lis√§t√§ uusia malleja jos tehd√§√§n uusia inccej√§ ja ylemp√§n√§ tehd√§ iffej√§.
   $pohjat = array();
   $pohjat[] = 'Tec';
   $pohjat[] = 'Intermec';
@@ -267,7 +267,7 @@ if (!isset($nayta_pdf)) {
   echo "</tr>";
   echo "</table>";
   echo "</form>";
-   // t‰st‰ alkaa toinen formi
+   // t√§st√§ alkaa toinen formi
   $sel = "";
   $lisa = "";
 
@@ -281,7 +281,7 @@ if (!isset($nayta_pdf)) {
   echo "<br>";
 
   echo "<table>";
-  echo "<tr><th colspan='2'><center>".t("Tulostetaan tuotetarrat hyllyjen v‰lilt‰")."</center></th><tr>";
+  echo "<tr><th colspan='2'><center>".t("Tulostetaan tuotetarrat hyllyjen v√§lilt√§")."</center></th><tr>";
   echo "<tr><th>".t("Alkuosoite")."</th>";
   echo "<td>",hyllyalue("ahyllyalue", $ahyllyalue);
   echo "-";
@@ -299,7 +299,7 @@ if (!isset($nayta_pdf)) {
   echo "<input type='text' name='lhyllyvali' size='5' maxlength='5' value='$lhyllyvali'>";
   echo "-";
   echo "<input type='text' name='lhyllytaso' size='5' maxlength='5' value='$lhyllytaso'></td></tr>";
-  echo "<tr><th>".t("Vain tuotteet joilla on saldoa hyllyill‰")."</th><td><input type='checkbox' name='saldo' value='1' $sel> </td>";
+  echo "<tr><th>".t("Vain tuotteet joilla on saldoa hyllyill√§")."</th><td><input type='checkbox' name='saldo' value='1' $sel> </td>";
 
   echo "<tr><th>".t("KPL")."</th><td><input type='text' name='tulostakappale' size='3' value='$tulostakappale'></td><tr>";
   echo "<tr><th>".t("Kirjoitin")."</th><td><select name='kirjoitin'>";

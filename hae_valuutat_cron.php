@@ -1,8 +1,8 @@
 <?php
 
-// Kutsutaanko CLI:stä
+// Kutsutaanko CLI:stÃ¤
 if (php_sapi_name() != 'cli') {
-  die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+  die ("TÃ¤tÃ¤ scriptiÃ¤ voi ajaa vain komentoriviltÃ¤!");
 }
 
 require ("inc/connect.inc");
@@ -36,8 +36,8 @@ if ($xml !== FALSE) {
     $result = mysql_query($query) or pupe_error($query);
   }
 
-  echo date("d.m.Y @ G:i:s").": Eurokurssit päivitetty $pvm\n\n";
+  echo date("d.m.Y @ G:i:s").": Eurokurssit pÃ¤ivitetty $pvm\n\n";
 }
 else {
-  echo date("d.m.Y @ G:i:s").": Valuuttakurssien haku epäonnistui!\n\n";
+  echo date("d.m.Y @ G:i:s").": Valuuttakurssien haku epÃ¤onnistui!\n\n";
 }

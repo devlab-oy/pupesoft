@@ -1,6 +1,6 @@
 <?php
 
-// online kysely.. näillä infoilla pitäs onnistua
+// online kysely.. nÃ¤illÃ¤ infoilla pitÃ¤s onnistua
 if ($_GET["user"] != "" and $_GET["pass"] != "" and $_GET["yhtio"] != "" and $_GET["ostoskori"] != "") {
 
   require("connect.inc");
@@ -10,7 +10,7 @@ if ($_GET["user"] != "" and $_GET["pass"] != "" and $_GET["yhtio"] != "" and $_G
   $ostoskori_yhtio    = mysql_real_escape_string($_GET["yhtio"]);
   $ostoskori_ostoskori  = mysql_real_escape_string($_GET["ostoskori"]);
 
-  // katotaan löytyykö asiakas
+  // katotaan lÃ¶ytyykÃ¶ asiakas
   $query = "SELECT oletus_asiakas
             FROM kuka
             WHERE yhtio         = '$ostoskori_yhtio'
@@ -24,7 +24,7 @@ if ($_GET["user"] != "" and $_GET["pass"] != "" and $_GET["yhtio"] != "" and $_G
 
     $kukarivi = mysql_fetch_array($result);
 
-    // asiakas löytyi, katotaan löytyykö sille ostoskoria $ostoskori
+    // asiakas lÃ¶ytyi, katotaan lÃ¶ytyykÃ¶ sille ostoskoria $ostoskori
     $query = "SELECT tilausrivi.*
               FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
               JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'B')

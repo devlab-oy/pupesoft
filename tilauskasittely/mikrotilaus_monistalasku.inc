@@ -14,10 +14,10 @@ if ($tee == "file") {
     }
 
     if ($_FILES['userfile']['size']==0) {
-      die ("<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font>");
+      die ("<font class='error'><br>".t("Tiedosto on tyhj√§")."!</font>");
     }
 
-    $file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
+    $file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep√§onnistui")."!");
 
     $tunnukset     = "";
     $korjaaalvit   = array();
@@ -100,11 +100,11 @@ if ($tee == 'mikrotila') {
 
   echo "<td>".t("Laskunro")."</td>";
   echo "<td>".t("Korjaa alvit")."</td>";
-  echo "<td>".t("Hyvit‰")."</td>";
+  echo "<td>".t("Hyvit√§")."</td>";
   echo "<td>".t("Reklamaatio")."</td>";
   echo "<td>".t("Suoraan laskutukseen")."</td>";
   echo "<td>".t("Laske rahtiveloitus uudestaan")."</td>";
-  echo "<td>".t("K‰ytet‰‰nkˆ reklamaatiossa hyvityshintoja")."</td>";
+  echo "<td>".t("K√§ytet√§√§nk√∂ reklamaatiossa hyvityshintoja")."</td>";
 
   echo "  </tr>
       </table>
@@ -114,7 +114,7 @@ if ($tee == 'mikrotila') {
 
   echo "  <th>".t("Valitse tiedosto").":</th>
       <td><input name='userfile' type='file'></td>
-      <td class='back'><input type='submit' value='".t("L‰heta")."'></td>
+      <td class='back'><input type='submit' value='".t("L√§heta")."'></td>
       </tr>
       </table>
       </form>";

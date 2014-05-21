@@ -61,7 +61,7 @@ if ($tee == 'N' or $tee == 'E') {
     $tee = 'Z';
   }
   else {
-    $varaosavirhe = t("Yht‰‰n tuotetta ei lˆytynyt")."!";
+    $varaosavirhe = t("Yht√§√§n tuotetta ei l√∂ytynyt")."!";
     $tuoteno = '';
     $tee = 'Y';
   }
@@ -71,7 +71,7 @@ if (isset($tuoteno)) $tkysy_lopetus = "{$palvelin2}tuote.php////tuoteno=".urlenc
 else $tkysy_lopetus = "";
 
 if ($lopetus != "") {
-  // Lis‰t‰‰n t‰m‰ lopetuslinkkiin
+  // Lis√§t√§√§n t√§m√§ lopetuslinkkiin
   $tkysy_lopetus = $lopetus."/SPLIT/".$tkysy_lopetus;
 }
 
@@ -244,7 +244,7 @@ if ($tee == 'Z') {
     $ttrow = array();
   }
 
-  // Tarkastetaan onko taricit k‰ytˆss‰
+  // Tarkastetaan onko taricit k√§yt√∂ss√§
   $tv_kaytossa = tarkista_onko_taric_veroperusteet_kaytossa();
 
   if ($tuoterow["tuoteno"] != "") {
@@ -258,7 +258,7 @@ if ($tee == 'Z') {
 
     $sarjanumero_kpl = 0;
 
-    // Jos tuote on sarjanumeroseurannassa niin kehahinta lasketaan yksilˆiden ostohinnoista (ostetut yksilˆt jotka eiv‰t viel‰ ole myyty(=laskutettu))
+    // Jos tuote on sarjanumeroseurannassa niin kehahinta lasketaan yksil√∂iden ostohinnoista (ostetut yksil√∂t jotka eiv√§t viel√§ ole myyty(=laskutettu))
     if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U" or $tuoterow['sarjanumeroseuranta'] == 'G') {
       $query  = "SELECT sarjanumeroseuranta.tunnus
                  FROM sarjanumeroseuranta
@@ -303,7 +303,7 @@ if ($tee == 'Z') {
        $tuoterow['hinnastoon'] = "<font style='color:#FF0000;'>".t("Ei")."</font>";
     }
     else {
-      $tuoterow['hinnastoon'] = "<font style='color:#00FF00;'>".t("Kyll‰")."</font>";
+      $tuoterow['hinnastoon'] = "<font style='color:#00FF00;'>".t("Kyll√§")."</font>";
     }
 
     // Varastoon
@@ -311,7 +311,7 @@ if ($tee == 'Z') {
        $tuoterow['ei_varastoida'] = "<font style='color:#FF0000;'>".t("Ei")."</font>";
     }
     else {
-      $tuoterow['ei_varastoida'] = "<font style='color:#00FF00;'>".t("Kyll‰")."</font>";
+      $tuoterow['ei_varastoida'] = "<font style='color:#00FF00;'>".t("Kyll√§")."</font>";
     }
 
     // Ostoehdotukselle
@@ -319,7 +319,7 @@ if ($tee == 'Z') {
       $tuoterow['ostoehdotus'] = "<font style='color:#FF0000;'>".t("Ei")."</font>";
     }
     else {
-      $tuoterow['ostoehdotus'] = "<font style='color:#00FF00;'>".t("Kyll‰")."</font>";
+      $tuoterow['ostoehdotus'] = "<font style='color:#00FF00;'>".t("Kyll√§")."</font>";
     }
 
     //tullinimike
@@ -405,7 +405,7 @@ if ($tee == 'Z') {
 
     echo "<tr>";
     echo "<th>".t("Tuotenumero")."<br>".t("Tuotemerkki")."</th>";
-    echo "<th>".t("Yksikkˆ")."</th>";
+    echo "<th>".t("Yksikk√∂")."</th>";
     echo "<th>".t("Eankoodi")."</th>";
     echo "<th colspan='2'>".t("Nimitys")."</th>";
     echo "<th>".t("Hinnastoon")."<br>".t("Status")."</th>";
@@ -434,13 +434,13 @@ if ($tee == 'Z') {
 
         $divit = "<div id='div_$trimtuoteno' class='popup'>";
         $divit .= "<table><tr><td valign='top'><table>";
-        $divit .= "<tr><td class='back' valign='top' align='center'>".t("Alkuper‰isnumero")."</td><td class='back' valign='top' align='center'>".t("Hinta")."</td><td class='back' valign='top' align='center'>".t("Merkki")."</td></tr>";
+        $divit .= "<tr><td class='back' valign='top' align='center'>".t("Alkuper√§isnumero")."</td><td class='back' valign='top' align='center'>".t("Hinta")."</td><td class='back' valign='top' align='center'>".t("Merkki")."</td></tr>";
 
         while ($origrow = mysql_fetch_assoc($origresult)) {
           ++$i;
           if ($i == 20) {
             $divit .= "</table></td><td valign='top'><table>";
-            $divit .= "<tr><td class='back' valign='top' align='center'>".t("Alkuper‰isnumero")."</td><td class='back' valign='top' align='center'>".t("Hinta")."</td><td class='back' valign='top' align='center'>".t("Merkki")."</td></tr>";
+            $divit .= "<tr><td class='back' valign='top' align='center'>".t("Alkuper√§isnumero")."</td><td class='back' valign='top' align='center'>".t("Hinta")."</td><td class='back' valign='top' align='center'>".t("Merkki")."</td></tr>";
             $i = 1;
           }
           $divit .= "<tr><td class='back' valign='top'>$origrow[orig_tuoteno]</td><td class='back' valign='top' align='right'>$origrow[orig_hinta]</td><td class='back' valign='top'>$origrow[merkki]</td></tr>";
@@ -489,8 +489,8 @@ if ($tee == 'Z') {
     echo "<tr>";
     echo "<th>".t("Osasto/try")."</th>";
     echo "<th>".t("Toimittaja")."</th>";
-    echo "<th>".t("Aleryhm‰")."</th>";
-    echo "<th>".t("T‰hti")."</th>";
+    echo "<th>".t("Aleryhm√§")."</th>";
+    echo "<th>".t("T√§hti")."</th>";
     echo "<th>".t("Perusalennus")."</th>";
     echo "<th>".t("VAK")."</th>";
     echo "</tr>";
@@ -611,9 +611,9 @@ if ($tee == 'Z') {
 
     //4
     echo "<tr>";
-    echo "<th>".t("H‰lyraja")." / ".t("Varastoitava")."</th>";
-    echo "<th>".t("Ostoer‰")."</th>";
-    echo "<th>".t("Myyntier‰")."</th>";
+    echo "<th>".t("H√§lyraja")." / ".t("Varastoitava")."</th>";
+    echo "<th>".t("Ostoer√§")."</th>";
+    echo "<th>".t("Myyntier√§")."</th>";
     echo "<th>".t("Kerroin")."</th>";
     echo "<th>".t("Tarrakerroin")."</th>";
     echo "<th>".t("Tarrakpl")."</th>";
@@ -656,10 +656,10 @@ if ($tee == 'Z') {
     echo "<tr>";
     echo "<th>".t("Luontipvm")."</th>";
     echo "<th>".t("Muutospvm")."</th>";
-    echo "<th>".t("Ep‰kurantti25pvm")."</th>";
-    echo "<th>".t("Ep‰kurantti50pvm")."</th>";
-    echo "<th>".t("Ep‰kurantti75pvm")."</th>";
-    echo "<th>".t("Ep‰kurantti100pvm")."</th>";
+    echo "<th>".t("Ep√§kurantti25pvm")."</th>";
+    echo "<th>".t("Ep√§kurantti50pvm")."</th>";
+    echo "<th>".t("Ep√§kurantti75pvm")."</th>";
+    echo "<th>".t("Ep√§kurantti100pvm")."</th>";
     echo "</tr>";
 
     echo "<tr>";
@@ -779,7 +779,7 @@ if ($tee == 'Z') {
       echo "$liitteet<br><br>";
     }
 
-    // aika karseeta, mutta katotaan voidaanko t‰ll‰st‰ optiota n‰ytt‰‰ yks tosi firma specific juttu
+    // aika karseeta, mutta katotaan voidaanko t√§ll√§st√§ optiota n√§ytt√§√§ yks tosi firma specific juttu
     if (table_exists("yhteensopivuus_tuote") and file_exists("yhteensopivuus_tuote.php") and tarkista_oikeus('yhteensopivuus_tuote.php')) {
 
               $lisa = " and tuoteno = '$tuoteno' ";
@@ -868,8 +868,8 @@ if ($tee == 'Z') {
       echo "<th>".t("Varasto")."</th>";
       echo "<th>".t("Varastopaikka")."</th>";
       echo "<th>".t("Saldo")."</th>";
-      echo "<th>".t("Hyllyss‰")."</th>";
-      echo "<th>".t("Myyt‰viss‰")."</th>";
+      echo "<th>".t("Hyllyss√§")."</th>";
+      echo "<th>".t("Myyt√§viss√§")."</th>";
       echo "</tr>";
 
       $kokonaissaldo = 0;
@@ -976,7 +976,7 @@ if ($tee == 'Z') {
       }
 
       echo "<tr>
-          <th colspan='2'>".t("Yhteens‰")."</th>
+          <th colspan='2'>".t("Yhteens√§")."</th>
           <th style='text-align:right;'>".sprintf("%.2f", $kokonaissaldo)."</th>
           <th style='text-align:right;'>".sprintf("%.2f", $kokonaishyllyssa)."</th>
           <th style='text-align:right;'>".sprintf("%.2f", $kokonaismyytavissa)."</th>
@@ -1005,7 +1005,7 @@ if ($tee == 'Z') {
       echo "<table>";
       echo "<tr>";
       echo "<th>".t("Tuotenumero")."</th>";
-      echo "<th>".t("Myyt‰viss‰")."</th>";
+      echo "<th>".t("Myyt√§viss√§")."</th>";
       echo "</tr>";
 
       // Listataan korvaavat ketju
@@ -1045,14 +1045,14 @@ if ($tee == 'Z') {
         echo "<tr><th colspan='3'>".t("Ketju").": $ketju.</th></tr>";
         echo "<tr>";
         echo "<th>".t("Tuotenumero")."</th>";
-        echo "<th>".t("Myyt‰viss‰")."</th>";
+        echo "<th>".t("Myyt√§viss√§")."</th>";
         echo "<th>".t("Vaihtoehtoinen")."</th>";
         echo "</tr>";
 
         // Haetaan tuotteet ketjukohtaisesti
         $_tuotteet = $vastaavat->tuotteet($ketju, $options);
 
-        // Lis‰t‰‰n lˆydetyt vastaavat mahdollisten myyt‰vien joukkoon
+        // Lis√§t√§√§n l√∂ydetyt vastaavat mahdollisten myyt√§vien joukkoon
         foreach ($_tuotteet as $_tuote) {
           list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($_tuote["tuoteno"], 'KAIKKI', '', '', '', '', '', '', '', $saldoaikalisa);
 
@@ -1063,7 +1063,7 @@ if ($tee == 'Z') {
 
           // Vaihtoehtoinen
           if ($_tuote['vaihtoehtoinen'] == 'K') {
-            echo t("Kyll‰");
+            echo t("Kyll√§");
           }
 
           echo "</td>";
@@ -1075,7 +1075,7 @@ if ($tee == 'Z') {
 
     echo "</td><td class='back' valign='top' style='padding:0px; margin:0px;height:0px;'>";
 
-    //Tuotemuutoksia halutaan n‰ytt‰‰, mik‰li niit‰ on.
+    //Tuotemuutoksia halutaan n√§ytt√§√§, mik√§li niit√§ on.
     $lista = hae_tuotemuutokset($tuoteno);
 
     if (count($lista) > 0) {
@@ -1139,7 +1139,7 @@ if ($tee == 'Z') {
       $toimipaikkarajaus = " and ((lasku.yhtio_toimipaikka = '{$toimipaikka}' and tilausrivi.tyyppi != 'O') OR (lasku.vanhatunnus = '{$toimipaikka}' and tilausrivi.tyyppi = 'O'))";
     }
 
-    // Tilausrivit t‰lle tuotteelle
+    // Tilausrivit t√§lle tuotteelle
     $query = "SELECT if (asiakas.ryhma != '', concat(lasku.nimi,' (',asiakas.ryhma,')'), lasku.nimi) nimi,
               lasku.tunnus,
               (tilausrivi.varattu+tilausrivi.jt) kpl,
@@ -1189,8 +1189,8 @@ if ($tee == 'Z') {
           <th>".t("Tyyppi")."</th>
           <th>".t("Luontiaika")."</th>
           <th>".t("Toim.aika")."</th>
-          <th>".t("M‰‰r‰")."</th>
-          <th>".t("Myyt‰viss‰")."</th>
+          <th>".t("M√§√§r√§")."</th>
+          <th>".t("Myyt√§viss√§")."</th>
           </tr>";
 
       $yhteensa   = array();
@@ -1206,7 +1206,7 @@ if ($tee == 'Z') {
         if ($jtrow["tyyppi"] == "O") {
 
           if ($jtrow["laskutila"] == "K") {
-            $tyyppi = t("Lis‰tty suoraan saapumiselle");
+            $tyyppi = t("Lis√§tty suoraan saapumiselle");
             $keikka = " / ".$jtrow["laskunro"];
           }
           else {
@@ -1228,7 +1228,7 @@ if ($tee == 'Z') {
           $merkki = "-";
         }
         elseif ($jtrow["tyyppi"] == "G" and $jtrow["tilaustyyppi"] == "S") {
-          $tyyppi = t("Sis‰inen tyˆm‰‰r‰ys");
+          $tyyppi = t("Sis√§inen ty√∂m√§√§r√§ys");
           $merkki = "-";
         }
         elseif ($jtrow["tyyppi"] == "G") {
@@ -1240,12 +1240,12 @@ if ($tee == 'Z') {
           $merkki = "-";
         }
         elseif ($jtrow["tyyppi"] == "L" and $jtrow["var"] == "J") {
-          $tyyppi = t("J‰lkitoimitus");
+          $tyyppi = t("J√§lkitoimitus");
           $merkki = "-";
         }
         elseif ($jtrow["tyyppi"] == "L" and $jtrow["kpl"] > 0 and $jtrow["osto_vai_hyvitys"] == "H") {
           // Marginaalioston hyvitys
-          $tyyppi = t("K‰ytetyn tavaran hyvitys");
+          $tyyppi = t("K√§ytetyn tavaran hyvitys");
           $merkki = "-";
         }
         elseif ($jtrow["tyyppi"] == "L" and $jtrow["kpl"] > 0) {
@@ -1260,7 +1260,7 @@ if ($tee == 'Z') {
         }
         elseif ($jtrow["tyyppi"] == "L" and $jtrow["kpl"] < 0 and $jtrow["osto_vai_hyvitys"] == "O") {
           // Marginaaliosto
-          $tyyppi = t("K‰ytetyn tavaran osto");
+          $tyyppi = t("K√§ytetyn tavaran osto");
           $merkki = "+";
         }
         elseif (($jtrow["tyyppi"] == "W" or $jtrow["tyyppi"] == "M") and $jtrow["tilaustyyppi"] == "W") {
@@ -1284,7 +1284,7 @@ if ($tee == 'Z') {
 
         if ((int) str_replace("-", "", $jtrow["pvm"]) > (int) date("Ymd") and $ekotettiin == 0) {
           echo "<tr>
-              <td colspan='6' align='right' class='spec'>".t("Myyt‰viss‰ nyt").":</td>
+              <td colspan='6' align='right' class='spec'>".t("Myyt√§viss√§ nyt").":</td>
               <td align='right' class='spec'>".sprintf('%.2f', $myyta)."</td>
               </tr>";
           $ekotettiin = 1;
@@ -1319,7 +1319,7 @@ if ($tee == 'Z') {
           echo "<div id='div_{$jtrow['tunnus']}{$jtrow['keikkanro']}' class='popup' style='width: 500px;'>";
           echo t("Saapuminen"),": {$jtrow['keikkanro']} / {$jtrow['nimi']}<br /><br />";
           echo t("Laatija"),": {$kuka_chk_row['nimi']}<br />";
-          echo t("Luontiaika"),": ",tv1dateconv($jtrow['luontiaika'], "pitk‰"),"<br /><br />";
+          echo t("Luontiaika"),": ",tv1dateconv($jtrow['luontiaika'], "pitk√§"),"<br /><br />";
           echo $jtrow["comments"];
           echo "</div>";
         }
@@ -1335,7 +1335,7 @@ if ($tee == 'Z') {
 
       foreach ($yhteensa as $type => $kappale) {
         echo "<tr>";
-        echo "<th colspan='5'>$type ".t("yhteens‰")."</th>";
+        echo "<th colspan='5'>$type ".t("yhteens√§")."</th>";
         echo "<th style='text-align:right;'>$kappale</th>";
         echo "<th></th>";
         echo "</tr>";
@@ -1366,7 +1366,7 @@ if ($tee == 'Z') {
         <input type='hidden' name='toim_kutsu' value='$toim_kutsu'>
         <input type='hidden' name='toimipaikka' value='{$toimipaikka}' />
         <font class='message'>".t("Raportointi")."</font><a href='#' name='Raportit'></a>
-        (<input type='radio' onclick='submit()' name='raportti' value='MYYNTI' $sele[M]> ".t("Myynnist‰")." /
+        (<input type='radio' onclick='submit()' name='raportti' value='MYYNTI' $sele[M]> ".t("Myynnist√§")." /
         <input type='radio' onclick='submit()' name='raportti' value='KULUTUS' $sele[K]> ".t("Kulutuksesta").")
         </form><hr>";
 
@@ -1485,10 +1485,10 @@ if ($tee == 'Z') {
               $month = "Touko";
               break;
             case "6":
-              $month = "Kes‰";
+              $month = "Kes√§";
               break;
             case "7":
-              $month = "Hein‰";
+              $month = "Hein√§";
               break;
             case "8":
               $month = "Elo";
@@ -1551,12 +1551,12 @@ if ($tee == 'Z') {
             and varastopaikat.tunnus IN ({$varow['tunnukset']})";
           }
           else {
-            // Jos toimipaikkarajaus palauttaa NULLia, ei n‰ytet‰ tapahtumia
+            // Jos toimipaikkarajaus palauttaa NULLia, ei n√§ytet√§ tapahtumia
             $ehto_where = "AND tapahtuma.tunnus = 0";
           }
         }
 
-        //  Tutkitaan onko t‰‰ liian hias
+        //  Tutkitaan onko t√§√§ liian hias
         $query = "SELECT
                   {$select_summa}
                   FROM tapahtuma USE INDEX (yhtio_tuote_laadittu)
@@ -1570,7 +1570,7 @@ if ($tee == 'Z') {
         $result3 = pupe_query($query);
         $lrow = mysql_fetch_assoc($result3);
 
-        echo "<table><tr><th>".t("Tyyppi")."</th>$otsikkorivi<th>".t("Yhteens‰")."</th></tr>";
+        echo "<table><tr><th>".t("Tyyppi")."</th>$otsikkorivi<th>".t("Yhteens√§")."</th></tr>";
         $erittely=array();
         $ed_erittely=array();
 
@@ -1648,7 +1648,7 @@ if ($tee == 'Z') {
           }
         }
 
-        echo "<tr><th>".t("Yhteens‰")."</th>";
+        echo "<tr><th>".t("Yhteens√§")."</th>";
 
         $kk=date("m");
         $gt=$ed_gt=0;
@@ -1760,10 +1760,10 @@ if ($tee == 'Z') {
 
             if ($siirow["tyyppi"] == "O") {
               // pultattu kiinni johonkin
-              $fnlina1 = " <font class='message'>(".t("Varattu lis‰varusteena").": $siirow[tuoteno] <a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($siirow["tuoteno"])."&sarjanumero_haku=".urlencode($siirow["sarjanumero"])."'>$siirow[sarjanumero]</a>)</font>";
+              $fnlina1 = " <font class='message'>(".t("Varattu lis√§varusteena").": $siirow[tuoteno] <a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($siirow["tuoteno"])."&sarjanumero_haku=".urlencode($siirow["sarjanumero"])."'>$siirow[sarjanumero]</a>)</font>";
             }
             elseif ($siirow["tyyppi"] == "G") {
-              // jos t‰m‰ on jollain siirtolistalla
+              // jos t√§m√§ on jollain siirtolistalla
               $fnlina1 = " <font class='message'>(".t("Kesken siirtolistalla").": $siirow[otunnus])</font>";
             }
           }
@@ -1802,7 +1802,7 @@ if ($tee == 'Z') {
       $sarjares = pupe_query($query);
 
       if (mysql_num_rows($sarjares) > 0) {
-        echo "<font class='message'>".t("Er‰numerot")."</font><hr>";
+        echo "<font class='message'>".t("Er√§numerot")."</font><hr>";
 
         echo "<table>";
         if ($tuoterow["sarjanumeroseuranta"] == "F") {
@@ -1814,17 +1814,17 @@ if ($tee == 'Z') {
         else {
           echo "<tr><th colspan='3'>".t("Varasto").":</th></tr>";
         }
-        echo "<th>".t("Er‰numero")."</th>";
+        echo "<th>".t("Er√§numero")."</th>";
 
         if ($tuoterow["sarjanumeroseuranta"] == "F") {
           echo "<th>".t("Parasta ennen")."</th>";
         }
 
-        echo "<th>".t("M‰‰r‰")."</th>";
+        echo "<th>".t("M√§√§r√§")."</th>";
         if ($tuoterow['sarjanumeroseuranta'] == 'G') {
           echo "<th>",t("Ostohinta"),"</th>";
         }
-        echo "<th>".t("Lis‰tieto")."</th></tr>";
+        echo "<th>".t("Lis√§tieto")."</th></tr>";
 
         while ($sarjarow = mysql_fetch_assoc($sarjares)) {
           echo "<tr>
@@ -1840,7 +1840,7 @@ if ($tee == 'Z') {
           }
           echo "<td>$sarjarow[lisatieto]</td>";
 
-          //  Katsotaan jos meid‰n pit‰isi liitt‰‰ jotain infoa lis‰tiedoista
+          //  Katsotaan jos meid√§n pit√§isi liitt√§√§ jotain infoa lis√§tiedoista
           if (file_exists("inc/generoi_sarjanumeron_info.inc")) {
             require("inc/generoi_sarjanumeron_info.inc");
             $sarjainfo = generoi_sarjanumeron_info($sarjarow["sarjanumero"]);
@@ -1876,9 +1876,9 @@ if ($tee == 'Z') {
       $chk[$historia] = "SELECTED";
 
       echo "<tr>";
-      echo "<th colspan='5'>".t("N‰yt‰ tapahtumat").": ";
+      echo "<th colspan='5'>".t("N√§yt√§ tapahtumat").": ";
       echo "<select name='historia' onchange='submit();'>'";
-      echo "<option value='1' $chk[1]> ".t("20 viimeisint‰")."</option>";
+      echo "<option value='1' $chk[1]> ".t("20 viimeisint√§")."</option>";
 
       $query = "SELECT * FROM tilikaudet WHERE yhtio = '$kukarow[yhtio]' ORDER BY tilikausi_loppu DESC";
       $tkresult = pupe_query($query);
@@ -1900,7 +1900,7 @@ if ($tee == 'Z') {
       if ($tapahtumalaji == "siirto")       $sel4="SELECTED";
       if ($tapahtumalaji == "kulutus")       $sel5="SELECTED";
       if ($tapahtumalaji == "Inventointi")     $sel6="SELECTED";
-      if ($tapahtumalaji == "Ep‰kurantti")     $sel7="SELECTED";
+      if ($tapahtumalaji == "Ep√§kurantti")     $sel7="SELECTED";
       if ($tapahtumalaji == "poistettupaikka")   $sel8="SELECTED";
       if ($tapahtumalaji == "uusipaikka")     $sel9="SELECTED";
 
@@ -1922,21 +1922,21 @@ if ($tee == 'Z') {
 
       echo "'>".t("Tapahtumalaji").": ";
       echo "<select name='tapahtumalaji' onchange='submit();'>'";
-      echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";
+      echo "<option value=''>".t("N√§yt√§ kaikki")."</option>";
       echo "<option value='laskutus' $sel1>".t("Laskutukset")."</option>";
       echo "<option value='tulo' $sel2>".t("Tulot")."</option>";
       echo "<option value='valmistus' $sel3>".t("Valmistukset")."</option>";
       echo "<option value='siirto' $sel4>".t("Siirrot")."</option>";
       echo "<option value='kulutus' $sel5>".t("Kulutukset")."</option>";
       echo "<option value='Inventointi' $sel6>".t("Inventoinnit")."</option>";
-      echo "<option value='Ep‰kurantti' $sel7>".t("Ep‰kuranttiusmerkinn‰t")."</option>";
+      echo "<option value='Ep√§kurantti' $sel7>".t("Ep√§kuranttiusmerkinn√§t")."</option>";
       echo "<option value='poistettupaikka' $sel8>".t("Poistetut tuotepaikat")."</option>";
       echo "<option value='uusipaikka' $sel9>".t("Perustetut tuotepaikat")."</option>";
       echo "</select>";
       echo "</th>";
 
       echo "<th>";
-      echo t("N‰yt‰ tilausrivin hinta ja ale").": <input type='checkbox' name='tilalehinta' id='tilalehinta' $check onClick='javascript:submit();'>";
+      echo t("N√§yt√§ tilausrivin hinta ja ale").": <input type='checkbox' name='tilalehinta' id='tilalehinta' $check onClick='javascript:submit();'>";
       echo "</th>";
 
       echo "</tr>";
@@ -1945,7 +1945,7 @@ if ($tee == 'Z') {
       echo "<th>".t("Laatija")."</th>";
       echo "<th>".t("Pvm")."</th>";
       echo "<th>".t("Tyyppi")."</th>";
-      echo "<th>".t("M‰‰r‰")."</th>";
+      echo "<th>".t("M√§√§r√§")."</th>";
       echo "<th>".t("Kplhinta")."</th>";
       echo "<th>".t("Kehahinta")."</th>";
       echo "<th>".t("Kate")."</th>";
@@ -2006,7 +2006,7 @@ if ($tee == 'Z') {
           and varastopaikat.tunnus IN ({$varow['tunnukset']})";
         }
         else {
-          // Jos toimipaikkarajaus palauttaa NULLia, ei n‰ytet‰ tapahtumia
+          // Jos toimipaikkarajaus palauttaa NULLia, ei n√§ytet√§ tapahtumia
           $ehto = "AND tapahtuma.tunnus = 0";
         }
       }
@@ -2063,7 +2063,7 @@ if ($tee == 'Z') {
         echo "</tr>";
       }
 
-      // Onko k‰ytt‰j‰ll‰ oikeus n‰hd‰ valmistuksia tai reseptej‰
+      // Onko k√§ytt√§j√§ll√§ oikeus n√§hd√§ valmistuksia tai reseptej√§
       $oikeu_t1 = tarkista_oikeus("tilauskasittely/tilaus_myynti.php", "VALMISTAVARASTOON");
 
       if ($yhtiorow["raaka_aineet_valmistusmyynti"] == "N") {
@@ -2080,8 +2080,8 @@ if ($tee == 'Z') {
 
         $vararvo_nyt -= $prow["arvo"];
 
-        // Ep‰kuranteissa saldo ei muutu
-        if ($prow["laji"] != "Ep‰kurantti") {
+        // Ep√§kuranteissa saldo ei muutu
+        if ($prow["laji"] != "Ep√§kurantti") {
           $saldo_nyt -= $prow["kpl"];
         }
 
@@ -2103,11 +2103,11 @@ if ($tee == 'Z') {
           elseif ($prow["laji"] == "valmistus" and $prow["laskutunnus"] != "") {
             echo "<a href='$PHP_SELF?tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]&lopetus=$lopetus'>".t("$prow[laji]")."</a>";
 
-            // N‰ytet‰‰n t‰m‰ vain jos k‰ytt‰j‰ll‰ on oikeus tehd‰ valmistuksia tai reseptej‰
+            // N√§ytet√§√§n t√§m√§ vain jos k√§ytt√§j√§ll√§ on oikeus tehd√§ valmistuksia tai reseptej√§
             if ($oikeu_t1 or $oikeu_t2 or $oikeu_t3 or $oikeu_t4) {
               echo "&nbsp;<img src='{$palvelin2}pics/lullacons/info.png' class='tooltip' id='$prow[trivitunn]'>";
 
-              // N‰ytet‰‰n mist‰ tuotteista t‰m‰ on valmistettu
+              // N√§ytet√§√§n mist√§ tuotteista t√§m√§ on valmistettu
               echo "<div id='div_$prow[trivitunn]' class='popup' style='width:200px;'>";
               echo "<table>";
 
@@ -2130,7 +2130,7 @@ if ($tee == 'Z') {
                   <th>".t("Tuoteno")."</th>
                   <th>".t("Kpl")."</th>
                   <th>".t("Arvo")."</th>
-                  <th>".t("Yhteens‰")."</th>
+                  <th>".t("Yhteens√§")."</th>
                   </tr>";
 
               $ressuyhteensa = 0;
@@ -2190,7 +2190,7 @@ if ($tee == 'Z') {
           echo "<td valign='top'>$prow[selite]";
 
           if ($prow["laji"] == "tulo" and $prow["lasku2tunnus"] != "") {
-            echo "<br><a href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[lasku2tunnus]&lopetus=$tkysy_lopetus'>".t("N‰yt‰ saapuminen")." $prow[lasku2laskunro]</a>";
+            echo "<br><a href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[lasku2tunnus]&lopetus=$tkysy_lopetus'>".t("N√§yt√§ saapuminen")." $prow[lasku2laskunro]</a>";
           }
 
           if (trim($prow["tapapaikka"]) != "" and $prow["tapahtuma_hyllyalue"] != "!!M") echo "<br>".t("Varastopaikka").": $prow[tapapaikka]";
@@ -2249,7 +2249,7 @@ if ($tee == 'Z') {
     echo $divit;
   }
   else {
-    echo "<font class='message'>".t("Yht‰‰n tuotetta ei lˆytynyt")."!<br></font>";
+    echo "<font class='message'>".t("Yht√§√§n tuotetta ei l√∂ytynyt")."!<br></font>";
   }
   $tee = '';
 }

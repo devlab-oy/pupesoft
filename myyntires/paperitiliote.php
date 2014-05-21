@@ -51,7 +51,7 @@ function alku () {
   $pdf->draw_rectangle(779, 300, 758, 580, $firstpage, $rectparam);
   $pdf->draw_rectangle(779, 420, 758, 580, $firstpage, $rectparam);
 
-  $pdf->draw_text(310, 771, t("P‰iv‰m‰‰r‰", $kieli),     $firstpage, $pieni);
+  $pdf->draw_text(310, 771, t("P√§iv√§m√§√§r√§", $kieli),     $firstpage, $pieni);
   $pdf->draw_text(310, 761, tv1dateconv($tito_pvm),   $firstpage, $norm);
 
   $pdf->draw_text(430, 771, t("Puhelin", $kieli), $firstpage, $pieni);
@@ -63,16 +63,16 @@ function alku () {
   $pdf->draw_text(310, 750, t("Ytunnus/Asiakasnumero", $kieli),   $firstpage, $pieni);
   $pdf->draw_text(310, 740, $asiakastiedot["ytunnus"],       $firstpage, $norm);
 
-  $pdf->draw_text(430, 750, t("S‰hkˆposti", $kieli),     $firstpage, $pieni);
+  $pdf->draw_text(430, 750, t("S√§hk√∂posti", $kieli),     $firstpage, $pieni);
   $pdf->draw_text(430, 740,  $kukarow["eposti"],        $firstpage, $norm);
 
-  //Rivit alkaa t‰s‰ kohtaa
+  //Rivit alkaa t√§s√§ kohtaa
   $kala = ($alatila == 'T' and $asiakastiedot["laskutus_nimi"] != "") ? 570 : 620;
 
   //eka rivi
   $pdf->draw_text(30,  $kala, t("Laskunro", $kieli),      $firstpage, $pieni);
   $pdf->draw_text(100, $kala, t("Pvm", $kieli),        $firstpage, $pieni);
-  $pdf->draw_text(180, $kala, t("Er‰pvm", $kieli),      $firstpage, $pieni);
+  $pdf->draw_text(180, $kala, t("Er√§pvm", $kieli),      $firstpage, $pieni);
 
   $pdf->draw_text(300, $kala, t("Valuutta", $kieli),      $firstpage, $pieni);
 
@@ -181,7 +181,7 @@ function loppu ($firstpage, $summat) {
     $lask = 1;
   }
 
-  //yhteens‰rivi
+  //yhteens√§rivi
   $pdf->draw_rectangle(110, 394, 90, 580,  $firstpage, $rectparam);
   $pdf->draw_rectangle(110, 540, 90, 580,  $firstpage, $rectparam);
 
@@ -193,7 +193,7 @@ function loppu ($firstpage, $summat) {
 
   foreach ($summat as $valuutta => $summa) {
     if (count($summat) == 1) {
-      $pdf->draw_text(404, 92,  t("YHTEENSƒ", $kieli).":",  $firstpage, $norm);
+      $pdf->draw_text(404, 92,  t("YHTEENS√Ñ", $kieli).":",  $firstpage, $norm);
       $pdf->draw_text(464, 92,  sprintf('%.2f', $summa),  $firstpage, $norm);
       $pdf->draw_text(550, 92,  $valuutta,      $firstpage, $norm);
     }
@@ -215,7 +215,7 @@ function loppu ($firstpage, $summat) {
   $pdf->draw_text(404, 72, $yhtiorow["pankkiiban3"]."      ".$yhtiorow["pankkiswift3"],  $firstpage, $norm);
 
 
-  //Alimmat kolme laatikkoa, yhtiˆtietoja
+  //Alimmat kolme laatikkoa, yhti√∂tietoja
   $pdf->draw_rectangle(70, 20, 20, 580,  $firstpage, $rectparam);
   $pdf->draw_rectangle(70, 207, 20, 580,  $firstpage, $rectparam);
   $pdf->draw_rectangle(70, 394, 20, 580,  $firstpage, $rectparam);
@@ -364,7 +364,7 @@ $query = "SELECT *
 $asiakasresult = pupe_query($query);
 $asiakastiedot = mysql_fetch_assoc($asiakasresult);
 
-//Otetaan t‰ss‰ asiakkaan kieli talteen
+//Otetaan t√§ss√§ asiakkaan kieli talteen
 $kieli = $asiakastiedot["kieli"];
 
 //ja kelataan akuun
@@ -404,14 +404,14 @@ while ($row = mysql_fetch_assoc($suoritusresult)) {
 
 loppu($firstpage,$totaali);
 
-//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+//keksit√§√§n uudelle failille joku varmasti uniikki nimi:
 list($usec, $sec) = explode(' ', microtime());
 mt_srand((float) $sec + ((float) $usec * 100000));
 $pdffilenimi = "/tmp/tiliote-".md5(uniqid(mt_rand(), true)).".pdf";
 
 //kirjoitetaan pdf faili levylle..
 $fh = fopen($pdffilenimi, "w");
-if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
+if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep√§onnistui $pdffilenimi");
 fclose($fh);
 
 if (!isset($tee) or $tee != 'TULOSTA_EMAIL') echo file_get_contents($pdffilenimi);

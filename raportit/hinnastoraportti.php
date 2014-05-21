@@ -1,9 +1,9 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-// Ei k‰ytet‰ pakkausta
+// Ei k√§ytet√§ pakkausta
 $compression = FALSE;
 
 if (isset($_REQUEST["tee"])) {
@@ -34,7 +34,7 @@ if ($raptee == "AJA") {
     // Order by lisa
     $order_extra = 'variaatio, vari, koko';
 
-    // queryyn muutoksia jos lajitellaan n‰in
+    // queryyn muutoksia jos lajitellaan n√§in
     $jarjestys_sel = ",   t1.selite as variaatio,
                 t2.selite as vari,
                 t3.selite as kokoselite,
@@ -62,7 +62,7 @@ if ($raptee == "AJA") {
   $showprod = TRUE;
 
   if (mysql_num_rows($productqueryresult) > 2000) {
-    echo t("Tuotteita ei n‰ytet‰ ruudulla, koska niit‰ on yli")." 2000.";
+    echo t("Tuotteita ei n√§ytet√§ ruudulla, koska niit√§ on yli")." 2000.";
 
     require_once ('inc/ProgressBar.class.php');
     $bar = new ProgressBar();
@@ -187,12 +187,12 @@ echo "<br><form method='post'>";
 echo "<input type='hidden' name='raptee' value='AJA'>";
 echo "<table>";
 echo "<tr>
-  <th>".t("N‰yt‰ myˆs keskihankintahinnat")."</th>
+  <th>".t("N√§yt√§ my√∂s keskihankintahinnat")."</th>
   <td><input type='checkbox' name='kehahinnat' $chk></td>
   </tr>\n";
 
 echo "<tr>
-  <th>".t("N‰yt‰ vain myyt‰viss‰ olevat tuotteet")."</th>
+  <th>".t("N√§yt√§ vain myyt√§viss√§ olevat tuotteet")."</th>
   <td><input type='checkbox' name='myytavissao' $chk2></td>
   </tr>\n";
 

@@ -2,7 +2,7 @@
 
 # Pupesoft -> Unifaun Printserver datasiirto
 
-// jos on laitettu kollikenttään 0 niin ei yritetä luoda siirtotiedostoa
+// jos on laitettu kollikenttÃ¤Ã¤n 0 niin ei yritetÃ¤ luoda siirtotiedostoa
 if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
 
   if ($unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") {

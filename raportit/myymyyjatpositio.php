@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 $pupe_DataTables = "myymyyjat";
 
@@ -18,7 +18,7 @@ $query = "SELECT year(tilikausi_alku) y, month(tilikausi_alku) m
 $result = pupe_query($query);
 $tilikausi = mysql_fetch_assoc($result);
 
-// K‰yttˆliittym‰
+// K√§ytt√∂liittym√§
 if (!isset($alkukk))  $alkukk  = date("m", mktime(0, 0, 0, $tilikausi["m"], 1, $tilikausi["y"]));
 if (!isset($alkuvv))  $alkuvv  = date("Y", mktime(0, 0, 0, $tilikausi["m"], 1, $tilikausi["y"]));
 if (!isset($loppukk)) $loppukk = date("m", mktime(0, 0, 0, date("m"), 1, date("Y")));
@@ -37,7 +37,7 @@ if (checkdate($alkukk, 1, $alkuvv) and checkdate($loppukk, 1, $loppuvv)) {
   $pvmloppu = date("Y-m-d", mktime(0, 0, 0, $loppukk+1, 0, $loppuvv));
 }
 else {
-  echo "<font class='error'>".t("P‰iv‰m‰‰r‰virhe")."!</font>";
+  echo "<font class='error'>".t("P√§iv√§m√§√§r√§virhe")."!</font>";
   $tee = "";
 }
 
@@ -64,7 +64,7 @@ echo "</tr>";
 $rukchk = "";
 if ($toimitetut != '') $rukchk = "CHECKED";
 
-echo "<tr><th>".t("Myˆs toimitetut tilaukset")."</th>
+echo "<tr><th>".t("My√∂s toimitetut tilaukset")."</th>
     <td><input type='checkbox' name='toimitetut' value='JOO' $rukchk></td>";
 echo "</tr>";
 
@@ -76,7 +76,7 @@ if ($tee != '') {
 
   // myynnit
   $query = "SELECT tilausrivin_lisatiedot.positio myyja,
-            ifnull(kuka.nimi, '÷-muu') nimi,
+            ifnull(kuka.nimi, '√ñ-muu') nimi,
             date_format(tilausrivi.laskutettuaika,'%Y/%m') kausi,
             round(sum(tilausrivi.rivihinta),0) summa
             FROM lasku use index (yhtio_tila_tapvm)
@@ -97,7 +97,7 @@ if ($tee != '') {
     $query_ale_lisa = generoi_alekentta('M');
 
     $query2 = "SELECT tilausrivin_lisatiedot.positio myyja,
-               ifnull(kuka.nimi, '÷-muu') nimi,
+               ifnull(kuka.nimi, '√ñ-muu') nimi,
                date_format(now(),'%Y/%m') kausi,
                round(sum(round((tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)) * tilausrivi.varattu * {$query_ale_lisa}, $yhtiorow[hintapyoristys])),0) summa
                FROM lasku
@@ -148,24 +148,24 @@ if ($tee != '') {
 
   $sarakemaara = count($rajataulu)+2;
 
-  // Piirret‰‰n headerit
+  // Piirret√§√§n headerit
   pupe_DataTables(array(array($pupe_DataTables, $sarakemaara, $sarakemaara)));
 
   echo "<table class='display dataTable' id='$pupe_DataTables'>";
 
   echo "<thead>";
   echo "<tr>";
-  echo "<th>".t("Myyj‰")."</th>";
+  echo "<th>".t("Myyj√§")."</th>";
 
   foreach ($rajataulu as $vvkk) {
     echo "<th>$vvkk</th>";
   }
 
-  echo "<th>".t("Yhteens‰")."</th>";
+  echo "<th>".t("Yhteens√§")."</th>";
   echo "</tr>";
   echo "</thead>";
 
-  // Piirret‰‰n itse data
+  // Piirret√§√§n itse data
   $yhteensa_summa_kausi = array();
 
   foreach ($summa as $myyja => $kausi_array) {
@@ -192,10 +192,10 @@ if ($tee != '') {
     echo "</tr>";
   }
 
-  // Piirret‰‰n yhteens‰rivi
+  // Piirret√§√§n yhteens√§rivi
   echo "<tfoot>";
   echo "<tr>";
-  echo "<th>".t("Yhteens‰ summa")."</th>";
+  echo "<th>".t("Yhteens√§ summa")."</th>";
 
   $yhteensa_summa = 0;
 

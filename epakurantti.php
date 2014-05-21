@@ -6,7 +6,7 @@ if ($toim == "VAIHDAKEHAHIN") {
   echo "<font class='head'>".t("Vaihda tuotteen keskihankintahinta")."</font><hr>";
 }
 else {
-  echo "<font class='head'>".t("Ep‰kurantit")."</font><hr>";
+  echo "<font class='head'>".t("Ep√§kurantit")."</font><hr>";
 }
 
 $tee = isset($tee) ? trim($tee) : "";
@@ -17,7 +17,7 @@ if ($toim == "VAIHDAKEHAHIN" and $tee == "tiedostosta") {
   if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE)) {
 
     if ($_FILES['userfile']['size'] == 0) {
-      echo "<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font>";
+      echo "<font class='error'><br>".t("Tiedosto on tyhj√§")."!</font>";
       $tee = '';
     }
 
@@ -27,7 +27,7 @@ if ($toim == "VAIHDAKEHAHIN" and $tee == "tiedostosta") {
     $retval = tarkasta_liite("userfile", array("XLSX","XLS","ODS","SLK","XML","GNUMERIC","CSV","TXT","DATAIMPORT"));
 
     if ($retval !== TRUE) {
-      echo "<font class='error'><br>".t("V‰‰r‰ tiedostomuoto")."!</font>";
+      echo "<font class='error'><br>".t("V√§√§r√§ tiedostomuoto")."!</font>";
       $tee = '';
     }
   }
@@ -38,7 +38,7 @@ if ($toim == "VAIHDAKEHAHIN" and $tee == "tiedostosta") {
 
 if ($toim == "VAIHDAKEHAHIN" and $tee == "tiedostosta") {
 
-  // Tehd‰‰n kaikki tapahtumat samalle tositteelle!
+  // Tehd√§√§n kaikki tapahtumat samalle tositteelle!
   $tapahtumat_samalle_tositteelle = "kylla";
 
   $excelrivit = pupeFileReader($_FILES['userfile']['tmp_name'], $ext);
@@ -49,7 +49,7 @@ if ($toim == "VAIHDAKEHAHIN" and $tee == "tiedostosta") {
     $oma_selite = $rivi[2];
     $tee     = "vaihda_kehahin";
 
-    echo t("K‰sitell‰‰n rivi‰").":  ".($rivinumero+1).". ".t("Tuote").": $tuoteno ";
+    echo t("K√§sitell√§√§n rivi√§").":  ".($rivinumero+1).". ".t("Tuote").": $tuoteno ";
 
     require ("epakurantti.inc");
 
@@ -68,7 +68,7 @@ if ($tee != '' and $tuoteno == "") {
 
 if ($tee != '') {
 
-  // t‰‰ll‰ tehd‰‰n ep‰kuranttihommat
+  // t√§√§ll√§ tehd√§√§n ep√§kuranttihommat
   // tarvitaan $kukarow, $tuoteno ja jos halutaan muuttaa ni $tee jossa on paalle, puolipaalle tai pois
   require ("epakurantti.inc");
 
@@ -102,47 +102,47 @@ if ($tee != '') {
     echo "<tr><th>".t("Tuote")                  ."</th><td>$tuoterow[tuoteno]</td></tr>";
     echo "<tr><th>".t("Varastonarvo nyt")      ."</th><td>$tuoterow[saldo] * $nykyinen_keskihankintahinta = $nykyinen_varastonarvo</td></tr>";
     echo "<tr><th>".t("Korjaamaton varastonarvo")  ."</th><td>$tuoterow[saldo] * $tuoterow[kehahin] = $brutto_varastonarvo</td></tr>";
-    echo "<tr><th>".t("25% ep‰kurantti")      ."</th><td>$tuoterow[epakurantti25pvm]</td></tr>";
-    echo "<tr><th>".t("Puoliep‰kurantti")      ."</th><td>$tuoterow[epakurantti50pvm]</td></tr>";
-    echo "<tr><th>".t("75% ep‰kurantti")      ."</th><td>$tuoterow[epakurantti75pvm]</td></tr>";
-    echo "<tr><th>".t("Ep‰kurantti")        ."</th><td>$tuoterow[epakurantti100pvm]</td></tr>";
+    echo "<tr><th>".t("25% ep√§kurantti")      ."</th><td>$tuoterow[epakurantti25pvm]</td></tr>";
+    echo "<tr><th>".t("Puoliep√§kurantti")      ."</th><td>$tuoterow[epakurantti50pvm]</td></tr>";
+    echo "<tr><th>".t("75% ep√§kurantti")      ."</th><td>$tuoterow[epakurantti75pvm]</td></tr>";
+    echo "<tr><th>".t("Ep√§kurantti")        ."</th><td>$tuoterow[epakurantti100pvm]</td></tr>";
     echo "</table><br>";
 
     if ($toim == "") {
-      // voidaan merkata 25ep‰kurantiksi
+      // voidaan merkata 25ep√§kurantiksi
       if ($tuoterow['epakurantti25pvm'] == '0000-00-00') {
         echo "<form method='post'>";
         echo "<input type='hidden' name='toim' value='{$toim}'>";
         echo "<input type='hidden' name = 'tuoteno' value='$tuoterow[tuoteno]'>";
         echo "<input type='hidden' name = 'tee' value='25paalle'> ";
-        echo "<input type='submit' value='".t("Merkit‰‰n 25% ep‰kurantiksi")."'></form> ";
+        echo "<input type='submit' value='".t("Merkit√§√§n 25% ep√§kurantiksi")."'></form> ";
       }
 
-      // voidaan merkata puoliep‰kurantiksi
+      // voidaan merkata puoliep√§kurantiksi
       if ($tuoterow['epakurantti50pvm'] == '0000-00-00') {
         echo "<form method='post'>";
         echo "<input type='hidden' name='toim' value='{$toim}'>";
         echo "<input type='hidden' name = 'tuoteno' value='$tuoterow[tuoteno]'>";
         echo "<input type='hidden' name = 'tee' value='puolipaalle'> ";
-        echo "<input type='submit' value='".t("Merkit‰‰n puoliep‰kurantiksi")."'></form> ";
+        echo "<input type='submit' value='".t("Merkit√§√§n puoliep√§kurantiksi")."'></form> ";
       }
 
-      // voidaan merkata 75ep‰kurantiksi
+      // voidaan merkata 75ep√§kurantiksi
       if ($tuoterow['epakurantti75pvm'] == '0000-00-00') {
         echo "<form method='post'>";
         echo "<input type='hidden' name='toim' value='{$toim}'>";
         echo "<input type='hidden' name = 'tuoteno' value='$tuoterow[tuoteno]'>";
         echo "<input type='hidden' name = 'tee' value='75paalle'> ";
-        echo "<input type='submit' value='".t("Merkit‰‰n 75% ep‰kurantiksi")."'></form> ";
+        echo "<input type='submit' value='".t("Merkit√§√§n 75% ep√§kurantiksi")."'></form> ";
       }
 
-      // voidaan merkata ep‰kurantiksi
+      // voidaan merkata ep√§kurantiksi
       if ($tuoterow['epakurantti100pvm'] == '0000-00-00') {
         echo "<form method='post'>";
         echo "<input type='hidden' name='toim' value='{$toim}'>";
         echo "<input type='hidden' name = 'tuoteno' value='$tuoterow[tuoteno]'>";
         echo "<input type='hidden' name = 'tee' value='paalle'>";
-        echo "<input type='submit' value='".t("Merkit‰‰n ep‰kurantiksi")."'></form> ";
+        echo "<input type='submit' value='".t("Merkit√§√§n ep√§kurantiksi")."'></form> ";
       }
 
       // voidaan aktivoida
@@ -182,7 +182,7 @@ if ($tee != '') {
       echo "<input type='submit' value='".t("Vaihda keskihankintahinta")."'></form>";
     }
     elseif ($toim == "VAIHDAKEHAHIN") {
-      echo "<font class='error'>".t("Tuote on ep‰kurantti. Keskihankintahintaa ei voida vaihtaa")."!</font><br>";
+      echo "<font class='error'>".t("Tuote on ep√§kurantti. Keskihankintahintaa ei voida vaihtaa")."!</font><br>";
     }
   }
   elseif ($tee != "STOP") {

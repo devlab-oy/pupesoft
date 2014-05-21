@@ -18,8 +18,8 @@ if(!function_exists("asiakastarkista")) {
 
     if (mysql_field_name($result, $i) == "ytunnus") {
       if ($ytunnus_select != '') {
-        // Jos selectoitu drop downista niin katotaan, että tämä on vielä vapaa
-        //jos konsernin asiakkaat synkronoidaan niin asiakkaiden yksilöivät tiedot on oltava konsernitasolla-yksilölliset
+        // Jos selectoitu drop downista niin katotaan, ettÃ¤ tÃ¤mÃ¤ on vielÃ¤ vapaa
+        //jos konsernin asiakkaat synkronoidaan niin asiakkaiden yksilÃ¶ivÃ¤t tiedot on oltava konsernitasolla-yksilÃ¶lliset
         $query = "SELECT group_concat(concat('\'',yhtio.yhtio,'\'')) yhtiot
                   FROM yhtio
                   JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
@@ -83,20 +83,20 @@ if(!function_exists("asiakastarkista")) {
       $tpres = pupe_query($tpque);
 
       if (mysql_num_rows($tpres) == 0) {
-        $virhe[$i] .= t("Avainsanaa ei löydy")."!";
+        $virhe[$i] .= t("Avainsanaa ei lÃ¶ydy")."!";
       }
     }
 
     if (mysql_field_name($result, $i) == "erikoisale") {
       if (trim($t[$i]) > 100 or trim($t[$i]) < 0) {
-        $virhe[$i] = t("Erikoisale pitää olla alle 100% ja yli 0%");
+        $virhe[$i] = t("Erikoisale pitÃ¤Ã¤ olla alle 100% ja yli 0%");
       }
     }
 
     if (mysql_field_name($result, $i) == "asiakasnro") {
       if ($asiakasnro_select != '') {
-        // Jos selectoitu drop downista niin katotaan, että tämä on vielä vapaa
-        //jos konsernin asiakkaat synkronoidaan niin asiakkaiden yksilöivät tiedot on oltava konsernitasolla-yksilölliset
+        // Jos selectoitu drop downista niin katotaan, ettÃ¤ tÃ¤mÃ¤ on vielÃ¤ vapaa
+        //jos konsernin asiakkaat synkronoidaan niin asiakkaiden yksilÃ¶ivÃ¤t tiedot on oltava konsernitasolla-yksilÃ¶lliset
         $query = "SELECT ifnull(group_concat(concat('\'',yhtio.yhtio,'\'')), '') yhtiot
                   FROM yhtio
                   JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
@@ -145,10 +145,10 @@ if(!function_exists("asiakastarkista")) {
 
         if (mysql_num_rows($sresult) > 0) {
           if ($alias_set == "VAHITTAISMYYNTI") {
-            $virhe[$i] .= t("Samalla tiedoilla on useita asiakkaita! Lisää tarkenne Asiakasnumeroon/Henkilötunnukseen.");
+            $virhe[$i] .= t("Samalla tiedoilla on useita asiakkaita! LisÃ¤Ã¤ tarkenne Asiakasnumeroon/HenkilÃ¶tunnukseen.");
           }
           else {
-            $virhe[$i] .= t("Samalla tiedoilla on useita asiakkaita! Lisää tarkenne Ytunnukseen/Asiakasnumeroon.");
+            $virhe[$i] .= t("Samalla tiedoilla on useita asiakkaita! LisÃ¤Ã¤ tarkenne Ytunnukseen/Asiakasnumeroon.");
           }
         }
       }
@@ -165,23 +165,23 @@ if(!function_exists("asiakastarkista")) {
 
       if (mysql_num_rows($sresult) > 0) {
         if ($alias_set == "VAHITTAISMYYNTI") {
-          $virhe[$i] = t("Samalla tiedoilla on useita asiakkaita! Lisää tarkenne Asiakasnumeroon/Henkilötunnukseen.");
+          $virhe[$i] = t("Samalla tiedoilla on useita asiakkaita! LisÃ¤Ã¤ tarkenne Asiakasnumeroon/HenkilÃ¶tunnukseen.");
 
         }
         else {
-          $virhe[$i] = t("Samalla tiedoilla on useita asiakkaita! Lisää tarkenne Ytunnukseen/Ovttunnukseen/Toim_ovttunnukseen.");
+          $virhe[$i] = t("Samalla tiedoilla on useita asiakkaita! LisÃ¤Ã¤ tarkenne Ytunnukseen/Ovttunnukseen/Toim_ovttunnukseen.");
         }
       }
     }
 
     if (mysql_field_name($result, $i) == "verkkotunnus") {
-      // verkkotunnus tulee datassa ennen CHN kenttää, joten otetaan tämä talteen
+      // verkkotunnus tulee datassa ennen CHN kenttÃ¤Ã¤, joten otetaan tÃ¤mÃ¤ talteen
       $apuverkkotunnus  = trim($t[$i]);
       $apuverkkotunnusi = $i;
     }
 
     if (mysql_field_name($result, $i) == "lasku_email") {
-      // lasku_email tulee datassa ennen CHN kenttää, joten otetaan tämä talteen
+      // lasku_email tulee datassa ennen CHN kenttÃ¤Ã¤, joten otetaan tÃ¤mÃ¤ talteen
       $apulasku_email  = trim($t[$i]);
       $apulasku_emaili = $i;
     }
@@ -199,19 +199,19 @@ if(!function_exists("asiakastarkista")) {
       $sresult = pupe_query($query);
 
       if (mysql_num_rows($sresult) != 1) {
-        $virhe[$i] = t("Tiliä ei löydy");
+        $virhe[$i] = t("TiliÃ¤ ei lÃ¶ydy");
       }
     }
 
     if (mysql_field_name($result, $i) == "chn") {
       if (isset($t[$i]) and trim($t[$i]) != '') {
-        // jos ollaan valittu sähköposti niin lasku_email pitää syöttää!
+        // jos ollaan valittu sÃ¤hkÃ¶posti niin lasku_email pitÃ¤Ã¤ syÃ¶ttÃ¤Ã¤!
         if (trim($t[$i]) == '666' and $apulasku_email == "") {
-          // Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi
-          $virhe[$i] = $virhe[$apulasku_emaili] = t("Olet valinnut laskutustavaksi sähköpostin ja lasku_email on tyhjä! Laskutus ei onnistu")."!";
+          // PitÃ¤Ã¤ aina setata myÃ¶s "tÃ¤mÃ¤n" kentÃ¤n virhe, muuten luedata ei toimi
+          $virhe[$i] = $virhe[$apulasku_emaili] = t("Olet valinnut laskutustavaksi sÃ¤hkÃ¶postin ja lasku_email on tyhjÃ¤! Laskutus ei onnistu")."!";
         }
 
-        // jos ollaan valittu jotain muuta kuin PAPERI tai EMAIL niin verkkotunnus pitää syöttää!
+        // jos ollaan valittu jotain muuta kuin PAPERI tai EMAIL niin verkkotunnus pitÃ¤Ã¤ syÃ¶ttÃ¤Ã¤!
         if (trim($t[$i]) != '999'
             and trim($t[$i]) != '112'
             and trim($t[$i]) != '666'
@@ -220,19 +220,19 @@ if(!function_exists("asiakastarkista")) {
             and trim($t[$i]) != '030'
             and $apuverkkotunnus == ""
             and $yhtiorow['verkkolasku_lah'] != 'apix') {
-          // Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi
-          $virhe[$i] = $virhe[$apuverkkotunnusi] = t("Olet valinnut laskutustavaksi muun kuin Paperi ja verkkotunnus on tyhjä! Laskutus ei onnistu")."!";
+          // PitÃ¤Ã¤ aina setata myÃ¶s "tÃ¤mÃ¤n" kentÃ¤n virhe, muuten luedata ei toimi
+          $virhe[$i] = $virhe[$apuverkkotunnusi] = t("Olet valinnut laskutustavaksi muun kuin Paperi ja verkkotunnus on tyhjÃ¤! Laskutus ei onnistu")."!";
         }
       }
     }
 
     if ((mysql_field_name($result, $i) == "email" or mysql_field_name($result, $i) == "lasku_email") and trim($t[$i]) != '') {
 
-      // Tarkistetaan sähköpostiosoite
+      // Tarkistetaan sÃ¤hkÃ¶postiosoite
       $email_virhe = tarkista_email($t[$i]);
 
       if ($email_virhe != "") {
-        $virhe[$i] = t("Sähköpostin domain ei löydy")."! ($email_virhe)";
+        $virhe[$i] = t("SÃ¤hkÃ¶postin domain ei lÃ¶ydy")."! ($email_virhe)";
       }
     }
 
@@ -246,7 +246,7 @@ if(!function_exists("asiakastarkista")) {
       $sresult = pupe_query($query);
 
       if (mysql_num_rows($sresult) == 0) {
-        $virhe[$i] = t("Tätä maksuehtoa ei saa käyttää asiakkaalla tässä maassa.");
+        $virhe[$i] = t("TÃ¤tÃ¤ maksuehtoa ei saa kÃ¤yttÃ¤Ã¤ asiakkaalla tÃ¤ssÃ¤ maassa.");
       }
     }
 
@@ -259,7 +259,7 @@ if(!function_exists("asiakastarkista")) {
       $sresult = pupe_query($query);
 
       if (mysql_num_rows($sresult) == 0) {
-        $virhe[$i] = t("Tätä toimitustapaa ei saa käyttää asiakkaalla tässä maassa.");
+        $virhe[$i] = t("TÃ¤tÃ¤ toimitustapaa ei saa kÃ¤yttÃ¤Ã¤ asiakkaalla tÃ¤ssÃ¤ maassa.");
       }
     }
 
@@ -274,7 +274,7 @@ if(!function_exists("asiakastarkista")) {
       $chk_res = pupe_query($query);
 
       if (mysql_num_rows($chk_res) != 2) {
-        $virhe[$i] = t("Tarvittavia tietoja puuttuu").". ".t("Lisää asiakkaan avainsanoihin Futur FTP -tiedot").".";
+        $virhe[$i] = t("Tarvittavia tietoja puuttuu").". ".t("LisÃ¤Ã¤ asiakkaan avainsanoihin Futur FTP -tiedot").".";
       }
     }
 
@@ -291,7 +291,7 @@ if(!function_exists("asiakastarkista")) {
         require ("tarkistaytunnus.inc");
 
         if ($ok == 0) {
-          // Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi
+          // PitÃ¤Ã¤ aina setata myÃ¶s "tÃ¤mÃ¤n" kentÃ¤n virhe, muuten luedata ei toimi
           $virhe[$i] = $virhe[$ytunnus_tunnus] = t("Virheellinen y-tunnus")."! $t[$i] -> $ytunnus";
 
         }
@@ -300,8 +300,8 @@ if(!function_exists("asiakastarkista")) {
         }
       }
       elseif ($yhtiorow["maa"] == 'FI' and strtoupper($t[$i]) == 'SE' and strtoupper(substr($t[$ytunnus_tunnus], 0, 2)) != "SE" and $asiak_laji != "H") {
-        // Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi
-        $virhe[$i] = $virhe[$ytunnus_tunnus] = t("Virheellinen y-tunnus")."! Laskutusosoite ruotsissa. Ytunnus pitää alkaa SE!";
+        // PitÃ¤Ã¤ aina setata myÃ¶s "tÃ¤mÃ¤n" kentÃ¤n virhe, muuten luedata ei toimi
+        $virhe[$i] = $virhe[$ytunnus_tunnus] = t("Virheellinen y-tunnus")."! Laskutusosoite ruotsissa. Ytunnus pitÃ¤Ã¤ alkaa SE!";
       }
     }
 
@@ -313,7 +313,7 @@ if(!function_exists("asiakastarkista")) {
     if (mysql_field_name($result, $i) == "laskutus_osoite" or mysql_field_name($result, $i) == "laskutus_postino" or mysql_field_name($result, $i) == "laskutus_postitp") {
 
       if ($laskutus_talteen != "" and trim($t[$i]) == "") {
-        $virhe[$i] = t("Pakollinen kenttä kun laskutus nimi on annettu")."!";
+        $virhe[$i] = t("Pakollinen kenttÃ¤ kun laskutus nimi on annettu")."!";
         $virhe[$laskutus_talteen_i] = t("Pakollisia: laskutusosoite, laskutus postinumero, laskutus postitoimipaikka")."!";
       }
 

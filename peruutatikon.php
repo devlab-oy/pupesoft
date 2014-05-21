@@ -50,7 +50,7 @@ if (isset($kausi)) {
 
     if (mysql_num_rows($result) == 1) {
       $row = mysql_fetch_array ($result);
-      echo "<tr><th>".t("Tiliotteiden tiliˆinnit")."</th><td>$row[pienin]</td><td>-</td><td>$row[suurin]</td></tr>";
+      echo "<tr><th>".t("Tiliotteiden tili√∂innit")."</th><td>$row[pienin]</td><td>-</td><td>$row[suurin]</td></tr>";
     }
 
     echo "</table><br><br>
@@ -73,7 +73,7 @@ if (isset($kausi)) {
 }
 
 if (!isset($kausi)) {
-  //Etsit‰‰n viimeksi viety kausi
+  //Etsit√§√§n viimeksi viety kausi
 
   //Myyntisaamiset
   $query  = "SELECT tunnus, left(tapvm, 7) kausi

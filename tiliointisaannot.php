@@ -11,7 +11,7 @@ if (!isset($maxtuote))  $maxtuote = '';
 if (!isset($kuvaus2))  $kuvaus2 = '';
 if (!isset($tilino))  $tilino = '';
 
-echo "<font class='head'>".t("Toimittajan tiliˆintis‰‰nnˆt")."</font><hr>";
+echo "<font class='head'>".t("Toimittajan tili√∂intis√§√§nn√∂t")."</font><hr>";
 
 if ($tee == 'S' or $tee == 'N' or $tee == 'Y') {
 
@@ -36,11 +36,11 @@ if ($tee == 'S' or $tee == 'N' or $tee == 'Y') {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
-    echo "<font class='error'>".t("Haulla ei lˆytynyt yht‰‰n toimittajaa")."</font>";
+    echo "<font class='error'>".t("Haulla ei l√∂ytynyt yht√§√§n toimittajaa")."</font>";
   }
 
   if (mysql_num_rows($result) > 40) {
-    echo "<font class='error'>".t("Haulla lˆytyi liikaa toimittajia. Tarkenna hakua")."</font>";
+    echo "<font class='error'>".t("Haulla l√∂ytyi liikaa toimittajia. Tarkenna hakua")."</font>";
   }
   else {
     echo "<table><tr>";
@@ -72,14 +72,14 @@ if ($tee == 'S' or $tee == 'N' or $tee == 'Y') {
 }
 
 if ($tee == 'P') {
-  // Olemassaolevaa s‰‰ntˆ‰ muutetaan, joten poistetaan rivi ja annetaan perustettavaksi
+  // Olemassaolevaa s√§√§nt√∂√§ muutetaan, joten poistetaan rivi ja annetaan perustettavaksi
   $query = "SELECT *
             FROM tiliointisaanto
             WHERE tunnus = '$rtunnus' and yhtio = '$kukarow[yhtio]'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
-    echo t("Tiliˆintis‰‰ntˆ‰ ei lˆydy")."! $query";
+    echo t("Tili√∂intis√§√§nt√∂√§ ei l√∂ydy")."! $query";
     exit;
   }
 
@@ -114,7 +114,7 @@ if ($tee == 'U') {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
-    $virhe  = "<font class='error'>".t("Haulla ei lˆytynyt yht‰‰n toimittajaa")."</font>";
+    $virhe  = "<font class='error'>".t("Haulla ei l√∂ytynyt yht√§√§n toimittajaa")."</font>";
     $ok    = 1;
     $tee  = '';
   }
@@ -129,13 +129,13 @@ if ($tee == 'U') {
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
-      $virhe = "<font class='error'>".t("Kustannuspaikkaa ei lˆydy")."!</font>";
+      $virhe = "<font class='error'>".t("Kustannuspaikkaa ei l√∂ydy")."!</font>";
       $ok = 1;
       $tee = '';
     }
   }
 
-  // Tarkistetaan s‰‰ntˆ
+  // Tarkistetaan s√§√§nt√∂
   if ($tyyppi == 't') {
 
     if ($mintuote != '' and $maxtuote == '') $maxtuote = $mintuote;
@@ -155,12 +155,12 @@ if ($tee == 'U') {
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
-      $virhe = "<font class='error'>".t("Tili‰ ei lˆydy")."!</font>";
+      $virhe = "<font class='error'>".t("Tili√§ ei l√∂ydy")."!</font>";
       $ok = 1;
       $tee = '';
     }
 
-    //Onko t‰lle v‰lille jo s‰‰ntˆ?
+    //Onko t√§lle v√§lille jo s√§√§nt√∂?
     if ($mintuote != '') {
       $query = "SELECT mintuote, maxtuote
                 FROM tiliointisaanto
@@ -182,13 +182,13 @@ if ($tee == 'U') {
         $result = pupe_query($query);
 
         if (mysql_num_rows($result) != 0) {
-          $virhe = "<font class='error'>".t("T‰lle v‰lille on jo s‰‰ntˆ")." 1</font>";
+          $virhe = "<font class='error'>".t("T√§lle v√§lille on jo s√§√§nt√∂")." 1</font>";
           $ok = 1;
           $tee = '';
         }
       }
       else {
-        $virhe = "<font class='error'>".t("T‰lle v‰lille on jo s‰‰ntˆ")." 2</font>";
+        $virhe = "<font class='error'>".t("T√§lle v√§lille on jo s√§√§nt√∂")." 2</font>";
         $ok = 1;
         $tee = '';
       }
@@ -196,7 +196,7 @@ if ($tee == 'U') {
   }
   elseif ($tyyppi == 'a') {
     if ($mintuote != '' or $maxtuote != '' or $tilino != '') {
-      $virhe = t("Sis‰inen virhe")."!";
+      $virhe = t("Sis√§inen virhe")."!";
       $ok = 1;
       $tee = '';
     }
@@ -208,7 +208,7 @@ if ($tee == 'U') {
   }
   elseif ($tyyppi == 'b' or $tyyppi == 'o') {
     if (trim($kuvaus) == '' and trim($kuvaus2) == '' and trim($mintuote) == '' and trim($maxtuote) == '' and trim($kustp) == '') {
-      $virhe = "<font class='error'>".t("Kaikki tiedot eiv‰t saa olla tyhji‰")."!</font>";
+      $virhe = "<font class='error'>".t("Kaikki tiedot eiv√§t saa olla tyhji√§")."!</font>";
       $ok = 1;
       $tee = '';
     }
@@ -221,7 +221,7 @@ if ($tee == 'U') {
       for ($i = 1; $i < 6; $i++) {
         if ($i == 1) {
           if ($hyvak1 == '') {
-            $virhe = "<font class='error'>".t("Valitse ensimm‰inen hyv‰ksyj‰")."!</font>";
+            $virhe = "<font class='error'>".t("Valitse ensimm√§inen hyv√§ksyj√§")."!</font>";
             $ok = 1;
             $tee = '';
             break;
@@ -229,7 +229,7 @@ if ($tee == 'U') {
         }
         else {
           if (${'hyvak'.$i} != '' and ${'hyvak'.($i-1)} == '') {
-            $virhe = "<font class='error'>".t("Valitse hyv‰ksyj‰t j‰rjestyksess‰")."!</font>";
+            $virhe = "<font class='error'>".t("Valitse hyv√§ksyj√§t j√§rjestyksess√§")."!</font>";
             $ok = 1;
             $tee = '';
             break;
@@ -244,7 +244,7 @@ if ($tee == 'U') {
 
 if ($tee == 'U') {
 
-  // Lis‰t‰‰n s‰‰ntˆ
+  // Lis√§t√§√§n s√§√§nt√∂
   $query = "INSERT into tiliointisaanto VALUES (
             '$kukarow[yhtio]',
             '$tyyppi',
@@ -271,7 +271,7 @@ if ($tee == 'U') {
 }
 
 if (isset($tunnus) and $tunnus > 0) {
-  // Toimittaja on valittu ja sille annetaan s‰‰ntˆj‰
+  // Toimittaja on valittu ja sille annetaan s√§√§nt√∂j√§
   if ($tila == "XML") {
 
     $query = "SELECT data, filename, kayttotarkoitus, tunnus
@@ -294,7 +294,7 @@ if (isset($tunnus) and $tunnus > 0) {
 
     require_once("inc/functions.inc");
 
-    // Katsotaan mit‰ aineistoa k‰pistell‰‰n
+    // Katsotaan mit√§ aineistoa k√§pistell√§√§n
     if ($kayttotyyppi == 'FINVOICE') {
         require("inc/verkkolasku-in-finvoice.inc");
     }
@@ -333,7 +333,7 @@ if (isset($tunnus) and $tunnus > 0) {
   $sel = array('t' => '', 'b' => '', 'o' => '', 'a' => '', 'k' => '');
   $sel[$tyyppi] = "SELECTED";
 
-  echo "<font class='head'>".t("S‰‰nnˆt")."</font><hr>
+  echo "<font class='head'>".t("S√§√§nn√∂t")."</font><hr>
       <form method='post'>
       <input type='hidden' name='tunnus' value='$tunnus'>";
   echo "<input type='hidden' name='lopetus' value='$lopetus'>";
@@ -343,21 +343,21 @@ if (isset($tunnus) and $tunnus > 0) {
 
   echo "  <table>
       <tr>
-      <th>".t("Valitse tiliˆintis‰‰nnˆn tyyppi").":</th>
+      <th>".t("Valitse tili√∂intis√§√§nn√∂n tyyppi").":</th>
       <td><select name='tyyppi' onchange='submit();'>
-      <option value='t' $sel[t]>1 ".t("Tuotes‰‰nnˆt")."</option>
+      <option value='t' $sel[t]>1 ".t("Tuotes√§√§nn√∂t")."</option>
       <option value='b' $sel[b]>2 ".t("Ostajan osoitetiedot")."</option>
       <option value='o' $sel[o]>3 ".t("Toimitusosoitteen tiedot")."</option>
       <option value='a' $sel[a]>4 ".t("Asiakastunnukset")."</option>
       <option value='k' $sel[k]>5 ".t("Kauttalaskutukset")."</option>
       </select></td>
-      <td class='back'><input type='submit' value='".t("N‰yt‰")."'></td>
+      <td class='back'><input type='submit' value='".t("N√§yt√§")."'></td>
       </tr>
       </table>
       </form><br><br>
       <table>";
 
-  // Pakko resetoida t‰‰ll‰kin, tai laskun-tyyppi-valikko voi heitt‰‰ h‰r‰npylly‰
+  // Pakko resetoida t√§√§ll√§kin, tai laskun-tyyppi-valikko voi heitt√§√§ h√§r√§npylly√§
   $vientidefault = '';
   $vientia = '';
   $vientib = '';
@@ -379,7 +379,7 @@ if (isset($tunnus) and $tunnus > 0) {
     $toimipaikka_select_lisa = ", tiliointisaanto.toimipaikka";
   }
 
-  // N‰ytet‰‰n vanhat s‰‰nnˆt muutosta varten
+  // N√§ytet√§√§n vanhat s√§√§nn√∂t muutosta varten
   if ($tyyppi == 't') {
     $query = "SELECT tiliointisaanto.tunnus, tiliointisaanto.mintuote, tiliointisaanto.maxtuote, tiliointisaanto.kuvaus, concat(tili.tilino,'/',tili.nimi) tilinumero,
               if(tiliointisaanto.kustp = 999999999, tiliointisaanto.kustp, kustannuspaikka.nimi) Kustannuspaikka {$toimipaikka_select_lisa}, tiliointisaanto.kustp, tiliointisaanto.vienti
@@ -466,7 +466,7 @@ if (isset($tunnus) and $tunnus > 0) {
               $hnimi = $hyvaksyja;
             }
 
-            echo t("Hyv‰ksyj‰")." {$xxx}: $hnimi<br/>";
+            echo t("Hyv√§ksyj√§")." {$xxx}: $hnimi<br/>";
           }
 
           $xxx++;
@@ -554,13 +554,13 @@ if (isset($tunnus) and $tunnus > 0) {
         <input type='hidden' name='tila' value='$tila'>
         <input type='hidden' name='liitetiedosto' value='$liitetiedosto'>
         <input type='hidden' name='kayttotyyppi' value='$kayttotyyppi'>
-        <input type='Submit' value = '".t("Muuta tiliˆintis‰‰ntˆ‰")."'>
+        <input type='Submit' value = '".t("Muuta tili√∂intis√§√§nt√∂√§")."'>
       </td></tr></form>";
   }
 
-  // Annetaan mahdollisuus tehd‰ uusi tiliˆinti
+  // Annetaan mahdollisuus tehd√§ uusi tili√∂inti
   if (!isset($ok) or $ok != 1) {
-    // Annetaan tyhj‰t tiedot, jos rivi oli virheetˆn
+    // Annetaan tyhj√§t tiedot, jos rivi oli virheet√∂n
     $maxtuote  = '';
     $mintuote  = '';
     $kuvaus    = '';
@@ -652,7 +652,7 @@ if (isset($tunnus) and $tunnus > 0) {
               ORDER BY nimi";
     $hyvak_result = pupe_query($query);
 
-    echo "<td nowrap>",t("Hyv‰ksyj‰")," 1: <select name='hyvak1'>";
+    echo "<td nowrap>",t("Hyv√§ksyj√§")," 1: <select name='hyvak1'>";
     echo "<option value=''>",t("Oletus"),"</option>";
 
     $sel = (isset($hyvak1) and $hyvak1 == "MAKSUUN") ? $sel = ' SELECTED' : '';
@@ -666,7 +666,7 @@ if (isset($tunnus) and $tunnus > 0) {
     echo "</select><br/>";
 
     mysql_data_seek($hyvak_result, 0);
-    echo t("Hyv‰ksyj‰")," 2: <select name='hyvak2'><option value=''>",t("Oletus"),"</option>";
+    echo t("Hyv√§ksyj√§")," 2: <select name='hyvak2'><option value=''>",t("Oletus"),"</option>";
 
     while ($hyvak_row = mysql_fetch_assoc($hyvak_result)) {
       $sel = (isset($hyvak2) and $hyvak2 == $hyvak_row['kuka']) ? $sel = ' SELECTED' : '';
@@ -676,7 +676,7 @@ if (isset($tunnus) and $tunnus > 0) {
     echo "</select><br/>";
 
     mysql_data_seek($hyvak_result, 0);
-    echo t("Hyv‰ksyj‰")," 3: <select name='hyvak3'><option value=''>",t("Oletus"),"</option>";
+    echo t("Hyv√§ksyj√§")," 3: <select name='hyvak3'><option value=''>",t("Oletus"),"</option>";
 
     while ($hyvak_row = mysql_fetch_assoc($hyvak_result)) {
       $sel = (isset($hyvak3) and $hyvak3 == $hyvak_row['kuka']) ? $sel = ' SELECTED' : '';
@@ -686,7 +686,7 @@ if (isset($tunnus) and $tunnus > 0) {
     echo "</select><br/>";
 
     mysql_data_seek($hyvak_result, 0);
-    echo t("Hyv‰ksyj‰")," 4: <select name='hyvak4'><option value=''>",t("Oletus"),"</option>";
+    echo t("Hyv√§ksyj√§")," 4: <select name='hyvak4'><option value=''>",t("Oletus"),"</option>";
 
     while ($hyvak_row = mysql_fetch_assoc($hyvak_result)) {
       $sel = (isset($hyvak4) and $hyvak4 == $hyvak_row['kuka']) ? $sel = ' SELECTED' : '';
@@ -696,7 +696,7 @@ if (isset($tunnus) and $tunnus > 0) {
     echo "</select><br/>";
 
     mysql_data_seek($hyvak_result, 0);
-    echo t("Hyv‰ksyj‰")," 5: <select name='hyvak5'><option value=''>",t("Oletus"),"</option>";
+    echo t("Hyv√§ksyj√§")," 5: <select name='hyvak5'><option value=''>",t("Oletus"),"</option>";
 
     while ($hyvak_row = mysql_fetch_assoc($hyvak_result)) {
       $sel = (isset($hyvak5) and $hyvak5 == $hyvak_row['kuka']) ? $sel = ' SELECTED' : '';
@@ -773,11 +773,11 @@ if (isset($tunnus) and $tunnus > 0) {
         </td>";
     }
 
-  echo "<td class='back'><input type='Submit' value = '".t("Lis‰‰ tiliˆintis‰‰ntˆ")."'>$virhe</td>";
+  echo "<td class='back'><input type='Submit' value = '".t("Lis√§√§ tili√∂intis√§√§nt√∂")."'>$virhe</td>";
   echo "</tr></form></table>";
 }
 else {
-  // T‰ll‰ ollaan, jos olemme vasta valitsemassa toimittajaa
+  // T√§ll√§ ollaan, jos olemme vasta valitsemassa toimittajaa
   echo "<form name = 'valinta' method='post'>
       <table>
       <td>".t("Valitse toimittaja")."</td>

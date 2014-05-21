@@ -86,7 +86,7 @@ if ($tee == '') {
   echo "</tr>";
   echo "</table>";
 
-  echo "<br><br><input type = 'submit' value = '".t("N‰yt‰")."'></form>";
+  echo "<br><br><input type = 'submit' value = '".t("N√§yt√§")."'></form>";
 
   require ("inc/footer.inc");
   exit;
@@ -95,7 +95,7 @@ if ($tee == '') {
 $timeparts = explode(" ",microtime());
 $phptime = $timeparts[1].substr($timeparts[0],1);
 
-// Onko meill‰ lis‰rajoitteita??
+// Onko meill√§ lis√§rajoitteita??
 $lisa='';
 $teksti='';
 
@@ -121,11 +121,11 @@ $result = mysql_query($query) or pupe_error($query);
 
 echo "<font class='message'>".t("Vuosi")." $alvv $teksti</font>";
 echo "<table>";
-echo "<tr><th>".t("taso")."</th><th>".t("tili")."</th><th>".t("nimi")."</th><th>".t("tammi")."</th><th>".t("helmi")."</th><th>".t("maalis")."</th><th>".t("huhti")."</th><th>".t("touko")."</th><th>".t("kes‰")."</th><th>".t("hein‰")."</th><th>".t("elo")."</th><th>".t("syys")."</th><th>".t("loka")."</th><th>".t("marras")."</th><th>".t("joulu")."</th></tr>";
+echo "<tr><th>".t("taso")."</th><th>".t("tili")."</th><th>".t("nimi")."</th><th>".t("tammi")."</th><th>".t("helmi")."</th><th>".t("maalis")."</th><th>".t("huhti")."</th><th>".t("touko")."</th><th>".t("kes√§")."</th><th>".t("hein√§")."</th><th>".t("elo")."</th><th>".t("syys")."</th><th>".t("loka")."</th><th>".t("marras")."</th><th>".t("joulu")."</th></tr>";
 
 while ($tilirow = mysql_fetch_array($result)) {
 
-  // haetaan kaikki, summataan phpss‰..
+  // haetaan kaikki, summataan phpss√§..
 
   $alku  = $alvv."-01-01";
   $loppu = $alvv*1+1 ."-01-01";

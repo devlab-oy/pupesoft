@@ -6,7 +6,7 @@
  * Kustomointi: Mikko Nousiainen mikko@datamonitor.fi
  *************************************************************/
 
-//jos on laitettu kollikentt‰‰n 0 niin ei yritet‰ luoda siirtotiedostoa
+//jos on laitettu kollikentt√§√§n 0 niin ei yritet√§ luoda siirtotiedostoa
 if ($kollityht > 0) {
 
   // Onko varastokohtainen delisprinttiserveri?
@@ -27,21 +27,21 @@ if ($kollityht > 0) {
 
     if ($toitarow['logy_rahtikirjanumerot'] != "" and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
 
-      $logyq = "  SELECT min(rahtikirjanro) rahtikirjanro
-            FROM rahtikirjanumero
-            WHERE yhtio = '$kukarow[yhtio]'
-            and kaytettyaika = '0000-00-00 00:00:00'";
+      $logyq = "SELECT min(rahtikirjanro) rahtikirjanro
+                FROM rahtikirjanumero
+                WHERE yhtio      = '$kukarow[yhtio]'
+                and kaytettyaika = '0000-00-00 00:00:00'";
       $logyres = pupe_query($logyq);
       $logyrow = mysql_fetch_assoc($logyres);
 
       $rahtikirjanro = $logyrow["rahtikirjanro"];
 
       if ($rahtikirjanro != "") {
-        $logyq = "  UPDATE rahtikirjanumero
-              SET kayttaja = '$kukarow[kuka]',
-              kaytettyaika = now()
-              WHERE yhtio = '$kukarow[yhtio]'
-              and rahtikirjanro = '$logyrow[rahtikirjanro]'";
+        $logyq = "UPDATE rahtikirjanumero
+                  SET kayttaja = '$kukarow[kuka]',
+                  kaytettyaika      = now()
+                  WHERE yhtio       = '$kukarow[yhtio]'
+                  and rahtikirjanro = '$logyrow[rahtikirjanro]'";
         $logyres = pupe_query($logyq);
       }
     }
@@ -63,13 +63,13 @@ if ($kollityht > 0) {
       die("Liikaa kolleja! (max 10 kpl)"); // kolleja ei saa olla yli 10 per toimitusrivi...
     }
 
-    //  Luodaan meid‰n tiedostorakenne parcelOrder arrayhin ja pukataan se tonne aineistoon sitten laakista
+    //  Luodaan meid√§n tiedostorakenne parcelOrder arrayhin ja pukataan se tonne aineistoon sitten laakista
     $parcelOrder=array();
     $parcelOrder["rahtikirjanro"] = $rahtikirjanro;
 
     $tilausnumerot = $tilausnumerot2 = "";
 
-    // Laitetaan max 30 merkki‰ tilausnumeroita v‰lilyˆnnill‰ eroteltuna
+    // Laitetaan max 30 merkki√§ tilausnumeroita v√§lily√∂nnill√§ eroteltuna
     foreach($lotsikot as $tilnum) {
       if ((strlen($tilausnumerot) + strlen($tilnum) + 1) <= 30) {
         $tilausnumerot = "{$tilausnumerot} {$tilnum}";
@@ -97,12 +97,12 @@ if ($kollityht > 0) {
       $r = mysql_field_name($laskures, $i);
       $v = $laskurow[$i];
 
-      //  Korvaavuksia ja n‰pp‰ily‰
+      //  Korvaavuksia ja n√§pp√§ily√§
       if($r=="asiakkaan_viite" and $v == "") {
         $v = $laskurow["viite"];
       }
 
-      //  Poistetaan aina kaikki turhat merkit ja v‰lilyˆnnit
+      //  Poistetaan aina kaikki turhat merkit ja v√§lily√∂nnit
       $parcelOrder[$r] = trim(str_replace(array("\r\n", "\r", "\n"), " ", $v));
     }
 
@@ -117,7 +117,7 @@ if ($kollityht > 0) {
       $r = mysql_field_name($asres, $i);
       $v = $asrow[$i];
 
-      //  Korvaavuksia ja n‰pp‰ily‰
+      //  Korvaavuksia ja n√§pp√§ily√§
 
       $parcelOrder["asiakas_".$r] = $v;
     }
@@ -131,7 +131,7 @@ if ($kollityht > 0) {
     $as_avainsana_row = mysql_fetch_assoc($as_avainsana_res);
 
     /*
-      Arvotaan l‰hetystapa
+      Arvotaan l√§hetystapa
     */
 
     // jos maksuehto on jv, laitetaan NP,NN,CD
@@ -140,7 +140,7 @@ if ($kollityht > 0) {
     }
     else {
       if (strtolower($toitarow['lajittelupiste']) == 'sameday') {
-        //$parcelOrder["lahetystapa"] = "NP,SD"; Toistaiseksi tuo SD pois DPD:n pyynnˆst‰ "sameday" tapauksessa.
+        //$parcelOrder["lahetystapa"] = "NP,SD"; Toistaiseksi tuo SD pois DPD:n pyynn√∂st√§ "sameday" tapauksessa.
         $parcelOrder["lahetystapa"] = "NP";
       }
       elseif (strtolower($toitarow['lajittelupiste']) == 'regular' and $as_avainsana_row['avainsana'] != '') {
@@ -153,7 +153,7 @@ if ($kollityht > 0) {
 
     $koko_summa = 0;
 
-    //  Luotamme vahvasti siihen, ett‰ meill‰ on rakir_res tallella.. T‰‰lt‰ tulee jotain hyˆdyllist‰ kumminkin..
+    //  Luotamme vahvasti siihen, ett√§ meill√§ on rakir_res tallella.. T√§√§lt√§ tulee jotain hy√∂dyllist√§ kumminkin..
     for($i=0;$i<mysql_num_fields($rakir_res);$i++) {
 
       $r = mysql_field_name($rakir_res, $i);
@@ -170,7 +170,7 @@ if ($kollityht > 0) {
     }
 
     if (isset($parcelOrder["jv_summa"]) and trim($parcelOrder["jv_summa"]) != "") {
-      $parcelOrder["kateinen"] = t("K‰teinen");
+      $parcelOrder["kateinen"] = t("K√§teinen");
     }
     else {
       $parcelOrder["kateinen"] = "";
@@ -179,7 +179,7 @@ if ($kollityht > 0) {
     }
 
     /*
-    Jos meill‰ oli joku yhteyshenkilˆ haetaan sen tiedot myˆs! (Falceback asiakas)
+    Jos meill√§ oli joku yhteyshenkil√∂ haetaan sen tiedot my√∂s! (Falceback asiakas)
     */
     $query = "SELECT nimi, titteli, email, puh, gsm, fax
               FROM laskun_lisatiedot
@@ -212,7 +212,7 @@ if ($kollityht > 0) {
         $r = mysql_field_name($yhres, $i);
         $v = $yhrow[$i];
 
-        //  Korvaavuksia ja n‰pp‰ily‰
+        //  Korvaavuksia ja n√§pp√§ily√§
         $parcelOrder["yhteyshenkilo_".$r] = $v;
       }
     }
@@ -226,19 +226,19 @@ if ($kollityht > 0) {
       # Reference
       # Reference 2
       # Viite
-      # Vastaanottajan yhteyshenkilˆ
+      # Vastaanottajan yhteyshenkil√∂
       # Vastaanottajan nimi
-      # Vastaanottajan l‰hiosoite
-      # Vastaanottajan l‰hiosoite 2
+      # Vastaanottajan l√§hiosoite
+      # Vastaanottajan l√§hiosoite 2
       # Vastaanottajan postinumero
       # Vastaanottajan postitoimipaikka
       # Vastaanottajan maa
       # Vastaanottajan puhelinnumero
-      # Pakkausten m‰‰r‰
-      # L‰hetystapa
-      # Loppusumma jos j‰lkivaatimus, muuten ei mit‰‰n
-      # Valuutta jos j‰lkivaatimus, muuten ei mit‰‰n
-      # Jos maksuehto on j‰lkivaatimus, laitetaan t("K‰teinen")
+      # Pakkausten m√§√§r√§
+      # L√§hetystapa
+      # Loppusumma jos j√§lkivaatimus, muuten ei mit√§√§n
+      # Valuutta jos j√§lkivaatimus, muuten ei mit√§√§n
+      # Jos maksuehto on j√§lkivaatimus, laitetaan t("K√§teinen")
       # Rahtikirjanro
       $delisprintFileFormat = array(
         "tilausnumero",
@@ -266,26 +266,26 @@ if ($kollityht > 0) {
     foreach($delisprintFileFormat as $p) {
       $aineisto .= $parcelOrder[$p].";";
 
-      // tehd‰‰n ylim‰‰r‰inen ; koska formaatissa on l‰hiosoite 2 mit‰ ei ole pupessa
+      // tehd√§√§n ylim√§√§r√§inen ; koska formaatissa on l√§hiosoite 2 mit√§ ei ole pupessa
       if ($p == "toim_osoite") {
         $aineisto .= ";";
       }
     }
 
-    // Muunnetaan merkistˆ Windows ANSI
-    iconv("ISO-8859-1", "Windows-1252", $aineisto);
+    // Muunnetaan merkist√∂ Windows ANSI
+    iconv("UTF-8", "Windows-1252", $aineisto);
 
     if (substr($dpd_ds_path,-1) != '/') {
       $dpd_ds_path .= '/';
     }
 
-    // Jos siirret‰‰n FTP:ll‰ niin $dpd_ds_path on remote pathi ja jos ei siirret‰ niin $dpd_ds_path on local pathi
+    // Jos siirret√§√§n FTP:ll√§ niin $dpd_ds_path on remote pathi ja jos ei siirret√§ niin $dpd_ds_path on local pathi
     if ($dpd_ds_host != "" and $dpd_ds_user != "" and $dpd_ds_pass != "" and $dpd_ds_path != "") {
 
       $filenimi = "/tmp/dpdimport-".md5(uniqid(rand(),true)).".dat";
 
       if (file_put_contents($filenimi, $aineisto) === FALSE) {
-        echo "<br><font class='error'>".t("tiedoston kirjoitus EPƒONNISTUI")."</font><br>";
+        echo "<br><font class='error'>".t("tiedoston kirjoitus EP√ÑONNISTUI")."</font><br>";
       }
 
       // tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile
@@ -303,12 +303,12 @@ if ($kollityht > 0) {
       $filenimi = $dpd_ds_path."dpdimport-".md5(uniqid(rand(),true)).".dat";
 
       if (file_put_contents($filenimi, $aineisto) === FALSE) {
-        echo "<br><font class='error'>".t("tiedoston kirjoitus EPƒONNISTUI")."</font><br>";
+        echo "<br><font class='error'>".t("tiedoston kirjoitus EP√ÑONNISTUI")."</font><br>";
       }
     }
   }
   else {
-    echo "<br><font class='error'>".t("DPD aineiston luotiin tarvittavia parametrej‰ puuttuu!")."</font><br>";
+    echo "<br><font class='error'>".t("DPD aineiston luotiin tarvittavia parametrej√§ puuttuu!")."</font><br>";
   }
 
 }

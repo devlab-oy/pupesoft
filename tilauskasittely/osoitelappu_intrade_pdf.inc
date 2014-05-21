@@ -3,7 +3,7 @@
 // tarvitaan tilauksen tunnus muutujassa $tunnus
 // printterin komento muuttujassa $oslapp
 // $kukarow[yhtio] jostain saadaan yhtio
-// $yhtiorow array josta saada l‰hett‰j‰n tiedot
+// $yhtiorow array josta saada l√§hett√§j√§n tiedot
 
 if ($phpnimi != "rahtikirja_custom.php") {
   //Tulostetaan standardi kolliosoitelappu
@@ -16,7 +16,7 @@ if ($phpnimi != "rahtikirja_custom.php") {
   $tempr = mysql_query($query) or pupe_error($query);
   $laskurow = mysql_fetch_assoc($tempr);
 
-  // K‰ytet‰‰nkˆ VAK-tietokantaa
+  // K√§ytet√§√§nk√∂ VAK-tietokantaa
   if ($yhtiorow["vak_kasittely"] != "") {
     $vakselect = "concat_ws(' ', concat('UN',yk_nro), nimi_ja_kuvaus, lipukkeet, pakkausryhma)";
     $vakjoin   = "JOIN vak ON tuote.yhtio = vak.yhtio and tuote.vakkoodi = vak.tunnus";
@@ -164,11 +164,11 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
     $sscc = $uniq_pakkaukset_sscc[$tulostuskpl];
   }
   else {
-    // tehd‰‰n SSCC :
+    // tehd√§√§n SSCC :
     // (00)
     // 1
     // ean (8)
-    // l‰hetenro (6) viimeist‰
+    // l√§hetenro (6) viimeist√§
     // tulostuskpl (2)
     // tarkiste (1)
     $sscc  = "1";
@@ -179,7 +179,7 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
     $sscc  = "00".$sscc.$loppu;
   }
 
-  // tehd‰‰n pdf:n uusi sivu
+  // tehd√§√§n pdf:n uusi sivu
   $firstpage = $pdf->new_page("a5");
 
   if (class_exists("Image_Barcode")) {
@@ -216,14 +216,14 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
   $pdf->draw_text(mm_pt(22), mm_pt(65), "Asiakastilaus: ",  $firstpage, $norm);
   $pdf->draw_text(mm_pt(50), mm_pt(65), "(400) $laskurow[asiakkaan_tilausnumero]{$kirjainlisa}",  $firstpage, $iso);
 
-  //teh‰‰ t‰st‰ viel‰ kaunis kattella
+  //teh√§√§ t√§st√§ viel√§ kaunis kattella
   $sscc = substr($sscc,0,4).substr($sscc,4,1).substr($sscc,5,8).substr($sscc,13,8).substr($sscc,21,1);
 
-  // piirret‰‰n viivakoodi paprulle
+  // piirret√§√§n viivakoodi paprulle
   $pdf->draw_text(mm_pt(22), mm_pt(33), "Kolli - Item ID.: ", $firstpage, $otsik);
   $pdf->draw_text(mm_pt(45), mm_pt(33), "(".substr($sscc, 0, 2).") ".substr($sscc, 2), $firstpage, $iso);
 
-  // sitten aletaan piirt‰m‰‰n itse PDF sis‰ltˆ‰
+  // sitten aletaan piirt√§m√§√§n itse PDF sis√§lt√∂√§
   // ensin isot viivat kohilleen
   $pdf->draw_rectangle(mm_pt(179),mm_pt(21.5),mm_pt(31),mm_pt(126.5), $firstpage, $rectparam);
 
@@ -266,8 +266,8 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
     }
   }
 
-  //Mist‰
-  $pdf->draw_text(mm_pt(22), mm_pt(175), "Mist‰ - FrÂn - From: ",              $firstpage, $otsik);
+  //Mist√§
+  $pdf->draw_text(mm_pt(22), mm_pt(175), "Mist√§ - Fr√•n - From: ",              $firstpage, $otsik);
   $pdf->draw_text(mm_pt(22), mm_pt(170), $yhtiorow['nimi'],                $firstpage, $pien);
   if ($yhtiorow['nimitark'] != '') {
     $pdf->draw_text(mm_pt(22), mm_pt(165), $yhtiorow['nimitark'],            $firstpage, $pien);
@@ -277,7 +277,7 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
     $pdf->draw_text(mm_pt(22), mm_pt(165), $yhtiorow['osoite'].", ".$yhtiorow['postino']." ".strtoupper($yhtiorow['postitp']),$firstpage, $pien);
   }
 
-  $pdf->draw_text(mm_pt(100), mm_pt(175), "L‰hetyspvm",                  $firstpage, $norm);
+  $pdf->draw_text(mm_pt(100), mm_pt(175), "L√§hetyspvm",                  $firstpage, $norm);
   $pdf->draw_text(mm_pt(100), mm_pt(170), date("d.m.Y") ,                  $firstpage, $norm);
 
   $query = "SELECT * FROM toimitustapa WHERE yhtio = '$kukarow[yhtio]' and selite = '$laskurow[toimitustapa]'";
@@ -300,15 +300,15 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
   $pdf->draw_text(mm_pt(100), mm_pt(140), "Toimituspvm",                  $firstpage, $norm);
   $pdf->draw_text(mm_pt(100), mm_pt(135), date("d.m.Y") ,                  $firstpage, $norm);
 
-  // Kuljetusohjeet = viivakoodi tulee t‰h‰n
+  // Kuljetusohjeet = viivakoodi tulee t√§h√§n
   $pdf->draw_text(mm_pt(22), mm_pt(112), "Kuljetusohjeet - Transportinstruktioner - Transport Instructions:",  $firstpage, $otsik);
-  $pdf->draw_text(mm_pt(22), mm_pt(107), "Reitti:                            Jono:                            L‰hetysehto:",  $firstpage, $otsik);
+  $pdf->draw_text(mm_pt(22), mm_pt(107), "Reitti:                            Jono:                            L√§hetysehto:",  $firstpage, $otsik);
 
   if (isset($vakit) and $vakit != "") {
     $pdf->draw_text(mm_pt(22), mm_pt(102), "VAK: ".$vakit, $firstpage, $norm);
   }
 
-  $pdf->draw_text(mm_pt(22), mm_pt(97),  "L‰mpˆtila +0....+30C",              $firstpage, $norm);
+  $pdf->draw_text(mm_pt(22), mm_pt(97),  "L√§mp√∂tila +0....+30C",              $firstpage, $norm);
 
   $pdf->draw_text(mm_pt(105), mm_pt(97),  "Kolli - Item",                  $firstpage, $otsik);
 
@@ -329,12 +329,12 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
   }
 }
 
-//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+//keksit√§√§n uudelle failille joku varmasti uniikki nimi:
 $pdffilenimi = "/tmp/osoitelappu-intrade-".md5(uniqid(rand(),true)).".pdf";
 
 //kirjoitetaan pdf faili levylle..
 $fh = fopen($pdffilenimi, "w");
-if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
+if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep√§onnistui $pdffilenimi");
 fclose($fh);
 
 if ($oslapp == 'email') {
@@ -344,7 +344,7 @@ if ($oslapp == 'email') {
   require("inc/sahkoposti.inc");
 }
 elseif ($tee == 'NAYTATILAUS') {
-  //Tyˆnnet‰‰n tuo pdf vaan putkeen!
+  //Ty√∂nnet√§√§n tuo pdf vaan putkeen!
   echo file_get_contents($pdffilenimi);
 }
 elseif ($oslapp != '' and $oslapp != 'edi') {

@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require('../inc/parametrit.inc');
@@ -38,7 +38,7 @@ if ($tee == "" or $tee == "JATKA") {
     $toimi = $ytunnus;
   }
   elseif ($tee != '') {
-    echo "<font class='error'>".t("Jonkun kent‰n tiedot puuttuu, ei voida ajaa raporttia")."</font><br>";
+    echo "<font class='error'>".t("Jonkun kent√§n tiedot puuttuu, ei voida ajaa raporttia")."</font><br>";
     $tee = "";
   }
 
@@ -114,7 +114,7 @@ if ($tee != '' and $asiakasid != "" and $toimittajaid != "" and $ytunnus != '' a
           <tr>
           <th>".t("Tuotenumero")."</th>
           <th>".t("Nimitys")."</th>
-          <th>".t("M‰‰r‰")."</th>
+          <th>".t("M√§√§r√§")."</th>
           <th>".t("Summa veroll")."</th>
           <th>".t("Summa vton")."</th>
           </tr>";
@@ -126,11 +126,11 @@ if ($tee != '' and $asiakasid != "" and $toimittajaid != "" and $ytunnus != '' a
       echo "</table>";
     }
     else {
-      echo "<br>".t("EI OSUMIA, TARKISTA SY÷TETYT RAJAUKSET")."!<br>";
+      echo "<br>".t("EI OSUMIA, TARKISTA SY√ñTETYT RAJAUKSET")."!<br>";
     }
 }
 
-//K‰ytt‰liittym‰
+//K√§ytt√§liittym√§
   echo "<br>";
   echo "<table><form method='post'>";
 
@@ -145,11 +145,11 @@ if ($tee != '' and $asiakasid != "" and $toimittajaid != "" and $ytunnus != '' a
   echo "<input type='hidden' name='tee' value='JATKA'>
       <input type='hidden' name='toimittajaid' value='$toimittajaid'>
       <input type='hidden' name='asiakasid' value='$asiakasid'>";
-  echo "<tr><th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+  echo "<tr><th>".t("Sy√∂t√§ alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
       <td><input type='text' name='ppa' value='$ppa' size='3'>
       <input type='text' name='kka' value='$kka' size='3'>
       <input type='text' name='vva' value='$vva' size='5'></td></tr>
-      <tr><th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+      <tr><th>".t("Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
       <td><input type='text' name='ppl' value='$ppl' size='3'>
       <input type='text' name='kkl' value='$kkl' size='3'>
       <input type='text' name='vvl' value='$vvl' size='5'></td></tr>";

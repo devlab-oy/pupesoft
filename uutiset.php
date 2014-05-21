@@ -53,7 +53,7 @@ else {
 if ($tee == 'LISAA') {
 
   if ($kukarow['yhtio'] == 'artr' and $toim == 'EXTRANET' and $automanual_uutinen == '' and $extranet_uutinen == '') {
-    echo "<font class='error'>".t("Uutisen n‰kyvyys on valittava! (Extranet tai Automanual)")."</font><br><br>";
+    echo "<font class='error'>".t("Uutisen n√§kyvyys on valittava! (Extranet tai Automanual)")."</font><br><br>";
     $rivi["kentta01"]  = $otsikko;
     $rivi["kentta02"]  = $uutinen;
     $rivi["kentta08"]  = $kentta08;
@@ -63,7 +63,7 @@ if ($tee == 'LISAA') {
     $tee = "SYOTA";
   }
   elseif ($kukarow['yhtio'] == 'artr' and $toim == 'AUTOMANUAL' and $automanual_uutinen == '') {
-    echo "<font class='error'>".t("Uutisen n‰kyvyys on valittava!")."</font><br><br>";
+    echo "<font class='error'>".t("Uutisen n√§kyvyys on valittava!")."</font><br><br>";
     $rivi["kentta01"]  = $otsikko;
     $rivi["kentta02"]  = $uutinen;
     $rivi["kentta09"]  = $kentta09;
@@ -144,7 +144,7 @@ if ($tee == 'LISAA') {
       $katunnus = mysql_insert_id();
 
       if ($liitostunnus != 0 && $kuva != '') {
-        // p‰ivitet‰‰n kuvalle viel‰ linkki toiseensuuntaa
+        // p√§ivitet√§√§n kuvalle viel√§ linkki toiseensuuntaa
         $query = "UPDATE liitetiedostot set liitostunnus='$katunnus' where tunnus='$liitostunnus'";
         $result = pupe_query($query);
       }
@@ -152,7 +152,7 @@ if ($tee == 'LISAA') {
     $tee = "";
   }
   else {
-    echo "<font class='error'>".t("Sek‰ otsikko ett‰ uutinen on syˆtett‰v‰!")."</font><br><br>";
+    echo "<font class='error'>".t("Sek√§ otsikko ett√§ uutinen on sy√∂tett√§v√§!")."</font><br><br>";
     $rivi["kentta01"]  = $otsikko;
     $rivi["kentta02"]  = $uutinen;
     $rivi["kentta08"]  = $kentta08;
@@ -210,7 +210,7 @@ if ($tee == "SYOTA") {
 
     echo "
       <tr>
-        <th>".t("Syˆt‰ uusi kuva")."</th>
+        <th>".t("Sy√∂t√§ uusi kuva")."</th>
         <td><input type='file' name='userfile'></td>
       </tr>";
   }
@@ -227,7 +227,7 @@ if ($tee == "SYOTA") {
       <td>$kukarow[nimi]</td>
      </tr>
      <tr>
-      <th>".t("P‰iv‰m‰‰r‰")."</th>
+      <th>".t("P√§iv√§m√§√§r√§")."</th>
       <td>".tv1dateconv($rivi['pvmalku'], "PITKA")."</td>
      </tr>";
 
@@ -285,7 +285,7 @@ if ($tee == "SYOTA") {
   if ($rivi['kokopaiva'] != "") $check = "CHECKED";
   else $check = "";
 
-  echo "<tr><th>".t("Prioriteetti")."</th><td><input type='checkbox' name='kokopaiva' $check> ".t("N‰ytet‰‰nkˆ uutinen aina p‰‰llimm‰isen‰")."</td></tr>";
+  echo "<tr><th>".t("Prioriteetti")."</th><td><input type='checkbox' name='kokopaiva' $check> ".t("N√§ytet√§√§nk√∂ uutinen aina p√§√§llimm√§isen√§")."</td></tr>";
 
   if ($yhtiorow['konserni'] != '') {
 
@@ -294,7 +294,7 @@ if ($tee == "SYOTA") {
 
     echo "<tr>
       <th>".t("Konserni")."</th>
-      <td><input type='checkbox' name='konserni' $check> ".t("N‰ytet‰‰nkˆ uutinen konsernin kaikilla yrityksill‰")."</td>
+      <td><input type='checkbox' name='konserni' $check> ".t("N√§ytet√§√§nk√∂ uutinen konsernin kaikilla yrityksill√§")."</td>
     </tr>";
   }
   if (($toim == "VIIKKOPALAVERI" or $toim == "ASIAKASPALVELU" or $toim == "RYJO") and ($rivi["kuka"] == $kukarow["kuka"])) {
@@ -303,7 +303,7 @@ if ($tee == "SYOTA") {
 
     echo "<tr>
         <th>".t("Lukko")."</th>
-        <td><input type='checkbox' name='lukittu' value='L' $check>".t("Lukitse palaveri. Lukittua palaveria ei voi muokata eik‰ poistaa.")."</td>
+        <td><input type='checkbox' name='lukittu' value='L' $check>".t("Lukitse palaveri. Lukittua palaveria ei voi muokata eik√§ poistaa.")."</td>
       </tr>";
   }
 
@@ -337,13 +337,13 @@ if ($tee == "SYOTA") {
     if ($kukarow['yhtio'] == 'artr' and ($toim == 'EXTRANET' or $toim == 'AUTOMANUAL')) {
       echo "<tr>
         <th>".t("Automanual")."</th>
-        <td><input type='checkbox' name='automanual_uutinen' $check1> ".t("N‰ytet‰‰nkˆ uutinen Automanualissa")."</td>
+        <td><input type='checkbox' name='automanual_uutinen' $check1> ".t("N√§ytet√§√§nk√∂ uutinen Automanualissa")."</td>
       </tr>";
     }
     if ($toim == 'EXTRANET') {
       echo "<tr>
         <th>".t("Extranet")."</th>
-        <td><input type='checkbox' name='extranet_uutinen' $check2> ".t("N‰ytet‰‰nkˆ uutinen Extranetiss‰")."</td>
+        <td><input type='checkbox' name='extranet_uutinen' $check2> ".t("N√§ytet√§√§nk√∂ uutinen Extranetiss√§")."</td>
       </tr>";
 
       $check3 = "";
@@ -353,7 +353,7 @@ if ($tee == "SYOTA") {
 
       echo "<tr>
         <th>".t("Extranet")."</th>
-        <td><input type='checkbox' name='kentta08' value='X' $check3> ".t("Ei n‰ytet‰ asiakkaan asiakkaille")."</td>
+        <td><input type='checkbox' name='kentta08' value='X' $check3> ".t("Ei n√§ytet√§ asiakkaan asiakkaille")."</td>
       </tr>";
     }
   }
@@ -361,7 +361,7 @@ if ($tee == "SYOTA") {
   echo "
     </table>
 
-    <br><input type='submit' value='".t("Syˆt‰")."'>
+    <br><input type='submit' value='".t("Sy√∂t√§")."'>
 
     </form>";
 }
@@ -450,7 +450,7 @@ if ($tee == "PRINTTAA") {
     <TR><TD VALIGN=middle bgcolor='#000000'>
         <FONT FACE='Lucida,Verdana,Helvetica,Arial' COLOR='#FFFFFF'>
         <B><SMALL>&nbsp;".t("Toimittaja").": $toimittaja</SMALL></B><BR>
-        <B><SMALL>&nbsp;".t("P‰iv‰m‰‰r‰").": ".tv1dateconv($paivays, "PITKA")."</SMALL></B>
+        <B><SMALL>&nbsp;".t("P√§iv√§m√§√§r√§").": ".tv1dateconv($paivays, "PITKA")."</SMALL></B>
         </FONT>
     <!--
       </TD><TD ALIGN=right bgcolor='#000000'>
@@ -471,7 +471,7 @@ if ($tee == '') {
     echo "<form method='post'>
       <input type='hidden' name='toim' value='$toim'>";
     echo "<input type='hidden' name='tee' value='SYOTA'>";
-    echo "<input type='submit' value='".t("Lis‰‰ uusi uutinen")."'>";
+    echo "<input type='submit' value='".t("Lis√§√§ uusi uutinen")."'>";
     echo "</form><br><br>";
   }
 
@@ -542,16 +542,16 @@ if ($tee == '') {
           $lisatietorow = mysql_fetch_array($lisatietores);
 
           if ($lisatietorow["image_width"] > 130 or $lisatietorow["image_width"] == 0) {
-            // Tehd‰‰n nyt t‰h‰n t‰llanen convert juttu niin k‰ytt‰j‰ien megakokoiset kuvat eiv‰t j‰‰ niin isoina kantaan
+            // Tehd√§√§n nyt t√§h√§n t√§llanen convert juttu niin k√§ytt√§j√§ien megakokoiset kuvat eiv√§t j√§√§ niin isoina kantaan
             $nimi1 = "/tmp/".md5(uniqid(rand(),true)).".jpg";
 
             $fh = fopen($nimi1, "w");
-            if (fwrite($fh, $lisatietorow["data"]) === FALSE) die("Kirjoitus ep‰onnistui $nimi1");
+            if (fwrite($fh, $lisatietorow["data"]) === FALSE) die("Kirjoitus ep√§onnistui $nimi1");
             fclose($fh);
 
             $nimi2 = "/tmp/".md5(uniqid(rand(),true)).".jpg";
 
-            // Haetaan kuvan v‰riprofiili
+            // Haetaan kuvan v√§riprofiili
             exec("nice -n 20 identify -format %[colorspace] \"$nimi1\"", $identify);
 
             $colorspace = "sRGB";
@@ -610,7 +610,7 @@ if ($tee == '') {
                       WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$m[1]'";
             $tres = pupe_query($query);
 
-            //  T‰m‰ me korvataan aina!
+            //  T√§m√§ me korvataan aina!
             $search[] = "/$m[0]/";
 
             if (mysql_num_rows($tres) > 1) {
@@ -634,7 +634,7 @@ if ($tee == '') {
           </tr>";
 
       echo "<tr><th colspan='2'>";
-      echo t("Toimittaja").": $uutinen[nimi]<br>".t("P‰iv‰m‰‰r‰").": ".tv1dateconv($uutinen['pvmalku'], "PITKA");
+      echo t("Toimittaja").": $uutinen[nimi]<br>".t("P√§iv√§m√§√§r√§").": ".tv1dateconv($uutinen['pvmalku'], "PITKA");
 
       if ($toim == "VERKKOKAUPPA") {
         echo "<br>Osasto: $uutinen[kentta09]";
@@ -678,9 +678,9 @@ if ($tee == '') {
     }
     echo "</table>";
 
-    echo "<a href='$PHP_SELF?limit=10&toim=$toim'>".t("N‰yt‰ viimeiset 10 uutista")."</a><br>";
-    echo "<a href='$PHP_SELF?limit=50&toim=$toim'>".t("N‰yt‰ viimeiset 50 uutista")."</a><br>";
-    echo "<a href='$PHP_SELF?limit=all&toim=$toim'>".t("N‰yt‰ kaikki uutiset")."</a><br>";
+    echo "<a href='$PHP_SELF?limit=10&toim=$toim'>".t("N√§yt√§ viimeiset 10 uutista")."</a><br>";
+    echo "<a href='$PHP_SELF?limit=50&toim=$toim'>".t("N√§yt√§ viimeiset 50 uutista")."</a><br>";
+    echo "<a href='$PHP_SELF?limit=all&toim=$toim'>".t("N√§yt√§ kaikki uutiset")."</a><br>";
   }
 }
 

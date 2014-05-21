@@ -14,7 +14,7 @@ if ($tee_pdf == 'tulosta_tratta') {
   exit;
 }
 
-// ekotetaan javascripti‰ jotta saadaan pdf:‰t uuteen ikkunaan
+// ekotetaan javascripti√§ jotta saadaan pdf:√§t uuteen ikkunaan
 js_openFormInNewWindow();
 
 if ($toim == "TRATTA") {
@@ -31,7 +31,7 @@ if ($tee == 'uusi_ekirje') {
 
   require ('myyntires/paperikarhu.php');
 
-  echo "<br><font class='ok'>eKirje l‰hetetty uudestaan asiakkaalle $asiakastiedot[nimi]!</font><br><br>";
+  echo "<br><font class='ok'>eKirje l√§hetetty uudestaan asiakkaalle $asiakastiedot[nimi]!</font><br><br>";
 }
 
 if ($tee == "uusi_ekirjekierros") {
@@ -61,26 +61,26 @@ if ($tee == "uusi_ekirjekierros") {
     $lasku_tunnus = $uek_row["karhuttavat"];
 
     try {
-      // koitetaan l‰hett‰‰ eKirje sek‰ tulostaa
+      // koitetaan l√§hett√§√§ eKirje sek√§ tulostaa
       require ('paperikarhu.php');
 
-      echo "<font class='ok'>eKirje l‰hetetty uudestaan asiakkaalle $asiakastiedot[nimi]!</font><br>";
+      echo "<font class='ok'>eKirje l√§hetetty uudestaan asiakkaalle $asiakastiedot[nimi]!</font><br>";
     }
     catch (Exception $e) {
       $ekarhu_success = false;
-      echo "<font class='error'>Ei voitu l‰hett‰‰ karhua eKirjeen‰. Virhe: " . $e->getMessage() . "</font>";
+      echo "<font class='error'>Ei voitu l√§hett√§√§ karhua eKirjeen√§. Virhe: " . $e->getMessage() . "</font>";
     }
 
     $uek_lask++;
   }
 
-  echo "<br><br><font class='ok'>L‰hetettiin: $uek_lask eKirjett‰!</font><br><br><br>";
+  echo "<br><br><font class='ok'>L√§hetettiin: $uek_lask eKirjett√§!</font><br><br><br>";
 }
 
 // Jos ollaan painettu poista-nappia
 if (isset($_POST['poista_tratta'])) {
   if ($poista_tratta_tunnus != '' and $ltunnus != '') {
-    // k‰sitell‰‰n muuttujat
+    // k√§sitell√§√§n muuttujat
     $poista_tratta_tunnus = (int) $poista_tratta_tunnus;
     $ltunnus = (int) $ltunnus;
 
@@ -91,7 +91,7 @@ if (isset($_POST['poista_tratta'])) {
     $res = pupe_query($query);
 
     while ($row = mysql_fetch_assoc($res)) {
-      // "poistetaan" haluttu tratta n‰kyvist‰ kertomalla laskuntunnus -1:ll‰
+      // "poistetaan" haluttu tratta n√§kyvist√§ kertomalla laskuntunnus -1:ll√§
       $ltun = $row['ltunnus'] * -1;
 
       $query = "UPDATE karhu_lasku SET
@@ -113,15 +113,15 @@ echo "<form name='karhu_selaa' method='post'>
     <tr>
       <th>".t("Laskunro")."</th><td><input type='text' name='laskunro'></td>
       <td class='back'><input type='submit' name='tee_hae' value='".t("Hae")."'></td>
-      <td class='back'><input type='submit' name='tee_kaikki' value='".t("N‰yt‰ kaikki avoimet")."'></td>
+      <td class='back'><input type='submit' name='tee_kaikki' value='".t("N√§yt√§ kaikki avoimet")."'></td>
     </tr>
     </table>
     </form>";
 
 if ($toim == "") {
-  echo "<br><br><font class='head'>".t("Selaa maksukehotuskierroksia / uudelleenl‰het‰ kierros asiakkaille")."</font><hr />";
+  echo "<br><br><font class='head'>".t("Selaa maksukehotuskierroksia / uudelleenl√§het√§ kierros asiakkaille")."</font><hr />";
   echo "<form name='karhu_selaa' method='post'>
-    <input type='submit' name='tee_kiekat' value='".t("N‰yt‰ maksukehotuskierrokset")."'>
+    <input type='submit' name='tee_kiekat' value='".t("N√§yt√§ maksukehotuskierrokset")."'>
     </form><br>";
 }
 
@@ -173,14 +173,14 @@ if ((isset($tee_hae) and $tee_hae != "") or (isset($tee_kaikki) and $tee_kaikki 
           <th>".t('Laskunro')."</th>
           <th>".t('Summa')."</th>
           <th>".t('Maksettu')."</th>
-          <th>".t('Laskun er‰p‰iv‰')."</th>";
+          <th>".t('Laskun er√§p√§iv√§')."</th>";
 
     if ($toim == "TRATTA") {
-      echo "<th>".t('Tratta pvm')."<br>".t('Er‰p‰iv‰')."</th>";
+      echo "<th>".t('Tratta pvm')."<br>".t('Er√§p√§iv√§')."</th>";
       echo "<th>".t('Trattakertoja')."</th>";
     }
     else {
-      echo "<th>".t('Maksukehotuspvm')."<br>".t('Er‰p‰iv‰')."</th>";
+      echo "<th>".t('Maksukehotuspvm')."<br>".t('Er√§p√§iv√§')."</th>";
       echo "<th>".t('Maksukehotuskertoja')."</th>";
     }
 
@@ -225,7 +225,7 @@ if ((isset($tee_hae) and $tee_hae != "") or (isset($tee_kaikki) and $tee_kaikki 
       $tunnukset = mysql_fetch_assoc($la_res);
 
       if ($toim == "TRATTA") {
-        $yhtiorow['karhuerapvm'] = 7; // t‰m‰ on hardcoodattu tratan tulostukseen
+        $yhtiorow['karhuerapvm'] = 7; // t√§m√§ on hardcoodattu tratan tulostukseen
       }
 
       if ($yhtiorow['karhuerapvm'] > 0) {
@@ -264,7 +264,7 @@ if ((isset($tee_hae) and $tee_hae != "") or (isset($tee_kaikki) and $tee_kaikki 
             <input type='hidden' name='lasku_tunnus[]' value='$tunnukset[laskutunnukset]'>
             <input type='hidden' name='tee' value='NAYTATILAUS'>
             <input type='hidden' name='tee_pdf' value='tulosta_tratta'>
-            <input type='submit' value='".t("N‰yt‰ pdf")."' onClick=\"js_openFormInNewWindow('tulostakopioform_$laskuri', ''); return false;\">
+            <input type='submit' value='".t("N√§yt√§ pdf")."' onClick=\"js_openFormInNewWindow('tulostakopioform_$laskuri', ''); return false;\">
             </form></td>";
       }
       else {
@@ -274,7 +274,7 @@ if ((isset($tee_hae) and $tee_hae != "") or (isset($tee_kaikki) and $tee_kaikki 
             <input type='hidden' name='lasku_tunnus[]' value='$tunnukset[laskutunnukset]'>
             <input type='hidden' name='tee' value='NAYTATILAUS'>
             <input type='hidden' name='tee_pdf' value='tulosta_karhu'>
-            <input type='submit' value='".t("N‰yt‰ pdf")."' onClick=\"js_openFormInNewWindow('tulostakopioform_$laskuri', ''); return false;\">
+            <input type='submit' value='".t("N√§yt√§ pdf")."' onClick=\"js_openFormInNewWindow('tulostakopioform_$laskuri', ''); return false;\">
             </form></td>";
 
         if (isset($ekirje_config) and is_array($ekirje_config)) {
@@ -290,7 +290,7 @@ if ((isset($tee_hae) and $tee_hae != "") or (isset($tee_kaikki) and $tee_kaikki 
               <input type='hidden' name='laskunro'     value = '$laskunro'>
               <input type='hidden' name='tee'         value = 'uusi_ekirje'>
               <input type='hidden' name='ekirje_laheta'   value = 'JOO'>
-              <input type='submit' value='".t("L‰het‰ eKirje uudestaan")."'>
+              <input type='submit' value='".t("L√§het√§ eKirje uudestaan")."'>
               </form></td>";
         }
       }
@@ -310,7 +310,7 @@ if ((isset($tee_hae) and $tee_hae != "") or (isset($tee_kaikki) and $tee_kaikki 
 
   }
   else {
-    echo "<br><font class='message'>Yht‰‰n laskua ei lˆytynyt!</font>";
+    echo "<br><font class='message'>Yht√§√§n laskua ei l√∂ytynyt!</font>";
   }
 }
 elseif (isset($tee_kiekat)) {
@@ -332,7 +332,7 @@ elseif (isset($tee_kiekat)) {
   echo "<br><br><font class='info'>".t("Maksukehotuskierrokset").":</font>";
   echo "<table><tr>
     <th>".t('Kierros')."</th>
-    <th>".t('Maksukehotusten m‰‰r‰')."</th>
+    <th>".t('Maksukehotusten m√§√§r√§')."</th>
     <th>".t('Maksamattomia laskuja nyt')."</th></tr>";
 
   while ($row = mysql_fetch_assoc($res)) {
@@ -347,7 +347,7 @@ elseif (isset($tee_kiekat)) {
           <input type='hidden' name='tee_kaikki'   value = '$tee_kaikki'>
           <input type='hidden' name='tee_kierros' value = 'JES'>
           <input type='hidden' name='kierros'   value = '$row[kierros]'>
-          <input type='submit' value='".t("N‰yt‰ kierroksen maksukehotukset")."'>
+          <input type='submit' value='".t("N√§yt√§ kierroksen maksukehotukset")."'>
           </form>
         </td>";
 
@@ -361,7 +361,7 @@ elseif (isset($tee_kiekat)) {
           <input type='hidden' name='tee_kiekat'    value = 'JOO'>
           <input type='hidden' name='kierros'       value = '$row[kierros]'>
           <input type='hidden' name='ekirje_laheta'   value = 'JOO'>
-          <input type='submit' value='".t("Uudelleenl‰het‰ eKirjeet")."'>
+          <input type='submit' value='".t("Uudelleenl√§het√§ eKirjeet")."'>
           </form>
         </td>";
     }
@@ -373,7 +373,7 @@ elseif (isset($tee_kiekat)) {
   echo "</table>";
 
   if (isset($ekirje_config) and is_array($ekirje_config)) {
-    echo "<br><font class='error'>".t("HUOM: eKirje l‰hetet‰‰n uudestaan vain jos asiakkaalla on viel‰ maksamattomia laskuja")."!</font>";
+    echo "<br><font class='error'>".t("HUOM: eKirje l√§hetet√§√§n uudestaan vain jos asiakkaalla on viel√§ maksamattomia laskuja")."!</font>";
   }
 }
 

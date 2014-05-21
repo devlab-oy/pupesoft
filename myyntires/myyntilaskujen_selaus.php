@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("../inc/parametrit.inc");
@@ -13,7 +13,7 @@ $kentat = 'laskunro, nimi, nimitark, erpcm, summa, viite, tunnus';
 $array = explode(",", $kentat);
 $count = count($array);
 for ($i=0; $i<=$count; $i++) {
-    // tarkastetaan onko hakukent‰ss‰ jotakin
+    // tarkastetaan onko hakukent√§ss√§ jotakin
     if (strlen($haku[$i]) > 0) {
       $lisa .= " and l." . $array[$i] . " like '%" . $haku[$i] . "%'";
       $ulisa .= "&haku[" . $i . "]=" . $haku[$i];
@@ -27,13 +27,13 @@ else{
 }
 
 
-// Myyntilaskuissa tila=U, kun lasku on laskutettu, X, jos lasku on l‰hetetty verkkolaskuna
+// Myyntilaskuissa tila=U, kun lasku on laskutettu, X, jos lasku on l√§hetetty verkkolaskuna
 // Alatila on A kun lasku on laskuttamatta.
 $maxrows = 500;
 $query = "SELECT COALESCE(l.laskunro,'-') laskunro, l.nimi nimi, l.nimitark nimitark, l.erpcm erpcm, l.summa summa, l.viite viite, l.tunnus tunnus, ytunnus
           FROM lasku l WHERE l.yhtio ='$kukarow[yhtio]' and l.tila = 'U' and l.mapvm='0000-00-00' $lisa
            ORDER BY $jarjestys LIMIT $maxrows";
-// Mik‰ on maksaja?
+// Mik√§ on maksaja?
 
 
 $result = mysql_query($query) or pupe_error($query);
@@ -80,7 +80,7 @@ echo "<td><input type='submit' value='".t("Etsi")."'></td></tr>";
 
 echo "</tr></table></form>";
 if($row >= $maxrows) {
-  echo "<br>".t("Kysely on liian iso esitett‰v‰ksi, ainoastaan ensimm‰iset")." $maxrows ".t("rivi‰ on n‰kyvill‰. Ole hyv‰, ja rajaa hakuehtoja").".";
+  echo "<br>".t("Kysely on liian iso esitett√§v√§ksi, ainoastaan ensimm√§iset")." $maxrows ".t("rivi√§ on n√§kyvill√§. Ole hyv√§, ja rajaa hakuehtoja").".";
 }
 
 //echo "Query: ". $query;

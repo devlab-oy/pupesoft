@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 //parametrit
@@ -8,7 +8,7 @@ include('../inc/parametrit.inc');
 
 js_popup();
 
-//N‰ytet‰‰n aina konsernikohtaisesti
+//N√§ytet√§√§n aina konsernikohtaisesti
 if ($yhtiorow["konserni"] != "") {
   $query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
   $result = mysql_query($query) or pupe_error($query);
@@ -25,8 +25,8 @@ $konsernit1 = " and yhtio in (".substr($konsernit, 0, -1).") ";
 $konsernit2 = " and kalenteri.yhtio in (".substr($konsernit, 0, -1).") ";
 $konsernit3 = " and kuka.yhtio in (".substr($konsernit, 0, -1).") ";
 
-//kuukaudet ja p‰iv‰t ja ajat
-$MONTH_ARRAY = array(1=>t('Tammi'),t('Helmi'),t('Maalis'),t('Huhti'),t('Touko'),t('Kes‰'),t('Hein‰'),t('Elo'),t('Syys'),t('Loka'),t('Marras'),t('Joulu'));
+//kuukaudet ja p√§iv√§t ja ajat
+$MONTH_ARRAY = array(1=>t('Tammi'),t('Helmi'),t('Maalis'),t('Huhti'),t('Touko'),t('Kes√§'),t('Hein√§'),t('Elo'),t('Syys'),t('Loka'),t('Marras'),t('Joulu'));
 $DAY_ARRAY = array(t("Ma"), t("Ti"), t("Ke"), t("To"), t("Pe"), t("La"), t("Su"));
 
 //kalenteritoiminnot
@@ -60,7 +60,7 @@ function month_name($month) {
   return $kk[$month-1];
 }
 
-// otetaan oletukseksi t‰m‰ monthkausi ja t‰m‰ vuosi
+// otetaan oletukseksi t√§m√§ monthkausi ja t√§m√§ vuosi
 if ($month == '') $month=date("n");
 if ($year == '')  $year=date("Y");
 if ($day == '') $day=date("j");
@@ -89,7 +89,7 @@ $myday = $day;
 
 $lopetus = "../crm/kuukausinakyma.php////osasto=$osasto//year=$year//month=$month//day=$pva//toim=$toim";
 
-echo "<font class='head'>".t("Kuukausin‰kym‰").": ". $MONTH_ARRAY[$month] ." $year</font><hr>";
+echo "<font class='head'>".t("Kuukausin√§kym√§").": ". $MONTH_ARRAY[$month] ." $year</font><hr>";
 
 echo "<table>";
 echo "<th>".t("Valitse kuukausi").":</th><td>
@@ -115,7 +115,7 @@ echo "</select><a href='$PHP_SELF?day=1&month=$nextmmonth&year=$nextymonth&osast
 echo "<td class='back' width='20'></td>";
 echo "<th>".t("Valitse osasto").":</th><td><select name='osasto' Onchange='submit();'>";
 
-//Haetaan kaikki k‰ytt‰j‰t
+//Haetaan kaikki k√§ytt√§j√§t
 $query = "SELECT distinct kuka.osasto
           FROM kuka, oikeu
           WHERE oikeu.yhtio  = kuka.yhtio
@@ -126,7 +126,7 @@ $query = "SELECT distinct kuka.osasto
           ORDER BY kuka.osasto";
 $result = mysql_query($query) or pupe_error($query);
 
-// jos ei olla valittu osastoa ja k‰ytt‰j‰ll‰ on oma osasto valitaan se
+// jos ei olla valittu osastoa ja k√§ytt√§j√§ll√§ on oma osasto valitaan se
 if ($osasto == "" and $kukarow["osasto"] != "") {
   $osasto = $kukarow["osasto"];
 }
@@ -135,7 +135,7 @@ if ($osasto == "kaikki") {
   $osasto = "";
 }
 
-echo "<option value='kaikki'>".t("N‰ytet‰‰n kaikki")."</option>";
+echo "<option value='kaikki'>".t("N√§ytet√§√§n kaikki")."</option>";
 
 while($row = mysql_fetch_array($result)) {
   if($row["osasto"] == $osasto) {
@@ -168,7 +168,7 @@ else {
   $osastolisa = "";
 }
 
-// Haetaan kaikki k‰ytt‰j‰t
+// Haetaan kaikki k√§ytt√§j√§t
 $query = "SELECT distinct if(kuka.nimi!='', kuka.nimi, kuka.kuka) nimi, kuka.kuka, kuka.osasto
           FROM kuka, oikeu
           WHERE oikeu.yhtio  = kuka.yhtio
@@ -247,21 +247,21 @@ while($row = mysql_fetch_array($result)) {
       $etufontti  = "";
       $takafontti = "";
 
-      if ($krow["kuittaus"] == "" and ($krow["selitetark"] == "Palkaton vapaa" or $krow["selitetark"] == "Sairasloma" or $krow["selitetark"] == "Kes‰loma" or $krow["selitetark"] == "Talviloma" or $krow["selitetark"] == "Ylityˆvapaa")) {
+      if ($krow["kuittaus"] == "" and ($krow["selitetark"] == "Palkaton vapaa" or $krow["selitetark"] == "Sairasloma" or $krow["selitetark"] == "Kes√§loma" or $krow["selitetark"] == "Talviloma" or $krow["selitetark"] == "Ylity√∂vapaa")) {
         $etufontti = "<font style='color:#FF0000;'>";
         $takafontti = "</font>";
       }
-      elseif ($krow["kuittaus"] != "" and ($krow["selitetark"] == "Palkaton vapaa" or $krow["selitetark"] == "Sairasloma" or $krow["selitetark"] == "Kes‰loma" or $krow["selitetark"] == "Talviloma" or $krow["selitetark"] == "Ylityˆvapaa")) {
+      elseif ($krow["kuittaus"] != "" and ($krow["selitetark"] == "Palkaton vapaa" or $krow["selitetark"] == "Sairasloma" or $krow["selitetark"] == "Kes√§loma" or $krow["selitetark"] == "Talviloma" or $krow["selitetark"] == "Ylity√∂vapaa")) {
         $etufontti = "<font style='color:#00FF00;'>";
         $takafontti = "</font>";
       }
 
-      //Vanhoja kalenteritapahtumia ei saa en‰‰ muuttaa
+      //Vanhoja kalenteritapahtumia ei saa en√§√§ muuttaa
       list($rvv,$rkk,$rpp) = explode("-",substr($krow["pvmloppu"],0,10));
       $kaleloppu  = (int) date('Ymd',mktime(0,0,0,$rkk,$rpp,$rvv));
       $aikanyt   = (int) date('Ymd',mktime(0,0,0,date('m'),date('d'),date('Y')));
 
-      // Vanhoja kalenteritapahtumia ei saa en‰‰ muuttaa ja Hyv‰ksyttyj‰ lomia ei saa ikin‰ muokata
+      // Vanhoja kalenteritapahtumia ei saa en√§√§ muuttaa ja Hyv√§ksyttyj√§ lomia ei saa ikin√§ muokata
       if($krow['tunnus'] != '' and $krow["kuittaus"] == "" and $kaleloppu >= $aikanyt and ($krow['kuka'] == $kukarow["kuka"] or $krow['laatija'] == $kukarow["kuka"])) {
         echo "<div id='div_$krow[tunnus]' class='popup' style='width:200px;'>";
 

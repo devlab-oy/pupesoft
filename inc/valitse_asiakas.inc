@@ -58,7 +58,7 @@ else {
   $dummy_tyyppi = "ENNAKKO";
 }
 
-// lis‰‰ tai poista asiakkaita dummytarjoukselta
+// lis√§√§ tai poista asiakkaita dummytarjoukselta
 if ($request['action'] == 'liita_asiakkaat') {
   $parametrit = array(
     "toim"             => $dummy_tyyppi,
@@ -74,7 +74,7 @@ elseif ($request['action'] == 'poista_asiakkaat') {
   poista_asiakkaita_dummytarjoukselta($request['tilausnumero'], $request['valitut_asiakastunnukset']);
 }
 
-// jos k‰ytt‰j‰ navigoi sivulle linkist‰, tarjous_tee on setattu, n‰in estet‰‰n turhan dummytarjouksen teko kun tullaan tarjouksen_splittauksesta
+// jos k√§ytt√§j√§ navigoi sivulle linkist√§, tarjous_tee on setattu, n√§in estet√§√§n turhan dummytarjouksen teko kun tullaan tarjouksen_splittauksesta
 if (isset($request['tarjous_tee'])) {
   $dummy_tarjous_row = tarkista_loytyyko_dummytarjous($asiakasid, $request['toim']);
   if (!empty($dummy_tarjous_row)) {
@@ -91,7 +91,7 @@ if (isset($request['tarjous_tee'])) {
   }
 }
 
-//tarkistetaan mik‰ n‰kym‰ n‰ytet‰‰n, poimitut asiakkaat vai asiakkaat joilla extranet k‰ytt‰j‰tunnus
+//tarkistetaan mik√§ n√§kym√§ n√§ytet√§√§n, poimitut asiakkaat vai asiakkaat joilla extranet k√§ytt√§j√§tunnus
 if ($request['tarjous_tee'] == 'nayta_poimitut_asiakkaat') {
   if (!empty($request['dummytarjous']['sopimus_lisatietoja'])) {
     $request['asiakkaat'] = hae_poimitut_asiakkaat($request['dummytarjous']['sopimus_lisatietoja']);
@@ -101,7 +101,7 @@ if ($request['tarjous_tee'] == 'nayta_poimitut_asiakkaat') {
     echo_asiakas_table($request);
   }
   else {
-    echo "<font class='message'>".t("Tarjoukselle ei ole valittu yht‰‰n asiakasta")."</font>";
+    echo "<font class='message'>".t("Tarjoukselle ei ole valittu yht√§√§n asiakasta")."</font>";
     echo "<br>";
     echo_asiakas_table($request);
   }
@@ -234,10 +234,10 @@ function echo_asiakas_table($request) {
     echo "<th><input type='checkbox' id='valitse_kaikki'></th>";
     echo "<th>", t("Nimi"), "</th>";
     echo "<th>", t("Asiakasnumero"), "</th>";
-    echo "<th>", t("Asiakasryhm‰"), "</th>";
+    echo "<th>", t("Asiakasryhm√§"), "</th>";
     echo "<th>", t("Osasto"), "</th>";
-    echo "<th>", t("Myyj‰"), "</th>";
-    echo "<th>", t("Myyj‰tunnus"), "</th>";
+    echo "<th>", t("Myyj√§"), "</th>";
+    echo "<th>", t("Myyj√§tunnus"), "</th>";
     echo "<tr>";
 
     foreach ($request['asiakkaat'] as $asiakas) {
@@ -274,7 +274,7 @@ function echo_asiakas_table($request) {
     echo "</table>";
     echo "<br>";
     if ($request['tarjous_tee'] == 'nayta_asiakas_valinta') {
-      $submitvalue = t("Liit‰ asiakkaat");
+      $submitvalue = t("Liit√§ asiakkaat");
     }
     else {
       $submitvalue = t("Poista asiakkaat");
@@ -324,7 +324,7 @@ function echo_asiakas_table($request) {
     echo "<form method='post' action='tilaus_myynti.php'>";
     echo "<input type='hidden' name='toim' value='{$request['toim']}' />";
     echo "<input type='hidden' name='tarjous_tee' value='nayta_poimitut_asiakkaat' />";
-    echo "<input type='submit' id='nayta_poimitut' value ='".t("N‰yt‰ poimitut")."'/>";
+    echo "<input type='submit' id='nayta_poimitut' value ='".t("N√§yt√§ poimitut")."'/>";
     echo "</form>";
   }
 }
@@ -335,7 +335,7 @@ function poista_asiakkaita_dummytarjoukselta($tilausnumero, $valitut_asiakastunn
 
   if (!empty($valitut_asiakastunnukset)) {
 
-    //haetaan dummytarjoukselle jo lis‰tyt asiakkaat jotta niist‰ voidaan poistaa valitut asiakkaat
+    //haetaan dummytarjoukselle jo lis√§tyt asiakkaat jotta niist√§ voidaan poistaa valitut asiakkaat
     $query = "  select sopimus_lisatietoja from laskun_lisatiedot
           where yhtio='{$kukarow['yhtio']}'
           and otunnus='{$tilausnumero}'";

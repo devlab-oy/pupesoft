@@ -1,14 +1,14 @@
 <?php
 
-// Kutsutaanko CLI:stä
+// Kutsutaanko CLI:stÃ¤
 if (php_sapi_name() != 'cli') {
-  die ("Tätä scriptiä voi ajaa vain komentoriviltä!\n");
+  die ("TÃ¤tÃ¤ scriptiÃ¤ voi ajaa vain komentoriviltÃ¤!\n");
 }
 
 date_default_timezone_set('Europe/Helsinki');
 
 if (trim($argv[1]) == '') {
-  die ("Et antanut lähettävää yhtiötä!\n");
+  die ("Et antanut lÃ¤hettÃ¤vÃ¤Ã¤ yhtiÃ¶tÃ¤!\n");
 }
 
 if (trim($argv[2]) == '') {
@@ -16,17 +16,17 @@ if (trim($argv[2]) == '') {
 }
 
 if (trim($argv[3]) == '') {
-  die ("Et antanut sähköpostiosoitetta!\n");
+  die ("Et antanut sÃ¤hkÃ¶postiosoitetta!\n");
 }
 
-// lisätään includepathiin pupe-root
+// lisÃ¤tÃ¤Ã¤n includepathiin pupe-root
 ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__));
 
 // otetaan tietokanta connect ja funktiot
 require("inc/connect.inc");
 require("inc/functions.inc");
 
-// Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
+// Sallitaan vain yksi instanssi tÃ¤stÃ¤ skriptistÃ¤ kerrallaan
 pupesoft_flock();
 
 $yhtio = mysql_real_escape_string(trim($argv[1]));
@@ -40,7 +40,7 @@ $query = "SELECT *
 $kukares = pupe_query($query);
 
 if (mysql_num_rows($kukares) != 1) {
-  exit("VIRHE: Admin käyttäjä ei löydy!\n");
+  exit("VIRHE: Admin kÃ¤yttÃ¤jÃ¤ ei lÃ¶ydy!\n");
 }
 
 $kukarow = mysql_fetch_assoc($kukares);
@@ -133,7 +133,7 @@ if ($handle = opendir($path)) {
             pupesoft_sahkoposti($params);
           }
 
-          // siirretään tiedosto done-kansioon
+          // siirretÃ¤Ã¤n tiedosto done-kansioon
           rename($path.$file, $path.'done/'.$file);
         }
       }

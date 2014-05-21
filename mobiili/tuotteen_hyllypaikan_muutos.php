@@ -59,12 +59,12 @@ if (isset($submit)) {
 
         // Parsitaan uusi tuotepaikka
         // Jos tuotepaikka on luettu viivakoodina, muotoa (C21 045) tai (21C 03V)
-        if (preg_match('/^([a-zÂ‰ˆ#0-9]{2,4} [a-zÂ‰ˆ#0-9]{2,4})/i', $minne_hyllypaikka)) {
+        if (preg_match('/^([a-z√•√§√∂#0-9]{2,4} [a-z√•√§√∂#0-9]{2,4})/i', $minne_hyllypaikka)) {
 
-          // Pilkotaan viivakoodilla luettu tuotepaikka v‰lilyˆnnist‰
+          // Pilkotaan viivakoodilla luettu tuotepaikka v√§lily√∂nnist√§
           list($alku, $loppu) = explode(' ', $minne_hyllypaikka);
 
-          // M‰ts‰t‰‰n numerot ja kirjaimet erilleen
+          // M√§ts√§t√§√§n numerot ja kirjaimet erilleen
           preg_match_all('/([0-9]+)|([a-z]+)/i', $alku, $alku);
           preg_match_all('/([0-9]+)|([a-z]+)/i', $loppu, $loppu);
 
@@ -74,29 +74,29 @@ if (isset($submit)) {
           $hyllyvali = $loppu[0][0];
           $hyllytaso = $loppu[0][1];
 
-          // Kaikkia tuotepaikkoja ei pystyt‰ parsimaan
+          // Kaikkia tuotepaikkoja ei pystyt√§ parsimaan
           if ($hyllyalue == '' or $hyllynro == '' or $hyllyvali == '' or $hyllytaso == '') {
-            $errors[] = t("Tuotepaikan haussa virhe, yrit‰ syˆtt‰‰ tuotepaikka k‰sin") . " ({$minne_hyllypaikka})";
+            $errors[] = t("Tuotepaikan haussa virhe, yrit√§ sy√∂tt√§√§ tuotepaikka k√§sin") . " ({$minne_hyllypaikka})";
           }
         }
-        // Tuotepaikka syˆtetty manuaalisesti (C-21-04-5) tai (C 21 04 5) tai (E 14 21 5) tai (2 P 58 D)
+        // Tuotepaikka sy√∂tetty manuaalisesti (C-21-04-5) tai (C 21 04 5) tai (E 14 21 5) tai (2 P 58 D)
         elseif (strstr($minne_hyllypaikka, '-') or strstr($minne_hyllypaikka, ' ')) {
-          // Parsitaan tuotepaikka omiin muuttujiin (erotelto v‰lilyˆnnill‰)
+          // Parsitaan tuotepaikka omiin muuttujiin (erotelto v√§lily√∂nnill√§)
           if (preg_match('/\w+\s\w+\s\w+\s\w+/i', $minne_hyllypaikka)) {
             list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode(' ', $minne_hyllypaikka);
           }
-          // (erotelto v‰liviivalla)
+          // (erotelto v√§liviivalla)
           elseif (preg_match('/\w+-\w+-\w+-\w+/i', $minne_hyllypaikka)) {
             list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode('-', $minne_hyllypaikka);
           }
 
-          // Ei saa olla tyhji‰ kentti‰
+          // Ei saa olla tyhji√§ kentti√§
           if ($hyllyalue == '' or $hyllynro == '' or $hyllyvali == '' or $hyllytaso == '') {
             $errors[] = t("Virheellinen tuotepaikka") . ". ({$minne_hyllypaikka})";
           }
         }
         else {
-          $errors[] = t("Virheellinen tuotepaikka, yrit‰ syˆtt‰‰ tuotepaikka k‰sin") . " ({$minne_hyllypaikka})";
+          $errors[] = t("Virheellinen tuotepaikka, yrit√§ sy√∂tt√§√§ tuotepaikka k√§sin") . " ({$minne_hyllypaikka})";
         }
 
         if (count($errors) == 0) {
@@ -114,7 +114,7 @@ if (isset($submit)) {
           if (mysql_num_rows($chk_res) == 0) $errors[] = t("Tuotepaikkaa (%s-%s-%s-%s) ei ole perustettu tuotteelle", "", $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso).'.';
         }
 
-        // Tarkistetaan ett‰ tuotepaikka on olemassa
+        // Tarkistetaan ett√§ tuotepaikka on olemassa
         if (count($errors) == 0 and !tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso)) {
           $errors[] = t("Tuotepaikkaa (%s-%s-%s-%s) ei ole perustettu varaston hyllypaikkoihin", "", $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso).'.';
         }
@@ -173,12 +173,12 @@ if (isset($submit)) {
           }
         }
 
-        $nakyma = 'siirr‰';
+        $nakyma = 'siirr√§';
       }
 
       break;
     default:
-      $errors[] = t("Yll‰tt‰v‰ virhe");
+      $errors[] = t("Yll√§tt√§v√§ virhe");
       break;
   }
 }
@@ -193,15 +193,15 @@ echo "<h1>",t("HYLLYPAIKAN MUUTOS"), "</h1></div>";
 echo "<form name='form1' method='post' action=''>";
 echo "<input type='hidden' name='tuotepaikan_tunnus' value='{$row['tunnus']}' />";
 
-if ($nakyma == 'siirr‰') {
+if ($nakyma == 'siirr√§') {
 
   echo "<input type='hidden' name='siirretty' value='1' />";
 
   if (isset($aiempi_siirrettava_yht) and $aiempi_siirrettava_yht != $siirrettava_yht) {
-    echo "<span class='error'>",t("Huomioithan, ett‰ siirrett‰v‰ m‰‰r‰ on muuttunut (%d)", "", $aiempi_siirrettava_yht),"</span><br />";
+    echo "<span class='error'>",t("Huomioithan, ett√§ siirrett√§v√§ m√§√§r√§ on muuttunut (%d)", "", $aiempi_siirrettava_yht),"</span><br />";
   }
 
-  echo "<span class='message'>",t("Siirr‰ %d tuotetta", "", $siirrettava_yht),"</span>";
+  echo "<span class='message'>",t("Siirr√§ %d tuotetta", "", $siirrettava_yht),"</span>";
 
   echo "<div class='controls'>";
   echo "<button name='submit' class='button left' id='haku_nappi' value='ok' onclick='submit();' class='button'>",t("OK"),"</button>";
@@ -231,12 +231,12 @@ else {
   echo "<input type='hidden' name='aiempi_siirrettava_yht' value='{$siirrettava_yht}' />";
 
   echo "<tr>";
-  echo "<th>",t("M‰‰r‰"),"</th>";
+  echo "<th>",t("M√§√§r√§"),"</th>";
   echo "<td>{$siirrettava_yht} {$row['yksikko']}</td>";
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>",t("Mist‰ hyllypaikka"),"</th>";
+  echo "<th>",t("Mist√§ hyllypaikka"),"</th>";
   echo "<td>{$row['hyllyalue']} {$row['hyllynro']} {$row['hyllyvali']} {$row['hyllytaso']}</td>";
   echo "</tr>";
   echo "<tr>";
@@ -256,7 +256,7 @@ else {
   echo "</table>";
   echo "<div class='controls'>";
   echo "<button name='submit' class='button left' id='haku_nappi' value='ok' onclick='submit();' class='button'>",t("OK"),"</button>";
-  echo "<button name='submit' class='button right' id='submit' value='kerayspaikka' onclick='submit();'>",t("UUSI KERƒYSPAIKKA"),"</button>";
+  echo "<button name='submit' class='button right' id='submit' value='kerayspaikka' onclick='submit();'>",t("UUSI KER√ÑYSPAIKKA"),"</button>";
   echo "</div>";
   echo "</form>";
 

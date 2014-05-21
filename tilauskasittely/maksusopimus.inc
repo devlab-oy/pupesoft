@@ -18,7 +18,7 @@ if ($tila == "lisaa_kaikki_jaksotukseen") {
     echo "<font class='error'>".t("Lasku ei osa maksusopimusta")."</font>";
   }
   else {
-    //  Varmistetaan ett‰ kaikki otsikot on nipussa
+    //  Varmistetaan ett√§ kaikki otsikot on nipussa
     $query = "UPDATE lasku
               SET jaksotettu=(if (tunnusnippu=0,tunnus,tunnusnippu))
               WHERE yhtio     = '$kukarow[yhtio]'
@@ -28,7 +28,7 @@ if ($tila == "lisaa_kaikki_jaksotukseen") {
               and alatila    != 'X'";
     $result = mysql_query($query) or pupe_error($query);
 
-    //  Varmistetaan, ett‰ kaikki vanhatunnukset on sopparilla
+    //  Varmistetaan, ett√§ kaikki vanhatunnukset on sopparilla
     if ($laskurow["vanhatunnus"] > 0) {
       $query = "UPDATE lasku
                 SET jaksotettu = '$laskurow[jaksotettu]'
@@ -69,7 +69,7 @@ if ($tila == "uusi") {
               and alatila != 'X'";
     $result = mysql_query($query) or pupe_error($query);
 
-    // T‰ss‰ meid‰n on hieman fiilattava t‰t‰ muuttujaa
+    // T√§ss√§ meid√§n on hieman fiilattava t√§t√§ muuttujaa
     if ($laskurow["tunnusnippu"] > 0) {
       $laskurow["jaksotettu"] = $laskurow["tunnusnippu"];
     }
@@ -77,7 +77,7 @@ if ($tila == "uusi") {
       $laskurow["jaksotettu"] = $laskurow["tunnus"];
     }
 
-    // Jos tilaus on slittaantunut useaksi osaksi laitetaan maksusoppari koskemaan kaikkia splittej‰ jotka periytyv‰t samalta tilaukselta
+    // Jos tilaus on slittaantunut useaksi osaksi laitetaan maksusoppari koskemaan kaikkia splittej√§ jotka periytyv√§t samalta tilaukselta
     if ($laskurow["vanhatunnus"] > 0) {
       $query = "UPDATE lasku
                 SET jaksotettu = '$laskurow[jaksotettu]'
@@ -185,10 +185,10 @@ if ($tila == "tallenna") {
 
     if (!checkdate($erpcmkk, $erpcmpp, $erpcmvv) or mysql_num_rows($erpres) == 0) {
       if (mysql_num_rows($erpres) == 0) {
-        echo "<font class='error'>".t("VIRHE: Yritykselt‰ ei lˆydy sopivaa maksuehtoa er‰p‰iv‰n k‰sinsyˆttˆˆn")."!</font><br>";
+        echo "<font class='error'>".t("VIRHE: Yritykselt√§ ei l√∂ydy sopivaa maksuehtoa er√§p√§iv√§n k√§sinsy√∂tt√∂√∂n")."!</font><br>";
       }
       else {
-        echo "<font class='error'>".t("VIRHE: Syˆtetty er‰p‰iv‰ on virheellinen")."!</font><br>";
+        echo "<font class='error'>".t("VIRHE: Sy√∂tetty er√§p√§iv√§ on virheellinen")."!</font><br>";
       }
       $erpcmvv = 0;
       $erpcmkk = 0;
@@ -281,7 +281,7 @@ if (mysql_num_rows($result) == 1) {
         <input type='hidden' name='tilausnumero' value='$tilausnumero'>
         <input type='hidden' name='tee' value='$tee'>
         <input type='hidden' name='tila' value='lisaa_kaikki_jaksotukseen'>
-        <input type='submit' name='uusi_maksupositio' value='".t("Lis‰‰ kaikki rivit sopimukseen")."'>
+        <input type='submit' name='uusi_maksupositio' value='".t("Lis√§√§ kaikki rivit sopimukseen")."'>
         </form>";
   }
 
@@ -333,7 +333,7 @@ if (mysql_num_rows($result) == 1) {
     $jaksotettavaa = $rivrow["jaksotettavaa_veroton"];
   }
 
-  // Haetaan kaikki t‰m‰n tilauksen laskutuspositiot (HUOM: Positioiden summ on veroton tai verollinen riippuen yhtiˆn myyntihinnoista)
+  // Haetaan kaikki t√§m√§n tilauksen laskutuspositiot (HUOM: Positioiden summ on veroton tai verollinen riippuen yhti√∂n myyntihinnoista)
   $query = "SELECT *
             FROM maksupositio
             WHERE yhtio = '$kukarow[yhtio]'
@@ -362,7 +362,7 @@ if (mysql_num_rows($result) == 1) {
         <th>#</th>
         <th>".t("Osuus %")."</th>
         <th>".t("Maksuehto / Kuvaus")."</th>
-        <th>".t("Lis‰tiedot / Ohje")."</th>
+        <th>".t("Lis√§tiedot / Ohje")."</th>
         <th>".t("Summa")."</th>
         </tr>";
 
@@ -402,12 +402,12 @@ if (mysql_num_rows($result) == 1) {
         }
         echo "</select><br>";
 
-        // otetaan erpcm kannasta jos mit‰‰n ei ole syˆtetty ruudulle
+        // otetaan erpcm kannasta jos mit√§√§n ei ole sy√∂tetty ruudulle
         if ($row["erpcm"] != "" and (int) $erpcmpp == 0 and (int) $ercpmkk == 0 and (int) $erpcmvv == 0 and $erpcm_virhe == "") {
           list($erpcmvv, $erpcmkk, $erpcmpp) = explode('-', $row["erpcm"]);
         }
 
-        // jos p‰iv‰m‰‰r‰ on nollaa laitetaan tyhj‰‰
+        // jos p√§iv√§m√§√§r√§ on nollaa laitetaan tyhj√§√§
         if ((int) $erpcmpp == 0 and (int) $erpcmkk == 0 and (int) $erpcmvv == 0) {
           $erpcmpp = "";
           $erpcmkk = "";
@@ -494,7 +494,7 @@ if (mysql_num_rows($result) == 1) {
       $erpcmkk = "";
       $erpcmvv = "";
 
-      //alkuun t‰m‰ resultti
+      //alkuun t√§m√§ resultti
       mysql_data_seek($kuvares,0);
       mysql_data_seek($mresult,0);
     }
@@ -502,18 +502,18 @@ if (mysql_num_rows($result) == 1) {
     $ihakaikki_verolli  = $loput_verolli + $jaksotettavaa_verolli;
     $ihakaikki_veroton  = $loput_veroton + $jaksotettavaa_veroton;
 
-    //K‰sin syˆtetty summa johon lasku pyˆristet‰‰n
+    //K√§sin sy√∂tetty summa johon lasku py√∂ristet√§√§n
     if ($laskurow["hinta"] <> 0 and abs($laskurow["hinta"]-$ihakaikki_verolli) <= 0.5) {
       $ihakaikki_verolli = sprintf("%.2f",$laskurow["hinta"]);
     }
-    //K‰sin syˆtetty summa johon lasku pyˆristet‰‰n
+    //K√§sin sy√∂tetty summa johon lasku py√∂ristet√§√§n
     if ($laskurow["hinta"] <> 0 and abs($laskurow["hinta"]-$loput_verolli-$jaksotettavaa_verolli) <= 0.5) {
       $jaksotettavaa_verolli = $laskurow["hinta"]-$loput_verolli;
     }
 
     echo "<tr>";
     echo "<th style='text-align:right' colspan='2'>$osuus %</th>";
-    echo "<th style='text-align:right' colspan='2'>".t("Maksupositiot yhteens‰")."</th>";
+    echo "<th style='text-align:right' colspan='2'>".t("Maksupositiot yhteens√§")."</th>";
     echo "<th style='text-align:right'>".sprintf('%.2f', $tot)."</th>";
     echo "</tr>";
 
@@ -524,14 +524,14 @@ if (mysql_num_rows($result) == 1) {
       $summavippaus   = round($jaksotettavaa-$tot,2);
 
       echo "<br>";
-      echo "<font class='error'>".t("Positiot eiv‰t t‰sm‰‰, muuta jotain positiota")." $osuusvippaus% $summavippaus $yhtiorow[valkoodi]</font>";
+      echo "<font class='error'>".t("Positiot eiv√§t t√§sm√§√§, muuta jotain positiota")." $osuusvippaus% $summavippaus $yhtiorow[valkoodi]</font>";
       echo "<br>";
     }
 
 
     if (round($tot, 2) == $jaksotettavaa) {
 
-      // ekotetaan javascripti‰ jotta saadaan pdf:‰t uuteen ikkunaan
+      // ekotetaan javascripti√§ jotta saadaan pdf:√§t uuteen ikkunaan
       js_openFormInNewWindow();
 
       echo "<br>";
@@ -557,19 +557,19 @@ if (mysql_num_rows($result) == 1) {
     echo "</tr>";
 
     echo "<tr>";
-    echo "<th>".t("Jaksotettavaa yhteens‰")."</th>";
+    echo "<th>".t("Jaksotettavaa yhteens√§")."</th>";
     echo "<td align='right'>".sprintf('%.2f', $jaksotettavaa_veroton)."</td>";
     echo "<td align='right'>".sprintf('%.2f', $jaksotettavaa_verolli)."</td>";
     echo "</tr>";
 
     echo "<tr>";
-    echo "<th>".t("Ei jaksotettavaa yhteens‰")."</th>";
+    echo "<th>".t("Ei jaksotettavaa yhteens√§")."</th>";
     echo "<td align='right'>".sprintf('%.2f', $loput_veroton)."</td>";
     echo "<td align='right'>".sprintf('%.2f', $loput_verolli)."</td>";
     echo "</tr>";
 
     echo "<tr>";
-    echo "<th>".t("Tilaus yhteens‰")."</th>";
+    echo "<th>".t("Tilaus yhteens√§")."</th>";
     echo "<td align='right'>".sprintf('%.2f', $ihakaikki_veroton)."</td>";
     echo "<td align='right'>".sprintf('%.2f', $ihakaikki_verolli)."</td>";
     echo "</tr>";

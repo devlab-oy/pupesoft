@@ -1,6 +1,6 @@
 <?php
 //Ohjelma vatii muuttujan $otunnus joka viittaa ostolaskuun johon rivit on kohdistettu.
-// sek‰ $laskurow arrayn jossa on select t‰hti from lasku jossa tunnus on $otunnus
+// sek√§ $laskurow arrayn jossa on select t√§hti from lasku jossa tunnus on $otunnus
 
 require_once('pdflib/phppdflib.class.php');
 
@@ -40,7 +40,7 @@ if (!function_exists('alku_tariffi')) {
     $pdf->draw_text(210, 545, t("Saapuneet laskut"), $firstpage, $pieni);
     $pdf->draw_text(210,  535, $laskurow["viesti"], $firstpage, $p);
 
-    $pdf->draw_text(410, 545, t("Laskun p‰iv‰ykset"), $firstpage, $pieni);
+    $pdf->draw_text(410, 545, t("Laskun p√§iv√§ykset"), $firstpage, $pieni);
     $pdf->draw_text(410, 535, $laskurow["tapvm"], $firstpage, $p);
 
     $pdf->draw_text(610, 545, t("Laskujen valuutta"), $firstpage, $pieni);
@@ -52,7 +52,7 @@ if (!function_exists('alku_tariffi')) {
     $pdf->draw_text(30,  520, t("Tuotekoodi"),      $firstpage, $pieni);
     $pdf->draw_text(155, 520, t("Toimittajan koodi"),  $firstpage, $pieni);
     $pdf->draw_text(270, 520, t("Nimitys"),      $firstpage, $pieni);
-    $pdf->draw_text(420, 520, t("M‰‰r‰"),        $firstpage, $pieni);
+    $pdf->draw_text(420, 520, t("M√§√§r√§"),        $firstpage, $pieni);
     $pdf->draw_text(490, 520, t("Hinta"),        $firstpage, $pieni);
     $pdf->draw_text(560, 520, t("Rivihinta"),      $firstpage, $pieni);
     $pdf->draw_text(630, 520, t("Tavaranimike"),    $firstpage, $pieni);
@@ -69,17 +69,17 @@ if (!function_exists('print_pdf_tariffi')) {
   function print_pdf_tariffi () {
     global $pdf, $kukarow, $yhtiorow, $komento, $otunnus, $tee;
 
-    //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+    //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
     list($usec, $sec) = explode(' ', microtime());
     mt_srand((float) $sec + ((float) $usec * 100000));
     $pdffilenimi = "/tmp/Tariffilista-".md5(uniqid(mt_rand(), true)).".pdf";
 
     //kirjoitetaan pdf faili levylle..
     $fh = fopen($pdffilenimi, "w");
-    if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
+    if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep√§onnistui $pdffilenimi");
     fclose($fh);
 
-    //itse print komento tulee valitse_tulosin.incilt‰...
+    //itse print komento tulee valitse_tulosin.incilt√§...
     if ($komento["Tariffilista"] == 'email') {
       $liite = $pdffilenimi;
       $kutsu = "Tariffilista";
@@ -89,7 +89,7 @@ if (!function_exists('print_pdf_tariffi')) {
       echo t("Tariffilista tulostuu")."...<br>";
     }
     elseif ($tee == 'NAYTATILAUS') {
-        //Tyˆnnet‰‰n tuo pdf vaan putkeen!
+        //Ty√∂nnet√§√§n tuo pdf vaan putkeen!
         echo file_get_contents($pdffilenimi);
       }
     elseif ($komento["Tariffilista"] != '' and $komento["Tariffilista"] != 'edi') {
@@ -150,5 +150,5 @@ while ($row = mysql_fetch_array($result)) {
   $lask++;
 }
 
-//kutsutaan lopuksi viel‰ print_pdf_tariffi funktiota
+//kutsutaan lopuksi viel√§ print_pdf_tariffi funktiota
 print_pdf_tariffi();

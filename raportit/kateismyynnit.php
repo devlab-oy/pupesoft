@@ -2,9 +2,9 @@
 
 require('../inc/parametrit.inc');
 
-echo "<font class='head'>".t("K‰teismyynnit")." $myy:</font><hr>";
+echo "<font class='head'>".t("K√§teismyynnit")." $myy:</font><hr>";
 
-// Tarkistetaan ett‰ jos ei ole t‰sm‰ys p‰‰ll‰ niin lukitaan t‰sm‰yksen p‰iv‰m‰‰r‰t. Jos t‰sm‰ys on p‰‰ll‰, lukitaan normaalin raportin p‰iv‰m‰‰r‰t
+// Tarkistetaan ett√§ jos ei ole t√§sm√§ys p√§√§ll√§ niin lukitaan t√§sm√§yksen p√§iv√§m√§√§r√§t. Jos t√§sm√§ys on p√§√§ll√§, lukitaan normaalin raportin p√§iv√§m√§√§r√§t
 echo "<script type='text/javascript' language='JavaScript'>
 
     <!--
@@ -302,7 +302,7 @@ echo "<script type='text/javascript' language='JavaScript'>
         }
 
         if (error == true) {
-          msg = '".t("Tietueiden t‰ytyy sis‰lt‰‰ vain numeroita").".';
+          msg = '".t("Tietueiden t√§ytyy sis√§lt√§√§ vain numeroita").".';
           alert(msg);
 
           skippaa_tama_submitti = true;
@@ -330,7 +330,7 @@ if (is_string($kassavalinnat)) {
 
 $lisakenttialinkkiin = "&lopetus=$PHP_SELF////myyjanro=$myyjanro//myyja=$myyja//tilityskpl=$tilityskpl//ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl//koti=$koti//printteri=$printteri//tee=$tee//kassavalinnat=".base64_encode(serialize($kassakone));
 
-// Lockdown-funktio, joka tarkistaa onko kyseinen kassalipas jo t‰sm‰tty.
+// Lockdown-funktio, joka tarkistaa onko kyseinen kassalipas jo t√§sm√§tty.
 function lockdown($vv, $kk, $pp, $tasmayskassa) {
   global $kukarow, $kassakone, $yhtiorow;
 
@@ -437,7 +437,7 @@ function tosite_print ($vv, $kk, $pp, $ltunnukset, $tulosta = null) {
 
         if ($edltunnus != $tasmaysrow["ltunnus"]) {
 
-          $ots  = t("K‰teismyynnin tosite")." ($tasmaysrow[ltunnus]) $yhtiorow[nimi] $pp.$kk.$vv\n\n";
+          $ots  = t("K√§teismyynnin tosite")." ($tasmaysrow[ltunnus]) $yhtiorow[nimi] $pp.$kk.$vv\n\n";
           $ots .= sprintf ('%-'.$selite_count.'.'.$selite_count.'s', t("Tapahtuma"));
           $ots .= sprintf ('%13s', t("Summa"));
           $ots .= "\n";
@@ -494,10 +494,10 @@ function tosite_print ($vv, $kk, $pp, $ltunnukset, $tulosta = null) {
       $line = exec("a2ps -o $filenimi.ps -R --medium=A4 --chars-per-line=94 --columns=1 --margin=1 --borders=0 $filenimi");
 
       if ($komento == "email" and $kukarow["eposti"] != '') {
-        // l‰hetet‰‰n meili
+        // l√§hetet√§√§n meili
         $komento = "";
 
-        $kutsu = t("K‰teismyynnit", $kieli);
+        $kutsu = t("K√§teismyynnit", $kieli);
 
         $liite         = "$filenimi.ps";
         $sahkoposti_cc     = "";
@@ -517,10 +517,10 @@ function tosite_print ($vv, $kk, $pp, $ltunnukset, $tulosta = null) {
     }
 }
 
-// Jos ollaan t‰sm‰ytt‰m‰ss‰ k‰teismyynti‰
+// Jos ollaan t√§sm√§ytt√§m√§ss√§ k√§teismyynti√§
 if (isset($tasmays) and $tasmays != "") {
 
-  // Tarkistetaan eri‰v‰tkˆ kassalippaiden pankki- ja luottokorttitilit
+  // Tarkistetaan eri√§v√§tk√∂ kassalippaiden pankki- ja luottokorttitilit
   if (count($kassakone) > 1) {
     $kassat_temp = "";
 
@@ -552,7 +552,7 @@ if (isset($tasmays) and $tasmays != "") {
       $foo = array_count_values($account_check["luottokortti"]);
 
       if (count($foo) > 1) {
-        echo "<font class='error'>".t("Kassalippaiden pankki- ja luottokorttitilit eri‰v‰t").".</font><br>";
+        echo "<font class='error'>".t("Kassalippaiden pankki- ja luottokorttitilit eri√§v√§t").".</font><br>";
         echo "<font class='error'>".t("Tarkista tiedot ja kokeile uudelleen").".</font><br><br>";
         $tee = '';
       }
@@ -565,7 +565,7 @@ if (isset($tasmays) and $tasmays != "") {
         $foo = array_count_values($account_check["pankkikortti"]);
 
         if (count($foo) > 1) {
-          echo "<font class='error'>".t("Kassalippaiden pankki- ja luottokorttitilit eri‰v‰t").".</font><br>";
+          echo "<font class='error'>".t("Kassalippaiden pankki- ja luottokorttitilit eri√§v√§t").".</font><br>";
           echo "<font class='error'>".t("Tarkista tiedot ja kokeile uudelleen").".</font><br><br>";
           $tee = '';
         }
@@ -576,31 +576,31 @@ if (isset($tasmays) and $tasmays != "") {
     }
   }
 
-  // Jos t‰sm‰ys on p‰‰ll‰ ja ei olla valittu mit‰‰n kassalipasta -> error
+  // Jos t√§sm√§ys on p√§√§ll√§ ja ei olla valittu mit√§√§n kassalipasta -> error
   if (count($kassakone) == 0 and $muutkassat == '') {
     echo "<font class='error'>".t("Valitse kassalipas")."!</font><br>";
     $tee = '';
   }
 
-  // Jos t‰sm‰ys on p‰‰ll‰ ja tilitett‰vien sarakkeiden m‰‰r‰ on jotain muuta kuin v‰lilt‰ 1-9 -> error
+  // Jos t√§sm√§ys on p√§√§ll√§ ja tilitett√§vien sarakkeiden m√§√§r√§ on jotain muuta kuin v√§lilt√§ 1-9 -> error
   if ((int) $tilityskpl < 1 or (int) $tilityskpl > 20) {
-    echo "<font class='error'>".t("Sarakkeiden m‰‰r‰ pit‰‰ olla v‰lilt‰ 1 - 20")."!</font><br>";
+    echo "<font class='error'>".t("Sarakkeiden m√§√§r√§ pit√§√§ olla v√§lilt√§ 1 - 20")."!</font><br>";
     $tee = '';
   }
 
-  // Jos t‰sm‰ys on p‰‰ll‰ ja ei olla annettu p‰iv‰m‰‰r‰‰ -> error
+  // Jos t√§sm√§ys on p√§√§ll√§ ja ei olla annettu p√§iv√§m√§√§r√§√§ -> error
   if (($vv == '' or $kk == '' or $pp == '') and !checkdate($kk, $pp, $vv)) {
-    echo "<font class='error'>".t("Syˆt‰ p‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</font><br>";
+    echo "<font class='error'>".t("Sy√∂t√§ p√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</font><br>";
     $tee = '';
   }
 
-  // Ei osata viel‰ t‰sm‰t‰ k‰teissuorituksia
+  // Ei osata viel√§ t√§sm√§t√§ k√§teissuorituksia
   if ($katsuori != '') {
-    echo "<font class='error'>".t("Sin‰ et osaa viel‰ t‰sm‰ytt‰‰ k‰teissuorituksia.")."</font><br>";
+    echo "<font class='error'>".t("Sin√§ et osaa viel√§ t√§sm√§ytt√§√§ k√§teissuorituksia.")."</font><br>";
     $tee = '';
   }
 
-  // Tarkistetaan ettei kassalippaiden tilej‰ puutu
+  // Tarkistetaan ettei kassalippaiden tilej√§ puutu
   if (count($kassakone) > 0) {
     $kassat_temp = "";
 
@@ -613,14 +613,14 @@ if (isset($tasmays) and $tasmays != "") {
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) != count($kassakone)) {
-      echo "<font class='error'>".t("Ei voida t‰sm‰ytt‰‰. Kassalippaan pakollisia tietoja puuttuu").".</font><br>";
+      echo "<font class='error'>".t("Ei voida t√§sm√§ytt√§√§. Kassalippaan pakollisia tietoja puuttuu").".</font><br>";
       $tee = '';
     }
   }
 
 }
 
-// Aloitetaan tiliˆinti
+// Aloitetaan tili√∂inti
 if ($tee == "tiliointi") {
 
   $ktunnukset = "";
@@ -678,27 +678,27 @@ if ($tee == "tiliointi") {
 
     if (stristr($kentta, "yht_")) {
       if ($kentta == "yht_kat") {
-        $comments_yht .= "K‰teinen yhteens‰: ";
+        $comments_yht .= "K√§teinen yhteens√§: ";
         $arvo = sprintf('%.2f', str_replace(',', '.', $arvo));
         $comments_yht .= "$arvo<br>";
       }
       elseif ($kentta == "yht_katot_ohjelm") {
-        $comments_yht .= "K‰teisotto-ohjelmasta yhteens‰: ";
+        $comments_yht .= "K√§teisotto-ohjelmasta yhteens√§: ";
         $arvo = str_replace(".",",",sprintf('%.2f',$arvo));
         $comments_yht .= "$arvo<br>";
       }
       elseif ($kentta == "yht_katot") {
-        $comments_yht .= "K‰teisotto yhteens‰: ";
+        $comments_yht .= "K√§teisotto yhteens√§: ";
         $arvo = sprintf('%.2f', str_replace(',', '.', $arvo));
         $comments_yht .= "$arvo<br>";
       }
       elseif ($kentta == "yht_kattil") {
-        $comments_yht .= "K‰teistilitys yhteens‰: ";
+        $comments_yht .= "K√§teistilitys yhteens√§: ";
         $arvo = sprintf('%.2f', str_replace(',', '.', $arvo));
         $comments_yht .= "$arvo<br>";
       }
       elseif ($kentta == "yht_kasero") {
-        $comments_yht .= "Kassaerotus yhteens‰: ";
+        $comments_yht .= "Kassaerotus yhteens√§: ";
         $arvo = sprintf('%.2f', str_replace(',', '.', $arvo));
         $comments_yht .= "$arvo<br>";
       }
@@ -748,7 +748,7 @@ if ($tee == "tiliointi") {
       if ($tilino == "") $tilino = $yhtiorow["luottokortti"];
     }
     elseif (stristr($arvo, "kateinen")) {
-      $maksutapa = t("K‰teinen");
+      $maksutapa = t("K√§teinen");
 
       list ($maksutapa_devnull, $tilino, $kassalipas) = explode("#", $arvo);
 
@@ -767,38 +767,38 @@ if ($tee == "tiliointi") {
       if ($tilino == "") $tilino = $yhtiorow["kassa"];
     }
 
-    // Tarkistetaan ettei arvo ole nolla ja jos kent‰n nimi on joko solu tai erotus
-    // Ei haluta tositteeseen nollarivej‰
+    // Tarkistetaan ettei arvo ole nolla ja jos kent√§n nimi on joko solu tai erotus
+    // Ei haluta tositteeseen nollarivej√§
     if (abs(str_replace(",",".", $arvo)) > 0 and (stristr($kentta, "solu") or stristr($kentta, "erotus"))) {
 
       // Pilkut pisteiksi
       $arvo = (float) str_replace(",",".", $arvo);
 
-      // Jos kent‰n nimi on soluerotus niin se tiliˆid‰‰n kassaerotustilille (eli t‰sm‰yserot), muuten normaalisti ylemp‰n‰ parsetettu tilinumero
+      // Jos kent√§n nimi on soluerotus niin se tili√∂id√§√§n kassaerotustilille (eli t√§sm√§yserot), muuten normaalisti ylemp√§n√§ parsetettu tilinumero
       if (stristr($kentta, "soluerotus")) {
         $tilino = $kassalipasrow["kassaerotus"];
         if ($tilino == "") $tilino = $yhtiorow["kassaerotus"];
       }
 
-      // Jos kentt‰ on soluerotus tai erotus niin kerrotaan arvo -1:ll‰
+      // Jos kentt√§ on soluerotus tai erotus niin kerrotaan arvo -1:ll√§
       if (stristr($kentta, "soluerotus") or stristr($kentta, "erotus")) {
         $arvo = $arvo * -1;
       }
 
       $selitelisa = "";
 
-      // Jos kentt‰ on soluerotus niin lis‰t‰‰n selitteeseen "kassaero"
+      // Jos kentt√§ on soluerotus niin lis√§t√§√§n selitteeseen "kassaero"
       if (stristr($kentta, "soluerotus")) {
         $selitelisa .= " ".t("kassaero");
       }
-      // Jos kentt‰ on erotus niin lis‰t‰‰n selitteeseen "erotus"
+      // Jos kentt√§ on erotus niin lis√§t√§√§n selitteeseen "erotus"
       elseif (stristr($kentta, "erotus")) {
         $selitelisa .= " ".t("erotus");
       }
 
       list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tilino, $kustp);
 
-      // Aletaan rakentaa insertti‰
+      // Aletaan rakentaa insertti√§
       $query = "INSERT INTO tiliointi SET
                 yhtio    = '$kukarow[yhtio]',
                 ltunnus  = '$laskuid',
@@ -816,7 +816,7 @@ if ($tee == "tiliointi") {
       $result = pupe_query($query);
     }
 
-    // Jos kentt‰ on k‰teistilitys, niin toinen tiliˆid‰‰n k‰teistilitys-tilille ja se summa myˆs miinustetaan kassasta
+    // Jos kentt√§ on k√§teistilitys, niin toinen tili√∂id√§√§n k√§teistilitys-tilille ja se summa my√∂s miinustetaan kassasta
     if (abs(str_replace(",",".",$arvo)) > 0 and stristr($kentta, "kateistilitys")) {
 
       $arvo = (float) str_replace(",",".",$arvo);
@@ -838,7 +838,7 @@ if ($tee == "tiliointi") {
                 summa    = $arvo,
                 vero     = 0,
                 lukko    = '',
-                selite   = '$kassalipas ".t("K‰teistilitys pankkiin kassasta")."',
+                selite   = '$kassalipas ".t("K√§teistilitys pankkiin kassasta")."',
                 laatija  = '$kukarow[kuka]',
                 laadittu = now()";
       $result = pupe_query($query);
@@ -860,13 +860,13 @@ if ($tee == "tiliointi") {
                 summa    = $arvo * -1,
                 vero     = 0,
                 lukko    = '',
-                selite   = '$kassalipas ".t("K‰teistilitys pankkiin kassasta")."',
+                selite   = '$kassalipas ".t("K√§teistilitys pankkiin kassasta")."',
                 laatija  = '$kukarow[kuka]',
                 laadittu = now()";
       $result = pupe_query($query);
     }
 
-    // Jos kentt‰ on k‰teisotto, niin toinen tiliˆid‰‰n k‰teisotto-tilille ja se summa myˆs miinustetaan kassasta
+    // Jos kentt√§ on k√§teisotto, niin toinen tili√∂id√§√§n k√§teisotto-tilille ja se summa my√∂s miinustetaan kassasta
     if (abs(str_replace(",",".",$arvo)) > 0 and stristr($kentta, "kateisotto")) {
       $arvo = (float) str_replace(",",".",$arvo);
 
@@ -885,7 +885,7 @@ if ($tee == "tiliointi") {
                 summa    = $arvo,
                 vero     = 0,
                 lukko    = '',
-                selite   = '$kassalipas ".t("K‰teisotto kassasta")."',
+                selite   = '$kassalipas ".t("K√§teisotto kassasta")."',
                 laatija  = '$kukarow[kuka]',
                 laadittu = now()";
       $result = pupe_query($query);
@@ -905,26 +905,26 @@ if ($tee == "tiliointi") {
                 summa    = $arvo * -1,
                 vero     = 0,
                 lukko    = '',
-                selite   = '$kassalipas ".t("K‰teisotto kassasta")."',
+                selite   = '$kassalipas ".t("K√§teisotto kassasta")."',
                 laatija  = '$kukarow[kuka]',
                 laadittu = now()";
       $result = pupe_query($query);
     }
   }
 
-  $comments_yht .= t("Loppukassa yhteens‰").": ";
+  $comments_yht .= t("Loppukassa yhteens√§").": ";
   $comments_yht .= sprintf('%.2f', $loppukassa)."<br>";
 
   $kassa_json = json_encode($kassalippaat_array);
   $kassa_json = $kassa_json . '##' . json_encode(array("loppukassa" => $loppukassa_array, "date" => "{$vv}-{$kk}-{$pp}"));
   $query = "UPDATE lasku
-            SET comments   = '$comments<br>".t("Alkukassa yhteens‰").": $pohjakassa<br>$comments_yht',
+            SET comments   = '$comments<br>".t("Alkukassa yhteens√§").": $pohjakassa<br>$comments_yht',
             sisviesti2  = concat_ws('##', '$kassa_json', sisviesti2)
             WHERE yhtio = '$kukarow[yhtio]'
             AND tunnus  = $laskuid";
   $result = pupe_query($query);
 
-  $tulosta = "kyll‰";
+  $tulosta = "kyll√§";
   $lasku_id = array();
   $lasku_id["ltunnukset"] = $laskuid;
   tosite_print($vv, $kk, $pp, $lasku_id, $tulosta);
@@ -995,7 +995,7 @@ elseif ($tee != '') {
   $lisa .= ") ";
 
   if (isset($tasmays) and $tasmays != '') {
-    //ylikirjotetaan koko lis‰, koska ei saa olla muita rajauksia
+    //ylikirjotetaan koko lis√§, koska ei saa olla muita rajauksia
     $lisa = " and lasku.mapvm = '$vv-$kk-$pp'";
   }
   else {
@@ -1044,7 +1044,7 @@ elseif ($tee != '') {
 
   $myyntisaamiset_tilit = substr($myyntisaamiset_tilit, 0, -1);
 
-  //jos monta kassalipasta niin tungetaan t‰m‰ queryyn.
+  //jos monta kassalipasta niin tungetaan t√§m√§ queryyn.
   if (count($kassakone) > 1 and isset($tasmays) and $tasmays != '') {
     $selecti = "if (tiliointi.tilino = kassalipas.kassa OR tiliointi.tilino = '$yhtiorow[kassa]', concat(kassalipas.nimi, ' kateinen'),
           if (tiliointi.tilino = kassalipas.pankkikortti OR tiliointi.tilino = '$yhtiorow[pankkikortti]', 'Pankkikortti',
@@ -1056,7 +1056,7 @@ elseif ($tee != '') {
           if (tiliointi.tilino = kassalipas.luottokortti OR tiliointi.tilino = '$yhtiorow[luottokortti]', 'Luottokortti', 'Muut'))) tyyppi, ";
   }
 
-  //Haetaan k‰teislaskut
+  //Haetaan k√§teislaskut
   $query = "SELECT
             {$selecti}
             if (lasku.kassalipas = '', 'Muut', lasku.kassalipas) kassa,
@@ -1101,12 +1101,12 @@ elseif ($tee != '') {
 
   if (mysql_num_rows($result) == 0) {
     $i = 2;
-    echo "<font class='error'>".t("K‰teismyyntej‰ ei lˆydy t‰lle p‰iv‰lle")."</font>";
+    echo "<font class='error'>".t("K√§teismyyntej√§ ei l√∂ydy t√§lle p√§iv√§lle")."</font>";
   }
 
   $ltunnukset = array();
 
-  // Tarkistetaan ensiksi onko kassalippaat jo tiliˆity lockdown-funktion avulla
+  // Tarkistetaan ensiksi onko kassalippaat jo tili√∂ity lockdown-funktion avulla
   if (isset($tasmays) and $tasmays != '') {
     $ltunnusx = array();
     if ($kassakone != '') {
@@ -1132,17 +1132,17 @@ elseif ($tee != '') {
 
     if (count($ltunnukset) > 0) {
       tosite_print($vv, $kk, $pp, $ltunnukset);
-      echo "$ltunnukset[kassalipas] ".t("on jo t‰sm‰tty. Tosite lˆytyy myˆs")." <a href='{$palvelin2}muutosite.php?tee=E&tunnus=$ltunnukset[ltunnukset]$lisakenttialinkkiin'>".t("t‰‰lt‰")."</a><br>";
+      echo "$ltunnukset[kassalipas] ".t("on jo t√§sm√§tty. Tosite l√∂ytyy my√∂s")." <a href='{$palvelin2}muutosite.php?tee=E&tunnus=$ltunnukset[ltunnukset]$lisakenttialinkkiin'>".t("t√§√§lt√§")."</a><br>";
     }
   }
 
   if ($i > 1) {
-    // Jos tositteita lˆytyy niin ei tehd‰ mit‰‰n
+    // Jos tositteita l√∂ytyy niin ei tehd√§ mit√§√§n
   }
   else {
     if (isset($tasmays) and $tasmays != '') {
       echo "<table><tr><td>";
-      echo "<font class='head'>".t("T‰sm‰ys").":</font><br>";
+      echo "<font class='head'>".t("T√§sm√§ys").":</font><br>";
       echo "<form method='post' id='tasmaytysform' onSubmit='return verify();'>";
       echo "<input type='hidden' name='tee' value='tiliointi'>";
       echo "<table width='100%'>";
@@ -1170,8 +1170,8 @@ elseif ($tee != '') {
       $row = mysql_fetch_assoc($result);
       $row = get_pohjakassa($row);
 
-      //haetaan viimeisin k‰teist‰sm‰ytys joka on poistettu.
-      //sisviesti2 k‰ytet‰‰n formin esit‰ytˆss‰
+      //haetaan viimeisin k√§teist√§sm√§ytys joka on poistettu.
+      //sisviesti2 k√§ytet√§√§n formin esit√§yt√∂ss√§
       $tasmaytys_query = "SELECT comments, sisviesti2
                           FROM lasku
                           WHERE yhtio     = '{$kukarow['yhtio']}'
@@ -1187,7 +1187,7 @@ elseif ($tee != '') {
 
       $tasmaytys_json_array = explode('##' , $tasmaytys_row['sisviesti2']);
 
-      //emme tied‰ miss‰ kohtaa array:t‰ kassalippaan kaikki elementit on tallessa, etsimme oikean kohdan.
+      //emme tied√§ miss√§ kohtaa array:t√§ kassalippaan kaikki elementit on tallessa, etsimme oikean kohdan.
       foreach($tasmaytys_json_array as $json_elementti) {
 
         $kassalipas_array = json_decode($json_elementti, true);
@@ -1246,7 +1246,7 @@ elseif ($tee != '') {
       $filenimi = "/tmp/KATKIRJA.txt";
       $fh = fopen($filenimi, "w+");
 
-      $ots  = t("K‰teismyynnin p‰iv‰kirja")." $yhtiorow[nimi] $ppa.$kka.$vva-$ppl.$kkl.$vvl\n\n";
+      $ots  = t("K√§teismyynnin p√§iv√§kirja")." $yhtiorow[nimi] $ppa.$kka.$vva-$ppl.$kkl.$vvl\n\n";
       $ots .= sprintf ('%-20.20s', t("Kassa"));
       $ots .= sprintf ('%-25.25s', t("Asiakas"));
       $ots .= sprintf ('%-10.10s', t("Y-tunnus"));
@@ -1331,7 +1331,7 @@ elseif ($tee != '') {
               }
 
               echo "'";
-              echo "' class='tumma' width='300px' nowrap>$kateismaksuekotus ".t("yhteens‰").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("N‰yt‰ / Piilota")."</a></td>";
+              echo "' class='tumma' width='300px' nowrap>$kateismaksuekotus ".t("yhteens√§").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("N√§yt√§ / Piilota")."</a></td>";
               echo "<input type='hidden' name='maksutapa$i' id='maksutapa$i' value='$solu#$tilinumero[kateinen]#$edkassanimi'>";
               echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='$solu solu$i' name='solu$i' size='10' autocomplete='off' value='{$tasmaytys_array[$edktunnus]['solu'.$i]}' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 
@@ -1382,7 +1382,7 @@ elseif ($tee != '') {
               else {
                 echo "9";
               }
-              echo "' width='300px' nowrap>$edkassanimi ".t("k‰teisotto-ohjelmasta otetut k‰teisotot yhteens‰").": <br/><a href=\"javascript:toggleGroup('nayta_otot$i')\">".t("N‰yt‰ / Piilota")."</a></td><td class='tumma' align='center' nowrap>";
+              echo "' width='300px' nowrap>$edkassanimi ".t("k√§teisotto-ohjelmasta otetut k√§teisotot yhteens√§").": <br/><a href=\"javascript:toggleGroup('nayta_otot$i')\">".t("N√§yt√§ / Piilota")."</a></td><td class='tumma' align='center' nowrap>";
               if(!empty($kateisotot)) {
                 $kateisottojen_summa = 0;
                 foreach($kateisotot[$edktunnus] as $kateisotto) {
@@ -1407,8 +1407,8 @@ elseif ($tee != '') {
                 else {
                   echo "9";
                 }
-              echo "' width='300px' nowrap>$edkassanimi ".t("k‰teisotto kassasta").":</td><td class='tumma' align='center'>";
-              //jos t‰sm‰ytys t‰lle p‰iv‰lle on kertaalleen tehty, n‰ytet‰‰n kyseisess‰ formissa annetut arvot
+              echo "' width='300px' nowrap>$edkassanimi ".t("k√§teisotto kassasta").":</td><td class='tumma' align='center'>";
+              //jos t√§sm√§ytys t√§lle p√§iv√§lle on kertaalleen tehty, n√§ytet√§√§n kyseisess√§ formissa annetut arvot
               echo "<input type='text' name='kateisotto$i' id='kateisotto$i' size='10' autocomplete='off' value='{$tasmaytys_array[$edktunnus]['kateisotto'.$i]}' onkeyup='update_summa(\"tasmaytysform\");'></td>";
               if ($tilityskpl > 1) {
                 $y = $i;
@@ -1428,7 +1428,7 @@ elseif ($tee != '') {
                 else {
                   echo "9";
                 }
-              echo "' align='left' class='tumma' width='300px' nowrap>$edkassanimi ".t("k‰teistilitys pankkiin kassasta").":</td>";
+              echo "' align='left' class='tumma' width='300px' nowrap>$edkassanimi ".t("k√§teistilitys pankkiin kassasta").":</td>";
               echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='kateistilitys$i' name='kateistilitys$i' size='10' autocomplete='off' value='{$tasmaytys_array[$edktunnus]['kateistilitys'.$i]}' onkeyup='update_summa(\"tasmaytysform\");'></td>";
               if ($tilityskpl > 1) {
                 $y = $i;
@@ -1513,7 +1513,7 @@ elseif ($tee != '') {
           echo "<td align='right'>$echolisa".sprintf('%.2f',$row['tilsumma'])."</td></tr>";
 
           $kateismaksu     = $row['tyyppi'];
-          $kateismaksuekotus   = t(str_replace("kateinen", "K‰teinen", $kateismaksu));
+          $kateismaksuekotus   = t(str_replace("kateinen", "K√§teinen", $kateismaksu));
           $kateismaksuyhteensa+= $row["tilsumma"];
           $yhteensa       += $row["tilsumma"];
           $kassayhteensa     += $row["tilsumma"];
@@ -1527,11 +1527,11 @@ elseif ($tee != '') {
       }
 
       if ($solu != 'kateinen' and ($pankkikortti === true or $luottokortti === true)) {
-        // jos meill‰ on vain pankkikortti ja/tai luottokorttitapahtumia eik‰ yht‰‰n k‰teist‰ niin halutaan silti n‰hd‰ kassalippaan alku- ja loppukassat yms
+        // jos meill√§ on vain pankkikortti ja/tai luottokorttitapahtumia eik√§ yht√§√§n k√§teist√§ niin halutaan silti n√§hd√§ kassalippaan alku- ja loppukassat yms
         $edkassa = "halutaan kassalippaan tiedot";
-        // t‰ll‰ p‰‰st‰‰n alempaan iffiin k‰siksi
+        // t√§ll√§ p√§√§st√§√§n alempaan iffiin k√§siksi
         $kateismaksu     = "kateinen";
-        $kateismaksuekotus   = t("K‰teinen");
+        $kateismaksuekotus   = t("K√§teinen");
 
         mysql_data_seek($result,0);
         $row = mysql_fetch_assoc($result);
@@ -1575,7 +1575,7 @@ elseif ($tee != '') {
       else {
         echo "9";
       }
-      echo "' class='tumma' width='300px' nowrap>$kateismaksuekotus ".t("yhteens‰").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("N‰yt‰ / Piilota")."</a></td>";
+      echo "' class='tumma' width='300px' nowrap>$kateismaksuekotus ".t("yhteens√§").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("N√§yt√§ / Piilota")."</a></td>";
 
       echo "<input type='hidden' name='maksutapa$i' value='$solu#$tilinumero[kateinen]#$edkassanimi'>";
 
@@ -1628,7 +1628,7 @@ elseif ($tee != '') {
       else {
         echo "9";
       }
-      echo "' width='300px' nowrap>$edkassanimi ".t("k‰teisotto-ohjelmasta otetut k‰teisotot yhteens‰").": <br/><a href=\"javascript:toggleGroup('nayta_otot$i')\">".t("N‰yt‰ / Piilota")."</a></td><td class='tumma' align='center' nowrap>";
+      echo "' width='300px' nowrap>$edkassanimi ".t("k√§teisotto-ohjelmasta otetut k√§teisotot yhteens√§").": <br/><a href=\"javascript:toggleGroup('nayta_otot$i')\">".t("N√§yt√§ / Piilota")."</a></td><td class='tumma' align='center' nowrap>";
       if(!empty($kateisotot)) {
         $kateisottojen_summa = 0;
         foreach($kateisotot[$edktunnus] as $kateisotto) {
@@ -1653,7 +1653,7 @@ elseif ($tee != '') {
       else {
         echo "9";
       }
-      echo "' width='300px' nowrap>$edkassanimi ".t("k‰teisotto kassasta").": </td><td class='tumma' align='center' nowrap>";
+      echo "' width='300px' nowrap>$edkassanimi ".t("k√§teisotto kassasta").": </td><td class='tumma' align='center' nowrap>";
       $temp_indeksi = 1;
       echo "<input type='text' name='kateisotto$i' id='kateisotto$i' size='10' autocomplete='off' value='{$tasmaytys_array[$edktunnus]['kateisotto'.$temp_indeksi]}' onkeyup='update_summa(\"tasmaytysform\");'></td>";
       if ($tilityskpl > 1) {
@@ -1674,7 +1674,7 @@ elseif ($tee != '') {
       else {
         echo "9";
       }
-      echo "' align='left' class='tumma' width='300px' nowrap>$edkassanimi ".t("k‰teistilitys pankkiin kassasta").":</td>";
+      echo "' align='left' class='tumma' width='300px' nowrap>$edkassanimi ".t("k√§teistilitys pankkiin kassasta").":</td>";
       $temp_indeksi = 1;
       echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='kateistilitys$i' name='kateistilitys$i' size='10' autocomplete='off' value='{$tasmaytys_array[$edktunnus]['kateistilitys'.$temp_indeksi]}' onkeyup='update_summa(\"tasmaytysform\");'></td>";
       if ($tilityskpl > 1) {
@@ -1795,7 +1795,7 @@ elseif ($tee != '') {
         echo "$edkassanimi";
       }
       echo "'>";
-      echo "<td colspan='6' class='tumma' width='300px' nowrap>".t("Pankkikortti yhteens‰").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("N‰yt‰ / Piilota")."</a></td>";
+      echo "<td colspan='6' class='tumma' width='300px' nowrap>".t("Pankkikortti yhteens√§").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("N√§yt√§ / Piilota")."</a></td>";
       $temp_indeksi = 1;
       echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='$solu solu$i' name='solu$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");' value='{$tasmaytys_array['pankkikortti']['solu'.$temp_indeksi]}' /></td>";
       if ($tilityskpl > 1) {
@@ -1894,7 +1894,7 @@ elseif ($tee != '') {
         echo "$edkassanimi";
       }
       echo "'>";
-      echo "<td colspan='6' class='tumma' width='300px' nowrap>".t("Luottokortti yhteens‰").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("N‰yt‰ / Piilota")."</a></td>";
+      echo "<td colspan='6' class='tumma' width='300px' nowrap>".t("Luottokortti yhteens√§").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("N√§yt√§ / Piilota")."</a></td>";
       $temp_indeksi = 1;
       echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='$solu solu$i' name='solu$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");' value='{$tasmaytys_array['luottokortti']['solu'.$temp_indeksi]}' /></td>";
       if ($tilityskpl > 1) {
@@ -1943,7 +1943,7 @@ elseif ($tee != '') {
           $kassayhteensa = $kassalippaan_kateisotot_yhteensa + $kassayhteensa;
 
           echo "</table><table width='100%'>";
-          echo "<tr><td colspan='7' class='tumma'>$edtyyppi ".t("yhteens‰").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("N‰yt‰ / Piilota")."</a></td>";
+          echo "<tr><td colspan='7' class='tumma'>$edtyyppi ".t("yhteens√§").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("N√§yt√§ / Piilota")."</a></td>";
           echo "<td align='right' class='tumma' style='width:100px'><b><div id='erotus$i'>".sprintf('%.2f',$kateismaksuyhteensa)."</div></b></td></tr>";
           $i++;
 
@@ -1960,7 +1960,7 @@ elseif ($tee != '') {
 
           if ($vaiht == 1) {
             $prn = "\n";
-            $prn .= sprintf ("%-'.84s", $kateismaksuekotus." ".t("yhteens‰")." ");
+            $prn .= sprintf ("%-'.84s", $kateismaksuekotus." ".t("yhteens√§")." ");
             $prn .= sprintf ("%'.10s", " ".sprintf('%.2f', $kateismaksuyhteensa));
             $prn .= "\n\n";
 
@@ -1972,7 +1972,7 @@ elseif ($tee != '') {
 
         if ($edkassa != $row["kassa"] and $edkassa != '') {
 
-          echo "<tr><th colspan='7'>$edkassanimi yhteens‰: </th>";
+          echo "<tr><th colspan='7'>$edkassanimi yhteens√§: </th>";
           echo "<td align='right' class='tumma'><b>".sprintf('%.2f',$kassayhteensa)."</b></td></tr>";
           echo "<tr><td>&nbsp;</td></tr>";
           echo "</table><table id='nayta$i' style='display:none;' width='100%'>";
@@ -1985,7 +1985,7 @@ elseif ($tee != '') {
               <th>$yhtiorow[valkoodi]</th></tr>";
 
           if ($vaiht == 1) {
-            $prn = sprintf ("%-'.84s", $edkassanimi." ".t("yhteens‰")." ");
+            $prn = sprintf ("%-'.84s", $edkassanimi." ".t("yhteens√§")." ");
             $prn .= sprintf ("%'.10s", " ".sprintf('%.2f', $kassayhteensa));
             $prn .= "\n\n\n";
 
@@ -2011,7 +2011,7 @@ elseif ($tee != '') {
         $edkateismaksu     = $kateismaksu;
         $edtyyppi       = $row["tyyppi"];
         $kateismaksu     = $row['tyyppi'];
-        $kateismaksuekotus   = t(str_replace("kateinen", "K‰teinen", $kateismaksu));
+        $kateismaksuekotus   = t(str_replace("kateinen", "K√§teinen", $kateismaksu));
 
         if ($vaiht == 1) {
           if ($rivit >= 60) {
@@ -2057,21 +2057,21 @@ elseif ($tee != '') {
 
       if ($edkassa != '') {
         echo "</table><table width='100%'>";
-        echo "<tr><td colspan='6' class='tumma'>$edtyyppi ".t("yhteens‰").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("N‰yt‰ / Piilota")."</a></th>";
+        echo "<tr><td colspan='6' class='tumma'>$edtyyppi ".t("yhteens√§").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("N√§yt√§ / Piilota")."</a></th>";
         echo "<td align='right' class='tumma' style='width:100px'><b><div id='erotus$i'>".sprintf('%.2f',$kateismaksuyhteensa)."</div></b></td></tr>";
 
-        echo "<tr><th colspan='6'>$edkassanimi yhteens‰:</th>";
+        echo "<tr><th colspan='6'>$edkassanimi yhteens√§:</th>";
         echo "<td align='right' class='tumma'><b>".sprintf('%.2f',$kassayhteensa)."</b></td></tr>";
 
         if ($vaiht == 1) {
           $prn = "\n";
-          $prn .= sprintf ("%-'.84s", $kateismaksuekotus." ".t("yhteens‰")." ");
+          $prn .= sprintf ("%-'.84s", $kateismaksuekotus." ".t("yhteens√§")." ");
           $prn .= sprintf ("%'.10s", " ".sprintf('%.2f', $kateismaksuyhteensa));
           $prn .= "\n\n";
 
           fwrite($fh, $prn);
           $rivit++;
-          $prn = sprintf ("%-'.84s", $edkassanimi." ".t("yhteens‰")." ");
+          $prn = sprintf ("%-'.84s", $edkassanimi." ".t("yhteens√§")." ");
           $prn .= sprintf ("%'.10s", " ".sprintf('%.2f', $kassayhteensa));
           $prn .= "\n\n";
           fwrite($fh, $prn);
@@ -2111,7 +2111,7 @@ elseif ($tee != '') {
         while ($row = mysql_fetch_assoc($result)) {
 
           echo "<tr>";
-          echo "<td>".t("K‰teissuoritus")."</td>";
+          echo "<td>".t("K√§teissuoritus")."</td>";
           echo "<td>".substr($row["nimi"],0,23)."</td>";
           echo "<td>$row[ytunnus]</td>";
           echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[tunnus]$lisakenttialinkkiin'>$row[laskunro]</a></td>";
@@ -2124,7 +2124,7 @@ elseif ($tee != '') {
               $rivit = 1;
             }
 
-            $prn  = sprintf ('%-20.20s',   t("K‰teissuoritus"));
+            $prn  = sprintf ('%-20.20s',   t("K√§teissuoritus"));
             $prn .= sprintf ('%-25.25s',   substr($row["nimi"],0,23));
             $prn .= sprintf ('%-10.10s',   $row["ytunnus"]);
             $prn .= sprintf ('%-12.12s',   $row["laskunro"]);
@@ -2142,15 +2142,15 @@ elseif ($tee != '') {
 
 
         echo "</table><table width='100%'>";
-        echo "<tr><td colspan='6' class='tumma'>".t("K‰teissuoritukset")." ".t("yhteens‰").": <a href=\"javascript:toggleGroup('naytaKATSUORI')\">".t("N‰yt‰ / Piilota")."</a></th>";
+        echo "<tr><td colspan='6' class='tumma'>".t("K√§teissuoritukset")." ".t("yhteens√§").": <a href=\"javascript:toggleGroup('naytaKATSUORI')\">".t("N√§yt√§ / Piilota")."</a></th>";
         echo "<td align='right' class='tumma' style='width:100px'><b><div id='erotusKATSUORI'>".sprintf('%.2f',$kassayhteensa)."</div></b></td></tr>";
 
-        echo "<tr><th colspan='6'>".t("K‰teissuoritukset")." ".t("yhteens‰").":</th>";
+        echo "<tr><th colspan='6'>".t("K√§teissuoritukset")." ".t("yhteens√§").":</th>";
         echo "<td align='right' class='tumma'><b>".sprintf('%.2f',$kassayhteensa)."</b></td></tr>";
 
         if ($vaiht == 1) {
           $prn = "\n";
-          $prn .= sprintf ("%-'.84s", t("K‰teissuoritukset")." ".t("yhteens‰")." ");
+          $prn .= sprintf ("%-'.84s", t("K√§teissuoritukset")." ".t("yhteens√§")." ");
           $prn .= sprintf ("%'.10s", " ".sprintf('%.2f', $kassayhteensa));
           $prn .= "\n\n";
 
@@ -2170,10 +2170,10 @@ elseif ($tee != '') {
     echo "<tr><td align='left' colspan='3'><font class='head'>";
 
     if (isset($tasmays) and $tasmays != '') {
-      echo t("Myynti yhteens‰");
+      echo t("Myynti yhteens√§");
     }
     else {
-      echo t("Kaikki kassat yhteens‰");
+      echo t("Kaikki kassat yhteens√§");
     }
 
     echo ":</font></td><td align='right'><input type='text' size='10'";
@@ -2183,26 +2183,26 @@ elseif ($tee != '') {
     echo "' disabled></td></tr>";
 
     if (isset($tasmays) and $tasmays != '') {
-      echo "<tr><td align='left' colspan='3'><font class='head'>".t("Kassalippaassa k‰teist‰").":</td><td align='right'>";
+      echo "<tr><td align='left' colspan='3'><font class='head'>".t("Kassalippaassa k√§teist√§").":</td><td align='right'>";
       echo "<input type='text' id='kaikkiyhteensa' size='10' value='' disabled></td></tr>";
-      echo "<tr><td align='left' colspan='3'><font class='head'>".t("Loppukassa yhteens‰").":</td><td align='right'>";
+      echo "<tr><td align='left' colspan='3'><font class='head'>".t("Loppukassa yhteens√§").":</td><td align='right'>";
       echo "<input type='text' name='loppukassa' id='loppukassa' size='10' disabled></td></tr>";
       echo "<tr><td>&nbsp;</td></tr>";
       echo "<tr><td align='left' colspan='3'><font class='head'>".t("Yhteenveto").":</td></tr>";
       echo "<tr><th colspan='3'>".t("Alkukassa").":</th><td class='tumma' align='right'>";
       echo "<input type='text' name='yht_alkukassa' id='yht_alkukassa' size='10' disabled></td></tr>";
-      echo "<tr><th colspan='3'>".t("K‰teinen").":</th><td class='tumma' align='right'>";
+      echo "<tr><th colspan='3'>".t("K√§teinen").":</th><td class='tumma' align='right'>";
       echo "<input type='text' name='yht_kateinen' id='yht_kateinen' size='10' disabled></td></tr>";
-      echo "<tr><th colspan='3'>".t("K‰teisotto").":</th><td class='tumma' align='right'>";
+      echo "<tr><th colspan='3'>".t("K√§teisotto").":</th><td class='tumma' align='right'>";
       echo "<input type='text' name='yht_kateisotto' id='yht_kateisotto' size='10' disabled></td></tr>";
-      echo "<tr><th colspan='3'>".t("K‰teistilitys").":</th><td class='tumma' align='right'>";
+      echo "<tr><th colspan='3'>".t("K√§teistilitys").":</th><td class='tumma' align='right'>";
       echo "<input type='text' name='yht_kateistilitys' id='yht_kateistilitys' size='10' disabled></td></tr>";
       echo "<tr><th colspan='3'>".t("Kassaerotus").":</th><td class='tumma' align='right'>";
       echo "<input type='text' name='yht_kassaerotus' id='yht_kassaerotus' size='10' disabled></td></tr>";
       echo "<tr><th colspan='3'>".t("Loppukassa").":</th><td class='tumma' align='right'>";
       echo "<input type='text' name='yht_loppukassa' id='yht_loppukassa' size='10' disabled></td></tr>";
 
-      echo "<tr><td align='right' colspan='4'><input type='submit' value='".t("Hyv‰ksy")."'></td></tr>";
+      echo "<tr><td align='right' colspan='4'><input type='submit' value='".t("Hyv√§ksy")."'></td></tr>";
 
       echo "<input type='hidden' name='loppukassa2' id='loppukassa2' value=''>";
       echo "<input type='hidden' name='yht_alkukas' id='yht_alkukas' value=''>";
@@ -2225,7 +2225,7 @@ elseif ($tee != '') {
 
   if ((!isset($tasmays) or $tasmays == '') and $vaiht == 1) {
     $prn = "\n";
-    $prn .= sprintf ("%-'.84s", t("Yhteens‰")." ");
+    $prn .= sprintf ("%-'.84s", t("Yhteens√§")." ");
     $prn .= sprintf ("%'.10s", " ".sprintf('%.2f', $yhteensa));
     $prn .= "\n";
     fwrite($fh, $prn);
@@ -2245,10 +2245,10 @@ elseif ($tee != '') {
     $line = exec("a2ps -o $filenimi.ps -R --medium=A4 --chars-per-line=94 --no-header --columns=1 --margin=0 --borders=0 $filenimi");
 
     if ($komento == "email" and $kukarow["eposti"] != '') {
-      // l‰hetet‰‰n meili
+      // l√§hetet√§√§n meili
       $komento = "";
 
-      $kutsu = t("K‰teismyynnit", $kieli);
+      $kutsu = t("K√§teismyynnit", $kieli);
 
       system("ps2pdf -sPAPERSIZE=a4 ".$filenimi.".ps ".$filenimi.".pdf");
 
@@ -2272,7 +2272,7 @@ elseif ($tee != '') {
   echo "</table>";
 }
 
-// K‰yttˆliittym‰
+// K√§ytt√∂liittym√§
 echo "<br>";
 echo "<form method='post'>";
 echo "<table>";
@@ -2286,7 +2286,7 @@ if (!isset($vvl)) $vvl = date("Y");
 if (!isset($ppl)) $ppl = date("d");
 
 echo "<tr>";
-echo "<th>".t("Syˆt‰ myyj‰numero")."</th>";
+echo "<th>".t("Sy√∂t√§ myyj√§numero")."</th>";
 echo "<td colspan='3'><input type='text' size='10' name='myyjanro' value='$myyjanro'>";
 
 $query = "SELECT tunnus, kuka, nimi, myyja
@@ -2296,7 +2296,7 @@ $query = "SELECT tunnus, kuka, nimi, myyja
 $yresult = pupe_query($query);
 
 echo "<tr>";
-echo "<th>".t("TAI valitse k‰ytt‰j‰")."</th>";
+echo "<th>".t("TAI valitse k√§ytt√§j√§")."</th>";
 echo "<td colspan='3'><select name='myyja'>";
 echo "<option value='' >".t("Kaikki")."</option>";
 
@@ -2333,17 +2333,17 @@ if ($oikeurow['paivitys'] == 1) {
   }
 
   echo "<tr>";
-  echo "<th>".t("T‰sm‰‰ k‰teismyynnit")."</th>";
+  echo "<th>".t("T√§sm√§√§ k√§teismyynnit")."</th>";
   echo "<td colspan='3'><input type='checkbox' id='tasmays' name='tasmays' $sel onClick='disableDates();'><br></td>";
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>".t("Tilitett‰vien sarakkeiden m‰‰r‰")."</th>";
+  echo "<th>".t("Tilitett√§vien sarakkeiden m√§√§r√§")."</th>";
   echo "<td colspan='3'><input type='text' id='tilityskpl' name='tilityskpl' size='3' maxlength='2' value='$tilityskpl' autocomplete='off'><br></td>";
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>".t("Syˆt‰ p‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>";
+  echo "<th>".t("Sy√∂t√§ p√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>";
   echo "<td><input type='text' name='pp' id='pp' value='$pp' size='3' $dis autocomplete='off'></td>";
   echo "<td><input type='text' name='kk' id='kk' value='$kk' size='3' $dis autocomplete='off'></td>";
   echo "<td><input type='text' name='vv' id='vv' value='$vv' size='5' $dis autocomplete='off'></td>";
@@ -2362,7 +2362,7 @@ while ($varow = mysql_fetch_assoc($vares)) {
   $sel = '';
   if ($kassakone[$varow["tunnus"]] != '') $sel = 'CHECKED';
   echo "<tr>";
-  echo "<th>".t("N‰yt‰")."</th>";
+  echo "<th>".t("N√§yt√§")."</th>";
   echo "<td colspan='3'><input type='checkbox' name='kassakone[$varow[tunnus]]' value='$varow[tunnus]' $sel> $varow[nimi]</td>";
   echo "</tr>";
 }
@@ -2371,7 +2371,7 @@ $sel = '';
 if ($muutkassat != '') $sel = 'CHECKED';
 
 echo "<tr>";
-echo "<th>".t("N‰yt‰")."</th>";
+echo "<th>".t("N√§yt√§")."</th>";
 echo "<td colspan='3'><input type='checkbox' name='muutkassat' value='MUUT' $sel>".t("Muut kassat")."</td>";
 echo "</tr>";
 
@@ -2379,8 +2379,8 @@ $sel = '';
 if ($katsuori != '') $sel = 'CHECKED';
 
 echo "<tr>";
-echo "<th>".t("N‰yt‰")."</th>";
-echo "<td colspan='3'><input type='checkbox' name='katsuori' value='MUUT' $sel>".t("K‰teissuoritukset")."</td>";
+echo "<th>".t("N√§yt√§")."</th>";
+echo "<td colspan='3'><input type='checkbox' name='katsuori' value='MUUT' $sel>".t("K√§teissuoritukset")."</td>";
 echo "</tr>";
 
 echo "<tr><td class='back'><br></td></tr>";
@@ -2388,14 +2388,14 @@ echo "<tr><td class='back'><br></td></tr>";
 echo "<input type='hidden' name='tee' value='kaikki'>";
 
 echo "<tr>";
-echo "<th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>";
+echo "<th>".t("Sy√∂t√§ alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>";
 echo "<td><input type='text' name='ppa' id='ppa' value='$ppa' size='3' $dis2></td>";
 echo "<td><input type='text' name='kka' id='kka' value='$kka' size='3' $dis2></td>";
 echo "<td><input type='text' name='vva' id='vva' value='$vva' size='5' $dis2></td>";
 echo "</tr>";
 
 echo "<tr>";
-echo "<th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>";
+echo "<th>".t("Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>";
 echo "<td><input type='text' name='ppl' id='ppl' value='$ppl' size='3' $dis2></td>";
 echo "<td><input type='text' name='kkl' id='kkl' value='$kkl' size='3' $dis2></td>";
 echo "<td><input type='text' name='vvl' id='vvl' value='$vvl' size='5' $dis2></td>";
@@ -2464,7 +2464,7 @@ function get_pohjakassa($row) {
 
   $like = "%{\"loppukassa\":{%\"" . $row["kassa"] . "\"%}%}%";
 
-  //katotaan eka lˆytyykˆ viimesen 4 viikkoon tapahtumia
+  //katotaan eka l√∂ytyyk√∂ viimesen 4 viikkoon tapahtumia
   $pk_query = "SELECT tunnus, tapvm, sisviesti2
                FROM lasku
                WHERE yhtio    = '$kukarow[yhtio]'
@@ -2476,7 +2476,7 @@ function get_pohjakassa($row) {
                LIMIT 1";
   $pk_result = pupe_query($pk_query);
 
-  //jos aikarajatulla haulla ei lˆytynyt mit‰‰n haetaan ilman aikarajausta
+  //jos aikarajatulla haulla ei l√∂ytynyt mit√§√§n haetaan ilman aikarajausta
   if (mysql_num_rows($pk_result) == 0) {
     $pk_query = "SELECT tunnus, tapvm, sisviesti2
                  FROM lasku
@@ -2494,12 +2494,12 @@ function get_pohjakassa($row) {
     $pk_t = explode("##", $pk_row["sisviesti2"]);
 
     if (count($pk_t) > 1) {
-      //pk_t:ss‰ on nyt sek‰ loppukassa jsonina, ett‰ kaikkien kassalippaiden formin kent‰t. pit‰‰ etsi‰ loppukassa json ja asettaa se row:hun
+      //pk_t:ss√§ on nyt sek√§ loppukassa jsonina, ett√§ kaikkien kassalippaiden formin kent√§t. pit√§√§ etsi√§ loppukassa json ja asettaa se row:hun
       foreach ($pk_t as $json_kassa_arvot) {
         $pk = json_decode($json_kassa_arvot, true);
 
         if ($pk !== NULL) {
-          //tarkoittaa, ett‰ json_decode on onnistunut
+          //tarkoittaa, ett√§ json_decode on onnistunut
           if (array_key_exists('loppukassa', $pk)) {
             $row["pohjakassa"] = $pk["loppukassa"][$row["kassa"]];
             break;
@@ -2524,7 +2524,7 @@ function populoi_kassalipas_muuttujat_kassakohtaisesti($_post) {
 
   foreach ($_post as $kentan_nimi => $kentan_arvo) {
     if (stristr($kentan_nimi, 'tyyppi_pohjakassa')) {
-      //t‰m‰ hoitaa k‰teismyynti kassalippaat
+      //t√§m√§ hoitaa k√§teismyynti kassalippaat
       preg_match_all('!\d+!', $kentan_nimi, $kassalippaan_indeksi);
       $kassalippaan_nimi = $_post['tyyppi_pohjakassa' . $kassalippaan_indeksi[0][0]];
       $kassalipas = hae_kassalipas($kassalippaan_nimi);
@@ -2532,11 +2532,11 @@ function populoi_kassalipas_muuttujat_kassakohtaisesti($_post) {
 
       foreach($_post as $etsi_kassalipas_nimi => $etsi_kassalipas_arvo) {
 
-        //etsit‰‰n kassalippaalle kuuluvat tilitys arvot
+        //etsit√§√§n kassalippaalle kuuluvat tilitys arvot
         if (strstr($etsi_kassalipas_nimi , $kassalippaan_indeksi[0][0])) {
 
           if (!stristr($etsi_kassalipas_nimi, 'solu') and !stristr($etsi_kassalipas_nimi, 'kateisotto') and !stristr($etsi_kassalipas_nimi, 'kateistilitys')) {
-            //yksisoluiset halutaan tallentaa ilman per‰st‰ lˆytyv‰‰ indeksi‰
+            //yksisoluiset halutaan tallentaa ilman per√§st√§ l√∂ytyv√§√§ indeksi√§
             $kassalippaat[$kassalippaan_tunnus][preg_replace("/[0-9]/", "", $etsi_kassalipas_nimi)] = $etsi_kassalipas_arvo;
           }
           else {
@@ -2551,14 +2551,14 @@ function populoi_kassalipas_muuttujat_kassakohtaisesti($_post) {
       }
     }
     elseif (stristr($kentan_nimi ,'maksutapa')) {
-      //t‰m‰ hoitaa pankki ja luottokortit, jotka eiv‰t ole kassa kohtaisia
+      //t√§m√§ hoitaa pankki ja luottokortit, jotka eiv√§t ole kassa kohtaisia
       if (stristr($kentan_arvo, 'pankkikortti') or stristr($kentan_arvo, 'luottokortti')) {
         $kortin_nimi = explode('#', $kentan_arvo);
         $kortin_nimi = $kortin_nimi[0];
         preg_match_all('!\d+!', $kentan_nimi, $kortin_indeksi);
         foreach($_post as $etsi_kortti_nimi => $etsi_kortti_arvo) {
 
-          //etsit‰‰n kassalippaalle kuuluvat tilitys arvot
+          //etsit√§√§n kassalippaalle kuuluvat tilitys arvot
           if (strstr($etsi_kortti_nimi , $kortin_indeksi[0][0])) {
 
             //monisoluisiin halutaan 1, 11 ,111 indeksin sijaan 1, 2, 3 jne.

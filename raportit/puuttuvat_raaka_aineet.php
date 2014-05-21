@@ -1,9 +1,9 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-// Ei k‰ytet‰ pakkausta
+// Ei k√§ytet√§ pakkausta
 $compression = FALSE;
 
 if (isset($_POST["tee"])) {
@@ -260,16 +260,16 @@ function generoi_custom_excel($valmistukset, $valmistuslinjat, $esitysmuoto) {
     'yksikko'       => t('Valmistuslinja'),
     'valmistettava_kpl'   => t('Valmistetaan kpl'),
     'ostohinta'       => t('Valmistuksen tila'),
-    'kerayspvm'       => t('Ker‰ysp‰iv‰'),
-    'toimaika'       => t('Valmistusp‰iv‰'),
+    'kerayspvm'       => t('Ker√§ysp√§iv√§'),
+    'toimaika'       => t('Valmistusp√§iv√§'),
   );
   $raaka_aine_headerit = array(
     'tuoteno'     => t('Raaka-Aineen Tuoteno'),
     'nimitys'     => t('Raaka-Aineen Nimitys'),
     'kappalemaara'   => t('Valmistusnumero'),
     'yksikko'     => t('Saldo'),
-    'paivitys_pvm'   => t('Hyllyss‰'),
-    'ostohinta'     => t('Myyt‰viss‰'),
+    'paivitys_pvm'   => t('Hyllyss√§'),
+    'ostohinta'     => t('Myyt√§viss√§'),
     'kehahin'     => t('Tilattu'),
     'ryhman_ale'   => t('Toimittaja'),
   );
@@ -395,8 +395,8 @@ function echo_valmistukset_joissa_raaka_aine_ei_riita($request) {
         echo "<th>".t('Valmistuslinja')."</th>";
         echo "<th>".t('Valmistetaan kpl')."</th>";
         echo "<th>".t('Valmistuksen tila')."</th>";
-        echo "<th>".t('Ker‰ysp‰iv‰')."</th>";
-        echo "<th>".t('Valmistusp‰iv‰')."</th>";
+        echo "<th>".t('Ker√§ysp√§iv√§')."</th>";
+        echo "<th>".t('Valmistusp√§iv√§')."</th>";
         echo "</tr>";
         echo "</thead>";
 
@@ -463,8 +463,8 @@ function echo_valmistukset_joissa_raaka_aine_ei_riita($request) {
         echo "<th>".t('Raaka-aineen nimitys')."</th>";
         echo "<th>".t('Valmistusnumero')."</th>";
         echo "<th>".t('Saldo')."</th>";
-        echo "<th>".t('Hyllyss‰')."</th>";
-        echo "<th>".t('Myyt‰viss‰')."</th>";
+        echo "<th>".t('Hyllyss√§')."</th>";
+        echo "<th>".t('Myyt√§viss√§')."</th>";
         echo "<th>".t('Tilattu')."</th>";
         echo "<th>".t('Toimittaja')."</th>";
         echo "</tr>";
@@ -574,7 +574,7 @@ function validate($request) {
   $valid = $validator->validate($request);
 
   if ($valid and strtotime($request['alku_pvm']) > strtotime($request['loppu_pvm'])) {
-    echo "<font class='error'>".t('Alkup‰iv‰m‰‰r‰ on myˆhemmin kuin loppup‰iv‰m‰‰r‰')."</font>";
+    echo "<font class='error'>".t('Alkup√§iv√§m√§√§r√§ on my√∂hemmin kuin loppup√§iv√§m√§√§r√§')."</font>";
     echo "<br/>";
     echo "<br/>";
     $valid = false;
@@ -595,7 +595,7 @@ function echo_kayttoliittyma($request) {
   echo "<table>";
 
   echo "<tr>";
-  echo "<th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>";
+  echo "<th>".t("Sy√∂t√§ alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>";
   echo "<td>";
   echo "<input type='text' name='alku_pp' value='{$request['alku_pp']}' size='3'>";
   echo "<input type='text' name='alku_kk' value='{$request['alku_kk']}' size='3'>";
@@ -604,7 +604,7 @@ function echo_kayttoliittyma($request) {
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>";
+  echo "<th>".t("Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>";
   echo "<td>";
   echo "<input type='text' name='loppu_pp' value='{$request['loppu_pp']}' size='3'>";
   echo "<input type='text' name='loppu_kk' value='{$request['loppu_kk']}' size='3'>";
@@ -652,8 +652,8 @@ function echo_kayttoliittyma($request) {
   echo "<th>".t('Esitysmuoto')."</th>";
   echo "<td>";
   echo "<select name='esitysmuoto'>";
-  echo "<option value='A' {$sel['A']}>".t('N‰yt‰ valmiste sek‰ raaka-aineet')."</option>";
-  echo "<option value='B' {$sel['B']}>".t('N‰yt‰ vain raaka-aineet')."</option>";
+  echo "<option value='A' {$sel['A']}>".t('N√§yt√§ valmiste sek√§ raaka-aineet')."</option>";
+  echo "<option value='B' {$sel['B']}>".t('N√§yt√§ vain raaka-aineet')."</option>";
   echo "</select>";
   echo "</td>";
   echo "</tr>";

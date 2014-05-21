@@ -1,11 +1,11 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("inc/parametrit.inc");
 
-echo "<font class='head'>".t("Uudelleenl‰het‰ tilausvahvistus")."</font><hr>";
+echo "<font class='head'>".t("Uudelleenl√§het√§ tilausvahvistus")."</font><hr>";
 
 if ($tee == "laheta" and $tunnukset != "") {
 
@@ -16,13 +16,13 @@ if ($tee == "laheta" and $tunnukset != "") {
 
     while ($laskurow = mysql_fetch_array($result)) {
 
-      echo t("Uudelleenl‰hetet‰‰n tilausvahvistus")." ($laskurow[tilausvahvistus]): $laskurow[nimi]<br>";
+      echo t("Uudelleenl√§hetet√§√§n tilausvahvistus")." ($laskurow[tilausvahvistus]): $laskurow[nimi]<br>";
 
       if (trim($laskurow['tilausvahvistus']) != "") {
         //
-        // LƒHETETƒƒN TILAUSVAHVISTUS
+        // L√ÑHETET√Ñ√ÑN TILAUSVAHVISTUS
         //
-        // tulostetaan t‰ss‰, niin saadaan vahvistukseen koko tilaus, ennenkun sen splitaatan eri varastoihin
+        // tulostetaan t√§ss√§, niin saadaan vahvistukseen koko tilaus, ennenkun sen splitaatan eri varastoihin
         $params_tilausvahvistus = array(
         'tee'            => "",
         'toim'            => "",
@@ -38,7 +38,7 @@ if ($tee == "laheta" and $tunnukset != "") {
     }
   }
   else {
-    print "<font class='error'>".t("Tilauksia ei lˆytynyt").": $tunnukset!</font><br>";
+    print "<font class='error'>".t("Tilauksia ei l√∂ytynyt").": $tunnukset!</font><br>";
   }
 }
 else {
@@ -46,6 +46,6 @@ else {
   echo "<form method='post'>";
   echo "<input type='hidden' name='tee' value='laheta'>";
   echo "<input name='tunnukset' type='text' size='60'>";
-  echo "<input type='submit' value='".t("L‰het‰ tilausvahvistukset")."'>";
+  echo "<input type='submit' value='".t("L√§het√§ tilausvahvistukset")."'>";
   echo "</form>";
 }

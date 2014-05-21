@@ -1,11 +1,11 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("inc/parametrit.inc");
 
-echo "<font class='head'>".t("Uudelleenl‰het‰ PostNord-ker‰yssanoma")."</font><hr>";
+echo "<font class='head'>".t("Uudelleenl√§het√§ PostNord-ker√§yssanoma")."</font><hr>";
 
 if ($tee == "laheta" and $tilaukset != "") {
 
@@ -21,12 +21,12 @@ if ($tee == "laheta" and $tilaukset != "") {
 
   if (mysql_num_rows($result) > 0) {
     while ($laskurow = mysql_fetch_assoc($res)) {
-      echo t("Uudelleenl‰hetet‰‰n PostNord-ker‰yssanoma").": $laskurow[tunnus]<br>";
+      echo t("Uudelleenl√§hetet√§√§n PostNord-ker√§yssanoma").": $laskurow[tunnus]<br>";
       posten_outbounddelivery($laskurow["tunnus"]);
     }
   }
   else {
-    echo "<font class='error'>".t("Tilauksia ei lˆytynyt").": $tilaukset!</font><br>";
+    echo "<font class='error'>".t("Tilauksia ei l√∂ytynyt").": $tilaukset!</font><br>";
   }
 }
 
@@ -34,7 +34,7 @@ echo "<br><br><font class='message'>".t("Anna tilausnumerot pilkulla eroteltuna"
 echo "<form method='post'>";
 echo "<input type='hidden' name='tee' value='laheta'>";
 echo "<textarea name='tilaukset' rows='10' cols='60'></textarea>";
-echo "<br><input type='submit' value='".t("L‰het‰ ker‰yssanomat")."'>";
+echo "<br><input type='submit' value='".t("L√§het√§ ker√§yssanomat")."'>";
 echo "</form>";
 
 require("inc/footer.inc");

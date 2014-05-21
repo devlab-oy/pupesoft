@@ -330,14 +330,29 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
       echo "<tr><td></td><td></td><td>".t("Tilaava toimipiste").":</td>";
       echo "<td valign='middle'>";
       echo "<select name='toimipiste'>";
-      echo "<option value=''>".t("Ei poikkeavaa toimipistettä")."</option>";
+      echo "<option value=''";
+
+      if ($srow['vanhatunnus'] == 0) {
+        echo 'selected';
+      }
+
+      echo ">";
+      echo t("Ei poikkeavaa toimipistettä");
+      echo "</option>";
 
       while($row = mysql_fetch_array($yresult)) {
         $sel = "";
 
-        if ($srow["vanhatunnus"] == $row["tunnus"] or ($srow['vanhatunnus'] == 0 and $kukarow['toimipaikka'] == $row['tunnus'])) $sel = "selected";
+        if (    $srow["vanhatunnus"] == $row["tunnus"]
+            or (!isset($srow['vanhatunnus']) and $kukarow['toimipaikka'] == $row['tunnus'])) {
+          $sel = "selected";
+        }
 
-        if ($sel == '' and $srow['vanhatunnus'] == 0 and $selectoitu_varasto_toimipaikka == $row['tunnus']) $sel = "selected";
+        if (    $sel == ''
+            and $srow['vanhatunnus'] == 0
+            and $selectoitu_varasto_toimipaikka == $row['tunnus']) {
+          $sel = "selected";
+        }
 
         echo "<option value='$row[tunnus]' $sel>$row[nimi] ($row[ovtlisa])</option>";
       }

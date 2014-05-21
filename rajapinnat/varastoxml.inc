@@ -2,7 +2,7 @@
 
 $tiedoston_sijainti = "{$pupe_root_polku}/dataout/dnstock_".date("Y_m_d_Hi").".xml";
 
-$xmlstr  = '<?xml version="1.0" encoding="iso-8859-1"?>';
+$xmlstr  = '<?xml version="1.0" encoding="utf-8"?>';
 $xmlstr .= '<products>';
 $xmlstr .= '</products>';
 

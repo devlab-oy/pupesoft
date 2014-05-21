@@ -6,7 +6,7 @@ foreach ($dnslajitelma as $key => $lajitelma) {
 
   $tiedoston_sijainti = "{$pupe_root_polku}/dataout/dnsassortment_".date("Y_m_d_Hi")."-$laskuri.xml";
 
-  $xmlstr  = '<?xml version="1.0" encoding="iso-8859-1"?>';
+  $xmlstr  = '<?xml version="1.0" encoding="utf-8"?>';
   $xmlstr .= '<assortments>';
   $xmlstr .= '</assortments>';
 

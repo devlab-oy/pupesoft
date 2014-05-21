@@ -303,7 +303,7 @@ class Pupe_Pdfekirje {
   private function _getXml()
   {
       return <<<XML
-<?xml version="1.0" encoding="ISO-8859-15"?>
+<?xml version="1.0" encoding="utf-8"?>
 <lb:LetterBundle xmlns:lb="urn:itella-letterbundle-v0x3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:itella-letterbundle-v0x3 LetterBundle_V0x3.xsd" lb:schemaVersion="v0x3">
   <lb:Bundle lb:senderBundleId=":tunniste">
     <lb:BundleCommon lb:isTest=":is_test">

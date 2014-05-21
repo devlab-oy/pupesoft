@@ -31,13 +31,13 @@ function erittele_laskut($file) {
         //  Tämä siksi että haluamme käyttää paikallista kuvausta eikä ladata kuvausta verkosta!
 
         if ($finvoiceversion >= 2) {
-          $ln = "<?xml version=\"1.0\" encoding=\"ISO-8859-15\"?>\n<?xml-stylesheet type=\"text/xsl\" href=\"datain/Finvoice_2.0.xsl\"?>\n<Finvoice Version=\"$lnversion[1]\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"datain/Finvoice_2.0.xsd\">";
+          $ln = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<?xml-stylesheet type=\"text/xsl\" href=\"datain/Finvoice_2.0.xsl\"?>\n<Finvoice Version=\"$lnversion[1]\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"datain/Finvoice_2.0.xsd\">";
         }
         elseif ($finvoiceversion == 1.3) {
-          $ln = "<?xml version=\"1.0\" encoding=\"ISO-8859-15\"?>\n<!DOCTYPE Finvoice SYSTEM \"datain/Finvoice_1.3.dtd\">\n<?xml-stylesheet type=\"text/xsl\" href=\"datain/Finvoice_1.3.xsl\"?>\n".$ln;
+          $ln = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<!DOCTYPE Finvoice SYSTEM \"datain/Finvoice_1.3.dtd\">\n<?xml-stylesheet type=\"text/xsl\" href=\"datain/Finvoice_1.3.xsl\"?>\n".$ln;
         }
         else {
-          $ln = "<?xml version=\"1.0\" encoding=\"ISO-8859-15\"?>\n<!DOCTYPE Finvoice SYSTEM \"datain/Finvoice.dtd\">\n<?xml-stylesheet type=\"text/xsl\" href=\"datain/Finvoice.xsl\"?>\n".$ln;
+          $ln = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<!DOCTYPE Finvoice SYSTEM \"datain/Finvoice.dtd\">\n<?xml-stylesheet type=\"text/xsl\" href=\"datain/Finvoice.xsl\"?>\n".$ln;
         }
       }
 

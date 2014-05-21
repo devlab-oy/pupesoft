@@ -53,11 +53,11 @@ elseif (strpos($_SERVER['SCRIPT_NAME'], "tiliote.php") !== FALSE and $verkkolask
   //Pupesoftista
   echo "Aloitetaan verkkolaskun sisäänluku...<br>\n<br>\n";
 
-  // Kopsataan uploadatta faili verkkoalskudirikkaan
+  // Kopsataan uploadatta faili verkkolaskudirikkaan
   $copy_boob = copy($filenimi, $laskut."/".$userfile);
 
   if ($copy_boob === FALSE) {
-      echo "Kopiointi epäonnistui $filenimi $laskut/$userfile<br>\n";
+    echo "Kopiointi epäonnistui $filenimi $laskut/$userfile<br>\n";
     exit;
   }
 }
@@ -73,8 +73,15 @@ else {
 if ($handle = opendir($laskut)) {
   while (($file = readdir($handle)) !== FALSE) {
     if (is_file($laskut."/".$file)) {
-
       $nimi = $laskut."/".$file;
+
+      // Muutetaan UTF-8:ksi jos lasku on jossain toisessa merkistössä
+      $encoding = exec("file -b --mime-encoding $nimi");
+
+      if ($encoding != "" and strtoupper($encoding) != 'UTF-8') {
+        exec("recode $encoding..UTF8 $nimi");
+      }
+
       $luotiinlaskuja = erittele_laskut($nimi);
 
       // Jos tiedostosta luotiin laskuja siirretään se tieltä pois

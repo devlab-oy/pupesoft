@@ -215,7 +215,8 @@ class pdffile
     // draw text
     function draw_text($left, $bottom, $text, $parent, $attrib = array())
     {
-        
+
+        // Käännetään merkistö LATIN:iksi PDF-library ei hanskaa UTF-8:ia
         $text = iconv("UTF-8", "ISO-8859-15//TRANSLIT", $text);
 
         if (!isset($this->objects[$parent]["type"]) or $this->objects[$parent]["type"] != "page") {

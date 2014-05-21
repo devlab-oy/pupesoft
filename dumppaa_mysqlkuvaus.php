@@ -16,6 +16,9 @@ if ($php_cli) {
   // otetaan tietokanta connect
   require("inc/connect.inc");
   require("inc/functions.inc");
+
+  // dummy yhtio (menee ainoastaan filenimeen)
+  $kukarow["yhtio"] = "crond";
 }
 else {
   if (isset($_POST["tee"])) {
@@ -40,6 +43,14 @@ else {
 
   $ulos = array();
 
+  // Jos ollaan annettu poikkeava MySQL portti hostnamessa, pitää se erotella komentorivityökalua varten
+  if (strpos($dbhost, ":") !== false) {
+    list($dbhost, $dbport) = explode(":", $dbhost);
+  }
+  else {
+    $dbport = 3306;
+  }
+
   # /usr/bin/mysqldump --> toimii ainakin fedorassa ja ubuntussa by default
   if (file_exists("/usr/bin/mysqldump")) {
     $mysql_dump_path = "/usr/bin/mysqldump";
@@ -51,7 +62,7 @@ else {
     $mysql_dump_path = "mysqldump";
   }
 
-  $kala = exec("$mysql_dump_path -u $dbuser --host=$dbhost --password=$dbpass $dbkanta --no-data", $ulos);
+  $kala = exec("$mysql_dump_path --user=$dbuser --host=$dbhost --port=$dbport --password=$dbpass --no-data $dbkanta", $ulos);
 
   if (!$toot = fopen("/tmp/".$tmpfilenimi, "w")) die("Filen /tmp/$tmpfilenimi luonti epäonnistui!");
 
@@ -101,7 +112,7 @@ else {
     foreach ($rivit as $rivi) {
       $rivi = trim(str_replace("\n", " ", $rivi));
       if ($rivi != "") {
-        echo "echo \"$rivi;\" | mysql -h $dbhost -u $dbuser --password=$dbpass $dbkanta;\\n";
+        echo "echo \"$rivi;\" | mysql --user=$dbuser --host=$dbhost --port=$dbport --password=$dbpass $dbkanta;\\n";
       }
     }
   }
@@ -123,7 +134,7 @@ else {
     $rivit = explode("\n", trim($updatet));
 
     foreach ($rivit as $rivi) {
-      if (trim($rivi) != "") echo "echo \"$rivi\" | mysql -h $dbhost -u $dbuser --password=$dbpass $dbkanta;\\n";
+      if (trim($rivi) != "") echo "echo \"$rivi\" | mysql --user=$dbuser --host=$dbhost --port=$dbport --password=$dbpass $dbkanta;\\n";
       else echo "\\n";
     }
   }

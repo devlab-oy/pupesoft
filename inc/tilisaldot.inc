@@ -1,6 +1,6 @@
 <?php
 
-$MONTH_ARRAY = array(1=>t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kes‰kuu'),t('Hein‰kuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
+$MONTH_ARRAY = array(1=>t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kes√§kuu'),t('Hein√§kuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
 
 if ($tee == '1' and !isset($ajarappari)) {
   $tee = "";
@@ -14,7 +14,7 @@ if ($tee == '1') {
     $sresult = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($sresult) != 1) {
-      echo "<font class='error'>".t("Tili puuttuu tai sit‰ ei lˆydy")."!</font><br>";
+      echo "<font class='error'>".t("Tili puuttuu tai sit√§ ei l√∂ydy")."!</font><br>";
 
       $tee='';
     }
@@ -50,11 +50,11 @@ if ($tee == '1') {
 
     echo "<font class='message'>".t("Vain kuukausi").": $alvy - ".$MONTH_ARRAY[$alvm]."</font><br>";
 
-    $lisa = " sum(if(tapvm>='$alvy-$alvm-01' and tapvm<='$alvy-$alvm-$alvd', 1, 0)) Vientej‰, sum(if(tapvm>='$alvy-$alvm-01' and tapvm<='$alvy-$alvm-$alvd', summa, 0)) Saldo";
+    $lisa = " sum(if(tapvm>='$alvy-$alvm-01' and tapvm<='$alvy-$alvm-$alvd', 1, 0)) Vientej√§, sum(if(tapvm>='$alvy-$alvm-01' and tapvm<='$alvy-$alvm-$alvd', summa, 0)) Saldo";
     $wher = " and tapvm <= '$alvy-$alvm-$alvd'";
   }
   else {
-    $lisa = " count(*) Vientej‰, sum(summa) Saldo";
+    $lisa = " count(*) Vientej√§, sum(summa) Saldo";
   }
 
   if ($tilino != '') {
@@ -106,7 +106,7 @@ if ($tee == '1') {
     echo "<th>".t("Kohde")."</font></th>";
     echo "<th>".t("Projekti")."</font></th>";
   }
-  echo "<th>".t("Vientej‰")."</font></th>";
+  echo "<th>".t("Vientej√§")."</font></th>";
   echo "<th>".t("Saldo")." ".$MONTH_ARRAY[($alvk*1)]."</font></th>";
   echo "<th>".t("Kumulatiivinen")."</font></th>";
   echo "<th>".t("Summa valuutassa")."</font></th>";
@@ -131,7 +131,7 @@ if ($tee == '1') {
       $worksheet->write($excelrivi, $iiiiii, t("Projekti"), $format_bold);
       $iiiiii++;
     }
-    $worksheet->write($excelrivi, $iiiiii, t("Vientej‰"), $format_bold);
+    $worksheet->write($excelrivi, $iiiiii, t("Vientej√§"), $format_bold);
     $iiiiii++;
     $worksheet->write($excelrivi, $iiiiii, t("Saldo")." ".$MONTH_ARRAY[($alvk*1)], $format_bold);
     $iiiiii++;
@@ -154,7 +154,7 @@ if ($tee == '1') {
     $summa  += $trow['Kumulatiivinen'];
     $summa2 += $trow['Saldo'];
 
-    if ($tilino == '' or $trow['Vientej‰'] > 0) {
+    if ($tilino == '' or $trow['Vientej√§'] > 0) {
       echo "<tr>";
 
       $lopelink = "&lopetus=$PHP_SELF////toim=tilisaldot//tee=$tee//tkausi=$tkausi//alvk=$alvk//tilino=$tilino//ajarappari=$ajarappari";
@@ -179,7 +179,7 @@ if ($tee == '1') {
         echo "<td>$trow[projekti]</td>";
       }
 
-      echo "<td>$trow[Vientej‰]</td>";
+      echo "<td>$trow[Vientej√§]</td>";
       echo "<td align='right'>$trow[Saldo]</td>";
 
       if ($tilino != '') {
@@ -228,7 +228,7 @@ if ($tee == '1') {
         $iiiiii++;
         $worksheet->write($excelrivi, $iiiiii, $trow["nimi"]);
         $iiiiii++;
-        $worksheet->write($excelrivi, $iiiiii, $trow["Vientej‰"]);
+        $worksheet->write($excelrivi, $iiiiii, $trow["Vientej√§"]);
         $iiiiii++;
         $worksheet->write($excelrivi, $iiiiii, $trow["Saldo"]);
         $iiiiii++;
@@ -322,7 +322,7 @@ for ($a=$alku; $a<=$lopp; $a++) {
 
 echo "  </select>
     </td></tr>
-    <tr><th>".t("per p‰iv‰ tilist‰")."</th>";
+    <tr><th>".t("per p√§iv√§ tilist√§")."</th>";
 
 echo "<td>";
 echo livesearch_kentta("valinta", "TILIHAKU", "tilino", 120, $tilino, "EISUBMIT");
@@ -340,4 +340,4 @@ echo "<tr><th>".t("Tee Excel")."</th>
     <td><input type = 'checkbox' name = 'excel'  value = 'YES'></td></tr></table>";
 
 
-echo "<br><input type = 'submit' name='ajarappari' value = '".t("N‰yt‰")."'></form>";
+echo "<br><input type = 'submit' name='ajarappari' value = '".t("N√§yt√§")."'></form>";

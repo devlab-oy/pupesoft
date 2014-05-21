@@ -1,12 +1,12 @@
 <?php
 
-// Kutsutaanko CLI:stä
+// Kutsutaanko CLI:stÃ¤
 if (php_sapi_name() != 'cli') {
-  die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+  die ("TÃ¤tÃ¤ scriptiÃ¤ voi ajaa vain komentoriviltÃ¤!");
 }
 
 if (trim($argv[1]) == '') {
-  echo "Et antanut yhtiötä!\n";
+  echo "Et antanut yhtiÃ¶tÃ¤!\n";
   exit;
 }
 
@@ -23,11 +23,11 @@ $kukarow['yhtio'] = (string) $argv[1];
 $kukarow['kuka'] = 'admin';
 $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
-//haetaan asiakkaat, joilla ( ei ole panttitili käytössä TAI asiakas on poistettu TAI tuote on poistettu TAI panttitili riviä ei ole käsitelty) ja tarkistetaan onko näillä asiakkailla kuitenkin pantteja
-//eli jos panttitili on poistettu käytöstä ja pantteja on niin kaikki avoimet pantit pitää laskuttaa
-//ajetaan arraystä jotta resultteihin ei pääse tulemaan tuplia
+//haetaan asiakkaat, joilla ( ei ole panttitili kÃ¤ytÃ¶ssÃ¤ TAI asiakas on poistettu TAI tuote on poistettu TAI panttitili riviÃ¤ ei ole kÃ¤sitelty) ja tarkistetaan onko nÃ¤illÃ¤ asiakkailla kuitenkin pantteja
+//eli jos panttitili on poistettu kÃ¤ytÃ¶stÃ¤ ja pantteja on niin kaikki avoimet pantit pitÃ¤Ã¤ laskuttaa
+//ajetaan arraystÃ¤ jotta resultteihin ei pÃ¤Ã¤se tulemaan tuplia
 $queryt = array(
-  "/*Asiakkaalla on panttitili käytössä, mutta sitä ei ole käsitelty ja pantin myyntipvm on 6kk sitten tai aikaisemmin*/
+  "/*Asiakkaalla on panttitili kÃ¤ytÃ¶ssÃ¤, mutta sitÃ¤ ei ole kÃ¤sitelty ja pantin myyntipvm on 6kk sitten tai aikaisemmin*/
   SELECT Group_concat(panttitili.tunnus) tunnukset,
   panttitili.asiakas   AS asiakas
   FROM   asiakas
@@ -127,7 +127,7 @@ foreach($queryt as $query) {
 
       $query_insert_lisa = '';
 
-      // nollataan ale2 ja ale3 kentät ja laitetaan INSERT ale1 100%
+      // nollataan ale2 ja ale3 kentÃ¤t ja laitetaan INSERT ale1 100%
       for ($alepostfix = 2; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
         $query_insert_lisa .= " ale{$alepostfix} = 0, ";
       }
@@ -253,7 +253,7 @@ foreach($queryt as $query) {
                 uusiotunnus          = 0";
       $insert_res = pupe_query($query);
 
-      // merkataan pantti käytetyksi
+      // merkataan pantti kÃ¤ytetyksi
       $query = "UPDATE panttitili SET
                 status            = 'X',
                 kaytettypvm       = now(),

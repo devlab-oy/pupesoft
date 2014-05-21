@@ -2,7 +2,7 @@
 $ulos  = "11";
   $ulos .= sprintf ('%010d', str_replace('-','',$yritirow['tilino']));
   $ulos .= date('ymd');
-$ulos .= 'LEVERANTÖRSBETALNINGAR';
+$ulos .= 'LEVERANTÃ–RSBETALNINGAR';
 $ulos .= '      ';
 $ulos .= 'SEK';
 $ulos .= sprintf ('%-18d', ' ');

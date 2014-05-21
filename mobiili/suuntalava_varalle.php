@@ -28,17 +28,17 @@ if (isset($submit) and trim($submit) != '') {
 
   if ($submit == 'submit') {
 
-    # Koodi ei saa olla tyhj‰!
+    # Koodi ei saa olla tyhj√§!
     if ($koodi != '') {
 
       // Parsitaan uusi tuotepaikka
       // Jos tuotepaikka on luettu viivakoodina, muotoa (C21 045) tai (21C 03V)
-      if (preg_match('/^([a-zÂ‰ˆ#0-9]{2,4} [a-zÂ‰ˆ#0-9]{2,4})/i', $tuotepaikka) and substr_count($tuotepaikka, " ") == 1) {
+      if (preg_match('/^([a-z√•√§√∂#0-9]{2,4} [a-z√•√§√∂#0-9]{2,4})/i', $tuotepaikka) and substr_count($tuotepaikka, " ") == 1) {
 
-        // Pilkotaan viivakoodilla luettu tuotepaikka v‰lilyˆnnist‰
+        // Pilkotaan viivakoodilla luettu tuotepaikka v√§lily√∂nnist√§
         list($alku, $loppu) = explode(' ', $tuotepaikka);
 
-        // M‰ts‰t‰‰n numerot ja kirjaimet erilleen
+        // M√§ts√§t√§√§n numerot ja kirjaimet erilleen
         preg_match_all('/([0-9]+)|([a-z]+)/i', $alku, $alku);
         preg_match_all('/([0-9]+)|([a-z]+)/i', $loppu, $loppu);
 
@@ -48,33 +48,33 @@ if (isset($submit) and trim($submit) != '') {
         $hyllyvali = $loppu[0][0];
         $hyllytaso = $loppu[0][1];
 
-        // Kaikkia tuotepaikkoja ei pystyt‰ parsimaan
+        // Kaikkia tuotepaikkoja ei pystyt√§ parsimaan
         if (empty($hyllyalue) or empty($hyllynro) or empty($hyllyvali) or empty($hyllytaso)) {
-          $error['varalle'] .= t("Tuotepaikan haussa virhe, yrit‰ syˆtt‰‰ tuotepaikka k‰sin") . " ($tuotepaikka)<br>";
+          $error['varalle'] .= t("Tuotepaikan haussa virhe, yrit√§ sy√∂tt√§√§ tuotepaikka k√§sin") . " ($tuotepaikka)<br>";
         }
       }
-      // Tuotepaikka syˆtetty manuaalisesti (C-21-04-5) tai (C 21 04 5)
+      // Tuotepaikka sy√∂tetty manuaalisesti (C-21-04-5) tai (C 21 04 5)
       elseif (strstr($tuotepaikka, '-') or strstr($tuotepaikka, ' ')) {
-        // Parsitaan tuotepaikka omiin muuttujiin (erotelto v‰lilyˆnnill‰)
+        // Parsitaan tuotepaikka omiin muuttujiin (erotelto v√§lily√∂nnill√§)
         if (preg_match('/\w+\s\w+\s\w+\s\w+/i', $tuotepaikka)) {
           list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode(' ', $tuotepaikka);
         }
-        // (erotelto v‰liviivalla)
+        // (erotelto v√§liviivalla)
         elseif (preg_match('/\w+-\w+-\w+-\w+/i', $tuotepaikka)) {
           list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode('-', $tuotepaikka);
         }
 
-        // Ei saa olla tyhji‰ kentti‰
+        // Ei saa olla tyhji√§ kentti√§
         if ($hyllyalue == '' or $hyllynro == '' or $hyllyvali == '' or $hyllytaso == '') {
           $error['varalle'] .= t("Virheellinen tuotepaikka") . ". ($tuotepaikka)<br>";
         }
       }
       else {
-        $error['varalle'] .= t("Virheellinen tuotepaikka, yrit‰ syˆtt‰‰ tuotepaikka k‰sin") . " ($tuotepaikka)<br>";
+        $error['varalle'] .= t("Virheellinen tuotepaikka, yrit√§ sy√∂tt√§√§ tuotepaikka k√§sin") . " ($tuotepaikka)<br>";
       }
 
       # Tarkistetaan hyllypaikka ja varmistuskoodi
-      # hyllypaikan on oltava reservipaikka ja siell‰ ei saa olla tuotteita
+      # hyllypaikan on oltava reservipaikka ja siell√§ ei saa olla tuotteita
       $options = array('varmistuskoodi' => $koodi, 'reservipaikka' => 'K');
       $kaikki_ok = tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $options);
 
@@ -85,7 +85,7 @@ if (isset($submit) and trim($submit) != '') {
           if (trim($_maara) != '') {
 
             if (!is_numeric($_maara)) {
-              $error['tuotteet'] = t("M‰‰r‰ t‰ytyy olla numeerinen!");
+              $error['tuotteet'] = t("M√§√§r√§ t√§ytyy olla numeerinen!");
               $kaikki_ok = false;
               break;
             }
@@ -101,7 +101,7 @@ if (isset($submit) and trim($submit) != '') {
             $chk_varattu_row = mysql_fetch_assoc($chk_varattu_res);
 
             if ((int) ($_maara * 10000) <= (int) ($chk_varattu_row['varattu'] * 10000)) {
-              $error['tuotteet'] = t("Syˆtetty m‰‰r‰ t‰ytyy olla suurempi kuin alkuper‰inen m‰‰r‰!");
+              $error['tuotteet'] = t("Sy√∂tetty m√§√§r√§ t√§ytyy olla suurempi kuin alkuper√§inen m√§√§r√§!");
               $kaikki_ok = false;
               break;
             }
@@ -112,7 +112,7 @@ if (isset($submit) and trim($submit) != '') {
       # Jos hyllypaikka ok, laitetaan koko suuntalava varastoon
       if ($kaikki_ok and $error['varalle'] == '' and $error['tuotteet'] == '') {
 
-        # Poistetaan k‰ytt‰j‰n kesken, ett‰ osataan vied‰ varastoon
+        # Poistetaan k√§ytt√§j√§n kesken, ett√§ osataan vied√§ varastoon
         $query = "UPDATE kuka SET kesken = 0 where yhtio = '$kukarow[yhtio]' and kuka = '$kukarow[kuka]'";
         $res = pupe_query($query);
 
@@ -133,16 +133,16 @@ if (isset($submit) and trim($submit) != '') {
               $chk_varattu_res = mysql_query($query);
               $chk_varattu_row = mysql_fetch_assoc($chk_varattu_res);
 
-              # Tehd‰‰n insertti erotukselle
+              # Tehd√§√§n insertti erotukselle
               $kopioitu_tilausrivi = kopioi_tilausrivi($_tunnus);
 
-              # P‰ivit‰ kopioidun kpl (maara - varattu)
+              # P√§ivit√§ kopioidun kpl (maara - varattu)
               paivita_tilausrivin_kpl($kopioitu_tilausrivi, ($_syotetty_maara - $chk_varattu_row['varattu']));
             }
           }
         }
 
-        # P‰ivitet‰‰n hyllypaikat
+        # P√§ivitet√§√§n hyllypaikat
         $paivitetyt_rivit = paivita_hyllypaikat($alusta_tunnus, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso);
 
         if ($paivitetyt_rivit > 0) {
@@ -153,11 +153,11 @@ if (isset($submit) and trim($submit) != '') {
             "hyllyvali" => $hyllyvali,
             "hyllytaso" => $hyllytaso);
 
-          # Vied‰‰n varastoon keikka kerrallaan.
+          # Vied√§√§n varastoon keikka kerrallaan.
           foreach($saapumiset as $saapuminen) {
-            # Saako keikan vied‰ varastoon
+            # Saako keikan vied√§ varastoon
             if (saako_vieda_varastoon($saapuminen, 'kalkyyli', 1) == 1) {
-              # Ei saa vied‰ varastoon, skipataan?
+              # Ei saa vied√§ varastoon, skipataan?
               $varastovirhe = true;
               continue;
             } else {
@@ -174,14 +174,14 @@ if (isset($submit) and trim($submit) != '') {
           }
           # Jos kaikki meni ok
           if (isset($varastovirhe)) {
-            $error['varalle'] .= t("Virhe varastoonvienniss‰")."<br>";
+            $error['varalle'] .= t("Virhe varastoonvienniss√§")."<br>";
           } else {
             echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=alusta.php'>";
             exit;
           }
         }
         else {
-          $error['varalle'] .= t("Yht‰‰n tuotetta ei lˆytynyt suuntalavalta")."<br>";
+          $error['varalle'] .= t("Yht√§√§n tuotetta ei l√∂ytynyt suuntalavalta")."<br>";
         }
       }
       else {
@@ -189,7 +189,7 @@ if (isset($submit) and trim($submit) != '') {
       }
     }
     else {
-      $error['varalle'] .= t("Varmistukoodi ei voi olla tyhj‰")."<br>";
+      $error['varalle'] .= t("Varmistukoodi ei voi olla tyhj√§")."<br>";
     }
   }
 }
@@ -219,7 +219,7 @@ echo "<div class='main'>
       <td colspan='3'>{$sscc['sscc']}</td>
     </tr>
     <tr>
-      <th>",t("Ker‰yspaikka"),"</th>
+      <th>",t("Ker√§yspaikka"),"</th>
       <td><input type='text' name='tuotepaikka' value='{$_tuotepaikka}' /></td>
     </tr>
     <tr>
@@ -275,7 +275,7 @@ if (mysql_num_rows($tuotteet_res) > 0) {
   echo "<table>";
   echo "<tr>";
   echo "<th>",t("Tuoteno"),"</th>";
-  echo "<th>",t("M‰‰r‰"),"</th>";
+  echo "<th>",t("M√§√§r√§"),"</th>";
   echo "</tr>";
 
   while ($tuotteet_row = mysql_fetch_assoc($tuotteet_res)) {

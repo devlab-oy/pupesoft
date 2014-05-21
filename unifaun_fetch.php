@@ -1,6 +1,6 @@
 <?php
 
-// Kutsutaanko CLI:stä
+// Kutsutaanko CLI:stÃ¤
 $php_cli = FALSE;
 
 if (php_sapi_name() == 'cli') {
@@ -10,11 +10,11 @@ if (php_sapi_name() == 'cli') {
 date_default_timezone_set('Europe/Helsinki');
 
 
-// haetaan yhtiön tiedot vain jos tätä tiedostoa kutsutaan komentoriviltä suoraan
+// haetaan yhtiÃ¶n tiedot vain jos tÃ¤tÃ¤ tiedostoa kutsutaan komentoriviltÃ¤ suoraan
 if ($php_cli and count(debug_backtrace()) <= 1) {
 
   if (trim($argv[1]) == '') {
-    echo "Et antanut yhtiötä!\n";
+    echo "Et antanut yhtiÃ¶tÃ¤!\n";
     exit;
   }
 
@@ -35,7 +35,7 @@ if ($php_cli and count(debug_backtrace()) <= 1) {
   $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 }
 
-// Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
+// Sallitaan vain yksi instanssi tÃ¤stÃ¤ skriptistÃ¤ kerrallaan
 pupesoft_flock();
 
 if (trim($operaattori) == '') {
@@ -53,7 +53,7 @@ if (!is_dir($ftpget_dest[$operaattori])) {
   exit;
 }
 
-// Setataan tämä, niin ftp-get.php toimii niin kuin pitäisikin
+// Setataan tÃ¤mÃ¤, niin ftp-get.php toimii niin kuin pitÃ¤isikin
 $argv[1] = $operaattori;
 
 require('ftp-get.php');
@@ -65,10 +65,10 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
     if (is_file($ftpget_dest[$operaattori]."/".$file)) {
 
       /*
-        * pupessa tilausnumerona lähetettiin tilausnumero_ssccvanha esim.: 6215821_1025616
+        * pupessa tilausnumerona lÃ¤hetettiin tilausnumero_ssccvanha esim.: 6215821_1025616
        */
 
-      /* Normaalisanoma ilman viitettä
+      /* Normaalisanoma ilman viitettÃ¤
        * tilnro;sscc_ulkoinen;rahtikirjanro;datetime
        * 12345;373325380188609457;1000017762;2012-01-20 13:51:50
        */
@@ -79,7 +79,7 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
        */
 
       /* Sanomien erikoiskeissit (Itella, TNT, DPD, Matkahuolto)
-       * tilnro;ensimmäinen kollitunniste on lähetysnumero;sama ensimmäinen kollitunniste on rahtikirjanumerona;timestamp
+       * tilnro;ensimmÃ¤inen kollitunniste on lÃ¤hetysnumero;sama ensimmÃ¤inen kollitunniste on rahtikirjanumerona;timestamp
        * 199188177;MA1234567810000009586;MA1234567810000009586;2012-01-23 10:58:57 (Kimi: MAtkahuolto)
        *
        * tilnro;sscc_ulkoinen;LOGY rahtikirjanro;timestamp
@@ -97,7 +97,7 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
       $sscc_ulkoinen = (is_int($sscc_ulkoinen) and $sscc_ulkoinen == 1) ? '' : trim($sscc_ulkoinen);
 
       // Unifaun laittaa viivakoodiin kaksi etunollaa jos SSCC on numeerinen
-      // Palautussanomasta etunollaat puuttuu, joten lisätään ne tässä
+      // Palautussanomasta etunollaat puuttuu, joten lisÃ¤tÃ¤Ã¤n ne tÃ¤ssÃ¤
       if (is_numeric($sscc_ulkoinen)) {
         $sscc_ulkoinen = "00".$sscc_ulkoinen;
       }
@@ -106,7 +106,7 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
 
         list($eranumero, $sscc) = explode("_", $eranumero_sscc);
 
-        // Jos paketilla on jo ulkoinen sscc, lähetetään discardParcel-sanoma
+        // Jos paketilla on jo ulkoinen sscc, lÃ¤hetetÃ¤Ã¤n discardParcel-sanoma
         $query = "SELECT *
                   FROM kerayserat
                   WHERE yhtio        = '{$kukarow['yhtio']}'

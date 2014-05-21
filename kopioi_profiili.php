@@ -1,7 +1,7 @@
 <?php
 require ("inc/parametrit.inc");
 
-echo "<font class='head'>".t("Kopioi k‰ytt‰j‰profiileja").":</font><hr>";
+echo "<font class='head'>".t("Kopioi k√§ytt√§j√§profiileja").":</font><hr>";
 
 if (isset($fromkuka)) {
   $fromkuka = explode('##',$fromkuka);
@@ -11,13 +11,13 @@ if (isset($fromkuka)) {
 }
 
 if ($copyready != '') {
-  echo "<font class='message'>".t("Kopioitiin k‰ytt‰j‰profiili")." $fromkuka ($fromyhtio) --> Yhtiˆlle $tokuka</font><br><br>";
+  echo "<font class='message'>".t("Kopioitiin k√§ytt√§j√§profiili")." $fromkuka ($fromyhtio) --> Yhti√∂lle $tokuka</font><br><br>";
 
   //haetaan profiili kaikki tiedot
   $query = "SELECT * FROM oikeu where kuka='$fromkuka' and profiili='$fromkuka' and yhtio='$fromyhtio'";
   $kukar = pupe_query($query);
 
-  //poistetaan se uudelta yhtiˆlt‰ jos se on olemassa
+  //poistetaan se uudelta yhti√∂lt√§ jos se on olemassa
   $query = "DELETE from oikeu
             where kuka   = '$fromkuka'
             and profiili = '$fromkuka'
@@ -44,7 +44,7 @@ if ($copyready != '') {
     $upres = pupe_query($query);
   }
 
-  //p‰ivitet‰‰n myˆs k‰ytt‰jien tiedot joilla on t‰m‰ profiili
+  //p√§ivitet√§√§n my√∂s k√§ytt√§jien tiedot joilla on t√§m√§ profiili
   $query = "SELECT *
             FROM kuka
             WHERE yhtio    = '$tokuka'
@@ -56,24 +56,24 @@ if ($copyready != '') {
     $profiilit = explode(',', $krow["profiilit"]);
 
     if (count($profiilit) > 0) {
-      //k‰yd‰‰n l‰pi k‰ytt‰j‰n kaikki profiilit
+      //k√§yd√§√§n l√§pi k√§ytt√§j√§n kaikki profiilit
       $triggeri = "";
       foreach($profiilit as $prof) {
-        //jos t‰m‰ kyseinen profiili on ollut k‰ytt‰j‰ll‰ aikaisemmin, niin joudumme p‰ivitt‰m‰‰n oikeudet
+        //jos t√§m√§ kyseinen profiili on ollut k√§ytt√§j√§ll√§ aikaisemmin, niin joudumme p√§ivitt√§m√§√§n oikeudet
         if (strtoupper($prof) == strtoupper($fromkuka)) {
           $triggeri = "HAPPY";
         }
       }
 
       if ($triggeri == "HAPPY") {
-        //poistetaan k‰ytt‰j‰n vanhat
+        //poistetaan k√§ytt√§j√§n vanhat
         $query = "DELETE FROM oikeu
                   WHERE yhtio = '$tokuka'
                   and kuka    = '$krow[kuka]'
                   and lukittu = ''";
         $pres = pupe_query($query);
 
-        //k‰yd‰‰n uudestaan profiili l‰pi
+        //k√§yd√§√§n uudestaan profiili l√§pi
         foreach ($profiilit as $prof) {
           $query = "SELECT *
                     FROM oikeu
@@ -83,7 +83,7 @@ if ($copyready != '') {
           $pres = pupe_query($query);
 
           while ($trow = mysql_fetch_array($pres)) {
-            //joudumme tarkistamaan ettei t‰t‰ oikeutta ole jo t‰ll‰ k‰ytt‰j‰ll‰.
+            //joudumme tarkistamaan ettei t√§t√§ oikeutta ole jo t√§ll√§ k√§ytt√§j√§ll√§.
             //voi olla esim jos se on lukittuna annettu
             $query = "SELECT yhtio
                       FROM oikeu
@@ -114,12 +114,12 @@ if ($copyready != '') {
             }
           }
         }
-        echo "<font class='message'>P‰ivitettiin k‰ytt‰j‰n $krow[kuka] profiili $prof</font><br>";
+        echo "<font class='message'>P√§ivitettiin k√§ytt√§j√§n $krow[kuka] profiili $prof</font><br>";
       }
     }
   }
 
-  // p‰ivite‰‰n kuka-tauluun mitk‰ k‰ytt‰j‰t on aktiivisia ja mitk‰ poistettuja
+  // p√§ivite√§√§n kuka-tauluun mitk√§ k√§ytt√§j√§t on aktiivisia ja mitk√§ poistettuja
   paivita_aktiiviset_kayttajat();
   paivita_aktiiviset_kayttajat("", $tokuka);
 
@@ -136,7 +136,7 @@ $query  = "SELECT distinct yhtio, nimi
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) == 0) {
-  echo "<br><font class='message'>".t("Palvelimella ei ole muita yhtiˆit‰")."!</font>";
+  echo "<br><font class='message'>".t("Palvelimella ei ole muita yhti√∂it√§")."!</font>";
   exit;
 }
 
@@ -146,7 +146,7 @@ while ($prow = mysql_fetch_array($result)) {
   $sovyhtiot .= ",'$prow[yhtio]'";
 }
 
-// tehd‰‰n k‰ytt‰j‰listaukset
+// tehd√§√§n k√§ytt√§j√§listaukset
 $query = "SELECT distinct kuka, profiili, yhtio
           FROM oikeu
           WHERE kuka    = profiili
@@ -173,16 +173,16 @@ while ($kurow=mysql_fetch_array($kukar)) {
 echo "</select></td></tr>";
 echo "</table>";
 
-echo "<br><br><font class='message'>".t("Mille yhtiˆlle kopioidaan").":</font>";
+echo "<br><br><font class='message'>".t("Mille yhti√∂lle kopioidaan").":</font>";
 
-// tehd‰‰n k‰ytt‰j‰listaukset
+// tehd√§√§n k√§ytt√§j√§listaukset
 
 $query = "SELECT distinct yhtio, nimi FROM yhtio WHERE yhtio in ($sovyhtiot) and yhtio!='$fromyhtio'";
 $kukar = pupe_query($query);
 
-echo "<table><tr><th align='left'>".t("Yhtiˆ").":</th><td>
+echo "<table><tr><th align='left'>".t("Yhti√∂").":</th><td>
 <select name='tokuka' onchange='submit()'>
-<option value=''>".t("Valitse yhtiˆ")."</option>";
+<option value=''>".t("Valitse yhti√∂")."</option>";
 
 while ($kurow=mysql_fetch_array($kukar)) {
   if ($tokuka==$kurow["yhtio"]) {
@@ -199,7 +199,7 @@ echo "</table>";
 
 if (($tokuka!='') and ($fromkuka!='')) {
   echo "<br><br>";
-  echo "<input type='submit' name='copyready' value='".t("Kopioi k‰yttˆprofiili")." $fromkuka --> Yhtiˆlle $tonimi'>";
+  echo "<input type='submit' name='copyready' value='".t("Kopioi k√§ytt√∂profiili")." $fromkuka --> Yhti√∂lle $tonimi'>";
 }
 
 echo "</form>";

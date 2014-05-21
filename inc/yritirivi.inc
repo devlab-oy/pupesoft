@@ -1,10 +1,10 @@
 <?php
 
 $ulos = "";
-$jatko = 1; // oletetaan normaali k‰sittely
-$tyyppi = 1; // oletetaan rivin n‰kyvyys
+$jatko = 1; // oletetaan normaali k√§sittely
+$tyyppi = 1; // oletetaan rivin n√§kyvyys
 
-if ($i == 0) { //yhtiˆt‰ ei n‰ytet‰
+if ($i == 0) { //yhti√∂t√§ ei n√§ytet√§
   $tyyppi = 0;
 }
 
@@ -25,8 +25,8 @@ if (mysql_field_name($result, $i) == "kaytossa") {
   }
 
   $ulos  = "<td><select name='$nimi'>";
-  $ulos .= "<option value = '' $sel1>".t("K‰ytˆss‰")."</option>";
-  $ulos .= "<option value = 'E' $sel2>".t("Poistettu / Ei k‰ytˆss‰")."</option>";
+  $ulos .= "<option value = '' $sel1>".t("K√§yt√∂ss√§")."</option>";
+  $ulos .= "<option value = 'E' $sel2>".t("Poistettu / Ei k√§yt√∂ss√§")."</option>";
   $ulos .= "</select></td>";
   $jatko = 0;
 }
@@ -67,14 +67,14 @@ if (mysql_field_name($result, $i) == "factoring") {
   }
 
   $ulos .= "<option value=''  $chk1>".t("Ei")."</option>";
-  $ulos .= "<option value='o' $chk2>".t("Kyll‰")."</option>";
+  $ulos .= "<option value='o' $chk2>".t("Kyll√§")."</option>";
 
   $ulos .= "</select></td>";
   $jatko = 0;
 
 }
 
- if (mysql_field_name($result, $i) == "hyvak") { //hyv‰ksyj‰t
+ if (mysql_field_name($result, $i) == "hyvak") { //hyv√§ksyj√§t
   $query = "SELECT kuka, nimi
             FROM kuka
             WHERE yhtio = '$kukarow[yhtio]'

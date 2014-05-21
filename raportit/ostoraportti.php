@@ -5,14 +5,14 @@ if (isset($_REQUEST["tee"])) {
   if ($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/","",$_REQUEST["kaunisnimi"]);
 }
 
-// Ei k‰ytet‰ pakkausta
+// Ei k√§ytet√§ pakkausta
 $compression = FALSE;
 
-// Enabloidaan, ett‰ Apache flushaa kaiken mahdollisen ruudulle kokoajan.
+// Enabloidaan, ett√§ Apache flushaa kaiken mahdollisen ruudulle kokoajan.
 ini_set('implicit_flush', 1);
 ob_implicit_flush(1);
 
-// Aikaa ja muistia enemm‰n kun normisivuille
+// Aikaa ja muistia enemm√§n kun normisivuille
 ini_set("memory_limit", "5G");
 ini_set("mysql.connect_timeout", 600);
 ini_set("max_execution_time", 18000);
@@ -79,14 +79,14 @@ else {
     $rappari = $kysely_kuka;
   }
 
-  //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+  //* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
   $useslave = 1;
 
   require ("inc/connect.inc");
 
   echo "<font class='head'>".t("Ostoraportti")."</font><hr>";
 
-  // org_rajausta tarvitaan yhdess‰ selectiss‰ joka triggerˆi taas toisen asian.
+  // org_rajausta tarvitaan yhdess√§ selectiss√§ joka trigger√∂i taas toisen asian.
   $org_rajaus = $abcrajaus;
   list($abcrajaus,$abcrajaustapa) = explode("##",$abcrajaus);
 
@@ -102,7 +102,7 @@ else {
     $lisavarattu = "";
   }
 
-  // Tarvittavat p‰iv‰m‰‰r‰t
+  // Tarvittavat p√§iv√§m√§√§r√§t
   if (!isset($kka1)) $kka1 = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
   if (!isset($vva1)) $vva1 = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
   if (!isset($ppa1)) $ppa1 = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
@@ -209,13 +209,13 @@ else {
   if ($lpaiva9 >= $lsuurin and $lpaiva9 != 19700101) $lsuurin = $lpaiva9;
 
   if ($apienin == 99999999 and $lsuurin == 0) {
-    $apienin = $lsuurin = date('Ymd'); // jos mit‰‰n ei lˆydy niin NOW molempiin. :)
+    $apienin = $lsuurin = date('Ymd'); // jos mit√§√§n ei l√∂ydy niin NOW molempiin. :)
   }
 
   $apvm = substr($apienin,0,4)."-".substr($apienin,4,2)."-".substr($apienin,6,2);
   $lpvm = substr($lsuurin,0,4)."-".substr($lsuurin,4,2)."-".substr($lsuurin,6,2);
 
-  //Voidaan tarvita jotain muuttujaa t‰‰lt‰
+  //Voidaan tarvita jotain muuttujaa t√§√§lt√§
   if (isset($muutparametrit)) {
     list($temp_osasto,$temp_tuoryh,$temp_ytunnus,$temp_tuotemerkki,$temp_asiakasosasto,$temp_asiakasno,$temp_toimittaja) = explode('#', $muutparametrit);
   }
@@ -229,7 +229,7 @@ else {
             "haly", "til", "valmistuksessa", "ennpois", "jt", "siirtojt", "ennakot",
             "1kk", "3kk", "6kk", "12kk", "ke", "1x2",
             "ostoera1", "ostoera3", "ostoera6", "ostoera12", "osthaly1", "osthaly3", "osthaly6", "osthaly12",
-            "o_era", "m_era", "kosal", "komy", "M‰‰r‰",
+            "o_era", "m_era", "kosal", "komy", "M√§√§r√§",
             "kuvaus", "lyhytkuvaus", "tkorkeus", "tleveys", "tmassa", "tsyvyys", "eankoodi",
             "hinnastoon", "toimittaja", "toim_tuoteno",
             "nimitys", "ostohinta", "myyntihinta",
@@ -250,7 +250,7 @@ else {
             "Kortuoteno", "Korsaldo", "Korennpois", "Kortil",
             "Kormy1", "Kormy2","Kormy3","Kormy4");
 
-  // sarakkeiden queryiss‰ olevat nimet
+  // sarakkeiden queryiss√§ olevat nimet
   $sarake_keyt = array(  "os"      => "osasto",
               "try"      => "try",
               "tme"      => "tuotemerkki",
@@ -291,7 +291,7 @@ else {
               "m_era"      => "myynti_era",
               "kosal"      => "kosal",
               "komy"      => "komy",
-              "M‰‰r‰"      => "kpl",
+              "M√§√§r√§"      => "kpl",
               "kuvaus"    => "kuvaus",
               "lyhytkuvaus"  => "lyhytkuvaus",
               "tkorkeus"    => "tuotekorkeus",
@@ -466,7 +466,7 @@ else {
 
     echo "  <table>
         <tr><th>".t("Osasto")."</th><td colspan='3'>$osasto2</td></tr>
-        <tr><th>".t("Tuoteryhm‰")."</th><td colspan='3'>$try2</td></tr>
+        <tr><th>".t("Tuoteryhm√§")."</th><td colspan='3'>$try2</td></tr>
         <tr><th>".t("Toimittaja")."</th><td colspan='3'>$ytunnus $trow1[nimi]</td></tr>
         <tr><th>".t("Tuotemerkki")."</th><td colspan='3'>$tme2</td></tr>
         <tr><th>".t("ABC-rajaus")."</th><td colspan='3'>$abcnimi</td></tr>
@@ -505,12 +505,12 @@ else {
       $lisaa2 .= " JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and liitostunnus = '$toimittajaid' ";
     }
 
-    ///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
+    ///* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *///
     $useslave = 1;
-    //Eli haetaan connect.inc uudestaan t‰ss‰
+    //Eli haetaan connect.inc uudestaan t√§ss√§
     require("../inc/connect.inc");
 
-    //Yhtiˆvalinnat
+    //Yhti√∂valinnat
     $query  = "SELECT distinct yhtio, nimi
                from yhtio
                where konserni = '$yhtiorow[konserni]' and konserni != ''";
@@ -571,24 +571,24 @@ else {
     $paikoittain = $valitut["paikoittain"];
 
     if ($varastot == "" and $paikoittain != "") {
-      echo "<font class='error'>".t("VIRHE: Et valinnut yht‰‰n varastoa.")."</font>";
+      echo "<font class='error'>".t("VIRHE: Et valinnut yht√§√§n varastoa.")."</font>";
       exit;
     }
 
     if ($varastot == "") {
-      echo "<font class='error'>".t("VIRHE: Et valinnut yht‰‰n varastoa.")."</font>";
+      echo "<font class='error'>".t("VIRHE: Et valinnut yht√§√§n varastoa.")."</font>";
       exit;
     }
 
     if ($yhtiot == "") {
-      echo "<font class='error'>".t("VIRHE: Et valinnut mit‰‰n yhtiˆt‰.")."</font>";
+      echo "<font class='error'>".t("VIRHE: Et valinnut mit√§√§n yhti√∂t√§.")."</font>";
       exit;
     }
 
     $abcwhere = "";
 
     if ($abcrajaus != "") {
-      // katotaan JT:ss‰ olevat tuotteet
+      // katotaan JT:ss√§ olevat tuotteet
       $query = "SELECT group_concat(distinct concat(\"'\",tilausrivi.tuoteno,\"'\") separator ',')
                 FROM tilausrivi USE INDEX (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
                 JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno $lisaa)
@@ -608,19 +608,19 @@ else {
       $abc_luontiaikarajaus = "";
 
       if ($abc_laadittuaika == "alle_12kk") {
-        # N‰m‰ menee lis‰‰ -muuttujaan, koska on AND ja pit‰‰ rajata koko query‰
+        # N√§m√§ menee lis√§√§ -muuttujaan, koska on AND ja pit√§√§ rajata koko query√§
         $lisaa .= " and tuote.luontiaika >= date_sub(current_date, interval 12 month) ";
       }
       elseif ($abc_laadittuaika == "yli_12kk") {
-        # N‰m‰ menee lis‰‰ -muuttujaan, koska on AND ja pit‰‰ rajata koko query‰
+        # N√§m√§ menee lis√§√§ -muuttujaan, koska on AND ja pit√§√§ rajata koko query√§
         $lisaa .= " and tuote.luontiaika < date_sub(current_date, interval 12 month) ";
       }
       elseif ($abc_laadittuaika == "yli_annettu" and $naytauudet_pp != '' and $naytauudet_kk != '' and $naytauudet_vv != '') {
-        # N‰m‰ menee abc_luontiaikarajaus -muuttujaan, koska on OR ja pit‰‰ rajata ehdollisesti abc rajausta
+        # N√§m√§ menee abc_luontiaikarajaus -muuttujaan, koska on OR ja pit√§√§ rajata ehdollisesti abc rajausta
         $abc_luontiaikarajaus = " or tuote.luontiaika >= '$naytauudet_vv-$naytauudet_kk-$naytauudet_pp' ";
       }
       else {
-        # N‰m‰ menee abc_luontiaikarajaus -muuttujaan, koska on OR ja pit‰‰ rajata ehdollisesti abc rajausta
+        # N√§m√§ menee abc_luontiaikarajaus -muuttujaan, koska on OR ja pit√§√§ rajata ehdollisesti abc rajausta
         $abc_luontiaikarajaus = " or tuote.luontiaika >= date_sub(current_date, interval 12 month) ";
       }
 
@@ -839,38 +839,38 @@ else {
 
     $res = pupe_query($query);
 
-    //  Oletetaan ett‰ k‰ytt‰j‰ ei halyua/saa ostaa poistuvia tai poistettuja tuotteita!
+    //  Oletetaan ett√§ k√§ytt√§j√§ ei halyua/saa ostaa poistuvia tai poistettuja tuotteita!
     if (!isset($valitut["poistetut"])) $valitut["poistetut"] = "checked";
     if (!isset($valitut["poistuvat"])) $valitut["poistuvat"] = "checked";
 
     if ($valitut["poistetut"] != '' and $valitut["poistuvat"] == '') {
-      echo "<font class='message'>".t("Vain aktiiviset tuotteet, poistuvat n‰ytet‰‰n").".<br>";
+      echo "<font class='message'>".t("Vain aktiiviset tuotteet, poistuvat n√§ytet√§√§n").".<br>";
     }
     if ($valitut["poistetut"] != '' and $valitut["poistuvat"] != '') {
       echo "<font class='message'>".t("Vain aktiiviset tuotteet").".<br>";
     }
     if ($valitut["poistetut"] == '' and $valitut["poistuvat"] != '') {
-      echo "<font class='message'>".t("Vain aktiiviset tuotteet, poistetut n‰ytet‰‰n").".<br>";
+      echo "<font class='message'>".t("Vain aktiiviset tuotteet, poistetut n√§ytet√§√§n").".<br>";
     }
     if ($valitut["OSTOTVARASTOITTAIN"] != '') {
-      echo "<font class='message'>".t("Tilatut eritell‰‰n varastoittain").".<br>";
+      echo "<font class='message'>".t("Tilatut eritell√§√§n varastoittain").".<br>";
     }
 
     if ($abcrajaus != "") {
 
-      echo "<font class='message'>".t("ABC-luokka tai ABC-osastoluokka tai ABC-tuoteryhm‰luokka tai ABC-tuotemerkkiluokka")."  >= $ryhmanimet[$abcrajaus] ".t("tai sit‰ on j‰lkitoimituksessa")." ";
+      echo "<font class='message'>".t("ABC-luokka tai ABC-osastoluokka tai ABC-tuoteryhm√§luokka tai ABC-tuotemerkkiluokka")."  >= $ryhmanimet[$abcrajaus] ".t("tai sit√§ on j√§lkitoimituksessa")." ";
 
       if ($abc_laadittuaika == "alle_12kk") {
-        echo t("ja tuote on perustettu 12kk sis‰ll‰");
+        echo t("ja tuote on perustettu 12kk sis√§ll√§");
       }
       elseif ($abc_laadittuaika == "yli_12kk") {
-        echo t("ja tuotetta ei olla perustettu 12kk sis‰ll‰");
+        echo t("ja tuotetta ei olla perustettu 12kk sis√§ll√§");
       }
       elseif ($abc_laadittuaika == "yli_annettu" and $naytauudet_pp != '' and $naytauudet_kk != '' and $naytauudet_vv != '') {
-        echo t("tai tuote on perustettu j‰lkeen"). " $naytauudet_pp.$naytauudet_kk.$naytauudet_vv";
+        echo t("tai tuote on perustettu j√§lkeen"). " $naytauudet_pp.$naytauudet_kk.$naytauudet_vv";
       }
       else {
-        echo t("tai tuote on perustettu viimeisen 12kk sis‰ll‰");
+        echo t("tai tuote on perustettu viimeisen 12kk sis√§ll√§");
       }
 
       echo ".<br>";
@@ -879,12 +879,12 @@ else {
     echo t("Tuotteita")." ".mysql_num_rows($res)." ".t("kpl").".<br>";
 
     if ($valitut["EHDOTETTAVAT"] != '') {
-      echo "<font class='message'>".t("Joista j‰tet‰‰n pois ne tuotteet joita ei ehdoteta ostettavaksi").".<br>";
+      echo "<font class='message'>".t("Joista j√§tet√§√§n pois ne tuotteet joita ei ehdoteta ostettavaksi").".<br>";
     }
 
     flush();
 
-    //keksit‰‰n failille joku varmasti uniikki nimi:
+    //keksit√§√§n failille joku varmasti uniikki nimi:
     list($usec, $sec) = explode(' ', microtime());
     mt_srand((float) $sec + ((float) $usec * 100000));
     $excelnimi = md5(uniqid(mt_rand(), true)).".xls";
@@ -1136,17 +1136,17 @@ else {
       $result   = pupe_query($query);
       $kulutrow = mysql_fetch_array($result);
 
-      // Yhteens‰ kpl: myydyt normi ja ennakkorivit sek‰ kulutukset (lis‰t‰‰n laskurowiin helppouden vuoksi)
+      // Yhteens√§ kpl: myydyt normi ja ennakkorivit sek√§ kulutukset (lis√§t√§√§n laskurowiin helppouden vuoksi)
       $laskurow["ykpl1"] = $laskurow["kpl1"] + $laskurow["e_kpl1"] + $kulutrow["kpl1"];
       $laskurow["ykpl2"] = $laskurow["kpl2"] + $laskurow["e_kpl2"] + $kulutrow["kpl2"];
       $laskurow["ykpl3"] = $laskurow["kpl3"] + $laskurow["e_kpl3"] + $kulutrow["kpl3"];
       $laskurow["ykpl4"] = $laskurow["kpl4"] + $laskurow["e_kpl4"] + $kulutrow["kpl4"];
 
-      //tilauksessa, ennakkopoistot ja jt  HUOM: varastolisa m‰‰ritelty jo aiemmin!
+      //tilauksessa, ennakkopoistot ja jt  HUOM: varastolisa m√§√§ritelty jo aiemmin!
       $query = "SELECT
                 sum(if(tyyppi in ('W','M'), varattu, 0)) valmistuksessa,
                 sum(if(tyyppi = 'O', varattu, 0)) tilattu,
-                sum(if(tyyppi = 'E' and var != 'O', varattu, 0)) ennakot, # toimittamattomat ennakot ilman optiorivej‰
+                sum(if(tyyppi = 'E' and var != 'O', varattu, 0)) ennakot, # toimittamattomat ennakot ilman optiorivej√§
                 sum(if(tyyppi in ('L','V') and var not in ('P','J','O','S'), varattu, 0)) ennpois, # saldon ennakkopoistoja
                 sum(if(tyyppi = 'L' and var in ('J','S'), jt $lisavarattu, 0)) jt
                 $varastolisa
@@ -1169,7 +1169,7 @@ else {
       $siirtojtrow = mysql_fetch_array($result);
 
       if ($paikoittain == '' and $varastot_yhtiot != '') {
-        // Kaikkien valittujen varastojen paikkojen saldo yhteens‰, mukaan tulee myˆs aina ne saldot jotka ei kuulu mihink‰‰n varastoalueeseen
+        // Kaikkien valittujen varastojen paikkojen saldo yhteens√§, mukaan tulee my√∂s aina ne saldot jotka ei kuulu mihink√§√§n varastoalueeseen
         $query = "SELECT sum(saldo) saldo, varastopaikat.tunnus
                   FROM tuotepaikat
                   LEFT JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
@@ -1212,7 +1212,7 @@ else {
 
       }
       else {
-        // Ajetaan varastopaikoittain eli t‰ss‰ on just t‰n paikan saldo
+        // Ajetaan varastopaikoittain eli t√§ss√§ on just t√§n paikan saldo
         $query = "SELECT saldo
                   from tuotepaikat
                   where yhtio='$row[yhtio]'
@@ -1236,7 +1236,7 @@ else {
         $row['osto_era'] = 1;
       }
 
-      ///* lasketaan ehdotelma, mit‰ kannattaisi tilata *///
+      ///* lasketaan ehdotelma, mit√§ kannattaisi tilata *///
 
       $ostettava_kausi1 = 0;
       $ostettava_kausi2 = 0;
@@ -1275,7 +1275,7 @@ else {
         ${"ostettava_kausi".$i} = (($kulutrow[$indeksi] + $laskurow[$indeksi] + $ennp['ennpois'] + $ennp['jt'] + $siirtojtrow['siirtojt']) / $ero) * $ehd_kausi1 - ($saldo['saldo'] + $ennp['tilattu'] + $ennp['valmistuksessa'] + $ennp['ennpois'] + $ennp['jt'] + $siirtojtrow['siirtojt']);
         ${"ostettavahaly_kausi".$i} = ($row['halytysraja'] - ($saldo['saldo'] + $ennp['tilattu'] + $ennp['valmistuksessa'] + $ennp['ennpois'] + $ennp['jt']));
 
-        // jos tuotteella on joku ostoer‰ pyˆristell‰‰n ylosp‰in, ett‰ tilataan aina toimittajan haluama m‰‰r‰
+        // jos tuotteella on joku ostoer√§ py√∂ristell√§√§n ylosp√§in, ett√§ tilataan aina toimittajan haluama m√§√§r√§
         if (${"ostettava_kausi".$i} != '') {
           ${"ostettava_era".$i} = ceil(${"ostettava_kausi".$i} / $row['osto_era']) * $row['osto_era'];
 
@@ -1365,7 +1365,7 @@ else {
         $value_6kk = '';
         $value_12kk = '';
 
-        // t‰h‰n ker‰t‰‰n sarakkeiden koordinaatteja, jos pit‰‰ p‰ivitt‰‰ j‰lkik‰teen jotain tietuetta
+        // t√§h√§n ker√§t√§√§n sarakkeiden koordinaatteja, jos pit√§√§ p√§ivitt√§√§ j√§lkik√§teen jotain tietuetta
         $column_location = array();
         $kosal_yht = 0;
         $komy_yht = 0;
@@ -1403,7 +1403,7 @@ else {
             elseif ($sarake == 'siirtojt') {
               $value = $siirtojtrow[$sarake_keyt[$sarake]];
             }
-            // t‰ss‰ keississ‰ otetaan arvot omista muuttujistaan
+            // t√§ss√§ keississ√§ otetaan arvot omista muuttujistaan
             elseif ($sarake == 'ostoera1' or $sarake == 'ostoera3' or $sarake == 'ostoera6' or $sarake == 'ostoera12' or
                 $sarake == '1kk' or $sarake == '3kk' or $sarake == '6kk' or $sarake == '12kk' or
                 $sarake == 'osthaly1' or $sarake == 'osthaly3' or $sarake == 'osthaly6' or $sarake == 'osthaly12' or
@@ -1421,7 +1421,7 @@ else {
                 $bg_color = $value >= 0 ? 'yellow' : 'yellow_text_red';
               }
             }
-            // tarvitaan oma taustav‰ri (sa + ti sarakkeet yhteens‰)
+            // tarvitaan oma taustav√§ri (sa + ti sarakkeet yhteens√§)
             elseif ($sarake == 'kosal') {
               $column_location['kosal']['rivi'] = $excelrivi;
               $column_location['kosal']['sarake'] = $excelsarake;
@@ -1431,19 +1431,19 @@ else {
               $value = round(($value_1kk + $value_3kk + $value_6kk + $value_12kk) / 4);
               $bg_color = $value < 0 ? 'text_red' : '';
             }
-            // myydyt kappaleet yhteens‰
+            // myydyt kappaleet yhteens√§
             elseif ($sarake == 'komy') {
               $column_location['komy']['rivi'] = $excelrivi;
               $column_location['komy']['sarake'] = $excelsarake;
             }
-            // nimitys pit‰‰ k‰ytt‰‰ avainsanafunkkarin kautta
+            // nimitys pit√§√§ k√§ytt√§√§ avainsanafunkkarin kautta
             elseif ($sarake == 'nimitys') {
               $value = t_tuotteen_avainsanat($row, 'nimitys');
             }
             elseif ($sarake == 'epa25pvm' or $sarake == 'epa50pvm' or $sarake == 'epa75pvm' or $sarake == 'epa100pvm' or $sarake == 'luontiaika') {
               $value = tv1dateconv($row[$sarake_keyt[$sarake]]);
             }
-            // puute 1 tarvitaan oma taustav‰ri, muuten haetaan tiedot puuterow-muuttujasta
+            // puute 1 tarvitaan oma taustav√§ri, muuten haetaan tiedot puuterow-muuttujasta
             elseif ($sarake == 'pu1' or $sarake == 'pu3' or $sarake == 'pu6' or $sarake == 'pu12') {
               if ($sarake == 'pu1') {
                 $bg_color = 'brown';
@@ -1451,7 +1451,7 @@ else {
 
               $value = $puuterow[$sarake_keyt[$sarake]];
             }
-            // myynneiss‰ haetaan kaikki laskurowsta
+            // myynneiss√§ haetaan kaikki laskurowsta
             elseif ($sarake == 'my1' or $sarake == 'my3' or $sarake == 'my6' or $sarake == 'my12' or
                 $sarake == 'ed1' or $sarake == 'ed3' or $sarake == 'ed6' or $sarake == 'ed12' or
                 $sarake == 'enn1' or $sarake == 'enn3' or $sarake == 'enn6' or $sarake == 'enn12' or
@@ -1468,7 +1468,7 @@ else {
               $value = $kulutrow[$sarake_keyt[$sarake]];
             }
             // defaulttina haetaan normaalista rowsta tiedot
-            elseif ($sarake == 'M‰‰r‰') {
+            elseif ($sarake == 'M√§√§r√§') {
               //korvaavat tuotteet
               $query  = "SELECT id
                          FROM korvaavat
@@ -1664,7 +1664,7 @@ else {
                   $bg_color = '';
                 }
                 else {
-                  // jos t‰nne tullaan niin kosal-sarake pit‰‰ v‰rj‰t‰ tyhj‰n‰ keltaiseksi
+                  // jos t√§nne tullaan niin kosal-sarake pit√§√§ v√§rj√§t√§ tyhj√§n√§ keltaiseksi
                   if (count($column_location) > 0) {
                     $korvaavien_rivi = (int) $column_location['kosal']['rivi'];
                     $korvaavien_sarake = (int) $column_location['kosal']['sarake'];
@@ -1679,7 +1679,7 @@ else {
                 }
               }
               else {
-                // jos t‰nne tullaan niin kosal-sarake pit‰‰ v‰rj‰t‰ tyhj‰n‰ keltaiseksi
+                // jos t√§nne tullaan niin kosal-sarake pit√§√§ v√§rj√§t√§ tyhj√§n√§ keltaiseksi
                 if (count($column_location) > 0) {
                   $korvaavien_rivi = (int) $column_location['kosal']['rivi'];
                   $korvaavien_sarake = (int) $column_location['kosal']['sarake'];
@@ -1701,7 +1701,7 @@ else {
 
             if ($value != '') {
               // katsotaan onko arvo numerollinen excel writerin takia (eri funkkarit)
-              // Ean on numeerinen, mutta excel rikkoo sen koska on niin pitk‰.
+              // Ean on numeerinen, mutta excel rikkoo sen koska on niin pitk√§.
               if (is_numeric($value) and $sarakkeet[$key] != 'eankoodi') {
                 if ($bg_color != '') {
                   $worksheet->writeNumber($excelrivi, $excelsarake, round($value, 2), ${"format_bg_".$bg_color});
@@ -1720,7 +1720,7 @@ else {
               }
             }
 
-            // siirret‰‰n saraketta eteenp‰in
+            // siirret√§√§n saraketta eteenp√§in
             $excelsarake++;
           }
         }
@@ -1878,16 +1878,16 @@ else {
     echo "  <form method='post' autocomplete='off'>
         <input type='hidden' name='tee' id='tee' value=''>
         <input type='hidden' name='toimittajaid' value='$toimittajaid'>
-        <br/>",t("Valitse v‰hint‰‰n yksi seuraavista:"),"<br/>";
+        <br/>",t("Valitse v√§hint√§√§n yksi seuraavista:"),"<br/>";
 
     // Monivalintalaatikot (osasto, try tuotemerkki...)
-    // M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
+    // M√§√§ritell√§√§n mitk√§ latikot halutaan mukaan
     $lisa  = "";
     $ulisa = "";
 
-    // selite     = k‰ytet‰‰nkˆ uutta vai vanhaa ulkoasua
-    // selitetark   = n‰ytett‰v‰t monivalintalaatikot, jos tyhj‰‰, otetaan oletus alhaalla
-    // selitetark_2 = mitk‰ n‰ytett‰vist‰ monivalintalaatikoista on normaaleja alasvetovalikoita
+    // selite     = k√§ytet√§√§nk√∂ uutta vai vanhaa ulkoasua
+    // selitetark   = n√§ytett√§v√§t monivalintalaatikot, jos tyhj√§√§, otetaan oletus alhaalla
+    // selitetark_2 = mitk√§ n√§ytett√§vist√§ monivalintalaatikoista on normaaleja alasvetovalikoita
     $query = "SELECT selite, selitetark, REPLACE(selitetark_2, ', ', ',') selitetark_2
               FROM avainsana
               WHERE yhtio  = '$kukarow[yhtio]'
@@ -1975,7 +1975,7 @@ else {
     echo "<select name='abcrajausluokka'>";
     echo "<option {$sel['y']} value='y'>",t("Yrityksen luokka"),"</option>";
     echo "<option {$sel['os']} value='os'>",t("Osaston luokka"),"</option>";
-    echo "<option {$sel['try']} value='try'>",t("Tuoteryhm‰n luokka"),"</option>";
+    echo "<option {$sel['try']} value='try'>",t("Tuoteryhm√§n luokka"),"</option>";
     echo "<option {$sel['tme']} value='tme'>",t("Tuotemerkin luokka"),"</option>";
     echo "</select>";
     echo "</td></tr>";
@@ -1993,7 +1993,7 @@ else {
     $sresult = pupe_query($query);
 
     echo "<select name='asiakasosasto'>";
-    echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";
+    echo "<option value=''>".t("N√§yt√§ kaikki")."</option>";
 
     while ($srow = mysql_fetch_array($sresult)) {
       $sel = '';
@@ -2030,7 +2030,7 @@ else {
     $sresult = pupe_query($query);
 
     if ($kysely_warning != '') {
-      echo "<font class='error'>",t("Et saa tallentaa toisen k‰ytt‰j‰n raporttia"),"!!!";
+      echo "<font class='error'>",t("Et saa tallentaa toisen k√§ytt√§j√§n raporttia"),"!!!";
     }
 
     echo "<table>";
@@ -2183,7 +2183,7 @@ else {
     }
 
     if (!isset($edrappari) or ($rappari == "" and $edrappari != "")) {
-      $defaultit = "PƒƒLLE";
+      $defaultit = "P√Ñ√ÑLLE";
     }
 
     $abcnimi = isset($ryhmanimet[$abcrajaus]) ? $ryhmanimet[$abcrajaus] : '';
@@ -2207,7 +2207,7 @@ else {
         <table>";
 
     if ($osasto != "") echo "<tr><th>".t("Osasto")."</th><td colspan='2'>$osasto</td></tr>";
-    if ($try != "") echo "<tr><th>".t("Tuoteryhm‰")."</th><td colspan='2'>$try</td></tr>";
+    if ($try != "") echo "<tr><th>".t("Tuoteryhm√§")."</th><td colspan='2'>$try</td></tr>";
     if ($ytunnus != "") echo "<tr><th>".t("Toimittaja")."</th><td colspan='2'>$ytunnus {$trow1['nimi']}</td></tr>";
     if ($tuotemerkki != "") echo "<tr><th>".t("Tuotemerkki")."</th><td colspan='2'>$tuotemerkki</td></tr>";
     if ($abcnimi != "") echo "<tr><th>".t("ABC-rajaus")."</th><td colspan='2'>$abcnimi</td></tr>";
@@ -2218,8 +2218,8 @@ else {
 
     echo "  <tr>
         <td class='back'></td>
-        <th>".t("Alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
-        <th>".t("Loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th></tr>";
+        <th>".t("Alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
+        <th>".t("Loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th></tr>";
 
     echo "  <tr><th>".t("Kausi 1")."</th>
         <td><input type='text' name='ppa1' value='$ppa1' size='5'>
@@ -2263,7 +2263,7 @@ else {
       $chk = "CHECKED";
     }
 
-    echo "<tr><th>".t("Tallenna p‰iv‰m‰‰r‰t:")."</th><td colspan='2'><input type='checkbox' name='valitut[TALLENNAPAIVAM]' value='TALLENNAPAIVAM' $chk></td></tr>";
+    echo "<tr><th>".t("Tallenna p√§iv√§m√§√§r√§t:")."</th><td colspan='2'><input type='checkbox' name='valitut[TALLENNAPAIVAM]' value='TALLENNAPAIVAM' $chk></td></tr>";
     echo "  <tr><td class='back'><br></td></tr>";
 
     //Ostokausivalinnat
@@ -2294,11 +2294,11 @@ else {
     echo "<tr><td class='back'><br></td></tr>";
 
     if (table_exists("yhteensopivuus_rekisteri")) {
-      echo "<tr><th>",t("Vuosimalliv‰li"),"<td colspan='2'><input type='text' name='vm1' id='vm1' size='10' value='$vm1'> - <input type='text' name='vm2' id='vm2' size='10' value='$vm2'></td></tr>";
+      echo "<tr><th>",t("Vuosimalliv√§li"),"<td colspan='2'><input type='text' name='vm1' id='vm1' size='10' value='$vm1'> - <input type='text' name='vm2' id='vm2' size='10' value='$vm2'></td></tr>";
       echo "<tr><td class='back'><br></td></tr>";
     }
 
-    //Yhtiˆvalinnat
+    //Yhti√∂valinnat
     $query  = "SELECT distinct yhtio, nimi
                from yhtio
                where konserni = '$yhtiorow[konserni]' and konserni != ''";
@@ -2318,7 +2318,7 @@ else {
         }
 
         if ($vlask == 0) {
-          echo "<tr><th rowspan='".mysql_num_rows($presult)."'>Huomioi yhtiˆn myynnit:</th>";
+          echo "<tr><th rowspan='".mysql_num_rows($presult)."'>Huomioi yhti√∂n myynnit:</th>";
         }
         else {
           echo "<tr>";
@@ -2349,46 +2349,46 @@ else {
     echo "<tr><th>".t("Aja raportti varastopaikoittain")."</th><td colspan='2'><input type='checkbox' name='valitut[paikoittain]' value='PAIKOITTAIN' $chk></td></tr>";
 
 
-    //N‰ytet‰‰nkˆ poistetut tuotteet
+    //N√§ytet√§√§nk√∂ poistetut tuotteet
     $chk = "";
-    if ($valitut["poistetut"] != '' or $defaultit == "PƒƒLLE") {
+    if ($valitut["poistetut"] != '' or $defaultit == "P√Ñ√ÑLLE") {
       $chk = "CHECKED";
     }
 
-    echo "<tr><th>".t("ƒl‰ n‰yt‰ poistettuja tuotteita")."</th><td colspan='2'><input type='checkbox' name='valitut[poistetut]' value='POISTETUT' $chk></td></tr>";
+    echo "<tr><th>".t("√Ñl√§ n√§yt√§ poistettuja tuotteita")."</th><td colspan='2'><input type='checkbox' name='valitut[poistetut]' value='POISTETUT' $chk></td></tr>";
 
-    //N‰ytet‰‰nkˆ poistetut tuotteet
+    //N√§ytet√§√§nk√∂ poistetut tuotteet
     $chk = "";
-    if ($valitut["poistuvat"] != '' or $defaultit == "PƒƒLLE") {
+    if ($valitut["poistuvat"] != '' or $defaultit == "P√Ñ√ÑLLE") {
       $chk = "CHECKED";
     }
 
-    echo "<tr><th>".t("ƒl‰ n‰yt‰ poistuvia tuotteita")."</th><td colspan='2'><input type='checkbox' name='valitut[poistuvat]' value='POISTUVAT' $chk></td></tr>";
+    echo "<tr><th>".t("√Ñl√§ n√§yt√§ poistuvia tuotteita")."</th><td colspan='2'><input type='checkbox' name='valitut[poistuvat]' value='POISTUVAT' $chk></td></tr>";
 
 
-    //N‰ytet‰‰nkˆ poistetut tuotteet
+    //N√§ytet√§√§nk√∂ poistetut tuotteet
     $chk = "";
-    if ($valitut["EIHINNASTOON"] != '' or $defaultit == "PƒƒLLE") {
+    if ($valitut["EIHINNASTOON"] != '' or $defaultit == "P√Ñ√ÑLLE") {
       $chk = "CHECKED";
     }
 
-    echo "<tr><th>".t("ƒl‰ n‰yt‰ tuotteita joita ei n‰ytet‰ hinnastossa")."</th><td colspan='2'><input type='checkbox' name='valitut[EIHINNASTOON]' value='EIHINNASTOON' $chk></td></tr>";
+    echo "<tr><th>".t("√Ñl√§ n√§yt√§ tuotteita joita ei n√§ytet√§ hinnastossa")."</th><td colspan='2'><input type='checkbox' name='valitut[EIHINNASTOON]' value='EIHINNASTOON' $chk></td></tr>";
 
-    //N‰ytet‰‰nkˆ ei varastoitavat tuotteet
+    //N√§ytet√§√§nk√∂ ei varastoitavat tuotteet
     $chk = "";
     if ($valitut["EIVARASTOITAVA"] != '') {
       $chk = "CHECKED";
     }
 
-    echo "<tr><th>".t("ƒl‰ n‰yt‰ tuotteita joita ei varastoida")."</th><td colspan='2'><input type='checkbox' name='valitut[EIVARASTOITAVA]' value='EIVARASTOITAVA' $chk></td></tr>";
+    echo "<tr><th>".t("√Ñl√§ n√§yt√§ tuotteita joita ei varastoida")."</th><td colspan='2'><input type='checkbox' name='valitut[EIVARASTOITAVA]' value='EIVARASTOITAVA' $chk></td></tr>";
 
-    //N‰ytet‰‰nkˆ ehdotettavat tuotteet
+    //N√§ytet√§√§nk√∂ ehdotettavat tuotteet
     $chk = "";
     if ($valitut["EHDOTETTAVAT"] != '') {
       $chk = "CHECKED";
     }
 
-    echo "<tr><th>".t("N‰yt‰ vain ostettavaksi ehdotettavat rivit")."</th><td colspan='2'><input type='checkbox' name='valitut[EHDOTETTAVAT]' value='EHDOTETTAVAT' $chk></td></tr>";
+    echo "<tr><th>".t("N√§yt√§ vain ostettavaksi ehdotettavat rivit")."</th><td colspan='2'><input type='checkbox' name='valitut[EHDOTETTAVAT]' value='EHDOTETTAVAT' $chk></td></tr>";
 
     if ($abcrajaus != "") {
 
@@ -2403,7 +2403,7 @@ else {
       echo "
       <tr>
         <th>
-          ".t("Listaa myˆs tuotteet, jotka on perustettu 12kk sis‰ll‰")."
+          ".t("Listaa my√∂s tuotteet, jotka on perustettu 12kk sis√§ll√§")."
         </th>
         <td colspan='2'>
           <input type='radio' name='abc_laadittuaika' value='' $chk1>
@@ -2412,7 +2412,7 @@ else {
 
       <tr>
         <th>
-          ".t("ƒl‰ listaa 12kk sis‰ll‰ perustettuja tuotteita")."
+          ".t("√Ñl√§ listaa 12kk sis√§ll√§ perustettuja tuotteita")."
         </th>
         <td colspan='2'>
           <input type='radio' name='abc_laadittuaika' value='alle_12kk' $chk2>
@@ -2421,7 +2421,7 @@ else {
 
       <tr>
         <th>
-          ".t("Listaa vain 12kk sis‰ll‰ perustetut tuotteet")."
+          ".t("Listaa vain 12kk sis√§ll√§ perustetut tuotteet")."
         </th>
         <td colspan='2'>
           <input type='radio' name='abc_laadittuaika' value='yli_12kk' $chk3>
@@ -2430,7 +2430,7 @@ else {
 
       <tr>
         <th>
-          ".t("Listaa myˆs tuotteet, jotka on perustettu j‰lkeen")."
+          ".t("Listaa my√∂s tuotteet, jotka on perustettu j√§lkeen")."
         </th>
         <td colspan='2'>
           <input type='radio' name='abc_laadittuaika' value='yli_annettu' $chk4>&nbsp;
@@ -2445,7 +2445,7 @@ else {
     echo "<tr><td class='back'><br></td></tr>";
 
     //Valitaan varastot joiden saldot huomioidaan
-    //Tutkitaan onko k‰ytt‰j‰ klikannut useampaa yhtiˆt‰
+    //Tutkitaan onko k√§ytt√§j√§ klikannut useampaa yhti√∂t√§
     if ($konsyhtiot  != '') {
       $konsyhtiot = " yhtio in (".$konsyhtiot.") ";
     }
@@ -2465,7 +2465,7 @@ else {
     echo "<tr>";
     echo "<th rowspan='".(mysql_num_rows($vtresult)+1)."'>".t("Varastot").":</th>";
     echo "<th>".t("Huomioi varaston saldo ostoehdotuksen laskennassa")."</th>";
-    echo "<th>".t("N‰yt‰ myˆs varaston saldo")."</th>";
+    echo "<th>".t("N√§yt√§ my√∂s varaston saldo")."</th>";
     echo "</tr>";
 
     while ($vrow = mysql_fetch_array($vtresult)) {

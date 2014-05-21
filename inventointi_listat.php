@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("inc/parametrit.inc");
@@ -8,7 +8,7 @@ require ("inc/parametrit.inc");
 if (strtolower($toim) == 'oletusvarasto') {
 
   if ($kukarow['oletus_varasto'] == 0) {
-    echo "<font class='error'>",t("Oletusvarastoa ei ole asetettu k‰ytt‰j‰lle"),".</font><br />";
+    echo "<font class='error'>",t("Oletusvarastoa ei ole asetettu k√§ytt√§j√§lle"),".</font><br />";
 
     require ("inc/footer.inc");
     exit;
@@ -27,12 +27,12 @@ echo "<input type='hidden' name='toim' value='$toim'>";
 echo "<input type='hidden' name='tee' value='TULOSTA'>";
 
 // Monivalintalaatikot (osasto, try tuotemerkki...)
-// M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
+// M√§√§ritell√§√§n mitk√§ latikot halutaan mukaan
 echo "<br><table>";
 echo "<tr><th>",t("Rajaa tuotteita"),"</th><td nowrap>";
 
-// selitetark   = n‰ytett‰v‰t monivalintalaatikot, jos tyhj‰‰, otetaan oletus alhaalla
-// selitetark_2 = mitk‰ n‰ytett‰vist‰ monivalintalaatikoista on normaaleja alasvetovalikoita
+// selitetark   = n√§ytett√§v√§t monivalintalaatikot, jos tyhj√§√§, otetaan oletus alhaalla
+// selitetark_2 = mitk√§ n√§ytett√§vist√§ monivalintalaatikoista on normaaleja alasvetovalikoita
 $query = "SELECT selitetark, REPLACE(selitetark_2, ', ', ',') selitetark_2
           FROM avainsana
           WHERE yhtio  = '$kukarow[yhtio]'
@@ -42,7 +42,7 @@ $avainsana_result = pupe_query($query);
 $avainsana_row = mysql_fetch_assoc($avainsana_result);
 
 // Monivalintalaatikot (osasto, try tuotemerkki...)
-// M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
+// M√§√§ritell√§√§n mitk√§ latikot halutaan mukaan
 if (trim($avainsana_row['selitetark']) != '') {
   $monivalintalaatikot = explode(",", $avainsana_row['selitetark']);
 
@@ -62,15 +62,15 @@ else {
 require ("tilauskasittely/monivalintalaatikot.inc");
 
 echo "</td></tr>";
-echo "<tr><th>".t("Listaa vain myydyimm‰t:")."</th>";
+echo "<tr><th>".t("Listaa vain myydyimm√§t:")."</th>";
 echo "<td><input type='text' size='6' name='top'> ".t("tuotetta");
 echo "</td></tr>";
 
-echo "<tr><th>".t("N‰yt‰ eniten varastonarvoon vaikuttavaa")."</th>";
+echo "<tr><th>".t("N√§yt√§ eniten varastonarvoon vaikuttavaa")."</th>";
 echo "<td><input type='text' size='6' name='varastoonvaikutus'> ".t("tuotetta");
 echo "</td></tr>";
 
-echo "<tr><th>".t("N‰yt‰ vain tuotteet joiden varaston arvo on yli")."</th>";
+echo "<tr><th>".t("N√§yt√§ vain tuotteet joiden varaston arvo on yli")."</th>";
 echo "<td><input type='text' size='9' name='varastonarvo'> ".$yhtiorow["valkoodi"]."</td>";
 echo "</tr>";
 
@@ -98,8 +98,8 @@ if ($yhtiorow['kerayserat'] != '') {
             AND nimitys != ''";
   $kresult = pupe_query($query);
 
-  # Ker‰ysvyˆhyke dropdown
-  echo "<tr><th>",t("Ker‰ysvyˆhyke"),"</th>";
+  # Ker√§ysvy√∂hyke dropdown
+  echo "<tr><th>",t("Ker√§ysvy√∂hyke"),"</th>";
   echo "<td><select name='keraysvyohyke'>";
   echo "<option value=''>",t("Valitse"),"</option>";
 
@@ -146,7 +146,7 @@ echo "<tr><th>".t("Valitse raportti")."</th>";
 echo "<td>
     <select name='raportti'>
       <option value=''>".t("Valitse")."</option>
-      <option value='vaarat' ".$sel['vaarat'].">".t("V‰‰r‰t saldot")."</option>
+      <option value='vaarat' ".$sel['vaarat'].">".t("V√§√§r√§t saldot")."</option>
       <option value='loppuneet' ".$sel['loppuneet'].">".t("Loppuneet tuotteet")."</option>
       <option value='negatiiviset' ".$sel['negatiiviset'].">".t("Kaikki miinus-saldolliset")."</option>
       <option value='tapahtumia' ".$sel['tapahtumia'].">".t("Tuotteet joilla tulo, myynti, valmistus tai varastonsiirtotapahtumia")."</option>
@@ -161,12 +161,12 @@ if (!isset($kkl)) $kkl = date("m");
 if (!isset($vvl)) $vvl = date("Y");
 if (!isset($ppl)) $ppl = date("d");
 
-echo "<tr><th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>";
+echo "<tr><th>".t("Sy√∂t√§ alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>";
 echo "<td><input type='text' name='ppa' value='$ppa' size='3'>
   <input type='text' name='kka' value='$kka' size='3'>
     <input type='text' name='vva' value='$vva' size='5'></td>";
 echo "</tr>";
-echo "<tr><th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>";
+echo "<tr><th>".t("Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>";
 echo "<td>  <input type='text' name='ppl' value='$ppl' size='3'>
   <input type='text' name='kkl' value='$kkl' size='3'>
   <input type='text' name='vvl' value='$vvl' size='5'>";
@@ -202,14 +202,14 @@ elseif ($naytasaldo == 'S') {
   $sel2 = "SELECTED";
 }
 
-echo "<tr><th>".t("Tulosta hyllyss‰ oleva m‰‰r‰:")."</th>";
+echo "<tr><th>".t("Tulosta hyllyss√§ oleva m√§√§r√§:")."</th>";
 echo "<td><select name='naytasaldo'>";
-echo "<option value=''>".t("Ei n‰ytet‰ m‰‰r‰‰")."</option>";
-echo "<option value='H' $sel1>".t("Hyllyss‰ oleva m‰‰r‰")."</option>";
+echo "<option value=''>".t("Ei n√§ytet√§ m√§√§r√§√§")."</option>";
+echo "<option value='H' $sel1>".t("Hyllyss√§ oleva m√§√§r√§")."</option>";
 echo "<option value='S' $sel2>".t("Saldo")."</option></select>";
 echo "</td></tr>";
 
-echo "<tr><th>".t("Listaa myˆs tuotteet jotka ovat inventoitu kahden viikon sis‰ll‰:")."</th>
+echo "<tr><th>".t("Listaa my√∂s tuotteet jotka ovat inventoitu kahden viikon sis√§ll√§:")."</th>
     <td><input type='checkbox' name='naytainvtuot' ".((isset($naytainvtuot) and $naytainvtuot!='') ? 'CHECKED' : '')."></td>
     </tr>";
 
@@ -217,11 +217,11 @@ if ($piilotaToim_tuoteno != "") {
   $checkPiilotaToim_tuoteno = "CHECKED";
 }
 
-echo "<tr><th>".t("ƒl‰ tulosta toimittajan tuotenumeroa listauksiin:")."</th>
+echo "<tr><th>".t("√Ñl√§ tulosta toimittajan tuotenumeroa listauksiin:")."</th>
   <td><input type='checkbox' name='piilotaToim_tuoteno' value='Y' $checkPiilotaToim_tuoteno></td>
   </tr>";
 
-echo "<tr><th>".t("Listaa vain tuotteet joita ei ole inventoitu p‰iv‰m‰‰r‰n‰ tai sen j‰lkeen:")."</th>
+echo "<tr><th>".t("Listaa vain tuotteet joita ei ole inventoitu p√§iv√§m√§√§r√§n√§ tai sen j√§lkeen:")."</th>
   <td><input type='text' name='ippa' value='$ippa' size='3'>
   <input type='text' name='ikka' value='$ikka' size='3'>
   <input type='text' name='ivva' value='$ivva' size='5'></td>
@@ -252,12 +252,12 @@ if ($yhtiorow['kerayserat'] == 'K') {
     echo "<td><select name='reservipaikka'>";
     echo "<option value=''>",t("Valitse"),"</option>";
     echo "<option value='E'>",t("Ei"),"</option>";
-    echo "<option value='K'>",t("Kyll‰"),"</option>";
+    echo "<option value='K'>",t("Kyll√§"),"</option>";
     echo "</select></td></tr>";
   }
 }
 
-echo "<tr><th>",t("J‰rjest‰ lista:"),"</th>";
+echo "<tr><th>",t("J√§rjest√§ lista:"),"</th>";
 
 $sel1 = "";
 $sel2 = "";
@@ -277,14 +277,14 @@ else {
 }
 
 echo "<td><select name='jarjestys'>";
-echo "<option value=''  $sel1>".t("Osoitej‰rjestykseen")."</option>";
-echo "<option value='tuoteno' $sel2>".t("Tuotenumeroj‰rjestykseen")."</option>";
-echo "<option value='nimityssorttaus' $sel4>".t("Nimitysj‰rjestykseen")."</option>";
-echo "<option value='osastotrytuoteno' $sel3>".t("Osasto/Tuoteryhm‰/Tuotenumeroj‰rjestykseen")."</option>";
+echo "<option value=''  $sel1>".t("Osoitej√§rjestykseen")."</option>";
+echo "<option value='tuoteno' $sel2>".t("Tuotenumeroj√§rjestykseen")."</option>";
+echo "<option value='nimityssorttaus' $sel4>".t("Nimitysj√§rjestykseen")."</option>";
+echo "<option value='osastotrytuoteno' $sel3>".t("Osasto/Tuoteryhm√§/Tuotenumeroj√§rjestykseen")."</option>";
 
 echo "</td></tr>";
 
-echo "<tr><th>",t("J‰rjest‰ sorttauskentt‰"),":</th>";
+echo "<tr><th>",t("J√§rjest√§ sorttauskentt√§"),":</th>";
 
 $selsorttaus = array();
 
@@ -381,7 +381,7 @@ echo "</table>";
 echo "<br><input type='submit' name='tulosta' value='",t("Aja"),"'>";
 echo "</form><br><br>";
 
-// jos paat ykkˆseks niin ei koita muokata/tulostaa file‰, vaan ekottaa filen polun ja nimen
+// jos paat ykk√∂seks niin ei koita muokata/tulostaa file√§, vaan ekottaa filen polun ja nimen
 $debug = "0";
 
 
@@ -400,7 +400,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
   $rajauslisa = "";
   $rajauslisatuote = "";
 
-  // jos ollaan ruksattu nayta myˆs inventoidut
+  // jos ollaan ruksattu nayta my√∂s inventoidut
   if ($naytainvtuot == '') {
     $rajauslisa .= " and tuotepaikat.inventointiaika <= date_sub(now(),interval 14 day) ";
   }
@@ -426,10 +426,10 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
 
     $tuotenoarray = array();
 
-    //n‰ytet‰‰n vain $top myydyint‰ tuotetta
-      $kutsu .= " ".t("Listaa vain myydyimm‰t:")." $top ".t("tuotetta");
+    //n√§ytet√§√§n vain $top myydyint√§ tuotetta
+      $kutsu .= " ".t("Listaa vain myydyimm√§t:")." $top ".t("tuotetta");
 
-        //Rullaava 6 kuukautta taaksep‰in
+        //Rullaava 6 kuukautta taaksep√§in
         $kka = date("m",mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
         $vva = date("Y",mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
         $ppa = date("d",mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
@@ -464,7 +464,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
 
     $tuotenoarray = array();
 
-    // N‰yt‰ Eniten Varastonarvoon Vaikuttavaa Tuotetta
+    // N√§yt√§ Eniten Varastonarvoon Vaikuttavaa Tuotetta
     $having = "";
     $limit = "";
 
@@ -558,14 +558,14 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
     $sorttauskentan_jarjestys .= ')';
   }
 
-  //hakulause, t‰m‰ on sama kaikilla vaihtoehdolilla ja gorup by lause joka on sama kaikilla
+  //hakulause, t√§m√§ on sama kaikilla vaihtoehdolilla ja gorup by lause joka on sama kaikilla
   $select  = " tuote.tuoteno, tuote.nimitys, tuote.sarjanumeroseuranta, group_concat(distinct tuotteen_toimittajat.toim_tuoteno) toim_tuoteno, tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka, inventointiaika, tuotepaikat.saldo,
   $sorttauskentan_jarjestys sorttauskentta";
   $groupby = " tuote.tuoteno, tuote.nimitys, tuote.sarjanumeroseuranta, tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, varastopaikka, inventointiaika, tuotepaikat.saldo ";
 
   $joinlisa = "";
 
-  # Resrvipaikka ja ker‰ysvyˆhyke rajaus vain jos ker‰yser‰t parametri on asetettu.
+  # Resrvipaikka ja ker√§ysvy√∂hyke rajaus vain jos ker√§yser√§t parametri on asetettu.
   if (($yhtiorow["varastopaikkojen_maarittely"] != '' and isset($reservipaikka)) or (isset($keraysvyohyke) and $yhtiorow["kerayserat"] == 'K')) {
     $ressulisa = $reservipaikka != '' ? "varaston_hyllypaikat.reservipaikka = '".mysql_real_escape_string($reservipaikka)."' AND " : "";
     $vyohykelisa = $keraysvyohyke != '' ? "varaston_hyllypaikat.keraysvyohyke = '".mysql_real_escape_string($keraysvyohyke)."' AND " : "";
@@ -585,9 +585,9 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
     $where = "";
 
     if ($tryt != '' or $osastot != '') {
-      ///* Inventoidaan osaston tai tuoteryhm‰n perusteella *///
+      ///* Inventoidaan osaston tai tuoteryhm√§n perusteella *///
       if ($osastot != "") $kutsu .= " ".t("Osasto").": $osastot ";
-      if ($tryt != "") $kutsu .= " ".t("Tuoteryhm‰").": $tryt ";
+      if ($tryt != "") $kutsu .= " ".t("Tuoteryhm√§").": $tryt ";
 
       $yhtiotaulu = "tuote";
       $from     = " FROM tuote use index (osasto_try_index) ";
@@ -698,7 +698,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
     $saldoresult = pupe_query($query);
 
     if (mysql_num_rows($saldoresult) == 0) {
-      echo "<font class='error'>",t("Ei lˆytynyt rivej‰"),"</font><br><br>";
+      echo "<font class='error'>",t("Ei l√∂ytynyt rivej√§"),"</font><br><br>";
       $tee='';
     }
   }
@@ -742,7 +742,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
 
     if ($raportti == 'vaarat') {
 
-      $kutsu = " ".t("V‰‰r‰t Saldot")." ({$ppa}.{$kka}.{$vva} - {$ppl}.{$kkl}.{$vvl}) ";
+      $kutsu = " ".t("V√§√§r√§t Saldot")." ({$ppa}.{$kka}.{$vva} - {$ppl}.{$kkl}.{$vvl}) ";
 
       if ($jarjestys == 'tuoteno') {
         $orderby = " tuotepaikat.tuoteno, sorttauskentta ";
@@ -850,7 +850,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
           }
 
     if (mysql_num_rows($saldoresult) == 0) {
-      echo "<font class='error'>".t("Yht‰‰n tuotetta ei lˆytynyt")."!</font><br><br>";
+      echo "<font class='error'>".t("Yht√§√§n tuotetta ei l√∂ytynyt")."!</font><br><br>";
       $tee = '';
     }
   }
@@ -870,7 +870,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
       $saldoresult = pupe_query($query);
   }
   else {
-    echo "<font class='error'>".t("Yht‰‰n tuotetta ei lˆytynyt")."!</font><br><br>";
+    echo "<font class='error'>".t("Yht√§√§n tuotetta ei l√∂ytynyt")."!</font><br><br>";
     $tee = '';
   }
 }
@@ -879,7 +879,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
   if (mysql_num_rows($saldoresult) > 0 ) {
 
     //kirjoitetaan  faili levylle..
-    //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+    //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
     list($usec, $sec) = explode(' ', microtime());
     mt_srand((float) $sec + ((float) $usec * 100000));
     $filenimi = "/tmp/".preg_replace("/[^a-z0-9\-_]/i", "", t("Inventointilista")."-".md5(uniqid(mt_rand(), true))).".txt";
@@ -893,7 +893,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
     //rivinleveys default
     $rivinleveys = 137;
 
-    //haetaan inventointilista numero t‰ss‰ vaiheessa
+    //haetaan inventointilista numero t√§ss√§ vaiheessa
     $query = "SELECT max(inventointilista) listanro
               FROM tuotepaikat
               WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'";
@@ -907,7 +907,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
     $ots .= sprintf ('%-18.14s',   t("Paikka"));
     $ots .= sprintf ('%-21.21s',   t("Tuoteno"));
 
-    // Ei n‰ytet‰ toim_tuotenumeroa, nimitys voi olla pidempi
+    // Ei n√§ytet√§ toim_tuotenumeroa, nimitys voi olla pidempi
     if ($piilotaToim_tuoteno == "") {
       $ots .= sprintf ('%-21.21s',   t("Toim.Tuoteno"));
       $ots .= sprintf ('%-40.38s',   t("Nimitys"));
@@ -918,7 +918,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
 
     if ($naytasaldo == 'H') {
       $rivinleveys += 10;
-      $ots .= sprintf ('%-10.10s',t("Hyllyss‰"));
+      $ots .= sprintf ('%-10.10s',t("Hyllyss√§"));
       $katkoviiva = '__________';
     }
     elseif ($naytasaldo == 'S') {
@@ -927,8 +927,8 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
       $katkoviiva = '__________';
     }
 
-    $ots .= sprintf ('%-7.7s',    t("M‰‰r‰"));
-    $ots .= sprintf ('%-9.9s',     t("Yksikkˆ"));
+    $ots .= sprintf ('%-7.7s',    t("M√§√§r√§"));
+    $ots .= sprintf ('%-9.9s',     t("Yksikk√∂"));
     $ots .= sprintf ('%-7.7s',     t("Tilkpl"));
     $ots .= sprintf ('%-13.13s',  t("Varattu/Ker"));
     $ots .= "\n";
@@ -945,7 +945,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
 
       // Joskus halutaan vain tulostaa lista, mutta ei oikeasti invata tuotteita
       if ($ei_inventointi == "") {
-        //p‰ivitet‰‰n tuotepaikan listanumero ja listaaika
+        //p√§ivitet√§√§n tuotepaikan listanumero ja listaaika
         $query = "UPDATE tuotepaikat
                   SET inventointilista  = '{$listanro}',
                   inventointilista_aika = '{$listaaika}'
@@ -966,7 +966,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
 
       if ($naytasaldo != '') {
 
-        //katotaan mihin varastooon tilausrivill‰ tuotepaikka kuuluu
+        //katotaan mihin varastooon tilausrivill√§ tuotepaikka kuuluu
         $rivipaikka = kuuluukovarastoon($tuoterow["hyllyalue"], $tuoterow["hyllynro"]);
 
         $query = "SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto,
@@ -1024,13 +1024,13 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
       $prn .= sprintf ('%-18.14s',   $tuoterow["varastopaikka"]);
       $prn .= sprintf ('%-21.21s',   $tuoterow["tuoteno"]);
 
-      // Jos valittu toim_tuoteno piilotus ei sit‰ piirret‰ (s‰‰stet‰‰n tilaa)
+      // Jos valittu toim_tuoteno piilotus ei sit√§ piirret√§ (s√§√§stet√§√§n tilaa)
       if ($piilotaToim_tuoteno == "") {
         $prn .= sprintf ('%-21.21s',   $tuoterow["toim_tuoteno"]);
         $prn .= sprintf ('%-40.38s',   t_tuotteen_avainsanat($tuoterow, 'nimitys'));
       }
       else {
-        // Jos toim_tuoteno ei nn‰ytet‰, t‰m‰ voi olla pidempi
+        // Jos toim_tuoteno ei nn√§ytet√§, t√§m√§ voi olla pidempi
         $prn .= sprintf ('%-60.58s',   t_tuotteen_avainsanat($tuoterow, 'nimitys'));
       }
 
@@ -1067,7 +1067,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
 
       $prn .= sprintf ('%-7.7d',   $prow["varattu"]);
 
-      //Haetaan ker‰tty m‰‰r‰
+      //Haetaan ker√§tty m√§√§r√§
       $query = "SELECT ifnull(sum(if(keratty!='',tilausrivi.varattu,0)),0) keratty,  ifnull(sum(tilausrivi.varattu),0) ennpois
                 FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
                 WHERE yhtio    = '{$kukarow['yhtio']}'
@@ -1136,7 +1136,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
               $siires = pupe_query($query);
               $siirow = mysql_fetch_assoc($siires);
 
-              $fnlina22 = " / ".t("Lis‰varusteena").": {$siirow['tuoteno']} {$siirow['sarjanumero']}";
+              $fnlina22 = " / ".t("Lis√§varusteena").": {$siirow['tuoteno']} {$siirow['sarjanumero']}";
             }
             else {
               $fnlina22 = "";
@@ -1165,7 +1165,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
 
     fclose($fh);
 
-    //k‰‰nnet‰‰n kaunniksi
+    //k√§√§nnet√§√§n kaunniksi
 
     if ($debug == '1') {
       echo "filenimi = {$filenimi}<br>";

@@ -1,9 +1,9 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta JA master kantaa *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta JA master kantaa *//
 $useslave = 1;
 
-//Tehd‰‰n t‰llanen replace jotta parametric.inc ei poista merkkej‰
+//Tehd√§√§n t√§llanen replace jotta parametric.inc ei poista merkkej√§
 $sqlapu = $_POST["sqlhaku"];
 
 if (isset($_POST["tee"])) {
@@ -11,14 +11,14 @@ if (isset($_POST["tee"])) {
   if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 }
 
-// Ei k‰ytet‰ pakkausta
+// Ei k√§ytet√§ pakkausta
 $compression = FALSE;
 
 require("../inc/parametrit.inc");
 
 ini_set("memory_limit", "2G");
 
-//Ja t‰ss‰ laitetaan ne takas
+//Ja t√§ss√§ laitetaan ne takas
 $sqlhaku = $sqlapu;
 
 if (isset($tee)) {
@@ -30,7 +30,7 @@ if (isset($tee)) {
 else {
   echo "<font class='head'>".t("SQL-raportti").":</font><hr>";
 
-  // k‰sitell‰‰n syˆtetty arvo n‰tiksi...
+  // k√§sitell√§√§n sy√∂tetty arvo n√§tiksi...
   $sqlhaku = stripslashes(strtolower(trim($sqlhaku)));
 
   // laitetaan aina kuudes merkki spaceks.. safetymeasure ni ei voi olla ku select
@@ -40,13 +40,13 @@ else {
 
   echo "<form name='sql' method='post' autocomplete='off'>";
   echo "<table>";
-  echo "<tr><th>".t("Syˆt‰ SQL kysely")."</th></tr>";
+  echo "<tr><th>".t("Sy√∂t√§ SQL kysely")."</th></tr>";
   echo "<tr><td><textarea cols='100' rows='15' rows='15' name='sqlhaku' style='font-family:\"Courier New\",Courier'>$sqlhaku</textarea></td></tr>";
   echo "<tr><td class='back'><input type='submit' value='".t("Suorita")."'></td></tr>";
   echo "</table>";
   echo "</form>";
 
-  // eka sana pit‰‰ olla select... safe enough kai.
+  // eka sana pit√§√§ olla select... safe enough kai.
   if (substr($sqlhaku, 0, strpos($sqlhaku, " ")) != 'select') {
     echo "<font class='error'>".t("Ainoastaan SELECT lauseet sallittu")."!</font><br>";
     $sqlhaku = "";
@@ -99,7 +99,7 @@ else {
       echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
       echo "</table><br>";
 
-      echo "<font class='message'>".t("Haun tulos")." ".mysql_num_rows($result)." ".t("rivi‰").".</font><br>";
+      echo "<font class='message'>".t("Haun tulos")." ".mysql_num_rows($result)." ".t("rivi√§").".</font><br>";
 
       mysql_data_seek($result,0);
 

@@ -595,7 +595,7 @@ class import
         echo "<pre>\n";
         $temp = $this->ob[$id];
         if (isset($temp['stream']) && $temp['stream']->decompressed) {
-//            $temp['stream']->d = '[STRIPPED]'; // kommentoin t‰m‰n, koska php 5:ll‰ joudutaan t‰h‰n haaraan joka tuhoaa pdf importin. jos t‰t‰ ei tehd‰ niin homma ok. go figure! -joni
+//            $temp['stream']->d = '[STRIPPED]'; // kommentoin t√§m√§n, koska php 5:ll√§ joudutaan t√§h√§n haaraan joka tuhoaa pdf importin. jos t√§t√§ ei tehd√§ niin homma ok. go figure! -joni
         }
         print_r($temp);
         echo "</pre>\n";

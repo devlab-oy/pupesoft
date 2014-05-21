@@ -6,7 +6,7 @@ echo "<font class='head'>".t("Suoraveloitusten kohdistus suorituksiin")."</font>
 
 if ($tee == 'V') {
 
-  // Lasku on valittu ja sit‰ tiliˆid‰‰n (suoritetaan)
+  // Lasku on valittu ja sit√§ tili√∂id√§√§n (suoritetaan)
   $query = "SELECT *
             FROM tiliointi
             WHERE tunnus = '$stunnus'
@@ -36,7 +36,7 @@ if ($tee == 'V') {
 
   list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["ostovelat"]);
 
-  // Oletustiliˆinnit
+  // Oletustili√∂innit
   // Ostovelat
   $query = "INSERT INTO tiliointi SET
             yhtio    = '$kukarow[yhtio]',
@@ -81,12 +81,12 @@ if ($tee == 'V') {
 
 }
 
-//N‰ytet‰‰n kohdistamattomat
+//N√§ytet√§√§n kohdistamattomat
 if ($tee == '') {
 
   echo "<table>";
 
-  // katotaan jos meill‰ on jotain selvittelytilej‰ pankkitilien takana
+  // katotaan jos meill√§ on jotain selvittelytilej√§ pankkitilien takana
   $query = "SELECT group_concat(concat('\'',oletus_selvittelytili,'\'')) oletus_selvittelytilit
             FROM yriti
             WHERE yhtio                = '$kukarow[yhtio]'

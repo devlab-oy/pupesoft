@@ -6,7 +6,7 @@ if (isset($_POST["tee"])) {
 }
 
 if (strpos($_SERVER['SCRIPT_NAME'], "ostoseuranta.php") !== FALSE) {
-  // Ei k‰ytet‰ pakkausta
+  // Ei k√§ytet√§ pakkausta
   $compression = FALSE;
 
   require ("../inc/parametrit.inc");
@@ -23,7 +23,7 @@ else {
     unset($_POST);
   }
 
-  //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+  //* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
   $useslave = 1;
   require ("inc/connect.inc");
 
@@ -48,13 +48,13 @@ else {
     // tutkaillaan saadut muuttujat
     $toimittaja = trim($toimittaja);
 
-    // hehe, n‰in on helpompi verrata p‰iv‰m‰‰ri‰
+    // hehe, n√§in on helpompi verrata p√§iv√§m√§√§ri√§
     $query  = "SELECT TO_DAYS('$vvl-$kkl-$ppl')-TO_DAYS('$vva-$kka-$ppa') ero";
     $result = mysql_query($query) or pupe_error($query);
     $row    = mysql_fetch_array($result);
 
     if ($row["ero"] > 365 and $ajotapa != 'tilausauki') {
-      echo "<font class='error'>".t("Jotta homma ei menisi liian hitaaksi, niin vuosi on pisin mahdollinen laskentav‰li!")."</font><br>";
+      echo "<font class='error'>".t("Jotta homma ei menisi liian hitaaksi, niin vuosi on pisin mahdollinen laskentav√§li!")."</font><br>";
       $tee = "";
     }
 
@@ -66,7 +66,7 @@ else {
       }
     }
 
-    // jos ei ole mit‰‰n yrityst‰ valittuna ei tehd‰ mit‰‰n
+    // jos ei ole mit√§√§n yrityst√§ valittuna ei tehd√§ mit√§√§n
     if (count($yhtiot) == 0) {
       $tee = "";
     }
@@ -78,7 +78,7 @@ else {
       $yhtio = substr($yhtio,0,-1);
     }
 
-    // jos joku p‰iv‰kentt‰ on tyhj‰‰ ei tehd‰ mit‰‰n
+    // jos joku p√§iv√§kentt√§ on tyhj√§√§ ei tehd√§ mit√§√§n
     if ($ppa == "" or $kka == "" or $vva == "" or $ppl == "" or $kkl == "" or $vvl == "") {
       $tee = "";
     }
@@ -123,7 +123,7 @@ else {
       $select = "";
       $gluku  = 0;
 
-      // n‰it‰ k‰ytet‰‰n queryss‰
+      // n√§it√§ k√§ytet√§√§n queryss√§
       $sel_osasto = "";
       $sel_tuoteryhma = "";
 
@@ -169,7 +169,7 @@ else {
         if ($mukaan == "tuoteryhma") {
           if ($group!="") $group .= ",tuote.try";
           else $group .= "tuote.try";
-          $select .= "tuote.try 'tuoteryhm‰', ";
+          $select .= "tuote.try 'tuoteryhm√§', ";
           $order  .= "tuote.try,";
           $gluku++;
         }
@@ -273,13 +273,13 @@ else {
       $vvaa = $vva - '1';
       $vvll = $vvl - '1';
 
-      // Jos ei olla valittu mit‰‰n
+      // Jos ei olla valittu mit√§√§n
       if ($group == "") {
         $select = "tuote.yhtio, ";
         $group = "lasku.yhtio";
       }
 
-      // Kumpaa p‰iv‰m‰‰r‰‰ k‰ytet‰‰n
+      // Kumpaa p√§iv√§m√§√§r√§√§ k√§ytet√§√§n
       if (strpos($ajotapa, "mapvm") !== FALSE) {
         $pvmvar = " lasku.mapvm ";
       }
@@ -297,12 +297,12 @@ else {
 
       $query_ale_lisa = generoi_alekentta('O');
 
-      // Tehd‰‰n query
+      // Tehd√§√§n query
       $query = "SELECT $select";
 
-      // Katotaan mist‰ kohtaa query‰ alkaa varsinaiset numerosarakkeet (HUOM: toi ', ' pilkkuspace erottaa sarakket toisistaan)
+      // Katotaan mist√§ kohtaa query√§ alkaa varsinaiset numerosarakkeet (HUOM: toi ', ' pilkkuspace erottaa sarakket toisistaan)
       if ($kuukausittain == "SARAKE") {
-        $MONTH_ARRAY    = array(1=> t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kes‰kuu'),t('Hein‰kuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
+        $MONTH_ARRAY    = array(1=> t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kes√§kuu'),t('Hein√§kuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
 
         $startmonth  = date("Ymd",mktime(0, 0, 0, $kka, 1,  $vva));
         $endmonth   = date("Ymd",mktime(0, 0, 0, $kkl, 1,  $vvl));
@@ -405,13 +405,13 @@ else {
         $rivilimitti = 1000;
 
         if($vain_excel != "") {
-          echo "<font class='error'>".t("Tallenna/avaa tulos exceliss‰")."!</font><br><br>";
+          echo "<font class='error'>".t("Tallenna/avaa tulos exceliss√§")."!</font><br><br>";
           $rivilimitti = 0;
         }
         else {
           if (mysql_num_rows($result) > $rivilimitti) {
             echo "<br><font class='error'>".t("Hakutulos oli liian suuri")."!</font><br>";
-            echo "<font class='error'>".t("Tallenna/avaa tulos exceliss‰")."!</font><br><br>";
+            echo "<font class='error'>".t("Tallenna/avaa tulos exceliss√§")."!</font><br><br>";
           }
         }
       }
@@ -486,7 +486,7 @@ else {
 
           if (mysql_num_rows($result) <= $rivilimitti) echo "<tr>";
 
-          // echotaan kenttien sis‰ltˆ
+          // echotaan kenttien sis√§lt√∂
           for ($i=0; $i < mysql_num_fields($result); $i++) {
 
             // jos kyseessa on tuote
@@ -505,7 +505,7 @@ else {
             }
 
             // jos kyseessa on tuoteosasto, haetaan sen nimi
-            if (mysql_field_name($result, $i) == "tuoteryhm‰") {
+            if (mysql_field_name($result, $i) == "tuoteryhm√§") {
               $osre = t_avainsana("TRY", "", "and avainsana.selite  = '$row[$i]'", $yhtio);
               $osrow = mysql_fetch_array($osre);
 
@@ -529,7 +529,7 @@ else {
               }
             }
 
-            // Jos gruupataan enemm‰n kuin yksi taso niin tehd‰‰n v‰lisumma
+            // Jos gruupataan enemm√§n kuin yksi taso niin tehd√§√§n v√§lisumma
             if ($gluku > 1 and $edluku != $row[0] and $edluku != 'x' and $piiyhteensa == '' and strpos($group, ',') !== FALSE and substr($group, 0, 13) != "tuote.tuoteno") {
               $excelsarake = $ostoind = $ostoarvoind = $ostokplind = 0;
 
@@ -606,7 +606,7 @@ else {
 
         $apu = mysql_num_fields($result)-11;
 
-        // jos gruupataan enemm‰n kuin yksi taso niin tehd‰‰n v‰lisumma
+        // jos gruupataan enemm√§n kuin yksi taso niin tehd√§√§n v√§lisumma
         if ($gluku > 1 and $mukaan != 'tuote' and $piiyhteensa == '') {
 
           if (mysql_num_rows($result) <= $rivilimitti) echo "<tr>";
@@ -704,7 +704,7 @@ else {
   }
 
   if ($lopetus == "") {
-    //K‰yttˆliittym‰
+    //K√§ytt√∂liittym√§
     if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
     if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
     if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
@@ -741,9 +741,9 @@ else {
     echo "<tr>";
     echo "<th>".t("Valitse ajotapa:")."</th>";
     echo "<td><select name='ajotapa'>";
-    echo "<option value='valmiit'          $chk1>".t("Valmiit saapumiset")." (".t("Varastoonvientip‰iv‰n mukaan").")</option>";
-    echo "<option value='kaikki'         $chk2>".t("Valmiit saapumiset ja keskener‰iset saapumiset")." (".t("Varastoonvientip‰iv‰n mukaan").")</option>";
-    echo "<option value='valmiit_mapvm'      $chk3>".t("Valmiit saapumiset")." (".t("Virallisen varastonarvolaskentap‰iv‰n mukaan").")</option>";
+    echo "<option value='valmiit'          $chk1>".t("Valmiit saapumiset")." (".t("Varastoonvientip√§iv√§n mukaan").")</option>";
+    echo "<option value='kaikki'         $chk2>".t("Valmiit saapumiset ja keskener√§iset saapumiset")." (".t("Varastoonvientip√§iv√§n mukaan").")</option>";
+    echo "<option value='valmiit_mapvm'      $chk3>".t("Valmiit saapumiset")." (".t("Virallisen varastonarvolaskentap√§iv√§n mukaan").")</option>";
     echo "</select></td>";
 
     echo "</tr>";
@@ -751,13 +751,13 @@ else {
 
     echo "<tr>";
     echo "<th>".t("Valitse tuoteosastot").":</th>";
-    echo "<th>".t("Valitse tuoteryhm‰t").":</th></tr>";
+    echo "<th>".t("Valitse tuoteryhm√§t").":</th></tr>";
 
     echo "<tr>";
     echo "<td valign='top'>";
 
-    // n‰ytet‰‰n soveltuvat osastot
-    // tehd‰‰n avainsana query
+    // n√§ytet√§√§n soveltuvat osastot
+    // tehd√§√§n avainsana query
     $res2 = t_avainsana("OSASTO");
 
     echo "<select name='mul_osasto[]' multiple='TRUE' size='10' style='width:100%;'>";
@@ -786,8 +786,8 @@ else {
     echo "</td>";
     echo "<td valign='top' class='back'>";
 
-    // n‰ytet‰‰n soveltuvat tryt
-    // tehd‰‰n avainsana query
+    // n√§ytet√§√§n soveltuvat tryt
+    // tehd√§√§n avainsana query
     $res2 = t_avainsana("TRY");
 
     echo "<select name='mul_try[]' multiple='TRUE' size='10' style='width:100%;'>";
@@ -798,7 +798,7 @@ else {
         $mul_check = 'SELECTED';
       }
     }
-    echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei tuoteryhm‰‰")."</option>";
+    echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei tuoteryhm√§√§")."</option>";
 
     while ($rivi = mysql_fetch_array($res2)) {
       $mul_check = '';
@@ -817,11 +817,11 @@ else {
 
     echo "<tr>";
     echo "<th>".t("Prio").": <input type='text' name='jarjestys[40]' size='2' value='$jarjestys[40]'> ".t("Osastoittain")." <input type='checkbox' name='ruksit[40]' value='osasto' $ruk40chk></th>";
-    echo "<th>".t("Prio").": <input type='text' name='jarjestys[50]' size='2' value='$jarjestys[50]'> ".t("Tuoteryhmitt‰in")." <input type='checkbox' name='ruksit[50]' value='tuoteryhma' $ruk50chk></th></tr>";
+    echo "<th>".t("Prio").": <input type='text' name='jarjestys[50]' size='2' value='$jarjestys[50]'> ".t("Tuoteryhmitt√§in")." <input type='checkbox' name='ruksit[50]' value='tuoteryhma' $ruk50chk></th></tr>";
 
     echo "</table><br>\n";
 
-    // lis‰rajaukset n‰kym‰..
+    // lis√§rajaukset n√§kym√§..
     if ($ruksit[60]  != '')       $ruk60chk          = "CHECKED";
     if ($ruksit[70]  != '')       $ruk70chk          = "CHECKED";
     if ($ruksit[80]  != '')       $ruk80chk          = "CHECKED";
@@ -846,7 +846,7 @@ else {
 
     echo "<table>
       <tr>
-      <th>".t("Lis‰rajaus")."</th>
+      <th>".t("Lis√§rajaus")."</th>
       <th>".t("Prio")."</th>
       <th> x</th>
       <th>".t("Rajaus")."</th>
@@ -887,7 +887,7 @@ else {
     echo "  </td>
       </tr>
       <tr>
-      <th>".t("Listaa merkeitt‰in")."</th>
+      <th>".t("Listaa merkeitt√§in")."</th>
       <td><input type='text' name='jarjestys[130]' size='2' value='$jarjestys[130]'></td>
       <td><input type='checkbox' name='ruksit[130]' value='merkki' $ruk130chk></td>
       <td><input type='text' name='rajaus[130]' value='$rajaus[130]'></td>
@@ -912,18 +912,18 @@ else {
       <td class='back'></td>
       </tr>
       <tr>
-      <th>".t("Piilota v‰lisummat")."</th>
+      <th>".t("Piilota v√§lisummat")."</th>
       <td><input type='checkbox' name='piiyhteensa' $piychk></td>
       <td></td>
       </tr>
       <tr>
-      <th>".t("N‰yt‰ tuotteiden nimitykset")."</th>
+      <th>".t("N√§yt√§ tuotteiden nimitykset")."</th>
       <td><input type='checkbox' name='nimitykset' $nimchk></td>
       <td></td>
       <td class='back'>".t("(Toimii vain jos listaat tuotteittain)")."</td>
       </tr>
       <tr>
-      <th>".t("N‰yt‰ tuotteiden massat")."</th>
+      <th>".t("N√§yt√§ tuotteiden massat")."</th>
       <td><input type='checkbox' name='massat' $maschk></td>
       <td></td>
       <td class='back'>".t("(Toimii vain jos listaat tuotteittain)")."</td>
@@ -942,15 +942,15 @@ else {
       </tr>
       </table><br>";
 
-    // p‰iv‰m‰‰r‰rajaus
+    // p√§iv√§m√§√§r√§rajaus
     echo "<table>";
     echo "<tr>
-      <th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+      <th>".t("Sy√∂t√§ alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
       <td><input type='text' name='ppa' value='$ppa' size='3'></td>
       <td><input type='text' name='kka' value='$kka' size='3'></td>
       <td><input type='text' name='vva' value='$vva' size='5'></td>
       </tr>\n
-      <tr><th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+      <tr><th>".t("Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
       <td><input type='text' name='ppl' value='$ppl' size='3'></td>
       <td><input type='text' name='kkl' value='$kkl' size='3'></td>
       <td><input type='text' name='vvl' value='$vvl' size='5'></td>

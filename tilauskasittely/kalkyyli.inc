@@ -20,7 +20,7 @@ if (mysql_num_rows($result) == 1) {
   $laskurow = mysql_fetch_array($result);
 }
 else {
-  echo "<font style='error'>".t("VIRHE: Saapumista ei en‰‰ lˆydy")."!</font>";
+  echo "<font style='error'>".t("VIRHE: Saapumista ei en√§√§ l√∂ydy")."!</font>";
   exit;
 }
 
@@ -45,7 +45,7 @@ if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
         paivita_poikkeavat_tulliprosentit($poikkeavat_tulliprosentit, $rivi_oletus_tulliprosentti);
       }
 
-      //merkataan ne rivit joita ei haluta vied‰ varastoon
+      //merkataan ne rivit joita ei haluta vied√§ varastoon
       $query = "UPDATE tilausrivi
                 SET varastoon = 0
                 WHERE uusiotunnus = '$laskurow[tunnus]'
@@ -72,7 +72,7 @@ if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
           $paiva    = $ppa[$varas];
 
           if (!checkdate($kuukausi, $paiva, $vuosi)) {
-            echo "<font class='error'>".t("VIRHE: Virheellinen p‰iv‰m‰‰r‰")." $vuosi-$kuukausi-$paiva</font><br>";
+            echo "<font class='error'>".t("VIRHE: Virheellinen p√§iv√§m√§√§r√§")." $vuosi-$kuukausi-$paiva</font><br>";
           }
           else {
             $query = "UPDATE tilausrivi
@@ -168,7 +168,7 @@ if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
       echo "<input type='hidden' name='vietiinko_koko_suuntalava' value='{$vietiinko_koko_suuntalava}' />";
     }
 
-    echo "<input type='submit' value='".t("Hyv‰lt‰ n‰ytt‰‰, vie varastoon!")."'>";
+    echo "<input type='submit' value='".t("Hyv√§lt√§ n√§ytt√§√§, vie varastoon!")."'>";
     echo "</form>";
 
     echo "<form method='post'>";
@@ -187,5 +187,5 @@ if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
   }
 }
 else {
-  echo "<br><br><font class='error'>".t("Saapumisen tiedot eiv‰t t‰sm‰‰! Korjaa asia")."!</font><br>";
+  echo "<br><br><font class='error'>".t("Saapumisen tiedot eiv√§t t√§sm√§√§! Korjaa asia")."!</font><br>";
 }

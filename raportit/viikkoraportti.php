@@ -1,17 +1,17 @@
 #!/usr/bin/php
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-// Kutsutaanko CLI:st‰
+// Kutsutaanko CLI:st√§
 if (php_sapi_name() != 'cli') {
-  die ("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!");
+  die ("T√§t√§ scripti√§ voi ajaa vain komentorivilt√§!");
 }
 
 require ("../inc/connect.inc");
 
-// hmm.. j‰nn‰‰
+// hmm.. j√§nn√§√§
 $kukarow['yhtio'] = addslashes(trim($argv[1]));
 $pomomail = addslashes(trim($argv[2]));
 $pomomail2 = addslashes(trim($argv[3]));
@@ -30,14 +30,14 @@ if (mysql_num_rows($yhtiores)==1) {
   if (mysql_num_rows($result) == 1) {
     $yhtion_parametritrow = mysql_fetch_array($result);
 
-    // lis‰t‰‰n kaikki yhtiorow arrayseen
+    // lis√§t√§√§n kaikki yhtiorow arrayseen
     foreach ($yhtion_parametritrow as $parametrit_nimi => $parametrit_arvo) {
       $yhtiorow[$parametrit_nimi] = $parametrit_arvo;
     }
   }
 }
 else {
-  die ("Yhtiˆ $kukarow[yhtio] ei lˆydy!");
+  die ("Yhti√∂ $kukarow[yhtio] ei l√∂ydy!");
 }
 
 echo "Viikkoraportti\n--------------\n\n";
@@ -45,7 +45,7 @@ echo "Viikkoraportti\n--------------\n\n";
 $query = "select distinct myyjanro from asiakas where yhtio='$kukarow[yhtio]' and myyjanro > 0";
 $myyre = mysql_query($query) or die($query);
 
-echo "Myyj‰t haettu...";
+echo "Myyj√§t haettu...";
 
 $query = "select distinct tuotemerkki from tuote where yhtio='$kukarow[yhtio]' order by 1";
 $merre = mysql_query($query) or die($query);
@@ -66,10 +66,10 @@ while ($myyjarow = mysql_fetch_array ($myyre)) {
   mysql_data_seek ($merre, 0);
 
   $sivu = "asiakas\tnimi\t";
-  $sivu .= "Yhteens‰ t‰m‰\tYhteens‰ edel\t";
+  $sivu .= "Yhteens√§ t√§m√§\tYhteens√§ edel\t";
   while ($merkkirow = mysql_fetch_array ($merre)) {
 
-    $sivu .= "$merkkirow[tuotemerkki] t‰m‰\t$merkkirow[tuotemerkki] edel\t";
+    $sivu .= "$merkkirow[tuotemerkki] t√§m√§\t$merkkirow[tuotemerkki] edel\t";
   }
 
   $sivu .= "\n";
@@ -132,15 +132,15 @@ while ($myyjarow = mysql_fetch_array ($myyre)) {
   $kukro = mysql_fetch_array ($kukre);
 
   if ($kukro["eposti"] == "") {
-    echo "Myyj‰ll‰ $kukro[nimi] ($myyjarow[myyjanro]) ei ole s‰hkˆpostiosoitetta!\n";
+    echo "Myyj√§ll√§ $kukro[nimi] ($myyjarow[myyjanro]) ei ole s√§hk√∂postiosoitetta!\n";
   }
   else {
-    echo "L‰hetet‰‰n meili $kukro[eposti].\n";
+    echo "L√§hetet√§√§n meili $kukro[eposti].\n";
 
     $nyt = date('d.m.y');
         $bound = uniqid(time()."_") ;
 
-        $header   = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+        $header   = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n";
         $header  .= "MIME-Version: 1.0\n" ;
         $header  .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
@@ -164,13 +164,13 @@ while ($myyjarow = mysql_fetch_array ($myyre)) {
 
         $content .= "--$bound\n";
 
-        $boob = mail($kukro["eposti"], mb_encode_mimeheader("Viikkoraportti $kukro[nimi] ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+        $boob = mail($kukro["eposti"], mb_encode_mimeheader("Viikkoraportti $kukro[nimi] ".date("d.m.Y"), "UTF-8", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 
     if ($pomomail != '') {
-      $boob = mail($pomomail, mb_encode_mimeheader("Viikkoraportti $kukro[nimi] ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+      $boob = mail($pomomail, mb_encode_mimeheader("Viikkoraportti $kukro[nimi] ".date("d.m.Y"), "UTF-8", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
     }
     if ($pomomail2 != '') {
-      $boob = mail($pomomail2, mb_encode_mimeheader("Viikkoraportti $kukro[nimi] ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+      $boob = mail($pomomail2, mb_encode_mimeheader("Viikkoraportti $kukro[nimi] ".date("d.m.Y"), "UTF-8", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
     }
   }
 

@@ -34,10 +34,10 @@ if(!function_exists("rahtisopimuksettarkista")) {
           }
           elseif ($ytunnus != "") {
             $t[$i]  = $ytunnus;
-            $virhe[$i] = t("Asiakas löytyi!");
+            $virhe[$i] = t("Asiakas lÃ¶ytyi!");
           }
           else {
-            $virhe[$i] = t("Asiakas puuttuu tai sitä ei löydy!");
+            $virhe[$i] = t("Asiakas puuttuu tai sitÃ¤ ei lÃ¶ydy!");
           }
         }
       }
@@ -65,10 +65,10 @@ if(!function_exists("rahtisopimuksettarkista")) {
           }
           elseif ($ytunnus != "" and $asiakasid > 0) {
             $t[$i]  = $asiakasid;
-            $virhe[$i] = t("Asiakas löytyi!");
+            $virhe[$i] = t("Asiakas lÃ¶ytyi!");
           }
           else {
-            $virhe[$i] = t("Asiakas puuttuu tai sitä ei löydy!");
+            $virhe[$i] = t("Asiakas puuttuu tai sitÃ¤ ei lÃ¶ydy!");
           }
         }
       }

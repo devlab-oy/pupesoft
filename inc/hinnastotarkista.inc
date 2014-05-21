@@ -30,7 +30,7 @@ if(!function_exists("hinnastotarkista")) {
         $sresult = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($sresult) == 0 or $chtuoteno == "") {
-          $virhe[$i] = t("Tuotenumero puuttuu tai sit‰ ei lˆydy!");
+          $virhe[$i] = t("Tuotenumero puuttuu tai sit√§ ei l√∂ydy!");
         }
       }
 
@@ -44,7 +44,7 @@ if(!function_exists("hinnastotarkista")) {
       else {
         list($vv,$kk,$pp) = explode("-", $chalkupvm);
         if (!checkdate($kk,$pp,$vv)) {
-          $virhe[$i] = t("Virheellinen p‰iv‰m‰‰r‰!");
+          $virhe[$i] = t("Virheellinen p√§iv√§m√§√§r√§!");
         }
       }
     }
@@ -57,7 +57,7 @@ if(!function_exists("hinnastotarkista")) {
       else {
         list($vv,$kk,$pp) = explode("-", $chloppupvm);
         if (!checkdate($kk,$pp,$vv)) {
-          $virhe[$i] = t("Virheellinen p‰iv‰m‰‰r‰!");
+          $virhe[$i] = t("Virheellinen p√§iv√§m√§√§r√§!");
         }
       }
     }

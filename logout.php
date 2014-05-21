@@ -18,7 +18,7 @@ echo "<html>
     <meta http-equiv=\"Cache-Control\" Content=\"no-cache\">
     <meta http-equiv=\"Pragma\" Content=\"no-cache\">
     <meta http-equiv=\"Expires\" Content=\"-1\">
-    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">
+    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">
   </head>
   <body>";
 

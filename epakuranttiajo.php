@@ -1,6 +1,6 @@
 <?php
 
-// Kutsutaanko CLI:st‰
+// Kutsutaanko CLI:st√§
 if (php_sapi_name() != 'cli') {
 
   if (isset($_POST["tee"])) {
@@ -16,25 +16,25 @@ if (php_sapi_name() != 'cli') {
   }
 
   if (!isset($ajo_tee) or $ajo_tee != "NAYTAPV") {
-    echo "<font class='head'>".t("Ep‰kuranttiajo")."</font><hr>";
+    echo "<font class='head'>".t("Ep√§kuranttiajo")."</font><hr>";
     echo "<br><form method='post'>";
     echo "<input type = 'hidden' name = 'ajo_tee' value = 'NAYTA'>";
-    echo "<input type = 'submit' value = '".t("N‰yt‰ ep‰kurantoitavat tuotteet")."'>";
+    echo "<input type = 'submit' value = '".t("N√§yt√§ ep√§kurantoitavat tuotteet")."'>";
     echo "</form><br>";
     echo "<br><br><br>";
   }
 
-  echo "<font class='head'>".t("Tutki ep‰kurantoitavia tuotteita")."</font><hr>";
+  echo "<font class='head'>".t("Tutki ep√§kurantoitavia tuotteita")."</font><hr>";
   echo "<br><form method='post'>";
   echo "<input type = 'hidden' name = 'ajo_tee' value = 'NAYTAPV'>";
   echo "<table>";
-  echo "<tr><th>".t("P‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+  echo "<tr><th>".t("P√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
     <td><input type='text' name='ppa' value='$ppa' size='3'></td>
     <td><input type='text' name='kka' value='$kka' size='3'></td>
     <td><input type='text' name='vva' value='$vva' size='5'></td>
     </tr><tr>";
   echo "</table><br>";
-  echo "<input type = 'submit' value = '".t("N‰yt‰ tuotteet")."'>";
+  echo "<input type = 'submit' value = '".t("N√§yt√§ tuotteet")."'>";
   echo "</form><br><br>";
 
 
@@ -57,7 +57,7 @@ else {
   require("inc/connect.inc");
   require("inc/functions.inc");
 
-  // Tehd‰‰n oletukset
+  // Tehd√§√§n oletukset
   $kukarow['yhtio'] = $argv[1];
   $kukarow['kuka'] = "admin";
   $yhtiorow = hae_yhtion_parametrit($argv[1]);
@@ -78,20 +78,20 @@ if (isset($ajo_tee) and $ajo_tee == "NAYTAPV") {
   $syotetty_paiva = (int) date("U", mktime(0, 0, 0, $kka, $ppa, $vva));
 
   if ($syotetty_paiva <= time()) {
-    echo t("VIRHE: Syˆtetty p‰iv‰m‰‰r‰ on oltava tulevaisuudessa")."!";
+    echo t("VIRHE: Sy√∂tetty p√§iv√§m√§√§r√§ on oltava tulevaisuudessa")."!";
     $ajo_tee = "";
   }
 }
 
 if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAPV" or $ajo_tee == "EPAKURANTOI"))) {
 
-  // Viimeisimm‰st‰ tulosta ja laskutuksesta n‰in monta p‰iv‰‰ HOUM: t‰n voi laittaa myˆs salasanat.php:seen.
+  // Viimeisimm√§st√§ tulosta ja laskutuksesta n√§in monta p√§iv√§√§ HOUM: t√§n voi laittaa my√∂s salasanat.php:seen.
   if (!isset($epakurtasot_array)) $epakurtasot_array = array("100%" => 913, "75%" => 820, "50%" => 730, "25%" => 547);
 
-  // T‰m‰ p‰iv‰
+  // T√§m√§ p√§iv√§
   $today = time();
 
-  // Tehd‰‰n kaikki tapahtumat samalle tositteelle!
+  // Tehd√§√§n kaikki tapahtumat samalle tositteelle!
   $tapahtumat_samalle_tositteelle = "kylla";
   $laskuid = 0;
   $epa_tuotemaara = 0;
@@ -142,7 +142,7 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
     echo "<th>".t("Viimeisin saapuminen")."</th>";
     echo "<th>".t("Viimeisin laskutus")."</th>";
     echo "<th>".t("Viim. tapahtuma")."</th>";
-    echo "<th>".t("Ep‰kurattitaso")."</th>";
+    echo "<th>".t("Ep√§kurattitaso")."</th>";
     echo "<th>".t("Saldo")."</th>";
     echo "<th>".t("Kehahin")."</th>";
     echo "<th>".t("Varastonarvo")."</th>";
@@ -161,7 +161,7 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
   $worksheet->writeString($excelrivi, $excelsarake++, t("Viimeisin saapuminen"), $format_bold);
   $worksheet->writeString($excelrivi, $excelsarake++, t("Viimeisin laskutus"), $format_bold);
   $worksheet->writeString($excelrivi, $excelsarake++, t("Viim. tapahtuma"), $format_bold);
-  $worksheet->writeString($excelrivi, $excelsarake++, t("Ep‰kurattitaso"), $format_bold);
+  $worksheet->writeString($excelrivi, $excelsarake++, t("Ep√§kurattitaso"), $format_bold);
   $worksheet->writeString($excelrivi, $excelsarake++, t("Saldo"), $format_bold);
   $worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin"), $format_bold);
   $worksheet->writeString($excelrivi, $excelsarake++, t("Varastonarvo"), $format_bold);
@@ -203,11 +203,11 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
       if (!$tulorow = mysql_fetch_assoc($tapres)) {
 
         if ($epakurantti_row["luontiaika"] != "0000-00-00 00:00:00") {
-          // Jos ei lˆydy tuloa, laitetaan tuotteen luontiaika
+          // Jos ei l√∂ydy tuloa, laitetaan tuotteen luontiaika
           $tulorow = array("laadittu" => substr($epakurantti_row["luontiaika"], 0, 10));
         }
         else {
-          // Jos ei lˆydy tuloa eik‰ tuotteen luontiaikaa, niin laitetaan jotain vanhaa
+          // Jos ei l√∂ydy tuloa eik√§ tuotteen luontiaikaa, niin laitetaan jotain vanhaa
           $tulorow = array("laadittu" => "1970-01-01");
         }
       }
@@ -223,7 +223,7 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
       $tapres = mysql_query($query) or pupe_error($query);
 
       if (!$laskutusrow = mysql_fetch_assoc($tapres)) {
-        // Jos ei lˆydy laskua, laitetaan jotain vanhaa
+        // Jos ei l√∂ydy laskua, laitetaan jotain vanhaa
         $laskutusrow = array("laadittu" => "1970-01-01");
       }
 
@@ -233,7 +233,7 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
       $viimeinen_tulo = (int) date("U", mktime(0, 0, 0, $kk1, $pp1, $vv1));
       $viimeinen_laskutus = (int) date("U", mktime(0, 0, 0, $kk2, $pp2, $vv2));
 
-      // Lasketaan monta p‰iv‰‰ on kulunut viimeisest‰ tulosta / laskutuksesta
+      // Lasketaan monta p√§iv√§√§ on kulunut viimeisest√§ tulosta / laskutuksesta
       $tulo = ($today - $viimeinen_tulo) / 60 / 60 / 24;
       $lasku = ($today - $viimeinen_laskutus) / 60 / 60 / 24;
 
@@ -241,7 +241,7 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
       $tee     = "";
       $mikataso   = 0;
 
-      // viimeisin tulo yli $epakurtasot_array["100%"] p‰iv‰‰ sitten --> 100% ep‰kurantiksi
+      // viimeisin tulo yli $epakurtasot_array["100%"] p√§iv√§√§ sitten --> 100% ep√§kurantiksi
       if (isset($epakurtasot_array["100%"]) and $epakurtasot_array["100%"] > 0 and $tulo > $epakurtasot_array["100%"] and $lasku > $epakurtasot_array["100%"] and $epakurantti_row["epakurantti100pvm"] == "0000-00-00") {
 
         if ($php_cli or (isset($ajo_tee) and $ajo_tee == "EPAKURANTOI")) {
@@ -251,7 +251,7 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
 
         $mikataso = 100;
       }
-      // viimeisin tulo yli $epakurtasot_array["75%"] p‰iv‰‰ sitten --> 75% ep‰kurantiksi
+      // viimeisin tulo yli $epakurtasot_array["75%"] p√§iv√§√§ sitten --> 75% ep√§kurantiksi
       elseif (isset($epakurtasot_array["75%"]) and $epakurtasot_array["75%"] > 0 and $tulo > $epakurtasot_array["75%"] and $lasku > $epakurtasot_array["75%"] and $epakurantti_row["epakurantti75pvm"] == "0000-00-00") {
 
         if ($php_cli or (isset($ajo_tee) and $ajo_tee == "EPAKURANTOI")) {
@@ -261,7 +261,7 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
 
         $mikataso = 75;
       }
-      // viimeisin tulo yli $epakurtasot_array["50%"] p‰iv‰‰ sitten --> 50% ep‰kurantiksi
+      // viimeisin tulo yli $epakurtasot_array["50%"] p√§iv√§√§ sitten --> 50% ep√§kurantiksi
       elseif (isset($epakurtasot_array["50%"]) and $epakurtasot_array["50%"] > 0 and $tulo > $epakurtasot_array["50%"] and $lasku > $epakurtasot_array["50%"] and $epakurantti_row["epakurantti50pvm"] == "0000-00-00") {
 
         if ($php_cli or (isset($ajo_tee) and $ajo_tee == "EPAKURANTOI")) {
@@ -271,7 +271,7 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
 
         $mikataso = 50;
       }
-      // viimeisin tulo yli $epakurtasot_array["25%"] p‰iv‰‰ sitten --> 25% ep‰kurantiksi
+      // viimeisin tulo yli $epakurtasot_array["25%"] p√§iv√§√§ sitten --> 25% ep√§kurantiksi
       elseif (isset($epakurtasot_array["25%"]) and $epakurtasot_array["25%"] > 0 and $tulo > $epakurtasot_array["25%"] and $lasku > $epakurtasot_array["25%"] and $epakurantti_row["epakurantti25pvm"] == "0000-00-00") {
 
         if ($php_cli or (isset($ajo_tee) and $ajo_tee == "EPAKURANTOI")) {
@@ -291,7 +291,7 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
 
         if (!$php_cli) echo "<tr><td><a target='Tuotekysely' href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($epakurantti_row['tuoteno'])."'>{$epakurantti_row['tuoteno']}</a>";
 
-        // N‰ytet‰‰n varastossa olevat er‰t/sarjanumerot
+        // N√§ytet√§√§n varastossa olevat er√§t/sarjanumerot
         if ($epakurantti_row["sarjanumeroseuranta"] == "V" or $epakurantti_row['sarjanumeroseuranta'] == 'T') {
 
           $query  = "SELECT sarjanumeroseuranta.*, sarjanumeroseuranta.tunnus sarjatunnus,
@@ -459,8 +459,8 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
 
   if ($epa_tuotemaara > 0) {
 
-    if (!$php_cli) echo "<tr><td class='tumma' colspan='9'>".t("Yhteens‰").":</td>";
-    $worksheet->writeString($excelrivi, 8, t("Yhteens‰"));
+    if (!$php_cli) echo "<tr><td class='tumma' colspan='9'>".t("Yhteens√§").":</td>";
+    $worksheet->writeString($excelrivi, 8, t("Yhteens√§"));
 
     if (!$php_cli) echo "<td class='tumma' align='right'>$vararvot_nyt</td>";
     $worksheet->writeNumber($excelrivi, 9, $vararvot_nyt);
@@ -475,8 +475,8 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
     if (!$php_cli) echo "</tr>";
     $excelrivi++;
 
-    if (!$php_cli) echo "<tr><td class='tumma' colspan='10'>".t("Ep‰kuranttimuutos yhteens‰").":</td>";
-    $worksheet->writeString($excelrivi, 8, t("Ep‰kuranttimuutos yhteens‰"));
+    if (!$php_cli) echo "<tr><td class='tumma' colspan='10'>".t("Ep√§kuranttimuutos yhteens√§").":</td>";
+    $worksheet->writeString($excelrivi, 8, t("Ep√§kuranttimuutos yhteens√§"));
 
     if (!$php_cli) echo "<td class='tumma' align='right'>",($vararvot_sit-$vararvot_nyt),"</td>";
     $worksheet->writeNumber($excelrivi, 10, ($vararvot_sit-$vararvot_nyt));
@@ -505,19 +505,19 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
       if ($ajo_tee != "NAYTAPV") {
         echo "<br><br><form name = 'valinta' method='post'>";
         echo "<input type = 'hidden' name = 'ajo_tee' value = 'EPAKURANTOI'>";
-        echo "<input type = 'submit' value = '".t("Tee ep‰kuranttiusp‰ivitykset")."'>";
+        echo "<input type = 'submit' value = '".t("Tee ep√§kuranttiusp√§ivitykset")."'>";
         echo "</form><br>";
       }
 
       require ("inc/footer.inc");
     }
     else {
-      // S‰hkˆpostin l‰hetykseen parametrit
+      // S√§hk√∂postin l√§hetykseen parametrit
       $parametri = array( "to"       => $yhtiorow['talhal_email'],
                 "cc"       => "",
-                "subject"    => t("Ep‰kuranttiajo"),
+                "subject"    => t("Ep√§kuranttiajo"),
                 "ctype"      => "text",
-                "body"      => t("Liitteen‰ ep‰kuranttiajon raportti").".",
+                "body"      => t("Liitteen√§ ep√§kuranttiajon raportti").".",
                 "attachements"  => array(0   => array(
                               "filename"    => "/tmp/".$excelnimi,
                               "newfilename"  => "Epakuranttiajo.xlsx",

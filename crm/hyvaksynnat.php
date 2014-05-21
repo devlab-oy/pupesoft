@@ -10,7 +10,7 @@ if($tee == "kuittaa") {       //lisataan tapahtuma kalenteriin
             and yhtio='$yhtio'";
   $result = mysql_query($query) or pupe_error($query);
 
-  echo t("Loma kuitattu hyv‰ksytyksi")."!<br><br>";
+  echo t("Loma kuitattu hyv√§ksytyksi")."!<br><br>";
   $tee = "";
 }
 
@@ -21,7 +21,7 @@ if($tee == "ei_kuittaa") {       //lisataan tapahtuma kalenteriin
             and yhtio='$yhtio'";
   $result = mysql_query($query) or pupe_error($query);
 
-  echo t("Loman hyv‰ksynt‰ peruttu")."!<br><br>";
+  echo t("Loman hyv√§ksynt√§ peruttu")."!<br><br>";
   $tee = "";
 }
 
@@ -72,8 +72,8 @@ if ($tee == "") {
   }
 
 
-  echo "<tr><td>N‰yt‰ myˆs kuitatut lomat:</td><td><input type='checkbox' $chk1 name='kuitatut' onclick='submit()'></td>";
-  echo "<tr><td>N‰yt‰ konserniyritysten lomat:</td><td><input type='checkbox' $chk2 name='konserni' onclick='submit()'></td>";
+  echo "<tr><td>N√§yt√§ my√∂s kuitatut lomat:</td><td><input type='checkbox' $chk1 name='kuitatut' onclick='submit()'></td>";
+  echo "<tr><td>N√§yt√§ konserniyritysten lomat:</td><td><input type='checkbox' $chk2 name='konserni' onclick='submit()'></td>";
 
   echo "</tr></form></table><br>";
 
@@ -87,7 +87,7 @@ if ($tee == "") {
               where $lisa2
               and kuka.yhtio=kalenteri.yhtio
               and kalenteri.tyyppi = 'kalenteri'
-              and kalenteri.tapa   in ('Palkaton vapaa','Sairasloma','Kes‰loma','Talviloma','Ylityˆvapaa')
+              and kalenteri.tapa   in ('Palkaton vapaa','Sairasloma','Kes√§loma','Talviloma','Ylity√∂vapaa')
               and kalenteri.kuka=kuka.kuka
               $lisa1
               and kuka.osasto='$osasto'
@@ -104,10 +104,10 @@ if ($tee == "") {
           <th>".("Aikaloppu")."</th><th>".("Kommentti")."</th>";
 
       if ($kuitatut != '')  {
-        echo "<th>".t("Hyv‰ksyj‰")."</th>";
+        echo "<th>".t("Hyv√§ksyj√§")."</th>";
       }
       if ($konserni != '') {
-        echo "<th>".t("Yhtiˆ")."</th>";
+        echo "<th>".t("Yhti√∂")."</th>";
       }
 
       echo "</tr>";
@@ -134,7 +134,7 @@ if ($tee == "") {
           echo "<input type='hidden' name='tunnus' value='$row[tunnus]'>";
           echo "<input type='hidden' name='yhtio' value='$row[yhtio]'>";
           echo "<input type='hidden' name='tee' value='kuittaa'>";
-          echo "<td><input type='submit' value='".t("Hyv‰ksy")."'></td>";
+          echo "<td><input type='submit' value='".t("Hyv√§ksy")."'></td>";
           echo "</form>";
         }
 
@@ -146,7 +146,7 @@ if ($tee == "") {
           echo "<input type='hidden' name='tunnus' value='$row[tunnus]'>";
           echo "<input type='hidden' name='yhtio' value='$row[yhtio]'>";
           echo "<input type='hidden' name='tee' value='ei_kuittaa'>";
-          echo "<td><input type='submit' value='".t("Peru hyv‰ksynt‰")."'></td>";
+          echo "<td><input type='submit' value='".t("Peru hyv√§ksynt√§")."'></td>";
           echo "</form>";
         }
 
@@ -157,7 +157,7 @@ if ($tee == "") {
       echo "</table>";
     }
     else {
-      echo "<font class='message'>".t("Yht‰‰n kuitattavaa lomaa ei lˆydy")."!</font>";
+      echo "<font class='message'>".t("Yht√§√§n kuitattavaa lomaa ei l√∂ydy")."!</font>";
     }
   }
 }

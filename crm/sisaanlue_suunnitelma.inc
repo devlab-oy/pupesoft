@@ -3,7 +3,7 @@
 if ($tee == "FILE") {
   if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
-    /** K‰sitelt‰v‰n filen nimi **/
+    /** K√§sitelt√§v√§n filen nimi **/
     $kasiteltava_tiedoto_path = $_FILES['userfile']['tmp_name'];
 
     $excelrivit = pupeFileReader($kasiteltava_tiedoto_path, $ext);
@@ -27,7 +27,7 @@ if ($tee == "FILE") {
       $suun     = "";
 
       if (is_numeric($rivi[9])) {
-        // Exceliss‰ p‰iv‰m‰‰r‰t lasketaan p‰iviss‰ p‰iv‰st‰ 1.1.1900
+        // Exceliss√§ p√§iv√§m√§√§r√§t lasketaan p√§iviss√§ p√§iv√§st√§ 1.1.1900
         $suun = explode("-", date("d-m-Y", (($rivi[9]-25569) * 86400)));
       }
       elseif (strpos(trim($rivi[9]), "/") !== FALSE) {
@@ -51,7 +51,7 @@ if ($tee == "FILE") {
       $kayty    = "";
 
       if (is_numeric($rivi[11])) {
-        // Exceliss‰ p‰iv‰m‰‰r‰t lasketaan p‰iviss‰ p‰iv‰st‰ 1.1.1900
+        // Exceliss√§ p√§iv√§m√§√§r√§t lasketaan p√§iviss√§ p√§iv√§st√§ 1.1.1900
         $kayty = explode("-", date("d-m-Y", (($rivi[11]-25569) * 86400)));
       }
       elseif (strpos(trim($rivi[11]), "/") !== FALSE) {
@@ -109,20 +109,20 @@ if ($tee == "FILE") {
         $kumpi = "Viikkosuunnitelma";
         $kpvm  = $suunpvm;
         if ($kommentit == '') {
-          $kommentit = "$kukarow[nimi] ".t("suunnittelee k‰yv‰ns‰ asiakkaan luona")." $pvm.";
+          $kommentit = "$kukarow[nimi] ".t("suunnittelee k√§yv√§ns√§ asiakkaan luona")." $pvm.";
         }
       }
       elseif (trim($kaytypvm) == '') {
-        echo "VIRHE: Rivill‰ $rivinumero. ".t("P‰iv‰m‰‰r‰ puuttui tai se oli virheellinen")."!<br>";
+        echo "VIRHE: Rivill√§ $rivinumero. ".t("P√§iv√§m√§√§r√§ puuttui tai se oli virheellinen")."!<br>";
         $virhe = 1;
       }
 
       if (trim($kaytypvm) != '') {
-        $kumpi = "Asiakask‰ynti";
+        $kumpi = "Asiakask√§ynti";
         $kpvm  = $kaytypvm;
       }
       elseif (trim($suunpvm) == '') {
-        echo "VIRHE: Rivill‰ $rivinumero. ".t("P‰iv‰m‰‰r‰ puuttui tai se oli virheellinen")."!<br>";
+        echo "VIRHE: Rivill√§ $rivinumero. ".t("P√§iv√§m√§√§r√§ puuttui tai se oli virheellinen")."!<br>";
         $virhe = 1;
       }
 
@@ -141,7 +141,7 @@ if ($tee == "FILE") {
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 0) {
-        echo t("VIRHE: Rivill‰")." $rivinumero. ".t("Asiakasta ei lˆydy")."! $query<br>";
+        echo t("VIRHE: Rivill√§")." $rivinumero. ".t("Asiakasta ei l√∂ydy")."! $query<br>";
         $virhe = 1;
       }
       else {
@@ -164,7 +164,7 @@ if ($tee == "FILE") {
 
         if (mysql_num_rows($result) == 0) {
 
-          if ($kumpi == "Asiakask‰ynti") {
+          if ($kumpi == "Asiakask√§ynti") {
 
             $query = "SELECT tunnus
                       FROM kalenteri
@@ -211,7 +211,7 @@ if ($tee == "FILE") {
                     luontiaika   =  now()";
           $result = pupe_query($query);
         }
-        elseif ($kumpi == "Asiakask‰ynti") {
+        elseif ($kumpi == "Asiakask√§ynti") {
           $query = "UPDATE kalenteri
                     SET
                     yhtio            = '$yhtio',
@@ -239,7 +239,7 @@ if ($tee == "FILE") {
           $result = pupe_query($query);
         }
         else {
-          echo t("VIRHE: Rivill‰")." $rivinumero. ".t("Tieto on jo viikkosuunnitelmassasi")."!<br>";
+          echo t("VIRHE: Rivill√§")." $rivinumero. ".t("Tieto on jo viikkosuunnitelmassasi")."!<br>";
         }
       }
     }
@@ -254,7 +254,7 @@ if ($tee == "FILE") {
       if ($vstk == 'Viikkosuunnitelma') {
         $sel1 = "CHECKED";
       }
-      if ($vstk == 'Asiakask‰ynti') {
+      if ($vstk == 'Asiakask√§ynti') {
         $sel2 = "CHECKED";
       }
     }
@@ -283,15 +283,15 @@ if ($tee == 'VALITSE_TIEDOSTO') {
         <td>".t("Ytunnus")."</td>
         <td>".t("Postitp")."</td>
         <td>".t("Postino")."</td>
-        <td>".t("Yhtiˆt")."</td>
-        <td>".t("Myyj‰")."</td>
+        <td>".t("Yhti√∂t")."</td>
+        <td>".t("Myyj√§")."</td>
         <td>".t("Email")."</td>
         <td>".t("Puhelin")."</td>
         <td>".t("Pvm")."</td>
         <td>".t("Kampanjat")."</td>
-        <td>".t("PvmK‰yty")."</td>
+        <td>".t("PvmK√§yty")."</td>
         <td>".t("Km")."</td>
-        <td>".t("L‰htˆ")."</td>
+        <td>".t("L√§ht√∂")."</td>
         <td>".t("Paluu")."</td>
         <td>".t("PvRaha")."</td>
         <td>".t("Kommentit")."</td>
@@ -303,7 +303,7 @@ if ($tee == 'VALITSE_TIEDOSTO') {
       <tr>
       <th>".t("Valitse tiedosto").":</th>
       <td><input name='userfile' type='file'></td>
-      <td class='back'><input type='submit' value='".t("L‰heta")."'></td>
+      <td class='back'><input type='submit' value='".t("L√§heta")."'></td>
       </tr>
       </table>
       </form>";

@@ -22,10 +22,10 @@ if (!function_exists('alku_dgd')) {
     $bold = Zend_Pdf_Font::fontWithName(Zend_Pdf_Font::FONT_HELVETICA_BOLD);
 
     $pdf->pages[$sivu]->setFont($norm, 10);
-    $pdf->pages[$sivu]->drawText($yhtiorow["nimi"], mm_pt(15), mm_pt(262), 'LATIN1');
-    $pdf->pages[$sivu]->drawText($yhtiorow["osoite"], mm_pt(15), mm_pt(258), 'LATIN1');
-    $pdf->pages[$sivu]->drawText($yhtiorow["postino"]." ".$yhtiorow["postitp"], mm_pt(15), mm_pt(254), 'LATIN1');
-    $pdf->pages[$sivu]->drawText(maa($yhtiorow["maa"], $kieli), mm_pt(15), mm_pt(250), 'LATIN1');
+    $pdf->pages[$sivu]->drawText($yhtiorow["nimi"], mm_pt(15), mm_pt(262), 'UTF-8');
+    $pdf->pages[$sivu]->drawText($yhtiorow["osoite"], mm_pt(15), mm_pt(258), 'UTF-8');
+    $pdf->pages[$sivu]->drawText($yhtiorow["postino"]." ".$yhtiorow["postitp"], mm_pt(15), mm_pt(254), 'UTF-8');
+    $pdf->pages[$sivu]->drawText(maa($yhtiorow["maa"], $kieli), mm_pt(15), mm_pt(250), 'UTF-8');
 
     // Rakirno
     $query = "SELECT r2.rahtikirjanro, group_concat(DISTINCT r2.otsikkonro) otsikkonro
@@ -46,12 +46,12 @@ if (!function_exists('alku_dgd')) {
       $laskurow["otsikkonro"]   = $laskurow["tunnus"];
     }
 
-    $pdf->pages[$sivu]->drawText($laskurow["rahtikirjanro"], mm_pt(110), mm_pt(263), 'LATIN1');
+    $pdf->pages[$sivu]->drawText($laskurow["rahtikirjanro"], mm_pt(110), mm_pt(263), 'UTF-8');
 
-    $pdf->pages[$sivu]->drawText($laskurow["toim_nimi"], mm_pt(15), mm_pt(242), 'LATIN1');
-    $pdf->pages[$sivu]->drawText($laskurow["toim_osoite"], mm_pt(15), mm_pt(238), 'LATIN1');
-    $pdf->pages[$sivu]->drawText($laskurow["toim_postino"]." ".$laskurow["toim_postitp"], mm_pt(15), mm_pt(234), 'LATIN1');
-    $pdf->pages[$sivu]->drawText(maa($laskurow["toim_maa"], $kieli), mm_pt(15), mm_pt(230), 'LATIN1');
+    $pdf->pages[$sivu]->drawText($laskurow["toim_nimi"], mm_pt(15), mm_pt(242), 'UTF-8');
+    $pdf->pages[$sivu]->drawText($laskurow["toim_osoite"], mm_pt(15), mm_pt(238), 'UTF-8');
+    $pdf->pages[$sivu]->drawText($laskurow["toim_postino"]." ".$laskurow["toim_postitp"], mm_pt(15), mm_pt(234), 'UTF-8');
+    $pdf->pages[$sivu]->drawText(maa($laskurow["toim_maa"], $kieli), mm_pt(15), mm_pt(230), 'UTF-8');
 
     // Ruksit
     $pdf->pages[$sivu]->drawLine(mm_pt(15), mm_pt(202), mm_pt(55), mm_pt(197));
@@ -61,13 +61,13 @@ if (!function_exists('alku_dgd')) {
     $pdf->pages[$sivu]->drawLine(mm_pt(58), mm_pt(197), mm_pt(101), mm_pt(202));
 
     // 9 Additional handling information
-    $pdf->pages[$sivu]->drawText(t("H‰t‰puhelinnumero", $kieli)." {$yhtiorow["puhelin"]}", mm_pt(105), mm_pt(202), 'LATIN1');
-    $pdf->pages[$sivu]->drawText($yhtiorow["nimi"], mm_pt(105), mm_pt(196), 'LATIN1');
+    $pdf->pages[$sivu]->drawText(t("H√§t√§puhelinnumero", $kieli)." {$yhtiorow["puhelin"]}", mm_pt(105), mm_pt(202), 'UTF-8');
+    $pdf->pages[$sivu]->drawText($yhtiorow["nimi"], mm_pt(105), mm_pt(196), 'UTF-8');
 
-    $pdf->pages[$sivu]->drawText($yhtiorow["nimi"], mm_pt(15), mm_pt(61), 'LATIN1');
+    $pdf->pages[$sivu]->drawText($yhtiorow["nimi"], mm_pt(15), mm_pt(61), 'UTF-8');
 
     if ($kukarow["yhtio"] == "mast") {
-      $nimirow = array("nimi" => "Virpi Kivel‰");
+      $nimirow = array("nimi" => "Virpi Kivel√§");
     }
     else {
       $query = "SELECT nimi
@@ -78,12 +78,12 @@ if (!function_exists('alku_dgd')) {
       $nimirow = mysql_fetch_assoc($nimires);
     }
 
-    $pdf->pages[$sivu]->drawText($nimirow["nimi"], mm_pt(15), mm_pt(50), 'LATIN1');
-    $pdf->pages[$sivu]->drawText($yhtiorow["kotipaikka"]." / ".tv1dateconv(date("Y-m-d")), mm_pt(15), mm_pt(41), 'LATIN1');
+    $pdf->pages[$sivu]->drawText($nimirow["nimi"], mm_pt(15), mm_pt(50), 'UTF-8');
+    $pdf->pages[$sivu]->drawText($yhtiorow["kotipaikka"]." / ".tv1dateconv(date("Y-m-d")), mm_pt(15), mm_pt(41), 'UTF-8');
 
-    $pdf->pages[$sivu]->drawText($yhtiorow["nimi"], mm_pt(143), mm_pt(61), 'LATIN1');
-    $pdf->pages[$sivu]->drawText($nimirow["nimi"], mm_pt(143), mm_pt(50), 'LATIN1');
-    $pdf->pages[$sivu]->drawText($yhtiorow["kotipaikka"]." / ".tv1dateconv(date("Y-m-d")), mm_pt(143), mm_pt(41), 'LATIN1');
+    $pdf->pages[$sivu]->drawText($yhtiorow["nimi"], mm_pt(143), mm_pt(61), 'UTF-8');
+    $pdf->pages[$sivu]->drawText($nimirow["nimi"], mm_pt(143), mm_pt(50), 'UTF-8');
+    $pdf->pages[$sivu]->drawText($yhtiorow["kotipaikka"]." / ".tv1dateconv(date("Y-m-d")), mm_pt(143), mm_pt(41), 'UTF-8');
 
     # Viivoitin
     #$pdf->pages[$sivu]->setLineWidth(0.5);
@@ -126,19 +126,19 @@ if (!function_exists('uusi_sivu_dgd')) {
       ${$key} = $val;
     }
 
-    // Loadataan lis‰sivun pohja omaan olioon
+    // Loadataan lis√§sivun pohja omaan olioon
     $pdf2 = Zend_Pdf::load($GLOBALS["pupe_root_polku"]."/tilauskasittely/DGDpohja_lisasivu.pdf");
 
-    // Kloonataan sivu jotta saadaan se liitetty‰ alkuper‰iseen dokumenttiin
+    // Kloonataan sivu jotta saadaan se liitetty√§ alkuper√§iseen dokumenttiin
     $pdf->pages[] = clone $pdf2->pages[0];
 
     $pdf->pages[$sivu]->setFont($norm, 10);
-    $pdf->pages[$sivu]->drawText($yhtiorow["nimi"], mm_pt(15), mm_pt(262), 'LATIN1');
-    $pdf->pages[$sivu]->drawText($yhtiorow["osoite"], mm_pt(15), mm_pt(258), 'LATIN1');
-    $pdf->pages[$sivu]->drawText($yhtiorow["postino"]." ".$yhtiorow["postitp"], mm_pt(15), mm_pt(254), 'LATIN1');
-    $pdf->pages[$sivu]->drawText(maa($yhtiorow["maa"]), mm_pt(15), mm_pt(250), 'LATIN1');
+    $pdf->pages[$sivu]->drawText($yhtiorow["nimi"], mm_pt(15), mm_pt(262), 'UTF-8');
+    $pdf->pages[$sivu]->drawText($yhtiorow["osoite"], mm_pt(15), mm_pt(258), 'UTF-8');
+    $pdf->pages[$sivu]->drawText($yhtiorow["postino"]." ".$yhtiorow["postitp"], mm_pt(15), mm_pt(254), 'UTF-8');
+    $pdf->pages[$sivu]->drawText(maa($yhtiorow["maa"]), mm_pt(15), mm_pt(250), 'UTF-8');
 
-    $pdf->pages[$sivu]->drawText($laskurow["rahtikirjanro"], mm_pt(110), mm_pt(263), 'LATIN1');
+    $pdf->pages[$sivu]->drawText($laskurow["rahtikirjanro"], mm_pt(110), mm_pt(263), 'UTF-8');
 
     // Luodaan palautettavat
     $return = array();
@@ -172,7 +172,7 @@ if (!function_exists('rivi_dgd')) {
 
       if (($sivu == 0 and $kala < 120) or ($sivu > 0 and $kala < 30)) {
 
-        $pdf->pages[$sivu]->drawText("Continues....", mm_pt(45), mm_pt($kala), 'LATIN1');
+        $pdf->pages[$sivu]->drawText("Continues....", mm_pt(45), mm_pt($kala), 'UTF-8');
 
         $sivu++;
 
@@ -198,15 +198,15 @@ if (!function_exists('rivi_dgd')) {
 
       $kollimaara_yht += $kollimaara;
 
-      $pdf->pages[$sivu]->drawText($teksti, mm_pt(45), mm_pt($kala), 'LATIN1');
-      $pdf->pages[$sivu]->drawText($kilot, mm_pt(145), mm_pt($kala), 'LATIN1');
+      $pdf->pages[$sivu]->drawText($teksti, mm_pt(45), mm_pt($kala), 'UTF-8');
+      $pdf->pages[$sivu]->drawText($kilot, mm_pt(145), mm_pt($kala), 'UTF-8');
       $kala-=5;
     }
 
-    $pdf->pages[$sivu]->drawText(1, mm_pt(20), mm_pt(175), 'LATIN1');
+    $pdf->pages[$sivu]->drawText(1, mm_pt(20), mm_pt(175), 'UTF-8');
 
     if ($kollimaara_yht > 1) {
-      $pdf->pages[$sivu]->drawText(" -  ".$kollimaara_yht, mm_pt(22), mm_pt(175), 'LATIN1');
+      $pdf->pages[$sivu]->drawText(" -  ".$kollimaara_yht, mm_pt(22), mm_pt(175), 'UTF-8');
     }
 
     $kala-=2;
@@ -217,7 +217,7 @@ if (!function_exists('rivi_dgd')) {
 
       if ($kala < 120) {
 
-        $pdf->pages[$sivu]->drawText("Continues....", mm_pt(45), mm_pt($kala), 'LATIN1');
+        $pdf->pages[$sivu]->drawText("Continues....", mm_pt(45), mm_pt($kala), 'UTF-8');
 
         $sivu++;
 
@@ -239,10 +239,10 @@ if (!function_exists('rivi_dgd')) {
         $pdf->pages[$sivu]->setFont($norm, 8);
       }
 
-      $pdf->pages[$sivu]->drawText($vaktuoterivi, mm_pt(45), mm_pt($kala), 'LATIN1');
+      $pdf->pages[$sivu]->drawText($vaktuoterivi, mm_pt(45), mm_pt($kala), 'UTF-8');
 
       if ($vaktuotepaino != "") {
-        $pdf->pages[$sivu]->drawText($vaktuotepaino, mm_pt(167), mm_pt($kala), 'LATIN1');
+        $pdf->pages[$sivu]->drawText($vaktuotepaino, mm_pt(167), mm_pt($kala), 'UTF-8');
       }
 
       $kala-=4;
@@ -274,7 +274,7 @@ if (!function_exists('loppu_dgd')) {
       $tsiv = $sivu+1;
 
       $pdf->pages[$pp]->setFont($norm, 10);
-      $pdf->pages[$pp]->drawText("$csiv       $tsiv", mm_pt(114), mm_pt(259), 'LATIN1');
+      $pdf->pages[$pp]->drawText("$csiv       $tsiv", mm_pt(114), mm_pt(259), 'UTF-8');
     }
 
     // Luodaan palautettavat
@@ -298,12 +298,12 @@ if (!function_exists('print_pdf_dgd')) {
     }
 
     if ($tee == 'NAYTATILAUS') {
-      //Tyˆnnet‰‰n tuo pdf vaan putkeen!
+      //Ty√∂nnet√§√§n tuo pdf vaan putkeen!
       echo $pdf->render();
     }
     else {
 
-      //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+      //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
       list($usec, $sec) = explode(' ', microtime());
       mt_srand((float) $sec + ((float) $usec * 100000));
       $pdffilenimi = "/tmp/DGD-".md5(uniqid(mt_rand(), true)).".pdf";

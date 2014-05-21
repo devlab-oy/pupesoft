@@ -1,14 +1,14 @@
 <?php
 
-//  Jos olemme tekem‰ss‰ jotain meill‰ on oltava kuka tai listaamme kaikki laskut mit‰ tietokannasta lˆytyy!
+//  Jos olemme tekem√§ss√§ jotain meill√§ on oltava kuka tai listaamme kaikki laskut mit√§ tietokannasta l√∂ytyy!
 if($tee == "T" and strlen(trim($kuka)) == 0) {
-  echo "<font class='error'>".t("VIRHE: Hyv‰ksyj‰ puuttuu")."!</font><br><br>";
+  echo "<font class='error'>".t("VIRHE: Hyv√§ksyj√§ puuttuu")."!</font><br><br>";
   $tee = "";
 }
 
 if ($tee == '') {
-   // Summaus hyv‰ksynn‰ss‰ olevista laskuista
-  echo "<font class='head'>".t("Laskuja hyv‰ksym‰tt‰")."</font><hr>";
+   // Summaus hyv√§ksynn√§ss√§ olevista laskuista
+  echo "<font class='head'>".t("Laskuja hyv√§ksym√§tt√§")."</font><hr>";
 
   $query = "SELECT hyvaksyja_nyt,
             if(kuka.nimi is not null, kuka.nimi, hyvaksyja_nyt) nimi,
@@ -28,9 +28,9 @@ if ($tee == '') {
   echo "<table>";
   echo "<tr>";
   echo "<th>".t("Kuka")."</th>";
-  echo "<th>".t("Kpl")."/".t("pys‰ytetty")."</th>";
-  echo "<th>".t("Min")." ".t("er‰pvm")."</th>";
-  echo "<th>".t("Max")." ".t("er‰pvm")."</th>";
+  echo "<th>".t("Kpl")."/".t("pys√§ytetty")."</th>";
+  echo "<th>".t("Min")." ".t("er√§pvm")."</th>";
+  echo "<th>".t("Max")." ".t("er√§pvm")."</th>";
   echo "<th>".t("Summa")." $yhtiorow[valkoodi]</th>";
   echo "</tr>";
 
@@ -46,9 +46,9 @@ if ($tee == '') {
   echo "</table><br>";
 }
 
-// Yhden k‰ytt‰j‰n pˆyd‰ll‰ olevat laskut tai sen muutos
+// Yhden k√§ytt√§j√§n p√∂yd√§ll√§ olevat laskut tai sen muutos
 if ($tee == 'T') {
-  // Muutetaan hyv‰ksynt‰‰
+  // Muutetaan hyv√§ksynt√§√§
   if ((strlen($mika) > 0) and (strlen($nimi) > 0)) {
     $query = "SELECT hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, hyvaksyja_nyt, h1time, h2time, h3time, h4time, h5time
               FROM lasku
@@ -56,14 +56,14 @@ if ($tee == 'T') {
     $result = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($result) == 0) {
-      echo "<font class='error'>".t("Muutettavaa laskua ei lˆytynyt")."!</font>";
+      echo "<font class='error'>".t("Muutettavaa laskua ei l√∂ytynyt")."!</font>";
       exit;
     }
 
     $trow = mysql_fetch_array($result);
     $mita = "";
 
-    // Aikaikkunan poisto, joku muu ehti ennen meit‰
+    // Aikaikkunan poisto, joku muu ehti ennen meit√§
     if ($trow['hyvaksyja_nyt'] == $kuka) {
       if (($trow['hyvak1'] == $kuka) and ($trow['h1time'] == '0000-00-00 00:00:00')) $mita = "hyvak1";
       elseif (($trow['hyvak2'] == $kuka) and ($trow['h2time'] == '0000-00-00 00:00:00')) $mita = "hyvak2";
@@ -84,7 +84,7 @@ if ($tee == 'T') {
       echo "<font class='message'>".t("Lasku siirrettiin").".. '$kuka' --> '$nimi'</font><br>";
     }
     else {
-      echo "<font class='error'>".t("Lasku ei en‰‰ ollut siirrett‰viss‰")."!</font><br>";
+      echo "<font class='error'>".t("Lasku ei en√§√§ ollut siirrett√§viss√§")."!</font><br>";
     }
   }
 
@@ -95,16 +95,16 @@ if ($tee == 'T') {
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) == 0) {
-    echo "<font class='message'>".t("K‰ytt‰j‰‰ ei en‰‰ lˆydy t‰lt‰ yhtiˆlt‰")."!</font><br>";
+    echo "<font class='message'>".t("K√§ytt√§j√§√§ ei en√§√§ l√∂ydy t√§lt√§ yhti√∂lt√§")."!</font><br>";
     $trow = array();
   }
   else {
     $trow = mysql_fetch_array ($result);
   }
 
-  echo "<font class='head'>$trow[nimi]".t(":n pˆyd‰ll‰ olevat laskut")."</font><hr>";
+  echo "<font class='head'>$trow[nimi]".t(":n p√∂yd√§ll√§ olevat laskut")."</font><hr>";
 
-  // Tehd‰‰n popup, jolla voidaan hyv‰ksyj‰ myˆhemmin vaihtaa
+  // Tehd√§√§n popup, jolla voidaan hyv√§ksyj√§ my√∂hemmin vaihtaa
   $query = "SELECT DISTINCT kuka.kuka, kuka.nimi
             FROM kuka
             JOIN oikeu ON oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi like '%hyvak.php'
@@ -138,15 +138,15 @@ if ($tee == 'T') {
   echo "<table><tr>";
   echo "<th>".t("Tapvm")."</th>";
   echo "<th>".t("Kapvm")."</th>";
-  echo "<th>".t("Er‰pvm")."</th>";
+  echo "<th>".t("Er√§pvm")."</th>";
   echo "<th>".t("Nimi")."</th>";
   echo "<th>".t("Postitp")."</th>";
   echo "<th>".t("Laskunro")."</th>";
-  echo "<th>".t("Yhtiˆn valuutassa")."</th>";
+  echo "<th>".t("Yhti√∂n valuutassa")."</th>";
   echo "<th>".t("Laskun valuutassa")."</th>";
   echo "<th>".t("Kustp")."</th>";
   echo "<th>".t("EBID")."</th>";
-  echo "<th>".t("Siirr‰")."</th>";
+  echo "<th>".t("Siirr√§")."</th>";
   echo "</tr>";
 
   while ($trow = mysql_fetch_array ($result)) {
@@ -176,7 +176,7 @@ if ($tee == 'T') {
     echo "<$erotin style='text-align: right;'>$trow[kotisumma] $yhtiorow[valkoodi]</$erotin>";
     echo "<$erotin style='text-align: right;'>$trow[summa] $trow[valkoodi]</$erotin>";
 
-    // Selvitet‰‰n laskun kustannuspaikat
+    // Selvitet√§√§n laskun kustannuspaikat
     $kustpq = "SELECT tiliointi.kustp, kustannuspaikka.nimi
                FROM tiliointi
                JOIN kustannuspaikka ON (kustannuspaikka.yhtio = tiliointi.yhtio AND kustannuspaikka.tunnus = tiliointi.kustp)
@@ -196,14 +196,14 @@ if ($tee == 'T') {
 
     echo "<td>$kustannuspaikan_nimi</td>";
 
-    // tehd‰‰n lasku linkki
+    // tehd√§√§n lasku linkki
     echo "<$erotin>". ebid($trow['tunnus']) ."</$erotin>";
 
     echo "  <form action = 'raportit.php?toim=hyvaksynta&tee=T&kuka=$kuka' method = 'post'>
         <input type = 'hidden' name = 'mika' value = '$trow[tunnus]'>";
     echo "  <$erotin>
         $ulos
-        <input type = 'submit' value = '".t("Siirr‰")."'>
+        <input type = 'submit' value = '".t("Siirr√§")."'>
         </$erotin>
         </form></tr>";
 

@@ -4,17 +4,17 @@ if (!function_exists("onkotapahtumajariveja")) {
   function onkotapahtumajariveja($tuoteno) {
     global $kukarow, $poistolukko;
 
-    // Tuotteen saa poistaa mik‰li sill‰ ei ole yht‰‰n tapahtumaa
+    // Tuotteen saa poistaa mik√§li sill√§ ei ole yht√§√§n tapahtumaa
     $query = "SELECT yhtio
               FROM tapahtuma USE INDEX (yhtio_laji_tuoteno)
               WHERE yhtio = '$kukarow[yhtio]'
-              and laji    in ('ep‰kurantti','inventointi','kulutus','laskutus','siirto','tulo','valmistus')
+              and laji    in ('ep√§kurantti','inventointi','kulutus','laskutus','siirto','tulo','valmistus')
               and tuoteno = '{$tuoteno}'
               LIMIT 1";
     $sdtres = pupe_query($query);
 
     if (mysql_num_rows($sdtres) == 0) {
-      // Ei saa olla myˆsk‰‰n yht‰‰n tilausrivi‰ (Puuterivit sallitaan)
+      // Ei saa olla my√∂sk√§√§n yht√§√§n tilausrivi√§ (Puuterivit sallitaan)
       $query = "SELECT yhtio
                 FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laadittu)
                 WHERE yhtio   = '$kukarow[yhtio]'
@@ -26,13 +26,13 @@ if (!function_exists("onkotapahtumajariveja")) {
       $sdtres = pupe_query($query);
 
       if (mysql_num_rows($sdtres) == 0) {
-        // Tapahtumia tai rivej‰ ei oo
+        // Tapahtumia tai rivej√§ ei oo
         $poistolukko = "";
         return;
       }
     }
 
-    // Tapahtumia tai rivej‰ on
+    // Tapahtumia tai rivej√§ on
     $poistolukko = "TSEKATTU";
   }
 }
@@ -53,7 +53,7 @@ if (!function_exists("tuotetarkista")) {
         $temp_ekakirjain = (substr(trim($t[$i]),0,1));
 
         if (($temp_ekakirjain == '*') or ($temp_ekakirjain == '@') or ($temp_ekakirjain == '?')) {
-          $virhe[$i] = t("Tuotenumero ei voi alkaa merkeill‰ *, @ tai ?");
+          $virhe[$i] = t("Tuotenumero ei voi alkaa merkeill√§ *, @ tai ?");
         }
         else {
           if (substr(trim($t[$i]),-1) == '*') {
@@ -68,7 +68,7 @@ if (!function_exists("tuotetarkista")) {
               $chkressiresult = pupe_query($query);
 
               if (mysql_num_rows($chkressiresult) > 0) {
-                $virhe[$i] = t("Tuotenumero on jo perustettu j‰rjestelm‰‰n");
+                $virhe[$i] = t("Tuotenumero on jo perustettu j√§rjestelm√§√§n");
               }
             }
           }
@@ -82,7 +82,7 @@ if (!function_exists("tuotetarkista")) {
         onkotapahtumajariveja($tem_tuoteno);
 
         if ($poistolukko != "" and strtoupper($luedata_toiminto) == "POISTA") {
-          $virhe[$i] = t("Tuotetta ei saa poistaa, koska tuotteella on tilausrivej‰/tapahtumia")."!";
+          $virhe[$i] = t("Tuotetta ei saa poistaa, koska tuotteella on tilausrivej√§/tapahtumia")."!";
         }
       }
     }
@@ -102,7 +102,7 @@ if (!function_exists("tuotetarkista")) {
       $tpres = pupe_query($tpque);
 
       if (mysql_num_rows($tpres) == 0) {
-        $virhe[$i] .= t("Kustannuspaikkaa ei lˆydy")."!";
+        $virhe[$i] .= t("Kustannuspaikkaa ei l√∂ydy")."!";
       }
     }
 
@@ -122,7 +122,7 @@ if (!function_exists("tuotetarkista")) {
           $tpres = pupe_query($tpque);
 
           if (mysql_num_rows($tpres) == 0) {
-            $virhe[$i] .= t("Avainsanaa ei lˆydy")."!";
+            $virhe[$i] .= t("Avainsanaa ei l√∂ydy")."!";
             return;
           }
         }
@@ -192,7 +192,7 @@ if (!function_exists("tuotetarkista")) {
       $sresult = pupe_query($query);
 
       if (mysql_num_rows($sresult) != 1) {
-        $virhe[$i] = t("Tili‰ ei lˆydy");
+        $virhe[$i] = t("Tili√§ ei l√∂ydy");
       }
     }
 
@@ -214,13 +214,13 @@ if (!function_exists("tuotetarkista")) {
     }
 
     if ($fieldname == "tullinimike2" and $tem_tullinimike1 != "") {
-      // jos tyhj‰‰ laitetaan nollaksi
+      // jos tyhj√§√§ laitetaan nollaksi
       if ($t[$i] == "") $t[$i] = "00";
     }
 
     if ($fieldname == "tuotetyyppi") {
       if (isset($t[$i])) {
-        // Tyyppi‰ ei saa vaihtaa, jos tuotteella on yksikin tapahtuma
+        // Tyyppi√§ ei saa vaihtaa, jos tuotteella on yksikin tapahtuma
         if (trim(strtoupper($trow["tuotetyyppi"])) != trim(strtoupper($t[$i]))) {
 
           // Onko tuotteella tapahtumia
@@ -230,11 +230,11 @@ if (!function_exists("tuotetarkista")) {
 
           if (trim(strtoupper($trow["tuotetyyppi"])) == "") {
             if ($poistolukko != "" and ($t[$i] == 'R' or $t[$i] == 'K' or $t[$i] == 'M')) {
-              $virhe[$i] = t("Tuotetyyppi‰ ei voida muuttaa, koska tuotteella on tapahtumia")."!";
+              $virhe[$i] = t("Tuotetyyppi√§ ei voida muuttaa, koska tuotteella on tapahtumia")."!";
             }
           }
           elseif ($poistolukko != "") {
-            $virhe[$i] = t("Tuotetyyppi‰ ei voida muuttaa, koska tuotteella on tapahtumia")."!";
+            $virhe[$i] = t("Tuotetyyppi√§ ei voida muuttaa, koska tuotteella on tapahtumia")."!";
           }
         }
 
@@ -258,7 +258,7 @@ if (!function_exists("tuotetarkista")) {
         $vresult = pupe_query($query);
         $vrow = mysql_fetch_array($vresult);
 
-        // Tietyt vaihdot sallitaan!!!, huomaa NOT iffiss‰, helpompi kirjoittaa n‰in p‰in
+        // Tietyt vaihdot sallitaan!!!, huomaa NOT iffiss√§, helpompi kirjoittaa n√§in p√§in
         if (!(($t[$i] == "S" and $vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("S","U")))
            or ($t[$i] == "U" and $vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("S","U")))
            or ($t[$i] == ""  and $vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("","T","V","E","F")))
@@ -266,7 +266,7 @@ if (!function_exists("tuotetarkista")) {
            or ($t[$i] == "V" and $vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("","T","V","E","F")))
            or ($t[$i] == "E" and (in_array($trow["sarjanumeroseuranta"], array("E","F")) or ($vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("","T","V","E","F")))))
            or ($t[$i] == "F" and (in_array($trow["sarjanumeroseuranta"], array("E","F")) or ($vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("","T","V","E","F"))))))) {
-          $virhe[$i] = t("Seurantatyyppi‰ ei voida muuttaa, koska tuotteella on tapahtumia")."!";
+          $virhe[$i] = t("Seurantatyyppi√§ ei voida muuttaa, koska tuotteella on tapahtumia")."!";
         }
       }
     }
@@ -305,30 +305,30 @@ if (!function_exists("tuotetarkista")) {
       }
       elseif ($t[$i] != '') {
 
-        // K‰ytt‰j‰t voi erotella myˆs maat pilkuilla, joten vaihdetaan ne t‰ss‰ spaceiksi, trimmataan ja uppercasetaan
+        // K√§ytt√§j√§t voi erotella my√∂s maat pilkuilla, joten vaihdetaan ne t√§ss√§ spaceiksi, trimmataan ja uppercasetaan
         $t[$i] = str_replace(",", " ", strtoupper(trim($t[$i])));
 
-        // Poistetaan ylim‰‰r‰iset spacet (kaksi tai enemm‰n spaceja yhdeksi spaceksi)
+        // Poistetaan ylim√§√§r√§iset spacet (kaksi tai enemm√§n spaceja yhdeksi spaceksi)
         $t[$i] = preg_replace("/ {2,}/", " ", $t[$i]);
 
-        // K‰yd‰‰n l‰pi syˆtetyt arvot, splitataan v‰lilyˆnnist‰
+        // K√§yd√§√§n l√§pi sy√∂tetyt arvot, splitataan v√§lily√∂nnist√§
         $apu_vientikiellot = explode(" ", $t[$i]);
 
         foreach ($apu_vientikiellot as $apu_vientikielto) {
 
-          // varmistetaan, ett‰ lˆytyy plus tai miinusmerkki
+          // varmistetaan, ett√§ l√∂ytyy plus tai miinusmerkki
           if (strpos($apu_vientikielto, "+") === FALSE and strpos($apu_vientikielto, "-") === FALSE) {
-            $virhe[$i] .= t("Maakoodi virheellisess‰ muodossa").": '$apu_vientikielto'<br>";
+            $virhe[$i] .= t("Maakoodi virheellisess√§ muodossa").": '$apu_vientikielto'<br>";
           }
-          // varmistetaan, ett‰ plus tai miinus on eka merkki
+          // varmistetaan, ett√§ plus tai miinus on eka merkki
           elseif (strpos($apu_vientikielto, "+") != 0 or strpos($apu_vientikielto, "-") != 0) {
-            $virhe[$i] .= t("Maakoodi virheellisess‰ muodossa").": '$apu_vientikielto'<br>";
+            $virhe[$i] .= t("Maakoodi virheellisess√§ muodossa").": '$apu_vientikielto'<br>";
           }
           else {
             // Otetaan eka +/- pois
             $apu_vientikielto = substr($apu_vientikielto, 1);
 
-            // Katsotaan lˆytyykˆ annettu maakoodi
+            // Katsotaan l√∂ytyyk√∂ annettu maakoodi
             $query = "SELECT distinct koodi
                       FROM maat
                       WHERE koodi = '$apu_vientikielto'";
@@ -342,7 +342,7 @@ if (!function_exists("tuotetarkista")) {
       }
 
       if ($virhe[$i] != "") {
-        $virhe[$i] .= t("Syˆt‰ tieto muodossa +MAAKOODI tai -MAAKOODI ja erottele maat v‰lilyˆnnill‰.");
+        $virhe[$i] .= t("Sy√∂t√§ tieto muodossa +MAAKOODI tai -MAAKOODI ja erottele maat v√§lily√∂nnill√§.");
       }
     }
 
@@ -356,7 +356,7 @@ if (!function_exists("tuotetarkista")) {
         $chkressiresult = pupe_query($query);
 
         if (mysql_num_rows($chkressiresult) > 0) {
-          $virhe[$i] = t("EAN-koodi on jo perustettu j‰rjestelm‰‰n");
+          $virhe[$i] = t("EAN-koodi on jo perustettu j√§rjestelm√§√§n");
         }
 
         if ($yhtiorow["tarkista_eankoodi"] == "K" and tarkista_ean13(trim($t[$i])) === FALSE) {
@@ -370,7 +370,7 @@ if (!function_exists("tuotetarkista")) {
       $valmistusaika_sekunneissa = trim($t[$i]);
 
       if ($valmistusaika_sekunneissa != "" and (!is_numeric($valmistusaika_sekunneissa) or $valmistusaika_sekunneissa < 0)) {
-        $virhe[$i] = t("Valmistusaika pit‰‰ olla suurempi tai yht‰suuri kuin 0");
+        $virhe[$i] = t("Valmistusaika pit√§√§ olla suurempi tai yht√§suuri kuin 0");
       }
     }
 
@@ -380,7 +380,7 @@ if (!function_exists("tuotetarkista")) {
 
       if (!empty($trow) and $tem_status_vanha != $tem_status) {
         //jos tuotteella status muutetaan ja tuotteella on vain oletuspaikka ja saldo on nolla,
-        //niin tuotteen muokkauksen yhteydess‰ mit‰tˆid‰‰n nykyinen tuotepaikka + tapahtumiin j‰lki ja perustetaan m‰‰ritellyin ehdoin uudet tuotepaikat.
+        //niin tuotteen muokkauksen yhteydess√§ mit√§t√∂id√§√§n nykyinen tuotepaikka + tapahtumiin j√§lki ja perustetaan m√§√§ritellyin ehdoin uudet tuotepaikat.
         list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tem_tuoteno);
 
         if ($saldo == 0) {
@@ -405,7 +405,7 @@ if (!function_exists("tuotetarkista")) {
           require("muuvarastopaikka.php");
         }
       }
-      // Jos kyseess‰ tuotteen poisto, tarkistetaan lˆytyykˆ tuotetta avoimilta ostotilauksilta, jos lˆytyy niin poistoa ei sallita.
+      // Jos kyseess√§ tuotteen poisto, tarkistetaan l√∂ytyyk√∂ tuotetta avoimilta ostotilauksilta, jos l√∂ytyy niin poistoa ei sallita.
       if ($tem_status == 'P') {
         $query = "SELECT tuoteno
                   FROM tilausrivi
@@ -417,12 +417,12 @@ if (!function_exists("tuotetarkista")) {
         $result = pupe_query($query);
 
         if(mysql_num_rows($result) > 0) {
-          $virhe[$i] = t("Tuotetta lˆytyy avoimelta ostotilaukselta, ei voida merkata poistetuksi");
+          $virhe[$i] = t("Tuotetta l√∂ytyy avoimelta ostotilaukselta, ei voida merkata poistetuksi");
         }
       }
     }
 
-    // ei piirret‰ ellei yhtiˆparametri ohjeista katsomaan t‰‰lt‰
+    // ei piirret√§ ellei yhti√∂parametri ohjeista katsomaan t√§√§lt√§
     if ($fieldname == "suoratoimitus") {
       if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('V', 'W', 'I', 'J'))) {
         if (!in_array($t[$i], array('S','U','X',''))) {
@@ -431,11 +431,11 @@ if (!function_exists("tuotetarkista")) {
       }
     }
 
-    //tehd‰‰n n‰‰ jutut t‰ss‰ koska t‰m‰ on aina viimeinen sarake
+    //tehd√§√§n n√§√§ jutut t√§ss√§ koska t√§m√§ on aina viimeinen sarake
     if ($fieldname == "tunnus") {
 
       if ($tem_kehahin != "" and $tem_kehahin != $trow["kehahin"] and $tem_eisaldoa == "") {
-        // Pit‰‰ aina setata myˆs "t‰m‰n" kent‰n virhe, muuten luedata ei toimi
+        // Pit√§√§ aina setata my√∂s "t√§m√§n" kent√§n virhe, muuten luedata ei toimi
         $virhe[$i] = $virhe[$tem_kehahin_ind] = t("Saldollisen tuotteen hankintahintaa ei voi muuttaa")."!";
       }
 
@@ -528,16 +528,16 @@ if (!function_exists("tuotetarkista")) {
                                  hyllynro  = '{$hyllynro}',
                                  hyllyvali = '{$hyllyvali}',
                                  hyllytaso = '{$hyllytaso}',
-                                 selite    = '".t("Tuoteyll‰pidossa lis‰ttiin tuotepaikka")." $hyllyalue $hyllynro $hyllyvali $hyllytaso',
+                                 selite    = '".t("Tuoteyll√§pidossa lis√§ttiin tuotepaikka")." $hyllyalue $hyllynro $hyllyvali $hyllytaso',
                                  laatija   = '$kukarow[kuka]',
                                  laadittu  = now()";
               $tapahtumaresult = pupe_query($tapahtumaquery);
 
-              if ($trow["luedata_from"] == "LUEDATA") { // jos tullaan lue datasta voidaan ja pit‰‰ k‰ytt‰‰ lue datan omaa echo funkkaria!
-                lue_data_echo("<font class='message'>".t("Lis‰ttiin varastopaikka")." {$_tuotepaikka}</font></br>");
+              if ($trow["luedata_from"] == "LUEDATA") { // jos tullaan lue datasta voidaan ja pit√§√§ k√§ytt√§√§ lue datan omaa echo funkkaria!
+                lue_data_echo("<font class='message'>".t("Lis√§ttiin varastopaikka")." {$_tuotepaikka}</font></br>");
               }
               else {
-                echo "<font class='message'>".t("Lis‰ttiin varastopaikka")." {$_tuotepaikka}</font></br>";
+                echo "<font class='message'>".t("Lis√§ttiin varastopaikka")." {$_tuotepaikka}</font></br>";
               }
 
               $_counter++;
@@ -546,10 +546,10 @@ if (!function_exists("tuotetarkista")) {
         }
       }
     }
-    //tarkistetaan ettei yritet‰ laittaa ostoehdotus sarakkeeseen v‰‰ri‰ kirjaimia! sallitut "E" = ei ja "" = kyll‰
+    //tarkistetaan ettei yritet√§ laittaa ostoehdotus sarakkeeseen v√§√§ri√§ kirjaimia! sallitut "E" = ei ja "" = kyll√§
     if ($fieldname == "ostoehdotus"){
       if ($t[$i] != "E" AND $t[$i] != "") {
-        $virhe[$i] = t("Ostoehdotus arvo tulee olla joko E tai tyhj‰! (E = ei n‰ytet‰ ja tyhj‰ = n‰ytet‰‰n)");
+        $virhe[$i] = t("Ostoehdotus arvo tulee olla joko E tai tyhj√§! (E = ei n√§ytet√§ ja tyhj√§ = n√§ytet√§√§n)");
       }
     }
   }

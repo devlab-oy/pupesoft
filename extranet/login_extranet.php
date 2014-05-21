@@ -30,14 +30,14 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
 
   if ((mysql_num_rows ($result) > 0) and ($vertaa == $krow['salasana'])) {
 
-    // Onko monta sopivaa k‰ytt‰j‰tietuetta == samalla henkilˆll‰ monta yrityst‰!
+    // Onko monta sopivaa k√§ytt√§j√§tietuetta == samalla henkil√∂ll√§ monta yrityst√§!
     if (mysql_num_rows($result) > 1) {
       $usea = 1;
     }
 
     // Kaikki ok!
     if ($err != 1) {
-      // Pit‰‰kˆ viel‰ kysy‰ yrityst‰???
+      // Pit√§√§k√∂ viel√§ kysy√§ yrityst√§???
       if (($usea != 1) or (strlen($yhtio) > 0)) {
         for ($i=0; $i<25; $i++) {
           $session = $session . chr(rand(65,90)) ;
@@ -69,9 +69,9 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
     }
   }
   else {
-    $errormsg = "<br><font class='error'>".t("K‰ytt‰j‰tunnusta ei lˆydy ja/tai",$browkieli)."<br>".t("Salasana on virheellinen",$browkieli)."!</font><br>";
+    $errormsg = "<br><font class='error'>".t("K√§ytt√§j√§tunnusta ei l√∂ydy ja/tai",$browkieli)."<br>".t("Salasana on virheellinen",$browkieli)."!</font><br>";
 
-    // Kirjataan ep‰onnistunut kirjautuminen virhelokiin...
+    // Kirjataan ep√§onnistunut kirjautuminen virhelokiin...
     error_log ("user $user: authentication failure for \"/pupesoft/\": Password Mismatch", 0);
   }
 }
@@ -83,7 +83,7 @@ $formi = "login"; // Kursorin ohjaus
 $kentta = "user";
 
 if (!headers_sent()) {
-  header("Content-Type: text/html; charset=iso-8859-1");
+  header("Content-Type: text/html; charset=utf-8");
   header("Pragma: public");
   header("Expires: 0");
   header("Last-Modified: ".gmdate("D, d M Y H:i:s")." GMT");
@@ -107,7 +107,7 @@ echo "
   }
 
   echo "<meta http-equiv='Pragma' content='no-cache'>
-  <meta http-equiv='Content-Type' content='text/html; charset=iso-8859-1'>";
+  <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>";
   if (isset($google_analytics)) {
     if ($_REQUEST["google_analytics"] == '') {
       echo $google_analytics;
@@ -147,7 +147,7 @@ else {
 
 echo "</a></td>
 <td>
-<font class='head'>".t("Sis‰‰nkirjautuminen",$browkieli)."</font><br><br>
+<font class='head'>".t("Sis√§√§nkirjautuminen",$browkieli)."</font><br><br>
 ";
 
 if (isset($usea) and $usea == 1) {
@@ -158,7 +158,7 @@ if (isset($usea) and $usea == 1) {
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) == 0) {
-    echo t("Sinulle lˆytyi monta k‰ytt‰j‰tunnusta, muttei yht‰‰n yrityst‰")."!";
+    echo t("Sinulle l√∂ytyi monta k√§ytt√§j√§tunnusta, muttei yht√§√§n yrityst√§")."!";
     exit;
   }
 
@@ -185,7 +185,7 @@ if (isset($usea) and $usea == 1) {
 }
 else {
 
-  //  Ei tehd‰ framesetti‰ jos hyp‰t‰‰n suoraan muualle
+  //  Ei tehd√§ framesetti√§ jos hyp√§t√§√§n suoraan muualle
   if ($location != "") {
     $target = "login_extranet.php";
   }
@@ -198,11 +198,11 @@ else {
         <form name='login' target='_top' action='$target' method='post'>
         <input type='hidden' name='go' value='$go'>
         <input type='hidden' name='location' value='$location'>
-        <tr><td><font class='menu'>".t("K‰ytt‰j‰tunnus",$browkieli).":</font></td><td><input type='text' value='' name='user' size='15' maxlength='30'></td></tr>
+        <tr><td><font class='menu'>".t("K√§ytt√§j√§tunnus",$browkieli).":</font></td><td><input type='text' value='' name='user' size='15' maxlength='30'></td></tr>
         <tr><td><font class='menu'>".t("Salasana",$browkieli).":</font></td><td><input type='password' name='salasana' size='15' maxlength='30'></td></tr>
       </table>
       $errormsg
-      <br><input type='submit' value='".t("Kirjaudu sis‰‰n",$browkieli)."'>
+      <br><input type='submit' value='".t("Kirjaudu sis√§√§n",$browkieli)."'>
       <br><br>
       <font class='info'>Copyright &copy; 2002-".date("Y")." <a href='http://www.devlab.fi/'>Devlab Oy</a> - <a href='license.php'>Licence Agreement</a></font>
       </form>

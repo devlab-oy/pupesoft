@@ -8,7 +8,7 @@ DBSALASANA=$3
 DBHOST=$4
 
 
-# Katsotaan, ett‰ parametrit on annettu
+# Katsotaan, ett√§ parametrit on annettu
 if [ -z ${DBKANTA} ] || [ -z ${DBKAYTTAJA} ] || [ -z ${DBSALASANA} ]; then
   echo
   echo "ERROR! Pakollisia parametreja ei annettu!"
@@ -20,7 +20,7 @@ if [ -z ${DBKANTA} ] || [ -z ${DBKAYTTAJA} ] || [ -z ${DBSALASANA} ]; then
 fi
 
 if [ -n "${DBHOST}" ]; then
-  # Katsotaan jos meill‰ on annettu poikkeava portti hostnamessa
+  # Katsotaan jos meill√§ on annettu poikkeava portti hostnamessa
   host_array=(${DBHOST//:/ })
 
   if [ -n "${host_array[1]}" ]; then
@@ -36,10 +36,10 @@ YHTIOT=`mysql ${DBHOSTLISA} --user=${DBKAYTTAJA} --password=${DBSALASANA} ${DBKA
 
 for YHTIO in $YHTIOT
 do
-  # Teh‰‰n pupesoftin iltasiivo
+  # Teh√§√§n pupesoftin iltasiivo
   cd ${POLKU};php iltasiivo.php $YHTIO
 
-  # K‰yd‰‰n luottoraja_t‰ynn‰ tilaukset l‰pi ja laukaistaan ne eteenp‰in jotka on ok
+  # K√§yd√§√§n luottoraja_t√§ynn√§ tilaukset l√§pi ja laukaistaan ne eteenp√§in jotka on ok
   cd ${POLKU};php odottaa_suoritusta.php $YHTIO
 
   echo -n `date "+%d.%m.%Y @ %H:%M:%S"`

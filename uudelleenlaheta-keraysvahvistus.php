@@ -1,17 +1,17 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 ini_set('implicit_flush', 1);
 ob_implicit_flush(1);
 
-// Ei k‰ytet‰ pakkausta
+// Ei k√§ytet√§ pakkausta
 $compression = FALSE;
 
 require ("inc/parametrit.inc");
 
-echo "<font class='head'>".t("Uudelleenl‰het‰ keraysvahvistus")."</font><hr>";
+echo "<font class='head'>".t("Uudelleenl√§het√§ keraysvahvistus")."</font><hr>";
 
 if ($tee == "laheta" and $tunnukset != "") {
 
@@ -26,7 +26,7 @@ if ($tee == "laheta" and $tunnukset != "") {
   if (mysql_num_rows($result) > 0) {
     while ($laskurow = mysql_fetch_assoc($result)) {
 
-      echo t("Uudelleenl‰hetet‰‰n ker‰ysvahvistus").": $laskurow[nimi] ({$laskurow['email']})<br>";
+      echo t("Uudelleenl√§hetet√§√§n ker√§ysvahvistus").": $laskurow[nimi] ({$laskurow['email']})<br>";
       flush();
 
       $komento = "asiakasemail".$laskurow['email'];
@@ -50,7 +50,7 @@ if ($tee == "laheta" and $tunnukset != "") {
     }
   }
   else {
-    echo "<font class='error'>".t("Tilauksia ei lˆytynyt").": $tunnukset!</font><br>";
+    echo "<font class='error'>".t("Tilauksia ei l√∂ytynyt").": $tunnukset!</font><br>";
   }
 }
 else {
@@ -58,6 +58,6 @@ else {
   echo "<form method='post'>";
   echo "<input type='hidden' name='tee' value='laheta'>";
   echo "<textarea name='tunnukset' rows='10' cols='60'></textarea>";
-  echo "<input type='submit' value='".t("L‰het‰ ker‰ysvahvistukset")."'>";
+  echo "<input type='submit' value='".t("L√§het√§ ker√§ysvahvistukset")."'>";
   echo "</form>";
 }

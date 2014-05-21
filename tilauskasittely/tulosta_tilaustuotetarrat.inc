@@ -32,7 +32,7 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
           global $yhtiorow, $laskurow, $kukarow, $fonts, $tid, $h, $pdf;
 
           if(!is_object($pdf)) {
-            //  Aloitellaan piirtely‰
+            //  Aloitellaan piirtely√§
             $pdf = new pdf;
             $pdf->enable('template');
 
@@ -52,7 +52,7 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
 
           }
 
-          //  Tehd‰‰n uusi sivu
+          //  Tehd√§√§n uusi sivu
           $pdf->addPage("10.1x3.8cm");
 
           $h=32;
@@ -89,7 +89,7 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
             $lisarow = mysql_fetch_array($lisares);
           }
 
-          //  Ratkaistaan tulostusm‰‰r‰
+          //  Ratkaistaan tulostusm√§√§r√§
           if(in_array($row["sarjanumeroseuranta"], array("S", "T", "U", "V"))) {
             $tarra_kpl = 1;
           }
@@ -121,7 +121,7 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
 
       }
 
-      //  Tulostetaan tarra jos meill‰ on jotain tulostettavaa
+      //  Tulostetaan tarra jos meill√§ on jotain tulostettavaa
       if($tarrat_tot>0) {
 
         //  Haetaan sopivan varaston printteri2
@@ -154,7 +154,7 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
           }
         }
         elseif ($tee == 'NAYTATILAUS') {
-          //Tyˆnnet‰‰n tuo pdf vaan putkeen!
+          //Ty√∂nnet√§√§n tuo pdf vaan putkeen!
           echo file_get_contents($pdf_tilaustuotetarrafilenimi);
         }
         elseif ($komento != '' and $komento != 'edi') {
@@ -164,7 +164,7 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
             echo "<font class='message'>".t("Tilaustuotetarrat tulostettiin")."</font><br>";
           }
           else {
-            echo "<font class='error'>".t("VIRHE: Tilaustuotetarrojen tulostus ep‰onnistui..")."</font><br>";
+            echo "<font class='error'>".t("VIRHE: Tilaustuotetarrojen tulostus ep√§onnistui..")."</font><br>";
           }
         }
 

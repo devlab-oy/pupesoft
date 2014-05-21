@@ -1,11 +1,11 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-// Kutsutaanko CLI:st‰
+// Kutsutaanko CLI:st√§
 if (php_sapi_name() != 'cli') {
-  die ("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!");
+  die ("T√§t√§ scripti√§ voi ajaa vain komentorivilt√§!");
 }
 
 // otetaan tietokanta connect
@@ -32,7 +32,7 @@ while ($yrow = mysql_fetch_array($yhtio_result)) {
 
     if (mysql_num_rows($result) == 1) {
       $yhtion_parametritrow = mysql_fetch_array($result);
-      // lis‰t‰‰n kaikki yhtiorow arrayseen, niin ollaan taaksep‰inyhteensopivia
+      // lis√§t√§√§n kaikki yhtiorow arrayseen, niin ollaan taaksep√§inyhteensopivia
       foreach ($yhtion_parametritrow as $parametrit_nimi => $parametrit_arvo) {
         $yhtiorow[$parametrit_nimi] = $parametrit_arvo;
       }
@@ -47,7 +47,7 @@ while ($yrow = mysql_fetch_array($yhtio_result)) {
 
   while ($toimrow = mysql_fetch_array($toimresult)) {
     if ($toimrow["toim_automaattinen_jtraportti"] == "pv") {
-      // annetaan menn‰ l‰pi, koska ajetaan joka p‰iv‰
+      // annetaan menn√§ l√§pi, koska ajetaan joka p√§iv√§
     }
     elseif ($toimrow["toim_automaattinen_jtraportti"] == "vk") {
       // ajetaan joka sunnuntai

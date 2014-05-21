@@ -1,10 +1,10 @@
 <?php
 
-// Sis‰‰n otetaan
+// Sis√§√§n otetaan
 // $tuorow jossa on tuotteen kaikki tiedot.
 // $laskurow jossa on saapumisen tiedot.
 
-// palauttaa $tulliprossa jossa on veroperusteprosentti tai eurom‰‰r‰/kp tai jotain sinne p‰in
+// palauttaa $tulliprossa jossa on veroperusteprosentti tai eurom√§√§r√§/kp tai jotain sinne p√§in
 
 $nimike_taso1 = $tuorow["tullinimike1"].$tuorow["tullinimike2"];
 $nimike_taso2 = $tuorow["tullinimike1"]."00";
@@ -14,7 +14,7 @@ $nimike_taso5 = substr($tuorow["tullinimike1"],0,2)."00000000";
 
 $nimike_taso = $nimike_taso1;
 
-//Tarkistetaan, ett‰ nimikkeemme on ilmoituskelpoinen
+//Tarkistetaan, ett√§ nimikkeemme on ilmoituskelpoinen
 $query  = "SELECT *
            from taric_veroperusteet
            where laji        = 'nim.dat'
@@ -80,7 +80,7 @@ if (mysql_num_rows($tv_res) == 0) {
 }
 else {
 
-  //haetaan maakoodit/-ryhm‰t jonka toimenpiteit‰ tulee tarkistaa
+  //haetaan maakoodit/-ryhm√§t jonka toimenpiteit√§ tulee tarkistaa
   $alkuperamaa = trim($laskurow["maa_lahetys"]);
   $maat = "";
 
@@ -104,7 +104,7 @@ else {
   }
 
 
-  //Haetaan oikeat toimenpiteet nimikeelle prioriteettij‰rjestyksess‰
+  //Haetaan oikeat toimenpiteet nimikeelle prioriteettij√§rjestyksess√§
   $query  = "SELECT *
              from taric_veroperusteet use index (nimike_index)
              where laji        = 'tp.dat'
@@ -163,17 +163,17 @@ else {
     $tv_nimres = pupe_query($query);
   }
 
-  // Toivottavasti lˆytyi jokin toimenpide
+  // Toivottavasti l√∂ytyi jokin toimenpide
   if (mysql_num_rows($tv_nimres) == 0) {
     if ($mista != 'tuote.php') {
-      echo "<font class='error'>".t("Ei lˆytynyt yht‰‰n toimenpidett‰ tuotteelle/nimikkeelle").": $tuorow[tuoteno]/$nimike_taso1 ".t("Alkuper‰maa/maaryhm‰t").": $alkuperamaa/$maat ".t("Korjaa tuotteen tullinimike")."!</font><br>";
+      echo "<font class='error'>".t("Ei l√∂ytynyt yht√§√§n toimenpidett√§ tuotteelle/nimikkeelle").": $tuorow[tuoteno]/$nimike_taso1 ".t("Alkuper√§maa/maaryhm√§t").": $alkuperamaa/$maat ".t("Korjaa tuotteen tullinimike")."!</font><br>";
     }
   }
   else {
-    ///* Luupataan lˆydetyt toimentpiteet *///
+    ///* Luupataan l√∂ydetyt toimentpiteet *///
     while ($tv_nimrow = mysql_fetch_assoc($tv_nimres)) {
 
-      // Haetaan toimepiteest‰ poissuljetut maat
+      // Haetaan toimepiteest√§ poissuljetut maat
       $query  = "SELECT *
                  from taric_veroperusteet use index (fyysinen_avain_index)
                  where laji    = 'exc.dat'
@@ -181,7 +181,7 @@ else {
                  and maa_ryhma in ('$alkuperamaa')";
       $tv_res = pupe_query($query);
 
-      //jos maamme ei ole poissuljettujen maiden joukossa, niin olemme lˆyt‰neet sopivan toimenpiteen
+      //jos maamme ei ole poissuljettujen maiden joukossa, niin olemme l√∂yt√§neet sopivan toimenpiteen
       if (mysql_num_rows($tv_res) == 0) {
         // Haetaan toimenpiteen alaviitteet
         $query  = "SELECT *
@@ -193,7 +193,7 @@ else {
 
         $tulliprossa = $tv_nimrow["maara"];
 
-        //echo "Lˆytyi toimenpide:  $tv_nimrow[nimike], $tv_nimrow[maara] $tv_nimrow[rahayksikko] ($tv_nimrow[voim_alkupvm] $tv_nimrow[voim_loppupvm])<br>";
+        //echo "L√∂ytyi toimenpide:  $tv_nimrow[nimike], $tv_nimrow[maara] $tv_nimrow[rahayksikko] ($tv_nimrow[voim_alkupvm] $tv_nimrow[voim_loppupvm])<br>";
 
         //lopetetaan luuppi ekaan sopivaan
         break;

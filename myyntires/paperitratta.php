@@ -67,7 +67,7 @@ function alku ($trattakierros_tunnus = '') {
   //Oikea sarake
   $pdf->draw_rectangle(800, 300, 779, 580,         $firstpage, $rectparam);
   $pdf->draw_rectangle(800, 420, 779, 580,         $firstpage, $rectparam);
-  $pdf->draw_text(310, 792, t("P‰iv‰m‰‰r‰", $kieli),     $firstpage, $pieni);
+  $pdf->draw_text(310, 792, t("P√§iv√§m√§√§r√§", $kieli),     $firstpage, $pieni);
 
   if ($trattakierros_tunnus != "") {
     $query = "SELECT pvm
@@ -96,7 +96,7 @@ function alku ($trattakierros_tunnus = '') {
 
   $pdf->draw_rectangle(779, 300, 758, 580, $firstpage, $rectparam);
   $pdf->draw_rectangle(779, 420, 758, 580, $firstpage, $rectparam);
-  $pdf->draw_text(310, 771, t("Er‰p‰iv‰", $kieli), $firstpage, $pieni);
+  $pdf->draw_text(310, 771, t("Er√§p√§iv√§", $kieli), $firstpage, $pieni);
 
   $seurday   = date("d",mktime(0, 0, 0, $kuu, $paiva+7,  $year));
   $seurmonth = date("m",mktime(0, 0, 0, $kuu, $paiva+7,  $year));
@@ -109,23 +109,23 @@ function alku ($trattakierros_tunnus = '') {
 
   $pdf->draw_rectangle(758, 300, 737, 580, $firstpage, $rectparam);
   $pdf->draw_rectangle(758, 420, 737, 580, $firstpage, $rectparam);
-  $pdf->draw_text(310, 750, t("Viiv‰stykorko", $kieli),     $firstpage, $pieni);
+  $pdf->draw_text(310, 750, t("Viiv√§stykorko", $kieli),     $firstpage, $pieni);
   $pdf->draw_text(310, 740, $yhtiorow["viivastyskorko"]."%",   $firstpage, $norm);
-  $pdf->draw_text(430, 750, t("S‰hkˆposti", $kieli),       $firstpage, $pieni);
+  $pdf->draw_text(430, 750, t("S√§hk√∂posti", $kieli),       $firstpage, $pieni);
   $pdf->draw_text(430, 740,  $yrow["eposti"],          $firstpage, $norm);
 
-  //Rivit alkaa t‰s‰ kohtaa
+  //Rivit alkaa t√§s√§ kohtaa
   $kala = 620;
 
   //Laskurivien otsikkotiedot
   //eka rivi
   $pdf->draw_text(30,  $kala, t("Laskun numero", $kieli)." / ".t("Viite", $kieli),    $firstpage, $pieni);
   $pdf->draw_text(180, $kala, t("Laskun pvm", $kieli),                  $firstpage, $pieni);
-  $pdf->draw_text(240, $kala, t("Er‰p‰iv‰", $kieli),                    $firstpage, $pieni);
-  $pdf->draw_text(295, $kala, t("Myˆh‰ss‰ pv", $kieli),                  $firstpage, $pieni);
+  $pdf->draw_text(240, $kala, t("Er√§p√§iv√§", $kieli),                    $firstpage, $pieni);
+  $pdf->draw_text(295, $kala, t("My√∂h√§ss√§ pv", $kieli),                  $firstpage, $pieni);
   $pdf->draw_text(360, $kala, t("Viimeisin muistutuspvm", $kieli),            $firstpage, $pieni);
   $pdf->draw_text(455, $kala, t("Laskun summa", $kieli),                  $firstpage, $pieni);
-  $pdf->draw_text(525, $kala, t("Perint‰kerta", $kieli),                  $firstpage, $pieni);
+  $pdf->draw_text(525, $kala, t("Perint√§kerta", $kieli),                  $firstpage, $pieni);
 
   $kala -= 15;
 
@@ -190,13 +190,13 @@ function loppu ($firstpage, $summa, $valkoodi) {
 
   global $pdf, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kaatosumma, $kieli, $maksuehtotiedot;
 
-  //yhteens‰rivi
+  //yhteens√§rivi
   $pdf->draw_rectangle(134,  20, 115, 580,  $firstpage, $rectparam);
   $pdf->draw_rectangle(134, 207, 115, 580,  $firstpage, $rectparam);
   $pdf->draw_rectangle(134, 394, 115, 580,  $firstpage, $rectparam);
   $pdf->draw_rectangle(134, 540, 115, 580,  $firstpage, $rectparam);
 
-  $pdf->draw_text(404, 122,  t("YHTEENSƒ", $kieli).":",  $firstpage, $norm);
+  $pdf->draw_text(404, 122,  t("YHTEENS√Ñ", $kieli).":",  $firstpage, $norm);
   $pdf->draw_text(464, 122,  $summa,            $firstpage, $norm);
   $pdf->draw_text(550, 122,  $valkoodi,    $firstpage, $norm);
 
@@ -243,7 +243,7 @@ function loppu ($firstpage, $summa, $valkoodi) {
     $pdf->draw_text(404, 72, "SWIFT: ".$yhtiorow["pankkiswift3"],  $firstpage, $pieni);
   }
 
-  //Alimmat kolme laatikkoa, yhtiˆtietoja
+  //Alimmat kolme laatikkoa, yhti√∂tietoja
   $pdf->draw_rectangle(65, 20,  20, 580,  $firstpage, $rectparam);
   $pdf->draw_rectangle(65, 207, 20, 580,  $firstpage, $rectparam);
   $pdf->draw_rectangle(65, 394, 20, 580,  $firstpage, $rectparam);
@@ -358,7 +358,7 @@ $query = "SELECT *
 $asiakasresult = pupe_query($query);
 $asiakastiedot = mysql_fetch_assoc($asiakasresult);
 
-//Otetaan t‰ss‰ asiakkaan kieli talteen
+//Otetaan t√§ss√§ asiakkaan kieli talteen
 $kieli = $asiakastiedot["kieli"];
 
 //ja kelataan akuun
@@ -371,7 +371,7 @@ $query = "SELECT GROUP_CONCAT(distinct liitostunnus) liitokset
 $lires = pupe_query($query);
 $lirow = mysql_fetch_assoc($lires);
 
-// Karhuvaiheessa t‰m‰ on tyhj‰
+// Karhuvaiheessa t√§m√§ on tyhj√§
 if ($laskutiedot["kpvm"] == "") {
   $laskutiedot["kpvm"] = date("Y-m-d");
 }
@@ -407,14 +407,14 @@ $loppusumma = sprintf('%.2f', $summa+$kaatosumma);
 
 loppu($firstpage,$loppusumma, $laskutiedot["valkoodi"]);
 
-//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+//keksit√§√§n uudelle failille joku varmasti uniikki nimi:
 list($usec, $sec) = explode(' ', microtime());
 mt_srand((float) $sec + ((float) $usec * 100000));
 $pdffilenimi = "/tmp/tratta-".md5(uniqid(mt_rand(), true)).".pdf";
 
 //kirjoitetaan pdf faili levylle..
 $fh = fopen($pdffilenimi, "w");
-if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
+if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep√§onnistui $pdffilenimi");
 fclose($fh);
 
 if ($nayta_pdf == 1) {
@@ -434,7 +434,7 @@ if ($nayta_pdf != 1 and $tee_pdf != 'tulosta_tratta') {
     if($kirow["komento"] == "email") {
       $liite = $pdffilenimi;
       $kutsu = "Tratta ".$asiakastiedot["ytunnus"];
-      echo t("Tratta l‰hetet‰‰n osoitteeseen")."  $kukarow[eposti]...\n<br>";
+      echo t("Tratta l√§hetet√§√§n osoitteeseen")."  $kukarow[eposti]...\n<br>";
 
       require("inc/sahkoposti.inc");
     }

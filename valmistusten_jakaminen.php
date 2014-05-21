@@ -8,7 +8,7 @@ $tee = (isset($tee)) ? $tee : '';
 
 // Jaetaan valmistus ja sen valmisteet ja niiden raaka-aineet
 if ($tee == "jaa_valmistus") {
-  // Yritet‰‰n jakaa valmistus
+  // Yritet√§√§n jakaa valmistus
   try {
     $kopion_id = jaa_valmistus($valmistus, $jaettavat_valmisteet);
   } catch (Exception $e) {
@@ -27,9 +27,9 @@ if (! $valmistukset) {
   echo t("Ei jaettavia valmistuksia");
 }
 
-// Loopataan valmistukset l‰pi
+// Loopataan valmistukset l√§pi
 foreach($valmistukset as $valmistus) {
-  // N‰ytet‰‰n vain ne valmistukset joilla on valmisteita ja ovat tilassa Odottaa valmistusta
+  // N√§ytet√§√§n vain ne valmistukset joilla on valmisteita ja ovat tilassa Odottaa valmistusta
   if (count($valmistus->tuotteet()) > 0 and in_array($valmistus->getTila(), array(Valmistus::ODOTTAA, Valmistus::KESKEYTETTY))) {
     echo "<table>";
     echo "<tr>
@@ -37,7 +37,7 @@ foreach($valmistukset as $valmistus) {
         <th>" . t("Tila") . "</th>
         <th>" . t("Nimitys") . "</th>
         <th>" . t("Viite") . "</th>
-        <th>" . t("M‰‰r‰") . "</th>
+        <th>" . t("M√§√§r√§") . "</th>
         <th>" . t("Valmistettu") . "</th>
       </tr>";
 

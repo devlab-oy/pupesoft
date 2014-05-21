@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("../inc/parametrit.inc");
@@ -90,9 +90,9 @@ $myohassa_summa = 0;
 
 echo "<table>";
 echo "<form name='laatu' method='post' autocomplete='off'>";
-echo "<tr><th>".t("Syˆt‰ vuosi (vvvv)")."</th>
+echo "<tr><th>".t("Sy√∂t√§ vuosi (vvvv)")."</th>
     <td><input type='text' name='vva' value='$vva' size='5'></td></tr>
-    <tr><th>",t("Valitse tuoteryhm‰"),"</th>";
+    <tr><th>",t("Valitse tuoteryhm√§"),"</th>";
 
 echo "<td>";
 $monivalintalaatikot = array("TRY");
@@ -104,16 +104,16 @@ echo "</td>";
 $tuoteryhmittain_chk = (isset($tuoteryhmittain) and trim($tuoteryhmittain) != '') ? ' CHECKED' : '';
 
 echo "  </select></td></tr>
-    <tr><th>".t("Tuoteryhmitt‰in")."</th><td align='center'><input type='checkbox' name='tuoteryhmittain'$tuoteryhmittain_chk></td><td class='back'><input type='submit' name='submit' value='Hae'></td></tr>";
+    <tr><th>".t("Tuoteryhmitt√§in")."</th><td align='center'><input type='checkbox' name='tuoteryhmittain'$tuoteryhmittain_chk></td><td class='back'><input type='submit' name='submit' value='Hae'></td></tr>";
 echo "</form>";
 echo "</table>";
 
 if (isset($tuoteryhmittain) and trim($tuoteryhmittain) != '') {
   echo "<table>";
-  echo "<tr><th>".t("Tuoteryhm‰")."</th><th>".t("Selite")."</th><th>".t("Aika")."</th><th>".t("Ajallaan")."</th><th>".t("Etuajassa")."</th><th>".t("Myˆh‰ss‰")."</th></tr>";
+  echo "<tr><th>".t("Tuoteryhm√§")."</th><th>".t("Selite")."</th><th>".t("Aika")."</th><th>".t("Ajallaan")."</th><th>".t("Etuajassa")."</th><th>".t("My√∂h√§ss√§")."</th></tr>";
 
   foreach ($tuoteryh as $key) {
-    // tehd‰‰n avainsana query
+    // tehd√§√§n avainsana query
     $seliteres = t_avainsana("TRY", $kukarow['kieli'], "and avainsana.selite ='$key[try]'");
     $seliterow = mysql_fetch_array($seliteres);
 
@@ -130,14 +130,14 @@ if (isset($tuoteryhmittain) and trim($tuoteryhmittain) != '') {
     $myohassa_summa += $key['myohassa'];
   }
 
-  echo "<tr><th colspan='3'>".t("Yhteens‰")."</th><td class='tumma' align='right'><strong>$ajallaan_summa</strong></td><td class='tumma' align='right'><strong>$etuajassa_summa</strong></td><td class='tumma' align='right'><strong>$myohassa_summa</strong></td></tr>";
+  echo "<tr><th colspan='3'>".t("Yhteens√§")."</th><td class='tumma' align='right'><strong>$ajallaan_summa</strong></td><td class='tumma' align='right'><strong>$etuajassa_summa</strong></td><td class='tumma' align='right'><strong>$myohassa_summa</strong></td></tr>";
   echo "</table>";
 }
 elseif ($submit != '' and $tuoteryhmittain == '') {
 
   echo "<table width='700'>";
-    echo "<tr><th>".t("Toimitukset")."</th><th>".t("Tammikuu")."</th><th>".t("Helmikuu")."</th><th>".t("Maaliskuu")."</th><th>".t("Huhtikuu")."</th><th>".t("Toukokuu")."</th><th>".t("Kes‰kuu")."</th><th>".t("Hein‰kuu")."</th><th>".t("Elokuu")."</th><th>".t("Syyskuu")."</th><th>".t("Lokakuu")."</th><th>".t("Marraskuu")."</th><th>".t("Joulukuu")."</th><th>".t("Yhteens‰")."</th></tr>";
-    echo "<tr><th>".t("Myˆh‰styneet").":</th>";
+    echo "<tr><th>".t("Toimitukset")."</th><th>".t("Tammikuu")."</th><th>".t("Helmikuu")."</th><th>".t("Maaliskuu")."</th><th>".t("Huhtikuu")."</th><th>".t("Toukokuu")."</th><th>".t("Kes√§kuu")."</th><th>".t("Hein√§kuu")."</th><th>".t("Elokuu")."</th><th>".t("Syyskuu")."</th><th>".t("Lokakuu")."</th><th>".t("Marraskuu")."</th><th>".t("Joulukuu")."</th><th>".t("Yhteens√§")."</th></tr>";
+    echo "<tr><th>".t("My√∂h√§styneet").":</th>";
       for ($i = 0; $i < 12; $i++) {
         if (isset($myohassa[$i]) and $myohassa[$i] != null) {
           $myohassa_summa += $myohassa[$i];

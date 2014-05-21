@@ -5,7 +5,7 @@ function hinnastorivi($tuote, $laskurow) {
 
     static $rivi = 1;
 
-  //haetaan aleryhm‰n tunnus
+  //haetaan aleryhm√§n tunnus
   $query = "SELECT b.tunnus, b.ryhma
             FROM tuote a
             LEFT JOIN perusalennus b ON a.yhtio = b.yhtio and a.aleryhma = b.ryhma
@@ -41,7 +41,7 @@ function hinnastorivi($tuote, $laskurow) {
       }
       $lask++;
     }
-    //t‰ss‰ listan viimeinen indeksi
+    //t√§ss√§ listan viimeinen indeksi
     $lask--;
 
     //edellinen ja seuraava korvaava

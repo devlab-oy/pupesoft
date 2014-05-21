@@ -2,8 +2,8 @@
 
 if ($kollityht > 0) {
 
-  // katsotaan varaston tulostusalueista mihin pakkaamoon kyseinen tulostusalue kuuluu (pakkaamo ylä tai pakkaamo ala)
-  // tämä tarkistus ohjaa ups-muuttujia
+  // katsotaan varaston tulostusalueista mihin pakkaamoon kyseinen tulostusalue kuuluu (pakkaamo ylÃ¤ tai pakkaamo ala)
+  // tÃ¤mÃ¤ tarkistus ohjaa ups-muuttujia
   $query = "SELECT pakkaamo
             FROM varaston_tulostimet
             WHERE yhtio = '{$kukarow['yhtio']}'
@@ -133,11 +133,11 @@ if ($kollityht > 0) {
 
     // SHIP TO
     $shipto            = $xml->OpenShipment->addChild('ShipTo');
-//    $customerid         = $shipto->addChild('CustomerID', $ups_laskurow['ytunnus']); // max 35 merkkiä, R
-    $companyorname         = $shipto->addChild('CompanyOrName', utf8_encode($ups_laskurow['toim_nimi'])); // max 35 merkkiä, R
+//    $customerid         = $shipto->addChild('CustomerID', $ups_laskurow['ytunnus']); // max 35 merkkiÃ¤, R
+    $companyorname         = $shipto->addChild('CompanyOrName', $ups_laskurow['toim_nimi']); // max 35 merkkiÃ¤, R
 
     if ($yhteyshenkiloasiakas['nimi'] != '') {
-      $attention = $shipto->addChild('Attention', substr(utf8_encode($yhteyshenkiloasiakas['nimi']), 0, 35)); // max 35 merkkiä, R (riippuu maasta)
+      $attention = $shipto->addChild('Attention', substr($yhteyshenkiloasiakas['nimi'], 0, 35)); // max 35 merkkiÃ¤, R (riippuu maasta)
     }
     elseif ($ups_laskurow['yhteyshenkilo_kaupallinen'] != '') {
       $query = "SELECT *
@@ -150,7 +150,7 @@ if ($kollityht > 0) {
       if ($yhteyshenkilo_kaupallinen_row['nimi'] == '') {
         $yhteyshenkilo_kaupallinen_row['nimi'] = '.';
       }
-      $attention = $shipto->addChild('Attention', substr(utf8_encode($yhteyshenkilo_kaupallinen_row['nimi']), 0, 35)); // max 35 merkkiä, R (riippuu maasta)
+      $attention = $shipto->addChild('Attention', substr($yhteyshenkilo_kaupallinen_row['nimi'], 0, 35)); // max 35 merkkiÃ¤, R (riippuu maasta)
     }
     elseif ($ups_laskurow['yhteyshenkilo_tekninen'] != '') {
       $query = "SELECT *
@@ -163,130 +163,130 @@ if ($kollityht > 0) {
       if ($yhteyshenkilo_tekninen_row['nimi'] == '') {
         $yhteyshenkilo_tekninen_row['nimi'] = '.';
       }
-      $attention = $shipto->addChild('Attention', substr(utf8_encode($yhteyshenkilo_tekninen_row['nimi']), 0, 35)); // max 35 merkkiä, R (riippuu maasta)
+      $attention = $shipto->addChild('Attention', substr($yhteyshenkilo_tekninen_row['nimi'], 0, 35)); // max 35 merkkiÃ¤, R (riippuu maasta)
     }
     else {
-      $attention = $shipto->addChild('Attention', '.'); // max 35 merkkiä, R (riippuu maasta)
+      $attention = $shipto->addChild('Attention', '.'); // max 35 merkkiÃ¤, R (riippuu maasta)
     }
 
-    $address1          = $shipto->addChild('Address1', utf8_encode($ups_laskurow['toim_osoite'])); // max 35 merkkiä, R
-    $countryterritory       = $shipto->addChild('CountryTerritory', $ups_laskurow['toim_maa']); // max 30 merkkiä, R
-    $postalcode          = $shipto->addChild('PostalCode', $ups_laskurow['toim_postino']); // max 9 merkkiä, C (riippuu maasta)
-    $cityortown          = $shipto->addChild('CityOrTown', utf8_encode($ups_laskurow['toim_postitp'])); // max 30 merkkiä, R
+    $address1          = $shipto->addChild('Address1', $ups_laskurow['toim_osoite']); // max 35 merkkiÃ¤, R
+    $countryterritory       = $shipto->addChild('CountryTerritory', $ups_laskurow['toim_maa']); // max 30 merkkiÃ¤, R
+    $postalcode          = $shipto->addChild('PostalCode', $ups_laskurow['toim_postino']); // max 9 merkkiÃ¤, C (riippuu maasta)
+    $cityortown          = $shipto->addChild('CityOrTown', $ups_laskurow['toim_postitp']); // max 30 merkkiÃ¤, R
     $telephone          = $ups_laskurow['puhelin'] != '' ? $shipto->addChild('Telephone', $ups_laskurow['puhelin']) :
                     ($ups_laskurow['gsm'] != '' ? $shipto->addChild('Telephone', $ups_laskurow['gsm']) :
-                    ($ups_laskurow['tyopuhelin'] != '' ? $shipto->addChild('Telephone', $ups_laskurow['tyopuhelin']) : $shipto->addChild('Telephone', '.'))); // max 15 merkkiä, C
-//    $stateprovincecounty     = $shipto->addChild('StateProvinceCounty', ''); // max 5 merkkiä, C (tarvitaan vain US & CA tapauksissa)
-//    $address2          = $shipto->addChild('Address2', ''); // max 35 merkkiä, O
-//    $address3          = $shipto->addChild('Address3', ''); // max 35 merkkiä, O
-//    $faxnumber          = $shipto->addChild('FaxNumber', $ups_laskurow['fax']); // max 15 merkkiä, O
-//    $emailaddress        = $shipto->addChild('EmailAddress', $ups_laskurow['email']); // max 50 merkkiä, O
-//    $taxidnumber        = $shipto->addChild('TaxIDNumber', ''); // max 15 merkkiä, O
-//    $receiverupsaccountnumber   = $shipto->addChild('ReceiverUpsAccountNumber', ''); // max 10 merkkiä, O
-//    $locationid          = $shipto->addChild('LocationID', ''); // 3 - 10 merkkiä, O
+                    ($ups_laskurow['tyopuhelin'] != '' ? $shipto->addChild('Telephone', $ups_laskurow['tyopuhelin']) : $shipto->addChild('Telephone', '.'))); // max 15 merkkiÃ¤, C
+//    $stateprovincecounty     = $shipto->addChild('StateProvinceCounty', ''); // max 5 merkkiÃ¤, C (tarvitaan vain US & CA tapauksissa)
+//    $address2          = $shipto->addChild('Address2', ''); // max 35 merkkiÃ¤, O
+//    $address3          = $shipto->addChild('Address3', ''); // max 35 merkkiÃ¤, O
+//    $faxnumber          = $shipto->addChild('FaxNumber', $ups_laskurow['fax']); // max 15 merkkiÃ¤, O
+//    $emailaddress        = $shipto->addChild('EmailAddress', $ups_laskurow['email']); // max 50 merkkiÃ¤, O
+//    $taxidnumber        = $shipto->addChild('TaxIDNumber', ''); // max 15 merkkiÃ¤, O
+//    $receiverupsaccountnumber   = $shipto->addChild('ReceiverUpsAccountNumber', ''); // max 10 merkkiÃ¤, O
+//    $locationid          = $shipto->addChild('LocationID', ''); // 3 - 10 merkkiÃ¤, O
 //    $residentialindicator    = $shipto->addChild('ResidentialIndicator', ''); // 1 merkki, O
 
     // SHIP FROM
     // laitetaan veikkolan varaston tiedot
     $shipfrom          = $xml->OpenShipment->addChild('ShipFrom');
-    $customerid         = $shipfrom->addChild('CustomerID', $yhtiorow['ytunnus']); // max 35 merkkiä, R
-    $companyorname         = $shipfrom->addChild('CompanyOrName', utf8_encode($yhtiorow['nimi'])); // max 35 merkkiä, R
-    $attention           = $shipfrom->addChild('Attention', substr('.', 0, 35)); // max 35 merkkiä, R (riippuu maasta)
-    $address1          = $shipfrom->addChild('Address1', "Teollisuustie 8-10"); // max 35 merkkiä, R
-    $countryterritory       = $shipfrom->addChild('CountryTerritory', $yhtiorow['maa']); // max 30 merkkiä, R
-    $postalcode          = $shipfrom->addChild('PostalCode', "02880"); // max 9 merkkiä, C (riippuu maasta)
-    $cityortown          = $shipfrom->addChild('CityOrTown', "Veikkola"); // max 30 merkkiä, R
-    $telephone          = $shipfrom->addChild('Telephone', "020 7188 450"); // max 15 merkkiä, C
-//    $address2          = $shipfrom->addChild('Address2', ''); // max 35 merkkiä, O
-//    $address3          = $shipfrom->addChild('Address3', ''); // max 35 merkkiä, O
-//    $stateprovincecounty     = $shipfrom->addChild('StateProvinceCounty', ''); // max 5 merkkiä, C (tarvitaan vain US & CA tapauksissa)
-//    $faxnumber          = $shipfrom->addChild('FaxNumber', $yhtiorow['fax']); // max 15 merkkiä, O
-//    $emailaddress        = $shipfrom->addChild('EmailAddress', $yhtiorow['email']); // max 50 merkkiä, O
-//    $taxidnumber        = $shipfrom->addChild('TaxIDNumber', ''); // max 15 merkkiä, O
-//    $taxidtype          = $shipfrom->addChild('TaxIDType', ''); // max 15 merkkiä, O
-//    $upsaccountnumber      = $shipfrom->addChild('UpsAccountNumber', ''); // 6 tai 10 merkkiä, C
+    $customerid         = $shipfrom->addChild('CustomerID', $yhtiorow['ytunnus']); // max 35 merkkiÃ¤, R
+    $companyorname         = $shipfrom->addChild('CompanyOrName', $yhtiorow['nimi']); // max 35 merkkiÃ¤, R
+    $attention           = $shipfrom->addChild('Attention', substr('.', 0, 35)); // max 35 merkkiÃ¤, R (riippuu maasta)
+    $address1          = $shipfrom->addChild('Address1', "Teollisuustie 8-10"); // max 35 merkkiÃ¤, R
+    $countryterritory       = $shipfrom->addChild('CountryTerritory', $yhtiorow['maa']); // max 30 merkkiÃ¤, R
+    $postalcode          = $shipfrom->addChild('PostalCode', "02880"); // max 9 merkkiÃ¤, C (riippuu maasta)
+    $cityortown          = $shipfrom->addChild('CityOrTown', "Veikkola"); // max 30 merkkiÃ¤, R
+    $telephone          = $shipfrom->addChild('Telephone', "020 7188 450"); // max 15 merkkiÃ¤, C
+//    $address2          = $shipfrom->addChild('Address2', ''); // max 35 merkkiÃ¤, O
+//    $address3          = $shipfrom->addChild('Address3', ''); // max 35 merkkiÃ¤, O
+//    $stateprovincecounty     = $shipfrom->addChild('StateProvinceCounty', ''); // max 5 merkkiÃ¤, C (tarvitaan vain US & CA tapauksissa)
+//    $faxnumber          = $shipfrom->addChild('FaxNumber', $yhtiorow['fax']); // max 15 merkkiÃ¤, O
+//    $emailaddress        = $shipfrom->addChild('EmailAddress', $yhtiorow['email']); // max 50 merkkiÃ¤, O
+//    $taxidnumber        = $shipfrom->addChild('TaxIDNumber', ''); // max 15 merkkiÃ¤, O
+//    $taxidtype          = $shipfrom->addChild('TaxIDType', ''); // max 15 merkkiÃ¤, O
+//    $upsaccountnumber      = $shipfrom->addChild('UpsAccountNumber', ''); // 6 tai 10 merkkiÃ¤, C
 //    $residentialindicator    = $shipfrom->addChild('ResidentialIndicator', ''); // 1 merkki, O
 
     /*
     // PRODUCER
     $producer          = $xml->OpenShipment->addChild('Producer');
-    $customerid         = $producer->addChild('CustomerID', ''); // max 35 merkkiä, R
-    $companyorname         = $producer->addChild('CompanyOrName', ''); // max 35 merkkiä, R
-    $attention           = $producer->addChild('Attention', ''); // max 35 merkkiä, R (riippuu maasta)
-    $address1          = $producer->addChild('Address1', ''); // max 35 merkkiä, R
-    $address2          = $producer->addChild('Address2', ''); // max 35 merkkiä, O
-    $address3          = $producer->addChild('Address3', ''); // max 35 merkkiä, O
-    $countryterritory       = $producer->addChild('CountryTerritory', ''); // max 30 merkkiä, R
-    $postalcode          = $producer->addChild('PostalCode', ''); // max 9 merkkiä, C (riippuu maasta)
-    $cityortown          = $producer->addChild('CityOrTown', ''); // max 30 merkkiä, R
-    $stateprovincecounty     = $producer->addChild('StateProvinceCounty', ''); // max 5 merkkiä, C (tarvitaan vain US & CA tapauksissa)
-    $telephone          = $producer->addChild('Telephone', ''); // max 15 merkkiä, C
-    $taxidnumber        = $producer->addChild('TaxIDNumber', ''); // max 15 merkkiä, O
+    $customerid         = $producer->addChild('CustomerID', ''); // max 35 merkkiÃ¤, R
+    $companyorname         = $producer->addChild('CompanyOrName', ''); // max 35 merkkiÃ¤, R
+    $attention           = $producer->addChild('Attention', ''); // max 35 merkkiÃ¤, R (riippuu maasta)
+    $address1          = $producer->addChild('Address1', ''); // max 35 merkkiÃ¤, R
+    $address2          = $producer->addChild('Address2', ''); // max 35 merkkiÃ¤, O
+    $address3          = $producer->addChild('Address3', ''); // max 35 merkkiÃ¤, O
+    $countryterritory       = $producer->addChild('CountryTerritory', ''); // max 30 merkkiÃ¤, R
+    $postalcode          = $producer->addChild('PostalCode', ''); // max 9 merkkiÃ¤, C (riippuu maasta)
+    $cityortown          = $producer->addChild('CityOrTown', ''); // max 30 merkkiÃ¤, R
+    $stateprovincecounty     = $producer->addChild('StateProvinceCounty', ''); // max 5 merkkiÃ¤, C (tarvitaan vain US & CA tapauksissa)
+    $telephone          = $producer->addChild('Telephone', ''); // max 15 merkkiÃ¤, C
+    $taxidnumber        = $producer->addChild('TaxIDNumber', ''); // max 15 merkkiÃ¤, O
 
     // ULTIMATE CONSIGNEE
     $ultimateconsignee      = $xml->OpenShipment->addChild('UltimateConsignee');
-    $customerid         = $ultimateconsignee->addChild('CustomerID', ''); // max 35 merkkiä, R
-    $companyorname         = $ultimateconsignee->addChild('CompanyOrName', ''); // max 35 merkkiä, R
-    $attention           = $ultimateconsignee->addChild('Attention', ''); // max 35 merkkiä, R (riippuu maasta)
-    $address1          = $ultimateconsignee->addChild('Address1', ''); // max 35 merkkiä, R
-    $address2          = $ultimateconsignee->addChild('Address2', ''); // max 35 merkkiä, O
-    $address3          = $ultimateconsignee->addChild('Address3', ''); // max 35 merkkiä, O
-    $countryterritory       = $ultimateconsignee->addChild('CountryTerritory', ''); // max 30 merkkiä, R
-    $postalcode          = $ultimateconsignee->addChild('PostalCode', ''); // max 9 merkkiä, C (riippuu maasta)
-    $cityortown          = $ultimateconsignee->addChild('CityOrTown', ''); // max 30 merkkiä, R
-    $stateprovincecounty     = $ultimateconsignee->addChild('StateProvinceCounty', ''); // max 5 merkkiä, C (tarvitaan vain US & CA tapauksissa)
-    $telephone          = $ultimateconsignee->addChild('Telephone', ''); // max 15 merkkiä, C
-    $taxidnumber        = $ultimateconsignee->addChild('TaxIDNumber', ''); // max 15 merkkiä, C
+    $customerid         = $ultimateconsignee->addChild('CustomerID', ''); // max 35 merkkiÃ¤, R
+    $companyorname         = $ultimateconsignee->addChild('CompanyOrName', ''); // max 35 merkkiÃ¤, R
+    $attention           = $ultimateconsignee->addChild('Attention', ''); // max 35 merkkiÃ¤, R (riippuu maasta)
+    $address1          = $ultimateconsignee->addChild('Address1', ''); // max 35 merkkiÃ¤, R
+    $address2          = $ultimateconsignee->addChild('Address2', ''); // max 35 merkkiÃ¤, O
+    $address3          = $ultimateconsignee->addChild('Address3', ''); // max 35 merkkiÃ¤, O
+    $countryterritory       = $ultimateconsignee->addChild('CountryTerritory', ''); // max 30 merkkiÃ¤, R
+    $postalcode          = $ultimateconsignee->addChild('PostalCode', ''); // max 9 merkkiÃ¤, C (riippuu maasta)
+    $cityortown          = $ultimateconsignee->addChild('CityOrTown', ''); // max 30 merkkiÃ¤, R
+    $stateprovincecounty     = $ultimateconsignee->addChild('StateProvinceCounty', ''); // max 5 merkkiÃ¤, C (tarvitaan vain US & CA tapauksissa)
+    $telephone          = $ultimateconsignee->addChild('Telephone', ''); // max 15 merkkiÃ¤, C
+    $taxidnumber        = $ultimateconsignee->addChild('TaxIDNumber', ''); // max 15 merkkiÃ¤, C
 
     // IMPORTER
     $importer          = $xml->OpenShipment->addChild('Importer');
-    $customerid         = $importer->addChild('CustomerID', ''); // max 35 merkkiä, R
-    $companyorname         = $importer->addChild('CompanyOrName', ''); // max 35 merkkiä, R
-    $attention           = $importer->addChild('Attention', ''); // max 35 merkkiä, R (riippuu maasta)
-    $address1          = $importer->addChild('Address1', ''); // max 35 merkkiä, R
-    $address2          = $importer->addChild('Address2', ''); // max 35 merkkiä, O
-    $address3          = $importer->addChild('Address3', ''); // max 35 merkkiä, O
-    $countryterritory       = $importer->addChild('CountryTerritory', ''); // max 30 merkkiä, R
-    $postalcode          = $importer->addChild('PostalCode', ''); // max 9 merkkiä, C (riippuu maasta)
-    $cityortown          = $importer->addChild('CityOrTown', ''); // max 30 merkkiä, R
-    $stateprovincecounty     = $importer->addChild('StateProvinceCounty', ''); // max 5 merkkiä, C (tarvitaan vain US & CA tapauksissa)
-    $telephone          = $importer->addChild('Telephone', ''); // max 15 merkkiä, C
-    $taxidnumber        = $importer->addChild('TaxIDNumber', ''); // max 15 merkkiä, C
-    $upsaccountnumber      = $importer->addChild('UpsAccountNumber', ''); // 6 tai 10 merkkiä, C
+    $customerid         = $importer->addChild('CustomerID', ''); // max 35 merkkiÃ¤, R
+    $companyorname         = $importer->addChild('CompanyOrName', ''); // max 35 merkkiÃ¤, R
+    $attention           = $importer->addChild('Attention', ''); // max 35 merkkiÃ¤, R (riippuu maasta)
+    $address1          = $importer->addChild('Address1', ''); // max 35 merkkiÃ¤, R
+    $address2          = $importer->addChild('Address2', ''); // max 35 merkkiÃ¤, O
+    $address3          = $importer->addChild('Address3', ''); // max 35 merkkiÃ¤, O
+    $countryterritory       = $importer->addChild('CountryTerritory', ''); // max 30 merkkiÃ¤, R
+    $postalcode          = $importer->addChild('PostalCode', ''); // max 9 merkkiÃ¤, C (riippuu maasta)
+    $cityortown          = $importer->addChild('CityOrTown', ''); // max 30 merkkiÃ¤, R
+    $stateprovincecounty     = $importer->addChild('StateProvinceCounty', ''); // max 5 merkkiÃ¤, C (tarvitaan vain US & CA tapauksissa)
+    $telephone          = $importer->addChild('Telephone', ''); // max 15 merkkiÃ¤, C
+    $taxidnumber        = $importer->addChild('TaxIDNumber', ''); // max 15 merkkiÃ¤, C
+    $upsaccountnumber      = $importer->addChild('UpsAccountNumber', ''); // 6 tai 10 merkkiÃ¤, C
 
     // THIRD PARTY
     $thirdparty          = $xml->OpenShipment->addChild('ThirdParty');
-    $customerid         = $thirdparty->addChild('CustomerID', ''); // max 35 merkkiä, R
-    $companyorname         = $thirdparty->addChild('CompanyOrName', ''); // max 35 merkkiä, R
-    $attention           = $thirdparty->addChild('Attention', ''); // max 35 merkkiä, R (riippuu maasta)
-    $address1          = $thirdparty->addChild('Address1', ''); // max 35 merkkiä, R
-    $address2          = $thirdparty->addChild('Address2', ''); // max 35 merkkiä, O
-    $address3          = $thirdparty->addChild('Address3', ''); // max 35 merkkiä, O
-    $countryterritory       = $thirdparty->addChild('CountryTerritory', ''); // max 50 merkkiä, R
-    $postalcode          = $thirdparty->addChild('PostalCode', ''); // max 9 merkkiä, C (riippuu maasta)
-    $cityortown          = $thirdparty->addChild('CityOrTown', ''); // max 30 merkkiä, R
-    $stateprovincecounty     = $thirdparty->addChild('StateProvinceCounty', ''); // max 5 merkkiä, C (tarvitaan vain US & CA tapauksissa)
+    $customerid         = $thirdparty->addChild('CustomerID', ''); // max 35 merkkiÃ¤, R
+    $companyorname         = $thirdparty->addChild('CompanyOrName', ''); // max 35 merkkiÃ¤, R
+    $attention           = $thirdparty->addChild('Attention', ''); // max 35 merkkiÃ¤, R (riippuu maasta)
+    $address1          = $thirdparty->addChild('Address1', ''); // max 35 merkkiÃ¤, R
+    $address2          = $thirdparty->addChild('Address2', ''); // max 35 merkkiÃ¤, O
+    $address3          = $thirdparty->addChild('Address3', ''); // max 35 merkkiÃ¤, O
+    $countryterritory       = $thirdparty->addChild('CountryTerritory', ''); // max 50 merkkiÃ¤, R
+    $postalcode          = $thirdparty->addChild('PostalCode', ''); // max 9 merkkiÃ¤, C (riippuu maasta)
+    $cityortown          = $thirdparty->addChild('CityOrTown', ''); // max 30 merkkiÃ¤, R
+    $stateprovincecounty     = $thirdparty->addChild('StateProvinceCounty', ''); // max 5 merkkiÃ¤, C (tarvitaan vain US & CA tapauksissa)
     $residentialindicator    = $thirdparty->addChild('ResidentialIndicator', ''); // 1 merkki, O
-    $telephone          = $thirdparty->addChild('Telephone', ''); // max 15 merkkiä, C
-    $faxnumber          = $thirdparty->addChild('FaxNumber', ''); // max 15 merkkiä, O
-    $taxidnumber        = $thirdparty->addChild('TaxIDNumber', ''); // max 15 merkkiä, C
-    $upsaccountnumber      = $thirdparty->addChild('UpsAccountNumber', ''); // 6 tai 10 merkkiä, C
+    $telephone          = $thirdparty->addChild('Telephone', ''); // max 15 merkkiÃ¤, C
+    $faxnumber          = $thirdparty->addChild('FaxNumber', ''); // max 15 merkkiÃ¤, O
+    $taxidnumber        = $thirdparty->addChild('TaxIDNumber', ''); // max 15 merkkiÃ¤, C
+    $upsaccountnumber      = $thirdparty->addChild('UpsAccountNumber', ''); // 6 tai 10 merkkiÃ¤, C
 
     // THIRD PARTY RECEIVER
     $thirdpartyreceiver      = $xml->OpenShipment->addChild('ThirdPartyReceiver');
-    $customerid         = $thirdpartyreceiver->addChild('CustomerID', ''); // max 30 merkkiä, R
-    $companyorname         = $thirdpartyreceiver->addChild('CompanyOrName', ''); // max 35 merkkiä, R
-    $attention           = $thirdpartyreceiver->addChild('Attention', ''); // max 35 merkkiä, R (riippuu maasta)
-    $address1          = $thirdpartyreceiver->addChild('Address1', ''); // max 35 merkkiä, R
-    $address2          = $thirdpartyreceiver->addChild('Address2', ''); // max 35 merkkiä, O
-    $address3          = $thirdpartyreceiver->addChild('Address3', ''); // max 35 merkkiä, O
-    $countryterritory       = $thirdpartyreceiver->addChild('CountryTerritory', ''); // max 50 merkkiä, R
-    $postalcode          = $thirdpartyreceiver->addChild('PostalCode', ''); // max 9 merkkiä, C (riippuu maasta)
-    $cityortown          = $thirdpartyreceiver->addChild('CityOrTown', ''); // max 30 merkkiä, R
-    $stateprovincecounty     = $thirdpartyreceiver->addChild('StateProvinceCounty', ''); // max 5 merkkiä, C (tarvitaan vain US & CA tapauksissa)
-    $telephone          = $thirdpartyreceiver->addChild('Telephone', ''); // max 15 merkkiä, C
-    $faxnumber          = $thirdpartyreceiver->addChild('FaxNumber', ''); // max 15 merkkiä, O
-    $upsaccountnumber      = $thirdpartyreceiver->addChild('UpsAccountNumber', ''); // 6 tai 10 merkkiä, C
+    $customerid         = $thirdpartyreceiver->addChild('CustomerID', ''); // max 30 merkkiÃ¤, R
+    $companyorname         = $thirdpartyreceiver->addChild('CompanyOrName', ''); // max 35 merkkiÃ¤, R
+    $attention           = $thirdpartyreceiver->addChild('Attention', ''); // max 35 merkkiÃ¤, R (riippuu maasta)
+    $address1          = $thirdpartyreceiver->addChild('Address1', ''); // max 35 merkkiÃ¤, R
+    $address2          = $thirdpartyreceiver->addChild('Address2', ''); // max 35 merkkiÃ¤, O
+    $address3          = $thirdpartyreceiver->addChild('Address3', ''); // max 35 merkkiÃ¤, O
+    $countryterritory       = $thirdpartyreceiver->addChild('CountryTerritory', ''); // max 50 merkkiÃ¤, R
+    $postalcode          = $thirdpartyreceiver->addChild('PostalCode', ''); // max 9 merkkiÃ¤, C (riippuu maasta)
+    $cityortown          = $thirdpartyreceiver->addChild('CityOrTown', ''); // max 30 merkkiÃ¤, R
+    $stateprovincecounty     = $thirdpartyreceiver->addChild('StateProvinceCounty', ''); // max 5 merkkiÃ¤, C (tarvitaan vain US & CA tapauksissa)
+    $telephone          = $thirdpartyreceiver->addChild('Telephone', ''); // max 15 merkkiÃ¤, C
+    $faxnumber          = $thirdpartyreceiver->addChild('FaxNumber', ''); // max 15 merkkiÃ¤, O
+    $upsaccountnumber      = $thirdpartyreceiver->addChild('UpsAccountNumber', ''); // 6 tai 10 merkkiÃ¤, C
     */
 
     $query ="SELECT merahti,
@@ -338,7 +338,7 @@ if ($kollityht > 0) {
     ******************************************************************************/
     // toimitustavat tulee olla mallia 'UPS EP'
     list($ups, $st) = explode(' ', $ups_laskurow['toimitustapa']);
-    $servicetype = $shipmentinformation->addChild('ServiceType', strtoupper($st)); // max 25 merkkiä, R
+    $servicetype = $shipmentinformation->addChild('ServiceType', strtoupper($st)); // max 25 merkkiÃ¤, R
 
     /******************************************************************************
     Package Type
@@ -352,16 +352,16 @@ if ($kollityht > 0) {
     25        UPS 25 KG Box
     30        Pallet (UK / PL only)
     ******************************************************************************/
-    $packagetype          = $shipmentinformation->addChild('PackageType', $pakkaus[0]); // max 2 merkkiä, R
-    $numberofpackages        = $shipmentinformation->addChild('NumberOfPackages', $ups_rakirow['kollit']); // max  3 merkkiä, R
-    $shipmentactualweight      = $shipmentinformation->addChild('ShipmentActualWeight', round($ups_rakirow['kilot'], 1)); // max 12,1 merkkiä, R  // Unless it is an ENVELOP
-    $shipmentdimensionalweight     = $shipmentinformation->addChild('ShipmentDimensionalWeight', ''); // max 12,1 merkkiä, O
-    $descriptionofgoods        = $shipmentinformation->addChild('DescriptionOfGoods', substr($ups_rakirow['pakkauskuvaustark'], 0, 50)); // max 50 merkkiä, C
-    $reference1            = $shipmentinformation->addChild('Reference1', $ups_laskurow['laskutunnus']); // max 35 merkkiä, O
-    $reference2            = $shipmentinformation->addChild('Reference2', ''); // max 35 merkkiä, O
-    $reference3            = $shipmentinformation->addChild('Reference3', ''); // max 35 merkkiä, O
-    $reference4            = $shipmentinformation->addChild('Reference4', ''); // max 35 merkkiä, O
-    $reference5            = $shipmentinformation->addChild('Reference5', ''); // max 35 merkkiä, O
+    $packagetype          = $shipmentinformation->addChild('PackageType', $pakkaus[0]); // max 2 merkkiÃ¤, R
+    $numberofpackages        = $shipmentinformation->addChild('NumberOfPackages', $ups_rakirow['kollit']); // max  3 merkkiÃ¤, R
+    $shipmentactualweight      = $shipmentinformation->addChild('ShipmentActualWeight', round($ups_rakirow['kilot'], 1)); // max 12,1 merkkiÃ¤, R  // Unless it is an ENVELOP
+    $shipmentdimensionalweight     = $shipmentinformation->addChild('ShipmentDimensionalWeight', ''); // max 12,1 merkkiÃ¤, O
+    $descriptionofgoods        = $shipmentinformation->addChild('DescriptionOfGoods', substr($ups_rakirow['pakkauskuvaustark'], 0, 50)); // max 50 merkkiÃ¤, C
+    $reference1            = $shipmentinformation->addChild('Reference1', $ups_laskurow['laskutunnus']); // max 35 merkkiÃ¤, O
+    $reference2            = $shipmentinformation->addChild('Reference2', ''); // max 35 merkkiÃ¤, O
+    $reference3            = $shipmentinformation->addChild('Reference3', ''); // max 35 merkkiÃ¤, O
+    $reference4            = $shipmentinformation->addChild('Reference4', ''); // max 35 merkkiÃ¤, O
+    $reference5            = $shipmentinformation->addChild('Reference5', ''); // max 35 merkkiÃ¤, O
 
     // Note: The two fields - Documents Only and Goods Not In Free Circulation - are mutually exclusive;
     // That is, if you select one, you cannot select the other.
@@ -369,8 +369,8 @@ if ($kollityht > 0) {
 
     $documentonly          = $shipmentinformation->addChild('DocumentOnly', ''); // 1 = select document only, 0 = deselect document only, C   // International Shipment
 //    $goodsnotinfreecirculation    = $shipmentinformation->addChild('GoodsNotInFreeCirculation', ''); // 1 merkki, C
-//    $specialinstructionforshipment  = $shipmentinformation->addChild('SpecialInstructionForShipment', ''); // max 69 merkkiä, R
-    $shippernumber          = $shipmentinformation->addChild('ShipperNumber', ''); // 6 tai 10 merkkiä, R
+//    $specialinstructionforshipment  = $shipmentinformation->addChild('SpecialInstructionForShipment', ''); // max 69 merkkiÃ¤, R
+    $shippernumber          = $shipmentinformation->addChild('ShipperNumber', ''); // 6 tai 10 merkkiÃ¤, R
 
     /******************************************************************************
     Billing Options
@@ -391,7 +391,7 @@ if ($kollityht > 0) {
     WorldEase  WorldEase will allow all billing options except Consignee billing.
     ******************************************************************************/
 
-//      $billingoption      = $shipmentinformation->addChild('BillingOption', 'PP'); // max 3 merkkiä, R
+//      $billingoption      = $shipmentinformation->addChild('BillingOption', 'PP'); // max 3 merkkiÃ¤, R
 
     /******************************************************************************
     Bill Transportation To
@@ -402,9 +402,9 @@ if ($kollityht > 0) {
     *******************************************************************************
     WorldEase  Bill Transportation to indicates the party who paid for Master Shipment
     ******************************************************************************/
-    // rahtikirjan merahti == '' --> Käytetään vastaanottajan rahtisopimusnumeroa, K = Käytetään lähettäjän rahtisopimusnumeroa
+    // rahtikirjan merahti == '' --> KÃ¤ytetÃ¤Ã¤n vastaanottajan rahtisopimusnumeroa, K = KÃ¤ytetÃ¤Ã¤n lÃ¤hettÃ¤jÃ¤n rahtisopimusnumeroa
     $rahdinmaksaja       = $ups_rakirow['merahti'] == 'K' ? 'SHP' : 'REC';
-    $billtransportationto  = $shipmentinformation->addChild('BillTransportationTo', "$rahdinmaksaja"); // max 3 merkkiä, C
+    $billtransportationto  = $shipmentinformation->addChild('BillTransportationTo', "$rahdinmaksaja"); // max 3 merkkiÃ¤, C
 
     /******************************************************************************
     Bill Duty & Tax To
@@ -416,7 +416,7 @@ if ($kollityht > 0) {
     WorldWase  Bill Duty and Tax To indicates the party who paid for the Duty and
     Tax of the Master Shipment.
     ******************************************************************************/
-    // jos vienti != '' --> vastaanottaja maksaa veron, muuten lähettäjä
+    // jos vienti != '' --> vastaanottaja maksaa veron, muuten lÃ¤hettÃ¤jÃ¤
 //    $vienninmaksaja   = $ups_laskurow['vienti'] == '' ? 'SHP' : 'REC';
     $vienninmaksaja    = 'REC'; // pakko kovakoodaa
     $billdutytaxto    = $shipmentinformation->addChild('BillDutyTaxTo', "$vienninmaksaja");
@@ -432,27 +432,27 @@ if ($kollityht > 0) {
     will translate the code and print the label Bill Transportation and Duty Tax To.
     ******************************************************************************/
 //    $splitdutyandtax  = $shipmentinformation->addChild('SplitDutyAndTax', ''); // 1 merkki, C
-//    $saturdaydelivery  = $shipmentinformation->addChild('SaturdayDelivery', ''); // max 2 merkkiä, O    // Note: Leave out if this accessorial is not used.
-//    $saturdaypickup    = $shipmentinformation->addChild('SaturdayPickUp', ''); // max 2 merkkiä, O
+//    $saturdaydelivery  = $shipmentinformation->addChild('SaturdayDelivery', ''); // max 2 merkkiÃ¤, O    // Note: Leave out if this accessorial is not used.
+//    $saturdaypickup    = $shipmentinformation->addChild('SaturdayPickUp', ''); // max 2 merkkiÃ¤, O
 
     // Declared Value
 //    $declaredvalue  = $shipmentinformation->addChild('DeclaredValue');
-//    $amount      = $declaredvalue->addChild('Amount', ''); // max 9,2 merkkiä, O
+//    $amount      = $declaredvalue->addChild('Amount', ''); // max 9,2 merkkiÃ¤, O
 //    $shipperpaid  = $declaredvalue->addChild('ShipperPaid', ''); // 1 merkki, O
 
-//    $merchandisedescriptionforpackage = $shipmentinformation->addChild('MerchandiseDescriptionForPackage', ''); // max 35 merkkiä, O
+//    $merchandisedescriptionforpackage = $shipmentinformation->addChild('MerchandiseDescriptionForPackage', ''); // max 35 merkkiÃ¤, O
 
     // Additional Handling
 //    $additionalhandling     = $shipmentinformation->addChild('AdditionalHandling');
-//    $numberofadditionalhandling = $additionalhandling->addChild('NumberOfAdditionalHandling', ''); // max 4 merkkiä, O
+//    $numberofadditionalhandling = $additionalhandling->addChild('NumberOfAdditionalHandling', ''); // max 4 merkkiÃ¤, O
 
     // COD (if selected, all elements are required)
 //    $cod                   = $shipmentinformation->addChild('COD');
 //    $cashonly                = $cod->addChild('CashOnly', ''); // 1 merkki, R
 //    $cashiercheckormoneyorderonlyindicator   = $cod->addChild('CashierCheckorMoneyOrderOnlyIndicator', ''); // 1 merkki, R
 //    $addshippingchargestocodindicator     = $cod->addChild('AddShippingChargesToCODIndicator', ''); // 1 merkki, R
-//    $amount                 = $cod->addChild('Amount', ''); // max 9,2 merkkiä, R
-//    $currency                 = $cod->addChild('Currency', ''); // max 3 merkkiä, R
+//    $amount                 = $cod->addChild('Amount', ''); // max 9,2 merkkiÃ¤, R
+//    $currency                 = $cod->addChild('Currency', ''); // max 3 merkkiÃ¤, R
 
 //    $returnofdocument = $shipmentinformation->addChild('ReturnOfDocument', ''); // 1 merkki, C  // poland only
 
@@ -463,14 +463,14 @@ if ($kollityht > 0) {
     // vastaanottaja
     $qvnrecipientandnotificationtypes  = $qvnoption->addChild('QVNRecipientAndNotificationTypes');
     $companyorname            = $qvnrecipientandnotificationtypes->addChild('CompanyOrName', ''); // WS 10.0 will populate ShipTo information
-    $contactname            = $qvnrecipientandnotificationtypes->addChild('ContactName', utf8_encode($asiakkaan_sahkopostiosoite_nimi));
-    $emailaddress            = $qvnrecipientandnotificationtypes->addChild('EMailAddress', utf8_encode($asiakkaan_sahkopostiosoite));
-    $ship                = $qvnrecipientandnotificationtypes->addChild('Ship', 'Y'); // lähetetään meili kun paketti lähtee
+    $contactname            = $qvnrecipientandnotificationtypes->addChild('ContactName', $asiakkaan_sahkopostiosoite_nimi);
+    $emailaddress            = $qvnrecipientandnotificationtypes->addChild('EMailAddress', $asiakkaan_sahkopostiosoite);
+    $ship                = $qvnrecipientandnotificationtypes->addChild('Ship', 'Y'); // lÃ¤hetetÃ¤Ã¤n meili kun paketti lÃ¤htee
     $exception              = $qvnrecipientandnotificationtypes->addChild('Exception', 'N'); // ??
     $delivery              = $qvnrecipientandnotificationtypes->addChild('Delivery', 'N'); // ??
 
     /*
-    // lähettäjä
+    // lÃ¤hettÃ¤jÃ¤
     $qvnrecipientandnotificationtypes2   = $qvnoption->addChild('QVNRecipientAndNotificationTypes');
     $companyorname            = $qvnrecipientandnotificationtypes2->addChild('CompanyOrName', $ups_laskurow['yhtio_nimi']);
     $contactname            = $qvnrecipientandnotificationtypes2->addChild('ContactName', $yhtiorow['postittaja_email']);
@@ -491,14 +491,14 @@ if ($kollityht > 0) {
     1        Reference 1
     2        Reference 2
     ******************************************************************************/
-    $subjectline            = $qvnoption->addChild('SubjectLine', ''); // max 75 merkkiä, R
+    $subjectline            = $qvnoption->addChild('SubjectLine', ''); // max 75 merkkiÃ¤, R
     $memo                = $qvnoption->addChild('Memo', substr('', 0, 150));
   }
 
     /*
     // Special Commodities (if selected, you must choose at least one element)
     $specialcommodities   = $shipmentinformation->addChild('SpecialCommodities');
-    $commoditiesdetails   = $specialcommodities->addChild('CommoditiesDetails', ''); // max 4 merkkiä
+    $commoditiesdetails   = $specialcommodities->addChild('CommoditiesDetails', ''); // max 4 merkkiÃ¤
     $iscalcoholicbeverages   = $specialcommodities->addChild('ISC-AlcoholicBeverages', ''); // 1 merkki
     $iscdiagnosticspecimens = $specialcommodities->addChild('ISC-DiagnosticSpecimens', ''); // 1 merkki
     $iscperishables     = $specialcommodities->addChild('ISC-Perishables', ''); // 1 merkki
@@ -526,7 +526,7 @@ if ($kollityht > 0) {
     ERL        UPS Electronic Return Label
     ******************************************************************************/
 //    $returnservice           = $shipmentinformation->addChild('ReturnService'); // if selected, you must choose at least one element and place a value in OPTIONS
-//    $options             = $returnservice->addChild('Options', ''); // max 3 merkkiä, R
+//    $options             = $returnservice->addChild('Options', ''); // max 3 merkkiÃ¤, R
 
     /******************************************************************************
     Print Address Only Invoice
@@ -536,9 +536,9 @@ if ($kollityht > 0) {
     <blank>      Print invoices according to User defaults if invoice information is provided; otherwise, do not print invoices
     ******************************************************************************/
 //    $printaddressonlyinvoice     = $returnservice->addChild('PrintAddressOnlyInvoice', ''); // 1 merkki, O
-//    $sendercompanyname         = $returnservice->addChild('SenderCompanyName', ''); // max 35 merkkiä, O
-//    $recipientemailaddress       = $returnservice->addChild('RecipientEmailAddress', ''); // max 50 merkkiä, O
-//    $failureofdeliveryemailaddress   = $returnservice->addChild('FailureOfDeliveryEmailAddress', ''); // max 50 merkkiä, O
+//    $sendercompanyname         = $returnservice->addChild('SenderCompanyName', ''); // max 35 merkkiÃ¤, O
+//    $recipientemailaddress       = $returnservice->addChild('RecipientEmailAddress', ''); // max 50 merkkiÃ¤, O
+//    $failureofdeliveryemailaddress   = $returnservice->addChild('FailureOfDeliveryEmailAddress', ''); // max 50 merkkiÃ¤, O
 //
     /******************************************************************************
     Instruction and Receipt Language
@@ -556,28 +556,28 @@ if ($kollityht > 0) {
     SE         Swedish
     ******************************************************************************/
     /*
-    $instructionandreceiptlanguage   = $returnservice->addChild('InstructionAndReceiptLanguage', ''); // max 2 merkkiä, C
-    $merchandisedescofpackage     = $returnservice->addChild('MerchandiseDescOfPackage', ''); // max 150 merkkiä, R
+    $instructionandreceiptlanguage   = $returnservice->addChild('InstructionAndReceiptLanguage', ''); // max 2 merkkiÃ¤, C
+    $merchandisedescofpackage     = $returnservice->addChild('MerchandiseDescOfPackage', ''); // max 150 merkkiÃ¤, R
 
     // Notify Before Del Option
     $notifybeforedeloption   = $shipmentinformation->addChild('NotifyBeforeDelOption'); // if selected, all elements are required
-    $contactperson       = $notifybeforedeloption->addChild('ContactPerson', ''); // max 35 merkkiä, R
-    $phone           = $notifybeforedeloption->addChild('Phone', ''); // max 15 merkkiä, R
+    $contactperson       = $notifybeforedeloption->addChild('ContactPerson', ''); // max 35 merkkiÃ¤, R
+    $phone           = $notifybeforedeloption->addChild('Phone', ''); // max 15 merkkiÃ¤, R
 
     // Handling Charge Option
     $handlingchargeoption       = $shipmentinformation->addChild('HandlingChargeOption');
     $handlingchargetype       = $handlingchargeoption->addChild('HandlingChargeType', ''); // 1 merkki, O
     $hcamountincreasedecreasetype   = $handlingchargeoption->addChild('HCAmountIncreaseDecreaseType', ''); // 1 merkki, O
-    $handlingchargeflatrate     = $handlingchargeoption->addChild('HandlingChargeFlatRate', ''); // max 4 merkkiä, O
-    $handlingchargepercentage     = $handlingchargeoption->addChild('HandlingChargePercentage', ''); // max 4 merkkiä, O
+    $handlingchargeflatrate     = $handlingchargeoption->addChild('HandlingChargeFlatRate', ''); // max 4 merkkiÃ¤, O
+    $handlingchargepercentage     = $handlingchargeoption->addChild('HandlingChargePercentage', ''); // max 4 merkkiÃ¤, O
 
     $fooditems             = $shipmentinformation->addChild('FoodItems', ''); // O
     $hundredweightpricingapplied   = $shipmentinformation->addChild('HundredWeightPricingApplied', ''); // 1 merkki, O
-    $usi               = $shipmentinformation->addChild('USI', ''); // max 50 merkkiä, R (required if Trade Direct)
-    $subpronumber           = $shipmentinformation->addChild('SubProNumber', '');  // max 19 merkkiä, O
-    $length             = $shipmentinformation->addChild('Length', ''); // max 4 merkkiä, O
-    $width               = $shipmentinformation->addChild('Width', ''); // max 4 merkkiä, O
-    $height             = $shipmentinformation->addChild('Height', ''); // max 4 merkkiä, O
+    $usi               = $shipmentinformation->addChild('USI', ''); // max 50 merkkiÃ¤, R (required if Trade Direct)
+    $subpronumber           = $shipmentinformation->addChild('SubProNumber', '');  // max 19 merkkiÃ¤, O
+    $length             = $shipmentinformation->addChild('Length', ''); // max 4 merkkiÃ¤, O
+    $width               = $shipmentinformation->addChild('Width', ''); // max 4 merkkiÃ¤, O
+    $height             = $shipmentinformation->addChild('Height', ''); // max 4 merkkiÃ¤, O
     $additionaldocuments       = $shipmentinformation->addChild('AdditionalDocuments', ''); // 1 merkki, O
     $proactiveresponseoption     = $shipmentinformation->addChild('ProactiveResponseOption', ''); // 1 merkki, O
     */
@@ -590,15 +590,15 @@ if ($kollityht > 0) {
     // ******************************************************************************
     /*
     $package          = $xml->OpenShipment->addChild('Package');
-    $packagetype         = $package->addChild('PackageType', ''); // max 35 merkkiä, R
-    $weight           = $package->addChild('Weight', ''); // max 4 merkkiä, O
+    $packagetype         = $package->addChild('PackageType', ''); // max 35 merkkiÃ¤, R
+    $weight           = $package->addChild('Weight', ''); // max 4 merkkiÃ¤, O
     $trackingnumber       = $package->addChild('TrackingNumber', ''); // O
-    $largepackageindicator     = $package->addChild('LargePackageIndicator', ''); // max 10 merkkiä, O
-    $reference1         = $package->addChild('Reference1', ''); // max 35 merkkiä, O
-    $reference2         = $package->addChild('Reference2', ''); // max 35 merkkiä, O
-    $reference3         = $package->addChild('Reference3', ''); // max 35 merkkiä, O
-    $reference4         = $package->addChild('Reference4', ''); // max 35 merkkiä, O
-    $reference5         = $package->addChild('Reference5', ''); // max 35 merkkiä, O
+    $largepackageindicator     = $package->addChild('LargePackageIndicator', ''); // max 10 merkkiÃ¤, O
+    $reference1         = $package->addChild('Reference1', ''); // max 35 merkkiÃ¤, O
+    $reference2         = $package->addChild('Reference2', ''); // max 35 merkkiÃ¤, O
+    $reference3         = $package->addChild('Reference3', ''); // max 35 merkkiÃ¤, O
+    $reference4         = $package->addChild('Reference4', ''); // max 35 merkkiÃ¤, O
+    $reference5         = $package->addChild('Reference5', ''); // max 35 merkkiÃ¤, O
     $additionalhandlingoption   = $package->addChild('AdditionalHandlingOption', ''); // 1 merkki, O
     $shipperreleaseoption     = $package->addChild('ShipperReleaseOption', '');  // 1 merkki, O
 
@@ -607,12 +607,12 @@ if ($kollityht > 0) {
     $cashonly                 = $cod->addChild('CashOnly', ''); // 1 merkki, R
     $cashiercheckormoneyorderonlyindicator   = $cod->addChild('CashierCheckorMoneyOrderOnlyIndicator', ''); // 1 merkki, R
     $addshippingchargestocodindicator     = $cod->addChild('AddShippingChargesToCODIndicator', ''); // 1 merkki, R
-    $amount                 = $cod->addChild('Amount', ''); // max 9,2 merkkiä, R
-    $currency                 = $cod->addChild('Currency', ''); // max 3 merkkiä, R
+    $amount                 = $cod->addChild('Amount', ''); // max 9,2 merkkiÃ¤, R
+    $currency                 = $cod->addChild('Currency', ''); // max 3 merkkiÃ¤, R
 
     // Declared Value
     $declaredvalue  = $package->addChild('DeclaredValue'); // if selected, you must enter an AMOUNT
-    $amount      = $declaredvalue->addChild('Amount', ''); // max 9,2 merkkiä, R
+    $amount      = $declaredvalue->addChild('Amount', ''); // max 9,2 merkkiÃ¤, R
     $shipperpaid  = $declaredvalue->addChild('ShipperPaid', ''); // 1 merkki, O
 
     // Delivery Confirmation
@@ -624,13 +624,13 @@ if ($kollityht > 0) {
     $qvnorreturnnotificationoption     = $package->addChild('QVNOrReturnNotificationOption');
     $qvnrecipientandnotificationtypes   = $qvnorreturnnotificationoption->addChild('QVNRecipientAndNotificationTypes');
     $companyorname             = $qvnrecipientandnotificationtypes->addChild('CompanyOrName', ''); // 1 merkki
-    $contactname             = $qvnrecipientandnotificationtypes->addChild('ContactName', ''); // max 35 merkkiä
-    $emailaddress             = $qvnrecipientandnotificationtypes->addChild('EmailAddress', ''); // max 50 merkkiä, R
+    $contactname             = $qvnrecipientandnotificationtypes->addChild('ContactName', ''); // max 35 merkkiÃ¤
+    $emailaddress             = $qvnrecipientandnotificationtypes->addChild('EmailAddress', ''); // max 50 merkkiÃ¤, R
     $ship                 = $qvnrecipientandnotificationtypes->addChild('Ship', ''); // 1 merkki
     $exception               = $qvnrecipientandnotificationtypes->addChild('Recipient', ''); // 1 merkki
     $delivery               = $qvnrecipientandnotificationtypes->addChild('Delivery', ''); // 1 merkki
-    $shipfromcompanyorname        = $qvnorreturnnotificationoption->addChild('ShipFromCompanyOrName', ''); // max 35 merkkiä
-    $failedemailaddress          = $qvnorreturnnotificationoption->addChild('FailedEmailAddress', ''); // max 50 merkkiä
+    $shipfromcompanyorname        = $qvnorreturnnotificationoption->addChild('ShipFromCompanyOrName', ''); // max 35 merkkiÃ¤
+    $failedemailaddress          = $qvnorreturnnotificationoption->addChild('FailedEmailAddress', ''); // max 50 merkkiÃ¤
     */
 
     /******************************************************************************
@@ -641,30 +641,30 @@ if ($kollityht > 0) {
     2        Reference 2
     ******************************************************************************/
     /*
-    $subjectline            = $qvnorreturnnotificationoption->addChild('SubjectLine', ''); // max 75 merkkiä, R
-    $memo                = $qvnorreturnnotificationoption->addChild('Memo', ''); // max 150 merkkiä
+    $subjectline            = $qvnorreturnnotificationoption->addChild('SubjectLine', ''); // max 75 merkkiÃ¤, R
+    $memo                = $qvnorreturnnotificationoption->addChild('Memo', ''); // max 150 merkkiÃ¤
 
     // Verbal Confirmation Option
     $verbalconfirmationoption     = $package->addChild('VerbalConfirmationOption'); // if selected, all elements are required
-    $verbalconfirmationcontactname   = $verbalconfirmationoption->addChild('VerbalConfirmationContactName', ''); // max 35 merkkiä
-    $verbalconfirmationtelephone   = $verbalconfirmationoption->addChild('VerbalConfirmationTelephone', ''); // max 15 merkkiä
+    $verbalconfirmationcontactname   = $verbalconfirmationoption->addChild('VerbalConfirmationContactName', ''); // max 35 merkkiÃ¤
+    $verbalconfirmationtelephone   = $verbalconfirmationoption->addChild('VerbalConfirmationTelephone', ''); // max 15 merkkiÃ¤
 
     $dangerousgoodsoption   = $package->addChild('DangerousGoodsOption', ''); // 1 merkki, O
-    $length          = $package->addChild('Length', ''); // max 4 merkkiä, O
-    $width           = $package->addChild('Width', ''); // max 4 merkkiä, O
-    $height         = $package->addChild('Height', ''); // max 4 merkkiä, O
-    $merchandisedescription = $package->addChild('MerchandiseDescription', ''); // max 105 merkkiä, R
+    $length          = $package->addChild('Length', ''); // max 4 merkkiÃ¤, O
+    $width           = $package->addChild('Width', ''); // max 4 merkkiÃ¤, O
+    $height         = $package->addChild('Height', ''); // max 4 merkkiÃ¤, O
+    $merchandisedescription = $package->addChild('MerchandiseDescription', ''); // max 105 merkkiÃ¤, R
 
     // Flexible Parcel Insurance Option
     $flexibleparcelinsuranceoption   = $package->addChild('FlexibleParcelInsuranceOption');
-    $flexibleparcelinsurancetype   = $flexibleparcelinsuranceoption->addChild('FlexibleParcelInsuranceType', ''); // max 20 merkkiä, R
-    $flexibleinsurancevalue     = $flexibleparcelinsuranceoption->addChild('FlexibleInsuranceValue', ''); // max 4 merkkiä, R
+    $flexibleparcelinsurancetype   = $flexibleparcelinsuranceoption->addChild('FlexibleParcelInsuranceType', ''); // max 20 merkkiÃ¤, R
+    $flexibleinsurancevalue     = $flexibleparcelinsuranceoption->addChild('FlexibleInsuranceValue', ''); // max 4 merkkiÃ¤, R
 
     $proactiveresponseoption = $package->addChild('ProactiveResponseOption', ''); // 1 merkki, O
 
     // Dry Ice Option
     $dryiceoption       = $package->addChild('DryIceOption'); // 1 merkki, O
-    $weight         = $dryiceoption->addChild('Weight', ''); // max 5 merkkiä, O
+    $weight         = $dryiceoption->addChild('Weight', ''); // max 5 merkkiÃ¤, O
     */
 
     /******************************************************************************
@@ -709,8 +709,8 @@ if ($kollityht > 0) {
     TU        Tube
     YD        Yard
     ******************************************************************************/
-//    $unitofmeasure       = $dryiceoption->addChild('UnitOfMeasure', ''); // max 10 merkkiä, O
-//    $regulationset       = $dryiceoption->addChild('RegulationSet', ''); // max 5 merkkiä, O
+//    $unitofmeasure       = $dryiceoption->addChild('UnitOfMeasure', ''); // max 10 merkkiÃ¤, O
+//    $regulationset       = $dryiceoption->addChild('RegulationSet', ''); // max 5 merkkiÃ¤, O
 //    $ismedical         = $dryiceoption->addChild('IsMedical', ''); // 1 merkki, O
 //    $dryicepackagingtype   = $dryiceoption->addChild('DryIcePackagingType', ''); // 1 merkki, O
 
@@ -746,7 +746,7 @@ if ($kollityht > 0) {
     FOB        Free On Board
     UNK        Unknown
     ******************************************************************************/
-//    $invoicetermofsale = $internationaldocumentation->addChild('InvoiceTermOfSale', ''); // max 255 merkkiä, C
+//    $invoicetermofsale = $internationaldocumentation->addChild('InvoiceTermOfSale', ''); // max 255 merkkiÃ¤, C
 
     /******************************************************************************
     Reason For Export
@@ -760,32 +760,32 @@ if ($kollityht > 0) {
     09        Other
     ******************************************************************************/
     /*
-    $invoicereasonforexport           = $internationaldocumentation->addChild('InvoiceReasonForExport', ''); // max 255 merkkiä, C
-    $invoicedeclarationstatement         = $internationaldocumentation->addChild('InvoiceDeclarationStatement', ''); // max 255 merkkiä, C
-    $invoiceadditionalcomments           = $internationaldocumentation->addChild('InvoiceAdditionalComments', ''); // max 300 merkkiä, C
-    $invoicecurrencycode             = $internationaldocumentation->addChild('InvoiceCurrencyCode', ''); // max 3 merkkiä, C
-    $invoicediscount               = $internationaldocumentation->addChild('InvoiceDiscount', ''); // max 4 merkkiä, C
-    $invoicechargesfreight             = $internationaldocumentation->addChild('InvoiceChargesFreight', ''); // max 4 merkkiä, C
-    $invoicechargesinsurance           = $internationaldocumentation->addChild('InvoiceChargesInsurance', ''); // max 4 merkkiä, C
-    $invoicechargesother             = $internationaldocumentation->addChild('InvoiceChargesOther', ''); // max 4 merkkiä, C
+    $invoicereasonforexport           = $internationaldocumentation->addChild('InvoiceReasonForExport', ''); // max 255 merkkiÃ¤, C
+    $invoicedeclarationstatement         = $internationaldocumentation->addChild('InvoiceDeclarationStatement', ''); // max 255 merkkiÃ¤, C
+    $invoiceadditionalcomments           = $internationaldocumentation->addChild('InvoiceAdditionalComments', ''); // max 300 merkkiÃ¤, C
+    $invoicecurrencycode             = $internationaldocumentation->addChild('InvoiceCurrencyCode', ''); // max 3 merkkiÃ¤, C
+    $invoicediscount               = $internationaldocumentation->addChild('InvoiceDiscount', ''); // max 4 merkkiÃ¤, C
+    $invoicechargesfreight             = $internationaldocumentation->addChild('InvoiceChargesFreight', ''); // max 4 merkkiÃ¤, C
+    $invoicechargesinsurance           = $internationaldocumentation->addChild('InvoiceChargesInsurance', ''); // max 4 merkkiÃ¤, C
+    $invoicechargesother             = $internationaldocumentation->addChild('InvoiceChargesOther', ''); // max 4 merkkiÃ¤, C
     $invoicelinetotal               = $internationaldocumentation->addChild('InvoiceLineTotal', ''); // system generated, C
     $customsvaluetotal               = $internationaldocumentation->addChild('CustomsValueTotal', ''); // system generated, C
-    $customsvaluecurrencycode           = $internationaldocumentation->addChild('CustomsValueCurrencyCode', ''); // max 3 merkkiä, C
-    $customsvalueorigin             = $internationaldocumentation->addChild('CustomsValueOrigin', ''); // max 255 merkkiä, C
-    $sedcode                   = $internationaldocumentation->addChild('SED-Code', ''); // max 2 merkkiä, C
-    $sedpartiestotransaction           = $internationaldocumentation->addChild('SED-PartiesToTransaction', ''); // max 255 merkkiä, C
+    $customsvaluecurrencycode           = $internationaldocumentation->addChild('CustomsValueCurrencyCode', ''); // max 3 merkkiÃ¤, C
+    $customsvalueorigin             = $internationaldocumentation->addChild('CustomsValueOrigin', ''); // max 255 merkkiÃ¤, C
+    $sedcode                   = $internationaldocumentation->addChild('SED-Code', ''); // max 2 merkkiÃ¤, C
+    $sedpartiestotransaction           = $internationaldocumentation->addChild('SED-PartiesToTransaction', ''); // max 255 merkkiÃ¤, C
     $sedultimateconsigneesameasshipto       = $internationaldocumentation->addChild('SED-UltimateConsigneeSameAsShipTo', ''); // 1 merkki, C
-    $sedcountryterritoryofultimatedestination   = $internationaldocumentation->addChild('SED-CountryTerritoryOfUltimateDestination', ''); // max 3 merkkiä, C
-    $sedaestransactionnumber           = $internationaldocumentation->addChild('SED-AESTransactionNumber', ''); // max 17 merkkiä, C
-    $sedaestransactionnumbertype         = $internationaldocumentation->addChild('SED-AESTransactionNumberType', ''); // max 7 merkkiä, C
+    $sedcountryterritoryofultimatedestination   = $internationaldocumentation->addChild('SED-CountryTerritoryOfUltimateDestination', ''); // max 3 merkkiÃ¤, C
+    $sedaestransactionnumber           = $internationaldocumentation->addChild('SED-AESTransactionNumber', ''); // max 17 merkkiÃ¤, C
+    $sedaestransactionnumbertype         = $internationaldocumentation->addChild('SED-AESTransactionNumberType', ''); // max 7 merkkiÃ¤, C
     $sedroutedtransaction             = $internationaldocumentation->addChild('SED-RoutedTransaction', ''); // 1 merkki, C
-    $sedcurrencyconversion             = $internationaldocumentation->addChild('SED-CurrencyConversion', ''); // max 12 merkkiä, C
-    $sedexportcode                 = $internationaldocumentation->addChild('SED-ExportCode', ''); // max 2 merkkiä, C
+    $sedcurrencyconversion             = $internationaldocumentation->addChild('SED-CurrencyConversion', ''); // max 12 merkkiÃ¤, C
+    $sedexportcode                 = $internationaldocumentation->addChild('SED-ExportCode', ''); // max 2 merkkiÃ¤, C
     $coupsprepareco               = $internationaldocumentation->addChild('CO-UPSPrepare-CO', ''); // 1 merkki, C
-    $coowneroragent               = $internationaldocumentation->addChild('CO-OwnerOrAgent', ''); // max 255 merkkiä, C
-    $naftaproducer                 = $internationaldocumentation->addChild('NAFTA-Producer', ''); // max 255 merkkiä, C
-    $naftablanketperiodstart           = $internationaldocumentation->addChild('NAFTA-BlanketPeriodStart', ''); // max 9 merkkiä, C
-    $naftablanketperiodend             = $internationaldocumentation->addChild('NAFTA-BlanketPeriodEnd', ''); // max 9 merkkiä, C
+    $coowneroragent               = $internationaldocumentation->addChild('CO-OwnerOrAgent', ''); // max 255 merkkiÃ¤, C
+    $naftaproducer                 = $internationaldocumentation->addChild('NAFTA-Producer', ''); // max 255 merkkiÃ¤, C
+    $naftablanketperiodstart           = $internationaldocumentation->addChild('NAFTA-BlanketPeriodStart', ''); // max 9 merkkiÃ¤, C
+    $naftablanketperiodend             = $internationaldocumentation->addChild('NAFTA-BlanketPeriodEnd', ''); // max 9 merkkiÃ¤, C
     */
 
 
@@ -800,11 +800,11 @@ if ($kollityht > 0) {
     */
     /*
     $goods                  = $xml->OpenShipment->addChild('Goods');
-    $partnumber               = $goods->addChild('PartNumber', ''); // max 35 merkkiä
-    $descriptionofgood             = $goods->addChild('DescriptionOfGood', ''); // max 105 merkkiä
-    $invnaftatariffcode           = $goods->addChild('Inv-NAFTA-TariffCode', ''); // max 105 merkkiä
-    $invnaftacocountryterritoryoforigin   = $goods->addChild('Inv-NAFTA-CO-CountryTerritoryOfOrigin', ''); // max 105 merkkiä
-    $invoiceunits               = $goods->addChild('InvoiceUnits', ''); // max 4 merkkiä
+    $partnumber               = $goods->addChild('PartNumber', ''); // max 35 merkkiÃ¤
+    $descriptionofgood             = $goods->addChild('DescriptionOfGood', ''); // max 105 merkkiÃ¤
+    $invnaftatariffcode           = $goods->addChild('Inv-NAFTA-TariffCode', ''); // max 105 merkkiÃ¤
+    $invnaftacocountryterritoryoforigin   = $goods->addChild('Inv-NAFTA-CO-CountryTerritoryOfOrigin', ''); // max 105 merkkiÃ¤
+    $invoiceunits               = $goods->addChild('InvoiceUnits', ''); // max 4 merkkiÃ¤
     */
 
     /******************************************************************************
@@ -850,35 +850,35 @@ if ($kollityht > 0) {
     YD        Yard
     ******************************************************************************/
     /*
-    $invoiceunitofmeasure             = $goods->addChild('InvoiceUnitOfMeasure', ''); // max 50 merkkiä
-    $invoicesedunitprice             = $goods->addChild('Invoice-SED-UnitPrice', ''); // max 19 merkkiä
+    $invoiceunitofmeasure             = $goods->addChild('InvoiceUnitOfMeasure', ''); // max 50 merkkiÃ¤
+    $invoicesedunitprice             = $goods->addChild('Invoice-SED-UnitPrice', ''); // max 19 merkkiÃ¤
     $invoicecurrencycode             = $goods->addChild('InvoiceCurrencyCode', ''); // 1 merkki
     $invoicenetweight               = $goods->addChild('InvoiceNetWeight', '');
-    $sedcogrossweight               = $goods->addChild('SED-CO-GrossWeight', ''); // max 4 merkkiä
-    $sedlbsorkgs                 = $goods->addChild('SED-LbsOrKgs', ''); // max 3 merkkiä
+    $sedcogrossweight               = $goods->addChild('SED-CO-GrossWeight', ''); // max 4 merkkiÃ¤
+    $sedlbsorkgs                 = $goods->addChild('SED-LbsOrKgs', ''); // max 3 merkkiÃ¤
     $sedprintgoodonsed               = $goods->addChild('SED-PrintGoodOn-SED', ''); // 1 merkki
-    $invoicesedcomarksandnumbers         = $goods->addChild('Invoice-SED-CO-MarksAndNumbers', ''); // max 105 merkkiä
-    $sedschedulenbnumber             = $goods->addChild('SED-ScheduleBNumber', ''); // max 10 merkkiä
-    $sedschedulebunits1             = $goods->addChild('SED-ScheduleBUnits1', ''); // max 10 merkkiä
-    $sedschedulebunits2             = $goods->addChild('SED-ScheduleBUnits2', ''); // max 10 merkkiä
-    $sedunitsofmeasure1             = $goods->addChild('SED-UnitsOfMeasure1', ''); // max 50 merkkiä
-    $sedunitsofmeasure2             = $goods->addChild('SED-UnitsOfMeasure2', ''); // max 50 merkkiä
-    $sedeccn                   = $goods->addChild('SED-ECCN', ''); // max 105 merkkiä
-    $sedexception                 = $goods->addChild('SED-Exception', ''); // max 24 merkkiä
-    $sedlicencenumber               = $goods->addChild('SED-LicenceNumber', ''); // max 15 merkkiä
-    $sedlicencenumberexpirationdate       = $goods->addChild('SED-LicenceNumberExpirationDate', ''); // max 10 merkkiä
+    $invoicesedcomarksandnumbers         = $goods->addChild('Invoice-SED-CO-MarksAndNumbers', ''); // max 105 merkkiÃ¤
+    $sedschedulenbnumber             = $goods->addChild('SED-ScheduleBNumber', ''); // max 10 merkkiÃ¤
+    $sedschedulebunits1             = $goods->addChild('SED-ScheduleBUnits1', ''); // max 10 merkkiÃ¤
+    $sedschedulebunits2             = $goods->addChild('SED-ScheduleBUnits2', ''); // max 10 merkkiÃ¤
+    $sedunitsofmeasure1             = $goods->addChild('SED-UnitsOfMeasure1', ''); // max 50 merkkiÃ¤
+    $sedunitsofmeasure2             = $goods->addChild('SED-UnitsOfMeasure2', ''); // max 50 merkkiÃ¤
+    $sedeccn                   = $goods->addChild('SED-ECCN', ''); // max 105 merkkiÃ¤
+    $sedexception                 = $goods->addChild('SED-Exception', ''); // max 24 merkkiÃ¤
+    $sedlicencenumber               = $goods->addChild('SED-LicenceNumber', ''); // max 15 merkkiÃ¤
+    $sedlicencenumberexpirationdate       = $goods->addChild('SED-LicenceNumberExpirationDate', ''); // max 10 merkkiÃ¤
     $naftaprintgoodonnafta             = $goods->addChild('NAFTA-PrintGoodOn-NAFTA', ''); // 1 merkki
-    $naftapreferencecriterion           = $goods->addChild('NAFTA-PreferenceCriterion', ''); // 2 merkkiä
-    $naftaproducer                 = $goods->addChild('NAFTA-Producer', ''); // max 255 merkkiä
+    $naftapreferencecriterion           = $goods->addChild('NAFTA-PreferenceCriterion', ''); // 2 merkkiÃ¤
+    $naftaproducer                 = $goods->addChild('NAFTA-Producer', ''); // max 255 merkkiÃ¤
     $naftamultiplecountriesterritoriesoforigin   = $goods->addChild('NAFTA-MultipleCountriesTerritoriesOfOrigin', ''); // 1 merkki
     $naftanetcostmethod              = $goods->addChild('NAFTA-NetCostMethod', ''); // 1 merkki
-    $naftanetcostperiodstartdate         = $goods->addChild('NAFTA-NetCostPeriodStartDate', ''); // max 10 merkkiä
-    $naftanetcostperiodenddate           = $goods->addChild('NAFTA-NetCostPeriodEndDate', ''); // max 10 merkkiä
+    $naftanetcostperiodstartdate         = $goods->addChild('NAFTA-NetCostPeriodStartDate', ''); // max 10 merkkiÃ¤
+    $naftanetcostperiodenddate           = $goods->addChild('NAFTA-NetCostPeriodEndDate', ''); // max 10 merkkiÃ¤
     $coprintgoodonco               = $goods->addChild('CO-PrintGoodOn-CO', ''); // 1 merkki
-    $conumberofpackagecontaininggood       = $goods->addChild('CO-NumberOfPackageContainingGood', ''); // max 4 merkkiä
+    $conumberofpackagecontaininggood       = $goods->addChild('CO-NumberOfPackageContainingGood', ''); // max 4 merkkiÃ¤
     */
 
-    // Muunnetaan merkistö Windows ANSI
+    // Muunnetaan merkistÃ¶ Windows ANSI
     iconv("ISO-8859-1", "Windows-1252", $xml);
 
     $xml_output = $xml->asXML();
@@ -887,7 +887,7 @@ if ($kollityht > 0) {
 
     //kirjoitetaan faili levylle..
     if (file_put_contents($filenimi, $xml_output) === FALSE) {
-      echo "<br><font class='error'>".t("tiedoston kirjoitus EPÄONNISTUI")." ($filenimi)</font><br>";
+      echo "<br><font class='error'>".t("tiedoston kirjoitus EPÃ„ONNISTUI")." ($filenimi)</font><br>";
     }
 
     // tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile
@@ -900,7 +900,7 @@ if ($kollityht > 0) {
     require ("inc/ftp-send.inc");
   }
   else {
-    echo "<br><font class='error'>".t("UPS aineiston luontiin tarvittavia parametrejä puuttuu!")."</font><br>";
+    echo "<br><font class='error'>".t("UPS aineiston luontiin tarvittavia parametrejÃ¤ puuttuu!")."</font><br>";
   }
 
 }

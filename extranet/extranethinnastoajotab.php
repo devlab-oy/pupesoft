@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require('parametrit.inc');
@@ -19,7 +19,7 @@ if (mysql_num_rows($result) == 1) {
   $ytunnus = $asiakas["ytunnus"];
 }
 else {
-  echo t("VIRHE: K‰ytt‰j‰tiedoissasi on virhe! Ota yhteys j‰rjestelm‰n yll‰pit‰j‰‰n.")."<br><br>";
+  echo t("VIRHE: K√§ytt√§j√§tiedoissasi on virhe! Ota yhteys j√§rjestelm√§n yll√§pit√§j√§√§n.")."<br><br>";
   exit;
 }
 
@@ -31,7 +31,7 @@ if ($tee != '') {
   $filenimi = "$kukarow[yhtio]-hinnasto-$ytunnus-".date('Ymd_His').".txt";
 
   if (!$fh = fopen("/tmp/".$filenimi, "w+")) {
-    die("filen luonti ep‰onnistui!");
+    die("filen luonti ep√§onnistui!");
   }
   $lisa = '';
 
@@ -59,7 +59,7 @@ if ($tee != '') {
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) == 0) {
-    $rivi .= t("Valitettavasti ei lˆytynyt yht‰‰n tuotetta.")."\t";
+    $rivi .= t("Valitettavasti ei l√∂ytynyt yht√§√§n tuotetta.")."\t";
   }
 
   $rivi .= t("Tuotenumero")."\t";
@@ -69,7 +69,7 @@ if ($tee != '') {
   $rivi .= t("Hinta_veroll")."\t";
   $rivi .= t("alv")."\t";
   $rivi .= t("Aleprosentti")."\t";
-  $rivi .= t("Aleryhm‰")."\t\n";
+  $rivi .= t("Aleryhm√§")."\t\n";
 
   while ($tuoterow = mysql_fetch_array($result)) {
 
@@ -99,7 +99,7 @@ if ($tee != '') {
 
   $filenimi = "/tmp/".t("Hinnasto")."-$kukarow[yhtio]-$ytunnus-".date('Ymd_His').".zip";
 
-  echo t("L‰hetet‰‰n s‰hkˆposti osoitteeseen").": ";
+  echo t("L√§hetet√§√§n s√§hk√∂posti osoitteeseen").": ";
   flush();
 
   $timeparts = explode(" ",microtime());
@@ -109,7 +109,7 @@ if ($tee != '') {
 
   $bound = uniqid(time()."_") ;
 
-  $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+  $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n";
   $header .= "MIME-Version: 1.0\n" ;
   $header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
@@ -123,21 +123,21 @@ if ($tee != '') {
 
   $content .= "--$bound\n" ;
 
-  $boob = mail($kukarow["eposti"], mb_encode_mimeheader(t("Hinnasto")."-$kukarow[yhtio]-$ytunnus-".date('Ymd_His'), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+  $boob = mail($kukarow["eposti"], mb_encode_mimeheader(t("Hinnasto")."-$kukarow[yhtio]-$ytunnus-".date('Ymd_His'), "UTF-8", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 
-  if ($boob===FALSE) echo " - ".t("S‰hkˆpostin l‰hetys ep‰onnistui")."!<br>";
-  else echo " $kukarow[eposti].<br>".t("S‰hkˆposti l‰hetetty").".<br>";
-  echo "<br>".t("Sinulle tulee liitteen‰ pakattu ZIP tiedosto josta saat purettua sarkaimilla erotellun tekstitiedoston").". <br>";
-  echo t("Huomaa ett‰ jos avaat tiedoston Exceliin, sinun pit‰‰ m‰‰ritell‰ ensimm‰inen sarake tekstiksi jotta Excel ei poista etunollia").". <br>";
+  if ($boob===FALSE) echo " - ".t("S√§hk√∂postin l√§hetys ep√§onnistui")."!<br>";
+  else echo " $kukarow[eposti].<br>".t("S√§hk√∂posti l√§hetetty").".<br>";
+  echo "<br>".t("Sinulle tulee liitteen√§ pakattu ZIP tiedosto josta saat purettua sarkaimilla erotellun tekstitiedoston").". <br>";
+  echo t("Huomaa ett√§ jos avaat tiedoston Exceliin, sinun pit√§√§ m√§√§ritell√§ ensimm√§inen sarake tekstiksi jotta Excel ei poista etunollia").". <br>";
 
-  //lopetetaan t‰h‰n
+  //lopetetaan t√§h√§n
   require ("footer.inc");
   exit;
 }
 
-//K‰yttˆliittym‰
-echo "<br>".t("Voit rajata hinnastoa joko valitsemalla yhden tuoteosaston, tai yhden tuoteryhm‰n. <br>Tai jos et tee mit‰‰n valintaa ajetaan hinnasto kaikista tuotteista").".<br>";
-echo "<br>".t("Aja hinnasto painamalla L‰het‰ nappia. Hinnasto l‰hetet‰‰n s‰hkˆpostilla liitetiedostona").".";
+//K√§ytt√∂liittym√§
+echo "<br>".t("Voit rajata hinnastoa joko valitsemalla yhden tuoteosaston, tai yhden tuoteryhm√§n. <br>Tai jos et tee mit√§√§n valintaa ajetaan hinnasto kaikista tuotteista").".<br>";
+echo "<br>".t("Aja hinnasto painamalla L√§het√§ nappia. Hinnasto l√§hetet√§√§n s√§hk√∂postilla liitetiedostona").".";
 echo "<br><br>";
 echo "<table><form method='post'>";
 
@@ -146,7 +146,7 @@ echo "<input type='hidden' name='tee' value='kaikki'>";
 echo "<tr>";
 echo "<th>".t("Valitse tuoteosasto")."</th>";
 
-// tehd‰‰n avainsana query
+// tehd√§√§n avainsana query
 $result = t_avainsana("OSASTO");
 
 echo "<td><select name='tuoteosasto'>";
@@ -159,9 +159,9 @@ while ($row = mysql_fetch_array($result)) {
 }
 
 echo "</select></td></tr>";
-echo "<tr><th>".t("tai tuoteryhm‰")."</th>";
+echo "<tr><th>".t("tai tuoteryhm√§")."</th>";
 
-// tehd‰‰n avainsana query
+// tehd√§√§n avainsana query
 $result = t_avainsana("TRY");
 
 echo "<td><select name='tuoteryhma'>";
@@ -176,7 +176,7 @@ while ($row = mysql_fetch_array($result)) {
 echo "</select></td>";
 echo "</tr>";
 
-echo "<tr><td class='back'><br><input type='submit' value='".t("L‰het‰")."'></td></tr></form>";
+echo "<tr><td class='back'><br><input type='submit' value='".t("L√§het√§")."'></td></tr></form>";
 
 echo "</table>  ";
 

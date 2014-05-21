@@ -11,7 +11,7 @@ if ($kukarow["kuka"] == "admin") {
   echo "</form>";
 }
 else {
-  echo "Vain admin k‰ytt‰j‰lle!";
+  echo "Vain admin k√§ytt√§j√§lle!";
 }
 
 if ($toiminto == 'TULOSTA' and $kukarow["kuka"] == "admin") {
@@ -32,12 +32,12 @@ if ($toiminto == 'TULOSTA' and $kukarow["kuka"] == "admin") {
             and tuote.sarjanumeroseuranta != ''";
   $paikres = pupe_query($query);
 
-  // p‰ivitet‰‰n eka virheelliset varastopaikat
+  // p√§ivitet√§√§n eka virheelliset varastopaikat
   foreach($paikat as $tuote => $kpl) {
 
     list($tuoteno, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $sarjanumerotunnus) = explode("#!#", $tuote);
 
-    // katotaan lˆytyykˆ paikka mik‰ oli sarjanumerolla
+    // katotaan l√∂ytyyk√∂ paikka mik√§ oli sarjanumerolla
     $query = "SELECT *
               FROM tuotepaikat
               WHERE tuoteno = '$tuoteno'
@@ -52,10 +52,10 @@ if ($toiminto == 'TULOSTA' and $kukarow["kuka"] == "admin") {
     // katotaan onko paikka OK
     $tunnus = kuuluukovarastoon($hyllyalue, $hyllynro);
 
-    # jos sarjanumeron tiedoissa on joku v‰‰r‰ varastopaikka, niin haetaan ekan varaston eka paikka ja laitetaan se sinne!
+    # jos sarjanumeron tiedoissa on joku v√§√§r√§ varastopaikka, niin haetaan ekan varaston eka paikka ja laitetaan se sinne!
     if ($tunnus == 0) {
 
-      echo "<br>P‰ivitettiin sarjanumeron varastopaikka $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso -> ";
+      echo "<br>P√§ivitettiin sarjanumeron varastopaikka $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso -> ";
 
       $query = "SELECT alkuhyllyalue, alkuhyllynro, tunnus
                 FROM varastopaikat
@@ -85,12 +85,12 @@ if ($toiminto == 'TULOSTA' and $kukarow["kuka"] == "admin") {
   // haetaan tuotteet
   list($saldot, $lisavarusteet, $paikat) = hae_tuotteet();
 
-  // p‰ivitet‰‰n saldot
+  // p√§ivitet√§√§n saldot
   foreach($saldot as $tuote => $kpl) {
 
     list($tuoteno, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode("#!#", $tuote);
 
-    // katotaan lˆytyykˆ paikka mik‰ oli sarjanumerolla
+    // katotaan l√∂ytyyk√∂ paikka mik√§ oli sarjanumerolla
     $query = "SELECT *
               FROM tuotepaikat
               WHERE tuoteno = '$tuoteno'
@@ -102,17 +102,17 @@ if ($toiminto == 'TULOSTA' and $kukarow["kuka"] == "admin") {
     $alkuresult = pupe_query($query);
     $alkurow = mysql_fetch_array($alkuresult);
 
-    // katotaan onko paikka OK (pit‰s olla kyll‰ kaikki OK!)
+    // katotaan onko paikka OK (pit√§s olla kyll√§ kaikki OK!)
     $tunnus = kuuluukovarastoon($hyllyalue, $hyllynro);
 
     if ($tunnus == 0) {
-      echo "<h1>miten t‰nne tultiin $query</h1>";
+      echo "<h1>miten t√§nne tultiin $query</h1>";
     }
 
     // jos paikka on OK
     if ($tunnus != 0) {
 
-      // tuotteella ei ollut perustettu t‰t‰ paikkaa
+      // tuotteella ei ollut perustettu t√§t√§ paikkaa
       if (mysql_num_rows($alkuresult) == 0) {
         // katotaaan eka onko joku paikka jo oletus
         $query = "SELECT *
@@ -156,7 +156,7 @@ if ($toiminto == 'TULOSTA' and $kukarow["kuka"] == "admin") {
                            hyllynro  = '$hyllynro',
                            hyllyvali = '$hyllyvali',
                            hyllytaso = '$hyllytaso',
-                           selite    = '".t("Sarjanumeroiden saldoissa lis‰ttiin tuotepaikka")." $hyllyalue $hyllynro $hyllyvali $hyllytaso',
+                           selite    = '".t("Sarjanumeroiden saldoissa lis√§ttiin tuotepaikka")." $hyllyalue $hyllynro $hyllyvali $hyllytaso',
                            laatija   = '$kukarow[kuka]',
                            laadittu  = now()";
         $tapahtumaresult = pupe_query($tapahtumaquery);
@@ -215,15 +215,15 @@ if ($toiminto == 'TULOSTA' and $kukarow["kuka"] == "admin") {
     // katotaan onko paikka OK
     $tunnus = kuuluukovarastoon($hyllyalue, $hyllynro);
 
-    // pit‰isi olla kaikki OK
+    // pit√§isi olla kaikki OK
     if ($tunnus == 0) {
-      echo "<h1>t‰nne ei pit‰s tulla $query</h1>";
+      echo "<h1>t√§nne ei pit√§s tulla $query</h1>";
     }
 
     // jos paikka on OK
     if ($tunnus != 0) {
 
-      // tuotteella ei ollut perustettu t‰t‰ paikkaa
+      // tuotteella ei ollut perustettu t√§t√§ paikkaa
       if (mysql_num_rows($alkuresult) == 0) {
 
         // katotaaan eka onko joku paikka jo oletus
@@ -268,7 +268,7 @@ if ($toiminto == 'TULOSTA' and $kukarow["kuka"] == "admin") {
                            hyllynro  = '$hyllynro',
                            hyllyvali = '$hyllyvali',
                            hyllytaso = '$hyllytaso',
-                           selite    = '".t("Sarjanumeroiden saldoissa lis‰ttiin tuotepaikka")." $hyllyalue $hyllynro $hyllyvali $hyllytaso',
+                           selite    = '".t("Sarjanumeroiden saldoissa lis√§ttiin tuotepaikka")." $hyllyalue $hyllynro $hyllyvali $hyllytaso',
                            laatija   = '$kukarow[kuka]',
                            laadittu  = now()";
         $result = pupe_query($tapahtumaquery);
@@ -308,7 +308,7 @@ function hae_tuotteet() {
   $saldot = array();
   $paikat = array();
 
-  // N‰ytet‰‰n kaikki vapaana/myym‰tt‰ olevat sarjanumerot
+  // N√§ytet√§√§n kaikki vapaana/myym√§tt√§ olevat sarjanumerot
   $query  = "SELECT sarjanumeroseuranta.*,
              if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys) nimitys,
              tuote.myyntihinta                   tuotemyyntihinta,
@@ -346,7 +346,7 @@ function hae_tuotteet() {
 
   while ($sarjarow = mysql_fetch_array($sarjares)) {
 
-    // lasketaan lis‰varusteet
+    // lasketaan lis√§varusteet
     if ($sarjarow["osto_perheid2"] > 0) {
       $query = "SELECT
                 tilausrivi.tuoteno,
@@ -366,7 +366,7 @@ function hae_tuotteet() {
       }
     }
 
-    // pit‰‰ uppercaseta!
+    // pit√§√§ uppercaseta!
     $sarjarow["tuoteno"]   = strtoupper($sarjarow["tuoteno"]);
     $sarjarow["hyllyalue"] = strtoupper($sarjarow["hyllyalue"]);
     $sarjarow["hyllynro"]  = strtoupper($sarjarow["hyllynro"]);

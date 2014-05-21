@@ -1,10 +1,10 @@
 <?php
 
 $ulos = "";
-$jatko = 1; // oletetaan normaali k‰sittely
-$tyyppi = 1; // oletetaan rivin n‰kyvyys
+$jatko = 1; // oletetaan normaali k√§sittely
+$tyyppi = 1; // oletetaan rivin n√§kyvyys
 
-if ($i == 0) { //yhtiˆt‰ ei n‰ytet‰
+if ($i == 0) { //yhti√∂t√§ ei n√§ytet√§
   $tyyppi = 0;
 }
 
@@ -103,7 +103,7 @@ if (mysql_field_name($result, $i) == "toim_automaattinen_jtraportti") {
   $sel[$trow[$i]] = "SELECTED";
 
   $ulos = "<td><select name='$nimi'><option value=''>".t("Ei")."</option>";
-  $ulos .= "<option value = 'pv' $sel[pv]>".t("P‰ivitt‰in")."</option>";
+  $ulos .= "<option value = 'pv' $sel[pv]>".t("P√§ivitt√§in")."</option>";
   $ulos .= "<option value = 'vk' $sel[vk]>".t("Viikottain")."</option>";
   $ulos .= "<option value = '2vk' {$sel["2vk"]}>".t("Joka toinen viikko")."</option>";
   $ulos .= "<option value = 'kk' $sel[kk]>".t("Kuukausittain")."</option>";
@@ -138,9 +138,9 @@ if (mysql_field_name($result, $i) == "sahkoinen_automaattituloutus") {
   $sel = array($trow[$i] => 'selected') + array('K' => '', 'J' => '');
 
   $ulos  = "<td><select name='{$nimi}'>";
-  $ulos .= "<option value=''>".t("S‰hkˆisen laskun sis‰‰nluvun yhteydess‰ ei oletuksena tulouteta tuotteita varastoon")."</option>";
-  $ulos .= "<option value='K'{$sel["K"]}>".t("Tuotteet tuloutetaan varastoon automaattisesti s‰hkˆisen laskun sis‰‰nluvun yhteydess‰")."</option>";
-  $ulos .= "<option value='J'{$sel["J"]}>".t("Tuotteet tuloutetaan varastoon ja j‰lkilasketaan automaattisesti s‰hkˆisen laskun sis‰‰nluvun yhteydess‰")."</option>";
+  $ulos .= "<option value=''>".t("S√§hk√∂isen laskun sis√§√§nluvun yhteydess√§ ei oletuksena tulouteta tuotteita varastoon")."</option>";
+  $ulos .= "<option value='K'{$sel["K"]}>".t("Tuotteet tuloutetaan varastoon automaattisesti s√§hk√∂isen laskun sis√§√§nluvun yhteydess√§")."</option>";
+  $ulos .= "<option value='J'{$sel["J"]}>".t("Tuotteet tuloutetaan varastoon ja j√§lkilasketaan automaattisesti s√§hk√∂isen laskun sis√§√§nluvun yhteydess√§")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

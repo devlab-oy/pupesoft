@@ -1,9 +1,9 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-// Kutsutaanko CLI:st‰
+// Kutsutaanko CLI:st√§
 $php_cli = FALSE;
 
 if (php_sapi_name() == 'cli') {
@@ -15,9 +15,9 @@ if (!$php_cli) {
   $kyhtio = $kukarow['yhtio'];
 }
 else {
-  //tarvitaan yhtiˆ
+  //tarvitaan yhti√∂
   if ($argv[1] != "") $kyhtio = trim($argv[1]);
-  else die ("Yhtiˆ on annettava!");
+  else die ("Yhti√∂ on annettava!");
 
   require ("/var/www/html/pupesoft/inc/connect.inc");
   require ("/var/www/html/pupesoft/inc/functions.inc");
@@ -74,7 +74,7 @@ function ftp_rmfiles($ftp_stream, $directory, $nodel = "", $nodelpict = "") {
     }
 
     foreach ($files as $file) {
-    #HUOM: Kuvia joiden nimess‰ on stringi "eipoisteta" ei poisteta
+    #HUOM: Kuvia joiden nimess√§ on stringi "eipoisteta" ei poisteta
     if (stripos($file, "eipoisteta") === FALSE) {
       if ($nodelpict != '') {
         if (strpos($file, $nodelpict) === FALSE) {
@@ -102,11 +102,11 @@ if ($tee == "aja") {
   $tulos_ulos_ftp  = "";
 
   if ($ftpkuvahost=='' or $ftpkuvauser=='' or $ftpkuvapass=='' or $ftpkuvapath=='' or $ftpmuupath == '') {
-    $tulos_ulos_ftp .= "<font class='error'>".t("L‰hetykseen tarvittavia tietoja puuttuu")."! (host, user, pass, path)</font><br>";
+    $tulos_ulos_ftp .= "<font class='error'>".t("L√§hetykseen tarvittavia tietoja puuttuu")."! (host, user, pass, path)</font><br>";
   }
   else {
 
-    //tehd‰‰n kysely t‰ss‰, ettei tule timeouttia
+    //tehd√§√§n kysely t√§ss√§, ettei tule timeouttia
     $query = "SELECT liitetiedostot.*
               FROM liitetiedostot
               JOIN tuote ON tuote.yhtio = liitetiedostot.yhtio and tuote.hinnastoon = 'W' and tuote.tunnus = liitetiedostot.liitostunnus
@@ -116,7 +116,7 @@ if ($tee == "aja") {
               ORDER BY liitetiedostot.kayttotarkoitus ASC";
     $result = pupe_query($query);
 
-    //l‰hetet‰‰n tiedosto
+    //l√§hetet√§√§n tiedosto
     $conn_id = ftp_connect($ftpkuvahost);
 
     // jos connectio ok, kokeillaan loginata
@@ -131,7 +131,7 @@ if ($tee == "aja") {
       $syy .= "Could not connect to remote host. ($ftpkuvahost)\n";
     }
 
-    // jos viimeinen merkki pathiss‰ ei ole kauttaviiva lis‰t‰‰n kauttaviiva...
+    // jos viimeinen merkki pathiss√§ ei ole kauttaviiva lis√§t√§√§n kauttaviiva...
     if (substr($ftpkuvapath, -1) != "/") {
        $ftpkuvapath .= "/";
     }
@@ -146,7 +146,7 @@ if ($tee == "aja") {
       $dirri = "/tmp";
 
       if (!is_writable($dirri)) {
-        die("$kokonimi ei ole m‰‰ritelty kirjoitusoikeutta. Ei voida jatkaa!<br>");
+        die("$kokonimi ei ole m√§√§ritelty kirjoitusoikeutta. Ei voida jatkaa!<br>");
       }
 
       ftp_rmfiles($conn_id, $ftpmuupath);
@@ -176,7 +176,7 @@ if ($tee == "aja") {
           $handle = fopen("$kokonimi", "x");
 
           if ($handle === FALSE) {
-            $syy .= "Tiedoston $row[filename] luonti ep‰onnistui!\n";
+            $syy .= "Tiedoston $row[filename] luonti ep√§onnistui!\n";
             $counter++;
           }
           else {
@@ -236,7 +236,7 @@ if ($tee == "") {
 
   echo "<table><form name='uliuli' method='post'>";
   echo "<input type='hidden' name='tee' value='aja'>";
-  echo "<tr><td class='back' colspan='2'><br><input type='submit' value='".t("Siirr‰ tuotekuvat")."'></td></tr>";
+  echo "<tr><td class='back' colspan='2'><br><input type='submit' value='".t("Siirr√§ tuotekuvat")."'></td></tr>";
   echo "</table>";
   echo "</form>";
 

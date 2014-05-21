@@ -29,7 +29,7 @@ if ($tee == "NAYTA") {
   }
 }
 
-$MONTH_ARRAY    = array(1=> t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kes‰kuu'),t('Hein‰kuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
+$MONTH_ARRAY    = array(1=> t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kes√§kuu'),t('Hein√§kuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
 $paivat     = array(1=> t('Maanantai'),t('Tiistai'),t('Keskiviikko'),t('Torstai'),t('Perjantai'),t('Lauantai'),t('Sunnuntai'));
 
 //kalenteritoiminnot
@@ -63,7 +63,7 @@ function month_name($month) {
   return $kk[$month-1];
 }
 
-// otetaan oletukseksi t‰m‰ kuukausi ja t‰m‰ vuosi
+// otetaan oletukseksi t√§m√§ kuukausi ja t√§m√§ vuosi
 if ($month == '')   $month = date("n");
 if ($year == '')    $year  = date("Y");
 if ($day == '')   $day   = date("j");
@@ -96,13 +96,13 @@ $myday   = sprintf('%02d',$day);
 echo "  <table align='left' width='50%'>
     <tr>
     <td class='back' colspan='4' align='center'>
-    <a href='$PHP_SELF?day=$backdday&month=$backmday&year=$backyday&toim=$toim'><< ".t("Edellinen p‰iv‰")."</a>&nbsp;&nbsp;&nbsp;
+    <a href='$PHP_SELF?day=$backdday&month=$backmday&year=$backyday&toim=$toim'><< ".t("Edellinen p√§iv√§")."</a>&nbsp;&nbsp;&nbsp;
     <b>$day. ". $MONTH_ARRAY[$month] ." $year</b>&nbsp;&nbsp;&nbsp;
-    <a href='$PHP_SELF?day=$nextdday&month=$nextmday&year=$nextyday&toim=$toim'>".t("Seuraava p‰iv‰")." >></a>
+    <a href='$PHP_SELF?day=$nextdday&month=$nextmday&year=$nextyday&toim=$toim'>".t("Seuraava p√§iv√§")." >></a>
     </tr>
     <tr>
     <th align='left' width='100'>".t("Kello") ."</th>
-    <th align='left' width='80'>" .t("Lis‰‰") ."</th>
+    <th align='left' width='80'>" .t("Lis√§√§") ."</th>
     <th align='left' width='130'>".t("Kuka")  ."</th>
     <th align='left' colspan='2'>".t("Viesti")."</th>
     </tr>";
@@ -110,7 +110,7 @@ echo "  <table align='left' width='50%'>
 $min = 0;
 $tun = 8;
 
-//N‰ytet‰‰n aina konsernikohtaisesti
+//N√§ytet√§√§n aina konsernikohtaisesti
 $query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
 $result = mysql_query($query) or pupe_error($query);
 $konsernit = "";
@@ -190,7 +190,7 @@ for($i=800; $i < 2200; $i++) {
 
     echo "<td colspan='2'>";
 
-    echo "<a href='$PHP_SELF?tee=NAYTA&year=$year&month=$month&day=$day&tunnus=$row[tunnus]&toim=$toim'>".t("Lis‰tiedot")."</a>";
+    echo "<a href='$PHP_SELF?tee=NAYTA&year=$year&month=$month&day=$day&tunnus=$row[tunnus]&toim=$toim'>".t("Lis√§tiedot")."</a>";
     echo "  &nbsp;&nbsp;$row[kentta05]</td>
         </tr>";
 
@@ -215,7 +215,7 @@ for($i=800; $i < 2200; $i++) {
         <td>";
 
     if($tun.$min <= 2100) {
-      echo "<a href='$PHP_SELF?kello=$kello&year=$year&month=$month&day=$day&tee=SYOTA&toim=$toim'>".t("Lis‰‰")."</a>";
+      echo "<a href='$PHP_SELF?kello=$kello&year=$year&month=$month&day=$day&tee=SYOTA&toim=$toim'>".t("Lis√§√§")."</a>";
     }
     echo "  </td>
         <td></td>
@@ -275,12 +275,12 @@ echo "  </select>
 
 echo "<tr><th>".date("W",mktime(0, 0, 0, $month, 1, $year))."</th>";
 
-// kirjotetaan alkuun tyhji‰ soluja
+// kirjotetaan alkuun tyhji√§ soluja
 for ($i=0; $i < weekday_number("1", $month, $year); $i++) {
   echo "<td>&nbsp;</td>";
 }
 
-// kirjoitetaan p‰iv‰m‰‰r‰t taulukkoon..
+// kirjoitetaan p√§iv√§m√§√§r√§t taulukkoon..
 for ($i=1; $i <= days_in_month($month, $year); $i++) {
   $pva = sprintf('%02d',$i);
 
@@ -315,7 +315,7 @@ for ($i=1; $i <= days_in_month($month, $year); $i++) {
 
   echo "  <td align='center' $style><a href='$PHP_SELF?session=$session&year=$year&month=$month&day=$i&toim=$toim'>$font $num</font></a></td>\n";
 
-  // jos kyseess‰ on sunnuntai, tehd‰‰n rivinvaihto..
+  // jos kyseess√§ on sunnuntai, tehd√§√§n rivinvaihto..
   if (weekday_number($i, $month, $year) == 6) {
     // kirjotetaan viikon numero jos seuraava viikko on olemassa
     if (days_in_month($month, $year) != $i) {
@@ -326,7 +326,7 @@ for ($i=1; $i <= days_in_month($month, $year); $i++) {
   }
 }
 
-//kirjoitetaan loppuun tyhji‰ soluja
+//kirjoitetaan loppuun tyhji√§ soluja
 for ($i=0; $i < 6-weekday_number(days_in_month($month, $year), $month, $year); $i++) {
   echo "<td>&nbsp;</td>";
 }

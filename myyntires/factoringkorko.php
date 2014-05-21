@@ -25,7 +25,7 @@ echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 
 if (isset($tilino)){
 
-  // tutkaillaan tili‰
+  // tutkaillaan tili√§
   $query = "SELECT *
             FROM tili
             WHERE yhtio = '$kukarow[yhtio]'
@@ -33,7 +33,7 @@ if (isset($tilino)){
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
-    echo "<font class='error'>".t("Kirjanpidon tili‰ ei lˆydy")."!</font> $tilino<br><br>";
+    echo "<font class='error'>".t("Kirjanpidon tili√§ ei l√∂ydy")."!</font> $tilino<br><br>";
     unset($viite);
     unset($tilino);
     unset($valitut);
@@ -59,7 +59,7 @@ if (isset($tapa) and $tapa == 'paalle') {
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
-      echo "<font class='error'>".t("Sopivia suorituksia ei lˆydy")."!</font><br><br>";
+      echo "<font class='error'>".t("Sopivia suorituksia ei l√∂ydy")."!</font><br><br>";
       unset($viite);
       unset($tilino);
     }
@@ -108,11 +108,11 @@ if (isset($tapa) and $tapa == 'paalle') {
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 0) {
-        echo "<font class='error'>".t("Suoritus on kadonnut tai se on k‰ytetty")."!</font><br><br>";
+        echo "<font class='error'>".t("Suoritus on kadonnut tai se on k√§ytetty")."!</font><br><br>";
       }
       else {
         $suoritusrow=mysql_fetch_assoc($result);
-        // p‰ivitet‰‰n suoritus
+        // p√§ivitet√§√§n suoritus
         $query = "UPDATE suoritus
                   SET kohdpvm = now()
                   WHERE yhtio = '$kukarow[yhtio]'
@@ -120,10 +120,10 @@ if (isset($tapa) and $tapa == 'paalle') {
         $result = pupe_query($query);
 
         if (mysql_affected_rows() == 0) {
-          echo "<font class='error'>".t("Suorituksen p‰ivitys ep‰onnistui")."! $tunnus</font><br>";
+          echo "<font class='error'>".t("Suorituksen p√§ivitys ep√§onnistui")."! $tunnus</font><br>";
         }
 
-        // tehd‰‰n kirjanpitomuutokset
+        // tehd√§√§n kirjanpitomuutokset
         $query = "UPDATE tiliointi SET
                   tilino      = '$tilino',
                   selite      = '".t("Kohdistettiin korkoihin")."'
@@ -132,7 +132,7 @@ if (isset($tapa) and $tapa == 'paalle') {
         $result = pupe_query($query);
 
         if (mysql_affected_rows() == 0) {
-          echo "<font class='error'>".t("Kirjanpitomuutoksia ei osattu tehd‰! Korjaa kirjanpito k‰sin")."!</font><br>";
+          echo "<font class='error'>".t("Kirjanpitomuutoksia ei osattu tehd√§! Korjaa kirjanpito k√§sin")."!</font><br>";
         }
       }
     }
@@ -158,7 +158,7 @@ if (isset($tapa) and $tapa == 'pois') {
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
-      echo "<font class='error'>".t("Sopivia korkovientej‰ ei lˆydy")."!</font><br><br>";
+      echo "<font class='error'>".t("Sopivia korkovientej√§ ei l√∂ydy")."!</font><br><br>";
       unset($viite);
       unset($tilino);
     }
@@ -200,12 +200,12 @@ if (isset($tapa) and $tapa == 'pois') {
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 0) {
-        echo "<font class='error'>".t("Suoritus on kadonnut tai se ei ole en‰‰ k‰ytetty")."!</font><br><br>";
+        echo "<font class='error'>".t("Suoritus on kadonnut tai se ei ole en√§√§ k√§ytetty")."!</font><br><br>";
       }
       else {
         $suoritusrow = mysql_fetch_assoc($result);
 
-        // Etsit‰‰n kirjanpitotapahtuma
+        // Etsit√§√§n kirjanpitotapahtuma
         $query = "SELECT summa
                   from tiliointi
                   where yhtio = '$kukarow[yhtio]'
@@ -213,7 +213,7 @@ if (isset($tapa) and $tapa == 'pois') {
         $result = pupe_query($query);
 
         if (mysql_num_rows($result) == 0) {
-          echo "<font class='error'>".t("Tiliˆinti on kadonnut")."!</font><br><br>";
+          echo "<font class='error'>".t("Tili√∂inti on kadonnut")."!</font><br><br>";
         }
         else {
           $tiliointirow = mysql_fetch_assoc($result);
@@ -231,7 +231,7 @@ if (isset($tapa) and $tapa == 'pois') {
             $tilino = $yhtiorow['factoringsaamiset'];
           }
 
-          // p‰ivitet‰‰n suoritus
+          // p√§ivitet√§√§n suoritus
           $query = "UPDATE suoritus
                     SET kohdpvm = '0000-00-00',
                     summa       = -1 * $tiliointirow[summa]
@@ -240,10 +240,10 @@ if (isset($tapa) and $tapa == 'pois') {
           $result = pupe_query($query);
 
           if (mysql_affected_rows() == 0) {
-            echo "<font class='error'>".t("Suorituksen p‰ivitys ep‰onnistui")."! $tunnus</font><br>";
+            echo "<font class='error'>".t("Suorituksen p√§ivitys ep√§onnistui")."! $tunnus</font><br>";
           }
 
-          // tehd‰‰n kirjanpitomuutokset
+          // tehd√§√§n kirjanpitomuutokset
           $query = "UPDATE tiliointi
                     SET tilino = '$tilino',
                     selite      = '".t("Korjattu suoritus")."'
@@ -252,7 +252,7 @@ if (isset($tapa) and $tapa == 'pois') {
           $result = pupe_query($query);
 
           if (mysql_affected_rows() == 0) {
-            echo "<font class='error'>".t("Kirjanpitomuutoksia ei osattu tehd‰! Korjaa kirjanpito k‰sin")."!</font><br>";
+            echo "<font class='error'>".t("Kirjanpitomuutoksia ei osattu tehd√§! Korjaa kirjanpito k√§sin")."!</font><br>";
           }
         }
       }
@@ -266,9 +266,9 @@ if (isset($tapa) and $tapa == 'pois') {
 if (!isset($tapa)) {
     echo "<form method='post' autocomplete='off'>";
     echo "<table>";
-    echo "<tr><th>".t("Suorituksia siirret‰‰n korkoihin")."</th>";
+    echo "<tr><th>".t("Suorituksia siirret√§√§n korkoihin")."</th>";
     echo "<td><input type='radio' name='tapa' value='paalle' checked></td></tr>";
-    echo "<tr><th>".t("Suorituksia siirret‰‰n koroista normaaleiksi suorituksiksi")."</th>";
+    echo "<tr><th>".t("Suorituksia siirret√§√§n koroista normaaleiksi suorituksiksi")."</th>";
     echo "<td><input type='radio' name='tapa' value='pois'></td></tr>";
     echo "<tr><td class='back'><input name='subnappi' type='submit' value='".t("Valitse")."'></td></tr>";
     echo "</table>";
@@ -279,9 +279,9 @@ else {
     if ($tapa == 'paalle') {
       echo "<form name='eikat' method='post' autocomplete='off'>";
       echo "<input type='hidden' name='tapa' value='$tapa'><table>";
-      echo "<tr><th>".t("Anna viitteen alku suorituuksista, jotka haluat k‰sitelt‰viksi")."</th>";
+      echo "<tr><th>".t("Anna viitteen alku suorituuksista, jotka haluat k√§sitelt√§viksi")."</th>";
       echo "<td><input type='text' name='viite' value = '50009'></td></tr>";
-      echo "<tr><th>".t("Mille tilille n‰m‰ varat tiliˆid‰‰n")."</th>";
+      echo "<tr><th>".t("Mille tilille n√§m√§ varat tili√∂id√§√§n")."</th>";
       echo "<td><input type='text' name='tilino'></td></tr>";
       echo "<tr><td class='back'><input name='subnappi' type='submit' value='".t("Hae suoritukset")."'></td></tr>";
       echo "</table>";
@@ -290,7 +290,7 @@ else {
     else {
       echo "<form name='eikat' method='post' autocomplete='off'>";
       echo "<input type='hidden' name='tapa' value='$tapa'><table>";
-      echo "<tr><th>".t("Anna viitteen alku korkovienneist‰, jotka haluat k‰sitelt‰viksi")."</th>";
+      echo "<tr><th>".t("Anna viitteen alku korkovienneist√§, jotka haluat k√§sitelt√§viksi")."</th>";
       echo "<td><input type='text' name='viite'></td></tr>";
       echo "<tr><td class='back'><input name='subnappi' type='submit' value='".t("Hae korkoviennit")."'></td></tr>";
       echo "</table>";

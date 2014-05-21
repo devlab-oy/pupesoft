@@ -38,7 +38,7 @@
 
   <table style='text-align: center;'>
     <tr>
-      <th><?php t("M‰‰r‰ yhteens‰") ?></th>
+      <th><?php t("M√§√§r√§ yhteens√§") ?></th>
       <td>
         <input type='text' id='maara' name='maara' value='0' readonly size='4'>
       </td>
@@ -67,7 +67,7 @@
       }
     });
 
-    // P‰ivitet‰‰n summa kenttt‰
+    // P√§ivitet√§√§n summa kenttt√§
     document.getElementById('maara').value = summa;
   }
 

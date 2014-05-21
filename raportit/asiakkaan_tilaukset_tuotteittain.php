@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 if (isset($_POST["tee"])) {
@@ -64,7 +64,7 @@ if ($tuoteno != '') {
   require ('inc/tuotehaku.inc');
 }
 
-// Pikku scripti formin tyhjent‰miseen
+// Pikku scripti formin tyhjent√§miseen
 echo "<script type='text/javascript' language='javascript'>
 function vaihdaClick() {
   document.etsiform.etsinappi.name='vaihda';
@@ -72,7 +72,7 @@ function vaihdaClick() {
 }
 </script>";
 
-//Etsi-kentt‰
+//Etsi-kentt√§
 echo "<br><table><form method='post' id='etsiform' name='etsiform'>
     <input type='hidden' name='toim' value='$toim'>
     <input type='hidden' name='tee' value='ETSI'>";
@@ -139,7 +139,7 @@ else {
 }
 
 echo "</tr>";
-echo "  <tr><th>".t("Syˆt‰ tuotenumero").":</th>
+echo "  <tr><th>".t("Sy√∂t√§ tuotenumero").":</th>
     <td colspan='3'>";
 
 if (isset($tuoteno) and trim($ulos) != '') {
@@ -151,27 +151,27 @@ else {
 
 echo "</td></tr>";
 
-echo "<tr><th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+echo "<tr><th>".t("Sy√∂t√§ alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
     <td><input type='text' name='ppa' value='$ppa' size='3'></td>
     <td><input type='text' name='kka' value='$kka' size='3'></td>
     <td><input type='text' name='vva' value='$vva' size='5'></td>
-    </tr><tr><th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+    </tr><tr><th>".t("Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
     <td><input type='text' name='ppl' value='$ppl' size='3'></td>
     <td><input type='text' name='kkl' value='$kkl' size='3'></td>
     <td><input type='text' name='vvl' value='$vvl' size='5'></td>";
 
 if ($toim == 'OSTO') {
-  echo "</tr><tr><th>".t("Valitse p‰iv‰m‰‰r‰n tyyppi")."</th>
+  echo "</tr><tr><th>".t("Valitse p√§iv√§m√§√§r√§n tyyppi")."</th>
     <td colspan='3'><select name='pvmtapa'>
-      <option value='laadittu' $pvm_select1>".t("Tilauksen laatimisp‰iv‰m‰‰r‰")."</option>
-      <option value='toimaika' $pvm_select2>".t("Tilauksen toivottu toimitusp‰iv‰m‰‰r‰")."</option>
+      <option value='laadittu' $pvm_select1>".t("Tilauksen laatimisp√§iv√§m√§√§r√§")."</option>
+      <option value='toimaika' $pvm_select2>".t("Tilauksen toivottu toimitusp√§iv√§m√§√§r√§")."</option>
     </select></td>";
 }
 else {
-  echo "</tr><tr><th>".t("Valitse p‰iv‰m‰‰r‰n tyyppi")."</th>
+  echo "</tr><tr><th>".t("Valitse p√§iv√§m√§√§r√§n tyyppi")."</th>
     <td colspan='3'><select name='pvmtapa'>
-      <option value='laadittu' $pvm_select1>".t("Tilauksen laatimisp‰iv‰m‰‰r‰")."</option>
-      <option value='laskutettu' $pvm_select2>".t("Tilauksen laskutusp‰iv‰m‰‰r‰")."</option>
+      <option value='laadittu' $pvm_select1>".t("Tilauksen laatimisp√§iv√§m√§√§r√§")."</option>
+      <option value='laskutettu' $pvm_select2>".t("Tilauksen laskutusp√§iv√§m√§√§r√§")."</option>
     </select></td>";
 }
 
@@ -205,8 +205,8 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
               lasku.nimi,
               lasku.postitp,
               tilausrivi.tuoteno,
-              round((tilausrivi.varattu+tilausrivi.kpl),4) m‰‰r‰,
-              round((tilausrivi.varattu+tilausrivi.kpl)*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4) ulkm‰‰r‰,
+              round((tilausrivi.varattu+tilausrivi.kpl),4) m√§√§r√§,
+              round((tilausrivi.varattu+tilausrivi.kpl)*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4) ulkm√§√§r√§,
               round(tilausrivi.hinta*if(lasku.vienti_kurssi=0, 1, lasku.vienti_kurssi), '$yhtiorow[hintapyoristys]') hinta,
               {$ale_query_select_lisa}
               round((tilausrivi.varattu+tilausrivi.kpl)*tilausrivi.hinta*if(lasku.vienti_kurssi=0, 1, lasku.vienti_kurssi)*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*{$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
@@ -249,13 +249,13 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
               $asiakaslisa
               tilausrivi.tuoteno,
               tilausrivi.nimitys,
-              (tilausrivi.kpl+tilausrivi.varattu) m‰‰r‰,
+              (tilausrivi.kpl+tilausrivi.varattu) m√§√§r√§,
               tilausrivi.hinta,
               {$ale_query_select_lisa}
               if (tilausrivi.kpl!=0, tilausrivi.rivihinta, tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}) rivihinta,
               tilausrivi.kate,
               lasku.toimaika,
-              lasku.lahetepvm K‰sittelyyn,
+              lasku.lahetepvm K√§sittelyyn,
               lasku.tila,
               lasku.alatila,
               lasku.tapvm,
@@ -358,10 +358,10 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
 
       for ($i=1; $i<mysql_num_fields($result)-$miinus; $i++) {
 
-        if (mysql_field_name($result,$i) == 'kerattyaika' or mysql_field_name($result,$i) == 'toimaika' or mysql_field_name($result,$i) == 'tuloutettu' or mysql_field_name($result,$i) == 'K‰sittelyyn') {
+        if (mysql_field_name($result,$i) == 'kerattyaika' or mysql_field_name($result,$i) == 'toimaika' or mysql_field_name($result,$i) == 'tuloutettu' or mysql_field_name($result,$i) == 'K√§sittelyyn') {
           echo "<$ero valign='top' $class>".tv1dateconv($row[$i],"pitka")."</$ero>";
         }
-        elseif (substr(mysql_field_name($result,$i), 0, 3) == 'ale' or mysql_field_name($result,$i) == 'm‰‰r‰') {
+        elseif (substr(mysql_field_name($result,$i), 0, 3) == 'ale' or mysql_field_name($result,$i) == 'm√§√§r√§') {
           if ($row[$i] == 0) {
             echo "<$ero valign='top' align='right' $class></$ero>";
           }
@@ -380,13 +380,13 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
             echo "<$ero colspan='2' valign='top' nowrap $class>".t("JT")."</$ero>";
           }
           else {
-            // T‰n rivin kate
+            // T√§n rivin kate
             $kate     = 0;
             $kate_eur  = 0;
 
             if ($row["tapvm"] != '0000-00-00') {
 
-              if ($row["m‰‰r‰"] == 0) {
+              if ($row["m√§√§r√§"] == 0) {
                 $kate = "";
                 $kate_eur = 0;
               }
@@ -410,7 +410,7 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
             }
             elseif ($kukarow['extranet'] == '' and ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "U")) {
               if ($kpl > 0) {
-                //Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on myynti‰
+                //Jos tuotteella yll√§pidet√§√§n in-out varastonarvo ja kyseess√§ on myynti√§
                 $ostohinta = sarjanumeron_ostohinta("myyntirivitunnus", $row["tunnus"]);
 
                 // Kate = Hinta - Ostohinta
@@ -422,15 +422,15 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
                 $kate_yht += $kate_eur;
               }
               elseif ($kpl < 0 and $row["osto_vai_hyvitys"] == "O") {
-                //Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on OSTOA
+                //Jos tuotteella yll√§pidet√§√§n in-out varastonarvo ja kyseess√§ on OSTOA
 
                 // Kate = 0
                 $kate = "0%";
               }
               elseif ($kpl < 0 and $row["osto_vai_hyvitys"] == "") {
-                //Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on HYVITYSTƒ
+                //Jos tuotteella yll√§pidet√§√§n in-out varastonarvo ja kyseess√§ on HYVITYST√Ñ
 
-                //T‰h‰n hyvitysriviin liitetyt sarjanumerot
+                //T√§h√§n hyvitysriviin liitetyt sarjanumerot
                 $query = "SELECT sarjanumero, kaytetty
                           FROM sarjanumeroseuranta
                           WHERE yhtio        = '$kukarow[yhtio]'
@@ -441,7 +441,7 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
 
                 while($sarjarow = mysql_fetch_array($sarjares)) {
 
-                  // Haetaan hyvitett‰vien myyntirivien kautta alkuper‰iset ostorivit
+                  // Haetaan hyvitett√§vien myyntirivien kautta alkuper√§iset ostorivit
                   $query  = "SELECT tilausrivi.rivihinta/tilausrivi.kpl ostohinta
                              FROM sarjanumeroseuranta
                              JOIN tilausrivi ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus
@@ -459,7 +459,7 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
                   $ostohinta += $sarjarow1["ostohinta"];
                 }
 
-                // Kate = Hinta - Alkuper‰inen ostohinta
+                // Kate = Hinta - Alkuper√§inen ostohinta
                 if ($row["rivihinta"] != 0) {
                   $kate = sprintf('%.2f',100 * ($row["rivihinta"]*-1 - $ostohinta)/$row["rivihinta"])."%";
                 }
@@ -477,13 +477,13 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
             elseif ($kukarow['extranet'] == '') {
 
               if ($row["rivihinta"] != 0) {
-                $kate = sprintf('%.2f',100*($row["rivihinta"] - (kehahin($row["tuoteno"])*($row["varattu"]+$row["jt"]+$row['m‰‰r‰'])))/$row["rivihinta"])."%";
+                $kate = sprintf('%.2f',100*($row["rivihinta"] - (kehahin($row["tuoteno"])*($row["varattu"]+$row["jt"]+$row['m√§√§r√§'])))/$row["rivihinta"])."%";
               }
               elseif (kehahin($row["tuoteno"]) != 0) {
                 $kate = "-100.00%";
               }
 
-              $kate_eur  = ($row["rivihinta"] - (kehahin($row["tuoteno"])*($row["varattu"]+$row["jt"]+$row['m‰‰r‰'])));
+              $kate_eur  = ($row["rivihinta"] - (kehahin($row["tuoteno"])*($row["varattu"]+$row["jt"]+$row['m√§√§r√§'])));
               $kate_yht += $kate_eur;
             }
 
@@ -518,7 +518,7 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
       }
 
       if ($row["var"] != "P" and $row["var"] != "J") {
-        $kplsumma += $row["m‰‰r‰"];
+        $kplsumma += $row["m√§√§r√§"];
         $rivihintasumma += $row["rivihinta"];
       }
 
@@ -526,7 +526,7 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
         $laskutyyppi= $row["tila"];
         $alatila  = $row["alatila"];
 
-        //tehd‰‰n selv‰kielinen tila/alatila
+        //tehd√§√§n selv√§kielinen tila/alatila
         require "../inc/laskutyyppi.inc";
 
         echo "<$ero valign='top' $class>".t("$laskutyyppi")." ".t("$alatila")."</$ero>";
@@ -547,7 +547,7 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
           <input type='hidden' name='ppl' value='$ppl'>
           <input type='hidden' name='kkl' value='$kkl'>
           <input type='hidden' name='vvl' value='$vvl'>
-          <input type='submit' value='".t("N‰yt‰ tilaus")."'></td></form>";
+          <input type='submit' value='".t("N√§yt√§ tilaus")."'></td></form>";
 
       echo "</tr>";
 
@@ -578,7 +578,7 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
 
     echo "<tr>
         <td colspan='$csp' class='back'></td>
-        <td align='right' class='back'>".t("Yhteens‰").":</td>
+        <td align='right' class='back'>".t("Yhteens√§").":</td>
         <td align='right' class='spec'>".(float) $kplsumma."</td>
         <td colspan='{$csp2}' align='right' class='back'></td>
         <td align='right' class='spec'>".sprintf('%01.2f', $rivihintasumma)."</td>";

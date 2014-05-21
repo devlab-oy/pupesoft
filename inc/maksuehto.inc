@@ -12,7 +12,7 @@ else {
 }
 
 if ($tunnus != '' and $upd != 1) {
-  // Toimitustavan saa poistaa mik‰li mill‰‰n asiakkaalla ei ole sit‰ k‰ytˆss‰ (tsekataan tuoterivi.inc)
+  // Toimitustavan saa poistaa mik√§li mill√§√§n asiakkaalla ei ole sit√§ k√§yt√∂ss√§ (tsekataan tuoterivi.inc)
   $kaytossa_disabled = "disabled";
 
   $query = "SELECT teksti
@@ -41,7 +41,7 @@ if ($tunnus != '' and $upd != 1) {
       $kaytossa_disabled = '';
     }
     else {
-      $otsikko_lisatiedot .= "<font class='message'>".t("HUOM: Maksuehtoa ei voi poistaa, koska se on k‰ytˆss‰").":";
+      $otsikko_lisatiedot .= "<font class='message'>".t("HUOM: Maksuehtoa ei voi poistaa, koska se on k√§yt√∂ss√§").":";
 
       $otsikko_lisatiedot .= "<ul>";
       if (mysql_num_rows($chkres1) > 0) {

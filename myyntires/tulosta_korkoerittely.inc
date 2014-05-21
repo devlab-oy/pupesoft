@@ -30,7 +30,7 @@ function paperi_alku () {
   //Oikea sarake
   $pdf->draw_rectangle(800, 300, 779, 580, $firstpage, $rectparam);
   $pdf->draw_rectangle(800, 420, 779, 580, $firstpage, $rectparam);
-  $pdf->draw_text(310, 792, t("P‰iv‰m‰‰r‰", $kieli), $firstpage, $pieni);
+  $pdf->draw_text(310, 792, t("P√§iv√§m√§√§r√§", $kieli), $firstpage, $pieni);
 
   if (basename($_SERVER["SCRIPT_FILENAME"]) != 'muutosite.php')
     $pdf->draw_text(310, 782, tv1dateconv(date('Y-m-d')), $firstpage, $norm);
@@ -42,11 +42,11 @@ function paperi_alku () {
 
   $pdf->draw_rectangle(779, 300, 758, 580, $firstpage, $rectparam);
   $pdf->draw_rectangle(779, 420, 758, 580, $firstpage, $rectparam);
-  $pdf->draw_text(310, 771, t("Er‰p‰iv‰", $kieli), $firstpage, $pieni);
+  $pdf->draw_text(310, 771, t("Er√§p√§iv√§", $kieli), $firstpage, $pieni);
 
 
   if (basename($_SERVER["SCRIPT_FILENAME"]) != 'muutosite.php') {
-    // Etsit‰‰n maksuehto
+    // Etsit√§√§n maksuehto
     $query = "SELECT *
               FROM maksuehto
               WHERE tunnus='$vmehto' and yhtio='$kukarow[yhtio]'";
@@ -79,7 +79,7 @@ function paperi_alku () {
   $pdf->draw_text(310, 750, t("Ytunnus/Asiakasnumero", $kieli),   $firstpage, $pieni);
   $pdf->draw_text(310, 740, $asiakastiedot["ytunnus"],       $firstpage, $norm);
 
-  $pdf->draw_text(430, 750, t("S‰hkˆposti", $kieli),   $firstpage, $pieni);
+  $pdf->draw_text(430, 750, t("S√§hk√∂posti", $kieli),   $firstpage, $pieni);
   $pdf->draw_text(430, 740, $yrow["eposti"],       $firstpage, $norm);
 
   $kala = 620;
@@ -87,11 +87,11 @@ function paperi_alku () {
   //Laskurivien otsikkotiedot
   //eka rivi
   $pdf->draw_text(30,  $kala, t("Laskunumero", $kieli),    $firstpage, $pieni);
-  $pdf->draw_text(100, $kala, t("P‰iv‰m‰‰r‰", $kieli),    $firstpage, $pieni);
-  $pdf->draw_text(160, $kala, t("Er‰p‰iv‰", $kieli),      $firstpage, $pieni);
+  $pdf->draw_text(100, $kala, t("P√§iv√§m√§√§r√§", $kieli),    $firstpage, $pieni);
+  $pdf->draw_text(160, $kala, t("Er√§p√§iv√§", $kieli),      $firstpage, $pieni);
   $pdf->draw_text(220, $kala, t("Maksettu", $kieli),      $firstpage, $pieni);
-  $pdf->draw_text(280, $kala, t("Myˆh‰ss‰ pv.", $kieli),    $firstpage, $pieni);
-  $pdf->draw_text(340, $kala, t("Viiv‰stykorko-%", $kieli),  $firstpage, $pieni);
+  $pdf->draw_text(280, $kala, t("My√∂h√§ss√§ pv.", $kieli),    $firstpage, $pieni);
+  $pdf->draw_text(340, $kala, t("Viiv√§stykorko-%", $kieli),  $firstpage, $pieni);
   $pdf->draw_text(425, $kala, t("Laskun summa", $kieli),    $firstpage, $pieni);
   $pdf->draw_text(520, $kala, t("Korko", $kieli),        $firstpage, $pieni);
 
@@ -137,19 +137,19 @@ function paperi_loppu ($firstpage, $summa, $masrow = "") {
 
   global $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kaatosumma, $kieli, $toimipaikkarow;
 
-  //yhteens‰rivi
+  //yhteens√§rivi
   if ($summa == '') {
     $pdf->draw_text(420, 75, t('Jatkuu...', $kieli), $firstpage, $norm);
   }
   else {
-    $pdf->draw_text(420, 75, t('Yhteens‰', $kieli).":", $firstpage, $norm);
+    $pdf->draw_text(420, 75, t('Yhteens√§', $kieli).":", $firstpage, $norm);
 
     $oikpos = $pdf->strlen($summa, $norm);
     $pdf->draw_text(540-$oikpos, 75, $summa, $firstpage, $norm);
     $pdf->draw_text(545, 75, $yhtiorow['valkoodi'], $firstpage, $norm);
   }
 
-  //Alimmat kolme laatikkoa, yhtiˆtietoja
+  //Alimmat kolme laatikkoa, yhti√∂tietoja
   $pdf->draw_rectangle(70, 20, 20, 580,  $firstpage, $rectparam);
   $pdf->draw_rectangle(70, 207, 20, 580,  $firstpage, $rectparam);
   $pdf->draw_rectangle(70, 394, 20, 580,  $firstpage, $rectparam);
@@ -292,7 +292,7 @@ $query = "SELECT *
 $mehtores = pupe_query($query);
 $mehtorow = mysql_fetch_assoc($mehtores);
 
-//Otetaan t‰ss‰ asiakkaan kieli talteen
+//Otetaan t√§ss√§ asiakkaan kieli talteen
 $kieli = $asiakastiedot["kieli"];
 
 //Liitostunnusta tarvitaan tee_korkolasku.inc failissa
@@ -307,7 +307,7 @@ $firstpage = paperi_alku();
 $summa = 0;
 while ($row = mysql_fetch_assoc($result)) {
   $summa = paperi_rivi($firstpage,$summa);
-  //p‰ivitet‰‰n korkosumma
+  //p√§ivitet√§√§n korkosumma
   if (basename($_SERVER["SCRIPT_FILENAME"]) != 'muutosite.php') {
     $query = "UPDATE lasku
               SET viikorkoeur = '$row[korkosumma]'
@@ -322,14 +322,14 @@ $loppusumma = sprintf('%.2f', $summa);
 paperi_loppu($firstpage,$loppusumma, $mehtorow);
 
 if (basename($_SERVER["SCRIPT_FILENAME"]) != 'muutosite.php') {
-  //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+  //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
   list($usec, $sec) = explode(' ', microtime());
   mt_srand((float) $sec + ((float) $usec * 100000));
   $pdffilenimi = "/tmp/korkoerittely-".md5(uniqid(mt_rand(), true)).".pdf";
 
   //kirjoitetaan pdf faili levylle..
   $fh = fopen($pdffilenimi, "w");
-  if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
+  if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep√§onnistui $pdffilenimi");
   fclose($fh);
 
   // itse print komento...

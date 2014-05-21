@@ -1,6 +1,6 @@
 <?php
-$otsikko = 'Alennusryhmät';
-$otsikko_nappi = 'alennusryhmä';
+$otsikko = 'AlennusryhmÃ¤t';
+$otsikko_nappi = 'alennusryhmÃ¤';
 
 $kentat = 'tunnus, ryhma, selite, alennus';
 $jarjestys = 'ryhma';

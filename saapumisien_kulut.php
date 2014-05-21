@@ -1,13 +1,13 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require("inc/parametrit.inc");
 
 echo "<font class='head'>".t("Saapumisien kulut")."</font><hr>";
 
-# Oletuksena viimeiset 30 p‰iv‰‰
+# Oletuksena viimeiset 30 p√§iv√§√§
 if (!isset($alkupp, $alkukk, $alkuvv, $loppupp, $loppukk, $loppuvv)) {
   $kuukausi_sitten = mktime(0, 0, 0, date("m")-1, date("d"), date("y"));
   $alkupp = date('d', $kuukausi_sitten);
@@ -65,13 +65,13 @@ if ($toimittajaid > 0) {
     $toimittaja = mysql_fetch_assoc($toimittaja_result);
 }
 
-# P‰iv‰m‰‰rien tarkistus
+# P√§iv√§m√§√§rien tarkistus
 if (checkdate($alkukk, $alkupp, $alkuvv) and checkdate($loppukk, $loppupp, $loppuvv)) {
   $alkupvm  = "$alkuvv-$alkukk-$alkupp";
   $loppupvm = "$loppuvv-$loppukk-$loppupp";
 }
 else {
-  echo "<font class='error'>".t("Virheellinen p‰iv‰m‰‰r‰").".</font>";
+  echo "<font class='error'>".t("Virheellinen p√§iv√§m√§√§r√§").".</font>";
   $tee = "";
 }
 
@@ -105,7 +105,7 @@ if ($tee == "raportoi" and $alkupvm != "" and $loppupvm != "") {
     if ($tama_rivi['nimi'] != $edellinen_rivi['nimi']) {
       if (isset($edellinen_rivi)) {
         echo "<tr class='spec'>
-          <td>".t("Yhteens‰")."</td>
+          <td>".t("Yhteens√§")."</td>
           <td style='text-align: right;'>{$yhteensa['vols']}</td>
           <td style='text-align: right;'>{$yhteensa['sks']}</td>
           <td style='text-align: right;'>".round($yhteensa['kulut'], 2)."</td>
@@ -114,7 +114,7 @@ if ($tee == "raportoi" and $alkupvm != "" and $loppupvm != "") {
           $yhteensa_kaikki['vols'] += $yhteensa['vols'];
           $yhteensa_kaikki['sks'] += $yhteensa['sks'];
           $yhteensa_kaikki['kulut'] += $yhteensa['kulut'];
-          $yhteensa = NULL; # Nollataan yhteens‰ arvot
+          $yhteensa = NULL; # Nollataan yhteens√§ arvot
       }
 
       # Toimittaja
@@ -172,10 +172,10 @@ if ($tee == "raportoi" and $alkupvm != "" and $loppupvm != "") {
     $edellinen_rivi = $tama_rivi;
   }
 
-  # VIELƒ viimeisen rivin yhteens‰ tulos
+  # VIEL√Ñ viimeisen rivin yhteens√§ tulos
   if (mysql_num_rows($saapumiset_result) > 0) {
     echo "<tr class='spec'>
-      <td>".t("Yhteens‰")."</td>
+      <td>".t("Yhteens√§")."</td>
       <td style='text-align: right;'>{$yhteensa['vols']}</td>
       <td style='text-align: right;'>{$yhteensa['sks']}</td>
       <td style='text-align: right;'>".round($yhteensa['kulut'], 2)."</td>
@@ -185,10 +185,10 @@ if ($tee == "raportoi" and $alkupvm != "" and $loppupvm != "") {
       $yhteensa_kaikki['sks'] += $yhteensa['sks'];
       $yhteensa_kaikki['kulut'] += $yhteensa['kulut'];
 
-    # Kaikkien rivien yhteens‰ tulos
+    # Kaikkien rivien yhteens√§ tulos
     echo "<tr><td class='back'><br/></td></tr>
       <tr class='spec'>
-      <th>".t("YHTEENSƒ")."</th>
+      <th>".t("YHTEENS√Ñ")."</th>
       <th style='text-align: right;'>{$yhteensa_kaikki['vols']}</th>
       <th style='text-align: right;'>{$yhteensa_kaikki['sks']}</th>
       <th style='text-align: right;'>".round($yhteensa_kaikki['kulut'], 2)."</th>
@@ -197,9 +197,9 @@ if ($tee == "raportoi" and $alkupvm != "" and $loppupvm != "") {
 
     echo "</table>";
   }
-  # mysql_num_rows == 0, ei lˆytynyt yht‰‰n saapumista
+  # mysql_num_rows == 0, ei l√∂ytynyt yht√§√§n saapumista
   else {
-    echo "<font class='error'>".t("Yht‰‰n saapumista ei lˆytynyt")."</font>";
+    echo "<font class='error'>".t("Yht√§√§n saapumista ei l√∂ytynyt")."</font>";
   }
 }
 

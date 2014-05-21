@@ -7,10 +7,10 @@ $tpp = substr($pvm,4,2);
 
 if ($tpv < 1000) $tpv += 2000;
 
-// Onko jotain kirjattavaa (t‰m‰ toimii jopa vastaviennin tapauksessa)?
+// Onko jotain kirjattavaa (t√§m√§ toimii jopa vastaviennin tapauksessa)?
 if (round($maara, 2) != 0) {
 
-  // Kirjoitetaan lasku, jos sellaista ei ole viel‰ tehty
+  // Kirjoitetaan lasku, jos sellaista ei ole viel√§ tehty
   if ($laskuid == 0) {
 
     $query = "INSERT into lasku set
@@ -25,7 +25,7 @@ if (round($maara, 2) != 0) {
     echo "<font class='message'>*** ".t("Tositteen otsikko luotu")." ***</font><br>\n";
   }
 
-  // Tehd‰‰n vastakirjaus
+  // Tehd√§√§n vastakirjaus
   if ($tkesken == 0 and $laskuid != 0) {
 
     list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yritirow["oletus_rahatili"]);
@@ -56,7 +56,7 @@ if (round($maara, 2) != 0) {
     echo "<font class='message'>*** ".t("Vastavienti luotu")." ($yritirow[oletus_rahatili]) ***</font><br>\n";
   }
 
-  // Tehd‰‰n normaali kirjaus
+  // Tehd√§√§n normaali kirjaus
   if ($laskuid != 0) {
     unset($tiliointisaantorow);
     require "tiliotesaannot.inc";
@@ -154,15 +154,15 @@ if (round($maara, 2) != 0) {
       $dummyresult = pupe_query($query);
     }
 
-    echo "<font class='message'>*** ".t("tiliˆinti luotu")." ($tiliotesaantotilino) ***</font><br>\n";
+    echo "<font class='message'>*** ".t("tili√∂inti luotu")." ($tiliotesaantotilino) ***</font><br>\n";
 
     if ($yhtiorow['tiliotteen_selvittelyt'] == "" and $tiliotedatarow['alku'] == $tiliotedatarow['loppu']) {
-      // Jos yhtiˆn parametri sallii ja k‰sittelyss‰ on yhden p‰iv‰n tiliote niin voidaan tiliˆid‰ kaikki selvittelyt samalle tositteelle.
+      // Jos yhti√∂n parametri sallii ja k√§sittelyss√§ on yhden p√§iv√§n tiliote niin voidaan tili√∂id√§ kaikki selvittelyt samalle tositteelle.
       $vastavienti += $maara;
       $vastavienti_valuutassa += $kohdm;
     }
     else {
-      // Muuten tiliˆid‰‰n kaikki selivttelyt omille tositteilleen ja tehd‰‰n vastavientiki per tosite, tietenki!
+      // Muuten tili√∂id√§√§n kaikki selivttelyt omille tositteilleen ja tehd√§√§n vastavientiki per tosite, tietenki!
       list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yritirow["oletus_rahatili"]);
 
       // Rahatili

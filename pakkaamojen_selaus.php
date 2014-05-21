@@ -34,7 +34,7 @@ if ($tee == "nollaa") {
     echo t("Lokerot nollattiin tilauksista")." : ".$tunnukset;
   }
   else {
-    echo "<font class='error'>".t("VIRHE: Et valinnut yht‰‰n tilausta")."!</font>";
+    echo "<font class='error'>".t("VIRHE: Et valinnut yht√§√§n tilausta")."!</font>";
   }
 
 }
@@ -50,7 +50,7 @@ $query = "SELECT distinct nimi
           ORDER BY nimi";
 $result = mysql_query($query) or pupe_error($query);
 
-echo "<option value='KAIKKI'>".t("N‰yt‰ kaikki")."</option>";
+echo "<option value='KAIKKI'>".t("N√§yt√§ kaikki")."</option>";
 
 while($row = mysql_fetch_array($result)){
   $sel = '';
@@ -134,14 +134,14 @@ if (mysql_num_rows($pakkaamore) != 0) {
 
       echo "<tr>";
       if ($yhtiorow['konsernivarasto'] != '') {
-        echo "<th valign='top'>".t("Yhtiˆ")."</th>";
+        echo "<th valign='top'>".t("Yhti√∂")."</th>";
       }
       echo "<th valign='top'>".t("Lokero")."</th>";
       echo "<th valign='top'>".t("Asiakas")."</th>";
       echo "<th valign='top'>".t("Nimi")."</th>";
       echo "<th valign='top'>".t("Tilaus")."</th>";
       echo "<th valign='top'>".t("Tulostettu")."</th>";
-      echo "<th valign='top'>".t("Ker‰tty")."</th>";
+      echo "<th valign='top'>".t("Ker√§tty")."</th>";
       echo "<th valign='top'><input type='submit' value='".t("Nollaa")."'></th>";
 
       echo "<tr class='aktiivi'>";

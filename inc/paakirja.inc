@@ -1,6 +1,6 @@
 <?php
 
-// jos yritet‰‰n‰ valita molempia niin ei anneta mit‰‰n!
+// jos yritet√§√§n√§ valita molempia niin ei anneta mit√§√§n!
 if ($asia_ytunnus != "" and $toim_ytunnus != "") {
   $ytunnus = $toim_ytunnus = $asia_ytunnus = $asiakasid = $toimittajaid = $tee = "";
 }
@@ -27,7 +27,7 @@ if ($toim_ytunnus != '' or $toimittajaid != '') {
   $toim_ytunnus = $ytunnus;
 }
 
-echo "<font class='head'>".t("P‰‰- ja p‰iv‰kirja")."</font><hr>
+echo "<font class='head'>".t("P√§√§- ja p√§iv√§kirja")."</font><hr>
     <form name = 'valinta' action = 'raportit.php' method='post'>
     <input type = 'hidden' name = 'toim' value = 'paakirja'>
     <input type = 'hidden' name = 'lopetus' value = '$lopetus'>
@@ -39,8 +39,8 @@ $sel = array();
 if (isset($tee)) $sel[$tee] = "SELECTED";
 
 echo "<select name='tee'>
-    <option value = 'K' $sel[K]>".t("P‰‰kirja")."</option>
-    <option value = 'P' $sel[P]>".t("P‰iv‰kirja")."</option>
+    <option value = 'K' $sel[K]>".t("P√§√§kirja")."</option>
+    <option value = 'P' $sel[P]>".t("P√§iv√§kirja")."</option>
     </select></td></tr>";
 
 echo "<tr><th>".t("Ajalta")."</th><td colspan='3'><select name='alvv'>";
@@ -238,7 +238,7 @@ if ($kasin != "") {
   $sel = "CHECKED";
 }
 
-echo "<tr><th>".t("Vain k‰sin viedyt")."</th><td colspan='3'><input type='checkbox' name='kasin' $sel>";
+echo "<tr><th>".t("Vain k√§sin viedyt")."</th><td colspan='3'><input type='checkbox' name='kasin' $sel>";
 
 $query = "SELECT kuka.kuka, kuka.nimi
           FROM kuka
@@ -256,8 +256,8 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
   echo "<option value = '{$vrow['kuka']}' {$sel[$vrow['kuka']]}>{$vrow['nimi']}</option>";
 }
 
-echo "<option value = 'automaatti' {$sel['automaatti']}>".t("Viiteaineistojen k‰sittely")."</option>";
-echo "<option value = 'tiliote' {$sel['tiliote']}>".t("Tiliotteiden k‰sittely")."</option>";
+echo "<option value = 'automaatti' {$sel['automaatti']}>".t("Viiteaineistojen k√§sittely")."</option>";
+echo "<option value = 'tiliote' {$sel['tiliote']}>".t("Tiliotteiden k√§sittely")."</option>";
 echo "<option value = 'verkkolas' {$sel['verkkolas']}>".t("Verkkolaskujen vastaanotto")."</option>";
 echo "<option value = 'crond' {$sel['crond']}>".t("Cron-ajo")."</option>";
 echo "</select>";
@@ -275,10 +275,10 @@ $konsel = array();
 $konsel[$konsernirajaus] = "SELECTED";
 
 echo "<td colspan='3'><select name='konsernirajaus'>
-    <option value=''>".t("N‰ytet‰‰n kaikki tiliˆinnit")."</option>
-    <option value='AT' $konsel[AT]>".t("N‰ytet‰‰n konserniasiakkaiden ja konsernitoimittajien tiliˆinnit")."</option>
-    <option value='T'  $konsel[T]>".t("N‰ytet‰‰n konsernitoimitajien tiliˆinnit")."</option>
-    <option value='A'  $konsel[A]>".t("N‰ytet‰‰n konserniasiakkaiden tiliˆinnit")."</option>
+    <option value=''>".t("N√§ytet√§√§n kaikki tili√∂innit")."</option>
+    <option value='AT' $konsel[AT]>".t("N√§ytet√§√§n konserniasiakkaiden ja konsernitoimittajien tili√∂innit")."</option>
+    <option value='T'  $konsel[T]>".t("N√§ytet√§√§n konsernitoimitajien tili√∂innit")."</option>
+    <option value='A'  $konsel[A]>".t("N√§ytet√§√§n konserniasiakkaiden tili√∂innit")."</option>
     </select>
     </td></tr>";
 
@@ -309,7 +309,7 @@ if ($palvelut != "") {
   $sel = "CHECKED";
 }
 
-// T‰m‰ viel‰ tekem‰tt‰
+// T√§m√§ viel√§ tekem√§tt√§
 //echo "<tr><th valign='top'>".t("Palveluiden erittely")."</th><td colspan='3'><input type='checkbox' $palvelut>";
 
 echo "</table><br>";
@@ -319,7 +319,7 @@ $noautosubmit = TRUE;
 
 require ("tilauskasittely/monivalintalaatikot.inc");
 
-echo "<br><input type = 'submit' value = '".t("N‰yt‰")."'></form><br><br>";
+echo "<br><input type = 'submit' value = '".t("N√§yt√§")."'></form><br><br>";
 
 if ($tee == '') {
   $formi = 'valinta';
@@ -328,17 +328,17 @@ if ($tee == '') {
 
 if ($tee != "") {
 
-  // Tutkitaan ensiksi, mille tilikaudelle pyydett‰v‰ lista lˆytyy, jos lista on sopiva
+  // Tutkitaan ensiksi, mille tilikaudelle pyydett√§v√§ lista l√∂ytyy, jos lista on sopiva
   $blvk = 0;
   $blvp = 0;
 
   if ($llvv > 0) {
     if ($alvv == 0 or $alvk == 0 or $alvp == 0 or $llvv == 0 or $llvk == 0 or $llvp == 0) {
-      echo "<font class='error'>".t("Haettaessa aikav‰lilt‰ pit‰‰ valita tarkka alku ja loppup‰iv‰.")."</font><br><br>";
+      echo "<font class='error'>".t("Haettaessa aikav√§lilt√§ pit√§√§ valita tarkka alku ja loppup√§iv√§.")."</font><br><br>";
       $tee = "";
     }
 
-    // Jos haetaan p‰iv‰m‰‰rill‰ niin nollataan tilikausi
+    // Jos haetaan p√§iv√§m√§√§rill√§ niin nollataan tilikausi
     $tkausi = 0;
   }
   else {
@@ -357,7 +357,7 @@ if ($tee != "") {
       $result = mysql_query($query) or pupe_error($query);
     }
     else {
-      // Jos haetaan tilikaudella niin nollataan muut p‰iv‰m‰‰r‰t
+      // Jos haetaan tilikaudella niin nollataan muut p√§iv√§m√§√§r√§t
       $alvv = 0;
       $alvk = 0;
       $alvp = 0;
@@ -373,7 +373,7 @@ if ($tee != "") {
     }
 
     if (mysql_num_rows($result) != 1) {
-      echo "<font class='error'>".t("Sopivaa yrityksen tilikautta ei lˆytynyt")."</font><br><br>";
+      echo "<font class='error'>".t("Sopivaa yrityksen tilikautta ei l√∂ytynyt")."</font><br><br>";
       $tee = "";
     }
 
@@ -385,7 +385,7 @@ if ($tee != "") {
   $lisa1  = ''; // aineiston hakemiseen
   $lisa2 = ''; // alkusaldon laskemiseen
 
-  // Tehd‰‰nkˆ linkit p‰iv‰kirjaan
+  // Tehd√§√§nk√∂ linkit p√§iv√§kirjaan
   $query = "SELECT yhtio
             FROM oikeu
             WHERE yhtio = '$kukarow[yhtio]'
@@ -401,12 +401,12 @@ if ($tee != "") {
     $mutositelink = FALSE;
   }
 
-  $nimi = t("P‰‰kirja");
+  $nimi = t("P√§√§kirja");
   $jarj = "tiliointi.tilino, tiliointi.tapvm, tiliointi.laadittu, tiliointi.summa";
 
-  // Haluttiinkin p‰iv‰kirja
+  // Haluttiinkin p√§iv√§kirja
   if ($tee == 'P') {
-    $nimi = t("P‰iv‰kirja");
+    $nimi = t("P√§iv√§kirja");
     $jarj = "tiliointi.tapvm, tiliointi.laadittu, tiliointi.tilino, tiliointi.summa";
   }
 
@@ -437,7 +437,7 @@ if ($tee != "") {
     $lisa2 = " and tiliointi.tapvm < '$alkupvm'";
   }
   else {
-    echo "<font class='head'>$nimi ".t("p‰iv‰lt‰")." ".tv1dateconv($alvv."-".$alvk."-".$alvp)."</font><hr>";
+    echo "<font class='head'>$nimi ".t("p√§iv√§lt√§")." ".tv1dateconv($alvv."-".$alvk."-".$alvp)."</font><hr>";
     $alkupvm  = date("Y-m-d", mktime(0, 0, 0, $alvk, $alvp, $alvv));
     $lisa1  = " and tiliointi.tapvm = '$alkupvm'";
     $lisa2 = " and tiliointi.tapvm < '$alkupvm'";
@@ -731,15 +731,15 @@ if ($tee != "") {
           $virhe = "";
 
           if ($tapvm_clean != $trow["laskutapvm"] and $tapvm_clean != $trow["laskumapvm"]) {
-            $virhe  .= t("Ostovelkatiliˆinnin p‰iv‰m‰‰r‰ virheellinen")."!";
+            $virhe  .= t("Ostovelkatili√∂innin p√§iv√§m√§√§r√§ virheellinen")."!";
           }
 
           if ($tapvm_clean == $trow["laskumapvm"] and (($trow["valkoodi"] == "" and $trow["summa"] != $trow["laskusumma"]) or ($trow["valkoodi"] != "" and $trow["summa_valuutassa"] != $trow["laskusumma"]))) {
-            $virhe  .= t("Ostovelkatiliˆinnin summa virheellinen")."!";
+            $virhe  .= t("Ostovelkatili√∂innin summa virheellinen")."!";
           }
 
           if ($tapvm_clean == $trow["laskutapvm"] and (($trow["valkoodi"] == "" and $trow["summa"] != ($trow["laskusumma"]*-1)) or ($trow["valkoodi"] != "" and $trow["summa_valuutassa"] != ($trow["laskusumma"]*-1)))) {
-            $virhe  .= t("Ostovelkatiliˆinnin summa virheellinen")."!";
+            $virhe  .= t("Ostovelkatili√∂innin summa virheellinen")."!";
           }
 
           if ($virhe != "") echo "<td class='spec'><font class='error'>$virhe</font></td>";
@@ -785,7 +785,7 @@ if ($tee != "") {
 
       echo "</tr>";
 
-      echo "<tr class='aktiivi'><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Negatiiviset yhteens‰")."</td>";
+      echo "<tr class='aktiivi'><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Negatiiviset yhteens√§")."</td>";
       echo "<td align = 'right' nowrap>".sprintf("%.2f", $summamiinus)."</td><td align='right'>*</td>";
 
       if (strlen(trim($tili)) > 0) {
@@ -794,7 +794,7 @@ if ($tee != "") {
 
       echo "</tr>";
 
-      echo "<tr class='aktiivi'><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Positiiviset yhteens‰")."</td>";
+      echo "<tr class='aktiivi'><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Positiiviset yhteens√§")."</td>";
       echo "<td align = 'right' nowrap>".sprintf("%.2f", $summaplus)."</td><td align='right'>*</td>";
 
       if (strlen(trim($tili)) > 0) {
@@ -805,7 +805,7 @@ if ($tee != "") {
 
       if (count($summa_valuutassa) > 0) {
         foreach ($summa_valuutassa as $valuutta => $summ) {
-          echo "<tr class='aktiivi'><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Yhteens‰")." $valuutta</td>";
+          echo "<tr class='aktiivi'><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Yhteens√§")." $valuutta</td>";
           echo "<td align = 'right' nowrap>".sprintf("%.2f", $summ)."</td><td align='right'>*</td>";
 
           if (strlen(trim($tili)) > 0) {
@@ -816,7 +816,7 @@ if ($tee != "") {
       }
 
       $summa = $summaplus + $summamiinus;
-      echo "<tr class='aktiivi'><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Yhteens‰")."</td>";
+      echo "<tr class='aktiivi'><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Yhteens√§")."</td>";
       echo "<td align = 'right' nowrap>".sprintf("%.2f", $summa)."</td><td align='right'>*</td>";
 
       if (strlen(trim($tili)) > 0) {

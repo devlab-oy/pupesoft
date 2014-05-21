@@ -230,5 +230,5 @@ if ($kaikkimeniok == "OK") {
 }
 else {
   // Laitetaan maili, että virheitä oli, tilaus jäi kesken jne.
-  mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun kauttalaskutus epäonnistui yhtiössä $yhtiorow[nimi]", "ISO-8859-1", "Q"), "Myyntitilaukselle: $tilausnumero ei löytynyt sopivaa asiakasta!", "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+  mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun kauttalaskutus epäonnistui yhtiössä $yhtiorow[nimi]", "UTF-8", "Q"), "Myyntitilaukselle: $tilausnumero ei löytynyt sopivaa asiakasta!", "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 }

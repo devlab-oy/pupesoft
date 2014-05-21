@@ -33,21 +33,21 @@ if (isset($submit) and trim($submit) != '') {
   if ($submit == 'submit') {
 
     if (!isset($maara)) {
-      $error['rivi'] = t("Syˆt‰ m‰‰r‰", $browkieli).'.';
+      $error['rivi'] = t("Sy√∂t√§ m√§√§r√§", $browkieli).'.';
     }
     elseif (!is_numeric($maara)) {
-      $error['rivi'] = t("M‰‰r‰n pit‰‰ olla numero", $browkieli).'.';
+      $error['rivi'] = t("M√§√§r√§n pit√§√§ olla numero", $browkieli).'.';
     }
     elseif ($maara < 1 or $maara >= $row['varattu']) {
       if ($row['varattu'] == 1) {
-        $error['rivi'] = t("Virheellinen m‰‰r‰", $browkieli).'.';
+        $error['rivi'] = t("Virheellinen m√§√§r√§", $browkieli).'.';
       }
       else {
-        $error['rivi'] = t("Sallitut m‰‰r‰t ovat", $browkieli).' 1 - '.($row['varattu'] - 1).'.';
+        $error['rivi'] = t("Sallitut m√§√§r√§t ovat", $browkieli).' 1 - '.($row['varattu'] - 1).'.';
       }
     }
     else {
-      # P‰ivitet‰‰n tilausrivin m‰‰r‰ ja splitataan rivi
+      # P√§ivitet√§√§n tilausrivin m√§√§r√§ ja splitataan rivi
       $ok = paivita_tilausrivin_kpl($tilausrivi, ($row['varattu'] - $maara));
       $uuden_rivin_id = splittaa_tilausrivi($tilausrivi, $maara, TRUE, TRUE);
 
@@ -60,7 +60,7 @@ if (isset($submit) and trim($submit) != '') {
 
 echo "<div class='header'>";
 echo "<button onclick='window.location.href=\"suuntalavan_tuotteet.php?$url\"' class='button left'><img src='back2.png'></button>";
-echo "<h1>",t("MUOKKAA SUUNTALAVAN RIVIƒ", $browkieli),"</h1></div>";
+echo "<h1>",t("MUOKKAA SUUNTALAVAN RIVI√Ñ", $browkieli),"</h1></div>";
 
 echo "<div class='main'>
 
@@ -79,7 +79,7 @@ echo "<div class='main'>
     <td colspan='2'>{$row['toim_tuoteno']}</td>
   </tr>
   <tr>
-    <th>",t("M‰‰r‰", $browkieli),"</th>
+    <th>",t("M√§√§r√§", $browkieli),"</th>
     <td><input type='text' name='maara' value='' size='7' />
     <td>{$row['varattu']} {$row['yksikko']}</td>
   </tr>

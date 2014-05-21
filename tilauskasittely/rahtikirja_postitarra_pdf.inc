@@ -4,11 +4,11 @@
 //
 // arrayt:
 // toitarow, otsikot, pakkaus, kilot, kollit, kuutiot, lavametri, vakit
-// $rakir_row:sta lˆytyy asiakkaan tiedot ja $rivi:st‰ ytunnus
+// $rakir_row:sta l√∂ytyy asiakkaan tiedot ja $rivi:st√§ ytunnus
 //
 // muuttujat:
 // otunnukset, rahdinmaksaja, rahtihinta, pvm, toimitustapa, kollityht, kilotyht, kuutiotyht, kirjoitin
-// jv tapauksissa on myˆs yhteensa, summa, jvhinta, lasno ja viite muuttujat
+// jv tapauksissa on my√∂s yhteensa, summa, jvhinta, lasno ja viite muuttujat
 //
 // tulostetaan rahtikirja
 
@@ -72,10 +72,10 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
     $oma = sprintf("%09s", substr(trim($rivi["rahtikirjanro"]), -9));
   }
   else {
-    $oma = sprintf("%09s", $rtunnus); // 9, pitk‰ numero tulee rahtikirja taulun tunnuksesta, pit‰‰ ollaa uniikki
+    $oma = sprintf("%09s", $rtunnus); // 9, pitk√§ numero tulee rahtikirja taulun tunnuksesta, pit√§√§ ollaa uniikki
   }
 
-  // tehd‰‰n viivakoodit
+  // tehd√§√§n viivakoodit
   $viiva1   = "JJFI$toitarow[sopimusnro]$kuka$oma";
 
   $viivaedi = "JJFI$toitarow[sopimusnro]$kuka$oma";
@@ -87,11 +87,11 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   // erotellaan spacella jokainen rahtikirjanumero
   $rahtikirjanro .= "$viiva2 ";
 
-  // tehd‰‰n pdf:n uusi sivu
+  // tehd√§√§n pdf:n uusi sivu
   $firstpage = $pdf->new_page("a5");
 
   if (class_exists("Image_Barcode")) {
-    //tehd‰‰n JJFI viivakoodi
+    //tehd√§√§n JJFI viivakoodi
     $nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
 
     imagejpeg(Image_Barcode::draw($viiva1, 'code128', 'jpg', false, 3, 170), $nimi);
@@ -122,12 +122,12 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
     system("rm -f $nimi");
   }
 
-  // sitten aletaan piirt‰m‰‰n itse PDF sis‰ltˆ‰
+  // sitten aletaan piirt√§m√§√§n itse PDF sis√§lt√∂√§
   $pdf->draw_text(50,  570,  $keltainen,                  $firstpage, $isobold);
   $pdf->draw_text(50,  560,  $kuljetus,                  $firstpage, $isobold);
   $pdf->draw_text(220, 570,  $keku,                    $firstpage, $huge);
 
-  $pdf->draw_text(18,  540,  "L‰hett‰j‰ Avs‰ndare From",           $firstpage, $pieni);
+  $pdf->draw_text(18,  540,  "L√§hett√§j√§ Avs√§ndare From",           $firstpage, $pieni);
   $pdf->draw_text(18,  530, $postirow["yhtio_nimi"],             $firstpage, $norm);
   $pdf->draw_text(18,  520, $postirow["yhtio_osoite"],          $firstpage, $norm);
   $pdf->draw_text(18,  510, $postirow["yhtio_postino"]." ".$postirow["yhtio_postitp"],$firstpage, $norm);
@@ -142,12 +142,12 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   // tuoteviivakoodin alle
   $pdf->draw_text(310, 532,  $tuoteviiva1,                 $firstpage, $viivacourier);
 
-  // jos k‰ytet‰‰n edi‰
+  // jos k√§ytet√§√§n edi√§
   if ($postiedihost != "" and $postiediuser != "" and $postiedipass != "" and $postiedipath != "") {
     $pdf->draw_text(345, 510,  "EDI",                   $firstpage, $huge);
   }
 
-  $pdf->draw_text(250, 490,  "P‰iv‰m‰‰r‰ Datum", $firstpage, $pieni);
+  $pdf->draw_text(250, 490,  "P√§iv√§m√§√§r√§ Datum", $firstpage, $pieni);
   $pdf->draw_text(250, 478,  date("d.m.Y"),                 $firstpage, $norm);
 
   $pdf->draw_rectangle(495,245,450,245,                   $firstpage, $rectparam);
@@ -169,9 +169,9 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   $pdf->draw_rectangle(428,110,400,110,                   $firstpage, $rectparam);
   $pdf->draw_rectangle(400,220,380,220,                   $firstpage, $rectparam);
   $pdf->draw_rectangle(365,300,380,300,                   $firstpage, $rectparam);
-  $pdf->draw_text(18,  422,  "Lis‰palvelut Till‰ggstj‰nster",        $firstpage, $pieni);
+  $pdf->draw_text(18,  422,  "Lis√§palvelut Till√§ggstj√§nster",        $firstpage, $pieni);
   $pdf->draw_text(282, 422,  "Kpl St.",                  $firstpage, $pieni);
-  $pdf->draw_text(112, 422,  "Maksaja muu kuin l‰hett‰j‰ Betalaren annan ‰n avs‰ndaren",$firstpage, $pieni);
+  $pdf->draw_text(112, 422,  "Maksaja muu kuin l√§hett√§j√§ Betalaren annan √§n avs√§ndaren",$firstpage, $pieni);
   $pdf->draw_text(112, 408,  "Maksajan sopimustunnus",          $firstpage, $pieni);
   $pdf->draw_text(112, 402,  "Betalarens avtalskod",            $firstpage, $pieni);
   $pdf->draw_text(18,  394,  "PE-summa PF-belopp",            $firstpage, $pieni);
@@ -179,7 +179,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   $pdf->draw_text(18,  374,  "Pankkiviite Bank referens",          $firstpage, $pieni);
   $pdf->draw_text(302, 374,  "BIC",                    $firstpage, $pieni);
 
-  // v‰h‰ arvoja
+  // v√§h√§ arvoja
   $pdf->draw_text(190, 405,  $rahdinmaksajan_nr,              $firstpage, $isobold);
   $pdf->draw_text(18,  384,  $postiennakkomaara,              $firstpage, $iso);
   $pdf->draw_text(222, 384,  $postiennakkotilino,              $firstpage, $iso);
@@ -187,7 +187,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   $pdf->draw_text(303, 366,  $postiennakkobic,              $firstpage, $iso);
   $pdf->draw_text(285, 405,  $kollityht,                  $firstpage, $iso);
 
-  // lis‰palvelut laatikot
+  // lis√§palvelut laatikot
   $pdf->draw_rectangle(402,18,420,38,                   $firstpage, $rectparam);
   $pdf->draw_rectangle(402,40,420,60,                   $firstpage, $rectparam);
   $pdf->draw_rectangle(402,62,420,82,                   $firstpage, $rectparam);
@@ -197,7 +197,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   $pdf->draw_text(67,  406,  $x[2],                    $firstpage, $iso);
   $pdf->draw_text(89,  406,  $x[3],                    $firstpage, $iso);
 
-  // viiva viivakooditekstin yl‰ ja alapuolelle
+  // viiva viivakooditekstin yl√§ ja alapuolelle
   $pdf->draw_rectangle(260,18,260,400,                   $firstpage, $rectparam);
   $pdf->draw_rectangle(365,18,365,400,                   $firstpage, $rectparam);
   $pdf->draw_text(140, 262,  $v2_alku,                  $firstpage, $viivacourier);
@@ -210,15 +210,15 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   $pdf->draw_text(18,  250,  "SAAPUMISILMOITUS ANKOMSTAVI",         $firstpage, $pienibold);
 
   if (count($vakit) > 0 or $toitarow['kuljyksikko'] != '') {
-    $pdf->draw_text(18,  242,  "Lis‰tietoja 0200 77000, www.itella.com * Mera information 0200 75000, www.itella.com.", $firstpage, $pieni);
-    $pdf->draw_text(18,  234,  "S‰ilytysaika on yksi (1) t‰ysi kalenteriviikko * Kvarligger en (1) hel kalendervecka.", $firstpage, $pieni);
+    $pdf->draw_text(18,  242,  "Lis√§tietoja 0200 77000, www.itella.com * Mera information 0200 75000, www.itella.com.", $firstpage, $pieni);
+    $pdf->draw_text(18,  234,  "S√§ilytysaika on yksi (1) t√§ysi kalenteriviikko * Kvarligger en (1) hel kalendervecka.", $firstpage, $pieni);
   }
   else {
-    $pdf->draw_text(18,  242,  "L‰hetys on noudettavissa Postistanne. Lis‰tietoja: 0200 77000, www.itella.com S‰ilytysaika on 2 t‰ytt‰ kalenteriviikkoa.", $firstpage, $pieni);
-    $pdf->draw_text(18,  234,  "Ni kan h‰mta fˆrs‰ndelsen pÂ Ert postkontor. Mera information: 0200 75000, www.itella.com Kvarligger 2 hela kalenderveckor.", $firstpage, $pieni);
+    $pdf->draw_text(18,  242,  "L√§hetys on noudettavissa Postistanne. Lis√§tietoja: 0200 77000, www.itella.com S√§ilytysaika on 2 t√§ytt√§ kalenteriviikkoa.", $firstpage, $pieni);
+    $pdf->draw_text(18,  234,  "Ni kan h√§mta f√∂rs√§ndelsen p√• Ert postkontor. Mera information: 0200 75000, www.itella.com Kvarligger 2 hela kalenderveckor.", $firstpage, $pieni);
   }
 
-  $pdf->draw_text(18,  215,  "L‰hett‰j‰ Avs‰ndare From",           $firstpage, $pieni);
+  $pdf->draw_text(18,  215,  "L√§hett√§j√§ Avs√§ndare From",           $firstpage, $pieni);
   $pdf->draw_text(18,  206, $postirow["yhtio_nimi"],               $firstpage, $norm);
   $pdf->draw_text(18,  197, $postirow["yhtio_osoite"],               $firstpage, $norm);
   $pdf->draw_text(18,  188, $postirow["yhtio_postino"]." ".$postirow["yhtio_postitp"],$firstpage, $norm);
@@ -233,7 +233,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   // viivakoodin alapuolella vasen laita
   $oikpos = $pdf->strlen("$keltainen $kuljetus $keku", $pienibold);
   $pdf->draw_text(400-$oikpos, 250,  "$keltainen $kuljetus $keku",    $firstpage, $pienibold);
-  $pdf->draw_text(250, 225,  "Lis‰tiedot Till‰ggsuppgifter",         $firstpage, $pieni);
+  $pdf->draw_text(250, 225,  "Lis√§tiedot Till√§ggsuppgifter",         $firstpage, $pieni);
 
   $apkal = 216;
 
@@ -258,7 +258,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
     $cnt++;
   }
 
-  $pdf->draw_text(250, 194,  "Sis‰ltˆ InnehÂll",               $firstpage, $pieni);
+  $pdf->draw_text(250, 194,  "Sis√§lt√∂ Inneh√•ll",               $firstpage, $pieni);
   $pdf->draw_text(250, 186,  "Kpl St.",                   $firstpage, $pieni);
   $pdf->draw_text(340, 178,  "kg",                     $firstpage, $pieni);
   $pdf->draw_text(352, 186,  "Pvm Datum",                 $firstpage, $pieni);
@@ -275,8 +275,8 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   $pdf->draw_rectangle(192,350,174,350,                   $firstpage, $rectparam);
   $pdf->draw_rectangle(156,335,174,335,                   $firstpage, $rectparam);
 
-  // ja v‰h‰ arvoja
-  $pdf->draw_text(255, 205,  "",                      $firstpage, $iso);  // t‰‰ on pikku lis‰tietoja kentt‰ JJFI koodin alla vasemmalla
+  // ja v√§h√§ arvoja
+  $pdf->draw_text(255, 205,  "",                      $firstpage, $iso);  // t√§√§ on pikku lis√§tietoja kentt√§ JJFI koodin alla vasemmalla
   $pdf->draw_text(255, 178,  $kollityht,                  $firstpage, $iso);
   $pdf->draw_text(297, 178,  $kilotyht,                  $firstpage, $iso);
   $pdf->draw_text(357, 178,  date("d.m.Y"),                $firstpage, $iso);
@@ -288,11 +288,11 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   // viiva alle
   $pdf->draw_rectangle(118,18,118,400,                   $firstpage, $rectparam);
 
-  // Lis‰tiedot
-  $pdf->draw_text(18, 110,  "Kuittaus ja nimen selvennys Kvittering och namnfˆrtydligande",  $firstpage, $pieni);
+  // Lis√§tiedot
+  $pdf->draw_text(18, 110,  "Kuittaus ja nimen selvennys Kvittering och namnf√∂rtydligande",  $firstpage, $pieni);
   $pdf->draw_text(40, 80,   ".               .                        klo kl.",        $firstpage, $pieni);
-  $pdf->draw_text(18, 70,   "Lis‰tiedot Till‰ggsuppgifter",                  $firstpage, $pieni);
-  $pdf->draw_text(18, 10,   t("Itella Green - ilmastoyst‰v‰llinen kuljetus"),          $firstpage, $iso);
+  $pdf->draw_text(18, 70,   "Lis√§tiedot Till√§ggsuppgifter",                  $firstpage, $pieni);
+  $pdf->draw_text(18, 10,   t("Itella Green - ilmastoyst√§v√§llinen kuljetus"),          $firstpage, $iso);
 
   $komm = "";
 
@@ -320,22 +320,22 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
   $pdf->draw_paragraph(70, 18, 15, 380, $komm, $firstpage, $isobold);
 
-  // koko kortin ymp‰rille border
+  // koko kortin ymp√§rille border
   $pdf->draw_rectangle(0, 0,  598, 418, $firstpage, $rectparam);
 
-  //l‰hetet‰‰n postin edisanoma
+  //l√§hetet√§√§n postin edisanoma
   if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
     require("postiedi.inc");
   }
 }
 
 if ($tulostakolli > 0) {
-  //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+  //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
   $pdffilenimi = "/tmp/rahtikirja-".md5(uniqid(rand(),true)).".pdf";
 
   //kirjoitetaan pdf faili levylle..
   $fh = fopen($pdffilenimi, "w");
-  if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
+  if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep√§onnistui $pdffilenimi");
   fclose($fh);
 
   //tulostetaan PDF
@@ -346,7 +346,7 @@ if ($tulostakolli > 0) {
     require("inc/sahkoposti.inc");
   }
   elseif ($kirjoitin == 'PDF_RUUDULLE') {
-    //Tyˆnnet‰‰n tuo pdf vaan putkeen!
+    //Ty√∂nnet√§√§n tuo pdf vaan putkeen!
     echo file_get_contents($pdffilenimi);
   }
   else {

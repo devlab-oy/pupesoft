@@ -14,8 +14,8 @@ $h-=$pdf->ln(1.4);
 if(in_array($row["sarjanumeroseuranta"], array("E", "F", "G"))) {
 
   $pdf->write($h, 1, 0, 15,   "Tilaus", "norm", "L", "B");
-  $pdf->write($h, 1, 20, 45,   "Erä", "norm", "L", "B");
-  $pdf->write($h, 1, 50, 68,   "Eräkoko", "norm", "L", "B");
+  $pdf->write($h, 1, 20, 45,   "ErÃ¤", "norm", "L", "B");
+  $pdf->write($h, 1, 50, 68,   "ErÃ¤koko", "norm", "L", "B");
   if($lisarow["pituus"]>0) {
     $pdf->write($h, 1, 73, 93,   "Pituus", "norm", "L", "B");
   }
@@ -29,7 +29,7 @@ if(in_array($row["sarjanumeroseuranta"], array("E", "F", "G"))) {
   }
   $h-=$pdf->ln(1.5);
 
-  $pdf->write($h, 1, 0, 15,   "Lisätiedot", "norm", "L", "B");
+  $pdf->write($h, 1, 0, 15,   "LisÃ¤tiedot", "norm", "L", "B");
   $h-=$pdf->ln(1.25);
   $pdf->write($h, 1, 0, 0,  "$row[lisatieto]", "norm", "L", "");
 }
@@ -48,7 +48,7 @@ elseif(in_array($row["sarjanumeroseuranta"], array("S", "T", "U", "V"))) {
   }
   $h-=$pdf->ln(1.5);
 
-  $pdf->write($h, 1, 0, 15,   "Lisätiedot", "norm", "L", "B");
+  $pdf->write($h, 1, 0, 15,   "LisÃ¤tiedot", "norm", "L", "B");
   $h-=$pdf->ln(1.25);
   $pdf->write($h, 1, 0, 0,  "$row[lisatieto]", "norm", "L", "");
 }

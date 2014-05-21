@@ -8,7 +8,7 @@ if(!function_exists("toimitustapatarkista")) {
 
     if ((mysql_field_name($result, $i)=="rahtikirja") and ($t[$i]!='')) {
       if (!file_exists("tilauskasittely/".$t[$i])) {
-        $virhe[$i] = t("Tiedosto tilauskasittely")."/$t[$i] ".t("ei lˆydy")."!";
+        $virhe[$i] = t("Tiedosto tilauskasittely")."/$t[$i] ".t("ei l√∂ydy")."!";
       }
     }
 
@@ -20,7 +20,7 @@ if(!function_exists("toimitustapatarkista")) {
       }
     }
 
-    // jos toimitustavan nime‰ ollaan muuttamassa...
+    // jos toimitustavan nime√§ ollaan muuttamassa...
     if ((mysql_field_name($result, $i)=="selite") and ($t[$i]!=$trow[$i])) {
       $toita = trim($t[$i]);
       $toita = str_replace("'","",$toita);
@@ -30,13 +30,13 @@ if(!function_exists("toimitustapatarkista")) {
       $updre = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($updre)!=0) {
-        $virhe[$i] = t("Et voi muuttaa toimitustaavan nime‰, koska")." '$toita' ".t("on jo olemassa")."!";
+        $virhe[$i] = t("Et voi muuttaa toimitustaavan nime√§, koska")." '$toita' ".t("on jo olemassa")."!";
       }
       else {
         $query = "UPDATE toimitustapa set selite='$toita' where selite='$trow[$i]' and yhtio='$kukarow[yhtio]'";
         $updre = mysql_query($query) or pupe_error($query);
 
-        echo "<font class='message'>".t("P‰ivitettiin")." ".mysql_affected_rows()." ".t("toimitustapa");
+        echo "<font class='message'>".t("P√§ivitettiin")." ".mysql_affected_rows()." ".t("toimitustapa");
 
         $query = "UPDATE asiakas set toimitustapa='$toita' where toimitustapa='$trow[$i]' and yhtio='$kukarow[yhtio]'";
         $updre = mysql_query($query) or pupe_error($query);
@@ -77,7 +77,7 @@ if(!function_exists("toimitustapatarkista")) {
     if (mysql_field_name($result, $i) == "erilliskasiteltavakulu" or mysql_field_name($result, $i) == "lisakulu" or mysql_field_name($result, $i) == "lisakulu_summa") {
       if (trim($t[$i]) == '') $t[$i] = 0;
       if (!is_numeric(trim($t[$i]))) {
-        $virhe[$i] = t("Kulu pit‰‰ olla numeerinen!");
+        $virhe[$i] = t("Kulu pit√§√§ olla numeerinen!");
       }
     }
 
@@ -87,7 +87,7 @@ if(!function_exists("toimitustapatarkista")) {
       $tuote = mysql_real_escape_string(trim($t[$i]));
 
       if ($tuote != "") {
-        // katotaan lˆytyykˆ t‰ll‰nen saldoton tuote
+        // katotaan l√∂ytyyk√∂ t√§ll√§nen saldoton tuote
         $query = "SELECT tunnus
                   FROM tuote
                   WHERE yhtio    = '$kukarow[yhtio]'
@@ -97,7 +97,7 @@ if(!function_exists("toimitustapatarkista")) {
         $xyresult = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($xyresult) == 0) {
-          $virhe[$i] = t("Tuotetta ei lˆydy!")." / ".t("Tuote pit‰‰ olla saldoton!");
+          $virhe[$i] = t("Tuotetta ei l√∂ydy!")." / ".t("Tuote pit√§√§ olla saldoton!");
         }
       }
     }

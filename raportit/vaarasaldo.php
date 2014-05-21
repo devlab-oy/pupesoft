@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require('../inc/parametrit.inc');
@@ -16,7 +16,7 @@ if (!isset($ppl)) $ppl = date("d");
 if (!isset($nayta)) $nayta = '';
 if (!isset($tee)) $tee = '';
 
-echo "<font class='head'>",t("Ker‰yspoikkeamat"),":</font><hr>";
+echo "<font class='head'>",t("Ker√§yspoikkeamat"),":</font><hr>";
 
 if ($tee != '') {
 
@@ -53,10 +53,10 @@ if ($tee != '') {
         <th>".t("Tilattu")."</th>
         <th>".t("Toimitettu")."</th>
         <th>".t("Tilauksessa")."</th>
-        <th>".t("Ensimm‰inen toimitus")."</th>
-        <th>".t("Hyllyss‰")."</th>
+        <th>".t("Ensimm√§inen toimitus")."</th>
+        <th>".t("Hyllyss√§")."</th>
         <th>".t("Saldo")."</th>
-        <th>".t("Ker‰‰j‰")."</th></tr>";
+        <th>".t("Ker√§√§j√§")."</th></tr>";
 
     while ($row = mysql_fetch_array($result)) {
 
@@ -93,30 +93,30 @@ if ($tee != '') {
 
   }
   else {
-    echo "<br>".t("Ei tuotteita v‰‰rill‰ saldoilla")."!<br>";
+    echo "<br>".t("Ei tuotteita v√§√§rill√§ saldoilla")."!<br>";
   }
 }
 
-//K‰yttˆliittym‰
+//K√§ytt√∂liittym√§
 echo "<br>";
 echo "<table><form method='post'>";
 echo "<input type='hidden' name='tee' value='kaikki'>";
 
 echo "<tr>";
-echo "<th>",t("N‰yt‰"),"</th>";
+echo "<th>",t("N√§yt√§"),"</th>";
 echo "<td><select name='nayta'>";
 echo "<option value=''>",t("Kaikki poikkeamat"),"</option>";
 
 $sel = $nayta == 'ei_ylijaamia' ? ' selected' : '';
 
-echo "<option value='ei_ylijaamia'{$sel}>",t("Kaikki paitsi rivit jossa ker‰‰j‰ on ker‰nnyt tilattua enemm‰n"),"</option>";
+echo "<option value='ei_ylijaamia'{$sel}>",t("Kaikki paitsi rivit jossa ker√§√§j√§ on ker√§nnyt tilattua enemm√§n"),"</option>";
 echo "</select></td>";
 echo "</tr>";
 
 echo "<tr>";
 echo "<th>",t("Hae rivit ajan mukaan"),"</th>";
 echo "<td><select name='rivien_aika'>";
-echo "<option value=''>",t("Ker‰ttyaika"),"</option>";
+echo "<option value=''>",t("Ker√§ttyaika"),"</option>";
 
 $sel = $rivien_aika == 'laskutettuaika' ? ' selected' : '';
 
@@ -124,11 +124,11 @@ echo "<option value='laskutettuaika'{$sel}>",t("Laskutettuaika"),"</option>";
 echo "</select></td>";
 echo "</tr>";
 
-echo "<tr><th>",t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)"),"</th>
+echo "<tr><th>",t("Sy√∂t√§ alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)"),"</th>
     <td><input type='text' name='ppa' value='{$ppa}' size='3'>
     <input type='text' name='kka' value='{$kka}' size='3'>
     <input type='text' name='vva' value='{$vva}' size='5'></td>
-    </tr><tr><th>",t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)"),"</th>
+    </tr><tr><th>",t("Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)"),"</th>
     <td><input type='text' name='ppl' value='{$ppl}' size='3'>
     <input type='text' name='kkl' value='{$kkl}' size='3'>
     <input type='text' name='vvl' value='{$vvl}' size='5'>";

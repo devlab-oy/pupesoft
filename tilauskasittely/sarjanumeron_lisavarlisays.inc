@@ -10,13 +10,13 @@ if (!function_exists('lisavarlisays')) {
     $result    = mysql_query($query) or pupe_error($query);
     $laskurow   = mysql_fetch_array($result);
 
-    //Tutkitaan lis‰varusteita
+    //Tutkitaan lis√§varusteita
     $query = "SELECT tilausrivi_osto.perheid2,
               sarjanumeroseuranta.hyllyalue,
               sarjanumeroseuranta.hyllynro,
               sarjanumeroseuranta.hyllyvali,
               sarjanumeroseuranta.hyllytaso,
-              concat_ws('#!°!#', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) paikka
+              concat_ws('#!¬°!#', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) paikka
               FROM sarjanumeroseuranta
               JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus and tilausrivi_osto.tunnus=tilausrivi_osto.perheid2
               WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
@@ -35,13 +35,13 @@ if (!function_exists('lisavarlisays')) {
       $sarjares = mysql_query($query) or pupe_error($query);
       $ostorow = mysql_fetch_array($sarjares);
 
-      // Haetaan muut lis‰varusteet
+      // Haetaan muut lis√§varusteet
       $query = "SELECT tilausrivi.tuoteno,
                 round(tilausrivi.kpl/$ostorow[kpl],2) kpl,
                 round(tilausrivi.varattu/$ostorow[kpl],2) varattu,
                 round(tilausrivi.tilkpl/$ostorow[kpl],2) tilkpl,
                 tilausrivi.tilkpl sistyomaarayskpl, tilausrivi.var, tilausrivi.tyyppi,
-                concat_ws('#!°!#', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
+                concat_ws('#!¬°!#', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
                 tilausrivi.hyllyalue,
                 tilausrivi.hyllynro,
                 tilausrivi.hyllyvali,
@@ -66,7 +66,7 @@ if (!function_exists('lisavarlisays')) {
         $myyrow = mysql_fetch_array($myyres);
 
         if (abs($myyrow["kpl"]) != 1) {
-          return t("VIRHE: Jos tuotteella on lis‰vausteita on tilausrivin tilattum‰‰r‰n oltava 1!");
+          return t("VIRHE: Jos tuotteella on lis√§vausteita on tilausrivin tilattum√§√§r√§n oltava 1!");
         }
 
         if ($myyrow["perheid2"] == 0) {
@@ -89,10 +89,10 @@ if (!function_exists('lisavarlisays')) {
           $tuoteres = mysql_query($query);
 
           if (mysql_num_rows($tuoteres) == 0) {
-            echo "<font class='error'>Tuotetta $sarjarow[tuoteno] ei lˆydy!</font><br>";
+            echo "<font class='error'>Tuotetta $sarjarow[tuoteno] ei l√∂ydy!</font><br>";
           }
           else {
-            // tuote lˆytyi ok, lis‰t‰‰n rivi
+            // tuote l√∂ytyi ok, lis√§t√§√§n rivi
             $trow = mysql_fetch_array($tuoteres);
 
             $ytunnus         = $laskurow["ytunnus"];
@@ -118,7 +118,7 @@ if (!function_exists('lisavarlisays')) {
             $tuoteno         = $sarjarow["tuoteno"];
             $perheid2     = $myyrow["perheid2"];
 
-            //Tutkitaan viel‰ ettei t‰m‰ lis‰varuste ole jo t‰n tuotteen alla
+            //Tutkitaan viel√§ ettei t√§m√§ lis√§varuste ole jo t√§n tuotteen alla
             $query = "SELECT tunnus, tilkpl, varattu, jt, var
                       FROM tilausrivi use index (yhtio_perheid2)
                       WHERE yhtio  = '$kukarow[yhtio]'
@@ -138,7 +138,7 @@ if (!function_exists('lisavarlisays')) {
                 ${'ale'.$alepostfix} = "";
               }
 
-              if ($sarjarow_isa["paikka"] != "#!°!##!°!##!°!#") {
+              if ($sarjarow_isa["paikka"] != "#!¬°!##!¬°!##!¬°!#") {
                 $paikka     = $sarjarow_isa["paikka"];
               }
 
@@ -147,7 +147,7 @@ if (!function_exists('lisavarlisays')) {
               $korvaavakielto   = "";
               $jtkielto      = $laskurow['jtkielto'];
 
-              // Ennakkotilaukset, Tarjoukset, Yll‰pitosopimukset ja Valmistukset eiv‰t tee saldotsekki‰
+              // Ennakkotilaukset, Tarjoukset, Yll√§pitosopimukset ja Valmistukset eiv√§t tee saldotsekki√§
               if ($laskurow["tilaustyyppi"] == "E" or $laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "0" or $laskurow["tila"] == "V") {
                 $varataan_saldoa = "EI";
               }
@@ -157,9 +157,9 @@ if (!function_exists('lisavarlisays')) {
 
               $perheid      = 0;
 
-              // Jos lis‰varuste on pultattu kiinni laitteeseen sis‰isell‰ tyˆm‰‰r‰yksell‰
-              // niin silloin, jos lis‰vauste on sarjanumeroitava, niin sarjanumeron tunnus tulee
-              // lis‰varusterivin sistyomaarays_sarjatunnus-kent‰ss‰
+              // Jos lis√§varuste on pultattu kiinni laitteeseen sis√§isell√§ ty√∂m√§√§r√§yksell√§
+              // niin silloin, jos lis√§vauste on sarjanumeroitava, niin sarjanumeron tunnus tulee
+              // lis√§varusterivin sistyomaarays_sarjatunnus-kent√§ss√§
               if ($sarjarow["tyyppi"] == 'G' and $sarjarow["sistyomaarays_sarjatunnus"] > 0) {
                 $query = "SELECT tunnus, myyntirivitunnus
                           FROM sarjanumeroseuranta
@@ -173,7 +173,7 @@ if (!function_exists('lisavarlisays')) {
                 }
               }
 
-              // jos meill‰ on ostoskori muuttujassa numero, niin halutaan lis‰t‰ tuotteita siihen ostoskoriin
+              // jos meill√§ on ostoskori muuttujassa numero, niin halutaan lis√§t√§ tuotteita siihen ostoskoriin
               if (is_numeric($ostoskori)) {
                 lisaa_ostoskoriin ($ostoskori, $laskurow["liitostunnus"], $tuoteno, $kpl);
                 $kukarow["kesken"] = "";
@@ -185,10 +185,10 @@ if (!function_exists('lisavarlisays')) {
                 require ("lisaarivi.inc");
               }
 
-              echo "<font class='message'>Lis‰ttiin $kpl kpl tuotetta $tuoteno.</font><br>";
+              echo "<font class='message'>Lis√§ttiin $kpl kpl tuotetta $tuoteno.</font><br>";
             }
             else {
-              // p‰ivitet‰‰n varmuuden vuoksi tehdaslis‰varusteen paikaksi sama kuin veneen paikka ja poistetaan JT-status jos rivi on JT-ss‰
+              // p√§ivitet√§√§n varmuuden vuoksi tehdaslis√§varusteen paikaksi sama kuin veneen paikka ja poistetaan JT-status jos rivi on JT-ss√§
               $tarkrow = mysql_fetch_array($tarkres);
 
               if ($tarkrow["var"] == "J") {

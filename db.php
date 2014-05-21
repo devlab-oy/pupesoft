@@ -1,6 +1,6 @@
 <?php
 
-//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+//* TÃ¤mÃ¤ skripti kÃ¤yttÃ¤Ã¤ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require "inc/parametrit.inc";
@@ -28,7 +28,7 @@ if ($table!='') {
 
   while ($row=mysql_fetch_array($fields))
   {
-    //tehdään array, että saadaan sortattua nimen mukaan..
+    //tehdÃ¤Ã¤n array, ettÃ¤ saadaan sortattua nimen mukaan..
     array_push($kala,"<tr><td>$row[0]</td><td>$row[1]</td><td>$row[2]</td><td>$row[3]</td><td>$row[4]</td><td>$row[5]</td></tr>");
   }
 

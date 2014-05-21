@@ -5,7 +5,7 @@ require("inc/parametrit.inc");
 echo "<font class='head'>".t("Tullinimikkeet")."</font><hr>";
 
 /*
-// n‰m‰ pit‰‰ ajaa jos p‰ivitt‰‰ uudet tullinimikkeet:
+// n√§m√§ pit√§√§ ajaa jos p√§ivitt√§√§ uudet tullinimikkeet:
 update tullinimike set su=trim(su);
 update tullinimike set su='' where su='-';
 update tullinimike set su_vientiilmo='NAR' where su='p/st';
@@ -18,10 +18,10 @@ update tullinimike set su_vientiilmo='KLT' where su='1000 l';
 update tullinimike set su_vientiilmo='TJO' where su='TJ';
 update tullinimike set su_vientiilmo='MWH' where su='1 000 kWh';
 update tullinimike set su_vientiilmo='MWH' where su='1000 kWh';
-update tullinimike set su_vientiilmo='MTQ' where su='m≥';
+update tullinimike set su_vientiilmo='MTQ' where su='m¬≥';
 update tullinimike set su_vientiilmo='MTQ' where su='m3';
 update tullinimike set su_vientiilmo='GRM' where su='g';
-update tullinimike set su_vientiilmo='MTK' where su='m≤';
+update tullinimike set su_vientiilmo='MTK' where su='m¬≤';
 update tullinimike set su_vientiilmo='MTK' where su='m2';
 update tullinimike set su_vientiilmo='MTR' where su='m';
 update tullinimike set su_vientiilmo='NPR' where su='pa';
@@ -51,7 +51,7 @@ if ($tee == "muuta") {
   $uusitullinimike1 = trim($uusitullinimike1);
   $uusitullinimike2 = trim($uusitullinimike2);
 
-  // katotaan, ett‰ tullinimike1 lˆytyy
+  // katotaan, ett√§ tullinimike1 l√∂ytyy
   $query = "SELECT cn FROM tullinimike WHERE cn = '$uusitullinimike1' and kieli = '$yhtiorow[kieli]'";
   $result = mysql_query($query) or pupe_error($query);
 
@@ -60,16 +60,16 @@ if ($tee == "muuta") {
     echo "<font class='error'>Tullinimike 1 on virheellinen!</font><br>";
   }
 
-  // kaks pitk‰ tai ei mit‰‰n
+  // kaks pitk√§ tai ei mit√§√§n
   if (strlen($uusitullinimike2) != 2) {
     $ok = 1;
-    echo "<font class='error'>Tullinimike 2 tulee olla 2 merkki‰ pitk‰!</font><br>";
+    echo "<font class='error'>Tullinimike 2 tulee olla 2 merkki√§ pitk√§!</font><br>";
   }
 
-  // t‰‰ on aika fiinisliippausta
+  // t√§√§ on aika fiinisliippausta
   if ($ok == 1) echo "<br>";
 
-  // jos kaikki meni ok, nii p‰ivitet‰‰n
+  // jos kaikki meni ok, nii p√§ivitet√§√§n
   if ($ok == 0) {
 
     if ($tullinimike2 != "") $lisa = " and tullinimike2='$tullinimike2'";
@@ -78,7 +78,7 @@ if ($tee == "muuta") {
     $query = "update tuote set tullinimike1='$uusitullinimike1', tullinimike2='$uusitullinimike2' where yhtio='$kukarow[yhtio]' and tullinimike1='$tullinimike1' $lisa";
     $result = mysql_query($query) or pupe_error($query);
 
-    echo sprintf("<font class='message'>P‰ivitettiin %s tuotetta.</font><br><br>", mysql_affected_rows());
+    echo sprintf("<font class='message'>P√§ivitettiin %s tuotetta.</font><br><br>", mysql_affected_rows());
 
     $tullinimike1 = $uusitullinimike1;
     $tullinimike2 = $uusitullinimike2;
@@ -99,7 +99,7 @@ if ($tee == "synkronoi") {
   $nimikeet = explode("\n", trim($nimikeet));
 
   if (count($nimikeet) == 0) {
-    echo t("Tiedoston avaus ep‰onnistui")."!";
+    echo t("Tiedoston avaus ep√§onnistui")."!";
     require ("inc/footer.inc");
     exit;
   }
@@ -111,7 +111,7 @@ if ($tee == "synkronoi") {
   $query  = "  DELETE FROM tullinimike";
   $result = mysql_query($query) or pupe_error($query);
 
-  // P‰ivitet‰‰n tuotteet 2012 - 2013
+  // P√§ivitet√§√§n tuotteet 2012 - 2013
   $muunnosavaimet = array(
     "03074191"=>"03074192",
     "03074951"=>"03079914",
@@ -154,7 +154,7 @@ if ($tee == "synkronoi") {
     "96190059"=>"96190050",
     "96190090"=>"96190071");
 
-  echo t("P‰ivitet‰‰n muuttuneet tullinimikkeet tuotteille")."...<br>";
+  echo t("P√§ivitet√§√§n muuttuneet tullinimikkeet tuotteille")."...<br>";
 
   foreach ($muunnosavaimet as $vanha => $uusi) {
     $query  = "UPDATE tuote set
@@ -167,12 +167,12 @@ if ($tee == "synkronoi") {
   // Eka rivi roskikseen
   unset($nimikeet[0]);
 
-  echo t("Lis‰t‰‰n uudet tullinimikkeet tietokantaan")."...<br>";
+  echo t("Lis√§t√§√§n uudet tullinimikkeet tietokantaan")."...<br>";
 
   foreach ($nimikeet as $rivi) {
     list($cnkey, $cn, $dashes, $dm, $su, $su_vientiilmo, $kieli) = explode("\t", trim($rivi));
 
-    $dm = preg_replace("/([^A-Z0-9ˆ‰Â≈ƒ÷ \.,\-_\:\/\!\|\?\+\(\)%#]|È)/i", "", $dm);
+    $dm = preg_replace("/([^A-Z0-9√∂√§√•√Ö√Ñ√ñ \.,\-_\:\/\!\|\?\+\(\)%#]|√©)/i", "", $dm);
 
     $query  = "INSERT INTO tullinimike SET
                yhtio         = '$kukarow[yhtio]',
@@ -188,18 +188,18 @@ if ($tee == "synkronoi") {
     $result = mysql_query($query) or pupe_error($query);
   }
 
-  echo t("P‰ivitys valmis")."...<br><br><hr>";
+  echo t("P√§ivitys valmis")."...<br><br><hr>";
 }
 
 
 echo "<br><form method='post' autocomplete='off'>";
-echo t("Listaa ja muokkaa tuotteiden tullinimikkeit‰").":<br><br>";
+echo t("Listaa ja muokkaa tuotteiden tullinimikkeit√§").":<br><br>";
 echo "<table>";
 echo "<tr>";
-echo "<th>".t("Syˆt‰ tullinimike").":</th>";
+echo "<th>".t("Sy√∂t√§ tullinimike").":</th>";
 echo "<td><input type='text' name='tullinimike1' value='$tullinimike1'></td>";
 echo "</tr><tr>";
-echo "<th>".t("Syˆt‰ tullinimikkeen lis‰osa").":</th>";
+echo "<th>".t("Sy√∂t√§ tullinimikkeen lis√§osa").":</th>";
 echo "<td><input type='text' name='tullinimike2' value='$tullinimike2'> (ei pakollinen) </td>";
 echo "<td class='back'><input type='submit' value='".t("Hae")."'></td>";
 echo "</tr></table>";
@@ -207,7 +207,7 @@ echo "</form><br><br>";
 
 echo "<form method='post' autocomplete='off'>";
 echo "<input type='hidden' name='tee' value='synkronoi'>";
-echo t("P‰ivit‰ j‰rjestelm‰n tullinimiketietokanta").":<br><br>";
+echo t("P√§ivit√§ j√§rjestelm√§n tullinimiketietokanta").":<br><br>";
 echo "<table>";
 echo "<th>".t("Nouda uusimmat tullinimikkeet").":</th>";
 echo "<td><input type='submit' value='".t("Nouda")."'></td>";
@@ -228,11 +228,11 @@ if ($tullinimike1 != "") {
   $resul = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($resul) == 0) {
-    echo "<font class='error'>Yht‰‰n tuotetta ei lˆytynyt!</font><br>";
+    echo "<font class='error'>Yht√§√§n tuotetta ei l√∂ytynyt!</font><br>";
   }
   else {
 
-    echo sprintf("<font class='message'>Haulla lˆytyi %s tuotetta.</font><br><br>", mysql_num_rows($resul));
+    echo sprintf("<font class='message'>Haulla l√∂ytyi %s tuotetta.</font><br><br>", mysql_num_rows($resul));
 
     echo "<form method='post' autocomplete='off'>";
     echo "<input type='hidden' name='tullinimike1' value='$tullinimike1'>";
@@ -241,12 +241,12 @@ if ($tullinimike1 != "") {
 
     echo "<table>";
     echo "<tr>";
-    echo "<th>".t("Syˆt‰ uusi tullinimike").":</th>";
+    echo "<th>".t("Sy√∂t√§ uusi tullinimike").":</th>";
     echo "<td><input type='text' name='uusitullinimike1' value='$uusitullinimike1'></td>";
     echo "</tr><tr>";
-    echo "<th>".t("Syˆt‰ tullinimikkeen lis‰osa").":</th>";
+    echo "<th>".t("Sy√∂t√§ tullinimikkeen lis√§osa").":</th>";
     echo "<td><input type='text' name='uusitullinimike2' value='$uusitullinimike2'></td>";
-    echo "<td class='back'><input type='submit' value='".t("P‰ivit‰")."'></td>";
+    echo "<td class='back'><input type='submit' value='".t("P√§ivit√§")."'></td>";
     echo "</tr></table>";
     echo "</form><br>";
 
@@ -258,16 +258,16 @@ if ($tullinimike1 != "") {
     echo "<th>".t("Merkki")."</th>";
     echo "<th>".t("Nimitys")."</th>";
     echo "<th>".t("Tullinimike")."</th>";
-    echo "<th>".t("Tullinimikkeen lis‰osa")."</th>";
+    echo "<th>".t("Tullinimikkeen lis√§osa")."</th>";
     echo "</tr>";
 
     while ($rivi = mysql_fetch_array($resul)) {
 
-      // tehd‰‰n avainsana query
+      // tehd√§√§n avainsana query
       $oresult = t_avainsana("OSASTO", "", "and avainsana.selite ='$rivi[osasto]'");
       $os = mysql_fetch_array($oresult);
 
-      // tehd‰‰n avainsana query
+      // tehd√§√§n avainsana query
       $tresult = t_avainsana("TRY", "", "and avainsana.selite ='$rivi[try]'");
       $try = mysql_fetch_array($tresult);
 

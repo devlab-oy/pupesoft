@@ -11,7 +11,7 @@ if (php_sapi_name() == 'cli') {
 
   $yhtio = trim($argv[1]);
 
-  //yhtiˆt‰ ei ole annettu
+  //yhti√∂t√§ ei ole annettu
   if (empty($yhtio)) {
     echo "\nUsage: php ".basename($argv[0])." yhtio\n\n";
     die;
@@ -19,7 +19,7 @@ if (php_sapi_name() == 'cli') {
 
   $yhtiorow = hae_yhtion_parametrit($yhtio);
 
-  // Haetaan k‰ytt‰j‰n tiedot
+  // Haetaan k√§ytt√§j√§n tiedot
   $kukarow = hae_kukarow('admin', $yhtio);
 }
 elseif (php_sapi_name() != 'cli') {
@@ -29,16 +29,16 @@ elseif (php_sapi_name() != 'cli') {
   echo "<font class='head'>".t('Asiakkaan jt-rivien toimitusajan vahvistus')."</font><hr>";
 }
 
-//haetaan ostotilaukset ja niiden tilausrivit joiden toimitusaika on p‰ivittynyt viimeisein 24h aikana
+//haetaan ostotilaukset ja niiden tilausrivit joiden toimitusaika on p√§ivittynyt viimeisein 24h aikana
 $ostotilauksien_tilausrivit = hae_ostotilauksien_tilausrivit_joiden_toimitusaika_on_muuttunut_tai_vahvistettu();
 
-//tarkistetaan onko yhtiolla s‰hkˆpostien l‰hetys parametri p‰‰ll‰
+//tarkistetaan onko yhtiolla s√§hk√∂postien l√§hetys parametri p√§√§ll√§
 if ($yhtiorow['jt_toimitusaika_email_vahvistus'] != 'K') {
-  //haetaan asiakkaat joilla kyseinen parametri on p‰‰ll‰ ja joilla on jt rivej‰
+  //haetaan asiakkaat joilla kyseinen parametri on p√§√§ll√§ ja joilla on jt rivej√§
   $kaikki_myyntitilaukset = false;
 }
 else {
-  //haetaan yhtion kaikki myyntitilaukset joilla on jt_rivej‰
+  //haetaan yhtion kaikki myyntitilaukset joilla on jt_rivej√§
   $kaikki_myyntitilaukset = true;
 }
 
@@ -49,7 +49,7 @@ $asiakkaille_lahtevat_sahkopostit = generoi_asiakas_emailit($ostotilauksien_tila
 laheta_asiakas_emailit($asiakkaille_lahtevat_sahkopostit);
 
 /**
- * Hakee ostotilaukset ja niiden rivit joiden toimaika on muuttunut viimeisen p‰iv‰n aikana
+ * Hakee ostotilaukset ja niiden rivit joiden toimaika on muuttunut viimeisen p√§iv√§n aikana
  *
  * @global array $kukarow
  * @global array $yhtiorow
@@ -87,7 +87,7 @@ function hae_ostotilauksien_tilausrivit_joiden_toimitusaika_on_muuttunut_tai_vah
 }
 
 /**
- * K‰sitell‰‰n ostolaskujen tilausrivit niin, ett‰ tuotteen alle saadaan kokonaistilaus m‰‰r‰t
+ * K√§sitell√§√§n ostolaskujen tilausrivit niin, ett√§ tuotteen alle saadaan kokonaistilaus m√§√§r√§t
  *
  * @global array $kukarow
  * @global array $yhtiorow
@@ -111,13 +111,13 @@ function kasittele_ostotilaukset($ostolaskut) {
 }
 
 /**
- * Hakee kaikki myyntitilaukset ja niiden rivit, joissa on jt-rivej‰
- * T‰t‰ funktiota k‰ytet‰‰n kun yhtiˆparametri jt_toimitusaika_email_vahvistus on p‰‰ll‰
+ * Hakee kaikki myyntitilaukset ja niiden rivit, joissa on jt-rivej√§
+ * T√§t√§ funktiota k√§ytet√§√§n kun yhti√∂parametri jt_toimitusaika_email_vahvistus on p√§√§ll√§
  *
  * TAI
  *
- * Hakee myyntitilaukset ja niiden rivit joiden asiakkailla on jt_toimitusaika_email_vahvistus p‰‰ll‰ sek‰ myyntitilauksia, joissa on jt-rivej‰
- * T‰t‰ funktiota k‰ytet‰‰n jos yhtiˆparametri jt_toimitusaika_email_vahvistus ei ole p‰‰ll‰
+ * Hakee myyntitilaukset ja niiden rivit joiden asiakkailla on jt_toimitusaika_email_vahvistus p√§√§ll√§ sek√§ myyntitilauksia, joissa on jt-rivej√§
+ * T√§t√§ funktiota k√§ytet√§√§n jos yhti√∂parametri jt_toimitusaika_email_vahvistus ei ole p√§√§ll√§
  *
  * @global array $kukarow
  * @global array $yhtiorow
@@ -133,7 +133,7 @@ function hae_myyntitilaukset_joilla_jt_riveja($kaikki_myyntitilaukset = true) {
   else {
     $asiakas_join = "AND asiakas.jt_toimitusaika_email_vahvistus = 'K'";
   }
-  //Haetaan kaikki myyntilaskut joiden asiakkaan jt_toimitusaika_email_vahvistus on K‰ytet‰‰n yhtiˆn oletus parametri‰ tai saa l‰hett‰‰ s‰hkˆposteja
+  //Haetaan kaikki myyntilaskut joiden asiakkaan jt_toimitusaika_email_vahvistus on K√§ytet√§√§n yhti√∂n oletus parametri√§ tai saa l√§hett√§√§ s√§hk√∂posteja
   $query = "SELECT lasku.tunnus,
             lasku.nimi,
             lasku.liitostunnus
@@ -213,7 +213,7 @@ function hae_myyntitilauksen_asiakas($liitostunnus) {
 }
 
 /**
- * Generoi ostotilausrivien sek‰ myyntitilauksien pohjalta asiakkaille l‰hetett‰v‰t emailit
+ * Generoi ostotilausrivien sek√§ myyntitilauksien pohjalta asiakkaille l√§hetett√§v√§t emailit
  *
  * @global array $kukarow
  * @global array $yhtiorow
@@ -230,10 +230,10 @@ function generoi_asiakas_emailit($tuotteet_ja_niiden_ostotilausrivit, $myyntitil
     foreach ($myyntitilaukset as $myyntitilaus) {
       foreach ($myyntitilaus['tilausrivit'] as $myyntitilausrivi) {
         if ($tuote_ja_sen_ostotilausrivit['tuoteno'] == $myyntitilausrivi['tuoteno']) {
-          //riitt‰‰kˆ tietyn tuotteen kaikkien ostotilausrivien kappaleet myyntitilausriville
+          //riitt√§√§k√∂ tietyn tuotteen kaikkien ostotilausrivien kappaleet myyntitilausriville
           if ($tuote_ja_sen_ostotilausrivit['tilkpl_jaljella'] >= $myyntitilausrivi['tilkpl']) {
             foreach ($tuote_ja_sen_ostotilausrivit['tilausrivit'] as &$ostotilausrivi) {
-              //riitt‰‰kˆ t‰m‰n kyseisen ostotilausrivin kappaleet myyntitilausriville
+              //riitt√§√§k√∂ t√§m√§n kyseisen ostotilausrivin kappaleet myyntitilausriville
               if ($ostotilausrivi['tilkpl_jaljella'] >= $myyntitilausrivi['tilkpl_jaljella']) {
                 populoi_asiakkaan_email_array($asiakkaille_lahtevat_sahkopostit, $myyntitilaus, $myyntitilausrivi, $ostotilausrivi);
 
@@ -254,8 +254,8 @@ function generoi_asiakas_emailit($tuotteet_ja_niiden_ostotilausrivit, $myyntitil
             }
           }
           else {
-            //jos ei riit‰
-            //vied‰‰n kyseisen tuotteen saldo nollille, jotta j‰lkimm‰iset myyntitilaukset eiv‰t p‰‰se niihin k‰siksi
+            //jos ei riit√§
+            //vied√§√§n kyseisen tuotteen saldo nollille, jotta j√§lkimm√§iset myyntitilaukset eiv√§t p√§√§se niihin k√§siksi
             $tuote_ja_sen_ostotilausrivit['tilkpl_jaljella'] = 0;
             continue;
           }
@@ -268,7 +268,7 @@ function generoi_asiakas_emailit($tuotteet_ja_niiden_ostotilausrivit, $myyntitil
 }
 
 /**
- * Populoi asiakas_email_arrayt‰, johon ker‰t‰‰n asiakkaalle l‰hetett‰vi‰ emaileja
+ * Populoi asiakas_email_arrayt√§, johon ker√§t√§√§n asiakkaalle l√§hetett√§vi√§ emaileja
  *
  * @global array $kukarow
  * @global array $yhtiorow
@@ -281,7 +281,7 @@ function populoi_asiakkaan_email_array(&$asiakkaille_lahtevat_sahkopostit, $myyn
   global $kukarow, $yhtiorow;
 
   $kieli = $myyntitilaus['asiakas']['kieli'];
-  //jos kaikki ostotilausrivin tuotteet riitt‰‰
+  //jos kaikki ostotilausrivin tuotteet riitt√§√§
   if ($ostotilausrivi['tilkpl_jaljella'] >= $myyntitilausrivi['tilkpl_jaljella']) {
     $kappaleet_jotka_riittaa = $myyntitilausrivi['tilkpl_jaljella'];
   }
@@ -289,16 +289,16 @@ function populoi_asiakkaan_email_array(&$asiakkaille_lahtevat_sahkopostit, $myyn
     $kappaleet_jotka_riittaa = $ostotilausrivi['tilkpl_jaljella'];
   }
 
-  //jos riitt‰‰ niin voidaan lis‰t‰ asiakkaan emailiin tilauksen alle tilausrivi
+  //jos riitt√§√§ niin voidaan lis√§t√§ asiakkaan emailiin tilauksen alle tilausrivi
   if (empty($asiakkaille_lahtevat_sahkopostit[$myyntitilaus['liitostunnus']]['tilaukset'][$myyntitilaus['tunnus']]['tilausrivit'][$myyntitilausrivi['tuoteno']])) {
     $asiakkaille_lahtevat_sahkopostit[$myyntitilaus['liitostunnus']]['tilaukset'][$myyntitilaus['tunnus']]['tilausrivit'][$myyntitilausrivi['tuoteno']] .= '<td>'.$myyntitilausrivi['tuoteno'].'</td>'
         .'<td>'.$myyntitilausrivi['nimitys'].'</td>'
         .'<td>'.$myyntitilausrivi['tilkpl'].'</td>'
-        .'<td>'.t("Toimitusaika", $kieli).': '.date('d.m.Y', strtotime($ostotilausrivi['toimaika'])).' '.(number_format($kappaleet_jotka_riittaa, 0)).' '.t("kpl", $kieli).' '; //HUOM JƒTETƒƒN VIIMEINEN TD PRINTTAAMATTA, jotta viimeiseen soluun voidaan appendaa lis‰‰ toimituksia. viimeinen td printataan emailin luomis vaiheessa
+        .'<td>'.t("Toimitusaika", $kieli).': '.date('d.m.Y', strtotime($ostotilausrivi['toimaika'])).' '.(number_format($kappaleet_jotka_riittaa, 0)).' '.t("kpl", $kieli).' '; //HUOM J√ÑTET√Ñ√ÑN VIIMEINEN TD PRINTTAAMATTA, jotta viimeiseen soluun voidaan appendaa lis√§√§ toimituksia. viimeinen td printataan emailin luomis vaiheessa
   }
   else {
     $asiakkaille_lahtevat_sahkopostit[$myyntitilaus['liitostunnus']]['tilaukset'][$myyntitilaus['tunnus']]['tilausrivit'][$myyntitilausrivi['tuoteno']] .= '<br/>'
-        .t("Toimitusaika", $kieli).': '.date('d.m.Y', strtotime($ostotilausrivi['toimaika'])).' '.(number_format($kappaleet_jotka_riittaa, 0)).' '.t("kpl", $kieli).' '; //HUOM JƒTETƒƒN VIIMEINEN TD PRINTTAAMATTA, jotta viimeiseen soluun voidaan appendaa lis‰‰ toimituksia. viimeinen td printataan emailin luomis vaiheessa
+        .t("Toimitusaika", $kieli).': '.date('d.m.Y', strtotime($ostotilausrivi['toimaika'])).' '.(number_format($kappaleet_jotka_riittaa, 0)).' '.t("kpl", $kieli).' '; //HUOM J√ÑTET√Ñ√ÑN VIIMEINEN TD PRINTTAAMATTA, jotta viimeiseen soluun voidaan appendaa lis√§√§ toimituksia. viimeinen td printataan emailin luomis vaiheessa
   }
 
   $asiakkaille_lahtevat_sahkopostit[$myyntitilaus['liitostunnus']]['kieli'] = $kieli;
@@ -306,7 +306,7 @@ function populoi_asiakkaan_email_array(&$asiakkaille_lahtevat_sahkopostit, $myyn
 }
 
 /**
- * L‰hett‰‰ generoidut emailit
+ * L√§hett√§√§ generoidut emailit
  *
  * @global array $kukarow
  * @global array $yhtiorow
@@ -329,13 +329,13 @@ function laheta_asiakas_emailit($asiakkaille_lahtevat_sahkopostit = array()) {
       $body .= "</tr>";
       foreach ($tilaus['tilausrivit'] as $tilausrivi) {
         $body .= "<tr>";
-        $body .= $tilausrivi.'</td>'; //emailin generoimis vaiheessa j‰tet‰‰n viimeinen td printtaamatta, jotta viimeiseen soluun pystyt‰‰n appendaamaan lis‰‰ toimituksia
+        $body .= $tilausrivi.'</td>'; //emailin generoimis vaiheessa j√§tet√§√§n viimeinen td printtaamatta, jotta viimeiseen soluun pystyt√§√§n appendaamaan lis√§√§ toimituksia
         $body .= "</tr>";
       }
       $body .= "</table>";
       $body .= "<br/>";
       $body .= "<br/>";
-      $body .= t("Yst‰v‰llisin terveisin", $asiakas_sahkoposti['kieli']);
+      $body .= t("Yst√§v√§llisin terveisin", $asiakas_sahkoposti['kieli']);
       $body .= "<br/>";
       $body .= $yhtiorow['nimi'];
       $body .= "<br/>";
@@ -351,7 +351,7 @@ function laheta_asiakas_emailit($asiakkaille_lahtevat_sahkopostit = array()) {
 }
 
 /**
- * L‰hett‰‰ yhden emailin
+ * L√§hett√§√§ yhden emailin
  *
  * @global array $kukarow
  * @global array $yhtiorow
@@ -363,7 +363,7 @@ function laheta_sahkoposti($email, $body) {
 
   $parametrit = array(
     "to"     => $email,
-    "subject"   => t('Tilauksenne toimitusajankohta on p‰ivittynyt'),
+    "subject"   => t('Tilauksenne toimitusajankohta on p√§ivittynyt'),
     "ctype"     => "html",
     "body"     => $body,
   );

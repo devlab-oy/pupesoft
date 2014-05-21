@@ -1,6 +1,6 @@
 <?php
 
-// Kutsutaanko CLI:st‰
+// Kutsutaanko CLI:st√§
 $php_cli = FALSE;
 
 if (php_sapi_name() == 'cli') {
@@ -24,17 +24,17 @@ $lock_params = array(
     "locktime" => 5400,
 );
 
-// Sallitaan vain yksi instanssi t‰st‰ skriptist‰ kerrallaan
+// Sallitaan vain yksi instanssi t√§st√§ skriptist√§ kerrallaan
 pupesoft_flock($lock_params);
 
-// Otetaan defaultit, jos ei olla yliajettu salasanat.php:ss‰
+// Otetaan defaultit, jos ei olla yliajettu salasanat.php:ss√§
 $verkkolaskut_in     = empty($verkkolaskut_in)     ? "/home/verkkolaskut"        : rtrim($verkkolaskut_in, "/");
 $verkkolaskut_ok     = empty($verkkolaskut_ok)     ? "/home/verkkolaskut/ok"     : rtrim($verkkolaskut_ok, "/");
 $verkkolaskut_orig   = empty($verkkolaskut_orig)   ? "/home/verkkolaskut/orig"   : rtrim($verkkolaskut_orig, "/");
 $verkkolaskut_error  = empty($verkkolaskut_error)  ? "/home/verkkolaskut/error"  : rtrim($verkkolaskut_error, "/");
 $verkkolaskut_reject = empty($verkkolaskut_reject) ? "/home/verkkolaskut/reject" : rtrim($verkkolaskut_reject, "/");
 
-// VIRHE: verkkolasku-kansiot on v‰‰rin m‰‰ritelty!
+// VIRHE: verkkolasku-kansiot on v√§√§rin m√§√§ritelty!
 if (!is_dir($verkkolaskut_in) or !is_writable($verkkolaskut_in)) exit;
 if (!is_dir($verkkolaskut_ok) or !is_writable($verkkolaskut_ok)) exit;
 if (!is_dir($verkkolaskut_orig) or !is_writable($verkkolaskut_orig)) exit;
@@ -47,29 +47,29 @@ $origlaskut = $verkkolaskut_orig;
 $errlaskut  = $verkkolaskut_error;
 
 if ($php_cli) {
-  // Ei tehd‰ mit‰‰n. T‰ll‰set iffit on sit‰ parasta koodia.
+  // Ei tehd√§ mit√§√§n. T√§ll√§set iffit on sit√§ parasta koodia.
 }
 elseif (strpos($_SERVER['SCRIPT_NAME'], "tiliote.php") !== FALSE and $verkkolaskut_in != "" and $verkkolaskut_ok != "" and $verkkolaskut_orig != "" and $verkkolaskut_error != "") {
   //Pupesoftista
-  echo "Aloitetaan verkkolaskun sis‰‰nluku...<br>\n<br>\n";
+  echo "Aloitetaan verkkolaskun sis√§√§nluku...<br>\n<br>\n";
 
   // Kopsataan uploadatta faili verkkoalskudirikkaan
   $copy_boob = copy($filenimi, $laskut."/".$userfile);
 
   if ($copy_boob === FALSE) {
-      echo "Kopiointi ep‰onnistui $filenimi $laskut/$userfile<br>\n";
+      echo "Kopiointi ep√§onnistui $filenimi $laskut/$userfile<br>\n";
     exit;
   }
 }
 else {
-  echo "N‰ill‰ ehdoilla emme voi ajaa verkkolaskujen sis‰‰nlukua!";
+  echo "N√§ill√§ ehdoilla emme voi ajaa verkkolaskujen sis√§√§nlukua!";
   exit;
 }
 
-  require ("inc/verkkolasku-in.inc"); // t‰‰ll‰ on itse koodi
-  require ("inc/verkkolasku-in-erittele-laskut.inc"); // t‰‰ll‰ pilkotaan Finvoiceaineiston laskut omiksi tiedostoikseen
+  require ("inc/verkkolasku-in.inc"); // t√§√§ll√§ on itse koodi
+  require ("inc/verkkolasku-in-erittele-laskut.inc"); // t√§√§ll√§ pilkotaan Finvoiceaineiston laskut omiksi tiedostoikseen
 
-// K‰sitell‰‰n ensin kaikki Finvoicet
+// K√§sitell√§√§n ensin kaikki Finvoicet
 if ($handle = opendir($laskut)) {
   while (($file = readdir($handle)) !== FALSE) {
     if (is_file($laskut."/".$file)) {
@@ -77,7 +77,7 @@ if ($handle = opendir($laskut)) {
       $nimi = $laskut."/".$file;
       $luotiinlaskuja = erittele_laskut($nimi);
 
-      // Jos tiedostosta luotiin laskuja siirret‰‰n se tielt‰ pois
+      // Jos tiedostosta luotiin laskuja siirret√§√§n se tielt√§ pois
       if ($luotiinlaskuja > 0) {
         rename($laskut."/".$file, $origlaskut."/".$file);
       }
@@ -113,7 +113,7 @@ if ($handle = opendir($laskut)) {
         list($alku,$loppu) = explode("####",$laskuvirhe);
 
         if (trim($loppu) == "ASN") {
-          // ei tehd‰ mit‰‰n vaan annetaan j‰‰d‰ roikkumaan kansioon seuraavaan kierrokseen saakka, tai kunnes joku lukee postit.
+          // ei tehd√§ mit√§√§n vaan annetaan j√§√§d√§ roikkumaan kansioon seuraavaan kierrokseen saakka, tai kunnes joku lukee postit.
         }
         else {
           rename($laskut."/".$file, $errlaskut."/".$file);
@@ -124,9 +124,9 @@ if ($handle = opendir($laskut)) {
 }
 
 if ($php_cli) {
-  # laitetaan k‰yttˆoikeudet kuntoon
+  # laitetaan k√§ytt√∂oikeudet kuntoon
   system("chown -R :apache $verkkolaskut_in; chmod -R 770 $verkkolaskut_in;");
 }
 
-# siivotaan yli 90 p‰iv‰‰ vanhat aineistot
+# siivotaan yli 90 p√§iv√§√§ vanhat aineistot
 system("find $verkkolaskut_in -type f -mtime +90 -delete");

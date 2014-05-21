@@ -2,7 +2,7 @@
 
 echo "<pre>";
 
-if (!$fd = fopen($filename, "r")) die("Filen '$filename' avaus ep‰onnistui!");
+if (!$fd = fopen($filename, "r")) die("Filen '$filename' avaus ep√§onnistui!");
 
 $toimpvm = date("Y")."-".date("n")."-".date("j");
 
@@ -19,7 +19,7 @@ if ($tyyppi == 'yct') {
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) != 1) {
-    echo t("Asiakasta ei lˆydy tai j‰rjestelm‰ss‰ on usea asiakas samalla ytunnuksella")."<br>";
+    echo t("Asiakasta ei l√∂ydy tai j√§rjestelm√§ss√§ on usea asiakas samalla ytunnuksella")."<br>";
   }
   else {
     $asiakasrow = mysql_fetch_array($result);
@@ -149,7 +149,7 @@ while ((!feof ($fd)) and ($error!=1)) {
     $result = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($result) == 0 and $tuoteno != '') {
-      echo t("Tuotenumeroa")." $tuoteno ".t("ei lˆytynyt korjaa asia muuten ei tapahdu mit‰‰n")."!";
+      echo t("Tuotenumeroa")." $tuoteno ".t("ei l√∂ytynyt korjaa asia muuten ei tapahdu mit√§√§n")."!";
       $tilanne = '0';
       break;
     }
@@ -280,7 +280,7 @@ while ((!feof ($fd)) and ($error!=1)) {
                     hyllynro  = '$hyllynro',
                     hyllyvali = '$hyllyvali',
                     hyllytaso = '$hyllytaso',
-                    selite    = '".t("Perustettiin tuotepaikka tilauksen sis‰‰nluonnissa ")." $alue 0 0 0',
+                    selite    = '".t("Perustettiin tuotepaikka tilauksen sis√§√§nluonnissa ")." $alue 0 0 0',
                     laatija   = '$kukarow[kuka]',
                     laadittu  = now()";
           $result = pupe_query($query);
@@ -602,7 +602,7 @@ while ((!feof ($fd)) and ($error!=1)) {
 if (($tyyppi == 'yct') and ($id != '')) {
 
   if ($tilanne == '0') {
-    $komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mit‰tˆi ohjelmassa tilaus_in.inc")."<br>";
+    $komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mit√§t√∂i ohjelmassa tilaus_in.inc")."<br>";
 
     $query = "UPDATE lasku SET
               tila        = 'D',
@@ -618,7 +618,7 @@ if (($tyyppi == 'yct') and ($id != '')) {
               AND otunnus = '$id'";
     $result = mysql_query($query) or pupe_error($query);
 
-    echo t("Ei voitu tehd‰ tilausta loppuun vaan se mit‰tˆitiin")."!";
+    echo t("Ei voitu tehd√§ tilausta loppuun vaan se mit√§t√∂itiin")."!";
   }
   else {
     require("../tilauskasittely/tilaus-valmis.inc");
@@ -627,7 +627,7 @@ if (($tyyppi == 'yct') and ($id != '')) {
 
     if ($mail == 'jep') {
       $rivi = '';
-      $rivi .= t("Tuoteno")."\t".t("m‰‰r‰")."\t".t("oletussaldo")."\t".t("h‰lytysraja")."\t".t("oletuspaikka")."\r\n";
+      $rivi .= t("Tuoteno")."\t".t("m√§√§r√§")."\t".t("oletussaldo")."\t".t("h√§lytysraja")."\t".t("oletuspaikka")."\r\n";
 
       $query = "SELECT tuoteno, tilkpl
                 FROM tilausrivi
@@ -680,11 +680,11 @@ if (($tyyppi == 'yct') and ($id != '')) {
         $rivi .= "$tilrow[tuoteno]\t$tilrow[tilkpl]\t$oletsaldo\t$hraja\t$alue\r\n";
       }
 
-      echo "<br>".t("L‰hetet‰‰n meili osoitteeseen")." $mailiosoite";
+      echo "<br>".t("L√§hetet√§√§n meili osoitteeseen")." $mailiosoite";
       $bound = uniqid(time()."_") ;
       $ny = date("d-m-Y");
 
-      $header   = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\r\n";
+      $header   = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\r\n";
           $header  .= "MIME-Version: 1.0\r\n" ;
           $header  .= "Content-Type: multipart/mixed; boundary=\"$bound\"\r\n" ;
 
@@ -699,12 +699,12 @@ if (($tyyppi == 'yct') and ($id != '')) {
 
       $content .= "--$bound\r\n";
 
-      $boob = mail($mailiosoite, mb_encode_mimeheader(t("tarveraportti")." ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+      $boob = mail($mailiosoite, mb_encode_mimeheader(t("tarveraportti")." ".date("d.m.Y"), "UTF-8", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
     }
   }
 }
 
-if ($error==1) echo "<font class='error'>".t("K‰sittelyss‰ tapahtui virhe")."</font><br>";
+if ($error==1) echo "<font class='error'>".t("K√§sittelyss√§ tapahtui virhe")."</font><br>";
 
 fclose ($fd);
 echo "</pre>";

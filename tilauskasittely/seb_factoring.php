@@ -1,7 +1,7 @@
 <?php
 require ("../inc/parametrit.inc");
 
-echo "<font class='head'>".t("L‰het‰ factoringaineisto").":</font><hr>";
+echo "<font class='head'>".t("L√§het√§ factoringaineisto").":</font><hr>";
 
 
 $query = "SELECT lasku.*
@@ -16,7 +16,7 @@ $query = "SELECT lasku.*
 $res = mysql_query($query) or pupe_error($query);
 
 echo "<br><br><table>";
-echo "<tr><th>#</th><th>".t("Laskunumero")."</th><th>".t("P‰iv‰m‰‰r‰")."</th><th>".t("Asiakas")."</th><th>".t("Maksuehto")."</th><th>".t("Arvo")."</th></tr>";
+echo "<tr><th>#</th><th>".t("Laskunumero")."</th><th>".t("P√§iv√§m√§√§r√§")."</th><th>".t("Asiakas")."</th><th>".t("Maksuehto")."</th><th>".t("Arvo")."</th></tr>";
 
 $factlask=1;
 $factoring_sisalto="";
@@ -49,7 +49,7 @@ while ($laskurow = mysql_fetch_array($res)) {
   $frow = mysql_fetch_array($fres);
 
   if($tee == 'LAHETA') {
-    //ker‰t‰‰n factoring aineiston sis‰ltˆ
+    //ker√§t√§√§n factoring aineiston sis√§lt√∂
     $sisalto     = "";
     $fakt_lahetys   = "";
     $sivu       = 1;
@@ -77,5 +77,5 @@ if($tee == 'LAHETA' and $factoring_sisalto != '') {
 elseif ($factlask > 1) {
   echo "  <form name='find' method='post'>
       <input type='hidden' name='tee' value='LAHETA'>
-      <input type='Submit' value='".t("L‰het‰ aineisto")."'></form>";
+      <input type='Submit' value='".t("L√§het√§ aineisto")."'></form>";
 }

@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 if (isset($_POST["tee"])) {
@@ -15,10 +15,10 @@ if($tee != "lataa_tiedosto") {
   flush();
 }
 
-//  T‰ss‰ voi kest‰‰..
+//  T√§ss√§ voi kest√§√§..
 set_time_limit(0);
 
-//Ja t‰ss‰ laitetaan ne takas
+//Ja t√§ss√§ laitetaan ne takas
 $sqlhaku = $sqlapu;
 
 if ($tee == "lataa_tiedosto") {
@@ -30,7 +30,7 @@ elseif($tee == "vie") {
 
   $tkausi = (int) $tkausi;
 
-  // Tutkitaan ensiksi, mille tilikaudelle pyydett‰v‰ lista lˆytyy, jos lista on sopiva
+  // Tutkitaan ensiksi, mille tilikaudelle pyydett√§v√§ lista l√∂ytyy, jos lista on sopiva
   $blvk = 0;
   $blvp = 0;
 
@@ -40,7 +40,7 @@ elseif($tee == "vie") {
               WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tkausi'";
     $result = pupe_query($query);
     if (mysql_num_rows($result) != 1) {
-      echo "<font class='error'>".t("Sopivaa yrityksen tilikautta ei lˆytynyt")."</font>";
+      echo "<font class='error'>".t("Sopivaa yrityksen tilikautta ei l√∂ytynyt")."</font>";
       exit;
     }
     $tilikaudetrow=mysql_fetch_array($result);
@@ -100,7 +100,7 @@ elseif($tee == "vie") {
 
       if(include('Spreadsheet/Excel/Writer.php')) {
 
-        //keksit‰‰n failille joku varmasti uniikki nimi:
+        //keksit√§√§n failille joku varmasti uniikki nimi:
         $workbook = new Spreadsheet_Excel_Writer($excelnimi);
         $workbook->setVersion(8);
         $worksheet =& $workbook->addWorksheet('Laskulistaus');
@@ -134,10 +134,10 @@ elseif($tee == "vie") {
         }
         $excelrivi++;
 
-        //  T‰m‰ lasku on uusi, tallennetaan liitteet
+        //  T√§m√§ lasku on uusi, tallennetaan liitteet
         if(!in_array($row["tunnus"], $tulostetut)) {
 
-          echo "<font class='message'>".t("K‰sitell‰‰n liitteet laskulle")." $row[tunnus] $row[nimi] $row[summa]@$row[mapvm]</font><br>";
+          echo "<font class='message'>".t("K√§sitell√§√§n liitteet laskulle")." $row[tunnus] $row[nimi] $row[summa]@$row[mapvm]</font><br>";
           $kuvaok = 0;
           $query = "SELECT *
                     FROM liitetiedostot
@@ -184,12 +184,12 @@ elseif($tee == "vie") {
               }
             }
             else {
-              echo "<font class='error'>".t("Laskutiedostoa ei lˆytynyt!")."</font><br>";
+              echo "<font class='error'>".t("Laskutiedostoa ei l√∂ytynyt!")."</font><br>";
             }
           }
 
           if($kuvaok != 1) {
-            echo "<font class='error'>".t("Laskulle ei lˆytynyt yht‰‰n kuvaa!!")."</font><br>";
+            echo "<font class='error'>".t("Laskulle ei l√∂ytynyt yht√§√§n kuvaa!!")."</font><br>";
           }
 
           $tulostetut[] = $row["tunnus"];
@@ -346,7 +346,7 @@ else {
   echo "</select></td>";
   echo "</tr>";
   echo "</table><br>
-        <input type = 'submit' value = '".t("N‰yt‰")."'></form>";
+        <input type = 'submit' value = '".t("N√§yt√§")."'></form>";
 
   require ("../inc/footer.inc");
 }

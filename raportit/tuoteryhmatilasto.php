@@ -1,11 +1,11 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("../inc/parametrit.inc");
 
-echo "<font class=head>".t("Tuoteryhm‰tilasto")."</font><hr>";
+echo "<font class=head>".t("Tuoteryhm√§tilasto")."</font><hr>";
 
 if (!isset($kka))
   $kka = date("m");
@@ -21,17 +21,17 @@ if (!isset($vvl))
 if (!isset($ppl))
   $ppl = date("d");
 
-// k‰yttis
+// k√§yttis
 echo "<form method='POST'>";
 echo "<input type='hidden' name='tee' value='raportoi'>";
 
 echo "<table>";
-echo "<tr><th>".t("Alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+echo "<tr><th>".t("Alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
     <td><input type='text' name='ppa' value='$ppa' size='3'></td>
     <td><input type='text' name='kka' value='$kka' size='3'></td>
     <td><input type='text' name='vva' value='$vva' size='5'></td></tr>";
 
-echo "<tr><th>".t("Loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+echo "<tr><th>".t("Loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
     <td><input type='text' name='ppl' value='$ppl' size='3'></td>
     <td><input type='text' name='kkl' value='$kkl' size='3'></td>
     <td><input type='text' name='vvl' value='$vvl' size='5'></td></tr>";
@@ -53,12 +53,12 @@ if ($tee != '' and isset($painoinnappia)) {
   $edellisvuosi = $vvl-1;
   $toissavuosi  = $vvl-2;
 
-  // Korjataan hieman monivalintalaatikon paluttamaa muuttujaa, koska t‰ss‰ tiedot luetaan laskulta ja tilausrivilt‰
+  // Korjataan hieman monivalintalaatikon paluttamaa muuttujaa, koska t√§ss√§ tiedot luetaan laskulta ja tilausrivilt√§
   $lisa = str_ireplace("asiakas.", "lasku.", $lisa);
   $lisa = str_ireplace("tuote.", "tilausrivi.", $lisa);
 
   echo "<table><tr>
-    <th>",t("Valittu aikav‰li"),"</th>
+    <th>",t("Valittu aikav√§li"),"</th>
     <td>{$ppa}</td>
     <td>{$kka}</td>
     <td>{$vva}</td>
@@ -71,12 +71,12 @@ if ($tee != '' and isset($painoinnappia)) {
   echo "<table>";
   echo "<th>".t("Piiri")."</th>";
   echo "<th>".t("Osasto")."</th>";
-  echo "<th>".t("Tuoteryhm‰")."</th>";
+  echo "<th>".t("Tuoteryhm√§")."</th>";
   echo "<th>".t("Myynti")."<br>$toissavuosi</th>";
   echo "<th>".t("Myynti")."<br>$edellisvuosi</th>";
   echo "<th>".t("Myyntiind")."</th>";
   echo "<th>".t("Myynti")."<br>$vvl</th>";
-  echo "<th>".t("Myynti")."<br>".t("aikav‰lill‰")."</th>";
+  echo "<th>".t("Myynti")."<br>".t("aikav√§lill√§")."</th>";
 
   $query = "SELECT
             lasku.piiri,

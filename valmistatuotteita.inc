@@ -7,7 +7,7 @@ else {
   require_once("tilauskasittely/tulosta_tilaustuotetarrat.inc");
 }
 
-//v‰h‰n joutuu laitaa talteen n‰it‰ alkuper‰isi‰
+//v√§h√§n joutuu laitaa talteen n√§it√§ alkuper√§isi√§
 $isavarattu   = $atil;
 $isatuoteno   = $tuoteno;
 $useavalmiste = "";
@@ -15,7 +15,7 @@ $useavalmiste = "";
 if ($tee == 'UV') {
   if ($atil <= 0) {
     $tee = '';
-    echo "<font class='error'>".t("Anna valmistettava m‰‰r‰")."</font><br>";
+    echo "<font class='error'>".t("Anna valmistettava m√§√§r√§")."</font><br>";
   }
 }
 
@@ -42,7 +42,7 @@ if ($tee == 'UV') {
 
   unset($tuoteresult);
 
-  // k‰ytet‰‰n rivill‰ olevaa paikkaa
+  // k√§ytet√§√§n rivill√§ olevaa paikkaa
   $query = "SELECT tuotepaikat.saldo, tuote.ei_saldoa, tuote.yksikko, tuote.kehahin, tuotepaikat.tunnus tunnus, tuote.sarjanumeroseuranta,
             tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso
             FROM tuote
@@ -56,7 +56,7 @@ if ($tee == 'UV') {
   $tuoteresult = pupe_query($query);
 
   if (mysql_num_rows($tuoteresult) != 1) {
-    //jos ei lˆytynyt yksiselitteist‰ rivi‰ yritet‰‰n oletuspaikkaa
+    //jos ei l√∂ytynyt yksiselitteist√§ rivi√§ yritet√§√§n oletuspaikkaa
     $query = "SELECT tuotepaikat.saldo, tuote.ei_saldoa, tuote.yksikko, tuote.kehahin, tuotepaikat.tunnus tunnus, tuote.sarjanumeroseuranta,
               tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso
               FROM tuote
@@ -69,7 +69,7 @@ if ($tee == 'UV') {
   }
 
   if (mysql_num_rows($tuoteresult) != 1) {
-    //jos ei lˆytynyt yksiselitteist‰ rivi‰ yritet‰‰n mit‰ tahansa paikkaa
+    //jos ei l√∂ytynyt yksiselitteist√§ rivi√§ yritet√§√§n mit√§ tahansa paikkaa
     $query = "SELECT tuotepaikat.saldo, tuote.ei_saldoa, tuote.yksikko, tuote.kehahin, tuotepaikat.tunnus tunnus, tuote.sarjanumeroseuranta,
               tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso
               FROM tuote
@@ -82,7 +82,7 @@ if ($tee == 'UV') {
 
   if (mysql_num_rows($tuoteresult) != 1) {
     $tee = '';
-    echo "<font class='error'>$isatuoteno ".t("Varastopaikkaa ei lˆydy")."</font><br>";
+    echo "<font class='error'>$isatuoteno ".t("Varastopaikkaa ei l√∂ydy")."</font><br>";
   }
   else {
     // Valmisteen kokonaissaldo
@@ -96,7 +96,7 @@ if ($tee == 'UV') {
     $valmisterow = mysql_fetch_assoc($tuoteresult);
     $valmisterow['kokonaissaldo'] = $saldorow['kokonaissaldo'];
 
-    // P‰ivitet‰‰n sarjanumerolle ja riville lˆytynyt paikka
+    // P√§ivitet√§√§n sarjanumerolle ja riville l√∂ytynyt paikka
     $query = "UPDATE tilausrivi SET
               hyllyalue   = '$valmisterow[hyllyalue]',
               hyllynro    = '$valmisterow[hyllynro]',
@@ -144,7 +144,7 @@ if ($tee == 'UV') {
 
         $varataankpl = 0;
 
-        //N‰in paljon haluamme k‰ytt‰‰ raaka-ainetta
+        //N√§in paljon haluamme k√§ytt√§√§ raaka-ainetta
         if ($kulukpllat[$raakaainerow["tunnus"]] != 0) {
           $varataankpl = $kulukpllat[$raakaainerow["tunnus"]];
         }
@@ -152,7 +152,7 @@ if ($tee == 'UV') {
           $varataankpl = $raakaainerow['varattu'] * $akerroin;
         }
 
-        //k‰ytet‰‰n rivill‰ olevaa paikkaa
+        //k√§ytet√§√§n rivill√§ olevaa paikkaa
         $query = "SELECT tuotepaikat.saldo, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso
                   FROM tuote
                   JOIN tuotepaikat ON (tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno)
@@ -165,7 +165,7 @@ if ($tee == 'UV') {
         $tuoteresult = pupe_query($query);
 
         if (mysql_num_rows($tuoteresult) != 1) {
-          //jos ei lˆytynyt yksiselitteist‰ rivi‰ yritet‰‰n oletuspaikkaa
+          //jos ei l√∂ytynyt yksiselitteist√§ rivi√§ yritet√§√§n oletuspaikkaa
           $query = "SELECT tuotepaikat.saldo, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso
                     FROM tuote
                     JOIN tuotepaikat ON (tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno)
@@ -177,7 +177,7 @@ if ($tee == 'UV') {
         }
 
         if (mysql_num_rows($tuoteresult) != 1) {
-          //jos ei lˆytynyt yksiselitteist‰ rivi‰ yritet‰‰n mit‰ tahansa paikkaa
+          //jos ei l√∂ytynyt yksiselitteist√§ rivi√§ yritet√§√§n mit√§ tahansa paikkaa
           $query = "SELECT tuotepaikat.saldo, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso
                     FROM tuote
                     JOIN tuotepaikat ON (tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno)
@@ -187,11 +187,11 @@ if ($tee == 'UV') {
           $tuoteresult = pupe_query($query);
         }
 
-        //katotaan kanssa, ett‰ perheenj‰senet lˆytyy kannasta ja niit‰ on riitt‰v‰sti
+        //katotaan kanssa, ett√§ perheenj√§senet l√∂ytyy kannasta ja niit√§ on riitt√§v√§sti
         if (mysql_num_rows($tuoteresult) == 1) {
           $trow = mysql_fetch_assoc($tuoteresult);
 
-          // P‰ivitet‰‰n sarjanumerolle ja riville lˆytynyt paikka
+          // P√§ivitet√§√§n sarjanumerolle ja riville l√∂ytynyt paikka
           $query = "UPDATE tilausrivi SET
                     hyllyalue   = '$trow[hyllyalue]',
                     hyllynro    = '$trow[hyllynro]',
@@ -213,13 +213,13 @@ if ($tee == 'UV') {
           }
 
           if ($trow['saldo'] < $varataankpl and $vakisinhyvaksy == "") {
-            $tee = ''; //Raaka-aineet eiv‰t riit‰!
-            echo "<font class='error'>$raakaainerow[tuoteno] ".t("saldo")." $trow[saldo] ".t("ei riit‰ valmistukseen")." ($varataankpl)</font><br>";
+            $tee = ''; //Raaka-aineet eiv√§t riit√§!
+            echo "<font class='error'>$raakaainerow[tuoteno] ".t("saldo")." $trow[saldo] ".t("ei riit√§ valmistukseen")." ($varataankpl)</font><br>";
           }
         }
         else {
           $tee = '';
-          echo "<font class='error'>$raakaainerow[tuoteno] ".t("Varastopaikkaa ei lˆydy")."</font><br>";
+          echo "<font class='error'>$raakaainerow[tuoteno] ".t("Varastopaikkaa ei l√∂ydy")."</font><br>";
         }
       }
     }
@@ -232,7 +232,7 @@ if ($tee == 'UV') {
   echo "<br><br>";
 }
 
-if ($tee == 'UV') { //Tehd‰‰n tuotteet!
+if ($tee == 'UV') { //Tehd√§√§n tuotteet!
 
   $uusiarvo   = 0;
   $kpl     = 0;
@@ -266,7 +266,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
                 and tuotepaikat.hyllyvali = '$raakaainerow[hyllyvali]'";
     }
     else {
-      //sittenh‰n tuote on saldoton
+      //sittenh√§n tuote on saldoton
       $query = "SELECT tuote.kehahin, tuote.ei_saldoa, tuote.yksikko,
                 tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm
                 FROM tuote
@@ -301,7 +301,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 
     $uusiarvo += $arvo;
 
-    ///* Tehd‰‰n tapahtuma *///
+    ///* Tehd√§√§n tapahtuma *///
     $query = "INSERT into tapahtuma set
               yhtio      = '$kukarow[yhtio]',
               tuoteno    = '$raakaainerow[tuoteno]',
@@ -314,7 +314,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
               hyllynro   = '$tuoterow[hyllynro]',
               hyllytaso  = '$tuoterow[hyllytaso]',
               hyllyvali  = '$tuoterow[hyllyvali]',
-              selite     = '".t("K‰ytettiin tuotteen")." $isatuoteno ".t("valmistamiseen")." ".t("tyˆm‰‰r‰yksell‰")." $tilrivirow[otunnus]',
+              selite     = '".t("K√§ytettiin tuotteen")." $isatuoteno ".t("valmistamiseen")." ".t("ty√∂m√§√§r√§yksell√§")." $tilrivirow[otunnus]',
               laatija    = '$kukarow[kuka]',
               laadittu   = now()";
     $result = pupe_query($query);
@@ -327,10 +327,10 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
                 and tunnus  = '$tuoterow[tunnus]'";
       $result = pupe_query($query);
 
-      //  Merkataan er‰ kulutetuksi
+      //  Merkataan er√§ kulutetuksi
       if (in_array($raakaainerow["sarjanumeroseuranta"], array("E","F","G"))) {
 
-        // Haetaan eka raaka-aineriviin liitetyn er‰n tiedot
+        // Haetaan eka raaka-aineriviin liitetyn er√§n tiedot
         $query = "SELECT *
                   FROM sarjanumeroseuranta
                   WHERE yhtio          = '$kukarow[yhtio]'
@@ -340,11 +340,11 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
         $lisa_res = pupe_query($query);
         $lisa_row = mysql_fetch_assoc($lisa_res);
 
-        // luodaan muuttuja jota pienennet‰‰n luupissa
+        // luodaan muuttuja jota pienennet√§√§n luupissa
         $eraayht = $kpl;
         $ederaostorivi = 0;
 
-        // koitetaan lˆyt‰‰ vapaita ostettuja eri‰ mit‰ kuluttaa
+        // koitetaan l√∂yt√§√§ vapaita ostettuja eri√§ mit√§ kuluttaa
         $query = "SELECT era_kpl, tunnus, ostorivitunnus
                   FROM sarjanumeroseuranta
                   WHERE yhtio          = '$kukarow[yhtio]'
@@ -360,22 +360,22 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
                   ORDER BY era_kpl DESC, tunnus";
         $erajaljella_res = pupe_query($query);
 
-        // jos lˆytyy ostettuja eri‰ myyt‰v‰ks niin menn‰‰n t‰nne
+        // jos l√∂ytyy ostettuja eri√§ myyt√§v√§ks niin menn√§√§n t√§nne
         while ($erajaljella_row = mysql_fetch_assoc($erajaljella_res)) {
 
-          // luodaan muuttuja jossa annetaan kyselyille m‰‰r‰muutoksen
+          // luodaan muuttuja jossa annetaan kyselyille m√§√§r√§muutoksen
           $eravahennetaan = 0;
 
-          // jos lˆydetyn er‰n m‰‰r‰ riitt‰‰ koko tarvittavaan m‰‰r‰‰n niin otetaan sen verran ku tarvitaan
+          // jos l√∂ydetyn er√§n m√§√§r√§ riitt√§√§ koko tarvittavaan m√§√§r√§√§n niin otetaan sen verran ku tarvitaan
           if ($erajaljella_row["era_kpl"] >= $eraayht) {
             $eravahennetaan = $eraayht;
           }
-          // muuten vaan lˆydetyn er‰n verran
+          // muuten vaan l√∂ydetyn er√§n verran
           else {
             $eravahennetaan = $erajaljella_row["era_kpl"];
           }
 
-          // v‰hennet‰‰n ostorivilt‰ tarvittava m‰‰r‰
+          // v√§hennet√§√§n ostorivilt√§ tarvittava m√§√§r√§
           $query = "UPDATE sarjanumeroseuranta
                     SET era_kpl = era_kpl-$eravahennetaan,
                     muutospvm   = now(),
@@ -387,11 +387,11 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
           $raakaerarow = array('tunnus' => 0, 'ostorivitunnus' => 0);
 
           if ($ederaostorivi == 0 and $lisa_row['era_kpl'] == 0) {
-            // T‰m‰ on loopin eka kierros, silloin p‰ivitet‰‰n aina alunperin raaka-aineriviin liitetty er‰numerorivi
+            // T√§m√§ on loopin eka kierros, silloin p√§ivitet√§√§n aina alunperin raaka-aineriviin liitetty er√§numerorivi
             $raakaerarow = $lisa_row;
           }
           else {
-            // Onko n‰ill‰ tiedoilla jo er‰ t‰ll‰ raaka-ainerivill‰? (Raaka-ainerivill‰ voi olla useampi er‰numerorivi jos joudutaan k‰ytt‰‰ useampaa er‰‰)
+            // Onko n√§ill√§ tiedoilla jo er√§ t√§ll√§ raaka-ainerivill√§? (Raaka-ainerivill√§ voi olla useampi er√§numerorivi jos joudutaan k√§ytt√§√§ useampaa er√§√§)
             $query = "SELECT *
                       FROM sarjanumeroseuranta
                       WHERE yhtio          = '$kukarow[yhtio]'
@@ -404,7 +404,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
           }
 
           if ($raakaerarow['ostorivitunnus'] == $erajaljella_row['ostorivitunnus']) {
-            // lis‰t‰‰n raaka-aineriviin liitetylle er‰lle m‰‰r‰, ja samalla p‰ivitet‰‰n ostorivitunnus oikeaksi
+            // lis√§t√§√§n raaka-aineriviin liitetylle er√§lle m√§√§r√§, ja samalla p√§ivitet√§√§n ostorivitunnus oikeaksi
             $query = "UPDATE sarjanumeroseuranta
                       SET era_kpl      = era_kpl+$eravahennetaan,
                       ostorivitunnus = '$erajaljella_row[ostorivitunnus]',
@@ -415,7 +415,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
             $lisa_res = pupe_query($query);
           }
           else {
-            // lis‰t‰‰n er‰ oikealla ostorivitunnuksella ja er‰n m‰‰r‰ll‰
+            // lis√§t√§√§n er√§ oikealla ostorivitunnuksella ja er√§n m√§√§r√§ll√§
             $query = "INSERT into sarjanumeroseuranta
                       SET yhtio      = '$kukarow[yhtio]',
                       tuoteno          = '$lisa_row[tuoteno]',
@@ -437,10 +437,10 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
             $lisa_res = pupe_query($query);
           }
 
-          // v‰hennet‰‰n luupattavaa m‰‰r‰‰
+          // v√§hennet√§√§n luupattavaa m√§√§r√§√§
           $eraayht -= $eravahennetaan;
 
-          // t‰t‰ ostorivitunnaria k‰ytettiin
+          // t√§t√§ ostorivitunnaria k√§ytettiin
           $ederaostorivi = $erajaljella_row["ostorivitunnus"];
 
           // Jos kaikki on jo allokoitu niin breikataan
@@ -449,7 +449,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
           }
         }
 
-        // Ei lˆytynyt riitt‰v‰sti ostettuja eri‰, eli "myyty pakkaselle" niin luodaan uusi er‰rivi jossa ostorivitunnus on nolla jonne laitetaan loppum‰‰r‰.
+        // Ei l√∂ytynyt riitt√§v√§sti ostettuja eri√§, eli "myyty pakkaselle" niin luodaan uusi er√§rivi jossa ostorivitunnus on nolla jonne laitetaan loppum√§√§r√§.
         if ($eraayht != 0) {
 
           $query = "INSERT into sarjanumeroseuranta
@@ -481,14 +481,14 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
         }
       }
 
-      echo "<font class='message'>".t("Varastosta k‰ytettiin tuotetta")." $raakaainerow[tuoteno] $kpl ".t_avainsana("Y", "", "and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite").", $tuoterow[kehahin]</font><br>";
+      echo "<font class='message'>".t("Varastosta k√§ytettiin tuotetta")." $raakaainerow[tuoteno] $kpl ".t_avainsana("Y", "", "and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite").", $tuoterow[kehahin]</font><br>";
 
     }
     else {
-      echo "<font class='message'>".t("K‰ytettiin tuotetta")." $raakaainerow[tuoteno] $kpl ".t_avainsana("Y", "", "and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite").", $tuoterow[kehahin]</font><br>";
+      echo "<font class='message'>".t("K√§ytettiin tuotetta")." $raakaainerow[tuoteno] $kpl ".t_avainsana("Y", "", "and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite").", $tuoterow[kehahin]</font><br>";
     }
 
-    //p‰ivitet‰‰n tilausrivi k‰ytetyksi
+    //p√§ivitet√§√§n tilausrivi k√§ytetyksi
     $query = "UPDATE tilausrivi
               SET varattu = round(varattu-$kpl,2),
               kpl         = round(kpl+$kpl,2)
@@ -507,33 +507,33 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
       if ((float) $kaikenkaikkiaan > 1) {
 
         if ((float) $kaikenkaikkiaan_arvot > 0) {
-          //jyvitet‰‰n $uusiarvo valmisteille kappaleiden ja kehahintojen mukaan
+          //jyvitet√§√§n $uusiarvo valmisteille kappaleiden ja kehahintojen mukaan
           $uusiarvo = round($uusiarvo * (($isavarattu * $valmisterow["kehahin"])/$kaikenkaikkiaan_arvot), 6);
         }
         else {
-          //jyvitet‰‰n $uusiarvo valmisteille valmisteiden m‰‰r‰n mukaan
+          //jyvitet√§√§n $uusiarvo valmisteille valmisteiden m√§√§r√§n mukaan
           $uusiarvo = round($uusiarvo/$kaikenkaikkiaan, 6);
         }
       }
 
       if ($valmisterow["sarjanumeroseuranta"] == "S" or $valmisterow["sarjanumeroseuranta"] == "U" or $valmisterow["sarjanumeroseuranta"] == "G") {
         $kehahin = 0;
-        $selite = t("Valmistettiin tuotetta tyˆm‰‰r‰yksell‰")." $tilrivirow[otunnus] ($uusiarvo)";
+        $selite = t("Valmistettiin tuotetta ty√∂m√§√§r√§yksell√§")." $tilrivirow[otunnus] ($uusiarvo)";
       }
       else {
         if ($valmisterow['kokonaissaldo'] + $isavarattu > 0 and $valmisterow['kokonaissaldo'] > 0) {
-          // kehahin matikka (tuotteella pit‰‰ olla saldoa ennen ja j‰lkeen, ett‰ kehahin lasketaan)
+          // kehahin matikka (tuotteella pit√§√§ olla saldoa ennen ja j√§lkeen, ett√§ kehahin lasketaan)
           $kehahin = round(($valmisterow['kokonaissaldo'] * $valmisterow['kehahin'] + $uusiarvo) / ($valmisterow['kokonaissaldo'] + $isavarattu), 6);
         }
         else {
-          // jos j‰‰d‰‰n saldossa t‰m‰nkin tulon j‰lkeen miinukselle tai nollille, laitetaan kehahin suoraan t‰m‰n valmistuksen hinnasta
+          // jos j√§√§d√§√§n saldossa t√§m√§nkin tulon j√§lkeen miinukselle tai nollille, laitetaan kehahin suoraan t√§m√§n valmistuksen hinnasta
           $kehahin = round($uusiarvo/$isavarattu, 6);
         }
 
-        $selite = t("Valmistettiin tuotetta tyˆm‰‰r‰yksell‰")." $tilrivirow[otunnus] ($valmisterow[kehahin] --> $kehahin)";
+        $selite = t("Valmistettiin tuotetta ty√∂m√§√§r√§yksell√§")." $tilrivirow[otunnus] ($valmisterow[kehahin] --> $kehahin)";
       }
 
-      ///* Tehd‰‰n tapahtuma *///
+      ///* Tehd√§√§n tapahtuma *///
       $query = "INSERT into tapahtuma set
                 yhtio      = '$kukarow[yhtio]',
                 tuoteno    = '$isatuoteno',
@@ -567,7 +567,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
                 and tunnus  = '$valmisterow[tunnus]'";
       $result = pupe_query($query);
 
-      // p‰ivitet‰‰n tilausrivi k‰ytetyksi ja splitataan se...
+      // p√§ivitet√§√§n tilausrivi k√§ytetyksi ja splitataan se...
       // osavalmistus tai kokovalmistus
       if ($isavarattu <= $tilrivirow["varattu"]) {
 
@@ -617,8 +617,8 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
           $valmistettavat .= ",".mysql_insert_id();
         }
 
-        //  Kaikille sarjanumeroille tehd‰‰n varastoon saavutettu O-rivi, muuten mm ker‰ys ei toimi ja ehk‰ se on myˆs loogisempaa?
-        //  P‰ivitet‰‰n valmistetulle riville laskutettuaika, jotta se n‰kyy kaikkialla oikein
+        //  Kaikille sarjanumeroille tehd√§√§n varastoon saavutettu O-rivi, muuten mm ker√§ys ei toimi ja ehk√§ se on my√∂s loogisempaa?
+        //  P√§ivitet√§√§n valmistetulle riville laskutettuaika, jotta se n√§kyy kaikkialla oikein
         if ($valmisterow["sarjanumeroseuranta"] != "") {
           $tilausriviTyyppi = "O";
           $laskutettuLisa = ", laskutettu = '$kukarow[kuka]', laskutettuaika = now()";
@@ -670,7 +670,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
         $jaljella = round($tilrivirow["varattu"] - $isavarattu, 2);
         $jaljella_tot += $jaljella;
 
-        //p‰ivitet‰‰n alkuper‰inen rivi
+        //p√§ivitet√§√§n alkuper√§inen rivi
         $query = "UPDATE tilausrivi
                   SET varattu = '$jaljella',
                   kpl         = round(kpl+$isavarattu,2)
@@ -680,10 +680,10 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
                   and tyyppi  in ('W','M')";
         $upparesult = pupe_query($query);
 
-        // Siirret‰‰n sarjanumerot valmistetulle tilausriville
+        // Siirret√§√§n sarjanumerot valmistetulle tilausriville
         if (in_array($valmisterow["sarjanumeroseuranta"], array("S","T","U","V"))) {
 
-          //  Siirret‰‰n ostorivin tunnus valmistetulle riville
+          //  Siirret√§√§n ostorivin tunnus valmistetulle riville
           $query = "SELECT tunnus
                     FROM sarjanumeroseuranta
                     WHERE yhtio        = '$kukarow[yhtio]'
@@ -712,7 +712,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
               $sarjarow = mysql_fetch_assoc($sarjares);
               $sarja = $sarjarow["kpl"]+1;
 
-              // varmistetaan, ett‰ t‰m‰ on uniikki!
+              // varmistetaan, ett√§ t√§m√§ on uniikki!
               $onUniikki = false;
 
               while ($onUniikki === false) {
@@ -745,7 +745,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
         }
         elseif (in_array($valmisterow["sarjanumeroseuranta"], array("E","F","G"))) {
 
-          // Siirret‰‰n ostorivin tunnus valmistetulle riville
+          // Siirret√§√§n ostorivin tunnus valmistetulle riville
           $query = "SELECT tunnus, era_kpl, sarjanumero, lisatieto
                     FROM sarjanumeroseuranta
                     WHERE yhtio        = '$kukarow[yhtio]'
@@ -763,7 +763,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
             $v_eranro = $sarjarow['sarjanumero'];
             $v_listie = $sarjarow['lisatieto'];
 
-            // Valmistetaan v‰hemm‰n ku er‰ss‰ ois kamaa, eli osavalmistus
+            // Valmistetaan v√§hemm√§n ku er√§ss√§ ois kamaa, eli osavalmistus
             if ($sarjarow["era_kpl"] > $isavarattu) {
               $eraa_tarvitaan_viela = $sarjarow["era_kpl"]-$isavarattu;
 
@@ -809,7 +809,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
         }
       }
 
-      //printataan pikku raporttia mit‰ tulikaan tehty‰
+      //printataan pikku raporttia mit√§ tulikaan tehty√§
       echo "<font class='message'>".t("Valmistettiin tuotetta")." $isatuoteno $isavarattu ".t_avainsana("Y", $kieli, "and avainsana.selite='$valmisterow[yksikko]'", "", "", "selite")."</font><br>";
 
       $query = "SELECT paivitys
@@ -827,7 +827,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 
         echo "<br>";
 
-        //  Kohdistetaan vain oikeille asiakkaille n‰iss‰ caseissa
+        //  Kohdistetaan vain oikeille asiakkaille n√§iss√§ caseissa
         if ($yhtiorow['automaattinen_jt_toimitus_valmistus'] == 'S' or $yhtiorow["automaattinen_jt_toimitus_valmistus"] == "V") {
           $suoralisa = "";
 
@@ -835,7 +835,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
             $suoralisa = "AND tilausrivin_lisatiedot.suoraan_laskutukseen = 'o'";
           }
 
-          //Tutkitaan lˆytyykˆ JT-rivi joka m‰pp‰ytyy t‰h‰n valmistusriviin
+          //Tutkitaan l√∂ytyyk√∂ JT-rivi joka m√§pp√§ytyy t√§h√§n valmistusriviin
              $query = "SELECT ifnull(if((tilausrivi.perheid != 0 and tilausrivi.tunnus != tilausrivi.perheid), tilausrivi.perheid, tilausrivi.tunnus), 0) jtrivi
                        FROM tilausrivin_lisatiedot
                        JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
@@ -845,16 +845,16 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
           $varastoon_result = pupe_query($query);
 
           while ($varastoon_row = mysql_fetch_assoc($varastoon_result)) {
-            // Mitk‰ suoratoimitukset valmistettiin t‰ll‰ keikalla
+            // Mitk√§ suoratoimitukset valmistettiin t√§ll√§ keikalla
             $jtrivit[$varastoon_row["jtrivi"]] = $varastoon_row["jtrivi"];
-            // Katotaan mille paikalle n‰‰ meni, jotta suoratoimitus voidaan laukasta t‰lt‰ paikalta
+            // Katotaan mille paikalle n√§√§ meni, jotta suoratoimitus voidaan laukasta t√§lt√§ paikalta
             $jtrivit_paikat[$varastoon_row["jtrivi"]] = $tapahtumaid;
           }
         }
 
         $varastosta = array(kuuluukovarastoon($tilrivirow["hyllyalue"], $tilrivirow["hyllynro"]));
 
-        // Toimitetaan vain valmistettua is‰tuotetta, ei KAIKKIA firman j‰lkitoimitusrivej‰
+        // Toimitetaan vain valmistettua is√§tuotetta, ei KAIKKIA firman j√§lkitoimitusrivej√§
         jt_toimita("", "", $varastosta, $jtrivit, $jtrivit_paikat, "tosi_automaaginen", "JATKA", "", $isatuoteno, '', "TULLAAN_VALMISTUKSESTA");
 
         //  Laitetaan tavarat liikkeelle jos sallitaan!
@@ -865,7 +865,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
     }
   }
 
-  // Tehd‰‰n uusi tuote $uusiarvo on k‰ytettyjen raaka-aineiden arvo.
+  // Tehd√§√§n uusi tuote $uusiarvo on k√§ytettyjen raaka-aineiden arvo.
   if ($useavalmiste == "ON") {
 
     // Katsotaan eka kuinka monta eri valmistetta syntyy
@@ -884,7 +884,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 
       if (isset($kaikenkaikkiaan_arvot)) {
         if ($uvrow["kehahin"] == 0) {
-          // Jos yksikin valmiste on nollakehalla, niin jyvitet‰‰n $uusiarvo valmisteille vain kappalem‰‰rien mukaan
+          // Jos yksikin valmiste on nollakehalla, niin jyvitet√§√§n $uusiarvo valmisteille vain kappalem√§√§rien mukaan
           unset($kaikenkaikkiaan_arvot);
         }
         else {
@@ -895,12 +895,12 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 
     mysql_data_seek($uvresult, 0);
 
-    // Valmistetaan ensimm‰inen is‰
+    // Valmistetaan ensimm√§inen is√§
     valmista_isa($valmisterow, $tilrivirow, $isavarattu, $isatuoteno, $uusiarvo, $kaikenkaikkiaan, $kaikenkaikkiaan_arvot);
 
     while ($uvrow = mysql_fetch_assoc($uvresult)) {
 
-      // k‰ytet‰‰n rivill‰ olevaa paikkaa
+      // k√§ytet√§√§n rivill√§ olevaa paikkaa
       $query = "SELECT tuotepaikat.saldo, tuote.ei_saldoa, tuote.yksikko, tuote.kehahin, tuotepaikat.tunnus tunnus, tuote.sarjanumeroseuranta,
                 tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso
                 FROM tuote
@@ -914,7 +914,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
       $tuoteresult = pupe_query($query);
 
       if (mysql_num_rows($tuoteresult) != 1) {
-        //jos ei lˆytynyt yksiselitteist‰ rivi‰ yritet‰‰n oletuspaikkaa
+        //jos ei l√∂ytynyt yksiselitteist√§ rivi√§ yritet√§√§n oletuspaikkaa
         $query = "SELECT tuotepaikat.saldo, tuote.ei_saldoa, tuote.yksikko, tuote.kehahin, tuotepaikat.tunnus tunnus, tuote.sarjanumeroseuranta,
                   tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso
                   FROM tuote
@@ -927,7 +927,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
       }
 
       if (mysql_num_rows($tuoteresult) != 1) {
-        //jos ei lˆytynyt yksiselitteist‰ rivi‰ yritet‰‰n mit‰ tahansa paikkaa
+        //jos ei l√∂ytynyt yksiselitteist√§ rivi√§ yritet√§√§n mit√§ tahansa paikkaa
         $query = "SELECT tuotepaikat.saldo, tuote.ei_saldoa, tuote.yksikko, tuote.kehahin, tuotepaikat.tunnus tunnus, tuote.sarjanumeroseuranta,
                   tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso
                   FROM tuote
@@ -939,7 +939,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
       }
 
       if (mysql_num_rows($tuoteresult) != 1) {
-        echo "<font class='error'>$uvrow[tuoteno] ".t("Varastopaikkaa ei lˆydy")."</font><br>";
+        echo "<font class='error'>$uvrow[tuoteno] ".t("Varastopaikkaa ei l√∂ydy")."</font><br>";
       }
       else {
 
@@ -954,7 +954,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
         $uvisarow = mysql_fetch_assoc($tuoteresult);
         $uvisarow['kokonaissaldo'] = $saldorow['kokonaissaldo'];
 
-        // P‰ivitet‰‰n sarjanumerolle ja riville lˆytynyt paikka
+        // P√§ivitet√§√§n sarjanumerolle ja riville l√∂ytynyt paikka
         $query = "UPDATE tilausrivi SET
                   hyllyalue   = '$uvisarow[hyllyalue]',
                   hyllynro    = '$uvisarow[hyllynro]',

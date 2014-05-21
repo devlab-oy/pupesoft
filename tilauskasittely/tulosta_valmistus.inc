@@ -53,7 +53,7 @@ if (!function_exists('alku_valm')) {
       $masresult = mysql_query($query) or pupe_error($query);
       $masrow = mysql_fetch_array($masresult);
 
-      //maksuehto tekstin‰
+      //maksuehto tekstin√§
       $maksuehto = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli);
 
       $pdf->draw_text(410, 815, $laskurow["hyvaksynnanmuutos"],   $thispage, $iso);
@@ -88,7 +88,7 @@ if (!function_exists('alku_valm')) {
 
       $pdf->draw_rectangle(779, 300, 758, 580, $thispage, $rectparam);
       $pdf->draw_rectangle(779, 420, 758, 580, $thispage, $rectparam);
-      $pdf->draw_text(310, 771, t("Ker‰ysaika", $kieli),           $thispage, $pieni);
+      $pdf->draw_text(310, 771, t("Ker√§ysaika", $kieli),           $thispage, $pieni);
 
       if ($laskurow["keraysvko"] != '') {
         $taika = t("Vko", $kieli)." ".date("W", strtotime($laskurow["kerayspvm"]));
@@ -124,15 +124,15 @@ if (!function_exists('alku_valm')) {
       $pdf->draw_rectangle(758, 420, 737, 580, $thispage, $rectparam);
       $pdf->draw_text(310, 750, t("Asiakasnumero", $kieli),     $thispage, $pieni);
       $pdf->draw_text(310, 740, $asrow["asiakasnro"],       $thispage, $norm);
-      $pdf->draw_text(430, 750, t("P‰iv‰ys", $kieli),        $thispage, $pieni);
+      $pdf->draw_text(430, 750, t("P√§iv√§ys", $kieli),        $thispage, $pieni);
       $pdf->draw_text(430, 740, tv1dateconv(date("Y-m-d")),     $thispage, $norm);
 
 
       $pdf->draw_rectangle(737, 300, 716, 580, $thispage, $rectparam);
       $pdf->draw_rectangle(737, 420, 716, 580, $thispage, $rectparam);
-      $pdf->draw_text(310, 729, t("Myyj‰", $kieli),     $thispage, $pieni);
+      $pdf->draw_text(310, 729, t("Myyj√§", $kieli),     $thispage, $pieni);
 
-      //etsit‰‰n myyj‰n nimi
+      //etsit√§√§n myyj√§n nimi
       $query  = "  select nimi
             from kuka
             where tunnus='$laskurow[myyja]' and yhtio='$kukarow[yhtio]'";
@@ -277,7 +277,7 @@ if (!function_exists('uusi_sivu_valm')) {
     $masresult = mysql_query($query) or pupe_error($query);
     $masrow = mysql_fetch_array($masresult);
 
-    //maksuehto tekstin‰
+    //maksuehto tekstin√§
     $maksuehto = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli);
 
     $pdf->draw_text(410, 815, $laskurow["hyvaksynnanmuutos"],       $thispage, $iso);
@@ -293,7 +293,7 @@ if (!function_exists('uusi_sivu_valm')) {
 
     $pdf->draw_rectangle(779, 300, 758, 580, $thispage, $rectparam);
     $pdf->draw_rectangle(779, 420, 758, 580, $thispage, $rectparam);
-    $pdf->draw_text(310, 771, t("Ker‰ysaika", $kieli),           $thispage, $pieni);
+    $pdf->draw_text(310, 771, t("Ker√§ysaika", $kieli),           $thispage, $pieni);
 
     if ($laskurow["keraysvko"] != '') {
       $taika = t("Vko", $kieli)." ".date("W", strtotime($laskurow["kerayspvm"]));
@@ -435,7 +435,7 @@ if (!function_exists('rivi_valm')) {
 
     static $tuoteperhe_omallesivulle = "";
 
-    // viivat rivien v‰liin...
+    // viivat rivien v√§liin...
     $x[0] = 20;
     $x[1] = 580;
     $y[0] = $y[1] = $kala + $rivinkorkeus - 4;
@@ -527,12 +527,12 @@ if (!function_exists('rivi_valm')) {
       $row["kommentti"] .= "\n".t("Asiakkaan tilausnumero", $kieli).": ".$laskurow['asiakkaan_tilausnumero'];
     }
 
-    // Mahtuuko rivi t‰lle sivulle
+    // Mahtuuko rivi t√§lle sivulle
     $kala_nyt = $kala;
 
     rivi_valmistus($devnull);
 
-    // Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
+    // Jos on paljon rivej√§ tehd√§√§n uusi otsikko...
     if ($kala <= 65) {
       $sivu++;
 
@@ -631,7 +631,7 @@ if (!function_exists('rivi_valmistus')) {
 
         $kala -= $rivinkorkeus;
 
-        $faktarow["fakta"] = t("Tyˆohje", $kieli).":\n".$faktarow["fakta"];
+        $faktarow["fakta"] = t("Ty√∂ohje", $kieli).":\n".$faktarow["fakta"];
 
         if ($row['valmistuslinja'] > 0) {
           $tuotantolinja = $row['valmistuslinja']. " - ". t_avainsana('valmistuslinja', $kieli, "and avainsana.selite='$row[valmistuslinja]'", "", "", "selitetark");
@@ -665,7 +665,7 @@ if (!function_exists('loppu_valm')) {
   function loppu_valm($thispage, $tots) {
     global $pdf, $sivu, $laskurow, $viite, $pieni, $norm, $rectparam, $kieli, $yhtiorow, $kala, $rivinkorkeus, $page, $paino;
 
-    //Alimmat kolme laatikkoa, yhtiˆtietoja
+    //Alimmat kolme laatikkoa, yhti√∂tietoja
     $pdf->draw_rectangle(70, 20, 20, 580,  $thispage, $rectparam);
     $pdf->draw_rectangle(70, 207, 20, 580,  $thispage, $rectparam);
     $pdf->draw_rectangle(70, 394, 20, 580,  $thispage, $rectparam);
@@ -679,12 +679,12 @@ if (!function_exists('loppu_valm')) {
     $pdf->draw_text(257, 55, $yhtiorow["puhelin"],        $thispage, $pieni);
     $pdf->draw_text(217, 45, t("Telefax", $kieli).":",      $thispage, $pieni);
     $pdf->draw_text(257, 45, $yhtiorow["fax"],          $thispage, $pieni);
-    $pdf->draw_text(217, 35, t("S‰hkˆposti", $kieli).":",    $thispage, $pieni);
+    $pdf->draw_text(217, 35, t("S√§hk√∂posti", $kieli).":",    $thispage, $pieni);
     $pdf->draw_text(257, 35, $yhtiorow["email"],        $thispage, $pieni);
 
-    //jos on suomalainen yritys tehd‰‰n ytunnus n‰tiks
+    //jos on suomalainen yritys tehd√§√§n ytunnus n√§tiks
     if (strtoupper($yhtiorow["maa"])== 'FI') {
-      //muutetaan ytunnus takas oikean n‰kˆseks
+      //muutetaan ytunnus takas oikean n√§k√∂seks
       $ytunpit = 8-strlen($yhtiorow["ytunnus"]);
 
       if ($ytunpit > 0) {
@@ -726,7 +726,7 @@ if (!function_exists('loppu_valm')) {
         $pdf->draw_text(575-$oikpos, 25, $paino." kg",        $thispage, $boldi);
       }
 
-      // viivat rivien v‰liin...
+      // viivat rivien v√§liin...
       $x[0] = 20;
       $x[1] = 580;
       $y[0] = $y[1] = $kala + $rivinkorkeus - 4;
@@ -746,7 +746,7 @@ if (!function_exists('print_pdf_valm')) {
 
     $returnvalue=0;
 
-    //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+    //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
     list($usec, $sec) = explode(' ', microtime());
     mt_srand((float) $sec + ((float) $usec * 100000));
     $pdffilenimi = "/tmp/Kerayslista-".md5(uniqid(mt_rand(), true)).".pdf";
@@ -770,7 +770,7 @@ if (!function_exists('print_pdf_valm')) {
       }
     }
     elseif ($tee == 'NAYTATILAUS') {
-      //Tyˆnnet‰‰n tuo pdf vaan putkeen!
+      //Ty√∂nnet√§√§n tuo pdf vaan putkeen!
       echo file_get_contents($pdffilenimi);
     }
     elseif ($komento != '' and $komento != 'edi') {

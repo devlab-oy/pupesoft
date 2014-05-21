@@ -13,7 +13,7 @@ $rectparam["width"] = 0.3;
 $norm["height"] = 8;
 $norm["font"] = "Helvetica";
 
-// tehdään pdf:n uusi sivu
+// tehdÃ¤Ã¤n pdf:n uusi sivu
 $firstpage = $pdf->new_page("a4");
 
 // A4 pointteina 595x842
@@ -84,7 +84,7 @@ for ($i = 1; $i < $kappalemaara; $i++) {
   if ($image) {
     $logoparam['scale'] = 0.1;
 
-    // piirretään viivakoodi paprulle
+    // piirretÃ¤Ã¤n viivakoodi paprulle
     $pdf->image_place($image, mm_pt($y - 22.5), mm_pt($x), $firstpage, $logoparam); // Y, X
   }
 

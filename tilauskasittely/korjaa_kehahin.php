@@ -3,10 +3,10 @@
 require("../inc/parametrit.inc");
 require("inc/functions.inc");
 
-echo "<font class='head'>".t("J‰lkilaske tapahtuma")."</font><hr>";
+echo "<font class='head'>".t("J√§lkilaske tapahtuma")."</font><hr>";
 
 if ($kukarow["kuka"] != "admin") {
-  echo "<br><font class='error'>".t("HUOM: T‰m‰ ohjelma sekoittaa kirjanpidon/logistiikan varastonarvon. T‰t‰ EI saa k‰ytt‰‰!")."</font>";
+  echo "<br><font class='error'>".t("HUOM: T√§m√§ ohjelma sekoittaa kirjanpidon/logistiikan varastonarvon. T√§t√§ EI saa k√§ytt√§√§!")."</font>";
   $tee = "DONTDOIT!!";
 }
 
@@ -28,14 +28,14 @@ if ($tee == "KORJAA") {
     $rivitunnus = $taparow["rivitunnus"];
     $tapahtumatunnus = $taparow["tunnus"];
 
-    echo "<font class='message'>Korjataan raaka-aineen $tuoteno tapahtumat $pvm ($rivitunnus) l‰htien.</font><br>";
+    echo "<font class='message'>Korjataan raaka-aineen $tuoteno tapahtumat $pvm ($rivitunnus) l√§htien.</font><br>";
 
     jalkilaskentafunktio($tuoteno, $pvm, $uusihinta, $rivitunnus, $tapahtumatunnus);
 
     echo $jalkilaskenta_debug_text;
   }
   else {
-    echo "<font class='error'>Tapahtumaa ei lˆydy!</font><br><br>";
+    echo "<font class='error'>Tapahtumaa ei l√∂ydy!</font><br><br>";
   }
 }
 
@@ -47,13 +47,13 @@ if ($tee == "VALITSE") {
   $res = pupe_query($query);
 
   if (mysql_num_rows($res) == 0) {
-    echo "<font class='error'>Tuotetta ei lˆytynyt</font><br><br>";
+    echo "<font class='error'>Tuotetta ei l√∂ytynyt</font><br><br>";
     $tee = "";
   }
   else {
     $tuoterow = mysql_fetch_array($res);
 
-    // n‰ytet‰‰n tuotteen tapahtumat
+    // n√§ytet√§√§n tuotteen tapahtumat
     $query = "SELECT *
               FROM tapahtuma use index (yhtio_tuote_laadittu)
               WHERE yhtio  = '{$kukarow["yhtio"]}'
@@ -76,7 +76,7 @@ if ($tee == "VALITSE") {
     echo "<th>selite</th>";
     echo "<th>laatija</th>";
     echo "<th>laadittu</th>";
-    echo "<th>k‰‰ntˆpiste</th>";
+    echo "<th>k√§√§nt√∂piste</th>";
     echo "</tr>";
 
     $selected = "";
@@ -121,12 +121,12 @@ if ($tee == "VALITSE") {
   }
 }
 
-// meill‰ ei ole valittua tilausta
+// meill√§ ei ole valittua tilausta
 if ($tee == "") {
   $formi  = "find";
   $kentta = "tuoteno";
 
-  // tehd‰‰n etsi valinta
+  // tehd√§√§n etsi valinta
   echo "<form name='find' method='post'>";
   echo t("Etsi tuotenumero").": ";
   echo "<input type='hidden' name='tee' value='VALITSE'>";

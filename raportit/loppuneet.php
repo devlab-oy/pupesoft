@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require('../inc/parametrit.inc');
@@ -9,7 +9,7 @@ echo "<font class='head'>".t("Loppuneet tuotteet").":</font><hr>";
 
 if (isset($kk) or isset($pp) or isset($vv)) {
   if (!checkdate($kk, $pp, $vv)) {
-    echo "<font class='error'>".t("P‰iv‰m‰‰r‰virhe")."!</font><br>";
+    echo "<font class='error'>".t("P√§iv√§m√§√§r√§virhe")."!</font><br>";
     $tee="";
   }
 }
@@ -51,12 +51,12 @@ if ($tee != '') {
     // exit;
   }
 
-  echo "  <table><tr><th>".t("Osasto")."</th><th>".t("Tuoteryhm‰")."</th>
+  echo "  <table><tr><th>".t("Osasto")."</th><th>".t("Tuoteryhm√§")."</th>
       <th nowrap>".t("Tuotenumero")."</th><th nowrap>".t("Nimitys")."</th>
       <th nowrap>".t("Loppunut")."</th>
-      <th nowrap>".t("Tilauksessa")."</th><th nowrap>".t("Ensimm‰inen toimitus")."</th>
+      <th nowrap>".t("Tilauksessa")."</th><th nowrap>".t("Ensimm√§inen toimitus")."</th>
       <th nowrap>".t("Varastopaikka")."</th><th nowrap>".t("Toimittajan tuoteno")."</th>
-      <th nowrap>".t("T‰htituote")."</th><th nowrap>".t("Hinnastoon")."</th>
+      <th nowrap>".t("T√§htituote")."</th><th nowrap>".t("Hinnastoon")."</th>
       <th nowrap>".t("Status")."</th><th nowrap>".t("Toimittaja")."</th></tr>";
 
   $rivit = 1;
@@ -77,7 +77,7 @@ if ($tee != '') {
   echo "</table>";
 }
 
-//K‰yttˆliittym‰
+//K√§ytt√∂liittym√§
 echo "<br>";
 echo "<table><form method='post'>";
 
@@ -89,7 +89,7 @@ if (!isset($pp))
   $pp = date("d")-1;
 
 echo "<input type='hidden' name='tee' value='kaikki'>";
-echo "<tr><th>".t("Syˆt‰ p‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+echo "<tr><th>".t("Sy√∂t√§ p√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
     <td><input type='text' name='pp' value='$pp' size='3'></td>
     <td><input type='text' name='kk' value='$kk' size='3'></td>
     <td><input type='text' name='vv' value='$vv' size='5'></td></tr>";

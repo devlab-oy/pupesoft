@@ -1,7 +1,7 @@
 <?php
 require ("inc/parametrit.inc");
 
-echo "<font class='head'>".t("Kopioi k‰yttˆoikeuksia").":</font><hr>";
+echo "<font class='head'>".t("Kopioi k√§ytt√∂oikeuksia").":</font><hr>";
 
   if ($copyready != '') {
     echo "<font class='message'>".t("Kopioitiin oikeudet")." $fromkuka ($fromyhtio) --> $tokuka ($toyhtio)</font><br><br>";
@@ -37,7 +37,7 @@ echo "<font class='head'>".t("Kopioi k‰yttˆoikeuksia").":</font><hr>";
       $upres = pupe_query($query);
     }
 
-    // p‰ivite‰‰n kuka-tauluun mitk‰ k‰ytt‰j‰t on aktiivisia ja mitk‰ poistettuja
+    // p√§ivite√§√§n kuka-tauluun mitk√§ k√§ytt√§j√§t on aktiivisia ja mitk√§ poistettuja
     paivita_aktiiviset_kayttajat($tokuka, $toyhtio);
 
     $fromkuka  = '';
@@ -49,9 +49,9 @@ echo "<font class='head'>".t("Kopioi k‰yttˆoikeuksia").":</font><hr>";
   echo "<br><form method='post'>";
   echo "<input type='hidden' name='tila' value='copy'>";
 
-  echo "<font class='message'>".t("Kenelt‰ kopioidaan").":</font>";
+  echo "<font class='message'>".t("Kenelt√§ kopioidaan").":</font>";
 
-  // tehd‰‰n k‰ytt‰j‰listaukset
+  // tehd√§√§n k√§ytt√§j√§listaukset
 
   $query = "SELECT distinct kuka.nimi, kuka.kuka
             FROM kuka
@@ -61,9 +61,9 @@ echo "<font class='head'>".t("Kopioi k‰yttˆoikeuksia").":</font><hr>";
             ORDER BY nimi";
   $kukar = pupe_query($query);
 
-  echo "<table><tr><th align='left'>".t("K‰ytt‰j‰").":</th><td>
+  echo "<table><tr><th align='left'>".t("K√§ytt√§j√§").":</th><td>
   <select name='fromkuka' onchange='submit()'>
-  <option value=''>".t("Valitse k‰ytt‰j‰")."</option>";
+  <option value=''>".t("Valitse k√§ytt√§j√§")."</option>";
 
   while ($kurow=mysql_fetch_array($kukar)) {
     if ($fromkuka==$kurow[1]) $select='selected';
@@ -75,7 +75,7 @@ echo "<font class='head'>".t("Kopioi k‰yttˆoikeuksia").":</font><hr>";
   echo "</select></td></tr>";
 
   if ($fromkuka!='') {
-    // tehd‰‰n yhtiolistaukset
+    // tehd√§√§n yhtiolistaukset
 
     $query = "SELECT DISTINCT kuka.yhtio, yhtio.nimi
               FROM kuka, yhtio
@@ -113,7 +113,7 @@ echo "<font class='head'>".t("Kopioi k‰yttˆoikeuksia").":</font><hr>";
 
   echo "<br><br><font class='message'>".t("Kenelle kopioidaan").":</font>";
 
-  // tehd‰‰n k‰ytt‰j‰listaukset
+  // tehd√§√§n k√§ytt√§j√§listaukset
 
   $query = "SELECT distinct kuka.nimi, kuka.kuka
             FROM kuka
@@ -123,9 +123,9 @@ echo "<font class='head'>".t("Kopioi k‰yttˆoikeuksia").":</font><hr>";
             ORDER BY nimi";
   $kukar = pupe_query($query);
 
-  echo "<table><tr><th align='left'>".t("K‰ytt‰j‰").":</th><td>
+  echo "<table><tr><th align='left'>".t("K√§ytt√§j√§").":</th><td>
   <select name='tokuka' onchange='submit()'>
-  <option value=''>".t("Valitse k‰ytt‰j‰")."</option>";
+  <option value=''>".t("Valitse k√§ytt√§j√§")."</option>";
 
   while ($kurow=mysql_fetch_array($kukar)) {
     if ($tokuka==$kurow[1]) $select='selected';
@@ -137,7 +137,7 @@ echo "<font class='head'>".t("Kopioi k‰yttˆoikeuksia").":</font><hr>";
   echo "</select></td></tr>";
 
   if ($tokuka!='') {
-    // tehd‰‰n yhtiolistaukset
+    // tehd√§√§n yhtiolistaukset
 
     $query = "SELECT distinct kuka.yhtio, yhtio.nimi
               FROM kuka, yhtio
@@ -174,7 +174,7 @@ echo "<font class='head'>".t("Kopioi k‰yttˆoikeuksia").":</font><hr>";
 
   if (($tokuka!='') and ($fromkuka!='')) {
     echo "<br><br>";
-    echo "<input type='submit' name='copyready' value='".t("Kopioi k‰yttˆoikeudet")." $fromkuka --> $tokuka'>";
+    echo "<input type='submit' name='copyready' value='".t("Kopioi k√§ytt√∂oikeudet")." $fromkuka --> $tokuka'>";
   }
 
   echo "</form>";

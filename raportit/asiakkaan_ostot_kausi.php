@@ -5,7 +5,7 @@ if (isset($_POST["tee"])) {
   if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 }
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("../inc/parametrit.inc");
@@ -17,13 +17,13 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
 
 echo "<font class='head'>".t("Asiakkaan/Osaston ostot annetulta kaudelta")."</font><hr>";
 
-// hehe, n‰in on helpompi verrata p‰iv‰m‰‰ri‰
+// hehe, n√§in on helpompi verrata p√§iv√§m√§√§ri√§
 $query  = "SELECT TO_DAYS('$vvl-$kkl-$ppl')-TO_DAYS('$vva-$kka-$ppa') ero";
 $result = pupe_query($query);
 $row    = mysql_fetch_array($result);
 
 if ($row["ero"] > 366) {
-  echo "<font class='error'>".t("Jotta homma ei menisi liian hitaaksi, niin vuosi on pisin mahdollinen laskentav‰li!")."</font><br>";
+  echo "<font class='error'>".t("Jotta homma ei menisi liian hitaaksi, niin vuosi on pisin mahdollinen laskentav√§li!")."</font><br>";
   echo t("Annetut rajaukset").": $ytunnus $asosasto $apvm $lpvm<br>";
   $tee = '';
 }
@@ -107,8 +107,8 @@ if ($tee == 'go') {
     echo "<table><tr><th colspan='2'>".t("Annetut rajaukset")."</th></tr>";
     echo "<tr><th>".t("Ytunnus")."</th><td>$ytunnus</td></tr>";
     echo "<tr><th>".t("Asiakasosasto")."</th><td>$asosasto</td></tr>";
-    echo "<tr><th>".t("Alkup‰iv‰m‰‰r‰")."</th><td>$apvm</td></tr>";
-    echo "<tr><th>".t("Loppup‰iv‰m‰‰r‰")."</th><td>$lpvm</td></tr>";
+    echo "<tr><th>".t("Alkup√§iv√§m√§√§r√§")."</th><td>$apvm</td></tr>";
+    echo "<tr><th>".t("Loppup√§iv√§m√§√§r√§")."</th><td>$lpvm</td></tr>";
     echo "</table><br>";
 
     echo "<table><tr>";
@@ -116,20 +116,20 @@ if ($tee == 'go') {
     echo "<th>".t("Nimitys")."</th>";
     echo "<th>".t("Summa")."</th>";
     echo "<th>".t("Kate")."</th>";
-    echo "<th>".t("M‰‰r‰")."</th>";
+    echo "<th>".t("M√§√§r√§")."</th>";
     echo "<th>".t("Ed.Summa")."</th>";
     echo "<th>".t("Ed.Kate")."</th>";
-    echo "<th>".t("Ed.M‰‰r‰")."</th>";
+    echo "<th>".t("Ed.M√§√§r√§")."</th>";
     echo "</tr>";
 
     $worksheet->write($excelrivi, 0, t("Tuoteno"), $format_bold);
     $worksheet->write($excelrivi, 1, t("Nimitys"), $format_bold);
     $worksheet->write($excelrivi, 2, t("Summa"), $format_bold);
     $worksheet->write($excelrivi, 3, t("Kate"), $format_bold);
-    $worksheet->write($excelrivi, 4, t("M‰‰r‰"), $format_bold);
+    $worksheet->write($excelrivi, 4, t("M√§√§r√§"), $format_bold);
     $worksheet->write($excelrivi, 5, t("Ed.Summa"), $format_bold);
     $worksheet->write($excelrivi, 6, t("Ed.Kate"), $format_bold);
-    $worksheet->write($excelrivi, 7, t("Ed.M‰‰r‰"), $format_bold);
+    $worksheet->write($excelrivi, 7, t("Ed.M√§√§r√§"), $format_bold);
     $excelrivi++;
 
     while ($row = mysql_fetch_assoc($result)) {
@@ -185,16 +185,16 @@ if (!isset($vvl))
 if (!isset($ppl))
   $ppl = date("d");
 
-echo "<tr><th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+echo "<tr><th>".t("Sy√∂t√§ alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
   <td><input type='text' name='ppa' value='$ppa' size='3'></td>
   <td><input type='text' name='kka' value='$kka' size='3'></td>
   <td><input type='text' name='vva' value='$vva' size='5'></td>
-  </tr><tr><th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+  </tr><tr><th>".t("Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
   <td><input type='text' name='ppl' value='$ppl' size='3'></td>
   <td><input type='text' name='kkl' value='$kkl' size='3'></td>
   <td><input type='text' name='vvl' value='$vvl' size='5'></td></tr>";
 
-$query = "SELECT distinct if(osasto = '','TYHJƒ', osasto) osasto
+$query = "SELECT distinct if(osasto = '','TYHJ√Ñ', osasto) osasto
           FROM asiakas
           WHERE yhtio = '$kukarow[yhtio]'
           ORDER BY 1";
@@ -214,7 +214,7 @@ $ulos2 .= "</select>";
 
 echo "<tr><th>".t("Valitse osasto")."</th>
     <td colspan='3'>$ulos2</td>
-    <tr><th>".t("tai syˆt‰ ytunnus").":</th>
+    <tr><th>".t("tai sy√∂t√§ ytunnus").":</th>
     <td colspan='3'><input type='text' name='ytunnus' value='$ytunnus' size='15'></td></tr>
     <input type='hidden' name='tee' value='go' size='15'>
   </table>";

@@ -18,7 +18,7 @@ if (!function_exists("keraysvyohyketarkista")) {
 
     if (mysql_field_name($result, $i) == "lahtojen_valinen_enimmaisaika" or mysql_field_name($result, $i) == "max_keraysera_pintaala") {
       if (trim($t[$i]) == '' or trim($t[$i]) == 0) {
-        $virhe[$i] .= t("Arvo ei saa olla nolla tai tyhj‰‰")."!";
+        $virhe[$i] .= t("Arvo ei saa olla nolla tai tyhj√§√§")."!";
       }
     }
   }

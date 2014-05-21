@@ -47,7 +47,7 @@ else {
     //-->
     </script>";
 
-  echo "<font class='head'>",t("Tuotekuvien yll‰pito"),"</font><hr>";
+  echo "<font class='head'>",t("Tuotekuvien yll√§pito"),"</font><hr>";
 
   echo "<form action='",$PHP_SELF,"' method='post'>";
   echo "<table>";
@@ -59,8 +59,8 @@ else {
           echo "<tr>";
             echo "<td class='back'>";
 
-              // n‰ytet‰‰n soveltuvat osastot
-              // tehd‰‰n avainsana query
+              // n√§ytet√§√§n soveltuvat osastot
+              // tehd√§√§n avainsana query
               $res2 = t_avainsana("OSASTO");
 
               if (mysql_num_rows($res2) > 11) {
@@ -107,18 +107,18 @@ else {
           echo "<tr>";
             echo "<td valign='top' class='back'>";
 
-              // n‰ytet‰‰n soveltuvat tryt
-              // tehd‰‰n avainsana query
+              // n√§ytet√§√§n soveltuvat tryt
+              // tehd√§√§n avainsana query
               $res2 = t_avainsana("TRY");
 
               if (mysql_num_rows($res2) > 11) {
                 echo "<div style='height:320px;overflow:auto;'>";
               }
 
-              ############### TUOTERYHMƒ
+              ############### TUOTERYHM√Ñ
               echo "<table>";
                 echo "<tr>";
-                  echo "<th colspan='2'>",t("Tuoterym‰"),":</th>";
+                  echo "<th colspan='2'>",t("Tuoterym√§"),":</th>";
                 echo "</tr>";
                 echo "<tr>";
                   echo "<td><input type='checkbox' name='mul_try' onclick='toggleAll(this);'></td><td nowrap>",t("Ruksaa kaikki"),"</td>";
@@ -155,7 +155,7 @@ else {
           echo "<tr>";
             echo "<td valign='top' class='back'>";
 
-              // n‰ytet‰‰n soveltuvat tuotemerkit
+              // n√§ytet√§√§n soveltuvat tuotemerkit
               $query = "  SELECT distinct tuotemerkki FROM tuote use index (yhtio_tuotemerkki) WHERE yhtio='$kukarow[yhtio]' and tuotemerkki != '' ORDER BY tuotemerkki";
               $res2  = mysql_query($query) or die($query);
 
@@ -203,7 +203,7 @@ else {
           echo "<tr>";
             echo "<td valign='top' class='back'>";
 
-              ############### TUNNUS (voidaan hakea tunnusv‰lill‰)
+              ############### TUNNUS (voidaan hakea tunnusv√§lill√§)
               echo "<table width='100%'>";
                 echo "<tr>";
                   echo "<th colspan='3'>",t("Tuotenumerohaku"),":</th>";
@@ -218,10 +218,10 @@ else {
           echo "<tr>";
             echo "<td valign='top' class='back'>";
 
-              ############### KƒYTT÷TARKOITUS (onko thumbnail vai tuotekuva)
+              ############### K√ÑYTT√ñTARKOITUS (onko thumbnail vai tuotekuva)
               echo "<table width='100%'>";
                 echo "<tr>";
-                  echo "<th colspan='2'>",t("K‰yttˆtarkoitus"),":</th>";
+                  echo "<th colspan='2'>",t("K√§ytt√∂tarkoitus"),":</th>";
                 echo "</tr>";
                 echo "<tr>";
                   echo "<td><input type='checkbox' name='mul_kay' onclick='toggleAll(this);'></td><td nowrap>",t("Ruksaa kaikki"),"</td>";
@@ -275,10 +275,10 @@ else {
           echo "<tr>";
             echo "<td valign='top' class='back'>";
 
-              ############### NƒYTƒ (jos halutaan n‰ytt‰‰ myˆs tuotekuvien popup-kuvat)
+              ############### N√ÑYT√Ñ (jos halutaan n√§ytt√§√§ my√∂s tuotekuvien popup-kuvat)
               echo "<table width='100%'>";
                 echo "<tr>";
-                  echo "<th colspan='2'>",t("N‰yt‰"),":</th>";
+                  echo "<th colspan='2'>",t("N√§yt√§"),":</th>";
                 echo "</tr>";
 
                 $mul_check = '';
@@ -316,7 +316,7 @@ else {
           echo "<tr>";
             echo "<td valign='top' class='back'>";
 
-              ############### SELITE (voidaan rajata selite -> tyhj‰ / ei tyhj‰)
+              ############### SELITE (voidaan rajata selite -> tyhj√§ / ei tyhj√§)
               echo "<table width='100%'>";
                 echo "<tr>";
                   echo "<th colspan='2'>".t("Selite").":</th>";
@@ -331,14 +331,14 @@ else {
                   $mul_check = 'CHECKED';
                 }
 
-                echo "<tr><td><input type='checkbox' name='mul_sel[]' value='ei_tyhja' {$mul_check}></td><td nowrap>",t("Ei tyhj‰"),"</td></tr>";
+                echo "<tr><td><input type='checkbox' name='mul_sel[]' value='ei_tyhja' {$mul_check}></td><td nowrap>",t("Ei tyhj√§"),"</td></tr>";
 
                 $mul_check = '';
                 if (count($mul_sel) > 0 and in_array('tyhja', $mul_sel)) {
                   $mul_check = 'CHECKED';
                 }
 
-                echo "<tr><td><input type='checkbox' name='mul_sel[]' value='tyhja' {$mul_check}></td><td nowrap>",t("Tyhj‰"),"</td></tr>";
+                echo "<tr><td><input type='checkbox' name='mul_sel[]' value='tyhja' {$mul_check}></td><td nowrap>",t("Tyhj√§"),"</td></tr>";
               echo "</table>";
 
             echo "</td>";
@@ -362,14 +362,14 @@ else {
                   $mul_check = 'CHECKED';
                 }
 
-                echo "<tr><td><input type='checkbox' name='mul_sta[]' value='P' {$mul_check}></td><td nowrap>",t("N‰yt‰ myˆs status P"),"</td></tr>";
+                echo "<tr><td><input type='checkbox' name='mul_sta[]' value='P' {$mul_check}></td><td nowrap>",t("N√§yt√§ my√∂s status P"),"</td></tr>";
 
                 $mul_check = '';
                 if (count($mul_sta) > 0 and in_array('X', $mul_sta)) {
                   $mul_check = 'CHECKED';
                 }
 
-                echo "<tr><td><input type='checkbox' name='mul_sta[]' value='X' {$mul_check}></td><td nowrap>",t("N‰yt‰ myˆs status X"),"</td></tr>";
+                echo "<tr><td><input type='checkbox' name='mul_sta[]' value='X' {$mul_check}></td><td nowrap>",t("N√§yt√§ my√∂s status X"),"</td></tr>";
               echo "</table>";
 
             echo "</td>";
@@ -383,7 +383,7 @@ else {
           echo "<tr>";
             echo "<td valign='top' class='back'>";
 
-              ############### SIVUTUS (sivutus tai n‰ytet‰‰n kaikki)
+              ############### SIVUTUS (sivutus tai n√§ytet√§√§n kaikki)
               echo "<table width='100%'>";
                 echo "<tr>";
                   echo "<th colspan='2'>".t("Sivutus").":</th>";
@@ -405,10 +405,10 @@ else {
 
             echo "<td valign='top' class='back'>";
 
-              ############### Tiedoston p‰‰te
+              ############### Tiedoston p√§√§te
               echo "<table width='100%'>";
                 echo "<tr>";
-                  echo "<th colspan='2'>".t("Tiedoston p‰‰te").":</th>";
+                  echo "<th colspan='2'>".t("Tiedoston p√§√§te").":</th>";
                 echo "</tr>";
 
                 echo "<tr><td><input type='checkbox' name='mul_ext' onclick='toggleAll(this);'></td><td nowrap>".t("Ruksaa kaikki")."</td></tr>";
@@ -566,12 +566,12 @@ else {
 
   if ($tee == 'LISTAA') {
 
-    //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+    //* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
     $useslave = 1;
 
     require('inc/connect.inc');
 
-    // n‰it‰ k‰ytet‰‰n queryss‰
+    // n√§it√§ k√§ytet√§√§n queryss√§
     $sel_osasto   = "";
     $sel_tuoteryhma = "";
     $sel_tuotemerkki = "";
@@ -704,7 +704,7 @@ else {
       if ($mul_exl == 'tallennetaan') {
         if (include('Spreadsheet/Excel/Writer.php')) {
 
-          //keksit‰‰n failille joku varmasti uniikki nimi:
+          //keksit√§√§n failille joku varmasti uniikki nimi:
           list($usec, $sec) = explode(' ', microtime());
           mt_srand((float) $sec + ((float) $usec * 100000));
           $excelnimi = md5(uniqid(mt_rand(), true)).".xls";
@@ -731,7 +731,7 @@ else {
 
         echo "<tr>";
           echo "<td valign='top' align='left' colspan='10' class='back'>";
-            echo t('Lˆytyi yhteens‰')," ",mysql_num_rows($result)," ",t('rivi‰');
+            echo t('L√∂ytyi yhteens√§')," ",mysql_num_rows($result)," ",t('rivi√§');
           echo "</td>";
         echo "</tr>";
 
@@ -755,7 +755,7 @@ else {
               echo "<th>",t('Leveys'),"</th>";
             }
           }
-          echo "<th>",t('K‰yttˆtarkoitus'),"</th>";
+          echo "<th>",t('K√§ytt√∂tarkoitus'),"</th>";
           echo "<th>",t('Selite'),"</th>";
           if ($mul_exl != 'tallennetaan') {
             echo "<th>",t('Poista'),"<br />".t('kaikki')." <input type='checkbox' name='mul_del' onclick='toggleAll(this);'></th>";
@@ -773,7 +773,7 @@ else {
           }
         }
 
-        // Exceli‰ k‰ytet‰‰n sis‰‰nlue datassa joten on laitettava sarakkeet sen mukaisesti (kaikkea ei siis saada laittaa mukaan vaikka mieli tekisi)
+        // Exceli√§ k√§ytet√§√§n sis√§√§nlue datassa joten on laitettava sarakkeet sen mukaisesti (kaikkea ei siis saada laittaa mukaan vaikka mieli tekisi)
         if (isset($workbook) and $mul_exl == 'tallennetaan') {
           $excelsarake = 0;
 
@@ -803,7 +803,7 @@ else {
               $excelsarake++;
             }
 
-            // tehd‰‰n pop-up divi jos keikalla on kommentti...
+            // tehd√§√§n pop-up divi jos keikalla on kommentti...
             if ($row['filename'] != '') {
               if ((strtolower($row['kayttotarkoitus']) == 'tk' and $nayta_tk != 'naytetaan') or (strtolower($row['kayttotarkoitus']) == 'hr' and $nayta_hr != 'naytetaan') or (strtolower($row['kayttotarkoitus']) == 'th' and $nayta_th != 'naytetaan') or (strtolower($row['kayttotarkoitus']) == 'mu')) {
                 echo "<td valign='top'>",$row['nimitys'],"</td>";
@@ -885,7 +885,7 @@ else {
 
         echo "<tr>";
           echo "<td valign='top' align='left' colspan='",$colspan,"' class='back'>";
-            echo t('Lˆytyi yhteens‰')," ",mysql_num_rows($result)," ",t('rivi‰');
+            echo t('L√∂ytyi yhteens√§')," ",mysql_num_rows($result)," ",t('rivi√§');
           echo "</td>";
 
           echo "<td valign='top' align='left' class='back'>";
@@ -964,7 +964,7 @@ else {
           $limitx = (($sivu - 1) * 50) - 50;
           if ($limitx >= 0) {
             $alkuun = "<a href='$PHP_SELF?tee=LISTAA&sivu=1&limit=0&tuoteno=".urlencode($tuoteno)."&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";
-            echo $alkuun,"&lt;&lt; ",t('Ensimm‰inen'),"</a>&nbsp;&nbsp;";
+            echo $alkuun,"&lt;&lt; ",t('Ensimm√§inen'),"</a>&nbsp;&nbsp;";
 
             $y = $sivu - 1;
             $edellinen = "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$y."&limit=$limitx&tuoteno=".urlencode($tuoteno)."&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";

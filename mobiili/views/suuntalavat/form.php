@@ -49,7 +49,7 @@
       </td>
     </tr>
     <tr>
-      <th>Ker‰ysvyˆhyke</th>
+      <th>Ker√§ysvy√∂hyke</th>
       <td>
         <select name='keraysvyohyke'>
           <?php
@@ -123,7 +123,7 @@
       </tr>
     </tr>
     <tr>
-      <th>K‰ytett‰vyys</th>
+      <th>K√§ytett√§vyys</th>
       <?php
 
         $checked = array('Y' => '', 'L' => '');
@@ -142,7 +142,7 @@
     <tr><th>Terminaalialue</th>
       <?php
 
-        $checked = array('L‰hett‰mˆ' => '', 'Pakkaamo' => '');
+        $checked = array('L√§hett√§m√∂' => '', 'Pakkaamo' => '');
 
         if (isset($suuntalava) and !empty($suuntalava['terminaalialue'])) {
           $checked[$suuntalava['terminaalialue']] = 'checked';
@@ -151,7 +151,7 @@
           $checked[$terminaalialue] = 'checked';
         }
 
-        echo "<td><input type='radio' name='terminaalialue' id='lahettamo' value='L‰hett‰mˆ' {$checked['L‰hett‰mˆ']} /><label for='lahettamo'>L‰hett‰mˆ</label>";
+        echo "<td><input type='radio' name='terminaalialue' id='lahettamo' value='L√§hett√§m√∂' {$checked['L√§hett√§m√∂']} /><label for='lahettamo'>L√§hett√§m√∂</label>";
         echo "<input type='radio' name='terminaalialue' id='pakkaamo' value='Pakkaamo' {$checked['Pakkaamo']} /><label for='pakkaamo'>Pakkaamo</label></td>";
       ?>
     </tr>
@@ -167,7 +167,7 @@
           $sallitaanko == 'K' ? $checked['K'] = 'checked' : $checked['E'] = 'checked';
         }
 
-        echo "<td><input type='radio' name='sallitaanko' id='kylla' value='K' {$checked['K']} /><label for='kylla'>Kyll‰</label>";
+        echo "<td><input type='radio' name='sallitaanko' id='kylla' value='K' {$checked['K']} /><label for='kylla'>Kyll√§</label>";
         echo "<input type='radio' name='sallitaanko' id='ei' value='' {$checked['E']} /><label for='ei'>Ei</label></td>";
       ?>
     </tr>

@@ -1,6 +1,6 @@
 <?php
 
-//  Kaikille sarjanumeroille tehd‰‰n varastoon saavutettu O-rivi, muuten mm ker‰ys ei toimi ja ehk‰ se on myˆs loogisempaa? (Muille tuotteille D-rivi)
+//  Kaikille sarjanumeroille tehd√§√§n varastoon saavutettu O-rivi, muuten mm ker√§ys ei toimi ja ehk√§ se on my√∂s loogisempaa? (Muille tuotteille D-rivi)
 if ($tilrivirow["sarjanumeroseuranta"] != "") {
   $tilausriviTyyppi = "O";
 }
@@ -8,7 +8,7 @@ else {
   $tilausriviTyyppi = "D";
 }
 
-//k‰ytet‰‰n tilausriveill‰ olevia tuotteita
+//k√§ytet√§√§n tilausriveill√§ olevia tuotteita
 $query = "SELECT tilausrivi.*,
           if(tilausrivi.varattu!=0, tilausrivi.varattu, tilausrivi.kpl) varattu,
           tuote.ei_saldoa, tuote.kehahin, tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm,
@@ -26,13 +26,13 @@ $uusiarvo = 0;
 
 while ($raakaainerow = mysql_fetch_assoc($raakaaineres)) {
 
-  // Perutaan t‰m‰ raaka-ainerivi kokonaan
+  // Perutaan t√§m√§ raaka-ainerivi kokonaan
   if ($perutaan == "JOO") {
     $raakaainerow["varattu"] = 0;
   }
 
-  // Katsotaan mik‰ tuotteen keskihankintahinta oli valmistusta tehdess‰
-  // Uusin hinta voi olla myˆs korjaustapahtumalla
+  // Katsotaan mik√§ tuotteen keskihankintahinta oli valmistusta tehdess√§
+  // Uusin hinta voi olla my√∂s korjaustapahtumalla
   // Otetaan viimeisin tapahtuma
   $query = "SELECT *
             FROM tapahtuma
@@ -44,7 +44,7 @@ while ($raakaainerow = mysql_fetch_assoc($raakaaineres)) {
   $tuoteresult = pupe_query($query);
 
   if (mysql_num_rows($tuoteresult) == 0) {
-    // Raaka-aine list‰tty j‰lkik‰teen tehd‰‰n tapahtuma
+    // Raaka-aine list√§tty j√§lkik√§teen tehd√§√§n tapahtuma
     if     ($raakaainerow['epakurantti100pvm'] != '0000-00-00') $raakaainerow['kehahin'] = 0;
     elseif ($raakaainerow['epakurantti75pvm'] != '0000-00-00') $raakaainerow['kehahin'] = round($raakaainerow['kehahin'] * 0.25, 6);
     elseif ($raakaainerow['epakurantti50pvm'] != '0000-00-00') $raakaainerow['kehahin'] = round($raakaainerow['kehahin'] * 0.5,  6);
@@ -63,7 +63,7 @@ while ($raakaainerow = mysql_fetch_assoc($raakaaineres)) {
               hyllynro   = '$raakaainerow[hyllynro]',
               hyllyvali  = '$raakaainerow[hyllyvali]',
               hyllytaso  = '$raakaainerow[hyllytaso]',
-              selite     = '".t("K‰ytettiin tuotteen")." $tilrivirow[tuoteno] ".t("valmistamiseen")." ".t("tyˆm‰‰r‰yksell‰")." $tilrivirow[otunnus]',
+              selite     = '".t("K√§ytettiin tuotteen")." $tilrivirow[tuoteno] ".t("valmistamiseen")." ".t("ty√∂m√§√§r√§yksell√§")." $tilrivirow[otunnus]',
               laatija    = '$kukarow[kuka]',
               laadittu   = now()";
     $tapahtumaresult = pupe_query($query);
@@ -82,11 +82,11 @@ while ($raakaainerow = mysql_fetch_assoc($raakaaineres)) {
   $arvo = $tuoterow['hinta'] * $raakaainerow['varattu'];
   $uusiarvo += $arvo;
 
-  //Tutkitan onko raaka-aineiden k‰yttˆm‰‰ri‰ muutettu
+  //Tutkitan onko raaka-aineiden k√§ytt√∂m√§√§ri√§ muutettu
   if ($raakaainerow["kpl"] != $raakaainerow["varattu"]) {
-    echo "<br><font class='message'>Raaka aineen $raakaainerow[tuoteno] kulutusta muutettu! $raakaainerow[kpl] --> $raakaainerow[varattu]. Teemme j‰lkilaskennan raaka-aineelle.</font><br>";
+    echo "<br><font class='message'>Raaka aineen $raakaainerow[tuoteno] kulutusta muutettu! $raakaainerow[kpl] --> $raakaainerow[varattu]. Teemme j√§lkilaskennan raaka-aineelle.</font><br>";
 
-    //Suoritetaan j‰lkilaskenta
+    //Suoritetaan j√§lkilaskenta
     $query = "SELECT *
               FROM tapahtuma
               WHERE yhtio    = '$kukarow[yhtio]'
@@ -97,12 +97,12 @@ while ($raakaainerow = mysql_fetch_assoc($raakaaineres)) {
     $res = pupe_query($query);
     $osavalm_lukumaara = mysql_num_rows($res);
 
-    //Lasketaan k‰‰ntˆpisteen saldomuutos joka johtuu raaka-aineen kulutuksen muutoksesta
+    //Lasketaan k√§√§nt√∂pisteen saldomuutos joka johtuu raaka-aineen kulutuksen muutoksesta
     $kaantopisteen_saldomuutos = round(($raakaainerow["kpl"] - $raakaainerow["varattu"]) / $osavalm_lukumaara, 2);
 
     while ($taparow = mysql_fetch_assoc($res)) {
 
-      //Etsit‰‰n k‰‰ntˆpiste
+      //Etsit√§√§n k√§√§nt√∂piste
       $query = "SELECT *
                 FROM tapahtuma
                 WHERE yhtio  = '$kukarow[yhtio]'
@@ -121,12 +121,12 @@ while ($raakaainerow = mysql_fetch_assoc($raakaaineres)) {
         $rivitunnus    = $kaantopisterow["rivitunnus"];
         $tapahtumatunnus = $kaantopisterow["tunnus"];
 
-        echo "<font class='message'>Korjataan raaka-aineen $tuoteno tapahtumat $pvm l‰htien. Raaka-aineen kulutusmuutos: $kaantopisteen_saldomuutos.</font><br>";
+        echo "<font class='message'>Korjataan raaka-aineen $tuoteno tapahtumat $pvm l√§htien. Raaka-aineen kulutusmuutos: $kaantopisteen_saldomuutos.</font><br>";
 
         jalkilaskentafunktio($tuoteno, $pvm, $uusihinta, $rivitunnus, $tapahtumatunnus, $kaantopisteen_saldomuutos);
       }
 
-      //P‰ivitet‰‰n myˆs tapahtuman kappalem‰‰r‰
+      //P√§ivitet√§√§n my√∂s tapahtuman kappalem√§√§r√§
       $query = "UPDATE tapahtuma
                 SET kpl = kpl+round($kaantopisteen_saldomuutos,2)
                 WHERE yhtio = '$kukarow[yhtio]'
@@ -134,8 +134,8 @@ while ($raakaainerow = mysql_fetch_assoc($raakaaineres)) {
       $updresult = pupe_query($query);
     }
 
-    // P‰ivitet‰‰n saldo oikeaksi vasta j‰lkilaskennan j‰lkeen kun valmistusmuutos otetaan huomioon
-    // Pistet‰‰n saldo aina oletuspaikalle
+    // P√§ivitet√§√§n saldo oikeaksi vasta j√§lkilaskennan j√§lkeen kun valmistusmuutos otetaan huomioon
+    // Pistet√§√§n saldo aina oletuspaikalle
     $mtos = $raakaainerow["kpl"] - $raakaainerow["varattu"];
 
     if ($raakaainerow["ei_saldoa"] == "") {
@@ -192,7 +192,7 @@ while ($raakaainerow = mysql_fetch_assoc($raakaaineres)) {
     }
     else {
       if (in_array($raakaainerow["sarjanumeroseuranta"], array("E","F","G"))) {
-        // P‰vitet‰‰n raaka-aineen er‰numeron era_kpl-kentt‰‰n oikea luku
+        // P√§vitet√§√§n raaka-aineen er√§numeron era_kpl-kentt√§√§n oikea luku
         $query = "UPDATE sarjanumeroseuranta
                   SET era_kpl = era_kpl+$mtos,
                   muutospvm            = now(),
@@ -212,7 +212,7 @@ while ($raakaainerow = mysql_fetch_assoc($raakaaineres)) {
         $result = pupe_query($query);
 
         if ($erarow = mysql_fetch_assoc($result)) {
-          // Ja palautetaan loput sinne mist‰ ne oli otettu
+          // Ja palautetaan loput sinne mist√§ ne oli otettu
           $query = "INSERT into sarjanumeroseuranta
                     SET yhtio      = '$kukarow[yhtio]',
                     tuoteno          = '$erarow[tuoteno]',
@@ -243,7 +243,7 @@ while ($raakaainerow = mysql_fetch_assoc($raakaaineres)) {
 
 if ($perutaan == "JOO") {
 
-  // P‰ivitet‰‰n myˆs valmisteen tapahtuman kappalem‰‰r‰
+  // P√§ivitet√§√§n my√∂s valmisteen tapahtuman kappalem√§√§r√§
   $query = "UPDATE tapahtuma
             SET kpl  = 0,
             selite         = concat(selite,' Valmistus peruttu')
@@ -273,7 +273,7 @@ if ($perutaan == "JOO") {
             LIMIT 1";
   $edkehares = pupe_query($query);
 
-  // Palautetaan valmisteen kehahin niinku se oli ennen t‰t‰ valmistusta
+  // Palautetaan valmisteen kehahin niinku se oli ennen t√§t√§ valmistusta
   if ($edkeharow = mysql_fetch_assoc($edkehares)) {
     $query = "UPDATE tuote
               SET kehahin = $edkeharow[hinta],
@@ -320,7 +320,7 @@ if ($perutaan == "JOO") {
   }
 
   if (in_array($tilrivirow["sarjanumeroseuranta"], array("E","F","G"))) {
-    // Valmisteen er‰numerot on siirretty valmistetulle tilausriville, eli ne jotka on tyypill‰ "O"
+    // Valmisteen er√§numerot on siirretty valmistetulle tilausriville, eli ne jotka on tyypill√§ "O"
     $query = "SELECT tunnus
               FROM tilausrivi
               WHERE yhtio = '$kukarow[yhtio]'
@@ -402,7 +402,7 @@ else {
     $kaikenkaikkiaan_arvot = 1;
   }
 
-  // Suoritetaan j‰lkilaskenta valmisteelle
+  // Suoritetaan j√§lkilaskenta valmisteelle
   $query = "SELECT sum(kpl) valmistetut
             FROM tilausrivi
             WHERE yhtio = '$kukarow[yhtio]'
@@ -429,10 +429,10 @@ else {
     $rivitunnus    = $taparow["rivitunnus"];
     $tapahtumatunnus = $taparow["tunnus"];
 
-    // Lasketaan k‰‰ntˆpisteen saldomuutos
+    // Lasketaan k√§√§nt√∂pisteen saldomuutos
     $kaantopisteen_saldomuutos = round(($taparow["kpl"] * ($valmkpl/$rowisa["valmistetut"]))-$taparow["kpl"], 2);
 
-    echo "<font class='message'>Korjataan tuotteen $tuoteno tapahtumat $pvm ($rivitunnus) l‰htien. Uusi ostohinta $uusihinta. ";
+    echo "<font class='message'>Korjataan tuotteen $tuoteno tapahtumat $pvm ($rivitunnus) l√§htien. Uusi ostohinta $uusihinta. ";
 
     if ($kaantopisteen_saldomuutos != 0) echo "Valmisteen kappalemuutos: $kaantopisteen_saldomuutos.";
 
@@ -441,7 +441,7 @@ else {
     jalkilaskentafunktio($tuoteno, $pvm, $uusihinta, $rivitunnus, $tapahtumatunnus, $kaantopisteen_saldomuutos);
 
     if ($kaantopisteen_saldomuutos != 0) {
-      //P‰ivitet‰‰n myˆs tapahtuman kappalem‰‰r‰
+      //P√§ivitet√§√§n my√∂s tapahtuman kappalem√§√§r√§
       $query = "UPDATE tapahtuma
                 SET kpl  = kpl+$kaantopisteen_saldomuutos,
                 selite      = concat(selite,'\nValmistus korjattu. Valmisteen kappalemuutos: $kaantopisteen_saldomuutos.')
@@ -484,7 +484,7 @@ else {
         }
 
         if (in_array($tilrivirow["sarjanumeroseuranta"], array("E","F","G"))) {
-          // P‰vitet‰‰n valmisteen er‰numeron era_kpl-kentt‰‰n oikea luku
+          // P√§vitet√§√§n valmisteen er√§numeron era_kpl-kentt√§√§n oikea luku
           $query = "UPDATE sarjanumeroseuranta
                     SET era_kpl = era_kpl+$kaantopisteen_saldomuutos,
                     muutospvm            = now(),

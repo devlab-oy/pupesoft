@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("../inc/parametrit.inc");
@@ -68,7 +68,7 @@ if ($tee == '') {
 
   echo "<tr>";
   echo "<td class='back' colspan='6'></td>";
-  echo "<th>".t("Yhteens‰")."</th>";
+  echo "<th>".t("Yhteens√§")."</th>";
   echo "<th>$yht</th>";
   echo "</tr>";
   echo "</table>";

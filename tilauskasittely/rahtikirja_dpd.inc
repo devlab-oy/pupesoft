@@ -42,7 +42,7 @@ if ($kollityht > 0) {
     $tempr = mysql_query($query) or pupe_error($query);
     $laskurow = mysql_fetch_array($tempr);
 
-    // haetaan varaston osoitetiedot, k‰ytet‰‰n niit‰ l‰hetystietoina
+    // haetaan varaston osoitetiedot, k√§ytet√§√§n niit√§ l√§hetystietoina
     $query = "SELECT nimi, nimitark, osoite, postino, postitp, maa
               FROM varastopaikat
               WHERE yhtio = '$kukarow[yhtio]'
@@ -50,7 +50,7 @@ if ($kollityht > 0) {
     $tempr = mysql_query($query) or pupe_error($query);
     $postirow_varasto = mysql_fetch_array($tempr);
 
-    // jos varastolle on annettu joku osoite, k‰ytet‰‰n sit‰
+    // jos varastolle on annettu joku osoite, k√§ytet√§√§n sit√§
     if ($postirow_varasto["nimi"] != "") {
       $laskurow["yhtio_nimi"]     = $postirow_varasto["nimi"];
       $laskurow['yhtio_nimitark']  = $postirow_varasto["nimitark"];
@@ -60,7 +60,7 @@ if ($kollityht > 0) {
       $laskurow["yhtio_maa"]       = $postirow_varasto["maa"];
     }
 
-    // jos meill‰ on printterin takana joku spessu osoitetieto niin k‰ytet‰‰n sen tietoja l‰hett‰j‰n tietoina
+    // jos meill√§ on printterin takana joku spessu osoitetieto niin k√§ytet√§√§n sen tietoja l√§hett√§j√§n tietoina
     if ($print["nimi"] != "") {
       $laskurow["yhtio_nimi"]    = $print["nimi"];
       $laskurow["yhtio_osoite"]  = $print["osoite"];
@@ -78,18 +78,18 @@ if ($kollityht > 0) {
 
       // loopataan luvut oikeelta vasemmalle
       for ($i = 16; $i >= 0; $i--) {
-        $summa += $kerroin * (ord($sscc{$i})-48); // lis‰t‰‰n summaan ko. luku * kerroin (t‰‰ hanskaa kirjaimet )
+        $summa += $kerroin * (ord($sscc{$i})-48); // lis√§t√§√§n summaan ko. luku * kerroin (t√§√§ hanskaa kirjaimet )
         $kerroin = 4 - $kerroin; // kerroin on vuorotellen 3 tai 1
       }
 
-      $sscc = ceil($summa / 10) * 10 - $summa; // tarkiste on luku mik‰ pit‰‰ lis‰t‰, ett‰ p‰‰st‰‰n seuraavaan tasakymmeneen
+      $sscc = ceil($summa / 10) * 10 - $summa; // tarkiste on luku mik√§ pit√§√§ lis√§t√§, ett√§ p√§√§st√§√§n seuraavaan tasakymmeneen
 
       return $sscc;
     }
   }
 
   $apu_kollityht = $kollityht;
-  if ($kollityht > 100) $apu_kollityht = 99; // varmuuden vuoks, kun ei saa olla ku kaks merkki‰
+  if ($kollityht > 100) $apu_kollityht = 99; // varmuuden vuoks, kun ei saa olla ku kaks merkki√§
 
   //PDF:n luonti ja defaultit
   define (__TRACE_ENABLED__, false);
@@ -135,15 +135,15 @@ if ($kollityht > 0) {
 
   for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
-    // tehd‰‰n SSCC :
+    // tehd√§√§n SSCC :
     // (00)
     // 1
     // ytunnus (8)
-    // l‰hetenro (6)
+    // l√§hetenro (6)
     // kollityht (2)
     // tarkiste (1)
 
-    //$prefix = "(00)"; // t‰‰ on turha
+    //$prefix = "(00)"; // t√§√§ on turha
     $sscc = 1;
     $sscc .= sprintf("%08.8s",$yhtiorow["ytunnus"]);
     $sscc .= sprintf('%06.6s', substr($laskurow["tunnus"], -6));
@@ -151,7 +151,7 @@ if ($kollityht > 0) {
     $loppu = tarkiste($sscc);
     $sscc = $sscc.$loppu;
 
-    // tehd‰‰n pdf:n uusi sivu
+    // tehd√§√§n pdf:n uusi sivu
     $firstpage = $pdf->new_page("a5");
 
     //DPD-LOGOGO
@@ -205,7 +205,7 @@ if ($kollityht > 0) {
         //flushataan barcode ja saadaam filenimi johon se tallennettiin
         $nimi1 = $obj->FlushObject();
 
-        //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+        //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
         $nimi2 = "/tmp/".md5(uniqid(rand(),true)).".png";
 
         passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
@@ -216,7 +216,7 @@ if ($kollityht > 0) {
           $image = $pdf->png_embed($data);
 
           if ($image) {
-            // piirret‰‰n viivakoodi paprulle
+            // piirret√§√§n viivakoodi paprulle
             $pdf->image_place($image, mm_pt(80), mm_pt(30), $firstpage); // Y, X
           }
         }
@@ -259,7 +259,7 @@ if ($kollityht > 0) {
         //flushataan barcode ja saadaam filenimi johon se tallennettiin
         $nimi1 = $obj->FlushObject();
 
-        //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+        //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
         $nimi2 = "/tmp/".md5(uniqid(rand(),true)).".png";
 
         passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
@@ -270,12 +270,12 @@ if ($kollityht > 0) {
           $image = $pdf->png_embed($data);
 
           if ($image) {
-            // piirret‰‰n viivakoodi paprulle
+            // piirret√§√§n viivakoodi paprulle
             $pdf->image_place($image, mm_pt(10), mm_pt(-15), $firstpage); // Y, X
           }
         }
 
-        //teh‰‰ t‰st‰ viel‰ kaunis kattella
+        //teh√§√§ t√§st√§ viel√§ kaunis kattella
         $sscc = substr($sscc,0,4)." ".substr($sscc,4,1)." ".substr($sscc,5,8)." ".substr($sscc,13,8)." ".substr($sscc,21,1);
 
         $pdf->draw_text(mm_pt(4), mm_pt(5), "Kolli - Item ID.: $sscc", $firstpage, $otsik);
@@ -290,12 +290,12 @@ if ($kollityht > 0) {
 
     }
 
-    // sitten aletaan piirt‰m‰‰n itse PDF sis‰ltˆ‰
+    // sitten aletaan piirt√§m√§√§n itse PDF sis√§lt√∂√§
     // ensin isot viivat kohilleen
     $pdf->draw_rectangle(585,5,5,415,                            $firstpage, $rectparam);
 
-    //Mist‰
-    $pdf->draw_text(mm_pt(4), mm_pt(200), "Mist‰ - FrÂn - From: ",              $firstpage, $otsik);
+    //Mist√§
+    $pdf->draw_text(mm_pt(4), mm_pt(200), "Mist√§ - Fr√•n - From: ",              $firstpage, $otsik);
     $pdf->draw_text(mm_pt(4), mm_pt(195), $laskurow['yhtio_nimi'],              $firstpage, $kirj);
     $pdf->draw_text(mm_pt(4), mm_pt(190), $laskurow['yhtio_nimitark'],            $firstpage, $kirj);
     $pdf->draw_text(mm_pt(4), mm_pt(185), $laskurow['yhtio_osoite'],            $firstpage, $kirj);
@@ -304,10 +304,10 @@ if ($kollityht > 0) {
     $pdf->draw_text(mm_pt(4), mm_pt(175), "Puh -Tel - Tel: ",                $firstpage, $otsik);
     $pdf->draw_text(mm_pt(4), mm_pt(170), $yhtiorow['puhelin'],                $firstpage, $kirj);
 
-    $pdf->draw_text(mm_pt(70), mm_pt(175), "L‰h.pvm. - Avs.dat. -  Desp.Date: ",      $firstpage, $otsik);
+    $pdf->draw_text(mm_pt(70), mm_pt(175), "L√§h.pvm. - Avs.dat. -  Desp.Date: ",      $firstpage, $otsik);
     $pdf->draw_text(mm_pt(70), mm_pt(170), date("d.m.Y") ,                  $firstpage, $kirj);
 
-    $pdf->draw_text(mm_pt(4), mm_pt(165), "L‰hett‰j‰ - Avs‰ndare - Sender: ",        $firstpage, $otsik);
+    $pdf->draw_text(mm_pt(4), mm_pt(165), "L√§hett√§j√§ - Avs√§ndare - Sender: ",        $firstpage, $otsik);
     $pdf->draw_text(mm_pt(4), mm_pt(160), "$kukarow[nimi]" ,                $firstpage, $kirj);
 
     $pdf->draw_text(mm_pt(70), mm_pt(165), "Viite - Referens - Reference: ",        $firstpage, $otsik);
@@ -358,7 +358,7 @@ if ($kollityht > 0) {
     $pdf->draw_rectangle(mm_pt(110),mm_pt(138),mm_pt(110),mm_pt(143),  $firstpage, $rectparam);
     $pdf->draw_rectangle(mm_pt(110),mm_pt(143),mm_pt(115),mm_pt(143),  $firstpage, $rectparam);
 
-    //Kuljetusohjeet = viivakoodi tulee t‰h‰n
+    //Kuljetusohjeet = viivakoodi tulee t√§h√§n
     $pdf->draw_text(mm_pt(4), mm_pt(70), "Kuljetusohjeet - Transportinstruktioner - Transport Instructions:",  $firstpage, $otsik);
     $pdf->draw_text(mm_pt(20), mm_pt(61), $laskurow["toimitustapa"],                      $firstpage, $hugein);
     $pdf->draw_text(mm_pt(20), mm_pt(56), "Paketteja - Paket - Packages: ".$kollityht,              $firstpage, $kirj);
@@ -383,18 +383,18 @@ if ($kollityht > 0) {
 
     $pdf->draw_paragraph(mm_pt(55), mm_pt(20), mm_pt(35), mm_pt(140), $komm, $firstpage, $kirj);
 
-    // ylh‰‰ll‰ on "oikee" tapa tehd‰, mutta me ei tiedet‰ t‰ss‰ vaiheessa kollien m‰‰r‰‰ eik‰ painoa
+    // ylh√§√§ll√§ on "oikee" tapa tehd√§, mutta me ei tiedet√§ t√§ss√§ vaiheessa kollien m√§√§r√§√§ eik√§ painoa
     $pdf->draw_text(mm_pt(4), mm_pt(30), "Tilaukset - Order - Orders: ",  $firstpage, $otsik);
     if ($tilausnumeroita == "") $tilausnumeroita = $laskurow["tunnus"];
     $pdf->draw_text(mm_pt(50), mm_pt(30), $tilausnumeroita, $firstpage, $kirj);
   }
 
-  //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+  //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
   $pdffilenimi = "/tmp/dpdosoitelappu-".md5(uniqid(rand(),true)).".pdf";
 
   //kirjoitetaan pdf faili levylle..
   $fh = fopen($pdffilenimi, "w");
-  if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
+  if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep√§onnistui $pdffilenimi");
   fclose($fh);
 
   if ($kirjoitin == "email") {

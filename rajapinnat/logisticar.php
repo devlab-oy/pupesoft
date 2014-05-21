@@ -1,15 +1,15 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-// Kutsutaanko CLI:st‰
+// Kutsutaanko CLI:st√§
 if (php_sapi_name() != 'cli') {
-  die ("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!");
+  die ("T√§t√§ scripti√§ voi ajaa vain komentorivilt√§!");
 }
 
 if (!isset($argv[1]) or $argv[1] == '') {
-  die("Yhtiˆ on annettava!!");
+  die("Yhti√∂ on annettava!!");
 }
 
 $yhtio = $argv[1];
@@ -29,7 +29,7 @@ $path = "/tmp/logisticar_siirto_$yhtio/";
 // Sivotaan eka vanha pois
 system("rm -rf $path");
 
-// Teh‰‰n uysi dirikka
+// Teh√§√§n uysi dirikka
 system("mkdir $path");
 
 $vuosilisa = "";
@@ -71,11 +71,11 @@ varasto($limit);
 varastotapahtumat($limit);
 myynti($limit);
 
-//Siirret‰‰n failit logisticar palvelimelle
+//Siirret√§√§n failit logisticar palvelimelle
 //siirto($path);
 ftpsiirto($path);
 
-// sambajakosiirto, ei k‰ytˆss‰ t‰ll‰ hetkell‰.
+// sambajakosiirto, ei k√§yt√∂ss√§ t√§ll√§ hetkell√§.
 function siirto ($path) {
   GLOBAL $logisticar, $yhtio;
 
@@ -167,7 +167,7 @@ function nimike($limit = '') {
   $rows = mysql_num_rows($rest);
 
   if ($rows == 0) {
-    echo "Yht‰‰n tuotetta ei lˆytynyt $query\n";
+    echo "Yht√§√§n tuotetta ei l√∂ytynyt $query\n";
     die();
   }
 
@@ -196,7 +196,7 @@ function nimike($limit = '') {
 
   while ($tuote = mysql_fetch_assoc($rest)) {
 
-    // mones t‰m‰ on
+    // mones t√§m√§ on
     $row++;
 
     $query = "SELECT
@@ -218,7 +218,7 @@ function nimike($limit = '') {
     $res = pupe_query($query);
     $paikka = mysql_fetch_assoc($res);
 
-    // mik‰ varasto
+    // mik√§ varasto
     $tuote['varastotunnus']       = kuuluukovarastoon($paikka['hyllyalue'], $paikka['hyllynro']);
     $tuote['toimittajatunnus']       = $tuot_toim_row['toimittajatunnus'];
     $tuote['toimittajannimiketunnus']   = $tuot_toim_row['toimittajannimiketunnus'];
@@ -258,7 +258,7 @@ function asiakas($limit = '') {
   $row = 0;
 
   if ($rows == 0) {
-    echo "Yht‰‰n asiakasta ei lˆytynyt\n";
+    echo "Yht√§√§n asiakasta ei l√∂ytynyt\n";
     die();
   }
 
@@ -307,7 +307,7 @@ function toimittaja($limit = '') {
   $rows = mysql_num_rows($rest);
   $row = 0;
   if ($rows == 0) {
-    echo "Yht‰‰n toimittajaa ei lˆytynyt\n";
+    echo "Yht√§√§n toimittajaa ei l√∂ytynyt\n";
     die();
   }
 
@@ -370,7 +370,7 @@ function varasto($limit = '') {
   $rows = mysql_num_rows($res);
   $row = 0;
   if ($rows == 0) {
-    echo "Yht‰‰n varastoa ei lˆytynyt\n";
+    echo "Yht√§√§n varastoa ei l√∂ytynyt\n";
     die();
   }
 
@@ -384,7 +384,7 @@ function varasto($limit = '') {
     'toimitusaika'
   );
 
-  // tehd‰‰n otsikot
+  // tehd√§√§n otsikot
   create_headers($fp, $headers);
 
   while ($trow = mysql_fetch_assoc($res)) {
@@ -477,7 +477,7 @@ function varastotapahtumat($limit = '') {
   $rows = mysql_num_rows($res);
   $row = 0;
   if ($rows == 0) {
-    echo "Yht‰‰n varastotapahtumaa ei lˆytynyt\n";
+    echo "Yht√§√§n varastotapahtumaa ei l√∂ytynyt\n";
     die();
   }
 
@@ -497,7 +497,7 @@ function varastotapahtumat($limit = '') {
     'tapahtumatyyppi' => null
   );
 
-  // tehd‰‰n otsikot
+  // tehd√§√§n otsikot
   create_headers($fp, array_keys($headers));
 
     while ($trow = mysql_fetch_assoc($res)) {
@@ -515,8 +515,8 @@ function varastotapahtumat($limit = '') {
         $trow['myyntiarvo'] = 0;
         $trow['ostoarvo'] = (-1 * $trow['ostoarvo']);
 
-        // jos kpl alle 0 niin t‰m‰ on oston palautus
-        // jolloin hinta myˆs miinus
+        // jos kpl alle 0 niin t√§m√§ on oston palautus
+        // jolloin hinta my√∂s miinus
         if ($trow['tapahtumamaara'] < 0) {
           // tapahtumamaara on aina positiivinen logisticarissa
           $trow['tapahtumamaara'] = (-1 * $trow['tapahtumamaara']);
@@ -534,7 +534,7 @@ function varastotapahtumat($limit = '') {
         // ostoarvo
         $trow['ostoarvo'] = $trow['myyntiarvo'] - $trow['kate'];
 
-        // t‰m‰ on myynninpalautus eli myyntiarvo on negatiivinen
+        // t√§m√§ on myynninpalautus eli myyntiarvo on negatiivinen
         if ($trow['tapahtumamaara'] < 0) {
           // tapahtumamaara on aina positiivinen logisticarissa
           $trow['tapahtumamaara'] = (-1 * $trow['tapahtumamaara']);
@@ -625,7 +625,7 @@ function myynti($limit = '') {
   $rows = mysql_num_rows($res);
   $row = 0;
   if ($rows == 0) {
-    echo "Yht‰‰n myyntitapahtumaa ei lˆytynyt\n";
+    echo "Yht√§√§n myyntitapahtumaa ei l√∂ytynyt\n";
     die();
   }
 
@@ -644,7 +644,7 @@ function myynti($limit = '') {
     'varastotunnus'   => null
   );
 
-  // tehd‰‰n otsikot
+  // tehd√§√§n otsikot
   create_headers($fp, array_keys($headers));
 
   while ($trow = mysql_fetch_assoc($res)) {
@@ -652,7 +652,7 @@ function myynti($limit = '') {
 
     switch (strtoupper($trow['tapahtumalaji'])) {
       case 'G':
-        // kirjoitetaan fileen vain avoimia siirtolistoja eli toimitettu pit‰‰ olla tyhj‰‰
+        // kirjoitetaan fileen vain avoimia siirtolistoja eli toimitettu pit√§√§ olla tyhj√§√§
         if ($trow['toimitettu'] != '') {
           continue;
         }

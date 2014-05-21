@@ -1,9 +1,9 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-//$toim='YKS' tarkottaa yksinkertainen ja silloin ei v‰litet‰ onko tuotteella eankoodia vaan tulostetaan suoraan tuoteno viivakoodiin
+//$toim='YKS' tarkottaa yksinkertainen ja silloin ei v√§litet√§ onko tuotteella eankoodia vaan tulostetaan suoraan tuoteno viivakoodiin
 require("inc/parametrit.inc");
 
 echo "<font class='head'>".t("Tulosta hyllytarroja")."</font><hr>";
@@ -19,13 +19,13 @@ if ($tee == 'Z') {
   if ($lisa == '') {
     if ($ahyllyalue == '' or $ahyllynro == '' or $ahyllyvali == '' or $ahyllytaso == '' or $lhyllyalue == '' or $lhyllynro == '' or $lhyllyvali == '' or $lhyllytaso == '') {
       $tee = 'Y';
-      $varaosavirhe = t("Sinun on annettava t‰ydellinen osoitev‰li")."<br>";
+      $varaosavirhe = t("Sinun on annettava t√§ydellinen osoitev√§li")."<br>";
     }
   }
   else {
     if ($yhyllyalue == '' or $yhyllynro == '' or $yhyllyvali == '' or $yhyllytaso == '') {
       $tee = 'Y';
-      $varaosavirhe = t("Sinun on annettava t‰ydellinen osoite")."<br>";
+      $varaosavirhe = t("Sinun on annettava t√§ydellinen osoite")."<br>";
     }
   }
 
@@ -45,7 +45,7 @@ if ($tee == 'Z') {
     }
     else {
       $tee = 'Y';
-      $varaosavirhe = t("Aluev‰lilt‰ ei lˆytynyt yht‰‰n paikkaa!")."<br>";
+      $varaosavirhe = t("Aluev√§lilt√§ ei l√∂ytynyt yht√§√§n paikkaa!")."<br>";
     }
   }
   else {
@@ -74,7 +74,7 @@ if ($tee== 'Z' and $ulos == '') {
 $formi  = 'formi';
 $kentta = 'ahyllyalue';
 
-echo t("Osoitev‰li");
+echo t("Osoitev√§li");
 
 echo "<form method='post' name='$formi' autocomplete='off'>";
 echo "<input type='hidden' name='tee' value='Z'>";
@@ -118,7 +118,7 @@ mysql_data_seek($kires,0);
 
 echo "</select></td>";
 
-//t‰h‰n arrayhin pit‰‰ lis‰t‰ uusia malleja jos tehd‰‰n uusia inccej‰ ja ylemp‰n‰ tehd‰ iffej‰.
+//t√§h√§n arrayhin pit√§√§ lis√§t√§ uusia malleja jos tehd√§√§n uusia inccej√§ ja ylemp√§n√§ tehd√§ iffej√§.
 $pohjat=array();
 $pohjat[]='Tec 80x20x4';
 
@@ -136,8 +136,8 @@ echo "</select></td>";
 echo "<td class='back'><input type='Submit' value='".t("Tulosta")."'></td>";
 echo "</tr></table></form><br><br><br>";
 
-// Annetaan mahollisuus tulostaa yksitt‰inen tarra
-echo "Yksitt‰inen osoite";
+// Annetaan mahollisuus tulostaa yksitt√§inen tarra
+echo "Yksitt√§inen osoite";
 
 echo "<table><tr>";
 echo "<th>".t("Hyllyosoite")."</th><th>".t("Kirjoitin")."</th><th>".t("Malli")."</th>";

@@ -31,7 +31,7 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
             $alasveto[$i] = "<select name='t[$i]'>".$ulos."</select>";
           }
 
-          $virhe[$i] = t("Tuotenumeroa ei löydy!");
+          $virhe[$i] = t("Tuotenumeroa ei lÃ¶ydy!");
         }
       }
       else {
@@ -44,7 +44,7 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
       $tem_kieli = trim($t[$i]);
 
       if ($tem_kieli == '') {
-        $virhe[$i] = t("Kieltä ei voi jättää tyhjäksi")."!";
+        $virhe[$i] = t("KieltÃ¤ ei voi jÃ¤ttÃ¤Ã¤ tyhjÃ¤ksi")."!";
       }
       else {
         $loytyyko = FALSE;
@@ -80,7 +80,7 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
       }
 
       if ($tem_laji == "SISTOIMITTAJA") {
-        // salitaan vaan konserniyhtiö joka ei ole me itse
+        // salitaan vaan konserniyhtiÃ¶ joka ei ole me itse
         $query = "SELECT *
                   FROM yhtio
                   WHERE yhtio   = '$t[$i]'
@@ -89,16 +89,16 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
         $sresult = pupe_query($query);
 
         if (mysql_num_rows($sresult) == 0) {
-          $virhe[$i] = t("VIRHE: Yhtiötä ei löydy")."!";
+          $virhe[$i] = t("VIRHE: YhtiÃ¶tÃ¤ ei lÃ¶ydy")."!";
         }
       }
       elseif (strtoupper($tem_laji) == "OLETUSVALINTA") {
-        if (!in_array(substr($t[$i], 0, 3), array("", "!!!", "¡¡¡", "¡¡V"))) {
+        if (!in_array(substr($t[$i], 0, 3), array("", "!!!", "Â¡Â¡Â¡", "Â¡Â¡V"))) {
           $virhe[$i] = t("Tuotteen %s oletusvalinta %s ei kelpaa!", "", $tem_tuoteno, $t[$i]);
         }
       }
 
-      // jos kyseessä on tuotteen parametri
+      // jos kyseessÃ¤ on tuotteen parametri
       if (substr(strtoupper($tem_laji), 0, 10) == "PARAMETRI_") {
         $query = "SELECT tunnus
                   from tuotteen_avainsanat
@@ -115,7 +115,7 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
       }
 
       if (strtoupper($tem_laji) == "PARAMETRI_VARIAATIO_JAKO") {
-        // Onko meillä moniulotteinen variaatio esim. väri ja koko...
+        // Onko meillÃ¤ moniulotteinen variaatio esim. vÃ¤ri ja koko...
         $variaatiot = explode(",", $t[$i]);
 
         foreach ($variaatiot as $variaatio) {
@@ -128,10 +128,10 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
           $sresult = pupe_query($query);
 
           if (mysql_num_rows($sresult) != 1) {
-            $virhe[$i] .= t("Tuotteella ei ole parametriä"). " '". $variaatio."'";
+            $virhe[$i] .= t("Tuotteella ei ole parametriÃ¤"). " '". $variaatio."'";
           }
           if ($variaatio == "variaatio" or $variaatio == "variaatio_jako") {
-            $virhe[$i] .= t("Variaatio jako ei voi olla variaatio eikä variaatio_jako"). "!";
+            $virhe[$i] .= t("Variaatio jako ei voi olla variaatio eikÃ¤ variaatio_jako"). "!";
           }
         }
       }
@@ -153,7 +153,7 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
       $results = pupe_query($query);
 
       if (mysql_num_rows($results) > 0) {
-        $virhe[$tem_tuoteno_i] = $virhe[$i] = t("Avainsana annetuilla tiedoilla löytyy kannasta. Duplikaatit ovat kiellettyjä!");
+        $virhe[$tem_tuoteno_i] = $virhe[$i] = t("Avainsana annetuilla tiedoilla lÃ¶ytyy kannasta. Duplikaatit ovat kiellettyjÃ¤!");
       }
     }
   }

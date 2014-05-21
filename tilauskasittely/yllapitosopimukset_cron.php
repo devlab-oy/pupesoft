@@ -1,12 +1,12 @@
 <?php
 
-// Kutsutaanko CLI:stä
+// Kutsutaanko CLI:stÃ¤
 if (php_sapi_name() != 'cli') {
-  die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+  die ("TÃ¤tÃ¤ scriptiÃ¤ voi ajaa vain komentoriviltÃ¤!");
 }
 
 if (!isset($argv[1]) or $argv[1] == '') {
-  echo "Anna yhtiö!!!\n";
+  echo "Anna yhtiÃ¶!!!\n";
   die;
 }
 
@@ -18,7 +18,7 @@ ini_set("display_errors", 0);
 require ("../inc/connect.inc");
 require ("../inc/functions.inc");
 
-// hmm.. jännää
+// hmm.. jÃ¤nnÃ¤Ã¤
 $kukarow['yhtio']     = $argv[1];
 $kieli           = $argv[2];
 $kukarow['kuka']      = "admin";
@@ -30,14 +30,14 @@ $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 $cron_pvm = array();
 $cron_tun = array();
 
-// ajetaan eka läpi niin saadaan laskuttamattomat sopparit muuttujiin
+// ajetaan eka lÃ¤pi niin saadaan laskuttamattomat sopparit muuttujiin
 require ("yllapitosopimukset.php");
 
 $laskutapvm = $cron_pvm;
 $laskutatun = $cron_tun;
 $tee        = "laskuta";
 
-// sitte ajetaan uudestaan laskuta modessa kaikki sopparit läpi
+// sitte ajetaan uudestaan laskuta modessa kaikki sopparit lÃ¤pi
 require ("yllapitosopimukset.php");
 
 // echotaan outputti

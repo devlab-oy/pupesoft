@@ -2,10 +2,10 @@
 
 $maara = (float) str_replace(",", ".", $maara);
 
-// Lopetetaan jos tilattava m‰‰r‰ on nolla
+// Lopetetaan jos tilattava m√§√§r√§ on nolla
 if ($maara > 0) {
 
-  //p‰ivitet‰‰n kukarow[kesken] kun k‰ytt‰j‰ tekee uutta tilausta
+  //p√§ivitet√§√§n kukarow[kesken] kun k√§ytt√§j√§ tekee uutta tilausta
   $query = "UPDATE kuka
             SET kesken = 0
             WHERE session = '$session'";
@@ -58,7 +58,7 @@ if ($maara > 0) {
 
   $valkoodi     = $srow["oletus_valkoodi"];
 
-  //ker‰yspvm pit‰isi olla -
+  //ker√§yspvm pit√§isi olla -
   if ($kukarow['kesken'] == 0 and $yhtiorow['ostotilaukseen_toimittajan_toimaika'] != '2') {
     $toimpp = date("j");
     $toimkk = date("n");
@@ -116,7 +116,7 @@ if ($maara > 0) {
 
   unset($jtsre);
 
-  // Jos varasto on syˆtetty niin ostetaan siihen varastoon
+  // Jos varasto on sy√∂tetty niin ostetaan siihen varastoon
   if ($varasto > 0) {
     $query = "SELECT tuotepaikat.*
               FROM tuotepaikat
@@ -157,12 +157,12 @@ if ($maara > 0) {
 
   $hinta = $osstu["ostohinta"];
 
-  //otetaan tuoteen kertoimet huomioon - eli jaetaan myyntihinta kertoimella, jotta saadaan yksikkˆhinta
+  //otetaan tuoteen kertoimet huomioon - eli jaetaan myyntihinta kertoimella, jotta saadaan yksikk√∂hinta
   if ($tuoterow["myyntihinta_maara"] != 0 and $osstu["ostohinta"] != 0) {
     $hinta = hintapyoristys($osstu["ostohinta"] / $tuoterow["myyntihinta_maara"]);
   }
 
-  // lis‰t‰‰n ostotilausrivi
+  // lis√§t√§√§n ostotilausrivi
   $query = "INSERT into tilausrivi
             (hinta, ale1, nimitys, tuoteno, try, osasto, tilkpl, varattu, yksikko, otunnus, yhtio, tyyppi, kommentti, toimaika, kerayspvm,hyllyalue, hyllynro, hyllyvali, hyllytaso, tilaajanrivinro, laatija, laadittu) values
             ('$hinta', '$osstu[alennus]','$tuoterow[nimitys]', '$tuoteno', '$tuoterow[try]', '$tuoterow[osasto]', '$maara', '$maara', '$tuoterow[yksikko]', '$tilausnumero', '$kukarow[yhtio]', 'O','', now(), now(), '$jtstu[hyllyalue]','$jtstu[hyllynro]','$jtstu[hyllyvali]','$jtstu[hyllytaso]', '$rivi','$kukarow[kuka]', now())";

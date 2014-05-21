@@ -41,7 +41,7 @@ if ($tee == 'uusiraportti') {
     $tee = '';
   }
   else {
-    echo "<font class='error'>",t("Tallennettavan raportin nimi ei saa olla tyhj‰"),"!</font><br/>";
+    echo "<font class='error'>",t("Tallennettavan raportin nimi ei saa olla tyhj√§"),"!</font><br/>";
     $tee = '';
     $error++;
   }
@@ -56,35 +56,35 @@ if ($tee == 'GO' and $error == 0) {
   }
 
   if (trim($tuotenumeron_sarake) == '') {
-    echo "<font class='error'>",t("Et sy‰tt‰nyt tuotenumeron sarakenumeroa"),"!</font><br/>";
+    echo "<font class='error'>",t("Et sy√§tt√§nyt tuotenumeron sarakenumeroa"),"!</font><br/>";
     $tee = '';
     $error++;
   }
   elseif (!is_numeric($tuotenumeron_sarake)) {
-    echo "<font class='error'>",t("Tuotenumeron sarakenumero t‰ytyy olla numeerinen"),"!</font><br/>";
+    echo "<font class='error'>",t("Tuotenumeron sarakenumero t√§ytyy olla numeerinen"),"!</font><br/>";
     $tee = '';
     $error++;
   }
 
   if (trim($tehtaan_saldon_sarake) == '') {
-    echo "<font class='error'>",t("Et sy‰tt‰nyt tehtaan saldon sarakenumeroa"),"!</font><br/>";
+    echo "<font class='error'>",t("Et sy√§tt√§nyt tehtaan saldon sarakenumeroa"),"!</font><br/>";
     $tee = '';
     $error++;
   }
   elseif (!is_numeric($tehtaan_saldon_sarake)) {
-    echo "<font class='error'>",t("Tehtaan saldon sarakenumero t‰ytyy olla numeerinen"),"!</font><br/>";
+    echo "<font class='error'>",t("Tehtaan saldon sarakenumero t√§ytyy olla numeerinen"),"!</font><br/>";
     $tee = '';
     $error++;
   }
 
   if ($tuotenumeron_sarake == $tehtaan_saldon_sarake) {
-    echo "<font class='error'>",t("Tuotenumeron sarakenumero ja tehtaan saldon sarakenumero eiv‰t saa olla samat"),"!</font><br/>";
+    echo "<font class='error'>",t("Tuotenumeron sarakenumero ja tehtaan saldon sarakenumero eiv√§t saa olla samat"),"!</font><br/>";
     $tee = '';
     $error++;
   }
 
   if ($tuotenumeron_sarake == 0 or $tehtaan_saldon_sarake == 0) {
-    echo "<font class='error'>",t("Tuotenumeron sarakenumero tai tehtaan saldon sarakenumero eiv‰t saa olla nollaa"),"!</font><br/>";
+    echo "<font class='error'>",t("Tuotenumeron sarakenumero tai tehtaan saldon sarakenumero eiv√§t saa olla nollaa"),"!</font><br/>";
     $tee = '';
     $error++;
   }
@@ -99,7 +99,7 @@ if ($tee == 'GO' and $error == 0) {
     $path_parts = pathinfo($_FILES['userfile']['name']);
 
     if (strtolower($path_parts['extension']) != 'xls' and strtolower($path_parts['extension']) != 'txt' and strtolower($path_parts['extension']) != 'csv') {
-      echo "<font class='error'>",t("Virheellinen tiedostop‰‰te"),"!</font><br/>";
+      echo "<font class='error'>",t("Virheellinen tiedostop√§√§te"),"!</font><br/>";
       $tee = '';
       $error++;
     }
@@ -176,7 +176,7 @@ if ($tee == 'GO' and $error == 0) {
         fclose($file);
       }
       else {
-        echo "<font class='error'>",t("Tiedoston avaus ep‰onnistui"),"!</font><br/>";
+        echo "<font class='error'>",t("Tiedoston avaus ep√§onnistui"),"!</font><br/>";
         $tee = '';
         $error++;
       }
@@ -186,7 +186,7 @@ if ($tee == 'GO' and $error == 0) {
       $tee = 'OK';
     }
     else {
-      echo "<font class='error'>",t("Tiedostosta ei luettu yht‰‰n tuotetta"),"!</font><br/>";
+      echo "<font class='error'>",t("Tiedostosta ei luettu yht√§√§n tuotetta"),"!</font><br/>";
       $tee = '';
       $error++;
     }
@@ -216,7 +216,7 @@ if ($tee == 'GO' and $error == 0) {
         $update_saldo_result = pupe_query($query);
       }
 
-      echo "<font class='message'>",t("P‰ivitettiin")," ",count($tuote)," ",t("tuotteen tehdas saldot"),".</font><br/>";
+      echo "<font class='message'>",t("P√§ivitettiin")," ",count($tuote)," ",t("tuotteen tehdas saldot"),".</font><br/>";
 
       $tee = '';
     }
@@ -252,8 +252,8 @@ if ($tee == '') {
 
   echo "<tr><td>",t("Toiminto"),"</td>";
   echo "<td><select name='toiminto'>";
-  echo "<option value='paivita'>",t("P‰ivitet‰‰n tiedostossa olevat tehtaan saldot, ei poisteta muita tehtaan saldoja"),"</option>";
-  echo "<option value='paivita_ja_poista'>",t("P‰ivitet‰‰n tiedostossa olevat tehtaan saldot, poistetaan muut tehtaan saldot"),"</option>";
+  echo "<option value='paivita'>",t("P√§ivitet√§√§n tiedostossa olevat tehtaan saldot, ei poisteta muita tehtaan saldoja"),"</option>";
+  echo "<option value='paivita_ja_poista'>",t("P√§ivitet√§√§n tiedostossa olevat tehtaan saldot, poistetaan muut tehtaan saldot"),"</option>";
   echo "</select></td></tr>";
 
   echo "<tr><td class='back'>&nbsp;</td></tr>";
@@ -314,7 +314,7 @@ if ($tee == '') {
   echo "</tr>";
 
   echo "<tr><td class='back'>&nbsp;</td></tr>";
-  echo "<tr><th colspan='2'>",t("Tiedoston sy‰tt‰"),"</th></tr>";
+  echo "<tr><th colspan='2'>",t("Tiedoston sy√§tt√§"),"</th></tr>";
   echo "<tr><td>",t("Valitse tiedosto"),":</td><td><input type='hidden' name='MAX_FILE_SIZE' value='50000000'><input name='userfile' type='file'></td></tr>";
 
   echo "<tr><td class='back' colspan='2'><input type='submit' value='",t("Aja tehdas saldot"),"'></td></tr>";

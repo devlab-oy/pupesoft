@@ -1,13 +1,13 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require('../inc/parametrit.inc');
 
 echo "<font class='head'>",t("Varastoonviedyt rivit"),"</font><hr>";
 
-//K‰yttˆliittym‰
+//K√§ytt√∂liittym√§
 if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
@@ -21,7 +21,7 @@ if (!isset($tapa)) $tapa = '';
 
 if (!isset($keraajanro_pakollinen)) $keraajanro_pakollinen = "";
 
-if (!isset($MONTH_ARRAY)) $MONTH_ARRAY = array(1=> t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kes‰kuu'),t('Hein‰kuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
+if (!isset($MONTH_ARRAY)) $MONTH_ARRAY = array(1=> t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kes√§kuu'),t('Hein√§kuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
 
 echo "  <script type='text/javascript'>
 
@@ -51,28 +51,28 @@ echo "<tr>";
 echo "<th>",t("Valitse tapa"),"</th>";
 echo "<td colspan='3'>";
 echo "<select name='tapa'>";
-echo "<option value='pp'{$sel['pp']}>",t("P‰ivitt‰in"),"</option>";
+echo "<option value='pp'{$sel['pp']}>",t("P√§ivitt√§in"),"</option>";
 echo "<option value='vk'{$sel['vk']}>",t("Viikottain"),"</option>";
 echo "<option value='kk'{$sel['kk']}>",t("Kuukausittain"),"</option>";
-echo "<option value='vieja'{$sel['vieja']}>",t("Viejitt‰in"),"</option>";
+echo "<option value='vieja'{$sel['vieja']}>",t("Viejitt√§in"),"</option>";
 echo "</select></td>";
 echo "</tr>";
 
 $chk = $keraajanro_pakollinen != '' ? "checked" : "";
 
 echo "<tr>";
-echo "<th>",t("Ker‰‰j‰numero pakollinen"),"</th>";
+echo "<th>",t("Ker√§√§j√§numero pakollinen"),"</th>";
 echo "<td colspan='3'><input type='checkbox' name='keraajanro_pakollinen' {$chk} /></td>";
 echo "</tr>";
 
 echo "<tr>";
-echo "<th>",t("Syˆt‰ p‰iv‰m‰‰r‰ (pp-kk-vvvv)"),"</th>";
+echo "<th>",t("Sy√∂t√§ p√§iv√§m√§√§r√§ (pp-kk-vvvv)"),"</th>";
 echo "<td><input type='text' name='ppa' value='{$ppa}' size='3'></td>";
 echo "<td><input type='text' name='kka' value='{$kka}' size='3'></td>";
 echo "<td><input type='text' name='vva' value='{$vva}' size='5'></td>";
 echo "</tr>";
 echo "<tr>";
-echo "<th>",t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)"),"</th>";
+echo "<th>",t("Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)"),"</th>";
 echo "<td><input type='text' name='ppl' value='{$ppl}' size='3'></td>";
 echo "<td><input type='text' name='kkl' value='{$kkl}' size='3'></td>";
 echo "<td><input type='text' name='vvl' value='{$vvl}' size='5'></td>";
@@ -88,12 +88,12 @@ echo "<br /><br />";
 if ($tee != "") {
 
   if (!checkdate($kka, $ppa, $vva)) {
-    echo "<font class='error'>",t("Virheellinen alkup‰iv‰m‰‰r‰"),"!</font><br>";
+    echo "<font class='error'>",t("Virheellinen alkup√§iv√§m√§√§r√§"),"!</font><br>";
     $tee = "";
   }
 
   if (!checkdate($kkl, $ppl, $vvl)) {
-    echo "<font class='error'>",t("Virheellinen loppup‰iv‰m‰‰r‰"),"!</font><br>";
+    echo "<font class='error'>",t("Virheellinen loppup√§iv√§m√§√§r√§"),"!</font><br>";
     $tee = "";
   }
 }
@@ -131,7 +131,7 @@ if ($tee != '') {
     echo "<th>",t("Nimi"),"</th>";
     echo "<th>",t("Saapuminen"),"</th>";
     echo "<th>",t("Toimittaja"),"</th>";
-    echo "<th>",t("Yksikˆt"),"</th>";
+    echo "<th>",t("Yksik√∂t"),"</th>";
     echo "<th>",t("Rivit"),"</th>";
     echo "<th nowrap>",t("Viety varastoon"),"</th>";
     echo "</tr>";
@@ -148,7 +148,7 @@ if ($tee != '') {
       if ($edkeraaja != $row["kuka"] and $lask > 0 and $ysumma != 0) {
 
         echo "<tr>";
-        echo "<th colspan='3'>",t("Yhteens‰"),":</th>";
+        echo "<th colspan='3'>",t("Yhteens√§"),":</th>";
         echo "<th style='text-align:right'>{$ysumma}</th>";
         echo "<th style='text-align:right'>{$rsumma}</th>";
         echo "<th></th>";
@@ -160,7 +160,7 @@ if ($tee != '') {
         echo "<th>",t("Nimi"),"</th>";
         echo "<th>",t("Saapuminen"),"</th>";
         echo "<th>",t("Toimittaja"),"</th>";
-        echo "<th>",t("Yksikˆt"),"</th>";
+        echo "<th>",t("Yksik√∂t"),"</th>";
         echo "<th>",t("Rivit"),"</th>";
         echo "<th nowrap>",t("Viety varastoon"),"</th>";
         echo "</tr>";
@@ -188,7 +188,7 @@ if ($tee != '') {
       $ysumma  += $row["yksikot"];
       $rsumma  += $row["rivit"];
 
-      // yhteens‰
+      // yhteens√§
       $ysummayht += $row["yksikot"];
       $rsummayht += $row["rivit"];
 
@@ -198,20 +198,20 @@ if ($tee != '') {
 
     if ($ysumma > 0) {
       echo "<tr>";
-      echo "<th colspan='3'>",t("Yhteens‰"),":</th>";
+      echo "<th colspan='3'>",t("Yhteens√§"),":</th>";
       echo "<th style='text-align:right'>{$ysumma}</th>";
       echo "<th style='text-align:right'>{$rsumma}</th>";
       echo "<th></th>";
       echo "</tr>";
     }
 
-    // Kaikki yhteens‰
+    // Kaikki yhteens√§
     echo "<tr>";
     echo "<td class='back'><br></td>";
     echo "</tr>";
 
     echo "<tr>";
-    echo "<th colspan='3'>",t("Kaikki yhteens‰"),":</th>";
+    echo "<th colspan='3'>",t("Kaikki yhteens√§"),":</th>";
     echo "<th style='text-align:right'>{$ysummayht}</th>";
     echo "<th style='text-align:right'>{$rsummayht}</th>";
     echo "<th></th>";
@@ -292,7 +292,7 @@ if ($tee != '') {
 
       echo "<td align='right'>{$ressu['yksikot']}</td>";
       echo "<td align='right'>{$ressu['rivit']}</td>";
-      echo "<td><img title='",t("K‰ytt‰jitt‰in"),"' alt='",t("K‰ytt‰jitt‰in"),"' src='{$palvelin2}pics/lullacons/go-down.png' /></td>";
+      echo "<td><img title='",t("K√§ytt√§jitt√§in"),"' alt='",t("K√§ytt√§jitt√§in"),"' src='{$palvelin2}pics/lullacons/go-down.png' /></td>";
       echo "</tr>";
 
 
@@ -316,7 +316,7 @@ if ($tee != '') {
 
       echo "<tr class='{$ressu['pvm']}' style='display:none;'>";
       echo "<th colspan='2'>",t("Nimi"),"</th>";
-      echo "<th>",t("Yksikˆt"),"</th>";
+      echo "<th>",t("Yksik√∂t"),"</th>";
       echo "<th>",t("Rivit"),"</th>";
       echo "<th></th>";
       echo "</tr>";
@@ -327,7 +327,7 @@ if ($tee != '') {
         echo "<td colspan='2'>{$kayttajittain_row['kuka']}</td>";
         echo "<td align='right'>{$kayttajittain_row['yksikot']}</td>";
         echo "<td align='right'>{$kayttajittain_row['rivit']}</td>";
-        echo "<td><img title='",t("K‰ytt‰j‰"),"' alt='",t("K‰ytt‰j‰"),"' src='{$palvelin2}pics/lullacons/go-down.png' /></td>";
+        echo "<td><img title='",t("K√§ytt√§j√§"),"' alt='",t("K√§ytt√§j√§"),"' src='{$palvelin2}pics/lullacons/go-down.png' /></td>";
         echo "</tr>";
 
         $query = "SELECT tilausrivi.uusiotunnus keikka,
@@ -351,7 +351,7 @@ if ($tee != '') {
         echo "<tr class='lapsi {$ressu['pvm']}{$kayttajittain_row['kuka_tunnus']}' style='display:none;'>";
         echo "<th>",t("Toimittaja"),"</th>";
         echo "<th>",t("Saapuminen"),"</th>";
-        echo "<th>",t("Yksikˆt"),"</th>";
+        echo "<th>",t("Yksik√∂t"),"</th>";
         echo "<th>",t("Rivit"),"</th>";
         echo "<th nowrap>",t("Viety varastoon"),"</th>";
         echo "</tr>";

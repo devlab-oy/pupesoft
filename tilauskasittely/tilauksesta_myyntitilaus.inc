@@ -1,10 +1,10 @@
 <?php
 
-//Sis‰‰n haluamme
+//Sis√§√§n haluamme
 // $otunnus jossa on kopioitavan tilauksen tunnus
-// $tilrivilisa muuttujalla voidaan rajailla mit‰ tilausrivej‰ kopsataan
-// $syot_varasto jos halutaan myyd‰ tietyst‰ varastosta
-// $syot_var voidaan ohjata var-kentt‰‰
+// $tilrivilisa muuttujalla voidaan rajailla mit√§ tilausrivej√§ kopsataan
+// $syot_varasto jos halutaan myyd√§ tietyst√§ varastosta
+// $syot_var voidaan ohjata var-kentt√§√§
 
 if (!function_exists("tilauksesta_myyntitilaus")) {
   function tilauksesta_myyntitilaus($otunnus, $tilrivilisa, $syot_varasto, $syot_var, $varataan_saldoa = "", $kopioi_paikat = "", $perusta="") {
@@ -21,7 +21,7 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
     $copresult = pupe_query($query);
 
     if (mysql_num_rows($copresult) == 0) {
-      $tilauksesta_myyntitilaus = t("Tarjouksella ei ollut yht‰‰n laskutettavaa rivi‰");
+      $tilauksesta_myyntitilaus = t("Tarjouksella ei ollut yht√§√§n laskutettavaa rivi√§");
       return;
     }
 
@@ -30,14 +30,14 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
       list($perusta, $asiakasjollepalautetaan) = explode("#", $perusta);
     }
 
-    //Kopioidaan otsikko ja siirret‰‰n rivit uudelle otsikolle
+    //Kopioidaan otsikko ja siirret√§√§n rivit uudelle otsikolle
     $query = "SELECT * FROM lasku WHERE tunnus='$otunnus' and yhtio ='$kukarow[yhtio]'";
     $monistares = pupe_query($query);
     $monistarow = mysql_fetch_array($monistares);
 
     $tehdaan_uusi_otsikko = TRUE;
 
-    // Katsotaan lˆytyykˆ jo sopiva otsikko, jos ei niin tehd‰‰n uusi, eli t‰ss‰ tapauksessa ei kopsata vanhaa
+    // Katsotaan l√∂ytyyk√∂ jo sopiva otsikko, jos ei niin tehd√§√§n uusi, eli t√§ss√§ tapauksessa ei kopsata vanhaa
     if ($perusta == "REKLAMAATIO") {
       $query = "SELECT lasku.*
                 FROM lasku
@@ -154,8 +154,8 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
       }
 
       /*
-        V‰h‰n glungea taas.. jos halutaan perustaa tarjous insertoidaan ensin pelkk‰ perusotsikko ja sitten t‰m‰ toimitusotsikko
-        Korjataan projektiotsikon tiedot insertin j‰lkeen..
+        V√§h√§n glungea taas.. jos halutaan perustaa tarjous insertoidaan ensin pelkk√§ perusotsikko ja sitten t√§m√§ toimitusotsikko
+        Korjataan projektiotsikon tiedot insertin j√§lkeen..
       */
 
       $tunnusnippu=$ptunnus=0;
@@ -181,7 +181,7 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
       $utunnus = mysql_insert_id();
 
       if ($perusta == "TYOMAARAYS") {
-        // Kopioidaan tyˆm‰‰r‰ys
+        // Kopioidaan ty√∂m√§√§r√§ys
         $query = "SELECT * FROM tyomaarays WHERE otunnus='$otunnus' and yhtio ='$kukarow[yhtio]'";
         $monistatyomres = pupe_query($query);
         $monistatyomrow = mysql_fetch_array($monistatyomres);
@@ -213,9 +213,9 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
       }
 
       /*
-        T‰‰ voi olla hassua, mutta n‰in t‰m‰ haluttiin!
-        Eli liitet‰‰n hyv‰ksytty tarjous uuteen tunnusnippuun eik‰ jatketa vanhaa.
-        T‰m‰ siksi, ett‰ tarjous on laitettu vet‰m‰‰n ehk‰ puoli vuotta aiemmin ja silloin t‰m‰ uusi tilaus ei mene raporteissa "loogisessa" j‰rjestyksess‰..
+        T√§√§ voi olla hassua, mutta n√§in t√§m√§ haluttiin!
+        Eli liitet√§√§n hyv√§ksytty tarjous uuteen tunnusnippuun eik√§ jatketa vanhaa.
+        T√§m√§ siksi, ett√§ tarjous on laitettu vet√§m√§√§n ehk√§ puoli vuotta aiemmin ja silloin t√§m√§ uusi tilaus ei mene raporteissa "loogisessa" j√§rjestyksess√§..
       */
 
       if ($monistarow["tunnusnippu"] > 0 and $monistarow["tila"] == "T") {
@@ -238,7 +238,7 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
       $fields = mysql_field_name($monistares2,0);
       $values = "'".$monistarow2[0]."'";
 
-      //  Samat tiedot tarvitaan myˆs projektill
+      //  Samat tiedot tarvitaan my√∂s projektill
       $pvalues = "'".$monistarow2[0]."'";
 
       for($i=1; $i < mysql_num_fields($monistares2)-1; $i++) { // Ei monisteta tunnusta
@@ -280,7 +280,7 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
         $mtunnus = $utunnus;
       }
 
-      //Siirret‰‰n maksusuunnitelma
+      //Siirret√§√§n maksusuunnitelma
       $query = "SELECT *
                 FROM maksupositio
                 WHERE yhtio = '$kukarow[yhtio]'
@@ -294,14 +294,14 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
                   and otunnus = '$otunnus'";
         $result = pupe_query($query);
 
-        //P‰ivitet‰‰n lasku
+        //P√§ivitet√§√§n lasku
         $query = "UPDATE lasku
                   SET jaksotettu   = '$mtunnus'
                   WHERE yhtio = '$kukarow[yhtio]'
                   and tunnus  = '$utunnus'";
         $result = pupe_query($query);
 
-        //  P‰ivitet‰‰n projekti
+        //  P√§ivitet√§√§n projekti
         if ($ptunnus > 0) {
           $query = "UPDATE lasku
                     SET jaksotettu   = '$mtunnus'
@@ -348,14 +348,14 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
       }
     }
 
-    //Siirret‰‰n tilausrivit
+    //Siirret√§√§n tilausrivit
     $kukarowkesken     = $kukarow["kesken"];
     $kukarow["kesken"]  = $utunnus;
     $varataan_sa_revert = FALSE;
     $isaok        = array();
 
     if ($perusta == "TYOMAARAYS") {
-      $tymlisa    = t("tyˆm‰‰r‰ykselle");
+      $tymlisa    = t("ty√∂m√§√§r√§ykselle");
       $linkkilisa = "<a href='tilaus_myynti.php?toim=TYOMAARAYS&tilausnumero=$utunnus'>".t("Siirry myyntitilaukselle")."</a>";
     }
     else {
@@ -363,7 +363,7 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
       $linkkilisa = "<a href='tilaus_myynti.php?toim=PIKATILAUS&tilausnumero=$utunnus'>".t("Siirry myyntitilaukselle")."</a>";
     }
 
-    $tilauksesta_myyntitilaus .= "<font class='message'>".t("Lis‰t‰‰n valitut rivit")." $tymlisa: $utunnus</font><br>";
+    $tilauksesta_myyntitilaus .= "<font class='message'>".t("Lis√§t√§√§n valitut rivit")." $tymlisa: $utunnus</font><br>";
 
     $query    = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$utunnus'";
     $laskures = mysql_query($query);
@@ -416,7 +416,7 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
         $hinta   = $coprivirow['hinta'];
       }
 
-      // jos k‰ytˆss‰ on myyntihinnan poikkeava m‰‰r‰, kerrotaan hinta takaisin kuntoon.
+      // jos k√§yt√∂ss√§ on myyntihinnan poikkeava m√§√§r√§, kerrotaan hinta takaisin kuntoon.
       if ($tuoterow["myyntihinta_maara"] != 0) {
         $hinta = $hinta * $tuoterow["myyntihinta_maara"];
       }
@@ -517,28 +517,28 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
 
       if (($coprivirow["var"] == "T" or $coprivirow["var"] == "U") and $coprivirow['toimittajan_tunnus'] != 0) {
         if ($coprivirow['var'] == 'T') {
-          $paikka = "°°°{$coprivirow['toimittajan_tunnus']}";
+          $paikka = "¬°¬°¬°{$coprivirow['toimittajan_tunnus']}";
         }
         else {
           $paikka = "!!!{$coprivirow['toimittajan_tunnus']}";
         }
       }
       elseif ($kopioi_paikat != "") {
-        $paikka  = $coprivirow['hyllyalue']."#!°!#".$coprivirow['hyllynro']."#!°!#".$coprivirow['hyllyvali']."#!°!#".$coprivirow['hyllytaso'];
+        $paikka  = $coprivirow['hyllyalue']."#!¬°!#".$coprivirow['hyllynro']."#!¬°!#".$coprivirow['hyllyvali']."#!¬°!#".$coprivirow['hyllytaso'];
       }
       else {
         $paikka  = "";
       }
 
       if (isset($isaok[$coprivirow['perheid2']]) and $isaok[$coprivirow['perheid2']] > 0 and $varataan_saldoa == "" and $coprivirow['perheid2'] != $coprivirow['tunnus'] and $coprivirow['perheid2'] > 0 and stripos($coprivirow["positio"], "TEHDAS") !== FALSE) {
-        // Jos kyseess‰ on tehdaslis‰varuste niin myyd‰‰n saldoa varaamatta
+        // Jos kyseess√§ on tehdaslis√§varuste niin myyd√§√§n saldoa varaamatta
         $varataan_saldoa = "EI";
         $varataan_sa_revert = TRUE;
       }
 
       if (isset($isaok[$coprivirow['perheid2']]) and $isaok[$coprivirow['perheid2']] > 0 and $coprivirow['perheid2'] != $coprivirow['tunnus'] and $coprivirow['perheid2'] > 0 and stripos($coprivirow["positio"], "TEHDAS") !== FALSE) {
-        // Otetaan paikka is‰lt‰ aina kun on tehdaslis‰varuste!
-        $query = "SELECT concat_ws('#!°!#', hyllyalue,hyllynro,hyllyvali,hyllytaso) paikka
+        // Otetaan paikka is√§lt√§ aina kun on tehdaslis√§varuste!
+        $query = "SELECT concat_ws('#!¬°!#', hyllyalue,hyllynro,hyllyvali,hyllytaso) paikka
                   FROM tilausrivi
                   WHERE yhtio = '$kukarow[yhtio]'
                   and tunnus  = '".$isaok[$coprivirow['perheid2']]."'";
@@ -555,11 +555,11 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
       $tuote_result = pupe_query($query);
       $trow = mysql_fetch_array($tuote_result);
 
-      $tilauksesta_myyntitilaus .= "<font class='message'>Lis‰t‰‰n rivi $tuoteno $kpl kpl tilaukselle $utunnus</font><br>";
+      $tilauksesta_myyntitilaus .= "<font class='message'>Lis√§t√§√§n rivi $tuoteno $kpl kpl tilaukselle $utunnus</font><br>";
 
       require('lisaarivi.inc');
 
-      // Jos is‰tuote meni ok ja sill‰ on tehdaslis‰varusteita niin lis‰t‰‰n ne saldosta piittaamatta
+      // Jos is√§tuote meni ok ja sill√§ on tehdaslis√§varusteita niin lis√§t√§√§n ne saldosta piittaamatta
       if (count($lisatyt_rivit1) == 1 and $coprivirow['perheid2'] == $coprivirow['tunnus']) {
         $isaok[$coprivirow['tunnus']] = $lisatyt_rivit1[0];
       }
@@ -570,7 +570,7 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
         $varataan_saldoa = "";
       }
 
-      // Korjataan sarjanumero-oliot, eli siirret‰‰n ne tarjousrivilt‰ tilausriville, jos kopioitava tilaus on tarjous
+      // Korjataan sarjanumero-oliot, eli siirret√§√§n ne tarjousrivilt√§ tilausriville, jos kopioitava tilaus on tarjous
       if ($monistarow["tila"] == "T" and count($lisatyt_rivit) > 0) {
         if ($coprivirow["varattu"] > 0) {
 
@@ -642,7 +642,7 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
           }
         }
 
-        //Jos jotakin kopioitavan rivin sarjanumeroista ei saatu kopioitua niin irrotetaan se silt‰ rivilt‰
+        //Jos jotakin kopioitavan rivin sarjanumeroista ei saatu kopioitua niin irrotetaan se silt√§ rivilt√§
         $query = "UPDATE sarjanumeroseuranta
                   SET $lisax = 0
                   WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
@@ -652,7 +652,7 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
       }
     }
 
-    //Korjataan perheid:t uusilla riveill‰
+    //Korjataan perheid:t uusilla riveill√§
     $query = "SELECT perheid, min(tunnus) uusiperheid
               FROM tilausrivi
               WHERE yhtio  = '$kukarow[yhtio]'
@@ -670,7 +670,7 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
       $cores = pupe_query($query);
     }
 
-    //Korjataan perheid2:t uusilla riveill‰
+    //Korjataan perheid2:t uusilla riveill√§
     $query = "SELECT perheid2, min(tunnus) uusiperheid2
               FROM tilausrivi
               WHERE yhtio   = '$kukarow[yhtio]'
@@ -688,10 +688,10 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
       $cores = pupe_query($query);
     }
 
-    //Jos kyseess‰ on laskutettava myyntitili
+    //Jos kyseess√§ on laskutettava myyntitili
     if (($monistarow["tila"] == "G" and $monistarow["alatila"] == "V" and $monistarow["tilaustyyppi"] == "M") or ($monistarow['clearing'] == 'EXTTARJOUS')) {
       if ($monistarow['clearing'] != 'EXTTARJOUS') {
-        // P‰ivitet‰‰n kopsatun laskun eilahetett‰ kentt‰‰
+        // P√§ivitet√§√§n kopsatun laskun eilahetett√§ kentt√§√§
         $query = "UPDATE lasku
                   SET eilahetetta = 'o'
                   where yhtio = '$kukarow[yhtio]'

@@ -15,7 +15,7 @@ if ($id != 0) {
   $res = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($res) != 1) {
-    echo t("Saapumista ei lˆydy")."!";
+    echo t("Saapumista ei l√∂ydy")."!";
     exit;
   }
 
@@ -32,7 +32,7 @@ if ($id != 0) {
   echo "<tr><th>".t("Vienti").":</th>      <td>$laskurow[vienti]</td></tr>";
   echo "</table><br><br>";
 
-  // N‰ytet‰‰n tilausrivit
+  // N√§ytet√§√§n tilausrivit
   $query = "SELECT *
             from tilausrivi
             where yhtio     = '$kukarow[yhtio]'
@@ -80,11 +80,11 @@ if ($id != 0) {
       echo "</table></td>";
     }
 
-    // T‰ss‰ toi DESC sana ja LIMIT 1 ovat erityisen t‰rkeit‰
+    // T√§ss√§ toi DESC sana ja LIMIT 1 ovat erityisen t√§rkeit√§
     $order = "";
     if ($tee == 'KORJAA') {
       $order = "DESC LIMIT 1";
-      //T‰ss‰ aloitetaan ykkˆsest‰ jotta voimme poistaa vientikerran jos niit‰ on monta vaikka meill‰ on order by desc ja se joka poistetaan tulee ekana j‰rjestyksess‰
+      //T√§ss√§ aloitetaan ykk√∂sest√§ jotta voimme poistaa vientikerran jos niit√§ on monta vaikka meill√§ on order by desc ja se joka poistetaan tulee ekana j√§rjestyksess√§
       $vientikerta = 1;
     }
     else {
@@ -100,7 +100,7 @@ if ($id != 0) {
     $countres = mysql_query($query) or pupe_error($query);
     $countrow = mysql_fetch_array($countres);
 
-    //Montako kertaa t‰m‰ rivi on viety varastoon
+    //Montako kertaa t√§m√§ rivi on viety varastoon
     $vientikerrat = $countrow["kpl"];
 
     //Haetaan tapahtuman tiedot
@@ -124,11 +124,11 @@ if ($id != 0) {
         echo "<tr><th>".t("Kehahinta").":</th><td>$taparow[hinta]</td></tr>";
       }
 
-      // Tutkitaan onko t‰t‰ tuotetta runkslattu t‰n tulon j‰lkeen
+      // Tutkitaan onko t√§t√§ tuotetta runkslattu t√§n tulon j√§lkeen
       $query = "SELECT count(*) kpl
                 from tapahtuma
                 where yhtio = '$kukarow[yhtio]'
-                and laji    in ('laskutus','inventointi','ep‰kurantti','valmistus')
+                and laji    in ('laskutus','inventointi','ep√§kurantti','valmistus')
                 and tuoteno = '$taparow[tuoteno]'
                 and tunnus  > '$taparow[tunnus]'";
       $tapares2 = mysql_query($query) or pupe_error($query);
@@ -140,13 +140,13 @@ if ($id != 0) {
         $voidaankopoistaa = "Ei";
       }
       elseif($vientikerrat == 1 and ($taparow2["kpl"] == 0 or $voidaankosnropoistaa == "OK")) {
-        $voidaankopoistaa = "Kyll‰";
+        $voidaankopoistaa = "Kyll√§";
       }
       elseif($vientikerrat > 1 and $taparow2["kpl"] >= 0 and $vientikerta > 0) {
-        $voidaankopoistaa = "Kyll‰";
+        $voidaankopoistaa = "Kyll√§";
       }
       elseif($vientikerrat > 1 and $taparow2["kpl"] == 0 and $vientikerta == 0) {
-        $voidaankopoistaa = "Kyll‰";
+        $voidaankopoistaa = "Kyll√§";
       }
       else {
         $voidaankopoistaa = "Ei";
@@ -172,7 +172,7 @@ if ($id != 0) {
         echo "</table></td>";
       }
 
-      if ($tee == 'KORJAA' and $voidaankopoistaa == "Kyll‰") {
+      if ($tee == 'KORJAA' and $voidaankopoistaa == "Kyll√§") {
         //Poistetaan tapahtuma
         $query = "DELETE from tapahtuma
                   where yhtio = '$kukarow[yhtio]'
@@ -181,7 +181,7 @@ if ($id != 0) {
 
         echo "$rivirow[tuoteno]: ".t("Poistetaan tapahtuma")."!<br>";
 
-        // onko t‰m‰ tehdaslis‰varuste
+        // onko t√§m√§ tehdaslis√§varuste
         if ($rivirow["perheid2"] != 0 and $rivirow["perheid2"] != $rivirow["tunnus"]) {
           $tehdaslisavaruste_lisa1 = ", saldo_varattu = saldo_varattu - $rivirow[kpl] ";
           $tehdaslisavaruste_lisa2 = ", saldo_varattu = $rivirow[kpl] ";
@@ -205,7 +205,7 @@ if ($id != 0) {
         $korjres = mysql_query($query) or pupe_error($query);
 
         if (mysql_affected_rows() == 0) {
-          echo "<font class='error'>".t("Varastopaikka")." $rivirow[hyllyalue]-$rivirow[hyllynro]-$rivirow[hyllytaso]-$rivirow[hyllyvali] ".t("ei lˆydy vaikka se on syˆtetty tilausriville! Koitetaan p‰ivitt‰‰ oletustapaikkaa!")."</font>";
+          echo "<font class='error'>".t("Varastopaikka")." $rivirow[hyllyalue]-$rivirow[hyllynro]-$rivirow[hyllytaso]-$rivirow[hyllyvali] ".t("ei l√∂ydy vaikka se on sy√∂tetty tilausriville! Koitetaan p√§ivitt√§√§ oletustapaikkaa!")."</font>";
 
           $query = "UPDATE tuotepaikat
                     set saldo = saldo - $rivirow[kpl],
@@ -221,14 +221,14 @@ if ($id != 0) {
 
             echo "<br><font class='error'>".t("Tuotteella")." $rivirow[tuoteno] ".t("ei ole oletuspaikkaakaaaaan")."!!!</font><br><br>";
 
-            // haetaan firman eka varasto, tˆk‰t‰‰n kama sinne ja tehd‰‰n siit‰ oletuspaikka
+            // haetaan firman eka varasto, t√∂k√§t√§√§n kama sinne ja tehd√§√§n siit√§ oletuspaikka
             $query = "SELECT alkuhyllyalue, alkuhyllynro from varastopaikat where yhtio='$kukarow[yhtio]' AND tyyppi != 'P' order by alkuhyllyalue, alkuhyllynro limit 1";
             $korjres = mysql_query($query) or pupe_error($query);
             $hyllyrow =  mysql_fetch_array($korjres);
 
             echo "<br><font class='error'>".t("Tehtiin oletuspaikka")." $rivirow[tuoteno]: $rivirow[alkuhyllyalue] $rivirow[alkuhyllynro] 0 0</font><br><br>";
 
-            // lis‰t‰‰n paikka
+            // lis√§t√§√§n paikka
             $query = "INSERT INTO tuotepaikat set
                       yhtio     = '$kukarow[yhtio]',
                       tuoteno   = '$rivirow[tuoteno]',
@@ -242,7 +242,7 @@ if ($id != 0) {
                       hyllyvali = '0'";
             $korjres = mysql_query($query) or pupe_error($query);
 
-            // tehd‰‰n tapahtuma
+            // tehd√§√§n tapahtuma
             $query = "INSERT into tapahtuma set
                       yhtio     = '$kukarow[yhtio]',
                       tuoteno   = '$rivirow[tuoteno]',
@@ -254,25 +254,25 @@ if ($id != 0) {
                       hyllynro  = '$hyllyrow[alkuhyllynro]',
                       hyllytaso = '0',
                       hyllyvali = '0',
-                      selite    = '".t("Lis‰ttiin tuotepaikka")." $hyllyrow[alkuhyllyalue] $hyllyrow[alkuhyllynro] 0 0',
+                      selite    = '".t("Lis√§ttiin tuotepaikka")." $hyllyrow[alkuhyllyalue] $hyllyrow[alkuhyllynro] 0 0',
                       laatija   = '$kukarow[kuka]',
                       laadittu  = now()";
             $korjres = mysql_query($query) or pupe_error($query);
           }
         }
 
-        echo "$rivirow[tuoteno]: ".t("P‰ivitet‰‰n saldo")." ($rivirow[kpl]) ".t("pois tuotepaikalta")."!<br>";
+        echo "$rivirow[tuoteno]: ".t("P√§ivitet√§√§n saldo")." ($rivirow[kpl]) ".t("pois tuotepaikalta")."!<br>";
 
-        //P‰ivitet‰‰n tuotteen kehahinta
+        //P√§ivitet√§√§n tuotteen kehahinta
         $query = "UPDATE tuote
                   SET kehahin   = '$taparow3[hinta]'
                   where yhtio = '$kukarow[yhtio]'
                   and tuoteno = '$rivirow[tuoteno]'";
         $korjres = mysql_query($query) or pupe_error($query);
 
-        echo "$rivirow[tuoteno]: ".t("P‰ivitet‰‰n tuotteen keskihankintahinta")." ($taparow[hinta] --> $taparow3[hinta]) ".t("takaisin edelliseen arvoon")."!<br>";
+        echo "$rivirow[tuoteno]: ".t("P√§ivitet√§√§n tuotteen keskihankintahinta")." ($taparow[hinta] --> $taparow3[hinta]) ".t("takaisin edelliseen arvoon")."!<br>";
 
-        // Katotaan oliko t‰m‰ ensimm‰inen ja viimeine varastovienti joka nyt poistettiin
+        // Katotaan oliko t√§m√§ ensimm√§inen ja viimeine varastovienti joka nyt poistettiin
         $query = "SELECT tunnus
                   from tapahtuma
                   where yhtio    = '$kukarow[yhtio]'
@@ -292,14 +292,14 @@ if ($id != 0) {
             $suuntalava_korjres = mysql_query($query) or pupe_error($query);
           }
 
-          // P‰ivitet‰‰n alkuper‰inen ostorivi
+          // P√§ivitet√§√§n alkuper√§inen ostorivi
           $query = "UPDATE tilausrivi
                     set varattu=kpl, kpl=0, laskutettuaika='0000-00-00', suuntalava=0
                     where yhtio = '$kukarow[yhtio]'
                     and tunnus  = '$rivirow[tunnus]'";
           $korjres = mysql_query($query) or pupe_error($query);
 
-          echo "$rivirow[tuoteno]: ".t("P‰ivite‰‰n tilausrivi takaisin tilaan ennen varastoonvienti‰")."<br>";
+          echo "$rivirow[tuoteno]: ".t("P√§ivite√§√§n tilausrivi takaisin tilaan ennen varastoonvienti√§")."<br>";
         }
         echo "<br>";
       }
@@ -314,12 +314,12 @@ if ($id != 0) {
   echo "</table><br><br>";
 
   if ($tee != 'KORJAA') {
-    echo "<a href='$PHP_SELF?tee=KORJAA&id=$id'>".t("N‰ytt‰‰ hyv‰lt‰ ja haluan korjata")."</a><br><br>";
+    echo "<a href='$PHP_SELF?tee=KORJAA&id=$id'>".t("N√§ytt√§√§ hyv√§lt√§ ja haluan korjata")."</a><br><br>";
     echo "<font class='error'>".t("HUOM: Poistaa vain yhden varastoonviennin per tuote per korjausajo")."!</font>";
 
   }
   else {
-    echo "<a href='$PHP_SELF?id=$id'>".t("N‰yt‰‰ saapuminen uudestaan")."</a>";
+    echo "<a href='$PHP_SELF?id=$id'>".t("N√§yt√§√§ saapuminen uudestaan")."</a>";
   }
 }
 
@@ -327,7 +327,7 @@ if ($id == '') {
   echo "<br><table>";
   echo "<tr>";
   echo "<form method = 'post'>";
-  echo "<th>".t("Syˆta saapumisen numero")."</th>";
+  echo "<th>".t("Sy√∂ta saapumisen numero")."</th>";
   echo "<td><input type='text' size='30' name='id'></td>";
   echo "<td><input type='submit' value='".t("Jatka")."'></td></form></tr>";
   echo "</table>";

@@ -1,6 +1,6 @@
 <?php
 
-// Kutsutaanko CLI:st‰
+// Kutsutaanko CLI:st√§
 $php_cli = FALSE;
 
 if (php_sapi_name() == 'cli') {
@@ -19,19 +19,19 @@ if ($php_cli) {
   require ("inc/functions.inc");
 
   if (!isset($ftpget_email)) $ftpget_email = "development@devlab.fi";       # kenelle meilataan jos on ongelma
-  if (!isset($ftpget_emailfrom)) $ftpget_emailfrom = "development@devlab.fi";   # mill‰ osoitteella meili l‰hetet‰‰n
+  if (!isset($ftpget_emailfrom)) $ftpget_emailfrom = "development@devlab.fi";   # mill√§ osoitteella meili l√§hetet√§√§n
 
-  // ja operaattori komentorivilt‰
+  // ja operaattori komentorivilt√§
   // itella, servinet, yms
-  // pit‰‰ olla m‰‰ritettyn‰ salasanat.inc:iss‰ tai sitten t‰m‰ menee puihin.
+  // pit√§√§ olla m√§√§ritettyn√§ salasanat.inc:iss√§ tai sitten t√§m√§ menee puihin.
   $operaattori = $argv[1];
 }
 
-// Sallitaan vain yksi instanssi t‰st‰ skriptist‰ kerrallaan
+// Sallitaan vain yksi instanssi t√§st√§ skriptist√§ kerrallaan
 pupesoft_flock();
 
 if ($operaattori == "") {
-  mail($ftpget_email,  mb_encode_mimeheader("VIRHE: FTP-get!", "ISO-8859-1", "Q"), "FTP-get sis‰‰nluvussa ongelma, ei operaattoria valittuna. Tutki asia!", "From: ".mb_encode_mimeheader("Pupesoft", "ISO-8859-1", "Q")." <$ftpget_emailfrom>\n", "-f $ftpget_emailfrom");
+  mail($ftpget_email,  mb_encode_mimeheader("VIRHE: FTP-get!", "UTF-8", "Q"), "FTP-get sis√§√§nluvussa ongelma, ei operaattoria valittuna. Tutki asia!", "From: ".mb_encode_mimeheader("Pupesoft", "UTF-8", "Q")." <$ftpget_emailfrom>\n", "-f $ftpget_emailfrom");
   exit;
 }
 
@@ -71,7 +71,7 @@ if ($ftpget_host[$operaattori] != '' and $ftpget_user[$operaattori] != '' and $f
         $fileget = ftp_get($conn_id, $temp_filename, $file, FTP_ASCII);
 
         if (filesize($temp_filename) == 0) {
-          #echo "VIRHE: Ladattava tiedotsto on tyhj‰!\n";
+          #echo "VIRHE: Ladattava tiedotsto on tyhj√§!\n";
           unlink($temp_filename);
         }
         elseif ($fileget) {
@@ -92,7 +92,7 @@ if ($ftpget_host[$operaattori] != '' and $ftpget_user[$operaattori] != '' and $f
 
   $palautus = 0;
 
-  // mik‰ feilas?
+  // mik√§ feilas?
   if ($conn_id === FALSE) {
     $palautus = 1;
   }
@@ -106,7 +106,7 @@ if ($ftpget_host[$operaattori] != '' and $ftpget_user[$operaattori] != '' and $f
     $palautus = 4;
   }
 
-  // jos siirto ep‰onnistuu
+  // jos siirto ep√§onnistuu
   if ($palautus != 0) {
     switch ($palautus) {
       case  1:
@@ -127,5 +127,5 @@ if ($ftpget_host[$operaattori] != '' and $ftpget_user[$operaattori] != '' and $f
   }
 }
 else {
-  mail($ftpget_email,  mb_encode_mimeheader("VIRHE: FTP-get!", "ISO-8859-1", "Q"), "FTP-get sis‰‰nluvussa saattaa olla ongelma. Jokin tarvittavista tiedoista on v‰‰rin (operaattori: $operaattori)", "From: ".mb_encode_mimeheader("Pupesoft", "ISO-8859-1", "Q")." <$ftpget_emailfrom>\n", "-f $ftpget_emailfrom");
+  mail($ftpget_email,  mb_encode_mimeheader("VIRHE: FTP-get!", "UTF-8", "Q"), "FTP-get sis√§√§nluvussa saattaa olla ongelma. Jokin tarvittavista tiedoista on v√§√§rin (operaattori: $operaattori)", "From: ".mb_encode_mimeheader("Pupesoft", "UTF-8", "Q")." <$ftpget_emailfrom>\n", "-f $ftpget_emailfrom");
 }

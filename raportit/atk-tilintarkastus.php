@@ -1,9 +1,9 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-// Ei k‰ytet‰ pakkausta
+// Ei k√§ytet√§ pakkausta
 $compression = FALSE;
 
 if (isset($_POST["tee"])) {
@@ -35,7 +35,7 @@ echo "<script type=\"text/javascript\" charset=\"utf-8\">
      </script>";
 
 
-// tehd‰‰n valtiontilintarkastajille atk-tarkistusmateriaalia
+// tehd√§√§n valtiontilintarkastajille atk-tarkistusmateriaalia
 echo "<font class='head'>".t("Atk-tilintarkastus")."</font><hr>";
 
 // default arvot yhtiorowlta
@@ -74,7 +74,7 @@ echo "</tr><tr>";
 echo "<th>Anna alkupvm</th>";
 echo "<td><input disabled='true' class='disabloitu' type='text' name='loppu' value='$loppu'></td>";
 echo "</tr><tr>";
-echo "<th>Lis‰‰ tositetyyppi ainestoon</th>";
+echo "<th>Lis√§√§ tositetyyppi ainestoon</th>";
 echo "<td><input disabled='true' class='disabloitu' type='checkbox' name='tositetyyppi_mukaan' $chk></td>";
 echo "</tr>";
 echo "</table>";
@@ -87,7 +87,7 @@ if ($tee == "raportti") {
 
   /* tilikartta */
 
-  // keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+  // keksit√§√§n uudelle failille joku varmasti uniikki nimi:
   $file2 = "tilikartta-".md5(uniqid(rand(),true)).".txt";
 
   // avataan faili
@@ -109,8 +109,8 @@ if ($tee == "raportti") {
 
     $bar->increase();
 
-    $rivi  = sprintf("%-6.6s",   $row['tilino']);    // tilinumero 6 merkki‰
-    $rivi .= sprintf("%-35.35s", $row['nimi']);      // selite 35 merkki‰
+    $rivi  = sprintf("%-6.6s",   $row['tilino']);    // tilinumero 6 merkki√§
+    $rivi .= sprintf("%-35.35s", $row['nimi']);      // selite 35 merkki√§
     $rivi .= "\n";                  // windows rivinvaihto (cr lf)
 
     fwrite($fh, $rivi);
@@ -119,9 +119,9 @@ if ($tee == "raportti") {
   // suljetaan tiedosto
   fclose($fh);
 
-  /* tiliˆinnit */
+  /* tili√∂innit */
 
-  // keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+  // keksit√§√§n uudelle failille joku varmasti uniikki nimi:
   $file1 = "tilioinnit-".md5(uniqid(rand(),true)).".txt";
 
   // avataan faili
@@ -140,7 +140,7 @@ if ($tee == "raportti") {
   $result = pupe_query($query);
 
 
-  echo "<br>Haetaan tiliˆinnit....<br>";
+  echo "<br>Haetaan tili√∂innit....<br>";
   $bar = new ProgressBar();
   $elements = mysql_num_rows($result); // total number of elements to process
   $bar->initialize($elements); // print the empty bar
@@ -149,26 +149,26 @@ if ($tee == "raportti") {
 
     $bar->increase();
 
-    $rivi  = sprintf("%-10.10s", $row['tapvm']);    // p‰iv‰m‰‰r‰ 10 merkki‰ (vvvv-kk-pp)
-    $rivi .= sprintf("%6.6s",    $row['tilino']);    // tilinumero 6 merkki‰
-    $rivi .= sprintf("%6.6s",    $row['kustp']);    // kustannuspaikka 6 merkki‰
-    $rivi .= sprintf("%6.6s",    $row['kohde']);    // kohde 6 merkki‰
-    $rivi .= sprintf("%6.6s",    $row['projekti']);    // projekti 6 merkki‰
-    $rivi .= sprintf("%13.13s",  $row['summa']);    // summa 13 merkki‰ (desimaalierotin piste)
-    $rivi .= sprintf("%7.7s",    $row['vero']);      // vero 7 merkki‰ (desimaalierotin piste)
-    $rivi .= sprintf("%-50.50s", $row['selite']);    // selite 50 merkki‰
-    $rivi .= sprintf("%-10.10s", $row['laatija']);    // laatijan nimi 10 merkki‰
-    $rivi .= sprintf("%-19.19s", $row['laadittu']);    // laadittuaika 19 merkki‰ (vvvv-kk-pp hh:mm:ss)
-    $rivi .= sprintf("%-15.15s", $row['ytunnus']);    // asiakkaan/toimittajan tunniste 15 merkki‰
-    $rivi .= sprintf("%-45.45s", $row['nimi']);      // asiakkaan/toimittajan nimi 45 merkki‰
-    $rivi .= sprintf("%-45.45s", $row['nimitark']);    // asiakkaan/toimittajan nimitarkenne 45 merkki‰
-    $rivi .= sprintf("%-45.45s", $row['osoite']);    // asiakkaan/toimittajan osoite 45 merkki‰
-    $rivi .= sprintf("%-45.45s", $row['osoitetark']);  // asiakkaan/toimittajan osoitetarkenne 45 merkki‰
-    $rivi .= sprintf("%-15.15s", $row['postino']);    // asiakkaan/toimittajan postinumero 15 merkki‰
-    $rivi .= sprintf("%-45.45s", $row['postitp']);    // asiakkaan/toimittajan postitoimipaikka 45 merkki‰
+    $rivi  = sprintf("%-10.10s", $row['tapvm']);    // p√§iv√§m√§√§r√§ 10 merkki√§ (vvvv-kk-pp)
+    $rivi .= sprintf("%6.6s",    $row['tilino']);    // tilinumero 6 merkki√§
+    $rivi .= sprintf("%6.6s",    $row['kustp']);    // kustannuspaikka 6 merkki√§
+    $rivi .= sprintf("%6.6s",    $row['kohde']);    // kohde 6 merkki√§
+    $rivi .= sprintf("%6.6s",    $row['projekti']);    // projekti 6 merkki√§
+    $rivi .= sprintf("%13.13s",  $row['summa']);    // summa 13 merkki√§ (desimaalierotin piste)
+    $rivi .= sprintf("%7.7s",    $row['vero']);      // vero 7 merkki√§ (desimaalierotin piste)
+    $rivi .= sprintf("%-50.50s", $row['selite']);    // selite 50 merkki√§
+    $rivi .= sprintf("%-10.10s", $row['laatija']);    // laatijan nimi 10 merkki√§
+    $rivi .= sprintf("%-19.19s", $row['laadittu']);    // laadittuaika 19 merkki√§ (vvvv-kk-pp hh:mm:ss)
+    $rivi .= sprintf("%-15.15s", $row['ytunnus']);    // asiakkaan/toimittajan tunniste 15 merkki√§
+    $rivi .= sprintf("%-45.45s", $row['nimi']);      // asiakkaan/toimittajan nimi 45 merkki√§
+    $rivi .= sprintf("%-45.45s", $row['nimitark']);    // asiakkaan/toimittajan nimitarkenne 45 merkki√§
+    $rivi .= sprintf("%-45.45s", $row['osoite']);    // asiakkaan/toimittajan osoite 45 merkki√§
+    $rivi .= sprintf("%-45.45s", $row['osoitetark']);  // asiakkaan/toimittajan osoitetarkenne 45 merkki√§
+    $rivi .= sprintf("%-15.15s", $row['postino']);    // asiakkaan/toimittajan postinumero 15 merkki√§
+    $rivi .= sprintf("%-45.45s", $row['postitp']);    // asiakkaan/toimittajan postitoimipaikka 45 merkki√§
 
     if ($tositetyyppi_mukaan != "") {
-      // Laitetaan tositetyyppi mukaan selkokielisen‰
+      // Laitetaan tositetyyppi mukaan selkokielisen√§
       if ($row["tila"] == "U") {
         $rivi .= sprintf("%-11.11s", "Myynti");
       }
@@ -178,7 +178,7 @@ if ($tee == "raportti") {
       elseif ($row["tila"] == "X") {
         switch($row["alatila"]) {
           case "E":
-            $rivi .= sprintf("%-11.11s", "Ep‰kurantointi");
+            $rivi .= sprintf("%-11.11s", "Ep√§kurantointi");
             break;
           case "I":
             $rivi .= sprintf("%-11.11s", "Inventointi");
@@ -187,10 +187,10 @@ if ($tee == "raportti") {
             $rivi .= sprintf("%-11.11s", "Varastosiirto");
             break;
           case "K":
-            $rivi .= sprintf("%-11.11s", "Kassalippaan t‰sm‰ytys");
+            $rivi .= sprintf("%-11.11s", "Kassalippaan t√§sm√§ytys");
             break;
           case "O":
-            $rivi .= sprintf("%-11.11s", "K‰teisotto");
+            $rivi .= sprintf("%-11.11s", "K√§teisotto");
             break;
           case "T":
             $rivi .= sprintf("%-11.11s", "Tilikauden tulos");
@@ -217,7 +217,7 @@ if ($tee == "raportti") {
 
   /* kustannuspaikat, projektit ja kohteet */
 
-  // keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+  // keksit√§√§n uudelle failille joku varmasti uniikki nimi:
   $file3 = "kustprojkoht-".md5(uniqid(rand(),true)).".txt";
 
   // avataan faili
@@ -253,9 +253,9 @@ if ($tee == "raportti") {
       $tyyppi = "";
     }
 
-    $rivi  = sprintf("%-15.15s", $tyyppi);        // tyyppi 15 merkki‰
-    $rivi .= sprintf("%11.11s",  $row['tunnus']);    // tunnus 11 merkki‰
-    $rivi .= sprintf("%-35.35s", $row['nimi']);      // nimi 35 merkki‰
+    $rivi  = sprintf("%-15.15s", $tyyppi);        // tyyppi 15 merkki√§
+    $rivi .= sprintf("%11.11s",  $row['tunnus']);    // tunnus 11 merkki√§
+    $rivi .= sprintf("%-35.35s", $row['nimi']);      // nimi 35 merkki√§
     $rivi .= "\n";                  // windows rivinvaihto (cr lf)
 
     fwrite($fh, $rivi);
@@ -265,7 +265,7 @@ if ($tee == "raportti") {
 
   // Tilaukset
 
-  // keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+  // keksit√§√§n uudelle failille joku varmasti uniikki nimi:
   $file4 = "toimitukset-".md5(uniqid(rand(),true)).".txt";
   $file5 = "toimitukset_rivit-".md5(uniqid(rand(),true)).".txt";
 
@@ -321,7 +321,7 @@ if ($tee == "raportti") {
 
   // Laskut
 
-  // keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+  // keksit√§√§n uudelle failille joku varmasti uniikki nimi:
   $file6 = "laskut-".md5(uniqid(rand(),true)).".txt";
   $file7 = "laskut_rivit-".md5(uniqid(rand(),true)).".txt";
 
@@ -373,7 +373,7 @@ if ($tee == "raportti") {
   fclose($fh);
   fclose($fhr);
 
-  // tehd‰‰n failista zippi
+  // tehd√§√§n failista zippi
   chdir("/tmp");
   exec("/usr/bin/zip Tilintarkastus-{$kukarow["yhtio"]}.zip ".escapeshellarg($file1)." ".escapeshellarg($file2)." ".escapeshellarg($file3)." ".escapeshellarg($file4)." ".escapeshellarg($file5)." ".escapeshellarg($file6)." ".escapeshellarg($file7));
 

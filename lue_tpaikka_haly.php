@@ -2,7 +2,7 @@
 
 require ("inc/parametrit.inc");
 
-echo "<font class='head'>".t("Lue tuotepaikkakohtaisia h‰lytysrajoja ja tilausm‰‰ri‰")."</font><hr>";
+echo "<font class='head'>".t("Lue tuotepaikkakohtaisia h√§lytysrajoja ja tilausm√§√§ri√§")."</font><hr>";
 
 if ($korjataan == '') $id = 0;
 
@@ -17,12 +17,12 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $korjataan ==
   }
 
   if ($_FILES['userfile']['size']==0) {
-    die ("<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font>");
+    die ("<font class='error'><br>".t("Tiedosto on tyhj√§")."!</font>");
   }
 
-  $file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
+  $file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep√§onnistui")."!");
 
-  echo "<font class='message'>".t("Tutkaillaan mit‰ olet l‰hett‰nyt").".<br></font>";
+  echo "<font class='message'>".t("Tutkaillaan mit√§ olet l√§hett√§nyt").".<br></font>";
 
    while ($rivi = fgets($file)) {
     // luetaan rivi tiedostosta..
@@ -129,7 +129,7 @@ if ($korjataan != '') {
                     luontiaika  = now()";
           $result = pupe_query($query);
 
-          // tehd‰‰n tapahtuma
+          // tehd√§√§n tapahtuma
           $query = "INSERT into tapahtuma set
                     yhtio     = '$kukarow[yhtio]',
                     tuoteno   = '$tuoteno[$id]',
@@ -141,14 +141,14 @@ if ($korjataan != '') {
                     hyllynro  = '$hyllynro[$id]',
                     hyllyvali = '$hyllyvali[$id]',
                     hyllytaso = '$hyllytaso[$id]',
-                    selite    = '".t("Lis‰ttiin tuotepaikka")." $hyllyalue[$id] $hyllynro[$id] $hyllyvali[$id] $hyllytaso[$id]',
+                    selite    = '".t("Lis√§ttiin tuotepaikka")." $hyllyalue[$id] $hyllynro[$id] $hyllyvali[$id] $hyllytaso[$id]',
                     laatija   = '$kukarow[kuka]',
                     laadittu  = now()";
           $korjres = pupe_query($query);
         }
       }
       else {
-        $error = "<font class='error'>".t("Antamasi varastopaikka ei ole k‰sitelt‰v‰ss‰ varastossa")."</font>";
+        $error = "<font class='error'>".t("Antamasi varastopaikka ei ole k√§sitelt√§v√§ss√§ varastossa")."</font>";
       }
     }
 
@@ -171,7 +171,7 @@ if ($korjataan != '') {
       $korj++;
 
       if ($korj== 1) {
-        echo "<tr><th>".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("H‰lytysraja")."</th><th>".t("Tilausm‰‰r‰")."</th><th>".t("Huomautus")."</th><th>".t("Paikka")."</th></tr>";
+        echo "<tr><th>".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("H√§lytysraja")."</th><th>".t("Tilausm√§√§r√§")."</th><th>".t("Huomautus")."</th><th>".t("Paikka")."</th></tr>";
       }
 
       echo "<tr><td>$id $tuoteno[$id]</td>";
@@ -186,7 +186,7 @@ if ($korjataan != '') {
         $nimrow = mysql_fetch_assoc($nimresult);
 
         if ($error == '') {
-          $error = t("Paikkaa ei lˆytynyt t‰st‰ varastosta, anna uusi paikka");
+          $error = t("Paikkaa ei l√∂ytynyt t√§st√§ varastosta, anna uusi paikka");
         }
 
         echo "  <td>".t_tuotteen_avainsanat($nimrow, 'nimitys')."</td>
@@ -207,7 +207,7 @@ if ($korjataan != '') {
         $paikkasyot++;
       }
       else {
-        echo "<td></td><td></td><td></td><td>".t("TUOTENUMERO EI L÷YDY")."!!!</td><td></td>";
+        echo "<td></td><td></td><td></td><td>".t("TUOTENUMERO EI L√ñYDY")."!!!</td><td></td>";
       }
 
       echo "</tr>";
@@ -217,7 +217,7 @@ if ($korjataan != '') {
         $korj++;
 
         if ($korj == 1) {
-          echo "<tr><th>".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("H‰lytysraja")."</th><th>".t("Tilausm‰‰r‰")."</th><th>".t("Huomautus")."</th><th>".t("Paikka")."</th></tr>";
+          echo "<tr><th>".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("H√§lytysraja")."</th><th>".t("Tilausm√§√§r√§")."</th><th>".t("Huomautus")."</th><th>".t("Paikka")."</th></tr>";
         }
 
         echo "<tr><td>$id $tuoteno[$id]</td>";
@@ -235,7 +235,7 @@ if ($korjataan != '') {
           echo "<td>".t_tuotteen_avainsanat($nimrow, 'nimitys')."</td>
               <td align='right'>$halytysraja[$id]</td>
               <td align='right'>$tilattava[$id]</td>
-              <td>".t("Valitse paikka jota haluat p‰ivitt‰‰")."</td>";
+              <td>".t("Valitse paikka jota haluat p√§ivitt√§√§")."</td>";
 
           echo "<td><select name='rivipaikka[$id]'><option value=''>".t("Ei Valintaa");
 
@@ -248,7 +248,7 @@ if ($korjataan != '') {
           echo "</select></td>";
         }
         else {
-          echo "<td></td><td></td><td>".t("TUOTENUMERO EI L÷YDY VAIKKA TUOTEPAIKKA ON")."!!!</td><td></td>";
+          echo "<td></td><td></td><td>".t("TUOTENUMERO EI L√ñYDY VAIKKA TUOTEPAIKKA ON")."!!!</td><td></td>";
         }
 
         echo "</tr>";
@@ -288,7 +288,7 @@ if ($korjataan != '') {
   if ($korj > 0) {
     if ($paikkasyot > 0) {
       echo "<tr>
-          <td colspan='5' class='spec' align='right'>".t("Syˆt‰ paikat kaikille riveille")."</td><td>
+          <td colspan='5' class='spec' align='right'>".t("Sy√∂t√§ paikat kaikille riveille")."</td><td>
           <input type='text' id='taytasarake_hyllyalue' size='6'>
           <input type='text' id='taytasarake_hyllynro'  size='2'>
           <input type='text' id='taytasarake_hyllyvali' size='2'>
@@ -312,7 +312,7 @@ else {
   echo "<font class='message'>".t("Tiedostomuoto").":</font><br>
       <table>
       <tr><th colspan='3'>".t("Sarkaineroteltu tekstitiedosto").".</th></tr>
-      <tr><td>".t("Tuoteno")."</td><td>".t("H‰lytysraja")."</td><td>".t("Tilausm‰‰r‰")."</td></tr>
+      <tr><td>".t("Tuoteno")."</td><td>".t("H√§lytysraja")."</td><td>".t("Tilausm√§√§r√§")."</td></tr>
       </table>
       <br>";
 
@@ -345,7 +345,7 @@ else {
 
   <tr><th>".t("Valitse tiedosto").":</th>
     <td><input name='userfile' type='file'></td>
-    <td class='back'><input type='submit' value='".t("L‰het‰")."'></td>
+    <td class='back'><input type='submit' value='".t("L√§het√§")."'></td>
   </tr>
   </table>
   </form>";

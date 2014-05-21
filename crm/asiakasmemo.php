@@ -3,7 +3,7 @@
 if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
   require ("../inc/parametrit.inc");
 
-  //Jos yll‰pidossa on luotu uusi asiakas
+  //Jos yll√§pidossa on luotu uusi asiakas
   if ($yllapidossa == "asiakas" and $yllapidontunnus != '') {
     $asiakasid   = $yllapidontunnus;
   }
@@ -38,13 +38,13 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
 $asmemo_lopetus = "{$palvelin2}crm/asiakasmemo.php////ytunnus=$ytunnus//asiakasid=$asiakasid";
 
 if ($lopetus != "") {
-  // Lis‰t‰‰n t‰m‰ lopetuslinkkiin
+  // Lis√§t√§√§n t√§m√§ lopetuslinkkiin
   $asmemo_lopetus = $lopetus."/SPLIT/".$asmemo_lopetus;
 }
 
 ///* Asiakas on valittu *///
 if ($ytunnus != '') {
-  ///* Jos ollaan k‰yty yll‰pidossa *///
+  ///* Jos ollaan k√§yty yll√§pidossa *///
   if ($yllapidossa == 'asiakas') {
     $yhtunnus = '';
   }
@@ -63,22 +63,22 @@ if ($ytunnus != '') {
       $res = pupe_query($query);
       $row = mysql_fetch_array($res);
 
-      $meili = "\n$kukarow[nimi] ".t("l‰hetti sinulle asiakasmemon").".\n\n\n";
+      $meili = "\n$kukarow[nimi] ".t("l√§hetti sinulle asiakasmemon").".\n\n\n";
       $meili .= t("Tapa").": $row[tapa]\n\n";
       $meili .= t("Ytunnus").": $row[asiakas]\n";
       $meili .= t("Asiakasnumero").": $row[asiakasnro]\n";
       $meili .= t("Asiakas").": $row[nimi] $row[nimitark] $row[toim_nimi] $row[toim_nimitark]\n";
-      $meili .= t("P‰v‰m‰‰r‰").": ".tv1dateconv($row["pvmalku"])."\n\n";
+      $meili .= t("P√§v√§m√§√§r√§").": ".tv1dateconv($row["pvmalku"])."\n\n";
       $meili .= t("Viesti").":\n".str_replace("\r\n","\n", $row["kentta01"])."\n\n";
       $meili .= "-----------------------\n\n";
 
-      $tulos = mail($email, mb_encode_mimeheader(t("Asiakasmemo")." $yhtiorow[nimi]", "ISO-8859-1", "Q"), $meili,"From: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <$kukarow[eposti]>\nReply-To: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$kukarow["eposti"].">\n", "-f $yhtiorow[postittaja_email]");
+      $tulos = mail($email, mb_encode_mimeheader(t("Asiakasmemo")." $yhtiorow[nimi]", "UTF-8", "Q"), $meili,"From: ".mb_encode_mimeheader($kukarow["nimi"], "UTF-8", "Q")." <$kukarow[eposti]>\nReply-To: ".mb_encode_mimeheader($kukarow["nimi"], "UTF-8", "Q")." <".$kukarow["eposti"].">\n", "-f $yhtiorow[postittaja_email]");
 
       if ($row["tyyppi"] == "Lead") {
-        $eviesti = "$kukarow[nimi] l‰hetti leadin k‰ytt‰j‰lle: $enimi / $email";
+        $eviesti = "$kukarow[nimi] l√§hetti leadin k√§ytt√§j√§lle: $enimi / $email";
       }
       else {
-        $eviesti = "$kukarow[nimi] l‰hetti memon k‰ytt‰j‰lle: $enimi / $email";
+        $eviesti = "$kukarow[nimi] l√§hetti memon k√§ytt√§j√§lle: $enimi / $email";
       }
 
       $kysely = "INSERT INTO kalenteri
@@ -113,7 +113,7 @@ if ($ytunnus != '') {
                    luontiaika      = now()";
         $result = pupe_query($kysely);
       }
-      //echo "<br>S‰hkˆposti l‰hetetty osoitteeseen: $email<br><br>";
+      //echo "<br>S√§hk√∂posti l√§hetetty osoitteeseen: $email<br><br>";
     }
 
     $tunnus = "";
@@ -133,11 +133,11 @@ if ($ytunnus != '') {
         <input type='hidden' name='yhtunnus' value='$yhtunnus'>";
 
     echo "<tr><th colspan='2' align='left'><br>".t("Asiakasvertailu").":</th></tr>";
-    echo "<tr><td>".t("Miten tuotteet esill‰").":</td><td><textarea name='esilla' cols='40' rows=5' wrap='hard'></textarea></td></tr>";
-    echo "<tr><td>".t("Myym‰l‰n ileisilme").":</td><td><textarea name='yleisilme' cols='40' rows='5' wrap='hard'></textarea></td></tr>";
-    echo "<tr><th colspan='2' align='left'><br>".t("Tuotteiden jakauma merkeitt‰in").":</th></tr>";
+    echo "<tr><td>".t("Miten tuotteet esill√§").":</td><td><textarea name='esilla' cols='40' rows=5' wrap='hard'></textarea></td></tr>";
+    echo "<tr><td>".t("Myym√§l√§n ileisilme").":</td><td><textarea name='yleisilme' cols='40' rows='5' wrap='hard'></textarea></td></tr>";
+    echo "<tr><th colspan='2' align='left'><br>".t("Tuotteiden jakauma merkeitt√§in").":</th></tr>";
     echo "<tr><td>".t("Puvut").":</td><td><textarea name='puvut'       cols='40' rows='2' wrap='hard'></textarea></td></tr>";
-    echo "<tr><td>".t("Kyp‰r‰t").":</td><td><textarea name='kyparat'     cols='40' rows='2' wrap='hard'></textarea></td></tr>";
+    echo "<tr><td>".t("Kyp√§r√§t").":</td><td><textarea name='kyparat'     cols='40' rows='2' wrap='hard'></textarea></td></tr>";
     echo "<tr><td>".t("Saappaat").":</td><td><textarea name='saappaat'     cols='40' rows='2' wrap='hard'></textarea></td></tr>";
     echo "<tr><td>".t("Hanskat").":</td><td><textarea name='hanskat'    cols='40' rows='2' wrap='hard'></textarea></td></tr>";
     echo "<tr><th><br></th><th></th></tr>";
@@ -147,7 +147,7 @@ if ($ytunnus != '') {
     echo "</form></table>";
   }
 
-  ///* Lis‰t‰‰n uusi memeotietue*///
+  ///* Lis√§t√§√§n uusi memeotietue*///
   if ($tee == "UUSIMEMO" and $tyyppi == "Muistutus" and $muistutusko == "") {
     $muistutusko   = "Muistutus";
     $tee       = "";
@@ -201,7 +201,7 @@ if ($ytunnus != '') {
           $result = pupe_query($query);
           $row = mysql_fetch_array($result);
 
-          // K‰ytt‰j‰lle l‰hetet‰‰n tekstiviestimuistutus
+          // K√§ytt√§j√§lle l√§hetet√§√§n tekstiviestimuistutus
           if ($row["puhno"] != '' and strlen($viesti) > 0 and $sms_palvelin != "" and $sms_user != "" and $sms_pass != "") {
 
             $ok = 1;
@@ -214,11 +214,11 @@ if ($ytunnus != '') {
             if (trim($retval) == "0") $ok = 0;
 
             if ($ok == 1) {
-              echo "<font class='error'>VIRHE: Tekstiviestin l‰hetys ep‰onnistui! $retval</font><br><br>";
+              echo "<font class='error'>VIRHE: Tekstiviestin l√§hetys ep√§onnistui! $retval</font><br><br>";
             }
 
             if ($ok == 0) {
-              echo "<font class='message'>Tekstiviestimuistutus lehetet‰‰n!</font><br><br>";
+              echo "<font class='message'>Tekstiviestimuistutus lehetet√§√§n!</font><br><br>";
             }
           }
         }
@@ -387,7 +387,7 @@ if ($ytunnus != '') {
 
   if ($tee == '') {
 
-    ///* Yhteyshenkilˆn tiedot, otetaan valitun yhteyshenkilˆn tiedot talteen  *///
+    ///* Yhteyshenkil√∂n tiedot, otetaan valitun yhteyshenkil√∂n tiedot talteen  *///
     if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
       $query = "SELECT *
                 FROM yhteyshenkilo
@@ -425,7 +425,7 @@ if ($ytunnus != '') {
       }
       $yhenkilo .= "</select></form>";
 
-      //N‰ytet‰‰n asiakkaan tietoja jos yhteyshenkilˆ‰ ei olla valittu
+      //N√§ytet√§√§n asiakkaan tietoja jos yhteyshenkil√∂√§ ei olla valittu
       if ($yhtunnus == "kaikki" or $yhtunnus == '') {
         $yemail   = $asiakasrow["email"];
         $ynimi    = "";
@@ -437,7 +437,7 @@ if ($ytunnus != '') {
         $yfakta   = $asiakasrow["fakta"];
       }
 
-      ///* Asiakaan tiedot ja yhteyshenkilˆn tiedot *///
+      ///* Asiakaan tiedot ja yhteyshenkil√∂n tiedot *///
       echo "<table>";
 
       echo "<tr>";
@@ -470,10 +470,10 @@ if ($ytunnus != '') {
       echo "<td>$asiakasrow[toim_nimi]</td><td>$yhenkilo</td>";
 
       if ($asylloik and tarkista_oikeus("yllapito.php", "yhteyshenkilo", "X")) {
-        echo "<td><a href='{$palvelin2}yllapito.php?toim=asiakas&tunnus=$asiakasid&lopetus=$asmemo_lopetus'>".t("Luo uusi yhteyshenkilˆ")."</a></td>";
+        echo "<td><a href='{$palvelin2}yllapito.php?toim=asiakas&tunnus=$asiakasid&lopetus=$asmemo_lopetus'>".t("Luo uusi yhteyshenkil√∂")."</a></td>";
       }
       else {
-        echo "<td>".t("(Luo uusi yhteyshenkilˆ)")."</td>";
+        echo "<td>".t("(Luo uusi yhteyshenkil√∂)")."</td>";
       }
 
       echo "</tr>";
@@ -482,7 +482,7 @@ if ($ytunnus != '') {
 
 
       if (mysql_num_rows($result) > 0 and $yhtunnus != '') {
-        echo "<td><a href='{$palvelin2}yllapito.php?toim=asiakas&tunnus=$asiakasid&lopetus=$asmemo_lopetus'>".t("Muuta yhteyshenkilˆn tietoja")."</a></td>";
+        echo "<td><a href='{$palvelin2}yllapito.php?toim=asiakas&tunnus=$asiakasid&lopetus=$asmemo_lopetus'>".t("Muuta yhteyshenkil√∂n tietoja")."</a></td>";
       }
       else {
         echo "<td></td>";
@@ -492,7 +492,7 @@ if ($ytunnus != '') {
       echo "<tr>";
       echo "<td>$asiakasrow[osoite]</td><td>$asiakasrow[toim_osoite]</td><td>".t("Fax").": $yfax</td>";
 
-      // P‰iv‰m‰‰r‰t rappareita varten
+      // P√§iv√§m√§√§r√§t rappareita varten
       $kka = date("m",mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
       $vva = date("Y",mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
       $ppa = date("d",mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
@@ -563,13 +563,13 @@ if ($ytunnus != '') {
       echo "</td><td><a href='{$palvelin2}budjetinyllapito_tat.php?toim=ASIAKAS&ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&submit_button=joo&alkuvv=".date("Y")."&alkukk=01&loppuvv=".date("Y")."&loppukk=12&lopetus=$asmemo_lopetus'>".t("Asiakkaan myyntitavoitteet")."</a></td></tr>";
 
       if ($yfakta != '' or $ytitteli != '' or $ynimi != '') {
-        echo "<tr><td colspan='2'>".t("Valittu yhteyshenkilˆ").": $ytitteli $ynimi</td><td colspan='2'>$yfakta</td></tr>";
+        echo "<tr><td colspan='2'>".t("Valittu yhteyshenkil√∂").": $ytitteli $ynimi</td><td colspan='2'>$yfakta</td></tr>";
       }
 
       echo "</table><br>";
     }
 
-    ///* Syˆt‰ memo-tietoa *///
+    ///* Sy√∂t√§ memo-tietoa *///
     if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
       echo "<table width='620'>";
 
@@ -586,10 +586,10 @@ if ($ytunnus != '') {
         echo "<input type='hidden' name='kuka' value='$kuka'>";
       }
 
-      echo "<tr><th>".t("Lis‰‰")."</th>";
+      echo "<tr><th>".t("Lis√§√§")."</th>";
 
       if ($yhtunnus > 0) {
-        echo "<th>".t("Yhteyshenkilˆ").": $ynimi</th>";
+        echo "<th>".t("Yhteyshenkil√∂").": $ynimi</th>";
       }
       else {
         echo "<td></td>";
@@ -658,7 +658,7 @@ if ($ytunnus != '') {
         if (!isset($mmm))
           $mmm = "00";
 
-        echo "<tr><th>".t("Muistutusp‰iv‰m‰‰r‰ (pp-kk-vvvv tt:mm)")."</th>
+        echo "<tr><th>".t("Muistutusp√§iv√§m√§√§r√§ (pp-kk-vvvv tt:mm)")."</th>
             <td colspan='2'><input type='text' name='mppa' value='$mppa' size='3'>-
             <input type='text' name='mkka' value='$mkka' size='3'>-
             <input type='text' name='mvva' value='$mvva' size='5'>
@@ -738,7 +738,7 @@ if ($ytunnus != '') {
         if (!isset($lhh))  $lhh = "10";
         if (!isset($lmm))  $lmm = "00";
 
-        echo "<tr><th>".t("Muistutusp‰iv‰m‰‰r‰ (pp-kk-vvvv tt:mm)")."</th>
+        echo "<tr><th>".t("Muistutusp√§iv√§m√§√§r√§ (pp-kk-vvvv tt:mm)")."</th>
             <td colspan='2'><input type='text' name='mppa' value='$lppa' size='3'>-
             <input type='text' name='mkka' value='$lkka' size='3'>-
             <input type='text' name='mvva' value='$lvva' size='5'>
@@ -777,7 +777,7 @@ if ($ytunnus != '') {
           <input type='hidden' name='ytunnus'   value='$ytunnus'>
           <input type='hidden' name='lopetus'   value='$lopetus'>
           <input type='hidden' name='asiakasid'   value='$asiakasid'>
-          <input type='submit' name='submit' value='".t("Korjaa viimeisint‰")."'>
+          <input type='submit' name='submit' value='".t("Korjaa viimeisint√§")."'>
           </form>
           </td></tr>";
 
@@ -821,10 +821,10 @@ if ($ytunnus != '') {
       if ($memorow["tapa"] == "asiakasanalyysi") {
         echo "<tr>
           <th>$memorow[tyyppi]</th><th>$memorow[laatija]</th><th>$memorow[laatija]@$memorow[paivamaara]
-          </th><th>".t("Tapa").": $memorow[tapa]</th><th>".t("Yhteyshenkilˆ").": $memorow[yhteyshenkilo]</th>
+          </th><th>".t("Tapa").": $memorow[tapa]</th><th>".t("Yhteyshenkil√∂").": $memorow[yhteyshenkilo]</th>
           </tr>
           <tr>
-          <td colspan='4'><pre>".t("Miten tuotteet esill‰").":<br>$memorow[viesti]<br><br>".t("Myym‰l‰n yleisilme").":<br>$memorow[kentta02]<br><br>".t("Tuotteiden jakauma merkeitt‰in").":<br>".t("Puvut").":<br>$memorow[kentta03]<br>".t("Kyp‰r‰t").":<br>$memorow[kentta04]<br>".t("Saappaat").":<br>$memorow[kentta05]<br>".t("Hanskat").":<br>$memorow[kentta06]<br>".t("Muut huomiot").":<br>$memorow[kentta07]<br><br>".t("Keskustelut/sovitut extrat").":<br>$memorow[kentta08]<br></pre></td>
+          <td colspan='4'><pre>".t("Miten tuotteet esill√§").":<br>$memorow[viesti]<br><br>".t("Myym√§l√§n yleisilme").":<br>$memorow[kentta02]<br><br>".t("Tuotteiden jakauma merkeitt√§in").":<br>".t("Puvut").":<br>$memorow[kentta03]<br>".t("Kyp√§r√§t").":<br>$memorow[kentta04]<br>".t("Saappaat").":<br>$memorow[kentta05]<br>".t("Hanskat").":<br>$memorow[kentta06]<br>".t("Muut huomiot").":<br>$memorow[kentta07]<br><br>".t("Keskustelut/sovitut extrat").":<br>$memorow[kentta08]<br></pre></td>
           </tr>";
       }
       else {
@@ -834,7 +834,7 @@ if ($ytunnus != '') {
               <th>$memorow[laatija]</th>
               <th>".tv1dateconv($memorow["paivamaara"])."</th>
               <th>".t("Tapa").": $memorow[tapa]</th>
-              <th>".t("Yhteyshenkilˆ").": $memorow[yhteyshenkilo]</th>";
+              <th>".t("Yhteyshenkil√∂").": $memorow[yhteyshenkilo]</th>";
 
           if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and substr($memorow['tyyppi'],0,7) != 'DELETED') {
             echo "<th><a href='$PHP_SELF?tunnus=$memorow[tunnus]&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&tee=POISTAMEMO&liitostyyppi=$memorow[tyyppi]&lopetus=$lopetus'>".t("Poista")."</a></th>";
@@ -851,7 +851,7 @@ if ($ytunnus != '') {
           $laskutyyppi = $memorow["laskutila"];
           $alatila   = $memorow["laskualatila"];
 
-          //tehd‰‰n selv‰kielinen tila/alatila
+          //tehd√§√§n selv√§kielinen tila/alatila
           require "inc/laskutyyppi.inc";
 
           echo "<br><br>".t("$laskutyyppi")." ".t("$alatila").":  <a href='{$palvelin2}raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$memorow[laskutunnus]&lopetus=$asmemo_lopetus'>$memorow[laskutunnus]</a> / ".tv1dateconv($memorow["laskumpvm"])."  ($memorow[laskumyyja])";
@@ -862,7 +862,7 @@ if ($ytunnus != '') {
         }
 
         if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $memorow["perheid"] == 0 and ($memorow["tyyppi"] == "Memo" or $memorow["tyyppi"] == "Lead")) {
-          echo "<tr><td colspan='3' align='right'>".t("L‰het‰ k‰ytt‰j‰lle").":</td><td colspan='3'>";
+          echo "<tr><td colspan='3' align='right'>".t("L√§het√§ k√§ytt√§j√§lle").":</td><td colspan='3'>";
           echo "<form method='POST'>";
           echo "<input type='hidden' name='tee' value='SAHKOPOSTI'>";
           echo "<input type='hidden' name='tunnus' value='$memorow[tunnus]'>";
@@ -870,7 +870,7 @@ if ($ytunnus != '') {
           echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";
           echo "<input type='hidden' name='lopetus' value='$lopetus'>";
           echo "<input type='hidden' name='asiakasid' value='$asiakasid'>";
-          echo "<select name='email'><option value=''>".t("Valitse k‰ytt‰j‰")."</option>";
+          echo "<select name='email'><option value=''>".t("Valitse k√§ytt√§j√§")."</option>";
 
           $query  = "SELECT kuka.nimi, kuka.eposti, min(kuka.kuka) kuka
                      FROM kuka
@@ -887,7 +887,7 @@ if ($ytunnus != '') {
           }
 
           echo "</select>";
-          echo "<input type='submit' value='".t("L‰het‰ viesti")."'>";
+          echo "<input type='submit' value='".t("L√§het√§ viesti")."'>";
           echo "</form>";
           echo "</td></tr>";
         }
@@ -907,11 +907,11 @@ if ($ytunnus != '') {
     if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE ) {
       if ($naytapoistetut == "") {
         echo "<br>";
-        echo "<a href='$PHP_SELF?naytapoistetut=OK&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&lopetus=$lopetus'>".t("N‰yt‰ poistetut muistiinpanot")."</a>";
+        echo "<a href='$PHP_SELF?naytapoistetut=OK&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&lopetus=$lopetus'>".t("N√§yt√§ poistetut muistiinpanot")."</a>";
       }
       else {
         echo "<br>";
-        echo "<a href='$PHP_SELF?naytapoistetut=&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&lopetus=$lopetus'>".t("N‰yt‰ aktiiviset muistiinpanot"). "</a>";
+        echo "<a href='$PHP_SELF?naytapoistetut=&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&lopetus=$lopetus'>".t("N√§yt√§ aktiiviset muistiinpanot"). "</a>";
       }
     }
   }
@@ -933,7 +933,7 @@ function listaaliitetiedostot($kalenteritunnus,$tyyppi) {
   $res = pupe_query($query);
 
   while ($row = mysql_fetch_array($res)) {
-    $out .= "<a href='{$palvelin2}view.php?id=$row[tunnus]' target='Attachment'>".t('N‰yt‰ liite')."</a> ".$row['filename']."<br>\n";
+    $out .= "<a href='{$palvelin2}view.php?id=$row[tunnus]' target='Attachment'>".t('N√§yt√§ liite')."</a> ".$row['filename']."<br>\n";
   }
 
   return $out;

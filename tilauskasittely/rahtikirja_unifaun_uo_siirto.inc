@@ -2,7 +2,7 @@
 
 # Pupesoft -> Unifaun Online datasiirto
 
-// jos on laitettu kollikenttään 0 niin ei yritetä luoda siirtotiedostoa
+// jos on laitettu kollikenttÃ¤Ã¤n 0 niin ei yritetÃ¤ luoda siirtotiedostoa
 if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
 
   if ($unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "") {
@@ -100,7 +100,7 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
         'lavametri'    => $lavametri[$indeksi]
       );
 
-      /* VOIDAAN LÄHETTÄÄ MYÖS MONTA CONTAINER-ROWTA PER SANOMA! YKSI HEADER */
+      /* VOIDAAN LÃ„HETTÃ„Ã„ MYÃ–S MONTA CONTAINER-ROWTA PER SANOMA! YKSI HEADER */
       $unifaun->setContainerRow($kollitiedot);
     }
 

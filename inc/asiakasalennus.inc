@@ -4,31 +4,31 @@ $otsikko = 'Asiakkaan alennukset';
 $otsikko_nappi = 'asiakasalennus';
 
 if ($from == "") {
-  // HUOM HUOM: eth‰n muuta n‰it‰ ilman, ett‰ korjaat myˆs yllapito.php:ss‰ iframen lukitse_avaimeen muuttujat
+  // HUOM HUOM: eth√§n muuta n√§it√§ ilman, ett√§ korjaat my√∂s yllapito.php:ss√§ iframen lukitse_avaimeen muuttujat
   $kentat = "asiakasalennus.tunnus,
   concat_ws('<br>', asiakasalennus.asiakas, (SELECT asiakas.nimi FROM asiakas WHERE asiakasalennus.yhtio = asiakas.yhtio AND asiakasalennus.asiakas = asiakas.tunnus)) Asiakas,
   asiakasalennus.ytunnus 'Ytunnus',
 #    concat_ws('<br>', asiakasalennus.ytunnus, (SELECT group_concat(distinct asiakas.nimi separator '<br>') FROM asiakas WHERE asiakasalennus.yhtio = asiakas.yhtio and asiakasalennus.ytunnus = asiakas.ytunnus and asiakas.ytunnus != '')) 'Ytunnus',
   (SELECT concat(dynaaminen_puu.tunnus, '<br>', dynaaminen_puu.nimi) FROM dynaaminen_puu WHERE dynaaminen_puu.tunnus = asiakasalennus.asiakas_segmentti AND dynaaminen_puu.yhtio = asiakasalennus.yhtio) 'Asiakaspuu',
-  asiakasalennus.asiakas_ryhma 'Asiakasryhm‰',
+  asiakasalennus.asiakas_ryhma 'Asiakasryhm√§',
   (SELECT concat(avainsana.selite, '<br>', avainsana.selitetark) FROM avainsana WHERE avainsana.laji = 'piiri' AND avainsana.selite = asiakasalennus.piiri AND avainsana.yhtio = asiakasalennus.yhtio) 'Piiri',
   asiakasalennus.tuoteno,
-  asiakasalennus.ryhma 'Alennusryhm‰',
+  asiakasalennus.ryhma 'Alennusryhm√§',
   asiakasalennus.alennus,
   asiakasalennus.alennuslaji,
   asiakasalennus.minkpl 'Minkpl',
   concat_ws('<br>', asiakasalennus.alkupvm, asiakasalennus.loppupvm) 'Alku/Loppu'";
 }
 else {
-  // HUOM HUOM: eth‰n muuta n‰it‰ ilman, ett‰ korjaat myˆs yllapito.php:ss‰ iframen lukitse_avaimeen muuttujat
+  // HUOM HUOM: eth√§n muuta n√§it√§ ilman, ett√§ korjaat my√∂s yllapito.php:ss√§ iframen lukitse_avaimeen muuttujat
   $kentat = "asiakasalennus.tunnus,
-  concat_ws('<br>', asiakasalennus.tuoteno, asiakasalennus.ryhma) 'Tuoteno/Alennusryhm‰',
+  concat_ws('<br>', asiakasalennus.tuoteno, asiakasalennus.ryhma) 'Tuoteno/Alennusryhm√§',
   asiakasalennus.alennus,
   asiakasalennus.alennuslaji,
   asiakasalennus.minkpl 'Minkpl',
   concat_ws('<br>', asiakasalennus.alkupvm, asiakasalennus.loppupvm) 'Alku/Loppu'";
 }
-// HUOM HUOM: eth‰n muuta n‰it‰ ilman, ett‰ korjaat myˆs yllapito.php:ss‰ iframen lukitse_avaimeen muuttujat
+// HUOM HUOM: eth√§n muuta n√§it√§ ilman, ett√§ korjaat my√∂s yllapito.php:ss√§ iframen lukitse_avaimeen muuttujat
 $hakukentat = "tunnus, asiakas, ytunnus,asiakas_segmentti, asiakas_ryhma,piiri, tuoteno, ryhma, alennus, alennuslaji, minkpl, alkupvm/loppupvm";
 
 $jarjestys = "asiakasalennus.ytunnus, asiakasalennus.asiakas_ryhma, asiakasalennus.piiri, asiakasalennus.tuoteno, asiakasalennus.ryhma, asiakasalennus.minkpl, asiakasalennus.alkupvm, asiakasalennus.loppupvm";

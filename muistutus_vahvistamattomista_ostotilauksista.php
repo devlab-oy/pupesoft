@@ -1,10 +1,10 @@
 <?php
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-// Kutsutaanko CLI:st‰
+// Kutsutaanko CLI:st√§
 if (php_sapi_name() != 'cli') {
-  die ("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!");
+  die ("T√§t√§ scripti√§ voi ajaa vain komentorivilt√§!");
 }
 
 if (isset($argv[1]) and trim($argv[1]) != '') {
@@ -13,7 +13,7 @@ if (isset($argv[1]) and trim($argv[1]) != '') {
   require ("inc/connect.inc");
   require ("inc/functions.inc");
 
-  // hmm.. j‰nn‰‰
+  // hmm.. j√§nn√§√§
   $kukarow['yhtio'] = $argv[1];
 
   $query    = "SELECT * from yhtio where yhtio='$kukarow[yhtio]'";
@@ -22,7 +22,7 @@ if (isset($argv[1]) and trim($argv[1]) != '') {
   if (mysql_num_rows($yhtiores) == 1) {
     $yhtiorow = mysql_fetch_array($yhtiores);
 
-    // haetaan yhtiˆn parametrit
+    // haetaan yhti√∂n parametrit
     $query = "SELECT *
               FROM yhtion_parametrit
               WHERE yhtio='$yhtiorow[yhtio]'";
@@ -30,14 +30,14 @@ if (isset($argv[1]) and trim($argv[1]) != '') {
 
     if (mysql_num_rows($result) == 1) {
       $yhtion_parametritrow = mysql_fetch_array($result);
-      // lis‰t‰‰n kaikki yhtiorow arrayseen, niin ollaan taaksep‰inyhteensopivia
+      // lis√§t√§√§n kaikki yhtiorow arrayseen, niin ollaan taaksep√§inyhteensopivia
       foreach ($yhtion_parametritrow as $parametrit_nimi => $parametrit_arvo) {
         $yhtiorow[$parametrit_nimi] = $parametrit_arvo;
       }
     }
   }
   else {
-    die ("Yhtiˆ $kukarow[yhtio] ei lˆydy!");
+    die ("Yhti√∂ $kukarow[yhtio] ei l√∂ydy!");
   }
 
   $query = "(SELECT tilausrivi.otunnus, lasku.laatija, concat('vastuuostaja#', kuka.eposti) eposti, lasku.nimi, lasku.ytunnus, COUNT(*) kpl
@@ -79,19 +79,19 @@ if (isset($argv[1]) and trim($argv[1]) != '') {
       list($postityyppi, $l_veposti) = explode("#", $veposti);
 
       if ($postityyppi == 'vastuuostaja') {
-        $meili = t("Vastuuostajalle ilmoitus vahvistamatta olevista ostotilauksien riveist‰").":\n\n" . $meili;
+        $meili = t("Vastuuostajalle ilmoitus vahvistamatta olevista ostotilauksien riveist√§").":\n\n" . $meili;
       }
       else {
         $meili = t("Sinulla on vahvistamatta seuraavien ostotilauksien rivit").":\n\n" . $meili;
       }
 
-      $tulos = mail($l_veposti, mb_encode_mimeheader(t("Muistutus vahvistamattomista ostotilausriveist‰"), "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+      $tulos = mail($l_veposti, mb_encode_mimeheader(t("Muistutus vahvistamattomista ostotilausriveist√§"), "UTF-8", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
       $meili = "";
     }
 
     $meili .= t("Ostotilaus").": " . $trow['otunnus'] . "\n";
     $meili .= t("Toimittaja").": " . $trow['nimi'] . "\n";
-    $meili .= t("Vahvistamattomia rivej‰").": " . $trow['kpl'] . "\n\n";
+    $meili .= t("Vahvistamattomia rivej√§").": " . $trow['kpl'] . "\n\n";
 
     $veposti = $trow['eposti'];
 

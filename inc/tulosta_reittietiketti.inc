@@ -210,9 +210,9 @@ if ($kerayseran_numero > 0) {
           if ($paino_chk_row['paino'] != 0) {
 
             /*
-             * DSV Roadilla, Kaukokiidolla sekä VR Transpointilla voi ilmoittaa eri VAK-tuotteet per paketti
+             * DSV Roadilla, Kaukokiidolla sekÃ¤ VR Transpointilla voi ilmoittaa eri VAK-tuotteet per paketti
              * Kiitolinjan kohdalla vain yksi UN-numero per kolli
-             * HIT-palvelun kohdalla sallitaan vain rajoitettu määrä vaarallisia aineita
+             * HIT-palvelun kohdalla sallitaan vain rajoitettu mÃ¤Ã¤rÃ¤ vaarallisia aineita
              */
 
             if ($toitarow['rahdinkuljettaja'] == 'DSV' or $toitarow['rahdinkuljettaja'] == 'KK' or $toitarow['rahdinkuljettaja'] == 'TP') {
@@ -286,7 +286,7 @@ if ($kerayseran_numero > 0) {
 
                 $ltq_maara = (float) preg_replace("/[^0-9,\.]/", "", str_replace(",", ".", $vak_chk_row["vakmaara"]));
 
-                // Käytetään vain millilitroja ja grammoja
+                // KÃ¤ytetÃ¤Ã¤n vain millilitroja ja grammoja
                 if ($ltq_yks == 'l' or $ltq_yks == 'kg') {
                   $ltq_maara = $ltq_maara * 1000;
                 }
@@ -331,7 +331,7 @@ if ($kerayseran_numero > 0) {
             'kuutiot' => $pakkaus_info_row['kuutiot']
           );
 
-          /* VOIDAAN LÄHETTÄÄ MYÖS MONTA CONTAINER-ROWTA PER SANOMA! YKSI HEADER */
+          /* VOIDAAN LÃ„HETTÃ„Ã„ MYÃ–S MONTA CONTAINER-ROWTA PER SANOMA! YKSI HEADER */
           $unifaun->setContainerRow($kollitiedot);
           $unifaun->ftpSend();
         }
@@ -351,7 +351,7 @@ if ($kerayseran_numero > 0) {
                'pakkaus_kirjain' => excel_column_name($keraysera_row['pakkausnro']),
                'sscc' => $keraysera_row['sscc'],
                'toimitustapa' => $row['toimitustapa'],
-               'rivit' => $keraysera_row['rivimaara'],//tilausrivien määrä
+               'rivit' => $keraysera_row['rivimaara'],//tilausrivien mÃ¤Ã¤rÃ¤
                'paino' => $pakkaus_info_row['tuotemassa'],
                'tilavuus' => $pakkaus_info_row['kuutiot'],
                'lask_nimi' => $rakir_row['toim_nimi'],

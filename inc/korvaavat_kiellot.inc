@@ -1,4 +1,4 @@
 <?php
-$otsikko  = 'Korvaavia ei myydä asiakkaalle';
+$otsikko  = 'Korvaavia ei myydÃ¤ asiakkaalle';
 $kentat   = 'tunnus, ytunnus, osasto, try, laji';
 $jarjestys   = 'ytunnus, osasto, try';

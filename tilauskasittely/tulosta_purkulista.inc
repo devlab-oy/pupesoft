@@ -1,7 +1,7 @@
 <?php
 
 //Ohjelma vatii muuttujan $otunnus joka viittaa ostolaskuun johon rivit on kohdistettu.
-// sek‰ $laskurow arrayn jossa on select t‰hti from lasku jossa tunnus on $otunnus
+// sek√§ $laskurow arrayn jossa on select t√§hti from lasku jossa tunnus on $otunnus
 
 require_once('pdflib/phppdflib.class.php');
 
@@ -99,16 +99,16 @@ if (!function_exists('alku_purku')) {
     }
 
     if ($mista == 'vastaanota') {
-      $pdf->draw_text(725, 520, t("M‰‰r‰", $kieli),        $firstpage, $pieni);
+      $pdf->draw_text(725, 520, t("M√§√§r√§", $kieli),        $firstpage, $pieni);
 
     }
     else {
-      $pdf->draw_text(600, 520, t("M‰‰r‰", $kieli),        $firstpage, $pieni);
+      $pdf->draw_text(600, 520, t("M√§√§r√§", $kieli),        $firstpage, $pieni);
       $pdf->draw_text(650, 520, t("Kerroin", $kieli),        $firstpage, $pieni);
-      $pdf->draw_text(705, 520, t("Toim.M‰‰r‰", $kieli),      $firstpage, $pieni);
+      $pdf->draw_text(705, 520, t("Toim.M√§√§r√§", $kieli),      $firstpage, $pieni);
     }
 
-    $pdf->draw_text(770, 520, t("Yksikkˆ", $kieli),        $firstpage, $pieni);
+    $pdf->draw_text(770, 520, t("Yksikk√∂", $kieli),        $firstpage, $pieni);
 
     $pdf->draw_rectangle(530, 20, 20, 808, $firstpage, $rectparam);
 
@@ -120,7 +120,7 @@ if (!function_exists('print_pdf_purku')) {
   function print_pdf_purku () {
     global $pdf, $kukarow, $yhtiorow, $komento, $otunnus, $tee, $kieli, $mista;
 
-    //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+    //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
     list($usec, $sec) = explode(' ', microtime());
     mt_srand((float) $sec + ((float) $usec * 100000));
 
@@ -136,7 +136,7 @@ if (!function_exists('print_pdf_purku')) {
     if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF Error $pdffilenimi");
     fclose($fh);
 
-    //itse print komento tulee valitse_tulosin.incilt‰...
+    //itse print komento tulee valitse_tulosin.incilt√§...
     if ($komento["Purkulista"] == 'email' or $komento["Vastaanotetut"] == 'email') {
       $liite = $pdffilenimi;
 
@@ -151,7 +151,7 @@ if (!function_exists('print_pdf_purku')) {
 
     }
     elseif ($tee == 'NAYTATILAUS') {
-        //Tyˆnnet‰‰n tuo pdf vaan putkeen!
+        //Ty√∂nnet√§√§n tuo pdf vaan putkeen!
         echo file_get_contents($pdffilenimi);
       }
     elseif (($komento["Purkulista"] != '' and $komento["Purkulista"] != 'edi') or ($komento["Vastaanotetut"] != '' and $komento["Vastaanotetut"] != 'edi')) {
@@ -359,7 +359,7 @@ if (!empty($tee_excel)) {
         'order' => 80
       ),
       'alkuperamaa' => array(
-        'header' => t('Alkuper‰maa'),
+        'header' => t('Alkuper√§maa'),
         'order' => 90
       ),
     );
@@ -383,7 +383,7 @@ if (!empty($tee_excel)) {
     echo "</table><br/>";
   }
   else {
-    echo "<font class='message'>" . t("Yht‰‰n rivi‰ ei lˆytynyt") . "</font>";
+    echo "<font class='message'>" . t("Yht√§√§n rivi√§ ei l√∂ytynyt") . "</font>";
   }
 }
 
@@ -417,14 +417,14 @@ if ($komento["Purkulista"] != '' or $komento["Vastaanotetut"] != '') {
     $out .= sprintf('%-6.6s',   t("Ajopvm"));
     $out .= sprintf('%1s',     ' ');
     $out .= sprintf('%8.8s',   date("d/m/y")); // Ajopvm
-    $out .= chr(10).chr(13);  // Line feed (Rivinvaihto) + Carriage return (Siirret‰‰n kirjoitusp‰‰ rivin alkuun)
+    $out .= chr(10).chr(13);  // Line feed (Rivinvaihto) + Carriage return (Siirret√§√§n kirjoitusp√§√§ rivin alkuun)
 
     // RIVI 2
     $out .= sprintf("%'-95s", '-');
     $out .= chr(10).chr(13);
 
     // RIVI 3
-    $out .= sprintf('%-62.62s',  $laskurow["ytunnus"].' '.$laskurow["nimi"]);  // Mist‰ tavara tulee
+    $out .= sprintf('%-62.62s',  $laskurow["ytunnus"].' '.$laskurow["nimi"]);  // Mist√§ tavara tulee
     $out .= sprintf('%1s',    ' ');
     $out .= sprintf('%10s',    t("Saapuminen").':');
     $out .= sprintf('%-11.11s',  $laskurow["laskunro"]);              // Keikan numero
@@ -466,7 +466,7 @@ if ($komento["Purkulista"] != '' or $komento["Vastaanotetut"] != '') {
     # Rivinvaihto alkuun, jotta printit osuvat tarroille
     # $out = chr(10).chr(13).$out;
 
-    // Form Feedi kahdesti, jotta ei tarvitse rullata k‰sin
+    // Form Feedi kahdesti, jotta ei tarvitse rullata k√§sin
     $out .= chr(12).chr(12);
 
     lpr($out, NULL, $komento["Purkulista"]);
@@ -576,7 +576,7 @@ if ($komento["Purkulista"] != '' or $komento["Vastaanotetut"] != '') {
                 and hyllytaso = '$row[hyllytaso]'";
       $xolesaldoresult = pupe_query($query);
 
-      // tuotepaikoista ei lˆydy rivill‰ olevaa varastopaikkaa.. silloin ei echota mit‰‰n paikkaa
+      // tuotepaikoista ei l√∂ydy rivill√§ olevaa varastopaikkaa.. silloin ei echota mit√§√§n paikkaa
       if (mysql_num_rows($xolesaldoresult) == 0) {
         $row["hyllyalue"] = "";
         $row["hyllynro"]  = "";
@@ -584,7 +584,7 @@ if ($komento["Purkulista"] != '' or $komento["Vastaanotetut"] != '') {
         $row["hyllytaso"] = "";
       }
 
-      // viivat rivien v‰liin...
+      // viivat rivien v√§liin...
       $x[0] = 20;
       $x[1] = 808;
       $y[0] = $y[1] = $kala + 15 - 4;
@@ -806,10 +806,10 @@ if ($komento["Purkulista"] != '' or $komento["Vastaanotetut"] != '') {
             $row["kommentti"] .= " \n".t("S:nro", $kieli).": ".$sarjarow["sarjanumero"];
           }
           elseif ($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "G") {
-            $row["kommentti"] .= " \n".t("Er‰", $kieli).": ".$sarjarow["sarjanumero"];
+            $row["kommentti"] .= " \n".t("Er√§", $kieli).": ".$sarjarow["sarjanumero"];
           }
           elseif ($row["sarjanumeroseuranta"] == "F") {
-            $row["kommentti"] .= " \n".t("Er‰", $kieli).": ".$sarjarow["sarjanumero"]." ".t("Parasta ennen", $kieli).": ".tv1dateconv($sarjarow["parasta_ennen"]);
+            $row["kommentti"] .= " \n".t("Er√§", $kieli).": ".$sarjarow["sarjanumero"]." ".t("Parasta ennen", $kieli).": ".tv1dateconv($sarjarow["parasta_ennen"]);
           }
         }
       }
@@ -839,7 +839,7 @@ if ($komento["Purkulista"] != '' or $komento["Vastaanotetut"] != '') {
         }
       }
 
-      // katsotaan onko tuotetta j‰lkitoimituksessa
+      // katsotaan onko tuotetta j√§lkitoimituksessa
       $query = "SELECT sum(varattu+jt) kpl
                 FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika)
                 WHERE yhtio        = '{$kukarow['yhtio']}'
@@ -851,7 +851,7 @@ if ($komento["Purkulista"] != '' or $komento["Vastaanotetut"] != '') {
       $jt_check_row = mysql_fetch_assoc($jt_check_res);
 
       if ($jt_check_row['kpl'] > 0) {
-        $row['kommentti'] .= "\n".t("J‰lkitoimituksessa")." {$jt_check_row['kpl']} ".t_avainsana("Y", "", "and avainsana.selite='{$row["yksikko"]}'", "", "", "selite");
+        $row['kommentti'] .= "\n".t("J√§lkitoimituksessa")." {$jt_check_row['kpl']} ".t_avainsana("Y", "", "and avainsana.selite='{$row["yksikko"]}'", "", "", "selite");
       }
 
       // Trimmataan uudestaan
@@ -892,7 +892,7 @@ if ($komento["Purkulista"] != '' or $komento["Vastaanotetut"] != '') {
       $total   += $row["hinta"];
     }
 
-    // viivat rivien v‰liin...
+    // viivat rivien v√§liin...
     $x[0] = 20;
     $x[1] = 808;
     $y[0] = $y[1] = $kala + 15 - 4;
@@ -907,14 +907,14 @@ if ($komento["Purkulista"] != '' or $komento["Vastaanotetut"] != '') {
       }
 
       $sumarum = sprintf('%.2f',$sumarum);
-      $pdf->draw_text(520,  $kala, t("Yhteens‰", $kieli),  $firstpage, $p);
+      $pdf->draw_text(520,  $kala, t("Yhteens√§", $kieli),  $firstpage, $p);
       $pdf->draw_text(570,  $kala, $sumarum,  $firstpage, $p);
 
 
       $pdf->draw_rectangle(40, 20,  20, 200, $firstpage, $rectparam);
       $pdf->draw_rectangle(40, 200, 20, 808, $firstpage, $rectparam);
       $pdf->draw_rectangle(40, 500, 20, 808, $firstpage, $rectparam);
-      $pdf->draw_text(30,   30, t("P‰iv‰m‰‰r‰ ja aika", $kieli),  $firstpage, $pieni);
+      $pdf->draw_text(30,   30, t("P√§iv√§m√§√§r√§ ja aika", $kieli),  $firstpage, $pieni);
       $pdf->draw_text(210,  30, t("Allekirjoitus", $kieli),  $firstpage, $pieni);
       $pdf->draw_text(504,  30, t("Nimenselvennys", $kieli),  $firstpage, $pieni);
     }
@@ -922,7 +922,7 @@ if ($komento["Purkulista"] != '' or $komento["Vastaanotetut"] != '') {
     print_pdf_purku();
   }
 
-  //p‰‰dyt‰‰n taas selailemaan toimittajia
+  //p√§√§dyt√§√§n taas selailemaan toimittajia
   if ($mista == "vastaanota") {
     echo t("Vastaanotetut lista tulostuu")."...<br>";
   }

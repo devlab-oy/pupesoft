@@ -1,8 +1,8 @@
 <?php
 
-// Kutsutaanko CLI:stä
+// Kutsutaanko CLI:stÃ¤
 if (php_sapi_name() != 'cli') {
-  die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+  die ("TÃ¤tÃ¤ scriptiÃ¤ voi ajaa vain komentoriviltÃ¤!");
 }
 
 require_once("../inc/functions.inc");
@@ -13,11 +13,11 @@ error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
 ini_set("display_errors", 0);
 
 if ($argv[1] == '') {
-  die ("Yhtiö on pakollinen tieto!\n");
+  die ("YhtiÃ¶ on pakollinen tieto!\n");
 }
 
 if ($argv[2] == '') {
-  die ("Sähköpostiosoite on pakollinen tieto!\n");
+  die ("SÃ¤hkÃ¶postiosoite on pakollinen tieto!\n");
 }
 
 if ($argv[0] == 'varastonarvo_cron.php' and $argv[1] != '' and $argv[2] != '') {
@@ -36,6 +36,6 @@ if ($argv[0] == 'varastonarvo_cron.php' and $argv[1] != '' and $argv[2] != '') {
     exec("php varastonarvo-super.php $kukarow[yhtio] $varastorow[varastot] $email");
   }
   else {
-    die ("Yhtään varastoa ei löytynyt!\n");
+    die ("YhtÃ¤Ã¤n varastoa ei lÃ¶ytynyt!\n");
   }
 }

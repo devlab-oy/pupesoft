@@ -15,13 +15,13 @@ if (!function_exists("tuotepaikattarkista")) {
       $tmp_tuotenoind = $i;
 
       if (mysql_num_rows($chktuote) != 1) {
-        $virhe[$i] = t("Tuotenumero ei lˆydy!");
+        $virhe[$i] = t("Tuotenumero ei l√∂ydy!");
       }
       else {
         $chktuoterow = mysql_fetch_assoc($chktuote);
 
         if ($chktuoterow['ei_saldoa'] != "") {
-          $virhe[$i] = t("Tuote on saldoton! Tuotepaikkaa ei voida lis‰t‰.");
+          $virhe[$i] = t("Tuote on saldoton! Tuotepaikkaa ei voida lis√§t√§.");
         }
       }
     }
@@ -36,7 +36,7 @@ if (!function_exists("tuotepaikattarkista")) {
 
     if (mysql_field_name($result, $i) == "tunnus") {
       if (kuuluukovarastoon($tmp_hyllyalue, $tmp_hyllynro) == 0) {
-        $virhe[$tmp_tuotenoind] = $virhe[$i] = t("VIRHE: Syˆtetty varastopaikka ei kuulu mihink‰‰n varastoon");
+        $virhe[$tmp_tuotenoind] = $virhe[$i] = t("VIRHE: Sy√∂tetty varastopaikka ei kuulu mihink√§√§n varastoon");
       }
     }
   }

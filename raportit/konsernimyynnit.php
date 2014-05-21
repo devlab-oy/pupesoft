@@ -1,23 +1,23 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("../inc/parametrit.inc");
 
-echo "<font class='head'>".t("Myynnit konserniyhtiˆille")."</font><hr>";
+echo "<font class='head'>".t("Myynnit konserniyhti√∂ille")."</font><hr>";
 $summa = 0;
 $kate = 0;
 
 // oikeellisuustarkistuksia
 if ($tee != "") {
   if (!checkdate($plvk, $plvp, $plvv)) {
-    echo "<font class='error'>".t("VIRHE: Alkup‰iv‰m‰‰r‰ on virheellinen")."!</font><br>";
+    echo "<font class='error'>".t("VIRHE: Alkup√§iv√§m√§√§r√§ on virheellinen")."!</font><br>";
     $tee = "";
   }
 
   if (!checkdate($alvk, $alvp, $alvv)) {
-    echo "<font class='error'>".t("VIRHE: Loppup‰iv‰m‰‰r‰ on virheellinen")."!</font><br>";
+    echo "<font class='error'>".t("VIRHE: Loppup√§iv√§m√§√§r√§ on virheellinen")."!</font><br>";
     $tee = "";
   }
 }
@@ -57,7 +57,7 @@ if ($tee == 'X') {
   }
 
   echo "<tr>";
-  echo "<th colspan='2'>Yhteens‰</th>";
+  echo "<th colspan='2'>Yhteens√§</th>";
   echo "<th>$summa</th>";
   echo "<th>$kate</th>";
   echo "</tr>";

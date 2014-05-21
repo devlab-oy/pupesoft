@@ -2,7 +2,7 @@
 
 require ("inc/parametrit.inc");
 
-echo "<font class='head'>".t("Varastojen h‰lytysrajat")."</font><hr>";
+echo "<font class='head'>".t("Varastojen h√§lytysrajat")."</font><hr>";
 
 list($abcrajaus,$abcrajaustapa) = explode("##",$abcrajaus);
 
@@ -11,7 +11,7 @@ if (!isset($abcrajaustapa)) $abcrajaustapa = "TK";
 list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcrajaustapa);
 
 
-// Tarvittavat p‰iv‰m‰‰r‰t
+// Tarvittavat p√§iv√§m√§√§r√§t
 if (!isset($kka1)) $kka1 = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 if (!isset($vva1)) $vva1 = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 if (!isset($ppa1)) $ppa1 = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
@@ -65,7 +65,7 @@ if ($lpaiva3 >= $lsuurin and $lpaiva3 != 19700101) $lsuurin = $lpaiva3;
 if ($lpaiva4 >= $lsuurin and $lpaiva4 != 19700101) $lsuurin = $lpaiva4;
 
 if ($apienin == 99999999 and $lsuurin == 0) {
-  $apienin = $lsuurin = date('Ymd'); // jos mit‰‰n ei lˆydy niin NOW molempiin. :)
+  $apienin = $lsuurin = date('Ymd'); // jos mit√§√§n ei l√∂ydy niin NOW molempiin. :)
 }
 
 $apvm = substr($apienin,0,4)."-".substr($apienin,4,2)."-".substr($apienin,6,2);
@@ -98,7 +98,7 @@ if (isset($tuoteno_array)) {
 
 }
 
-// katsotaan tarvitaanko menn‰ toimittajahakuun
+// katsotaan tarvitaanko menn√§ toimittajahakuun
 if ($ytunnus_haku != "") {
   $ytunnus = $ytunnus_haku;
 
@@ -133,7 +133,7 @@ if ($tee == "paivita") {
 
   }
 
-  echo "P‰ivitetiin $laskuri tuotetta.<br><br>";
+  echo "P√§ivitetiin $laskuri tuotetta.<br><br>";
   $tee = "";
 
 }
@@ -156,7 +156,7 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
     }
 
   echo "<table><tr><td class='back' valign='top'>";
-  echo "<tr><th>H‰lytysrajan laskenta</th><td>$tarve pv tarve</td></tr>";
+  echo "<tr><th>H√§lytysrajan laskenta</th><td>$tarve pv tarve</td></tr>";
 
   $lisaa  = ""; // tuote-rajauksia
   $lisaa2 = ""; // toimittaja-rajauksia
@@ -218,19 +218,19 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
   }
 
   echo "</table></td><td class='back' valign='top'><table>";
-  echo "<tr><th>".t("Kausi 1")."</th><td>$vva1-$kka1-$ppa1 - $vvl1-$kkl1-$ppl1</td><td class='back'> <-- ".t("k‰ytet‰‰n h‰lytysrajaehdotuksen laskentaan")."</td></tr>";
+  echo "<tr><th>".t("Kausi 1")."</th><td>$vva1-$kka1-$ppa1 - $vvl1-$kkl1-$ppl1</td><td class='back'> <-- ".t("k√§ytet√§√§n h√§lytysrajaehdotuksen laskentaan")."</td></tr>";
   echo "<tr><th>".t("Kausi 2")."</th><td>$vva2-$kka2-$ppa2 - $vvl2-$kkl2-$ppl2</td></tr>";
   echo "<tr><th>".t("Kausi 3")."</th><td>$vva3-$kka3-$ppa3 - $vvl3-$kkl3-$ppl3</td></tr>";
   echo "<tr><th>".t("Kausi 4")."</th><td>$vva4-$kka4-$ppa4 - $vvl4-$kkl4-$ppl4</td></tr>";
   echo "</table>";
   echo "</td></tr></table>";
 
-  // hehe, n‰in on helpompi verrata p‰iv‰m‰‰ri‰
+  // hehe, n√§in on helpompi verrata p√§iv√§m√§√§ri√§
   $query  = "SELECT TO_DAYS('$vvl1-$kkl1-$ppl1')-TO_DAYS('$vva1-$kka1-$ppa1') ero";
   $result = pupe_query($query);
   $erorow = mysql_fetch_array($result);
 
-  // t‰ss‰ on itse query
+  // t√§ss√§ on itse query
 
   $query = "SELECT
             tuote.tuoteno,
@@ -283,9 +283,9 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
   if ($maittain != "") {
     echo "<th>".t("Myynti")."<br>".t("maittain")."</th>";
   }
-  echo "<th>".t("H‰lytysraja")."</th>";
-  echo "<th>".t("Tilausm‰‰r‰")."</th>";
-  echo "<th>".t("H‰lyehdotus")."</th>";
+  echo "<th>".t("H√§lytysraja")."</th>";
+  echo "<th>".t("Tilausm√§√§r√§")."</th>";
+  echo "<th>".t("H√§lyehdotus")."</th>";
 
   echo "</tr>\n";
 
@@ -340,11 +340,11 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 
     echo "<td align='right'>$summarow[puutekpl1]</td>";
 
-    // saldo myyt‰vissa kaikki varastot
+    // saldo myyt√§vissa kaikki varastot
     list(, , $saldo) = saldo_myytavissa($row["tuoteno"], "KAIKKI");
     echo "<td align='right'>".sprintf("%.2f",$saldo)."<br>";
 
-    // saldo myyt‰vissa t‰m‰ varasto
+    // saldo myyt√§vissa t√§m√§ varasto
     list(, , $saldo) = saldo_myytavissa($row["tuoteno"], "KAIKKI", $row[tunnus]);
     echo sprintf("%.2f",$saldo)."</td>";
 
@@ -372,23 +372,23 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
       echo "</td>";
     }
 
-    // t‰ss‰ lasketaan ehdotettava h‰lytysraja: lasketaan p‰iv‰n myynti ja kerrotaan haluituilla p‰ivill‰
+    // t√§ss√§ lasketaan ehdotettava h√§lytysraja: lasketaan p√§iv√§n myynti ja kerrotaan haluituilla p√§ivill√§
     $halyehdotus = ceil($summarow["varastonkpl1"] / $erorow["ero"] * $tarve);
 
-    // jos k‰ytˆss‰ on abc analyysi ja h‰lyehdotus on nolla ja tuote kuuluu A,B,C,D luokkaan niin laitetaan aina yksi
+    // jos k√§yt√∂ss√§ on abc analyysi ja h√§lyehdotus on nolla ja tuote kuuluu A,B,C,D luokkaan niin laitetaan aina yksi
     if ($abcpaalla == "kylla" and $halyehdotus == 0 and $row["abcluokka"] < 4) {
       $halyehdotus = 1;
     }
 
     echo "<td align='right'>$row[halytysraja]</td>";
 
-    // sitten input kent‰t
+    // sitten input kent√§t
     echo "<td align='right'><input type='text' name='tilausmaara[$row[paikkatunnus]]' value='$row[tilausmaara]' size='5'></td>";
     echo "<td align='right'><input type='text' name='halytysraja[$row[paikkatunnus]]' value='$halyehdotus' size='5'></td>";
 
     echo "</tr>\n";
 
-    // teh‰‰n popup divi myynneist‰
+    // teh√§√§n popup divi myynneist√§
     $divit .= "<div id='div_$row[paikkatunnus]' class='popup' style='width:250px;'>";
     $divit .= "<table style='width:250px;'>";
     $divit .= "<tr><th nowrap>".t("Kok.Myynti 1")."</th>";
@@ -414,14 +414,14 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 
   echo "</table>\n";
 
-  echo "<br><input type='submit' value = '".t("P‰ivit‰")."'>
+  echo "<br><input type='submit' value = '".t("P√§ivit√§")."'>
     </form>";
 
   // echotaan divit filen loppuun
   echo $divit;
 }
 
-// n‰ytet‰‰n k‰yttˆliittym‰..
+// n√§ytet√§√§n k√§ytt√∂liittym√§..
 if ($tee == "" or !isset($ehdotusnappi)) {
 
   echo "<form method='post' autocomplete='off'>
@@ -463,7 +463,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 
 
   echo "<tr><th valign=top>" . t('Varastot') . "<br /><br /><span style='font-size: 0.8em;'>"
-    . t('Saat kaikki varastot jos et valitse yht‰‰n')
+    . t('Saat kaikki varastot jos et valitse yht√§√§n')
     . "</span></th>
       <td>";
 
@@ -480,7 +480,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 
   echo "</select></td></tr>\n";
 
-  echo "<tr><th>".t("H‰lytysrajan laskenta")."</th>\n";
+  echo "<tr><th>".t("H√§lytysrajan laskenta")."</th>\n";
   echo "<td><select name='tarve'>\n";
   echo "<option value='3'>".t("3 pv tarve")."</option>";
   echo "<option value='7'>".t("7 pv tarve")."</option>";
@@ -494,11 +494,11 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 
   echo "<tr><th>".t("Osasto")."</th><td>";
 
-  // tehd‰‰n avainsana query
+  // tehd√§√§n avainsana query
   $sresult = t_avainsana("OSASTO");
 
   echo "<select name='osasto'>\n";
-  echo "<option value=''>".t("N‰yt‰ kaikki")."</option>\n";
+  echo "<option value=''>".t("N√§yt√§ kaikki")."</option>\n";
 
   while ($srow = mysql_fetch_array($sresult)) {
     $sel = '';
@@ -511,14 +511,14 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 
   echo "</td></tr>\n";
 
-  echo "<tr><th>".t("Tuoteryhm‰")."</th><td>";
+  echo "<tr><th>".t("Tuoteryhm√§")."</th><td>";
 
-  //Tehd‰‰n osasto & tuoteryhm‰ pop-upit
-  // tehd‰‰n avainsana query
+  //Tehd√§√§n osasto & tuoteryhm√§ pop-upit
+  // tehd√§√§n avainsana query
   $sresult = t_avainsana("TRY");
 
   echo "<select name='tuoryh'>\n";
-  echo "<option value=''>".t("N‰yt‰ kaikki")."</option>\n";
+  echo "<option value=''>".t("N√§yt√§ kaikki")."</option>\n";
 
   while ($srow = mysql_fetch_array($sresult)) {
     $sel = '';
@@ -532,7 +532,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
   echo "</td></tr>";
   echo "<tr><th>".t("Tuotemerkki")."</th><td>";
 
-  //Tehd‰‰n osasto & tuoteryhm‰ pop-upit
+  //Tehd√§√§n osasto & tuoteryhm√§ pop-upit
   $query = "SELECT distinct tuotemerkki
             FROM tuote
             WHERE yhtio='$kukarow[yhtio]' and tuotemerkki != ''
@@ -540,7 +540,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
   $sresult = pupe_query($query);
 
   echo "<select name='tuotemerkki'>\n";
-  echo "<option value=''>".t("N‰yt‰ kaikki")."</option>\n";
+  echo "<option value=''>".t("N√§yt√§ kaikki")."</option>\n";
 
   while ($srow = mysql_fetch_array($sresult)) {
     $sel = '';
@@ -593,37 +593,37 @@ if ($tee == "" or !isset($ehdotusnappi)) {
   echo "</select>";
   echo "</td></tr>";
 
-  echo "<tr><th>".t("Uusien tuotteiden n‰kyvyys")."</th>";
+  echo "<tr><th>".t("Uusien tuotteiden n√§kyvyys")."</th>";
   echo "<td><select name='uudettuotteet'>";
-  echo "<option value='eiuusia'>".t("ƒl‰ listaa uusia tuotteita")."</option>";
+  echo "<option value='eiuusia'>".t("√Ñl√§ listaa uusia tuotteita")."</option>";
   echo "<option value='vainuudet'>".t("Listaa vain uudet tuotteet")."</option>";
   echo "<option value='kaikki'>".t("Listaa kaikki tuotteet")."</option>";
   echo "</select>";
   echo "</td></tr>";
 
-  //  Oletetaan ett‰ k‰ytt‰j‰ ei halyua/saa ostaa poistuvia tai poistettuja tuotteita!
+  //  Oletetaan ett√§ k√§ytt√§j√§ ei halyua/saa ostaa poistuvia tai poistettuja tuotteita!
   if(!isset($poistetut)) $poistetut = "checked";
   if(!isset($poistuva)) $poistuva = "checked";
 
   $chk = "";
   if ($poistetut != "") $chk = "checked";
-  echo "<tr><th>".t("ƒl‰ n‰yt‰ poistettuja tuotteita")."</th><td colspan='3'><input type='checkbox' name='poistetut' $chk></td></tr>";
+  echo "<tr><th>".t("√Ñl√§ n√§yt√§ poistettuja tuotteita")."</th><td colspan='3'><input type='checkbox' name='poistetut' $chk></td></tr>";
 
   $chk = "";
   if ($poistuva != "") $chk = "checked";
-  echo "<tr><th>".t("ƒl‰ n‰yt‰ poistuvia tuotteita")."</th><td colspan='3'><input type='checkbox' name='poistuva' $chk></td></tr>";
+  echo "<tr><th>".t("√Ñl√§ n√§yt√§ poistuvia tuotteita")."</th><td colspan='3'><input type='checkbox' name='poistuva' $chk></td></tr>";
 
   $chk = "";
   if ($eihinnastoon != "") $chk = "checked";
-  echo "<tr><th>".t("ƒl‰ n‰yt‰ tuotteita joita ei n‰ytet‰ hinnastossa")."</th><td colspan='3'><input type='checkbox' name='eihinnastoon' $chk></td></tr>";
+  echo "<tr><th>".t("√Ñl√§ n√§yt√§ tuotteita joita ei n√§ytet√§ hinnastossa")."</th><td colspan='3'><input type='checkbox' name='eihinnastoon' $chk></td></tr>";
 
   $chk = "";
   if ($ehdotettavat != "") $chk = "checked";
-  echo "<tr><th>".t("N‰yt‰ vain ostettavaksi ehdotettavat rivit")."</th><td colspan='3'><input type='checkbox' name='ehdotettavat' $chk></td></tr>";
+  echo "<tr><th>".t("N√§yt√§ vain ostettavaksi ehdotettavat rivit")."</th><td colspan='3'><input type='checkbox' name='ehdotettavat' $chk></td></tr>";
 
   $chk = "";
   if ($maittain != "") $chk = "checked";
-  echo "<tr><th>".t("N‰yt‰ myynti maittain")."</th><td colspan='3'><input type='checkbox' name='maittain' $chk></td></tr>";
+  echo "<tr><th>".t("N√§yt√§ myynti maittain")."</th><td colspan='3'><input type='checkbox' name='maittain' $chk></td></tr>";
   echo "</table>";
 
   echo "<br><table>";
@@ -639,7 +639,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
       <td> - </td>
       <td><input type='text' name='ppl1' value='$ppl1' size='5'></td>
       <td><input type='text' name='kkl1' value='$kkl1' size='5'></td>
-      <td><input type='text' name='vvl1' value='$vvl1' size='5'></td><td class='back'> <-- ".t("k‰ytet‰‰n h‰lytysrajaehdotuksen laskentaan")."</td>
+      <td><input type='text' name='vvl1' value='$vvl1' size='5'></td><td class='back'> <-- ".t("k√§ytet√§√§n h√§lytysrajaehdotuksen laskentaan")."</td>
       </tr>";
 
   echo "  <tr><th>".t("Kausi 2")."</th>

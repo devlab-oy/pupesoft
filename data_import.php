@@ -1,10 +1,10 @@
 <?php
 
-// Enabloidaan, ett‰ Apache flushaa kaiken mahdollisen ruudulle kokoajan.
+// Enabloidaan, ett√§ Apache flushaa kaiken mahdollisen ruudulle kokoajan.
 ini_set('implicit_flush', 1);
 ob_implicit_flush(1);
 
-// Ei k‰ytet‰ pakkausta
+// Ei k√§ytet√§ pakkausta
 $compression = FALSE;
 
 // Ladataan tiedosto
@@ -18,7 +18,7 @@ require ("inc/parametrit.inc");
 // Ladataan tai poistetaan tiedosto
 if (isset($tee) and ($tee == "lataa_tiedosto" or $tee == "poista_file")) {
 
-  // Tarkistetaan eka, ett‰ t‰m‰ on t‰m‰n k‰ytt‰j‰n file
+  // Tarkistetaan eka, ett√§ t√§m√§ on t√§m√§n k√§ytt√§j√§n file
   // Filename on muotoa: lue-data#username#yhtio#taulu#randombit#alkuperainen_filename#jarjestys.DATAIMPORT.LOG
   $filen_tiedot = explode("#", $datain_filenimi);
   $kuka = $filen_tiedot[1];
@@ -42,7 +42,7 @@ if (isset($tee) and ($tee == "lataa_tiedosto" or $tee == "poista_file")) {
 if (isset($tee) and $tee == "poistakaikki_filetsut") {
   if ($files = scandir($pupe_root_polku."/datain")) {
       foreach ($files as $file) {
-      // T‰m‰ file on valmis lue-data file
+      // T√§m√§ file on valmis lue-data file
       if (substr($file, 0, 11+strlen($kukarow["kuka"])+strlen($kukarow["yhtio"])) == "lue-data#{$kukarow["kuka"]}#{$kukarow["yhtio"]}#" and substr($file, -4) == ".LOG") {
         unlink($pupe_root_polku."/datain/".$file);
         unlink($pupe_root_polku."/datain/".substr($file,0,-3)."ERR");
@@ -51,7 +51,7 @@ if (isset($tee) and $tee == "poistakaikki_filetsut") {
   }
 }
 
-echo "<font class='head'>".t("Datan sis‰‰nluku")." ".t("er‰ajo")."</font><hr>";
+echo "<font class='head'>".t("Datan sis√§√§nluku")." ".t("er√§ajo")."</font><hr>";
 
 // Muuttujat
 $tee       = isset($tee) ? trim($tee) : "";
@@ -59,7 +59,7 @@ $table     = isset($table) ? trim($table) : "";
 $laheta    = isset($laheta) ? trim($laheta) : "";
 $tablelisa = "";
 
-// K‰sitell‰‰n file
+// K√§sitell√§√§n file
 if ($tee == "file" and $laheta != "") {
 
   $kasitellaan_tiedosto = TRUE;
@@ -84,13 +84,13 @@ if ($tee == "file" and $laheta != "") {
 
   if (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
-    echo "<font class='message'>".t("Tarkastetaan l‰hetetty tiedosto")."...</font><br><br>\n";
+    echo "<font class='message'>".t("Tarkastetaan l√§hetetty tiedosto")."...</font><br><br>\n";
 
     $alkuperainen_filenimi = $_FILES['userfile']['name'];
     $kasiteltava_tiedosto_path = $_FILES['userfile']['tmp_name'];
 
     if ($_FILES['userfile']['size'] == 0) {
-      echo "<font class='error'>".t("Tiedosto on tyhj‰")."!</font><br>\n";
+      echo "<font class='error'>".t("Tiedosto on tyhj√§")."!</font><br>\n";
       $kasitellaan_tiedosto = FALSE;
     }
 
@@ -116,22 +116,22 @@ if ($tee == "file" and $laheta != "") {
     }
 
     if (preg_match('/[^A-Za-z0-9\. \-\_]/', $alkuperainen_filenimi)) {
-      echo "<font class='error'>".t("Tiedostonimess‰ kiellettyj‰ merkkej‰").". ".t("Sallitut merkit").": A-Z 0-9</font><br>\n";
+      echo "<font class='error'>".t("Tiedostonimess√§ kiellettyj√§ merkkej√§").". ".t("Sallitut merkit").": A-Z 0-9</font><br>\n";
       $kasitellaan_tiedosto = FALSE;
     }
 
-    // Tehd‰‰n Excel -> CSV konversio
+    // Tehd√§√§n Excel -> CSV konversio
     if ($kasitellaan_tiedosto === TRUE and $kasitellaan_tiedosto_tyyppi == "XLS") {
 
       $kasiteltava_tiedosto_path_csv = $kasiteltava_tiedosto_path.".DATAIMPORT";
 
-      /** M‰‰ritell‰‰n importattavan tiedoston tyyppi. Kaikki vaihtoehdot saa komentorivilt‰: ssconvert --list-importers **/
+      /** M√§√§ritell√§√§n importattavan tiedoston tyyppi. Kaikki vaihtoehdot saa komentorivilt√§: ssconvert --list-importers **/
       $import_type = "--import-type=Gnumeric_Excel:excel";
 
       $return_string = system("/usr/bin/ssconvert --export-type=Gnumeric_stf:stf_csv $import_type ".escapeshellarg($kasiteltava_tiedosto_path)." ".escapeshellarg($kasiteltava_tiedosto_path_csv), $return);
 
       if ($return != 0 or strpos($return_string, "CRITICAL") !== FALSE) {
-        echo "<font class='error'>".t("Tiedoston konversio ep‰onnistui")."!</font><br>\n";
+        echo "<font class='error'>".t("Tiedoston konversio ep√§onnistui")."!</font><br>\n";
         $kasitellaan_tiedosto = FALSE;
       }
       else {
@@ -145,7 +145,7 @@ if ($tee == "file" and $laheta != "") {
       $kasiteltava_tiedosto_path = $kasiteltava_tiedosto_path_csv;
     }
 
-    // Tehd‰‰n XLSX -> CSV konversio
+    // Tehd√§√§n XLSX -> CSV konversio
     if ($kasitellaan_tiedosto === TRUE and $kasitellaan_tiedosto_tyyppi == "XLSX") {
 
       // Tallennetaan XLSX faili CSV muotoon
@@ -162,14 +162,14 @@ if ($tee == "file" and $laheta != "") {
       $kasitellaan_tiedosto_tyyppi = "DATAIMPORT";
     }
 
-    // Generoidaan uusi k‰ytt‰j‰kohtainen filenimi datain -hakemistoon. Konversion j‰lkeen filename on muotoa: lue-data#username#yhtio#taulu#randombit#alkuperainen_filename#jarjestys.DATAIMPORT
+    // Generoidaan uusi k√§ytt√§j√§kohtainen filenimi datain -hakemistoon. Konversion j√§lkeen filename on muotoa: lue-data#username#yhtio#taulu#randombit#alkuperainen_filename#jarjestys.DATAIMPORT
     $kasiteltava_filenimi = "lue-data#".$kukarow["kuka"]."#".$kukarow["yhtio"]."#".$table.$tablelisa."#".md5(uniqid(microtime(), TRUE) . $_SERVER['REMOTE_ADDR'] . $_SERVER['HTTP_USER_AGENT'])."#".$alkuperainen_filenimi;
     $kasiteltava_filepath = $pupe_root_polku."/datain/";
     $kasiteltava_kokonimi = $kasiteltava_filepath.$kasiteltava_filenimi;
 
-    // Siirret‰‰n tiedosto datain -hakemistoon
+    // Siirret√§√§n tiedosto datain -hakemistoon
     if (!rename($kasiteltava_tiedosto_path, $kasiteltava_kokonimi)) {
-      echo "<font class='error'>".t("Tiedoston kopiointi ep‰onnistui")."! $kasiteltava_tiedosto_path &raquo; $kasiteltava_kokonimi</font><br>\n";
+      echo "<font class='error'>".t("Tiedoston kopiointi ep√§onnistui")."! $kasiteltava_tiedosto_path &raquo; $kasiteltava_kokonimi</font><br>\n";
       $kasitellaan_tiedosto = FALSE;
     }
   }
@@ -181,12 +181,12 @@ if ($tee == "file" and $laheta != "") {
   // File saatu palvelimelle OK
   if ($kasitellaan_tiedosto === TRUE and $kasitellaan_tiedosto_tyyppi == "DATAIMPORT") {
 
-    // Otetaan tiedostosta ensimm‰inen rivi talteen, siin‰ on headerit
-    $file = fopen($kasiteltava_kokonimi, "r") or die (t("Tiedoston avaus ep‰onnistui")."!");
+    // Otetaan tiedostosta ensimm√§inen rivi talteen, siin√§ on headerit
+    $file = fopen($kasiteltava_kokonimi, "r") or die (t("Tiedoston avaus ep√§onnistui")."!");
     $header_rivi = fgets($file);
     fclose($file);
 
-    // Laitetaan header fileen, koska filejen mergett‰minen on nopeempaa komentorivilt‰
+    // Laitetaan header fileen, koska filejen mergett√§minen on nopeempaa komentorivilt√§
     $header_file = $kasiteltava_filepath.md5(uniqid(microtime(), TRUE) . $_SERVER['REMOTE_ADDR'] . $_SERVER['HTTP_USER_AGENT']);
     file_put_contents($header_file, $header_rivi);
 
@@ -194,34 +194,34 @@ if ($tee == "file" and $laheta != "") {
     chdir($kasiteltava_filepath);
     system("/usr/bin/split -l 10000 ".escapeshellarg($kasiteltava_kokonimi)." ".escapeshellarg($kasiteltava_filenimi."#"));
 
-    // Poistetaan alkuper‰inen
+    // Poistetaan alkuper√§inen
     unlink($kasiteltava_kokonimi);
 
     $montako_osaa = 0;
 
-    // Loopataan l‰pi kaikki splitatut tiedostot
+    // Loopataan l√§pi kaikki splitatut tiedostot
     if ($handle = opendir($kasiteltava_filepath)) {
         while (false !== ($file = readdir($handle))) {
 
-        // T‰m‰ file t‰m‰n k‰ytt‰j‰n t‰m‰n session file
+        // T√§m√§ file t√§m√§n k√§ytt√§j√§n t√§m√§n session file
         if (substr($file, 0, strlen($kasiteltava_filenimi)) == $kasiteltava_filenimi) {
 
-          // Jos kyseess‰ on eka file (loppuu "aa"), ei laiteta headeri‰
+          // Jos kyseess√§ on eka file (loppuu "aa"), ei laiteta headeri√§
           if (substr($file, -2) == "aa") {
-            // Renametaan alkuper‰iseksi plus DATAIMPORT p‰‰te
+            // Renametaan alkuper√§iseksi plus DATAIMPORT p√§√§te
             rename($file, $file.".DATAIMPORT");
           }
           else {
-            // Keksit‰‰n temp file
+            // Keksit√§√§n temp file
             $temp_file = $kasiteltava_filepath.md5(uniqid(microtime(), TRUE) . $_SERVER['REMOTE_ADDR'] . $_SERVER['HTTP_USER_AGENT']);
 
-            // Concatenoidaan headerifile ja t‰m‰ file temppi fileen
+            // Concatenoidaan headerifile ja t√§m√§ file temppi fileen
             system("cat ".escapeshellarg($header_file)." ".escapeshellarg($file)." > ".escapeshellarg($temp_file));
 
-            // Poistetaan alkuper‰inen file
+            // Poistetaan alkuper√§inen file
             unlink($file);
 
-            // Renametaan temppifile alkuper‰iseksi plus DATAIMPORT p‰‰te
+            // Renametaan temppifile alkuper√§iseksi plus DATAIMPORT p√§√§te
             rename($temp_file, $file.".DATAIMPORT");
           }
 
@@ -236,33 +236,33 @@ if ($tee == "file" and $laheta != "") {
 
     if ($montako_osaa > 1) {
       echo "<font class='message'>".t("Tiedostosi")." $alkuperainen_filenimi ".t("jaettiin")." $montako_osaa ".t("osaan").".</font>\n";
-      echo "<font class='message'>".t("Jokainen osa sis‰lt‰‰ 10000 rivi‰").".</font><br><br>\n";
+      echo "<font class='message'>".t("Jokainen osa sis√§lt√§√§ 10000 rivi√§").".</font><br><br>\n";
     }
 
-    echo "<font class='message'>".t("Tiedosto siirretty k‰sittelyjonoon.")." ".t("Voit nyt poistua t‰st‰ ohjelmasta.")."</font><br>";
-    echo "<font class='message'>".t("Tiedosto sis‰‰nluetaan automaattisesti.")." ".t("Palaa t‰h‰n ohjelmaan n‰hd‰ksesi ajon tuloksen.")."</font><br><br>\n";
+    echo "<font class='message'>".t("Tiedosto siirretty k√§sittelyjonoon.")." ".t("Voit nyt poistua t√§st√§ ohjelmasta.")."</font><br>";
+    echo "<font class='message'>".t("Tiedosto sis√§√§nluetaan automaattisesti.")." ".t("Palaa t√§h√§n ohjelmaan n√§hd√§ksesi ajon tuloksen.")."</font><br><br>\n";
 
-    // Laukaistaan itse sis‰‰najo
+    // Laukaistaan itse sis√§√§najo
     exec("/usr/bin/php {$pupe_root_polku}/data_import_ajo.php > /dev/null 2>/dev/null &");
 
   }
   else {
-    echo "<font class='error'>".t("Dataa ei k‰sitelty")."!</font><br><br>\n";
+    echo "<font class='error'>".t("Dataa ei k√§sitelty")."!</font><br><br>\n";
   }
 }
 
-// Katsotaan onko k‰ytt‰j‰ll‰ tiedostoja k‰sittelyss‰
+// Katsotaan onko k√§ytt√§j√§ll√§ tiedostoja k√§sittelyss√§
 $tiedostoja_jonossa = 0;
 $omia_tiedostoja_jonossa = 0;
 
 if ($handle = opendir($pupe_root_polku."/datain")) {
     while (false !== ($file = readdir($handle))) {
-    // T‰m‰ file on valmis lue-data file
+    // T√§m√§ file on valmis lue-data file
 
     if (substr($file, 0, 9) == "lue-data#" and substr($file, -11) == ".DATAIMPORT") {
       $tiedostoja_jonossa++;
 
-      // T‰m‰ on t‰m‰n k‰ytt‰j‰n file
+      // T√§m√§ on t√§m√§n k√§ytt√§j√§n file
       if (substr($file, 0, 11+strlen($kukarow["kuka"])+strlen($kukarow["yhtio"])) == "lue-data#{$kukarow["kuka"]}#{$kukarow["yhtio"]}#") {
         $omia_tiedostoja_jonossa++;
       }
@@ -273,12 +273,12 @@ if ($handle = opendir($pupe_root_polku."/datain")) {
 
 if ($tiedostoja_jonossa > 0) {
   echo "<br>";
-  echo "<font class='message'>".t("Sinulla")." ".t("on")." $omia_tiedostoja_jonossa ".t("tiedostoa")." ".t("odottamassa k‰sittely‰").".</font><br>";
-  echo "<font class='message'>".t("Palvelimella")." ".t("on")." ".t("yhteens‰")." $tiedostoja_jonossa ".t("tiedostoa")." ".t("odottamassa k‰sittely‰").".</font><br>";
+  echo "<font class='message'>".t("Sinulla")." ".t("on")." $omia_tiedostoja_jonossa ".t("tiedostoa")." ".t("odottamassa k√§sittely√§").".</font><br>";
+  echo "<font class='message'>".t("Palvelimella")." ".t("on")." ".t("yhteens√§")." $tiedostoja_jonossa ".t("tiedostoa")." ".t("odottamassa k√§sittely√§").".</font><br>";
   echo "<br>";
 }
 
-// Taulut, jota voidaan k‰sitell‰
+// Taulut, jota voidaan k√§sitell√§
 $taulut = array(
   'abc_parametrit'                  => 'ABC-parametrit',
   'asiakas'                         => 'Asiakas',
@@ -288,13 +288,13 @@ $taulut = array(
   'asiakkaan_avainsanat'            => 'Asiakkaan avainsanat',
   'avainsana'                       => 'Avainsanat',
   'budjetti'                        => 'Budjetti',
-  'etaisyydet'                      => 'Et‰isyydet varastosta',
-  'extranet_kayttajan_lisatiedot'   => 'Extranet-k‰ytt‰j‰n lis‰tietoja',
+  'etaisyydet'                      => 'Et√§isyydet varastosta',
+  'extranet_kayttajan_lisatiedot'   => 'Extranet-k√§ytt√§j√§n lis√§tietoja',
   'hinnasto'                        => 'Hinnasto',
   'kalenteri'                       => 'Kalenteritietoja',
-  'kuka'                            => 'K‰ytt‰j‰tietoja',
+  'kuka'                            => 'K√§ytt√§j√§tietoja',
   'kustannuspaikka'                 => 'Kustannuspaikat',
-  'lahdot'                    => 'L‰hdˆt',
+  'lahdot'                    => 'L√§hd√∂t',
   'liitetiedostot'                  => 'Liitetiedostot',
   'maksuehto'                       => 'Maksuehto',
   'pakkaus'                         => 'Pakkaustiedot',
@@ -306,7 +306,7 @@ $taulut = array(
   'rahtisopimukset'                 => 'Rahtisopimukset',
   'rekisteritiedot'                 => 'Rekisteritiedot',
   'sanakirja'                       => 'Sanakirja',
-  'sarjanumeron_lisatiedot'         => 'Sarjanumeron lis‰tiedot',
+  'sarjanumeron_lisatiedot'         => 'Sarjanumeron lis√§tiedot',
   'taso'                            => 'Tilikartan rakenne',
   'tili'                            => 'Tilikartta',
   'todo'                            => 'Todo-lista',
@@ -314,7 +314,7 @@ $taulut = array(
   'toimittajaalennus'               => 'Toimittajan alennukset',
   'toimittajahinta'                 => 'Toimittajan hinnat',
   'toimitustapa'                    => 'Toimitustavat',
-  'toimitustavan_lahdot'            => 'Toimitustavan l‰hdˆt',
+  'toimitustavan_lahdot'            => 'Toimitustavan l√§hd√∂t',
   'tullinimike'                     => 'Tullinimikeet',
   'tuote'                           => 'Tuote',
   'tuotepaikat'                     => 'Tuotepaikat',
@@ -326,14 +326,14 @@ $taulut = array(
   'tuotteen_toimittajat_tuotenumerot' => 'Tuotteen toimittajan vaihtoehtoiset tuotenumerot',
   'vak'                             => 'VAK-tietoja',
   'varaston_hyllypaikat'            => 'Varaston hyllypaikat',
-  'yhteyshenkilo'                   => 'Yhteyshenkilˆt',
+  'yhteyshenkilo'                   => 'Yhteyshenkil√∂t',
 );
 
-// Yhtiˆkohtaisia
+// Yhti√∂kohtaisia
 if (table_exists('auto_vari_tuote')) {
-  $taulut['auto_vari']              = 'Autov‰ri-datat';
-  $taulut['auto_vari_tuote']        = 'Autov‰ri-v‰rikirja';
-  $taulut['auto_vari_korvaavat']    = 'Autov‰ri-korvaavat';
+  $taulut['auto_vari']              = 'Autov√§ri-datat';
+  $taulut['auto_vari_tuote']        = 'Autov√§ri-v√§rikirja';
+  $taulut['auto_vari_korvaavat']    = 'Autov√§ri-korvaavat';
 }
 
 if (table_exists('yhteensopivuus_tuote')) {
@@ -344,12 +344,12 @@ if (table_exists('yhteensopivuus_tuote')) {
   $taulut['yhteensopivuus_mp']               = 'Yhteensopivuus mp-mallit';
   $taulut['yhteensopivuus_rekisteri']        = 'Yhteensopivuus rekisterinumerot';
   $taulut['yhteensopivuus_tuote']            = 'Yhteensopivuus tuotteet';
-  $taulut['yhteensopivuus_tuote_lisatiedot'] = 'Yhteensopivuus tuotteet lis‰tiedot';
+  $taulut['yhteensopivuus_tuote_lisatiedot'] = 'Yhteensopivuus tuotteet lis√§tiedot';
   $taulut['rekisteritiedot_lisatiedot']      = 'Rekisteritiedot lisatiedot';
   $taulut['yhteensopivuus_valmistenumero']   = 'Yhteensopivuus valmistenumero';
 }
 
-// Taulut aakkosj‰rjestykseen
+// Taulut aakkosj√§rjestykseen
 asort($taulut);
 
 // Selectoidaan aktiivi
@@ -374,8 +374,8 @@ echo "</tr>";
 if (in_array($table, array("yhteyshenkilo", "asiakkaan_avainsanat", "kalenteri"))) {
   echo "<tr><th>".t("Ytunnus-tarkkuus").":</th>
       <td><select name='ytunnustarkkuus'>
-      <option value=''>".t("P‰ivitet‰‰n vain, jos Ytunnuksella lˆytyy yksi rivi")."</option>
-      <option value='2'>".t("P‰ivitet‰‰n kaikki syˆtetyll‰ Ytunnuksella lˆytyv‰t asiakkaat")."</option>
+      <option value=''>".t("P√§ivitet√§√§n vain, jos Ytunnuksella l√∂ytyy yksi rivi")."</option>
+      <option value='2'>".t("P√§ivitet√§√§n kaikki sy√∂tetyll√§ Ytunnuksella l√∂ytyv√§t asiakkaat")."</option>
       </select></td>
   </tr>";
 }
@@ -401,8 +401,8 @@ if (in_array($table, array("puun_alkio_asiakas", "puun_alkio_tuote"))) {
 if (in_array($table, array("asiakasalennus", "asiakashinta"))) {
   echo "<tr><th>".t("Segmentin valinta").":</th>
       <td><select name='segmenttivalinta'>
-      <option value='1'>".t("Valitaan k‰ytett‰v‰ksi asiakas-segmentin koodia")."</option>
-      <option value='2'>".t("Valitaan k‰ytett‰v‰ksi asiakas-segmentin tunnusta ")."</option>
+      <option value='1'>".t("Valitaan k√§ytett√§v√§ksi asiakas-segmentin koodia")."</option>
+      <option value='2'>".t("Valitaan k√§ytett√§v√§ksi asiakas-segmentin tunnusta ")."</option>
       </select></td>
   </tr>";
   echo "<tr><th>".t("Asiakkaan valinta").":</th>
@@ -417,9 +417,9 @@ if (in_array($table, array("asiakasalennus", "asiakashinta"))) {
 if ($table == "tuotteen_toimittajat") {
   echo "<tr><th>".t("Toimittajan valinta").":</th>
         <td><select name='toimittajavalinta'>
-        <option value='1'>".t("K‰ytet‰‰n toimittajan tunnusta")."</option>
-        <option value='2'>".t("K‰ytet‰‰n toimittajan ytunnusta")."</option>
-        <option value='3'>".t("K‰ytet‰‰n toimittajan toimittajanumeroa")."</option>
+        <option value='1'>".t("K√§ytet√§√§n toimittajan tunnusta")."</option>
+        <option value='2'>".t("K√§ytet√§√§n toimittajan ytunnusta")."</option>
+        <option value='3'>".t("K√§ytet√§√§n toimittajan toimittajanumeroa")."</option>
         </select></td>
     </tr>";
 }
@@ -428,14 +428,14 @@ if ($table == "extranet_kayttajan_lisatiedot") {
   echo "<tr><th>".t("Liitostunnus").":</th>
       <td><select name='liitostunnusvalinta'>
       <option value='1'>".t("Liitostunnus-sarakkeessa liitostunnus")."</option>
-      <option value='2'>".t("Liitostunnus-sarakkeessa k‰ytt‰j‰nimi")."</option>
+      <option value='2'>".t("Liitostunnus-sarakkeessa k√§ytt√§j√§nimi")."</option>
       </select></td>
   </tr>";
 }
 
 echo "  <tr><th>".t("Valitse tiedosto").":</th>
     <td><input name='userfile' type='file'></td>
-    <td class='back'><input type='submit' name='laheta' value='".t("L‰het‰")."'></td>
+    <td class='back'><input type='submit' name='laheta' value='".t("L√§het√§")."'></td>
   </tr>
 
   </table>
@@ -444,18 +444,18 @@ echo "  <tr><th>".t("Valitse tiedosto").":</th>
 
 exec("/usr/bin/php {$pupe_root_polku}/data_import_ajo.php > /dev/null 2>/dev/null &");
 
-// N‰ytet‰‰n k‰ytt‰j‰n kaikki LOG filet
+// N√§ytet√§√§n k√§ytt√§j√§n kaikki LOG filet
 $kasitelty = array();
 $kasitelty_i = 0;
 
 if ($files = scandir($pupe_root_polku."/datain")) {
     foreach ($files as $file) {
-    // T‰m‰ file on valmis lue-data file
+    // T√§m√§ file on valmis lue-data file
     if (substr($file, 0, 11+strlen($kukarow["kuka"])+strlen($kukarow["yhtio"])) == "lue-data#{$kukarow["kuka"]}#{$kukarow["yhtio"]}#" and substr($file, -4) == ".LOG") {
 
       $log = file_get_contents($pupe_root_polku."/datain/".$file);
 
-      // T‰m‰ logi on jo k‰sitelty
+      // T√§m√§ logi on jo k√§sitelty
       if (strpos($log, "## LUE-DATA-EOF ##") !== FALSE) {
 
         // Filename on muotoa: lue-data#username#yhtio#taulu#randombit#alkuperainen_filename#jarjestys.DATAIMPORT.LOG
@@ -463,7 +463,7 @@ if ($files = scandir($pupe_root_polku."/datain")) {
         $kuka = $filen_tiedot[1];
         $taulu = $filen_tiedot[3];
 
-        // T‰‰lt‰ voi tulla ties mit‰ lis‰parameja, unohdetaan ne t‰ss‰
+        // T√§√§lt√§ voi tulla ties mit√§ lis√§parameja, unohdetaan ne t√§ss√§
         if (strpos($taulu, ".") !== FALSE) {
           $cleantaulu = substr($taulu, 0, strpos($taulu, "."));
         }
@@ -488,13 +488,13 @@ if ($files = scandir($pupe_root_polku."/datain")) {
 
 if (count($kasitelty) > 0) {
 
-  echo "<font class='head'>".t("Sinun k‰sitellyt ajot").":</font><hr>";
+  echo "<font class='head'>".t("Sinun k√§sitellyt ajot").":</font><hr>";
 
   echo "<table>";
   echo "<tr>";
   echo "<th>".t("Tiedosto")."</th>";
   echo "<th>".t("Taulu")."</th>";
-  echo "<th>".t("K‰sitelty")."</th>";
+  echo "<th>".t("K√§sitelty")."</th>";
   echo "<th>".t("Lokitiedosto")."</th>";
   echo "<th>".t("Virheelliset rivit")."</th>";
   echo "<th>".t("Poista lokitiedosto")."</th>";
@@ -517,7 +517,7 @@ if (count($kasitelty) > 0) {
     echo "<input type='hidden' name='datain_filenimi' value='{$file["errfilename"]}'>";
     echo "<input type='submit' value='".t("Tallenna")."'>";
     echo "</form></td>";
-    echo "<td><form method='post' onsubmit=\"return confirm('".t("Oletko varma, ett‰ haluat poistaa lokitiedoston?")."')\">";
+    echo "<td><form method='post' onsubmit=\"return confirm('".t("Oletko varma, ett√§ haluat poistaa lokitiedoston?")."')\">";
     echo "<input type='hidden' name='tee' value='poista_file'>";
     echo "<input type='hidden' name='datain_filenimi' value='{$file["filename"]}'>";
     echo "<input type='submit' value='".t("Poista")."'>";
@@ -527,7 +527,7 @@ if (count($kasitelty) > 0) {
 
   echo "</table><br><br>";
 
-  echo "<form method='post' onsubmit=\"return confirm('".t("Oletko varma, ett‰ haluat poistaa lokitiedoston?")."')\">";
+  echo "<form method='post' onsubmit=\"return confirm('".t("Oletko varma, ett√§ haluat poistaa lokitiedoston?")."')\">";
   echo "<input type='hidden' name='tee' value='poistakaikki_filetsut'>";
   echo "<input type='submit' value='".t("Poista kaikki lokitedostot")."'>";
   echo "</form>";

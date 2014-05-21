@@ -18,7 +18,7 @@ if (!function_exists("toimitustavan_lahdottarkista")) {
 
     if (mysql_field_name($result, $i) == "lahdon_viikonpvm") {
       if (trim($t[$i]) == '') {
-        $virhe[$i] .= t("L‰hdˆn viikonp‰iv‰ puuttuu")."!";
+        $virhe[$i] .= t("L√§hd√∂n viikonp√§iv√§ puuttuu")."!";
       }
       else {
         $t[$i] = trim(mysql_real_escape_string($t[$i]));

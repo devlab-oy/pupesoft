@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 if (isset($_POST["supertee"])) {
@@ -51,8 +51,8 @@ if ($ytunnus != '' or $ytunnus == 'TULKAIKKI') {
   echo "<th>".t("ytunnus")."</th>";
   echo "<th>".t("nimi")."</th>";
   echo "<th><a href='?suunta=$suunta&ytunnus=$ytunnus'>".t("Toimitusaika")."</a></th>";
-  echo "<th>".t("rivim‰‰r‰")."</th>";
-  echo "<th>".t("kplm‰‰r‰")."</th>";
+  echo "<th>".t("rivim√§√§r√§")."</th>";
+  echo "<th>".t("kplm√§√§r√§")."</th>";
   echo "<th>".t("arvo")."</th>";
   echo "<th>".t("valuutta")."</th>";
   echo "</tr>";
@@ -91,9 +91,9 @@ if ($ytunnus != '' or $ytunnus == 'TULKAIKKI') {
       $excelsarake++;
       $worksheet->write($excelrivi, $excelsarake, t("Toimitusaika"), $format_bold);
       $excelsarake++;
-      $worksheet->write($excelrivi, $excelsarake, t("rivim‰‰r‰"), $format_bold);
+      $worksheet->write($excelrivi, $excelsarake, t("rivim√§√§r√§"), $format_bold);
       $excelsarake++;
-      $worksheet->write($excelrivi, $excelsarake, t("kplm‰‰r‰"), $format_bold);
+      $worksheet->write($excelrivi, $excelsarake, t("kplm√§√§r√§"), $format_bold);
       $excelsarake++;
       $worksheet->write($excelrivi, $excelsarake, t("arvo"), $format_bold);
       $excelsarake++;
@@ -149,7 +149,7 @@ if ($ytunnus != '' or $ytunnus == 'TULKAIKKI') {
   }
 
   echo "<tr>";
-  echo "<th colspan='4'>".t("Yhteens‰").":</th>";
+  echo "<th colspan='4'>".t("Yhteens√§").":</th>";
   echo "<td class='tumma' align='right'>$rivsum</td>";
   echo "<td class='tumma' align='right'>$tilsum</td>";
   echo "<td class='tumma' align='right'>$eursum</td>";
@@ -202,7 +202,7 @@ if ($vain_excel_kaikki != '') {
 
 echo "<br><form name=asiakas method='post' autocomplete='off'>";
 echo "<table><tr>";
-echo "<th>".t("Anna ytunnus tai osa nimest‰")."</th>";
+echo "<th>".t("Anna ytunnus tai osa nimest√§")."</th>";
 echo "<td><input type='text' name='ytunnus' value='$ytunnus'></td></tr>";
 echo "<tr><th>".t("Raportti Exceliin")."</th>";
 echo "<td><input type='checkbox' name='vain_excel' $vain_excelchk></td><tr>";

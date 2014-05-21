@@ -19,11 +19,11 @@ if (isset($toiminto) and (int) $toiminto > 0 and $suuntalavan_tunnus == "") {
 }
 
 if ($tee == "etsi_sscc" and $sscc == "") {
-  $error_sscc = "&larr;&nbsp;".t("Syötä SSCC-koodi").".";
+  $error_sscc = "&larr;&nbsp;".t("SyÃ¶tÃ¤ SSCC-koodi").".";
 }
 
 if ($tee == "etsi_saapuminen" and $saapuminen == "") {
-  $error_saapuminen = "&larr;&nbsp;".t("Syötä saapumisen numero").".";
+  $error_saapuminen = "&larr;&nbsp;".t("SyÃ¶tÃ¤ saapumisen numero").".";
 }
 
 if ($tee == 'tavaraetiketti' and $otunnus != "" and $suuntalavan_tunnus != "") {
@@ -130,7 +130,7 @@ if ($tee == 'etsi_sscc' and $sscc != "") {
     echo "</table>";
   }
   else {
-    echo "<br /><font class='message'>",t("Suuntalavaa ei löytynyt"),".</font><br /><br />";
+    echo "<br /><font class='message'>",t("Suuntalavaa ei lÃ¶ytynyt"),".</font><br /><br />";
   }
 }
 
@@ -210,8 +210,8 @@ if ($tee == 'etsi_saapuminen' and $saapuminen != "") {
     echo "<tr>";
     echo "<th>",t("SSCC"),"</th>";
     echo "<th>",t("Tyyppi"),"</th>";
-    echo "<th>",t("Keräysvyöhyke"),"</th>";
-    echo "<th>",t("Käytettävyys"),"</th>";
+    echo "<th>",t("KerÃ¤ysvyÃ¶hyke"),"</th>";
+    echo "<th>",t("KÃ¤ytettÃ¤vyys"),"</th>";
     echo "<th>",t("Terminaalialue"),"</th>";
     echo "<th>",t("Korkeus"),"</th>";
     echo "<th>",t("Paino"),"</th>";
@@ -252,7 +252,7 @@ if ($tee == 'etsi_saapuminen' and $saapuminen != "") {
     echo "</table>";
   }
   else {
-    echo "<br /><font class='message'>",t("Suuntalavaa ei löytynyt"),".</font><br /><br />";
+    echo "<br /><font class='message'>",t("Suuntalavaa ei lÃ¶ytynyt"),".</font><br /><br />";
   }
 }
 

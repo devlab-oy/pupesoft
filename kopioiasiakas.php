@@ -34,7 +34,7 @@ if ($tee == "write") {
 
   // Luodaan tietue
   if ($errori == '') {
-    // Taulun ensimm‰inen kentt‰ on aina yhtiˆ
+    // Taulun ensimm√§inen kentt√§ on aina yhti√∂
     $query = "INSERT into asiakas values ('$kukarow[yhtio]'";
       for ($i=1; $i < mysql_num_fields($result); $i++) {
       $query .= ",'" . $t[$i] . "'";
@@ -44,7 +44,7 @@ if ($tee == "write") {
     $result = pupe_query($query);
     $uusiidee = mysql_insert_id();
 
-    //  T‰m‰ funktio tekee myˆs oikeustarkistukset!
+    //  T√§m√§ funktio tekee my√∂s oikeustarkistukset!
     synkronoi($kukarow["yhtio"], "asiakas", $uusiidee, "", "");
 
     if (isset($tapahtumat) !== FALSE) {
@@ -72,7 +72,7 @@ if ($tee == "edit") {
   echo "<input type = 'hidden' name = 'tee' value ='write'>";
   echo "<input type = 'hidden' name = 'id' value ='$id'>";
 
-  // Kokeillaan geneerist‰
+  // Kokeillaan geneerist√§
   $query = "SELECT *
             FROM asiakas
             WHERE tunnus='$id' and yhtio='$kukarow[yhtio]'";
@@ -161,7 +161,7 @@ if ($tee == "edit") {
 
   echo "<table>";
   echo "<tr><td>";
-  echo t("Siirr‰ kalenteritapahtumat ja asiakasmemot")." <input type = 'checkbox' name = 'tapahtumat' $chk>";
+  echo t("Siirr√§ kalenteritapahtumat ja asiakasmemot")." <input type = 'checkbox' name = 'tapahtumat' $chk>";
   echo "</td></tr>";
   echo "<tr><td class='back'>";
   echo "<input type = 'submit' value = '".t("Perusta")."'>";

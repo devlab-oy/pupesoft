@@ -1,6 +1,6 @@
 <?php
-#tietuetunnus on ensimm‰inen merkki
-# 0 -> er‰tietue
+#tietuetunnus on ensimm√§inen merkki
+# 0 -> er√§tietue
 # 3 -> viitesiirto
 # 5 -> suoraveloitus
 # 9 -> summatietue
@@ -22,7 +22,7 @@ if ($type == '0' and substr($tietue, 0,3) != "\$\$E" and substr($tietue, 0,3) !=
   echo "<tr><th>".t("Aineiston luontipv")."</th><td>".pankkipvm(substr($tietue,1,6))."</td></tr>";
   echo "<tr><th>".t("Aineiston luontiaika")."</th><td>".substr($tietue,7,4)."</td></tr>";
   echo "<tr><th>".t("Rahalaitostunnus")."</th><td>".substr($tietue,11,2)."</td></tr>";
-  echo "<tr><th>".t("Aineisto k‰sitelty")."</th><td>".tv1dateconv($tiliotedatarow["kasitelty"])."</td></tr>";
+  echo "<tr><th>".t("Aineisto k√§sitelty")."</th><td>".tv1dateconv($tiliotedatarow["kasitelty"])."</td></tr>";
 
   echo "</table><br>";
 

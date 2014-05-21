@@ -1,9 +1,9 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-// DataTables p‰‰lle
+// DataTables p√§√§lle
 $pupe_DataTables = "selaasoppareita";
 
 require('../inc/parametrit.inc');
@@ -14,7 +14,7 @@ $query_ale_lisa = generoi_alekentta('M');
 
 echo "<font class='head'>".t("Selaa Sopimuksia")."</font><hr>";
 
-// Tehd‰‰n taulukko
+// Tehd√§√§n taulukko
 echo "<table class='display dataTable' id='$pupe_DataTables'>";
 echo "<thead>";
 echo "<tr>";
@@ -24,7 +24,7 @@ echo "<th>".t("Asiakas")."</th>";
 echo "<th>".t("Tuoteno")."</th>";
 echo "<th>".t("Nimitys")."</th>";
 echo "<th>".t("Kommentti")."</th>";
-echo "<th>".t("Sis‰inen")."<br>".t("Kommentti")."</th>";
+echo "<th>".t("Sis√§inen")."<br>".t("Kommentti")."</th>";
 echo "<th>".t("Alku pvm")."</th>";
 echo "<th>".t("Loppu pvm")."</th>";
 echo "<th>".t("Kpl")."</th>";
@@ -34,7 +34,7 @@ echo "<th>".t("Sarjanumero")."</th>";
 echo "<th>".t("Vasteaika")."</th>";
 echo "</tr>";
 
-// Hakukent‰t
+// Hakukent√§t
 echo "<tr>";
 echo "<td><input type='text' class='search_field' name='search_tilausnumero'/></td>";
 echo "<td><input type='text' class='search_field' name='search_asiakkaan_tilausnumero'/></td>";

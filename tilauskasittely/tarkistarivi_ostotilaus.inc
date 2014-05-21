@@ -15,33 +15,33 @@ $rarresult = pupe_query($query);
 $trow = mysql_fetch_assoc($rarresult);
 
 if (mysql_num_rows($rarresult) == 0) {
-  $varaosavirhe .= t("VIRHE: Tuotetta ei lˆydy")."!<br>";
+  $varaosavirhe .= t("VIRHE: Tuotetta ei l√∂ydy")."!<br>";
   $riviok++;
   $tilausok++;
 }
 
 if ($trow["liitostunnus"] == 0 and $toim_tarkistus != "EI" and $riviok == 0) {
-  $varaosavirhe .= t("VIRHE: Tuotetta ei voi tilata t‰lt‰ toimittajalta")."!<br>";
+  $varaosavirhe .= t("VIRHE: Tuotetta ei voi tilata t√§lt√§ toimittajalta")."!<br>";
   $riviok++;
   $tilausok++;
 }
 
-// katsotaan, ettei tilata ep‰kuranttia tuotetta
+// katsotaan, ettei tilata ep√§kuranttia tuotetta
 if (($trow["epakurantti25pvm"] != '0000-00-00' or $trow["epakurantti50pvm"] != '0000-00-00' or $trow["epakurantti75pvm"] != '0000-00-00' or $trow["epakurantti100pvm"] != '0000-00-00') and $riviok == 0) {
-  $varaosavirhe .= t("VIRHE: Tuote on ep‰kurantti, sit‰ ei voi tilata!")."<br>1/4: $trow[epakurantti25pvm]<br>1/2: $trow[epakurantti50pvm]<br>3/4: $trow[epakurantti75pvm]<br>1/1: $trow[epakurantti100pvm]";
+  $varaosavirhe .= t("VIRHE: Tuote on ep√§kurantti, sit√§ ei voi tilata!")."<br>1/4: $trow[epakurantti25pvm]<br>1/2: $trow[epakurantti50pvm]<br>3/4: $trow[epakurantti75pvm]<br>1/1: $trow[epakurantti100pvm]";
   $riviok++;
   $tilausok++;
 }
 
-//poistotuotek‰sittely
+//poistotuotek√§sittely
 if (in_array($trow["status"], array('P','X')) and $riviok == 0) {
-  $varaosavirhe .= t("VIRHE: T‰m‰ on poistotuote, sit‰ ei voi tilata")."!<br>";
+  $varaosavirhe .= t("VIRHE: T√§m√§ on poistotuote, sit√§ ei voi tilata")."!<br>";
   $riviok++;
   $tilausok++;
 }
 
 if ($trow['ei_saldoa'] != '' and $riviok == 0) {
-  $varaosavirhe .= t("HUOM: Tuote ei ole varastoitava, sit‰ ei voida saavuttaa varastoon")."!<br>";
+  $varaosavirhe .= t("HUOM: Tuote ei ole varastoitava, sit√§ ei voida saavuttaa varastoon")."!<br>";
   $riviok++;
 }
 
@@ -54,7 +54,7 @@ if ($trow['ostoehdotus'] == 'E' and strpos($_SERVER['SCRIPT_NAME'], "tilaus_osto
 }
 
 if ($yhtiorow['ostoera_pyoristys'] == 'K' and isset($ostoerahuom) and is_array($ostoerahuom) and in_array($prow['tunnus'], $ostoerahuom) and $kpl_st != $org_kpl) {
-  $varaosavirhe .= "<font class='message'>".t("HUOM: Rivin m‰‰r‰ on pyˆristetty t‰yteen ostoer‰‰n!")."<br></font>";
+  $varaosavirhe .= "<font class='message'>".t("HUOM: Rivin m√§√§r√§ on py√∂ristetty t√§yteen ostoer√§√§n!")."<br></font>";
 }
 
 if ($trow["myyntihinta_maara"] != 0 and $prow["hinta"] != 0) {
@@ -103,10 +103,10 @@ if ($oikeusostohintapaiv !== FALSE and (float) $prow["hinta"] != (float) $trow['
     $paivitaostohinta = '';
 
     if ($toiminto == 'kohdista') {
-      echo "<font class='message'>".t("P‰ivitettiin tuotteen")." $trow[tuoteno] ".t("ostohinta").": $trow[ostohinta] -> $paiv_hinta</font><br>";
+      echo "<font class='message'>".t("P√§ivitettiin tuotteen")." $trow[tuoteno] ".t("ostohinta").": $trow[ostohinta] -> $paiv_hinta</font><br>";
     }
     else {
-      $varaosavirhe .= "<font class='message'>".t("P‰ivitettiin tuotteen")." $trow[tuoteno] ".t("ostohinta").": $trow[ostohinta] -> $paiv_hinta</font>";
+      $varaosavirhe .= "<font class='message'>".t("P√§ivitettiin tuotteen")." $trow[tuoteno] ".t("ostohinta").": $trow[ostohinta] -> $paiv_hinta</font>";
     }
 
   }
@@ -138,14 +138,14 @@ if ($oikeusostohintapaiv !== FALSE and (float) $prow["hinta"] != (float) $trow['
       $varaosavirhe .= "<input type='hidden' name='kommentti' value = '$kommentti'>";
     }
 
-    $varaosavirhe .= "  <font class='message'>".t("P‰ivit‰ tuotteen ostohinta").":<br> ".hintapyoristys($trow["ostohinta"])." $trow[valuutta] -> ".hintapyoristys($prow["hinta"])." $trow[valuutta]</font><br>
-              <input type='submit' name='JOPA' value='".t("P‰ivit‰")."'>
-              <input type='submit' name='ALPA' value='".t("ƒl‰ p‰ivit‰")."'>
+    $varaosavirhe .= "  <font class='message'>".t("P√§ivit√§ tuotteen ostohinta").":<br> ".hintapyoristys($trow["ostohinta"])." $trow[valuutta] -> ".hintapyoristys($prow["hinta"])." $trow[valuutta]</font><br>
+              <input type='submit' name='JOPA' value='".t("P√§ivit√§")."'>
+              <input type='submit' name='ALPA' value='".t("√Ñl√§ p√§ivit√§")."'>
               </form>";
   }
 }
 
-//toimitusajan p‰ivitys toimittajan toimitusaikaan
+//toimitusajan p√§ivitys toimittajan toimitusaikaan
 if ((($trow["toimitusaika"] != 0 and $trow["toimitusaika"] != '') or ($toimittajarow["oletus_toimaika"] != 0 and $toimittajarow["oletus_toimaika"] != '')) and $riviok == 0 and strpos($_SERVER['SCRIPT_NAME'], "tilaus_osto.php") !== FALSE and ($yhtiorow["ostotilaukseen_toimittajan_toimaika"] == '1' or $yhtiorow["ostotilaukseen_toimittajan_toimaika"] == '2')) {
 
   if ($trow["toimitusaika"] != 0 and $trow["toimitusaika"] != '') {
@@ -166,7 +166,7 @@ if ((($trow["toimitusaika"] != 0 and $trow["toimitusaika"] != '') or ($toimittaj
       $paivita_res = pupe_query($paivita_toimaika);
     }
 
-    $varaosavirhe .= "<font class='message'>".t("P‰ivitettiin tuotteen")." $trow[tuoteno] ".t("toimitusaika").": ".tv1dateconv($prow["toimaika"])." -> ".tv1dateconv($ehdotus_pvm)."</font>";
+    $varaosavirhe .= "<font class='message'>".t("P√§ivitettiin tuotteen")." $trow[tuoteno] ".t("toimitusaika").": ".tv1dateconv($prow["toimaika"])." -> ".tv1dateconv($ehdotus_pvm)."</font>";
     $paivitetty_ok = "YES";
     $JOPATO = "";
   }
@@ -198,7 +198,7 @@ if ((($trow["toimitusaika"] != 0 and $trow["toimitusaika"] != '') or ($toimittaj
               <input type='hidden' name='paiv_toimaika'     value = '$ehdotus_pvm'>
               <input type='hidden' name='paiv_rivitunnus'   value = '$prow[tunnus]'>
               <font class='message'>".t("Haluatko muuttaa toimitusajan")." ".tv1dateconv($prow["toimaika"])." ".t("tuotteen toimittajan toimitusaikaan")." ".tv1dateconv($ehdotus_pvm)."!</font><br>
-              <input type='submit' name='JOPATO' value='".t("P‰ivit‰")."'>
+              <input type='submit' name='JOPATO' value='".t("P√§ivit√§")."'>
               </form>";
   }
 
@@ -206,7 +206,7 @@ if ((($trow["toimitusaika"] != 0 and $trow["toimitusaika"] != '') or ($toimittaj
 
 if (!isset($rivienmaara) or $rivienmaara < 100) {
 
-  // Haetaan vastaavuusketjut korvaavat ketjun p‰‰tuotteella
+  // Haetaan vastaavuusketjut korvaavat ketjun p√§√§tuotteella
   require_once 'vastaavat.class.php';
 
   $vastaavat = new Vastaavat($prow["tuoteno"]);
@@ -272,7 +272,7 @@ if (!isset($rivienmaara) or $rivienmaara < 100) {
 
        $_tilattu = (int) $prow['tilattu'];
 
-       // Ostopuolella toimipaikan tunnus tallennetaan vanhatunnus-kentt‰‰n
+       // Ostopuolella toimipaikan tunnus tallennetaan vanhatunnus-kentt√§√§n
        if ($tuotteen_toimittaja_row['selitetark_2'] != "") {
          $vastaavat_table .= "<div class='availability {$_tuote['vastaavat_tunnus']}_{$_tilattu}_availability' /> <span class='{$_tuote['vastaavat_tunnus']}_{$_tilattu}_loading'></span></div>&nbsp;";
          $vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_custid' value='{$tuotteen_toimittaja_row['selitetark_2']}' />";
@@ -323,7 +323,7 @@ if (!isset($rivienmaara) or $rivienmaara < 100) {
               <input type='hidden' name='toimi_tunnus'  value = '{$tuotteen_toimittaja_row['toimi_tunnus']}'>
               <input type='hidden' name='tee'       value = 'PV'>
               <input type='hidden' name='tapa'       value = 'VAIHDARIVI'>
-              <input type='Submit' value='".t("Tilaa tuote")."' onclick='return confirm(\"".t('Oletko varma ett‰ haluat vaihtaa tuotteen')."\")'>
+              <input type='Submit' value='".t("Tilaa tuote")."' onclick='return confirm(\"".t('Oletko varma ett√§ haluat vaihtaa tuotteen')."\")'>
               </form>";
       }
 
@@ -343,9 +343,9 @@ if (!isset($rivienmaara) or $rivienmaara < 100) {
         <th>".t("Toimittaja")."</th>
         <th>".t("Ostohinta")."</th>
         <th>".t("Hinta")."</th>
-        <th>".t("Saldo myyt‰viss‰")."</th>
+        <th>".t("Saldo myyt√§viss√§")."</th>
         <th>".t("Toimittajan saldo")."</th>
-        <th>".t("Toimittajan saldo p‰ivitetty")."</th>";
+        <th>".t("Toimittajan saldo p√§ivitetty")."</th>";
 
       if ($sahkoinen_tilausliitanta) $vastaavat_html .= "<th>".t("Tarkista toimittajan saldo")."</th>";
 
@@ -408,7 +408,7 @@ if (!isset($rivienmaara) or $rivienmaara < 100) {
                   <input type='hidden' name='toimi_tunnus'  value = '{$tuotteen_toimittaja_row['toimi_tunnus']}'>
                   <input type='hidden' name='tee'       value = 'PV'>
                   <input type='hidden' name='tapa'       value = 'VAIHDARIVI'>
-                  <input type='Submit' value='".t("Tilaa tuote")."' onclick='return confirm(\"".t('Oletko varma ett‰ haluat vaihtaa tuotteen')."\")'>
+                  <input type='Submit' value='".t("Tilaa tuote")."' onclick='return confirm(\"".t('Oletko varma ett√§ haluat vaihtaa tuotteen')."\")'>
                   </form> "
           ."</td></tr>";
     }
@@ -425,7 +425,7 @@ if (!isset($rivienmaara) or $rivienmaara < 100) {
       <th>".t("Toimittaja")."</th>
       <th>".t("Ostohinta")."</th>
       <th>".t("Hinta")."</th>
-      <th>".t("Saldo myyt‰viss‰")."</th>
+      <th>".t("Saldo myyt√§viss√§")."</th>
       <th>".t("Tehtaan saldo")."</th>";
     $vastaavat_html .= "<th>";
 

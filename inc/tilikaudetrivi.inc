@@ -1,9 +1,9 @@
 <?php
 
 $ulos = "";
-$jatko = 1; // oletetaan normaali käsittely
-$tyyppi = 1; // oletetaan rivin näkyvyys
-if ($i == 0) { //yhtiötä ei näytetä
+$jatko = 1; // oletetaan normaali kÃ¤sittely
+$tyyppi = 1; // oletetaan rivin nÃ¤kyvyys
+if ($i == 0) { //yhtiÃ¶tÃ¤ ei nÃ¤ytetÃ¤
   $tyyppi = 0;
 }
 

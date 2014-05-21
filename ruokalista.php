@@ -159,7 +159,7 @@ if ($tee == "AMERIKA") {
   $kka  = $alku[1];
   $vva  = date("Y");
 
-  echo "<tr><th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+  echo "<tr><th>".t("Sy√∂t√§ alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
       <td><input type='text' name='ppa' value='$ppa' size='3'></td>
       <td><input type='text' name='kka' value='$kka' size='3'></td>
       <td><input type='text' name='vva' value='$vva' size='5'></td>";
@@ -170,7 +170,7 @@ if ($tee == "AMERIKA") {
   $kkl  = $loppu[1];
   $vvl  = date("Y");
 
-  echo "<tr><th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+  echo "<tr><th>".t("Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
       <td><input type='text' name='ppl' value='$ppl' size='3'></td>
       <td><input type='text' name='kkl' value='$kkl' size='3'></td>
       <td><input type='text' name='vvl' value='$vvl' size='5'></td>";
@@ -231,7 +231,7 @@ if ($tee == "AMERIKA") {
 
     </table>
 
-    <br><input type='submit' value='".t("Syˆt‰")."'>
+    <br><input type='submit' value='".t("Sy√∂t√§")."'>
 
     </form>";
 }
@@ -268,7 +268,7 @@ if ($tee == "SYOTA") {
   if (!isset($rivi["vva"])) $rivi["vva"] = date("Y");
   if (!isset($rivi["ppa"])) $rivi["ppa"] = date("d");
 
-  echo "<tr><th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+  echo "<tr><th>".t("Sy√∂t√§ alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
       <td><input type='text' name='ppa' value='$rivi[ppa]' size='3'></td>
       <td><input type='text' name='kka' value='$rivi[kka]' size='3'></td>
       <td><input type='text' name='vva' value='$rivi[vva]' size='5'></td>";
@@ -277,7 +277,7 @@ if ($tee == "SYOTA") {
   if (!isset($rivi["vvl"])) $rivi["vvl"] = date("Y");
   if (!isset($rivi["ppl"])) $rivi["ppl"] = date("d");
 
-  echo "<tr><th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+  echo "<tr><th>".t("Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
       <td><input type='text' name='ppl' value='$rivi[ppl]' size='3'></td>
       <td><input type='text' name='kkl' value='$rivi[kkl]' size='3'></td>
       <td><input type='text' name='vvl' value='$rivi[vvl]' size='5'></td>";
@@ -316,7 +316,7 @@ if ($tee == "SYOTA") {
 
     </table>
 
-    <br><input type='submit' value='".t("Syˆt‰")."'>
+    <br><input type='submit' value='".t("Sy√∂t√§")."'>
 
     </form>";
 }
@@ -335,12 +335,12 @@ if ($tee == '') {
 
   echo "<form method='post'>";
   echo "<input type='hidden' name='tee' value='SYOTA'>";
-  echo "<input type='submit' value='".t("Lis‰‰ uusi ruokalista")."'></td>";
+  echo "<input type='submit' value='".t("Lis√§√§ uusi ruokalista")."'></td>";
   echo "</form>";
 
   echo "<form method='post'>";
   echo "<input type='hidden' name='tee' value='AMERIKA'>";
-  echo "<input type='submit' value='".t("Lis‰‰ uusi Luonasamerika-ruokalista")."'></td>";
+  echo "<input type='submit' value='".t("Lis√§√§ uusi Luonasamerika-ruokalista")."'></td>";
   echo "</form>";
 
   if ($limit=="all") $limit = "";
@@ -386,9 +386,9 @@ if ($tee == '') {
       echo "</td></tr></table>";
     }
 
-    echo "<a href='$PHP_SELF?limit=10'>".t("N‰yt‰ viimeiset 10 ruokalistaa")."</a><br>";
-    echo "<a href='$PHP_SELF?limit=50'>".t("N‰yt‰ viimeiset 50 ruokalistaa")."</a><br>";
-    echo "<a href='$PHP_SELF?limit=all'>".t("N‰yt‰ kaikki ruokalistat")."</a><br>";
+    echo "<a href='$PHP_SELF?limit=10'>".t("N√§yt√§ viimeiset 10 ruokalistaa")."</a><br>";
+    echo "<a href='$PHP_SELF?limit=50'>".t("N√§yt√§ viimeiset 50 ruokalistaa")."</a><br>";
+    echo "<a href='$PHP_SELF?limit=all'>".t("N√§yt√§ kaikki ruokalistat")."</a><br>";
   }
 
 }

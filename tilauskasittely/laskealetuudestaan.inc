@@ -45,11 +45,11 @@ while ($jjrow = mysql_fetch_array($jresultlask)) {
             WHERE yhtio='$kukarow[yhtio]' and ryhma = '$trow[aleryhma]' and ytunnus = '$laskurow[ytunnus]'";
   $aleresult = mysql_query($query) or pupe_error($query);
 
-  // TODO: Tämä koko osio on mystistä paskaa!
+  // TODO: TÃ¤mÃ¤ koko osio on mystistÃ¤ paskaa!
   if (mysql_num_rows($aleresult) != 0) {
     $alerow = mysql_fetch_array ($aleresult);
 
-    //jos rivi on katemyyty tai käyttäjä haluaa, lasketaan ale uudestaan
+    //jos rivi on katemyyty tai kÃ¤yttÃ¤jÃ¤ haluaa, lasketaan ale uudestaan
     if (($alerow["alennus"]{0} == "-" and $trow["kehahin"] > 0) or $laskeuusix != "") {
 
       $debug = 0;

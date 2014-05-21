@@ -15,7 +15,7 @@ if ($livesearch_tee == "TILIHAKU") {
 
 echo "<font class='head'>".t("Uusi konsernitosite")."</font><hr>";
 
-// Tarkistetetaan syˆtteet perustusta varten
+// Tarkistetetaan sy√∂tteet perustusta varten
 if ($tee == 'I') {
 
   $summa = str_replace ( ",", ".", $summa);
@@ -29,7 +29,7 @@ if ($tee == 'I') {
 
   if (!$val) {
     echo "<font class='error'>" . t('Virheellinen tapahtumapvm') . "</font><br>";
-    $gok = 1; //  Tositetta ei kirjoiteta kantaan viel‰
+    $gok = 1; //  Tositetta ei kirjoiteta kantaan viel√§
   }
 
   $kuva = false;
@@ -41,7 +41,7 @@ if ($tee == 'I') {
 
     $data = mysql_real_escape_string(file_get_contents($_FILES['userfile']['tmp_name']));
 
-    // lis‰t‰‰n kuva
+    // lis√§t√§√§n kuva
     $query = "INSERT INTO liitetiedostot set
               yhtio      = '{$kukarow['yhtio']}',
               liitos     = 'lasku',
@@ -58,37 +58,37 @@ if ($tee == 'I') {
 
   $turvasumma = $summa;
   $totsumma[$kukarow['yhtio']] = 0;
-  $totmaara = $omaara+$vmaara; // Yhteens‰ tarvittavien tiliˆintirivien m‰‰r‰
+  $totmaara = $omaara+$vmaara; // Yhteens√§ tarvittavien tili√∂intirivien m√§√§r√§
 
   for ($i=0; $i<$totmaara; $i++) {
 
-    //Vaihdetaan yrityst‰!
+    //Vaihdetaan yrityst√§!
     if ($i == $omaara) {
       $turvayhtio = $kukarow['yhtio'];
       $kukarow['yhtio'] = $vastaanottaja;
       $totsumma[$kukarow['yhtio']] = 0;
     }
 
-    // K‰sitell‰‰nkˆ rivi??
+    // K√§sitell√§√§nk√∂ rivi??
     if (strlen($itili[$i]) > 0 or strlen($isumma[$i]) > 0) {
 
       $isumma[$i] = str_replace (",", ".", $isumma[$i]);
 
-      // Siirret‰‰n oletusselite tiliˆinneille
+      // Siirret√§√§n oletusselite tili√∂inneille
       if (strlen($selite) > 0 and strlen($iselite[$i]) == 0) {
         $iselite[$i] = $selite;
       }
 
       // Selite puuttuu
       if (strlen($iselite[$i]) == 0) {
-        $ivirhe[$i] = t('Rivilt‰ puuttuu selite').'<br>';
+        $ivirhe[$i] = t('Rivilt√§ puuttuu selite').'<br>';
         $gok = 1;
       }
 
       // Oletussummalla korvaaminen mahdollista
       if ($turvasumma > 0) {
         if ($isumma[$i] == '-') {
-          // Summan vastaluku k‰yttˆˆn
+          // Summan vastaluku k√§ytt√∂√∂n
           $isumma[$i] = -1 * $turvasumma;
         }
         elseif ($isumma[$i] == 0) {
@@ -99,7 +99,7 @@ if ($tee == 'I') {
 
       // Summa puuttuu
       if ($isumma[$i] == 0) {
-        $ivirhe[$i] .= t('Rivilt‰ puuttuu summa').'<br>';
+        $ivirhe[$i] .= t('Rivilt√§ puuttuu summa').'<br>';
         $gok = 1;
       }
 
@@ -121,28 +121,28 @@ if ($tee == 'I') {
       $ivirhe[$i] .= $virhe;
       $iulos[$i] = $ulos;
 
-      // Sielt‰ kenties tuli p‰ivitys tilinumeroon
+      // Sielt√§ kenties tuli p√§ivitys tilinumeroon
       if ($ok == 0) {
-        // Annetaan k‰ytt‰j‰n p‰‰tt‰‰ onko ok
+        // Annetaan k√§ytt√§j√§n p√§√§tt√§√§ onko ok
         if ($itili[$i] != $tili) {
           $itili[$i] = $tili;
-          $gok = 1; // Tositetta ei kirjoiteta kantaan viel‰
+          $gok = 1; // Tositetta ei kirjoiteta kantaan viel√§
         }
       }
       else {
         $gok = 1;
       }
-      $gok = $ok; // Nostetaan virhe ylemm‰lle tasolle
+      $gok = $ok; // Nostetaan virhe ylemm√§lle tasolle
     }
   }
 
   if ($totsumma[$kukarow['yhtio']] != -1 * $totsumma[$turvayhtio]) {
-    echo "<font class='error'>".t("Yrityksille menev‰t tiliˆinnit eiv‰t t‰sm‰‰")."!</font><br><br>";
+    echo "<font class='error'>".t("Yrityksille menev√§t tili√∂innit eiv√§t t√§sm√§√§")."!</font><br><br>";
     $tee = '';
   }
 
   if ($gok == 1) { // Jossain tapahtui virhe
-    echo "<font class='error'>".t("Jossain oli virheit‰/muutoksia!")."</font><br><br>";
+    echo "<font class='error'>".t("Jossain oli virheit√§/muutoksia!")."</font><br><br>";
     $tee = '';
   }
 
@@ -164,7 +164,7 @@ if ($tee == 'I') {
   $turvatunnus = $tunnus;
 
   if ($fnimi) {
-    // p‰ivitet‰‰n kuvalle viel‰ linkki toiseensuuntaa
+    // p√§ivitet√§√§n kuvalle viel√§ linkki toiseensuuntaa
     $query = "UPDATE liitetiedostot SET
               liitostunnus = '$tunnus',
               selite       = '$selite $summa'
@@ -173,7 +173,7 @@ if ($tee == 'I') {
   }
 
   $totsumma = 0;
-  $totmaara = $omaara+$vmaara; // Yhteens‰ tarvittavien tiliˆintirivien m‰‰r‰
+  $totmaara = $omaara+$vmaara; // Yhteens√§ tarvittavien tili√∂intirivien m√§√§r√§
 
   for ($i=0; $i<$totmaara; $i++) {
 
@@ -194,7 +194,7 @@ if ($tee == 'I') {
 
       require ("inc/teetiliointi.inc");
 
-      // Aloitetaan vieraan yrityksen tiliˆinnit
+      // Aloitetaan vieraan yrityksen tili√∂innit
       $totsumma = 0;
       $turvayhtio = $kukarow['yhtio'];
       $kukarow['yhtio'] = $vastaanottaja;
@@ -212,12 +212,12 @@ if ($tee == 'I') {
 
       if (!empty($fnimi)) {
 
-        // kopioidaan liitetiedosto toiselta rivilt‰
+        // kopioidaan liitetiedosto toiselta rivilt√§
         $query = "SELECT * from liitetiedostot where tunnus='$fnimi'";
         $res = pupe_query($query);
         $liite = mysql_fetch_assoc($res);
 
-        // n‰m‰ arvot vaihdetaan ainoastaan
+        // n√§m√§ arvot vaihdetaan ainoastaan
         $liite['liitostunnus'] = $tunnus;
         $liite['yhtio']        = $kukarow['yhtio'];
         unset($liite['tunnus']);
@@ -236,13 +236,13 @@ if ($tee == 'I') {
     }
 
     if (strlen($itili[$i]) > 0) {
-      // Tehd‰‰n tiliˆinnit
+      // Tehd√§√§n tili√∂innit
       $tili = $itili[$i];
       $kustp = $ikustp[$i];
       $kohde = $ikohde[$i];
       $projekti = $iprojekti[$i];
       $summa = $isumma[$i];
-      $totsumma += $summa; // Vastavieti‰ varten
+      $totsumma += $summa; // Vastavieti√§ varten
       $vero = $ivero[$i];
       $selite = $iselite[$i];
       require ("inc/teetiliointi.inc");
@@ -283,7 +283,7 @@ if ($tee == 'I') {
   echo "  <form action='muutosite.php' method='post'>
       <input type='hidden' name='tee' value='E'>
       <input type='hidden' name='tunnus' value='$turvatunnus'>
-      <input type='submit' value='".t("N‰yt‰ tosite")."'>
+      <input type='submit' value='".t("N√§yt√§ tosite")."'>
       </form><br><hr><br>";
 }
 
@@ -299,7 +299,7 @@ if ($tee == '') {
     $yresult = pupe_query($query);
 
     if (mysql_num_rows($yresult) < 1) {
-      echo "<font class='error'>".t("Konsernissasi ei ole yht‰‰n yrityst‰. N‰in ollen et voi k‰ytt‰‰ t‰t‰ toimintoa")."</font>";
+      echo "<font class='error'>".t("Konsernissasi ei ole yht√§√§n yrityst√§. N√§in ollen et voi k√§ytt√§√§ t√§t√§ toimintoa")."</font>";
       require ("inc/footer.inc");
       exit;
     }
@@ -331,7 +331,7 @@ if ($tee == '') {
         <input type='hidden' name='tpv' maxlength='4' size=4 value='$tpv'>
         <table>
         <tr>
-        <td>".t("Oman yrityksen tiliˆintirivien m‰‰r‰")."</td>
+        <td>".t("Oman yrityksen tili√∂intirivien m√§√§r√§")."</td>
         <td>
         <select name='omaara'>
         <option value ='1'>1
@@ -341,7 +341,7 @@ if ($tee == '') {
         </select>
         </td>
         </tr><tr>
-        <td>".t("Konserniyrityksen tiliˆintirivien m‰‰r‰")."</td>
+        <td>".t("Konserniyrityksen tili√∂intirivien m√§√§r√§")."</td>
         <td>
         <select name='vmaara'>
         <option value ='1'>1
@@ -355,7 +355,7 @@ if ($tee == '') {
     $formi = 'tosite';
     $kentta = 'tpp';
 
-    echo "<font class='message'>Syˆt‰ tositteen otsikkotiedot:</font>";
+    echo "<font class='message'>Sy√∂t√§ tositteen otsikkotiedot:</font>";
 
     echo "<form name = 'tosite' method='post' enctype='multipart/form-data'>
         <input type='hidden' name='tee' value='I'>
@@ -365,7 +365,7 @@ if ($tee == '') {
         <table>";
 
     echo "<tr>";
-    echo "<th>".t("Tositteen p‰iv‰ys")."</th>";
+    echo "<th>".t("Tositteen p√§iv√§ys")."</th>";
     echo "<td><input type='text' name='tpp' maxlength='2' size=2 value='$tpp'>";
     echo "<input type='text' name='tpk' maxlength='2' size=2 value='$tpk'>";
     echo "<input type='text' name='tpv' maxlength='4' size=4 value='$tpv'> ".t("ppkkvvvv")."</td>";
@@ -392,11 +392,11 @@ if ($tee == '') {
 
     echo "<br><font class='message'>".t("Oma yritys").": $yhtiorow[nimi]</font>";
 
-    $totmaara = $omaara+$vmaara; // Yhteens‰ tarvittavien tiliˆintirivien m‰‰r‰
+    $totmaara = $omaara+$vmaara; // Yhteens√§ tarvittavien tili√∂intirivien m√§√§r√§
 
     for ($i=0; $i<$totmaara; $i++) {
 
-      // Valitaan vastaanottava konsernin j‰sen
+      // Valitaan vastaanottava konsernin j√§sen
       if ($i == $omaara) {
         $turvayhtio=$kukarow['yhtio'];
 
@@ -415,7 +415,7 @@ if ($tee == '') {
 
       echo "<tr>";
       if ($iulos[$i] == '') {
-        //Annetaan selv‰kielinen nimi
+        //Annetaan selv√§kielinen nimi
         $tilinimi = '';
 
         if ($itili[$i] != '') {
@@ -436,7 +436,7 @@ if ($tee == '') {
         echo "<td>$iulos[$i]</td>";
       }
 
-      // Tehd‰‰n kustannuspaikkapopup
+      // Tehd√§√§n kustannuspaikkapopup
       $query = "SELECT tunnus, nimi
                 FROM kustannuspaikka
                 WHERE yhtio   = '$kukarow[yhtio]'
@@ -457,7 +457,7 @@ if ($tee == '') {
       }
       echo "</select><br>";
 
-      // Tehd‰‰n kohdepopup
+      // Tehd√§√§n kohdepopup
       $query = "SELECT tunnus, nimi
                 FROM kustannuspaikka
                 WHERE yhtio   = '$kukarow[yhtio]'
@@ -478,7 +478,7 @@ if ($tee == '') {
       }
       echo "</select><br>";
 
-      // Tehd‰‰n projektipopup
+      // Tehd√§√§n projektipopup
       $query = "SELECT tunnus, nimi
                 FROM kustannuspaikka
                 WHERE yhtio   = '$kukarow[yhtio]'

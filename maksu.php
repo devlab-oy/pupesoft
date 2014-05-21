@@ -11,7 +11,7 @@ if ($tee == 'P') {
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) == 0) {
-    echo t("Maksua ei lˆydy")."!";
+    echo t("Maksua ei l√∂ydy")."!";
     exit;
   }
 
@@ -34,14 +34,14 @@ if ($tee == 'M') {
 }
 
 if ($tee == 'U') {
-  // Lis‰t‰‰n maksurivi
+  // Lis√§t√§√§n maksurivi
   if ($ok != 1) {
     $query = "SELECT konserni
               FROM yhtio
               WHERE yhtio = '$kukarow[yhtio]'";
     $result = mysql_query($query) or pupe_error($query);
     if (mysql_num_rows($result) == 0) {
-      echo t("Yrityst‰ ei lˆydy")."!";
+      echo t("Yrityst√§ ei l√∂ydy")."!";
       exit;
     }
     $yrow=mysql_fetch_array($result);
@@ -93,9 +93,9 @@ while ($maksurow=mysql_fetch_array ($result)) {
       </td></tr></form>";
 }
 
-// Annetaan mahdollisuus tehd‰ uusi maksu
+// Annetaan mahdollisuus tehd√§ uusi maksu
 if ($ok != 1) {
-  // Annetaan tyhj‰t tiedot, jos rivi oli virheetˆn
+  // Annetaan tyhj√§t tiedot, jos rivi oli virheet√∂n
   $tapvm = '';
   $summa = '';
   $selite = '';
@@ -108,7 +108,7 @@ echo "<tr><td></td>
   <input type='text' name='tapvm' value = '$tapvm'></td>
   <td><input type='text' name='summa' value = '$summa'></td>
   <td><input type='text' name='selite' value = '$selite'></td>
-  <td><input type='Submit' value = '".t("Lis‰‰")."'></td>
+  <td><input type='Submit' value = '".t("Lis√§√§")."'></td>
   </tr></form>";
 echo "</table>";
 

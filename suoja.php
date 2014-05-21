@@ -2,7 +2,7 @@
 
 require ("inc/parametrit.inc");
 
-echo " <!-- Enabloidaan shiftill‰ checkboxien chekkaus //-->
+echo " <!-- Enabloidaan shiftill√§ checkboxien chekkaus //-->
     <script src='inc/checkboxrange.js'></script>
 
     <script language='javascript' type='text/javascript'>
@@ -27,7 +27,7 @@ elseif ($toim != "extranet") {
   $selkukarow = mysql_fetch_array($result);
 }
 
-// tehd‰‰n oikeuksien p‰ivitys
+// tehd√§√§n oikeuksien p√§ivitys
 if ($update == 'totta' and $selkukarow["kuka"] != "") {
   // poistetaan ihan aluksi kaikki.. iiik.
   $query = "DELETE
@@ -43,7 +43,7 @@ if ($update == 'totta' and $selkukarow["kuka"] != "") {
 
   // sitten tutkaillaan onko jotain ruksattu...
   if (count($valittu) != 0) {
-    foreach ($valittu as $rastit) { // Tehd‰‰n oikeudet
+    foreach ($valittu as $rastit) { // Tehd√§√§n oikeudet
       list ($nimi, $alanimi, $sov) = explode("#", $rastit);
 
       //haetaan menu itemi
@@ -72,11 +72,11 @@ if ($update == 'totta' and $selkukarow["kuka"] != "") {
                 muuttaja   = '{$kukarow['kuka']}'";
       $result = pupe_query($query);
     }
-    echo "<font class='message'>".t("K‰yttˆoikeudet p‰ivitetty")."!</font><br>";
+    echo "<font class='message'>".t("K√§ytt√∂oikeudet p√§ivitetty")."!</font><br>";
   }
 
   if (count($paivitys) != 0) {
-    foreach ($paivitys as $rastit) { // P‰ivitet‰‰n p‰ivitys-kentt‰
+    foreach ($paivitys as $rastit) { // P√§ivitet√§√§n p√§ivitys-kentt√§
       list ($nimi, $alanimi, $sov) = explode("#", $rastit);
 
       $query = "SELECT nimi
@@ -100,7 +100,7 @@ if ($update == 'totta' and $selkukarow["kuka"] != "") {
   }
 
   if (count($lukot) != 0) {
-    foreach ($lukot as $rastit) { // P‰ivitet‰‰n lukittu-kentt‰
+    foreach ($lukot as $rastit) { // P√§ivitet√§√§n lukittu-kentt√§
       list ($nimi, $alanimi, $sov) = explode("#", $rastit);
 
       $query = "SELECT nimi
@@ -127,17 +127,17 @@ if ($update == 'totta' and $selkukarow["kuka"] != "") {
     }
   }
 
-  // p‰ivite‰‰n kuka-tauluun mitk‰ k‰ytt‰j‰t on aktiivisia ja mitk‰ poistettuja
+  // p√§ivite√§√§n kuka-tauluun mitk√§ k√§ytt√§j√§t on aktiivisia ja mitk√§ poistettuja
   paivita_aktiiviset_kayttajat($selkukarow["kuka"]);
 }
 
 echo "<font class='head'>".t("Tietosuoja").":</font><hr>";
 
-echo "<font class='message'>".t("K‰ytt‰j‰n")." $selkukarow[nimi] ".t("k‰yttˆoikeudet")." ($yhtiorow[nimi])</font><hr>";
+echo "<font class='message'>".t("K√§ytt√§j√§n")." $selkukarow[nimi] ".t("k√§ytt√∂oikeudet")." ($yhtiorow[nimi])</font><hr>";
 
 echo "<table>
     <tr>
-      <th>".t("Valitse k‰ytt‰j‰").":</th>
+      <th>".t("Valitse k√§ytt√§j√§").":</th>
       <td>
       <form method='post'>
       <input type='hidden' name='toim' value='$toim'>
@@ -148,7 +148,7 @@ if ($toim == "" or $selkukarow["kuka"] != "") {
   echo "<option selected value='$selkukarow[tunnus]'>$selkukarow[nimi] ($selkukarow[kuka])</option>";
 }
 elseif ($toim == "extranet" and $selkukarow["kuka"] == "") {
-  echo "<option selected value=''>".t("Valitse k‰ytt‰j‰")."</option>";
+  echo "<option selected value=''>".t("Valitse k√§ytt√§j√§")."</option>";
 }
 
 if ($toim == "extranet" and $selkukarow["tunnus"] != "") {
@@ -225,7 +225,7 @@ if ($sovellus == "") {
   exit;
 }
 
-// n‰ytet‰‰n oikeuslista
+// n√§ytet√§√§n oikeuslista
 echo "<table>";
 
 $query = "SELECT *
@@ -274,8 +274,8 @@ while ($orow=mysql_fetch_array($result)) {
     echo "<tr><td class='back colspan='5'><br></td></tr>";
     echo "<tr><th>".t("Sovellus")."</th>
       <th colspan='2'>".t("Toiminto")."</th>
-      <th>".t("K‰yttˆ")."</th>
-      <th>".t("P‰ivitys")."</th>
+      <th>".t("K√§ytt√∂")."</th>
+      <th>".t("P√§ivitys")."</th>
       <th>".t("Lukittu")."</th>
       </tr>";
   }
@@ -333,7 +333,7 @@ echo "</table>";
 
 if ($toim == "" or ($toim == "extranet" and $selkukarow["kuka"] != "")) {
   echo "<br>";
-  echo "<input type='submit' value='".t("P‰ivit‰ tiedot")."'></form>";
+  echo "<input type='submit' value='".t("P√§ivit√§ tiedot")."'></form>";
 }
 
 require("inc/footer.inc");

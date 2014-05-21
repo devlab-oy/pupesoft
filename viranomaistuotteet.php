@@ -9,7 +9,7 @@ if ($livesearch_tee == "TILIHAKU") {
   exit;
 }
 
-echo "<font class='head'>".t("Viranomaistuotteiden p‰ivitys")."</font><hr>";
+echo "<font class='head'>".t("Viranomaistuotteiden p√§ivitys")."</font><hr>";
 
 flush();
 
@@ -25,12 +25,12 @@ if ($tee == 'PERUSTA') {
     $tilino           = (int) $tilille[$riviindex];
 
     $maa_koodi        = trim($maa[$riviindex]);
-    $maa_nimi         = trim(preg_replace("/[^a-z\,\.\-\(\) Â‰ˆ¸≈ƒ÷]/i", "", trim($maannimi[$riviindex])));
+    $maa_nimi         = trim(preg_replace("/[^a-z\,\.\-\(\) √•√§√∂√º√Ö√Ñ√ñ]/i", "", trim($maannimi[$riviindex])));
     $vuosi            = date('y', mktime(0, 0, 0, 1, 6, $annettuvuosi));
     $lisaa_nimi       = trim($erikoisehto[$riviindex]);
 
-    $tuotenimitys     = "Ulkomaanp‰iv‰raha $annettuvuosi $maa_nimi";
-    $tuotenimitys_osa = "Ulkomaanosap‰iv‰raha $annettuvuosi $maa_nimi";
+    $tuotenimitys     = "Ulkomaanp√§iv√§raha $annettuvuosi $maa_nimi";
+    $tuotenimitys_osa = "Ulkomaanosap√§iv√§raha $annettuvuosi $maa_nimi";
 
     if ($maa_koodi != '' and $lisaa_nimi == '') {
       $tuoteno = "PR-$maa_koodi-$vuosi";
@@ -75,7 +75,7 @@ if ($tee == 'PERUSTA') {
     $result = mysql_query($query) or pupe_error($query);
   }
 
-  echo "<br>".t("Ukomaanp‰iv‰rahat lis‰tty kantaan")."<br><br><br>";
+  echo "<br>".t("Ukomaanp√§iv√§rahat lis√§tty kantaan")."<br><br><br>";
   unset($tee);
 }
 
@@ -91,7 +91,7 @@ if ($tee == 'POISTA') {
             AND right(tuoteno, 2) < $annettuvuosipoista";
   $result = mysql_query($query) or pupe_error($query);
 
-  echo "<br>".t("Vanhat p‰iv‰rahat poistettu k‰ytˆst‰")."<br><br><br>";
+  echo "<br>".t("Vanhat p√§iv√§rahat poistettu k√§yt√∂st√§")."<br><br><br>";
   unset($tee);
 }
 
@@ -105,7 +105,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and isset($annett
   }
 
   if ($_FILES['userfile']['size'] == 0) {
-    die ("<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font>");
+    die ("<font class='error'><br>".t("Tiedosto on tyhj√§")."!</font>");
   }
 
   require_once ('excel_reader/reader.php');
@@ -118,7 +118,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and isset($annett
   $data->setRowColOffset(0);
   $data->read($_FILES['userfile']['tmp_name']);
 
-  echo "<font class='message'>".t("Tarkastetaan l‰hetetty tiedosto")."...<br><br></font>";
+  echo "<font class='message'>".t("Tarkastetaan l√§hetetty tiedosto")."...<br><br></font>";
   echo "<form method='post'>";
 
   // luetaan eka rivi tiedostosta..
@@ -128,7 +128,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and isset($annett
     $headers[] = strtoupper(trim($data->sheets[0]['cells'][0][$excej]));
   }
 
-  // Poistetaan tyhj‰t headerit oikealta
+  // Poistetaan tyhj√§t headerit oikealta
   for ($excej = 0; $excej = (count($headers)-1); $excej--) {
     if ($headers[$excej] != "") {
       break;
@@ -138,7 +138,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and isset($annett
     }
   }
 
-  // Luetaan tiedosto loppuun ja tehd‰‰n taulukohtainen array koko datasta
+  // Luetaan tiedosto loppuun ja tehd√§√§n taulukohtainen array koko datasta
   for ($excei = 1; $excei < $data->sheets[0]['numRows']; $excei++) {
     for ($excej = 0; $excej < count($headers); $excej++) {
       $taulunrivit[$taulut[$excej]][$excei-1][] = trim($data->sheets[0]['cells'][$excei][$excej]);
@@ -170,7 +170,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and isset($annett
           $res2 = mysql_query($query2) or pupe_error($query2);
 
           echo "<select name='maa[$eriviindex]' >";
-          echo "<option value = ''>".t("VIRHE: Maatunnusta ei lˆytynyt")."!</option>";
+          echo "<option value = ''>".t("VIRHE: Maatunnusta ei l√∂ytynyt")."!</option>";
 
           while ($vrow = mysql_fetch_assoc($res2)) {
             $sel="";
@@ -182,9 +182,9 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and isset($annett
 
           echo "</select></td>";
 
-          echo "<td><input type='checkbox' name='erikoisehto[$eriviindex]' value='K'> ".t("Lis‰‰ maan nimi tuotenumeroon");
+          echo "<td><input type='checkbox' name='erikoisehto[$eriviindex]' value='K'> ".t("Lis√§√§ maan nimi tuotenumeroon");
           echo "<input type='hidden' name='maannimi[$eriviindex]' value='$eriv'></td>";
-          echo "<td>".t("Ulkomaanp‰iv‰raha")." $annettuvuosi $eriv</td>";
+          echo "<td>".t("Ulkomaanp√§iv√§raha")." $annettuvuosi $eriv</td>";
         }
         else {
           echo "<td><input type='hidden' name='hinta[$eriviindex]' value='$eriv' />$eriv</td>";
@@ -200,7 +200,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and isset($annett
 
   echo "<table>";
   echo "<tr colspan='3'>";
-  echo "<td class='back'><input type='submit' name='perusta' value='".t("Perusta ulkomaanp‰iv‰rahat")."' />";
+  echo "<td class='back'><input type='submit' name='perusta' value='".t("Perusta ulkomaanp√§iv√§rahat")."' />";
   echo "<input type='hidden' name='tee' value='PERUSTA' >";
   echo "<input type='hidden' name='annettuvuosi' value='$annettuvuosi' >";
   echo"</td></tr></table>";
@@ -223,7 +223,7 @@ if ($tee == "synkronoi") {
   $tilires = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($tilires) == 0) {
-    echo "<font class='error'>".t("VIRHE: Ulkomaanp‰iv‰rahojen tilinumero puuttuu")."!</font><br>";
+    echo "<font class='error'>".t("VIRHE: Ulkomaanp√§iv√§rahojen tilinumero puuttuu")."!</font><br>";
     $tee = '';
   }
 
@@ -235,14 +235,14 @@ if ($tee == "synkronoi") {
   $tilires = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($tilires) == 0) {
-    echo "<font class='error'>".t("VIRHE: Kotimaanp‰iv‰rahojen tilinumero puuttuu")."!</font><br>";
+    echo "<font class='error'>".t("VIRHE: Kotimaanp√§iv√§rahojen tilinumero puuttuu")."!</font><br>";
     $tee = '';
   }
 }
 
 if ($tee == "synkronoi") {
 
-  echo t("Lis‰t‰‰n uudet viranomaistuotteet tietokantaan")."...<br>";
+  echo t("Lis√§t√§√§n uudet viranomaistuotteet tietokantaan")."...<br>";
 
   $ok = FALSE;
 
@@ -254,7 +254,7 @@ if ($tee == "synkronoi") {
   }
 
   if (!$ok) {
-    echo t("Tiedoston avaus ep‰onnistui")."!";
+    echo t("Tiedoston avaus ep√§onnistui")."!";
     require ("inc/footer.inc");
     exit;
   }
@@ -265,7 +265,7 @@ if ($tee == "synkronoi") {
   while ($rivi = fgets($file)) {
     list($tuoteno, $nimitys, $alv, $kommentoitava, $kuvaus, $myyntihinta, $tuotetyyppi, $vienti, $malli, $myymalahinta) = explode("\t", trim($rivi));
 
-    if (strpos($nimitys, "Ulkomaanp‰iv‰raha") !== FALSE) {
+    if (strpos($nimitys, "Ulkomaanp√§iv√§raha") !== FALSE) {
       $tilino = $ulkomaantilinumero;
     }
     else {
@@ -310,7 +310,7 @@ if ($tee == "synkronoi") {
 
 if ($tee == "synkronoi" or $tee == "synkronoimaat") {
 
-  echo t("P‰ivitet‰‰n maat tietokantaan")."...<br>";
+  echo t("P√§ivitet√§√§n maat tietokantaan")."...<br>";
 
   $ok = FALSE;
 
@@ -322,7 +322,7 @@ if ($tee == "synkronoi" or $tee == "synkronoimaat") {
   }
 
   if (!$ok) {
-    echo t("Tiedoston avaus ep‰onnistui")."!";
+    echo t("Tiedoston avaus ep√§onnistui")."!";
     require ("inc/footer.inc");
     exit;
   }
@@ -352,14 +352,14 @@ if ($tee == "synkronoi" or $tee == "synkronoimaat") {
 
   fclose($file);
 
-  echo t("P‰ivitys referenssist‰ valmis")."...<br>";
+  echo t("P√§ivitys referenssist√§ valmis")."...<br>";
   unset($tee);
 }
 
 if ($tee == '') {
   echo "<br><form method='post' name='sendfile' enctype='multipart/form-data'>";
 
-  echo t("Lue ulkomaanp‰iv‰rahat tiedostosta").":<br><br>";
+  echo t("Lue ulkomaanp√§iv√§rahat tiedostosta").":<br><br>";
   echo "<table>";
   echo "<tr><th>".t("Valitse tiedosto").":</th>";
   echo "<td><input name='userfile' type='file'></td>";
@@ -373,30 +373,30 @@ if ($tee == '') {
   echo "</table>";
   echo "</form><br><br>";
 
-  echo t("Poista vanhat p‰iv‰rahat sek‰ KM- alkuiset muut kulut")." (PR-*".(date("y")-1)." KM-*".(date("y")-1)."):<br><br>";
+  echo t("Poista vanhat p√§iv√§rahat sek√§ KM- alkuiset muut kulut")." (PR-*".(date("y")-1)." KM-*".(date("y")-1)."):<br><br>";
   echo "<form method='post'>";
   echo "<table>";
-  echo "<tr><th>".t("Poista edellisten vuosien p‰iv‰rahat ja muut kulut k‰ytˆst‰")."</th>";
+  echo "<tr><th>".t("Poista edellisten vuosien p√§iv√§rahat ja muut kulut k√§yt√∂st√§")."</th>";
   echo "<td><input type='submit' value='".t("Poista")."'></td>";
   echo "<input type='hidden' name='tee' value='POISTA'><input type='hidden' name='annettuvuosipoista' value='".date('y')."'><tr>";
   echo "</table>";
   echo "</form><br><br>";
 
-  echo t("P‰ivit‰ j‰rjestelm‰n p‰iv‰rahat").":<br><br>";
+  echo t("P√§ivit√§ j√§rjestelm√§n p√§iv√§rahat").":<br><br>";
   echo "<form method='post'>";
   echo "<table>";
-  echo "<tr><th>".t("Tili (Kirjanpito)")." ".t("Kotimaanp‰iv‰rahat")."</th><td width='200' valign='top'>".livesearch_kentta("sendfile", "TILIHAKU", "kotimaantilinumero", 170, $kotimaantilinumero, "EISUBMIT")."</td></tr>";
-  echo "<tr><th>".t("Tili (Kirjanpito)")." ".t("Ulkomaanp‰iv‰rahat")."</th><td width='200' valign='top'>".livesearch_kentta("sendfile", "TILIHAKU", "ulkomaantilinumero", 170, $ulkomaantilinumero, "EISUBMIT")."</td></tr>";
-  echo "<tr><th>".t("Nouda uusimmat p‰iv‰rahat")."</th>";
+  echo "<tr><th>".t("Tili (Kirjanpito)")." ".t("Kotimaanp√§iv√§rahat")."</th><td width='200' valign='top'>".livesearch_kentta("sendfile", "TILIHAKU", "kotimaantilinumero", 170, $kotimaantilinumero, "EISUBMIT")."</td></tr>";
+  echo "<tr><th>".t("Tili (Kirjanpito)")." ".t("Ulkomaanp√§iv√§rahat")."</th><td width='200' valign='top'>".livesearch_kentta("sendfile", "TILIHAKU", "ulkomaantilinumero", 170, $ulkomaantilinumero, "EISUBMIT")."</td></tr>";
+  echo "<tr><th>".t("Nouda uusimmat p√§iv√§rahat")."</th>";
   echo "<td><input type='submit' value='".t("Nouda")."'></td>";
   echo "<input type='hidden' name='tee' value='synkronoi'><tr>";
   echo "</table>";
   echo "</form>";
 
   echo "<br><br><br>";
-  echo t("P‰ivit‰ j‰rjestelm‰n maat").":<br><br>";
+  echo t("P√§ivit√§ j√§rjestelm√§n maat").":<br><br>";
   echo "<form method='post'>";
-  echo "<input type='submit' value='".t("P‰ivit‰ maat referenssist‰")."'>";
+  echo "<input type='submit' value='".t("P√§ivit√§ maat referenssist√§")."'>";
   echo "<input type='hidden' name='tee' value='synkronoimaat'><tr>";
   echo "</form>";
 

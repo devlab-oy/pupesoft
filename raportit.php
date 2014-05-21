@@ -6,21 +6,21 @@ if (isset($_POST["tee"])) {
   if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 }
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-// N‰iss‰ keisseiss‰ ei slavea
+// N√§iss√§ keisseiss√§ ei slavea
 if (($_REQUEST["toim"] == 'hyvaksynta' and $_REQUEST["tee"] == 'T') or $_REQUEST["toim"] == 'maksuvalmius' or $_REQUEST["toim_tee"] == 'kululasku') {
   $useslave = 0;
 }
 
 if ($_REQUEST["toim"] == 'avoimet') {
-  // DataTables p‰‰lle
+  // DataTables p√§√§lle
   $pupe_DataTables = array("avoimet0", "avoimet1");
 }
 
 if ($_REQUEST["toim"] == 'toimittajahaku' or $_REQUEST["toim"] == 'laskuhaku' or $_REQUEST["toim"] == 'myyrespaakirja') {
-  // DataTables p‰‰lle
+  // DataTables p√§√§lle
   $pupe_DataTables = $_REQUEST["toim"];
 }
 

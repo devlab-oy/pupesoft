@@ -32,7 +32,7 @@ if (!function_exists('uusi_sivu_erittely')) {
       $pdf->set_default('margin-right',   0);
     }
 
-    // tehd‰‰n pdf:n uusi sivu
+    // tehd√§√§n pdf:n uusi sivu
     $firstpage = $pdf->new_page("a4");
     tulosta_logo_pdf($pdf, $firstpage, $laskurow);
 
@@ -97,12 +97,12 @@ if (!function_exists('rivi_erittely')) {
     if (!isset($pdf) or $kala < 150 or ($toitarow['erittely'] == 'k' and isset($edytunnus) and $edytunnus != $laskurow['ytunnus'])) {
 
       if ($kala < 150) {
-        // Piiret‰‰n edelliselle sivulle summatiedot
+        // Piiret√§√§n edelliselle sivulle summatiedot
         list($kala, $kollityht, $kilotyht, $lavametriyht) = loppu_erittely($kala1, $kala, $firstpage, $kollityht, $kilotyht, $lavametriyht);
         $summatmenijo = TRUE;
       }
       elseif ($toitarow['erittely'] == 'k' and isset($edytunnus) and $edytunnus != $laskurow['ytunnus']) {
-        // Piiret‰‰n edelliselle sivulle summatiedot
+        // Piiret√§√§n edelliselle sivulle summatiedot
         list($kala, $kollityht, $kilotyht, $lavametriyht) = loppu_erittely($kala1, $kala, $firstpage, $kollityht, $kilotyht, $lavametriyht);
       }
 
@@ -112,7 +112,7 @@ if (!function_exists('rivi_erittely')) {
 
     // Asiakas vaihtuu, uudet otsikkotiedot
     if (!$summatmenijo and $toitarow['erittely'] != 'k' and isset($edliitostunnus) and $edliitostunnus != $laskurow['liitostunnus']) {
-      // Piiret‰‰n sivulle summatiedot
+      // Piiret√§√§n sivulle summatiedot
       list($kala, $kollityht, $kilotyht, $lavametriyht) = loppu_erittely($kala1, $kala, $firstpage, $kollityht, $kilotyht, $lavametriyht);
       $otsikot = TRUE;
     }
@@ -177,13 +177,13 @@ if (!function_exists('rivi_erittely')) {
       $kala -= 50;
 
       //kollitietot
-      //yl‰rivi
+      //yl√§rivi
       if ($toitarow['erittely'] == 'k') {
         $pdf->draw_rectangle($kala, 60, $kala-15, 110, $firstpage, $rectparam);
-        $pdf->draw_text(62, $kala-8, t("Myym‰l‰nro", $kieli),  $firstpage, $norm);
+        $pdf->draw_text(62, $kala-8, t("Myym√§l√§nro", $kieli),  $firstpage, $norm);
         $pdf->draw_text(62, $kala-14, t("Astilnro", $kieli),  $firstpage, $norm);
         $pdf->draw_rectangle($kala, 110, $kala-15, 242,  $firstpage, $rectparam);
-        $pdf->draw_text(113, $kala-8, t("Myym‰l‰n nimi", $kieli),  $firstpage, $norm);
+        $pdf->draw_text(113, $kala-8, t("Myym√§l√§n nimi", $kieli),  $firstpage, $norm);
       }
       else {
         $pdf->draw_rectangle($kala, 60, $kala-15, 242, $firstpage, $rectparam);
@@ -218,9 +218,9 @@ if (!function_exists('rivi_erittely')) {
         $kala2 -= 10;
       }
 
-      // Lis‰kommentti j‰lkivaatimuksesta seuraavalle riville
+      // Lis√§kommentti j√§lkivaatimuksesta seuraavalle riville
       if ($laskurow['jv'] != '') {
-        $pdf->draw_text(62, $kala2, t("J‰lkivaatimus"), $firstpage, $kirj);
+        $pdf->draw_text(62, $kala2, t("J√§lkivaatimus"), $firstpage, $kirj);
         $kala2 -= 10;
       }
     }
@@ -265,9 +265,9 @@ if (!function_exists('rivi_erittely')) {
   }
 }
 
-//rahtikirja-tulostus.php riveilt‰ 784 - 788 tulee v‰lilyˆntej‰
+//rahtikirja-tulostus.php riveilt√§ 784 - 788 tulee v√§lily√∂ntej√§
 $otunnukset = str_replace(' ', '', $otunnukset);
-// Ei kaaduta erroriin jos jostain syyst‰ tullaan tyhj‰ll‰
+// Ei kaaduta erroriin jos jostain syyst√§ tullaan tyhj√§ll√§
 if ($otunnukset == "") $otunnukset = 0;
 
 if ($yhdistetaan_lahtoon != 0 and !empty($yhdistettavan_lahdon_tilaukset)) {
@@ -331,16 +331,16 @@ if (mysql_num_rows($result) > 0) {
     list($kala, $firstpage, $kollityht, $kilotyht, $lavametriyht) = rivi_erittely($laskurow, $kala, $firstpage, $kollityht, $kilotyht, $lavametriyht, $vikarivi);
   }
 
-  //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+  //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
   $pdffilenimi = "/tmp/rahtikirjaerittely-".md5(uniqid(rand(),true)).".pdf";
 
   //kirjoitetaan pdf faili levylle..
   $fh = fopen($pdffilenimi, "w");
-  if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
+  if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep√§onnistui $pdffilenimi");
   fclose($fh);
 
   if ($tee == 'NAYTATILAUS') {
-    //Tyˆnnet‰‰n tuo pdf vaan putkeen!
+    //Ty√∂nnet√§√§n tuo pdf vaan putkeen!
     echo file_get_contents($pdffilenimi);
   }
   else {

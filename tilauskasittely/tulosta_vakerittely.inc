@@ -52,8 +52,8 @@ if (!function_exists('vakadr_otsikko')) {
     $pdf->draw_text(290,815, t("Kuljetuksen VAK/ADR-erittely", $kieli), $thispage, $iso);
 
     // VASEN PUOLI
-    // Myyj‰n tiedot
-    $pdf->draw_text(30, 717, t("L‰hett‰j‰", $kieli),$thispage, $boldi);
+    // Myyj√§n tiedot
+    $pdf->draw_text(30, 717, t("L√§hett√§j√§", $kieli),$thispage, $boldi);
     $pdf->draw_text(30, 707, $yhtiorow["nimi"],  $thispage, $norm);
     $pdf->draw_text(30, 697, $yhtiorow["osoite"],  $thispage, $norm);
     $pdf->draw_text(30, 687, $yhtiorow["postino"]." ".$yhtiorow["postitp"], $thispage, $norm);
@@ -81,7 +81,7 @@ if (!function_exists('vakadr_otsikko')) {
     $pdf->draw_text(290, 780, t("Tilausnumero", $kieli),$thispage, $norm);
     $pdf->draw_text(370, 780, $laskurow["tunnus"], $thispage, $norm);
 
-    $pdf->draw_text(290, 770, t("P‰iv‰m‰‰r‰", $kieli), $thispage, $norm);
+    $pdf->draw_text(290, 770, t("P√§iv√§m√§√§r√§", $kieli), $thispage, $norm);
     $pdf->draw_text(370, 770, date('d.m.Y H:i'), $thispage, $norm);
 
     if (trim($laskurow['ohjausmerkki']) != '') {
@@ -89,8 +89,8 @@ if (!function_exists('vakadr_otsikko')) {
       $pdf->draw_text(370, 740, $laskurow['ohjausmerkki'], $thispage, $iso);
     }
 
-    // Otsikon viimeisin rivi on pikseliss‰ 673
-    // 665 on laskettu ottaen huomioon ett‰ jokaisen SSCC:n alussa tiputetaan $kala-15 (650), joka on oikeakohta aloittaa piirt‰minen.
+    // Otsikon viimeisin rivi on pikseliss√§ 673
+    // 665 on laskettu ottaen huomioon ett√§ jokaisen SSCC:n alussa tiputetaan $kala-15 (650), joka on oikeakohta aloittaa piirt√§minen.
 
     $params["kala"] = 595;
     $kala      = 595;
@@ -109,7 +109,7 @@ if (!function_exists('vakadr_rivi')) {
     // Luodaan muuttujat
     extract($params);
 
-    // Jos on paljon rivej‰ tehd‰‰n uusi sivu...
+    // Jos on paljon rivej√§ tehd√§√§n uusi sivu...
     if ($kala <= 100) {
       $sivu++;
 
@@ -126,21 +126,21 @@ if (!function_exists('vakadr_rivi')) {
 
     if (isset($sscc)) {
 
-      $kala = $kala-15; // oikeasta kohtaan ja ett‰ SSCC v‰liin tulee v‰li‰
+      $kala = $kala-15; // oikeasta kohtaan ja ett√§ SSCC v√§liin tulee v√§li√§
 
       if ((is_numeric($sscc_ulkoinen) and (int) $sscc_ulkoinen > 0) or (!is_numeric($sscc_ulkoinen) and (string) $sscc_ulkoinen != "")) {
-        $pdf->draw_text(150,$kala, $sscc_ulkoinen, $thispage, $boldi); // ULKOINEN_SSCC t‰h‰n jos lˆytyy
+        $pdf->draw_text(150,$kala, $sscc_ulkoinen, $thispage, $boldi); // ULKOINEN_SSCC t√§h√§n jos l√∂ytyy
       }
       else {
-        $pdf->draw_text(150,$kala, $sscc, $thispage, $boldi); // SSCC t‰h‰n
+        $pdf->draw_text(150,$kala, $sscc, $thispage, $boldi); // SSCC t√§h√§n
       }
 
-      // t‰‰ on se ongelma.
-      // tehd‰‰n kollikohtaiset otsikot.
+      // t√§√§ on se ongelma.
+      // tehd√§√§n kollikohtaiset otsikot.
       $pdf->draw_text(30,  $kala, t("Kollitunniste (SSCC)", $kieli), $thispage, $boldi);
       $pdf->draw_text(290,$kala, t("Tilaus", $kieli), $thispage, $boldi);
       $pdf->draw_text(330,$kala, $laskurow["tunnus"], $thispage, $norm);
-      $pdf->draw_text(520,$kala, t("M‰‰r‰ kg", $kieli), $thispage, $boldi);
+      $pdf->draw_text(520,$kala, t("M√§√§r√§ kg", $kieli), $thispage, $boldi);
       $kala = $kala-12;
 
     }
@@ -172,7 +172,7 @@ if (!function_exists('vakadr_loppu')) {
     // Luodaan muuttujat
     extract($params);
 
-    // yhtiˆtiedot
+    // yhti√∂tiedot
     $y_tiedot_ok  = FALSE;
     $y_nimi     = $laskurow["yhtio_nimi"];
     $y_osoite     = $laskurow["yhtio_osoite"];
@@ -200,7 +200,7 @@ if (!function_exists('vakadr_loppu')) {
       }
     }
 
-    // jos meill‰ on lasku menossa ulkomaille ja se laskutetaan eri ovttunnuksella
+    // jos meill√§ on lasku menossa ulkomaille ja se laskutetaan eri ovttunnuksella
     if ($laskurow["yhtio_ovttunnus"] != "" and $laskurow["yhtio_ovttunnus"] != $yhtiorow["ovttunnus"]) {
       // haetaan toimipaikan tiedot
       $alhqur = "SELECT puhelin, fax, email, www from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and vat_numero='$laskurow[yhtio_ovttunnus]'";
@@ -217,7 +217,7 @@ if (!function_exists('vakadr_loppu')) {
       }
     }
 
-    // jos ei olla haettu muualta, niin haetaan tiedot yhtiˆlt‰
+    // jos ei olla haettu muualta, niin haetaan tiedot yhti√∂lt√§
     if (!$y_tiedot_ok) {
       // haetaan toimipaikan tiedot
       $alhqur = "SELECT puhelin, fax, email, www from yhtio where yhtio='$laskurow[yhtio]'";
@@ -234,7 +234,7 @@ if (!function_exists('vakadr_loppu')) {
     }
 
 
-    //Alimmat kolme laatikkoa, yhtiˆtietoja
+    //Alimmat kolme laatikkoa, yhti√∂tietoja
     $pdf->draw_rectangle(70, 20, 20, 580,  $thispage, $rectparam);
     $pdf->draw_rectangle(70, 207, 20, 580,  $thispage, $rectparam);
     $pdf->draw_rectangle(70, 394, 20, 580,  $thispage, $rectparam);
@@ -248,7 +248,7 @@ if (!function_exists('vakadr_loppu')) {
     $pdf->draw_text(247, 55, $y_puhelin,            $thispage, $pieni);
     $pdf->draw_text(217, 45, t("Telefax", $kieli).":",      $thispage, $pieni);
     $pdf->draw_text(247, 45, $y_fax,              $thispage, $pieni);
-    $pdf->draw_text(217, 35, t("S‰hkˆposti", $kieli).":",    $thispage, $pieni);
+    $pdf->draw_text(217, 35, t("S√§hk√∂posti", $kieli).":",    $thispage, $pieni);
     $pdf->draw_text(257, 35, $y_email,              $thispage, $pieni);
     $pdf->draw_text(217, 25, t("Web", $kieli).":",        $thispage, $pieni);
     $pdf->draw_text(247, 25, $y_www,              $thispage, $pieni);
@@ -275,7 +275,7 @@ if (!function_exists('print_pdf_vakadr')) {
     extract($params);
     $returnvalue = 0;
 
-    //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+    //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
     $pdffilenimi = tempnam("/tmp", "VakAdr").".pdf";
 
     //kirjoitetaan pdf faili levylle..
@@ -284,7 +284,7 @@ if (!function_exists('print_pdf_vakadr')) {
     fclose($fh);
 
     if ($tee == 'NAYTATILAUS') {
-      //Tyˆnnet‰‰n tuo pdf vaan putkeen!
+      //Ty√∂nnet√§√§n tuo pdf vaan putkeen!
       echo file_get_contents($pdffilenimi);
     }
     else {

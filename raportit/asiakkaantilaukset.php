@@ -1,6 +1,6 @@
 <?php
 
-// DataTables p‰‰lle
+// DataTables p√§√§lle
 $pupe_DataTables = "asiakkaantilaukset";
 
 require ("../inc/parametrit.inc");
@@ -85,7 +85,7 @@ if ($cleantoim == 'TARJOUS') {
   $til = " tila in ('T','D') and tilaustyyppi='T' ";
 }
 if ($cleantoim == 'YLLAPITO') {
-  echo "<font class='head'>".t("Asiakkaan yll‰pitosopimukset").":</font><hr>";
+  echo "<font class='head'>".t("Asiakkaan yll√§pitosopimukset").":</font><hr>";
 
   $til = " tila in ('L','0','D') and tilaustyyppi='0' ";
 }
@@ -101,12 +101,12 @@ if ($cleantoim == 'TAKUU') {
 }
 
 if ($til == "" or $cleantoim == "") {
-  echo "<p><font class='error'>".t("J‰rjestelm‰virhe, t‰m‰n modulin suorittaminen suoralla urlilla on kielletty")." !!!</font></p>";
+  echo "<p><font class='error'>".t("J√§rjestelm√§virhe, t√§m√§n modulin suorittaminen suoralla urlilla on kielletty")." !!!</font></p>";
   require ("inc/footer.inc");
   exit;
 }
 
-//  Voidaan n‰ytt‰‰ vain tilaus ilman hakuja yms. Haluamme kuitenkin tarkastaa oikeudet.
+//  Voidaan n√§ytt√§√§ vain tilaus ilman hakuja yms. Haluamme kuitenkin tarkastaa oikeudet.
 if ($tee == "NAYTA" and $til != "") {
   require ("raportit/naytatilaus.inc");
   require ("inc/footer.inc");
@@ -181,7 +181,7 @@ if ($tee == 'NAYTATILAUS') {
               <td>$rahtirow[lavametri]</td>";
 
         if ($rahtirow['merahti']== 'K') {
-          echo "  <td>".t("L‰hett‰j‰")."</td>";
+          echo "  <td>".t("L√§hett√§j√§")."</td>";
         }
         else {
           echo "  <td>".t("Vastaanottaja")."</td>";
@@ -288,7 +288,7 @@ elseif ($laskunro > 0) {
     $asiakasid     = $row["liitostunnus"];
   }
 }
-//astilnro kent‰ss‰ on laskun tunnus, jotta livesearch hakukent‰n ID olisi yksilˆllinen
+//astilnro kent√§ss√§ on laskun tunnus, jotta livesearch hakukent√§n ID olisi yksil√∂llinen
 elseif ($astilnro != '') {
   $query = "SELECT laskunro, ytunnus, liitostunnus, tunnus, asiakkaan_tilausnumero, nimi
             FROM lasku
@@ -314,7 +314,7 @@ elseif ($astilnro != '') {
 }
 
 if ($ytunnus != '') {
-  // Pikku scripti formin tyhjent‰miseen
+  // Pikku scripti formin tyhjent√§miseen
   echo "<script type='text/javascript' language='javascript'>
   function vaihdaClick() {
     document.etsiform.etsinappi.name='vaihda';
@@ -359,12 +359,12 @@ if ($ytunnus != '') {
     $chk = "CHECKED";
   }
 
-  echo "<tr><th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+  echo "<tr><th>".t("Sy√∂t√§ alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
       <td><input type='text' name='ppa' value='$ppa' size='3'></td>
       <td><input type='text' name='kka' value='$kka' size='3'></td>
       <td><input type='text' name='vva' value='$vva' size='5'></td>
       </tr>";
-  echo "<tr><th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+  echo "<tr><th>".t("Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
       <td><input type='text' name='ppl' value='$ppl' size='3'></td>
       <td><input type='text' name='kkl' value='$kkl' size='3'></td>
       <td><input type='text' name='vvl' value='$vvl' size='5'></td>";
@@ -485,7 +485,7 @@ if ($ytunnus != '') {
               $yhtioekojoin
               WHERE lasku.$logistiikka_yhtiolisa ";
 
-    if (substr($ytunnus, 0, 1) == '£') {
+    if (substr($ytunnus, 0, 1) == '¬£') {
       $query .= "  and lasku.nimi    = '$asiakasrow[nimi]'
             and lasku.nimitark  = '$asiakasrow[nimitark]'
             and lasku.osoite  = '$asiakasrow[osoite]'
@@ -516,7 +516,7 @@ if ($ytunnus != '') {
   echo "<tr>";
 
   if (mysql_num_rows($result) > 50) {
-    echo "<th>".t("N‰yt‰ 500 uusinta tilausta")."</th>";
+    echo "<th>".t("N√§yt√§ 500 uusinta tilausta")."</th>";
     echo "<td colspan='3' class=''>";
     echo "<input type='checkbox' name='kaikki' $chk></td>";
   }
@@ -531,7 +531,7 @@ if ($ytunnus != '') {
   echo "</form>";
 
   if (mysql_num_rows($result) > 50 and $limittrikkeri == "A") {
-    echo "<p><font class='error'>".t("HUOM")."! ".t("N‰ytet‰‰n vain 50 uusinta tilausta")."</font></p>";
+    echo "<p><font class='error'>".t("HUOM")."! ".t("N√§ytet√§√§n vain 50 uusinta tilausta")."</font></p>";
   }
 
   if (mysql_num_rows($result) > 0) {
@@ -583,7 +583,7 @@ if ($ytunnus != '') {
 
       echo "<tr>";
 
-      // Laatikot laskujen ymp‰rille
+      // Laatikot laskujen ymp√§rille
       if ($row["laskunro"] > 0 and $row["laskunro"] != $edlaskunro) {
         $query = "SELECT count(*)
                   FROM lasku
@@ -648,7 +648,7 @@ if ($ytunnus != '') {
           echo "<div id='div_kommentti$row[0]' class='popup' style='width: 500px;'>";
           echo t("Tilaus laadittu")." $row[laatija] @ ".tv1dateconv($row["luontiaika"], 'X')."<br>";
           echo t("Tilaus valmis")." $row[hyvak1] @ ".tv1dateconv($row["h1time"], 'X')."<br>";
-          echo t("Tilaus hyv‰ksytty")." $row[hyvak2] @ ".tv1dateconv($row["h2time"], 'X');
+          echo t("Tilaus hyv√§ksytty")." $row[hyvak2] @ ".tv1dateconv($row["h2time"], 'X');
           echo "</div>";
           echo "<td valign='top' $classalku class='tooltip' id='kommentti$row[0]'>$row[0]</td>";
         }
@@ -677,10 +677,10 @@ if ($ytunnus != '') {
       $laskutyyppi  = $row["tila"];
       $alatila    = $row["alatila"];
 
-      //tehd‰‰n selv‰kielinen tila/alatila
+      //tehd√§√§n selv√§kielinen tila/alatila
       require "../inc/laskutyyppi.inc";
 
-      if ($laskutyyppi == "Mit‰tˆity") {
+      if ($laskutyyppi == "Mit√§t√∂ity") {
         $fn1 = "<font class='error'>";
         $fn2 = "</font>";
       }
@@ -705,7 +705,7 @@ if ($ytunnus != '') {
           <input type='hidden' name='lasku_yhtio'     value = '$row[yhtio]'>
           <input type='hidden' name='tunnus'       value = '$row[tilaus]'>";
 
-      //  Pysyt‰‰n projektilla jos valitaan vain projekti
+      //  Pysyt√§√§n projektilla jos valitaan vain projekti
       if ($row["tila"] == "R" or $nippu > 0) {
         if ($nippu > 0) {
           echo "<input type='hidden' name='otunnus' value='$nippu'>";
@@ -729,7 +729,7 @@ if ($ytunnus != '') {
           <input type='hidden' name='ppl' value='$ppl'>
           <input type='hidden' name='kkl' value='$kkl'>
           <input type='hidden' name='vvl' value='$vvl'>
-          <input type='submit' value='".t("N‰yt‰ tilaus")."'>
+          <input type='submit' value='".t("N√§yt√§ tilaus")."'>
           </form></td>";
 
       echo "</tr>";
@@ -746,7 +746,7 @@ if ($ytunnus != '') {
 }
 
 if ((int) $asiakasid == 0 and (int) $toimittajaid == 0) {
-  // N‰ytet‰‰n muuten vaan sopivia tilauksia
+  // N√§ytet√§√§n muuten vaan sopivia tilauksia
 
   echo "<form name = 'asiaktilaus' action = 'asiakkaantilaukset.php' method = 'post'>
     <input type='hidden' name='lopetus' value='$lopetus'>

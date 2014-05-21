@@ -6,19 +6,19 @@ if (strpos($_SERVER['SCRIPT_NAME'], "karhu.php")  !== FALSE) {
 
 echo "<font class='head'>".t("Maksukehotukset")."</font><hr>";
 
-// vain n‰in monta p‰iv‰‰ sitten karhutut
-// laskut huomioidaan n‰kym‰sss‰
+// vain n√§in monta p√§iv√§√§ sitten karhutut
+// laskut huomioidaan n√§kym√§sss√§
 if (!isset($kpvm_aikaa)) {
   $kpvm_aikaa = 10;
 }
 
-// vain n‰in monta p‰iv‰‰ sitten er‰‰ntyneet
-// laskut huomioidaan n‰kym‰sss‰
+// vain n√§in monta p√§iv√§√§ sitten er√§√§ntyneet
+// laskut huomioidaan n√§kym√§sss√§
 if (!isset($lpvm_aikaa)) {
   $lpvm_aikaa = 7;
 }
 
-// n‰in monta kertaa karhutun j‰lkeen ehdotetaan asiakkaalle myyntikieltoa
+// n√§in monta kertaa karhutun j√§lkeen ehdotetaan asiakkaalle myyntikieltoa
 if (!isset($karhu_kertaa_myyntikielto)) {
   $karhu_kertaa_myyntikielto = 2;
 }
@@ -26,7 +26,7 @@ if (!isset($karhu_kertaa_myyntikielto)) {
 // jos jollain laskulla on kolmas tai useampi karhukierros menossa, asetetaan asiakas myyntikieltoon
 $ehdota_maksukielto = 0;
 
-// jos jollain laskulla on toinen tai useampi karhukierros menossa, voidaan l‰hett‰‰ karhu myˆs myyj‰n s‰hkˆpostiin (vain jos sellainen lˆytyy)
+// jos jollain laskulla on toinen tai useampi karhukierros menossa, voidaan l√§hett√§√§ karhu my√∂s myyj√§n s√§hk√∂postiin (vain jos sellainen l√∂ytyy)
 $ehdota_karhuemail_myyjalle = 0;
 $myyjalla_on_eposti = 0;
 
@@ -36,7 +36,7 @@ $query = "SELECT tunnus from avainsana where laji = 'KARHUVIESTI' and yhtio ='$y
 $res = pupe_query($query);
 
 if (mysql_num_rows($res) == 0) {
-    echo "<font class='error'>".t("Yhtiˆll‰ ei ole yht‰‰n maksukehotusviesti‰. Maksukehotuksia ei voida luoda").".</font><br>";
+    echo "<font class='error'>".t("Yhti√∂ll√§ ei ole yht√§√§n maksukehotusviesti√§. Maksukehotuksia ei voida luoda").".</font><br>";
     $tee = '';
 }
 
@@ -55,25 +55,25 @@ if ($tee == 'LAHETA') {
     $result = pupe_query($query);
   }
 
-  // kirjeen l‰hetyksen status
+  // kirjeen l√§hetyksen status
   $ekarhu_success = true;
 
   if (!empty($_POST['lasku_tunnus'])) {
     try {
-      // koitetaan l‰hett‰‰ eKirje sek‰ tulostaa
+      // koitetaan l√§hett√§√§ eKirje sek√§ tulostaa
       require ('paperikarhu.php');
     }
     catch (Exception $e) {
       $ekarhu_success = false;
-      echo "<font class='error'>".t("Ei voitu l‰hett‰‰ maksukehotusta eKirjeen‰, maksukehotuksen l‰hetys peruttiin").". ".t("VIRHE").": " . $e->getMessage() . "</font>";
+      echo "<font class='error'>".t("Ei voitu l√§hett√§√§ maksukehotusta eKirjeen√§, maksukehotuksen l√§hetys peruttiin").". ".t("VIRHE").": " . $e->getMessage() . "</font>";
     }
   }
   else {
-    echo "<font class='error'>".t("Et valinnut yht‰‰n laskua").".</font>";
+    echo "<font class='error'>".t("Et valinnut yht√§√§n laskua").".</font>";
     $ekarhu_success = false;
   }
 
-  // poistetaan karhuttu vain jos karhun l‰hetys onnistui,
+  // poistetaan karhuttu vain jos karhun l√§hetys onnistui,
   // muuten voidaan kokeilla samaa uudestaan!!!!!
   if ($ekarhu_success) {
     array_shift($karhuttavat);
@@ -116,12 +116,12 @@ if ($tee == "ALOITAKARHUAMINEN") {
         $maksuehtolista = " and lasku.maksuehto in ($maksuehdotrow[karhuttavat]) and lasku.valkoodi = '$factoringrow[valkoodi]'";
       }
       else {
-        echo t("Ei peritt‰vi‰ laskuja");
+        echo t("Ei peritt√§vi√§ laskuja");
         exit;
       }
     }
     else {
-      echo t("Valittu factoringsopimus ei lˆydy");
+      echo t("Valittu factoringsopimus ei l√∂ydy");
       exit;
     }
   }
@@ -137,7 +137,7 @@ if ($tee == "ALOITAKARHUAMINEN") {
       $maksuehtolista = " and lasku.maksuehto in ($maksuehdotrow[karhuttavat])";
     }
     else {
-      echo t("Ei peritt‰vi‰ laskuja");
+      echo t("Ei peritt√§vi√§ laskuja");
       exit;
     }
   }
@@ -217,7 +217,7 @@ if ($tee == "ALOITAKARHUAMINEN") {
     }
   }
   else {
-    echo "<font class='message'>".t("Ei peritt‰vi‰ asiakkaita")."!</font><br><br>";
+    echo "<font class='message'>".t("Ei peritt√§vi√§ asiakkaita")."!</font><br><br>";
     $tee = "";
   }
 }
@@ -226,12 +226,12 @@ if ($tee == "KARHUAKAIKKI") {
 
   foreach ($karhuttavat as $lasku_tunnus) {
     try {
-      // koitetaan l‰hett‰‰ eKirje sek‰ tulostaa
+      // koitetaan l√§hett√§√§ eKirje sek√§ tulostaa
       require ('paperikarhu.php');
     }
     catch (Exception $e) {
       $ekarhu_success = false;
-      echo "<font class='error'>Ei voitu l‰hett‰‰ karhua eKirjeen‰, karhuaminen peruttiin. Virhe: " . $e->getMessage() . "</font>";
+      echo "<font class='error'>Ei voitu l√§hett√§√§ karhua eKirjeen√§, karhuaminen peruttiin. Virhe: " . $e->getMessage() . "</font>";
     }
 
     unset($karhuviesti);
@@ -245,7 +245,7 @@ if ($tee == 'KARHUA' and isset($karhuttavat_cookiesta) and $karhuttavat_cookiest
 }
 
 if ($tee == 'KARHUA' and $karhuttavat[0] == "") {
-  echo "<font class='message'>".t("Kaikki asiakkaat k‰yty l‰pi")."!</font><br><br>";
+  echo "<font class='message'>".t("Kaikki asiakkaat k√§yty l√§pi")."!</font><br><br>";
   $tee = "";
 }
 
@@ -257,7 +257,7 @@ if ($tee == 'KARHUA')  {
             max(karhukierros.pvm) as kpvm,
             count(distinct karhu_lasku.ktunnus) as karhuttu,
             sum(if(karhukierros.tyyppi='T', 1, 0)) tratattu,
-            if(maksuehto.jv!='', '".t("J‰lkivaatimus")."' ,'') jv, lasku.yhtio_toimipaikka, lasku.valkoodi,
+            if(maksuehto.jv!='', '".t("J√§lkivaatimus")."' ,'') jv, lasku.yhtio_toimipaikka, lasku.valkoodi,
             concat_ws(' ', lasku.viesti, lasku.comments) comments,
             asiakas.myyntikielto
             FROM lasku
@@ -377,9 +377,9 @@ if ($tee == 'KARHUA')  {
   echo "</td><td valign='top' class='back'>";
 
   echo "<table>";
-  echo "<tr><th>".t("Edellinen maksukehotus v‰h").".</th><td>$kpvm_aikaa ".t("p‰iv‰‰ sitten").".</td></tr>";
-  echo "<tr><th>".t("Er‰p‰iv‰st‰ v‰h").".</th><td>$lpvm_aikaa ".t("p‰iv‰‰").".</td></tr>";
-  echo "<tr><th>".t("S‰hkˆposti")."</th><td>$asiakastiedot[karhu_email]</td></tr>";
+  echo "<tr><th>".t("Edellinen maksukehotus v√§h").".</th><td>$kpvm_aikaa ".t("p√§iv√§√§ sitten").".</td></tr>";
+  echo "<tr><th>".t("Er√§p√§iv√§st√§ v√§h").".</th><td>$lpvm_aikaa ".t("p√§iv√§√§").".</td></tr>";
+  echo "<tr><th>".t("S√§hk√∂posti")."</th><td>$asiakastiedot[karhu_email]</td></tr>";
   echo "<tr><td class='back'></td><td class='back'><br></td></tr>";
 
   $query = "SELECT GROUP_CONCAT(distinct liitostunnus) liitokset
@@ -401,7 +401,7 @@ if ($tee == 'KARHUA')  {
   $kaatosumma=$kaato["summa"];
   if (!$kaatosumma) $kaatosumma='0.00';
 
-  echo "<tr><th>".t("Kaatotilill‰")."</th><td>$kaatosumma</td></tr>";
+  echo "<tr><th>".t("Kaatotilill√§")."</th><td>$kaatosumma</td></tr>";
 
   echo "</table>";
   echo "</td></tr></table><br>";
@@ -411,15 +411,15 @@ if ($tee == 'KARHUA')  {
   echo "<td class='back'><input type='button' onclick='javascript:document.lahetaformi.submit();' value='".t('Tulosta paperille')."'></td>";
 
   if ($asiakastiedot["karhu_email"] != "") {
-    echo "<td class='back'><input type='button' onclick='javascript:document.lahetaformi.email_laheta.click();' value='".t('L‰het‰ s‰hkˆposti')."'></td>";
+    echo "<td class='back'><input type='button' onclick='javascript:document.lahetaformi.email_laheta.click();' value='".t('L√§het√§ s√§hk√∂posti')."'></td>";
   }
 
   if (isset($ekirje_config) and is_array($ekirje_config)) {
-    echo "<td class='back'><input type='button' onclick='document.lahetaformi.ekirje_laheta.click();' value='".t('L‰het‰ eKirje')."'></td>";
+    echo "<td class='back'><input type='button' onclick='document.lahetaformi.ekirje_laheta.click();' value='".t('L√§het√§ eKirje')."'></td>";
   }
 
   if ($yhtiorow["verkkolasku_lah"] == "maventa") {
-    echo "<td class='back'><input type='button' onclick='document.lahetaformi.maventa_laheta.click();' value='".t('L‰het‰ Maventaan')."'></td>";
+    echo "<td class='back'><input type='button' onclick='document.lahetaformi.maventa_laheta.click();' value='".t('L√§het√§ Maventaan')."'></td>";
   }
 
   echo "<td class='back'><input type='button' onclick='javascript:document.ohitaformi.submit();' value='".t("Ohita")."'></td>";
@@ -430,18 +430,18 @@ if ($tee == 'KARHUA')  {
   echo "<th>".t("Laskunpvm")."</th>";
   echo "<th>".t("Laskunro")."</th>";
   echo "<th>".t("Summa")."</th>";
-  echo "<th>".t("Er‰p‰iv‰")."</th>";
-  echo "<th>".t("Ik‰ p‰iv‰‰")."</th>";
+  echo "<th>".t("Er√§p√§iv√§")."</th>";
+  echo "<th>".t("Ik√§ p√§iv√§√§")."</th>";
   echo "<th>".t("Maksukehotuskerrat")."</th>";
   echo "<th>".t("Viimeisin maksukehotus")."</th>";
-  echo "<th>".t("Lis‰t‰‰n maksukehotukselle")."</th>";
+  echo "<th>".t("Lis√§t√§√§n maksukehotukselle")."</th>";
   echo "<th>".t("Myyntikielto")."</th>";
   echo "<th>".t("Viesti")."</th></tr>";
 
   $summmmma = 0;
   $valuutat = array();
 
-  // Pidet‰‰n karhuttavat filess‰
+  // Pidet√§√§n karhuttavat filess√§
   $karhuttavatfile = tempnam("/tmp", "karhu");
   file_put_contents($karhuttavatfile, serialize($karhuttavat));
   $karhuttavatfile = basename($karhuttavatfile);
@@ -495,7 +495,7 @@ if ($tee == 'KARHUA')  {
     echo "<td>$lasku[comments]</td>";
     echo "</tr>\n";
 
-    // jos yht‰k‰‰n laskua on karhuttu kolmeen kertaan, tarjotaan asiakkaan asettamista myyntikieltoon
+    // jos yht√§k√§√§n laskua on karhuttu kolmeen kertaan, tarjotaan asiakkaan asettamista myyntikieltoon
     if ($lasku["karhuttu"] > $karhu_kertaa_myyntikielto) {
       $ehdota_maksukielto = 1;
     }
@@ -516,7 +516,7 @@ if ($tee == 'KARHUA')  {
 
     $summmmma += $lasku["summa"];
 
-    // ker‰t‰‰n eri valuutat taulukkoon
+    // ker√§t√§√§n eri valuutat taulukkoon
     if (!in_array($lasku["valkoodi"], $valuutat)) {
       $valuutat[] = $lasku["valkoodi"];
     }
@@ -524,19 +524,19 @@ if ($tee == 'KARHUA')  {
 
   $summmmma -= $kaatosumma;
 
-  echo "<th colspan='2'>".t("Maksukehotuksella yhteens‰")."</th>";
+  echo "<th colspan='2'>".t("Maksukehotuksella yhteens√§")."</th>";
   echo "<th>".sprintf('%.2f', $summmmma)."</th>";
   echo "<td class='back'></td></tr>";
 
   echo "</table><br>";
 
   if ($ehdota_maksukielto) {
-    echo "<font class='error'><input type='checkbox' name = 'aseta_myyntikielto' value = '{$asiakastiedot["ytunnus"]}'> " . t("Asiakkaalla on v‰hint‰‰n %s kertaa karhuttu lasku. Aseta myyntikielto asiakkaille ytunnuksella", "", ($karhu_kertaa_myyntikielto + 1)).": {$asiakastiedot["ytunnus"]}</font>";
+    echo "<font class='error'><input type='checkbox' name = 'aseta_myyntikielto' value = '{$asiakastiedot["ytunnus"]}'> " . t("Asiakkaalla on v√§hint√§√§n %s kertaa karhuttu lasku. Aseta myyntikielto asiakkaille ytunnuksella", "", ($karhu_kertaa_myyntikielto + 1)).": {$asiakastiedot["ytunnus"]}</font>";
   }
 
   if ($ehdota_karhuemail_myyjalle and $myyjalla_on_eposti) {
     if ($ehdota_maksukielto) echo "<br>";
-    echo "<font class='message'><input type='checkbox' name = 'laheta_karhuemail_myyjalle' value = '{$myyjatiedot["eposti"]}'> " . t("L‰het‰ maksukehotus myˆs myyj‰n s‰hkˆpostiin").": {$myyjatiedot["eposti"]}</font>";
+    echo "<font class='message'><input type='checkbox' name = 'laheta_karhuemail_myyjalle' value = '{$myyjatiedot["eposti"]}'> " . t("L√§het√§ maksukehotus my√∂s myyj√§n s√§hk√∂postiin").": {$myyjatiedot["eposti"]}</font>";
   }
 
   echo "<table>";
@@ -553,16 +553,16 @@ if ($tee == 'KARHUA')  {
   echo "<td class='back'><input name='$kentta' type='submit' value='".t('Tulosta paperille')."'>";
 
   if ($asiakastiedot["karhu_email"] != "") {
-    echo "<input type='submit' name='email_laheta' value='".t('L‰het‰ s‰hkˆposti')."'>";
+    echo "<input type='submit' name='email_laheta' value='".t('L√§het√§ s√§hk√∂posti')."'>";
   }
 
-  // voiko l‰hett‰‰ eKirjeen?
+  // voiko l√§hett√§√§ eKirjeen?
   if (isset($ekirje_config) and is_array($ekirje_config)) {
-    echo "<input type='submit' name='ekirje_laheta' value='" . t('L‰het‰ eKirje') . "'>";
+    echo "<input type='submit' name='ekirje_laheta' value='" . t('L√§het√§ eKirje') . "'>";
   }
 
   if ($yhtiorow["verkkolasku_lah"] == "maventa") {
-    echo "<input type='submit' name='maventa_laheta' value='" . t('L‰het‰ Maventaan') . "'>";
+    echo "<input type='submit' name='maventa_laheta' value='" . t('L√§het√§ Maventaan') . "'>";
   }
 
   echo "</td></form>";
@@ -584,7 +584,7 @@ if ($tee == "") {
 
   echo "<form method='post'>";
   echo "<input type='hidden' name='tee' value='ALOITAKARHUAMINEN'>";
-  echo t("Syˆt‰ ytunnus jos haluat l‰hett‰‰ maksukehotuksen tietylle asiakkaalle").".<br>".t("J‰t‰ kentt‰ tyhj‰ksi jos haluat aloittaa ensimm‰isest‰ asiakkaasta").".<br><br>";
+  echo t("Sy√∂t√§ ytunnus jos haluat l√§hett√§√§ maksukehotuksen tietylle asiakkaalle").".<br>".t("J√§t√§ kentt√§ tyhj√§ksi jos haluat aloittaa ensimm√§isest√§ asiakkaasta").".<br><br>";
 
   echo "<table>";
 
@@ -609,7 +609,7 @@ if ($tee == "") {
     echo "<input type='hidden' name='ktunnus' value='0'>";
   }
 
-  echo "<tr><th>".t("L‰het‰ maksukehotuksia vain maahan")."</th>";
+  echo "<tr><th>".t("L√§het√§ maksukehotuksia vain maahan")."</th>";
   echo "<td><select name='lasku_maa'>";
   echo "<option value=''>".t("Ei maavalintaa")."</option>";
 
@@ -640,7 +640,7 @@ if ($tee == "") {
             ORDER BY nimi";
   $meapu = pupe_query($apuqu);
 
-  echo "<tr><th>".t("Yhteyshenkilˆ")."</th>";
+  echo "<tr><th>".t("Yhteyshenkil√∂")."</th>";
   echo "<td><select name='yhteyshenkilo'>";
 
   while ($row = mysql_fetch_assoc($meapu)) {

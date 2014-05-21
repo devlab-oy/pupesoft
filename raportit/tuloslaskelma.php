@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta JA master kantaa *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta JA master kantaa *//
 $useslave = 1;
 
 if (isset($_POST["teetiedosto"])) {
@@ -13,7 +13,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "tuloslaskelma.php")  !== FALSE) {
 }
 else {
   if ((int) $mul_proj[0] == 0) {
-    die("<font class='error'>ƒl‰ edes yrit‰!</font>");
+    die("<font class='error'>√Ñl√§ edes yrit√§!</font>");
   }
 }
 
@@ -60,7 +60,7 @@ else {
 
     if ($tyyppi == 4) {
       $sisulk = "sisainen";
-      $sisulk_txt = "sis‰inen";
+      $sisulk_txt = "sis√§inen";
     }
     else {
       $sisulk = "ulkoinen";
@@ -80,7 +80,7 @@ else {
       $tililisa = " and left(tili.tilino, 1) <= 2 ";
     }
 
-    // Katsotaan, ett‰ kaikilla tileill‰ on tasot kunnossa
+    // Katsotaan, ett√§ kaikilla tileill√§ on tasot kunnossa
     $query = "SELECT tili.*, taso.tunnus tasotunnus
               FROM tili
               LEFT JOIN taso ON taso.yhtio=tili.yhtio and tili.{$sisulk}_taso=taso.taso
@@ -93,7 +93,7 @@ else {
 
       enable_ajax();
 
-      echo "<br><font class='error'>".t("HUOM")."!  ".t("Sinulla on %s tili‰ joilta puuttuu tai on virheellinen %s taso", "", mysql_num_rows($result), $sisulk_txt)."!<br>".t("Jos n‰ill‰ tileill‰ on tapahtumia, niin tapahtumat eiv‰t n‰y laskelmassa").".</font><br><a href=\"javascript:toggleGroup('eee')\">".t("N‰yt‰ / Piilota")." ".t("tilit")."</a><br><br>";
+      echo "<br><font class='error'>".t("HUOM")."!  ".t("Sinulla on %s tili√§ joilta puuttuu tai on virheellinen %s taso", "", mysql_num_rows($result), $sisulk_txt)."!<br>".t("Jos n√§ill√§ tileill√§ on tapahtumia, niin tapahtumat eiv√§t n√§y laskelmassa").".</font><br><a href=\"javascript:toggleGroup('eee')\">".t("N√§yt√§ / Piilota")." ".t("tilit")."</a><br><br>";
 
       if ($toim_tee != "") {
         echo "<div id='eee' style='display:block'>";
@@ -118,12 +118,12 @@ else {
 
   if ($tltee == "aja") {
     if ($plvv * 12 + $plvk > $alvv * 12 + $alvk) {
-      echo "<font class='error'>".t("Alkukausi on p‰‰ttymiskauden j‰lkeen")."</font><br>";
+      echo "<font class='error'>".t("Alkukausi on p√§√§ttymiskauden j√§lkeen")."</font><br>";
       $tltee = '';
     }
   }
 
-  // tehd‰‰n k‰yttˆliittym‰, n‰ytet‰‰n aina
+  // tehd√§√§n k√§ytt√∂liittym√§, n√§ytet√§√§n aina
   $sel = array(4 => "", 3 => "", "T" => "", 1 => "", 2 => "");
   if ($tyyppi != "") $sel[$tyyppi] = "SELECTED";
 
@@ -138,7 +138,7 @@ else {
       <td>";
 
   echo "  <select name = 'tyyppi'>
-      <option $sel[4] value='4'>".t("Sis‰inen tuloslaskelma")."</option>
+      <option $sel[4] value='4'>".t("Sis√§inen tuloslaskelma")."</option>
       <option $sel[3] value='3'>".t("Ulkoinen tuloslaskelma")."</option>
       <option $sel[T] value='T'>".t("Tase")."</option>
       <option $sel[1] value='1'>".t("Vastaavaa")." (".t("Varat").")</option>
@@ -304,7 +304,7 @@ else {
 
   echo "<tr><th valign='top'>".t("Lukujen tarkkuus")."</th>
       <td><select name='tarkkuus'>
-        <option $sel[1]   value='1'>".t("ƒl‰ jaa lukuja")."</option>
+        <option $sel[1]   value='1'>".t("√Ñl√§ jaa lukuja")."</option>
         <option $sel[1000] value='1000'>".t("Jaa 1000:lla")."</option>
         <option $sel[10000] value='10000'>".t("Jaa 10 000:lla")."</option>
         <option $sel[100000] value='100000'>".t("Jaa 100 000:lla")."</option>
@@ -328,14 +328,14 @@ else {
   $kausi = array("VY" => "", "KY" => "", "V" => "", "K" => "", "Y" => "");
   $kausi[$kaikkikaudet] = "SELECTED";
 
-  echo "<tr><th valign='top'>".t("N‰kym‰")."</th>";
+  echo "<tr><th valign='top'>".t("N√§kym√§")."</th>";
 
   echo "<td><select name='kaikkikaudet'>
-      <option value='VY' $kausi[VY]>".t("N‰yt‰ vain viimeisin kausi ja yhteens‰summa")."</option>
-      <option value='KY' $kausi[KY]>".t("N‰yt‰ kaikki kaudet ja yhteens‰summa")."</option>
-      <option value='V'  $kausi[V]>".t("N‰yt‰ vain viimeisin kausi")."</option>
-      <option value='K'  $kausi[K]>".t("N‰yt‰ kaikki kaudet")."</option>
-      <option value='Y'  $kausi[Y]>".t("N‰yt‰ vain yhteens‰summa")."</option>
+      <option value='VY' $kausi[VY]>".t("N√§yt√§ vain viimeisin kausi ja yhteens√§summa")."</option>
+      <option value='KY' $kausi[KY]>".t("N√§yt√§ kaikki kaudet ja yhteens√§summa")."</option>
+      <option value='V'  $kausi[V]>".t("N√§yt√§ vain viimeisin kausi")."</option>
+      <option value='K'  $kausi[K]>".t("N√§yt√§ kaikki kaudet")."</option>
+      <option value='Y'  $kausi[Y]>".t("N√§yt√§ vain yhteens√§summa")."</option>
       </select>
       </td></tr>";
 
@@ -351,10 +351,10 @@ else {
   $konsel[$konsernirajaus] = "SELECTED";
 
   echo "<td><select name='konsernirajaus' DISABLED>
-      <option value=''>".t("N‰ytet‰‰n kaikki tiliˆinnit")."</option>
-      <option value='AT' $konsel[AT]>".t("N‰ytet‰‰n konserniasiakkaiden ja konsernitoimittajien tiliˆinnit")."</option>
-      <option value='T'  $konsel[T]>".t("N‰ytet‰‰n konsernitoimitajien tiliˆinnit")."</option>
-      <option value='A'  $konsel[A]>".t("N‰ytet‰‰n konserniasiakkaiden tiliˆinnit")."</option>
+      <option value=''>".t("N√§ytet√§√§n kaikki tili√∂innit")."</option>
+      <option value='AT' $konsel[AT]>".t("N√§ytet√§√§n konserniasiakkaiden ja konsernitoimittajien tili√∂innit")."</option>
+      <option value='T'  $konsel[T]>".t("N√§ytet√§√§n konsernitoimitajien tili√∂innit")."</option>
+      <option value='A'  $konsel[A]>".t("N√§ytet√§√§n konserniasiakkaiden tili√∂innit")."</option>
       </select>
       HUOM: Ominaisuus huollossa!</td></tr>";
 
@@ -373,7 +373,7 @@ else {
   echo "<br>&nbsp;<input type='checkbox' name='sarakebox[KOHDE]' $bchek[KOHDE]> ".t("Kohteittain");
   echo "<br>&nbsp;<input type='checkbox' name='sarakebox[PROJEKTI]' $bchek[PROJEKTI]> ".t("Projekteittain");
   echo "<br>&nbsp;<input type='checkbox' name='sarakebox[ASOSASTO]' $bchek[ASOSASTO] DISABLED> ".t("Asiakasosastoittain");
-  echo "<br>&nbsp;<input type='checkbox' name='sarakebox[ASRYHMA]' $bchek[ASRYHMA] DISABLED> ".t("Asiakasryhmitt‰in");
+  echo "<br>&nbsp;<input type='checkbox' name='sarakebox[ASRYHMA]' $bchek[ASRYHMA] DISABLED> ".t("Asiakasryhmitt√§in");
   echo "</td></tr>";
 
   if ($teepdf != "") $vchek = "CHECKED";
@@ -394,7 +394,7 @@ else {
 
   require ("tilauskasittely/monivalintalaatikot.inc");
 
-  echo "<br><input type = 'submit' value = '".t("N‰yt‰")."'></form><br><br>";
+  echo "<br><input type = 'submit' value = '".t("N√§yt√§")."'></form><br><br>";
 
   if ($tltee == "aja") {
     // Desimaalit
@@ -438,8 +438,8 @@ else {
       $luku_kerroin = -1;
     }
     else {
-      // Sis‰inen tuloslaskelma
-      $otsikko   = "Sis‰inen tuloslaskelma";
+      // Sis√§inen tuloslaskelma
+      $otsikko   = "Sis√§inen tuloslaskelma";
       $kirjain   = "S";
       $aputyyppi   = 3;
       $tilikarttataso = "sisainen_taso";
@@ -470,14 +470,14 @@ else {
       $alvp = substr($tkrow['tilikausi_loppu'], 8, 2);
     }
 
-    // Tarkistetaan viel‰ p‰iv‰m‰‰r‰t
+    // Tarkistetaan viel√§ p√§iv√§m√§√§r√§t
     if (!checkdate($plvk, $plvp, $plvv)) {
-      echo "<font class='error'>".t("VIRHE: Alkup‰iv‰m‰‰r‰ on virheellinen")."!</font><br>";
+      echo "<font class='error'>".t("VIRHE: Alkup√§iv√§m√§√§r√§ on virheellinen")."!</font><br>";
       $tltee = "";
     }
 
     if (!checkdate($alvk, $alvp, $alvv)) {
-      echo "<font class='error'>".t("VIRHE: Loppup‰iv‰m‰‰r‰ on virheellinen")."!</font><br>";
+      echo "<font class='error'>".t("VIRHE: Loppup√§iv√§m√§√§r√§ on virheellinen")."!</font><br>";
       $tltee = "";
     }
 
@@ -497,10 +497,10 @@ else {
 
     // Ajetaan rapotti kustannuspaikoittain
     if (isset($sarakebox["KUSTP"]) and $sarakebox["KUSTP"] != "") {
-      // Kun tehd‰‰n monta saraketta niin ei joinata budjettiin
+      // Kun tehd√§√§n monta saraketta niin ei joinata budjettiin
       $vertailubu = "";
 
-      // N‰it‰ tarvitaan kun piirret‰‰n headerit
+      // N√§it√§ tarvitaan kun piirret√§√§n headerit
       $query = "SELECT tunnus, concat_ws(' - ', if (koodi='', NULL, koodi), nimi) nimi
                 FROM kustannuspaikka
                 WHERE yhtio   = '$kukarow[yhtio]'
@@ -518,10 +518,10 @@ else {
 
     // Ajetaan rapotti kohteittain
     if (isset($sarakebox["KOHDE"]) and $sarakebox["KOHDE"] != "") {
-      // Kun tehd‰‰n monta saraketta niin ei joinata budjettiin
+      // Kun tehd√§√§n monta saraketta niin ei joinata budjettiin
       $vertailubu = "";
 
-      // N‰it‰ tarvitaan kun piirret‰‰n headerit
+      // N√§it√§ tarvitaan kun piirret√§√§n headerit
       $query = "SELECT tunnus, concat_ws(' - ', if (koodi='', NULL, koodi), nimi) nimi
                 FROM kustannuspaikka
                 WHERE yhtio   = '$kukarow[yhtio]'
@@ -539,10 +539,10 @@ else {
 
     // Ajetaan rapotti projekteittain
     if (isset($sarakebox["PROJEKTI"]) and $sarakebox["PROJEKTI"] != "") {
-      // Kun tehd‰‰n monta saraketta niin ei joinata budjettiin
+      // Kun tehd√§√§n monta saraketta niin ei joinata budjettiin
       $vertailubu = "";
 
-      // N‰it‰ tarvitaan kun piirret‰‰n headerit
+      // N√§it√§ tarvitaan kun piirret√§√§n headerit
       $query = "SELECT tunnus, concat_ws(' - ', if (koodi='', NULL, koodi), nimi) nimi
                 FROM kustannuspaikka
                 WHERE yhtio   = '$kukarow[yhtio]'
@@ -558,16 +558,16 @@ else {
       $groupsarake .= "'projektit::',tiliointi.projekti,'#!#',";
     }
 
-    // Tarvitaan lasku/asiakasjoini jos rajataan tai ajetaan raportti asiakasosatoittain tai asiakasryhmitt‰in
+    // Tarvitaan lasku/asiakasjoini jos rajataan tai ajetaan raportti asiakasosatoittain tai asiakasryhmitt√§in
     if ((isset($lisa) and strpos($lisa, "asiakas.") !== FALSE) or (isset($sarakebox["ASOSASTO"]) and $sarakebox["ASOSASTO"] != "") or (isset($sarakebox["ASRYHMA"]) and $sarakebox["ASRYHMA"] != "")) {
-      // Kun tehd‰‰n asiakas tai toimittajajoini niin ei vertailla budjettiin koska siin‰ ei olisi mit‰‰n j‰rke‰
+      // Kun tehd√§√§n asiakas tai toimittajajoini niin ei vertailla budjettiin koska siin√§ ei olisi mit√§√§n j√§rke√§
       $vertailubu = "";
 
       $laskujoini = " JOIN lasku ON tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus ";
       $asiakasjoini = " JOIN asiakas ON lasku.yhtio = asiakas.yhtio and (lasku.liitostunnus = asiakas.tunnus or (tiliointi.liitos = 'A' and tiliointi.liitostunnus = asiakas.tunnus)) ";
 
       if (isset($sarakebox["ASOSASTO"]) and $sarakebox["ASOSASTO"] != "") {
-        // N‰it‰ tarvitaan kun piirret‰‰n headerit
+        // N√§it√§ tarvitaan kun piirret√§√§n headerit
         $vresult = t_avainsana("ASIAKASOSASTO");
 
         while ($vrow = mysql_fetch_assoc($vresult)) {
@@ -578,7 +578,7 @@ else {
       }
 
       if (isset($sarakebox["ASRYHMA"]) and $sarakebox["ASRYHMA"] != "") {
-        // N‰it‰ tarvitaan kun piirret‰‰n headerit
+        // N√§it√§ tarvitaan kun piirret√§√§n headerit
         $vresult = t_avainsana("ASIAKASRYHMA");
 
         while ($vrow = mysql_fetch_assoc($vresult)) {
@@ -598,7 +598,7 @@ else {
 
     // Tarvitaan lasku/asiakasjoini/toimittajajoini jos rajataan tai ajetaan vain konserniasiakkaista tai konsernitoimittajista
     if (isset($konsernirajaus) and $konsernirajaus != "") {
-      // Kun tehd‰‰n asiakas tai toimittajajoini niin ei vertailla budjettiin koska siin‰ ei olisi mit‰‰n j‰rke‰
+      // Kun tehd√§√§n asiakas tai toimittajajoini niin ei vertailla budjettiin koska siin√§ ei olisi mit√§√§n j√§rke√§
       $vertailubu = "";
 
       $laskujoini = " JOIN lasku ON tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus ";
@@ -627,7 +627,7 @@ else {
 
   if ($tltee == "aja") {
 
-    // T‰ss‰ voidaan vain setata ei_yhteens‰ muuttuja, muut tehd‰‰n myˆhemmin
+    // T√§ss√§ voidaan vain setata ei_yhteens√§ muuttuja, muut tehd√§√§n my√∂hemmin
     if ($kaikkikaudet == "KY" or $kaikkikaudet == "VY" or $kaikkikaudet == "Y") {
       $ei_yhteensa = "";
     }
@@ -635,7 +635,7 @@ else {
       $ei_yhteensa = "JOO";
     }
 
-    // Haetaan yhtiˆn tulostili
+    // Haetaan yhti√∂n tulostili
     $query = "SELECT tunnus, tilino
               FROM tili
               WHERE yhtio = '{$kukarow['yhtio']}'
@@ -646,7 +646,7 @@ else {
       $tulostilirow = mysql_fetch_assoc($tulostilires);
     }
 
-    // Tehd‰‰nkˆ linkit p‰iv‰kirjaan
+    // Tehd√§√§nk√∂ linkit p√§iv√§kirjaan
     $query = "SELECT yhtio
               FROM oikeu
               WHERE yhtio = '$kukarow[yhtio]'
@@ -677,7 +677,7 @@ else {
       $totalalku  = ($plvv-1)."-".$plvk."-".$plvp;
 
       if ((int) $alvk == 2 and (int) $alvp == 29 and date("t", mktime(0, 0, 0, $alvk, 1, $alvv)) == 29) {
-        // onko t‰m‰ vuosi karkausvuosi?
+        // onko t√§m√§ vuosi karkausvuosi?
         $totalloppued = ($alvv-1)."-".$alvk."-28";
       }
       elseif ((int) $alvk == 2 and (int) $alvp == 28 and date("t", mktime(0, 0, 0, $alvk, 1, ($alvv-1))) == 29) {
@@ -722,7 +722,7 @@ else {
         if ($i == $endmonth) {
 
           if ((int) $alvk == 2 and (int) $alvp == 29 and date("t", mktime(0, 0, 0, $alvk, 1, $alvv)) == 29) {
-            // onko t‰m‰ vuosi karkausvuosi?
+            // onko t√§m√§ vuosi karkausvuosi?
             $loppu_ed = ($alvv-1)."-".$alvk."-28";
           }
           elseif ((int) $alvk == 2 and (int) $alvp == 28 and date("t", mktime(0, 0, 0, $alvk, 1, ($alvv-1))) == 29) {
@@ -759,7 +759,7 @@ else {
     $vkaed = date("Y/m", mktime(0, 0, 0, $plvk, 1, $plvv-1));
     $vkled = date("Y/m", mktime(0, 0, 0, $alvk+1, 0, $alvv-1));
 
-    // Yhteens‰otsikkomukaan
+    // Yhteens√§otsikkomukaan
     if ($ei_yhteensa == "") {
       $alkuquery1 .= " ,sum(if (tiliointi.tapvm >= '$annettualk' and tiliointi.tapvm <= '$totalloppu', tiliointi.summa, 0)) '$vka - $vkl' \n";
       $alkuquery2 .= " ,sum(if (tiliointi.tapvm >= '$annettualk' and tiliointi.tapvm <= '$totalloppu', tiliointi.summa, 0)) '$vka - $vkl' \n";
@@ -785,7 +785,7 @@ else {
       $tilijoini = "  JOIN tili ON tiliointi.yhtio=tili.yhtio and tiliointi.tilino=tili.tilino";
     }
 
-    // Haetaan kaikki tiliˆinnit
+    // Haetaan kaikki tili√∂innit
     $query = "SELECT tiliointi.tilino, $groupsarake groupsarake, $alkuquery1
               FROM tiliointi USE INDEX (yhtio_tapvm_tilino)
               $laskujoini
@@ -847,7 +847,7 @@ else {
         $tulosres = pupe_query($query);
 
         while ($tulosrow = mysql_fetch_assoc($tulosres)) {
-          // Jos tiliˆintej‰ ei ole, niin laitetaan tulos suoraan t‰h‰n, muuten summataan yhteen myˆhemmin
+          // Jos tili√∂intej√§ ei ole, niin laitetaan tulos suoraan t√§h√§n, muuten summataan yhteen my√∂hemmin
           if (!isset($tilioinnit[(string) $tulostilirow["tilino"]][(string) $tulosrow["groupsarake"]])) {
             $tilioinnit[(string) $tulostilirow["tilino"]][(string) $tulosrow["groupsarake"]] = $tulosrow;
           }
@@ -888,14 +888,14 @@ else {
 
     while ($tasorow = mysql_fetch_assoc($tasores)) {
 
-      // mill‰ tasolla ollaan (1,2,3,4,5,6)
+      // mill√§ tasolla ollaan (1,2,3,4,5,6)
       $tasoluku = strlen($tasorow["taso"]);
 
-      // tasonimi talteen (rightp‰dd‰t‰‰n ÷:ll‰, niin saadaan oikeaan j‰rjestykseen)
-      $apusort = str_pad($tasorow["taso"], 20, "÷");
+      // tasonimi talteen (rightp√§dd√§t√§√§n √ñ:ll√§, niin saadaan oikeaan j√§rjestykseen)
+      $apusort = str_pad($tasorow["taso"], 20, "√ñ");
       $tasonimi[$apusort] = $tasorow["nimi"];
 
-      // Jos tasolla on oletusarvo per kk. Esim poistot, jotka kirjataan vasta tilinp‰‰tˆksess‰
+      // Jos tasolla on oletusarvo per kk. Esim poistot, jotka kirjataan vasta tilinp√§√§t√∂ksess√§
       if ($tasorow["oletusarvo"] != 0) {
         $oletusarvo[$tasorow["taso"]] = $tasorow["oletusarvo"];
       }
@@ -941,13 +941,13 @@ else {
                 $summa[$kausi][$taso[$i]][(string) $sarake] = $tilirow_sum[$kausi];
               }
               else {
-                // Summataan kaikkia pienempi‰ summaustasoja
+                // Summataan kaikkia pienempi√§ summaustasoja
                 for ($i = $tasoluku - 1; $i >= 0; $i--) {
                   // Summat per kausi/taso
                   if (isset($summa[$kausi][$taso[$i]][(string) $sarake])) $summa[$kausi][$taso[$i]][(string) $sarake] += $tilirow_sum[$kausi];
                   else $summa[$kausi][$taso[$i]][(string) $sarake] = $tilirow_sum[$kausi];
 
-                  //Onko t‰m‰ yhtiˆn tulostili? Jos on niin summataan tulos mukaan
+                  //Onko t√§m√§ yhti√∂n tulostili? Jos on niin summataan tulos mukaan
                   if (isset($tulokset[$sarake][$kausi]) and ($tilirow["tunnus"] == $yhtiorow["tilikauden_tulos"])) {
                     $summa[$kausi][$taso[$i]][(string) $sarake] += $tulokset[$sarake][$kausi];
                   }
@@ -960,7 +960,7 @@ else {
                 if (isset($tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake])) $tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake] += $tilirow_sum[$kausi];
                 else $tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake] = $tilirow_sum[$kausi];
 
-                // Onko t‰m‰ yhtiˆn tulostili? Jos on niin summataan tulos mukaan
+                // Onko t√§m√§ yhti√∂n tulostili? Jos on niin summataan tulos mukaan
                 if (isset($tulokset[$sarake][$kausi]) and ($tilirow["tunnus"] == $yhtiorow["tilikauden_tulos"])) {
                   $tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake] += $tulokset[$sarake][$kausi];
                 }
@@ -970,7 +970,7 @@ else {
         }
       }
       else {
-        // vaikka ei ois yht‰‰n tili‰ niin voi olla, ett‰ budjetti on syˆtetty
+        // vaikka ei ois yht√§√§n tili√§ niin voi olla, ett√§ budjetti on sy√∂tetty
         $tilirow_summat = $budjetit[(string) $tasorow["taso"]];
 
         foreach ($tilirow_summat as $sarake => $tilirow_sum) {
@@ -985,22 +985,22 @@ else {
         }
       }
 
-      // Summataan kaikkia pienempi‰ summaustasoja sijoittaen puuttuvat oletusarvot
-      $summattavakausi = array(); //T‰‰ll‰ on summa, jota summataan ylˆs
-      $summattavataso = ''; //T‰‰ll‰ on oletusarvon taso
-      $summattavaluku = 0; //T‰‰ll‰ on tason oletusarvo
+      // Summataan kaikkia pienempi√§ summaustasoja sijoittaen puuttuvat oletusarvot
+      $summattavakausi = array(); //T√§√§ll√§ on summa, jota summataan yl√∂s
+      $summattavataso = ''; //T√§√§ll√§ on oletusarvon taso
+      $summattavaluku = 0; //T√§√§ll√§ on tason oletusarvo
       $summattavaindeksi = $tasoluku -1;
       $kumulointikausi = $vka . " - " . $vkl;
 
       if (isset($oletusarvo[$taso[$summattavaindeksi]])) {
-        //echo "Oletus lˆytyi " .  $taso[$summattavaindeksi] ."<br>";
+        //echo "Oletus l√∂ytyi " .  $taso[$summattavaindeksi] ."<br>";
         $summattavataso = $taso[$summattavaindeksi];
         $summattavaluku = $oletusarvo[$taso[$summattavaindeksi]];
 
         foreach ($sarakkeet as $sarake) {
           foreach ($kaudet as $kausi) {
             if (substr($kausi,0,4) != "budj") {
-              //K‰ytet‰‰n oletusarvo, jos alkuper‰isen tason arvo on 0
+              //K√§ytet√§√§n oletusarvo, jos alkuper√§isen tason arvo on 0
               if ((isset($summa[$kausi][$taso[$summattavaindeksi]][(string) $sarake]) and $summa[$kausi][$taso[$summattavaindeksi]][(string) $sarake] == 0) or !isset($summa[$kausi][$taso[$summattavaindeksi]][(string) $sarake])) {
 
                 if ($kausi != $vka." - ".$vkl and $kausi != $vkaed." - ".$vkled and $kausi >= $vka) {
@@ -1017,7 +1017,7 @@ else {
                     $summa[$kumulointikausi][$taso[$i]][(string) $sarake]  += $summattavaluku;
                   }
 
-                  //Onko t‰m‰ yhtiˆn tulostili? Jos on niin summataan tulos mukaan
+                  //Onko t√§m√§ yhti√∂n tulostili? Jos on niin summataan tulos mukaan
                   if (isset($tulokset[$sarake][$kausi]) and $tilirow["tunnus"] == $yhtiorow["tilikauden_tulos"]) {
                     $summa[$kausi][$taso[$i]][(string) $sarake] += $tulokset[$sarake][$kausi];
                   }
@@ -1061,7 +1061,7 @@ else {
       $alkukausi = 0;
     }
     else {
-      // vain yhteens‰
+      // vain yhteens√§
       $alkukausi = count($kaudet)-1;
 
       if ($vertailued != "" and $vertailubu != ""){
@@ -1124,26 +1124,26 @@ else {
     $rivit_px = array();
     $px = 0;
 
-    // loopataan tasot l‰pi
+    // loopataan tasot l√§pi
     foreach ($tasonimi as $key_c => $value) {
 
       $px++;
 
-      $key = str_replace("÷", "", $key_c); // ÷-kirjaimet pois
+      $key = str_replace("√ñ", "", $key_c); // √ñ-kirjaimet pois
 
       // tulostaan rivi vain jos se kuuluu rajaukseen
       if (strlen($key) <= $rtaso or $rtaso == "TILI") {
 
         $class = "";
 
-        // laitetaan ykkˆs ja kakkostason rivit tummalla selkeyden vuoksi
+        // laitetaan ykk√∂s ja kakkostason rivit tummalla selkeyden vuoksi
         if (strlen($key) < 3 and $rtaso > 2) $class = "tumma";
 
         $rivi = "<tr class='aktiivi'>";
 
         if ($toim == "TASOMUUTOS") {
           $rivi .= "<td class='back' nowrap><a href='?tasomuutos=TRUE&taso=$key&kirjain=$kirjain&tee=muuta&lopetus=$lopetus'>$key</a></td>";
-          $rivi .= "<td class='back' nowrap><a href='?tasomuutos=TRUE&taso=$key&kirjain=$kirjain&edtaso=$edkey&tee=lisaa&lopetus=$lopetus'>".t("Lis‰‰ taso tasoon")." $key</a></td>";
+          $rivi .= "<td class='back' nowrap><a href='?tasomuutos=TRUE&taso=$key&kirjain=$kirjain&edtaso=$edkey&tee=lisaa&lopetus=$lopetus'>".t("Lis√§√§ taso tasoon")." $key</a></td>";
         }
 
         $tilirivi   = "";
@@ -1239,7 +1239,7 @@ else {
               $apu = ""; // nollat spaseiks
             }
             else {
-              $tulos++; // summaillaan t‰t‰ jos meill‰ oli rivill‰ arvo niin osataan tulostaa
+              $tulos++; // summaillaan t√§t√§ jos meill√§ oli rivill√§ arvo niin osataan tulostaa
             }
 
             if (is_numeric($apu)) {
@@ -1258,7 +1258,7 @@ else {
 
         $rivi .= "</tr>\n";
 
-        // kakkostason j‰lkeen aina yks tyhj‰ rivi.. paitsi jos otetaan vain kakkostason raportti
+        // kakkostason j√§lkeen aina yks tyhj√§ rivi.. paitsi jos otetaan vain kakkostason raportti
         if (strlen($key) == 2 and ($rtaso > 2 or $rtaso == "TILI")) {
           $rivi .= "<tr><td class='back'>&nbsp;</td></tr>";
 
@@ -1465,7 +1465,7 @@ else {
       alku();
     }
 
-    // Kirjoitetaan exceli ja/tai pdf:‰
+    // Kirjoitetaan exceli ja/tai pdf:√§
     if ((isset($teepdf) and $teepdf == "OK") or (isset($teexls) and $teexls == "OK")) {
 
       $excelrivi = 1;
@@ -1513,7 +1513,7 @@ else {
     }
 
     if (isset($teepdf) and $teepdf == "OK") {
-      //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+      //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
       list($usec, $sec) = explode(' ', microtime());
       mt_srand((float) $sec + ((float) $usec * 100000));
       $pdffilenimi = "Tuloslaskelma-".md5(uniqid(mt_rand(), true)).".pdf";
@@ -1528,7 +1528,7 @@ else {
       echo "<form method='post' class='multisubmit'>";
       echo "<input type='hidden' name='toim' value='$toim'>";
       echo "<input type='hidden' name='teetiedosto' value='lataa_tiedosto'>";
-      // poistetaan v‰lilyˆnti
+      // poistetaan v√§lily√∂nti
       $otsikko = str_replace(" ","_",$otsikko);
       echo "<input type='hidden' name='kaunisnimi' value='$otsikko.pdf'>";
       echo "<input type='hidden' name='tmpfilenimi' value='$pdffilenimi'>";
@@ -1545,7 +1545,7 @@ else {
       echo "<form method='post' class='multisubmit'>";
       echo "<input type='hidden' name='toim' value='$toim'>";
       echo "<input type='hidden' name='teetiedosto' value='lataa_tiedosto'>";
-      // poistetaan v‰lilyˆnti
+      // poistetaan v√§lily√∂nti
       $otsikko = str_replace(" ","_",$otsikko);
       echo "<input type='hidden' name='kaunisnimi' value='$otsikko.xlsx'>";
       echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";

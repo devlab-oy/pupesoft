@@ -19,7 +19,7 @@ $sres  = mysql_query($query) or pupe_error($query);
 $srow  = mysql_fetch_array($sres);
 $ennakkopoistot  = $srow[0];
 
-//j‰lkitoimituksessa olevat
+//j√§lkitoimituksessa olevat
 $query = "SELECT sum(jt) jt, lasku.ytunnus ytunnus
           FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus), lasku use index (PRIMARY)
           WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -39,7 +39,7 @@ $jtssa = "";
 $jtsum = 0;
 
 while($jsrow  = mysql_fetch_array($jsres)) {
-  $jtssa .= t("HUOM: Asiakkaalle")." $jsrow[ytunnus] ".t("on ennaltavarattu")." $jsrow[jt] ".t("kpl t‰t‰ tuotetta")."!<br>";
+  $jtssa .= t("HUOM: Asiakkaalle")." $jsrow[ytunnus] ".t("on ennaltavarattu")." $jsrow[jt] ".t("kpl t√§t√§ tuotetta")."!<br>";
   $jtsum += $jsrow["jt"];
 }
 
@@ -47,7 +47,7 @@ while($jsrow  = mysql_fetch_array($jsres)) {
 $query = "select * from tuotepaikat where tuoteno='$tuotenumero' and yhtio='$kukarow[yhtio]' and hyllyalue='$hyllyalue' and hyllynro='$hyllynro' and hyllytaso='$hyllytaso' and hyllyvali='$hyllyvali'";
 $tpres = mysql_query($query) or pupe_error($query);
 
-// jos pyydetylt‰ tuotepaikalta ei lˆydy saldoa laitetaan nollaksi
+// jos pyydetylt√§ tuotepaikalta ei l√∂ydy saldoa laitetaan nollaksi
 if (mysql_num_rows($tpres)==0) {
   $saldo = 0;
 }

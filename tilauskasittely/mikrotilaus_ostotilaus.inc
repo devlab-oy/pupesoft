@@ -13,7 +13,7 @@ if ($tee == "file") {
     }
 
     if ($_FILES['userfile']['size']==0) {
-      die ("<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font>");
+      die ("<font class='error'><br>".t("Tiedosto on tyhj√§")."!</font>");
     }
 
     $excelrivi = pupeFileReader($_FILES['userfile']['tmp_name'], $ext, '');
@@ -92,7 +92,7 @@ if ($tee == "file") {
           require('lisaarivi.inc');
         }
         else {
-          echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei lˆydy")."!</font><br>";
+          echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei l√∂ydy")."!</font><br>";
         }
       }
 
@@ -140,7 +140,7 @@ if ($tee == 'mikrotila') {
       </td>
       </tr>
       <tr><th colspan='7'>".t("Sarkaineroteltu tekstitiedosto tai Excel-tiedosto").".</th></tr>
-      <tr><td>".t("Tuoteno")."</td><td>".t("M‰‰r‰")."</td><td>".t("Arvioitu toimitusp‰iv‰ vvvv-kk-pp")."</td><td>".t("Hinta")."</td><td>".t("Ale")."</td><td>".t("Paikka (#!°!#-eroteltu)")."</td></tr>
+      <tr><td>".t("Tuoteno")."</td><td>".t("M√§√§r√§")."</td><td>".t("Arvioitu toimitusp√§iv√§ vvvv-kk-pp")."</td><td>".t("Hinta")."</td><td>".t("Ale")."</td><td>".t("Paikka (#!¬°!#-eroteltu)")."</td></tr>
       </table>
 
       <br>
@@ -148,7 +148,7 @@ if ($tee == 'mikrotila') {
       <tr>
       <th>".t("Valitse tiedosto").":</th>
       <td><input name='userfile' type='file'></td>
-      <td class='back'><input type='submit' value='".t("L‰heta")."'></td>
+      <td class='back'><input type='submit' value='".t("L√§heta")."'></td>
       </tr>
       </table>
       </form>";

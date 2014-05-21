@@ -19,7 +19,7 @@ if ($tee == "avaa") {
   $res = mysql_query($query) or pupe_error($query);
 
   if (mysql_affected_rows() != 1) {
-    echo "<font class='error'>".t("Saapumisen avaus epäonnistui")."!</font>";
+    echo "<font class='error'>".t("Saapumisen avaus epÃ¤onnistui")."!</font>";
     $tee = "etsi";
   }
   else {
@@ -74,7 +74,7 @@ if ($tee == "etsi") {
     echo "</form>";
   }
   else {
-    echo "<font class='error'>".t("Saapumista ei löytynyt").": $keikka!</font>";
+    echo "<font class='error'>".t("Saapumista ei lÃ¶ytynyt").": $keikka!</font>";
   }
 }
 
@@ -83,7 +83,7 @@ echo "<input type='hidden' name='tee' value='etsi'>";
 
 echo "<table>";
 echo "<tr>";
-echo "<th>".t("Syötä saapumisnumero").":</th>";
+echo "<th>".t("SyÃ¶tÃ¤ saapumisnumero").":</th>";
 echo "<td><input type='text' name='keikka'></td>";
 echo "</tr>";
 echo "</table>";

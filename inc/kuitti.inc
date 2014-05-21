@@ -61,7 +61,7 @@ $kirj["font"] = "Times-Roman";
 $huge["height"] = 22;
 $huge["font"] = "Helvetica-Bold";
 
-// sitten aletaan piirt‰m‰‰n itse PDF sis‰ltˆ‰
+// sitten aletaan piirt√§m√§√§n itse PDF sis√§lt√∂√§
 $firstpage = $pdf->new_page("a4");
 
 //Tulostetaan kaksi kappaletta samalle sivulle
@@ -78,7 +78,7 @@ for ($siirto = 0; $siirto <= 426; $siirto += 426) {
   $pdf->draw_text(65,  736 - $siirto,
     sprintf(t("%s:lle"), $saaja),                  $firstpage, $kirj);
 
-  $pdf->draw_text(65,  714 - $siirto, t("Lis‰tietoja").": " . $kuittirow['selite'],
+  $pdf->draw_text(65,  714 - $siirto, t("Lis√§tietoja").": " . $kuittirow['selite'],
                                     $firstpage, $kirj);
 
   $pdf->draw_text(65,  635 - $siirto,  t("Allekirjoitus"),        $firstpage, $pieni);
@@ -86,12 +86,12 @@ for ($siirto = 0; $siirto <= 426; $siirto += 426) {
   $pdf->draw_text(65,  610 - $siirto,  $saaja,              $firstpage, $pieni);
 }
 
-//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+//keksit√§√§n uudelle failille joku varmasti uniikki nimi:
 $pdffilenimi = "/tmp/kuitti-".md5(uniqid(rand(),true)).".pdf";
 
 //kirjoitetaan pdf faili levylle..
 $fh = fopen($pdffilenimi, "w");
-if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
+if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep√§onnistui $pdffilenimi");
 fclose($fh);
 
 //itse print komento...

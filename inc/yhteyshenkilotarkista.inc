@@ -32,7 +32,7 @@ if(!function_exists("yhteyshenkilotarkista")) {
       $result = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($result) > 1) {
-        $virhe[$i] = t("Oletusyhteyshenkilö on jo valittu")."!";
+        $virhe[$i] = t("OletusyhteyshenkilÃ¶ on jo valittu")."!";
       }
     }
   }

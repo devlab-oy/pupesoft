@@ -12,7 +12,7 @@ if (!isset($nayta_pdf)) {
 }
 
 if ($nayta_pdf != 1) {
-  echo "<font class='head'>".t("L‰hetetyt saldovahvistukset")."</font><hr>";
+  echo "<font class='head'>".t("L√§hetetyt saldovahvistukset")."</font><hr>";
 }
 
 if (!isset($ppa)) {
@@ -88,7 +88,7 @@ if ($request['tee'] == 'hae_lahetetyt_saldovahvistukset') {
   echo_lahetetyt_saldovahvistukset($request);
 }
 elseif ($request['tee'] == 'NAYTATILAUS' or $request['tee'] == 'tulosta_saldovahvistus_pdf') {
-  //requestissa tulee saldovahvistus_tunnus. T‰llˆin $saldovahvistus arrayssa on vain yksi solu
+  //requestissa tulee saldovahvistus_tunnus. T√§ll√∂in $saldovahvistus arrayssa on vain yksi solu
   $saldovahvistus = hae_lahetetyt_saldovahvistukset($request);
 
   $saldovahvistus['saldovahvistus_viesti'] = search_array_key_for_value_recursive($request['saldovahvistus_viestit'], 'selite', $saldovahvistus['saldovahvistus_viesti']);
@@ -105,7 +105,7 @@ elseif ($request['tee'] == 'NAYTATILAUS' or $request['tee'] == 'tulosta_saldovah
     exec($kirjoitin_komento['komento'].' '.$pdf_filepath);
   }
 
-  //unset, jotta k‰yttˆliittym‰‰n tulisi rajausten mukaiset saldovahvistukset.
+  //unset, jotta k√§ytt√∂liittym√§√§n tulisi rajausten mukaiset saldovahvistukset.
   unset($request['saldovahvistus_tunnus']);
 
   $request['saldovahvistukset'] = hae_lahetetyt_saldovahvistukset($request);
@@ -118,7 +118,7 @@ elseif ($request['tee'] == 'laheta_sahkoposti') {
 echo "<br/>";
 echo "<br/>";
 
-echo "<font class='head'>".t("L‰hetettyjen saldovahvistusten selaaminen")."</font><hr>";
+echo "<font class='head'>".t("L√§hetettyjen saldovahvistusten selaaminen")."</font><hr>";
 
 echo_lahetettyjen_saldovahvistusten_selaaminen_kayttoliittyma($request);
 
@@ -132,10 +132,10 @@ if ($request['tee'] == 'hae_lahetetyt_saldovahvistukset_aikavali') {
 if (isset($lahetetyt_count) and isset($ei_lahetetty_count)) {
   echo "<br/>";
   echo "<br/>";
-  echo '<font class="message">'.$lahetetyt_count.' '.t('s‰hkˆpostia l‰hetetty').'</font>';
+  echo '<font class="message">'.$lahetetyt_count.' '.t('s√§hk√∂postia l√§hetetty').'</font>';
   if ($ei_lahetetty_count > 0) {
     echo "<br/>";
-    echo '<font class="message">'.$ei_lahetetty_count.' '.t('s‰hkˆpostin l‰hett‰minen ep‰onnistui').'</font>';
+    echo '<font class="message">'.$ei_lahetetty_count.' '.t('s√§hk√∂postin l√§hett√§minen ep√§onnistui').'</font>';
   }
 }
 ?>
@@ -208,7 +208,7 @@ function echo_lahetetyt_saldovahvistukset($request) {
   }
   else {
     echo "<tr>";
-    echo "<td>".t('Ei l‰hetettyj‰ saldovahvistuksia')."</td>";
+    echo "<td>".t('Ei l√§hetettyj√§ saldovahvistuksia')."</td>";
     echo "</tr>";
   }
 
@@ -228,7 +228,7 @@ function echo_lahetetty_saldovahvistus_rivi($saldovahvistusrivi, $request, $hidd
   echo "<td valign='top'>";
   $i = 0;
   $asiakasnumerot_string = "";
-  //asiakasnumerot array:ss‰ on asiakasnumero ja tunnus, jotta uusi saldovahvistusn‰kym‰ss‰ asiakasnumero linkki osaa ohjata oikeaan asiakkaaseen
+  //asiakasnumerot array:ss√§ on asiakasnumero ja tunnus, jotta uusi saldovahvistusn√§kym√§ss√§ asiakasnumero linkki osaa ohjata oikeaan asiakkaaseen
   foreach ($saldovahvistusrivi['asiakasnumerot'] as $asiakasnumero_ja_tunnus) {
     $asiakasnumerot_string .= $asiakasnumero_ja_tunnus['asiakasnumero'].' / ';
     if ($i != 0 and $i % 10 == 0) {
@@ -251,7 +251,7 @@ function echo_lahetetty_saldovahvistus_rivi($saldovahvistusrivi, $request, $hidd
 
   echo "<td valign='top' class='back'>";
   echo "<form method='POST' action='' id='".implode('', $saldovahvistusrivi['lasku_tunnukset'])."' name='".implode('', $saldovahvistusrivi['lasku_tunnukset'])."' autocomplete='off'>";
-  echo "<input type='submit' value='".t("N‰yt‰ pdf")."' onClick=\"js_openFormInNewWindow('".implode('', $saldovahvistusrivi['lasku_tunnukset'])."', '".implode('', $saldovahvistusrivi['lasku_tunnukset'])."'); return false;\">";
+  echo "<input type='submit' value='".t("N√§yt√§ pdf")."' onClick=\"js_openFormInNewWindow('".implode('', $saldovahvistusrivi['lasku_tunnukset'])."', '".implode('', $saldovahvistusrivi['lasku_tunnukset'])."'); return false;\">";
   echo "<input type='hidden' name='tee' value='NAYTATILAUS' />";
   echo "<input type='hidden' name='nayta_pdf' value='1' />";
   echo "<input type='hidden' name='saldovahvistus_viesti' value='{$request['saldovahvistus_viesti']}' />";
@@ -274,7 +274,7 @@ function echo_lahetetty_saldovahvistus_rivi($saldovahvistusrivi, $request, $hidd
   echo "<br/>";
 
   echo "<form method='POST' action=''>";
-  echo "<input type='submit' value='".t('L‰het‰ asiakkaalle')."' />";
+  echo "<input type='submit' value='".t('L√§het√§ asiakkaalle')."' />";
   echo "<input type='hidden' name='tee' value='laheta_sahkoposti' />";
   echo "<input type='hidden' name='saldovahvistus[saldovahvistus_viesti]' value='{$saldovahvistusrivi['saldovahvistus_viesti']}' />";
   echo "<input type='hidden' name='saldovahvistus[laskun_avoin_paiva]' value='{$saldovahvistusrivi['avoin_saldo_pvm']}' />";
@@ -332,7 +332,7 @@ function echo_lahetettyjen_saldovahvistusten_selaaminen_kayttoliittyma($request)
   echo "<table>";
 
   echo "<tr>";
-  echo "<th>".t('Alkup‰iv‰m‰‰r‰').":</th>";
+  echo "<th>".t('Alkup√§iv√§m√§√§r√§').":</th>";
   echo "<td>";
   echo "<input type='text' name='ppa' value='{$request['ppa']}' size='3' />";
   echo "<input type='text' name='kka' value='{$request['kka']}' size='3' />";
@@ -341,7 +341,7 @@ function echo_lahetettyjen_saldovahvistusten_selaaminen_kayttoliittyma($request)
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>".t('Loppup‰iv‰m‰‰r‰').":</th>";
+  echo "<th>".t('Loppup√§iv√§m√§√§r√§').":</th>";
   echo "<td>";
   echo "<input type='text' name='ppl' value='{$request['ppl']}' size='3' />";
   echo "<input type='text' name='kkl' value='{$request['kkl']}' size='3' />";
@@ -362,7 +362,7 @@ function echo_lahetetyt_saldovahvistukset_aika_vali($request) {
   echo "<table>";
 
   echo "<tr>";
-  echo "<th>".t('L‰hetetyt saldovahvistukset')."</th>";
+  echo "<th>".t('L√§hetetyt saldovahvistukset')."</th>";
   echo "</tr>";
 
   if (!empty($request['saldovahvistukset'])) {
@@ -390,7 +390,7 @@ function echo_lahetetyt_saldovahvistukset_aika_vali($request) {
   }
   else {
     echo "<tr>";
-    echo "<td>".t('Ei l‰hetettyj‰ saldovahvistuksia')."</td>";
+    echo "<td>".t('Ei l√§hetettyj√§ saldovahvistuksia')."</td>";
     echo "</tr>";
   }
 

@@ -1,6 +1,6 @@
 <?php
 
-//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+//* TÃ¤mÃ¤ skripti kÃ¤yttÃ¤Ã¤ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("inc/parametrit.inc");
@@ -10,7 +10,7 @@ enable_ajax();
 
 echo "<font class='head'>".t("Tarkista asiakkaiden ja toimittajien ytunnukset")."</font><hr><br>";
 
-//  Mikäli asiakkaalla on jokin y-tunnustarkistus voimassa, tarkistetaan, että asiakkaiden ytunnukset ovat sitä mitä pitäisi..
+//  MikÃ¤li asiakkaalla on jokin y-tunnustarkistus voimassa, tarkistetaan, ettÃ¤ asiakkaiden ytunnukset ovat sitÃ¤ mitÃ¤ pitÃ¤isi..
 if ($yhtiorow["ytunnus_tarkistukset"] != "E") {
 
   $rajaus = "";
@@ -40,7 +40,7 @@ if ($yhtiorow["ytunnus_tarkistukset"] != "E") {
     $query = $asiakasQuery;
   }
 
-  echo "<font class='info'>".t("Tarkistetaan yritysasiakkaiden ja toimittajien ytunnukset yhtiön parametrien mukaisesti.")."</font><br><br>";
+  echo "<font class='info'>".t("Tarkistetaan yritysasiakkaiden ja toimittajien ytunnukset yhtiÃ¶n parametrien mukaisesti.")."</font><br><br>";
 
   $result = pupe_query($query) or pupe_error($query);
 
@@ -99,7 +99,7 @@ if ($yhtiorow["ytunnus_tarkistukset"] != "E") {
   }
 }
 else {
-  echo "<font class='message'>".t("Yrityksellä ei ole y-tunnusten tarkistus käytössä.")."</font>";
+  echo "<font class='message'>".t("YrityksellÃ¤ ei ole y-tunnusten tarkistus kÃ¤ytÃ¶ssÃ¤.")."</font>";
 }
 
 require("inc/footer.inc");

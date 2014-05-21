@@ -2,14 +2,14 @@
 
 // Luetaan viitemaksuja tietokannasta...
 // Automaattikohdistetaan viitemaksuja...
-// Tehdään kohdistamattomista laskuja...
+// TehdÃ¤Ã¤n kohdistamattomista laskuja...
 
-#tietuetunnus on ensimmäinen merkki
-# 0 -> erätietue
+#tietuetunnus on ensimmÃ¤inen merkki
+# 0 -> erÃ¤tietue
 # 3 -> viitesiirto
 # 5 -> suoraveloitus
 # 9 -> summatietue
-  # S -> factoringrivi, alatyyppi positiossa 88 (numerointi alkaa yhdestä)
+  # S -> factoringrivi, alatyyppi positiossa 88 (numerointi alkaa yhdestÃ¤)
 
 $type = substr($tietue,0,1);
   $factoring_oikaisutunnus = substr($tietue, 87, 1);
@@ -20,14 +20,14 @@ if ($type == '0') {
   #print "Aineston luontiaika => ".substr($tietue,7,4)."\n";
   #print "Rahalaitostunnus => ".substr($tietue,11,2)."\n";
   #print "Laskuttajan palvelutunnus => ".substr($tietue,13,9)."\n";
-  #print "Rahayksikön koodi => ".substr($tietue,22,1)."\n";
+  #print "RahayksikÃ¶n koodi => ".substr($tietue,22,1)."\n";
   #print "Varalla => ".substr($tietue,23,67)."\n";
 }
 elseif ($type == '3' or ($type == 'S' and $factoring_oikaisutunnus == '0' )) {
 
   #viitesiirto
   #print "Oikaisutunnus => ".substr($tietue,87,1)."\n";
-  #print "Välitystapa => ".substr($tietue,88,1)."\n";
+  #print "VÃ¤litystapa => ".substr($tietue,88,1)."\n";
   #print "Palautekoodi => ".substr($tietue,89,1)."\n";
 
       if ($type == 'S') {
@@ -42,7 +42,7 @@ elseif ($type == '3' or ($type == 'S' and $factoring_oikaisutunnus == '0' )) {
   $reference = ltrim(substr($tietue,43,20), '0');
 
   $sum = substr($tietue,77,10);
-  $sum = $sum/100; #XXX summa on sentteinä, etunollatäytöllä.
+  $sum = $sum/100; #XXX summa on sentteinÃ¤, etunollatÃ¤ytÃ¶llÃ¤.
 
   $currency_code = substr($tietue,75,1);
 
@@ -55,11 +55,11 @@ elseif ($type == '3' or ($type == 'S' and $factoring_oikaisutunnus == '0' )) {
   $yritirow = mysql_fetch_assoc($result);
 
   if ($yritirow["yhtio"] == "") {
-    echo "<font class='error'>Tilille $account ei löytynyt yritystä.</font><br>\n";
+    echo "<font class='error'>Tilille $account ei lÃ¶ytynyt yritystÃ¤.</font><br>\n";
     continue;
   }
   else {
-    // Setataan kukarow-yhtiö
+    // Setataan kukarow-yhtiÃ¶
     $kukarow["yhtio"] = $yritirow["yhtio"];
   }
 
@@ -71,7 +71,7 @@ elseif ($type == '3' or ($type == 'S' and $factoring_oikaisutunnus == '0' )) {
     $valresult = pupe_query($query);
 
     if (mysql_num_rows($valresult) != 1) {
-      echo "<font class='error'> Valuuttaa '$yritirow[valkoodi]' ei löytynyt!</font><br>\n";
+      echo "<font class='error'> Valuuttaa '$yritirow[valkoodi]' ei lÃ¶ytynyt!</font><br>\n";
       continue;
     }
     else {
@@ -87,7 +87,7 @@ elseif ($type == '3' or ($type == 'S' and $factoring_oikaisutunnus == '0' )) {
     $valrow = mysql_fetch_assoc ($valresult);
 
     if ($valrow["valkoodi"] == '') {
-      echo "<font class='error'> Yhtiöllä ei ole valuuttaa!</font><br>\n";
+      echo "<font class='error'> YhtiÃ¶llÃ¤ ei ole valuuttaa!</font><br>\n";
       continue;
     }
     else {
@@ -101,7 +101,7 @@ elseif ($type == '3' or ($type == 'S' and $factoring_oikaisutunnus == '0' )) {
   $result = pupe_query($query);
   $tiliointitunnus = mysql_insert_id();
 
-  #päivitetään suorituksen tunnnus tiliotedataan ja tiliotedata käsitellyksi
+  #pÃ¤ivitetÃ¤Ã¤n suorituksen tunnnus tiliotedataan ja tiliotedata kÃ¤sitellyksi
   $query = "UPDATE tiliotedata
             SET tiliointitunnus = '$tiliointitunnus', kasitelty = now()
             WHERE tunnus = '$tiliotedatarow[tunnus]'";
@@ -111,9 +111,9 @@ elseif ($type == '3' or ($type == 'S' and $factoring_oikaisutunnus == '0' )) {
 elseif ($type == '9') {
   #print "Tietuetunnus => $type\n";
   #print "Tapahtumien kpl => ".substr($tietue,1,6)."\n";
-  #print "Tapahtumien määrä => ".substr($tietue,7,11)."\n";
+  #print "Tapahtumien mÃ¤Ã¤rÃ¤ => ".substr($tietue,7,11)."\n";
   #print "Oikaisutapahtumien kpl => ".substr($tietue,18,6)."\n";
-  #print "Oikaisutapahtumien määrä => ".substr($tietue,24,11)."\n";
+  #print "Oikaisutapahtumien mÃ¤Ã¤rÃ¤ => ".substr($tietue,24,11)."\n";
   #print "Varalla => ".substr($tietue,35,5)."\n";
   #print "done, insert/read/error: $insertcnt/$readcnt/$errcnt\n";
 }

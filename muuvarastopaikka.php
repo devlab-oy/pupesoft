@@ -79,7 +79,7 @@ if ($tee == 'S' or $tee == 'E') {
     $tee    ='M';
   }
   else {
-    $varaosavirhe = t("Yht‰‰n tuotetta ei lˆytynyt")."!";
+    $varaosavirhe = t("Yht√§√§n tuotetta ei l√∂ytynyt")."!";
     $tuoteno   = '';
     $tee    ='Y';
   }
@@ -120,15 +120,15 @@ if ($tee == 'MUUTA') {
     }
   }
 
-  //Kun tuotteen statusta muutetaa, poistetaan tuotteelta myˆs automaattisesti perustetut tuotepaikat, jos tuotteelle ei ole perustettu manuaalisesti yht‰‰n paikkaa.
+  //Kun tuotteen statusta muutetaa, poistetaan tuotteelta my√∂s automaattisesti perustetut tuotepaikat, jos tuotteelle ei ole perustettu manuaalisesti yht√§√§n paikkaa.
   //Haetaan edellisen tuote statuksen oletuspaikat
   if ($kutsuja == 'tuotetarkista.inc') {
     $kaikki_oletuspaikat = hae_kaikki_oletuspaikat_try_tai_status($tem_try_vanha, $tem_status_vanha);
 
     foreach ($poista as $poistettava) {
-      //Jos poistettavaa paikkaa ei lˆydy kaikista_oletuspaikoista,
-      //tarkoittaa se, ett‰ kyseess‰ on manuaalisesti lis‰tty tuotepaikka.
-      //T‰llˆin mit‰‰n paikkaa ei voida poistaa.
+      //Jos poistettavaa paikkaa ei l√∂ydy kaikista_oletuspaikoista,
+      //tarkoittaa se, ett√§ kyseess√§ on manuaalisesti lis√§tty tuotepaikka.
+      //T√§ll√∂in mit√§√§n paikkaa ei voida poistaa.
       $oletuspaikka = in_array($poistettava['hylly'], $kaikki_oletuspaikat);
 
       if (!$oletuspaikka) {
@@ -138,7 +138,7 @@ if ($tee == 'MUUTA') {
     }
   }
 
-  // K‰yd‰‰n l‰pi poistettavat paikat
+  // K√§yd√§√§n l√§pi poistettavat paikat
   if (count($poista) > 0) {
     foreach ($poista as $poistettava) {
       if (is_array($poistettava)) {
@@ -149,7 +149,7 @@ if ($tee == 'MUUTA') {
       }
 
       if ($poistetaan == $oletusrow["tunnus"] and ($saldot[$poistetaan] != 0 or count($saldot) > 1)) {
-        echo "<font class='error'>".t("Et voi poistaa oletuspaikkaa, koska sill‰ on saldoa tai tuotteella on muitakin paikkoja")."</font><br><br>";
+        echo "<font class='error'>".t("Et voi poistaa oletuspaikkaa, koska sill√§ on saldoa tai tuotteella on muitakin paikkoja")."</font><br><br>";
       }
       elseif ($saldot[$poistetaan] != 0) {
         echo "<font class='error'>".t("Et voi poistaa paikkaa jolla on saldoa")."</font><br><br>";
@@ -239,8 +239,8 @@ if ($tee == 'MUUTA') {
 
       $uusi_oletusrow = mysql_fetch_assoc($oletus_result);
 
-      // Tehd‰‰n p‰ivitykset
-      echo "<font class='message'>".t("Siirret‰‰n oletuspaikka")."</font><br><br>";
+      // Tehd√§√§n p√§ivitykset
+      echo "<font class='message'>".t("Siirret√§√§n oletuspaikka")."</font><br><br>";
 
       $hylly = array(
           "hyllyalue" => $uusi_oletusrow['hyllyalue'],
@@ -251,7 +251,7 @@ if ($tee == 'MUUTA') {
       $upd_result = paivita_oletuspaikka($tuoteno, $hylly);
 
       if ($upd_result["paivitetyt_ostorivit"] > 0) {
-        echo "<font class='message'>".t("P‰ivitettiin %s ostotilausrivin varastopaikkaa.", '', $upd_result["paivitetyt_ostorivit"])."</font><br><br>";
+        echo "<font class='message'>".t("P√§ivitettiin %s ostotilausrivin varastopaikkaa.", '', $upd_result["paivitetyt_ostorivit"])."</font><br><br>";
       }
     }
     else {
@@ -305,7 +305,7 @@ if ($tee == 'MUUTA') {
   }
 }
 
-// Siirret‰‰n saldo, jos se on viel‰ olemassa
+// Siirret√§√§n saldo, jos se on viel√§ olemassa
 if ($tee == 'N') {
   if ($mista == $minne) {
     echo "<font class='error'>".t("Kummatkin paikat ovat samat")."!</font><br><br>";
@@ -320,7 +320,7 @@ if ($tee == 'N') {
   $asaldo = (float) str_replace( ",", ".", $asaldo);
 
   if ($asaldo == 0) {
-    echo "<font class='error'>".t("Anna siirrett‰v‰ m‰‰r‰")."!</font><br><br>";
+    echo "<font class='error'>".t("Anna siirrett√§v√§ m√§√§r√§")."!</font><br><br>";
 
     if ($kutsuja == 'vastaanota.php') {
       $tee = 'X';
@@ -335,10 +335,10 @@ if ($tee == 'N') {
 if ($tee == 'N') {
 
   // Tarvitsemme
-  // $asaldo  = siirrett‰v‰ m‰‰r‰
+  // $asaldo  = siirrett√§v√§ m√§√§r√§
   // $mista   = tuotepaikan tunnus josta otetaan
-  // $minne   = tuotepaikan tunnus jonne siirret‰‰n
-  // $tuoteno = tuotenumero jota siirret‰‰n
+  // $minne   = tuotepaikan tunnus jonne siirret√§√§n
+  // $tuoteno = tuotenumero jota siirret√§√§n
 
   if ($kutsuja == "vastaanota.php") {
     $uusitee = "X";
@@ -353,7 +353,7 @@ if ($tee == 'N') {
   $otetaan   = array(0 => $mista);
   $siirretaan   = array(0 => $minne);
 
-  // Mist‰ varastosta otetaan?
+  // Mist√§ varastosta otetaan?
   $query = "SELECT *
             FROM tuotepaikat
             WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]' and tunnus='$otetaan[0]'";
@@ -361,11 +361,11 @@ if ($tee == 'N') {
   $mistarow = mysql_fetch_array($result);
 
   if (mysql_num_rows($result) == 0) {
-    echo "<font class='error'>".t("T‰m‰ varastopaikka katosi tuotteelta")." $otetaan[0]</font><br><br>";
+    echo "<font class='error'>".t("T√§m√§ varastopaikka katosi tuotteelta")." $otetaan[0]</font><br><br>";
     $tee = $uusitee;
   }
 
-  // Minne varastoon vied‰‰n?
+  // Minne varastoon vied√§√§n?
   $query = "SELECT *
             FROM tuotepaikat
             WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]' and tunnus='$siirretaan[0]'";
@@ -373,7 +373,7 @@ if ($tee == 'N') {
   $minnerow = mysql_fetch_array($result);
 
   if (mysql_num_rows($result) == 0) {
-    echo "<font class='error'>".t("T‰m‰ varastopaikka katosi tuotteelta")." $siirretaan[0]</font><br><br>";
+    echo "<font class='error'>".t("T√§m√§ varastopaikka katosi tuotteelta")." $siirretaan[0]</font><br><br>";
     $tee = $uusitee;
   }
 
@@ -382,9 +382,9 @@ if ($tee == 'N') {
   // T = Sarjanumeroseuranta. Myynti / Keskihinta-varastonarvo
   // U = Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo. Automaattinen sarjanumerointi
   // V = Sarjanumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo
-  // E = Er‰numeroseuranta. Osto-Myynti / Keskihinta-varastonarvo
-  // F = Er‰numeroseuranta parasta-ennen p‰iv‰ll‰. Osto-Myynti / Keskihinta-varastonarvo
-  // G = Er‰numeroseuranta. Osto-Myynti / In-Out varastonarvo
+  // E = Er√§numeroseuranta. Osto-Myynti / Keskihinta-varastonarvo
+  // F = Er√§numeroseuranta parasta-ennen p√§iv√§ll√§. Osto-Myynti / Keskihinta-varastonarvo
+  // G = Er√§numeroseuranta. Osto-Myynti / In-Out varastonarvo
   $query = "SELECT sum(if(tuote.sarjanumeroseuranta in ('S','T','U','V'), 1, 0)) sarjat,
             sum(if(tuote.sarjanumeroseuranta in ('E','F','G'), 1, 0)) erat
             FROM tuote
@@ -408,19 +408,19 @@ if ($tee == 'N') {
     $siirrettava_era_row = mysql_fetch_assoc($siirrettava_era_res);
 
     if (!is_array($sarjano_array) or $sarjano_kpl_array[$sarjano_array[0]] < $asaldo) {
-      echo "<font class='error'>".t("Tarkista er‰numerovalintasi")."</font><br><br>";
+      echo "<font class='error'>".t("Tarkista er√§numerovalintasi")."</font><br><br>";
       $tee = $uusitee;
     }
 
     if ($siirrettava_era_row['hyllyalue'] != $mistarow['hyllyalue'] or $siirrettava_era_row['hyllynro'] != $mistarow['hyllynro'] or $siirrettava_era_row['hyllyvali'] != $mistarow['hyllyvali'] or $siirrettava_era_row['hyllytaso'] != $mistarow['hyllytaso']) {
-      echo "<font class='error'>",t("Siirrett‰v‰ er‰ ei ole l‰hdevarastossa"),"!</font><br><br>";
+      echo "<font class='error'>",t("Siirrett√§v√§ er√§ ei ole l√§hdevarastossa"),"!</font><br><br>";
       $tee = $uusitee;
     }
   }
   elseif ($sarjacheck_row["sarjat"] > 0) {
 
     foreach ($sarjano_array as $sarjatun) {
-      //Tutkitaan lis‰varusteita
+      //Tutkitaan lis√§varusteita
       $query = "SELECT tilausrivi_osto.perheid2
                 FROM sarjanumeroseuranta
                 JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON tilausrivi_osto.yhtio = sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus = sarjanumeroseuranta.ostorivitunnus and tilausrivi_osto.tunnus = tilausrivi_osto.perheid2
@@ -440,7 +440,7 @@ if ($tee == 'N') {
         $sarjares = pupe_query($query);
         $ostorow = mysql_fetch_array($sarjares);
 
-        // Haetaan muut lis‰varusteet
+        // Haetaan muut lis√§varusteet
         $query = "SELECT tilausrivi.tuoteno, round(tilausrivi.kpl/$ostorow[kpl]) kpl, round(tilausrivi.tilkpl/$ostorow[kpl]) tilkpl, tilausrivi.tilkpl sistyomaarayskpl,
                   tilausrivi.var, tilausrivi.tyyppi, concat_ws('#', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
                   if (tuote.sarjanumeroseuranta = 'S', tilausrivin_lisatiedot.sistyomaarays_sarjatunnus, 0) sarjatunnus
@@ -472,13 +472,13 @@ if ($tee == 'N') {
     }
   }
 
-  //t‰h‰n erroriin tullaan vain jos kyseess‰ ei ole siirtolista
-  //koska jos meill‰ on ker‰tty siirtolista niin ne m‰‰r‰t myˆs halutaan siirt‰‰ vaikka saldo menisikin nollille tai miinukselle
+  //t√§h√§n erroriin tullaan vain jos kyseess√§ ei ole siirtolista
+  //koska jos meill√§ on ker√§tty siirtolista niin ne m√§√§r√§t my√∂s halutaan siirt√§√§ vaikka saldo menisikin nollille tai miinukselle
   $saldook = 0;
 
   for ($iii=0; $iii< count($tuotteet); $iii++) {
 
-    // Tutkitaan lis‰varusteiden tuotepaikkoja
+    // Tutkitaan lis√§varusteiden tuotepaikkoja
     $query = "SELECT *
               FROM tuotepaikat
               WHERE tuoteno = '$tuotteet[$iii]'
@@ -494,31 +494,31 @@ if ($tee == 'N') {
 
       $lisavartprow = mysql_fetch_array($result);
 
-      //Tutkitaan siirret‰‰nkˆ tietty‰ jo varattua lis‰varustetta
+      //Tutkitaan siirret√§√§nk√∂ tietty√§ jo varattua lis√§varustetta
       if ($lisavaruste[$iii] == "LISAVARUSTE") {
-        // Tuotepaikka josta lis‰varuste otetaan
+        // Tuotepaikka josta lis√§varuste otetaan
         $otetaan[$iii] = $lisavartprow["tunnus"];
 
         $myytavissa += $kappaleet[$iii];
       }
 
       if ($kappaleet[$iii] > $myytavissa and $kutsuja != "vastaanota.php") {
-        echo "Tuotetta ei voida siirt‰‰. Saldo ei riitt‰nyt. $tuotteet[$iii] $kappaleet[$iii] ($mistarow[hyllyalue] $mistarow[hyllynro] $mistarow[hyllyvali] $mistarow[hyllytaso])<br>";
+        echo "Tuotetta ei voida siirt√§√§. Saldo ei riitt√§nyt. $tuotteet[$iii] $kappaleet[$iii] ($mistarow[hyllyalue] $mistarow[hyllynro] $mistarow[hyllyvali] $mistarow[hyllytaso])<br>";
         $saldook++;
       }
     }
     elseif ($kutsuja != "vastaanota.php") {
-      echo t("Tuotetta ei voida siirt‰‰. Tuotetta ei lˆytynyt paikalta").": $tuotteet[$iii] ($mistarow[hyllyalue] $mistarow[hyllynro] $mistarow[hyllyvali] $mistarow[hyllytaso])<br>";
+      echo t("Tuotetta ei voida siirt√§√§. Tuotetta ei l√∂ytynyt paikalta").": $tuotteet[$iii] ($mistarow[hyllyalue] $mistarow[hyllynro] $mistarow[hyllyvali] $mistarow[hyllytaso])<br>";
       $saldook++;
     }
   }
 
   if ($saldook > 0) { //Taravat myytiin alta!
-    echo "<font class='error'>".t("Siirett‰v‰ m‰‰r‰ on liian iso")."</font><br><br>";
+    echo "<font class='error'>".t("Siirett√§v√§ m√§√§r√§ on liian iso")."</font><br><br>";
     $tee = $uusitee;
   }
 
-  // Varmistetaan, ett‰ vastaanottavat paikat lˆytyy
+  // Varmistetaan, ett√§ vastaanottavat paikat l√∂ytyy
   if ($saldook == 0) {
 
     for ($iii=0; $iii< count($tuotteet); $iii++) {
@@ -532,7 +532,7 @@ if ($tee == 'N') {
                 and hyllytaso = '$minnerow[hyllytaso]'";
       $result = pupe_query($query);
 
-      // Vastaanottavaa paikkaa ei lˆydy, perustetaan se
+      // Vastaanottavaa paikkaa ei l√∂ydy, perustetaan se
       if (mysql_num_rows($result) == 0) {
         $query = "INSERT into tuotepaikat (yhtio, hyllyalue, hyllynro, hyllyvali, hyllytaso, tuoteno, laatija, luontiaika)
                   VALUES (
@@ -547,7 +547,7 @@ if ($tee == 'N') {
         $result = pupe_query($query);
         $lisatty_tun = mysql_insert_id();
 
-        // Tuotepaikka jonne lis‰varuste vied‰‰n
+        // Tuotepaikka jonne lis√§varuste vied√§√§n
         if ($lisavaruste[$iii] == "LISAVARUSTE") {
           $siirretaan[$iii] = $lisatty_tun;
         }
@@ -563,7 +563,7 @@ if ($tee == 'N') {
                   hyllynro  = '$minnerow[hyllynro]',
                   hyllyvali = '$minnerow[hyllyvali]',
                   hyllytaso = '$minnerow[hyllytaso]',
-                  selite    = '".t("Lis‰ttiin tuotepaikka")." $minnerow[hyllyalue] $minnerow[hyllynro] $minnerow[hyllyvali] $minnerow[hyllytaso]',
+                  selite    = '".t("Lis√§ttiin tuotepaikka")." $minnerow[hyllyalue] $minnerow[hyllynro] $minnerow[hyllyvali] $minnerow[hyllytaso]',
                   laatija   = '$kukarow[kuka]',
                   laadittu  = now()";
         $result = pupe_query($query);
@@ -573,7 +573,7 @@ if ($tee == 'N') {
       else {
         $lisavartprow = mysql_fetch_array($result);
 
-        // Tuotepaikka jonne lis‰varuste vied‰‰n
+        // Tuotepaikka jonne lis√§varuste vied√§√§n
         if ($lisavaruste[$iii] == "LISAVARUSTE") {
           $siirretaan[$iii] = $lisavartprow["tunnus"];
         }
@@ -610,7 +610,7 @@ if ($tee == 'N') {
     hyllysiirto($params);
   }
 
-  //P‰ivitet‰‰n sarjanumerot
+  //P√§ivitet√§√§n sarjanumerot
   if ($sarjacheck_row["sarjat"] > 0 and count($sarjano_array) > 0) {
     foreach($sarjano_array as $sarjano) {
       if ($sarjano > 0) {
@@ -639,7 +639,7 @@ if ($tee == 'N') {
 
         $sarjaquerylisa = '';
 
-        // jos er‰ loppuu, poistetaa sen n‰kyvyys
+        // jos er√§ loppuu, poistetaa sen n√§kyvyys
         if ($sarrr_row['era_kpl'] - $asaldo == 0) {
           $sarjaquerylisa = "myyntirivitunnus = '-1', siirtorivitunnus = '-1', ";
         }
@@ -703,7 +703,7 @@ if ($tee == 'N') {
   }
 
 
-  // P‰ivitet‰‰n lis‰vausteiden sarjanumerot
+  // P√§ivitet√§√§n lis√§vausteiden sarjanumerot
   if (isset($lisavar_sarj) and count($lisavar_sarj) > 0) {
     foreach($lisavar_sarj as $sarjano) {
       if ($sarjano > 0) {
@@ -817,23 +817,23 @@ if ($tee == 'UUSIPAIKKA') {
                   hyllynro  = '$ahyllynro',
                   hyllyvali = '$ahyllyvali',
                   hyllytaso = '$ahyllytaso',
-                  selite    = '".t("Lis‰ttiin tuotepaikka")." $ahyllyalue $ahyllynro $ahyllyvali $ahyllytaso',
+                  selite    = '".t("Lis√§ttiin tuotepaikka")." $ahyllyalue $ahyllynro $ahyllyvali $ahyllytaso',
                   laatija   = '$kukarow[kuka]',
                   laadittu  = now()";
         $result = pupe_query($query);
       }
       else {
-        echo "<font class='error'>",("Uusi varastopaikka ei lˆydy tai ei kuulu mihink‰‰n varastoon"),": {$tuoteno} ({$ahyllyalue}, {$ahyllynro}, {$ahyllyvali}, {$ahyllytaso})</font><br />";
+        echo "<font class='error'>",("Uusi varastopaikka ei l√∂ydy tai ei kuulu mihink√§√§n varastoon"),": {$tuoteno} ({$ahyllyalue}, {$ahyllynro}, {$ahyllyvali}, {$ahyllytaso})</font><br />";
         $failure = "Y";
       }
     }
     else {
-      echo "<font class='error'>".("Uusi varastopaikka ei kuulu mihink‰‰n varastoon").": $tuoteno ($ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso)</font><br>";
+      echo "<font class='error'>".("Uusi varastopaikka ei kuulu mihink√§√§n varastoon").": $tuoteno ($ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso)</font><br>";
       $failure = "Y";
     }
   }
   else {
-    echo "<font class='error'>".("Uusi varastopaikka lˆytyy jo tuotteelta").": $tuoteno ($ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso)</font><br>";
+    echo "<font class='error'>".("Uusi varastopaikka l√∂ytyy jo tuotteelta").": $tuoteno ($ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso)</font><br>";
   }
   $tee = 'M';
   if ($kutsuja == "varastopaikka_aineistolla.php") $tee = "PALATTIIN_MUUSTA";
@@ -912,9 +912,9 @@ if ($tee == 'M') {
       <input type='hidden' name='toim' value='{$toim}' />
       <input type = 'hidden' name = 'tee' value ='N'>
       <tr>
-      <th>".t("L‰hett‰v‰")."<br>".t("varastopaikka").":</th>
+      <th>".t("L√§hett√§v√§")."<br>".t("varastopaikka").":</th>
       <th>".t("Vastaanottava")."<br>".t("varastopaikka").":</th>
-      <th>".t("Siirrett‰v‰")."<br>".t("m‰‰r‰").":</th>";
+      <th>".t("Siirrett√§v√§")."<br>".t("m√§√§r√§").":</th>";
 
   if ($trow["sarjanumeroseuranta"] != '') {
     echo "<th>".t("Valitse")."<br>".t("sarjanumerot").":</th>";
@@ -1092,10 +1092,10 @@ if ($tee == 'M') {
   echo "<th>".t("Selite")."</th>";
   echo "<td colspan='$sncspan' ><input type='text' name='selite' size='50' /></td>";
 
-  echo "<td class='back'><input type = 'submit' value = '".t("Siirr‰")."'></td>
+  echo "<td class='back'><input type = 'submit' value = '".t("Siirr√§")."'></td>
       </tr></table></form><br>";
 
-  // Tehd‰‰n k‰yttˆliittym‰ paikkojen muutoksille (otetus tai pois)
+  // Tehd√§√§n k√§ytt√∂liittym√§ paikkojen muutoksille (otetus tai pois)
   echo "  <form name = 'valinta' method='post'>
       <input type = 'hidden' name = 'tee' value ='MUUTA'>
       <input type = 'hidden' name = 'toim' value = '{$toim}' />
@@ -1105,11 +1105,11 @@ if ($tee == 'M') {
   echo "<tr>";
   echo "<th>",t("Varastopaikka"),"</th>";
   echo "<th>",t("Saldo"),"</th>";
-  echo "<th>",t("Hyllyss‰"),"</th>";
-  echo "<th>",t("Myyt‰viss‰"),"</th>";
+  echo "<th>",t("Hyllyss√§"),"</th>";
+  echo "<th>",t("Myyt√§viss√§"),"</th>";
   echo "<th>",t("Oletuspaikka"),"</th>";
-  echo "<th>",t("H‰lyraja"),"</th>";
-  echo "<th>",t("Tilausm‰‰r‰"),"</th>";
+  echo "<th>",t("H√§lyraja"),"</th>";
+  echo "<th>",t("Tilausm√§√§r√§"),"</th>";
   echo "<th>",t("Prio"),"</th>";
   echo "<th>",t("Poista"),"</th>";
   echo "</tr>";
@@ -1169,7 +1169,7 @@ if ($tee == 'M') {
         echo "<td></td><td></td><td></td><td></td>";
       }
 
-      // Ei n‰ytet‰ boxia, jos sit‰ ei saa k‰ytt‰‰
+      // Ei n√§ytet√§ boxia, jos sit√§ ei saa k√§ytt√§√§
       if ($saldorow["saldo"] != 0 and $saldorow["oletus"] != "") {
         echo "<td></td>";
       }
@@ -1192,7 +1192,7 @@ if ($tee == 'M') {
       echo "</tr>";
     }
   }
-  echo "<tr><td colspan='9'><input type = 'submit' value = '".t("P‰ivit‰")."'></td></table></form><br>";
+  echo "<tr><td colspan='9'><input type = 'submit' value = '".t("P√§ivit√§")."'></td></table></form><br>";
 
   $ahyllyalue  = '';
   $ahyllynro  = '';
@@ -1203,15 +1203,15 @@ if ($tee == 'M') {
       <input type='hidden' name='tee' value='UUSIPAIKKA'>
       <input type = 'hidden' name = 'toim' value = '{$toim}' />
       <input type='hidden' name='tuoteno' value='$tuoteno'>
-      <tr><th>".t("Lis‰‰ uusi varastopaikka")."</th></tr>
+      <tr><th>".t("Lis√§√§ uusi varastopaikka")."</th></tr>
       <tr><td>
       ".t("Alue")." ",hyllyalue('ahyllyalue', $ahyllyalue),"
       ".t("Nro")."  <input type = 'text' name = 'ahyllynro'  size = '5' maxlength='5' value = '$ahyllynro'>
-      ".t("V‰li")." <input type = 'text' name = 'ahyllyvali' size = '5' maxlength='5' value = '$ahyllyvali'>
+      ".t("V√§li")." <input type = 'text' name = 'ahyllyvali' size = '5' maxlength='5' value = '$ahyllyvali'>
       ".t("Taso")." <input type = 'text' name = 'ahyllytaso' size = '5' maxlength='5' value = '$ahyllytaso'>";
 
   echo "  </td></tr>
-      <tr><td><input type = 'submit' value = '".t("Lis‰‰")."'></td></tr>
+      <tr><td><input type = 'submit' value = '".t("Lis√§√§")."'></td></tr>
       </table></form>";
 
   echo "<br><hr><form name = 'valinta' method='post'>
@@ -1221,7 +1221,7 @@ if ($tee == 'M') {
 }
 
 if ($tee == '') {
-  // T‰ll‰ ollaan, jos olemme vasta valitsemassa tuotetta
+  // T√§ll√§ ollaan, jos olemme vasta valitsemassa tuotetta
   echo "<form name = 'valinta' method='post'>
       <input type='hidden' name='tee' value='M'>
       <input type = 'hidden' name = 'toim' value = '{$toim}' />

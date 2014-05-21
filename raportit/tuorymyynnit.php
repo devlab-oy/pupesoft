@@ -1,16 +1,16 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("../inc/parametrit.inc");
 
-echo "<font class='head'>".t("Asiakkaan ostot tuoteryhm‰st‰")."</font><hr>";
+echo "<font class='head'>".t("Asiakkaan ostot tuoteryhm√§st√§")."</font><hr>";
 
 if ($try=='' or $ytunnus=='') {
   echo "<form name=asiakas method='post' autocomplete='off'>";
   echo "<table><tr>";
-  echo "<th>".t("Anna asiakasnumero tai osa nimest‰")."</th>";
+  echo "<th>".t("Anna asiakasnumero tai osa nimest√§")."</th>";
   echo "<td><input type='text' name='ytunnus' value='$ytunnus'></td>";
   echo "<td class='back'></td>";
   echo "</tr><tr>";
@@ -18,7 +18,7 @@ if ($try=='' or $ytunnus=='') {
   echo "<td><input type='text' name='osasto' value='$osasto'></td>";
   echo "<td class='back'></td>";
   echo "</tr><tr>";
-  echo "<th>".t("Anna tuoteryhm‰")."</th>";
+  echo "<th>".t("Anna tuoteryhm√§")."</th>";
   echo "<td><input type='text' name='try' value='$try'></td>";
   echo "<td class='back'><input type='submit' value='".t("Hae")."'></td>";
   echo "</tr></table>";
@@ -29,7 +29,7 @@ if ($ytunnus!='') {
   require ("inc/asiakashaku.inc");
 }
 
-// jos meill‰ on onnistuneesti valittu asiakas
+// jos meill√§ on onnistuneesti valittu asiakas
 if ($ytunnus!='' and $try!='') {
 
   echo "<table><tr>";
@@ -47,17 +47,17 @@ if ($ytunnus!='' and $try!='') {
   echo "</tr></table>";
 
 
-  // hardcoodataan v‰rej‰
+  // hardcoodataan v√§rej√§
   $cmyynti = "#ccccff";
   $ckate   = "#ff9955";
   $ckatepr = "#00dd00";
-  $maxcol  = 12; // montako columnia n‰yttˆ on
+  $maxcol  = 12; // montako columnia n√§ytt√∂ on
 
 
   $katteet_naytetaan = ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "") ? true : false;
 
-  // tehd‰‰n asiakkaan ostot tuoteryhm‰st‰
-  echo "<br><font class='message'>".t("Osasto")." $osasto ".t("tuoteryhm‰")." $try ".t("myynti kausittain viimeiset 24 kk")." (<font color='$cmyynti'>".t("myynti")."</font>";
+  // tehd√§√§n asiakkaan ostot tuoteryhm√§st√§
+  echo "<br><font class='message'>".t("Osasto")." $osasto ".t("tuoteryhm√§")." $try ".t("myynti kausittain viimeiset 24 kk")." (<font color='$cmyynti'>".t("myynti")."</font>";
 
   if ($katteet_naytetaan) echo "/<font color='$ckate'>".t("kate")."</font>";
   if ($katteet_naytetaan) echo "/<font color='$ckatepr'>".t("kateprosentti")."</font>";
@@ -106,7 +106,7 @@ if ($ytunnus!='' and $try!='') {
 
     if ($col==1) echo "<tr>\n";
 
-    // lasketaan pylv‰iden korkeus
+    // lasketaan pylv√§iden korkeus
     if ($maxeur>0) {
       $hmyynti  = round(50*$sumrow['myynti']/$maxeur,0);
       $hkate    = round(50*$sumrow['kate']/$maxeur,0);
@@ -148,7 +148,7 @@ if ($ytunnus!='' and $try!='') {
     $col++;
   }
 
-  // teh‰‰n validia htmll‰‰ ja t‰ytet‰‰n tyhj‰t solut..
+  // teh√§√§n validia htmll√§√§ ja t√§ytet√§√§n tyhj√§t solut..
   $ero = $maxcol+1-$col;
 
   if ($ero<>$maxcol)

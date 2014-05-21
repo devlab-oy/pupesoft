@@ -1,6 +1,6 @@
 <?php
 
-// Kutsutaanko CLI:stä
+// Kutsutaanko CLI:stÃ¤
 $php_cli = FALSE;
 
 if (php_sapi_name() == 'cli') {
@@ -12,7 +12,7 @@ date_default_timezone_set('Europe/Helsinki');
 if ($php_cli) {
 
   if (trim($argv[1]) == '') {
-    echo "Et antanut yhtiötä!\n";
+    echo "Et antanut yhtiÃ¶tÃ¤!\n";
     exit;
   }
 
@@ -28,16 +28,16 @@ if ($php_cli) {
   $yhtio = pupesoft_cleanstring($argv[1]);
   $yhtiorow = hae_yhtion_parametrit($yhtio);
 
-  // Haetaan käyttäjän tiedot
+  // Haetaan kÃ¤yttÃ¤jÃ¤n tiedot
   $kukarow  = hae_kukarow('admin', $yhtio);
 
   $PHP_SELF = "maksuehto_send.php";
 }
 
-// Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
+// Sallitaan vain yksi instanssi tÃ¤stÃ¤ skriptistÃ¤ kerrallaan
 pupesoft_flock();
 
-// Katsotaan, että tarvittavat muuttujat on setattu
+// Katsotaan, ettÃ¤ tarvittavat muuttujat on setattu
 $y = $kukarow["yhtio"];
 
 if (!isset(  $maksuaineiston_siirto[$y]["host"],
@@ -65,7 +65,7 @@ $localdir_error = $maksuaineiston_siirto[$y]["local_dir_error"];
 $ftpsucc = $maksuaineiston_siirto[$y]["local_dir_ok"];
   $ftpfail = $localdir_error;
 
-// Loopataan läpi pankkipolku
+// Loopataan lÃ¤pi pankkipolku
 if ($handle = opendir($localdir)) {
   while (($file = readdir($handle)) !== FALSE) {
     $ftpfile = realpath($localdir."/".$file);
@@ -76,9 +76,9 @@ if ($handle = opendir($localdir)) {
   closedir($handle);
 }
 
-// Loopataan läpi epäonnistuneet dirikka
+// Loopataan lÃ¤pi epÃ¤onnistuneet dirikka
 if ($handle = opendir($localdir_error)) {
-  // Ei siirretä feilattuja enää uudestaan jos feilaa taas
+  // Ei siirretÃ¤ feilattuja enÃ¤Ã¤ uudestaan jos feilaa taas
   unset($ftpfail);
   while (($file = readdir($handle)) !== FALSE) {
     $ftpfile = realpath($localdir_error."/".$file);

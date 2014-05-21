@@ -28,7 +28,7 @@ else {
       }
       </script>
 
-      <!-- Enabloidaan shiftill‰ checkboxien chekkaus //-->
+      <!-- Enabloidaan shiftill√§ checkboxien chekkaus //-->
       <script src='inc/checkboxrange.js'></script>
 
       <script language='javascript' type='text/javascript'>
@@ -51,7 +51,7 @@ else {
       $ruksaa = array_merge($pakolliset,$wherelliset);
     }
 
-    // Oletusaliakset ja onko niiss‰ pakollisia
+    // Oletusaliakset ja onko niiss√§ pakollisia
     $query = "SELECT distinct selite
               FROM avainsana
               WHERE yhtio      = '$kukarow[yhtio]'
@@ -77,7 +77,7 @@ else {
   // jos ollaan annettu uusirappari nimi, niin unohdetaan dropdowni!
   if ($uusirappari != "") $kysely = "";
 
-  // n‰it‰ muuttujia ei tallenneta
+  // n√§it√§ muuttujia ei tallenneta
   $ala_tallenna = array("kysely", "uusirappari", "edkysely", "rtee");
 
   // tallennetaan uusi kysely
@@ -85,19 +85,19 @@ else {
     tallenna_muisti($uusirappari, $ala_tallenna);
   }
 
-  // tallennetaan aina myˆs kysely uudestaan jos sit‰ ajetaan (jos on oma rappari)
+  // tallennetaan aina my√∂s kysely uudestaan jos sit√§ ajetaan (jos on oma rappari)
   if ($rtee == "AJA" and $kysely != '' and $kysely_kuka == $kukarow["kuka"]) {
     tallenna_muisti($kysely_mika, $ala_tallenna);
   }
 
-  // jos kysely on valittuna mutta ei olla viel‰ ajamassa niin haetaan muuttujat
+  // jos kysely on valittuna mutta ei olla viel√§ ajamassa niin haetaan muuttujat
   if ($kysely != "" and $rtee != "AJA") {
     hae_muisti($kysely_mika, $kysely_kuka);
   }
 
   if ($rtee == "AJA" and is_array($kentat)) {
 
-    //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+    //* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
     $useslave = 1;
 
     require ("inc/connect.inc");
@@ -154,7 +154,7 @@ else {
 
     foreach ($jarjestys as $kentta => $jarj) {
       if ($jarj != "") {
-        // katotaan monesko t‰‰ oli alkuper‰sess‰ listassa
+        // katotaan monesko t√§√§ oli alkuper√§sess√§ listassa
         $looppi_apu = 1;
         foreach ($kentat as $kala1 => $kala2) {
           if ($kala1 == $kentta) {
@@ -176,7 +176,7 @@ else {
                 $order";
     $result = mysql_query($sqlhaku) or pupe_error($sqlhaku);
 
-    echo "<font class='message'><pre>$sqlhaku</pre><br>".t("Haun tulos")." ".mysql_num_rows($result)." ".t("rivi‰").".</font><br><br>";
+    echo "<font class='message'><pre>$sqlhaku</pre><br>".t("Haun tulos")." ".mysql_num_rows($result)." ".t("rivi√§").".</font><br><br>";
 
     if (mysql_num_rows($result) > 0) {
       if (include('inc/pupeExcel.inc')) {
@@ -332,7 +332,7 @@ else {
     echo "<tr><td>".t("Tallenna kysely").":</td><td><input type='text' size='20' name='uusirappari' value=''></td></tr>";
     echo "<tr><td>".t("Valitse kysely").":</td><td>";
 
-    // tehd‰‰n "serializoitua" dataa ni etsit‰‰n t‰ll‰ vain t‰m‰n tablen tallennettuja kyselyit‰...
+    // tehd√§√§n "serializoitua" dataa ni etsit√§√§n t√§ll√§ vain t√§m√§n tablen tallennettuja kyselyit√§...
     $data = "\"table\";s:".strlen($table).":\"$table\"";
 
     //Haetaan tallennetut kyselyt
@@ -363,11 +363,11 @@ else {
     echo "</table><br><br>";
 
     echo "<table>";
-    echo "<tr><td>".t("Ruksaa sis‰‰nluvussa pakolliset kent‰t").":</td><td><input type='submit' name='ruks_pakolliset' value='".t("Ruksaa")."'></td></tr>";
+    echo "<tr><td>".t("Ruksaa sis√§√§nluvussa pakolliset kent√§t").":</td><td><input type='submit' name='ruks_pakolliset' value='".t("Ruksaa")."'></td></tr>";
     echo "</table><br><br>";
 
     echo "<table>";
-    echo "<tr><th>".t("Kentt‰")."</th><th>".t("Valitse")."</th><th>".t("Operaattori")."</th><th>".t("Rajaus")."</th><th>".t("J‰rjestys")."</th></tr>";
+    echo "<tr><th>".t("Kentt√§")."</th><th>".t("Valitse")."</th><th>".t("Operaattori")."</th><th>".t("Rajaus")."</th><th>".t("J√§rjestys")."</th></tr>";
 
     $kala = array();
 
@@ -375,7 +375,7 @@ else {
 
       list($taulu, $sarake) = explode(".", $row[0]);
 
-      //tehd‰‰n array, ett‰ saadaan sortattua nimen mukaan..
+      //tehd√§√§n array, ett√§ saadaan sortattua nimen mukaan..
       if ($kentat[$row[0]] == $row[0]) {
         $chk = "CHECKED";
       }

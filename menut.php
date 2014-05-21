@@ -2,7 +2,7 @@
 
 require ("inc/parametrit.inc");
 
-echo "<font class='head'>".t("Menujen yll‰pito")."</font><hr>";
+echo "<font class='head'>".t("Menujen yll√§pito")."</font><hr>";
 
 $syncyhtiot = $yhtiot;
 unset($syncyhtiot["REFERENSSI"]);
@@ -34,7 +34,7 @@ if (isset($synkronoi) and count($syncyhtiot) > 1) {
             ORDER BY sovellus, jarjestys, jarjestys2";
   $result = pupe_query($query);
 
-  //poistetaan molemilta yhtiˆilt‰ t‰m‰ menu
+  //poistetaan molemilta yhti√∂ilt√§ t√§m√§ menu
   $query = "DELETE
             FROM oikeu
             WHERE yhtio in ($yht)
@@ -84,7 +84,7 @@ if (isset($synkronoi) and count($syncyhtiot) > 1) {
                 muuttaja   = '{$kukarow['kuka']}'";
       $insresult = pupe_query($query);
 
-      //p‰ivitett‰n k‰ytt‰jien oikeudet
+      //p√§ivitett√§n k√§ytt√§jien oikeudet
       $query = "UPDATE oikeu
                 SET nimitys  = '$row[nimitys]',
                 jarjestys    = '$jarj',
@@ -171,7 +171,7 @@ if ((isset($synkronoireferenssi) OR isset($synkronoireferenssialapaivita)) and c
     }
   }
 
-  // Sortataan array niin ett‰ omat privaatit lis‰ykset tulee sopivaan rakoon referenssiin n‰hden
+  // Sortataan array niin ett√§ omat privaatit lis√§ykset tulee sopivaan rakoon referenssiin n√§hden
   $jarj0 = $jarj1 = $jarj2 = array();
   foreach ($rows as $key => $row) {
     $jarj0[$key] = $row['sovellus'];
@@ -235,7 +235,7 @@ if ((isset($synkronoireferenssi) OR isset($synkronoireferenssialapaivita)) and c
         $insid = mysql_insert_id();
 
         if (isset($synkronoireferenssialapaivita)) {
-          // Jos lis‰t‰‰n uusi v‰liin, niin loput pit‰‰ tyˆnt‰‰ v‰h‰n eteenp‰in
+          // Jos lis√§t√§√§n uusi v√§liin, niin loput pit√§√§ ty√∂nt√§√§ v√§h√§n eteenp√§in
           $query = "UPDATE oikeu
                     SET jarjestys  = jarjestys+10,
                     muutospvm      = now(),
@@ -248,7 +248,7 @@ if ((isset($synkronoireferenssi) OR isset($synkronoireferenssialapaivita)) and c
         }
       }
 
-      // p‰ivitett‰n k‰ytt‰jien oikeudet
+      // p√§ivitett√§n k√§ytt√§jien oikeudet
       if (!isset($synkronoireferenssialapaivita)) {
         $query = "UPDATE oikeu
                   SET nimitys  = '$row[nimitys]',
@@ -283,7 +283,7 @@ if ($tee == "PAIVITAJARJETYS") {
 
       $row = mysql_fetch_array($result);
 
-      //p‰ivitet‰‰n uudet menun tiedot kaikille k‰ytt‰jille
+      //p√§ivitet√§√§n uudet menun tiedot kaikille k√§ytt√§jille
       $query = "UPDATE oikeu
                 SET jarjestys  = '$jarj',
                 jarjestys2     = '$jarjestys2[$tun]',
@@ -302,7 +302,7 @@ if ($tee == "PAIVITAJARJETYS") {
     }
   }
 
-  echo "<font class='message'>".t("J‰rjestykset p‰ivitetty")."!<br><br></font>";
+  echo "<font class='message'>".t("J√§rjestykset p√§ivitetty")."!<br><br></font>";
 
 
   $yhtiot = array();
@@ -334,7 +334,7 @@ if ($tee == "PAIVITA") {
       $yht = str_replace(",","','",$yht);
       $yht = "'".$yht."'";
 
-      //p‰ivitet‰‰n uudet menun tiedot kaikille k‰ytt‰jille
+      //p√§ivitet√§√§n uudet menun tiedot kaikille k√§ytt√§jille
       $query = "UPDATE oikeu
                 SET sovellus = '$sove',
                 nimi           = '$nimi',
@@ -357,7 +357,7 @@ if ($tee == "PAIVITA") {
       $result = pupe_query($query);
       $num1 = mysql_affected_rows();
 
-      echo "<font class='message'>$num1 ".t("rivi‰ p‰ivitetty")."!<br></font>";
+      echo "<font class='message'>$num1 ".t("rivi√§ p√§ivitetty")."!<br></font>";
     }
 
     $yhtiot = array();
@@ -398,7 +398,7 @@ if ($tee == "PAIVITA") {
         $result = pupe_query($query);
         $num = mysql_affected_rows();
 
-        echo "<font class='message'>$num ".t("rivi‰ lis‰tty")."!<br></font>";
+        echo "<font class='message'>$num ".t("rivi√§ lis√§tty")."!<br></font>";
       }
     }
   }
@@ -439,13 +439,13 @@ if ($tee == "MUUTA") {
   }
 
   echo "<table>
-      <tr><th>".t("Muokataan yhtˆille")."</th><td>".str_replace(",REFERENSSI" , "", $yht)."</td></tr>
+      <tr><th>".t("Muokataan yht√∂ille")."</th><td>".str_replace(",REFERENSSI" , "", $yht)."</td></tr>
       <tr><th>".t("Sovellus")."</th><td><input type='text' name='sove' value='$sove'></td></tr>
       <tr><th>".t("Nimi")."</th><td><input type='text' name='nimi' value='$nimi'></td></tr>
       <tr><th>".t("Alanimi")."</th><td><input type='text' name='alanimi' value='$alanimi'></td></tr>
       <tr><th>".t("Nimitys")."</th><td><input type='text' name='nimitys' value='$nimitys'></td></tr>
-      <tr><th>".t("J‰rjestys")."</th><td><input type='text' name='jarjestys' value='$jarjestys'></td></tr>
-      <tr><th>".t("J‰rjestys2")."</th><td><input type='text' name='jarjestys2' value='$jarjestys2'></td></tr>";
+      <tr><th>".t("J√§rjestys")."</th><td><input type='text' name='jarjestys' value='$jarjestys'></td></tr>
+      <tr><th>".t("J√§rjestys2")."</th><td><input type='text' name='jarjestys2' value='$jarjestys2'></td></tr>";
 
   if ($hidden != '') {
     $chk = "CHECKED";
@@ -458,7 +458,7 @@ if ($tee == "MUUTA") {
       <tr><th>".t("Kopioi")."</th><td><input type='checkbox' name='kopioi'></td></tr>
       </table>
       <br>
-      <input type='submit' value='".t("P‰ivit‰")."'>
+      <input type='submit' value='".t("P√§ivit√§")."'>
       </form>";
 
   if ($tunnus > 0) {
@@ -473,7 +473,7 @@ if ($tee == "MUUTA") {
 }
 
 if ($tee == 'POISTA') {
-  // haetaan poistettavan rivin alkuper‰iset tiedot
+  // haetaan poistettavan rivin alkuper√§iset tiedot
   $query  = "SELECT *
              from oikeu
              where tunnus='$tunnus'";
@@ -488,7 +488,7 @@ if ($tee == 'POISTA') {
     $yht = str_replace(",","','",$yht);
     $yht = "'".$yht."'";
 
-    //p‰ivitet‰‰n uudet menun tiedot kaikille k‰ytt‰jille
+    //p√§ivitet√§√§n uudet menun tiedot kaikille k√§ytt√§jille
     $query = "DELETE from oikeu
               WHERE sovellus = '$row[sovellus]'
               and nimi       = '$row[nimi]'
@@ -501,11 +501,11 @@ if ($tee == 'POISTA') {
     $num1 = mysql_affected_rows();
 
     foreach ($yarray as $yhtio) {
-      // p‰ivite‰‰n kuka-tauluun mitk‰ k‰ytt‰j‰t on aktiivisia ja mitk‰ poistettuja
+      // p√§ivite√§√§n kuka-tauluun mitk√§ k√§ytt√§j√§t on aktiivisia ja mitk√§ poistettuja
       paivita_aktiiviset_kayttajat("", $yhtio);
     }
 
-    echo "<font class='message'>$num1 ".t("rivi‰ poistettu")."!<br></font>";
+    echo "<font class='message'>$num1 ".t("rivi√§ poistettu")."!<br></font>";
   }
 
   $yhtiot = array();
@@ -538,7 +538,7 @@ if ($tee == "") {
       $chk = "";
     }
 
-    echo "<tr><th>".t("N‰yt‰ yhtiˆ").":</th><td><input type='checkbox' name='yhtiot[$prow[yhtio]]' value='$prow[yhtio]' $chk onclick='submit();'> $prow[nimi]</td></tr>";
+    echo "<tr><th>".t("N√§yt√§ yhti√∂").":</th><td><input type='checkbox' name='yhtiot[$prow[yhtio]]' value='$prow[yhtio]' $chk onclick='submit();'> $prow[nimi]</td></tr>";
     $sovyhtiot .= "'$prow[yhtio]',";
   }
 
@@ -549,7 +549,7 @@ if ($tee == "") {
     $chk = "";
   }
 
-  echo "<tr><th>".t("N‰yt‰ referenssivalikot").":</th><td><input type='checkbox' name='yhtiot[REFERENSSI]' value='REFERENSSI' $chk onclick='submit();'></td></tr>";
+  echo "<tr><th>".t("N√§yt√§ referenssivalikot").":</th><td><input type='checkbox' name='yhtiot[REFERENSSI]' value='REFERENSSI' $chk onclick='submit();'></td></tr>";
 
   $sovyhtiot = substr($sovyhtiot,0,-1);
 
@@ -562,7 +562,7 @@ if ($tee == "") {
 
   echo "<tr><th>".t("Valitse sovellus").":</th><td><select name='sovellus' onchange='submit();'>";
 
-  echo "<option value=''>".t("N‰yt‰ kaikki").":</option>";
+  echo "<option value=''>".t("N√§yt√§ kaikki").":</option>";
 
   while ($orow = mysql_fetch_array($result)) {
     $sel = '';
@@ -579,7 +579,7 @@ if ($tee == "") {
   }
 
   echo "<tr><th>".t("Synkronoi referenssiin").":</th><td><input type='submit' name='synkronoireferenssi' value='".t("Synkronoi")."'></td></tr>";
-  echo "<tr><th>".t("Synkronoi referenssiin")." ".t("‰l‰ p‰ivit‰ j‰rjestyksi‰").":</th><td><input type='submit' name='synkronoireferenssialapaivita' value='".t("Synkronoi")."'></td></tr>";
+  echo "<tr><th>".t("Synkronoi referenssiin")." ".t("√§l√§ p√§ivit√§ j√§rjestyksi√§").":</th><td><input type='submit' name='synkronoireferenssialapaivita' value='".t("Synkronoi")."'></td></tr>";
 
   echo "</form>";
 
@@ -596,7 +596,7 @@ if ($tee == "") {
     echo "<input type='hidden' name='sovellus' value='$sovellus'>";
     echo "<input type='hidden' name='sove' value='$sovellus'>";
     echo "<input type='hidden' name='yht' value='$yht'>";
-    echo "<tr><th>".t("Uusi valikko").":</th><td><input type='submit' value='".t("Lis‰‰")."'></td></tr>";
+    echo "<tr><th>".t("Uusi valikko").":</th><td><input type='submit' value='".t("Lis√§√§")."'></td></tr>";
     echo "</form>";
   }
 
@@ -748,7 +748,7 @@ if ($tee == "") {
       echo "</table>";
 
       if ($yhtio != "REFERENSSI") {
-        echo "<input type='submit' value='".t("P‰ivit‰ j‰rjestykset")."'>\n";
+        echo "<input type='submit' value='".t("P√§ivit√§ j√§rjestykset")."'>\n";
         echo "</form>";
       }
 

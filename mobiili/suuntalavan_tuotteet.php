@@ -20,7 +20,7 @@ if (isset($submit) and trim($submit) != '') {
 
   # edit ja submit tarvitsee valitun rivin.
   if (!isset($_POST['tilausrivi']) and $viivakoodi == '') {
-    $error['tuotteet'] = t("Rivi‰ ei ole valittu").'.';
+    $error['tuotteet'] = t("Rivi√§ ei ole valittu").'.';
   }
 
   if ($submit == 'varalle') {
@@ -59,15 +59,15 @@ if (isset($alusta_tunnus)) {
   $eankoodi = (isset($viivakoodi) and trim($viivakoodi))  ? trim($viivakoodi) : "";
   $res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, $orderby, $ascdesc, "", "", $eankoodi);
 
-  # Jos tuotetta ei lˆydy t‰lt‰ lavalta
+  # Jos tuotetta ei l√∂ydy t√§lt√§ lavalta
   if (mysql_num_rows($res) == 0 && $eankoodi != '') {
-    $error['tuotteet'] = t("Suuntalavalta ei lˆytynyt kyseist‰ tuotetta");
+    $error['tuotteet'] = t("Suuntalavalta ei l√∂ytynyt kyseist√§ tuotetta");
     # Haetaan tuotteet uudelleen ilman eankoodia
     $res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, $orderby, $ascdesc);
   }
-  # Muuten tyhj‰ lava
+  # Muuten tyhj√§ lava
   elseif(mysql_num_rows($res) == 0) {
-    echo t("Suuntalava on tyhj‰")."!<br/>";
+    echo t("Suuntalava on tyhj√§")."!<br/>";
 
     echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=alusta.php'>";
     exit;
@@ -92,7 +92,7 @@ if (isset($alusta_tunnus)) {
 
 echo "<div class='header'>";
 if (isset($viivakoodi)) {
-  //Jos viivakoodilla ollaan etsitty jotain, back-nappi palaa kokolistaus-n‰kym‰‰n
+  //Jos viivakoodilla ollaan etsitty jotain, back-nappi palaa kokolistaus-n√§kym√§√§n
   echo "<button onclick='window.location.href=\"suuntalavan_tuotteet.php?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}&sort_by=tuoteno&sort_by_direction_tuoteno={$sort_by_direction_tuoteno}\"' class='button left'><img src='back2.png'></button>";
 }
 else {
@@ -133,7 +133,7 @@ echo $sort_by_direction_tuoteno == 'asc' ? "<img src='{$palvelin2}pics/lullacons
 
 echo "</th>
 <th nowrap>
-<a href='suuntalavan_tuotteet.php?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}&sort_by=maara&sort_by_direction_maara={$sort_by_direction_maara}'>",t("M‰‰r‰"),"</a>&nbsp;";
+<a href='suuntalavan_tuotteet.php?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}&sort_by=maara&sort_by_direction_maara={$sort_by_direction_maara}'>",t("M√§√§r√§"),"</a>&nbsp;";
 
 echo $sort_by_direction_maara == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
 
@@ -175,7 +175,7 @@ echo "</th>
     # tuotepaikat oletuspaikoiksi.
     if ($oletuspaikat) {
 
-      # P‰ivitet‰‰n tilausriveille oletuspaikat.
+      # P√§ivitet√§√§n tilausriveille oletuspaikat.
       $oletus_query = "SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso
                        FROM tuotepaikat
                        WHERE tuoteno='{$tuote['tuoteno']}'
@@ -191,8 +191,8 @@ echo "</th>
           'hyllytaso' => $oletus['hyllytaso']
         );
 
-      # Jos tilausrivill‰ oleva hyllypaikka ei ole tuotteen oletuspaikka
-      # p‰ivitet‰‰n tilausrivin hyllypaikka oletuspaikaksi.
+      # Jos tilausrivill√§ oleva hyllypaikka ei ole tuotteen oletuspaikka
+      # p√§ivitet√§√§n tilausrivin hyllypaikka oletuspaikaksi.
       if ($tuote['osoite'] != implode(" ", $hylly)) {
         paivita_tilausrivin_hylly($tuote['tilriv_tunnus'], $hylly);
         $tuote['osoite'] = implode(" ", $hylly);
@@ -215,7 +215,7 @@ echo "<script type='text/javascript'>
 
   $(document).ready(function() {
     $('#viivakoodi').on('keyup', function() {
-      // Autosubmit vain jos on syˆtetty tarpeeksi pitk‰ viivakoodi
+      // Autosubmit vain jos on sy√∂tetty tarpeeksi pitk√§ viivakoodi
       if ($('#viivakoodi').val().length > 8) {
         document.getElementById('valitse_nappi').click();
       }

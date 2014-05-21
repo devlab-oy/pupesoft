@@ -81,7 +81,7 @@ echo "  <script type='text/javascript'>
 
     </script>";
 
-echo "<font class='head'>",t("Ker‰ysvyˆhykeallokointi"),"</font><hr>";
+echo "<font class='head'>",t("Ker√§ysvy√∂hykeallokointi"),"</font><hr>";
 
 $query = "SELECT *
           FROM keraysvyohyke
@@ -94,7 +94,7 @@ if (mysql_num_rows($keraysvyohyke_res) > 0) {
   echo "<div id='divi' style='display:none;'>";
   echo "<table>";
   echo "<tr>";
-  echo "<th id='th_0'>",t("Ker‰‰j‰"),"</th>";
+  echo "<th id='th_0'>",t("Ker√§√§j√§"),"</th>";
 
   $id = 1;
   while ($keraysvyohyke_row = mysql_fetch_assoc($keraysvyohyke_res)) {
@@ -110,7 +110,7 @@ if (mysql_num_rows($keraysvyohyke_res) > 0) {
 
   echo "<thead>";
   echo "<tr>";
-  echo "<th id='thead_keraaja'>",t("Ker‰‰j‰"),"</th>";
+  echo "<th id='thead_keraaja'>",t("Ker√§√§j√§"),"</th>";
 
   mysql_data_seek($keraysvyohyke_res, 0);
 

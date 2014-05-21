@@ -1,6 +1,6 @@
 <?php
 
-//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+//* TÃ¤mÃ¤ skripti kÃ¤yttÃ¤Ã¤ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("inc/parametrit.inc");
@@ -60,7 +60,7 @@ echo "<tr>
     <th><a href='?sort=puhno&nimi_haku=$nimi_haku&puhno_haku=$puhno_haku&eposti_haku=$eposti_haku&osasto_haku=$osasto_haku&yhtio_haku=$yhtio_haku'>puhno</a></th>
     <th><a href='?sort=eposti&nimi_haku=$nimi_haku&puhno_haku=$puhno_haku&eposti_haku=$eposti_haku&osasto_haku=$osasto_haku&yhtio_haku=$yhtio_haku'>eposti</a></th>
     <th><a href='?sort=osasto&nimi_haku=$nimi_haku&puhno_haku=$puhno_haku&eposti_haku=$eposti_haku&osasto_haku=$osasto_haku&yhtio_haku=$yhtio_haku'>osasto</a></th>
-    <th><a href='?sort=yhtio&nimi_haku=$nimi_haku&puhno_haku=$puhno_haku&eposti_haku=$eposti_haku&osasto_haku=$osasto_haku&yhtio_haku=$yhtio_haku'>yhtiö</a></th>
+    <th><a href='?sort=yhtio&nimi_haku=$nimi_haku&puhno_haku=$puhno_haku&eposti_haku=$eposti_haku&osasto_haku=$osasto_haku&yhtio_haku=$yhtio_haku'>yhtiÃ¶</a></th>
   </tr>";
 
 echo "<input type='hidden' name='sort' value = '$sort'>";

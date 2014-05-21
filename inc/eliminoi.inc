@@ -7,7 +7,7 @@ if (isset($tee)) {
   $alvp = (int) $alvp;
   $tkausi = (int) $tkausi;
 
-  // Tutkitaan ensiksi, mille tilikaudelle pyydett‰v‰ lista lˆytyy, jos lista on sopiva
+  // Tutkitaan ensiksi, mille tilikaudelle pyydett√§v√§ lista l√∂ytyy, jos lista on sopiva
   $blvk = 0;
   $blvp = 0;
 
@@ -34,13 +34,13 @@ if (isset($tee)) {
   }
 
   if (mysql_num_rows($result) != 1) {
-    echo "<font class='error'>".t("Sopivaa yrityksen tilikautta ei lˆytynyt")."</font>";
+    echo "<font class='error'>".t("Sopivaa yrityksen tilikautta ei l√∂ytynyt")."</font>";
     exit;
   }
 
   $tilikaudetrow = mysql_fetch_array($result);
 
-  $lisa = '';  // Tiliˆintien haku
+  $lisa = '';  // Tili√∂intien haku
   $lisa2 = ''; // Alkusaldon laskentaan
 
   if ($tkausi != 0) {
@@ -59,7 +59,7 @@ if (isset($tee)) {
     $lisa2 = "tiliointi.tapvm < '$alvv-$alvk-01'";
   }
   else {
-    echo "<font class='head'>".t("Eliminointi")." ".t("p‰iv‰lt‰")." $alvv-$alvk-$alvp</font><hr>";
+    echo "<font class='head'>".t("Eliminointi")." ".t("p√§iv√§lt√§")." $alvv-$alvk-$alvp</font><hr>";
     $lisa  = "tiliointi.tapvm = '$alvv-$alvk-$alvp'";
     $lisa2 = "tiliointi.tapvm < '$alvv-$alvk-$alvp'";
   }
@@ -181,7 +181,7 @@ if (isset($tee)) {
       $trow = $tilirivi[$key];
       //echo "<td>'$key','$sorttaus[$key]'</td>";
 
-      // katotaan saadaanko n‰ytt‰‰ eliminoitu rivi:
+      // katotaan saadaanko n√§ytt√§√§ eliminoitu rivi:
       if (!isset($valitut[$key]) or $alanayta == "") {
 
         echo "<tr class='aktiivi'>";
@@ -218,7 +218,7 @@ if (isset($tee)) {
 
               echo "<td class='$class' align='right' nowrap>";
 
-              if($excel=='') { // tehd‰‰n linkki jos ei haluta excel muodossa
+              if($excel=='') { // tehd√§√§n linkki jos ei haluta excel muodossa
                 echo "<a href = 'muutosite.php?tee=E&tunnus=$trow[ltunnus]'><font $class>";
                 echo str_replace(".",",",sprintf("%.2f", $trow[$i]));
                 echo "</font></a>";
@@ -242,7 +242,7 @@ if (isset($tee)) {
 
           }
           else {
-            // Selv‰kieliset tarkenteet
+            // Selv√§kieliset tarkenteet
             if (($i > 1) and ($i < 5) and ($trow[$i] > 0)) {
               $query = "SELECT nimi
                         FROM kustannuspaikka
@@ -267,9 +267,9 @@ if (isset($tee)) {
       }
     }
 
-    // Jos halutaan excel muotoa niin ei tehd‰ t‰t‰..
+    // Jos halutaan excel muotoa niin ei tehd√§ t√§t√§..
     if ($excel=='') {
-      echo "<tr><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Negatiiviset yhteens‰")."</td>";
+      echo "<tr><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Negatiiviset yhteens√§")."</td>";
       echo "<td align = 'right' nowrap>";
       printf("%.2f", $summamiinus);
       echo "</td><td>*</td>";
@@ -280,7 +280,7 @@ if (isset($tee)) {
 
       echo "</tr>";
 
-      echo "<tr><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Positiiviset yhteens‰")."</td>";
+      echo "<tr><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Positiiviset yhteens√§")."</td>";
       echo "<td align = 'right' nowrap>";
       printf("%.2f", $summaplus);
       echo "</td><td>*</td>";
@@ -292,7 +292,7 @@ if (isset($tee)) {
       echo "</tr>";
 
       $summa = $summaplus + $summamiinus;
-      echo "<tr><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Yhteens‰")."</td>";
+      echo "<tr><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Yhteens√§")."</td>";
       echo "<td align = 'right'>";
       printf("%.2f", $summa);
       echo "</td><td>*</td>";
@@ -485,10 +485,10 @@ if (isset($tee)) {
   echo "</select></td>";
   echo "</tr>";
 
-  echo "<tr><th>".t("ƒl‰ n‰yt‰ eliminoituja tiliˆintej‰")."</th><td><input type='checkbox' name='alanayta'></td></tr>";
+  echo "<tr><th>".t("√Ñl√§ n√§yt√§ eliminoituja tili√∂intej√§")."</th><td><input type='checkbox' name='alanayta'></td></tr>";
   echo "<tr><th>".t("Excel muoto")."</th><td><input type='checkbox' name='excel'></td></tr>";
   echo "</table><br>
-        <input type = 'submit' value = '".t("N‰yt‰")."'></form>";
+        <input type = 'submit' value = '".t("N√§yt√§")."'></form>";
 
   $formi = 'valinta';
   $kentta = 'tili';

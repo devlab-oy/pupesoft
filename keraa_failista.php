@@ -6,7 +6,7 @@ if ($tee == "keraa") {
   if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE)) {
 
     if ($_FILES['userfile']['size'] == 0) {
-      echo "<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font>";
+      echo "<font class='error'><br>".t("Tiedosto on tyhj√§")."!</font>";
       $tee = '';
     }
 
@@ -16,7 +16,7 @@ if ($tee == "keraa") {
     $retval = tarkasta_liite("userfile", array("XLSX","XLS","ODS","SLK","XML","GNUMERIC","CSV","TXT","DATAIMPORT"));
 
     if ($retval !== TRUE) {
-      echo "<font class='error'><br>".t("V‰‰r‰ tiedostomuoto")."!</font>";
+      echo "<font class='error'><br>".t("V√§√§r√§ tiedostomuoto")."!</font>";
       $tee = '';
     }
   }
@@ -58,7 +58,7 @@ if ($tee == "keraa") {
     $result = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($result) != 1) {
-      echo "<font class='error'>".t("Tilausta: %s ei voida merkata ker‰tyksi. Tilaus v‰‰r‰ss‰ tilassa", "", $tilaus)."!</font><br>";
+      echo "<font class='error'>".t("Tilausta: %s ei voida merkata ker√§tyksi. Tilaus v√§√§r√§ss√§ tilassa", "", $tilaus)."!</font><br>";
       continue;
     }
     else {
@@ -88,16 +88,16 @@ if ($tee == "keraa") {
         $tilauksenrivit[] = $valmis_era_chk_row['tunnus'];
 
         if ($rivimaara == 1 and $valmis_era_chk_row['varattu'] != $kpl) {
-          // Vain yksi rivi ja ker‰tty m‰‰r‰ on eri ku myyty m‰‰r‰
+          // Vain yksi rivi ja ker√§tty m√§√§r√§ on eri ku myyty m√§√§r√§
           $maara[$valmis_era_chk_row['tunnus']] = $kpl;
         }
         elseif ($rivimaara > 1 and $rivimaara < $rivilask and $valmis_era_chk_row['varattu'] > $kpl) {
-          // Enemm‰n kuin yksi rivi ja ker‰tty m‰‰r‰ on pienempi kuin myyty m‰‰r‰
+          // Enemm√§n kuin yksi rivi ja ker√§tty m√§√§r√§ on pienempi kuin myyty m√§√§r√§
           $maara[$valmis_era_chk_row['tunnus']] = $kpl;
           $kpl = 0;
         }
         elseif ($rivimaara > 1 and $rivimaara == $rivilask and $valmis_era_chk_row['varattu'] != $kpl) {
-          // Vika rivi ja ker‰tty m‰‰r‰ on eri kuin myyty m‰‰r‰
+          // Vika rivi ja ker√§tty m√§√§r√§ on eri kuin myyty m√§√§r√§
           $maara[$valmis_era_chk_row['tunnus']] = $kpl;
         }
         else {
@@ -187,12 +187,12 @@ if ($tee == "keraa") {
     $kirre = pupe_query($query);
     $prirow = mysql_fetch_assoc($kirre);
 
-    // vakadr-tulostin on aina sama kuin l‰hete-tulostin
+    // vakadr-tulostin on aina sama kuin l√§hete-tulostin
     $valittu_tulostin = $vakadr_tulostin = $prirow['printteri1'];
     $valittu_oslapp_tulostin = $prirow['printteri3'];
 
     $lasku_yhtio = "";
-    $real_submit = "Merkkaa ker‰tyksi";
+    $real_submit = "Merkkaa ker√§tyksi";
 
     require('tilauskasittely/keraa.php');
   }
@@ -202,7 +202,7 @@ echo "<br><br><form method='post' enctype='multipart/form-data'>";
 echo "<input type='hidden' name='tee' value='keraa'>";
 
 echo "<br><br>
-    <font class='head'>".t("Lue ker‰tt‰v‰t tuotteet tiedostosta")."</font><hr>
+    <font class='head'>".t("Lue ker√§tt√§v√§t tuotteet tiedostosta")."</font><hr>
     <table>
     <tr><th colspan='3'>".t("Tiedostomuoto").":</th></tr>
     <tr>";

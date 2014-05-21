@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("../inc/parametrit.inc");
@@ -17,20 +17,20 @@ echo "<td><input type='text' size='10' name='vv' value='$vv'><input type='text' 
 echo "<td class='back'></td>";
 echo "</tr><tr>";
 echo "<th>".t("Anna osasto")."</th>";
-echo "<td><input type='text' size='10' name='osasto' value='$osasto'> ".t("(tyhj‰ = kaikki)")."</td>";
+echo "<td><input type='text' size='10' name='osasto' value='$osasto'> ".t("(tyhj√§ = kaikki)")."</td>";
 echo "<td class='back'><input name='submit' type='submit' value='".t("Aja raportti")."'></td>";
 echo "</tr>";
 echo "</table>";
 echo "</form>";
 
-// jos meill‰ on onnistuneesti valittu asiakas
+// jos meill√§ on onnistuneesti valittu asiakas
 if ($submit != '' and $vv != '' and $kk != '') {
 
-  // hardcoodataan v‰rej‰
+  // hardcoodataan v√§rej√§
   $cmyynti = "#9999ff";
   $ckate   = "#ff9955";
   $ckatepr = "#00dd00";
-  $maxcol  = 12; // montako columnia n‰yttˆ on
+  $maxcol  = 12; // montako columnia n√§ytt√∂ on
 
   if ($osasto != "") {
     $where = "and osasto='$osasto'";
@@ -43,7 +43,7 @@ if ($submit != '' and $vv != '' and $kk != '') {
   $ayy = "$vv-$kk-01";
   $lyy = date("Y-m-01",mktime(0, 0, 0, $kk+1, 1, $vv));
 
-  // tehd‰‰n asiakkaan ostot tuoteryhm‰st‰
+  // tehd√§√§n asiakkaan ostot tuoteryhm√§st√§
   echo "<br><font class='message'>".t("Tuoteryhmien myynnit")." $vv-$kk ".t("osastolta")." $osasto (<font color='$cmyynti'>".t("myynti")."</font>/<font color='$ckate'>".t("kate")."</font>/<font color='$ckatepr'>".t("kateprosentti")."</font>)</font><hr>";
 
   $query  = "SELECT
@@ -81,7 +81,7 @@ if ($submit != '' and $vv != '' and $kk != '') {
 
     if ($col==1) echo "<tr>\n";
 
-    // lasketaan pylv‰iden korkeus
+    // lasketaan pylv√§iden korkeus
     if ($maxeur>0) {
       $hmyynti  = round(50*$sumrow['myynti']/$maxeur,0);
       $hkate    = round(50*$sumrow['kate']/$maxeur,0);
@@ -121,7 +121,7 @@ if ($submit != '' and $vv != '' and $kk != '') {
     $col++;
   }
 
-  // teh‰‰n validia htmll‰‰ ja t‰ytet‰‰n tyhj‰t solut..
+  // teh√§√§n validia htmll√§√§ ja t√§ytet√§√§n tyhj√§t solut..
   $ero = $maxcol+1-$col;
 
   if ($ero<>$maxcol)

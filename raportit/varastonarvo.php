@@ -1,6 +1,6 @@
 <?php
 
-// T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta
+// T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta
 $useslave = 1;
 
 require ("../inc/parametrit.inc");
@@ -10,7 +10,7 @@ if (!isset($tryittain)) $tryittain = "";
 
 echo "<font class='head'>",t("Varastonarvo"),"</font><hr>";
 
-echo " <!-- Enabloidaan shiftill‰ checkboxien chekkaus //-->
+echo " <!-- Enabloidaan shiftill√§ checkboxien chekkaus //-->
     <script src='../inc/checkboxrange.js'></script>
 
     <script language='javascript' type='text/javascript'>
@@ -27,7 +27,7 @@ else {
 }
 echo "<table>";
 echo "<tr>";
-echo "<th valign=top>".t('N‰yt‰ piilotetut varastot')."</th>";
+echo "<th valign=top>".t('N√§yt√§ piilotetut varastot')."</th>";
 
 echo "<td>";
 echo "<form method='POST'>";
@@ -38,7 +38,7 @@ echo "</tr>";
 echo "</table>";
 echo "<br />";
 
-// piirrell‰‰n formi
+// piirrell√§√§n formi
 echo "<form method='post'>";
 
 $monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI");
@@ -63,11 +63,11 @@ else {
 }
 
 echo "<tr>";
-echo "<th>",t("Aja tuotemerkeitt‰in"),":</th><td><input type='checkbox' name='merkki' $chk></td>";
+echo "<th>",t("Aja tuotemerkeitt√§in"),":</th><td><input type='checkbox' name='merkki' $chk></td>";
 echo "</tr>";
 
 echo "<tr>";
-echo "<th>",t("Tai tuoteryhmitt‰in"),":</th><td><input type='checkbox' name='tryittain' $chk2></td>";
+echo "<th>",t("Tai tuoteryhmitt√§in"),":</th><td><input type='checkbox' name='tryittain' $chk2></td>";
 echo "</tr>";
 
 $epakur_chk1 = "";
@@ -85,16 +85,16 @@ elseif ($epakur == 'ei_epakur') {
 }
 
 echo "<tr>";
-echo "<th>",t("N‰ytett‰v‰t tuotteet"),":</th><td>";
+echo "<th>",t("N√§ytett√§v√§t tuotteet"),":</th><td>";
 echo "<select name='epakur'>";
-echo "<option value='kaikki'    $epakur_chk1>",t("N‰yt‰ kaikki tuotteet"),"</option>";
-echo "<option value='epakur'    $epakur_chk2>",t("N‰yt‰ vain ep‰kurantit tuotteet"),"</option>";
-echo "<option value='ei_epakur' $epakur_chk3>",t("N‰yt‰ varastonarvoon vaikuttavat tuotteet"),"</option>";
+echo "<option value='kaikki'    $epakur_chk1>",t("N√§yt√§ kaikki tuotteet"),"</option>";
+echo "<option value='epakur'    $epakur_chk2>",t("N√§yt√§ vain ep√§kurantit tuotteet"),"</option>";
+echo "<option value='ei_epakur' $epakur_chk3>",t("N√§yt√§ varastonarvoon vaikuttavat tuotteet"),"</option>";
 echo "</select>";
 echo "</td></tr>";
 
 echo "<tr><th valign=top>",t('Varastot'),"<br /><br /><span style='font-size: 0.8em;'>"
-  ,t('Saat kaikki varastot jos et valitse yht‰‰n')
+  ,t('Saat kaikki varastot jos et valitse yht√§√§n')
   ,"</span></th>
     <td>";
 
@@ -133,7 +133,7 @@ if (isset($ajetaan)) {
   $epakurlisa    = "";
   $varastojoini   = "";
 
-  // $lisa -muuttuja tulee monivalintalaatikot-inc:st‰
+  // $lisa -muuttuja tulee monivalintalaatikot-inc:st√§
 
   $varastosumma    = 0;
   $bruttovarastosumma = 0;
@@ -170,10 +170,10 @@ if (isset($ajetaan)) {
     $orderby = "ORDER BY ".substr($orderby, 0, -1);
   }
 
-  // 12 kuukautta taaksepp‰in kuun eka p‰iv‰
+  // 12 kuukautta taaksepp√§in kuun eka p√§iv√§
   $kausi = date("Y-m-d", mktime(0, 0, 0, date("m")-12, 1, date("Y")));
 
-  // ep‰kurantti
+  // ep√§kurantti
   if ($epakur == 'epakur') {
     $epakurlisa = " AND (epakurantti100pvm != '0000-00-00' or epakurantti75pvm != '0000-00-00' or epakurantti50pvm != '0000-00-00' or epakurantti25pvm != '0000-00-00') ";
   }
@@ -234,7 +234,7 @@ if (isset($ajetaan)) {
   }
 
   if ($tryittain != '') {
-    echo "<th>",t("Tuoteryhm‰"),"</th>";
+    echo "<th>",t("Tuoteryhm√§"),"</th>";
   }
 
   if (isset($varastot) and count($varastot) > 0) {
@@ -281,7 +281,7 @@ if (isset($ajetaan)) {
 
     if ($merkki != '' or $tryittain != '') {
 
-      // tuotteen m‰‰r‰ varastossa nyt
+      // tuotteen m√§√§r√§ varastossa nyt
       $query = "SELECT sum(saldo) varasto
                 FROM tuote
                 JOIN tuotepaikat use index (tuote_index) on tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno
@@ -334,7 +334,7 @@ if (isset($ajetaan)) {
       $colspan++;
     }
 
-    echo "<td class='tumma' colspan='$colspan'>",t("Yhteens‰"),"</td>";
+    echo "<td class='tumma' colspan='$colspan'>",t("Yhteens√§"),"</td>";
     echo "<td class='tumma' align='right'>",sprintf("%.2f",$varastosumma),"</td>";
     echo "<td class='tumma' align='right'>",sprintf("%.2f",$bruttovarastosumma),"</td>";
     echo "</tr>";

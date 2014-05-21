@@ -17,7 +17,7 @@ echo "<link rel='stylesheet' type='text/css' href='fullcalendar.css' />
   <script type='text/javascript' src='valmistuslinjat.js'></script>";
 
 
-// Jos $teet‰ ei ole
+// Jos $teet√§ ei ole
 if (!isset($tee)) $tee = '';
 
 // Debug
@@ -25,7 +25,7 @@ if (isset($laske_kestot_uudelleen)) {
   rebuild_valmistuslinjat();
 }
 
-/** Valmistusten siirt‰minen valmistuslinjalla */
+/** Valmistusten siirt√§minen valmistuslinjalla */
 if (isset($method) and $method == 'move') {
 
   // Haetaan valitun valmistuksen tiedot
@@ -37,7 +37,7 @@ if (isset($method) and $method == 'move') {
   $result = pupe_query($query);
   $valittu_valmistus = mysql_fetch_assoc($result);
 
-  // Siiret‰‰n aiemmaksi
+  // Siiret√§√§n aiemmaksi
   if ($direction == 'left') {
     $edellinen = etsi_edellinen_valmistus($valittu_valmistus);
     if ($edellinen) {
@@ -45,7 +45,7 @@ if (isset($method) and $method == 'move') {
       vaihda_valmistusten_paikkaa($edellinen, $valittu_valmistus, $valittu_valmistus['henkilo']);
     }
   }
-  // Siirret‰‰n myˆh‰isemm‰ksi
+  // Siirret√§√§n my√∂h√§isemm√§ksi
   elseif ($direction == 'right') {
     $seuraava = etsi_seuraava_valmistus($valittu_valmistus);
     if ($seuraava) {
@@ -54,22 +54,22 @@ if (isset($method) and $method == 'move') {
   }
 }
 
-/** Poistetaan kalenterista kalenterimerkint‰ */
+/** Poistetaan kalenterista kalenterimerkint√§ */
 if (isset($tee) and $tee == 'poista' and is_numeric($tunnus)) {
   $poista_query = "DELETE FROM kalenteri WHERE yhtio='{$kukarow['yhtio']}' AND tunnus={$tunnus}";
   if (pupe_query($poista_query)) {
-    echo "Poistettiin kalenterimerkint‰!";
+    echo "Poistettiin kalenterimerkint√§!";
     $tee = '';
   }
 }
 
 /**
- * Valmistuksen tilan p‰ivitt‰minen
+ * Valmistuksen tilan p√§ivitt√§minen
  */
 if ($tee == 'paivita' and isset($method) and $method == 'update') {
   $valmistus = Valmistus::find($tunnus);
 
-  // Keskeyt‰ tyˆ (TK) ja Valmis tarkastukseen (VT) kysyy lis‰formilla tiedot valmistuksesta
+  // Keskeyt√§ ty√∂ (TK) ja Valmis tarkastukseen (VT) kysyy lis√§formilla tiedot valmistuksesta
   if (!isset($varmistus) and ($tila == 'VT') and $valmistus->getTila() == 'VA') {
 
     // VALMISTA FORMI
@@ -85,7 +85,7 @@ if ($tee == 'paivita' and isset($method) and $method == 'update') {
     echo "<table>";
     echo "<tr><th>".t("Valmistus")."</th><td>{$valmistus->tunnus()}</td></tr>";
 
-    // Mahdollisuus muuttaa valmistuksen p‰iv‰m‰‰ri‰
+    // Mahdollisuus muuttaa valmistuksen p√§iv√§m√§√§ri√§
     echo "<tr><th>".t("Aloitusaika")."</th>";
     echo "<td><input type='text' name='pvmalku' value='{$valmistus->pvmalku}'></td></tr>";
     echo "<tr><th>".t("Lopetusaika")."</th>";
@@ -99,13 +99,13 @@ if ($tee == 'paivita' and isset($method) and $method == 'update') {
         <td>{$valmiste['tuoteno']}
         </tr>";
       echo "<tr>
-        <th>".t("Valmistettava m‰‰r‰")."</th>
+        <th>".t("Valmistettava m√§√§r√§")."</th>
         <td><input type='text' name='valmisteet[{$valmiste['tunnus']}][maara]' value='{$valmiste['varattu']}'></td>
         </tr>";
     }
 
     echo "<tr>
-      <th>".t("Ylityˆtunnit")."</th>
+      <th>".t("Ylity√∂tunnit")."</th>
       <td><input type='text' name='ylityotunnit' value='{$valmistus->ylityotunnit}'></td>
       </tr>";
     echo "<tr>
@@ -119,9 +119,9 @@ if ($tee == 'paivita' and isset($method) and $method == 'update') {
     echo "<input type='submit' value='Valmis'>";
     echo "</form>";
   }
-  // KESKEYTƒ FORMI
+  // KESKEYT√Ñ FORMI
   elseif (!isset($varmistus) and ($tila == 'TK') and $valmistus->getTila() == 'VA') {
-    echo "<font class='head'>" . t("Keskeyt‰ tyˆ") . "</font>";
+    echo "<font class='head'>" . t("Keskeyt√§ ty√∂") . "</font>";
 
     echo "<form method='POST'>";
     echo "<input type='hidden' name='tunnus' value='$tunnus'>";
@@ -142,11 +142,11 @@ if ($tee == 'paivita' and isset($method) and $method == 'update') {
     }
 
     echo "<tr>
-      <th>".t("Ylityˆtunnit")."</th>
+      <th>".t("Ylity√∂tunnit")."</th>
       <td><input type='text' name='ylityotunnit' value='{$valmistus->ylityotunnit}'></td>
       </tr>";
     echo "<tr>
-      <th>".t("K‰ytetyt tunnit")."</th>
+      <th>".t("K√§ytetyt tunnit")."</th>
       <td><input type='text' name='kaytetyttunnit' value='{$valmistus->kaytetyttunnit}'></td>
       </tr>";
     echo "<tr><th>".t("Kommentit")."</th><td><input type='text' name='kommentti' value='{$valmistus->kommentti}'></td></tr>";
@@ -158,17 +158,17 @@ if ($tee == 'paivita' and isset($method) and $method == 'update') {
     echo "</form>";
   }
   else {
-    // Muut tilat p‰ivitet‰‰n suoraan
+    // Muut tilat p√§ivitet√§√§n suoraan
     $varmistus = 'ok';
   }
 
-  // Jos kaikki ok, p‰ivitet‰‰n valmistuksen tiedot
+  // Jos kaikki ok, p√§ivitet√§√§n valmistuksen tiedot
   if ($varmistus == 'ok') {
 
     // Splitatanko valmistus flag
     $splitataan = false;
 
-    // Tarkistetaan syˆtetyt m‰‰r‰t ja verrataan valmisteen tilauksen m‰‰riin
+    // Tarkistetaan sy√∂tetyt m√§√§r√§t ja verrataan valmisteen tilauksen m√§√§riin
     foreach ($valmistus->tuotteet() as $valmiste) {
 
       // Tarkastetaan tarvitseeko valmistusta splitata
@@ -179,9 +179,9 @@ if ($tee == 'paivita' and isset($method) and $method == 'update') {
       }
     }
 
-    // Valmistetta on valmistettu v‰hemmin kuin sit‰ on tilattu.
+    // Valmistetta on valmistettu v√§hemmin kuin sit√§ on tilattu.
     if ($splitataan) {
-      // Yritet‰‰n jakaa valmistus
+      // Yritet√§√§n jakaa valmistus
       try {
         $kopion_id = jaa_valmistus($valmistus->tunnus(), $jaettavat_valmisteet);
       } catch (Exception $e) {
@@ -189,7 +189,7 @@ if ($tee == 'paivita' and isset($method) and $method == 'update') {
       }
     }
 
-    // Jos valmistuksessa oleva tyˆ keskeytet‰‰n tai merkataan valmiiksi
+    // Jos valmistuksessa oleva ty√∂ keskeytet√§√§n tai merkataan valmiiksi
     if ($tila=='TK' or $tila=='VT' and $valmistus->getTila() == 'VA') {
 
       if ($pvmalku == '') {
@@ -201,11 +201,11 @@ if ($tee == 'paivita' and isset($method) and $method == 'update') {
       }
 
       if ($kaytetyttunnit > $valmistus->kesto()) {
-        $errors .= "<font class='error'>" . t("K‰ytetty enemm‰n kuin valmistuksen kesto") . "</font>";
+        $errors .= "<font class='error'>" . t("K√§ytetty enemm√§n kuin valmistuksen kesto") . "</font>";
       }
 
       if (empty($errors)) {
-        // Tarkistetaan ja p‰ivitet‰‰n k‰ytetyt tunnit, ylityˆtunnit ja kommentti
+        // Tarkistetaan ja p√§ivitet√§√§n k√§ytetyt tunnit, ylity√∂tunnit ja kommentti
         $query = "UPDATE kalenteri SET
                   pvmalku     = '$pvmalku',
                   pvmloppu    = '$pvmloppu',
@@ -225,7 +225,7 @@ if ($tee == 'paivita' and isset($method) and $method == 'update') {
                                AND tyyppi  = 'V'";
           pupe_query($tilausrivi_query);
 
-          //p‰ivitet‰‰n valmisteen ker‰yspvm ja toimaika nykyhetkeen, jotta ne tulevat myyt‰viksi
+          //p√§ivitet√§√§n valmisteen ker√§yspvm ja toimaika nykyhetkeen, jotta ne tulevat myyt√§viksi
           $tilausrivi_query = "UPDATE tilausrivi SET
                                kerayspvm   = '{$pvmloppu}',
                                toimaika    = '{$pvmloppu}'
@@ -237,12 +237,12 @@ if ($tee == 'paivita' and isset($method) and $method == 'update') {
       }
     }
 
-    // Jos ei oo virheit‰ yritet‰‰n vaihtaa valmistuksen tilaa
+    // Jos ei oo virheit√§ yritet√§√§n vaihtaa valmistuksen tilaa
     if (empty($errors)) {
       try {
         $valmistus->setTila($tila);
       } catch (Exception $e) {
-        $errors .= "<font class='error'>".t("Valmistuksen tilan muuttaminen ep‰onnistui").". <br>{$e->getMessage()}</font>";
+        $errors .= "<font class='error'>".t("Valmistuksen tilan muuttaminen ep√§onnistui").". <br>{$e->getMessage()}</font>";
       }
     }
 
@@ -254,7 +254,7 @@ if ($tee == 'paivita' and isset($method) and $method == 'update') {
 }
 
 /**
- * Lis‰‰ valmistus tyˆjonoon
+ * Lis√§√§ valmistus ty√∂jonoon
  */
 if ($tee == 'lisaa_tyojonoon') {
 
@@ -262,7 +262,7 @@ if ($tee == 'lisaa_tyojonoon') {
     $errors .= "<font class='error'>".t("Valitse valmistuslinja")."</font>";
   }
   else {
-    // Lis‰t‰‰n valmistus valmistuslinjalle
+    // Lis√§t√§√§n valmistus valmistuslinjalle
     lisaa_valmistus($valmistus, $valmistuslinja);
   }
 
@@ -270,27 +270,27 @@ if ($tee == 'lisaa_tyojonoon') {
 }
 
 /**
- * Lis‰‰ kalenteriin muun merkinn‰n
+ * Lis√§√§ kalenteriin muun merkinn√§n
  */
 if ($tee == 'lisaa_kalenteriin') {
 
   #echo "valmistuslinja: $valmistuslinja tyyppi: $tyyppi";
 
-  // Alkuaika on pakko syˆtt‰‰
+  // Alkuaika on pakko sy√∂tt√§√§
   if (empty($pvmalku)) {
-    $errors .= "<font class='error'>" . t("Alkuaika ei voi olla tyhj‰") . "</font>";
+    $errors .= "<font class='error'>" . t("Alkuaika ei voi olla tyhj√§") . "</font>";
   }
-  // Tarkestataan kalenterimerkinn‰n tyyppi
-  // Yhtiˆkohtaisia voi olla PYh‰ tai Muu Tyˆ
+  // Tarkestataan kalenterimerkinn√§n tyyppi
+  // Yhti√∂kohtaisia voi olla PYh√§ tai Muu Ty√∂
   elseif ($valmistuslinja == '' and !in_array($tyyppi, array('PY', 'MT'))) {
-    $errors .= "<font class='error'>" . t("Valitse joku valmistuslinja") . ".<br>" . t("Vain pyh‰ tai muu tyˆ voi olla yhtiˆkohtainen.") . "</font>";
+    $errors .= "<font class='error'>" . t("Valitse joku valmistuslinja") . ".<br>" . t("Vain pyh√§ tai muu ty√∂ voi olla yhti√∂kohtainen.") . "</font>";
   }
   else {
-    // Jos loppuaika on j‰tetty tyhj‰ksi, setatan se alkuajan p‰iv‰n loppuun
+    // Jos loppuaika on j√§tetty tyhj√§ksi, setatan se alkuajan p√§iv√§n loppuun
     if (!empty($pvmloppu)) {
       $pvmloppu = strtotime($pvmloppu);
     }
-    // Jos pvmloppu on tyhj‰, setataan se alkup‰iv‰n loppuun
+    // Jos pvmloppu on tyhj√§, setataan se alkup√§iv√§n loppuun
     else {
       $pvmloppu = mktime(23, 59, 59, date('m', $pvmalku), date('d', $pvmalku), date('Y', $pvmalku));
     }
@@ -298,13 +298,13 @@ if ($tee == 'lisaa_kalenteriin') {
     // Alkuaika timestampiksi
     $pvmalku = strtotime($pvmalku);
 
-    // Jos alkuaika on pienempi kuin loppuaika, lis‰t‰‰n tapahtuma kalenteriin
+    // Jos alkuaika on pienempi kuin loppuaika, lis√§t√§√§n tapahtuma kalenteriin
     if ($pvmalku < $pvmloppu) {
-      // p‰iv‰m‰‰r‰t ok
+      // p√§iv√§m√§√§r√§t ok
       $pvmalku = date('Y-m-d H:i:s', $pvmalku);
       $pvmloppu = date('Y-m-d H:i:s', $pvmloppu);
 
-      // Lis‰t‰‰n tietokantaan
+      // Lis√§t√§√§n tietokantaan
       $query = "INSERT INTO kalenteri SET yhtio='{$kukarow['yhtio']}', tyyppi='$tyyppi', pvmalku='$pvmalku', pvmloppu='$pvmloppu', henkilo='$valmistuslinja'";
       pupe_query($query);
     }
@@ -330,9 +330,9 @@ if ($tee == '') {
       <input type='hidden' name='tee' value='paivita'>
       <select name='tila' onchange='submit()'>
       <option value=''>Valitse</option>
-      <option value='OV'>Siir‰ parkkiin</option>
+      <option value='OV'>Siir√§ parkkiin</option>
       <option value='VA'>Aloita valmistus</option>
-      <option value='TK'>Keskeyt‰ valmistus</option>
+      <option value='TK'>Keskeyt√§ valmistus</option>
       <option value='VT'>Valmis tarkistukseen</option>
       </select>
     </form>";
@@ -340,7 +340,7 @@ if ($tee == '') {
   echo "</div>";
 
   // html
-  echo "<font class='head'>".t("Tyˆjono tyˆsuunnittelu")."</font><hr>";
+  echo "<font class='head'>".t("Ty√∂jono ty√∂suunnittelu")."</font><hr>";
 
   echo "<input type='hidden' id='yhtiorow' value='{$kukarow['yhtio']}'>";
   echo "<div id='calendar'></div>";
@@ -367,7 +367,7 @@ if ($tee == '') {
   echo "<th>".t("Tila")."</th>";
   echo "<th>".t("Nimitys")."</th>";
   echo "<th>".t("Viite")."</th>";
-  echo "<th>".t("M‰‰r‰")."</th>";
+  echo "<th>".t("M√§√§r√§")."</th>";
   echo "<th>".t("Kesto")."</th>";
   echo "<th></th>";
   echo "</tr>";
@@ -430,7 +430,7 @@ if ($tee == '') {
 
   echo "</table>";
 
-  /* Muut kalenterimerkinn‰t*/
+  /* Muut kalenterimerkinn√§t*/
   echo "<br>";
   echo "<font class='head'>" . t("Muut") . "</font>";
   echo "<hr>";
@@ -442,7 +442,7 @@ if ($tee == '') {
   echo "<th>".t("Valmistuslinja").":</th>";
   echo "<td>";
   echo "<select name='valmistuslinja'>";
-  echo "<option value=''>".t("Yhtiˆkohtainen")."</option>";
+  echo "<option value=''>".t("Yhti√∂kohtainen")."</option>";
 
   foreach($linjat as $linja) {
     echo "<option value='$linja[selite]'>$linja[selitetark]</option>";
@@ -455,10 +455,10 @@ if ($tee == '') {
   echo "<th>Tyyppi:</th>";
   echo "<td>";
   echo "<select name='tyyppi'>";
-  echo "<option value='PY'>Pyh‰ (yhtiˆkohtainen)</option>";
-  echo "<option value='PE'>Pekkasp‰iv‰</option>";
+  echo "<option value='PY'>Pyh√§ (yhti√∂kohtainen)</option>";
+  echo "<option value='PE'>Pekkasp√§iv√§</option>";
   echo "<option value='SA'>Sairasloma</option>";
-  echo "<option value='MT'>Muu tyˆ</option>";
+  echo "<option value='MT'>Muu ty√∂</option>";
   echo "<option value='LO'>Loma</option>";
   echo "<option value='PO'>Vapaa/Poissa</option>";
   echo "</select>";
@@ -473,7 +473,7 @@ if ($tee == '') {
   echo "</tr>";
   echo "<table>";
   echo "<br>";
-  echo "<input type='submit' value='".t("Lis‰‰ kalenteriin")."'>";
+  echo "<input type='submit' value='".t("Lis√§√§ kalenteriin")."'>";
   echo "</form>";
 }
 

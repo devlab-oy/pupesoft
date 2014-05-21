@@ -10,8 +10,8 @@ $xml = new SimpleXMLElement($xmlstr);
 
 $customer = $xml->addChild('customer');
 $customer->addChild('case','pupesoft');
-$customer->addChild('name', utf8_encode(xmlentities($yhtiorow["nimi"])));
-$customer->addChild('address', utf8_encode(xmlentities($yhtiorow["osoite"])));
+$customer->addChild('name', xmlentities($yhtiorow["nimi"]));
+$customer->addChild('address', xmlentities($yhtiorow["osoite"]));
 $customer->addChild('timestamp', date("Y-m-d H:i"));
 
 // HINNASTOJEN PERUSTIEDOT
@@ -20,7 +20,7 @@ $pricelists = $xml->addChild('pricelists');
 foreach ($dnshinnasto as $hinnasto) {
 
   $pricelist = $pricelists->addChild('pricelist');
-    $pricelist->addChild('pricelistcode', utf8_encode(xmlentities($hinnasto["tuoteno"])));
+    $pricelist->addChild('pricelistcode', xmlentities($hinnasto["tuoteno"]));
     $pricelist->addChild('name', $hinnasto["selite"]);
     $pricelist->addChild('nameswe', $hinnasto["selite"]);
     $pricelist->addChild('namewng', $hinnasto["selite"]);
@@ -33,8 +33,8 @@ $items = $xml->addChild('items');
 
 foreach ($dnshinnasto as $hinnasto) {
   $item = $items->addChild('item');
-    $item->addChild('pricelistcode', utf8_encode(xmlentities($hinnasto["tuoteno"])));
-    $item->addChild('productcode', utf8_encode(xmlentities($hinnasto["tuoteno"])));
+    $item->addChild('pricelistcode', xmlentities($hinnasto["tuoteno"]));
+    $item->addChild('productcode', xmlentities($hinnasto["tuoteno"]));
     $item->addChild('price',$hinnasto["hinta"]);
 }
 

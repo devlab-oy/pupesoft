@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 include('../inc/parametrit.inc');
@@ -85,7 +85,7 @@ if (!function_exists("piirra_tuntiraportti")) {
 
     if (mysql_num_rows($sresult) > 0) {
 
-      $echootsikot =  "<tr><th>".t("Tyˆm‰‰r‰ys").":<br>".t("Nimi").":<br>".t("Ytunnus").":</th><th>".t("Tyˆnjohdon tyˆtunnit").":</th><th>".t("Asentajien tyˆtunnit")."</th><th>".t("Tyˆstatus").":</th><th>".t("Matkalaskut").":</th></tr>";
+      $echootsikot =  "<tr><th>".t("Ty√∂m√§√§r√§ys").":<br>".t("Nimi").":<br>".t("Ytunnus").":</th><th>".t("Ty√∂njohdon ty√∂tunnit").":</th><th>".t("Asentajien ty√∂tunnit")."</th><th>".t("Ty√∂status").":</th><th>".t("Matkalaskut").":</th></tr>";
 
       $kaletunnit = array();
       $asekaletunnit = array();
@@ -160,10 +160,10 @@ if (!function_exists("piirra_tuntiraportti")) {
           $rivihinta_row = mysql_fetch_assoc($rivihinta_res);
 
           if (!isset($rivihinnat['Tuotteet'][$row['valkoodi']])) $rivihinnat['Tuotteet'][$row['valkoodi']] = 0;
-          if (!isset($rivihinnat['Tyˆt'][$row['valkoodi']])) $rivihinnat['Tyˆt'][$row['valkoodi']] = 0;
+          if (!isset($rivihinnat['Ty√∂t'][$row['valkoodi']])) $rivihinnat['Ty√∂t'][$row['valkoodi']] = 0;
 
           $rivihinnat['Tuotteet'][$row['valkoodi']] += $rivihinta_row['rivihinta_tuote'];
-          $rivihinnat['Tyˆt'][$row['valkoodi']] += $rivihinta_row['rivihinta_tyo'];
+          $rivihinnat['Ty√∂t'][$row['valkoodi']] += $rivihinta_row['rivihinta_tyo'];
 
           if ($rivihinta_row['yksikko'] != '') {
             $kplyht = $rivihinta_row['yksikko'];
@@ -229,7 +229,7 @@ if (!function_exists("piirra_tuntiraportti")) {
       }
 
       if (isset($rivihinnat) and count($rivihinnat) > 0) {
-        echo "<tr><td class='spec' valign='top'>".t("Tuotteet ja tyˆt yhteens‰").":</td>";
+        echo "<tr><td class='spec' valign='top'>".t("Tuotteet ja ty√∂t yhteens√§").":</td>";
 
         echo "<td class='spec' style='padding: 0px;' valign='top'><table width='100%'>";
 
@@ -241,7 +241,7 @@ if (!function_exists("piirra_tuntiraportti")) {
 
             echo "<tr><td class='spec' align='left'>",t("$tuotetyyppi").":";
 
-            if ($tuotetyyppi == 'Tyˆt') {
+            if ($tuotetyyppi == 'Ty√∂t') {
               echo "<br/>";
               $yksgroup = array();
 
@@ -270,7 +270,7 @@ if (!function_exists("piirra_tuntiraportti")) {
           }
         }
 
-        echo "<tr><td class='spec'>",t("Yhteens‰"),":</td>";
+        echo "<tr><td class='spec'>",t("Yhteens√§"),":</td>";
 
         foreach ($hinnatyht as $val => $hinta) {
           echo "<td class='spec' align='right'>$hinta $valuutta</td>";
@@ -281,7 +281,7 @@ if (!function_exists("piirra_tuntiraportti")) {
       }
 
       if ((isset($kaletunnit) and count($kaletunnit) > 0) or (isset($matkakulut) and count($matkakulut) > 0) or (isset($asekaletunnit) and count($asekaletunnit) > 0)) {
-        echo "<tr><td class='spec' valign='top'>".t("Tunnit yhteens‰").":</td>";
+        echo "<tr><td class='spec' valign='top'>".t("Tunnit yhteens√§").":</td>";
 
         echo "<td class='spec' style='padding: 0px;' valign='top'><table width='100%'>";
 
@@ -330,7 +330,7 @@ if (!function_exists("piirra_tuntiraportti")) {
   }
 }
 
-//Voidaan tarvita jotain muuttujaa t‰‰lt‰
+//Voidaan tarvita jotain muuttujaa t√§√§lt√§
 if (isset($muutparametrit)) {
   list($tyom_nro,$asentaja,$tyojono,$tyostatus,$asiakasid,$asiakasosasto,$asiakasryhma,$kka,$vva,$ppa,$kkl,$vvl,$ppl,$tultiin) = explode('#', $muutparametrit);
 }
@@ -356,7 +356,7 @@ echo "  <form method='post'>
     <input type='hidden' name='tee' value='raportoi'>
     <table>
     <tr>
-    <th>",t("Tyˆm‰‰r‰ys numero"),"</th>
+    <th>",t("Ty√∂m√§√§r√§ys numero"),"</th>
     <td colspan='3'><input type='text' name='tyom_nro' value='$tyom_nro'></td>
     </tr>
     <tr>
@@ -382,7 +382,7 @@ echo "</select></td></tr>";
 
 $vresult = t_avainsana("ASIAKASRYHMA");
 
-echo "<tr><th>",t("Asiakasryhm‰"),"</th><td colspan='3'><select name='asiakasryhma'>";
+echo "<tr><th>",t("Asiakasryhm√§"),"</th><td colspan='3'><select name='asiakasryhma'>";
 echo "<option value = ''>".t("Kaikki")."</option>";
 
 while ($vrow = mysql_fetch_assoc($vresult)) {
@@ -398,7 +398,7 @@ echo "</select></td></tr>";
 
 $vresult = t_avainsana("TYOM_TYOLINJA");
 
-echo "<tr><th>",t("Tyˆlinja"),"</th><td colspan='3'><select name='asentaja'>";
+echo "<tr><th>",t("Ty√∂linja"),"</th><td colspan='3'><select name='asentaja'>";
 echo "<option value = ''>".t("Kaikki")."</option>";
 
 $sel = "";
@@ -421,7 +421,7 @@ echo "</select></td></tr>";
 
 $vresult = t_avainsana("TYOM_TYOJONO");
 
-echo "<tr><th>",t("Tyˆjono"),"</th><td colspan='3'><select name='tyojono'>";
+echo "<tr><th>",t("Ty√∂jono"),"</th><td colspan='3'><select name='tyojono'>";
 echo "<option value = ''>".t("Kaikki")."</option>";
 
 while ($vrow = mysql_fetch_assoc($vresult)) {
@@ -437,7 +437,7 @@ echo "</select></td></tr>";
 
 $vresult = t_avainsana("TYOM_TYOSTATUS");
 
-echo "<tr><th>",t("Tyˆstatus"),"</th><td colspan='3'><select name='tyostatus'>";
+echo "<tr><th>",t("Ty√∂status"),"</th><td colspan='3'><select name='tyostatus'>";
 echo "<option value = ''>".t("Kaikki")."</option>";
 
 while ($vrow = mysql_fetch_assoc($vresult)) {
@@ -451,13 +451,13 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
 
 echo "</select></td></tr>";
 
-echo "  <tr><th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+echo "  <tr><th>".t("Sy√∂t√§ alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
     <td><input type='text' name='ppa' value='$ppa' size='3'></td>
     <td><input type='text' name='kka' value='$kka' size='3'></td>
     <td><input type='text' name='vva' value='$vva' size='5'></td>
     </tr>
     <tr>
-    <th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+    <th>".t("Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
     <td><input type='text' name='ppl' value='$ppl' size='3'></td>
     <td><input type='text' name='kkl' value='$kkl' size='3'></td>
     <td><input type='text' name='vvl' value='$vvl' size='5'></td>
@@ -473,7 +473,7 @@ if ($tee == 'raportoi' and trim($ytunnus) != '' and $tultiin != 'asiakashaku') {
 
   $tultiin = 'asiakashaku';
 
-  //Voidaan tarvita jotain muuttujaa t‰‰lt‰
+  //Voidaan tarvita jotain muuttujaa t√§√§lt√§
   $muutparametrit = $tyom_nro.'#'.$asentaja.'#'.$tyojono.'#'.$tyostatus.'#'.$asiakasid.'#'.$asiakasosasto.'#'.$asiakasryhma.'#'.$kka.'#'.$vva.'#'.$ppa.'#'.$kkl.'#'.$vvl.'#'.$ppl.'#'.$tultiin;
 
   if (@include("inc/asiakashaku.inc"));

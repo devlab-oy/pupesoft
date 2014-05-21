@@ -20,8 +20,8 @@ if (!isset($erittely)) {
   echo "<th>".t("Tila")."</th>";
   echo "<th>".t("Summa")." $yhtiorow[valkoodi]</th>";
   echo "<th>".t("Kpl")."</th>";
-  echo "<th>".t("Min")." ".t("er‰pvm")."</th>";
-  echo "<th>".t("Max")." ".t("er‰pvm")."</th>";
+  echo "<th>".t("Min")." ".t("er√§pvm")."</th>";
+  echo "<th>".t("Max")." ".t("er√§pvm")."</th>";
   echo "</tr>";
 
   while ($trow=mysql_fetch_array($result)) {
@@ -82,7 +82,7 @@ if (isset($erittely)) {
     echo "<td valign='top' style='text-align: right;'>$trow[summa] $trow[valkoodi]</td>";
     echo "<td valign='top' style='text-align: right;'>$trow[laskunro]</td>";
 
-    // tehd‰‰n lasku linkki
+    // tehd√§√§n lasku linkki
     echo "<td valign='top'>". ebid($trow['tunnus']) ."</td>";
 
     if ($erittely == "Q" or $erittely == "P") {

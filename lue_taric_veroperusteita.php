@@ -1,8 +1,8 @@
 <?php
 
-// Kutsutaanko CLI:stä
+// Kutsutaanko CLI:stÃ¤
 if (php_sapi_name() != 'cli') {
-  die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+  die ("TÃ¤tÃ¤ scriptiÃ¤ voi ajaa vain komentoriviltÃ¤!");
 }
 
 echo "TARIC Veroperusteet\n\n";
@@ -35,7 +35,7 @@ for ($a = 1; $a < count($argv); $a++) {
         $laji = "tp.dat";
       }
 
-      echo "FAILIA KÄSITELLÄÄN: $laji\n";
+      echo "FAILIA KÃ„SITELLÃ„Ã„N: $laji\n";
 
       // luetaan tiedosto alusta loppuun...
       $rivi = fgets($file, 4096);
@@ -43,7 +43,7 @@ for ($a = 1; $a < count($argv); $a++) {
 
       while (!feof($file)) {
 
-        //Lisätään toimenpide
+        //LisÃ¤tÃ¤Ã¤n toimenpide
         if ($laji == 'tp.dat' or $laji == 'tp_l.dat') {
           $toimenpide_id       = trim(substr($rivi,0,8));
           $toimenpidetyyppi     = trim(substr($rivi,8,3));
@@ -97,11 +97,11 @@ for ($a = 1; $a < count($argv); $a++) {
           $kala = mysql_affected_rows();
 
           if ($laji == 'tp_l.dat') {
-            //echo "Lisättiin: $laji, $kala tietuetta. toimenpide_id='$toimenpide_id' and voim_alkupvm='$vva-$kka-$ppa' and duty_expr_id='$duty_expr_id'\n";
+            //echo "LisÃ¤ttiin: $laji, $kala tietuetta. toimenpide_id='$toimenpide_id' and voim_alkupvm='$vva-$kka-$ppa' and duty_expr_id='$duty_expr_id'\n";
           }
         }
 
-        //Muutetaan toimenpidettä
+        //Muutetaan toimenpidettÃ¤
         if ($laji == 'tp_m.dat') {
           $toimenpide_id       = trim(substr($rivi,0,8));
           $toimenpidetyyppi     = trim(substr($rivi,8,3));
@@ -155,10 +155,10 @@ for ($a = 1; $a < count($argv); $a++) {
           $kala = mysql_affected_rows();
 
           if ($kala != '1') {
-            //echo "Päivitettiin: $laji, $kala tietuetta. toimenpide_id='$toimenpide_id' and voim_alkupvm='$vva-$kka-$ppa' and duty_expr_id='$duty_expr_id'\n";
+            //echo "PÃ¤ivitettiin: $laji, $kala tietuetta. toimenpide_id='$toimenpide_id' and voim_alkupvm='$vva-$kka-$ppa' and duty_expr_id='$duty_expr_id'\n";
           }
           else {
-            //echo "Päivitettiin: $laji, $kala tietuetta. toimenpide_id='$toimenpide_id' and voim_alkupvm='$vva-$kka-$ppa' and duty_expr_id='$duty_expr_id'\n";
+            //echo "PÃ¤ivitettiin: $laji, $kala tietuetta. toimenpide_id='$toimenpide_id' and voim_alkupvm='$vva-$kka-$ppa' and duty_expr_id='$duty_expr_id'\n";
           }
         }
 
@@ -189,7 +189,7 @@ for ($a = 1; $a < count($argv); $a++) {
           }
         }
 
-        //Lisätään nimiketietue
+        //LisÃ¤tÃ¤Ã¤n nimiketietue
         if ($laji == 'nim.dat') {
           $nimike         = trim(substr($rivi,0,10));
 
@@ -216,10 +216,10 @@ for ($a = 1; $a < count($argv); $a++) {
           $result = mysql_query($query) or pupe_error($query);
           $kala = mysql_affected_rows();
 
-          // echo "Lisättiin: $laji, $kala tietuetta.\n";
+          // echo "LisÃ¤ttiin: $laji, $kala tietuetta.\n";
         }
 
-        //Lisätään poissuljettujen maiden tietue
+        //LisÃ¤tÃ¤Ã¤n poissuljettujen maiden tietue
         if ($laji == 'exc.dat') {
           $toimenpide_id       = trim(substr($rivi,0,8));
           $poissuljettu_maa    = trim(substr($rivi,8,4));
@@ -231,11 +231,11 @@ for ($a = 1; $a < count($argv); $a++) {
           $result = mysql_query($query) or pupe_error($query);
           $kala = mysql_affected_rows();
 
-          // echo "Lisättiin: $laji, $kala tietuetta.\n";
+          // echo "LisÃ¤ttiin: $laji, $kala tietuetta.\n";
         }
 
 
-        //Lisätään toimenpiteiden alaviitteet
+        //LisÃ¤tÃ¤Ã¤n toimenpiteiden alaviitteet
         if ($laji == 'alav.dat') {
           $toimenpide_id       = trim(substr($rivi,0,8));
           $alaviitteen_tyyppi    = trim(substr($rivi,8,2));
@@ -249,7 +249,7 @@ for ($a = 1; $a < count($argv); $a++) {
           $result = mysql_query($query) or pupe_error($query);
           $kala = mysql_affected_rows();
 
-          // echo "Lisättiin: $laji, $kala tietuetta.\n";
+          // echo "LisÃ¤ttiin: $laji, $kala tietuetta.\n";
         }
 
         $lask++;
@@ -258,7 +258,7 @@ for ($a = 1; $a < count($argv); $a++) {
 
       } // end while eof
 
-      echo "\n\n$lask tietuetta käsitelty\n\n";
+      echo "\n\n$lask tietuetta kÃ¤sitelty\n\n";
     }
   }
 

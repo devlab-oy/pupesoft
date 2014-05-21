@@ -112,7 +112,7 @@ if ($lopeta_body) {
     echo "<hr>";
 
     if (!empty($aika_debug_array)) {
-      // Sortataan kestoj‰rjestykseen
+      // Sortataan kestoj√§rjestykseen
       array_multisort($aika_debug_array, SORT_DESC, $quer_debug_array);
     }
 

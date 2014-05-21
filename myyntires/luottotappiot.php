@@ -1,6 +1,6 @@
 <?php
 
-// DataTables p‰‰lle
+// DataTables p√§√§lle
 $pupe_DataTables = "luottotappiot";
 
 require ("../inc/parametrit.inc");
@@ -26,7 +26,7 @@ if ($tila == 'K' and is_array($luottotappio)) {
 
   if ($laskunrot != "") {
 
-    // Haetaan kaikki tiliˆinnit paitsi varasto, varastonmuutos ja alv (tiliointi.aputunnus = 0)
+    // Haetaan kaikki tili√∂innit paitsi varasto, varastonmuutos ja alv (tiliointi.aputunnus = 0)
     $query = "SELECT lasku.*, tiliointi.ltunnus, tiliointi.tilino, tiliointi.summa, tiliointi.vero, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti
               FROM lasku
               JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus and tiliointi.korjattu = '' and tiliointi.aputunnus = 0 AND tiliointi.tilino NOT IN ('$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[alv]'))
@@ -48,7 +48,7 @@ if ($tila == 'K' and is_array($luottotappio)) {
         // Hoidetaan alv
         $alv = round($lasku['summa'] * $lasku['vero'] / 100, 2);
 
-        // Tarkenteet kopsataan alkuper‰iselt‰ tiliˆinnilt‰, mutta jos alkuper‰inen tiliˆinti on ilman tarkenteita, niin menn‰‰n tilin defaulteilla
+        // Tarkenteet kopsataan alkuper√§iselt√§ tili√∂innilt√§, mutta jos alkuper√§inen tili√∂inti on ilman tarkenteita, niin menn√§√§n tilin defaulteilla
         list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["luottotappiot"], $lasku["kustp"], $lasku["kohde"], $lasku["projekti"]);
 
         $query = "INSERT INTO tiliointi SET
@@ -69,10 +69,10 @@ if ($tila == 'K' and is_array($luottotappio)) {
         $result = pupe_query($query);
         $isa = mysql_insert_id ($link);
 
-        // Tiliˆid‰‰n alv
+        // Tili√∂id√§√§n alv
         if ($lasku['vero'] != 0) {
 
-          // jos yhtiˆn toimipaikka lˆytyy, otetaan alvtilinumero t‰m‰n takaa jos se lˆytyy
+          // jos yhti√∂n toimipaikka l√∂ytyy, otetaan alvtilinumero t√§m√§n takaa jos se l√∂ytyy
           if ($lasku["yhtio_toimipaikka"] != '' and $yhtiorow["toim_alv"] != '') {
             $alvtilino = $yhtiorow["toim_alv"];
           }
@@ -101,7 +101,7 @@ if ($tila == 'K' and is_array($luottotappio)) {
       }
       else {
 
-        // Tarkenteet kopsataan alkuper‰iselt‰ tiliˆinnilt‰, mutta jos alkuper‰inen tiliˆinti on ilman tarkenteita, niin menn‰‰n tilin defaulteilla
+        // Tarkenteet kopsataan alkuper√§iselt√§ tili√∂innilt√§, mutta jos alkuper√§inen tili√∂inti on ilman tarkenteita, niin menn√§√§n tilin defaulteilla
         list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($lasku["tilino"], $lasku["kustp"], $lasku["kohde"], $lasku["projekti"]);
 
         $query = "INSERT INTO tiliointi SET
@@ -126,16 +126,16 @@ if ($tila == 'K' and is_array($luottotappio)) {
       $result = pupe_query($query);
     }
 
-    echo "<font class='message'>".t("Laskut on tiliˆity luottotappioksi")."!</font><br><br>";
+    echo "<font class='message'>".t("Laskut on tili√∂ity luottotappioksi")."!</font><br><br>";
     $tila = "";
   }
   else {
-    echo "<font class='message'>".t("VIRHE: Et valinnut yht‰‰n laskua")."!</font><br><br>";
+    echo "<font class='message'>".t("VIRHE: Et valinnut yht√§√§n laskua")."!</font><br><br>";
     $tila = "N";
   }
 }
 elseif ($tila == 'K') {
-  echo "<font class='message'>".t("VIRHE: Et valinnut yht‰‰n laskua")."!</font><br><br>";
+  echo "<font class='message'>".t("VIRHE: Et valinnut yht√§√§n laskua")."!</font><br><br>";
   $tila = "N";
 }
 
@@ -192,7 +192,7 @@ if ($tila == 'N') {
   echo "<tr>";
   echo "<th>".t("Laskunro")."</th>";
   echo "<th>".t("Tapvm")."</th>";
-  echo "<th>".t("Er‰pvm")."</th>";
+  echo "<th>".t("Er√§pvm")."</th>";
   echo "<th>".t("Summa")."</th>";
   echo "<th>".t("Luottotappio")."</th>";
   echo "</tr>";
@@ -228,7 +228,7 @@ if ($tila == 'N') {
   echo "<tr>";
   echo "<th colspan='2'>".t("Kirjaa luottotappioksi")."</th>";
   echo "</tr><tr>";
-  echo "<td>".t("P‰iv‰m‰‰r‰")." ".t("pp-kk-vvvv")."</td>";
+  echo "<td>".t("P√§iv√§m√§√§r√§")." ".t("pp-kk-vvvv")."</td>";
   echo "<td>
       <input type='text' name='tpp' maxlength='2' size='2' value='$tpp'>
       <input type='text' name='tpk' maxlength='2' size='2' value='$tpk'>
@@ -272,8 +272,8 @@ if ($tila == "") {
   echo "<tr><th>".t("Rajaus")."</th>";
 
   echo "<td><select name='eraantyneet'>
-      <option value=''>".t("N‰yt‰ kaikki laskut")."</option>
-      <option value='E' $erachk>".t("N‰yt‰ vain er‰‰ntyneet laskut")."</option>
+      <option value=''>".t("N√§yt√§ kaikki laskut")."</option>
+      <option value='E' $erachk>".t("N√§yt√§ vain er√§√§ntyneet laskut")."</option>
       </select></td>
       <td class='back'><input type='submit' value='".t("Aja")."'></td>";
   echo "</table>";

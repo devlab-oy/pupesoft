@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("../inc/parametrit.inc");
@@ -50,7 +50,7 @@ echo "<option value=''>",t("Myyntitilauksen luontiajan mukaan"),"</option>";
 
 $sel = $raporttityyppi == 'kerays' ? ' selected' : '';
 
-echo "<option value='kerays'{$sel}>",t("Myyntitilauksen ker‰ysajan mukaan"),"</option>";
+echo "<option value='kerays'{$sel}>",t("Myyntitilauksen ker√§ysajan mukaan"),"</option>";
 echo "</select></td>";
 echo "</tr>";
 
@@ -68,10 +68,10 @@ echo "</tr>";
 $sel = $laskutusajo_tuotteet != '' ? " selected" : "";
 
 echo "<tr>";
-echo "<th>",t("Pupesoftin automaattisesti lis‰‰m‰t tuotteet"),",<br>",t("kuten esimerkiksi rahtituotenumero ja kuljetusvakuutus"),"</th>";
+echo "<th>",t("Pupesoftin automaattisesti lis√§√§m√§t tuotteet"),",<br>",t("kuten esimerkiksi rahtituotenumero ja kuljetusvakuutus"),"</th>";
 echo "<td colspan='3'><select name='laskutusajo_tuotteet'>";
-echo "<option value=''>",t("N‰yt‰"),"</option>";
-echo "<option value='ei'{$sel}>",t("Ei n‰ytet‰"),"</option>";
+echo "<option value=''>",t("N√§yt√§"),"</option>";
+echo "<option value='ei'{$sel}>",t("Ei n√§ytet√§"),"</option>";
 echo "</select></td>";
 echo "</tr>";
 
@@ -80,8 +80,8 @@ $sel = $nayta_viennit != '' ? " selected" : "";
 echo "<tr>";
 echo "<th>",t("Vienti"),"</th>";
 echo "<td colspan='3'><select name='nayta_viennit'>";
-echo "<option value=''>",t("N‰yt‰"),"</option>";
-echo "<option value='ei'{$sel}>",t("Ei n‰ytet‰"),"</option>";
+echo "<option value=''>",t("N√§yt√§"),"</option>";
+echo "<option value='ei'{$sel}>",t("Ei n√§ytet√§"),"</option>";
 echo "</select></td>";
 echo "</tr>";
 
@@ -96,7 +96,7 @@ if (mysql_num_rows($lahdot_chk_res) == 1) {
   $sel = $toimittumassa != '' ? " checked" : "";
 
   echo "<tr>";
-  echo "<th>",t("Huomioidaan vain niiden tilauksien rivit") ,"<br>",t("jotka on annetun p‰iv‰m‰‰r‰v‰lin l‰hdˆiss‰"),"</th>";
+  echo "<th>",t("Huomioidaan vain niiden tilauksien rivit") ,"<br>",t("jotka on annetun p√§iv√§m√§√§r√§v√§lin l√§hd√∂iss√§"),"</th>";
   echo "<td colspan='3'><input type='checkbox' name='toimittumassa' {$sel} /></td>";
   echo "</tr>";
 }
@@ -108,7 +108,7 @@ echo "<th>",t("Tilaustyyppi"),"</th>";
 echo "<td colspan='3'>";
 echo "<input type='hidden' name='tilaustyyppi[]' value='default' />";
 echo "<input type='checkbox' name='tilaustyyppi[]' value='N' {$sel['N']}>",t("Normaalitilaus"),"<br />";
-echo "<input type='checkbox' name='tilaustyyppi[]' value='2' {$sel[2]}>",t("Varastot‰ydennys"),"<br />";
+echo "<input type='checkbox' name='tilaustyyppi[]' value='2' {$sel[2]}>",t("Varastot√§ydennys"),"<br />";
 echo "<input type='checkbox' name='tilaustyyppi[]' value='7' {$sel[7]}>",t("Tehdastilaus"),"<br />";
 echo "<input type='checkbox' name='tilaustyyppi[]' value='S' {$sel['S']}>",t("Sarjatilaus"),"<br />";
 echo "<input type='checkbox' name='tilaustyyppi[]' value='8' {$sel[8]}>",t("Muiden mukana"),"<br />";
@@ -117,14 +117,14 @@ echo "</td>";
 echo "</tr>";
 
 echo "<tr>";
-echo "<th>",t("Syˆt‰ alkup‰iv‰m‰‰r‰")," (",t("pp-kk-vvvv"),")</th>";
+echo "<th>",t("Sy√∂t√§ alkup√§iv√§m√§√§r√§")," (",t("pp-kk-vvvv"),")</th>";
 echo "<td><input type='text' name='ppa' value='{$ppa}' size='3'></td>";
 echo "<td><input type='text' name='kka' value='{$kka}' size='3'></td>";
 echo "<td><input type='text' name='vva' value='{$vva}' size='5'></td>";
 echo "</tr>";
 
 echo "<tr>";
-echo "<th>",t("Syˆt‰ loppup‰iv‰m‰‰r‰")," (",t("pp-kk-vvvv"),")</th>";
+echo "<th>",t("Sy√∂t√§ loppup√§iv√§m√§√§r√§")," (",t("pp-kk-vvvv"),")</th>";
 echo "<td><input type='text' name='ppl' value='{$ppl}' size='3'></td>";
 echo "<td><input type='text' name='kkl' value='{$kkl}' size='3'></td>";
 echo "<td><input type='text' name='vvl' value='{$vvl}' size='5'></td>";
@@ -140,7 +140,7 @@ echo "</form><br /><br />";
 if ($tee != '') {
 
   if ($raporttityyppi == "kerays") {
-    echo "<font class='head'>",t("Ker‰tyt rivit")," {$ppa}.{$kka}.{$vva} - {$ppl}.{$kkl}.{$vvl}</font>";
+    echo "<font class='head'>",t("Ker√§tyt rivit")," {$ppa}.{$kka}.{$vva} - {$ppl}.{$kkl}.{$vvl}</font>";
 
     $ajotapa = 'tilausrivi.kerattyaika';
     $ajoindex = 'yhtio_tyyppi_kerattyaika';
@@ -246,30 +246,30 @@ if ($tee != '') {
 
   echo "<tr>";
   echo "<th></th>";
-  echo "<th colspan='2' align='center'>",t("Yhteens‰"),"</th>";
+  echo "<th colspan='2' align='center'>",t("Yhteens√§"),"</th>";
 
   if ($nayta_viennit == '') {
     echo "<th colspan='2' align='center'>",t("Vienti EU"),"</th>";
     echo "<th colspan='2' align='center'>",t("ei-EU"),"</th>";
   }
 
-  echo "<th colspan='2' align='center'>",t("S‰hkˆinen"),"</th>";
+  echo "<th colspan='2' align='center'>",t("S√§hk√∂inen"),"</th>";
   echo "</tr>";
 
   echo "<tr>";
   echo "<th>",t("Kello"),"</th>";
-  echo "<th>",t("Rivej‰"),"</th>";
-  echo "<th>",t("Nimikkeit‰"),"</th>";
+  echo "<th>",t("Rivej√§"),"</th>";
+  echo "<th>",t("Nimikkeit√§"),"</th>";
 
   if ($nayta_viennit == '') {
-    echo "<th>",t("Rivej‰"),"</th>";
-    echo "<th>",t("Nimikkeit‰"),"</th>";
-    echo "<th>",t("Rivej‰"),"</th>";
-    echo "<th>",t("Nimikkeit‰"),"</th>";
+    echo "<th>",t("Rivej√§"),"</th>";
+    echo "<th>",t("Nimikkeit√§"),"</th>";
+    echo "<th>",t("Rivej√§"),"</th>";
+    echo "<th>",t("Nimikkeit√§"),"</th>";
   }
 
-  echo "<th>",t("Rivej‰"),"</th>";
-  echo "<th>",t("Nimikkeit‰"),"</th>";
+  echo "<th>",t("Rivej√§"),"</th>";
+  echo "<th>",t("Nimikkeit√§"),"</th>";
   echo "</tr>";
 
   while ($row = mysql_fetch_assoc($res)) {
@@ -343,7 +343,7 @@ if ($tee != '') {
             round(sum(IF(lasku.vienti = 'K', kpl + varattu + jt, 0))) ei_eu_nimikkeita,";
   }
 
-  ///* Yhteens‰rivi, annetaan tietokannan teh‰ tyˆ, en jakssa summata while loopissa t. juppe*///
+  ///* Yhteens√§rivi, annetaan tietokannan teh√§ ty√∂, en jakssa summata while loopissa t. juppe*///
   $query = "SELECT
             count(*) yhteensa_riveja,
             round(sum(kpl + varattu + jt)) yhteensa_nimikkeita,
@@ -363,7 +363,7 @@ if ($tee != '') {
   $row = mysql_fetch_array($res);
 
   echo "<tr>";
-  echo "<th>".t("Yhteens‰").":</th>";
+  echo "<th>".t("Yhteens√§").":</th>";
   echo "<th style='text-align:right;'>{$row['yhteensa_riveja']}</th>";
   echo "<th style='text-align:right;'>{$row['yhteensa_nimikkeita']}</th>";
 

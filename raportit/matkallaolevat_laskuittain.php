@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 if (isset($_POST["tee"])) {
@@ -56,7 +56,7 @@ if (isset($tkausi) and $tkausi > 0) {
 else {
   if ($vv != "") {
     if (!checkdate($kk, $pp, $vv)) {
-      echo "<font class='error'>".t("Virheellinen p‰iv‰m‰‰r‰")."!</font><br><br>";
+      echo "<font class='error'>".t("Virheellinen p√§iv√§m√§√§r√§")."!</font><br><br>";
     }
     else {
        $alisa = "$vv-$kk-$pp";
@@ -65,7 +65,7 @@ else {
 
   if ($lvv != "") {
     if (!checkdate($lkk, $lpp, $lvv)) {
-      echo "<font class='error'>".t("Virheellinen p‰iv‰m‰‰r‰")."!</font><br><br>";
+      echo "<font class='error'>".t("Virheellinen p√§iv√§m√§√§r√§")."!</font><br><br>";
     }
     else {
       $llisa = "$lvv-$lkk-$lpp";
@@ -100,12 +100,12 @@ echo "<td colspan='2' class='back'> ".t("tai")." </td>";
 echo "</tr>";
 
 echo "<tr>";
-echo "<th>".t("Syˆt‰ alkup‰iv‰")."</th>";
+echo "<th>".t("Sy√∂t√§ alkup√§iv√§")."</th>";
 echo "<td><input type='text' name='pp' size='5' value='$pp'><input type='text' name='kk' size='5' value='$kk'><input type='text' name='vv' size='7' value='$vv'></td>";
 echo "</tr>";
 
 echo "<tr>";
-echo "<th>".t("Syˆt‰ loppup‰iv‰")."</th>";
+echo "<th>".t("Sy√∂t√§ loppup√§iv√§")."</th>";
 echo "<td><input type='text' name='lpp' size='5' value='$lpp'><input type='text' name='lkk' size='5' value='$lkk'><input type='text' name='lvv' size='7' value='$lvv'></td>";
 echo "</tr>";
 
@@ -118,7 +118,7 @@ echo "<tr><th>".t("Tee Excel")."</th>
     <td><input type = 'checkbox' name = 'excel'  value = 'YES' $chk></td></tr>";
 
 echo "</table>";
-echo "<br><input type='submit' value='".t("N‰yt‰")."'>";
+echo "<br><input type='submit' value='".t("N√§yt√§")."'>";
 
 echo "</form>";
 echo "<br><br>";
@@ -149,7 +149,7 @@ if ($alisa != "" and $llisa != "") {
     echo "<th>".t("Valuutta")."</th>";
     echo "<th>".t("Saapuminen")."</th>";
     echo "<th>".t("Saapuminen suljettu")."</th>";
-    echo "<th>".t("Varastoonvientip‰iv‰")."</th>";
+    echo "<th>".t("Varastoonvientip√§iv√§")."</th>";
     echo "<th>".t("Toimitusehto")."</th>";
     echo "</tr>";
 
@@ -169,7 +169,7 @@ if ($alisa != "" and $llisa != "") {
       $worksheet->write($excelrivi, $excelsarake++, t("Valuutta"), $format_bold);
       $worksheet->write($excelrivi, $excelsarake++, t("Saapuminen"), $format_bold);
       $worksheet->write($excelrivi, $excelsarake++, t("Saapuminen suljettu"), $format_bold);
-      $worksheet->write($excelrivi, $excelsarake++, t("Varastoonvientip‰iv‰"), $format_bold);
+      $worksheet->write($excelrivi, $excelsarake++, t("Varastoonvientip√§iv√§"), $format_bold);
       $worksheet->write($excelrivi, $excelsarake++, t("Toimitusehto"), $format_bold);
 
       $excelrivi++;
@@ -195,7 +195,7 @@ if ($alisa != "" and $llisa != "") {
       $liotsres = pupe_query($query);
 
       while ($liotsrow = mysql_fetch_assoc($liotsres)) {
-        // Virallinen varastoonvientip‰iv‰
+        // Virallinen varastoonvientip√§iv√§
         $query = "SELECT laskunro, tunnus, mapvm, liitostunnus
                   FROM lasku
                   WHERE yhtio     = '$kukarow[yhtio]'
@@ -205,7 +205,7 @@ if ($alisa != "" and $llisa != "") {
         $keikres = pupe_query($query);
         $keikrow = mysql_fetch_assoc($keikres);
 
-        // Milloin rivit on viety saldoille keskim‰‰rin
+        // Milloin rivit on viety saldoille keskim√§√§rin
         $query = "SELECT round(AVG(DATE_FORMAT(laskutettuaika, '%Y%m%d'))) laskutettuaika
                   FROM tilausrivi
                   WHERE yhtio     = '{$kukarow['yhtio']}'
@@ -256,7 +256,7 @@ if ($alisa != "" and $llisa != "") {
     }
 
     echo "<tr>";
-    echo "<th colspan='4'>".t("Yhteens‰")."</th>";
+    echo "<th colspan='4'>".t("Yhteens√§")."</th>";
     echo "<th style='text-align:right;'>". sprintf("%.02f", $summa)."</td>";
     echo "<th colspan='5'></th>";
     echo "</tr>";

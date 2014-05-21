@@ -215,6 +215,9 @@ class pdffile
     // draw text
     function draw_text($left, $bottom, $text, $parent, $attrib = array())
     {
+        
+        $text = iconv("UTF-8", "ISO-8859-15//TRANSLIT", $text);
+
         if (!isset($this->objects[$parent]["type"]) or $this->objects[$parent]["type"] != "page") {
             $this->_push_std_error(6001);
             return false;

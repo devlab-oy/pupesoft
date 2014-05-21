@@ -1,8 +1,8 @@
 <?php
 
 $ulos = "";
-$jatko = 1; // oletetaan normaali k‰sittely
-$tyyppi = 1; // oletetaan rivin n‰kyvyys
+$jatko = 1; // oletetaan normaali k√§sittely
+$tyyppi = 1; // oletetaan rivin n√§kyvyys
 
 
 if (substr(mysql_field_name($result,$i),0,9) == 'printteri') {
@@ -38,9 +38,9 @@ if (mysql_field_name($result,$i) == 'tyyppi') {
 
   $ulos = "<td><select name='$nimi'>";
 
-  $ulos .= "<option value=''>".t("Normaalivarasto josta kaikki myyv‰t")."</option>";
-  $ulos .= "<option value='V' $sel[V]>".t("Erikoisvarasto josta voi myyd‰")."</option>";
-  $ulos .= "<option value='E' $sel[E]>".t("Erikoisvarasto josta automaattisesti ei myyd‰")."</option>";
+  $ulos .= "<option value=''>".t("Normaalivarasto josta kaikki myyv√§t")."</option>";
+  $ulos .= "<option value='V' $sel[V]>".t("Erikoisvarasto josta voi myyd√§")."</option>";
+  $ulos .= "<option value='E' $sel[E]>".t("Erikoisvarasto josta automaattisesti ei myyd√§")."</option>";
   $ulos .= "<option value='P' $sel[P]>".t("Poistettu varasto")."</option>";
   $ulos .= "</select>";
 
@@ -60,8 +60,8 @@ if (mysql_field_name($result, $i) == "nouto") {
     $chk = 'selected';
   }
 
-  $ulos .= "<option value='0'>".t("Ei n‰ytet‰ Extranetin Hae ja selaa-ohjelmassa noutovarastona")."</option>";
-  $ulos .= "<option value='1' $chk>".t("N‰ytet‰‰n Extranetin Hae ja selaa-ohjelmassa noutovarastona")."</option>";
+  $ulos .= "<option value='0'>".t("Ei n√§ytet√§ Extranetin Hae ja selaa-ohjelmassa noutovarastona")."</option>";
+  $ulos .= "<option value='1' $chk>".t("N√§ytet√§√§n Extranetin Hae ja selaa-ohjelmassa noutovarastona")."</option>";
 
   $ulos .= "</select></td>";
   $jatko = 0;
@@ -132,7 +132,7 @@ if (mysql_field_name($result, $i) == "kontti") {
     $chk2 = 'selected';
   }
 
-  $ulos .= "<option value='1' $chk1>".t("Kyll‰")."</option>";
+  $ulos .= "<option value='1' $chk1>".t("Kyll√§")."</option>";
   $ulos .= "<option value='0' $chk2>".t("Ei")."</option>";
 
   $ulos .= "</select></td>";
@@ -209,7 +209,7 @@ if (mysql_field_name($result, $i) == "ulkoinen_jarjestelma") {
   $sel[$trow[$i]] = " selected";
 
   $ulos .= "<select name='{$nimi}'>";
-  $ulos .= "<option value=''>".t("Ei k‰ytˆss‰")."</option>";
+  $ulos .= "<option value=''>".t("Ei k√§yt√∂ss√§")."</option>";
   $ulos .= "<option value='K'{$sel['K']}>".t("Kardex")."</option>";
   $ulos .= "<option value='V'{$sel['V']}>".t("Vocollect")."</option>";
   $ulos .= "<option value='U'{$sel['U']}>".t("Unikko")."</option>";

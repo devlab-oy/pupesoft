@@ -26,7 +26,7 @@ if ($tee == 'PAIVITAMYYJA' and (int) $tunnus > 0 and (int) $myyja > 0) {
             and alatila = 'X'";
   pupe_query($query);
 
-  die("Myyj‰ p‰ivitetty!");
+  die("Myyj√§ p√§ivitetty!");
 }
 
 if ($tee == 'PAIVITARIVIMYYJA' and (int) $rivitunnus > 0 and $myyja != "") {
@@ -37,7 +37,7 @@ if ($tee == 'PAIVITARIVIMYYJA' and (int) $rivitunnus > 0 and $myyja != "") {
             and tilausrivitunnus = '$rivitunnus'";
   pupe_query($query);
 
-  die("Myyj‰ p‰ivitetty!");
+  die("Myyj√§ p√§ivitetty!");
 }
 
 if ($tee == 'NAYTATILAUS') {
@@ -48,16 +48,16 @@ if ($tee == 'NAYTATILAUS') {
   exit;
 }
 
-echo "<font class='head'>".t("Vaihda tilauksen myyj‰").":</font><hr>";
+echo "<font class='head'>".t("Vaihda tilauksen myyj√§").":</font><hr>";
 echo "<form method='post'>";
 echo "<table>";
 
-echo "<tr><th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+echo "<tr><th>".t("Sy√∂t√§ alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
     <td><input type='text' name='ppa' value='$ppa' size='3'></td>
     <td><input type='text' name='kka' value='$kka' size='3'></td>
     <td><input type='text' name='vva' value='$vva' size='5'></td>
     </tr>";
-echo "<tr><th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+echo "<tr><th>".t("Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
     <td><input type='text' name='ppl' value='$ppl' size='3'></td>
     <td><input type='text' name='kkl' value='$kkl' size='3'></td>
     <td><input type='text' name='vvl' value='$vvl' size='5'></td>";
@@ -66,21 +66,21 @@ echo "</tr>";
 $rukchk = "";
 if ($sopparit  != '') $rukchk = "CHECKED";
 
-echo "<tr><th>".t("Piilota yll‰pitosopimukset")."</th>
+echo "<tr><th>".t("Piilota yll√§pitosopimukset")."</th>
     <td colspan='3'><input type='checkbox' name='sopparit' value='YLLARI' $rukchk></td>";
 echo "</tr>";
 
 $rukchk = "";
 if ($riveittain  != '') $rukchk = "CHECKED";
 
-echo "<tr><th>".t("Riveitt‰in")."</th>
+echo "<tr><th>".t("Riveitt√§in")."</th>
     <td colspan='3'><input type='checkbox' name='riveittain' value='RIVI' $rukchk></td>";
 echo "</tr>";
 
 $rukchk = "";
 if ($puuttuvat  != '') $rukchk = "CHECKED";
 
-echo "<tr><th>".t("N‰yt‰ vain ne josta myyj‰ puuttuu")."</th>
+echo "<tr><th>".t("N√§yt√§ vain ne josta myyj√§ puuttuu")."</th>
     <td colspan='3'><input type='checkbox' name='puuttuvat' value='VAIN' $rukchk></td>";
 echo "</tr>";
 
@@ -91,7 +91,7 @@ $query = "SELECT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
           ORDER BY kuka.nimi";
 $myyjares = pupe_query($query);
 
-echo "<tr><th>".t("N‰yt‰ vain myyj‰n tilaukset")."</th><td colspan='3'><select name='laskumyyja'>";
+echo "<tr><th>".t("N√§yt√§ vain myyj√§n tilaukset")."</th><td colspan='3'><select name='laskumyyja'>";
 echo "<option value=''>".t("Valitse")."</option>";
 
 while ($myyjarow = mysql_fetch_assoc($myyjares)) {
@@ -159,7 +159,7 @@ $query = "SELECT
           ORDER BY 1";
 $result = pupe_query($query);
 
-echo "<input type='submit' value='".t("N‰yt‰ tilaukset")."'>";
+echo "<input type='submit' value='".t("N√§yt√§ tilaukset")."'>";
 echo "</form><br><br>";
 
 if (mysql_num_rows($result) > 0) {
@@ -189,10 +189,10 @@ if (mysql_num_rows($result) > 0) {
   echo "<th>".t("Asiakas")."</th>";
   echo "<th>".t("Summa")."</th>";
   echo "<th>".t("Tilausviite")."</th>";
-  echo "<th>".t("Myyj‰")."</th>";
+  echo "<th>".t("Myyj√§")."</th>";
 
   if ($riveittain != "") {
-    echo "<th>".t("Rivimyyj‰")."</th>";
+    echo "<th>".t("Rivimyyj√§")."</th>";
   }
 
   echo "</tr>";
@@ -288,7 +288,7 @@ if (mysql_num_rows($result) > 0) {
       echo "</select></form><div id='div_$row[tunnus]'></div></td>";
     }
 
-    echo "<td class='back' valign='top'><a href='' onclick=\"window.open('{$palvelin2}vaihda_tilauksen_myyja.php?tee=NAYTATILAUS&tunnus=$row[tunnus]', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=600'); return false;\">".t("N‰yt‰ tilaus")."</a></td>";
+    echo "<td class='back' valign='top'><a href='' onclick=\"window.open('{$palvelin2}vaihda_tilauksen_myyja.php?tee=NAYTATILAUS&tunnus=$row[tunnus]', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=600'); return false;\">".t("N√§yt√§ tilaus")."</a></td>";
     echo "</tr>";
   }
 

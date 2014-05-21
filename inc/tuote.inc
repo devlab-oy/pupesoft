@@ -26,5 +26,5 @@ else {
 }
 
 
-// Tuotteen saa poistaa mik‰li sill‰ ei ole yht‰‰n tapahtumaa (tsekataan tuoterivi.inc)
+// Tuotteen saa poistaa mik√§li sill√§ ei ole yht√§√§n tapahtumaa (tsekataan tuoterivi.inc)
 $poistolukko = "ON";

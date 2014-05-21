@@ -1,13 +1,13 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require('../inc/parametrit.inc');
 
 echo "<font class='head'>".t("Myyjien myynnit").":</font><hr>";
 
-// K‰yttˆliittym‰
+// K√§ytt√∂liittym√§
 if (!isset($alkukk)) $alkukk = date("m", mktime(0, 0, 0, date("m"), 1, date("Y")-1));
 if (!isset($alkuvv)) $alkuvv = date("Y", mktime(0, 0, 0, date("m"), 1, date("Y")-1));
 if (!isset($loppukk)) $loppukk = date("m", mktime(0, 0, 0, date("m")-1, 1, date("Y")));
@@ -20,7 +20,7 @@ if (checkdate($alkukk, 1, $alkuvv) and checkdate($loppukk, 1, $loppuvv)) {
   $pvmloppu = date("Y-m-d", mktime(0, 0, 0, $loppukk+1, 0, $loppuvv));
 }
 else {
-  echo "<font class='error'>".t("P‰iv‰m‰‰r‰virhe")."!</font>";
+  echo "<font class='error'>".t("P√§iv√§m√§√§r√§virhe")."!</font>";
   $tee = "";
 }
 
@@ -80,10 +80,10 @@ if ($tee != '') {
   $raja     = '0000-00';
   $rajataulu   = array();
 
-  // Piirret‰‰n headerit
+  // Piirret√§√§n headerit
   echo "<table>";
   echo "<tr>";
-  echo "<th>".t("Myyj‰")."</th>";
+  echo "<th>".t("Myyj√§")."</th>";
 
   while ($raja < substr($pvmloppu, 0, 7)) {
 
@@ -105,10 +105,10 @@ if ($tee != '') {
     echo "<th>$vuosi/$kk</th>";
   }
 
-  echo "<th>".t("Yhteens‰")."</th>";
+  echo "<th>".t("Yhteens√§")."</th>";
   echo "</tr>";
 
-  // Piirret‰‰n itse data
+  // Piirret√§√§n itse data
   $yhteensa_summa_kausi = array();
   $yhteensa_kate_kausi = array();
 
@@ -141,9 +141,9 @@ if ($tee != '') {
     echo "</tr>";
   }
 
-  // Piirret‰‰n yhteens‰rivi
+  // Piirret√§√§n yhteens√§rivi
   echo "<tr>";
-  echo "<th>".t("Yhteens‰ summa")."<br>".t("Yhteens‰ kate")."<br>".t("Kateprosentti")."</th>";
+  echo "<th>".t("Yhteens√§ summa")."<br>".t("Yhteens√§ kate")."<br>".t("Kateprosentti")."</th>";
 
   $yhteensa_summa = 0;
   $yhteensa_kate = 0;

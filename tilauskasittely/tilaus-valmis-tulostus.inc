@@ -1,9 +1,9 @@
 <?php
-//sis‰‰n halutaan $laskurow jossa on tulostettavan tilauksen tiedot
+//sis√§√§n halutaan $laskurow jossa on tulostettavan tilauksen tiedot
 //jos tilauksia on useita $laskurow muuttujassa on jonkun tilauksen tiedot
 
 if (isset($laskurow['varasto']) AND $laskurow['varasto'] != 0) {
-  // katotaan ihan aluksi, ett‰ meill‰ on edellytykset tulostukselle...
+  // katotaan ihan aluksi, ett√§ meill√§ on edellytykset tulostukselle...
   $query  = "SELECT * FROM varastopaikat WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$laskurow['varasto']}'";
   $prires = pupe_query($query);
 
@@ -14,14 +14,14 @@ if (isset($laskurow['varasto']) AND $laskurow['varasto'] != 0) {
     $kirres = pupe_query($query);
 
     if (mysql_num_rows($kirres) == 0)
-      die ("<font class='error'>VIRHE: Varaston $prirow[nimitys] tulostinta ei lˆydy. L‰hetteit‰ ei voida tulostaa...</font>");
+      die ("<font class='error'>VIRHE: Varaston $prirow[nimitys] tulostinta ei l√∂ydy. L√§hetteit√§ ei voida tulostaa...</font>");
   }
   else {
-    die ("<font class='error'>Yht‰‰n varastoa ei ole m‰‰ritelty. L‰hetteit‰ ei voida tulostaa...</font>");
+    die ("<font class='error'>Yht√§√§n varastoa ei ole m√§√§ritelty. L√§hetteit√§ ei voida tulostaa...</font>");
   }
 }
 
-// tarkistetan tulostuksessa syntyvi‰ virheit‰
+// tarkistetan tulostuksessa syntyvi√§ virheit√§
 $virheellinen  = "";
 $returnvalue  = 0;
 $komento    = "";
@@ -50,10 +50,10 @@ else {
 $chk_result = pupe_query($queryc);
 $chk_row = mysql_fetch_assoc($chk_result);
 
-// Katsotaan, ett‰ t‰m‰ ker‰yslista ei ole jo tulostettu
+// Katsotaan, ett√§ t√§m√§ ker√§yslista ei ole jo tulostettu
 if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] != 0) {
 
-  // P‰ivitet‰‰n tilaus pois jonosta ja avataan lukot
+  // P√§ivitet√§√§n tilaus pois jonosta ja avataan lukot
   if ($toim == 'VASTAANOTA_REKLAMAATIO' and $yhtiorow['reklamaation_kasittely'] == 'U') {
     $query = "UPDATE lasku SET
               alatila     = 'C'
@@ -142,7 +142,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
 
   $laskurow['pakkaamo'] = pakkaamo($tilausnumeroita, "yes", $ei_pakkaamoa);
 
-  //ker‰yslistan tulostusta varten
+  //ker√§yslistan tulostusta varten
   require_once ("tulosta_lahete_kerayslista.inc");
 
   //haetaan asiakkaan tiedot
@@ -183,7 +183,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
 
   $tyyppi = "";
 
-  // ker‰yslistalle ei oletuksena tulosteta saldottomia tuotteita
+  // ker√§yslistalle ei oletuksena tulosteta saldottomia tuotteita
   if ($yhtiorow["kerataanko_saldottomat"] == '') {
     $lisa1 = " and tuote.ei_saldoa = '' ";
   }
@@ -233,7 +233,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     }
   }
 
-  // ker‰yslistan rivit
+  // ker√§yslistan rivit
   if (($yhtiorow['kerayserat'] == 'K' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') or ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A'))) {
 
     if ($yhtiorow['kerayserat'] == 'K') $vhlisa = "JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso AND vh.keraysvyohyke = kerayserat.keraysvyohyke)";
@@ -259,7 +259,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     $query = "SELECT tilausrivi.*,
               $select_lisa
               $sorttauskentta,
-              if (tuote.tuotetyyppi='K','2 Tyˆt','1 Muut') tuotetyyppi,
+              if (tuote.tuotetyyppi='K','2 Ty√∂t','1 Muut') tuotetyyppi,
               if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
               tuote.sarjanumeroseuranta,
               tuote.eankoodi
@@ -328,7 +328,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
   'kerayseran_numero' => $kerayseran_numero,
   'kerayslistatyyppi'  => $kerayslistatyyppi);
 
-  // Aloitellaan ker‰yslistan teko
+  // Aloitellaan ker√§yslistan teko
   $params_kerayslista = alku_kerayslista($params_kerayslista);
 
   while ($row = mysql_fetch_assoc($riresult)) {
@@ -359,9 +359,9 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
   if (mysql_num_rows($prires) > 0) {
     $prirow = mysql_fetch_assoc($prires);
 
-    $apuprintteri = $prirow['printteri1']; // l‰heteprintteri
+    $apuprintteri = $prirow['printteri1']; // l√§heteprintteri
 
-    //haetaan optimaalinen tulostin t‰lle l‰hetteelle
+    //haetaan optimaalinen tulostin t√§lle l√§hetteelle
     $tilaus  = $tilausnumeroita;
     $varasto = $laskurow["varasto"];
 
@@ -371,12 +371,12 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
       $apuprintteri = $kirjoitin;
     }
 
-    // k‰sinvalittu printteri
+    // k√§sinvalittu printteri
     if (isset($valittu_tulostin) and $valittu_tulostin != '') {
       $apuprintteri = $valittu_tulostin;
     }
 
-    //haetaan l‰hetteen tulostuskomento
+    //haetaan l√§hetteen tulostuskomento
     $query = "SELECT komento
               FROM kirjoittimet
               WHERE yhtio = '$kukarow[yhtio]'
@@ -393,7 +393,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
 
     print_pdf_kerayslista($params_kerayslista);
 
-    // jos halutaan MY÷S l‰hete
+    // jos halutaan MY√ñS l√§hete
     if ($yhtiorow["lahetteen_tulostustapa"] == "L") {
       $lahetteen_tulostustapa_query = "SELECT *
                                        FROM lasku
@@ -401,7 +401,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
                                        AND tunnus  in ($tilausnumeroita)";
       $lahetteen_tulostustapa_result = pupe_query($lahetteen_tulostustapa_query);
 
-      // Loopataan kaikki ker‰yslistan tilaukset ja tulostetaan l‰hete
+      // Loopataan kaikki ker√§yslistan tilaukset ja tulostetaan l√§hete
       while ($lahetteen_tulostustapa_row = mysql_fetch_assoc($lahetteen_tulostustapa_result)) {
         $params = array(
           'laskurow'          => $lahetteen_tulostustapa_row,
@@ -425,9 +425,9 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     $returnvalue = 1;
   }
 
-  //Merkataan ep‰onnistuneeksi ja palautetaan tulostusjonoon
+  //Merkataan ep√§onnistuneeksi ja palautetaan tulostusjonoon
   if ($returnvalue != 0) {
-    echo "<br><font class='error'>".t("L‰hetteen tulostus ep‰onnistui")."! ".t("Tilaus")." $laskurow[tunnus] ".t("siirrettiin tulostusjonoon").". ".t("K‰y tulostamassa l‰hete tulostusjonosta").": <a href='lahetteen_tulostusjono.php'>".t("Tulostusjono")."</a>.</font><br><br>";
+    echo "<br><font class='error'>".t("L√§hetteen tulostus ep√§onnistui")."! ".t("Tilaus")." $laskurow[tunnus] ".t("siirrettiin tulostusjonoon").". ".t("K√§y tulostamassa l√§hete tulostusjonosta").": <a href='lahetteen_tulostusjono.php'>".t("Tulostusjono")."</a>.</font><br><br>";
     $virheellinen = "X";
 
     if ($toim == 'VASTAANOTA_REKLAMAATIO' and $yhtiorow['reklamaation_kasittely'] == 'U') {
@@ -448,7 +448,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     $result = pupe_query($query);
   }
 
-  // jos meill‰ oli l‰hetteen tulostusongelmia
+  // jos meill√§ oli l√§hetteen tulostusongelmia
   if ($virheellinen != 'X') {
 
     // jos tilauksia on useita niin laitetaan niille yhteinen kerayslista-tunnus
@@ -494,7 +494,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
   }
 }
 else {
-  echo "<font class='error'>".t("VIRHE: L‰hete/Ker‰yslista on jo tulostettu!")."</font><br>";
+  echo "<font class='error'>".t("VIRHE: L√§hete/Ker√§yslista on jo tulostettu!")."</font><br>";
 
   if (!isset($lukotetaan) or $lukotetaan) {
     // poistetaan lukot

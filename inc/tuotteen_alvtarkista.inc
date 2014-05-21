@@ -16,7 +16,7 @@ if(!function_exists("tuotteen_alvtarkista")) {
       $chkressiresult = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($chkressiresult) == 0) {
-        $virhe[$i] = t("Tuotenumero ei lˆydy");
+        $virhe[$i] = t("Tuotenumero ei l√∂ydy");
       }
 
       $tem_tuoteno = $t[$i];
@@ -25,7 +25,7 @@ if(!function_exists("tuotteen_alvtarkista")) {
 
     if (mysql_field_name($result, $i) == "maa") {
       if ($t[$i] == $yhtiorow["maa"]) {
-        $virhe[$i] = t("T‰m‰ on turhaa, syˆt‰ t‰m‰ alv tuotetietojen taakse.");
+        $virhe[$i] = t("T√§m√§ on turhaa, sy√∂t√§ t√§m√§ alv tuotetietojen taakse.");
       }
 
       $tem_maa = $t[$i];
@@ -50,7 +50,7 @@ if(!function_exists("tuotteen_alvtarkista")) {
       $sresult = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($sresult) != 1) {
-        $virhe[$i] = t("Tili puuttuu tai sit‰ ei lˆydy");
+        $virhe[$i] = t("Tili puuttuu tai sit√§ ei l√∂ydy");
       }
     }
 
@@ -65,8 +65,8 @@ if(!function_exists("tuotteen_alvtarkista")) {
       $sresult = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($sresult) > 0) {
-        // Pit‰‰ aina setata myˆs "t‰m‰n" kent‰n virhe, muuten luedata ei toimi
-        $virhe[$chtuoteno_ind] = $virhe[$i] = t("VIRHE: N‰ill‰ tiedoilla on jo alv j‰rjestelm‰ss‰!");
+        // Pit√§√§ aina setata my√∂s "t√§m√§n" kent√§n virhe, muuten luedata ei toimi
+        $virhe[$chtuoteno_ind] = $virhe[$i] = t("VIRHE: N√§ill√§ tiedoilla on jo alv j√§rjestelm√§ss√§!");
       }
     }
   }

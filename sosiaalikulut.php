@@ -195,14 +195,14 @@ echo "</td></tr>";
 echo "</table>";
 echo "</form>";
 
-// Tarkistetaan viel‰ p‰iv‰m‰‰r‰t
+// Tarkistetaan viel√§ p√§iv√§m√§√§r√§t
 if (!checkdate($alkukausi_kk, $alkukausi_pp, $alkukausi_vv)) {
-  echo "<font class='error'>",t("VIRHE: Alkup‰iv‰m‰‰r‰ on virheellinen"),"!</font><br>";
+  echo "<font class='error'>",t("VIRHE: Alkup√§iv√§m√§√§r√§ on virheellinen"),"!</font><br>";
   $tee = "";
 }
 
 if (!checkdate($loppukausi_kk, $loppukausi_pp, $loppukausi_vv)) {
-  echo "<font class='error'>",t("VIRHE: Loppup‰iv‰m‰‰r‰ on virheellinen"),"!</font><br>";
+  echo "<font class='error'>",t("VIRHE: Loppup√§iv√§m√§√§r√§ on virheellinen"),"!</font><br>";
   $tee = "";
 }
 
@@ -211,10 +211,10 @@ if ($tee == 'laske') {
   echo "<br /><font class='head'>",t("Hakutulos"),"</font><hr>";
 
   if ($tilinalku == '' and $tilinloppu == '') {
-    echo "<font class='error'>",t("Pit‰‰ syˆtt‰‰ ainakin yksi tili"),".</font>";
+    echo "<font class='error'>",t("Pit√§√§ sy√∂tt√§√§ ainakin yksi tili"),".</font>";
   }
   elseif ($prosentti == '' or $prosentti == 0) {
-    echo "<font class='error'>",t("Laskentaprosentti pit‰‰ syˆtt‰‰ ja se ei saa olla tyhj‰ tai nolla"),".</font>";
+    echo "<font class='error'>",t("Laskentaprosentti pit√§√§ sy√∂tt√§√§ ja se ei saa olla tyhj√§ tai nolla"),".</font>";
   }
   else {
 
@@ -339,7 +339,7 @@ if ($tee == 'laske') {
 
       echo "<table>";
       echo "<tr>";
-      echo "<th>",t("Yhteens‰"),"</th>";
+      echo "<th>",t("Yhteens√§"),"</th>";
       echo "<th></th>";
       if ($i > 1) echo "<th></th>";
       echo "</tr>";
@@ -390,7 +390,7 @@ if ($tee == 'laske') {
       }
 
       echo "<tr>";
-      echo "<th>",t("Yhteens‰"),"</th>";
+      echo "<th>",t("Yhteens√§"),"</th>";
       echo "<td>{$summaus}</td>";
       if ($i > 1) echo "<td></td>";
       echo "</tr>";

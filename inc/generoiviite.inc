@@ -1,8 +1,8 @@
 <?php
-// otetaan sisään $viite muuttuja jossa on laskunnumero
+// otetaan sisÃ¤Ã¤n $viite muuttuja jossa on laskunnumero
 // palautetaan valmis $viite
 
-// poistetaan kaikki muut merkit paitsi numerot 0-9 sekä poistetaan etunollat
+// poistetaan kaikki muut merkit paitsi numerot 0-9 sekÃ¤ poistetaan etunollat
 $viite   = ltrim(preg_replace("/[^0-9]/", "", $viite),"0");
 $kerroin = 7;
 $tulo    = 0;

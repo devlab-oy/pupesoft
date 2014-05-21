@@ -1,7 +1,7 @@
 <?php
 
 if (php_sapi_name() != 'cli') {
-  die ("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!");
+  die ("T√§t√§ scripti√§ voi ajaa vain komentorivilt√§!");
 }
 
 ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
@@ -19,7 +19,7 @@ require_once ('inc/functions.inc');
  */
 
 if (!isset($argv[1]) or $argv[1] == '') {
-  echo "Anna yhtiˆ!!!\n";
+  echo "Anna yhti√∂!!!\n";
   die;
 }
 
@@ -52,11 +52,11 @@ function hae_suoritusta_odottavat_tilaukset() {
 function kasittele_tilaukset($tilaukset) {
   global $kukarow, $yhtiorow;
 
-  if (count($tilaukset) > 0) echo "\n".t("Otetaan").' '.count($tilaukset).' '.t("myyntitilausta k‰sittelyyn")."\n";
+  if (count($tilaukset) > 0) echo "\n".t("Otetaan").' '.count($tilaukset).' '.t("myyntitilausta k√§sittelyyn")."\n";
 
   foreach ($tilaukset as $laskurow) {
 
-    // Parametrej‰ saatanat.php:lle
+    // Parametrej√§ saatanat.php:lle
     $sytunnus = $laskurow['ytunnus'];
     $sliitostunnus = $laskurow['liitostunnus'];
     $eiliittymaa = "ON";
@@ -139,7 +139,7 @@ function aseta_tilaus_kesken_tilaan($laskurow) {
     echo t("Lasku").' '.$laskurow['tunnus'].' '.t("asetettiin kesken tilaan")."\n";
 
     if ($laskurow['tila'] == 'N') {
-      //tilaus-valmis.inc hoitaa meille j‰rkev‰n l‰hdˆn kun tilauksen tila ja alatila on oikein
+      //tilaus-valmis.inc hoitaa meille j√§rkev√§n l√§hd√∂n kun tilauksen tila ja alatila on oikein
       $kukarow['kesken'] = $laskurow['tunnus'];
 
       require("tilauskasittely/tilaus-valmis.inc");

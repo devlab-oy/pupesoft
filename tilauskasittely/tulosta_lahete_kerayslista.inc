@@ -37,7 +37,7 @@ if (!function_exists('alku_kerayslista')) {
 
       require_once('Spreadsheet/Excel/Writer.php');
 
-      //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+      //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
       list($usec, $sec) = explode(' ', microtime());
       mt_srand((float) $sec + ((float) $usec * 100000));
       $page = "/tmp/Outbound_order-{$laskurow['tunnus']}.xls";
@@ -66,7 +66,7 @@ if (!function_exists('alku_kerayslista')) {
 
       require_once('Spreadsheet/Excel/Writer.php');
 
-      //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+      //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
       list($usec, $sec) = explode(' ', microtime());
       mt_srand((float) $sec + ((float) $usec * 100000));
       $page = "/tmp/Outbound_order-{$laskurow['tunnus']}.xls";
@@ -162,7 +162,7 @@ if (!function_exists('alku_kerayslista')) {
       $masresult = pupe_query($query);
       $masrow = mysql_fetch_assoc($masresult);
 
-      //maksuehto tekstin‰
+      //maksuehto tekstin√§
       $maksuehto = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli);
 
       $pdf->draw_text(410, 815, $laskurow["hyvaksynnanmuutos"],   $thispage, $iso);
@@ -181,7 +181,7 @@ if (!function_exists('alku_kerayslista')) {
         $pdf->draw_text(310,815, t("Myyntitili", $kieli),     $thispage, $iso);
       }
       else {
-        $pdf->draw_text(310,815, t("Ker‰yslista", $kieli),     $thispage, $iso);
+        $pdf->draw_text(310,815, t("Ker√§yslista", $kieli),     $thispage, $iso);
       }
 
       $pdf->draw_text(310, 803, t("Sivu", $kieli),         $thispage, $norm);
@@ -208,7 +208,7 @@ if (!function_exists('alku_kerayslista')) {
       $pdf->draw_rectangle(800, 300, 779, 580, $thispage, $rectparam);
 
       if ($yhtiorow['kerayserat'] == 'K' and isset($kerayseran_numero) and $kerayseran_numero > 0) {
-        $pdf->draw_text(310, 792, t("Ker‰yser‰", $kieli),       $thispage, $pieni);
+        $pdf->draw_text(310, 792, t("Ker√§yser√§", $kieli),       $thispage, $pieni);
         $pdf->draw_text(310, 782, $kerayseran_numero,        $thispage, $boldi);
       }
       else {
@@ -219,7 +219,7 @@ if (!function_exists('alku_kerayslista')) {
 
       $pdf->draw_rectangle(779, 300, 758, 580, $thispage, $rectparam);
       $pdf->draw_rectangle(779, 420, 758, 580, $thispage, $rectparam);
-      $pdf->draw_text(310, 771, t("Ker‰ysaika", $kieli),           $thispage, $pieni);
+      $pdf->draw_text(310, 771, t("Ker√§ysaika", $kieli),           $thispage, $pieni);
 
       $DAY_ARRAY = array(1 => t("Ma", $kieli), t("Ti", $kieli), t("Ke", $kieli), t("To", $kieli), t("Pe", $kieli), t("La", $kieli), t("Su", $kieli));
 
@@ -259,7 +259,7 @@ if (!function_exists('alku_kerayslista')) {
       $pdf->draw_rectangle(758, 420, 737, 580, $thispage, $rectparam);
       $pdf->draw_text(310, 750, t("Asiakasnumero", $kieli),     $thispage, $pieni);
       $pdf->draw_text(310, 740, $asrow["asiakasnro"],       $thispage, $norm);
-      $pdf->draw_text(430, 750, t("K‰sitelty pvm", $kieli),        $thispage, $pieni);
+      $pdf->draw_text(430, 750, t("K√§sitelty pvm", $kieli),        $thispage, $pieni);
       $pdf->draw_text(430, 740, tv1dateconv($laskurow['h1time'], "pitka"),     $thispage, $norm);
 
 
@@ -268,9 +268,9 @@ if (!function_exists('alku_kerayslista')) {
 
       if ($yhtiorow['kerayserat'] == 'K' and isset($kerayseran_numero) and $kerayseran_numero > 0) {
 
-        $pdf->draw_text(310, 729, t("Ker‰‰j‰", $kieli),     $thispage, $pieni);
+        $pdf->draw_text(310, 729, t("Ker√§√§j√§", $kieli),     $thispage, $pieni);
 
-        //etsit‰‰n myyj‰n nimi
+        //etsit√§√§n myyj√§n nimi
         $query  = "SELECT kuka.nimi
                    FROM kerayserat
                    JOIN kuka ON (kuka.yhtio = kerayserat.yhtio AND kuka.kuka = kerayserat.laatija)
@@ -284,9 +284,9 @@ if (!function_exists('alku_kerayslista')) {
 
       }
       else {
-        $pdf->draw_text(310, 729, t("Myyj‰", $kieli),     $thispage, $pieni);
+        $pdf->draw_text(310, 729, t("Myyj√§", $kieli),     $thispage, $pieni);
 
-        //etsit‰‰n myyj‰n nimi
+        //etsit√§√§n myyj√§n nimi
         $query  = "SELECT nimi, kuka
                    FROM kuka
                    WHERE tunnus = '$laskurow[myyja]'
@@ -302,7 +302,7 @@ if (!function_exists('alku_kerayslista')) {
 
       $ttapae = $laskurow["toimitustapa"];
 
-      //etsit‰‰n lˆytyykˆ rahtisopimusta
+      //etsit√§√§n l√∂ytyyk√∂ rahtisopimusta
       $rahtirow = hae_rahtisopimusnumero($ttapae, $laskurow["ytunnus"], $laskurow["liitostunnus"], false, $laskurow["rahtisopimus"]);
 
       if ($rahtirow["rahtisopimus"] != "") {
@@ -332,7 +332,7 @@ if (!function_exists('alku_kerayslista')) {
       $pdf->draw_rectangle(653, 300, 632, 580, $thispage, $rectparam);
 
       if ($myyrow['kuka'] != $laskurow['laatija']) {
-        //etsit‰‰n laatijan nimi
+        //etsit√§√§n laatijan nimi
         $query  = "SELECT nimi
                    from kuka
                    where kuka='$laskurow[laatija]' and yhtio='$kukarow[yhtio]'";
@@ -364,7 +364,7 @@ if (!function_exists('alku_kerayslista')) {
         }
 
         $pdf->draw_rectangle(632, 300, 611, 580, $thispage, $rectparam);
-        $pdf->draw_text(310, 624, t("Ker‰‰j‰lle", $kieli),   $thispage, $pieni);
+        $pdf->draw_text(310, 624, t("Ker√§√§j√§lle", $kieli),   $thispage, $pieni);
         $pdf->draw_text(310, 614, $keraaja_teksti,   $thispage, $keraaja_font);
       }
 
@@ -403,11 +403,11 @@ if (!function_exists('alku_kerayslista')) {
         $komm .= "\n".t("Kommentti", $kieli)." 2:###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti2']), 70, "\n###");
       }
 
-      # Jos JT-tilaus niin tarkistetaan monta j‰lkitilausta on tehty.
+      # Jos JT-tilaus niin tarkistetaan monta j√§lkitilausta on tehty.
       if ($laskurow['clearing'] == 'JT-TILAUS') {
 
-        # vanha_otunnus on alkuper‰inen tilausnumero
-        # Haetaan kaikkien t‰ll‰ tilauksella olevien tilausrivien alkuper‰iset tilausnumerot
+        # vanha_otunnus on alkuper√§inen tilausnumero
+        # Haetaan kaikkien t√§ll√§ tilauksella olevien tilausrivien alkuper√§iset tilausnumerot
         $query = "SELECT group_concat(DISTINCT tlt2.vanha_otunnus) alkuperaiset_tilaukset
                   FROM tilausrivi
                   JOIN tilausrivin_lisatiedot as tlt2 USE INDEX (tilausrivitunnus) ON (tlt2.yhtio = tilausrivi.yhtio AND tlt2.tilausrivitunnus = tilausrivi.tunnus)
@@ -418,7 +418,7 @@ if (!function_exists('alku_kerayslista')) {
         $query_result = pupe_query($query);
         $isa_tilaus = mysql_fetch_assoc($query_result);
 
-        # Lasketaan kuinka monta toimitettua tilausrivi‰ lˆytyy per alkuper‰inen tilaus
+        # Lasketaan kuinka monta toimitettua tilausrivi√§ l√∂ytyy per alkuper√§inen tilaus
         if ($isa_tilaus['alkuperaiset_tilaukset'] != NULL) {
           $query = "SELECT tlt2.vanha_otunnus, count(distinct DATE(tilausrivi.toimitettuaika))+1 as toimituksia
                     FROM tilausrivin_lisatiedot as tlt2
@@ -430,16 +430,16 @@ if (!function_exists('alku_kerayslista')) {
                     ORDER BY toimituksia";
           $query_result = pupe_query($query);
 
-          // Jos yksikin tilaus jossa ei ole toimitettuja rivej‰
+          // Jos yksikin tilaus jossa ei ole toimitettuja rivej√§
           while ($ensimmainen_toimitus_row = mysql_fetch_assoc($query_result)) {
             $komm .= "\n{$ensimmainen_toimitus_row['toimituksia']}. ".t("toimitus tilauksesta")." {$ensimmainen_toimitus_row['vanha_otunnus']}";
           }
         }
       }
 
-      // Jos ker‰yslistat/l‰hetteet tulostetaan heti, niin voidaan tulostaa JT tieto mukaan
+      // Jos ker√§yslistat/l√§hetteet tulostetaan heti, niin voidaan tulostaa JT tieto mukaan
       if (trim($laskurow['clearing']) == 'JT-TILAUS' and $yhtiorow["lahetteen_tulostustapa"] != "K" and $yhtiorow["lahetteen_tulostustapa"] != "L") {
-        $komm .= "\n*** ".t("JƒLKITOIMITUS")." ***";
+        $komm .= "\n*** ".t("J√ÑLKITOIMITUS")." ***";
       }
 
       //Tulostetaan laskun kommentti
@@ -493,7 +493,7 @@ if (!function_exists('alku_kerayslista')) {
       $image = $pdf->jfif_embed($data);
       $pdf->image_place($image, 805, 440, $thispage, array("scale" => 0.3));
 
-      // Tehd‰‰n asiakasnumero-viivakoodi
+      // Tehd√§√§n asiakasnumero-viivakoodi
       if ($kukarow['yhtio'] == 'hair' and $asrow["asiakasnro"] > 0) {
         if ($laskurow['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] != '') {
           $bottom_barcode = 582;
@@ -550,7 +550,7 @@ if (!function_exists('uusi_sivu_kerayslista')) {
       $pdf->draw_text(310,815, t("Myyntitili", $kieli),         $thispage, $iso);
     }
     else {
-      $pdf->draw_text(310,815, t("Ker‰yslista", $kieli),         $thispage, $iso);
+      $pdf->draw_text(310,815, t("Ker√§yslista", $kieli),         $thispage, $iso);
     }
 
     $pdf->draw_text(310, 803, t("Sivu", $kieli),             $thispage, $norm);
@@ -559,7 +559,7 @@ if (!function_exists('uusi_sivu_kerayslista')) {
     $pdf->draw_rectangle(800, 300, 779, 580, $thispage, $rectparam);
 
     if ($yhtiorow['kerayserat'] == 'K' and isset($kerayseran_numero) and $kerayseran_numero > 0) {
-      $pdf->draw_text(310, 792, t("Ker‰yser‰", $kieli),       $thispage, $pieni);
+      $pdf->draw_text(310, 792, t("Ker√§yser√§", $kieli),       $thispage, $pieni);
       $pdf->draw_text(310, 782, $kerayseran_numero,        $thispage, $boldi);
     }
     else {
@@ -569,7 +569,7 @@ if (!function_exists('uusi_sivu_kerayslista')) {
 
     $pdf->draw_rectangle(779, 300, 758, 580, $thispage, $rectparam);
     $pdf->draw_rectangle(779, 420, 758, 580, $thispage, $rectparam);
-    $pdf->draw_text(310, 771, t("Ker‰ysaika", $kieli),           $thispage, $pieni);
+    $pdf->draw_text(310, 771, t("Ker√§ysaika", $kieli),           $thispage, $pieni);
 
     if ($laskurow["keraysvko"] != '') {
       $DAY_ARRAY = array(1 => t("Ma", $kieli), t("Ti", $kieli), t("Ke", $kieli), t("To", $kieli), t("Pe", $kieli), t("La", $kieli), t("Su", $kieli));
@@ -676,7 +676,7 @@ if (!function_exists('rivi_otsikot_kerayslista')) {
       $pdf->draw_text(45,  $kala+15, t("Paikka", $kieli),          $thispage, $norm);
       $pdf->draw_text(125, $kala+15, t("Tuotenumero/Tuotenimi", $kieli),  $thispage, $norm);
       $pdf->draw_text(330, $kala+15, t("Toimittajan tuoteno", $kieli),  $thispage, $norm);
-      $pdf->draw_text(425, $kala+15, t("Hyllyss‰", $kieli),        $thispage, $norm);
+      $pdf->draw_text(425, $kala+15, t("Hyllyss√§", $kieli),        $thispage, $norm);
       $pdf->draw_text(473, $kala+15, t("Tilattu", $kieli),        $thispage, $norm);
       $pdf->draw_text(530, $kala+15, t("Toimitus", $kieli),        $thispage, $norm);
 
@@ -733,7 +733,7 @@ if (!function_exists('rivi_kerayslista')) {
       $kala++;
     }
     else {
-      // viivat rivien v‰liin...
+      // viivat rivien v√§liin...
       $x[0] = 20;
       $x[1] = 580;
       $y[0] = $y[1] = $kala + $rivinkorkeus - 4;
@@ -742,7 +742,7 @@ if (!function_exists('rivi_kerayslista')) {
         $pdf->draw_line($x, $y, $thispage, $rectparam);
       }
 
-      //jos ollaan liian pitk‰ll‰ tehd‰‰n uusi otsikko...
+      //jos ollaan liian pitk√§ll√§ tehd√§√§n uusi otsikko...
       if ($kala < 95) {
 
         $sivu++;
@@ -779,7 +779,7 @@ if (!function_exists('rivi_kerayslista')) {
         $row["perhe_kommentti1"] = "";
         $row["perhe_kommentti2"] = "";
 
-        // Info tuoteperheest‰
+        // Info tuoteperheest√§
         if ($row["perheid"] > 0 and $perheid != $row["perheid"]) {
           $numrows = 0;
 
@@ -843,14 +843,14 @@ if (!function_exists('rivi_kerayslista')) {
           $kala -= $rivinkorkeus;
 
           if (trim($row["perhe_kommentti2"]) != '') {
-            $plen = $pdf->strlen(t("Sis‰lt‰‰ tuotteet", $kieli).": ", $norm);
-            $pdf->draw_text(23, $kala, t("Sis‰lt‰‰ tuotteet", $kieli).": ", $thispage, $norm);
+            $plen = $pdf->strlen(t("Sis√§lt√§√§ tuotteet", $kieli).": ", $norm);
+            $pdf->draw_text(23, $kala, t("Sis√§lt√§√§ tuotteet", $kieli).": ", $thispage, $norm);
             list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti2"], 500, $pdf, $norm);
             $pdf->draw_text($plen+23, $kala, $ff_string, $thispage, $ff_font);
             $kala -= $rivinkorkeus;
           }
 
-          //jos ollaan liian pitk‰ll‰ tehd‰‰n uusi otsikko...
+          //jos ollaan liian pitk√§ll√§ tehd√§√§n uusi otsikko...
           if ($kala < 95) {
 
             $sivu++;
@@ -893,12 +893,12 @@ if (!function_exists('rivi_kerayslista')) {
         $tresult = pupe_query($query);
         $trow   = mysql_fetch_assoc($tresult);
 
-        // lis‰t‰‰n tuotteen takaata kommenni ker‰‰j‰lle, t‰m‰ tulostuu vain ker‰yslistaan ja purkulistaan.
+        // lis√§t√§√§n tuotteen takaata kommenni ker√§√§j√§lle, t√§m√§ tulostuu vain ker√§yslistaan ja purkulistaan.
         if (trim($trow['kerayskommentti']) !="") {
           $row['kommentti'] .= "\n".$trow['kerayskommentti'];
         }
 
-        // jos rekkulalla on suoraan toimittajalle palautettvia rivej‰
+        // jos rekkulalla on suoraan toimittajalle palautettvia rivej√§
         if ($row['asiakkaan_positio'] > 0) {
 
           $query = "SELECT nimi
@@ -911,7 +911,7 @@ if (!function_exists('rivi_kerayslista')) {
           $row['kommentti'] .= "\n".t("Palutetaan toimittajalle").": ".$asiakas_check_row['nimi'];
         }
 
-        //varaston sis‰isen siirron kohdetuotepaikka, tsekataan onko tietoja ja onko kyseess‰ varmasti varaston sis‰inen siirto. Jos, laitetaan siirtolistalle kohdetuotepaikasta infoa.
+        //varaston sis√§isen siirron kohdetuotepaikka, tsekataan onko tietoja ja onko kyseess√§ varmasti varaston sis√§inen siirto. Jos, laitetaan siirtolistalle kohdetuotepaikasta infoa.
         $query = "SELECT kohde_hyllyalue, kohde_hyllynro, kohde_hyllyvali, kohde_hyllytaso
                   FROM tilausrivin_lisatiedot as tlt2
                   WHERE yhtio          = '$kukarow[yhtio]'
@@ -931,7 +931,7 @@ if (!function_exists('rivi_kerayslista')) {
         $rivivarastohyllyssa = 0;
 
         if ($trow["ei_saldoa"] == '') {
-          //katotaan mihin varastooon tilausrivill‰ tuotepaikka kuuluu
+          //katotaan mihin varastooon tilausrivill√§ tuotepaikka kuuluu
           $rivipaikka = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"]);
 
           if ($onkolaajattoimipaikat and $laskurow['yhtio_toimipaikka'] != 0) {
@@ -1036,7 +1036,7 @@ if (!function_exists('rivi_kerayslista')) {
           $pdf->draw_text(575-$oikpos, $kala, $row['varattu']+$row['kpl'],   $thispage, $norm);
         }
         else {
-          if ($row["var"] == 'J') { // j‰lkitoimitus
+          if ($row["var"] == 'J') { // j√§lkitoimitus
             $oikpos = $pdf->strlen(t("**JT**", $kieli), $norm);
             $pdf->draw_text(575-$oikpos, $kala, t("**JT**", $kieli),   $thispage, $norm);
           }
@@ -1044,7 +1044,7 @@ if (!function_exists('rivi_kerayslista')) {
             $oikpos = $pdf->strlen(t("PUUTE", $kieli), $norm);
             $pdf->draw_text(575-$oikpos, $kala, t("PUUTE", $kieli),   $thispage, $norm);
           }
-          elseif ($row["var"] == 'H') { // v‰kisin hyv‰ksytty
+          elseif ($row["var"] == 'H') { // v√§kisin hyv√§ksytty
             $oikpos = $pdf->strlen("...........", $norm);
             $pdf->draw_text(575-$oikpos, $kala, "...........",   $thispage, $norm);
           }
@@ -1153,7 +1153,7 @@ if (!function_exists('rivi_kerayslista')) {
 
           $row['kommentti'] .= t("Tilausnumero", $kieli).": {$row['otunnus']}";
 
-          //etsit‰‰n myyj‰n nimi
+          //etsit√§√§n myyj√§n nimi
           $query  = "SELECT kuka.nimi
                      FROM lasku
                      JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.tunnus = lasku.myyja AND kuka.yhtio = lasku.yhtio)
@@ -1162,14 +1162,14 @@ if (!function_exists('rivi_kerayslista')) {
           $myyresult = pupe_query($query);
           $myyrow = mysql_fetch_assoc($myyresult);
 
-          $row['kommentti'] .= "\n".t("Myyj‰", $kieli).": {$myyrow['nimi']}";
+          $row['kommentti'] .= "\n".t("Myyj√§", $kieli).": {$myyrow['nimi']}";
         }
 
-        // Otetaan yhteens‰kommentti pois kerˆyslistalta (t‰m‰ tieto lˆytyy rivilt‰ jos tilaus on laskutettu, mutta l‰hetteell‰ sit‰ ei voi n‰ytt‰‰)
-        $row["kommentti"] = preg_replace("/ ".t("yhteens‰", $kieli).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
-        $row["kommentti"] = preg_replace("/ ".t("yhteens‰", $asrow["kieli"]).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
-        $row["kommentti"] = preg_replace("/ ".t("yhteens‰").": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
-        $row["kommentti"] = preg_replace("/ "."yhteens‰".": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
+        // Otetaan yhteens√§kommentti pois ker√∂yslistalta (t√§m√§ tieto l√∂ytyy rivilt√§ jos tilaus on laskutettu, mutta l√§hetteell√§ sit√§ ei voi n√§ytt√§√§)
+        $row["kommentti"] = preg_replace("/ ".t("yhteens√§", $kieli).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
+        $row["kommentti"] = preg_replace("/ ".t("yhteens√§", $asrow["kieli"]).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
+        $row["kommentti"] = preg_replace("/ ".t("yhteens√§").": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
+        $row["kommentti"] = preg_replace("/ "."yhteens√§".": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
 
         // Trimmataan uudestaan
         $row["kommentti"] = trim($row["kommentti"]);
@@ -1233,10 +1233,10 @@ if (!function_exists('loppu_kerayslista')) {
     }
 
     if ($kerayslistatyyppi == 'EXCEL1' or $kerayslistatyyppi == 'EXCEL2') {
-      // T‰ss‰ p‰rj‰t‰‰n ilman footteria....
+      // T√§ss√§ p√§rj√§t√§√§n ilman footteria....
     }
     else {
-      // yhtiˆtiedot
+      // yhti√∂tiedot
       $y_tiedot_ok  = FALSE;
       $y_nimi     = $laskurow["yhtio_nimi"];
       $y_osoite     = $laskurow["yhtio_osoite"];
@@ -1264,7 +1264,7 @@ if (!function_exists('loppu_kerayslista')) {
         }
       }
 
-      // jos meill‰ on lasku menossa ulkomaille ja se laskutetaan eri ovttunnuksella
+      // jos meill√§ on lasku menossa ulkomaille ja se laskutetaan eri ovttunnuksella
       if ($laskurow["yhtio_ovttunnus"] != "" and $laskurow["yhtio_ovttunnus"] != $yhtiorow["ovttunnus"]) {
         // haetaan toimipaikan tiedot
         $alhqur = "SELECT puhelin, fax, email, www from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and vat_numero='$laskurow[yhtio_ovttunnus]'";
@@ -1281,7 +1281,7 @@ if (!function_exists('loppu_kerayslista')) {
         }
       }
 
-      // jos ei olla haettu muualta, niin haetaan tiedot yhtiˆlt‰
+      // jos ei olla haettu muualta, niin haetaan tiedot yhti√∂lt√§
       if (!$y_tiedot_ok) {
         // haetaan toimipaikan tiedot
         $alhqur = "SELECT puhelin, fax, email, www from yhtio where yhtio='$laskurow[yhtio]'";
@@ -1297,7 +1297,7 @@ if (!function_exists('loppu_kerayslista')) {
         }
       }
 
-      //Alimmat kolme laatikkoa, yhtiˆtietoja
+      //Alimmat kolme laatikkoa, yhti√∂tietoja
       $pdf->draw_rectangle(70, 20, 20, 580,  $thispage, $rectparam);
       $pdf->draw_rectangle(70, 207, 20, 580,  $thispage, $rectparam);
       $pdf->draw_rectangle(70, 394, 20, 580,  $thispage, $rectparam);
@@ -1311,7 +1311,7 @@ if (!function_exists('loppu_kerayslista')) {
       $pdf->draw_text(257, 55, $y_puhelin,            $thispage, $pieni);
       $pdf->draw_text(217, 45, t("Telefax", $kieli).":",      $thispage, $pieni);
       $pdf->draw_text(257, 45, $y_fax,              $thispage, $pieni);
-      $pdf->draw_text(217, 35, t("S‰hkˆposti", $kieli).":",    $thispage, $pieni);
+      $pdf->draw_text(217, 35, t("S√§hk√∂posti", $kieli).":",    $thispage, $pieni);
       $pdf->draw_text(257, 35, $y_email,              $thispage, $pieni);
       $pdf->draw_text(217, 25, t("Web", $kieli).":",        $thispage, $pieni);
       $pdf->draw_text(257, 25, $y_www,              $thispage, $pieni);
@@ -1332,7 +1332,7 @@ if (!function_exists('loppu_kerayslista')) {
           $pdf->draw_text(575-$oikpos, 25, $paino." kg",        $thispage, $boldi);
         }
 
-        // viivat rivien v‰liin...
+        // viivat rivien v√§liin...
         $x[0] = 20;
         $x[1] = 580;
         $y[0] = $y[1] = $kala + $rivinkorkeus - 4;
@@ -1391,8 +1391,8 @@ if (!function_exists('print_pdf_kerayslista')) {
         echo t("Myyntitili tulostuu")."...<br>";
       }
       else {
-        $kutsu = t("Ker‰yslista", $kieli).": $laskurow[tunnus]";
-        echo t("Ker‰yslista tulostuu")."...<br>";
+        $kutsu = t("Ker√§yslista", $kieli).": $laskurow[tunnus]";
+        echo t("Ker√§yslista tulostuu")."...<br>";
       }
 
       if ($kukarow["extranet"] == '') {
@@ -1403,7 +1403,7 @@ if (!function_exists('print_pdf_kerayslista')) {
       }
     }
     else {
-      //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+      //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
       list($usec, $sec) = explode(' ', microtime());
       mt_srand((float) $sec + ((float) $usec * 100000));
       $pdffilenimi = "/tmp/Kerayslista-".md5(uniqid(mt_rand(), true)).".pdf";
@@ -1434,8 +1434,8 @@ if (!function_exists('print_pdf_kerayslista')) {
           echo t("Myyntitili tulostuu")."...<br>";
         }
         else {
-          $kutsu = t("Ker‰yslista", $kieli);
-          echo t("Ker‰yslista tulostuu")."...<br>";
+          $kutsu = t("Ker√§yslista", $kieli);
+          echo t("Ker√§yslista tulostuu")."...<br>";
         }
 
         if ($kukarow["extranet"] == '') {
@@ -1446,11 +1446,11 @@ if (!function_exists('print_pdf_kerayslista')) {
         }
       }
       elseif ($tee == 'NAYTATILAUS') {
-        //Tyˆnnet‰‰n tuo pdf vaan putkeen!
+        //Ty√∂nnet√§√§n tuo pdf vaan putkeen!
         echo file_get_contents($pdffilenimi);
       }
       elseif ($komento != '' and $komento != 'edi') {
-        echo t("Ker‰yslista tulostuu")."...<br>";
+        echo t("Ker√§yslista tulostuu")."...<br>";
         $line = exec("$komento $pdffilenimi", $output, $returnvalue);
       }
 

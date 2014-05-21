@@ -29,7 +29,7 @@ if(!function_exists("asiakasalennustarkista")) {
         $sresult = pupe_query($query);
 
         if (mysql_num_rows($sresult) == 0) {
-          $virhe[$i] = t("Ytunnuksella ei lˆydy asiakasta!");
+          $virhe[$i] = t("Ytunnuksella ei l√∂ydy asiakasta!");
         }
       }
     }
@@ -67,10 +67,10 @@ if(!function_exists("asiakasalennustarkista")) {
           }
           elseif ($ytunnus != "" and $asiakasid > 0) {
             $t[$i]  = $asiakasid;
-            if (strpos($_SERVER['SCRIPT_NAME'], "lue_data.php") === FALSE) $virhe[$i] = t("Asiakas lˆytyi!");
+            if (strpos($_SERVER['SCRIPT_NAME'], "lue_data.php") === FALSE) $virhe[$i] = t("Asiakas l√∂ytyi!");
           }
           else {
-            $virhe[$i] = t("Asiakas puuttuu tai sit‰ ei lˆydy!");
+            $virhe[$i] = t("Asiakas puuttuu tai sit√§ ei l√∂ydy!");
           }
         }
       }
@@ -84,7 +84,7 @@ if(!function_exists("asiakasalennustarkista")) {
         $sresult = t_avainsana("ASIAKASRYHMA", "", "and avainsana.selite = '$chasiakas_ryhma'");
 
         if (mysql_num_rows($sresult) == 0) {
-          $virhe[$i] = t("Asiakasryhm‰ puuttuu tai sit‰ ei lˆydy!");
+          $virhe[$i] = t("Asiakasryhm√§ puuttuu tai sit√§ ei l√∂ydy!");
         }
       }
     }
@@ -114,7 +114,7 @@ if(!function_exists("asiakasalennustarkista")) {
             $alasveto[$i] = "<select name='t[$i]'>".$ulos."</select>";
           }
 
-          $virhe[$i] = t("Tuotenumero puuttuu tai sit‰ ei lˆydy!");
+          $virhe[$i] = t("Tuotenumero puuttuu tai sit√§ ei l√∂ydy!");
         }
       }
     }
@@ -130,7 +130,7 @@ if(!function_exists("asiakasalennustarkista")) {
         $sresult = pupe_query($query);
 
         if (mysql_num_rows($sresult) != 1) {
-          $virhe[$i] = t("Aleryhm‰ puuttuu tai sit‰ ei lˆydy!");
+          $virhe[$i] = t("Aleryhm√§ puuttuu tai sit√§ ei l√∂ydy!");
         }
       }
     }
@@ -144,7 +144,7 @@ if(!function_exists("asiakasalennustarkista")) {
         $preres = pupe_query($preq);
 
         if (mysql_num_rows($preres) != 1) {
-          $virhe[$i] = t("Asiakassegmentti puuttuu tai sit‰ ei lˆydy!");
+          $virhe[$i] = t("Asiakassegmentti puuttuu tai sit√§ ei l√∂ydy!");
         }
       }
     }
@@ -160,7 +160,7 @@ if(!function_exists("asiakasalennustarkista")) {
         $preres = pupe_query($preq);
 
         if (mysql_num_rows($preres) != 1) {
-          $virhe[$i] = t("Asiakaspiiri puuttuu tai sit‰ ei lˆydy! ");
+          $virhe[$i] = t("Asiakaspiiri puuttuu tai sit√§ ei l√∂ydy! ");
         }
       }
     }
@@ -176,12 +176,12 @@ if(!function_exists("asiakasalennustarkista")) {
       if ($chastunn > 0) $rajlask++;
 
       if ($rajlask > 1 or $rajlask == 0) {
-        $virhe[$i] = t("Valitse vain asiakas, ytunnus, asiakasryhm‰, asiakassegmentti tai piiri!");
+        $virhe[$i] = t("Valitse vain asiakas, ytunnus, asiakasryhm√§, asiakassegmentti tai piiri!");
       }
     }
 
     if ($chryhma == '' and $chtuoteno == '' and mysql_field_name($result, $i) == 'ryhma') {
-      $virhe[$i] = t("Sinun on annettava joko tuote tai ryhm‰!");
+      $virhe[$i] = t("Sinun on annettava joko tuote tai ryhm√§!");
     }
 
     if (mysql_field_name($result, $i) == "minkpl") {
@@ -208,7 +208,7 @@ if(!function_exists("asiakasalennustarkista")) {
         $vv = substr($chalkupvm, 0, 4);
 
         if (!checkdate($kk, $pp, $vv)) {
-          $virhe[$i] = t("Alkup‰iv‰m‰‰r‰ virheellinen!");
+          $virhe[$i] = t("Alkup√§iv√§m√§√§r√§ virheellinen!");
         }
       }
     }
@@ -227,7 +227,7 @@ if(!function_exists("asiakasalennustarkista")) {
         $vv = substr($chloppupvm, 0, 4);
 
         if (!checkdate($kk, $pp, $vv)) {
-          $virhe[$i] = t("Loppup‰iv‰m‰‰r‰ virheellinen!");
+          $virhe[$i] = t("Loppup√§iv√§m√§√§r√§ virheellinen!");
         }
       }
     }
@@ -273,8 +273,8 @@ if(!function_exists("asiakasalennustarkista")) {
       $dsresult = pupe_query($aquery);
 
       if (mysql_num_rows($dsresult) > 0) {
-        // Pit‰‰ aina setata myˆs "t‰m‰n" kent‰n virhe, muuten luedata ei toimi
-        $virhe[$chtuoteno_ind] = $virhe[$i] = t("VIRHE: N‰ill‰ tiedoilla on jo asiakasalennus j‰rjestelm‰ss‰!");
+        // Pit√§√§ aina setata my√∂s "t√§m√§n" kent√§n virhe, muuten luedata ei toimi
+        $virhe[$chtuoteno_ind] = $virhe[$i] = t("VIRHE: N√§ill√§ tiedoilla on jo asiakasalennus j√§rjestelm√§ss√§!");
       }
     }
   }

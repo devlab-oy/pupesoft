@@ -1,7 +1,7 @@
 <?php
 
 $ulos = "";
-$jatko = 1; // oletetaan normaali käsittely
+$jatko = 1; // oletetaan normaali kÃ¤sittely
 
 if (mysql_field_name($result, $i) == "laskutus_nimi" or
   mysql_field_name($result, $i) == "laskutus_nimitark" or

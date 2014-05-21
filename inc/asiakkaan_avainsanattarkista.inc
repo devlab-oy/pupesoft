@@ -19,7 +19,7 @@ if(!function_exists("asiakkaan_avainsanattarkista")) {
 
     if (mysql_field_name($result, $i) == "avainsana") {
       if (trim($t[$i]) == '') {
-        $virhe[$i] = t("Selite ei voi olla tyhjä")."!";
+        $virhe[$i] = t("Selite ei voi olla tyhjÃ¤")."!";
       }
       $tem_avainsana = $t[$i];
       $tem_avainsana_i = $i;
@@ -43,7 +43,7 @@ if(!function_exists("asiakkaan_avainsanattarkista")) {
       $results = pupe_query($query);
 
       if (mysql_num_rows($results) > 0) {
-        $virhe[$tem_avainsana_i] = $virhe[$i] = t("Avainsana annetuilla tiedoilla löytyy kannasta. Duplikaatit ovat kiellettyjä!");
+        $virhe[$tem_avainsana_i] = $virhe[$i] = t("Avainsana annetuilla tiedoilla lÃ¶ytyy kannasta. Duplikaatit ovat kiellettyjÃ¤!");
       }
     }
   }

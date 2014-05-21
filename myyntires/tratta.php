@@ -4,20 +4,20 @@ require ("../inc/parametrit.inc");
 
 echo "<font class='head'>".t("Tratta")."</font><hr>";
 
-//vain n‰in monta p‰iv‰‰ sitten karhutut
+//vain n√§in monta p√§iv√§√§ sitten karhutut
 //laskut huomioidaan trattauksessa
 $kpvm_aikaa = 0;
 
-//vain n‰in monta p‰iv‰‰ sitten er‰‰ntyneet
-//laskut huomioidaan n‰kym‰sss‰
+//vain n√§in monta p√§iv√§√§ sitten er√§√§ntyneet
+//laskut huomioidaan n√§kym√§sss√§
 $lpvm_aikaa = 10;
 
-//lasku pit‰‰ olla karhuttu v‰h n‰in
-//monta kertaa jotta sit‰ haluutaan tratata
+//lasku pit√§√§ olla karhuttu v√§h n√§in
+//monta kertaa jotta sit√§ haluutaan tratata
 $karhu_kerta = 2;
 
 if ($kukarow["kirjoitin"] == 0) {
-  echo "<font class='error'>".t("Sinulla pit‰‰ olla henkilˆkohtainen tulostin valittuna, ett‰ voit tulostaa trattoja").".</font><br>";
+  echo "<font class='error'>".t("Sinulla pit√§√§ olla henkil√∂kohtainen tulostin valittuna, ett√§ voit tulostaa trattoja").".</font><br>";
   $tee = "";
 }
 
@@ -27,7 +27,7 @@ if ($tee == 'LAHETA') {
     $jatka = true;
   }
   else {
-    echo "<font class='error'>".t("Et valinnut yht‰‰n laskua").".</font>";
+    echo "<font class='error'>".t("Et valinnut yht√§√§n laskua").".</font>";
     $jatka = false;
   }
 
@@ -75,7 +75,7 @@ if ($tee == "ALOITATRATTAAMINEN") {
       }
     }
     else {
-      echo "Valittu factoringsopimus ei lˆydy";
+      echo "Valittu factoringsopimus ei l√∂ydy";
       exit;
     }
   }
@@ -221,9 +221,9 @@ if ($tee == 'TRATTAA')  {
   echo "</td><td valign='top' class='back'>";
 
   echo "<table>";
-  echo "<tr><th>".t("Edellinen maksukehotus v‰h").".</th><td>$kpvm_aikaa ".t("p‰iv‰‰ sitten").".</td></tr>";
-  echo "<tr><th>".t("Er‰p‰iv‰st‰ v‰h").".</th><td>$lpvm_aikaa ".t("p‰iv‰‰").".</td></tr>";
-  echo "<tr><th>".t("Maksukehotus l‰hetetty v‰h").".</th><td>$karhu_kerta ".t("kertaa").".</td></tr>";
+  echo "<tr><th>".t("Edellinen maksukehotus v√§h").".</th><td>$kpvm_aikaa ".t("p√§iv√§√§ sitten").".</td></tr>";
+  echo "<tr><th>".t("Er√§p√§iv√§st√§ v√§h").".</th><td>$lpvm_aikaa ".t("p√§iv√§√§").".</td></tr>";
+  echo "<tr><th>".t("Maksukehotus l√§hetetty v√§h").".</th><td>$karhu_kerta ".t("kertaa").".</td></tr>";
   echo "<tr><td class='back'></td><td class='back'><br></td></tr>";
 
   $query = "SELECT GROUP_CONCAT(distinct liitostunnus) liitokset
@@ -245,7 +245,7 @@ if ($tee == 'TRATTAA')  {
   $kaatosumma=$kaato["summa"];
   if (!$kaatosumma) $kaatosumma='0.00';
 
-  echo "<tr><th>".t("Kaatotilill‰")."</th><td>$kaatosumma</td></tr>";
+  echo "<tr><th>".t("Kaatotilill√§")."</th><td>$kaatosumma</td></tr>";
 
   echo "</table>";
   echo "</td></tr></table><br>";
@@ -253,7 +253,7 @@ if ($tee == 'TRATTAA')  {
 
   echo "<table>";
   echo "<tr>";
-  echo "<td class='back'><input type='button' onclick='javascript:document.lahetaformi.submit();' value='".t("L‰het‰")."'></td>";
+  echo "<td class='back'><input type='button' onclick='javascript:document.lahetaformi.submit();' value='".t("L√§het√§")."'></td>";
   echo "<td class='back'><input type='button' onclick='javascript:document.ohitaformi.submit();' value='".t("Ohita")."'></td>";
   echo "</tr>";
   echo "</table><br>";
@@ -263,8 +263,8 @@ if ($tee == 'TRATTAA')  {
   echo "<th>".t("Laskunpvm")."</th>";
   echo "<th>".t("Laskunro")."</th>";
   echo "<th>".t("Summa")."</th>";
-  echo "<th>".t("Er‰p‰iv‰")."</th>";
-  echo "<th>".t("Ik‰ p‰iv‰‰")."</th>";
+  echo "<th>".t("Er√§p√§iv√§")."</th>";
+  echo "<th>".t("Ik√§ p√§iv√§√§")."</th>";
   echo "<th>".t("Maksukehotuksia")."</th>";
   echo "<th>".t("Edellinen maksukehotus")."</th>";
   echo "<th>".t("Tratataan")."</th>";
@@ -308,7 +308,7 @@ if ($tee == 'TRATTAA')  {
 
   $summmmma += $kaatosumma;
 
-  echo "<th colspan='2'>".t("Tratalla yhteens‰")."</th>";
+  echo "<th colspan='2'>".t("Tratalla yhteens√§")."</th>";
   echo "<th>$summmmma</th>";
   echo "<td class='back'></td></tr>";
 
@@ -324,7 +324,7 @@ if ($tee == 'TRATTAA')  {
     echo "\n<input type='hidden' name='tratattavat[]' value='$tunnukset'>";
   }
 
-  echo "<td class='back'><input name='$kentta' type='submit' value='".t("L‰het‰")."'></td></form>";
+  echo "<td class='back'><input name='$kentta' type='submit' value='".t("L√§het√§")."'></td></form>";
 
 
   echo "<form name='ohitaformi' method='post'>";
@@ -344,7 +344,7 @@ if ($tee == "") {
 
   echo "<form method='post'>";
   echo "<input type='hidden' name='tee' value='ALOITATRATTAAMINEN'>";
-  echo t("Syˆt‰ ytunnus jos haluat tratata tietty‰ asiakasta").".<br>".t("J‰t‰ kentt‰ tyhj‰ksi jos haluat aloittaa trattaamisen ensimm‰isest‰ asiakkaasta").".<br><br>";
+  echo t("Sy√∂t√§ ytunnus jos haluat tratata tietty√§ asiakasta").".<br>".t("J√§t√§ kentt√§ tyhj√§ksi jos haluat aloittaa trattaamisen ensimm√§isest√§ asiakkaasta").".<br><br>";
   echo "<table>";
 
   $apuqu = "  select concat(nimitys,' ', valkoodi, ' (',sopimusnumero,')') nimi, tunnus
@@ -416,7 +416,7 @@ if ($tee == "") {
         where yhtio='$kukarow[yhtio]' and nimi!='' and puhno!='' and eposti!='' and extranet=''";
   $meapu = mysql_query($apuqu) or pupe_error($apuqu);
 
-  echo "<tr><th>".t("Yhteyshenkilˆ").":</th>";
+  echo "<tr><th>".t("Yhteyshenkil√∂").":</th>";
   echo "<td><select name='yhteyshenkilo'>";
 
   while($row = mysql_fetch_array($meapu)) {

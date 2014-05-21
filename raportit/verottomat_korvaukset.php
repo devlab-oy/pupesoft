@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 if (isset($_POST["tee"])) {
@@ -37,7 +37,7 @@ for ($i = date("Y"); $i >= date("Y")-4; $i--) {
 echo "</select>";
 echo "</td>";
 
-echo "<td class='back'><input type='submit' value='".t("N‰yt‰")."'></td>";
+echo "<td class='back'><input type='submit' value='".t("N√§yt√§")."'></td>";
 echo "</tr>";
 
 echo "</table>";
@@ -78,7 +78,7 @@ if ($tee == "NAYTA") {
     echo "<th>".t("Verokodi")." / ".t("Korvaus")."</th>";
     echo "<th>".t("Kappaletta")."</th>";
     echo "<th>".t("Hinta")."</th>";
-    echo "<th>".t("Yhteens‰")."</th>";
+    echo "<th>".t("Yhteens√§")."</th>";
     echo "</tr>";
 
     $ednimi    = "";
@@ -89,7 +89,7 @@ if ($tee == "NAYTA") {
     while ($row = mysql_fetch_assoc($result)) {
 
       if ($row["kuvaus"] == '50') {
-        $kuvaus = t("P‰iv‰rahat ja ateriakorvaukset");
+        $kuvaus = t("P√§iv√§rahat ja ateriakorvaukset");
       }
       else {
         $kuvaus = t("Verovapaa kilometrikorvaus");
@@ -140,7 +140,7 @@ if ($tee == "NAYTA") {
         $vspserie[$row["ytunnus"]]["kilsat_raha"] = $row["yhteensa"];
       }
 
-      // var:t otettiin k‰yttˆˆn vasta 2013
+      // var:t otettiin k√§ytt√∂√∂n vasta 2013
       if ($vv >= 2013) {
         $varlisa = "tilausrivi.var";
       }
@@ -199,7 +199,7 @@ if ($tee == "NAYTA") {
     echo "<tr><td class='back' colspan='5'></td></tr>";
 
     echo "<tr class='aktiivi'>";
-    echo "<th colspan='2'>50 ".t("P‰iv‰rahat ja ateriakorvaukset")."</th>";
+    echo "<th colspan='2'>50 ".t("P√§iv√§rahat ja ateriakorvaukset")."</th>";
     echo "<td align='right'>".number_format($kappaleet[50], 2, ',', ' ')."</td>";
     echo "<td colspan='2' align='right'>".number_format($summat[50], 2, ',', ' ')."</td>";
     echo "</tr>";

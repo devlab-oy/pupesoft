@@ -44,7 +44,7 @@ if ($tee == "JALKILASKE" and checkdate($kka, $ppa, $vva)) {
 
     $rekurkoko = count($korjattavat_valmistukset);
 
-    // T‰ss‰ on rekursiivista toimintaa $korjattavat_valmistukset-array voi kasvaa matkan varrella
+    // T√§ss√§ on rekursiivista toimintaa $korjattavat_valmistukset-array voi kasvaa matkan varrella
     for ($korjattavat_valmistukset_ind=0; $korjattavat_valmistukset_ind < $rekurkoko; $korjattavat_valmistukset_ind++) {
       jalkilaske_valmistus($korjattavat_valmistukset[$korjattavat_valmistukset_ind]);
 
@@ -54,13 +54,13 @@ if ($tee == "JALKILASKE" and checkdate($kka, $ppa, $vva)) {
     echo "</table>";
   }
   else {
-    echo "<br><br><font class='message'>".t("Yht‰‰n valmistettavaa tilausta/tuotetta ei lˆytynyt")."...</font>";
+    echo "<br><br><font class='message'>".t("Yht√§√§n valmistettavaa tilausta/tuotetta ei l√∂ytynyt")."...</font>";
   }
 
   $tee = "";
 }
 elseif ($tee == "JALKILASKE") {
-  echo "<font class='error'>".t("VIRHE: Syˆtetty p‰iv‰m‰‰r‰ oli virheellinen")."!</font><br><br>";
+  echo "<font class='error'>".t("VIRHE: Sy√∂tetty p√§iv√§m√§√§r√§ oli virheellinen")."!</font><br><br>";
   $tee = "";
 }
 
@@ -69,7 +69,7 @@ if ($tee == "") {
   echo "<input type='hidden' name='tee' value='JALKILASKE'>";
   echo "<table>";
   echo "<tr>
-    <th>".t("Syˆt‰ p‰iv‰m‰‰r‰ josta korjataan")." ".t("(pp-kk-vvvv)")."</th>
+    <th>".t("Sy√∂t√§ p√§iv√§m√§√§r√§ josta korjataan")." ".t("(pp-kk-vvvv)")."</th>
     <td><input type='text' name='ppa' value='$ppa' size='3'></td>
     <td><input type='text' name='kka' value='$kka' size='3'></td>
     <td><input type='text' name='vva' value='$vva' size='5'></td>

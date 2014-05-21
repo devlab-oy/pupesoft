@@ -10,11 +10,11 @@ elseif (@include_once("inc/parametrit.inc"));
 
 if (empty($browkieli)) $browkieli = 'fi';
 
-# Index.php ei sis‰llyt‰ parametrit incist‰ headereita
+# Index.php ei sis√§llyt√§ parametrit incist√§ headereita
 echo "<meta name='viewport' content='width=250,height=246, user-scalable=no, maximum-scale=1'>\n";
 echo "<link rel='stylesheet' type='text/css' href='kasipaate.css' />\n";
 echo "<body>";
-echo "<div class='header'><h1>",t("PƒƒVALIKKO", $browkieli),"</h1></div>";
+echo "<div class='header'><h1>",t("P√Ñ√ÑVALIKKO", $browkieli),"</h1></div>";
 
 echo "<div class='main valikko'>";
 if (tarkista_oikeus("mobiili/siirto.php")) {

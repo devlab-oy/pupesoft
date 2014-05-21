@@ -1,6 +1,6 @@
 <?php
 
-echo "<font class='head'>".t("Sidottup‰‰oma")."</font><hr>";
+echo "<font class='head'>".t("Sidottup√§√§oma")."</font><hr>";
 
 echo "<form method='post'><input type='hidden' name='toim' value='ostovelat'>";
 echo "<table><tr><th></th><th></th>";
@@ -127,7 +127,7 @@ for ($i=1; $i<8; $i++) {
   echo "</tr>";
 }
 
-echo "<tr><th></th><th>".t('Yhteens‰')."</th>";
+echo "<tr><th></th><th>".t('Yhteens√§')."</th>";
 for ($j=1; $j<$sarakkeita +1; $j++) echo "<th>$col[$j]</th>";
 echo "</tr>";
 if (!isset($kumulatiivinen) and !is_array($taso)) $kumulatiivinen='on';
@@ -158,4 +158,4 @@ echo "</select></td>";
 
 echo "<td><input type='checkbox' name='kumulatiivinen' $kumulatiivinen> ".t("Kumulatiivinen")."</td>";
 echo "<td><input type='checkbox' name='tuhat' $tuhat> ".t("Jaa luvut 1000:lla")."</td>";
-echo "<td><input type='submit' value='".t("N‰yt‰")."'></td></tr></table></form>";
+echo "<td><input type='submit' value='".t("N√§yt√§")."'></td></tr></table></form>";

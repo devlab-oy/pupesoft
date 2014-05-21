@@ -55,7 +55,7 @@ if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '') {
       }
     }
     else {
-      $errors[] = t("Viivakoodilla %s ei lˆytynyt tuotetta", '', $viivakoodi)."<br />";
+      $errors[] = t("Viivakoodilla %s ei l√∂ytynyt tuotetta", '', $viivakoodi)."<br />";
       $viivakoodi = "";
     }
   }
@@ -64,7 +64,7 @@ if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '') {
 
 }
 else {
-  # T‰nne ei pit‰is p‰‰ty‰, tarkistetaan jo ostotilaus.php:ss‰
+  # T√§nne ei pit√§is p√§√§ty√§, tarkistetaan jo ostotilaus.php:ss√§
   echo t("Parametrivirhe");
   echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=ostotilaus.php'>";
   exit();
@@ -72,7 +72,7 @@ else {
 
 if ($_viivakoodi == $viivakoodi) $viivakoodi = "";
 
-# Tarkistetaan onko k‰ytt‰j‰ll‰ kesken saapumista
+# Tarkistetaan onko k√§ytt√§j√§ll√§ kesken saapumista
 $keskeneraiset_query = "SELECT kuka.kesken FROM lasku
                         JOIN kuka ON (lasku.tunnus=kuka.kesken and lasku.yhtio=kuka.yhtio)
                         WHERE kuka='{$kukarow['kuka']}'
@@ -80,7 +80,7 @@ $keskeneraiset_query = "SELECT kuka.kesken FROM lasku
                         and lasku.tila='K'";
 $keskeneraiset = mysql_fetch_assoc(pupe_query($keskeneraiset_query));
 
-# Jos kuka.kesken on saapuminen, k‰ytet‰‰n sit‰
+# Jos kuka.kesken on saapuminen, k√§ytet√§√§n sit√§
 if ($keskeneraiset['kesken'] != 0) {
   $saapuminen = $keskeneraiset['kesken'];
 }
@@ -140,10 +140,10 @@ $tilausten_lukumaara = mysql_num_rows($result);
 
 if ($orig_tilausten_lukumaara == 0) $orig_tilausten_lukumaara = $tilausten_lukumaara;
 
-// Jos etsit‰‰n viivakoodilla ja kyseist‰ tuotetta ei lˆydy esim. ostotilaukselta, tehd‰‰n uusi haku ilman viivakoodia
+// Jos etsit√§√§n viivakoodilla ja kyseist√§ tuotetta ei l√∂ydy esim. ostotilaukselta, tehd√§√§n uusi haku ilman viivakoodia
 if ($tilausten_lukumaara == 0 and (isset($_viivakoodi) and $_viivakoodi != "") and count($params) > 1) {
 
-  $errors[] = t("Viivakoodilla %s ei lˆytynyt tuotetta", '', $_viivakoodi)."<br />";
+  $errors[] = t("Viivakoodilla %s ei l√∂ytynyt tuotetta", '', $_viivakoodi)."<br />";
 
   unset($params['viivakoodi']);
 
@@ -218,7 +218,7 @@ if ($tilausten_lukumaara == 0) {
   exit();
 }
 
-# Jos vain yksi osuma, menn‰‰n suoraan hyllytykseen;
+# Jos vain yksi osuma, menn√§√§n suoraan hyllytykseen;
 if ($tilausten_lukumaara == 1 and $orig_tilausten_lukumaara == 1 and $_viivakoodi == "") {
 
   $url_array['tilausrivi'] = $tilaukset['tunnus'];
@@ -232,13 +232,13 @@ if ($tilausten_lukumaara == 1 and $orig_tilausten_lukumaara == 1 and $_viivakood
 }
 
 if (isset($virhe)) {
-  $errors[] = t("Tuotetta ei lˆytynyt").".<br>";
+  $errors[] = t("Tuotetta ei l√∂ytynyt").".<br>";
 }
 
 # Result alkuun
 mysql_data_seek($result, 0);
 
-//otetaan haltuun se tapaus, jos heti halutaan menn‰ takasin hakuruutuun ja meill‰ ei ole viel‰ tehtyn‰ uutta saapumista -> pit‰‰ setata erillinen muuttuja, jotta saapumistunnuksen settaaminen kukarow.keskeniin ohitettaisiin kun palataan hakuun ostotilaus.php
+//otetaan haltuun se tapaus, jos heti halutaan menn√§ takasin hakuruutuun ja meill√§ ei ole viel√§ tehtyn√§ uutta saapumista -> pit√§√§ setata erillinen muuttuja, jotta saapumistunnuksen settaaminen kukarow.keskeniin ohitettaisiin kun palataan hakuun ostotilaus.php
 if (!isset($saapuminen)) {
   $backsaapuminen = "";
 }
@@ -347,7 +347,7 @@ while($row = mysql_fetch_assoc($result)) {
 }
 
 echo "</table></div>";
-echo "Rivej‰: ".mysql_num_rows($result);
+echo "Rivej√§: ".mysql_num_rows($result);
 
 echo "<div class='controls'>
 <button type='submit' name='submit' value='ok' onsubmit='false'>",t("OK"),"</button>
@@ -369,7 +369,7 @@ echo "<script type='text/javascript'>
 
   $(document).ready(function() {
     $('#viivakoodi').on('keyup', function() {
-      // Autosubmit vain jos on syˆtetty tarpeeksi pitk‰ viivakoodi
+      // Autosubmit vain jos on sy√∂tetty tarpeeksi pitk√§ viivakoodi
       if (is_mobile && $('#viivakoodi').val().length > 8) {
         document.getElementById('valitse_nappi').click();
       }

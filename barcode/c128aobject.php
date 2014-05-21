@@ -37,7 +37,7 @@ Contact author at: barcode@mribti.com
    {
      $this->BarcodeObject($Width, $Height, $Style);
    $this->mValue   = $Value;
-   $this->mChars   = " !\"#$%&'()*+´-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_";
+   $this->mChars   = " !\"#$%&'()*+Â´-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_";
    $this->mCharSet = array
     (
       "212222",   /*   00 */

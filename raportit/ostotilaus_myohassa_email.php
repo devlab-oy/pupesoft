@@ -15,7 +15,7 @@ if (php_sapi_name() == 'cli') {
   $yhtio = trim($argv[1]);
   $paivamaararaja = trim($argv[2]);
 
-  //yhtiˆt‰ tai s‰hkˆpostia ei ole annettu
+  //yhti√∂t√§ tai s√§hk√∂postia ei ole annettu
   if (empty($yhtio) or empty($paivamaararaja)) {
     echo "\nUsage: php ".basename($argv[0])." yhtio 3\n\n";
     die;
@@ -23,7 +23,7 @@ if (php_sapi_name() == 'cli') {
 
   $yhtiorow = hae_yhtion_parametrit($yhtio);
 
-  // Haetaan k‰ytt‰j‰n tiedot
+  // Haetaan k√§ytt√§j√§n tiedot
   $query = "SELECT *
             FROM kuka
             WHERE yhtio = '$yhtio'
@@ -45,7 +45,7 @@ else {
   //Debuggaamista varten
   require("../inc/parametrit.inc");
 
-  echo "<font class='head'>".t('Myˆh‰ss‰ olevien ostotilausten l‰hetys s‰hkˆpostiin')."</font><hr>";
+  echo "<font class='head'>".t('My√∂h√§ss√§ olevien ostotilausten l√§hetys s√§hk√∂postiin')."</font><hr>";
 
   $tee = "hae_ostotilaukset";
   $paivamaararaja = 3;
@@ -72,7 +72,7 @@ if (php_sapi_name() != 'cli') {
 }
 
 /**
- * Haetaan tavarantoimittajalla l‰hetetyt ostotilaskut, jotka eiv‰t ole viel‰ saapuneet
+ * Haetaan tavarantoimittajalla l√§hetetyt ostotilaskut, jotka eiv√§t ole viel√§ saapuneet
  *
  * @global array $kukarow
  * @param int $paivamaararaja
@@ -81,7 +81,7 @@ if (php_sapi_name() != 'cli') {
 function hae_myohassa_olevat_ostotilaukset($paivamaararaja) {
   global $kukarow;
 
-  //AND tilausrivi.keratty = '', ei haeta ostotilausrivej‰, jotka on jo saapuneet varastoon.
+  //AND tilausrivi.keratty = '', ei haeta ostotilausrivej√§, jotka on jo saapuneet varastoon.
   $query = "SELECT lasku.tunnus as lasku_tunnus,
             lasku.nimi as toimittaja,
             tilausrivi.toimaika as toimitusaika,
@@ -145,7 +145,7 @@ function kasittele_ostotilaukset($ostotilaukset, $ostaja_tyyppi) {
 }
 
 /**
- *   Generoi s‰hkˆpostit ostajittain ostajien ostotilauksista.
+ *   Generoi s√§hk√∂postit ostajittain ostajien ostotilauksista.
  *
  * @param array $ostotilaukset
  * @return array
@@ -153,9 +153,9 @@ function kasittele_ostotilaukset($ostotilaukset, $ostaja_tyyppi) {
 function generoi_email_body($ostotilaukset) {
   $email_bodys = array();
 
-  //index:ss‰ on ostotilaus ostaja kuka
+  //index:ss√§ on ostotilaus ostaja kuka
   foreach ($ostotilaukset as $ostaja => $ostajan_ostotilaukset) {
-    $email_bodys[$ostaja] = t("Seuraavat ostotilausrivit ovat myˆh‰ss‰").".\n\n";
+    $email_bodys[$ostaja] = t("Seuraavat ostotilausrivit ovat my√∂h√§ss√§").".\n\n";
     foreach ($ostajan_ostotilaukset as $ostotilaus_tunnus => $ostotilaus) {
       $email_bodys[$ostaja] .= "-----------------------\n";
       $email_bodys[$ostaja] .= t("Ostotilaus")." $ostotilaus_tunnus\n";
@@ -174,7 +174,7 @@ function generoi_email_body($ostotilaukset) {
 }
 
 /**
- * L‰hett‰‰ s‰hkˆpostit
+ * L√§hett√§√§ s√§hk√∂postit
  *
  * @param array $email_bodys
  */
@@ -183,7 +183,7 @@ function laheta_sahkopostit($email_bodys) {
     $to = hae_sahkopostiosoite($kuka);
     $parametrit = array(
       "to"     => $to,
-      "subject"   => t("Myˆh‰ss‰ olevat ostotilaukset"),
+      "subject"   => t("My√∂h√§ss√§ olevat ostotilaukset"),
       "ctype"     => "plain",
       "body"     => $email_body);
     pupesoft_sahkoposti($parametrit);
@@ -191,7 +191,7 @@ function laheta_sahkopostit($email_bodys) {
 }
 
 /**
- *   Hakee kuka-taulusta s‰hkˆpostiosoitteen
+ *   Hakee kuka-taulusta s√§hk√∂postiosoitteen
  *
  * @global array $kukarow
  * @param string $kuka
@@ -211,7 +211,7 @@ function hae_sahkopostiosoite($kuka) {
 }
 
 /**
- *   Hakee k‰ytt‰j‰nimen ostajanro perusteella
+ *   Hakee k√§ytt√§j√§nimen ostajanro perusteella
  *
  * @global array $kukarow
  * @param int $ostajanro

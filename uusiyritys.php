@@ -6,7 +6,7 @@ echo "<font class='head'>".t("Uuden yrityksen ohjattu perustaminen").":</font><h
 $error = 0;
 
 if ($tila == 'parametrit') {
-  // Tee yritys t‰‰ll‰
+  // Tee yritys t√§√§ll√§
   if ($yhtio == '') {
     echo "<font class='error'>".t("Yritykselle on annettava tunnus")."</font><br>";
     $error = 1;
@@ -30,12 +30,12 @@ if ($tila == 'parametrit') {
   if (mysql_num_rows($result) > 0) {
     $uusiyhtiorow = mysql_fetch_array($result);
 
-    echo "<font class='error'>".t("Tunnus $yhtio on jo k‰ytˆss‰ (".$uusiyhtiorow['nimi'].")")."</font><br>";
+    echo "<font class='error'>".t("Tunnus $yhtio on jo k√§yt√∂ss√§ (".$uusiyhtiorow['nimi'].")")."</font><br>";
     $error = 1;
   }
 
   if ($error == 0) {
-    // Tehd‰‰n yhtiˆ
+    // Tehd√§√§n yhti√∂
     $query = "INSERT into yhtio
               SET yhtio  = '$yhtio',
               nimi       = '$nimi',
@@ -43,14 +43,14 @@ if ($tila == 'parametrit') {
               luontiaika = now()";
     $result = pupe_query($query);
 
-    // Tehd‰‰n parametrit
+    // Tehd√§√§n parametrit
     $query = "INSERT into yhtion_parametrit
               SET yhtio  = '$yhtio',
               laatija    = '$kukarow[kuka]',
               luontiaika = now()";
     $result = pupe_query($query);
 
-    // Tehd‰‰n haluttu valuutta
+    // Tehd√§√§n haluttu valuutta
     $query = "INSERT into valuu
               SET yhtio  = '$yhtio',
               nimi       = '$valuutta',
@@ -71,7 +71,7 @@ if ($tila == 'ulkonako') {
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
-      echo "<font class='error'>".t("Kopioitava yritys ei lˆydy")."</font><br>";
+      echo "<font class='error'>".t("Kopioitava yritys ei l√∂ydy")."</font><br>";
       $error = 1;
     }
 
@@ -113,7 +113,7 @@ if ($tila == 'ulkonako') {
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
-      echo "<font class='error'>".t("Kopioitava yritys ei lˆydy")."</font><br>";
+      echo "<font class='error'>".t("Kopioitava yritys ei l√∂ydy")."</font><br>";
       $error = 1;
     }
 
@@ -172,7 +172,7 @@ if ($tila == 'perusta') {
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
-      echo "<font class='error'>".t("Kopioitava yritys ei lˆydy")."</font><br>";
+      echo "<font class='error'>".t("Kopioitava yritys ei l√∂ydy")."</font><br>";
       $error = 1;
     }
 
@@ -245,7 +245,7 @@ if ($tila == 'profiilit') {
 
 if ($tila == 'kayttaja') {
 
-  //Tehd‰‰n k‰ytt‰j‰
+  //Tehd√§√§n k√§ytt√§j√§
   $profile = '';
   if (is_array($profiilit)) {
     if (count($profiilit) > 0) {
@@ -263,7 +263,7 @@ if ($tila == 'kayttaja') {
     $krow = mysql_fetch_array($pres);
     $salasana = $krow['salasana'];
     $nimi = $krow['nimi'];
-    echo "<font class='message'>$krow[nimi] ".t("K‰ytt‰j‰ lˆytyi muistakin yrityksist‰. Tietoja kopioitiin!"),"<br></font>";
+    echo "<font class='message'>$krow[nimi] ".t("K√§ytt√§j√§ l√∂ytyi muistakin yrityksist√§. Tietoja kopioitiin!"),"<br></font>";
   }
   else $salasana = md5($salasana);
 
@@ -275,15 +275,15 @@ if ($tila == 'kayttaja') {
             profiilit = '$profile'";
   $result = pupe_query($query);
 
-  //Insertoidaan ainakin oikeudet k‰ytt‰j‰hallintaan
+  //Insertoidaan ainakin oikeudet k√§ytt√§j√§hallintaan
   $query = "INSERT into oikeu
             SET
             kuka       = '$kuka',
-            sovellus   = 'K‰ytt‰j‰t ja valikot',
+            sovellus   = 'K√§ytt√§j√§t ja valikot',
             nimi       = 'suoja.php',
             alanimi    = '',
             paivitys   = '1',
-            nimitys    = 'K‰yttˆoikeudet',
+            nimitys    = 'K√§ytt√∂oikeudet',
             jarjestys  = '30',
             jarjestys2 = '',
             lukittu    = '1',
@@ -301,9 +301,9 @@ if ($tila == 'kayttaja') {
       $pres = pupe_query($query);
 
       while ($trow = mysql_fetch_array($pres)) {
-        //joudumme tarkistamaan ettei t‰t‰ oikeutta ole jo t‰ll‰ k‰ytt‰j‰ll‰.
+        //joudumme tarkistamaan ettei t√§t√§ oikeutta ole jo t√§ll√§ k√§ytt√§j√§ll√§.
         //voi olla jossain toisessa profiilissa
-        //jos oikeus on jo jostaan toisesta profiilista katotaan oisko eroja p‰ivitysoikeus kohassa
+        //jos oikeus on jo jostaan toisesta profiilista katotaan oisko eroja p√§ivitysoikeus kohassa
         $query = "SELECT yhtio
                   FROM oikeu
                   WHERE kuka   = '$kuka'
@@ -567,7 +567,7 @@ if ($tila == 'varasto') {
   unset($valuutta);
 }
 
-// K‰yttˆliittym‰
+// K√§ytt√∂liittym√§
 if (isset($tila)) {
   $query = "SELECT nimi
             from yhtio
@@ -582,7 +582,7 @@ if (isset($tila)) {
   $uusiyhtiorow = mysql_fetch_array($result);
 
   echo "<br><table>
-      <tr><th>".t("Yhtiˆ")."</th><th>".t("Nimi")."</th></tr>
+      <tr><th>".t("Yhti√∂")."</th><th>".t("Nimi")."</th></tr>
       <tr><td>$yhtio</td><td>$uusiyhtiorow[nimi]</td></tr>
       </table><br><br>";
 }
@@ -598,7 +598,7 @@ if ($tila == 'parametrit') {
       <input type='hidden' name = 'tila' value='ulkonako'>
       <input type='hidden' name = 'yhtio' value='$yhtio'>
       <table>
-      <tr><th>".t("Milt‰ yritykselt‰ kopioidaan tiedot ja parametrit?").":</th><td><select name='fromyhtio'>
+      <tr><th>".t("Milt√§ yritykselt√§ kopioidaan tiedot ja parametrit?").":</th><td><select name='fromyhtio'>
       <option value=''>".t("Ei kopioida")."</option>";
 
   while ($uusiyhtiorow = mysql_fetch_array($result)) {
@@ -622,7 +622,7 @@ if ($tila == 'ulkonako') {
       <input type='hidden' name = 'tila' value='perusta'>
       <input type='hidden' name = 'yhtio' value='$yhtio'>
       <table>
-      <tr><th>".t("Milt‰ yritykselt‰ kopioidaan ulkon‰kˆ?").":</th><td><select name='fromyhtio'>
+      <tr><th>".t("Milt√§ yritykselt√§ kopioidaan ulkon√§k√∂?").":</th><td><select name='fromyhtio'>
       <option value=''>".t("Ei kopioida")."</option>";
 
   while ($uusiyhtiorow=mysql_fetch_array($result)) {
@@ -646,7 +646,7 @@ if ($tila == 'perusta') {
       <input type='hidden' name = 'tila' value='menut'>
       <input type='hidden' name = 'yhtio' value='$yhtio'>
       <table>
-      <tr><th>".t("Milt‰ yritykselt‰ kopioidaan menut?").":</th><td><select name='fromyhtio'>
+      <tr><th>".t("Milt√§ yritykselt√§ kopioidaan menut?").":</th><td><select name='fromyhtio'>
       <option value=''>".t("Ei kopioida")."</option>";
 
   while ($uusiyhtiorow=mysql_fetch_array($result)) {
@@ -672,7 +672,7 @@ if ($tila == 'menut') {
         <input type='hidden' name = 'yhtio' value='$yhtio'>
         <input type='hidden' name = 'fromyhtio' value='$fromyhtio'>
         <table>
-        <tr><th>".t("Mitk‰ profiilit kopioidaan?").":</th><td></td></tr>";
+        <tr><th>".t("Mitk√§ profiilit kopioidaan?").":</th><td></td></tr>";
 
     while ($profiilirow=mysql_fetch_array($result)) {
       echo "<tr><td>$profiilirow[profiili]</td><td><input type='checkbox' name = 'profiilit[]' value='$profiilirow[profiili]' checked></td></tr>";
@@ -686,7 +686,7 @@ if ($tila == 'menut') {
 }
 
 if ($tila == 'profiilit') {
-  // k‰ytt‰j‰t
+  // k√§ytt√§j√§t
   $query = "SELECT distinct profiili FROM oikeu WHERE yhtio = '$yhtio' and profiili != ''";
   $result = pupe_query($query);
 
@@ -700,7 +700,7 @@ if ($tila == 'profiilit') {
       <input type='hidden' name = 'yhtio' value='$yhtio'>
       <input type='hidden' name = 'fromyhtio' value='$fromyhtio'>
       <table>
-      <tr><th>".t("Anna k‰ytt‰j‰tunnus").":</th><td><input type='text' name = 'kuka' value='$kuka'></td></tr>
+      <tr><th>".t("Anna k√§ytt√§j√§tunnus").":</th><td><input type='text' name = 'kuka' value='$kuka'></td></tr>
       <tr><th>".t("Nimi").":</th><td><input type='text' name = 'nimi' value='$nimi'></td></tr>
       <tr><th>".t("Salasana")."</th><td><input type='text' name = 'salasana' value='$salasana'></td></tr>
       <tr><th>".t("Profiilit")."</th><td></td></tr>";
@@ -711,7 +711,7 @@ if ($tila == 'profiilit') {
 
   echo "<tr><th></th><td><input type='submit' value='".t('Perusta')."'></td></tr></table></form>";
 
-  echo "<br>HUOM: Uudelle k‰ytt‰j‰lle lis‰t‰‰n aina k‰yttˆoikeudet uuden yrityksen k‰yttˆoikeuksien hallintaan.";
+  echo "<br>HUOM: Uudelle k√§ytt√§j√§lle lis√§t√§√§n aina k√§ytt√∂oikeudet uuden yrityksen k√§ytt√∂oikeuksien hallintaan.";
 }
 
 if ($tila == 'kayttaja') {
@@ -723,7 +723,7 @@ if ($tila == 'kayttaja') {
       <input type='hidden' name = 'tila' value='tili'>
       <input type='hidden' name = 'yhtio' value='$yhtio'>
       <table>
-      <tr><th>".t("Milt‰ yritykselt‰ kopioidaan tilikartta?").":</th><td><select name='fromyhtio'>
+      <tr><th>".t("Milt√§ yritykselt√§ kopioidaan tilikartta?").":</th><td><select name='fromyhtio'>
       <option value=''>".t("Ei kopioida")."</option>";
 
   while ($uusiyhtiorow = mysql_fetch_array($result)) {
@@ -747,7 +747,7 @@ if ($tila == 'tili') {
       <input type='hidden' name = 'tila' value='avainsana'>
       <input type='hidden' name = 'yhtio' value='$yhtio'>
       <table>
-      <tr><th>".t("Milt‰ yritykselt‰ kopioidaan avainsanat?").":</th><td><select name='fromyhtio'>";
+      <tr><th>".t("Milt√§ yritykselt√§ kopioidaan avainsanat?").":</th><td><select name='fromyhtio'>";
 
   while ($uusiyhtiorow=mysql_fetch_array($result)) {
 
@@ -759,15 +759,15 @@ if ($tila == 'tili') {
 
   echo "</select></td></tr>";
   echo "<tr><td><INPUT type='checkbox' name='eimitaan' value='x'>".t("Avainsanoja ei kopioida")."</td><td></td</tr>";
-  echo "<tr><td>".t("Mitk‰ avainsanatyypit kopioidaan")."</td><td></td></tr>";
+  echo "<tr><td>".t("Mitk√§ avainsanatyypit kopioidaan")."</td><td></td></tr>";
   echo "  <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='Y'>".t("Yksikko")."</td></tr>
-      <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='TRY'>".t("Tuoteryhm‰")."</td></tr>
+      <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='TRY'>".t("Tuoteryhm√§")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='OSASTO'>".t("Tuoteosasto")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='TUOTEMERKKI'>".t("Tuotemerkki")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='S' >".t("Tuotteen status")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='TUOTEULK'>".t("Tuotteiden avainsanojen laji")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='VARASTOLUOKKA'>".t("Varastoluokka")."</td></tr>
-      <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='SARJANUMERON_LI'>".t("Sarjanumeron lis‰tieto")."</td></tr>
+      <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='SARJANUMERON_LI'>".t("Sarjanumeron lis√§tieto")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='PARAMETRI'>".t("Tuotteen parametri")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='TARRATYYPPI'>".t("Tuotteen tarratyyppi")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='ASIAKASLUOKKA'>".t("Asiakasluokka")."</td></tr>
@@ -775,28 +775,28 @@ if ($tila == 'tili') {
       <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='ASIAKASRYHMA'>".t("Asiakasryhma")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='ASIAKASTILA'>".t("Asiakastila")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='PIIRI'>".t("Asiakkaan piiri")."</td></tr>
-      <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='LASKT_EMAIL'>".t("Laskutustiedot autom. s‰hkˆpostitukseen")."</td></tr>
-      <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='LASKT_EMAIL_SOP'>".t("Laskutustiedot autom. s‰hkˆpostitukseen (Sopimus)")."</td></tr>
+      <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='LASKT_EMAIL'>".t("Laskutustiedot autom. s√§hk√∂postitukseen")."</td></tr>
+      <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='LASKT_EMAIL_SOP'>".t("Laskutustiedot autom. s√§hk√∂postitukseen (Sopimus)")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='ASAVAINSANA'>".t("Asiakkaan avainsanojen laji")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='EXTASAVAINSANA'>".t("Extranet-asiakkaan avainsanojen laji")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='TV'>".t("Tilausvahvistus")."</td></tr>
-      <tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='LAHETETYYPPI'>".t("L‰hetetyyppi")."</td></tr>
+      <tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='LAHETETYYPPI'>".t("L√§hetetyyppi")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='KALETAPA'>".t("CRM yhteydenottotapa")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='MYSQLALIAS'>".t("Tietokantasarakkeen nimialias")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='TOIMITUSTAPA_OS'>".t("Toimitustapa ostolle (kuljetus)")."</td></tr>
-      <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='KUKAASEMA'>".t("K‰yt‰j‰n asema")."</td></tr>
+      <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='KUKAASEMA'>".t("K√§yt√§j√§n asema")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='ALVULK'>".t("Ulkomaan ALV%")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='ALV'>".t("ALV%")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='SEURANTA'>".t("Tilauksen seurantaluokka")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='TOIMEHTO'>".t("Toimitusehto")."</td></tr>
-      <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='HENKILO_OSASTO'>".t("Henkilˆosasto")."</td></tr>
+      <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='HENKILO_OSASTO'>".t("Henkil√∂osasto")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='RAHTIKIRJA'>".t("Rahtikirjatyyppi")."</td></tr>
-      <tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='KERAYSLISTA'>".t("Ker‰yslista")."</td></tr>
+      <tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='KERAYSLISTA'>".t("Ker√§yslista")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='TOIMTAPAKV'>".t("Toimitustavan kieliversio")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='KVERITTELY'>".t("Kulunvalvonnan erittely")."</td></tr>
-      <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='TYOM_TYOJONO'>".t("Tyˆm‰‰r‰ysten tyˆjono")."</td></tr>
-      <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='TYOM_TYOSTATUS'>".t("Tyˆm‰‰r‰ysten tyˆstatus")."</td></tr>
-      <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='TYOM_TYOLINJA'>".t("Tyˆm‰‰r‰ysten tyˆlinja")."</td></tr>
+      <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='TYOM_TYOJONO'>".t("Ty√∂m√§√§r√§ysten ty√∂jono")."</td></tr>
+      <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='TYOM_TYOSTATUS'>".t("Ty√∂m√§√§r√§ysten ty√∂status")."</td></tr>
+      <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='TYOM_TYOLINJA'>".t("Ty√∂m√§√§r√§ysten ty√∂linja")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='KT'>".t("Kauppatapahtuman luonne")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='TULLI'>".t("Poistumistoimipaikka")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='KM'>".t("Kuljetusmuoto")."</td></tr>
@@ -804,8 +804,8 @@ if ($tila == 'tili') {
       <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='LASKUKUVAUS'>".t("Maksuposition kuvaus")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='KARHUVIESTI'>".t("Maksukehotusviesti")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='MAKSUEHTOKV'>".t("Maksuehdon kieliversio")."</td></tr>
-      <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='CRM_ROOLI'>".t("Yhteyshenkilˆn rooli")."</td></tr>
-      <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='CRM_SUORAMARKKI'>".t("Yhteyshenkilˆn suoramarkkinointitiedot")."</td></tr>
+      <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='CRM_ROOLI'>".t("Yhteyshenkil√∂n rooli")."</td></tr>
+      <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='CRM_SUORAMARKKI'>".t("Yhteyshenkil√∂n suoramarkkinointitiedot")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='VAKIOVIESTI'>".t("Laskun vakioviesti")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='VAKIOVIESTI_TIL'>".t("Tilausvahvistuksen vakioviesti")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='LITETY'>".t("Liitetiedostotyyppi")."</td></tr>
@@ -813,8 +813,8 @@ if ($tila == 'tili') {
       <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='JAKELULISTA'>".t("Email jakelulista")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='LUETTELO'>".t("Luettelotyyppi")."</td></tr>
       <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='TRIVITYYPPI'>".t("Tilausrivin tyyppi")."</td></tr>
-      <tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='LASKUTUS_SAATE'>".t("Laskun s‰hkˆpostisaatekirje asiakkaalle")."</td></tr>
-      <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='TV_LISATIETO'>".t("Tilausvahvistuksen lis‰tiedot")."</td></tr>";
+      <tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='LASKUTUS_SAATE'>".t("Laskun s√§hk√∂postisaatekirje asiakkaalle")."</td></tr>
+      <tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='TV_LISATIETO'>".t("Tilausvahvistuksen lis√§tiedot")."</td></tr>";
   echo "<tr><th></th><td><input type='submit' value='".t('Kopioi')."'></td></tr></table></form>";
 }
 
@@ -827,7 +827,7 @@ if ($tila == 'avainsana') {
       <input type='hidden' name = 'tila' value='kirjoitin'>
       <input type='hidden' name = 'yhtio' value='$yhtio'>
       <table>
-      <tr><th>".t("Milt‰ yritykselt‰ kopioidaan kirjoittimet?").":</th><td><select name='fromyhtio'>
+      <tr><th>".t("Milt√§ yritykselt√§ kopioidaan kirjoittimet?").":</th><td><select name='fromyhtio'>
       <option value=''>".t("Ei kopioida")."</option>";
 
   while ($uusiyhtiorow=mysql_fetch_array($result)) {
@@ -851,7 +851,7 @@ if ($tila == 'kirjoitin') {
       <input type='hidden' name = 'tila' value='maksuehto'>
       <input type='hidden' name = 'yhtio' value='$yhtio'>
       <table>
-      <tr><th>".t("Milt‰ yritykselt‰ kopioidaan maksuehdot?").":</th><td><select name='fromyhtio'>
+      <tr><th>".t("Milt√§ yritykselt√§ kopioidaan maksuehdot?").":</th><td><select name='fromyhtio'>
       <option value=''>".t("Ei kopioida")."</option>";
 
   while ($uusiyhtiorow=mysql_fetch_array($result)) {
@@ -875,7 +875,7 @@ if ($tila == 'maksuehto') {
       <input type='hidden' name = 'tila' value='toimitustapa'>
       <input type='hidden' name = 'yhtio' value='$yhtio'>
       <table>
-      <tr><th>".t("Milt‰ yritykselt‰ kopioidaan toimitustavat?").":</th><td><select name='fromyhtio'>
+      <tr><th>".t("Milt√§ yritykselt√§ kopioidaan toimitustavat?").":</th><td><select name='fromyhtio'>
       <option value=''>".t("Ei kopioida")."</option>";
 
   while ($uusiyhtiorow = mysql_fetch_array($result)) {

@@ -1,9 +1,9 @@
 <?php
 
-// otetaan sisään $hetu
+// otetaan sisÃ¤Ã¤n $hetu
 // palautetaan $hetuok
 
-// Henkilötunnus on muotoa PPKKVVSNNNT
+// HenkilÃ¶tunnus on muotoa PPKKVVSNNNT
 
 $hetuok = 0; // kaikki ok
 
@@ -12,19 +12,19 @@ if (strlen($hetu) == 11) {
   // muutetaan kaikki kirjamet kapitaaleiksi
   $hetu = strtoupper($hetu);
 
-  // konkatenoidaan pvm ja yksilönumero tarkistuslaskua varten
+  // konkatenoidaan pvm ja yksilÃ¶numero tarkistuslaskua varten
   $hetutarkista1 = substr($hetu, 0, 6).substr($hetu, 7, 3);
 
   // otetaan tarkistusmerkki talteen
   $hetutarkista2 = substr($hetu, 10, 1);
 
-  // otetaan välimerkki tarkistusta varten
+  // otetaan vÃ¤limerkki tarkistusta varten
   $hetutarkista3 = substr($hetu, 6, 1);
 
   // otetaan tarkistettavasta osasta mod 31
   $jaannos = $hetutarkista1 % 31;
 
-  // tehdään jakojäännöksestä konversio kirjaimeen
+  // tehdÃ¤Ã¤n jakojÃ¤Ã¤nnÃ¶ksestÃ¤ konversio kirjaimeen
   if ($jaannos <  10) $tarkiste = $jaannos;
   if ($jaannos == 10) $tarkiste = "A";
   if ($jaannos == 11) $tarkiste = "B";
@@ -48,12 +48,12 @@ if (strlen($hetu) == 11) {
   if ($jaannos == 29) $tarkiste = "X";
   if ($jaannos == 30) $tarkiste = "Y";
 
-  // katotaan päästiinkö samaan tarkisteeseen
+  // katotaan pÃ¤Ã¤stiinkÃ¶ samaan tarkisteeseen
   if ($tarkiste != $hetutarkista2) {
     $hetuok = 1; // ei ole ok
   }
 
-  // katotaan, että välimerkki on oikein
+  // katotaan, ettÃ¤ vÃ¤limerkki on oikein
   if ($hetutarkista3 != "-" and $hetutarkista3 != '+' and $hetutarkista3 != 'A') {
     $hetuok = 1; // ei ole ok
   }

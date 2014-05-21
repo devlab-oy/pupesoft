@@ -1,9 +1,9 @@
 <?php
 
 $ulos = "";
-$jatko = 1; // oletetaan normaali k‰sittely
-$tyyppi = 1; // oletetaan rivin n‰kyvyys
-if ($i == 0) { //yhtiˆt‰ ei n‰ytet‰
+$jatko = 1; // oletetaan normaali k√§sittely
+$tyyppi = 1; // oletetaan rivin n√§kyvyys
+if ($i == 0) { //yhti√∂t√§ ei n√§ytet√§
   $tyyppi = 0;
 }
 
@@ -52,7 +52,7 @@ if (mysql_field_name($result, $i) == "isa_tarkenne") {
   $jatko = 0;
 }
 
- if (mysql_field_name($result, $i) == "kaytossa") { //ei k‰ytˆss‰
+ if (mysql_field_name($result, $i) == "kaytossa") { //ei k√§yt√∂ss√§
 
   $sel = $osel = "";
 
@@ -64,7 +64,7 @@ if (mysql_field_name($result, $i) == "isa_tarkenne") {
     $sel = "selected";
   }
 
-      $ulos = "<td><select name='$nimi'><option value='o' $sel>".t("Kyll‰");
+      $ulos = "<td><select name='$nimi'><option value='o' $sel>".t("Kyll√§");
   $ulos .= "<option value='E' " . $osel . ">".t("Ei");
   $ulos .= "</select></td>";
   $jatko = 0;

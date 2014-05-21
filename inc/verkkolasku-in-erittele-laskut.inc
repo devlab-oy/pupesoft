@@ -9,14 +9,14 @@ function erittele_laskut($file) {
   $soap = "";
   $ebid = "";
 
-  $poistettavat = array('/','.',':'); //Merkit, jotka poistetaan filenimest‰
+  $poistettavat = array('/','.',':'); //Merkit, jotka poistetaan filenimest√§
 
   if (stripos(file_get_contents($file), "Finvoice") !== FALSE) {
     foreach (file($file) as $ln) {
 
-      $ln = trim($ln); // varmistaan ett‰ ei j‰‰ roskia
+      $ln = trim($ln); // varmistaan ett√§ ei j√§√§ roskia
 
-      //Haetaan Finvoicen tunnusmerkkej‰
+      //Haetaan Finvoicen tunnusmerkkej√§
       if (preg_match("/\<SOAP\-ENV\:Envelope.*\>/i", $ln) > 0) {
         $type = "SOAP";
       }
@@ -27,8 +27,8 @@ function erittele_laskut($file) {
 
         $ln = substr($ln, stripos($ln, "<Finvoice"));
 
-        //   lis‰t‰‰n varmasti oikeat DOCTYPE m‰‰ritys
-        //  T‰m‰ siksi ett‰ haluamme k‰ytt‰‰ paikallista kuvausta eik‰ ladata kuvausta verkosta!
+        //   lis√§t√§√§n varmasti oikeat DOCTYPE m√§√§ritys
+        //  T√§m√§ siksi ett√§ haluamme k√§ytt√§√§ paikallista kuvausta eik√§ ladata kuvausta verkosta!
 
         if ($finvoiceversion >= 2) {
           $ln = "<?xml version=\"1.0\" encoding=\"ISO-8859-15\"?>\n<?xml-stylesheet type=\"text/xsl\" href=\"datain/Finvoice_2.0.xsl\"?>\n<Finvoice Version=\"$lnversion[1]\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"datain/Finvoice_2.0.xsd\">";
@@ -41,30 +41,30 @@ function erittele_laskut($file) {
         }
       }
 
-      //  Meill‰ oli SOAP kehys, t‰‰lt‰ me saadaan EBID sender-messageid
+      //  Meill√§ oli SOAP kehys, t√§√§lt√§ me saadaan EBID sender-messageid
       if (isset($type) and $type == "SOAP" and preg_match("/\<eb\:MessageId\>(.*?)\<\/eb\:MessageId\>/i", $ln, $messageid) > 0) {
         $ebid = $messageid[1];
         $ebid = str_replace($poistettavat,"_",$ebid);
       }
 
-      if ($type == "SOAP") $soap .= $ln; // T‰ss‰ soap kehys
+      if ($type == "SOAP") $soap .= $ln; // T√§ss√§ soap kehys
       if ($type == "FINVOICE") $boob .= $ln."\n"; // Rakennetaan varsinainen finvoice tiedosto
 
-      //   Tiedostosta lˆytyi finvoiceaineisto
+      //   Tiedostosta l√∂ytyi finvoiceaineisto
       if ($type == "FINVOICE" and stripos($ln, "</Finvoice>") !== FALSE) {
 
-        // Oteaan SOAP-kehyksest‰ Receiver PartyId koska se ei nyt aina tulekaan niin kauniisti Finvoicessa, esim jos toimittajalla on huono asiakasrekisteri
+        // Oteaan SOAP-kehyksest√§ Receiver PartyId koska se ei nyt aina tulekaan niin kauniisti Finvoicessa, esim jos toimittajalla on huono asiakasrekisteri
         if ($soap != "" and preg_match("/\<eb\:To\>\<eb\:PartyId\>(.*?)\<\/eb\:PartyId\>\<eb\:Role\>Receiver\<\/eb\:Role\>\<\/eb\:To\>/i", $soap, $receiverparty) > 0) {
 
-          // Jos tieto lˆytyy
+          // Jos tieto l√∂ytyy
           if (trim($receiverparty[1]) != "") {
-            // Lˆytyykˆ BuyerOrganisationUnitNumber-segmentti
+            // L√∂ytyyk√∂ BuyerOrganisationUnitNumber-segmentti
             if (preg_match("/\<BuyerOrganisationUnitNumber\>.*?\<\/BuyerOrganisationUnitNumber\>/i", $boob, $buyermatch)) {
-              // Jos lˆytyy niin muokataan
+              // Jos l√∂ytyy niin muokataan
               $boob = str_replace($buyermatch[0], "<BuyerOrganisationUnitNumber>".$receiverparty[1]."</BuyerOrganisationUnitNumber>", $boob);
             }
             else {
-              // Muuten lis‰t‰‰n
+              // Muuten lis√§t√§√§n
               $boob = str_replace("</BuyerPartyDetails>", "</BuyerPartyDetails>\n<BuyerOrganisationUnitNumber>".$receiverparty[1]."</BuyerOrganisationUnitNumber>", $boob);
             }
           }
@@ -76,7 +76,7 @@ function erittele_laskut($file) {
 
         $path_parts = pathinfo($file);
 
-        // Siivotaan vanha nimi, ettei nimi mee liian pitk‰ksi...
+        // Siivotaan vanha nimi, ettei nimi mee liian pitk√§ksi...
         $path_parts["filename"] = preg_replace("/(finvoice\-)/", "", $path_parts["filename"]);
         $path_parts["filename"] = preg_replace("/(\-gen[a-z0-9]{20,20})/", "", $path_parts["filename"]);
 
@@ -111,7 +111,7 @@ function erittele_laskut($file) {
       $vakio_alku = '<?xml version="1.0"?><LedgerJournal><LedgerJournalTable><LedgerJournalName>ORAO</LedgerJournalName><Name>Ostolaskut Unikosta</Name>';
       $vakio_loppu = '</LedgerJournalTable></LedgerJournal>';
 
-      // Lis‰t‰‰n ekaan tiedostoon alkutagit
+      // Lis√§t√§√§n ekaan tiedostoon alkutagit
       $xmlnimi = "ORAO-$i-".md5(uniqid(mt_rand(), true)).".xml";
       file_put_contents($laskut."/".$xmlnimi, $vakio_alku);
 
@@ -121,7 +121,7 @@ function erittele_laskut($file) {
           // Kun toimittaja vaihtuu, kirjoitetaan lopputagit...
           file_put_contents($laskut."/".$xmlnimi, $vakio_loppu, FILE_APPEND);
 
-          // ...ja keksit‰‰n uusi tiedostonimi...
+          // ...ja keksit√§√§n uusi tiedostonimi...
           $xmlnimi = "ORAO-$i-".md5(uniqid(mt_rand(), true)).".xml";
 
           // ...ja kirjotetaan sinne alkutagit
@@ -134,7 +134,7 @@ function erittele_laskut($file) {
         $i++;
       }
 
-      // Lis‰t‰‰n viimeiseen tiedostoon lopputagit
+      // Lis√§t√§√§n viimeiseen tiedostoon lopputagit
       file_put_contents($laskut."/".$xmlnimi, $vakio_loppu, FILE_APPEND);
       $luotiinlaskuja++;
     }
@@ -145,7 +145,7 @@ function erittele_laskut($file) {
       // Laitetaan teccomifile ensin talteen sellaisenaan
       $path_parts = pathinfo($file);
 
-      // Siivotaan vanha nimi, ettei nimi mee liian pitk‰ksi...
+      // Siivotaan vanha nimi, ettei nimi mee liian pitk√§ksi...
       $path_parts["basename"] = preg_replace("/(teccominvoice_)/", "", $path_parts["basename"]);
 
       $filenimi = "teccominvoice_{$path_parts['basename']}";
@@ -156,18 +156,18 @@ function erittele_laskut($file) {
       // poistetaan nonprintable merkit
       $xmldata = preg_replace("/[^\x20-\xFF\n]/", "", $xmldata);
 
-      //  T‰m‰ siksi ett‰ haluamme k‰ytt‰‰ paikallista kuvausta eik‰ ladata kuvausta verkosta!
+      //  T√§m√§ siksi ett√§ haluamme k√§ytt√§√§ paikallista kuvausta eik√§ ladata kuvausta verkosta!
       $xmldata = preg_replace("/^.*?<Invoice>/ms", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<?xml-stylesheet type=\"text/xsl\" href=\"datain/teccom-invoice.xsl\"?>\n<Invoice>", $xmldata, 1);
 
       // Jos data ei oo UTF-8 muodossa niin laitetaan se siihen
       if (mb_detect_encoding($xmldata, 'UTF-8', true) === FALSE) {
-            $xmldata = utf8_encode($xmldata);
+            $xmldata = $xmldata;
           }
 
       $save = file_put_contents($file, $xmldata);
       $path_parts = pathinfo($file);
 
-      // Siivotaan vanha nimi, ettei nimi mee liian pitk‰ksi...
+      // Siivotaan vanha nimi, ettei nimi mee liian pitk√§ksi...
       $path_parts["basename"] = preg_replace("/(teccominvoice_)/", "", $path_parts["basename"]);
 
       rename($file, "{$laskut}/teccominvoice_{$path_parts['basename']}");

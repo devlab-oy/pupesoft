@@ -144,9 +144,9 @@ if (!function_exists('alku')) {
     $pdf->draw_rectangle(779, 420, 758, 580, $thispage, $rectparam);
     $pdf->draw_text(310, 771, t("Y-tunnus", $kieli),     $thispage, $pieni);
 
-    //jos on suomalainen yritys tehd‰‰n ytunnus n‰tiks
+    //jos on suomalainen yritys tehd√§√§n ytunnus n√§tiks
     if (strtoupper($yhtiorow["maa"])== 'FI') {
-      //muutetaan ytunnus takas oikean n‰kˆseks
+      //muutetaan ytunnus takas oikean n√§k√∂seks
       $ytunpit = 8-strlen($yhtiorow["ytunnus"]);
 
       if ($ytunpit > 0) {
@@ -173,7 +173,7 @@ if (!function_exists('alku')) {
         }
 
     $pdf->draw_text(310, 761, $uytunnus,                 $thispage, $norm);
-    $pdf->draw_text(430, 771, t("P‰iv‰ys", $kieli),           $thispage, $pieni);
+    $pdf->draw_text(430, 771, t("P√§iv√§ys", $kieli),           $thispage, $pieni);
     $pdf->draw_text(430, 761, tv1dateconv(date("Y-m-d")),         $thispage, $norm);
 
     $pdf->draw_rectangle(758, 300, 737, 580, $thispage, $rectparam);
@@ -186,7 +186,7 @@ if (!function_exists('alku')) {
     $pdf->draw_rectangle(737, 300, 716, 580, $thispage, $rectparam);
     $pdf->draw_rectangle(737, 420, 716, 580, $thispage, $rectparam);
 
-    $pdf->draw_text(310, 729, t("Yhteyshenkilˆ", $kieli),        $thispage, $pieni);
+    $pdf->draw_text(310, 729, t("Yhteyshenkil√∂", $kieli),        $thispage, $pieni);
 
     $pdf->draw_text(430, 729, t("Kuljetus", $kieli),           $thispage, $pieni);
 
@@ -223,10 +223,10 @@ if (!function_exists('alku')) {
     $pdf->draw_text(25,  $kala+15, t("Tilausnumero", $kieli),  $thispage, $norm);
     $pdf->draw_text(100,  $kala+15, t("Tuotenumero", $kieli),  $thispage, $norm);
     $pdf->draw_text(292, $kala+15, t("Toimitusaika", $kieli),  $thispage, $norm);
-    $pdf->draw_text(352, $kala+15, t("M‰‰r‰", $kieli),      $thispage, $norm);
+    $pdf->draw_text(352, $kala+15, t("M√§√§r√§", $kieli),      $thispage, $norm);
     $pdf->draw_text(422, $kala+15, t("Hinta", $kieli),      $thispage, $norm);
     $pdf->draw_text(482, $kala+15, t("Ale", $kieli),      $thispage, $norm);
-    $pdf->draw_text(522, $kala+15, t("Yhteens‰", $kieli),    $thispage, $norm);
+    $pdf->draw_text(522, $kala+15, t("Yhteens√§", $kieli),    $thispage, $norm);
 
     return($thispage);
   }
@@ -236,14 +236,14 @@ if (!function_exists('rivi')) {
   function rivi($thispage) {
     global $pdf, $laskurow, $row, $yhtiorow, $kukarow, $sivu, $page, $rectparam, $pieni, $norm, $boldi, $pieni_boldi, $iso, $kieli, $kala, $nimitykset, $rivinumerot, $toim;
 
-    // viivat rivien v‰liin...
+    // viivat rivien v√§liin...
     $x[0] = 20;
     $x[1] = 580;
     $y[0] = $y[1] = $kala + 15 - 5;
 
     $pdf->draw_line($x, $y, $thispage, $rectparam);
 
-    // Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
+    // Jos on paljon rivej√§ tehd√§√§n uusi otsikko...
     if ($kala <= 100) {
       $sivu++;
 
@@ -282,7 +282,7 @@ if (!function_exists('loppu')) {
   function loppu ($thispage, $total, $laitetaanko_yhteensarivi) {
     global $pdf, $laskurow, $yhtiorow, $kukarow, $page, $sivu, $rectparam, $kieli, $kala, $norm, $pieni;
 
-    //Alimmat kolme laatikkoa, yhtiˆtietoja
+    //Alimmat kolme laatikkoa, yhti√∂tietoja
     $pdf->draw_rectangle(70, 20, 20, 580,  $thispage, $rectparam);
     $pdf->draw_rectangle(70, 207, 20, 580,  $thispage, $rectparam);
     $pdf->draw_rectangle(70, 394, 20, 580,  $thispage, $rectparam);
@@ -296,12 +296,12 @@ if (!function_exists('loppu')) {
     $pdf->draw_text(257, 55, $yhtiorow["puhelin"],        $thispage, $pieni);
     $pdf->draw_text(217, 45, t("Telefax", $kieli).":",      $thispage, $pieni);
     $pdf->draw_text(257, 45, $yhtiorow["fax"],          $thispage, $pieni);
-    $pdf->draw_text(217, 35, t("S‰hkˆposti", $kieli).":",    $thispage, $pieni);
+    $pdf->draw_text(217, 35, t("S√§hk√∂posti", $kieli).":",    $thispage, $pieni);
     $pdf->draw_text(257, 35, $yhtiorow["email"],        $thispage, $pieni);
 
-    //jos on suomalainen yritys tehd‰‰n ytunnus n‰tiks
+    //jos on suomalainen yritys tehd√§√§n ytunnus n√§tiks
     if (strtoupper($yhtiorow["maa"])== 'FI') {
-      //muutetaan ytunnus takas oikean n‰kˆseks
+      //muutetaan ytunnus takas oikean n√§k√∂seks
       $ytunpit = 8-strlen($yhtiorow["ytunnus"]);
 
       if ($ytunpit > 0) {
@@ -335,7 +335,7 @@ if (!function_exists('loppu')) {
     $pdf->draw_text(454, 35,  $yhtiorow["pankkinimi1"]." ".$yhtiorow["pankkitili1"],  $thispage, $pieni);
 
     if ($laitetaanko_yhteensarivi == 1 and $total != 0) {
-      $pdf->draw_text(430, 82, t("Yhteens‰", $kieli).":",               $thispage, $norm);
+      $pdf->draw_text(430, 82, t("Yhteens√§", $kieli).":",               $thispage, $norm);
 
       $oikpos = $pdf->strlen(sprintf('%.2f',$total)." ".$laskurow["valkoodi"], $norm);
       $pdf->draw_text(555-$oikpos, 82, sprintf('%.2f',$total)." ".$laskurow["valkoodi"], $thispage, $norm);
@@ -346,7 +346,7 @@ if (!function_exists('loppu')) {
     }
 
     if ($laitetaanko_yhteensarivi == 1) {
-      // viivat rivien v‰liin...
+      // viivat rivien v√§liin...
       $x[0] = 20;
       $x[1] = 580;
       $y[0] = $y[1] = $kala + 15 - 4;
@@ -365,14 +365,14 @@ if (!function_exists('print_pdf')) {
     global $pdf, $kukarow, $yhtiorow, $komento, $kieli, $tee;
 
     if ($komento["Ostotilaus"] != '' or $tee == 'NAYTATILAUS') {
-      //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+      //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
       list($usec, $sec) = explode(' ', microtime());
       mt_srand((float) $sec + ((float) $usec * 100000));
       $pdffilenimi = "/tmp/Vahvistamattomat-".md5(uniqid(mt_rand(), true)).".pdf";
 
       //kirjoitetaan pdf faili levylle..
       $fh = fopen($pdffilenimi, "w+");
-      if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
+      if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep√§onnistui $pdffilenimi");
       fclose($fh);
 
       // itse print komento...
@@ -381,7 +381,7 @@ if (!function_exists('print_pdf')) {
         $kutsu = "Ostotilaus";
 
         require("../inc/sahkoposti.inc");
-        echo t("Vahvistamattomat rivit l‰hetetty s‰hkˆpostiin")."...<br><br>";
+        echo t("Vahvistamattomat rivit l√§hetetty s√§hk√∂postiin")."...<br><br>";
       }
 
              $tee = "";
@@ -397,21 +397,21 @@ unset($page);
 $sivu  = 1;
 $total = 0;
 
-// Aloitellaan l‰hetteen teko
+// Aloitellaan l√§hetteen teko
 $page[$sivu] = alku();
 
 foreach ($vahvistamattomat_rivit as $row) {
-  //count koska array:ssa on myˆs total amount jonka ei haluta printtaantuvan
+  //count koska array:ssa on my√∂s total amount jonka ei haluta printtaantuvan
   if(count($row) > 2) {
     rivi($page[$sivu]);
   }
 }
 $total = $vahvistamattomat_rivit['total_rivihinta'];
 
-//Viimeiselle sivulle myˆs lopputekstit
+//Viimeiselle sivulle my√∂s lopputekstit
 loppu($page[$sivu], $total, 1);
 
-//kutsutaan lopuksi viel‰ print_pdf funktiota
+//kutsutaan lopuksi viel√§ print_pdf funktiota
 $pdffilenimi = print_pdf();
 
 system("rm -f $pdffilenimi");

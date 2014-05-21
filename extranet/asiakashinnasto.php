@@ -1,9 +1,9 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-// Ei k‰ytet‰ pakkausta
+// Ei k√§ytet√§ pakkausta
 $compression = FALSE;
 
 if (isset($_POST["tee_lataa"])) {
@@ -57,12 +57,12 @@ else {
       $asiakas = $asiakasrow["tunnus"];
     }
     else {
-      echo t("VIRHE: K‰ytt‰j‰tiedoissasi on virhe! Ota yhteys j‰rjestelm‰n yll‰pit‰j‰‰n.")."<br><br>";
+      echo t("VIRHE: K√§ytt√§j√§tiedoissasi on virhe! Ota yhteys j√§rjestelm√§n yll√§pit√§j√§√§n.")."<br><br>";
       exit;
     }
   }
 
-  //K‰yttˆliittym‰
+  //K√§ytt√∂liittym√§
   echo "<br>";
   echo "<table><form method='post'>";
   echo "<input type='hidden' name='tee' value='kaikki'>";
@@ -101,10 +101,10 @@ else {
   }
 
   // Monivalintalaatikot (osasto, try tuotemerkki...)
-  // M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
+  // M√§√§ritell√§√§n mitk√§ latikot halutaan mukaan
   $monivalintalaatikot = array("OSASTO", "TRY");
 
-  echo "<tr><th>".t("Osasto")." / ".t("tuoteryhm‰").":</th><td nowrap>";
+  echo "<tr><th>".t("Osasto")." / ".t("tuoteryhm√§").":</th><td nowrap>";
 
   if (@include("tilauskasittely/monivalintalaatikot.inc"));
   elseif (@include("monivalintalaatikot.inc"));
@@ -152,7 +152,7 @@ else {
       $GLOBALS['eta_yhtio'] = "";
     }
     elseif (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '') {
-      // haetaan et‰yhtiˆn tiedot
+      // haetaan et√§yhti√∂n tiedot
       $yhtiorow_eta = $yhtiorow = hae_yhtion_parametrit($GLOBALS['eta_yhtio']);
     }
 
@@ -166,7 +166,7 @@ else {
 
     if (include('Spreadsheet/Excel/Writer.php')) {
 
-      //keksit‰‰n failille joku varmasti uniikki nimi:
+      //keksit√§√§n failille joku varmasti uniikki nimi:
       list($usec, $sec) = explode(' ', microtime());
       mt_srand((float) $sec + ((float) $usec * 100000));
       $excelnimi = md5(uniqid(mt_rand(), true)).".xls";
@@ -191,10 +191,10 @@ else {
       $worksheet->writeString($excelrivi,  0, t("Tuotenumero", $hinkieli), $format_bold);
       $worksheet->writeString($excelrivi,  1, t("EAN-koodi", $hinkieli), $format_bold);
       $worksheet->writeString($excelrivi,  2, t("Osasto", $hinkieli), $format_bold);
-      $worksheet->writeString($excelrivi,  3, t("Tuoteryhm‰", $hinkieli), $format_bold);
+      $worksheet->writeString($excelrivi,  3, t("Tuoteryhm√§", $hinkieli), $format_bold);
       $worksheet->writeString($excelrivi,  4, t("Nimitys", $hinkieli), $format_bold);
-      $worksheet->writeString($excelrivi,  5, t("Yksikkˆ", $hinkieli), $format_bold);
-      $worksheet->writeString($excelrivi,  6, t("Aleryhm‰", $hinkieli), $format_bold);
+      $worksheet->writeString($excelrivi,  5, t("Yksikk√∂", $hinkieli), $format_bold);
+      $worksheet->writeString($excelrivi,  6, t("Aleryhm√§", $hinkieli), $format_bold);
       $worksheet->writeString($excelrivi,  7, t("Veroton Myyntihinta", $hinkieli), $format_bold);
       $worksheet->writeString($excelrivi,  8, t("Verollinen Myyntihinta", $hinkieli), $format_bold);
 
@@ -242,7 +242,7 @@ else {
 
       $hinnat = alehinta($laskurow, $alehinrrow, 1, '', '', '', $palautettavat_kentat, $GLOBALS['eta_yhtio']);
 
-      // Kauttalaskutuksessa pit‰‰ otaa et‰yhtiˆn tiedot
+      // Kauttalaskutuksessa pit√§√§ otaa et√§yhti√∂n tiedot
       if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $GLOBALS['koti_yhtio'] == $kukarow['yhtio']) {
         $yhtiorow = $yhtiorow_eta;
       }
@@ -272,7 +272,7 @@ else {
         }
       }
 
-      // Jos tuote n‰ytet‰‰n vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei lˆydy
+      // Jos tuote n√§ytet√§√§n vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei l√∂ydy
       if ($rrow["hinnastoon"] == "V" and (($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and $onko_asiakkaalla_alennuksia === FALSE)) {
         continue;
       }
@@ -296,14 +296,14 @@ else {
       $asiakashinta_verollinen = 0;
 
       if ($yhtiorow["alv_kasittely"] == "") {
-        // Hinnat sis‰lt‰v‰t arvonlis‰veron
+        // Hinnat sis√§lt√§v√§t arvonlis√§veron
         $verollinen         = $rrow["myyntihinta"];
         $veroton         = round(($rrow["myyntihinta"]/(1+$rrow['alv']/100)), 2);
         $asiakashinta_veroton    = round(($asiakashinta/(1+$lis_alv/100)), 2);
         $asiakashinta_verollinen = $asiakashinta;
       }
       else {
-        // Hinnat ovat nettohintoja joihin lis‰t‰‰n arvonlis‰vero
+        // Hinnat ovat nettohintoja joihin lis√§t√§√§n arvonlis√§vero
         $verollinen        = round(($rrow["myyntihinta"]*(1+$rrow['alv']/100)), 2);
         $veroton         = $rrow["myyntihinta"];
         $asiakashinta_veroton    = $asiakashinta;

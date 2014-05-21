@@ -68,7 +68,7 @@ if ($tee == 'TOIMITA' and isset($maksutapa) and $maksutapa == 'seka') {
 
   echo "<table><form name='laskuri' method='post'>";
 
-  //k‰yd‰‰n kaikki ruksatut tilaukset l‰pi
+  //k√§yd√§√§n kaikki ruksatut tilaukset l√§pi
   if (count($tunnus) > 0) {
     $laskutettavat = "";
     foreach ($tunnus as $tun) {
@@ -98,12 +98,12 @@ if ($tee == 'TOIMITA' and isset($maksutapa) and $maksutapa == 'seka') {
 
   $summa = $laskurow["loppusumma"];
 
-  //K‰sin syˆtetty summa johon lasku pyˆristet‰‰n
+  //K√§sin sy√∂tetty summa johon lasku py√∂ristet√§√§n
   if ($laskurow["hinta"] <> 0 and abs($laskurow["hinta"]-$summa) <= 0.5 and abs($summa) >= 0.5) {
     $summa = sprintf("%.2f",$laskurow["hinta"]);
   }
 
-  //Jos laskun loppusumma pyˆristet‰‰n l‰himp‰‰n tasalukuun
+  //Jos laskun loppusumma py√∂ristet√§√§n l√§himp√§√§n tasalukuun
   if ($yhtiorow["laskunsummapyoristys"] == 'o' or $asrow["laskunsummapyoristys"] == 'o') {
     $summa = sprintf("%.2f",round($summa ,0));
   }
@@ -148,7 +148,7 @@ if ($tee == 'TOIMITA' and isset($maksutapa) and $maksutapa == 'seka') {
   echo "</tr>";
 
   echo "<tr>";
-  echo "<td>".t("K‰teisell‰")."</td>";
+  echo "<td>".t("K√§teisell√§")."</td>";
   echo "<td><input type='text' name='kateismaksu[kateinen]' id='kateismaksu' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$loppusumma\");'></td>";
   echo "<td>$valkoodi</td>";
   echo "</tr>";
@@ -172,7 +172,7 @@ if ($tee == 'TOIMITA' and isset($maksutapa) and $maksutapa == 'seka') {
   echo "</tr>";
 
   echo "<tr>";
-  echo "<td class='back'><input type='submit' name='hyvaksy_nappi' id='hyvaksy_nappi' value='".t("Hyv‰ksy")."' disabled></td>";
+  echo "<td class='back'><input type='submit' name='hyvaksy_nappi' id='hyvaksy_nappi' value='".t("Hyv√§ksy")."' disabled></td>";
   echo "</tr>";
 
   echo "</form><br><br>";
@@ -185,7 +185,7 @@ if ($tee == 'TOIMITA' and isset($maksutapa) and $maksutapa == 'seka') {
 
 if ($tee == 'TOIMITA') {
 
-  //k‰yd‰‰n kaikki ruksatut tilaukset l‰pi
+  //k√§yd√§√§n kaikki ruksatut tilaukset l√§pi
   if (count($tunnus) != 0) {
 
     $laskutettavat = "";
@@ -199,7 +199,7 @@ if ($tee == 'TOIMITA') {
   $laskutettavaa_on = TRUE;
 
   if ($laskutettavat != "") {
-    //tarkistetaan ekaks ettei yksik‰‰n tilauksista ole jo toimitettu/laskutettu
+    //tarkistetaan ekaks ettei yksik√§√§n tilauksista ole jo toimitettu/laskutettu
     $query = "SELECT yhtio
               FROM tilausrivi
               WHERE otunnus   in ($laskutettavat)
@@ -217,7 +217,7 @@ if ($tee == 'TOIMITA') {
   }
 
   if ($laskutettavaa_on) {
-    // merkataan t‰ss‰ vaiheessa toimittamattomat rivi toimitetuiksi
+    // merkataan t√§ss√§ vaiheessa toimittamattomat rivi toimitetuiksi
     $query = "UPDATE tilausrivi
               SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
               WHERE otunnus   in ($laskutettavat)
@@ -235,7 +235,7 @@ if ($tee == 'TOIMITA') {
       $katlisa = "";
     }
 
-    //ja p‰ivitet‰‰n laskujen otsikot laskutusjonoon
+    //ja p√§ivitet√§√§n laskujen otsikot laskutusjonoon
     $query = "UPDATE lasku
               set alatila = 'D'
               $katlisa
@@ -249,7 +249,7 @@ if ($tee == 'TOIMITA') {
 
     require("verkkolasku.php");
 
-    // K‰yd‰‰n kaikki ruksatut maksusopimukset l‰pi
+    // K√§yd√§√§n kaikki ruksatut maksusopimukset l√§pi
     if (isset($positiotunnus) and count($positiotunnus) > 0) {
 
       require("../maksusopimus_laskutukseen.php");
@@ -269,7 +269,7 @@ if ($tee == 'TOIMITA') {
           $laskutettavat = 0;
           echo "<br>";
 
-          // Tehd‰‰n ennakkolasku
+          // Tehd√§√§n ennakkolasku
           $laskutettavat = ennakkolaskuta($postun);
 
           if ($laskutettavat > 0) {
@@ -281,7 +281,7 @@ if ($tee == 'TOIMITA') {
           }
         }
 
-        // Katsotaan ennakkolaskujen tiloja ja tutkitaan voidaanko tehd‰ loppulaskutus
+        // Katsotaan ennakkolaskujen tiloja ja tutkitaan voidaanko tehd√§ loppulaskutus
         $query = "SELECT
                   sum(if(maksupositio.uusiotunnus > 0 and uusiolasku.tila='L' and uusiolasku.alatila='X', 1, 0)) laskutettu_kpl,
                   count(*) yhteensa_kpl,
@@ -387,10 +387,10 @@ if ($tee == "VALITSE") {
   $kateinen = "";
   $maa = "";
 
-   // Tehd‰‰n valinta
+   // Tehd√§√§n valinta
   if (mysql_num_rows($res) > 0) {
 
-    //p‰iv‰m‰‰r‰n tarkistus
+    //p√§iv√§m√§√§r√§n tarkistus
     $tilalk = explode("-", $yhtiorow["tilikausi_alku"]);
     $tillop = explode("-", $yhtiorow["tilikausi_loppu"]);
 
@@ -411,7 +411,7 @@ if ($tee == "VALITSE") {
     echo "<input type='hidden' name='tee' value='TOIMITA'>";
     echo "<table>";
 
-    //otetaan eka rivi ja k‰ytet‰‰n sit‰ otsikoiden tulostamiseen
+    //otetaan eka rivi ja k√§ytet√§√§n sit√§ otsikoiden tulostamiseen
     $ekarow = mysql_fetch_assoc($res);
 
     $toimitusselite = "";
@@ -420,9 +420,9 @@ if ($tee == "VALITSE") {
     if ($ekarow["chn"] == '010') $toimitusselite = t("Verkkolasku");
     if ($ekarow["chn"] == '020') $toimitusselite = t("Vienti-Verkkolasku (EU)");
     if ($ekarow["chn"] == '030') $toimitusselite = t("Vienti-Verkkolasku, tulostuspalvelu (EU)");
-    if ($ekarow["chn"] == '111') $toimitusselite = t("Itella EDI: EIH-1.4 s‰hkˆinen lasku");
+    if ($ekarow["chn"] == '111') $toimitusselite = t("Itella EDI: EIH-1.4 s√§hk√∂inen lasku");
     if ($ekarow['chn'] == '112') $toimitusselite = t("Pupesoft-Finvoice: Verkkolasku Pupesoftista-Pupesoftiin");
-    if ($ekarow["chn"] == '666') $toimitusselite = t("S‰hkˆposti");
+    if ($ekarow["chn"] == '666') $toimitusselite = t("S√§hk√∂posti");
     if ($ekarow["chn"] == '667') $toimitusselite = t("Paperilasku, tulostetaan manuaalisesti");
 
     echo "<tr>";
@@ -478,7 +478,7 @@ if ($tee == "VALITSE") {
 
     mysql_data_seek($res,0);
 
-    // Onko yht‰‰n jaksotettua tilausta
+    // Onko yht√§√§n jaksotettua tilausta
     $jaksotettuja = FALSE;
 
     while ($row = mysql_fetch_assoc($res)) {
@@ -497,7 +497,7 @@ if ($tee == "VALITSE") {
     echo "<th>".t("Arvo")."<br>".t("Summa")."</th>";
     echo "<th>".t("Tyyppi")."</th>";
     echo "<th>".t("Laatija")."<br>".t("Laadittu")."</th>";
-    echo "<th>".t("Laskutusp‰iv‰")."</th>";
+    echo "<th>".t("Laskutusp√§iv√§")."</th>";
     echo "<th>".t("Maksuehto")."</th>";
     echo "<th>".t("Toimitustapa")."</th>";
     echo "<th>".t("Muokkaa tilausta")."</th>";
@@ -511,7 +511,7 @@ if ($tee == "VALITSE") {
         echo "<tr><td class='back' align='center' colspan='5'><hr></td><td class='back' align='center'><font class='info'>".t("Lasku").":</font></td><td class='back' colspan='3'><hr></td></tr>";
       }
 
-      // jos yksikin on k‰teinen niin kaikki on k‰teist‰ (se hoidetaan jo ylh‰‰ll‰)
+      // jos yksikin on k√§teinen niin kaikki on k√§teist√§ (se hoidetaan jo ylh√§√§ll√§)
       if ($row["kateinen"] != "") $kateinen = "X";
       if ($row["maa"] != "") $maa = $row["maa"];
 
@@ -532,7 +532,7 @@ if ($tee == "VALITSE") {
         $teksti = "Veloitus";
       }
       if ($hyvrow["veloitus"] > 0 and $hyvrow["hyvitys"] > 0) {
-        $teksti = "Veloitusta ja hyvityst‰";
+        $teksti = "Veloitusta ja hyvityst√§";
       }
       if ($hyvrow["hyvitys"] > 0  and $hyvrow["veloitus"] == 0) {
         $teksti = "Hyvitys";
@@ -551,50 +551,50 @@ if ($tee == "VALITSE") {
       elseif ($row["laskutusvkopv"] == 6) $teksti = t("Perjantai");
       elseif ($row["laskutusvkopv"] == 7) $teksti = t("Lauantai");
       elseif ($row["laskutusvkopv"] == 1) $teksti = t("Sunnuntai");
-      elseif ($row["laskutusvkopv"] == 9) $teksti = t("Laskut l‰hetet‰‰n vain ohittamalla laskutusvkopv");
+      elseif ($row["laskutusvkopv"] == 9) $teksti = t("Laskut l√§hetet√§√§n vain ohittamalla laskutusvkopv");
       elseif ($row["laskutusvkopv"] < 0) {
 
         if ($row["laskutusvkopv"] == -1) {
-          // Kuukauden viimeinen arkip‰iv‰
+          // Kuukauden viimeinen arkip√§iv√§
           $laskutusvkopv = laskutuspaiva("vika", TRUE);
         }
         elseif ($row["laskutusvkopv"] == -2) {
-          // Kuukauden ensimm‰inen arkip‰iv‰
+          // Kuukauden ensimm√§inen arkip√§iv√§
           $laskutusvkopv = laskutuspaiva("eka", TRUE);
 
-          // Jos mentiin ohi, niin otetaan seuraavan kuun eka arkip‰iv‰
+          // Jos mentiin ohi, niin otetaan seuraavan kuun eka arkip√§iv√§
           if (date("Ymd") > (int) str_replace("-", "", $laskutusvkopv)) {
             $laskutusvkopv = laskutuspaiva("eka", TRUE, 1);
           }
         }
         elseif ($row["laskutusvkopv"] == -3) {
-          // Kuukauden keskimm‰inen arkip‰iv‰
+          // Kuukauden keskimm√§inen arkip√§iv√§
           $laskutusvkopv = laskutuspaiva("keski", TRUE);
 
-          // Jos mentiin ohi, niin otetaan seuraavan kuun keskimm‰inen arkip‰iv‰
+          // Jos mentiin ohi, niin otetaan seuraavan kuun keskimm√§inen arkip√§iv√§
           if (date("Ymd") > (int) str_replace("-", "", $laskutusvkopv)) {
             $laskutusvkopv = laskutuspaiva("keski", TRUE, 1);
           }
         }
         elseif ($row["laskutusvkopv"] == -4) {
-          // Kuukauden keskimm‰inen ja viimeinen arkip‰iv‰
+          // Kuukauden keskimm√§inen ja viimeinen arkip√§iv√§
           $laskutusvkopv = laskutuspaiva("keski", TRUE);
 
-          // Jos keskimm‰inen meni ohi, niin otetaan kuun vika arkip‰iv‰
+          // Jos keskimm√§inen meni ohi, niin otetaan kuun vika arkip√§iv√§
           if (date("Ymd") > (int) str_replace("-", "", $laskutusvkopv)) {
             $laskutusvkopv = laskutuspaiva("vika", TRUE);
           }
         }
         elseif ($row["laskutusvkopv"] == -5) {
-          // Kuukauden ensimm‰inen ja keskimm‰inen arkip‰iv‰
+          // Kuukauden ensimm√§inen ja keskimm√§inen arkip√§iv√§
           $laskutusvkopv = laskutuspaiva("eka", TRUE);
 
-          // Jos eka meni ohi, niin otetaan kuun keskimm‰inen arkip‰iv‰
+          // Jos eka meni ohi, niin otetaan kuun keskimm√§inen arkip√§iv√§
           if (date("Ymd") > (int) str_replace("-", "", $laskutusvkopv)) {
             $laskutusvkopv = laskutuspaiva("keski", TRUE);
           }
 
-          // Jos keskimm‰inen meni ohi, niin otetaan seuraavan kuun eka arkip‰iv‰
+          // Jos keskimm√§inen meni ohi, niin otetaan seuraavan kuun eka arkip√§iv√§
           if (date("Ymd") > (int) str_replace("-", "", $laskutusvkopv)) {
             $laskutusvkopv = laskutuspaiva("eka", TRUE, 1);
           }
@@ -649,7 +649,7 @@ if ($tee == "VALITSE") {
         }
 
         if ($row["jaksotettu"] > 0 and $tarkrow["toimittamatta"] == 0 and $tarkrow["toimituksia"] > 0 and !in_array($row["jaksotettu"], $maksu_positiot)) {
-          //Pidet‰‰n muistissa mitk‰ maksusopparit me ollaan jo tulostettu ruudulle
+          //Pidet√§√§n muistissa mitk√§ maksusopparit me ollaan jo tulostettu ruudulle
           $maksu_positiot[] = $row["jaksotettu"];
 
           echo "<td>".t("Sopimus")." $row[jaksotettu]: <input type='checkbox' name='positiotunnus[$row[jaksotettu]]' value='$row[jaksotettu]'></td>";
@@ -666,10 +666,10 @@ if ($tee == "VALITSE") {
       }
 
       if ($hyvrow["nollarivi"] > 0) {
-        echo "<td class='back'>&nbsp;<font class='error'>".t("HUOM: Tilauksella on nollahintaisia rivej‰!")."</font></td>";
+        echo "<td class='back'>&nbsp;<font class='error'>".t("HUOM: Tilauksella on nollahintaisia rivej√§!")."</font></td>";
       }
 
-      //Varmistetaan, ett‰ meill‰ on verkkotunnus laskulla jos pit‰isi l‰hett‰‰ verkkolaskuja!
+      //Varmistetaan, ett√§ meill√§ on verkkotunnus laskulla jos pit√§isi l√§hett√§√§ verkkolaskuja!
       if ($row["chn"] == "010" and $yhtiorow['verkkolasku_lah'] != 'apix') {
         $query = "SELECT verkkotunnus
                   FROM asiakas
@@ -794,7 +794,7 @@ if ($tee == "VALITSE") {
     echo "<option value='ee' $sel[ee]>".t("Eesti")."</option>";
     echo "</select></td></tr>";
 
-    // Haetaan laskutussaate jos chn on s‰hkˆposti
+    // Haetaan laskutussaate jos chn on s√§hk√∂posti
     if ($ekarow["chn"] == "666") {
       $query = "SELECT *
                 FROM avainsana
@@ -868,7 +868,7 @@ if ($tee == "VALITSE") {
       }
       echo "</select></td></tr>";
 
-      echo "<tr><th>".t("Tulosta SAD-lomakkeen lis‰sivut").":</th><td><select name='valittu_sadlitulostin'>";
+      echo "<tr><th>".t("Tulosta SAD-lomakkeen lis√§sivut").":</th><td><select name='valittu_sadlitulostin'>";
 
       echo "<option value=''>".t("Ei kirjoitinta")."</option>";
 
@@ -881,20 +881,20 @@ if ($tee == "VALITSE") {
     }
 
     if ($toim == "VIENTI") {
-      echo "<tr><th>",t("Tulosta myˆs tullinimike ja alkuper‰maa")."</th>";
+      echo "<tr><th>",t("Tulosta my√∂s tullinimike ja alkuper√§maa")."</th>";
       echo "<td colspan='3'><input type='checkbox' name='tullinimike_ja_alkuperamaa' /></td></tr>";
     }
 
-    echo "<tr><th>".t("Syˆt‰ poikkeava laskutusp‰iv‰m‰‰r‰ (pp-kk-vvvv)").":</th>
+    echo "<tr><th>".t("Sy√∂t√§ poikkeava laskutusp√§iv√§m√§√§r√§ (pp-kk-vvvv)").":</th>
         <td><input type='text' name='laskpp' value='' size='3'></td>
         <td><input type='text' name='laskkk' value='' size='3'></td>
         <td><input type='text' name='laskvv' value='' size='5'></td></tr>";
 
     if ($yhtiorow["myyntilaskun_erapvmlaskenta"] == "K") {
-      echo "<tr><th>".t("Laske er‰p‰iv‰").":</th>
+      echo "<tr><th>".t("Laske er√§p√§iv√§").":</th>
         <td colspan='3'><select name='erpcmlaskenta'>";
-      echo "<option value=''>".t("Er‰p‰iv‰ lasketaan laskutusp‰iv‰st‰")."</option>";
-      echo "<option value='NOW'>".t("Er‰p‰iv‰ lasketaan t‰st‰ hetkest‰")."</option>";
+      echo "<option value=''>".t("Er√§p√§iv√§ lasketaan laskutusp√§iv√§st√§")."</option>";
+      echo "<option value='NOW'>".t("Er√§p√§iv√§ lasketaan t√§st√§ hetkest√§")."</option>";
       echo "</select></td></tr>";
     }
 
@@ -924,7 +924,7 @@ if ($tee == "VALITSE") {
             kk = Number(kk.value)-1;
             vv = Number(vv.value);
 
-            // Mik‰li ei syˆtet‰ mit‰‰n 3 kentt‰‰n niin oletetaan t‰t‰p‰iv‰‰ maksup‰iv‰ksi
+            // Mik√§li ei sy√∂tet√§ mit√§√§n 3 kentt√§√§n niin oletetaan t√§t√§p√§iv√§√§ maksup√§iv√§ksi
             if (vv == 0 && pp == 0 && kk == -1) {
               var tanaanpp = $tanaanpp;
               var tanaankk = $tanaankk;
@@ -933,7 +933,7 @@ if ($tee == "VALITSE") {
               var dateSyotetty = new Date(tanaanvv, tanaankk, tanaanpp);
               var pvmcheck = new Date(tanaanvv, tanaankk, tanaanpp);
 
-              // Laitetaan yksi ylim‰‰r‰inen kuukausi niin saadaan tulostukseen oikea kk n‰kyviin
+              // Laitetaan yksi ylim√§√§r√§inen kuukausi niin saadaan tulostukseen oikea kk n√§kyviin
               var tanaanoikeakk = $tanaankk+1;
               if (tanaanoikeakk <10) {
                 tanaanoikeakk = '0'+tanaanoikeakk;
@@ -942,7 +942,7 @@ if ($tee == "VALITSE") {
 
             }
             else {
-              // voidaan syˆtt‰‰ kentt‰‰ 2 pituinen vuosiarvo esim. 11 = 2011
+              // voidaan sy√∂tt√§√§ kentt√§√§ 2 pituinen vuosiarvo esim. 11 = 2011
               if (vv > 0 && vv < 1000) {
                 vv = vv+2000;
               }
@@ -950,7 +950,7 @@ if ($tee == "VALITSE") {
               var dateSyotetty = new Date(vv,kk,pp);
               var pvmcheck = new Date(vv,kk,pp);
 
-              // Laitetaan yksi ylim‰‰r‰inen kuukausi niin saadaan tulostukseen oikea kk n‰kyviin
+              // Laitetaan yksi ylim√§√§r√§inen kuukausi niin saadaan tulostukseen oikea kk n√§kyviin
               var oikeakk = kk+1;
               if (oikeakk < 10) {
                 oikeakk = '0'+oikeakk;
@@ -978,12 +978,12 @@ if ($tee == "VALITSE") {
             dateSyotetty = dateSyotetty.getTime();
 
             if (dateSyotetty < dateTiliAlku || dateSyotetty > dateTiliLoppu) {
-              var msg = msg+'".t("VIRHE: Syˆtetty p‰iv‰m‰‰r‰ ei sis‰lly kuluvaan tilikauteen!")." ';
+              var msg = msg+'".t("VIRHE: Sy√∂tetty p√§iv√§m√§√§r√§ ei sis√§lly kuluvaan tilikauteen!")." ';
             }
 
-            // ALERT errorit ennen confirmi‰, n‰in estet‰‰n ettei vahingossakaan p‰‰st‰ l‰pi.
+            // ALERT errorit ennen confirmi√§, n√§in estet√§√§n ettei vahingossakaan p√§√§st√§ l√§pi.
             if (ero < 0) {
-              var msg = msg+'".t("VIRHE: Laskua ei voi p‰iv‰t‰ tulevaisuuteen!")." ';
+              var msg = msg+'".t("VIRHE: Laskua ei voi p√§iv√§t√§ tulevaisuuteen!")." ';
             }
 
             if (msg != '') {
@@ -996,22 +996,22 @@ if ($tee == "VALITSE") {
             if (laskutusviikonpaiva > 0 && laskutusviikonpaiva < 9 ) {
               if (laskutusviikonpaiva != vertaa) {
                 naytetaanko_herja = true;
-                var msg = '".t("Asiakkaan normaali laskutusp‰iv‰ on")." '+laskutusviikonteksti+'. ".t("Haluatko varmasti laskuttaa")." '+paivamaara+'? ';
+                var msg = '".t("Asiakkaan normaali laskutusp√§iv√§ on")." '+laskutusviikonteksti+'. ".t("Haluatko varmasti laskuttaa")." '+paivamaara+'? ';
               }
             }
             else if (laskutusviikonpaiva < 0) {
               if (laskutusviikonteksti != paivamaara) {
                 naytetaanko_herja = true;
-                var msg = '".t("Asiakkaan normaali laskutusp‰iv‰ on")." '+laskutusviikonteksti+'. ".t("Haluatko varmasti laskuttaa")." '+paivamaara+'? ';
+                var msg = '".t("Asiakkaan normaali laskutusp√§iv√§ on")." '+laskutusviikonteksti+'. ".t("Haluatko varmasti laskuttaa")." '+paivamaara+'? ';
               }
             }
             else if (laskutusviikonpaiva == 9) {
               naytetaanko_herja = true;
-              var msg = '".t("Asiakkaan normaali laskutusp‰iv‰ on")." '+laskutusviikonteksti+'. ".t("Haluatko varmasti laskuttaa")." '+paivamaara+'? ';
+              var msg = '".t("Asiakkaan normaali laskutusp√§iv√§ on")." '+laskutusviikonteksti+'. ".t("Haluatko varmasti laskuttaa")." '+paivamaara+'? ';
             }
 
             if (ero >= 2) {
-              var msg = msg+'".t("Oletko varma, ett‰ haluat p‰iv‰t‰ laskun yli 2pv menneisyyteen?")." ';
+              var msg = msg+'".t("Oletko varma, ett√§ haluat p√§iv√§t√§ laskun yli 2pv menneisyyteen?")." ';
               naytetaanko_herja = true;
             }
 
@@ -1029,12 +1029,12 @@ if ($tee == "VALITSE") {
   }
 }
 
-// meill‰ ei ole valittua tilausta
+// meill√§ ei ole valittua tilausta
 if ($tee == "") {
   $formi  = "find";
   $kentta  = "etsi";
 
-  // tehd‰‰n etsi valinta
+  // tehd√§√§n etsi valinta
   echo "<form name='find' method='post'>";
   echo "<input type='hidden' name='toim' value='$toim'>";
   echo "<input type='hidden' name='tee' value=''>";
@@ -1057,8 +1057,8 @@ if ($tee == "") {
     $ketjutus_group = "";
   }
 
-  // GROUP BY pit‰‰ olla sama kun verkkolasku.php:ss‰ rivi ~1243
-  // HUOM LISƒKSI laskutusviikonp‰iv‰ mukaan GROUP BY:hin!!!!
+  // GROUP BY pit√§√§ olla sama kun verkkolasku.php:ss√§ rivi ~1243
+  // HUOM LIS√ÑKSI laskutusviikonp√§iv√§ mukaan GROUP BY:hin!!!!
   $query = "SELECT
             lasku.laskutusvkopv, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp,
             lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
@@ -1099,10 +1099,10 @@ if ($tee == "") {
     echo "<tr>
         <th>".t("Tilaukset")."</th>
         <th>".t("Asiakas")."</th>
-        <th>".t("Tilauksia")."<br>".t("Rivej‰")."</th>
+        <th>".t("Tilauksia")."<br>".t("Rivej√§")."</th>
         <th>".t("Arvo")."</th>
         <th>".t("Maksuehto")."</th>
-        <th>".t("Laskutusp‰iv‰")."<br>".t("Toimitus")."</th>
+        <th>".t("Laskutusp√§iv√§")."<br>".t("Toimitus")."</th>
         <th>".t("Tila")."</th></tr>";
 
     $arvoyhteensa = 0;
@@ -1114,7 +1114,7 @@ if ($tee == "") {
       $laskutyyppi  = $tilrow["tila"];
       $alatila    = $tilrow["alatila"];
 
-      //tehd‰‰n selv‰kielinen tila/alatila
+      //tehd√§√§n selv√§kielinen tila/alatila
       require "inc/laskutyyppi.inc";
 
       $toimitusselite = "";
@@ -1122,11 +1122,11 @@ if ($tee == "") {
       if ($tilrow["chn"] == '010') $toimitusselite = t("Verkkolasku");
       if ($tilrow["chn"] == '020') $toimitusselite = t("Vienti-Verkkolasku (EU)");
       if ($tilrow["chn"] == '030') $toimitusselite = t("Vienti-Verkkolasku, tulostuspalvelu (EU)");
-      if ($tilrow["chn"] == '111') $toimitusselite = t("Itella EDI: EIH-1.4 s‰hkˆinen lasku");
+      if ($tilrow["chn"] == '111') $toimitusselite = t("Itella EDI: EIH-1.4 s√§hk√∂inen lasku");
       if ($tilrow["chn"] == '112') $toimitusselite = t("Pupesoft-Finvoice: Verkkolasku Pupesoftista-Pupesoftiin");
-      if ($tilrow["chn"] == '666') $toimitusselite = t("S‰hkˆposti");
-      if ($tilrow["chn"] == '667') $toimitusselite = t("Paperilasku, k‰sitell‰‰n manuaalisesti");
-      if ($tilrow["chn"] == '999') $toimitusselite = t("Laskutuskielto, laskutusta ei tehd‰");
+      if ($tilrow["chn"] == '666') $toimitusselite = t("S√§hk√∂posti");
+      if ($tilrow["chn"] == '667') $toimitusselite = t("Paperilasku, k√§sitell√§√§n manuaalisesti");
+      if ($tilrow["chn"] == '999') $toimitusselite = t("Laskutuskielto, laskutusta ei tehd√§");
 
       $teksti = "";
 
@@ -1138,50 +1138,50 @@ if ($tee == "") {
       elseif ($tilrow["laskutusvkopv"] == 6) $teksti = t("Perjantai");
       elseif ($tilrow["laskutusvkopv"] == 7) $teksti = t("Lauantai");
       elseif ($tilrow["laskutusvkopv"] == 1) $teksti = t("Sunnuntai");
-      elseif ($tilrow["laskutusvkopv"] == 9) $teksti = t("Laskut l‰hetet‰‰n vain ohittamalla laskutusvkopv");
+      elseif ($tilrow["laskutusvkopv"] == 9) $teksti = t("Laskut l√§hetet√§√§n vain ohittamalla laskutusvkopv");
       elseif ($tilrow["laskutusvkopv"] < 0) {
 
         if ($tilrow["laskutusvkopv"] == -1) {
-          // Kuukauden viimeinen arkip‰iv‰
+          // Kuukauden viimeinen arkip√§iv√§
           $laskutusvkopv = laskutuspaiva("vika", TRUE);
         }
         elseif ($tilrow["laskutusvkopv"] == -2) {
-          // Kuukauden ensimm‰inen arkip‰iv‰
+          // Kuukauden ensimm√§inen arkip√§iv√§
           $laskutusvkopv = laskutuspaiva("eka", TRUE);
 
-          // Jos mentiin ohi, niin otetaan seuraavan kuun eka arkip‰iv‰
+          // Jos mentiin ohi, niin otetaan seuraavan kuun eka arkip√§iv√§
           if (date("Ymd") > (int) str_replace("-", "", $laskutusvkopv)) {
             $laskutusvkopv = laskutuspaiva("eka", TRUE, 1);
           }
         }
         elseif ($tilrow["laskutusvkopv"] == -3) {
-          // Kuukauden keskimm‰inen arkip‰iv‰
+          // Kuukauden keskimm√§inen arkip√§iv√§
           $laskutusvkopv = laskutuspaiva("keski", TRUE);
 
-          // Jos mentiin ohi, niin otetaan seuraavan kuun keskimm‰inen arkip‰iv‰
+          // Jos mentiin ohi, niin otetaan seuraavan kuun keskimm√§inen arkip√§iv√§
           if (date("Ymd") > (int) str_replace("-", "", $laskutusvkopv)) {
             $laskutusvkopv = laskutuspaiva("keski", TRUE, 1);
           }
         }
         elseif ($tilrow["laskutusvkopv"] == -4) {
-          // Kuukauden keskimm‰inen ja viimeinen arkip‰iv‰
+          // Kuukauden keskimm√§inen ja viimeinen arkip√§iv√§
           $laskutusvkopv = laskutuspaiva("keski", TRUE);
 
-          // Jos keskimm‰inen meni ohi, niin otetaan kuun vika arkip‰iv‰
+          // Jos keskimm√§inen meni ohi, niin otetaan kuun vika arkip√§iv√§
           if (date("Ymd") > (int) str_replace("-", "", $laskutusvkopv)) {
             $laskutusvkopv = laskutuspaiva("vika", TRUE);
           }
         }
         elseif ($tilrow["laskutusvkopv"] == -5) {
-          // Kuukauden ensimm‰inen ja keskimm‰inen arkip‰iv‰
+          // Kuukauden ensimm√§inen ja keskimm√§inen arkip√§iv√§
           $laskutusvkopv = laskutuspaiva("eka", TRUE);
 
-          // Jos eka meni ohi, niin otetaan kuun keskimm‰inen arkip‰iv‰
+          // Jos eka meni ohi, niin otetaan kuun keskimm√§inen arkip√§iv√§
           if (date("Ymd") > (int) str_replace("-", "", $laskutusvkopv)) {
             $laskutusvkopv = laskutuspaiva("keski", TRUE);
           }
 
-          // Jos keskimm‰inen meni ohi, niin otetaan seuraavan kuun eka arkip‰iv‰
+          // Jos keskimm√§inen meni ohi, niin otetaan seuraavan kuun eka arkip√§iv√§
           if (date("Ymd") > (int) str_replace("-", "", $laskutusvkopv)) {
             $laskutusvkopv = laskutuspaiva("eka", TRUE, 1);
           }
@@ -1218,13 +1218,13 @@ if ($tee == "") {
 
     if ($arvoyhteensa != 0) {
       echo "<br><table>";
-      echo "<tr><th>".t("Tilausten arvo yhteens‰")." ($tilauksiayhteensa ".t("kpl")."): </th><td align='right'>$arvoyhteensa $yhtiorow[valkoodi]</td></tr>";
-      echo "<tr><th>".t("Tilausten summa yhteens‰").": </th><td align='right'>$summayhteensa $yhtiorow[valkoodi]</td></tr>";
+      echo "<tr><th>".t("Tilausten arvo yhteens√§")." ($tilauksiayhteensa ".t("kpl")."): </th><td align='right'>$arvoyhteensa $yhtiorow[valkoodi]</td></tr>";
+      echo "<tr><th>".t("Tilausten summa yhteens√§").": </th><td align='right'>$summayhteensa $yhtiorow[valkoodi]</td></tr>";
       echo "</table>";
     }
   }
   else {
-    echo "<font class='message'>".t("Yht‰‰n toimitettavaa ei lˆytynyt")."...</font>";
+    echo "<font class='message'>".t("Yht√§√§n toimitettavaa ei l√∂ytynyt")."...</font>";
   }
 }
 

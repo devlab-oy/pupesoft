@@ -5,7 +5,7 @@ if (isset($_POST["tee"])) {
   if(isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 }
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("../inc/parametrit.inc");
@@ -15,9 +15,9 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
   exit;
 }
 
-echo "<font class=head>".t("Keskener‰iset myyntitilit/siirtolistat asiakkaittain")."</font><hr>";
+echo "<font class=head>".t("Keskener√§iset myyntitilit/siirtolistat asiakkaittain")."</font><hr>";
 
-// k‰yttis
+// k√§yttis
 if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m"), 1, date("Y")));
 if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m"), 1, date("Y")));
 if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m"), 1, date("Y")));
@@ -37,8 +37,8 @@ echo "<table>";
 
 echo "<tr><th>".t("Ajotapa")."</th><td>";
 echo "<select name='ajotapa'>";
-echo "<option value=''>".t("Listaa myyntitilej‰ ja siirtolistoja")."</option>";
-echo "<option value='myyntitili'{$sel["M"]}>".t("Listaa vain myyntitilej‰")."</option>";
+echo "<option value=''>".t("Listaa myyntitilej√§ ja siirtolistoja")."</option>";
+echo "<option value='myyntitili'{$sel["M"]}>".t("Listaa vain myyntitilej√§")."</option>";
 echo "<option value='siirtolista'{$sel["S"]}>".t("Listaa vain siirtolistoja")."</option>";
 echo "</select>";
 echo "</td></tr>";
@@ -50,14 +50,14 @@ require ("tilauskasittely/monivalintalaatikot.inc");
 
 echo "</td></tr>";
 echo "<tr>
-  <th>",t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)"),"</th>
+  <th>",t("Sy√∂t√§ alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)"),"</th>
     <td>
       <input type='text' name='ppa' value='{$ppa}' size='3'>
       <input type='text' name='kka' value='{$kka}' size='3'>
       <input type='text' name='vva' value='{$vva}' size='5'>
     </td>
   </tr>\n
-  <tr><th>",t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)"),"</th>
+  <tr><th>",t("Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)"),"</th>
     <td>
       <input type='text' name='ppl' value='{$ppl}' size='3'>
       <input type='text' name='kkl' value='{$kkl}' size='3'>
@@ -71,7 +71,7 @@ echo "</form>";
 echo "<br><br>";
 
 if ($tee != "" and isset($painoinnappia) and ($ppa == "" or $kka == "" or $vva == "" or $ppl == "" or $kkl == "" or $vvl == "")) {
-  echo "<font class='error'>", t("Anna p‰iv‰m‰‰r‰rajaus"), "!</font>";
+  echo "<font class='error'>", t("Anna p√§iv√§m√§√§r√§rajaus"), "!</font>";
   $tee = "";
 }
 
@@ -79,7 +79,7 @@ if ($tee != "" and isset($painoinnappia)) {
 
   if (@include('Spreadsheet/Excel/Writer.php')) {
 
-    //keksit‰‰n failille joku varmasti uniikki nimi:
+    //keksit√§√§n failille joku varmasti uniikki nimi:
     list($usec, $sec) = explode(' ', microtime());
     mt_srand((float) $sec + ((float) $usec * 100000));
     $excelnimi = md5(uniqid(mt_rand(), true)).".xls";
@@ -101,10 +101,10 @@ if ($tee != "" and isset($painoinnappia)) {
   $table_data .= "<th>".t("Ytunnus")."</th>";
   $table_data .= "<th>".t("Nimi")."</th>";
   $table_data .= "<th>".t("Tuoteosasto")."</th>";
-  $table_data .= "<th>".t("Tuoteryhm‰")."</th>";
+  $table_data .= "<th>".t("Tuoteryhm√§")."</th>";
   $table_data .= "<th>".t("Tuoteno")."</th>";
   $table_data .= "<th>".t("Nimitys")."</th>";
-  $table_data .= "<th>".t("Kappalem‰‰r‰")."</th>";
+  $table_data .= "<th>".t("Kappalem√§√§r√§")."</th>";
 
   if (isset($workbook)) {
     $excelsarake = 0;
@@ -114,14 +114,14 @@ if ($tee != "" and isset($painoinnappia)) {
     $worksheet->writeString($excelrivi, $excelsarake++, t("Ytunnus"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("Nimi"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteosasto"));
-    $worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteryhm‰"));
+    $worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteryhm√§"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteno"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
-    $worksheet->writeString($excelrivi, $excelsarake++, t("Kappalem‰‰r‰"));
+    $worksheet->writeString($excelrivi, $excelsarake++, t("Kappalem√§√§r√§"));
     $excelrivi++;
   }
 
-  // Halutaanko vain siirtolistoja, myyntitilej‰ vai molempia
+  // Halutaanko vain siirtolistoja, myyntitilej√§ vai molempia
   if ($ajotapa == "myyntitili") {
     $rajaus = "AND lasku.tilaustyyppi = 'M' AND tilausrivi.kpl != 0";
   }
@@ -132,7 +132,7 @@ if ($tee != "" and isset($painoinnappia)) {
     $rajaus = "AND ((lasku.tilaustyyppi = 'M' AND tilausrivi.kpl != 0) OR (lasku.tilaustyyppi = 'G' AND lasku.alatila NOT IN ('X', 'V')))";
   }
 
-  // Etsit‰‰n kaikki myyntitili-/siirtolistarivit, joissa on jotain keskener‰ist‰
+  // Etsit√§√§n kaikki myyntitili-/siirtolistarivit, joissa on jotain keskener√§ist√§
   $query = "SELECT lasku.tilaustyyppi,
             lasku.tunnus,
             left(lasku.luontiaika, 10) luontiaika,
@@ -161,7 +161,7 @@ if ($tee != "" and isset($painoinnappia)) {
 
   if ($total_rows > 0) {
 
-    echo "<font class='message'>", t("Lˆytyi"), " $total_rows ", t("rivi‰"), ".</font>";
+    echo "<font class='message'>", t("L√∂ytyi"), " $total_rows ", t("rivi√§"), ".</font>";
 
     while ($row = mysql_fetch_assoc($result)) {
 
@@ -229,7 +229,7 @@ if ($tee != "" and isset($painoinnappia)) {
   }
 
   if ($total_rows == 0) {
-    echo "<font class='message'>", t("Yht‰‰n soveltuvaa rivi‰ ei lˆytynyt"), ".</font>";
+    echo "<font class='message'>", t("Yht√§√§n soveltuvaa rivi√§ ei l√∂ytynyt"), ".</font>";
   }
 }
 

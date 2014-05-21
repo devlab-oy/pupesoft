@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("inc/parametrit.inc");
@@ -25,7 +25,7 @@ if ($tee == 'X') {
 
     echo "<font class='message'>".t("Tarkistettavia tapahtumia").": ".mysql_num_rows($result)."</font><br>";
     echo "<table>";
-    echo "<tr><th>".t("Nimi")."</th><th>".t("Tapvm")."</th><th>".t("Laskun summa")."</th><th>".t("Vastaava tiliˆinti")."</th></tr>";
+    echo "<tr><th>".t("Nimi")."</th><th>".t("Tapvm")."</th><th>".t("Laskun summa")."</th><th>".t("Vastaava tili√∂inti")."</th></tr>";
 
     while ($tapahtuma = mysql_fetch_assoc($result)) {
       if ($tapahtuma['lsumma'] != $tapahtuma['tsumma']) {
@@ -36,7 +36,7 @@ if ($tee == 'X') {
     }
 
     echo "</table>";
-    echo "<font class='message'>".t("T‰hdell‰ merkityill‰ on tapahtuma- ja maksup‰iv‰ sama. Virhe voi johtua siit‰").".</font><br>";
+    echo "<font class='message'>".t("T√§hdell√§ merkityill√§ on tapahtuma- ja maksup√§iv√§ sama. Virhe voi johtua siit√§").".</font><br>";
     echo "<font class='message'>".t("Valmis")."!</font><br><br>";
 
     echo "<font class='message'>".t("Tarkistetaan ostolaskujen maksujen kirjaukset ostovelkoihin").":</font><br>";
@@ -52,7 +52,7 @@ if ($tee == 'X') {
 
     echo "<font class='message'>".t("Tarkistettavia tapahtumia").": ".mysql_num_rows($result)."</font><br>";
     echo "<table>";
-    echo "<tr><th>".t("Nimi")."</th><th>".t("Tapvm")."</th><th>".t("Laskun summa")."</th><th>".t("Vastaava tiliˆinti")."</th></tr>";
+    echo "<tr><th>".t("Nimi")."</th><th>".t("Tapvm")."</th><th>".t("Laskun summa")."</th><th>".t("Vastaava tili√∂inti")."</th></tr>";
 
     while ($tapahtuma = mysql_fetch_assoc($result)) {
       if ($tapahtuma['lsumma'] != $tapahtuma['tsumma']) {
@@ -63,7 +63,7 @@ if ($tee == 'X') {
     }
 
     echo "</table>";
-    echo "<font class='message'>".t("T‰hdell‰ merkityill‰ on tapahtuma- ja maksup‰iv‰ sama. Virhe voi johtua siit‰").".</font><br>";
+    echo "<font class='message'>".t("T√§hdell√§ merkityill√§ on tapahtuma- ja maksup√§iv√§ sama. Virhe voi johtua siit√§").".</font><br>";
     echo "<font class='message'>".t("Valmis")."!</font><br><br>";
 
     echo "<font class='message'>".t("Tarkistetaan ostotositteiden loppusummat").":</font><br>";
@@ -111,7 +111,7 @@ if ($tee == 'X') {
 
     echo "<font class='message'>".t("Tarkistettavia tapahtumia").": ".mysql_num_rows($result)."</font><br>";
     echo "<table>";
-    echo "<tr><th>".t("Nimi")."</th><th>".t("Tapvm")."</th><th>".t("Laskun summa")."</th><th>".t("Vastaava tiliˆinti")."</th></tr>";
+    echo "<tr><th>".t("Nimi")."</th><th>".t("Tapvm")."</th><th>".t("Laskun summa")."</th><th>".t("Vastaava tili√∂inti")."</th></tr>";
 
     while ($tapahtuma = mysql_fetch_assoc($result)) {
       if ($tapahtuma['lsumma'] != $tapahtuma['tsumma']) {
@@ -122,7 +122,7 @@ if ($tee == 'X') {
       }
     }
     echo "</table>";
-    echo "<font class='message'>".t("T‰hdell‰ merkityill‰ on tapahtuma- ja maksup‰iv‰ sama. Virhe voi johtua siit‰")."</font><br>";
+    echo "<font class='message'>".t("T√§hdell√§ merkityill√§ on tapahtuma- ja maksup√§iv√§ sama. Virhe voi johtua siit√§")."</font><br>";
     echo "<font class='message'>".t("Valmis")."!</font><br><br>";
 
     echo "<font class='message'>".t("Tarkistetaan myyntilaskujen maksujen kirjaukset myyntisaamisiin").":</font><br>";
@@ -143,7 +143,7 @@ if ($tee == 'X') {
 
     echo "<font class='message'>".t("Tarkistettavia tapahtumia").": ".mysql_num_rows($result)."</font><br>";
     echo "<table>";
-    echo "<tr><th>".t("Nimi")."</th><th>".t("Tapvm")."</th><th>".t("Laskun summa")."</th><th>".t("Vastaava tiliˆinti")."</th></tr>";
+    echo "<tr><th>".t("Nimi")."</th><th>".t("Tapvm")."</th><th>".t("Laskun summa")."</th><th>".t("Vastaava tili√∂inti")."</th></tr>";
 
     while ($tapahtuma = mysql_fetch_assoc($result)) {
       if ($tapahtuma['lsumma'] != $tapahtuma['tsumma']) {
@@ -154,7 +154,7 @@ if ($tee == 'X') {
     }
 
     echo "</table>";
-    echo "<font class='message'>".t("T‰hdell‰ merkityill‰ on tapahtuma- ja maksup‰iv‰ sama. Virhe voi johtua siit‰")."</font><br>";
+    echo "<font class='message'>".t("T√§hdell√§ merkityill√§ on tapahtuma- ja maksup√§iv√§ sama. Virhe voi johtua siit√§")."</font><br>";
     echo "<font class='message'>".t("Valmis")."!</font><br><br>";
 
     echo "<font class='message'>".t("Tarkistetaan myyntilaskutositteiden loppusummat").":</font><br>";
@@ -186,10 +186,10 @@ if ($tee == 'X') {
 }
 
 if ($tee == '') {
-  // mik‰ kuu/vuosi nyt on
+  // mik√§ kuu/vuosi nyt on
   $year = date("Y");
   $kuu  = date("n");
-  // poimitaan erikseen edellisen kuun viimeisen p‰iv‰n vv,kk,pp raportin oletusp‰iv‰m‰‰r‰ksi
+  // poimitaan erikseen edellisen kuun viimeisen p√§iv√§n vv,kk,pp raportin oletusp√§iv√§m√§√§r√§ksi
   $ek_vv = date("Y",mktime(0,0,0,$kuu,0,$year));
   $ek_kk = date("n",mktime(0,0,0,$kuu,0,$year));
 
@@ -201,7 +201,7 @@ if ($tee == '') {
       <td><input type = 'text' name = 'kk' value='$ek_kk' size=2>
       <input type = 'text' name = 'vv' value='$ek_vv' size=4></td>
       </tr>
-      <th>Mit‰ tarkistetaan:</th>
+      <th>Mit√§ tarkistetaan:</th>
       <td><input type = 'radio' name = 'valinta' value='M' checked> Myyntilaskut<br>
       <input type = 'radio' name = 'valinta' value='O'> Ostolaskut</td>
       </tr>

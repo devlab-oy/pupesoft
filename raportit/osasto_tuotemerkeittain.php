@@ -1,14 +1,14 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 if (@include("../inc/parametrit.inc"));
 elseif (@include("parametrit.inc"));
 else exit;
 
-echo "<font class='head'>".t("Osastoseuranta tuotemerkeitt‰in")."</font><hr>";
-echo "<p>".t("T‰ss‰ ajetaan annettu kausi ja verrataan sit‰ edellisen vuoden vastaavaan kauteen").".<br>";
+echo "<font class='head'>".t("Osastoseuranta tuotemerkeitt√§in")."</font><hr>";
+echo "<p>".t("T√§ss√§ ajetaan annettu kausi ja verrataan sit√§ edellisen vuoden vastaavaan kauteen").".<br>";
 
 $asiakasytunnus = "";
 
@@ -41,7 +41,7 @@ if ($tee == 'go') {
   $row    = mysql_fetch_array($result);
 
   if ($row["ero"] > 365) {
-    echo "<br><br><font class='error'>".t("Jotta homma ei menisi liian hitaaksi, niin vuosi on pisin mahdollinen laskentav‰li!")."</font><br>";
+    echo "<br><br><font class='error'>".t("Jotta homma ei menisi liian hitaaksi, niin vuosi on pisin mahdollinen laskentav√§li!")."</font><br>";
     $err = 1;
   }
 
@@ -49,7 +49,7 @@ if ($tee == 'go') {
     echo "<p>".t("ind = vertailu ed. vuoden vastaavaan kauteen")."<br>";
 
     if ($kukarow["extranet"] == '') {
-      echo t("Osuus % = osuus osaston kokonaismyynnist‰/katteesta")."<br><br>";
+      echo t("Osuus % = osuus osaston kokonaismyynnist√§/katteesta")."<br><br>";
     }
 
     echo "<table>";
@@ -63,8 +63,8 @@ if ($tee == 'go') {
       echo "<th>".t("Osuus")." %</th>";
     }
 
-    echo "<th>".t("M‰‰r‰")."</th>";
-    echo "<th>".t("ind M‰‰r‰")."</th>";
+    echo "<th>".t("M√§√§r√§")."</th>";
+    echo "<th>".t("ind M√§√§r√§")."</th>";
 
     if ($kukarow["extranet"] == '') {
       echo "<th>".t("Kate")."</th>";
@@ -86,7 +86,7 @@ if ($tee == 'go') {
     $lisa1 = '';
     $lisa2 = '';
 
-    //extranet k‰ytt‰j‰ll‰ on aina asiakas valittuna
+    //extranet k√§ytt√§j√§ll√§ on aina asiakas valittuna
     if ($kukarow["extranet"] != '') {
       $asiakas = $kukarow['oletus_asiakas'];
     }
@@ -121,7 +121,7 @@ if ($tee == 'go') {
 
     $query =  "  select
           tilausrivi.osasto,
-          if(tuote.tuotemerkki='','Ilman tuotemerkki‰',tuote.tuotemerkki) tuotemerkki,
+          if(tuote.tuotemerkki='','Ilman tuotemerkki√§',tuote.tuotemerkki) tuotemerkki,
           sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.kate,0)) kateedyht,
           sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.rivihinta,0)) myyntiedyht,
           sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.kpl,0)) kpledyht,
@@ -141,7 +141,7 @@ if ($tee == 'go') {
 
     if (mysql_num_rows($yhtresulta) != 0) {
 
-      //tehd‰‰n ensin summamuuttujat
+      //tehd√§√§n ensin summamuuttujat
       while ($yhtrow = mysql_fetch_array ($yhtresulta)) {
 
         if ($yhtrow["osasto"] != $edosasto) {
@@ -186,7 +186,7 @@ if ($tee == 'go') {
       //ja tulostetaan kaikki rivit ruudulle
       while ($yhtrow = mysql_fetch_array ($yhtresulta)) {
 
-        //t‰ss‰ tulee yhteens‰rivi
+        //t√§ss√§ tulee yhteens√§rivi
         if ($yhtrow["osasto"] != $edosasto) {
           $i = $yhtrow["osasto"];
 
@@ -215,12 +215,12 @@ if ($tee == 'go') {
             $kateosuus = sprintf('%.2f',($osastokatecuryht[$i] / $kaikkikatecuryht) * 100);
           else $kateosuus = 0;
 
-          // tehd‰‰n avainsana query
+          // tehd√§√§n avainsana query
           $sresult = t_avainsana("OSASTO", "", "and avainsana.selite ='$yhtrow[osasto]'");
           $srow = mysql_fetch_array($sresult);
 
           echo "<tr>";
-          echo "<td><b>$yhtrow[osasto] $srow[selitetark] yhteens‰</b></td>";
+          echo "<td><b>$yhtrow[osasto] $srow[selitetark] yhteens√§</b></td>";
           echo "<td align='right'><b>".str_replace(".",",",$osastomyynticuryht[$i])."</b></td>";
           echo "<td align='right'><b>".str_replace(".",",",$indlvtot)."</b></td>";
 
@@ -324,7 +324,7 @@ if ($tee == 'go') {
       else $indlv = "n/a";
 
       echo "<tr>";
-      echo "<th>Yhteens‰</th>";
+      echo "<th>Yhteens√§</th>";
       echo "<th align='right'>".str_replace(".",",",$kaikkimyynticuryht)."</th>";
       echo "<th align='right'>".str_replace(".",",",$indlv)."</th>";
 
@@ -361,12 +361,12 @@ if ($tee == 'go') {
       echo "</table><br>";
     }
     else {
-      echo "<font class='error'>".t("Yht‰‰n rivi‰ ei lˆytynyt")."!</font><br>";
+      echo "<font class='error'>".t("Yht√§√§n rivi√§ ei l√∂ytynyt")."!</font><br>";
     }
   }
 }
 
-//K‰yttˆliittym‰
+//K√§ytt√∂liittym√§
 
 if (!isset($kka))
   $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
@@ -388,17 +388,17 @@ echo "<input type='hidden' name='tee' value='go'>";
 
 echo "<table>";
 
-echo "<tr><th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+echo "<tr><th>".t("Sy√∂t√§ alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
     <td><input type='text' name='ppa' value='$ppa' size='3'></td>
     <td><input type='text' name='kka' value='$kka' size='3'></td>
     <td><input type='text' name='vva' value='$vva' size='5'></td>
-    </tr><tr><th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+    </tr><tr><th>".t("Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
     <td><input type='text' name='ppl' value='$ppl' size='3'></td>
     <td><input type='text' name='kkl' value='$kkl' size='3'></td>
     <td><input type='text' name='vvl' value='$vvl' size='5'></td></tr>";
 
 if ($kukarow["extranet"] == '') {
-  echo "<tr><th>".t("Valitse asiakkaan maa (jos et, ajetaan kaikki yhteens‰)")."</th><td colspan = '3'>";
+  echo "<tr><th>".t("Valitse asiakkaan maa (jos et, ajetaan kaikki yhteens√§)")."</th><td colspan = '3'>";
 
   $query = "SELECT distinct b.nimi, a.maa
             FROM asiakas a, maat b
@@ -419,7 +419,7 @@ if ($kukarow["extranet"] == '') {
 
 
   echo "</td></tr>
-      <tr><th>".t("tai asiakkaan osasto (jos et, ajetaan kaikki yhteens‰)")."</th><td colspan = '3'>";
+      <tr><th>".t("tai asiakkaan osasto (jos et, ajetaan kaikki yhteens√§)")."</th><td colspan = '3'>";
 
   $query = "SELECT distinct osasto
             FROM asiakas
@@ -441,7 +441,7 @@ if ($kukarow["extranet"] == '') {
   if ($asiakasytunnus != "") $asiakas = $asiakasytunnus;
 
   echo "</td></tr>
-      <tr><th>".t("tai anna asiakkaan ytunnus (jos et, ajetaan kaikki yhteens‰)")."</th><td colspan = '3'><input type='text' name='asiakas' value='$asiakas' size='15'></td></tr>";
+      <tr><th>".t("tai anna asiakkaan ytunnus (jos et, ajetaan kaikki yhteens√§)")."</th><td colspan = '3'><input type='text' name='asiakas' value='$asiakas' size='15'></td></tr>";
 }
 
 echo "</table>";

@@ -50,7 +50,7 @@ if ($tee == "SendRegistrationInfo") {
         </Content>
         </Request>";
 
-  $xmlfile = utf8_encode($xmlfile);
+  $xmlfile = $xmlfile;
 
   #$url = "https://test-api.apix.fi/registration";
   $url = "https://api.apix.fi/registration";
@@ -79,10 +79,10 @@ if ($tee == "SendRegistrationInfo") {
   $status_message1 = "<br><br>";
 
   if ($xml->Status == "OK") {
-    $status_message1 .= "<font class='ok'>L‰hetys onnistui!</font>";
+    $status_message1 .= "<font class='ok'>L√§hetys onnistui!</font>";
   }
   else {
-    $status_message1 .= "<font class='error'>L‰hetys ep‰onnistui!<br><br>";
+    $status_message1 .= "<font class='error'>L√§hetys ep√§onnistui!<br><br>";
     foreach ($xml->FreeText as $teksti) {
       $status_message1 .= $teksti."<br>";
     }
@@ -126,7 +126,7 @@ if ($tee == "RetrieveTransferID") {
     }
 
     if ($transfer_id != "" and $transfer_key != "") {
-      $status_message2 .= "<font class='ok'>P‰ivitys onnistui, APIX laskutus k‰yttˆˆnotettu!</font>";
+      $status_message2 .= "<font class='ok'>P√§ivitys onnistui, APIX laskutus k√§ytt√∂√∂notettu!</font>";
 
       $query = "UPDATE yhtion_parametrit SET
                 apix_tunnus                  = '$transfer_id',
@@ -138,12 +138,12 @@ if ($tee == "RetrieveTransferID") {
       $query = mysql_query($query) or pupe_error($query);
     }
     else {
-      $status_message2 .= "<font class='error'>P‰ivitys ep‰onnistui!<br><br>";
-      $status_message2 .= "<font class='error'>Asiakastiedot olivat tyhj‰‰!<br>";
+      $status_message2 .= "<font class='error'>P√§ivitys ep√§onnistui!<br><br>";
+      $status_message2 .= "<font class='error'>Asiakastiedot olivat tyhj√§√§!<br>";
     }
   }
   else {
-    $status_message2 .= "<font class='error'>P‰ivitys ep‰onnistui!<br><br>";
+    $status_message2 .= "<font class='error'>P√§ivitys ep√§onnistui!<br><br>";
     foreach ($xml->FreeText as $teksti) {
       $status_message2 .= $teksti."<br>";
     }
@@ -151,39 +151,39 @@ if ($tee == "RetrieveTransferID") {
   }
 }
 
-echo "<font class='head'>".t("APIX Laskutuksen k‰yttˆˆnotto")."</font><hr>";
+echo "<font class='head'>".t("APIX Laskutuksen k√§ytt√∂√∂notto")."</font><hr>";
 
 echo "<br>";
 echo "<img src='{$palvelin2}pics/apix_logo.png'>";
 echo "<br><br>";
 
-echo "<font class='message'>Vaihe 1: L‰het‰ yhtiˆtiedot APIX:lle</font><hr>";
+echo "<font class='message'>Vaihe 1: L√§het√§ yhti√∂tiedot APIX:lle</font><hr>";
 
 echo "<form method = 'post' class='multisubmit'>";
 echo "<input type='hidden' name='tee' value='SendRegistrationInfo'>";
-echo "<input type='submit' value='L‰het‰ yhtiˆtiedot klikkaamalla t‰st‰'>";
+echo "<input type='submit' value='L√§het√§ yhti√∂tiedot klikkaamalla t√§st√§'>";
 echo "</form>";
 echo $status_message1;
 echo "<br><br>";
 
-echo "<font class='message'>Vaihe 2: Rekisterˆidy APIX asiakkaaksi ja hanki verkkopostimerkkej‰ heid‰n verkkokaupasta</font><hr>";
+echo "<font class='message'>Vaihe 2: Rekister√∂idy APIX asiakkaaksi ja hanki verkkopostimerkkej√§ heid√§n verkkokaupasta</font><hr>";
 #  echo "<form target='top' action='https://test-registration.apix.fi' method='get'>";
 echo "<form target='top' action='https://registration.apix.fi' method='get'>";
-echo "<input type='submit' value='Siirry APIX rekisterˆintiin klikkaamalla t‰st‰'>";
+echo "<input type='submit' value='Siirry APIX rekister√∂intiin klikkaamalla t√§st√§'>";
 echo "</form>";
 
 echo "<br><br>";
 
-echo "<font class='message'>Vaihe 3: Ota APIX laskutus k‰yttˆˆn Pupesoft:issa antamalla APIX k‰ytt‰j‰tietosi</font><hr>";
+echo "<font class='message'>Vaihe 3: Ota APIX laskutus k√§ytt√∂√∂n Pupesoft:issa antamalla APIX k√§ytt√§j√§tietosi</font><hr>";
 
 echo "<form method = 'post' class='multisubmit'>";
 echo "<input type='hidden' name='tee' value='RetrieveTransferID'>";
 echo "<table>";
-echo "<tr><th>K‰ytt‰j‰tunnus</th><td><input type='text' size='20' name='username' value='$username'></td></tr>";
+echo "<tr><th>K√§ytt√§j√§tunnus</th><td><input type='text' size='20' name='username' value='$username'></td></tr>";
 echo "<tr><th>Salasana</th><td><input type='password' size='20' name='password' value='$password'></td></tr>";
 echo "</table>";
 echo "<br>";
-echo "<input type='submit' value='Ota APIX laskutus k‰yttˆˆn klikkaamalla t‰st‰'>";
+echo "<input type='submit' value='Ota APIX laskutus k√§ytt√∂√∂n klikkaamalla t√§st√§'>";
 echo $status_message2;
 
 echo "</form>";

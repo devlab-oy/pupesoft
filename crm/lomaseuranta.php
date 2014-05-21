@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("../inc/parametrit.inc");
@@ -18,11 +18,11 @@ $lisa2 = " yhtio in (".substr($konsernit, 0, -1).") ";
 
 echo "<table>";
 echo "<tr>";
-echo "<th>".t("Valitse k‰ytt‰j‰").":</th>";
+echo "<th>".t("Valitse k√§ytt√§j√§").":</th>";
 
 
 echo "<form method='POST'>";
-echo "<td><select name='kuka' onchange='submit()'><option value=''>".t("Valitse k‰ytt‰j‰")."</option>";
+echo "<td><select name='kuka' onchange='submit()'><option value=''>".t("Valitse k√§ytt√§j√§")."</option>";
 
 $query  = "SELECT distinct kuka, nimi
            FROM kuka
@@ -60,7 +60,7 @@ if ($kuka != '') {
             where kalenteri.$lisa2
             and kuka.yhtio=kalenteri.yhtio
             and kalenteri.tyyppi = 'kalenteri'
-            and kalenteri.tapa   in ('Kes‰loma','Talviloma')
+            and kalenteri.tapa   in ('Kes√§loma','Talviloma')
             and kalenteri.kuka=kuka.kuka
             and kuka.kuka='$kuka'
             ORDER BY kalenteri.kuka, kalenteri.tapa, kalenteri.pvmalku";
@@ -74,7 +74,7 @@ if ($kuka != '') {
         <th>".("Osasto")."</th><th>".("Pvmalku")."</th>
         <th>".("Aikaalku")."</th><th>".("Pvmloppu")."</th>
         <th>".("Aikaloppu")."</th><th>".("Kommentti")."</th>";
-    echo "<th>".t("Hyv‰ksyj‰")."</th>";
+    echo "<th>".t("Hyv√§ksyj√§")."</th>";
     echo "<th>".t("Pituus")."</th>";
     echo "</tr>";
 

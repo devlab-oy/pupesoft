@@ -1,12 +1,12 @@
 <?php
 
-// Kutsutaanko CLI:st‰
+// Kutsutaanko CLI:st√§
 if (php_sapi_name() != 'cli') {
-  die ("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!");
+  die ("T√§t√§ scripti√§ voi ajaa vain komentorivilt√§!");
 }
 
 if (trim($argv[1]) == '') {
-  echo "Et antanut yhtiˆt‰!\n";
+  echo "Et antanut yhti√∂t√§!\n";
   exit;
 }
 
@@ -24,7 +24,7 @@ $kukarow['kieli'] = 'fi';
 
 $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
-// Kuinka pitk‰lle tulevaisuuteen l‰htˆj‰ generoidaan
+// Kuinka pitk√§lle tulevaisuuteen l√§ht√∂j√§ generoidaan
 if (isset($argv[2]) and trim($argv[2]) != '') {
   $paivia_eteenpain = (int) trim($argv[2]);
 }
@@ -32,7 +32,7 @@ else {
   $paivia_eteenpain = 14;
 }
 
-// P‰iv‰ajo?
+// P√§iv√§ajo?
 if (isset($argv[3]) and trim($argv[3]) != '') {
   $paivaajo = TRUE;
 }
@@ -40,7 +40,7 @@ else {
   $paivaajo = FALSE;
 }
 
-// Poistetaan aktiiviset, vanhentuneet l‰hdˆt joihin ei oo liitetty yht‰‰n tilausta
+// Poistetaan aktiiviset, vanhentuneet l√§hd√∂t joihin ei oo liitetty yht√§√§n tilausta
 $query = "SELECT tunnus
           FROM lahdot
           WHERE yhtio = '{$kukarow['yhtio']}'
@@ -67,7 +67,7 @@ while ($chk_row = mysql_fetch_assoc($chk_res)) {
   }
 }
 
-// Poistetaan sellaiset l‰hdˆt, jotka on poistettu toimitustapojen_lahdoista ja joissa ei ole tilauksia
+// Poistetaan sellaiset l√§hd√∂t, jotka on poistettu toimitustapojen_lahdoista ja joissa ei ole tilauksia
 if ($paivaajo) {
   $query = "SELECT *
             FROM lahdot
@@ -89,10 +89,10 @@ else {
 
 $chk_res = pupe_query($query);
 
-// Loopataan kaikki generoidut l‰hdˆt
+// Loopataan kaikki generoidut l√§hd√∂t
 while ($chk_row = mysql_fetch_assoc($chk_res)) {
 
-  // Tehd‰‰n asiakasluokka-konversio toisin p‰in
+  // Tehd√§√§n asiakasluokka-konversio toisin p√§in
   $wquery = "SELECT group_concat(concat('\'',selite,'\'')) luokka
              FROM avainsana
              WHERE yhtio      = '$kukarow[yhtio]'
@@ -108,7 +108,7 @@ while ($chk_row = mysql_fetch_assoc($chk_res)) {
     $asiakasluokka = "";
   }
 
-  // Lˆytyykˆ viel‰ toimitustavan_lahdot oletus ja onko oletus voimassa?
+  // L√∂ytyyk√∂ viel√§ toimitustavan_lahdot oletus ja onko oletus voimassa?
   $query1 = "SELECT tunnus
              FROM toimitustavan_lahdot
              WHERE yhtio               = '{$kukarow['yhtio']}'
@@ -124,7 +124,7 @@ while ($chk_row = mysql_fetch_assoc($chk_res)) {
              AND (alkupvm = '0000-00-00' OR (alkupvm != '0000-00-00' AND alkupvm <= '{$chk_row['pvm']}'))";
   $chk_res2 = pupe_query($query1);
 
-  // Voimassa olevaa oletusta ei lˆytynyt, lˆytyykˆ 'poistettu' joka on viel‰ l‰hdˆn p‰iv‰n‰ voimassa?
+  // Voimassa olevaa oletusta ei l√∂ytynyt, l√∂ytyyk√∂ 'poistettu' joka on viel√§ l√§hd√∂n p√§iv√§n√§ voimassa?
   if (mysql_num_rows($chk_res2) == 0) {
     $query2 = "SELECT tunnus
                FROM toimitustavan_lahdot
@@ -143,7 +143,7 @@ while ($chk_row = mysql_fetch_assoc($chk_res)) {
     $chk_res2 = pupe_query($query2);
   }
 
-  // Onko l‰hdˆss‰ tilauksia?
+  // Onko l√§hd√∂ss√§ tilauksia?
   $query = "SELECT tunnus
             FROM lasku
             WHERE yhtio             = '{$kukarow['yhtio']}'
@@ -168,7 +168,7 @@ while ($chk_row = mysql_fetch_assoc($chk_res)) {
 }
 
 
-// Kuinka pitk‰lle ollaan jo generoitu t‰n skriptin toimesta l‰htˆj‰ per toimitustapa
+// Kuinka pitk√§lle ollaan jo generoitu t√§n skriptin toimesta l√§ht√∂j√§ per toimitustapa
 $query = "SELECT liitostunnus, varasto, max(pvm) maxpvm
           FROM lahdot
           WHERE yhtio = '{$kukarow['yhtio']}'
@@ -185,13 +185,13 @@ for ($i = 0; $i <= $paivia_eteenpain; $i++) {
 
   $time = mktime(0, 0, 0, date("m"), date("d") + $i, date("Y"));
 
-  // P‰iv‰m‰‰r‰
+  // P√§iv√§m√§√§r√§
   $pvm = date("Y-m-d", $time);
 
-  // P‰iv‰m‰‰r‰ numeerinen
+  // P√§iv√§m√§√§r√§ numeerinen
   $pvm_int = date("Ymd", $time);
 
-  // Viikonp‰iv‰
+  // Viikonp√§iv√§
   $aika_vkonpvm = date("w", $time);
 
   $query = "SELECT *
@@ -206,19 +206,19 @@ for ($i = 0; $i <= $paivia_eteenpain; $i++) {
 
     $alkupvm = (int) str_replace("-", "", $t_row["alkupvm"]);
 
-    // Lis‰t‰‰n vain jos p‰iv‰lle ei oo aikaisemmin lis‰tty, tai jos alkupvm-muuttujalla halutaan lis‰t‰ $max_pvm_array-slotin sis‰lle uusia l‰htˆj‰
+    // Lis√§t√§√§n vain jos p√§iv√§lle ei oo aikaisemmin lis√§tty, tai jos alkupvm-muuttujalla halutaan lis√§t√§ $max_pvm_array-slotin sis√§lle uusia l√§ht√∂j√§
     if (($pvm_int >= $alkupvm and $alkupvm > 0) or
       ($alkupvm == 0 and (!isset($max_pvm_array[$t_row["liitostunnus"]][$t_row["varasto"]]) or
       (isset($max_pvm_array[$t_row["liitostunnus"]][$t_row["varasto"]]) and $pvm_int > $max_pvm_array[$t_row["liitostunnus"]][$t_row["varasto"]])))) {
 
-      // Tehd‰‰n asiakasluokka-konversio
+      // Tehd√§√§n asiakasluokka-konversio
       $asiakasluokka = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selite='{$t_row['asiakasluokka']}'", "", "", "selitetark_3");
 
       if ((int) $asiakasluokka <= 0) {
         continue;
       }
 
-      // Onko t‰lle p‰iv‰lle jo generoitu t‰n skriptin toimesta l‰htˆj‰
+      // Onko t√§lle p√§iv√§lle jo generoitu t√§n skriptin toimesta l√§ht√∂j√§
       $query = "SELECT *
                 FROM lahdot
                 WHERE yhtio              = '{$kukarow['yhtio']}'
@@ -257,7 +257,7 @@ for ($i = 0; $i <= $paivia_eteenpain; $i++) {
 }
 
 if (!$paivaajo) {
-  // Nollataan v‰kisinker‰yst‰p‰t aina p‰iv‰n p‰‰tteeksi
+  // Nollataan v√§kisinker√§yst√§p√§t aina p√§iv√§n p√§√§tteeksi
   $query = "UPDATE lahdot
             SET vakisin_kerays = ''
             WHERE yhtio         = '{$kukarow['yhtio']}'

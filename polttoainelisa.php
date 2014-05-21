@@ -2,7 +2,7 @@
 
 require("inc/parametrit.inc");
 
-echo "<font class='head'>",t("Rahtimaksujen polttoainelis‰"),"</font><hr>";
+echo "<font class='head'>",t("Rahtimaksujen polttoainelis√§"),"</font><hr>";
 
 if (isset($lisaa) and isset($polttoainelisa) and isset($toimitustapa)) {
 
@@ -10,7 +10,7 @@ if (isset($lisaa) and isset($polttoainelisa) and isset($toimitustapa)) {
   $toimitustapa = mysql_real_escape_string($toimitustapa);
 
   if ($polttoainelisa == 0) {
-    echo "<font class='error'>",t("Polttoainelis‰n hintakerroin on syˆtett‰v‰"),"!</font><br/><br/>";
+    echo "<font class='error'>",t("Polttoainelis√§n hintakerroin on sy√∂tett√§v√§"),"!</font><br/><br/>";
   }
   else {
     $query = "SELECT *
@@ -46,7 +46,7 @@ $query = "SELECT DISTINCT rahtimaksut.toimitustapa
 $toimitustapa_res = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($toimitustapa_res) == 0) {
-  echo "<font class='error'>",t("Yhdell‰k‰‰n toimitustavalla ei ole rahtimaksuja"),"!</font>";
+  echo "<font class='error'>",t("Yhdell√§k√§√§n toimitustavalla ei ole rahtimaksuja"),"!</font>";
 }
 else {
 
@@ -64,9 +64,9 @@ else {
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>",t("Polttoainelis‰n hintakerroin"),":</th>";
+  echo "<th>",t("Polttoainelis√§n hintakerroin"),":</th>";
   echo "<td><input type='text' name='polttoainelisa' id='polttoainelisa' value='' size='5'></td>";
-  echo "<td class='back'><input type='submit' name='lisaa' id='lisaa' value='",t("Lis‰‰"),"'></td>";
+  echo "<td class='back'><input type='submit' name='lisaa' id='lisaa' value='",t("Lis√§√§"),"'></td>";
   echo "</tr>";
 
   echo "</table>";

@@ -9,7 +9,7 @@ if ($tee == "lataa_tiedosto") {
   exit;
 }
 
-echo "<font class='head'>".t("Arvonlis‰veron yhteenvetoilmoitus")."</font><hr><br>";
+echo "<font class='head'>".t("Arvonlis√§veron yhteenvetoilmoitus")."</font><hr><br>";
 
 // Oletusvalinta edellinen kuukausi
 if (isset($kohdekausi) and $kohdekausi != "") {
@@ -28,7 +28,7 @@ echo "<th>".t("Valitse kohdekuukausi")."</th>";
 echo "<td>";
 echo "<select name = 'kohdekausi'>";
 
-// N‰ytet‰‰n kausivalinnat kaksi kuukautta eteenp‰in ja vuosi taaksep‰in
+// N√§ytet√§√§n kausivalinnat kaksi kuukautta eteenp√§in ja vuosi taaksep√§in
 for ($i = 0; $i < 15; $i++) {
   $kuukausi = date("m/Y", mktime(0, 0, 0, date("m") - 1 + $i, 1, date("Y")-1));
   $sel = ($kuukausi == $default_kausi) ? " selected" : "";
@@ -50,7 +50,7 @@ if ($tee == "VSRALVYV") {
   // Erotellaan kuukausi ja vuosi
   list($kuukausi, $vuosi) = explode("/", $kohdekausi);
 
-  // Tehd‰‰n alku ja loppup‰iv‰
+  // Tehd√§√§n alku ja loppup√§iv√§
   $alkupvm  = date("Y-m-d", mktime(0, 0, 0, $kuukausi,   1, $vuosi));
   $loppupvm = date("Y-m-d", mktime(0, 0, 0, $kuukausi+1, 0, $vuosi));
 
@@ -93,11 +93,11 @@ if ($tee == "VSRALVYV") {
     // Yhteissumma
     $summa_yhteensa = 0;
 
-    // Tehd‰‰n tietuetta
+    // Tehd√§√§n tietuetta
     $tietue_rivi = 0;
     $tietue_rivitiedot = "";
 
-    // T‰h‰n ker‰t‰‰n raportin data
+    // T√§h√§n ker√§t√§√§n raportin data
     $yhteenvetoilmoitus_array = array();
 
     // Myynnit
@@ -113,7 +113,7 @@ if ($tee == "VSRALVYV") {
       $yhteenvetoilmoitus_array[$array_key]["kale"] = 0;
     }
 
-    // Tavaramyynnin k‰teisalennukset
+    // Tavaramyynnin k√§teisalennukset
     list($kakerroinlisa, $ttres) = alvilmo_kassa_ale_erittely($alkupvm, $loppupvm, "", "", "fi311", 0, TRUE);
 
     if (is_resource($ttres)) {
@@ -133,7 +133,7 @@ if ($tee == "VSRALVYV") {
       }
     }
 
-    // Palvelumyynnin k‰teisalennukset
+    // Palvelumyynnin k√§teisalennukset
     list($kakerroinlisa, $ttres) = alvilmo_kassa_ale_erittely($alkupvm, $loppupvm, "", "", "fi312", 0, TRUE);
 
     if (is_resource($ttres)) {
@@ -153,7 +153,7 @@ if ($tee == "VSRALVYV") {
       }
     }
 
-    // Kolmikantamyynnin k‰teisalennukset
+    // Kolmikantamyynnin k√§teisalennukset
     list($kakerroinlisa, $ttres) = alvilmo_kassa_ale_erittely($alkupvm, $loppupvm, "", "", "kolmikanta", 0, TRUE);
 
     if (is_resource($ttres)) {
@@ -173,7 +173,7 @@ if ($tee == "VSRALVYV") {
       }
     }
 
-    // Sortataan multidimensoinen array. Pit‰‰ ensiksi tehd‰ sortattavista keyst‰ omat arrayt
+    // Sortataan multidimensoinen array. Pit√§√§ ensiksi tehd√§ sortattavista keyst√§ omat arrayt
     $apusort_jarj1 = $apusort_jarj2 = $apusort_jarj3 = array();
 
     foreach ($yhteenvetoilmoitus_array as $apusort_key => $apusort_row) {
@@ -182,10 +182,10 @@ if ($tee == "VSRALVYV") {
       $apusort_jarj3[$apusort_key] = $apusort_row['ytunnus'];
     }
 
-    // Sortataan taulukko koodi, maa, ytunnus j‰rjestykseen
+    // Sortataan taulukko koodi, maa, ytunnus j√§rjestykseen
     array_multisort($apusort_jarj1, SORT_DESC, $apusort_jarj2, SORT_ASC, $apusort_jarj3, SORT_ASC, $yhteenvetoilmoitus_array);
 
-    // Piirret‰‰n data ruudulle
+    // Piirret√§√§n data ruudulle
     foreach ($yhteenvetoilmoitus_array as $row) {
       echo "<tr class='aktiivi'>";
       echo "<td>".t($row["koodi"])."</td>";
@@ -197,8 +197,8 @@ if ($tee == "VSRALVYV") {
 
       if ($row["maa"] == "") {
         echo "<td class='back'><font class='error'>";
-        echo t("VIRHE! Maa puuttuu laskulta sek‰ asiakkaalta")."!<br>";
-        echo t("Rivi‰ ei huomioida yhteissummassa").".<br>";
+        echo t("VIRHE! Maa puuttuu laskulta sek√§ asiakkaalta")."!<br>";
+        echo t("Rivi√§ ei huomioida yhteissummassa").".<br>";
         echo t("Korjaa asiakkaan tiedot ennen ilmoittamista")."!";
         echo "</font></td>";
       }
@@ -207,7 +207,7 @@ if ($tee == "VSRALVYV") {
       }
 
       if ($row["kale"] != 0 and $row["kale"] != $row["laskuja"]) {
-        echo "<td class='back'><font class='info'>".t("HUOM: Myynniss‰ on huomioitu %s kassa-alennus(ta)", $kukarow["kieli"], $row["kale"]).".</font></td>";
+        echo "<td class='back'><font class='info'>".t("HUOM: Myynniss√§ on huomioitu %s kassa-alennus(ta)", $kukarow["kieli"], $row["kale"]).".</font></td>";
       }
 
       if ($row["kale"] != 0 and $row["kale"] == $row["laskuja"]) {
@@ -219,7 +219,7 @@ if ($tee == "VSRALVYV") {
       if ($row["maa"] != "") {
         $summa_yhteensa += $row["summa"];
 
-        // Tehd‰‰n tietuetta
+        // Tehd√§√§n tietuetta
         $tietue_rivi++;
 
         // Kauppatapakoodit
@@ -237,16 +237,16 @@ if ($tee == "VSRALVYV") {
         $arvo = round($row["summa"] * 100);
 
         // Rivitiedot
-        $tietue_rivitiedot .= "102:{$row["maa"]}\n";  // Maatunnus. Asiakkaan arvonlis‰verotunnisteen maatunnusosa.
-        $tietue_rivitiedot .= "103:{$ytunnus}\n";    // Asiakkaan arvonlis‰verotunniste. Asiakkaan arvonlis‰verotunniste ilman maatunnusta.
+        $tietue_rivitiedot .= "102:{$row["maa"]}\n";  // Maatunnus. Asiakkaan arvonlis√§verotunnisteen maatunnusosa.
+        $tietue_rivitiedot .= "103:{$ytunnus}\n";    // Asiakkaan arvonlis√§verotunniste. Asiakkaan arvonlis√§verotunniste ilman maatunnusta.
         $tietue_rivitiedot .= "210:{$arvo}\n";      // Myynnin arvo EU-maihin
-        $tietue_rivitiedot .= "104:{$koodi}\n";      // Kauppatapakoodi. Tavaramyynnin koodi on tyhj‰. Kolmikantakaupassa koodi on 3. Palvelumyynnin koodi on 4.
-        $tietue_rivitiedot .= "009:{$tietue_rivi}\n";  // Toistuvien osatietoryhmien v‰limerkki: juokseva numero.
+        $tietue_rivitiedot .= "104:{$koodi}\n";      // Kauppatapakoodi. Tavaramyynnin koodi on tyhj√§. Kolmikantakaupassa koodi on 3. Palvelumyynnin koodi on 4.
+        $tietue_rivitiedot .= "009:{$tietue_rivi}\n";  // Toistuvien osatietoryhmien v√§limerkki: juokseva numero.
       }
     }
 
     echo "<tr>";
-    echo "<th colspan = '4'>".t("Yhteens‰")."</th>";
+    echo "<th colspan = '4'>".t("Yhteens√§")."</th>";
     echo "<td class = 'tumma' align = 'right'>".sprintf("%.2f", $summa_yhteensa)."</th>";
     echo "<th></th>";
     echo "</tr>";
@@ -254,25 +254,25 @@ if ($tee == "VSRALVYV") {
     echo "</table>";
     echo "<br>";
 
-    // Tehd‰‰n tietue
+    // Tehd√§√§n tietue
     $uytunnus = tulosta_ytunnus($yhtiorow["ytunnus"]);
     $arvo = round($summa_yhteensa * 100);
     $tunniste = substr(md5(date("YmdHis")), 0, 9);
 
     $tietue  = "000:VSRALVYV\n";          // Tietovirran nimi
-    $tietue .= "100:".date("dmY")."\n";        // Saapumisp‰iv‰ ppkkvvvv. Ilmoituksen arvop‰iv‰ eli p‰iv‰, jona tiedonkeruupalvelu vastaanotti tiedot.
-    $tietue .= "051:".date("H:i:s").":00\n";    // Saapumisp‰iv‰n kellonaika hh:mm:ss:dd. Ilmoituksen arvop‰iv‰n kellonaika, jona tiedonkeruupalvelu vastaanotti tiedot.
+    $tietue .= "100:".date("dmY")."\n";        // Saapumisp√§iv√§ ppkkvvvv. Ilmoituksen arvop√§iv√§ eli p√§iv√§, jona tiedonkeruupalvelu vastaanotti tiedot.
+    $tietue .= "051:".date("H:i:s").":00\n";    // Saapumisp√§iv√§n kellonaika hh:mm:ss:dd. Ilmoituksen arvop√§iv√§n kellonaika, jona tiedonkeruupalvelu vastaanotti tiedot.
     $tietue .= "105:VW\n";              // Vastaanottavan palvelun tunnus, joka sovitaan palvelukohtaisesti.
                             // Positio 1: E=Itella, S=TeliaSonera, U=Aditro, N=Logica, K=Koivuniemi, V=Ilmoitin.fi
-                            // Positio 2: W=Webin kautta syˆtetty tietue, O=Ohjelmistointegraation tuottama
-    $tietue .= "107:{$tunniste}\n";          // Tunniste, jonka tiedonkeruupalvelu muodostaa yksilˆim‰‰n ilmoituksen
+                            // Positio 2: W=Webin kautta sy√∂tetty tietue, O=Ohjelmistointegraation tuottama
+    $tietue .= "107:{$tunniste}\n";          // Tunniste, jonka tiedonkeruupalvelu muodostaa yksil√∂im√§√§n ilmoituksen
     $tietue .= "010:{$uytunnus}\n";          // Y-tunnus tai Y-tunnus ja siihen liitetty toimipaikkatunnus
     $tietue .= "053:{$kohdekausi}\n";        // Kohdekausi kk/vvvv
-    $tietue .= "098:1\n";              // Rahayksikkˆ, mill‰ tiedot annetaan: euro=1
-    $tietue .= "101:{$arvo}\n";            // Koko yhteisˆmyynnin arvo kohdekautena
-    $tietue .= "001:{$tietue_rivi}\n";        // Toistuvien osatietoryhmien lukum‰‰r‰ ja alkumerkki (= n ryhm‰‰)
+    $tietue .= "098:1\n";              // Rahayksikk√∂, mill√§ tiedot annetaan: euro=1
+    $tietue .= "101:{$arvo}\n";            // Koko yhteis√∂myynnin arvo kohdekautena
+    $tietue .= "001:{$tietue_rivi}\n";        // Toistuvien osatietoryhmien lukum√§√§r√§ ja alkumerkki (= n ryhm√§√§)
     $tietue .= $tietue_rivitiedot;
-    $tietue .= "999:1\n";              // Lopputunnus: Tietueen juokseva numero. Verovelvolliskohtainen ilmoitus p‰‰ttyy.
+    $tietue .= "999:1\n";              // Lopputunnus: Tietueen juokseva numero. Verovelvolliskohtainen ilmoitus p√§√§ttyy.
 
     $filenimi = "VSRALVYV-$vuosi-$kuukausi-".date("His").".txt";
     file_put_contents("$pupe_root_polku/dataout/$filenimi", $tietue);

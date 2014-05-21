@@ -184,7 +184,7 @@ class Image_Barcode_Code39 extends Image_Barcode
        $black = imagecolorallocate( $img, 0, 0, 0 );
        $white = imagecolorallocate( $img, 255, 255, 255 );
 
-     // entinen parametri imagefontheightiss‰ oli "gdFontSmall", nykysin ottaa int
+     // entinen parametri imagefontheightiss√§ oli "gdFontSmall", nykysin ottaa int
        $font_height = ( $noText ? 0 : imagefontheight( 1 ) );
 
      // entinen parametri oli "gdFontSmall", nykysin ottaa int

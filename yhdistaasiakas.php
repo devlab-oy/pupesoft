@@ -6,11 +6,11 @@ if (!isset($konserni))   $konserni = '';
 if (!isset($tee))     $tee = '';
 if (!isset($oper))     $oper = '';
 
-echo "<font class='head'>".t("Yhdist‰ asiakkaita")."</font><hr>";
+echo "<font class='head'>".t("Yhdist√§ asiakkaita")."</font><hr>";
 
 if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
 
-  // t‰ss‰ on j‰tett‰v‰n asiakkaan tiedot
+  // t√§ss√§ on j√§tett√§v√§n asiakkaan tiedot
   $jquery  = "SELECT *
               FROM asiakas
               where yhtio = '$kukarow[yhtio]'
@@ -18,16 +18,16 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
   $jresult = pupe_query($jquery);
   $jrow = mysql_fetch_assoc($jresult);
 
-  echo "<br>".t("J‰tet‰‰n asiakas").": $jrow[ytunnus] $jrow[nimi] ".$jrow['osoite']." ".$jrow['postino']." ".$jrow['postitp']."<br>";
+  echo "<br>".t("J√§tet√§√§n asiakas").": $jrow[ytunnus] $jrow[nimi] ".$jrow['osoite']." ".$jrow['postino']." ".$jrow['postitp']."<br>";
 
-  // Otetaan j‰tett‰v‰ pois poistettavista jos se on sinne ruksattu
+  // Otetaan j√§tett√§v√§ pois poistettavista jos se on sinne ruksattu
   unset($yhdista[$jataminut]);
 
   $historia = t("Asiakkaaseen").": ". $jrow["nimi"].", ". t("ytunnus").": ". $jrow["ytunnus"].", ".t("asiakasnro").": ". $asrow["asiakasnro"] ." ".t("liitettiin seuraavat asiakkaat").": \\n";
 
   foreach ($yhdista as $haettava) {
 
-    // haetaan "Yhdistett‰v‰n" firman tiedot esille niin saadaan oikeat parametrit.
+    // haetaan "Yhdistett√§v√§n" firman tiedot esille niin saadaan oikeat parametrit.
     $asquery = "SELECT * FROM asiakas WHERE yhtio='$kukarow[yhtio]' AND tunnus = '{$haettava}'";
     $asresult = pupe_query($asquery);
 
@@ -35,7 +35,7 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
 
       $asrow = mysql_fetch_assoc($asresult);
 
-      echo "<br>".t("Yhdistet‰‰n").": $asrow[ytunnus] $asrow[nimi] ".$asrow['osoite']." ".$asrow['postino']." ".$asrow['postitp']."<br>";
+      echo "<br>".t("Yhdistet√§√§n").": $asrow[ytunnus] $asrow[nimi] ".$asrow['osoite']." ".$asrow['postino']." ".$asrow['postitp']."<br>";
 
       // haetaan asiakashinta ensin Ytunnuksella.
       $hquery = "SELECT *
@@ -49,7 +49,7 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
         echo "<font class='error'>".t("Ei asiakashintoja y-tunnuksella")."</font><br>";
       }
       else {
-        echo "<font class='ok'>".t("Lˆytyi asiakashintoja y-tunnuksella")."</font><br>";
+        echo "<font class='ok'>".t("L√∂ytyi asiakashintoja y-tunnuksella")."</font><br>";
         while ($ahrow = mysql_fetch_assoc($hresult)) {
 
           $tarksql = "SELECT *
@@ -110,10 +110,10 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
         echo "<font class='error'>".t("Ei asiakashintoja asiakastunnuksella")."</font><br>";
       }
       else {
-        echo "<font class='ok'>".t("Lˆytyi asiakashintoja asiakastunnuksella")."</font><br>";
+        echo "<font class='ok'>".t("L√∂ytyi asiakashintoja asiakastunnuksella")."</font><br>";
         while ($ahrow = mysql_fetch_assoc($hresult)) {
 
-          // Ytunnus voi olla myˆs setattu, mutta ei huomioida sit‰ t‰ss‰...
+          // Ytunnus voi olla my√∂s setattu, mutta ei huomioida sit√§ t√§ss√§...
           $tarksql = "SELECT *
                       FROM asiakashinta
                       where yhtio           = '$kukarow[yhtio]'
@@ -172,7 +172,7 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
         echo "<font class='error'>".t("Ei asiakasalennuksia y-tunnuksella")."</font><br>";
       }
       else {
-        echo "<font class='ok'>".t("Lˆytyi asiakasalennuksia y-tunnuksella")."</font><br>";
+        echo "<font class='ok'>".t("L√∂ytyi asiakasalennuksia y-tunnuksella")."</font><br>";
         while ($alrow = mysql_fetch_assoc($hresult)) {
 
           $tarksql = "SELECT * FROM asiakasalennus
@@ -228,9 +228,9 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
         echo "<font class='error'>".t("Ei asiakasalennuksia asiakastunnuksella")."</font><br>";
       }
       else {
-        echo "<font class='ok'>".t("Lˆytyi asiakasalennuksia asiakastunnuksella")."</font><br>";
+        echo "<font class='ok'>".t("L√∂ytyi asiakasalennuksia asiakastunnuksella")."</font><br>";
         while ($alrow = mysql_fetch_assoc($hresult)) {
-          // Ytunnus voi olla myˆs setattu, mutta ei huomioida sit‰ t‰ss‰...
+          // Ytunnus voi olla my√∂s setattu, mutta ei huomioida sit√§ t√§ss√§...
           $tarksql = "SELECT * FROM asiakasalennus
                       where yhtio           = '$kukarow[yhtio]'
                       and tuoteno           = '$alrow[tuoteno]'
@@ -282,10 +282,10 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
       $hresult = pupe_query($hquery);
 
       if (mysql_num_rows($hresult) == 0) {
-        echo "<font class='error'>".t("Ei lˆytynyt asiakaskommentteja asiakkaalta")."</font><br>";
+        echo "<font class='error'>".t("Ei l√∂ytynyt asiakaskommentteja asiakkaalta")."</font><br>";
       }
       else {
-        echo "<font class='ok'>".t("Lˆytyi asiakaskommentteja asiakkaalta")."</font><br>";
+        echo "<font class='ok'>".t("L√∂ytyi asiakaskommentteja asiakkaalta")."</font><br>";
         while ($ahrow = mysql_fetch_assoc($hresult)) {
 
           $tarksql = "SELECT *
@@ -321,10 +321,10 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
       $hresult = pupe_query($hquery);
 
       if (mysql_num_rows($hresult) == 0) {
-        echo "<font class='error'>".t("Ei lˆytynyt rahtisopimuksia y-tunnuksella")."</font><br>";
+        echo "<font class='error'>".t("Ei l√∂ytynyt rahtisopimuksia y-tunnuksella")."</font><br>";
       }
       else {
-        echo "<font class='ok'>".t("Lˆytyi rahtisopimuksia y-tunnuksella")."</font><br>";
+        echo "<font class='ok'>".t("L√∂ytyi rahtisopimuksia y-tunnuksella")."</font><br>";
         while ($ahrow = mysql_fetch_assoc($hresult)) {
 
           $tarksql = "SELECT *
@@ -365,10 +365,10 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
       $hresult = pupe_query($hquery);
 
       if (mysql_num_rows($hresult) == 0) {
-        echo "<font class='error'>".t("Ei lˆytynyt rahtisopimuksia asiakastunnuksella")."</font><br>";
+        echo "<font class='error'>".t("Ei l√∂ytynyt rahtisopimuksia asiakastunnuksella")."</font><br>";
       }
       else {
-        echo "<font class='ok'>".t("Lˆytyi rahtisopimuksia asiakastunnuksella")."</font><br>";
+        echo "<font class='ok'>".t("L√∂ytyi rahtisopimuksia asiakastunnuksella")."</font><br>";
         while ($ahrow = mysql_fetch_assoc($hresult)) {
 
           $tarksql = "SELECT *
@@ -401,7 +401,7 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
         }
       }
 
-      // !!!!!!!! YHTEYSHENKIL÷ OSIO !!!!!!!!!!!!
+      // !!!!!!!! YHTEYSHENKIL√ñ OSIO !!!!!!!!!!!!
       $hquery = "SELECT *
                  FROM yhteyshenkilo
                  WHERE yhtio      = '$kukarow[yhtio]'
@@ -410,10 +410,10 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
       $hresult = pupe_query($hquery);
 
       if (mysql_num_rows($hresult) == 0) {
-        echo "<font class='error'>".t("Ei lˆytynyt yhteyshenkilˆit‰ asiakkaalta")."</font><br>";
+        echo "<font class='error'>".t("Ei l√∂ytynyt yhteyshenkil√∂it√§ asiakkaalta")."</font><br>";
       }
       else {
-        echo "<font class='ok'>".t("Lˆytyi yhteyshenkilˆit‰ asiakkaalta")."</font><br>";
+        echo "<font class='ok'>".t("L√∂ytyi yhteyshenkil√∂it√§ asiakkaalta")."</font><br>";
         while ($ahrow = mysql_fetch_assoc($hresult)) {
 
           $tarksql = "SELECT *
@@ -470,10 +470,10 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
       $hresult = pupe_query($hquery);
 
       if (mysql_num_rows($hresult) == 0) {
-        echo "<font class='error'>".t("Ei lˆytynyt avainsanoja asiakkaalta")."</font><br>";
+        echo "<font class='error'>".t("Ei l√∂ytynyt avainsanoja asiakkaalta")."</font><br>";
       }
       else {
-        echo "<font class='ok'>".t("Lˆytyi avainsanoja asiakkaalta")."</font><br>";
+        echo "<font class='ok'>".t("L√∂ytyi avainsanoja asiakkaalta")."</font><br>";
         while ($ahrow = mysql_fetch_assoc($hresult)) {
 
           $tarksql = "SELECT *
@@ -511,10 +511,10 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
       $hresult = pupe_query($hquery);
 
       if (mysql_num_rows($hresult) == 0) {
-        echo "<font class='error'>".t("Ei lˆytynyt liitteit‰ asiakkaalta")."</font><br>";
+        echo "<font class='error'>".t("Ei l√∂ytynyt liitteit√§ asiakkaalta")."</font><br>";
       }
       else {
-        echo "<font class='ok'>".t("Lˆytyi liitteit‰ asiakkaalta")."</font><br>";
+        echo "<font class='ok'>".t("L√∂ytyi liitteit√§ asiakkaalta")."</font><br>";
         while ($ahrow = mysql_fetch_assoc($hresult)) {
 
           $tarksql = "SELECT *
@@ -570,10 +570,10 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
       $hresult = pupe_query($hquery);
 
       if (mysql_num_rows($hresult) == 0) {
-        echo "<font class='error'>".t("Ei lˆytynyt dynaamisen puun liitoksia asiakkaalta")."</font><br>";
+        echo "<font class='error'>".t("Ei l√∂ytynyt dynaamisen puun liitoksia asiakkaalta")."</font><br>";
       }
       else {
-        echo "<font class='ok'>".t("Lˆytyi dynaamisen puun liitoksia asiakkaalta")."</font><br>";
+        echo "<font class='ok'>".t("L√∂ytyi dynaamisen puun liitoksia asiakkaalta")."</font><br>";
         while ($ahrow = mysql_fetch_assoc($hresult)) {
 
           $tarksql = "SELECT *
@@ -601,7 +601,7 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
         }
       }
 
-      // !!!!!! Asiakasmemot, kalenterit, siell‰ olevat liitetiedostot menee kalenterintunnuksen mukaan, joten niiit‰ ei tarvitse erikseen p‰ivitt‰‰
+      // !!!!!! Asiakasmemot, kalenterit, siell√§ olevat liitetiedostot menee kalenterintunnuksen mukaan, joten niiit√§ ei tarvitse erikseen p√§ivitt√§√§
       $memohaku = "SELECT liitostunnus, asiakas
                    FROM kalenteri
                    WHERE yhtio      = '$kukarow[yhtio]'
@@ -610,7 +610,7 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
       $ahy = mysql_num_rows($memores);
 
       if ($ahy != 0) {
-        echo "<font class='ok'>".t("P‰ivitettiin CRM-tiedot asiakkaalta")."</font><br>";
+        echo "<font class='ok'>".t("P√§ivitettiin CRM-tiedot asiakkaalta")."</font><br>";
 
         $memosql = "UPDATE kalenteri
                     SET asiakas = '$jrow[ytunnus]', liitostunnus = '$jrow[tunnus]'
@@ -619,7 +619,7 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
         $memores = pupe_query($memosql);
       }
       else {
-        echo "<font class='error'>".t("Ei lˆytynyt CRM-tietoja asiakkaalta")."</font><br>";
+        echo "<font class='error'>".t("Ei l√∂ytynyt CRM-tietoja asiakkaalta")."</font><br>";
       }
 
       // !!!!!!!! LASKUTUS OSIO !!!!!!!!!!!!
@@ -630,13 +630,13 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
       if (trim($lrow['tunnukset']) != "") {
         $lupdate = "UPDATE lasku SET liitostunnus = '$jrow[tunnus]' WHERE yhtio ='$kukarow[yhtio]' and liitostunnus='$asrow[tunnus]' AND tunnus IN ($lrow[tunnukset])";
         $lupdateresult = pupe_query($lupdate);
-        echo "<font class='ok'>".t("Asiakkaan laskut p‰ivitettiin")."</font><br>";
+        echo "<font class='ok'>".t("Asiakkaan laskut p√§ivitettiin")."</font><br>";
       }
       else {
-        echo "<font class='error'>".t("Ei lˆytynyt laskuja asiakkaalta")."</font><br>";
+        echo "<font class='error'>".t("Ei l√∂ytynyt laskuja asiakkaalta")."</font><br>";
       }
 
-      // Muutetaan asiakkaan laji = 'P', j‰tet‰‰n varmuudeksi talteen, toistaiseksi.
+      // Muutetaan asiakkaan laji = 'P', j√§tet√§√§n varmuudeksi talteen, toistaiseksi.
       $paivitys = "UPDATE asiakas set laji='P' where yhtio ='$kukarow[yhtio]' AND tunnus = '$asrow[tunnus]'";
       $pairesult = pupe_query($paivitys);
 
@@ -714,7 +714,7 @@ $result = pupe_query($query);
 echo "<br><table>";
 echo "<tr>";
 
-for ($i = 1; $i < mysql_num_fields($result)-1; $i++) { // HAKUKENTƒT
+for ($i = 1; $i < mysql_num_fields($result)-1; $i++) { // HAKUKENT√ÑT
   echo "<th><a href='$PHP_SELF?ojarj=".mysql_field_name($result,$i).$ulisa."'>" . t(mysql_field_name($result,$i)) . "</a>";
 
   if   (mysql_field_len($result,$i)>20) $size='20';
@@ -726,8 +726,8 @@ for ($i = 1; $i < mysql_num_fields($result)-1; $i++) { // HAKUKENTƒT
   echo "<br><input type='text' name='haku[$i]' value='$haku[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
   echo "</th>";
 }
-echo "<th>".t("Yhdist‰")."</th><th>".t("j‰t‰ t‰m‰")."</th>";
-echo "<td class='back'>&nbsp;&nbsp;<input type='Submit' value='".t("Etsi / yhdist‰")."'></td></tr>\n\n";
+echo "<th>".t("Yhdist√§")."</th><th>".t("j√§t√§ t√§m√§")."</th>";
+echo "<td class='back'>&nbsp;&nbsp;<input type='Submit' value='".t("Etsi / yhdist√§")."'></td></tr>\n\n";
 
 $kalalask = 1;
 
@@ -737,7 +737,7 @@ while ($trow = mysql_fetch_array ($result)) { // tiedot
   for ($i=1; $i<mysql_num_fields($result)-1; $i++) {
 
     if ($i == 1) {
-      if (trim($trow[1]) == '') $trow[1] = t("*tyhj‰*");
+      if (trim($trow[1]) == '') $trow[1] = t("*tyhj√§*");
       echo "<td><a name='2_$kalalask' href='".$palvelin2."yllapito.php?toim=asiakas&tunnus=$trow[tunnus]&lopetus=".$palvelin2."yhdistaasiakas.php////ojarj=$ojarj".str_replace("&", "//", $ulisa)."///2_$kalalask'>$trow[$i]</a></td>";
     }
     elseif (mysql_field_name($result,$i) == 'ytunnus') {
@@ -757,7 +757,7 @@ while ($trow = mysql_fetch_array ($result)) { // tiedot
 
 echo "</table><br><br>";
 
-echo "<input type='submit' value='".t("Yhdist‰ asiakkaat")."'>";
+echo "<input type='submit' value='".t("Yhdist√§ asiakkaat")."'>";
 echo "</form>";
 
 require ("inc/footer.inc");

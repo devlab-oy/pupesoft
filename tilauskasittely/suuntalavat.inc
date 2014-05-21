@@ -1,5 +1,5 @@
 <?php
-# Voidaan tehd‰ uusi lava ilman otunnusta
+# Voidaan tehd√§ uusi lava ilman otunnusta
 if(!empty($otunnus)) {
 
   $query  = "SELECT *
@@ -14,7 +14,7 @@ if(!empty($otunnus)) {
     $laskurow = mysql_fetch_assoc($result);
   }
   else {
-    echo "<font style='error'>".t("VIRHE: Saapumista ei en‰‰ lˆydy")."!</font>";
+    echo "<font style='error'>".t("VIRHE: Saapumista ei en√§√§ l√∂ydy")."!</font>";
     exit;
   }
 }
@@ -23,7 +23,7 @@ if (!isset($suuntalavat_ei_kayttoliittymaa) or $suuntalavat_ei_kayttoliittymaa !
   echo "  <script type=\"text/javascript\" charset=\"utf-8\">
         $(document).ready(function() {
           if ('$tee' == 'uusi') {
-            // valitaan sscc-kentt‰ heti kun ollaan muokkaamassa, jotta voidaan lukea viivakoodi heti ilman klikkailuja
+            // valitaan sscc-kentt√§ heti kun ollaan muokkaamassa, jotta voidaan lukea viivakoodi heti ilman klikkailuja
             $('#sscc').focus().select();
           }
         });
@@ -72,7 +72,7 @@ if (!function_exists('lisaa_suuntalava')) {
   function lisaa_suuntalava($otunnus, Array $params) {
   global $kukarow;
 
-  # Pakolliset parametrit, jos suuntalavan_tunnus on setattu tarvitaan otunnus. (p‰ivitys)
+  # Pakolliset parametrit, jos suuntalavan_tunnus on setattu tarvitaan otunnus. (p√§ivitys)
   # Uuden suuntalavan luonnissa ei otunnus ole pakollinen
   if (!empty($suuntalavan_tunnus) and empty($otunnus)) exit("Virhe: lisaa_suuntalava(), otunnus puuttuu.");
 
@@ -85,7 +85,7 @@ if (!function_exists('lisaa_suuntalava')) {
       'korkeus', 'paino', 'suuntalavan_tunnus', 'valittutunnus', 'automaattinen_paivitys'
       );
 
-  # Parametri tyhj‰ksi jos sit‰ ei ole setattu
+  # Parametri tyhj√§ksi jos sit√§ ei ole setattu
   foreach($sallitut_parametrit as $sallittu) {
     if (!isset($params[$sallittu])) $params[$sallittu] = '';
   }
@@ -97,7 +97,7 @@ if (!function_exists('lisaa_suuntalava')) {
   $paino = str_replace(",", ".", $paino);
   $korkeus = str_replace(",", ".", $korkeus);
 
-  # Jos suuntalava on annettu (p‰ivitet‰‰n)
+  # Jos suuntalava on annettu (p√§ivitet√§√§n)
   if (trim($suuntalavan_tunnus) != '') {
 
     $query = "SELECT keraysvyohyke
@@ -108,8 +108,8 @@ if (!function_exists('lisaa_suuntalava')) {
     $keraysvyohyke_chk_res = pupe_query($query);
     $keraysvyohyke_chk_row = mysql_fetch_assoc($keraysvyohyke_chk_res);
 
-    // jos vaihdetaan ker‰ysvyˆhykett‰, nollataan suuntalavat kohdistetuilta tilausriveilt‰ johon suuntalava kuuluu
-    // t‰m‰n j‰lkeen koitetaan p‰ivitt‰‰ suuntalavan tunnus uudestaan k‰ytt‰en apuna uutta valittua ker‰ysvyˆhykett‰
+    // jos vaihdetaan ker√§ysvy√∂hykett√§, nollataan suuntalavat kohdistetuilta tilausriveilt√§ johon suuntalava kuuluu
+    // t√§m√§n j√§lkeen koitetaan p√§ivitt√§√§ suuntalavan tunnus uudestaan k√§ytt√§en apuna uutta valittua ker√§ysvy√∂hykett√§
     if ($keraysvyohyke_chk_row['keraysvyohyke'] != $keraysvyohyke) {
 
       $query = "UPDATE tilausrivi SET
@@ -200,7 +200,7 @@ if (!function_exists('lisaa_suuntalava')) {
     $insert_result = pupe_query($query);
     $uusi_suuntalavan_tunnus = mysql_insert_id();
 
-    # Jos tehd‰‰n uusi lava ilman saapumista, ei tehd‰ liitosta suuntalava_saapuminen tauluun
+    # Jos tehd√§√§n uusi lava ilman saapumista, ei tehd√§ liitosta suuntalava_saapuminen tauluun
     if($otunnus != '') {
       $query = "INSERT INTO suuntalavat_saapuminen SET
                 yhtio      = '{$kukarow['yhtio']}',
@@ -214,7 +214,7 @@ if (!function_exists('lisaa_suuntalava')) {
       $insert_result = pupe_query($query);
     }
 
-    // p‰ivitet‰‰n suuntalava automaattisesti niille riveille mihin se m‰ts‰‰
+    // p√§ivitet√§√§n suuntalava automaattisesti niille riveille mihin se m√§ts√§√§
     if (trim($automaattinen_paivitys) == 'K' OR (trim($automaattinen_paivitys) == 'S' and $valittutunnus != '')) {
 
       if (trim($automaattinen_paivitys) == 'K') {
@@ -321,7 +321,7 @@ if ($tee == 'imaiserivit') {
 
   $paivmaara = mysql_affected_rows();
 
-  echo "<br><br>".t("Suuntalavaan liitettiin %s rivi‰ keikalta", "", $paivmaara)."!<br><br>";
+  echo "<br><br>".t("Suuntalavaan liitettiin %s rivi√§ keikalta", "", $paivmaara)."!<br><br>";
 
   if ($suuntalavat_ei_kayttoliittymaa == "KYLLA") {
     $tee = 'EIHALUTANAYTTAAMITAAN';
@@ -366,7 +366,7 @@ if ($tee == 'siirtovalmis') {
       }
     }
 
-    # Jos k‰sittelytapa on setattu
+    # Jos k√§sittelytapa on setattu
     $kasittelytapa_lisa = (isset($kasittelytapa) && $kasittelytapa == 'H') ? ", kasittelytapa = 'H'" : "";
 
     $query = "UPDATE suuntalavat SET
@@ -480,7 +480,7 @@ if ($tee == 'vie_koko_suuntalava') {
 
   if ($yhtiorow['varastopaikkojen_maarittely'] == 'M') {
 
-    // otetaan yksi suuntalavan tuotteen hyllyalue, jolla voidaan m‰ts‰t‰ sen mukaan uutta paikkaa suuntalavalle
+    // otetaan yksi suuntalavan tuotteen hyllyalue, jolla voidaan m√§ts√§t√§ sen mukaan uutta paikkaa suuntalavalle
     $query = "SELECT hyllyalue
               FROM tilausrivi
               WHERE yhtio     = '{$kukarow['yhtio']}'
@@ -560,7 +560,7 @@ if ($tee == 'vie_koko_suuntalava') {
       echo "<br /<br />",t("tai"),"<br /><br />";
     }
     else {
-      echo "<font class='error'>",t("Suuntalava ei mahdu varastoon"),"! ",t("Syˆt‰ suuntalavan hyllypaikka manuaalisesti"),".</font><br /><br />";
+      echo "<font class='error'>",t("Suuntalava ei mahdu varastoon"),"! ",t("Sy√∂t√§ suuntalavan hyllypaikka manuaalisesti"),".</font><br /><br />";
     }
   }
 
@@ -574,7 +574,7 @@ if ($tee == 'vie_koko_suuntalava') {
   echo "<input type='hidden' name='koko_suuntalava' value='X' />";
 
   echo "<table><tr>";
-  echo "<th>",t("Syˆt‰ suuntalavalle hyllypaikka"),"</th>";
+  echo "<th>",t("Sy√∂t√§ suuntalavalle hyllypaikka"),"</th>";
   echo "<td>",hyllyalue("suuntalavanhyllyalue", '')," <input type='text' name='suuntalavanhyllynro' size='6' maxlength='5' value='' /> <input type='text' name='suuntalavanhyllyvali' size='6' maxlength='5' value='' /> <input type='text' name='suuntalavanhyllytaso' size='6' maxlength='5' value='' /></td>";
   echo "</tr></table>";
 
@@ -639,9 +639,9 @@ if ($tee == 'uusi') {
   echo "<table>";
   echo "<tr><th colspan='2'>",t("Uusi suuntalava"),"</th></tr>";
   echo "<tr><th>SSCC-",t("koodi"),"</th>";
-  echo "<td><input type='text' name='sscc' id='sscc' value='{$sscc}' />{$virheviesti['sscc']}<br /><font class='info'>",t("SSCC-koodi t‰ytyy olla v‰hint‰‰ 7 merkki‰ pitk‰"),".</font></td></tr>";
-  echo "<tr><th>",t("Varastopaikkav‰li alku"),"</th><td>",hyllyalue("alkuhyllyalue", $alkuhyllyalue),"{$virheviesti['alkuhyllyalue']} <input type='text' name='alkuhyllynro' size='6' maxlength='5' value='{$alkuhyllynro}' />{$virheviesti['alkuhyllynro']} <input type='text' name='alkuhyllyvali' size='6' maxlength='5' value='{$alkuhyllynro}' />{$virheviesti['alkuhyllyvali']} <input type='text' name='alkuhyllytaso' size='6' maxlength='5' value='{$alkuhyllytaso}' />{$virheviesti['alkuhyllytaso']}</td></tr>";
-  echo "<tr><th>",t("Varastopaikkav‰li loppu"),"</th><td>",hyllyalue("loppuhyllyalue", $loppuhyllyalue),"{$virheviesti['loppuhyllyalue']} <input type='text' name='loppuhyllynro' size='6' maxlength='5' value='{$loppuhyllynro}' />{$virheviesti['loppuhyllynro']} <input type='text' name='loppuhyllyvali' size='6' maxlength='5' value='{$loppuhyllyvali}' />{$virheviesti['loppuhyllyvali']} <input type='text' name='loppuhyllytaso' size='6' maxlength='5' value='{$loppuhyllytaso}' />{$virheviesti['loppuhyllytaso']}</td></tr>";
+  echo "<td><input type='text' name='sscc' id='sscc' value='{$sscc}' />{$virheviesti['sscc']}<br /><font class='info'>",t("SSCC-koodi t√§ytyy olla v√§hint√§√§ 7 merkki√§ pitk√§"),".</font></td></tr>";
+  echo "<tr><th>",t("Varastopaikkav√§li alku"),"</th><td>",hyllyalue("alkuhyllyalue", $alkuhyllyalue),"{$virheviesti['alkuhyllyalue']} <input type='text' name='alkuhyllynro' size='6' maxlength='5' value='{$alkuhyllynro}' />{$virheviesti['alkuhyllynro']} <input type='text' name='alkuhyllyvali' size='6' maxlength='5' value='{$alkuhyllynro}' />{$virheviesti['alkuhyllyvali']} <input type='text' name='alkuhyllytaso' size='6' maxlength='5' value='{$alkuhyllytaso}' />{$virheviesti['alkuhyllytaso']}</td></tr>";
+  echo "<tr><th>",t("Varastopaikkav√§li loppu"),"</th><td>",hyllyalue("loppuhyllyalue", $loppuhyllyalue),"{$virheviesti['loppuhyllyalue']} <input type='text' name='loppuhyllynro' size='6' maxlength='5' value='{$loppuhyllynro}' />{$virheviesti['loppuhyllynro']} <input type='text' name='loppuhyllyvali' size='6' maxlength='5' value='{$loppuhyllyvali}' />{$virheviesti['loppuhyllyvali']} <input type='text' name='loppuhyllytaso' size='6' maxlength='5' value='{$loppuhyllytaso}' />{$virheviesti['loppuhyllytaso']}</td></tr>";
 
   $query = "SELECT *
             FROM pakkaus
@@ -659,7 +659,7 @@ if ($tee == 'uusi') {
 
   echo "</select>{$virheviesti['tyyppi']}</td></tr>";
 
-  echo "<tr><th>",t("Ker‰ysvyˆhyke"),"</th>";
+  echo "<tr><th>",t("Ker√§ysvy√∂hyke"),"</th>";
   echo "<td><select name='keraysvyohyke'><option value=''>",t("Valitse"),"</option>";
 
   $query = "SELECT tunnus, nimitys FROM keraysvyohyke WHERE yhtio = '{$kukarow['yhtio']}' AND nimitys != ''";
@@ -676,7 +676,7 @@ if ($tee == 'uusi') {
   $sel_y = $kaytettavyys == 'Y' ? ' selected' : '';
   $sel_l = $kaytettavyys == 'L' ? ' selected' : '';
 
-  echo "<tr><th>",t("K‰ytett‰vyys"),"</th>";
+  echo "<tr><th>",t("K√§ytett√§vyys"),"</th>";
   echo "<td><select name='kaytettavyys'>";
   // echo "<option value=''>",t("Valitse"),"</option>";
   echo "<option value='Y'{$sel_y}>",t("Yksityinen"),"</option>";
@@ -703,7 +703,7 @@ if ($tee == 'uusi') {
     $sel_sp = "";
   }
 
-  echo "<tr><th>".t("Sallitaanko suuntalavalle useilta %s erivyˆhykkeilt‰ tuotteita",$kieli,'<br>')."</th>";
+  echo "<tr><th>".t("Sallitaanko suuntalavalle useilta %s erivy√∂hykkeilt√§ tuotteita",$kieli,'<br>')."</th>";
   echo "<td><select name='usea_keraysvyohyke'>";
   echo "<option value='' $sel_sp>".t("Ei Sallita")."</option>";
   echo "<option value='K' $sel_sp>".t("Sallitaan")."</option>";
@@ -711,17 +711,17 @@ if ($tee == 'uusi') {
   echo "</td></tr>";
 
   echo "<tr><th>",t("Korkeus"),"</th><td><input type='text' name='korkeus' value='{$korkeus}' />{$virheviesti['korkeus']}</td></tr>";
-  echo "<tr><th>",t("Paino"),"</th><td><input type='text' name='paino' value='{$paino}' />{$virheviesti['paino']}<br/><font class='info'>",t("Paino lasketaan automaattisesti tuotteiden takaa, jos paino j‰tet‰‰n nollaksi"),".</font></td></tr>";
+  echo "<tr><th>",t("Paino"),"</th><td><input type='text' name='paino' value='{$paino}' />{$virheviesti['paino']}<br/><font class='info'>",t("Paino lasketaan automaattisesti tuotteiden takaa, jos paino j√§tet√§√§n nollaksi"),".</font></td></tr>";
 
-  echo "<tr><th>",t("Automaattinen p‰ivitys"),"</th>";
+  echo "<tr><th>",t("Automaattinen p√§ivitys"),"</th>";
   echo "<td><select name='automaattinen_paivitys'>";
   echo "<option value=''>",t("Ei"),"</option>";
-  echo "<option value='K'>",t("Kyll‰"),"</option>";
+  echo "<option value='K'>",t("Kyll√§"),"</option>";
   echo "</select>";
-  echo "<br/><font class='info'>",t("P‰ivitet‰‰n suuntalava automaattisesti niille riveille mihin se kohdistuu"),".</font>";
+  echo "<br/><font class='info'>",t("P√§ivitet√§√§n suuntalava automaattisesti niille riveille mihin se kohdistuu"),".</font>";
   echo "</td></tr>";
 
-  echo "<tr><td class='back' colspan='2'><input type='submit' value='",t("Lis‰‰ suuntalava"),"' /></td></tr>";
+  echo "<tr><td class='back' colspan='2'><input type='submit' value='",t("Lis√§√§ suuntalava"),"' /></td></tr>";
   echo "</table>";
   echo "</form>";
 
@@ -829,10 +829,10 @@ if ($tee == '') {
 
   echo "<table>";
   echo "<tr><th>SSCC-",t("koodi"),"</th>";
-  echo "<th>",t("Varastopaikkav‰li"),"</th>";
+  echo "<th>",t("Varastopaikkav√§li"),"</th>";
   echo "<th>",t("Tyyppi"),"</th>";
-  echo "<th>",t("Ker‰ysvyohyke"),"</th>";
-  echo "<th>",t("K‰ytettavyys"),"</th>";
+  echo "<th>",t("Ker√§ysvyohyke"),"</th>";
+  echo "<th>",t("K√§ytettavyys"),"</th>";
   echo "<th>",t("Terminaalialue"),"</th>";
   echo "<th>",t("Korkeus"),"</th>";
   echo "<th>",t("Paino"),"</th>";
@@ -896,7 +896,7 @@ if ($tee == '') {
     if ($suuntalavat_row['tila'] != '') {
       if ($suuntalavat_row['tila'] == 'S') {
 
-        # Jos lavan k‰sittelytapa on suoraan hyllyyn, disabloidaan vie varastoon nappi
+        # Jos lavan k√§sittelytapa on suoraan hyllyyn, disabloidaan vie varastoon nappi
         $disabled = ($suuntalavat_row['kasittelytapa'] == 'H') ? "style='color: #888;' disabled" : "";
 
         echo "<font class='ok'>",t("Siirtovalmis"),"!</font><br />";
@@ -964,7 +964,7 @@ if ($tee == '') {
           echo "<input type='hidden' name='ytunnus' value='{$laskurow['ytunnus']}'>";
           echo "<input type='hidden' name='tee' value='peruutettu' />";
           echo "<input type='hidden' name='suuntalavan_tunnus' value='{$suuntalavat_row['tunnus']}' />";
-          echo "<input type='submit' value='",t("Peruuta / Tyhjenn‰ suuntalava"),"' />";
+          echo "<input type='submit' value='",t("Peruuta / Tyhjenn√§ suuntalava"),"' />";
           echo "</form>";
         }
 
@@ -975,7 +975,7 @@ if ($tee == '') {
         echo "<input type='hidden' name='ytunnus' value='{$laskurow['ytunnus']}'>";
         echo "<input type='hidden' name='tee' value='imaiserivit' />";
         echo "<input type='hidden' name='suuntalavan_tunnus' value='{$suuntalavat_row['tunnus']}' />";
-        echo "<input type='submit' value='",t("Liit‰ kaikki suuntalavattomat rivit t‰h‰n suuntalavaan"),"' />";
+        echo "<input type='submit' value='",t("Liit√§ kaikki suuntalavattomat rivit t√§h√§n suuntalavaan"),"' />";
         echo "</form>";
       }
       elseif ($suuntalavat_row['tila'] == 'P') {
@@ -1011,7 +1011,7 @@ if ($tee == '') {
       echo "<input type='hidden' name='ytunnus' value='{$laskurow['ytunnus']}'>";
       echo "<input type='hidden' name='tee' value='imaiserivit' />";
       echo "<input type='hidden' name='suuntalavan_tunnus' value='{$suuntalavat_row['tunnus']}' />";
-      echo "<input type='submit' value='",t("Liit‰ kaikki suuntalavattomat rivit t‰h‰n suuntalavaan"),"' />";
+      echo "<input type='submit' value='",t("Liit√§ kaikki suuntalavattomat rivit t√§h√§n suuntalavaan"),"' />";
       echo "</form>";
     }
 

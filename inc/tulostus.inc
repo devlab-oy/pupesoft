@@ -9,5 +9,5 @@ sprintf('%-8s', '').sprintf('%-31s', $row[2])  .sprintf('%-10s', '').sprintf('%-
 sprintf('%-8s', '').sprintf('%-31s', $row[3])  .sprintf('%-10s', '').sprintf('%-31s', $row[8])."\n".
 sprintf('%-8s', '').sprintf('%-31s', $row[4])  .sprintf('%-10s', '').sprintf('%-31s', $row[9])."\n\n".
 sprintf('%-13s', 'Maksuehto:')  .sprintf('%-26s', $row[10])  .sprintf('%-15s', 'Toimtapa:')    .sprintf('%-26s', $row[11])."\n".
-sprintf('%-13s', 'ALV:')        .sprintf('%-26s', $row[12])  .sprintf('%-15s', 'Myyj‰:')       .sprintf('%-26s', $row[13])."\n";
+sprintf('%-13s', 'ALV:')        .sprintf('%-26s', $row[12])  .sprintf('%-15s', 'Myyj√§:')       .sprintf('%-26s', $row[13])."\n";
 $rivi = $rivi + 13;

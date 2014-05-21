@@ -1,10 +1,10 @@
 <?php
 
 $ulos = "";
-$jatko = 1; // oletetaan normaali k‰sittely
-$tyyppi = 1; // oletetaan rivin n‰kyvyys
+$jatko = 1; // oletetaan normaali k√§sittely
+$tyyppi = 1; // oletetaan rivin n√§kyvyys
 
-if ($i == 0) { //yhtiˆt‰ ei n‰ytet‰
+if ($i == 0) { //yhti√∂t√§ ei n√§ytet√§
   $tyyppi = 0;
 }
 
@@ -47,7 +47,7 @@ if (mysql_field_name($result, $i) == "ryhma") {
   $sresult = mysql_query($query) or pupe_error($query);
 
   $ulos = "<td><select id='ryhma' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
-  $ulos .= "<option value = ''>".t("Ei ryhm‰‰")."</option>";
+  $ulos .= "<option value = ''>".t("Ei ryhm√§√§")."</option>";
 
   while ($srow = mysql_fetch_array($sresult)) {
     $sel = '';
@@ -58,7 +58,7 @@ if (mysql_field_name($result, $i) == "ryhma") {
   }
 
   $ulos .= "</select>\n";
-  $ulos .= " <a href='#' onclick=\"js_open_yllapito('ryhma','toim=perusalennus');\"><img src='pics/lullacons/add.png'>".t("Uusi ryhm‰")."</a></td>\n";
+  $ulos .= " <a href='#' onclick=\"js_open_yllapito('ryhma','toim=perusalennus');\"><img src='pics/lullacons/add.png'>".t("Uusi ryhm√§")."</a></td>\n";
   $jatko = 0;
 }
 
@@ -67,7 +67,7 @@ if (mysql_field_name($result, $i) == "ytunnus" and isset($alasveto[$i])) {
   $jatko = 0;
 }
 elseif (mysql_field_name($result, $i) == "ytunnus") {
-  // Ei maxlength:i‰ koska silloin hakutoiminto ei v‰ltt‰m‰tt‰ toimi
+  // Ei maxlength:i√§ koska silloin hakutoiminto ei v√§ltt√§m√§tt√§ toimi
   $ulos = "<td nowrap><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size'></td>";
   $jatko = 0;
 }
@@ -91,7 +91,7 @@ elseif (mysql_field_name($result, $i) == "toimittaja") {
   else {
     if ($trow[$i] == 0) $trow[$i] = "";
 
-    // Ei maxlength:i‰ koska silloin hakutoiminto ei v‰ltt‰m‰tt‰ toimi
+    // Ei maxlength:i√§ koska silloin hakutoiminto ei v√§ltt√§m√§tt√§ toimi
     $ulos = "<td nowrap><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size'></td>";
     $jatko = 0;
   }

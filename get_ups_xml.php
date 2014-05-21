@@ -1,8 +1,8 @@
 <?php
 
-// Kutsutaanko CLI:stä
+// Kutsutaanko CLI:stÃ¤
 if (php_sapi_name() != 'cli') {
-  die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+  die ("TÃ¤tÃ¤ scriptiÃ¤ voi ajaa vain komentoriviltÃ¤!");
 }
 
 date_default_timezone_set('Europe/Helsinki');
@@ -44,14 +44,14 @@ foreach ($ups_path as $ups_key => $ups_val) {
       $files = @ftp_nlist($conn_id, "*.Out");
     }
 
-    // joe epäonnistu, haetaaan filet passive modella
+    // joe epÃ¤onnistu, haetaaan filet passive modella
     if (!$files_xxx) {
       ftp_pasv($conn_id, true);
       $files_xxx = ftp_nlist($conn_id, "*.xxx");
       $files = ftp_nlist($conn_id, "*.Out");
     }
 
-    // dellataan löydetyt *.xxx filet
+    // dellataan lÃ¶ydetyt *.xxx filet
     if ($files_xxx) {
       foreach ($files_xxx as $file) {
         ftp_delete($conn_id, $file);
@@ -59,7 +59,7 @@ foreach ($ups_path as $ups_key => $ups_val) {
       }
     }
 
-    // käydään läpi kaikki *.out filet
+    // kÃ¤ydÃ¤Ã¤n lÃ¤pi kaikki *.out filet
     if ($files) {
 
       foreach ($files as $file) {
@@ -120,7 +120,7 @@ foreach ($ups_path as $ups_key => $ups_val) {
         }
       }
 
-      echo date("d.m.Y @ G:i:s").": Päivitettiin $ups_lisattuja rahtikirjanumeroa. Dellattiin $ups_dellattuja tiedostoa.\n";
+      echo date("d.m.Y @ G:i:s").": PÃ¤ivitettiin $ups_lisattuja rahtikirjanumeroa. Dellattiin $ups_dellattuja tiedostoa.\n";
     }
 
     if ($conn_id) {

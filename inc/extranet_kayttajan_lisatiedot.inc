@@ -1,5 +1,5 @@
 <?php
-$otsikko = 'Extranet-käyttäjän ulkoiset tunnukset';
+$otsikko = 'Extranet-kÃ¤yttÃ¤jÃ¤n ulkoiset tunnukset';
 $otsikko_nappi = 'ulkoinen tunnus';
 
 $kentat = 'tunnus, laji, selite, selitetark, liitostunnus';

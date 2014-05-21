@@ -35,7 +35,7 @@ if (isset($tee) and $tee == "pupevoice_siirto") {
 
 if (isset($tee) and $tee == "apix_siirto") {
 
-  // Splitataan file ja l‰hetet‰‰n laskut sopivissa osissa
+  // Splitataan file ja l√§hetet√§√§n laskut sopivissa osissa
   $apix_laskuarray = explode("<?xml version=\"1.0\"", file_get_contents("/tmp/".$filenimi));
   $apix_laskumaara = count($apix_laskuarray);
   $apix_laskut_20l = array();
@@ -46,13 +46,13 @@ if (isset($tee) and $tee == "apix_siirto") {
     for ($a = 1; $a < $apix_laskumaara; $a++) {
       preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $apix_laskuarray[$a], $invoice_number);
 
-      // Laitetaan 20 laskua arrayseen ja l‰hetet‰‰n ne...
+      // Laitetaan 20 laskua arrayseen ja l√§hetet√§√§n ne...
       $apix_laskut_20l[$invoice_number[1]] = "<?xml version=\"1.0\"".$apix_laskuarray[$a];
 
       if (count($apix_laskut_20l) == 20 or $a == ($apix_laskumaara-1)) {
         echo apix_invoice_put_file($apix_laskut_20l, $kieli);
 
-        // Nollataan t‰m‰
+        // Nollataan t√§m√§
         $apix_laskut_20l = array();
       }
     }
@@ -60,7 +60,7 @@ if (isset($tee) and $tee == "apix_siirto") {
 }
 
 if (isset($tee) and $tee == 'maventa_siirto') {
-  // T‰ytet‰‰n api_keys, n‰ill‰ kirjaudutaan Maventaan
+  // T√§ytet√§√§n api_keys, n√§ill√§ kirjaudutaan Maventaan
   $api_keys = array();
   $api_keys["user_api_key"]   = $yhtiorow['maventa_api_avain'];
   $api_keys["vendor_api_key"] = $yhtiorow['maventa_ohjelmisto_api_avain'];
@@ -79,10 +79,10 @@ if (isset($tee) and $tee == 'maventa_siirto') {
   }
   catch (Exception $exVirhe) {
     $client = FALSE;
-    echo "VIRHE: Yhteys Maventaan ep‰onnistui: ",  $exVirhe->getMessage(), "\n";
+    echo "VIRHE: Yhteys Maventaan ep√§onnistui: ",  $exVirhe->getMessage(), "\n";
   }
 
-  // Splitataan file ja l‰hetet‰‰n laskut sopivissa osissa
+  // Splitataan file ja l√§hetet√§√§n laskut sopivissa osissa
   $maventa_laskuarray = explode("<SOAP-ENV:Envelope", file_get_contents("{$pupe_root_polku}/dataout/".basename($filenimi)));
   $maventa_laskumaara = count($maventa_laskuarray);
 
@@ -131,12 +131,12 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
 
   if (!function_exists("vlas_dateconv")) {
     function vlas_dateconv ($date) {
-      //k‰‰nt‰‰ mysqln vvvv-kk-mm muodon muotoon vvvvkkmm
+      //k√§√§nt√§√§ mysqln vvvv-kk-mm muodon muotoon vvvvkkmm
       return substr($date,0,4).substr($date,5,2).substr($date,8,2);
     }
   }
 
-  //tehd‰‰n viitteest‰ SPY standardia eli 20 merkki‰ etunollilla
+  //tehd√§√§n viitteest√§ SPY standardia eli 20 merkki√§ etunollilla
   if (!function_exists("spyconv")) {
     function spyconv ($spy) {
       return $spy = sprintf("%020.020s",$spy);
@@ -163,10 +163,10 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
   }
 
   //Tiedostojen polut ja nimet
-  //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+  //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
   $nimixml = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".xml";
 
-  //  Itellan iPost vaatii siirtoon v‰h‰n oman nimen..
+  //  Itellan iPost vaatii siirtoon v√§h√§n oman nimen..
   if ($yhtiorow["verkkolasku_lah"] == "iPost") {
     $nimiipost = "-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
     $nimifinvoice = "$pupe_root_polku/dataout/TRANSFER_IPOST".$nimiipost;
@@ -184,16 +184,16 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
   $nimiedi = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".edi";
 
   //Pupevoice xml-dataa
-  if (!$tootxml = fopen($nimixml, "w")) die("Filen $nimixml luonti ep‰onnistui!");
+  if (!$tootxml = fopen($nimixml, "w")) die("Filen $nimixml luonti ep√§onnistui!");
 
   //Finvoice xml-dataa
-  if (!$tootfinvoice = fopen($nimifinvoice, "w")) die("Filen $nimifinvoice luonti ep‰onnistui!");
+  if (!$tootfinvoice = fopen($nimifinvoice, "w")) die("Filen $nimifinvoice luonti ep√§onnistui!");
 
   //Elma-EDI-inhouse dataa (EIH-1.4.0)
-  if (!$tootedi = fopen($nimiedi, "w")) die("Filen $nimiedi luonti ep‰onnistui!");
+  if (!$tootedi = fopen($nimiedi, "w")) die("Filen $nimiedi luonti ep√§onnistui!");
 
-  //Sis‰inenfinvoice xml-dataa
-  if (!$tootsisainenfinvoice = fopen($nimisisainenfinvoice, "w")) die("Filen $nimisisainenfinvoice luonti ep‰onnistui!");
+  //Sis√§inenfinvoice xml-dataa
+  if (!$tootsisainenfinvoice = fopen($nimisisainenfinvoice, "w")) die("Filen $nimisisainenfinvoice luonti ep√§onnistui!");
 
   //Haetaan tarvittavat funktiot aineistojen tekoa varten
   require("verkkolasku_elmaedi.inc");
@@ -219,8 +219,8 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
   $lkm = count(explode(',', $laskunumerot));
 
   if (!isset($tee) or $tee != "NAYTATILAUS") {
-    echo "<br><font class='message'>".t("Syˆtit")." $lkm ".t("laskua").".</font><br>";
-    echo "<font class='message'>".t("Aineistoon lis‰t‰‰n")." ".mysql_num_rows($res)." ".t("laskua").".</font><br><br>";
+    echo "<br><font class='message'>".t("Sy√∂tit")." $lkm ".t("laskua").".</font><br>";
+    echo "<font class='message'>".t("Aineistoon lis√§t√§√§n")." ".mysql_num_rows($res)." ".t("laskua").".</font><br><br>";
   }
 
   while ($lasrow = mysql_fetch_assoc($res)) {
@@ -235,7 +235,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       $masrow = array();
 
       if ($lasrow["erpcm"] == "0000-00-00") {
-        echo "<font class='message'><br>\n".t("Maksuehtoa")." $lasrow[maksuehto] ".t("ei lˆydy!")." Tunnus $lasrow[tunnus] ".t("Laskunumero")." $lasrow[laskunro] ".t("ep‰onnistui pahasti")."!</font><br>\n<br>\n";
+        echo "<font class='message'><br>\n".t("Maksuehtoa")." $lasrow[maksuehto] ".t("ei l√∂ydy!")." Tunnus $lasrow[tunnus] ".t("Laskunumero")." $lasrow[laskunro] ".t("ep√§onnistui pahasti")."!</font><br>\n<br>\n";
       }
     }
     else {
@@ -333,15 +333,15 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       $laskun_kieli = trim(strtoupper($kieli));
     }
 
-    // t‰ss‰ pohditaan laitetaanko verkkolaskuputkeen
+    // t√§ss√§ pohditaan laitetaanko verkkolaskuputkeen
     if (verkkolaskuputkeen($lasrow, $masrow)) {
 
-      // Nyt meill‰ on:
+      // Nyt meill√§ on:
       // $lasrow array on U-laskun tiedot
       // $yhtiorow array on yhtion tiedot
       // $masrow array maksuehdon tiedot
 
-      // Etsit‰‰n myyj‰n nimi
+      // Etsit√§√§n myyj√§n nimi
       $mquery  = "SELECT nimi, puhno, eposti
                   FROM kuka
                   WHERE tunnus = '$lasrow[myyja]'
@@ -349,7 +349,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       $myyresult = mysql_query($mquery) or pupe_error($mquery);
       $myyrow = mysql_fetch_assoc($myyresult);
 
-      //HUOM: T‰ss‰ kaikki sallitut verkkopuolen chn:‰t
+      //HUOM: T√§ss√§ kaikki sallitut verkkopuolen chn:√§t
       if (!in_array($lasrow['chn'], array("100", "010", "001", "020", "111", "112"))) {
         //Paperi by default
         $lasrow['chn'] = "100";
@@ -369,10 +369,10 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       }
 
       // Laskukohtaiset kommentit kuntoon
-      // T‰m‰ merkki | eli pystyviiva on rivinvaihdon merkki laskun kommentissa elmalla
+      // T√§m√§ merkki | eli pystyviiva on rivinvaihdon merkki laskun kommentissa elmalla
       $komm = "";
 
-      // Onko k‰‰nteist‰ verotusta
+      // Onko k√§√§nteist√§ verotusta
       $alvquery = "SELECT tunnus
                    FROM tilausrivi
                    WHERE yhtio     = '$kukarow[yhtio]'
@@ -405,7 +405,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
         $lasrow['sisviesti1'] = str_replace(array("\r\n","\r","\n"),"|", trim($komm));
       }
 
-      // Hoidetaan pyˆristys sek‰ valuuttak‰sittely
+      // Hoidetaan py√∂ristys sek√§ valuuttak√§sittely
       if ($lasrow["valkoodi"] != '' and trim(strtoupper($lasrow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
         $lasrow["kasumma"]    = $lasrow["kasumma_valuutassa"];
         $lasrow["summa"]    = $lasrow["summa_valuutassa"];
@@ -419,7 +419,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       }
 
       if (strtoupper($laskun_kieli) != strtoupper($yhtiorow['kieli'])) {
-        //K‰‰nnet‰‰n maksuehto
+        //K√§√§nnet√§√§n maksuehto
         $masrow["teksti"] = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $laskun_kieli);
       }
 
@@ -528,9 +528,9 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
         $order_sorttaus = $yhtiorow["laskun_jarjestys_suunta"];
       }
 
-      // Asiakkaan / yhtiˆn laskutyyppi
+      // Asiakkaan / yhti√∂n laskutyyppi
       if ($lasrow['laskutyyppi'] == -9 or $lasrow['laskutyyppi'] == 0) {
-        //jos laskulta lˆytyv‰t laskutyyppi on Oletus k‰ytet‰‰n asiakkaan tai yhtiˆn oletus laskutyyppi‰
+        //jos laskulta l√∂ytyv√§t laskutyyppi on Oletus k√§ytet√§√§n asiakkaan tai yhti√∂n oletus laskutyyppi√§
         if (isset($asiakas_apu_row['laskutyyppi']) and $asiakas_apu_row['laskutyyppi'] != -9) {
           $laskutyyppi = $asiakas_apu_row['laskutyyppi'];
         }
@@ -569,7 +569,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
                 lasku.viesti laskuviesti,
                 lasku.asiakkaan_tilausnumero,
                 lasku.luontiaika tilauspaiva,
-                if (tuote.tuotetyyppi = 'K','2 Tyˆt','1 Muut') tuotetyyppi,
+                if (tuote.tuotetyyppi = 'K','2 Ty√∂t','1 Muut') tuotetyyppi,
                 if (tilausrivi.var2 = 'EIOST', 'EIOST', '') var2,
                 if (tuote.myyntihinta_maara = 0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
                 min(tilausrivi.hyllyalue) hyllyalue,
@@ -611,12 +611,12 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
 
       while ($tilrow = mysql_fetch_assoc($tilres)) {
 
-        // N‰ytet‰‰n vain perheen is‰ ja summataan lasten hinnat is‰riville
+        // N√§ytet√§√§n vain perheen is√§ ja summataan lasten hinnat is√§riville
         if ($laskutyyppi == 2 or $laskutyyppi == 12) {
           if ($tilrow["perheid"] > 0) {
-            // kyseess‰ on is‰
+            // kyseess√§ on is√§
             if ($tilrow["perheid"] == $tilrow["tunnus"]) {
-              // lasketaan is‰tuotteen riville lapsien hinnat yhteen
+              // lasketaan is√§tuotteen riville lapsien hinnat yhteen
               $query = "SELECT
                         sum(tilausrivi.rivihinta) rivihinta,
                         round(sum(tilausrivi.rivihinta) / $tilrow[kpl], '$yhtiorow[hintapyoristys]') hinta,
@@ -643,7 +643,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
               $tilrow["erikoisale"] = "";
             }
             else {
-              // lapsia ei lis‰t‰
+              // lapsia ei lis√§t√§
               continue;
             }
           }
@@ -651,7 +651,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
 
 
         if (strtolower($laskun_kieli) != strtolower($yhtiorow['kieli'])) {
-          //K‰‰nnet‰‰n nimitys
+          //K√§√§nnet√§√§n nimitys
           $tilrow['nimitys'] = t_tuotteen_avainsanat($tilrow, 'nimitys', $laskun_kieli);
         }
 
@@ -670,15 +670,15 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
           $rivigrouppaus = TRUE;
         }
 
-        // Otetaan yhteens‰kommentti pois jos summataan rivej‰
+        // Otetaan yhteens√§kommentti pois jos summataan rivej√§
         if ($rivigrouppaus) {
-          $tilrow["kommentti"] = preg_replace("/ ".t("yhteens‰", $kieli).": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
-          $tilrow["kommentti"] = preg_replace("/ ".t("yhteens‰", $asiakas_apu_row["kieli"]).": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
-          $tilrow["kommentti"] = preg_replace("/ ".t("yhteens‰").": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
-          $tilrow["kommentti"] = preg_replace("/ "."yhteens‰".": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
+          $tilrow["kommentti"] = preg_replace("/ ".t("yhteens√§", $kieli).": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
+          $tilrow["kommentti"] = preg_replace("/ ".t("yhteens√§", $asiakas_apu_row["kieli"]).": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
+          $tilrow["kommentti"] = preg_replace("/ ".t("yhteens√§").": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
+          $tilrow["kommentti"] = preg_replace("/ "."yhteens√§".": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
         }
 
-        // Laitetaan alennukset kommenttiin, koska laskulla on vain yksi alekentt‰
+        // Laitetaan alennukset kommenttiin, koska laskulla on vain yksi alekentt√§
         if ($yhtiorow['myynnin_alekentat'] > 1 or $tilrow['erikoisale'] > 0)  {
 
           $alekomm = "";
@@ -696,14 +696,14 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
           $tilrow["kommentti"] = $alekomm.$tilrow["kommentti"];
         }
 
-        //K‰‰nteinen arvonlis‰verovelvollisuus ja K‰ytetyn tavaran myynti
+        //K√§√§nteinen arvonlis√§verovelvollisuus ja K√§ytetyn tavaran myynti
         if ($tilrow["alv"] >= 600) {
           $tilrow["alv"] = 0;
-          $tilrow["kommentti"] .= " Ei lis‰tty‰ arvonlis‰veroa, ostajan k‰‰nnetty verovelvollisuus.";
+          $tilrow["kommentti"] .= " Ei lis√§tty√§ arvonlis√§veroa, ostajan k√§√§nnetty verovelvollisuus.";
         }
         elseif ($tilrow["alv"] >= 500) {
           $tilrow["alv"] = 0;
-          $tilrow["kommentti"] .= " Ei sis‰ll‰ v‰hennett‰v‰‰ veroa.";
+          $tilrow["kommentti"] .= " Ei sis√§ll√§ v√§hennett√§v√§√§ veroa.";
         }
 
         //Hetaan sarjanumeron tiedot
@@ -754,26 +754,26 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
           // Veroton rivihinta valuutassa
           $tilrow["rivihinta"] = $tilrow["rivihinta_valuutassa"];
 
-          // Yksikkˆhinta valuutassa
+          // Yksikk√∂hinta valuutassa
           $tilrow["hinta"] = laskuval($tilrow["hinta"], $tilrow["vienti_kurssi"]);
         }
 
-        // Yksikkˆhinta on laskulla aina veroton
+        // Yksikk√∂hinta on laskulla aina veroton
         if ($yhtiorow["alv_kasittely"] == '') {
           $tilrow["hinta"] = $tilrow["hinta"] / (1 + $tilrow["alv"] / 100);
         }
 
-        // Veron m‰‰r‰
+        // Veron m√§√§r√§
         $vatamount = $tilrow['rivihinta'] * $tilrow['alv'] / 100;
 
-        // Pyˆristet‰‰n ja formatoidaan lopuksi
+        // Py√∂ristet√§√§n ja formatoidaan lopuksi
         $tilrow["hinta"]          = hintapyoristys($tilrow["hinta"]);
         $tilrow["rivihinta"]       = hintapyoristys($tilrow["rivihinta"]);
         $tilrow["rivihinta_verollinen"]  = hintapyoristys($tilrow["rivihinta_verollinen"]);
         $vatamount              = hintapyoristys($vatamount);
 
-        $tilrow['kommentti'] = preg_replace("/[^A-Za-z0-9÷ˆƒ‰≈Â‹¸ ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $tilrow['kommentti']);
-        $tilrow['nimitys']    = preg_replace("/[^A-Za-z0-9÷ˆƒ‰≈Â‹¸ ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $tilrow['nimitys']);
+        $tilrow['kommentti'] = preg_replace("/[^A-Za-z0-9√ñ√∂√Ñ√§√Ö√•√ú√º ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $tilrow['kommentti']);
+        $tilrow['nimitys']    = preg_replace("/[^A-Za-z0-9√ñ√∂√Ñ√§√Ö√•√ú√º ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $tilrow['nimitys']);
 
         // Otetaan seuraavan rivin otunnus
         if ($rivilaskuri < $rivimaara) {
@@ -838,15 +838,15 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       $lask++;
     }
     else {
-      echo "\n".t("T‰m‰ lasku ei mene verkkolaskuoperaattorille")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
+      echo "\n".t("T√§m√§ lasku ei mene verkkolaskuoperaattorille")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
     }
   }
 
-  //Aineistojen lopput‰git
+  //Aineistojen lopput√§git
   elmaedi_aineisto_loppu($tootedi, $timestamppi);
   pupevoice_aineisto_loppu($tootxml);
 
-  //  Tulostetaan virheet jos niit‰ oli
+  //  Tulostetaan virheet jos niit√§ oli
   echo $tulos_ulos;
 
   // suljetaan faili
@@ -855,7 +855,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
   fclose($tootfinvoice);
   fclose($tootsisainenfinvoice);
 
-  //dellataan failit jos ne on tyhji‰
+  //dellataan failit jos ne on tyhji√§
   if (filesize($nimixml) == 0) {
     unlink($nimixml);
   }
@@ -890,7 +890,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       $ftppath = (isset($verkkopath_lah) and trim($verkkopath_lah) != '') ? $verkkopath_lah : "out/einvoice/data/";
       $ftpfile = realpath($nimixml);
 
-      // t‰t‰ ei ajata eik‰ k‰ytet‰, mutta jos tulee ftp errori niin echotaan t‰‰ meiliin, niin ei tartte k‰sin kirjotella resendi‰
+      // t√§t√§ ei ajata eik√§ k√§ytet√§, mutta jos tulee ftp errori niin echotaan t√§√§ meiliin, niin ei tartte k√§sin kirjotella resendi√§
       echo "<pre>ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile</pre>";
 
       echo "<table>";
@@ -903,11 +903,11 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       echo "</table><br><br>";
 
       echo "<table>";
-      echo "<tr><th>".t("L‰het‰ pupevoice-aineisto uudestaan Itellaan").":</th>";
+      echo "<tr><th>".t("L√§het√§ pupevoice-aineisto uudestaan Itellaan").":</th>";
       echo "<form method='post'>";
       echo "<input type='hidden' name='tee' value='pupevoice_siirto'>";
       echo "<input type='hidden' name='filenimi' value='".basename($nimixml)."'>";
-      echo "<td class='back'><input type='submit' value='".t("L‰het‰")."'></td></tr></form>";
+      echo "<td class='back'><input type='submit' value='".t("L√§het√§")."'></td></tr></form>";
       echo "</table>";
     }
     elseif ($yhtiorow["verkkolasku_lah"] == "finvoice" and file_exists(realpath($nimifinvoice))) {
@@ -919,7 +919,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       $ftpfile = realpath($nimifinvoice);
       $renameftpfile = $nimifinvoice_delivered;
 
-      // t‰t‰ ei ajata eik‰ k‰ytet‰, mutta jos tulee ftp errori niin echotaan t‰‰ meiliin, niin ei tartte k‰sin kirjotella resendi‰
+      // t√§t√§ ei ajata eik√§ k√§ytet√§, mutta jos tulee ftp errori niin echotaan t√§√§ meiliin, niin ei tartte k√§sin kirjotella resendi√§
       echo "<pre>mv $ftpfile ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile)."\nncftpput -u $ftpuser -p $ftppass -T T $ftphost $ftppath ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile)."</pre>";
 
       echo "<table>";
@@ -937,7 +937,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       $apixfinvoice  = basename($nimifinvoice);
       $apixzipfile  = "Apix_".$yhtiorow['yhtio']."_invoices_$timestamp.zip";
 
-      // Luodaan temppidirikka jonne tyˆnnet‰‰n t‰n kiekan kaikki apixfilet
+      // Luodaan temppidirikka jonne ty√∂nnet√§√§n t√§n kiekan kaikki apixfilet
       list($usec, $sec) = explode(' ', microtime());
       mt_srand((float) $sec + ((float) $usec * 100000));
       $apix_tmpdirnimi = "/tmp/apix-".md5(uniqid(mt_rand(), true));
@@ -949,17 +949,17 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
           echo "APIX finvoicemove $apixfinvoice feilas!";
         }
 
-        // Luodaan laskupdf:‰t
+        // Luodaan laskupdf:√§t
         foreach ($tulostettavat_apix as $apixlasku) {
           $apixtmpfile = tulosta_lasku("LASKU:".$apixlasku, $kieli, "VERKKOLASKU_APIX", "", "", "", "");
 
-          // Siirret‰‰n faili apixtemppiin
+          // Siirret√§√§n faili apixtemppiin
           if (!rename($apixtmpfile, $apix_tmpdirnimi."/Apix_invoice_$apixlasku.pdf")) {
             echo "APIX tmpmove Apix_invoice_$apixlasku.pdf feilas!";
           }
         }
 
-        // Tehd‰‰n apixzippi
+        // Tehd√§√§n apixzippi
         exec("cd $apix_tmpdirnimi; zip $apixzipfile *;");
 
         // Aineisto dataouttiin
@@ -978,11 +978,11 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
         echo "</table><br><br>";
 
         echo "<table>";
-        echo "<tr><th>".t("L‰het‰ aineisto uudestaan APIX:lle").":</th>";
+        echo "<tr><th>".t("L√§het√§ aineisto uudestaan APIX:lle").":</th>";
         echo "<form method='post'>";
         echo "<input type='hidden' name='tee' value='apix_siirto'>";
         echo "<input type='hidden' name='filenimi' value='".basename($nimifinvoice)."'>";
-        echo "<td class='back'><input type='submit' value='".t("L‰het‰")."'></td></tr></form>";
+        echo "<td class='back'><input type='submit' value='".t("L√§het√§")."'></td></tr></form>";
         echo "</table>";
       }
       else {
@@ -990,7 +990,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       }
     }
     elseif ($yhtiorow["verkkolasku_lah"] == "maventa" and file_exists(realpath($nimifinvoice))) {
-      // T‰ytet‰‰n api_keys, n‰ill‰ kirjaudutaan Maventaan
+      // T√§ytet√§√§n api_keys, n√§ill√§ kirjaudutaan Maventaan
       $virhe = 0;
       $api_keys = array();
       $api_keys["user_api_key"]   = $yhtiorow['maventa_api_avain'];
@@ -1002,7 +1002,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       }
 
       if ($api_keys["user_api_key"] == "" or $api_keys["vendor_api_key"] == "") {
-        echo "<p class='error'>".t("Ei voida l‰hett‰‰ materiaalia Maventalle, koska Maventa-avaimet puuttuu")."</p>";
+        echo "<p class='error'>".t("Ei voida l√§hett√§√§ materiaalia Maventalle, koska Maventa-avaimet puuttuu")."</p>";
         $virhe = 1;
       }
 
@@ -1020,8 +1020,8 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
         echo "<input type='hidden' name='tee' value='maventa_siirto'>";
         echo "<input type='hidden' name='filenimi' value='".basename($nimifinvoice)."'>";
         echo "<table>";
-        echo "<tr><th>".t("L‰het‰ aineisto uudestaan MAVENTA:lle").":</th>";
-        echo "<td class='back'><input type='submit' value='".t("L‰het‰")."'></td></tr>";
+        echo "<tr><th>".t("L√§het√§ aineisto uudestaan MAVENTA:lle").":</th>";
+        echo "<td class='back'><input type='submit' value='".t("L√§het√§")."'></td></tr>";
         echo "</table>";
         echo "</form>";
       }
@@ -1037,11 +1037,11 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       echo "</table><br><br>";
 
       echo "<table>";
-      echo "<tr><th>".t("L‰het‰ iPost-aineisto uudestaan Itellaan").":</th>";
+      echo "<tr><th>".t("L√§het√§ iPost-aineisto uudestaan Itellaan").":</th>";
       echo "<form method='post'>";
       echo "<input type='hidden' name='tee' value='ipost_siirto'>";
       echo "<input type='hidden' name='filenimi' value='".basename($nimifinvoice)."'>";
-      echo "<td class='back'><input type='submit' value='".t("L‰het‰")."'></td></tr></form>";
+      echo "<td class='back'><input type='submit' value='".t("L√§het√§")."'></td></tr></form>";
       echo "</table>";
     }
 

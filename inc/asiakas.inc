@@ -13,7 +13,7 @@ if ($haku == "asiakasnro" or $haku == "ytunnus") {
     $apu_asiakasnumero = (int) $t[$pointer];
   }
 
-  //jos konsernin asiakkaat synkronoidaan niin asiakkaiden yksilöivät tiedot on oltava konsernitasolla-yksilölliset
+  //jos konsernin asiakkaat synkronoidaan niin asiakkaiden yksilÃ¶ivÃ¤t tiedot on oltava konsernitasolla-yksilÃ¶lliset
   $query = "SELECT group_concat(concat('\'',yhtio.yhtio,'\'')) yhtiot
             FROM yhtio
             JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
@@ -66,7 +66,7 @@ if ($haku == "asiakasnro" or $haku == "ytunnus") {
       $counteri++;
 
       if ($counteri > 999) {
-        $apu_asiakasnumero = t('Ei löytynyt');
+        $apu_asiakasnumero = t('Ei lÃ¶ytynyt');
         break;
       }
     }

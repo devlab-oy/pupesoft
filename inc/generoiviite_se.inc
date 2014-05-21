@@ -1,11 +1,11 @@
 <?php
-// otetaan sisään $viite muuttuja jossa on laskunnumero
+// otetaan sisÃ¤Ã¤n $viite muuttuja jossa on laskunnumero
 // palautetaan valmis $viite
 
 //jos $viite = 123456;
-//vastaus on 12345682 josta 8 on merkkien määrä ja 2 on tarkistusnumero
+//vastaus on 12345682 josta 8 on merkkien mÃ¤Ã¤rÃ¤ ja 2 on tarkistusnumero
 
-// poistetaan kaikki muut merkit paitsi numerot 0-9 sekä poistetaan etunollat
+// poistetaan kaikki muut merkit paitsi numerot 0-9 sekÃ¤ poistetaan etunollat
 $viite   = ltrim(ereg_replace("[^0-9]", "", $viite),"0");
 $kerroin = 2;
 
@@ -13,7 +13,7 @@ $maara = strlen($viite)+2;
 
 $viite .= $maara;
 
-//lasketaan tarkista, ja tähän tarvitaan mukaan merkkimäärä numero
+//lasketaan tarkista, ja tÃ¤hÃ¤n tarvitaan mukaan merkkimÃ¤Ã¤rÃ¤ numero
 for ($i=1; $i<=strlen($viite); $i++) {
   // oikealta vasemmalle
   $merkki = substr($viite, -1 * $i, 1);

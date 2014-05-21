@@ -27,7 +27,7 @@ if(!function_exists("tuotteen_toimittajattarkista")) {
             $alasveto[$i] = "<select name='t[$i]'>".$ulos."</select>";
           }
 
-          $virhe[$i] = t("Tuotenumeroa ei lˆydy!");
+          $virhe[$i] = t("Tuotenumeroa ei l√∂ydy!");
         }
       }
       else {
@@ -141,7 +141,7 @@ if(!function_exists("tuotteen_toimittajattarkista")) {
         $sresult = pupe_query($query);
 
         if (mysql_num_rows($sresult) > 0) {
-          $virhe[$i] = t("T‰m‰ toimittaja on jo t‰ll‰ tuotteella")."!";
+          $virhe[$i] = t("T√§m√§ toimittaja on jo t√§ll√§ tuotteella")."!";
         }
       }
 
@@ -163,7 +163,7 @@ if(!function_exists("tuotteen_toimittajattarkista")) {
       $tuotoimirow = mysql_fetch_assoc($sresult);
 
       if ($t[$i] == "" and $tuotoimirow["tyyppi"] != "") {
-        $virhe[$i] = t("Online/sis‰inen toimittaja vaatii aina toimittajan tuotenumeron")."!";
+        $virhe[$i] = t("Online/sis√§inen toimittaja vaatii aina toimittajan tuotenumeron")."!";
       }
     }
   }

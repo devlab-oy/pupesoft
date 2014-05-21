@@ -5,25 +5,25 @@ require 'inc/parametrit.inc';
 require 'valmistuslinjat.inc';
 require 'valmistus.class.php';
 
-// Yhtiˆnparametri pit‰‰ olla setattu jotta t‰t‰ toimminallisuutta voidaan k‰ytt‰‰
+// Yhti√∂nparametri pit√§√§ olla setattu jotta t√§t√§ toimminallisuutta voidaan k√§ytt√§√§
 if ($yhtiorow['valmistuksessa_kaytetaan_tilakoodeja'] != 'K') {
-  exit("Valmistuslinjojen tyˆjonot toiminta vaatii yhtiˆnparametrin valmistuksessa k‰ytet‰‰n tilakoodeja");
+  exit("Valmistuslinjojen ty√∂jonot toiminta vaatii yhti√∂nparametrin valmistuksessa k√§ytet√§√§n tilakoodeja");
 }
 
 /**
- * N‰ytet‰‰n lomake valmistuksen tilan vaihdossa
+ * N√§ytet√§√§n lomake valmistuksen tilan vaihdossa
  *
  */
 if (isset($tee) and $tee == 'verify') {
   // Haetaan aina valmistus
   $valmistus = Valmistus::find($tunnus);
 
-  // N‰ytet‰‰n edit formi (valmista_tarkastukseen)
-  // Formilla kysyt‰‰n valmistettu m‰‰r‰ ja kommentit
+  // N√§ytet√§√§n edit formi (valmista_tarkastukseen)
+  // Formilla kysyt√§√§n valmistettu m√§√§r√§ ja kommentit
   if ($tila == Valmistus::VALMIS_TARKASTUKSEEN) {
     include '_valmistus_edit.php';
   }
-  // N‰ytet‰‰n formi (keskeytys)
+  // N√§ytet√§√§n formi (keskeytys)
   elseif ($tila == Valmistus::KESKEYTETTY) {
     include '_keskeyta_valmistus.php';
   }
@@ -33,18 +33,18 @@ if (isset($tee) and $tee == 'verify') {
 }
 
 /**
- * Jos tullaan lommakkeelta, p‰ivitet‰‰n valmistuksen tiedot
+ * Jos tullaan lommakkeelta, p√§ivitet√§√§n valmistuksen tiedot
  */
 if (isset($tee) and $tee == 'update') {
 
   // Haetaan aina valmistus
   $valmistus = Valmistus::find($tunnus);
 
-  // Keskeytet‰‰n tyˆ
+  // Keskeytet√§√§n ty√∂
   if ($tila == 'TK') {
 
     try {
-      // Merkataan kommentti, ylityˆtunnit ja kaytetyttunnit talteen
+      // Merkataan kommentti, ylity√∂tunnit ja kaytetyttunnit talteen
       $valmistus->kommentti = $kommentti;
       $valmistus->ylityotunnit = $ylityotunnit;
       $valmistus->kaytetyttunnit = $kaytetyttunnit;
@@ -56,7 +56,7 @@ if (isset($tee) and $tee == 'update') {
   }
   // Merkataan valmiiksi
   elseif ($tila == 'VT') {
-    // Loopataan p‰ivitett‰v‰t valmisteet l‰pi ja tarkistetaan syˆtetyt m‰‰r‰t
+    // Loopataan p√§ivitett√§v√§t valmisteet l√§pi ja tarkistetaan sy√∂tetyt m√§√§r√§t
     // Splitataan tarvittaessa
     try {
 
@@ -65,32 +65,32 @@ if (isset($tee) and $tee == 'update') {
         $tuotteet = $valmistus->tuotteet();
 
         if (empty($tuotteet)) {
-          throw new Exception("Valmistuksella ei ole yht‰‰n valmistetta");
+          throw new Exception("Valmistuksella ei ole yht√§√§n valmistetta");
         }
 
-        // Loopataan valmistukset l‰pi
+        // Loopataan valmistukset l√§pi
         foreach ($tuotteet as $valmiste) {
 
-          // Syˆtetyt arvot
+          // Sy√∂tetyt arvot
           $maara = $valmisteet[$valmiste['tuoteno']]['maara'];
           $tunnit = $valmisteet[$valmiste['tuoteno']]['tunnit'];
 
-          // M‰‰r‰‰ pienennet‰‰n (splitataan valmistus)
+          // M√§√§r√§√§ pienennet√§√§n (splitataan valmistus)
           if ($maara < $valmiste['varattu']) {
-            throw new Exception("Virhe valmistuksen keskeytyksess‰ (ei jaettu)");
+            throw new Exception("Virhe valmistuksen keskeytyksess√§ (ei jaettu)");
           }
-          // M‰‰r‰ on sama (valmistus on valmistettu kokonaan)
+          // M√§√§r√§ on sama (valmistus on valmistettu kokonaan)
           elseif ($maara == $valmiste['varattu']) {
-            #echo "m‰‰r‰ sama! p‰ivitet‰‰n vaan tila ja lis‰t‰‰n kommentit";
+            #echo "m√§√§r√§ sama! p√§ivitet√§√§n vaan tila ja lis√§t√§√§n kommentit";
           }
           // Virhe
           else {
-            throw new Exception("Valmistettava m‰‰r‰ ei voi olla suurempi kuin tilattu m‰‰r‰");
+            throw new Exception("Valmistettava m√§√§r√§ ei voi olla suurempi kuin tilattu m√§√§r√§");
           }
         }
       }
 
-      // p‰ivitet‰‰n kalenterin tiedot
+      // p√§ivitet√§√§n kalenterin tiedot
       $query = "UPDATE kalenteri
                 SET kentta01 = '{$ylityotunnit}',
                 kentta02    = '{$kommentti}',
@@ -108,21 +108,21 @@ if (isset($tee) and $tee == 'update') {
   }
   else {
     try {
-      // P‰ivitet‰‰n vain tila
+      // P√§ivitet√§√§n vain tila
       $valmistus->setTila($tila);
     } catch (Exception $e) {
       $errors = "VIRHE: {$e->getMessage()}";
     }
   }
 
-  // Palataan tyˆjono n‰kym‰‰n
+  // Palataan ty√∂jono n√§kym√§√§n
   $tee = '';
 }
 
 if ($tee == '') {
 
-  /* TY÷JONO TY÷NTEKIJƒ */
-  echo "<font class='head'>".t("Valmistuslinjojen tyˆjonot")."</font>";
+  /* TY√ñJONO TY√ñNTEKIJ√Ñ */
+  echo "<font class='head'>".t("Valmistuslinjojen ty√∂jonot")."</font>";
   echo "<hr>";
 
   // Haetaan valmistuslinjat
@@ -132,11 +132,11 @@ if ($tee == '') {
     echo "Ei valmistuslinjoja";
   }
 
-  // Valmistuksen tilat selv‰kielisen‰
+  // Valmistuksen tilat selv√§kielisen√§
   $tilat = array(
       'OV' => 'Odottaa valmistusta',
       'VA' => 'Valmistuksessa',
-      'TK' => 'Tyˆ keskeytetty',
+      'TK' => 'Ty√∂ keskeytetty',
       'VT' => 'Valmis tarkastukseen',
       'TA' => 'Tarkastettu'
     );
@@ -152,11 +152,11 @@ if ($tee == '') {
       <th>" . t("Tila") . " </th>
       <th>" . t("Nimitys") . "</th>
       <th>" . t("Viite") . "</th>
-      <th>" . t("M‰‰r‰") . "</th>
+      <th>" . t("M√§√§r√§") . "</th>
       <th></th>
       </tr>";
 
-    // Haetaan linjan 4 uusinta kalenterimerkinn‰t
+    // Haetaan linjan 4 uusinta kalenterimerkinn√§t
     $tyojono_query = "SELECT kalenteri.kuka, kalenteri.henkilo, nimitys, varattu, yksikko, pvmalku, pvmloppu, kalenteri.tunnus, lasku.valmistuksen_tila, lasku.viesti, lasku.tunnus as valmistusnumero, kalenteri.otunnus
                       FROM kalenteri
                       JOIN tilausrivi on (tilausrivi.yhtio=kalenteri.yhtio and tilausrivi.otunnus=kalenteri.otunnus)
@@ -169,7 +169,7 @@ if ($tee == '') {
                       LIMIT 4";
     $tyojono_result = pupe_query($tyojono_query);
 
-    // Jos tyˆjono on tyhj‰
+    // Jos ty√∂jono on tyhj√§
     if (mysql_num_rows($tyojono_result) == 0) {
       echo "<tr>";
       echo "<td colspan=5>";
@@ -178,7 +178,7 @@ if ($tee == '') {
       echo "</tr>";
     }
     else {
-      // Tyˆjonon tyˆt
+      // Ty√∂jonon ty√∂t
       while($tyojono = mysql_fetch_assoc($tyojono_result)) {
         echo "<tr>";
         echo "<td>" . $tyojono['valmistusnumero'] . "</td>";
@@ -200,16 +200,16 @@ if ($tee == '') {
           echo "<option value='VA'>Aloita valmistus</option>";
 
         }
-        // Aloitettu valmistus voidaan merkata valmistetuksi tai keskeytt‰‰
+        // Aloitettu valmistus voidaan merkata valmistetuksi tai keskeytt√§√§
         elseif ($tyojono['valmistuksen_tila'] == Valmistus::VALMISTUKSESSA) {
-          echo "<option value='TK'>Keskeyt‰ valmistus</option>";
+          echo "<option value='TK'>Keskeyt√§ valmistus</option>";
           echo "<option value='VT'>Valmis tarkistukseen</option>";
         }
         elseif ($tyojono['valmistuksen_tila'] == Valmistus::KESKEYTETTY) {
           echo "<option value='VA'>Aloita valmistus</option>";
         }
 
-        echo "<option value='OV'>(Siir‰ parkkiin)</option>"; # TODO: T‰t‰ ei tarvita t‰‰ll‰.
+        echo "<option value='OV'>(Siir√§ parkkiin)</option>"; # TODO: T√§t√§ ei tarvita t√§√§ll√§.
         echo "</select>";
 
         echo "</form>";

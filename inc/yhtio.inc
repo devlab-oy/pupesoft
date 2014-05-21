@@ -1,7 +1,7 @@
 <?php
 
-$otsikko = 'Yhtiön tiedot';
-$otsikko_nappi   = 'yhtiö';
+$otsikko = 'YhtiÃ¶n tiedot';
+$otsikko_nappi   = 'yhtiÃ¶';
 
 $kentat = 'tunnus, yhtio, nimi, ytunnus';
 $jarjestys = 'yhtio';

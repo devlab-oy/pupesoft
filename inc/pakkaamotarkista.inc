@@ -8,7 +8,7 @@ if (!function_exists("pakkaamotarkista")) {
 
     if (mysql_field_name($result, $i) == "nimi") {
       if (trim($t[$i]) == '') {
-        $virhe[$i] .= t("Nimi ei saa olla tyhj‰")."!";
+        $virhe[$i] .= t("Nimi ei saa olla tyhj√§")."!";
       }
       else {
         $t[$i] = trim(mysql_real_escape_string($t[$i]));
@@ -19,7 +19,7 @@ if (!function_exists("pakkaamotarkista")) {
     if (mysql_field_name($result, $i) == "lokero") {
 
       if (trim($t[$i]) == '') {
-        $virhe[$i] .= t("Lokero ei saa olla tyhj‰")."!";
+        $virhe[$i] .= t("Lokero ei saa olla tyhj√§")."!";
       }
       else {
         $t[$i] = trim(mysql_real_escape_string($t[$i]));
@@ -48,7 +48,7 @@ if (!function_exists("pakkaamotarkista")) {
             $pakkaamo_chk_res = mysql_query($query) or pupe_error($query);
 
             if (mysql_num_rows($pakkaamo_chk_res) != 0) {
-              $virhe[$i] .= t("P‰‰llekk‰isi‰ lokeroita samassa varastossa")."!";
+              $virhe[$i] .= t("P√§√§llekk√§isi√§ lokeroita samassa varastossa")."!";
             }
           }
         }
@@ -57,7 +57,7 @@ if (!function_exists("pakkaamotarkista")) {
 
     if (mysql_field_name($result, $i) == "printteri0") {
       if (trim($t[$i]) == '') {
-        $virhe[$i] .= t("Pakkaamon tulostin ei saa olla tyhj‰")."!";
+        $virhe[$i] .= t("Pakkaamon tulostin ei saa olla tyhj√§")."!";
       }
       else {
         $t[$i] = trim(mysql_real_escape_string($t[$i]));
@@ -65,7 +65,7 @@ if (!function_exists("pakkaamotarkista")) {
     }
     if (mysql_field_name($result, $i) == "printteri1") {
       if (trim($t[$i]) == '') {
-        $virhe[$i] .= t("Pakkaamon tulostin ei saa olla tyhj‰")."!";
+        $virhe[$i] .= t("Pakkaamon tulostin ei saa olla tyhj√§")."!";
       }
       else {
         $t[$i] = trim(mysql_real_escape_string($t[$i]));
@@ -73,7 +73,7 @@ if (!function_exists("pakkaamotarkista")) {
     }
     if (mysql_field_name($result, $i) == "printteri2") {
       if (trim($t[$i]) == '') {
-        $virhe[$i] .= t("Pakkaamon tulostin ei saa olla tyhj‰")."!";
+        $virhe[$i] .= t("Pakkaamon tulostin ei saa olla tyhj√§")."!";
       }
       else {
         $t[$i] = trim(mysql_real_escape_string($t[$i]));
@@ -81,7 +81,7 @@ if (!function_exists("pakkaamotarkista")) {
     }
     if (mysql_field_name($result, $i) == "printteri3") {
       if (trim($t[$i]) == '') {
-        $virhe[$i] .= t("Pakkaamon tulostin ei saa olla tyhj‰")."!";
+        $virhe[$i] .= t("Pakkaamon tulostin ei saa olla tyhj√§")."!";
       }
       else {
         $t[$i] = trim(mysql_real_escape_string($t[$i]));
@@ -89,7 +89,7 @@ if (!function_exists("pakkaamotarkista")) {
     }
     if (mysql_field_name($result, $i) == "printteri4") {
       if (trim($t[$i]) == '') {
-        $virhe[$i] .= t("Pakkaamon tulostin ei saa olla tyhj‰")."!";
+        $virhe[$i] .= t("Pakkaamon tulostin ei saa olla tyhj√§")."!";
       }
       else {
         $t[$i] = trim(mysql_real_escape_string($t[$i]));
@@ -97,7 +97,7 @@ if (!function_exists("pakkaamotarkista")) {
     }
     if (mysql_field_name($result, $i) == "printteri6") {
       if (trim($t[$i]) == '') {
-        $virhe[$i] .= t("Pakkaamon tulostin ei saa olla tyhj‰")."!";
+        $virhe[$i] .= t("Pakkaamon tulostin ei saa olla tyhj√§")."!";
       }
       else {
         $t[$i] = trim(mysql_real_escape_string($t[$i]));
@@ -105,7 +105,7 @@ if (!function_exists("pakkaamotarkista")) {
     }
     if (mysql_field_name($result, $i) == "printteri7") {
       if (trim($t[$i]) == '') {
-        $virhe[$i] .= t("Pakkaamon tulostin ei saa olla tyhj‰")."!";
+        $virhe[$i] .= t("Pakkaamon tulostin ei saa olla tyhj√§")."!";
       }
       else {
         $t[$i] = trim(mysql_real_escape_string($t[$i]));

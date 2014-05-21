@@ -1,10 +1,10 @@
 <?php
 
 $ulos = "";
-$jatko = 1; // oletetaan normaali k‰sittely
-$tyyppi = 1; // oletetaan rivin n‰kyvyys
+$jatko = 1; // oletetaan normaali k√§sittely
+$tyyppi = 1; // oletetaan rivin n√§kyvyys
 
-if ($i == 0) { //yhtiˆt‰ ei n‰ytet‰
+if ($i == 0) { //yhti√∂t√§ ei n√§ytet√§
   $tyyppi = 0;
 }
 
@@ -102,7 +102,7 @@ if (mysql_field_name($result, $i) == "viitetyyppi") {
   }
 
   $ulos  = "<td><select name='$nimi'>";
-  $ulos .= "<option value=''> ".t("Laskun viite muodostetaan sopimusnumerosta, v‰limerkist‰ ja laskunumerosta")."</option>";
+  $ulos .= "<option value=''> ".t("Laskun viite muodostetaan sopimusnumerosta, v√§limerkist√§ ja laskunumerosta")."</option>";
   $ulos .= "<option value='X' $sel> ".t("Laskun viite muodostetaan laskunumerosta")."</option>";
   $ulos .= "</select></td>";
 

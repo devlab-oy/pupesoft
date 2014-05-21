@@ -19,7 +19,7 @@ if(!function_exists("yhtion_toimipaikattarkista")) {
       $sresult = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($sresult) != 1) {
-        //Olisiko siell‰ nimi
+        //Olisiko siell√§ nimi
         if ($t[$i] != '') {
           $query = "SELECT nimi, tilino
                     FROM tili
@@ -41,7 +41,7 @@ if(!function_exists("yhtion_toimipaikattarkista")) {
             $virhe[$i] = t("Valitse tili");
           }
         }
-        if ($virhe[$i] == '') $virhe[$i] = t("Tili‰ ei lˆydy");
+        if ($virhe[$i] == '') $virhe[$i] = t("Tili√§ ei l√∂ydy");
       }
     }
 
@@ -104,7 +104,7 @@ if(!function_exists("yhtion_toimipaikattarkista")) {
         $vresult = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($vresult) == 0) {
-          $virhe[$tem_vatnumeroind] = $virhe[$i] = t("Yrityksen ALV-prosentit puuttuvat t‰lle maalle (%s)! K‰y perustamassa ensin ne avainsanoihin.", "", $tem_maa);
+          $virhe[$tem_vatnumeroind] = $virhe[$i] = t("Yrityksen ALV-prosentit puuttuvat t√§lle maalle (%s)! K√§y perustamassa ensin ne avainsanoihin.", "", $tem_maa);
         }
 
         $query = "SELECT *
@@ -131,7 +131,7 @@ if(!function_exists("yhtion_toimipaikattarkista")) {
           $tem_puhelin == "" or
           $tem_vatnumero == "") {
 
-          $virhe[$tem_vatnumeroind] = $virhe[$i] = t("Kaikki tiedot on syˆtett‰v‰ alv-velvolliselle toimipaikalle!");
+          $virhe[$tem_vatnumeroind] = $virhe[$i] = t("Kaikki tiedot on sy√∂tett√§v√§ alv-velvolliselle toimipaikalle!");
         }
       }
     }

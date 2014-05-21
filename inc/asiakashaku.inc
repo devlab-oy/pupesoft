@@ -29,12 +29,12 @@ else {
 }
 
 $ytunnus     = addslashes(trim($ytunnus));
-$limit      = 1000; // montako riviä on maksimi
+$limit      = 1000; // montako riviÃ¤ on maksimi
 $monta       = 0;
 $asiakasrajaus   = "";
 
 if (in_array($kutsuja, array("asiakasemo.php","kalenteri.php"))) {
-  // Tässä haarassa myös prospektit näytetään
+  // TÃ¤ssÃ¤ haarassa myÃ¶s prospektit nÃ¤ytetÃ¤Ã¤n
   if ($myos_poistetut == "") {
     $asiakasrajaus = " and asiakas.laji != 'P' ";
   }
@@ -43,7 +43,7 @@ if (in_array($kutsuja, array("asiakasemo.php","kalenteri.php"))) {
   }
 }
 else {
-  // Normaalisti prospekteja ei näytetä, mutta jos ollaan tarjouksella voidaa niitä katsoa
+  // Normaalisti prospekteja ei nÃ¤ytetÃ¤, mutta jos ollaan tarjouksella voidaa niitÃ¤ katsoa
   if ($myos_prospektit == "TRUE" and $kutsuja == "otsik.inc" and $toim == "TARJOUS") {
     $asiakasrajaus = " and asiakas.laji not in ('P') ";
   }
@@ -55,13 +55,13 @@ else {
   }
 }
 
-//  Jos käyttäjällä on valittu piirejä niin sallitaan vain ko. piirin/piirien hakeminen
+//  Jos kÃ¤yttÃ¤jÃ¤llÃ¤ on valittu piirejÃ¤ niin sallitaan vain ko. piirin/piirien hakeminen
 if ($kukarow["piirit"] != "") {
   $asiakasrajaus .= " and asiakas.piiri IN ($kukarow[piirit]) ";
 }
 
 if (is_numeric($asiakasid) and $asiakasid > 0) {
-  // Jos asiakaan tunnus on löydetty niin ei rajata "$asiakasrajaus":lla ollenkaan
+  // Jos asiakaan tunnus on lÃ¶ydetty niin ei rajata "$asiakasrajaus":lla ollenkaan
   $query  = "SELECT asiakas.*, yhtio.nimi yhtionimi
              FROM asiakas
              JOIN yhtio on asiakas.yhtio=yhtio.yhtio
@@ -71,14 +71,14 @@ if (is_numeric($asiakasid) and $asiakasid > 0) {
   $monta  = mysql_num_rows($result);
 }
 elseif ($ytunnus != '') {
-  if (substr($ytunnus,0,1) == "£") {
-    // jos eka merkki £ etsitään tilausnumerolla
+  if (substr($ytunnus,0,1) == "Â£") {
+    // jos eka merkki Â£ etsitÃ¤Ã¤n tilausnumerolla
     // eka merkki pois alusta
     $ytunnus = substr($ytunnus, 1);
 
     $query  = "SELECT lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.toim_nimi,
                lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
-               concat('£',lasku.tunnus) ytunnus, concat('£',lasku.tunnus) tunnus, yhtio.nimi yhtionimi
+               concat('Â£',lasku.tunnus) ytunnus, concat('Â£',lasku.tunnus) tunnus, yhtio.nimi yhtionimi
                FROM lasku
                JOIN yhtio on lasku.yhtio=yhtio.yhtio
                WHERE lasku.$konsyhtiot
@@ -88,15 +88,15 @@ elseif ($ytunnus != '') {
   }
 
   if (substr($ytunnus,0,1) == "*") {
-    // jos eka merkki on * etsitään laskuilta asiakastietoja nimellä
+    // jos eka merkki on * etsitÃ¤Ã¤n laskuilta asiakastietoja nimellÃ¤
 
     // eka merkki pois alusta
     $ytunnus = substr($ytunnus, 1);
 
-    // kokeillaan ihan asiakkaan nimellä laskulta
+    // kokeillaan ihan asiakkaan nimellÃ¤ laskulta
     $query  = "SELECT lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.toim_nimi,
                lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
-               concat('£',max(lasku.tunnus)) ytunnus, concat('£',max(lasku.tunnus)) tunnus, yhtio.nimi yhtionimi
+               concat('Â£',max(lasku.tunnus)) ytunnus, concat('Â£',max(lasku.tunnus)) tunnus, yhtio.nimi yhtionimi
                FROM lasku use index (asiakasnimi)
                JOIN yhtio on lasku.yhtio=yhtio.yhtio
                WHERE lasku.$konsyhtiot
@@ -111,15 +111,15 @@ elseif ($ytunnus != '') {
   }
 
   if ($monta == 0  and substr($ytunnus,0,1) == "#") {
-    // jos eka merkki on # etsitään toimitusnimen perusteella
+    // jos eka merkki on # etsitÃ¤Ã¤n toimitusnimen perusteella
 
     // eka merkki pois alusta
     $ytunnus = substr($ytunnus, 1);
 
-    // kokeillaan ihan asiakkaan nimellä laskulta
+    // kokeillaan ihan asiakkaan nimellÃ¤ laskulta
     $query  = "SELECT lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.toim_nimi,
                lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
-               concat('£',max(lasku.tunnus)) ytunnus, concat('£',max(lasku.tunnus)) tunnus, yhtio.nimi yhtionimi
+               concat('Â£',max(lasku.tunnus)) ytunnus, concat('Â£',max(lasku.tunnus)) tunnus, yhtio.nimi yhtionimi
                FROM lasku use index (asiakastoim_nimi)
                JOIN yhtio on lasku.yhtio=yhtio.yhtio
                WHERE lasku.$konsyhtiot
@@ -136,7 +136,7 @@ elseif ($ytunnus != '') {
   if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
     $query = "SELECT lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.toim_nimi,
               lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
-              concat('£',max(lasku.tunnus)) ytunnus, concat('£',max(lasku.tunnus)) tunnus, yhtio.nimi yhtionimi
+              concat('Â£',max(lasku.tunnus)) ytunnus, concat('Â£',max(lasku.tunnus)) tunnus, yhtio.nimi yhtionimi
               FROM lasku
               JOIN yhtio on lasku.yhtio=yhtio.yhtio
               JOIN tyomaarays ON lasku.yhtio=tyomaarays.yhtio and lasku.tunnus=tyomaarays.otunnus
@@ -152,7 +152,7 @@ elseif ($ytunnus != '') {
     if ($monta == 0) {
       $query = "SELECT lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.toim_nimi,
                 lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
-                concat('£',max(lasku.tunnus)) ytunnus, concat('£',max(lasku.tunnus)) tunnus, yhtio.nimi yhtionimi
+                concat('Â£',max(lasku.tunnus)) ytunnus, concat('Â£',max(lasku.tunnus)) tunnus, yhtio.nimi yhtionimi
                 FROM lasku
                 JOIN yhtio on lasku.yhtio=yhtio.yhtio
                 JOIN tyomaarays ON lasku.yhtio=tyomaarays.yhtio and lasku.tunnus=tyomaarays.otunnus
@@ -231,7 +231,7 @@ elseif ($ytunnus != '') {
 
   if ($monta == 0 and is_string($ytunnus)) {
 
-    // ei rikota alkuperäistä ytunnus-muuttuja
+    // ei rikota alkuperÃ¤istÃ¤ ytunnus-muuttuja
     $ytunnus2 = $ytunnus;
 
     // mahdollistetaan asiakashaku monella eri sanalla
@@ -248,7 +248,7 @@ elseif ($ytunnus != '') {
 
     $postitplisa = '';
 
-    // jos on annettu postitoimipaikka, niin lisätää se jokaiseen asiakashakuqueryyn ja ei tehdä erillistä postitoimipaikka unionia
+    // jos on annettu postitoimipaikka, niin lisÃ¤tÃ¤Ã¤ se jokaiseen asiakashakuqueryyn ja ei tehdÃ¤ erillistÃ¤ postitoimipaikka unionia
     if (trim($postitp) != '') {
       $postitp2 = mysql_real_escape_string($postitp);
       $postitplisa = " and asiakas.postitp like '%$postitp2%' ";
@@ -363,10 +363,10 @@ elseif ($asiakasnro != '') {
 
 if ($monta == 0) {
   if ($ytunnus and strpos($_SERVER["PHP_SELF"], "lue_data.php") === FALSE) {
-    echo "<font class='error'>".t("Asiakas")." ". tarkistahetu($ytunnus)." ".t("ei löydy")."!</font> ";
+    echo "<font class='error'>".t("Asiakas")." ". tarkistahetu($ytunnus)." ".t("ei lÃ¶ydy")."!</font> ";
   }
   elseif ($asiakasnro and strpos($_SERVER["PHP_SELF"], "lue_data.php") === FALSE) {
-    echo "<font class='error'>".t("Asiakas")." '$asiakasnro' ".t("ei löydy")."!</font> ";
+    echo "<font class='error'>".t("Asiakas")." '$asiakasnro' ".t("ei lÃ¶ydy")."!</font> ";
   }
 
   if (($ytunnus or $asiakasnro) and strpos($PHP_SELF, "tilaus_myynti") === FALSE and $kutsuja != "yllapito.php") {
@@ -397,7 +397,7 @@ if ($monta == 0) {
       }
     }
 
-    echo "<input type='submit' value='".t("Etsi myös poistettuja asiakkaita")."'>";
+    echo "<input type='submit' value='".t("Etsi myÃ¶s poistettuja asiakkaita")."'>";
     echo "</form>";
   }
 
@@ -430,7 +430,7 @@ if ($monta == 0) {
       }
     }
 
-    echo "<input type='submit' value='".t("Etsi myös prospekti asiakkaita")."'>";
+    echo "<input type='submit' value='".t("Etsi myÃ¶s prospekti asiakkaita")."'>";
     echo "</form>";
   }
 
@@ -468,14 +468,14 @@ if ($monta == 1) {
 if ($monta > 1 and $monta <= $limit) {
 
   if ($kutsuja != "yllapito.php") {
-    //tämä vain otsik.php:tä varten
+    //tÃ¤mÃ¤ vain otsik.php:tÃ¤ varten
     echo $lause;
 
     echo "<table border='0'>";
     echo "<tr class='aktiivi'>";
 
     if ($konserni != '') {
-      echo "<th>".t("yhtiö")."</th>";
+      echo "<th>".t("yhtiÃ¶")."</th>";
     }
 
     echo "<th>".t("ytunnus")."</th>
@@ -489,7 +489,7 @@ if ($monta > 1 and $monta <= $limit) {
 
     if     ($asiakas['ytunnus']    != '') $numero = trim($asiakas['ytunnus']);
     elseif ($asiakas['asiakasnro'] != '') $numero = trim($asiakas['asiakasnro']);
-    else    die("Tällä asiakkaalla ei ole mitään tietoja! Tee JOTAIN!");
+    else    die("TÃ¤llÃ¤ asiakkaalla ei ole mitÃ¤Ã¤n tietoja! Tee JOTAIN!");
 
     $brnim     = '';
     $bros     = '';
@@ -507,7 +507,7 @@ if ($monta > 1 and $monta <= $limit) {
     $asiakas['postitp']      = trim($asiakas['postitp']);
 
     if ($kutsuja != "yllapito.php") {
-      // jos mikätahansa on eri ja mikätahansa on erisuurta ku tyhjää.. tää on varmaan huomenna daily WTF:ssä.. :)
+      // jos mikÃ¤tahansa on eri ja mikÃ¤tahansa on erisuurta ku tyhjÃ¤Ã¤.. tÃ¤Ã¤ on varmaan huomenna daily WTF:ssÃ¤.. :)
       if (($asiakas['toim_nimi'] != $asiakas["nimi"] or $asiakas['toim_osoite'] != $asiakas["osoite"] or $asiakas['toim_postino'] != $asiakas["postino"] or $asiakas['toim_postitp'] != $asiakas["postitp"] or $asiakas["toim_nimitark"] != $asiakas["nimitark"]) and
         ($asiakas['toim_nimi'] != "" or $asiakas['toim_osoite'] != "" or $asiakas['toim_postino'] != "" or $asiakas['toim_postitp'] != "" or $asiakas["toim_nimitark"] != "")) {
         $brnim     = '<br>'.$asiakas['toim_nimi']." ".$asiakas['toim_nimitark'];
@@ -523,7 +523,7 @@ if ($monta > 1 and $monta <= $limit) {
       }
 
       if ($asiakas["laji"] == "K" and $yhtiorow["yhtio"] == "artr") {
-        $brnim .= "<br><font class='error'>".t("HUOM: Tämä on korjaamo-asiakas")."</font>";
+        $brnim .= "<br><font class='error'>".t("HUOM: TÃ¤mÃ¤ on korjaamo-asiakas")."</font>";
       }
 
       echo "<td>$asiakas[ytunnus]</td>
@@ -578,7 +578,7 @@ if ($monta > 1 and $monta <= $limit) {
       echo "</tr>";
     }
     else {
-      // jos mikätahansa on eri ja mikätahansa on erisuurta ku tyhjää.. tää on varmaan huomenna daily WTF:ssä.. :)
+      // jos mikÃ¤tahansa on eri ja mikÃ¤tahansa on erisuurta ku tyhjÃ¤Ã¤.. tÃ¤Ã¤ on varmaan huomenna daily WTF:ssÃ¤.. :)
       if (($asiakas['toim_nimi'] != $asiakas["nimi"] or $asiakas['toim_osoite'] != $asiakas["osoite"] or $asiakas['toim_postino'] != $asiakas["postino"] or $asiakas['toim_postitp'] != $asiakas["postitp"]) and
         ($asiakas['toim_nimi'] != "" or $asiakas['toim_osoite'] != "" or $asiakas['toim_postino'] != "" or $asiakas['toim_postitp'] != "")) {
         $brnim     = ', '.$asiakas['toim_nimi']." ".$asiakas['toim_nimitark'];
@@ -627,7 +627,7 @@ if ($monta > 1 and $monta <= $limit) {
         }
       }
 
-      echo "<input type='submit' value='".t("Etsi myös poistettuja asiakkaita")."'>";
+      echo "<input type='submit' value='".t("Etsi myÃ¶s poistettuja asiakkaita")."'>";
       echo "</form><br>";
     }
   }
@@ -661,7 +661,7 @@ if ($monta > 1 and $monta <= $limit) {
       }
     }
 
-    echo "<input type='submit' value='".t("Etsi myös prospekti asiakkaita")."'>";
+    echo "<input type='submit' value='".t("Etsi myÃ¶s prospekti asiakkaita")."'>";
     echo "</form>";
   }
 
@@ -670,7 +670,7 @@ if ($monta > 1 and $monta <= $limit) {
 }
 
 if ($monta > $limit) {
-  echo "<font class='error'>".t("Asiakashaulla löytyi")." $monta ".t("sopivaa asiakasta. Tarkenna hakuasi")."!</font><br><br>";
+  echo "<font class='error'>".t("Asiakashaulla lÃ¶ytyi")." $monta ".t("sopivaa asiakasta. Tarkenna hakuasi")."!</font><br><br>";
   $ytunnus = "";
 }
 
@@ -697,7 +697,7 @@ if ($kutsuja == "otsik.inc" or $kutsuja == "asiakasemo.php" or $kutsuja == "kale
 
     //Annetaan mahdollisuus perustaa uusi asiakas
     echo "<table border='0'>";
-    echo "<tr><td>".t("Oikeaa asiakasta ei löytynyt. Perusta uusi asiakas")."</td>";
+    echo "<tr><td>".t("Oikeaa asiakasta ei lÃ¶ytynyt. Perusta uusi asiakas")."</td>";
 
     if (mysql_num_rows($oikeuresult1) > 0) {
       echo "<td class='back'>";
@@ -706,7 +706,7 @@ if ($kutsuja == "otsik.inc" or $kutsuja == "asiakasemo.php" or $kutsuja == "kale
       echo "<input type='hidden' name='toim'    value='asiakas!!!VAHITTAISMYYNTI!!!true'>";
       echo "<input type='hidden' name='laji'    value='H'>";
       echo "<input type='hidden' name='uusi'    value='1'>";
-      echo "<input type='submit' value='".t("Uusi henkilöasiakas")."'>";
+      echo "<input type='submit' value='".t("Uusi henkilÃ¶asiakas")."'>";
       echo "</form>";
       echo "</td>";
     }

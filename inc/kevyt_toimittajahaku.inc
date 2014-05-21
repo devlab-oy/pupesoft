@@ -4,7 +4,7 @@
 // palautetaan $toimittajarow
 
 $ytunnus = addslashes(trim($ytunnus));
-$limit   = 300; // montako rivi‰ on maksimi
+$limit   = 300; // montako rivi√§ on maksimi
 $monta   = 0;
 
 if (is_numeric($toimittajaid) and $toimittajaid > 0) {
@@ -17,7 +17,7 @@ if (is_numeric($toimittajaid) and $toimittajaid > 0) {
 }
 
 if ($monta == 0 and $ytunnus != '') {
-  //etsit‰‰n eka koko ytunnuksella
+  //etsit√§√§n eka koko ytunnuksella
   $query  = "SELECT *
              FROM toimi
              WHERE yhtio  = '{$kukarow["yhtio"]}'
@@ -29,7 +29,7 @@ if ($monta == 0 and $ytunnus != '') {
 }
 
 if ($monta == 0 and $ytunnus != '') {
-  //etsit‰‰n eka koko toimittajanrolla
+  //etsit√§√§n eka koko toimittajanrolla
   $query  = "SELECT *
              FROM toimi
              WHERE yhtio        = '{$kukarow["yhtio"]}'
@@ -72,7 +72,7 @@ if ($monta == 0 and $ytunnus != '') {
 
 if ($monta==0) {
   if (strpos($_SERVER["PHP_SELF"], "lue_data.php") === FALSE) {
-    echo "<font class='error'>".t("Toimittajaa")." '$ytunnus' ".t("ei lˆydy")."!</font><br>";
+    echo "<font class='error'>".t("Toimittajaa")." '$ytunnus' ".t("ei l√∂ydy")."!</font><br>";
   }
   $ytunnus     = "";
   $toimittajaid   = "";
@@ -85,7 +85,7 @@ if ($monta==1) {
 }
 
 if ($monta > 1 and $monta <= $limit) {
-  //t‰m‰ vain otsik.php:t‰ varten
+  //t√§m√§ vain otsik.php:t√§ varten
   echo $lause;
 
   if ($kutsuja != "yllapito.php") {
@@ -170,6 +170,6 @@ if ($monta > 1 and $monta <= $limit) {
 }
 
 if ($monta > $limit) {
-  echo "<font class='error'>".t("VIRHE: Toimittajahaulla lˆytyi")." $monta ".t("sopivaa toimittajaa. Tarkenna hakuasi")."!</font><br><br>";
+  echo "<font class='error'>".t("VIRHE: Toimittajahaulla l√∂ytyi")." $monta ".t("sopivaa toimittajaa. Tarkenna hakuasi")."!</font><br><br>";
   $ytunnus="";
 }

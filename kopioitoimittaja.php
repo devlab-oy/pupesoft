@@ -27,7 +27,7 @@ if ($tee == "write") {
 
   // Luodaan tietue
   if ($errori == '') {
-    // Taulun ensimm‰inen kentt‰ on aina yhtiˆ
+    // Taulun ensimm√§inen kentt√§ on aina yhti√∂
     $query = "INSERT into toimi values ('$kukarow[yhtio]'";
       for ($i=1; $i < mysql_num_fields($result); $i++) {
       $query .= ",'" . $t[$i] . "'";
@@ -37,7 +37,7 @@ if ($tee == "write") {
     $result = mysql_query($query) or pupe_error($query);
     $uusiidee = mysql_insert_id();
 
-    //  T‰m‰ funktio tekee myˆs oikeustarkistukset!
+    //  T√§m√§ funktio tekee my√∂s oikeustarkistukset!
     synkronoi($kukarow["yhtio"], "toimi", $uusiidee, "", "");
 
     $tee = '';
@@ -53,7 +53,7 @@ if ($tee == "edit") {
   echo "<input type = 'hidden' name = 'tee' value ='write'>";
   echo "<input type = 'hidden' name = 'id' value ='$id'>";
 
-  // Kokeillaan geneerist‰
+  // Kokeillaan geneerist√§
   $query = "SELECT *
             FROM toimi
             WHERE tunnus='$id' and yhtio='$kukarow[yhtio]'";

@@ -12,7 +12,7 @@ if (isset($exceltee) and $exceltee == "lataa_tiedosto") {
   exit;
 }
 else {
-  // t‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta
+  // t√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta
   $useslave = 1;
 
   if ($toim == "") {
@@ -56,7 +56,7 @@ else {
     echo "<br><br>".t("Valitse toiminto").":<br><br>";
     echo "</font>";
     echo "<li><a class='menu' href='$PHP_SELF?tee=YHTEENVETO&toim=$toim'         >".t("ABC-luokkayhteenveto")."</a><br>";
-    echo "<li><a class='menu' href='$PHP_SELF?tee=OSASTOTRY&toim=$toim'          >".t("Asiakasosaston tai asiakasryhm‰n luokat")."</a><br>";
+    echo "<li><a class='menu' href='$PHP_SELF?tee=OSASTOTRY&toim=$toim'          >".t("Asiakasosaston tai asiakasryhm√§n luokat")."</a><br>";
     echo "<li><a class='menu' href='$PHP_SELF?tee=LUOKKA&toim=$toim'             >".t("Luokan asiakkaat")."</a><br>";
     echo "<li><a class='menu' href='$PHP_SELF?tee=PITKALISTA&toim=$toim'         >".t("Kaikki tiedot Excel-tiedostoon")."</a><br>";
   }
@@ -65,7 +65,7 @@ else {
 
   list($ryhmanimet, $ryhmaprossat, $kiertonopeus_tavoite, $palvelutaso_tavoite, $varmuusvarasto_pv, $toimittajan_toimitusaika_pv) = hae_ryhmanimet($abcchar);
 
-  // jos kaikki tarvittavat tiedot lˆytyy menn‰‰n queryyn
+  // jos kaikki tarvittavat tiedot l√∂ytyy menn√§√§n queryyn
   if ($tee == 'YHTEENVETO') {
     require ("abc_yhteenveto.php");
   }

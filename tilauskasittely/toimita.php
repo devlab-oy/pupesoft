@@ -66,12 +66,12 @@ if ($tee == 'P' and $maksutapa == 'seka') {
 
   echo "<tr><th>".t("Laskun loppusumma")."</th><td align='right'>$rivihinta</td><td>$valkoodi</td></tr>";
 
-  echo "<tr><td>".t("K‰teisell‰")."</td><td><input type='text' name='kateismaksu[kateinen]' id='kateismaksu' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$rivihinta\");'></td><td>$valkoodi</td></tr>";
+  echo "<tr><td>".t("K√§teisell√§")."</td><td><input type='text' name='kateismaksu[kateinen]' id='kateismaksu' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$rivihinta\");'></td><td>$valkoodi</td></tr>";
   echo "<tr><td>".t("Pankkikortilla")."</td><td><input type='text' name='kateismaksu[pankkikortti]' id='pankkikortti' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$rivihinta\");'></td><td>$valkoodi</td></tr>";
   echo "<tr><td>".t("Luottokortilla")."</td><td><input type='text' name='kateismaksu[luottokortti]' id='luottokortti' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$rivihinta\");'></td><td>$valkoodi</td></tr>";
 
   echo "<tr><th>".t("Erotus")."</th><td name='loppusumma' id='loppusumma' align='right'><strong>0.00</strong></td><td>$valkoodi</td></tr>";
-  echo "<tr><td class='back'><input type='submit' name='hyvaksy_nappi' id='hyvaksy_nappi' value='".t("Hyv‰ksy")."' disabled></td></tr>";
+  echo "<tr><td class='back'><input type='submit' name='hyvaksy_nappi' id='hyvaksy_nappi' value='".t("Hyv√§ksy")."' disabled></td></tr>";
 
   echo "</form><br><br>";
 
@@ -89,7 +89,7 @@ if ($tee == 'maksu') {
 
 if ($tee=='P') {
 
-  // jos kyseess‰ ei ole nouto tai noutajan nimi on annettu, voidaan merkata tilaus toimitetuksi..
+  // jos kyseess√§ ei ole nouto tai noutajan nimi on annettu, voidaan merkata tilaus toimitetuksi..
   if (($nouto != 'yes') or ($noutaja != '')) {
     $query = "UPDATE tilausrivi
               SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
@@ -115,7 +115,7 @@ if ($tee=='P') {
               WHERE tunnus='$otunnus' and yhtio='$kukarow[yhtio]'";
     $result = pupe_query($query);
 
-    // jos kyseess‰ on k‰teismyynti‰, tulostetaaan k‰teislasku
+    // jos kyseess√§ on k√§teismyynti√§, tulostetaaan k√§teislasku
     $query  = "SELECT *
                from lasku, maksuehto
                where lasku.tunnus   = '$otunnus'
@@ -125,7 +125,7 @@ if ($tee=='P') {
     $result = pupe_query($query);
     $tilrow = mysql_fetch_array($result);
 
-    // Etuk‰teen maksetut tilaukset pit‰‰ muuttaa takaisin "maksettu"-tilaan
+    // Etuk√§teen maksetut tilaukset pit√§√§ muuttaa takaisin "maksettu"-tilaan
     $query = "UPDATE lasku SET
               alatila      = 'X'
               WHERE yhtio  = '$kukarow[yhtio]'
@@ -134,10 +134,10 @@ if ($tee=='P') {
               AND chn      = '999'";
     $ures  = pupe_query($query);
 
-    // jos kyseess‰ on k‰teiskauppaa ja EI vienti‰, laskutetaan ja tulostetaan tilaus..
+    // jos kyseess√§ on k√§teiskauppaa ja EI vienti√§, laskutetaan ja tulostetaan tilaus..
     if ($tilrow['kateinen']!='' and $tilrow["vienti"]=='') {
 
-      //tulostetaan k‰teislasku...
+      //tulostetaan k√§teislasku...
       $laskutettavat  = $otunnus;
       $tee       = "TARKISTA";
       $laskutakaikki   = "KYLLA";
@@ -154,8 +154,8 @@ if ($tee=='P') {
       require ("verkkolasku.php");
     }
 
-    //Tulostetaan uusi l‰hete jos k‰ytt‰j‰ valitsi drop-downista printterin
-    //Paitsi jos tilauksen tila p‰ivitettiin sellaiseksi, ett‰ l‰hetett‰ ei kuulu tulostaa
+    //Tulostetaan uusi l√§hete jos k√§ytt√§j√§ valitsi drop-downista printterin
+    //Paitsi jos tilauksen tila p√§ivitettiin sellaiseksi, ett√§ l√§hetett√§ ei kuulu tulostaa
     $query = "SELECT *
               FROM lasku
               WHERE tunnus in ($otunnus)
@@ -185,21 +185,21 @@ if ($tee=='P') {
 
         $prirow = mysql_fetch_array($prires);
 
-        // k‰teinen muuttuja viritet‰‰n tilaus-valmis.inc:iss‰ jos maksuehto on k‰teinen
-        // ja silloin pit‰‰ kaikki l‰hetteet tulostaa aina printteri5:lle (lasku printteri)
+        // k√§teinen muuttuja viritet√§√§n tilaus-valmis.inc:iss√§ jos maksuehto on k√§teinen
+        // ja silloin pit√§√§ kaikki l√§hetteet tulostaa aina printteri5:lle (lasku printteri)
         if ($kateinen == 'X') {
           $apuprintteri = $prirow['printteri5']; // laskuprintteri
         }
         else {
           if ($valittu_tulostin == "oletukselle") {
-            $apuprintteri = $prirow['printteri1']; // l‰heteprintteri
+            $apuprintteri = $prirow['printteri1']; // l√§heteprintteri
           }
           else {
             $apuprintteri = $valittu_tulostin;
           }
         }
 
-        //haetaan l‰hetteen tulostuskomento
+        //haetaan l√§hetteen tulostuskomento
         $query   = "SELECT * FROM kirjoittimet where yhtio = '$kukarow[yhtio]' and tunnus = '$apuprintteri'";
         $kirres  = pupe_query($query);
         $kirrow  = mysql_fetch_array($kirres);
@@ -241,19 +241,19 @@ if ($tee=='P') {
   }
   else {
     $id = $otunnus;
-    $virhe = "<font class='error'>".t("Noutajan nimi on syˆtett‰v‰")."!</font><br><br>";
+    $virhe = "<font class='error'>".t("Noutajan nimi on sy√∂tett√§v√§")."!</font><br><br>";
   }
 }
 
 if ($id == '') $id = 0;
 
-// meill‰ ei ole valittua tilausta
+// meill√§ ei ole valittua tilausta
 if ($id == '0') {
   $formi  = "find";
   $kentta  = "etsi";
   $boob   = "";
 
-  // tehd‰‰n etsi valinta
+  // tehd√§√§n etsi valinta
   echo "<form name='find' method='post'>".t("Etsi tilausta").": <input type='text' name='etsi'><input type='Submit' value='".t("Etsi")."'></form><br><br>";
 
   $haku = '';
@@ -272,7 +272,7 @@ if ($id == '0') {
   $tilre = pupe_query($query);
 
   while ($tilrow = mysql_fetch_array($tilre)) {
-    // etsit‰‰n sopivia tilauksia
+    // etsit√§√§n sopivia tilauksia
     $query = "SELECT lasku.yhtio, lasku.yhtio_nimi, lasku.tunnus 'tilaus',
               concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, maksuehto.teksti maksuehto, lasku.toimitustapa,
               date_format(lasku.luontiaika, '%Y-%m-%d') laadittu, kuka.nimi laatija, lasku.toimaika
@@ -287,10 +287,10 @@ if ($id == '0') {
               ORDER by laadittu desc";
     $result = pupe_query($query);
 
-    //piirret‰‰n taulukko...
+    //piirret√§√§n taulukko...
     if (mysql_num_rows($result) != 0) {
       while ($row = mysql_fetch_array($result)) {
-        // piirret‰‰n vaan kerran taulukko-otsikot
+        // piirret√§√§n vaan kerran taulukko-otsikot
         if ($boob == '') {
           $boob = 'kala';
 
@@ -299,11 +299,11 @@ if ($id == '0') {
           for ($i=0; $i<mysql_num_fields($result); $i++) {
             if (mysql_field_name($result, $i) == 'yhtio_nimi') {
               if ($logistiikka_yhtio != '') {
-                echo "<th align='left'>",t("Yhtiˆ"),"</th>";
+                echo "<th align='left'>",t("Yhti√∂"),"</th>";
               }
             }
             elseif (mysql_field_name($result, $i) == 'yhtio') {
-              // skipataan t‰‰
+              // skipataan t√§√§
             }
             else {
               echo "<th align='left'>".t(mysql_field_name($result,$i))."</th>";
@@ -324,7 +324,7 @@ if ($id == '0') {
             }
           }
           elseif (mysql_field_name($result, $i) == 'yhtio') {
-            // skipataan t‰‰
+            // skipataan t√§√§
           }
           else {
             echo "<td>$row[$i]</td>";
@@ -342,7 +342,7 @@ if ($id == '0') {
   if ($boob != '')
     echo "</table>";
   else
-    echo "<font class='message'>".t("Yht‰‰n toimitettavaa tilausta ei lˆytynyt")."...</font>";
+    echo "<font class='message'>".t("Yht√§√§n toimitettavaa tilausta ei l√∂ytynyt")."...</font>";
 }
 
 if ($id > 0) {
@@ -366,7 +366,7 @@ if ($id > 0) {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result)==0){
-    die(t("Tilausta")." $id ".t("ei voida toimittaa, koska kaikkia tilauksen tietoja ei lˆydy!")."!");
+    die(t("Tilausta")." $id ".t("ei voida toimittaa, koska kaikkia tilauksen tietoja ei l√∂ydy!")."!");
   }
 
   $row = mysql_fetch_assoc($result);
@@ -408,8 +408,8 @@ if ($id > 0) {
       <tr>
       <th>".t("Varastopaikka")."</th>
       <th>".t("Tuoteno")."</th>
-      <th>".t("M‰‰r‰")."</th>
-      <th>".t("Ker‰tty")."</th>
+      <th>".t("M√§√§r√§")."</th>
+      <th>".t("Ker√§tty")."</th>
       </tr>";
 
   $summa = 0;
@@ -427,13 +427,13 @@ if ($id > 0) {
         </tr>";
   }
 
-  // EE keississ‰ lasketaan veron m‰‰r‰‰ saman kaavan mukaan ku laskun tulostuksessa alvierittelyss‰
+  // EE keississ√§ lasketaan veron m√§√§r√§√§ saman kaavan mukaan ku laskun tulostuksessa alvierittelyss√§
   // ja sit lopuksi summataan $arvo+$alvinmaara jotta saadaan laskun verollinen loppusumma
   if (strtoupper($yhtiorow['maa']) == 'EE') {
 
     $alvinmaara = 0;
 
-    //Haetaan kaikki alvikannat riveilt‰
+    //Haetaan kaikki alvikannat riveilt√§
     $alvquery = "SELECT DISTINCT alv
                  FROM tilausrivi
                  WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -465,7 +465,7 @@ if ($id > 0) {
 
   echo "</table><br>";
 
-  // Etsit‰‰n asiakas
+  // Etsit√§√§n asiakas
   $query = "SELECT laskunsummapyoristys
             FROM asiakas
             WHERE tunnus = '$row[liitostunnus]'
@@ -473,12 +473,12 @@ if ($id > 0) {
   $asres = pupe_query($query);
   $asrow = mysql_fetch_assoc($asres);
 
-  //K‰sin syˆtetty summa johon lasku pyˆristet‰‰n
+  //K√§sin sy√∂tetty summa johon lasku py√∂ristet√§√§n
   if ($row["hinta"] <> 0 and abs($row["hinta"]-$summa) <= 0.5 and abs($summa) >= 0.5) {
     $summa = sprintf("%.2f",$row["hinta"]);
   }
 
-  // Jos laskun loppusumma pyˆristet‰‰n l‰himp‰‰n tasalukuun
+  // Jos laskun loppusumma py√∂ristet√§√§n l√§himp√§√§n tasalukuun
   if ($yhtiorow["laskunsummapyoristys"] == 'o' or $asrow["laskunsummapyoristys"] == 'o') {
     $summa = sprintf("%.2f", round($summa, 0));
   }
@@ -496,7 +496,7 @@ if ($id > 0) {
 
   if ($toita['nouto'] != '' and $row['kateinen'] != '' and $row["chn"] != '999' and ($row["mapvm"] == "" or $row["mapvm"] == '0000-00-00')) {
 
-    echo "<tr><th>".t("Verollinen Yhteens‰")."</th><td>$summa $row[valkoodi]</td></tr>";
+    echo "<tr><th>".t("Verollinen Yhteens√§")."</th><td>$summa $row[valkoodi]</td></tr>";
 
     echo "<tr><th>".t("Valitse kassalipas")."</th><td>";
 
@@ -561,13 +561,13 @@ if ($id > 0) {
   }
 
   if ($row["chn"] == '999' and $row["mapvm"] != "" and $row["mapvm"] != '0000-00-00') {
-    echo "<tr><th>".t("Maksutapa")."</th><td><font class='error'>".t("Tilaus on maksettu jo etuk‰teen luottokortilla").".</font></td></tr>";
+    echo "<tr><th>".t("Maksutapa")."</th><td><font class='error'>".t("Tilaus on maksettu jo etuk√§teen luottokortilla").".</font></td></tr>";
   }
 
   if (($toita['nouto'] !='' and $row['kateinen'] == '' ) or ($row["chn"] == '999' and $row["mapvm"] != "" and $row["mapvm"] != '0000-00-00')) {
 
-    // jos kyseess‰ on nouto jota *EI* makseta k‰teisell‰, kysyt‰‰n noutajan nime‰..
-    echo "<tr><th>".t("Syˆt‰ noutajan nimi")."</th>";
+    // jos kyseess√§ on nouto jota *EI* makseta k√§teisell√§, kysyt√§√§n noutajan nime√§..
+    echo "<tr><th>".t("Sy√∂t√§ noutajan nimi")."</th>";
     echo "<td><input size='60' type='text' name='noutaja'></td></tr>";
     echo "<input type='hidden' name='nouto' value='yes'>";
     echo "<input type='hidden' name='kassalipas' value=''>";
@@ -577,7 +577,7 @@ if ($id > 0) {
     $kentta  = "noutaja";
   }
 
-  echo "<tr><th>".t("L‰hete")."</th><td>";
+  echo "<tr><th>".t("L√§hete")."</th><td>";
 
   $query = "SELECT *
             FROM kirjoittimet

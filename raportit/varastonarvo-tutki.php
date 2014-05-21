@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("../inc/parametrit.inc");
@@ -19,19 +19,19 @@ $vv1   = sprintf("%04d", trim($vv1));
 if ($osasto == "") $osasto = trim($osasto2);
 if ($try    == "")    $try = trim($try2);
 
-// h‰rski oikeellisuustzekki
+// h√§rski oikeellisuustzekki
 if ($pp == "00" or $kk == "00" or $vv == "0000") $tee = $pp = $kk = $vv = "";
 if ($pp1 == "00" or $kk1 == "00" or $vv1 == "0000") $tee = $pp1 = $kk1 = $vv1 = "";
 
-// piirrell‰‰n formi
+// piirrell√§√§n formi
 echo "<form method='post' autocomplete='OFF'>";
 echo "<table>";
 echo "<tr>";
-echo "<th>".t("Syˆt‰ alku pp-kk-vvvv").":</th>";
+echo "<th>".t("Sy√∂t√§ alku pp-kk-vvvv").":</th>";
 echo "<td><input type='text' name='pp' size='5' value='$pp'><input type='text' name='kk' size='5' value='$kk'><input type='text' name='vv' size='7' value='$vv'></td>";
 echo "</tr>";
 echo "<tr>";
-echo "<th>".t("Syˆt‰ loppu pp-kk-vvvv").":</th>";
+echo "<th>".t("Sy√∂t√§ loppu pp-kk-vvvv").":</th>";
 echo "<td><input type='text' name='pp1' size='5' value='$pp1'><input type='text' name='kk1' size='5' value='$kk1'><input type='text' name='vv1' size='7' value='$vv1'></td>";
 echo "</tr>";
 echo "</table>";
@@ -75,12 +75,12 @@ if ($tee == "tee") {
     echo "<td align='right'>$trow[kpl]</td>";
     echo "<td align='right'>$trow[logistiikka]</td>";
 
-    //Etsit‰‰n vastaavat kirjapidon viennit
+    //Etsit√§√§n vastaavat kirjapidon viennit
     $lvalinta = '';
 
     if ($trow['laji'] == 'laskutus')   $lvalinta = "tila = 'U' and alatila = 'X' and selite not like 'Varastoontulo%'";
     if ($trow['laji'] == 'Inventointi') $lvalinta = "tila = 'X' and (selite like 'Inventointi%' or selite like 'KORJATTU: Inventointi%')";
-    if ($trow['laji'] == 'Ep‰kurantti') $lvalinta = "tila = 'X' and selite like '%ep‰kura%'";
+    if ($trow['laji'] == 'Ep√§kurantti') $lvalinta = "tila = 'X' and selite like '%ep√§kura%'";
     if ($trow['laji'] == 'tulo')     $lvalinta = " ((tila in ('H', 'M', 'P', 'Q', 'Y') and vienti in ('B', 'C', 'E', 'F', 'H', 'I')) or (tila = 'U' and alatila = 'X' and selite like 'Varastoontulo%'))";
 
     if ($lvalinta != '') {
@@ -132,7 +132,7 @@ if ($tee == "tee") {
   $lrow = mysql_fetch_assoc($lresult);
 
   echo "<br>";
-  echo t("Samalta ajanjaksolta varastonarvoon vaikuttavat k‰siviennit tileilt‰"). " $yhtiorow[varasto] & $yhtiorow[matkalla_olevat]: ";
+  echo t("Samalta ajanjaksolta varastonarvoon vaikuttavat k√§siviennit tileilt√§"). " $yhtiorow[varasto] & $yhtiorow[matkalla_olevat]: ";
   echo "<font class='message'>";
   echo round($lrow["summa"] - $automaatit, 2);
   echo " $yhtiorow[valkoodi]";
@@ -213,7 +213,7 @@ if ($tee == "tee") {
     }
   }
 
-  echo "</table><br><br>Yhteens‰: $eroyht";
+  echo "</table><br><br>Yhteens√§: $eroyht";
   echo "<br><br><hr>";
 
   echo "<font class='message'>".t("Myyntilaskut ja niiden varastonmuutos")."</font><br><br>";
@@ -343,7 +343,7 @@ if ($tee == "tee") {
       $mres = pupe_query($query);
       $mrow = mysql_fetch_assoc($mres);
 
-      // Laskulla luulatavimmin +- samaa tuotetta jolloin varmuutos ja kate yhteens‰ nolla
+      // Laskulla luulatavimmin +- samaa tuotetta jolloin varmuutos ja kate yhteens√§ nolla
       if ($srow["varmuutos"] == 0 and $mrow["varmuutos"] == 0) {
         $trow["varmuutos"]   = 0;
         $kpvarmuu       = 0;
@@ -378,7 +378,7 @@ if ($tee == "tee") {
     }
   }
 
-  echo "</table><br><br>Yhteens‰: $eroyht<br>";
+  echo "</table><br><br>Yhteens√§: $eroyht<br>";
 
   echo "<br><hr>";
   echo "<font class='message'>".t("Saapumiset ja niiden varastonmuutos (listataan vain jos eroja)")."</font><br><br>";
@@ -399,7 +399,7 @@ if ($tee == "tee") {
   echo "<tr>";
   echo "<th>".t("saapuminen")."</th>";
   echo "<th>".t("toimittaja")."</th>";
-  echo "<th>".t("j‰lkilaskettu")."</th>";
+  echo "<th>".t("j√§lkilaskettu")."</th>";
   echo "<th>".t("laskut")."</th>";
   echo "<th>".t("tilausrivit")."</th>";
   echo "<th>".t("tapahtumat")."</th>";
@@ -427,7 +427,7 @@ if ($tee == "tee") {
     $keikres = pupe_query($query);
     $keekrow = mysql_fetch_assoc($keikres);
 
-    // Nollataan n‰m‰
+    // Nollataan n√§m√§
     $kprow = array();
     $k2prow = array();
 
@@ -449,7 +449,7 @@ if ($tee == "tee") {
     }
 
     // haetaan liitettyjen rahti-laskujen varastonmuutos kirjanpidosta
-    // suuntaa-antava, koska rahtilaskusta on voitu liitt‰‰ vain osa t‰h‰n saapumiseen
+    // suuntaa-antava, koska rahtilaskusta on voitu liitt√§√§ vain osa t√§h√§n saapumiseen
     if ($keekrow["rahtilaskut"] != "") {
       $query = "SELECT sum(summa) rahtilaskusummakokonaan
                 FROM lasku
@@ -458,7 +458,7 @@ if ($tee == "tee") {
       $k2pres = pupe_query($query);
       $k2prow = mysql_fetch_assoc($k2pres);
 
-      // Haetaan kululaskun kaikki verotiliˆinnit jotta voidaan tallentaa myˆs veroton summa
+      // Haetaan kululaskun kaikki verotili√∂innit jotta voidaan tallentaa my√∂s veroton summa
       $query = "SELECT sum(summa) summa
                 from tiliointi
                 where yhtio  = '$kukarow[yhtio]'
@@ -513,7 +513,7 @@ if ($tee == "tee") {
   $ero = $lomuutos - $kpmuutos;
 
   echo "<tr>";
-  echo "<th colspan='4'>".t('Saapumiset yhteens‰')."</th>";
+  echo "<th colspan='4'>".t('Saapumiset yhteens√§')."</th>";
   echo "<th align='right' NOWRAP>".round($timuutos,2)."</th>";
   echo "<th align='right' NOWRAP>".round($lomuutos,2)."</th>";
   echo "<th align='right' NOWRAP>".round($kpmuutos,2)."</th>";
@@ -523,7 +523,7 @@ if ($tee == "tee") {
   echo "</table>";
 
   echo "<br><hr>";
-  echo "<font class='message'>".t("V‰‰rin laskutetut myyntitilaukset (suuntaa-antava arvio)")."</font><br><br>";
+  echo "<font class='message'>".t("V√§√§rin laskutetut myyntitilaukset (suuntaa-antava arvio)")."</font><br><br>";
 
   echo "<table>";
 
@@ -556,7 +556,7 @@ if ($tee == "tee") {
               FROM tapahtuma use index (yhtio_tuote_laadittu)
               WHERE tapahtuma.yhtio  = '$kukarow[yhtio]'
               AND tapahtuma.tuoteno  = '$tuoterow[tuoteno]'
-              AND tapahtuma.laji    != 'Ep‰kurantti'
+              AND tapahtuma.laji    != 'Ep√§kurantti'
               AND tapahtuma.kpl     != 0
               AND laadittu           >= '$vv-$kk-$pp 00:00:00'
               AND laadittu           <= '$vv1-$kk1-$pp1 23:59:59'
@@ -568,7 +568,7 @@ if ($tee == "tee") {
 
     while ($tapahtumarow = mysql_fetch_assoc($result2)) {
 
-      // pidet‰‰n tallessa aina viimeisin tulon kehahinta
+      // pidet√§√§n tallessa aina viimeisin tulon kehahinta
       if ($tapahtumarow["laji"] == "tulo") {
         $edellisen_tulon_kehahin = $tapahtumarow["kplhinta"];
       }
@@ -595,7 +595,7 @@ if ($tee == "tee") {
   }
 
   echo "<tr>";
-  echo "<th colspan='5'>Yhteens‰</th>";
+  echo "<th colspan='5'>Yhteens√§</th>";
   echo "<th>".sprintf("%.02f", $heitto_yhteensa)."</th>";
   echo "</tr>";
 

@@ -1,9 +1,9 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-// Ei k‰ytet‰ pakkausta
+// Ei k√§ytet√§ pakkausta
 $compression = FALSE;
 
 if (isset($_POST["tee"])) {
@@ -32,7 +32,7 @@ if ($tee == 'lataa_tiedosto') {
 if ($ajax_request) {
   if ($hae_varastot) {
     if ($yhtio == '') {
-      //jos dropdownista valitaan tyhj‰ pit‰‰ t‰ss‰ kohtaan yhtioon laittaa joku ep‰validi yhtio, koska hae_varastot funkkarissa on empty(), jolloin k‰ytet‰‰n kukarow:ta
+      //jos dropdownista valitaan tyhj√§ pit√§√§ t√§ss√§ kohtaan yhtioon laittaa joku ep√§validi yhtio, koska hae_varastot funkkarissa on empty(), jolloin k√§ytet√§√§n kukarow:ta
       $yhtio = "EPAVALIDI";
     }
     $varastot = hae_varastot(array(), $yhtio);
@@ -43,7 +43,7 @@ if ($ajax_request) {
   }
   elseif ($hae_inventointilajit) {
     if ($yhtio == '') {
-      //jos dropdownista valitaan tyhj‰ pit‰‰ t‰ss‰ kohtaan yhtioon laittaa joku ep‰validi yhtio, koska hae_varastot funkkarissa on empty(), jolloin k‰ytet‰‰n kukarow:ta
+      //jos dropdownista valitaan tyhj√§ pit√§√§ t√§ss√§ kohtaan yhtioon laittaa joku ep√§validi yhtio, koska hae_varastot funkkarissa on empty(), jolloin k√§ytet√§√§n kukarow:ta
       $yhtio = "EPAVALIDI";
     }
     $inventointi_lajit = hae_inventointilajit(array(), $yhtio);
@@ -54,7 +54,7 @@ if ($ajax_request) {
   }
   elseif ($hae_tilikaudet) {
     if ($yhtio == '') {
-      //jos dropdownista valitaan tyhj‰ pit‰‰ t‰ss‰ kohtaan yhtioon laittaa joku ep‰validi yhtio, koska hae_varastot funkkarissa on empty(), jolloin k‰ytet‰‰n kukarow:ta
+      //jos dropdownista valitaan tyhj√§ pit√§√§ t√§ss√§ kohtaan yhtioon laittaa joku ep√§validi yhtio, koska hae_varastot funkkarissa on empty(), jolloin k√§ytet√§√§n kukarow:ta
       $yhtio = "EPAVALIDI";
     }
     $tilikaudet = hae_tilikaudet(array(), $yhtio);
@@ -90,7 +90,7 @@ if ($ajax_request) {
     $request['ppl'] = $paiva_1[2];
 
     if ($onko_validi) {
-      //requestiin pit‰‰ setata pvm_inventointeja_yhteensa jossa queryss‰ osataan laskea mukaan myˆs inventoinnit joiden saldo ei muuttunut
+      //requestiin pit√§√§ setata pvm_inventointeja_yhteensa jossa queryss√§ osataan laskea mukaan my√∂s inventoinnit joiden saldo ei muuttunut
       $request['pvm_inventointeja_yhteensa'] = true;
       $inventointien_lkm = count(hae_inventoinnit($request));
     }
@@ -169,8 +169,8 @@ gauge();
 <script>
   (function($) {
     var InventointiastePlugin = function(element) {
-      //TODO varasto, inventointilaji ja tilikausi toiminnallisuudet pit‰‰ koodata omiin plugareihin.
-      //TODO HTML generointi pit‰‰ kirjoittaa omaan plugariin, jolle passataan data.
+      //TODO varasto, inventointilaji ja tilikausi toiminnallisuudet pit√§√§ koodata omiin plugareihin.
+      //TODO HTML generointi pit√§√§ kirjoittaa omaan plugariin, jolle passataan data.
       var element = $(element);
       var obj = this;
       var yhtio;
@@ -234,19 +234,19 @@ gauge();
       };
 
       var parsi_yhtio_domista = function() {
-        //TODO kaikki yhtiot listattu domiin checkbox vieress‰
+        //TODO kaikki yhtiot listattu domiin checkbox vieress√§
 
-        //TODO kirjoita parsi yhtio, joka osaa hakea yhtion jotenkin j‰rkev‰sti dropdownista
+        //TODO kirjoita parsi yhtio, joka osaa hakea yhtion jotenkin j√§rkev√§sti dropdownista
         //yhtio dropdown
         //custom case
         var yhtio = $(document).find('#yhtio').find(':selected').attr('data-yhtio');
 
         if (yhtio === undefined) {
-          //yhtio kirjotettu esim divin sis‰‰n
+          //yhtio kirjotettu esim divin sis√§√§n
           yhtio = $(document).find('#yhtio').html();
           if (yhtio === undefined) {
             if (console && console.log) {
-              console.log('Varastoa ei lˆytynyt domista!!!!');
+              console.log('Varastoa ei l√∂ytynyt domista!!!!');
 
               return undefined;
             }
@@ -522,7 +522,7 @@ gauge();
         url: 'inventointiaste.php?ajax_request=1&hae_inventointien_lukumaara_paivan_perusteella=1&no_head=yes'
       }).done(function(data) {
         if (console && console.log) {
-          console.log('Inventointien m‰‰r‰ onnistui');
+          console.log('Inventointien m√§√§r√§ onnistui');
           console.log(data);
         }
         $('#paiva_inventoitu_yhteensa_td').html(data);
@@ -634,7 +634,7 @@ if ($request['tee'] == 'aja_raportti') {
         'order'   => 2
       ),
       'paiva'             => array(
-        'header' => t('P‰iv‰'),
+        'header' => t('P√§iv√§'),
         'order'   => 3
       ),
       'kellon_aika'         => array(
@@ -662,11 +662,11 @@ if ($request['tee'] == 'aja_raportti') {
         'order'   => 20
       ),
       'kpl'             => array(
-        'header' => t('Inventointi m‰‰r‰'),
+        'header' => t('Inventointi m√§√§r√§'),
         'order'   => 50
       ),
       'tuoteryhma'         => array(
-        'header' => t('Tuoteryhm‰'),
+        'header' => t('Tuoteryhm√§'),
         'order'   => 21
       ),
       'hyllypaikka'         => array(
@@ -678,7 +678,7 @@ if ($request['tee'] == 'aja_raportti') {
         'order'   => 89
       ),
       'keraysvyohyke_nimitys'     => array(
-        'header' => t('Ker‰ysvyohykkeen nimitys'),
+        'header' => t('Ker√§ysvyohykkeen nimitys'),
         'order'   => 40
       ),
     );
@@ -711,12 +711,12 @@ function init(&$request) {
   global $palvelin2;
 
   echo "<input type='hidden' id='valitse_varasto_error_message' value='".t("Valitse varasto")."' />";
-  echo "<input type='hidden' id='valitse_aika_error_message' value='".t("Syˆt‰ validi aika")."' />";
+  echo "<input type='hidden' id='valitse_aika_error_message' value='".t("Sy√∂t√§ validi aika")."' />";
   echo "<input type='hidden' id='12kk_gauge_message' value='".t("Juokseva 12kk")."' />";
   echo "<input type='hidden' id='tilikausi_gauge_message' value='".t("Kuluva tilikausi")."' />";
-  echo "<input type='hidden' id='yhtio_ei_varasto_message' value='".t("Yhtiˆll‰ ei ole varastoja")."' />";
-  echo "<input type='hidden' id='yhtio_ei_inventointilajeja_message' value='".t("Yhtiˆll‰ ei ole inventointilajeja")."' />";
-  echo "<input type='hidden' id='valitse_tilikausi_message' value='".t("Valitse tilikausi tai syˆt‰ p‰iv‰m‰‰r‰ rajat")."' />";
+  echo "<input type='hidden' id='yhtio_ei_varasto_message' value='".t("Yhti√∂ll√§ ei ole varastoja")."' />";
+  echo "<input type='hidden' id='yhtio_ei_inventointilajeja_message' value='".t("Yhti√∂ll√§ ei ole inventointilajeja")."' />";
+  echo "<input type='hidden' id='valitse_tilikausi_message' value='".t("Valitse tilikausi tai sy√∂t√§ p√§iv√§m√§√§r√§ rajat")."' />";
   echo "<input type='hidden' id='down_arrow' value='{$palvelin2}pics/lullacons/bullet-arrow-down.png' />";
   echo "<input type='hidden' id='right_arrow' value='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />";
 
@@ -726,18 +726,18 @@ function init(&$request) {
 
   $request['yhtiot'] = hae_yhtiot($request);
   if (!empty($request['yhtiot'])) {
-    array_unshift($request['yhtiot'], array('tunnus' => '', 'nimi'   => t("Valitse yhtiˆ")));
+    array_unshift($request['yhtiot'], array('tunnus' => '', 'nimi'   => t("Valitse yhti√∂")));
   }
   else {
-    $request['yhtiot'] = array('tunnus' => '', 'nimi'   => t("Valitse yhtiˆ"));
+    $request['yhtiot'] = array('tunnus' => '', 'nimi'   => t("Valitse yhti√∂"));
   }
 
   $request['tilikaudet'] = hae_tilikaudet($request);
   if (!empty($request['tilikaudet'])) {
-    array_unshift($request['tilikaudet'], array('tunnus'   => '', 'tilikausi'   => t("Valitse tilikausi tai syˆt‰ p‰iv‰m‰‰r‰ rajat")));
+    array_unshift($request['tilikaudet'], array('tunnus'   => '', 'tilikausi'   => t("Valitse tilikausi tai sy√∂t√§ p√§iv√§m√§√§r√§ rajat")));
   }
   else {
-    $request['tilikaudet'] = array('tunnus'   => '', 'tilikausi'   => t("Valitse tilikausi tai syˆt‰ p‰iv‰m‰‰r‰ rajat"));
+    $request['tilikaudet'] = array('tunnus'   => '', 'tilikausi'   => t("Valitse tilikausi tai sy√∂t√§ p√§iv√§m√§√§r√§ rajat"));
   }
 
   foreach ($request['tilikaudet'] as $tilikausi) {
@@ -760,7 +760,7 @@ function init(&$request) {
   $request['varastot'] = hae_varastot($request);
 
   if (empty($request['valitut_varastot'])) {
-    //ensimm‰inen sivulataus, requestista ei ole tullut valittuja varastoja, rajataan k‰yttˆliittym‰‰n esivalittujen varastojen perusteella
+    //ensimm√§inen sivulataus, requestista ei ole tullut valittuja varastoja, rajataan k√§ytt√∂liittym√§√§n esivalittujen varastojen perusteella
     foreach ($request['varastot'] as $varasto) {
       if (!empty($varasto['checked'])) {
         $request['valitut_varastot'][] = $varasto['tunnus'];
@@ -771,7 +771,7 @@ function init(&$request) {
   $request['inventointilajit'] = hae_inventointilajit($request);
 
   if (empty($request['valitut_inventointilajit'])) {
-    //ensimm‰inen sivulataus, requestista ei ole tullut valittuja inventointilajeja, rajataan k‰yttˆliittym‰‰n esivalittujen inventointilajien perusteella
+    //ensimm√§inen sivulataus, requestista ei ole tullut valittuja inventointilajeja, rajataan k√§ytt√∂liittym√§√§n esivalittujen inventointilajien perusteella
     foreach ($request['inventointilajit'] as $inventointilaji) {
       if (!empty($inventointilaji['checked'])) {
         $request['valitut_inventointilajit'][] = $inventointilaji['selite'];
@@ -782,14 +782,14 @@ function init(&$request) {
   $request['statukset'] = hae_tuote_statukset($request);
 
   if (empty($request['valittu_status'])) {
-    //ensimm‰inen sivulataus, requestista ei ole tullut valittuja statuksia, rajataan k‰yttˆliittym‰‰n esivalitun statuksen eli ensimm‰isen statuksen perusteella
+    //ensimm√§inen sivulataus, requestista ei ole tullut valittuja statuksia, rajataan k√§ytt√∂liittym√§√§n esivalitun statuksen eli ensimm√§isen statuksen perusteella
     $request['valittu_status'] = $request['statukset'][0]['selite'];
   }
 }
 
 function echo_arvot(&$request) {
 
-  //haetaan t‰m‰n tilikauden j‰ljell‰ olevien tyˆp‰ivien lukum‰‰r‰
+  //haetaan t√§m√§n tilikauden j√§ljell√§ olevien ty√∂p√§ivien lukum√§√§r√§
   $tyopaivien_lukumaara = hae_tyopaivien_lukumaara($request['tamanhetkinen_tilikausi']['tilikausi_alku'], $request['tamanhetkinen_tilikausi']['tilikausi_loppu']);
 
   $inventointien_lukumaara_12kk = hae_inventoitavien_lukumaara($request, '12kk');
@@ -802,8 +802,8 @@ function echo_arvot(&$request) {
 
   $inventointeja_per_paiva = ($tuotepaikkojen_lukumaara - $inventointien_lukumaara_tilikausi) / $tyopaivien_lukumaara;
 
-  //Hae_inventoinnit hakee valitun tilikauden tai annetun p‰iv‰m‰‰r‰ v‰lin perusteella inventoinnit.
-  //Koska hae_inventoinnit funktiota kutsutaan t‰m‰n funktion j‰lkeen uudestaan pit‰‰ tilikausi ja p‰iv‰m‰‰r‰t laittaa talteen, jotta ohjelma toimii oikein.
+  //Hae_inventoinnit hakee valitun tilikauden tai annetun p√§iv√§m√§√§r√§ v√§lin perusteella inventoinnit.
+  //Koska hae_inventoinnit funktiota kutsutaan t√§m√§n funktion j√§lkeen uudestaan pit√§√§ tilikausi ja p√§iv√§m√§√§r√§t laittaa talteen, jotta ohjelma toimii oikein.
   $valittu_tilikausi_temp = $request['valittu_tilikausi'];
   $vva_temp = $request['vva'];
   $kka_temp = $request['kka'];
@@ -812,9 +812,9 @@ function echo_arvot(&$request) {
   $vvl_temp = $request['vvl'];
   $kkl_temp = $request['kkl'];
   $ppl_temp = $request['ppl'];
-  //unsetataan valittu_tilikausi jotta parsi_paivat-funktiossa k‰ytet‰‰n vva kka jne.
+  //unsetataan valittu_tilikausi jotta parsi_paivat-funktiossa k√§ytet√§√§n vva kka jne.
   unset($request['valittu_tilikausi']);
-  //Defaulttina halutaan eilisen p‰iv‰n inventoinnit. Koska queryss‰ on BETWEEN alku AND loppu niin ajat pit‰‰ antaa allaolevan mukaisella tavalla
+  //Defaulttina halutaan eilisen p√§iv√§n inventoinnit. Koska queryss√§ on BETWEEN alku AND loppu niin ajat pit√§√§ antaa allaolevan mukaisella tavalla
   $eilen = date('d.m.Y', strtotime('now - 1 day'));
 
   $eilen_array = explode('.', $eilen);
@@ -828,11 +828,11 @@ function echo_arvot(&$request) {
   $request['kkl'] = $tanaan[1];
   $request['ppl'] = $tanaan[2];
 
-  //requestiin pit‰‰ setata pvm_inventointeja_yhteensa jossa queryss‰ osataan laskea mukaan myˆs inventoinnit joiden saldo ei muuttunut
+  //requestiin pit√§√§ setata pvm_inventointeja_yhteensa jossa queryss√§ osataan laskea mukaan my√∂s inventoinnit joiden saldo ei muuttunut
   $request['pvm_inventointeja_yhteensa'] = true;
   $eilen_inventoitu_yhteensa = count(hae_inventoinnit($request));
 
-  //asetetaan tempist‰ value takaisin omille paikoilleen.
+  //asetetaan tempist√§ value takaisin omille paikoilleen.
   $request['valittu_tilikausi'] = $valittu_tilikausi_temp;
   $request['vva'] = $vva_temp;
   $request['kka'] = $kka_temp;
@@ -844,7 +844,7 @@ function echo_arvot(&$request) {
 
   echo "<table>";
   echo "<tr>";
-  echo "<th>".t("Tuotepaikkojen inventointeja pit‰‰ suorittaa per p‰iv‰")."</th>";
+  echo "<th>".t("Tuotepaikkojen inventointeja pit√§√§ suorittaa per p√§iv√§")."</th>";
   echo "<td>".round($inventointeja_per_paiva, 0)."</td>";
   echo "</tr>";
 
@@ -854,7 +854,7 @@ function echo_arvot(&$request) {
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th><input type='text' id='inventoitu_yhteensa_pvm' size=10 value='{$eilen}'/> ".t("inventoitu yhteens‰")."</th>";
+  echo "<th><input type='text' id='inventoitu_yhteensa_pvm' size=10 value='{$eilen}'/> ".t("inventoitu yhteens√§")."</th>";
   echo "<td id='paiva_inventoitu_yhteensa_td'>{$eilen_inventoitu_yhteensa}</td>";
   echo "</tr>";
 
@@ -920,7 +920,7 @@ function echo_table_second_layer($rivi, $rivi_index) {
 
     echo "<td></td>";
     echo "<td>";
-    //$inventointilaji pit‰‰ sis‰ll‰‰n ainoastaan tietyn inventointilajin inventointeja, t‰llˆin voimme printata lajin nimityksen ensimm‰isest‰ alkiosta
+    //$inventointilaji pit√§√§ sis√§ll√§√§n ainoastaan tietyn inventointilajin inventointeja, t√§ll√∂in voimme printata lajin nimityksen ensimm√§isest√§ alkiosta
     echo $inventointilaji['tapahtumat'][0]['inventointilaji'];
     echo "&nbsp";
     echo "<img class='inventointilajeittain_img' src='{$palvelin2}pics/lullacons/bullet-arrow-down.png' />";
@@ -958,9 +958,9 @@ function echo_table_third_layer($inventointilaji) {
   echo "<tr>";
   echo "<th>".t("Tuoteno")."</th>";
   echo "<th>".t("Nimitys")."</th>";
-  echo "<th>".t("Tuoteryhm‰")."</th>";
+  echo "<th>".t("Tuoteryhm√§")."</th>";
   echo "<th>".t("Hyllypaikka")."</th>";
-  echo "<th>".t("Ker‰ysvyˆhyke")."</th>";
+  echo "<th>".t("Ker√§ysvy√∂hyke")."</th>";
   echo "<th>".t("Kpl")."</th>";
   echo "<th>".t("Rahavaikutus")."</th>";
   echo "<th>".t("Selite")."</th>";
@@ -1002,14 +1002,14 @@ function echo_kayttoliittyma($request) {
   echo "<td><input type='checkbox' name='tallenna_exceliin' ".(!empty($request['tallenna_exceliin']) ? 'checked="checked"' : '')."/></td>";
   echo "</tr>";
   echo "<tr>";
-  echo "<th>", t("Syˆt‰ alkup‰iv‰m‰‰r‰"), " (", t("pp-kk-vvvv"), ")</th>";
+  echo "<th>", t("Sy√∂t√§ alkup√§iv√§m√§√§r√§"), " (", t("pp-kk-vvvv"), ")</th>";
   echo "<td><input type='text' name='ppa' id='ppa' class='alku_aika' value='{$request['ppa']}' size='3'>";
   echo "<input type='text' name='kka' id='kka' class='alku_aika' value='{$request['kka']}' size='3'>";
   echo "<input type='text' name='vva' id='vva' class='alku_aika' value='{$request['vva']}' size='5'></td>";
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>", t("Syˆt‰ loppup‰iv‰m‰‰r‰"), " (", t("pp-kk-vvvv"), ")</th>";
+  echo "<th>", t("Sy√∂t√§ loppup√§iv√§m√§√§r√§"), " (", t("pp-kk-vvvv"), ")</th>";
   echo "<td><input type='text' name='ppl' id='ppl' class='loppu_aika' value='{$request['ppl']}' size='3'>";
   echo "<input type='text' name='kkl' id='kkl' class='loppu_aika' value='{$request['kkl']}' size='3'>";
   echo "<input type='text' name='vvl' id='vvl' class='loppu_aika' value='{$request['vvl']}' size='5'></td>";
@@ -1023,7 +1023,7 @@ function echo_kayttoliittyma($request) {
     echo "<option value='{$tilikausi['tunnus']}' {$tilikausi['selected']}>{$tilikausi['tilikausi']}</option>";
   }
   echo "</select>";
-  echo t("Tilikauden valinta yliajaa yll‰olevan p‰iv‰m‰‰r‰ valinnan");
+  echo t("Tilikauden valinta yliajaa yll√§olevan p√§iv√§m√§√§r√§ valinnan");
   echo "</td>";
   echo "</tr>";
 
@@ -1039,7 +1039,7 @@ function echo_kayttoliittyma($request) {
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>".t("Valitse yhtiˆ")."</th>";
+  echo "<th>".t("Valitse yhti√∂")."</th>";
   echo "<td>";
   echo "<select id='yhtio' name='yhtio'>";
   foreach ($request['yhtiot'] as $yhtio) {
@@ -1055,7 +1055,7 @@ function echo_kayttoliittyma($request) {
     $chk = $request['ei_huomioida_tuotepaikkoja_avainsanoista'] ? 'checked' : '';
 
     echo "<tr>";
-    echo "<th>",t("Ei huomioida avainsanoihin m‰‰riteltyj‰ tuotepaikkoja"),"</th>";
+    echo "<th>",t("Ei huomioida avainsanoihin m√§√§riteltyj√§ tuotepaikkoja"),"</th>";
     echo "<td>";
     echo "<input type='hidden' name='ei_huomioida_tuotepaikkoja_avainsanoista[]' value='default' /><br />";
     echo "<input type='checkbox' name='ei_huomioida_tuotepaikkoja_avainsanoista[]' {$chk} /><br />";
@@ -1124,10 +1124,10 @@ function kasittele_rivit($rivit) {
       $aika = $eilinen;
     }
 
-    //ker‰t‰‰n kuukausittain luvut suoraan kuukauden alle
+    //ker√§t√§√§n kuukausittain luvut suoraan kuukauden alle
     keraa_kuukausittain_luvut($rivi, $rivit_temp, $inventointilaji, $aika);
 
-    //ker‰t‰‰n inventointilajeittain luvut suoraan inventointilajin alle
+    //ker√§t√§√§n inventointilajeittain luvut suoraan inventointilajin alle
     keraa_inventointilajeittain_luvut($rivi, $rivit_temp, $inventointilaji, $aika);
 
     $rivit_temp[$aika]['inventointilajit'][$inventointilaji]['tapahtumat'][] = $rivi;
@@ -1194,7 +1194,7 @@ function parsi_paivat(&$request) {
 
   if (!empty($request['valittu_tilikausi'])) {
     $tilikausi_temp = search_array_key_for_value_recursive($request['tilikaudet'], 'tunnus', $request['valittu_tilikausi']);
-    //funktion on tarkoitus palauttaa ainoastaan yksi tilikausi, siksi voimme viitata indeksill‰
+    //funktion on tarkoitus palauttaa ainoastaan yksi tilikausi, siksi voimme viitata indeksill√§
     $request['alku_aika'] = $tilikausi_temp[0]['tilikausi_alku'];
     $request['loppu_aika'] = $tilikausi_temp[0]['tilikausi_loppu'];
   }
@@ -1242,7 +1242,7 @@ function hae_inventoitavien_lukumaara(&$request, $aikavali_tyyppi = '') {
   }
 
   if (!empty($request['valittu_yhtio'])) {
-    //jos requestista on tullut yhtio k‰ytet‰‰n sit‰
+    //jos requestista on tullut yhtio k√§ytet√§√§n sit√§
     $yhtio = $request['valittu_yhtio'];
   }
   else {
@@ -1284,7 +1284,7 @@ function hae_tuotepaikkojen_lukumaara(&$request) {
   global $kukarow;
 
   if (!empty($request['valittu_yhtio'])) {
-    //jos requestista on tullut yhtio k‰ytet‰‰n sit‰
+    //jos requestista on tullut yhtio k√§ytet√§√§n sit√§
     $yhtio = $request['valittu_yhtio'];
   }
   else {
@@ -1330,7 +1330,7 @@ function kuuluuko_hylly_varastoon($request, $varasto_row) {
             AND varastopaikat.tunnus IN (".implode(', ', $request['valitut_varastot']).")";
 
   $count = 0;
-  //jos ollaan valittu kaikki varastot tiedet‰‰n, ett‰ se kuuluu varmasti valittuihin varastoihin
+  //jos ollaan valittu kaikki varastot tiedet√§√§n, ett√§ se kuuluu varmasti valittuihin varastoihin
   if (count($request['varastot']) == count($request['valitut_varastot'])) {
     $count = $varasto_row['kpl'];
   }
@@ -1349,7 +1349,7 @@ function hae_inventoinnit(&$request) {
   global $kukarow, $yhtiorow;
 
   parsi_paivat($request);
-  //kun inventointeja haetaan p‰iv‰n perusteella Inventointeja yhteens‰ kentt‰‰n, halutaan n‰ytt‰‰ myˆs inventoinnit joiden inventoitu saldo on ollut 0
+  //kun inventointeja haetaan p√§iv√§n perusteella Inventointeja yhteens√§ kentt√§√§n, halutaan n√§ytt√§√§ my√∂s inventoinnit joiden inventoitu saldo on ollut 0
   if (empty($request['pvm_inventointeja_yhteensa'])) {
     $tapahtuma_where = "AND tapahtuma.kpl != 0";
   }
@@ -1366,7 +1366,7 @@ function hae_inventoinnit(&$request) {
   }
 
   if (!empty($request['valittu_yhtio'])) {
-    //jos requestista on tullut yhtio k‰ytet‰‰n sit‰
+    //jos requestista on tullut yhtio k√§ytet√§√§n sit√§
     $yhtio = $request['valittu_yhtio'];
   }
   else {
@@ -1396,7 +1396,7 @@ function hae_inventoinnit(&$request) {
             tuote.try AS tuoteryhma,
             tapahtuma.kpl,
             Concat_ws('-', tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllytaso, tapahtuma.hyllyvali) AS hyllypaikka,
-            IFNULL(kuka.nimi, '".t("Poistettu k‰ytt‰j‰")."') as laatija,
+            IFNULL(kuka.nimi, '".t("Poistettu k√§ytt√§j√§")."') as laatija,
             IFNULL(keraysvyohyke.nimitys, '".t("Poistettu")."') AS keraysvyohyke_nimitys
             FROM tapahtuma USE INDEX (yhtio_laji_laadittu)
             JOIN tuote
@@ -1448,7 +1448,7 @@ function hae_varaston_hyllypaikkojen_lukumaara($request) {
   global $kukarow;
 
   if (!empty($request['valittu_yhtio'])) {
-    //jos requestista on tullut yhtio k‰ytet‰‰n sit‰
+    //jos requestista on tullut yhtio k√§ytet√§√§n sit√§
     $yhtio = $request['valittu_yhtio'];
   }
   else {
@@ -1481,7 +1481,7 @@ function hae_yhtiot(&$request = array()) {
         //jos requestista tulee valittu yhtio valitaan se
         $yhtio['selected'] = 'selected';
 
-        //laitetaan requestista tullut valittu yhtio talteen myˆhemp‰‰ k‰yttˆ‰ varten
+        //laitetaan requestista tullut valittu yhtio talteen my√∂hemp√§√§ k√§ytt√∂√§ varten
         $request['valittu_yhtio'] = $yhtio['yhtio'];
       }
       else {
@@ -1489,7 +1489,7 @@ function hae_yhtiot(&$request = array()) {
       }
     }
     else {
-      //jos requestista ei tule valittua yhtiota esivalitaan k‰ytt‰j‰n yhtiˆ
+      //jos requestista ei tule valittua yhtiota esivalitaan k√§ytt√§j√§n yhti√∂
       if ($yhtio['yhtio'] == $kukarow['yhtio']) {
         $yhtio['selected'] = 'selected';
       }
@@ -1507,12 +1507,12 @@ function hae_yhtiot(&$request = array()) {
 function hae_tilikaudet($request = array(), $yhtio = '') {
   global $kukarow;
 
-  //t‰m‰ on ajax_requestia varten
+  //t√§m√§ on ajax_requestia varten
   if (empty($yhtio)) {
     $yhtio = $kukarow['yhtio'];
   }
 
-  //jos requestista tulee yhtiˆ k‰ytet‰‰n sit‰
+  //jos requestista tulee yhti√∂ k√§ytet√§√§n sit√§
   if (!empty($request['yhtio'])) {
     $yhtio = $request['valittu_yhtio'];
   }
@@ -1529,8 +1529,8 @@ function hae_tilikaudet($request = array(), $yhtio = '') {
       $tilikausi['selected'] = 'selected';
     }
     else {
-      //jos requestista ei tule valittua tilikautta, esivalitaan t‰m‰n hetkinen tilikausi, mutta jos requestissa tulee ppa, kka, vva, ppl, kkl tai vvl tarkoittaa t‰m‰, ett‰ kyseess‰ ei ole ensimm‰inen sivu lataus, jolloin tilikautta ei kuulu esivalita
-      //huom! js est‰‰ ep‰validin ajan syˆtt‰misen, t‰llˆin riitt‰‰, ett‰ tarkastamme vva:n
+      //jos requestista ei tule valittua tilikautta, esivalitaan t√§m√§n hetkinen tilikausi, mutta jos requestissa tulee ppa, kka, vva, ppl, kkl tai vvl tarkoittaa t√§m√§, ett√§ kyseess√§ ei ole ensimm√§inen sivu lataus, jolloin tilikautta ei kuulu esivalita
+      //huom! js est√§√§ ep√§validin ajan sy√∂tt√§misen, t√§ll√∂in riitt√§√§, ett√§ tarkastamme vva:n
       if ($tilikausi['tilikausi_alku'] <= date('Y-m-d') and $tilikausi['tilikausi_loppu'] > date('Y-m-d') and empty($request['vva'])) {
         $tilikausi['selected'] = 'selected';
       }
@@ -1554,7 +1554,7 @@ function hae_varastot($request = array(), $yhtio = '') {
     $yhtio = $kukarow['yhtio'];
   }
 
-  //jos requestista on tullut valittu_yhtio k‰ytet‰‰n sit‰
+  //jos requestista on tullut valittu_yhtio k√§ytet√§√§n sit√§
   if (!empty($request['valittu_yhtio'])) {
     $yhtio = $request['valittu_yhtio'];
   }
@@ -1578,7 +1578,7 @@ function hae_varastot($request = array(), $yhtio = '') {
     }
     else {
       //requesista ei tullut valittuja varastoja
-      //valitaan k‰ytt‰j‰n oletusvarasto jos asetettu
+      //valitaan k√§ytt√§j√§n oletusvarasto jos asetettu
       if (!empty($kukarow['oletus_varasto'])) {
         if ($kukarow['oletus_varasto'] == $varasto['tunnus']) {
           $varasto['checked'] = 'checked';
@@ -1608,7 +1608,7 @@ function hae_inventointilajit($request = array(), $yhtio = '') {
     $yhtio = $kukarow['yhtio'];
   }
 
-  //jos requestista on tullut valittu_yhtio k‰ytet‰‰n sit‰
+  //jos requestista on tullut valittu_yhtio k√§ytet√§√§n sit√§
   if (!empty($request['valittu_yhtio'])) {
     $yhtio = $request['valittu_yhtio'];
   }
@@ -1686,6 +1686,6 @@ function echo_tallennus_formi($xls_filename) {
   echo "<br/>";
 }
 
-function array_utf8_encode(&$item, $key) {
-  $item = utf8_encode($item);
+function array_&$item, $key {
+  $item = $item;
 }

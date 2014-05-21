@@ -1,9 +1,9 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-// DataTables p‰‰lle
+// DataTables p√§√§lle
 $pupe_DataTables = "tilauskanta";
 
 require('../inc/parametrit.inc');
@@ -124,7 +124,7 @@ if ($tee == 'aja') {
     $laskutyyppi = $prow["tila"];
     $alatila     = $prow["alatila"];
 
-    //tehd‰‰n selv‰kielinen tila/alatila
+    //tehd√§√§n selv√§kielinen tila/alatila
     require "inc/laskutyyppi.inc";
 
     $tarkenne = " ";
@@ -201,27 +201,27 @@ if (!isset($ppl))
   $ppl = date("d",mktime(0, 0, 0, date("m"), date("d")+14, date("Y")));
 
 
-echo "<tr><th>".t("Syˆt‰ toimitusajan alku (pp-kk-vvvv)")."</th>
+echo "<tr><th>".t("Sy√∂t√§ toimitusajan alku (pp-kk-vvvv)")."</th>
     <td><input type='text' name='ppa' value='$ppa' size='3'></td>
     <td><input type='text' name='kka' value='$kka' size='3'></td>
     <td><input type='text' name='vva' value='$vva' size='5'></td>
     <td class='back'></td>
-    </tr><tr><th>".t("Syˆt‰ toimitusajan loppu (pp-kk-vvvv)")."</th>
+    </tr><tr><th>".t("Sy√∂t√§ toimitusajan loppu (pp-kk-vvvv)")."</th>
     <td><input type='text' name='ppl' value='$ppl' size='3'></td>
     <td><input type='text' name='kkl' value='$kkl' size='3'></td>
     <td><input type='text' name='vvl' value='$vvl' size='5'></td>
     <td class='back'></td></tr>";
 
-echo "<tr><th>".t("Syˆt‰ tuotenumerov‰li (Ei pakollinen)").":</th>
+echo "<tr><th>".t("Sy√∂t√§ tuotenumerov√§li (Ei pakollinen)").":</th>
     <td colspan='3'><input type='text' name='tuotealku' value='$tuotealku' size='15'> - <input type='text' name='tuoteloppu' value='$tuoteloppu' size='15'></td></tr>";
 
-// tehd‰‰n avainsana query
+// tehd√§√§n avainsana query
 $sresult = t_avainsana("OSASTO");
 
 echo "<tr><th>".t("Osasto (Ei pakollinen)")."</th><td colspan='3'>";
 
 echo "<select name='osasto'>";
-echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";
+echo "<option value=''>".t("N√§yt√§ kaikki")."</option>";
 
 while ($srow = mysql_fetch_array($sresult)) {
   $sel = '';
@@ -233,13 +233,13 @@ while ($srow = mysql_fetch_array($sresult)) {
 echo "</select>";
 echo "</td></tr>";
 
-// tehd‰‰n avainsana query
+// tehd√§√§n avainsana query
 $sresult = t_avainsana("TRY");
 
-echo "<tr><th>".t("Tuoteryhm‰ (Ei pakollinen)")."</th><td colspan='3'>";
+echo "<tr><th>".t("Tuoteryhm√§ (Ei pakollinen)")."</th><td colspan='3'>";
 
 echo "<select name='try'>";
-echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";
+echo "<option value=''>".t("N√§yt√§ kaikki")."</option>";
 
 while ($srow = mysql_fetch_array($sresult)) {
   $sel = '';

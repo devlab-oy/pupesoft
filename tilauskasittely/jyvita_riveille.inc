@@ -1,12 +1,12 @@
 <?php
 
 /*
-  T‰nne tarvitaan:
+  T√§nne tarvitaan:
   $jysum joka on loppusumma joka tilaukselle halutaan
   $tilausnumero TAI $valitut_tilausrivi_tunnukset
 
-  Jos jyvsumma on negatiivinen on se alennuksen m‰‰r‰
-  Jos jyvsumma sis‰lt‰‰ % merkin annetaan erikoisalennusta
+  Jos jyvsumma on negatiivinen on se alennuksen m√§√§r√§
+  Jos jyvsumma sis√§lt√§√§ % merkin annetaan erikoisalennusta
 
   $yhtiorow["jyvita_alennus"]
     ''  = Alennus jokaisen rivin hintaan
@@ -32,14 +32,14 @@ else {
   $hinta_riv2 = "tilausrivi.hinta";
 }
 
-// jos radiobutton verottomat hinnat on p‰‰ll‰ ja yhtion parametri verolliset myyntihinnat
+// jos radiobutton verottomat hinnat on p√§√§ll√§ ja yhtion parametri verolliset myyntihinnat
 // eli otetaan verot pois
 if ($tilausrivi_alvillisuus == 'E' and $yhtiorow['alv_kasittely'] == '') {
   $hinta_riv .= " / (1 + (tilausrivi.alv / 100)) ";
   $jyvitetaan_ristiin = "X";
 }
-//jos radiobutton verolliset hinnat on p‰‰ll‰ ja yhtion parametri verottomat myyntihinnat
-// eli lis‰t‰‰n verot
+//jos radiobutton verolliset hinnat on p√§√§ll√§ ja yhtion parametri verottomat myyntihinnat
+// eli lis√§t√§√§n verot
 elseif ($tilausrivi_alvillisuus != 'E' and $yhtiorow['alv_kasittely'] != '') {
   $hinta_riv .= " * (1 + (tilausrivi.alv / 100)) ";
   $jyvitetaan_ristiin = "X";
@@ -82,14 +82,14 @@ elseif ($jysum == 0) {
     $laskurow["hinta"] = 0;
   }
   else {
-    echo "<font class='error'>".t("Jyvitett‰v‰ summa ei saa olla nolla")."!</font><br>";
+    echo "<font class='error'>".t("Jyvitett√§v√§ summa ei saa olla nolla")."!</font><br>";
   }
 }
 elseif ($jysum < 0 and $nega_summa >= 0) {
-  echo "<font class='error'>".t("Et voi jyvitt‰‰ summaa negatiiviseksi jos sinulla ei ole hyvitysrivej‰")."!</font><br>";
+  echo "<font class='error'>".t("Et voi jyvitt√§√§ summaa negatiiviseksi jos sinulla ei ole hyvitysrivej√§")."!</font><br>";
 }
 elseif ($jysum > 0 and $plus_summa <= 0) {
-  echo "<font class='error'>".t("Et voi jyvitt‰‰ summaa positiiviseksi jos sinulla ei ole veloitusrivej‰")."!</font><br>";
+  echo "<font class='error'>".t("Et voi jyvitt√§√§ summaa positiiviseksi jos sinulla ei ole veloitusrivej√§")."!</font><br>";
 }
 else {
 
@@ -101,8 +101,8 @@ else {
     $laskurow["erikoisale"] = $jysum;
   }
   elseif ($yhtiorow["jyvita_alennus"] == "T" or ($yhtiorow["jyvita_alennus"] == "P" and $toim == "PROJEKTI")) {
-    //   Alennus lis‰t‰‰n alennustuotteelle
-    //  TODO t‰m‰ on osittain turhaa koska projektia ei ole viel‰ kˆytˆss‰, kohta on!
+    //   Alennus lis√§t√§√§n alennustuotteelle
+    //  TODO t√§m√§ on osittain turhaa koska projektia ei ole viel√§ k√∂yt√∂ss√§, kohta on!
     $query = "SELECT * FROM tuote WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$yhtiorow[alennus_tuotenumero]'";
     $rhire = pupe_query($query);
 
@@ -131,7 +131,7 @@ else {
   }
   else {
 
-    // Jyvitet‰‰n riveille uusihinta ja tallennetaan syˆtetty summa lasku.hinta-kentt‰‰n
+    // Jyvitet√§√§n riveille uusihinta ja tallennetaan sy√∂tetty summa lasku.hinta-kentt√§√§n
     // huomioidaan hyvitysrivit ja ei muuteta niitten hintoja
 
     $boob_jyva = 0;
@@ -139,11 +139,11 @@ else {
     $ale_query_select_lisa = generoi_alekentta_select('erikseen', 'M');
 
     if ($jysum < 0 and $nega_summa != 0) {
-      // jos jyvityssumma on miinusta ja meill‰ on hyvitysrivej‰, kosketaan vain hyvitysriveihin
+      // jos jyvityssumma on miinusta ja meill√§ on hyvitysrivej√§, kosketaan vain hyvitysriveihin
       $halu_summa = $jysum - $plus_summa;
       $jypro = $halu_summa / $nega_summa;
 
-      // Rullataan tilausrivej‰
+      // Rullataan tilausrivej√§
       $query = "SELECT tunnus, tuoteno, hinta, {$ale_query_select_lisa} tilkpl
                 FROM tilausrivi
                 WHERE yhtio     = '$kukarow[yhtio]'
@@ -155,11 +155,11 @@ else {
                 ORDER BY hinta";
     }
     elseif ($jysum > 0 and $plus_summa != 0) {
-      // jos jyvityssumma on plussaa ja meill‰ on veloitusrivej‰, kosketaan vain veloitusriveihin
+      // jos jyvityssumma on plussaa ja meill√§ on veloitusrivej√§, kosketaan vain veloitusriveihin
       $halu_summa = $jysum - $nega_summa;
       $jypro = $halu_summa / $plus_summa;
 
-      // Rullataan tilausrivej‰
+      // Rullataan tilausrivej√§
       $query = "SELECT tunnus, tuoteno, hinta, {$ale_query_select_lisa} tilkpl
                 FROM tilausrivi
                 WHERE yhtio     = '$kukarow[yhtio]'
@@ -171,7 +171,7 @@ else {
                 ORDER BY hinta";
     }
     else {
-      echo "<font class='error'>".t("Jyvitys ep‰onnistui")."!</font><br>";
+      echo "<font class='error'>".t("Jyvitys ep√§onnistui")."!</font><br>";
       $boob_jyva = 1;
     }
 
@@ -185,7 +185,7 @@ else {
         $upresult = pupe_query($query);
       }
 
-      //  P‰ivitet‰‰n laskulle hinta-kentt‰‰n syˆtetty summa, mutta vain siin‰ tapauksessa, ett‰ syˆtetty summa on verollinen.
+      //  P√§ivitet√§√§n laskulle hinta-kentt√§√§n sy√∂tetty summa, mutta vain siin√§ tapauksessa, ett√§ sy√∂tetty summa on verollinen.
       if ($yhtiorow['alv_kasittely'] == '' or ($yhtiorow['alv_kasittely'] != '' and $jyvitetaan_ristiin == "X")) {
         $query = "UPDATE lasku SET hinta = '$jysum' WHERE tunnus = '$kukarow[kesken]' and yhtio = '$kukarow[yhtio]'";
         $result = pupe_query($query);

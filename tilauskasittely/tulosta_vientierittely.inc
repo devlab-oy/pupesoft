@@ -21,7 +21,7 @@ $Xlask = 1;
 $Xsivu = 1;
 
 
-//hetaan kaikki otunnukset jotka lˆytyv‰t t‰n uusiotunnuksen alta
+//hetaan kaikki otunnukset jotka l√∂ytyv√§t t√§n uusiotunnuksen alta
 $Xquery = "SELECT distinct otunnus
            FROM tilausrivi
            WHERE tilausrivi.uusiotunnus = '$uusiotunnus'
@@ -35,12 +35,12 @@ while ($Xurow = mysql_fetch_array($Xuresult)) {
 
 $Xtunnukset2 = substr($Xtunnukset2,0,-1);
 
-// varmistetaan viel‰, ett‰ lˆyty tilauksia
+// varmistetaan viel√§, ett√§ l√∂yty tilauksia
 if ($Xtunnukset2 != "") {
 
   $Xkilot  = 0;
 
-  //haetaan kollim‰‰r‰ ja bruttopaino
+  //haetaan kollim√§√§r√§ ja bruttopaino
   $Xquery = "SELECT sum(kilot) kilot
              FROM rahtikirjat
              WHERE otsikkonro in ($Xtunnukset2) and yhtio='$kukarow[yhtio]'";
@@ -77,7 +77,7 @@ if ($Xtunnukset2 != "") {
   $Xriviresult = mysql_query($Xquery) or pupe_error($Xquery);
 
   if (mysql_num_rows($Xriviresult) < 1) {
-    echo t("Yht‰‰n tilausrivi‰ ei lˆytynyt")."!<br>";
+    echo t("Yht√§√§n tilausrivi√§ ei l√∂ytynyt")."!<br>";
   }
 
   // listan functiot...
@@ -151,12 +151,12 @@ if ($Xtunnukset2 != "") {
 
       if ($vakkeja) $Xpdf->draw_text(310, 572, t("VAK/UN", $kieli), $Xfirstpage, $Xpieni);
 
-      $Xpdf->draw_text(370, 572, t("M‰‰r‰", $kieli),      $Xfirstpage, $Xpieni);
+      $Xpdf->draw_text(370, 572, t("M√§√§r√§", $kieli),      $Xfirstpage, $Xpieni);
       $Xpdf->draw_text(430, 572, t("Hinta", $kieli),      $Xfirstpage, $Xpieni);
       $Xpdf->draw_text(470, 572, t("Paino", $kieli),      $Xfirstpage, $Xpieni);
 
       if ($yhtiorow["vienti_erittelyn_tulostus"] != "I") {
-        $Xpdf->draw_text(520, 572, t("Alkuper‰maa", $kieli),  $Xfirstpage, $Xpieni);
+        $Xpdf->draw_text(520, 572, t("Alkuper√§maa", $kieli),  $Xfirstpage, $Xpieni);
       }
 
       return($Xfirstpage);
@@ -217,7 +217,7 @@ if ($Xtunnukset2 != "") {
     function erittely_loppu ($Xfirstpage) {
       global $Xpdf, $yhtiorow, $Xsivu, $Xrectparam, $Xnorm, $Xpieni, $kieli;
 
-      //Alimmat kolme laatikkoa, yhtiˆtietoja
+      //Alimmat kolme laatikkoa, yhti√∂tietoja
       $Xpdf->draw_rectangle(55, 20, 20, 580,              $Xfirstpage, $Xrectparam);
       $Xpdf->draw_rectangle(55, 207, 20, 580,              $Xfirstpage, $Xrectparam);
       $Xpdf->draw_rectangle(55, 394, 20, 580,              $Xfirstpage, $Xrectparam);
@@ -230,7 +230,7 @@ if ($Xtunnukset2 != "") {
       $Xpdf->draw_text(257, 45, $yhtiorow["puhelin"],          $Xfirstpage, $Xpieni);
       $Xpdf->draw_text(217, 35, t("Telefax", $kieli).":",        $Xfirstpage, $Xpieni);
       $Xpdf->draw_text(247, 35, $yhtiorow["fax"],            $Xfirstpage, $Xpieni);
-      $Xpdf->draw_text(217, 25, t("S‰hkˆposti", $kieli).": ".$yhtiorow["email"], $Xfirstpage, $Xpieni);
+      $Xpdf->draw_text(217, 25, t("S√§hk√∂posti", $kieli).": ".$yhtiorow["email"], $Xfirstpage, $Xpieni);
 
       $Xpdf->draw_text(404, 45, t("Y-tunnus", $kieli).":",      $Xfirstpage, $Xpieni);
       $Xpdf->draw_text(454, 45, $yhtiorow["maa"]."-".$yhtiorow["ytunnus"],  $Xfirstpage, $Xpieni);
@@ -251,7 +251,7 @@ if ($Xtunnukset2 != "") {
 
   mysql_data_seek($Xriviresult, 0);
 
-  ///* Tehd‰‰n lista *///
+  ///* Tehd√§√§n lista *///
   $Xfirstpage = erittely_alku();
 
   while ($Xrow = mysql_fetch_array($Xriviresult)) {
@@ -261,5 +261,5 @@ if ($Xtunnukset2 != "") {
   erittely_loppu($Xfirstpage);
 }
 else {
-  echo "<font class='error'>".t("Tilausta ei lˆytynyt")."!<br>$Xquery<br></font>";
+  echo "<font class='error'>".t("Tilausta ei l√∂ytynyt")."!<br>$Xquery<br></font>";
 }

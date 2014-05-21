@@ -4,9 +4,9 @@ require ("inc/parametrit.inc");
 
 echo "<font class='head'>".t("Sanakirjan synkronointi")."</font><hr>";
 
-if ($oikeurow['paivitys'] != '1') { // Saako p‰ivitt‰‰
+if ($oikeurow['paivitys'] != '1') { // Saako p√§ivitt√§√§
   if ($uusi == 1) {
-    echo "<b>".t("Sinulla ei ole oikeutta lis‰t‰")."</b><br>";
+    echo "<b>".t("Sinulla ei ole oikeutta lis√§t√§")."</b><br>";
     $uusi = '';
   }
   if ($del == 1) {
@@ -96,13 +96,13 @@ if ($tee == "TEE" or $tee == "UPDATE") {
 
                 $sanakirjarow[$kieli] = pupesoft_cleanstring($sanakirjarow[$kieli]);
 
-                // Korjataan k‰‰nnˆksen eka merkki vastamaan referenssin ekan merkin kokoa
+                // Korjataan k√§√§nn√∂ksen eka merkki vastamaan referenssin ekan merkin kokoa
                 if (ctype_upper(substr($sanakirjarow["fi"], 0, 1)) === TRUE) {
                   // Eka merkki iso kirjain
                   $sanakirjarow[$kieli] = ucfirst($sanakirjarow[$kieli]);
                 }
                 else {
-                  // Muuten koko stringi pienill‰
+                  // Muuten koko stringi pienill√§
                   $sanakirjarow[$kieli] = strtolower($sanakirjarow[$kieli]);
                 }
 
@@ -171,10 +171,10 @@ if ($tee == "TEE" or $tee == "UPDATE") {
 
       while ($sanakirjarow = mysql_fetch_assoc($sanakirjaresult)) {
         echo "<tr><td>".$sanakirjarow["kysytty"]."</td>";
-        echo "<td>".$sanakirjarow["fi"]."</td><td><font class='error'>".t("Puuttuu referenssist‰")."</font></td>";
+        echo "<td>".$sanakirjarow["fi"]."</td><td><font class='error'>".t("Puuttuu referenssist√§")."</font></td>";
 
         foreach ($kieliarray as $kieli) {
-          echo "<td>".$sanakirjarow[$kieli]."</td><td><font class='error'>".t("Puuttuu referenssist‰")."</font></td>";
+          echo "<td>".$sanakirjarow[$kieli]."</td><td><font class='error'>".t("Puuttuu referenssist√§")."</font></td>";
         }
 
         echo "</tr>";

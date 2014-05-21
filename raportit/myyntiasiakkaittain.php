@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 if (isset($_POST["tee"])) {
@@ -19,7 +19,7 @@ if (isset($tee)) {
 else {
   echo "<font class='head'>".t("Myynti asiakkaittain").":</font><hr>";
 
-  //K‰yttˆliittym‰
+  //K√§ytt√∂liittym√§
   if (!isset($kka))
     $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
   if (!isset($vva))
@@ -49,11 +49,11 @@ else {
   echo "<input type='hidden' name='matee' value='kaikki'>";
 
   echo "<table style='display:inline;padding-right:4px;'>";
-  echo "<tr><th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+  echo "<tr><th>".t("Sy√∂t√§ alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
         <td><input type='text' name='ppa' value='$ppa' size='3'></td>
         <td><input type='text' name='kka' value='$kka' size='3'></td>
         <td><input type='text' name='vva' value='$vva' size='5'></td>
-        </tr><tr><th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+        </tr><tr><th>".t("Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
         <td><input type='text' name='ppl' value='$ppl' size='3'></td>
         <td><input type='text' name='kkl' value='$kkl' size='3'></td>
         <td><input type='text' name='vvl' value='$vvl' size='5'></td></tr>";
@@ -64,7 +64,7 @@ else {
   echo "</table>";
 
   // Monivalintalaatikot (osasto, try tuotemerkki...)
-  // M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
+  // M√§√§ritell√§√§n mitk√§ latikot halutaan mukaan
   $monivalintalaatikot = array("OSASTO", "TRY");
 
   require ("../tilauskasittely/monivalintalaatikot.inc");
@@ -120,7 +120,7 @@ else {
       echo "<th>".t("Ytunnus")."</th>";
       echo "<th>".t("Nimi")."</th>";
       echo "<th>".t("Nimitark")."</th>";
-      if ($summaa == '') echo "<th>".t("Aleryhm‰")."</th>";
+      if ($summaa == '') echo "<th>".t("Aleryhm√§")."</th>";
 
       if ($summaa == '') {
         for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
@@ -129,21 +129,21 @@ else {
       }
 
       if ($summaa == '') echo "<th>".t("Piiri")."</th>";
-      echo "<th>".t("M‰‰r‰")."</th>";
+      echo "<th>".t("M√§√§r√§")."</th>";
       echo "<th>".t("Summa")."</th>";
       echo "<th>".t("Kate")."</th>";
       echo "<th>".t("Katepros")."</th>";
     }
     else {
       echo "<br><font class='error'>".t("Hakutulos oli liian suuri")."!</font><br>";
-      echo "<font class='error'>".t("Tallenna/avaa tulos exceliss‰")."!</font><br><br>";
+      echo "<font class='error'>".t("Tallenna/avaa tulos exceliss√§")."!</font><br><br>";
     }
 
     $sarake = 0;
     $worksheet->write($excelrivi, $sarake++, t("Ytunnus"), $format_bold);
     $worksheet->write($excelrivi, $sarake++, t("Nimi"), $format_bold);
     $worksheet->write($excelrivi, $sarake++, t("Nimitark"), $format_bold);
-    if ($summaa == '') $worksheet->write($excelrivi, $sarake++, t("Aleryhm‰"), $format_bold);
+    if ($summaa == '') $worksheet->write($excelrivi, $sarake++, t("Aleryhm√§"), $format_bold);
 
     if ($summaa == '') {
       for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
@@ -152,7 +152,7 @@ else {
     }
 
     if ($summaa == '') $worksheet->write($excelrivi, $sarake++, t("Piiri"), $format_bold);
-    $worksheet->write($excelrivi, $sarake++, t("M‰‰r‰"), $format_bold);
+    $worksheet->write($excelrivi, $sarake++, t("M√§√§r√§"), $format_bold);
     $worksheet->write($excelrivi, $sarake++, t("Summa"), $format_bold);
     $worksheet->write($excelrivi, $sarake++, t("Kate"), $format_bold);
     $worksheet->write($excelrivi, $sarake++, t("Katepros"), $format_bold);
@@ -166,7 +166,7 @@ else {
           ${'ale'.$alepostfix} = 0;
         }
 
-        //haetaan tuoteryhmm‰n alennusryhm‰
+        //haetaan tuoteryhmm√§n alennusryhm√§
         $query = "SELECT alennus, alennuslaji
                   FROM asiakasalennus
                   WHERE yhtio='$kukarow[yhtio]' and ryhma = '$lrow[aleryhma]' and ytunnus = '$lrow[ytunnus]'";

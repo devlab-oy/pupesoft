@@ -146,7 +146,7 @@ class Unifaun {
 
     $uni_ready = $control->addChild('ready');
 
-    $uni_ready_val = $uni_ready->addChild('val', utf8_encode($mergeid));
+    $uni_ready_val = $uni_ready->addChild('val', $mergeid);
     $uni_ready_val->addAttribute('n', 'mergeid');
 
     $uni_close = $control->addChild('close');
@@ -154,7 +154,7 @@ class Unifaun {
     $uni_close_val = $uni_close->addChild('val', $printer);
     $uni_close_val->addAttribute('n', 'printer');
 
-    $uni_close_val = $uni_close->addChild('val', utf8_encode($mergeid));
+    $uni_close_val = $uni_close->addChild('val', $mergeid);
     $uni_close_val->addAttribute('n', 'mergeid');
 
     $this->xml = $xml;
@@ -173,7 +173,7 @@ class Unifaun {
     $uni_discard->addAttribute('type', 'parcel');
 
     if ($mergeid != "") {
-      $uni_discard_val = $uni_discard->addChild('val', utf8_encode($mergeid));
+      $uni_discard_val = $uni_discard->addChild('val', $mergeid);
       $uni_discard_val->addAttribute('n', 'mergeid');
     }
 
@@ -220,43 +220,43 @@ class Unifaun {
        * voidaan silloin jättää nimitiedot tyhjiksi
       */
       $uni_sender = $xml->addChild('sender');  # Attribute sndid corresponds to sender ID/quick ID. Any contents. Mandatory
-      $uni_sender->addAttribute('sndid', utf8_encode("{$this->yhtiorow["tunnus"]}"));
+      $uni_sender->addAttribute('sndid', "{$this->yhtiorow["tunnus"]}");
 
         // $uni_snd_val = $uni_sender->addChild('val', str_replace($search, $replace, $this->postirow["yhtio_nimi"])); # Sender's name
-        $uni_snd_val = $uni_sender->addChild('val', utf8_encode($this->postirow["yhtio_nimi"])); # Sender's name
+        $uni_snd_val = $uni_sender->addChild('val', $this->postirow["yhtio_nimi"]); # Sender's name
         $uni_snd_val->addAttribute('n', "name");
 
-        $uni_snd_val = $uni_sender->addChild('val', utf8_encode($this->postirow["yhtio_osoite"])); # Address line 1
+        $uni_snd_val = $uni_sender->addChild('val', $this->postirow["yhtio_osoite"]); # Address line 1
         $uni_snd_val->addAttribute('n', "address1");
 
         #$uni_snd_val = $uni_sender->addChild('val', ""); # Address line 2
         #$uni_snd_val->addAttribute('n', "address2");
 
-        $uni_snd_val = $uni_sender->addChild('val', utf8_encode($this->postirow["yhtio_postino"])); # Zip code
+        $uni_snd_val = $uni_sender->addChild('val', $this->postirow["yhtio_postino"]); # Zip code
         $uni_snd_val->addAttribute('n', "zipcode");
 
-        $uni_snd_val = $uni_sender->addChild('val', utf8_encode($this->postirow["yhtio_postitp"])); # City
+        $uni_snd_val = $uni_sender->addChild('val', $this->postirow["yhtio_postitp"]); # City
         $uni_snd_val->addAttribute('n', "city");
 
-        $uni_snd_val = $uni_sender->addChild('val', utf8_encode($this->postirow["yhtio_maa"])); # Country code according to ISO-standard
+        $uni_snd_val = $uni_sender->addChild('val', $this->postirow["yhtio_maa"]); # Country code according to ISO-standard
         $uni_snd_val->addAttribute('n', "country");
 
         #$uni_snd_val = $uni_sender->addChild('val', ""); # Contact person
         #$uni_snd_val->addAttribute('n', "contact");
 
-        $uni_snd_val = $uni_sender->addChild('val', utf8_encode($this->yhtiorow["puhelin"])); # Phone number
+        $uni_snd_val = $uni_sender->addChild('val', $this->yhtiorow["puhelin"]); # Phone number
         $uni_snd_val->addAttribute('n', "phone");
 
-        $uni_snd_val = $uni_sender->addChild('val', utf8_encode($this->yhtiorow["fax"])); # Fax number
+        $uni_snd_val = $uni_sender->addChild('val', $this->yhtiorow["fax"]); # Fax number
         $uni_snd_val->addAttribute('n', "fax");
 
         #$uni_snd_val = $uni_sender->addChild('val', ""); # Organisation number (only for Sweden)
         #$uni_snd_val->addAttribute('n', "orgno");
 
-        $uni_snd_val = $uni_sender->addChild('val', utf8_encode(str_replace("0037", "FI", $this->postirow["yhtio_ovttunnus"]))); # VAT number
+        $uni_snd_val = $uni_sender->addChild('val', str_replace("0037", "FI", $this->postirow["yhtio_ovttunnus"])); # VAT number
         $uni_snd_val->addAttribute('n', "vatno");
 
-        $uni_snd_val = $uni_sender->addChild('val', utf8_encode($this->yhtiorow["email"])); # E-mail
+        $uni_snd_val = $uni_sender->addChild('val', $this->yhtiorow["email"]); # E-mail
         $uni_snd_val->addAttribute('n', "email");
 
         #$uni_snd_val = $uni_sender->addChild('val', ""); # Mobile phone number. In Sweden the number must begin with 07 and contain 10 digits.
@@ -264,14 +264,14 @@ class Unifaun {
 
         // Lähettäjän rahtisopimustiedot
         $uni_sender_partner = $uni_sender->addChild('partner'); # Attribute parid corresponds to carrier's ID. See SUP-112-Services-en.xls.
-        $uni_sender_partner->addAttribute('parid', utf8_encode($this->toitarow['rahdinkuljettaja']));
+        $uni_sender_partner->addAttribute('parid', $this->toitarow['rahdinkuljettaja']);
 
           $lahettajan_sopimusnro = $this->toitarow['sopimusnro'] != "" ? $this->toitarow['sopimusnro'] : "n/a";
 
-          $uni_par_val = $uni_sender_partner->addChild('val', utf8_encode($lahettajan_sopimusnro));   # Customer number
+          $uni_par_val = $uni_sender_partner->addChild('val', $lahettajan_sopimusnro);   # Customer number
           $uni_par_val->addAttribute('n', "custno");
 
-          $uni_par_val = $uni_sender_partner->addChild('val', utf8_encode($this->toitarow['sopimusnro']));   # Customer number for international services
+          $uni_par_val = $uni_sender_partner->addChild('val', $this->toitarow['sopimusnro']);   # Customer number for international services
           $uni_par_val->addAttribute('n', "custno_international");
 
           #$uni_par_val = $uni_sender_partner->addChild('val', "");   # EDI-address. UFPS only.
@@ -292,10 +292,10 @@ class Unifaun {
           #$uni_par_val = $uni_sender_partner->addChild('val', "");   # Specifies an offshore account.
           #$uni_par_val->addAttribute('n', "konto");
 
-          $uni_par_val = $uni_sender_partner->addChild('val', utf8_encode($this->yhtiorow["pankkitili1"]));   # IBAN account number
+          $uni_par_val = $uni_sender_partner->addChild('val', $this->yhtiorow["pankkitili1"]);   # IBAN account number
           $uni_par_val->addAttribute('n', "iban");
 
-          $uni_par_val = $uni_sender_partner->addChild('val', utf8_encode($this->yhtiorow["pankkiswift1"]));   # BIC number
+          $uni_par_val = $uni_sender_partner->addChild('val', $this->yhtiorow["pankkiswift1"]);   # BIC number
           $uni_par_val->addAttribute('n', "bic");
 
           #$uni_par_val = $uni_sender_partner->addChild('val', "");   # Payment method. Used for Posten's mail services. Valid values: INVO = Credit without delivery note INVODN = Credit with delivery note METERED = Domestic franking STAMP = Stamp/cash
@@ -304,14 +304,14 @@ class Unifaun {
       // Vastaanottajan tiedot
       $uni_receiver = $xml->addChild('receiver');  # Any contents. Mandatory.
 
-      $uni_receiver->addAttribute('rcvid', utf8_encode($this->asiakasrow["tunnus"]));
+      $uni_receiver->addAttribute('rcvid', $this->asiakasrow["tunnus"]);
 
         // jos vastaanottaja maksaa rahdin, haetaan sopimusnumero asiakkaan rahtisopimukselta
         if ($this->toitarow['merahti'] == '') {
 
           // Lähettäjän rahtisopimustiedot
           $uni_receiver_partner = $uni_receiver->addChild('partner'); # Attribute parid corresponds to carrier's ID. See SUP-112-Services-en.xls.
-          $uni_receiver_partner->addAttribute('parid', utf8_encode($this->toitarow['rahdinkuljettaja']));
+          $uni_receiver_partner->addAttribute('parid', $this->toitarow['rahdinkuljettaja']);
 
           $query = "SELECT rahtisopimus
                     FROM rahtisopimukset
@@ -348,7 +348,7 @@ class Unifaun {
             }
           }
 
-          $uni_par_val = $uni_receiver_partner->addChild('val', utf8_encode($rahtisopimusnro));   # Customer number
+          $uni_par_val = $uni_receiver_partner->addChild('val', $rahtisopimusnro);   # Customer number
           $uni_par_val->addAttribute('n', "custno");
 
           // Nämä ovat nyt käytössä:
@@ -408,19 +408,19 @@ class Unifaun {
           $uni_rcv_val->addAttribute('n', "id4user");
         }
 
-        $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode(trim($this->rakir_row["toim_nimi"]." ".$this->rakir_row["toim_nimitark"]))); # Receiver's name
+        $uni_rcv_val = $uni_receiver->addChild('val', trim($this->rakir_row["toim_nimi"]." ".$this->rakir_row["toim_nimitark"])); # Receiver's name
         $uni_rcv_val->addAttribute('n', "name");
 
-        $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->rakir_row["toim_osoite"])); # Address line 1
+        $uni_rcv_val = $uni_receiver->addChild('val', $this->rakir_row["toim_osoite"]); # Address line 1
         $uni_rcv_val->addAttribute('n', "address1");
 
         #$uni_rcv_val = $uni_receiver->addChild('val', ""); # Address line 2
         #$uni_rcv_val->addAttribute('n', "address2");
 
-        $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->rakir_row["toim_postino"])); # Zipcode
+        $uni_rcv_val = $uni_receiver->addChild('val', $this->rakir_row["toim_postino"]); # Zipcode
         $uni_rcv_val->addAttribute('n', "zipcode");
 
-        $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->rakir_row["toim_postitp"])); # City
+        $uni_rcv_val = $uni_receiver->addChild('val', $this->rakir_row["toim_postitp"]); # City
         $uni_rcv_val->addAttribute('n', "city");
 
         #$uni_rcv_val = $uni_receiver->addChild('val', ""); # State
@@ -429,28 +429,28 @@ class Unifaun {
         // jos asiakkaan toim_maa on tyhjä niin oletetaan, että se on sama ku yhtiön maa
         $toim_maa = ($this->rakir_row['toim_maa'] != "") ? $this->rakir_row['toim_maa'] : $this->postirow["yhtio_maa"];
 
-        $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($toim_maa)); # Country code according to ISO standard
+        $uni_rcv_val = $uni_receiver->addChild('val', $toim_maa); # Country code according to ISO standard
         $uni_rcv_val->addAttribute('n', "country");
 
-        $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->postirow["tilausyhteyshenkilo"])); # Contact person
+        $uni_rcv_val = $uni_receiver->addChild('val', $this->postirow["tilausyhteyshenkilo"]); # Contact person
         $uni_rcv_val->addAttribute('n', "contact");
 
-        $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->rakir_row["puhelin"])); # Phone number
+        $uni_rcv_val = $uni_receiver->addChild('val', $this->rakir_row["puhelin"]); # Phone number
         $uni_rcv_val->addAttribute('n', "phone");
 
-        $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->asiakasrow["fax"])); # Fax number
+        $uni_rcv_val = $uni_receiver->addChild('val', $this->asiakasrow["fax"]); # Fax number
         $uni_rcv_val->addAttribute('n', "fax");
 
         #$uni_rcv_val = $uni_receiver->addChild('val', ""); # Organisation number (for Sweden only)
         #$uni_rcv_val->addAttribute('n', "orgno");
 
-        $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->postirow["ytunnus"])); # VAT number
+        $uni_rcv_val = $uni_receiver->addChild('val', $this->postirow["ytunnus"]); # VAT number
         $uni_rcv_val->addAttribute('n', "vatno");
 
-        #$uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->asiakasrow["email"])); # E-mail
+        #$uni_rcv_val = $uni_receiver->addChild('val', $this->asiakasrow["email"]); # E-mail
         #$uni_rcv_val->addAttribute('n', "email");
 
-        $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->rakir_row["puhelin"])); # Mobile phone number. For Sweden, the number must begin with 07 and contain 10 characters.
+        $uni_rcv_val = $uni_receiver->addChild('val', $this->rakir_row["puhelin"]); # Mobile phone number. For Sweden, the number must begin with 07 and contain 10 characters.
         $uni_rcv_val->addAttribute('n', "sms");
 
         #$uni_rcv_val = $uni_receiver->addChild('val', ""); # Door code
@@ -484,7 +484,7 @@ class Unifaun {
 
       // Lähetyksen tiedot
       $uni_shipment = $xml->addChild('shipment');  # Unique order number. Any contents. Mandatory. Order number is searchable in the system but not printed on shipping documents.
-      $uni_shipment->addAttribute('orderno', utf8_encode($this->postirow["shipment_unique_id"]));
+      $uni_shipment->addAttribute('orderno', $this->postirow["shipment_unique_id"]);
 
       if ($this->toitarow['tulostustapa'] == 'E') {
 
@@ -495,16 +495,16 @@ class Unifaun {
           $mergeid = md5(date("Ymd").$this->postirow["ytunnus"].$this->postirow["toim_osoite"].$this->postirow["toim_postino"].$this->postirow["toim_postitp"]);
         }
 
-        $uni_shipment->addAttribute('mergeid', utf8_encode($mergeid));
+        $uni_shipment->addAttribute('mergeid', $mergeid);
       }
 
-        $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->yhtiorow["tunnus"])); # Defines the sender. Refers to the sndid value for sender.
+        $uni_shi_val = $uni_shipment->addChild('val', $this->yhtiorow["tunnus"]); # Defines the sender. Refers to the sndid value for sender.
         $uni_shi_val->addAttribute('n', "from");
 
         #$uni_shi_val = $uni_shipment->addChild('val', ""); # Defines the legal sender (not printed on shipping documents).
         #$uni_shi_val->addAttribute('n', "legalfrom");
 
-        $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->asiakasrow["tunnus"])); # Defines the receiver. Refers to rcvid value for receiver.
+        $uni_shi_val = $uni_shipment->addChild('val', $this->asiakasrow["tunnus"]); # Defines the receiver. Refers to rcvid value for receiver.
         $uni_shi_val->addAttribute('n', "to");
 
         #$uni_shi_val = $uni_shipment->addChild('val', ""); # Defines the legal receiver (not printed on shipping documents).
@@ -519,7 +519,7 @@ class Unifaun {
         #$uni_shi_val = $uni_shipment->addChild('val', ""); # Importer
         #$uni_shi_val->addAttribute('n', "customsto");
 
-        #$uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->postirow["tunnus"])); # Shipment ID. UFPS only.
+        #$uni_shi_val = $uni_shipment->addChild('val', $this->postirow["tunnus"]); # Shipment ID. UFPS only.
         #$uni_shi_val->addAttribute('n', "shpid");
 
 
@@ -531,7 +531,7 @@ class Unifaun {
         }
 
         # PakkausID
-        $uni_shi_val = $uni_shipment->addChild('val', utf8_encode(substr($pakkausid, 0, 30))); # Free text field with any contents. Can be used for delivery instructions, for example. It is printed on shipping documents. 4 lines available, freetext1-4. Max. 30 characters/line.
+        $uni_shi_val = $uni_shipment->addChild('val', substr($pakkausid, 0, 30)); # Free text field with any contents. Can be used for delivery instructions, for example. It is printed on shipping documents. 4 lines available, freetext1-4. Max. 30 characters/line.
         $uni_shi_val->addAttribute('n', "freetext1");
 
         # kollilaji
@@ -542,7 +542,7 @@ class Unifaun {
           $kollilaji = "";
         }
 
-        $uni_shi_val = $uni_shipment->addChild('val', utf8_encode(substr($kollilaji, 0, 30))); # Free text field with any contents. Can be used for delivery instructions, for example. It is printed on shipping documents. 4 lines available, freetext1-4. Max. 30 characters/line.
+        $uni_shi_val = $uni_shipment->addChild('val', substr($kollilaji, 0, 30)); # Free text field with any contents. Can be used for delivery instructions, for example. It is printed on shipping documents. 4 lines available, freetext1-4. Max. 30 characters/line.
         $uni_shi_val->addAttribute('n', "freetext2");
 
         if (strlen($this->postirow["ohjausmerkki"]) > 30) {
@@ -555,17 +555,17 @@ class Unifaun {
         }
 
         # ohjausmerkki
-        $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($ohjausmerkki1)); # Free text field with any contents. Can be used for delivery instructions, for example. It is printed on shipping documents. 4 lines available, freetext1-4. Max. 30 characters/line.
+        $uni_shi_val = $uni_shipment->addChild('val', $ohjausmerkki1); # Free text field with any contents. Can be used for delivery instructions, for example. It is printed on shipping documents. 4 lines available, freetext1-4. Max. 30 characters/line.
         $uni_shi_val->addAttribute('n', "freetext3");
 
-        $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->rakir_row["viesti"])); # Free text field with any contents. Can be used for delivery instructions, for example. It is printed on shipping documents. 4 lines available, freetext1-4. Max. 30 characters/line.
+        $uni_shi_val = $uni_shipment->addChild('val', $this->rakir_row["viesti"]); # Free text field with any contents. Can be used for delivery instructions, for example. It is printed on shipping documents. 4 lines available, freetext1-4. Max. 30 characters/line.
         $uni_shi_val->addAttribute('n', "freetext4");
 
         #$uni_shi_val = $uni_shipment->addChild('val', ""); # Number of EUR pallets in the shipment. Requires palletregno for sender and receiver.
         #$uni_shi_val->addAttribute('n', "eurpallets");
 
         # lähettäjän viite
-        $reference = utf8_encode(substr(preg_replace("/[^\x20-\xFF]/", "", trim($this->postirow["viesti"])), 0, 17));
+        $reference = substr(preg_replace("/[^\x20-\xFF]/", "", trim($this->postirow["viesti"]), 0, 17));
 
         $uni_shi_val = $uni_shipment->addChild('val', $reference); # Shipment reference. Any contents. Max. 17 characters.
         $uni_shi_val->addAttribute('n', "reference");
@@ -576,7 +576,7 @@ class Unifaun {
         }
 
         # vastaanottajan viite
-        $reference = utf8_encode(substr(preg_replace("/[^\x20-\xFF]/", "", trim($this->postirow["asiakkaan_tilausnumero"])), 0, 17));
+        $reference = substr(preg_replace("/[^\x20-\xFF]/", "", trim($this->postirow["asiakkaan_tilausnumero"]), 0, 17));
 
         $uni_shi_val = $uni_shipment->addChild('val', $reference); # Receiver's reference. Any contents. Max. 17 characters.
         $uni_shi_val->addAttribute('n', "rcvreference");
@@ -629,7 +629,7 @@ class Unifaun {
         #$uni_shi_val = $uni_shipment->addChild('val', ""); # Defines which documents to print. Pipe characters are mandatory. Valid values: |label| = Label only, |sis| = Waybill only, |*| = None of the above
         #$uni_shi_val->addAttribute('n', "printset");
 
-        $uni_shi_val = $uni_shipment->addChild('val', utf8_encode(date("Y-m-d"))); # Defines shipment date. Printed on shipping documents. The default value is the current date. Please note that EDI is sent on this date.
+        $uni_shi_val = $uni_shipment->addChild('val', date("Y-m-d")); # Defines shipment date. Printed on shipping documents. The default value is the current date. Please note that EDI is sent on this date.
         $uni_shi_val->addAttribute('n', "shipdate");
 
         #$uni_shi_val = $uni_shipment->addChild('val', ""); # Customs currency unit
@@ -637,12 +637,12 @@ class Unifaun {
 
         if (trim($rahdinkuljettaja_row['neutraali']) != "") {
           $uni_service = $uni_shipment->addChild('service'); # Corresponds to carrier's service. See SUP-112-Services-en.xls for valid services.
-          $uni_service->addAttribute('srvid', utf8_encode('FREEG'));
-          $uni_service->addAttribute('subid', utf8_encode($this->toitarow['rahdinkuljettaja']));
+          $uni_service->addAttribute('srvid', 'FREEG');
+          $uni_service->addAttribute('subid', $this->toitarow['rahdinkuljettaja']);
         }
         else {
           $uni_service = $uni_shipment->addChild('service'); # Corresponds to carrier's service. See SUP-112-Services-en.xls for valid services.
-          $uni_service->addAttribute('srvid', utf8_encode($this->toitarow['virallinen_selite']));
+          $uni_service->addAttribute('srvid', $this->toitarow['virallinen_selite']);
         }
 
           if (trim($this->toitarow['lajittelupiste']) != "") {
@@ -668,18 +668,18 @@ class Unifaun {
             $uni_addon = $uni_service->addChild('addon');
             $uni_addon->addAttribute('adnid', 'rpay');
 
-            $uni_add_val = $uni_addon->addChild('val', utf8_encode($rahtisopimusnro));
+            $uni_add_val = $uni_addon->addChild('val', $rahtisopimusnro);
             $uni_add_val->addAttribute('n', 'custno');
           }
           elseif ($this->toitarow['merahti'] == "" and in_array($this->toitarow['virallinen_selite'], $allowed_opay)) {
             $uni_addon = $uni_service->addChild('addon');
             $uni_addon->addAttribute('adnid', 'opay');
 
-            $uni_add_val = $uni_addon->addChild('val', utf8_encode($rahtisopimusnro));
+            $uni_add_val = $uni_addon->addChild('val', $rahtisopimusnro);
             $uni_add_val->addAttribute('n', 'custno');
 
             if ($this->toitarow['virallinen_selite'] == "IT09" or $this->toitarow['virallinen_selite'] == "IT14") {
-              $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["tunnus"])); # Payment reference. Used with add-on COD.
+              $uni_add_val = $uni_addon->addChild('val', $this->postirow["tunnus"]); # Payment reference. Used with add-on COD.
               $uni_add_val->addAttribute('n', "reference");
             }
           }
@@ -687,7 +687,7 @@ class Unifaun {
           if ($this->toitarow['virallinen_selite'] == "P19" and $this->rakir_row["puhelin"] != "") {
             $uni_addon = $uni_service->addChild('addon'); # Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
             $uni_addon->addAttribute('adnid', "NOTSMS");
-            $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->rakir_row["puhelin"])); # Defines value for misctype.
+            $uni_add_val = $uni_addon->addChild('val', $this->rakir_row["puhelin"]); # Defines value for misctype.
             $uni_add_val->addAttribute('n', "misc");
             $uni_add_val = $uni_addon->addChild('val', "PHONE"); # Used to define notification mode for add-on NOT. Valid values: PHONE = Phone, FAX = Fax.
             $uni_add_val->addAttribute('n', "misctype");
@@ -701,10 +701,10 @@ class Unifaun {
             $uni_addon = $uni_service->addChild('addon'); # Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
             $uni_addon->addAttribute('adnid', "COD");
 
-              $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->yhteensa)); # Amount. Used only with add-on COD (Cash On Delivery).
+              $uni_add_val = $uni_addon->addChild('val', $this->yhteensa); # Amount. Used only with add-on COD (Cash On Delivery).
               $uni_add_val->addAttribute('n', "amount");
 
-              $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->viite)); # Payment reference. Used with add-on COD.
+              $uni_add_val = $uni_addon->addChild('val', $this->viite); # Payment reference. Used with add-on COD.
               $uni_add_val->addAttribute('n', "reference");
           }
 
@@ -753,7 +753,7 @@ class Unifaun {
     $uni_parcel = $this->xml->shipment->addChild('container'); # Parcel information can be supplied in various ways. See p. 7.
     $uni_parcel->addAttribute('type', "parcel");
 
-    $uni_par_val = $uni_parcel->addChild('val', round(utf8_encode($pakkaustiedot['maara']))); # Number of parcels, pyöristetään varmuuden vuoksi lähimpään kokonaislukuun
+    $uni_par_val = $uni_parcel->addChild('val', round($pakkaustiedot['maara'])); # Number of parcels, pyöristetään varmuuden vuoksi lähimpään kokonaislukuun
     $uni_par_val->addAttribute('n', "copies");
 
     #$uni_par_val = $uni_parcel->addChild('val', ""); # Parcel ID. Used only for custom parcel ID. UFPS only. Cntid is to be incremented according to number of parcels.
@@ -768,12 +768,12 @@ class Unifaun {
       $pakkauskoodi = "KLI";
     }
 
-    $uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkauskoodi)); # Package code. See SUP-112-Services-en.xls for valid package codes.
+    $uni_par_val = $uni_parcel->addChild('val', $pakkauskoodi); # Package code. See SUP-112-Services-en.xls for valid package codes.
     $uni_par_val->addAttribute('n', "packagecode");
 
     $pakkaustiedot['paino'] = $pakkaustiedot['paino'] < 1 ? 1 : $pakkaustiedot['paino'];
 
-    $uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['paino'])); # Weight
+    $uni_par_val = $uni_parcel->addChild('val', $pakkaustiedot['paino']); # Weight
     $uni_par_val->addAttribute('n', "weight");
 
     $query = "SELECT koodi, pakkauksen_sarman_minimimitta
@@ -810,27 +810,27 @@ class Unifaun {
 
     $pakkaustiedot['kuutiot'] = $pakkaustiedot['kuutiot'] < 0.01 ? 0.01 : $pakkaustiedot['kuutiot'];
 
-    $uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['kuutiot'])); # Volume
+    $uni_par_val = $uni_parcel->addChild('val', $pakkaustiedot['kuutiot']); # Volume
     $uni_par_val->addAttribute('n', "volume");
 
     if ($pakkaustiedot['lavametri'] > 0) {
-      $uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['lavametri'])); # Loadmeter. Can only be specified for entire shipment.
+      $uni_par_val = $uni_parcel->addChild('val', $pakkaustiedot['lavametri']); # Loadmeter. Can only be specified for entire shipment.
       $uni_par_val->addAttribute('n', "area");
     }
 
-    $uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['syvyys'])); # Length
+    $uni_par_val = $uni_parcel->addChild('val', $pakkaustiedot['syvyys']); # Length
     $uni_par_val->addAttribute('n', "length");
 
-    $uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['leveys'])); # Width
+    $uni_par_val = $uni_parcel->addChild('val', $pakkaustiedot['leveys']); # Width
     $uni_par_val->addAttribute('n', "width");
 
-    $uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['korkeus'])); # Height
+    $uni_par_val = $uni_parcel->addChild('val', $pakkaustiedot['korkeus']); # Height
     $uni_par_val->addAttribute('n', "height");
 
     #$uni_par_val = $uni_parcel->addChild('val', ""); # Item number
     #$uni_par_val->addAttribute('n', "itemno");
 
-    $uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['pakkauskuvaus'])); # Contents
+    $uni_par_val = $uni_parcel->addChild('val', $pakkaustiedot['pakkauskuvaus']); # Contents
     $uni_par_val->addAttribute('n', "contents");
 
     if ($this->toitarow['rahdinkuljettaja'] == 'POSTI' and (count($pakkaustiedot['vakkoodi']) > 0 or $pakkaustiedot['pakkauskuvaus'] == 'MUU KOLLI')) {
@@ -850,32 +850,32 @@ class Unifaun {
         $uni_article = $uni_parcel->addChild('article');
 
         if (isset($vak['tuoteno']) and $vak['tuoteno'] != '') {
-          $uni_par_val = $uni_article->addChild('val', utf8_encode($vak['tuoteno'])); # article number
+          $uni_par_val = $uni_article->addChild('val', $vak['tuoteno']); # article number
           $uni_par_val->addAttribute('n', "articleno");
         }
 
         if (isset($vak['tuotenimitys']) and $vak['tuotenimitys'] != '') {
-          $uni_par_val = $uni_article->addChild('val', utf8_encode($vak['tuotenimitys'])); # UN-number for ADR. Supplied as a 4 digit code.
+          $uni_par_val = $uni_article->addChild('val', $vak['tuotenimitys']); # UN-number for ADR. Supplied as a 4 digit code.
           $uni_par_val->addAttribute('n', "name");
         }
 
         if (isset($vak['kpl']) and $vak['kpl'] != '') {
-          $uni_par_val = $uni_article->addChild('val', utf8_encode($vak['kpl'])); # UN-number for ADR. Supplied as a 4 digit code.
+          $uni_par_val = $uni_article->addChild('val', $vak['kpl']); # UN-number for ADR. Supplied as a 4 digit code.
           $uni_par_val->addAttribute('n', "count");
         }
 
         if (isset($vak['kpl_paino']) and $vak['kpl_paino'] != '') {
-          $uni_par_val = $uni_article->addChild('val', utf8_encode($vak['kpl_paino'])); # UN-number for ADR. Supplied as a 4 digit code.
+          $uni_par_val = $uni_article->addChild('val', $vak['kpl_paino']); # UN-number for ADR. Supplied as a 4 digit code.
           $uni_par_val->addAttribute('n', "weight");
         }
 
         if (isset($vak['yk_nro']) and $vak['yk_nro'] != '') {
-          $uni_par_val = $uni_article->addChild('val', utf8_encode($vak['yk_nro'])); # UN-number for ADR. Supplied as a 4 digit code.
+          $uni_par_val = $uni_article->addChild('val', $vak['yk_nro']); # UN-number for ADR. Supplied as a 4 digit code.
           $uni_par_val->addAttribute('n', "dnguncode");
         }
 
         if (isset($vak['lipukkeet']) and $vak['lipukkeet'] != '') {
-          $uni_par_val = $uni_article->addChild('val', utf8_encode($vak['lipukkeet'])); # Label number for ADR
+          $uni_par_val = $uni_article->addChild('val', $vak['lipukkeet']); # Label number for ADR
           $uni_par_val->addAttribute('n', "dnghzcode");
         }
 
@@ -883,17 +883,17 @@ class Unifaun {
           $vak['pakkausryhma'] = (int) $vak['pakkausryhma'];
           $vak['pakkausryhma'] = $vak['pakkausryhma'] > 3 ? 3 : $vak['pakkausryhma'];
 
-          $uni_par_val = $uni_article->addChild('val', utf8_encode(str_repeat("I", $vak['pakkausryhma']))); # Packaging group/ADR-class. Supplied as I, II or III.
+          $uni_par_val = $uni_article->addChild('val', str_repeat("I", $vak['pakkausryhma'])); # Packaging group/ADR-class. Supplied as I, II or III.
           $uni_par_val->addAttribute('n', "dngpkcode");
         }
 
         if (isset($vak['luokka']) and $vak['luokka'] != '') {
-          $uni_par_val = $uni_article->addChild('val', utf8_encode($vak['luokka'])); # ADR-class
+          $uni_par_val = $uni_article->addChild('val', $vak['luokka']); # ADR-class
           $uni_par_val->addAttribute('n', "dngadrclass");
         }
 
         if (isset($vak['nimi_ja_kuvaus']) and $vak['nimi_ja_kuvaus'] != '') {
-          $uni_par_val = $uni_article->addChild('val', utf8_encode($vak['nimi_ja_kuvaus'])); # Official transport name for item regarding ADR
+          $uni_par_val = $uni_article->addChild('val', $vak['nimi_ja_kuvaus']); # Official transport name for item regarding ADR
           $uni_par_val->addAttribute('n', "dngdescr");
         }
 
@@ -910,7 +910,7 @@ class Unifaun {
           $vak['paino'] = $vak['paino'] < 1 ? 1 : $vak['paino'];
 
           # Net weight for ADR goods class I (usually explosive contents). Always mandatory for DBSchenker, regardless of class. Defined in kg.
-          $uni_par_val = $uni_article->addChild('val', utf8_encode($vak['paino']));
+          $uni_par_val = $uni_article->addChild('val', $vak['paino']);
           $uni_par_val->addAttribute('n', "dngnetweight");
         }
       }

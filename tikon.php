@@ -12,14 +12,14 @@ if ($lataa_tiedosto == 1) {
   exit;
 }
 
-// poimitaan kuluva p‰iv‰, raportin timestampille
+// poimitaan kuluva p√§iv√§, raportin timestampille
 $today = date("Y-m-d");
 
 echo "<font class='head'>".t("Siirto ulkoiseen kirjanpitoon")."</font><hr>";
 
 if ($kausi == "") {
 
-  //N‰ytet‰‰n k‰yttˆliittym‰
+  //N√§ytet√§√§n k√§ytt√∂liittym√§
   echo "<form name = 'valinta' method='post'>";
 
   echo "<table>";
@@ -47,7 +47,7 @@ if ($kausi == "") {
 function teetietue ($yhtio, $tosite, $summa, $ltunnus, $tapvm, $tilino, $kustp, $projekti, $ytunnus, $nimi, $selite, $jakso) {
 
   $ulos = 'TKB';                                //tietuetyyppi
-  $ulos .= sprintf ('%-8s',  $tapvm);                      //p‰iv‰m‰‰r‰
+  $ulos .= sprintf ('%-8s',  $tapvm);                      //p√§iv√§m√§√§r√§
   $ulos .= sprintf ('%-08d', $tosite);                     //tositelaji ja tositenumero
   $ulos .= sprintf ('%03d', '0');                       //???? tositenumeron tarkenne 1
   $ulos .= sprintf ('%03d', '0');                       //???? tositenumeron tarkenne 2
@@ -68,26 +68,26 @@ function teetietue ($yhtio, $tosite, $summa, $ltunnus, $tapvm, $tilino, $kustp, 
     $maara = sprintf ('%015d',  round(100 * $summa * -1,2));
   }
 
-  $ulos .= $etu;                                //raham‰‰r‰n etumerkki
-  $ulos .= $summa;                              //raham‰‰r‰
-  $ulos .= $etu;                                //m‰‰r‰n etumerkki
-  $ulos .= $maara;                              //m‰‰r‰
-  $ulos .= sprintf ('%-72.72s', $nimi . "/" . $selite);            //liikekumppanin nimi + tiliˆinnin selite
+  $ulos .= $etu;                                //raham√§√§r√§n etumerkki
+  $ulos .= $summa;                              //raham√§√§r√§
+  $ulos .= $etu;                                //m√§√§r√§n etumerkki
+  $ulos .= $maara;                              //m√§√§r√§
+  $ulos .= sprintf ('%-72.72s', $nimi . "/" . $selite);            //liikekumppanin nimi + tili√∂innin selite
   $ulos .= sprintf ('%-8.8s', '');                       //asiakasnumero
   $ulos .= sprintf ('%-2.2s', ' ');                      //???? laskulaji
   $ulos .= sprintf ('%-6.6s', ' ');                       //laskun numero
   $ulos .= sprintf ('%-6.6s', ' ');                      //???? kustannuslaji
-  $ulos .= sprintf ('%-8.8s', ' ');                      //???? ryhm‰3
-  $ulos .= sprintf ('%-6.6s', ' ');                      //???? ryhm‰3 laji
-  $ulos .= sprintf ('%-8.8s', ' ');                      //???? ryhm‰4
-  $ulos .= sprintf ('%-6.6s', ' ');                      //???? ryhm‰4 laji
-  $ulos .= '+';                                //???? m‰‰r‰ kahden etumerkki
-  $ulos .= sprintf ('%015d', '0');                      //???? m‰‰r‰ 2
-  $ulos .= '+';                                //???? m‰‰r‰ kolmen etumerkki
-  $ulos .= sprintf ('%015d', '0');                      //???? m‰‰r‰ 3
+  $ulos .= sprintf ('%-8.8s', ' ');                      //???? ryhm√§3
+  $ulos .= sprintf ('%-6.6s', ' ');                      //???? ryhm√§3 laji
+  $ulos .= sprintf ('%-8.8s', ' ');                      //???? ryhm√§4
+  $ulos .= sprintf ('%-6.6s', ' ');                      //???? ryhm√§4 laji
+  $ulos .= '+';                                //???? m√§√§r√§ kahden etumerkki
+  $ulos .= sprintf ('%015d', '0');                      //???? m√§√§r√§ 2
+  $ulos .= '+';                                //???? m√§√§r√§ kolmen etumerkki
+  $ulos .= sprintf ('%015d', '0');                      //???? m√§√§r√§ 3
   $ulos .= sprintf ('%-4s', ' ');                        //???? yritysnumero
-  $ulos .= sprintf ('%-20s', ' ');                      //???? maksatuser‰tunnus
-  $ulos .= sprintf ('%-3s', 'EUR');                      //rahayksikˆn valuutta
+  $ulos .= sprintf ('%-20s', ' ');                      //???? maksatuser√§tunnus
+  $ulos .= sprintf ('%-3s', 'EUR');                      //rahayksik√∂n valuutta
 
   $palautus = $ulos."\r\n";
 
@@ -227,7 +227,7 @@ function rivit ($result, $laji, $yhtio, $summataan) {
   return array($palautus, $rivitruudulle);
 }
 
-//Onko aikaisempia ei vietyj‰ rivej‰?
+//Onko aikaisempia ei vietyj√§ rivej√§?
 $query  = "SELECT left(tapvm, 7) kausi, count(distinct(ltunnus)) kpl
            FROM tiliointi
            WHERE yhtio  = '$kukarow[yhtio]'
@@ -240,7 +240,7 @@ $result = pupe_query($query);
 
 if (mysql_num_rows($result) > 0) {
 
-  echo "<font class='error'>".t("N‰m‰ tiliˆinnit ovat siirt‰m‰tt‰ edellisilt‰ kausilta").":</font><br>";
+  echo "<font class='error'>".t("N√§m√§ tili√∂innit ovat siirt√§m√§tt√§ edellisilt√§ kausilta").":</font><br>";
 
   echo "<table>";
   echo "<tr>";
@@ -259,7 +259,7 @@ if (mysql_num_rows($result) > 0) {
   echo "<br><br>";
 }
 
-//Tarkistetaan aineisto tikon-mieless‰
+//Tarkistetaan aineisto tikon-mieless√§
 $tikonerr = 0;
 
 $query  = "SELECT tapvm, nimi, summa, tunnus
@@ -273,7 +273,7 @@ $result = pupe_query($query);
 
 if (mysql_num_rows($result) > 0) {
 
-  echo "<font class='error'>N‰ill‰ laskuilla laskunpvm ja maksupvm ovat samat. T‰m‰ aiheuttaa ongelmia siirrossa.</font>";
+  echo "<font class='error'>N√§ill√§ laskuilla laskunpvm ja maksupvm ovat samat. T√§m√§ aiheuttaa ongelmia siirrossa.</font>";
 
   echo "<table>";
   echo "<tr>";
@@ -293,7 +293,7 @@ if (mysql_num_rows($result) > 0) {
 
   echo "</table>";
 
-  echo "<font class='error'>N‰m‰ on korjattava ennenkuin siirto voidaan tehd‰!</font><br><br>";
+  echo "<font class='error'>N√§m√§ on korjattava ennenkuin siirto voidaan tehd√§!</font><br><br>";
   $tikonerr = 1;
 }
 
@@ -310,7 +310,7 @@ $result = pupe_query($query);
 
 if (mysql_num_rows($result) > 0) {
 
-  echo "<font class='error'>".t("VIRHE: N‰ilt‰ laskuilta puuttuvat kaikki laskupvm:n tiliˆinnit")."!</font>";
+  echo "<font class='error'>".t("VIRHE: N√§ilt√§ laskuilta puuttuvat kaikki laskupvm:n tili√∂innit")."!</font>";
 
   echo "<table>";
   echo "<tr>";
@@ -329,7 +329,7 @@ if (mysql_num_rows($result) > 0) {
   }
 
   echo "</table>";
-  echo "<font class='error'>".t("N‰m‰ on korjattava ennenkuin siirto voidaan tehd‰")."!</font><br><br>";
+  echo "<font class='error'>".t("N√§m√§ on korjattava ennenkuin siirto voidaan tehd√§")."!</font><br><br>";
   $tikonerr = 1;
 }
 
@@ -350,7 +350,7 @@ $result = pupe_query($query);
 
 if (mysql_num_rows($result) > 0) {
 
-  echo "<font class='error'>".t("VIRHE: N‰ilt‰ laskuita puuttuvat kaikki maksupvm:n tiliˆinnit")."!</font>";
+  echo "<font class='error'>".t("VIRHE: N√§ilt√§ laskuita puuttuvat kaikki maksupvm:n tili√∂innit")."!</font>";
   echo "<table>";
   echo "<tr>";
 
@@ -371,7 +371,7 @@ if (mysql_num_rows($result) > 0) {
     echo "</tr>";
   }
   echo "</table>";
-  echo "<font class='error'>".t("N‰ma on korjattava ennenkuin siirto voidaan tehd‰")."!</font>";
+  echo "<font class='error'>".t("N√§ma on korjattava ennenkuin siirto voidaan tehd√§")."!</font>";
   $tikonerr=1;
 }
 
@@ -435,7 +435,7 @@ if (mysql_num_rows($result_ov) > 0) {
   fwrite($toot, $palautus);
 }
 
-//tehd‰‰n uusi kysely jossa yhdistet‰‰n suoritukset ja rahatapahtumat = TILIOTE
+//tehd√§√§n uusi kysely jossa yhdistet√§√§n suoritukset ja rahatapahtumat = TILIOTE
 $query  = "SELECT date_format(tiliointi.tapvm, '%d%m%Y') tapvm, date_format(tiliointi.tapvm, '%y%m') jakso,
            tiliointi.tilino, tiliointi.kustp, tiliointi.projekti, tiliointi.summa,
            tiliointi.selite, lasku.ytunnus, tiliointi.ltunnus, lasku.mapvm, tiliointi.tunnus, lasku.laskunro, lasku.nimi, tiliointi.tapvm tapvmclean
@@ -487,7 +487,7 @@ echo "<th>".t("Tosite")."</th>";
 echo "<th>".t("Mapvm")."</th>";
 echo "</tr>";
 
-//K‰yd‰‰n l‰pi kaikki laskurivit
+//K√§yd√§√§n l√§pi kaikki laskurivit
 foreach ($rivitruudulle1 as $rivirow) {
   echo "<tr>";
   echo "<td>".tv1dateconv($rivirow["tapvm"])."</td>";
@@ -504,7 +504,7 @@ foreach ($rivitruudulle1 as $rivirow) {
 }
 echo "</table><br><br>";
 
-echo "<br><font class=head>$yhtiorow[nimi] ostovelkojen tiliˆinnit: $kausi</font><br>";
+echo "<br><font class=head>$yhtiorow[nimi] ostovelkojen tili√∂innit: $kausi</font><br>";
 echo t("Ostovelkoja").": ".mysql_num_rows($result_ov)." ".t("kappaletta")."<br><br>";
 
 echo "<table>";
@@ -519,7 +519,7 @@ echo "<th>".t("Selite")."</th>";
 echo "<th>".t("Tosite")."</th>";
 echo "</tr>";
 
-//K‰yd‰‰n l‰pi kaikki laskurivit
+//K√§yd√§√§n l√§pi kaikki laskurivit
 foreach ($rivitruudulle2 as $rivirow) {
   echo "<tr>";
   echo "<td>".tv1dateconv($rivirow["tapvm"])."</td>";
@@ -534,8 +534,8 @@ foreach ($rivitruudulle2 as $rivirow) {
 }
 echo "</table><br><br>";
 
-echo "<br><font class=head>$yhtiorow[nimi] tiliotteen tiliˆinnit: $kausi</font><br>";
-echo t("Tiliotteiden tiliˆinnit").": ".mysql_num_rows($result_mrt)." ".t("tapahtumaa")."<br><br>";
+echo "<br><font class=head>$yhtiorow[nimi] tiliotteen tili√∂innit: $kausi</font><br>";
+echo t("Tiliotteiden tili√∂innit").": ".mysql_num_rows($result_mrt)." ".t("tapahtumaa")."<br><br>";
 
 echo "<table>";
 echo "<tr>";
@@ -549,7 +549,7 @@ echo "<th>".t("Selite")."</th>";
 echo "<th>".t("Tosite")."</th>";
 echo "</tr>";
 
-//K‰yd‰‰n l‰pi kaikki laskurivit
+//K√§yd√§√§n l√§pi kaikki laskurivit
 foreach ($rivitruudulle3 as $rivirow) {
   echo "<tr>";
   echo "<td>".tv1dateconv($rivirow["tapvm"])."</td>";

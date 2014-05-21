@@ -2,9 +2,9 @@
 
 //luodaan korkolasku
 
-//sis‰‰n otetaan $liitostunnus. $liitostunnus tulee paperikorkolasku.php-failista
+//sis√§√§n otetaan $liitostunnus. $liitostunnus tulee paperikorkolasku.php-failista
 //ja maksuehdon tunnus $vmehto
-//ja $loppusumma jossa on maksettavan koron m‰‰r‰. $loppusumma tulee paperikorkolasku.php-failista
+//ja $loppusumma jossa on maksettavan koron m√§√§r√§. $loppusumma tulee paperikorkolasku.php-failista
 
 //Haetaan asiakkaan tiedot
 $query = "SELECT * FROM asiakas WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$liitostunnus'";
@@ -16,7 +16,7 @@ if (mysql_num_rows($result) != 1) {
 }
 $asrow = mysql_fetch_array($result);
 
-//Etsit‰‰n t‰m‰ t‰ss‰ tilanteessa k‰ytett‰v‰ maksuehto
+//Etsit√§√§n t√§m√§ t√§ss√§ tilanteessa k√§ytett√§v√§ maksuehto
 $apuqu = "SELECT * FROM maksuehto WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$vmehto'";
 $meapu = mysql_query($apuqu) or pupe_error($apuqu);
 
@@ -206,6 +206,6 @@ if (mysql_num_rows($result) == 1) {
   require ("../tilauskasittely/tilaus-valmis.inc");
 }
 else {
-  echo "<br><br><font class='error'>Korko-tuotetta ei lˆydy! Ole hyv‰ ja perusta tuote tuotenumerolla 'korko'.</font>";
+  echo "<br><br><font class='error'>Korko-tuotetta ei l√∂ydy! Ole hyv√§ ja perusta tuote tuotenumerolla 'korko'.</font>";
   exit;
 }

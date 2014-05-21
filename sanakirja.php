@@ -6,12 +6,12 @@ echo "<font class='head'>".t("Sanakirja")."</font><hr>";
 
 echo "<form method='post' autocomplete='off'>";
 echo "<table><tr>";
-echo "<th>".t("Valitse k‰‰nnett‰v‰t kielet")."</th>";
+echo "<th>".t("Valitse k√§√§nnett√§v√§t kielet")."</th>";
 echo "<td><table>";
 
 $r = 0;
 
-// k‰yd‰‰n l‰pi mahdolliset kielet
+// k√§yd√§√§n l√§pi mahdolliset kielet
 foreach ($GLOBALS["sanakirja_kielet"] as $sanakirja_kieli => $sanakirja_kieli_nimi) {
   if ($sanakirja_kieli == "fi") continue;
 
@@ -34,19 +34,19 @@ else {
   $sel2 = 'CHECKED';
 }
 
-echo "<th>".t("N‰yt‰ kaikki lauseet")."</th>";
+echo "<th>".t("N√§yt√§ kaikki lauseet")."</th>";
 echo "<td><input type='radio' name='show' value='all' $sel1></td>";
 echo "</tr><tr>";
-echo "<th>".t("N‰yt‰ vain k‰‰nt‰m‰ttˆm‰t lauseet")."</th>";
+echo "<th>".t("N√§yt√§ vain k√§√§nt√§m√§tt√∂m√§t lauseet")."</th>";
 echo "<td><input type='radio' name='show' value='empty' $sel2></td>";
 echo "</tr>";
 
 echo "<tr><td class='back'><br></td></tr>";
 
-echo "<tr><th>".t("Mill‰ kielell‰ etsit‰‰n")."</th>";
+echo "<tr><th>".t("Mill√§ kielell√§ etsit√§√§n")."</th>";
 echo "<td><select name='etsi_kieli'>";
 
-echo "<option value=''>".t("Ei etsit‰")."</option>";
+echo "<option value=''>".t("Ei etsit√§")."</option>";
 
 foreach ($GLOBALS["sanakirja_kielet"] as $sanakirja_kieli => $sanakirja_kieli_nimi) {
   $sel = '';
@@ -69,12 +69,12 @@ echo "<td class='back'><input name='nappi1' type='submit' value='".t("Hae")."'><
 echo "</table><br>";
 
 if ($maxtunnus > 0) {
-  // k‰yd‰‰n l‰pi mahdolliset kielet
+  // k√§yd√§√§n l√§pi mahdolliset kielet
   foreach ($GLOBALS["sanakirja_kielet"] as $sanakirja_kieli => $sanakirja_kieli_nimi) {
     for ($i=0; $i<=$maxtunnus; $i++) {
-      // eli etsit‰‰n kielen nimisesta arraysta indexill‰ $i
+      // eli etsit√§√§n kielen nimisesta arraysta indexill√§ $i
       if (${$sanakirja_kieli}[$i] != "") {
-        $value = addslashes(trim(${$sanakirja_kieli}[$i])); // spacella pystyy tyhjent‰m‰‰n kent‰n, mutta ei tallenneta sit‰
+        $value = addslashes(trim(${$sanakirja_kieli}[$i])); // spacella pystyy tyhjent√§m√§√§n kent√§n, mutta ei tallenneta sit√§
 
         $query = "UPDATE sanakirja set $sanakirja_kieli='$value', muuttaja='$kukarow[kuka]', muutospvm=now() where tunnus='$i'";
         $result = pupe_query($query);
@@ -82,11 +82,11 @@ if ($maxtunnus > 0) {
     }
   }
 
-  echo "<font class='message'>".t("Sanakirja p‰ivitetty!")."</font><br><br>";
+  echo "<font class='message'>".t("Sanakirja p√§ivitetty!")."</font><br><br>";
   $tee = "";
 }
 
-// jos meill‰ on onnistuneesti valittu kieli
+// jos meill√§ on onnistuneesti valittu kieli
 if (count($kieli) > 0) {
 
   $query  = "select tunnus, fi ";
@@ -165,17 +165,17 @@ if (count($kieli) > 0) {
       echo "</tr>";
     }
 
-    echo "<tr><th colspan='".mysql_num_rows($result)."'>".t("Yhteens‰")." $laskkaannos ".t("rivi‰")."</th></tr>";
+    echo "<tr><th colspan='".mysql_num_rows($result)."'>".t("Yhteens√§")." $laskkaannos ".t("rivi√§")."</th></tr>";
     echo "</table>";
     echo "<input type='hidden' name='maxtunnus' value='$maxtunnus'>";
-    echo "<br><input type='submit' name='paivita' value='".t("P‰ivit‰")."'>";
+    echo "<br><input type='submit' name='paivita' value='".t("P√§ivit√§")."'>";
   }
   else {
-    echo "<font class='message'>".t("Haulla ei lˆytynyt yht‰‰n rivi‰!")."</font>";
+    echo "<font class='message'>".t("Haulla ei l√∂ytynyt yht√§√§n rivi√§!")."</font>";
   }
 }
 else {
-  echo "<br><br><font class='error'>".t("Valitse k‰‰nnett‰v‰ kieli!")."</font><br><br>";
+  echo "<br><br><font class='error'>".t("Valitse k√§√§nnett√§v√§ kieli!")."</font><br><br>";
 }
 
 require ("inc/footer.inc");

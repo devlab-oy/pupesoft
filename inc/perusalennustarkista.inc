@@ -19,7 +19,7 @@ if(!function_exists("perusalennustarkista")) {
         $chkressiresult = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($chkressiresult) > 0) {
-          $virhe[$i] = t("Alennusryhm‰ on jo perustettu j‰rjestelm‰‰n");
+          $virhe[$i] = t("Alennusryhm√§ on jo perustettu j√§rjestelm√§√§n");
         }
       }
     }

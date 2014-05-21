@@ -70,5 +70,5 @@ $query = "UPDATE tiliotedata
           and perheid  = '$tiliotedatape'";
 $dummyresult = pupe_query($query);
 
-// Merkataan k‰sitellyiksi & lis‰t‰‰n linkki
+// Merkataan k√§sitellyiksi & lis√§t√§√§n linkki
 echo "<font class='message'>*** ".t("tosite luotu")." ***</font><br>\n";

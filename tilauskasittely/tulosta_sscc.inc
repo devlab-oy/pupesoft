@@ -8,7 +8,7 @@ if (mysql_num_rows($result) == 1) {
 }
 else {
   if (!isset($suuntalavat_ei_kayttoliittymaa) or $suuntalavat_ei_kayttoliittymaa != "KYLLA") {
-    echo "<font class='error'>",t("VIRHE: Tilausta ei en‰‰ lˆydy"),"!</font>";
+    echo "<font class='error'>",t("VIRHE: Tilausta ei en√§√§ l√∂ydy"),"!</font>";
   }
   exit;
 }
@@ -67,7 +67,7 @@ if ($tee == 'tulosta_sscc') {
     $lopetus = '';
     $tee = (!isset($sscc_kopio) or $sscc_kopio == '') ? 'uusi' : '';
     if (!isset($suuntalavat_ei_kayttoliittymaa) or $suuntalavat_ei_kayttoliittymaa != "KYLLA") {
-      echo "<font class='message'>",t("K‰ytett‰v‰ SSCC-koodi"),": {$sscc}</font><br /><br />";
+      echo "<font class='message'>",t("K√§ytett√§v√§ SSCC-koodi"),": {$sscc}</font><br /><br />";
 
       require('suuntalavat.inc');
       require('inc/footer.inc');

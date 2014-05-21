@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 if (!isset($sakkl)) $sakkl = date("m");
@@ -26,12 +26,12 @@ echo "<font class='head'>".t("Maksettavat laskut")." - $yhtiorow[nimi]</font><hr
 echo "<table>";
 echo "<form method='post'>";
 echo "<input type='hidden' name='tee' value='NAYTA'>";
-echo "<tr><th>".t("N‰yt‰ vain t‰m‰ ytunnus").":</th><td valign='top'><input type='text' name='sytunnus' size ='15' value='$sytunnus'></td></tr>";
-echo "<tr><th>".t("N‰yt‰ vain t‰m‰ nimi").":</th><td valign='top'><input type='text' name='nimi' size ='15' value='$nimi'></td></tr>";
-echo "<tr><th>".t("N‰yt‰ vain ne joille maksettavaa on yli").":</th><td valign='top'><input type='text' name='yli' size ='15' value='$yli'></td></tr>";
+echo "<tr><th>".t("N√§yt√§ vain t√§m√§ ytunnus").":</th><td valign='top'><input type='text' name='sytunnus' size ='15' value='$sytunnus'></td></tr>";
+echo "<tr><th>".t("N√§yt√§ vain t√§m√§ nimi").":</th><td valign='top'><input type='text' name='nimi' size ='15' value='$nimi'></td></tr>";
+echo "<tr><th>".t("N√§yt√§ vain ne joille maksettavaa on yli").":</th><td valign='top'><input type='text' name='yli' size ='15' value='$yli'></td></tr>";
 
 echo "<tr>
-    <th>".t("N‰yt‰ vain ne laskut jotka on p‰iv‰tty ennen").":</th>
+    <th>".t("N√§yt√§ vain ne laskut jotka on p√§iv√§tty ennen").":</th>
     <td valign='top'><input type='text' name='sappl' value='$sappl' size='3'><input type='text' name='sakkl' value='$sakkl' size='3'><input type='text' name='savvl' value='$savvl' size='5'></td>
     </tr>";
 
@@ -78,7 +78,7 @@ echo "<tr><th>".t("Summat").":</th>";
 echo "<td><select name='valuutassako'>";
 echo "<option value = ''>".t("Yrityksen valuutassa")."</option>";
 echo "<option value = 'V' $sel1>".t("Laskun valuutassa")."</option>";
-echo "</select></td><td valign='top' class='back'><input type='submit' value='".t("N‰yt‰")."'></td></tr>";
+echo "</select></td><td valign='top' class='back'><input type='submit' value='".t("N√§yt√§")."'></td></tr>";
 echo "</form>";
 echo "</table><br>";
 
@@ -169,7 +169,7 @@ if ($tee == 'NAYTA') {
 
     if (include('Spreadsheet/Excel/Writer.php')) {
 
-      //keksit‰‰n failille joku varmasti uniikki nimi:
+      //keksit√§√§n failille joku varmasti uniikki nimi:
       list($usec, $sec) = explode(' ', microtime());
       mt_srand((float) $sec + ((float) $usec * 100000));
       $excelnimi = md5(uniqid(mt_rand(), true)).".xls";
@@ -205,7 +205,7 @@ if ($tee == 'NAYTA') {
       $excelsarake++;
       $worksheet->write($excelrivi, $excelsarake, t("yli 121 pv"), $format_bold);
       $excelsarake++;
-      $worksheet->write($excelrivi, $excelsarake, t("Yhteens‰"), $format_bold);
+      $worksheet->write($excelrivi, $excelsarake, t("Yhteens√§"), $format_bold);
 
       $excelsarake = 0;
       $excelrivi++;
@@ -222,7 +222,7 @@ if ($tee == 'NAYTA') {
     echo "<th align='right'>".t("61-90 pv")."</th>";
     echo "<th align='right'>".t("91-120 pv")."</th>";
     echo "<th align='right'>".t("yli 121 pv")."</th>";
-    echo "<th align='right'>".t("Yhteens‰")."</th>";
+    echo "<th align='right'>".t("Yhteens√§")."</th>";
     echo "</tr>";
 
     while ($row = mysql_fetch_assoc($result)) {
@@ -285,7 +285,7 @@ if ($tee == 'NAYTA') {
 
     if ($rivilask >= 1) {
       echo "<tr>";
-      echo "<td valign='top' class='tumma' align='right' colspan='2'>".t("Yhteens‰").":</th>";
+      echo "<td valign='top' class='tumma' align='right' colspan='2'>".t("Yhteens√§").":</th>";
       echo "<td valign='top' class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$aay))."</td>";
       echo "<td valign='top' class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$aabby))."</td>";
       echo "<td valign='top' class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$bby))."</td>";

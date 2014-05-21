@@ -1,7 +1,7 @@
 <?php
 
 // Ohjelma vatii muuttujan $otunnus joka viittaa saapumiseen johon rivit on kohdistettu.
-// sek‰ $laskurow arrayn jossa on keikka jossa tunnus on $otunnus
+// sek√§ $laskurow arrayn jossa on keikka jossa tunnus on $otunnus
 require_once('pdflib/phppdflib.class.php');
 
 $select_lisa = "";
@@ -44,7 +44,7 @@ if (!function_exists('alku_vastaanotto')) {
      $pdf->draw_text(315, 768, $laskurow['laskunro'], $firstpage, $norm);
 
     $pdf->draw_rectangle(785, 445, 765, 445, $firstpage, $rectparam);
-     $pdf->draw_text(450, 778, t("Henkilˆ", $kieli), $firstpage, $pieni);
+     $pdf->draw_text(450, 778, t("Henkil√∂", $kieli), $firstpage, $pieni);
      $pdf->draw_text(450, 768, $kukarow['nimi'], $firstpage, $norm);
 
     $pdf->draw_rectangle(765, 310, 745, 580, $firstpage, $rectparam);
@@ -53,7 +53,7 @@ if (!function_exists('alku_vastaanotto')) {
 
     $pdf->draw_rectangle(725, 15, 705, 580, $firstpage, $rectparam2);
      $pdf->draw_text(20, 716, t("SSCC"), $firstpage, $pieniboldi);
-     $pdf->draw_text(20, 708, t("Ker‰ysvyˆhyke"), $firstpage, $pieniboldi);
+     $pdf->draw_text(20, 708, t("Ker√§ysvy√∂hyke"), $firstpage, $pieniboldi);
      $pdf->draw_text(100, 716, t("Paikka"), $firstpage, $pieniboldi);
      $pdf->draw_text(175, 716, t("Tuoteno"), $firstpage, $pieniboldi);
      $pdf->draw_text(175, 708, t("Nimitys"), $firstpage, $pieniboldi);
@@ -83,7 +83,7 @@ if (!function_exists('print_pdf_vastaanotto')) {
   function print_pdf_vastaanotto () {
     global $pdf, $kukarow, $yhtiorow, $komento, $tee;
 
-    //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+    //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
     list($usec, $sec) = explode(' ', microtime());
     mt_srand((float) $sec + ((float) $usec * 100000));
 
@@ -94,7 +94,7 @@ if (!function_exists('print_pdf_vastaanotto')) {
     if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF Error $pdffilenimi");
     fclose($fh);
 
-    //itse print komento tulee valitse_tulosin.incilt‰...
+    //itse print komento tulee valitse_tulosin.incilt√§...
     if ($komento["Vastaanottoraportti"] == 'email') {
       $liite = $pdffilenimi;
 
@@ -107,7 +107,7 @@ if (!function_exists('print_pdf_vastaanotto')) {
       echo t("Vastaanottoraportti tulostuu"),"...<br>";
     }
     elseif ($tee == 'NAYTATILAUS') {
-        //Tyˆnnet‰‰n tuo pdf vaan putkeen!
+        //Ty√∂nnet√§√§n tuo pdf vaan putkeen!
         echo file_get_contents($pdffilenimi);
       }
     elseif ($komento["Vastaanottoraportti"] != '' and $komento["Vastaanottoraportti"] != 'edi') {

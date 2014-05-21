@@ -4,7 +4,7 @@ require "inc/connect.inc";
 require "inc/functions.inc";
 require "valmistuslinjat.inc";
 
-// Haetaan yhtiˆ
+// Haetaan yhti√∂
 $yhtio = hae_yhtion_parametrit($_GET['yhtio']);
 $kukarow['yhtio'] = $yhtio['yhtio'];
 
@@ -41,8 +41,8 @@ if (isset($_GET['valmistukset']) and $_GET['valmistukset'] == 'true') {
   // Kaikki valmistuslinjan tapahtumat
   $all_events = array();
 
-  // Haetaan yhtiˆkohtaiset merkinn‰t
-  // Muu tyˆ tai Pyh‰
+  // Haetaan yhti√∂kohtaiset merkinn√§t
+  // Muu ty√∂ tai Pyh√§
   $query = "SELECT kalenteri.pvmalku,
             kalenteri.pvmloppu,
             kalenteri.kuka,
@@ -57,7 +57,7 @@ if (isset($_GET['valmistukset']) and $_GET['valmistukset'] == 'true') {
 
   $yhtiokohtaiset_tapahtumat = array();
 
-  // Lomat ja muut yhtiˆkohtaiset merkinn‰t
+  // Lomat ja muut yhti√∂kohtaiset merkinn√§t
   while ($pyha = mysql_fetch_assoc($result)) {
     $yhtiokohtaiset_tapahtumat[] = $pyha;
   }
@@ -65,10 +65,10 @@ if (isset($_GET['valmistukset']) and $_GET['valmistukset'] == 'true') {
   // Loopataan valmistuslinjat yksi kerrallaan
   foreach($valmistuslinjat as $linja) {
 
-    // Lis‰t‰‰n yhtiokohtaiset tapahtumat
+    // Lis√§t√§√§n yhtiokohtaiset tapahtumat
     foreach($yhtiokohtaiset_tapahtumat as $tapahtuma) {
       $json = array();
-      $json['title']   = utf8_encode($tapahtuma['tyyppi']);
+      $json['title']   = $tapahtuma['tyyppi'];
       $json['start']   = $tapahtuma['pvmalku'];
       $json['end']   = $tapahtuma['pvmloppu'];
       $json['allDay'] = false;
@@ -78,8 +78,8 @@ if (isset($_GET['valmistukset']) and $_GET['valmistukset'] == 'true') {
       $all_events[]     = $json;
     }
 
-    // Haetaan ja lis‰t‰‰n henkilˆkohtaiset tapahtumat
-    // pekkanen, sairasloma, muu tyˆ, loma, tai vapaa/poissa
+    // Haetaan ja lis√§t√§√§n henkil√∂kohtaiset tapahtumat
+    // pekkanen, sairasloma, muu ty√∂, loma, tai vapaa/poissa
     $query = "SELECT kalenteri.pvmalku as start,
               kalenteri.pvmloppu as end,
               kalenteri.kuka,
@@ -98,7 +98,7 @@ if (isset($_GET['valmistukset']) and $_GET['valmistukset'] == 'true') {
       $all_events[] = $row;
     }
 
-    // Lis‰t‰‰n Valmistuslinjalla olevat valmistukset
+    // Lis√§t√§√§n Valmistuslinjalla olevat valmistukset
     $valmistukset = hae_valmistuslinjan_valmistukset($linja);
     foreach($valmistukset as $valmistus) {
       #echo "valmistus: $valmistus[otunnus] $valmistus[pvmalku] $valmistus[pvmloppu]<br>";
@@ -130,13 +130,13 @@ if (isset($_GET['valmistukset']) and $_GET['valmistukset'] == 'true') {
         'kuka': ?,            # ?
         'resource': '1',        # kalenteri.henkilo
         'tunnus': '12345',        # kalenteri.tunnus
-        'allDay': false,        # ei kokop‰iv‰n eventtej‰
-        'color': '#F00',        # v‰ri
+        'allDay': false,        # ei kokop√§iv√§n eventtej√§
+        'color': '#F00',        # v√§ri
         'kesto': '20'          # valmistuksen_kesto()
       }
       */
 
-      $json['title'] = utf8_encode($title);
+      $json['title'] = $title;
       $json['allDay'] = false;
       $json['tunnus'] = $valmistus['otunnus'];
       $json['resource'] = $linja['id'];

@@ -49,7 +49,7 @@ if (isset($maksuehto) and isset($tunnus)) {
     $laskurow = mysql_fetch_assoc($result);
   }
 
-  // haetaan asiakkaan tiedot (esim konserniyhtiˆ)
+  // haetaan asiakkaan tiedot (esim konserniyhti√∂)
   $query = "SELECT konserniyhtio
             FROM asiakas
             WHERE yhtio = '$kukarow[yhtio]'
@@ -60,7 +60,7 @@ if (isset($maksuehto) and isset($tunnus)) {
 
 if (isset($maksuehto) and isset($tunnus)) {
 
-  // korjaillaan er‰p‰iv‰t ja kassa-alet
+  // korjaillaan er√§p√§iv√§t ja kassa-alet
   if ($mehtorow['abs_pvm'] == '0000-00-00') {
     $erapvm = "adddate('$laskurow[tapvm]', interval $mehtorow[rel_pvm] day)";
   }
@@ -82,7 +82,7 @@ if (isset($maksuehto) and isset($tunnus)) {
     $kassa_loppusumma = "";
   }
 
-  // p‰ivitet‰‰n lasku
+  // p√§ivitet√§√§n lasku
   $query = "UPDATE lasku set
             maksuehto   = '$maksuehto',
             erpcm       = $erapvm,
@@ -109,7 +109,7 @@ if (isset($maksuehto) and isset($tunnus)) {
     $myysaatili  = $yhtiorow['myyntisaamiset'];
   }
 
-  // tehd‰‰n kirjanpitomuutokset
+  // tehd√§√§n kirjanpitomuutokset
   if ($laji == 'pois') {
     $query = "UPDATE tiliointi
               SET tilino = '$myysaatili'
@@ -141,7 +141,7 @@ if (isset($maksuehto) and isset($tunnus)) {
     echo "<font class='message'>".t("Korjattiin kirjanpitoviennit")." (".mysql_affected_rows()." ".t("kpl").").</font><br>";
   }
   else {
-    echo "<font class='error'>".t("Kirjanpitomuutoksia ei osattu tehd‰! Korjaa kirjanpito k‰sin")."!</font><br>";
+    echo "<font class='error'>".t("Kirjanpitomuutoksia ei osattu tehd√§! Korjaa kirjanpito k√§sin")."!</font><br>";
   }
 
   unset($laskuno);
@@ -149,7 +149,7 @@ if (isset($maksuehto) and isset($tunnus)) {
 
 if (isset($laskuno)) {
 
-  // haetaan lasku. pit‰‰ factoroimaton
+  // haetaan lasku. pit√§√§ factoroimaton
   $query = "SELECT lasku.*, lasku.tunnus ltunnus, maksuehto.tunnus, maksuehto.teksti
             from lasku
             JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.factoring=''
@@ -173,9 +173,9 @@ if (isset($laskuno)) {
 
   if (mysql_num_rows($result) == 0) {
     if ($laji == 'pois')
-      echo "<font class='error'>".t("Laskunumerolla")." '$laskuno' ".t("ei lˆydy factoroitua laskua")."!</font><br><br>";
+      echo "<font class='error'>".t("Laskunumerolla")." '$laskuno' ".t("ei l√∂ydy factoroitua laskua")."!</font><br><br>";
     else
-      echo "<font class='error'>".t("Laskunumerolla")." '$laskuno' ".t("ei lˆydy normaalia laskua")."!</font><br><br>";
+      echo "<font class='error'>".t("Laskunumerolla")." '$laskuno' ".t("ei l√∂ydy normaalia laskua")."!</font><br><br>";
     unset($laskuno);
   }
   else {
@@ -191,7 +191,7 @@ if (isset($laskuno)) {
       <tr><th>".t("Laskun summa")."</th><td>$laskurow[summa]</td></tr>
       <tr><th>".t("Laskun summa (veroton)")."</th><td>$laskurow[arvo]</td></tr>
       <tr><th>".t("Maksuehto")."</th><td>".t_tunnus_avainsanat($laskurow, "teksti", "MAKSUEHTOKV")."</td></tr>
-      <tr><th>".t("Tapahtumap‰iv‰")."</th><td>$laskurow[tapvm]</td></tr>
+      <tr><th>".t("Tapahtumap√§iv√§")."</th><td>$laskurow[tapvm]</td></tr>
       <tr><th>".t("Uusi maksuehto")."</th>
       <td>";
 
@@ -228,9 +228,9 @@ if (isset($laskuno)) {
 if (!isset($laskuno)) {
   echo "<form name='eikat' method='post' autocomplete='off'>";
   echo "<table><tr>";
-  echo "<td><input type='radio' name='laji' value='paalle' checked> ".t("Lis‰‰ factoring")."</td>";
+  echo "<td><input type='radio' name='laji' value='paalle' checked> ".t("Lis√§√§ factoring")."</td>";
   echo "<td><input type='radio' name='laji' value='pois'> ".t("Poista factoring")."</td></tr>";
-  echo "<tr><th>".t("Syˆt‰ laskunumero")."</th>";
+  echo "<tr><th>".t("Sy√∂t√§ laskunumero")."</th>";
   echo "<td><input type='text' name='laskuno'></td>";
   echo "<td class='back'><input name='subnappi' type='submit' value='".t("Hae lasku")."'></td>";
   echo "</tr></table>";

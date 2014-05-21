@@ -16,7 +16,7 @@ if (isset($uusi) AND !isset($virhe)) {
   $nollaus_query = "UPDATE kuka SET kesken=0 WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
   $result = pupe_query($nollaus_query);
 }
-// Katsotaan onko k‰ytt‰j‰lle keskener‰ist‰ saapumista
+// Katsotaan onko k√§ytt√§j√§lle keskener√§ist√§ saapumista
 elseif (!isset($virhe) AND (!isset($backsaapuminen) OR $backsaapuminen != "")) {
   $query = "SELECT kesken
             FROM kuka
@@ -26,10 +26,10 @@ elseif (!isset($virhe) AND (!isset($backsaapuminen) OR $backsaapuminen != "")) {
   $result = pupe_query($query);
   $kesken_row = mysql_fetch_assoc($result);
 
-  // Jos k‰ytt‰j‰ll‰ ei ole keskener‰ist‰ saapumista, haetaan k‰ytt‰j‰n viimeisimm‰ksi luotu saapumisotsikko ja jatketaan sit‰
+  // Jos k√§ytt√§j√§ll√§ ei ole keskener√§ist√§ saapumista, haetaan k√§ytt√§j√§n viimeisimm√§ksi luotu saapumisotsikko ja jatketaan sit√§
   if ($kesken_row['kesken'] == 0) {
 
-    // Haetaan k‰ytt‰j‰n uusin saapumisen tunnus ja setataan se kesken kolumniin
+    // Haetaan k√§ytt√§j√§n uusin saapumisen tunnus ja setataan se kesken kolumniin
     $query = "SELECT *
               FROM lasku
               WHERE yhtio = '{$kukarow['yhtio']}'
@@ -49,23 +49,23 @@ elseif (!isset($virhe) AND (!isset($backsaapuminen) OR $backsaapuminen != "")) {
   }
 }
 
-# Jos haulla ei lˆytyny mit‰‰n, ollaan palattu t‰lle sivulle virheparametrilla.
+# Jos haulla ei l√∂ytyny mit√§√§n, ollaan palattu t√§lle sivulle virheparametrilla.
 if (isset($virhe)) {
-  $errors[] = t("Ei lˆytynyt. Hae uudestaan.");
+  $errors[] = t("Ei l√∂ytynyt. Hae uudestaan.");
 }
 
 if (isset($submit)) {
   switch($submit) {
     case 'ok':
-      # Haettu v‰hint‰‰n yhdell‰ kent‰ll‰
+      # Haettu v√§hint√§√§n yhdell√§ kent√§ll√§
       if (empty($data['viivakoodi']) and empty($data['tuotenumero']) and empty($data['ostotilaus'])) {
-        $errors[] = t("V‰hint‰‰n yksi kentt‰ on syˆtett‰v‰");
+        $errors[] = t("V√§hint√§√§n yksi kentt√§ on sy√∂tett√§v√§");
         break;
       }
 
       $data['manuaalisesti_syotetty_ostotilausnro'] = $data['ostotilaus'] != '' ? 1 : 0;
 
-      # Rakennetaan parametrit kentist‰
+      # Rakennetaan parametrit kentist√§
       $url = http_build_query($data);
 
       echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tuotteella_useita_tilauksia.php?{$url}'>"; exit();
@@ -74,7 +74,7 @@ if (isset($submit)) {
       echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tulouta.php'>"; exit();
          break;
     default:
-      $errors[] = t("Yll‰tt‰v‰ virhe");
+      $errors[] = t("Yll√§tt√§v√§ virhe");
       break;
   }
 }
@@ -125,7 +125,7 @@ echo "<script type='text/javascript'>
 
   $(document).ready(function() {
     $('#viivakoodi').on('keyup', function() {
-      // Autosubmit vain jos on syˆtetty tarpeeksi pitk‰ viivakoodi
+      // Autosubmit vain jos on sy√∂tetty tarpeeksi pitk√§ viivakoodi
       if (is_mobile && $('#viivakoodi').val().length > 8) {
         document.getElementById('haku_nappi').click();
       }

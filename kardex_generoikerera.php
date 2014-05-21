@@ -1,5 +1,5 @@
 <?php
-// Kutsutaanko CLI:st‰
+// Kutsutaanko CLI:st√§
 $php_cli = FALSE;
 
 if (php_sapi_name() == 'cli') {
@@ -7,11 +7,11 @@ if (php_sapi_name() == 'cli') {
 }
 
 if (!$php_cli) {
-  die ("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!");
+  die ("T√§t√§ scripti√§ voi ajaa vain komentorivilt√§!");
 }
 else {
   if (trim($argv[1]) == '') {
-    echo "Et antanut yhtiˆt‰!\n";
+    echo "Et antanut yhti√∂t√§!\n";
     exit;
   }
 
@@ -42,23 +42,23 @@ else {
 
   while ($gen_ker_row = mysql_fetch_assoc($gen_ker_res_result)) {
 
-    // HUOM!!! FUNKTIOSSA TEHDƒƒN LOCK TABLESIT, LUKKOJA EI AVATA TƒSSƒ FUNKTIOSSA! MUISTA AVATA LUKOT FUNKTION KƒYT÷N JƒLKEEN!!!!!!!!!!
+    // HUOM!!! FUNKTIOSSA TEHD√Ñ√ÑN LOCK TABLESIT, LUKKOJA EI AVATA T√ÑSS√Ñ FUNKTIOSSA! MUISTA AVATA LUKOT FUNKTION K√ÑYT√ñN J√ÑLKEEN!!!!!!!!!!
     $erat = tee_keraysera($gen_ker_row["tunnus"], $gen_ker_row["varasto"]);
 
     if (isset($erat['tilaukset']) and count($erat['tilaukset']) > 0) {
-      // Tallennetaan miss‰ t‰‰ er‰ on tehty
+      // Tallennetaan miss√§ t√§√§ er√§ on tehty
       $ohjelma_moduli = "KARDEX";
 
-      // Tallennetaan ker‰yser‰
+      // Tallennetaan ker√§yser√§
       require('inc/tallenna_keraysera.inc');
 
-      // N‰m‰ tilaukset tallennettin ker‰yser‰‰n
+      // N√§m√§ tilaukset tallennettin ker√§yser√§√§n
       if (isset($lisatyt_tilaukset) and count($lisatyt_tilaukset) > 0) {
 
         $otunnukset = implode(",", $lisatyt_tilaukset);
         $kerayslistatunnus = array_shift(array_keys($lisatyt_tilaukset));
 
-        // tilaus on jo tilassa N A, p‰ivitet‰‰n nyt tilaus "ker‰yslista tulostettu" eli L A
+        // tilaus on jo tilassa N A, p√§ivitet√§√§n nyt tilaus "ker√§yslista tulostettu" eli L A
         $query = "UPDATE lasku SET
                   tila        = 'L',
                   lahetepvm   = now(),
@@ -80,7 +80,7 @@ else {
       // Tulostetaan kollilappu
       require('inc/tulosta_reittietiketti.inc');
 
-      // L‰hetet‰‰n tiedot kardexiin
+      // L√§hetet√§√§n tiedot kardexiin
       require("inc/kardex_send.inc");
     }
   }

@@ -3,14 +3,14 @@
 require ("inc/parametrit.inc");
 
 if (!isset($thumb_size_x, $thumb_size_y, $normaali_size_x, $normaali_size_y)) {
-  echo "<font class='error'>Kuvakokoja ei ole m‰‰ritelty. Ei voida jatkaa!</font>";
+  echo "<font class='error'>Kuvakokoja ei ole m√§√§ritelty. Ei voida jatkaa!</font>";
   exit;
 }
 
-echo "<font class='head'>".t("Kuvien sis‰‰nluku")."</font><hr>";
+echo "<font class='head'>".t("Kuvien sis√§√§nluku")."</font><hr>";
 
 if ($yhtiorow['kuvapankki_polku'] == '') {
-  echo "<font class='error'>Kuvapankkia ei ole m‰‰ritelty. Ei voida jatkaa!</font>";
+  echo "<font class='error'>Kuvapankkia ei ole m√§√§ritelty. Ei voida jatkaa!</font>";
   exit;
 }
 
@@ -67,7 +67,7 @@ function konvertoi ($ykoko, $xkoko, $type, $taulu, $kuva, $dirri, $upfile1) {
   $uusnimi = $dirri."/".$taulu."/".$type."/".$kuva;
 
   if ($ykoko > 0 and $ykoko < $kork and ($kork >= $leve or $xkoko == 0)) {
-    // Haetaan kuvan v‰riprofiili
+    // Haetaan kuvan v√§riprofiili
     exec("nice -n 20 identify -format %[colorspace] \"$upfile1\"", $identify);
 
     $colorspace = "sRGB";
@@ -77,7 +77,7 @@ function konvertoi ($ykoko, $xkoko, $type, $taulu, $kuva, $dirri, $upfile1) {
       exec("nice -n 20 convert -resize x$ykoko -quality 90 -colorspace $colorspace -strip \"$upfile1\" \"$upfilesgh\"", $output, $error);
     }
   elseif ($xkoko > 0 and $xkoko < $leve and ($leve > $kork or $ykoko == 0)) {
-    // Haetaan kuvan v‰riprofiili
+    // Haetaan kuvan v√§riprofiili
     exec("nice -n 20 identify -format %[colorspace] \"$upfile1\"", $identify);
 
     $colorspace = "sRGB";
@@ -100,7 +100,7 @@ function konvertoi ($ykoko, $xkoko, $type, $taulu, $kuva, $dirri, $upfile1) {
     $copy_boob = copy($upfilesgh, $uusnimi);
 
     if ($copy_boob === FALSE) {
-        echo "Kopiointi ep‰onnistui $upfilesgh $uusnimi $upfile1 <br>";
+        echo "Kopiointi ep√§onnistui $upfilesgh $uusnimi $upfile1 <br>";
       $upfileall = "";
     }
     else {
@@ -122,24 +122,24 @@ $dirri = $yhtiorow['kuvapankki_polku']."/".$kukarow['yhtio'];
 $alkupituus = strlen($dirri) + 1;
 
 if (!is_writable($dirri)) {
-  echo "<font class='error'>Kuvapankkiin ($dirri) ei ole m‰‰ritelty kirjoitusoikeutta. Ei voida jatkaa!<br></font>";
+  echo "<font class='error'>Kuvapankkiin ($dirri) ei ole m√§√§ritelty kirjoitusoikeutta. Ei voida jatkaa!<br></font>";
   exit;
 }
 
 if ($tee == 'GO') {
 
   if ($kasittele_kuvat != "1" and $thumb_kuvat != "1" and $normaali_kuvat != "1" and $paino_kuvat != "1" and $muut_kuvat != "1") {
-    echo "<font class='message'>Et valinnut mit‰‰n k‰sitelt‰v‰‰!</font>";
+    echo "<font class='message'>Et valinnut mit√§√§n k√§sitelt√§v√§√§!</font>";
     exit;
   }
 
-  // k‰yd‰‰n l‰pi ensin k‰sitelt‰v‰t kuvat
+  // k√§yd√§√§n l√§pi ensin k√§sitelt√§v√§t kuvat
   $files = listdir($dirri);
 
   if (isset($kasittele_kuvat) and $kasittele_kuvat == '1') {
 
     echo "<br>";
-    echo "<font class='message'>K‰sitell‰‰n konvertoitavia kuvia:</font>";
+    echo "<font class='message'>K√§sitell√§√§n konvertoitavia kuvia:</font>";
     echo "<br><br>";
 
     foreach ($files as $file) {
@@ -164,14 +164,14 @@ if ($tee == 'GO') {
 
         if (file_exists($file)) {
 
-          // konvertoidaan thumb kuva ja siirret‰‰n thumb hakemistoon
+          // konvertoidaan thumb kuva ja siirret√§√§n thumb hakemistoon
           $thumbi = konvertoi($thumb_size_y, $thumb_size_x, 'thumb', $taulu, $kuva, $dirri, $file);
 
           if ($thumbi != '') {
             echo " &raquo; luotiin thumb-kuva.";
           }
 
-          // konvertoidaan normaali kuva ja siirret‰‰n normaali hakemistoon
+          // konvertoidaan normaali kuva ja siirret√§√§n normaali hakemistoon
           $normi = konvertoi($normaali_size_y, $normaali_size_x, 'normaali', $taulu, $kuva, $dirri, $file);
 
           if ($normi != '') {
@@ -188,7 +188,7 @@ if ($tee == 'GO') {
         }
       }
       else {
-        echo " &raquo;  <font class='error'>Virhe! Voidaan k‰sitell‰ vain kuvia!<br>";
+        echo " &raquo;  <font class='error'>Virhe! Voidaan k√§sitell√§ vain kuvia!<br>";
       }
 
     }
@@ -196,10 +196,10 @@ if ($tee == 'GO') {
     echo "<br>";
   }
 
-  echo "<font class='message'>P‰ivitet‰‰n tuotekuvat j‰rjestelm‰‰n:</font>";
+  echo "<font class='message'>P√§ivitet√§√§n tuotekuvat j√§rjestelm√§√§n:</font>";
   echo "<br><br>";
 
-  // k‰yd‰‰n l‰pi dirikka nyt uudestaan
+  // k√§yd√§√§n l√§pi dirikka nyt uudestaan
   $files = listdir($dirri);
 
   foreach ($files as $file) {
@@ -228,7 +228,7 @@ if ($tee == 'GO') {
     elseif ($toiminto == 'muut' and $muut_kuvat != "1") {
       continue;
     }
-    // ohitetaan aina k‰sitelt‰v‰t kuvat, koska ne on hoidettu jo ylh‰‰ll‰
+    // ohitetaan aina k√§sitelt√§v√§t kuvat, koska ne on hoidettu jo ylh√§√§ll√§
     elseif ($toiminto == "kasittele") {
       continue;
     }
@@ -245,7 +245,7 @@ if ($tee == 'GO') {
     $koko = getimagesize($file);
     $filetype = $koko["mime"];
 
-    // Jos ei olla saatu filetyyppi‰ niin arvotaan se vaikka filen nimest‰
+    // Jos ei olla saatu filetyyppi√§ niin arvotaan se vaikka filen nimest√§
     if ($filetype == "") {
       if ($ext == "jpg" or $ext == "jpeg") {
         $filetype = "image/jpeg";
@@ -270,28 +270,28 @@ if ($tee == 'GO') {
 
     echo "<font class='message'>$kuva</font> ";
 
-    // jos saimme jonkun imagesizen, katsellaan, ett‰ se on ok
+    // jos saimme jonkun imagesizen, katsellaan, ett√§ se on ok
     if ($koko !== FALSE) {
       if ($toiminto == 'thumb' and (($kork > $thumb_size_y and $thumb_size_y > 0) or ($leve > $thumb_size_x and $thumb_size_x > 0))) {
-        // konvertoidaan thumb kuva ja siirret‰‰n thumb hakemistoon
+        // konvertoidaan thumb kuva ja siirret√§√§n thumb hakemistoon
         $thumbi = konvertoi($thumb_size_y, $thumb_size_x, 'thumb', $taulu, $kuva, $dirri, $file);
         if ($thumbi != "") {
           echo " &raquo; Skaalattiin thumb-kuva";
         }
         else {
-          echo " &raquo; <font class='error'>Ohitetaan thumb-kuva, koska resoluutio $leve x $kork on liian suuri ja skaalaus ep‰onnistui!</font><br>";
+          echo " &raquo; <font class='error'>Ohitetaan thumb-kuva, koska resoluutio $leve x $kork on liian suuri ja skaalaus ep√§onnistui!</font><br>";
           continue;
         }
       }
 
       if ($toiminto == 'normaali' and (($kork > $normaali_size_y and $normaali_size_y > 0) or ($leve > $normaali_size_x and $normaali_size_x > 0))) {
-        // konvertoidaan normaali kuva ja siirret‰‰n normaali hakemistoon
+        // konvertoidaan normaali kuva ja siirret√§√§n normaali hakemistoon
         $normi = konvertoi($normaali_size_y, $normaali_size_x, 'normaali', $taulu, $kuva, $dirri, $file);
         if ($normi != "") {
           echo " &raquo; Skaalattiin normaalikuva-kuva";
         }
         else {
-          echo " &raquo; <font class='error'>Ohitetaan normaali-kuva, koska resoluutio $leve x $kork on liian suuri ja skaalaus ep‰onnistui!</font><br>";
+          echo " &raquo; <font class='error'>Ohitetaan normaali-kuva, koska resoluutio $leve x $kork on liian suuri ja skaalaus ep√§onnistui!</font><br>";
           continue;
         }
       }
@@ -303,7 +303,7 @@ if ($tee == 'GO') {
     $ext = $path_parts['extension'];
     $jarjestys = 0;
 
-    // pit‰‰ kattoo onko nimess‰ h‰shsi‰
+    // pit√§√§ kattoo onko nimess√§ h√§shsi√§
     if (strpos($kuva, "#") !== FALSE) {
       list($kuva, $jarjestys) = explode("#", $kuva);
       $kuva = "$kuva.$ext";
@@ -318,7 +318,7 @@ if ($tee == 'GO') {
       $mihin = strpos($kuva, "%");
       $kuvanalku = substr($kuva, 0, $mihin);
 
-      //kyseess‰ on k‰yttˆturvatiedot ja tuotekortti
+      //kyseess√§ on k√§ytt√∂turvatiedot ja tuotekortti
       if (strpos($kuva,"%ktt") !== FALSE) {
         $mistakieli = strpos($kuva, "%ktt") + 4;
         $mikakieli = substr($kuva, $mistakieli, 2);
@@ -331,10 +331,10 @@ if ($tee == 'GO') {
           strpos($mikakieli, "no") !== FALSE or
           strpos($mikakieli, "de") !== FALSE) {
 
-          $apuselite = t("K‰yttˆturvatiedote", $mikakieli);
+          $apuselite = t("K√§ytt√∂turvatiedote", $mikakieli);
         }
         else {
-          $apuselite = t("K‰yttˆturvatiedote");
+          $apuselite = t("K√§ytt√∂turvatiedote");
           $mikakieli = "fi";
         }
       }
@@ -378,7 +378,7 @@ if ($tee == 'GO') {
       }
 
       if ($filesize == 0) {
-        echo " &raquo; <font class='error'>Ohitetaan kuva, koska tiedosto on tyhj‰!</font><br>";
+        echo " &raquo; <font class='error'>Ohitetaan kuva, koska tiedosto on tyhj√§!</font><br>";
         continue;
       }
 
@@ -402,7 +402,7 @@ if ($tee == 'GO') {
       $data = addslashes(fread($filee, $filesize));
 
       if ($data === FALSE) {
-        echo " &raquo; <font class='error'>Ohitetaan kuva, koska tiedoston luku ep‰onnistui!</font><br>";
+        echo " &raquo; <font class='error'>Ohitetaan kuva, koska tiedoston luku ep√§onnistui!</font><br>";
         continue;
       }
 
@@ -416,9 +416,9 @@ if ($tee == 'GO') {
 
       if (mysql_num_rows($apuresult) > 0) {
 
-        echo " &raquo; Lis‰ttiin liitetiedosto tuotteelle ";
+        echo " &raquo; Lis√§ttiin liitetiedosto tuotteelle ";
 
-        // lis‰t‰‰n file
+        // lis√§t√§√§n file
         while ($apurow = mysql_fetch_array($apuresult)) {
 
           $kuvaselite = "Tuotekuva";
@@ -449,7 +449,7 @@ if ($tee == 'GO') {
                     and filename        = '$apukuva'";
           $delresult = pupe_query($query);
 
-          // lis‰t‰‰n uusi
+          // lis√§t√§√§n uusi
           $query = "INSERT INTO liitetiedostot SET
                     yhtio           = '$kukarow[yhtio]',
                     liitos          = '$taulu',
@@ -485,7 +485,7 @@ if ($tee == 'GO') {
         unlink($file);
       }
       else {
-        echo " &raquo; <font class='error'>Ohitetaan kuva, koska kuvalle ei lˆytynyt tuotetta!</font><br>";
+        echo " &raquo; <font class='error'>Ohitetaan kuva, koska kuvalle ei l√∂ytynyt tuotetta!</font><br>";
       }
     }
   }
@@ -495,7 +495,7 @@ if ($tee == 'GO') {
 if ($tee == 'DUMPPAA' and $mitkadumpataan != '') {
 
   if (!is_writable($dirri."/".$mitkadumpataan)) {
-    die("Kuvapankkiin/$mitkadumpataan ei ole m‰‰ritelty kirjoitusoikeutta. Ei voida jatkaa!<br>");
+    die("Kuvapankkiin/$mitkadumpataan ei ole m√§√§ritelty kirjoitusoikeutta. Ei voida jatkaa!<br>");
   }
 
   if (strtolower($mitkadumpataan) != 'tuote') {
@@ -532,14 +532,14 @@ if ($tee == 'DUMPPAA' and $mitkadumpataan != '') {
       $toiminto = "muut";
     }
     else {
-      echo "<font class='message'>Tuntematon k‰yttˆtarkoitus $row[kayttotarkoitus]!</font>";
+      echo "<font class='message'>Tuntematon k√§ytt√∂tarkoitus $row[kayttotarkoitus]!</font>";
       continue;
     }
 
     $kokonimi = $dirri."/".$row["liitos"]."/".$toiminto;
 
     if (!is_writable($kokonimi)) {
-      echo "<font class='error'>Hakemistolle $kokonimi ei ole m‰‰ritelty kirjoitusoikeutta. Ei voida tallentaa kuvaa!</font><br>";
+      echo "<font class='error'>Hakemistolle $kokonimi ei ole m√§√§ritelty kirjoitusoikeutta. Ei voida tallentaa kuvaa!</font><br>";
       continue;
     }
 
@@ -550,7 +550,7 @@ if ($tee == 'DUMPPAA' and $mitkadumpataan != '') {
       $handle = fopen("$kokonimi", "x");
 
       if ($handle === FALSE) {
-        echo "<font class='error'>Tiedoston $kokonimi kirjoitus ep‰onnistui!</font><br>";
+        echo "<font class='error'>Tiedoston $kokonimi kirjoitus ep√§onnistui!</font><br>";
       }
       else {
         file_put_contents($kokonimi, $row["data"]);
@@ -570,7 +570,7 @@ if ($tee == 'DUMPPAA' and $mitkadumpataan != '') {
   echo "<br><font class='message'>Vietiin $dumpattuja kuvaa kuvapankkiin</font><br>";
 
   if ($dellattuja > 0) {
-    echo "<br><font class='message'>Poistettiin $dellattuja kuvaa j‰rjestelm‰st‰</font><br>";
+    echo "<br><font class='message'>Poistettiin $dellattuja kuvaa j√§rjestelm√§st√§</font><br>";
   }
 
   echo "<br>";
@@ -606,7 +606,7 @@ foreach ($files as $file) {
   }
 }
 
-// k‰yttˆliittym‰
+// k√§ytt√∂liittym√§
 echo "<form name='uliuli' method='post'>";
 echo "<input type='hidden' name='tee' value='GO'>";
 
@@ -634,7 +634,7 @@ if ($lukuthumbit + $lukunormit + $lukupainot + $lukumuut + $lukutconvertit == 0)
 
   echo "<table>";
   echo "<tr><th colspan='2'>Vie kuvat takaisin kuvapankkiin</th></tr>";
-  echo "<tr><td>Poistetaanko j‰rjestelm‰st‰</td><td><input type='checkbox' name='dumppaajapoista' value='1'></td></tr>";
+  echo "<tr><td>Poistetaanko j√§rjestelm√§st√§</td><td><input type='checkbox' name='dumppaajapoista' value='1'></td></tr>";
   echo "</table>";
 
   echo "<br>";

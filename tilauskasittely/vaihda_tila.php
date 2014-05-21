@@ -59,7 +59,7 @@ if ($tunnus != "" and $tee == "vaihda") {
       }
     }
     else {
-      // l‰hete tulostettu
+      // l√§hete tulostettu
       if ($tila == "3") {
         $query = "UPDATE tilausrivi SET
                   keratty        = '',
@@ -90,7 +90,7 @@ if ($tunnus != "" and $tee == "vaihda") {
         $tila_result = pupe_query($query);
       }
 
-      // tilaus ker‰tty
+      // tilaus ker√§tty
       if ($tila == "4") {
         $query = "UPDATE tilausrivi SET
                   toimitettu     = '',
@@ -119,7 +119,7 @@ if ($tunnus != "" and $tee == "vaihda") {
         $tila_result = pupe_query($query);
       }
 
-      // rahtikirjatiedot syˆtetty
+      // rahtikirjatiedot sy√∂tetty
       if ($tila == "5") {
         $query = "UPDATE tilausrivi SET
                   toimitettu     = '',
@@ -228,7 +228,7 @@ if ($tunnus != "" and $tee == "vaihda") {
       $tila_result = pupe_query($query);
     }
 
-    // mit‰tˆi
+    // mit√§t√∂i
     if ($tila == "999") {
 
       $query = "UPDATE tilausrivi SET
@@ -240,7 +240,7 @@ if ($tunnus != "" and $tee == "vaihda") {
       $query = "UPDATE lasku SET
                 tila         = 'D',
                 alatila      = tila,
-                comments     = '{$kukarow['nimi']} ({$kukarow['kuka']}) ".t("mit‰tˆi tilauksen ohjelmassa vaihda_tila.php")." ".date("d.m.y @ G:i:s")."'
+                comments     = '{$kukarow['nimi']} ({$kukarow['kuka']}) ".t("mit√§t√∂i tilauksen ohjelmassa vaihda_tila.php")." ".date("d.m.y @ G:i:s")."'
                  WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tunnus   = '{$tunnus}'";
       $tila_result = pupe_query($query);
@@ -296,7 +296,7 @@ if ($tunnus != "" and $tee == "valitse") {
 
     $tila_row = mysql_fetch_assoc($tila_result);
 
-    // vain laskuttamattomille myyntitilaukille voi tehd‰ jotain
+    // vain laskuttamattomille myyntitilaukille voi tehd√§ jotain
     if (  ($tila_row["tila"] == "L" and $tila_row["alatila"] != "X") or
         ($tila_row["tila"] == "N" and in_array($tila_row["alatila"], array('A',''))) or
         ($tila_row["tila"] == "V" and in_array($tila_row["alatila"], array('','A','J','C'))) or
@@ -311,7 +311,7 @@ if ($tunnus != "" and $tee == "valitse") {
       echo "<th>",t("Vaihda tilauksen tila"),": </th>";
       echo "<td><select name='tila'>";
       echo "<option value = ''>",t("Valitse uusi tila"),"</option>";
-      echo "<option value = '999'>",t("Mit‰tˆity"),"</option>";
+      echo "<option value = '999'>",t("Mit√§t√∂ity"),"</option>";
 
       if ($tila_row['tila'] == "C") {
 
@@ -337,13 +337,13 @@ if ($tunnus != "" and $tee == "valitse") {
           echo "<option value = '2'>",t("Tilaus tulostusjonossa"),"</option>";
         }
         if (in_array($tila_row["alatila"], array('B','C','D'))) {
-          echo "<option value = '3'>",t("Ker‰yslista tulostettu"),"</option>";
+          echo "<option value = '3'>",t("Ker√§yslista tulostettu"),"</option>";
         }
         if (in_array($tila_row["alatila"], array('B','D'))) {
-          echo "<option value = '4'>",t("Tilaus ker‰tty"),"</option>";
+          echo "<option value = '4'>",t("Tilaus ker√§tty"),"</option>";
         }
         if (in_array($tila_row["alatila"], array('D'))) {
-          echo "<option value = '5'>",t("Rahtikirjatiedot syˆtetty"),"</option>";
+          echo "<option value = '5'>",t("Rahtikirjatiedot sy√∂tetty"),"</option>";
         }
 
       }
@@ -365,7 +365,7 @@ if ($tunnus != "" and $tee == "valitse") {
 
   }
   else {
-    echo "<font class='error'>",t("Tilausta ei lˆydy"),"!</font>";
+    echo "<font class='error'>",t("Tilausta ei l√∂ydy"),"!</font>";
     $tee = "";
   }
 

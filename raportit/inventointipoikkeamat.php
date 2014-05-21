@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta JA master kantaa *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta JA master kantaa *//
 $useslave = 1;
 
 if (isset($_POST["tee"])) {
@@ -36,7 +36,7 @@ if (!isset($vvl))
 if (!isset($ppl))
   $ppl = date("d");
 
-// piirrell‰‰n formi
+// piirrell√§√§n formi
 echo "<form name='inve' method='post' autocomplete='off'>";
 echo "<input type='hidden' name='tee' value='Y'>
     <input type='hidden' name='toim' value='$toim'>";
@@ -54,7 +54,7 @@ elseif (isset($tila) and $tila == "tulosta_excel") {
 
 echo "<tr><th>".t("Valitse toiminto")."</th><td colspan='3'>
     <select name='tila'>
-    <option value='inventoi'>".t("N‰yt‰ ruudulla")."</option>
+    <option value='inventoi'>".t("N√§yt√§ ruudulla")."</option>
     <option value='tulosta' $seltul>".t("Tulosta inventointipoikkeamalista")."</option>
     <option value='tulosta_excel' $seltule>".t("Tulosta inventointipoikkeamalista Excel-tiedostoon")."</option>
     </select></td></tr>";
@@ -75,7 +75,7 @@ $query  = "SELECT tunnus, nimitys
            ORDER BY tyyppi, nimitys";
 $vares = pupe_query($query);
 
-echo "<tr><th valign='top'>".t('Varastot')."<br /><br />(".t('Saat kaikki varastot jos et valitse yht‰‰n').")</th>";
+echo "<tr><th valign='top'>".t('Varastot')."<br /><br />(".t('Saat kaikki varastot jos et valitse yht√§√§n').")</th>";
 echo "<td colspan='3'>";
 
 $varastot = (isset($_POST['varastot']) and is_array($_POST['varastot'])) ? $_POST['varastot'] : array();
@@ -90,20 +90,20 @@ $varastot = (isset($_POST['varastot']) and is_array($_POST['varastot'])) ? $_POS
 }
 echo "</td></tr>";
 
-echo "<tr><th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+echo "<tr><th>".t("Sy√∂t√§ alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
     <td><input type='text' name='ppa' value='$ppa' size='3'></td>
     <td><input type='text' name='kka' value='$kka' size='3'></td>
     <td><input type='text' name='vva' value='$vva' size='5'></td>
-    </tr><tr><th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+    </tr><tr><th>".t("Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
     <td><input type='text' name='ppl' value='$ppl' size='3'></td>
     <td><input type='text' name='kkl' value='$kkl' size='3'></td>
     <td><input type='text' name='vvl' value='$vvl' size='5'></td>";
 
 
-echo "<tr><th>".t("Listaa tuotteet joilla poikkeamaprosentti on v‰hint‰‰n")."</th>
-    <td colspan='3'><input type='text' size='15' name='prosmuutos' value='$prosmuutos' size='3'> ".t("prosenttia")."</td><td class='back'>".t("Lis‰tyt tuotteet + merkill‰ ja v‰hennetyt tuotteet - merkill‰, tai absoluuttinen.")."</td></tr>";
+echo "<tr><th>".t("Listaa tuotteet joilla poikkeamaprosentti on v√§hint√§√§n")."</th>
+    <td colspan='3'><input type='text' size='15' name='prosmuutos' value='$prosmuutos' size='3'> ".t("prosenttia")."</td><td class='back'>".t("Lis√§tyt tuotteet + merkill√§ ja v√§hennetyt tuotteet - merkill√§, tai absoluuttinen.")."</td></tr>";
 
-echo "<tr><th>".t("Listaa tuotteet joiden kappalem‰‰r‰ on muuttunut v‰hint‰‰n")."</th>
+echo "<tr><th>".t("Listaa tuotteet joiden kappalem√§√§r√§ on muuttunut v√§hint√§√§n")."</th>
     <td colspan='3'><input type='text' size='15' name='kplmuutos' value='$kplmuutos' size='3'> ".t("kappaletta")."</td></tr>";
 
 echo "<tr><th>".t("Listaa vain sarjanumerolliset tuotteet")."</th>
@@ -116,7 +116,7 @@ if ($naytanimitys != '') {
   $naytanimitys = 'checked';
 }
 
-echo "<tr><th>".t("N‰yt‰ tuotteen nimitys ja arvonmuutos tulosteella")."</th>
+echo "<tr><th>".t("N√§yt√§ tuotteen nimitys ja arvonmuutos tulosteella")."</th>
     <td colspan='3'><input type='checkbox' name='naytanimitys' $naytanimitys></td></tr>";
 
 echo "<tr><td class='back'><br><input type='submit' value='".t("Aja raportti")."'></td></tr></form></table><br><br><br>";
@@ -379,14 +379,14 @@ if ($tee == 'Y') {
   $saldoresult = pupe_query($query);
 
   if (mysql_num_rows($saldoresult) == 0) {
-    echo "<font class='error'>".t("Yht‰‰n tuotetta ei lˆytynyt")."!</font><br><br>";
+    echo "<font class='error'>".t("Yht√§√§n tuotetta ei l√∂ytynyt")."!</font><br><br>";
     $tee  = '';
     $tila = '';
   }
   elseif ($tila != 'tulosta' and $tila != 'tulosta_excel') {
     echo "<table>";
     echo "<tr>";
-    echo "<th>".t("Nimitys")."</th><th>".t("Varastopaikka")."</th><th>".t("Inventointiaika")."</th><th>".t("M‰‰r‰")."</th><th>".t("Poikkeamaprosentti")." %</th>";
+    echo "<th>".t("Nimitys")."</th><th>".t("Varastopaikka")."</th><th>".t("Inventointiaika")."</th><th>".t("M√§√§r√§")."</th><th>".t("Poikkeamaprosentti")." %</th>";
     echo "</tr>";
 
     while ($tuoterow = mysql_fetch_assoc($saldoresult)) {
@@ -506,7 +506,7 @@ if ($tee == "TULOSTA" and mysql_num_rows($saldoresult) > 0 ) {
   }
 
   //kirjoitetaan  faili levylle..
-  //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+  //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
   list($usec, $sec) = explode(' ', microtime());
   mt_srand((float) $sec + ((float) $usec * 100000));
   $filenimi = "/tmp/Inventointilista-".md5(uniqid(mt_rand(), true)).".txt";
@@ -521,7 +521,7 @@ if ($tee == "TULOSTA" and mysql_num_rows($saldoresult) > 0 ) {
   $ots .= sprintf ('%-21.21s',   t("Tuoteno"));
   $ots .= sprintf ('%-21.21s',   t("Toim.Tuoteno"));
   $ots .= sprintf ('%-10.10s',  t("Poikkeama"));
-  $ots .= sprintf ('%-9.9s',     t("Yksikkˆ"));
+  $ots .= sprintf ('%-9.9s',     t("Yksikk√∂"));
   $ots .= sprintf ('%-20.20',   t("Inv.pvm"));
   $ots .= "\n";
   $ots .= "-------------------------------------------------------------------------------------------------------\n\n";
@@ -572,7 +572,7 @@ if ($tee == "TULOSTA" and mysql_num_rows($saldoresult) > 0 ) {
   }
 
   if ($naytanimitys != '') {
-    $prn = t("Arvonmuutos yhteens‰").": ".sprintf ('%-21.21s', round($arvoyht,2));
+    $prn = t("Arvonmuutos yhteens√§").": ".sprintf ('%-21.21s', round($arvoyht,2));
     fwrite($fh, $prn);
   }
 
@@ -593,7 +593,7 @@ if ($tee == "TULOSTA" and mysql_num_rows($saldoresult) > 0 ) {
     system("rm -f ".$filenimi.".pdf");
   }
   else {
-    //k‰‰nnet‰‰n kaunniksi
+    //k√§√§nnet√§√§n kaunniksi
     $line2 = exec("$komento[Inventointipoikkeamat] ".$filenimi.".ps");
   }
 
@@ -627,7 +627,7 @@ if ($tee == "TULOSTAEXCEL" and mysql_num_rows($saldoresult) > 0 ) {
   $worksheet->write($excelrivi, 3, t("Paikka"),               $format_bold);
   $worksheet->write($excelrivi, 4, t("Poikkeama"),             $format_bold);
   $worksheet->write($excelrivi, 5, t("Poikkeama")." %",           $format_bold);
-  $worksheet->write($excelrivi, 6, t("Yksikkˆ"),               $format_bold);
+  $worksheet->write($excelrivi, 6, t("Yksikk√∂"),               $format_bold);
   $worksheet->write($excelrivi, 7, t("Inv.pvm"),               $format_bold);
   $worksheet->write($excelrivi, 8, t("Varastonarvo ennen inventointia"),   $format_bold);
   $worksheet->write($excelrivi, 9, t("Arvonmuutos"),             $format_bold);

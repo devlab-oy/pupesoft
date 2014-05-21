@@ -36,18 +36,18 @@ class FormValidator {
     'mitavaan'     => "^[\d\D]{1,}\$"
   );
   public $regex_meanings = array(
-    'paiva'       => "Pitää olla päivä",
-    'summa'       => "Pitää olla summa",
-    'numero'     => "Pitää olla numero",
-    'kirjain_numero' => "Pitää olla kirjain tai numero",
-    'ei_tyhja'     => "Ei saa olla tyhjä",
+    'paiva'       => "PitÃ¤Ã¤ olla pÃ¤ivÃ¤",
+    'summa'       => "PitÃ¤Ã¤ olla summa",
+    'numero'     => "PitÃ¤Ã¤ olla numero",
+    'kirjain_numero' => "PitÃ¤Ã¤ olla kirjain tai numero",
+    'ei_tyhja'     => "Ei saa olla tyhjÃ¤",
     'sanoja'     => "Vain sanoja",
-    'puh'       => "Pitää olla puhelinnumero",
-    'postino'     => "Pitää olla postinumero",
-    'hinta'       => "Pitää olla hinta",
+    'puh'       => "PitÃ¤Ã¤ olla puhelinnumero",
+    'postino'     => "PitÃ¤Ã¤ olla postinumero",
+    'hinta'       => "PitÃ¤Ã¤ olla hinta",
     '2digitopt'     => "Optionaalinen 2 desimaalia",
-    '2digitforce'   => "Pitää olla 2 desimaali",
-    'mitavaan'     => "Voi olla mitä vain"
+    '2digitforce'   => "PitÃ¤Ã¤ olla 2 desimaali",
+    'mitavaan'     => "Voi olla mitÃ¤ vain"
   );
   private $validations, $sanatations, $mandatories, $errors, $corrects, $fields;
 
@@ -96,7 +96,7 @@ class FormValidator {
    */
   public function getScript() {
     if (!empty($this->errors)) {
-      $output = "alert('Seuraavissa kentissä oli virheitä.";
+      $output = "alert('Seuraavissa kentissÃ¤ oli virheitÃ¤.";
       foreach ($this->errors as $key => $val) {
         $output .= '\n'.$key.': '.$this->regex_meanings[$val];
       }

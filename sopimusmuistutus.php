@@ -1,18 +1,18 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-// Kutsutaanko CLI:st‰
+// Kutsutaanko CLI:st√§
 if (php_sapi_name() != 'cli') {
-  die ("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!");
+  die ("T√§t√§ scripti√§ voi ajaa vain komentorivilt√§!");
 }
 
 require('inc/connect.inc');
 require('inc/functions.inc');
 
 if ($argv[1] != "") {
-  // ja yhtio rivilt‰ ensimm‰inen arg
+  // ja yhtio rivilt√§ ensimm√§inen arg
   $yhtio = mysql_real_escape_string($argv[1]);
   $yhtiorow = hae_yhtion_parametrit($yhtio);
 }
@@ -29,11 +29,11 @@ else {
   exit;
 }
 
-// tilausrivi.kerayspvm => poikkeava alkup‰iv‰
-// tilausrivi.toimaika => poikkeava loppup‰iv‰
+// tilausrivi.kerayspvm => poikkeava alkup√§iv√§
+// tilausrivi.toimaika => poikkeava loppup√§iv√§
 
-// Haetaan kaikki 30 p‰iv‰n p‰‰st‰ vanhenevat sopimukset/sopimusrivit
-// Datediff -30 tarkoittaa ett‰ 30 pv kuluttua sopimus menee umpeen ja 30 tarkoittaa ett‰ meni 30 pv sitten umpeen.
+// Haetaan kaikki 30 p√§iv√§n p√§√§st√§ vanhenevat sopimukset/sopimusrivit
+// Datediff -30 tarkoittaa ett√§ 30 pv kuluttua sopimus menee umpeen ja 30 tarkoittaa ett√§ meni 30 pv sitten umpeen.
 $query = "(SELECT distinct lasku.tunnus, lasku.ytunnus, lasku.nimi, lasku.asiakkaan_tilausnumero, lasku.valkoodi
            FROM lasku
            JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio
@@ -63,14 +63,14 @@ if (mysql_num_rows($result) == 0) {
   exit;
 }
 
-// Tehd‰‰n email
-$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <{$yhtiorow["postittaja_email"]}>\n";
-$header .= "Content-type: text/html; charset=\"iso-8859-1\"\n";
+// Tehd√§√§n email
+$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <{$yhtiorow["postittaja_email"]}>\n";
+$header .= "Content-type: text/html; charset=\"utf-8\"\n";
 
 $out  = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\">";
 $out .= "<html>";
 $out .= "<head>";
-$out .= "<meta http-equiv='Content-Type' content='text/html; charset=ISO-8859-15'>";
+$out .= "<meta http-equiv='Content-Type' content='text/html; charset=utf-8'>";
 $out .= "<style type='text/css'>{$yhtiorow["css"]}</style>";
 $out .= "<title></title>";
 $out .= "</head>";
@@ -143,4 +143,4 @@ $out .= "</table>";
 $out .= "</body>";
 $out .= "</html>";
 
-$postia = mail($to_email, mb_encode_mimeheader("{$yhtiorow["nimi"]} - ".t("Vanhenevat sopimukset", $kieli), "ISO-8859-1", "Q"), $out, $header, "-f {$yhtiorow["postittaja_email"]}");
+$postia = mail($to_email, mb_encode_mimeheader("{$yhtiorow["nimi"]} - ".t("Vanhenevat sopimukset", $kieli), "UTF-8", "Q"), $out, $header, "-f {$yhtiorow["postittaja_email"]}");

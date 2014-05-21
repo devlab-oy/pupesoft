@@ -6,32 +6,32 @@ if ($postiedihost != "" and $postiediuser != "" and $postiedipass != "" and $pos
   $file = "dataout/postiedi-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
 
   // avataan faili
-  if (!$handle = fopen($file, "w")) die("Filen '$file' luonti ep‰onnistui!");
+  if (!$handle = fopen($file, "w")) die("Filen '$file' luonti ep√§onnistui!");
 
-  // tehd‰‰n EDI-aineisto
+  // tehd√§√§n EDI-aineisto
   $ulos  = "";
   $ulos .= "ICHGSTART:$postirow[tunnus]\n";                    // tilauksen numero
   $ulos .= "ICHG_DATA:EIH-1.4.1\n";
   $ulos .= "ICHG_INFO:$postirow[laatija]\n";                    // laatija
   $ulos .= "SMSGSTART:$postirow[tunnus]\n";                    // rahtikirjan numero
   $ulos .= "SBGMITYPE:700\n";
-  $ulos .= "SBGMINUMB:$postirow[ytunnus]\n";                    // pelkk‰ ytunnus, niin niputtuu paremmin
+  $ulos .= "SBGMINUMB:$postirow[ytunnus]\n";                    // pelkk√§ ytunnus, niin niputtuu paremmin
   $ulos .= "SMGMMFUNC:7\n";
   $ulos .= "SCNT11_TL:1@PCE\n";                          // kollit, aina yksi. koska aina file per kolli
   $ulos .= "SCNT7__TL:$kilotyht@KGM\n";                      // kilot
-  $ulos .= "SRFFCT_NU:$sopnro\n";                          // meid‰n rahtisopimusnro
+  $ulos .= "SRFFCT_NU:$sopnro\n";                          // meid√§n rahtisopimusnro
   $ulos .= "SRFFFN_NU:\n";
   $ulos .= "STDT20_TT:\n";
   $ulos .= "STDT20_DT:143@".date("YmdHi")."@203\n";
-  $ulos .= "STDT5__LC:5@$yhtiorow[postino]@16@@$yhtiorow[postitp]\n";        // l‰hett‰j‰n postino ja postitp
+  $ulos .= "STDT5__LC:5@$yhtiorow[postino]@16@@$yhtiorow[postitp]\n";        // l√§hett√§j√§n postino ja postitp
   $ulos .= "STDT8__LC:8@$rakir_row[toim_postino]@16@@$rakir_row[toim_postitp]\n";  // vastaanottajan postino ja postitp
-  $ulos .= "SNADCZ_PC:$yhtiorow[ytunnus]@100\n";                  // l‰hett‰j‰n ytunnus
-  $ulos .= "SNADCZ_NA:$yhtiorow[nimi]\n";                      // l‰hett‰j‰n nimi
-  $ulos .= "SNADCZ_NX:\n";                            // l‰hett‰j‰n nimitarkenne
-  $ulos .= "SNADCZ_SA:$yhtiorow[osoite]\n";                    // l‰hett‰j‰n osoite
-  $ulos .= "SNADCZ_CI:$yhtiorow[postitp]\n";                    // l‰hett‰j‰n postitp
-  $ulos .= "SNADCZ_PO:$yhtiorow[postino]\n";                    // l‰hett‰j‰n postino
-  $ulos .= "SNADCZ_CN:$yhtiorow[maa]\n";                      // l‰hett‰j‰n maa
+  $ulos .= "SNADCZ_PC:$yhtiorow[ytunnus]@100\n";                  // l√§hett√§j√§n ytunnus
+  $ulos .= "SNADCZ_NA:$yhtiorow[nimi]\n";                      // l√§hett√§j√§n nimi
+  $ulos .= "SNADCZ_NX:\n";                            // l√§hett√§j√§n nimitarkenne
+  $ulos .= "SNADCZ_SA:$yhtiorow[osoite]\n";                    // l√§hett√§j√§n osoite
+  $ulos .= "SNADCZ_CI:$yhtiorow[postitp]\n";                    // l√§hett√§j√§n postitp
+  $ulos .= "SNADCZ_PO:$yhtiorow[postino]\n";                    // l√§hett√§j√§n postino
+  $ulos .= "SNADCZ_CN:$yhtiorow[maa]\n";                      // l√§hett√§j√§n maa
   $ulos .= "SNADCN_PC:\n";
   $ulos .= "SNADCN_NA:$rakir_row[toim_nimi]\n";                  // vastaanottajan nimi
   $ulos .= "SNADCN_NX:$rakir_row[toim_nimitark]\n";                // vastaanottan nimitarkenne
@@ -40,7 +40,7 @@ if ($postiedihost != "" and $postiediuser != "" and $postiedipass != "" and $pos
   $ulos .= "SNADCN_PO:$rakir_row[toim_postino]\n";                // vastaanottajan postino
 
   if ($rakir_row['merahti'] == 'K') {
-    // K‰ytet‰‰n l‰hett‰j‰n rahtisopimusnumeroa
+    // K√§ytet√§√§n l√§hett√§j√§n rahtisopimusnumeroa
     $ulos .= "SNADFP_PC:$toitarow[sopimusnro]@100\n";              // rahdinmaksajan sopimusnumero
     $ulos .= "SNADFP_NA:$yhtiorow[nimi]\n";                    // rahdinmaksajan nimi
     $ulos .= "SNADFP_NX:\n";                          // rahdinmaksajan nimitarkenne
@@ -50,7 +50,7 @@ if ($postiedihost != "" and $postiediuser != "" and $postiedipass != "" and $pos
     $ulos .= "SNADFP_CN:$yhtiorow[maa]\n";                    // rahdinmaksajan maa
   }
   else {
-    // K‰ytet‰‰n vastaanottajan rahtisopimusnumeroa
+    // K√§ytet√§√§n vastaanottajan rahtisopimusnumeroa
     $ulos .= "SNADFP_PC:$postirow[rahtisopimus]@100\n";              // rahdinmaksajan sopimusnumero
     $ulos .= "SNADFP_NA:$postirow[nimi]\n";                    // rahdinmaksajan nimi
     $ulos .= "SNADFP_NX:$postirow[nimitark]\n";                  // rahdinmaksajan nimitarkenne
@@ -62,22 +62,22 @@ if ($postiedihost != "" and $postiediuser != "" and $postiedipass != "" and $pos
 
   $ulos .= "SCNISTART:1\n";
   $ulos .= "SCNI___CN:9999\n";
-  $ulos .= "SGID___GI:@1@PC@@@PAKETTI@1\n";                    // pakkauskoodit.. t‰m‰ pit‰‰ koodata paremmin!! nyt aina paketti
+  $ulos .= "SGID___GI:@1@PC@@@PAKETTI@1\n";                    // pakkauskoodit.. t√§m√§ pit√§√§ koodata paremmin!! nyt aina paketti
   $ulos .= "SGIDHANPI:$tuoteviiva1\n";                      // postin kuljetuskoodi
-  $ulos .= "SGIDHANPI:2Z3102\n";                          // monipakettil‰hetys koodi, lis‰t‰‰n aina
+  $ulos .= "SGIDHANPI:2Z3102\n";                          // monipakettil√§hetys koodi, lis√§t√§√§n aina
 
-  if (in_array("3", $x)) $ulos .= "SGIDHANPI:2Z3103\n";                // vastaanottaja maksaa lis‰palvelu
-  if (in_array("4", $x)) $ulos .= "SGIDHANPI:2Z3104\n";                // erikoisk‰sitelt‰v‰
+  if (in_array("3", $x)) $ulos .= "SGIDHANPI:2Z3103\n";                // vastaanottaja maksaa lis√§palvelu
+  if (in_array("4", $x)) $ulos .= "SGIDHANPI:2Z3104\n";                // erikoisk√§sitelt√§v√§
   if (in_array("6", $x)) $ulos .= "SGIDHANPI:2Z3106\n";                // lauantaijaleku
-  if (in_array("7", $x)) $ulos .= "SGIDHANPI:2Z3107\n";              // kuljetusyksikkˆkuljetus
+  if (in_array("7", $x)) $ulos .= "SGIDHANPI:2Z3107\n";              // kuljetusyksikk√∂kuljetus
 
   $ulos .= "SGIDPA_PC:$viivaedi\n";                        // viivakoodi
 
-   // jos kyseess‰ on postiennakko...
+   // jos kyseess√§ on postiennakko...
   if ($postiennakkomaara != '')  {
-    $ulos .= "SGIDHANPI:2Z3101\n";                        // lis‰palvelu postiennakko
+    $ulos .= "SGIDHANPI:2Z3101\n";                        // lis√§palvelu postiennakko
     $ulos .= "SGID22_TC:@@@POSTIENNAKKO@C\n";                  // postiennakkoa
-    $ulos .= "SGID22_MA:$postiennakkomaara@EUR\n";                // postiennakkom‰‰r‰
+    $ulos .= "SGID22_MA:$postiennakkomaara@EUR\n";                // postiennakkom√§√§r√§
     $ulos .= "SGIDADERF:$postiennakkotilino\n";                  // postiennakkotilinumero
     $ulos .= "SGIDPQ_RF:$postiennakkoviite\n";                  // postiennakkoviitenumero
   }
@@ -88,7 +88,7 @@ if ($postiedihost != "" and $postiediuser != "" and $postiedipass != "" and $pos
 
   // kirjotetaan aineisto failiin
   if (fwrite($handle, $ulos) === FALSE)
-    die("failin kirjoitus ep‰onnistui");
+    die("failin kirjoitus ep√§onnistui");
 
   // suljetaan file
   fclose ($handle);

@@ -16,8 +16,8 @@ js_popup();
 
 echo "<font class='head'>".t("Asennuskalenteri").":</font><hr><br>";
 
-// Voi tulla myˆs salasanat.php:st‰
-if (!isset($MONTH_ARRAY)) $MONTH_ARRAY = array(1=> t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kes‰kuu'),t('Hein‰kuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
+// Voi tulla my√∂s salasanat.php:st√§
+if (!isset($MONTH_ARRAY)) $MONTH_ARRAY = array(1=> t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kes√§kuu'),t('Hein√§kuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
 if (!isset($DAY_ARRAY)) $DAY_ARRAY = array(t("Maanantai"), t("Tiistai"), t("Keskiviikko"), t("Torstai"), t("Perjantai"), t("Lauantai"), t("Sunnuntai"));
 if (!isset($AIKA_ARRAY)) $AIKA_ARRAY = array("08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00");
 
@@ -28,7 +28,7 @@ if (!isset($tyojono) and $toim == 'TYOMAARAYS_ASENTAJA') {
 }
 
 if (!isset($tyojono)) {
-  // Onko k‰ytt‰j‰ll‰ oletustyˆjono
+  // Onko k√§ytt√§j√§ll√§ oletusty√∂jono
   $query = "SELECT selite
             FROM avainsana
             WHERE yhtio     = '$kukarow[yhtio]'
@@ -58,7 +58,7 @@ while ($kirow = mysql_fetch_array($kires)) {
   $ASENTAJA_ARRAY_TARK[] = $kirow["selitetark_2"];
 }
 
-// otetaan oletukseksi t‰m‰ kuukausi ja t‰m‰ vuosi
+// otetaan oletukseksi t√§m√§ kuukausi ja t√§m√§ vuosi
 if ($month == '') $month = date("n");
 else $month = sprintf("%02d", $month);
 
@@ -73,7 +73,7 @@ if ($lmonth != '') $lmonth = sprintf("%02d", $lmonth);
 if ($lyear != '') $lyear = sprintf("%04d", $lyear);
 if ($lday != '') $lday = sprintf("%02d", $lday);
 
-//lasketaan edellinen ja seuraava paiva kun siiryt‰‰n yksi p‰iv‰
+//lasketaan edellinen ja seuraava paiva kun siiryt√§√§n yksi p√§iv√§
 $backmday = date("n",mktime(0, 0, 0, $month, $day-1,  $year));
 $backyday = date("Y",mktime(0, 0, 0, $month, $day-1,  $year));
 $backdday = date("j",mktime(0, 0, 0, $month, $day-1,  $year));
@@ -82,7 +82,7 @@ $nextmday = date("n",mktime(0, 0, 0, $month, $day+1,  $year));
 $nextyday = date("Y",mktime(0, 0, 0, $month, $day+1,  $year));
 $nextdday = date("j",mktime(0, 0, 0, $month, $day+1,  $year));
 
-//lasketaan edellinen ja seuraava paiva kun siiryt‰‰n yksi kuukausi
+//lasketaan edellinen ja seuraava paiva kun siiryt√§√§n yksi kuukausi
 $backmmonth = date("n",mktime(0, 0, 0, $month-1, $day,  $year));
 $backymonth = date("Y",mktime(0, 0, 0, $month-1, $day,  $year));
 $backdmonth = date("j",mktime(0, 0, 0, $month-1, $day,  $year));
@@ -143,11 +143,11 @@ if ($tee == "LISAA") {
 
   //tarkistetaan, etta alku ja loppu ovat eri..
   if ($alku == $loppu) {
-    echo "<font class='error'>".t("VIRHE: Alku- ja p‰‰ttymisajankohta ovat samat")."!</font><br><br>";
+    echo "<font class='error'>".t("VIRHE: Alku- ja p√§√§ttymisajankohta ovat samat")."!</font><br><br>";
     $tee = "VARAA";
   }
   if ($alku > $loppu) {
-    echo "<font class='error'>".t("VIRHE: P‰‰ttymisjankohta on aikaisempi kuin alkamisajankohta")."!</font><br><br>";
+    echo "<font class='error'>".t("VIRHE: P√§√§ttymisjankohta on aikaisempi kuin alkamisajankohta")."!</font><br><br>";
     $tee = "VARAA";
   }
 
@@ -165,7 +165,7 @@ if ($tee == "LISAA") {
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) > 0) {
-    echo "<font class='error'>".t("VIRHE: P‰‰llekk‰isi‰ tapahtumia")."!</font><br><br>";
+    echo "<font class='error'>".t("VIRHE: P√§√§llekk√§isi√§ tapahtumia")."!</font><br><br>";
     $tee = "VARAA";
   }
 
@@ -215,7 +215,7 @@ if ($tee == "LISAA") {
         $viestit_chk_res = mysql_query($kysely) or pupe_error($kysely);
         $viestit_chk_row = mysql_fetch_assoc($viestit_chk_res);
 
-        kalenteritapahtuma ("Muistutus", "Asentajan kuittaus", "Muista tyˆm‰‰r‰ys $liitostunnus\n\n$viestit_chk_row[viesti]\n$viestit_chk_row[comments]\n$viestit_chk_row[sisviesti2]", $liitostunnus, "K", '', $liitostunnus, "'$year-$month-$day $aika'", "'$lyear-$lmonth-$lday $laika'", 'ASENTAJA');
+        kalenteritapahtuma ("Muistutus", "Asentajan kuittaus", "Muista ty√∂m√§√§r√§ys $liitostunnus\n\n$viestit_chk_row[viesti]\n$viestit_chk_row[comments]\n$viestit_chk_row[sisviesti2]", $liitostunnus, "K", '', $liitostunnus, "'$year-$month-$day $aika'", "'$lyear-$lmonth-$lday $laika'", 'ASENTAJA');
       }
     }
 
@@ -266,7 +266,7 @@ if ($tee == "LISAA") {
         $viestit_chk_res = mysql_query($kysely) or pupe_error($kysely);
         $viestit_chk_row = mysql_fetch_assoc($viestit_chk_res);
 
-        kalenteritapahtuma ("Muistutus", "Asentajan kuittaus", "Muista tyˆm‰‰r‰ys $liitostunnus\n\n$viestit_chk_row[viesti]\n$viestit_chk_row[comments]\n$viestit_chk_row[sisviesti2]", $liitostunnus, "K", '', $liitostunnus, "'$year-$month-$day $aika'", "'$lyear-$lmonth-$lday $laika'", 'ASENTAJA');
+        kalenteritapahtuma ("Muistutus", "Asentajan kuittaus", "Muista ty√∂m√§√§r√§ys $liitostunnus\n\n$viestit_chk_row[viesti]\n$viestit_chk_row[comments]\n$viestit_chk_row[sisviesti2]", $liitostunnus, "K", '', $liitostunnus, "'$year-$month-$day $aika'", "'$lyear-$lmonth-$lday $laika'", 'ASENTAJA');
       }
     }
 
@@ -369,7 +369,7 @@ if ($tee == "POISTA") {
             and tyyppi = 'asennuskalenteri'";
   $result = mysql_query($query) or pupe_error($query);
 
-  echo "<font class='message'>".t("Kalenterimerkint‰ poistettu")."!</font><br><br>";
+  echo "<font class='message'>".t("Kalenterimerkint√§ poistettu")."!</font><br><br>";
   $tee = "";
 }
 
@@ -393,13 +393,13 @@ if ($tee == "VARAA") {
   }
 
   echo "<tr><th>",t("Asentaja"),":</th><td>$asentaja</td></tr>";
-  echo "<tr><th>",t("Tyˆjono"),":</th><td>$tyojono</td></tr>";
+  echo "<tr><th>",t("Ty√∂jono"),":</th><td>$tyojono</td></tr>";
 
   if ($yhtiorow['tyomaarays_asennuskalenteri_muistutus'] == 'K') {
-    echo "<tr><th>",t("Lis‰‰ muistutus"),":</th>";
+    echo "<tr><th>",t("Lis√§√§ muistutus"),":</th>";
     echo "<td><select name='lisaa_muistutus'>";
-    echo "<option value=''>",t("Ei lis‰t‰ muistutusta kalenteriin"),"</option>";
-    echo "<option value='kylla'>",t("Lis‰t‰‰n muistutus kalenteriin"),"</option>";
+    echo "<option value=''>",t("Ei lis√§t√§ muistutusta kalenteriin"),"</option>";
+    echo "<option value='kylla'>",t("Lis√§t√§√§n muistutus kalenteriin"),"</option>";
     echo "</select></td></tr>";
   }
 
@@ -407,7 +407,7 @@ if ($tee == "VARAA") {
   if (!isset($lmonth)) $lmonth = $month;
   if (!isset($lyear)) $lyear   = $year;
 
-  echo  "<tr><th nowrap>".t("Tyˆn alku").":</th><td>".tv1dateconv(sprintf('%04d',$year)."-".sprintf('%02d',$month)."-".sprintf('%02d',$day))." - $aika</td></tr>";
+  echo  "<tr><th nowrap>".t("Ty√∂n alku").":</th><td>".tv1dateconv(sprintf('%04d',$year)."-".sprintf('%02d',$month)."-".sprintf('%02d',$day))." - $aika</td></tr>";
 
   $whileaika = $AIKA_ARRAY[0];
   if (!isset($aikaloppu)) $aikaloppu = date("H:i", mktime(substr($aika,0,2), substr($aika,3,2)+60, 0));
@@ -420,7 +420,7 @@ if ($tee == "VARAA") {
   $whileloppu = $whileloppu.":".$whlopm;
 
   echo  "<tr>
-    <th nowrap>$whileloppu ".t("Tyˆn loppu").":</th>
+    <th nowrap>$whileloppu ".t("Ty√∂n loppu").":</th>
     <td>
     <input type='text' size='3' name='lday' value='$lday'>
     <input type='text' size='3' name='lmonth' value='$lmonth'>
@@ -445,7 +445,7 @@ if ($tee == "VARAA") {
     echo "<input type='submit' value='".t("Muokkaa")."'>";
   }
   else {
-    echo "<input type='submit' value='".t("Lis‰‰")."'>";
+    echo "<input type='submit' value='".t("Lis√§√§")."'>";
   }
 
   echo "</form>";
@@ -499,13 +499,13 @@ if ($tee == "") {
   echo "</select></td>";
   echo "<td><a href='$PHP_SELF?toim=$toim&day=1&month=$nextmmonth&year=$nextymonth&tyojono=$tyojono&liitostunnus=$liitostunnus&tyotunnus=$tyotunnus&lopetus=$lopetus'> >> </a></td>";
 
-  echo "<th>".t("Tyˆjono").":</th><td>";
+  echo "<th>".t("Ty√∂jono").":</th><td>";
 
   echo "<select name='tyojono' Onchange='submit();'>";
 
   $vresult = t_avainsana("TYOM_TYOJONO");
 
-  echo "<option value = ''>".t("Kaikki tyˆjonot")."</option>";
+  echo "<option value = ''>".t("Kaikki ty√∂jonot")."</option>";
 
   while ($vrow = mysql_fetch_array($vresult)) {
     $sel="";
@@ -517,7 +517,7 @@ if ($tee == "") {
 
   echo "</select>";
   echo "</td>";
-  echo "<td class='back'><input type='submit' value='".t("N‰yt‰")."'></form></td>";
+  echo "<td class='back'><input type='submit' value='".t("N√§yt√§")."'></form></td>";
   echo "</tr>";
   echo "</table></center><br>";
 }
@@ -552,7 +552,7 @@ if ($tee == "") {
     echo "</td>";
 
     if (count($ASENTAJA_ARRAY_TARK) < 5) {
-      // Kirjotetaan alkuun tyhji‰ soluja
+      // Kirjotetaan alkuun tyhji√§ soluja
       if (weekday_number("1", $month, $year) < count($DAY_ARRAY)) {
         for ($i = 0; $i < weekday_number("1", $month, $year); $i++) {
           echo "<td class='back' style='height: 100%;'>&nbsp;</td>";
@@ -578,7 +578,7 @@ if ($tee == "") {
       $orderlisa = '';
       $tyyppilisa = "'asennuskalenteri','kalenteri'";
 
-      // asentaja saa n‰hd‰ vaan asennuskalenterin merkinn‰t.
+      // asentaja saa n√§hd√§ vaan asennuskalenterin merkinn√§t.
       if ($toim == 'TYOMAARAYS_ASENTAJA') {
         $selectlisa = "lasku.tunnus, ";
         $orderlisa = " lasku.tunnus, ";
@@ -625,7 +625,7 @@ if ($tee == "") {
 
               $slot = str_replace(array(":","-"," "), "", $year."-".sprintf('%02d', $month)."-".sprintf('%02d', $i)." ".$a);
 
-              // Koska kale on tuntitarkuudella tyˆ alkaa aina "00" minuuttina
+              // Koska kale on tuntitarkuudella ty√∂ alkaa aina "00" minuuttina
               $alku = str_replace(array(":","-"," "), "", substr($vrow["pvmalku"],0,14)."00");
 
               $lopp = str_replace(array(":","-"," "), "", substr($vrow["pvmloppu"],0,16));
@@ -648,15 +648,15 @@ if ($tee == "") {
                   echo "<div id='div_$vrow[liitostunnus]' class='popup'>";
 
                   if ($vrow["tyyppi"] == "asennuskalenteri") {
-                    echo t("Tyˆm‰‰r‰ys").": $vrow[liitostunnus]";
+                    echo t("Ty√∂m√§√§r√§ys").": $vrow[liitostunnus]";
                     echo "<br>".t("Asiakas").": $vrow[nimi] $vrow[toim_nimi]";
                   }
                   else {
-                    echo t("Kalenterimerkint‰").": $vrow[tapa]";
+                    echo t("Kalenterimerkint√§").": $vrow[tapa]";
                   }
 
                   if (trim($vrow["viesti"]) != "") echo "<br><br>",t("Tilausviite"),": $vrow[viesti]";
-                  if (trim($vrow["komm1"]) != "") echo "<br><br>",t("Tyˆn kuvaus").": ".str_replace("\n", "<br>", $vrow["komm1"]);
+                  if (trim($vrow["komm1"]) != "") echo "<br><br>",t("Ty√∂n kuvaus").": ".str_replace("\n", "<br>", $vrow["komm1"]);
                   if (trim($vrow["komm2"]) != "") echo "<br>".t("Toimenpiteet").": ".str_replace("\n", "<br>", $vrow["komm2"]);
 
                   echo "</div>";
@@ -801,7 +801,7 @@ if ($tee == "") {
     }
   }
 
-  // Kirjotetaan loppuun tyhji‰ soluja
+  // Kirjotetaan loppuun tyhji√§ soluja
   if (count($ASENTAJA_ARRAY_TARK) < 5 and weekday_number($i, $month, $year) < count($DAY_ARRAY) and weekday_number($i, $month, $year) > 0) {
     for ($a = weekday_number($i, $month, $year); $a <= count($DAY_ARRAY)-1; $a++) {
       echo "<td class='back'>&nbsp;</td>";

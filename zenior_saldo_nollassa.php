@@ -1,8 +1,8 @@
 <?php
 
-// Kutsutaanko CLI:st‰
+// Kutsutaanko CLI:st√§
 if (php_sapi_name() != 'cli') {
-  die ("Ajo ainoastaan cronista / komentorivilt‰!");
+  die ("Ajo ainoastaan cronista / komentorivilt√§!");
 }
 
 if (!isset($argv[1])) {
@@ -20,16 +20,16 @@ ini_set("display_errors", 0);
 require("inc/connect.inc");
 require("inc/functions.inc");
 
-// Tehd‰‰n oletukset
+// Tehd√§√§n oletukset
 $kukarow['yhtio'] = $argv[1];
 $kukarow['kuka'] = "admin";
 $yhtiorow = hae_yhtion_parametrit($argv[1]);
 
 if ($yhtiorow["epakurantoinnin_myyntihintaleikkuri"] != 'Z') {
-  die(t("T‰m‰ toiminto on k‰ytett‰viss‰ vain, jos yhtiˆparametri epakurantoinnin_myyntihintaleikkuri on 'Z'"));
+  die(t("T√§m√§ toiminto on k√§ytett√§viss√§ vain, jos yhti√∂parametri epakurantoinnin_myyntihintaleikkuri on 'Z'"));
 }
 
-// hae nollasaldoiset ep‰kurantit, tarvitaan tuoteno ja avainsanalle tallennettu alkuper‰inen hinta
+// hae nollasaldoiset ep√§kurantit, tarvitaan tuoteno ja avainsanalle tallennettu alkuper√§inen hinta
 $query  = "SELECT t.tuoteno,
            a.selitetark        as orig_myyntihinta,
            MAX(t.myyntihinta)  as varahinta,
@@ -47,7 +47,7 @@ while ($row = mysql_fetch_assoc($result)) {
 
     // jos talteenotettu hinta ei ole nollaa isompi, otetaan viimeisin myyntihinta
     $hinta = (floatval($row["orig_myyntihinta"]) > 0) ? floatval($row["orig_myyntihinta"]) : $row["varahinta"];
-    $selite = t("Ep‰kuranttimuutos") . ": ".t("Tuote")." {$row["tuoteno"]} ".t("p‰ivitet‰‰n kurantiksi");
+    $selite = t("Ep√§kuranttimuutos") . ": ".t("Tuote")." {$row["tuoteno"]} ".t("p√§ivitet√§√§n kurantiksi");
 
   $t_query = "UPDATE tuote
               SET status        = 'T',
@@ -70,7 +70,7 @@ while ($row = mysql_fetch_assoc($result)) {
     $t_query = "INSERT INTO tapahtuma SET
                 yhtio    = '{$kukarow["yhtio"]}',
                 tuoteno  = '{$row["tuoteno"]}',
-                laji     = 'Ep‰kurantti',
+                laji     = 'Ep√§kurantti',
                 kpl      = '0',
                 hinta    = 0,
                 kplhinta = 0,

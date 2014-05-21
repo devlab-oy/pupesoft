@@ -1,11 +1,11 @@
 <?php
 
-// Kutsutaanko CLI:stä
+// Kutsutaanko CLI:stÃ¤
 if (php_sapi_name() != 'cli') {
-  die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+  die ("TÃ¤tÃ¤ scriptiÃ¤ voi ajaa vain komentoriviltÃ¤!");
 }
 
-echo "Luetaan maaryhmiä\n\n";
+echo "Luetaan maaryhmiÃ¤\n\n";
 
 require ("/var/www/html/pupesoft/inc/connect.inc");
 require ("/var/www/html/pupesoft/inc/functions.inc");
@@ -56,6 +56,6 @@ while (!feof($file)) {
   $rivi = fgets($file, 4096);
 } // end while eof
 
-echo "$lask maata lisätty!\n";
+echo "$lask maata lisÃ¤tty!\n";
 
 fclose($file);

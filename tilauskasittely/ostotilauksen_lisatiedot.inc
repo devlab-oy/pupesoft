@@ -12,21 +12,21 @@ if (mysql_num_rows($result) == 1) {
   $laskurow = mysql_fetch_assoc($result);
 }
 else {
-  echo "<font style='error'>".t("VIRHE: Saapumista ei en‰‰ lˆydy")."!</font>";
+  echo "<font style='error'>".t("VIRHE: Saapumista ei en√§√§ l√∂ydy")."!</font>";
   exit;
 }
 
-// lasku taulussa k‰ytet‰‰n kentti‰ seuraavasti:
+// lasku taulussa k√§ytet√§√§n kentti√§ seuraavasti:
 //
 // rahti      = kuluprosentti
 // rahti_etu    = eturahti
-// rahti_huolinta  = kulusumma (jos lˆytyy niin ohittaa kuluprosentin)
+// rahti_huolinta  = kulusumma (jos l√∂ytyy niin ohittaa kuluprosentin)
 
 if ($tee == "update") {
 
   list (,,,,,,,,$llrow,,,,,,,) = tsekit($laskurow, 0, 0);
 
-  // Tsekki tehd‰‰n vain jos vaihto-omaisuus laskuja on liitetty saapumiseen!
+  // Tsekki tehd√§√§n vain jos vaihto-omaisuus laskuja on liitetty saapumiseen!
   if ($llrow["volasku"] > 0 and abs($rahti_etu) > abs($llrow['vosumma_valuutassa'])) {
     echo "<font class='message'>".t("VIRHE: Eturahti ei saa olla suurempi kuin laskujen yhteissumma")."!</font><br><br>";
 
@@ -39,9 +39,9 @@ if ($tee == "update") {
     }
   }
 
-  // Pyˆristysero tarkistus
+  // Py√∂ristysero tarkistus
   if ($llrow['volasku'] > 0 and abs($pyoristys_erot) > abs($llrow['vosumma_valuutassa'])) {
-    echo "<font class='message'>".t("VIRHE: Pyˆristysero ei saa olla suurempi kuin laskujen yhteissumma")."!</font><br><br>";
+    echo "<font class='message'>".t("VIRHE: Py√∂ristysero ei saa olla suurempi kuin laskujen yhteissumma")."!</font><br><br>";
 
     $tee = "";
     $toiminto = "lisatiedot";
@@ -53,7 +53,7 @@ if ($tee == "update") {
   }
 
   if ((float) $erikoisale_saapuminen < 0 or (float) $erikoisale_saapuminen > 100) {
-    echo "<font class='message'>".t("VIRHE: Erikoisale pit‰‰ olla alle 100% ja yli 0%")."!</font><br><br>";
+    echo "<font class='message'>".t("VIRHE: Erikoisale pit√§√§ olla alle 100% ja yli 0%")."!</font><br><br>";
 
     $tee = "";
     $toiminto = "lisatiedot";
@@ -66,7 +66,7 @@ if ($tee == "update") {
 
   foreach ($tilauksen_erikoisale as $etil => $eale) {
     if ((float) $eale < 0 or (float) $eale > 100) {
-      echo "<font class='message'>".t("VIRHE: Erikoisale pit‰‰ olla alle 100% ja yli 0%")."! ".t("Tilaus").": $etil</font><br><br>";
+      echo "<font class='message'>".t("VIRHE: Erikoisale pit√§√§ olla alle 100% ja yli 0%")."! ".t("Tilaus").": $etil</font><br><br>";
 
       $tee = "";
       $toiminto = "lisatiedot";
@@ -88,7 +88,7 @@ if ($tee == "update") {
   }
 
   if ($nappikeikalla != 'ollaan') {
-    echo "<font class='message'>".t("Muutit eturahtia ja/tai erikoisalennusta, kohdistus pit‰‰ tarkastaa uudelleen.")."</font><br><br>";
+    echo "<font class='message'>".t("Muutit eturahtia ja/tai erikoisalennusta, kohdistus pit√§√§ tarkastaa uudelleen.")."</font><br><br>";
   }
   else {
     echo "<font class='message'>".t("Muutit eturahtia ja/tai erikoisalennusta, muistathan painaa kohdistus valmis, jotta muutokset huomioidaan.")."<br></font>";
@@ -167,7 +167,7 @@ if ($tee == "") {
   // kaunistellaan
   if ($llrow["voverosumma_valuutassa"] == "") $llrow["voverosumma_valuutassa"] = "0.00";
 
-  // n‰ytet‰‰n viel‰ laskun tiedot, ettei kohdisteta p‰in berberi‰
+  // n√§ytet√§√§n viel√§ laskun tiedot, ettei kohdisteta p√§in berberi√§
   echo "<br><table>";
   echo "<tr>";
   echo "<th>".t("saapuminen")."</th>";
@@ -177,7 +177,7 @@ if ($tee == "") {
   echo "<th>".t("toimitusehto")."</th>";
   echo "<th>".t("ostolaskut")."</th>";
   echo "<th>".t("kohdistettu")."</th>";
-  echo "<th>".t("j‰ljell‰")."</th>";
+  echo "<th>".t("j√§ljell√§")."</th>";
   echo "</tr>";
   echo "<tr>
       <td>$laskurow[laskunro]</td>
@@ -202,7 +202,7 @@ if ($tee == "") {
     echo "<input type='hidden' name='nappikeikalla' value='ollaan'>";
   }
 
-  echo "<tr><th>".t("L‰hetysmaa").":</th><td colspan='3'>
+  echo "<tr><th>".t("L√§hetysmaa").":</th><td colspan='3'>
       <select name='maa_lahetys'>";
 
   $query = "SELECT distinct koodi, nimi
@@ -230,7 +230,7 @@ if ($tee == "") {
   echo "</select></td>";
   echo "</tr>";
 
-  echo "  <tr><th>".t("M‰‰r‰maan koodi").":</th>
+  echo "  <tr><th>".t("M√§√§r√§maan koodi").":</th>
       <td colspan='3'><select name='maa_maara'>";
 
   $query = "SELECT distinct koodi, nimi
@@ -347,7 +347,7 @@ if ($tee == "") {
   }
 
   if (abs($laskurow['pyoristys_erot']) > abs($llrow['vosumma_valuutassa'])) {
-    $pyoristusero_lisatiedot .= "<font class='message'>".t("VIRHE: Pyˆristysero ei saa olla suurempi kuin laskujen yhteissumma")."!</font><br>";
+    $pyoristusero_lisatiedot .= "<font class='message'>".t("VIRHE: Py√∂ristysero ei saa olla suurempi kuin laskujen yhteissumma")."!</font><br>";
   }
 
   if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) {
@@ -370,12 +370,12 @@ if ($tee == "") {
 
   echo "<tr><th valign='top'>".t("Nettopaino").":</th><td valign='top' colspan='3'><input type='text' name='bruttopaino' value='$laskurow[bruttopaino]'></td><td valign='top' class='back' width='450'>$lisamassa</td></tr>";
 
-  // N‰ytet‰‰n eturahti vain jos yhtiˆnparametri jalkilaskenta_kuluperuste == ''
+  // N√§ytet√§√§n eturahti vain jos yhti√∂nparametri jalkilaskenta_kuluperuste == ''
   if (($yhtiorow['yhtio'] != 'artr' and $yhtiorow['yhtio'] != 'mergr') or $laskurow['rahti_etu'] != 0) {
     echo "<tr><th valign='top'>".t("Veroton")." ".t("Eturahti").":</th><td valign='top'><input type='text' name='rahti_etu' value='$laskurow[rahti_etu]'></td><td colspan='2' valign='top' nowrap>".t("Eturahdin ALV").": ".alv_popup('rahti_etu_alv', $laskurow["rahti_etu_alv"])."</td><td class='back'> $lisatiedot </td></tr>";
   }
 
-  echo "<tr><th valign='top'>".t("Veroton")." ".t("Pyˆristysero").":</th><td valign='top'><input type='text' id='pyoristys_erot' name='pyoristys_erot' value='$laskurow[pyoristys_erot]'></td><td colspan='2' valign='top' nowrap>".t("Pyˆristyseron ALV").": ".alv_popup('pyoristys_erot_alv', $laskurow["pyoristys_erot_alv"])."</td><td class='back'>$pyoristusero_lisatiedot</td></tr>";
+  echo "<tr><th valign='top'>".t("Veroton")." ".t("Py√∂ristysero").":</th><td valign='top'><input type='text' id='pyoristys_erot' name='pyoristys_erot' value='$laskurow[pyoristys_erot]'></td><td colspan='2' valign='top' nowrap>".t("Py√∂ristyseron ALV").": ".alv_popup('pyoristys_erot_alv', $laskurow["pyoristys_erot_alv"])."</td><td class='back'>$pyoristusero_lisatiedot</td></tr>";
   echo "<tr><th valign='top'>".t("Arvioitu kuluprosentti").":</th><td valign='top' colspan='3'><input type='text' name='rahti' value='$laskurow[rahti]'> n.nn %</td></tr>";
   echo "<tr><th valign='top'>".t("Kulusumma")." $yhtiorow[valkoodi]:</th><td valign='top' colspan='3'><input type='text' name='rahti_huolinta' value='$laskurow[rahti_huolinta]'> ".t("ohittaa kuluprosentin")."</td></tr>";
   echo "<tr><th valign='top'>".t("Erikoisalennus").":</th><td valign='top' colspan='3'><input type='text' name='erikoisale_saapuminen' value='$laskurow[erikoisale_saapuminen]'></td></tr>";
@@ -415,14 +415,14 @@ if ($tee == "") {
 
   echo "</table>";
 
-  echo "<br><input type='submit' id='paivita' value='".t("P‰ivit‰ tiedot")."'>";
+  echo "<br><input type='submit' id='paivita' value='".t("P√§ivit√§ tiedot")."'>";
   echo "</form>";
 
   echo "
     <script type='text/javascript'>
 
-      // Tarkistetaan onko pyˆristyseroja muutettu ja varmistetaan
-      // k‰ytt‰j‰lt‰ ett‰ t‰m‰ on ok.
+      // Tarkistetaan onko py√∂ristyseroja muutettu ja varmistetaan
+      // k√§ytt√§j√§lt√§ ett√§ t√§m√§ on ok.
       var muutettu_pyoristyseroja = false;
       $('#pyoristys_erot').on('change', function() {
         muutettu_pyoristyseroja = true;
@@ -430,7 +430,7 @@ if ($tee == "") {
 
       $('#paivita').on('click', function() {
         if(muutettu_pyoristyseroja) {
-          return confirm('".t("Olet lis‰nnyt tai muuttanut pˆyristyseroja, oletko varma")."?');
+          return confirm('".t("Olet lis√§nnyt tai muuttanut p√∂yristyseroja, oletko varma")."?');
         }
       });
 

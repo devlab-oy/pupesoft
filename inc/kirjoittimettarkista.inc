@@ -20,7 +20,7 @@ if(!function_exists("kirjoittimettarkista")) {
         $chkressiresult = pupe_query($query);
 
         if (mysql_num_rows($chkressiresult) > 0) {
-          $virhe[$i] = t("Kirjoitin on jo perustettu j‰rjestelm‰‰n");
+          $virhe[$i] = t("Kirjoitin on jo perustettu j√§rjestelm√§√§n");
         }
       }
     }

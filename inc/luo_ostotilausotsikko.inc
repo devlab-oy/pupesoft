@@ -64,7 +64,7 @@ if (!function_exists('luo_ostotilausotsikko')) {
 
     $tiltoi = hae_toimittaja($params['liitostunnus']);
 
-    // Jos ostotilausta ei ole luotu myyntitilaukselta (tilaus_osto.php ~545), k‰ytet‰‰n toimittajan oletuksia
+    // Jos ostotilausta ei ole luotu myyntitilaukselta (tilaus_osto.php ~545), k√§ytet√§√§n toimittajan oletuksia
     if (empty($params['nimi'])) {
       $toim_nimi     = $tiltoi["nimi"];
       $toim_nimitark   = $tiltoi["nimitark"];
@@ -97,7 +97,7 @@ if (!function_exists('luo_ostotilausotsikko')) {
 
     $ostotilauksen_kasittely_wherelisa = "";
 
-    // K‰sitell‰‰n myyntitilauksen otsikolla setattu "ostotilauksen k‰sittely"
+    // K√§sitell√§√§n myyntitilauksen otsikolla setattu "ostotilauksen k√§sittely"
     switch ($params['ostotilauksen_kasittely']) {
       case '5':
       case '4':
@@ -151,7 +151,7 @@ if (!function_exists('luo_ostotilausotsikko')) {
               {$ostotilauksen_kasittely_wherelisa}";
     $ostotilaus_result = pupe_query($query);
 
-    // ei lˆydy, tehd‰‰n uus otsikko
+    // ei l√∂ydy, tehd√§√§n uus otsikko
     if (mysql_num_rows($ostotilaus_result) == 0) {
 
       $query = "INSERT INTO lasku SET

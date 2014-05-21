@@ -36,12 +36,12 @@ if (!function_exists("varaston_hyllypaikattarkista")) {
           $chk_res = pupe_query($query);
 
           if (mysql_num_rows($chk_res) != 0) {
-            $virhe[$i] = t("Syötetty varastopaikka on jo tietokannassa")."!";
+            $virhe[$i] = t("SyÃ¶tetty varastopaikka on jo tietokannassa")."!";
           }
         }
       }
       else {
-        $virhe[$i] = ucwords(mysql_field_name($result, $i)).' '.t("ei saa olla tyhjä")."!";
+        $virhe[$i] = ucwords(mysql_field_name($result, $i)).' '.t("ei saa olla tyhjÃ¤")."!";
       }
     }
   }

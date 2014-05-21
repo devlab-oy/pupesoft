@@ -1,13 +1,13 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("../inc/parametrit.inc");
 
-echo "<font class='head'>".t("Tiliˆinnit lajeittain")."</font><hr>";
+echo "<font class='head'>".t("Tili√∂innit lajeittain")."</font><hr>";
 
-// k‰yttˆliittym‰
+// k√§ytt√∂liittym√§
 if (!isset($pp)) $pp = date("d", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 if (!isset($kk)) $kk = date("m", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 if (!isset($vv)) $vv = date("Y", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
@@ -23,7 +23,7 @@ $lkk = sprintf("%02d", trim($lkk));
 $lvv = sprintf("%04d", trim($lvv));
 
 if (!checkdate($kk, $pp, $vv) or !checkdate($lkk, $lpp, $lvv)) {
-  echo "<font class='error'>".t("Virheellinen p‰iv‰m‰‰r‰")."!</font><br><br>";
+  echo "<font class='error'>".t("Virheellinen p√§iv√§m√§√§r√§")."!</font><br><br>";
   $tee = "";
 }
 
@@ -47,12 +47,12 @@ echo "<td>
 echo "</tr>";
 
 echo "<tr>";
-echo "<th>".t("Syˆt‰ alkup‰iv‰")."</th>";
+echo "<th>".t("Sy√∂t√§ alkup√§iv√§")."</th>";
 echo "<td><input type='text' name='pp' size='5' value='$pp'><input type='text' name='kk' size='5' value='$kk'><input type='text' name='vv' size='7' value='$vv'></td>";
 echo "</tr>";
 
 echo "<tr>";
-echo "<th>".t("Syˆt‰ loppup‰iv‰")."</th>";
+echo "<th>".t("Sy√∂t√§ loppup√§iv√§")."</th>";
 echo "<td><input type='text' name='lpp' size='5' value='$lpp'><input type='text' name='lkk' size='5' value='$lkk'><input type='text' name='lvv' size='7' value='$lvv'></td>";
 echo "</tr>";
 
@@ -63,12 +63,12 @@ else {
   $chk = "";
 }
 
-echo "<th>".t("N‰yt‰ vain tehdaspalautukset")."</th>";
+echo "<th>".t("N√§yt√§ vain tehdaspalautukset")."</th>";
 echo "<td><input type = 'checkbox' name='tehdaspalautukset' $chk></td></tr>";
 
 echo "</table>";
 
-echo "<br><input type='submit' value='".t("Hae tiliˆinnit")."'>";
+echo "<br><input type='submit' value='".t("Hae tili√∂innit")."'>";
 
 echo "</form>";
 echo "<br><br>";
@@ -144,7 +144,7 @@ if ($tee == "raportti") {
     }
 
     echo "<tr>";
-    echo "<th colspan='2'>".t("Yhteens‰")."</th>";
+    echo "<th colspan='2'>".t("Yhteens√§")."</th>";
     echo "<th style='text-align:right;'>". sprintf("%.02f", $summa)."</td>";
     echo "<th style='text-align:right;'>". sprintf("%.02f", $verosumma)."</td>";
     echo "</tr>";
@@ -246,7 +246,7 @@ if ($tee == "raportti") {
             $query .= " sum(if(tilausrivi.alv=$alv_row[selite], rivihinta*(tilausrivi.alv/100), 0)) alv$alv_row[selite], ";
           }
 
-          //  Tehd‰‰n lista viel‰ alv erottelusta
+          //  Tehd√§√§n lista viel√§ alv erottelusta
           $query .= "  'dummy'
                 FROM lasku
                 JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.tyyppi!='D'
@@ -262,7 +262,7 @@ if ($tee == "raportti") {
             $query .= " sum(if(t1.vero=$alv_row[selite], t2.summa, 0)) alv$alv_row[selite], ";
           }
 
-          // Haetaan  kaikki verotiliˆinnit
+          // Haetaan  kaikki verotili√∂innit
           $query .= "  'dummy'
                 FROM tiliointi t1
                 JOIN tiliointi t2 ON t1.yhtio=t2.yhtio and t1.ltunnus=t2.ltunnus and t1.tunnus=t2.aputunnus and t2.korjattu = ''
@@ -292,7 +292,7 @@ if ($tee == "raportti") {
             echo "<td nowrap valign='top' class='back'><font class='error'>VIRHE: Verollinen lasku toimitettu ulkomaille!</font></td>";
           }
 
-          echo "<td nowrap valign='top' class='back'><a href='../tilauskasittely/tulostakopio.php?otunnus=$row[tunnus]&toim=LASKU&tee=NAYTATILAUS'>".t("N‰yt‰ lasku")."</a></td>";
+          echo "<td nowrap valign='top' class='back'><a href='../tilauskasittely/tulostakopio.php?otunnus=$row[tunnus]&toim=LASKU&tee=NAYTATILAUS'>".t("N√§yt√§ lasku")."</a></td>";
         }
         else {
           echo "<td nowrap valign='top' class='back'>".ebid($row['tunnus'])."</td>";
@@ -303,7 +303,7 @@ if ($tee == "raportti") {
       }
 
       echo "<tr>";
-      echo "<th colspan='3'>".t("Yhteens‰")."</th>";
+      echo "<th colspan='3'>".t("Yhteens√§")."</th>";
       echo "<th style='text-align:right;' nowrap>". number_format($summa, 2, ',', ' ')."</th>";
       echo "<th></th>";
       echo "<th></th>";

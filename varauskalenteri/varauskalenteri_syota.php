@@ -53,7 +53,7 @@ else {
 }
 
 echo "<tr>
-    <th>".t("P‰‰ttymisajankohta").":</th>
+    <th>".t("P√§√§ttymisajankohta").":</th>
     <td>
     <input type='text' size='3' name='lday'   value='$day'>
     <input type='text' size='3' name='lmonth' value='$month'>
@@ -95,28 +95,28 @@ for($i = 801; $i <= 2300; $i++) {
 echo "</select></td>
   </tr>
   <tr><th>".t("Kohde").":</th><td><input type='hidden' name='toim' value='$toim'>$toim</td></tr>
-  <tr><th>".t("Yhtiˆ").":</th><td><input type='text' name='kentta01' size='30' value='$yhtiorow[nimi]'></td></tr>
+  <tr><th>".t("Yhti√∂").":</th><td><input type='text' name='kentta01' size='30' value='$yhtiorow[nimi]'></td></tr>
   <tr><th>".t("Osasto").":</th><td><input type='text' name='kentta02' size='30'></td></tr>
   <tr><th>".t("Tilaisuus").":</th><td><select name='kentta03'>
   <option value='Kokous'>Kokous</option>
   <option value='Edustus'>Edustus</option>
   <option value='Koulutus'>Koulutus</option>
-  <option value='Esittely/N‰yttely'>Esittely/N‰yttely</option>
-  <option value='Muu'>Muu, mik‰ --></option>
+  <option value='Esittely/N√§yttely'>Esittely/N√§yttely</option>
+  <option value='Muu'>Muu, mik√§ --></option>
   </select>&nbsp;
   <input type='text' name='kentta04' size='30'></td></tr>
-  <tr><th>".t("Lis‰tiedot").":</th><td><textarea name='kentta05' cols='30' rows='3' wrap='hard'></textarea></td></tr>";
+  <tr><th>".t("Lis√§tiedot").":</th><td><textarea name='kentta05' cols='30' rows='3' wrap='hard'></textarea></td></tr>";
 
 if ($toim == "Sauna") {
   echo "<tr><td colspan='2' class='back'><br><br>".t("Tilaisuuden tarkemmat tiedot").":</td></tr>";
-  echo "<tr><th>".t("Is‰nn‰t").":</th><td><textarea name='kentta06' cols='30' rows='3' wrap='hard'>$kukarow[nimi]</textarea></td></tr>";
+  echo "<tr><th>".t("Is√§nn√§t").":</th><td><textarea name='kentta06' cols='30' rows='3' wrap='hard'>$kukarow[nimi]</textarea></td></tr>";
   echo "<tr><th>".t("Vieraat").":</th><td><textarea name='kentta07' cols='30' rows='2' wrap='hard'></textarea></td></tr>";
-  echo "<tr><th>".t("Vieraslukum‰‰r‰").":</th><td><input type='text' name='kentta08' size='31'></td></tr>";
+  echo "<tr><th>".t("Vieraslukum√§√§r√§").":</th><td><input type='text' name='kentta08' size='31'></td></tr>";
   echo "<tr><th>Juomatoivomus:</th><td><textarea name='kentta10' cols='30' rows='3' wrap='hard'></textarea></td></tr>";
 }
 echo "</table>";
 
-echo "<br><input type='submit' name='lis' value='Lis‰‰'>";
+echo "<br><input type='submit' name='lis' value='Lis√§√§'>";
 echo "</form>";
 
 $jatko = 0;

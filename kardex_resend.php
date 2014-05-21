@@ -1,6 +1,6 @@
 <?php
 
-// Kutsutaanko CLI:stä
+// Kutsutaanko CLI:stÃ¤
 $php_cli = FALSE;
 
 if (php_sapi_name() == 'cli') {
@@ -12,7 +12,7 @@ date_default_timezone_set('Europe/Helsinki');
 if ($php_cli) {
 
   if (trim($argv[1]) == '') {
-    echo "Et antanut yhtiötä!\n";
+    echo "Et antanut yhtiÃ¶tÃ¤!\n";
     exit;
   }
 
@@ -32,7 +32,7 @@ if ($php_cli) {
   $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 }
 
-// Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
+// Sallitaan vain yksi instanssi tÃ¤stÃ¤ skriptistÃ¤ kerrallaan
 pupesoft_flock();
 
 if (!is_dir($kardex_sscc)) {
@@ -40,7 +40,7 @@ if (!is_dir($kardex_sscc)) {
   exit;
 }
 
-// jos ulkoinen sscc on puuttunut, koitetaan lähettää kardex-tiedosto uudelleen
+// jos ulkoinen sscc on puuttunut, koitetaan lÃ¤hettÃ¤Ã¤ kardex-tiedosto uudelleen
 if ($handle = opendir($kardex_sscc)) {
 
   while (($file = readdir($handle)) !== FALSE) {
@@ -55,7 +55,7 @@ if ($handle = opendir($kardex_sscc)) {
   closedir($handle);
 }
 
-// koitetaan uudelleen lähettää kardex-tiedosto, jos FTP-siirto on feilannut aikaisemmin
+// koitetaan uudelleen lÃ¤hettÃ¤Ã¤ kardex-tiedosto, jos FTP-siirto on feilannut aikaisemmin
 if ($kardex_host != "" and $kardex_user != "" and $kardex_pass != "" and $kardex_path != "" and $kardex_fail != "") {
   $ftphost = $kardex_host;
   $ftpuser = $kardex_user;

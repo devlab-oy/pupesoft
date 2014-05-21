@@ -54,7 +54,7 @@ if (($hyllyalue != '' and $hyllynro != '' and $hyllyvali != '' and $hyllytaso !=
       $hae_viivakoodilla = true;
     }
     else {
-      $errors[] = t("Viivakoodilla %s ei lˆytynyt tuotetta", '', $viivakoodi)."<br />";
+      $errors[] = t("Viivakoodilla %s ei l√∂ytynyt tuotetta", '', $viivakoodi)."<br />";
       $viivakoodi = "";
     }
   }
@@ -63,7 +63,7 @@ if (($hyllyalue != '' and $hyllynro != '' and $hyllyvali != '' and $hyllytaso !=
 
 }
 else {
-  # T‰nne ei pit‰is p‰‰ty‰, tarkistetaan jo hyllysiirrot.php:ss‰
+  # T√§nne ei pit√§is p√§√§ty√§, tarkistetaan jo hyllysiirrot.php:ss√§
   echo t("Parametrivirhe");
   echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=hyllysiirrot.php'>";
   exit();
@@ -123,7 +123,7 @@ while($row = mysql_fetch_assoc($result)) {
 echo "</table></div>";
 
 if ($_cnt == 0) {
-  echo "<span class='error'>",t("Yht‰‰n siirre‰tt‰v‰‰ tuotetta / tuotepaikkaa ei ole"),"</span>";
+  echo "<span class='error'>",t("Yht√§√§n siirre√§tt√§v√§√§ tuotetta / tuotepaikkaa ei ole"),"</span>";
 }
 
 echo "<div class='controls'></div>";

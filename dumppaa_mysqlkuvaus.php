@@ -1,6 +1,6 @@
 <?php
 
-// Kutsutaanko CLI:stä
+// Kutsutaanko CLI:stÃ¤
 $php_cli = FALSE;
 
 if (php_sapi_name() == 'cli') {
@@ -43,7 +43,7 @@ else {
 
   $ulos = array();
 
-  // Jos ollaan annettu poikkeava MySQL portti hostnamessa, pitää se erotella komentorivityökalua varten
+  // Jos ollaan annettu poikkeava MySQL portti hostnamessa, pitÃ¤Ã¤ se erotella komentorivityÃ¶kalua varten
   if (strpos($dbhost, ":") !== false) {
     list($dbhost, $dbport) = explode(":", $dbhost);
   }
@@ -64,7 +64,7 @@ else {
 
   $kala = exec("$mysql_dump_path --user=$dbuser --host=$dbhost --port=$dbport --password=$dbpass --no-data $dbkanta", $ulos);
 
-  if (!$toot = fopen("/tmp/".$tmpfilenimi, "w")) die("Filen /tmp/$tmpfilenimi luonti epäonnistui!");
+  if (!$toot = fopen("/tmp/".$tmpfilenimi, "w")) die("Filen /tmp/$tmpfilenimi luonti epÃ¤onnistui!");
 
   foreach ($ulos as $print) {
     // poistetaan mysql-sarakkeen kommentti koska se kaataa sqlupdate-ohjelman
@@ -117,7 +117,7 @@ else {
     }
   }
 
-  // Löytyykö custom updateja?
+  // LÃ¶ytyykÃ¶ custom updateja?
   $ch  = curl_init();
   curl_setopt ($ch, CURLOPT_URL, "http://api.devlab.fi/sqlupdate.sql");
   curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, FALSE);

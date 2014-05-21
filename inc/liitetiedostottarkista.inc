@@ -50,14 +50,14 @@ if(!function_exists("liitetiedostottarkista")) {
         $retval = tarkasta_liite("liite_data");
 
         if ($retval !== TRUE) {
-          // Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi
+          // PitÃ¤Ã¤ aina setata myÃ¶s "tÃ¤mÃ¤n" kentÃ¤n virhe, muuten luedata ei toimi
           $virhe[$i] = $virhe[$liite_datai] = $retval;
         }
 
-        //  Onko meillä jokin kuvatyyppi?
+        //  Onko meillÃ¤ jokin kuvatyyppi?
         list($type, $crap) = explode("/", $_FILES["liite_data"]["type"]);
 
-        //tarkastetaan löytyykö kuva jo kannasta
+        //tarkastetaan lÃ¶ytyykÃ¶ kuva jo kannasta
         if ($liite_kayttotarkoitus == "TK" and $type == "image" and strtoupper($liite_liitos) == 'TUOTE') {
           $kayttotarkoitus_lisa = " and kayttotarkoitus in ('TK','TH') ";
         }
@@ -71,7 +71,7 @@ if(!function_exists("liitetiedostottarkista")) {
         // sallitut merkit listattu, kaikki muut poistetaan filenamesta...
         $file_name = preg_replace("/[^A-Z0-9\._\-%]/i", "", $_FILES['liite_data']['name']);
 
-        //ehkä kieli whereen
+        //ehkÃ¤ kieli whereen
         $query = "SELECT filename, kayttotarkoitus
                   FROM liitetiedostot
                   where yhtio      = '$kukarow[yhtio]'
@@ -84,8 +84,8 @@ if(!function_exists("liitetiedostottarkista")) {
         if (mysql_num_rows($result) > 0) {
           $checkrow = mysql_fetch_array($result);
 
-          // Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi
-          $virhe[$i] = $virhe[$liite_datai] = t("VIRHE: Tiedosto %s %s löytyy jo tuotteelle", $kieli, $file_name, $checkrow['kayttotarkoitus']);
+          // PitÃ¤Ã¤ aina setata myÃ¶s "tÃ¤mÃ¤n" kentÃ¤n virhe, muuten luedata ei toimi
+          $virhe[$i] = $virhe[$liite_datai] = t("VIRHE: Tiedosto %s %s lÃ¶ytyy jo tuotteelle", $kieli, $file_name, $checkrow['kayttotarkoitus']);
         }
         else {
 
@@ -144,7 +144,7 @@ if(!function_exists("liitetiedostottarkista")) {
             $uusi_tunnus = tallenna_liite("liite_data", $liite_liitos, $liite_liitostunnus, $liite_selite, $liite_kayttotarkoitus, $tunnus, $liite_jarjestys, $liite_kieli);
           }
 
-          // palautetaan tämä ylläpito.phplle
+          // palautetaan tÃ¤mÃ¤ yllÃ¤pito.phplle
           $tunnus = $uusi_tunnus;
         }
       }

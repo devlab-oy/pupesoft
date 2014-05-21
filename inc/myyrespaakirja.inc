@@ -1,6 +1,6 @@
 <?php
 
-echo "<font class='head'>".t("Suoritusp‰iv‰kirja")."</font><hr>";
+echo "<font class='head'>".t("Suoritusp√§iv√§kirja")."</font><hr>";
 
 if (!isset($alvk)) $alvk = date("m", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 if (!isset($alvp)) $alvp = date("d", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
@@ -114,7 +114,7 @@ echo "
 
   echo "
   </td>
-      <td class='back'><input type = 'submit' value = '".t("N‰yt‰")."'></td></tr></table></form><br><br>";
+      <td class='back'><input type = 'submit' value = '".t("N√§yt√§")."'></td></tr></table></form><br><br>";
 
 if ($tee == "1") {
 
@@ -140,16 +140,16 @@ if ($tee == "1") {
     $jarj = "tiliointi.tapvm, tiliointi.summa";
 
     if ($alvk == 0) {
-            echo "<font class='head'>".t("Suoritusp‰iv‰kirja vuodelta")." $alvv</font><hr>";
+            echo "<font class='head'>".t("Suoritusp√§iv√§kirja vuodelta")." $alvv</font><hr>";
         $lisa = "LEFT(tiliointi.tapvm,4) = '$alvv'";
     }
     else {
       if ($alvp == 0) {
-        echo "<font class='head'>".t("Suoritusp‰iv‰kirja kaudelta")." $alvv-$alvk</font><hr>";
+        echo "<font class='head'>".t("Suoritusp√§iv√§kirja kaudelta")." $alvv-$alvk</font><hr>";
         $lisa = "LEFT(tiliointi.tapvm,7) = '$alvv-$alvk'";
       }
       else {
-        echo "<font class='head'>".t("Suoritusp‰iv‰kirja p‰iv‰lt‰")." $alvv-$alvk-$alvp</font><hr>";
+        echo "<font class='head'>".t("Suoritusp√§iv√§kirja p√§iv√§lt√§")." $alvv-$alvk-$alvp</font><hr>";
         $lisa = "tiliointi.tapvm = '$alvv-$alvk-$alvp'";
       }
     }
@@ -198,7 +198,7 @@ if ($tee == "1") {
         <th>".t("Valuutta")."</th>
         <th>".t("Pvm")."</th>
         <th>".t("Suoritus")." $yhtiorow[valkoodi]</th>
-        <th>".t("Yhteens‰")." $yhtiorow[valkoodi]</th>
+        <th>".t("Yhteens√§")." $yhtiorow[valkoodi]</th>
         </tr>
         <tr>
         <td><input type='text' class='search_field' name='search_nimi'></td>
@@ -246,13 +246,13 @@ if ($tee == "1") {
 
     echo "<tfoot>";
     echo "<tr>
-      <td class='tumma' colspan='6'>".t("Yhteens‰")."</td>
+      <td class='tumma' colspan='6'>".t("Yhteens√§")."</td>
       <td class='tumma' name='yhteensa' id='yhteensa' align='right'>".sprintf("%.2f", $summa),"</td>
       </tr>";
     echo "</tfoot>";
     echo "</table><br>";
   }
   else {
-    echo "Sopivia tilej‰ ei lˆytynyt!";
+    echo "Sopivia tilej√§ ei l√∂ytynyt!";
   }
 }

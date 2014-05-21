@@ -28,7 +28,7 @@ echo "<form action = 'raportit.php' method='post'>
     <input type = 'hidden' name = 'toim' value = 'maksuvalmius'>
     ".t("Maksuvalmius")."</td><td>
     <select name='aika'>
-                   <option value = 'pv' $sel1>".t("P‰iv‰")."
+                   <option value = 'pv' $sel1>".t("P√§iv√§")."
                    <option value = 'vi' $sel2>".t("Viikko")."
                    <option value = 'kk' $sel3>".t("Kuukausi")."
     </select></td>";
@@ -38,14 +38,14 @@ if ($yhtiorow["konserni"] != "") {
     <td><input type = 'checkbox' name = 'konserni' $sel4></td>";
 }
 
-echo "<td>".t("ƒl‰ n‰yt‰ l‰hetettyj‰")."</td>
+echo "<td>".t("√Ñl√§ n√§yt√§ l√§hetettyj√§")."</td>
     <td><input type = 'checkbox' name = 'eilahetettyja' $sel5></td>
-    <td><input type = 'submit' value = '".t("N‰yt‰")."'></td>
+    <td><input type = 'submit' value = '".t("N√§yt√§")."'></td>
     </tr></table></form><br>";
 
 if ($aika != '') {
 
-  // Tehd‰‰n alkusiivous!
+  // Tehd√§√§n alkusiivous!
   $query = "SELECT konserni
             FROM yhtio
             WHERE yhtio = '$kukarow[yhtio]'";
@@ -55,7 +55,7 @@ if ($aika != '') {
     $trow = mysql_fetch_array($result);
   }
   else {
-    echo t("Yhtiˆit‰ lˆytyi monta tai ei lainkaan! Virhe!");
+    echo t("Yhti√∂it√§ l√∂ytyi monta tai ei lainkaan! Virhe!");
     exit;
   }
 
@@ -64,8 +64,8 @@ if ($aika != '') {
             WHERE (konserni='$trow[konserni]' or yhtio='$kukarow[yhtio]') and tyyppi != 'MU'";
   $result = mysql_query($query) or pupe_error($query);
 
-  // Lis‰t‰‰n uudet
-  // Onko meill‰ konsernin‰kˆkulma??
+  // Lis√§t√§√§n uudet
+  // Onko meill√§ konsernin√§k√∂kulma??
   if ($konserni == 'on') {
     $query = "SELECT yhtio, konserni, nimi
               FROM yhtio
@@ -74,7 +74,7 @@ if ($aika != '') {
     $result = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($result) < 2) {
-      echo t("Pyysit konsernin‰kˆkulmaa, mutta yritys ei ole konsernin osa").".<br>";
+      echo t("Pyysit konsernin√§k√∂kulmaa, mutta yritys ei ole konsernin osa").".<br>";
       exit;
     }
     else {
@@ -112,7 +112,7 @@ if ($aika != '') {
       }
 
       //Ostoreskontra
-      //  Ei listata maksuun l‰hetettyj‰ aineistoja, luotetaan ett‰ ne on maksettu
+      //  Ei listata maksuun l√§hetettyj√§ aineistoja, luotetaan ett√§ ne on maksettu
       if($eilahetettyja != "") {
         $tilat = "'H', 'M', 'P'";
       }
@@ -171,7 +171,7 @@ if ($aika != '') {
     }
 
     //Ostoreskontra
-    //  Ei listata maksuun l‰hetettyj‰ aineistoja, luotetaan ett‰ ne on maksettu
+    //  Ei listata maksuun l√§hetettyj√§ aineistoja, luotetaan ett√§ ne on maksettu
     if($eilahetettyja != "") {
       $tilat = "'H', 'M', 'P'";
     }
@@ -230,7 +230,7 @@ if ($aika != '') {
   echo "<th>".t("Myyntireskontra")."</th>";
   echo "<th>".t("Ostoreskontra")."</th>";
   echo "<th>".t("Muu")."</th>";
-  echo "<th>".t("Yhteens‰")."</th>";
+  echo "<th>".t("Yhteens√§")."</th>";
   echo "<th>".t("Kumulatiivinen")."</th>";
   echo "</tr>";
 
@@ -240,7 +240,7 @@ if ($aika != '') {
     if($trow["Aika"] != "") {
       $class = "";
       if ($aika == 'pv') {
-        echo "<td>".t("P‰iv‰").": ";
+        echo "<td>".t("P√§iv√§").": ";
         echo "<td style='text-align: right;'>".tv1dateconv($trow["Aika"])."</td>";
       }
       if ($aika == 'vi') {
@@ -254,7 +254,7 @@ if ($aika != '') {
     }
     else {
       $class = "tumma";
-      echo "<td class='$class'>".t("Yhteens‰").": ";
+      echo "<td class='$class'>".t("Yhteens√§").": ";
       echo "<td class='$class'></td>";
     }
 

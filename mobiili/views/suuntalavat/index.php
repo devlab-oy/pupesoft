@@ -20,7 +20,7 @@
   <table>
     <tr>
       <th><?php echo t("SSCC") ?></th>
-      <th><?php echo t("Ker.vyöhyk.") ?></th>
+      <th><?php echo t("Ker.vyÃ¶hyk.") ?></th>
       <th><?php echo t("Rivit") ?></th>
       <th><?php echo t("Tyyppi") ?></th>
     </tr>

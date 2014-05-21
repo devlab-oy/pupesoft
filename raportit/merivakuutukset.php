@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require('../inc/parametrit.inc');
@@ -62,7 +62,7 @@ if ($tee != '') {
       $rahtikulut += round($row['pyoristys_erot'] * $row['vienti_kurssi'], 2);
     }
     else {
-      // Jos ollaan annettu t‰lle batchille kulusumma, k‰ytet‰‰nkin vaan sit‰!
+      // Jos ollaan annettu t√§lle batchille kulusumma, k√§ytet√§√§nkin vaan sit√§!
       if ($row["rahti_huolinta"] != 0) {
         $rahtikulut = $row["rahti_huolinta"];
       }
@@ -88,7 +88,7 @@ if ($tee != '') {
 
   echo "<tr>";
   echo "<td class='back' colspan='4'></td>";
-  echo "<td class='tumma'>".t("Yhteens‰")."</th>";
+  echo "<td class='tumma'>".t("Yhteens√§")."</th>";
   echo "<td class='tumma' align='right'>".sprintf('%.2f', $yarvo)."</th>";
   echo "<td class='tumma' align='right'>".sprintf('%.2f', $yvakarvo)."</th>";
   echo "<td class='tumma' align='right'>".sprintf('%.2f', $yfenarvo)."</th>";
@@ -98,11 +98,11 @@ if ($tee != '') {
 }
 
 
-//K‰yttˆliittym‰
+//K√§ytt√∂liittym√§
 echo "<br><br><br>";
 echo "<table><form method='post'>";
 
-// ehdotetaan 7 p‰iv‰‰ taaksep‰in
+// ehdotetaan 7 p√§iv√§√§ taaksep√§in
 if (!isset($kka))
   $kka = date("m",mktime(0, 0, 0, date("m"), date("d")-7, date("Y")));
 if (!isset($vva))
@@ -134,11 +134,11 @@ while($row = mysql_fetch_array($result)){
 echo "</select></td>";
 
 
-echo "<tr><th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰")."</th>
+echo "<tr><th>".t("Sy√∂t√§ alkup√§iv√§m√§√§r√§")."</th>
     <td><input type='text' name='ppa' value='$ppa' size='3'></td>
     <td><input type='text' name='kka' value='$kka' size='3'></td>
     <td><input type='text' name='vva' value='$vva' size='5'></td>
-    </tr><tr><th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰")."</th>
+    </tr><tr><th>".t("Sy√∂t√§ loppup√§iv√§m√§√§r√§")."</th>
     <td><input type='text' name='ppl' value='$ppl' size='3'></td>
     <td><input type='text' name='kkl' value='$kkl' size='3'></td>
     <td><input type='text' name='vvl' value='$vvl' size='5'></td>";

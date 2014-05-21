@@ -16,7 +16,7 @@ if(!function_exists("kassalipastarkista")) {
       $sresult = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($sresult) != 1) {
-        //Olisiko siell‰ nimi
+        //Olisiko siell√§ nimi
         if ($t[$i] != '') {
           $query = "SELECT nimi, tilino
                     FROM tili
@@ -38,14 +38,14 @@ if(!function_exists("kassalipastarkista")) {
           }
 
         }
-        if ($virhe[$i] == '') $virhe[$i] = t("Tili puuttuu tai sit‰ ei lˆydy");
+        if ($virhe[$i] == '') $virhe[$i] = t("Tili puuttuu tai sit√§ ei l√∂ydy");
       }
     }
 
     if (mysql_field_name($result, $i) == "nimi") {
 
       if ($t[$i] == '') {
-        $virhe[$i] = t("Nimi on syˆtett‰v‰");
+        $virhe[$i] = t("Nimi on sy√∂tett√§v√§");
       }
 
       $query = "SELECT *
@@ -56,7 +56,7 @@ if(!function_exists("kassalipastarkista")) {
 
       while ($srow = mysql_fetch_array($sresult)) {
         if (strpos(strtoupper($t[$i]), strtoupper($srow["nimi"])) !== FALSE or strpos(strtoupper($srow["nimi"]), strtoupper($t[$i])) !== FALSE) {
-          $virhe[$i] = t("Nimi on jo k‰ytˆss‰").": $srow[nimi]";
+          $virhe[$i] = t("Nimi on jo k√§yt√∂ss√§").": $srow[nimi]";
           break;
         }
       }

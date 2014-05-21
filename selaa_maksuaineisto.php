@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("inc/parametrit.inc");
@@ -198,7 +198,7 @@ if ($tee == '') {
           <input type='hidden' name='loppukk' value='$loppukk'>
           <input type='hidden' name='loppupp' value='$loppupp'>
           <input type='hidden' name='tunnukset' value='{$row['tunnukset']}'>
-          <input type='submit' value='".t("N‰yt‰")."'>
+          <input type='submit' value='".t("N√§yt√§")."'>
           </form>
           </td>";
 
@@ -285,7 +285,7 @@ if ($tee == 'selaa') {
     echo "<th>",t("Nimi"),"</th>";
     echo "<th>",t("Laskunro"),"</th>";
     echo "<th>",t("Tapvm"),"</th>";
-    echo "<th>",t("Er‰pvm"),"</th>";
+    echo "<th>",t("Er√§pvm"),"</th>";
     echo "<th>",t("Olmapvm"),"</th>";
     echo "<th>",t("Mapvm"),"</th>";
     echo "<th>",t("Summa"),"</th>";
@@ -336,7 +336,7 @@ if ($tee == 'selaa') {
     }
 
     echo "<tr>";
-    echo "<th colspan='6'>".t("Yhteens‰")." $laskuja ".t("kpl")."</th>";
+    echo "<th colspan='6'>".t("Yhteens√§")." $laskuja ".t("kpl")."</th>";
     echo "<th>$summa $yhtiorow[valkoodi]</th>";
     echo "<th>$poimittu_summa $yhtiorow[valkoodi]</th>";
     echo "<th colspan='2'></th>";
@@ -353,7 +353,7 @@ if ($tee == 'selaa') {
     }
   }
   else {
-    echo "<br /><font class='error'>",t("Yht‰‰n laskua ei lˆytynyt"),".</font><br />";
+    echo "<br /><font class='error'>",t("Yht√§√§n laskua ei l√∂ytynyt"),".</font><br />";
   }
 }
 

@@ -4,11 +4,11 @@
 //
 // arrayt:
 // toitarow, otsikot, pakkaus, kilot, kollit, kuutiot, lavametri, vakit
-// $rakir_row:sta lˆytyy asiakkaan tiedot ja $rivi:st‰ ytunnus
+// $rakir_row:sta l√∂ytyy asiakkaan tiedot ja $rivi:st√§ ytunnus
 //
 // muuttujat:
 // otunnukset, rahdinmaksaja, rahtihinta, pvm, toimitustapa, kollityht, kilotyht, kuutiotyht, kirjoitin
-// jv tapauksissa on myˆs yhteensa, summa, jvhinta, lasno ja viite muuttujat
+// jv tapauksissa on my√∂s yhteensa, summa, jvhinta, lasno ja viite muuttujat
 //
 // tulostetaan rahtikirja
 
@@ -31,10 +31,10 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
     $oma = sprintf("%09s", substr($rivi["rahtikirjanro"], -9));
   }
   else {
-    $oma = sprintf("%09s",$rtunnus);       // 9, pitk‰ numero tulee rahtikirja taulun tunnuksesta, pit‰‰ olaa uniikki
+    $oma = sprintf("%09s",$rtunnus);       // 9, pitk√§ numero tulee rahtikirja taulun tunnuksesta, pit√§√§ olaa uniikki
   }
 
-  // tehd‰‰n viivakoodit
+  // tehd√§√§n viivakoodit
   $viiva1  = ">6JJFI";
   $viiva1 .= substr($toitarow['sopimusnro'], 0, 1);
   $viiva1 .= ">5";
@@ -64,13 +64,13 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
                {PC085;0025,0068,1,1,H,00,B|}
          {RC085;Itella|}
 
-               *** KIINTEƒƒ TEKSTIƒ JA VIIVOJA ***
+               *** KIINTE√Ñ√Ñ TEKSTI√Ñ JA VIIVOJA ***
                {PC004;0060,0168,05,05,H,00,B|}
-               {RC004;L‰hett‰j‰ Avs‰ndare From|}
+               {RC004;L√§hett√§j√§ Avs√§ndare From|}
                {PC005;0060,0369,05,05,H,00,B|}
                {RC005;Vastaanottaja Adressat To   Puh.|}
                {PC008;0810,0409,05,05,A,00,B|}
-               {RC008;P‰iv‰m‰‰r‰|}
+               {RC008;P√§iv√§m√§√§r√§|}
                {PC009;0810,0429,05,05,A,00,B|}
                {RC009;Datum|}
                {PC010;0975,0529,05,05,H,00,B|}
@@ -78,9 +78,9 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
                {PC011;0975,0589,05,05,H,00,B|}
                {RC011;m3|}
                {PC012;0057,0631,05,10,G,00,B|}
-               {RC012;Lis‰palvelut  Till‰ggstj‰nster|}
+               {RC012;Lis√§palvelut  Till√§ggstj√§nster|}
                {PC013;0340,0626,05,10,G,00,B|}
-               {RC013;Maksaja muu kuin l‰hett‰j‰  Betalaren annan ‰n avs‰ndaren|}
+               {RC013;Maksaja muu kuin l√§hett√§j√§  Betalaren annan √§n avs√§ndaren|}
                {PC014;0887,0633,05,05,H,00,B|}
                {RC014;Kpl St.|}
                {PC015;0057,0709,05,10,G,00,B|}
@@ -98,27 +98,27 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
   if (count($vakit) > 0 or $toitarow['kuljyksikko'] != '') {
     $sivu .= "{PC020;0060,1235,05,10,G,00,B|}
-                 {RC020;Lis‰tietoja 0200 77000, www.itella.com * Mera information 0200 75000, www.itella.com.|}
+                 {RC020;Lis√§tietoja 0200 77000, www.itella.com * Mera information 0200 75000, www.itella.com.|}
                  {PC021;0060,1261,05,10,G,00,B|}
-                 {RC021;S‰ilytysaika on yksi (1) t‰ysi kalenteriviikko * Kvarligger en (1) hel kalendervecka.|}
+                 {RC021;S√§ilytysaika on yksi (1) t√§ysi kalenteriviikko * Kvarligger en (1) hel kalendervecka.|}
                  {PC022;0060,1287,05,10,G,00,B|}
                  {RC022;|}";
   }
   else {
     $sivu .= "{PC020;0060,1235,05,10,G,00,B|}
-                 {RC020;L‰hetys on noudettavissa Postistanne. Lis‰tietoja 0200 77000, www.itella.com.|}
+                 {RC020;L√§hetys on noudettavissa Postistanne. Lis√§tietoja 0200 77000, www.itella.com.|}
                  {PC021;0060,1261,05,10,G,00,B|}
-                 {RC021;Ni kan h‰mta fˆrs‰ndelsen pÂ Ert postkontor. Mera information 0200 75000, www.itella.com.|}
+                 {RC021;Ni kan h√§mta f√∂rs√§ndelsen p√• Ert postkontor. Mera information 0200 75000, www.itella.com.|}
                  {PC022;0060,1287,05,10,G,00,B|}
-                 {RC022;S‰ilytysaika on 2 t‰ytt‰ kalenteriviikkoa. Kvarligger 2 hela kalenderveckor.|}";
+                 {RC022;S√§ilytysaika on 2 t√§ytt√§ kalenteriviikkoa. Kvarligger 2 hela kalenderveckor.|}";
   }
 
   $sivu .= "
 
        {PC023;0060,1319,05,05,H,00,B|}
-               {RC023;L‰hett‰j‰ Avs‰ndare From|}
+               {RC023;L√§hett√§j√§ Avs√§ndare From|}
                {PC123;0690,1319,05,05,H,00,B|}
-               {RC123;Lis‰tiedot Till‰ggsuppgifter|}
+               {RC123;Lis√§tiedot Till√§ggsuppgifter|}
                {PC024;0060,1389,05,05,H,00,B|}
                {RC024;Vastaanottaja Adressat To   Puh.|}
                {PC025;0975,1620,05,05,H,00,B|}
@@ -128,7 +128,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
                {PC027;0805,1588,05,05,H,00,B|}
                {RC027;Kpl St.|}
                {PC028;0055,1655,05,10,G,00,B|}
-               {RC028;Sis‰ltˆ InnehÂll|}
+               {RC028;Sis√§lt√∂ Inneh√•ll|}
                {PC029;0055,1709,05,10,G,00,B|}
                {RC029;PE-summa PF-belopp|}
                {PC030;0375,1739,05,05,H,00,B|}
@@ -140,7 +140,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
        {PC032;0740,1775,05,10,G,00,B|}
                {RC032;BIC|}
                {PC033;0055,1830,05,10,G,00,B|}
-               {RC033;Kuittaus ja nimen selvennys Kvittering och namnfˆrtydligande|}
+               {RC033;Kuittaus ja nimen selvennys Kvittering och namnf√∂rtydligande|}
                {PC035;0340,0651,05,10,G,00,B|}
                {RC035;Maksajan sopimustunnus|}
                {PC036;0341,0677,05,10,G,00,B|}
@@ -220,11 +220,11 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
                {PC090;0705,0208,07,07,Q,00,B|}
                {RC090;$tuoteviiva1|}
 
-               *** LISƒTIETO-OSA EDI/2W (Otsikko) ***
+               *** LIS√ÑTIETO-OSA EDI/2W (Otsikko) ***
                {PC034;0060,1930,05,05,H,00,B|}
-               {RC034;Lis‰tiedot Till‰ggsuppgifter|}
+               {RC034;Lis√§tiedot Till√§ggsuppgifter|}
        {PC033;0060,2250,08,08,H,00,B|}
-               {RC033;Itella Green - ilmastoyst‰v‰llinen kuljetus|}
+               {RC033;Itella Green - ilmastoyst√§v√§llinen kuljetus|}
 
                *** MUUTTUVAA TIETOA ***
                {PC039;0060,0204,05,05,I,00,B|}
@@ -316,7 +316,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
                {PC077;0350,1793,05,05,I,00,B|}
                {RC077;".$postiennakkoviite."|}
 
-               *** LISƒTIETO-OSA EDI/2W (Ei Viivakoodia) ***
+               *** LIS√ÑTIETO-OSA EDI/2W (Ei Viivakoodia) ***
                {PC079;0060,1980,05,05,H,00,B|}
                {RC079;$vakit[0]|}
                {PC080;0060,2010,05,05,H,00,B|}
@@ -345,13 +345,13 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   $sivu = escapeshellarg($sivu);
 
   if ($kirjoitin == "email") {
-    echo t("Rahtikirjaa ei voida tulostaa s‰hkˆpostiin")."<br>";
+    echo t("Rahtikirjaa ei voida tulostaa s√§hk√∂postiin")."<br>";
   }
   else {
     $line = exec("echo \"$sivu\" | $kirjoitin");
   }
 
-  //l‰hetet‰‰n postin edisanoma
+  //l√§hetet√§√§n postin edisanoma
   if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
     require("postiedi.inc");
   }

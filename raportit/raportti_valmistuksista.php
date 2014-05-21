@@ -1,6 +1,6 @@
 <?php
 
-// Datatables p‰‰lle
+// Datatables p√§√§lle
 $pupe_DataTables = array("raportti_valmistuksista");
 
 if (isset($_REQUEST["tee"])) {
@@ -8,7 +8,7 @@ if (isset($_REQUEST["tee"])) {
   if ($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/","",$_REQUEST["kaunisnimi"]);
 }
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("../inc/parametrit.inc");
@@ -22,7 +22,7 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
 // Pupe datatables koodi
 pupe_DataTables(array(array($pupe_DataTables[0], 12, 12)));
 
-// Piirret‰‰n taulu aluksi display:none, ettei selain piirr‰ sit‰ ruudulle. Toglataan display p‰‰lle kun dokumentti on ready ja datatables tehny rivityksen.
+// Piirret√§√§n taulu aluksi display:none, ettei selain piirr√§ sit√§ ruudulle. Toglataan display p√§√§lle kun dokumentti on ready ja datatables tehny rivityksen.
 echo '<script language="javascript">
 $(document).ready(function() {
   $("#raportti_valmistuksista").toggle();
@@ -32,10 +32,10 @@ $(document).ready(function() {
 // Tarvittavat muuttujat
 $tee = isset($tee) ? trim($tee) : "";
 
-echo "<font class='head'>".t("Raportti avoimista ja tehdyist‰ valmistuksista")."</font><hr>";
+echo "<font class='head'>".t("Raportti avoimista ja tehdyist√§ valmistuksista")."</font><hr>";
 echo "<br>";
 
-// Ehdotetaan oletuksena edellist‰ kuukautta
+// Ehdotetaan oletuksena edellist√§ kuukautta
 if (!isset($pp1)) $pp1 = date("d", mktime(0, 0, 0, date("m")-1, 1, date("Y")));
 if (!isset($kk1)) $kk1 = date("m", mktime(0, 0, 0, date("m")-1, 1, date("Y")));
 if (!isset($vv1)) $vv1 = date("Y", mktime(0, 0, 0, date("m")-1, 1, date("Y")));
@@ -52,7 +52,7 @@ if (checkdate($kk1, $pp1, $vv1) and checkdate($kk2, $pp2, $vv2)) {
   $pvmloppu = date("Y-m-d", mktime(0, 0, 0, $kk2, $pp2, $vv2));
 }
 else {
-  echo "<font class='error'>".t("VIRHE: P‰iv‰m‰‰riss‰ ongelmia")."!</font><br><br>";
+  echo "<font class='error'>".t("VIRHE: P√§iv√§m√§√§riss√§ ongelmia")."!</font><br><br>";
   $tee = "";
 }
 
@@ -60,14 +60,14 @@ echo "<form method='post'>";
 
 echo "<table>";
 echo "<tr>";
-echo "<th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>";
+echo "<th>".t("Sy√∂t√§ alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>";
 echo "<td><input type='text' name='pp1' value='$pp1' size='3'>";
 echo "<input type='text' name='kk1' value='$kk1' size='3'>";
 echo "<input type='text' name='vv1' value='$vv2' size='5'></td>";
 echo "</tr>";
 
 echo "<tr>";
-echo "<th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>";
+echo "<th>".t("Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>";
 echo "<td><input type='text' name='pp2' value='$pp2' size='3'>";
 echo "<input type='text' name='kk2' value='$kk2' size='3'>";
 echo "<input type='text' name='vv2' value='$vv2' size='5'></td>";
@@ -108,12 +108,12 @@ echo "<tr>";
 echo "<th>".t('Esitysmuoto')."</th>";
 echo "<td>";
 echo "<select name='esitysmuoto'>";
-echo "<option value=''>".t('N‰ytet‰‰n tuotteittain')."</option>";
+echo "<option value=''>".t('N√§ytet√§√§n tuotteittain')."</option>";
 $sel = '';
 if ($esitysmuoto == 'Y') {
   $sel = 'SELECTED';
 }
-echo "<option value='Y' {$sel}>".t('N‰ytet‰‰n vain yhteens‰rivit')."</option>";
+echo "<option value='Y' {$sel}>".t('N√§ytet√§√§n vain yhteens√§rivit')."</option>";
 echo "</select>";
 echo "</td>";
 echo "</tr>";
@@ -140,7 +140,7 @@ echo "<br>";
 if ($tee == "ajaraportti" and isset($submit_nappi)) {
 
   if (include('Spreadsheet/Excel/Writer.php')) {
-    //keksit‰‰n failille joku varmasti uniikki nimi:
+    //keksit√§√§n failille joku varmasti uniikki nimi:
     list($usec, $sec) = explode(' ', microtime());
     mt_srand((float) $sec + ((float) $usec * 100000));
     $excelnimi = md5(uniqid(mt_rand(), true)).".xls";
@@ -212,7 +212,7 @@ if ($tee == "ajaraportti" and isset($submit_nappi)) {
       $excelsarake++;
       $worksheet->write($excelrivi, $excelsarake, t("Tuoteosasto"), $format_bold);
       $excelsarake++;
-      $worksheet->write($excelrivi, $excelsarake, t("Tuoteryhm‰"), $format_bold);
+      $worksheet->write($excelrivi, $excelsarake, t("Tuoteryhm√§"), $format_bold);
       $excelsarake++;
       $worksheet->write($excelrivi, $excelsarake, t("Valmistuslinja"), $format_bold);
       $excelsarake++;
@@ -224,11 +224,11 @@ if ($tee == "ajaraportti" and isset($submit_nappi)) {
       $excelsarake++;
       $worksheet->write($excelrivi, $excelsarake, t("Valmistuksen tila"), $format_bold);
       $excelsarake++;
-      $worksheet->write($excelrivi, $excelsarake, t("Ker‰ysajankohta"), $format_bold);
+      $worksheet->write($excelrivi, $excelsarake, t("Ker√§ysajankohta"), $format_bold);
       $excelsarake++;
       $worksheet->write($excelrivi, $excelsarake, t("Valmistusajankohta"), $format_bold);
       $excelsarake++;
-      $worksheet->write($excelrivi, $excelsarake, t("Toteutunut valmistusp‰iv‰"), $format_bold);
+      $worksheet->write($excelrivi, $excelsarake, t("Toteutunut valmistusp√§iv√§"), $format_bold);
       $excelsarake++;
     }
 
@@ -239,15 +239,15 @@ if ($tee == "ajaraportti" and isset($submit_nappi)) {
       echo "<th>".t("Tuoteno")."</th>";
       echo "<th>".t("Tuotteen nimi")."</th>";
       echo "<th>".t("Tuoteosasto")."</th>";
-      echo "<th>".t("Tuoteryhm‰")."</th>";
+      echo "<th>".t("Tuoteryhm√§")."</th>";
       echo "<th>".t("Valmistuslinja")."</th>";
       echo "<th>".t("Valmistusnumero")."</th>";
       echo "<th>".t("Valmistettu kpl")."</th>";
       echo "<th>".t("Valmistetaan kpl")."</th>";
       echo "<th>".t("Valmistuksen tila")."</th>";
-      echo "<th>".t("Ker‰ysajankohta")."</th>";
+      echo "<th>".t("Ker√§ysajankohta")."</th>";
       echo "<th>".t("Valmistusajankohta")."</th>";
-      echo "<th>".t("Toteutunut Valmistusp‰iv‰")."</th>";
+      echo "<th>".t("Toteutunut Valmistusp√§iv√§")."</th>";
       echo "</tr>";
 
       echo "<tr>";
@@ -281,7 +281,7 @@ if ($tee == "ajaraportti" and isset($submit_nappi)) {
       $osasto = t_avainsana("OSASTO", "", "and avainsana.selite='$rivit[osasto]'", "", "", "selitetark");
       $try   = t_avainsana("TRY", "", "and avainsana.selite='$rivit[try]'", "", "", "selitetark");
 
-      if($linja == "") $linja = t("Ei m‰‰ritelty");
+      if($linja == "") $linja = t("Ei m√§√§ritelty");
 
       if ($esitysmuoto == '') {
         echo "<tr class='aktiivi'>";
@@ -328,7 +328,7 @@ if ($tee == "ajaraportti" and isset($submit_nappi)) {
         $excelsarake++;
       }
 
-      // tehd‰‰n yhteenveto arrayt
+      // tehd√§√§n yhteenveto arrayt
       if (!isset($yhteenveto_valmistettu[$rivit["valmistuslinja"]])) $yhteenveto_valmistettu[$rivit["valmistuslinja"]] = 0;
       if (!isset($yhteenveto_valmistetaan[$rivit["valmistuslinja"]])) $yhteenveto_valmistetaan[$rivit["valmistuslinja"]] = 0;
 
@@ -343,7 +343,7 @@ if ($tee == "ajaraportti" and isset($submit_nappi)) {
       echo "</tbody>";
       echo "<tfoot>";
       echo "<tr>";
-      echo "<th colspan='6'>".t("N‰kym‰ yhteens‰").":</th>";
+      echo "<th colspan='6'>".t("N√§kym√§ yhteens√§").":</th>";
       echo "<th valign='top' name='yhteensa' id='yhteensa_6' style='text-align: right'></th>";
       echo "<th valign='top' name='yhteensa' id='yhteensa_7' style='text-align: right'></th>";
       echo "<th colspan='4'></th>";
@@ -353,7 +353,7 @@ if ($tee == "ajaraportti" and isset($submit_nappi)) {
       echo "<br>";
     }
 
-    // tehd‰‰n summat taulu
+    // tehd√§√§n summat taulu
     echo "<br>";
     echo "<font class='message'>".t("Yhteenveto valmistuslinjoittain")."</font><br><br>";
     echo "<table>";
@@ -366,7 +366,7 @@ if ($tee == "ajaraportti" and isset($submit_nappi)) {
     foreach ($yhteenveto_valmistettu as $valmistuslinja => $value) {
 
       $linja_yht = t_avainsana("VALMISTUSLINJA", "", "and avainsana.selite='$valmistuslinja'", "", "", "selitetark");
-      if ($linja_yht == "") $linja_yht = t("Ei M‰‰ritelty");
+      if ($linja_yht == "") $linja_yht = t("Ei M√§√§ritelty");
 
       echo "<tr>";
       echo "<td>{$linja_yht}</td>";
@@ -376,7 +376,7 @@ if ($tee == "ajaraportti" and isset($submit_nappi)) {
     }
 
     echo "<tr>";
-    echo "<th>".t("Yhteens‰")."</th>";
+    echo "<th>".t("Yhteens√§")."</th>";
     echo "<th style='text-align:right;'>".array_sum($yhteenveto_valmistettu)."</th>";
     echo "<th style='text-align:right;'>".array_sum($yhteenveto_valmistetaan)."</th>";
     echo "</tr>";
@@ -395,7 +395,7 @@ if ($tee == "ajaraportti" and isset($submit_nappi)) {
     echo "</table></form><br />";
   }
   else {
-    echo "<br><font class='error'>".t("Yht‰‰n tuotetta ei lˆytynyt")."!</font>";
+    echo "<br><font class='error'>".t("Yht√§√§n tuotetta ei l√∂ytynyt")."!</font>";
   }
 }
 

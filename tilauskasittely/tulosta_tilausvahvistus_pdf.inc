@@ -57,8 +57,8 @@ if ($verollisethinnat) {
 #$lahetetyyppi = "tulosta_lahete_brutto.inc";
 #$lahetetyyppi = "tulosta_lahete_eialeja.inc";
 #$lahetetyyppi = "tulosta_lahete_viivakoodi.inc";
-#$lahetetyyppi = "tulosta_lahete_viivakoodi_ykshinta_normaali.inc"; # N‰ytet‰‰n asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina
-#$lahetetyyppi = "tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc"; # N‰ytet‰‰n asiakkaan hinta, viivakoodi ja jt-rivit normaaleina. Ei alennuksia
+#$lahetetyyppi = "tulosta_lahete_viivakoodi_ykshinta_normaali.inc"; # N√§ytet√§√§n asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina
+#$lahetetyyppi = "tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc"; # N√§ytet√§√§n asiakkaan hinta, viivakoodi ja jt-rivit normaaleina. Ei alennuksia
 #$lahetetyyppi = "tulosta_lahete_viivakoodi_osh.inc";
 #$lahetetyyppi = "tulosta_lahete_asiakviivakoodi.inc";
 #$lahetetyyppi = "tulosta_lahete_viivakoodi_ean13.inc";
@@ -134,14 +134,14 @@ if (in_array($naytatvale, array(10,11))) {
   $jtsort_lisa = "IF(tilausrivi.tuoteno='{$yhtiorow['rahti_tuotenumero']}', 2, 0) jtsort,";
 }
 
-// generoidaan l‰hetteelle ja ker‰yslistalle rivinumerot
+// generoidaan l√§hetteelle ja ker√§yslistalle rivinumerot
 // Rivit groupataan tilausvahvistukselle
 if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
   $query = "SELECT tilausrivi.perheid, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.kommentti, tilausrivi.tilaajanrivinro, tilausrivi.otunnus, tilausrivi.netto, {$ale_query_select_lisa}
             tilausrivi.toimaika, tilausrivi.hinta, tilausrivi.keratty, tilausrivi.var, tilausrivi.yksikko,
             $sorttauskentta,
             {$jtsort_lisa}
-            if (tuote.tuotetyyppi='K','2 Tyˆt','1 Muut') tuotetyyppi,
+            if (tuote.tuotetyyppi='K','2 Ty√∂t','1 Muut') tuotetyyppi,
             if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
             tuote.sarjanumeroseuranta,
             sum(tilausrivi.varattu) varattu,
@@ -171,7 +171,7 @@ else {
             round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
             $sorttauskentta,
             {$jtsort_lisa}
-            if (tuote.tuotetyyppi='K','2 Tyˆt','1 Muut') tuotetyyppi,
+            if (tuote.tuotetyyppi='K','2 Ty√∂t','1 Muut') tuotetyyppi,
             if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
             tuote.sarjanumeroseuranta
             FROM tilausrivi
@@ -189,7 +189,7 @@ else {
 
 $riresult = pupe_query($query);
 
-// t‰m‰ siksi koska halutaan alkuper‰isen tilauksen tilausnumero pdf-filuun.
+// t√§m√§ siksi koska halutaan alkuper√§isen tilauksen tilausnumero pdf-filuun.
 if (($laskurow["tunnusnippu"] > 0 or $yhtiorow["tilausvahvistus_lahetys"] == 1) and $laskurow['vanhatunnus'] > 0) {
   $laskurow["tunnus"] = $laskurow['vanhatunnus'];
 }
@@ -234,10 +234,10 @@ $params_lahete = array(
 'yhteensamaara'        => 0,
 );
 
-// Aloitellaan l‰hetteen teko
+// Aloitellaan l√§hetteen teko
 $params_lahete = alku_lahete($params_lahete);
 
-// Piirret‰‰n rivit
+// Piirret√§√§n rivit
 mysql_data_seek($riresult,0);
 
 while ($row = mysql_fetch_assoc($riresult)) {

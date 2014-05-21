@@ -2,7 +2,7 @@
 
 require ("inc/parametrit.inc");
 
-echo "<font class='head'>".t("Valuuttakurssien p‰ivitys")."<hr></font>";
+echo "<font class='head'>".t("Valuuttakurssien p√§ivitys")."<hr></font>";
 
 $ch  = curl_init();
 curl_setopt ($ch, CURLOPT_URL, "http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml");
@@ -16,7 +16,7 @@ $xml = @simplexml_load_string($xml);
 
 if ($xml !== FALSE) {
 
-  echo t("Kurssien l‰hde").": <a href='http://www.ecb.europa.eu/stats/exchange/eurofxref/html/index.en.html'>Reference rates European Central Bank</a><br><br>";
+  echo t("Kurssien l√§hde").": <a href='http://www.ecb.europa.eu/stats/exchange/eurofxref/html/index.en.html'>Reference rates European Central Bank</a><br><br>";
 
   $pvm = tv1dateconv($xml->Cube->Cube->attributes()->time);
   $pvm_mysql = $xml->Cube->Cube->attributes()->time;
@@ -42,7 +42,7 @@ if ($xml !== FALSE) {
       $result = pupe_query($query);
 
       if (mysql_affected_rows() != 0) {
-        echo "<td class='back'>".t("Kurssi p‰ivitetty").".</td>";
+        echo "<td class='back'>".t("Kurssi p√§ivitetty").".</td>";
       }
 
       $query = "INSERT INTO valuu_historia (kotivaluutta, valuutta, kurssi, kurssipvm)
@@ -59,7 +59,7 @@ if ($xml !== FALSE) {
   if ($yhtiorow["valkoodi"] == "EUR") {
     echo "<br><form method='post'>
         <input type='hidden' name='tee' value='PAIVITA'>
-        <input type='submit' value='".t("P‰ivit‰ kurssit")."'>
+        <input type='submit' value='".t("P√§ivit√§ kurssit")."'>
         </form>";
   }
   else {
@@ -67,7 +67,7 @@ if ($xml !== FALSE) {
   }
 }
 else {
-  echo "<font class='error'>".t("Valuuttakurssien haku ep‰onnistui")."!</font><br>";
+  echo "<font class='error'>".t("Valuuttakurssien haku ep√§onnistui")."!</font><br>";
 }
 
 require ("inc/footer.inc");

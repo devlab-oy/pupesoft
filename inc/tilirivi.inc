@@ -1,10 +1,10 @@
 <?php
 
 $ulos   = "";
-$jatko  = 1; // oletetaan normaali käsittely
-$tyyppi = 1; // oletetaan rivin näkyvyys
+$jatko  = 1; // oletetaan normaali kÃ¤sittely
+$tyyppi = 1; // oletetaan rivin nÃ¤kyvyys
 
-// yhtiötä ei näytetä
+// yhtiÃ¶tÃ¤ ei nÃ¤ytetÃ¤
 if ($i == 0) {
   $tyyppi = 0;
 }
@@ -130,7 +130,7 @@ if (mysql_field_name($result, $i) == "toimijaliitos") {
 
   $ulos = "<td><select name='$nimi'>\n";
   $ulos .= "<option value = ''>".t("Ei liitospakkoa")."</option>\n";
-  $ulos .= "<option value = 'A' $sel>".t("Muistiotositteelle on liitettävä asiakas tai toimittaja")."</option>\n";
+  $ulos .= "<option value = 'A' $sel>".t("Muistiotositteelle on liitettÃ¤vÃ¤ asiakas tai toimittaja")."</option>\n";
   $ulos .= "</select></td>\n";
   $jatko = 0;
 }
@@ -142,14 +142,14 @@ if (mysql_field_name($result, $i) == "tiliointi_tarkistus") {
   $sel[$apu] = "selected";
 
   $ulos = "<td><select name='$nimi'>\n";
-  $ulos .= "<option value = '0' $sel[0]>".t("Ei pakollisia kenttiä")."</option>\n";
-  $ulos .= "<option value = '1' $sel[1]>".t("pakollisia kenttiä tiliöinnissä on kustannuspaikka")."</option>\n";
-  $ulos .= "<option value = '2' $sel[2]>".t("pakollisia kenttiä tiliöinnissä on kustannuspaikka, kohde")."</option>\n";
-  $ulos .= "<option value = '3' $sel[3]>".t("pakollisia kenttiä tiliöinnissä on kustannuspaikka, projekti")."</option>\n";
-  $ulos .= "<option value = '4' $sel[4]>".t("pakollisia kenttiä tiliöinnissä on kustannuspaikka, kohde ja projekti")."</option>\n";
-  $ulos .= "<option value = '5' $sel[5]>".t("pakollisia kenttiä tiliöinnissä on kohde")."</option>\n";
-   $ulos .= "<option value = '6' $sel[6]>".t("pakollisia kenttiä tiliöinnissä on kohde, projekti")."</option>\n";
-  $ulos .= "<option value = '7' $sel[7]>".t("pakollisia kenttiä tiliöinnissä on projekti")."</option>\n";
+  $ulos .= "<option value = '0' $sel[0]>".t("Ei pakollisia kenttiÃ¤")."</option>\n";
+  $ulos .= "<option value = '1' $sel[1]>".t("pakollisia kenttiÃ¤ tiliÃ¶innissÃ¤ on kustannuspaikka")."</option>\n";
+  $ulos .= "<option value = '2' $sel[2]>".t("pakollisia kenttiÃ¤ tiliÃ¶innissÃ¤ on kustannuspaikka, kohde")."</option>\n";
+  $ulos .= "<option value = '3' $sel[3]>".t("pakollisia kenttiÃ¤ tiliÃ¶innissÃ¤ on kustannuspaikka, projekti")."</option>\n";
+  $ulos .= "<option value = '4' $sel[4]>".t("pakollisia kenttiÃ¤ tiliÃ¶innissÃ¤ on kustannuspaikka, kohde ja projekti")."</option>\n";
+  $ulos .= "<option value = '5' $sel[5]>".t("pakollisia kenttiÃ¤ tiliÃ¶innissÃ¤ on kohde")."</option>\n";
+   $ulos .= "<option value = '6' $sel[6]>".t("pakollisia kenttiÃ¤ tiliÃ¶innissÃ¤ on kohde, projekti")."</option>\n";
+  $ulos .= "<option value = '7' $sel[7]>".t("pakollisia kenttiÃ¤ tiliÃ¶innissÃ¤ on projekti")."</option>\n";
   $ulos .= "</select></td>\n";
   $jatko = 0;
 }
@@ -165,8 +165,8 @@ if (mysql_field_name($result, $i) == "manuaali_esto") {
   if ($trow[$i] != "") $sel = "SELECTED";
 
   $ulos = "<td><select name='$nimi'>\n";
-  $ulos .= "<option value = ''>".t("Tiliöinti muokattavissa")."</option>\n";
-  $ulos .= "<option value = 'X' $sel>".t("Tiliöinnin manuaalinen lisäys/muokkaus estetty")."</option>\n";
+  $ulos .= "<option value = ''>".t("TiliÃ¶inti muokattavissa")."</option>\n";
+  $ulos .= "<option value = 'X' $sel>".t("TiliÃ¶innin manuaalinen lisÃ¤ys/muokkaus estetty")."</option>\n";
   $ulos .= "</select></td>\n";
   $jatko = 0;
 }

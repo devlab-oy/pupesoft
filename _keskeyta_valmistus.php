@@ -1,4 +1,4 @@
-<div class='head'><?php echo t("Keskeytä työ") ?></div>
+<div class='head'><?php echo t("KeskeytÃ¤ tyÃ¶") ?></div>
 
 <form method='POST'>
 <input type='hidden' name='tee' value='update'>
@@ -11,11 +11,11 @@
     <td><?php echo $valmistus->tunnus() ?></td>
   </tr>
   <tr>
-    <th><?php echo t("Ylityötunnit") ?></th>
+    <th><?php echo t("YlityÃ¶tunnit") ?></th>
     <td><input type='text' name='ylityotunnit'></td>
   </tr>
   <tr>
-    <th><?php echo t("Käytetyt tunnit") ?></th>
+    <th><?php echo t("KÃ¤ytetyt tunnit") ?></th>
     <td><input type='text' name='kaytetyttunnit'></td>
   </tr>
   <tr>
@@ -25,7 +25,7 @@
 
   <tr>
     <th><?php echo t("Valmiste") ?></th>
-    <th><?php echo t("Määrä") ?></th>
+    <th><?php echo t("MÃ¤Ã¤rÃ¤") ?></th>
   </tr>
 
   <?php foreach($valmistus->tuotteet() as $valmiste) { ?>

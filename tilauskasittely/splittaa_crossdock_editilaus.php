@@ -26,7 +26,7 @@ if (!is_dir($kohdehakemisto) and !is_writable($kohdehakemisto)) {
 
 $kohdehakemisto = rtrim($kohdehakemisto, "/");
 
-// Orders 91.1 tulee ostajan tiedot ennen vastaanottajaa, joten meid‰n pit‰‰ heti t‰ss‰ vaiheessa kaivaa jo vastaanottajan tiedot
+// Orders 91.1 tulee ostajan tiedot ennen vastaanottajaa, joten meid√§n pit√§√§ heti t√§ss√§ vaiheessa kaivaa jo vastaanottajan tiedot
 $order_tietosisalto = file_get_contents($filename);
 
 $order_tietosisalto = str_replace("\n","", $order_tietosisalto);
@@ -67,7 +67,7 @@ foreach ($order_tietosisalto as $key => $value) {
       $current_product = $value;
     }
     elseif (substr($value, 0, 6) == "NAD+CZ") {
-      // Joissakin keisseiss‰ NAD+SE puuttuu mutta tilalla on NAD+CZ
+      // Joissakin keisseiss√§ NAD+SE puuttuu mutta tilalla on NAD+CZ
       $value = str_replace("NAD+CZ", "NAD+SE", $value);
       $edi_rivi_temp[] = $value;
     }
@@ -97,7 +97,7 @@ foreach ($order_tietosisalto as $key => $value) {
 
 unset($order_tietosisalto);
 
-// Etsit‰‰n otsikon p‰‰tt‰v‰n rivin index
+// Etsit√§√§n otsikon p√§√§tt√§v√§n rivin index
 $found = array_search("UNS+D", $edi_rivi_temp);
 $otsikonloppu = $edi_rivi_temp[$found];
 unset($edi_rivi_temp[$found]);
@@ -111,9 +111,9 @@ $edi_rivi_loppu = implode("'", $edi_rivi_loppu);
 
 foreach ($arska as $key => &$value) {
 
-  // Tuunataan jokaiselle toimitusosoitteelle oma editilaus ja ajetaan sis‰‰n
+  // Tuunataan jokaiselle toimitusosoitteelle oma editilaus ja ajetaan sis√§√§n
   if ($key != '') {
-    // Laitetaan toimitusosoite viel‰ header-segmenttiin($edi_rivi_alku) ennen headerin lopputagia
+    // Laitetaan toimitusosoite viel√§ header-segmenttiin($edi_rivi_alku) ennen headerin lopputagia
     $edi_rivi = $edi_rivi_alku."'$key'";
     $edi_rivi .= $otsikonloppu."'";
 
@@ -127,14 +127,14 @@ foreach ($arska as $key => &$value) {
         $edi_rivi .= $kippari[0]."'";
         // Toimituspaivamaara
         $edi_rivi .= $kippari[3]."'";
-        // T‰ll‰ segmentill‰ kerrotaan editilaus_in:lle ett‰ yksitt‰isen tilausrivin tiedot loppuu ja voidaan lis‰t‰ tuote tilaukselle
+        // T√§ll√§ segmentill√§ kerrotaan editilaus_in:lle ett√§ yksitt√§isen tilausrivin tiedot loppuu ja voidaan lis√§t√§ tuote tilaukselle
         $edi_rivi .= "PCD+12'";
       }
     }
 
-    // Lis‰t‰‰n koko sanoman lopputagit
+    // Lis√§t√§√§n koko sanoman lopputagit
     $edi_rivi .= $edi_rivi_loppu;
-    // Splitataan n‰tisti 80merkkisiksi riveiksi
+    // Splitataan n√§tisti 80merkkisiksi riveiksi
     $edi_rivi = chunk_split ($edi_rivi, 80, "\n");
 
     // Luodaan tiedosto suoraan normaalien editilausten kansioon

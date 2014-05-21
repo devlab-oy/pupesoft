@@ -1,7 +1,7 @@
 <?php
 
-//kaipaa sisään
-//$varasto = varaston tunnus josta myydään
+//kaipaa sisÃ¤Ã¤n
+//$varasto = varaston tunnus josta myydÃ¤Ã¤n
 //$tilaus  = tilausnumero/tilausnumerot jota optimoidaan
 //palauttaa $kirjoitin jossa on parhaan kirjoittimen tunnnus
 

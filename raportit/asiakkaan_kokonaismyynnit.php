@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("../inc/parametrit.inc");
@@ -11,7 +11,7 @@ if ($ytunnus!='') {
   require ("inc/asiakashaku.inc");
 }
 
-// jos meill‰ on onnistuneesti valittu asiakas
+// jos meill√§ on onnistuneesti valittu asiakas
 if ($ytunnus!='') {
 
   echo "<table><tr>";
@@ -29,13 +29,13 @@ if ($ytunnus!='') {
   echo "</tr></table>";
 
 
-  // hardcoodataan v‰rej‰
+  // hardcoodataan v√§rej√§
   //$cmyynti = "#ccccff";
   //$ckate   = "#ff9955";
   //$ckatepr = "#00dd00";
-  $maxcol  = 12; // montako columnia n‰yttˆ on
+  $maxcol  = 12; // montako columnia n√§ytt√∂ on
 
-  // tehd‰‰n asiakkaan ostot tuoteryhm‰st‰
+  // tehd√§√§n asiakkaan ostot tuoteryhm√§st√§
   echo "<br><font class='message'>".t("Myynti vuosittain viimeiset 4 vuotta")." (<font color='$cmyynti'>".t("myynti")."</font>/<font color='$ckate'>".t("kate")."</font>/<font color='$ckatepr'>".t("kateprosentti")."</font>)</font><hr>";
 
   // 4 v sitten
@@ -70,7 +70,7 @@ if ($ytunnus!='') {
 
     if ($col==1) echo "<tr>\n";
 
-    // lasketaan pylv‰iden korkeus
+    // lasketaan pylv√§iden korkeus
     if ($maxeur>0) {
       $hmyynti  = round(50*$sumrow['myynti']/$maxeur,0);
       $hkate    = round(50*$sumrow['kate']/$maxeur,0);
@@ -109,7 +109,7 @@ if ($ytunnus!='') {
     $col++;
   }
 
-  // teh‰‰n validia htmll‰‰ ja t‰ytet‰‰n tyhj‰t solut..
+  // teh√§√§n validia htmll√§√§ ja t√§ytet√§√§n tyhj√§t solut..
   $ero = $maxcol+1-$col;
 
   if ($ero<>$maxcol)
@@ -122,7 +122,7 @@ if ($ytunnus!='') {
 
 echo "<br><br><form name=asiakas method='post' autocomplete='off'>";
 echo "<table><tr>";
-echo "<th>".t("Anna asiakasnumero tai osa nimest‰")."</th>";
+echo "<th>".t("Anna asiakasnumero tai osa nimest√§")."</th>";
 echo "<td><input type='text' name='ytunnus' value='$ytunnus'></td>";
 echo "<td class='back'><input type='submit' value='".t("Hae")."'></td>";
 echo "</tr></table>";

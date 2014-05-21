@@ -5,7 +5,7 @@ if (isset($_POST["tee"])) {
   if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 }
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require("inc/parametrit.inc");
@@ -174,14 +174,14 @@ if ($tee == "TEEAINEISTO") {
     $alvp = substr($tkrow['tilikausi_loppu'], 8, 2);
   }
 
-  // Tarkistetaan viel‰ p‰iv‰m‰‰r‰t
+  // Tarkistetaan viel√§ p√§iv√§m√§√§r√§t
   if (!checkdate($plvk, $plvp, $plvv)) {
-    echo "<font class='error'>".t("VIRHE: Alkup‰iv‰m‰‰r‰ on virheellinen")."!</font><br>";
+    echo "<font class='error'>".t("VIRHE: Alkup√§iv√§m√§√§r√§ on virheellinen")."!</font><br>";
     $tee = "";
   }
 
   if (!checkdate($alvk, $alvp, $alvv)) {
-    echo "<font class='error'>".t("VIRHE: Loppup‰iv‰m‰‰r‰ on virheellinen")."!</font><br>";
+    echo "<font class='error'>".t("VIRHE: Loppup√§iv√§m√§√§r√§ on virheellinen")."!</font><br>";
     $tee = "";
   }
 }
@@ -194,13 +194,13 @@ if ($tee == "TEEAINEISTO") {
 
   echo "<table>";
   echo "<tr>
-    <th>",t("Alkup‰iv‰m‰‰r‰"),"</th>
+    <th>",t("Alkup√§iv√§m√§√§r√§"),"</th>
     <td>{$plvp}</td>
     <td>{$plvk}</td>
     <td>{$plvv}</td>
     </tr>\n";
   echo "<tr>
-    <th>",t("Loppup‰iv‰m‰‰r‰"),"</th>
+    <th>",t("Loppup√§iv√§m√§√§r√§"),"</th>
     <td>{$alvp}</td>
     <td>{$alvk}</td>
     <td>{$alvv}</td>

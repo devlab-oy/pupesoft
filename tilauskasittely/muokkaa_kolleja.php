@@ -41,7 +41,7 @@ echo "</select>";
 echo "</td></tr>";
 
 echo "<tr>";
-echo "<th>",t("Etsi rahtikirjoja l‰hdˆn tunnuksella"),"</th>";
+echo "<th>",t("Etsi rahtikirjoja l√§hd√∂n tunnuksella"),"</th>";
 echo "<td><input type='text' name='checkbox_parent[]' value='{$lahto}' /> <input type='submit' value='",t("Etsi"),"' /></td>";
 echo "</tr>";
 echo "</table>";
@@ -61,7 +61,7 @@ if ($tee == 'paivita') {
   }
 
   if ($muutetaan_pakkausta and $siirretaan_pakkausta) {
-    echo "<font class='error'>",t("Et voi muuttaa ja siirt‰‰ pakkauksia samaan aikaan"),".</font><br /><br />";
+    echo "<font class='error'>",t("Et voi muuttaa ja siirt√§√§ pakkauksia samaan aikaan"),".</font><br /><br />";
     $tee = 'muuta';
 
     reset($uusi_pakkaus);
@@ -232,8 +232,8 @@ if ($tee == 'paivita') {
                   lavametri = lavametri + {$lavametrit}";
           }
 
-          // Tarkistetaan aluksi montako rivi‰ kyseisell‰ rahtikirjalla on
-          // Jos rivej‰ on > 1, p‰ivitet‰‰n vaan ensimm‰ist‰ lˆytyv‰‰ rivi‰
+          // Tarkistetaan aluksi montako rivi√§ kyseisell√§ rahtikirjalla on
+          // Jos rivej√§ on > 1, p√§ivitet√§√§n vaan ensimm√§ist√§ l√∂ytyv√§√§ rivi√§
           $query = "SELECT tunnus
                     FROM rahtikirjat
                     WHERE yhtio       = '{$kukarow['yhtio']}'
@@ -346,9 +346,9 @@ if ($tee == 'muuta') {
     echo "<td><select name='uusi_pakkaus[{$keraysera_row['sscc']}]'>";
     echo "<option value=''>",t("Valitse"),"</option>";
 
-    echo "<optgroup label='",t("Ker‰yser‰ss‰"),"'>";
+    echo "<optgroup label='",t("Ker√§yser√§ss√§"),"'>";
 
-    $query = "SELECT CONCAT(IFNULL(pakkaus.pakkaus, 'Yksin ker‰ilyalustalle'), ' ', IF(kerayserat.sscc_ulkoinen != 0, kerayserat.sscc_ulkoinen, kerayserat.sscc)) pak,
+    $query = "SELECT CONCAT(IFNULL(pakkaus.pakkaus, 'Yksin ker√§ilyalustalle'), ' ', IF(kerayserat.sscc_ulkoinen != 0, kerayserat.sscc_ulkoinen, kerayserat.sscc)) pak,
               IFNULL(kerayserat.pakkaus, 'muu_kolli') pakkaus,
               IF(kerayserat.sscc_ulkoinen != 0, kerayserat.sscc_ulkoinen, kerayserat.sscc) sscc
               FROM kerayserat
@@ -368,7 +368,7 @@ if ($tee == 'muuta') {
     echo "</optgroup>";
 
     echo "<optgroup label='",t("Pakkaukset"),"'>";
-    echo "<option value='muu_kolli'>",t("Yksin ker‰ilyalustalle"),"</option>";
+    echo "<option value='muu_kolli'>",t("Yksin ker√§ilyalustalle"),"</option>";
 
     $query = "SELECT *
               FROM pakkaus
@@ -403,7 +403,7 @@ if ($tee == 'muuta') {
 
     echo "<tr><td><select name='uusi_pakkaus_kaikki_yhteen[{$kaikki_yhteen_pakkaukseen_sscc}]'>";
     echo "<option value=''>",t("Valitse"),"</option>";
-    echo "<option value='muu_kolli'>",t("Yksin ker‰ilyalustalle"),"</option>";
+    echo "<option value='muu_kolli'>",t("Yksin ker√§ilyalustalle"),"</option>";
 
     $query = "SELECT *
               FROM pakkaus
@@ -451,7 +451,7 @@ if ($tee == '' and isset($checkbox_parent) and count($checkbox_parent) == 1) {
   $rakir_res = pupe_query($query);
 
   if (mysql_num_rows($rakir_res) == 0) {
-    echo "<font class='message'>",t("Yht‰‰n tulostettavaa rahtikirjaa ei lˆytynyt"),".</font><br /><br />";
+    echo "<font class='message'>",t("Yht√§√§n tulostettavaa rahtikirjaa ei l√∂ytynyt"),".</font><br /><br />";
   }
   else {
 
@@ -459,12 +459,12 @@ if ($tee == '' and isset($checkbox_parent) and count($checkbox_parent) == 1) {
 
     while ($rakir_row = mysql_fetch_assoc($rakir_res)) {
 
-      // Katsotaan onko t‰m‰ koontikuljetus
+      // Katsotaan onko t√§m√§ koontikuljetus
       if ($toitarow["tulostustapa"] == "L" or $toitarow["tulostustapa"] == "K") {
         // Monen asiakkaan rahtikirjat tulostuu aina samalle paperille
         $asiakaslisa = " ";
 
-        //Toimitusosoitteeksi halutaan t‰ss‰ tapauksessa toimitustavan takaa lˆytyv‰t
+        //Toimitusosoitteeksi halutaan t√§ss√§ tapauksessa toimitustavan takaa l√∂ytyv√§t
         $rakir_row["toim_maa"]    = $toitarow["toim_maa"];
         $rakir_row["toim_nimi"]    = $toitarow["toim_nimi"];
         $rakir_row["toim_nimitark"]  = $toitarow["toim_nimitark"];
@@ -474,7 +474,7 @@ if ($tee == '' and isset($checkbox_parent) and count($checkbox_parent) == 1) {
 
       }
       else {
-        // Normaalissa keississ‰ ainoastaan saman toimitusasiakkaan kirjat menee samalle paperille
+        // Normaalissa keississ√§ ainoastaan saman toimitusasiakkaan kirjat menee samalle paperille
         $asiakaslisa = "and lasku.ytunnus      = '$rakir_row[ytunnus]'
                 and lasku.toim_maa      = '$rakir_row[toim_maa]'
                 and lasku.toim_nimi      = '$rakir_row[toim_nimi]'
@@ -485,7 +485,7 @@ if ($tee == '' and isset($checkbox_parent) and count($checkbox_parent) == 1) {
                 and lasku.toim_postitp    = '$rakir_row[toim_postitp]' ";
       }
 
-      // haetaan t‰lle rahtikirjalle kuuluvat tunnukset
+      // haetaan t√§lle rahtikirjalle kuuluvat tunnukset
       $query = "SELECT GROUP_CONCAT(DISTINCT lasku.tunnus) otunnus,
                 GROUP_CONCAT(DISTINCT rahtikirjat.tunnus) rtunnus,
                 GROUP_CONCAT(DISTINCT rahtikirjat.rahtikirjanro SEPARATOR ', ') rahtikirjanrot,
@@ -527,7 +527,7 @@ if ($tee == '' and isset($checkbox_parent) and count($checkbox_parent) == 1) {
       echo "<th>",t("Osoite"),"</th>";
       echo "<th>",t("Rahtikirjanumerot"),"</th>";
       echo "<th>",t("Rahdinmaksaja"),"</th>";
-      echo "<th>",t("Pakkauksien lukum‰‰r‰"),"</th>";
+      echo "<th>",t("Pakkauksien lukum√§√§r√§"),"</th>";
       echo "<th>",t("Paino"),"</th>";
       echo "<th>",t("Tilavuus"),"</th>";
       echo "</tr>";
@@ -536,7 +536,7 @@ if ($tee == '' and isset($checkbox_parent) and count($checkbox_parent) == 1) {
 
       while ($rivi = mysql_fetch_assoc($res)) {
 
-        // otetaan kaikki otsikkonumerot ja rahtikirjanumerot talteen... tarvitaan myˆhemmin hauissa
+        // otetaan kaikki otsikkonumerot ja rahtikirjanumerot talteen... tarvitaan my√∂hemmin hauissa
         $otunnukset = $rivi['otunnus'];
         $tunnukset = $rivi['rtunnus'];
 
@@ -545,10 +545,10 @@ if ($tee == '' and isset($checkbox_parent) and count($checkbox_parent) == 1) {
         echo "<td>$rakir_row[toim_osoite] $rakir_row[toim_postino] $rakir_row[toim_postitp]</td>";
 
         if ($rakir_row['merahti'] == 'K') {
-          $rahdinmaksaja = t("L‰hett‰j‰");
+          $rahdinmaksaja = t("L√§hett√§j√§");
         }
         else {
-          $rahdinmaksaja = t("Vastaanottaja"); //t‰m‰ on defaultti
+          $rahdinmaksaja = t("Vastaanottaja"); //t√§m√§ on defaultti
         }
 
         echo "<td>{$rivi['rahtikirjanrot']}</td>";

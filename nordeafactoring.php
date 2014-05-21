@@ -32,7 +32,7 @@ if ($tee == 'TARKISTA') {
 }
 
 if ($tee == '') {
-  //K‰yttˆliittym‰
+  //K√§ytt√∂liittym√§
   echo "<br>";
   echo "<form method='post'>";
   echo "Luo uusi siirtotiedosto<br>";
@@ -87,11 +87,11 @@ if ($tee == '') {
   echo "</select></td></tr>";
 
   echo "<tr>
-      <th>Syˆt‰ laskuv‰lin alku:</th>
+      <th>Sy√∂t√§ laskuv√§lin alku:</th>
       <td><input type='text' name='ppa' value='$arow[eka]' size='10'></td>
       </tr>
       <tr>
-      <th>Syˆt‰ laskuv‰lin loppu:</th>
+      <th>Sy√∂t√§ laskuv√§lin loppu:</th>
       <td><input type='text' name='ppl' value='$arow[vika]' size='10'></td>
       </tr>";
 
@@ -112,7 +112,7 @@ if ($tee == '') {
   echo "<td class='back'><input type='submit' value='Luo siirtoaineisto'></td></tr></form></table><br><br>";
 
 
-  //K‰yttˆliittym‰
+  //K√§ytt√∂liittym√§
   echo "<br>";
   echo "<form method='post'>";
   echo "Uudelleenluo siirtotiedosto<br>";
@@ -174,7 +174,7 @@ if ($tee == 'TULOSTA') {
   $frow = mysql_fetch_assoc($fres);
 
 
-  //Luodaan er‰tietue
+  //Luodaan er√§tietue
   if ($toim == "OKO") {
     $ulos  = sprintf ('%-4.4s', "LA01");                  //sovellustunnus
   }
@@ -188,10 +188,10 @@ if ($tee == 'TULOSTA') {
   $ulos .= sprintf ('%01.1s',     0);                      //tietuetunnus
 
   if ($toim == 'SAMPO') {
-    $ulos .= sprintf ('%017.17s',       str_replace('-','',$yhtiorow["ytunnus"]));  //myyj‰n ytunnus etunollilla SAMPO!
+    $ulos .= sprintf ('%017.17s',       str_replace('-','',$yhtiorow["ytunnus"]));  //myyj√§n ytunnus etunollilla SAMPO!
   }
   else {
-    $ulos .= sprintf ('%-17.17s',   str_replace('-','',$yhtiorow["ytunnus"]));  //myyj‰n ytunnus ilman v‰liviivaa OKO & NORDEA
+    $ulos .= sprintf ('%-17.17s',   str_replace('-','',$yhtiorow["ytunnus"]));  //myyj√§n ytunnus ilman v√§liviivaa OKO & NORDEA
   }
 
   $ulos .= sprintf ('%06.6s',     $luontipvm);                //aineiston luontipvm
@@ -200,20 +200,20 @@ if ($tee == 'TULOSTA') {
   $ulos .= sprintf ('%-3.3s',   $valkoodi);                  //valuutta
 
   if ($toim == "OKO") {
-    $ulos .= sprintf ('%-2.2s', "OP");                    //rahoitusyhtiˆn tunnus
+    $ulos .= sprintf ('%-2.2s', "OP");                    //rahoitusyhti√∂n tunnus
   }
   elseif ($toim == "SAMPO") {
-    $ulos .= sprintf ('%-2.2s', "PR");                    //rahoitusyhtiˆn tunnus SAMPO
+    $ulos .= sprintf ('%-2.2s', "PR");                    //rahoitusyhti√∂n tunnus SAMPO
   }
   else {
-    $ulos .= sprintf ('%-2.2s', "MR");                    //rahoitusyhtiˆn tunnus
+    $ulos .= sprintf ('%-2.2s', "MR");                    //rahoitusyhti√∂n tunnus
   }
 
   if ($toim == "OKO") {
-    $ulos .= sprintf ('%-30.30s',   $yhtiorow["nimi"]);            //siirt‰j‰n nimi
+    $ulos .= sprintf ('%-30.30s',   $yhtiorow["nimi"]);            //siirt√§j√§n nimi
   }
   else {
-    $ulos .= sprintf ('%-30.30s',   $kukarow["nimi"]);            //siirt‰j‰n nimi
+    $ulos .= sprintf ('%-30.30s',   $kukarow["nimi"]);            //siirt√§j√§n nimi
   }
 
   $ulos .= sprintf ('%06.6s',   $factoringsiirtonumero);          //siirtoluettelon numero
@@ -228,7 +228,7 @@ if ($tee == 'TULOSTA') {
   }
 
   if ($tee_u != 'UUDELLEENLUO' and ($ppa == '' or $ppl == '' or $ppl < $ppa)) {
-    echo "Huono laskunumerov‰li!";
+    echo "Huono laskunumerov√§li!";
     exit;
   }
 
@@ -253,7 +253,7 @@ if ($tee == 'TULOSTA') {
   $dresult = pupe_query($dquery);
 
   if (mysql_num_rows($dresult) == 0) {
-    echo "Huono laskunumerov‰li! Yht‰‰n siirett‰v‰‰ laskua ei lˆytynyt!";
+    echo "Huono laskunumerov√§li! Yht√§√§n siirett√§v√§√§ laskua ei l√∂ytynyt!";
     exit;
   }
 
@@ -306,7 +306,7 @@ if ($tee == 'TULOSTA') {
     $laskuvirh = 0;
 
     echo "<table>";
-    echo "<tr><th>P‰iv‰m‰‰r‰:</th><td>".date("d.m.Y")."</td>";
+    echo "<tr><th>P√§iv√§m√§√§r√§:</th><td>".date("d.m.Y")."</td>";
     echo "<tr><th>Sopimusnumero:</th><td>{$frow["sopimusnumero"]}</td>";
     echo "<tr><th>Siirtoluettelon numero:</th><td>$factoringsiirtonumero</td></tr></table><br>";
 
@@ -365,7 +365,7 @@ if ($tee == 'TULOSTA') {
       }
 
       if ($toim == "OKO") {
-        $ulos .= sprintf ('%-30.30s',    "");                               //ostajan nimitark (Ei k‰ytˆss‰)
+        $ulos .= sprintf ('%-30.30s',    "");                               //ostajan nimitark (Ei k√§yt√∂ss√§)
       }
       else {
         $ulos .= sprintf ('%-30.30s',    $laskurow["nimitark"]);                       //ostajan nimitark
@@ -393,7 +393,7 @@ if ($tee == 'TULOSTA') {
       $ulos .= sprintf ('%-3.3s',     $laskurow["valkoodi"]);                    //valuutta
 
       if ($toim == "OKO") {
-        $ulos .= sprintf ('%04.4s',   "");                            //viivastyskorko (Ei k‰ytˆss‰)
+        $ulos .= sprintf ('%04.4s',   "");                            //viivastyskorko (Ei k√§yt√∂ss√§)
       }
       else {
         $ulos .= sprintf ('%04.4s',   $laskurow["viikorkopros"]);                  //viivastyskorko
@@ -403,11 +403,11 @@ if ($tee == 'TULOSTA') {
       $ulos .= sprintf ('%06.6s',       0);
 
       if ($toim == "OKO") {
-        $ulos .= sprintf ('%03.3s',     1);                              //myyj‰n sopimustunnus
+        $ulos .= sprintf ('%03.3s',     1);                              //myyj√§n sopimustunnus
         $ulos .= sprintf ('%-179.179s',  0);
       }
       elseif ($toim == 'SAMPO') {
-        $ulos .= sprintf ('%-182.182s', 0);                                                         // Sampo, tyhj‰‰, Varalla..
+        $ulos .= sprintf ('%-182.182s', 0);                                                         // Sampo, tyhj√§√§, Varalla..
       }
       else {
         if ($laskurow["maa"] != $yhtiorow["maa"] and $laskurow["maa"] != '') {
@@ -451,12 +451,12 @@ if ($tee == 'TULOSTA') {
       else {
         $ulos .= sprintf ('%010.10s',    $laskurow["laskunro"]);                    //laskunro
       }
-      $ulos .= sprintf ('%06.6s',       $laskurow["tapvm"]);                    //laskun p‰iv‰ys
+      $ulos .= sprintf ('%06.6s',       $laskurow["tapvm"]);                    //laskun p√§iv√§ys
       $ulos .= sprintf ('%-3.3s',     $laskurow["valkoodi"]);                    //valuutta
-      $ulos .= sprintf ('%06.6s',     $laskurow["tapvm"]);                    //laskun arvop‰iv‰
-      $ulos .= sprintf ('%02.2s',     $laskurow["tyyppi"]);                    //laskun tyyppi 01-veloitus 02-hyvitys 03-viiv‰styskorkolasku jne...
-      $ulos .= sprintf ('%012.12s',     $laskurow["summa"]);                    //summa etumerkitˆn, senttein‰
-      $ulos .= sprintf ('%06.6s',     $laskurow["erpcm"]);                    //er‰p‰iv‰
+      $ulos .= sprintf ('%06.6s',     $laskurow["tapvm"]);                    //laskun arvop√§iv√§
+      $ulos .= sprintf ('%02.2s',     $laskurow["tyyppi"]);                    //laskun tyyppi 01-veloitus 02-hyvitys 03-viiv√§styskorkolasku jne...
+      $ulos .= sprintf ('%012.12s',     $laskurow["summa"]);                    //summa etumerkit√∂n, senttein√§
+      $ulos .= sprintf ('%06.6s',     $laskurow["erpcm"]);                    //er√§p√§iv√§
 
       if ($laskurow["kasumma"] > 0) {
         $ulos .= sprintf ('%06.6s',   $laskurow["kapvm"]);                    //kassa-ale1 pvm
@@ -516,7 +516,7 @@ if ($tee == 'TULOSTA') {
       }
 
       $ulos .= sprintf ('%010.10s',      0);
-      $ulos .= sprintf ('%04.4s',       0);                              //alv (ei v‰litet‰)
+      $ulos .= sprintf ('%04.4s',       0);                              //alv (ei v√§litet√§)
 
 
       if ($toim == "OKO") {
@@ -529,7 +529,7 @@ if ($tee == 'TULOSTA') {
         $ulos .= sprintf ('%-13.13s',   "");
         $ulos .= sprintf ('%-30.30s',   "");
         $ulos .= sprintf ('%06.6s',   0);
-        $ulos .= sprintf ('%03.3s',   1);                              //myyj‰n sopimustunnus
+        $ulos .= sprintf ('%03.3s',   1);                              //myyj√§n sopimustunnus
         $ulos .= sprintf ('%-38.38s',   "");
       }
       else {
@@ -586,7 +586,7 @@ if ($tee == 'TULOSTA') {
     if ($laskuvirh > 0) {
       echo "</table>";
       echo "<br><br>";
-      echo "Aineistossa oli virheit‰! Korjaa ne ja aja uudestaan!";
+      echo "Aineistossa oli virheit√§! Korjaa ne ja aja uudestaan!";
     }
     else {
       if ($tee_u != 'UUDELLEENLUO') {
@@ -651,7 +651,7 @@ if ($tee == 'TULOSTA') {
 
       $ulos .= "\r\n";
 
-      //keksit‰‰n uudelle failille joku hyv‰ nimi:
+      //keksit√§√§n uudelle failille joku hyv√§ nimi:
       if ($toim == "OKO") {
         $filenimi = "OKOsiirto-$factoringsiirtonumero.txt";
       }
@@ -664,14 +664,14 @@ if ($tee == 'TULOSTA') {
 
       //kirjoitetaan faili levylle..
       $fh = fopen("dataout/".$filenimi, "w");
-      if (fwrite($fh, $ulos) === FALSE) die("Kirjoitus ep‰onnistui $filenimi");
+      if (fwrite($fh, $ulos) === FALSE) die("Kirjoitus ep√§onnistui $filenimi");
       fclose($fh);
 
       echo "<tr><td class='back'><br></td></tr>";
 
-      echo "<tr><td class='back' colspan='2'></td><th>Yhteens‰ $vlaskukpl veloituslaskua</th><td align='right'>".sprintf('%.2f', $vlaskusum/100)."</td><td>$laskurow[valkoodi]</td></tr>";
-      echo "<tr><td class='back' colspan='2'></td><th>Yhteens‰ $hlaskukpl hyvityslaskua</th><td align='right'> ".sprintf('%.2f', $hlaskusum/100)."</td><td>$laskurow[valkoodi]</td></tr>";
-      echo "<tr><td class='back' colspan='2'></td><th>Yhteens‰</th><td align='right'> ".sprintf('%.2f', ($vlaskusum+($hlaskusum*-1))/100)."</td><td>$laskurow[valkoodi]</td></tr>";
+      echo "<tr><td class='back' colspan='2'></td><th>Yhteens√§ $vlaskukpl veloituslaskua</th><td align='right'>".sprintf('%.2f', $vlaskusum/100)."</td><td>$laskurow[valkoodi]</td></tr>";
+      echo "<tr><td class='back' colspan='2'></td><th>Yhteens√§ $hlaskukpl hyvityslaskua</th><td align='right'> ".sprintf('%.2f', $hlaskusum/100)."</td><td>$laskurow[valkoodi]</td></tr>";
+      echo "<tr><td class='back' colspan='2'></td><th>Yhteens√§</th><td align='right'> ".sprintf('%.2f', ($vlaskusum+($hlaskusum*-1))/100)."</td><td>$laskurow[valkoodi]</td></tr>";
 
       echo "</table>";
       echo "<br><br>";
@@ -694,7 +694,7 @@ if ($tee == 'TULOSTA') {
     }
   }
   else {
-    echo "<br><br>Yht‰‰n siirrett‰v‰‰ laskua ei ole!<br>";
+    echo "<br><br>Yht√§√§n siirrett√§v√§√§ laskua ei ole!<br>";
     $tee = "";
   }
 }

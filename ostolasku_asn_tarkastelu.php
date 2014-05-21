@@ -12,7 +12,7 @@ echo "  <script type='text/javascript'>
 
         $('.poistabutton').click(function(){
 
-          if (confirm('",t("Haluatko todella poistaa t‰m‰n sanoman?"),"')) {
+          if (confirm('",t("Haluatko todella poistaa t√§m√§n sanoman?"),"')) {
             var kollitunniste = $(this).attr('id');
 
             if ($('#valitse').val() == 'asn') {
@@ -114,7 +114,7 @@ if (!isset($tee)) $tee = '';
 if (!isset($valitse)) $valitse = '';
 if (!isset($asn_rivi)) $asn_rivi = '';
 if (!isset($toimipaikka)) $toimipaikka = '';
-if (isset($muut_siirrettavat) and trim($muut_siirrettavat) != "") list($asn_rivi, $toimittaja, $tilausnro, $tuoteno, $tilaajanrivinro, $kpl, $valitse, $kolli, $toimittajanumero, $asn_numero, $toimipaikka) = explode("!°!", $muut_siirrettavat);
+if (isset($muut_siirrettavat) and trim($muut_siirrettavat) != "") list($asn_rivi, $toimittaja, $tilausnro, $tuoteno, $tilaajanrivinro, $kpl, $valitse, $kolli, $toimittajanumero, $asn_numero, $toimipaikka) = explode("!¬°!", $muut_siirrettavat);
 
 if ($tee == 'poista_sanoma') {
 
@@ -178,22 +178,22 @@ if ($tee == 'vaihdatoimittaja') {
 
   if (isset($nimi) and trim($nimi) != '') {
 
-    //tehd‰‰n asiakas- ja toimittajahaku yhteensopivuus
+    //tehd√§√§n asiakas- ja toimittajahaku yhteensopivuus
     $ytunnus = $nimi;
 
     $lause = "<font class='head'>".t("Valitse toimittaja").":</font><hr><br>";
     require ("inc/kevyt_toimittajahaku.inc");
 
     if ($ytunnus == '' and $monta > 1) {
-      //Lˆytyi monta sopivaa, n‰ytet‰‰n formi, mutta ei otsikkoa
+      //L√∂ytyi monta sopivaa, n√§ytet√§√§n formi, mutta ei otsikkoa
       $tila = 'monta';
     }
     elseif ($ytunnus == '' and $monta < 1) {
-      //yht‰‰n asiakasta ei lˆytynyt, n‰ytet‰‰n otsikko
+      //yht√§√§n asiakasta ei l√∂ytynyt, n√§ytet√§√§n otsikko
       $tila = '';
     }
     else {
-      //oikea asiakas on lˆytynyt
+      //oikea asiakas on l√∂ytynyt
       $tunnus = $toimittajaid;
       $tila = 'ok';
     }
@@ -227,8 +227,8 @@ if ($tee == 'vaihdatoimittaja') {
       $tila = 'ok';
     }
     else {
-      //toimittajalla ei ole toimittaja numeroa, sit‰ ei voida laittaa asn_sanomien toimittajaksi
-      echo "<font class='error'>".t("Toimittajalta puuttuu toimittajanumero").". ".t("Sit‰ ei voida laittaa asn_sanomien toimittajaksi")."</font>";
+      //toimittajalla ei ole toimittaja numeroa, sit√§ ei voida laittaa asn_sanomien toimittajaksi
+      echo "<font class='error'>".t("Toimittajalta puuttuu toimittajanumero").". ".t("Sit√§ ei voida laittaa asn_sanomien toimittajaksi")."</font>";
       echo "<br/>";
       $tee = 'vaihdatoimittaja';
       $tila = '';
@@ -259,7 +259,7 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
   if ($valitse != 'asn' and $tee == 'vahvistavakisinkolli') {
 
     // Kun vahvistetaan katsotaan onko lasku liitetty jo saapumiseen
-    // Jos on, niin merkataan asn_sanoma status x eik‰ menn‰ automaattikohdistukseen
+    // Jos on, niin merkataan asn_sanoma status x eik√§ menn√§ automaattikohdistukseen
     $query = "SELECT tunnus
               FROM lasku
               WHERE yhtio  = '{$kukarow['yhtio']}'
@@ -291,7 +291,7 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
 
         $automaattikohdistukseen = false;
 
-        echo "<font class='message'>",t("Lasku oli jo liitetty saapumiseen"),". ",t("P‰ivitet‰‰n lasku k‰sitellyksi"),".</font><br /><br />";
+        echo "<font class='message'>",t("Lasku oli jo liitetty saapumiseen"),". ",t("P√§ivitet√§√§n lasku k√§sitellyksi"),".</font><br /><br />";
       }
     }
   }
@@ -357,10 +357,10 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
         $result = pupe_query($query);
         $lapset = mysql_fetch_assoc($result);
 
-        // Lapsia lˆytyi, t‰m‰ on is‰tuote
+        // Lapsia l√∂ytyi, t√§m√§ on is√§tuote
         if (!is_null($lapset["lapset"])) {
 
-          // Haetaan tilausnumerot joilla t‰m‰ tuote on
+          // Haetaan tilausnumerot joilla t√§m√§ tuote on
           $query = "SELECT group_concat(otunnus) tilaukset
                     FROM tilausrivi
                     WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
@@ -371,7 +371,7 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
           foreach (explode(",", $lapset['lapset']) as $lapsi_tuoteno) {
 
             if ($tilaukset['tilaukset'] != '') {
-              // Haetaan t‰m‰n is‰tuotteen lapsituotteiden tunnukset
+              // Haetaan t√§m√§n is√§tuotteen lapsituotteiden tunnukset
               $query = "SELECT tunnus, tuoteno
                         FROM tilausrivi
                         WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
@@ -383,7 +383,7 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
 
             if ($tilaukset['tilaukset'] == '' or mysql_num_rows($result) == 0) {
 
-              // otetaan ensimm‰isen is‰tuotteen tilausrivin tiedot
+              // otetaan ensimm√§isen is√§tuotteen tilausrivin tiedot
               $query = "SELECT *
                         FROM tilausrivi
                         WHERE yhtio = '{$kukarow['yhtio']}'
@@ -441,7 +441,7 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
                      kpl         = '{$isa_chk_row['kpl']}',
                      hinta       = '{$hinta}',
                      laatija     = 'lapset',
-                     kommentti   = 'ASN-sanomalta: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lis‰t‰‰n lapsituote: {$lapsitieto['tuoteno']}',
+                     kommentti   = 'ASN-sanomalta: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lis√§t√§√§n lapsituote: {$lapsitieto['tuoteno']}',
                      laadittu    =  now(),
                      hyllyalue   = '{$lapsitieto['hyllyalue']}',
                      hyllynro    = '{$lapsitieto['hyllynro']}',
@@ -454,7 +454,7 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
                 $id = mysql_insert_id();
                 $paketin_rivit[] = $id;
 
-                // p‰ivitet‰‰n is‰
+                // p√§ivitet√§√§n is√§
                 $updateisa = "UPDATE tilausrivi SET
                  perheid     = tunnus
                  WHERE yhtio = '{$kukarow['yhtio']}'
@@ -469,7 +469,7 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
                 $info_res = pupe_query($query);
                 $info_row = mysql_fetch_assoc($info_res);
 
-                // Tehd‰‰n uusi rivi, jossa on j‰ljelle j‰‰neet kappaleet
+                // Tehd√§√§n uusi rivi, jossa on j√§ljelle j√§√§neet kappaleet
                 $fields = "yhtio";
                 $values = "'{$kukarow['yhtio']}'";
 
@@ -547,7 +547,7 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
 
           while ($tilausrivirow = mysql_fetch_assoc($tilausrivires)) {
             if ($tilausrivirow['uusiotunnus'] == 0) {
-              // lˆytyi, ei ole keikalla
+              // l√∂ytyi, ei ole keikalla
               $ostoilla[$x]["tunnus"] = $tilausrivirow['tunnus']; // tilausrivi tunnus
               $ostoilla[$x]["hinta"] = $rtuoteno[$i]["hinta"];
               $ostoilla[$x]["kpl"] = $rtuoteno[$i]["kpl"];
@@ -562,7 +562,7 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
               $ostoilla[$x]['tuoteno'] = $tilausrivirow['tuoteno'];
             }
             else {
-              // lˆytyi, on jo keikalla
+              // l√∂ytyi, on jo keikalla
               $keikoilla[$x]["tunnus"] = $tilausrivirow['tunnus'];
               $keikoilla[$x]["uusiotunnus"] = $tilausrivirow['uusiotunnus'];
               $keikoilla[$x]["hinta"] = $rtuoteno[$i]["hinta"];
@@ -576,7 +576,7 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
               $keikoilla[$x]["ale3"] = $rtuoteno[$i]["ale3"];
               $keikoilla[$x]['tuoteno'] = $tilausrivirow['tuoteno'];
 
-              // jos tilausrivin saapumisella onkin jo vaihto-omaisuuslasku, ei edet‰ ja nollataan asn_sanomat.tilausrivi
+              // jos tilausrivin saapumisella onkin jo vaihto-omaisuuslasku, ei edet√§ ja nollataan asn_sanomat.tilausrivi
               $query = "SELECT saapuminen.tunnus
                         FROM lasku AS saapuminen
                         WHERE saapuminen.yhtio = '{$kukarow['yhtio']}'
@@ -585,7 +585,7 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
                         AND saapuminen.mapvm   = '0000-00-00'";
               $saapres = pupe_query($query);
 
-              // Jos ei lˆydy laskua, irrotetaan kohdistus
+              // Jos ei l√∂ydy laskua, irrotetaan kohdistus
               if (mysql_num_rows($saapres) == 0) {
                 $lasku_manuaalisesti_check = 1;
 
@@ -687,7 +687,7 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
       }
     }
     elseif ($valitse != 'asn' and count($rtuoteno) > 0 and $laskuttajan_toimittajanumero != "" and $lasku_manuaalisesti_check != 0) {
-      echo "<font class='message'>",t("Laskun rivej‰ oli liitetty saapumiseen jossa oli jo vaihto-omaisuus lasku"),". ",t("Poistetaan t‰mmˆisten rivien liitos"),". ",t("K‰sittele lasku"), " $lasku ",t("uudestaan"),".</font><br /><br />";
+      echo "<font class='message'>",t("Laskun rivej√§ oli liitetty saapumiseen jossa oli jo vaihto-omaisuus lasku"),". ",t("Poistetaan t√§mm√∂isten rivien liitos"),". ",t("K√§sittele lasku"), " $lasku ",t("uudestaan"),".</font><br /><br />";
     }
 
     if ($valitse == 'asn' and count($paketin_rivit) > 0) {
@@ -717,7 +717,7 @@ if ($tee == 'poistakohdistus') {
   $kollires = pupe_query($query);
   $rivi = mysql_fetch_assoc($kollires);
 
-  // poistetaan STATUS-t‰pp‰
+  // poistetaan STATUS-t√§pp√§
   $query = "UPDATE asn_sanomat SET status = '', tilausrivi= NULL WHERE yhtio = '{$kukarow['yhtio']}' {$wherelisa}";
   $kollires = pupe_query($query);
 
@@ -798,8 +798,8 @@ if ($tee == 'uusirivi') {
 
       list($hinta,,,) = alehinta_osto($laskurow, $trow, $kpl);
 
-      //pidet‰‰n kaikki muuttujat tallessa
-      $muut_siirrettavat = $asn_rivi."!°!".$toimittaja."!°!".$tilausnro."!°!".$tuoteno."!°!".$tilaajanrivinro."!°!".$kpl."!°!".$valitse."!°!".$kolli."!°!".$toimittajanumero."!°!".$asn_numero."!°!".$toimipaikka;
+      //pidet√§√§n kaikki muuttujat tallessa
+      $muut_siirrettavat = $asn_rivi."!¬°!".$toimittaja."!¬°!".$tilausnro."!¬°!".$tuoteno."!¬°!".$tilaajanrivinro."!¬°!".$kpl."!¬°!".$valitse."!¬°!".$kolli."!¬°!".$toimittajanumero."!¬°!".$asn_numero."!¬°!".$toimipaikka;
 
       $rivinotunnus = $tilausnro;
       $toimaika = date('Y')."-".date('m')."-".date('d');
@@ -812,12 +812,12 @@ if ($tee == 'uusirivi') {
     }
   }
   else {
-    $error = t("Ostotilausta").' '.$tilausnro.' '.t("ei lˆydy")."!";
+    $error = t("Ostotilausta").' '.$tilausnro.' '.t("ei l√∂ydy")."!";
     $tee = 'etsi';
   }
 }
 
-//poistetaan rivi, n‰ytet‰‰n lista
+//poistetaan rivi, n√§ytet√§√§n lista
 if ($tee == 'TI' and isset($tyhjenna)) {
   $tee = 'etsi';
 }
@@ -877,18 +877,18 @@ if ($tee == 'TI') {
 
   require('tilauskasittely/tarkistarivi_ostotilaus.inc');
 
-  //n‰ytet‰‰n virhe ja annetaan mahis korjata se
+  //n√§ytet√§√§n virhe ja annetaan mahis korjata se
   if (trim($varaosavirhe) != '' or trim($tuoteno) == "") {
 
-    //rivien splittausvaihtoehtot n‰kyviin
+    //rivien splittausvaihtoehtot n√§kyviin
     $automatiikka = 'ON';
 
-    //pidet‰‰n kaikki muuttujat tallessa
-    $muut_siirrettavat = $asn_rivi."!°!".$toimittaja."!°!".$tilausnro."!°!".$tuoteno."!°!".$tilaajanrivinro."!°!".$kpl."!°!".$valitse."!°!".$kolli."!°!".$toimittajanumero."!°!".$asn_numero."!°!".$toimipaikka;
+    //pidet√§√§n kaikki muuttujat tallessa
+    $muut_siirrettavat = $asn_rivi."!¬°!".$toimittaja."!¬°!".$tilausnro."!¬°!".$tuoteno."!¬°!".$tilaajanrivinro."!¬°!".$kpl."!¬°!".$valitse."!¬°!".$kolli."!¬°!".$toimittajanumero."!¬°!".$asn_numero."!¬°!".$toimipaikka;
 
     $rivinotunnus = $tilausnro;
 
-    echo t("Muuta rivi‰"),":<br>";
+    echo t("Muuta rivi√§"),":<br>";
     require('tilauskasittely/syotarivi_ostotilaus.inc');
     require('inc/footer.inc');
     exit;
@@ -909,7 +909,7 @@ if ((isset($varaosavirhe) and trim($varaosavirhe) == '') and ($tee == "TI") and 
     $tuoteno_array[] = $tuoteno;
   }
 
-  //K‰ytt‰j‰n syˆtt‰m‰ hinta ja ale ja netto, pit‰‰ s‰ilˆ‰ jotta tuotehaussakin voidaan syˆtt‰‰ n‰m‰
+  //K√§ytt√§j√§n sy√∂tt√§m√§ hinta ja ale ja netto, pit√§√§ s√§il√∂√§ jotta tuotehaussakin voidaan sy√∂tt√§√§ n√§m√§
   for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
     ${'kayttajan_ale'.$alepostfix} = ${'ale'.$alepostfix};
   }
@@ -930,11 +930,11 @@ if ((isset($varaosavirhe) and trim($varaosavirhe) == '') and ($tee == "TI") and 
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) > 0) {
-      //Tuote lˆytyi
+      //Tuote l√∂ytyi
       $trow = mysql_fetch_array($result);
     }
     else {
-      //Tuotetta ei lˆydy, arvataan muutamia muuttujia
+      //Tuotetta ei l√∂ydy, arvataan muutamia muuttujia
       $trow["alv"] = $laskurow["alv"];
     }
 
@@ -953,7 +953,7 @@ if ((isset($varaosavirhe) and trim($varaosavirhe) == '') and ($tee == "TI") and 
 
     $varasto = $laskurow["varasto"];
 
-    //Tehd‰‰n muuttujaswitchit
+    //Tehd√§√§n muuttujaswitchit
     if (is_array($hinta_array)) {
       $hinta = $hinta_array[$tuoteno];
     }
@@ -1027,7 +1027,7 @@ if ((isset($varaosavirhe) and trim($varaosavirhe) == '') and ($tee == "TI") and 
   }
 
   if ($lisavarusteita == "ON" and $perheid2 > 0) {
-    //P‰ivitet‰‰n is‰lle perheid jotta tiedet‰‰n, ett‰ lis‰varusteet on nyt lis‰tty
+    //P√§ivitet√§√§n is√§lle perheid jotta tiedet√§√§n, ett√§ lis√§varusteet on nyt lis√§tty
     $query = "UPDATE tilausrivi set
               perheid2    = '{$perheid2}'
               where yhtio = '{$kukarow['yhtio']}'
@@ -1038,25 +1038,25 @@ if ((isset($varaosavirhe) and trim($varaosavirhe) == '') and ($tee == "TI") and 
   $tee = 'etsi';
 }
 
-//korjataan siirrett‰v‰t muuttujat taas talteen
+//korjataan siirrett√§v√§t muuttujat taas talteen
 if (isset($muut_siirrettavat) and trim($muut_siirrettavat) != "") {
-  list($asn_rivi, $toimittaja, $tilausnro, $tuoteno, $tilaajanrivinro, $kpl, $valitse, $kolli, $toimittajanumero, $asn_numero, $toimipaikka) = explode("!°!", $muut_siirrettavat);
+  list($asn_rivi, $toimittaja, $tilausnro, $tuoteno, $tilaajanrivinro, $kpl, $valitse, $kolli, $toimittajanumero, $asn_numero, $toimipaikka) = explode("!¬°!", $muut_siirrettavat);
 }
 
 if ($tee == 'kohdista_tilausrivi') {
 
   if (count($tunnukset) == 0) {
-    $error = t("Halusit kohdistaa, mutta et valinnut yht‰‰n rivi‰")."!";
+    $error = t("Halusit kohdistaa, mutta et valinnut yht√§√§n rivi√§")."!";
     $tee = 'etsi';
   }
   else {
-    // typecastataan formista tulleet tunnukset stringeist‰ inteiksi
+    // typecastataan formista tulleet tunnukset stringeist√§ inteiksi
     $tunnukset = array_map('intval', $tunnukset);
     $poista_tilausrivi = array_map('intval', $poista_tilausrivi);
     $ostotilauksella_tilaajanrivinro = array_map('intval',$ostotilauksella_tilaajanrivinro);
 
-    // otetaan ostotilausrivin kpl m‰‰r‰, splitataan ja menn‰‰ eteenp‰in...
-    // T‰m‰ pit‰‰ sitten jollain tavalla muuttaa paremmaksi, t‰m‰ on versio 1.0
+    // otetaan ostotilausrivin kpl m√§√§r√§, splitataan ja menn√§√§ eteenp√§in...
+    // T√§m√§ pit√§√§ sitten jollain tavalla muuttaa paremmaksi, t√§m√§ on versio 1.0
 
     $kaytettavat_tunnukset = array();
     $kaytettava_kappalemaara_yhteensa = 0;
@@ -1077,7 +1077,7 @@ if ($tee == 'kohdista_tilausrivi') {
       $lajilisa = 'tec';
     }
 
-    // haetaan ASN-sanomalta kpl m‰‰r‰
+    // haetaan ASN-sanomalta kpl m√§√§r√§
     $hakuquery = "SELECT *
                   FROM asn_sanomat
                   WHERE yhtio = '{$kukarow['yhtio']}'
@@ -1095,7 +1095,7 @@ if ($tee == 'kohdista_tilausrivi') {
     }
 
     if ($kaytettava_kappalemaara_yhteensa < $asn_row_haku['kappalemaara']) {
-      $error = t("Valitse v‰hint‰‰n")." {$asn_row_haku['kappalemaara']}!";
+      $error = t("Valitse v√§hint√§√§n")." {$asn_row_haku['kappalemaara']}!";
       $tee = 'etsi';
     }
     else {
@@ -1123,7 +1123,7 @@ if ($tee == 'kohdista_tilausrivi') {
       $tuoteno_res = pupe_query($query);
       $tuoteno_row = mysql_fetch_assoc($tuoteno_res);
 
-      // tehd‰‰n splitti
+      // tehd√§√§n splitti
       if ($kaytettava_kappalemaara_yhteensa > $asn_row_haku['kappalemaara']) {
 
         $erotus = abs($kaytettava_kappalemaara_yhteensa - $asn_row_haku['kappalemaara']);
@@ -1139,7 +1139,7 @@ if ($tee == 'kohdista_tilausrivi') {
         $updatelisa = $ostotilausrivirow['kpl'] != 0 ? "kpl = '{$upd_kpl}'," : "varattu = '{$upd_kpl}',";
         $rivihintalisa = $yks_rivihinta != 0 ? "rivihinta = '".($yks_rivihinta * $upd_kpl)."'," : "";
 
-        // P‰ivitet‰‰n alkuper‰iselle riville saapunut kappalem‰‰r‰
+        // P√§ivitet√§√§n alkuper√§iselle riville saapunut kappalem√§√§r√§
         $query = "UPDATE tilausrivi SET
                   {$updatelisa}
                   {$rivihintalisa}
@@ -1150,7 +1150,7 @@ if ($tee == 'kohdista_tilausrivi') {
 
         $insertlisa = $ostotilausrivirow['kpl'] != 0 ? "kpl = '{$erotus}'," : "varattu = '{$erotus}',";
 
-        // Tehd‰‰n uusi rivi, jossa on j‰ljelle j‰‰neet kappaleet
+        // Tehd√§√§n uusi rivi, jossa on j√§ljelle j√§√§neet kappaleet
         $fields = "yhtio";
         $values = "'{$kukarow['yhtio']}'";
 
@@ -1199,7 +1199,7 @@ if ($tee == 'kohdista_tilausrivi') {
           $tapahtuma_res = pupe_query($query);
           $tapahtuma_row = mysql_fetch_assoc($tapahtuma_res);
 
-          // Tehd‰‰n uusi rivi, jossa on j‰ljelle j‰‰neet kappaleet
+          // Tehd√§√§n uusi rivi, jossa on j√§ljelle j√§√§neet kappaleet
           $fields = "yhtio";
           $values = "'{$kukarow['yhtio']}'";
 
@@ -1235,7 +1235,7 @@ if ($tee == 'kohdista_tilausrivi') {
         }
       }
 
-      // p‰ivitet‰‰n t‰ss‰ vaiheessa tilaukselle tilaajanrivipositio t‰lle uudelle riville, mik‰li ollaan poistamassa samalla vanha.
+      // p√§ivitet√§√§n t√§ss√§ vaiheessa tilaukselle tilaajanrivipositio t√§lle uudelle riville, mik√§li ollaan poistamassa samalla vanha.
       if ($poista_tilausrivi["0"] != 0) {
 
         $updatequery2 = "UPDATE tilausrivi SET
@@ -1278,7 +1278,7 @@ if ($tee == 'etsi') {
 
   if ($valitse == 'asn') {
     if (isset($asn_rivi) and strpos($asn_rivi, '##') !== false) {
-      list($asn_rivi, , $tilaajanrivinro) = explode('##', $asn_rivi); // ei otetan linkist‰ tuoteno:a koska jos siin‰ on v‰li niin hajoilee
+      list($asn_rivi, , $tilaajanrivinro) = explode('##', $asn_rivi); // ei otetan linkist√§ tuoteno:a koska jos siin√§ on v√§li niin hajoilee
 
       $asn_rivi = (int) $asn_rivi;
 
@@ -1296,7 +1296,7 @@ if ($tee == 'etsi') {
       $chk_res = pupe_query($query);
 
       if (mysql_num_rows($chk_res) == 0) {
-        // haetaan vaihtoehtoisten tuotenumeroiden (tuotteen_toimittajat_tuotenumerot) kautta tuotteen_toimittajat.toim_tuoteno. Osataan myˆs hakea vaihtoehtoinen tuotenumero ilman ett‰
+        // haetaan vaihtoehtoisten tuotenumeroiden (tuotteen_toimittajat_tuotenumerot) kautta tuotteen_toimittajat.toim_tuoteno. Osataan my√∂s hakea vaihtoehtoinen tuotenumero ilman ett√§
         $chk_res = tuotteen_toimittajat_tuotenumerot_haku($asn_row['toim_tuoteno'], $asn_row['toimittajanumero']);
 
         if (mysql_num_rows($chk_res) != 0) {
@@ -1338,7 +1338,7 @@ if ($tee == 'etsi') {
       }
     }
 
-    // pakotetaan tuoteno asn_sanomasta. V‰lilyˆnnit tekee kiusaa
+    // pakotetaan tuoteno asn_sanomasta. V√§lily√∂nnit tekee kiusaa
     // if (!isset($tuoteno)) $tuoteno =  $asn_row['toim_tuoteno'];
     if (!isset($toimittaja) and isset($asn_row)) $toimittaja = $asn_row['toimittajanumero'];
     if (!isset($tilausnro) and isset($asn_row)) $tilausnro = $asn_row['tilausnumero'];
@@ -1391,7 +1391,7 @@ if ($tee == 'etsi') {
 
   if ($toimirow['asn_sanomat'] == 'K') {
     echo "<tr>";
-    echo "<td colspan='6' class='back'><input type='checkbox' name='rivit_ei_asnlla'{$chk} /> ",t("N‰yt‰ myˆs rivit joita ei ole ASN:ll‰ tullut"),"</td>";
+    echo "<td colspan='6' class='back'><input type='checkbox' name='rivit_ei_asnlla'{$chk} /> ",t("N√§yt√§ my√∂s rivit joita ei ole ASN:ll√§ tullut"),"</td>";
     echo "</tr>";
   }
 
@@ -1471,7 +1471,7 @@ if ($tee == 'etsi') {
       $toimipaikka_ostotilaus_lisa = $toimipaikka_saapuminen_lisa = "";
     }
 
-    // Ostotilaukset ja suoraan saapumiselle lis‰tyt, mutta ei saa olla saapumiselle kohdistettu
+    // Ostotilaukset ja suoraan saapumiselle lis√§tyt, mutta ei saa olla saapumiselle kohdistettu
     $query1 = "(SELECT DISTINCT tilausrivi.tunnus,
                 tilausrivi.tuoteno,
                 tilausrivi.otunnus,
@@ -1507,7 +1507,7 @@ if ($tee == 'etsi') {
                 {$toimipaikka_saapuminen_lisa}
                 {$tilausnrolisa})";
 
-    // Saapumiset, ei loppulasketut eik‰ sellaset joihin on jo vaihto-omaisuuslasku liitetty, pit‰‰ olla saapumiselle kohdistettu
+    // Saapumiset, ei loppulasketut eik√§ sellaset joihin on jo vaihto-omaisuuslasku liitetty, pit√§√§ olla saapumiselle kohdistettu
     $query2 = "SELECT DISTINCT tilausrivi.tunnus,
                tilausrivi.tuoteno,
                tilausrivi.otunnus,
@@ -1550,7 +1550,7 @@ if ($tee == 'etsi') {
         $lajilisa = 'tec';
       }
 
-      // katsotaan ettei rivi‰ ole jo kohdistettu muuhun riviin
+      // katsotaan ettei rivi√§ ole jo kohdistettu muuhun riviin
       $query = "SELECT tunnus
                 FROM asn_sanomat
                 WHERE yhtio          = '{$kukarow['yhtio']}'
@@ -1562,7 +1562,7 @@ if ($tee == 'etsi') {
       if (mysql_num_rows($chkres) > 0) continue;
 
       if ($valitse != 'asn' and $toimirow['asn_sanomat'] == 'K' and (!isset($rivit_ei_asnlla) or trim($rivit_ei_asnlla) == '')) {
-        // katsotaan ett‰ asn rivi pit‰‰ olla olemassa
+        // katsotaan ett√§ asn rivi pit√§√§ olla olemassa
         $query = "SELECT *
                   FROM asn_sanomat
                   WHERE yhtio          = '{$kukarow['yhtio']}'
@@ -1734,7 +1734,7 @@ if ($tee == 'nayta') {
       $chk_res = pupe_query($query);
 
       if (mysql_num_rows($chk_res) == 0) {
-        // haetaan vaihtoehtoisten tuotenumeroiden (tuotteen_toimittajat_tuotenumerot) kautta tuotteen_toimittajat.toim_tuoteno. Osataan myˆs hakea vaihtoehtoinen tuotenumero ilman ett‰
+        // haetaan vaihtoehtoisten tuotenumeroiden (tuotteen_toimittajat_tuotenumerot) kautta tuotteen_toimittajat.toim_tuoteno. Osataan my√∂s hakea vaihtoehtoinen tuotenumero ilman ett√§
         $chk_res = tuotteen_toimittajat_tuotenumerot_haku($row['toim_tuoteno'], $toimittajanumero);
 
         if (mysql_num_rows($chk_res) != 0) {
@@ -2103,7 +2103,7 @@ if ($tee == '') {
     echo "<th>",t("ASN sanomanumero"),"</th>";
     echo "<th>",t("ASN kollinumero"),"</th>";
     echo "<th>",t("Saapumispvm"),"</th>";
-    echo "<th>",t("Rivim‰‰r‰"),"<br />",t("ok")," / ",t("kaikki"),"</th>";
+    echo "<th>",t("Rivim√§√§r√§"),"<br />",t("ok")," / ",t("kaikki"),"</th>";
     echo "</tr>";
 
     $ed_asn = '';
@@ -2119,7 +2119,7 @@ if ($tee == '') {
       if ($ed_toimittaja != '' and $ed_toimittaja != $row['toimittajanumero']) {
 
         if ($naytetaanko_toimittajabutton) {
-          //asn_numerot array:ssa on t‰ss‰ kohtaa yks value liikaa, joka ei kuulu t‰lle toimittajalle. poisettaan se arrayst‰
+          //asn_numerot array:ssa on t√§ss√§ kohtaa yks value liikaa, joka ei kuulu t√§lle toimittajalle. poisettaan se arrayst√§
           $seuraavaan_asn_array = array_pop($asn_numerot);
 
           echo "<tr><th colspan='8'><input type='button' class='toimittajabutton' id='".implode(',', $asn_numerot)."' value='",t("Vaihda toimittajaa"),"' />";
@@ -2234,7 +2234,7 @@ if ($tee == '') {
     echo "<th>",t("Swift"),"</th>";
     echo "<th>",t("Ostolaskunro"),"</th>";
     echo "<th>",t("Saapumispvm"),"</th>";
-    echo "<th>",t("Rivim‰‰r‰"),"<br />",t("ok")," / ",t("kaikki"),"</th>";
+    echo "<th>",t("Rivim√§√§r√§"),"<br />",t("ok")," / ",t("kaikki"),"</th>";
     echo "</tr>";
 
     $ed_toimittaja = '';

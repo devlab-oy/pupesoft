@@ -50,7 +50,7 @@ foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
     $tilausnumero = luo_myyntitilausotsikko('ENNAKKO', $tarjous_asiakas, '', '', '', '', '', '');
   }
 
-  //Halutaan pit‰‰ asiakkaille kopioitavissa tarjouksissa myyj‰n valitsema varasto, viesti, toimitusviikko
+  //Halutaan pit√§√§ asiakkaille kopioitavissa tarjouksissa myyj√§n valitsema varasto, viesti, toimitusviikko
   $query = "UPDATE lasku
             JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
             SET lasku.varasto = '{$alkuperainen_varasto}',
@@ -81,7 +81,7 @@ foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
 
       $trow = hae_tuote($tilausrivi['tuoteno']);
 
-      // Mik‰ maa mik‰ valuutta - Tarkistetaan asiakkaan valuutta ja maa
+      // Mik√§ maa mik√§ valuutta - Tarkistetaan asiakkaan valuutta ja maa
       $query = "SELECT *
                 FROM asiakas
                 WHERE yhtio = '{$kukarow['yhtio']}'
@@ -130,7 +130,7 @@ foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
     }
   }
 
-  // T‰ll‰ parametrilla ohitetaan tilausvahvistuksen l‰hett‰minen Tarjouspohjaa kopioidessa
+  // T√§ll√§ parametrilla ohitetaan tilausvahvistuksen l√§hett√§minen Tarjouspohjaa kopioidessa
   $laskurow['tilausvahvistus'] = "";
 
   require_once('tilaus-valmis.inc');

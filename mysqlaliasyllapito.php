@@ -2,7 +2,7 @@
 
 require ("inc/parametrit.inc");
 
-echo "<font class='head'>".t("Mysqlalias-avainsanojen yll‰pito")."</font><hr>";
+echo "<font class='head'>".t("Mysqlalias-avainsanojen yll√§pito")."</font><hr>";
 
 if ($upd == 1) {
 
@@ -17,7 +17,7 @@ if ($upd == 1) {
 
   for ($i=1; $i < mysql_num_fields($result)-1; $i++) {
 
-    // Tarkistetaan saako k‰ytt‰j‰ p‰ivitt‰‰ t‰t‰ kentt‰‰
+    // Tarkistetaan saako k√§ytt√§j√§ p√§ivitt√§√§ t√§t√§ kentt√§√§
     $al_nimi   = mysql_field_name($result, $i);
 
     $query = "DELETE
@@ -113,7 +113,7 @@ $tabresult = pupe_query($query);
 $sel[$taulu] = "SELECTED";
 
 echo "<form method = 'post'><table>";
-echo "<tr><th>".t("Muokkaa aliasryhm‰‰").":</th><td>";
+echo "<tr><th>".t("Muokkaa aliasryhm√§√§").":</th><td>";
 echo "<select name = 'taulu'>";
 
 while ($tables = mysql_fetch_array($tabresult)) {
@@ -144,7 +144,7 @@ echo "</td></tr></table></form><br><br>";
 if ($taulu == "") {
 
   echo "<form method = 'post'><table>";
-  echo "<tr><th>".t("Kopioi aliasryhm‰").":</th><td>";
+  echo "<tr><th>".t("Kopioi aliasryhm√§").":</th><td>";
   echo "<select name = 'kopsaataulu'>";
 
   mysql_data_seek($tabresult, 0);
@@ -172,13 +172,13 @@ if ($taulu == "") {
 
   echo "</select></td>";
 
-  echo "<th>".t("Uuden aliasryhm‰n nimi").":</th><td><input type='text' size='30' name='uusisetti'>";
+  echo "<th>".t("Uuden aliasryhm√§n nimi").":</th><td><input type='text' size='30' name='uusisetti'>";
   echo "</select></td><td class='back'>";
   echo "<input type='submit' value='".t("Valitse")."'>";
   echo "</td></tr></table></form><br><br>";
 }
 
-// Nyt n‰ytet‰‰n vanha tai tehd‰‰n uusi(=tyhj‰)
+// Nyt n√§ytet√§√§n vanha tai tehd√§√§n uusi(=tyhj√§)
 if ($taulu != "") {
 
   $cleantaulu = $taulu;
@@ -189,7 +189,7 @@ if ($taulu != "") {
 
   list($taulu, $alias_set) = explode("###", $taulu);
 
-  // Kokeillaan geneerist‰
+  // Kokeillaan geneerist√§
   $query = "SELECT *
             FROM $taulu
             WHERE tunnus = 0";
@@ -200,12 +200,12 @@ if ($taulu != "") {
   echo "<table>";
   echo "<tr>";
   echo "<th>Sarakkeen nimi</th>";
-  echo "<th>N‰kyvyys</th>";
+  echo "<th>N√§kyvyys</th>";
   echo "<th>Pakollisuus</th>";
   echo "<th>Seliteteksti</th>";
   echo "<th>Oletusarvo</th>";
   echo "<th>Ohjeteksti</th>";
-  echo "<th>Esimerkkej‰</th>";
+  echo "<th>Esimerkkej√§</th>";
   echo "</tr>";
 
   for ($i=0; $i < mysql_num_fields($result) - 1; $i++) {
@@ -229,11 +229,11 @@ if ($taulu != "") {
       $size = '10';
     }
 
-    $maxsize = mysql_field_len($result,$i); // Jotta t‰t‰ voidaan muuttaa
+    $maxsize = mysql_field_len($result,$i); // Jotta t√§t√§ voidaan muuttaa
 
     require ("inc/$taulu"."rivi.inc");
 
-    // N‰it‰ kentti‰ ei ikin‰ saa p‰ivitt‰‰ k‰yttˆliittym‰st‰
+    // N√§it√§ kentti√§ ei ikin√§ saa p√§ivitt√§√§ k√§ytt√∂liittym√§st√§
     if (mysql_field_name($result, $i) == "laatija" or
       mysql_field_name($result, $i) == "muutospvm" or
       mysql_field_name($result, $i) == "muuttaja" or
@@ -267,12 +267,12 @@ if ($taulu != "") {
       $ohjeteksti = $al_row['selitetark_5'];
     }
 
-    // $tyyppi --> 0 rivi‰ ei n‰ytet‰ ollenkaan
-    // $tyyppi --> 1 rivi n‰ytet‰‰n normaalisti
-    // $tyyppi --> 1.5 rivi n‰ytet‰‰n normaalisti ja se on p‰iv‰m‰‰r‰kentt‰
-    // $tyyppi --> 2 rivi n‰ytet‰‰n, mutta sit‰ ei voida muokata, eik‰ sen arvoa p‰vitet‰
-    // $tyyppi --> 3 rivi n‰ytet‰‰n, mutta sit‰ ei voida muokata, mutta sen arvo p‰ivitet‰‰n
-    // $tyyppi --> 4 rivi‰ ei n‰ytet‰ ollenkaan, mutta sen arvo p‰ivitet‰‰n
+    // $tyyppi --> 0 rivi√§ ei n√§ytet√§ ollenkaan
+    // $tyyppi --> 1 rivi n√§ytet√§√§n normaalisti
+    // $tyyppi --> 1.5 rivi n√§ytet√§√§n normaalisti ja se on p√§iv√§m√§√§r√§kentt√§
+    // $tyyppi --> 2 rivi n√§ytet√§√§n, mutta sit√§ ei voida muokata, eik√§ sen arvoa p√§vitet√§
+    // $tyyppi --> 3 rivi n√§ytet√§√§n, mutta sit√§ ei voida muokata, mutta sen arvo p√§ivitet√§√§n
+    // $tyyppi --> 4 rivi√§ ei n√§ytet√§ ollenkaan, mutta sen arvo p√§ivitet√§√§n
     // $tyyppi --> 5 liitetiedosto
 
     if (($tyyppi > 0 and $tyyppi < 4) or $tyyppi == 5) {
@@ -326,12 +326,12 @@ if ($taulu != "") {
     }
   }
   echo "</table><br>";
-  echo "<input type='submit' value='".t("P‰ivit‰")."'>";
+  echo "<input type='submit' value='".t("P√§ivit√§")."'>";
   echo "</form><br><br>";
 
   echo "  <SCRIPT LANGUAGE=JAVASCRIPT>
         function verify(){
-          msg = '".t("HUOM: Oletko varma, ett‰ haluat poistaa aliakset?")."';
+          msg = '".t("HUOM: Oletko varma, ett√§ haluat poistaa aliakset?")."';
 
           if (confirm(msg)) {
             return true;

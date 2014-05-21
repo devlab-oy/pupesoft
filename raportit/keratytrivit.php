@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require('../inc/parametrit.inc');
@@ -36,9 +36,9 @@ echo "  <script type='text/javascript'>
 
     </script>";
 
-echo "<font class='head'>",t("Ker‰tyt rivit"),"</font><hr>";
+echo "<font class='head'>",t("Ker√§tyt rivit"),"</font><hr>";
 
-if (!isset($MONTH_ARRAY)) $MONTH_ARRAY = array(1=> t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kes‰kuu'),t('Hein‰kuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
+if (!isset($MONTH_ARRAY)) $MONTH_ARRAY = array(1=> t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kes√§kuu'),t('Hein√§kuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
 
 if (!isset($tee)) $tee = '';
 
@@ -57,7 +57,7 @@ if (!isset($keraysvyohykkeet)) $keraysvyohykkeet = array();
 
 if (!isset($edellinen_vuosi)) $edellinen_vuosi = "";
 
-//K‰yttˆliittym‰
+//K√§ytt√∂liittym√§
 echo "<form method='post'>";
 echo "<table>";
 
@@ -69,8 +69,8 @@ echo "<tr>";
 echo "<th>",t("Valitse tapa"),"</th>";
 echo "<td colspan='3'>";
 echo "<select name='tapa'>";
-echo "<option value='keraaja'{$sel['keraaja']}>",t("Ker‰‰jitt‰in"),"</option>";
-echo "<option value='kerpvm'{$sel['kerpvm']}>",t("P‰ivitt‰in"),"</option>";
+echo "<option value='keraaja'{$sel['keraaja']}>",t("Ker√§√§jitt√§in"),"</option>";
+echo "<option value='kerpvm'{$sel['kerpvm']}>",t("P√§ivitt√§in"),"</option>";
 echo "<option value='kerkk'{$sel['kerkk']}>",t("Kuukausittain"),"</option>";
 echo "</select>";
 echo "</td>";
@@ -84,7 +84,7 @@ $vares = pupe_query($query);
 
 if (mysql_num_rows($vares) > 0) {
   echo "<tr>";
-  echo "<th valign=top>",t('Ker‰ysvyˆhykkeet'),"<br /><br /><span style='font-size: 0.8em;'>",t('Saat kaikki ker‰ysvyˆhykkeet jos et valitse yht‰‰n'),"</span></th>";
+  echo "<th valign=top>",t('Ker√§ysvy√∂hykkeet'),"<br /><br /><span style='font-size: 0.8em;'>",t('Saat kaikki ker√§ysvy√∂hykkeet jos et valitse yht√§√§n'),"</span></th>";
   echo "<td colspan='3'>";
 
     while ($varow = mysql_fetch_assoc($vares)) {
@@ -104,7 +104,7 @@ $query  = "SELECT tunnus, nimitys
 $vares = pupe_query($query);
 
 echo "<tr>";
-echo "<th valign=top>",t('Varastot'),"<br /><br /><span style='font-size: 0.8em;'>",t('Saat kaikki varastot jos et valitse yht‰‰n'),"</span></th>";
+echo "<th valign=top>",t('Varastot'),"<br /><br /><span style='font-size: 0.8em;'>",t('Saat kaikki varastot jos et valitse yht√§√§n'),"</span></th>";
 echo "<td colspan='3'>";
 
   while ($varow = mysql_fetch_assoc($vares)) {
@@ -117,18 +117,18 @@ echo "</td></tr>";
 
 $chk = $edellinen_vuosi != '' ? "checked" : "";
 
-echo "<tr><th valign=top>",t('Edellinen vuosi'),"<br /><br /><span style='font-size: 0.8em;'>",t('Otetaan huomioon vain p‰iv‰- tai kuukausin‰kym‰ss‰'),"</span></th>";
+echo "<tr><th valign=top>",t('Edellinen vuosi'),"<br /><br /><span style='font-size: 0.8em;'>",t('Otetaan huomioon vain p√§iv√§- tai kuukausin√§kym√§ss√§'),"</span></th>";
 echo "<td colspan='3'><input type='checkbox' name='edellinen_vuosi' {$chk} /></td></tr>";
 
 echo "<tr>";
-echo "<th>",t("Syˆt‰ p‰iv‰m‰‰r‰ (pp-kk-vvvv)"),"</th>";
+echo "<th>",t("Sy√∂t√§ p√§iv√§m√§√§r√§ (pp-kk-vvvv)"),"</th>";
 echo "<td><input type='text' name='ppa' value='{$ppa}' size='3'></td>";
 echo "<td><input type='text' name='kka' value='{$kka}' size='3'></td>";
 echo "<td><input type='text' name='vva' value='{$vva}' size='5'></td>";
 echo "</tr>";
 
 echo "<tr>";
-echo "<th>",t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)"),"</th>";
+echo "<th>",t("Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)"),"</th>";
 echo "<td><input type='text' name='ppl' value='{$ppl}' size='3'></td>";
 echo "<td><input type='text' name='kkl' value='{$kkl}' size='3'></td>";
 echo "<td><input type='text' name='vvl' value='{$vvl}' size='5'></td>";
@@ -137,7 +137,7 @@ echo "</tr>";
 $chk = $eipoistettuja != '' ? " checked" : "";
 
 echo "<tr>";
-echo "<th>",t("ƒl‰ n‰yt‰ poistettujen k‰ytt‰jien rivej‰"),"</th>";
+echo "<th>",t("√Ñl√§ n√§yt√§ poistettujen k√§ytt√§jien rivej√§"),"</th>";
 echo "<td colspan='3'><input type='checkbox' name='eipoistettuja'{$chk}></td>";
 echo "</tr>";
 
@@ -277,7 +277,7 @@ if ($tee != '') {
       $nimet[$row['keratty']] = $row['nimi'];
     }
 
-    echo "<img src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' /> <font class='info'>= ",t("Voit avata alatasoja nuolella varustetuista riveist‰"),"</font>";
+    echo "<img src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' /> <font class='info'>= ",t("Voit avata alatasoja nuolella varustetuista riveist√§"),"</font>";
 
     echo "<br /><br />";
 
@@ -286,15 +286,15 @@ if ($tee != '') {
     echo "<th colspan='5'></th>";
     echo "<th norwap>",t("Puuterivit"),"</th>";
     echo "<th norwap>",t("Siirrot"),"</th>";
-    echo "<th nowrap>",t("Ker‰tyt"),"</th>";
-    echo "<th nowrap>",t("Yhteens‰"),"</th>";
-    echo "<th nowrap>",t("Kappaleet"),"<br />",t("Yhteens‰"),"</th>";
-    echo "<th nowrap>",t("Kilot"),"<br />",t("Yhteens‰"),"</th>";
+    echo "<th nowrap>",t("Ker√§tyt"),"</th>";
+    echo "<th nowrap>",t("Yhteens√§"),"</th>";
+    echo "<th nowrap>",t("Kappaleet"),"<br />",t("Yhteens√§"),"</th>";
+    echo "<th nowrap>",t("Kilot"),"<br />",t("Yhteens√§"),"</th>";
     echo "</tr>";
 
     echo "<tr class='nayta_keraajittain tumma' id='keraajittain'>";
 
-    echo "<td colspan='5'><img id='arrowi_keraajittain' style='float:left;' src='{$palvelin2}pics/lullacons/bullet-arrow-down.png' /> ".t("Yhteens‰")."</td>";
+    echo "<td colspan='5'><img id='arrowi_keraajittain' style='float:left;' src='{$palvelin2}pics/lullacons/bullet-arrow-down.png' /> ".t("Yhteens√§")."</td>";
 
     foreach ($data['summaus']['yhteensa'] as $_arr_key => $_arr_values) {
       echo "<td>{$_arr_values}</td>";
@@ -305,13 +305,13 @@ if ($tee != '') {
     unset($data['summaus']['yhteensa']);
 
     echo "<tr class='keraajittain child' style=''>";
-    echo "<th nowrap colspan='5'>",t("Ker‰‰j‰"),"</th>";
+    echo "<th nowrap colspan='5'>",t("Ker√§√§j√§"),"</th>";
     echo "<th norwap>",t("Puuterivit"),"</th>";
     echo "<th norwap>",t("Siirrot"),"</th>";
-    echo "<th nowrap>",t("Ker‰tyt"),"</th>";
-    echo "<th nowrap>",t("Yhteens‰"),"</th>";
-    echo "<th nowrap>",t("Kappaleet"),"<br />",t("Yhteens‰"),"</th>";
-    echo "<th nowrap>",t("Kilot"),"<br />",t("Yhteens‰"),"</th>";
+    echo "<th nowrap>",t("Ker√§tyt"),"</th>";
+    echo "<th nowrap>",t("Yhteens√§"),"</th>";
+    echo "<th nowrap>",t("Kappaleet"),"<br />",t("Yhteens√§"),"</th>";
+    echo "<th nowrap>",t("Kilot"),"<br />",t("Yhteens√§"),"</th>";
     echo "</tr>";
 
     foreach ($data['summaus'] as $_arr_key => $_arr_values) {
@@ -332,17 +332,17 @@ if ($tee != '') {
       echo "</tr>";
 
       echo "<tr class='{$id} child' style='display: none;'>";
-      echo "<th nowrap>",t("Ker‰‰j‰nro"),"</th>";
+      echo "<th nowrap>",t("Ker√§√§j√§nro"),"</th>";
       echo "<th nowrap>",t("Tilaus"),"</th>";
-      echo "<th nowrap>",t("L‰hete tulostettu"),"</th>";
-      echo "<th nowrap>",t("Tilaus ker‰tty"),"</th>";
-      echo "<th nowrap>",t("K‰ytetty aika"),"</th>";
+      echo "<th nowrap>",t("L√§hete tulostettu"),"</th>";
+      echo "<th nowrap>",t("Tilaus ker√§tty"),"</th>";
+      echo "<th nowrap>",t("K√§ytetty aika"),"</th>";
       echo "<th norwap>",t("Puuterivit"),"</th>";
       echo "<th norwap>",t("Siirrot"),"</th>";
-      echo "<th nowrap>",t("Ker‰tyt"),"</th>";
-      echo "<th nowrap>",t("Yhteens‰"),"</th>";
-      echo "<th nowrap>",t("Kappaleet"),"<br />",t("Yhteens‰"),"</th>";
-      echo "<th nowrap>",t("Kilot"),"<br />",t("Yhteens‰"),"</th>";
+      echo "<th nowrap>",t("Ker√§tyt"),"</th>";
+      echo "<th nowrap>",t("Yhteens√§"),"</th>";
+      echo "<th nowrap>",t("Kappaleet"),"<br />",t("Yhteens√§"),"</th>";
+      echo "<th nowrap>",t("Kilot"),"<br />",t("Yhteens√§"),"</th>";
       echo "</tr>";
 
       foreach ($data['keraaja'][$_arr_key] as $aika => $arr) {
@@ -466,9 +466,9 @@ if ($tee != '') {
       echo "<th>",t("{$postfix_title}Pvm"),"</th>";
       echo "<th>",t("{$postfix_title}Puutteet"),"</th>";
       echo "<th>",t("{$postfix_title}Siirrot"),"</th>";
-      echo "<th>",t("{$postfix_title}Ker‰tyt"),"</th>";
+      echo "<th>",t("{$postfix_title}Ker√§tyt"),"</th>";
       echo "<th>",t("{$postfix_title}Palautukset"),"</th>";
-      echo "<th>",t("{$postfix_title}Yhteens‰"),"</th>";
+      echo "<th>",t("{$postfix_title}Yhteens√§"),"</th>";
       echo "</tr>";
 
       foreach (${"data{$postfix}"} as $pvm => $arr) {
@@ -490,12 +490,12 @@ if ($tee != '') {
           else {
 
             echo "<tr class='",str_replace("-", "", $pvm),"' style='display:none;'>";
-            echo "<th>",t("{$postfix_title}Ker‰‰j‰"),"</th>";
+            echo "<th>",t("{$postfix_title}Ker√§√§j√§"),"</th>";
             echo "<th>",t("{$postfix_title}Puutteet"),"</th>";
             echo "<th>",t("{$postfix_title}Siirrot"),"</th>";
-            echo "<th>",t("{$postfix_title}Ker‰tyt"),"</th>";
+            echo "<th>",t("{$postfix_title}Ker√§tyt"),"</th>";
             echo "<th>",t("{$postfix_title}Palautukset"),"</th>";
-            echo "<th>",t("{$postfix_title}Yhteens‰"),"</th>";
+            echo "<th>",t("{$postfix_title}Yhteens√§"),"</th>";
             echo "</tr>";
 
             foreach ($_arr as $title => $__arr) {
@@ -530,7 +530,7 @@ if ($tee != '') {
       }
 
       echo "<tr>";
-      echo "<th>",t("Yhteens‰"),"</th>";
+      echo "<th>",t("Yhteens√§"),"</th>";
       echo "<td class='tumma' align='right'>{$puutteet_yht}</td>";
       echo "<td class='tumma' align='right'>{$siirrot_yht}</td>";
       echo "<td class='tumma' align='right'>{$kappaleet_yht}</td>";

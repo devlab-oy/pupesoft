@@ -1,6 +1,6 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("../inc/parametrit.inc");
@@ -11,17 +11,17 @@ echo "<font class='head'>Hae tuotteen tulliprossa (veroperustetieto):</font><hr>
 echo "<form method='post'>
   <br><br>
   <table>
-  <tr><th>".t("Syˆt‰ tuotenumero").":</th>
+  <tr><th>".t("Sy√∂t√§ tuotenumero").":</th>
     <td><input type='text' name='tuoteno' value = '$tuoteno'></td>
     <td class='back'><input type='submit' value='".t("Hae")."'></td>
   </tr>
   </table>
   </form><br><br><br><br>";
 
-echo t("N‰yt‰ kaikki tuotteet").":<hr>";
+echo t("N√§yt√§ kaikki tuotteet").":<hr>";
 echo "<form method='post'>
   <table>
-  <tr><th>".t("Simuloitu tuotteiden l‰hetysmaa").":</th>";
+  <tr><th>".t("Simuloitu tuotteiden l√§hetysmaa").":</th>";
 
 $query = "SELECT distinct koodi, nimi
           FROM maat
@@ -52,7 +52,7 @@ $query = "SELECT distinct toimi.tunnus, toimi.nimi, toimi.nimitark
 $vresult = mysql_query($query) or pupe_error($query);
 
 echo "<td><select name='toimittaja'>";
-echo "<option value = ''>".t("N‰yt‰ kaikki")."</option>";
+echo "<option value = ''>".t("N√§yt√§ kaikki")."</option>";
 
 while ($vrow = mysql_fetch_assoc($vresult)) {
   $sel="";
@@ -65,7 +65,7 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
 
 echo "</select>";
 echo "</td>
-  <td class='back'><input type='submit' name='KAIKKI' value='".t("N‰yt‰")."'></td>
+  <td class='back'><input type='submit' name='KAIKKI' value='".t("N√§yt√§")."'></td>
   </tr>
   </table>
   </form><br><br>";
@@ -81,7 +81,7 @@ if ($tuoteno != '') {
   $result = mysql_query($query) or pupe_error($query);
   $tuorow = mysql_fetch_array($result);
 
-  echo "Tuotteen tiedot: $tuoteno, Tullinimike1: $tuorow[tullinimike1], Tullinimike2: $tuorow[tullinimike2], Alkuper‰maa: $tuorow[alkuperamaa], Tulliprosentti: ";
+  echo "Tuotteen tiedot: $tuoteno, Tullinimike1: $tuorow[tullinimike1], Tullinimike2: $tuorow[tullinimike2], Alkuper√§maa: $tuorow[alkuperamaa], Tulliprosentti: ";
 
   $tulliprossa = "";
   $laskurow["maa_lahetys"] = $tuorow["alkuperamaa"];

@@ -3,7 +3,7 @@ require ("../inc/parametrit.inc");
 
 js_popup();
 
-echo "<font class='head'>".t("Yhdist‰ valmistuksia").":</font><hr>";
+echo "<font class='head'>".t("Yhdist√§ valmistuksia").":</font><hr>";
 
 if ($tee == 'NAYTATILAUS') {
   require ("raportit/naytatilaus.inc");
@@ -17,7 +17,7 @@ if($ohitus == "OHITA") {
 }
 
 if($tee=='YHDISTA') {
-  //K‰yd‰‰n l‰pi rivit
+  //K√§yd√§√§n l√§pi rivit
 
 
   if (count($valmistettavat) > 1 or ($tilaukseen > 0 and count($valmistettavat) > 0)) {
@@ -31,7 +31,7 @@ if($tee=='YHDISTA') {
 
     if($tilaukseen > 0) {
 
-      //  Tarkastetaan ett‰ tunnus on oikein
+      //  Tarkastetaan ett√§ tunnus on oikein
       $query = "SELECT tunnus
                 FROM  lasku
                 WHERE yhtio = '$kukarow[yhtio]'
@@ -45,7 +45,7 @@ if($tee=='YHDISTA') {
       $otunnus = $tilaukseen;
 
 
-      echo "<font class='message'>".t("Liitet‰‰n rivit valmistukseen")." $otunnus</font><br>";
+      echo "<font class='message'>".t("Liitet√§√§n rivit valmistukseen")." $otunnus</font><br>";
 
       $query = "UPDATE lasku SET
                 comments    = '$comments',
@@ -82,7 +82,7 @@ if($tee=='YHDISTA') {
 
 
     foreach($valmistettavat as $rivitunnus) {
-      //Otetaan alkuper‰isen otsikon numero talteen
+      //Otetaan alkuper√§isen otsikon numero talteen
       $query = "SELECT otunnus
                 FROM tilausrivi
                 WHERE yhtio = '$kukarow[yhtio]'
@@ -97,7 +97,7 @@ if($tee=='YHDISTA') {
                 and tilausrivitunnus = '$rivitunnus'";
       $result = mysql_query($query) or pupe_error($query);
 
-      //Siirret‰‰n rivi uudelle otsikolle
+      //Siirret√§√§n rivi uudelle otsikolle
       $query = "UPDATE tilausrivi
                 SET otunnus = '$otunnus'
                 WHERE yhtio     = '$kukarow[yhtio]'
@@ -106,7 +106,7 @@ if($tee=='YHDISTA') {
                 and uusiotunnus = 0";
       $result = mysql_query($query) or pupe_error($query);
 
-      //Tsekataan onko alkuper‰isotsikolla viel‰ rivej‰
+      //Tsekataan onko alkuper√§isotsikolla viel√§ rivej√§
       $query = "SELECT count(*) jaljella
                 FROM tilausrivi
                 WHERE yhtio = '$kukarow[yhtio]'
@@ -115,7 +115,7 @@ if($tee=='YHDISTA') {
       $rivirow = mysql_fetch_array($result);
 
       if ($rivirow["jaljella"] == 0) {
-        //p‰ivitet‰‰n alkuper‰isen otsikon alatila
+        //p√§ivitet√§√§n alkuper√§isen otsikon alatila
         $query = "UPDATE lasku
                   SET alatila = 'Y'
                   WHERE yhtio = '$kukarow[yhtio]'
@@ -126,7 +126,7 @@ if($tee=='YHDISTA') {
 
 
     if($yhtiorow["valmistusten_yhdistaminen"] == "P") {
-      //  Testataan saataisiinko jotain perheit‰ yhdistetty‰
+      //  Testataan saataisiinko jotain perheit√§ yhdistetty√§
       $query = "SELECT group_concat(tunnus) tunnukset, count(*) rivei
                 FROM tilausrivi
                 WHERE yhtio = '$kukarow[yhtio]' and otunnus='$otunnus' and tyyppi IN ('W','M') and perheid = tunnus
@@ -155,20 +155,20 @@ if($tee=='YHDISTA') {
           $yhdista = array();
           while($srow = mysql_fetch_array($sresult)) {
 
-            //  T‰nne menn‰‰n jos vaihdetaan summausta ja meill‰ on jotain yhdistett‰v‰‰
+            //  T√§nne menn√§√§n jos vaihdetaan summausta ja meill√§ on jotain yhdistett√§v√§√§
             if($edstringi != "" and $edstringi != $srow["stringi"] and count($yhdista) > 1) {
               $yhdistettavat[] = implode(',', $yhdista);
               $yhdista = array();
             }
 
-            //  Jos meill‰ on sama stringi kuin edellinen voidaan yhdist‰‰
+            //  Jos meill√§ on sama stringi kuin edellinen voidaan yhdist√§√§
             if($edstringi == $srow["stringi"]) {
               if(count($yhdista) == 0) {
                 $yhdista[] = $edperheid;
               }
               $yhdista[] = $srow["perheid"];
 
-              echo "<font class='info'>".t("Yhdistet‰‰n tuote")." $srow[tuoteno]!</font><br>";
+              echo "<font class='info'>".t("Yhdistet√§√§n tuote")." $srow[tuoteno]!</font><br>";
             }
 
             $edstringi = $srow["stringi"];
@@ -180,7 +180,7 @@ if($tee=='YHDISTA') {
             $yhdista = array();
           }
 
-          //  Ou jea! Miell‰ on sopivat reseptit summataanpas nm‰ nyt sitten yhteen!
+          //  Ou jea! Miell√§ on sopivat reseptit summataanpas nm√§ nyt sitten yhteen!
           if(count($yhdistettavat) > 0) {
             foreach($yhdistettavat as $tunnukset) {
 
@@ -190,7 +190,7 @@ if($tee=='YHDISTA') {
               //  tiedot varmasti ok?
               if($ekaperhe > 0 and $loput != "") {
 
-                //  P‰ivitet‰‰n summa ekaan tietueeseen toinen tuhotaan! HUOM: t‰m‰ ei tajua mit‰‰n varastopaikoista, jos meill‰ on sama tuote 2 kertaa on myˆs suuri ongelma!
+                //  P√§ivitet√§√§n summa ekaan tietueeseen toinen tuhotaan! HUOM: t√§m√§ ei tajua mit√§√§n varastopaikoista, jos meill√§ on sama tuote 2 kertaa on my√∂s suuri ongelma!
                 $query = "SELECT tuoteno, sum(kpl) kpl, sum(varattu) varattu, sum(jt) jt, sum(tilkpl) tilkpl, group_concat(if(kommentti='', NULL, kommentti)) kommentti
                           FROM tilausrivi
                           WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$otunnus' and perheid IN ($tunnukset)
@@ -198,7 +198,7 @@ if($tee=='YHDISTA') {
                 $sresult = mysql_query($query) or pupe_error($query);
                 while($srow = mysql_fetch_array($sresult)) {
 
-                  //  P‰ivitet‰‰n ekan perheen tiedot
+                  //  P√§ivitet√§√§n ekan perheen tiedot
                   $query = "UPDATE tilausrivi SET
                             kpl         = '".round($srow['kpl'], 2)."',
                             tilkpl      = '".round($srow['tilkpl'], 2 )."',
@@ -219,7 +219,7 @@ if($tee=='YHDISTA') {
                 }
               }
               else {
-                echo "<font class='error'>".t("VIRHE: Rivej‰ ei osattu summata!")."</font><br>";
+                echo "<font class='error'>".t("VIRHE: Rivej√§ ei osattu summata!")."</font><br>";
               }
             }
           }
@@ -231,7 +231,7 @@ if($tee=='YHDISTA') {
     $tee = "";
   }
   else {
-    echo "<font class='error'>",t("Valitse ainakin 2 rivi‰ jotka aiot yhdist‰‰")."</font><br><br>";
+    echo "<font class='error'>",t("Valitse ainakin 2 rivi√§ jotka aiot yhdist√§√§")."</font><br><br>";
     $tee = "VALITSE";
     $valmistettavat = implode(",", $valmistettavat);
   }
@@ -282,9 +282,9 @@ if ($tee == "VALITSE") {
   echo "<th>".t("Nimitys")."/".t("Kommentti")."</a></th>";
   echo "<th>".t("Valmiste")."</a></th>";
   echo "<th>".t("Valmistetaan")."</a></th>";
-  echo "<th>".t("Ker‰ysaika")."</a></th>";
+  echo "<th>".t("Ker√§ysaika")."</a></th>";
   echo "<th>".t("Valmistusaika")."</a></th>";
-  echo "<th>".t("Yhdist‰")."</a></th>";
+  echo "<th>".t("Yhdist√§")."</a></th>";
   echo "</tr>";
 
   $rivkpl = mysql_num_rows($presult);
@@ -311,7 +311,7 @@ if ($tee == "VALITSE") {
       $faktarow = mysql_fetch_array($faktares);
       $id = uniqid();
       echo "<div id='div_$id' class='popup' style='width: 400px'>
-          <font class='head'>Tuotteen yhdistett‰vyys</font><br>
+          <font class='head'>Tuotteen yhdistett√§vyys</font><br>
           $faktarow[fakta2]<br></div>";
       $linkki = "<div style='text-align: right; float:right;' class='tooltip' id='$id'>&nbsp;&nbsp;<img src='../pics/lullacons/info.png' height='13'></div>";
     }
@@ -364,7 +364,7 @@ if ($tee == "VALITSE") {
             WHERE yhtio = '$kukarow[yhtio]' and tila = 'V' and alatila IN ('', 'J') and ytunnus = 'Valmistusajo'";
   $result = mysql_query($query) or pupe_error($query);
 
-  echo "<table><tr><th>".t("Yhdist‰ valitut valmistukseen").":</th>
+  echo "<table><tr><th>".t("Yhdist√§ valitut valmistukseen").":</th>
       <td><input type='hidden' id='ohitus' name='ohitus' value=''><select name='tilaukseen' onchange = \"document.getElementById('ohitus').value='OHITA'; submit();\"><option value = ''>".t("Tee uusi valmistusajo")."</option>'";
 
   if(mysql_num_rows($result) > 0) {
@@ -380,27 +380,27 @@ if ($tee == "VALITSE") {
   }
 
   echo "</select>
-      <td class='back'><input type='submit' value='".t("Yhdist‰")."'></td>
+      <td class='back'><input type='submit' value='".t("Yhdist√§")."'></td>
     </tr></table></form>";
 }
 
-// meill‰ ei ole valittua tilausta
+// meill√§ ei ole valittua tilausta
 if ($tee == "") {
   $formi  = "find";
   $kentta  = "etsi";
 
-  // tehd‰‰n etsi valinta
+  // tehd√§√§n etsi valinta
   echo "<br><form name='find' method='post'>";
   echo "<input type='hidden' name='toim'  value='$toim'>";
 
   echo "<table>";
   echo "<tr>
-    <th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+    <th>".t("Sy√∂t√§ alkup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
     <td><input type='text' name='ppa' value='$ppa' size='3'></td>
     <td><input type='text' name='kka' value='$kka' size='3'></td>
     <td><input type='text' name='vva' value='$vva' size='5'></td>
     </tr>\n
-    <tr><th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+    <tr><th>".t("Sy√∂t√§ loppup√§iv√§m√§√§r√§ (pp-kk-vvvv)")."</th>
     <td><input type='text' name='ppl' value='$ppl' size='3'></td>
     <td><input type='text' name='kkl' value='$kkl' size='3'></td>
     <td><input type='text' name='vvl' value='$vvl' size='5'></td>
@@ -522,8 +522,8 @@ if ($tee == "") {
     echo "<th align='left'><a href = '$PHP_SELF?ojarj=2&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&etsi=$etsi'>".t("Asiakas/Varasto")."</a></th>";
     echo "<th align='left'><a href = '$PHP_SELF?ojarj=3&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&etsi=$etsi'>".t("Ytunnus")."</a></th>";
     echo "<th align='left'><a href = '$PHP_SELF?ojarj=4&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&etsi=$etsi'>".t("Valmiste")."</a></th>";
-    echo "<th align='left'><a href = '$PHP_SELF?ojarj=5&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&etsi=$etsi'>".t("M‰‰r‰")."</a></th>";
-    echo "<th align='left'><a href = '$PHP_SELF?ojarj=6&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&etsi=$etsi'>".t("Ker‰ysaika")."</a></th>";
+    echo "<th align='left'><a href = '$PHP_SELF?ojarj=5&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&etsi=$etsi'>".t("M√§√§r√§")."</a></th>";
+    echo "<th align='left'><a href = '$PHP_SELF?ojarj=6&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&etsi=$etsi'>".t("Ker√§ysaika")."</a></th>";
     echo "<th align='left'><a href = '$PHP_SELF?ojarj=7&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&etsi=$etsi'>".t("Valmistusaika")."</a></th>";
     echo "</tr>";
 
@@ -552,7 +552,7 @@ if ($tee == "") {
     echo "</table>";
   }
   else {
-    echo "<font class='message'>".t("Yht‰‰n valmistettavaa tilausta/tuotetta ei lˆytynyt")."...</font>";
+    echo "<font class='message'>".t("Yht√§√§n valmistettavaa tilausta/tuotetta ei l√∂ytynyt")."...</font>";
   }
 }
 

@@ -14,7 +14,7 @@ $laskun_erapaiva    = array_shift($xml->xpath('Group8[PAT/@e4279="1"]/DTM[@eC507
 $laskun_kapvm       = "";
 $laskun_kasumma     = "";
 $laskuttajan_ovt    = array_shift($xml->xpath('Group2/NAD[@e3035="II"]/@eC082.3039'));
-$laskuttajan_nimi    = utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="II"]/@eC080.3036.1')));
+$laskuttajan_nimi    = array_shift($xml->xpath('Group2/NAD[@e3035="II"]/@eC080.3036.1'));
 $laskuttajan_vat    = array_shift($xml->xpath('Group2/Group3/RFF[@eC506.1153="VA"]/@eC506.1154'));
 $laskuttajan_valkoodi   = "";
 $laskun_pankkiviite    = array_shift($xml->xpath('Group1/RFF[@eC506.1153="PQ"]/@eC506.1154'));
@@ -27,37 +27,37 @@ $laskun_toimitunnus    = 0;
 $toim_asiakkaantiedot = array();
 $toim_asiakkaantiedot["toim_ovttunnus"]  = trim(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@eC082.3039')));
 $toim_asiakkaantiedot["ytunnus"]     = trim(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@eC082.3039')));
-$toim_asiakkaantiedot["nimi"]       = trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@eC080.3036.1'))));
-$toim_asiakkaantiedot["osoite"]     = trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@eC059.3042.1'))));
-$toim_asiakkaantiedot["postino"]     = trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@e3251'))));
-$toim_asiakkaantiedot["postitp"]     = trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@e3164'))));
+$toim_asiakkaantiedot["nimi"]       = trim(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@eC080.3036.1')));
+$toim_asiakkaantiedot["osoite"]     = trim(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@eC059.3042.1')));
+$toim_asiakkaantiedot["postino"]     = trim(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@e3251')));
+$toim_asiakkaantiedot["postitp"]     = trim(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@e3164')));
 
 $ostaja_asiakkaantiedot = array();
 $ostaja_asiakkaantiedot["toim_ovttunnus"]  = trim(array_shift($xml->xpath('Group2/NAD[@e3035="BY"]/@eC082.3039')));
 $ostaja_asiakkaantiedot["ytunnus"]       = trim(array_shift($xml->xpath('Group2/NAD[@e3035="BY"]/@eC082.3039')));
-$ostaja_asiakkaantiedot["nimi"]       = trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="BY"]/@eC080.3036.1'))));
-$ostaja_asiakkaantiedot["osoite"]       = trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="BY"]/@eC059.3042.1'))));
-$ostaja_asiakkaantiedot["postino"]       = trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="BY"]/@e3251'))));
-$ostaja_asiakkaantiedot["postitp"]       = trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="BY"]/@e3164'))));
+$ostaja_asiakkaantiedot["nimi"]       = trim(array_shift($xml->xpath('Group2/NAD[@e3035="BY"]/@eC080.3036.1')));
+$ostaja_asiakkaantiedot["osoite"]       = trim(array_shift($xml->xpath('Group2/NAD[@e3035="BY"]/@eC059.3042.1')));
+$ostaja_asiakkaantiedot["postino"]       = trim(array_shift($xml->xpath('Group2/NAD[@e3035="BY"]/@e3251')));
+$ostaja_asiakkaantiedot["postitp"]       = trim(array_shift($xml->xpath('Group2/NAD[@e3035="BY"]/@e3164')));
 
-/// Jos BY tiedot puuttuu niin otetaan IV kentistä
+/// Jos BY tiedot puuttuu niin otetaan IV kentistÃ¤
 if ($ostaja_asiakkaantiedot["nimi"] == '') {
   $ostaja_asiakkaantiedot["toim_ovttunnus"]  = trim(array_shift($xml->xpath('Group2/NAD[@e3035="IV"]/@eC082.3039')));
   $ostaja_asiakkaantiedot["ytunnus"]       = trim(array_shift($xml->xpath('Group2/NAD[@e3035="IV"]/@eC082.3039')));
-  $ostaja_asiakkaantiedot["nimi"]       = trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="IV"]/@eC080.3036.1'))));
-  $ostaja_asiakkaantiedot["osoite"]       = trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="IV"]/@eC059.3042.1'))));
-  $ostaja_asiakkaantiedot["postino"]       = trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="IV"]/@e3251'))));
-  $ostaja_asiakkaantiedot["postitp"]       = trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="IV"]/@e3164'))));
+  $ostaja_asiakkaantiedot["nimi"]       = trim(array_shift($xml->xpath('Group2/NAD[@e3035="IV"]/@eC080.3036.1')));
+  $ostaja_asiakkaantiedot["osoite"]       = trim(array_shift($xml->xpath('Group2/NAD[@e3035="IV"]/@eC059.3042.1')));
+  $ostaja_asiakkaantiedot["postino"]       = trim(array_shift($xml->xpath('Group2/NAD[@e3035="IV"]/@e3251')));
+  $ostaja_asiakkaantiedot["postitp"]       = trim(array_shift($xml->xpath('Group2/NAD[@e3035="IV"]/@e3164')));
 }
 
 $laskuttajan_toimittajanumero = "";
 
-// jos ei löytynyt EUR summaa kokeillaan ilman valkoodia
+// jos ei lÃ¶ytynyt EUR summaa kokeillaan ilman valkoodia
 if ($laskun_summa_eur == 0) {
   $laskun_summa_eur = (float) array_shift($xml->xpath('Group48/MOA[@eC516.5025="9" and @eC516.6345=""]/@eC516.5004'));
 }
 
-// jos ei sillonkaan löytynyt summaa niin haetaan kokonaan ilman valkoodi segmenttiä
+// jos ei sillonkaan lÃ¶ytynyt summaa niin haetaan kokonaan ilman valkoodi segmenttiÃ¤
 if ($laskun_summa_eur == 0) {
   $laskun_summa_eur = (float) array_shift($xml->xpath('Group48/MOA[@eC516.5025="9"]/@eC516.5004'));
 }
@@ -81,7 +81,7 @@ $rivien_summa_yhteensa  = 0;
 if (count($tuotetiedot) > 0) {
   foreach ($tuotetiedot as $tuotetieto) {
 
-    // Varmistetaan, että Group25 pitää sisällään tuotenumeron
+    // Varmistetaan, ettÃ¤ Group25 pitÃ¤Ã¤ sisÃ¤llÃ¤Ã¤n tuotenumeron
     if (array_shift($tuotetieto->xpath('LIN/@eC212.7140')) != NULL) {
 
       // Tuotekoodi
@@ -103,10 +103,10 @@ if (count($tuotetiedot) > 0) {
       $rtuoteno[$i]['rivihinta_verolli'] = round($rtuoteno[$i]['rivihinta'] * (1 + ($ealvi[$i] / 100)), 2);
       $rtuoteno[$i]["riviinfo"] = pupesoft_cleanstring(array_shift($tuotetieto-> xpath('IMD/@eC273.7008.1')));
 
-      // Laskutettu määrä
+      // Laskutettu mÃ¤Ã¤rÃ¤
       $rtuoteno[$i]["kpl"] = array_shift($tuotetieto-> xpath('QTY[@eC186.6063="12"]/@eC186.6060'));
 
-      // Jotkut toimittajat lähettää laskutetun määrän 47 segmentissä eikä 12 niinku kuuluis
+      // Jotkut toimittajat lÃ¤hettÃ¤Ã¤ laskutetun mÃ¤Ã¤rÃ¤n 47 segmentissÃ¤ eikÃ¤ 12 niinku kuuluis
       if ((float) $rtuoteno[$i]["kpl"] == 0) {
         $rtuoteno[$i]["kpl"] = array_shift($tuotetieto-> xpath('QTY[@eC186.6063="47"]/@eC186.6060'));
       }
@@ -116,7 +116,7 @@ if (count($tuotetiedot) > 0) {
       //  Viite (EuroCard)
       $rtuoteno[$i]["riviviite"] = pupesoft_cleanstring(array_shift($tuotetieto->xpath('Group29/RFF[@eC506.1153="VN"]/@eC506.1154')));
 
-      //  Tapahtumapäivä
+      //  TapahtumapÃ¤ivÃ¤
       $rtuoteno[$i]["laskutettuaika"] = array_shift($tuotetieto->xpath('DTM[@eC507.2005="11"]/@eC507.2380'));
 
       $i++;

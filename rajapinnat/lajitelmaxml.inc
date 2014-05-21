@@ -14,8 +14,8 @@ foreach ($dnslajitelma as $key => $lajitelma) {
 
   $customer = $xml->addChild('customer');
   $customer->addChild('case','pupesoft');
-  $customer->addChild('name', utf8_encode(xmlentities($yhtiorow["nimi"])));
-  $customer->addChild('address', utf8_encode(xmlentities($yhtiorow["osoite"])));
+  $customer->addChild('name', xmlentities($yhtiorow["nimi"]));
+  $customer->addChild('address', xmlentities($yhtiorow["osoite"]));
   $customer->addChild('timestamp', date("Y-m-d H:i"));
 
   // HINNASTOJEN PERUSTIEDOT
@@ -29,11 +29,11 @@ foreach ($dnslajitelma as $key => $lajitelma) {
   foreach ($lajitelma as $tiedot) {
 
     $assortment = $product->addChild('assortment');
-      $assortment->addChild('code', utf8_encode(xmlentities($tiedot["tuoteno"])));
-      $assortment->addChild('assortmentname', utf8_encode(xmlentities($tiedot["nimitys"])));
-      $assortment->addChild('assortmentnameswe', utf8_encode(xmlentities($tiedot["nimi_swe"])));
-      $assortment->addChild('assortmentnameeng', utf8_encode(xmlentities($tiedot["nimi_eng"])));
-      $assortment->addChild('ean', utf8_encode(xmlentities($tiedot["ean"])));
+      $assortment->addChild('code', xmlentities($tiedot["tuoteno"]));
+      $assortment->addChild('assortmentname', xmlentities($tiedot["nimitys"]));
+      $assortment->addChild('assortmentnameswe', xmlentities($tiedot["nimi_swe"]));
+      $assortment->addChild('assortmentnameeng', xmlentities($tiedot["nimi_eng"]));
+      $assortment->addChild('ean', xmlentities($tiedot["ean"]));
       $assortment->addChild('assortmentprice',$tiedot["myyntihinta"]);
       $assortment->addChild('kuluttajahinta',$tiedot["myymalahinta"]);
       $properties = $assortment->addChild('properties');
@@ -41,9 +41,9 @@ foreach ($dnslajitelma as $key => $lajitelma) {
       // Loopataan lajitelman parametrit
       foreach ($tiedot["parametrit"] as $parametrit) {
         $propertytype = $properties->addChild('propertytype');
-          $propertytype->addChild('propertytypename', utf8_encode(xmlentities($parametrit["nimi"])));
+          $propertytype->addChild('propertytypename', xmlentities($parametrit["nimi"]));
             $property = $propertytype->addChild('property');
-            $property->addChild('propertyname', utf8_encode(xmlentities($parametrit["arvo"])));
+            $property->addChild('propertyname', xmlentities($parametrit["arvo"]));
       }
   }
 

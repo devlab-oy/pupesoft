@@ -16,7 +16,7 @@ if ($vero != 0) { // Netotetaan alvi
   $summa -= $alv;
 }
 
-if ((!isset($kpexport) or $kpexport != 1) and strtoupper($yhtiorow['maa']) == 'FI') $tositenro = 0; // Jos t‰t‰ ei tarvita
+if ((!isset($kpexport) or $kpexport != 1) and strtoupper($yhtiorow['maa']) == 'FI') $tositenro = 0; // Jos t√§t√§ ei tarvita
 
 // jos on valittu tiliointipvm popupista
 if (isset($tiliointipvm) and $tiliointipvm != ''){
@@ -25,12 +25,12 @@ if (isset($tiliointipvm) and $tiliointipvm != ''){
 
 $tapvmlisa = "'{$laskurow['tapvm']}'";
 
-// jos tiliˆinti on suljetulla tilikaudella, laitetaan uusi tiliˆinti kuluvalle tilikaudelle eli t‰lle p‰iv‰lle
+// jos tili√∂inti on suljetulla tilikaudella, laitetaan uusi tili√∂inti kuluvalle tilikaudelle eli t√§lle p√§iv√§lle
 if (isset($suljettu_tilikausi) and $suljettu_tilikausi) {
   $tapvmlisa = "now()";
 }
 
-// jos ollaan muokkaamassa tiliˆinti‰ ja se on ollut valuutassa
+// jos ollaan muokkaamassa tili√∂inti√§ ja se on ollut valuutassa
 if (isset($vanhasumma) and isset($vanhasumma_valuutassa) and isset($vanhasumma_valkoodi) and $vanhasumma != "" and $vanhasumma_valuutassa != "" and $vanhasumma_valkoodi != "") {
   // lasketaan kurssi
   $vanhasumma_kurssi = $vanhasumma_valuutassa / $vanhasumma;
@@ -40,7 +40,7 @@ if (isset($vanhasumma) and isset($vanhasumma_valuutassa) and isset($vanhasumma_v
   $valkoodi = $vanhasumma_valkoodi;
 }
 
-// jos ollaan saatu poikkeava alvtili k‰ytet‰‰n sit‰, varmistetaan ett‰ se ei ole tyhj‰‰ ja ett‰ on numero, jos ei niin yhtion takaa
+// jos ollaan saatu poikkeava alvtili k√§ytet√§√§n sit√§, varmistetaan ett√§ se ei ole tyhj√§√§ ja ett√§ on numero, jos ei niin yhtion takaa
 if (!isset($alv_tili) or $alv_tili == "" or !is_numeric($alv_tili)) {
   $alv_tili = $yhtiorow["alv"];
 }
@@ -145,7 +145,7 @@ else {
 $result = pupe_query($query);
 $isa = mysql_insert_id();
 
-// Tiliˆid‰‰n alv
+// Tili√∂id√§√§n alv
 if ($vero != 0) {
 
   if (!isset($alv_valuutassa)) {

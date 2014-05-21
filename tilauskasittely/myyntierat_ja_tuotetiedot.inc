@@ -1,6 +1,6 @@
 <?php
 
-if ($yhtiorow['tilauksen_myyntieratiedot'] == '') die(t("Yhtiˆn parametrit - Tilauksen_myyntier‰tiedot ei ole aktiivinen"));
+if ($yhtiorow['tilauksen_myyntieratiedot'] == '') die(t("Yhti√∂n parametrit - Tilauksen_myyntier√§tiedot ei ole aktiivinen"));
 
 if (isset($_COOKIE['avainsanalaji_keksi'])) $lajit = unserialize(urldecode($_COOKIE['avainsanalaji_keksi']));
 
@@ -20,7 +20,7 @@ if (isset($_POST['piirtele_valikko'])) {
         });
       </script>";
 
-  // piirrell‰‰n tuotteen_avainsanat-valikko
+  // piirrell√§√§n tuotteen_avainsanat-valikko
   echo "<br><br>";
 
   $query = "SELECT selite, selitetark
@@ -32,7 +32,7 @@ if (isset($_POST['piirtele_valikko'])) {
 
   echo "<form>";
   echo "<table border='0' cellpadding='5' cellspacing='0' width='600'>";
-  echo "<tr><th>".t("Valitse avainsanat sek‰ lis‰kielet")."<br><br><input type='checkbox' class='check_all' value='lajiboksit'>".t("Valitse Kaikki")."</th><td>";
+  echo "<tr><th>".t("Valitse avainsanat sek√§ lis√§kielet")."<br><br><input type='checkbox' class='check_all' value='lajiboksit'>".t("Valitse Kaikki")."</th><td>";
 
   $query = "SELECT DISTINCT kieli
             FROM tuotteen_avainsanat
@@ -92,7 +92,7 @@ if (isset($_POST['piirtele_valikko'])) {
   echo "</form>";
 }
 elseif(isset($lajit) and count($lajit) > 0) {
-  // t‰‰ll‰ ajellaan rapsa ja tallennetaan henkseliin
+  // t√§√§ll√§ ajellaan rapsa ja tallennetaan henkseliin
 
   include('inc/pupeExcel.inc');
 
@@ -101,7 +101,7 @@ elseif(isset($lajit) and count($lajit) > 0) {
   $excelrivi    = 0;
   $excelsarake = 0;
 
-  //piirret‰‰n defaulttisarakkeiden headerit
+  //piirret√§√§n defaulttisarakkeiden headerit
   // Tuote
   $worksheet->write($excelrivi, $excelsarake++, t("Tuotenumero"),  $format_bold);
   $worksheet->write($excelrivi, $excelsarake++, t("Ean-koodi"),  $format_bold);
@@ -112,9 +112,9 @@ elseif(isset($lajit) and count($lajit) > 0) {
   $worksheet->write($excelrivi, $excelsarake++, t("Tuotekorkeus"),  $format_bold);
   $worksheet->write($excelrivi, $excelsarake++, t("Tuotemassa"),  $format_bold);
   $worksheet->write($excelrivi, $excelsarake++, t("Myyntihinta"),  $format_bold);
-  $worksheet->write($excelrivi, $excelsarake++, t("Myyntier‰"),  $format_bold);
+  $worksheet->write($excelrivi, $excelsarake++, t("Myyntier√§"),  $format_bold);
   $worksheet->write($excelrivi, $excelsarake++, t("Alv"),  $format_bold);
-  $worksheet->write($excelrivi, $excelsarake++, t("Yksikkˆ"),  $format_bold);
+  $worksheet->write($excelrivi, $excelsarake++, t("Yksikk√∂"),  $format_bold);
   $worksheet->write($excelrivi, $excelsarake++, t("Tullinimike"),  $format_bold);
   $worksheet->write($excelrivi, $excelsarake++, t("Lyhytkuvaus"),  $format_bold);
   $worksheet->write($excelrivi, $excelsarake++, t("Kuvaus"),  $format_bold);
@@ -125,7 +125,7 @@ elseif(isset($lajit) and count($lajit) > 0) {
   $worksheet->write($excelrivi, $excelsarake++, t("Asiakkaan valuutta"),  $format_bold);
 
   // Tuotteen toimittajat
-  $worksheet->write($excelrivi, $excelsarake++, t("Alkuper‰maa"),  $format_bold);
+  $worksheet->write($excelrivi, $excelsarake++, t("Alkuper√§maa"),  $format_bold);
 
   $excelrivi++;
 
@@ -137,7 +137,7 @@ elseif(isset($lajit) and count($lajit) > 0) {
   while ($row = mysql_fetch_array($tilausrivit_talteen)) {
       $rows[] = $row;
   }
-  // Reversataan ett‰ tilausrivit on exceliss‰ samassa j‰rjestyksess‰ kuin ruudulla
+  // Reversataan ett√§ tilausrivit on exceliss√§ samassa j√§rjestyksess√§ kuin ruudulla
   $rows = array_reverse($rows);
 
   $eka_tuote = TRUE;
@@ -150,7 +150,7 @@ elseif(isset($lajit) and count($lajit) > 0) {
   $asiakasressi = pupe_query($query);
   $asiakasrowi = mysql_fetch_assoc($asiakasressi);
 
-  //loopataan myyntier‰tiedot per tilausrivi
+  //loopataan myyntier√§tiedot per tilausrivi
   foreach ($rows as $tilausrivi) {
     // Haetaan tuotteen tiedot
     $query = "SELECT *
@@ -160,7 +160,7 @@ elseif(isset($lajit) and count($lajit) > 0) {
     $tuoteressi = pupe_query($query);
     $tuoterowi = mysql_fetch_assoc($tuoteressi);
 
-    // Haetaan kaikki tuotteen alkuper‰maat
+    // Haetaan kaikki tuotteen alkuper√§maat
     $query = "SELECT group_concat(DISTINCT alkuperamaa) kaikkimaat
               FROM tuotteen_toimittajat
               WHERE yhtio = '{$kukarow['yhtio']}'
@@ -196,11 +196,11 @@ elseif(isset($lajit) and count($lajit) > 0) {
     $worksheet->write($excelrivi, $excelsarake++, str_replace(".", ",", $tuoterowi['tuotemassa']));
     // myyntihinta
     $worksheet->write($excelrivi, $excelsarake++, str_replace(".", ",", hintapyoristys($tuoterowi['myyntihinta']), $yhtiorow['hintapyoristys']));
-    // myyntier‰
+    // myyntier√§
     $worksheet->write($excelrivi, $excelsarake++, str_replace(".", ",", $tuoterowi['myynti_era']));
     // alv
     $worksheet->write($excelrivi, $excelsarake++, str_replace(".", ",", $tuoterowi['alv']));
-    // yksikkˆ
+    // yksikk√∂
     $worksheet->write($excelrivi, $excelsarake++, $tuoterowi['yksikko']);
     // tullinimike1
     $worksheet->write($excelrivi, $excelsarake++, $tuoterowi['tullinimike1']);
@@ -216,13 +216,13 @@ elseif(isset($lajit) and count($lajit) > 0) {
     // asiakkaan valuutta
     $worksheet->write($excelrivi, $excelsarake++, $laskurow['valkoodi']);
 
-    //alkuper‰maa/t
+    //alkuper√§maa/t
     $worksheet->write($excelrivi, $excelsarake++, $alkuperamaat['kaikkimaat']);
 
     foreach ($lajit as $asanalaji) {
 
       foreach ($kielet as $kieli) {
-        // etsit‰‰n tuotteen avainsanat per valittu laji ja kieli
+        // etsit√§√§n tuotteen avainsanat per valittu laji ja kieli
         $query = "SELECT *
                   FROM tuotteen_avainsanat
                   WHERE yhtio = '{$kukarow['yhtio']}'
@@ -231,7 +231,7 @@ elseif(isset($lajit) and count($lajit) > 0) {
                   AND kieli   = '{$kieli}'";
         $result = pupe_query($query);
 
-        //laitetaan uusi headeri per valittu kieli vain ekalla rivill‰
+        //laitetaan uusi headeri per valittu kieli vain ekalla rivill√§
         if ($eka_tuote) $worksheet->write(0, $excelsarake, $asanalaji." ".strtoupper($kieli), $format_bold);
 
         $asanase = mysql_fetch_assoc($result);
@@ -258,6 +258,6 @@ elseif(isset($lajit) and count($lajit) > 0) {
     echo "</table><br>";
   }
   else {
-    echo t("Tallennus ep‰onnistui")."!<br>";
+    echo t("Tallennus ep√§onnistui")."!<br>";
   }
 }

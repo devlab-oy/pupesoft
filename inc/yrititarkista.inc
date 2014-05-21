@@ -20,7 +20,7 @@ if(!function_exists("yrititarkista")) {
       $sresult = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($sresult) != 1) {
-        //Olisiko siell‰ nimi
+        //Olisiko siell√§ nimi
         if ($t[$i] != '') {
           $query = "SELECT nimi, tilino
                     FROM tili
@@ -41,7 +41,7 @@ if(!function_exists("yrititarkista")) {
           }
 
         }
-        if ($virhe[$i] == '') $virhe[$i] = t("Tili puuttuu tai sit‰ ei lˆydy");
+        if ($virhe[$i] == '') $virhe[$i] = t("Tili puuttuu tai sit√§ ei l√∂ydy");
       }
     }
 
@@ -71,7 +71,7 @@ if(!function_exists("yrititarkista")) {
       $sresult = pupe_query($query);
 
       if (mysql_num_rows($sresult) > 0) {
-        $virhe[$i] = t("Tili on jo perustettu j‰rjestelm‰‰n")."!";
+        $virhe[$i] = t("Tili on jo perustettu j√§rjestelm√§√§n")."!";
       }
 
       if (strtoupper($yhtiorow['maa']) == 'FI') {

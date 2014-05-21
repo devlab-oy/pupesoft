@@ -1,6 +1,6 @@
 <?php
 
-// M‰‰ritell‰‰n funktio, jolla kopsataan valitut rivit uudelle myyntitilaukselle.
+// M√§√§ritell√§√§n funktio, jolla kopsataan valitut rivit uudelle myyntitilaukselle.
 require("tilauksesta_myyntitilaus.inc");
 
 if ($tilatapa == "VALITSE") {
@@ -14,7 +14,7 @@ if ($tilatapa == "VALITSE") {
     $selb = "SELECTED";
   }
 
-  $paikat = "<option value=''>".t("J‰t‰ myyntitiliin");
+  $paikat = "<option value=''>".t("J√§t√§ myyntitiliin");
   $paikat .= "<option value='A' $sela>".t("Laskuta asiakasta");
   $paikat .= "<option value='B' $selb>".t("Palauta omaan varastoon");
 
@@ -33,7 +33,7 @@ if ($tilatapa == "VALITSE") {
 }
 
 if ($tilatapa == "PAIVITA") {
-  //P‰ivitet‰‰n is‰n perheid nollaksi jotta voidaan lis‰t‰ lis‰ lis‰varusteita
+  //P√§ivitet√§√§n is√§n perheid nollaksi jotta voidaan lis√§t√§ lis√§ lis√§varusteita
   $query  = "SELECT *
              FROM tilausrivi
              WHERE yhtio = '$kukarow[yhtio]'
@@ -166,7 +166,7 @@ if ($tilatapa == "LASKUTA") {
 
   echo "$tilauksesta_myyntitilaus<br><br>";
 
-  //Laitetaan myyntitilin kappalem‰‰ri‰ kuntoon jotta niit‰ ei voisi laskuttaa vahingossa monta kertaa
+  //Laitetaan myyntitilin kappalem√§√§ri√§ kuntoon jotta niit√§ ei voisi laskuttaa vahingossa monta kertaa
   $query = "UPDATE tilausrivi
             SET varattu = 0,
             kpl          = 0
@@ -188,8 +188,8 @@ if ($tilatapa == "LASKUTA") {
 
 if ($tilatapa == "PALAUTA") {
 
-  // Tehd‰‰n siirrett‰vist‰ riveist‰ siirtolista
-  $query = "SELECT tilausrivi.*, concat_ws('#!°!#', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka
+  // Tehd√§√§n siirrett√§vist√§ riveist√§ siirtolista
+  $query = "SELECT tilausrivi.*, concat_ws('#!¬°!#', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka
             FROM tilausrivi
             WHERE tilausrivi.yhtio  = '{$kukarow["yhtio"]}'
             AND tilausrivi.otunnus  = '{$kukarow["kesken"]}'
@@ -199,7 +199,7 @@ if ($tilatapa == "PALAUTA") {
 
   if (mysql_num_rows($palauta_result) > 0) {
 
-    // Tehd‰‰n siirtolistaotsikko
+    // Tehd√§√§n siirtolistaotsikko
     $query = "SELECT varasto, clearing
               FROM lasku
               WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
@@ -207,9 +207,9 @@ if ($tilatapa == "PALAUTA") {
     $otsikko_result = pupe_query($query);
     $otsikko_row = mysql_fetch_assoc($otsikko_result);
 
-    // L‰hett‰v‰ varasto otetaan myyntitilin vastaanottavasta varastosta
+    // L√§hett√§v√§ varasto otetaan myyntitilin vastaanottavasta varastosta
     $varasto = $otsikko_row["clearing"];
-    // Vastaanottava varasto otetaan myyntitilin l‰hett‰v‰st‰ varastosta
+    // Vastaanottava varasto otetaan myyntitilin l√§hett√§v√§st√§ varastosta
     $clearing = $otsikko_row["varasto"];
 
     $toim = "SIIRTOLISTA";
@@ -228,7 +228,7 @@ if ($tilatapa == "PALAUTA") {
     $laskuresult = pupe_query($query);
     $laskurow = mysql_fetch_assoc($laskuresult);
 
-    // Loopataan l‰pi myyntitilin rivit..
+    // Loopataan l√§pi myyntitilin rivit..
     while ($palauta_row = mysql_fetch_assoc($palauta_result)) {
 
       $query = "SELECT *
@@ -240,20 +240,20 @@ if ($tilatapa == "PALAUTA") {
 
       $tuoteno = $palauta_row["tuoteno"];
       $kpl = $palauta_row["kpl"];
-      $var = "H"; // Varmuuden vuoksi v‰kisin hyv‰ksytty rivi, ettei tule ongelmia
+      $var = "H"; // Varmuuden vuoksi v√§kisin hyv√§ksytty rivi, ettei tule ongelmia
       $paikka = $palauta_row["paikka"];
 
-      // Lis‰t‰‰n rivi
+      // Lis√§t√§√§n rivi
       // $laskurow      --> jossa on laskun kaikki tiedot
       // $trow        --> jossa on tuotteen kaikki tiedot
       // $tuoteno        --> jossa on tuotenumero
-      // $kpl          --> jossa on kappalem‰‰r‰
+      // $kpl          --> jossa on kappalem√§√§r√§
       // $var          --> H,J,P varrit
-      // $paikka        --> milt‰ varastopaikalta siirret‰‰n
+      // $paikka        --> milt√§ varastopaikalta siirret√§√§n
 
       require("tilauskasittely/lisaarivi.inc");
 
-      // P‰ivitet‰‰n uusi siirtolistan rivi samantien ker‰tyksi
+      // P√§ivitet√§√§n uusi siirtolistan rivi samantien ker√§tyksi
       $query = "UPDATE tilausrivi SET
                 keratty     = '{$kukarow["kuka"]}',
                 kerattyaika = now()
@@ -261,7 +261,7 @@ if ($tilatapa == "PALAUTA") {
                 AND tunnus  in (".implode(",", $lisatyt_rivit1).")";
       $update_result = pupe_query($query);
 
-      // P‰ivitet‰‰n myyntitilin rivi k‰sittelyksi
+      // P√§ivitet√§√§n myyntitilin rivi k√§sittelyksi
       $query = "UPDATE tilausrivi SET
                 varattu     = 0,
                 kpl         = 0
@@ -270,7 +270,7 @@ if ($tilatapa == "PALAUTA") {
       $tilausrivi_result = pupe_query($query);
     }
 
-    // P‰ivitet‰‰n uusi siirtolista odottamaan vastaanottokuittausta
+    // P√§ivitet√§√§n uusi siirtolista odottamaan vastaanottokuittausta
     $query = "UPDATE lasku SET
               lahetepvm   = now(),
               alatila     = 'C'
@@ -289,11 +289,11 @@ if ($tilatapa == "PALAUTA") {
   $kukarow["kesken"] = 0;
   $tilausnumero = 0;
 
-  echo "<font class='message'>".t("Valitut rivit siirret‰‰n omaan varastoon")."!</font><br><br>";
+  echo "<font class='message'>".t("Valitut rivit siirret√§√§n omaan varastoon")."!</font><br><br>";
 }
 
 if ($tilatapa == "LEPAA") {
-  // poistetaan aktiiviset tilaukset jota t‰ll‰ k‰ytt‰j‰ll‰ oli
+  // poistetaan aktiiviset tilaukset jota t√§ll√§ k√§ytt√§j√§ll√§ oli
   $query = "UPDATE kuka SET
             kesken      = ''
             WHERE yhtio = '$kukarow[yhtio]'

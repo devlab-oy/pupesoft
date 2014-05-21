@@ -49,18 +49,18 @@ echo "  <script language='javascript'>
 $lopetus = "{$palvelin2}hyvak.php////kutsuja=";
 
 if ($keikalla == "on") {
-  //  T‰‰ll‰ haetaan laskurow aika monta kertaa, joskus voisi tehd‰ recodea?
+  //  T√§√§ll√§ haetaan laskurow aika monta kertaa, joskus voisi tehd√§ recodea?
   $query = "  SELECT * FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
   $abures = pupe_query($query);
   $laskurow = mysql_fetch_assoc($abures);
 
-  //  Meill‰ on oikea toimittajaid
+  //  Meill√§ on oikea toimittajaid
   if ($tee == "haekeikka") {
 
     echo "<br>";
 
-    // Mihin t‰m‰ on listattu Listataan
-    //  Jos meill‰ ei ole viel‰ toimittajaa valitaan ensin se
+    // Mihin t√§m√§ on listattu Listataan
+    //  Jos meill√§ ei ole viel√§ toimittajaa valitaan ensin se
     if ($toimittajaid != "" or $ytunnus != "") {
       $keikkamonta = 0;
       $hakutunnus = $ytunnus;
@@ -97,17 +97,17 @@ if ($keikalla == "on") {
           echo "<input type='hidden' name='tee' value = 'liita'>";
           echo "<input type='hidden' name='tunnus' value = '$tunnus'>";
           echo "<input type='hidden' name='toimittajaid' value = '$toimittajaid'>";
-          echo "<table><tr><th>".t("Saapuminen")."</th><th>".t("Kommentit")."</th><th>".t("Rivej‰")."/".t("varastossa")."</th><th>".t("Varastonarvo")."</th><th>".t("Summa")."</th></tr>";
+          echo "<table><tr><th>".t("Saapuminen")."</th><th>".t("Kommentit")."</th><th>".t("Rivej√§")."/".t("varastossa")."</th><th>".t("Varastonarvo")."</th><th>".t("Summa")."</th></tr>";
 
           while($row = mysql_fetch_assoc($result)) {
             echo "<tr><td>$row[keikka]</td><td>$row[comments]</td><td align='right'>$row[kpl]/$row[varastossa]</td><td align='right'>$row[varastossaarvo]</td><td>";
             echo "<input type='text' name='liita[".$row["otunnus"]."][liitasumma]' value='$liitasumma' size='10'>";
             echo "</td></tr>";
           }
-          echo "<tr><td class='back' colspan='5' align = 'right'><input type='submit' value='".t("Liit‰ saapumisiin")."'></td></tr></table></form>";
+          echo "<tr><td class='back' colspan='5' align = 'right'><input type='submit' value='".t("Liit√§ saapumisiin")."'></td></tr></table></form>";
         }
         else {
-          echo "<table><tr><th>".t("Saapuminen")."</th><th>".t("Kommentit")."</th><th>".t("Rivej‰")."/".t("varastossa")."</th><th>".t("Varastonarvo")."</th></tr>";
+          echo "<table><tr><th>".t("Saapuminen")."</th><th>".t("Kommentit")."</th><th>".t("Rivej√§")."/".t("varastossa")."</th><th>".t("Varastonarvo")."</th></tr>";
           while($row = mysql_fetch_assoc($result)) {
 
             $query = "SELECT sum(summa) summa
@@ -131,7 +131,7 @@ if ($keikalla == "on") {
                 <input type='hidden' name='osto_kulu' value='{$laskurow['osto_kulu']}' />
                 <input type='hidden' name='osto_rahti' value='{$laskurow['osto_rahti']}' />
                 <input type='hidden' name='osto_rivi_kulu' value='{$laskurow['osto_rivi_kulu']}' />
-                <input type='submit' value='".t("Liit‰ saapumiseen")."'>
+                <input type='submit' value='".t("Liit√§ saapumiseen")."'>
                 </form>";
             echo "</td></tr>";
           }
@@ -195,11 +195,11 @@ if ($keikalla == "on") {
     $tee = "";
   }
   else {
-    echo "Kui s‰‰ t‰nne p‰‰sit?!";
+    echo "Kui s√§√§ t√§nne p√§√§sit?!";
   }
 }
 
-if ($kutsuja != "MATKALASKU") echo "<font class='head'>".t('Hyv‰ksytt‰v‰t laskusi')."</font><hr><br>";
+if ($kutsuja != "MATKALASKU") echo "<font class='head'>".t('Hyv√§ksytt√§v√§t laskusi')."</font><hr><br>";
 
 $onko_eka_hyvaksyja = FALSE;
 
@@ -216,24 +216,24 @@ if ((int) $tunnus != 0) {
     $check_row = mysql_fetch_assoc($check_res);
 
     if ($check_row['tilaustyyppi'] == "M" and $check_row['hyvak2'] == $kukarow['kuka'] and $check_row["h2time"] == "0000-00-00 00:00:00") {
-      // Matkalaskuilla eka hyv‰ksyj‰ on aina matkustaja itse joka ei saa korjata kirjanpitoa, vaan toka hyv‰ksyj‰ vastaa tiliˆinneist‰
+      // Matkalaskuilla eka hyv√§ksyj√§ on aina matkustaja itse joka ei saa korjata kirjanpitoa, vaan toka hyv√§ksyj√§ vastaa tili√∂inneist√§
       $onko_eka_hyvaksyja = TRUE;
       $eka_hyvaksyja = $check_row['hyvak2'];
     }
     elseif ($check_row['tilaustyyppi'] != "M" and $check_row['hyvak1'] == $kukarow['kuka'] and $check_row["h1time"] == "0000-00-00 00:00:00") {
-      // jos ensimm‰inen hyv‰ksyj‰ on t‰‰ k‰ytt‰j‰ ja ei olla viel‰ hyv‰ksytty
+      // jos ensimm√§inen hyv√§ksyj√§ on t√§√§ k√§ytt√§j√§ ja ei olla viel√§ hyv√§ksytty
       $onko_eka_hyvaksyja = TRUE;
       $eka_hyvaksyja = $check_row['hyvak1'];
     }
 
-    // Matkalaskun eka hyv‰ksyj‰, eli matkustaja itse ei saa muuttaa tiliˆintej‰
+    // Matkalaskun eka hyv√§ksyj√§, eli matkustaja itse ei saa muuttaa tili√∂intej√§
     if ($check_row['tilaustyyppi'] == "M" and $check_row['hyvak1'] == $kukarow['kuka'] and $check_row["h1time"] == "0000-00-00 00:00:00") {
       if ($kukarow['taso'] != 1) $kukarow['taso'] = 1;
     }
   }
 }
 
-// halutaan n‰hd‰ otsikko, tai ollaan eka hyv‰ksyj‰ ja ei olla hyv‰ksym‰ss‰ laskua
+// halutaan n√§hd√§ otsikko, tai ollaan eka hyv√§ksyj√§ ja ei olla hyv√§ksym√§ss√§ laskua
 if ($tee == 'M' or ($onko_eka_hyvaksyja === TRUE and $tee != 'H' and $tee != 'D' and $tee != 'Z' and ($kukarow['taso'] == '2' or $kukarow["taso"] == '3'))) {
   $query = "SELECT *
             FROM lasku
@@ -285,7 +285,7 @@ if ($tee == 'D' and $oikeurow['paivitys'] == '1') {
 
     $komm = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") ".t("Poisti laskun")."<br>" . $trow['comments'];
 
-    // Ylikirjoitetaan tiliˆinnit
+    // Ylikirjoitetaan tili√∂innit
     $query = "UPDATE tiliointi SET
               korjattu           = '$kukarow[kuka]',
               korjausaika        = now()
@@ -409,7 +409,7 @@ if ($tee == "palauta") {
         <br><br>
         <form method='post'>
         <input type='hidden' name='tunnus' value='$tunnus'>
-        <input type = 'submit' value = '".t("Palaa laskun hyv‰ksynt‰‰n")."'>
+        <input type = 'submit' value = '".t("Palaa laskun hyv√§ksynt√§√§n")."'>
         </form>";
 
     require("inc/footer.inc");
@@ -417,12 +417,12 @@ if ($tee == "palauta") {
   }
   else {
 
-    //  Palautetaan takaisin edelliselle hyv‰ksyj‰lle
+    //  Palautetaan takaisin edelliselle hyv√§ksyj√§lle
     if ((int) $hyvaksyja > 0) {
       $upd = "h{$hyvaksyja}time = '0000-00-00 00:00:00', hyvaksyja_nyt = '".$lrow["hyvak{$hyvaksyja}"]."'";
       $kukahyvak = $lrow["hyvak{$hyvaksyja}"];
     }
-    else die("Hyv‰ksyj‰ ei kelpaa");
+    else die("Hyv√§ksyj√§ ei kelpaa");
 
     $query = "SELECT *
               FROM kuka
@@ -431,7 +431,7 @@ if ($tee == "palauta") {
     $result = pupe_query($query);
     $krow = mysql_fetch_assoc($result);
 
-    $komm = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") ".t("Palautti laskun hyv‰ksyj‰lle").": $krow[nimi], $viesti<br>";
+    $komm = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") ".t("Palautti laskun hyv√§ksyj√§lle").": $krow[nimi], $viesti<br>";
 
     $query = "UPDATE lasku SET
               $upd,
@@ -440,17 +440,17 @@ if ($tee == "palauta") {
               AND yhtio    = '$kukarow[yhtio]'";
     $result = pupe_query($query);
 
-    echo "<font class='message'>".t('Palauttettiin lasku k‰ytt‰j‰lle')." $krow[nimi]</font><br>";
+    echo "<font class='message'>".t('Palauttettiin lasku k√§ytt√§j√§lle')." $krow[nimi]</font><br>";
 
-    //  L‰hetet‰‰n maili virheen merkiksi!
-    mail($krow["eposti"], mb_encode_mimeheader("Hyv‰ksym‰si lasku palautettiin", "ISO-8859-1", "Q"), t("Hyv‰ksym‰si lasku toimittajalta %s, %s %s palautettiin korjattavaksi.\n\nSyy: %s \n\nPalauttaja:", $krow["kieli"], $lrow["nimi"], $lrow["summa"], $lrow["valkoodi"], $viesti)." $kukarow[nimi], $yhtiorow[nimi]", "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+    //  L√§hetet√§√§n maili virheen merkiksi!
+    mail($krow["eposti"], mb_encode_mimeheader("Hyv√§ksym√§si lasku palautettiin", "UTF-8", "Q"), t("Hyv√§ksym√§si lasku toimittajalta %s, %s %s palautettiin korjattavaksi.\n\nSyy: %s \n\nPalauttaja:", $krow["kieli"], $lrow["nimi"], $lrow["summa"], $lrow["valkoodi"], $viesti)." $kukarow[nimi], $yhtiorow[nimi]", "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
     $tunnus = "";
     $tee = "";
   }
 }
 
 if ($tee == 'W' and $komm == '') {
-  echo "<font class='error'>".t('Anna pys‰ytyksen syy')."</font>";
+  echo "<font class='error'>".t('Anna pys√§ytyksen syy')."</font>";
   $tee = 'Z';
 }
 
@@ -459,9 +459,9 @@ if ($tee == 'V' and $komm == '') {
   $tee = '';
 }
 
-// Lasku laitetaan holdiin k‰yttˆliittym‰
+// Lasku laitetaan holdiin k√§ytt√∂liittym√§
 if ($tee == 'Z') {
-  $query = "SELECT tunnus, tapvm, erpcm 'er‰pvm', ytunnus, nimi, postitp, round(summa * vienti_kurssi, 2) 'kotisumma', summa, valkoodi, comments
+  $query = "SELECT tunnus, tapvm, erpcm 'er√§pvm', ytunnus, nimi, postitp, round(summa * vienti_kurssi, 2) 'kotisumma', summa, valkoodi, comments
             FROM lasku
             WHERE hyvaksyja_nyt = '$kukarow[kuka]' and
             yhtio               = '$kukarow[yhtio]' and
@@ -498,13 +498,13 @@ if ($tee == 'Z') {
 
   echo "</tr></table>";
 
-  echo "<br><table><tr><td>".t("Anna syy kierron pys‰ytykselle")."</td>";
+  echo "<br><table><tr><td>".t("Anna syy kierron pys√§ytykselle")."</td>";
   echo "  <form method='post'>
       <input type='hidden' name='tee' value='W'>
       <input type='hidden' name = 'nayta' value='$nayta'>
       <input type='hidden' name='tunnus' value='$trow[tunnus]'>";
 
-  echo "  <td><input type='text' name='komm' size='25'><input type='Submit' value='".t("Pys‰yt‰ laskun kierto")."'></td>
+  echo "  <td><input type='text' name='komm' size='25'><input type='Submit' value='".t("Pys√§yt√§ laskun kierto")."'></td>
       </form>
       </tr>
       </table>";
@@ -566,7 +566,7 @@ if ($tee == 'V') {
   $tee = '';
 }
 
-// Hyv‰ksynt‰listaa muutetaan
+// Hyv√§ksynt√§listaa muutetaan
 if ($tee == 'L') {
   $query = "SELECT *
             FROM lasku
@@ -585,7 +585,7 @@ if ($tee == 'L') {
   $laskurow = mysql_fetch_assoc($result);
 
   if ($eka_hyvaksyja != $laskurow['hyvaksyja_nyt'] or $laskurow['hyvaksynnanmuutos'] == '') {
-    echo "<font class = 'error'>".t('Lasku on v‰‰r‰ss‰ tilassa')."</font>";
+    echo "<font class = 'error'>".t('Lasku on v√§√§r√§ss√§ tilassa')."</font>";
 
     require ("inc/footer.inc");
     exit;
@@ -602,7 +602,7 @@ if ($tee == 'L') {
 
   $tee = '';
 
-  echo "<font class='message'>" . t("Hyv‰ksynt‰j‰rjestys").": $laskurow[hyvak1]";
+  echo "<font class='message'>" . t("Hyv√§ksynt√§j√§rjestys").": $laskurow[hyvak1]";
   if ($hyvak[2] != '') echo " -&gt; $hyvak[2]";
   if ($hyvak[3] != '') echo " -&gt; $hyvak[3]";
   if ($hyvak[4] != '') echo " -&gt; $hyvak[4]";
@@ -611,7 +611,7 @@ if ($tee == 'L') {
 }
 
 if ($tee == 'H') {
-  // Lasku merkit‰‰n hyv‰ksytyksi, tehd‰‰n timestamp ja p‰ivitet‰‰n hyvaksyja_nyt
+  // Lasku merkit√§√§n hyv√§ksytyksi, tehd√§√§n timestamp ja p√§ivitet√§√§n hyvaksyja_nyt
   $query = "SELECT *
             FROM lasku
             WHERE yhtio   = '$kukarow[yhtio]' and
@@ -628,7 +628,7 @@ if ($tee == 'H') {
 
   $laskurow = mysql_fetch_assoc($result);
 
-  //  Kun tehd‰‰n matkalaskun ensimm‰inen hyv‰ksynt‰..
+  //  Kun tehd√§√§n matkalaskun ensimm√§inen hyv√§ksynt√§..
   if ($laskurow["tilaustyyppi"] == "M" and $laskurow["h1time"]=="0000-00-00 00:00:00") {
 
     $query = "SELECT * from toimi where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
@@ -638,10 +638,10 @@ if ($tee == 'H') {
     if ($toimirow["oletus_erapvm"] > 0) $erpaivia = $toimirow["oletus_erapvm"];
     else $erpaivia = 1;
 
-    //  P‰ivitet‰‰n tapvm ja viesti laskulle
+    //  P√§ivitet√§√§n tapvm ja viesti laskulle
     $viesti = t("Matkalasku")." ".date("d").".".date("m").".".date("Y");
 
-    // Otetaan yhtiˆn tiedoista ostoreskontran sallittu tilikauden ajankohta
+    // Otetaan yhti√∂n tiedoista ostoreskontran sallittu tilikauden ajankohta
     $tilalk = (int) str_replace("-", "", $yhtiorow["tilikausi_alku"]);
     $tillop = (int) str_replace("-", "", $yhtiorow["tilikausi_loppu"]);
     $latapv = (int) str_replace("-", "", $laskurow["tapvm"]);
@@ -656,7 +656,7 @@ if ($tee == 'H') {
                 AND tunnus  = '$tunnus'";
       $updres = pupe_query($query);
 
-      //  P‰ivitet‰‰n tiliˆintien tapvm as well
+      //  P√§ivitet√§√§n tili√∂intien tapvm as well
       $query = " UPDATE tiliointi set tapvm=now() where yhtio = '$kukarow[yhtio]' and ltunnus='$tunnus'";
       $updres = pupe_query($query);
     }
@@ -670,7 +670,7 @@ if ($tee == 'H') {
     }
   }
 
-  // Kuka hyv‰ksyi??
+  // Kuka hyv√§ksyi??
   if ($laskurow['hyvaksyja_nyt'] == $laskurow['hyvak1'] and $laskurow["h1time"]=="0000-00-00 00:00:00") {
     $kentta = "h1time";
     $laskurow['h1time'] = "99";
@@ -692,7 +692,7 @@ if ($tee == 'H') {
     $laskurow['h5time'] = "99";
   }
 
-  // Kuka hyv‰ksyy seuraavaksi??
+  // Kuka hyv√§ksyy seuraavaksi??
   if ($laskurow['h5time'] == '0000-00-00 00:00:00' and strlen(trim($laskurow['hyvak5'])) != 0) {
     $hyvaksyja_nyt = $laskurow['hyvak5'];
   }
@@ -711,29 +711,29 @@ if ($tee == 'H') {
 
   $mapvm = '0000-00-00'; // Laskua ei oletuksena merkata maksetuksi
 
-  // T‰m‰ ei olekaan lasku vaan hyv‰ksynn‰ss‰ oleva tosite!
+  // T√§m√§ ei olekaan lasku vaan hyv√§ksynn√§ss√§ oleva tosite!
   if ($laskurow['tila'] != 'X') {
 
     $tila = "H";
-    $viesti = t("Seuraava hyv‰ksyj‰ on")." '" .$hyvaksyja_nyt ."'";
+    $viesti = t("Seuraava hyv√§ksyj√§ on")." '" .$hyvaksyja_nyt ."'";
 
         if (strlen($hyvaksyja_nyt) == 0) {
 
-      // Suoraveloitus merkit‰‰n heti maksua odottavaksi
+      // Suoraveloitus merkit√§√§n heti maksua odottavaksi
           if ($laskurow['suoraveloitus'] != '') {
 
-            // Jotta tied‰mme seuraavan tilan pit‰‰ tutkia toimittajaa
+            // Jotta tied√§mme seuraavan tilan pit√§√§ tutkia toimittajaa
             $tila = 'Q';
             $viesti = t("Suoraveloituslasku odottaa nyt suorituksen kuittausta");
 
-        // #TODO eikˆ t‰ss‰ pit‰isi olla liitostunnus?!?
+        // #TODO eik√∂ t√§ss√§ pit√§isi olla liitostunnus?!?
             $query = "SELECT *
                       FROM toimi
                       WHERE yhtio = '$kukarow[yhtio]'
                       and ytunnus = '$laskurow[ytunnus]'";
         $result = pupe_query($query);
 
-        // Toimittaja lˆytyi
+        // Toimittaja l√∂ytyi
         if (mysql_num_rows($result) > 0) {
           $toimirow = mysql_fetch_assoc($result);
 
@@ -751,7 +751,7 @@ if ($tee == 'H') {
         }
   }
   else {
-    $viesti = t("Tosite on hyv‰ksytty")."!";
+    $viesti = t("Tosite on hyv√§ksytty")."!";
     $tila = 'X';
   }
 
@@ -764,14 +764,14 @@ if ($tee == 'H') {
                 WHERE yhtio   = '$kukarow[yhtio]' and tunnus='$tunnus'";
   $result = pupe_query($query);
 
-  echo "<br><font class='message'>'$laskurow[hyvaksyja_nyt]' ".t("hyv‰ksyi laskun")." $viesti</font><br><br>";
+  echo "<br><font class='message'>'$laskurow[hyvaksyja_nyt]' ".t("hyv√§ksyi laskun")." $viesti</font><br><br>";
 
   $tunnus = '';
   $tee = '';
 }
 
 if ($tee == 'P') {
-  // Olemassaolevaa tiliˆinti‰ muutetaan, joten poistetaan rivi ja annetaan perustettavaksi
+  // Olemassaolevaa tili√∂inti√§ muutetaan, joten poistetaan rivi ja annetaan perustettavaksi
   $query = "SELECT *
             FROM tiliointi
             WHERE tunnus = '$ptunnus' and
@@ -779,7 +779,7 @@ if ($tee == 'P') {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
-    echo t("Tiliˆinti‰ ei lˆydy")."! $query";
+    echo t("Tili√∂inti√§ ei l√∂ydy")."! $query";
 
     require ("inc/footer.inc");
     exit;
@@ -798,7 +798,7 @@ if ($tee == 'P') {
 
   $ok = 1;
 
-  // Etsit‰‰n kaikki tiliˆintirivit, jotka kuuluvat t‰h‰n tiliˆintiin ja lasketaan niiden summa
+  // Etsit√§√§n kaikki tili√∂intirivit, jotka kuuluvat t√§h√§n tili√∂intiin ja lasketaan niiden summa
   $query = "SELECT sum(summa) summa
             FROM tiliointi
             WHERE aputunnus = '$ptunnus' and
@@ -827,11 +827,11 @@ if ($tee == 'P') {
             and yhtio    = '$kukarow[yhtio]'";
   $result = pupe_query($query);
 
-  $tee = "E"; // N‰ytet‰‰n milt‰ tosite nyt n‰ytt‰‰
+  $tee = "E"; // N√§ytet√§√§n milt√§ tosite nyt n√§ytt√§√§
 }
 
 if ($tee == 'U') {
-  // Lis‰t‰‰n tiliˆintirivi
+  // Lis√§t√§√§n tili√∂intirivi
   $query = "SELECT *
             FROM lasku
             WHERE yhtio = '$kukarow[yhtio]'
@@ -839,7 +839,7 @@ if ($tee == 'U') {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 1) {
-    echo t("Laskua ei en‰‰ lˆydy! Systeemivirhe!");
+    echo t("Laskua ei en√§√§ l√∂ydy! Systeemivirhe!");
 
     require ("inc/footer.inc");
     exit;
@@ -878,8 +878,8 @@ if ($tee == 'U') {
       }
     }
     else {
-      // T‰ll‰ ei viel‰ ole tositenroa. Yritet‰‰n jotain
-      // T‰lle saamme tositenron ostoveloista
+      // T√§ll√§ ei viel√§ ole tositenroa. Yritet√§√§n jotain
+      // T√§lle saamme tositenron ostoveloista
       if ($laskurow['tapvm'] == $tiliointipvm) {
 
         $query = "SELECT tosite
@@ -902,7 +902,7 @@ if ($tee == 'U') {
         $tositenro = $tositerow['tosite'];
       }
 
-       // T‰lle saamme tositenron ostoveloista
+       // T√§lle saamme tositenron ostoveloista
       if ($laskurow['mapvm'] == $tiliointipvm) {
 
         $query = "SELECT tosite
@@ -934,7 +934,7 @@ if ($tee == 'U') {
 
 if (strlen($tunnus) != 0) {
 
-  // Lasku on valittu ja sit‰ tiliˆid‰‰n
+  // Lasku on valittu ja sit√§ tili√∂id√§√§n
   $query = "SELECT *,
             concat_ws('@', laatija, luontiaika) kuka,
             round(summa * vienti_kurssi, 2) kotisumma
@@ -952,13 +952,13 @@ if (strlen($tunnus) != 0) {
 
   $laskurow = mysql_fetch_assoc($result);
 
-  // Saa hyv‰ksy‰ jos saa hyv‰ksy‰ mink‰ summaisia vain.
-  // Saa hyv‰ksy‰ jos laskun summa on pienempi ku hyvaksyja_maksimisumma
+  // Saa hyv√§ksy√§ jos saa hyv√§ksy√§ mink√§ summaisia vain.
+  // Saa hyv√§ksy√§ jos laskun summa on pienempi ku hyvaksyja_maksimisumma
   if ($kukarow['hyvaksyja_maksimisumma'] == 0 or $kukarow['hyvaksyja_maksimisumma'] >= $laskurow['summa']) {
     $saako_hyvaksya = TRUE;
   }
 
-  //  Tarkistetaan onko t‰ll‰ist‰ laskua t‰lt‰ toimittajalta jo kierrossa
+  //  Tarkistetaan onko t√§ll√§ist√§ laskua t√§lt√§ toimittajalta jo kierrossa
   if ($laskurow["laskunro"] != "") {
     $query = "SELECT *,
               concat_ws('@', laatija, luontiaika) kuka,
@@ -988,7 +988,7 @@ if (strlen($tunnus) != 0) {
   echo "<tr>";
   echo "<th>".t("Laatija/Laadittu")."</th>";
   echo "<th>".t("Tapvm")."</th>";
-  echo "<th>".t("Er‰pvm/Kapvm")."</th>";
+  echo "<th>".t("Er√§pvm/Kapvm")."</th>";
   echo "</tr>";
 
   echo "<tr>";
@@ -1045,7 +1045,7 @@ if (strlen($tunnus) != 0) {
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>".t("Summa yhtiˆn valuutassa")."</th>";
+  echo "<th>".t("Summa yhti√∂n valuutassa")."</th>";
   echo "<th>".t("Summa laskun valuutassa")."</th>";
   echo "<th>".t("Tyyppi")."</th>";
   echo "</tr>";
@@ -1056,7 +1056,7 @@ if (strlen($tunnus) != 0) {
 
   echo "<td>".ebid($laskurow["tunnus"]) . "</td>";
 
-  // N‰ytet‰‰n poistonappi, jos se on sallittu ja lasku ei ole keikalla ja on avoimella tilikaudella
+  // N√§ytet√§√§n poistonappi, jos se on sallittu ja lasku ei ole keikalla ja on avoimella tilikaudella
   $query = "SELECT laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='$tunnus'";
   $keikres = pupe_query($query);
 
@@ -1071,7 +1071,7 @@ if (strlen($tunnus) != 0) {
 
     echo "  <SCRIPT LANGUAGE=JAVASCRIPT>
           function verify(){
-            msg = '".t("Haluatko todella poistaa t‰m‰n laskun ja sen kaikki tiliˆinnit?")."';
+            msg = '".t("Haluatko todella poistaa t√§m√§n laskun ja sen kaikki tili√∂innit?")."';
 
             if (confirm(msg)) {
               return true;
@@ -1133,12 +1133,12 @@ if (strlen($tunnus) != 0) {
       <input type='hidden' name='iframe_id' value = '$iframe_id'>";
 
   echo "  <tr>
-      <th colspan='2'>".t("Lis‰‰ kommentti")."</th>
+      <th colspan='2'>".t("Lis√§√§ kommentti")."</th>
       </tr>";
 
   echo "  <tr>
       <td><input type='text' name='komm' value='' size='50'></td>
-      <td><input type='Submit' value='".t("Lis‰‰ kommentti")."'></td>
+      <td><input type='Submit' value='".t("Lis√§√§ kommentti")."'></td>
       </tr>";
 
   echo "</form>";
@@ -1147,7 +1147,7 @@ if (strlen($tunnus) != 0) {
   echo "<br><table>";
   echo "<tr>";
 
-  // Jos laskua hyvaksyy ensimm‰inen henkilˆ ja laskulla on annettu mahdollisuus hyvksynt‰listan muutokseen n‰ytet‰‰n se!";
+  // Jos laskua hyvaksyy ensimm√§inen henkil√∂ ja laskulla on annettu mahdollisuus hyvksynt√§listan muutokseen n√§ytet√§√§n se!";
   if ($onko_eka_hyvaksyja and $laskurow['hyvaksynnanmuutos'] != '') {
 
     echo "<td class='back' valign='top'><table>";
@@ -1166,7 +1166,7 @@ if (strlen($tunnus) != 0) {
         <input type='hidden' name='iframe' value = '$iframe'>
         <input type='hidden' name='iframe_id' value = '$iframe_id'>";
 
-    echo "<tr><th colspan='2'>".t("Hyv‰ksyj‰t")."</th></tr>";
+    echo "<tr><th colspan='2'>".t("Hyv√§ksyj√§t")."</th></tr>";
 
     $query = "SELECT kuka, nimi
               FROM kuka
@@ -1190,7 +1190,7 @@ if (strlen($tunnus) != 0) {
 
     echo "<tr><td>";
 
-    // T‰ytet‰‰n 4 hyv‰ksynt‰kentt‰‰ (ensimm‰inen on jo k‰ytˆss‰)
+    // T√§ytet√§√§n 4 hyv√§ksynt√§kentt√§√§ (ensimm√§inen on jo k√§yt√∂ss√§)
     for ($i = 2; $i < 6; $i++) {
 
       while ($vrow = mysql_fetch_assoc($vresult)) {
@@ -1220,7 +1220,7 @@ if (strlen($tunnus) != 0) {
         $ulos .= "<option value ='$vrow[kuka]' $sel>$vrow[nimi]</option>";
       }
 
-      // K‰yd‰‰n sama data l‰pi uudestaan
+      // K√§yd√§√§n sama data l√§pi uudestaan
       mysql_data_seek($vresult, 0);
 
       echo "$i. <select name='hyvak[$i]'>
@@ -1240,7 +1240,7 @@ if (strlen($tunnus) != 0) {
   else {
 
     echo "<td class='back' valign='top'><table>";
-    echo "<tr><th>".t("Hyv‰ksyj‰")."</th><th>".t("Hyv‰ksytty")."</th><th></th></tr>";
+    echo "<tr><th>".t("Hyv√§ksyj√§")."</th><th>".t("Hyv√§ksytty")."</th><th></th></tr>";
 
     for ($i = 1; $i < 6; $i++) {
       $hyind = "hyvak".$i;
@@ -1291,7 +1291,7 @@ if (strlen($tunnus) != 0) {
     enable_ajax();
 
     echo "<br><table>";
-    echo "<tr><th>".t("Laskusta k‰ytetty saapumisilla")."</th><th>".t("Summa")."</th></tr>";
+    echo "<tr><th>".t("Laskusta k√§ytetty saapumisilla")."</th><th>".t("Summa")."</th></tr>";
 
     $query = "SELECT sum(summa) summa
               from tiliointi
@@ -1340,7 +1340,7 @@ if (strlen($tunnus) != 0) {
       }
     }
     else {
-      echo "<tr><td colspan = '2'>".t("Laskua ei ole viel‰ kohdistettu")."</td></tr>";
+      echo "<tr><td colspan = '2'>".t("Laskua ei ole viel√§ kohdistettu")."</td></tr>";
     }
 
     $apurow = mysql_fetch_assoc($apure);
@@ -1349,7 +1349,7 @@ if (strlen($tunnus) != 0) {
     $jaljella = round($jaljella, 2);
 
     if ($jaljella > 0) {
-      //  Vaihtoomaisuuslaskuille ei tarvitse hakea toimittajaa, sen me tied‰mme jo!
+      //  Vaihtoomaisuuslaskuille ei tarvitse hakea toimittajaa, sen me tied√§mme jo!
       if (!in_array($laskurow["vienti"], array("B","E","H"))) {
         if ($toimittajaid == "") $toimittajaid = $laskurow["liitostunnus"];
 
@@ -1359,13 +1359,13 @@ if (strlen($tunnus) != 0) {
         $toimilisa = "";
       }
 
-      $lisa = "<a id='uusi' href='javascript:sndReq(\"keikka\", \"{$palvelin2}hyvak.php?keikalla=on&tee=haekeikka&tunnus=$tunnus$toimilisa\");'>".t("Liit‰ saapumiseen")."</a>";
+      $lisa = "<a id='uusi' href='javascript:sndReq(\"keikka\", \"{$palvelin2}hyvak.php?keikalla=on&tee=haekeikka&tunnus=$tunnus$toimilisa\");'>".t("Liit√§ saapumiseen")."</a>";
     }
     else {
       $lisa = "";
     }
 
-    echo "<tr><th>".t("J‰ljell‰")."</th><th>$jaljella $laskurow[valkoodi]</th><td class='back'>$lisa</td></tr>";
+    echo "<tr><th>".t("J√§ljell√§")."</th><th>$jaljella $laskurow[valkoodi]</th><td class='back'>$lisa</td></tr>";
 
     echo "</table>";
 
@@ -1374,7 +1374,7 @@ if (strlen($tunnus) != 0) {
   }
 
   if ($ok != 1) {
-    // Annetaan tyhj‰t tiedot, jos rivi oli virheetˆn
+    // Annetaan tyhj√§t tiedot, jos rivi oli virheet√∂n
     $tili      = '';
     $kustp     = '';
     $kohde     = '';
@@ -1384,16 +1384,16 @@ if (strlen($tunnus) != 0) {
     $vero      = alv_oletus();
   }
 
-  // T‰t‰ ei siis tehd‰ jos kyseess‰ on kevenetty versio
+  // T√§t√§ ei siis tehd√§ jos kyseess√§ on kevenetty versio
   if ($kukarow['taso'] == '1' or $kukarow['taso'] == '2' or $kukarow["taso"] == '3') {
 
     if ($kukarow['taso'] == '2' or $kukarow["taso"] == '3') {
       echo "<br><table>";
-      echo "<tr><th colspan='3'>".t("Selite tiliˆinneille")."</th></tr><tr><td colspan='3'><input type='text' id='lisaselite' value='{$lisaselite}' maxlength='150' size='60'></td></tr>";
+      echo "<tr><th colspan='3'>".t("Selite tili√∂inneille")."</th></tr><tr><td colspan='3'><input type='text' id='lisaselite' value='{$lisaselite}' maxlength='150' size='60'></td></tr>";
       echo "</table>";
     }
 
-    // Tositteen tiliˆintirivit...
+    // Tositteen tili√∂intirivit...
     require ("inc/tiliointirivit.inc");
     echo "<br><br>";
 
@@ -1403,11 +1403,11 @@ if (strlen($tunnus) != 0) {
         echo "<form method='post'>
             <input type='hidden' name = 'tunnus' value='$tunnus'>
             <input type='hidden' name = 'tee' value='H'>
-            <input type='Submit' value='".t("Hyv‰ksy tiliˆinti ja lasku")."'>
+            <input type='Submit' value='".t("Hyv√§ksy tili√∂inti ja lasku")."'>
             </form><br>";
       }
       else {
-        echo "<font class='error'>",t("Hyv‰ksytt‰v‰n laskun summa ylitt‰‰ sallitun hyv‰ksynn‰n maksimisumman ja / tai sinun j‰lkeesi hyv‰ksyj‰listalla ei ole esimiest‰si"),"!</font><br /><br />";
+        echo "<font class='error'>",t("Hyv√§ksytt√§v√§n laskun summa ylitt√§√§ sallitun hyv√§ksynn√§n maksimisumman ja / tai sinun j√§lkeesi hyv√§ksyj√§listalla ei ole esimiest√§si"),"!</font><br /><br />";
       }
     }
 
@@ -1415,31 +1415,31 @@ if (strlen($tunnus) != 0) {
       echo "<form method='post'>
           <input type='hidden' name='tee' value='palauta'>
           <input type='hidden' name='tunnus' value='$tunnus'>
-          <input type='Submit' value='".t("Palauta lasku edelliselle hyv‰ksyj‰lle")."'>
+          <input type='Submit' value='".t("Palauta lasku edelliselle hyv√§ksyj√§lle")."'>
           </form><br>";
     }
   }
 
   if ($kukarow['taso'] == 9) {
 
-    // Kevennetyn k‰yttˆliittym‰ alkaa t‰st‰
+    // Kevennetyn k√§ytt√∂liittym√§ alkaa t√§st√§
     echo "<table><tr>";
 
     if (!isset($saako_hyvaksya) or (isset($saako_hyvaksya) and trim($saako_hyvaksya) != '')) {
       echo "<form method='post'>
           <input type='hidden' name = 'tunnus' value='$tunnus'>
           <input type='hidden' name = 'tee' value='H'>
-          <td class='back'><input type='Submit' value='".t("Hyv‰ksy lasku")."'></td>
+          <td class='back'><input type='Submit' value='".t("Hyv√§ksy lasku")."'></td>
           </form>";
     }
     else {
-      echo "<font class='error'>",t("Hyv‰ksytt‰v‰n laskun summa ylitt‰‰ sallitun hyv‰ksynn‰n maksimisumman ja sinun j‰lkeesi hyv‰ksyj‰listalla ei ole esimiest‰si"),"!</font><br />";
+      echo "<font class='error'>",t("Hyv√§ksytt√§v√§n laskun summa ylitt√§√§ sallitun hyv√§ksynn√§n maksimisumman ja sinun j√§lkeesi hyv√§ksyj√§listalla ei ole esimiest√§si"),"!</font><br />";
     }
 
     echo "<form method='post'>
         <input type='hidden' name='tee' value='Z'>
         <input type='hidden' name='tunnus' value='$tunnus'>
-        <td class='back'><input type='Submit' value='".t("Pys‰yt‰ laskun k‰sittely")."'></td>
+        <td class='back'><input type='Submit' value='".t("Pys√§yt√§ laskun k√§sittely")."'></td>
         </form>";
 
     echo "</tr></table><br>";
@@ -1458,7 +1458,7 @@ if (strlen($tunnus) != 0) {
         <input type='hidden' name = 'iframe' value='yes'>
         <input type='hidden' name = 'nayta' value='$nayta'>
         <input type='hidden' name = 'tee' value = ''>
-        <th>".t("Avaa lasku t‰h‰n ikkunaan")."</th>
+        <th>".t("Avaa lasku t√§h√§n ikkunaan")."</th>
         <td>";
 
     if (is_array($liitteet) and count($liitteet) == 1) {
@@ -1502,7 +1502,7 @@ if (strlen($tunnus) != 0) {
 }
 elseif ($kutsuja == "") {
 
-  // T‰ll‰ ollaan, jos olemme vasta valitsemassa laskua
+  // T√§ll√§ ollaan, jos olemme vasta valitsemassa laskua
   if ($nayta == '') {
     $query = "SELECT count(*) kpl
               FROM lasku
@@ -1515,14 +1515,14 @@ elseif ($kutsuja == "") {
     $trow = mysql_fetch_assoc ($result);
 
     if ($trow["kpl"] > 0) {
-      echo "<a href='$PHP_SELF?nayta=1'><font class='error'>". sprintf(t('Sinulla on %d pys‰ytetty‰ laskua'), $trow["kpl"]) . "</font></a><br><br>";
+      echo "<a href='$PHP_SELF?nayta=1'><font class='error'>". sprintf(t('Sinulla on %d pys√§ytetty√§ laskua'), $trow["kpl"]) . "</font></a><br><br>";
     }
   }
 
   if ($nayta != '') $nayta = '';
   else $nayta = "and alatila != 'H'";
 
-  // and alatila != 'M', keskener‰isi‰ matkalaskuja ei n‰ytet‰
+  // and alatila != 'M', keskener√§isi√§ matkalaskuja ei n√§ytet√§
   $query = "SELECT *, round(summa * vienti_kurssi, 2) kotisumma
             FROM lasku
              WHERE hyvaksyja_nyt  = '$kukarow[kuka]'
@@ -1534,12 +1534,12 @@ elseif ($kutsuja == "") {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
-    echo "<b>".t("Sinulla ei ole hyv‰ksym‰ttˆmi‰ laskuja")."</b><br>";
+    echo "<b>".t("Sinulla ei ole hyv√§ksym√§tt√∂mi√§ laskuja")."</b><br>";
     require ("inc/footer.inc");
     exit;
   }
 
-  //tablen sarakkeiden m‰‰r‰ riippuu $kukarow['taso']
+  //tablen sarakkeiden m√§√§r√§ riippuu $kukarow['taso']
   $sarakkeet_base = 12;
 
   if ($kukarow['taso'] == 1 or $kukarow['taso'] == 2 or $kukarow['taso'] == 3) {
@@ -1559,11 +1559,11 @@ elseif ($kutsuja == "") {
   echo "<thead>";
   echo "<tr>";
   echo "<th>".t("Tapvm")."</th>";
-  echo "<th>".t("Er‰pvm/Kapvm")."</th>";
+  echo "<th>".t("Er√§pvm/Kapvm")."</th>";
   echo "<th>".t("Ytunnus")."</th>";
   echo "<th>".t("Nimi")."</th>";
   echo "<th>".t("Postitp")."</th>";
-  echo "<th>".t("Yhtiˆn valuutassa")."</th>";
+  echo "<th>".t("Yhti√∂n valuutassa")."</th>";
   echo "<th>".t("Laskun valuutassa")."</th>";
   echo "<th>".t("Laskunro")."</th>";
   echo "<th>".t("Liitetty")."</th>";
@@ -1598,7 +1598,7 @@ elseif ($kutsuja == "") {
 
     echo "<tr class='aktiivi'>";
 
-     // Eli vain tasolla 1/2/3 ja ensimm‰iselle hyv‰ksyj‰lle.
+     // Eli vain tasolla 1/2/3 ja ensimm√§iselle hyv√§ksyj√§lle.
     if (($kukarow["taso"] == '2' or $kukarow["taso"] == '3') and $onko_eka_hyvaksyja) {
       echo "<td valign='top'>".pupe_DataTablesEchoSort($trow['tapvm'])."<a href='$PHP_SELF?tee=M&tunnus=$trow[tunnus]'>".tv1dateconv($trow["tapvm"])."</a></td>";
     }
@@ -1628,7 +1628,7 @@ elseif ($kutsuja == "") {
     echo "<td valign='top' style='text-align: right;'>$trow[laskunro]</td>";
     echo "<td valign='top' style='text-align: right;'>$liitetty</td>";
 
-    // tehd‰‰n lasku linkki
+    // tehd√§√§n lasku linkki
     echo "<td valign='top'>".ebid($trow['tunnus']) ."</td>";
 
     if ($liitetaanko_editilaus_laskulle_hakemisto != '') {
@@ -1657,7 +1657,7 @@ elseif ($kutsuja == "") {
         }
       }
       elseif ($invoice == 'ei_loydy_edia') {
-        echo "<font class='error'>".t("Tilaus ei lˆydy")."</font>";
+        echo "<font class='error'>".t("Tilaus ei l√∂ydy")."</font>";
       }
       else {
         echo "&nbsp;";
@@ -1666,7 +1666,7 @@ elseif ($kutsuja == "") {
       echo "</td>";
     }
 
-    // kustannuspaikka n‰kyviin asiakkaan toiveesta..
+    // kustannuspaikka n√§kyviin asiakkaan toiveesta..
     $kustpq = "SELECT kustp,
                (SELECT DISTINCT nimi
                FROM kustannuspaikka
@@ -1681,7 +1681,7 @@ elseif ($kutsuja == "") {
     $kustpres = pupe_query($kustpq);
     $kustprivi = mysql_fetch_assoc($kustpres);
     if (trim($kustprivi['kustp2']) =='') {
-      echo "<td>".t("Kustannuspaikkaa ei ole syˆtetty")."</td>";
+      echo "<td>".t("Kustannuspaikkaa ei ole sy√∂tetty")."</td>";
     }
     else {
       echo "<td>".$kustprivi['kustp2']."</td>";
@@ -1695,7 +1695,7 @@ elseif ($kutsuja == "") {
         </form>
       </td>";
 
-    // ykkˆs ja kakkos ja kolmos tason spessuja
+    // ykk√∂s ja kakkos ja kolmos tason spessuja
     if ($kukarow['taso'] == '1' or $kukarow['taso'] == '2' or $kukarow["taso"] == '3') {
       // Mahdollisuus laittaa lasku holdiin
       if ($trow['alatila'] != 'H') {
@@ -1703,7 +1703,7 @@ elseif ($kutsuja == "") {
             <form method='post'>
             <input type='hidden' name='tee' value='Z'>
             <input type='hidden' name='tunnus' value='$trow[tunnus]'>
-            <input type='submit' value='".t("Pys‰yt‰")."'>
+            <input type='submit' value='".t("Pys√§yt√§")."'>
             </form>
           </td>";
       }
@@ -1713,7 +1713,7 @@ elseif ($kutsuja == "") {
             <input type='hidden' name='tee' value='Z'>
             <input type='hidden' name='lopetus' value='$lopetus'>
             <input type='hidden' name='tunnus' value='$trow[tunnus]'>
-            <input type='Submit' value='".t("Lis‰‰ kommentti")."'>
+            <input type='Submit' value='".t("Lis√§√§ kommentti")."'>
             </form>
           </td>";
       }
@@ -1740,7 +1740,7 @@ elseif ($kutsuja == "") {
 
   echo "  <SCRIPT LANGUAGE=JAVASCRIPT>
       function verify() {
-        msg = '".t("Haluatko todella poistaa t‰m‰n laskun ja sen kaikki tiliˆinnit?")."';
+        msg = '".t("Haluatko todella poistaa t√§m√§n laskun ja sen kaikki tili√∂innit?")."';
 
         if (confirm(msg)) {
           return true;

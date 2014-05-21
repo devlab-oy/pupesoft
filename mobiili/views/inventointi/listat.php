@@ -9,7 +9,7 @@
     <tr>
       <th>Listan nro</th>
       <th>Tuotteita</th>
-      <th>Hyllyalue v‰li</th>
+      <th>Hyllyalue v√§li</th>
     </tr>
 
     <?php foreach($listat as $lista): ?>

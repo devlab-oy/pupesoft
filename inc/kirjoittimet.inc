@@ -1,4 +1,4 @@
 <?php
-$otsikko = 'Kirjoittimien ylläpito';
+$otsikko = 'Kirjoittimien yllÃ¤pito';
 $kentat = 'tunnus, kirjoitin, komento';
 $jarjestys = 'kirjoitin';

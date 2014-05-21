@@ -137,67 +137,67 @@ if ($toim == "TILAUSVAHVISTUS" and $yhtiorow["tilausvahvistus_tyyppi_tulostus"] 
   $verollisethinnat = FALSE;
 
   if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
-    $naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
+    $naytatvale = 2; // jos mell√§ on tilausvahvistuksessa kakkonen, ei haluta n√§h√§ aleja
   }
   elseif (strpos($row2['tilausvahvistus'], '11') !== FALSE) {
-    $naytatvale = 11; // jos meill‰ on tilausvahvistuksessa seiska, niin tehd‰‰n N‰ytet‰‰n asiakkaan hinta, viivakoodi ja jt-rivit normaaleina. Ei alennuksia
+    $naytatvale = 11; // jos meill√§ on tilausvahvistuksessa seiska, niin tehd√§√§n N√§ytet√§√§n asiakkaan hinta, viivakoodi ja jt-rivit normaaleina. Ei alennuksia
     if (strpos($row2['tilausvahvistus'], 'Y') !== FALSE) {
       $tuoteperheetyhdessa = TRUE;
     }
   }
   elseif (strpos($row2['tilausvahvistus'], '10') !== FALSE) {
-    $naytatvale = 10; // jos meill‰ on tilausvahvistuksessa kymppi, niin tehd‰‰n N‰ytet‰‰n asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina
+    $naytatvale = 10; // jos meill√§ on tilausvahvistuksessa kymppi, niin tehd√§√§n N√§ytet√§√§n asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina
     if (strpos($row2['tilausvahvistus'], 'Y') !== FALSE) {
       $tuoteperheetyhdessa = TRUE;
     }
   }
   elseif (strpos($row2['tilausvahvistus'], '8') !== FALSE) {
-    $naytatvale = 8; // jos meill‰ on tilausvahvistuksessa kasi, niin tehd‰‰n EAN tilausvahvistus asiakashinnalla ja ei n‰ytet‰ alennuksia
+    $naytatvale = 8; // jos meill√§ on tilausvahvistuksessa kasi, niin tehd√§√§n EAN tilausvahvistus asiakashinnalla ja ei n√§ytet√§ alennuksia
   }
   elseif (strpos($row2['tilausvahvistus'], '7') !== FALSE) {
-    $naytatvale = 7; // jos meill‰ on tilausvahvistuksessa seiska, niin tehd‰‰n EAN tilausvahvistus
+    $naytatvale = 7; // jos meill√§ on tilausvahvistuksessa seiska, niin tehd√§√§n EAN tilausvahvistus
     if (strpos($row2['tilausvahvistus'], 'Y') !== FALSE) {
       $tuoteperheetyhdessa = TRUE;
     }
   }
   elseif (strpos($row2['tilausvahvistus'], '6') !== FALSE) {
-    $naytatvale = 6; // jos meill‰ on tilausvahvistuksessa kutonen, niin tehd‰‰n customoitu tilausvahvistus
+    $naytatvale = 6; // jos meill√§ on tilausvahvistuksessa kutonen, niin tehd√§√§n customoitu tilausvahvistus
     if (strpos($row2['tilausvahvistus'], 'Y') !== FALSE) {
       $tuoteperheetyhdessa = TRUE;
     }
   }
   elseif (strpos($row2['tilausvahvistus'], '5') !== FALSE) {
-    $naytatvale = 5; // jos mell‰ on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
+    $naytatvale = 5; // jos mell√§ on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
     if (strpos($row2['tilausvahvistus'], 'Y') !== FALSE) {
       $tuoteperheetyhdessa = TRUE;
     }
   }
   elseif (strpos($row2['tilausvahvistus'], '4') !== FALSE) {
-    $naytatvale = 4; // jos mell‰ on tilausvahvistuksessa nelonen, ei haluta n‰hd‰ alennuksia, n‰ytet‰‰n tilausrivin hinta ja rivihinta
+    $naytatvale = 4; // jos mell√§ on tilausvahvistuksessa nelonen, ei haluta n√§hd√§ alennuksia, n√§ytet√§√§n tilausrivin hinta ja rivihinta
     if (strpos($row2['tilausvahvistus'], 'Y') !== FALSE) {
       $tuoteperheetyhdessa = TRUE;
     }
   }
   elseif (strpos($row2['tilausvahvistus'], '3') !== FALSE) {
-    $naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
+    $naytatvale = 3; // jos mell√§ on tilausvahvistuksessa kolmonen, ei haluta n√§hd√§ hintoja, pelk√§st√§√§n kpl-m√§√§r√§t
     if (strpos($row2['tilausvahvistus'], 'Y') !== FALSE) {
       $tuoteperheetyhdessa = TRUE;
     }
   }
   elseif (strpos($row2['tilausvahvistus'], '2') !== FALSE) {
-    $naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
+    $naytatvale = 2; // jos mell√§ on tilausvahvistuksessa kakkonen, ei haluta n√§h√§ aleja
     if (strpos($row2['tilausvahvistus'], 'Y') !== FALSE) {
       $tuoteperheetyhdessa = TRUE;
     }
   }
   elseif (strpos($row2['tilausvahvistus'], '1') !== FALSE) {
-    $naytatvale = 1; // jos mell‰ on tilausvahvistuksessa ykkˆnen, halutaan n‰h‰ alet
+    $naytatvale = 1; // jos mell√§ on tilausvahvistuksessa ykk√∂nen, halutaan n√§h√§ alet
     if (strpos($row2['tilausvahvistus'], 'Y') !== FALSE) {
       $tuoteperheetyhdessa = TRUE;
     }
   }
   else {
-    $naytatvale = 1; // halutaan n‰h‰ alet
+    $naytatvale = 1; // halutaan n√§h√§ alet
   }
 
   if (strpos($laskurow['tilausvahvistus'], 'V') !== FALSE) {
@@ -207,41 +207,41 @@ if ($toim == "TILAUSVAHVISTUS" and $yhtiorow["tilausvahvistus_tyyppi_tulostus"] 
   $tvsel[$naytatvale] = "SELECTED";
 
   echo "<tr><th>".t("Tyyppi")."</th><td><select name='seltvtyyppi'>";
-  echo "<option value = '1' $tvsel[1]>".t("N‰ytet‰‰n asiakkaan hinta ja alennus")."</option>";
-  echo "<option value = '2' $tvsel[2]>".t("N‰ytet‰‰n tuotteen myyntihinta ja alennusryhm‰")."</option>";
-  echo "<option value = '3' $tvsel[3]>".t("Ei n‰ytet‰ hintoja eik‰ alennuksia")."</option>";
-  echo "<option value = '4' $tvsel[4]>".t("N‰ytet‰‰n asiakkaan hinta")."</option>";
+  echo "<option value = '1' $tvsel[1]>".t("N√§ytet√§√§n asiakkaan hinta ja alennus")."</option>";
+  echo "<option value = '2' $tvsel[2]>".t("N√§ytet√§√§n tuotteen myyntihinta ja alennusryhm√§")."</option>";
+  echo "<option value = '3' $tvsel[3]>".t("Ei n√§ytet√§ hintoja eik√§ alennuksia")."</option>";
+  echo "<option value = '4' $tvsel[4]>".t("N√§ytet√§√§n asiakkaan hinta")."</option>";
   echo "<option value = '5' $tvsel[5]>".t("Haetaan hinnat toisesta pupesta")."</option>";
-  echo "<option value = '6' $tvsel[6]>".t("N‰ytet‰‰n asiakkaan hinta ja alennus, modifioitu tulostuspohja")."</option>";
-  echo "<option value = '7' $tvsel[7]>".t("N‰ytet‰‰n asiakkaan hinta ja alennus sek‰ EAN-viivakoodi")."</option>";
-  echo "<option value = '8' $tvsel[8]>".t("N‰ytet‰‰n bruttorivihinta ja EAN-viivakoodi")."</option>";
-  echo "<option value = '10' $tvsel[10]>".t("N‰ytet‰‰n asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina")."</option>";
-  echo "<option value = '11' $tvsel[11]>".t("N‰ytet‰‰n asiakkaan hinta, viivakoodi ja jt-rivit normaaleina. Ei alennuksia")."</option>";
+  echo "<option value = '6' $tvsel[6]>".t("N√§ytet√§√§n asiakkaan hinta ja alennus, modifioitu tulostuspohja")."</option>";
+  echo "<option value = '7' $tvsel[7]>".t("N√§ytet√§√§n asiakkaan hinta ja alennus sek√§ EAN-viivakoodi")."</option>";
+  echo "<option value = '8' $tvsel[8]>".t("N√§ytet√§√§n bruttorivihinta ja EAN-viivakoodi")."</option>";
+  echo "<option value = '10' $tvsel[10]>".t("N√§ytet√§√§n asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina")."</option>";
+  echo "<option value = '11' $tvsel[11]>".t("N√§ytet√§√§n asiakkaan hinta, viivakoodi ja jt-rivit normaaleina. Ei alennuksia")."</option>";
   echo "</select></td></tr>";
 }
 
 if ($toim == "TILAUSVAHVISTUS") {
-  echo "<tr><th>",t("N‰ytet‰‰nkˆ rivihinta"),"</th><td><select name='naytetaanko_rivihinta'>";
-  echo "<option value=''>",t("N‰ytet‰‰n rivihinta"),"</option>";
-  echo "<option value='ei_rivihintaa'>",t("Ei n‰ytet‰ rivihintaa"),"</option>";
+  echo "<tr><th>",t("N√§ytet√§√§nk√∂ rivihinta"),"</th><td><select name='naytetaanko_rivihinta'>";
+  echo "<option value=''>",t("N√§ytet√§√§n rivihinta"),"</option>";
+  echo "<option value='ei_rivihintaa'>",t("Ei n√§ytet√§ rivihintaa"),"</option>";
   echo "</select></td></tr>";
 }
 
 if ($toim == "TARJOUS") {
-  echo "<tr><th>",t("N‰ytet‰‰nkˆ verolliset vai verottomat hinnat"),"</th><td><select name='verolliset_verottomat_hinnat'>";
-  echo "<option value=''>",t("Haetaan yhtiˆn parametreist‰"),"</option>";
+  echo "<tr><th>",t("N√§ytet√§√§nk√∂ verolliset vai verottomat hinnat"),"</th><td><select name='verolliset_verottomat_hinnat'>";
+  echo "<option value=''>",t("Haetaan yhti√∂n parametreist√§"),"</option>";
   echo "<option value='verolliset'>",t("Verolliset"),"</option>";
   echo "<option value='verottomat'>",t("Verottomat"),"</option>";
   echo "</select></td></tr>";
 
-  echo "<tr><th>",t("N‰ytet‰‰nkˆ rivihinta"),"</th><td><select name='naytetaanko_rivihinta'>";
-  echo "<option value=''>",t("N‰ytet‰‰n hinnat"),"</option>";
-  echo "<option value='ei_rivihintaa'>",t("Ei n‰ytet‰ rivihintaa"),"</option>";
+  echo "<tr><th>",t("N√§ytet√§√§nk√∂ rivihinta"),"</th><td><select name='naytetaanko_rivihinta'>";
+  echo "<option value=''>",t("N√§ytet√§√§n hinnat"),"</option>";
+  echo "<option value='ei_rivihintaa'>",t("Ei n√§ytet√§ rivihintaa"),"</option>";
   echo "<option value='kokonaan_ilman_hintoja'>",t("Kokonaan ilman hintoja"),"</option>";
   echo "</select></td></tr>";
 
-  echo "<tr><th>",t("N‰ytet‰‰nkˆ tuotenumerot"),"</th><td><select name='naytetaanko_tuoteno'>";
-  echo "<option value=''>",t("Kyll‰"),"</option>";
+  echo "<tr><th>",t("N√§ytet√§√§nk√∂ tuotenumerot"),"</th><td><select name='naytetaanko_tuoteno'>";
+  echo "<option value=''>",t("Kyll√§"),"</option>";
   echo "<option value='ei'>",t("Ei"),"</option>";
   echo "</select></td></tr>";
 }
@@ -330,7 +330,7 @@ foreach ($tulostimet as $tulostin) {
   }
 
   if ($toim == "PROFORMA" or $toim == "VIENTILASKU") {
-    echo "<tr><th>",t("Tulosta myˆs tullinimike ja alkuper‰maa")."</th>";
+    echo "<tr><th>",t("Tulosta my√∂s tullinimike ja alkuper√§maa")."</th>";
     echo "<td><input type='checkbox' name='tullinimike_ja_alkuperamaa' /></td></tr>";
   }
 
@@ -340,9 +340,9 @@ foreach ($tulostimet as $tulostin) {
   echo "<option value='PDF_RUUDULLE'>".t('PDF Ruudulle')."</option>";
 
   if (($toim == 'TARJOUS' or $toim == 'MYYNTISOPIMUS' or $toim == 'LAHETE' or $toim == 'TILAUSVAHVISTUS' or $toim == 'LASKU') and $asrow['email'] != '') {
-    echo "<option value='asiakasemail$asrow[email]'>".t("Asiakkaan s‰hkˆpostiin").": $asrow[email]</option>";
+    echo "<option value='asiakasemail$asrow[email]'>".t("Asiakkaan s√§hk√∂postiin").": $asrow[email]</option>";
     if ($toim == 'LASKU' and trim($asrow['lasku_email']) != '') {
-      echo "<option value='asiakasemail$asrow[lasku_email]'>".t("Asiakkaan laskutuss‰hkˆpostiin").": $asrow[lasku_email]</option>";
+      echo "<option value='asiakasemail$asrow[lasku_email]'>".t("Asiakkaan laskutuss√§hk√∂postiin").": $asrow[lasku_email]</option>";
     }
   }
 
@@ -384,9 +384,9 @@ foreach ($tulostimet as $tulostin) {
   echo "</select></td>";
   echo "</tr>";
 
-  if ($tulostin == 'Tyˆm‰‰r‰ys' and $kukarow['hinnat'] == 0) {
+  if ($tulostin == 'Ty√∂m√§√§r√§ys' and $kukarow['hinnat'] == 0) {
 
-    echo "<tr><th rowspan='2'>".t("Tyˆm‰‰r‰ystyyppi")."</th><td>";
+    echo "<tr><th rowspan='2'>".t("Ty√∂m√§√§r√§ystyyppi")."</th><td>";
     echo "<select name='tyomtyyppi'>";
 
     $sel = array();
@@ -397,10 +397,10 @@ foreach ($tulostimet as $tulostin) {
     echo "<option value = 'O' $sel[O]>".t("Tuotetiedot")."</option>";
     echo "<option value = 'P' $sel[P]>".t("Tuotetiedot ja varastopaikka")."</option>";
 
-    // Katsotaan onko Zebra-tulostinta k‰ytˆss‰.
-    // Oletetaan ett‰ silloin merkistˆ ei ole 0
+    // Katsotaan onko Zebra-tulostinta k√§yt√∂ss√§.
+    // Oletetaan ett√§ silloin merkist√∂ ei ole 0
 
-    if ($seepra) echo "<option value = 'Z'>",t("Tyˆm‰‰r‰ystarra Zebra"),"</option>";
+    if ($seepra) echo "<option value = 'Z'>",t("Ty√∂m√§√§r√§ystarra Zebra"),"</option>";
 
     echo "</select>";
     echo "</td></tr>";
@@ -437,7 +437,7 @@ foreach ($tulostimet as $tulostin) {
     echo "</select>";
     echo "</td></tr>";
 
-    echo "<tr><th rowspan='$colspanni'>".t("J‰rjestele purkulista")."</th>";
+    echo "<tr><th rowspan='$colspanni'>".t("J√§rjestele purkulista")."</th>";
 
     if ($yhtiorow['suuntalavat'] == 'S' and $toim != 'REKLAMAATIO') {
       echo "<td><input type='radio' name='sorttaus' value='indeksi' checked='checked' />",t("hyllypaikan indeksin mukaan"),"</td></tr><tr>";
@@ -460,14 +460,14 @@ foreach ($tulostimet as $tulostin) {
     }
 
     echo "<tr><th rowspan='$span'>".t("Tulostettavat rivit")."</th><td><input type='radio' name='mitkarivit' value='kaikki'> ".t("kaikki rivit")."</td></tr>";
-    echo "<tr><td><input type='radio' name='mitkarivit' value='viematta' CHECKED> ".t("saldoille viem‰tt‰ olevat rivit")."</td></tr>";
+    echo "<tr><td><input type='radio' name='mitkarivit' value='viematta' CHECKED> ".t("saldoille viem√§tt√§ olevat rivit")."</td></tr>";
     echo "<tr><td><input type='radio' name='mitkarivit' value='viedyt'> ".t("saldoille viedyt rivit")."</td></tr>";
     if ($yhtiorow['viivakoodi_purkulistaan'] == 'K') {
       echo "<tr><td><input type='radio' name='mitkarivit' value='koodittomat'> ".t("Viivakoodittomat rivit")."</td></tr>";
     }
 
     echo "<tr>";
-    echo "<th>".t("Tee excel tullinimikkeist‰")."</th>";
+    echo "<th>".t("Tee excel tullinimikkeist√§")."</th>";
 
     echo "<td>";
     echo "<input type='checkbox' name='tee_excel' value='1' />";
@@ -477,13 +477,13 @@ foreach ($tulostimet as $tulostin) {
 }
 
 if (isset($laskurow) and $laskurow['kirjoitin'] == "edi") {
-  echo "<tr><td colspan='2' class='back'><font class='error'>".t("HUOM: EDI-tiedosto on jo kerran l‰hetetty toimittajalle")."!</font></td><tr>";
+  echo "<tr><td colspan='2' class='back'><font class='error'>".t("HUOM: EDI-tiedosto on jo kerran l√§hetetty toimittajalle")."!</font></td><tr>";
 }
 
 echo "</table><br><input type='submit' name='tulosta' value='".t("Tulosta")."'></form>";
 
 if (strpos($_SERVER['SCRIPT_NAME'], "keikka.php") === FALSE) {
-  //lopetetaan t‰h‰n, muuten esim rivit.inc nollaa kukarow[kesken] muuttujan ja moni muukin asia toimisi kovin heikosti...
+  //lopetetaan t√§h√§n, muuten esim rivit.inc nollaa kukarow[kesken] muuttujan ja moni muukin asia toimisi kovin heikosti...
   require("inc/footer.inc");
   exit;
 }

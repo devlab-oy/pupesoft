@@ -57,7 +57,7 @@ function hae_ostotilauksen_tilausrivien_toimittajien_saldot(tilausnumero) {
     }
   }).fail(function(data) {
     if (console && console.log) {
-      console.log('Saldojen haku EPÄONNISTUI');
+      console.log('Saldojen haku EPÃ„ONNISTUI');
     }
   });
 }

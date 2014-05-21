@@ -5,10 +5,10 @@ if (isset($_POST["tee"])) {
   if(isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 }
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-// Ei k‰ytet‰ pakkausta
+// Ei k√§ytet√§ pakkausta
 $compression = FALSE;
 
 require ("../inc/parametrit.inc");
@@ -19,7 +19,7 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
   exit;
 }
 
-echo "<font class=head>".t("Tuotteet joiden tulossa oleva saldo ei riit‰")."</font><hr>";
+echo "<font class=head>".t("Tuotteet joiden tulossa oleva saldo ei riit√§")."</font><hr>";
 
 if ($ytunnus != '') {
   $toimittajaid = "";
@@ -34,7 +34,7 @@ else {
   $toimittajaid = "";
 }
 
-// k‰yttis
+// k√§yttis
 echo "<br><form method='POST'>";
 echo "<input type='hidden' name='tee' value='raportoi'>";
 echo "<table>";
@@ -82,7 +82,7 @@ if ($tee != "" and isset($painoinnappia)) {
 
   if (@include('Spreadsheet/Excel/Writer.php')) {
 
-    //keksit‰‰n failille joku varmasti uniikki nimi:
+    //keksit√§√§n failille joku varmasti uniikki nimi:
     list($usec, $sec) = explode(' ', microtime());
     mt_srand((float) $sec + ((float) $usec * 100000));
     $excelnimi = md5(uniqid(mt_rand(), true)).".xls";
@@ -100,7 +100,7 @@ if ($tee != "" and isset($painoinnappia)) {
 
   $vajaasaldot_table = "<table>";
   $vajaasaldot_table .= "<th>".t("Osasto")."</th>";
-  $vajaasaldot_table .= "<th>".t("Tuoteryhm‰")."</th>";
+  $vajaasaldot_table .= "<th>".t("Tuoteryhm√§")."</th>";
   $vajaasaldot_table .= "<th>".t("Tuoteno")."</th>";
   $vajaasaldot_table .= "<th>".t("Nimitys")."</th>";
   $vajaasaldot_table .= "<th>".t("Varastosaldo")."</th>";
@@ -111,7 +111,7 @@ if ($tee != "" and isset($painoinnappia)) {
   if (isset($workbook)) {
     $excelsarake = 0;
     $worksheet->writeString($excelrivi, $excelsarake++, t("Osasto"));
-    $worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteryhm‰"));
+    $worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteryhm√§"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteno"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("Varastosaldo"));
@@ -139,7 +139,7 @@ if ($tee != "" and isset($painoinnappia)) {
 
   if ($total_rows > 0) {
 
-    echo "<font class='message'>", t("K‰sitell‰‰n"), " $total_rows ", t("tuotetta"), ".</font>";
+    echo "<font class='message'>", t("K√§sitell√§√§n"), " $total_rows ", t("tuotetta"), ".</font>";
     require('inc/ProgressBar.class.php');
 
     $bar = new ProgressBar();
@@ -160,7 +160,7 @@ if ($tee != "" and isset($painoinnappia)) {
       $ostoresult = pupe_query($query);
       $ostorivi = mysql_fetch_assoc($ostoresult);
 
-      // Ajetaan saldomyyt‰viss‰ niin, ett‰ JT-rivej‰ ei huomioida suuntaaan eik‰ toiseen
+      // Ajetaan saldomyyt√§viss√§ niin, ett√§ JT-rivej√§ ei huomioida suuntaaan eik√§ toiseen
       list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], 'JTSPEC');
 
       $query = "SELECT sum(jt $lisavarattu) jt
@@ -239,7 +239,7 @@ if ($tee != "" and isset($painoinnappia)) {
   }
 
   if ($total_rows == 0 or $current_row == 0) {
-    echo "<font class='message'>", t("Yht‰‰n soveltuvaa tuotetta ei lˆytynyt"), ".</font>";
+    echo "<font class='message'>", t("Yht√§√§n soveltuvaa tuotetta ei l√∂ytynyt"), ".</font>";
   }
 }
 

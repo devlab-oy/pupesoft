@@ -1,5 +1,5 @@
 <?php
-// Katsotaan tyyppi $tilausrivityyppi kentästä ja annetaan se selväkielisenä takaisin
+// Katsotaan tyyppi $tilausrivityyppi kentÃ¤stÃ¤ ja annetaan se selvÃ¤kielisenÃ¤ takaisin
 
 switch ($tilausrivityyppi) {
   case "0":
@@ -9,7 +9,7 @@ switch ($tilausrivityyppi) {
     $tilausrivityyppi = "Ostoskori";
     break;
   case "D":
-    $tilausrivityyppi = "Mitätöity";
+    $tilausrivityyppi = "MitÃ¤tÃ¶ity";
     break;
   case "E":
     $tilausrivityyppi = "Enakkotilaus";

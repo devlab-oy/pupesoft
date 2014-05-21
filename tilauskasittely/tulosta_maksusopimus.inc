@@ -64,7 +64,7 @@ if (!function_exists('tulosta_maksusopimus')) {
     $query_ale_lisa = generoi_alekentta('M');
 
     // Lasketaan maksusopimuksen arvo verokannoittain jotta voidaan laskuttaa ennakot oikeissa alveissa
-    // ja lis‰t‰‰n ennakkolaskutusrivi laskulle, vain jaksotetut rivit!
+    // ja lis√§t√§√§n ennakkolaskutusrivi laskulle, vain jaksotetut rivit!
     $query = "SELECT
               sum(if (tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if ('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)) jaksotettavaa
               FROM lasku
@@ -91,10 +91,10 @@ if (!function_exists('tulosta_maksusopimus')) {
 
     $pdf->draw_rectangle(713, 25, 695, 565, $page, $rectparam);
 
-    $pdf->draw_text(30, 700, t("Er‰nro", $kieli), $page, $boldi);
+    $pdf->draw_text(30, 700, t("Er√§nro", $kieli), $page, $boldi);
     $pdf->draw_text(100, 700, t("Summa", $kieli), $page, $boldi);
     $pdf->draw_text(160, 700, t("Osuus", $kieli), $page, $boldi);
-    $pdf->draw_text(210, 700, t("Lis‰tiedot", $kieli), $page, $boldi);
+    $pdf->draw_text(210, 700, t("Lis√§tiedot", $kieli), $page, $boldi);
     $pdf->draw_text(390, 700, t("Ohje", $kieli), $page, $boldi);
 
     $i = 1;
@@ -114,7 +114,7 @@ if (!function_exists('tulosta_maksusopimus')) {
           $posrow_valisumma = ($row['summa'] * (1 + ($row['alv'] / 100)) - $row['summa']) * ($posrow['osuus'] / 100);
         }
 
-        // $summa on verollinen tai veroton riippuen yhtiˆn myyntihinnoista
+        // $summa on verollinen tai veroton riippuen yhti√∂n myyntihinnoista
         $summa += ($row["summa"] / $sumrow["jaksotettavaa"] * $posrow["summa"]) + $posrow_valisumma;
       }
 
@@ -128,10 +128,10 @@ if (!function_exists('tulosta_maksusopimus')) {
 
         $pdf->draw_rectangle(713, 25, 695, 565, $page, $rectparam);
 
-        $pdf->draw_text(30, 700, t("Er‰nro", $kieli), $page, $boldi);
+        $pdf->draw_text(30, 700, t("Er√§nro", $kieli), $page, $boldi);
         $pdf->draw_text(100, 700, t("Summa", $kieli), $page, $boldi);
         $pdf->draw_text(160, 700, t("Osuus", $kieli), $page, $boldi);
-        $pdf->draw_text(210, 700, t("Lis‰tiedot", $kieli), $page, $boldi);
+        $pdf->draw_text(210, 700, t("Lis√§tiedot", $kieli), $page, $boldi);
         $pdf->draw_text(390, 700, t("Ohje", $kieli), $page, $boldi);
 
         $kala = 680;
@@ -187,14 +187,14 @@ if (!function_exists('tulosta_maksusopimus')) {
     $y[0] = $y[1] = $kala - 30;
     $pdf->draw_line($x, $y, $page, $rectparam);
 
-    $pdf->draw_text(330, $kala, t("Myyj‰n allekirjoitus", $kieli), $page, $boldi);
+    $pdf->draw_text(330, $kala, t("Myyj√§n allekirjoitus", $kieli), $page, $boldi);
 
     $x[0] = 330;
     $x[1] = 480;
     $y[0] = $y[1] = $kala - 30;
     $pdf->draw_line($x, $y, $page, $rectparam);
 
-    //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+    //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
     list($usec, $sec) = explode(' ', microtime());
     mt_srand((float) $sec + ((float) $usec * 100000));
     $pdf_filenimi = "/tmp/Maksusopimus-".md5(uniqid(mt_rand(), true)).".pdf";

@@ -34,23 +34,30 @@ $query = "SELECT lasku.*,
           laskun_lisatiedot.laskutus_postino,
           laskun_lisatiedot.laskutus_postitp,
           laskun_lisatiedot.laskutus_maa,
-          if (lasku.tila = 'L' and lasku.laskunro > 0, (SELECT lasku.mapvm FROM lasku l WHERE l.yhtio = lasku.yhtio AND l.laskunro = lasku.laskunro AND l.tila = 'U' limit 1), lasku.mapvm) mapvm,
-          if (lasku.tila = 'U', (  SELECT group_concat(distinct alv SEPARATOR ' ')
-                      FROM tilausrivi use index (uusiotunnus_index)
-                      WHERE tilausrivi.yhtio      = lasku.yhtio
-                      AND tilausrivi.uusiotunnus  = lasku.tunnus
-                      and tilausrivi.var         != 'O'
-                      AND tilausrivi.tyyppi      != 'D'),
-                      ( SELECT group_concat(distinct alv SEPARATOR ' ')
-                      FROM tilausrivi use index (yhtio_otunnus)
-                      WHERE tilausrivi.yhtio      = lasku.yhtio
-                      AND tilausrivi.otunnus      = lasku.tunnus
-                      and tilausrivi.var         != 'O'
-                      AND tilausrivi.tyyppi      != 'D')) alv
-          
+          if (lasku.tila = 'L' and lasku.laskunro > 0,
+                (   SELECT lasku.mapvm
+                    FROM lasku l
+                    WHERE l.yhtio = lasku.yhtio
+                    AND l.laskunro = lasku.laskunro
+                    AND l.tila = 'U'
+                    LIMIT 1), lasku.mapvm) mapvm,
+          if (lasku.tila = 'U',
+                (   SELECT group_concat(distinct alv SEPARATOR ' ')
+                    FROM tilausrivi use index (uusiotunnus_index)
+                    WHERE tilausrivi.yhtio = lasku.yhtio
+                    AND tilausrivi.uusiotunnus = lasku.tunnus
+                    AND tilausrivi.var != 'O'
+                    AND tilausrivi.tyyppi != 'D'),
+                (   SELECT group_concat(distinct alv SEPARATOR ' ')
+                    FROM tilausrivi use index (yhtio_otunnus)
+                    WHERE tilausrivi.yhtio = lasku.yhtio
+                    AND tilausrivi.otunnus = lasku.tunnus
+                    AND tilausrivi.var != 'O'
+                    AND tilausrivi.tyyppi != 'D')) alv
           FROM lasku
-          LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
-          WHERE lasku.tunnus                      = '$tunnus'
+          LEFT JOIN laskun_lisatiedot
+          ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
+          WHERE lasku.tunnus = '$tunnus'
           $lis
           and lasku.yhtio='$kukarow[yhtio]'";
 $aresult = pupe_query($query);
@@ -824,11 +831,12 @@ else {
 
   // Tilausrivit
   $query = "SELECT tilausrivin_lisatiedot.*, tilausrivi.*,
-            tilausrivi.kpl m‰‰r‰,
+            tilausrivi.kpl,
             if (tuotetyyppi='K','Tyˆ','Varaosa') tuotetyyppi,
             tuote.myyntihinta,
             tuote.kehahin,
             tuote.sarjanumeroseuranta,
+            tuote.tuoteno,
             tuote.myyntihinta_maara,
             tuote.status,
             tuote.ei_saldoa,
@@ -988,7 +996,7 @@ else {
 
     //Haetaan sarjanumeron tiedot
     if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
-      if ($row["m‰‰r‰"] + $row["varattu"] > 0){
+      if ($row["kpl"] + $row["varattu"] > 0){
         $sarjanutunnus = "ostorivitunnus";
       }
       else {
@@ -999,13 +1007,13 @@ else {
       if ($laskurow["tila"] == "G") {
         $sarjanutunnus = "siirtorivitunnus";
       }
-      elseif ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["varattu"] + $row["m‰‰r‰"] < 0 and $row["var2"] == "EIOST") {
+      elseif ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["varattu"] + $row["kpl"] < 0 and $row["var2"] == "EIOST") {
         $sarjanutunnus = "ostorivitunnus";
       }
-      elseif ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["varattu"] + $row["m‰‰r‰"] < 0) {
+      elseif ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["varattu"] + $row["kpl"] < 0) {
         $sarjanutunnus = "myyntirivitunnus";
       }
-      elseif ($row["varattu"] + $row["m‰‰r‰"] < 0) {
+      elseif ($row["varattu"] + $row["kpl"] < 0) {
         $sarjanutunnus = "ostorivitunnus";
       }
       else {
@@ -1297,8 +1305,8 @@ else {
 
     echo "<td $class align='right' valign='top' nowrap>".($row["tilkpl"]*1)."</td>";
 
-    if ($row["m‰‰r‰"] != 0) {
-      $kpl_ruudulle = $row['m‰‰r‰'] * 1;
+    if ($row["kpl"] != 0) {
+      $kpl_ruudulle = $row['kpl'] * 1;
     }
     elseif ($row["var"] == 'J') {
       $kpl_ruudulle = $row['jt'] * 1;
@@ -1330,9 +1338,9 @@ else {
     echo "<td $classvar align='center' valign='top'>$row[var]&nbsp;</td>";
     echo "<td $class align='center' valign='top'>$row[netto]&nbsp;</td>";
 
-    $kpl         = $row["varattu"]+$row["jt"]+$row['m‰‰r‰'];
-    $myyntihinta  = hintapyoristys(tuotteen_myyntihinta($laskurow, $trow, 1));
-    $bruttorivi    = $row["hinta"] * $kpl;
+    $kpl = $row["varattu"]+$row["jt"]+$row['kpl'];
+    $myyntihinta = hintapyoristys(tuotteen_myyntihinta($laskurow, $trow, 1));
+    $bruttorivi = $row["hinta"] * $kpl;
 
     if ($kukarow['hinnat'] == 1) {
       echo "<td $class align='right' valign='top' nowrap>$myyntihinta</td>";
@@ -1390,10 +1398,11 @@ else {
 
       if ($laskurow["tapvm"] != '0000-00-00') {
 
-        if ($row["m‰‰r‰"] == 0) {
+        if ($row["kpl"] == 0) {
           $kate = "";
         }
         elseif ($row["rivihinta"] != 0) {
+          $row["kate"] = kate_kuluineen($row["tuoteno"], $row["rivihinta"], $row["kate"]);
           if ($row["kate"] < 0) {
             $kate = sprintf('%.2f', -1 * abs(100 * $row["kate"] / $row["rivihinta"]))."%";
           }
@@ -1411,7 +1420,7 @@ else {
         if ($kpl > 0) {
           //Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on myynti‰
           $ostohinta = sarjanumeron_ostohinta("myyntirivitunnus", $row["tunnus"]);
-
+          $ostohinta = hinta_kuluineen($row["tuoteno"], $ostohinta);
           // Kate = Hinta - Ostohinta
           if ($row["rivihinta"] != 0) {
             $kate = sprintf('%.2f',100*($row["rivihinta"] - ($ostohinta * $kpl))/$row["rivihinta"])."%";
@@ -1453,8 +1462,8 @@ else {
                       LIMIT 1";
             $sarjares1 = pupe_query($query);
             $sarjarow1 = mysql_fetch_assoc($sarjares1);
-
-            $ostohinta += $sarjarow1["ostohinta"];
+            $oh = hinta_kuluineen($arow['tuoteno'], $sarjarow1['ostohinta']);
+            $ostohinta += $oh;
           }
 
           // Kate = Hinta - Alkuper‰inen ostohinta
@@ -1477,13 +1486,15 @@ else {
           $kate = "";
         }
         elseif ($row["rivihinta"] != 0) {
-          $kate = sprintf('%.2f',100*($row["rivihinta"] - (kehahin($row["tuoteno"])*($row["varattu"]+$row["jt"]+$row['m‰‰r‰'])))/$row["rivihinta"])."%";
+          $khh = kehahin($row["tuoteno"]);
+          $khh = hinta_kuluineen($row["tuoteno"], $khh);
+          $kate = round(100 * ($row["rivihinta"] - ($khh*($row["varattu"]+$row["jt"]+$row["kpl"]))) / $row["rivihinta"], 2) . "%";
         }
         elseif (kehahin($row["tuoteno"]) != 0) {
           $kate = "-100.00%";
         }
 
-        if ($row["tyyppi"] != "V" and $row["tuoteno"] != $yhtiorow["ennakkomaksu_tuotenumero"]) $kate_yht += ($row["rivihinta"] - (kehahin($row["tuoteno"])*($row["varattu"]+$row["jt"]+$row['m‰‰r‰'])));
+        if ($row["tyyppi"] != "V" and $row["tuoteno"] != $yhtiorow["ennakkomaksu_tuotenumero"]) $kate_yht += ($row["rivihinta"] - (kehahin($row["tuoteno"])*($row["varattu"]+$row["jt"]+$row['kpl'])));
       }
 
       echo "<td $class align='right' valign='top' nowrap>$kate</td>";
@@ -1640,7 +1651,12 @@ else {
 
     $colspan += $yhtiorow['myynnin_alekentat'] - 1;
 
-    echo "<tr><td class='back' colspan='$colspan'></td><td class='spec' colspan='3' align='right' nowrap>".t("Veroton yhteens‰").":</td><td class='spec' align='right'>".sprintf('%.2f',$arvo_yht)."</td><td class='spec'>$laskurow[valkoodi]</td></tr>";
+    echo "<tr>
+        <td class='back' colspan='$colspan'></td>
+        <td class='spec' colspan='3' align='right' nowrap>".t("Veroton yhteens‰").":</td>
+        <td class='spec' align='right'>".sprintf('%.2f',$arvo_yht)."</td>
+        <td class='spec'>$laskurow[valkoodi]</td>
+      </tr>";
 
 
     // Haetaan kaikki alvikannat riveilt‰

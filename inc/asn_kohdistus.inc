@@ -360,10 +360,10 @@ if (!function_exists("asn_kohdistus")) {
 
           // päivitetään tilausrivin tunnus talteen asn_sanomat-tauluun, koska tämä kohdistuu kyseiseen riviin
           $updatequery = "UPDATE asn_sanomat SET
-           tilausrivi  = '{$siistitty},{$extraa}',
-           tuoteno     = '{$tilausrivirow['tuoteno']}'
-           WHERE yhtio = '{$kukarow['yhtio']}'
-           AND tunnus  = '{$row['tunnus']}'";
+                          tilausrivi  = '{$siistitty},{$extraa}',
+                          tuoteno     = '{$tilausrivirow['tuoteno']}'
+                          WHERE yhtio = '{$kukarow['yhtio']}'
+                          AND tunnus  = '{$row['tunnus']}'";
           $upd_res = pupe_query($updatequery);
           $kaytetyt_tilausrivit[] = $extraa;
           $paketin_rivit[]    = $extraa;
@@ -397,10 +397,10 @@ if (!function_exists("asn_kohdistus")) {
 
           // päivitetään tilausrivin tunnus talteen asn_sanomat-tauluun, koska tämä kohdistuu kyseiseen riviin
           $updatequery = "UPDATE asn_sanomat SET
-           tilausrivi  = '{$siistitty}',
-           tuoteno     = '{$tilausrivirow['tuoteno']}'
-           WHERE yhtio = '{$kukarow['yhtio']}'
-           AND tunnus  = '{$row['tunnus']}'";
+                          tilausrivi  = '{$siistitty}',
+                          tuoteno     = '{$tilausrivirow['tuoteno']}'
+                          WHERE yhtio = '{$kukarow['yhtio']}'
+                          AND tunnus  = '{$row['tunnus']}'";
           $upd_res = pupe_query($updatequery);
 
           // Satula-Runko case
@@ -449,10 +449,10 @@ if (!function_exists("asn_kohdistus")) {
 
           // päivitetään tilausrivin tunnus talteen asn_sanomat-tauluun, koska tämä kohdistuu kyseiseen riviin
           $updatequery = "UPDATE asn_sanomat SET
-           tilausrivi  = '{$siistitty}',
-           tuoteno     = '{$tilausrivirow['tuoteno']}'
-           WHERE yhtio = '{$kukarow['yhtio']}'
-           AND tunnus  = '{$row['tunnus']}'";
+                          tilausrivi  = '{$siistitty}',
+                          tuoteno     = '{$tilausrivirow['tuoteno']}'
+                          WHERE yhtio = '{$kukarow['yhtio']}'
+                          AND tunnus  = '{$row['tunnus']}'";
           $upd_res = pupe_query($updatequery);
 
           // Satula-Runko case

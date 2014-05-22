@@ -94,9 +94,9 @@ if ($tee == "valmis") {
             // JÄMÄHAARA
             if ($paljon_pitaa_mahtua_muualle != 'kaikki') {
               $update_query = "UPDATE tilausrivi SET
-               varattu     = '{$montako_tuotetta_mahtuu}'
-               WHERE yhtio = '{$kukarow['yhtio']}'
-               AND tunnus  = '{$tilausrivirow['tunnus']}'";
+                               varattu     = '{$montako_tuotetta_mahtuu}'
+                               WHERE yhtio = '{$kukarow['yhtio']}'
+                               AND tunnus  = '{$tilausrivirow['tunnus']}'";
               $update_res = pupe_query($update_query);
 
               $insert_query = "INSERT INTO tilausrivi SET ";

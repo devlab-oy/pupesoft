@@ -10,8 +10,8 @@ require 'base64'
 
 class SiirtokehotusPDF
   @margin = nil
-  @data = nil
-  @pdf = nil
+  @data   = nil
+  @pdf    = nil
 
   def initialize
     @margin = 20
@@ -26,20 +26,20 @@ class SiirtokehotusPDF
   def rows
 
     row_headers
-    @data.each_with_index do |r,i|
+    @data.each_with_index do |r, i|
       @vp_size = r['varapaikat'].size
-      if @pdf.cursor < ( 15 + @vp_size * 15 )
+      if @pdf.cursor < (15 + @vp_size * 15)
         @pdf.start_new_page
         row_headers
       end
-      oletus_row(r,i)
+      oletus_row(r, i)
     end
   end
 
   def row_headers
     @pdf.font 'Helvetica', :style => :bold, :size => 8
     @pdf.float do
-        @pdf.text "Tyyppi"
+      @pdf.text "Tyyppi"
     end
     @pdf.float do
       @pdf.indent(100) do
@@ -56,7 +56,7 @@ class SiirtokehotusPDF
         @pdf.text "Hyllyssä"
       end
     end
-     @pdf.float do
+    @pdf.float do
       @pdf.indent(400) do
         @pdf.text "Hälytysraja"
       end
@@ -68,48 +68,48 @@ class SiirtokehotusPDF
     @pdf.move_down 10
   end
 
-  def oletus_row(r,i)
+  def oletus_row(r, i)
     @pdf.float do
-         @pdf.text "Oletuspaikka"
+      @pdf.text "Oletuspaikka"
     end
     @pdf.float do
       @pdf.indent(100) do
-         @pdf.text r['tuoteno']
+        @pdf.text r['tuoteno']
       end
     end
     @pdf.float do
       @pdf.indent(200) do
-         @pdf.text r['tuotepaikka']
+        @pdf.text r['tuotepaikka']
       end
     end
     @pdf.float do
       @pdf.indent(300) do
-         @pdf.text r['hyllyssa']
+        @pdf.text r['hyllyssa']
       end
     end
     @pdf.float do
       @pdf.indent(400) do
-         @pdf.text r['haly']
+        @pdf.text r['haly']
       end
     end
     @pdf.move_down 15
-    r['varapaikat'].each_with_index do |r,i|
-      vara_row(r,i)
+    r['varapaikat'].each_with_index do |r, i|
+      vara_row(r, i)
     end
   end
 
-  def vara_row(r,i)
+  def vara_row(r, i)
     @pdf.float do
-         @pdf.text "Varapaikka"
+      @pdf.text "Varapaikka"
     end
     @pdf.float do
       @pdf.indent(200) do
-         @pdf.text r['tuotepaikka']
+        @pdf.text r['tuotepaikka']
       end
     end
     @pdf.float do
       @pdf.indent(300) do
-         @pdf.text r['hyllyssa']
+        @pdf.text r['hyllyssa']
       end
     end
 
@@ -121,9 +121,6 @@ class SiirtokehotusPDF
     @pdf.move_down 15
   end
 
-
-
-
   def data=(data)
     @data = data
   end
@@ -134,17 +131,17 @@ if !ARGV[0].empty?
 
   @data = JSON.load(File.read(ARGV[0]))
 
-      file          = ''
-      margin        = 20
-      _pdf          = Prawn::Document.new(:page_size   => 'A4',
-                                          :page_layout => :portrait,
-                                          :margin      => margin
-      )
+  file   = ''
+  margin = 20
+  _pdf   = Prawn::Document.new(:page_size   => 'A4',
+                               :page_layout => :portrait,
+                               :margin      => margin
+  )
 
-    pdf      = SiirtokehotusPDF.new
-    pdf.data = @data
-    file = pdf.generate _pdf
-    _pdf.render_file "/tmp/#{file}"
-    puts file
+  pdf      = SiirtokehotusPDF.new
+  pdf.data = @data
+  file     = pdf.generate _pdf
+  _pdf.render_file "/tmp/#{file}"
+  puts file
 
 end

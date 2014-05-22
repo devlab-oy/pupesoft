@@ -455,43 +455,12 @@ $toimittamatta = $kpl; //N‰in paljon ollaan toimittamassa
 
 if ($lisaarivi_debug == 1) echo "Tilattu m‰‰r‰: $toimittamatta<br>";
 
-// Jos kyseess‰ on rivi joka halutaan tilata ihan normaalisti joltain toimittajalta
-if (substr($paikka,0,3) == "°°°") {
-  $var          = "T";
-  $toimittajan_tunnus  = substr($paikka, 3);
-  $paikka         = "#!°!#";
-}
-elseif ($var == "T" and substr($paikka,0,3) != "°°°" and substr($paikka,0,3) != "!!!") {
-  $var         = "";
-  $toimittajan_tunnus  = "";
-}
-
-if (substr($paikka,0,3) == "!!!") {
-  $var          = "U";
-  $toimittajan_tunnus  = substr($paikka, 3);
-  $paikka         = "";
-}
-elseif ($var == "U" and substr($paikka,0,3) != "!!!") {
-  $var         = "";
-  $toimittajan_tunnus  = "";
-}
-
-// Jos kyseess‰ on rivi joka halutaan tilata ihan normaalisti joltain toimittajalta
-if (substr($paikka,0,3) == "°°V") {
-  $var          = "R";
-  $paikka         = substr($paikka, 3);
-}
-elseif ($var == "R" and substr($paikka,0,3) != "°°V" and substr($paikka,0,3) != "°°V") {
-  $var         = "";
-  $toimittajan_tunnus  = "";
-}
-
 // Jos kyseess‰ on rivi joka halutaan siirt‰‰ varastosiirtona (siirtolista) var = S
 $kohde_varasto_update = "";
 $paivita_hyllyt_varastosiirto = false;
-if (substr($paikka,0,3) == "°°S") {
+if (substr($paikka, 0, 3) == "°°S") {
   $paivita_hyllyt_varastosiirto = true;
-  $var          = "S";
+  $var = "S";
   $varasto_tunnukset = explode('°°S', $paikka);
   //$varasto_tunnukset: 0 = tyhj‰, 1 = avainsana.tunnus, 2 = lahdevarasto.tunnus, 3 = kohdevarasto.tunnus
   $toimittajan_tunnus = $varasto_tunnukset[1];
@@ -550,16 +519,16 @@ if (substr($paikka,0,3) == "°°S") {
     }
   }
 }
-elseif ($var == "S" and substr($paikka,0,3) != "°°S" and substr($paikka,0,3) != "°°S") {
+elseif ($var == "S" and substr($paikka, 0, 3) != "°°S" and substr($paikka, 0, 3) != "°°S") {
   $paivita_hyllyt_varastosiirto = false;
-  $var         = "";
-  $toimittajan_tunnus  = "";
+  $var = "";
+  $toimittajan_tunnus = "";
   $kohde_varasto_update = " tilausrivin_lisatiedot.kohde_hyllyalue = '0',
                             tilausrivin_lisatiedot.kohde_hyllynro = '0',
                             tilausrivin_lisatiedot.kohde_hyllytaso = '0',
                             tilausrivin_lisatiedot.kohde_hyllyvali = '0',";
 
-  if (!empty($perheid) and !empty($paikka)) {
+  if (!empty($perheid) and !empty($paikka) and substr($paikka, 0, 3) != "°°°") {
     $query = "SELECT *
               FROM tilausrivi
               WHERE yhtio = '{$kukarow['yhtio']}'
@@ -594,8 +563,7 @@ elseif ($var == "S" and substr($paikka,0,3) != "°°S" and substr($paikka,0,3) != 
       pupe_query($query);
     }
   }
-
-  if (!empty($perheid) and empty($paikka)) {
+  else if (!empty($perheid) and empty($paikka) and substr($paikka, 0, 3) != "°°°") {
     $query = "SELECT *
               FROM tilausrivi
               WHERE yhtio = '{$kukarow['yhtio']}'
@@ -607,7 +575,7 @@ elseif ($var == "S" and substr($paikka,0,3) != "°°S" and substr($paikka,0,3) != 
       $tuotepaikkojen_saldot = varaston_tuotepaikkojen_saldo($lapsirivi['tuoteno'], array($laskurow['varasto']));
       $lahdevarasto_tuotepaikka = $tuotepaikkojen_saldot[0];
       $query = "UPDATE tilausrivi
-                SET var = '',
+                SET var = 'P',
                 hyllyalue = '{$lahdevarasto_tuotepaikka['hyllyalue']}',
                 hyllynro = '{$lahdevarasto_tuotepaikka['hyllynro']}',
                 hyllyvali = '{$lahdevarasto_tuotepaikka['hyllyvali']}',
@@ -627,6 +595,69 @@ elseif ($var == "S" and substr($paikka,0,3) != "°°S" and substr($paikka,0,3) != 
       pupe_query($query);
     }
   }
+  else if (substr($paikka, 0, 3) == "°°°") {
+    $query = "SELECT *
+              FROM tilausrivi
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND otunnus = {$laskurow['tunnus']}
+              AND perheid = {$perheid}";
+    $result = pupe_query($query);
+
+    $toimittajan_tunnus  = substr($paikka, 3);
+
+    while ($lapsirivi = mysql_fetch_assoc($result)) {
+      $query = "UPDATE tilausrivi
+                SET var = 'T',
+                hyllyalue = '',
+                hyllynro = '',
+                hyllyvali = '',
+                hyllytaso = ''
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus = {$lapsirivi['tunnus']}";
+      pupe_query($query);
+
+      $query = "UPDATE tilausrivin_lisatiedot
+                SET toimittajan_tunnus = '{$toimittajan_tunnus}',
+                kohde_hyllyalue = '0',
+                kohde_hyllynro = '0',
+                kohde_hyllyvali = '0',
+                kohde_hyllytaso = '0'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tilausrivitunnus = {$lapsirivi['tunnus']}";
+      pupe_query($query);
+    }
+  }
+}
+
+// Jos kyseess‰ on rivi joka halutaan tilata ihan normaalisti joltain toimittajalta
+if (substr($paikka,0,3) == "°°°") {
+  $var          = "T";
+  $toimittajan_tunnus  = substr($paikka, 3);
+  $paikka         = "#!°!#";
+}
+elseif ($var == "T" and substr($paikka,0,3) != "°°°" and substr($paikka,0,3) != "!!!") {
+  $var         = "";
+  $toimittajan_tunnus  = "";
+}
+
+if (substr($paikka,0,3) == "!!!") {
+  $var          = "U";
+  $toimittajan_tunnus  = substr($paikka, 3);
+  $paikka         = "";
+}
+elseif ($var == "U" and substr($paikka,0,3) != "!!!") {
+  $var         = "";
+  $toimittajan_tunnus  = "";
+}
+
+// Jos kyseess‰ on rivi joka halutaan tilata ihan normaalisti joltain toimittajalta
+if (substr($paikka,0,3) == "°°V") {
+  $var          = "R";
+  $paikka         = substr($paikka, 3);
+}
+elseif ($var == "R" and substr($paikka,0,3) != "°°V" and substr($paikka,0,3) != "°°V") {
+  $var         = "";
+  $toimittajan_tunnus  = "";
 }
 
 $perhelisa = "";

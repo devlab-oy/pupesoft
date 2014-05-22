@@ -126,9 +126,9 @@ if ($oper == t("Vaihda listan kaikkien asiakkaiden tila")) {
   // K‰yd‰‰n lista l‰pi kertaalleen
   while ($trow = mysql_fetch_array ($result)) {
     $query_update = "UPDATE asiakas
-           SET tila = '$astila_vaihto'
-           WHERE tunnus = '$trow[tunnus]'
-           AND yhtio    = '$yhtiorow[yhtio]'";
+                     SET tila = '$astila_vaihto'
+                     WHERE tunnus = '$trow[tunnus]'
+                     AND yhtio    = '$yhtiorow[yhtio]'";
     $result_update = pupe_query($query_update);
   }
   $result = pupe_query($query);

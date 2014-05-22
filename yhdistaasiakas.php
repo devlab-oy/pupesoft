@@ -74,23 +74,23 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
 
           if ($ahy == 0) {
             $ahinsert = "INSERT INTO asiakashinta SET
-               yhtio             = '$kukarow[yhtio]',
-               tuoteno           = '$ahrow[tuoteno]',
-               ryhma             = '$ahrow[ryhma]',
-               asiakas           = 0,
-               ytunnus           = '$jrow[ytunnus]',
-               asiakas_ryhma     = '$ahrow[asiakas_ryhma]',
-               asiakas_segmentti = '$ahrow[asiakas_segmentti]',
-               piiri             = '$ahrow[piiri]',
-               hinta             = '$ahrow[hinta]',
-               valkoodi          = '$ahrow[valkoodi]',
-               minkpl            = '$ahrow[minkpl]',
-               maxkpl            = '$ahrow[maxkpl]',
-               alkupvm           = '$ahrow[alkupvm]',
-               loppupvm          = '$ahrow[loppupvm]',
-               laji              = '$ahrow[laji]',
-               laatija           = '$kukarow[kuka]',
-               luontiaika        = now()";
+                         yhtio             = '$kukarow[yhtio]',
+                         tuoteno           = '$ahrow[tuoteno]',
+                         ryhma             = '$ahrow[ryhma]',
+                         asiakas           = 0,
+                         ytunnus           = '$jrow[ytunnus]',
+                         asiakas_ryhma     = '$ahrow[asiakas_ryhma]',
+                         asiakas_segmentti = '$ahrow[asiakas_segmentti]',
+                         piiri             = '$ahrow[piiri]',
+                         hinta             = '$ahrow[hinta]',
+                         valkoodi          = '$ahrow[valkoodi]',
+                         minkpl            = '$ahrow[minkpl]',
+                         maxkpl            = '$ahrow[maxkpl]',
+                         alkupvm           = '$ahrow[alkupvm]',
+                         loppupvm          = '$ahrow[loppupvm]',
+                         laji              = '$ahrow[laji]',
+                         laatija           = '$kukarow[kuka]',
+                         luontiaika        = now()";
             $ahinsertresult = pupe_query($ahinsert);
 
             synkronoi($kukarow["yhtio"], "asiakashinta", mysql_insert_id(), "", "");
@@ -136,23 +136,23 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
 
           if ($ahy == 0) {
             $ahinsert = "INSERT INTO asiakashinta SET
-               yhtio             = '$kukarow[yhtio]',
-               tuoteno           = '$ahrow[tuoteno]',
-               ryhma             = '$ahrow[ryhma]',
-               asiakas           = '$jrow[tunnus]',
-               ytunnus           = '',
-               asiakas_ryhma     = '$ahrow[asiakas_ryhma]',
-               asiakas_segmentti = '$ahrow[asiakas_segmentti]',
-               piiri             = '$ahrow[piiri]',
-               hinta             = '$ahrow[hinta]',
-               valkoodi          = '$ahrow[valkoodi]',
-               minkpl            = '$ahrow[minkpl]',
-               maxkpl            = '$ahrow[maxkpl]',
-               alkupvm           = '$ahrow[alkupvm]',
-               loppupvm          = '$ahrow[loppupvm]',
-               laji              = '$ahrow[laji]',
-               laatija           = '$kukarow[kuka]',
-               luontiaika        = now()";
+                         yhtio             = '$kukarow[yhtio]',
+                         tuoteno           = '$ahrow[tuoteno]',
+                         ryhma             = '$ahrow[ryhma]',
+                         asiakas           = '$jrow[tunnus]',
+                         ytunnus           = '',
+                         asiakas_ryhma     = '$ahrow[asiakas_ryhma]',
+                         asiakas_segmentti = '$ahrow[asiakas_segmentti]',
+                         piiri             = '$ahrow[piiri]',
+                         hinta             = '$ahrow[hinta]',
+                         valkoodi          = '$ahrow[valkoodi]',
+                         minkpl            = '$ahrow[minkpl]',
+                         maxkpl            = '$ahrow[maxkpl]',
+                         alkupvm           = '$ahrow[alkupvm]',
+                         loppupvm          = '$ahrow[loppupvm]',
+                         laji              = '$ahrow[laji]',
+                         laatija           = '$kukarow[kuka]',
+                         luontiaika        = now()";
             $ahinsertresult = pupe_query($ahinsert);
 
             synkronoi($kukarow["yhtio"], "asiakashinta", mysql_insert_id(), "", "");
@@ -194,21 +194,21 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
 
           if ($ahy == 0) {
             $alinsert = "INSERT INTO asiakasalennus SET
-               yhtio             = '$kukarow[yhtio]',
-               tuoteno           = '$alrow[tuoteno]',
-               ryhma             = '$alrow[ryhma]',
-               asiakas           = 0,
-               ytunnus           = '$jrow[ytunnus]',
-               asiakas_ryhma     = '$alrow[asiakas_ryhma]',
-               asiakas_segmentti = '$alrow[asiakas_segmentti]',
-               piiri             = '$alrow[piiri]',
-               alennus           = '$alrow[alennus]',
-               alennuslaji       = '$alrow[alennuslaji]',
-               minkpl            = '$alrow[minkpl]',
-               alkupvm           = '$alrow[alkupvm]',
-               loppupvm          = '$alrow[loppupvm]',
-               laatija           = '$kukarow[kuka]',
-               luontiaika        = now()";
+                         yhtio             = '$kukarow[yhtio]',
+                         tuoteno           = '$alrow[tuoteno]',
+                         ryhma             = '$alrow[ryhma]',
+                         asiakas           = 0,
+                         ytunnus           = '$jrow[ytunnus]',
+                         asiakas_ryhma     = '$alrow[asiakas_ryhma]',
+                         asiakas_segmentti = '$alrow[asiakas_segmentti]',
+                         piiri             = '$alrow[piiri]',
+                         alennus           = '$alrow[alennus]',
+                         alennuslaji       = '$alrow[alennuslaji]',
+                         minkpl            = '$alrow[minkpl]',
+                         alkupvm           = '$alrow[alkupvm]',
+                         loppupvm          = '$alrow[loppupvm]',
+                         laatija           = '$kukarow[kuka]',
+                         luontiaika        = now()";
             $alinsertresult = pupe_query($alinsert);
 
             synkronoi($kukarow["yhtio"], "asiakasalennus", mysql_insert_id(), "", "");
@@ -251,22 +251,22 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
 
           if ($ahy == 0) {
             $alinsert = "INSERT INTO asiakasalennus SET
-               yhtio             = '$kukarow[yhtio]',
-               tuoteno           = '$alrow[tuoteno]',
-               ryhma             = '$alrow[ryhma]',
-               asiakas           = '$jrow[tunnus]',
-               ytunnus           = '',
-               asiakas_ryhma     = '$alrow[asiakas_ryhma]',
-               asiakas_segmentti = '$alrow[asiakas_segmentti]',
-               piiri             = '$alrow[piiri]',
-               alennus           = '$alrow[alennus]',
-               alennuslaji       = '$alrow[alennuslaji]',
-               minkpl            = '$alrow[minkpl]',
-               monikerta         = '$alrow[monikerta]',
-               alkupvm           = '$alrow[alkupvm]',
-               loppupvm          = '$alrow[loppupvm]',
-               laatija           = '$kukarow[kuka]',
-               luontiaika        = now()";
+                         yhtio             = '$kukarow[yhtio]',
+                         tuoteno           = '$alrow[tuoteno]',
+                         ryhma             = '$alrow[ryhma]',
+                         asiakas           = '$jrow[tunnus]',
+                         ytunnus           = '',
+                         asiakas_ryhma     = '$alrow[asiakas_ryhma]',
+                         asiakas_segmentti = '$alrow[asiakas_segmentti]',
+                         piiri             = '$alrow[piiri]',
+                         alennus           = '$alrow[alennus]',
+                         alennuslaji       = '$alrow[alennuslaji]',
+                         minkpl            = '$alrow[minkpl]',
+                         monikerta         = '$alrow[monikerta]',
+                         alkupvm           = '$alrow[alkupvm]',
+                         loppupvm          = '$alrow[loppupvm]',
+                         laatija           = '$kukarow[kuka]',
+                         luontiaika        = now()";
             $alinsertresult = pupe_query($alinsert);
 
             synkronoi($kukarow["yhtio"], "asiakasalennus", mysql_insert_id(), "", "");
@@ -299,12 +299,12 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
 
           if ($ahy == 0) {
             $ahinsert = "INSERT INTO asiakaskommentti SET
-               yhtio      = '$kukarow[yhtio]',
-                kommentti = '$ahrow[kommentti]',
-                tuoteno   = '$ahrow[tuoteno]',
-                ytunnus   = '$jrow[ytunnus]',
-                laatija   = '$kukarow[kuka]',
-               luontiaika = now()";
+                         yhtio      = '$kukarow[yhtio]',
+                          kommentti = '$ahrow[kommentti]',
+                          tuoteno   = '$ahrow[tuoteno]',
+                          ytunnus   = '$jrow[ytunnus]',
+                          laatija   = '$kukarow[kuka]',
+                         luontiaika = now()";
             $ahinsertresult = pupe_query($ahinsert);
 
             synkronoi($kukarow["yhtio"], "asiakaskommentti", mysql_insert_id(), "", "");
@@ -341,15 +341,15 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
 
           if ($ahy == 0) {
             $ahinsert = "INSERT INTO rahtisopimukset SET
-               yhtio        = '$kukarow[yhtio]',
-               toimitustapa = '$ahrow[toimitustapa]',
-               asiakas      = 0,
-               ytunnus      = '$jrow[ytunnus]',
-               rahtisopimus = '$ahrow[rahtisopimus]',
-               selite       = '$ahrow[selite]',
-               muumaksaja   = '$ahrow[muumaksaja]',
-                laatija     = '$kukarow[kuka]',
-               luontiaika   = now()";
+                         yhtio        = '$kukarow[yhtio]',
+                         toimitustapa = '$ahrow[toimitustapa]',
+                         asiakas      = 0,
+                         ytunnus      = '$jrow[ytunnus]',
+                         rahtisopimus = '$ahrow[rahtisopimus]',
+                         selite       = '$ahrow[selite]',
+                         muumaksaja   = '$ahrow[muumaksaja]',
+                          laatija     = '$kukarow[kuka]',
+                         luontiaika   = now()";
             $ahinsertresult = pupe_query($ahinsert);
 
             synkronoi($kukarow["yhtio"], "rahtisopimukset", mysql_insert_id(), "", "");
@@ -385,15 +385,15 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
 
           if ($ahy == 0) {
             $ahinsert = "INSERT INTO rahtisopimukset SET
-               yhtio        = '$kukarow[yhtio]',
-               toimitustapa = '$ahrow[toimitustapa]',
-               asiakas      = '$jrow[tunnus]',
-               ytunnus      = '',
-               rahtisopimus = '$ahrow[rahtisopimus]',
-               selite       = '$ahrow[selite]',
-               muumaksaja   = '$ahrow[muumaksaja]',
-                laatija     = '$kukarow[kuka]',
-               luontiaika   = now()";
+                         yhtio        = '$kukarow[yhtio]',
+                         toimitustapa = '$ahrow[toimitustapa]',
+                         asiakas      = '$jrow[tunnus]',
+                         ytunnus      = '',
+                         rahtisopimus = '$ahrow[rahtisopimus]',
+                         selite       = '$ahrow[selite]',
+                         muumaksaja   = '$ahrow[muumaksaja]',
+                          laatija     = '$kukarow[kuka]',
+                         luontiaika   = now()";
             $ahinsertresult = pupe_query($ahinsert);
 
             synkronoi($kukarow["yhtio"], "rahtisopimukset", mysql_insert_id(), "", "");
@@ -438,23 +438,23 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
 
           if ($ahy == 0) {
             $ahinsert = "INSERT INTO yhteyshenkilo SET
-               yhtio               = '$kukarow[yhtio]',
-               tyyppi              = '$ahrow[tyyppi]',
-               liitostunnus        = '$jrow[tunnus]',
-               nimi                = '$ahrow[nimi]',
-               titteli             = '$ahrow[titteli]',
-               rooli               = '$ahrow[rooli]',
-               suoramarkkinointi   = '$ahrow[suoramarkkinointi]',
-               email               = '$ahrow[email]',
-               puh                 = '$ahrow[puh]',
-               gsm                 = '$ahrow[gsm]',
-               fax                 = '$ahrow[fax]',
-               www                 = '$ahrow[www]',
-               fakta               = '$ahrow[fakta]',
-               tilausyhteyshenkilo = '$ahrow[tilausyhteyshenkilo]',
-               oletusyhteyshenkilo = '$ahrow[oletusyhteyshenkilo]',
-               laatija             = '$kukarow[kuka]',
-               luontiaika          = now()";
+                         yhtio               = '$kukarow[yhtio]',
+                         tyyppi              = '$ahrow[tyyppi]',
+                         liitostunnus        = '$jrow[tunnus]',
+                         nimi                = '$ahrow[nimi]',
+                         titteli             = '$ahrow[titteli]',
+                         rooli               = '$ahrow[rooli]',
+                         suoramarkkinointi   = '$ahrow[suoramarkkinointi]',
+                         email               = '$ahrow[email]',
+                         puh                 = '$ahrow[puh]',
+                         gsm                 = '$ahrow[gsm]',
+                         fax                 = '$ahrow[fax]',
+                         www                 = '$ahrow[www]',
+                         fakta               = '$ahrow[fakta]',
+                         tilausyhteyshenkilo = '$ahrow[tilausyhteyshenkilo]',
+                         oletusyhteyshenkilo = '$ahrow[oletusyhteyshenkilo]',
+                         laatija             = '$kukarow[kuka]',
+                         luontiaika          = now()";
             $ahinsertresult = pupe_query($ahinsert);
 
             synkronoi($kukarow["yhtio"], "yhteyshenkilo", mysql_insert_id(), "", "");
@@ -488,13 +488,13 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
 
           if ($ahy == 0) {
             $ahinsert = "INSERT INTO asiakkaan_avainsanat SET
-               yhtio        = '$kukarow[yhtio]',
-               liitostunnus = '$jrow[tunnus]',
-               kieli        = '$ahrow[kieli]',
-               laji         = '$ahrow[laji]',
-               avainsana    = '$ahrow[avainsana]',
-               laatija      = '$kukarow[kuka]',
-               luontiaika   = now()";
+                         yhtio        = '$kukarow[yhtio]',
+                         liitostunnus = '$jrow[tunnus]',
+                         kieli        = '$ahrow[kieli]',
+                         laji         = '$ahrow[laji]',
+                         avainsana    = '$ahrow[avainsana]',
+                         laatija      = '$kukarow[kuka]',
+                         luontiaika   = now()";
             $ahinsertresult = pupe_query($ahinsert);
 
             synkronoi($kukarow["yhtio"], "asiakkaan_avainsanat", mysql_insert_id(), "", "");
@@ -539,23 +539,23 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
 
           if ($ahy == 0) {
             $ahinsert = "INSERT INTO liitetiedostot SET
-               yhtio           = '$kukarow[yhtio]',
-               liitos          = '$ahrow[liitos]',
-               liitostunnus    = '$jrow[tunnus]',
-               data            = '".mysql_real_escape_string($ahrow["data"])."',
-               selite          = '$ahrow[selite]',
-               kieli           = '$ahrow[kieli]',
-               filename        = '$ahrow[filename]',
-               filesize        = '$ahrow[filesize]',
-               filetype        = '$ahrow[filetype]',
-               image_width     = '$ahrow[image_width]',
-               image_height    = '$ahrow[image_height]',
-               image_bits      = '$ahrow[image_bits]',
-               image_channels  = '$ahrow[image_channels]',
-               kayttotarkoitus = '$ahrow[kayttotarkoitus]',
-               jarjestys       = '$ahrow[jarjestys]',
-               laatija         = '$kukarow[kuka]',
-               luontiaika      = now()";
+                         yhtio           = '$kukarow[yhtio]',
+                         liitos          = '$ahrow[liitos]',
+                         liitostunnus    = '$jrow[tunnus]',
+                         data            = '".mysql_real_escape_string($ahrow["data"])."',
+                         selite          = '$ahrow[selite]',
+                         kieli           = '$ahrow[kieli]',
+                         filename        = '$ahrow[filename]',
+                         filesize        = '$ahrow[filesize]',
+                         filetype        = '$ahrow[filetype]',
+                         image_width     = '$ahrow[image_width]',
+                         image_height    = '$ahrow[image_height]',
+                         image_bits      = '$ahrow[image_bits]',
+                         image_channels  = '$ahrow[image_channels]',
+                         kayttotarkoitus = '$ahrow[kayttotarkoitus]',
+                         jarjestys       = '$ahrow[jarjestys]',
+                         laatija         = '$kukarow[kuka]',
+                         luontiaika      = now()";
             $ahinsertresult = pupe_query($ahinsert);
           }
         }
@@ -588,14 +588,14 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
 
           if ($ahy == 0) {
             $ahinsert = "INSERT INTO puun_alkio SET
-               yhtio       = '$kukarow[yhtio]',
-               liitos      = '$jrow[tunnus]',
-               kieli       = '$ahrow[kieli]',
-               laji        = '$ahrow[laji]',
-               puun_tunnus = '$ahrow[puun_tunnus]',
-               jarjestys   = '$ahrow[jarjestys]',
-               laatija     = '$kukarow[kuka]',
-               luontiaika  = now()";
+                         yhtio       = '$kukarow[yhtio]',
+                         liitos      = '$jrow[tunnus]',
+                         kieli       = '$ahrow[kieli]',
+                         laji        = '$ahrow[laji]',
+                         puun_tunnus = '$ahrow[puun_tunnus]',
+                         jarjestys   = '$ahrow[jarjestys]',
+                         laatija     = '$kukarow[kuka]',
+                         luontiaika  = now()";
             $ahinsertresult = pupe_query($ahinsert);
           }
         }

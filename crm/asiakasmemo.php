@@ -377,9 +377,9 @@ if ($ytunnus != '') {
     $tee = '';
 
     $query_update = "UPDATE asiakas SET tila = '$astila'
-           WHERE yhtio                 = '$kukarow[yhtio]'
-                           and ytunnus = '$ytunnus'
-                           and tunnus  = '$asiakasid'";
+                     WHERE yhtio                 = '$kukarow[yhtio]'
+                                     and ytunnus = '$ytunnus'
+                                     and tunnus  = '$asiakasid'";
     $result_update = pupe_query($query_update);
 
     echo t("Vaihdettiin asiakkaan tila")."<br/>";

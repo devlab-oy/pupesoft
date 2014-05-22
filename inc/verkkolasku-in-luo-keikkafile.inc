@@ -504,32 +504,32 @@ if (!function_exists('tuoteperhe_check')) {
       $saldo_varattu = $lapsitieto['varattu'] + $lapsitieto['kpl'];
 
       $lisainsert = "INSERT INTO tilausrivi SET
-           yhtio       = '{$lapsitieto['yhtio']}',
-           tyyppi      = '{$lapsitieto['tyyppi']}',
-           toimaika    = '{$lapsitieto['toimaika']}',
-           kerayspvm   = '{$lapsitieto['kerayspvm']}',
-           otunnus     = '{$lapsitieto['otunnus']}',
-           tuoteno     = '{$lapsitieto['tuoteno']}',
-           try         = '{$lapsitieto['try']}',
-           osasto      = '{$lapsitieto['osasto']}',
-           nimitys     = '{$lapsitieto['nimitys']}',
-           yksikko     = '{$lapsitieto['yksikko']}',
-           tilkpl      = '{$lapsitieto['tilkpl']}',
-           varattu     = '{$saldo_varattu}',
-           kpl         = '0',
-           ale1        = '{$ale['ale1']}',
-           ale2        = '{$ale['ale2']}',
-           ale3        = '{$ale['ale3']}',
-           hinta       = '{$hinta}',
-           laatija     = 'lapset',
-           kommentti   = 'Lasku: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lis‰t‰‰n lapsituote: {$lapsitieto['tuoteno']}',
-           laadittu    =  now(),
-           hyllyalue   = '{$lapsitieto['hyllyalue']}',
-           hyllynro    = '{$lapsitieto['hyllynro']}',
-           hyllytaso   = '{$lapsitieto['hyllytaso']}',
-           hyllyvali   = '{$lapsitieto['hyllyvali']}',
-           perheid     = '{$lapsitieto['tunnus']}',
-           uusiotunnus = '{$lapsitieto['uusiotunnus']}'";
+                     yhtio       = '{$lapsitieto['yhtio']}',
+                     tyyppi      = '{$lapsitieto['tyyppi']}',
+                     toimaika    = '{$lapsitieto['toimaika']}',
+                     kerayspvm   = '{$lapsitieto['kerayspvm']}',
+                     otunnus     = '{$lapsitieto['otunnus']}',
+                     tuoteno     = '{$lapsitieto['tuoteno']}',
+                     try         = '{$lapsitieto['try']}',
+                     osasto      = '{$lapsitieto['osasto']}',
+                     nimitys     = '{$lapsitieto['nimitys']}',
+                     yksikko     = '{$lapsitieto['yksikko']}',
+                     tilkpl      = '{$lapsitieto['tilkpl']}',
+                     varattu     = '{$saldo_varattu}',
+                     kpl         = '0',
+                     ale1        = '{$ale['ale1']}',
+                     ale2        = '{$ale['ale2']}',
+                     ale3        = '{$ale['ale3']}',
+                     hinta       = '{$hinta}',
+                     laatija     = 'lapset',
+                     kommentti   = 'Lasku: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lis‰t‰‰n lapsituote: {$lapsitieto['tuoteno']}',
+                     laadittu    =  now(),
+                     hyllyalue   = '{$lapsitieto['hyllyalue']}',
+                     hyllynro    = '{$lapsitieto['hyllynro']}',
+                     hyllytaso   = '{$lapsitieto['hyllytaso']}',
+                     hyllyvali   = '{$lapsitieto['hyllyvali']}',
+                     perheid     = '{$lapsitieto['tunnus']}',
+                     uusiotunnus = '{$lapsitieto['uusiotunnus']}'";
       if ($debug == 1) {
          echo "<pre>",str_replace("\t", "", $lisainsert),"</pre>";
       }
@@ -1152,15 +1152,15 @@ for ($i = 0; $i < count($rtuoteno); $i++) {
       if ($tilausrivirow['varattu'] == $rtuoteno[$i]["kpl"]) {
 
         $update_asn = "UPDATE asn_sanomat SET
-         tilausrivi       = '{$tilausrivirow['tunnus']}',
-         keikkarivinhinta = '{$tilausrivirow['hinta']}',
-         ale1             = '{$tilausrivirow['ale1']}',
-         ale2             = '{$tilausrivirow['ale2']}',
-         ale3             = '{$tilausrivirow['ale3']}',
-         tuoteno          = '{$tilausrivirow['tuoteno']}'
-         WHERE yhtio      = '{$kukarow['yhtio']}'
-         AND tunnus       = '{$rtuoteno[$i]['insert_id']}'
-         AND laji         = '{$lajilisa}'";
+                       tilausrivi       = '{$tilausrivirow['tunnus']}',
+                       keikkarivinhinta = '{$tilausrivirow['hinta']}',
+                       ale1             = '{$tilausrivirow['ale1']}',
+                       ale2             = '{$tilausrivirow['ale2']}',
+                       ale3             = '{$tilausrivirow['ale3']}',
+                       tuoteno          = '{$tilausrivirow['tuoteno']}'
+                       WHERE yhtio      = '{$kukarow['yhtio']}'
+                       AND tunnus       = '{$rtuoteno[$i]['insert_id']}'
+                       AND laji         = '{$lajilisa}'";
         pupe_query($update_asn);
 
         list($ostoilla, $keikoilla) = ostoilla_vai_keikoilla($ostoilla, $keikoilla, $tilausrivirow['tunnus'], $tilausrivirow, $rtuoteno[$i], $debug);
@@ -1176,15 +1176,15 @@ for ($i = 0; $i < count($rtuoteno); $i++) {
         paivita_ja_splittaa($tilausrivirow, $rtuoteno[$i]["kpl"], $kappaleerotus, $debug);
 
         $update_asn = "UPDATE asn_sanomat SET
-         tilausrivi       = '{$tilausrivirow['tunnus']}',
-         keikkarivinhinta = '{$tilausrivirow['hinta']}',
-         ale1             = '{$tilausrivirow['ale1']}',
-         ale2             = '{$tilausrivirow['ale2']}',
-         ale3             = '{$tilausrivirow['ale3']}',
-         tuoteno          = '{$tilausrivirow['tuoteno']}'
-         WHERE yhtio      = '{$kukarow['yhtio']}'
-         AND tunnus       = '{$rtuoteno[$i]['insert_id']}'
-         AND laji         = '{$lajilisa}'";
+                       tilausrivi       = '{$tilausrivirow['tunnus']}',
+                       keikkarivinhinta = '{$tilausrivirow['hinta']}',
+                       ale1             = '{$tilausrivirow['ale1']}',
+                       ale2             = '{$tilausrivirow['ale2']}',
+                       ale3             = '{$tilausrivirow['ale3']}',
+                       tuoteno          = '{$tilausrivirow['tuoteno']}'
+                       WHERE yhtio      = '{$kukarow['yhtio']}'
+                       AND tunnus       = '{$rtuoteno[$i]['insert_id']}'
+                       AND laji         = '{$lajilisa}'";
         if ($debug == 1) {
           echo "<pre>",str_replace("\t", "", $update_asn),"</pre><br><br>";
         }
@@ -1239,10 +1239,10 @@ for ($i = 0; $i < count($rtuoteno); $i++) {
 
           // jos skipattiin v‰h‰nkin niin nollataan kaikki kohdistukset
           $updatequery = "UPDATE asn_sanomat SET
-           tilausrivi  = NULL,
-           tuoteno     = '{$tilausrivirow['tuoteno']}'
-           WHERE yhtio = '{$kukarow['yhtio']}'
-           AND tunnus  = '{$rtuoteno[$i]['insert_id']}'";
+                          tilausrivi  = NULL,
+                          tuoteno     = '{$tilausrivirow['tuoteno']}'
+                          WHERE yhtio = '{$kukarow['yhtio']}'
+                          AND tunnus  = '{$rtuoteno[$i]['insert_id']}'";
           $upd_res = pupe_query($updatequery);
 
           if ($debug == 1) {
@@ -1258,9 +1258,9 @@ for ($i = 0; $i < count($rtuoteno); $i++) {
 
             // jos skipattiin v‰h‰nkin niin nollataan kaikki kohdistukset
             $updatequery = "UPDATE asn_sanomat SET
-             tilausrivi  = NULL
-             WHERE yhtio = '{$kukarow['yhtio']}'
-             AND tunnus  = '{$rtuoteno[$i]['insert_id']}'";
+                            tilausrivi  = NULL
+                            WHERE yhtio = '{$kukarow['yhtio']}'
+                            AND tunnus  = '{$rtuoteno[$i]['insert_id']}'";
             $upd_res = pupe_query($updatequery);
 
             if ($debug == 1) {
@@ -1589,10 +1589,10 @@ for ($i = 0; $i < count($rtuoteno); $i++) {
 
         // p‰ivitet‰‰n tilausrivin tunnus talteen asn_sanomat-tauluun, koska t‰m‰ kohdistuu kyseiseen riviin
         $updatequery = "UPDATE asn_sanomat SET
-         tilausrivi  = '{$siistitty}',
-         tuoteno     = '{$upd_tuoteno}'
-         WHERE yhtio = '{$kukarow['yhtio']}'
-         AND tunnus  = '{$rtuoteno[$i]['insert_id']}'";
+                        tilausrivi  = '{$siistitty}',
+                        tuoteno     = '{$upd_tuoteno}'
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND tunnus  = '{$rtuoteno[$i]['insert_id']}'";
         if ($debug == 1) {
           echo "<pre>$updatequery</pre>";
         }
@@ -1897,15 +1897,15 @@ if ($osrow["ebid"] == "TECCOM-INVOICE" or ($osrow['ebid'] == 'MAVENTAXML' and $t
         $hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);
 
         $update_asn = "UPDATE asn_sanomat SET
-         keikkarivinhinta = '{$hinta_chk_row['hinta']}',
-         ale1             = '{$hinta_chk_row['ale1']}',
-         ale2             = '{$hinta_chk_row['ale2']}',
-         ale3             = '{$hinta_chk_row['ale3']}',
-         status           = 'X',
-         tuoteno          = '{$hinta_chk_row['tuoteno']}'
-         WHERE yhtio      = '{$kukarow['yhtio']}'
-         AND tunnus       = '{$pointteri['insert_id']}'
-         AND laji         = '{$lajilisa}'";
+                       keikkarivinhinta = '{$hinta_chk_row['hinta']}',
+                       ale1             = '{$hinta_chk_row['ale1']}',
+                       ale2             = '{$hinta_chk_row['ale2']}',
+                       ale3             = '{$hinta_chk_row['ale3']}',
+                       status           = 'X',
+                       tuoteno          = '{$hinta_chk_row['tuoteno']}'
+                       WHERE yhtio      = '{$kukarow['yhtio']}'
+                       AND tunnus       = '{$pointteri['insert_id']}'
+                       AND laji         = '{$lajilisa}'";
         pupe_query($update_asn);
 
         if ($hinta_chk_row['perheid'] != 0) {
@@ -1917,17 +1917,17 @@ if ($osrow["ebid"] == "TECCOM-INVOICE" or ($osrow['ebid'] == 'MAVENTAXML' and $t
           }
 
           $update = "UPDATE tilausrivi SET
-           {$lapsen_lisakululisa}
-           ale1         = 0,
-           ale2         = 0,
-           ale3         = 0,
-           erikoisale   = 0,
-           netto        = '',
-           uusiotunnus  = '{$_uusiotunnus}'
-           WHERE yhtio  = '{$kukarow['yhtio']}'
-           AND otunnus  = '{$hinta_chk_row['otunnus']}'
-           AND perheid  = '{$hinta_chk_row['perheid']}'
-           AND tunnus  != '{$hinta_chk_row['perheid']}'";
+                     {$lapsen_lisakululisa}
+                     ale1         = 0,
+                     ale2         = 0,
+                     ale3         = 0,
+                     erikoisale   = 0,
+                     netto        = '',
+                     uusiotunnus  = '{$_uusiotunnus}'
+                     WHERE yhtio  = '{$kukarow['yhtio']}'
+                     AND otunnus  = '{$hinta_chk_row['otunnus']}'
+                     AND perheid  = '{$hinta_chk_row['perheid']}'
+                     AND tunnus  != '{$hinta_chk_row['perheid']}'";
           pupe_query($update);
         }
 
@@ -1958,21 +1958,21 @@ if ($osrow["ebid"] == "TECCOM-INVOICE" or ($osrow['ebid'] == 'MAVENTAXML' and $t
         $ale3lisa = (isset($pointteri['ale3']) and trim($pointteri['ale3']) != "" and trim($pointteri['ale3']) != 0) ? " ale3 = '{$pointteri['ale3']}', " : " ale3 = 0, ";
 
         $update = "UPDATE tilausrivi SET
-         hinta       = '{$pointteri['hinta']}',
-         netto       = '',
-         erikoisale  = 0,
-         {$ale1lisa}
-         {$ale2lisa}
-         {$ale3lisa}
-         uusiotunnus = '{$_uusiotunnus}'
-         WHERE yhtio = '{$kukarow['yhtio']}'
-         AND tunnus  = '{$pointteri['tunnus']}'";
+                   hinta       = '{$pointteri['hinta']}',
+                   netto       = '',
+                   erikoisale  = 0,
+                   {$ale1lisa}
+                   {$ale2lisa}
+                   {$ale3lisa}
+                   uusiotunnus = '{$_uusiotunnus}'
+                   WHERE yhtio = '{$kukarow['yhtio']}'
+                   AND tunnus  = '{$pointteri['tunnus']}'";
         pupe_query($update);
 
         $update = "UPDATE asn_sanomat SET
-         toim_tuoteno = '{$pointteri['tuoteno']}'
-         WHERE yhtio  = '{$kukarow['yhtio']}'
-         AND tunnus   = '{$pointteri['insert_id']}'";
+                   toim_tuoteno = '{$pointteri['tuoteno']}'
+                   WHERE yhtio  = '{$kukarow['yhtio']}'
+                   AND tunnus   = '{$pointteri['insert_id']}'";
         pupe_query($update);
 
         if ($hinta_chk_row['suuntalava'] != 0) {

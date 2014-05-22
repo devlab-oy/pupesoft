@@ -867,17 +867,28 @@ if (
 
     $siirto_varastot = hae_mahdolliset_siirto_varastot($kohde_varastot, $row['tuoteno']);
 
-    $_isa_saldot = array();
+    if (!isset($_isa_saldot)) {
+      $_isa_saldot = array();
+    }
+
     foreach ($siirto_varastot as $siirto_varasto) {
 
       $saldo_myytavissa = $siirto_varasto['tuote']['myytavissa'];
       if ($_onko_isatuote) {
         $tuoteperhe_saldomyytavissa = tuoteperhe_myytavissa($trow['tuoteno'], '', '', $siirto_varasto['lahde_tunnus']);
         $saldo_myytavissa = $tuoteperhe_saldomyytavissa[$siirto_varasto['lahde_nimi']];
-        $_isa_saldot[$row['perheid']] = $saldo_myytavissa;
+        $_isa_saldot[$row['perheid']] = array(
+            'saldo_myytavissa' => $saldo_myytavissa,
+            'var' => $row['var'],
+        );
       }
       else if ($_onko_lapsituote) {
-        $saldo_myytavissa = $_isa_saldot[$row['perheid']];
+        if ($_isa_saldot[$row['perheid']]['var'] == 'S') {
+          $saldo_myytavissa = $_isa_saldot[$row['perheid']]['saldo_myytavissa'];
+        }
+        else {
+          continue;
+        }
       }
 
       //Jos tilausrivin toimittajan_tunnus ja siirto_varasto.tunnus on samat,

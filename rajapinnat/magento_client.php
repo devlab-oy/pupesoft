@@ -940,9 +940,8 @@ class MagentoClient {
     $attribute_list = $this->getAttributeList();
     $attribute_id = '';
 
-var_dump($attribute_list);
-    // Etsit‰‰n halutun attribuutin id
-    foreach ($attribute_list as $attribute) {
+    // Etsitään halutun attribuutin id
+    foreach($attribute_list as $attribute) {
       if (strcasecmp($attribute['code'], $name) == 0) {
         $attribute_id = $attribute['attribute_id'];
         $attribute_type = $attribute['type'];

@@ -11473,7 +11473,7 @@ if (!function_exists("progress_bar")) {
     if ($microtime_start === NULL) {
       $timeparts = explode(" ", microtime());
       $microtime_start = $timeparts[1].substr($timeparts[0], 1);
-      }
+    }
 
     $timeparts = explode(" ", microtime());
     $microtime_stop = $timeparts[1].substr($timeparts[0], 1);
@@ -11482,15 +11482,21 @@ if (!function_exists("progress_bar")) {
     $microtime_current = round($microtime_stop - $microtime_start, 0);
     $microtime_total = round($microtime_current / $current_item * $total_items, 0);
 
-    // Printataan vaan sekunnin välein
-    if ($microtime_current != $microtime_current_last) {
+    // Printataan vaan sekunnin välein, tai jos ollaan vikassa
+    if ($microtime_current != $microtime_current_last or $current_item >= $total_items) {
       $hash = sprintf("%'#".round($current_item / $total_items * $bar_length)."s", '');
 
-      printf("|%-{$bar_length}s| [$current_item/$total_items]\n\n  elapsed: %-{$bar_length}s\nremaining: %-{$bar_length}s\n    total: %-{$bar_length}s\r".chr(27)."[4A",
-        $hash,
-        seconds_readable($microtime_current),
-        seconds_readable($microtime_total - $microtime_current),
-        seconds_readable($microtime_total));
+      $bar_string  = "|%-{$bar_length}s| [$current_item/$total_items]\n\n";
+      $bar_string .= "  elapsed: %-{$bar_length}s\n";
+      $bar_string .= "remaining: %-{$bar_length}s\n";
+      $bar_string .= "    total: %-{$bar_length}s\r";
+      $bar_string .= chr(27)."[4A";
+
+      $elapsed = seconds_readable($microtime_current);
+      $remaining = seconds_readable($microtime_total - $microtime_current);
+      $total = seconds_readable($microtime_total);
+
+      printf($bar_string, $hash, $elapsed, $remaining, $total);
     }
 
     $microtime_current_last = $microtime_current;
@@ -23714,14 +23720,16 @@ if (!function_exists("tee_tiliointi")) {
     global $kukarow, $yhtiorow;
 
     // Tarvitaan
-    $tunnus   = (!empty($parametrit['tunnus'])) ? $parametrit['tunnus'] : 0;
-    $tili     = (!empty($parametrit['tili'])) ? $parametrit['tili'] : '';
-    $summa    = (!empty($parametrit['summa'])) ? $parametrit['summa'] : 0;
-    $vero     = (!empty($parametrit['vero'])) ? $parametrit['vero'] : 0;
-    $kustp    = (!empty($parametrit['kustp'])) ? $parametrit['kustp'] : 0;
-    $kohde    = (!empty($parametrit['kohde'])) ? $parametrit['kohde'] : 0;
-    $projekti = (!empty($parametrit['projekti'])) ? $parametrit['projekti'] : 0;
-    $selite   = (!empty($parametrit['selite'])) ? $parametrit['selite'] : '';
+    $tunnus          = (!empty($parametrit['tunnus'])) ? $parametrit['tunnus'] : 0;
+    $tili            = (!empty($parametrit['tili'])) ? $parametrit['tili'] : '';
+    $summa           = (!empty($parametrit['summa'])) ? $parametrit['summa'] : 0;
+    $vero            = (!empty($parametrit['vero'])) ? $parametrit['vero'] : 0;
+    $kustp           = (!empty($parametrit['kustp'])) ? $parametrit['kustp'] : 0;
+    $kohde           = (!empty($parametrit['kohde'])) ? $parametrit['kohde'] : 0;
+    $projekti        = (!empty($parametrit['projekti'])) ? $parametrit['projekti'] : 0;
+    $selite          = (!empty($parametrit['selite'])) ? $parametrit['selite'] : '';
+    $liitostunnus    = (!empty($parametrit['liitostunnus'])) ? $parametrit['liitostunnus'] : '';
+    $tapahtumatunnus = (!empty($parametrit['tapahtumatunnus'])) ? $parametrit['tapahtumatunnus'] : '';
 
     require('inc/teetiliointi.inc');
   }

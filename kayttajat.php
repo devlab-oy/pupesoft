@@ -1567,13 +1567,11 @@ if ($tee == "") {
   if ($toim == "extranet") $extrsel = "X";
   else $extrsel = "";
 
-  $query = "SELECT kuka.nimi, kuka.kuka, kuka.tunnus, if (count(oikeu.tunnus) > 0, 0, 1) aktiivinen
+  $query = "SELECT kuka.nimi, kuka.kuka, kuka.tunnus, kuka.aktiivinen
             FROM kuka
-            LEFT JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
-            WHERE kuka.yhtio  = '{$kukarow['yhtio']}'
+            WHERE kuka.yhtio = '{$kukarow['yhtio']}'
             AND kuka.extranet = '{$extrsel}'
-            GROUP BY 1,2,3
-            ORDER BY aktiivinen, kuka.nimi";
+            ORDER BY kuka.aktiivinen, kuka.nimi";
   $kukares = pupe_query($query);
 
   echo "<optgroup label='",t("Aktiiviset käyttäjät"),"'>";

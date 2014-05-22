@@ -76,7 +76,7 @@ class MagentoClient {
   private $_categoryaccesscontrol = FALSE;
 
   /**
-   * Configurable-tuotteella k‰ytett‰v‰ nimitys, oletuksena nimitys
+   * Configurable-tuotteella käytettävä nimityskenttä, oletuksena nimitys
    */
   private $_configurable_tuote_nimityskentta = "nimitys";
   /**
@@ -232,7 +232,7 @@ class MagentoClient {
 
       $multi_data = array();
 
-      // Simple tuotteiden parametrit kuten koko ja v‰ri
+      // Simple tuotteiden parametrit kuten koko ja väri
       foreach($tuote['tuotteen_parametrit'] as $parametri) {
         $key = $parametri['option_name'];
         $multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
@@ -261,7 +261,7 @@ class MagentoClient {
                           'additional_attributes' => array('multi_data' => $multi_data),
                           );
 
-      // Lis‰t‰‰n tai p‰ivitet‰‰n tuote
+      // Lisätään tai päivitetään tuote
 
       // Jos tuotetta ei ole olemassa niin lisätään se
       if (!in_array($tuote['tuoteno'], $skus_in_store)) {
@@ -359,7 +359,7 @@ class MagentoClient {
 
     $hintakentta = $this->_hintakentta;
 
-    // Mit‰ kentt‰‰ k‰ytet‰‰n configurable_tuotteen nimen‰
+    // Mitä kenttää käytetään configurable_tuotteen nimenä
     $configurable_tuote_nimityskentta = $this->_configurable_tuote_nimityskentta;
 
     // Lisätään tuotteet
@@ -814,7 +814,7 @@ class MagentoClient {
     $attribute_id = '';
 
 var_dump($attribute_list);
-    // Etsit‰‰n halutun attribuutin id
+    // Etsitään halutun attribuutin id
     foreach($attribute_list as $attribute) {
       if (strcasecmp($attribute['code'], $name) == 0) {
         $attribute_id = $attribute['attribute_id'];
@@ -847,7 +847,7 @@ var_dump($attribute_list);
       $optionToAdd = array(
           "label" => array(
               array(
-                  "store_id" => 1,
+                  "store_id" => 0,
                   "value" => $value
               )
           ),

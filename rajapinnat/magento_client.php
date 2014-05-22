@@ -181,7 +181,8 @@ class MagentoClient {
     $categoryaccesscontrol = $this->_categoryaccesscontrol;
 
     $count = 0;
-
+    $mary = $this->checkSubCategory(array ("kissa"));
+    exit;
     // Loopataan osastot ja tuoteryhmat
     foreach ($dnstuotepuu as $alakategoria) {
 
@@ -902,11 +903,39 @@ class MagentoClient {
 
   /**
    * Etsii alakategoriaa Magenton kategoriapuusta
+   * Jos ei löydy niin luo
    * parametreiksi etsittävän kategorian nimi, tämän ancestorit, ja magenton kategoriapuu mistä etsitään
    * Palauttaa: $parent_ids, $parent_names
    */
-  private function getCategoryTree($name, $ancestors, $root, $taso = 1) {
-    $parent_ids = array ();
+  private function checkSubCategory($category_chain) {
+
+    // Haetaan kategoriat
+    $category_tree = $this->getCategories();
+    // Skipataan "root" taso myös magentosta
+    $category_tree = $category_tree['children'][0]['children'];
+
+    $category_chain = array(utf8_encode("ASENNUSTARVIKKEET"), utf8_encode("PUTKITUSTARVIKKEET"));
+    // Perustettava ketju
+    $category_chains_to_create = array ();
+    
+    $dumbos = array ();
+    foreach ($category_chain as $cat) {
+      $cat = utf8_encode($cat);
+      /*for ($x=1 ; $x < $level ; $x++) {
+        
+      }*/
+      list ($dumbo, $ears) = $this->getSubCategoryIdFromArray($cat, $category_tree);
+      $category_chains_to_create[] = empty($dumbo) ? $cat : $dumbo;
+      if (!is_numeric($dumbo)) {
+       $this->getSubCategoryIdFromArray($cat, $category_tree);
+      }
+    }
+    var_dump($category_chains_to_create);
+    // for ($x=0; $x<=count($category_chain)-1; $x++) {
+    //     if (strcasecmp($searchname, $category_chain[$x]) == 0) {
+    //     }
+    //   }
+    /*$parent_ids = array ();
     $parent_names = array ();
     
     $searchname = isset($ancestors[$taso]) ? utf8_encode($ancestors[$taso]) : '';
@@ -924,6 +953,52 @@ class MagentoClient {
         $taso++;
       }
     }
+
+    if (count($foundthis) > 0 and $searchname != '') {
+      
+      list($parent_ids,$parent_names) = $this->getCategoryTree($name, $ancestors, $foundthis, $taso);
+    }*/  
+    // Palautetaan löytyneiden vanhempien idt ja nimet
+    //return array($parent_ids, $parent_names);
+  }
+  
+  // 
+  private function getSubCategoryIdFromArray($needle, $haystack) {
+
+      foreach($haystack as $i => $category) {
+        if (strcasecmp($needle, $category['name']) == 0) {
+          return array($category['category_id'], $category['children']);
+        }
+      }
+      return array ();
+  }
+  
+  /**
+   * Perustaa kategorian Magenton kategoriapuuhun
+   * parametreiksi koko perustettavan kategoriaketjun nimet arrayssa
+   * alkaen ykköstasolta, key = 
+   * Palauttaa: 
+   */
+  private function createSubCategory($category_chain) {
+    
+    
+    // Skipataan "root" taso myös magentosta
+    $category_tree = $category_tree['children'][0]['children'];
+
+    $foundthis = '';
+
+    /*for() {}
+      
+      // Etsitään nimellä
+      if (strcasecmp($searchname, $category) == 0) {
+        //$parent_ids[]   = $category['category_id'];
+        //$parent_names[] = $category['name'];
+        
+        // Jos nollatason ancestor löytyy niinsilloin tämän solun childreneistä löytyy myös loput jos on löytyäkseen
+        //$foundthis = $category['children'];
+        $taso++;
+      }
+    }*/
 
     if (count($foundthis) > 0 and $searchname != '') {
       

@@ -813,7 +813,6 @@ class MagentoClient {
     $attribute_list = $this->getAttributeList();
     $attribute_id = '';
 
-var_dump($attribute_list);
     // Etsitään halutun attribuutin id
     foreach($attribute_list as $attribute) {
       if (strcasecmp($attribute['code'], $name) == 0) {

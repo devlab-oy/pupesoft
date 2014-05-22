@@ -182,6 +182,7 @@ class MagentoClient {
 
     $hintakentta = $this->_hintakentta;
 
+    $category_ids = array ();
     // Tuote countteri
     $count = 0;
 
@@ -214,9 +215,24 @@ class MagentoClient {
       }
 
       $tuote['kuluprosentti'] = ($tuote['kuluprosentti'] == 0) ? '' : $tuote['kuluprosentti'];
-
       // Etsitään kategoria_id tuoteryhmällä
-      $category_id = $this->findCategory(utf8_encode($tuote['try_nimi']), $category_tree['children']);
+      $category_ids[] = $this->findCategory(utf8_encode($tuote['try_nimi']), $category_tree['children']);
+
+      $palikat = $tuote['breadcrumbs'];
+      // Lisätään myös tuotepuun kategoriat
+      if (isset($palikat) and count($palikat) > 0) {
+
+        //DEBUG
+        $kuntti = count($palikat);
+        echo "Palikoita oli: $kuntti \n";
+
+        $loppu = $this->findSubCategory($palikat, $category_tree['children']);
+        echo "Loppusitaatti: \n";
+        var_dump($loppu);
+        exit;
+        //endDEBUG
+        //$category_ids[] =
+      }
 
       // Jos tuote ei oo osa configurable_grouppia, niin niitten kuuluu olla visibleja.
       if (isset($individual_tuotteet[$tuote_clean])) {
@@ -695,6 +711,40 @@ class MagentoClient {
   }
 
   /// Private functions ///
+  
+  /**
+   * Hakee oletus attribuuttisetin
+   * @return syvimmän kategorian tunnus
+   */
+  private function findSubCategory($catname, $root, $results = array()) {
+     $category_id = false;
+
+      foreach($root as $i => $category) {
+
+        // Jos löytyy tästä tasosta nii palautetaan id
+        if (strcasecmp($name, $category['name']) == 0) {
+
+          // Jos kyseisen kategorian alla on saman niminen kategoria,
+          // palautetaan sen id nykyisen sijasta (osasto ja try voivat olla saman niminisä).
+          if (!empty($category['children'])) {# and strcasecmp($category['children'][0]['name'], $name) == 0) 
+            //$results[] = $category['children'][0]['category_id'];
+            //return $category['children'][0]['category_id'];
+            echo "yritti keijottaa";
+          }
+
+          return $category_id = $category['category_id'];
+        }
+
+        // Muuten jatketaan ettimistä
+        $r = $this->findCategory($name, $category['children'], $results);
+        if ($r != null) {
+          return $r;
+        }
+      }
+
+      // Mitään ei löytyny
+      return $category_id;
+  }
 
   /**
    * Hakee oletus attribuuttisetin

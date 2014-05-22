@@ -103,11 +103,6 @@ class SiirtokehotusPDF
          @pdf.text "Varapaikka"
     end
     @pdf.float do
-      @pdf.indent(100) do
-         @pdf.text r['tuoteno']
-      end
-    end
-    @pdf.float do
       @pdf.indent(200) do
          @pdf.text r['tuotepaikka']
       end

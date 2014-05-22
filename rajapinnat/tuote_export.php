@@ -178,8 +178,12 @@
               ORDER BY t0.lft";
     $result_tp = pupe_query($query);
     $tuotepuurow = mysql_fetch_assoc($result_tp);
-    
-
+    var_dump($tuotepuurow['ancestors']);
+    var_dump($tuotepuurow['node']);
+    $breadcrumbs = empty($tuotepuurow['ancestors']) ? array () : explode("\n",$tuotepuurow['ancestors']);
+    $breadcrumbs[] = $tuotepuurow['node'];
+    array_shift($breadcrumbs);
+    var_dump($breadcrumbs);
     $dnstuote[] = array('tuoteno'        => $row["tuoteno"],
               'nimi'          => $row["nimitys"],
               'kuvaus'        => $row["kuvaus"],
@@ -203,7 +207,7 @@
               'target'        => $row["target"],
               'onsale'        => $row["onsale"],
               'tunnus'        => $row['tunnus'],
-              #$breadcrumbs => array($tuotepuurow['node'], 
+              'breadcrumbs' => $breadcrumbs, //Tuotepuun oksien nimet
               );
   }
 
@@ -361,7 +365,7 @@
                         );
   }
   
-  echo date("d.m.Y @ G:i:s")." - Haetaan dynaaminen tuotepuu.\n";
+/*  echo date("d.m.Y @ G:i:s")." - Haetaan dynaaminen tuotepuu.\n";
 
   $query = "SELECT t0.nimi node,
             t0.lft,
@@ -399,7 +403,7 @@
                            'ancestors' => $ancestors,
                           );
   }
-
+*/
   if ($ajetaanko_kaikki == "NO") {
     $muutoslisa = "AND asiakas.muutospvm >= '{$datetime_checkpoint}'";
   }

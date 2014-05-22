@@ -326,9 +326,6 @@ class MagentoClient {
       // Etsitään kategoria_id tuoteryhmällä
       $category_ids[] = $this->findCategory(utf8_encode($tuote['try_nimi']), $category_tree['children']);
 
-      // Lisätään myös tuotepuun kategoriat
-      #count $tuote['breadcrumbs'] > 0;
-
       // Jos tuote ei oo osa configurable_grouppia, niin niitten kuuluu olla visibleja.
       if (isset($individual_tuotteet[$tuote_clean])) {
         $visibility = self::CATALOG_SEARCH;
@@ -341,6 +338,21 @@ class MagentoClient {
         array('website' => 1, 'customer_group_id' => 1, 'qty' => 2,'price' => 50.00),
         //array('website_id' => 'lexxa', 'cust_group' => 1, 'qty' => 1,'price' => 400),
       );
+      $palikat = $tuote['breadcrumbs'];
+      // Lisätään myös tuotepuun kategoriat
+      if (isset($palikat) and count($palikat) > 0) {
+        
+        //DEBUG
+        $kuntti = count($palikat);
+        echo "Palikoita oli: $kuntti \n";
+        
+        $loppu = $this->checkSubCategory($palikat);
+        echo "Loppusitaatti: \n";
+        var_dump($loppu);
+        exit;
+        //endDEBUG
+        //$category_ids[] =
+      }
 
       $tuote_data = array(
           'categories'            => $category_ids,
@@ -902,75 +914,80 @@ class MagentoClient {
   }
 
   /**
-   * Etsii alakategoriaa Magenton kategoriapuusta
-   * Jos ei löydy niin luo
-   * parametreiksi etsittävän kategorian nimi, tämän ancestorit, ja magenton kategoriapuu mistä etsitään
-   * Palauttaa: $parent_ids, $parent_names
+   * Etsii alakategoriaketjua Magenton kategoriapuusta
+   * Jos ei löydy niin luo puuttuvat solut
+   * parametreiksi etsittävä breadcrumbs array
+   * Palauttaa: ketjun viimeisen solun magento id:n
    */
-  private function checkSubCategory($category_chain) {
+  private function checkSubCategory($breadcrumbs) {
 
+    $final_category_id = 0;
     // Haetaan kategoriat
     $category_tree = $this->getCategories();
     // Skipataan "root" taso myös magentosta
     $category_tree = $category_tree['children'][0]['children'];
+    
 
-    $category_chain = array(utf8_encode("ASENNUSTARVIKKEET"), utf8_encode("PUTKITUSTARVIKKEET"));
+    //$breadcrumbs = array(utf8_encode("ASENNUSTARVIKKEET"), utf8_encode("PUTKITUSTARVIKKEET"));
     // Perustettava ketju
     $category_chains_to_create = array ();
-    
-    $dumbos = array ();
-    foreach ($category_chain as $cat) {
+    $isi = '';
+    foreach ($breadcrumbs as $cat) {
+      $category_tree = $this->getCategories();
+      $category_tree = $category_tree['children'][0]['children'];
+
       $cat = utf8_encode($cat);
-      /*for ($x=1 ; $x < $level ; $x++) {
-        
-      }*/
-      list ($dumbo, $ears) = $this->getSubCategoryIdFromArray($cat, $category_tree);
-      $category_chains_to_create[] = empty($dumbo) ? $cat : $dumbo;
-      if (!is_numeric($dumbo)) {
-       $this->getSubCategoryIdFromArray($cat, $category_tree);
+      $found = FALSE;
+      echo "etsitään $cat \n";
+      $counter = 0;
+      $jou = $this->findCategory($cat, $category_tree);
+
+      $category_chains_to_create[] = $jou;
+      /*while (!is_numeric($category_tree)) {
+        if (is_numeric($isi)) $category_tree[$isi]['children'];
+        $category_tree = $this->getSubCategoryIdFromArray($cat, $category_tree);
+        if (is_array($category_tree) and count($category_tree) == 0 or empty($category_tree)) {
+          $category_chains_to_create[] = $cat;
+          $found = TRUE;
+        }
+        if (is_numeric($category_tree) and (int) $category_tree > 0) {
+          $category_chains_to_create[] = $category_tree;
+          echo "löytyi $category_tree \n";
+          $isit[$category_tree];
+          $found = TRUE;
+        }
+        $counter++;
+        if($counter > 50) break;
       }
-    }
-    var_dump($category_chains_to_create);
-    // for ($x=0; $x<=count($category_chain)-1; $x++) {
-    //     if (strcasecmp($searchname, $category_chain[$x]) == 0) {
-    //     }
-    //   }
-    /*$parent_ids = array ();
-    $parent_names = array ();
-    
-    $searchname = isset($ancestors[$taso]) ? utf8_encode($ancestors[$taso]) : '';
-    $foundthis = '';
-
-    foreach($root as $i => $category) {
-
-      // Etsitään nimellä
-      if (strcasecmp($searchname, $category['name']) == 0) {
-        $parent_ids[]   = $category['category_id'];
-        $parent_names[] = $category['name'];
-        
-        // Jos nollatason ancestor löytyy niinsilloin tämän solun childreneistä löytyy myös loput jos on löytyäkseen
-        $foundthis = $category['children'];
-        $taso++;
-      }
-    }
-
-    if (count($foundthis) > 0 and $searchname != '') {
+      */
       
-      list($parent_ids,$parent_names) = $this->getCategoryTree($name, $ancestors, $foundthis, $taso);
-    }*/  
-    // Palautetaan löytyneiden vanhempien idt ja nimet
-    //return array($parent_ids, $parent_names);
+    }
+    echo "löytyi $jou";
+    var_dump($category_chains_to_create);
+    //$keykala = end(array_keys($category_chains_to_create));
+    $vika = $category_chains_to_create[count($category_chains_to_create) - 1];
+    if (is_numeric($vika)) {
+      return $vika;
+    }
+    else {
+      //return $this->createSubCategory($category_chains_to_create);
+    }
+    
   }
   
   // 
   private function getSubCategoryIdFromArray($needle, $haystack) {
 
-      foreach($haystack as $i => $category) {
-        if (strcasecmp($needle, $category['name']) == 0) {
-          return array($category['category_id'], $category['children']);
-        }
+    foreach($haystack as $i => $category) {
+      if (strcasecmp($needle, $category['name']) == 0) {
+        return $category['category_id'];
       }
-      return array ();
+    }
+    if (count($haystack) > 0 and isset($haystack['children'])) {
+      return $haystack['children'];
+    }
+    else return array ();
+    
   }
   
   /**
@@ -981,31 +998,20 @@ class MagentoClient {
    */
   private function createSubCategory($category_chain) {
     
-    
+    echo "tultiin createSubCategory";
+    var_dump($category_chain);
     // Skipataan "root" taso myös magentosta
-    $category_tree = $category_tree['children'][0]['children'];
-
-    $foundthis = '';
-
-    /*for() {}
-      
-      // Etsitään nimellä
-      if (strcasecmp($searchname, $category) == 0) {
-        //$parent_ids[]   = $category['category_id'];
-        //$parent_names[] = $category['name'];
-        
-        // Jos nollatason ancestor löytyy niinsilloin tämän solun childreneistä löytyy myös loput jos on löytyäkseen
-        //$foundthis = $category['children'];
-        $taso++;
-      }
-    }*/
-
-    if (count($foundthis) > 0 and $searchname != '') {
-      
-      list($parent_ids,$parent_names) = $this->getCategoryTree($name, $ancestors, $foundthis, $taso);
-    }  
-    // Palautetaan löytyneiden vanhempien idt ja nimet
-    return array($parent_ids, $parent_names);
+    // $category_tree = $category_tree['children'][0]['children'];
+    // 
+    //     $foundthis = '';
+    // 
+    //     if (count($foundthis) > 0 and $searchname != '') {
+    //       
+    //      // list($parent_ids,$parent_names) = $this->getCategoryTree($name, $ancestors, $foundthis, $taso);
+    //     } 
+    //    
+    // Palautetaan syvimmän luodun keijon id
+    //return array($parent_ids, $parent_names);
   }
 
   /**

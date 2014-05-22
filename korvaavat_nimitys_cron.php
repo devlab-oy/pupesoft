@@ -35,8 +35,8 @@ echo "Päivitetään korvaavuusketjun nimitykset ...\n\n";
 
 // Haetaan tuoteketjut
 $select = "SELECT distinct id
- FROM korvaavat
- WHERE yhtio='{$kukarow['yhtio']}'";
+           FROM korvaavat
+           WHERE yhtio='{$kukarow['yhtio']}'";
 $result = pupe_query($select);
 
 // Loopataan ketjut läpi

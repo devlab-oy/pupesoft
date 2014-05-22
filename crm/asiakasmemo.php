@@ -1,7 +1,7 @@
 <?php
 
 if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
-  require ("../inc/parametrit.inc");
+  require "../inc/parametrit.inc";
 
   //Jos ylläpidossa on luotu uusi asiakas
   if ($yllapidossa == "asiakas" and $yllapidontunnus != '') {
@@ -31,7 +31,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
     $kutsuja   = "asiakasemo.php";
     $ahlopetus   = "{$palvelin2}crm/asiakasmemo.php////";
 
-    require ("inc/asiakashaku.inc");
+    require "inc/asiakashaku.inc";
   }
 }
 
@@ -376,7 +376,8 @@ if ($ytunnus != '') {
     $tee2 = $tee;
     $tee = '';
 
-    $query_update = "UPDATE asiakas SET tila = '$astila'
+    $query_update = "UPDATE asiakas
+                     SET tila = '$astila'
            WHERE yhtio                 = '$kukarow[yhtio]'
                            and ytunnus = '$ytunnus'
                            and tunnus  = '$asiakasid'";
@@ -918,11 +919,11 @@ if ($ytunnus != '') {
    }
 
 if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
-  require ("../inc/footer.inc");
+  require "inc/footer.inc";
 }
 
 function listaaliitetiedostot($kalenteritunnus,$tyyppi) {
-  GLOBAL $palvelin2,$kukarow;
+  global $palvelin2, $kukarow;
   $out = "";
 
   $query = "SELECT tunnus, filename

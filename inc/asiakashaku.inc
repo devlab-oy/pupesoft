@@ -745,6 +745,7 @@ if ($monta != 1) {
     echo "<input type='hidden' name='toim' value='$toim'>";
     echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
     echo "<input type='hidden' name='var' value='$var'>";
+    echo "<input type='hidden' name='muutparametrit' value='{$muutparametrit}'>";
     echo "<input type='submit' value='".t("Hae kaikista toimipaikoista")."'>";
     echo "</form>";
   }

@@ -644,11 +644,9 @@ if (
 
           $paikat .= "' $sel title='$title'>$title</option>";
 
-          // jos toimitetaan erikoisvarastosta, niin käyttäjän pitää hyväksyä se
+          // jos toimitetaan erikoisvarastosta, niin ilmoitetaan siitä
           if ($alkurow['varasto'] != $laskurow["varasto"] and $tm_toimitustaparow["nouto"] == "" and $sel != '' and !in_array($row["var2"], array("OK", "PK")) and $kukarow['kassamyyja'] == '' and $row['varattu'] > 0 and $alkurow['varastotyyppi'] == 'E' and $alkurow['erikoistoimitus_alarajasumma'] > 0 and (float) $row['myyntihinta'] >= (float) $alkurow['erikoistoimitus_alarajasumma']) {
-            $varaosavirhe .= t("HUOM: toimitetaan erikoisvarastosta, toimitusaika 2pv. Haluatko hyväksyä")."?<br/>";
-            $saako_hyvaksya++;
-
+            $varaosakommentti .= t("Toimitusaika 2pv.")."<br/>";
             $riviok++;
             $tilausok++;
           }

@@ -566,6 +566,7 @@ if ($tee == 'MUUTA') {
               taso                          = '{$taso}',
               tilaus_valmis                 = '{$tilaus_valmis}',
               hinnat                        = '{$hinnat}',
+              kulujen_laskeminen_hintoihin  = '{$kulujen_laskeminen_hintoihin}',
               saatavat                      = '{$saatavat}',
               keraajanro                    = '{$keraajanro}',
               myyja                         = '{$myyja}',
@@ -917,6 +918,15 @@ if ($tee == 'MUUTA') {
       echo "<option value='0'  {$sel0}>",t("Normaali"),"</option>";
       echo "<option value='1'  {$sel1}>",t("N‰ytet‰‰n vain tuotteen myyntihinta"),"</option>";
       echo "<option value='-1' {$sel2}>",t("Hintoja ei n‰ytet‰"),"</option>";
+      echo "</select></td></tr>";
+
+      $selK = ($krow["kulujen_laskeminen_hintoihin"] == 'K' ? "selected" : "");
+      $selE = ($krow["kulujen_laskeminen_hintoihin"] == 'E' ? "selected" : "");
+
+      echo "<tr><th align='left'>" . t("kuluprosentin esitt‰minen") . ":</th>";
+      echo "<td><select name='kulujen_laskeminen_hintoihin'>";
+      echo "<option value='K' $selK>" . t("Hintoihin lasketaan kuluprosentti") . "</option>";
+      echo "<option value='E' $selE>" . t("Hintoihin ei lasketa kuluprosenttia") . "</option>";
       echo "</select></td></tr>";
 
       if ($toim == 'extranet') {

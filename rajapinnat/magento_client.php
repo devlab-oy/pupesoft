@@ -713,37 +713,46 @@ class MagentoClient {
   /// Private functions ///
   
   /**
-   * Hakee oletus attribuuttisetin
-   * @return syvimmän kategorian tunnus
+   * Parametrinä tulee yhden tuotteen koko breadcrumbs
+   * 
    */
-  private function findSubCategory($catname, $root, $results = array()) {
-     $category_id = false;
+  private function createCategoryTree($ancestors) {
 
-      foreach($root as $i => $category) {
+    id = salasanat ihja rootti id;
+    
+    foreach ancestors as nimi
+      id = createSubCategory(nimi, id)
+    end
+    
+    return id
+  }
 
-        // Jos löytyy tästä tasosta nii palautetaan id
-        if (strcasecmp($name, $category['name']) == 0) {
+  private function createSubCategory(nimi, isätunnus) {
+    
+    otetaan koko tuotepuu, valitaan siitä eka solu idn perusteella
+    sen lapsista etsitään nimeä, jos ei löydy, luodaan viimeisimmän idn alle
+    lopuksi palautetaan id
+    
+    koko array = $this->getCategories();
+    puu = etsiarraysta(koko, isätunnus)
+    
+    foreach puu as itemi
+      if itemi nimi = $nimi
+        return id
+      end
+    end
+    
+    id = magentokutsu, addchild to $isä name $nimi
 
-          // Jos kyseisen kategorian alla on saman niminen kategoria,
-          // palautetaan sen id nykyisen sijasta (osasto ja try voivat olla saman niminisä).
-          if (!empty($category['children'])) {# and strcasecmp($category['children'][0]['name'], $name) == 0) 
-            //$results[] = $category['children'][0]['category_id'];
-            //return $category['children'][0]['category_id'];
-            echo "yritti keijottaa";
-          }
+    unset($this->_category_tree);
 
-          return $category_id = $category['category_id'];
-        }
-
-        // Muuten jatketaan ettimistä
-        $r = $this->findCategory($name, $category['children'], $results);
-        if ($r != null) {
-          return $r;
-        }
-      }
-
-      // Mitään ei löytyny
-      return $category_id;
+    return id
+    tsekataan onko olemassa nimi isien alla
+    etsitaan magentotuotepuusta eka isä ja 
+  }
+  
+  prvate function etsiarraysta(array, isatunnus) {
+    etsitään keytä "category_id" valuella isatunnus ja return sen lapset
   }
 
   /**

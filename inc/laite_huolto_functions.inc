@@ -8,7 +8,6 @@ else {
   require_once("{$filepath}/luo_myyntitilausotsikko.inc");
 }
 
-
 function hae_laitteelle_mahdolliset_huoltosyklit($laite_tyyppi = '', $laite_koko = '', $paikan_olosuhde = '') {
   global $kukarow, $yhtiorow;
 
@@ -23,30 +22,30 @@ function hae_laitteelle_mahdolliset_huoltosyklit($laite_tyyppi = '', $laite_koko
     $huoltosykli_where .= "  AND huoltosykli.olosuhde = '{$paikan_olosuhde}'";
   }
 
-  $query = "  SELECT huoltosykli.tunnus,
-        ta.selite AS huoltosykli_tyyppi,
-        ta.selitetark AS huoltosykli_prioriteetti,
-        concat_ws(' - ', tuote.nimitys, huoltosykli.tyyppi, huoltosykli.koko,
-          (
-            SELECT selitetark
-            FROM avainsana
-            WHERE avainsana.yhtio = huoltosykli.yhtio
-            AND avainsana.selite = huoltosykli.olosuhde
-            AND avainsana.laji = 'OLOSUHDE'
-          )
-        ) as dropdown_text,
-        huoltosykli.huoltovali,
-        huoltosykli.pakollisuus
-        FROM huoltosykli
-        JOIN tuote
-        ON ( tuote.yhtio = huoltosykli.yhtio
-          AND tuote.tuoteno = huoltosykli.toimenpide )
-        JOIN tuotteen_avainsanat AS ta
-        ON ( ta.yhtio = tuote.yhtio
-          AND ta.tuoteno = tuote.tuoteno
-          AND ta.laji = 'tyomaarayksen_ryhmittely' )
-        WHERE huoltosykli.yhtio = '{$kukarow['yhtio']}'
-        {$huoltosykli_where}";
+  $query = "SELECT huoltosykli.tunnus,
+            ta.selite AS huoltosykli_tyyppi,
+            ta.selitetark AS huoltosykli_prioriteetti,
+            concat_ws(' - ', tuote.nimitys, huoltosykli.tyyppi, huoltosykli.koko,
+              (
+                SELECT selitetark
+                FROM avainsana
+                WHERE avainsana.yhtio = huoltosykli.yhtio
+                AND avainsana.selite = huoltosykli.olosuhde
+                AND avainsana.laji = 'OLOSUHDE'
+              )
+            ) as dropdown_text,
+            huoltosykli.huoltovali,
+            huoltosykli.pakollisuus
+            FROM huoltosykli
+            JOIN tuote
+            ON ( tuote.yhtio = huoltosykli.yhtio
+              AND tuote.tuoteno = huoltosykli.toimenpide )
+            JOIN tuotteen_avainsanat AS ta
+            ON ( ta.yhtio = tuote.yhtio
+              AND ta.tuoteno = tuote.tuoteno
+              AND ta.laji = 'tyomaarayksen_ryhmittely' )
+            WHERE huoltosykli.yhtio = '{$kukarow['yhtio']}'
+            {$huoltosykli_where}";
   $huoltosykli_result = pupe_query($query);
   $huoltosyklit = array();
   while ($huoltosykli = mysql_fetch_assoc($huoltosykli_result)) {
@@ -59,50 +58,50 @@ function hae_laitteelle_mahdolliset_huoltosyklit($laite_tyyppi = '', $laite_koko
 function hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy() {
   global $kukarow;
 
-  $query = "  SELECT laite.tuoteno,
-        huoltosyklit_laitteet.viimeinen_tapahtuma,
-        laite.tunnus AS laite_tunnus,
-        huoltosyklit_laitteet.huoltosykli_tunnus,
-        huoltosyklit_laitteet.huoltovali AS huoltovali,
-        huoltosykli.toimenpide,
-        huoltosykli.huoltovali AS toimenpide_oletus_huoltovali,
-        asiakas.tunnus AS asiakas_tunnus,
-        kohde.tunnus AS kohde_tunnus,
-        kohde.nimi AS kohde_nimi,
-        kohde.vastuuhenkilo AS kohde_vastuuhenkilo,
-        paikka.nimi AS paikka_nimi,
-        tuotteen_avainsanat.selite AS toimenpide_tuotteen_tyyppi,
-        tuotteen_avainsanat.selitetark AS toimenpide_tuotteen_prioriteetti
-        FROM   laite
-        JOIN huoltosyklit_laitteet
-        ON ( huoltosyklit_laitteet.yhtio = laite.yhtio
-          AND huoltosyklit_laitteet.laite_tunnus = laite.tunnus
-          AND IFNULL(huoltosyklit_laitteet.viimeinen_tapahtuma, '0000-00-00') < Date_sub(CURRENT_DATE, INTERVAL (huoltosyklit_laitteet.huoltovali - 30) DAY) )
-        JOIN huoltosykli
-        ON ( huoltosykli.yhtio = huoltosyklit_laitteet.yhtio
-          AND huoltosykli.tunnus = huoltosyklit_laitteet.huoltosykli_tunnus )
-        JOIN paikka
-        ON ( paikka.yhtio = laite.yhtio
-          AND paikka.tunnus = laite.paikka )
-        JOIN kohde
-        ON ( kohde.yhtio = paikka.yhtio
-          AND kohde.tunnus = paikka.kohde )
-        JOIN asiakas
-        ON ( asiakas.yhtio = kohde.yhtio
-          AND asiakas.tunnus = kohde.asiakas )
-        JOIN tuote
-        ON ( tuote.yhtio = laite.yhtio
-          AND tuote.tuoteno = huoltosykli.toimenpide )
-        LEFT JOIN tuotteen_avainsanat
-        ON ( tuotteen_avainsanat.yhtio = tuote.yhtio
-          AND tuotteen_avainsanat.tuoteno = tuote.tuoteno
-          AND tuotteen_avainsanat.laji = 'tyomaarayksen_ryhmittely' )
-        WHERE  laite.yhtio = '{$kukarow['yhtio']}'
-        AND laite.tila IN ('N', 'V', 'K')/*Normaali, varalaite, kateissa*/
-        AND ( laite.omistaja = '' OR laite.omistaja IS NULL )
-        ORDER BY laite_tunnus ASC,
-        tuotteen_avainsanat.selitetark ASC,
-        kohde.tunnus ASC";
+  $query = "SELECT laite.tuoteno,
+            huoltosyklit_laitteet.viimeinen_tapahtuma,
+            laite.tunnus AS laite_tunnus,
+            huoltosyklit_laitteet.huoltosykli_tunnus,
+            huoltosyklit_laitteet.huoltovali AS huoltovali,
+            huoltosykli.toimenpide,
+            huoltosykli.huoltovali AS toimenpide_oletus_huoltovali,
+            asiakas.tunnus AS asiakas_tunnus,
+            kohde.tunnus AS kohde_tunnus,
+            kohde.nimi AS kohde_nimi,
+            kohde.vastuuhenkilo AS kohde_vastuuhenkilo,
+            paikka.nimi AS paikka_nimi,
+            tuotteen_avainsanat.selite AS toimenpide_tuotteen_tyyppi,
+            tuotteen_avainsanat.selitetark AS toimenpide_tuotteen_prioriteetti
+            FROM   laite
+            JOIN huoltosyklit_laitteet
+            ON ( huoltosyklit_laitteet.yhtio = laite.yhtio
+              AND huoltosyklit_laitteet.laite_tunnus = laite.tunnus
+              AND IFNULL(huoltosyklit_laitteet.viimeinen_tapahtuma, '0000-00-00') < Date_sub(CURRENT_DATE, INTERVAL (huoltosyklit_laitteet.huoltovali - 30) DAY) )
+            JOIN huoltosykli
+            ON ( huoltosykli.yhtio = huoltosyklit_laitteet.yhtio
+              AND huoltosykli.tunnus = huoltosyklit_laitteet.huoltosykli_tunnus )
+            JOIN paikka
+            ON ( paikka.yhtio = laite.yhtio
+              AND paikka.tunnus = laite.paikka )
+            JOIN kohde
+            ON ( kohde.yhtio = paikka.yhtio
+              AND kohde.tunnus = paikka.kohde )
+            JOIN asiakas
+            ON ( asiakas.yhtio = kohde.yhtio
+              AND asiakas.tunnus = kohde.asiakas )
+            JOIN tuote
+            ON ( tuote.yhtio = laite.yhtio
+              AND tuote.tuoteno = huoltosykli.toimenpide )
+            LEFT JOIN tuotteen_avainsanat
+            ON ( tuotteen_avainsanat.yhtio = tuote.yhtio
+              AND tuotteen_avainsanat.tuoteno = tuote.tuoteno
+              AND tuotteen_avainsanat.laji = 'tyomaarayksen_ryhmittely' )
+            WHERE  laite.yhtio = '{$kukarow['yhtio']}'
+            AND laite.tila IN ('N', 'V', 'K')/*Normaali, varalaite, kateissa*/
+            AND ( laite.omistaja = '' OR laite.omistaja IS NULL )
+            ORDER BY laite_tunnus ASC,
+            tuotteen_avainsanat.selitetark ASC,
+            kohde.tunnus ASC";
   $result = pupe_query($query);
 
   $laitteet = array();
@@ -125,48 +124,48 @@ function hae_laitteet_ja_niiden_huoltosyklit_ajalta($start, $end, $asiakas) {
   }
 
 
-  $query = "  SELECT laite.tuoteno,
-        huoltosyklit_laitteet.viimeinen_tapahtuma,
-        laite.tunnus AS laite_tunnus,
-        huoltosyklit_laitteet.huoltosykli_tunnus,
-        huoltosyklit_laitteet.huoltovali AS huoltovali,
-        huoltosykli.toimenpide,
-        huoltosykli.huoltovali AS toimenpide_oletus_huoltovali,
-        asiakas.tunnus AS asiakas_tunnus,
-        kohde.nimi AS kohde_nimi,
-        paikka.nimi AS paikka_nimi,
-        tuotteen_avainsanat.selite AS toimenpide_tuotteen_tyyppi,
-        tuotteen_avainsanat.selitetark AS toimenpide_tuotteen_prioriteetti
-        FROM   laite
-        JOIN huoltosyklit_laitteet
-        ON ( huoltosyklit_laitteet.yhtio = laite.yhtio
-          AND huoltosyklit_laitteet.laite_tunnus = laite.tunnus )
-        JOIN huoltosykli
-        ON ( huoltosykli.yhtio = laite.yhtio
-          AND huoltosykli.tunnus = huoltosyklit_laitteet.huoltosykli_tunnus )
-        JOIN paikka
-        ON ( paikka.yhtio = laite.yhtio
-          AND paikka.tunnus = laite.paikka )
-        JOIN kohde
-        ON ( kohde.yhtio = paikka.yhtio
-          AND kohde.tunnus = paikka.kohde )
-        JOIN asiakas
-        ON ( asiakas.yhtio = kohde.yhtio
-          AND asiakas.tunnus = kohde.asiakas )
-        JOIN tuote
-        ON ( tuote.yhtio = laite.yhtio
-          AND tuote.tuoteno = huoltosykli.toimenpide )
-        LEFT JOIN tuotteen_avainsanat
-        ON ( tuotteen_avainsanat.yhtio = tuote.yhtio
-          AND tuotteen_avainsanat.tuoteno = tuote.tuoteno
-          AND tuotteen_avainsanat.laji = 'tyomaarayksen_ryhmittely' )
-        WHERE  laite.yhtio = '{$kukarow['yhtio']}'
-        AND laite.tila IN ('N', 'V', 'K')/*Normaali, varalaite, kateissa*/
-        AND ( laite.omistaja = '' OR laite.omistaja IS NULL )
-        AND DATE_ADD( huoltosyklit_laitteet.viimeinen_tapahtuma, INTERVAL huoltosyklit_laitteet.huoltovali DAY) BETWEEN '{$start}' AND '{$end}'
-        {$asiakas_and}
-        ORDER BY laite_tunnus ASC,
-        tuotteen_avainsanat.selitetark ASC";
+  $query = "SELECT laite.tuoteno,
+            huoltosyklit_laitteet.viimeinen_tapahtuma,
+            laite.tunnus AS laite_tunnus,
+            huoltosyklit_laitteet.huoltosykli_tunnus,
+            huoltosyklit_laitteet.huoltovali AS huoltovali,
+            huoltosykli.toimenpide,
+            huoltosykli.huoltovali AS toimenpide_oletus_huoltovali,
+            asiakas.tunnus AS asiakas_tunnus,
+            kohde.nimi AS kohde_nimi,
+            paikka.nimi AS paikka_nimi,
+            tuotteen_avainsanat.selite AS toimenpide_tuotteen_tyyppi,
+            tuotteen_avainsanat.selitetark AS toimenpide_tuotteen_prioriteetti
+            FROM   laite
+            JOIN huoltosyklit_laitteet
+            ON ( huoltosyklit_laitteet.yhtio = laite.yhtio
+              AND huoltosyklit_laitteet.laite_tunnus = laite.tunnus )
+            JOIN huoltosykli
+            ON ( huoltosykli.yhtio = laite.yhtio
+              AND huoltosykli.tunnus = huoltosyklit_laitteet.huoltosykli_tunnus )
+            JOIN paikka
+            ON ( paikka.yhtio = laite.yhtio
+              AND paikka.tunnus = laite.paikka )
+            JOIN kohde
+            ON ( kohde.yhtio = paikka.yhtio
+              AND kohde.tunnus = paikka.kohde )
+            JOIN asiakas
+            ON ( asiakas.yhtio = kohde.yhtio
+              AND asiakas.tunnus = kohde.asiakas )
+            JOIN tuote
+            ON ( tuote.yhtio = laite.yhtio
+              AND tuote.tuoteno = huoltosykli.toimenpide )
+            LEFT JOIN tuotteen_avainsanat
+            ON ( tuotteen_avainsanat.yhtio = tuote.yhtio
+              AND tuotteen_avainsanat.tuoteno = tuote.tuoteno
+              AND tuotteen_avainsanat.laji = 'tyomaarayksen_ryhmittely' )
+            WHERE  laite.yhtio = '{$kukarow['yhtio']}'
+            AND laite.tila IN ('N', 'V', 'K')/*Normaali, varalaite, kateissa*/
+            AND ( laite.omistaja = '' OR laite.omistaja IS NULL )
+            AND DATE_ADD( huoltosyklit_laitteet.viimeinen_tapahtuma, INTERVAL huoltosyklit_laitteet.huoltovali DAY) BETWEEN '{$start}' AND '{$end}'
+            {$asiakas_and}
+            ORDER BY laite_tunnus ASC,
+            tuotteen_avainsanat.selitetark ASC";
 
   $result = pupe_query($query);
 
@@ -332,15 +331,14 @@ function generoi_tyomaarays_temp($huollettavan_laitteen_huoltosyklirivi) {
   }
 
   $parametrit = array(
-    'trow'     => $trow,
-    'laskurow'   => $laskurow,
-    'kpl'     => 1,
-    'tuoteno'   => $trow['tuoteno'],
-    'hinta'     => $hinta,
-    'netto'     => '',
-    'ale1'     => $ale,
+      'trow'     => $trow,
+      'laskurow' => $laskurow,
+      'kpl'      => 1,
+      'tuoteno'  => $trow['tuoteno'],
+      'hinta'    => $hinta,
+      'netto'    => '',
+      'ale1'     => $ale,
   );
-
 
   $rivit = lisaa_rivi($parametrit);
 
@@ -428,26 +426,26 @@ function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_
   }
 
   $parametrit = array(
-    'trow'     => $trow,
-    'laskurow'   => $laskurow,
-    'kpl'     => 1,
-    'tuoteno'   => $trow['tuoteno'],
-    'hinta'     => $hinta,
-    'netto'     => '',
-    'ale1'     => $ale,
+      'trow'     => $trow,
+      'laskurow' => $laskurow,
+      'kpl'      => 1,
+      'tuoteno'  => $trow['tuoteno'],
+      'hinta'    => $hinta,
+      'netto'    => '',
+      'ale1'     => $ale,
   );
   $rivit = lisaa_rivi($parametrit);
 
   if ($lisaa_kulut) {
     $kaynti_trow = hae_tuote('KAYNTI');
     $parametrit = array(
-      'trow'     => $kaynti_trow,
-      'laskurow'   => $laskurow,
-      'kpl'     => 1,
-      'tuoteno'   => $kaynti_trow['tuoteno'],
-      'hinta'     => 0,
-      'netto'     => '',
-      'ale1'     => 0,
+        'trow'     => $kaynti_trow,
+        'laskurow' => $laskurow,
+        'kpl'      => 1,
+        'tuoteno'  => $kaynti_trow['tuoteno'],
+        'hinta'    => 0,
+        'netto'    => '',
+        'ale1'     => 0,
     );
     lisaa_rivi($parametrit);
   }
@@ -495,82 +493,82 @@ function luo_tyomaarays($asiakas, $toimaika, $summa, $alv_23 = true, $vastuuhenk
     $maksuehto['tunnus'] = 0;
   }
 
-  $query   = "  INSERT INTO lasku SET
-          yhtio = '{$kukarow['yhtio']}',
-          yhtio_nimi = '{$yhtiorow['nimi']}',
-          yhtio_osoite = '{$yhtiorow['osoite']}',
-          yhtio_postino = '{$yhtiorow['postino']}',
-          yhtio_postitp = '{$yhtiorow['postitp']}',
-          yhtio_maa = '{$yhtiorow['maa']}',
-          yhtio_ovttunnus = '{$yhtiorow['ovttunnus']}',
-          yhtio_kotipaikka = '{$yhtiorow['kotipaikka']}',
-          yhtio_toimipaikka = '{$yhtiorow['toimipaikka']}',
-          nimi = '{$asiakas['nimi']}',
-          nimitark = '{$asiakas['nimitark']}',
-          osoite = '{$asiakas['osoite']}',
-          osoitetark = '{$asiakas['osoitetark']}',
-          postino = '{$asiakas['postino']}',
-          postitp = '{$asiakas['postitp']}',
-          maa = '{$asiakas['maa']}',
-          toim_nimi = '{$asiakas['toim_nimi']}',
-          toim_nimitark = '{$asiakas['toim_nimitark']}',
-          toim_osoite = '{$asiakas['osoite']}',
-          toim_postino = '{$asiakas['postino']}',
-          toim_postitp = '{$asiakas['postitp']}',
-          toim_maa = '{$asiakas['maa']}',
-          valkoodi = 'EUR',
-          alv = '{$alv}',
-          toimaika = '{$toimaika}',
-          kerayspvm = NOW(),
-          summa = '{$summa}',
-          hinta = '{$summa}',
-          lahetetyyppi = 'tulosta_lahete_eiale_eihinta.inc',
-          laskutyyppi = '-9',
-          myyja = '{$kukarow['tunnus']}',
-          maksuehto = '{$maksuehto['tunnus']}',
-          toimitustapa = 'Nouto',
-          ytunnus = '{$asiakas['ytunnus']}',
-          ovttunnus = '{$asiakas['ovttunnus']}',
-          toim_ovttunnus = '{$asiakas['ovttunnus']}',
-          chn = '100',
-          mapvm = '0000-00-00',
-          popvm = '0000-00-00 00:00:00',
-          alv_tili = '{$yhtiorow['alv']}',
-          tila = 'A',
-          alatila = '',
-          muutospvm = NOW(),
-          muuttaja = '{$kukarow['kuka']}',
-          laatija = '{$kukarow['kuka']}',
-          luontiaika = NOW(),
-          tilaustyyppi = 'A',
-          liitostunnus = '{$asiakas['tunnus']}',
-          ohjelma_moduli = 'PUPESOFT'";
+  $query = "INSERT INTO lasku SET
+            yhtio = '{$kukarow['yhtio']}',
+            yhtio_nimi = '{$yhtiorow['nimi']}',
+            yhtio_osoite = '{$yhtiorow['osoite']}',
+            yhtio_postino = '{$yhtiorow['postino']}',
+            yhtio_postitp = '{$yhtiorow['postitp']}',
+            yhtio_maa = '{$yhtiorow['maa']}',
+            yhtio_ovttunnus = '{$yhtiorow['ovttunnus']}',
+            yhtio_kotipaikka = '{$yhtiorow['kotipaikka']}',
+            yhtio_toimipaikka = '{$yhtiorow['toimipaikka']}',
+            nimi = '{$asiakas['nimi']}',
+            nimitark = '{$asiakas['nimitark']}',
+            osoite = '{$asiakas['osoite']}',
+            osoitetark = '{$asiakas['osoitetark']}',
+            postino = '{$asiakas['postino']}',
+            postitp = '{$asiakas['postitp']}',
+            maa = '{$asiakas['maa']}',
+            toim_nimi = '{$asiakas['toim_nimi']}',
+            toim_nimitark = '{$asiakas['toim_nimitark']}',
+            toim_osoite = '{$asiakas['osoite']}',
+            toim_postino = '{$asiakas['postino']}',
+            toim_postitp = '{$asiakas['postitp']}',
+            toim_maa = '{$asiakas['maa']}',
+            valkoodi = 'EUR',
+            alv = '{$alv}',
+            toimaika = '{$toimaika}',
+            kerayspvm = NOW(),
+            summa = '{$summa}',
+            hinta = '{$summa}',
+            lahetetyyppi = 'tulosta_lahete_eiale_eihinta.inc',
+            laskutyyppi = '-9',
+            myyja = '{$kukarow['tunnus']}',
+            maksuehto = '{$maksuehto['tunnus']}',
+            toimitustapa = 'Nouto',
+            ytunnus = '{$asiakas['ytunnus']}',
+            ovttunnus = '{$asiakas['ovttunnus']}',
+            toim_ovttunnus = '{$asiakas['ovttunnus']}',
+            chn = '100',
+            mapvm = '0000-00-00',
+            popvm = '0000-00-00 00:00:00',
+            alv_tili = '{$yhtiorow['alv']}',
+            tila = 'A',
+            alatila = '',
+            muutospvm = NOW(),
+            muuttaja = '{$kukarow['kuka']}',
+            laatija = '{$kukarow['kuka']}',
+            luontiaika = NOW(),
+            tilaustyyppi = 'A',
+            liitostunnus = '{$asiakas['tunnus']}',
+            ohjelma_moduli = 'PUPESOFT'";
   pupe_query($query);
-  $tunnus   = mysql_insert_id();
+  $tunnus = mysql_insert_id();
 
-  $query = "  INSERT INTO laskun_lisatiedot SET
-        yhtio = '{$kukarow['yhtio']}',
-        otunnus = '{$tunnus}',
-        kolm_ovttunnus = 'FI',
-        kolm_maa = '{$asiakas['maa']}',
-        laskutus_nimi = '{$asiakas['nimi']}',
-        laskutus_osoite = '{$asiakas['osoite']}',
-        laskutus_postino = '{$asiakas['postino']}',
-        laskutus_postitp = '{$asiakas['postitp']}',
-        laskutus_maa = '{$asiakas['maa']}',
-        muutospvm = NOW(),
-        muuttaja = '{$kukarow['kuka']}',
-        laatija = '{$kukarow['kuka']}',
-        luontiaika = NOW()";
+  $query = "INSERT INTO laskun_lisatiedot SET
+            yhtio = '{$kukarow['yhtio']}',
+            otunnus = '{$tunnus}',
+            kolm_ovttunnus = 'FI',
+            kolm_maa = '{$asiakas['maa']}',
+            laskutus_nimi = '{$asiakas['nimi']}',
+            laskutus_osoite = '{$asiakas['osoite']}',
+            laskutus_postino = '{$asiakas['postino']}',
+            laskutus_postitp = '{$asiakas['postitp']}',
+            laskutus_maa = '{$asiakas['maa']}',
+            muutospvm = NOW(),
+            muuttaja = '{$kukarow['kuka']}',
+            laatija = '{$kukarow['kuka']}',
+            luontiaika = NOW()";
   pupe_query($query);
 
-  $query = "  INSERT INTO tyomaarays SET
-        yhtio = '{$kukarow['yhtio']}',
-        laatija = '{$kukarow['kuka']}',
-        luontiaika = NOW(),
-        tyostatus = 'X',
-        tyojono = '{$vastuuhenkilo}',
-        otunnus = '{$tunnus}'";
+  $query = "INSERT INTO tyomaarays SET
+            yhtio = '{$kukarow['yhtio']}',
+            laatija = '{$kukarow['kuka']}',
+            luontiaika = NOW(),
+            tyostatus = 'X',
+            tyojono = '{$vastuuhenkilo}',
+            otunnus = '{$tunnus}'";
   pupe_query($query);
 
   return $tunnus;
@@ -579,37 +577,37 @@ function luo_tyomaarays($asiakas, $toimaika, $summa, $alv_23 = true, $vastuuhenk
 function paivita_laite_tunnus_toimenpiteen_tilausriville_temp($laite, $tilausrivit) {
   global $kukarow, $yhtiorow;
 
-  $query = "  UPDATE tilausrivin_lisatiedot_temp
-        JOIN tilausrivi_temp
-        ON ( tilausrivi_temp.yhtio = tilausrivin_lisatiedot_temp.yhtio
-          AND tilausrivi_temp.tunnus = tilausrivin_lisatiedot_temp.tilausrivitunnus
-          AND tilausrivi_temp.tunnus = '{$tilausrivit[0][0]}')
-        SET asiakkaan_positio = {$laite['laite_tunnus']}
-        WHERE tilausrivin_lisatiedot_temp.yhtio = '{$kukarow['yhtio']}'";
+  $query = "UPDATE tilausrivin_lisatiedot_temp
+            JOIN tilausrivi_temp
+            ON ( tilausrivi_temp.yhtio = tilausrivin_lisatiedot_temp.yhtio
+              AND tilausrivi_temp.tunnus = tilausrivin_lisatiedot_temp.tilausrivitunnus
+              AND tilausrivi_temp.tunnus = '{$tilausrivit[0][0]}')
+            SET asiakkaan_positio = {$laite['laite_tunnus']}
+            WHERE tilausrivin_lisatiedot_temp.yhtio = '{$kukarow['yhtio']}'";
   pupe_query($query);
 }
 
 function paivita_tyojono_ja_tyostatus_tyomaaraykselle_temp($tyomaarays_tunnus, $laite) {
   global $kukarow, $yhtiorow;
 
-  $query = "  UPDATE tyomaarays_temp
-        SET tyojono = '{$laite['tyojono']}',
-        tyostatus = 'A'
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND otunnus = '{$tyomaarays_tunnus}'";
+  $query = "UPDATE tyomaarays_temp
+            SET tyojono = '{$laite['tyojono']}',
+            tyostatus = 'A'
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND otunnus = '{$tyomaarays_tunnus}'";
   pupe_query($query);
 }
 
 function paivita_laite_tunnus_toimenpiteen_tilausriville($laite, $tilausrivit) {
   global $kukarow, $yhtiorow;
 
-  $query = "  UPDATE tilausrivin_lisatiedot
-        JOIN tilausrivi
-        ON ( tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
-          AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-          AND tilausrivi.tunnus = '{$tilausrivit[0][0]}')
-        SET asiakkaan_positio = {$laite['laite_tunnus']}
-        WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'";
+  $query = "UPDATE tilausrivin_lisatiedot
+            JOIN tilausrivi
+            ON ( tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
+              AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+              AND tilausrivi.tunnus = '{$tilausrivit[0][0]}')
+            SET asiakkaan_positio = {$laite['laite_tunnus']}
+            WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'";
   pupe_query($query);
 }
 
@@ -637,11 +635,10 @@ function paivita_tyojono_ja_tyostatus_tyomaarayksille($tyomaarays_tunnukset, $la
     $tyomaarays_tunnukset = array($tyomaarays_tunnukset);
   }
 
-  $query = "  UPDATE tyomaarays
-        SET
-        {$update}
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND otunnus IN ('".implode("','", $tyomaarays_tunnukset)."')";
+  $query = "UPDATE tyomaarays SET
+            {$update}
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND otunnus IN ('".implode("','", $tyomaarays_tunnukset)."')";
   pupe_query($query);
 
   return true;
@@ -651,11 +648,11 @@ function paivita_viimenen_tapahtuma_laitteen_huoltosyklille($laite_tunnus, $huol
   global $kukarow, $yhtiorow;
 
   if ($viimeinen_tapahtuma != '') {
-    $query = "  SELECT IFNULL(viimeinen_tapahtuma, '0000-00-00') AS viimeinen_tapahtuma
-          FROM huoltosyklit_laitteet
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND laite_tunnus = '{$laite_tunnus}'
-          AND huoltosykli_tunnus = '{$huoltosykli_tunnus}'";
+    $query = "SELECT IFNULL(viimeinen_tapahtuma, '0000-00-00') AS viimeinen_tapahtuma
+              FROM huoltosyklit_laitteet
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND laite_tunnus = '{$laite_tunnus}'
+              AND huoltosykli_tunnus = '{$huoltosykli_tunnus}'";
     $result = pupe_query($query);
     $huoltosykli = mysql_fetch_assoc($result);
 
@@ -677,13 +674,13 @@ function paivita_viimenen_tapahtuma_laitteen_huoltosyklille($laite_tunnus, $huol
     $huoltosyklit_laitteet_update = "viimeinen_tapahtuma = '".date('Y-m-d', strtotime($viimeinen_tapahtuma))."'";
   }
 
-  $query = "  UPDATE huoltosyklit_laitteet
-        SET {$huoltosyklit_laitteet_update},
-        muutospvm = NOW(),
-        muuttaja = '{$kukarow['kuka']}'
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND laite_tunnus = '{$laite_tunnus}'
-        AND huoltosykli_tunnus = '{$huoltosykli_tunnus}'";
+  $query = "UPDATE huoltosyklit_laitteet
+            SET {$huoltosyklit_laitteet_update},
+            muutospvm = NOW(),
+            muuttaja = '{$kukarow['kuka']}'
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND laite_tunnus = '{$laite_tunnus}'
+            AND huoltosykli_tunnus = '{$huoltosykli_tunnus}'";
   pupe_query($query);
 }
 
@@ -703,18 +700,18 @@ function paivita_laitteen_muiden_jonossa_olevien_huoltosyklien_viimeinen_tapahtu
 function paivita_tilausrivin_kommentti($tilausrivi_tunnus, $kommentti) {
   global $kukarow, $yhtiorow;
 
-  $query = "  SELECT kommentti
-        FROM tilausrivi
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tunnus = '{$tilausrivi_tunnus}'";
+  $query = "SELECT kommentti
+            FROM tilausrivi
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = '{$tilausrivi_tunnus}'";
   $result = pupe_query($query);
   $tilausrivi = mysql_fetch_assoc($result);
 
   $kommentti = $tilausrivi['kommentti'].' '.$kommentti;
-  $query = "  UPDATE tilausrivi
-        SET kommentti = '{$kommentti}'
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tunnus = '{$tilausrivi_tunnus}'";
+  $query = "UPDATE tilausrivi
+            SET kommentti = '{$kommentti}'
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = '{$tilausrivi_tunnus}'";
   pupe_query($query);
 }
 
@@ -723,18 +720,18 @@ function tarkista_loytyyko_tyomaarays($laite) {
 
   //tarkistetaan löytyykö tälle laitteelle kesken tilassa / ei valmis oleva työmääräys
 
-  $query = "  SELECT *
-        FROM lasku
-        JOIN tilausrivi
-        ON ( tilausrivi.yhtio = lasku.yhtio
-          AND tilausrivi.otunnus = lasku.tunnus
-          AND tilausrivi.tuoteno = '{$laite['toimenpide']}')
-        JOIN tilausrivin_lisatiedot
-        ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-          AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
-          AND tilausrivin_lisatiedot.asiakkaan_positio = '{$laite['laite_tunnus']}')
-        WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-        AND lasku.tila = 'A'";
+  $query = "SELECT *
+            FROM lasku
+            JOIN tilausrivi
+            ON ( tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus = lasku.tunnus
+              AND tilausrivi.tuoteno = '{$laite['toimenpide']}')
+            JOIN tilausrivin_lisatiedot
+            ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
+              AND tilausrivin_lisatiedot.asiakkaan_positio = '{$laite['laite_tunnus']}')
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.tila = 'A'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -747,11 +744,11 @@ function tarkista_loytyyko_tyomaarays($laite) {
 function tarkista_toimenpide_saldo($laite) {
   global $kukarow, $yhtiorow;
 
-  $query = "  SELECT ei_saldoa
-        FROM tuote
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tuoteno = '{$laite['toimenpide']}'
-        AND ei_saldoa = 'o'";
+  $query = "SELECT ei_saldoa
+            FROM tuote
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tuoteno = '{$laite['toimenpide']}'
+            AND ei_saldoa = 'o'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -769,10 +766,10 @@ function aseta_tyomaarayksen_toimitusajankohta($tyomaarays_tunnus, $ajankohta) {
   }
   $ajankohta = date("Y-m-d", strtotime($ajankohta));
 
-  $query = "  UPDATE lasku
-        SET toimaika = '{$ajankohta}'
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tunnus = '{$tyomaarays_tunnus}'";
+  $query = "UPDATE lasku
+            SET toimaika = '{$ajankohta}'
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = '{$tyomaarays_tunnus}'";
   pupe_query($query);
 }
 
@@ -784,20 +781,20 @@ function aseta_tyomaarayksen_tilausrivien_toimaika($tyomaarays_tunnus, $ajankoht
   }
   $ajankohta = date("Y-m-d", strtotime($ajankohta));
 
-  $query = "  UPDATE tilausrivi
-        SET toimaika = '{$ajankohta}'
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND otunnus = '{$tyomaarays_tunnus}'";
+  $query = "UPDATE tilausrivi
+            SET toimaika = '{$ajankohta}'
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND otunnus = '{$tyomaarays_tunnus}'";
   pupe_query($query);
 }
 
 function aseta_tyomaarayksen_toimitusajankohta_temp($tyomaarays_tunnus, $ajankohta) {
   global $kukarow;
 
-  $query = "  UPDATE lasku_temp
-        SET toimaika = '{$ajankohta}'
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tunnus = '{$tyomaarays_tunnus}'";
+  $query = "UPDATE lasku_temp
+            SET toimaika = '{$ajankohta}'
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = '{$tyomaarays_tunnus}'";
   pupe_query($query);
 }
 
@@ -808,10 +805,10 @@ function aseta_tyomaaraysten_status($lasku_tunnukset, $status) {
     return false;
   }
 
-  $query = "  UPDATE tyomaarays
-        SET tyostatus = '{$status}'
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tyomaarays.otunnus IN ('".implode("','", $lasku_tunnukset)."')";
+  $query = "UPDATE tyomaarays
+            SET tyostatus = '{$status}'
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tyomaarays.otunnus IN ('".implode("','", $lasku_tunnukset)."')";
   pupe_query($query);
 }
 
@@ -822,10 +819,10 @@ function aseta_laitteen_tila($laite_tunnus, $tila) {
     return false;
   }
 
-  $query = "  UPDATE laite
-        SET tila = '{$tila}'
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tunnus = '{$laite_tunnus}'";
+  $query = "UPDATE laite
+            SET tila = '{$tila}'
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = '{$laite_tunnus}'";
   pupe_query($query);
 }
 
@@ -836,21 +833,21 @@ function hae_laitteen_edellinen_tyomaarays($laite_tunnus) {
     return false;
   }
 
-  $query = "  SELECT tyomaarays.*,
-        tilausrivin_lisatiedot.asiakkaan_positio AS laite_tunnus,
-        tilausrivi.nimitys AS toimenpidetuote_nimitys,
-        tilausrivi.toimitettuaika
-        FROM tyomaarays
-        JOIN tilausrivi
-        ON ( tilausrivi.yhtio = tyomaarays.yhtio
-          AND tilausrivi.otunnus = tyomaarays.otunnus )
-        JOIN tilausrivin_lisatiedot
-        ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-          AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
-          AND tilausrivin_lisatiedot.asiakkaan_positio = '{$laite_tunnus}')
-        WHERE tyomaarays.yhtio = '{$kukarow['yhtio']}'
-        ORDER BY tilausrivi.toimitettuaika DESC
-        LIMIT 1";
+  $query = "SELECT tyomaarays.*,
+            tilausrivin_lisatiedot.asiakkaan_positio AS laite_tunnus,
+            tilausrivi.nimitys AS toimenpidetuote_nimitys,
+            tilausrivi.toimitettuaika
+            FROM tyomaarays
+            JOIN tilausrivi
+            ON ( tilausrivi.yhtio = tyomaarays.yhtio
+              AND tilausrivi.otunnus = tyomaarays.otunnus )
+            JOIN tilausrivin_lisatiedot
+            ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
+              AND tilausrivin_lisatiedot.asiakkaan_positio = '{$laite_tunnus}')
+            WHERE tyomaarays.yhtio = '{$kukarow['yhtio']}'
+            ORDER BY tilausrivi.toimitettuaika DESC
+            LIMIT 1";
   $result = pupe_query($query);
 
   return mysql_fetch_assoc($result);
@@ -859,11 +856,11 @@ function hae_laitteen_edellinen_tyomaarays($laite_tunnus) {
 function merkkaa_tyomaarays_tehdyksi($request) {
   global $kukarow, $yhtiorow;
 
-  $query = "  UPDATE lasku
-        SET tila = 'L',
-        alatila = 'D'
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tunnus IN ('".implode("','", $request['lasku_tunnukset'])."')";
+  $query = "UPDATE lasku
+            SET tila = 'L',
+            alatila = 'D'
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus IN ('".implode("','", $request['lasku_tunnukset'])."')";
   pupe_query($query);
 
   //Toimitettuaika manual settiä käytetään konversio-ajossa
@@ -874,18 +871,18 @@ function merkkaa_tyomaarays_tehdyksi($request) {
     $toimitettuaika_update = "toimitettuaika = '".date('Y-m-d H:i:s', strtotime($request['toimitettuaika']))."'";
   }
 
-  $query = "  UPDATE tilausrivi
-        SET toimitettu = '{$kukarow['kuka']}',
-        {$toimitettuaika_update}
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND otunnus IN ('".implode("','", $request['lasku_tunnukset'])."')";
+  $query = "UPDATE tilausrivi
+            SET toimitettu = '{$kukarow['kuka']}',
+            {$toimitettuaika_update}
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND otunnus IN ('".implode("','", $request['lasku_tunnukset'])."')";
   pupe_query($query);
 
   foreach ($request['lasku_tunnukset'] as $lasku_tunnus) {
-    $query = "  SELECT tyostatus
-          FROM tyomaarays
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND otunnus = '{$lasku_tunnus}'";
+    $query = "SELECT tyostatus
+              FROM tyomaarays
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND otunnus = '{$lasku_tunnus}'";
     $result = pupe_query($query);
     $tyomaarays = mysql_fetch_assoc($result);
 
@@ -900,11 +897,11 @@ function merkkaa_tyomaarays_tehdyksi($request) {
 function hae_tyomaarays($tyomaarays_tunnus) {
   global $kukarow;
 
-  $query = "  SELECT *
-        FROM lasku
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tunnus = '{$tyomaarays_tunnus}'
-        AND tila != 'D'";
+  $query = "SELECT *
+            FROM lasku
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = '{$tyomaarays_tunnus}'
+            AND tila != 'D'";
   $result = pupe_query($query);
   return mysql_fetch_assoc($result);
 }
@@ -912,11 +909,11 @@ function hae_tyomaarays($tyomaarays_tunnus) {
 function hae_tyomaarays_temp($tyomaarays_tunnus) {
   global $kukarow;
 
-  $query = "  SELECT *
-        FROM lasku_temp
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tunnus = '{$tyomaarays_tunnus}'
-        AND tila != 'D'";
+  $query = "SELECT *
+            FROM lasku_temp
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = '{$tyomaarays_tunnus}'
+            AND tila != 'D'";
   $result = pupe_query($query);
   return mysql_fetch_assoc($result);
 }
@@ -924,10 +921,10 @@ function hae_tyomaarays_temp($tyomaarays_tunnus) {
 function hae_kohde($kohde_tunnus) {
   global $kukarow;
 
-  $query = "  SELECT *
-        FROM kohde
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tunnus = '{$kohde_tunnus}'";
+  $query = "SELECT *
+            FROM kohde
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = '{$kohde_tunnus}'";
   $kohde_result = pupe_query($query);
   return mysql_fetch_assoc($kohde_result);
 }
@@ -935,10 +932,10 @@ function hae_kohde($kohde_tunnus) {
 function onko_huoltosyklilla_laitteita($huoltosykli_tunnus) {
   global $kukarow, $yhtiorow;
 
-  $query = "  SELECT *
-        FROM huoltosyklit_laitteet
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND huoltosykli_tunnus = '{$huoltosykli_tunnus}'";
+  $query = "SELECT *
+            FROM huoltosyklit_laitteet
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND huoltosykli_tunnus = '{$huoltosykli_tunnus}'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -951,10 +948,10 @@ function onko_huoltosyklilla_laitteita($huoltosykli_tunnus) {
 function aseta_tyomaarays_var($tilausrivi_tunnus, $var) {
   global $kukarow, $yhtiorow;
 
-  $query = "  UPDATE tilausrivi
-        SET var = '{$var}'
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tunnus = '{$tilausrivi_tunnus}'";
+  $query = "UPDATE tilausrivi
+            SET var = '{$var}'
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = '{$tilausrivi_tunnus}'";
   pupe_query($query);
 }
 
@@ -968,23 +965,23 @@ function aseta_tyomaarays_status($status, $tilausrivi_tunnus = '', $lasku_tunnus
   $join = "";
   $where = "";
   if (!empty($tilausrivi_tunnus)) {
-    $join = "  JOIN lasku
-          ON ( lasku.yhtio = tyomaarays.yhtio
-            AND lasku.tunnus = tyomaarays.otunnus )
-          JOIN tilausrivi
-          ON ( tilausrivi.yhtio = lasku.yhtio
-            AND tilausrivi.otunnus = lasku.tunnus
-            AND tilausrivi.tunnus = '{$tilausrivi_tunnus}')";
+    $join = " JOIN lasku
+              ON ( lasku.yhtio = tyomaarays.yhtio
+                AND lasku.tunnus = tyomaarays.otunnus )
+              JOIN tilausrivi
+              ON ( tilausrivi.yhtio = lasku.yhtio
+                AND tilausrivi.otunnus = lasku.tunnus
+                AND tilausrivi.tunnus = '{$tilausrivi_tunnus}')";
   }
   else if (!empty($lasku_tunnus)) {
     $where = "  AND tyomaarays.otunnus = '{$lasku_tunnus}'";
   }
 
-  $query = "  UPDATE tyomaarays
-        {$join}
-        SET tyomaarays.tyostatus = '{$status}'
-        WHERE tyomaarays.yhtio = '{$kukarow['yhtio']}'
-        {$where}";
+  $query = "UPDATE tyomaarays
+            {$join}
+            SET tyomaarays.tyostatus = '{$status}'
+            WHERE tyomaarays.yhtio = '{$kukarow['yhtio']}'
+            {$where}";
   pupe_query($query);
 }
 
@@ -1006,8 +1003,8 @@ function huoltosykli_rivi($tyyppi, $request) {
 
   $args = array(
       'laite_tunnus' => $laite_tunnus,
-      'tyyppi' => $tyyppi,
-      'tuoteno' => $request['tuoteno'],
+      'tyyppi'       => $tyyppi,
+      'tuoteno'      => $request['tuoteno'],
   );
   $huoltosyklit = hae_mahdolliset_huoltosyklit($args);
 
@@ -1102,26 +1099,26 @@ function hae_laitteen_huoltosyklit($laitetunnus, $tyyppi = '') {
     $tuotteen_avainsanat_join = "  AND t1.selite = '{$tyyppi}' ";
   }
 
-  $query = "  SELECT huoltosykli.tunnus AS huoltosykli_tunnus,
-        t1.selite AS huoltosykli_tyyppi,
-        t1.selitetark AS huoltosykli_prioriteetti,
-        huoltosyklit_laitteet.huoltovali,
-        huoltosyklit_laitteet.pakollisuus,
-        huoltosyklit_laitteet.viimeinen_tapahtuma,
-        huoltosyklit_laitteet.tunnus AS huoltosykli_laite_tunnus
-        FROM huoltosyklit_laitteet
-        JOIN huoltosykli
-        ON ( huoltosykli.yhtio = huoltosyklit_laitteet.yhtio
-          AND huoltosykli.tunnus = huoltosyklit_laitteet.huoltosykli_tunnus )
-        JOIN tuote
-        ON ( tuote.yhtio = huoltosykli.yhtio
-          AND tuote.tuoteno = huoltosykli.toimenpide )
-        JOIN tuotteen_avainsanat AS t1
-        ON ( t1.yhtio = tuote.yhtio
-          AND t1.tuoteno = tuote.tuoteno
-          {$tuotteen_avainsanat_join})
-        WHERE huoltosyklit_laitteet.yhtio = '{$kukarow['yhtio']}'
-        AND laite_tunnus = '{$laitetunnus}'";
+  $query = "SELECT huoltosykli.tunnus AS huoltosykli_tunnus,
+            t1.selite AS huoltosykli_tyyppi,
+            t1.selitetark AS huoltosykli_prioriteetti,
+            huoltosyklit_laitteet.huoltovali,
+            huoltosyklit_laitteet.pakollisuus,
+            huoltosyklit_laitteet.viimeinen_tapahtuma,
+            huoltosyklit_laitteet.tunnus AS huoltosykli_laite_tunnus
+            FROM huoltosyklit_laitteet
+            JOIN huoltosykli
+            ON ( huoltosykli.yhtio = huoltosyklit_laitteet.yhtio
+              AND huoltosykli.tunnus = huoltosyklit_laitteet.huoltosykli_tunnus )
+            JOIN tuote
+            ON ( tuote.yhtio = huoltosykli.yhtio
+              AND tuote.tuoteno = huoltosykli.toimenpide )
+            JOIN tuotteen_avainsanat AS t1
+            ON ( t1.yhtio = tuote.yhtio
+              AND t1.tuoteno = tuote.tuoteno
+              {$tuotteen_avainsanat_join})
+            WHERE huoltosyklit_laitteet.yhtio = '{$kukarow['yhtio']}'
+            AND laite_tunnus = '{$laitetunnus}'";
 
   $result = pupe_query($query);
 
@@ -1133,11 +1130,11 @@ function hae_laitteen_huoltosyklit($laitetunnus, $tyyppi = '') {
 
   if (empty($laitteen_huoltosyklit)) {
     $laitteen_huoltosyklit[] = array(
-      'tunnus'         => 0,
-      'huoltovali'       => 0,
-      'pakollisuus'       => 0,
-      'huoltosykli_laite_tunnus'         => 0,
-      'viimeinen_tapahtuma'   => '',
+        'tunnus'                   => 0,
+        'huoltovali'               => 0,
+        'pakollisuus'              => 0,
+        'huoltosykli_laite_tunnus' => 0,
+        'viimeinen_tapahtuma'      => '',
     );
   }
 
@@ -1201,29 +1198,29 @@ function hae_huoltosyklit_tyyppi_koko($sammutin_tyyppi, $sammutin_koko, $tyyppi 
     $tuotteen_avainsanat_join = " AND tuotteen_avainsanat.selite = '{$tyyppi}'";
   }
 
-  $query = "  SELECT huoltosykli.tunnus,
-        concat_ws(' - ', tuote.nimitys, huoltosykli.tyyppi, huoltosykli.koko,
-          (
-            SELECT selitetark
-            FROM avainsana
-            WHERE avainsana.yhtio = huoltosykli.yhtio
-            AND avainsana.selite = huoltosykli.olosuhde
-            AND avainsana.laji = 'OLOSUHDE'
-          )
-        ) as dropdown_text,
-        huoltosykli.huoltovali,
-        huoltosykli.pakollisuus
-        FROM huoltosykli
-        JOIN tuote
-        ON ( tuote.yhtio = huoltosykli.yhtio
-          AND tuote.tuoteno = huoltosykli.toimenpide )
-        JOIN tuotteen_avainsanat
-        ON ( tuotteen_avainsanat.yhtio = huoltosykli.yhtio
-          AND tuotteen_avainsanat.tuoteno = huoltosykli.toimenpide
-          {$tuotteen_avainsanat_join} )
-        WHERE huoltosykli.yhtio = '{$kukarow['yhtio']}'
-        AND huoltosykli.tyyppi = '{$sammutin_tyyppi}'
-        {$where}";
+  $query = "SELECT huoltosykli.tunnus,
+            concat_ws(' - ', tuote.nimitys, huoltosykli.tyyppi, huoltosykli.koko,
+              (
+                SELECT selitetark
+                FROM avainsana
+                WHERE avainsana.yhtio = huoltosykli.yhtio
+                AND avainsana.selite = huoltosykli.olosuhde
+                AND avainsana.laji = 'OLOSUHDE'
+              )
+            ) as dropdown_text,
+            huoltosykli.huoltovali,
+            huoltosykli.pakollisuus
+            FROM huoltosykli
+            JOIN tuote
+            ON ( tuote.yhtio = huoltosykli.yhtio
+              AND tuote.tuoteno = huoltosykli.toimenpide )
+            JOIN tuotteen_avainsanat
+            ON ( tuotteen_avainsanat.yhtio = huoltosykli.yhtio
+              AND tuotteen_avainsanat.tuoteno = huoltosykli.toimenpide
+              {$tuotteen_avainsanat_join} )
+            WHERE huoltosykli.yhtio = '{$kukarow['yhtio']}'
+            AND huoltosykli.tyyppi = '{$sammutin_tyyppi}'
+            {$where}";
 
   $huoltosykli_result = pupe_query($query);
 
@@ -1237,14 +1234,13 @@ function hae_huoltosyklit_tyyppi_koko($sammutin_tyyppi, $sammutin_koko, $tyyppi 
 }
 
 if (!function_exists('hae_sammuttimien_koot')) {
-
   function hae_sammuttimien_koot() {
     global $kukarow, $yhtiorow;
 
-    $query = "  SELECT DISTINCT selite
-          FROM tuotteen_avainsanat
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND laji = 'sammutin_koko'";
+    $query = "SELECT DISTINCT selite
+              FROM tuotteen_avainsanat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND laji = 'sammutin_koko'";
     $result = pupe_query($query);
 
     $sammuttimien_koot = array();
@@ -1254,19 +1250,16 @@ if (!function_exists('hae_sammuttimien_koot')) {
 
     return $sammuttimien_koot;
   }
-
 }
 
-
 if (!function_exists('hae_sammuttimien_tyypit')) {
-
   function hae_sammuttimien_tyypit() {
     global $kukarow, $yhtiorow;
 
-    $query = "  SELECT DISTINCT selite
-          FROM tuotteen_avainsanat
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND laji = 'sammutin_tyyppi'";
+    $query = "SELECT DISTINCT selite
+              FROM tuotteen_avainsanat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND laji = 'sammutin_tyyppi'";
     $result = pupe_query($query);
 
     $sammuttimien_tyypit = array();
@@ -1276,131 +1269,127 @@ if (!function_exists('hae_sammuttimien_tyypit')) {
 
     return $sammuttimien_tyypit;
   }
-
 }
 
 if (!function_exists('hae_mahdolliset_sammutin_tyypit')) {
-
   function hae_mahdolliset_sammutin_tyypit() {
     return array(
-      'jauhesammutin'       => t('Jauhesammutin'),
-      'hiilidioksidisammutin'   => t('Hiilidioksidisammutin'),
-      'nestesammutin'       => t('Nestesammutin'),
-      'halonisammutin'     => t('Halonisammutin'),
-      'kalvovaahtosammutin'   => t('Kalvovaahtosammutin'),
-      'paloposti'         => t('Paloposti'),
-      'muistutus'         => t('Muistutus'),
+        'jauhesammutin'         => t('Jauhesammutin'),
+        'hiilidioksidisammutin' => t('Hiilidioksidisammutin'),
+        'nestesammutin'         => t('Nestesammutin'),
+        'halonisammutin'        => t('Halonisammutin'),
+        'kalvovaahtosammutin'   => t('Kalvovaahtosammutin'),
+        'paloposti'             => t('Paloposti'),
+        'muistutus'             => t('Muistutus'),
     );
   }
-
 }
 
 if (!function_exists("huoltovali_options")) {
-
   function huoltovali_options($huoltosykli_tunnus = '') {
     global $kukarow;
 
     $huoltovali_options = array(
-      3650 => array(
-        'dropdown_text'   => '10 '.t('vuotta'),
-        'days'       => 3650,
-        'months'     => 120,
-        'years'       => 10,
-      ),
-      1825 => array(
-        'dropdown_text'   => '5 '.t('vuotta'),
-        'days'       => 1825,
-        'months'     => 60,
-        'years'       => 5,
-      ),
-      730   => array(
-        'dropdown_text'   => '2 '.t('vuotta'),
-        'days'       => 730,
-        'months'     => 24,
-        'years'       => 2,
-      ),
-      365   => array(
-        'dropdown_text'   => '1 '.t('vuotta'),
-        'days'       => 365,
-        'months'     => 12,
-        'years'       => 1,
-      ),
-      330   => array(
-        'dropdown_text'   => '11 '.t('kuukautta'),
-        'days'       => 330,
-        'months'     => 11,
-        'years'       => 11 / 12,
-      ),
-      300   => array(
-        'dropdown_text'   => '10 '.t('kuukautta'),
-        'days'       => 300,
-        'months'     => 10,
-        'years'       => 10 / 12,
-      ),
-      270   => array(
-        'dropdown_text'   => '9 '.t('kuukautta'),
-        'days'       => 270,
-        'months'     => 9,
-        'years'       => 9 / 12,
-      ),
-      240   => array(
-        'dropdown_text'   => '8 '.t('kuukautta'),
-        'days'       => 240,
-        'months'     => 8,
-        'years'       => 8 / 12,
-      ),
-      210   => array(
-        'dropdown_text'   => '7 '.t('kuukautta'),
-        'days'       => 210,
-        'months'     => 7,
-        'years'       => 7 / 12,
-      ),
-      180   => array(
-        'dropdown_text'   => '6 '.t('kuukautta'),
-        'days'       => 180,
-        'months'     => 6,
-        'years'       => 6 / 12,
-      ),
-      150   => array(
-        'dropdown_text'   => '5 '.t('kuukautta'),
-        'days'       => 150,
-        'months'     => 5,
-        'years'       => 5 / 12,
-      ),
-      120   => array(
-        'dropdown_text'   => '4 '.t('kuukautta'),
-        'days'       => 120,
-        'months'     => 4,
-        'years'       => 4 / 12,
-      ),
-      90   => array(
-        'dropdown_text'   => '3 '.t('kuukautta'),
-        'days'       => 90,
-        'months'     => 3,
-        'years'       => 3 / 12,
-      ),
-      60   => array(
-        'dropdown_text'   => '2 '.t('kuukautta'),
-        'days'       => 60,
-        'months'     => 2,
-        'years'       => 2 / 12,
-      ),
-      30   => array(
-        'dropdown_text'   => '1 '.t('kuukautta'),
-        'days'       => 30,
-        'months'     => 1,
-        'years'       => 1 / 12,
-      ),
+        3650 => array(
+            'dropdown_text' => '10 '.t('vuotta'),
+            'days'          => 3650,
+            'months'        => 120,
+            'years'         => 10,
+        ),
+        1825 => array(
+            'dropdown_text' => '5 '.t('vuotta'),
+            'days'          => 1825,
+            'months'        => 60,
+            'years'         => 5,
+        ),
+        730  => array(
+            'dropdown_text' => '2 '.t('vuotta'),
+            'days'          => 730,
+            'months'        => 24,
+            'years'         => 2,
+        ),
+        365  => array(
+            'dropdown_text' => '1 '.t('vuotta'),
+            'days'          => 365,
+            'months'        => 12,
+            'years'         => 1,
+        ),
+        330  => array(
+            'dropdown_text' => '11 '.t('kuukautta'),
+            'days'          => 330,
+            'months'        => 11,
+            'years'         => 11 / 12,
+        ),
+        300  => array(
+            'dropdown_text' => '10 '.t('kuukautta'),
+            'days'          => 300,
+            'months'        => 10,
+            'years'         => 10 / 12,
+        ),
+        270  => array(
+            'dropdown_text' => '9 '.t('kuukautta'),
+            'days'          => 270,
+            'months'        => 9,
+            'years'         => 9 / 12,
+        ),
+        240  => array(
+            'dropdown_text' => '8 '.t('kuukautta'),
+            'days'          => 240,
+            'months'        => 8,
+            'years'         => 8 / 12,
+        ),
+        210  => array(
+            'dropdown_text' => '7 '.t('kuukautta'),
+            'days'          => 210,
+            'months'        => 7,
+            'years'         => 7 / 12,
+        ),
+        180  => array(
+            'dropdown_text' => '6 '.t('kuukautta'),
+            'days'          => 180,
+            'months'        => 6,
+            'years'         => 6 / 12,
+        ),
+        150  => array(
+            'dropdown_text' => '5 '.t('kuukautta'),
+            'days'          => 150,
+            'months'        => 5,
+            'years'         => 5 / 12,
+        ),
+        120  => array(
+            'dropdown_text' => '4 '.t('kuukautta'),
+            'days'          => 120,
+            'months'        => 4,
+            'years'         => 4 / 12,
+        ),
+        90   => array(
+            'dropdown_text' => '3 '.t('kuukautta'),
+            'days'          => 90,
+            'months'        => 3,
+            'years'         => 3 / 12,
+        ),
+        60   => array(
+            'dropdown_text' => '2 '.t('kuukautta'),
+            'days'          => 60,
+            'months'        => 2,
+            'years'         => 2 / 12,
+        ),
+        30   => array(
+            'dropdown_text' => '1 '.t('kuukautta'),
+            'days'          => 30,
+            'months'        => 1,
+            'years'         => 1 / 12,
+        ),
     );
 
     if (empty($huoltosykli_tunnus)) {
       return $huoltovali_options;
     }
 
-    $query = "  SELECT huoltovali
-          FROM huoltosykli
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tunnus = {$huoltosykli_tunnus}";
+    $query = "SELECT huoltovali
+              FROM huoltosykli
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = {$huoltosykli_tunnus}";
     $result = pupe_query($query);
     $max_huoltovali = mysql_result($result, 0);
 
@@ -1411,5 +1400,4 @@ if (!function_exists("huoltovali_options")) {
     }
     return $huoltovali_options;
   }
-
 }

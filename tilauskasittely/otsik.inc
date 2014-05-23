@@ -3842,15 +3842,15 @@ if (isset($jatka)) {
   }
 
   if (($toim == "PROJEKTI" or $yhtiorow["splittauskielto"] == "K") and $kukarow["kesken"] > 0) {
-    $abuq = "  SELECT *
-          FROM lasku
-          WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tilausnumero'";
+    $abuq = "SELECT *
+             FROM lasku
+             WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tilausnumero'";
     $abures = pupe_query($abuq);
     $originaali["lasku"] = mysql_fetch_assoc($abures);
 
-    $abuq = "  SELECT *
-          FROM laskun_lisatiedot
-          WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$tilausnumero'";
+    $abuq = "SELECT *
+             FROM laskun_lisatiedot
+             WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$tilausnumero'";
     $abures = pupe_query($abuq);
     $originaali["laskun_lisatiedot"] = mysql_fetch_assoc($abures);
   }

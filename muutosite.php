@@ -609,29 +609,29 @@ if (isset($tee_Y) or isset($tee_Z) or isset($tee_X) or isset($tee_XKAIKKI) or is
           $orgpvm_pankki = substr(str_replace("-", "", $orgpvm), 2);
 
           //viiteaineistom summa, sen tiliöinnit ovat suoraan myyntilaskuilla, joten niitä ei oikein tähän saa haettua
-          $subq = "  SELECT sum(substring(tieto, 78, 10)/100) aineistosumma
-                FROM tiliotedata
-                WHERE yhtio = '$kukarow[yhtio]'
-                and tyyppi  = '3'
-                and tilino  = '$trow[tilino]'
-                and substr(tieto, 16, 6) = '$orgpvm_pankki'
-                and left(tieto, 1) = '3'";
+          $subq = "SELECT sum(substring(tieto, 78, 10)/100) aineistosumma
+                   FROM tiliotedata
+                   WHERE yhtio = '$kukarow[yhtio]'
+                   and tyyppi  = '3'
+                   and tilino  = '$trow[tilino]'
+                   and substr(tieto, 16, 6) = '$orgpvm_pankki'
+                   and left(tieto, 1) = '3'";
           $subr = pupe_query($subq);
           $asumma = mysql_fetch_assoc($subr);
 
           if ($trow[$kennimi] != "") {
             // Haetaan tositteet
-            $subq = "  SELECT group_concat(distinct ltunnus) ltunnus
-                  FROM tiliointi
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  AND tunnus IN ($trow[$kennimi])";
+            $subq = "SELECT group_concat(distinct ltunnus) ltunnus
+                     FROM tiliointi
+                     WHERE yhtio = '$kukarow[yhtio]'
+                     AND tunnus  IN ($trow[$kennimi])";
             $subr = pupe_query($subq);
             $ltunnukset = mysql_fetch_assoc($subr);
 
-            $subq = "  SELECT oletus_rahatili
-                  FROM yriti
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and tilino  = '$trow[tilino]'";
+            $subq = "SELECT oletus_rahatili
+                     FROM yriti
+                     WHERE yhtio = '$kukarow[yhtio]'
+                     and tilino  = '$trow[tilino]'";
             $subr = pupe_query($subq);
             $oratil = mysql_fetch_assoc($subr);
 
@@ -1214,7 +1214,7 @@ if ($tee == 'E' or $tee == 'F') {
                 alatila
                 FROM lasku
                 WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus = '{$trow['vanhatunnus']}'";
+                AND tunnus  = '{$trow['vanhatunnus']}'";
       $varastosiirto_result = pupe_query($query);
       $varastosiirto = mysql_fetch_assoc($varastosiirto_result);
 

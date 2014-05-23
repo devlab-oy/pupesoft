@@ -3663,17 +3663,17 @@ if ($tee == '') {
         $ok = 0;
 
         if ($yhtiorow["kalenterimerkinnat"] == "") {
-          $kysely = "  INSERT INTO kalenteri
-                SET tapa     = '".t("Teksiviesti")."',
-                asiakas      = '$laskurow[ytunnus]',
-                liitostunnus   = '$laskurow[liitostunnus]',
-                kuka         = '$kukarow[kuka]',
-                yhtio        = '$kukarow[yhtio]',
-                tyyppi       = 'Memo',
-                pvmalku      = now(),
-                kentta01     = '$smsnumero\n$smsviesti',
-                laatija      = '$kukarow[kuka]',
-                luontiaika    = now()";
+          $kysely = "INSERT INTO kalenteri
+                     SET tapa     = '".t("Teksiviesti")."',
+                     asiakas      = '$laskurow[ytunnus]',
+                     liitostunnus = '$laskurow[liitostunnus]',
+                     kuka         = '$kukarow[kuka]',
+                     yhtio        = '$kukarow[yhtio]',
+                     tyyppi       = 'Memo',
+                     pvmalku      = now(),
+                     kentta01     = '$smsnumero\n$smsviesti',
+                     laatija      = '$kukarow[kuka]',
+                     luontiaika   = now()";
           $result = pupe_query($kysely);
         }
 
@@ -5484,13 +5484,13 @@ if ($tee == '') {
 
               $query = "SELECT *
                         FROM lahdot
-                        WHERE yhtio               = '{$kukarow['yhtio']}'
-                        AND liitostunnus          = {$toimitustapa['tunnus']}
-                        AND varasto               = {$varasto['tunnus']}
-                        AND aktiivi               = ''
+                        WHERE yhtio              = '{$kukarow['yhtio']}'
+                        AND liitostunnus         = {$toimitustapa['tunnus']}
+                        AND varasto              = {$varasto['tunnus']}
+                        AND aktiivi              = ''
                         AND ((pvm                 > CURRENT_DATE)
                         OR (pvm                   = CURRENT_DATE
-                        AND viimeinen_tilausaika  > CURRENT_TIME))";
+                        AND viimeinen_tilausaika > CURRENT_TIME))";
               $lahdot_result = pupe_query($query);
 
               if (mysql_num_rows($lahdot_result) == 0) {

@@ -6375,18 +6375,18 @@ if (!function_exists("kalenteritapahtuma")) {
     }
 
     //Tehdään asiakasmemotapahtuma jos se on tarpeellinen
-    $kysely = "  INSERT INTO kalenteri
-          SET tapa     = '$tapa',
-          asiakas       = '$asrow[ytunnus]',
-          liitostunnus  = '$liitostunnus',
-          henkilo      = '$henkilo',
-          kuka         = '$kukarow[kuka]',
-          yhtio        = '$kukarow[yhtio]',
-          tyyppi       = '$tyyppi',
-          pvmalku      = $pvmalku,
-          otunnus      = '$otunnus',
-          kuittaus      = '$kuittaus',
-          kentta01     = '$viesti'";
+    $kysely = "INSERT INTO kalenteri
+               SET tapa     = '$tapa',
+               asiakas      = '$asrow[ytunnus]',
+               liitostunnus = '$liitostunnus',
+               henkilo      = '$henkilo',
+               kuka         = '$kukarow[kuka]',
+               yhtio        = '$kukarow[yhtio]',
+               tyyppi       = '$tyyppi',
+               pvmalku      = $pvmalku,
+               otunnus      = '$otunnus',
+               kuittaus     = '$kuittaus',
+               kentta01     = '$viesti'";
 
     if (trim($asentaja) != '') {
       $kysely .= ", kentta02 = '$liitostunnus', pvmloppu = $pvmloppu ";
@@ -12722,11 +12722,11 @@ if (!function_exists("LisaaTaso")) {
     $re = pupe_query($qu);
 
     // Haetaan valitun tason tiedot
-    $q2 = "  SELECT @myRight := rgt, @myLeft := lft
-        FROM dynaaminen_puu
-        WHERE yhtio = '{$kukarow["yhtio"]}'
-        AND laji   = '$laji'
-        AND lft   = '$left'";
+    $q2 = "SELECT @myRight := rgt, @myLeft := lft
+           FROM dynaaminen_puu
+           WHERE yhtio = '{$kukarow["yhtio"]}'
+           AND laji    = '$laji'
+           AND lft     = '$left'";
     $re = pupe_query($q2);
 
     // Pävitetään kaikki nodet, jotka on uuden noden oikealla puolella kaksi pykälää oikealle (vasen puoli)
@@ -15754,10 +15754,10 @@ if (!function_exists("hae_hyvityshinta")) {
     $tilausrivit = array();
 
     // Haetaan tuotteen tiedot
-    $status =  "  SELECT *
-            FROM tuote
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tuoteno = '{$tuoteno}'";
+    $status =  "SELECT *
+                FROM tuote
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tuoteno = '{$tuoteno}'";
     $tuoteres = pupe_query($status);
     $tuoterow = mysql_fetch_assoc($tuoteres);
 
@@ -15888,19 +15888,19 @@ if (!function_exists("hae_hyvityshinta")) {
       $kommentti = $palautuskielto = "";
 
       $sql = "SELECT tuote_kentta,
-          tuote_arvo,
-          asiakas_kentta,
-          asiakas_arvo,
-          asiakas_segmentti,
-          aika_ostosta,
-          rokotusprosentti,
-          palautuskielto,
-          prioriteetti,
-          rokotusselite
-          FROM hyvityssaannot
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND (aika_ostosta > '{$tilausrivi_arvo['ika']}' or aika_ostosta = 0)
-          ORDER BY prioriteetti, tunnus";
+              tuote_arvo,
+              asiakas_kentta,
+              asiakas_arvo,
+              asiakas_segmentti,
+              aika_ostosta,
+              rokotusprosentti,
+              palautuskielto,
+              prioriteetti,
+              rokotusselite
+              FROM hyvityssaannot
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND (aika_ostosta > '{$tilausrivi_arvo['ika']}' or aika_ostosta = 0)
+              ORDER BY prioriteetti, tunnus";
       $result = pupe_query($sql);
 
       while ($rivi = mysql_fetch_array($result)) {

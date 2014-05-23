@@ -1815,8 +1815,8 @@ while ($tietue = fgets($fd)) {
             elseif ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and $laskurow['yhtio_toimipaikka'] == 0) {
               $query = "SELECT *
                         FROM varastopaikat
-                        WHERE yhtio = '{$kukarow['yhtio']}'
-                        AND tyyppi = ''
+                        WHERE yhtio     = '{$kukarow['yhtio']}'
+                        AND tyyppi      = ''
                         AND toimipaikka = 0";
               $varresult = pupe_query($query);
 

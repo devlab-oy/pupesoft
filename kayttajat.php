@@ -1569,7 +1569,7 @@ if ($tee == "") {
 
   $query = "SELECT kuka.nimi, kuka.kuka, kuka.tunnus, kuka.aktiivinen
             FROM kuka
-            WHERE kuka.yhtio = '{$kukarow['yhtio']}'
+            WHERE kuka.yhtio  = '{$kukarow['yhtio']}'
             AND kuka.extranet = '{$extrsel}'
             ORDER BY kuka.aktiivinen, kuka.nimi";
   $kukares = pupe_query($query);

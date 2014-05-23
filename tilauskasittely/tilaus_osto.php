@@ -654,9 +654,9 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
         pupe_query($copy_query);
 
         $update_query = "UPDATE tilausrivin_lisatiedot
-         SET toimittajan_tunnus = '{$toimi_tunnus}'
-         WHERE yhtio          = '{$kukarow['yhtio']}'
-         AND tilausrivitunnus = '{$myyntitilausrivi_tunnus_temp}'";
+                         SET toimittajan_tunnus = '{$toimi_tunnus}'
+                         WHERE yhtio          = '{$kukarow['yhtio']}'
+                         AND tilausrivitunnus = '{$myyntitilausrivi_tunnus_temp}'";
         pupe_query($update_query);
 
         $tee = 'TI';

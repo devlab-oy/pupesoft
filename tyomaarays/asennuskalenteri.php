@@ -208,10 +208,10 @@ if ($tee == "LISAA") {
         $muistutus_insert_res = mysql_query($query) or pupe_error($query);
       }
       else {
-        $kysely = "  SELECT viesti, comments, sisviesti2
-              FROM lasku
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND tunnus = '$liitostunnus'";
+        $kysely = "SELECT viesti, comments, sisviesti2
+                   FROM lasku
+                   WHERE yhtio = '$kukarow[yhtio]'
+                   AND tunnus  = '$liitostunnus'";
         $viestit_chk_res = mysql_query($kysely) or pupe_error($kysely);
         $viestit_chk_row = mysql_fetch_assoc($viestit_chk_res);
 
@@ -237,32 +237,32 @@ if ($tee == "LISAA") {
     if ($yhtiorow['tyomaarays_asennuskalenteri_muistutus'] == 'K' and isset($lisaa_muistutus) and trim($lisaa_muistutus) == 'kylla') {
       $query .= ", kentta02 = '$liitostunnus' ";
 
-      $kysely = "  SELECT *
-            FROM kalenteri
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND tyyppi = 'Muistutus'
-            AND tapa = 'Asentajan kuittaus'
-            AND liitostunnus = '$liitostunnus'
-            AND kentta02 = '$liitostunnus'
-            AND kuittaus != ''
-            ORDER BY tunnus DESC";
+      $kysely = "SELECT *
+                 FROM kalenteri
+                 WHERE yhtio       = '$kukarow[yhtio]'
+                 AND tyyppi        = 'Muistutus'
+                 AND tapa          = 'Asentajan kuittaus'
+                 AND liitostunnus  = '$liitostunnus'
+                 AND kentta02      = '$liitostunnus'
+                 AND kuittaus     != ''
+                 ORDER BY tunnus DESC";
       $muistutus_chk_res = mysql_query($kysely) or pupe_error($kysely);
 
       if (mysql_num_rows($muistutus_chk_res) != 0) {
         $muistutus_chk_row = mysql_fetch_assoc($muistutus_chk_res);
 
-        $kysely = "  UPDATE kalenteri SET
-              pvmloppu = '$lyear-$lmonth-$lday $laika'
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND tunnus = '$muistutus_chk_row[tunnus]'";
+        $kysely = "UPDATE kalenteri SET
+                   pvmloppu    = '$lyear-$lmonth-$lday $laika'
+                   WHERE yhtio = '$kukarow[yhtio]'
+                   AND tunnus  = '$muistutus_chk_row[tunnus]'";
         $muistutus_insert_res = mysql_query($kysely) or pupe_error($kysely);
       }
       else {
 
-        $kysely = "  SELECT viesti, comments, sisviesti2
-              FROM lasku
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND tunnus = '$liitostunnus'";
+        $kysely = "SELECT viesti, comments, sisviesti2
+                   FROM lasku
+                   WHERE yhtio = '$kukarow[yhtio]'
+                   AND tunnus  = '$liitostunnus'";
         $viestit_chk_res = mysql_query($kysely) or pupe_error($kysely);
         $viestit_chk_row = mysql_fetch_assoc($viestit_chk_res);
 

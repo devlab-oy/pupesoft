@@ -1812,6 +1812,18 @@ while ($tietue = fgets($fd)) {
             elseif ($olinvarasto != "") {
               $varasto = $olinvarasto;
             }
+            elseif ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and $laskurow['yhtio_toimipaikka'] == 0) {
+              $query = "SELECT *
+                        FROM varastopaikat
+                        WHERE yhtio     = '{$kukarow['yhtio']}'
+                        AND tyyppi      = ''
+                        AND toimipaikka = 0";
+              $varresult = pupe_query($query);
+
+              while ($varrow = mysql_fetch_assoc($varresult)) {
+                array_push($varasto, $varrow['tunnus']);
+              }
+            }
 
             // jos terminaalitoimitus niin ohitetaan kaikki saldozekit, sekä laitetaan kommenttiriville asiakkaan tuotenumero ja nimitys
             if ($editilaus_tila == "Z") {

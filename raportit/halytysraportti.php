@@ -958,7 +958,7 @@ else {
         $query = "SELECT
                   sum(if(tyyppi in ('W','M'), varattu, 0)) valmistuksessa,
                   sum(if(tyyppi = 'O', varattu, 0)) tilattu,
-                  sum(if(tyyppi = 'E', varattu, 0)) ennakot, # toimittamattomat ennakot
+                  sum(if(tyyppi = 'E' and var != 'O', varattu, 0)) ennakot, # toimittamattomat ennakot
                   sum(if(tyyppi in ('L','V') and var not in ('P','J','O','S'), varattu, 0)) ennpois,
                   sum(if(tyyppi in ('L','G') and var = 'J', jt $lisavarattu, 0)) jt
                   $varastolisa

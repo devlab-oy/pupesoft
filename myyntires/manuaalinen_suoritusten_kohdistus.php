@@ -1230,8 +1230,42 @@ if ($tila == 'tee_kohdistus') {
           }
         }
 
+        //tarkistetaan vielä että jos ollaan tehty osasuorituksia laskulle jo aiemmin niin laitetaan viimeisen osasuorituksen maksupäivämäärä laskun maksettupäivämääräksi
+        if ($lasku["summa"] != $lasku["alkup_summa"]) {
+          //jos kyseessä on ollut normaalilasku niin silloin haettavan myyntisaamistiliöinnin summan tulee olla negatiivinen ja jos on kyseessä hyvityslasku niin silloin haettavan myyntisaamistiliöinnin tulee olla positiivinen
+          if ($lasku["alkup_summa"] >= 0) {
+            $wherelisa = "AND summa < 0";
+          }
+          else {
+            $wherelisa = "AND summa > 0";
+          }
+
+          //sitten katsotaan milloin nämä osasuoritukset on tehty
+          $query = "SELECT tapvm
+                    FROM tiliointi
+                    WHERE yhtio  = '{$kukarow["yhtio"]}'
+                    AND tilino   = '{$suoritus["myyntisaamiset_tilino"]}'
+                    AND ltunnus  = {$lasku["tunnus"]}
+                    AND korjattu = ''
+                    $wherelisa
+                    ORDER BY tapvm DESC
+                    LIMIT 1";
+          $uusinresult = pupe_query($query);
+          $uusin = mysql_fetch_assoc($uusinresult);
+
+          if ((int) str_replace("-", "", $uusin["tapvm"]) > (int) str_replace("-", "", $laskun_maksupvm)) {
+            $laskun_maksupvm_laskulle = $uusin["tapvm"];
+          }
+          else {
+            $laskun_maksupvm_laskulle = $laskun_maksupvm;
+          }
+        }
+        else {
+          $laskun_maksupvm_laskulle = $laskun_maksupvm;
+        }
+
         $query = "UPDATE lasku
-                  SET mapvm     = '$laskun_maksupvm',
+                  SET mapvm                 = '$laskun_maksupvm_laskulle',
                   viikorkoeur               = '$korkosumma',
                   saldo_maksettu            = 0,
                   saldo_maksettu_valuutassa = 0

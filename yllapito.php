@@ -1062,10 +1062,10 @@ for ($i=0; $i<=$count; $i++) {
 
     if ($from == "" and ((($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'kohde' or $toim == 'asiakashinta') and trim($array[$i]) == 'asiakas') or ($toim == 'yhteyshenkilo' and trim($array[$i]) == 'liitostunnus'))) {
       if (!is_numeric($haku[$i])) {
-        $ashak = "  SELECT group_concat(tunnus) tunnukset
-              FROM asiakas
-              WHERE yhtio = '$kukarow[yhtio]'
-              and nimi {$hakuehto}";
+        $ashak = "SELECT group_concat(tunnus) tunnukset
+                  FROM asiakas
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and nimi {$hakuehto}";
         $ashakres = pupe_query($ashak);
         $ashakrow = mysql_fetch_assoc($ashakres);
 
@@ -1084,10 +1084,10 @@ for ($i=0; $i<=$count; $i++) {
       if (strpos($hakuehto, 'kaikki') === false) $lisa .= " AND asiakas.toimipaikka {$hakuehto} ";
     }
     elseif ($from == "" and $toim == 'toimi' and $alias_set == "KAYTTAJA") {
-      $ashak = "  SELECT group_concat(concat('\'',kuka,'\'')) kukat
-            FROM kuka
-            WHERE yhtio = '$kukarow[yhtio]'
-            and (nimi {$hakuehto} or kuka {$hakuehto})";
+      $ashak = "SELECT group_concat(concat('\'',kuka,'\'')) kukat
+                FROM kuka
+                WHERE yhtio = '$kukarow[yhtio]'
+                and (nimi {$hakuehto} or kuka {$hakuehto})";
       $ashakres = pupe_query($ashak);
       $ashakrow = mysql_fetch_assoc($ashakres);
 
@@ -1126,10 +1126,10 @@ for ($i=0; $i<=$count; $i++) {
     }
     elseif ($from == "" and $toim == 'tuotteen_toimittajat' and trim($array[$i]) == 'nimi') {
       if (!is_numeric($haku[$i])) {
-        $ashak = "  SELECT group_concat(tunnus) tunnukset
-              FROM toimi
-              WHERE yhtio = '$kukarow[yhtio]'
-              and nimi {$hakuehto}";
+        $ashak = "SELECT group_concat(tunnus) tunnukset
+                  FROM toimi
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and nimi {$hakuehto}";
         $ashakres = pupe_query($ashak);
         $ashakrow = mysql_fetch_assoc($ashakres);
 
@@ -1148,10 +1148,10 @@ for ($i=0; $i<=$count; $i++) {
 
       if (!is_numeric($haku[$i])) {
         // haetaan laskutus-asiakas
-        $ashak = "  SELECT group_concat(distinct concat('\'',ytunnus,'\'')) tunnukset
-              FROM asiakas
-              WHERE yhtio = '$kukarow[yhtio]'
-              and (nimi {$hakuehto} or ytunnus {$hakuehto})";
+        $ashak = "SELECT group_concat(distinct concat('\'',ytunnus,'\'')) tunnukset
+                  FROM asiakas
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and (nimi {$hakuehto} or ytunnus {$hakuehto})";
         $ashakres = pupe_query($ashak);
         $ashakrow = mysql_fetch_assoc($ashakres);
 

@@ -285,9 +285,9 @@ while ($orow=mysql_fetch_array($result)) {
   $luk    = '';
 
   if ($selkukarow["kuka"] != "") {
-    $oq = "  SELECT *
-        FROM oikeu
-        WHERE yhtio='$kukarow[yhtio]' and kuka='$selkukarow[kuka]' and nimi='$orow[nimi]' and alanimi='$orow[alanimi]' and sovellus='$orow[sovellus]'";
+    $oq = "SELECT *
+           FROM oikeu
+           WHERE yhtio='$kukarow[yhtio]' and kuka='$selkukarow[kuka]' and nimi='$orow[nimi]' and alanimi='$orow[alanimi]' and sovellus='$orow[sovellus]'";
     $or = pupe_query($oq);
 
     if (mysql_num_rows($or) != 0) {

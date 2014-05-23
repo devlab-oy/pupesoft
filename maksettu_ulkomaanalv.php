@@ -92,11 +92,11 @@ if($tee == "aja") {
 
   echo "<hr>";
 
-  $kuluALV = "  SELECT if(tuotteen_alv.alv IS NULL, 0, tuotteen_alv.alv)
-          FROM tilausrivi
-          LEFT JOIN tuotteen_alv ON tuotteen_alv.yhtio=tilausrivi.yhtio and tuotteen_alv.tuoteno=tilausrivi.tuoteno
-          WHERE tilausrivi.yhtio=tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus=tilausrivin_lisatiedot.tilausrivitunnus
-          LIMIT 1";
+  $kuluALV = "SELECT if(tuotteen_alv.alv IS NULL, 0, tuotteen_alv.alv)
+              FROM tilausrivi
+              LEFT JOIN tuotteen_alv ON tuotteen_alv.yhtio=tilausrivi.yhtio and tuotteen_alv.tuoteno=tilausrivi.tuoteno
+              WHERE tilausrivi.yhtio=tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus=tilausrivin_lisatiedot.tilausrivitunnus
+              LIMIT 1";
 
   $query = "SELECT tiliointi.*,
             date_format(tiliointi.tapvm, '%d.%m.%Y') tapvm,
@@ -109,7 +109,7 @@ if($tee == "aja") {
             LEFT JOIN kustannuspaikka kustp ON tiliointi.yhtio=kustp.yhtio and tiliointi.kustp=kustp.tunnus
             LEFT JOIN kustannuspaikka projekti ON tiliointi.yhtio=projekti.yhtio and tiliointi.projekti=projekti.tunnus
             LEFT JOIN kustannuspaikka kohde ON tiliointi.yhtio=kohde.yhtio and tiliointi.kohde=kohde.tunnus
-            
+
             WHERE tiliointi.yhtio='$kukarow[yhtio]' and
             tapvm>='$alku' and
             tapvm<='$loppu'

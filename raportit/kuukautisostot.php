@@ -2913,7 +2913,7 @@ function kappaleet_tila_myynti($tuoteno, $row_yhtio, $lisavarattu, $varastolisa,
 
   $query = "SELECT
             sum(if(tyyppi IN ('W','M'), varattu, 0)) valmistuksessa,
-            sum(if(tyyppi = 'E', varattu, 0)) ennakot, # toimittamattomat ennakot
+            sum(if(tyyppi = 'E' and var != 'O', varattu, 0)) ennakot, # toimittamattomat ennakot
             sum(if(tyyppi IN ('L','V') AND var NOT IN ('P','J','O','S'), varattu, 0)) ennpois,
             sum(if(tyyppi IN ('L','G') AND var = 'J', jt $lisavarattu, 0)) jt
             $varastolisa

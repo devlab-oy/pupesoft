@@ -761,9 +761,9 @@ if ($tee == "JATKA") {
     $tuotelisa .= " and tuote.osasto = '$tuoteosasto' ";
   }
 
-      if ($ei_tehdastoimitus_tuotteita != "") {
-          $tuotelisa .= " and tuote.status != 'T' ";
-      }
+  if ($ei_tehdastoimitus_tuotteita != "") {
+      $tuotelisa .= " and tuote.status != 'T' ";
+  }
 
   if ($tuotemerkki != '') {
     $tuotelisa .= " and tuote.tuotemerkki = '$tuotemerkki' ";
@@ -777,7 +777,7 @@ if ($tee == "JATKA") {
     $laskulisa .= " and lasku.myyja = '{$myyja}' ";
   }
 
-  if ($yhtiorow['jt_toimitus_varastorajaus'] == 'K') {
+  if ($yhtiorow['jt_toimitus_varastorajaus'] == 'K' and count($suoratoimitus_rivit) == 0) {
     if (count($varastosta) > 0 and trim(implode(", ", $varastosta)) != '') {
       $laskulisa .= " and lasku.varasto in (0, ".implode(", ", $varastosta).") ";
     }
@@ -2192,7 +2192,7 @@ if ($tee == "JATKA") {
               unset($lapsires);
             }
 
-            if ($kukarow['extranet'] == '' and (!isset($php_cli) or !$php_cli)) {
+            if ($kukarow['extranet'] == '' and (!isset($php_cli) or !$php_cli) and $automaaginen == '') {
               // Korvaavat tuotteet //
               $query  = "SELECT * from korvaavat where tuoteno='$jtrow[tuoteno]' and yhtio='$kukarow[yhtio]'";
               $korvaresult = pupe_query($query);

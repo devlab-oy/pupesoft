@@ -471,7 +471,7 @@
             }
           }
         }
-        
+
         if ($yhtiorow['laite_huolto'] == 'X' and $toim == 'tuote') {
           if (isset($sammutin_tyyppi)) {
             $query1 = "  INSERT INTO tuotteen_avainsanat
@@ -512,9 +512,9 @@
               $kuka = $kukarow['kuka'];
               $yhtio = $kukarow['yhtio'];
 
-              if (!empty($sykli['tuleva_toimenpide_pvm'])) {
-                $tuleva_toimenpide_pvm = date('Y-m-d', strtotime($sykli['tuleva_toimenpide_pvm']));
-                $viimeinen_tapahtuma = date('Y-m-d', strtotime("{$tuleva_toimenpide_pvm} - {$huoltovali} days"));
+              if (!empty($sykli['seuraava_tuleva_tapahtuma'])) {
+                $seuraava_tuleva_tapahtuma = date('Y-m-d', strtotime($sykli['seuraava_tuleva_tapahtuma']));
+                $viimeinen_tapahtuma = date('Y-m-d', strtotime("{$seuraava_tuleva_tapahtuma} - {$huoltovali} days"));
 
                 $viimeinen_tapahtuma_query = "viimeinen_tapahtuma = '{$viimeinen_tapahtuma}',";
               }
@@ -625,9 +625,9 @@
               $yhtio = $kukarow['yhtio'];
 
               $viimeinen_tapahtuma_query = "";
-              if (!empty($sykli['tuleva_toimenpide_pvm'])) {
-                $tuleva_toimenpide_pvm = date('Y-m-d', strtotime($sykli['tuleva_toimenpide_pvm']));
-                $viimeinen_tapahtuma = date('Y-m-d', strtotime("{$tuleva_toimenpide_pvm} - {$huoltovali} days"));
+              if (!empty($sykli['seuraava_tuleva_tapahtuma'])) {
+                $seuraava_tuleva_tapahtuma = date('Y-m-d', strtotime($sykli['seuraava_tuleva_tapahtuma']));
+                $viimeinen_tapahtuma = date('Y-m-d', strtotime("{$seuraava_tuleva_tapahtuma} - {$huoltovali} days"));
 
                 $viimeinen_tapahtuma_query = "viimeinen_tapahtuma = '{$viimeinen_tapahtuma}',";
               }
@@ -2177,11 +2177,15 @@
             AND laji = 'tyomaarayksen_ryhmittely'";
       $result = pupe_query($query);
 
+      $request = array(
+          'tuoteno' => $t[1],
+          'huoltosyklit' => $huoltosyklit
+      );
       while ($selite = mysql_fetch_assoc($result)) {
-        huoltosykli_rivi($selite['selite']);
+        huoltosykli_rivi($selite['selite'], $request);
       }
     }
-    
+
     if ($yhtiorow['laite_huolto'] == 'X' and $toim == 'tuote' and $pikaperustus == 1) {
       //quick fix
       //@TODO remove this

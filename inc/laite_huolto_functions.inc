@@ -989,17 +989,27 @@ function aseta_tyomaarays_status($status, $tilausrivi_tunnus = '', $lasku_tunnus
 }
 
 //luodaan huoltosyklirivi huoltosyklityypin perusteella
-function huoltosykli_rivi($tyyppi) {
+function huoltosykli_rivi($tyyppi, $request) {
   global $tunnus;
 
   $laite_tunnus = $tunnus;
 
-  $laitteen_huoltosykli = hae_laitteen_huoltosyklit($laite_tunnus, $tyyppi);
-  $laitteen_huoltosykli = $laitteen_huoltosykli[0];
+  if (!empty($laite_tunnus)) {
+    $laitteen_huoltosykli = hae_laitteen_huoltosyklit($laite_tunnus, $tyyppi);
+    $laitteen_huoltosykli = $laitteen_huoltosykli[0];
+  }
+  else {
+    $laitteen_huoltosykli = $request['huoltosyklit'][$tyyppi];
+  }
 
   $pakollisuus_chk = "";
 
-  $huoltosyklit = hae_mahdolliset_huoltosyklit($laite_tunnus, $tyyppi);
+  $args = array(
+      'laite_tunnus' => $laite_tunnus,
+      'tyyppi' => $tyyppi,
+      'tuoteno' => $request['tuoteno'],
+  );
+  $huoltosyklit = hae_mahdolliset_huoltosyklit($args);
 
   if ($laitteen_huoltosykli['pakollisuus'] == 1) {
     $pakollisuus_chk = "CHECKED";
@@ -1007,7 +1017,7 @@ function huoltosykli_rivi($tyyppi) {
 
   echo "<tr>";
   echo "<th>".t('Huoltosykli')." <br /> {$tyyppi}";
-  echo "<input type='hidden' name='huoltosyklit[{$tyyppi}][huoltosykli_laite_tunnus]' value='{$laitteen_huoltosykli['hl_tunnus']}' />";
+  echo "<input type='hidden' name='huoltosyklit[{$tyyppi}][huoltosykli_laite_tunnus]' value='{$laitteen_huoltosykli['huoltosykli_laite_tunnus']}' />";
   echo"</th>";
   echo "<td>";
 
@@ -1022,7 +1032,7 @@ function huoltosykli_rivi($tyyppi) {
 
   if ($huoltosyklit) {
     foreach ($huoltosyklit as $huoltosykli) {
-      if ($laitteen_huoltosykli['tunnus'] == $huoltosykli['tunnus']) {
+      if ($laitteen_huoltosykli['huoltosykli_tunnus'] == $huoltosykli['tunnus']) {
         $sel = "SELECTED";
       }
       echo "<option value='{$huoltosykli['tunnus']}' {$sel}>".$huoltosykli['dropdown_text']."</option>";
@@ -1068,7 +1078,10 @@ function huoltosykli_rivi($tyyppi) {
   if (!empty($laitteen_huoltosykli['viimeinen_tapahtuma'])) {
     $seuraava_tuleva_tapahtuma = date('d.m.Y', strtotime("{$laitteen_huoltosykli['viimeinen_tapahtuma']} + {$laitteen_huoltosykli['huoltovali']} days"));
   }
-  echo "<input type='text' id='tuleva_toimenpide_{$tyyppi}' class='tuleva_toimenpide' name='huoltosyklit[{$tyyppi}][tuleva_toimenpide_pvm]' value='{$seuraava_tuleva_tapahtuma}'/>";
+  else {
+    $seuraava_tuleva_tapahtuma = $laitteen_huoltosykli['seuraava_tuleva_tapahtuma'];
+  }
+  echo "<input type='text' id='tuleva_toimenpide_{$tyyppi}' class='tuleva_toimenpide' name='huoltosyklit[{$tyyppi}][seuraava_tuleva_tapahtuma]' value='{$seuraava_tuleva_tapahtuma}'/>";
   echo "<div class='tuleva_toimenpide_error'>";
   echo "</div>";
   echo "</td>";
@@ -1089,13 +1102,13 @@ function hae_laitteen_huoltosyklit($laitetunnus, $tyyppi = '') {
     $tuotteen_avainsanat_join = "  AND t1.selite = '{$tyyppi}' ";
   }
 
-  $query = "  SELECT huoltosykli.tunnus,
+  $query = "  SELECT huoltosykli.tunnus AS huoltosykli_tunnus,
         t1.selite AS huoltosykli_tyyppi,
         t1.selitetark AS huoltosykli_prioriteetti,
         huoltosyklit_laitteet.huoltovali,
         huoltosyklit_laitteet.pakollisuus,
         huoltosyklit_laitteet.viimeinen_tapahtuma,
-        huoltosyklit_laitteet.tunnus AS hl_tunnus
+        huoltosyklit_laitteet.tunnus AS huoltosykli_laite_tunnus
         FROM huoltosyklit_laitteet
         JOIN huoltosykli
         ON ( huoltosykli.yhtio = huoltosyklit_laitteet.yhtio
@@ -1123,7 +1136,7 @@ function hae_laitteen_huoltosyklit($laitetunnus, $tyyppi = '') {
       'tunnus'         => 0,
       'huoltovali'       => 0,
       'pakollisuus'       => 0,
-      'hl_tunnus'         => 0,
+      'huoltosykli_laite_tunnus'         => 0,
       'viimeinen_tapahtuma'   => '',
     );
   }
@@ -1132,33 +1145,39 @@ function hae_laitteen_huoltosyklit($laitetunnus, $tyyppi = '') {
 }
 
 //haetaan sallitut huoltosyklit huoltosyklityypin ja laitenumeron perusteella
-function hae_mahdolliset_huoltosyklit($laite_tunnus, $tyyppi) {
+function hae_mahdolliset_huoltosyklit(array $args) {
   global $kukarow;
 
-  if ($laite_tunnus == '') {
+  $laite_tunnus = (isset($args['laite_tunnus'])) ? (int)$args['laite_tunnus'] : 0;
+  $tyyppi = (isset($args['tyyppi'])) ? $args['tyyppi'] : '';
+  $tuoteno = (isset($args['tuoteno'])) ? $args['tuoteno'] : '';
+
+  if ($laite_tunnus == '' and $tuoteno == '') {
     return false;
   }
 
-  $tuoteno_query = "  SELECT tuoteno
-            FROM laite
-            WHERE tunnus = $laite_tunnus
-            AND yhtio = '{$kukarow['yhtio']}'";
-  $tuoteno_result = pupe_query($tuoteno_query);
-  $tuoteno = mysql_result($tuoteno_result, 0);
+  if (!empty($laite_tunnus)) {
+    $tuoteno_query = "SELECT tuoteno
+                      FROM laite
+                      WHERE tunnus = $laite_tunnus
+                      AND yhtio = '{$kukarow['yhtio']}'";
+    $tuoteno_result = pupe_query($tuoteno_query);
+    $tuoteno = mysql_result($tuoteno_result, 0);
+  }
 
   $sammutin_koko_query = "SELECT selite
-              FROM tuotteen_avainsanat
-              WHERE tuoteno = '{$tuoteno}'
-              AND laji = 'sammutin_koko'
-              AND yhtio = '{$kukarow['yhtio']}'";
+                          FROM tuotteen_avainsanat
+                          WHERE tuoteno = '{$tuoteno}'
+                          AND laji = 'sammutin_koko'
+                          AND yhtio = '{$kukarow['yhtio']}'";
   $sammutin_koko_result = pupe_query($sammutin_koko_query);
   $sammutin_koko = mysql_result($sammutin_koko_result, 0);
 
-  $sammutin_tyyppi_query = "  SELECT selite
-                FROM tuotteen_avainsanat
-                WHERE tuoteno = '{$tuoteno}'
-                AND laji = 'sammutin_tyyppi'
-                AND yhtio = '{$kukarow['yhtio']}'";
+  $sammutin_tyyppi_query = "SELECT selite
+                            FROM tuotteen_avainsanat
+                            WHERE tuoteno = '{$tuoteno}'
+                            AND laji = 'sammutin_tyyppi'
+                            AND yhtio = '{$kukarow['yhtio']}'";
   $sammutin_tyyppi_result = pupe_query($sammutin_tyyppi_query);
   $sammutin_tyyppi = mysql_result($sammutin_tyyppi_result, 0);
 
@@ -1171,7 +1190,7 @@ function hae_huoltosyklit_tyyppi_koko($sammutin_tyyppi, $sammutin_koko, $tyyppi 
   if (empty($sammutin_tyyppi)) {
     return array();
   }
-  
+
   $where = "";
   if (!empty($sammutin_koko)) {
     $where = " AND huoltosykli.koko = $sammutin_koko";

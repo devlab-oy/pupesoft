@@ -154,10 +154,10 @@ if (!function_exists('tyomaarays_alku')) {
     $pdf->draw_text(310, 729, t("Myyjä", $kieli),     $thispage, $pieni);
 
     //etsitään myyjän nimi
-    $query  = "  SELECT nimi
-          FROM kuka
-          WHERE tunnus = '$laskurow[myyja]'
-          AND yhtio   = '$kukarow[yhtio]'";
+    $query  = "SELECT nimi
+               FROM kuka
+               WHERE tunnus = '$laskurow[myyja]'
+               AND yhtio    = '$kukarow[yhtio]'";
     $myyresult = pupe_query($query);
     $myyrow = mysql_fetch_array($myyresult);
 
@@ -221,10 +221,10 @@ if (!function_exists('tyomaarays_alku')) {
             $laskurow[$kentta] = tv1dateconv($laskurow[$kentta]);
           }
           elseif ($kentta == "suorittaja") {
-            $query = "  SELECT nimi
-                  FROM kuka
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and kuka    = '".$laskurow[$kentta]."'";
+            $query = "SELECT nimi
+                      FROM kuka
+                      WHERE yhtio = '$kukarow[yhtio]'
+                      and kuka    = '".$laskurow[$kentta]."'";
             $yresult = pupe_query($query);
             $row = mysql_fetch_array($yresult);
 
@@ -580,40 +580,40 @@ if (!function_exists('tyomaarays_rivi')) {
     if ($row["perheid"] > 0 and $perheid != $row["perheid"]) {
       $numrows = 0;
 
-      $query = "  SELECT vanhatunnus
-            FROM lasku
-            WHERE yhtio  = '$kukarow[yhtio]'
-            and tunnus  = '$row[otunnus]'";
+      $query = "SELECT vanhatunnus
+                FROM lasku
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tunnus  = '$row[otunnus]'";
       $vtunres = pupe_query($query);
       $vtunrow = mysql_fetch_array($vtunres);
 
       if ($vtunrow["vanhatunnus"] != 0) {
-        $query = "   SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
-              FROM lasku use index (yhtio_vanhatunnus)
-              WHERE yhtio    = '$kukarow[yhtio]'
-              and vanhatunnus = '$vtunrow[vanhatunnus]'";
+        $query = "SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
+                  FROM lasku use index (yhtio_vanhatunnus)
+                  WHERE yhtio     = '$kukarow[yhtio]'
+                  and vanhatunnus = '$vtunrow[vanhatunnus]'";
         $perheresult = pupe_query($query);
         $numrows = mysql_num_rows($perheresult);
       }
 
       if ($numrows == 0 or $vtunrow["vanhatunnus"] == 0) {
-        $query = "  SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
-              FROM lasku use index (PRIMARY)
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tunnus  = '$row[otunnus]'";
+        $query = "SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
+                  FROM lasku use index (PRIMARY)
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and tunnus  = '$row[otunnus]'";
         $perheresult = pupe_query($query);
       }
 
       if (mysql_num_rows($perheresult) > 0) {
         $perherow = mysql_fetch_array($perheresult);
 
-        $query = "  SELECT distinct tilausrivi.tuoteno, tilausrivi.nimitys, varattu
-              FROM tilausrivi
-              JOIN tuote tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
-              WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-              and tilausrivi.otunnus in ($perherow[tunnukset])
-              and tilausrivi.perheid = '$row[perheid]'
-              ORDER BY tilausrivi.tunnus";
+        $query = "SELECT distinct tilausrivi.tuoteno, tilausrivi.nimitys, varattu
+                  FROM tilausrivi
+                  JOIN tuote tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
+                  WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+                  and tilausrivi.otunnus in ($perherow[tunnukset])
+                  and tilausrivi.perheid = '$row[perheid]'
+                  ORDER BY tilausrivi.tunnus";
         $perheresult = pupe_query($query);
 
         if (mysql_num_rows($perheresult) > 1) {
@@ -767,13 +767,13 @@ if (!function_exists('tyomaarays_rivi')) {
         $sarjanutunnus = "myyntirivitunnus";
       }
 
-      $query = "  SELECT DISTINCT sarjanumero, parasta_ennen
-            FROM sarjanumeroseuranta
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tuoteno = '$row[tuoteno]'
-            and $sarjanutunnus='$row[tunnus]'
-            and sarjanumero != ''
-            ORDER BY sarjanumero";
+      $query = "SELECT DISTINCT sarjanumero, parasta_ennen
+                FROM sarjanumeroseuranta
+                WHERE yhtio      = '$kukarow[yhtio]'
+                and tuoteno      = '$row[tuoteno]'
+                and $sarjanutunnus='$row[tunnus]'
+                and sarjanumero != ''
+                ORDER BY sarjanumero";
       $sarjares = pupe_query($query);
 
       if (mysql_num_rows($sarjares) > 0) {

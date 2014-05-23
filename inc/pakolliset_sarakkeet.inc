@@ -395,12 +395,12 @@ if (!function_exists("pakolliset_sarakkeet")) {
 
     if ($synkronointi != 'ALA_YHDISTA_MYSQLALIAKSIA') {
       // Haetaan kenttien pakollisuudet sekä oletukset MySQL aliaksista. Selitetark_2 on profiilin nimi, joten haetaan vain "oletusprofiilista"
-      $query = "  SELECT selite, selitetark_3, selitetark_4
-            FROM avainsana use index (yhtio_laji_selite)
-            WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND laji = 'MYSQLALIAS'
-            AND selite LIKE '$table.%'
-            AND selitetark_2 = ''";
+      $query = "SELECT selite, selitetark_3, selitetark_4
+                FROM avainsana use index (yhtio_laji_selite)
+                WHERE yhtio      = '{$kukarow["yhtio"]}'
+                AND laji         = 'MYSQLALIAS'
+                AND selite       LIKE '$table.%'
+                AND selitetark_2 = ''";
       $result = pupe_query($query);
 
       while ($row = mysql_fetch_assoc($result)) {

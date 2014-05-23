@@ -10,10 +10,10 @@ $kukarow['yhtio'] = $yhtio['yhtio'];
 
 // Haetaan valmistuslinjat
 $query = "SELECT selite as id, selitetark as name
-      FROM avainsana
-      WHERE yhtio='{$kukarow['yhtio']}'
-      AND laji='VALMISTUSLINJA'
-      ORDER BY selite";
+          FROM avainsana
+          WHERE yhtio='{$kukarow['yhtio']}'
+          AND laji='VALMISTUSLINJA'
+          ORDER BY selite";
 $result = pupe_query($query);
 
 $valmistuslinjat = array();
@@ -44,15 +44,15 @@ if (isset($_GET['valmistukset']) and $_GET['valmistukset'] == 'true') {
   // Haetaan yhtiökohtaiset merkinnät
   // Muu työ tai Pyhä
   $query = "SELECT kalenteri.pvmalku,
-          kalenteri.pvmloppu,
-          kalenteri.kuka,
-          kalenteri.henkilo,
-          kalenteri.tyyppi,
-          kalenteri.tunnus
-        FROM kalenteri
-        WHERE yhtio='{$kukarow['yhtio']}'
-        AND henkilo = ''
-        AND tyyppi IN ('PY', 'MT')";
+            kalenteri.pvmloppu,
+            kalenteri.kuka,
+            kalenteri.henkilo,
+            kalenteri.tyyppi,
+            kalenteri.tunnus
+            FROM kalenteri
+            WHERE yhtio='{$kukarow['yhtio']}'
+            AND henkilo = ''
+            AND tyyppi  IN ('PY', 'MT')";
   $result = pupe_query($query);
 
   $yhtiokohtaiset_tapahtumat = array();
@@ -81,15 +81,15 @@ if (isset($_GET['valmistukset']) and $_GET['valmistukset'] == 'true') {
     // Haetaan ja lisätään henkilökohtaiset tapahtumat
     // pekkanen, sairasloma, muu työ, loma, tai vapaa/poissa
     $query = "SELECT kalenteri.pvmalku as start,
-            kalenteri.pvmloppu as end,
-            kalenteri.kuka,
-            kalenteri.henkilo as resource,
-            kalenteri.tyyppi,
-            kalenteri.tunnus
-          FROM kalenteri
-          WHERE yhtio='{$kukarow['yhtio']}'
-          AND henkilo='{$linja['id']}'
-          AND tyyppi IN ('PE', 'SA', 'MT', 'LO', 'PO')";
+              kalenteri.pvmloppu as end,
+              kalenteri.kuka,
+              kalenteri.henkilo as resource,
+              kalenteri.tyyppi,
+              kalenteri.tunnus
+              FROM kalenteri
+              WHERE yhtio='{$kukarow['yhtio']}'
+              AND henkilo='{$linja['id']}'
+              AND tyyppi IN ('PE', 'SA', 'MT', 'LO', 'PO')";
     $result = pupe_query($query);
 
     while ($row = mysql_fetch_assoc($result)) {

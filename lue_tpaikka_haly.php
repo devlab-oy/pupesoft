@@ -90,11 +90,11 @@ if ($korjataan != '') {
 
       if ($kuuluuko > 0) {
 
-        $query = "  SELECT *
-              FROM tuotepaikat
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tuoteno = '$tuoteno[$id]'
-              and oletus != ''";
+        $query = "SELECT *
+                  FROM tuotepaikat
+                  WHERE yhtio  = '$kukarow[yhtio]'
+                  and tuoteno  = '$tuoteno[$id]'
+                  and oletus  != ''";
         $oleresult = pupe_query($query);
 
         if (mysql_num_rows($oleresult) == 0) {
@@ -104,14 +104,14 @@ if ($korjataan != '') {
           $oletus = '';
         }
 
-        $query = "  SELECT tunnus
-              FROM tuotepaikat
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND tuoteno   = '$tuoteno[$id]'
-              AND hyllyalue  = '$hyllyalue[$id]'
-              AND hyllynro  = '$hyllynro[$id]'
-              AND hyllyvali  = '$hyllyvali[$id]'
-              AND hyllytaso  = '$hyllytaso[$id]'";
+        $query = "SELECT tunnus
+                  FROM tuotepaikat
+                  WHERE yhtio   = '$kukarow[yhtio]'
+                  AND tuoteno   = '$tuoteno[$id]'
+                  AND hyllyalue = '$hyllyalue[$id]'
+                  AND hyllynro  = '$hyllynro[$id]'
+                  AND hyllyvali = '$hyllyvali[$id]'
+                  AND hyllytaso = '$hyllytaso[$id]'";
         $loytyykoresult = pupe_query($query);
 
         if (mysql_num_rows($loytyykoresult) == 0) {
@@ -123,19 +123,19 @@ if ($korjataan != '') {
       }
     }
 
-    $query = "  SELECT tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
-          concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) hyllypaikka,
-          tuote.tuoteno, tuote.nimitys, varastopaikat.tunnus, tuotepaikat.oletus, tuotepaikat.halytysraja, tuotepaikat.tilausmaara, tuotepaikat.tunnus,
-          concat(rpad(upper(tuotepaikat.hyllyalue) ,5,' '),lpad(tuotepaikat.hyllynro ,5,' ')) ihmepaikka
-          FROM tuotepaikat, varastopaikat, tuote
-          WHERE tuotepaikat.yhtio = varastopaikat.yhtio and tuotepaikat.yhtio = tuote.yhtio
-          and concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0')) >= concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0'))
-          and concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0')) <= concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0'))
-          and tuotepaikat.tuoteno = tuote.tuoteno
-          and tuotepaikat.yhtio = '$kukarow[yhtio]'
-          and tuotepaikat.tuoteno = '$tuoteno[$id]'
-          and varastopaikat.tunnus = '$tuvarasto'
-          order by 1";
+    $query = "SELECT tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
+              concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) hyllypaikka,
+              tuote.tuoteno, tuote.nimitys, varastopaikat.tunnus, tuotepaikat.oletus, tuotepaikat.halytysraja, tuotepaikat.tilausmaara, tuotepaikat.tunnus,
+              concat(rpad(upper(tuotepaikat.hyllyalue) ,5,' '),lpad(tuotepaikat.hyllynro ,5,' ')) ihmepaikka
+              FROM tuotepaikat, varastopaikat, tuote
+              WHERE tuotepaikat.yhtio  = varastopaikat.yhtio and tuotepaikat.yhtio = tuote.yhtio
+              and concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0')) >= concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0'))
+              and concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0')) <= concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0'))
+              and tuotepaikat.tuoteno  = tuote.tuoteno
+              and tuotepaikat.yhtio    = '$kukarow[yhtio]'
+              and tuotepaikat.tuoteno  = '$tuoteno[$id]'
+              and varastopaikat.tunnus = '$tuvarasto'
+              order by 1";
     $result2 = pupe_query($query);
 
     if (mysql_num_rows($result2) == 0) {
@@ -147,10 +147,10 @@ if ($korjataan != '') {
 
       echo "<tr><td>$id $tuoteno[$id]</td>";
 
-      $query = "  SELECT tuoteno, nimitys
-            FROM tuote
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tuoteno = '$tuoteno[$id]'";
+      $query = "SELECT tuoteno, nimitys
+                FROM tuote
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tuoteno = '$tuoteno[$id]'";
       $nimresult = pupe_query($query);
 
       if (mysql_num_rows($nimresult) == 1) {
@@ -193,11 +193,11 @@ if ($korjataan != '') {
 
         echo "<tr><td>$id $tuoteno[$id]</td>";
 
-        $query = "  SELECT tuoteno, nimitys
-              FROM tuote
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tuoteno = '$tuoteno[$id]'
-              LIMIT 1";
+        $query = "SELECT tuoteno, nimitys
+                  FROM tuote
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and tuoteno = '$tuoteno[$id]'
+                  LIMIT 1";
         $nimresult = pupe_query($query);
 
         if (mysql_num_rows($nimresult) == 1) {
@@ -227,11 +227,11 @@ if ($korjataan != '') {
       else {
         echo "<input type='hidden' name='rivipaikka[$id]' value='$rivipaikka[$id]'>";
 
-        $query = "  UPDATE tuotepaikat
-              SET halytysraja = '$halytysraja[$id]',
-              tilausmaara = '$tilattava[$id]'
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND tunnus  = '$rivipaikka[$id]'";
+        $query = "UPDATE tuotepaikat
+                  SET halytysraja = '$halytysraja[$id]',
+                  tilausmaara = '$tilattava[$id]'
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND tunnus  = '$rivipaikka[$id]'";
         $updresult = pupe_query($query);
       }
       echo "  <input type='hidden' name='tuoteno[$id]' value='$tuoteno[$id]'>
@@ -247,11 +247,11 @@ if ($korjataan != '') {
           <input type='hidden' name='tilattava[$id]' value='$tilattava[$id]'>
           <input type='hidden' name='uusipaikka[$id]' value=''>";
 
-      $query = "  UPDATE tuotepaikat
-            SET halytysraja = '$halytysraja[$id]',
-            tilausmaara = '$tilattava[$id]'
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND tunnus = '$varow[tunnus]'";
+      $query = "UPDATE tuotepaikat
+                SET halytysraja = '$halytysraja[$id]',
+                tilausmaara = '$tilattava[$id]'
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND tunnus  = '$varow[tunnus]'";
       $updresult = pupe_query($query);
     }
   }
@@ -291,10 +291,10 @@ else {
       echo "<tr><th>".t("Valitse varasto:")."</th>
         <td><select name='tuvarasto'>";
 
-  $query = "  SELECT tunnus, nimitys
-        FROM varastopaikat
-        WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
-        ORDER BY tyyppi, nimitys";
+  $query = "SELECT tunnus, nimitys
+            FROM varastopaikat
+            WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
+            ORDER BY tyyppi, nimitys";
   $result = pupe_query($query);
 
   echo "<option value=''>".t("Ei valittu")."</option>";

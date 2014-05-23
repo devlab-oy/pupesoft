@@ -19,10 +19,10 @@ elseif (mysql_field_name($result, $i) == "tuoteno" and isset($lukitse_avaimeen))
 
 if (mysql_field_name($result, $i) == "ryhma") {
 
-  $query = "  SELECT ryhma, if (ryhma!=selite, concat_ws(' - ', ryhma, selite), ryhma) selitetark
-        FROM perusalennus
-        WHERE yhtio='$kukarow[yhtio]'
-        ORDER BY ryhma";
+  $query = "SELECT ryhma, if (ryhma!=selite, concat_ws(' - ', ryhma, selite), ryhma) selitetark
+            FROM perusalennus
+            WHERE yhtio='$kukarow[yhtio]'
+            ORDER BY ryhma";
   $sresult = mysql_query($query) or pupe_error($query);
 
   $ulos = "<td><select id='ryhma' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
@@ -57,9 +57,9 @@ if (mysql_field_name($result, $i) == "toimittaja" and isset($alasveto[$i])) {
 }
 elseif (mysql_field_name($result, $i) == "toimittaja") {
   if ((int) $trow[$i] > 0) {
-    $query  = "  SELECT *
-          FROM toimi
-          WHERE yhtio='$kukarow[yhtio]' and tunnus='$trow[$i]'";
+    $query  = "SELECT *
+               FROM toimi
+               WHERE yhtio='$kukarow[yhtio]' and tunnus='$trow[$i]'";
     $sresult = mysql_query($query) or pupe_error($query);
     $srow = mysql_fetch_array($sresult);
     $ssize = strlen($trow[$i])+2;

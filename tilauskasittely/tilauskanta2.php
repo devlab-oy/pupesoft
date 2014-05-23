@@ -67,18 +67,18 @@ if ($tee == 'aja' and $atoimvko != '' and ($ltoimvko == '' or $ltoimvko >= $atoi
   }
 
   $query =  "SELECT if(lasku.toimvko>0,concat_ws('@@',lasku.toimvko,lasku.toimaika),lasku.toimaika) as 'Toimitusaika', tuoteno as 'Tuotenumero', if(jt>0,jt,varattu) as 'M‰‰r‰',
-        concat(concat(nimi,'<br>'),if(nimitark!='',concat(nimitark,'<br>'),''),if(toim_nimi!='',if(toim_nimi!=nimi,concat(toim_nimi,'<br>'),''),''),if(toim_nimitark!='',if(toim_nimitark!=nimitark,concat(toim_nimitark,'<br>'),''),'')) as 'Nimi/Toim. nimi',
-        lasku.tunnus as 'Tilausnro', lasku.tila, lasku.alatila, tilausrivi.tunnus
-        FROM tilausrivi
-        JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
-        WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-        AND tilausrivi.tyyppi = 'L'
-        AND tilausrivi.laskutettuaika = '0000-00-00'
-        AND tilausrivi.toimaika >= '$alkuaika'
-        AND tilausrivi.toimaika <= '$loppuaika'
-        AND tilausrivi.keratty = ''
-        AND (tilausrivi.varattu > 0 or tilausrivi.jt > 0)
-        ORDER BY $jarjestys ";
+             concat(concat(nimi,'<br>'),if(nimitark!='',concat(nimitark,'<br>'),''),if(toim_nimi!='',if(toim_nimi!=nimi,concat(toim_nimi,'<br>'),''),''),if(toim_nimitark!='',if(toim_nimitark!=nimitark,concat(toim_nimitark,'<br>'),''),'')) as 'Nimi/Toim. nimi',
+             lasku.tunnus as 'Tilausnro', lasku.tila, lasku.alatila, tilausrivi.tunnus
+             FROM tilausrivi
+             JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
+             WHERE tilausrivi.yhtio        = '$kukarow[yhtio]'
+             AND tilausrivi.tyyppi         = 'L'
+             AND tilausrivi.laskutettuaika = '0000-00-00'
+             AND tilausrivi.toimaika       >= '$alkuaika'
+             AND tilausrivi.toimaika       <= '$loppuaika'
+             AND tilausrivi.keratty        = ''
+             AND (tilausrivi.varattu > 0 or tilausrivi.jt > 0)
+             ORDER BY $jarjestys ";
   $result = mysql_query($query) or pupe_error($query);
 
   echo "<table><tr>";

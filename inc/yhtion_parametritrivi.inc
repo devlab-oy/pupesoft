@@ -1308,11 +1308,11 @@ if ($fieldname == "oletus_toimitusehto2") {
 
 if ($fieldname == "lasku_tulostin") {
 
-  $query = "  SELECT *
-        from kirjoittimet
-        where yhtio = '$kukarow[yhtio]'
-        AND komento != 'EDI'
-        ORDER BY kirjoitin";
+  $query = "SELECT *
+            from kirjoittimet
+            where yhtio  = '$kukarow[yhtio]'
+            AND komento != 'EDI'
+            ORDER BY kirjoitin";
   $kires = mysql_query($query) or pupe_error($query);
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -3122,9 +3122,8 @@ if ($fieldname == "pakollinen_varasto") {
 
   $sel = $trow[$i] == 'K' ? "selected" : "";
 
-  $ulos .= "<option value = ''>".t("Varaston valinta ei pakollinen")."</option>";
-  $ulos .= "<option value = 'K'{$sel}>".t("Varaston valinta on pakollinen: myyntitilauksella, ostotilauksella, tarjouksella ja reklamaatiolla")."</option>";
-
+  $ulos .= "<option value = ''>".t("Varaston valinta ei pakollinen. Tilaukselle voidaan lisätä rivejä useasta varastosta")."</option>";
+  $ulos .= "<option value = 'K'{$sel}>".t("Varaston valinta on pakollinen. Tilaukselle voidaan lisätä rivejä vain yhdestä varastosta: myyntitilauksella, ostotilauksella, tarjouksella ja reklamaatiolla")."</option>";
 
   $jatko = 0;
 }
@@ -3297,10 +3296,10 @@ if ($fieldname == "nouto_suoraan_laskutukseen") {
 }
 
 if ($fieldname == "reklamaation_vastaanottovarasto" ) {
-  $query = "  SELECT tunnus, nimitys
-        FROM varastopaikat
-        WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
-        ORDER BY tyyppi, nimitys";
+  $query = "SELECT tunnus, nimitys
+            FROM varastopaikat
+            WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
+            ORDER BY tyyppi, nimitys";
   $sresult = mysql_query($query) or pupe_error($query);
 
   $ulos = "<td><select name='$nimi'>";
@@ -3985,10 +3984,10 @@ if ($fieldname == 'suoratoimitusvarasto') {
 
   $ulos .= "<option value = '0'>".t("Ei valittu")."</option>";
 
-  $query  = "  SELECT *
-        FROM varastopaikat
-        WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'
-        ORDER BY tyyppi, nimitys";
+  $query  = "SELECT *
+             FROM varastopaikat
+             WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'
+             ORDER BY tyyppi, nimitys";
   $vares = pupe_query($query);
 
   while ($varow = mysql_fetch_assoc($vares)) {
@@ -3996,6 +3995,18 @@ if ($fieldname == 'suoratoimitusvarasto') {
     $ulos .= "<option value = '{$varow['tunnus']}' {$sel}>{$varow['nimitys']}</option>";
   }
 
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if (mysql_field_name($result, $i) == 'yhdistetaan_identtiset_laskulla') {
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'k' ? 'selected' : '';
+
+  $ulos .= "<option value = ''>".t("Samalta tilaukselta löytyviä jakaantuneita tilausrivejä ei yhdistetä laskulla")."</option>";
+  $ulos .= "<option value = 'k' {$sel}>".t("Samalta tilaukselta löytyvät jakaantuneet tilausrivit yhdistetään laskulla")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -4018,10 +4029,10 @@ if ($fieldname == 'takuuvarasto') {
 
   $ulos .= "<option value = '0'>".t("Ei valittu")."</option>";
 
-  $query  = "  SELECT *
-        FROM varastopaikat
-        WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'
-        ORDER BY tyyppi, nimitys";
+  $query  = "SELECT *
+             FROM varastopaikat
+             WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'
+             ORDER BY tyyppi, nimitys";
   $vares = pupe_query($query);
 
   while ($varow = mysql_fetch_assoc($vares)) {

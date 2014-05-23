@@ -12,12 +12,12 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
 
     $tilauksesta_myyntitilaus = "";
 
-    $query = "  SELECT *
-          FROM tilausrivi
-          WHERE yhtio = '$kukarow[yhtio]'
-          and otunnus = '$otunnus'
-          and tyyppi != 'D'
-          $tilrivilisa";
+    $query = "SELECT *
+              FROM tilausrivi
+              WHERE yhtio  = '$kukarow[yhtio]'
+              and otunnus  = '$otunnus'
+              and tyyppi  != 'D'
+              $tilrivilisa";
     $copresult = pupe_query($query);
 
     if (mysql_num_rows($copresult) == 0) {
@@ -39,16 +39,16 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
 
     // Katsotaan lˆytyykˆ jo sopiva otsikko, jos ei niin tehd‰‰n uusi, eli t‰ss‰ tapauksessa ei kopsata vanhaa
     if ($perusta == "REKLAMAATIO") {
-      $query = "  SELECT lasku.*
-            FROM lasku
-            WHERE yhtio        = '$kukarow[yhtio]'
-            and tila        = 'N'
-            and alatila       in ('','A')
-            and yhtio_toimipaikka = '{$kukarow['toimipaikka']}'
-            and liitostunnus     = '{$asiakasjollepalautetaan}'
-            and tilaustyyppi    = '9'
-            ORDER BY luontiaika DESC
-            LIMIT 1";
+      $query = "SELECT lasku.*
+                FROM lasku
+                WHERE yhtio           = '$kukarow[yhtio]'
+                and tila              = 'N'
+                and alatila           in ('','A')
+                and yhtio_toimipaikka = '{$kukarow['toimipaikka']}'
+                and liitostunnus      = '{$asiakasjollepalautetaan}'
+                and tilaustyyppi      = '9'
+                ORDER BY luontiaika DESC
+                LIMIT 1";
       $stresult = pupe_query($query);
 
       if (mysql_num_rows($stresult) == 1) {
@@ -281,42 +281,42 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
       }
 
       //Siirret‰‰n maksusuunnitelma
-      $query = "  SELECT *
-            FROM maksupositio
-            WHERE yhtio = '$kukarow[yhtio]'
-            and otunnus = '$otunnus'";
+      $query = "SELECT *
+                FROM maksupositio
+                WHERE yhtio = '$kukarow[yhtio]'
+                and otunnus = '$otunnus'";
       $copresult = pupe_query($query);
 
       if (mysql_num_rows($copresult) > 0) {
-        $query = "  UPDATE maksupositio
-              SET otunnus = '$mtunnus'
-              WHERE yhtio = '$kukarow[yhtio]'
-              and otunnus = '$otunnus'";
+        $query = "UPDATE maksupositio
+                  SET otunnus = '$mtunnus'
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and otunnus = '$otunnus'";
         $result = pupe_query($query);
 
         //P‰ivitet‰‰n lasku
-        $query = "  UPDATE lasku
-              SET jaksotettu   = '$mtunnus'
-              WHERE yhtio   = '$kukarow[yhtio]'
-              and tunnus     = '$utunnus'";
+        $query = "UPDATE lasku
+                  SET jaksotettu   = '$mtunnus'
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and tunnus  = '$utunnus'";
         $result = pupe_query($query);
 
         //  P‰ivitet‰‰n projekti
         if ($ptunnus > 0) {
-          $query = "  UPDATE lasku
-                SET jaksotettu   = '$mtunnus'
-                WHERE yhtio   = '$kukarow[yhtio]'
-                and tunnus     = '$ptunnus'";
+          $query = "UPDATE lasku
+                    SET jaksotettu   = '$mtunnus'
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    and tunnus  = '$ptunnus'";
           $result = pupe_query($query);
         }
       }
 
       //Kopioidaan liitetiedostot
-      $query = "  SELECT *
-            from liitetiedostot
-            where yhtio      = '$kukarow[yhtio]'
-            and liitostunnus  = '$otunnus'
-            and liitos      = 'lasku'";
+      $query = "SELECT *
+                from liitetiedostot
+                where yhtio      = '$kukarow[yhtio]'
+                and liitostunnus = '$otunnus'
+                and liitos       = 'lasku'";
       $liiteres = pupe_query($query);
 
       if (mysql_num_rows($liiteres) > 0) {
@@ -325,24 +325,24 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
 
           $liiterow["data"] = mysql_real_escape_string($liiterow["data"]);
 
-          $query = "  INSERT INTO liitetiedostot SET
-                  yhtio        = '$kukarow[yhtio]',
-                  liitos       = '$liiterow[liitos]',
-                  liitostunnus   = '$utunnus',
-                  data         = '$liiterow[data]',
-                  selite       = '$liiterow[selite]',
-                kieli      = '$liiterow[kieli]',
-                  filename     = '$liiterow[filename]',
-                  filesize     = '$liiterow[filesize]',
-                  filetype     = '$liiterow[filetype]',
-                  image_width    = '$liiterow[image_width]',
-                  image_height  = '$liiterow[image_height]',
-                  image_bits    = '$liiterow[image_bits]',
-                  image_channels  = '$liiterow[image_channels]',
-                  kayttotarkoitus  = '$liiterow[kayttotarkoitus]',
-                  jarjestys    = '$liiterow[jarjestys]',
-                  laatija      = '$kukarow[kuka]',
-                  luontiaika    = now()";
+          $query = "INSERT INTO liitetiedostot SET
+                    yhtio           = '$kukarow[yhtio]',
+                    liitos          = '$liiterow[liitos]',
+                    liitostunnus    = '$utunnus',
+                    data            = '$liiterow[data]',
+                    selite          = '$liiterow[selite]',
+                    kieli           = '$liiterow[kieli]',
+                    filename        = '$liiterow[filename]',
+                    filesize        = '$liiterow[filesize]',
+                    filetype        = '$liiterow[filetype]',
+                    image_width     = '$liiterow[image_width]',
+                    image_height    = '$liiterow[image_height]',
+                    image_bits      = '$liiterow[image_bits]',
+                    image_channels  = '$liiterow[image_channels]',
+                    kayttotarkoitus = '$liiterow[kayttotarkoitus]',
+                    jarjestys       = '$liiterow[jarjestys]',
+                    laatija         = '$kukarow[kuka]',
+                    luontiaika      = now()";
           $liiteinsres = pupe_query($query);
         }
       }
@@ -369,22 +369,22 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
     $laskures = mysql_query($query);
     $laskurow = mysql_fetch_array($laskures);
 
-    $query = "  SELECT tilausrivi.*, tilausrivin_lisatiedot.positio, tilausrivin_lisatiedot.toimittajan_tunnus
-          FROM tilausrivi
-          LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-          WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-          and tilausrivi.otunnus = '$otunnus'
-          and tilausrivi.tyyppi != 'D'
-          $tilrivilisa
-          ORDER by tilausrivi.perheid2, tilausrivi.perheid, tilausrivi.tunnus";
+    $query = "SELECT tilausrivi.*, tilausrivin_lisatiedot.positio, tilausrivin_lisatiedot.toimittajan_tunnus
+              FROM tilausrivi
+              LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+              WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
+              and tilausrivi.otunnus  = '$otunnus'
+              and tilausrivi.tyyppi  != 'D'
+              $tilrivilisa
+              ORDER by tilausrivi.perheid2, tilausrivi.perheid, tilausrivi.tunnus";
     $copresult = pupe_query($query);
 
     while ($coprivirow = mysql_fetch_array($copresult)) {
 
-      $query = "  SELECT *
-            FROM tuote
-            WHERE yhtio  = '$kukarow[yhtio]'
-            and  tuoteno = '$coprivirow[tuoteno]'";
+      $query = "SELECT *
+                FROM tuote
+                WHERE yhtio  = '$kukarow[yhtio]'
+                and  tuoteno = '$coprivirow[tuoteno]'";
       $aresult = pupe_query($query);
       $tuoterow = mysql_fetch_assoc($aresult);
 
@@ -440,20 +440,20 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
       if ($perusta == "REKLAMAATIO") {
         $kpl = $kpl * -1;
 
-        $query  = "  SELECT *
-              FROM asiakas
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tunnus  = '$asiakasjollepalautetaan'";
+        $query  = "SELECT *
+                   FROM asiakas
+                   WHERE yhtio = '$kukarow[yhtio]'
+                   and tunnus  = '$asiakasjollepalautetaan'";
         $result = pupe_query($query);
         $asiakasrow = mysql_fetch_assoc($result);
 
-        $query = "  SELECT toimi.tunnus
-              FROM toimi
-              JOIN tuotteen_toimittajat ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus AND tuotteen_toimittajat.tuoteno = '{$tuoteno}')
-              WHERE toimi.yhtio = '$kukarow[yhtio]'
-              AND toimi.tyyppi != 'P'
-              AND toimi.ytunnus = '{$asiakasrow['ytunnus']}'
-              LIMIT 1";
+        $query = "SELECT toimi.tunnus
+                  FROM toimi
+                  JOIN tuotteen_toimittajat ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus AND tuotteen_toimittajat.tuoteno = '{$tuoteno}')
+                  WHERE toimi.yhtio  = '$kukarow[yhtio]'
+                  AND toimi.tyyppi  != 'P'
+                  AND toimi.ytunnus  = '{$asiakasrow['ytunnus']}'
+                  LIMIT 1";
         $result = pupe_query($query);
         $toimirow = mysql_fetch_assoc($result);
 
@@ -461,10 +461,10 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
         $ostorow["liitostunnus"] = $toimirow['tunnus'];
         $ostorow["valkoodi"]    = $toimirow['valkoodi'];
 
-        $vquery = "  SELECT nimi, kurssi, tunnus
-              FROM valuu
-              WHERE yhtio = '$kukarow[yhtio]'
-              and nimi   = '{$toimirow['valkoodi']}'";
+        $vquery = "SELECT nimi, kurssi, tunnus
+                   FROM valuu
+                   WHERE yhtio = '$kukarow[yhtio]'
+                   and nimi    = '{$toimirow['valkoodi']}'";
         $vresult = pupe_query($vquery);
 
         if (mysql_num_rows($vresult) == 1) {
@@ -538,10 +538,10 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
 
       if (isset($isaok[$coprivirow['perheid2']]) and $isaok[$coprivirow['perheid2']] > 0 and $coprivirow['perheid2'] != $coprivirow['tunnus'] and $coprivirow['perheid2'] > 0 and stripos($coprivirow["positio"], "TEHDAS") !== FALSE) {
         // Otetaan paikka is‰lt‰ aina kun on tehdaslis‰varuste!
-        $query = "  SELECT concat_ws('#!°!#', hyllyalue,hyllynro,hyllyvali,hyllytaso) paikka
-              FROM tilausrivi
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tunnus = '".$isaok[$coprivirow['perheid2']]."'";
+        $query = "SELECT concat_ws('#!°!#', hyllyalue,hyllynro,hyllyvali,hyllytaso) paikka
+                  FROM tilausrivi
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and tunnus  = '".$isaok[$coprivirow['perheid2']]."'";
         $aresult = pupe_query($query);
         $paikkarow = mysql_fetch_assoc($aresult);
 
@@ -580,40 +580,40 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
           $lisax = "ostorivitunnus";
         }
 
-        $query = "  SELECT $lisax, count(*) kpl
-              FROM sarjanumeroseuranta
-              WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
-              and sarjanumeroseuranta.tuoteno = '$coprivirow[tuoteno]'
-              and sarjanumeroseuranta.$lisax  = '$coprivirow[tunnus]'
-              group by $lisax";
+        $query = "SELECT $lisax, count(*) kpl
+                  FROM sarjanumeroseuranta
+                  WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
+                  and sarjanumeroseuranta.tuoteno = '$coprivirow[tuoteno]'
+                  and sarjanumeroseuranta.$lisax  = '$coprivirow[tunnus]'
+                  group by $lisax";
         $sarjares = pupe_query($query);
         $sarjarow = mysql_fetch_array($sarjares);
 
         foreach($lisatyt_rivit as $lisatty_tun) {
-          $query = "  SELECT *
-                FROM tilausrivi
-                WHERE yhtio = '$kukarow[yhtio]'
-                and otunnus = '$utunnus'
-                and tunnus  = '$lisatty_tun'";
+          $query = "SELECT *
+                    FROM tilausrivi
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    and otunnus = '$utunnus'
+                    and tunnus  = '$lisatty_tun'";
           $lisres = pupe_query($query);
           $lisrow = mysql_fetch_array($lisres);
 
           if ($lisrow["varattu"] != 0) {
             $lisrow["varattu"] = (int) abs(round($lisrow["varattu"], 0));
 
-            $query = "  UPDATE sarjanumeroseuranta
-                  SET $lisax = '$lisrow[tunnus]'
-                  WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
-                  and sarjanumeroseuranta.tuoteno = '$coprivirow[tuoteno]'
-                  and sarjanumeroseuranta.$lisax  = '$coprivirow[tunnus]'
-                  LIMIT $lisrow[varattu]";
+            $query = "UPDATE sarjanumeroseuranta
+                      SET $lisax = '$lisrow[tunnus]'
+                      WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
+                      and sarjanumeroseuranta.tuoteno = '$coprivirow[tuoteno]'
+                      and sarjanumeroseuranta.$lisax  = '$coprivirow[tunnus]'
+                      LIMIT $lisrow[varattu]";
             $cores = pupe_query($query);
           }
 
           //Kopioidaan tilausrivin lisatiedot
-          $query = "  SELECT *
-                FROM tilausrivin_lisatiedot
-                WHERE tilausrivitunnus = '$coprivirow[tunnus]' and yhtio = '$kukarow[yhtio]'";
+          $query = "SELECT *
+                    FROM tilausrivin_lisatiedot
+                    WHERE tilausrivitunnus = '$coprivirow[tunnus]' and yhtio = '$kukarow[yhtio]'";
           $monistares2 = pupe_query($query);
 
           if (mysql_num_rows($monistares2) > 0) {
@@ -643,48 +643,48 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
         }
 
         //Jos jotakin kopioitavan rivin sarjanumeroista ei saatu kopioitua niin irrotetaan se silt‰ rivilt‰
-        $query = "  UPDATE sarjanumeroseuranta
-              SET $lisax = 0
-              WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
-              and sarjanumeroseuranta.tuoteno = '$coprivirow[tuoteno]'
-              and sarjanumeroseuranta.$lisax  = '$coprivirow[tunnus]'";
+        $query = "UPDATE sarjanumeroseuranta
+                  SET $lisax = 0
+                  WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
+                  and sarjanumeroseuranta.tuoteno = '$coprivirow[tuoteno]'
+                  and sarjanumeroseuranta.$lisax  = '$coprivirow[tunnus]'";
         $cores = pupe_query($query);
       }
     }
 
     //Korjataan perheid:t uusilla riveill‰
-    $query = "  SELECT perheid, min(tunnus) uusiperheid
-          FROM tilausrivi
-          WHERE yhtio = '$kukarow[yhtio]'
-          and otunnus = '$utunnus'
-          and perheid != 0
-          GROUP by perheid";
+    $query = "SELECT perheid, min(tunnus) uusiperheid
+              FROM tilausrivi
+              WHERE yhtio  = '$kukarow[yhtio]'
+              and otunnus  = '$utunnus'
+              and perheid != 0
+              GROUP by perheid";
     $copresult = pupe_query($query);
 
     while ($coprivirow = mysql_fetch_array($copresult)) {
-      $query = "  UPDATE tilausrivi
-            SET perheid = '$coprivirow[uusiperheid]'
-            WHERE yhtio = '$kukarow[yhtio]'
-            and otunnus = '$utunnus'
-            and perheid = '$coprivirow[perheid]'";
+      $query = "UPDATE tilausrivi
+                SET perheid = '$coprivirow[uusiperheid]'
+                WHERE yhtio = '$kukarow[yhtio]'
+                and otunnus = '$utunnus'
+                and perheid = '$coprivirow[perheid]'";
       $cores = pupe_query($query);
     }
 
     //Korjataan perheid2:t uusilla riveill‰
-    $query = "  SELECT perheid2, min(tunnus) uusiperheid2
-          FROM tilausrivi
-          WHERE yhtio = '$kukarow[yhtio]'
-          and otunnus = '$utunnus'
-          and perheid2 != 0
-          GROUP by perheid2";
+    $query = "SELECT perheid2, min(tunnus) uusiperheid2
+              FROM tilausrivi
+              WHERE yhtio   = '$kukarow[yhtio]'
+              and otunnus   = '$utunnus'
+              and perheid2 != 0
+              GROUP by perheid2";
     $copresult = pupe_query($query);
 
     while ($coprivirow = mysql_fetch_array($copresult)) {
-      $query = "  UPDATE tilausrivi
-            SET perheid2 = '$coprivirow[uusiperheid2]'
-            WHERE yhtio = '$kukarow[yhtio]'
-            and otunnus = '$utunnus'
-            and perheid2 = '$coprivirow[perheid2]'";
+      $query = "UPDATE tilausrivi
+                SET perheid2 = '$coprivirow[uusiperheid2]'
+                WHERE yhtio  = '$kukarow[yhtio]'
+                and otunnus  = '$utunnus'
+                and perheid2 = '$coprivirow[perheid2]'";
       $cores = pupe_query($query);
     }
 
@@ -692,19 +692,19 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
     if (($monistarow["tila"] == "G" and $monistarow["alatila"] == "V" and $monistarow["tilaustyyppi"] == "M") or ($monistarow['clearing'] == 'EXTTARJOUS')) {
       if ($monistarow['clearing'] != 'EXTTARJOUS') {
         // P‰ivitet‰‰n kopsatun laskun eilahetett‰ kentt‰‰
-        $query = "  UPDATE lasku
-              SET eilahetetta = 'o'
-              where yhtio = '$kukarow[yhtio]'
-              and tunnus = '$kukarow[kesken]'";
+        $query = "UPDATE lasku
+                  SET eilahetetta = 'o'
+                  where yhtio = '$kukarow[yhtio]'
+                  and tunnus  = '$kukarow[kesken]'";
         $result = pupe_query($query);
 
         $tilausvalmiskutsuja = "MYYNTITILI";
       }
 
-      $query   = "  SELECT *
-            from lasku
-            where tunnus = '$kukarow[kesken]'
-            and yhtio = '$kukarow[yhtio]'";
+      $query   = "SELECT *
+                  from lasku
+                  where tunnus = '$kukarow[kesken]'
+                  and yhtio    = '$kukarow[yhtio]'";
       $result    = pupe_query($query);
       $laskurow   = mysql_fetch_array($result);
 

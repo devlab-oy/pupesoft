@@ -4,9 +4,9 @@ require ("inc/parametrit.inc");
 
 echo "<font class='head'>",t("Messenger"),"</font><hr>";
 
-$query = "  SELECT distinct yhtio
-      FROM yhtio
-      WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
+$query = "SELECT distinct yhtio
+          FROM yhtio
+          WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
 $result = pupe_query($query);
 $konsyhtiot = "";
 
@@ -16,8 +16,8 @@ while ($row = mysql_fetch_array($result)) {
 $konsyhtiot = " in (".substr($konsyhtiot, 0, -1).") ";
 
 if (isset($messenger) and $message != "") {
-  $query = "  INSERT INTO messenger
-        SET yhtio='$kukarow[yhtio]', kuka='$kukarow[kuka]', vastaanottaja='$vastaanottaja', viesti='$message', status='$status', luontiaika=now()";
+  $query = "INSERT INTO messenger
+            SET yhtio='$kukarow[yhtio]', kuka='$kukarow[kuka]', vastaanottaja='$vastaanottaja', viesti='$message', status='$status', luontiaika=now()";
   $messenger_result = pupe_query($query);
 }
 
@@ -25,12 +25,12 @@ if (!isset($kpl)) {
   $kpl = 20;
 }
 
-$query = "  SELECT DISTINCT messenger.vastaanottaja viimeisin
-      FROM kuka
-      LEFT JOIN messenger ON (messenger.yhtio=kuka.yhtio AND messenger.kuka=kuka.kuka)
-      WHERE kuka.extranet  = ''
-      AND messenger.tunnus = (SELECT max(tunnus) FROM messenger WHERE kuka='$kukarow[kuka]')
-      ORDER BY viimeisin DESC";
+$query = "SELECT DISTINCT messenger.vastaanottaja viimeisin
+          FROM kuka
+          LEFT JOIN messenger ON (messenger.yhtio=kuka.yhtio AND messenger.kuka=kuka.kuka)
+          WHERE kuka.extranet  = ''
+          AND messenger.tunnus = (SELECT max(tunnus) FROM messenger WHERE kuka='$kukarow[kuka]')
+          ORDER BY viimeisin DESC";
 $viimeisin_result = pupe_query($query);
 $viimeisin_row = mysql_fetch_array($viimeisin_result);
 
@@ -40,13 +40,13 @@ echo "<input type='hidden' name='messenger' value='X'>";
 echo "<input type='hidden' name='status' value='X'>";
 echo "<tr><th>".t("Lähetä viesti")." --> ".t("Vastaanottaja").": <select name='vastaanottaja'>";
 
-$query = "  SELECT DISTINCT kuka.nimi, kuka.kuka
-      FROM kuka
-      WHERE kuka.yhtio $konsyhtiot
-      AND kuka.aktiivinen = 1
-      AND kuka.extranet = ''
-      AND kuka.nimi    != ''
-      ORDER BY kuka.nimi, kuka.kuka";
+$query = "SELECT DISTINCT kuka.nimi, kuka.kuka
+          FROM kuka
+          WHERE kuka.yhtio $konsyhtiot
+          AND kuka.aktiivinen  = 1
+          AND kuka.extranet    = ''
+          AND kuka.nimi       != ''
+          ORDER BY kuka.nimi, kuka.kuka";
 $result = pupe_query($query);
 
 while ($userrow = mysql_fetch_array($result)) {
@@ -76,14 +76,14 @@ else {
   $sel3 = "selected";
 }
 
-$query = "  SELECT messenger.tunnus, messenger.status, messenger.viesti, (SELECT nimi FROM kuka WHERE kuka.yhtio $konsyhtiot AND kuka.kuka = messenger.vastaanottaja LIMIT 1) vastaanottaja, kuka.nimi, messenger.luontiaika
-      FROM messenger
-      JOIN kuka ON (kuka.yhtio=messenger.yhtio AND kuka.kuka=messenger.kuka)
-      WHERE messenger.yhtio $konsyhtiot
-      AND messenger.$kuka='$kukarow[kuka]'
-      AND extranet=''
-      ORDER BY messenger.luontiaika
-      DESC LIMIT $kpl";
+$query = "SELECT messenger.tunnus, messenger.status, messenger.viesti, (SELECT nimi FROM kuka WHERE kuka.yhtio $konsyhtiot AND kuka.kuka = messenger.vastaanottaja LIMIT 1) vastaanottaja, kuka.nimi, messenger.luontiaika
+          FROM messenger
+          JOIN kuka ON (kuka.yhtio=messenger.yhtio AND kuka.kuka=messenger.kuka)
+          WHERE messenger.yhtio $konsyhtiot
+          AND messenger.$kuka='$kukarow[kuka]'
+          AND extranet=''
+          ORDER BY messenger.luontiaika
+          DESC LIMIT $kpl";
 $result = pupe_query($query);
 
 echo "<br>".t("Näytä")." ";

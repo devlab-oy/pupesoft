@@ -39,11 +39,11 @@ if ($faarao == 'TUTKHM') {
 
       // toimittajan tuotenumero ylikirjottaa tuotteen?
       if ($toim_tuoteno != "") {
-        $query = "  SELECT GROUP_CONCAT(distinct concat(\"'\", tuoteno, \"'\") SEPARATOR ',') tuoteno
-              FROM tuotteen_toimittajat use index (yhtio_toimtuoteno)
-              WHERE yhtio = '$kukarow[yhtio]'
-              and toim_tuoteno = '$toim_tuoteno'
-              and liitostunnus = '$toimittajaid'";
+        $query = "SELECT GROUP_CONCAT(distinct concat(\"'\", tuoteno, \"'\") SEPARATOR ',') tuoteno
+                  FROM tuotteen_toimittajat use index (yhtio_toimtuoteno)
+                  WHERE yhtio      = '$kukarow[yhtio]'
+                  and toim_tuoteno = '$toim_tuoteno'
+                  and liitostunnus = '$toimittajaid'";
         $result = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($result) > 0) {
@@ -62,20 +62,20 @@ if ($faarao == 'TUTKHM') {
       if ($tuote_etsi != "") {
 
         //Etsit‰‰n hyv‰‰ osumaa!
-        $query = "  SELECT tilausrivi.*
-              FROM tilausrivi, lasku, tuote
-              WHERE lasku.ytunnus = '$laskurow[ytunnus]'
-              and lasku.yhtio = '$kukarow[yhtio]'
-              and tilausrivi.otunnus = lasku.tunnus
-              and tilausrivi.yhtio = lasku.yhtio
-              and tilausrivi.yhtio = tuote.yhtio
-              and tilausrivi.tuoteno = tuote.tuoteno
-              and lasku.tila = 'O'
-              and lasku.alatila = 'A'
-              and tilausrivi.tyyppi = 'O'
-              and tilausrivi.uusiotunnus = 0
-              and tilausrivi.tuoteno in ($tuote_etsi)
-              ORDER BY tilausrivi.otunnus, tilausrivi.varattu";
+        $query = "SELECT tilausrivi.*
+                  FROM tilausrivi, lasku, tuote
+                  WHERE lasku.ytunnus        = '$laskurow[ytunnus]'
+                  and lasku.yhtio            = '$kukarow[yhtio]'
+                  and tilausrivi.otunnus     = lasku.tunnus
+                  and tilausrivi.yhtio       = lasku.yhtio
+                  and tilausrivi.yhtio       = tuote.yhtio
+                  and tilausrivi.tuoteno     = tuote.tuoteno
+                  and lasku.tila             = 'O'
+                  and lasku.alatila          = 'A'
+                  and tilausrivi.tyyppi      = 'O'
+                  and tilausrivi.uusiotunnus = 0
+                  and tilausrivi.tuoteno     in ($tuote_etsi)
+                  ORDER BY tilausrivi.otunnus, tilausrivi.varattu";
         $result = mysql_query($query) or pupe_error($query);
 
         $ok=0;
@@ -84,12 +84,12 @@ if ($faarao == 'TUTKHM') {
 
           while ($rivirow = mysql_fetch_array ($result)) {
 
-            $query = "  SELECT tuotekerroin
-                  FROM tuotteen_toimittajat use index (yhtio_toimtuoteno)
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and toim_tuoteno = '$toim_tuoteno'
-                  and liitostunnus = '$toimittajaid'
-                  and tuoteno = '$rivirow[tuoteno]'";
+            $query = "SELECT tuotekerroin
+                      FROM tuotteen_toimittajat use index (yhtio_toimtuoteno)
+                      WHERE yhtio      = '$kukarow[yhtio]'
+                      and toim_tuoteno = '$toim_tuoteno'
+                      and liitostunnus = '$toimittajaid'
+                      and tuoteno      = '$rivirow[tuoteno]'";
             $kerroinres = mysql_query($query) or pupe_error($query);
 
             if (mysql_num_rows($kerroinres) > 1) {
@@ -120,12 +120,12 @@ if ($faarao == 'TUTKHM') {
 
             while ($rivirow = mysql_fetch_array ($result)) {
 
-              $query = "  SELECT tuotekerroin
-                    FROM tuotteen_toimittajat use index (yhtio_toimtuoteno)
-                    WHERE yhtio = '$kukarow[yhtio]'
-                    and toim_tuoteno = '$toim_tuoteno'
-                    and liitostunnus = '$toimittajaid'
-                    and tuoteno = '$rivirow[tuoteno]'";
+              $query = "SELECT tuotekerroin
+                        FROM tuotteen_toimittajat use index (yhtio_toimtuoteno)
+                        WHERE yhtio      = '$kukarow[yhtio]'
+                        and toim_tuoteno = '$toim_tuoteno'
+                        and liitostunnus = '$toimittajaid'
+                        and tuoteno      = '$rivirow[tuoteno]'";
               $kerroinres = mysql_query($query) or pupe_error($query);
 
               if (mysql_num_rows($kerroinres) > 1) {
@@ -157,12 +157,12 @@ if ($faarao == 'TUTKHM') {
 
             while ($rivirow = mysql_fetch_array ($result)) {
 
-              $query = "  SELECT tuotekerroin
-                    FROM tuotteen_toimittajat use index (yhtio_toimtuoteno)
-                    WHERE yhtio = '$kukarow[yhtio]'
-                    and toim_tuoteno = '$toim_tuoteno'
-                    and liitostunnus = '$toimittajaid'
-                    and tuoteno = '$rivirow[tuoteno]'";
+              $query = "SELECT tuotekerroin
+                        FROM tuotteen_toimittajat use index (yhtio_toimtuoteno)
+                        WHERE yhtio      = '$kukarow[yhtio]'
+                        and toim_tuoteno = '$toim_tuoteno'
+                        and liitostunnus = '$toimittajaid'
+                        and tuoteno      = '$rivirow[tuoteno]'";
               $kerroinres = mysql_query($query) or pupe_error($query);
 
               if (mysql_num_rows($kerroinres) > 1) {
@@ -186,11 +186,11 @@ if ($faarao == 'TUTKHM') {
                 $filehinta = $hinta;
 
                 // Poistetaan vanha rivi
-                $query = "  DELETE from tilausrivi
-                      WHERE tunnus = '$rivirow[tunnus]'
-                      and yhtio = '$kukarow[yhtio]'
-                      and tyyppi = 'O'
-                      and otunnus = '$rivirow[otunnus]'";
+                $query = "DELETE from tilausrivi
+                          WHERE tunnus = '$rivirow[tunnus]'
+                          and yhtio    = '$kukarow[yhtio]'
+                          and tyyppi   = 'O'
+                          and otunnus  = '$rivirow[otunnus]'";
                 $poistoresult = mysql_query($query) or pupe_error($query);
 
                 // Lis‰t‰‰n rivi ja splitataan se k‰ytt‰j‰n toiveita mukaillen
@@ -221,10 +221,10 @@ if ($faarao == 'TUTKHM') {
                   ${'ale'.$alepostfix} = $rivirow["ale{$alepostfix}"];
                 }
 
-                $query = "  SELECT *
-                      FROM tuote
-                      WHERE yhtio = '$kukarow[yhtio]'
-                      and tuoteno = '$rivirow[tuoteno]'";
+                $query = "SELECT *
+                          FROM tuote
+                          WHERE yhtio = '$kukarow[yhtio]'
+                          and tuoteno = '$rivirow[tuoteno]'";
                 $tuoteresult = mysql_query($query) or pupe_error($query);
                 $trow = mysql_fetch_array($tuoteresult);
 
@@ -255,13 +255,13 @@ if ($faarao == 'TUTKHM') {
             }
 
             //Tarksitetaan viel‰ ennen p‰ivityst‰, ettei saapumsita ole poistettu ja infotaan k‰ytt‰j‰‰, jos n‰in on k‰ynyt
-            $query = "  SELECT tila
-                  FROM lasku
-                  WHERE yhtio = '{$kukarow[yhtio]}'
-                  AND tila = 'K'
-                  AND alatila = ''
-                  AND vanhatunnus = 0
-                  AND tunnus = '$otunnus'";
+            $query = "SELECT tila
+                      FROM lasku
+                      WHERE yhtio     = '{$kukarow[yhtio]}'
+                      AND tila        = 'K'
+                      AND alatila     = ''
+                      AND vanhatunnus = 0
+                      AND tunnus      = '$otunnus'";
             $res = pupe_query($query);
             if (mysql_num_rows($res) == 1){
               $query = "UPDATE tilausrivi SET uusiotunnus='$otunnus' $kululisa $hintalisa WHERE tunnus = '$rivirow[tunnus]' AND yhtio='$kukarow[yhtio]'";

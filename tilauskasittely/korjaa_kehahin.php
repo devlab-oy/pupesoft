@@ -14,10 +14,10 @@ if ($tee == "KORJAA") {
   // takasin tuotteen valintaan
   $tee = "";
 
-  $query = "  SELECT *
-        FROM tapahtuma
-        WHERE yhtio = '{$kukarow["yhtio"]}'
-        AND tunnus = '$rivitunnus'";
+  $query = "SELECT *
+            FROM tapahtuma
+            WHERE yhtio = '{$kukarow["yhtio"]}'
+            AND tunnus  = '$rivitunnus'";
   $res = pupe_query($query);
 
   if (mysql_num_rows($res) == 1) {
@@ -40,10 +40,10 @@ if ($tee == "KORJAA") {
 }
 
 if ($tee == "VALITSE") {
-  $query = "  SELECT *
-        FROM tuote
-        WHERE yhtio = '{$kukarow["yhtio"]}'
-        AND tuoteno = '$tuoteno'";
+  $query = "SELECT *
+            FROM tuote
+            WHERE yhtio = '{$kukarow["yhtio"]}'
+            AND tuoteno = '$tuoteno'";
   $res = pupe_query($query);
 
   if (mysql_num_rows($res) == 0) {
@@ -54,12 +54,12 @@ if ($tee == "VALITSE") {
     $tuoterow = mysql_fetch_array($res);
 
     // näytetään tuotteen tapahtumat
-    $query = "  SELECT *
-          FROM tapahtuma use index (yhtio_tuote_laadittu)
-          WHERE yhtio = '{$kukarow["yhtio"]}'
-          and tuoteno = '{$tuoterow["tuoteno"]}'
-          and laadittu >= '{$yhtiorow["tilikausi_alku"]}'
-          ORDER BY laadittu DESC";
+    $query = "SELECT *
+              FROM tapahtuma use index (yhtio_tuote_laadittu)
+              WHERE yhtio  = '{$kukarow["yhtio"]}'
+              and tuoteno  = '{$tuoterow["tuoteno"]}'
+              and laadittu >= '{$yhtiorow["tilikausi_alku"]}'
+              ORDER BY laadittu DESC";
     $res = pupe_query($query);
 
     echo "<form method='post'>";

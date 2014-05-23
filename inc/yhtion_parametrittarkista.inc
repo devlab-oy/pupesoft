@@ -66,12 +66,12 @@ if(!function_exists("yhtion_parametrittarkista")) {
 
       if ($tuote != "") {
         // katotaan löytyykö tällänen saldoton tuote
-        $query = "  SELECT tunnus
-              FROM tuote
-              WHERE yhtio  = '$kukarow[yhtio]'
-              AND tuoteno = '$tuote'
-              AND tuoteno != ''
-              AND ei_saldoa != ''";
+        $query = "SELECT tunnus
+                  FROM tuote
+                  WHERE yhtio    = '$kukarow[yhtio]'
+                  AND tuoteno    = '$tuote'
+                  AND tuoteno   != ''
+                  AND ei_saldoa != ''";
         $xyresult = pupe_query($query);
 
         if (mysql_num_rows($xyresult) == 0) {
@@ -84,10 +84,10 @@ if(!function_exists("yhtion_parametrittarkista")) {
 
       $tuote = trim($t[$i]);
 
-      $query = "  SELECT *
-            from maksuehto
-            where yhtio  = '$kukarow[yhtio]'
-            and summanjakoprososa2 != 0";
+      $query = "SELECT *
+                from maksuehto
+                where yhtio             = '$kukarow[yhtio]'
+                and summanjakoprososa2 != 0";
       $xyresult = pupe_query($query);
 
       if (mysql_num_rows($xyresult) != 0 and $tuote=='') {

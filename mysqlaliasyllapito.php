@@ -9,9 +9,9 @@ if ($upd == 1) {
   list($xtaulu, $xalias_set) = explode("###", $taulu);
 
   // Luodaan puskuri, jotta saadaan taulukot kuntoon
-  $query = "  SELECT *
-        FROM $xtaulu
-        WHERE tunnus = '0'";
+  $query = "SELECT *
+            FROM $xtaulu
+            WHERE tunnus = '0'";
   $result = pupe_query($query);
   $trow = mysql_fetch_array($result);
 
@@ -20,12 +20,12 @@ if ($upd == 1) {
     // Tarkistetaan saako k‰ytt‰j‰ p‰ivitt‰‰ t‰t‰ kentt‰‰
     $al_nimi   = mysql_field_name($result, $i);
 
-    $query = "  DELETE
-          FROM avainsana
-          WHERE yhtio = '$kukarow[yhtio]'
-          and laji  = 'MYSQLALIAS'
-          and selite  = '$xtaulu.$al_nimi'
-          and selitetark_2 = '$xalias_set'";
+    $query = "DELETE
+              FROM avainsana
+              WHERE yhtio      = '$kukarow[yhtio]'
+              and laji         = 'MYSQLALIAS'
+              and selite       = '$xtaulu.$al_nimi'
+              and selitetark_2 = '$xalias_set'";
     $al_res = pupe_query($query);
 
     if ($mysqlaliasbox[$al_nimi] != "" or trim($mysqlalias[$al_nimi]) != "" or trim($oletusarvo[$al_nimi]) != "" or trim($ohjeteksti[$al_nimi]) != "") {
@@ -43,16 +43,16 @@ if ($upd == 1) {
 
       $xotsikko = str_replace("(BR)", "<br>", trim($mysqlalias[$al_nimi]));
 
-      $query = "  INSERT INTO avainsana
-            SET yhtio     = '$kukarow[yhtio]',
-            laji      = 'MYSQLALIAS',
-            nakyvyys    = '$nakyvyys',
-            selite      = '$xtaulu.$al_nimi',
-            selitetark     = '$xotsikko',
-            selitetark_2   = '$xalias_set',
-            selitetark_3   = '$pakollisuus',
-            selitetark_4  = '{$oletusarvo[$al_nimi]}',
-            selitetark_5  = '{$ohjeteksti[$al_nimi]}'";
+      $query = "INSERT INTO avainsana
+                SET yhtio     = '$kukarow[yhtio]',
+                laji         = 'MYSQLALIAS',
+                nakyvyys     = '$nakyvyys',
+                selite       = '$xtaulu.$al_nimi',
+                selitetark   = '$xotsikko',
+                selitetark_2 = '$xalias_set',
+                selitetark_3 = '$pakollisuus',
+                selitetark_4 = '{$oletusarvo[$al_nimi]}',
+                selitetark_5 = '{$ohjeteksti[$al_nimi]}'";
       $al_res = pupe_query($query);
     }
   }
@@ -61,11 +61,11 @@ if ($upd == 1) {
 if ($delete == 1) {
   list($xtaulu, $xalias_set) = explode("###", $taulu);
 
-  $query = "  DELETE FROM avainsana
-        WHERE yhtio = '$kukarow[yhtio]'
-        and laji = 'MYSQLALIAS'
-        and selite like '$xtaulu.%'
-        and selitetark_2 = '$xalias_set'";
+  $query = "DELETE FROM avainsana
+            WHERE yhtio      = '$kukarow[yhtio]'
+            and laji         = 'MYSQLALIAS'
+            and selite       like '$xtaulu.%'
+            and selitetark_2 = '$xalias_set'";
   $al_res1 = pupe_query($query);
 
   echo "<br><br>".t("Mysqlaliakset poistettu")."!<br><br><br>";
@@ -77,30 +77,30 @@ if ($kopsaataulu != "" and $uusisetti != "") {
 
   list($kopsaataulu, $alias_set) = explode("###", $kopsaataulu);
 
-  $query = "  SELECT *
-        FROM avainsana
-        WHERE yhtio = '$kukarow[yhtio]'
-        and laji='MYSQLALIAS'
-        and selite like '$kopsaataulu.%'
-        and selitetark_2 = '$alias_set'";
+  $query = "SELECT *
+            FROM avainsana
+            WHERE yhtio      = '$kukarow[yhtio]'
+            and laji='MYSQLALIAS'
+            and selite       like '$kopsaataulu.%'
+            and selitetark_2 = '$alias_set'";
   $al_res1 = pupe_query($query);
 
-  $query = "  SELECT *
-        FROM avainsana
-        WHERE yhtio = '$kukarow[yhtio]'
-        and laji='MYSQLALIAS'
-        and selite like '$kopsaataulu.%'
-        and selitetark_2 = '$uusisetti'";
+  $query = "SELECT *
+            FROM avainsana
+            WHERE yhtio      = '$kukarow[yhtio]'
+            and laji='MYSQLALIAS'
+            and selite       like '$kopsaataulu.%'
+            and selitetark_2 = '$uusisetti'";
   $al_res2 = pupe_query($query);
 
   if (mysql_num_rows($al_res1) > 0 and mysql_num_rows($al_res2) == 0) {
     while ($al_row = mysql_fetch_array($al_res1)) {
-      $query = "  INSERT INTO avainsana
-            SET yhtio     = '$kukarow[yhtio]',
-            laji      = 'MYSQLALIAS',
-            selite      = '$al_row[selite]',
-            selitetark     = '$al_row[selitetark]',
-            selitetark_2   = '$uusisetti'";
+      $query = "INSERT INTO avainsana
+                SET yhtio     = '$kukarow[yhtio]',
+                laji         = 'MYSQLALIAS',
+                selite       = '$al_row[selite]',
+                selitetark   = '$al_row[selitetark]',
+                selitetark_2 = '$uusisetti'";
       $al_res3 = pupe_query($query);
     }
   }
@@ -119,12 +119,12 @@ echo "<select name = 'taulu'>";
 while ($tables = mysql_fetch_array($tabresult)) {
   if (file_exists("inc/".$tables[0].".inc")) {
 
-    $query = "  SELECT distinct selitetark_2
-          FROM avainsana
-          WHERE yhtio = '$kukarow[yhtio]'
-          and laji  = 'MYSQLALIAS'
-          and selite  like '".$tables[0].".%'
-          and selitetark_2 != ''";
+    $query = "SELECT distinct selitetark_2
+              FROM avainsana
+              WHERE yhtio       = '$kukarow[yhtio]'
+              and laji          = 'MYSQLALIAS'
+              and selite        like '".$tables[0].".%'
+              and selitetark_2 != ''";
     $al_res = pupe_query($query);
 
     echo "<option value='$tables[0]' ".$sel[$tables[0]].">$tables[0]</option>";
@@ -152,12 +152,12 @@ if ($taulu == "") {
   while ($tables = mysql_fetch_array($tabresult)) {
     if (file_exists("inc/".$tables[0].".inc")) {
 
-      $query = "  SELECT distinct selitetark_2
-            FROM avainsana
-            WHERE yhtio = '$kukarow[yhtio]'
-            and laji  = 'MYSQLALIAS'
-            and selite  like '".$tables[0].".%'
-            and selitetark_2 != ''";
+      $query = "SELECT distinct selitetark_2
+                FROM avainsana
+                WHERE yhtio       = '$kukarow[yhtio]'
+                and laji          = 'MYSQLALIAS'
+                and selite        like '".$tables[0].".%'
+                and selitetark_2 != ''";
       $al_res = pupe_query($query);
 
       echo "<option value='$tables[0]' ".$sel[$tables[0]].">$tables[0]</option>";
@@ -190,9 +190,9 @@ if ($taulu != "") {
   list($taulu, $alias_set) = explode("###", $taulu);
 
   // Kokeillaan geneerist‰
-  $query = "  SELECT *
-        FROM $taulu
-        WHERE tunnus = 0";
+  $query = "SELECT *
+            FROM $taulu
+            WHERE tunnus = 0";
   $result = pupe_query($query);
   $trow = mysql_fetch_array($result);
 
@@ -249,12 +249,12 @@ if ($taulu != "") {
     $oletusarvo = "";
     $ohjeteksti = "";
 
-    $query = "  SELECT *
-          FROM avainsana
-          WHERE yhtio = '$kukarow[yhtio]'
-          and laji='MYSQLALIAS'
-          and selite='$taulu.$al_nimi'
-          and selitetark_2 = '$alias_set'";
+    $query = "SELECT *
+              FROM avainsana
+              WHERE yhtio      = '$kukarow[yhtio]'
+              and laji='MYSQLALIAS'
+              and selite='$taulu.$al_nimi'
+              and selitetark_2 = '$alias_set'";
     $al_res = pupe_query($query);
 
     if (mysql_num_rows($al_res) > 0) {

@@ -18,9 +18,9 @@ switch ($tunnus) {
     echo "<tr><th>".t("asiakas")."</th><th>" . t("tilino") .  "</th></tr>";
     echo "<tr><td>".substr($tietue, 147, 35)."</td><td>$pankkitilino</td></tr>";
 
-    $query = "  SELECT hyvak, nimi, oletus_rahatili, oletus_kulutili, yhtio
-          FROM yriti
-          WHERE tilino = '$pankkitilino'";
+    $query = "SELECT hyvak, nimi, oletus_rahatili, oletus_kulutili, yhtio
+              FROM yriti
+              WHERE tilino = '$pankkitilino'";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) != 1) {
@@ -43,9 +43,9 @@ switch ($tunnus) {
         echo "<font class='message'>".t("Tilin rahatili on")." '$yritirow[oletus_rahatili]' ".t("ja kulutili")." '$yritirow[oletus_kulutili]'</font><br>\n";
       }
 
-      $query = "  SELECT *
-            FROM yhtio
-            WHERE yhtio = '$yritirow[yhtio]'";
+      $query = "SELECT *
+                FROM yhtio
+                WHERE yhtio = '$yritirow[yhtio]'";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) != 1) {
@@ -55,9 +55,9 @@ switch ($tunnus) {
       else {
         $yhtiorow = mysql_fetch_assoc ($result);
 
-        $query = "  SELECT *
-              FROM yhtion_parametrit
-              WHERE yhtio='$yhtiorow[yhtio]'";
+        $query = "SELECT *
+                  FROM yhtion_parametrit
+                  WHERE yhtio='$yhtiorow[yhtio]'";
         $result = pupe_query($query);
 
         if (mysql_num_rows($result) == 1) {
@@ -136,12 +136,12 @@ switch ($tunnus) {
       if ($viite > 0) {
         echo "<font class='message'>Pupesoft: ".t("Maksukandidaatti viiteno")."</font><br>\n";
 
-        $query = "  SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
-              FROM lasku
-              WHERE viite = '$viite'
-              and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01))
-              and yhtio = '$yritirow[yhtio]'
-              and tila = 'Q'";
+        $query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
+                  FROM lasku
+                  WHERE viite = '$viite'
+                  and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01))
+                  and yhtio   = '$yritirow[yhtio]'
+                  and tila    = 'Q'";
         $result = pupe_query($query);
 
         if (mysql_num_rows($result) != 1) {
@@ -156,33 +156,33 @@ switch ($tunnus) {
         echo "<font class='message'>Pupesoft: ".t("Maksukandidaatti nimi & m‰‰r‰")."</font><br>\n";
 
         // tarkka 35 merkki‰ <-> 35 merkki‰ nimihaku
-        $query = "  SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
-              FROM lasku
-              WHERE left(nimi, 35) = left('$maksaa', 35)
-              and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01))
-              and yhtio   = '$yritirow[yhtio]'
-              and tila   = 'Q'";
+        $query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
+                  FROM lasku
+                  WHERE left(nimi, 35) = left('$maksaa', 35)
+                  and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01))
+                  and yhtio = '$yritirow[yhtio]'
+                  and tila  = 'Q'";
         $result = pupe_query($query);
 
         if (mysql_num_rows($result) != 1) {
           // tarkka 35 merkki‰ <-> 35 merkki‰ NIMI ja NIMITARK haku
-          $query = "  SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
-                FROM lasku
-                WHERE left(concat_ws(' ', nimi, nimitark), 35) = left('$maksaa', 35)
-                and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01))
-                and yhtio   = '$yritirow[yhtio]'
-                and tila   = 'Q'";
+          $query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
+                    FROM lasku
+                    WHERE left(concat_ws(' ', nimi, nimitark), 35) = left('$maksaa', 35)
+                    and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01))
+                    and yhtio = '$yritirow[yhtio]'
+                    and tila  = 'Q'";
           $result = pupe_query($query);
         }
 
         if (mysql_num_rows($result) != 1) {
           // kokeillaan samalla kaavalla kun lum2 riviss‰
-          $query = "  SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
-                FROM lasku
-                WHERE replace(left(concat_ws(' ', if(pankki_haltija != '', pankki_haltija, concat_ws(' ', nimi, if(nimitark!='', nimitark, NULL))), osoite, postitp), 30), '&', ' ') = left('$maksaa', 30)
-                and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01))
-                and yhtio  = '$yritirow[yhtio]'
-                and tila   = 'Q'";
+          $query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
+                    FROM lasku
+                    WHERE replace(left(concat_ws(' ', if(pankki_haltija != '', pankki_haltija, concat_ws(' ', nimi, if(nimitark!='', nimitark, NULL))), osoite, postitp), 30), '&', ' ') = left('$maksaa', 30)
+                    and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01))
+                    and yhtio = '$yritirow[yhtio]'
+                    and tila  = 'Q'";
           $result = pupe_query($query);
         }
 
@@ -190,12 +190,12 @@ switch ($tunnus) {
           // poistetaan oy:t ja ab:t
           $maksaa = trim(preg_replace('/\b(OY|AB)\b/i', '', strtoupper($maksaa)));
 
-          $query = "  SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
-                FROM lasku
-                WHERE left(nimi,35) LIKE '%$maksaa%'
-                and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01))
-                and yhtio  = '$yritirow[yhtio]'
-                and tila   = 'Q'";
+          $query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
+                    FROM lasku
+                    WHERE left(nimi,35) LIKE '%$maksaa%'
+                    and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01))
+                    and yhtio = '$yritirow[yhtio]'
+                    and tila  = 'Q'";
           $result = pupe_query($query);
         }
 
@@ -208,12 +208,12 @@ switch ($tunnus) {
           $maksaa = str_replace ("ƒ", "A", $maksaa);
           $maksaa = str_replace ("÷", "O", $maksaa);
 
-          $query = "  SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
-                FROM lasku
-                WHERE replace(replace(replace(replace(replace(replace(left(nimi,35),'Â','a'), '‰','a'), 'ˆ','o'), '≈','A'), 'ƒ','A'), '÷','O') LIKE '%$maksaa%'
-                and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01))
-                and yhtio   = '$yritirow[yhtio]'
-                and tila   = 'Q'";
+          $query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
+                    FROM lasku
+                    WHERE replace(replace(replace(replace(replace(replace(left(nimi,35),'Â','a'), '‰','a'), 'ˆ','o'), '≈','A'), 'ƒ','A'), '÷','O') LIKE '%$maksaa%'
+                    and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01))
+                    and yhtio = '$yritirow[yhtio]'
+                    and tila  = 'Q'";
           $result = pupe_query($query);
         }
 
@@ -244,10 +244,10 @@ switch ($tunnus) {
       }
 
       if ($tiliotedataka != '0000-00-00') {
-        $query = "  SELECT tiliointi.tilino tilino, tili.nimi nimi, concat_ws('@',korjattu, korjausaika) korjattu, ltunnus
-              FROM tiliointi
-              LEFT JOIN tili on tili.yhtio=tiliointi.yhtio and tili.tilino=tiliointi.tilino
-              WHERE tiliointi.tunnus = '$tiliotedatatu'";
+        $query = "SELECT tiliointi.tilino tilino, tili.nimi nimi, concat_ws('@',korjattu, korjausaika) korjattu, ltunnus
+                  FROM tiliointi
+                  LEFT JOIN tili on tili.yhtio=tiliointi.yhtio and tili.tilino=tiliointi.tilino
+                  WHERE tiliointi.tunnus = '$tiliotedatatu'";
         $tiliointiresult = pupe_query($query);
 
         if ($tiliointirow = mysql_fetch_assoc($tiliointiresult)) {

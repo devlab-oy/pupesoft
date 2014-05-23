@@ -14,11 +14,11 @@ if ($haku == "asiakasnro" or $haku == "ytunnus") {
   }
 
   //jos konsernin asiakkaat synkronoidaan niin asiakkaiden yksilöivät tiedot on oltava konsernitasolla-yksilölliset
-  $query = "  SELECT group_concat(concat('\'',yhtio.yhtio,'\'')) yhtiot
-        FROM yhtio
-        JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
-        where konserni   = '$yhtiorow[konserni]'
-        and (synkronoi = '$toim' or synkronoi like '$toim,%' or synkronoi like '%,$toim,%' or synkronoi like '%,$toim')";
+  $query = "SELECT group_concat(concat('\'',yhtio.yhtio,'\'')) yhtiot
+            FROM yhtio
+            JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
+            where konserni = '$yhtiorow[konserni]'
+            and (synkronoi = '$toim' or synkronoi like '$toim,%' or synkronoi like '%,$toim,%' or synkronoi like '%,$toim')";
   $vresult2 = mysql_query($query) or pupe_error($query);
   $srowapu = mysql_fetch_array($vresult2);
 
@@ -42,10 +42,10 @@ if ($haku == "asiakasnro" or $haku == "ytunnus") {
       $apu_asiakasnumero = 0;
     }
 
-    $query = "  SELECT MAX($haku+0) $haku
-          FROM asiakas USE INDEX (asno_index)
-          WHERE yhtio in ($tarkyhtio)
-          AND asiakasnro+0 >= $apu_asiakasnumero";
+    $query = "SELECT MAX($haku+0) $haku
+              FROM asiakas USE INDEX (asno_index)
+              WHERE yhtio in ($tarkyhtio)
+              AND asiakasnro+0 >= $apu_asiakasnumero";
     $vresult = mysql_query($query) or pupe_error($query);
     $vrow = mysql_fetch_assoc($vresult);
 
@@ -57,10 +57,10 @@ if ($haku == "asiakasnro" or $haku == "ytunnus") {
     while (!isset($vresult) or mysql_num_rows($vresult) >= 1) {
       $apu_asiakasnumero++;
 
-      $query = "  SELECT $haku
-            FROM asiakas USE INDEX (asno_index)
-            WHERE yhtio in ($tarkyhtio)
-            AND asiakasnro+0 = $apu_asiakasnumero";
+      $query = "SELECT $haku
+                FROM asiakas USE INDEX (asno_index)
+                WHERE yhtio in ($tarkyhtio)
+                AND asiakasnro+0 = $apu_asiakasnumero";
       $vresult = mysql_query($query) or pupe_error($query);
 
       $counteri++;
@@ -91,13 +91,23 @@ $otsikko   = 'Asiakkaat';
 
 $kentatlisa = $hakukentatlisa = "";
 
-if ($yhtiorow['toimipaikkakasittely'] == 'L') {
-  $kentatlisa = "if(asiakas.toimipaikka != 0, (select nimi from yhtion_toimipaikat where yhtio='{$kukarow['yhtio']}' and tunnus = asiakas.toimipaikka), '') toimipaikka,";
+if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
+  $kentatlisa = "if(asiakas.toimipaikka != 0,
+      (select nimi from yhtion_toimipaikat where yhtio='{$kukarow['yhtio']}'
+      and tunnus = asiakas.toimipaikka), '') toimipaikka,";
   $hakukentatlisa = ",toimipaikka";
 }
 
-$kentat   = "tunnus, ytunnus, concat_ws('<br>', concat_ws(' ', nimi, nimitark), concat_ws(' ', toim_nimi, toim_nimitark)) 'Nimi/Toim_nimi', concat_ws('<br>', postitp, toim_postitp) 'Postitp/Toim_postitp', asiakasnro 'Asiakasnumero', concat_ws('<br>', ovttunnus, toim_ovttunnus) 'Ovttunnus/Toim_ovttunnus', {$kentatlisa} laji HIDDEN_laji ";
-$hakukentat = "tunnus, ytunnus, nimi/nimitark/toim_nimi/toim_nimitark, postitp/toim_postitp, asiakasnro, ovttunnus/toim_ovttunnus {$hakukentatlisa}";
+$kentat = "tunnus, ytunnus, concat_ws('<br>',
+  concat_ws(' ', nimi, nimitark),
+  concat_ws(' ', toim_nimi, toim_nimitark)) 'Nimi/Toim_nimi',
+  concat_ws('<br>', postitp, toim_postitp) 'Postitp/Toim_postitp',
+  asiakasnro 'Asiakasnumero',
+  concat_ws('<br>', ovttunnus, toim_ovttunnus) 'Ovttunnus/Toim_ovttunnus',
+  {$kentatlisa} laji HIDDEN_laji ";
+
+$hakukentat = "tunnus, ytunnus, nimi/nimitark/toim_nimi/toim_nimitark,
+  postitp/toim_postitp, asiakasnro, ovttunnus/toim_ovttunnus {$hakukentatlisa}";
 
 $jarjestys   = 'selaus, nimi';
 

@@ -3,11 +3,11 @@
 // Annetaan mahdollisuus tehdä uusi tiliöinti, jos siihen on oikeus
 
 // Onko tosite liitetty saapumiseen
-$query = "  SELECT nimi, laskunro
-      from lasku
-      where yhtio    = '$kukarow[yhtio]'
-      and tila    = 'K'
-      and vanhatunnus  = '$tunnus'";
+$query = "SELECT nimi, laskunro
+          from lasku
+          where yhtio     = '$kukarow[yhtio]'
+          and tila        = 'K'
+          and vanhatunnus = '$tunnus'";
 $keikres = pupe_query($query);
 
 if (mysql_num_rows($keikres) > 0) {
@@ -73,12 +73,12 @@ if ($oikeurow['paivitys'] == 1 and ($kukarow['taso'] == 2 or $kukarow['taso'] ==
     $selite = '';
   }
 
-  $query = "  SELECT tunnus, nimi, koodi
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tyyppi = 'K'
-        and kaytossa != 'E'
-        ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, nimi, koodi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and tyyppi    = 'K'
+            and kaytossa != 'E'
+            ORDER BY koodi+0, koodi, nimi";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -94,12 +94,12 @@ if ($oikeurow['paivitys'] == 1 and ($kukarow['taso'] == 2 or $kukarow['taso'] ==
     $ulos .= "</select><br>";
   }
 
-  $query = "  SELECT tunnus, nimi, koodi
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tyyppi = 'O'
-        and kaytossa != 'E'
-        ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, nimi, koodi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and tyyppi    = 'O'
+            and kaytossa != 'E'
+            ORDER BY koodi+0, koodi, nimi";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -115,12 +115,12 @@ if ($oikeurow['paivitys'] == 1 and ($kukarow['taso'] == 2 or $kukarow['taso'] ==
     $ulos .= "</select><br>";
   }
 
-  $query = "  SELECT tunnus, nimi, koodi
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tyyppi = 'P'
-        and kaytossa != 'E'
-        ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, nimi, koodi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and tyyppi    = 'P'
+            and kaytossa != 'E'
+            ORDER BY koodi+0, koodi, nimi";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -182,15 +182,15 @@ if ($oikeurow['paivitys'] == 1 and ($kukarow['taso'] == 2 or $kukarow['taso'] ==
   echo "<td valign='top'>";
 
   // haetaan kaikki tiliöintien tapahtumapäivät plus unionilla tämä päivä mukaan
-  $query = "  (SELECT distinct(tapvm) pvm
-        FROM tiliointi
-        WHERE yhtio = '$kukarow[yhtio]' and ltunnus = '$tunnus' and tapvm >= '$yhtiorow[tilikausi_alku]')
-        UNION
-        (SELECT CURDATE() pvm)
-        UNION
-        (SELECT if ('$trow[tapvm]' >= '$yhtiorow[tilikausi_alku]', '$trow[tapvm]', CURDATE()) pvm)
-        UNION
-        (SELECT mapvm pvm FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus' and mapvm >= '$yhtiorow[tilikausi_alku]')";
+  $query = "(SELECT distinct(tapvm) pvm
+             FROM tiliointi
+             WHERE yhtio = '$kukarow[yhtio]' and ltunnus = '$tunnus' and tapvm >= '$yhtiorow[tilikausi_alku]')
+             UNION
+             (SELECT CURDATE() pvm)
+             UNION
+             (SELECT if ('$trow[tapvm]' >= '$yhtiorow[tilikausi_alku]', '$trow[tapvm]', CURDATE()) pvm)
+             UNION
+             (SELECT mapvm pvm FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus' and mapvm >= '$yhtiorow[tilikausi_alku]')";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 1) {
@@ -245,10 +245,10 @@ if ($oikeurow['paivitys'] == 1 and ($kukarow['taso'] == 2 or $kukarow['taso'] ==
       $taulu = "SQLERROR";
     }
 
-    $query = "  SELECT nimi, nimitark
-          FROM {$taulu}
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tunnus = '{$liitostunnus}'";
+    $query = "SELECT nimi, nimitark
+              FROM {$taulu}
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = '{$liitostunnus}'";
     $liitos_nimi_res = pupe_query($query);
     $liitos_nimi_row = mysql_fetch_assoc($liitos_nimi_res);
 
@@ -301,10 +301,10 @@ if ($viivatut != 'on') {
 }
 
 // tarkistetaan mikä tila otsikolla on
-$query = "  SELECT tila
-      FROM lasku
-      WHERE yhtio = '{$kukarow['yhtio']}'
-      AND tunnus  = '{$tunnus}'";
+$query = "SELECT tila
+          FROM lasku
+          WHERE yhtio = '{$kukarow['yhtio']}'
+          AND tunnus  = '{$tunnus}'";
 $tila_chk_res = pupe_query($query);
 $tila_chk_row = mysql_fetch_assoc($tila_chk_res);
 
@@ -332,31 +332,31 @@ $tila_chk_row = mysql_fetch_assoc($tila_chk_res);
   $grouppaus = "";
   }
 
-$query = "  SELECT
-      tiliointi.tilino tilino,
-      tili.nimi tilinimi,
-      concat_ws(' / ', a.nimi, b.nimi, c.nimi) tarkenne,
-      tiliointi.vero vero,
-      tiliointi.tapvm,
-      tiliointi.liitos,
-      tiliointi.liitostunnus,
-      tiliointi.valkoodi,
-      tiliointi.lukko,
-      tiliointi.korjattu,
-      tili.manuaali_esto,
-      $summaselect
-      FROM tiliointi
-      LEFT JOIN tili ON tili.yhtio = tiliointi.yhtio and tili.tilino = tiliointi.tilino
-      LEFT JOIN kustannuspaikka a ON a.yhtio = '$kukarow[yhtio]' and a.tunnus = tiliointi.kustp and a.tyyppi = 'K'
-      LEFT JOIN kustannuspaikka b ON b.yhtio = '$kukarow[yhtio]' and b.tunnus = tiliointi.kohde and b.tyyppi = 'O'
-      LEFT JOIN kustannuspaikka c ON c.yhtio = '$kukarow[yhtio]' and c.tunnus = tiliointi.projekti and c.tyyppi = 'P'
-      LEFT JOIN kuka la ON (la.yhtio = tiliointi.yhtio and la.kuka = tiliointi.laatija)
-      LEFT JOIN kuka ko ON (ko.yhtio = tiliointi.yhtio and ko.kuka = tiliointi.korjattu)
-      WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-      and tiliointi.ltunnus = '$tunnus'
-      $lisa
-      $grouppaus
-      ORDER BY tiliointi.tapvm, tiliointi.tilino, tiliointi.laadittu, tiliointi.tunnus";
+$query = "SELECT
+          tiliointi.tilino tilino,
+          tili.nimi tilinimi,
+          concat_ws(' / ', a.nimi, b.nimi, c.nimi) tarkenne,
+          tiliointi.vero vero,
+          tiliointi.tapvm,
+          tiliointi.liitos,
+          tiliointi.liitostunnus,
+          tiliointi.valkoodi,
+          tiliointi.lukko,
+          tiliointi.korjattu,
+          tili.manuaali_esto,
+          $summaselect
+          FROM tiliointi
+          LEFT JOIN tili ON tili.yhtio = tiliointi.yhtio and tili.tilino = tiliointi.tilino
+          LEFT JOIN kustannuspaikka a ON a.yhtio = '$kukarow[yhtio]' and a.tunnus = tiliointi.kustp and a.tyyppi = 'K'
+          LEFT JOIN kustannuspaikka b ON b.yhtio = '$kukarow[yhtio]' and b.tunnus = tiliointi.kohde and b.tyyppi = 'O'
+          LEFT JOIN kustannuspaikka c ON c.yhtio = '$kukarow[yhtio]' and c.tunnus = tiliointi.projekti and c.tyyppi = 'P'
+          LEFT JOIN kuka la ON (la.yhtio = tiliointi.yhtio and la.kuka = tiliointi.laatija)
+          LEFT JOIN kuka ko ON (ko.yhtio = tiliointi.yhtio and ko.kuka = tiliointi.korjattu)
+          WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+          and tiliointi.ltunnus = '$tunnus'
+          $lisa
+          $grouppaus
+          ORDER BY tiliointi.tapvm, tiliointi.tilino, tiliointi.laadittu, tiliointi.tunnus";
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) == 0) {
@@ -404,10 +404,10 @@ while ($trow = mysql_fetch_assoc($result)) {
       $taulu = "SQLERROR";
     }
 
-    $query = "  SELECT nimi, nimitark
-          FROM {$taulu}
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tunnus = '{$trow['liitostunnus']}'";
+    $query = "SELECT nimi, nimitark
+              FROM {$taulu}
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = '{$trow['liitostunnus']}'";
     $liitos_nimi_res = pupe_query($query);
     $liitos_nimi_row = mysql_fetch_assoc($liitos_nimi_res);
 
@@ -552,20 +552,20 @@ echo "</tr>";
 
 echo "<tr>";
 
-$query = "  SELECT liitostunnus, tilaustyyppi
-      FROM lasku
-      WHERE yhtio = '$kukarow[yhtio]'
-      and tunnus = '$tunnus'";
+$query = "SELECT liitostunnus, tilaustyyppi
+          FROM lasku
+          WHERE yhtio = '$kukarow[yhtio]'
+          and tunnus  = '$tunnus'";
 $lasres = pupe_query($query);
 $mtklasrow = mysql_fetch_assoc($lasres);
 
 //  Saadaanko muokata superina?
-$query = "  SELECT yhtio
-      FROM oikeu
-      WHERE yhtio  = '$kukarow[yhtio]'
-      and kuka  = '$kukarow[kuka]'
-      and nimi  = 'matkalasku.php'
-      and alanimi = 'SUPER'";
+$query = "SELECT yhtio
+          FROM oikeu
+          WHERE yhtio = '$kukarow[yhtio]'
+          and kuka    = '$kukarow[kuka]'
+          and nimi    = 'matkalasku.php'
+          and alanimi = 'SUPER'";
 $oires = pupe_query($query);
 
 if (mysql_num_rows($oires) > 0) {
@@ -575,11 +575,11 @@ else {
   $su = "";
 }
 
-$query = "  SELECT tunnus
-      FROM toimi
-      WHERE yhtio = '$kukarow[yhtio]'
-      AND tunnus = '$mtklasrow[liitostunnus]'
-      AND laskun_erittely != ''";
+$query = "SELECT tunnus
+          FROM toimi
+          WHERE yhtio          = '$kukarow[yhtio]'
+          AND tunnus           = '$mtklasrow[liitostunnus]'
+          AND laskun_erittely != ''";
 $toimires = pupe_query($query);
 
 if (mysql_num_rows($toimires)==1) {

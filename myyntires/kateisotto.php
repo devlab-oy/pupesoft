@@ -194,15 +194,15 @@ else {
 function tarkista_kassalippaan_tasmaytys($kassalipas_tunnus, $date) {
   global $kukarow;
 
-  $query = "  SELECT group_concat(distinct lasku.tunnus) ltunnukset,
-        group_concat(distinct tiliointi.selite) selite
-        FROM lasku
-        JOIN kassalipas ON ( kassalipas.yhtio = lasku.yhtio AND kassalipas.tunnus = {$kassalipas_tunnus} )
-        JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.selite LIKE concat(kassalipas.nimi,' %') AND tiliointi.korjattu = '')
-        WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-        AND lasku.tila     = 'X'
-        AND lasku.alatila = 'K'
-        AND lasku.tapvm   = '{$date}'";
+  $query = "SELECT group_concat(distinct lasku.tunnus) ltunnukset,
+            group_concat(distinct tiliointi.selite) selite
+            FROM lasku
+            JOIN kassalipas ON ( kassalipas.yhtio = lasku.yhtio AND kassalipas.tunnus = {$kassalipas_tunnus} )
+            JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.selite LIKE concat(kassalipas.nimi,' %') AND tiliointi.korjattu = '')
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.tila    = 'X'
+            AND lasku.alatila = 'K'
+            AND lasku.tapvm   = '{$date}'";
   $result = pupe_query($query);
 
   return mysql_fetch_assoc($result);
@@ -272,17 +272,17 @@ function tee_kateisotto($kassalipas, $request_params) {
 function tee_laskuotsikko($kassalipas, $summa, $yleinen_kommentti, $date) {
   global $kukarow;
 
-  $query = "  INSERT INTO lasku
-        SET yhtio    = '{$kukarow['yhtio']}',
-        summa      = '$summa',
-        comments    = '{$yleinen_kommentti}',
-        tila      = 'X',
-        alatila    = 'O',
-        laatija    = '{$kukarow['kuka']}',
-        luontiaika    = NOW(),
-        tapvm      = '{$date}',
-        kassalipas   = '{$kassalipas['tunnus']}',
-        nimi      = '".t("Käteisotto kassalippaasta").": {$kassalipas['nimi']}'";
+  $query = "INSERT INTO lasku
+            SET yhtio    = '{$kukarow['yhtio']}',
+            summa      = '$summa',
+            comments   = '{$yleinen_kommentti}',
+            tila       = 'X',
+            alatila    = 'O',
+            laatija    = '{$kukarow['kuka']}',
+            luontiaika = NOW(),
+            tapvm      = '{$date}',
+            kassalipas = '{$kassalipas['tunnus']}',
+            nimi       = '".t("Käteisotto kassalippaasta").": {$kassalipas['nimi']}'";
   pupe_query($query);
 
   return mysql_insert_id();
@@ -318,21 +318,21 @@ function tee_tiliointi($params, $kulu_tiliointi = false, $alv_tiliointi = false)
 
   $date = $params['date'];
 
-  $query = "  INSERT INTO tiliointi
-                SET yhtio   = '{$kukarow['yhtio']}',
-                laatija   = '{$kukarow['kuka']}',
-                laadittu   = NOW(),
-                ltunnus   = '{$params['lasku_tunnus']}',
-                tilino     = '{$kateisoton_luonne_row['tilino']}',
-                kustp     = '{$kateisoton_luonne_row['kustp']}',
-                tapvm     = '{$date}',
-                summa     = {$params['summa']},
-                summa_valuutassa = {$params['summa']},
-                valkoodi   = '{$yhtiorow['valkoodi']}',
-                selite     = '{$selite}',
-        {$kulu_tiliointi_linkki}
-        {$lukko}
-                vero     = {$vero}";
+  $query = "INSERT INTO tiliointi
+            SET yhtio   = '{$kukarow['yhtio']}',
+            laatija          = '{$kukarow['kuka']}',
+            laadittu         = NOW(),
+            ltunnus          = '{$params['lasku_tunnus']}',
+            tilino           = '{$kateisoton_luonne_row['tilino']}',
+            kustp            = '{$kateisoton_luonne_row['kustp']}',
+            tapvm            = '{$date}',
+            summa            = {$params['summa']},
+            summa_valuutassa = {$params['summa']},
+            valkoodi         = '{$yhtiorow['valkoodi']}',
+            selite           = '{$selite}',
+            {$kulu_tiliointi_linkki}
+            {$lukko}
+            vero             = {$vero}";
 
     pupe_query($query);
 
@@ -417,10 +417,10 @@ function validoi_liitetiedosto($_FILES) {
 function hae_kassalipas($kassalipas_tunnus) {
   global $kukarow, $yhtiorow;
 
-  $query = "  SELECT *
-        FROM kassalipas
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tunnus = '{$kassalipas_tunnus}'";
+  $query = "SELECT *
+            FROM kassalipas
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus  = '{$kassalipas_tunnus}'";
   $result = pupe_query($query);
 
   //tarkistetaan, että kassalippaan takaa löytyy tilinumerot, jos ei löydy niin laitetaan yhtiorown takaa defut
@@ -448,10 +448,10 @@ function hae_kassalippaat() {
     $sallitut_kassalipppaat = "AND tunnus IN ({$kukarow['kassalipas_otto']})";
   }
 
-  $query = "  SELECT *
-        FROM kassalipas
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        {$sallitut_kassalipppaat}";
+  $query = "SELECT *
+            FROM kassalipas
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            {$sallitut_kassalipppaat}";
   $result = pupe_query($query);
 
   $kassalippaat = array();
@@ -465,17 +465,17 @@ function hae_kassalippaat() {
 function hae_kateisoton_luonne($avainsana_tunnus) {
   global $kukarow;
 
-  $query = "  SELECT avainsana.tunnus,
-        avainsana.selite,
-        avainsana.selitetark,
-        tili.tilino,
-        tili.kustp
-        FROM avainsana
-        JOIN tili
-        ON ( tili.yhtio = avainsana.yhtio AND tili.tunnus = avainsana.selite )
-        WHERE avainsana.yhtio = '{$kukarow['yhtio']}'
-        AND avainsana.laji='KATEISOTTO'
-        and avainsana.tunnus = '{$avainsana_tunnus}'";
+  $query = "SELECT avainsana.tunnus,
+            avainsana.selite,
+            avainsana.selitetark,
+            tili.tilino,
+            tili.kustp
+            FROM avainsana
+            JOIN tili
+            ON ( tili.yhtio = avainsana.yhtio AND tili.tunnus = avainsana.selite )
+            WHERE avainsana.yhtio = '{$kukarow['yhtio']}'
+            AND avainsana.laji='KATEISOTTO'
+            and avainsana.tunnus  = '{$avainsana_tunnus}'";
   $result = pupe_query($query);
 
   return mysql_fetch_assoc($result);
@@ -484,15 +484,15 @@ function hae_kateisoton_luonne($avainsana_tunnus) {
 function hae_kateisoton_luonteet() {
   global $kukarow;
 
-  $query = "  SELECT avainsana.tunnus,
-        avainsana.selite,
-        avainsana.selitetark,
-        tili.tilino
-        FROM avainsana
-        JOIN tili
-        ON ( tili.yhtio = avainsana.yhtio AND tili.tunnus = avainsana.selite )
-        WHERE avainsana.yhtio = '{$kukarow['yhtio']}'
-        AND avainsana.laji='KATEISOTTO'";
+  $query = "SELECT avainsana.tunnus,
+            avainsana.selite,
+            avainsana.selitetark,
+            tili.tilino
+            FROM avainsana
+            JOIN tili
+            ON ( tili.yhtio = avainsana.yhtio AND tili.tunnus = avainsana.selite )
+            WHERE avainsana.yhtio = '{$kukarow['yhtio']}'
+            AND avainsana.laji='KATEISOTTO'";
   $result = pupe_query($query);
 
   $kateisoton_luonteet = array();

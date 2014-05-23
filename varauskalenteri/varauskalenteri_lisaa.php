@@ -66,23 +66,23 @@ if ($toim == "Sauna") {
   }
 }
 
-$query = "  INSERT into kalenteri SET
-      kuka     = '$kukarow[kuka]',
-      yhtio    = '$kukarow[yhtio]',
-      pvmalku    = '$year-$month-$day $kello',
-      pvmloppu  = '$lyear-$lmonth-$lday $lkello',
-      tapa     = '$toim',
-      kentta01  = '$kentta01',
-      kentta02  = '$kentta02',
-      kentta03  = '$kentta03',
-      kentta04  = '$kentta04',
-      kentta05  = '$kentta05',
-      kentta06  = '$kentta06',
-      kentta07  = '$kentta07',
-      kentta08  = '$kentta08',
-      kentta09  = '$kentta09',
-      kentta10  = '$kentta10',
-      tyyppi    = 'varauskalenteri'";
+$query = "INSERT into kalenteri SET
+          kuka     = '$kukarow[kuka]',
+          yhtio    = '$kukarow[yhtio]',
+          pvmalku  = '$year-$month-$day $kello',
+          pvmloppu = '$lyear-$lmonth-$lday $lkello',
+          tapa     = '$toim',
+          kentta01 = '$kentta01',
+          kentta02 = '$kentta02',
+          kentta03 = '$kentta03',
+          kentta04 = '$kentta04',
+          kentta05 = '$kentta05',
+          kentta06 = '$kentta06',
+          kentta07 = '$kentta07',
+          kentta08 = '$kentta08',
+          kentta09 = '$kentta09',
+          kentta10 = '$kentta10',
+          tyyppi   = 'varauskalenteri'";
 $result = mysql_query($query) or pupe_error($query);
 
 echo "<br><br>".t("Tapahtuma lisätty varauskalenteriin")."!";

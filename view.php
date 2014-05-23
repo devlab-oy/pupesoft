@@ -13,9 +13,9 @@ else {
 
 $session = mysql_real_escape_string($_COOKIE["pupesoft_session"]);
 
-$query = "  SELECT *
-      FROM kuka
-      WHERE session = '$session'";
+$query = "SELECT *
+          FROM kuka
+          WHERE session = '$session'";
 $result = mysql_query($query) or die(mysql_error());
 $kuka_check_row = mysql_fetch_assoc($result);
 

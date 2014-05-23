@@ -50,10 +50,10 @@ if (mysql_field_name($result, $i) == "factoringyhtio") {
 }
 
 if (mysql_field_name($result, $i) == "valkoodi") { //valuutta
-  $query = "  SELECT nimi, tunnus
-                FROM valuu
-               WHERE yhtio = '$kukarow[yhtio]'
-                 ORDER BY jarjestys";
+  $query = "SELECT nimi, tunnus
+            FROM valuu
+            WHERE yhtio = '$kukarow[yhtio]'
+             ORDER BY jarjestys";
   $vresult = mysql_query($query) or pupe_error($query);
 
   $ulos = "<td><select name='$nimi'>";
@@ -71,11 +71,11 @@ if (mysql_field_name($result, $i) == "valkoodi") { //valuutta
 }
 
 if (mysql_field_name($result, $i) == "pankki_tili") { //valuutta
-  $query = "  SELECT nimi, tilino
-                FROM yriti
-               WHERE yhtio  = '$kukarow[yhtio]'
-        and kaytossa = ''
-                 ORDER BY nimi";
+  $query = "SELECT nimi, tilino
+            FROM yriti
+            WHERE yhtio  = '$kukarow[yhtio]'
+            and kaytossa = ''
+             ORDER BY nimi";
   $vresult = mysql_query($query) or pupe_error($query);
 
   $ulos = "<td><select name='$nimi'>";

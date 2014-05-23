@@ -1215,8 +1215,10 @@ if ($tee == 'E' or $tee == 'F') {
               AND tunnus = '{$trow['vanhatunnus']}'";
     $varastosiirto_result = pupe_query($query);
     $varastosiirto = mysql_fetch_assoc($varastosiirto_result);
-    $_onko_varastosiirto = ($varastosiirto['tila'] == 'G' and $varastosiirto['alatila'] == 'X');
+
+    $_onko_varastosiirto = ($varastosiirto['tila'] == 'G' and in_array($varastosiirto['alatila'], array('X','V')));
     $_kirjanpidollinen_varastosiirto = ($yhtiorow['kirjanpidollinen_varastosiirto_myyntitilaukselta'] == 'K');
+
     //Tarkistetaan onko myyntilaskun vanhatunnus linkiss‰ vastaanotettu varastosiirto
     //ja onko kirjanpidollinen varastosiirto p‰‰ll‰
     if ($_kirjanpidollinen_varastosiirto and $_onko_varastosiirto) {

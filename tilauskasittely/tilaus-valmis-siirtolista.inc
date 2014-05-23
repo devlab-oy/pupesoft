@@ -405,37 +405,40 @@ else {
                   AND tunnus              = '{$tunnus}'
                   AND (toimitustavan_lahto = 0 OR chn = 'GEN')";
         $result = pupe_query($query);
-        $lahtorow = mysql_fetch_assoc($result);
 
-        // Tilaustyyppi 2, eli varastotäydennys, siirretään aina yhden päivän eteenpäin
-        $eteenpain = ($lahtorow["chn"] == "GEN") ? 1 : 0;
+        if (mysql_num_rows($result) == 1) {
+          $lahtorow = mysql_fetch_assoc($result);
 
-        $lahdot = seuraavat_lahtoajat($lahtorow["toimitustapa"], $lahtorow["prioriteettinro"], $lahtorow["varasto"], 0, $eteenpain);
+          // Tilaustyyppi 2, eli varastotäydennys, siirretään aina yhden päivän eteenpäin
+          $eteenpain = ($lahtorow["chn"] == "GEN") ? 1 : 0;
 
-        if ($lahdot !== FALSE) {
-          // Otetaan eka lähtö
-          $valittu_lahto = array_shift($lahdot);
+          $lahdot = seuraavat_lahtoajat($lahtorow["toimitustapa"], $lahtorow["prioriteettinro"], $lahtorow["varasto"], 0, $eteenpain);
 
-          // Jos generoiduissa siirroissa toimitustavan_lahto jo löytyi, tsekataa sen lähtöpvm ja kloaika, et onko se isompi kuin valittu_lahto tunnus.
-          // Jos ei, käytetään valittu_lahto tunnus, muuten alk.per toimitustavan_lahtoa
-          if ($lahtorow['toimitustavan_lahto'] != 0 and $lahtorow['chn'] == 'GEN') {
-            $query = "SELECT *
-                      FROM lahdot
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND tunnus  = '{$lahtorow['toimitustavan_lahto']}'";
-            $result = pupe_query($query);
-            $lahtorow2 = mysql_fetch_assoc($result);
+          if ($lahdot !== FALSE) {
+            // Otetaan eka lähtö
+            $valittu_lahto = array_shift($lahdot);
 
-            if ($valittu_lahto['pvm'] <= $lahtorow2['pvm'] and $valittu_lahto['lahdon_kellonaika'] < $lahtorow2['lahdon_kellonaika']) {
-              $valittu_lahto['tunnus'] = $lahtorow2['tunnus'];
+            // Jos generoiduissa siirroissa toimitustavan_lahto jo löytyi, tsekataa sen lähtöpvm ja kloaika, et onko se isompi kuin valittu_lahto tunnus.
+            // Jos ei, käytetään valittu_lahto tunnus, muuten alk.per toimitustavan_lahtoa
+            if ($lahtorow['toimitustavan_lahto'] != 0 and $lahtorow['chn'] == 'GEN') {
+              $query = "SELECT *
+                        FROM lahdot
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND tunnus  = '{$lahtorow['toimitustavan_lahto']}'";
+              $result = pupe_query($query);
+              $lahtorow2 = mysql_fetch_assoc($result);
+
+              if ($valittu_lahto['pvm'] <= $lahtorow2['pvm'] and $valittu_lahto['lahdon_kellonaika'] < $lahtorow2['lahdon_kellonaika']) {
+                $valittu_lahto['tunnus'] = $lahtorow2['tunnus'];
+              }
             }
-          }
 
-          $query = "UPDATE lasku
-                    SET toimitustavan_lahto = '{$valittu_lahto['tunnus']}'
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus  = '{$tunnus}'";
-          pupe_query($query);
+            $query = "UPDATE lasku
+                      SET toimitustavan_lahto = '{$valittu_lahto['tunnus']}'
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tunnus  = '{$tunnus}'";
+            pupe_query($query);
+          }
         }
       }
     }

@@ -33,6 +33,19 @@ if (isset($tee) and $tee == "pupevoice_siirto") {
   require("inc/ftp-send.inc");
 }
 
+if (isset($tee) and $tee == "edi_siirto") {
+  $ftphost = (isset($verkkohost_lah) and trim($verkkohost_lah) != '') ? $verkkohost_lah : "ftp.verkkolasku.net";
+  $ftpuser = $yhtiorow['verkkotunnus_lah'];
+  $ftppass = $yhtiorow['verkkosala_lah'];
+  $ftppath = (isset($verkkopath_lah) and trim($verkkopath_lah) != '') ? $verkkopath_lah : "out/einvoice/data/";
+  $ftpfile = "{$pupe_root_polku}/dataout/".basename($filenimi);
+  $ftpfail = "{$pupe_root_polku}/dataout/elmaedi_error/";
+
+  $tulos_ulos = "";
+
+  require("inc/ftp-send.inc");
+}
+
 if (isset($tee) and $tee == "apix_siirto") {
 
   // Splitataan file ja l‰hetet‰‰n laskut sopivissa osissa

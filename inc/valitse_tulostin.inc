@@ -84,10 +84,10 @@ if ($toim == "OSTO" or $tulostimet[0] == "Ostotilaus") {
 
   $mista = 'toimi';
 
-  $editsql = "  SELECT *
-          FROM toimi
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND tunnus = '$toimittajaid'";
+  $editsql = "SELECT *
+              FROM toimi
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND tunnus  = '$toimittajaid'";
   $edires = pupe_query($editsql);
   $editoimrow = mysql_fetch_assoc($edires);
 }

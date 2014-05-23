@@ -352,14 +352,14 @@ if ($asiakasid > 0) {
 
       // Haetaan asiakasbudjetti
       // Löytyykö kokonaisbudjetti
-      $budj_q = "  SELECT
-            sum(if(osasto = '' and try = '', summa, 0)) kokonaisbudjetti,
-            sum(if(osasto != '', summa, 0)) osastobudjetti,
-            sum(if(try != '', summa, 0)) trybudjetti
-            FROM budjetti_asiakas
-            WHERE yhtio      = '$kukarow[yhtio]'
-            and kausi       = '$vuosi$kuukausi'
-            and asiakkaan_tunnus = '$asiakasid'";
+      $budj_q = "SELECT
+                 sum(if(osasto = '' and try = '', summa, 0)) kokonaisbudjetti,
+                 sum(if(osasto != '', summa, 0)) osastobudjetti,
+                 sum(if(try != '', summa, 0)) trybudjetti
+                 FROM budjetti_asiakas
+                 WHERE yhtio          = '$kukarow[yhtio]'
+                 and kausi            = '$vuosi$kuukausi'
+                 and asiakkaan_tunnus = '$asiakasid'";
       $budj_r = pupe_query($budj_q);
       $budjro = mysql_fetch_assoc($budj_r);
 

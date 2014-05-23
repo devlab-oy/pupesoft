@@ -672,8 +672,8 @@ if (isset($ehdotusnappi) and $ehdotusnappi != "") {
   }
   else {
     // Jos toimittajaa ei olla rajattu, haetaan tuotteen oletustoimittaja subqueryllä
-    $toimittaja_select = "  (SELECT liitostunnus FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = ifnull(samankaltaiset.isatuoteno, tuote.tuoteno) ORDER BY if(jarjestys = 0, 9999, jarjestys), tunnus LIMIT 1) toimittaja,
-                (SELECT pakkauskoko FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = ifnull(samankaltaiset.isatuoteno, tuote.tuoteno) ORDER BY if(jarjestys = 0, 9999, jarjestys), tunnus LIMIT 1) pakkauskoko";
+    $toimittaja_select = "(SELECT liitostunnus FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = ifnull(samankaltaiset.isatuoteno, tuote.tuoteno) ORDER BY if(jarjestys = 0, 9999, jarjestys), tunnus LIMIT 1) toimittaja,
+                           (SELECT pakkauskoko FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = ifnull(samankaltaiset.isatuoteno, tuote.tuoteno) ORDER BY if(jarjestys = 0, 9999, jarjestys), tunnus LIMIT 1) pakkauskoko";
   }
 
   if ($abcrajaus != "") {

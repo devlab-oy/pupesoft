@@ -377,9 +377,9 @@ if (mysql_num_rows($result) == 1) {
 
       if ($row["osuus"] != $todellinen_osuus) {
         $maposupdate_query = "UPDATE maksupositio SET
-              osuus       = '$todellinen_osuus'
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND tunnus  = '$row[tunnus]'";
+                              osuus       = '$todellinen_osuus'
+                              WHERE yhtio = '$kukarow[yhtio]'
+                              AND tunnus  = '$row[tunnus]'";
         $maposupdate = mysql_query($maposupdate_query) or pupe_error($maposupdate_query);
 
         $row["osuus"] = $todellinen_osuus;

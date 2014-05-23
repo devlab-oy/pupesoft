@@ -1243,7 +1243,7 @@ if ($tila == 'tee_kohdistus') {
           //sitten katsotaan milloin nämä osasuoritukset on tehty
           $query = "SELECT tapvm
                     FROM tiliointi
-                    WHERE yhtio = '{$kukarow["yhtio"]}'
+                    WHERE yhtio  = '{$kukarow["yhtio"]}'
                     AND tilino   = '{$suoritus["myyntisaamiset_tilino"]}'
                     AND ltunnus  = {$lasku["tunnus"]}
                     AND korjattu = ''

@@ -2332,11 +2332,11 @@ else {
                 list($null, $dynlaji, $null) = explode("_", mysql_field_name($result, $i));
 
                 if (!${"dyn_".$dynlaji}) {
-                  $dynpuu_q = "   SELECT subparent.nimi
-                          FROM dynaaminen_puu AS subnode
-                          JOIN dynaaminen_puu AS subparent ON (subparent.yhtio = subnode.yhtio AND subparent.laji = subnode.laji AND subparent.lft < subnode.lft AND subparent.rgt > subnode.lft)
-                          WHERE subnode.tunnus = ".$row[mysql_field_name($result, $i)]."
-                          ORDER BY subparent.lft";
+                  $dynpuu_q = "SELECT subparent.nimi
+                               FROM dynaaminen_puu AS subnode
+                               JOIN dynaaminen_puu AS subparent ON (subparent.yhtio = subnode.yhtio AND subparent.laji = subnode.laji AND subparent.lft < subnode.lft AND subparent.rgt > subnode.lft)
+                               WHERE subnode.tunnus = ".$row[mysql_field_name($result, $i)]."
+                               ORDER BY subparent.lft";
                   $dynpuu_r = pupe_query($dynpuu_q);
 
                   ${"dyn_".$dynlaji} = TRUE;
@@ -2414,13 +2414,13 @@ else {
               }
 
               // Valitun kauden tavoite:
-              $budj_q = "  SELECT kausi, sum(summa) summa
-                    FROM {$budj_taulu}
-                    WHERE yhtio        = '{$kukarow['yhtio']}'
-                    and kausi          >= '{$alku_kausi}'
-                    and kausi          <= '{$lopu_kausi}'
-                    {$bulisa}
-                    GROUP BY kausi";
+              $budj_q = "SELECT kausi, sum(summa) summa
+                         FROM {$budj_taulu}
+                         WHERE yhtio = '{$kukarow['yhtio']}'
+                         and kausi   >= '{$alku_kausi}'
+                         and kausi   <= '{$lopu_kausi}'
+                         {$bulisa}
+                         GROUP BY kausi";
               $budj_r = pupe_query($budj_q);
 
               $tavoite_yhtl = 0;
@@ -2453,14 +2453,14 @@ else {
 
               if ($piiloed == "") {
                 // Edellisen kauden tavoite
-                $budj_q = "  SELECT kausi, sum(summa) summa
-                      FROM {$budj_taulu}
-                      WHERE yhtio        = '{$kukarow['yhtio']}'
-                      and kausi          >= '{$alku_kausi_ed}'
-                      and kausi          <= '{$lopu_kausi_ed}'
-                      {$bulisa}
-                      and osasto        = ''
-                      GROUP BY kausi";
+                $budj_q = "SELECT kausi, sum(summa) summa
+                           FROM {$budj_taulu}
+                           WHERE yhtio = '{$kukarow['yhtio']}'
+                           and kausi   >= '{$alku_kausi_ed}'
+                           and kausi   <= '{$lopu_kausi_ed}'
+                           {$bulisa}
+                           and osasto  = ''
+                           GROUP BY kausi";
                 $budj_r = pupe_query($budj_q);
 
                 $tavoite_yhtl = 0;

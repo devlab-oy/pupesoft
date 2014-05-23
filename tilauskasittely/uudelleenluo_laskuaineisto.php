@@ -34,10 +34,10 @@ if (isset($tee) and $tee == "pupevoice_siirto") {
 }
 
 if (isset($tee) and $tee == "edi_siirto") {
-  $ftphost = (isset($verkkohost_lah) and trim($verkkohost_lah) != '') ? $verkkohost_lah : "ftp.verkkolasku.net";
-  $ftpuser = $yhtiorow['verkkotunnus_lah'];
-  $ftppass = $yhtiorow['verkkosala_lah'];
-  $ftppath = (isset($verkkopath_lah) and trim($verkkopath_lah) != '') ? $verkkopath_lah : "out/einvoice/data/";
+  $ftphost = $edi_ftphost;
+  $ftpuser = $edi_ftpuser;
+  $ftppass = $edi_ftppass;
+  $ftppath = $edi_ftppath;
   $ftpfile = "{$pupe_root_polku}/dataout/".basename($filenimi);
   $ftpfail = "{$pupe_root_polku}/dataout/elmaedi_error/";
 
@@ -1058,12 +1058,12 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       echo "</table>";
     }
 
-    if (file_exists(realpath($nimiedi))) {
+    if (file_exists(realpath($nimiedi))) {      
       //siirretaan laskutiedosto operaattorille
-      $ftphost = (isset($verkkohost_lah) and trim($verkkohost_lah) != '') ? $verkkohost_lah : "ftp.verkkolasku.net";
-      $ftpuser = $yhtiorow['verkkotunnus_lah'];
-      $ftppass = $yhtiorow['verkkosala_lah'];
-      $ftppath = (isset($verkkopath_lah) and trim($verkkopath_lah) != '') ? $verkkopath_lah : "out/einvoice/data/";
+      $ftphost = $edi_ftphost;
+      $ftpuser = $edi_ftpuser;
+      $ftppass = $edi_ftppass;
+      $ftppath = $edi_ftppath;
       $ftpfile = realpath($nimiedi);
 
       // t‰t‰ ei ajata eik‰ k‰ytet‰, mutta jos tulee ftp errori niin echotaan t‰‰ meiliin, niin ei tartte k‰sin kirjotella resendi‰

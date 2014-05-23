@@ -403,12 +403,12 @@ else {
                   FROM lasku
                   WHERE yhtio             = '{$kukarow['yhtio']}'
                   AND tunnus              = '{$tunnus}'
-                  AND toimitustavan_lahto = 0";
+                  AND (toimitustavan_lahto = 0 OR chn = 'GEN')";
         $result = pupe_query($query);
         $lahtorow = mysql_fetch_assoc($result);
 
         // Tilaustyyppi 2, eli varastot‰ydennys, siirret‰‰n aina yhden p‰iv‰n eteenp‰in
-        $eteenpain = ($lahtorow["tilaustyyppi"] == 2) ? 1 : 0;
+        $eteenpain = ($lahtorow["chn"] == "GEN") ? 1 : 0;
 
         $lahdot = seuraavat_lahtoajat($lahtorow["toimitustapa"], $lahtorow["prioriteettinro"], $lahtorow["varasto"], 0, $eteenpain);
 

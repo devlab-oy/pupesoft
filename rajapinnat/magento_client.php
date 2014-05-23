@@ -69,6 +69,11 @@ class MagentoClient {
    * Verkkokaupan "hinta"-kenttä, joko myymalahinta tai myyntihinta
    */
   private $_hintakentta = "myymalahinta";
+  
+  /**
+   * Verkkokaupassa käytettävät tuoteryhmät, default tuoteryhmä tai tuotepuu 
+   */
+  private $_kategoriat = "tuoteryhma";
 
   /**
    * Onko "Category access control"-moduli on asennettu? Oletukena ei oo.
@@ -117,6 +122,13 @@ class MagentoClient {
     $this->log("Lisätään kategoriat");
 
     $categoryaccesscontrol = $this->_categoryaccesscontrol;
+    
+    $selected_category = $this->_kategoriat;
+    
+    if ($selected_category != 'tuoteryhma') {
+      $this->log("Ohitetaan kategorioiden luonti. Kategoriatyypiksi valittu tuotepuu.");
+      return 0;
+    } 
 
     $parent_id = $this->_parent_id; // Magento kategorian tunnus, jonka alle kaikki tuoteryhmät lisätään (pitää katsoa magentosta)
     $count = 0;
@@ -181,8 +193,11 @@ class MagentoClient {
     $this->log("Lisätään tuotteita (simple)");
 
     $hintakentta = $this->_hintakentta;
+    
+    $selected_category = $this->_kategoriat;
 
     $category_ids = array ();
+
     // Tuote countteri
     $count = 0;
 
@@ -215,17 +230,22 @@ class MagentoClient {
       }
 
       $tuote['kuluprosentti'] = ($tuote['kuluprosentti'] == 0) ? '' : $tuote['kuluprosentti'];
-      // Etsitään kategoria_id tuoteryhmällä
-      $category_ids[] = $this->findCategory(utf8_encode($tuote['try_nimi']), $category_tree['children']);
 
-      $tuotepuun_nodet = $tuote['tuotepuun_nodet'];
-      // Lisätään myös tuotepuun kategoriat
-      if (isset($tuotepuun_nodet) and count($tuotepuun_nodet) > 0) {
-        foreach ($tuotepuun_nodet as $tuotepolku) {
-          $category_ids[] = $this->createCategoryTree($tuotepolku);
+      // Etsitään kategoria_id tuoteryhmällä
+      if ($selected_category == 'tuoteryhma') {
+        $category_ids[] = $this->findCategory(utf8_encode($tuote['try_nimi']), $category_tree['children']);
+      }
+      else {
+        // Etsitään kategoria_id:t tuotepuun tuotepolulla
+        $tuotepuun_nodet = $tuote['tuotepuun_nodet'];
+
+        // Lisätään myös tuotepuun kategoriat
+        if (isset($tuotepuun_nodet) and count($tuotepuun_nodet) > 0) {
+          foreach ($tuotepuun_nodet as $tuotepolku) {
+            $category_ids[] = $this->createCategoryTree($tuotepolku);
+          }
         }
       }
-
       // Jos tuote ei oo osa configurable_grouppia, niin niitten kuuluu olla visibleja.
       if (isset($individual_tuotteet[$tuote_clean])) {
         $visibility = self::CATALOG_SEARCH;
@@ -1093,12 +1113,23 @@ class MagentoClient {
   public function setHintakentta($hintakentta) {
     $this->_hintakentta = $hintakentta;
   }
+  
+  /**
+      * Asettaa _kategoriat-muuttujan, parametri säätelee
+      * perustetaanko magenton tuoteryhmärakenne tuoteryhmien vai tuotepuun pohjalta
+      * Oletus 'tuoteryhma', vaihtoehtoisesti tuotepuu
+      * 
+      * @param string $magento_kategoriat
+      */
+    public function setKategoriat($magento_kategoriat) {
+      $this->_kategoriat = $magento_kategoriat;
+    }
 
   /**
    * Asettaa categoryaccesscontrol-muuttujan
    * Oletus FALSE
    *
-   * @param string $$categoryaccesscontrol BOOLEAN
+   * @param string $categoryaccesscontrol BOOLEAN
    */
   public function setCategoryaccesscontrol($categoryaccesscontrol) {
     $this->_categoryaccesscontrol = $categoryaccesscontrol;

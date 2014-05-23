@@ -611,6 +611,9 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
 
   // Verkkokaupanhintakenttä, joko myyntihinta tai myymalahinta
   if (isset($magento_hintakentta)) $magento_client->setHintakentta($magento_hintakentta);
+  
+  // Käytetäänkö tuoteryhminä tuoteryhmiä(default) vai tuotepuuta
+  if (isset($magento_kategoriat)) $magento_client->setKategoriat($magento_kategoriat);
 
   // Onko "Category access control"-moduli on asennettu
   if (isset($categoryaccesscontrol)) $magento_client->setCategoryaccesscontrol($categoryaccesscontrol);

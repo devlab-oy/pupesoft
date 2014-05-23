@@ -1284,11 +1284,11 @@ class MagentoClient {
           $asiakas['magento_id'] = $result;
 
           // P‰ivitet‰‰n magento_id pupeen
-          $query = "  UPDATE asiakkaan_avainsanat
-                SET tarkenne = '{$result}'
-                WHERE yhtio = '{$asiakas['yhtio']}'
-                AND liitostunnus = '{$asiakas['tunnus']}'
-                AND avainsana = 'magento_tunnus'";
+          $query = "UPDATE asiakkaan_avainsanat
+                    SET tarkenne = '{$result}'
+                    WHERE yhtio      = '{$asiakas['yhtio']}'
+                    AND liitostunnus = '{$asiakas['tunnus']}'
+                    AND avainsana    = 'magento_tunnus'";
           pupe_query($query);
         }
         catch (Exception $e) {

@@ -25,7 +25,7 @@ if (!function_exists("tilauksesta_varastosiirto")) {
     if ($varastosiirto_tyyppi == 'K') {
       $ok = kirjanpidollinen_varastosiirto($myyntitilaus);
     }
-    else if ($varastosiirto_tyyppi == 'N') {
+    elseif ($varastosiirto_tyyppi == 'N') {
       $ok = normaali_varastosiirto($myyntitilaus);
     }
     else {

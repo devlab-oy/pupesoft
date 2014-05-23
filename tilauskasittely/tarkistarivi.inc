@@ -848,7 +848,7 @@ if (
     if (!empty($laskurow['varasto'])) {
       $kohde_varastot = array($laskurow['varasto']);
     }
-    else if (empty($laskurow['varasto']) and !empty($laskurow['yhtio_toimipaikka'])) {
+    elseif (empty($laskurow['varasto']) and !empty($laskurow['yhtio_toimipaikka'])) {
       $kohde_varastot = hae_yhtion_toimipaikan_varastot($laskurow['yhtio_toimipaikka']);
       $kohde_varastot = array_column($kohde_varastot, 'tunnus');
     }
@@ -1253,7 +1253,7 @@ if ($row['tuoteno'] != '' and ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A
                 if (!empty($laskurow['varasto'])) {
                   $kohde_varastot = array($laskurow['varasto']);
                 }
-                else if (empty($laskurow['varasto']) and !empty($laskurow['yhtio_toimipaikka'])) {
+                elseif (empty($laskurow['varasto']) and !empty($laskurow['yhtio_toimipaikka'])) {
                   $kohde_varastot = hae_yhtion_toimipaikan_varastot($laskurow['yhtio_toimipaikka']);
                   $kohde_varastot = array_column($kohde_varastot, 'tunnus');
                 }

@@ -321,7 +321,7 @@ class C128CObject extends BarcodeObject {
     }
 
     if ($this->mStyle & BCS_ALIGN_CENTER) $sPos = (integer)(($this->mWidth - $size ) / 2);
-    else if ($this->mStyle & BCS_ALIGN_RIGHT) $sPos = $this->mWidth - $size;
+    elseif ($this->mStyle & BCS_ALIGN_RIGHT) $sPos = $this->mWidth - $size;
     else $sPos = 0;
 
     /* Total height of bar code -Bars only- */

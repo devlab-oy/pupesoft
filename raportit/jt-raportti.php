@@ -49,19 +49,19 @@ while ($yrow = mysql_fetch_array($yhtio_result)) {
     if ($toimrow["toim_automaattinen_jtraportti"] == "pv") {
       // annetaan mennä läpi, koska ajetaan joka päivä
     }
-    else if ($toimrow["toim_automaattinen_jtraportti"] == "vk") {
+    elseif ($toimrow["toim_automaattinen_jtraportti"] == "vk") {
       // ajetaan joka sunnuntai
       if (date('N') != 7) {
         continue;
       }
     }
-    else if ($toimrow["toim_automaattinen_jtraportti"] == "2vk") {
+    elseif ($toimrow["toim_automaattinen_jtraportti"] == "2vk") {
       // ajetaan joka toinen viikko
       if (date('N') != 15) {
         continue;
       }
     }
-    else if ($toimrow["toim_automaattinen_jtraportti"] == "kk" or $toimrow["toim_automaattinen_jtraportti"] == "2vk") {
+    elseif ($toimrow["toim_automaattinen_jtraportti"] == "kk" or $toimrow["toim_automaattinen_jtraportti"] == "2vk") {
       // ajetaan kuun 1. pv
       if (date('j') != 1) {
         continue;

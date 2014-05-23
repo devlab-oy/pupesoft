@@ -946,14 +946,14 @@ if ($id == '0' and $echotaanko) {
   if (isset($varastorajaus) and !empty($varastorajaus)) {
     $varasto .= ' AND lasku.clearing = '.(int) $varastorajaus;
   }
-  else if ($varastorajaus === 0 and !empty($kukarow['oletus_varasto'])) {
+  elseif ($varastorajaus === 0 and !empty($kukarow['oletus_varasto'])) {
     $varasto .= ' AND lasku.clearing = '.(int) $kukarow['oletus_varasto'];
   }
 
   if (isset($toimipaikkarajaus) and $toimipaikkarajaus != 'kaikki') {
     $varasto .= " AND lasku.yhtio_toimipaikka = {$toimipaikkarajaus}";
   }
-  else if (!isset($toimipaikkarajaus) and $kukarow['toimipaikka'] != 0) {
+  elseif (!isset($toimipaikkarajaus) and $kukarow['toimipaikka'] != 0) {
     $varasto .= " AND lasku.yhtio_toimipaikka = {$kukarow['toimipaikka']}";
   }
 

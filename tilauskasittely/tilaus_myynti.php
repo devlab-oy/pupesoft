@@ -3733,7 +3733,7 @@ if ($tee == '') {
     if ($tila == "LISATIETOJA_RIVILLE") {
       $updlisa = "positio = '$positio',";
     }
-    else if ($tila == "ASPOSITIO_RIVILLE") {
+    elseif ($tila == "ASPOSITIO_RIVILLE") {
       $updlisa = "asiakkaan_positio = '$asiakkaan_positio',";
     }
     else {
@@ -4605,7 +4605,7 @@ if ($tee == '') {
     if ($toim == "REKLAMAATIO" and $tuoteno == '') {
       $tuoteno_lisa = $trow['tuoteno'];
     }
-    else if (is_array($tuoteno_array)) {
+    elseif (is_array($tuoteno_array)) {
       $tuoteno_lisa = implode("','", $tuoteno_array);
     }
     else {

@@ -218,20 +218,12 @@ class MagentoClient {
       // Etsitään kategoria_id tuoteryhmällä
       $category_ids[] = $this->findCategory(utf8_encode($tuote['try_nimi']), $category_tree['children']);
 
-      $palikat = $tuote['breadcrumbs'];
+      $tuotepuun_nodet = $tuote['tuotepuun_nodet'];
       // Lisätään myös tuotepuun kategoriat
-      if (isset($palikat) and count($palikat) > 0) {
-
-        //DEBUG
-        $kuntti = count($palikat);
-        echo "Palikoita oli: $kuntti \n";
-
-        $loppu = $this->findSubCategory($palikat, $category_tree['children']);
-        echo "Loppusitaatti: \n";
-        var_dump($loppu);
-        exit;
-        //endDEBUG
-        //$category_ids[] =
+      if (isset($tuotepuun_nodet) and count($tuotepuun_nodet) > 0) {
+        foreach ($tuotepuun_nodet as $tuotepolku) {
+          $category_ids[] = $this->createCategoryTree($tuotepolku);
+        }
       }
 
       // Jos tuote ei oo osa configurable_grouppia, niin niitten kuuluu olla visibleja.
@@ -243,7 +235,7 @@ class MagentoClient {
       }
 
       $tuote_data = array(
-          'categories'            => array($category_id),
+          'categories'            => $category_ids,
           'websites'              => explode(" ", $tuote['nakyvyys']),
           'name'                  => utf8_encode($tuote['nimi']),
           'description'           => utf8_encode($tuote['kuvaus']),
@@ -713,46 +705,76 @@ class MagentoClient {
   /// Private functions ///
   
   /**
-   * Parametrinä tulee yhden tuotteen koko breadcrumbs
-   * 
+   * Parametrinä tulee yhden tuotteen koko tuotepolku
+   * eli tuotepuun tuoteryhmät järjestyksessä rootista lähtien
+   * @return syvimmän kategorian id
    */
   private function createCategoryTree($ancestors) {
 
-    id = salasanat ihja rootti id;
+    $cat_id = $this->_parent_id;
     
-    foreach ancestors as nimi
-      id = createSubCategory(nimi, id)
-    end
+    foreach ($ancestors as $nimi) {
+      $cat_id = $this->createSubCategory($nimi, $cat_id);
+    }
     
-    return id
+    return $cat_id;
   }
 
-  private function createSubCategory(nimi, isätunnus) {
+  /**
+   * Lisää tuotepuun kategorian annettun category_id:n alle
+   * jos sellaista ei ole jo olemassa
+   * @return luodun tai löydetyn kategorian id
+   */
+  private function createSubCategory($name, $parent_cat_id) {
     
-    otetaan koko tuotepuu, valitaan siitä eka solu idn perusteella
-    sen lapsista etsitään nimeä, jos ei löydy, luodaan viimeisimmän idn alle
-    lopuksi palautetaan id
+    // otetaan koko tuotepuu, valitaan siitä eka solu idn perusteella
+    // sen lapsista etsitään nimeä, jos ei löydy, luodaan viimeisimmän idn alle
+    // lopuksi palautetaan id
+    $name = utf8_encode($name);
+    $categoryaccesscontrol = $this->_categoryaccesscontrol;
+    $magento_tree = $this->getCategories();
+    $results = $this->getParentArray($magento_tree, "$parent_cat_id");
     
-    koko array = $this->getCategories();
-    puu = etsiarraysta(koko, isätunnus)
-    
-    foreach puu as itemi
-      if itemi nimi = $nimi
-        return id
-      end
-    end
-    
-    id = magentokutsu, addchild to $isä name $nimi
+    // Etsitään kategoriaa
+    foreach ($results[0]['children'] as $k => $v) {
+      if (strcasecmp($name, $v['name']) == 0) {
+        return $v['category_id'];
+      }
+    }
+
+    // Lisätään kategoria, jos ei löytynyt
+    $category_data = array(
+                           'name'                  => $name,
+                           'is_active'             => 1,
+                           'position'              => 1,
+                           'default_sort_by'       => 'position',
+                           'available_sort_by'     => 'position',
+                           'include_in_menu'       => 1
+                           );
+
+    if ($categoryaccesscontrol) {
+      // HUOM: Vain jos "Category access control"-moduli on asennettu
+      $category_data['accesscontrol_show_group'] = 0;
+    }
+
+    // Kutsutaan soap rajapintaa
+    $category_id = $this->_proxy->call($this->_session, 'catalog_category.create',
+      array($parent_cat_id, $category_data)
+    );
+    $this->log("Lisättiin tuotepuun kategoria:$name tunnuksella: $category_id");
 
     unset($this->_category_tree);
 
-    return id
-    tsekataan onko olemassa nimi isien alla
-    etsitaan magentotuotepuusta eka isä ja 
+    return $category_id; 
   }
-  
-  prvate function etsiarraysta(array, isatunnus) {
-    etsitään keytä "category_id" valuella isatunnus ja return sen lapset
+
+  /**
+   *
+   */
+  private function getParentArray($tree, $parent_cat_id) {
+    //etsitään keytä "category_id" valuella isatunnus ja return sen lapset
+    return search_array_key_for_value_recursive($tree, 'category_id', $parent_cat_id);
+    
   }
 
   /**

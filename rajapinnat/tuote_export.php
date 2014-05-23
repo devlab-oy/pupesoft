@@ -177,13 +177,15 @@ while ($row = mysql_fetch_array($res)) {
             GROUP BY t0.nimi
             ORDER BY t0.lft";
   $result_tp = pupe_query($query);
-  $tuotepuurow = mysql_fetch_assoc($result_tp);
-  var_dump($tuotepuurow['ancestors']);
-  var_dump($tuotepuurow['node']);
-  $breadcrumbs = empty($tuotepuurow['ancestors']) ? array () : explode("\n",$tuotepuurow['ancestors']);
-  $breadcrumbs[] = $tuotepuurow['node'];
-  array_shift($breadcrumbs);
-  var_dump($breadcrumbs);
+
+  $tuotepuun_nodet = array ();
+  
+  while ($tuotepuurow = mysql_fetch_assoc($result_tp)) {
+    $breadcrumbs = empty($tuotepuurow['ancestors']) ? array () : explode("\n",$tuotepuurow['ancestors']);
+    $breadcrumbs[] = $tuotepuurow['node'];
+    if (count($breadcrumbs) > 1) array_shift($breadcrumbs);
+    $tuotepuun_nodet[] = $breadcrumbs;
+  }
   $dnstuote[] = array('tuoteno'        => $row["tuoteno"],
             'nimi'          => $row["nimitys"],
             'kuvaus'        => $row["kuvaus"],
@@ -207,7 +209,7 @@ while ($row = mysql_fetch_array($res)) {
             'target'        => $row["target"],
             'onsale'        => $row["onsale"],
             'tunnus'        => $row['tunnus'],
-            'breadcrumbs' => $breadcrumbs
+            'tuotepuun_nodet' => $tuotepuun_nodet
             );
 }
 

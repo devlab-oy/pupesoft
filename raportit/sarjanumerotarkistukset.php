@@ -14,31 +14,31 @@ if ($tee == 'NAYTATILAUS') {
 
 
 if ($tee == "OSTOVAIHYVITYS") {
-  $query  = "  SELECT *
-        FROM tilausrivin_lisatiedot
-        WHERE yhtio       = '$kukarow[yhtio]'
-        and tilausrivitunnus = '$rivitunnus'";
+  $query  = "SELECT *
+             FROM tilausrivin_lisatiedot
+             WHERE yhtio          = '$kukarow[yhtio]'
+             and tilausrivitunnus = '$rivitunnus'";
   $lisatied_res = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($lisatied_res) > 0) {
     $lisatied_row = mysql_fetch_array($lisatied_res);
 
-    $query = "  UPDATE tilausrivin_lisatiedot
-          SET osto_vai_hyvitys   = '$osto_vai_hyvitys',
-          muutospvm        = now(),
-          muuttaja        = '$kukarow[kuka]'
-          WHERE yhtio  = '$kukarow[yhtio]'
-          and tilausrivitunnus = '$rivitunnus'
-          and tunnus   = '$lisatied_row[tunnus]'";
+    $query = "UPDATE tilausrivin_lisatiedot
+              SET osto_vai_hyvitys   = '$osto_vai_hyvitys',
+              muutospvm            = now(),
+              muuttaja             = '$kukarow[kuka]'
+              WHERE yhtio          = '$kukarow[yhtio]'
+              and tilausrivitunnus = '$rivitunnus'
+              and tunnus           = '$lisatied_row[tunnus]'";
     $result = mysql_query($query) or pupe_error($query);
   }
   else {
-    $query = "  INSERT INTO tilausrivin_lisatiedot
-          SET yhtio      = '$kukarow[yhtio]',
-          tilausrivitunnus = '$rivitunnus',
-          osto_vai_hyvitys = '$osto_vai_hyvitys',
-          luontiaika     = now(),
-          laatija      = '$kukarow[kuka]'";
+    $query = "INSERT INTO tilausrivin_lisatiedot
+              SET yhtio      = '$kukarow[yhtio]',
+              tilausrivitunnus = '$rivitunnus',
+              osto_vai_hyvitys = '$osto_vai_hyvitys',
+              luontiaika       = now(),
+              laatija          = '$kukarow[kuka]'";
     $result = mysql_query($query) or pupe_error($query);
   }
 
@@ -131,53 +131,53 @@ if (($jarjestys_1 != '' or $jarjestys_2 != '' or $jarjestys_3 != '' or $jarjesty
     echo "<tr><th>Myyntitilaus<br>Ostotilaus</th><th>Tuoteno</th><th>Nimitys</th><th>Myyntihinta<br>Ostohinta</th><th>Myyntikate<br>Ostokate</th><th>O/H</th><th>Sarjanumero</th></tr>";
 
     if ($tyyppi == "myynti") {
-      $query = "  SELECT tilausrivi.otunnus, tilausrivi.tunnus myyntitunnus, tilausrivi.tuoteno, tilausrivi.nimitys,
-            round(tilausrivi.rivihinta/tilausrivi.kpl,2) rivihinta,
-            round(tilausrivi.kate/tilausrivi.kpl,2) kate,
-            round(ostorivi.kate/abs(ostorivi.kpl),2) osto_kate,
-            ostorivi.tunnus ostotunnus,
-            if(ostorivi.tyyppi IN ('O'), ostorivi.uusiotunnus, ostorivi.otunnus) ostotilaus,
-            sarjanumeroseuranta.sarjanumero sarjanumero, sarjanumeroseuranta.tunnus sarjatunnus,
-            tilausrivi.kpl, myyntilasku.viesti, tilausrivin_lisatiedot.osto_vai_hyvitys,
-            if(sarjanumeroseuranta.kaytetty='' or sarjanumeroseuranta.kaytetty is null, 'Uusi', 'Käytetty') kaytetty,
-            tuote.kehahin,
-            (select count(distinct sarjanumero) from sarjanumeroseuranta css where css.yhtio=tilausrivi.yhtio and css.tuoteno=tilausrivi.tuoteno and css.myyntirivitunnus=tilausrivi.tunnus) css
-            FROM tilausrivi
-            JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta='S'
-            LEFT JOIN sarjanumeroseuranta ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tuoteno=sarjanumeroseuranta.tuoteno and tilausrivi.tunnus=sarjanumeroseuranta.myyntirivitunnus
-            LEFT JOIN tilausrivi ostorivi ON ostorivi.yhtio=sarjanumeroseuranta.yhtio and ostorivi.tunnus=sarjanumeroseuranta.ostorivitunnus
-            LEFT JOIN lasku myyntilasku ON myyntilasku.yhtio=tilausrivi.yhtio and myyntilasku.tunnus=tilausrivi.otunnus
-            LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-            WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-            $lisa1
-            $lisa2
-            and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl'
-            $lisa3
-            order by tilausrivi.tunnus";
+      $query = "SELECT tilausrivi.otunnus, tilausrivi.tunnus myyntitunnus, tilausrivi.tuoteno, tilausrivi.nimitys,
+                round(tilausrivi.rivihinta/tilausrivi.kpl,2) rivihinta,
+                round(tilausrivi.kate/tilausrivi.kpl,2) kate,
+                round(ostorivi.kate/abs(ostorivi.kpl),2) osto_kate,
+                ostorivi.tunnus ostotunnus,
+                if(ostorivi.tyyppi IN ('O'), ostorivi.uusiotunnus, ostorivi.otunnus) ostotilaus,
+                sarjanumeroseuranta.sarjanumero sarjanumero, sarjanumeroseuranta.tunnus sarjatunnus,
+                tilausrivi.kpl, myyntilasku.viesti, tilausrivin_lisatiedot.osto_vai_hyvitys,
+                if(sarjanumeroseuranta.kaytetty='' or sarjanumeroseuranta.kaytetty is null, 'Uusi', 'Käytetty') kaytetty,
+                tuote.kehahin,
+                (select count(distinct sarjanumero) from sarjanumeroseuranta css where css.yhtio=tilausrivi.yhtio and css.tuoteno=tilausrivi.tuoteno and css.myyntirivitunnus=tilausrivi.tunnus) css
+                FROM tilausrivi
+                JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta='S'
+                LEFT JOIN sarjanumeroseuranta ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tuoteno=sarjanumeroseuranta.tuoteno and tilausrivi.tunnus=sarjanumeroseuranta.myyntirivitunnus
+                LEFT JOIN tilausrivi ostorivi ON ostorivi.yhtio=sarjanumeroseuranta.yhtio and ostorivi.tunnus=sarjanumeroseuranta.ostorivitunnus
+                LEFT JOIN lasku myyntilasku ON myyntilasku.yhtio=tilausrivi.yhtio and myyntilasku.tunnus=tilausrivi.otunnus
+                LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+                WHERE tilausrivi.yhtio        = '$kukarow[yhtio]'
+                $lisa1
+                $lisa2
+                and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl'
+                $lisa3
+                order by tilausrivi.tunnus";
     }
     else {
-      $query = "  SELECT myyntirivi.otunnus, myyntirivi.tunnus myyntitunnus, tilausrivi.tuoteno, tilausrivi.nimitys,
-            round(myyntirivi.rivihinta/myyntirivi.kpl,2) rivihinta,
-            round(myyntirivi.kate/myyntirivi.kpl,2) kate,
-            round(tilausrivi.kate/abs(tilausrivi.kpl),2) osto_kate,
-            tilausrivi.tunnus ostotunnus,
-            if(tilausrivi.tyyppi IN ('O'), tilausrivi.uusiotunnus, tilausrivi.otunnus) ostotilaus,
-            sarjanumeroseuranta.sarjanumero sarjanumero, sarjanumeroseuranta.tunnus sarjatunnus,
-            tilausrivi.kpl, ostolasku.viesti, tilausrivin_lisatiedot.osto_vai_hyvitys,
-            if(sarjanumeroseuranta.kaytetty='' or sarjanumeroseuranta.kaytetty is null, 'Uusi', 'Käytetty') kaytetty,
-            tuote.kehahin,
-            (select count(distinct sarjanumero) from sarjanumeroseuranta css where css.yhtio=tilausrivi.yhtio and css.tuoteno=tilausrivi.tuoteno and css.ostorivitunnus=tilausrivi.tunnus) css
-            FROM tilausrivi
-            JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta='S'
-            LEFT JOIN sarjanumeroseuranta ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tuoteno=sarjanumeroseuranta.tuoteno and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus
-            LEFT JOIN tilausrivi myyntirivi ON myyntirivi.yhtio=sarjanumeroseuranta.yhtio and myyntirivi.tunnus=sarjanumeroseuranta.myyntirivitunnus and sarjanumeroseuranta.myyntirivitunnus>0
-            LEFT JOIN lasku ostolasku ON ostolasku.yhtio=tilausrivi.yhtio and ostolasku.tunnus=tilausrivi.otunnus
-            LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-            WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-            $lisa1
-            $lisa2
-            $lisa3
-            order by tilausrivi.tunnus";
+      $query = "SELECT myyntirivi.otunnus, myyntirivi.tunnus myyntitunnus, tilausrivi.tuoteno, tilausrivi.nimitys,
+                round(myyntirivi.rivihinta/myyntirivi.kpl,2) rivihinta,
+                round(myyntirivi.kate/myyntirivi.kpl,2) kate,
+                round(tilausrivi.kate/abs(tilausrivi.kpl),2) osto_kate,
+                tilausrivi.tunnus ostotunnus,
+                if(tilausrivi.tyyppi IN ('O'), tilausrivi.uusiotunnus, tilausrivi.otunnus) ostotilaus,
+                sarjanumeroseuranta.sarjanumero sarjanumero, sarjanumeroseuranta.tunnus sarjatunnus,
+                tilausrivi.kpl, ostolasku.viesti, tilausrivin_lisatiedot.osto_vai_hyvitys,
+                if(sarjanumeroseuranta.kaytetty='' or sarjanumeroseuranta.kaytetty is null, 'Uusi', 'Käytetty') kaytetty,
+                tuote.kehahin,
+                (select count(distinct sarjanumero) from sarjanumeroseuranta css where css.yhtio=tilausrivi.yhtio and css.tuoteno=tilausrivi.tuoteno and css.ostorivitunnus=tilausrivi.tunnus) css
+                FROM tilausrivi
+                JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta='S'
+                LEFT JOIN sarjanumeroseuranta ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tuoteno=sarjanumeroseuranta.tuoteno and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus
+                LEFT JOIN tilausrivi myyntirivi ON myyntirivi.yhtio=sarjanumeroseuranta.yhtio and myyntirivi.tunnus=sarjanumeroseuranta.myyntirivitunnus and sarjanumeroseuranta.myyntirivitunnus>0
+                LEFT JOIN lasku ostolasku ON ostolasku.yhtio=tilausrivi.yhtio and ostolasku.tunnus=tilausrivi.otunnus
+                LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+                WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+                $lisa1
+                $lisa2
+                $lisa3
+                order by tilausrivi.tunnus";
     }
 
     $vresult = mysql_query($query) or pupe_error($query);

@@ -34,29 +34,29 @@ else {
 
 // Haetaan kaikki 30 p‰iv‰n p‰‰st‰ vanhenevat sopimukset/sopimusrivit
 // Datediff -30 tarkoittaa ett‰ 30 pv kuluttua sopimus menee umpeen ja 30 tarkoittaa ett‰ meni 30 pv sitten umpeen.
-$query = "  (SELECT distinct lasku.tunnus, lasku.ytunnus, lasku.nimi, lasku.asiakkaan_tilausnumero, lasku.valkoodi
-      FROM lasku
-      JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio
-        AND laskun_lisatiedot.otunnus = lasku.tunnus
-        AND datediff(now(), laskun_lisatiedot.sopimus_loppupvm) = -30)
-      WHERE lasku.yhtio = '$yhtio'
-      AND lasku.tila = '0'
-      AND lasku.alatila != 'D')
+$query = "(SELECT distinct lasku.tunnus, lasku.ytunnus, lasku.nimi, lasku.asiakkaan_tilausnumero, lasku.valkoodi
+           FROM lasku
+           JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio
+             AND laskun_lisatiedot.otunnus  = lasku.tunnus
+             AND datediff(now(), laskun_lisatiedot.sopimus_loppupvm) = -30)
+           WHERE lasku.yhtio                = '$yhtio'
+           AND lasku.tila                   = '0'
+           AND lasku.alatila               != 'D')
 
-      UNION
+           UNION
 
-      (SELECT distinct lasku.tunnus, lasku.ytunnus, lasku.nimi, lasku.asiakkaan_tilausnumero, lasku.valkoodi
-      FROM lasku
-      JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
-        AND tilausrivi.otunnus = lasku.tunnus
-        AND tilausrivi.tyyppi = 'L'
-        AND tilausrivi.toimaika != '0000-00-00'
-        AND datediff(now(), tilausrivi.toimaika) = -30)
-      WHERE lasku.yhtio = '$yhtio'
-      AND lasku.tila = '0'
-      AND lasku.alatila != 'D')
+           (SELECT distinct lasku.tunnus, lasku.ytunnus, lasku.nimi, lasku.asiakkaan_tilausnumero, lasku.valkoodi
+           FROM lasku
+           JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
+             AND tilausrivi.otunnus         = lasku.tunnus
+             AND tilausrivi.tyyppi          = 'L'
+             AND tilausrivi.toimaika       != '0000-00-00'
+             AND datediff(now(), tilausrivi.toimaika) = -30)
+           WHERE lasku.yhtio                = '$yhtio'
+           AND lasku.tila                   = '0'
+           AND lasku.alatila               != 'D')
 
-      ORDER BY 1 asc";
+           ORDER BY 1 asc";
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) == 0) {
@@ -103,19 +103,19 @@ $query_ale_lisa = generoi_alekentta('M');
 
 while ($laskurow = mysql_fetch_assoc($result)) {
 
-  $query = "  SELECT tilausrivi.tuoteno,
-        tilausrivi.nimitys,
-        round(tilausrivi.hinta * tilausrivi.varattu * {$query_ale_lisa}, {$yhtiorow["hintapyoristys"]}) rivihinta,
-        tilausrivi.varattu,
-        tilausrivi.hinta,
-        tilausrivi.kommentti,
-        if (tilausrivi.kerayspvm = '0000-00-00', if(laskun_lisatiedot.sopimus_loppupvm = '0000-00-00', '', laskun_lisatiedot.sopimus_loppupvm), tilausrivi.kerayspvm) rivinsopimus_alku,
-        if (tilausrivi.toimaika = '0000-00-00', if(laskun_lisatiedot.sopimus_alkupvm = '0000-00-00', '', laskun_lisatiedot.sopimus_loppupvm), tilausrivi.toimaika) rivinsopimus_loppu
-        FROM tilausrivi
-        JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = tilausrivi.yhtio and laskun_lisatiedot.otunnus = tilausrivi.otunnus)
-        WHERE tilausrivi.yhtio = '$yhtio'
-        AND tilausrivi.otunnus = {$laskurow["tunnus"]}
-        AND tilausrivi.tyyppi = '0'";
+  $query = "SELECT tilausrivi.tuoteno,
+            tilausrivi.nimitys,
+            round(tilausrivi.hinta * tilausrivi.varattu * {$query_ale_lisa}, {$yhtiorow["hintapyoristys"]}) rivihinta,
+            tilausrivi.varattu,
+            tilausrivi.hinta,
+            tilausrivi.kommentti,
+            if (tilausrivi.kerayspvm = '0000-00-00', if(laskun_lisatiedot.sopimus_loppupvm = '0000-00-00', '', laskun_lisatiedot.sopimus_loppupvm), tilausrivi.kerayspvm) rivinsopimus_alku,
+            if (tilausrivi.toimaika = '0000-00-00', if(laskun_lisatiedot.sopimus_alkupvm = '0000-00-00', '', laskun_lisatiedot.sopimus_loppupvm), tilausrivi.toimaika) rivinsopimus_loppu
+            FROM tilausrivi
+            JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = tilausrivi.yhtio and laskun_lisatiedot.otunnus = tilausrivi.otunnus)
+            WHERE tilausrivi.yhtio = '$yhtio'
+            AND tilausrivi.otunnus = {$laskurow["tunnus"]}
+            AND tilausrivi.tyyppi  = '0'";
   $riviresult = pupe_query($query);
 
   while ($rivirow = mysql_fetch_assoc($riviresult)) {

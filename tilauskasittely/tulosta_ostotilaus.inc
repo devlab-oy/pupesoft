@@ -2,9 +2,9 @@
 
 $tulosta_ostotilaus_ulos = "";
 
-$query = "  SELECT *
-      FROM lasku
-      WHERE tunnus = '$otunnus' and yhtio='$kukarow[yhtio]'";
+$query = "SELECT *
+          FROM lasku
+          WHERE tunnus = '$otunnus' and yhtio='$kukarow[yhtio]'";
 $sresult = pupe_query($query);
 $laskurow = mysql_fetch_array($sresult);
 
@@ -17,10 +17,10 @@ if ($laskurow['tila'] != 'O' and $laskurow['tila'] != 'D' and $laskurow['tilaust
 if ($komento['Ostotilaus'] == 'edi') {
 
   // haetaan toimittajan tiedot
-  $query = "  SELECT *
-        FROM toimi
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND tunnus  = '$laskurow[liitostunnus]'";
+  $query = "SELECT *
+            FROM toimi
+            WHERE yhtio = '$kukarow[yhtio]'
+            AND tunnus  = '$laskurow[liitostunnus]'";
   $toimires = pupe_query($query);
   $toimirow = mysql_fetch_array($toimires);
 
@@ -138,11 +138,11 @@ else {
         $pdf->draw_text(50, 604, $maan_tiedot["nimi"],     $thispage, $norm);
       }
 
-      $query = "  SELECT *
-            FROM toimi
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tunnus   = '$laskurow[liitostunnus]'
-            LIMIT 1";
+      $query = "SELECT *
+                FROM toimi
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tunnus  = '$laskurow[liitostunnus]'
+                LIMIT 1";
       $rarres = pupe_query($query);
       $toimirow = mysql_fetch_array($rarres);
 
@@ -195,9 +195,9 @@ else {
       $pdf->draw_text(310, 750, t("Asiaa hoitaa", $kieli), $thispage, $pieni);
 
       //etsitään myyjän nimi
-      $query  = "  SELECT nimi
-            FROM kuka
-            WHERE tunnus='$laskurow[myyja]' AND yhtio='$kukarow[yhtio]'";
+      $query  = "SELECT nimi
+                 FROM kuka
+                 WHERE tunnus='$laskurow[myyja]' AND yhtio='$kukarow[yhtio]'";
       $myyresult = pupe_query($query);
       $myyrow = mysql_fetch_array($myyresult);
 
@@ -255,10 +255,10 @@ else {
 
       // suoratoimituksissa verkkotunnus-kenttään tallentuu vastaanottajan liitostunnus
       if ($laskurow['verkkotunnus'] != '' and $laskurow['suoraveloitus'] != '') {
-        $query = "  SELECT if(gsm != '', gsm, if(tyopuhelin != '', tyopuhelin, puhelin)) puh
-              FROM asiakas
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus = '{$laskurow['verkkotunnus']}'";
+        $query = "SELECT if(gsm != '', gsm, if(tyopuhelin != '', tyopuhelin, puhelin)) puh
+                  FROM asiakas
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus  = '{$laskurow['verkkotunnus']}'";
         $puhelinres = pupe_query($query);
         $puhelinrow = mysql_fetch_assoc($puhelinres);
 
@@ -439,12 +439,12 @@ else {
       }
 
       //  Tarkastetaan olisiko toimittajalla yksikkö!
-      $query = "  SELECT toim_yksikko
-            FROM tuotteen_toimittajat
-            WHERE yhtio     = '$kukarow[yhtio]'
-            AND tuoteno     = '$row[tuoteno]'
-            AND liitostunnus   = '$laskurow[liitostunnus]'
-            LIMIT 1";
+      $query = "SELECT toim_yksikko
+                FROM tuotteen_toimittajat
+                WHERE yhtio      = '$kukarow[yhtio]'
+                AND tuoteno      = '$row[tuoteno]'
+                AND liitostunnus = '$laskurow[liitostunnus]'
+                LIMIT 1";
       $rarres = pupe_query($query);
       $rarrow   = mysql_fetch_array($rarres);
 
@@ -510,11 +510,11 @@ else {
       extract($params);
 
       if($yhtiorow['lomakkeiden_allekirjoitus'] == 'X') {
-        $allekirjoitus_query = "  SELECT nimi,
-                      asema
-                      FROM kuka
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND tunnus = '{$laskurow['allekirjoittaja']}'";
+        $allekirjoitus_query = "SELECT nimi,
+                                asema
+                                FROM kuka
+                                WHERE yhtio = '{$kukarow['yhtio']}'
+                                AND tunnus  = '{$laskurow['allekirjoittaja']}'";
         $allekirjoitus_result = pupe_query($allekirjoitus_query);
         $allekirjoitus_row = mysql_fetch_assoc($allekirjoitus_result);
 
@@ -659,41 +659,41 @@ else {
 
   if ($toim != "HAAMU") {
     if ($mista == 'tulostakopio') {
-      $query = "  SELECT tilausrivi.tunnus, toim_tuoteno, toim_nimitys, tuote.tuoteno, round(tilausrivi.tilkpl*if (tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu,
-            tilausrivi.hinta, {$query_ale_select_lisa} round(tilausrivi.tilkpl*if (tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*{$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
-            substring(tuote.nimitys,1,80) nimitys, kommentti, tilausrivi.yksikko, toimaika, substring(tilausrivi.nimitys,1,80) rivinimitys,
-            $sorttauskentta
-            FROM tilausrivi
-            join tuote USING (yhtio, tuoteno)
-            join tuotteen_toimittajat on tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
-            WHERE tilausrivi.otunnus = '$otunnus'
-            and tilausrivi.yhtio   = '$kukarow[yhtio]'
-            and tilausrivi.tyyppi  != 'D'
-            ORDER BY sorttauskentta $yhtiorow[ostotilauksen_jarjestys_suunta], tilausrivi.tunnus";
+      $query = "SELECT tilausrivi.tunnus, toim_tuoteno, toim_nimitys, tuote.tuoteno, round(tilausrivi.tilkpl*if (tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu,
+                tilausrivi.hinta, {$query_ale_select_lisa} round(tilausrivi.tilkpl*if (tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*{$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
+                substring(tuote.nimitys,1,80) nimitys, kommentti, tilausrivi.yksikko, toimaika, substring(tilausrivi.nimitys,1,80) rivinimitys,
+                $sorttauskentta
+                FROM tilausrivi
+                join tuote USING (yhtio, tuoteno)
+                join tuotteen_toimittajat on tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
+                WHERE tilausrivi.otunnus  = '$otunnus'
+                and tilausrivi.yhtio      = '$kukarow[yhtio]'
+                and tilausrivi.tyyppi    != 'D'
+                ORDER BY sorttauskentta $yhtiorow[ostotilauksen_jarjestys_suunta], tilausrivi.tunnus";
     }
     else {
-      $query = "  SELECT tilausrivi.tunnus, toim_tuoteno, toim_nimitys, tuote.tuoteno, round(tilausrivi.varattu*if (tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu,
-            tilausrivi.hinta, {$query_ale_select_lisa} round(tilausrivi.varattu*if (tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*{$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
-            substring(tuote.nimitys,1,80) nimitys, kommentti, tilausrivi.yksikko, toimaika, substring(tilausrivi.nimitys,1,80) rivinimitys,
-            $sorttauskentta
-            FROM tilausrivi
-            join tuote USING (yhtio, tuoteno)
-            join tuotteen_toimittajat on tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
-            WHERE tilausrivi.otunnus = '$otunnus'
-            and tilausrivi.yhtio   = '$kukarow[yhtio]'
-            and tilausrivi.tyyppi  != 'D'
-            ORDER BY sorttauskentta $yhtiorow[ostotilauksen_jarjestys_suunta], tilausrivi.tunnus";
+      $query = "SELECT tilausrivi.tunnus, toim_tuoteno, toim_nimitys, tuote.tuoteno, round(tilausrivi.varattu*if (tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu,
+                tilausrivi.hinta, {$query_ale_select_lisa} round(tilausrivi.varattu*if (tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*{$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
+                substring(tuote.nimitys,1,80) nimitys, kommentti, tilausrivi.yksikko, toimaika, substring(tilausrivi.nimitys,1,80) rivinimitys,
+                $sorttauskentta
+                FROM tilausrivi
+                join tuote USING (yhtio, tuoteno)
+                join tuotteen_toimittajat on tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
+                WHERE tilausrivi.otunnus  = '$otunnus'
+                and tilausrivi.yhtio      = '$kukarow[yhtio]'
+                and tilausrivi.tyyppi    != 'D'
+                ORDER BY sorttauskentta $yhtiorow[ostotilauksen_jarjestys_suunta], tilausrivi.tunnus";
     }
   }
   else {
-    $query = "  SELECT tilausrivi.tunnus, tilausrivi.tuoteno toim_tuoteno, tilausrivi.nimitys toim_nimitys, tuote.tuoteno, round(tilausrivi.varattu, 2) varattu,
-          tilausrivi.hinta, {$query_ale_select_lisa} round(tilausrivi.varattu*tilausrivi.hinta*{$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
-          substring(tuote.nimitys,1,80) nimitys, kommentti, tilausrivi.yksikko, toimaika, substring(tilausrivi.nimitys,1,80) rivinimitys
-          FROM tilausrivi
-          join tuote USING (yhtio, tuoteno)
-          WHERE tilausrivi.otunnus = '$otunnus'
-          and tilausrivi.yhtio   = '$kukarow[yhtio]'
-          ORDER BY tilausrivi.tunnus";
+    $query = "SELECT tilausrivi.tunnus, tilausrivi.tuoteno toim_tuoteno, tilausrivi.nimitys toim_nimitys, tuote.tuoteno, round(tilausrivi.varattu, 2) varattu,
+              tilausrivi.hinta, {$query_ale_select_lisa} round(tilausrivi.varattu*tilausrivi.hinta*{$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
+              substring(tuote.nimitys,1,80) nimitys, kommentti, tilausrivi.yksikko, toimaika, substring(tilausrivi.nimitys,1,80) rivinimitys
+              FROM tilausrivi
+              join tuote USING (yhtio, tuoteno)
+              WHERE tilausrivi.otunnus = '$otunnus'
+              and tilausrivi.yhtio     = '$kukarow[yhtio]'
+              ORDER BY tilausrivi.tunnus";
   }
 
   $result = pupe_query($query);

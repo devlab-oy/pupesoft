@@ -18,9 +18,9 @@ if (($tee == 'U' or $tee == 'P' or $tee == 'M' or $tee == 'J') and $oikeurow['pa
 }
 
 if ($tunnus != 0) {
-  $query = "  SELECT *, concat_ws(' ', tapvm, mapvm) laskunpvm
-        FROM lasku
-        WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
+  $query = "SELECT *, concat_ws(' ', tapvm, mapvm) laskunpvm
+            FROM lasku
+            WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
   $result = mysql_query ($query) or pupe_error($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -120,12 +120,12 @@ if ($iframe != '') echo "<div style='float: left; width: 55%; padding-right: 10p
 
 if ($jarj == '') $jarj = "nimi";
 
-$query = "  SELECT *
-      FROM lasku
-      WHERE yhtio = '$kukarow[yhtio]'
-      $pvmlisa
-      and $lajiv
-      ORDER BY $jarj, nimi, summa desc";
+$query = "SELECT *
+          FROM lasku
+          WHERE yhtio = '$kukarow[yhtio]'
+          $pvmlisa
+          and $lajiv
+          ORDER BY $jarj, nimi, summa desc";
 $result = pupe_query($query);
 $loppudiv ='';
 
@@ -181,10 +181,10 @@ if ($iframe != '') echo "<div style='height: 400px; overflow: auto; width: 100%;
 
 if ($tee == 'P') {
   // Olemassaolevaa tiliöintiä muutetaan, joten poistetaan rivi ja annetaan perustettavaksi
-  $query = "  SELECT *
-        FROM tiliointi
-        WHERE tunnus = '$ptunnus' and
-        yhtio = '$kukarow[yhtio]'";
+  $query = "SELECT *
+            FROM tiliointi
+            WHERE tunnus = '$ptunnus' and
+            yhtio        = '$kukarow[yhtio]'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -208,32 +208,32 @@ if ($tee == 'P') {
   $ok = 1;
 
   // Etsitään kaikki tiliöintirivit, jotka kuuluvat tähän tiliöintiin ja lasketaan niiden summa
-  $query = "  SELECT sum(summa) summa
-        FROM tiliointi
-        WHERE aputunnus = '$ptunnus'
-        and yhtio = '$kukarow[yhtio]'
-        and korjattu = ''
-        GROUP BY aputunnus";
+  $query = "SELECT sum(summa) summa
+            FROM tiliointi
+            WHERE aputunnus = '$ptunnus'
+            and yhtio       = '$kukarow[yhtio]'
+            and korjattu    = ''
+            GROUP BY aputunnus";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 0) {
     $summarow = mysql_fetch_assoc($result);
     $summa += $summarow["summa"];
 
-    $query = "  UPDATE tiliointi SET
-          korjattu = '$kukarow[kuka]',
-          korjausaika = now()
-          WHERE aputunnus = '$ptunnus'
-          and yhtio = '$kukarow[yhtio]'
-          and korjattu = ''";
+    $query = "UPDATE tiliointi SET
+              korjattu        = '$kukarow[kuka]',
+              korjausaika     = now()
+              WHERE aputunnus = '$ptunnus'
+              and yhtio       = '$kukarow[yhtio]'
+              and korjattu    = ''";
     $result = pupe_query($query);
   }
 
-  $query = "  UPDATE tiliointi SET
-        korjattu = '$kukarow[kuka]',
-        korjausaika = now()
-        WHERE tunnus = '$ptunnus'
-        and yhtio = '$kukarow[yhtio]'";
+  $query = "UPDATE tiliointi SET
+            korjattu     = '$kukarow[kuka]',
+            korjausaika  = now()
+            WHERE tunnus = '$ptunnus'
+            and yhtio    = '$kukarow[yhtio]'";
   $result = pupe_query($query);
 
   $tee = "E";
@@ -241,10 +241,10 @@ if ($tee == 'P') {
 
 if ($tee == 'U') {
   // Lisätään tiliöintirivi
-  $query = "  SELECT *
-        FROM lasku
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tunnus = '$tunnus'";
+  $query = "SELECT *
+            FROM lasku
+            WHERE yhtio = '$kukarow[yhtio]'
+            and tunnus  = '$tunnus'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 1) {
@@ -272,11 +272,11 @@ if ($tee == 'U') {
   if ($kpexport == 1 or strtoupper($yhtiorow['maa']) != 'FI') {
 
     if ($tositenro != 0) {
-      $query = "  SELECT tosite
-            FROM tiliointi
-            WHERE yhtio = '$kukarow[yhtio]'
-            and ltunnus = '$tunnus'
-            and tosite = '$tositenro'";
+      $query = "SELECT tosite
+                FROM tiliointi
+                WHERE yhtio = '$kukarow[yhtio]'
+                and ltunnus = '$tunnus'
+                and tosite  = '$tositenro'";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 0) {
@@ -291,13 +291,13 @@ if ($tee == 'U') {
       // Tälle saamme tositenron ostoveloista
       if ($laskurow['tapvm'] == $tiliointipvm) {
 
-        $query = "  SELECT tosite
-              FROM tiliointi
-              WHERE yhtio = '$kukarow[yhtio]'
-              and ltunnus = '$tunnus'
-              and tapvm = '$tiliointipvm'
-              and tilino in ('$yhtiorow[ostovelat]', '$yhtiorow[konserniostovelat]')
-              and summa = round($laskurow[summa] * $laskurow[vienti_kurssi],2) * -1";
+        $query = "SELECT tosite
+                  FROM tiliointi
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and ltunnus = '$tunnus'
+                  and tapvm   = '$tiliointipvm'
+                  and tilino  in ('$yhtiorow[ostovelat]', '$yhtiorow[konserniostovelat]')
+                  and summa   = round($laskurow[summa] * $laskurow[vienti_kurssi],2) * -1";
         $result = pupe_query($query);
 
         if (mysql_num_rows($result) == 0) {
@@ -314,13 +314,13 @@ if ($tee == 'U') {
        // Tälle saamme tositenron ostoveloista
       if ($laskurow['mapvm'] == $tiliointipvm) {
 
-        $query = "  SELECT tosite
-              FROM tiliointi
-              WHERE yhtio = '$kukarow[yhtio]'
-              and ltunnus = '$tunnus'
-              and tapvm = '$tiliointipvm'
-              and tilino in ('$yhtiorow[ostovelat]', '$yhtiorow[konserniostovelat]')
-              and summa = round($laskurow[summa] * $laskurow[vienti_kurssi],2)";
+        $query = "SELECT tosite
+                  FROM tiliointi
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and ltunnus = '$tunnus'
+                  and tapvm   = '$tiliointipvm'
+                  and tilino  in ('$yhtiorow[ostovelat]', '$yhtiorow[konserniostovelat]')
+                  and summa   = round($laskurow[summa] * $laskurow[vienti_kurssi],2)";
         $result = pupe_query($query);
 
         if (mysql_num_rows($result) == 0) {

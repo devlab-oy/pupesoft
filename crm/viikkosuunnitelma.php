@@ -137,20 +137,20 @@ if ($tee == '') {
     $tapahaku = "'Viikkosuunnitelma', 'Nädalaplaan'";
   }
 
-  $query = "  SELECT asiakas.postitp, asiakas.postino, asiakas.ytunnus, asiakas.asiakasnro, kalenteri.yhtio, asiakas.nimi,
-        asiakas.myyjanro, asiakas.email, asiakas.puhelin,
-        left(kalenteri.pvmalku,10) pvmalku,
-        kentta01, kentta02, kentta03, kentta04, if(right(pvmalku,8)='00:00:00','',right(pvmalku,8)) aikaalku, if(right(pvmloppu,8)='00:00:00','',right(pvmloppu,8)) aikaloppu
-        FROM kalenteri, asiakas use index (ytunnus_index)
-        WHERE asiakas.yhtio=kalenteri.yhtio
-        and asiakas.tunnus=kalenteri.liitostunnus
-        $konsernit
-        and kalenteri.kuka     = '$kukarow[kuka]'
-        and kalenteri.pvmalku >= '$viikkoalku 00:00:00'
-        and kalenteri.pvmalku <= '$viikkoloppu 23:59:59'
-        and kalenteri.tapa   IN ($tapahaku)
-        and kalenteri.tyyppi IN ('kalenteri','memo')
-        order by kalenteri.tunnus";
+  $query = "SELECT asiakas.postitp, asiakas.postino, asiakas.ytunnus, asiakas.asiakasnro, kalenteri.yhtio, asiakas.nimi,
+            asiakas.myyjanro, asiakas.email, asiakas.puhelin,
+            left(kalenteri.pvmalku,10) pvmalku,
+            kentta01, kentta02, kentta03, kentta04, if(right(pvmalku,8)='00:00:00','',right(pvmalku,8)) aikaalku, if(right(pvmloppu,8)='00:00:00','',right(pvmloppu,8)) aikaloppu
+            FROM kalenteri, asiakas use index (ytunnus_index)
+            WHERE asiakas.yhtio=kalenteri.yhtio
+            and asiakas.tunnus=kalenteri.liitostunnus
+            $konsernit
+            and kalenteri.kuka    = '$kukarow[kuka]'
+            and kalenteri.pvmalku >= '$viikkoalku 00:00:00'
+            and kalenteri.pvmalku <= '$viikkoloppu 23:59:59'
+            and kalenteri.tapa    IN ($tapahaku)
+            and kalenteri.tyyppi  IN ('kalenteri','memo')
+            order by kalenteri.tunnus";
   $result = pupe_query($query);
 
   echo "<table>";

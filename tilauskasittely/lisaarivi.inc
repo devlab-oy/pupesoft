@@ -44,27 +44,107 @@ if ($kukarow['toimipaikka'] != $laskurow['yhtio_toimipaikka'] and $yhtiorow['myy
 // debuggia varten, laita 1 jos haluut messuja
 $lisaarivi_debug = 0;
 
-if (!isset($rivitunnus)) $rivitunnus = 0;
-else $rivitunnus = (int) $rivitunnus;
+if ($laskurow["tila"] == 'G' and !isset($kohde_alue) and isset($tuoteno)) {
+  //Laitetaan tuote oletusvaraston tuotepaikalle
+  $tuotteen_oletuspaikka = hae_tuotteen_tuotepaikat($tuoteno, $laskurow['clearing']);
 
-if (!isset($perheid))   $perheid = 0;
-else $perheid = (int)   $perheid;
+  if (!empty($tuotteen_oletuspaikka)) {
+    // otetaan eka löytynyt tuotepaikka kohdetuotepaikaksi
+    $kohde_alue   = $tuotteen_oletuspaikka[0]['hyllyalue'];
+    $kohde_nro    = $tuotteen_oletuspaikka[0]['hyllynro'];
+    $kohde_vali   = $tuotteen_oletuspaikka[0]['hyllyvali'];
+    $kohde_taso   = $tuotteen_oletuspaikka[0]['hyllytaso'];
+  }
+  else {
+    //Jos tuotteella ei ole tuotepaikkaa kohdevarastossa, luodaan se
+    lisaa_tuotepaikka($tuoteno, "", "", "", "", "", "", 0, 0, $laskurow['clearing']);
+  }
+}
 
-if (!isset($perheid2))   $perheid2 = 0;
-else $perheid2 = (int)   $perheid2;
+if (!isset($indeksi)) {
+  $indeksi = 0;
+}
 
-if (!isset($rivilaadittu))     $rivilaadittu = "";
-if (!isset($kommentti))     $kommentti = "";
-if (!isset($ale_peruste))    $ale_peruste = "";
-if (!isset($jaksotettu))     $jaksotettu = "";
-if (!isset($korvaavakielto))  $korvaavakielto = "";
-if (!isset($orvoteikiinnosta))   $orvoteikiinnosta = "";
-if (!isset($jtspec))       $jtspec = "";
-if (!isset($paikka))       $paikka = "";
-if (!isset($perhekielto))     $perhekielto = "";
-if (!isset($valmistuslinja))  $valmistuslinja = "";
-if (!isset($rekisterinumero))  $rekisterinumero = "";
-if (!isset($jo_syotetty_rekisterinumero)) $jo_syotetty_rekisterinumero = "";
+if (!isset($osto_sarjatunnus)) {
+  $osto_sarjatunnus = 0;
+}
+
+if (!isset($myy_sarjatunnus)) {
+  $myy_sarjatunnus = 0;
+}
+
+if (!isset($rivitunnus)) {
+  $rivitunnus = 0;
+}
+else {
+  $rivitunnus = (int) $rivitunnus;
+}
+
+if (!isset($perheid)) {
+  $perheid = 0;
+}
+else {
+  $perheid = (int)   $perheid;
+}
+
+if (!isset($perheid2)) {
+  $perheid2 = 0;
+}
+else {
+  $perheid2 = (int)   $perheid2;
+}
+
+if (!isset($rivinumero)) {
+  $rivinumero = "";
+}
+
+if (!isset($rivilaadittu)) {
+  $rivilaadittu = "";
+}
+
+if (!isset($kommentti)) {
+  $kommentti = "";
+}
+
+if (!isset($ale_peruste)) {
+  $ale_peruste = "";
+}
+
+if (!isset($jaksotettu)) {
+  $jaksotettu = "";
+}
+
+if (!isset($korvaavakielto)) {
+  $korvaavakielto = "";
+}
+
+if (!isset($orvoteikiinnosta)) {
+  $orvoteikiinnosta = "";
+}
+
+if (!isset($jtspec)) {
+  $jtspec = "";
+}
+
+if (!isset($paikka)) {
+  $paikka = "";
+}
+
+if (!isset($perhekielto)) {
+  $perhekielto = "";
+}
+
+if (!isset($valmistuslinja)) {
+ $valmistuslinja = "";
+}
+
+if (!isset($rekisterinumero)) {
+  $rekisterinumero = "";
+}
+
+if (!isset($jo_syotetty_rekisterinumero)) {
+  $jo_syotetty_rekisterinumero = "";
+}
 
 if ($rekisterinumero == '') {
   //Kun yhtion_parametri myyntitilausrivi_rekisterinumero == K, käyttöliittymästä on mahdollisuus syöttää tilausriville rekisterinumero.
@@ -109,14 +189,14 @@ if (!function_exists("tuoteperhe_reku")) {
     global $yhtiorow, $kukarow;
 
     //Haetaan tuoteperheen lapset ja lisätään ne $tuoteperhe ja $kaikkituotteet arraysiin
-    $query = "  SELECT tuoteperhe.*
-          FROM tuoteperhe
-          JOIN tuote ON tuoteperhe.yhtio = tuote.yhtio and tuoteperhe.tuoteno = tuote.tuoteno
-          WHERE tuoteperhe.yhtio = '$kukarow[yhtio]'
-          and tuoteperhe.isatuoteno = '$isatuoteno'
-          $perhelisa
-          $kieltolisa
-          ORDER BY tuoteperhe.tuoteno, tuoteperhe.tunnus";
+    $query = "SELECT tuoteperhe.*
+              FROM tuoteperhe
+              JOIN tuote ON tuoteperhe.yhtio = tuote.yhtio and tuoteperhe.tuoteno = tuote.tuoteno
+              WHERE tuoteperhe.yhtio    = '$kukarow[yhtio]'
+              and tuoteperhe.isatuoteno = '$isatuoteno'
+              $perhelisa
+              $kieltolisa
+              ORDER BY tuoteperhe.tuoteno, tuoteperhe.tunnus";
     $perheresult = pupe_query($query);
 
     while ($perherow = mysql_fetch_assoc($perheresult)) {
@@ -145,14 +225,14 @@ if (!function_exists("tuoteperhe_reku2")) {
       $isat_array[] = $tuoteno;
 
       // Haetaan tuoteperheen lapset ja lisätään ne $isa_array arrayseen
-      $query = "  SELECT tuoteperhe.*
-            FROM tuoteperhe
-            JOIN tuote ON tuoteperhe.yhtio = tuote.yhtio and tuoteperhe.tuoteno = tuote.tuoteno
-            WHERE tuoteperhe.yhtio = '$kukarow[yhtio]'
-            and tuoteperhe.isatuoteno = '$tuoteno'
-            $perhelisa
-            $kieltolisa
-            ORDER BY tuoteperhe.tuoteno, tuoteperhe.tunnus";
+      $query = "SELECT tuoteperhe.*
+                FROM tuoteperhe
+                JOIN tuote ON tuoteperhe.yhtio = tuote.yhtio and tuoteperhe.tuoteno = tuote.tuoteno
+                WHERE tuoteperhe.yhtio    = '$kukarow[yhtio]'
+                and tuoteperhe.isatuoteno = '$tuoteno'
+                $perhelisa
+                $kieltolisa
+                ORDER BY tuoteperhe.tuoteno, tuoteperhe.tunnus";
       $perheresult = pupe_query($query);
 
       while ($perherow = mysql_fetch_assoc($perheresult)) {
@@ -197,11 +277,11 @@ if (isset($varasto) and $lisaarivi_debug == 1) echo "Myydään varastoista: ",var_
 // katotaan oletuspaikka ja myydään tietenkin sieltä jos niin halutaan
 if ($olpaikalta != '') {
   $olquery = "SELECT concat_ws('#!¡!#',hyllyalue,hyllynro,hyllyvali,hyllytaso) olpaikka
-        FROM tuotepaikat
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND tuoteno = '$trow[tuoteno]'
-        AND oletus != ''
-        LIMIT 1";
+              FROM tuotepaikat
+              WHERE yhtio  = '$kukarow[yhtio]'
+              AND tuoteno  = '$trow[tuoteno]'
+              AND oletus  != ''
+              LIMIT 1";
   $olpares = pupe_query($olquery);
   $olparow = mysql_fetch_assoc($olpares);
 
@@ -409,13 +489,13 @@ if ($kpl > 0 and $rivityyppi == 'O' and $yhtiorow['ostoera_pyoristys'] == 'K') {
 
   // haetaan tuotteen toimittajan takaata pakkauskoko tai jotain
   // Otetaan $trow laajemmin, tuotteen_toimittaja tiedot ja 2 avainsanaa
-  $query = "  SELECT tuote.*, tt.toim_tuoteno, tt.osto_era, tt.pakkauskoko, tt.ostohinta, tt.valuutta, tt.osto_alv, ta1.selite pakkaus2, ta2.selite pakkaus3
-        FROM tuote
-        JOIN tuotteen_toimittajat as tt on (tt.yhtio = tuote.yhtio and tuote.tuoteno = tt.tuoteno and tt.liitostunnus = '$laskurow[liitostunnus]')
-        LEFT JOIN tuotteen_avainsanat as ta1 on (ta1.yhtio=tuote.yhtio and ta1.tuoteno=tuote.tuoteno and ta1.laji='pakkauskoko2' )
-        LEFT JOIN tuotteen_avainsanat as ta2 on (ta2.yhtio=tuote.yhtio and ta2.tuoteno=tuote.tuoteno and ta2.laji='pakkauskoko3')
-        WHERE tuote.yhtio='{$kukarow["yhtio"]}'
-        AND tuote.tuoteno = '{$trow["tuoteno"]}'";
+  $query = "SELECT tuote.*, tt.toim_tuoteno, tt.osto_era, tt.pakkauskoko, tt.ostohinta, tt.valuutta, tt.osto_alv, ta1.selite pakkaus2, ta2.selite pakkaus3
+            FROM tuote
+            JOIN tuotteen_toimittajat as tt on (tt.yhtio = tuote.yhtio and tuote.tuoteno = tt.tuoteno and tt.liitostunnus = '$laskurow[liitostunnus]')
+            LEFT JOIN tuotteen_avainsanat as ta1 on (ta1.yhtio=tuote.yhtio and ta1.tuoteno=tuote.tuoteno and ta1.laji='pakkauskoko2' )
+            LEFT JOIN tuotteen_avainsanat as ta2 on (ta2.yhtio=tuote.yhtio and ta2.tuoteno=tuote.tuoteno and ta2.laji='pakkauskoko3')
+            WHERE tuote.yhtio='{$kukarow["yhtio"]}'
+            AND tuote.tuoteno = '{$trow["tuoteno"]}'";
   $ttresult = pupe_query($query);
   $ttrow = mysql_fetch_assoc($ttresult);
 
@@ -671,11 +751,11 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
   // Katsotaan onko maksuehto jälkivaatimus, koska silloin ei toimiteta erikoisvarastoista vaikka erikoistoimitus_alarajasumma ylittyisi
   if (!isset($jvtsekres)) {
-    $apuqu = "  SELECT tunnus
-          FROM maksuehto
-          WHERE yhtio  = '$kukarow[yhtio]'
-          AND tunnus  = '$laskurow[maksuehto]'
-          AND jv      != ''";
+    $apuqu = "SELECT tunnus
+              FROM maksuehto
+              WHERE yhtio  = '$kukarow[yhtio]'
+              AND tunnus   = '$laskurow[maksuehto]'
+              AND jv      != ''";
     $jvtsekres = pupe_query($apuqu);
 
     if (mysql_num_rows($jvtsekres) > 0) {
@@ -685,11 +765,11 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
   // Vientiasiakkaille ei myydä erikoisvarastoista jos toimitustapa on nouto
   if (!isset($tntsekres)) {
-    $apuqu = "  SELECT tunnus
-          FROM toimitustapa
-          WHERE yhtio  = '$kukarow[yhtio]'
-          AND selite  = '$laskurow[toimitustapa]'
-          AND nouto  != ''";
+    $apuqu = "SELECT tunnus
+              FROM toimitustapa
+              WHERE yhtio  = '$kukarow[yhtio]'
+              AND selite   = '$laskurow[toimitustapa]'
+              AND nouto   != ''";
     $tntsekres = pupe_query($apuqu);
 
     if (mysql_num_rows($tntsekres) > 0) {
@@ -913,10 +993,10 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
   // Sitten käydään kaikkien tuotteiden saldot läpi kaikilta varastopaikoilta
   foreach ($kaikkituotteet as $tuoteno) {
 
-    $query = "  SELECT ei_saldoa, status
-          FROM tuote
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tuoteno = '$tuoteno'";
+    $query = "SELECT ei_saldoa, status
+              FROM tuote
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tuoteno = '$tuoteno'";
     $zres = pupe_query($query);
     $zrow = mysql_fetch_assoc($zres);
 
@@ -933,30 +1013,30 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
       }
 
       // Käydään läpi tuotepaikat
-      if (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") and $paikka != "EIERAAVIELA#!¡!#EIEI" AND $rivityyppi != 'W' AND ($laskurow["tila"] != 'V' or $paikka != "")) {
-        $query = "  SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
-              tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
-              sarjanumeroseuranta.sarjanumero era,
-              concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta,
-              varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi, varastopaikat.erikoistoimitus_alarajasumma
-              FROM tuote
-              JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
-              JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-              and concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-              and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-              JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio
-              and sarjanumeroseuranta.tuoteno = tuote.tuoteno
-              and sarjanumeroseuranta.hyllyalue = tuotepaikat.hyllyalue
-              and sarjanumeroseuranta.hyllynro = tuotepaikat.hyllynro
-              and sarjanumeroseuranta.hyllyvali = tuotepaikat.hyllyvali
-              and sarjanumeroseuranta.hyllytaso = tuotepaikat.hyllytaso
-              and sarjanumeroseuranta.myyntirivitunnus = 0
-              and sarjanumeroseuranta.era_kpl != 0
-              WHERE tuote.yhtio = '$kukarow[yhtio]'
-              and tuote.tuoteno = '$tuoteno'
-              $notfromvarasto
-              GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16
-              ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
+      if (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") and $paikka != "EIERAAVIELA#!¡!#EIEI" and $rivityyppi != 'W' and ($laskurow["tila"] != 'V' or $paikka != "")) {
+        $query = "SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
+                  tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
+                  sarjanumeroseuranta.sarjanumero era,
+                  concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta,
+                  varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi, varastopaikat.erikoistoimitus_alarajasumma
+                  FROM tuote
+                  JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
+                  JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
+                  and concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+                  and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+                  JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio
+                  and sarjanumeroseuranta.tuoteno           = tuote.tuoteno
+                  and sarjanumeroseuranta.hyllyalue         = tuotepaikat.hyllyalue
+                  and sarjanumeroseuranta.hyllynro          = tuotepaikat.hyllynro
+                  and sarjanumeroseuranta.hyllyvali         = tuotepaikat.hyllyvali
+                  and sarjanumeroseuranta.hyllytaso         = tuotepaikat.hyllytaso
+                  and sarjanumeroseuranta.myyntirivitunnus  = 0
+                  and sarjanumeroseuranta.era_kpl          != 0
+                  WHERE tuote.yhtio                         = '$kukarow[yhtio]'
+                  and tuote.tuoteno                         = '$tuoteno'
+                  $notfromvarasto
+                  GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16
+                  ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
       }
       else {
 
@@ -966,20 +1046,20 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
           $limit = " LIMIT 1 ";
         }
 
-        $query = "  SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
-              tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuotepaikat.prio,
-              concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
-              varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi, varastopaikat.erikoistoimitus_alarajasumma, '' era
-              FROM tuote
-              JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
-              JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-              and concat(rpad(upper(alkuhyllyalue), 5, '0'),lpad(upper(alkuhyllynro), 5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-              and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-              WHERE tuote.yhtio = '$kukarow[yhtio]'
-              and tuote.tuoteno = '$tuoteno'
-              $notfromvarasto
-              ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta
-              $limit";
+        $query = "SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
+                  tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuotepaikat.prio,
+                  concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
+                  varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi, varastopaikat.erikoistoimitus_alarajasumma, '' era
+                  FROM tuote
+                  JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
+                  JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
+                  and concat(rpad(upper(alkuhyllyalue), 5, '0'),lpad(upper(alkuhyllynro), 5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+                  and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+                  WHERE tuote.yhtio = '$kukarow[yhtio]'
+                  and tuote.tuoteno = '$tuoteno'
+                  $notfromvarasto
+                  ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta
+                  $limit";
       }
 
       $zres = pupe_query($query);
@@ -1290,6 +1370,19 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
         // Jos tuotteella on tuotepaikkoja
         foreach ($zzrow as $zrow) {
 
+          if ($lisaarivi_debug == 1) {
+            echo "({$yhtiorow["puute_jt_oletus"]} == O <br>
+                    or $varataan_saldoa == EI <br>
+                    or ({$zrow["myytavissa"]} > 0 <br>
+                      and (($rivityyppi == 'L' and {$kukarow['kassamyyja']} == '' and $myy_erikoistoim_ok and {$zrow['varastotyyppi']} == 'E' and {$zrow['erikoistoimitus_alarajasumma']} > 0 and (float) {$trow['myyntihinta']} >= (float) {$zrow['erikoistoimitus_alarajasumma']}) <br>
+                        or {$zrow["varastotyyppi"]} == '' <br>
+                        or {$zrow["varastotyyppi"]} == 'V' <br>
+                        or (is_array($varasto) and in_array({$zrow["varasto"]}, $varasto) and {$laskurow["varasto"]} == 0)
+                        or {$laskurow["varasto"]} == {$zrow["varasto"]}) <br>
+                    ) <br>
+                  ) <br><br>";
+          }
+
           if ($yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI" or ($zrow["myytavissa"] > 0 and (($rivityyppi == 'L' and $kukarow['kassamyyja'] == '' and $myy_erikoistoim_ok and $zrow['varastotyyppi'] == 'E' and $zrow['erikoistoimitus_alarajasumma'] > 0 and (float) $trow['myyntihinta'] >= (float) $zrow['erikoistoimitus_alarajasumma']) or $zrow["varastotyyppi"] == '' or $zrow["varastotyyppi"] == 'V' or (is_array($varasto) and in_array($zrow["varasto"], $varasto) and $laskurow["varasto"] == 0) or $laskurow["varasto"] == $zrow["varasto"]))) {
 
             if ($lisaarivi_debug == 1) echo "Myydään $tuoteno paikalta $zrow[hyllyalue]-$zrow[hyllynro]-$zrow[hyllyvali]-$zrow[hyllytaso]: $zrow[myytavissa] kappaletta<br>";
@@ -1592,9 +1685,9 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               }
 
               // Haetaan käsiteltävän tuotteen tiedot
-              $query = "  SELECT *
-                    FROM tuote
-                    WHERE yhtio='$kukarow[yhtio]' and tuoteno='$myy_tuoteno[$indeksi]'";
+              $query = "SELECT *
+                        FROM tuote
+                        WHERE yhtio='$kukarow[yhtio]' and tuoteno='$myy_tuoteno[$indeksi]'";
               $tres = pupe_query($query);
               $trow = mysql_fetch_assoc($tres);
 
@@ -1752,41 +1845,41 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 $myy_hyllyvali[$indeksi] = $myy_hyllyvali_temp;
               }
 
-              $query = "  INSERT into tilausrivi set
-                    hyllyalue     = '$myy_hyllyalue[$indeksi]',
-                    hyllynro     = '$myy_hyllynro[$indeksi]',
-                    hyllytaso     = '$myy_hyllytaso[$indeksi]',
-                    hyllyvali     = '$myy_hyllyvali[$indeksi]',
-                    tilaajanrivinro = '$rivinumero',
-                    laatija     = '$kukarow[kuka]',
-                    laadittu     = $vanharivilaadittu,
-                    yhtio       = '$kukarow[yhtio]',
-                    tuoteno     = '$myy_tuoteno[$indeksi]',
-                    varattu     = '$varattu',
-                    yksikko     = '$trow[yksikko]',
-                    kpl       = '0',
-                    kpl2      = '$kpl2',
-                    tilkpl       = '$tilattu',
-                    {$query_ale_lrivi}
-                    {$query_erikoisale_lisa}
-                    alv       = '$lis_alv',
-                    netto      = '$lis_netto',
-                    hinta       = '$lis_hinta',
-                    kerayspvm     = '$kerayspvm',
-                    otunnus     = '$kukarow[kesken]',
-                    tyyppi       = '$rivityyppi',
-                    toimaika     = '$toimaika',
-                    kommentti     = '$kommentti',
-                    ale_peruste    = '$ale_peruste',
-                    var       = '',
-                    var2      = '{$var2}',
-                    try        = '$trow[try]',
-                    osasto      = '$trow[osasto]',
-                    perheid      = '$perheid',
-                    perheid2    = '$perheid2',
-                    tunnus       = '$rivitunnus',
-                    nimitys     = '$trow[nimitys]',
-                    jaksotettu    = '$jaksotettu'";
+              $query = "INSERT into tilausrivi set
+                        hyllyalue       = '$myy_hyllyalue[$indeksi]',
+                        hyllynro        = '$myy_hyllynro[$indeksi]',
+                        hyllytaso       = '$myy_hyllytaso[$indeksi]',
+                        hyllyvali       = '$myy_hyllyvali[$indeksi]',
+                        tilaajanrivinro = '$rivinumero',
+                        laatija         = '$kukarow[kuka]',
+                        laadittu        = $vanharivilaadittu,
+                        yhtio           = '$kukarow[yhtio]',
+                        tuoteno         = '$myy_tuoteno[$indeksi]',
+                        varattu         = '$varattu',
+                        yksikko         = '$trow[yksikko]',
+                        kpl             = '0',
+                        kpl2            = '$kpl2',
+                        tilkpl          = '$tilattu',
+                        {$query_ale_lrivi}
+                        {$query_erikoisale_lisa}
+                        alv             = '$lis_alv',
+                        netto           = '$lis_netto',
+                        hinta           = '$lis_hinta',
+                        kerayspvm       = '$kerayspvm',
+                        otunnus         = '$kukarow[kesken]',
+                        tyyppi          = '$rivityyppi',
+                        toimaika        = '$toimaika',
+                        kommentti       = '$kommentti',
+                        ale_peruste     = '$ale_peruste',
+                        var             = '',
+                        var2            = '{$var2}',
+                        try             = '$trow[try]',
+                        osasto          = '$trow[osasto]',
+                        perheid         = '$perheid',
+                        perheid2        = '$perheid2',
+                        tunnus          = '$rivitunnus',
+                        nimitys         = '$trow[nimitys]',
+                        jaksotettu      = '$jaksotettu'";
 
               if ($trow['ei_saldoa'] != '' and $yhtiorow["kerataanko_saldottomat"] == '') {
                 $query .= ", keratty = 'saldoton', kerattyaika = now()";
@@ -1797,7 +1890,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
               $trivtyrow = array("selite" => "");
 
-              @include("trivityyppivalinta.inc");
+              @include "trivityyppivalinta.inc";
 
               //special case: Kun yhtiöparametri Valmistuksien_kasittely on asennossa, "valmistuksella voi olla vain yksi valmiste...",
               //excelistä sisäänluettavissa valmistusriveissä voi antaa valmistuslinjan ja toivotut päivämäärät (mikrotilaus.inc)
@@ -1809,10 +1902,15 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 $positio = $trivtyrow['selite'];
               }
 
-              $query = "  SELECT *
-                    FROM tilausrivin_lisatiedot
-                    WHERE yhtio       = '$kukarow[yhtio]'
-                    and tilausrivitunnus = '$lisatty_tun'";
+              if (!isset($myy_ohita_kerays[$indeksi])) {
+                $myy_ohita_kerays[$indeksi] = "";
+              }
+
+              $tlisatied_lisa2 = "";
+              $query = "SELECT *
+                        FROM tilausrivin_lisatiedot
+                        WHERE yhtio          = '$kukarow[yhtio]'
+                        and tilausrivitunnus = '$lisatty_tun'";
               $lisatied_res = pupe_query($query);
 
               if (!isset($myy_erikoistoimitus[$indeksi])) {
@@ -1838,18 +1936,18 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               if (mysql_num_rows($lisatied_res) > 0) {
                 $lisatied_row = mysql_fetch_assoc($lisatied_res);
 
-                $query = "  UPDATE tilausrivin_lisatiedot
-                      SET
-                      positio = if (positio = '' or '$valmistuslinja' != '', '{$positio}', positio),
-                      toimittajan_tunnus    = '$toimittajan_tunnus',
-                      rekisterinumero      = '{$rekisterinumero}',
-                      muutospvm        = now(),
-                      muuttaja        = '$kukarow[kuka]',
-                      erikoistoimitus_myynti  = '$myy_erikoistoimitus[$indeksi]'
-                      {$tlisatied_lisa}
-                      {$tlisatied_lisa2}
-                      WHERE yhtio       = '$kukarow[yhtio]'
-                      and tilausrivitunnus = '$lisatty_tun'";
+                $query = "UPDATE tilausrivin_lisatiedot
+                          SET
+                          positio                = if (positio = '' or '$valmistuslinja' != '', '{$positio}', positio),
+                          toimittajan_tunnus     = '$toimittajan_tunnus',
+                          rekisterinumero        = '{$rekisterinumero}',
+                          muutospvm              = now(),
+                          muuttaja               = '$kukarow[kuka]',
+                          erikoistoimitus_myynti = '$myy_erikoistoimitus[$indeksi]'
+                          {$tlisatied_lisa}
+                          {$tlisatied_lisa2}
+                          WHERE yhtio            = '$kukarow[yhtio]'
+                          and tilausrivitunnus   = '$lisatty_tun'";
                 $result = pupe_query($query);
               }
               else {
@@ -1862,22 +1960,22 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
                 $autoid = !empty($autoid) ? $autoid : 0;
 
-                $query = "  INSERT INTO tilausrivin_lisatiedot
-                      SET yhtio        = '$kukarow[yhtio]',
-                      positio         = '{$positio}',
-                      toimittajan_tunnus    = '$toimittajan_tunnus',
-                      ei_nayteta         = '$myy_lapsi_ein[$indeksi]',
-                      tilausrivitunnus    = '$lisatty_tun',
-                      erikoistoimitus_myynti   = '$myy_erikoistoimitus[$indeksi]',
-                      ohita_kerays      = '{$myy_ohita_kerays[$indeksi]}',
-                      vanha_otunnus      = '$kukarow[kesken]',
-                      rekisterinumero      = '{$rekisterinumero}',
-                      autoid          = '{$autoid}',
-                      jarjestys        = '$jarjestys',
-                      luontiaika        = now(),
-                      laatija         = '$kukarow[kuka]'
-                      {$tlisatied_lisa}
-                      {$tlisatied_lisa2}";
+                $query = "INSERT INTO tilausrivin_lisatiedot
+                          SET yhtio = '{$kukarow['yhtio']}',
+                          positio                = '{$positio}',
+                          toimittajan_tunnus     = '{$toimittajan_tunnus}',
+                          ei_nayteta             = '{$myy_lapsi_ein[$indeksi]}',
+                          tilausrivitunnus       = '{$lisatty_tun}',
+                          erikoistoimitus_myynti = '{$myy_erikoistoimitus[$indeksi]}',
+                          ohita_kerays           = '{$myy_ohita_kerays[$indeksi]}',
+                          vanha_otunnus          = '{$kukarow['kesken']}',
+                          rekisterinumero        = '{$rekisterinumero}',
+                          autoid                 = '{$autoid}',
+                          jarjestys              = '{$jarjestys}',
+                          luontiaika             = now(),
+                          laatija                = '{$kukarow['kuka']}'
+                          $tlisatied_lisa
+                          $tlisatied_lisa2";
 
                 if ($trow["sarjanumeroseuranta"] == "S" and $varattu < 0) {
                   $query .= " , osto_vai_hyvitys='O' ";
@@ -1912,32 +2010,32 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                   $tunken = "ostorivitunnus";
                 }
 
-                $query = "  SELECT sarjanumeroseuranta.tunnus, sarjanumeroseuranta.kaytetty
-                      FROM sarjanumeroseuranta
-                      LEFT JOIN tilausrivi ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.$tunken
-                      LEFT JOIN lasku ON lasku.yhtio=sarjanumeroseuranta.yhtio and lasku.tunnus=tilausrivi.otunnus
-                      WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
-                      and sarjanumeroseuranta.tunnus  IN ($myy_sarjatunnus)
-                      and sarjanumeroseuranta.tuoteno = '$myy_tuoteno[$indeksi]'
-                      and (sarjanumeroseuranta.myyntirivitunnus = 0 or lasku.tila='T')
-                      ORDER BY sarjanumeroseuranta.tunnus
-                      LIMIT ". (int) abs($varattu);
+                $query = "SELECT sarjanumeroseuranta.tunnus, sarjanumeroseuranta.kaytetty
+                          FROM sarjanumeroseuranta
+                          LEFT JOIN tilausrivi ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.$tunken
+                          LEFT JOIN lasku ON lasku.yhtio=sarjanumeroseuranta.yhtio and lasku.tunnus=tilausrivi.otunnus
+                          WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
+                          and sarjanumeroseuranta.tunnus  IN ($myy_sarjatunnus)
+                          and sarjanumeroseuranta.tuoteno = '$myy_tuoteno[$indeksi]'
+                          and (sarjanumeroseuranta.myyntirivitunnus = 0 or lasku.tila='T')
+                          ORDER BY sarjanumeroseuranta.tunnus
+                          LIMIT ". (int) abs($varattu);
                 $sres = pupe_query($query);
 
                 while ($srow = mysql_fetch_assoc($sres)) {
-                  $query = "  UPDATE sarjanumeroseuranta
-                        SET $tunken      = '$lisatty_tun'
-                        WHERE yhtio       = '$kukarow[yhtio]'
-                        and tunnus       = '$srow[tunnus]'
-                        and tuoteno       = '$myy_tuoteno[$indeksi]'";
+                  $query = "UPDATE sarjanumeroseuranta
+                            SET $tunken      = '$lisatty_tun'
+                            WHERE yhtio = '$kukarow[yhtio]'
+                            and tunnus  = '$srow[tunnus]'
+                            and tuoteno = '$myy_tuoteno[$indeksi]'";
                   $sarjares = pupe_query($query);
 
                   if ($srow["kaytetty"] == 'K') {
-                    $query = "  UPDATE tilausrivi
-                          SET alv=alv+500
-                          WHERE yhtio = '$kukarow[yhtio]'
-                          and tunnus = '$lisatty_tun'
-                          and alv < 500";
+                    $query = "UPDATE tilausrivi
+                              SET alv=alv+500
+                              WHERE yhtio = '$kukarow[yhtio]'
+                              and tunnus  = '$lisatty_tun'
+                              and alv     < 500";
                     $sarjares = pupe_query($query);
                   }
                 }
@@ -1950,15 +2048,15 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 if ($varattu > 0) {
                   $tunken = "myyntirivitunnus";
 
-                  $query = "  SELECT *
-                        FROM sarjanumeroseuranta
-                        WHERE yhtio    = '$kukarow[yhtio]'
-                        and tuoteno    = '$myy_tuoteno[$indeksi]'
-                        and hyllyalue  = '$myy_hyllyalue[$indeksi]'
-                        and hyllynro   = '$myy_hyllynro[$indeksi]'
-                        and hyllytaso   = '$myy_hyllytaso[$indeksi]'
-                        and hyllyvali   = '$myy_hyllyvali[$indeksi]'
-                        and sarjanumero = '$myy_era[$indeksi]'";
+                  $query = "SELECT *
+                            FROM sarjanumeroseuranta
+                            WHERE yhtio     = '$kukarow[yhtio]'
+                            and tuoteno     = '$myy_tuoteno[$indeksi]'
+                            and hyllyalue   = '$myy_hyllyalue[$indeksi]'
+                            and hyllynro    = '$myy_hyllynro[$indeksi]'
+                            and hyllytaso   = '$myy_hyllytaso[$indeksi]'
+                            and hyllyvali   = '$myy_hyllyvali[$indeksi]'
+                            and sarjanumero = '$myy_era[$indeksi]'";
                   $lisa_res = pupe_query($query);
                   $lisa_row = mysql_fetch_assoc($lisa_res);
 
@@ -1969,24 +2067,24 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                   $oslisa = "";
                 }
 
-                $query = "  INSERT into sarjanumeroseuranta
-                      SET yhtio     = '$kukarow[yhtio]',
-                      tuoteno      = '$myy_tuoteno[$indeksi]',
-                      lisatieto     = '$lisa_row[lisatieto]',
-                      $tunken     = '$lisatty_tun',
-                      $oslisa
-                      kaytetty    = '$lisa_row[kaytetty]',
-                      era_kpl      = '',
-                      laatija      = '$kukarow[kuka]',
-                      luontiaika    = now(),
-                      takuu_alku     = '$lisa_row[takuu_alku]',
-                      takuu_loppu    = '$lisa_row[takuu_loppu]',
-                      parasta_ennen  = '$lisa_row[parasta_ennen]',
-                      hyllyalue     = '$myy_hyllyalue[$indeksi]',
-                      hyllynro     = '$myy_hyllynro[$indeksi]',
-                      hyllytaso     = '$myy_hyllytaso[$indeksi]',
-                      hyllyvali     = '$myy_hyllyvali[$indeksi]',
-                      sarjanumero   = '$myy_era[$indeksi]'";
+                $query = "INSERT into sarjanumeroseuranta
+                          SET yhtio     = '$kukarow[yhtio]',
+                          tuoteno       = '$myy_tuoteno[$indeksi]',
+                          lisatieto     = '$lisa_row[lisatieto]',
+                          $tunken     = '$lisatty_tun',
+                          $oslisa
+                          kaytetty      = '$lisa_row[kaytetty]',
+                          era_kpl       = '',
+                          laatija       = '$kukarow[kuka]',
+                          luontiaika    = now(),
+                          takuu_alku    = '$lisa_row[takuu_alku]',
+                          takuu_loppu   = '$lisa_row[takuu_loppu]',
+                          parasta_ennen = '$lisa_row[parasta_ennen]',
+                          hyllyalue     = '$myy_hyllyalue[$indeksi]',
+                          hyllynro      = '$myy_hyllynro[$indeksi]',
+                          hyllytaso     = '$myy_hyllytaso[$indeksi]',
+                          hyllyvali     = '$myy_hyllyvali[$indeksi]',
+                          sarjanumero   = '$myy_era[$indeksi]'";
                 $lisa_res = pupe_query($query);
               }
 
@@ -1994,21 +2092,21 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 //Päivitetään isän perhetunnus
                 if ($rivityyppi == 'V') {
 
-                  $query = "  SELECT tuoteno
-                        FROM tilausrivi
-                        WHERE yhtio  = '$kukarow[yhtio]'
-                        and tunnus  = $perheid_lisaarivi
-                        and tyyppi  = 'V'";
+                  $query = "SELECT tuoteno
+                            FROM tilausrivi
+                            WHERE yhtio = '$kukarow[yhtio]'
+                            and tunnus  = $perheid_lisaarivi
+                            and tyyppi  = 'V'";
                   $lisa_res = pupe_query($query);
                   $lisa_row = mysql_fetch_assoc($lisa_res);
 
                   if ($lisatied_row["porauskuvio"] == "M" or (isset($lapsenlap_array[$lisa_row["tuoteno"]]) and strtoupper($lapsenlap_array[$lisa_row["tuoteno"]]) == strtoupper($lisa_row["tuoteno"]))) {
                     $valmistetyyppi = "M";
 
-                    $query = "  UPDATE tilausrivin_lisatiedot
-                          SET porauskuvio  = '$valmistetyyppi'
-                          WHERE yhtio       = '$kukarow[yhtio]'
-                          and tilausrivitunnus = '$perheid_lisaarivi'";
+                    $query = "UPDATE tilausrivin_lisatiedot
+                              SET porauskuvio  = '$valmistetyyppi'
+                              WHERE yhtio          = '$kukarow[yhtio]'
+                              and tilausrivitunnus = '$perheid_lisaarivi'";
                     $result = pupe_query($query);
                   }
                   else {
@@ -2165,15 +2263,15 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     if (!$kvkasittely) {
 
       // Otetaan tuotteen oletustoimittaja
-      $query = "  SELECT tuotteen_toimittajat.tehdas_saldo
-            FROM tuotteen_toimittajat use index (yhtio_tuoteno)
-            JOIN toimi
-            ON ( toimi.yhtio = tuotteen_toimittajat.yhtio
-              AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
-            WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
-              AND tuotteen_toimittajat.tuoteno = '$tuoteno'
-            ORDER BY if (tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys)
-            LIMIT 1";
+      $query = "SELECT tuotteen_toimittajat.tehdas_saldo
+                FROM tuotteen_toimittajat use index (yhtio_tuoteno)
+                JOIN toimi
+                ON ( toimi.yhtio = tuotteen_toimittajat.yhtio
+                  AND toimi.tunnus                 = tuotteen_toimittajat.liitostunnus)
+                WHERE tuotteen_toimittajat.yhtio   = '$kukarow[yhtio]'
+                  AND tuotteen_toimittajat.tuoteno = '$tuoteno'
+                ORDER BY if (tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys)
+                LIMIT 1";
 
       $toimpaikres = pupe_query($query);
       $krow = mysql_fetch_assoc($toimpaikres);
@@ -2253,10 +2351,10 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       }
     }
 
-    $query = "  SELECT *
-          FROM tuote
-          WHERE tuoteno = '$tuoteno'
-          and yhtio = '$kukarow[yhtio]'";
+    $query = "SELECT *
+              FROM tuote
+              WHERE tuoteno = '$tuoteno'
+              and yhtio     = '$kukarow[yhtio]'";
     $tuoteresult = pupe_query($query);
 
     if (mysql_num_rows($tuoteresult) == 0) {
@@ -2285,7 +2383,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       if (!empty($laskurow['varasto'])) {
         $kohde_varastot = array($laskurow['varasto']);
       }
-      else if (empty($laskurow['varasto']) and !empty($laskurow['yhtio_toimipaikka'])) {
+      elseif (empty($laskurow['varasto']) and !empty($laskurow['yhtio_toimipaikka'])) {
         $kohde_varastot = hae_yhtion_toimipaikan_varastot($laskurow['yhtio_toimipaikka']);
         $kohde_varastot = array_column($kohde_varastot, 'tunnus');
       }
@@ -2364,18 +2462,18 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
         if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('A', 'B', 'C', 'I', 'J'))) {
           // Katsotaan onko tälle tuotteelle toimittajaa ja oletusvienti on jotain vaihto-omaisuutta (Tilaa-toimittajalta drop-downiin mukaan)
-          $query = "  SELECT tilausrivin_lisatiedot.toimittajan_tunnus
-                FROM tilausrivi
-                JOIN tilausrivin_lisatiedot
-                ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-                  AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
-                  AND tilausrivin_lisatiedot.toimittajan_tunnus != 0 )
-                WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
-                AND tilausrivi.tyyppi != 'D'
-                AND tilausrivi.var in ('J','T','U')
-                ORDER BY tilausrivi.tunnus ASC
-                LIMIT 1";
+          $query = "SELECT tilausrivin_lisatiedot.toimittajan_tunnus
+                    FROM tilausrivi
+                    JOIN tilausrivin_lisatiedot
+                    ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+                      AND tilausrivin_lisatiedot.tilausrivitunnus    = tilausrivi.tunnus
+                      AND tilausrivin_lisatiedot.toimittajan_tunnus != 0 )
+                    WHERE tilausrivi.yhtio                           = '{$kukarow['yhtio']}'
+                    AND tilausrivi.otunnus                           = '{$laskurow['tunnus']}'
+                    AND tilausrivi.tyyppi                           != 'D'
+                    AND tilausrivi.var                               in ('J','T','U')
+                    ORDER BY tilausrivi.tunnus ASC
+                    LIMIT 1";
           $toimittaja_result = pupe_query($query);
           $toimittaja = mysql_fetch_assoc($toimittaja_result);
 
@@ -2391,20 +2489,20 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
         }
 
         // Otetaan tuotteen oletustoimittaja
-        $query = "  SELECT toimi.tyyppi_tieto,
-              tuotteen_toimittajat.liitostunnus,
-              toimi.nimi,
-              toimi.suoratoimitus,
-              tuotteen_toimittajat.tehdas_saldo
-              FROM tuotteen_toimittajat use index (yhtio_tuoteno)
-              JOIN toimi
-              ON ( toimi.yhtio = tuotteen_toimittajat.yhtio
-                AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
-                {$yksi_suoratoimittaja_join})
-              WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
-              AND tuotteen_toimittajat.tuoteno = '$trow[tuoteno]'
-              ORDER BY if (tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys)
-              LIMIT 1";
+        $query = "SELECT toimi.tyyppi_tieto,
+                  tuotteen_toimittajat.liitostunnus,
+                  toimi.nimi,
+                  toimi.suoratoimitus,
+                  tuotteen_toimittajat.tehdas_saldo
+                  FROM tuotteen_toimittajat use index (yhtio_tuoteno)
+                  JOIN toimi
+                  ON ( toimi.yhtio = tuotteen_toimittajat.yhtio
+                    AND toimi.tunnus               = tuotteen_toimittajat.liitostunnus
+                    {$yksi_suoratoimittaja_join})
+                  WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
+                  AND tuotteen_toimittajat.tuoteno = '$trow[tuoteno]'
+                  ORDER BY if (tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys)
+                  LIMIT 1";
         $toimpaikres = pupe_query($query);
         $krow = mysql_fetch_assoc($toimpaikres);
 
@@ -2454,10 +2552,10 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           if (in_array($yhtiorow['puute_jt_oletus'], array('','A'))) {
             $var = "P";
           }
-          else if (in_array($yhtiorow['puute_jt_oletus'], array('J','B'))) {
+          elseif (in_array($yhtiorow['puute_jt_oletus'], array('J','B'))) {
             $var = "J";
           }
-          else if (in_array($yhtiorow['puute_jt_oletus'], array('H'))) {
+          elseif (in_array($yhtiorow['puute_jt_oletus'], array('H'))) {
             $var = "";
           }
           else {
@@ -2550,10 +2648,10 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           if (isset($jt_manual) and $jt_manual != '' and !empty($yhtiorow['jt_manual'])) {
             $kerayspvm = date('Y-m-d', strtotime('now'));
           }
-          else if ((isset($jt_muidenmukana) and $jt_muidenmukana == 'KYLLA') or (!isset($jt_muidenmukana) and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A')) {
+          elseif ((isset($jt_muidenmukana) and $jt_muidenmukana == 'KYLLA') or (!isset($jt_muidenmukana) and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A')) {
             $kerayspvm = date('Y-m-d', strtotime('now + 3 month'));
           }
-          else if ((isset($jt_muidenmukana) and $jt_muidenmukana == 'EI') or (!isset($jt_muidenmukana) and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A')) {
+          elseif ((isset($jt_muidenmukana) and $jt_muidenmukana == 'EI') or (!isset($jt_muidenmukana) and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A')) {
             $kerayspvm = date('Y-m-d', strtotime('now'));
           }
         case 'R' : // Valmistetaan asiakkaalle
@@ -2682,14 +2780,14 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     else {
       // haetaan vielä tuotteen oletuspaikka puuteriville, jotta seuranta ois helpompaa
       //jos laskurow[varasto] on setattu niin yritetään löytää paikka siitä varastosta
-      $query = "  SELECT tuotepaikat.*, varastopaikat.tunnus varastotunnus
-            FROM tuotepaikat
-            LEFT JOIN varastopaikat ON tuotepaikat.yhtio = varastopaikat.yhtio
-            and concat(rpad(upper(alkuhyllyalue) ,5,'0'),lpad(upper(alkuhyllynro) ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-            and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-            where tuotepaikat.yhtio = '$kukarow[yhtio]'
-            and tuotepaikat.tuoteno = '$trow[tuoteno]'
-            ORDER BY tuotepaikat.oletus DESC";
+      $query = "SELECT tuotepaikat.*, varastopaikat.tunnus varastotunnus
+                FROM tuotepaikat
+                LEFT JOIN varastopaikat ON tuotepaikat.yhtio = varastopaikat.yhtio
+                and concat(rpad(upper(alkuhyllyalue) ,5,'0'),lpad(upper(alkuhyllynro) ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+                and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+                where tuotepaikat.yhtio = '$kukarow[yhtio]'
+                and tuotepaikat.tuoteno = '$trow[tuoteno]'
+                ORDER BY tuotepaikat.oletus DESC";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) > 0) {
@@ -2712,7 +2810,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           }
 
           // Jos paikkaa ei vieläkään löytynyt, luodaan tilauksen varastoon tuotepaikka ja käytetään sitä (ostossa toisin)
-          if (!$loydetytpaikat AND $rivityyppi != 'O') {
+          if (!$loydetytpaikat and $rivityyppi != 'O') {
 
             if ($laskurow['varasto'] != 0) {
               $_varasto = $laskurow['varasto'];
@@ -2721,10 +2819,10 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
               $_varasto = $varasto[0];
             }
 
-            $query = "  SELECT alkuhyllyalue, alkuhyllynro
-                  FROM varastopaikat
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus = '{$_varasto}'";
+            $query = "SELECT alkuhyllyalue, alkuhyllynro
+                      FROM varastopaikat
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tunnus  = '{$_varasto}'";
             $oletus_tuotepaikka_res = pupe_query($query);
             $oletus_tuotepaikka_row = mysql_fetch_assoc($oletus_tuotepaikka_res);
 
@@ -2806,7 +2904,6 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       if ($lisaarivi_debug == 1) echo "$edi_ulos<br>";
     }
 
-
     // Jos hinta ja alekertoimet on setattu
     if ($puu_hintake[$i] != "X") {
       if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
@@ -2869,11 +2966,11 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     // Jos ollaan tultu editilauksesta ja meillä on puute/jt, katsotaan onko tälle tuotteelle vastaavia ja pistetään ne kommenttiin
     if ($kutsuja == "EDITILAUS" and ($var == "J" or $var == "P")) {
       //vastaavat tuotteet
-      $query  = "  SELECT *
-            FROM vastaavat
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND tuoteno = '$trow[tuoteno]'
-            LIMIT 1";
+      $query  = "SELECT *
+                 FROM vastaavat
+                 WHERE yhtio = '$kukarow[yhtio]'
+                 AND tuoteno = '$trow[tuoteno]'
+                 LIMIT 1";
       $ediresult = pupe_query($query);
 
       if (mysql_num_rows($ediresult) > 0) {
@@ -2883,12 +2980,12 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
         $vrow = mysql_fetch_assoc($ediresult);
 
-        $query = "  SELECT *
-              FROM vastaavat
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND id = '$vrow[id]'
-              AND tuoteno <> '$trow[tuoteno]'
-              ORDER BY jarjestys, tuoteno";
+        $query = "SELECT *
+                  FROM vastaavat
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND id      = '$vrow[id]'
+                  AND tuoteno <> '$trow[tuoteno]'
+                  ORDER BY jarjestys, tuoteno";
         $edi2result = pupe_query($query);
 
         while ($edirow = mysql_fetch_assoc($edi2result)) {
@@ -2896,10 +2993,10 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           list(, , $vmyytavissa) = saldo_myytavissa($edirow["tuoteno"]);
 
           if ($vmyytavissa > 0) {
-            $tvsql = "  SELECT *
-                  FROM tuote
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  AND tuoteno = '$edirow[tuoteno]'";
+            $tvsql = "SELECT *
+                      FROM tuote
+                      WHERE yhtio = '$kukarow[yhtio]'
+                      AND tuoteno = '$edirow[tuoteno]'";
             $tvresult = pupe_query($tvsql);
             $tvrow = mysql_fetch_assoc($tvresult);
 
@@ -2967,11 +3064,11 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       }
       elseif ($rivitunnus == 0 or ($laskurow['tila'] == 'O' and $laskurow['alatila'] == '' and $laskurow['laskunro'] == 0)) {
 
-        $query = "  SELECT tuotekerroin
-              FROM tuotteen_toimittajat
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tuoteno = '{$trow['tuoteno']}'
-              AND liitostunnus = '{$laskurow['liitostunnus']}'";
+        $query = "SELECT tuotekerroin
+                  FROM tuotteen_toimittajat
+                  WHERE yhtio      = '{$kukarow['yhtio']}'
+                  AND tuoteno      = '{$trow['tuoteno']}'
+                  AND liitostunnus = '{$laskurow['liitostunnus']}'";
         $tt_res = pupe_query($query);
         $tt_row = mysql_fetch_assoc($tt_res);
 
@@ -3015,43 +3112,43 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     }
 
     // lisätään puuterivi
-    $query = "  INSERT into tilausrivi set
-          hyllyalue     = '$p_hyllyalue',
-          hyllynro     = '$p_hyllynro',
-          hyllyvali     = '$p_hyllyvali',
-          hyllytaso     = '$p_hyllytaso',
-          tilaajanrivinro = '$rivinumero',
-          laatija     = '$kukarow[kuka]',
-          laadittu     = $vanharivilaadittu,
-          yhtio       = '$kukarow[yhtio]',
-          tuoteno     = '$trow[tuoteno]',
-          varattu     = '$varattu',
-          yksikko     = '$trow[yksikko]',
-          kpl       = '0',
-          kpl2      = '$kpl2',
-          tilkpl       = '$kpl',
-          jt        = '$jt',
-          {$query_insert_ale_lisa}
-          {$query_erikoisale_lisa}
-          alv       = '$lis_alv',
-          netto      = '$lis_netto',
-          hinta       = '$lis_hinta',
-          {$query_insert_hinta_alkuperainen_lisa}
-          kerayspvm     = '$kerayspvm',
-          otunnus     = '$kukarow[kesken]',
-          tyyppi       = '$rivityyppi',
-          toimaika     = '$toimaika',
-          kommentti     = '$kommentti',
-          ale_peruste    = '$ale_peruste',
-          var       = '$var',
-          var2       = '{$var2}',
-          try        = '$trow[try]',
-          osasto      = '$trow[osasto]',
-          perheid      = '$perheid',
-          perheid2    = '$perheid2',
-          tunnus       = '$rivitunnus',
-          nimitys     = '$trow[nimitys]',
-          jaksotettu    = '$jaksotettu'";
+    $query = "INSERT into tilausrivi set
+              hyllyalue       = '$p_hyllyalue',
+              hyllynro        = '$p_hyllynro',
+              hyllyvali       = '$p_hyllyvali',
+              hyllytaso       = '$p_hyllytaso',
+              tilaajanrivinro = '$rivinumero',
+              laatija         = '$kukarow[kuka]',
+              laadittu        = $vanharivilaadittu,
+              yhtio           = '$kukarow[yhtio]',
+              tuoteno         = '$trow[tuoteno]',
+              varattu         = '$varattu',
+              yksikko         = '$trow[yksikko]',
+              kpl             = '0',
+              kpl2            = '$kpl2',
+              tilkpl          = '$kpl',
+              jt              = '$jt',
+              {$query_insert_ale_lisa}
+              {$query_erikoisale_lisa}
+              alv             = '$lis_alv',
+              netto           = '$lis_netto',
+              hinta           = '$lis_hinta',
+              {$query_insert_hinta_alkuperainen_lisa}
+              kerayspvm       = '$kerayspvm',
+              otunnus         = '$kukarow[kesken]',
+              tyyppi          = '$rivityyppi',
+              toimaika        = '$toimaika',
+              kommentti       = '$kommentti',
+              ale_peruste     = '$ale_peruste',
+              var             = '$var',
+              var2            = '{$var2}',
+              try             = '$trow[try]',
+              osasto          = '$trow[osasto]',
+              perheid         = '$perheid',
+              perheid2        = '$perheid2',
+              tunnus          = '$rivitunnus',
+              nimitys         = '$trow[nimitys]',
+              jaksotettu      = '$jaksotettu'";
 
     if ($trow['ei_saldoa'] != '' and $yhtiorow["kerataanko_saldottomat"] == '') {
       $query .= ", kerattyaika = now()";
@@ -3062,21 +3159,21 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
     if ($suoratoimitus_splittaus and $rivitunnus == $lisatty_tun) {
       // Päivitetään suoratoimitus-myyntitilausrivin määrät
-      $query = "  UPDATE tilausrivi
-            JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.tilausrivilinkki > 0 and tilausrivin_lisatiedot.tilausrivilinkki = '$lisatty_tun')
-            SET tilausrivi.tilkpl  = '$varattu',
-            tilausrivi.varattu     = if(tilausrivi.varattu != 0, $varattu, 0),
-            tilausrivi.jt       = if(tilausrivi.jt != 0, $varattu, 0)
-            WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-            and tilausrivi.tunnus = '$suoratoimitus_rivitun'";
+      $query = "UPDATE tilausrivi
+                JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.tilausrivilinkki > 0 and tilausrivin_lisatiedot.tilausrivilinkki = '$lisatty_tun')
+                SET tilausrivi.tilkpl  = '$varattu',
+                tilausrivi.varattu     = if(tilausrivi.varattu != 0, $varattu, 0),
+                tilausrivi.jt          = if(tilausrivi.jt != 0, $varattu, 0)
+                WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+                and tilausrivi.tunnus  = '$suoratoimitus_rivitun'";
       $result = pupe_query($query);
     }
     elseif ($suoratoimitus_splittaus and $rivitunnus != $lisatty_tun) {
       // Splitataan suoratoimitus-myyntitilausrivi
-      $query = "  SELECT varattu, jt
-            FROM tilausrivi
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tunnus = '$suoratoimitus_rivitun'";
+      $query = "SELECT varattu, jt
+                FROM tilausrivi
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tunnus  = '$suoratoimitus_rivitun'";
       $result = pupe_query($query);
       $suora_row = mysql_fetch_assoc($result);
 
@@ -3092,7 +3189,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     }
 
     $trivtyrow = array("selite" => "");
-    @include("trivityyppivalinta.inc");
+    @include "trivityyppivalinta.inc";
 
     //special case: Kun yhtiöparametri Valmistuksien_kasittely on asennossa, "valmistuksella voi olla vain yksi valmiste...",
     //excelistä sisäänluettavissa valmistusriveissä voi antaa valmistuslinjan ja toivotut päivämäärät (mikrotilaus.inc)
@@ -3104,10 +3201,10 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       $positio = $trivtyrow['selite'];
     }
 
-    $query = "  SELECT *
-          FROM tilausrivin_lisatiedot
-          WHERE yhtio       = '$kukarow[yhtio]'
-          and tilausrivitunnus = '$lisatty_tun'";
+    $query = "SELECT *
+              FROM tilausrivin_lisatiedot
+              WHERE yhtio          = '$kukarow[yhtio]'
+              and tilausrivitunnus = '$lisatty_tun'";
     $lisatied_res = pupe_query($query);
 
     $tlisatied_lisa2 = "";
@@ -3127,20 +3224,20 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     if (mysql_num_rows($lisatied_res) > 0) {
       $lisatied_row = mysql_fetch_assoc($lisatied_res);
 
-      $query = "  UPDATE tilausrivin_lisatiedot
-            SET
-            positio = if (positio = '' or '$valmistuslinja' != '', '{$positio}', positio),
-            toimittajan_tunnus  = '$toimittajan_tunnus',
-            {$kohde_varasto_update}
-            rekisterinumero    = '{$rekisterinumero}',
-            muutospvm      = now(),
-            muuttaja      = '$kukarow[kuka]',
-            ei_nayteta      = '{$puu_ein[$i]}'
-            {$tlisatied_lisa}
-            {$tlisatied_lisa2}
-            {$jt_manual_lisa}
-            WHERE yhtio       = '$kukarow[yhtio]'
-            and tilausrivitunnus = '$lisatty_tun'";
+      $query = "UPDATE tilausrivin_lisatiedot
+                SET
+                positio              = if (positio = '' or '$valmistuslinja' != '', '{$positio}', positio),
+                toimittajan_tunnus   = '$toimittajan_tunnus',
+                {$kohde_varasto_update}
+                rekisterinumero      = '{$rekisterinumero}',
+                muutospvm            = now(),
+                muuttaja             = '$kukarow[kuka]',
+                ei_nayteta           = '{$puu_ein[$i]}'
+                {$tlisatied_lisa}
+                {$tlisatied_lisa2}
+                {$jt_manual_lisa}
+                WHERE yhtio          = '$kukarow[yhtio]'
+                and tilausrivitunnus = '$lisatty_tun'";
       $result = pupe_query($query);
     }
     else {
@@ -3153,23 +3250,23 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
       $autoid = !empty($autoid) ? $autoid : 0;
 
-      $query = "  INSERT INTO tilausrivin_lisatiedot
-            SET yhtio      = '$kukarow[yhtio]',
-            positio       = '{$positio}',
-            toimittajan_tunnus  = '$toimittajan_tunnus',
-            {$kohde_varasto_update}
-            tilausrivitunnus  = '$lisatty_tun',
-            jarjestys      = '$jarjestys',
-            vanha_otunnus    = '$kukarow[kesken]',
-            ei_nayteta      = '{$puu_ein[$i]}',
-            ohita_kerays     = '{$puu_ohiker[$i]}',
-            rekisterinumero    = '{$rekisterinumero}',
-            autoid        = '{$autoid}',
-            luontiaika      = now(),
-            laatija       = '$kukarow[kuka]'
-            {$tlisatied_lisa}
-            {$tlisatied_lisa2}
-            {$jt_manual_lisa}";
+      $query = "INSERT INTO tilausrivin_lisatiedot
+                SET yhtio      = '$kukarow[yhtio]',
+                positio            = '{$positio}',
+                toimittajan_tunnus = '$toimittajan_tunnus',
+                {$kohde_varasto_update}
+                tilausrivitunnus   = '$lisatty_tun',
+                jarjestys          = '$jarjestys',
+                vanha_otunnus      = '$kukarow[kesken]',
+                ei_nayteta         = '{$puu_ein[$i]}',
+                ohita_kerays       = '{$puu_ohiker[$i]}',
+                rekisterinumero    = '{$rekisterinumero}',
+                autoid             = '{$autoid}',
+                luontiaika         = now(),
+                laatija            = '$kukarow[kuka]'
+                {$tlisatied_lisa}
+                {$tlisatied_lisa2}
+                {$jt_manual_lisa}";
 
       if ($trow["sarjanumeroseuranta"] == "S" and $kpl < 0) {
         $query .= " , osto_vai_hyvitys='O' ";
@@ -3209,44 +3306,43 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           $tunken = "myyntirivitunnus";
         }
 
-        $query = "  SELECT yhtio, lisatieto, sarjanumero, kaytetty, tunnus
-              FROM sarjanumeroseuranta
-              WHERE tunnus   IN ($myy_sarjatunnus)
-              and tuoteno    = '$trow[tuoteno]'
-              ORDER BY tunnus
-              LIMIT ". (int) abs($varattu+$jt);
+        $query = "SELECT yhtio, lisatieto, sarjanumero, kaytetty, tunnus
+                  FROM sarjanumeroseuranta
+                  WHERE tunnus IN ($myy_sarjatunnus)
+                  and tuoteno  = '$trow[tuoteno]'
+                  ORDER BY tunnus
+                  LIMIT ". (int) abs($varattu+$jt);
         $sres = pupe_query($query);
 
         while ($srow = mysql_fetch_assoc($sres)) {
           if ($var == "S") {
             // jos syötetään sarjanumertollinen tuote suoratoimitukseen niin liitetään tämä myyntirivi siihen kiinni
-            $query = "  INSERT INTO sarjanumeroseuranta
-                  SET
-                  yhtio        = '$kukarow[yhtio]',
-                  tuoteno        = '$trow[tuoteno]',
-                  lisatieto      = 'Suoratoimitetaan yhtiöstä: $srow[yhtio]. $srow[lisatieto]',
-                  sarjanumero      = '$srow[sarjanumero]',
-                  kaytetty      = '$srow[kaytetty]',
-                  myyntirivitunnus   = '$lisatty_tun'";
+            $query = "INSERT INTO sarjanumeroseuranta
+                      SET
+                      yhtio            = '$kukarow[yhtio]',
+                      tuoteno          = '$trow[tuoteno]',
+                      lisatieto        = 'Suoratoimitetaan yhtiöstä: $srow[yhtio]. $srow[lisatieto]',
+                      sarjanumero      = '$srow[sarjanumero]',
+                      kaytetty         = '$srow[kaytetty]',
+                      myyntirivitunnus = '$lisatty_tun'";
             $sarjares = pupe_query($query);
           }
           else {
-            $query = "  UPDATE sarjanumeroseuranta
-                  SET $tunken      = '$lisatty_tun'
-                  WHERE yhtio       = '$kukarow[yhtio]'
-                  and tunnus       = '$srow[tunnus]'
-                  and tuoteno       = '$trow[tuoteno]'
-                  and $tunken      = 0";
+            $query = "UPDATE sarjanumeroseuranta
+                      SET $tunken      = '$lisatty_tun'
+                      WHERE yhtio = '$kukarow[yhtio]'
+                      and tunnus  = '$srow[tunnus]'
+                      and tuoteno = '$trow[tuoteno]'
+                      and $tunken      = 0";
             $sarjares = pupe_query($query);
           }
 
-
           if ($srow["kaytetty"] == 'K') {
-            $query = "  UPDATE tilausrivi
-                  SET alv=alv+500
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and tunnus = '$lisatty_tun'
-                  and alv < 500";
+            $query = "UPDATE tilausrivi
+                      SET alv=alv+500
+                      WHERE yhtio = '$kukarow[yhtio]'
+                      and tunnus  = '$lisatty_tun'
+                      and alv     < 500";
             $sarjares = pupe_query($query);
           }
         }
@@ -3259,21 +3355,21 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     if (count($puu_tuoteno) > 1 and $rivityyppi != 'O' and $lop == "") {
       //Päivitetään isän perhetunnus
       if ($rivityyppi == 'V') {
-        $query = "  SELECT tuoteno
-              FROM tilausrivi
-              WHERE yhtio  = '$kukarow[yhtio]'
-              and tunnus  = $perheid_lisaarivi
-              and tyyppi  = 'V'";
+        $query = "SELECT tuoteno
+                  FROM tilausrivi
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and tunnus  = $perheid_lisaarivi
+                  and tyyppi  = 'V'";
         $lisa_res = pupe_query($query);
         $lisa_row = mysql_fetch_assoc($lisa_res);
 
         if ($lisatied_row["porauskuvio"] == "M" or (isset($lapsenlap_array[$lisa_row["tuoteno"]]) and strtoupper($lapsenlap_array[$lisa_row["tuoteno"]]) == strtoupper($lisa_row["tuoteno"]))) {
           $valmistetyyppi = "M";
 
-          $query = "  UPDATE tilausrivin_lisatiedot
-                SET porauskuvio  = '$valmistetyyppi'
-                WHERE yhtio       = '$kukarow[yhtio]'
-                and tilausrivitunnus = '$perheid_lisaarivi'";
+          $query = "UPDATE tilausrivin_lisatiedot
+                    SET porauskuvio  = '$valmistetyyppi'
+                    WHERE yhtio          = '$kukarow[yhtio]'
+                    and tilausrivitunnus = '$perheid_lisaarivi'";
           $result = pupe_query($query);
         }
         else {
@@ -3304,5 +3400,85 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     $omalle_tilaukselle = "";
     $rivinumero      = "";
     $tilrivinumero    = "";
+  }
+}
+
+$_yhteen_varastoon  = ($yhtiorow['pakollinen_varasto'] == 'K');
+$_sopivatilaustoimi = (in_array($toim, array('RIVISYOTTO','PIKATILAUS','REKLAMAATIO','TARJOUS')));
+
+if ($_yhteen_varastoon and $_sopivatilaustoimi and !in_array($var, array('S', 'U', 'T', 'P'))) {
+  $myy_hyllyalue_temp = $myy_hyllyalue[0];
+  $myy_hyllynro_temp  = $myy_hyllynro[0];
+
+  $_normi_tyhja       = (empty($myy_hyllyalue) and empty($myy_hyllynro));
+  $_puute_ei_tyhja    = (!empty($p_hyllyalue) and !empty($p_hyllynro));
+  $_puutteesta_hyllyt = ( $_normi_tyhja and $_puute_ei_tyhja);
+
+  if ($_puutteesta_hyllyt) {
+    $myy_hyllyalue_temp = $p_hyllyalue;
+    $myy_hyllynro_temp = $p_hyllynro;
+  }
+
+  if ($laskurow['varasto'] == 0 and $myy_hyllynro_temp != '' and $myy_hyllyalue_temp != '') {
+    $varasto = kuuluukovarastoon($myy_hyllyalue_temp, $myy_hyllynro_temp);
+
+    if (!empty($varasto)) {
+      $v_toimipaikka = hae_varaston_toimipaikka($varasto);
+      if ($v_toimipaikka['tunnus'] == 0) {
+        $_toimipaikka = $kukarow['toimipaikka'];
+        $kukarow['toimipaikka'] = 0;
+      }
+
+      //$vt_yhtiorow varaston toimipaikan yhtiorow
+      $vt_yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $v_toimipaikka['tunnus']);
+      $kukarow['toimipaikka'] = (isset($_toimipaikka) ? $_toimipaikka : $kukarow['toimipaikka']);
+      unset($_toimipaikka);
+      $update = "";
+
+      # Katsotaan onko varasto sidottu johonkin toimipaikkaan
+      # Ja onko se eri kuin otsikolla oleva toimipaikka
+      # Katsotaan uudella yhtiörown parametreilla pitääkö täppiä laittaa
+      $_laajat_toimipaikat = ($vt_yhtiorow['toimipaikkakasittely'] == "L");
+      $_laskun_toimipaikka = ($laskurow['yhtio_toimipaikka'] != $v_toimipaikka['tunnus']);
+
+      if ($_laajat_toimipaikat and $_laskun_toimipaikka) {
+
+        $_onko_myyntitilaus = (in_array($toim, array("RIVISYOTTO", "PIKATILAUS")));
+        $_kerataanko_valmistukset = (
+                $vt_yhtiorow["kerataanko_valmistukset"] == "E"
+                and $toim == "VALMISTAASIAKKAALLE"
+                );
+        $_lahetteen_tulostustapa = ($vt_yhtiorow['lahetteen_tulostustapa'] == 'I');
+
+        if ($_kerataanko_valmistukset or $_lahetteen_tulostustapa) {
+          $eilahe = 'o';
+        }
+        else {
+          $eilahe = '';
+        }
+
+        $_myyntitilaus_osatoimitus = (
+                $vt_yhtiorow['myyntitilaus_osatoimitus'] == 'E'
+                and $_onko_myyntitilaus
+                );
+
+        if ($_myyntitilaus_osatoimitus) {
+          $osatoimitus = 'o';
+        }
+        else {
+          $osatoimitus = '';
+        }
+
+        $update = "  , eilahetetta = '{$eilahe}'
+                    , osatoimitus = '{$osatoimitus}'";
+      }
+
+      $query = "UPDATE lasku
+                SET varasto = '{$varasto}'
+                {$update}
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$laskurow['tunnus']}'";
+      pupe_query($query);
+    }
   }
 }

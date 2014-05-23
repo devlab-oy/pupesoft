@@ -36,29 +36,29 @@ if ($yhtiorow['kerayserat'] == 'K' and $real_submit != "" and $tee == 'valitse' 
 
 if ($tee == 'erittelykopsu') {
 
-  $query = "  SELECT *
-        FROM lahdot
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND tunnus  = '$lahto'";
+  $query = "SELECT *
+            FROM lahdot
+            WHERE yhtio = '$kukarow[yhtio]'
+            AND tunnus  = '$lahto'";
   $lahtores = pupe_query($query);
 
   if (mysql_num_rows($lahtores) > 0) {
 
     $lahtorow = mysql_fetch_assoc($lahtores);
 
-    $query = "  SELECT *
-          FROM toimitustapa
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND tunnus  = '$lahtorow[liitostunnus]'";
+    $query = "SELECT *
+              FROM toimitustapa
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND tunnus  = '$lahtorow[liitostunnus]'";
     $toitares = pupe_query($query);
     $toitarow = mysql_fetch_assoc($toitares);
 
-    $query = "  SELECT group_concat(tunnus) tilaukset
-          FROM lasku
-          WHERE yhtio  = '$kukarow[yhtio]'
-          AND tila     = 'L'
-          AND alatila != ''
-          AND toimitustavan_lahto = '$lahtorow[tunnus]'";
+    $query = "SELECT group_concat(tunnus) tilaukset
+              FROM lasku
+              WHERE yhtio              = '$kukarow[yhtio]'
+              AND tila                 = 'L'
+              AND alatila             != ''
+              AND toimitustavan_lahto  = '$lahtorow[tunnus]'";
     $laskures = pupe_query($query);
     $laskurow = mysql_fetch_assoc($laskures);
 
@@ -105,12 +105,12 @@ if ($tee == 'tulosta') {
     }
 
     //Tässä on haettava tulostettavan tilauksen tiedot
-    $query = "  SELECT toimitustapa, tulostuspaikka, group_concat(otsikkonro) otsikkonro
-          FROM rahtikirjat
-          WHERE yhtio      = '$kukarow[yhtio]'
-          $querylisa
-          GROUP BY 1,2
-          LIMIT 1";
+    $query = "SELECT toimitustapa, tulostuspaikka, group_concat(otsikkonro) otsikkonro
+              FROM rahtikirjat
+              WHERE yhtio = '$kukarow[yhtio]'
+              $querylisa
+              GROUP BY 1,2
+              LIMIT 1";
     $ores  = mysql_query($query) or pupe_error($query);
     $rrow  = mysql_fetch_array($ores);
 
@@ -141,10 +141,10 @@ if ($tee == 'tulosta') {
     }
     else {
       //Tässä on haettava tulostettavien tilausten tunnukset
-      $query = "  SELECT group_concat(otsikkonro) otsikkonro
-            FROM rahtikirjat
-            WHERE yhtio      = '$kukarow[yhtio]'
-            and rahtikirjanro  in ('".implode("','", $rtunnukset)."')";
+      $query = "SELECT group_concat(otsikkonro) otsikkonro
+                FROM rahtikirjat
+                WHERE yhtio       = '$kukarow[yhtio]'
+                and rahtikirjanro in ('".implode("','", $rtunnukset)."')";
       $ores  = mysql_query($query) or pupe_error($query);
       $rrow  = mysql_fetch_array($ores);
       unset($tultiin);
@@ -191,11 +191,11 @@ if ($tee == 'valitse' and $real_submit != '') {
 
     if (isset($lahto) and trim($lahto) != "" and $yhtiorow['kerayserat'] == 'K') {
 
-      $query = "  SELECT toimitustapa, GROUP_CONCAT(tunnus) tunnukset
-            FROM lasku
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND toimitustavan_lahto = '{$lahto}'
-            GROUP BY 1";
+      $query = "SELECT toimitustapa, GROUP_CONCAT(tunnus) tunnukset
+                FROM lasku
+                WHERE yhtio             = '{$kukarow['yhtio']}'
+                AND toimitustavan_lahto = '{$lahto}'
+                GROUP BY 1";
       $lahdot_lasku_chk_res = pupe_query($query);
       $lahdot_lasku_chk_row = mysql_fetch_assoc($lahdot_lasku_chk_res);
 
@@ -207,30 +207,30 @@ if ($tee == 'valitse' and $real_submit != '') {
 
     $toimitustapalisa = $toimitustapa != "" ? "and toimitustapa  = '{$toimitustapa}'" : "";
 
-    $query = "  SELECT yhtio, rahtikirjanro, sum(kilot) paino
-          from rahtikirjat
-          where yhtio    = '$kukarow[yhtio]'
-          and tulostuspaikka  = '$varasto'
-          {$toimitustapalisa}
-          and tulostettu    > '$vv-$kk-$pp 00:00:00'
-          and tulostettu    < '$vv-$kk-$pp 23:59:59'
-          {$tunnuksetlisa}
-          GROUP BY rahtikirjanro";
+    $query = "SELECT yhtio, rahtikirjanro, sum(kilot) paino
+              from rahtikirjat
+              where yhtio        = '$kukarow[yhtio]'
+              and tulostuspaikka = '$varasto'
+              {$toimitustapalisa}
+              and tulostettu     > '$vv-$kk-$pp 00:00:00'
+              and tulostettu     < '$vv-$kk-$pp 23:59:59'
+              {$tunnuksetlisa}
+              GROUP BY rahtikirjanro";
   }
   else {
-      $query = "  SELECT rahtikirjanro
-          from rahtikirjat
-          where otsikkonro = '$otunnus'
-                and yhtio = '$kukarow[yhtio]'";
+      $query = "SELECT rahtikirjanro
+                from rahtikirjat
+                where otsikkonro = '$otunnus'
+                      and yhtio  = '$kukarow[yhtio]'";
       $res = mysql_query($query) or pupe_error($query);
       $rahtikirjanro = mysql_fetch_array($res);
 
-    $query = "  SELECT rahtikirjanro, sum(kilot) paino, yhtio
-          from rahtikirjat
-          where yhtio      = '$kukarow[yhtio]'
-          and rahtikirjanro  = '$rahtikirjanro[rahtikirjanro]'
-          and tulostettu != '0000-00-00 00:00:00'
-          GROUP BY rahtikirjanro";
+    $query = "SELECT rahtikirjanro, sum(kilot) paino, yhtio
+              from rahtikirjat
+              where yhtio        = '$kukarow[yhtio]'
+              and rahtikirjanro  = '$rahtikirjanro[rahtikirjanro]'
+              and tulostettu    != '0000-00-00 00:00:00'
+              GROUP BY rahtikirjanro";
     $toimitustapa   = "";
     $varasto     = "";
   }
@@ -318,11 +318,11 @@ if ($tee == 'valitse' and $real_submit != '') {
 
     echo "</table><br>";
 
-    $query = "  SELECT *
-          FROM kirjoittimet
-          WHERE yhtio='$kukarow[yhtio]'
-          AND komento != 'EDI'
-          ORDER BY kirjoitin";
+    $query = "SELECT *
+              FROM kirjoittimet
+              WHERE yhtio='$kukarow[yhtio]'
+              AND komento != 'EDI'
+              ORDER BY kirjoitin";
     $kirre = mysql_query($query) or pupe_error($query);
 
     echo t("Rahtikirjatulostin"),"<br>";
@@ -417,10 +417,10 @@ if ($tee == '') {
   echo "</select></td></tr>";
 
   // haetaan kaikki varastot
-  $query  = "  SELECT tunnus, nimitys, yhtio
-        FROM varastopaikat
-        WHERE $logistiikka_yhtiolisa AND tyyppi != 'P'
-        ORDER BY yhtio, tyyppi, nimitys";
+  $query  = "SELECT tunnus, nimitys, yhtio
+             FROM varastopaikat
+             WHERE $logistiikka_yhtiolisa AND tyyppi != 'P'
+             ORDER BY yhtio, tyyppi, nimitys";
   $result = mysql_query($query) or pupe_error($query);
 
   // jos löytyy enemmän kuin yksi, tehdään varasto popup..
@@ -470,29 +470,29 @@ if ($tee == '') {
       $toimitustapalisa = "AND lahdot.liitostunnus = '{$toimitustapa_tunnus}'";
     }
 
-    $query = "  SELECT lahdot.tunnus, lahdot.lahdon_kellonaika, tt.selite, count(lasku.tunnus) AS cnt
-          FROM lahdot
-          JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus)
-          JOIN toimitustapa AS tt ON (tt.yhtio = lasku.yhtio
-            AND tt.tunnus = lahdot.liitostunnus
-            AND tt.selite = lasku.toimitustapa
-            AND tt.tulostustapa != 'X'
-            AND tt.rahtikirja != 'rahtikirja_tyhja.inc')
-          JOIN rahtikirjat AS r ON (r.yhtio = lasku.yhtio
-            AND r.tulostuspaikka = '{$varasto}'
-            AND r.toimitustapa = lasku.toimitustapa
-            AND r.tulostettu > '{$vv}-{$kk}-{$pp} 00:00:00'
-            AND r.tulostettu < '{$vv}-{$kk}-{$pp} 23:59:59'
-            AND r.otsikkonro = lasku.tunnus)
-          WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
-          AND lahdot.pvm = '{$vv}-{$kk}-{$pp}'
-          AND lahdot.varasto = '{$varasto}'
-          AND lahdot.aktiivi = 'S'
-          AND lahdot.liitostunnus != 0
-          {$toimitustapalisa}
-          GROUP BY 1,2,3
-          HAVING cnt > 0
-          ORDER BY lahdot.lahdon_kellonaika, tt.selite";
+    $query = "SELECT lahdot.tunnus, lahdot.lahdon_kellonaika, tt.selite, count(lasku.tunnus) AS cnt
+              FROM lahdot
+              JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus)
+              JOIN toimitustapa AS tt ON (tt.yhtio = lasku.yhtio
+                AND tt.tunnus          = lahdot.liitostunnus
+                AND tt.selite          = lasku.toimitustapa
+                AND tt.tulostustapa   != 'X'
+                AND tt.rahtikirja     != 'rahtikirja_tyhja.inc')
+              JOIN rahtikirjat AS r ON (r.yhtio = lasku.yhtio
+                AND r.tulostuspaikka   = '{$varasto}'
+                AND r.toimitustapa     = lasku.toimitustapa
+                AND r.tulostettu       > '{$vv}-{$kk}-{$pp} 00:00:00'
+                AND r.tulostettu       < '{$vv}-{$kk}-{$pp} 23:59:59'
+                AND r.otsikkonro       = lasku.tunnus)
+              WHERE lahdot.yhtio       = '{$kukarow['yhtio']}'
+              AND lahdot.pvm           = '{$vv}-{$kk}-{$pp}'
+              AND lahdot.varasto       = '{$varasto}'
+              AND lahdot.aktiivi       = 'S'
+              AND lahdot.liitostunnus != 0
+              {$toimitustapalisa}
+              GROUP BY 1,2,3
+              HAVING cnt > 0
+              ORDER BY lahdot.lahdon_kellonaika, tt.selite";
     $lahdot_res = pupe_query($query);
 
     while ($lahdot_row = mysql_fetch_assoc($lahdot_res)) {
@@ -518,24 +518,24 @@ if ($tee == '') {
     echo "<input type='hidden' name='real_submit' value='joo'>";
     echo "<table>";
 
-    $query  = "  SELECT lahdot.tunnus, lahdot.lahdon_kellonaika, toimitustapa.selite
-          FROM lahdot
-          JOIN toimitustapa ON (lahdot.yhtio=toimitustapa.yhtio AND lahdot.liitostunnus=toimitustapa.tunnus AND toimitustapa.erittely != '')
-          JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus)
-          JOIN rahtikirjat AS r ON (r.yhtio = lasku.yhtio
-            AND r.tulostuspaikka = '{$varasto}'
-            AND r.toimitustapa = lasku.toimitustapa
-            AND r.tulostettu > '{$vv}-{$kk}-{$pp} 00:00:00'
-            AND r.tulostettu < '{$vv}-{$kk}-{$pp} 23:59:59'
-            AND r.otsikkonro = lasku.tunnus)
-          WHERE lahdot.yhtio = '$kukarow[yhtio]'
-          AND lahdot.varasto = '{$varasto}'
-          AND lahdot.aktiivi = 'S'
-          AND lahdot.pvm = '{$vv}-{$kk}-{$pp}'
-          AND toimitustapa.tulostustapa != 'X'
-          {$toimitustapalisa}
-          GROUP BY 1,2,3
-          ORDER BY lahdot.lahdon_kellonaika, toimitustapa.selite";
+    $query  = "SELECT lahdot.tunnus, lahdot.lahdon_kellonaika, toimitustapa.selite
+               FROM lahdot
+               JOIN toimitustapa ON (lahdot.yhtio=toimitustapa.yhtio AND lahdot.liitostunnus=toimitustapa.tunnus AND toimitustapa.erittely != '')
+               JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus)
+               JOIN rahtikirjat AS r ON (r.yhtio = lasku.yhtio
+                 AND r.tulostuspaikka         = '{$varasto}'
+                 AND r.toimitustapa           = lasku.toimitustapa
+                 AND r.tulostettu             > '{$vv}-{$kk}-{$pp} 00:00:00'
+                 AND r.tulostettu             < '{$vv}-{$kk}-{$pp} 23:59:59'
+                 AND r.otsikkonro             = lasku.tunnus)
+               WHERE lahdot.yhtio             = '$kukarow[yhtio]'
+               AND lahdot.varasto             = '{$varasto}'
+               AND lahdot.aktiivi             = 'S'
+               AND lahdot.pvm                 = '{$vv}-{$kk}-{$pp}'
+               AND toimitustapa.tulostustapa != 'X'
+               {$toimitustapalisa}
+               GROUP BY 1,2,3
+               ORDER BY lahdot.lahdon_kellonaika, toimitustapa.selite";
     $result = mysql_query($query) or pupe_error($query);
 
     echo "<tr><th>".t("Valitse lähto").":</th>";
@@ -550,11 +550,11 @@ if ($tee == '') {
 
     echo "</select></td></tr>";
 
-    $query = "  SELECT *
-          FROM kirjoittimet
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND komento != 'EDI'
-          ORDER BY kirjoitin";
+    $query = "SELECT *
+              FROM kirjoittimet
+              WHERE yhtio  = '$kukarow[yhtio]'
+              AND komento != 'EDI'
+              ORDER BY kirjoitin";
     $kirre = mysql_query($query) or pupe_error($query);
 
     echo "<tr><th>".t("Tulostin"),"</th>";

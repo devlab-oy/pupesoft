@@ -29,10 +29,10 @@ $yhtio = mysql_escape_string(trim($argv[1]));
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 
 // Haetaan kukarow
-$query = "  SELECT *
-      FROM kuka
-      WHERE yhtio = '{$yhtio}'
-      AND kuka = 'admin'";
+$query = "SELECT *
+          FROM kuka
+          WHERE yhtio = '{$yhtio}'
+          AND kuka    = 'admin'";
 $kukares = pupe_query($query);
 
 if (mysql_num_rows($kukares) != 1) {
@@ -79,11 +79,11 @@ if ($handle = opendir($path)) {
 
         if ($tilausnumero == 0 or trim($seurantakoodi) == '') continue;
 
-        $query = "  UPDATE rahtikirjat SET
-              rahtikirjanro = concat(rahtikirjanro, ' ', '{$seurantakoodi}'),
-              tulostettu  = now()
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND otsikkonro = '{$tilausnumero}'";
+        $query = "UPDATE rahtikirjat SET
+                  rahtikirjanro  = concat(rahtikirjanro, ' ', '{$seurantakoodi}'),
+                  tulostettu     = now()
+                  WHERE yhtio    = '{$kukarow['yhtio']}'
+                  AND otsikkonro = '{$tilausnumero}'";
         pupe_query($query);
 
         if (mysql_affected_rows() == 0) {
@@ -91,10 +91,10 @@ if ($handle = opendir($path)) {
           break;
         }
 
-        $query = "  SELECT SUM(kilot) kilotyht
-              FROM rahtikirjat
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND otsikkonro = '{$tilausnumero}'";
+        $query = "SELECT SUM(kilot) kilotyht
+                  FROM rahtikirjat
+                  WHERE yhtio    = '{$kukarow['yhtio']}'
+                  AND otsikkonro = '{$tilausnumero}'";
         $kilotres = pupe_query($query);
         $kilotrow = mysql_fetch_assoc($kilotres);
 
@@ -103,29 +103,29 @@ if ($handle = opendir($path)) {
         // Katsotaan onko magento-API konffattu, eli verkkokauppa käytössä, silloin merkataan tilaus toimitetuksi Magentossa kun rahtikirja tulostetaan
         if (isset($magento_api_url) and $magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "") {
 
-          $query = "  SELECT toimitustapa
-                FROM rahtikirjat
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND otsikkonro = '{$tilausnumero}'";
+          $query = "SELECT toimitustapa
+                    FROM rahtikirjat
+                    WHERE yhtio    = '{$kukarow['yhtio']}'
+                    AND otsikkonro = '{$tilausnumero}'";
           $chk_res = pupe_query($query);
 
           if (mysql_num_rows($chk_res) > 0) {
 
             $chk_row = mysql_fetch_assoc($chk_res);
 
-            $query = "  SELECT *
-                  FROM toimitustapa
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND selite = '{$chk_row['toimitustapa']}'";
+            $query = "SELECT *
+                      FROM toimitustapa
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND selite  = '{$chk_row['toimitustapa']}'";
             $toitares = pupe_query($query);
             $toitarow = mysql_fetch_assoc($toitares);
 
-            $query = "  SELECT asiakkaan_tilausnumero
-                  FROM lasku
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus = '{$tilausnumero}'
-                  AND laatija = 'Magento'
-                  AND asiakkaan_tilausnumero != ''";
+            $query = "SELECT asiakkaan_tilausnumero
+                      FROM lasku
+                      WHERE yhtio                 = '{$kukarow['yhtio']}'
+                      AND tunnus                  = '{$tilausnumero}'
+                      AND laatija                 = 'Magento'
+                      AND asiakkaan_tilausnumero != ''";
             $mageres = pupe_query($query);
 
             while ($magerow = mysql_fetch_assoc($mageres)) {

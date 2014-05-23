@@ -66,11 +66,11 @@ if ($tee == "tulosta") {
   $kkl = date("m", mktime(0, 0, 0, $kk+1, 0, $vv));
   $ppl = date("d", mktime(0, 0, 0, $kk+1, 0, $vv));
 
-  $query = "  SELECT distinct koodi, nimi
-        FROM maat
-        where nimi != ''
-        and eu != ''
-        ORDER BY koodi";
+  $query = "SELECT distinct koodi, nimi
+            FROM maat
+            where nimi != ''
+            and eu     != ''
+            ORDER BY koodi";
   $vresult = mysql_query($query) or pupe_error($query);
 
   $eumaat = "";
@@ -131,30 +131,30 @@ if ($tee == "tulosta") {
 
     $alennukset = generoi_alekentta('O', 'tilausrivi');
 
-    $query = "  (SELECT
-          tuote.tullinimike1,
-          if (lasku.maa_lahetys='', toimi.maa, lasku.maa_lahetys) maalahetys,
-          ifnull((SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa not in ('$yhtiorow[maa]','') LIMIT 1), if (lasku.maa_lahetys='', toimi.maa, lasku.maa_lahetys)) alkuperamaa,
-          if (lasku.maa_maara='', if (lasku.toim_maa='', if(varastopaikat.maa is null or varastopaikat.maa='', '$yhtiorow[maa]', varastopaikat.maa), lasku.toim_maa), lasku.maa_maara) maamaara,
-          lasku.kuljetusmuoto,
-          lasku.kauppatapahtuman_luonne,
-          tullinimike.su_vientiilmo su,
-          'Saapuminen' as tapa,
-          $vainnimikelisa2
-          $ee_kentat
-          max(lasku.laskunro) laskunro,
-          max(tuote.tuoteno) tuoteno,
-          left(max(tuote.nimitys), 40) nimitys,
-          round(sum(tilausrivi.kpl * if(tuote.toinenpaljous_muunnoskerroin = 0, 1, tuote.toinenpaljous_muunnoskerroin)),0) kpl,
-          round(sum(if(tuote.tuotemassa > 0, tilausrivi.kpl * tuote.tuotemassa, if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino)), 0) as paino,
-          if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
-          if (round(sum(tilausrivi.rivihinta / (1 + (lasku.rahti / 100))),0) > 0.50,
-            if (valuu.intrastat_kurssi = 0,
-              round(sum(tilausrivi.rivihinta / (1 + (lasku.rahti / 100)) / lasku.vienti_kurssi),0),
-              round(sum(tilausrivi.rivihinta / (1 + (lasku.rahti / 100)) / valuu.intrastat_kurssi),0)), 1) as rivihinta_laskutusarvo,
-          group_concat(lasku.tunnus) as kaikkitunnukset,
-          group_concat(distinct tilausrivi.perheid2) as perheid2set,
-          group_concat(concat(tuote.tunnus,'!¡!', tuote.tuoteno)) as kaikkituotteet";
+    $query = "(SELECT
+               tuote.tullinimike1,
+               if (lasku.maa_lahetys='', toimi.maa, lasku.maa_lahetys) maalahetys,
+               ifnull((SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa not in ('$yhtiorow[maa]','') LIMIT 1), if (lasku.maa_lahetys='', toimi.maa, lasku.maa_lahetys)) alkuperamaa,
+               if (lasku.maa_maara='', if (lasku.toim_maa='', if(varastopaikat.maa is null or varastopaikat.maa='', '$yhtiorow[maa]', varastopaikat.maa), lasku.toim_maa), lasku.maa_maara) maamaara,
+               lasku.kuljetusmuoto,
+               lasku.kauppatapahtuman_luonne,
+               tullinimike.su_vientiilmo su,
+               'Saapuminen' as tapa,
+               $vainnimikelisa2
+               $ee_kentat
+               max(lasku.laskunro) laskunro,
+               max(tuote.tuoteno) tuoteno,
+               left(max(tuote.nimitys), 40) nimitys,
+               round(sum(tilausrivi.kpl * if(tuote.toinenpaljous_muunnoskerroin = 0, 1, tuote.toinenpaljous_muunnoskerroin)),0) kpl,
+               round(sum(if(tuote.tuotemassa > 0, tilausrivi.kpl * tuote.tuotemassa, if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino)), 0) as paino,
+               if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
+               if (round(sum(tilausrivi.rivihinta / (1 + (lasku.rahti / 100))),0) > 0.50,
+                 if (valuu.intrastat_kurssi = 0,
+                   round(sum(tilausrivi.rivihinta / (1 + (lasku.rahti / 100)) / lasku.vienti_kurssi),0),
+                   round(sum(tilausrivi.rivihinta / (1 + (lasku.rahti / 100)) / valuu.intrastat_kurssi),0)), 1) as rivihinta_laskutusarvo,
+               group_concat(lasku.tunnus) as kaikkitunnukset,
+               group_concat(distinct tilausrivi.perheid2) as perheid2set,
+               group_concat(concat(tuote.tunnus,'!¡!', tuote.tuoteno)) as kaikkituotteet";
 
     if ($yhtiorow['intrastat_pvm'] == '') {
       $query .= "  FROM lasku use index (yhtio_tila_mapvm)
@@ -1020,10 +1020,10 @@ if (mysql_num_rows($vresult) > 0) {
         <select name='kayttajan_valinta_maa'>";
         echo "<option value='' $sel>".t("Ei valintaa")."</option>";
 
-        $query = "  SELECT distinct koodi, nimi
-              FROM maat
-              where nimi != '' and eu != '' and koodi != '$yhtiorow[maa]'
-              ORDER BY koodi";
+        $query = "SELECT distinct koodi, nimi
+                  FROM maat
+                  where nimi != '' and eu != '' and koodi != '$yhtiorow[maa]'
+                  ORDER BY koodi";
         $vresult = mysql_query($query) or pupe_error($query);
 
         while ($row = mysql_fetch_array($vresult)) {

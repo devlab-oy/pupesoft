@@ -11,9 +11,9 @@ if(!function_exists("asiakaskommenttitarkista")) {
     }
 
     if (mysql_field_name($result, $i) == "ytunnus") {
-      $query = "  SELECT ytunnus
-            FROM asiakas
-            WHERE yhtio='$kukarow[yhtio]' and ytunnus = '$t[$i]'";
+      $query = "SELECT ytunnus
+                FROM asiakas
+                WHERE yhtio='$kukarow[yhtio]' and ytunnus = '$t[$i]'";
       $sresult = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($sresult) == 0) {
@@ -22,9 +22,9 @@ if(!function_exists("asiakaskommenttitarkista")) {
     }
 
     if (mysql_field_name($result, $i) == "tuoteno") {
-        $query = "  SELECT tuoteno
-              FROM tuote
-              WHERE yhtio='$kukarow[yhtio]' and tuoteno = '$t[$i]'";
+        $query = "SELECT tuoteno
+                  FROM tuote
+                  WHERE yhtio='$kukarow[yhtio]' and tuoteno = '$t[$i]'";
         $sresult = mysql_query($query) or pupe_error($query);
         if (mysql_num_rows($sresult) != 1) {
           $virhe[$i] = t("Tuotenumero puuttuu tai sitä ei löydy!");

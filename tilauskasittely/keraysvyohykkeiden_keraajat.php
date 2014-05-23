@@ -197,25 +197,25 @@ foreach ($nayta_valinnat as $mita_naytetaan) {
 $wherelisa = "AND ({$wherelisa})";
 $kerayserat_tilalisa = $kerayserat_tilalisa != "" ? " AND ({$kerayserat_tilalisa})" : "";
 
-$query = "  SELECT keraysvyohyke.nimitys AS 'ker_nimitys',
-      GROUP_CONCAT(DISTINCT lasku.tunnus) AS 'tilaukset',
-      COUNT(DISTINCT lasku.tunnus) AS 'tilatut',
-      COUNT(DISTINCT tilausrivi.tunnus) AS 'suunnittelussa',
-      SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 1, 0)) AS 'keratyt',
-      ROUND(SUM(tilausrivi.varattu * tuote.tuotemassa), 0) AS 'kg_suun',
-      ROUND(SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', tilausrivi.varattu * tuote.tuotemassa, 0)), 0) AS 'kg_ker',
-      ROUND(SUM(tilausrivi.varattu * (tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * 1000)), 0) AS 'litrat_suun',
-      ROUND(SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', (tilausrivi.varattu * tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * 1000), 0)), 0) AS 'litrat_ker'
-      FROM lasku
-      JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J','O','S') AND tilausrivi.varattu > 0)
-      JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
-      JOIN keraysvyohyke ON (keraysvyohyke.yhtio = vh.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)
-      JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-      JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('','P','T') AND lahdot.pvm >= '".date("Y-m-d")." 00:00:00' AND lahdot.pvm <= '".date("Y-m-d")." 23:59:59')
-      WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-      {$wherelisa}
-      GROUP BY keraysvyohyke.nimitys
-      ORDER BY 1";
+$query = "SELECT keraysvyohyke.nimitys AS 'ker_nimitys',
+          GROUP_CONCAT(DISTINCT lasku.tunnus) AS 'tilaukset',
+          COUNT(DISTINCT lasku.tunnus) AS 'tilatut',
+          COUNT(DISTINCT tilausrivi.tunnus) AS 'suunnittelussa',
+          SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 1, 0)) AS 'keratyt',
+          ROUND(SUM(tilausrivi.varattu * tuote.tuotemassa), 0) AS 'kg_suun',
+          ROUND(SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', tilausrivi.varattu * tuote.tuotemassa, 0)), 0) AS 'kg_ker',
+          ROUND(SUM(tilausrivi.varattu * (tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * 1000)), 0) AS 'litrat_suun',
+          ROUND(SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', (tilausrivi.varattu * tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * 1000), 0)), 0) AS 'litrat_ker'
+          FROM lasku
+          JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J','O','S') AND tilausrivi.varattu > 0)
+          JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
+          JOIN keraysvyohyke ON (keraysvyohyke.yhtio = vh.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)
+          JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+          JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('','P','T') AND lahdot.pvm >= '".date("Y-m-d")." 00:00:00' AND lahdot.pvm <= '".date("Y-m-d")." 23:59:59')
+          WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+          {$wherelisa}
+          GROUP BY keraysvyohyke.nimitys
+          ORDER BY 1";
 $result = pupe_query($query);
 
 echo "<table>";
@@ -262,15 +262,15 @@ while ($row = mysql_fetch_assoc($result)) {
   echo "<th class='keraysvyohyke' id='{$i}'>{$row['ker_nimitys']}&nbsp;<img title='",t("Näytä kerääjät"),"' alt='",t("Näytä kerääjät"),"' src='{$palvelin2}pics/lullacons/go-down.png' style='float:right;' /></th>";
   echo "<td>";
 
-  $query = "  SELECT lasku.tunnus, SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 0, 1)) AS 'keratyt'
-        FROM lasku
-        JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J','O','S') AND tilausrivi.varattu > 0)
-        JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.ohita_kerays = '')
-        WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-        AND lasku.tunnus IN ({$row['tilaukset']})
-        {$wherelisa}
-        GROUP BY 1
-        ORDER BY lasku.tunnus";
+  $query = "SELECT lasku.tunnus, SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 0, 1)) AS 'keratyt'
+            FROM lasku
+            JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J','O','S') AND tilausrivi.varattu > 0)
+            JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.ohita_kerays = '')
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.tunnus  IN ({$row['tilaukset']})
+            {$wherelisa}
+            GROUP BY 1
+            ORDER BY lasku.tunnus";
   $chk_res = pupe_query($query);
 
   $chk = 0;
@@ -294,36 +294,36 @@ while ($row = mysql_fetch_assoc($result)) {
   echo "<td>{$row['litrat_ker']} / {$row['litrat_suun']}</td>";
   echo "<td></td>";
 
-  $query = "  SELECT ROUND((COUNT(DISTINCT lasku.tunnus) * keraysvyohyke.tilauksen_tyoaikavakio_min_per_tilaus + COUNT(DISTINCT tilausrivi.tunnus) * keraysvyohyke.kerailyrivin_tyoaikavakio_min_per_rivi) / 60, 1) AS 'kapasiteettitarve'
-        FROM lasku
-        JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J','O','S') AND tilausrivi.varattu > 0)
-        JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
-        JOIN keraysvyohyke ON (keraysvyohyke.yhtio = vh.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)
-        WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-        AND lasku.tunnus IN ({$row['tilaukset']})
-        {$wherelisa}";
+  $query = "SELECT ROUND((COUNT(DISTINCT lasku.tunnus) * keraysvyohyke.tilauksen_tyoaikavakio_min_per_tilaus + COUNT(DISTINCT tilausrivi.tunnus) * keraysvyohyke.kerailyrivin_tyoaikavakio_min_per_rivi) / 60, 1) AS 'kapasiteettitarve'
+            FROM lasku
+            JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J','O','S') AND tilausrivi.varattu > 0)
+            JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
+            JOIN keraysvyohyke ON (keraysvyohyke.yhtio = vh.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.tunnus  IN ({$row['tilaukset']})
+            {$wherelisa}";
   $kap_res = pupe_query($query);
   $kap_row = mysql_fetch_assoc($kap_res);
 
   echo "<td>{$kap_row['kapasiteettitarve']} h</td>";
   echo "</tr>";
 
-  $query = "  SELECT kuka.nimi AS 'keraaja',
-        GROUP_CONCAT(DISTINCT kerayserat.nro) AS 'erat',
-        GROUP_CONCAT(DISTINCT kerayserat.otunnus) AS 'otunnukset',
-        MIN(SUBSTRING(kerayserat.luontiaika, 12, 5)) AS 'aloitusaika',
-        ROUND(SUM(tilausrivi.varattu * tuote.tuotemassa), 0) AS 'kg',
-        COUNT(DISTINCT kerayserat.tilausrivi) AS 'rivit',
-        COUNT(DISTINCT kerayserat.otunnus) AS 'tilaukset'
-        FROM kerayserat
-        JOIN kuka ON (kuka.yhtio = kerayserat.yhtio AND kuka.kuka = kerayserat.laatija)
-        JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D')
-        JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-        WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-        AND kerayserat.otunnus IN ({$row['tilaukset']})
-        {$kerayserat_tilalisa}
-        GROUP BY 1
-        ORDER BY 1";
+  $query = "SELECT kuka.nimi AS 'keraaja',
+            GROUP_CONCAT(DISTINCT kerayserat.nro) AS 'erat',
+            GROUP_CONCAT(DISTINCT kerayserat.otunnus) AS 'otunnukset',
+            MIN(SUBSTRING(kerayserat.luontiaika, 12, 5)) AS 'aloitusaika',
+            ROUND(SUM(tilausrivi.varattu * tuote.tuotemassa), 0) AS 'kg',
+            COUNT(DISTINCT kerayserat.tilausrivi) AS 'rivit',
+            COUNT(DISTINCT kerayserat.otunnus) AS 'tilaukset'
+            FROM kerayserat
+            JOIN kuka ON (kuka.yhtio = kerayserat.yhtio AND kuka.kuka = kerayserat.laatija)
+            JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D')
+            JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+            WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+            AND kerayserat.otunnus IN ({$row['tilaukset']})
+            {$kerayserat_tilalisa}
+            GROUP BY 1
+            ORDER BY 1";
   $era_res = pupe_query($query);
 
   if (mysql_num_rows($era_res)> 0) {
@@ -353,19 +353,19 @@ while ($row = mysql_fetch_assoc($result)) {
       echo "<th></th>";
       echo "</tr>";
 
-      $query = "  SELECT kerayserat.nro,
-            GROUP_CONCAT(DISTINCT lasku.toimitustavan_lahto ORDER BY lasku.toimitustavan_lahto SEPARATOR '<br />') AS 'toimitustavan_lahto',
-            GROUP_CONCAT(DISTINCT kerayserat.tila) AS 'tila',
-            GROUP_CONCAT(DISTINCT CONCAT(lasku.nimi, ' ', lasku.nimitark) ORDER BY nimi, nimitark SEPARATOR '<br />') AS 'nimi',
-            GROUP_CONCAT(DISTINCT lasku.toimitustapa ORDER BY toimitustapa SEPARATOR '<br />') AS 'toimitustapa',
-            GROUP_CONCAT(DISTINCT lasku.prioriteettinro ORDER BY prioriteettinro SEPARATOR ', ') AS 'prioriteettinro',
-            GROUP_CONCAT(DISTINCT lasku.tunnus) AS 'tunnus'
-            FROM kerayserat
-            JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus AND lasku.tunnus IN ({$row['tilaukset']}))
-            WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-            AND kerayserat.nro IN ({$era_row['erat']})
-            GROUP BY 1
-            ORDER BY 1";
+      $query = "SELECT kerayserat.nro,
+                GROUP_CONCAT(DISTINCT lasku.toimitustavan_lahto ORDER BY lasku.toimitustavan_lahto SEPARATOR '<br />') AS 'toimitustavan_lahto',
+                GROUP_CONCAT(DISTINCT kerayserat.tila) AS 'tila',
+                GROUP_CONCAT(DISTINCT CONCAT(lasku.nimi, ' ', lasku.nimitark) ORDER BY nimi, nimitark SEPARATOR '<br />') AS 'nimi',
+                GROUP_CONCAT(DISTINCT lasku.toimitustapa ORDER BY toimitustapa SEPARATOR '<br />') AS 'toimitustapa',
+                GROUP_CONCAT(DISTINCT lasku.prioriteettinro ORDER BY prioriteettinro SEPARATOR ', ') AS 'prioriteettinro',
+                GROUP_CONCAT(DISTINCT lasku.tunnus) AS 'tunnus'
+                FROM kerayserat
+                JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus AND lasku.tunnus IN ({$row['tilaukset']}))
+                WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+                AND kerayserat.nro     IN ({$era_row['erat']})
+                GROUP BY 1
+                ORDER BY 1";
 
       $asiakas_res = pupe_query($query);
 
@@ -394,22 +394,22 @@ while ($row = mysql_fetch_assoc($result)) {
         echo "<td></td>";
         echo "</tr>";
 
-        $query = "  SELECT tilausrivi.tuoteno,
-              tuote.nimitys,
-              CONCAT(tilausrivi.hyllyalue, '-', tilausrivi.hyllynro, '-', tilausrivi.hyllyvali, '-', tilausrivi.hyllytaso) AS 'kerayspaikka',
-              tilausrivi.otunnus,
-              CONCAT(lasku.nimi, ' ', lasku.nimitark) AS 'nimi',
-              ROUND(SUM(kerayserat.kpl_keratty), 0) AS 'keratty',
-              ROUND(SUM(tilausrivi.varattu), 0) AS 'tilattu'
-              FROM kerayserat
-              JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D')
-              JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
-              JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-              JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
-              WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-              AND kerayserat.otunnus IN ({$asiakas_row['tunnus']})
-              GROUP BY 1,2,3,4,5
-              ORDER BY vh.indeksi";
+        $query = "SELECT tilausrivi.tuoteno,
+                  tuote.nimitys,
+                  CONCAT(tilausrivi.hyllyalue, '-', tilausrivi.hyllynro, '-', tilausrivi.hyllyvali, '-', tilausrivi.hyllytaso) AS 'kerayspaikka',
+                  tilausrivi.otunnus,
+                  CONCAT(lasku.nimi, ' ', lasku.nimitark) AS 'nimi',
+                  ROUND(SUM(kerayserat.kpl_keratty), 0) AS 'keratty',
+                  ROUND(SUM(tilausrivi.varattu), 0) AS 'tilattu'
+                  FROM kerayserat
+                  JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D')
+                  JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
+                  JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+                  JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
+                  WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+                  AND kerayserat.otunnus IN ({$asiakas_row['tunnus']})
+                  GROUP BY 1,2,3,4,5
+                  ORDER BY vh.indeksi";
         $rivi_res = pupe_query($query);
 
         if (mysql_num_rows($rivi_res) > 0) {
@@ -497,12 +497,12 @@ else {
   $lasku_where = "AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))";
 }
 
-$query = "  SELECT DISTINCT varastopaikat.nimitys AS 'var_nimitys', varastopaikat.tunnus AS 'var_tunnus'
-      FROM lasku
-      JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio AND varastopaikat.tunnus = lasku.varasto)
-      WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-      {$lasku_where}
-      ORDER BY 1";
+$query = "SELECT DISTINCT varastopaikat.nimitys AS 'var_nimitys', varastopaikat.tunnus AS 'var_tunnus'
+          FROM lasku
+          JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio AND varastopaikat.tunnus = lasku.varasto)
+          WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+          {$lasku_where}
+          ORDER BY 1";
 $res = pupe_query($query);
 
 echo "<input type='hidden' name='varasto[]' value='default' />";
@@ -525,12 +525,12 @@ echo "</td>";
 
 echo "<td>";
 
-$query = "  SELECT DISTINCT keraysvyohyke.nimitys AS 'ker_nimitys', keraysvyohyke.tunnus AS 'ker_tunnus'
-      FROM lasku
-      JOIN keraysvyohyke ON (keraysvyohyke.yhtio = lasku.yhtio AND keraysvyohyke.varasto = lasku.varasto)
-      WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-      {$lasku_where}
-      ORDER BY 1";
+$query = "SELECT DISTINCT keraysvyohyke.nimitys AS 'ker_nimitys', keraysvyohyke.tunnus AS 'ker_tunnus'
+          FROM lasku
+          JOIN keraysvyohyke ON (keraysvyohyke.yhtio = lasku.yhtio AND keraysvyohyke.varasto = lasku.varasto)
+          WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+          {$lasku_where}
+          ORDER BY 1";
 $res = pupe_query($query);
 
 echo "<input type='hidden' name='keraysvyohyke[]' value='default' />";
@@ -553,12 +553,12 @@ echo "</td>";
 
 echo "<td>";
 
-$query = "  SELECT DISTINCT lasku.toimitustapa, toimitustapa.tunnus AS 'tt_tunnus'
-      FROM lasku
-      JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa AND toimitustapa.extranet != 'K')
-      WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-      {$lasku_where}
-      ORDER BY 1";
+$query = "SELECT DISTINCT lasku.toimitustapa, toimitustapa.tunnus AS 'tt_tunnus'
+          FROM lasku
+          JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa AND toimitustapa.extranet != 'K')
+          WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+          {$lasku_where}
+          ORDER BY 1";
 $res = pupe_query($query);
 
 echo "<input type='hidden' name='toimitustapa[]' value='default' />";
@@ -581,11 +581,11 @@ echo "</td>";
 
 echo "<td>";
 
-$query = "  SELECT DISTINCT lasku.prioriteettinro
-      FROM lasku
-      WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-      AND lasku.prioriteettinro != 0
-      {$lasku_where}";
+$query = "SELECT DISTINCT lasku.prioriteettinro
+          FROM lasku
+          WHERE lasku.yhtio          = '{$kukarow['yhtio']}'
+          AND lasku.prioriteettinro != 0
+          {$lasku_where}";
 $res = pupe_query($query);
 
 echo "<input type='hidden' name='prioriteetit[]' value='default' />";
@@ -761,24 +761,24 @@ if (isset($submit_form)) {
       $luontiaikalisa = " AND lahdot.pvm >= '".date("Y-m-d")." 00:00:00' AND lahdot.pvm <= '".date("Y-m-d")." 23:59:59' ";
     }
 
-    $query = "  SELECT SUBSTRING(lahdot.lahdon_kellonaika, 1, 5) AS 'klo', GROUP_CONCAT(lasku.tunnus) tunnukset
-          {$select_aloittamatta}
-          {$select_aloitettu}
-          {$select_keratty}
-          FROM lasku
-          JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J','O','S') AND tilausrivi.varattu > 0)
-          JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso {$vhlisa})
-          JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-          JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('','P','T') {$luontiaikalisa})
-          {$keraysvyohykelisa}
-          {$toimitustapalisa}
-          WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-          AND lasku.prioriteettinro != 0
-          {$varastolisa}
-          {$prioriteettilisa}
-          AND ({$tilalisa})
-          {$groupbylisa}
-          ORDER BY 1";
+    $query = "SELECT SUBSTRING(lahdot.lahdon_kellonaika, 1, 5) AS 'klo', GROUP_CONCAT(lasku.tunnus) tunnukset
+              {$select_aloittamatta}
+              {$select_aloitettu}
+              {$select_keratty}
+              FROM lasku
+              JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J','O','S') AND tilausrivi.varattu > 0)
+              JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso {$vhlisa})
+              JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+              JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('','P','T') {$luontiaikalisa})
+              {$keraysvyohykelisa}
+              {$toimitustapalisa}
+              WHERE lasku.yhtio          = '{$kukarow['yhtio']}'
+              AND lasku.prioriteettinro != 0
+              {$varastolisa}
+              {$prioriteettilisa}
+              AND ({$tilalisa})
+              {$groupbylisa}
+              ORDER BY 1";
     $res = pupe_query($query);
 
     $data = array();

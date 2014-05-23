@@ -308,9 +308,9 @@ if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_G
 
     // jos meillä on sessio niin poistetaan se tietokannasta jo aluks
     if ($session != "") {
-      $query = "  UPDATE kuka
-            SET session = ''
-            WHERE session = '" . mysql_real_escape_string($session) . "'";
+      $query = "UPDATE kuka
+                SET session = ''
+                WHERE session = '" . mysql_real_escape_string($session) . "'";
       $result = mysql_query($query) or die ("Päivitys epäonnistui sisäänkirjautumisessa");
     }
 
@@ -319,17 +319,17 @@ if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_G
       $session .= chr(rand(65,90)) ;
     }
 
-    $query = "  UPDATE kuka
-          SET session = '$session',
-          lastlogin = now()
-          WHERE kuka = '$apukukarow[kuka]'
-           and yhtio = '$apukukarow[yhtio]'";
+    $query = "UPDATE kuka
+              SET session = '$session',
+              lastlogin  = now()
+              WHERE kuka = '$apukukarow[kuka]'
+               and yhtio = '$apukukarow[yhtio]'";
     $result = mysql_query($query) or die ("Päivitys epäonnistui sisäänkirjautumisessa");
 
-    $query = "  UPDATE kuka
-          SET session = ''
-          WHERE kuka = '$apukukarow[kuka]'
-           and yhtio != '$apukukarow[yhtio]'";
+    $query = "UPDATE kuka
+              SET session = ''
+              WHERE kuka  = '$apukukarow[kuka]'
+               and yhtio != '$apukukarow[yhtio]'";
     $result = mysql_query($query) or die ("Päivitys epäonnistui sisäänkirjautumisessa");
 
     $bool = setcookie("pupesoft_session", $session, time()+43200, "/"); // 12 tuntia voimassa
@@ -399,9 +399,9 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
   }
   else {
 
-    $query = "  SELECT *
-          FROM kuka
-          WHERE session='" . mysql_real_escape_string($session) . "'";
+    $query = "SELECT *
+              FROM kuka
+              WHERE session='" . mysql_real_escape_string($session) . "'";
     $result = mysql_query($query) or die ("Kysely ei onnistu kuka $query");
 
     if (mysql_num_rows($result) != 1 or strlen($session) != 25) {
@@ -795,12 +795,12 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
       // Autetaan sanakirjan ylläpidossa
       if ($kukarow["yhtio"] != "" and $kukarow["kuka"] != "") {
-        $query = "  SELECT yhtio
-              FROM oikeu
-              WHERE yhtio  = '$kukarow[yhtio]'
-              and kuka  = '$kukarow[kuka]'
-              and nimi  = 'sanakirja.php'
-              and alanimi = ''";
+        $query = "SELECT yhtio
+                  FROM oikeu
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and kuka    = '$kukarow[kuka]'
+                  and nimi    = 'sanakirja.php'
+                  and alanimi = ''";
         $ksres = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($ksres) > 0) $kaannetyt_sanat = array();
@@ -817,13 +817,13 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
     // Messenger-viestit (X = ei luettu)
     if (basename($phpnimi) != 'indexvas.php' and (!isset($_GET["ohje"]) or $_GET["ohje"] != "off") and (!isset($no_head) or $no_head != "yes")) {
 
-      $message_query = "  SELECT messenger.tunnus, left(messenger.viesti, 25) kooste, messenger.viesti, kuka.nimi, messenger.luontiaika
-                FROM messenger USE INDEX (yhtio_vastaanottaja_status)
-                JOIN kuka USE INDEX (kuka_index) ON (kuka.yhtio = messenger.yhtio AND kuka.kuka = messenger.kuka)
-                WHERE messenger.yhtio in ($konserni_yhtiot)
-                AND messenger.vastaanottaja = '$kukarow[kuka]'
-                AND kuka.extranet = ''
-                AND messenger.status = 'X'";
+      $message_query = "SELECT messenger.tunnus, left(messenger.viesti, 25) kooste, messenger.viesti, kuka.nimi, messenger.luontiaika
+                        FROM messenger USE INDEX (yhtio_vastaanottaja_status)
+                        JOIN kuka USE INDEX (kuka_index) ON (kuka.yhtio = messenger.yhtio AND kuka.kuka = messenger.kuka)
+                        WHERE messenger.yhtio       in ($konserni_yhtiot)
+                        AND messenger.vastaanottaja = '$kukarow[kuka]'
+                        AND kuka.extranet           = ''
+                        AND messenger.status        = 'X'";
       if ($message_result = mysql_query($message_query)) {
         if (mysql_num_rows($message_result) > 0) {
 

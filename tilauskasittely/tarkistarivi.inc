@@ -647,8 +647,6 @@ if (
           // jos toimitetaan erikoisvarastosta, niin ilmoitetaan siitä
           if ($alkurow['varasto'] != $laskurow["varasto"] and $tm_toimitustaparow["nouto"] == "" and $sel != '' and !in_array($row["var2"], array("OK", "PK")) and $kukarow['kassamyyja'] == '' and $row['varattu'] > 0 and $alkurow['varastotyyppi'] == 'E' and $alkurow['erikoistoimitus_alarajasumma'] > 0 and (float) $row['myyntihinta'] >= (float) $alkurow['erikoistoimitus_alarajasumma']) {
             $varaosakommentti .= t("Toimitusaika 2pv.")."<br/>";
-            $riviok++;
-            $tilausok++;
           }
 
           $paikatlask++;

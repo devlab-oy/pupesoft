@@ -1208,7 +1208,16 @@ if ($tee == 'E' or $tee == 'F') {
       echo "<tr><td colspan='3'>".wordwrap($faktarow["fakta"], 120, "<br>")."</td></tr>";
     }
 
-    if ($yhtiorow['kirjanpidollinen_varastosiirto_myyntitilaukselta'] == 'K') {
+    $query = "SELECT tila,
+              alatila
+              FROM lasku
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = '{$trow['vanhatunnus']}'";
+    $varastosiirto_result = pupe_query($query);
+    $varastosiirto = mysql_fetch_assoc($varastosiirto_result);
+    $_onko_varastosiirto = ($varastosiirto['tila'] == 'G' and $varastosiirto['alatila'] == 'X');
+    $_kirjanpidollinen_varastosiirto = ($yhtiorow['kirjanpidollinen_varastosiirto_myyntitilaukselta'] == 'K');
+    if ($_kirjanpidollinen_varastosiirto and $_onko_varastosiirto) {
       echo "<tr>";
       echo "<th>".t('Varastosiirtotosite')."</th>";
       echo "<td colspan='5'>";

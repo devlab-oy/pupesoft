@@ -4,9 +4,9 @@ ob_start();
 
 require ("parametrit.inc");
 
-$query = "  UPDATE kuka SET
-      session = ''
-      WHERE session = '$session'";
+$query = "UPDATE kuka SET
+          session       = ''
+          WHERE session = '$session'";
 $result = pupe_query($query);
 $bool = setcookie("pupesoft_session", "", time()-43200, "/");
 

@@ -10,18 +10,18 @@ if(!function_exists("kassalipastarkista")) {
       (mysql_field_name($result, $i) == "kateistilitys") or
       (mysql_field_name($result, $i) == "kassaerotus")) {
 
-      $query = "  SELECT nimi
-            FROM tili
-            WHERE yhtio='$kukarow[yhtio]' and tilino = '$t[$i]'";
+      $query = "SELECT nimi
+                FROM tili
+                WHERE yhtio='$kukarow[yhtio]' and tilino = '$t[$i]'";
       $sresult = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($sresult) != 1) {
         //Olisiko siellä nimi
         if ($t[$i] != '') {
-          $query = "  SELECT nimi, tilino
-                FROM tili
-                WHERE yhtio = '$kukarow[yhtio]' and nimi like '%$t[$i]%'
-                ORDER BY tilino";
+          $query = "SELECT nimi, tilino
+                    FROM tili
+                    WHERE yhtio = '$kukarow[yhtio]' and nimi like '%$t[$i]%'
+                    ORDER BY tilino";
           $sresult = mysql_query($query) or pupe_error($query);
 
           if (mysql_num_rows($sresult) > 0) {
@@ -48,10 +48,10 @@ if(!function_exists("kassalipastarkista")) {
         $virhe[$i] = t("Nimi on syötettävä");
       }
 
-      $query = "  SELECT *
-            FROM kassalipas
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tunnus != '$tunnus'";
+      $query = "SELECT *
+                FROM kassalipas
+                WHERE yhtio  = '$kukarow[yhtio]'
+                and tunnus  != '$tunnus'";
       $sresult = mysql_query($query) or pupe_error($query);
 
       while ($srow = mysql_fetch_array($sresult)) {

@@ -72,11 +72,11 @@ function loop_packet($xml_element, $parameters) {
 
         $toim_tuoteno_wherelisa = trim($tuote2) != "" ? "AND tt.toim_tuoteno IN ('{$tuote}','{$tuote2}')" : "AND tt.toim_tuoteno = '{$tuote}'";
 
-        $query = "  SELECT tt.*
-              FROM tuotteen_toimittajat AS tt
-              JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus AND toimi.toimittajanro = '{$tavarantoimittajanumero}' AND toimi.tyyppi != 'P')
-              WHERE tt.yhtio = 'artr'
-              {$toim_tuoteno_wherelisa}";
+        $query = "SELECT tt.*
+                  FROM tuotteen_toimittajat AS tt
+                  JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus AND toimi.toimittajanro = '{$tavarantoimittajanumero}' AND toimi.tyyppi != 'P')
+                  WHERE tt.yhtio = 'artr'
+                  {$toim_tuoteno_wherelisa}";
         $chk_res = pupe_query($query);
 
         if (mysql_num_rows($chk_res) != 0) {
@@ -104,19 +104,19 @@ function loop_packet($xml_element, $parameters) {
           }
         }
 
-        $query = "  SELECT tuotteen_toimittajat.tuotekerroin
-              FROM toimi
-              JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
-                            AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
-                            AND tuotteen_toimittajat.toim_tuoteno = '{$tuote}'
-                            AND tuotteen_toimittajat.toim_tuoteno != '')
-              JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio
-                      AND tuote.tuoteno = tuotteen_toimittajat.tuoteno
-                      AND tuote.status != 'P')
-              WHERE toimi.yhtio = '{$kukarow['yhtio']}'
-              AND toimi.toimittajanro = '{$tavarantoimittajanumero}'
-              AND toimi.tyyppi != 'P'
-              AND toimi.asn_sanomat = 'K'";
+        $query = "SELECT tuotteen_toimittajat.tuotekerroin
+                  FROM toimi
+                  JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
+                                AND tuotteen_toimittajat.liitostunnus  = toimi.tunnus
+                                AND tuotteen_toimittajat.toim_tuoteno  = '{$tuote}'
+                                AND tuotteen_toimittajat.toim_tuoteno != '')
+                  JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio
+                          AND tuote.tuoteno                            = tuotteen_toimittajat.tuoteno
+                          AND tuote.status                            != 'P')
+                  WHERE toimi.yhtio                                    = '{$kukarow['yhtio']}'
+                  AND toimi.toimittajanro                              = '{$tavarantoimittajanumero}'
+                  AND toimi.tyyppi                                    != 'P'
+                  AND toimi.asn_sanomat                                = 'K'";
         $tuotekerroin_chk_res = pupe_query($query);
 
         if (mysql_num_rows($tuotekerroin_chk_res) > 0) {
@@ -128,24 +128,24 @@ function loop_packet($xml_element, $parameters) {
         }
 
         // tämä siksi ettei haluta tallentaa 0 rivejä kantaan.
-        $sqlinsert =  " INSERT INTO asn_sanomat SET
-                yhtio         = '$kukarow[yhtio]',
-                laji        = 'asn',
-                toimittajanumero  = '$tavarantoimittajanumero',
-                asn_numero      = '$asn_numero',
-                sscc_koodi      = '$sscc',
-                saapumispvm     = '$toimituspvm',
-                vastaanottaja     = '$vastaanottaja',
-                tilausnumero     = '$tuotteelta_tilausno',
-                paketinnumero    = '$paketti_nro',
-                paketintunniste   = '$laatikkoind',
-                lahetyslistannro   = '$pakkauslista',
-                toim_tuoteno    = '$tuote',
-                toim_tuoteno2    = '$tuote2',
-                kappalemaara    = '$kpl',
-                tilausrivinpositio  = '$tilausrivinpositio',
-                laatija       = '$kukarow[kuka]',
-                luontiaika       = now()";
+        $sqlinsert =  "INSERT INTO asn_sanomat SET
+                       yhtio              = '$kukarow[yhtio]',
+                       laji               = 'asn',
+                       toimittajanumero   = '$tavarantoimittajanumero',
+                       asn_numero         = '$asn_numero',
+                       sscc_koodi         = '$sscc',
+                       saapumispvm        = '$toimituspvm',
+                       vastaanottaja      = '$vastaanottaja',
+                       tilausnumero       = '$tuotteelta_tilausno',
+                       paketinnumero      = '$paketti_nro',
+                       paketintunniste    = '$laatikkoind',
+                       lahetyslistannro   = '$pakkauslista',
+                       toim_tuoteno       = '$tuote',
+                       toim_tuoteno2      = '$tuote2',
+                       kappalemaara       = '$kpl',
+                       tilausrivinpositio = '$tilausrivinpositio',
+                       laatija            = '$kukarow[kuka]',
+                       luontiaika         = now()";
         $result = pupe_query($sqlinsert);
         $tunnus_liitetiedostoon = mysql_insert_id();
       }
@@ -310,11 +310,11 @@ if ($handle = opendir($teccomkansio)) {
 
         if ($tavarantoimittajanumero != "" and $asn_numero != "") {
 
-          $tarkinsert = " SELECT tunnus
-                  FROM asn_sanomat
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  AND toimittajanumero = '$tavarantoimittajanumero'
-                  AND asn_numero = '$asn_numero'";
+          $tarkinsert = "SELECT tunnus
+                         FROM asn_sanomat
+                         WHERE yhtio          = '$kukarow[yhtio]'
+                         AND toimittajanumero = '$tavarantoimittajanumero'
+                         AND asn_numero       = '$asn_numero'";
           $checkinsertresult = pupe_query($tarkinsert);
 
           if (mysql_num_rows($checkinsertresult) > 0) {
@@ -327,23 +327,23 @@ if ($handle = opendir($teccomkansio)) {
 
             $filesize = strlen($tiedosto_sisalto);
 
-            $tecquery = "  INSERT INTO liitetiedostot SET
-                    yhtio          = '$kukarow[yhtio]',
-                    liitos         = 'asn_sanomat',
-                    liitostunnus     = '$tunnus_liitetiedostoon',
-                    data           = '$tiedosto_sisalto',
-                    selite         = '$tavarantoimittajanumero ASN_sanoman $asn_numero tiedosto',
-                    filename       = '$file',
-                    filesize       = '$filesize',
-                    filetype       = 'text/xml',
-                    image_width      = '',
-                    image_height    = '',
-                    image_bits      = '',
-                    image_channels    = '',
-                    kayttotarkoitus    = 'TECCOM-ASN',
-                    jarjestys      = '1',
-                    laatija        = '$kukarow[kuka]',
-                    luontiaika      = now()";
+            $tecquery = "INSERT INTO liitetiedostot SET
+                         yhtio           = '$kukarow[yhtio]',
+                         liitos          = 'asn_sanomat',
+                         liitostunnus    = '$tunnus_liitetiedostoon',
+                         data            = '$tiedosto_sisalto',
+                         selite          = '$tavarantoimittajanumero ASN_sanoman $asn_numero tiedosto',
+                         filename        = '$file',
+                         filesize        = '$filesize',
+                         filetype        = 'text/xml',
+                         image_width     = '',
+                         image_height    = '',
+                         image_bits      = '',
+                         image_channels  = '',
+                         kayttotarkoitus = 'TECCOM-ASN',
+                         jarjestys       = '1',
+                         laatija         = '$kukarow[kuka]',
+                         luontiaika      = now()";
             $Xresult = pupe_query($tecquery);
             rename($teccomkansio."/".$file, $teccomkansio_valmis."/".$file);
           }

@@ -46,9 +46,9 @@ echo "<td>".t("Älä näytä lähetettyjä")."</td>
 if ($aika != '') {
 
   // Tehdään alkusiivous!
-  $query = "  SELECT konserni
-        FROM yhtio
-        WHERE yhtio = '$kukarow[yhtio]'";
+  $query = "SELECT konserni
+            FROM yhtio
+            WHERE yhtio = '$kukarow[yhtio]'";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) == 1) {
@@ -60,17 +60,17 @@ if ($aika != '') {
   }
 
   // Poistetaan vanhat tapahtumat
-  $query = "  DELETE from maksu
-        WHERE (konserni='$trow[konserni]' or yhtio='$kukarow[yhtio]') and tyyppi != 'MU'";
+  $query = "DELETE from maksu
+            WHERE (konserni='$trow[konserni]' or yhtio='$kukarow[yhtio]') and tyyppi != 'MU'";
   $result = mysql_query($query) or pupe_error($query);
 
   // Lisätään uudet
   // Onko meillä konserninäkökulma??
   if ($konserni == 'on') {
-    $query = "  SELECT yhtio, konserni, nimi
-          FROM yhtio
-          WHERE konserni = '$trow[konserni]'
-          and konserni != ''";
+    $query = "SELECT yhtio, konserni, nimi
+              FROM yhtio
+              WHERE konserni  = '$trow[konserni]'
+              and konserni   != ''";
     $result = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($result) < 2) {
@@ -91,23 +91,23 @@ if ($aika != '') {
 
     while ($yrow = mysql_fetch_array ($result)) {
       //Myyntireskontra
-      $query = "  SELECT if(kapvm > now(), kapvm,erpcm) olmapvm, sum(summa) summa, count(*)
-            FROM lasku
-            WHERE yhtio = '$yrow[yhtio]' and lasku.tila = 'U' and mapvm='0000-00-00'
-            GROUP BY 1";
+      $query = "SELECT if(kapvm > now(), kapvm,erpcm) olmapvm, sum(summa) summa, count(*)
+                FROM lasku
+                WHERE yhtio = '$yrow[yhtio]' and lasku.tila = 'U' and mapvm='0000-00-00'
+                GROUP BY 1";
       $yresult = mysql_query($query) or pupe_error($query);
 
       while ($trow=mysql_fetch_array ($yresult)) {
         $query = "INSERT into maksu values (
-              '$yrow[yhtio]',
-              '$yrow[konserni]',
-              '$kukarow[kuka]',
-              '$trow[olmapvm]',
-              'MY',
-              '$trow[summa]',
-              'Ostolaskuja',
-              '',
-              '')";
+                  '$yrow[yhtio]',
+                  '$yrow[konserni]',
+                  '$kukarow[kuka]',
+                  '$trow[olmapvm]',
+                  'MY',
+                  '$trow[summa]',
+                  'Ostolaskuja',
+                  '',
+                  '')";
         $xresult = mysql_query($query) or pupe_error($query);
       }
 
@@ -121,22 +121,22 @@ if ($aika != '') {
       }
 
       $query = "SELECT olmapvm, -1 * sum(summa * valuu.kurssi) summa, count(*)
-            FROM lasku, valuu, yhtio
-            WHERE lasku.yhtio = '$yrow[yhtio]' and valuu.yhtio = '$yrow[yhtio]' and
-                lasku.valkoodi = valuu.nimi and lasku.tila in ($tilat)
-            GROUP BY olmapvm";
+                FROM lasku, valuu, yhtio
+                WHERE lasku.yhtio  = '$yrow[yhtio]' and valuu.yhtio = '$yrow[yhtio]' and
+                    lasku.valkoodi = valuu.nimi and lasku.tila in ($tilat)
+                GROUP BY olmapvm";
       $yresult = mysql_query($query) or pupe_error($query);
       while ($trow=mysql_fetch_array ($yresult)) {
         $query = "INSERT into maksu values (
-              '$yrow[yhtio]',
-              '$yrow[konserni]',
-              '$kukarow[kuka]',
-              '$trow[olmapvm]',
-              'OS',
-              '$trow[summa]',
-              'Ostolaskuja',
-              '',
-              '')";
+                  '$yrow[yhtio]',
+                  '$yrow[konserni]',
+                  '$kukarow[kuka]',
+                  '$trow[olmapvm]',
+                  'OS',
+                  '$trow[summa]',
+                  'Ostolaskuja',
+                  '',
+                  '')";
         $xresult = mysql_query($query) or pupe_error($query);
       }
     }
@@ -147,10 +147,10 @@ if ($aika != '') {
 
     //Myyntireskontra
     $query = "SELECT if(kapvm > now(), kapvm, erpcm) olmapvm, sum(summa) summa, count(*)
-          FROM lasku
-          WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila = 'U'
-            and mapvm='0000-00-00'
-          GROUP BY 1";
+              FROM lasku
+              WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila = 'U'
+                and mapvm='0000-00-00'
+              GROUP BY 1";
 
     $result = mysql_query($query) or pupe_error($query);
 
@@ -158,15 +158,15 @@ if ($aika != '') {
 
     while ($trow=mysql_fetch_array ($result)) {
       $query = "INSERT into maksu values (
-            '$kukarow[yhtio]',
-             '',
-            '$kukarow[kuka]',
-            '$trow[olmapvm]',
-            'MY',
-            '$trow[summa]',
-            'Ostolaskuja',
-            '',
-            '')";
+                '$kukarow[yhtio]',
+                 '',
+                '$kukarow[kuka]',
+                '$trow[olmapvm]',
+                'MY',
+                '$trow[summa]',
+                'Ostolaskuja',
+                '',
+                '')";
       $xresult = mysql_query($query) or pupe_error($query);
     }
 
@@ -179,26 +179,26 @@ if ($aika != '') {
       $tilat = "'H', 'M', 'P','Q'";
     }
 
-    $query = "  SELECT olmapvm, -1 * sum(summa * valuu.kurssi) summa, count(*)
-          FROM lasku, valuu
-          WHERE lasku.yhtio = '$kukarow[yhtio]'
-          and valuu.yhtio = '$kukarow[yhtio]'
-          and lasku.valkoodi = valuu.nimi
-          and lasku.tila in ($tilat)
-          GROUP BY olmapvm";
+    $query = "SELECT olmapvm, -1 * sum(summa * valuu.kurssi) summa, count(*)
+              FROM lasku, valuu
+              WHERE lasku.yhtio  = '$kukarow[yhtio]'
+              and valuu.yhtio    = '$kukarow[yhtio]'
+              and lasku.valkoodi = valuu.nimi
+              and lasku.tila     in ($tilat)
+              GROUP BY olmapvm";
     $result = mysql_query($query) or pupe_error($query);
     //echo "Laskuja '". mysql_num_rows($result) . "'<br>";
     while ($trow=mysql_fetch_array ($result)) {
       $query = "INSERT into maksu values (
-            '$kukarow[yhtio]',
-             '',
-            '$kukarow[kuka]',
-            '$trow[olmapvm]',
-            'OS',
-            '$trow[summa]',
-            'Ostolaskuja',
-            '',
-            '')";
+                '$kukarow[yhtio]',
+                 '',
+                '$kukarow[kuka]',
+                '$trow[olmapvm]',
+                'OS',
+                '$trow[summa]',
+                'Ostolaskuja',
+                '',
+                '')";
       $xresult = mysql_query($query) or pupe_error($query);
     }
   }
@@ -212,16 +212,16 @@ if ($aika != '') {
   if ($aika == 'kk') {
     $tapa = "left(tapvm,7)";;
   }
-  $query = "  SELECT $tapa Aika,
-        sum(if(tyyppi='MY',summa,0)) Myyntires,
-        sum(if(tyyppi='OS',summa,0)) Ostores,
-        sum(if(tyyppi='MU',-1 * summa,0)) Muu,
-        sum(if(tyyppi='MU',-1 * summa,summa)) Yhteensa
-        FROM maksu
-        WHERE yhtio = '$kukarow[yhtio]'
-        and maksettu <> 1
-        GROUP BY Aika ASC
-            WITH ROLLUP";
+  $query = "SELECT $tapa Aika,
+            sum(if(tyyppi='MY',summa,0)) Myyntires,
+            sum(if(tyyppi='OS',summa,0)) Ostores,
+            sum(if(tyyppi='MU',-1 * summa,0)) Muu,
+            sum(if(tyyppi='MU',-1 * summa,summa)) Yhteensa
+            FROM maksu
+            WHERE yhtio  = '$kukarow[yhtio]'
+            and maksettu <> 1
+            GROUP BY Aika ASC
+                WITH ROLLUP";
   $result = mysql_query($query) or pupe_error($query);
 
   echo "<table><tr>";

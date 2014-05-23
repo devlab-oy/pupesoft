@@ -58,15 +58,15 @@ if (!isset($kukarow)) {
 }
 
 // haetaan halutut varastotaphtumat
-$query  = "  SELECT yhtio, tunnus, date_format(tapvm, '%Y%m%d') tapvm, month(tapvm) KUUKAUSI
-      FROM lasku
-      WHERE yhtio  = '$kukarow[yhtio]'
-      and tila     = 'U'
-      and alatila  = 'X'
-      and tapvm   >= '$accident_date'
-      and tapvm   <= '$accident_date_end'
-      and laskunro > 0
-      ORDER BY tapvm";
+$query  = "SELECT yhtio, tunnus, date_format(tapvm, '%Y%m%d') tapvm, month(tapvm) KUUKAUSI
+           FROM lasku
+           WHERE yhtio  = '$kukarow[yhtio]'
+           and tila     = 'U'
+           and alatila  = 'X'
+           and tapvm    >= '$accident_date'
+           and tapvm    <= '$accident_date_end'
+           and laskunro > 0
+           ORDER BY tapvm";
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) > 0) {
@@ -76,49 +76,49 @@ if (mysql_num_rows($result) > 0) {
 
   while ($laskurow = mysql_fetch_assoc($result)) {
 
-    $query  = "  SELECT round(sum(tilausrivi.rivihinta-ifnull(tilausrivi.kate_korjattu, tilausrivi.kate)), 2) varmuutos, group_concat(tilausrivi.tunnus) tunnukset
-          FROM tilausrivi
-          JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
-          WHERE tilausrivi.yhtio     = '$kukarow[yhtio]'
-          and tilausrivi.tyyppi      = 'L'
-          and tilausrivi.uusiotunnus = {$laskurow['tunnus']}";
+    $query  = "SELECT round(sum(tilausrivi.rivihinta-ifnull(tilausrivi.kate_korjattu, tilausrivi.kate)), 2) varmuutos, group_concat(tilausrivi.tunnus) tunnukset
+               FROM tilausrivi
+               JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
+               WHERE tilausrivi.yhtio     = '$kukarow[yhtio]'
+               and tilausrivi.tyyppi      = 'L'
+               and tilausrivi.uusiotunnus = {$laskurow['tunnus']}";
     $rivires = pupe_query($query);
     $rivirow = mysql_fetch_assoc($rivires);
 
     if ($rivirow['tunnukset'] != "") {
 
-      $query  = "  SELECT sum(summa) varmuutos, count(*) varmuma, group_concat(tunnus) varmuutokset,
-            max(tapvm) maxtapvm,
-            if(max(tapvm) >= '$kpitokausi_auki_pvm', 1, 0) crossyearerror,
-            group_concat(if(tapvm >= '$kpitokausi_auki_pvm', tunnus, 0)) tanvuodentunnarit,
-            group_concat(if(tapvm  < '$kpitokausi_auki_pvm', tunnus, 0)) viimevuodentunnarit
-            FROM tiliointi
-            WHERE yhtio  = '$kukarow[yhtio]'
-            and ltunnus  = $laskurow[tunnus]
-            and korjattu = ''
-            and tilino   in ('$yhtiorow[varastonmuutos]','$yhtiorow[raaka_ainevarastonmuutos]')";
+      $query  = "SELECT sum(summa) varmuutos, count(*) varmuma, group_concat(tunnus) varmuutokset,
+                 max(tapvm) maxtapvm,
+                 if(max(tapvm) >= '$kpitokausi_auki_pvm', 1, 0) crossyearerror,
+                 group_concat(if(tapvm >= '$kpitokausi_auki_pvm', tunnus, 0)) tanvuodentunnarit,
+                 group_concat(if(tapvm  < '$kpitokausi_auki_pvm', tunnus, 0)) viimevuodentunnarit
+                 FROM tiliointi
+                 WHERE yhtio  = '$kukarow[yhtio]'
+                 and ltunnus  = $laskurow[tunnus]
+                 and korjattu = ''
+                 and tilino   in ('$yhtiorow[varastonmuutos]','$yhtiorow[raaka_ainevarastonmuutos]')";
       $tilires = pupe_query($query);
       $tilirow = mysql_fetch_assoc($tilires);
 
-      $query  = "  SELECT sum(summa) varasto, group_concat(tunnus) varastot,
-            max(tapvm) maxtapvm,
-            if(max(tapvm) >= '$kpitokausi_auki_pvm', 1, 0) crossyearerror,
-            group_concat(if(tapvm >= '$kpitokausi_auki_pvm', tunnus, 0)) tanvuodentunnarit,
-            group_concat(if(tapvm  < '$kpitokausi_auki_pvm', tunnus, 0)) viimevuodentunnarit
-            FROM tiliointi
-            WHERE yhtio  = '$kukarow[yhtio]'
-            and ltunnus  = $laskurow[tunnus]
-            and korjattu = ''
-            and tilino   in ('$yhtiorow[varasto]','$yhtiorow[raaka_ainevarasto]')";
+      $query  = "SELECT sum(summa) varasto, group_concat(tunnus) varastot,
+                 max(tapvm) maxtapvm,
+                 if(max(tapvm) >= '$kpitokausi_auki_pvm', 1, 0) crossyearerror,
+                 group_concat(if(tapvm >= '$kpitokausi_auki_pvm', tunnus, 0)) tanvuodentunnarit,
+                 group_concat(if(tapvm  < '$kpitokausi_auki_pvm', tunnus, 0)) viimevuodentunnarit
+                 FROM tiliointi
+                 WHERE yhtio  = '$kukarow[yhtio]'
+                 and ltunnus  = $laskurow[tunnus]
+                 and korjattu = ''
+                 and tilino   in ('$yhtiorow[varasto]','$yhtiorow[raaka_ainevarasto]')";
       $varares = pupe_query($query);
       $vararow = mysql_fetch_assoc($varares);
 
-      $query  = "  SELECT sum(tapahtuma.hinta * tapahtuma.kpl) * -1 varmuutos
-            FROM tapahtuma
-            JOIN tuote ON (tapahtuma.yhtio = tuote.yhtio and tapahtuma.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
-            WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
-            and tapahtuma.laji    = 'laskutus'
-            and tapahtuma.rivitunnus in ({$rivirow['tunnukset']})";
+      $query  = "SELECT sum(tapahtuma.hinta * tapahtuma.kpl) * -1 varmuutos
+                 FROM tapahtuma
+                 JOIN tuote ON (tapahtuma.yhtio = tuote.yhtio and tapahtuma.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
+                 WHERE tapahtuma.yhtio    = '$kukarow[yhtio]'
+                 and tapahtuma.laji       = 'laskutus'
+                 and tapahtuma.rivitunnus in ({$rivirow['tunnukset']})";
       $tapares = pupe_query($query);
       $taparow = mysql_fetch_assoc($tapares);
 
@@ -243,13 +243,13 @@ if (mysql_num_rows($result) > 0) {
             kopioitiliointi($ekamuutos[0], "", $params);
 
             // Yliviivataan alkuperäiset varastonmuutostiliöinnit
-            $query = "  UPDATE tiliointi
-                  SET korjattu = '{$kukarow['kuka']}', korjausaika = now()
-                  WHERE yhtio  = '$kukarow[yhtio]'
-                  and ltunnus  = $laskurow[tunnus]
-                  and korjattu = ''
-                  and tilino   in ('$yhtiorow[varastonmuutos]','$yhtiorow[raaka_ainevarastonmuutos]')
-                  and tunnus   in ({$tilirow['varmuutokset']})";
+            $query = "UPDATE tiliointi
+                      SET korjattu = '{$kukarow['kuka']}', korjausaika = now()
+                      WHERE yhtio  = '$kukarow[yhtio]'
+                      and ltunnus  = $laskurow[tunnus]
+                      and korjattu = ''
+                      and tilino   in ('$yhtiorow[varastonmuutos]','$yhtiorow[raaka_ainevarastonmuutos]')
+                      and tunnus   in ({$tilirow['varmuutokset']})";
             pupe_query($query);
           }
 
@@ -271,13 +271,13 @@ if (mysql_num_rows($result) > 0) {
             kopioitiliointi($ekamuutos[0], "", $params);
 
             // Yliviivataan alkuperäiset varastonmuutostiliöinnit
-            $query = "  UPDATE tiliointi
-                  SET korjattu = '{$kukarow['kuka']}', korjausaika = now()
-                  WHERE yhtio  = '$kukarow[yhtio]'
-                  and ltunnus  = $laskurow[tunnus]
-                  and korjattu = ''
-                  and tilino   in ('$yhtiorow[varasto]','$yhtiorow[raaka_ainevarasto]')
-                  and tunnus   in ({$vararow['varastot']})";
+            $query = "UPDATE tiliointi
+                      SET korjattu = '{$kukarow['kuka']}', korjausaika = now()
+                      WHERE yhtio  = '$kukarow[yhtio]'
+                      and ltunnus  = $laskurow[tunnus]
+                      and korjattu = ''
+                      and tilino   in ('$yhtiorow[varasto]','$yhtiorow[raaka_ainevarasto]')
+                      and tunnus   in ({$vararow['varastot']})";
             pupe_query($query);
           }
         }

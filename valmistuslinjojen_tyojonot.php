@@ -92,12 +92,12 @@ if (isset($tee) and $tee == 'update') {
 
       // päivitetään kalenterin tiedot
       $query = "UPDATE kalenteri
-            SET kentta01 = '{$ylityotunnit}',
-            kentta02     = '{$kommentti}',
-            pvmalku      = '{$pvmalku}',
-            pvmloppu     = '{$pvmloppu}'
-            WHERE yhtio  = '{$kukarow['yhtio']}'
-            AND otunnus  = '{$tunnus}'";
+                SET kentta01 = '{$ylityotunnit}',
+                kentta02    = '{$kommentti}',
+                pvmalku     = '{$pvmalku}',
+                pvmloppu    = '{$pvmloppu}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND otunnus = '{$tunnus}'";
       pupe_query($query);
 
       $valmistus->setTila($tila);
@@ -158,15 +158,15 @@ if ($tee == '') {
 
     // Haetaan linjan 4 uusinta kalenterimerkinnät
     $tyojono_query = "SELECT kalenteri.kuka, kalenteri.henkilo, nimitys, varattu, yksikko, pvmalku, pvmloppu, kalenteri.tunnus, lasku.valmistuksen_tila, lasku.viesti, lasku.tunnus as valmistusnumero, kalenteri.otunnus
-            FROM kalenteri
-            JOIN tilausrivi on (tilausrivi.yhtio=kalenteri.yhtio and tilausrivi.otunnus=kalenteri.otunnus)
-            JOIN lasku on (lasku.yhtio=kalenteri.yhtio and lasku.tunnus=kalenteri.otunnus)
-            WHERE kalenteri.yhtio='{$kukarow['yhtio']}'
-            AND henkilo='{$linja['selite']}'
-            AND tilausrivi.tyyppi='W'
-            AND lasku.valmistuksen_tila != ('TA')
-            ORDER BY pvmalku
-            LIMIT 4";
+                      FROM kalenteri
+                      JOIN tilausrivi on (tilausrivi.yhtio=kalenteri.yhtio and tilausrivi.otunnus=kalenteri.otunnus)
+                      JOIN lasku on (lasku.yhtio=kalenteri.yhtio and lasku.tunnus=kalenteri.otunnus)
+                      WHERE kalenteri.yhtio='{$kukarow['yhtio']}'
+                      AND henkilo='{$linja['selite']}'
+                      AND tilausrivi.tyyppi='W'
+                      AND lasku.valmistuksen_tila != ('TA')
+                      ORDER BY pvmalku
+                      LIMIT 4";
     $tyojono_result = pupe_query($tyojono_query);
 
     // Jos työjono on tyhjä

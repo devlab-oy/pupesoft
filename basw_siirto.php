@@ -131,10 +131,10 @@ echo "</select></td></tr>";
 
 echo "<tr><th valign='top'>".t("tai koko tilikausi")."</th>";
 
-$query = "  SELECT *
-      FROM tilikaudet
-      WHERE yhtio = '$kukarow[yhtio]'
-      ORDER BY tilikausi_alku DESC";
+$query = "SELECT *
+          FROM tilikaudet
+          WHERE yhtio = '$kukarow[yhtio]'
+          ORDER BY tilikausi_alku DESC";
 $vresult = pupe_query($query);
 
 echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa");
@@ -159,9 +159,9 @@ if ($tee == "TEEAINEISTO") {
   }
 
   if ((int) $tkausi > 0) {
-    $query = "  SELECT tilikausi_alku, tilikausi_loppu
-          FROM tilikaudet
-          WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tkausi'";
+    $query = "SELECT tilikausi_alku, tilikausi_loppu
+              FROM tilikaudet
+              WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tkausi'";
     $result = pupe_query($query);
     $tkrow = mysql_fetch_assoc($result);
 
@@ -207,15 +207,15 @@ if ($tee == "TEEAINEISTO") {
     </tr>\n";
   echo "</table><br>";
 
-  $query = "  SELECT tiliointi.tilino, kustannuspaikka.koodi, sum(tiliointi.summa) summa
-        FROM tiliointi
-        LEFT JOIN kustannuspaikka ON tiliointi.yhtio = kustannuspaikka.yhtio and tiliointi.kustp = kustannuspaikka.tunnus
-        WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
-        and tiliointi.korjattu = ''
-        and tiliointi.tapvm   >= '$plvv-$plvk-$plvp'
-        and tiliointi.tapvm   <= '$alvv-$alvk-$alvp'
-        GROUP BY 1,2
-        ORDER BY 1,2";
+  $query = "SELECT tiliointi.tilino, kustannuspaikka.koodi, sum(tiliointi.summa) summa
+            FROM tiliointi
+            LEFT JOIN kustannuspaikka ON tiliointi.yhtio = kustannuspaikka.yhtio and tiliointi.kustp = kustannuspaikka.tunnus
+            WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
+            and tiliointi.korjattu = ''
+            and tiliointi.tapvm    >= '$plvv-$plvk-$plvp'
+            and tiliointi.tapvm    <= '$alvv-$alvk-$alvp'
+            GROUP BY 1,2
+            ORDER BY 1,2";
   $result = mysql_query($query) or pupe_error($query);
 
   echo "<table>";

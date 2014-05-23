@@ -13,14 +13,14 @@ if ($tee != '') {
   $virtu = "";
 
   // tehdään tullin aineisto
-  $query = "  SELECT tuote.tullinimike1, ifnull(tuotteen_toimittajat.alkuperamaa, '') alkuperamaa, tuote.tuoteno, tuote.nimitys
-        FROM tuote
-        LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno)
-        WHERE tuote.yhtio = '$kukarow[yhtio]'
-        AND tuote.tullinimike1 > 0
-        AND tuote.status NOT IN ('P','X')
-        GROUP BY tullinimike1, alkuperamaa
-        ORDER BY tullinimike1, alkuperamaa";
+  $query = "SELECT tuote.tullinimike1, ifnull(tuotteen_toimittajat.alkuperamaa, '') alkuperamaa, tuote.tuoteno, tuote.nimitys
+            FROM tuote
+            LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno)
+            WHERE tuote.yhtio      = '$kukarow[yhtio]'
+            AND tuote.tullinimike1 > 0
+            AND tuote.status       NOT IN ('P','X')
+            GROUP BY tullinimike1, alkuperamaa
+            ORDER BY tullinimike1, alkuperamaa";
   $result = mysql_query($query) or pupe_error($query);
 
   while ($row  = mysql_fetch_array($result)) {

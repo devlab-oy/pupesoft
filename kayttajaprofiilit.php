@@ -14,9 +14,9 @@ echo "<font class='head'>".t("Käyttäjäprofiilit").":</font><hr>";
 
 //tehdään tsekki, että ei tehdä profiilia samannimiseksi kuin joku käyttäjä
 if ($profiili != '') {
-  $query = "  SELECT nimi
-        FROM kuka use index (kuka_index)
-        WHERE kuka='$profiili' and yhtio='$kukarow[yhtio]'";
+  $query = "SELECT nimi
+            FROM kuka use index (kuka_index)
+            WHERE kuka='$profiili' and yhtio='$kukarow[yhtio]'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -28,12 +28,12 @@ if ($profiili != '') {
 
 if ($tee == 'POISTA' and $profiili != "") {
 
-  $query = "  DELETE
+  $query = "DELETE
             FROM oikeu
-        WHERE yhtio  = '$kukarow[yhtio]'
-        AND kuka     = '$profiili'
-        AND profiili = '$profiili'
-        AND lukittu  = ''";
+            WHERE yhtio  = '$kukarow[yhtio]'
+            AND kuka     = '$profiili'
+            AND profiili = '$profiili'
+            AND lukittu  = ''";
   $result = pupe_query($query);
   $maara = mysql_affected_rows();
 
@@ -50,11 +50,11 @@ if ($tee == 'POISTA' and $profiili != "") {
 if ($tee == 'PAIVITA' and $profiili != "") {
 
   // poistetaan ihan aluksi kaikki.
-  $query = "  DELETE
-        FROM oikeu
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND kuka = '$profiili'
-        AND profiili = '$profiili'";
+  $query = "DELETE
+            FROM oikeu
+            WHERE yhtio  = '$kukarow[yhtio]'
+            AND kuka     = '$profiili'
+            AND profiili = '$profiili'";
 
   if ($sovellus != '' and $sovellus != 'kaikki_sovellukset') {
     $query .= " AND sovellus='$sovellus'";
@@ -68,13 +68,13 @@ if ($tee == 'PAIVITA' and $profiili != "") {
       list ($nimi, $alanimi, $sov) = explode("#", $rastit);
 
       // haetaan menu itemi
-      $query = "  SELECT nimi, nimitys, jarjestys, alanimi, sovellus, jarjestys2, hidden
-            FROM oikeu
-            WHERE yhtio    = '$kukarow[yhtio]'
-            AND kuka    = ''
-            AND sovellus  = '$sov'
-            AND nimi    = '$nimi'
-            AND alanimi    = '$alanimi'";
+      $query = "SELECT nimi, nimitys, jarjestys, alanimi, sovellus, jarjestys2, hidden
+                FROM oikeu
+                WHERE yhtio  = '$kukarow[yhtio]'
+                AND kuka     = ''
+                AND sovellus = '$sov'
+                AND nimi     = '$nimi'
+                AND alanimi  = '$alanimi'";
       $result = pupe_query($query);
       $trow = mysql_fetch_assoc($result);
 
@@ -84,33 +84,33 @@ if ($tee == 'PAIVITA' and $profiili != "") {
         $paivitys_ins = '1';
       }
 
-      $query = "  INSERT into oikeu
-            SET kuka  = '$profiili',
-            profiili  = '$profiili',
-            sovellus  = '$trow[sovellus]',
-            nimi    = '$trow[nimi]',
-            alanimi   = '$trow[alanimi]',
-            paivitys  = '$paivitys_ins',
-            lukittu    = '',
-            nimitys    = '$trow[nimitys]',
-            jarjestys   = '$trow[jarjestys]',
-            jarjestys2  = '$trow[jarjestys2]',
-            hidden    = '$trow[hidden]',
-            yhtio    = '$kukarow[yhtio]',
-            laatija   = '{$kukarow['kuka']}',
-            luontiaika   = now(),
-            muutospvm   = now(),
-            muuttaja   = '{$kukarow['kuka']}'";
+      $query = "INSERT into oikeu
+                SET kuka  = '$profiili',
+                profiili   = '$profiili',
+                sovellus   = '$trow[sovellus]',
+                nimi       = '$trow[nimi]',
+                alanimi    = '$trow[alanimi]',
+                paivitys   = '$paivitys_ins',
+                lukittu    = '',
+                nimitys    = '$trow[nimitys]',
+                jarjestys  = '$trow[jarjestys]',
+                jarjestys2 = '$trow[jarjestys2]',
+                hidden     = '$trow[hidden]',
+                yhtio      = '$kukarow[yhtio]',
+                laatija    = '{$kukarow['kuka']}',
+                luontiaika = now(),
+                muutospvm  = now(),
+                muuttaja   = '{$kukarow['kuka']}'";
       $result = pupe_query($query);
     }
     echo "<font class='message'>".t("Käyttöoikeudet päivitetty")."!</font><br>";
   }
 
   //päivitetään käyttäjien profiilit (joilla on käytössä tämä profiili)
-  $query = "  SELECT *
-        FROM kuka
-         WHERE yhtio = '$kukarow[yhtio]'
-        AND profiilit like '%$profiili%'";
+  $query = "SELECT *
+            FROM kuka
+             WHERE yhtio  = '$kukarow[yhtio]'
+            AND profiilit like '%$profiili%'";
   $kres = pupe_query($query);
 
   while ($krow = mysql_fetch_assoc($kres)) {
@@ -128,51 +128,51 @@ if ($tee == 'PAIVITA' and $profiili != "") {
 
       if ($triggeri == "HAPPY") {
         // poistetaan käyttäjän vanhat
-        $query = "  DELETE FROM oikeu
-              WHERE yhtio  = '$kukarow[yhtio]'
-              AND kuka     = '$krow[kuka]'
-              AND kuka    != ''
-              AND profiili = ''
-              AND lukittu  = ''";
+        $query = "DELETE FROM oikeu
+                  WHERE yhtio   = '$kukarow[yhtio]'
+                  AND kuka      = '$krow[kuka]'
+                  AND kuka     != ''
+                  AND profiili  = ''
+                  AND lukittu   = ''";
         $pres = pupe_query($query);
 
         // käydään uudestaan profiili läpi
         foreach ($profiilit as $prof) {
-          $query = "  SELECT *
-                FROM oikeu
-                WHERE yhtio   = '$kukarow[yhtio]'
-                AND kuka   = '$prof'
-                AND profiili = '$prof'";
+          $query = "SELECT *
+                    FROM oikeu
+                    WHERE yhtio  = '$kukarow[yhtio]'
+                    AND kuka     = '$prof'
+                    AND profiili = '$prof'";
           $pres = pupe_query($query);
 
           while ($trow = mysql_fetch_assoc($pres)) {
             // joudumme tarkistamaan ettei tätä oikeutta ole jo tällä käyttäjällä.
             // voi olla esim jos se on lukittuna annettu
-            $query = "  SELECT yhtio, paivitys
-                  FROM oikeu use index (sovellus_index)
-                  WHERE yhtio    = '$kukarow[yhtio]'
-                  AND kuka    = '$krow[kuka]'
-                  AND sovellus  = '$trow[sovellus]'
-                  AND nimi    = '$trow[nimi]'
-                  AND alanimi   = '$trow[alanimi]'";
+            $query = "SELECT yhtio, paivitys
+                      FROM oikeu use index (sovellus_index)
+                      WHERE yhtio  = '$kukarow[yhtio]'
+                      AND kuka     = '$krow[kuka]'
+                      AND sovellus = '$trow[sovellus]'
+                      AND nimi     = '$trow[nimi]'
+                      AND alanimi  = '$trow[alanimi]'";
             $tarkesult = pupe_query($query);
 
             if (mysql_num_rows($tarkesult) == 0) {
-              $query = "  INSERT into oikeu
-                    SET kuka  = '$krow[kuka]',
-                    sovellus  = '$trow[sovellus]',
-                    nimi    = '$trow[nimi]',
-                    alanimi   = '$trow[alanimi]',
-                    paivitys  = '$trow[paivitys]',
-                    nimitys    = '$trow[nimitys]',
-                    jarjestys   = '$trow[jarjestys]',
-                    jarjestys2  = '$trow[jarjestys2]',
-                    hidden    = '$trow[hidden]',
-                    yhtio    = '$kukarow[yhtio]',
-                    laatija   = '{$kukarow['kuka']}',
-                    luontiaika   = now(),
-                    muutospvm   = now(),
-                    muuttaja   = '{$kukarow['kuka']}'";
+              $query = "INSERT into oikeu
+                        SET kuka  = '$krow[kuka]',
+                        sovellus   = '$trow[sovellus]',
+                        nimi       = '$trow[nimi]',
+                        alanimi    = '$trow[alanimi]',
+                        paivitys   = '$trow[paivitys]',
+                        nimitys    = '$trow[nimitys]',
+                        jarjestys  = '$trow[jarjestys]',
+                        jarjestys2 = '$trow[jarjestys2]',
+                        hidden     = '$trow[hidden]',
+                        yhtio      = '$kukarow[yhtio]',
+                        laatija    = '{$kukarow['kuka']}',
+                        luontiaika = now(),
+                        muutospvm  = now(),
+                        muuttaja   = '{$kukarow['kuka']}'";
               $rresult = pupe_query($query);
             }
             else {
@@ -180,15 +180,15 @@ if ($tee == 'PAIVITA' and $profiili != "") {
 
               if ($trow["paivitys"] == 1 and $tarkrow["paivitys"] != 1) {
                 // Meillä ei välttämättä ollut päivitysoikeutta, koska aiempi checki ei huomio sitä. Lisätään päivitysoikeus.
-                $query = "  UPDATE oikeu
-                      SET paivitys   = 1,
-                      muutospvm     = now(),
-                      muuttaja     = '{$kukarow['kuka']}'
-                      WHERE yhtio    = '$kukarow[yhtio]'
-                      AND kuka    = '$krow[kuka]'
-                      AND sovellus  = '$trow[sovellus]'
-                      AND nimi    = '$trow[nimi]'
-                      AND alanimi   = '$trow[alanimi]'";
+                $query = "UPDATE oikeu
+                          SET paivitys   = 1,
+                          muutospvm    = now(),
+                          muuttaja     = '{$kukarow['kuka']}'
+                          WHERE yhtio  = '$kukarow[yhtio]'
+                          AND kuka     = '$krow[kuka]'
+                          AND sovellus = '$trow[sovellus]'
+                          AND nimi     = '$trow[nimi]'
+                          AND alanimi  = '$trow[alanimi]'";
                 $tarkesult = pupe_query($query);
               }
             }
@@ -234,10 +234,10 @@ echo "<table>
     <td><select name='profiili' onchange='submit()'>";
 
 if ($uusiprofiili == "") {
-  $query = "  SELECT distinct profiili
-        FROM oikeu
-        WHERE yhtio='$kukarow[yhtio]' and profiili!=''
-        ORDER BY profiili";
+  $query = "SELECT distinct profiili
+            FROM oikeu
+            WHERE yhtio='$kukarow[yhtio]' and profiili!=''
+            ORDER BY profiili";
   $kukares = pupe_query($query);
 
   while ($kurow=mysql_fetch_assoc($kukares)) {
@@ -278,11 +278,11 @@ if ($profiili != '') {
 
   echo "<table>";
 
-  $query = "  SELECT distinct sovellus
-        FROM oikeu
-        where yhtio = '$kukarow[yhtio]'
-        $sovellus_rajaus
-        order by sovellus";
+  $query = "SELECT distinct sovellus
+            FROM oikeu
+            where yhtio = '$kukarow[yhtio]'
+            $sovellus_rajaus
+            order by sovellus";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 1) {
@@ -329,12 +329,12 @@ if ($profiili != '') {
   // näytetään oikeuslista
   echo "<table>";
 
-  $query = "  SELECT *
-        FROM oikeu
-        WHERE
-        $lisa
-        $sovellus_rajaus
-        and yhtio = '$kukarow[yhtio]'";
+  $query = "SELECT *
+            FROM oikeu
+            WHERE
+            $lisa
+            $sovellus_rajaus
+            and yhtio = '$kukarow[yhtio]'";
 
   if ($sovellus != "kaikki_sovellukset") {
     $query .= " and sovellus = '$sovellus'";
@@ -384,14 +384,14 @@ if ($profiili != '') {
     $checked  = '';
     $paivit    = '';
 
-    $oq = "  SELECT *
-        FROM oikeu
-        WHERE yhtio    = '$kukarow[yhtio]'
-        and kuka    = '$profiili'
-        and profiili  = '$profiili'
-        and nimi    = '$orow[nimi]'
-        and alanimi    = '$orow[alanimi]'
-        and sovellus  = '$orow[sovellus]'";
+    $oq = "SELECT *
+           FROM oikeu
+           WHERE yhtio  = '$kukarow[yhtio]'
+           and kuka     = '$profiili'
+           and profiili = '$profiili'
+           and nimi     = '$orow[nimi]'
+           and alanimi  = '$orow[alanimi]'
+           and sovellus = '$orow[sovellus]'";
     $or = pupe_query($oq);
 
     if (mysql_num_rows($or) != 0) {

@@ -11,11 +11,11 @@ if ($i == 0) { //yhtiötä ei näytetä
 if (mysql_field_name($result, $i) == "toimipaikka") {
     $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300)." onchange='submit();'>";
 
-    $query = "  SELECT *
-          FROM yhtion_toimipaikat
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND vat_numero = ''
-          ORDER BY nimi";
+    $query = "SELECT *
+              FROM yhtion_toimipaikat
+              WHERE yhtio    = '{$kukarow['yhtio']}'
+              AND vat_numero = ''
+              ORDER BY nimi";
     $vares = pupe_query($query);
 
     while ($varow = mysql_fetch_assoc($vares)) {

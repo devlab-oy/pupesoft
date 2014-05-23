@@ -6,9 +6,9 @@ function paperi_alku () {
   $firstpage = $pdf->new_page("a4");
 
   //Haetaan yhteyshenkilon tiedot
-  $apuqu = "  SELECT *
-        from kuka
-        where yhtio='$kukarow[yhtio]' and tunnus='$yhteyshenkilo'";
+  $apuqu = "SELECT *
+            from kuka
+            where yhtio='$kukarow[yhtio]' and tunnus='$yhteyshenkilo'";
   $yres = pupe_query($apuqu);
   $yrow = mysql_fetch_assoc($yres);
 
@@ -47,9 +47,9 @@ function paperi_alku () {
 
   if (basename($_SERVER["SCRIPT_FILENAME"]) != 'muutosite.php') {
     // Etsit‰‰n maksuehto
-    $query = "  SELECT *
-          FROM maksuehto
-          WHERE tunnus='$vmehto' and yhtio='$kukarow[yhtio]'";
+    $query = "SELECT *
+              FROM maksuehto
+              WHERE tunnus='$vmehto' and yhtio='$kukarow[yhtio]'";
     $presult = pupe_query($query);
     $xrow = mysql_fetch_assoc($presult);
 
@@ -212,45 +212,45 @@ for ($i=0; $i < count($lasku_tunnus); $i++) {
 }
 
 if (basename($_SERVER["SCRIPT_FILENAME"]) == 'muutosite.php') {
-  $query = "  SELECT tunnus
-        FROM kuka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and kuka = '$trow[laatija]'";
+  $query = "SELECT tunnus
+            FROM kuka
+            WHERE yhtio = '$kukarow[yhtio]'
+            and kuka    = '$trow[laatija]'";
   $result = pupe_query($query);
   $yrow = mysql_fetch_assoc($result);
   $yhteyshenkilo = $yrow['tunnus'];
 
-  $query = "  SELECT group_concat(tunnus) tunnukset
-        FROM asiakas
-        WHERE yhtio = '$kukarow[yhtio]'
-        and ytunnus = '$trow[ytunnus]'";
+  $query = "SELECT group_concat(tunnus) tunnukset
+            FROM asiakas
+            WHERE yhtio = '$kukarow[yhtio]'
+            and ytunnus = '$trow[ytunnus]'";
   $result = pupe_query($query);
   $asiakasrow2 = mysql_fetch_assoc($result);
 
-  $query = "  SELECT l.tunnus, l.liitostunnus, t.summa*-1 summa, l.erpcm, l.yhtio_toimipaikka,
-        l.laskunro, t.tapvm mapvm, l.tapvm tapvm, l.tunnus, l.viikorkopros, to_days(t.tapvm) - to_days(l.erpcm) as ika,
-        round(l.viikorkopros * t.summa * -1 * (to_days(t.tapvm)-to_days(l.erpcm)) / 36500,2) as korkosumma, l.maksuehto
-        FROM lasku l
-        join tiliointi t use index (tositerivit_index) on (t.yhtio = l.yhtio and t.tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]') and t.tapvm > l.erpcm and t.tapvm <= '$trow[tapvm]' and l.tunnus = t.ltunnus)
-        LEFT JOIN maksuehto me on (me.yhtio=l.yhtio and me.tunnus=l.maksuehto)
-        WHERE l.liitostunnus in ($asiakasrow2[tunnukset])
-        and l.yhtio = '$kukarow[yhtio]'
-        and l.tila = 'U'
-        and l.mapvm > '0000-00-00'
-        and l.olmapvm = '$trow[tapvm]'
-        ORDER BY l.laskunro, t.tapvm";
+  $query = "SELECT l.tunnus, l.liitostunnus, t.summa*-1 summa, l.erpcm, l.yhtio_toimipaikka,
+            l.laskunro, t.tapvm mapvm, l.tapvm tapvm, l.tunnus, l.viikorkopros, to_days(t.tapvm) - to_days(l.erpcm) as ika,
+            round(l.viikorkopros * t.summa * -1 * (to_days(t.tapvm)-to_days(l.erpcm)) / 36500,2) as korkosumma, l.maksuehto
+            FROM lasku l
+            join tiliointi t use index (tositerivit_index) on (t.yhtio = l.yhtio and t.tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]') and t.tapvm > l.erpcm and t.tapvm <= '$trow[tapvm]' and l.tunnus = t.ltunnus)
+            LEFT JOIN maksuehto me on (me.yhtio=l.yhtio and me.tunnus=l.maksuehto)
+            WHERE l.liitostunnus in ($asiakasrow2[tunnukset])
+            and l.yhtio          = '$kukarow[yhtio]'
+            and l.tila           = 'U'
+            and l.mapvm          > '0000-00-00'
+            and l.olmapvm        = '$trow[tapvm]'
+            ORDER BY l.laskunro, t.tapvm";
 }
 else {
-  $query = "  SELECT l.tunnus, l.liitostunnus, t.summa*-1 summa, l.erpcm, l.yhtio_toimipaikka,
-        l.laskunro, t.tapvm mapvm, l.tapvm tapvm, l.tunnus, l.viikorkopros, to_days(t.tapvm) - to_days(l.erpcm) as ika,
-        round(l.viikorkopros * t.summa * -1 * (to_days(t.tapvm)-to_days(l.erpcm)) / 36500,2) as korkosumma, l.maksuehto
-        FROM lasku l use index (PRIMARY)
-        join tiliointi t use index (tositerivit_index) on (t.yhtio = l.yhtio and t.tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]') and t.tapvm > l.erpcm and l.tunnus = t.ltunnus)
-        LEFT JOIN maksuehto me on (me.yhtio=l.yhtio and me.tunnus=l.maksuehto)
-        WHERE l.tunnus in ($xquery)
-        and l.yhtio = '$kukarow[yhtio]'
-        and l.tila = 'U'
-        ORDER BY l.laskunro, t.tapvm";
+  $query = "SELECT l.tunnus, l.liitostunnus, t.summa*-1 summa, l.erpcm, l.yhtio_toimipaikka,
+            l.laskunro, t.tapvm mapvm, l.tapvm tapvm, l.tunnus, l.viikorkopros, to_days(t.tapvm) - to_days(l.erpcm) as ika,
+            round(l.viikorkopros * t.summa * -1 * (to_days(t.tapvm)-to_days(l.erpcm)) / 36500,2) as korkosumma, l.maksuehto
+            FROM lasku l use index (PRIMARY)
+            join tiliointi t use index (tositerivit_index) on (t.yhtio = l.yhtio and t.tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]') and t.tapvm > l.erpcm and l.tunnus = t.ltunnus)
+            LEFT JOIN maksuehto me on (me.yhtio=l.yhtio and me.tunnus=l.maksuehto)
+            WHERE l.tunnus in ($xquery)
+            and l.yhtio    = '$kukarow[yhtio]'
+            and l.tila     = 'U'
+            ORDER BY l.laskunro, t.tapvm";
 }
 
 $result = pupe_query($query);
@@ -258,10 +258,10 @@ $result = pupe_query($query);
 $asiakastiedot = mysql_fetch_assoc($result);
 
 if ($asiakastiedot["yhtio_toimipaikka"] != '' and $asiakastiedot["yhtio_toimipaikka"] != 0) {
-  $toimipaikkaquery = "  SELECT *
-              FROM yhtion_toimipaikat
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND tunnus  = '$asiakastiedot[yhtio_toimipaikka]'";
+  $toimipaikkaquery = "SELECT *
+                       FROM yhtion_toimipaikat
+                       WHERE yhtio = '$kukarow[yhtio]'
+                       AND tunnus  = '$asiakastiedot[yhtio_toimipaikka]'";
   $toimipaikkares = pupe_query($toimipaikkaquery);
   $toimipaikkarow = mysql_fetch_assoc($toimipaikkares);
 }
@@ -278,17 +278,17 @@ else {
   $toimipaikkarow["kotipaikka"]   = $yhtiorow["kotipaikka"];
 }
 
-$query = "  SELECT *
-      FROM asiakas
-      WHERE yhtio='$kukarow[yhtio]'
-      AND tunnus = '$asiakastiedot[liitostunnus]'";
+$query = "SELECT *
+          FROM asiakas
+          WHERE yhtio='$kukarow[yhtio]'
+          AND tunnus = '$asiakastiedot[liitostunnus]'";
 $asiakasresult = pupe_query($query);
 $asiakastiedot = mysql_fetch_assoc($asiakasresult);
 
-$query = "  SELECT *
-      FROM maksuehto
-      WHERE yhtio='$kukarow[yhtio]'
-      AND tunnus = '$asiakastiedot[maksuehto]'";
+$query = "SELECT *
+          FROM maksuehto
+          WHERE yhtio='$kukarow[yhtio]'
+          AND tunnus = '$asiakastiedot[maksuehto]'";
 $mehtores = pupe_query($query);
 $mehtorow = mysql_fetch_assoc($mehtores);
 
@@ -309,10 +309,10 @@ while ($row = mysql_fetch_assoc($result)) {
   $summa = paperi_rivi($firstpage,$summa);
   //p‰ivitet‰‰n korkosumma
   if (basename($_SERVER["SCRIPT_FILENAME"]) != 'muutosite.php') {
-    $query = "  UPDATE lasku
-          SET viikorkoeur = '$row[korkosumma]'
-          WHERE tunnus = '$row[tunnus]'
-          and yhtio = '$kukarow[yhtio]'";
+    $query = "UPDATE lasku
+              SET viikorkoeur = '$row[korkosumma]'
+              WHERE tunnus = '$row[tunnus]'
+              and yhtio    = '$kukarow[yhtio]'";
     $eurresult = pupe_query($query);
   }
 }
@@ -333,10 +333,10 @@ if (basename($_SERVER["SCRIPT_FILENAME"]) != 'muutosite.php') {
   fclose($fh);
 
   // itse print komento...
-  $query = "  SELECT komento
-        from kirjoittimet
-        where yhtio = '$kukarow[yhtio]'
-        and tunnus = '$kirjoitin'";
+  $query = "SELECT komento
+            from kirjoittimet
+            where yhtio = '$kukarow[yhtio]'
+            and tunnus  = '$kirjoitin'";
   $kires = pupe_query($query);
 
   if (mysql_num_rows($kires) == 1) {

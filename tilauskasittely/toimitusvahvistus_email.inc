@@ -16,15 +16,15 @@ if ($toimitusvahvistus_email_lahetys) {
 
   $query_ale_lisa = generoi_alekentta('M');
 
-  $query = "  SELECT tilausrivi.tuoteno,
-        tilausrivi.varattu+tilausrivi.kpl as maara,
-        tilausrivi.nimitys,
-        round(tilausrivi.hinta * tilausrivi.varattu * {$query_ale_lisa}, 2) hinta,
-        lasku.valkoodi
-        FROM lasku
-        JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi = 'L' AND tilausrivi.toimitettu != '' AND tilausrivi.toimitettuaika != '0000-00-00 00:00:00')
-        WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-        AND lasku.tunnus IN ({$otunnukset})";
+  $query = "SELECT tilausrivi.tuoteno,
+            tilausrivi.varattu+tilausrivi.kpl as maara,
+            tilausrivi.nimitys,
+            round(tilausrivi.hinta * tilausrivi.varattu * {$query_ale_lisa}, 2) hinta,
+            lasku.valkoodi
+            FROM lasku
+            JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi = 'L' AND tilausrivi.toimitettu != '' AND tilausrivi.toimitettuaika != '0000-00-00 00:00:00')
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.tunnus  IN ({$otunnukset})";
   $rivi_loop_res = pupe_query($query);
 
   while ($rivi_loop_row = mysql_fetch_assoc($rivi_loop_res)) {
@@ -33,10 +33,10 @@ if ($toimitusvahvistus_email_lahetys) {
 
   $body .= "\n";
 
-  $query = "  SELECT rahtikirjanro
-        FROM rahtikirjat
-        WHERE tunnus IN ({$tunnukset})
-        AND yhtio = '{$kukarow['yhtio']}'";
+  $query = "SELECT rahtikirjanro
+            FROM rahtikirjat
+            WHERE tunnus IN ({$tunnukset})
+            AND yhtio    = '{$kukarow['yhtio']}'";
   $seurantakoodit_res = pupe_query($query);
 
   $body .= t("Seurantakoodit").":\n";

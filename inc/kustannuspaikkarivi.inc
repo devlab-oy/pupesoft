@@ -28,11 +28,11 @@ if (mysql_field_name($result, $i) == "tyyppi") { //kustannuspaikat
 }
 
 if (mysql_field_name($result, $i) == "isa_tarkenne") {
-  $query = "  SELECT tunnus, koodi, nimi
-        FROM kustannuspaikka
-        WHERE yhtio  = '$kukarow[yhtio]'
-        and kaytossa != 'E'
-        ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, koodi, nimi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and kaytossa != 'E'
+            ORDER BY koodi+0, koodi, nimi";
   $vresult = mysql_query($query) or pupe_error($query);
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";

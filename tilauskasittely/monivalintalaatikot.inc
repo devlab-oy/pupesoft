@@ -166,14 +166,14 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
   if (substr($monivalintalaatikko, 0, 10) == "dynaaminen") {
     $param = substr($monivalintalaatikko, 11);
 
-    $query = "  SELECT DISTINCT (COUNT(node.tunnus) - 1) AS syvyys
-          FROM dynaaminen_puu AS node
-          JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft)
-          WHERE node.yhtio = '{$kukarow['yhtio']}'
-          AND node.laji = '{$param}'
-          AND node.lft > 1
-          GROUP BY node.lft
-          ORDER BY syvyys";
+    $query = "SELECT DISTINCT (COUNT(node.tunnus) - 1) AS syvyys
+              FROM dynaaminen_puu AS node
+              JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft)
+              WHERE node.yhtio = '{$kukarow['yhtio']}'
+              AND node.laji    = '{$param}'
+              AND node.lft     > 1
+              GROUP BY node.lft
+              ORDER BY syvyys";
     $dynpuu_count_result = pupe_query($query, $link);
 
     while ($count_row = mysql_fetch_assoc($dynpuu_count_result)) {
@@ -354,16 +354,16 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
             $liitoksetlisawhere = " and puun_alkio.liitos != '' ";
           }
 
-          $query = "  SELECT GROUP_CONCAT(DISTINCT node.tunnus) tunnukset
-                {$liitoksetlisa}
-                FROM dynaaminen_puu AS node
-                JOIN puun_alkio ON (puun_alkio.yhtio = node.yhtio AND puun_alkio.puun_tunnus = node.tunnus AND puun_alkio.laji = node.laji)
-                JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft AND parent.tunnus IN ($dynaamiset))
-                WHERE node.yhtio = '{$kukarow['yhtio']}'
-                AND node.laji = '{$param}'
-                AND node.lft > 1
-                {$liitoksetlisawhere}
-                ORDER BY node.lft";
+          $query = "SELECT GROUP_CONCAT(DISTINCT node.tunnus) tunnukset
+                    {$liitoksetlisa}
+                    FROM dynaaminen_puu AS node
+                    JOIN puun_alkio ON (puun_alkio.yhtio = node.yhtio AND puun_alkio.puun_tunnus = node.tunnus AND puun_alkio.laji = node.laji)
+                    JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft AND parent.tunnus IN ($dynaamiset))
+                    WHERE node.yhtio = '{$kukarow['yhtio']}'
+                    AND node.laji    = '{$param}'
+                    AND node.lft     > 1
+                    {$liitoksetlisawhere}
+                    ORDER BY node.lft";
           $kaikki_puun_tunnukset_res = pupe_query($query, $link);
           $kaikki_puun_tunnukset_row = mysql_fetch_assoc($kaikki_puun_tunnukset_res);
 
@@ -714,41 +714,41 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
   if ($monivalintalaatikko == "osasto") {
     if (isset($monivalinta_tuotteet)) {
-      $query = "  SELECT DISTINCT avainsana.selite,
-                  $kieli_selitetark,
-            sum(if(tuote.status not in ('P','X'), 1, (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0))) naytetaanko
-            FROM tuote
-            JOIN avainsana ON (avainsana.yhtio = tuote.yhtio AND avainsana.selite = tuote.osasto AND avainsana.laji = 'OSASTO' AND avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
-            WHERE tuote.yhtio = '$kukarow[yhtio]'
-            $kieltolisa
-            $extra_poislisa
-            $poislisa_mulsel
-            AND tuote.tuoteno in ($monivalinta_tuotteet)
-            GROUP BY 1,2
-            HAVING naytetaanko > 0
-            ORDER BY avainsana.selitetark";
+      $query = "SELECT DISTINCT avainsana.selite,
+                $kieli_selitetark,
+                sum(if(tuote.status not in ('P','X'), 1, (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0))) naytetaanko
+                FROM tuote
+                JOIN avainsana ON (avainsana.yhtio = tuote.yhtio AND avainsana.selite = tuote.osasto AND avainsana.laji = 'OSASTO' AND avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
+                WHERE tuote.yhtio = '$kukarow[yhtio]'
+                $kieltolisa
+                $extra_poislisa
+                $poislisa_mulsel
+                AND tuote.tuoteno in ($monivalinta_tuotteet)
+                GROUP BY 1,2
+                HAVING naytetaanko > 0
+                ORDER BY avainsana.selitetark";
     }
     else {
-      $query = "  SELECT DISTINCT avainsana.selite,
-                  $kieli_selitetark
-                  FROM avainsana
-                  WHERE avainsana.yhtio = '$kukarow[yhtio]'
-                  and avainsana.laji = 'OSASTO'
-                  and avainsana.kieli in ('$yhtiorow[kieli]', '')
-                  $avainlisa
-                  $orderlisa";
+      $query = "SELECT DISTINCT avainsana.selite,
+                $kieli_selitetark
+                FROM avainsana
+                WHERE avainsana.yhtio = '$kukarow[yhtio]'
+                and avainsana.laji    = 'OSASTO'
+                and avainsana.kieli   in ('$yhtiorow[kieli]', '')
+                $avainlisa
+                $orderlisa";
     }
     $sresult = pupe_query($query);
 
     if (mysql_num_rows($sresult) == 0) {
-      $query = "  SELECT DISTINCT tuote.osasto selite, tuote.osasto selitetark
-            FROM tuote
-            WHERE tuote.yhtio = '$kukarow[yhtio]'
-            and tuote.osasto != ''
-            $kieltolisa
-            $extra_poislisa
-            $poislisa_mulsel
-            ORDER BY 1, 2";
+      $query = "SELECT DISTINCT tuote.osasto selite, tuote.osasto selitetark
+                FROM tuote
+                WHERE tuote.yhtio  = '$kukarow[yhtio]'
+                and tuote.osasto  != ''
+                $kieltolisa
+                $extra_poislisa
+                $poislisa_mulsel
+                ORDER BY 1, 2";
       $sresult = pupe_query($query);
     }
 
@@ -818,55 +818,55 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
   if ($monivalintalaatikko == "try") {
     if (isset($monivalinta_tuotteet)) {
-      $query = "  SELECT distinct avainsana.selite,
-            $kieli_selitetark,
-            sum(if(tuote.status not in ('P','X'), 1, (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0))) naytetaanko
-            FROM tuote
-            JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.try = avainsana.selite and avainsana.laji = 'TRY' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
-            WHERE tuote.yhtio = '$kukarow[yhtio]'
-            $lisa_haku_osasto
-            $kieltolisa
-            $extra_poislisa
-            $poislisa_mulsel
-            AND tuote.tuoteno in ($monivalinta_tuotteet)
-            GROUP BY 1,2
-            HAVING naytetaanko > 0
-            ORDER BY avainsana.selitetark";
+      $query = "SELECT distinct avainsana.selite,
+                $kieli_selitetark,
+                sum(if(tuote.status not in ('P','X'), 1, (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0))) naytetaanko
+                FROM tuote
+                JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.try = avainsana.selite and avainsana.laji = 'TRY' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
+                WHERE tuote.yhtio = '$kukarow[yhtio]'
+                $lisa_haku_osasto
+                $kieltolisa
+                $extra_poislisa
+                $poislisa_mulsel
+                AND tuote.tuoteno in ($monivalinta_tuotteet)
+                GROUP BY 1,2
+                HAVING naytetaanko > 0
+                ORDER BY avainsana.selitetark";
     }
     elseif ($lisa_haku_osasto == "") {
-      $query = "  SELECT DISTINCT avainsana.selite,
-                  $kieli_selitetark
-                  FROM avainsana
-                  WHERE avainsana.yhtio = '$kukarow[yhtio]'
-                  and avainsana.laji = 'TRY'
-                  and avainsana.kieli in ('$yhtiorow[kieli]', '')
-                  $avainlisa
-                  $orderlisa";
+      $query = "SELECT DISTINCT avainsana.selite,
+                $kieli_selitetark
+                FROM avainsana
+                WHERE avainsana.yhtio = '$kukarow[yhtio]'
+                and avainsana.laji    = 'TRY'
+                and avainsana.kieli   in ('$yhtiorow[kieli]', '')
+                $avainlisa
+                $orderlisa";
     }
     else {
-      $query = "  SELECT distinct avainsana.selite,
-            $kieli_selitetark
-            FROM tuote
-            JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.try = avainsana.selite and avainsana.laji = 'TRY' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
-            WHERE tuote.yhtio = '$kukarow[yhtio]'
-            $lisa_haku_osasto
-            $kieltolisa
-            $extra_poislisa
-            $poislisa_mulsel
-            $orderlisa";
+      $query = "SELECT distinct avainsana.selite,
+                $kieli_selitetark
+                FROM tuote
+                JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.try = avainsana.selite and avainsana.laji = 'TRY' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
+                WHERE tuote.yhtio = '$kukarow[yhtio]'
+                $lisa_haku_osasto
+                $kieltolisa
+                $extra_poislisa
+                $poislisa_mulsel
+                $orderlisa";
     }
     $sresult = pupe_query($query);
 
     if (mysql_num_rows($sresult) == 0) {
-      $query = "  SELECT DISTINCT tuote.try selite, tuote.try selitetark
-            FROM tuote
-            WHERE tuote.yhtio = '$kukarow[yhtio]'
-            and tuote.try != ''
-            $lisa_haku_osasto
-            $kieltolisa
-            $extra_poislisa
-            $poislisa_mulsel
-            ORDER BY 1, 2";
+      $query = "SELECT DISTINCT tuote.try selite, tuote.try selitetark
+                FROM tuote
+                WHERE tuote.yhtio  = '$kukarow[yhtio]'
+                and tuote.try     != ''
+                $lisa_haku_osasto
+                $kieltolisa
+                $extra_poislisa
+                $poislisa_mulsel
+                ORDER BY 1, 2";
       $sresult = pupe_query($query);
     }
 
@@ -936,64 +936,64 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     unset($tmsresult);
 
     if (isset($monivalinta_tuotteet)) {
-      $query = "  SELECT avainsana.selite as tme,
-            $kieli_selite,
-            sum(if(tuote.status not in ('P','X'), 1, (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0))) naytetaanko
-            FROM tuote
-            JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.tuotemerkki = avainsana.selite and avainsana.laji = 'TUOTEMERKKI' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
-            WHERE tuote.yhtio = '$kukarow[yhtio]'
-            $lisa_haku_osasto
-            $lisa_haku_try
-            $kieltolisa
-            $extra_poislisa
-            $poislisa_mulsel
-            AND tuote.tuoteno in ($monivalinta_tuotteet)
-            GROUP BY 1,2
-            HAVING naytetaanko > 0
-            ORDER BY avainsana.selite";
+      $query = "SELECT avainsana.selite as tme,
+                $kieli_selite,
+                sum(if(tuote.status not in ('P','X'), 1, (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0))) naytetaanko
+                FROM tuote
+                JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.tuotemerkki = avainsana.selite and avainsana.laji = 'TUOTEMERKKI' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
+                WHERE tuote.yhtio = '$kukarow[yhtio]'
+                $lisa_haku_osasto
+                $lisa_haku_try
+                $kieltolisa
+                $extra_poislisa
+                $poislisa_mulsel
+                AND tuote.tuoteno in ($monivalinta_tuotteet)
+                GROUP BY 1,2
+                HAVING naytetaanko > 0
+                ORDER BY avainsana.selite";
       $tmsresult = pupe_query($query);
     }
     elseif ($lisa_haku_osasto == "" and $lisa_haku_try == "" and $lisa_dynaaminen["tuote"] == "") {
-      $query = "  SELECT avainsana.selite as tme,
-            $kieli_selite
-                  FROM avainsana
-                  WHERE avainsana.yhtio   = '$kukarow[yhtio]'
-                  and avainsana.laji     = 'TUOTEMERKKI'
-            and avainsana.kieli in ('$yhtiorow[kieli]', '')
-                  $avainlisa
-                  ORDER BY avainsana.jarjestys, avainsana.selite";
+      $query = "SELECT avainsana.selite as tme,
+                $kieli_selite
+                      FROM avainsana
+                      WHERE avainsana.yhtio = '$kukarow[yhtio]'
+                      and avainsana.laji    = 'TUOTEMERKKI'
+                and avainsana.kieli         in ('$yhtiorow[kieli]', '')
+                      $avainlisa
+                      ORDER BY avainsana.jarjestys, avainsana.selite";
       $tmsresult = pupe_query($query);
     }
     elseif ($lisa_haku_osasto != "" or $lisa_haku_try != "" or $lisa_dynaaminen["tuote"] != "") {
-      $query = "  SELECT distinct avainsana.selite as tme,
-            $kieli_selite
-            FROM tuote
-            {$lisa_dynaaminen["tuote"]}
-            JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.tuotemerkki = avainsana.selite and avainsana.laji = 'TUOTEMERKKI' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
-            WHERE tuote.yhtio = '$kukarow[yhtio]'
-            $lisa_haku_osasto
-            $lisa_haku_try
-            $lisa_haku_malli
-            $kieltolisa
-            $extra_poislisa
-            $poislisa_mulsel
-            ORDER BY avainsana.jarjestys, avainsana.selite";
+      $query = "SELECT distinct avainsana.selite as tme,
+                $kieli_selite
+                FROM tuote
+                {$lisa_dynaaminen["tuote"]}
+                JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.tuotemerkki = avainsana.selite and avainsana.laji = 'TUOTEMERKKI' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
+                WHERE tuote.yhtio = '$kukarow[yhtio]'
+                $lisa_haku_osasto
+                $lisa_haku_try
+                $lisa_haku_malli
+                $kieltolisa
+                $extra_poislisa
+                $poislisa_mulsel
+                ORDER BY avainsana.jarjestys, avainsana.selite";
       $tmsresult = pupe_query($query);
     }
 
     if (is_resource($tmsresult) and mysql_num_rows($tmsresult) == 0) {
-      $query = "  SELECT DISTINCT tuote.tuotemerkki tme, tuote.tuotemerkki selite
-            FROM tuote
-            {$lisa_dynaaminen["tuote"]}
-            $lisa_parametri
-            WHERE tuote.yhtio = '$kukarow[yhtio]'
-            and tuote.tuotemerkki != ''
-            $lisa_haku_osasto
-            $lisa_haku_try
-            $kieltolisa
-            $extra_poislisa
-            $poislisa_mulsel
-            ORDER BY 1";
+      $query = "SELECT DISTINCT tuote.tuotemerkki tme, tuote.tuotemerkki selite
+                FROM tuote
+                {$lisa_dynaaminen["tuote"]}
+                $lisa_parametri
+                WHERE tuote.yhtio      = '$kukarow[yhtio]'
+                and tuote.tuotemerkki != ''
+                $lisa_haku_osasto
+                $lisa_haku_try
+                $kieltolisa
+                $extra_poislisa
+                $poislisa_mulsel
+                ORDER BY 1";
       $tmsresult = pupe_query($query);
     }
 
@@ -1063,64 +1063,64 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
       if (($lisa_haku_tme != '' or $lisa_haku_try != '') and ($monivalintalaatikko == "malli" or (!in_array("malli", $monivalintalaatikot) and $monivalintalaatikko == 'malli/mallitark'))) {
         // malli dropdown
         if (isset($monivalinta_tuotteet)) {
-          $query = "  SELECT avainsana.selite as malli,
-                $kieli_selite,
-                sum(if(tuote.status not in ('P','X'), 1, (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0))) naytetaanko
-                FROM tuote
-                JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.malli = avainsana.selite and avainsana.laji = 'MALLI' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
-                WHERE tuote.yhtio = '$kukarow[yhtio]'
-                $lisa_haku_osasto
-                $lisa_haku_try
-                $lisa_haku_tme
-                $kieltolisa
-                $extra_poislisa
-                $poislisa_mulsel
-                AND tuote.tuoteno in ($monivalinta_tuotteet)
-                GROUP BY 1,2
-                HAVING naytetaanko > 0
-                ORDER BY avainsana.selite";
+          $query = "SELECT avainsana.selite as malli,
+                    $kieli_selite,
+                    sum(if(tuote.status not in ('P','X'), 1, (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0))) naytetaanko
+                    FROM tuote
+                    JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.malli = avainsana.selite and avainsana.laji = 'MALLI' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
+                    WHERE tuote.yhtio = '$kukarow[yhtio]'
+                    $lisa_haku_osasto
+                    $lisa_haku_try
+                    $lisa_haku_tme
+                    $kieltolisa
+                    $extra_poislisa
+                    $poislisa_mulsel
+                    AND tuote.tuoteno in ($monivalinta_tuotteet)
+                    GROUP BY 1,2
+                    HAVING naytetaanko > 0
+                    ORDER BY avainsana.selite";
           $sxresult = pupe_query($query);
         }
         elseif ($lisa_haku_try == "" and $lisa_haku_tme == "") {
-          $query = "  SELECT avainsana.selite as malli,
-                $kieli_selite
-                      FROM avainsana
-                      WHERE avainsana.yhtio   = '$kukarow[yhtio]'
-                      and avainsana.laji     = 'MALLI'
-                and avainsana.kieli in ('$yhtiorow[kieli]', '')
-                      $avainlisa
-                      ORDER BY avainsana.jarjestys, avainsana.selite";
+          $query = "SELECT avainsana.selite as malli,
+                    $kieli_selite
+                          FROM avainsana
+                          WHERE avainsana.yhtio = '$kukarow[yhtio]'
+                          and avainsana.laji    = 'MALLI'
+                    and avainsana.kieli         in ('$yhtiorow[kieli]', '')
+                          $avainlisa
+                          ORDER BY avainsana.jarjestys, avainsana.selite";
           $sxresult = pupe_query($query);
         }
         elseif ($lisa_haku_try != "" or $lisa_haku_tme != "") {
-          $query = "  SELECT distinct avainsana.selite as malli,
-                $kieli_selite
-                FROM tuote
-                $lisa_parametri
-                JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.malli = avainsana.selite and avainsana.laji = 'MALLI' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
-                WHERE tuote.yhtio = '$kukarow[yhtio]'
-                $lisa_haku_osasto
-                $lisa_haku_try
-                $lisa_haku_tme
-                $kieltolisa
-                $extra_poislisa
-                $poislisa_mulsel
-                ORDER BY avainsana.jarjestys, avainsana.selite";
+          $query = "SELECT distinct avainsana.selite as malli,
+                    $kieli_selite
+                    FROM tuote
+                    $lisa_parametri
+                    JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.malli = avainsana.selite and avainsana.laji = 'MALLI' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
+                    WHERE tuote.yhtio = '$kukarow[yhtio]'
+                    $lisa_haku_osasto
+                    $lisa_haku_try
+                    $lisa_haku_tme
+                    $kieltolisa
+                    $extra_poislisa
+                    $poislisa_mulsel
+                    ORDER BY avainsana.jarjestys, avainsana.selite";
           $sxresult = pupe_query($query);
         }
 
         if (is_resource($sxresult) and mysql_num_rows($sxresult) == 0) {
-          $query = "  SELECT DISTINCT tuote.malli malli, tuote.malli selite
-                FROM tuote
-                WHERE tuote.yhtio = '$kukarow[yhtio]'
-                and tuote.malli != ''
-                $lisa_haku_osasto
-                $lisa_haku_try
-                $lisa_haku_tme
-                $kieltolisa
-                $extra_poislisa
-                $poislisa_mulsel
-                ORDER BY malli";
+          $query = "SELECT DISTINCT tuote.malli malli, tuote.malli selite
+                    FROM tuote
+                    WHERE tuote.yhtio  = '$kukarow[yhtio]'
+                    and tuote.malli   != ''
+                    $lisa_haku_osasto
+                    $lisa_haku_try
+                    $lisa_haku_tme
+                    $kieltolisa
+                    $extra_poislisa
+                    $poislisa_mulsel
+                    ORDER BY malli";
           $sxresult = pupe_query($query);
         }
 
@@ -1187,67 +1187,67 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
         // mallitarkenne dropdown
         if (isset($monivalinta_tuotteet)) {
-          $query = "  SELECT avainsana.selite as mallitarkenne,
-                $kieli_selite,
-                sum(if(tuote.status not in ('P','X'), 1, (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0))) naytetaanko
-                FROM tuote
-                JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.mallitarkenne = avainsana.selite and avainsana.laji = 'MALLITARKENNE' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
-                WHERE tuote.yhtio = '$kukarow[yhtio]'
-                $lisa_haku_osasto
-                $lisa_haku_try
-                $lisa_haku_tme
-                $lisa_haku_malli
-                $kieltolisa
-                $extra_poislisa
-                $poislisa_mulsel
-                AND tuote.tuoteno in ($monivalinta_tuotteet)
-                GROUP BY 1,2
-                HAVING naytetaanko > 0
-                ORDER BY avainsana.selite";
+          $query = "SELECT avainsana.selite as mallitarkenne,
+                    $kieli_selite,
+                    sum(if(tuote.status not in ('P','X'), 1, (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0))) naytetaanko
+                    FROM tuote
+                    JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.mallitarkenne = avainsana.selite and avainsana.laji = 'MALLITARKENNE' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
+                    WHERE tuote.yhtio = '$kukarow[yhtio]'
+                    $lisa_haku_osasto
+                    $lisa_haku_try
+                    $lisa_haku_tme
+                    $lisa_haku_malli
+                    $kieltolisa
+                    $extra_poislisa
+                    $poislisa_mulsel
+                    AND tuote.tuoteno in ($monivalinta_tuotteet)
+                    GROUP BY 1,2
+                    HAVING naytetaanko > 0
+                    ORDER BY avainsana.selite";
           $sxresult = pupe_query($query);
         }
         elseif ($lisa_haku_malli == "") {
-          $query = "  SELECT avainsana.selite as mallitarkenne,
-                $kieli_selite
-                      FROM avainsana
-                      WHERE avainsana.yhtio   = '$kukarow[yhtio]'
-                      and avainsana.laji     = 'MALLITARKENNE'
-                and avainsana.kieli in ('$yhtiorow[kieli]', '')
-                      $avainlisa
-                      ORDER BY avainsana.jarjestys, avainsana.selite";
+          $query = "SELECT avainsana.selite as mallitarkenne,
+                    $kieli_selite
+                          FROM avainsana
+                          WHERE avainsana.yhtio = '$kukarow[yhtio]'
+                          and avainsana.laji    = 'MALLITARKENNE'
+                    and avainsana.kieli         in ('$yhtiorow[kieli]', '')
+                          $avainlisa
+                          ORDER BY avainsana.jarjestys, avainsana.selite";
           $sxresult = pupe_query($query);
         }
         elseif ($lisa_haku_malli != "") {
-          $query = "  SELECT distinct avainsana.selite as mallitarkenne,
-                $kieli_selite
-                FROM tuote
-                $lisa_parametri
-                JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.mallitarkenne = avainsana.selite and avainsana.laji = 'MALLITARKENNE' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
-                WHERE tuote.yhtio = '$kukarow[yhtio]'
-                $lisa_haku_osasto
-                $lisa_haku_try
-                $lisa_haku_tme
-                $lisa_haku_malli
-                $kieltolisa
-                $extra_poislisa
-                $poislisa_mulsel
-                ORDER BY avainsana.jarjestys, avainsana.selite";
+          $query = "SELECT distinct avainsana.selite as mallitarkenne,
+                    $kieli_selite
+                    FROM tuote
+                    $lisa_parametri
+                    JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.mallitarkenne = avainsana.selite and avainsana.laji = 'MALLITARKENNE' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
+                    WHERE tuote.yhtio = '$kukarow[yhtio]'
+                    $lisa_haku_osasto
+                    $lisa_haku_try
+                    $lisa_haku_tme
+                    $lisa_haku_malli
+                    $kieltolisa
+                    $extra_poislisa
+                    $poislisa_mulsel
+                    ORDER BY avainsana.jarjestys, avainsana.selite";
           $sxresult = pupe_query($query);
         }
 
         if (is_resource($sxresult) and mysql_num_rows($sxresult) == 0) {
-          $query = "  SELECT DISTINCT tuote.mallitarkenne mallitarkenne, tuote.mallitarkenne selite
-                FROM tuote
-                WHERE tuote.yhtio = '$kukarow[yhtio]'
-                and tuote.mallitarkenne != ''
-                $lisa_haku_osasto
-                $lisa_haku_try
-                $lisa_haku_tme
-                $lisa_haku_malli
-                $kieltolisa
-                $extra_poislisa
-                $poislisa_mulsel
-                ORDER BY mallitarkenne";
+          $query = "SELECT DISTINCT tuote.mallitarkenne mallitarkenne, tuote.mallitarkenne selite
+                    FROM tuote
+                    WHERE tuote.yhtio        = '$kukarow[yhtio]'
+                    and tuote.mallitarkenne != ''
+                    $lisa_haku_osasto
+                    $lisa_haku_try
+                    $lisa_haku_tme
+                    $lisa_haku_malli
+                    $kieltolisa
+                    $extra_poislisa
+                    $poislisa_mulsel
+                    ORDER BY mallitarkenne";
           $sxresult = pupe_query($query);
         }
 
@@ -1339,11 +1339,11 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
         $joinlisa .= " JOIN yhteensopivuus_tuote ON (yhteensopivuus_tuote.yhtio = puun_alkio.yhtio AND yhteensopivuus_tuote.tuoteno = puun_alkio.liitos and yhteensopivuus_tuote.atunnus IN ($autoid)) ";
       }
 
-      $query = "  SELECT GROUP_CONCAT(DISTINCT puun_tunnus) tunnukset
-            FROM puun_alkio
-            $joinlisa
-            WHERE puun_alkio.yhtio = '{$kukarow['yhtio']}'
-            AND puun_alkio.laji = '{$tree}'";
+      $query = "SELECT GROUP_CONCAT(DISTINCT puun_tunnus) tunnukset
+                FROM puun_alkio
+                $joinlisa
+                WHERE puun_alkio.yhtio = '{$kukarow['yhtio']}'
+                AND puun_alkio.laji    = '{$tree}'";
       $kaikki_puun_tunnukset_res = pupe_query($query, $link);
       $kaikki_puun_tunnukset_row = mysql_fetch_assoc($kaikki_puun_tunnukset_res);
 
@@ -1357,17 +1357,17 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     }
 
     // Haetaan koko hierarkia
-    $query = "  SELECT DISTINCT parent.tunnus node_tunnus, parent.nimi node_nimi,
-          parent.syvyys,
-          parent.lft,
-          parent.rgt
-          FROM dynaaminen_puu AS node $nodeinde
-          JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft AND parent.lft > 1)
-          WHERE node.yhtio = '{$kukarow['yhtio']}'
-          AND node.laji = '{$tree}'
-          AND node.lft > 1
-          $nodelisa
-          ORDER BY syvyys, node_nimi";
+    $query = "SELECT DISTINCT parent.tunnus node_tunnus, parent.nimi node_nimi,
+              parent.syvyys,
+              parent.lft,
+              parent.rgt
+              FROM dynaaminen_puu AS node $nodeinde
+              JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft AND parent.lft > 1)
+              WHERE node.yhtio = '{$kukarow['yhtio']}'
+              AND node.laji    = '{$tree}'
+              AND node.lft     > 1
+              $nodelisa
+              ORDER BY syvyys, node_nimi";
     $sxresult2 = pupe_query($query, $link);
 
     if (mysql_num_rows($sxresult2) > 0) {
@@ -1500,43 +1500,43 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
       // dynaaminen dropdowni
       if (isset($monivalinta_tuotteet)) {
-        $query = "  SELECT 1_t_av_$parametri.selite as $parametri,
-              sum(if(tuote.status != 'P', 1, (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0))) naytetaanko
-              FROM tuote
-              {$lisa_dynaaminen["tuote"]}
-              $lisa_parametri
-              JOIN tuotteen_avainsanat 1_t_av_$parametri ON (1_t_av_$parametri.yhtio = tuote.yhtio and 1_t_av_$parametri.laji = 'parametri_$parametri' and 1_t_av_$parametri.tuoteno = tuote.tuoteno and 1_t_av_$parametri$kieli_lisa and 1_t_av_$parametri.selite != '')
-              JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and avainsana.selite = '$parametri' and avainsana.laji = 'PARAMETRI' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
-              WHERE tuote.yhtio = '$kukarow[yhtio]'
-              $lisa_haku_osasto
-              $lisa_haku_try
-              $lisa_haku_tme
-              $kieltolisa
-              $extra_poislisa
-              $poislisa_mulsel
-              AND tuote.tuoteno in ($monivalinta_tuotteet)
-              GROUP BY 1
-              HAVING naytetaanko > 0
-              ORDER BY 1_t_av_$parametri.jarjestys, 1_t_av_$parametri.selite";
+        $query = "SELECT 1_t_av_$parametri.selite as $parametri,
+                  sum(if(tuote.status != 'P', 1, (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0))) naytetaanko
+                  FROM tuote
+                  {$lisa_dynaaminen["tuote"]}
+                  $lisa_parametri
+                  JOIN tuotteen_avainsanat 1_t_av_$parametri ON (1_t_av_$parametri.yhtio = tuote.yhtio and 1_t_av_$parametri.laji = 'parametri_$parametri' and 1_t_av_$parametri.tuoteno = tuote.tuoteno and 1_t_av_$parametri$kieli_lisa and 1_t_av_$parametri.selite != '')
+                  JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and avainsana.selite = '$parametri' and avainsana.laji = 'PARAMETRI' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
+                  WHERE tuote.yhtio = '$kukarow[yhtio]'
+                  $lisa_haku_osasto
+                  $lisa_haku_try
+                  $lisa_haku_tme
+                  $kieltolisa
+                  $extra_poislisa
+                  $poislisa_mulsel
+                  AND tuote.tuoteno in ($monivalinta_tuotteet)
+                  GROUP BY 1
+                  HAVING naytetaanko > 0
+                  ORDER BY 1_t_av_$parametri.jarjestys, 1_t_av_$parametri.selite";
         $sxresult = pupe_query($query);
       }
       else {
-        $query = "  SELECT distinct 1_t_av_$parametri.selite as $parametri
-              FROM tuote
-              {$lisa_dynaaminen["tuote"]}
-              $lisa_parametri
-              JOIN tuotteen_avainsanat 1_t_av_$parametri ON (1_t_av_$parametri.yhtio = tuote.yhtio and 1_t_av_$parametri.laji = 'parametri_$parametri' and 1_t_av_$parametri.tuoteno = tuote.tuoteno and 1_t_av_$parametri$kieli_lisa and 1_t_av_$parametri.selite != '')
-              JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and avainsana.selite = '$parametri' and avainsana.laji = 'PARAMETRI' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
-              WHERE tuote.yhtio = '$kukarow[yhtio]'
-              $lisa_haku_osasto
-              $lisa_haku_try
-              $lisa_haku_tme
-              $lisa_haku_malli
-              $kieltolisa
-              $extra_poislisa
-              $poislisa_mulsel
-              GROUP BY 1
-              ORDER BY 1_t_av_$parametri.jarjestys, 1_t_av_$parametri.selite";
+        $query = "SELECT distinct 1_t_av_$parametri.selite as $parametri
+                  FROM tuote
+                  {$lisa_dynaaminen["tuote"]}
+                  $lisa_parametri
+                  JOIN tuotteen_avainsanat 1_t_av_$parametri ON (1_t_av_$parametri.yhtio = tuote.yhtio and 1_t_av_$parametri.laji = 'parametri_$parametri' and 1_t_av_$parametri.tuoteno = tuote.tuoteno and 1_t_av_$parametri$kieli_lisa and 1_t_av_$parametri.selite != '')
+                  JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and avainsana.selite = '$parametri' and avainsana.laji = 'PARAMETRI' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
+                  WHERE tuote.yhtio = '$kukarow[yhtio]'
+                  $lisa_haku_osasto
+                  $lisa_haku_try
+                  $lisa_haku_tme
+                  $lisa_haku_malli
+                  $kieltolisa
+                  $extra_poislisa
+                  $poislisa_mulsel
+                  GROUP BY 1
+                  ORDER BY 1_t_av_$parametri.jarjestys, 1_t_av_$parametri.selite";
         $sxresult = pupe_query($query);
       }
 
@@ -1612,11 +1612,11 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     echo "<tr>";
 
     // tehdään query
-    $query = "  SELECT DISTINCT myyja, nimi, tunnus
-          FROM kuka
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND myyja > 0
-          ORDER BY myyja";
+    $query = "SELECT DISTINCT myyja, nimi, tunnus
+              FROM kuka
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND myyja   > 0
+              ORDER BY myyja";
     $sresult = pupe_query($query);
 
     echo "<td nowrap style='padding:0px'><select name='mul_laskumyyja[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
@@ -1704,11 +1704,11 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     echo "<tr>";
 
     // tehdään query
-    $query = "  SELECT DISTINCT myyja, nimi
-          FROM kuka
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND myyja > 0
-          ORDER BY myyja";
+    $query = "SELECT DISTINCT myyja, nimi
+              FROM kuka
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND myyja   > 0
+              ORDER BY myyja";
     $sresult = pupe_query($query);
 
     echo "<td nowrap style='padding:0px'><select name='mul_tuotemyyja[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
@@ -1752,11 +1752,11 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     echo "<tr>";
 
     // tehdään query
-    $query = "  SELECT DISTINCT myyja, nimi
-          FROM kuka
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND myyja > 0
-          ORDER BY myyja";
+    $query = "SELECT DISTINCT myyja, nimi
+              FROM kuka
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND myyja   > 0
+              ORDER BY myyja";
     $sresult = pupe_query($query);
 
     echo "<td nowrap style='padding:0px'><select name='mul_asiakasmyyja[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
@@ -1799,11 +1799,11 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
     echo "<tr>";
 
-    $query = "  SELECT DISTINCT myyja, nimi
-          FROM kuka
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND myyja > 0
-          ORDER BY myyja";
+    $query = "SELECT DISTINCT myyja, nimi
+              FROM kuka
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND myyja   > 0
+              ORDER BY myyja";
     $sresult = pupe_query($query);
 
     echo "<td nowrap style='padding:0px'><select name='mul_tuoteostaja[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
@@ -2038,12 +2038,12 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
         }
       </script> ";
 
-    $query = "  SELECT tunnus, nimi, koodi, isa_tarkenne
-          FROM kustannuspaikka
-          WHERE yhtio = '$kukarow[yhtio]'
-          and kaytossa != 'E'
-          and tyyppi = 'K'
-          ORDER BY isa_tarkenne, koodi+0, koodi, nimi";
+    $query = "SELECT tunnus, nimi, koodi, isa_tarkenne
+              FROM kustannuspaikka
+              WHERE yhtio   = '$kukarow[yhtio]'
+              and kaytossa != 'E'
+              and tyyppi    = 'K'
+              ORDER BY isa_tarkenne, koodi+0, koodi, nimi";
     $sresult = pupe_query($query);
 
     $kustparray = array();
@@ -2155,12 +2155,12 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
   if ($monivalintalaatikko == "kohde") {
 
-    $query = "  SELECT tunnus, nimi, koodi
-          FROM kustannuspaikka
-          WHERE yhtio = '$kukarow[yhtio]'
-          and kaytossa != 'E'
-          and tyyppi = 'O'
-          ORDER BY koodi+0, koodi, nimi";
+    $query = "SELECT tunnus, nimi, koodi
+              FROM kustannuspaikka
+              WHERE yhtio   = '$kukarow[yhtio]'
+              and kaytossa != 'E'
+              and tyyppi    = 'O'
+              ORDER BY koodi+0, koodi, nimi";
     $sresult = pupe_query($query);
 
     if (mysql_num_rows($sresult) > 0) {
@@ -2210,12 +2210,12 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
   if ($monivalintalaatikko == "projekti") {
 
-    $query = "  SELECT tunnus, nimi, koodi
-          FROM kustannuspaikka
-          WHERE yhtio = '$kukarow[yhtio]'
-          and kaytossa != 'E'
-          and tyyppi = 'P'
-          ORDER BY koodi+0, koodi, nimi";
+    $query = "SELECT tunnus, nimi, koodi
+              FROM kustannuspaikka
+              WHERE yhtio   = '$kukarow[yhtio]'
+              and kaytossa != 'E'
+              and tyyppi    = 'P'
+              ORDER BY koodi+0, koodi, nimi";
     $sresult = pupe_query($query);
 
     if (mysql_num_rows($sresult) > 0) {

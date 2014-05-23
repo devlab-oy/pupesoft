@@ -17,9 +17,9 @@ if (isset($uusi)) {
   $title = t("Uusi suuntalava");
 
   # Haetaan tyypit
-  $query = "  SELECT *
-        FROM pakkaus
-        WHERE yhtio = '{$kukarow['yhtio']}'";
+  $query = "SELECT *
+            FROM pakkaus
+            WHERE yhtio = '{$kukarow['yhtio']}'";
   $pakkaus_result = pupe_query($query);
 
   while($rivi = mysql_fetch_assoc($pakkaus_result)) {
@@ -28,8 +28,8 @@ if (isset($uusi)) {
 
   # Haetaan keräysvyöhykkeet
   $keraysvyohyke_query = "SELECT tunnus, nimitys
-              FROM keraysvyohyke
-              WHERE yhtio = '{$kukarow['yhtio']}' AND nimitys != ''";
+                          FROM keraysvyohyke
+                          WHERE yhtio = '{$kukarow['yhtio']}' AND nimitys != ''";
   $keraysvyohyke_result = pupe_query($keraysvyohyke_query);
 
   while($rivi = mysql_fetch_assoc($keraysvyohyke_result)) {
@@ -37,12 +37,12 @@ if (isset($uusi)) {
   }
 
   # Kirjoittimet
-  $query = "  SELECT *
-        FROM kirjoittimet
-        WHERE yhtio  = '{$kukarow['yhtio']}'
-        #AND komento != 'email'
-        AND komento != 'edi'
-        ORDER BY kirjoitin";
+  $query = "SELECT *
+            FROM kirjoittimet
+            WHERE yhtio  = '{$kukarow['yhtio']}'
+            #AND komento != 'email'
+            AND komento != 'edi'
+            ORDER BY kirjoitin";
   $kires = mysql_query($query) or pupe_error($query);
 
   $kirjoittimet = array();
@@ -70,11 +70,11 @@ if (isset($uusi)) {
       $tee = "eihalutamitankayttoliittymaapliis";
 
       # Kirjoittimen komento
-      $query = "  SELECT komento
-            FROM kirjoittimet
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = '{$tulostin}'
-            ORDER BY kirjoitin";
+      $query = "SELECT komento
+                FROM kirjoittimet
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$tulostin}'
+                ORDER BY kirjoitin";
       $kires = mysql_query($query) or pupe_error($query);
       $kirow = mysql_fetch_assoc($kires);
       $komento = $kirow['komento'];
@@ -124,9 +124,9 @@ elseif (isset($muokkaa) and is_numeric($muokkaa)) {
   $title = t("Suuntalavan muokkaus");
 
   # Tyyppi
-  $query = "  SELECT *
-        FROM pakkaus
-        WHERE yhtio = '{$kukarow['yhtio']}'";
+  $query = "SELECT *
+            FROM pakkaus
+            WHERE yhtio = '{$kukarow['yhtio']}'";
   $pakkaus_result = pupe_query($query);
 
   while($rivi = mysql_fetch_assoc($pakkaus_result)) {
@@ -135,8 +135,8 @@ elseif (isset($muokkaa) and is_numeric($muokkaa)) {
 
   # Keräysvyöhyke
   $keraysvyohyke_query = "SELECT tunnus, nimitys
-              FROM keraysvyohyke
-              WHERE yhtio = '{$kukarow['yhtio']}' AND nimitys != ''";
+                          FROM keraysvyohyke
+                          WHERE yhtio = '{$kukarow['yhtio']}' AND nimitys != ''";
   $keraysvyohyke_result = pupe_query($keraysvyohyke_query);
 
   while($rivi = mysql_fetch_assoc($keraysvyohyke_result)) {
@@ -149,13 +149,13 @@ elseif (isset($muokkaa) and is_numeric($muokkaa)) {
   $disabled = (mysql_num_rows($result) != 0) ? ' disabled' : '';
 
   # Suuntalavan tiedot
-  $query = "  SELECT
-        suuntalavat.*,
-        pakkaus.pakkaus,
-        pakkaus.tunnus as ptunnus
-        FROM suuntalavat
-        LEFT JOIN pakkaus on (pakkaus.tunnus=suuntalavat.tyyppi)
-        WHERE suuntalavat.tunnus='$muokkaa' and suuntalavat.yhtio='{$kukarow['yhtio']}'";
+  $query = "SELECT
+            suuntalavat.*,
+            pakkaus.pakkaus,
+            pakkaus.tunnus as ptunnus
+            FROM suuntalavat
+            LEFT JOIN pakkaus on (pakkaus.tunnus=suuntalavat.tyyppi)
+            WHERE suuntalavat.tunnus='$muokkaa' and suuntalavat.yhtio='{$kukarow['yhtio']}'";
   $result = pupe_query($query);
   if(!$suuntalava = mysql_fetch_assoc($result)) exit("Virheellinen suuntalavan tunnus");
 
@@ -280,19 +280,19 @@ else {
 
   # Haetaan 'validit' suuntalavat
   # suuntalavat.tila=''
-  $query = "  SELECT
-        suuntalavat.sscc,
-        ifnull(keraysvyohyke.nimitys, '-') as keraysvyohyke,
-        ifnull(pakkaus.pakkaus, '-') as tyyppi,
-        count(tilausrivi.tunnus) as rivit,
-        suuntalavat.tunnus
-        FROM suuntalavat
-        LEFT JOIN tilausrivi on (tilausrivi.yhtio = suuntalavat.yhtio and tilausrivi.suuntalava = suuntalavat.tunnus)
-        LEFT JOIN pakkaus on (pakkaus.tunnus = suuntalavat.tyyppi)
-        LEFT JOIN keraysvyohyke on (keraysvyohyke.tunnus = suuntalavat.keraysvyohyke)
-        WHERE suuntalavat.tila='' and suuntalavat.sscc!='Suoratoimitus' $hakuehto and suuntalavat.yhtio='{$kukarow['yhtio']}'
-        GROUP BY 1,2,3
-        ORDER BY suuntalavat.tunnus DESC";
+  $query = "SELECT
+            suuntalavat.sscc,
+            ifnull(keraysvyohyke.nimitys, '-') as keraysvyohyke,
+            ifnull(pakkaus.pakkaus, '-') as tyyppi,
+            count(tilausrivi.tunnus) as rivit,
+            suuntalavat.tunnus
+            FROM suuntalavat
+            LEFT JOIN tilausrivi on (tilausrivi.yhtio = suuntalavat.yhtio and tilausrivi.suuntalava = suuntalavat.tunnus)
+            LEFT JOIN pakkaus on (pakkaus.tunnus = suuntalavat.tyyppi)
+            LEFT JOIN keraysvyohyke on (keraysvyohyke.tunnus = suuntalavat.keraysvyohyke)
+            WHERE suuntalavat.tila='' and suuntalavat.sscc!='Suoratoimitus' $hakuehto and suuntalavat.yhtio='{$kukarow['yhtio']}'
+            GROUP BY 1,2,3
+            ORDER BY suuntalavat.tunnus DESC";
   $result = pupe_query($query);
 
   while($rivi = mysql_fetch_assoc($result)) {

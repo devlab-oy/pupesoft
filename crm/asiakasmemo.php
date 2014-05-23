@@ -56,10 +56,10 @@ if ($ytunnus != '') {
     if ($email != "" and $ekuka != "") {
 
       // Haetaan muistiinpano
-      $query = "  SELECT kalenteri.*, asiakas.nimi, asiakas.nimitark, asiakas.toim_nimi, asiakas.toim_nimitark, asiakas.asiakasnro
-            FROM kalenteri
-            LEFT JOIN asiakas ON (kalenteri.yhtio = asiakas.yhtio and kalenteri.liitostunnus = asiakas.tunnus)
-            WHERE kalenteri.tunnus = '$tunnus'";
+      $query = "SELECT kalenteri.*, asiakas.nimi, asiakas.nimitark, asiakas.toim_nimi, asiakas.toim_nimitark, asiakas.asiakasnro
+                FROM kalenteri
+                LEFT JOIN asiakas ON (kalenteri.yhtio = asiakas.yhtio and kalenteri.liitostunnus = asiakas.tunnus)
+                WHERE kalenteri.tunnus = '$tunnus'";
       $res = pupe_query($query);
       $row = mysql_fetch_array($res);
 
@@ -81,36 +81,36 @@ if ($ytunnus != '') {
         $eviesti = "$kukarow[nimi] lähetti memon käyttäjälle: $enimi / $email";
       }
 
-      $kysely = "  INSERT INTO kalenteri
-            SET tapa     = '$row[tapa]',
-            asiakas      = '$row[asiakas]',
-            liitostunnus   = '$row[liitostunnus]',
-            henkilo      = '$row[henkilo]',
-            kuka         = '$kukarow[kuka]',
-            yhtio        = '$kukarow[yhtio]',
-            tyyppi       = 'Memo',
-            pvmalku      = now(),
-            kentta01     = '$eviesti',
-            perheid     = '$row[tunnus]',
-            laatija      = '$kukarow[kuka]',
-            luontiaika    = now()";
+      $kysely = "INSERT INTO kalenteri
+                 SET tapa     = '$row[tapa]',
+                 asiakas      = '$row[asiakas]',
+                 liitostunnus = '$row[liitostunnus]',
+                 henkilo      = '$row[henkilo]',
+                 kuka         = '$kukarow[kuka]',
+                 yhtio        = '$kukarow[yhtio]',
+                 tyyppi       = 'Memo',
+                 pvmalku      = now(),
+                 kentta01     = '$eviesti',
+                 perheid      = '$row[tunnus]',
+                 laatija      = '$kukarow[kuka]',
+                 luontiaika   = now()";
       $result = pupe_query($kysely);
 
       if ($row["tyyppi"] == "Lead") {
-        $kysely = "  INSERT INTO kalenteri
-              SET tapa     = '$row[tapa]',
-              asiakas      = '$row[asiakas]',
-              liitostunnus   = '$row[liitostunnus]',
-              henkilo      = '$row[henkilo]',
-              kuka         = '$ekuka',
-              myyntipaallikko  = '$row[myyntipaallikko]',
-              yhtio        = '$kukarow[yhtio]',
-              tyyppi       = '$row[tyyppi]',
-              pvmalku      = '$row[pvmalku]',
-              kentta01     = '$row[kentta01]',
-              kuittaus     = '$row[kuittaus]',
-              laatija      = '$kukarow[kuka]',
-              luontiaika    = now()";
+        $kysely = "INSERT INTO kalenteri
+                   SET tapa     = '$row[tapa]',
+                   asiakas         = '$row[asiakas]',
+                   liitostunnus    = '$row[liitostunnus]',
+                   henkilo         = '$row[henkilo]',
+                   kuka            = '$ekuka',
+                   myyntipaallikko = '$row[myyntipaallikko]',
+                   yhtio           = '$kukarow[yhtio]',
+                   tyyppi          = '$row[tyyppi]',
+                   pvmalku         = '$row[pvmalku]',
+                   kentta01        = '$row[kentta01]',
+                   kuittaus        = '$row[kuittaus]',
+                   laatija         = '$kukarow[kuka]',
+                   luontiaika      = now()";
         $result = pupe_query($kysely);
       }
       //echo "<br>Sähköposti lähetetty osoitteeseen: $email<br><br>";
@@ -175,29 +175,29 @@ if ($ytunnus != '') {
 
     if ($korjaus == '') {
       if ($viesti != '') {
-        $kysely = "  INSERT INTO kalenteri
-              SET tapa     = '$tapa',
-              asiakas      = '$ytunnus',
-              liitostunnus   = '$asiakasid',
-              henkilo      = '$yhtunnus',
-              kuka         = '$kuka',
-              myyntipaallikko  = '$myyntipaallikko',
-              yhtio        = '$kukarow[yhtio]',
-              tyyppi       = '$tyyppi',
-              pvmalku      = $pvmalku,
-              kentta01     = '$viesti',
-              kuittaus     = '$kuittaus',
-              laatija      = '$kukarow[kuka]',
-              luontiaika    = now()";
+        $kysely = "INSERT INTO kalenteri
+                   SET tapa     = '$tapa',
+                   asiakas         = '$ytunnus',
+                   liitostunnus    = '$asiakasid',
+                   henkilo         = '$yhtunnus',
+                   kuka            = '$kuka',
+                   myyntipaallikko = '$myyntipaallikko',
+                   yhtio           = '$kukarow[yhtio]',
+                   tyyppi          = '$tyyppi',
+                   pvmalku         = $pvmalku,
+                   kentta01        = '$viesti',
+                   kuittaus        = '$kuittaus',
+                   laatija         = '$kukarow[kuka]',
+                   luontiaika      = now()";
         $result = pupe_query($kysely);
         $muist = mysql_insert_id();
 
         if ($tyyppi == "Muistutus") {
 
-          $query = "  SELECT *
-                FROM kuka
-                WHERE yhtio  = '$kukarow[yhtio]'
-                and kuka  = '$kuka'";
+          $query = "SELECT *
+                    FROM kuka
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    and kuka    = '$kuka'";
           $result = pupe_query($query);
           $row = mysql_fetch_array($result);
 
@@ -238,21 +238,21 @@ if ($ytunnus != '') {
       }
     }
     else {
-      $kysely = "  UPDATE kalenteri
-            SET tapa     = '$tapa',
-            asiakas      = '$ytunnus',
-            liitostunnus   = '$asiakasid',
-            henkilo      = '$yhtunnus',
-            kuka         = '$kuka',
-            myyntipaallikko  = '$myyntipaallikko',
-            yhtio        = '$kukarow[yhtio]',
-            tyyppi       = '$tyyppi',
-            pvmalku      = $pvmalku,
-            kentta01     = '$viesti',
-            kuittaus     = '$kuittaus',
-            muuttaja    = '$kukarow[kuka]',
-            muutospvm    = now()
-            WHERE tunnus = '$korjaus'";
+      $kysely = "UPDATE kalenteri
+                 SET tapa     = '$tapa',
+                 asiakas         = '$ytunnus',
+                 liitostunnus    = '$asiakasid',
+                 henkilo         = '$yhtunnus',
+                 kuka            = '$kuka',
+                 myyntipaallikko = '$myyntipaallikko',
+                 yhtio           = '$kukarow[yhtio]',
+                 tyyppi          = '$tyyppi',
+                 pvmalku         = $pvmalku,
+                 kentta01        = '$viesti',
+                 kuittaus        = '$kuittaus',
+                 muuttaja        = '$kukarow[kuka]',
+                 muutospvm       = now()
+                 WHERE tunnus    = '$korjaus'";
       $result = pupe_query($kysely);
 
       $aputyyppi       = $tyyppi;
@@ -291,43 +291,43 @@ if ($ytunnus != '') {
 
   if ($tee == "LISAAASANALYYSI") {
     if ($esilla != '' || $yleisilme != '') {
-      $kysely = "  INSERT INTO kalenteri
-            SET tapa = 'asiakasanalyysi',
-            asiakas  = '$ytunnus',
-            liitostunnus = '$asiakasid',
-            henkilo  = '$yhtunnus',
-            kuka     = '$kukarow[kuka]',
-            yhtio    = '$kukarow[yhtio]',
-            kentta01 = '$esilla',
-            kentta02 = '$yleisilme',
-            kentta03 = '$puvut',
-            kentta04 = '$kyparat',
-            kentta05 = '$saappaat',
-            kentta06 = '$hanskat',
-            kentta07 = '$muuta',
-            kentta08 = '$extrat',
-            tyyppi   = 'Memo',
-            pvmalku  = now()";
+      $kysely = "INSERT INTO kalenteri
+                 SET tapa = 'asiakasanalyysi',
+                 asiakas      = '$ytunnus',
+                 liitostunnus = '$asiakasid',
+                 henkilo      = '$yhtunnus',
+                 kuka         = '$kukarow[kuka]',
+                 yhtio        = '$kukarow[yhtio]',
+                 kentta01     = '$esilla',
+                 kentta02     = '$yleisilme',
+                 kentta03     = '$puvut',
+                 kentta04     = '$kyparat',
+                 kentta05     = '$saappaat',
+                 kentta06     = '$hanskat',
+                 kentta07     = '$muuta',
+                 kentta08     = '$extrat',
+                 tyyppi       = 'Memo',
+                 pvmalku      = now()";
       $result = pupe_query($kysely);
     }
     $tee = '';
   }
 
   if ($tee == "POISTAMEMO") {
-    $kysely = "  UPDATE kalenteri
-          SET
-          tyyppi = concat('DELETED ',tyyppi)
-          WHERE tunnus    = '$tunnus'
-          and yhtio      = '$kukarow[yhtio]'
-          and asiakas      = '$ytunnus'
-          and liitostunnus   = '$asiakasid'";
+    $kysely = "UPDATE kalenteri
+               SET
+               tyyppi           = concat('DELETED ',tyyppi)
+               WHERE tunnus     = '$tunnus'
+               and yhtio        = '$kukarow[yhtio]'
+               and asiakas      = '$ytunnus'
+               and liitostunnus = '$asiakasid'";
     $result = pupe_query($kysely);
 
-    $kysely = "  UPDATE liitetiedostot
-          SET   liitos = concat('DELETED ',liitos)
-          WHERE   liitostunnus   = '$tunnus'
-          AND   liitos      = '$liitostyyppi'
-          and   yhtio      = '$kukarow[yhtio]'";
+    $kysely = "UPDATE liitetiedostot
+               SET   liitos = concat('DELETED ',liitos)
+               WHERE   liitostunnus = '$tunnus'
+               AND   liitos         = '$liitostyyppi'
+               and   yhtio          = '$kukarow[yhtio]'";
 
     $result = pupe_query($kysely);
 
@@ -337,15 +337,15 @@ if ($ytunnus != '') {
   if ($tee == "KORJAAMEMO") {
 
     // Haetaan viimeisin muistiinpano
-    $query = "  SELECT *
-          FROM kalenteri
-          WHERE liitostunnus   = '$asiakasid'
-          and tyyppi      in ('Memo','Muistutus','Kuittaus','Lead','Myyntireskontraviesti')
-          and tapa       != 'asiakasanalyysi'
-          and yhtio      = '$kukarow[yhtio]'
-          and (perheid=0 or tunnus=perheid)
-          ORDER BY tunnus desc
-          LIMIT 1";
+    $query = "SELECT *
+              FROM kalenteri
+              WHERE liitostunnus  = '$asiakasid'
+              and tyyppi          in ('Memo','Muistutus','Kuittaus','Lead','Myyntireskontraviesti')
+              and tapa           != 'asiakasanalyysi'
+              and yhtio           = '$kukarow[yhtio]'
+              and (perheid=0 or tunnus=perheid)
+              ORDER BY tunnus desc
+              LIMIT 1";
     $res = pupe_query($query);
     $korjrow = mysql_fetch_array($res);
 
@@ -376,10 +376,10 @@ if ($ytunnus != '') {
     $tee2 = $tee;
     $tee = '';
 
-    $query_update = "  UPDATE asiakas SET tila = '$astila'
-              WHERE yhtio  = '$kukarow[yhtio]'
-                              and ytunnus  = '$ytunnus'
-                              and tunnus  = '$asiakasid'";
+    $query_update = "UPDATE asiakas SET tila = '$astila'
+                     WHERE yhtio                 = '$kukarow[yhtio]'
+                                     and ytunnus = '$ytunnus'
+                                     and tunnus  = '$asiakasid'";
     $result_update = pupe_query($query_update);
 
     echo t("Vaihdettiin asiakkaan tila")."<br/>";
@@ -389,12 +389,12 @@ if ($ytunnus != '') {
 
     ///* Yhteyshenkilön tiedot, otetaan valitun yhteyshenkilön tiedot talteen  *///
     if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
-      $query = "  SELECT *
-            FROM yhteyshenkilo
-            WHERE yhtio     = '$kukarow[yhtio]'
-            and liitostunnus = '$asiakasid'
-            and tyyppi      = 'A'
-            ORDER BY nimi";
+      $query = "SELECT *
+                FROM yhteyshenkilo
+                WHERE yhtio      = '$kukarow[yhtio]'
+                and liitostunnus = '$asiakasid'
+                and tyyppi       = 'A'
+                ORDER BY nimi";
       $result = pupe_query($query);
 
       $yhenkilo = "<form method='POST'>
@@ -626,13 +626,13 @@ if ($ytunnus != '') {
             <td colspan='2'><select name='kuka'>
             <option value='$kukarow[kuka]'>".t("Itse")."</option>";
 
-        $query = "  SELECT DISTINCT kuka.tunnus, kuka.nimi, kuka.kuka
-              FROM kuka
-              JOIN oikeu ON (oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi = 'crm/kalenteri.php')
-              WHERE kuka.yhtio = '$kukarow[yhtio]'
-              AND kuka.aktiivinen = 1
-              and kuka.kuka != '$kukarow[kuka]'
-              ORDER BY kuka.nimi";
+        $query = "SELECT DISTINCT kuka.tunnus, kuka.nimi, kuka.kuka
+                  FROM kuka
+                  JOIN oikeu ON (oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi = 'crm/kalenteri.php')
+                  WHERE kuka.yhtio     = '$kukarow[yhtio]'
+                  AND kuka.aktiivinen  = 1
+                  and kuka.kuka       != '$kukarow[kuka]'
+                  ORDER BY kuka.nimi";
         $result = pupe_query($query);
 
         while ($row = mysql_fetch_array($result)) {
@@ -684,13 +684,13 @@ if ($ytunnus != '') {
             <th>".t("Leadia valvoo").":</th>
             <td colspan='2'><select name='myyntipaallikko'>";
 
-        $query = "  SELECT DISTINCT kuka.tunnus, kuka.nimi, kuka.kuka
-              FROM kuka
-              JOIN oikeu ON (oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi = 'crm/kalenteri.php')
-              WHERE kuka.yhtio = '$kukarow[yhtio]'
-              AND kuka.aktiivinen = 1
-              and kuka.asema like '%MP%'
-              ORDER BY kuka.nimi";
+        $query = "SELECT DISTINCT kuka.tunnus, kuka.nimi, kuka.kuka
+                  FROM kuka
+                  JOIN oikeu ON (oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi = 'crm/kalenteri.php')
+                  WHERE kuka.yhtio    = '$kukarow[yhtio]'
+                  AND kuka.aktiivinen = 1
+                  and kuka.asema      like '%MP%'
+                  ORDER BY kuka.nimi";
         $result = pupe_query($query);
 
         while ($row = mysql_fetch_array($result)) {
@@ -711,13 +711,13 @@ if ($ytunnus != '') {
             <td colspan='2'><select name='kuka'>
             <option value='$kukarow[kuka]'>$kukarow[nimi]</option>";
 
-        $query = "  SELECT DISTINCT kuka.tunnus, kuka.nimi, kuka.kuka
-              FROM kuka
-              JOIN oikeu ON (oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi = 'crm/kalenteri.php')
-              WHERE kuka.yhtio = '$kukarow[yhtio]'
-              AND kuka.aktiivinen = 1
-              and kuka.kuka != '$kukarow[kuka]'
-              ORDER BY kuka.nimi";
+        $query = "SELECT DISTINCT kuka.tunnus, kuka.nimi, kuka.kuka
+                  FROM kuka
+                  JOIN oikeu ON (oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi = 'crm/kalenteri.php')
+                  WHERE kuka.yhtio     = '$kukarow[yhtio]'
+                  AND kuka.aktiivinen  = 1
+                  and kuka.kuka       != '$kukarow[kuka]'
+                  ORDER BY kuka.nimi";
         $result = pupe_query($query);
 
         while ($row = mysql_fetch_array($result)) {
@@ -792,19 +792,19 @@ if ($ytunnus != '') {
       $lisadel = " and left(kalenteri.tyyppi,7) != 'DELETED'";
     }
 
-    $query = "  SELECT kalenteri.tyyppi, tapa, kalenteri.asiakas ytunnus, yhteyshenkilo.nimi yhteyshenkilo,
-          if(kuka.nimi!='',kuka.nimi, kalenteri.kuka) laatija, kentta01 viesti, left(pvmalku,10) paivamaara,
-          kentta02, kentta03, kentta04, kentta05, kentta06, kentta07, kentta08,
-          lasku.tunnus laskutunnus, lasku.tila laskutila, lasku.alatila laskualatila, kuka2.nimi laskumyyja, lasku.muutospvm laskumpvm,
-          kalenteri.tunnus, kalenteri.perheid, if(kalenteri.perheid!=0, kalenteri.perheid, kalenteri.tunnus) sorttauskentta
-          FROM kalenteri
-          LEFT JOIN yhteyshenkilo ON kalenteri.yhtio=yhteyshenkilo.yhtio and kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.tyyppi = 'A'
-          LEFT JOIN kuka ON kalenteri.yhtio=kuka.yhtio and kalenteri.kuka=kuka.kuka
-          LEFT JOIN lasku ON kalenteri.yhtio=lasku.yhtio and kalenteri.otunnus=lasku.tunnus
-          LEFT JOIN kuka kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
-          WHERE kalenteri.liitostunnus = '$asiakasid'
-          $lisadel
-          and kalenteri.yhtio = '$kukarow[yhtio]' ";
+    $query = "SELECT kalenteri.tyyppi, tapa, kalenteri.asiakas ytunnus, yhteyshenkilo.nimi yhteyshenkilo,
+              if(kuka.nimi!='',kuka.nimi, kalenteri.kuka) laatija, kentta01 viesti, left(pvmalku,10) paivamaara,
+              kentta02, kentta03, kentta04, kentta05, kentta06, kentta07, kentta08,
+              lasku.tunnus laskutunnus, lasku.tila laskutila, lasku.alatila laskualatila, kuka2.nimi laskumyyja, lasku.muutospvm laskumpvm,
+              kalenteri.tunnus, kalenteri.perheid, if(kalenteri.perheid!=0, kalenteri.perheid, kalenteri.tunnus) sorttauskentta
+              FROM kalenteri
+              LEFT JOIN yhteyshenkilo ON kalenteri.yhtio=yhteyshenkilo.yhtio and kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.tyyppi = 'A'
+              LEFT JOIN kuka ON kalenteri.yhtio=kuka.yhtio and kalenteri.kuka=kuka.kuka
+              LEFT JOIN lasku ON kalenteri.yhtio=lasku.yhtio and kalenteri.otunnus=lasku.tunnus
+              LEFT JOIN kuka kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
+              WHERE kalenteri.liitostunnus = '$asiakasid'
+              $lisadel
+              and kalenteri.yhtio          = '$kukarow[yhtio]' ";
 
     if ($yhtunnus > 0) {
       $query .= " and henkilo='$yhtunnus'";
@@ -872,14 +872,14 @@ if ($ytunnus != '') {
           echo "<input type='hidden' name='asiakasid' value='$asiakasid'>";
           echo "<select name='email'><option value=''>".t("Valitse käyttäjä")."</option>";
 
-          $query  = "  SELECT kuka.nimi, kuka.eposti, min(kuka.kuka) kuka
-                FROM kuka
-                WHERE kuka.yhtio    = '$kukarow[yhtio]'
-                AND kuka.aktiivinen = 1
-                and kuka.extranet   = ''
-                and kuka.eposti    != ''
-                GROUP BY 1,2
-                ORDER BY kuka.nimi";
+          $query  = "SELECT kuka.nimi, kuka.eposti, min(kuka.kuka) kuka
+                     FROM kuka
+                     WHERE kuka.yhtio     = '$kukarow[yhtio]'
+                     AND kuka.aktiivinen  = 1
+                     and kuka.extranet    = ''
+                     and kuka.eposti     != ''
+                     GROUP BY 1,2
+                     ORDER BY kuka.nimi";
           $vares = pupe_query($query);
 
           while ($varow = mysql_fetch_array($vares)) {
@@ -925,11 +925,11 @@ function listaaliitetiedostot($kalenteritunnus,$tyyppi) {
   GLOBAL $palvelin2,$kukarow;
   $out = "";
 
-  $query = "  SELECT tunnus, filename
-        FROM liitetiedostot
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND liitostunnus = '$kalenteritunnus'
-        AND liitos = '$tyyppi'";
+  $query = "SELECT tunnus, filename
+            FROM liitetiedostot
+            WHERE yhtio      = '$kukarow[yhtio]'
+            AND liitostunnus = '$kalenteritunnus'
+            AND liitos       = '$tyyppi'";
   $res = pupe_query($query);
 
   while ($row = mysql_fetch_array($res)) {

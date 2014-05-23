@@ -8,15 +8,15 @@ if ($tee == "") {
   echo "<font class='message'>Luodaan Danskebank Factoring siirtolista kaikista l‰hett‰m‰ttˆmist‰ factoring laskuista.</font><br><br>";
 
   // haetaan kaikki sampo factoroidut laskut jota ei ole viel‰ liitetty mihink‰‰n siirtolistalle
-  $query = "  SELECT count(*) kpl, sum(arvo) arvo, sum(summa) summa
-        FROM lasku USE INDEX (factoring)
-        JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto and maksuehto.factoring = 'SAMPO')
-        WHERE lasku.yhtio = '$kukarow[yhtio]' and
-        lasku.tila = 'U' and
-        lasku.alatila = 'X' and
-        lasku.summa != 0 and
-        lasku.factoringsiirtonumero = '' and
-        lasku.valkoodi = '$yhtiorow[valkoodi]'";
+  $query = "SELECT count(*) kpl, sum(arvo) arvo, sum(summa) summa
+            FROM lasku USE INDEX (factoring)
+            JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto and maksuehto.factoring = 'SAMPO')
+            WHERE lasku.yhtio            = '$kukarow[yhtio]' and
+            lasku.tila                   = 'U' and
+            lasku.alatila                = 'X' and
+            lasku.summa                 != 0 and
+            lasku.factoringsiirtonumero  = '' and
+            lasku.valkoodi               = '$yhtiorow[valkoodi]'";
   $result = mysql_query ($query) or pupe_error($query);
   $laskurow = mysql_fetch_array($result);
 
@@ -56,11 +56,11 @@ if ($tee == "") {
 
   echo "<table><tr><th>Valitse tulostin</th><td>";
 
-  $query = "  SELECT *
-        FROM kirjoittimet
-        WHERE
-        yhtio='$kukarow[yhtio]'
-        ORDER by kirjoitin";
+  $query = "SELECT *
+            FROM kirjoittimet
+            WHERE
+            yhtio='$kukarow[yhtio]'
+            ORDER by kirjoitin";
   $kirre = mysql_query($query) or pupe_error($query);
 
   echo "<select name='valittu_tulostin'>";
@@ -86,16 +86,16 @@ if ($tee == 'TULOSTA') {
   $numero = (int) $numero;
 
   // haetaan kaikki sampo factoroidut laskut jota ei ole viel‰ liitetty mihink‰‰n siirtolistalle
-  $query = "  SELECT ifnull(group_concat(lasku.tunnus),0) tunnukset
-        FROM lasku USE INDEX (factoring)
-        JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto and maksuehto.factoring = 'SAMPO')
-        WHERE lasku.yhtio = '$kukarow[yhtio]' and
-        lasku.tila = 'U' and
-        lasku.alatila = 'X' and
-        lasku.summa != 0 and
-        lasku.factoringsiirtonumero = '$numero' and
-        lasku.valkoodi = '$yhtiorow[valkoodi]'
-        order by laskunro";
+  $query = "SELECT ifnull(group_concat(lasku.tunnus),0) tunnukset
+            FROM lasku USE INDEX (factoring)
+            JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto and maksuehto.factoring = 'SAMPO')
+            WHERE lasku.yhtio            = '$kukarow[yhtio]' and
+            lasku.tila                   = 'U' and
+            lasku.alatila                = 'X' and
+            lasku.summa                 != 0 and
+            lasku.factoringsiirtonumero  = '$numero' and
+            lasku.valkoodi               = '$yhtiorow[valkoodi]'
+            order by laskunro";
   $result = mysql_query ($query) or pupe_error($query);
   $laskurow = mysql_fetch_array($result);
 
@@ -109,16 +109,16 @@ if ($tee == 'TULOSTA') {
       $result = mysql_query ($query) or pupe_error($query);
 
       // haetaan seuraava vapaa listanumero
-      $query = "  SELECT max(factoringsiirtonumero) + 1
-            FROM lasku
-            WHERE yhtio = '$kukarow[yhtio]'";
+      $query = "SELECT max(factoringsiirtonumero) + 1
+                FROM lasku
+                WHERE yhtio = '$kukarow[yhtio]'";
       $result = mysql_query ($query) or pupe_error($query);
       $facrow = mysql_fetch_array($result);
 
       // p‰ivitet‰‰n se laskuille
-      $query = "  UPDATE lasku
-            SET factoringsiirtonumero = '$facrow[0]'
-            WHERE yhtio = '$kukarow[yhtio]' and tunnus in ($laskurow[tunnukset])";
+      $query = "UPDATE lasku
+                SET factoringsiirtonumero = '$facrow[0]'
+                WHERE yhtio = '$kukarow[yhtio]' and tunnus in ($laskurow[tunnukset])";
       $result = mysql_query ($query) or pupe_error($query);
 
       $numero = $facrow[0];
@@ -129,9 +129,9 @@ if ($tee == 'TULOSTA') {
     }
 
     // sitte k‰yd‰‰n vasta laskut l‰pi..
-    $query = "  SELECT *
-          FROM lasku
-          WHERE yhtio = '$kukarow[yhtio]' and tunnus in ($laskurow[tunnukset])";
+    $query = "SELECT *
+              FROM lasku
+              WHERE yhtio = '$kukarow[yhtio]' and tunnus in ($laskurow[tunnukset])";
     $result = mysql_query ($query) or pupe_error($query);
 
     // laskurit nollaan
@@ -194,11 +194,11 @@ if ($tee == 'TULOSTA') {
     }
 
     // sitte k‰yd‰‰n vasta laskut l‰pi..
-    $query  = "  SELECT *
-          from factoring
-          where yhtio = '$kukarow[yhtio]'
-          and factoringyhtio = 'SAMPO'
-          and valkoodi = '$yhtiorow[valkoodi]'";
+    $query  = "SELECT *
+               from factoring
+               where yhtio        = '$kukarow[yhtio]'
+               and factoringyhtio = 'SAMPO'
+               and valkoodi       = '$yhtiorow[valkoodi]'";
     $result = mysql_query ($query) or pupe_error($query);
     $soprow = mysql_fetch_array($result);
 
@@ -261,10 +261,10 @@ if ($tee == 'TULOSTA') {
     $otsikkoulos .= sprintf("%20.20s",  "$kaikki eur\n");
     $otsikkoulos .= "\n\n";
 
-    $query = "  SELECT komento
-          FROM kirjoittimet
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tunnus = '$valittu_tulostin'";
+    $query = "SELECT komento
+              FROM kirjoittimet
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tunnus  = '$valittu_tulostin'";
     $kirres = mysql_query($query) or pupe_error($query);
     $kirrow = mysql_fetch_assoc($kirres);
 

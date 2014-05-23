@@ -197,22 +197,22 @@ if ($tee == 'GO' and $error == 0) {
       $tuotenumeron_sijainti_pupessa = mysql_real_escape_string($tuotenumeron_sijainti_pupessa);
 
       if ($toiminto == 'paivita_ja_poista') {
-        $query = "  UPDATE tuotteen_toimittajat SET
-              tehdas_saldo = '0',
-              tehdas_saldo_paivitetty = now()
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND liitostunnus = '$tuotteen_toimittaja'";
+        $query = "UPDATE tuotteen_toimittajat SET
+                  tehdas_saldo            = '0',
+                  tehdas_saldo_paivitetty = now()
+                  WHERE yhtio             = '$kukarow[yhtio]'
+                  AND liitostunnus        = '$tuotteen_toimittaja'";
         $update_saldo_result = pupe_query($query);
       }
 
       foreach ($tuote as $index => $tuoteno) {
 
-        $query = "  UPDATE tuotteen_toimittajat SET
-              tehdas_saldo = '{$saldo[$index]}',
-              tehdas_saldo_paivitetty = now()
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND liitostunnus = '$tuotteen_toimittaja'
-              AND $tuotenumeron_sijainti_pupessa = '$tuoteno'";
+        $query = "UPDATE tuotteen_toimittajat SET
+                  tehdas_saldo            = '{$saldo[$index]}',
+                  tehdas_saldo_paivitetty = now()
+                  WHERE yhtio             = '$kukarow[yhtio]'
+                  AND liitostunnus        = '$tuotteen_toimittaja'
+                  AND $tuotenumeron_sijainti_pupessa = '$tuoteno'";
         $update_saldo_result = pupe_query($query);
       }
 
@@ -231,11 +231,11 @@ if ($tee == '') {
 
   echo "<tr><th colspan='2'>",t("Toimittajan valinnat"),"</th></tr>";
 
-  $query = "  SELECT DISTINCT toimi.tunnus, toimi.nimi, toimi.nimitark
-        FROM toimi
-        JOIN tuotteen_toimittajat ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
-        WHERE toimi.yhtio = '$kukarow[yhtio]'
-        AND toimi.ytunnus != 'FI'";
+  $query = "SELECT DISTINCT toimi.tunnus, toimi.nimi, toimi.nimitark
+            FROM toimi
+            JOIN tuotteen_toimittajat ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
+            WHERE toimi.yhtio  = '$kukarow[yhtio]'
+            AND toimi.ytunnus != 'FI'";
   $tuotteen_toimittajat_result = pupe_query($query);
 
   echo "<tr><td>",t("Tuotteen toimittaja"),"</td>";
@@ -282,12 +282,12 @@ if ($tee == '') {
   echo "<tr><th colspan='2'>",t("Raportin valinnat"),"</th></tr>";
 
   //Haetaan tallennetut kyselyt
-  $query = "  SELECT distinct kuka.nimi, kuka.kuka, tallennetut_parametrit.nimitys
-        FROM tallennetut_parametrit
-        JOIN kuka on (kuka.yhtio = tallennetut_parametrit.yhtio and kuka.kuka = tallennetut_parametrit.kuka)
-        WHERE tallennetut_parametrit.yhtio = '$kukarow[yhtio]'
-        and tallennetut_parametrit.sovellus = '$_SERVER[SCRIPT_NAME]'
-        ORDER BY tallennetut_parametrit.nimitys";
+  $query = "SELECT distinct kuka.nimi, kuka.kuka, tallennetut_parametrit.nimitys
+            FROM tallennetut_parametrit
+            JOIN kuka on (kuka.yhtio = tallennetut_parametrit.yhtio and kuka.kuka = tallennetut_parametrit.kuka)
+            WHERE tallennetut_parametrit.yhtio  = '$kukarow[yhtio]'
+            and tallennetut_parametrit.sovellus = '$_SERVER[SCRIPT_NAME]'
+            ORDER BY tallennetut_parametrit.nimitys";
   $sresult = pupe_query($query);
 
   echo "<tr><td>",t("Valitse raportti"),":</td>";

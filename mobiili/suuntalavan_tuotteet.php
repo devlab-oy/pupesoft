@@ -165,7 +165,7 @@ echo "</th>
 
     if ($row = mysql_fetch_assoc($onko_suoratoimitus_res)) {
       if ($row["suoraan_laskutukseen"] == "") echo "&nbsp;",t("JT");
-      else if ($row["suoraan_laskutukseen"] == "o") echo "&nbsp;",t("JTS");
+      elseif ($row["suoraan_laskutukseen"] == "o") echo "&nbsp;",t("JTS");
     }
 
     echo "</td>";
@@ -176,11 +176,11 @@ echo "</th>
     if ($oletuspaikat) {
 
       # P‰ivitet‰‰n tilausriveille oletuspaikat.
-      $oletus_query = "  SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso
-                FROM tuotepaikat
-                WHERE tuoteno='{$tuote['tuoteno']}'
-                AND oletus='X'
-                AND yhtio='{$yhtiorow['yhtio']}'";
+      $oletus_query = "SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso
+                       FROM tuotepaikat
+                       WHERE tuoteno='{$tuote['tuoteno']}'
+                       AND oletus='X'
+                       AND yhtio='{$yhtiorow['yhtio']}'";
       $oletus_result = mysql_query($oletus_query);
       $oletus = mysql_fetch_assoc($oletus_result);
 

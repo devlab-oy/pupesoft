@@ -12,10 +12,10 @@ require("inc/functions.inc");
 function alv_update_lisaa_avainsanat($query_where_lisa = "") {
 
   // Loopataan läpi kaikki asennuksen suomalaiset yhtiot
-  $query = "  SELECT yhtio
-              FROM yhtio
-              WHERE maa = 'FI'
-              $query_where_lisa";
+  $query = "SELECT yhtio
+            FROM yhtio
+            WHERE maa = 'FI'
+            $query_where_lisa";
   $yhtio_result = mysql_query($query) or die($query);
 
   // Lisätään uuset verokannat
@@ -27,59 +27,59 @@ function alv_update_lisaa_avainsanat($query_where_lisa = "") {
     echo date("H:i:s d.m.Y"), ": Avainsanat yritykselle $yhtio\n";
 
     // Poistetaan uuden alvit jos käyttäjät on itse lisännyt niitä
-    $query = "  DELETE from avainsana
-                where yhtio = '$yhtio'
-                and laji = 'ALV'
-                and selite in ('10', '14', '24')";
+    $query = "DELETE from avainsana
+              where yhtio = '$yhtio'
+              and laji    = 'ALV'
+              and selite  in ('10', '14', '24')";
     $result = pupe_query($query);
 
     // Lisätään 10 verokanta
-    $query = "  INSERT into avainsana SET
-                yhtio       = '$yhtio',
-                kieli       = 'fi',
-                laji        = 'ALV',
-                selite      = '10',
-                jarjestys   = '10',
-                laatija     = 'devlab',
-                luontiaika  = now()";
+    $query = "INSERT into avainsana SET
+              yhtio      = '$yhtio',
+              kieli      = 'fi',
+              laji       = 'ALV',
+              selite     = '10',
+              jarjestys  = '10',
+              laatija    = 'devlab',
+              luontiaika = now()";
     $result = pupe_query($query);
 
     // Lisätään 14 verokanta
-    $query = "  INSERT into avainsana SET
-                yhtio       = '$yhtio',
-                kieli       = 'fi',
-                laji        = 'ALV',
-                selite      = '14',
-                jarjestys   = '14',
-                laatija     = 'devlab',
-                luontiaika  = now()";
+    $query = "INSERT into avainsana SET
+              yhtio      = '$yhtio',
+              kieli      = 'fi',
+              laji       = 'ALV',
+              selite     = '14',
+              jarjestys  = '14',
+              laatija    = 'devlab',
+              luontiaika = now()";
     $result = pupe_query($query);
 
     // Lisätään 24 verokanta
-    $query = "  INSERT into avainsana SET
-                yhtio       = '$yhtio',
-                kieli       = 'fi',
-                laji        = 'ALV',
-                selite      = '24',
-                jarjestys   = '24',
-                laatija     = 'devlab',
-                luontiaika  = now()";
+    $query = "INSERT into avainsana SET
+              yhtio      = '$yhtio',
+              kieli      = 'fi',
+              laji       = 'ALV',
+              selite     = '24',
+              jarjestys  = '24',
+              laatija    = 'devlab',
+              luontiaika = now()";
     $result = pupe_query($query);
 
     // Poistetaan oletus verokanta ja päivitetään perheet
-    $query = "  UPDATE avainsana SET
-                selitetark = '',
-                perhe = tunnus
-                where yhtio = '$yhtio'
-                and laji = 'ALV'";
+    $query = "UPDATE avainsana SET
+              selitetark  = '',
+              perhe       = tunnus
+              where yhtio = '$yhtio'
+              and laji    = 'ALV'";
     $result = pupe_query($query);
 
     // Päivitetään uusi oletusverokanta
-    $query = "  UPDATE avainsana SET
-                selitetark = 'o'
-                where yhtio = '$yhtio'
-                and laji = 'ALV'
-                and selite = '24'";
+    $query = "UPDATE avainsana SET
+              selitetark  = 'o'
+              where yhtio = '$yhtio'
+              and laji    = 'ALV'
+              and selite  = '24'";
     $result = pupe_query($query);
   }
 }
@@ -87,10 +87,10 @@ function alv_update_lisaa_avainsanat($query_where_lisa = "") {
 function alv_update_paivita_tuote_ja_asiakas($query_where_lisa = "") {
 
   // Loopataan läpi kaikki asennuksen suomalaiset yhtiot
-  $query = "  SELECT yhtio
-              FROM yhtio
-              WHERE maa = 'FI'
-              $query_where_lisa";
+  $query = "SELECT yhtio
+            FROM yhtio
+            WHERE maa = 'FI'
+            $query_where_lisa";
   $yhtio_result = mysql_query($query) or die($query);
 
   // Lisätään uuset verokannat
@@ -102,31 +102,31 @@ function alv_update_paivita_tuote_ja_asiakas($query_where_lisa = "") {
 
     echo date("H:i:s d.m.Y"), ": Tuote-/asiakasmuutos yritykselle $yhtio\n";
 
-    $query = "  UPDATE asiakas
-                SET alv = 24
-                WHERE yhtio = '$yhtio'
-                AND alv != 0";
+    $query = "UPDATE asiakas
+              SET alv = 24
+              WHERE yhtio  = '$yhtio'
+              AND alv     != 0";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
-    $query = "  UPDATE tuote
-                SET alv = 10
-                WHERE yhtio = '$yhtio'
-                AND alv = 9";
+    $query = "UPDATE tuote
+              SET alv = 10
+              WHERE yhtio = '$yhtio'
+              AND alv     = 9";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
-    $query = "  UPDATE tuote
-                SET alv = 14
-                WHERE yhtio = '$yhtio'
-                AND alv = 13";
+    $query = "UPDATE tuote
+              SET alv = 14
+              WHERE yhtio = '$yhtio'
+              AND alv     = 13";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
-    $query = "  UPDATE tuote
-                SET alv = 24
-                WHERE yhtio = '$yhtio'
-                AND alv = 23";
+    $query = "UPDATE tuote
+              SET alv = 24
+              WHERE yhtio = '$yhtio'
+              AND alv     = 23";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
@@ -137,10 +137,10 @@ function alv_update_paivita_tuote_ja_asiakas($query_where_lisa = "") {
 function alv_update_paivita_avoimet($query_where_lisa = "") {
 
   // Loopataan läpi kaikki asennuksen suomalaiset yhtiot
-  $query = "  SELECT yhtio
-              FROM yhtio
-              WHERE maa = 'FI'
-              $query_where_lisa";
+  $query = "SELECT yhtio
+            FROM yhtio
+            WHERE maa = 'FI'
+            $query_where_lisa";
   $yhtio_result = mysql_query($query) or die($query);
 
   // päivitetään uudet verokannat
@@ -153,70 +153,70 @@ function alv_update_paivita_avoimet($query_where_lisa = "") {
     echo date("H:i:s d.m.Y"), ": Avoimet tapahtumat yritykselle $yhtio\n";
 
     // Tarjous
-    $query = "  UPDATE tilausrivi
-                JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
-                  AND lasku.tunnus = tilausrivi.otunnus
-                  AND lasku.tila = 'T'
-                  AND lasku.alatila NOT IN ('X', 'B'))
-                SET tilausrivi.alv = if(tilausrivi.alv = 23, 24, if(tilausrivi.alv = 13, 14, if(tilausrivi.alv = 9, 10, tilausrivi.alv)))
-                WHERE tilausrivi.yhtio = '$yhtio'
-                AND tilausrivi.alv in (23, 13, 9)
-                AND tilausrivi.tyyppi = 'T'";
+    $query = "UPDATE tilausrivi
+              JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
+                AND lasku.tunnus     = tilausrivi.otunnus
+                AND lasku.tila       = 'T'
+                AND lasku.alatila    NOT IN ('X', 'B'))
+              SET tilausrivi.alv = if(tilausrivi.alv = 23, 24, if(tilausrivi.alv = 13, 14, if(tilausrivi.alv = 9, 10, tilausrivi.alv)))
+              WHERE tilausrivi.yhtio = '$yhtio'
+              AND tilausrivi.alv     in (23, 13, 9)
+              AND tilausrivi.tyyppi  = 'T'";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
     // Ylläpitosopimus
-    $query = "  UPDATE tilausrivi
-                JOIN lasku on (lasku.yhtio = tilausrivi.yhtio
-                  AND lasku.tunnus = tilausrivi.otunnus
-                  AND lasku.tila = '0'
-                  AND lasku.alatila != 'D')
-                SET tilausrivi.alv = if(tilausrivi.alv = 23, 24, if(tilausrivi.alv = 13, 14, if(tilausrivi.alv = 9, 10, tilausrivi.alv)))
-                WHERE tilausrivi.yhtio = '$yhtio'
-                AND tilausrivi.alv in (23, 13, 9)
-                AND tilausrivi.tyyppi = '0'";
+    $query = "UPDATE tilausrivi
+              JOIN lasku on (lasku.yhtio = tilausrivi.yhtio
+                AND lasku.tunnus      = tilausrivi.otunnus
+                AND lasku.tila        = '0'
+                AND lasku.alatila    != 'D')
+              SET tilausrivi.alv = if(tilausrivi.alv = 23, 24, if(tilausrivi.alv = 13, 14, if(tilausrivi.alv = 9, 10, tilausrivi.alv)))
+              WHERE tilausrivi.yhtio  = '$yhtio'
+              AND tilausrivi.alv      in (23, 13, 9)
+              AND tilausrivi.tyyppi   = '0'";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
     // Työmääräys, Reklamaatio, Myyntitilaus, Myyntitilaus kesken, Ennakkotilaus, Tallennettu web-tilaus/tarjous
-    $query = "  UPDATE tilausrivi
-                JOIN lasku on (lasku.yhtio = tilausrivi.yhtio
-                  AND lasku.tunnus = tilausrivi.otunnus
-                  AND lasku.tila IN ('A', 'C', 'L', 'N', 'E', 'F')
-                  AND lasku.alatila != 'X')
-                SET tilausrivi.alv = if(tilausrivi.alv = 23, 24, if(tilausrivi.alv = 13, 14, if(tilausrivi.alv = 9, 10, tilausrivi.alv)))
-                WHERE tilausrivi.yhtio = '$yhtio'
-                AND tilausrivi.tyyppi IN ('L', 'V', 'W', 'E', 'F')
-                AND tilausrivi.alv in (23, 13, 9)
-                AND tilausrivi.laskutettuaika = '0000-00-00'
-                AND (tilausrivi.toimitettuaika = '0000-00-00 00:00:00' OR tilausrivi.toimitettuaika >= '2013-01-01 00:00:00')";
+    $query = "UPDATE tilausrivi
+              JOIN lasku on (lasku.yhtio = tilausrivi.yhtio
+                AND lasku.tunnus             = tilausrivi.otunnus
+                AND lasku.tila               IN ('A', 'C', 'L', 'N', 'E', 'F')
+                AND lasku.alatila           != 'X')
+              SET tilausrivi.alv = if(tilausrivi.alv = 23, 24, if(tilausrivi.alv = 13, 14, if(tilausrivi.alv = 9, 10, tilausrivi.alv)))
+              WHERE tilausrivi.yhtio         = '$yhtio'
+              AND tilausrivi.tyyppi          IN ('L', 'V', 'W', 'E', 'F')
+              AND tilausrivi.alv             in (23, 13, 9)
+              AND tilausrivi.laskutettuaika  = '0000-00-00'
+              AND (tilausrivi.toimitettuaika = '0000-00-00 00:00:00' OR tilausrivi.toimitettuaika >= '2013-01-01 00:00:00')";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
     // Valmistus
-    $query = "  UPDATE tilausrivi
-                JOIN lasku on (lasku.yhtio = tilausrivi.yhtio
-                  AND lasku.tunnus = tilausrivi.otunnus
-                  AND lasku.tila = 'V'
-                  AND lasku.alatila != 'V')
-                SET tilausrivi.alv = if(tilausrivi.alv = 23, 24, if(tilausrivi.alv = 13, 14, if(tilausrivi.alv = 9, 10, tilausrivi.alv)))
-                WHERE tilausrivi.yhtio = '$yhtio'
-                AND tilausrivi.tyyppi in ('V', 'W', 'M', 'L')
-                AND tilausrivi.alv in (23, 13, 9)
-                AND tilausrivi.laskutettuaika = '0000-00-00'
-                AND (tilausrivi.toimitettuaika = '0000-00-00 00:00:00' OR tilausrivi.toimitettuaika >= '2013-01-01 00:00:00')";
+    $query = "UPDATE tilausrivi
+              JOIN lasku on (lasku.yhtio = tilausrivi.yhtio
+                AND lasku.tunnus             = tilausrivi.otunnus
+                AND lasku.tila               = 'V'
+                AND lasku.alatila           != 'V')
+              SET tilausrivi.alv = if(tilausrivi.alv = 23, 24, if(tilausrivi.alv = 13, 14, if(tilausrivi.alv = 9, 10, tilausrivi.alv)))
+              WHERE tilausrivi.yhtio         = '$yhtio'
+              AND tilausrivi.tyyppi          in ('V', 'W', 'M', 'L')
+              AND tilausrivi.alv             in (23, 13, 9)
+              AND tilausrivi.laskutettuaika  = '0000-00-00'
+              AND (tilausrivi.toimitettuaika = '0000-00-00 00:00:00' OR tilausrivi.toimitettuaika >= '2013-01-01 00:00:00')";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
     // Kaikkien ym. tyyppien otsikot
-    $query = "  UPDATE lasku
-                SET lasku.alv = 24
-                WHERE lasku.yhtio = '$yhtio'
-                AND lasku.alv = 23
-                AND ((lasku.tila = 'V' AND lasku.alatila != 'V')
-                  OR (lasku.tila = 'T' AND lasku.alatila NOT IN ('X', 'B'))
-                  OR (lasku.tila = '0' AND lasku.alatila != 'D')
-                  OR (lasku.tila IN ('A', 'C', 'L', 'N', 'E', 'F') AND lasku.alatila != 'X'))";
+    $query = "UPDATE lasku
+              SET lasku.alv = 24
+              WHERE lasku.yhtio = '$yhtio'
+              AND lasku.alv     = 23
+              AND ((lasku.tila = 'V' AND lasku.alatila != 'V')
+                OR (lasku.tila = 'T' AND lasku.alatila NOT IN ('X', 'B'))
+                OR (lasku.tila = '0' AND lasku.alatila != 'D')
+                OR (lasku.tila IN ('A', 'C', 'L', 'N', 'E', 'F') AND lasku.alatila != 'X'))";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
@@ -229,12 +229,12 @@ function alv_update_paivita_hinnat($query_where_lisa = "") {
   // HUOM!! Tämä funktio olettaa, että tuotteiden verokantaa EI OLE vielä päivitetty!
 
   // Loopataan läpi kaikki asennuksen suomalaiset yhtiot, joilla on verolliset myyntihinnat
-  $query = "  SELECT yhtio.yhtio
-              FROM yhtio
-              JOIN yhtion_parametrit on (yhtion_parametrit.yhtio = yhtio.yhtio
-                AND yhtion_parametrit.alv_kasittely = '')
-              WHERE yhtio.maa = 'FI'
-              $query_where_lisa";
+  $query = "SELECT yhtio.yhtio
+            FROM yhtio
+            JOIN yhtion_parametrit on (yhtion_parametrit.yhtio = yhtio.yhtio
+              AND yhtion_parametrit.alv_kasittely = '')
+            WHERE yhtio.maa                       = 'FI'
+            $query_where_lisa";
   $yhtio_result = mysql_query($query) or die($query);
 
   // Lisätään uuset verokannat
@@ -246,132 +246,132 @@ function alv_update_paivita_hinnat($query_where_lisa = "") {
 
     echo date("H:i:s d.m.Y"), ": Hintamuutos yritykselle $yhtio\n";
 
-    $query = "  UPDATE tuote set
-                tuote.myyntihinta  = round(tuote.myyntihinta  / 1.09 * 1.10, {$yhtiorow['hintapyoristys']}),
-                tuote.myymalahinta = round(tuote.myymalahinta / 1.09 * 1.10, {$yhtiorow['hintapyoristys']}),
-                tuote.nettohinta   = round(tuote.nettohinta   / 1.09 * 1.10, {$yhtiorow['hintapyoristys']})
-                WHERE tuote.yhtio = '$yhtio'
-                AND tuote.alv = 9";
+    $query = "UPDATE tuote set
+              tuote.myyntihinta  = round(tuote.myyntihinta  / 1.09 * 1.10, {$yhtiorow['hintapyoristys']}),
+              tuote.myymalahinta = round(tuote.myymalahinta / 1.09 * 1.10, {$yhtiorow['hintapyoristys']}),
+              tuote.nettohinta   = round(tuote.nettohinta   / 1.09 * 1.10, {$yhtiorow['hintapyoristys']})
+              WHERE tuote.yhtio  = '$yhtio'
+              AND tuote.alv      = 9";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
-    $query = "  UPDATE tuote set
-                tuote.myyntihinta  = round(tuote.myyntihinta  / 1.13 * 1.14, {$yhtiorow['hintapyoristys']}),
-                tuote.myymalahinta = round(tuote.myymalahinta / 1.13 * 1.14, {$yhtiorow['hintapyoristys']}),
-                tuote.nettohinta   = round(tuote.nettohinta   / 1.13 * 1.14, {$yhtiorow['hintapyoristys']})
-                WHERE tuote.yhtio = '$yhtio'
-                AND tuote.alv = 13";
+    $query = "UPDATE tuote set
+              tuote.myyntihinta  = round(tuote.myyntihinta  / 1.13 * 1.14, {$yhtiorow['hintapyoristys']}),
+              tuote.myymalahinta = round(tuote.myymalahinta / 1.13 * 1.14, {$yhtiorow['hintapyoristys']}),
+              tuote.nettohinta   = round(tuote.nettohinta   / 1.13 * 1.14, {$yhtiorow['hintapyoristys']})
+              WHERE tuote.yhtio  = '$yhtio'
+              AND tuote.alv      = 13";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
-    $query = "  UPDATE tuote set
-                tuote.myyntihinta  = round(tuote.myyntihinta  / 1.23 * 1.24, {$yhtiorow['hintapyoristys']}),
-                tuote.myymalahinta = round(tuote.myymalahinta / 1.23 * 1.24, {$yhtiorow['hintapyoristys']}),
-                tuote.nettohinta   = round(tuote.nettohinta   / 1.23 * 1.24, {$yhtiorow['hintapyoristys']})
-                WHERE tuote.yhtio = '$yhtio'
-                AND tuote.alv = 23";
+    $query = "UPDATE tuote set
+              tuote.myyntihinta  = round(tuote.myyntihinta  / 1.23 * 1.24, {$yhtiorow['hintapyoristys']}),
+              tuote.myymalahinta = round(tuote.myymalahinta / 1.23 * 1.24, {$yhtiorow['hintapyoristys']}),
+              tuote.nettohinta   = round(tuote.nettohinta   / 1.23 * 1.24, {$yhtiorow['hintapyoristys']})
+              WHERE tuote.yhtio  = '$yhtio'
+              AND tuote.alv      = 23";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
-    $query = "  UPDATE hinnasto
-                JOIN tuote on (tuote.yhtio = hinnasto.yhtio
-                  AND tuote.tuoteno = hinnasto.tuoteno
-                  AND tuote.alv = 9)
-                SET hinnasto.hinta = round(hinnasto.hinta / 1.09 * 1.10, {$yhtiorow['hintapyoristys']})
-                WHERE hinnasto.yhtio = '$yhtio'";
+    $query = "UPDATE hinnasto
+              JOIN tuote on (tuote.yhtio = hinnasto.yhtio
+                AND tuote.tuoteno  = hinnasto.tuoteno
+                AND tuote.alv      = 9)
+              SET hinnasto.hinta = round(hinnasto.hinta / 1.09 * 1.10, {$yhtiorow['hintapyoristys']})
+              WHERE hinnasto.yhtio = '$yhtio'";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
-    $query = "  UPDATE hinnasto
-                JOIN tuote on (tuote.yhtio = hinnasto.yhtio
-                  AND tuote.tuoteno = hinnasto.tuoteno
-                  AND tuote.alv = 13)
-                SET hinnasto.hinta = round(hinnasto.hinta / 1.13 * 1.14, {$yhtiorow['hintapyoristys']})
-                WHERE hinnasto.yhtio = '$yhtio'";
+    $query = "UPDATE hinnasto
+              JOIN tuote on (tuote.yhtio = hinnasto.yhtio
+                AND tuote.tuoteno  = hinnasto.tuoteno
+                AND tuote.alv      = 13)
+              SET hinnasto.hinta = round(hinnasto.hinta / 1.13 * 1.14, {$yhtiorow['hintapyoristys']})
+              WHERE hinnasto.yhtio = '$yhtio'";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
-    $query = "  UPDATE hinnasto
-                JOIN tuote on (tuote.yhtio = hinnasto.yhtio
-                  AND tuote.tuoteno = hinnasto.tuoteno
-                  AND tuote.alv = 23)
-                SET hinnasto.hinta = round(hinnasto.hinta / 1.23 * 1.24, {$yhtiorow['hintapyoristys']})
-                WHERE hinnasto.yhtio = '$yhtio'";
+    $query = "UPDATE hinnasto
+              JOIN tuote on (tuote.yhtio = hinnasto.yhtio
+                AND tuote.tuoteno  = hinnasto.tuoteno
+                AND tuote.alv      = 23)
+              SET hinnasto.hinta = round(hinnasto.hinta / 1.23 * 1.24, {$yhtiorow['hintapyoristys']})
+              WHERE hinnasto.yhtio = '$yhtio'";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
     // Oletetaan, että toimitustapojen JV-kulut ovat alv 23% (pyöristys aina kaksi)
-    $query = "  UPDATE toimitustapa set
-                toimitustapa.jvkulu = round(toimitustapa.jvkulu / 1.23 * 1.24, 2)
-                WHERE toimitustapa.yhtio = '$yhtio'";
+    $query = "UPDATE toimitustapa set
+              toimitustapa.jvkulu      = round(toimitustapa.jvkulu / 1.23 * 1.24, 2)
+              WHERE toimitustapa.yhtio = '$yhtio'";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
-    $query = "  UPDATE asiakashinta
-                JOIN tuote on (tuote.yhtio = asiakashinta.yhtio
-                  AND tuote.tuoteno = asiakashinta.tuoteno
-                  AND tuote.alv = 9)
-                SET asiakashinta.hinta = round(asiakashinta.hinta / 1.09 * 1.10, {$yhtiorow['hintapyoristys']})
-                WHERE asiakashinta.yhtio = '$yhtio'
-                AND asiakashinta.tuoteno != ''";
+    $query = "UPDATE asiakashinta
+              JOIN tuote on (tuote.yhtio = asiakashinta.yhtio
+                AND tuote.tuoteno       = asiakashinta.tuoteno
+                AND tuote.alv           = 9)
+              SET asiakashinta.hinta = round(asiakashinta.hinta / 1.09 * 1.10, {$yhtiorow['hintapyoristys']})
+              WHERE asiakashinta.yhtio  = '$yhtio'
+              AND asiakashinta.tuoteno != ''";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
-    $query = "  UPDATE asiakashinta
-                JOIN tuote on (tuote.yhtio = asiakashinta.yhtio
-                  AND tuote.tuoteno = asiakashinta.tuoteno
-                  AND tuote.alv = 13)
-                SET asiakashinta.hinta = round(asiakashinta.hinta / 1.13 * 1.14, {$yhtiorow['hintapyoristys']})
-                WHERE asiakashinta.yhtio = '$yhtio'
-                AND asiakashinta.tuoteno != ''";
+    $query = "UPDATE asiakashinta
+              JOIN tuote on (tuote.yhtio = asiakashinta.yhtio
+                AND tuote.tuoteno       = asiakashinta.tuoteno
+                AND tuote.alv           = 13)
+              SET asiakashinta.hinta = round(asiakashinta.hinta / 1.13 * 1.14, {$yhtiorow['hintapyoristys']})
+              WHERE asiakashinta.yhtio  = '$yhtio'
+              AND asiakashinta.tuoteno != ''";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
-    $query = "  UPDATE asiakashinta
-                JOIN tuote on (tuote.yhtio = asiakashinta.yhtio
-                  AND tuote.tuoteno = asiakashinta.tuoteno
-                  AND tuote.alv = 23)
-                SET asiakashinta.hinta = round(asiakashinta.hinta / 1.23 * 1.24, {$yhtiorow['hintapyoristys']})
-                WHERE asiakashinta.yhtio = '$yhtio'
-                AND asiakashinta.tuoteno != ''";
+    $query = "UPDATE asiakashinta
+              JOIN tuote on (tuote.yhtio = asiakashinta.yhtio
+                AND tuote.tuoteno       = asiakashinta.tuoteno
+                AND tuote.alv           = 23)
+              SET asiakashinta.hinta = round(asiakashinta.hinta / 1.23 * 1.24, {$yhtiorow['hintapyoristys']})
+              WHERE asiakashinta.yhtio  = '$yhtio'
+              AND asiakashinta.tuoteno != ''";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
     // HUOM!! Oletetaan, että kaikki asiakashinnat, jota ei olla liitetty tuotteisiin on 23%
-    $query = "  UPDATE asiakashinta set
-                asiakashinta.hinta = round(asiakashinta.hinta / 1.23 * 1.24, {$yhtiorow['hintapyoristys']})
-                WHERE asiakashinta.yhtio = '$yhtio'
-                AND asiakashinta.tuoteno = ''";
+    $query = "UPDATE asiakashinta set
+              asiakashinta.hinta       = round(asiakashinta.hinta / 1.23 * 1.24, {$yhtiorow['hintapyoristys']})
+              WHERE asiakashinta.yhtio = '$yhtio'
+              AND asiakashinta.tuoteno = ''";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
     // HUOM!! Oletetaan, että kaikki rahtimaksut on 23% (pyöristys aina kaksi)
-    $query = "  UPDATE rahtimaksut set
-                rahtimaksut.rahtihinta = round(rahtimaksut.rahtihinta / 1.23 * 1.24, 2)
-                WHERE rahtimaksut.yhtio = '$yhtio'";
+    $query = "UPDATE rahtimaksut set
+              rahtimaksut.rahtihinta  = round(rahtimaksut.rahtihinta / 1.23 * 1.24, 2)
+              WHERE rahtimaksut.yhtio = '$yhtio'";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
     // HUOM!! Oletetaan, että rajasummat ovat 23%
-    $query = "  UPDATE yhtion_parametrit set
-                yhtion_parametrit.suoratoim_ulkomaan_alarajasumma        = round(yhtion_parametrit.suoratoim_ulkomaan_alarajasumma / 1.23 * 1.24, 2),
-                yhtion_parametrit.erikoisvarastomyynti_alarajasumma      = round(yhtion_parametrit.erikoisvarastomyynti_alarajasumma / 1.23 * 1.24, 2),
-                yhtion_parametrit.erikoisvarastomyynti_alarajasumma_rivi = round(yhtion_parametrit.erikoisvarastomyynti_alarajasumma_rivi / 1.23 * 1.24, 2),
-                yhtion_parametrit.rahtivapaa_alarajasumma                = round(yhtion_parametrit.rahtivapaa_alarajasumma / 1.23 * 1.24, 2),
-                yhtion_parametrit.laskutuslisa                           = if (yhtion_parametrit.laskutuslisa_tyyppi not in ('L', 'K', 'N'),
-                                                                                round(yhtion_parametrit.laskutuslisa / 1.23 * 1.24, 2),
-                                                                                yhtion_parametrit.laskutuslisa),
-                yhtion_parametrit.kuljetusvakuutus                       = if (yhtion_parametrit.kuljetusvakuutus_tyyppi not in ('B', 'G'),
-                                                                                round(yhtion_parametrit.kuljetusvakuutus / 1.23 * 1.24, 2),
-                                                                                yhtion_parametrit.kuljetusvakuutus)
-                WHERE yhtion_parametrit.yhtio = '$yhtio'";
+    $query = "UPDATE yhtion_parametrit set
+              yhtion_parametrit.suoratoim_ulkomaan_alarajasumma        = round(yhtion_parametrit.suoratoim_ulkomaan_alarajasumma / 1.23 * 1.24, 2),
+              yhtion_parametrit.erikoisvarastomyynti_alarajasumma      = round(yhtion_parametrit.erikoisvarastomyynti_alarajasumma / 1.23 * 1.24, 2),
+              yhtion_parametrit.erikoisvarastomyynti_alarajasumma_rivi = round(yhtion_parametrit.erikoisvarastomyynti_alarajasumma_rivi / 1.23 * 1.24, 2),
+              yhtion_parametrit.rahtivapaa_alarajasumma                = round(yhtion_parametrit.rahtivapaa_alarajasumma / 1.23 * 1.24, 2),
+              yhtion_parametrit.laskutuslisa                           = if (yhtion_parametrit.laskutuslisa_tyyppi not in ('L', 'K', 'N'),
+                                                                              round(yhtion_parametrit.laskutuslisa / 1.23 * 1.24, 2),
+                                                                              yhtion_parametrit.laskutuslisa),
+              yhtion_parametrit.kuljetusvakuutus                       = if (yhtion_parametrit.kuljetusvakuutus_tyyppi not in ('B', 'G'),
+                                                                              round(yhtion_parametrit.kuljetusvakuutus / 1.23 * 1.24, 2),
+                                                                              yhtion_parametrit.kuljetusvakuutus)
+              WHERE yhtion_parametrit.yhtio                            = '$yhtio'";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
     // HUOM!! Oletetaan että asiakkaan rajasumma on 23%
-    $query = "  UPDATE asiakas set
-                asiakas.rahtivapaa_alarajasumma = round(asiakas.rahtivapaa_alarajasumma / 1.23 * 1.24, 2)
-                WHERE asiakas.yhtio = '$yhtio'";
+    $query = "UPDATE asiakas set
+              asiakas.rahtivapaa_alarajasumma = round(asiakas.rahtivapaa_alarajasumma / 1.23 * 1.24, 2)
+              WHERE asiakas.yhtio             = '$yhtio'";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 

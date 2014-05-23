@@ -13,12 +13,12 @@ if (!function_exists("ennakkolaskuta")) {
     global $kukarow, $yhtiorow;
 
     ///* Etsitään laskun kaikki tiedot jolle maksusopimus on tehty *///
-    $query = "  SELECT *
-          FROM lasku
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tunnus = '$tunnus'
-          and tila in ('L','N','R')
-          and alatila != 'X'";
+    $query = "SELECT *
+              FROM lasku
+              WHERE yhtio  = '$kukarow[yhtio]'
+              and tunnus   = '$tunnus'
+              and tila     in ('L','N','R')
+              and alatila != 'X'";
     $stresult = pupe_query($query);
 
     if (mysql_num_rows($stresult) == 0) {
@@ -36,11 +36,11 @@ if (!function_exists("ennakkolaskuta")) {
     if ($debug==1) echo t("Perusotsikko löytyi")." $laskurow[nimi]<br>";
 
     // Onko sopimuksella vielä jotain ennakkolaskutettavaa
-    $query = "  SELECT yhtio
-          FROM maksupositio
-          WHERE yhtio = '$kukarow[yhtio]'
-          and otunnus = '$tunnus'
-          and uusiotunnus = 0";
+    $query = "SELECT yhtio
+              FROM maksupositio
+              WHERE yhtio     = '$kukarow[yhtio]'
+              and otunnus     = '$tunnus'
+              and uusiotunnus = 0";
     $posres = pupe_query($query);
 
     if (mysql_num_rows($posres) <= 1) {
@@ -49,13 +49,13 @@ if (!function_exists("ennakkolaskuta")) {
     }
 
     //  tarkistetaan että meillä on jotain järkevää laskutettavaa
-    $query = "  SELECT *
-          FROM maksupositio
-          WHERE yhtio = '$kukarow[yhtio]'
-          and otunnus = '$tunnus'
-          and uusiotunnus = 0
-          ORDER BY tunnus
-          LIMIT 1";
+    $query = "SELECT *
+              FROM maksupositio
+              WHERE yhtio     = '$kukarow[yhtio]'
+              and otunnus     = '$tunnus'
+              and uusiotunnus = 0
+              ORDER BY tunnus
+              LIMIT 1";
     $posres = pupe_query($query);
     $posrow = mysql_fetch_assoc($posres);
 
@@ -67,12 +67,12 @@ if (!function_exists("ennakkolaskuta")) {
     }
 
     // Tilausrivin kommentti-kenttään menevä kommentti
-    $query = "  SELECT
-          sum(if (uusiotunnus > 0, 1, 0)) laskutettu,
-          count(*) yhteensa
-          FROM maksupositio
-          WHERE yhtio = '$kukarow[yhtio]'
-          and otunnus = '$tunnus'";
+    $query = "SELECT
+              sum(if (uusiotunnus > 0, 1, 0)) laskutettu,
+              count(*) yhteensa
+              FROM maksupositio
+              WHERE yhtio = '$kukarow[yhtio]'
+              and otunnus = '$tunnus'";
     $abures = pupe_query($query);
     $aburow = mysql_fetch_assoc($abures);
 
@@ -187,10 +187,10 @@ if (!function_exists("ennakkolaskuta")) {
     $id = mysql_insert_id();
 
     // tehdään vanhan laskun lisätiedoista 1:1 kopio...
-    $query = "  SELECT *
-          FROM laskun_lisatiedot
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND otunnus = '$tunnus'";
+    $query = "SELECT *
+              FROM laskun_lisatiedot
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND otunnus = '$tunnus'";
     $lisatiedot_result = pupe_query($query);
     $lisatiedot_row = mysql_fetch_assoc($lisatiedot_result);
 
@@ -218,10 +218,10 @@ if (!function_exists("ennakkolaskuta")) {
     $lisatiedot_result = pupe_query($query);
 
     // tehdään vanhan laskun työmääräystidoista 1:1 kopio...
-    $query = "  SELECT *
-          FROM tyomaarays
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND otunnus = '$tunnus'";
+    $query = "SELECT *
+              FROM tyomaarays
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND otunnus = '$tunnus'";
     $lisatiedot_result = pupe_query($query);
     $lisatiedot_row = mysql_fetch_assoc($lisatiedot_result);
 
@@ -254,13 +254,13 @@ if (!function_exists("ennakkolaskuta")) {
 
     // Lasketaan maksusopimuksen arvo verokannoittain jotta voidaan laskuttaa ennakot oikeissa alveissa
     // ja lisätään ennakkolaskutusrivi laskulle, vain jaksotetut rivit!
-    $query = "  SELECT
-          sum(if (tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)) jaksotettavaa
-          FROM lasku
-          JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and (tilausrivi.varattu+tilausrivi.jt) > 0 and tilausrivi.jaksotettu=lasku.jaksotettu
-          WHERE lasku.yhtio     = '$kukarow[yhtio]'
-          and lasku.jaksotettu    = '$tunnus'
-          GROUP by lasku.jaksotettu";
+    $query = "SELECT
+              sum(if (tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)) jaksotettavaa
+              FROM lasku
+              JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and (tilausrivi.varattu+tilausrivi.jt) > 0 and tilausrivi.jaksotettu=lasku.jaksotettu
+              WHERE lasku.yhtio    = '$kukarow[yhtio]'
+              and lasku.jaksotettu = '$tunnus'
+              GROUP by lasku.jaksotettu";
     $result = pupe_query($query);
     $sumrow = mysql_fetch_assoc($result);
 
@@ -268,29 +268,29 @@ if (!function_exists("ennakkolaskuta")) {
 
       $alet = generoi_alekentta_select('erikseen', 'M');
 
-      $query = "  SELECT
-            tilausrivi.tuoteno,
-            tilausrivi.nimitys,
-            tilausrivi.kommentti,
-            tilausrivi.varattu,
-            tilausrivi.tilkpl,
-            {$alet}
-            if (tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if ('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1), 0) summa,
-            if (tilausrivi.alv >= 600 or tilausrivi.alv < 500, tilausrivi.alv, 0) alv
-            FROM lasku
-            JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and (tilausrivi.varattu + tilausrivi.jt) > 0 and tilausrivi.jaksotettu = lasku.jaksotettu)
-            WHERE lasku.yhtio = '$kukarow[yhtio]'
-            and lasku.jaksotettu = '$tunnus'";
+      $query = "SELECT
+                tilausrivi.tuoteno,
+                tilausrivi.nimitys,
+                tilausrivi.kommentti,
+                tilausrivi.varattu,
+                tilausrivi.tilkpl,
+                {$alet}
+                if (tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if ('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1), 0) summa,
+                if (tilausrivi.alv >= 600 or tilausrivi.alv < 500, tilausrivi.alv, 0) alv
+                FROM lasku
+                JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and (tilausrivi.varattu + tilausrivi.jt) > 0 and tilausrivi.jaksotettu = lasku.jaksotettu)
+                WHERE lasku.yhtio    = '$kukarow[yhtio]'
+                and lasku.jaksotettu = '$tunnus'";
     }
     else {
-      $query = "  SELECT
-            sum(if (tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if ('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)) summa,
-            if (tilausrivi.alv >= 600 or tilausrivi.alv < 500, tilausrivi.alv, 0) alv
-            FROM lasku
-            JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and (tilausrivi.varattu + tilausrivi.jt) > 0 and tilausrivi.jaksotettu = lasku.jaksotettu)
-            WHERE lasku.yhtio = '$kukarow[yhtio]'
-            and lasku.jaksotettu = '$tunnus'
-            GROUP BY lasku.jaksotettu, alv";
+      $query = "SELECT
+                sum(if (tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if ('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)) summa,
+                if (tilausrivi.alv >= 600 or tilausrivi.alv < 500, tilausrivi.alv, 0) alv
+                FROM lasku
+                JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and (tilausrivi.varattu + tilausrivi.jt) > 0 and tilausrivi.jaksotettu = lasku.jaksotettu)
+                WHERE lasku.yhtio    = '$kukarow[yhtio]'
+                and lasku.jaksotettu = '$tunnus'
+                GROUP BY lasku.jaksotettu, alv";
     }
     $sresult = pupe_query($query);
     $tot = 0;
@@ -311,8 +311,8 @@ if (!function_exists("ennakkolaskuta")) {
       echo "<font class = 'message'>".t("Käy tekemässä ennakkolasku manuaalisesti. Ennakkolaskulle perustetun laskun tunnus on")." $id</font><br>";
       echo "<font class = 'message'>".t("Ennakkolaskutuksen tuotenumero on")." $yhtiorow[ennakkomaksu_tuotenumero]</font><br><br>";
 
-      $query  = "  INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, laatija, laadittu) values
-            ('0', 'N', '1', '1', '$id', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '{$laskurow['alv']}', '$rivikommentti', '$kukarow[kuka]', now())";
+      $query  = "INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, laatija, laadittu) values
+                 ('0', 'N', '1', '1', '$id', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '{$laskurow['alv']}', '$rivikommentti', '$kukarow[kuka]', now())";
       $addtil = pupe_query($query);
     }
     else {
@@ -350,8 +350,8 @@ if (!function_exists("ennakkolaskuta")) {
 
         $laitetaanko_netto = $yhtiorow['ennakkolaskun_tyyppi'] == 'E' ? "" : "N";
 
-        $query  = "  INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, laatija, laadittu {$ale_kentat}) values
-            ('$summa', '{$laitetaanko_netto}', '{$varattu}', '{$tilkpl}', '$id', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '$rivikommentti', '$kukarow[kuka]', now() {$ale_arvot})";
+        $query  = "INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, laatija, laadittu {$ale_kentat}) values
+                   ('$summa', '{$laitetaanko_netto}', '{$varattu}', '{$tilkpl}', '$id', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '$rivikommentti', '$kukarow[kuka]', now() {$ale_arvot})";
         $addtil = pupe_query($query);
 
         if ($debug==1) echo t("Lisättiin ennakkolaskuun rivi")." $summa $row[alv] otunnus $id<br>";
@@ -367,17 +367,17 @@ if (!function_exists("ennakkolaskuta")) {
     $result = pupe_query($query);
 
     // merkataan tässä vaiheessa luotu ennakkomaksu-tilaus toimitetuksi
-    $query = "  UPDATE tilausrivi
-          SET toimitettu = '$kukarow[kuka]', toimitettuaika=now(), kerattyaika=now()
-          WHERE yhtio = '$kukarow[yhtio]'
-          and otunnus = '$id'";
+    $query = "UPDATE tilausrivi
+              SET toimitettu = '$kukarow[kuka]', toimitettuaika=now(), kerattyaika=now()
+              WHERE yhtio = '$kukarow[yhtio]'
+              and otunnus = '$id'";
     $result = pupe_query($query);
 
     // ja päivitetään luotu ennakkomaksu-tilaus laskutusjonoon
-    $query = "  UPDATE lasku
-          set tila='L', alatila='D'
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tunnus = '$id'";
+    $query = "UPDATE lasku
+              set tila='L', alatila='D'
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tunnus  = '$id'";
     $result = pupe_query($query);
 
     return $id;
@@ -389,11 +389,11 @@ if (!function_exists("loppulaskuta")) {
     global $kukarow, $yhtiorow;
 
     ///* Tutkitaan alkuperäisten tilausten tiloja *///
-    $query = "  SELECT sum(if(tila='L' and alatila = 'J',1,0)) toimitus_valmis, sum(if (tila='R',1,0)) rojekti, count(*) kaikki, max(tunnus) vikatunnus
-          FROM lasku
-          WHERE yhtio = '$kukarow[yhtio]'
-          and jaksotettu = '$tunnus'
-          and tila in ('L','N','R')";
+    $query = "SELECT sum(if(tila='L' and alatila = 'J',1,0)) toimitus_valmis, sum(if (tila='R',1,0)) rojekti, count(*) kaikki, max(tunnus) vikatunnus
+              FROM lasku
+              WHERE yhtio    = '$kukarow[yhtio]'
+              and jaksotettu = '$tunnus'
+              and tila       in ('L','N','R')";
     $stresult = pupe_query($query);
 
     if (mysql_num_rows($stresult) == 0) {
@@ -412,13 +412,13 @@ if (!function_exists("loppulaskuta")) {
     }
 
     // tarkistetaan että meillä on jotain järkevää laskutettavaa
-    $query = "  SELECT *
-          FROM maksupositio
-          WHERE yhtio = '$kukarow[yhtio]'
-          and otunnus = '$tunnus'
-          and uusiotunnus = ''
-          ORDER BY tunnus
-          LIMIT 1";
+    $query = "SELECT *
+              FROM maksupositio
+              WHERE yhtio     = '$kukarow[yhtio]'
+              and otunnus     = '$tunnus'
+              and uusiotunnus = ''
+              ORDER BY tunnus
+              LIMIT 1";
     $posres = pupe_query($query);
 
     if (mysql_num_rows($posres) == 1) {
@@ -432,12 +432,12 @@ if (!function_exists("loppulaskuta")) {
     if ($debug==1) echo t("Löydettiin maksupositio")." $posrow[tunnus], $posrow[osuus] %, $posrow[maksuehto]<br>";
 
     // Tilausrivin kommentti-kenttään menevä kommentti
-    $query = "  SELECT
-          sum(if (uusiotunnus > 0, 1, 0)) laskutettu,
-          count(*) yhteensa
-          FROM maksupositio
-          WHERE yhtio = '$kukarow[yhtio]'
-          and otunnus = '$tunnus'";
+    $query = "SELECT
+              sum(if (uusiotunnus > 0, 1, 0)) laskutettu,
+              count(*) yhteensa
+              FROM maksupositio
+              WHERE yhtio = '$kukarow[yhtio]'
+              and otunnus = '$tunnus'";
     $abures = pupe_query($query);
     $aburow = mysql_fetch_assoc($abures);
 
@@ -450,11 +450,11 @@ if (!function_exists("loppulaskuta")) {
     }
 
     //  Tarkastetaan että meillä on ok maksuehto loppulaskutukseen!!!
-    $apuqu = "  SELECT *
-          from maksuehto
-          where yhtio    = '$kukarow[yhtio]'
-          and tunnus     = '$posrow[maksuehto]'
-          and jaksotettu = ''";
+    $apuqu = "SELECT *
+              from maksuehto
+              where yhtio    = '$kukarow[yhtio]'
+              and tunnus     = '$posrow[maksuehto]'
+              and jaksotettu = ''";
     $meapu = pupe_query($apuqu);
 
     $erlisa = "";
@@ -478,12 +478,12 @@ if (!function_exists("loppulaskuta")) {
     echo "<font class = 'message'>".t("Loppulaskutetaan tilaus")." $tunnus<br></font><br>";
 
     //Lasketaan paljonko ollaan jo laskutettu ja millä verokannoilla
-    $query = "  SELECT round(sum(rivihinta * if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),2) laskutettu, tilausrivi.alv
-          FROM lasku
-          JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and kpl <> 0 and uusiotunnus > 0 and tilausrivi.tuoteno='$yhtiorow[ennakkomaksu_tuotenumero]'
-          WHERE lasku.yhtio = '$kukarow[yhtio]'
-          and lasku.jaksotettu = '".($tunnus*-1)."'
-          GROUP BY alv";
+    $query = "SELECT round(sum(rivihinta * if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),2) laskutettu, tilausrivi.alv
+              FROM lasku
+              JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and kpl <> 0 and uusiotunnus > 0 and tilausrivi.tuoteno='$yhtiorow[ennakkomaksu_tuotenumero]'
+              WHERE lasku.yhtio    = '$kukarow[yhtio]'
+              and lasku.jaksotettu = '".($tunnus*-1)."'
+              GROUP BY alv";
     $sresult = pupe_query($query);
 
     //  Haetaan asiakkaan kieli niin hekin ymmärtävät..
@@ -504,8 +504,8 @@ if (!function_exists("loppulaskuta")) {
 
     while ($row = mysql_fetch_assoc($sresult)) {
 
-      $query  = "  INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, keratty, kerattyaika, toimitettu, toimitettuaika, laatija, laadittu)
-            values  ('$row[laskutettu]', 'N', '-1', '-1', '$vikatunnus', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '$rivikommentti', '$kukarow[kuka]', now(), '$kukarow[kuka]', now(), '$kukarow[kuka]', now())";
+      $query  = "INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, keratty, kerattyaika, toimitettu, toimitettuaika, laatija, laadittu)
+                 values  ('$row[laskutettu]', 'N', '-1', '-1', '$vikatunnus', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '$rivikommentti', '$kukarow[kuka]', now(), '$kukarow[kuka]', now(), '$kukarow[kuka]', now())";
       $addtil = pupe_query($query);
 
       if ($debug == 1) echo t("Loppulaskuun lisättiin ennakkolaskun hyvitys")." -$row[laskutettu] alv $row[alv]% otunnus $vimppa<br>";
@@ -516,29 +516,29 @@ if (!function_exists("loppulaskuta")) {
     $result = pupe_query($query);
 
     // Alkuperäinen tilaus/tilaukset menee laskutukseen
-    $query = "  UPDATE lasku
-          SET maksuehto   = '$posrow[maksuehto]',
-          clearing     = 'loppulasku',
-          ketjutus     = 'o',
-          $erlisa
-          alatila     = 'D'
-          WHERE yhtio   = '$kukarow[yhtio]'
-          and jaksotettu   = '$tunnus'
-          and tila    != 'R'";
+    $query = "UPDATE lasku
+              SET maksuehto   = '$posrow[maksuehto]',
+              clearing        = 'loppulasku',
+              ketjutus        = 'o',
+              $erlisa
+              alatila         = 'D'
+              WHERE yhtio     = '$kukarow[yhtio]'
+              and jaksotettu  = '$tunnus'
+              and tila       != 'R'";
     $result = pupe_query($query);
 
     //  Merkataan projekti valmiiksi
-    $query = "  UPDATE lasku
-          SET alatila   = 'B'
-          WHERE yhtio   = '$kukarow[yhtio]'
-          and jaksotettu   = '$tunnus'
-          and tila    = 'R'";
+    $query = "UPDATE lasku
+              SET alatila   = 'B'
+              WHERE yhtio    = '$kukarow[yhtio]'
+              and jaksotettu = '$tunnus'
+              and tila       = 'R'";
     $result = pupe_query($query);
 
-    $query = "  SELECT group_concat(distinct tunnus) tunnukset
-          FROM lasku
-          WHERE yhtio = '$kukarow[yhtio]'
-          and jaksotettu   = '$tunnus'";
+    $query = "SELECT group_concat(distinct tunnus) tunnukset
+              FROM lasku
+              WHERE yhtio    = '$kukarow[yhtio]'
+              and jaksotettu = '$tunnus'";
     $lres = pupe_query($query);
     $lrow = mysql_fetch_assoc($lres);
 
@@ -548,9 +548,9 @@ if (!function_exists("loppulaskuta")) {
 
 //Käyttöliittymä
 if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) {
-  $query = "  SELECT nimitys
-        FROM tuote
-        WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'";
+  $query = "SELECT nimitys
+            FROM tuote
+            WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'";
   $tresult = pupe_query($query);
 
   if (mysql_num_rows($tresult) == 0) die(t("VIRHE: Yhtiöllä EI OLE ennakkolaskutustuotetta, sopimuslaskutusta ei voida toteuttaa!"));
@@ -564,13 +564,13 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
 
   if ($tee == "ennakkolaskuta_kaikki") {
     // seuraava positio on tämä siis
-    $query = "  SELECT count(*)-1 as ennakko_kpl
-          FROM maksupositio
-          JOIN maksuehto on maksupositio.yhtio = maksupositio.yhtio and maksupositio.maksuehto = maksuehto.tunnus
-          WHERE maksupositio.yhtio    = '$kukarow[yhtio]'
-          and maksupositio.otunnus    = '$tunnus'
-          and maksupositio.uusiotunnus = 0
-          ORDER BY maksupositio.tunnus";
+    $query = "SELECT count(*)-1 as ennakko_kpl
+              FROM maksupositio
+              JOIN maksuehto on maksupositio.yhtio = maksupositio.yhtio and maksupositio.maksuehto = maksuehto.tunnus
+              WHERE maksupositio.yhtio     = '$kukarow[yhtio]'
+              and maksupositio.otunnus     = '$tunnus'
+              and maksupositio.uusiotunnus = 0
+              ORDER BY maksupositio.tunnus";
     $rahres = pupe_query($query);
     $posrow = mysql_fetch_assoc($rahres);
 
@@ -590,20 +590,20 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
 
     $vapauta_tilaus_keraykseen = true;
 
-    $query = "  UPDATE lasku SET
-          alatila = ''
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tunnus  = '{$tunnus}'
-          AND tila    = 'N'
-          AND alatila = 'B'";
+    $query = "UPDATE lasku SET
+              alatila     = ''
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = '{$tunnus}'
+              AND tila    = 'N'
+              AND alatila = 'B'";
     $upd_res = pupe_query($query);
 
     $kukarow['kesken'] = $tunnus;
 
-    $query = "  SELECT *
-          FROM lasku
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tunnus = '{$tunnus}'";
+    $query = "SELECT *
+              FROM lasku
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = '{$tunnus}'";
     $laskures = pupe_query($query);
     $laskurow = mysql_fetch_assoc($laskures);
 
@@ -626,27 +626,27 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
           }
         </SCRIPT>";
 
-    $query = "  SELECT
-          lasku.jaksotettu jaksotettu,
-          concat_ws(' ',lasku.nimi, lasku.nimitark) nimi,
-          lasku.tila,
-          sum(if (maksupositio.uusiotunnus > 0 and uusiolasku.tila='L' and uusiolasku.alatila='X', 1, 0)) AS laskutettu_kpl,
-          sum(if (maksupositio.uusiotunnus = 0, 1, 0)) tekematta_kpl,
-          count(*) AS yhteensa_kpl,
-          sum(if (maksupositio.uusiotunnus = 0 or (maksupositio.uusiotunnus > 0 and uusiolasku.alatila!='X'), maksupositio.summa,0)) laskuttamatta,
-          sum(if (maksupositio.uusiotunnus > 0 and uusiolasku.tila='L' and uusiolasku.alatila='X', maksupositio.summa, 0)) laskutettu,
-          sum(maksupositio.summa) yhteensa
-          FROM lasku
-          JOIN maksupositio ON maksupositio.yhtio = lasku.yhtio and maksupositio.otunnus = lasku.tunnus
-          JOIN maksuehto ON maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto and maksuehto.jaksotettu != ''
-          LEFT JOIN lasku uusiolasku ON maksupositio.yhtio = uusiolasku.yhtio and maksupositio.uusiotunnus = uusiolasku.tunnus
-          WHERE lasku.yhtio = '$kukarow[yhtio]'
-          and lasku.jaksotettu > 0
-          and lasku.tila in ('L','N','R','A','D')
-          and lasku.alatila != 'X'
-          GROUP BY jaksotettu, nimi, tila
-          HAVING count(*) > sum(if (maksupositio.uusiotunnus > 0 and uusiolasku.tila='L' and uusiolasku.alatila='X', 1, 0))
-          ORDER BY jaksotettu desc";
+    $query = "SELECT
+              lasku.jaksotettu jaksotettu,
+              concat_ws(' ',lasku.nimi, lasku.nimitark) nimi,
+              lasku.tila,
+              sum(if (maksupositio.uusiotunnus > 0 and uusiolasku.tila='L' and uusiolasku.alatila='X', 1, 0)) AS laskutettu_kpl,
+              sum(if (maksupositio.uusiotunnus = 0, 1, 0)) tekematta_kpl,
+              count(*) AS yhteensa_kpl,
+              sum(if (maksupositio.uusiotunnus = 0 or (maksupositio.uusiotunnus > 0 and uusiolasku.alatila!='X'), maksupositio.summa,0)) laskuttamatta,
+              sum(if (maksupositio.uusiotunnus > 0 and uusiolasku.tila='L' and uusiolasku.alatila='X', maksupositio.summa, 0)) laskutettu,
+              sum(maksupositio.summa) yhteensa
+              FROM lasku
+              JOIN maksupositio ON maksupositio.yhtio = lasku.yhtio and maksupositio.otunnus = lasku.tunnus
+              JOIN maksuehto ON maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto and maksuehto.jaksotettu != ''
+              LEFT JOIN lasku uusiolasku ON maksupositio.yhtio = uusiolasku.yhtio and maksupositio.uusiotunnus = uusiolasku.tunnus
+              WHERE lasku.yhtio     = '$kukarow[yhtio]'
+              and lasku.jaksotettu  > 0
+              and lasku.tila        in ('L','N','R','A','D')
+              and lasku.alatila    != 'X'
+              GROUP BY jaksotettu, nimi, tila
+              HAVING count(*) > sum(if (maksupositio.uusiotunnus > 0 and uusiolasku.tila='L' and uusiolasku.alatila='X', 1, 0))
+              ORDER BY jaksotettu desc";
     $result = pupe_query($query);
 
     pupe_DataTables(array(array($pupe_DataTables, 7, 8)));
@@ -683,12 +683,12 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
 
       //onko poistetun tilauksen takana loppulaskutusta odottava tilaus?
       if ($row["tila"] == 'D') {
-        $query = "  SELECT tunnus
-              FROM lasku
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND vanhatunnus = '{$row['jaksotettu']}'
-              AND tila IN ('L','N','R','A')
-              AND alatila != 'X'";
+        $query = "SELECT tunnus
+                  FROM lasku
+                  WHERE yhtio      = '{$kukarow['yhtio']}'
+                  AND vanhatunnus  = '{$row['jaksotettu']}'
+                  AND tila         IN ('L','N','R','A')
+                  AND alatila     != 'X'";
         $deleteds = pupe_query($query);
 
         if (mysql_num_rows($deleteds) == 0) {
@@ -697,32 +697,32 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
       }
 
       // seuraava positio on tämä siis
-      $query = "  SELECT maksupositio.*, maksuehto.teksti, maksuehto.teksti
-            FROM maksupositio
-            JOIN maksuehto on maksupositio.yhtio = maksupositio.yhtio and maksupositio.maksuehto = maksuehto.tunnus
-            WHERE maksupositio.yhtio = '$kukarow[yhtio]'
-            and maksupositio.otunnus = '$row[jaksotettu]'
-            and maksupositio.uusiotunnus = 0
-            ORDER BY maksupositio.tunnus
-            LIMIT 1";
+      $query = "SELECT maksupositio.*, maksuehto.teksti, maksuehto.teksti
+                FROM maksupositio
+                JOIN maksuehto on maksupositio.yhtio = maksupositio.yhtio and maksupositio.maksuehto = maksuehto.tunnus
+                WHERE maksupositio.yhtio     = '$kukarow[yhtio]'
+                and maksupositio.otunnus     = '$row[jaksotettu]'
+                and maksupositio.uusiotunnus = 0
+                ORDER BY maksupositio.tunnus
+                LIMIT 1";
       $rahres = pupe_query($query);
       $posrow = mysql_fetch_assoc($rahres);
 
-      $query = "  SELECT *
-            FROM lasku
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tunnus  = '$row[jaksotettu]'
-            ORDER BY tunnus
-            LIMIT 1";
+      $query = "SELECT *
+                FROM lasku
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tunnus  = '$row[jaksotettu]'
+                ORDER BY tunnus
+                LIMIT 1";
       $rahres = pupe_query($query);
       $laskurow = mysql_fetch_assoc($rahres);
 
-      $query = "  SELECT tunnus
-            FROM lasku
-            WHERE yhtio   = '$kukarow[yhtio]'
-            and jaksotettu  = '$row[jaksotettu]'
-            and tila in ('L','N','R')
-            ORDER BY tunnus";
+      $query = "SELECT tunnus
+                FROM lasku
+                WHERE yhtio    = '$kukarow[yhtio]'
+                and jaksotettu = '$row[jaksotettu]'
+                and tila       in ('L','N','R')
+                ORDER BY tunnus";
       $rahres = pupe_query($query);
 
       echo "<tr>";
@@ -747,26 +747,26 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
           </table>
           </td>";
 
-      $query = "  SELECT tunnus
-            FROM lasku
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tila = 'N'
-            AND alatila = 'B'
-            AND tunnus = '{$row['jaksotettu']}'";
+      $query = "SELECT tunnus
+                FROM lasku
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tila    = 'N'
+                AND alatila = 'B'
+                AND tunnus  = '{$row['jaksotettu']}'";
       $tila_chk_res = pupe_query($query);
 
       // loppulaskutetaan maksusopimus
       if ($row["yhteensa_kpl"] - $row["laskutettu_kpl"] <= 1) {
         // tarkastetaan onko kaikki jo toimitettu ja tämä on good to go
-        $query = "  SELECT
-              sum(if (lasku.tila='L' and lasku.alatila IN ('J','X'),1,0)) tilaok,
-              sum(if (tilausrivi.toimitettu='',1,0)) toimittamatta,
-              count(*) toimituksia
-              FROM lasku
-              JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.jaksotettu=lasku.jaksotettu and tilausrivi.tyyppi != 'D' and tilausrivi.var != 'P')
-              WHERE lasku.yhtio = '$kukarow[yhtio]'
-              and lasku.jaksotettu = '$row[jaksotettu]' and tila in ('L','N','R')
-              GROUP BY lasku.jaksotettu";
+        $query = "SELECT
+                  sum(if (lasku.tila='L' and lasku.alatila IN ('J','X'),1,0)) tilaok,
+                  sum(if (tilausrivi.toimitettu='',1,0)) toimittamatta,
+                  count(*) toimituksia
+                  FROM lasku
+                  JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.jaksotettu=lasku.jaksotettu and tilausrivi.tyyppi != 'D' and tilausrivi.var != 'P')
+                  WHERE lasku.yhtio    = '$kukarow[yhtio]'
+                  and lasku.jaksotettu = '$row[jaksotettu]' and tila in ('L','N','R')
+                  GROUP BY lasku.jaksotettu";
         $tarkres = pupe_query($query);
         $tarkrow = mysql_fetch_assoc($tarkres);
 

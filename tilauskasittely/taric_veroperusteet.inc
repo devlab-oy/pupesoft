@@ -15,24 +15,24 @@ $nimike_taso5 = substr($tuorow["tullinimike1"],0,2)."00000000";
 $nimike_taso = $nimike_taso1;
 
 //Tarkistetaan, että nimikkeemme on ilmoituskelpoinen
-$query  = "  SELECT *
-      from taric_veroperusteet
-      where laji = 'nim.dat'
-      and nimike = '$nimike_taso1'
-      and voim_alkupvm  <= now()
-      and voim_loppupvm >= now()";
+$query  = "SELECT *
+           from taric_veroperusteet
+           where laji        = 'nim.dat'
+           and nimike        = '$nimike_taso1'
+           and voim_alkupvm  <= now()
+           and voim_loppupvm >= now()";
 $tv_res = pupe_query($query);
 
 if (mysql_num_rows($tv_res) == 0) {
 
   $nimike_taso = $nimike_taso2;
 
-  $query  = "  SELECT *
-        from taric_veroperusteet
-        where laji = 'nim.dat'
-        and nimike = '$nimike_taso2'
-        and voim_alkupvm  <= now()
-        and voim_loppupvm >= now()";
+  $query  = "SELECT *
+             from taric_veroperusteet
+             where laji        = 'nim.dat'
+             and nimike        = '$nimike_taso2'
+             and voim_alkupvm  <= now()
+             and voim_loppupvm >= now()";
   $tv_res = pupe_query($query);
 }
 
@@ -40,12 +40,12 @@ if (mysql_num_rows($tv_res) == 0) {
 
   $nimike_taso = $nimike_taso3;
 
-  $query  = "  SELECT *
-        from taric_veroperusteet
-        where laji = 'nim.dat'
-        and nimike = '$nimike_taso3'
-        and voim_alkupvm  <= now()
-        and voim_loppupvm >= now()";
+  $query  = "SELECT *
+             from taric_veroperusteet
+             where laji        = 'nim.dat'
+             and nimike        = '$nimike_taso3'
+             and voim_alkupvm  <= now()
+             and voim_loppupvm >= now()";
   $tv_res = pupe_query($query);
 }
 
@@ -53,12 +53,12 @@ if (mysql_num_rows($tv_res) == 0) {
 
   $nimike_taso = $nimike_taso4;
 
-  $query  = "  SELECT *
-        from taric_veroperusteet
-        where laji = 'nim.dat'
-        and nimike = '$nimike_taso4'
-        and voim_alkupvm  <= now()
-        and voim_loppupvm >= now()";
+  $query  = "SELECT *
+             from taric_veroperusteet
+             where laji        = 'nim.dat'
+             and nimike        = '$nimike_taso4'
+             and voim_alkupvm  <= now()
+             and voim_loppupvm >= now()";
   $tv_res = pupe_query($query);
 }
 
@@ -66,12 +66,12 @@ if (mysql_num_rows($tv_res) == 0) {
 
   $nimike_taso = $nimike_taso5;
 
-  $query  = "  SELECT *
-        from taric_veroperusteet
-        where laji = 'nim.dat'
-        and nimike = '$nimike_taso5'
-        and voim_alkupvm  <= now()
-        and voim_loppupvm >= now()";
+  $query  = "SELECT *
+             from taric_veroperusteet
+             where laji        = 'nim.dat'
+             and nimike        = '$nimike_taso5'
+             and voim_alkupvm  <= now()
+             and voim_loppupvm >= now()";
   $tv_res = pupe_query($query);
 }
 
@@ -84,9 +84,9 @@ else {
   $alkuperamaa = trim($laskurow["maa_lahetys"]);
   $maat = "";
 
-  $query  = "  SELECT *
-        FROM maat
-        WHERE koodi in ('$alkuperamaa')";
+  $query  = "SELECT *
+             FROM maat
+             WHERE koodi in ('$alkuperamaa')";
   $tv_maares = pupe_query($query);
 
   if (mysql_num_rows($tv_maares) > 0) {
@@ -105,61 +105,61 @@ else {
 
 
   //Haetaan oikeat toimenpiteet nimikeelle prioriteettijärjestyksessä
-  $query  = "  SELECT *
-        from taric_veroperusteet use index (nimike_index)
-        where laji = 'tp.dat'
-        and nimike = '$nimike_taso1'
-        and maa_ryhma in ($maat)
-        and voim_alkupvm  <= now()
-        and voim_loppupvm >= now()
-        ORDER BY maara desc, maa_ryhma";
+  $query  = "SELECT *
+             from taric_veroperusteet use index (nimike_index)
+             where laji        = 'tp.dat'
+             and nimike        = '$nimike_taso1'
+             and maa_ryhma     in ($maat)
+             and voim_alkupvm  <= now()
+             and voim_loppupvm >= now()
+             ORDER BY maara desc, maa_ryhma";
   $tv_nimres = pupe_query($query);
 
   if (mysql_num_rows($tv_nimres) == 0) {
-    $query  = "  SELECT *
-          from taric_veroperusteet use index (nimike_index)
-          where laji = 'tp.dat'
-          and nimike = '$nimike_taso2'
-          and maa_ryhma in ($maat)
-          and voim_alkupvm  <= now()
-          and voim_loppupvm >= now()
-          ORDER BY maara desc, maa_ryhma";
+    $query  = "SELECT *
+               from taric_veroperusteet use index (nimike_index)
+               where laji        = 'tp.dat'
+               and nimike        = '$nimike_taso2'
+               and maa_ryhma     in ($maat)
+               and voim_alkupvm  <= now()
+               and voim_loppupvm >= now()
+               ORDER BY maara desc, maa_ryhma";
     $tv_nimres = pupe_query($query);
   }
 
   if (mysql_num_rows($tv_nimres) == 0) {
-    $query  = "  SELECT *
-          from taric_veroperusteet use index (nimike_index)
-          where laji = 'tp.dat'
-          and nimike = '$nimike_taso3'
-          and maa_ryhma in ($maat)
-          and voim_alkupvm  <= now()
-          and voim_loppupvm >= now()
-          ORDER BY maara desc, maa_ryhma";
+    $query  = "SELECT *
+               from taric_veroperusteet use index (nimike_index)
+               where laji        = 'tp.dat'
+               and nimike        = '$nimike_taso3'
+               and maa_ryhma     in ($maat)
+               and voim_alkupvm  <= now()
+               and voim_loppupvm >= now()
+               ORDER BY maara desc, maa_ryhma";
     $tv_nimres = pupe_query($query);
   }
 
   if (mysql_num_rows($tv_nimres) == 0) {
-    $query  = "  SELECT *
-          from taric_veroperusteet use index (nimike_index)
-          where laji = 'tp.dat'
-          and nimike = '$nimike_taso4'
-          and maa_ryhma in ($maat)
-          and voim_alkupvm  <= now()
-          and voim_loppupvm >= now()
-          ORDER BY maara desc, maa_ryhma";
+    $query  = "SELECT *
+               from taric_veroperusteet use index (nimike_index)
+               where laji        = 'tp.dat'
+               and nimike        = '$nimike_taso4'
+               and maa_ryhma     in ($maat)
+               and voim_alkupvm  <= now()
+               and voim_loppupvm >= now()
+               ORDER BY maara desc, maa_ryhma";
     $tv_nimres = pupe_query($query);
   }
 
   if (mysql_num_rows($tv_nimres) == 0) {
-    $query  = "  SELECT *
-          from taric_veroperusteet use index (nimike_index)
-          where laji = 'tp.dat'
-          and nimike = '$nimike_taso5'
-          and maa_ryhma in ($maat)
-          and voim_alkupvm  <= now()
-          and voim_loppupvm >= now()
-          ORDER BY maara desc, maa_ryhma";
+    $query  = "SELECT *
+               from taric_veroperusteet use index (nimike_index)
+               where laji        = 'tp.dat'
+               and nimike        = '$nimike_taso5'
+               and maa_ryhma     in ($maat)
+               and voim_alkupvm  <= now()
+               and voim_loppupvm >= now()
+               ORDER BY maara desc, maa_ryhma";
     $tv_nimres = pupe_query($query);
   }
 
@@ -174,20 +174,20 @@ else {
     while ($tv_nimrow = mysql_fetch_assoc($tv_nimres)) {
 
       // Haetaan toimepiteestä poissuljetut maat
-      $query  = "  SELECT *
-            from taric_veroperusteet use index (fyysinen_avain_index)
-            where laji = 'exc.dat'
-            and toimenpide_id= '$tv_nimrow[toimenpide_id]'
-            and maa_ryhma in ('$alkuperamaa')";
+      $query  = "SELECT *
+                 from taric_veroperusteet use index (fyysinen_avain_index)
+                 where laji    = 'exc.dat'
+                 and toimenpide_id= '$tv_nimrow[toimenpide_id]'
+                 and maa_ryhma in ('$alkuperamaa')";
       $tv_res = pupe_query($query);
 
       //jos maamme ei ole poissuljettujen maiden joukossa, niin olemme löytäneet sopivan toimenpiteen
       if (mysql_num_rows($tv_res) == 0) {
         // Haetaan toimenpiteen alaviitteet
-        $query  = "  SELECT *
-              from taric_veroperusteet use index (fyysinen_avain_index)
-              where laji = 'alav.dat'
-              and toimenpide_id= '$tv_nimrow[toimenpide_id]'";
+        $query  = "SELECT *
+                   from taric_veroperusteet use index (fyysinen_avain_index)
+                   where laji = 'alav.dat'
+                   and toimenpide_id= '$tv_nimrow[toimenpide_id]'";
         $tv_alavres = pupe_query($query);
 
 

@@ -1,9 +1,9 @@
 <?php
 
-$query = "  SELECT *
-      FROM lasku
-      WHERE tunnus = '$tunnus'
-      AND yhtio ='$kukarow[yhtio]'";
+$query = "SELECT *
+          FROM lasku
+          WHERE tunnus = '$tunnus'
+          AND yhtio ='$kukarow[yhtio]'";
 $lresult = pupe_query($query);
 
 if (mysql_num_rows($lresult) == 0) {
@@ -13,11 +13,11 @@ if (mysql_num_rows($lresult) == 0) {
 
 $laskurow = mysql_fetch_assoc($lresult);
 
-$query = "  SELECT *
-      FROM tiliointi
-      WHERE tunnus = '$isa'
-      AND ltunnus = '$tunnus'
-      AND yhtio = '$kukarow[yhtio]'";
+$query = "SELECT *
+          FROM tiliointi
+          WHERE tunnus = '$isa'
+          AND ltunnus  = '$tunnus'
+          AND yhtio    = '$kukarow[yhtio]'";
 $tresult = pupe_query($query);
 
 if (mysql_num_rows($tresult) == 0) {
@@ -114,41 +114,41 @@ elseif (count($kausi) > 0) {
         $asumma = 0;
       }
 
-      $query = "  INSERT INTO tiliointi SET
-            yhtio    = '$kukarow[yhtio]',
-            ltunnus    = '$tiliointirow[ltunnus]',
-            tilino    = '$tiliointirow[tilino]',
-            kustp    = '$tiliointirow[kustp]',
-            kohde    = '$tiliointirow[kohde]',
-            projekti  = '$tiliointirow[projekti]',
-            tapvm    = '$tapvm',
-            summa    = '$asumma',
-            vero    = 0,
-            selite    = 'Jaksotus $tiliointirow[selite]',
-            lukko    = '',
-            laatija    = '$kukarow[kuka]',
-            laadittu  = now()";
+      $query = "INSERT INTO tiliointi SET
+                yhtio    = '$kukarow[yhtio]',
+                ltunnus  = '$tiliointirow[ltunnus]',
+                tilino   = '$tiliointirow[tilino]',
+                kustp    = '$tiliointirow[kustp]',
+                kohde    = '$tiliointirow[kohde]',
+                projekti = '$tiliointirow[projekti]',
+                tapvm    = '$tapvm',
+                summa    = '$asumma',
+                vero     = 0,
+                selite   = 'Jaksotus $tiliointirow[selite]',
+                lukko    = '',
+                laatija  = '$kukarow[kuka]',
+                laadittu = now()";
       $result = pupe_query($query);
       $jisa = mysql_insert_id($link);
       $viimeinen1 = $jisa;
 
       // Tehdään vastaava siirtosaaminen
       $ssumma = $tiliointirow['summa'] - $asumma;
-      $query = "  INSERT INTO tiliointi SET
-            yhtio    = '$kukarow[yhtio]',
-            ltunnus    = '$tiliointirow[ltunnus]',
-            tilino    = '$jaksotilino',
-            kustp    = '$tiliointirow[kustp]',
-            kohde    = '$tiliointirow[kohde]',
-            projekti  = '$tiliointirow[projekti]',
-            tapvm    = '$tapvm',
-            summa    = $ssumma,
-            vero    = 0,
-            selite    = 'Jaksotus $tiliointirow[selite]',
-            lukko    = '1',
-            aputunnus  = '$jisa',
-            laatija    = '$kukarow[kuka]',
-            laadittu  = now()";
+      $query = "INSERT INTO tiliointi SET
+                yhtio     = '$kukarow[yhtio]',
+                ltunnus   = '$tiliointirow[ltunnus]',
+                tilino    = '$jaksotilino',
+                kustp     = '$tiliointirow[kustp]',
+                kohde     = '$tiliointirow[kohde]',
+                projekti  = '$tiliointirow[projekti]',
+                tapvm     = '$tapvm',
+                summa     = $ssumma,
+                vero      = 0,
+                selite    = 'Jaksotus $tiliointirow[selite]',
+                lukko     = '1',
+                aputunnus = '$jisa',
+                laatija   = '$kukarow[kuka]',
+                laadittu  = now()";
       $result = pupe_query($query);
       $viimeinen2 = mysql_insert_id($link);
 
@@ -169,39 +169,39 @@ elseif (count($kausi) > 0) {
       $pvv = substr($tiliointirow['tapvm'], 0, 4); // Tämä on vuosi
       $tapvm = date("Y-m-d", mktime (0, 0, 0, $pkk+$mille-1, 1, $pvv));
 
-      $query = "  INSERT INTO tiliointi SET
-            yhtio    = '$kukarow[yhtio]',
-            ltunnus    = '$tiliointirow[ltunnus]',
-            tilino    = '$tiliointirow[tilino]',
-            kustp    = '$tiliointirow[kustp]',
-            kohde    = '$tiliointirow[kohde]',
-            projekti  = '$tiliointirow[projekti]',
-            tapvm    = '$tapvm',
-            summa    = '$summa',
-            vero    = 0,
-            selite    = 'Jaksotus $tiliointirow[selite]',
-            lukko    = '1',
-            aputunnus  = '$jisa',
-            laatija    = '$kukarow[kuka]',
-            laadittu  = now()";
+      $query = "INSERT INTO tiliointi SET
+                yhtio     = '$kukarow[yhtio]',
+                ltunnus   = '$tiliointirow[ltunnus]',
+                tilino    = '$tiliointirow[tilino]',
+                kustp     = '$tiliointirow[kustp]',
+                kohde     = '$tiliointirow[kohde]',
+                projekti  = '$tiliointirow[projekti]',
+                tapvm     = '$tapvm',
+                summa     = '$summa',
+                vero      = 0,
+                selite    = 'Jaksotus $tiliointirow[selite]',
+                lukko     = '1',
+                aputunnus = '$jisa',
+                laatija   = '$kukarow[kuka]',
+                laadittu  = now()";
       $result = pupe_query($query);
       $viimeinen1 = mysql_insert_id($link);
 
-      $query = "  INSERT INTO tiliointi SET
-            yhtio    = '$kukarow[yhtio]',
-            ltunnus    = '$tiliointirow[ltunnus]',
-            tilino    = '$jaksotilino',
-            kustp    = '$tiliointirow[kustp]',
-            kohde    = '$tiliointirow[kohde]',
-            projekti  = '$tiliointirow[projekti]',
-            tapvm    = '$tapvm',
-            summa    = $summa * -1,
-            vero    = 0,
-            selite    = 'Jaksotus $tiliointirow[selite]',
-            lukko    = '1',
-            aputunnus  = '$jisa',
-            laatija    = '$kukarow[kuka]',
-            laadittu  = now()";
+      $query = "INSERT INTO tiliointi SET
+                yhtio     = '$kukarow[yhtio]',
+                ltunnus   = '$tiliointirow[ltunnus]',
+                tilino    = '$jaksotilino',
+                kustp     = '$tiliointirow[kustp]',
+                kohde     = '$tiliointirow[kohde]',
+                projekti  = '$tiliointirow[projekti]',
+                tapvm     = '$tapvm',
+                summa     = $summa * -1,
+                vero      = 0,
+                selite    = 'Jaksotus $tiliointirow[selite]',
+                lukko     = '1',
+                aputunnus = '$jisa',
+                laatija   = '$kukarow[kuka]',
+                laadittu  = now()";
       $result = pupe_query($query);
       $viimeinen2 = mysql_insert_id($link);
 

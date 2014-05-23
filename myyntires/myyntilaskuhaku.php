@@ -17,10 +17,10 @@ if (!function_exists("kuka_kayttaja")) {
   function kuka_kayttaja($keta_haetaan) {
     global $kukarow, $yhtiorow;
 
-    $query = "  SELECT kuka.nimi
-          FROM kuka
-          WHERE kuka.yhtio = '{$kukarow['yhtio']}'
-          AND kuka.kuka ='$keta_haetaan'";
+    $query = "SELECT kuka.nimi
+              FROM kuka
+              WHERE kuka.yhtio = '{$kukarow['yhtio']}'
+              AND kuka.kuka ='$keta_haetaan'";
     $kukares = pupe_query($query);
     $row = mysql_fetch_assoc($kukares);
 
@@ -71,13 +71,13 @@ if (trim($summa1) == "") {
 // LN = Etsit‰‰n myyj‰n tai laatijan nimell‰
 if ($tee == 'LN') {
   // haetaan vain aktiivisia k‰ytt‰ji‰
-  $query = "  SELECT
-        group_concat(concat('\'',kuka.kuka,'\'')) kuka,
-        group_concat(concat(if(kuka.myyja=0, null, kuka.myyja))) myyja
-        FROM kuka
-        WHERE kuka.yhtio = '{$kukarow['yhtio']}'
-        AND kuka.aktiivinen = 1
-        AND (kuka.kuka like '%$summa1%' or kuka.nimi like '%$summa1%')";
+  $query = "SELECT
+            group_concat(concat('\'',kuka.kuka,'\'')) kuka,
+            group_concat(concat(if(kuka.myyja=0, null, kuka.myyja))) myyja
+            FROM kuka
+            WHERE kuka.yhtio    = '{$kukarow['yhtio']}'
+            AND kuka.aktiivinen = 1
+            AND (kuka.kuka like '%$summa1%' or kuka.nimi like '%$summa1%')";
   $kukares = pupe_query($query);
 
   $row = mysql_fetch_assoc($kukares);
@@ -151,11 +151,11 @@ if ($tee == 'N') {
 
 // A = Etsit‰‰n asiakannumeroa laskulta
 if ($tee == 'A') {
-  $query  = "  SELECT group_concat(tunnus) asiakkaat
-        FROM asiakas
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        and asiakasnro = '$summa1'
-        and asiakasnro not in ('0','')";
+  $query  = "SELECT group_concat(tunnus) asiakkaat
+             FROM asiakas
+             WHERE yhtio    = '{$kukarow['yhtio']}'
+             and asiakasnro = '$summa1'
+             and asiakasnro not in ('0','')";
   $result = pupe_query($query);
   $row = mysql_fetch_assoc($result);
 
@@ -184,12 +184,12 @@ if ($tee == 'L') {
 }
 
 if ($tee != '') {
-  $query = "  SELECT tapvm, erpcm, laskunro, concat_ws(' ', nimi, nimitark) nimi,
-        summa, valkoodi, ebid, tila, alatila, tunnus,
-        mapvm, saldo_maksettu, ytunnus, liitostunnus, laatija
-        FROM lasku {$index}
-        WHERE {$ehto} and yhtio = '{$kukarow['yhtio']}'
-        ORDER BY {$jarj}";
+  $query = "SELECT tapvm, erpcm, laskunro, concat_ws(' ', nimi, nimitark) nimi,
+            summa, valkoodi, ebid, tila, alatila, tunnus,
+            mapvm, saldo_maksettu, ytunnus, liitostunnus, laatija
+            FROM lasku {$index}
+            WHERE {$ehto} and yhtio = '{$kukarow['yhtio']}'
+            ORDER BY {$jarj}";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {

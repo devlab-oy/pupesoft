@@ -23,21 +23,21 @@ if (isset($_POST['piirtele_valikko'])) {
   // piirrell‰‰n tuotteen_avainsanat-valikko
   echo "<br><br>";
 
-  $query = "  SELECT selite, selitetark
-        FROM avainsana
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND laji    = 'PARAMETRI'
-        ORDER BY selite";
+  $query = "SELECT selite, selitetark
+            FROM avainsana
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND laji    = 'PARAMETRI'
+            ORDER BY selite";
   $result = pupe_query($query);
 
   echo "<form>";
   echo "<table border='0' cellpadding='5' cellspacing='0' width='600'>";
   echo "<tr><th>".t("Valitse avainsanat sek‰ lis‰kielet")."<br><br><input type='checkbox' class='check_all' value='lajiboksit'>".t("Valitse Kaikki")."</th><td>";
 
-  $query = "  SELECT DISTINCT kieli
-        FROM tuotteen_avainsanat
-        WHERE yhtio='{$yhtiorow['yhtio']}'
-        AND kieli != '{$yhtiorow['kieli']}'";
+  $query = "SELECT DISTINCT kieli
+            FROM tuotteen_avainsanat
+            WHERE yhtio='{$yhtiorow['yhtio']}'
+            AND kieli != '{$yhtiorow['kieli']}'";
   $ressu = pupe_query($query);
 
   echo "<input type='checkbox' name='kielet[]' value='{$row['kieli']}' checked disabled> ".strtoupper($yhtiorow['kieli'])."<br>";
@@ -143,36 +143,36 @@ elseif(isset($lajit) and count($lajit) > 0) {
   $eka_tuote = TRUE;
 
   // Haetaan asiakkaan tiedot
-  $query = "  SELECT *
-        FROM asiakas
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tunnus = '{$laskurow['liitostunnus']}'";
+  $query = "SELECT *
+            FROM asiakas
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus  = '{$laskurow['liitostunnus']}'";
   $asiakasressi = pupe_query($query);
   $asiakasrowi = mysql_fetch_assoc($asiakasressi);
 
   //loopataan myyntier‰tiedot per tilausrivi
   foreach ($rows as $tilausrivi) {
     // Haetaan tuotteen tiedot
-    $query = "  SELECT *
-          FROM tuote
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tuoteno = '{$tilausrivi['tuoteno']}'";
+    $query = "SELECT *
+              FROM tuote
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tuoteno = '{$tilausrivi['tuoteno']}'";
     $tuoteressi = pupe_query($query);
     $tuoterowi = mysql_fetch_assoc($tuoteressi);
 
     // Haetaan kaikki tuotteen alkuper‰maat
-    $query = "  SELECT group_concat(DISTINCT alkuperamaa) kaikkimaat
-          FROM tuotteen_toimittajat
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tuoteno = '{$tilausrivi['tuoteno']}'";
+    $query = "SELECT group_concat(DISTINCT alkuperamaa) kaikkimaat
+              FROM tuotteen_toimittajat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tuoteno = '{$tilausrivi['tuoteno']}'";
     $toimittajaressi = pupe_query($query);
     $alkuperamaat = mysql_fetch_assoc($toimittajaressi);
 
     // Haetaan asiakkaan tuotenumero
-    $query = "  SELECT *
-          FROM asiakaskommentti
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tuoteno = '{$tilausrivi['tuoteno']}'";
+    $query = "SELECT *
+              FROM asiakaskommentti
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tuoteno = '{$tilausrivi['tuoteno']}'";
     $spessuressi = pupe_query($query);
     $spessurowi = mysql_fetch_assoc($spessuressi);
 
@@ -223,12 +223,12 @@ elseif(isset($lajit) and count($lajit) > 0) {
 
       foreach ($kielet as $kieli) {
         // etsit‰‰n tuotteen avainsanat per valittu laji ja kieli
-        $query = "  SELECT *
-              FROM tuotteen_avainsanat
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tuoteno = '{$tilausrivi['tuoteno']}'
-              AND laji    = '{$asanalaji}'
-              AND kieli   = '{$kieli}'";
+        $query = "SELECT *
+                  FROM tuotteen_avainsanat
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tuoteno = '{$tilausrivi['tuoteno']}'
+                  AND laji    = '{$asanalaji}'
+                  AND kieli   = '{$kieli}'";
         $result = pupe_query($query);
 
         //laitetaan uusi headeri per valittu kieli vain ekalla rivill‰

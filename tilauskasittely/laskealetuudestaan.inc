@@ -4,29 +4,29 @@ if ($mista== 'jtselaus') {
   $kukarow['kesken']=$laskurow['tunnus'];
 
   // Nyt alennukset ja hinnat ja alvi lasketaan automaattisesti uudestaan
-  $query = "  SELECT *
-        from tilausrivi
-        where yhtio  = '$kukarow[yhtio]'
-        and otunnus  = '$kukarow[kesken]'
-        and netto  = ''";
+  $query = "SELECT *
+            from tilausrivi
+            where yhtio = '$kukarow[yhtio]'
+            and otunnus = '$kukarow[kesken]'
+            and netto   = ''";
   $jresultlask = mysql_query($query) or pupe_error($query);
 }
 elseif ($mista== 'jtrivit_tilaukselle.inc') {
   // Nyt alennukset ja hinnat ja alvi lasketaan automaattisesti uudestaan
-  $query = "  SELECT *
-        from tilausrivi
-        where yhtio  = '$kukarow[yhtio]'
-        and tunnus  = '$tunnus'
-        and netto  = ''";
+  $query = "SELECT *
+            from tilausrivi
+            where yhtio = '$kukarow[yhtio]'
+            and tunnus  = '$tunnus'
+            and netto   = ''";
   $jresultlask = mysql_query($query) or pupe_error($query);
 }
 elseif ($mista== 'jtrivit_tilaukselle.php' and $kukarow['extranet'] != '') {
   // Nyt alennukset ja hinnat ja alvi lasketaan automaattisesti uudestaan
-  $query = "  SELECT *
-        from tilausrivi
-        where yhtio  = '$kukarow[yhtio]'
-        and tunnus  = '$tunnus'
-        and netto  = ''";
+  $query = "SELECT *
+            from tilausrivi
+            where yhtio = '$kukarow[yhtio]'
+            and tunnus  = '$tunnus'
+            and netto   = ''";
   $jresultlask = mysql_query($query) or pupe_error($query);
 
   $laskurow["ytunnus"] = $kukarow["oletus_asiakas"];
@@ -34,15 +34,15 @@ elseif ($mista== 'jtrivit_tilaukselle.php' and $kukarow['extranet'] != '') {
 
 while ($jjrow = mysql_fetch_array($jresultlask)) {
 
-  $query = "  SELECT *
-        from tuote
-        where yhtio='$kukarow[yhtio]' and tuoteno='$jjrow[tuoteno]'";
+  $query = "SELECT *
+            from tuote
+            where yhtio='$kukarow[yhtio]' and tuoteno='$jjrow[tuoteno]'";
   $tres  = mysql_query($query) or pupe_error($query);
   $trow  = mysql_fetch_array($tres);
 
-  $query = "  SELECT alennus
-        FROM asiakasalennus
-        WHERE yhtio='$kukarow[yhtio]' and ryhma = '$trow[aleryhma]' and ytunnus = '$laskurow[ytunnus]'";
+  $query = "SELECT alennus
+            FROM asiakasalennus
+            WHERE yhtio='$kukarow[yhtio]' and ryhma = '$trow[aleryhma]' and ytunnus = '$laskurow[ytunnus]'";
   $aleresult = mysql_query($query) or pupe_error($query);
 
   // TODO: Tämä koko osio on mystistä paskaa!

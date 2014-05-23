@@ -3,7 +3,7 @@
 // käsittämätön juttu, mutta ei voi muuta
 if ($_POST["voipcall"] != "") $_GET["voipcall"]  = "";
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if (!isset($konserni))   $konserni = '';
 if (!isset($tee))     $tee = '';
@@ -25,7 +25,7 @@ echo "<form method='post'>
 $monivalintalaatikot = array("ASIAKASOSASTO", "ASIAKASRYHMA", "ASIAKASPIIRI", "ASIAKASMYYJA", "ASIAKASTILA", "<br>DYNAAMINEN_ASIAKAS");
 $monivalintalaatikot_normaali = array();
 
-require ("tilauskasittely/monivalintalaatikot.inc");
+require "tilauskasittely/monivalintalaatikot.inc";
 
 if ($yhtiorow['konserni'] != "") {
   $chk = "";
@@ -84,33 +84,33 @@ else {
 
 if ($yhtiorow['viikkosuunnitelma'] == '') {
   if ($tee == "lahetalista") {
-    $query = "  SELECT asiakas.tunnus, asiakas.nimi, asiakas.postitp, asiakas.ytunnus, asiakas.yhtio, asiakas.asiakasnro, asiakas.nimitark,
-          asiakas.osoite, asiakas.postino, asiakas.postitp, asiakas.maa, asiakas.toim_nimi, asiakas.toim_nimitark, asiakas.toim_osoite,
-          asiakas.toim_postino, asiakas.toim_postitp, asiakas.toim_maa, asiakas.puhelin, asiakas.fax, asiakas.myyjanro, asiakas.email,
-          asiakas.osasto, asiakas.piiri, asiakas.ryhma, asiakas.fakta, asiakas.toimitustapa, asiakas.yhtio
-          FROM asiakas
-          WHERE $konsernit
-          $lisa";
+    $query = "SELECT asiakas.tunnus, asiakas.nimi, asiakas.postitp, asiakas.ytunnus, asiakas.yhtio, asiakas.asiakasnro, asiakas.nimitark,
+              asiakas.osoite, asiakas.postino, asiakas.postitp, asiakas.maa, asiakas.toim_nimi, asiakas.toim_nimitark, asiakas.toim_osoite,
+              asiakas.toim_postino, asiakas.toim_postitp, asiakas.toim_maa, asiakas.puhelin, asiakas.fax, asiakas.myyjanro, asiakas.email,
+              asiakas.osasto, asiakas.piiri, asiakas.ryhma, asiakas.fakta, asiakas.toimitustapa, asiakas.yhtio
+              FROM asiakas
+              WHERE $konsernit
+              $lisa";
     $tiednimi = "asiakaslista.xls";
   }
   else {
-    $query = "  SELECT asiakas.tunnus, if (asiakas.nimi != asiakas.toim_nimi, CONCAT(asiakas.nimi, '<br />', asiakas.toim_nimi), asiakas.nimi) nimi,
-          asiakas.asiakasnro, asiakas.ytunnus,  if (asiakas.toim_postitp != '', asiakas.toim_postitp, asiakas.postitp) postitp,
-          if (asiakas.toim_postino != 00000, asiakas.toim_postino, asiakas.postino) postino,
-          asiakas.yhtio, asiakas.myyjanro, asiakas.email, asiakas.puhelin $selectlisa
-          FROM asiakas
-          WHERE $konsernit
-          $lisa";
+    $query = "SELECT asiakas.tunnus, if (asiakas.nimi != asiakas.toim_nimi, CONCAT(asiakas.nimi, '<br />', asiakas.toim_nimi), asiakas.nimi) nimi,
+              asiakas.asiakasnro, asiakas.ytunnus,  if (asiakas.toim_postitp != '', asiakas.toim_postitp, asiakas.postitp) postitp,
+              if (asiakas.toim_postino != 00000, asiakas.toim_postino, asiakas.postino) postino,
+              asiakas.yhtio, asiakas.myyjanro, asiakas.email, asiakas.puhelin $selectlisa
+              FROM asiakas
+              WHERE $konsernit
+              $lisa";
     $tiednimi = "viikkosuunnitelma.xls";
   }
 }
 else {
-  $query = "  SELECT asiakas.tunnus, asiakas.nimi, (SELECT concat_ws(' ', kuka.myyja, kuka.nimi) FROM kuka WHERE kuka.yhtio = '$kukarow[yhtio]' AND kuka.myyja = asiakas.myyjanro AND kuka.myyja > 0 LIMIT 1) myyja,
-        asiakas.ytunnus, asiakas.asiakasnro, if (asiakas.toim_postitp != '', asiakas.toim_postitp, asiakas.postitp) postitp,
-        asiakas.puhelin, asiakas.yhtio
-        FROM asiakas
-        WHERE $konsernit
-        $lisa";
+  $query = "SELECT asiakas.tunnus, asiakas.nimi, (SELECT concat_ws(' ', kuka.myyja, kuka.nimi) FROM kuka WHERE kuka.yhtio = '$kukarow[yhtio]' AND kuka.myyja = asiakas.myyjanro AND kuka.myyja > 0 LIMIT 1) myyja,
+            asiakas.ytunnus, asiakas.asiakasnro, if (asiakas.toim_postitp != '', asiakas.toim_postitp, asiakas.postitp) postitp,
+            asiakas.puhelin, asiakas.yhtio
+            FROM asiakas
+            WHERE $konsernit
+            $lisa";
 }
 if ($lisa == "" and ($tee != 'laheta' or $tee != 'lahetalista')) {
   $limit = " LIMIT 200 ";
@@ -124,11 +124,11 @@ $result = pupe_query($query);
 
 if ($oper == t("Vaihda listan kaikkien asiakkaiden tila")) {
   // Käydään lista läpi kertaalleen
-  while ($trow = mysql_fetch_array ($result)) {
-    $query_update = "  UPDATE asiakas
-              SET tila = '$astila_vaihto'
-              WHERE tunnus = '$trow[tunnus]'
-              AND yhtio = '$yhtiorow[yhtio]'";
+  while ($trow = mysql_fetch_array($result)) {
+    $query_update = "UPDATE asiakas
+                     SET tila = '$astila_vaihto'
+                     WHERE tunnus = '$trow[tunnus]'
+                     AND yhtio    = '$yhtiorow[yhtio]'";
     $result_update = pupe_query($query_update);
   }
   $result = pupe_query($query);
@@ -137,7 +137,7 @@ if ($oper == t("Vaihda listan kaikkien asiakkaiden tila")) {
 if ($tee == 'laheta' or $tee == 'lahetalista') {
 
   if ($tee == "lahetalista") {
-    if (@include('Spreadsheet/Excel/Writer.php')) {
+    if (@include 'Spreadsheet/Excel/Writer.php') {
       //keksitään failille joku varmasti uniikki nimi:
       list($usec, $sec) = explode(' ', microtime());
       mt_srand((float) $sec + ((float) $usec * 100000));
@@ -157,7 +157,7 @@ if ($tee == 'laheta' or $tee == 'lahetalista') {
 
         for ($i=1; $i<mysql_num_fields($result)-1; $i++) {
           if (isset($workbook)) {
-            $worksheet->write($excelrivi, $excelsarake, t(mysql_field_name($result,$i)) , $format_bold);
+            $worksheet->write($excelrivi, $excelsarake, t(mysql_field_name($result, $i)) , $format_bold);
             $excelsarake++;
           }
         }
@@ -168,7 +168,7 @@ if ($tee == 'laheta' or $tee == 'lahetalista') {
     }
   }
   else {
-    if (@include('Spreadsheet/Excel/Writer.php')) {
+    if (@include 'Spreadsheet/Excel/Writer.php') {
       //keksitään failille joku varmasti uniikki nimi:
       list($usec, $sec) = explode(' ', microtime());
       mt_srand((float) $sec + ((float) $usec * 100000));
@@ -189,7 +189,7 @@ if ($tee == 'laheta' or $tee == 'lahetalista') {
         for ($i=1; $i<mysql_num_fields($result); $i++) {
           //$liite .= $trow[$i]."\t";
           if (isset($workbook)) {
-            $worksheet->write($excelrivi, $excelsarake, t(mysql_field_name($result,$i)) , $format_bold);
+            $worksheet->write($excelrivi, $excelsarake, t(mysql_field_name($result, $i)) , $format_bold);
             $excelsarake++;
           }
         }
@@ -262,22 +262,22 @@ if ($tee == 'laheta' or $tee == 'lahetalista') {
     echo "<br><br><font class='message'>".t("Suunnitelmapohja lähetetty sähköpostiisi")."!</font><br><br><br>";
   }
 
-  mysql_data_seek($result,0);
+  mysql_data_seek($result, 0);
 }
 
 echo "<br><table>";
 echo "<tr>";
 
 for ($i = 1; $i < mysql_num_fields($result)-1; $i++) {
-  echo "<th><a href='$PHP_SELF?konserni=$konserni&ojarj=".mysql_field_name($result,$i).$ulisa."'>" . t(mysql_field_name($result,$i)) . "</a>";
+  echo "<th><a href='$PHP_SELF?konserni=$konserni&ojarj=".mysql_field_name($result, $i).$ulisa."'>" . t(mysql_field_name($result, $i)) . "</a>";
 
-  if   (mysql_field_len($result,$i)>10) $size='20';
-  elseif  (mysql_field_len($result,$i)<5)  $size='5';
+  if   (mysql_field_len($result, $i)>10) $size='20';
+  elseif  (mysql_field_len($result, $i)<5)  $size='5';
   else  $size='10';
 
   if (!isset($haku[$i])) $haku[$i] = '';
 
-  echo "<br><input type='text' name='haku[$i]' value='$haku[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
+  echo "<br><input type='text' name='haku[$i]' value='$haku[$i]' size='$size' maxlength='" . mysql_field_len($result, $i) ."'>";
   echo "</th>";
 }
 
@@ -285,7 +285,7 @@ echo "<td class='back'>&nbsp;&nbsp;<input type='Submit' value='".t("Etsi")."'></
 
 $kalalask = 1;
 
-while ($trow=mysql_fetch_array ($result)) {
+while ($trow=mysql_fetch_array($result)) {
   echo "<tr class='aktiivi'>";
 
   for ($i=1; $i<mysql_num_fields($result)-1; $i++) {
@@ -293,7 +293,7 @@ while ($trow=mysql_fetch_array ($result)) {
       if (trim($trow[1]) == '') $trow[1] = t("*tyhjä*");
       echo "<td><a name='1_$kalalask' href='".$palvelin2."crm/asiakasmemo.php?ytunnus=$trow[ytunnus]&asiakasid=$trow[tunnus]&lopetus=".$palvelin2."crm/asiakaslista.php////konserni=$konserni//ojarj=$ojarj".str_replace("&", "//", $ulisa)."///1_$kalalask'>$trow[1]</a></td>";
     }
-    elseif (mysql_field_name($result,$i) == 'ytunnus') {
+    elseif (mysql_field_name($result, $i) == 'ytunnus') {
       echo "<td><a name='2_$kalalask' href='".$palvelin2."yllapito.php?toim=asiakas&tunnus=$trow[tunnus]&lopetus=".$palvelin2."crm/asiakaslista.php////konserni=$konserni//ojarj=$ojarj".str_replace("&", "//", $ulisa)."///2_$kalalask'>$trow[$i]</a></td>";
     }
     else {
@@ -342,4 +342,4 @@ if (mysql_num_rows($asosresult) > 0) {
 
 echo "</form>";
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

@@ -33,13 +33,13 @@ if (!empty($alusta_tunnus)) {
 
 # Jos suuntalavan_tuotteet() ei löytynyt mitään
 if(!isset($row)) {
-  $query = "  SELECT
-        tilausrivi.*,
-        tuotteen_toimittajat.toim_tuoteno
-        FROM tilausrivi
-        LEFT JOIN tuotteen_toimittajat on (tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.yhtio=tilausrivi.yhtio)
-        WHERE tilausrivi.tunnus='{$tilausrivi}'
-        AND tilausrivi.yhtio='{$kukarow['yhtio']}'";
+  $query = "SELECT
+            tilausrivi.*,
+            tuotteen_toimittajat.toim_tuoteno
+            FROM tilausrivi
+            LEFT JOIN tuotteen_toimittajat on (tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.yhtio=tilausrivi.yhtio)
+            WHERE tilausrivi.tunnus='{$tilausrivi}'
+            AND tilausrivi.yhtio='{$kukarow['yhtio']}'";
   $row = mysql_fetch_assoc(pupe_query($query));
 }
 
@@ -102,19 +102,19 @@ if (isset($submit_button) and trim($submit_button) != '') {
         }
         elseif ($yhtiorow['suuntalavat'] == "" and $saapuminen != 0) {
           // Jos yhtiö ei käytä suuntalavaa ja rivi ei ole saapumisella
-          $query = "  UPDATE tilausrivi SET
-                uusiotunnus = '{$saapuminen}'
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus = '{$row['tunnus']}'";
+          $query = "UPDATE tilausrivi SET
+                    uusiotunnus = '{$saapuminen}'
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus  = '{$row['tunnus']}'";
           pupe_query($query);
         }
 
         //tarkistetaan vielä ettei riviä ole jo viety varastoon
-        $viety_query = "  SELECT uusiotunnus
-                  FROM tilausrivi
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus = '{$row['tunnus']}'
-                  AND laskutettuaika != '0000-00-00'";
+        $viety_query = "SELECT uusiotunnus
+                        FROM tilausrivi
+                        WHERE yhtio         = '{$kukarow['yhtio']}'
+                        AND tunnus          = '{$row['tunnus']}'
+                        AND laskutettuaika != '0000-00-00'";
         $viety = pupe_query($viety_query);
 
         if (mysql_num_rows($viety) == 0) {
@@ -234,10 +234,10 @@ if (isset($submit_button) and trim($submit_button) != '') {
 
         # Jos temppi lava niin merkataan suoraan puretuksi
         if ($temppi_lava) {
-          $query = "  UPDATE suuntalavat SET
-                tila = 'P'
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus = '{$alusta_tunnus}'";
+          $query = "UPDATE suuntalavat SET
+                    tila        = 'P'
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus  = '{$alusta_tunnus}'";
           $tila_res = pupe_query($query);
         }
 

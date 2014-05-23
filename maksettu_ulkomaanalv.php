@@ -19,10 +19,10 @@ if($tee == "aja") {
 
   // Tutkitaan ensiksi, mille tilikaudelle pyydettävä lista löytyy, jos lista on sopiva
   if ($tkausi > 0) {
-    $query = "  SELECT *
-          FROM tilikaudet
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tunnus = '$tkausi'";
+    $query = "SELECT *
+              FROM tilikaudet
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tunnus  = '$tkausi'";
     $result = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($result) != 1) {
@@ -57,10 +57,10 @@ if($tee == "aja") {
     echo "<font class='info'>".t("Maahan")." {$row["nimi"]}</font><br>";
   }
   if ($kustp!="") {
-    $query = "  SELECT nimi
-          from kustannuspaikka
-          where yhtio='$kukarow[yhtio]'
-          and tunnus='$kustp'";
+    $query = "SELECT nimi
+              from kustannuspaikka
+              where yhtio='$kukarow[yhtio]'
+              and tunnus='$kustp'";
     $result=mysql_query($query) or pupe_error($query);
     $row=mysql_fetch_array($result);
 
@@ -68,10 +68,10 @@ if($tee == "aja") {
     echo "<font class='info'>".t("kustannuspaikalle")." {$row["nimi"]}</font><br>";
   }
   if ($kohde!="") {
-    $query = "  SELECT nimi
-          from kustannuspaikka
-          where yhtio='$kukarow[yhtio]'
-          and tunnus='$kohde'";
+    $query = "SELECT nimi
+              from kustannuspaikka
+              where yhtio='$kukarow[yhtio]'
+              and tunnus='$kohde'";
     $result=mysql_query($query) or pupe_error($query);
     $row=mysql_fetch_array($result);
 
@@ -79,10 +79,10 @@ if($tee == "aja") {
     echo "<font class='info'>".t("Kohtelle")." {$row["nimi"]}</font><br>";
   }
   if ($proj!="") {
-    $query = "  SELECT nimi
-          from kustannuspaikka
-          where yhtio='$kukarow[yhtio]'
-          and tunnus='$proj'";
+    $query = "SELECT nimi
+              from kustannuspaikka
+              where yhtio='$kukarow[yhtio]'
+              and tunnus='$proj'";
     $result=mysql_query($query) or pupe_error($query);
     $row=mysql_fetch_array($result);
 
@@ -92,30 +92,30 @@ if($tee == "aja") {
 
   echo "<hr>";
 
-  $kuluALV = "  SELECT if(tuotteen_alv.alv IS NULL, 0, tuotteen_alv.alv)
-          FROM tilausrivi
-          LEFT JOIN tuotteen_alv ON tuotteen_alv.yhtio=tilausrivi.yhtio and tuotteen_alv.tuoteno=tilausrivi.tuoteno
-          WHERE tilausrivi.yhtio=tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus=tilausrivin_lisatiedot.tilausrivitunnus
-          LIMIT 1";
+  $kuluALV = "SELECT if(tuotteen_alv.alv IS NULL, 0, tuotteen_alv.alv)
+              FROM tilausrivi
+              LEFT JOIN tuotteen_alv ON tuotteen_alv.yhtio=tilausrivi.yhtio and tuotteen_alv.tuoteno=tilausrivi.tuoteno
+              WHERE tilausrivi.yhtio=tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus=tilausrivin_lisatiedot.tilausrivitunnus
+              LIMIT 1";
 
-  $query = "  SELECT tiliointi.*,
-        date_format(tiliointi.tapvm, '%d.%m.%Y') tapvm,
-        round(summa*(1-(if(kulun_kohdemaan_alv=0, ($kuluALV), kulun_kohdemaan_alv)/100)),2) veroton_osuus,
-        concat_ws('/',kustp.nimi,kohde.nimi,projekti.nimi) kustannuspaikka,
-        tilausrivin_lisatiedot.kulun_kohdemaa,
-        if(kulun_kohdemaan_alv=0, ($kuluALV), kulun_kohdemaan_alv) kulun_kohdemaan_alv
-        FROM tiliointi
-        JOIN tilausrivin_lisatiedot ON tiliointi.yhtio=tilausrivin_lisatiedot.yhtio and tiliointi.tunnus=tilausrivin_lisatiedot.tiliointirivitunnus and kulun_kohdemaa!='{$yhtiorow["maa"]}' {$lisa["lisatiedot"]}
-        LEFT JOIN kustannuspaikka kustp ON tiliointi.yhtio=kustp.yhtio and tiliointi.kustp=kustp.tunnus
-        LEFT JOIN kustannuspaikka projekti ON tiliointi.yhtio=projekti.yhtio and tiliointi.projekti=projekti.tunnus
-        LEFT JOIN kustannuspaikka kohde ON tiliointi.yhtio=kohde.yhtio and tiliointi.kohde=kohde.tunnus
+  $query = "SELECT tiliointi.*,
+            date_format(tiliointi.tapvm, '%d.%m.%Y') tapvm,
+            round(summa*(1-(if(kulun_kohdemaan_alv=0, ($kuluALV), kulun_kohdemaan_alv)/100)),2) veroton_osuus,
+            concat_ws('/',kustp.nimi,kohde.nimi,projekti.nimi) kustannuspaikka,
+            tilausrivin_lisatiedot.kulun_kohdemaa,
+            if(kulun_kohdemaan_alv=0, ($kuluALV), kulun_kohdemaan_alv) kulun_kohdemaan_alv
+            FROM tiliointi
+            JOIN tilausrivin_lisatiedot ON tiliointi.yhtio=tilausrivin_lisatiedot.yhtio and tiliointi.tunnus=tilausrivin_lisatiedot.tiliointirivitunnus and kulun_kohdemaa!='{$yhtiorow["maa"]}' {$lisa["lisatiedot"]}
+            LEFT JOIN kustannuspaikka kustp ON tiliointi.yhtio=kustp.yhtio and tiliointi.kustp=kustp.tunnus
+            LEFT JOIN kustannuspaikka projekti ON tiliointi.yhtio=projekti.yhtio and tiliointi.projekti=projekti.tunnus
+            LEFT JOIN kustannuspaikka kohde ON tiliointi.yhtio=kohde.yhtio and tiliointi.kohde=kohde.tunnus
 
-        WHERE tiliointi.yhtio='$kukarow[yhtio]' and
-        tapvm>='$alku' and
-        tapvm<='$loppu'
-        {$lisa["where"]}
-        and kulun_kohdemaa NOT IN ('','{$yhtiorow[maa]}')
-        ORDER BY kulun_kohdemaa, tapvm";
+            WHERE tiliointi.yhtio='$kukarow[yhtio]' and
+            tapvm>='$alku' and
+            tapvm<='$loppu'
+            {$lisa["where"]}
+            and kulun_kohdemaa NOT IN ('','{$yhtiorow[maa]}')
+            ORDER BY kulun_kohdemaa, tapvm";
   $result = mysql_query($query) or pupe_error($query);
 
   if(mysql_num_rows($result)>0) {
@@ -247,9 +247,9 @@ if ($tee == '') {
 
     echo "<tr><th>".t("tai koko tilikausi")."</th>";
      $query = "SELECT *
-          FROM tilikaudet
-          WHERE yhtio = '$kukarow[yhtio]'
-          ORDER BY tilikausi_alku";
+               FROM tilikaudet
+               WHERE yhtio = '$kukarow[yhtio]'
+               ORDER BY tilikausi_alku";
     $vresult = mysql_query($query) or pupe_error($query);
     echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa");
     while ($vrow=mysql_fetch_array($vresult)) {
@@ -264,12 +264,12 @@ if ($tee == '') {
 
   echo "<tr><th>".t("Vain kustannuspaikka")."</th>";
 
-  $query = "  SELECT tunnus, nimi
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and kaytossa != 'E'
-        and tyyppi = 'K'
-        ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, nimi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and kaytossa != 'E'
+            and tyyppi    = 'K'
+            ORDER BY koodi+0, koodi, nimi";
   $vresult = mysql_query($query) or pupe_error($query);
 
   echo "<td><select name='kustp'><option value=''>".t("Ei valintaa");
@@ -286,12 +286,12 @@ if ($tee == '') {
   echo "</tr>";
   echo "<tr><th>".t("Vain kohde")."</th>";
 
-  $query = "  SELECT tunnus, nimi
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and kaytossa != 'E'
-        and tyyppi = 'O'
-        ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, nimi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and kaytossa != 'E'
+            and tyyppi    = 'O'
+            ORDER BY koodi+0, koodi, nimi";
   $vresult = mysql_query($query) or pupe_error($query);
 
   echo "<td><select name='kohde'><option value=''>Ei valintaa";
@@ -308,12 +308,12 @@ if ($tee == '') {
   echo "</tr>";
   echo "<tr><th>".t("Vain projekti")."</th>";
 
-  $query = "  SELECT tunnus, nimi
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and kaytossa != 'E'
-        and tyyppi = 'P'
-        ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, nimi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and kaytossa != 'E'
+            and tyyppi    = 'P'
+            ORDER BY koodi+0, koodi, nimi";
   $vresult = mysql_query($query) or pupe_error($query);
 
   echo "<td><select name='proj'><option value=''>".t("Ei valintaa");
@@ -330,10 +330,10 @@ if ($tee == '') {
 
   echo "<tr><th>".t("Vain maa")."</th>";
 
-  $query = "  SELECT distinct koodi, nimi
-        FROM maat
-        WHERE nimi != ''
-        ORDER BY koodi";
+  $query = "SELECT distinct koodi, nimi
+            FROM maat
+            WHERE nimi != ''
+            ORDER BY koodi";
   $vresult = mysql_query($query) or pupe_error($query);
   echo "<td><select name='maa'>";
 

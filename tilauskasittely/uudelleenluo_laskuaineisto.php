@@ -1046,6 +1046,16 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
     }
 
     if (file_exists(realpath($nimiedi))) {
+      //siirretaan laskutiedosto operaattorille
+      $ftphost = (isset($verkkohost_lah) and trim($verkkohost_lah) != '') ? $verkkohost_lah : "ftp.verkkolasku.net";
+      $ftpuser = $yhtiorow['verkkotunnus_lah'];
+      $ftppass = $yhtiorow['verkkosala_lah'];
+      $ftppath = (isset($verkkopath_lah) and trim($verkkopath_lah) != '') ? $verkkopath_lah : "out/einvoice/data/";
+      $ftpfile = realpath($nimiedi);
+
+      // t‰t‰ ei ajata eik‰ k‰ytet‰, mutta jos tulee ftp errori niin echotaan t‰‰ meiliin, niin ei tartte k‰sin kirjotella resendi‰
+      echo "<pre>ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile</pre>";
+
       echo "<table>";
       echo "<tr><th>".t("Tallenna Elmaedi-aineisto").":</th>";
       echo "<form method='post' class='multisubmit'>";
@@ -1053,6 +1063,14 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       echo "<input type='hidden' name='kaunisnimi' value='".basename($nimiedi)."'>";
       echo "<input type='hidden' name='filenimi' value='".basename($nimiedi)."'>";
       echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+      echo "</table><br><br>";
+
+      echo "<table>";
+      echo "<tr><th>".t("L‰het‰ Elmaedi-aineisto uudelleen").":</th>";
+      echo "<form method='post'>";
+      echo "<input type='hidden' name='tee' value='edi_siirto'>";
+      echo "<input type='hidden' name='filenimi' value='".basename($nimiedi)."'>";
+      echo "<td class='back'><input type='submit' value='".t("L‰het‰")."'></td></tr></form>";
       echo "</table>";
     }
 

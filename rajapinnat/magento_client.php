@@ -372,6 +372,10 @@ class MagentoClient {
 
     $hintakentta = $this->_hintakentta;
 
+    $selected_category = $this->_kategoriat;
+
+    $category_ids = array ();
+
     // Lisätään tuotteet
     foreach ($dnslajitelma as $nimitys => $tuotteet) {
 
@@ -383,9 +387,21 @@ class MagentoClient {
       // Erikoishinta
       $tuotteet[0]['kuluprosentti'] = ($tuotteet[0]['kuluprosentti'] == 0) ? '' : $tuotteet[0]['kuluprosentti'];
 
-      // Etsitään kategoria mihin tuote lisätään
-      $category_id = $this->findCategory($tuotteet[0]['try_nimi'], $category_tree['children']);
+      // Etsitään kategoria_id tuoteryhmällä
+      if ($selected_category == 'tuoteryhma') {
+         $category_ids[] = $this->findCategory($tuotteet[0]['try_nimi'], $category_tree['children']);
+      }
+      else {
+        // Etsitään kategoria_id:t tuotepuun tuotepolulla
+        $tuotepuun_nodet = $tuotteet[0]['tuotepuun_nodet'];
 
+        // Lisätään myös tuotepuun kategoriat
+        if (isset($tuotepuun_nodet) and count($tuotepuun_nodet) > 0) {
+          foreach ($tuotepuun_nodet as $tuotepolku) {
+            $category_ids[] = $this->createCategoryTree($tuotepolku);
+          }
+        }
+      }
       // Tehdään 'associated_skus' -kenttä
       // Vaatii, että Magentoon asennetaan 'magento-improve-api' -moduli: https://github.com/jreinke/magento-improve-api
       $lapsituotteet_array = array();
@@ -398,7 +414,7 @@ class MagentoClient {
 
       // Configurable tuotteen tiedot
       $configurable = array(
-        'categories'      => array($category_id),
+        'categories'      => $category_ids,
         'websites'        => explode(" ", $tuotteet[0]['nakyvyys']),
         'name'          => utf8_encode($tuotteet[0]['nimitys']),
         'description'           => utf8_encode($tuotteet[0]['kuvaus']),

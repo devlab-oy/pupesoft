@@ -8687,6 +8687,121 @@ if (!function_exists("palauta_intrastat_tiedot")) {
   }
 }
 
+if (!function_exists("livesearch_asiakkaantilausnumero")) {
+  function livesearch_asiakkaantilausnumero($toim) {
+    global $yhtiorow, $kukarow, $palvelin2;
+
+    $tee = $_REQUEST["livesearch_tee"];
+    $nimi = $_REQUEST["livesearch_nimi"];
+    $formi = $_REQUEST["livesearch_form"];
+    $hakuid = $_REQUEST["livesearch_hakuid"];
+    $submit = $_REQUEST["livesearch_submit"];
+    $haku = trim($_REQUEST["livesearch_haku"]);
+
+    if (substr($toim, 0, 8) == "KONSERNI") {
+      $logistiikka_yhtio = '';
+      $logistiikka_yhtiolisa = '';
+      $lasku_yhtio_originaali = $kukarow['yhtio'];
+      $konserni = "KONSERNIVARASTO";
+
+      if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
+        $logistiikka_yhtio = $konsernivarasto_yhtiot;
+        $logistiikka_yhtiolisa = "yhtio in ($logistiikka_yhtio)";
+
+        if ($lasku_yhtio != '') {
+          $kukarow['yhtio'] = mysql_real_escape_string($lasku_yhtio);
+          $yhtiorow = hae_yhtion_parametrit($lasku_yhtio);
+        }
+      }
+      else {
+        $logistiikka_yhtiolisa = "yhtio = '$kukarow[yhtio]'";
+      }
+
+      $cleantoim = substr($toim, 8);
+    }
+    else {
+      $logistiikka_yhtio = '';
+      $logistiikka_yhtiolisa = "yhtio = '$kukarow[yhtio]'";
+      $lasku_yhtio_originaali = $kukarow['yhtio'];
+
+      $cleantoim = $toim;
+    }
+
+    if (strlen($haku) >= 2) {
+
+      echo "
+      <script TYPE='text/javascript' LANGUAGE='JavaScript'>
+        document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
+      </script>";
+
+      $haku_array = explode(" ", $haku);
+      $haku_query = "";
+
+      foreach ($haku_array as $haku) {
+        $haku = mysql_real_escape_string($haku);
+        $haku_query .= "and asiakkaan_tilausnumero like ('$haku%') ";
+      }
+
+      $query = "SELECT tunnus, asiakkaan_tilausnumero, nimi, luontiaika, tunnus
+                FROM lasku use index (yhtio_asiakkaan_tilausnumero)
+                WHERE tila in ('L','U','N','R','E','D')
+                and DATEDIFF(luontiaika,NOW()) <= 365
+                $haku_query
+                and $logistiikka_yhtiolisa";
+      $result = pupe_query($query);
+
+      $limit = 0;
+      if (mysql_num_rows($result) > 0) {
+        while ($row = mysql_fetch_assoc($result)) {
+          echo "  <div id='asiakastilausnumero_valinta_$hakuid$row[tunnus]'
+                name='selectOptions$hakuid'
+                onmouseover=\"this.className='liveSearchSelectedItem';
+                  keyStrokeIndex = -1;
+                  var aEls = document.getElementsByName('selectOptions$hakuid');
+                  for (var iEl = 0; iEl < aEls.length; iEl++) {
+                    if (aEls[iEl].id.substring(0,14) == 'asiakastilausnumero_valinta_$hakuid' && aEls[iEl].id != 'asiakastilausnumero_valinta_$hakuid$row[tunnus]') {
+                      document.getElementById(aEls[iEl].id).className='';
+                    }
+                  } \"
+                onmouseout=\"this.className='';\"
+                onclick=\"document.getElementById('$hakuid').value='$row[tunnus]';";
+
+                if ($submit == "") {
+                  echo "document.$formi.submit();";
+                  echo "console.log(document.$formi);";
+                }
+                else {
+                  echo "document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';";
+                  echo "console.log(document.$formi);";
+                }
+                $laadittu = tv1dateconv($row["luontiaika"]);
+                echo "\"
+                style='padding:2px;'>
+                <font style='font-weight:bold'>$row[asiakkaan_tilausnumero]</font> &raquo; $row[nimi] - $laadittu
+              </div><div name='selectValues$hakuid' id='$row[tunnus]'></div>";
+          $limit++;
+
+          if ($limit > 49) {
+            break;
+          }
+        }
+
+        echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>".t("Haulla löytyi")." ".mysql_num_rows($result). " ",t("tilausta")," ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
+      }
+      else {
+        echo "<div style='padding:2px'><font class='message'>".t("Ei tilauksia.")."</font></div>";
+      }
+    }
+    else {
+      echo "
+      <script TYPE='text/javascript' LANGUAGE='JavaScript'>
+        document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
+        document.getElementById('livesearch_$hakuid').style.innerHTML = '';
+      </script>";
+    }
+  }
+}
+
 if (!function_exists("livesearch_tilihaku")) {
   function livesearch_tilihaku() {
     global $yhtiorow, $kukarow, $palvelin2;
@@ -8723,13 +8838,13 @@ if (!function_exists("livesearch_tilihaku")) {
       $limit = 0;
       if (mysql_num_rows($result) > 0) {
         while ($row = mysql_fetch_assoc($result)) {
-          echo "  <div id='tuote_valinta_$hakuid$row[tunnus]'
+          echo "  <div id='tili_valinta_$hakuid$row[tunnus]'
                 name='selectOptions$hakuid'
                 onmouseover=\"this.className='liveSearchSelectedItem';
                   keyStrokeIndex = -1;
                   var aEls = document.getElementsByName('selectOptions$hakuid');
                   for (var iEl = 0; iEl < aEls.length; iEl++) {
-                    if (aEls[iEl].id.substring(0,14) == 'tuote_valinta_$hakuid' && aEls[iEl].id != 'tuote_valinta_$hakuid$row[tunnus]') {
+                    if (aEls[iEl].id.substring(0,14) == 'tili_valinta_$hakuid' && aEls[iEl].id != 'tili_valinta_$hakuid$row[tunnus]') {
                       document.getElementById(aEls[iEl].id).className='';
                     }
                   } \"
@@ -9673,7 +9788,6 @@ if (!function_exists("livesearch_toimittajahaku")) {
 }
 
 if (!function_exists("livesearch_sarjanumerohaku")) {
-
   function livesearch_sarjanumerohaku($toim = '') {
     global $yhtiorow, $kukarow, $palvelin2;
 
@@ -11368,15 +11482,21 @@ if (!function_exists("progress_bar")) {
     $microtime_current = round($microtime_stop - $microtime_start, 0);
     $microtime_total = round($microtime_current / $current_item * $total_items, 0);
 
-    // Printataan vaan sekunnin välein
-    if ($microtime_current != $microtime_current_last) {
+    // Printataan vaan sekunnin välein, tai jos ollaan vikassa
+    if ($microtime_current != $microtime_current_last or $current_item >= $total_items) {
       $hash = sprintf("%'#".round($current_item / $total_items * $bar_length)."s", '');
 
-      printf("|%-{$bar_length}s| [$current_item/$total_items]\n\n  elapsed: %-{$bar_length}s\nremaining: %-{$bar_length}s\n    total: %-{$bar_length}s\r".chr(27)."[4A",
-        $hash,
-        seconds_readable($microtime_current),
-        seconds_readable($microtime_total - $microtime_current),
-        seconds_readable($microtime_total));
+      $bar_string  = "|%-{$bar_length}s| [$current_item/$total_items]\n\n";
+      $bar_string .= "  elapsed: %-{$bar_length}s\n";
+      $bar_string .= "remaining: %-{$bar_length}s\n";
+      $bar_string .= "    total: %-{$bar_length}s\r";
+      $bar_string .= chr(27)."[4A";
+
+      $elapsed = seconds_readable($microtime_current);
+      $remaining = seconds_readable($microtime_total - $microtime_current);
+      $total = seconds_readable($microtime_total);
+
+      printf($bar_string, $hash, $elapsed, $remaining, $total);
     }
 
     $microtime_current_last = $microtime_current;
@@ -23608,6 +23728,8 @@ if (!function_exists("tee_tiliointi")) {
     $kohde    = (!empty($parametrit['kohde'])) ? $parametrit['kohde'] : 0;
     $projekti = (!empty($parametrit['projekti'])) ? $parametrit['projekti'] : 0;
     $selite   = (!empty($parametrit['selite'])) ? $parametrit['selite'] : '';
+    $liitostunnus    = (!empty($parametrit['liitostunnus'])) ? $parametrit['liitostunnus'] : '';
+    $tapahtumatunnus = (!empty($parametrit['tapahtumatunnus'])) ? $parametrit['tapahtumatunnus'] : '';
 
     require('inc/teetiliointi.inc');
   }
@@ -26606,9 +26728,11 @@ if (!function_exists('hae_mahdolliset_siirto_varastot')) {
   function hae_mahdolliset_siirto_varastot($kohde_varastot = array(), $tuoteno = '') {
     global $kukarow, $yhtiorow;
 
-    $avainsana_where = "";
     if (!empty($kohde_varastot)) {
       $avainsana_where = "  AND a.selitetark IN (".implode(', ', $kohde_varastot).")";
+    }
+    else {
+      return array();
     }
 
     $query = "SELECT a.*,
@@ -26968,10 +27092,14 @@ if (!function_exists('hae_yhtion_toimipaikan_varastot')) {
   function hae_yhtion_toimipaikan_varastot($yhtio_toimipaikka) {
     global $kukarow, $yhtiorow;
 
+    // haetaan kaikki paitsi poistetut varastot annetulta toimipaikalta
+    // sortataan tyypin ja nimityksen mukaan varastot
     $query = "SELECT *
               FROM varastopaikat
               WHERE yhtio     = '{$kukarow['yhtio']}'
-              AND toimipaikka = '{$yhtio_toimipaikka}'";
+                  AND toimipaikka  = '{$yhtio_toimipaikka}'
+                  AND tyyppi      != 'P'
+                  ORDER BY if(tyyppi = '', 0, if(tyyppi = 'V', 1, 2)), nimitys";
     $varastopaikat_result = pupe_query($query);
     $varastopaikat = array();
 
@@ -27098,56 +27226,15 @@ if (!function_exists('tee_kirjanpidollinen_varastosiirto')) {
     }
 
     $myyntitilaus = hae_lasku($myyntitilaus_tunnus);
-    $varastot = hae_yhtion_toimipaikan_varastot($myyntitilaus['yhtion_toimipaikka']);
+    $varastot       = hae_yhtion_toimipaikan_varastot($myyntitilaus['yhtio_toimipaikka']);
+    $varastot       = array_column($varastot, 'tunnus');
 
-    //Yhtiön toimipaikalla voi olla monta varastoa. Alkuksi verrataan vain ensimmäistä.
-    //@TODO muutetaan ehkä jossain vaiheessa niin, että verrataan kaikkiin yhtiön toimipaikan varastoihin
-    if ($myyntitilaus['varasto'] != $varastot[0]['tunnus']) {
+    // Yhtiön toimipaikalla voi olla monta varastoa.
+    if (count($varastot) > 0 and !in_array($myyntitilaus['varasto'], $varastot)) {
       require('tilauskasittely/tilauksesta_varastosiirto.inc');
 
       //Myyntitilaukselle valittu varasto ei ole yhtion toimipaikan varastoissa. Tällöin tehdään kirjanpidollinen varastosiirto
       tilauksesta_varastosiirto($myyntitilaus_tunnus, 'K');
-    }
-  }
-}
-
-if (!function_exists('hae_tuotepaikka')) {
-  function hae_tuotepaikka($tuoteno, $hyllyalue, $hyllynro, $hyllytaso, $hyllyvali) {
-    global $kukarow, $yhtiorow;
-
-    $query = "SELECT *
-              FROM tuotepaikat
-              WHERE yhtio   = '{$kukarow['yhtio']}'
-              AND tuoteno   = '{$tuoteno}'
-              AND hyllyalue = '{$hyllyalue}'
-              AND hyllynro  = '{$hyllynro}'
-              AND hyllytaso = '{$hyllytaso}'
-              AND hyllyvali = '{$hyllyvali}'";
-    $result = pupe_query($query);
-
-    return mysql_fetch_assoc($result);
-  }
-}
-
-if (!function_exists('luo_tuotepaikka')) {
-  function luo_tuotepaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $tuoteno) {
-    global $kukarow, $yhtiorow;
-
-    $tuotepaikka = hae_tuotepaikka($tuoteno, $hyllyalue, $hyllynro, $hyllytaso, $hyllyvali);
-    if (empty($tuotepaikka)) {
-      luo_tapahtuma($tuoteno, 'uusipaikka', $hyllyalue, $hyllynro, $hyllytaso, $hyllyvali);
-      $query = "INSERT INTO tuotepaikat
-                SET yhtio = '{$kukarow['yhtio']}',
-                tuoteno    = '{$tuoteno}',
-                hyllyalue  = '{$hyllyalue}',
-                hyllynro   = '{$hyllynro}',
-                hyllytaso  = '{$hyllytaso}',
-                hyllyvali  = '{$hyllyvali}',
-                laatija    = '{$kukarow['kuka']}',
-                luontiaika = NOW(),
-                muutospvm  = NOW(),
-                muuttaja   = '{$kukarow['yhtio']}'";
-      pupe_query($query);
     }
   }
 }
@@ -27208,27 +27295,41 @@ if (!function_exists('hae_tuotepaikat')) {
 }
 
 if (!function_exists('hae_tuotteen_tuotepaikat')) {
-  function hae_tuotteen_tuotepaikat($tuoteno) {
+  function hae_tuotteen_tuotepaikat($tuoteno, $varasto = 0) {
     global $kukarow, $yhtiorow;
 
     if (empty($tuoteno)) {
       return array();
     }
 
-    $query = "SELECT *
+    $varastojoin = '';
+
+    if (!empty($varasto)) {
+
+      $varastojoin = "JOIN varastopaikat on (
+                      varastopaikat.yhtio=tuotepaikat.yhtio and
+                      concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
+                      concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+                      AND varastopaikat.tunnus = {$varasto}
+                      )";
+    }
+
+    $query = "SELECT tuotepaikat.*
               FROM tuotepaikat
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tuoteno = '{$tuoteno}'";
+                  $varastojoin
+                  WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+                  AND tuotepaikat.tuoteno = '{$tuoteno}'
+                  ORDER BY tuotepaikat.oletus desc";
     $result = pupe_query($query);
 
     $tuotepaikat = array();
+
     while ($tuotepaikka = mysql_fetch_assoc($result)) {
       $tuotepaikat[] = $tuotepaikka;
     }
 
     return $tuotepaikat;
   }
-
 }
 
 if (!function_exists('hae_varasto')) {
@@ -27632,6 +27733,10 @@ if (!function_exists('valitse_oletusvarasto')) {
 
     $varasto = (isset($args['varasto']) and is_numeric($args['varasto'])) ? (int) $args['varasto'] : null;
 
+    $asiakas_tunnus     = isset($args['asiakas_tunnus']) ? (int) $args['asiakas_tunnus'] : 0;
+    $toimipaikka_tunnus = isset($args['toimipaikka']) ? (int) $args['toimipaikka'] : 0;
+    $toimitus_maa       = isset($args['toimitus_maa']) ? $args['toimitus_maa'] : '';
+
     if (isset($args['varastot']) and is_array($args['varastot'])) {
       $varastot = $args['varastot'];
     }
@@ -27640,7 +27745,7 @@ if (!function_exists('valitse_oletusvarasto')) {
     }
 
     // Jos ollaan valittu varasto käyttöliittymästä
-    if (!is_null($varasto) and (in_array($varasto, $varastot) or $varasto == 0)) {
+    if (!is_null($varasto) and (in_array($varasto, $varastot) or $varasto === 0)) {
       return $varasto;
     }
 
@@ -27664,6 +27769,53 @@ if (!function_exists('valitse_oletusvarasto')) {
       return $varastot[0];
     }
 
+    # asiakkaan_avainsanat.tarkenne = oletusruksi
+    if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and $asiakas_tunnus != 0) {
+      $query = "SELECT asiakkaan_avainsanat.avainsana,
+                asiakkaan_avainsanat.tarkenne
+                FROM asiakkaan_avainsanat
+                WHERE asiakkaan_avainsanat.yhtio       = '{$kukarow['yhtio']}'
+                AND asiakkaan_avainsanat.laji          = 'oletusmyyntivarasto'
+                AND asiakkaan_avainsanat.liitostunnus  = {$asiakas_tunnus}
+                AND asiakkaan_avainsanat.tarkenne     != ''";
+      $aov_result = pupe_query($query);
+
+      if (mysql_num_rows($aov_result) > 0) {
+        $aov_row = mysql_fetch_assoc($aov_result);
+
+        if (in_array($aov_row['avainsana'], $varastot)) {
+          return $aov_row['avainsana'];
+        }
+      }
+    }
+
+    # avainsana.selitetark_2 = oletusruksi
+    if ($toimipaikka_tunnus != 0) {
+      // Haetaan varastot joita toimipaikka saa käyttää
+      $query = "SELECT varastopaikat.tunnus
+                FROM avainsana
+                JOIN varastopaikat
+                ON (varastopaikat.yhtio = avainsana.yhtio
+                  AND varastopaikat.tunnus           = avainsana.selitetark
+                  AND (varastopaikat.sallitut_maat LIKE '%{$toimitus_maa}%'
+                     OR varastopaikat.sallitut_maat  = '')
+                  AND varastopaikat.tyyppi          != 'P')
+                WHERE avainsana.yhtio                = '{$kukarow['yhtio']}'
+                AND avainsana.laji                   = 'TOIMMYYNTI'
+                AND avainsana.selite                 = {$toimipaikka_tunnus}
+                AND avainsana.selitetark_2          != ''
+                ORDER BY avainsana.jarjestys ASC";
+      $result = pupe_query($query);
+
+      if (mysql_num_rows($result) > 0) {
+        $varastorow = mysql_fetch_assoc($result);
+
+        if (in_array($varastorow['tunnus'], $varastot)) {
+          return $varastorow['tunnus'];
+        }
+      }
+    }
+
     // jos "Esivalitaan myyntitilaukselle käyttäjän oletusvarasto"
     if ($yhtiorow['oletusvarasto_tilaukselle'] == 'O' and in_array($kukarow['oletus_varasto'], $varastot)) {
       return $kukarow['oletus_varasto'];
@@ -27683,6 +27835,41 @@ if (!function_exists('valitse_oletusvarasto')) {
     }
 
     return 0;
+  }
+}
+
+if (!function_exists('palauta_varasto')) {
+  function palauta_varasto($args) {
+    global $kukarow, $yhtiorow;
+
+    $asiakas_tunnus = isset($args['asiakas_tunnus']) ? (int) $args['asiakas_tunnus'] : 0;
+    $toimipaikka = isset($args['toimipaikka_tunnus']) ? (int) $args['toimipaikka_tunnus'] : 0;
+    $toim = isset($args['toim']) ? $args['toim'] : '';
+    $tilaustyyppi = isset($args['tilaustyyppi']) ? $args['tilaustyyppi'] : '';
+    $varasto = isset($args['varasto']) ? $args['varasto'] : '';
+    $toimitus_maa = isset($args['toimitus_maa']) ? $args['toimitus_maa'] : '';
+
+    $args = array(
+      'asiakas_tunnus' => $asiakas_tunnus,
+      'toimipaikka_tunnus' => $toimipaikka,
+      'toim' => $toim,
+      'tilaustyyppi' => $tilaustyyppi,
+      'toimitus_maa' => $toimitus_maa,
+    );
+
+    $varastot = sallitut_varastot($args);
+
+    $args = array(
+      'varasto' => $varasto,
+      'varastot' => $varastot,
+      'asiakas_tunnus' => $asiakas_tunnus,
+      'toimitus_maa' => $toimitus_maa,
+      'toimipaikka' => $toimipaikka,
+    );
+
+    $varasto = valitse_oletusvarasto($args);
+
+    return array($varasto, $varastot);
   }
 }
 
@@ -27813,6 +28000,118 @@ if (!function_exists('tilauksen_toimipaikka')) {
     }
 
     return 0;
+  }
+}
+
+if (!function_exists('eilahetetta')) {
+  function eilahetetta(array $args) {
+    global $kukarow, $yhtiorow, $toim;
+
+    $srow = isset($args['srow']) ? $args['srow'] : array();
+    $toimtapa_apuro = isset($args['toimtapa_apuro']) ? $args['toimtapa_apuro'] : array();
+    $poikkeava_yhtiorow = isset($args['poikkeava_yhtiorow']) ? $args['poikkeava_yhtiorow'] : array();
+
+    $_yhtiorow = $yhtiorow;
+    if (!empty($poikkeava_yhtiorow)) {
+      $_yhtiorow = $poikkeava_yhtiorow;
+    }
+
+    if (!empty($srow)) {
+      $_eilahetetta_valmistus = (
+              !isset($srow['eilahetetta'])
+              and $_yhtiorow["kerataanko_valmistukset"] == "E"
+              and $toim == "VALMISTAASIAKKAALLE"
+              );
+      $_eilahetetta_tulostustapa = (
+              !isset($srow['eilahetetta'])
+              and $_yhtiorow['lahetteen_tulostustapa'] == 'I'
+              );
+      $_eilahetetta_nouto = (
+              !isset($srow['eilahetetta'])
+              and in_array($toim, array("RIVISYOTTO", "PIKATILAUS"))
+              and $toimtapa_apuro['nouto'] != ''
+              and $_yhtiorow['nouto_suoraan_laskutukseen'] == 'K'
+              );
+
+      if ($srow['eilahetetta'] != ''
+              or $_eilahetetta_valmistus
+              or $_eilahetetta_tulostustapa
+              or $_eilahetetta_nouto) {
+        return true;
+      }
+    }
+    else {
+      $_eilahetetta_valmistus = (
+              $_yhtiorow["kerataanko_valmistukset"] == "E"
+              and $toim == "VALMISTAASIAKKAALLE"
+              );
+      $_eilahetetta_tulostustapa = (
+              $_yhtiorow['lahetteen_tulostustapa'] == 'I'
+              );
+      $_eilahetetta_nouto = (
+              in_array($toim, array("RIVISYOTTO", "PIKATILAUS"))
+              and $toimtapa_apuro['nouto'] != ''
+              and $_yhtiorow['nouto_suoraan_laskutukseen'] == 'K'
+              );
+
+      if ($srow['eilahetetta'] != ''
+              or $_eilahetetta_valmistus
+              or $_eilahetetta_tulostustapa
+              or $_eilahetetta_nouto) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+}
+
+if (!function_exists('osatoimitus')) {
+  function osatoimitus(array $args) {
+    global $kukarow, $yhtiorow, $toim;
+
+    $srow = isset($args['srow']) ? $args['srow'] : array();
+    $oletus = isset($args['oletus']) ? $args['oletus'] : array();
+    $poikkeava_yhtiorow = isset($args['poikkeava_yhtiorow']) ? $args['poikkeava_yhtiorow'] : array();
+    $huomioidaanko_kukarow_kesen = isset($args['huomioidaanko_kukarow_kesen']) ? $args['huomioidaanko_kukarow_kesen'] : false;
+
+    $_yhtiorow = $yhtiorow;
+    if (!empty($poikkeava_yhtiorow)) {
+      $_yhtiorow = $poikkeava_yhtiorow;
+    }
+
+    // Tarjouksia ei oletuksena osatoimiteta
+    $_osatoimitus_oletus = (
+            (in_array($toim, array("TARJOUS", "EXTTARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "")
+            and $kukarow["kesken"] == 0
+            );
+
+    if ($huomioidaanko_kukarow_kesen) {
+      $_osatoimitus_myyntitilaus = (
+            $_yhtiorow['myyntitilaus_osatoimitus'] == 'E'
+            and $kukarow["kesken"] == 0
+            and in_array($toim, array("RIVISYOTTO", "PIKATILAUS"))
+            );
+    }
+    else {
+      $_osatoimitus_myyntitilaus = (
+            $_yhtiorow['myyntitilaus_osatoimitus'] == 'E'
+            and in_array($toim, array("RIVISYOTTO", "PIKATILAUS"))
+            );
+    }
+
+    if (!empty($srow)) {
+      if ($srow['osatoimitus'] != '' or $_osatoimitus_oletus or $_osatoimitus_myyntitilaus) {
+        return true;
+      }
+    }
+    else {
+      if ($_osatoimitus_oletus or $_osatoimitus_myyntitilaus) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }
 

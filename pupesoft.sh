@@ -27,10 +27,10 @@ S3BUCKET=""
 # Backupataan kanta
 NOMYSQLBACKUP=""
 
-# Mysql slow queries logfile
+# MySQL slow queries logfile
 SLOWLOG=""
 
-# Joa mysql on toisella palvelimella
+# Jos MySQL on toisella palvelimella tai pitää antaa custom MySQL portti
 DBHOST=""
 
 # Komennot

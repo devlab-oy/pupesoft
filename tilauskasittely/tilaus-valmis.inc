@@ -13,13 +13,30 @@ if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
   exit;
 }
 
+// jos tilauksen varasto on setattu ja on laaja toimipaikkakäsittely,
+// tutkitaan eroaako varaston toimipaikka tilauksen toimipaikasta. Jos, haetaan $yhtiorow uusiksi.
+if ($laskurow['varasto'] != 0 and $yhtiorow['toimipaikkakasittely'] == 'L') {
+
+  $query = "SELECT toimipaikka
+            FROM varastopaikat
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus  = {$laskurow['varasto']}";
+  $_tp_res = pupe_query($query);
+  $_tp_row = mysql_fetch_assoc($_tp_res);
+
+  if ($_tp_row['toimipaikka'] != $laskurow['yhtio_toimipaikka']) {
+    $kukarow['toimipaikka'] = $_tp_row['toimipaikka'];
+    $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+  }
+}
+
 if ($laskurow['tila'] == 'N' and $laskurow['alatila'] == '') {
   //Kampanjoiden tarkistus ja tuotteiden lisäys jos osuu johonkin.
   tarkista_osuuko_myyntitilaus_kampanjaan($laskurow['tunnus']);
 }
 
 //jos tilaustyyppi on 2 ja ohjausmerkki on tyhjää, niin pistetään ohjausmerkiksi tilaustyypin selkokielinen nimi
-if ($laskurow['tilaustyyppi'] == "2" AND trim($laskurow['ohjausmerkki']) == "") {
+if ($laskurow['tilaustyyppi'] == "2" and trim($laskurow['ohjausmerkki']) == "") {
   $ohjausmerkkilisa = ", ohjausmerkki = 'Varastotäydennys'";
   $laskurow["ohjausmerkki"] = "Varastotäydennys";
 }
@@ -58,11 +75,32 @@ $query = "SELECT *
 $maksuehto_result = pupe_query($query);
 $maksuehtorow = mysql_fetch_assoc($maksuehto_result);
 
+// Tarkistetaan, onko kaikki rivit hyvitysrivejä -> ei luottorajatarkistusta
+$query = "SELECT tunnus
+          FROM tilausrivi
+          WHERE yhtio  = '{$kukarow['yhtio']}'
+          AND otunnus  = '{$laskurow['tunnus']}'
+          AND tyyppi  != 'D'
+          AND (varattu + jt) > 0 ";
+$veloitus_result = pupe_query($query);
+$veloitusrow = mysql_fetch_assoc($veloitus_result);
+
 // Myynti esteteään jos luottoraja on ylitetty (K - kaikki estetään, E -  kaikki muu ku myyjien tekemä estetään)
 // Jos maksuehto on käteinen, sallitaan luottorajan ylitys
 // samma på erapaivan_ylityksen_raja
-$luottoraja_chk = ((in_array($yhtiorow["luottorajan_ylitys"], array("K","J","L","M"))             or (in_array($yhtiorow["luottorajan_ylitys"], array("E","F"))             and ($kukarow["extranet"] != "" or $tilausvalmiskutsuja != "TILAUSMYYNTI"))) and $tilausvalmis_asiakas_row['luottoraja'] != 0 and $maksuehtorow['kateinen'] == '') ? 1 : 0;
-$erapaiva_chk   =  (in_array($yhtiorow["erapaivan_ylityksen_toimenpide"], array("K","J","L","M")) or (in_array($yhtiorow["erapaivan_ylityksen_toimenpide"], array("E","F")) and ($kukarow["extranet"] != "" or $tilausvalmiskutsuja != "TILAUSMYYNTI"))) ? 1 : 0;
+$luottoraja_chk = ((in_array($yhtiorow["luottorajan_ylitys"], array("K", "J", "L", "M"))
+    or (in_array($yhtiorow["luottorajan_ylitys"], array("E", "F"))
+      and ($kukarow["extranet"] != ""
+        or $tilausvalmiskutsuja != "TILAUSMYYNTI")))
+  and $tilausvalmis_asiakas_row['luottoraja'] != 0
+  and $maksuehtorow['kateinen'] == ''
+  and strpos($_SERVER['SCRIPT_NAME'], "korkolasku.php") === FALSE
+  and mysql_num_rows($veloitus_result) > 0) ? 1 : 0;
+
+$erapaiva_chk   =  (in_array($yhtiorow["erapaivan_ylityksen_toimenpide"], array("K", "J", "L", "M"))
+  or (in_array($yhtiorow["erapaivan_ylityksen_toimenpide"], array("E", "F"))
+    and ($kukarow["extranet"] != ""
+      or $tilausvalmiskutsuja != "TILAUSMYYNTI"))) ? 1 : 0;
 
 if ($luottoraja_chk or $erapaiva_chk) {
 
@@ -80,10 +118,10 @@ if ($luottoraja_chk or $erapaiva_chk) {
   ob_start();
 
   if ($toim != "EXTRANET") {
-    require ("raportit/saatanat.php");
+    require "raportit/saatanat.php";
   }
   else {
-    require ("saatanat.php");
+    require "saatanat.php";
   }
 
   ob_end_clean();
@@ -538,7 +576,7 @@ else {
 
     if (!empty($sahkoinen_lahete) and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and !empty($sahkoinen_lahete_toim) and in_array($toim, $sahkoinen_lahete_toim)) {
 
-      require("inc/sahkoinen_lahete.class.inc");
+      require "inc/sahkoinen_lahete.class.inc";
 
       sahkoinen_lahete($laskurow);
     }
@@ -626,7 +664,7 @@ else {
           $valittu_tulostin = "AUTOMAAGINEN_VALINTA";
         }
 
-        require ("tilauskasittely/verkkolasku.php");
+        require "tilauskasittely/verkkolasku.php";
 
         unset($valittu_tulostin);
       }
@@ -946,7 +984,7 @@ else {
         $valittu_tulostin = "AUTOMAAGINEN_VALINTA";
       }
 
-      require ("tilauskasittely/verkkolasku.php");
+      require "tilauskasittely/verkkolasku.php";
 
       unset($valittu_tulostin);
     }
@@ -985,7 +1023,7 @@ else {
 
         if (!empty($sahkoinen_lahete) and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and !empty($sahkoinen_lahete_toim) and in_array($toim, $sahkoinen_lahete_toim)) {
 
-          require("inc/sahkoinen_lahete.class.inc");
+          require "inc/sahkoinen_lahete.class.inc";
 
           sahkoinen_lahete($laskurow);
         }
@@ -993,7 +1031,7 @@ else {
         if ($toim != "REKLAMAATIO") {
           // Tulostetaan keräyslista
           $tilausnumeroita = $laskurow["tunnus"];
-          require("tilaus-valmis-tulostus.inc");
+          require "tilaus-valmis-tulostus.inc";
         }
 
         // Tulostetaan lähete
@@ -1019,7 +1057,7 @@ else {
 
           $myynti_vai_osto = 'M';
 
-          require("editilaus_out_futur.inc");
+          require "editilaus_out_futur.inc";
 
           $laskurow = $tmp_laskurow;
         }
@@ -1095,7 +1133,7 @@ else {
 
         // Jos meillä on osatoimituskielto, ni mennään katsomaan pitääkö tilaus jättää odottamaan tuotteita
         if ($laskurow['osatoimitus'] != '') {
-          require ("tilauskasittely/tilaus-valmis-valitsetila.inc");
+          require "tilauskasittely/tilaus-valmis-valitsetila.inc";
         }
       }
 
@@ -1113,7 +1151,7 @@ else {
           $valittu_tulostin = "AUTOMAAGINEN_VALINTA";
         }
 
-        require ("tilauskasittely/verkkolasku.php");
+        require "tilauskasittely/verkkolasku.php";
 
         unset($valittu_tulostin);
       }
@@ -1424,17 +1462,6 @@ else {
         // Intrastat-tiedot
         $laskurow = palauta_intrastat_tiedot($laskurow, $varasto);
 
-        // Haetaan aina oikean toimipaikan yhtiön parametrit
-            $query = "SELECT toimipaikka
-                      FROM varastopaikat
-                      WHERE yhtio = '$kukarow[yhtio]'
-                      AND tunnus  = {$varasto}";
-            $_tp_res = pupe_query($query);
-            $_tp_row = mysql_fetch_assoc($_tp_res);
-
-        $kukarow['toimipaikka'] = $_tp_row['yhtio_toimipaikka'];
-        $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
-
         // varasto vaihtuu, splitataan tilaus, paitsi jos kyseessä on jv-tilaus jonka rahtikirja tulostetaan heti, tai jos spliauskielto on trigattu
         // omalle_tilaukselle - tilauksia ei splitata muuten ku omiksi tilauksiksi (eli ei esim splitata varastoittain tai vyöhykkeittäin)
         if ((  ((($varasto != $edvarasto and $edvarasto != 'x' and $edomalle_tilaukselle == 0) or
@@ -1650,9 +1677,6 @@ else {
         }
       }
 
-      $kukarow['toimipaikka'] = $laskurow['yhtio_toimipaikka'];
-      $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
-
       // Valitaan paras varasto ja tulostusalue alkuperäiselle osalla
       asort($varasto_kpl_array);
       asort($tulalue_kpl_array);
@@ -1696,7 +1720,7 @@ else {
       $ohjausmerkkilisa = "";
 
       // Jos sarjatilaus ja ohjausmerkki puuttuu
-      if ($omalle_tilaukselle > 0 AND trim($laskurow['ohjausmerkki']) == "") {
+      if ($omalle_tilaukselle > 0 and trim($laskurow['ohjausmerkki']) == "") {
         $ohjausmerkkilisa = " , ohjausmerkki = '{$ohjausmerkki_nro}-{$laskurow['vanhatunnus']}' ";
       }
 
@@ -1784,10 +1808,8 @@ else {
         $result = pupe_query($query);
 
         if (mysql_num_rows($result) > 0) {
-          $lahtorow = mysql_fetch_assoc($result);
 
-          $kukarow['toimipaikka'] = $lahtorow['yhtio_toimipaikka'];
-          $yhtiorow_chk = hae_yhtion_parametrit($lahtorow['yhtio']);
+          $lahtorow = mysql_fetch_assoc($result);
 
           if ($yhtiorow_chk['kerayserat'] != 'K') continue;
 
@@ -1808,8 +1830,6 @@ else {
           }
         }
       }
-
-      $kukarow['toimipaikka'] = $laskurow['yhtio_toimipaikka'];
 
       foreach ($varasto_chk_array as $_otunnus => $_ulkoinen_jarjestelma) {
         if ($laskurow['tila'] == 'N' and ($laskurow['alatila'] == '' or ($laskurow['alatila'] == 'A' and isset($tilausvalmiskutsuja) and $tilausvalmiskutsuja == "EDITILAUS")) and $_ulkoinen_jarjestelma == 'P') {
@@ -1859,25 +1879,23 @@ else {
 
           if (!empty($sahkoinen_lahete) and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and !empty($sahkoinen_lahete_toim) and in_array($toim, $sahkoinen_lahete_toim)) {
 
-            require("inc/sahkoinen_lahete.class.inc");
+            require "inc/sahkoinen_lahete.class.inc";
 
             sahkoinen_lahete($laskurow);
           }
 
           $kutsuja = "tilaus-valmis.inc";
 
-          require("tilaus-valmis-valitsetila.inc");
+          require "tilaus-valmis-valitsetila.inc";
         }
       }
       else {
         foreach ($tilausnumerot as $tilausnumero) {
+
           //luetaan laskun tiedot uudestaan tässä, per splitti
           $query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";
           $result = pupe_query($query);
           $laskurow = mysql_fetch_assoc($result);
-
-          $kukarow['toimipaikka'] = $laskurow['yhtio_toimipaikka'];
-          $yhtiorow = hae_yhtion_parametrit($laskurow['yhtio']);
 
           // Jos tullaan JT-selauksen kautta niin ei laiteta vahvistuksia jos yhtiöllä ei oo erikseen haluttu niitä
           if (isset($tilausvalmiskutsuja) and $tilausvalmiskutsuja == "JTSELAUS" and (($yhtiorow["tilausvahvistus_jttoimituksista"] == "" and $tilausvalmis_asiakas_row["tilausvahvistus_jttoimituksista"] != "K") or $tilausvalmis_asiakas_row["tilausvahvistus_jttoimituksista"] == "E")) {
@@ -1904,7 +1922,7 @@ else {
 
           if (!empty($sahkoinen_lahete) and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and !empty($sahkoinen_lahete_toim) and in_array($toim, $sahkoinen_lahete_toim)) {
 
-            require("inc/sahkoinen_lahete.class.inc");
+            require "inc/sahkoinen_lahete.class.inc";
 
             sahkoinen_lahete($laskurow);
           }
@@ -1912,7 +1930,7 @@ else {
           ///* Tässä katotaan onko lähetteellä tosiaan mitään kerättävää *///
           $kutsuja = "tilaus-valmis.inc";
 
-          require("tilaus-valmis-valitsetila.inc");
+          require "tilaus-valmis-valitsetila.inc";
         }
       }
 
@@ -1958,9 +1976,6 @@ else {
 
           $jt_chk_row = mysql_fetch_assoc($jt_chk_res);
 
-          $kukarow['toimipaikka'] = $jt_chk_row['yhtio_toimipaikka'];
-          $yhtiorow = hae_yhtion_parametrit($jt_chk_row['yhtio']);
-
           if ($yhtiorow['jt_email'] == '') continue;
 
           $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
@@ -1986,9 +2001,6 @@ else {
           echo t("Lähetettiin jälkitoimitus-sähköposti")."...<br><br>";
         }
       }
-
-      $kukarow['toimipaikka'] = $laskurow['yhtio_toimipaikka'];
-      $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
     }
   } // end jos yksikin rivi kerätty else haara
 }

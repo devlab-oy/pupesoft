@@ -732,6 +732,8 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
           echo "<font class='ok'>".t("Löytyi liitteitä asiakkaalta")."</font><br>";
           while ($ahrow = mysql_fetch_assoc($hresult)) {
 
+            $ahrow['filename'] = mysql_real_escape_string($ahrow['filename']);
+
             $tarksql = "SELECT *
                         FROM liitetiedostot
                         where yhtio         = '$kukarow[yhtio]'

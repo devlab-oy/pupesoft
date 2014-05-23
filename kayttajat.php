@@ -23,14 +23,14 @@ if (!isset($oletus_profiili))  $oletus_profiili = '';
 if (!isset($oletus_asiakastiedot)) $oletus_asiakastiedot = '';
 if (!isset($myyja))        $myyja = "";
 
-if (isset($toim) and $toim == 'extranet') {
+if ($toim == 'extranet') {
   echo "Extranet-";
 }
 
 echo t("Käyttäjähallinta"),":</font><hr>";
 
 // tää on tällänän kikka.. älkää seotko.. en jaksa pyörittää toimia joka formista vaikka pitäs..
-if (isset($toim)) $PHP_SELF = $PHP_SELF."?toim={$toim}";
+$PHP_SELF = $PHP_SELF."?toim={$toim}";
 
 if (isset($generatepass) and $generatepass != "") {
   $generoitupass = trim(shell_exec("openssl rand -base64 12"));
@@ -39,7 +39,7 @@ if (isset($generatepass) and $generatepass != "") {
 }
 
 if (isset($muutparametrit)) {
-  list ($tee, $selkuka, $kumpi, $yoaid) = explode("#", $muutparametrit);
+  list ($tee, $selkuka, $kumpi, $yoaid) = explode("!¡!", $muutparametrit);
 
   if ($kumpi == 1) {
     $ytunnus_oa_id = $asiakasid;
@@ -52,10 +52,14 @@ if (isset($muutparametrit)) {
 
   $ytunnus_oa = "";
   $ytunnus_oat = "";
+
+  if ($tee == "MUUTA" and !empty($ytunnus) and isset($toimipaikka_rajaus) and $toimipaikka_rajaus != "") {
+    $kumpi == 1 ? $ytunnus_oa = $ytunnus : $ytunnus_oat = $ytunnus;
+  }
 }
 
 if ($tee == "MUUTA" and $ytunnus_oa != "" and $ytunnus_oa != '0') {
-  $muutparametrit = "MUUTA#{$selkuka}#1#{$oletus_asiakastiedot}";
+  $muutparametrit = "MUUTA!¡!{$selkuka}!¡!1!¡!{$oletus_asiakastiedot}";
   $ytunnus     = $ytunnus_oa;
   $asiakasid     = "";
   $ytunnus_oat    = "";
@@ -86,7 +90,7 @@ elseif (isset($ytunnus_oa) and $ytunnus_oa == '0') {
 }
 
 if ($tee == "MUUTA" and $ytunnus_oat != "" and $ytunnus_oat != '0') {
-  $muutparametrit = "MUUTA#{$selkuka}#2#{$oletus_asiakas}";
+  $muutparametrit = "MUUTA!¡!{$selkuka}!¡!2!¡!{$oletus_asiakas}";
   $ytunnus     = $ytunnus_oat;
   $asiakasid     = "";
   $ytunnus_oa    = "";
@@ -496,6 +500,11 @@ if (isset($selkuka) and ($selkuka == "UUSI" or $selkuka == "KOPSAAUUSI")) {
 }
 elseif (strtoupper($toim) == 'EXTRANET' and isset($selkuka)) {
   $query = "SELECT * FROM kuka WHERE tunnus = '{$selkuka}' and extranet != ''";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) == 0) {
+    $query = "SELECT * FROM kuka WHERE kuka = '{$selkuka}' and extranet != ''";
+  }
 }
 elseif (isset($selkuka)) {
   $query = "SELECT * FROM kuka WHERE tunnus = '{$selkuka}' and extranet = ''";
@@ -1558,13 +1567,11 @@ if ($tee == "") {
   if ($toim == "extranet") $extrsel = "X";
   else $extrsel = "";
 
-  $query = "SELECT kuka.nimi, kuka.kuka, kuka.tunnus, if (count(oikeu.tunnus) > 0, 0, 1) aktiivinen
+  $query = "SELECT kuka.nimi, kuka.kuka, kuka.tunnus, kuka.aktiivinen
             FROM kuka
-            LEFT JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
             WHERE kuka.yhtio  = '{$kukarow['yhtio']}'
             AND kuka.extranet = '{$extrsel}'
-            GROUP BY 1,2,3
-            ORDER BY aktiivinen, kuka.nimi";
+            ORDER BY kuka.aktiivinen, kuka.nimi";
   $kukares = pupe_query($query);
 
   echo "<optgroup label='",t("Aktiiviset käyttäjät"),"'>";

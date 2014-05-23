@@ -118,7 +118,7 @@ class MagentoClient {
 
     $categoryaccesscontrol = $this->_categoryaccesscontrol;
     // Magento kategorian tunnus, jonka alle kaikki tuoteryhmät lisätään (pitää katsoa magentosta)
-    $parent_id = $this->_parent_id; 
+    $parent_id = $this->_parent_id;
     $count = 0;
 
     // Loopataan osastot ja tuoteryhmat
@@ -203,30 +203,30 @@ class MagentoClient {
 
           }
           else {
-           
+
             // Haetaan ancestorien tunnukset
             if (count($alakategoria['ancestors']) > 2) {
-            list($parent_ids, $parent_names) = $this->getCategoryTree($alakategoria['nimi'], 
-                                                                      $alakategoria['ancestors'], 
+            list($parent_ids, $parent_names) = $this->getCategoryTree($alakategoria['nimi'],
+                                                                      $alakategoria['ancestors'],
                                                                       $category_tree['children'][0]['children']);
             echo "Palautui\n";
             var_dump($parent_ids);
             var_dump($parent_names);
           }
-            
-            
+
+
           }
-          
+
           // Koitetaan perustaa tuoteryhmä tai koko ketju
           foreach ($parent_ids as $key => $value) {
             // Haetaan kategoriat joka kerta koska lisättäessä puu muuttuu
             $category_tree = $this->getCategories();
 
             $parent_id = $value;
-            
+
             // Katsotaan pitääkö kategoria piilottaa menusta ---Yli 3-tason(tästäkin parami salasanat.php?) alakategoriat pitäisi piilottaa menusta
             $inclusion = $syvyys > 3  ? 0 : 1;
-            
+
             $alakategoria['nimi'] = count($parent_ids) > 1 ? utf8_encode($parent_names[$key]) : $alakategoria['nimi'];
             // Tarkistetaan onko kategoriaa magentossa
             if ($syvyys > 1) {
@@ -237,7 +237,7 @@ class MagentoClient {
             }
             // Jos kategoria löytyy niin mennään seuraavaan soluun
             if ($found) continue;
-            
+
             // Lisätään kategoria, jos ei löytynyt
             $sub_category_data = array(
               'name'                  => $alakategoria['nimi'],
@@ -341,11 +341,11 @@ class MagentoClient {
       $palikat = $tuote['breadcrumbs'];
       // Lisätään myös tuotepuun kategoriat
       if (isset($palikat) and count($palikat) > 0) {
-        
+
         //DEBUG
         $kuntti = count($palikat);
         echo "Palikoita oli: $kuntti \n";
-        
+
         $loppu = $this->checkSubCategory($palikat);
         echo "Loppusitaatti: \n";
         var_dump($loppu);
@@ -926,7 +926,7 @@ class MagentoClient {
     $category_tree = $this->getCategories();
     // Skipataan "root" taso myös magentosta
     $category_tree = $category_tree['children'][0]['children'];
-    
+
 
     //$breadcrumbs = array(utf8_encode("ASENNUSTARVIKKEET"), utf8_encode("PUTKITUSTARVIKKEET"));
     // Perustettava ketju
@@ -960,7 +960,7 @@ class MagentoClient {
         if($counter > 50) break;
       }
       */
-      
+
     }
     echo "löytyi $jou";
     var_dump($category_chains_to_create);
@@ -972,10 +972,10 @@ class MagentoClient {
     else {
       //return $this->createSubCategory($category_chains_to_create);
     }
-    
+
   }
-  
-  // 
+
+  //
   private function getSubCategoryIdFromArray($needle, $haystack) {
 
     foreach($haystack as $i => $category) {
@@ -987,29 +987,29 @@ class MagentoClient {
       return $haystack['children'];
     }
     else return array ();
-    
+
   }
-  
+
   /**
    * Perustaa kategorian Magenton kategoriapuuhun
    * parametreiksi koko perustettavan kategoriaketjun nimet arrayssa
-   * alkaen ykköstasolta, key = 
-   * Palauttaa: 
+   * alkaen ykköstasolta, key =
+   * Palauttaa:
    */
   private function createSubCategory($category_chain) {
-    
+
     echo "tultiin createSubCategory";
     var_dump($category_chain);
     // Skipataan "root" taso myös magentosta
     // $category_tree = $category_tree['children'][0]['children'];
-    // 
+    //
     //     $foundthis = '';
-    // 
+    //
     //     if (count($foundthis) > 0 and $searchname != '') {
-    //       
+    //
     //      // list($parent_ids,$parent_names) = $this->getCategoryTree($name, $ancestors, $foundthis, $taso);
-    //     } 
-    //    
+    //     }
+    //
     // Palautetaan syvimmän luodun keijon id
     //return array($parent_ids, $parent_names);
   }
@@ -1217,7 +1217,7 @@ class MagentoClient {
     // Palautetaan tuotekuvat
     return $tuotekuvat;
   }
-  
+
   /**
    * Lisää päivitettyjä asiakkaita Magento-verkkokauppaan.
    *
@@ -1243,7 +1243,7 @@ class MagentoClient {
           'group_id'        => 1,
           //'group_id'        => $asiakas['aleryhma'],
       );
-      
+
       $laskutus_osoite_data = array(
           'firstname'        => $asiakas['laskutus_nimi'],
           'lastname'        => $asiakas['laskutus_nimi'],
@@ -1255,7 +1255,7 @@ class MagentoClient {
           'company'        => $asiakas['nimi'],
           'is_default_billing'    => true,
       );
-      
+
       $toimitus_osoite_data = array(
           'firstname'        => $asiakas['toimitus_nimi'],
           'lastname'        => $asiakas['toimitus_nimi'],
@@ -1274,8 +1274,8 @@ class MagentoClient {
       if (empty($asiakas['magento_id'])) {
         try {
           $result = $this->_proxy->call(
-            $this->_session, 
-            'customer.create', 
+            $this->_session,
+            'customer.create',
              array(
                     $asiakas_data
             ));
@@ -1300,8 +1300,8 @@ class MagentoClient {
       else {
         try {
           $result = $this->_proxy->call(
-            $this->_session, 
-            'customer.update', 
+            $this->_session,
+            'customer.update',
              array(
                     $asiakas['magento_id'],
                     $asiakas_data

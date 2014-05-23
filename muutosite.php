@@ -1217,6 +1217,8 @@ if ($tee == 'E' or $tee == 'F') {
     $varastosiirto = mysql_fetch_assoc($varastosiirto_result);
     $_onko_varastosiirto = ($varastosiirto['tila'] == 'G' and $varastosiirto['alatila'] == 'X');
     $_kirjanpidollinen_varastosiirto = ($yhtiorow['kirjanpidollinen_varastosiirto_myyntitilaukselta'] == 'K');
+    //Tarkistetaan onko myyntilaskun vanhatunnus linkiss‰ vastaanotettu varastosiirto
+    //ja onko kirjanpidollinen varastosiirto p‰‰ll‰
     if ($_kirjanpidollinen_varastosiirto and $_onko_varastosiirto) {
       echo "<tr>";
       echo "<th>".t('Varastosiirtotosite')."</th>";

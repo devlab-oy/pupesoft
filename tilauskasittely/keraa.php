@@ -464,11 +464,11 @@ if ($tee == 'P') {
 
     if ($ok_chk) {
       for ($y=0; $y<count($kerivi); $y++) {
-        $que0 = "  SELECT tilausrivi.tunnus
-              FROM tilausrivi
-              JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
-              WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-              AND tilausrivi.tunnus  = '{$kerivi[$y]}'";
+        $que0 = "SELECT tilausrivi.tunnus
+                 FROM tilausrivi
+                 JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
+                 WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                 AND tilausrivi.tunnus  = '{$kerivi[$y]}'";
         $tark = pupe_query($que0);
 
         if (mysql_num_rows($tark) == 1 and trim($keraysera_pakkaus[$kerivi[$y]]) == '') $virherivi++;
@@ -945,9 +945,9 @@ if ($tee == 'P') {
 
                   // Jotta saadaa lasku kopsattua kivasti jos se splittaantuu
                   $laspliq = "SELECT *
-                        FROM lasku
-                        WHERE yhtio = '$kukarow[yhtio]'
-                        and tunnus = '$tilrivirow[otunnus]'";
+                              FROM lasku
+                              WHERE yhtio = '$kukarow[yhtio]'
+                              and tunnus  = '$tilrivirow[otunnus]'";
                   $laskusplitres = pupe_query($laspliq);
                   $laskusplitrow = mysql_fetch_assoc($laskusplitres);
 
@@ -997,10 +997,10 @@ if ($tee == 'P') {
                   $insres  = pupe_query($kysely);
                   $tilausnumerot[$tilrivirow["otunnus"]] = mysql_insert_id();
 
-                  $kysely2 = "  SELECT laskutus_nimi, laskutus_nimitark, laskutus_osoite, laskutus_postino, laskutus_postitp, laskutus_maa, laatija, luontiaika, otunnus
-                          FROM laskun_lisatiedot
-                          WHERE yhtio = '$kukarow[yhtio]'
-                          AND otunnus = '$tilrivirow[otunnus]'";
+                  $kysely2 = "SELECT laskutus_nimi, laskutus_nimitark, laskutus_osoite, laskutus_postino, laskutus_postitp, laskutus_maa, laatija, luontiaika, otunnus
+                              FROM laskun_lisatiedot
+                              WHERE yhtio = '$kukarow[yhtio]'
+                              AND otunnus = '$tilrivirow[otunnus]'";
                   $lisatiedot_result = pupe_query($kysely2);
                   $lisatiedot_row = mysql_fetch_assoc($lisatiedot_result);
 
@@ -1281,14 +1281,14 @@ if ($tee == 'P') {
           // Pitää lisätä päivityksen yhteydessä myös tuotepaikka...
           if ($toim == 'VASTAANOTA_REKLAMAATIO' and $keraysvirhe == 0) {
 
-            $select = "  SELECT *
-                  FROM tuotepaikat
-                  WHERE yhtio   = '$kukarow[yhtio]'
-                  AND hyllyalue   = '$reklahyllyalue'
-                  AND hyllynro   = '$reklahyllynro'
-                  AND hyllyvali   = '$reklahyllyvali'
-                  AND hyllytaso   = '$reklahyllytaso'
-                  AND tuoteno   = '{$rivin_puhdas_tuoteno[$apui]}'";
+            $select = "SELECT *
+                       FROM tuotepaikat
+                       WHERE yhtio   = '$kukarow[yhtio]'
+                       AND hyllyalue = '$reklahyllyalue'
+                       AND hyllynro  = '$reklahyllynro'
+                       AND hyllyvali = '$reklahyllyvali'
+                       AND hyllytaso = '$reklahyllytaso'
+                       AND tuoteno   = '{$rivin_puhdas_tuoteno[$apui]}'";
             $hakures = pupe_query($select);
             $sresults = mysql_fetch_assoc($hakures);
 

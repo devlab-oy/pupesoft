@@ -42,6 +42,8 @@ else{
 }
 
 $ytunnus     = addslashes(trim($ytunnus));
+$ytunnus_talteen = $ytunnus;
+
 $limit      = 1000; // montako riviä on maksimi
 $monta       = 0;
 $asiakasrajaus   = "";
@@ -440,10 +442,10 @@ if ($monta > 1 and $monta <= $limit) {
 
     if ($yhtiorow['toimipaikkakasittely'] == 'L') {
 
-        echo "<th>";
+      echo "<th>";
 
-        echo "<form method='post'>";
-        echo "<input type='hidden' name='ale1' value='$ale1'>";
+      echo "<form method='post'>";
+      echo "<input type='hidden' name='ale1' value='$ale1'>";
       echo "<input type='hidden' name='ale2' value='$ale2'>";
       echo "<input type='hidden' name='ale3' value='$ale3'>";
       echo "<input type='hidden' name='from' value='$from'>";
@@ -471,6 +473,7 @@ if ($monta > 1 and $monta <= $limit) {
       echo "<input type='hidden' name='toim' value='$toim'>";
       echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
       echo "<input type='hidden' name='var' value='$var'>";
+      echo "<input type='hidden' name='muutparametrit' value='$muutparametrit'>";
 
         $query = "SELECT *
                   FROM yhtion_toimipaikat
@@ -481,6 +484,7 @@ if ($monta > 1 and $monta <= $limit) {
 
         if (mysql_num_rows($vresult) > 0) {
 
+          echo "<input type='hidden' name='ytunnus' value='{$ytunnus_talteen}'>";
           echo "<select name='toimipaikka_rajaus' onchange='this.form.submit()'>";
           echo "<option value='X' "; if($toimipaikka_rajaus == 'X') {echo 'selected';} echo ">" . t("Kaikki") . "</option>";
           echo "<option value='0' "; if(empty($toimipaikka_rajaus)) {echo 'selected';} echo ">" . t("Ei toimipaikkaa") . "</option>";
@@ -711,6 +715,7 @@ if ($monta != 1) {
     }
 
     echo "<form method='post'>";
+    echo "<input type='hidden' name='ytunnus' value='{$ytunnus_talteen}'>";
     echo "<input type='hidden' name='toimipaikka_rajaus' value='X'>";
     echo "<input type='hidden' name='ale1' value='$ale1'>";
     echo "<input type='hidden' name='ale2' value='$ale2'>";
@@ -740,6 +745,7 @@ if ($monta != 1) {
     echo "<input type='hidden' name='toim' value='$toim'>";
     echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
     echo "<input type='hidden' name='var' value='$var'>";
+    echo "<input type='hidden' name='muutparametrit' value='{$muutparametrit}'>";
     echo "<input type='submit' value='".t("Hae kaikista toimipaikoista")."'>";
     echo "</form>";
   }

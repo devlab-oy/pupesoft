@@ -1667,16 +1667,16 @@ elseif ($kutsuja == "") {
     }
 
     // kustannuspaikka näkyviin asiakkaan toiveesta..
-    $kustpq = "  SELECT kustp,
-            (SELECT DISTINCT nimi
-            FROM kustannuspaikka
-            WHERE kustannuspaikka.yhtio=tiliointi.yhtio AND kustannuspaikka.tunnus=tiliointi.kustp) kustp2
-          FROM tiliointi
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND ltunnus = '$trow[tunnus]'
-          and kustp != 0
-          and korjattu = ''
-          ORDER BY tiliointi.tunnus LIMIT 1";
+    $kustpq = "SELECT kustp,
+               (SELECT DISTINCT nimi
+               FROM kustannuspaikka
+               WHERE kustannuspaikka.yhtio=tiliointi.yhtio AND kustannuspaikka.tunnus=tiliointi.kustp) kustp2
+               FROM tiliointi
+               WHERE yhtio   = '$kukarow[yhtio]'
+               AND ltunnus   = '$trow[tunnus]'
+               and kustp    != 0
+               and korjattu  = ''
+               ORDER BY tiliointi.tunnus LIMIT 1";
 
     $kustpres = pupe_query($kustpq);
     $kustprivi = mysql_fetch_assoc($kustpres);

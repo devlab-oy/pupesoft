@@ -33,9 +33,9 @@ if ($tee_pdf == 'tulosta_tratta') {
 }
 
 if ($tee == 'tulosta_korkoerittely') {
-  $apuqu = "  SELECT *
-        from lasku
-        where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
+  $apuqu = "SELECT *
+            from lasku
+            where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
   $res = pupe_query($apuqu);
   if (mysql_num_rows($res) == 1) {
     $trow = mysql_fetch_assoc($res);
@@ -230,9 +230,9 @@ if (isset($tee_Y) or isset($tee_Z) or isset($tee_X) or isset($tee_XKAIKKI) or is
                  AND lasku.tapvm                   <= '{$vvl}-{$kkl}-{$ppl}'
                  GROUP BY 1,2,3,4,5,6
                  HAVING saamistilejä != 1)
-                 
+
                  UNION
-                 
+
                  (SELECT lasku.tunnus ltunnus, lasku.laskunro, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm,
                  count(tiliointi.tunnus) saamistilejä,
                  round(sum(tiliointi.summa),2) heitto
@@ -283,9 +283,9 @@ if (isset($tee_Y) or isset($tee_Z) or isset($tee_X) or isset($tee_XKAIKKI) or is
                  AND lasku.tapvm   <= '{$vvl}-{$kkl}-{$ppl}'
                  HAVING (alv1 != 'MV' or alv2 != 'MV')
                  ORDER by lasku.laskunro)
-                 
+
                  UNION DISTINCT
-                 
+
                  (SELECT distinct l2.tunnus ltunnus, l2.laskunro, l2.nimi, l2.tapvm, tr1.tuoteno, s1.sarjanumero, if(tr2.alv>=500, 'MV', tr2.alv) alv2, if(tr1.alv>=500, 'MV', tr1.alv) alv1, lasku.laskunro, lasku.nimi
                  FROM lasku
                  JOIN tiliointi t1 ON lasku.yhtio=t1.yhtio and lasku.tunnus=t1.ltunnus and t1.korjattu = '' and t1.tilino='$yhtiorow[myynti_marginaali]'
@@ -609,29 +609,29 @@ if (isset($tee_Y) or isset($tee_Z) or isset($tee_X) or isset($tee_XKAIKKI) or is
           $orgpvm_pankki = substr(str_replace("-", "", $orgpvm), 2);
 
           //viiteaineistom summa, sen tiliöinnit ovat suoraan myyntilaskuilla, joten niitä ei oikein tähän saa haettua
-          $subq = "  SELECT sum(substring(tieto, 78, 10)/100) aineistosumma
-                FROM tiliotedata
-                WHERE yhtio = '$kukarow[yhtio]'
-                and tyyppi  = '3'
-                and tilino  = '$trow[tilino]'
-                and substr(tieto, 16, 6) = '$orgpvm_pankki'
-                and left(tieto, 1) = '3'";
+          $subq = "SELECT sum(substring(tieto, 78, 10)/100) aineistosumma
+                   FROM tiliotedata
+                   WHERE yhtio = '$kukarow[yhtio]'
+                   and tyyppi  = '3'
+                   and tilino  = '$trow[tilino]'
+                   and substr(tieto, 16, 6) = '$orgpvm_pankki'
+                   and left(tieto, 1) = '3'";
           $subr = pupe_query($subq);
           $asumma = mysql_fetch_assoc($subr);
 
           if ($trow[$kennimi] != "") {
             // Haetaan tositteet
-            $subq = "  SELECT group_concat(distinct ltunnus) ltunnus
-                  FROM tiliointi
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  AND tunnus IN ($trow[$kennimi])";
+            $subq = "SELECT group_concat(distinct ltunnus) ltunnus
+                     FROM tiliointi
+                     WHERE yhtio = '$kukarow[yhtio]'
+                     AND tunnus  IN ($trow[$kennimi])";
             $subr = pupe_query($subq);
             $ltunnukset = mysql_fetch_assoc($subr);
 
-            $subq = "  SELECT oletus_rahatili
-                  FROM yriti
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and tilino  = '$trow[tilino]'";
+            $subq = "SELECT oletus_rahatili
+                     FROM yriti
+                     WHERE yhtio = '$kukarow[yhtio]'
+                     and tilino  = '$trow[tilino]'";
             $subr = pupe_query($subq);
             $oratil = mysql_fetch_assoc($subr);
 
@@ -1208,13 +1208,26 @@ if ($tee == 'E' or $tee == 'F') {
       echo "<tr><td colspan='3'>".wordwrap($faktarow["fakta"], 120, "<br>")."</td></tr>";
     }
 
-    if ($yhtiorow['kirjanpidollinen_varastosiirto_myyntitilaukselta'] == 'K') {
-      echo "<tr>";
-      echo "<th>".t('Varastosiirtotosite')."</th>";
-      echo "<td colspan='5'>";
-      echo "<a href='{$palvelin2}muutosite.php?tee=E&tunnus={$trow['vanhatunnus']}&lopetus={$palvelin2}myyntires/myyntilaskuhaku.php////tee=N'>".t('Varastosiirto').": {$trow['vanhatunnus']}</a>";
-      echo "</td>";
-      echo "</tr>";
+    $_kirjanpidollinen_varastosiirto = ($yhtiorow['kirjanpidollinen_varastosiirto_myyntitilaukselta'] == 'K');
+    if ($_kirjanpidollinen_varastosiirto) {
+      $query = "SELECT tila,
+                alatila
+                FROM lasku
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$trow['vanhatunnus']}'";
+      $varastosiirto_result = pupe_query($query);
+      $varastosiirto = mysql_fetch_assoc($varastosiirto_result);
+
+      $_onko_varastosiirto = ($varastosiirto['tila'] == 'G' and in_array($varastosiirto['alatila'], array('X','V')));
+      //Tarkistetaan onko myyntilaskun vanhatunnus linkissä vastaanotettu varastosiirto
+      if ($_onko_varastosiirto) {
+        echo "<tr>";
+        echo "<th>".t('Varastosiirtotosite')."</th>";
+        echo "<td colspan='5'>";
+        echo "<a href='{$palvelin2}muutosite.php?tee=E&tunnus={$trow['vanhatunnus']}&lopetus={$palvelin2}myyntires/myyntilaskuhaku.php////tee=N'>".t('Varastosiirto').": {$trow['vanhatunnus']}</a>";
+        echo "</td>";
+        echo "</tr>";
+      }
     }
 
     echo "<tr><th colspan='3'>".t("Selite tiliöinneille")."</th></tr><tr><td colspan='3'><input type='text' id='lisaselite' value='{$lisaselite}' maxlength='150' size='60'></td></tr>";

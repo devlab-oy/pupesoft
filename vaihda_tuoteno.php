@@ -510,12 +510,12 @@ if ($error == 0 and $tee == "file") {
                 while ($ahrow = mysql_fetch_assoc($hresult)) {
 
                   $tarksql = "SELECT *
-                        FROM puun_alkio
-                        where yhtio    = '$kukarow[yhtio]'
-                        and liitos     = '$uustuoteno'
-                        and kieli     = '$ahrow[kieli]'
-                        and laji     = '$ahrow[laji]'
-                        and puun_tunnus = '$ahrow[puun_tunnus]'";
+                              FROM puun_alkio
+                              where yhtio     = '$kukarow[yhtio]'
+                              and liitos      = '$uustuoteno'
+                              and kieli       = '$ahrow[kieli]'
+                              and laji        = '$ahrow[laji]'
+                              and puun_tunnus = '$ahrow[puun_tunnus]'";
                   $tarkesult = pupe_query($tarksql);
 
                   if (mysql_num_rows($tarkesult) == 0) {
@@ -663,10 +663,10 @@ if ($error == 0 and $tee == "file") {
       }
 
       // Haetaan tuotepäälliköiden sähköpostiosoitteet esille.
-      $postisql  = "  SELECT kuka, nimi, eposti
-              FROM kuka
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND myyja = '$key'";
+      $postisql  = "SELECT kuka, nimi, eposti
+                    FROM kuka
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    AND myyja   = '$key'";
       $resuposti = pupe_query($postisql);
 
       while ($posti = mysql_fetch_assoc($resuposti)) {

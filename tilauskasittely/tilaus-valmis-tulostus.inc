@@ -34,8 +34,8 @@ if ($yhtiorow['kerayserat'] == 'K' and $yhtiorow['siirtolistan_tulostustapa'] ==
 }
 
 if (!isset($lukotetaan) or $lukotetaan) {
-  $query = "  LOCK TABLE
-        lasku WRITE";
+  $query = "LOCK TABLE
+            lasku WRITE";
   $res = pupe_query($query);
 }
 
@@ -375,7 +375,9 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     $kal++;
   }
 
-  mysql_data_seek($riresult, 0);
+  if (mysql_num_rows($riresult) > 0) {
+    mysql_data_seek($riresult, 0);
+  }
 
   if (!isset($kieli)) $kieli = "";
   if (!isset($toim)) $toim = "";

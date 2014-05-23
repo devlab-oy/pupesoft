@@ -44,6 +44,23 @@ if ($kukarow['toimipaikka'] != $laskurow['yhtio_toimipaikka'] and $yhtiorow['myy
 // debuggia varten, laita 1 jos haluut messuja
 $lisaarivi_debug = 0;
 
+if ($laskurow["tila"] == 'G' and !isset($kohde_alue) and isset($tuoteno)) {
+  //Laitetaan tuote oletusvaraston tuotepaikalle
+  $tuotteen_oletuspaikka = hae_tuotteen_tuotepaikat($tuoteno, $laskurow['clearing']);
+
+  if (!empty($tuotteen_oletuspaikka)) {
+    // otetaan eka löytynyt tuotepaikka kohdetuotepaikaksi
+    $kohde_alue   = $tuotteen_oletuspaikka[0]['hyllyalue'];
+    $kohde_nro    = $tuotteen_oletuspaikka[0]['hyllynro'];
+    $kohde_vali   = $tuotteen_oletuspaikka[0]['hyllyvali'];
+    $kohde_taso   = $tuotteen_oletuspaikka[0]['hyllytaso'];
+  }
+  else {
+    //Jos tuotteella ei ole tuotepaikkaa kohdevarastossa, luodaan se
+    lisaa_tuotepaikka($tuoteno, "", "", "", "", "", "", 0, 0, $laskurow['clearing']);
+  }
+}
+
 if (!isset($indeksi)) {
   $indeksi = 0;
 }
@@ -640,11 +657,11 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
   // Katsotaan onko maksuehto jälkivaatimus, koska silloin ei toimiteta erikoisvarastoista vaikka erikoistoimitus_alarajasumma ylittyisi
   if (!isset($jvtsekres)) {
-    $apuqu = "  SELECT tunnus
-          FROM maksuehto
-          WHERE yhtio  = '$kukarow[yhtio]'
-          AND tunnus  = '$laskurow[maksuehto]'
-          AND jv      != ''";
+    $apuqu = "SELECT tunnus
+              FROM maksuehto
+              WHERE yhtio  = '$kukarow[yhtio]'
+              AND tunnus   = '$laskurow[maksuehto]'
+              AND jv      != ''";
     $jvtsekres = pupe_query($apuqu);
 
     if (mysql_num_rows($jvtsekres) > 0) {
@@ -654,11 +671,11 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
   // Vientiasiakkaille ei myydä erikoisvarastoista jos toimitustapa on nouto
   if (!isset($tntsekres)) {
-    $apuqu = "  SELECT tunnus
-          FROM toimitustapa
-          WHERE yhtio  = '$kukarow[yhtio]'
-          AND selite  = '$laskurow[toimitustapa]'
-          AND nouto  != ''";
+    $apuqu = "SELECT tunnus
+              FROM toimitustapa
+              WHERE yhtio  = '$kukarow[yhtio]'
+              AND selite   = '$laskurow[toimitustapa]'
+              AND nouto   != ''";
     $tntsekres = pupe_query($apuqu);
 
     if (mysql_num_rows($tntsekres) > 0) {
@@ -1258,6 +1275,19 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
         // Jos tuotteella on tuotepaikkoja
         foreach ($zzrow as $zrow) {
+
+          if ($lisaarivi_debug == 1) {
+            echo "({$yhtiorow["puute_jt_oletus"]} == O <br>
+                    or $varataan_saldoa == EI <br>
+                    or ({$zrow["myytavissa"]} > 0 <br>
+                      and (($rivityyppi == 'L' and {$kukarow['kassamyyja']} == '' and $myy_erikoistoim_ok and {$zrow['varastotyyppi']} == 'E' and {$zrow['erikoistoimitus_alarajasumma']} > 0 and (float) {$trow['myyntihinta']} >= (float) {$zrow['erikoistoimitus_alarajasumma']}) <br>
+                        or {$zrow["varastotyyppi"]} == '' <br>
+                        or {$zrow["varastotyyppi"]} == 'V' <br>
+                        or (is_array($varasto) and in_array({$zrow["varasto"]}, $varasto) and {$laskurow["varasto"]} == 0)
+                        or {$laskurow["varasto"]} == {$zrow["varasto"]}) <br>
+                    ) <br>
+                  ) <br><br>";
+          }
 
           if ($yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI" or ($zrow["myytavissa"] > 0 and (($rivityyppi == 'L' and $kukarow['kassamyyja'] == '' and $myy_erikoistoim_ok and $zrow['varastotyyppi'] == 'E' and $zrow['erikoistoimitus_alarajasumma'] > 0 and (float) $trow['myyntihinta'] >= (float) $zrow['erikoistoimitus_alarajasumma']) or $zrow["varastotyyppi"] == '' or $zrow["varastotyyppi"] == 'V' or (is_array($varasto) and in_array($zrow["varasto"], $varasto) and $laskurow["varasto"] == 0) or $laskurow["varasto"] == $zrow["varasto"]))) {
 
@@ -2852,10 +2882,10 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           list(, , $vmyytavissa) = saldo_myytavissa($edirow["tuoteno"]);
 
           if ($vmyytavissa > 0) {
-            $tvsql = "  SELECT *
-                  FROM tuote
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  AND tuoteno = '$edirow[tuoteno]'";
+            $tvsql = "SELECT *
+                      FROM tuote
+                      WHERE yhtio = '$kukarow[yhtio]'
+                      AND tuoteno = '$edirow[tuoteno]'";
             $tvresult = pupe_query($tvsql);
             $tvrow = mysql_fetch_assoc($tvresult);
 

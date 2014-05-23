@@ -285,9 +285,9 @@ $query =  "(SELECT DISTINCT tapahtuma.tuoteno
             WHERE tapahtuma.yhtio    = '{$mista_yhtio}'
             AND tapahtuma.tuoteno    IN (SELECT tuoteno FROM tuotteen_toimittajat WHERE yhtio = '{$mihin_yhtio}' AND liitostunnus = {$mista_yhtion_toimittajan_tunnus})
             AND tapahtuma.laadittu   >= '{$datetime_checkpoint}')
-            
+
             UNION
-            
+
             (SELECT DISTINCT tilausrivi.tuoteno
             FROM tilausrivi
             JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio

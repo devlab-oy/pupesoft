@@ -189,13 +189,13 @@ if (isset($submit) and trim($submit) != '') {
           );
 
         // Tarkistetaan onko syötetty hyllypaikka jo tälle tuotteelle
-        $tuotteen_oma_hyllypaikka = "  SELECT * FROM tuotepaikat
-                        WHERE tuoteno = '$row[tuoteno]'
-                        AND yhtio     = '{$kukarow['yhtio']}'
-                        AND hyllyalue = '$hyllyalue'
-                        AND hyllynro  = '$hyllynro'
-                        AND hyllyvali = '$hyllyvali'
-                        AND hyllytaso = '$hyllytaso'";
+        $tuotteen_oma_hyllypaikka = "SELECT * FROM tuotepaikat
+                                     WHERE tuoteno = '$row[tuoteno]'
+                                     AND yhtio     = '{$kukarow['yhtio']}'
+                                     AND hyllyalue = '$hyllyalue'
+                                     AND hyllynro  = '$hyllynro'
+                                     AND hyllyvali = '$hyllyvali'
+                                     AND hyllytaso = '$hyllytaso'";
         $oma_paikka = mysql_query($tuotteen_oma_hyllypaikka);
 
         // Jos syötettyä paikkaa ei ole tämän tuotteen, lisätään uusi tuotepaikka
@@ -232,7 +232,7 @@ if (isset($submit) and trim($submit) != '') {
 
             // Lukitaan taulut saldojen siirtoa varten
             $query = "LOCK TABLE
-                  tuotepaikat WRITE";
+                      tuotepaikat WRITE";
             $result = pupe_query($query);
 
             $query = "UPDATE tuotepaikat SET
@@ -258,10 +258,10 @@ if (isset($submit) and trim($submit) != '') {
 
             // Lukitaan taulut saldojen siirtoa varten
             $query = "LOCK TABLE
-                  tuotepaikat WRITE,
-                  tapahtuma WRITE,
-                  tuote READ,
-                  tilausrivi WRITE";
+                      tuotepaikat WRITE,
+                      tapahtuma WRITE,
+                      tuote READ,
+                      tilausrivi WRITE";
             $result = pupe_query($query);
 
             // Tarkistetaan löytyykö tuotepaikka MISTÄ saldot siirretään

@@ -56,9 +56,9 @@ if ($tee == 'aja') {
              and lasku.tila     in ('L','N','V')
              and lasku.alatila  not in ('X','V')
              and lasku.toimaika >= '$alkupvm' and lasku.toimaika <= '$loppupvm')
-             
+
              UNION
-             
+
              (SELECT lasku.toimaika as 'Toimitusaika',
              concat(concat(nimi,'<br>'),if(nimitark!='',concat(nimitark,'<br>'),''),if(toim_nimi!='',if(toim_nimi!=nimi,concat(toim_nimi,'<br>'),''),''),if(toim_nimitark!='',if(toim_nimitark!=nimitark,concat(toim_nimitark,'<br>'),''),'')) as 'Nimi/Toim. nimi',
              lasku.tunnus as 'Tilausnro', lasku.tila, lasku.alatila, lasku.tilaustyyppi, lasku.viesti as viesti
@@ -68,9 +68,9 @@ if ($tee == 'aja') {
              and lasku.tila     = 'N'
              and tapvm          = '0000-00-00'
              and lasku.toimaika >= '$alkupvm' and lasku.toimaika <= '$loppupvm')
-             
+
              UNION
-             
+
              (SELECT lasku.toimaika as 'Toimitusaika',
              concat(concat(nimi,'<br>'),if(nimitark!='',concat(nimitark,'<br>'),''),if(toim_nimi!='',if(toim_nimi!=nimi,concat(toim_nimi,'<br>'),''),''),if(toim_nimitark!='',if(toim_nimitark!=nimitark,concat(toim_nimitark,'<br>'),''),'')) as 'Nimi/Toim. nimi',
              lasku.tunnus as 'Tilausnro', lasku.tila, lasku.alatila, lasku.tilaustyyppi, lasku.viesti as viesti
@@ -80,7 +80,7 @@ if ($tee == 'aja') {
              and lasku.tila     = 'E'
              and tapvm          = '0000-00-00'
              and lasku.toimaika >= '$alkupvm' and lasku.toimaika <= '$loppupvm')
-             
+
              ORDER BY 1, 3 ";
   $result = mysql_query($query) or pupe_error($query);
 

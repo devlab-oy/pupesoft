@@ -433,11 +433,11 @@ if ($tee == "YHTEENVETO") {
     }
 
     if ($tuotemyyja == 'KAIKKI') {
-      $keymyyja = "  SELECT nimi
-              FROM kuka
-              WHERE yhtio = '$kukarow[yhtio]'
-              and myyja = '$row[myyjanro]'
-              AND myyja > 0";
+      $keymyyja = "SELECT nimi
+                   FROM kuka
+                   WHERE yhtio = '$kukarow[yhtio]'
+                   and myyja   = '$row[myyjanro]'
+                   AND myyja   > 0";
       $myyjares = pupe_query($keymyyja);
       $keytuotemyyja = mysql_fetch_assoc($myyjares);
 
@@ -445,11 +445,11 @@ if ($tee == "YHTEENVETO") {
     }
 
     if ($tuoteostaja == 'KAIKKI') {
-      $keyostaja = "  SELECT nimi
-              FROM kuka
-              WHERE yhtio = '$kukarow[yhtio]'
-              and myyja = '$row[ostajanro]'
-              AND myyja > 0";
+      $keyostaja = "SELECT nimi
+                    FROM kuka
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    and myyja   = '$row[ostajanro]'
+                    AND myyja   > 0";
       $ostajares = pupe_query($keyostaja);
       $keytuoteostaja = mysql_fetch_assoc($ostajares);
 

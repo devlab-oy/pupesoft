@@ -68,11 +68,11 @@ if ($oikeusostohintapaiv !== FALSE and (float) $prow["hinta"] != (float) $trow['
   if ($paivitaostohinta == 'ON' and ($ALPA != '' or $JOPA != '') and $prow["tuoteno"] == $paiv_tuoteno and $prow["tunnus"] == $paiv_rivitunnus) {
     $paok = '';
     if ($toiminto != 'kohdista') {
-      $oshinq = "  UPDATE tilausrivi
-            set var    = 'O'
-            where yhtio  = '$kukarow[yhtio]'
-            and tunnus  = '$prow[tunnus]'
-            and otunnus = '$kukarow[kesken]'";
+      $oshinq = "UPDATE tilausrivi
+                 set var    = 'O'
+                 where yhtio = '$kukarow[yhtio]'
+                 and tunnus  = '$prow[tunnus]'
+                 and otunnus = '$kukarow[kesken]'";
       $ishinr = pupe_query($oshinq);
 
       $prow['var'] = "O";
@@ -90,11 +90,11 @@ if ($oikeusostohintapaiv !== FALSE and (float) $prow["hinta"] != (float) $trow['
 
   if ($paivitaostohinta == 'ON' and $JOPA != '' and $prow["tuoteno"] == $paiv_tuoteno and ($prow["tunnus"] == $paiv_rivitunnus or $toiminto == 'kohdista')) {
     $paok ='';
-    $oshinq = "  UPDATE tuotteen_toimittajat
-          SET ostohinta    = '$paiv_hinta'
-          WHERE yhtio      = '$kukarow[yhtio]'
-          AND tuoteno      = '$prow[tuoteno]'
-          AND liitostunnus  = '$laskurow[liitostunnus]'";
+    $oshinq = "UPDATE tuotteen_toimittajat
+               SET ostohinta    = '$paiv_hinta'
+               WHERE yhtio      = '$kukarow[yhtio]'
+               AND tuoteno      = '$prow[tuoteno]'
+               AND liitostunnus = '$laskurow[liitostunnus]'";
     $ishinr = pupe_query($oshinq);
 
     $paok = 'ok';
@@ -158,11 +158,11 @@ if ((($trow["toimitusaika"] != 0 and $trow["toimitusaika"] != '') or ($toimittaj
   if ($paivitatoimaika == "ON" and $prow["tunnus"] == $paiv_rivitunnus and $JOPATO != '') {
 
     if ($JOPATO != '') {
-      $paivita_toimaika = "  UPDATE tilausrivi
-                  SET toimaika = '$paiv_toimaika'
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and tunnus  = '$paiv_rivitunnus'
-                  and otunnus = '$kukarow[kesken]'";
+      $paivita_toimaika = "UPDATE tilausrivi
+                           SET toimaika = '$paiv_toimaika'
+                           WHERE yhtio = '$kukarow[yhtio]'
+                           and tunnus  = '$paiv_rivitunnus'
+                           and otunnus = '$kukarow[kesken]'";
       $paivita_res = pupe_query($paivita_toimaika);
     }
 

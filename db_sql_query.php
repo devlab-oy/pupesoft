@@ -169,11 +169,11 @@ else {
     $selecti = substr(trim($selecti), 0, -1);
 
     $sqlhaku = "SELECT $selecti
-FROM $table
-$joinit
-WHERE $table.yhtio = '$kukarow[yhtio]'
-$where
-$order";
+                FROM $table
+                $joinit
+                WHERE $table.yhtio = '$kukarow[yhtio]'
+                $where
+                $order";
     $result = mysql_query($sqlhaku) or pupe_error($sqlhaku);
 
     echo "<font class='message'><pre>$sqlhaku</pre><br>".t("Haun tulos")." ".mysql_num_rows($result)." ".t("riviä").".</font><br><br>";

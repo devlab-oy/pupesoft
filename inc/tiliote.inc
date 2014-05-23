@@ -849,14 +849,14 @@ switch ($tunnus) {
     $maksuviite  = trim(substr($tietue, 159, 20));
 
     // Tutkitaan seuraava maksu ja sen avulla laitetaan kuittikoodi ja erialla arvot kuntoon
-    $tdq = "  SELECT tiliotedata.*
-          FROM tiliotedata
-          WHERE yhtio = '$tiliotedatarow[yhtio]'
-          and alku   = '$tiliotedatarow[alku]'
-          and tilino  = '$tiliotedatarow[tilino]'
-          and tyyppi  = '$tiliotedatarow[tyyppi]'
-          and tunnus  > '$tiliotedatarow[tunnus]'
-          ORDER BY perheid, tunnus";
+    $tdq = "SELECT tiliotedata.*
+            FROM tiliotedata
+            WHERE yhtio = '$tiliotedatarow[yhtio]'
+            and alku    = '$tiliotedatarow[alku]'
+            and tilino  = '$tiliotedatarow[tilino]'
+            and tyyppi  = '$tiliotedatarow[tyyppi]'
+            and tunnus  > '$tiliotedatarow[tunnus]'
+            ORDER BY perheid, tunnus";
     $tdres2peek = pupe_query($tdq);
 
     while ($tdrow2peek = mysql_fetch_assoc($tdres2peek)) {

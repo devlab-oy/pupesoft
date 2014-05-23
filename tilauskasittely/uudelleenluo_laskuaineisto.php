@@ -33,6 +33,19 @@ if (isset($tee) and $tee == "pupevoice_siirto") {
   require("inc/ftp-send.inc");
 }
 
+if (isset($tee) and $tee == "edi_siirto") {
+  $ftphost = $edi_ftphost;
+  $ftpuser = $edi_ftpuser;
+  $ftppass = $edi_ftppass;
+  $ftppath = $edi_ftppath;
+  $ftpfile = "{$pupe_root_polku}/dataout/".basename($filenimi);
+  $ftpfail = "{$pupe_root_polku}/dataout/elmaedi_error/";
+
+  $tulos_ulos = "";
+
+  require("inc/ftp-send.inc");
+}
+
 if (isset($tee) and $tee == "apix_siirto") {
 
   // Splitataan file ja lähetetään laskut sopivissa osissa
@@ -208,12 +221,12 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
   $timestamppi = gmdate("YmdHis");
 
   //Hetaan laskut jotka laitetaan aineistoon
-  $query = "  SELECT *
-              from lasku
-              where yhtio = '$kukarow[yhtio]'
-              and tila    = 'U'
-              and alatila = 'X'
-              and laskunro in ($laskunumerot)";
+  $query = "SELECT *
+            from lasku
+            where yhtio  = '$kukarow[yhtio]'
+            and tila     = 'U'
+            and alatila  = 'X'
+            and laskunro in ($laskunumerot)";
   $res   = mysql_query($query) or pupe_error($query);
 
   $lkm = count(explode(',', $laskunumerot));
@@ -225,10 +238,10 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
 
   while ($lasrow = mysql_fetch_assoc($res)) {
     // Haetaan maksuehdon tiedot
-    $query  = "  SELECT pankkiyhteystiedot.*, maksuehto.*
-          FROM maksuehto
-          LEFT JOIN pankkiyhteystiedot on (pankkiyhteystiedot.yhtio=maksuehto.yhtio and pankkiyhteystiedot.tunnus=maksuehto.pankkiyhteystiedot)
-          WHERE maksuehto.yhtio='$kukarow[yhtio]' and maksuehto.tunnus='$lasrow[maksuehto]'";
+    $query  = "SELECT pankkiyhteystiedot.*, maksuehto.*
+               FROM maksuehto
+               LEFT JOIN pankkiyhteystiedot on (pankkiyhteystiedot.yhtio=maksuehto.yhtio and pankkiyhteystiedot.tunnus=maksuehto.pankkiyhteystiedot)
+               WHERE maksuehto.yhtio='$kukarow[yhtio]' and maksuehto.tunnus='$lasrow[maksuehto]'";
     $result = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($result) == 0) {
@@ -244,11 +257,11 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
 
     //Haetaan factoringsopimuksen tiedot
     if ($masrow["factoring"] != '') {
-      $query = "  SELECT *
-            FROM factoring
-            WHERE yhtio     = '$kukarow[yhtio]'
-            and factoringyhtio   = '$masrow[factoring]'
-            and valkoodi     = '$lasrow[valkoodi]'";
+      $query = "SELECT *
+                FROM factoring
+                WHERE yhtio        = '$kukarow[yhtio]'
+                and factoringyhtio = '$masrow[factoring]'
+                and valkoodi       = '$lasrow[valkoodi]'";
       $fres = mysql_query($query) or pupe_error($query);
       $frow = mysql_fetch_assoc($fres);
     }
@@ -303,10 +316,10 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       $pankkitiedot["pankkiswift3"] =  $yhtiorow["pankkiswift3"];
     }
 
-    $asiakas_apu_query = "  SELECT *
-                FROM asiakas
-                WHERE yhtio = '$kukarow[yhtio]'
-                AND tunnus = '$lasrow[liitostunnus]'";
+    $asiakas_apu_query = "SELECT *
+                          FROM asiakas
+                          WHERE yhtio = '$kukarow[yhtio]'
+                          AND tunnus  = '$lasrow[liitostunnus]'";
     $asiakas_apu_res = mysql_query($asiakas_apu_query) or pupe_error($asiakas_apu_query);
 
     if (mysql_num_rows($asiakas_apu_res) == 1) {
@@ -343,9 +356,9 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
 
       // Etsitään myyjän nimi
       $mquery  = "SELECT nimi, puhno, eposti
-            FROM kuka
-            WHERE tunnus = '$lasrow[myyja]'
-            and yhtio    = '$kukarow[yhtio]'";
+                  FROM kuka
+                  WHERE tunnus = '$lasrow[myyja]'
+                  and yhtio    = '$kukarow[yhtio]'";
       $myyresult = mysql_query($mquery) or pupe_error($mquery);
       $myyrow = mysql_fetch_assoc($myyresult);
 
@@ -373,12 +386,12 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       $komm = "";
 
       // Onko käänteistä verotusta
-      $alvquery = "   SELECT tunnus
-              FROM tilausrivi
-              WHERE yhtio = '$kukarow[yhtio]'
-              and uusiotunnus in ($lasrow[tunnus])
-              and tyyppi  = 'L'
-              and alv >= 600";
+      $alvquery = "SELECT tunnus
+                   FROM tilausrivi
+                   WHERE yhtio     = '$kukarow[yhtio]'
+                   and uusiotunnus in ($lasrow[tunnus])
+                   and tyyppi      = 'L'
+                   and alv         >= 600";
       $alvresult = mysql_query($alvquery) or pupe_error($alvquery);
 
       if (mysql_num_rows($alvresult) > 0) {
@@ -423,13 +436,13 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
         $masrow["teksti"] = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $laskun_kieli);
       }
 
-      $query = "  SELECT
-            ifnull(min(date_format(if('$yhtiorow[tilausrivien_toimitettuaika]' = 'X', toimaika, if('$yhtiorow[tilausrivien_toimitettuaika]' = 'K' and keratty = 'saldoton', toimaika, toimitettuaika)), '%Y-%m-%d')), '0000-00-00') mint,
-            ifnull(max(date_format(if('$yhtiorow[tilausrivien_toimitettuaika]' = 'X', toimaika, if('$yhtiorow[tilausrivien_toimitettuaika]' = 'K' and keratty = 'saldoton', toimaika, toimitettuaika)), '%Y-%m-%d')), '0000-00-00') maxt
-            FROM tilausrivi
-            WHERE yhtio = '$kukarow[yhtio]'
-            and uusiotunnus = '$lasrow[tunnus]'
-            and toimitettuaika != '0000-00-00 00:00:00'";
+      $query = "SELECT
+                ifnull(min(date_format(if('$yhtiorow[tilausrivien_toimitettuaika]' = 'X', toimaika, if('$yhtiorow[tilausrivien_toimitettuaika]' = 'K' and keratty = 'saldoton', toimaika, toimitettuaika)), '%Y-%m-%d')), '0000-00-00') mint,
+                ifnull(max(date_format(if('$yhtiorow[tilausrivien_toimitettuaika]' = 'X', toimaika, if('$yhtiorow[tilausrivien_toimitettuaika]' = 'K' and keratty = 'saldoton', toimaika, toimitettuaika)), '%Y-%m-%d')), '0000-00-00') maxt
+                FROM tilausrivi
+                WHERE yhtio         = '$kukarow[yhtio]'
+                and uusiotunnus     = '$lasrow[tunnus]'
+                and toimitettuaika != '0000-00-00 00:00:00'";
       $toimaikares = mysql_query($query) or pupe_error($query);
       $toimaikarow = mysql_fetch_assoc($toimaikares);
 
@@ -458,33 +471,33 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       }
 
       // Tarvitaan rivien eri verokannat
-      $alvquery = "  SELECT distinct alv
-              FROM tilausrivi
-              WHERE yhtio = '$kukarow[yhtio]'
-              and uusiotunnus = '$lasrow[tunnus]'
-              and tyyppi  = 'L'
-              ORDER BY alv";
+      $alvquery = "SELECT distinct alv
+                   FROM tilausrivi
+                   WHERE yhtio     = '$kukarow[yhtio]'
+                   and uusiotunnus = '$lasrow[tunnus]'
+                   and tyyppi      = 'L'
+                   ORDER BY alv";
       $alvresult = mysql_query($alvquery) or pupe_error($alvquery);
 
       while ($alvrow1 = mysql_fetch_assoc($alvresult)) {
 
         if ($alvrow1["alv"] >= 500) {
-          $aquery = "  SELECT '0' alv,
-                round(sum(tilausrivi.rivihinta/if (lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1)),2) rivihinta,
-                round(sum(0),2) alvrivihinta
-                FROM tilausrivi
-                JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
-                WHERE tilausrivi.uusiotunnus = '$lasrow[tunnus]' and tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.alv = '$alvrow1[alv]' and tilausrivi.tyyppi = 'L'
-                GROUP BY alv";
+          $aquery = "SELECT '0' alv,
+                     round(sum(tilausrivi.rivihinta/if (lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1)),2) rivihinta,
+                     round(sum(0),2) alvrivihinta
+                     FROM tilausrivi
+                     JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
+                     WHERE tilausrivi.uusiotunnus = '$lasrow[tunnus]' and tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.alv = '$alvrow1[alv]' and tilausrivi.tyyppi = 'L'
+                     GROUP BY alv";
         }
         else {
-          $aquery = "  SELECT tilausrivi.alv,
-                round(sum(tilausrivi.rivihinta/if (lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1)),2) rivihinta,
-                round(sum((tilausrivi.rivihinta/if (lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1))*(tilausrivi.alv/100)),2) alvrivihinta
-                FROM tilausrivi
-                JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
-                WHERE tilausrivi.uusiotunnus = '$lasrow[tunnus]' and tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.alv = '$alvrow1[alv]' and tilausrivi.tyyppi = 'L'
-                GROUP BY alv";
+          $aquery = "SELECT tilausrivi.alv,
+                     round(sum(tilausrivi.rivihinta/if (lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1)),2) rivihinta,
+                     round(sum((tilausrivi.rivihinta/if (lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1))*(tilausrivi.alv/100)),2) alvrivihinta
+                     FROM tilausrivi
+                     JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
+                     WHERE tilausrivi.uusiotunnus = '$lasrow[tunnus]' and tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.alv = '$alvrow1[alv]' and tilausrivi.tyyppi = 'L'
+                     GROUP BY alv";
         }
         $aresult = mysql_query($aquery) or pupe_error($aquery);
         $alvrow = mysql_fetch_assoc($aresult);
@@ -548,60 +561,60 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       $query_ale_lisa = generoi_alekentta('M');
 
       // Haetaan laskun kaikki rivit
-      $query = "  SELECT
-            if (tilausrivi.nimitys='Kuljetusvakuutus', tilausrivin_lisatiedot.vanha_otunnus, ifnull((SELECT vanha_otunnus from tilausrivin_lisatiedot t_lisa where t_lisa.yhtio=tilausrivi.yhtio and t_lisa.tilausrivitunnus=tilausrivi.perheid and t_lisa.omalle_tilaukselle != ''), tilausrivi.tunnus)) rivigroup,
-            tilausrivi.ale1,
-            tilausrivi.ale2,
-            tilausrivi.ale3,
-            tilausrivi.alv,
-            tuote.eankoodi,
-            tuote.ei_saldoa,
-            tilausrivi.erikoisale,
-            tilausrivi.nimitys,
-            tilausrivin_lisatiedot.osto_vai_hyvitys,
-            tuote.sarjanumeroseuranta,
-            tilausrivi.tuoteno,
-            tilausrivi.uusiotunnus,
-            tilausrivi.yksikko,
-            tilausrivi.hinta,
-            tilausrivi.netto,
-            lasku.vienti_kurssi,
-            lasku.viesti laskuviesti,
-            lasku.asiakkaan_tilausnumero,
-            lasku.luontiaika tilauspaiva,
-            if (tuote.tuotetyyppi = 'K','2 Työt','1 Muut') tuotetyyppi,
-            if (tilausrivi.var2 = 'EIOST', 'EIOST', '') var2,
-            if (tuote.myyntihinta_maara = 0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
-            min(tilausrivi.hyllyalue) hyllyalue,
-            min(tilausrivi.hyllynro) hyllynro,
-            min(tilausrivi.keratty) keratty,
-            min(if (tilausrivi.toimaika = '0000-00-00', date_format(now(), '%Y-%m-%d'), tilausrivi.toimaika)) toimaika,
-            min(if (date_format(tilausrivi.toimitettuaika, '%Y-%m-%d') = '0000-00-00', date_format(now(), '%Y-%m-%d'), date_format(tilausrivi.toimitettuaika, '%Y-%m-%d'))) toimitettuaika,
-            min(tilausrivi.otunnus) otunnus,
-            min(tilausrivi.perheid) perheid,
-            min(tilausrivi.tunnus) tunnus,
-            min(tilausrivi.kommentti) kommentti,
-            min(tilausrivi.tilaajanrivinro) tilaajanrivinro,
-            min(tilausrivi.laadittu) laadittu,
-            sum(tilausrivi.tilkpl) tilkpl,
-            sum(round(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}, $yhtiorow[hintapyoristys])) rivihinta_verollinen,
-            sum((tilausrivi.hinta / {$lasrow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa,
-            group_concat(tilausrivi.tunnus) rivitunnukset,
-            group_concat(distinct tilausrivi.perheid) perheideet,
-            count(*) rivigroup_maara,
-            sum(tilausrivi.rivihinta) rivihinta,
-            sum(tilausrivi.kpl) kpl,
-            $sorttauskentta
-            FROM tilausrivi
-            JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
-            JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
-            LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-            WHERE tilausrivi.yhtio     = '$kukarow[yhtio]'
-            and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
-            and tilausrivi.kpl != 0
-            and tilausrivi.uusiotunnus   = '$lasrow[tunnus]'
-            GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23
-            ORDER BY tilausrivi.otunnus, if(tilausrivi.tuoteno in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]'), 2, 1), $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
+      $query = "SELECT
+                if ((tilausrivi.nimitys='Kuljetusvakuutus' OR '{$yhtiorow['yhdistetaan_identtiset_laskulla']}' = 'k'), tilausrivin_lisatiedot.vanha_otunnus, ifnull((SELECT vanha_otunnus from tilausrivin_lisatiedot t_lisa where t_lisa.yhtio=tilausrivi.yhtio and t_lisa.tilausrivitunnus=tilausrivi.perheid and t_lisa.omalle_tilaukselle != ''), tilausrivi.tunnus)) rivigroup,
+                tilausrivi.ale1,
+                tilausrivi.ale2,
+                tilausrivi.ale3,
+                tilausrivi.alv,
+                tuote.eankoodi,
+                tuote.ei_saldoa,
+                tilausrivi.erikoisale,
+                tilausrivi.nimitys,
+                tilausrivin_lisatiedot.osto_vai_hyvitys,
+                tuote.sarjanumeroseuranta,
+                tilausrivi.tuoteno,
+                tilausrivi.uusiotunnus,
+                tilausrivi.yksikko,
+                tilausrivi.hinta,
+                tilausrivi.netto,
+                lasku.vienti_kurssi,
+                lasku.viesti laskuviesti,
+                lasku.asiakkaan_tilausnumero,
+                lasku.luontiaika tilauspaiva,
+                if (tuote.tuotetyyppi = 'K','2 Työt','1 Muut') tuotetyyppi,
+                if (tilausrivi.var2 = 'EIOST', 'EIOST', '') var2,
+                if (tuote.myyntihinta_maara = 0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
+                min(tilausrivi.hyllyalue) hyllyalue,
+                min(tilausrivi.hyllynro) hyllynro,
+                min(tilausrivi.keratty) keratty,
+                min(if (tilausrivi.toimaika = '0000-00-00', date_format(now(), '%Y-%m-%d'), tilausrivi.toimaika)) toimaika,
+                min(if (date_format(tilausrivi.toimitettuaika, '%Y-%m-%d') = '0000-00-00', date_format(now(), '%Y-%m-%d'), date_format(tilausrivi.toimitettuaika, '%Y-%m-%d'))) toimitettuaika,
+                min(tilausrivi.otunnus) otunnus,
+                min(tilausrivi.perheid) perheid,
+                min(tilausrivi.tunnus) tunnus,
+                min(tilausrivi.kommentti) kommentti,
+                min(tilausrivi.tilaajanrivinro) tilaajanrivinro,
+                min(tilausrivi.laadittu) laadittu,
+                sum(tilausrivi.tilkpl) tilkpl,
+                sum(round(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}, $yhtiorow[hintapyoristys])) rivihinta_verollinen,
+                sum((tilausrivi.hinta / {$lasrow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa,
+                group_concat(tilausrivi.tunnus) rivitunnukset,
+                group_concat(distinct tilausrivi.perheid) perheideet,
+                count(*) rivigroup_maara,
+                sum(tilausrivi.rivihinta) rivihinta,
+                sum(tilausrivi.kpl) kpl,
+                $sorttauskentta
+                FROM tilausrivi
+                JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
+                JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+                LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+                WHERE tilausrivi.yhtio      = '$kukarow[yhtio]'
+                and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
+                and tilausrivi.kpl         != 0
+                and tilausrivi.uusiotunnus  = '$lasrow[tunnus]'
+                GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23
+                ORDER BY tilausrivi.otunnus, if(tilausrivi.tuoteno in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]'), 2, 1), $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
       $tilres = mysql_query($query) or pupe_error($query);
 
       $rivinumerot = array(0 => 0);
@@ -617,16 +630,16 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
             // kyseessä on isä
             if ($tilrow["perheid"] == $tilrow["tunnus"]) {
               // lasketaan isätuotteen riville lapsien hinnat yhteen
-              $query = "  SELECT
-                    sum(tilausrivi.rivihinta) rivihinta,
-                    round(sum(tilausrivi.rivihinta) / $tilrow[kpl], '$yhtiorow[hintapyoristys]') hinta,
-                    sum(round(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * tilausrivi.kpl * {$query_ale_lisa}, $yhtiorow[hintapyoristys])) rivihinta_verollinen,
-                    sum((tilausrivi.hinta / {$lasrow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * tilausrivi.kpl * {$query_ale_lisa}) rivihinta_valuutassa
-                    FROM tilausrivi
-                    WHERE tilausrivi.yhtio     = '$kukarow[yhtio]'
-                    and tilausrivi.uusiotunnus   = '$tilrow[uusiotunnus]'
-                    and tilausrivi.perheid     in ($tilrow[perheideet])
-                    and tilausrivi.perheid     > 0";
+              $query = "SELECT
+                        sum(tilausrivi.rivihinta) rivihinta,
+                        round(sum(tilausrivi.rivihinta) / $tilrow[kpl], '$yhtiorow[hintapyoristys]') hinta,
+                        sum(round(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * tilausrivi.kpl * {$query_ale_lisa}, $yhtiorow[hintapyoristys])) rivihinta_verollinen,
+                        sum((tilausrivi.hinta / {$lasrow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * tilausrivi.kpl * {$query_ale_lisa}) rivihinta_valuutassa
+                        FROM tilausrivi
+                        WHERE tilausrivi.yhtio     = '$kukarow[yhtio]'
+                        and tilausrivi.uusiotunnus = '$tilrow[uusiotunnus]'
+                        and tilausrivi.perheid     in ($tilrow[perheideet])
+                        and tilausrivi.perheid     > 0";
               $riresult = pupe_query($query);
               $perherow = mysql_fetch_assoc($riresult);
 
@@ -714,12 +727,12 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
           $sarjanutunnus = "ostorivitunnus";
         }
 
-        $query = "  SELECT *
-              FROM sarjanumeroseuranta
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tuoteno = '$tilrow[tuoteno]'
-              and $sarjanutunnus in ($tilrow[rivitunnukset])
-              and sarjanumero != ''";
+        $query = "SELECT *
+                  FROM sarjanumeroseuranta
+                  WHERE yhtio      = '$kukarow[yhtio]'
+                  and tuoteno      = '$tilrow[tuoteno]'
+                  and $sarjanutunnus in ($tilrow[rivitunnukset])
+                  and sarjanumero != ''";
         $sarjares = mysql_query($query) or pupe_error($query);
 
         if ($tilrow["kommentti"] != '' and mysql_num_rows($sarjares) > 0) {
@@ -735,12 +748,12 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
             $tilrow["kommentti"] = "EAN: $tilrow[eankoodi]|$tilrow[kommentti]";
           }
 
-          $query = "  SELECT kommentti
-                FROM asiakaskommentti
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tuoteno = '{$tilrow['tuoteno']}'
-                AND ytunnus = '{$lasrow['ytunnus']}'
-                ORDER BY tunnus";
+          $query = "SELECT kommentti
+                    FROM asiakaskommentti
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tuoteno = '{$tilrow['tuoteno']}'
+                    AND ytunnus = '{$lasrow['ytunnus']}'
+                    ORDER BY tunnus";
           $asiakaskommentti_res = mysql_query($query) or pupe_error($query);
 
           if (mysql_num_rows($asiakaskommentti_res) > 0) {
@@ -1045,7 +1058,17 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       echo "</table>";
     }
 
-    if (file_exists(realpath($nimiedi))) {
+    if (file_exists(realpath($nimiedi))) {      
+      //siirretaan laskutiedosto operaattorille
+      $ftphost = $edi_ftphost;
+      $ftpuser = $edi_ftpuser;
+      $ftppass = $edi_ftppass;
+      $ftppath = $edi_ftppath;
+      $ftpfile = realpath($nimiedi);
+
+      // tätä ei ajata eikä käytetä, mutta jos tulee ftp errori niin echotaan tää meiliin, niin ei tartte käsin kirjotella resendiä
+      echo "<pre>ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile</pre>";
+
       echo "<table>";
       echo "<tr><th>".t("Tallenna Elmaedi-aineisto").":</th>";
       echo "<form method='post' class='multisubmit'>";
@@ -1053,6 +1076,14 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       echo "<input type='hidden' name='kaunisnimi' value='".basename($nimiedi)."'>";
       echo "<input type='hidden' name='filenimi' value='".basename($nimiedi)."'>";
       echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+      echo "</table><br><br>";
+
+      echo "<table>";
+      echo "<tr><th>".t("Lähetä Elmaedi-aineisto uudelleen").":</th>";
+      echo "<form method='post'>";
+      echo "<input type='hidden' name='tee' value='edi_siirto'>";
+      echo "<input type='hidden' name='filenimi' value='".basename($nimiedi)."'>";
+      echo "<td class='back'><input type='submit' value='".t("Lähetä")."'></td></tr></form>";
       echo "</table>";
     }
 

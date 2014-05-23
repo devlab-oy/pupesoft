@@ -2,21 +2,21 @@
 
 require_once('tilauskasittely/luo_myyntitilausotsikko.inc');
 
-$query = "  SELECT laskun_lisatiedot.sopimus_lisatietoja,
-      laskun_lisatiedot.saate,
-      lasku.olmapvm,
-      lasku.clearing,
-      lasku.viesti,
-      lasku.toimvko,
-      lasku.toimaika as toimitusaika,
-      tilausrivi.*,
-      lasku.varasto,
-      lasku.tilaustyyppi
-      FROM laskun_lisatiedot
-      JOIN tilausrivi ON (tilausrivi.yhtio = laskun_lisatiedot.yhtio AND tilausrivi.otunnus = laskun_lisatiedot.otunnus)
-      JOIN lasku ON (lasku.yhtio = laskun_lisatiedot.yhtio AND lasku.tunnus = laskun_lisatiedot.otunnus)
-      WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
-      AND laskun_lisatiedot.otunnus = '{$tilausnumero}'";
+$query = "SELECT laskun_lisatiedot.sopimus_lisatietoja,
+          laskun_lisatiedot.saate,
+          lasku.olmapvm,
+          lasku.clearing,
+          lasku.viesti,
+          lasku.toimvko,
+          lasku.toimaika as toimitusaika,
+          tilausrivi.*,
+          lasku.varasto,
+          lasku.tilaustyyppi
+          FROM laskun_lisatiedot
+          JOIN tilausrivi ON (tilausrivi.yhtio = laskun_lisatiedot.yhtio AND tilausrivi.otunnus = laskun_lisatiedot.otunnus)
+          JOIN lasku ON (lasku.yhtio = laskun_lisatiedot.yhtio AND lasku.tunnus = laskun_lisatiedot.otunnus)
+          WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
+          AND laskun_lisatiedot.otunnus = '{$tilausnumero}'";
 $result = pupe_query($query);
 
 $tilausrivit = array();
@@ -51,25 +51,25 @@ foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
   }
 
   //Halutaan pit‰‰ asiakkaille kopioitavissa tarjouksissa myyj‰n valitsema varasto, viesti, toimitusviikko
-  $query = "  UPDATE lasku
-        JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
-        SET lasku.varasto = '{$alkuperainen_varasto}',
-        lasku.olmapvm = '{$viimeinen_voimassaolo_pvm}',
-        laskun_lisatiedot.saate = '{$saate_teksti}',
-        lasku.clearing = '{$clearing}',
-        lasku.viesti = '{$viesti}',
-        lasku.toimvko = '{$toimitusviikko}',
-        lasku.toimaika = '{$toimaika}',
-        lasku.tilaustyyppi = '{$tilaustyyppi}'
-        WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-        AND lasku.tunnus = '{$tilausnumero}'";
+  $query = "UPDATE lasku
+            JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
+            SET lasku.varasto = '{$alkuperainen_varasto}',
+            lasku.olmapvm           = '{$viimeinen_voimassaolo_pvm}',
+            laskun_lisatiedot.saate = '{$saate_teksti}',
+            lasku.clearing          = '{$clearing}',
+            lasku.viesti            = '{$viesti}',
+            lasku.toimvko           = '{$toimitusviikko}',
+            lasku.toimaika          = '{$toimaika}',
+            lasku.tilaustyyppi      = '{$tilaustyyppi}'
+            WHERE lasku.yhtio       = '{$kukarow['yhtio']}'
+            AND lasku.tunnus        = '{$tilausnumero}'";
   pupe_query($query);
 
-  $query = "  SELECT *
-        FROM lasku
-        JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
-        WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-        AND lasku.tunnus = '{$tilausnumero}'";
+  $query = "SELECT *
+            FROM lasku
+            JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.tunnus  = '{$tilausnumero}'";
   $result = pupe_query($query);
   $laskurow = mysql_fetch_assoc($result);
 
@@ -82,19 +82,19 @@ foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
       $trow = hae_tuote($tilausrivi['tuoteno']);
 
       // Mik‰ maa mik‰ valuutta - Tarkistetaan asiakkaan valuutta ja maa
-      $query = "  SELECT *
-            FROM asiakas
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = '{$tarjous_asiakas}'";
+      $query = "SELECT *
+                FROM asiakas
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$tarjous_asiakas}'";
       $result = pupe_query($query);
       $maatiedot = mysql_fetch_assoc($result);
 
       // Haetaanko ruotsihinnat
       if (strtoupper($maatiedot["valkoodi"]) != strtoupper($yhtiorow['valkoodi'])) {
-        $query = "  SELECT alv
-              FROM tuotteen_alv
-              WHERE tuoteno = '{$tilausrivi['tuoteno']}'
-              AND maa = '{$maatiedot['maa']}'";
+        $query = "SELECT alv
+                  FROM tuotteen_alv
+                  WHERE tuoteno = '{$tilausrivi['tuoteno']}'
+                  AND maa       = '{$maatiedot['maa']}'";
         $result = pupe_query($query);
         $tuotteen_alv_rivi = mysql_fetch_assoc($result);
         $tuotteen_alv = $tuotteen_alv_rivi['alv'];
@@ -136,14 +136,14 @@ foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
   require_once('tilaus-valmis.inc');
 }
 
-$query = "  UPDATE lasku
-      SET tila = 'D'
-      WHERE yhtio = '{$kukarow['yhtio']}'
-      AND tunnus = '{$dummy_tarjouksen_tilausnumero}'";
+$query = "UPDATE lasku
+          SET tila = 'D'
+          WHERE yhtio = '{$kukarow['yhtio']}'
+          AND tunnus  = '{$dummy_tarjouksen_tilausnumero}'";
 pupe_query($query);
 
-$query = "  UPDATE kuka
-      SET kesken = 0
-      WHERE yhtio = '{$kukarow['yhtio']}'
-      AND kuka = '{$kukarow['kuka']}'";
+$query = "UPDATE kuka
+          SET kesken = 0
+          WHERE yhtio = '{$kukarow['yhtio']}'
+          AND kuka    = '{$kukarow['kuka']}'";
 pupe_query($query);

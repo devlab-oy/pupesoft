@@ -61,12 +61,12 @@ if ($eiliittymaa != 'ON') {
   echo "<tr><th>".t("N‰yt‰ vain ne joilla saatavaa on yli").":</th><td valign='top'><input type='text' name='yli' size ='15' value='$yli'></td></tr>";
   echo "<tr><th>".t("Anna p‰iv‰m‰‰r‰, muodossa pp-kk-vvvv:")."</th><td><input type = 'text' name = 'sappl' value='$sappl' size=2><input type = 'text' name = 'sakkl' value='$sakkl' size=2><input type = 'text' name = 'savvl' value='$savvl' size=4></td></tr>";
 
-  $query = "  SELECT tunnus
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tyyppi = 'K'
-        and kaytossa != 'E'
-        LIMIT 1";
+  $query = "SELECT tunnus
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and tyyppi    = 'K'
+            and kaytossa != 'E'
+            LIMIT 1";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -92,10 +92,10 @@ if ($eiliittymaa != 'ON') {
   echo "<option value = 'kustannuspaikka'    $sel[kustannuspaikka]>".t("Kustannuspaikka")."</option>";
   echo "</select></td><td class='back'>".t("Kaatotilin saldo voidaan n‰ytt‰‰ vain jos summaustaso on Asiakas tai Ytunnus").".</td></tr>";
 
-  $query = "  SELECT nimi, tunnus
-                FROM valuu
-               WHERE yhtio = '$kukarow[yhtio]'
-                 ORDER BY jarjestys";
+  $query = "SELECT nimi, tunnus
+            FROM valuu
+            WHERE yhtio = '$kukarow[yhtio]'
+             ORDER BY jarjestys";
   $vresult = pupe_query($query);
 
   echo "<tr><th>".t("Valitse valuutta").":</th><td><select name='savalkoodi'>";
@@ -189,13 +189,13 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
     // KAUTTALASKUTUSKIKKARE
     if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $kukarow['yhtio'] == $GLOBALS['koti_yhtio'] and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS')) {
 
-      $query = "  SELECT osasto, ifnull(group_concat(tunnus), 0) tunnukset
-            FROM asiakas
-            WHERE yhtio = '{$GLOBALS['eta_yhtio']}'
-            AND laji != 'P'
-            AND ytunnus = '{$laskurow['ytunnus']}'
-            AND toim_ovttunnus = '{$laskurow['toim_ovttunnus']}'
-            GROUP BY 1";
+      $query = "SELECT osasto, ifnull(group_concat(tunnus), 0) tunnukset
+                FROM asiakas
+                WHERE yhtio         = '{$GLOBALS['eta_yhtio']}'
+                AND laji           != 'P'
+                AND ytunnus         = '{$laskurow['ytunnus']}'
+                AND toim_ovttunnus  = '{$laskurow['toim_ovttunnus']}'
+                GROUP BY 1";
       $result = pupe_query($query);
       $row = mysql_fetch_assoc($result);
 
@@ -212,11 +212,11 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
     }
 
     if (!isset($GLOBALS['eta_yhtio']) or trim($GLOBALS['eta_yhtio']) == '' or $GLOBALS['eta_yhtio'] == $kukarow['yhtio']) {
-      $query = "  SELECT ifnull(group_concat(tunnus), 0) tunnukset
-            FROM asiakas
-            WHERE yhtio = '$saatavat_yhtio'
-            AND ytunnus = '$sytunnus'
-            AND laji != 'P'";
+      $query = "SELECT ifnull(group_concat(tunnus), 0) tunnukset
+                FROM asiakas
+                WHERE yhtio  = '$saatavat_yhtio'
+                AND ytunnus  = '$sytunnus'
+                AND laji    != 'P'";
       $result = pupe_query($query);
       $row = mysql_fetch_assoc($result);
     }
@@ -295,25 +295,25 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
     $summalisa .= " sum(if(TO_DAYS('$savvl-$sakkl-$sappl')-TO_DAYS(lasku.erpcm) > {$saatavat_array[count($saatavat_array)-1]}, tiliointi.summa, 0)) 'yli_{$saatavat_array[count($saatavat_array)-1]}',\n";
   }
 
-  $query = "  SELECT
-        {$selecti},
-        {$summalisa}
-        min(lasku.liitostunnus) litu,
-        min(lasku.tunnus) latunnari
-        FROM lasku use index (yhtio_tila_mapvm)
-        JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$savvl-$sakkl-$sappl' {$tiliointilisa})
-        {$luottolisa}
-        WHERE lasku.yhtio = '{$saatavat_yhtio}'
-        and (lasku.mapvm > '{$savvl}-{$sakkl}-{$sappl}' or lasku.mapvm = '0000-00-00')
-        and lasku.tapvm  <= '{$savvl}-{$sakkl}-{$sappl}'
-        and lasku.tapvm > '0000-00-00'
-        and lasku.tila = 'U'
-        and lasku.alatila = 'X'
-        {$generoitumuuttuja}
-        {$salisa1}
-        GROUP BY {$grouppauslisa}
-        {$having}
-        ORDER BY 1,2,3";
+  $query = "SELECT
+            {$selecti},
+            {$summalisa}
+            min(lasku.liitostunnus) litu,
+            min(lasku.tunnus) latunnari
+            FROM lasku use index (yhtio_tila_mapvm)
+            JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$savvl-$sakkl-$sappl' {$tiliointilisa})
+            {$luottolisa}
+            WHERE lasku.yhtio = '{$saatavat_yhtio}'
+            and (lasku.mapvm > '{$savvl}-{$sakkl}-{$sappl}' or lasku.mapvm = '0000-00-00')
+            and lasku.tapvm   <= '{$savvl}-{$sakkl}-{$sappl}'
+            and lasku.tapvm   > '0000-00-00'
+            and lasku.tila    = 'U'
+            and lasku.alatila = 'X'
+            {$generoitumuuttuja}
+            {$salisa1}
+            GROUP BY {$grouppauslisa}
+            {$having}
+            ORDER BY 1,2,3";
 
   $result = pupe_query($query);
 
@@ -529,10 +529,10 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
         }
 
         if ($grouppaus == "kustannuspaikka" or $tiliointilisa != "") {
-          $query = "  SELECT nimi, koodi
-                FROM kustannuspaikka
-                WHERE yhtio = '$kukarow[yhtio]'
-                and tunnus = '{$row['kustannuspaikka']}'";
+          $query = "SELECT nimi, koodi
+                    FROM kustannuspaikka
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    and tunnus  = '{$row['kustannuspaikka']}'";
           $nimiresult = pupe_query($query);
 
           if (mysql_num_rows($nimiresult) == 1) {
@@ -687,15 +687,15 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
         $liitoslisa2 = "AND lasku.liitostunnus='{$sliitostunnus}' ";
       }
 
-      $query = "  SELECT jv
-            FROM asiakas
-            JOIN maksuehto ON (maksuehto.yhtio = asiakas.yhtio and maksuehto.tunnus = asiakas.maksuehto and maksuehto.kaytossa = '' and maksuehto.jv != '')
-            WHERE asiakas.yhtio = '$saatavat_yhtio'
-            AND asiakas.ytunnus = '$sytunnus'
-            AND asiakas.laji != 'P'
-            {$liitoslisa1}
-            $eta_asiakaslisa
-            LIMIT 1";
+      $query = "SELECT jv
+                FROM asiakas
+                JOIN maksuehto ON (maksuehto.yhtio = asiakas.yhtio and maksuehto.tunnus = asiakas.maksuehto and maksuehto.kaytossa = '' and maksuehto.jv != '')
+                WHERE asiakas.yhtio  = '$saatavat_yhtio'
+                AND asiakas.ytunnus  = '$sytunnus'
+                AND asiakas.laji    != 'P'
+                {$liitoslisa1}
+                $eta_asiakaslisa
+                LIMIT 1";
       $maksuehto_chk_res = pupe_query($query);
       $maksuehto_chk_row = mysql_fetch_assoc($maksuehto_chk_res);
 
@@ -716,16 +716,16 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
       }
 
       //katsotaan onko asiakkaalla maksamattomia trattoja, jos on niin ei anneta tehd‰ tilausta
-      $query = "   SELECT count(lasku.tunnus) kpl
-            FROM lasku USE INDEX (yhtio_tila_mapvm)
-            JOIN karhu_lasku ON (lasku.tunnus = karhu_lasku.ltunnus)
-            JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus and karhukierros.yhtio = lasku.yhtio and karhukierros.tyyppi = 'T')
-            WHERE lasku.yhtio = '$saatavat_yhtio'
-            and lasku.tila    = 'U'
-            and lasku.alatila = 'X'
-            and lasku.mapvm   = '0000-00-00'
-            and lasku.ytunnus = '$sytunnus'
-            {$liitoslisa2}";
+      $query = "SELECT count(lasku.tunnus) kpl
+                FROM lasku USE INDEX (yhtio_tila_mapvm)
+                JOIN karhu_lasku ON (lasku.tunnus = karhu_lasku.ltunnus)
+                JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus and karhukierros.yhtio = lasku.yhtio and karhukierros.tyyppi = 'T')
+                WHERE lasku.yhtio = '$saatavat_yhtio'
+                and lasku.tila    = 'U'
+                and lasku.alatila = 'X'
+                and lasku.mapvm   = '0000-00-00'
+                and lasku.ytunnus = '$sytunnus'
+                {$liitoslisa2}";
       $trattares = pupe_query($query);
       $tratat = mysql_fetch_assoc($trattares);
 
@@ -771,12 +771,12 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
     }
 
     // Voi olla, ett‰ asiakkaalla on avoimia tilauksia, mutta ei avoimia laskuja, huomioidaan n‰m‰ luottorajassa
-    $query = "  SELECT ifnull(group_concat(tunnus), 0) liitostunnus
-          FROM asiakas
-          WHERE yhtio = '$saatavat_yhtio'
-          AND ytunnus = '$sytunnus'
-          AND laji != 'P'
-          {$liitoslisa1}";
+    $query = "SELECT ifnull(group_concat(tunnus), 0) liitostunnus
+              FROM asiakas
+              WHERE yhtio  = '$saatavat_yhtio'
+              AND ytunnus  = '$sytunnus'
+              AND laji    != 'P'
+              {$liitoslisa1}";
     $result = pupe_query($query);
     $row = mysql_fetch_assoc($result);
 

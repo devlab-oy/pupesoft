@@ -63,9 +63,9 @@ if ($tee == "1") {
     }
 
     // Tehd‰‰n alkusiivous!
-    $query = "  SELECT konserni
-          FROM yhtio
-          WHERE yhtio = '$kukarow[yhtio]'";
+    $query = "SELECT konserni
+              FROM yhtio
+              WHERE yhtio = '$kukarow[yhtio]'";
     $result = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($result) == 1) {
@@ -77,9 +77,9 @@ if ($tee == "1") {
       exit;
     }
 
-    $query = "  SELECT yhtio, konserni, nimi
-          FROM yhtio
-          WHERE konserni = '$yhtiorow[konserni]' and konserni != ''";
+    $query = "SELECT yhtio, konserni, nimi
+              FROM yhtio
+              WHERE konserni = '$yhtiorow[konserni]' and konserni != ''";
     $result = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($result) < 2) {
@@ -110,17 +110,17 @@ if ($tee == "1") {
     $tapa = "left(if(lasku.tila = 'K', DATE_ADD(tilausrivi.toimaika, INTERVAL ifnull(toimi.oletus_erapvm,0) DAY), if(lasku.tila in ('H','M','P','Q','U'), if(kapvm > now(),kapvm,erpcm),olmapvm)),7) olmapvm";
   }
 
-  $query = "  SELECT $tapa,
-        sum(if(lasku.tila = 'U' and mapvm = '0000-00-00', lasku.summa, 0)) myynti,
-        round(sum(if(lasku.tila != 'U' and lasku.tila != 'K', -1*lasku.summa*valuu.kurssi, 0)),2) osto,
-        sum(if(lasku.tila = 'K', tilausrivi.hinta, 0)) summa
-        FROM lasku
-        LEFT JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and tilausrivi.tyyppi = 'O' and tilausrivi.toimaika != '0000-00-00')
-        LEFT JOIN toimi ON (toimi.yhtio = lasku.yhtio and toimi.tunnus = lasku.liitostunnus)
-        LEFT JOIN valuu ON (valuu.yhtio = lasku.yhtio and lasku.valkoodi = valuu.nimi)
-        WHERE lasku.yhtio in ($yhtio) and ((lasku.tila in ('H','M','P','Q','U') and (alatila != 'X' or tila='U')) or (lasku.vanhatunnus = 0 and lasku.tila='K')) and lasku.mapvm = '0000-00-00'
-        GROUP BY 1
-        HAVING myynti<>0 or osto<>0 or summa<>0";
+  $query = "SELECT $tapa,
+            sum(if(lasku.tila = 'U' and mapvm = '0000-00-00', lasku.summa, 0)) myynti,
+            round(sum(if(lasku.tila != 'U' and lasku.tila != 'K', -1*lasku.summa*valuu.kurssi, 0)),2) osto,
+            sum(if(lasku.tila = 'K', tilausrivi.hinta, 0)) summa
+            FROM lasku
+            LEFT JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and tilausrivi.tyyppi = 'O' and tilausrivi.toimaika != '0000-00-00')
+            LEFT JOIN toimi ON (toimi.yhtio = lasku.yhtio and toimi.tunnus = lasku.liitostunnus)
+            LEFT JOIN valuu ON (valuu.yhtio = lasku.yhtio and lasku.valkoodi = valuu.nimi)
+            WHERE lasku.yhtio in ($yhtio) and ((lasku.tila in ('H','M','P','Q','U') and (alatila != 'X' or tila='U')) or (lasku.vanhatunnus = 0 and lasku.tila='K')) and lasku.mapvm = '0000-00-00'
+            GROUP BY 1
+            HAVING myynti<>0 or osto<>0 or summa<>0";
   $result = mysql_query($query) or pupe_error($query);
 
   echo "<table>";

@@ -103,10 +103,10 @@ if (mysql_field_name($result, $i) == "kateinen") {
 
 if (mysql_field_name($result, $i) == "factoring") {
 
-  $query = "  SELECT distinct factoringyhtio
-        FROM factoring
-        WHERE yhtio = '$kukarow[yhtio]'
-        ORDER BY factoringyhtio";
+  $query = "SELECT distinct factoringyhtio
+            FROM factoring
+            WHERE yhtio = '$kukarow[yhtio]'
+            ORDER BY factoringyhtio";
   $vresult = mysql_query($query) or pupe_error($query);
 
   $ulos = "<td><select name='$nimi'>";
@@ -126,10 +126,10 @@ if (mysql_field_name($result, $i) == "factoring") {
 
 
 if (mysql_field_name($result, $i) == "osamaksuehto1" or mysql_field_name($result, $i) == "osamaksuehto2") {
-  $query = "  SELECT *
-        FROM maksuehto
-        WHERE yhtio = '$kukarow[yhtio]'
-        ORDER BY jarjestys, teksti";
+  $query = "SELECT *
+            FROM maksuehto
+            WHERE yhtio = '$kukarow[yhtio]'
+            ORDER BY jarjestys, teksti";
   $vresult = mysql_query($query) or pupe_error($query);
 
   $ulos = "<td><select name='$nimi'>";
@@ -147,10 +147,10 @@ if (mysql_field_name($result, $i) == "osamaksuehto1" or mysql_field_name($result
 }
 
 if (mysql_field_name($result, $i) == "pankkiyhteystiedot") {
-  $query = "  SELECT *
-        FROM pankkiyhteystiedot
-        WHERE yhtio = '$kukarow[yhtio]'
-        ORDER BY nimitys";
+  $query = "SELECT *
+            FROM pankkiyhteystiedot
+            WHERE yhtio = '$kukarow[yhtio]'
+            ORDER BY nimitys";
   $vresult = mysql_query($query) or pupe_error($query);
 
   $ulos = "<td><select name='$nimi'>";

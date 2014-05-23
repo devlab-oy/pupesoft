@@ -15,18 +15,18 @@ if(!function_exists("hinnastotarkista")) {
     if (mysql_field_name($result, $i) == "tuoteno") {
       $chtuoteno = $t[$i];
       if ($chtuoteno != '') {
-        $query = "  SELECT tuoteno
-              FROM tuote
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND tuoteno = '$t[$i]'";
+        $query = "SELECT tuoteno
+                  FROM tuote
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND tuoteno = '$t[$i]'";
         $sresult = mysql_query($query) or pupe_error($query);
       }
 
       if (mysql_num_rows($sresult) != 1 or $chtuoteno == "") {
-        $query = "  SELECT tuoteno
-              FROM tuotteen_toimittajat
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND toim_tuoteno = '$t[$i]'";
+        $query = "SELECT tuoteno
+                  FROM tuotteen_toimittajat
+                  WHERE yhtio      = '$kukarow[yhtio]'
+                  AND toim_tuoteno = '$t[$i]'";
         $sresult = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($sresult) == 0 or $chtuoteno == "") {

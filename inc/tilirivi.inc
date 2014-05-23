@@ -98,12 +98,12 @@ if (mysql_field_name($result, $i) == "kustp" or mysql_field_name($result, $i) ==
   $sel = array();
   $sel[$trow[$i]] = "SELECTED";
 
-  $query = "  SELECT tunnus, nimi, koodi
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tyyppi = '$kustp_tyyppi'
-        and kaytossa != 'E'
-        ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, nimi, koodi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and tyyppi    = '$kustp_tyyppi'
+            and kaytossa != 'E'
+            ORDER BY koodi+0, koodi, nimi";
   $tasoresu = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($tasoresu) > 0) {

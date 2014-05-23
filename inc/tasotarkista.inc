@@ -25,12 +25,12 @@ if(!function_exists("tasotarkista")) {
         $virhe[$i] = t("Tulosseuranta taso tulee olla numero!");
       }
       else {
-        $query = "  SELECT tunnus
-              FROM taso
-              WHERE yhtio = '{$kukarow["yhtio"]}'
-              AND taso = BINARY '$t[$i]'
-              AND tyyppi = '$tyyppitalteen'
-              AND tunnus != '$tunnus'";
+        $query = "SELECT tunnus
+                  FROM taso
+                  WHERE yhtio  = '{$kukarow["yhtio"]}'
+                  AND taso     = BINARY '$t[$i]'
+                  AND tyyppi   = '$tyyppitalteen'
+                  AND tunnus  != '$tunnus'";
         $sresult = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($sresult) > 0) {
@@ -47,12 +47,12 @@ if(!function_exists("tasotarkista")) {
       $t[$i] = trim($t[$i]);
 
       foreach (explode(",", $t[$i]) as $sumtas) {
-        $query = "  SELECT tunnus
-              FROM taso
-              WHERE yhtio = '{$kukarow["yhtio"]}'
-              AND taso = BINARY '$sumtas'
-              AND tyyppi = '$tyyppitalteen'
-              AND tunnus != '$tunnus'";
+        $query = "SELECT tunnus
+                  FROM taso
+                  WHERE yhtio  = '{$kukarow["yhtio"]}'
+                  AND taso     = BINARY '$sumtas'
+                  AND tyyppi   = '$tyyppitalteen'
+                  AND tunnus  != '$tunnus'";
         $sresult = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($sresult) == 0) {

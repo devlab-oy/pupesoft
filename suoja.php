@@ -13,16 +13,16 @@ echo " <!-- Enabloidaan shiftillä checkboxien chekkaus //-->
 
 // Muutetaanko jonkun muun oikeuksia??
 if ($selkuka != '') {
-  $query = "  SELECT nimi, kuka, tunnus
-        FROM kuka
-        WHERE tunnus='$selkuka'";
+  $query = "SELECT nimi, kuka, tunnus
+            FROM kuka
+            WHERE tunnus='$selkuka'";
   $result = pupe_query($query);
   $selkukarow = mysql_fetch_array($result);
 }
 elseif ($toim != "extranet") {
-  $query = "  SELECT nimi, kuka, tunnus
-        FROM kuka
-        WHERE tunnus='$kukarow[tunnus]'";
+  $query = "SELECT nimi, kuka, tunnus
+            FROM kuka
+            WHERE tunnus='$kukarow[tunnus]'";
   $result = pupe_query($query);
   $selkukarow = mysql_fetch_array($result);
 }
@@ -30,10 +30,10 @@ elseif ($toim != "extranet") {
 // tehdään oikeuksien päivitys
 if ($update == 'totta' and $selkukarow["kuka"] != "") {
   // poistetaan ihan aluksi kaikki.. iiik.
-  $query = "  DELETE
-        FROM oikeu
-        WHERE yhtio = '$kukarow[yhtio]'
-        and kuka = '$selkukarow[kuka]'";
+  $query = "DELETE
+            FROM oikeu
+            WHERE yhtio = '$kukarow[yhtio]'
+            and kuka    = '$selkukarow[kuka]'";
 
   if ($sovellus != '' and $sovellus != 'kaikki_sovellukset') {
     $query .= " and sovellus='$sovellus'";
@@ -47,29 +47,29 @@ if ($update == 'totta' and $selkukarow["kuka"] != "") {
       list ($nimi, $alanimi, $sov) = explode("#", $rastit);
 
       //haetaan menu itemi
-      $query = "  SELECT nimi, nimitys, jarjestys, alanimi, sovellus, jarjestys2, hidden
-            FROM oikeu
-            WHERE kuka='' and nimi='$nimi' and alanimi='$alanimi' and sovellus='$sov' and yhtio='$kukarow[yhtio]'";
+      $query = "SELECT nimi, nimitys, jarjestys, alanimi, sovellus, jarjestys2, hidden
+                FROM oikeu
+                WHERE kuka='' and nimi='$nimi' and alanimi='$alanimi' and sovellus='$sov' and yhtio='$kukarow[yhtio]'";
       $result = pupe_query($query);
       $trow = mysql_fetch_array($result);
 
-      $query = "  INSERT into oikeu
-            SET
-            kuka    = '$selkukarow[kuka]',
-            sovellus  = '$trow[sovellus]',
-            nimi    = '$trow[nimi]',
-            alanimi   = '$trow[alanimi]',
-            paivitys  = '',
-            lukittu    = '',
-            nimitys    = '$trow[nimitys]',
-            jarjestys   = '$trow[jarjestys]',
-            jarjestys2  = '$trow[jarjestys2]',
-            hidden    = '$trow[hidden]',
-            yhtio    = '$kukarow[yhtio]',
-            laatija   = '{$kukarow['kuka']}',
-            luontiaika   = now(),
-            muutospvm   = now(),
-            muuttaja   = '{$kukarow['kuka']}'";
+      $query = "INSERT into oikeu
+                SET
+                kuka       = '$selkukarow[kuka]',
+                sovellus   = '$trow[sovellus]',
+                nimi       = '$trow[nimi]',
+                alanimi    = '$trow[alanimi]',
+                paivitys   = '',
+                lukittu    = '',
+                nimitys    = '$trow[nimitys]',
+                jarjestys  = '$trow[jarjestys]',
+                jarjestys2 = '$trow[jarjestys2]',
+                hidden     = '$trow[hidden]',
+                yhtio      = '$kukarow[yhtio]',
+                laatija    = '{$kukarow['kuka']}',
+                luontiaika = now(),
+                muutospvm  = now(),
+                muuttaja   = '{$kukarow['kuka']}'";
       $result = pupe_query($query);
     }
     echo "<font class='message'>".t("Käyttöoikeudet päivitetty")."!</font><br>";
@@ -79,21 +79,21 @@ if ($update == 'totta' and $selkukarow["kuka"] != "") {
     foreach ($paivitys as $rastit) { // Päivitetään päivitys-kenttä
       list ($nimi, $alanimi, $sov) = explode("#", $rastit);
 
-      $query = "  SELECT nimi
-            FROM oikeu
-            WHERE yhtio='$kukarow[yhtio]' and kuka='$selkukarow[kuka]' and nimi='$nimi' and alanimi='$alanimi' and sovellus='$sov'";
+      $query = "SELECT nimi
+                FROM oikeu
+                WHERE yhtio='$kukarow[yhtio]' and kuka='$selkukarow[kuka]' and nimi='$nimi' and alanimi='$alanimi' and sovellus='$sov'";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 1) {
-        $query = "  UPDATE oikeu
-              SET paivitys = '1',
-              muutospvm    = now(),
-              muuttaja    = '{$kukarow['kuka']}'
-              WHERE yhtio    = '$kukarow[yhtio]'
-              AND kuka    = '$selkukarow[kuka]'
-              AND nimi    = '$nimi'
-              AND alanimi    = '$alanimi'
-              AND sovellus  = '$sov'";
+        $query = "UPDATE oikeu
+                  SET paivitys = '1',
+                  muutospvm    = now(),
+                  muuttaja     = '{$kukarow['kuka']}'
+                  WHERE yhtio  = '$kukarow[yhtio]'
+                  AND kuka     = '$selkukarow[kuka]'
+                  AND nimi     = '$nimi'
+                  AND alanimi  = '$alanimi'
+                  AND sovellus = '$sov'";
         $result = pupe_query($query);
       }
     }
@@ -103,25 +103,25 @@ if ($update == 'totta' and $selkukarow["kuka"] != "") {
     foreach ($lukot as $rastit) { // Päivitetään lukittu-kenttä
       list ($nimi, $alanimi, $sov) = explode("#", $rastit);
 
-      $query = "  SELECT nimi
-            FROM oikeu
-            WHERE yhtio    = '$kukarow[yhtio]'
-            AND kuka    = '$selkukarow[kuka]'
-            AND nimi    = '$nimi'
-            AND alanimi    = '$alanimi'
-            AND sovellus  = '$sov'";
+      $query = "SELECT nimi
+                FROM oikeu
+                WHERE yhtio  = '$kukarow[yhtio]'
+                AND kuka     = '$selkukarow[kuka]'
+                AND nimi     = '$nimi'
+                AND alanimi  = '$alanimi'
+                AND sovellus = '$sov'";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 1) {
-        $query = "  UPDATE oikeu
-              SET lukittu = '1',
-              muutospvm   = now(),
-              muuttaja   = '{$kukarow['kuka']}'
-              WHERE yhtio    = '$kukarow[yhtio]'
-              AND kuka    = '$selkukarow[kuka]'
-              AND nimi    = '$nimi'
-              AND alanimi    = '$alanimi'
-              AND sovellus  = '$sov'";
+        $query = "UPDATE oikeu
+                  SET lukittu = '1',
+                  muutospvm    = now(),
+                  muuttaja     = '{$kukarow['kuka']}'
+                  WHERE yhtio  = '$kukarow[yhtio]'
+                  AND kuka     = '$selkukarow[kuka]'
+                  AND nimi     = '$nimi'
+                  AND alanimi  = '$alanimi'
+                  AND sovellus = '$sov'";
         $result = pupe_query($query);
       }
     }
@@ -153,21 +153,21 @@ elseif ($toim == "extranet" and $selkukarow["kuka"] == "") {
 
 if ($toim == "extranet" and $selkukarow["tunnus"] != "") {
   $query = "SELECT *
-        FROM kuka
-        WHERE tunnus!='$selkukarow[tunnus]' and yhtio='$kukarow[yhtio]' and extranet != ''
-        ORDER BY nimi";
+            FROM kuka
+            WHERE tunnus!='$selkukarow[tunnus]' and yhtio='$kukarow[yhtio]' and extranet != ''
+            ORDER BY nimi";
 }
 elseif ($toim == "extranet" and $selkukarow["tunnus"] == "") {
   $query = "SELECT *
-        FROM kuka
-        WHERE yhtio='$kukarow[yhtio]' and extranet != ''
-        ORDER BY nimi";
+            FROM kuka
+            WHERE yhtio='$kukarow[yhtio]' and extranet != ''
+            ORDER BY nimi";
 }
 else {
   $query = "SELECT *
-        FROM kuka
-        WHERE tunnus!='$selkukarow[tunnus]' and extranet = '' and yhtio='$kukarow[yhtio]'
-        ORDER BY nimi";
+            FROM kuka
+            WHERE tunnus!='$selkukarow[tunnus]' and extranet = '' and yhtio='$kukarow[yhtio]'
+            ORDER BY nimi";
 }
 $kukares = pupe_query($query);
 
@@ -184,11 +184,11 @@ else {
   $sovellus_rajaus = " and sovellus not like 'Extranet%' ";
 }
 
-$query = "  SELECT distinct sovellus
-      FROM oikeu
-      where yhtio = '$kukarow[yhtio]'
-      $sovellus_rajaus
-      order by sovellus";
+$query = "SELECT distinct sovellus
+          FROM oikeu
+          where yhtio = '$kukarow[yhtio]'
+          $sovellus_rajaus
+          order by sovellus";
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) > 0) {
@@ -228,11 +228,11 @@ if ($sovellus == "") {
 // näytetään oikeuslista
 echo "<table>";
 
-$query = "  SELECT *
-      FROM oikeu
-      WHERE kuka = ''
-      and yhtio = '$kukarow[yhtio]'
-      $sovellus_rajaus";
+$query = "SELECT *
+          FROM oikeu
+          WHERE kuka = ''
+          and yhtio  = '$kukarow[yhtio]'
+          $sovellus_rajaus";
 
 if ($sovellus != '' and $sovellus != 'kaikki_sovellukset') {
   $query .= " and sovellus='$sovellus'";
@@ -285,9 +285,9 @@ while ($orow=mysql_fetch_array($result)) {
   $luk    = '';
 
   if ($selkukarow["kuka"] != "") {
-    $oq = "  SELECT *
-        FROM oikeu
-        WHERE yhtio='$kukarow[yhtio]' and kuka='$selkukarow[kuka]' and nimi='$orow[nimi]' and alanimi='$orow[alanimi]' and sovellus='$orow[sovellus]'";
+    $oq = "SELECT *
+           FROM oikeu
+           WHERE yhtio='$kukarow[yhtio]' and kuka='$selkukarow[kuka]' and nimi='$orow[nimi]' and alanimi='$orow[alanimi]' and sovellus='$orow[sovellus]'";
     $or = pupe_query($oq);
 
     if (mysql_num_rows($or) != 0) {

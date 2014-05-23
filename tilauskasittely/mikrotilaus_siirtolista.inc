@@ -74,9 +74,9 @@ if ($tee == "file") {
       }
 
       if ($tuoteno != '' and $kpl > 0) {
-        $query = "  SELECT *
-              FROM tuote
-              WHERE tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
+        $query = "SELECT *
+                  FROM tuote
+                  WHERE tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
         $result = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($result) == 1) {
@@ -116,11 +116,11 @@ if ($tee == "file") {
 
       if ((int) $olliriveja > 0 and $mtrivilask >= (int) $olliriveja) {
 
-        $query = "  UPDATE lasku
-              SET alatila = 'J'
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tunnus = '$laskurow[tunnus]'
-              and tila='G'";
+        $query = "UPDATE lasku
+                  SET alatila = 'J'
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and tunnus  = '$laskurow[tunnus]'
+                  and tila='G'";
         $updresult = mysql_query($query) or pupe_error($query);
 
         $mtrivilask = 0;
@@ -147,9 +147,9 @@ if ($tee == "file") {
 
         require ("otsik_siirtolista.inc");
 
-        $query = "  SELECT *
-              FROM lasku
-              WHERE tunnus = '$kukarow[kesken]'";
+        $query = "SELECT *
+                  FROM lasku
+                  WHERE tunnus = '$kukarow[kesken]'";
         $aresult = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($aresult) == 0) {

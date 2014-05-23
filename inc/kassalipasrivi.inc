@@ -23,10 +23,10 @@ if ((mysql_field_name($result, $i) == "kassa") or
   else {
     $ulos = "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
 
-    $query = "  SELECT nimi
-          FROM tili
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tilino = '$trow[$i]'";
+    $query = "SELECT nimi
+              FROM tili
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tilino  = '$trow[$i]'";
     $vresult = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($vresult) == 1) {
@@ -40,12 +40,12 @@ if ((mysql_field_name($result, $i) == "kassa") or
 if (mysql_field_name($result, $i) == "kustp") {
 
   $ulos = "<td><select name='$nimi'><option value=' '>".t("Ei kustannuspaikkaa")."</option>";
-  $query = "  SELECT tunnus, nimi
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and kaytossa != 'E'
-        and tyyppi = 'K'
-        ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, nimi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and kaytossa != 'E'
+            and tyyppi    = 'K'
+            ORDER BY koodi+0, koodi, nimi";
   $vresult = mysql_query($query) or pupe_error($query);
 
   while ($vrow = mysql_fetch_array($vresult)) {

@@ -46,20 +46,20 @@ if ($submit != '' and $vv != '' and $kk != '') {
   // tehdään asiakkaan ostot tuoteryhmästä
   echo "<br><font class='message'>".t("Tuoteryhmien myynnit")." $vv-$kk ".t("osastolta")." $osasto (<font color='$cmyynti'>".t("myynti")."</font>/<font color='$ckate'>".t("kate")."</font>/<font color='$ckatepr'>".t("kateprosentti")."</font>)</font><hr>";
 
-  $query  = "  SELECT
-        osasto,
-        try,
-        round(sum(rivihinta), 0) myynti,
-        round(sum(kate), 0) kate,
-        round(sum(kpl), 0) kpl,
-        round(sum(kate) / sum(rivihinta) * 100, 1) katepro
-        from tilausrivi use index (yhtio_tyyppi_laskutettuaika)
-        where yhtio = '$kukarow[yhtio]'
-        and tyyppi = 'L'
-        and laskutettuaika >= '$ayy'
-        and laskutettuaika < '$lyy'
-        $where
-        group by osasto, try";
+  $query  = "SELECT
+             osasto,
+             try,
+             round(sum(rivihinta), 0) myynti,
+             round(sum(kate), 0) kate,
+             round(sum(kpl), 0) kpl,
+             round(sum(kate) / sum(rivihinta) * 100, 1) katepro
+             from tilausrivi use index (yhtio_tyyppi_laskutettuaika)
+             where yhtio        = '$kukarow[yhtio]'
+             and tyyppi         = 'L'
+             and laskutettuaika >= '$ayy'
+             and laskutettuaika < '$lyy'
+             $where
+             group by osasto, try";
   $result = mysql_query($query) or pupe_error($query);
 
   // otetaan suurin myynti talteen

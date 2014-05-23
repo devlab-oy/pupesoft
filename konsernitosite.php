@@ -42,15 +42,15 @@ if ($tee == 'I') {
     $data = mysql_real_escape_string(file_get_contents($_FILES['userfile']['tmp_name']));
 
     // lis‰t‰‰n kuva
-    $query = "  INSERT INTO liitetiedostot set
-          yhtio      = '{$kukarow['yhtio']}',
-          liitos     = 'lasku',
-          laatija    = '{$kukarow['kuka']}',
-          luontiaika = now(),
-          data       = '$data',
-          filename   = '$filename',
-          filesize   = '$filesize',
-          filetype   = '$filetype'";
+    $query = "INSERT INTO liitetiedostot set
+              yhtio      = '{$kukarow['yhtio']}',
+              liitos     = 'lasku',
+              laatija    = '{$kukarow['kuka']}',
+              luontiaika = now(),
+              data       = '$data',
+              filename   = '$filename',
+              filesize   = '$filesize',
+              filetype   = '$filetype'";
     $result = pupe_query($query);
     $liitostunnus = mysql_insert_id();
     $fnimi = $liitostunnus;
@@ -153,22 +153,22 @@ if ($tee == 'I') {
 // Kirjoitetaan tosite jos tiedot ok!
 if ($tee == 'I') {
 
-  $query = "  INSERT into lasku set
-        yhtio = '$kukarow[yhtio]',
-        tapvm = '$tpv-$tpk-$tpp',
-        tila = 'X',
-        laatija = '$kukarow[kuka]',
-        luontiaika = now()";
+  $query = "INSERT into lasku set
+            yhtio      = '$kukarow[yhtio]',
+            tapvm      = '$tpv-$tpk-$tpp',
+            tila       = 'X',
+            laatija    = '$kukarow[kuka]',
+            luontiaika = now()";
   $result = pupe_query($query);
   $tunnus = mysql_insert_id($link);
   $turvatunnus = $tunnus;
 
   if ($fnimi) {
     // p‰ivitet‰‰n kuvalle viel‰ linkki toiseensuuntaa
-    $query = "  UPDATE liitetiedostot SET
-          liitostunnus = '$tunnus',
-          selite = '$selite $summa'
-          WHERE tunnus = '$fnimi'";
+    $query = "UPDATE liitetiedostot SET
+              liitostunnus = '$tunnus',
+              selite       = '$selite $summa'
+              WHERE tunnus = '$fnimi'";
     $result = pupe_query($query);
   }
 
@@ -201,12 +201,12 @@ if ($tee == 'I') {
 
       $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
-      $query = "  INSERT into lasku set
-            yhtio = '$kukarow[yhtio]',
-            tapvm = '$tpv-$tpk-$tpp',
-            tila = 'X',
-            laatija = '$kukarow[kuka]',
-            luontiaika = now()";
+      $query = "INSERT into lasku set
+                yhtio      = '$kukarow[yhtio]',
+                tapvm      = '$tpv-$tpk-$tpp',
+                tila       = 'X',
+                laatija    = '$kukarow[kuka]',
+                luontiaika = now()";
       $result = pupe_query($query);
       $tunnus = mysql_insert_id ($link);
 
@@ -291,11 +291,11 @@ if ($tee == 'I') {
 if ($tee == '') {
 
   if ($vastaanottaja == '') {
-    $query = "  SELECT yhtio, nimi
-          FROM yhtio
-          WHERE konserni = '$yhtiorow[konserni]'
-          AND trim(konserni) != ''
-          AND yhtio != '$kukarow[yhtio]'";
+    $query = "SELECT yhtio, nimi
+              FROM yhtio
+              WHERE konserni  = '$yhtiorow[konserni]'
+              AND trim(konserni) != ''
+              AND yhtio      != '$kukarow[yhtio]'";
     $yresult = pupe_query($query);
 
     if (mysql_num_rows($yresult) < 1) {
@@ -419,10 +419,10 @@ if ($tee == '') {
         $tilinimi = '';
 
         if ($itili[$i] != '') {
-          $query = "  SELECT nimi
-                FROM tili
-                WHERE yhtio = '$kukarow[yhtio]'
-                AND tilino = '$itili[$i]'";
+          $query = "SELECT nimi
+                    FROM tili
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    AND tilino  = '$itili[$i]'";
           $vresult = pupe_query($query);
 
           if (mysql_num_rows($vresult) == 1) {
@@ -437,12 +437,12 @@ if ($tee == '') {
       }
 
       // Tehd‰‰n kustannuspaikkapopup
-      $query = "  SELECT tunnus, nimi
-            FROM kustannuspaikka
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tyyppi = 'K'
-            and kaytossa != 'E'
-            ORDER BY koodi+0, koodi, nimi";
+      $query = "SELECT tunnus, nimi
+                FROM kustannuspaikka
+                WHERE yhtio   = '$kukarow[yhtio]'
+                and tyyppi    = 'K'
+                and kaytossa != 'E'
+                ORDER BY koodi+0, koodi, nimi";
       $vresult = pupe_query($query);
 
       echo "<td><select name='ikustp[$i]'>";
@@ -458,12 +458,12 @@ if ($tee == '') {
       echo "</select><br>";
 
       // Tehd‰‰n kohdepopup
-      $query = "  SELECT tunnus, nimi
-            FROM kustannuspaikka
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tyyppi = 'O'
-            and kaytossa != 'E'
-            ORDER BY koodi+0, koodi, nimi";
+      $query = "SELECT tunnus, nimi
+                FROM kustannuspaikka
+                WHERE yhtio   = '$kukarow[yhtio]'
+                and tyyppi    = 'O'
+                and kaytossa != 'E'
+                ORDER BY koodi+0, koodi, nimi";
       $vresult = pupe_query($query);
 
       echo "<select name='ikohde[$i]'>";
@@ -479,12 +479,12 @@ if ($tee == '') {
       echo "</select><br>";
 
       // Tehd‰‰n projektipopup
-      $query = "  SELECT tunnus, nimi
-            FROM kustannuspaikka
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tyyppi = 'P'
-            and kaytossa != 'E'
-            ORDER BY koodi+0, koodi, nimi";
+      $query = "SELECT tunnus, nimi
+                FROM kustannuspaikka
+                WHERE yhtio   = '$kukarow[yhtio]'
+                and tyyppi    = 'P'
+                and kaytossa != 'E'
+                ORDER BY koodi+0, koodi, nimi";
       $vresult = pupe_query($query);
 
       echo "<select name='iprojekti[$i]'>";

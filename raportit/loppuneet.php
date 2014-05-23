@@ -25,25 +25,25 @@ if ($tee != '') {
     $varastot = " and varastopaikat.tunnus in ($varastot) ";
   }
 
-  $query = "  SELECT tuote.osasto, tuote.try, tuotepaikat.tuoteno, tuote.nimitys, tuotepaikat.saldoaika,
-        concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka,
-        tuote.yksikko, tuotepaikat.inventointiaika, tuote.tahtituote, tuote.hinnastoon, tuote.status,
-        group_concat(tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '/') toim_tuoteno,
-        group_concat(toimi.ytunnus                     order by tuotteen_toimittajat.tunnus separator '/') toimittaja
-        FROM tuotepaikat
-        JOIN tuote ON tuote.yhtio=tuotepaikat.yhtio  and tuote.tuoteno=tuotepaikat.tuoteno
-        LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno
-        LEFT JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
-        LEFT JOIN varastopaikat
-        ON varastopaikat.yhtio = tuotepaikat.yhtio
-        and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-        and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-        WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
-        and tuotepaikat.saldoaika >= '$vv-$kk-$pp 00:00:00'
-        and tuotepaikat.saldo <= 0
-        $varastot
-        group by 1,2,3,4,5,6,7,8,9,10,11
-        ORDER BY osasto, try, tuoteno";
+  $query = "SELECT tuote.osasto, tuote.try, tuotepaikat.tuoteno, tuote.nimitys, tuotepaikat.saldoaika,
+            concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka,
+            tuote.yksikko, tuotepaikat.inventointiaika, tuote.tahtituote, tuote.hinnastoon, tuote.status,
+            group_concat(tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '/') toim_tuoteno,
+            group_concat(toimi.ytunnus                     order by tuotteen_toimittajat.tunnus separator '/') toimittaja
+            FROM tuotepaikat
+            JOIN tuote ON tuote.yhtio=tuotepaikat.yhtio  and tuote.tuoteno=tuotepaikat.tuoteno
+            LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno
+            LEFT JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
+            LEFT JOIN varastopaikat
+            ON varastopaikat.yhtio = tuotepaikat.yhtio
+            and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+            and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+            WHERE tuotepaikat.yhtio   = '$kukarow[yhtio]'
+            and tuotepaikat.saldoaika >= '$vv-$kk-$pp 00:00:00'
+            and tuotepaikat.saldo     <= 0
+            $varastot
+            group by 1,2,3,4,5,6,7,8,9,10,11
+            ORDER BY osasto, try, tuoteno";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) > 498) {
@@ -62,9 +62,9 @@ if ($tee != '') {
   $rivit = 1;
   while ($row = mysql_fetch_array($result)) {
     //katsotaan onko tuotetta tilauksessa
-    $query = "  SELECT sum(varattu) varattu, min(toimaika) toimaika
-          FROM tilausrivi
-          WHERE yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]' and varattu>0 and tyyppi='O'";
+    $query = "SELECT sum(varattu) varattu, min(toimaika) toimaika
+              FROM tilausrivi
+              WHERE yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]' and varattu>0 and tyyppi='O'";
     $result1 = mysql_query($query) or pupe_error($query);
     $prow    = mysql_fetch_array($result1);
 
@@ -95,10 +95,10 @@ echo "<tr><th>".t("Syötä päivämäärä (pp-kk-vvvv)")."</th>
     <td><input type='text' name='vv' value='$vv' size='5'></td></tr>";
 
 //valitaan varasto
-$query = "  SELECT *
-      FROM varastopaikat
-      WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
-      ORDER BY tyyppi, nimitys";
+$query = "SELECT *
+          FROM varastopaikat
+          WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
+          ORDER BY tyyppi, nimitys";
 $vtresult = mysql_query($query) or pupe_error($query);
 
 while ($vrow = mysql_fetch_array($vtresult)) {

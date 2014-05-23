@@ -10,9 +10,9 @@ if (isset($vahennettava_era)) $vahennettava_era = str_replace(",", ".", $vahenne
 if ($tapa == "tuonti" and $tee != "") {
 
   $query = "SELECT *
-        FROM lasku
-        WHERE tunnus in ($otunnus)
-        and yhtio = '$kukarow[yhtio]'";
+            FROM lasku
+            WHERE tunnus in ($otunnus)
+            and yhtio    = '$kukarow[yhtio]'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -27,25 +27,25 @@ if ($tapa == "tuonti" and $tee != "") {
 
     $ultilno = tarvitaanko_intrastat($maa_lahetys, $maa_maara);
 
-    $query = "  UPDATE lasku
-          SET maa_maara            = '$maa_maara',
-          maa_lahetys            = '$maa_lahetys',
-          kauppatapahtuman_luonne      = '$kauppatapahtuman_luonne',
-          kuljetusmuoto            = '$kuljetusmuoto',
-          sisamaan_kuljetus          = '$sisamaan_kuljetus',
-          sisamaan_kuljetusmuoto       = '$sisamaan_kuljetusmuoto',
-          sisamaan_kuljetus_kansallisuus    = '$sisamaan_kuljetus_kansallisuus',
-          kontti               = '$kontti',
-          aktiivinen_kuljetus        = '$aktiivinen_kuljetus',
-          aktiivinen_kuljetus_kansallisuus = '$aktiivinen_kuljetus_kansallisuus',
-          poistumistoimipaikka        = '$poistumistoimipaikka',
-          poistumistoimipaikka_koodi      = '$poistumistoimipaikka_koodi',
-          bruttopaino            = '$bruttopaino',
-          lisattava_era            = '$lisattava_era',
-          vahennettava_era          = '$vahennettava_era',
-          ultilno              = '$ultilno'
-          WHERE tunnus in ($otunnus)
-          and yhtio = '$kukarow[yhtio]'";
+    $query = "UPDATE lasku
+              SET maa_maara            = '$maa_maara',
+              maa_lahetys                      = '$maa_lahetys',
+              kauppatapahtuman_luonne          = '$kauppatapahtuman_luonne',
+              kuljetusmuoto                    = '$kuljetusmuoto',
+              sisamaan_kuljetus                = '$sisamaan_kuljetus',
+              sisamaan_kuljetusmuoto           = '$sisamaan_kuljetusmuoto',
+              sisamaan_kuljetus_kansallisuus   = '$sisamaan_kuljetus_kansallisuus',
+              kontti                           = '$kontti',
+              aktiivinen_kuljetus              = '$aktiivinen_kuljetus',
+              aktiivinen_kuljetus_kansallisuus = '$aktiivinen_kuljetus_kansallisuus',
+              poistumistoimipaikka             = '$poistumistoimipaikka',
+              poistumistoimipaikka_koodi       = '$poistumistoimipaikka_koodi',
+              bruttopaino                      = '$bruttopaino',
+              lisattava_era                    = '$lisattava_era',
+              vahennettava_era                 = '$vahennettava_era',
+              ultilno                          = '$ultilno'
+              WHERE tunnus                     in ($otunnus)
+              and yhtio                        = '$kukarow[yhtio]'";
     $result = pupe_query($query);
 
     $tee = "";
@@ -69,11 +69,11 @@ if ($tapa == "tuonti" and $tee != "") {
     echo "<tr><td>$laskurow[ytunnus]</td><td>$laskurow[nimi]</td><td>$laskurow[tapvm]</td><td>$laskurow[summa] $laskurow[valkoodi]</td><td>$laskurow[toimitusehto]</td></tr>";
     echo "</table><br>";
 
-    $query  = "  SELECT sum(tuotemassa*(varattu+kpl)) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
-          FROM tilausrivi
-          JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
-          WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-          and tilausrivi.otunnus in ($otunnus)";
+    $query  = "SELECT sum(tuotemassa*(varattu+kpl)) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
+               FROM tilausrivi
+               JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
+               WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+               and tilausrivi.otunnus in ($otunnus)";
     $painoresult = pupe_query($query);
     $painorow = mysql_fetch_assoc($painoresult);
 
@@ -97,9 +97,9 @@ if ($tapa == "tuonti" and $tee != "") {
         <input type='hidden' name='tee' value='update'>";
 
     $query = "SELECT sum(kollit) kollit, sum(kilot) kilot
-          FROM rahtikirjat
-          WHERE otsikkonro in ($otunnus)
-          and yhtio = '$kukarow[yhtio]'";
+              FROM rahtikirjat
+              WHERE otsikkonro in ($otunnus)
+              and yhtio        = '$kukarow[yhtio]'";
     $result = pupe_query($query);
     $rahtirow = mysql_fetch_assoc($result);
 
@@ -115,10 +115,10 @@ if ($tapa == "tuonti" and $tee != "") {
     echo "<td>";
     echo "<select name='maa_lahetys' style='width:300px;'>";
 
-    $query = "  SELECT distinct koodi, nimi
-          FROM maat
-          where nimi != ''
-          ORDER BY koodi";
+    $query = "SELECT distinct koodi, nimi
+              FROM maat
+              where nimi != ''
+              ORDER BY koodi";
     $result = pupe_query($query);
 
     echo "<option value=''>".t("Valitse")."</option>";
@@ -138,10 +138,10 @@ if ($tapa == "tuonti" and $tee != "") {
     echo "<td>";
     echo "<select name='maa_maara' style='width:300px;'>";
 
-    $query = "  SELECT distinct koodi, nimi
-          FROM maat
-          where nimi != ''
-          ORDER BY koodi";
+    $query = "SELECT distinct koodi, nimi
+              FROM maat
+              where nimi != ''
+              ORDER BY koodi";
     $result = pupe_query($query);
 
     if ($laskurow["maa_maara"] == "") $laskurow["maa_maara"] = $yhtiorow["maa"];
@@ -234,9 +234,9 @@ elseif ($tee != "") {
 
       // lasketaan rahtikirjalta jos miell‰ on nippu tilauksia tai jos bruttopainoa ei ole annettu k‰yttˆliittym‰st‰
       if (count($otunnukset) > 1 or !isset($bruttopaino) or (int) $bruttopaino == 0) {
-        $query = "  SELECT sum(kilot) kilot
-              FROM rahtikirjat
-              WHERE otsikkonro = '$otun' and yhtio='$kukarow[yhtio]'";
+        $query = "SELECT sum(kilot) kilot
+                  FROM rahtikirjat
+                  WHERE otsikkonro = '$otun' and yhtio='$kukarow[yhtio]'";
         $result   = pupe_query($query);
         $rahtirow = mysql_fetch_assoc ($result);
         $bruttopaino = $rahtirow['kilot'];
@@ -252,34 +252,34 @@ elseif ($tee != "") {
 
       $ultilno = tarvitaanko_intrastat($varaston_row["maa"], $maa_maara);
 
-      $query = "  UPDATE lasku
-            SET maa_maara           = '$maa_maara',
-            maa_lahetys            = '$varaston_row[maa]',
-            kauppatapahtuman_luonne     = '$kauppatapahtuman_luonne',
-            kuljetusmuoto           = '$kuljetusmuoto',
-            sisamaan_kuljetus         = '$sisamaan_kuljetus',
-            sisamaan_kuljetusmuoto      = '$sisamaan_kuljetusmuoto',
-            sisamaan_kuljetus_kansallisuus   = '$sisamaan_kuljetus_kansallisuus',
-            kontti              = '$kontti',
-            aktiivinen_kuljetus       = '$aktiivinen_kuljetus',
-            aktiivinen_kuljetus_kansallisuus= '$aktiivinen_kuljetus_kansallisuus',
-            poistumistoimipaikka       = '$poistumistoimipaikka',
-            poistumistoimipaikka_koodi     = '$poistumistoimipaikka_koodi',
-            bruttopaino           = '$bruttopaino',
-            lisattava_era           = '$lisattava_era',
-            vahennettava_era         = '$vahennettava_era',
-            comments            = '$lomake_lisatiedot',
-            ultilno              = '$ultilno'
-            WHERE tunnus = '$otun' and yhtio = '$kukarow[yhtio]'";
+      $query = "UPDATE lasku
+                SET maa_maara           = '$maa_maara',
+                maa_lahetys                    = '$varaston_row[maa]',
+                kauppatapahtuman_luonne        = '$kauppatapahtuman_luonne',
+                kuljetusmuoto                  = '$kuljetusmuoto',
+                sisamaan_kuljetus              = '$sisamaan_kuljetus',
+                sisamaan_kuljetusmuoto         = '$sisamaan_kuljetusmuoto',
+                sisamaan_kuljetus_kansallisuus = '$sisamaan_kuljetus_kansallisuus',
+                kontti                         = '$kontti',
+                aktiivinen_kuljetus            = '$aktiivinen_kuljetus',
+                aktiivinen_kuljetus_kansallisuus= '$aktiivinen_kuljetus_kansallisuus',
+                poistumistoimipaikka           = '$poistumistoimipaikka',
+                poistumistoimipaikka_koodi     = '$poistumistoimipaikka_koodi',
+                bruttopaino                    = '$bruttopaino',
+                lisattava_era                  = '$lisattava_era',
+                vahennettava_era               = '$vahennettava_era',
+                comments                       = '$lomake_lisatiedot',
+                ultilno                        = '$ultilno'
+                WHERE tunnus                   = '$otun' and yhtio = '$kukarow[yhtio]'";
       $result = pupe_query($query);
 
       //p‰ivitet‰‰n alatila vain jos tilaus ei viel‰ ole laskutettu
-      $query = "  UPDATE lasku
-            SET alatila = 'E'
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tunnus = '$otun'
-            and tila = 'L'
-            and alatila NOT IN ('X', 'J')";
+      $query = "UPDATE lasku
+                SET alatila = 'E'
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tunnus  = '$otun'
+                and tila    = 'L'
+                and alatila NOT IN ('X', 'J')";
       $result = pupe_query($query);
     }
 
@@ -300,14 +300,14 @@ elseif ($tee != "") {
         <input type='hidden' name='tee' value='L'>";
 
     $query = "SELECT *
-          FROM lasku
-          WHERE tunnus in ($otunnus) and yhtio='$kukarow[yhtio]'";
+              FROM lasku
+              WHERE tunnus in ($otunnus) and yhtio='$kukarow[yhtio]'";
     $result = pupe_query($query);
     $laskurow = mysql_fetch_assoc($result);
 
     $query = "SELECT sum(kollit) kollit, sum(kilot) kilot
-          FROM rahtikirjat
-          WHERE otsikkonro in ($otunnus) and yhtio='$kukarow[yhtio]'";
+              FROM rahtikirjat
+              WHERE otsikkonro in ($otunnus) and yhtio='$kukarow[yhtio]'";
     $result = pupe_query($query);
     $rahtirow = mysql_fetch_assoc($result);
 
@@ -317,10 +317,10 @@ elseif ($tee != "") {
     $result = pupe_query($query);
     $asiakasrow = mysql_fetch_assoc($result);
 
-    $query  = "  SELECT sum(tuotemassa*(varattu+kpl)) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
-          FROM tilausrivi
-          JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
-          WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.otunnus in ($otunnus)";
+    $query  = "SELECT sum(tuotemassa*(varattu+kpl)) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
+               FROM tilausrivi
+               JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
+               WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.otunnus in ($otunnus)";
     $painoresult = pupe_query($query);
     $painorow = mysql_fetch_assoc($painoresult);
 
@@ -354,10 +354,10 @@ elseif ($tee != "") {
     echo "<th>".t("M‰‰r‰maan koodi").":</th>";
     echo "<td>";
 
-    $query = "  SELECT distinct koodi, nimi
-          FROM maat
-          where nimi != ''
-          ORDER BY koodi";
+    $query = "SELECT distinct koodi, nimi
+              FROM maat
+              where nimi != ''
+              ORDER BY koodi";
     $maat_result = pupe_query($query);
 
     echo "<select name='maa_maara' style='width:300px;'>";
@@ -621,16 +621,16 @@ if ($tee == '' and $toim == "MUOKKAA") {
     if ($tapa == "tuonti") $tila = " and lasku.tila='K' and lasku.vanhatunnus=0 ";
     else $tila = " and lasku.tila in ('L','U') and lasku.alatila IN ('X', 'J') ";
 
-    $query = "  SELECT lasku.laskunro, lasku.nimi, lasku.luontiaika, kuka.nimi laatija, lasku.vienti, lasku.tapvm, group_concat(lasku.tunnus) tunnus
-          FROM lasku
-          LEFT JOIN kuka on kuka.yhtio = lasku.yhtio and kuka.tunnus = lasku.myyja
-          WHERE lasku.yhtio = '$kukarow[yhtio]'
-          and lasku.vienti != ''
-          $tila
-          $haku
-          GROUP BY lasku.laskunro
-          ORDER BY lasku.tapvm desc
-          LIMIT 50";
+    $query = "SELECT lasku.laskunro, lasku.nimi, lasku.luontiaika, kuka.nimi laatija, lasku.vienti, lasku.tapvm, group_concat(lasku.tunnus) tunnus
+              FROM lasku
+              LEFT JOIN kuka on kuka.yhtio = lasku.yhtio and kuka.tunnus = lasku.myyja
+              WHERE lasku.yhtio  = '$kukarow[yhtio]'
+              and lasku.vienti  != ''
+              $tila
+              $haku
+              GROUP BY lasku.laskunro
+              ORDER BY lasku.tapvm desc
+              LIMIT 50";
     $tilre = pupe_query($query);
 
     echo "<table>";
@@ -695,15 +695,15 @@ elseif ($tee == '') {
   if (is_numeric($etsi)) $haku="and tunnus='$etsi'";
 
   //listataan laskuttamattomat tilausket
-  $query = "  SELECT tunnus tilaus, nimi asiakas, luontiaika laadittu, laatija, vienti, erpcm, ytunnus, nimi, nimitark, postino, postitp, maksuehto, lisattava_era, vahennettava_era, ketjutus,
-        maa_maara, kuljetusmuoto, kauppatapahtuman_luonne, sisamaan_kuljetus, sisamaan_kuljetusmuoto, poistumistoimipaikka, poistumistoimipaikka_koodi, alatila
-        FROM lasku
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tila = 'L'
-        and alatila in ('B','D','E')
-        AND vienti in ('K','E')
-        $haku
-        ORDER by 5,6,7,8,9,10,11,12,13,14";
+  $query = "SELECT tunnus tilaus, nimi asiakas, luontiaika laadittu, laatija, vienti, erpcm, ytunnus, nimi, nimitark, postino, postitp, maksuehto, lisattava_era, vahennettava_era, ketjutus,
+            maa_maara, kuljetusmuoto, kauppatapahtuman_luonne, sisamaan_kuljetus, sisamaan_kuljetusmuoto, poistumistoimipaikka, poistumistoimipaikka_koodi, alatila
+            FROM lasku
+            WHERE yhtio = '$kukarow[yhtio]'
+            and tila    = 'L'
+            and alatila in ('B','D','E')
+            AND vienti  in ('K','E')
+            $haku
+            ORDER by 5,6,7,8,9,10,11,12,13,14";
   $tilre = pupe_query($query);
 
   echo "<br><br>";
@@ -733,10 +733,10 @@ elseif ($tee == '') {
     $vahennettava_era  = '';
 
     while ($tilrow = mysql_fetch_assoc($tilre)) {
-      $query = "  SELECT sum(if(varattu>0,1,0))  veloitus, sum(if(varattu<0,1,0)) hyvitys
-            from tilausrivi
-            where yhtio = '$kukarow[yhtio]'
-            and otunnus = '$tilrow[tilaus]'";
+      $query = "SELECT sum(if(varattu>0,1,0))  veloitus, sum(if(varattu<0,1,0)) hyvitys
+                from tilausrivi
+                where yhtio = '$kukarow[yhtio]'
+                and otunnus = '$tilrow[tilaus]'";
       $hyvre = pupe_query($query);
       $hyvrow = mysql_fetch_assoc($hyvre);
 

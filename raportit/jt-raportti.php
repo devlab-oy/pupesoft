@@ -24,9 +24,9 @@ while ($yrow = mysql_fetch_array($yhtio_result)) {
   if (mysql_num_rows($result) == 1) {
     $yhtiorow = mysql_fetch_array($result);
 
-    $query = "  SELECT *
-          FROM yhtion_parametrit
-          WHERE yhtio='$yhtiorow[yhtio]'";
+    $query = "SELECT *
+              FROM yhtion_parametrit
+              WHERE yhtio='$yhtiorow[yhtio]'";
     $result = mysql_query($query)
         or die ("Kysely ei onnistu yhtio $query");
 
@@ -39,29 +39,29 @@ while ($yrow = mysql_fetch_array($yhtio_result)) {
     }
   }
 
-  $toimquery = "  SELECT *
-          FROM yhtion_toimipaikat
-          WHERE yhtio = '$yhtiorow[yhtio]'
-          AND toim_automaattinen_jtraportti != ''";
+  $toimquery = "SELECT *
+                FROM yhtion_toimipaikat
+                WHERE yhtio                        = '$yhtiorow[yhtio]'
+                AND toim_automaattinen_jtraportti != ''";
   $toimresult = mysql_query($toimquery) or die ("Kysely ei onnistu yhtio $query");
 
   while ($toimrow = mysql_fetch_array($toimresult)) {
     if ($toimrow["toim_automaattinen_jtraportti"] == "pv") {
       // annetaan mennä läpi, koska ajetaan joka päivä
     }
-    else if ($toimrow["toim_automaattinen_jtraportti"] == "vk") {
+    elseif ($toimrow["toim_automaattinen_jtraportti"] == "vk") {
       // ajetaan joka sunnuntai
       if (date('N') != 7) {
         continue;
       }
     }
-    else if ($toimrow["toim_automaattinen_jtraportti"] == "2vk") {
+    elseif ($toimrow["toim_automaattinen_jtraportti"] == "2vk") {
       // ajetaan joka toinen viikko
       if (date('N') != 15) {
         continue;
       }
     }
-    else if ($toimrow["toim_automaattinen_jtraportti"] == "kk" or $toimrow["toim_automaattinen_jtraportti"] == "2vk") {
+    elseif ($toimrow["toim_automaattinen_jtraportti"] == "kk" or $toimrow["toim_automaattinen_jtraportti"] == "2vk") {
       // ajetaan kuun 1. pv
       if (date('j') != 1) {
         continue;
@@ -81,15 +81,15 @@ while ($yrow = mysql_fetch_array($yhtio_result)) {
       $lisavarattu = "";
     }
 
-    $liitostunnus_query = "  SELECT DISTINCT lasku.liitostunnus FROM tilausrivi
-                JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus AND lasku.yhtio_toimipaikka = $toimrow[tunnus])
-                WHERE tilausrivi.yhtio = '$yhtiorow[yhtio]'
-                AND tilausrivi.tyyppi       = 'L'
-                AND tilausrivi.var         = 'J'
-                AND tilausrivi.keratty       = ''
-                AND tilausrivi.uusiotunnus     = 0
-                AND tilausrivi.kpl         = 0
-                AND tilausrivi.jt $lisavarattu  > 0";
+    $liitostunnus_query = "SELECT DISTINCT lasku.liitostunnus FROM tilausrivi
+                           JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus AND lasku.yhtio_toimipaikka = $toimrow[tunnus])
+                           WHERE tilausrivi.yhtio     = '$yhtiorow[yhtio]'
+                           AND tilausrivi.tyyppi      = 'L'
+                           AND tilausrivi.var         = 'J'
+                           AND tilausrivi.keratty     = ''
+                           AND tilausrivi.uusiotunnus = 0
+                           AND tilausrivi.kpl         = 0
+                           AND tilausrivi.jt $lisavarattu  > 0";
     $liitostunnus_result = mysql_query($liitostunnus_query) or die($liitostunnus_query);
 
     while ($liitostunnus_row = mysql_fetch_array($liitostunnus_result)) {
@@ -100,17 +100,17 @@ while ($yrow = mysql_fetch_array($yhtio_result)) {
 
       if ($asiakasrow["email"] != "") {
 
-        $jtquery = "  SELECT tilausrivi.nimitys, tilausrivi.otunnus, tilausrivi.tuoteno, tilausrivi.laadittu, tilausrivi.tilkpl
-                FROM tilausrivi USE INDEX (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
-                JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.yhtio_toimipaikka = $toimrow[tunnus] and lasku.tunnus = tilausrivi.otunnus and lasku.osatoimitus = '' AND lasku.liitostunnus = '{$asiakasrow['tunnus']}')
-                WHERE tilausrivi.yhtio   = '$yhtiorow[yhtio]'
-                AND tilausrivi.tyyppi       = 'L'
-                AND tilausrivi.var         = 'J'
-                AND tilausrivi.keratty       = ''
-                AND tilausrivi.uusiotunnus     = 0
-                AND tilausrivi.kpl         = 0
-                AND tilausrivi.jt $lisavarattu  > 0
-                ORDER BY tilausrivi.otunnus";
+        $jtquery = "SELECT tilausrivi.nimitys, tilausrivi.otunnus, tilausrivi.tuoteno, tilausrivi.laadittu, tilausrivi.tilkpl
+                    FROM tilausrivi USE INDEX (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
+                    JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.yhtio_toimipaikka = $toimrow[tunnus] and lasku.tunnus = tilausrivi.otunnus and lasku.osatoimitus = '' AND lasku.liitostunnus = '{$asiakasrow['tunnus']}')
+                    WHERE tilausrivi.yhtio     = '$yhtiorow[yhtio]'
+                    AND tilausrivi.tyyppi      = 'L'
+                    AND tilausrivi.var         = 'J'
+                    AND tilausrivi.keratty     = ''
+                    AND tilausrivi.uusiotunnus = 0
+                    AND tilausrivi.kpl         = 0
+                    AND tilausrivi.jt $lisavarattu  > 0
+                    ORDER BY tilausrivi.otunnus";
 
         $jtresult = mysql_query($jtquery) or pupe_error($jtquery);
 

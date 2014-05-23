@@ -12,12 +12,12 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
   $session = "";
   srand ((double) microtime() * 1000000);
 
-  $query = "  SELECT kuka.kuka, kuka.session, kuka.salasana
-        FROM kuka
-        JOIN asiakas ON (asiakas.yhtio = kuka.yhtio AND asiakas.tunnus = kuka.oletus_asiakas AND asiakas.laji != 'P')
-        WHERE kuka.kuka = '$user'
-        AND kuka.extranet != ''
-        AND kuka.oletus_asiakas != ''";
+  $query = "SELECT kuka.kuka, kuka.session, kuka.salasana
+            FROM kuka
+            JOIN asiakas ON (asiakas.yhtio = kuka.yhtio AND asiakas.tunnus = kuka.oletus_asiakas AND asiakas.laji != 'P')
+            WHERE kuka.kuka          = '$user'
+            AND kuka.extranet       != ''
+            AND kuka.oletus_asiakas != ''";
   $result = mysql_query($query) or pupe_error($query);
   $krow = mysql_fetch_array($result);
 
@@ -43,10 +43,10 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
           $session = $session . chr(rand(65,90)) ;
         }
 
-        $query = "  UPDATE kuka
-              SET session = '$session',
-              lastlogin = now()
-              WHERE kuka = '$user' and extranet != '' and oletus_asiakas != ''";
+        $query = "UPDATE kuka
+                  SET session = '$session',
+                  lastlogin  = now()
+                  WHERE kuka = '$user' and extranet != '' and oletus_asiakas != ''";
         if (strlen($yhtio) > 0) {
           $query .= " and yhtio = '$yhtio'";
         }
@@ -151,10 +151,10 @@ echo "</a></td>
 ";
 
 if (isset($usea) and $usea == 1) {
-  $query = "  SELECT yhtio.nimi, yhtio.yhtio
-        FROM kuka, yhtio
-        WHERE kuka='$user'
-        and yhtio.yhtio=kuka.yhtio";
+  $query = "SELECT yhtio.nimi, yhtio.yhtio
+            FROM kuka, yhtio
+            WHERE kuka='$user'
+            and yhtio.yhtio=kuka.yhtio";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) == 0) {

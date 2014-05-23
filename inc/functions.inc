@@ -24673,7 +24673,7 @@ if (!function_exists('hae_tilauksen_rekisterinumerot')) {
 if (!function_exists('paivita_ohjausmerkki')) {
   function paivita_ohjausmerkki($laskurow) {
     global $kukarow;
-    
+
     $query = "SELECT tarkenne
               FROM asiakkaan_avainsanat
               WHERE yhtio      = '{$kukarow['yhtio']}'

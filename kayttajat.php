@@ -147,7 +147,7 @@ if ($tee == 'delkesken') {
 if ($tee == 'deloikeu') {
   $query = "UPDATE kuka
             SET profiilit   = '',
-            aktiivinen = 0,
+            aktiivinen = 1,
             muuttaja   = '{$kukarow['kuka']}',
             muutospvm  = now()
             WHERE kuka = '{$selkuka}'
@@ -562,7 +562,6 @@ if ($tee == 'MUUTA') {
         $keraysvyohyke = implode(",", $keraysvyohyke);
       }
     }
-
 
     $max_keraysera_alustat = isset($max_keraysera_alustat) ? (int) $max_keraysera_alustat : 0;
 

@@ -51,6 +51,11 @@ if (!function_exists('kirjanpidollinen_varastosiirto')) {
 
     $myyntitilausrivit = array_find($myyntitilaus['tilausrivit'], $lahde_ja_kohde_varasto_yhdistelma);
 
+    // Ei teh‰ mit‰‰ jos ei ole yht‰‰n rivi‰
+    if (empty($myyntitilausrivit)) {
+      return false;
+    }
+
     aseta_kukarow_kesken(0);
 
     //Kaikilla myyntitilausriveill‰ on sama toimitustapa, joka m‰‰ritell‰‰n avainsanoissa SIIRTOVARASTOT. T‰llˆin voidaan viitata indeksill‰.

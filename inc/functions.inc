@@ -28286,6 +28286,7 @@ if (!function_exists("hinnan_kuluprosentti")) {
     if ($yhtiorow['kulujen_laskeminen_hintoihin'] == 'E' or $kukarow['kulujen_laskeminen_hintoihin'] == 'E') {
       return false;
     }
+
     $query = "  SELECT toimi.kulujen_laskeminen_hintoihin
           FROM tuotteen_toimittajat
           JOIN toimi ON ( toimi.yhtio = tuotteen_toimittajat.yhtio

@@ -1494,7 +1494,12 @@ else {
           $kate = "-100.00%";
         }
 
-        if ($row["tyyppi"] != "V" and $row["tuoteno"] != $yhtiorow["ennakkomaksu_tuotenumero"]) $kate_yht += ($row["rivihinta"] - (kehahin($row["tuoteno"])*($row["varattu"]+$row["jt"]+$row['kpl'])));
+        if ($row["tyyppi"] != "V" and $row["tuoteno"] != $yhtiorow["ennakkomaksu_tuotenumero"]) {
+          $khh = kehahin($row["tuoteno"]);
+          $khh = hinta_kuluineen($row["tuoteno"], $khh);
+
+          $kate_yht += ($row["rivihinta"] - ($khh*($row["varattu"]+$row["jt"]+$row['kpl'])));
+        }
       }
 
       echo "<td $class align='right' valign='top' nowrap>$kate</td>";

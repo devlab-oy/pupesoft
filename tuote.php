@@ -2217,7 +2217,16 @@ if ($tee == 'Z') {
           echo "</td>";
 
           echo "<td nowrap align='right' valign='top'>$prow[kpl]</td>";
-          echo "<td nowrap align='right' valign='top'>".hintapyoristys($prow["kplhinta"])."</td>";
+          echo "<td nowrap align='right' valign='top'>";
+
+          if ($prow['laji'] == 'tulo') {
+            echo hintapyoristys(hinta_kuluineen($tuoterow["tuoteno"], $prow["kplhinta"]));
+          }
+          else {
+            echo hintapyoristys($prow["kplhinta"]);
+          }
+
+          echo "</td>";
           $_hinta = hinta_kuluineen($tuoterow['tuoteno'], $prow['hinta']);
           echo "<td nowrap align='right' valign='top'>".$_hinta."</td>";
 

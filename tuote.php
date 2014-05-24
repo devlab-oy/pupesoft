@@ -1940,6 +1940,12 @@ if ($tee == 'Z') {
       if ($tapahtumalaji == "poistettupaikka")   $sel8="SELECTED";
       if ($tapahtumalaji == "uusipaikka")     $sel9="SELECTED";
 
+      $kulujen_laskeminen_hintoihin = ($yhtiorow['kulujen_laskeminen_hintoihin'] == '');
+
+      if (!$kulujen_laskeminen_hintoihin) {
+        $kulujen_laskeminen_hintoihin = ($kukarow['kulujen_laskeminen_hintoihin'] == '');
+      }
+
       if ($tilalehinta != '') {
         $check = "CHECKED";
       }
@@ -2219,7 +2225,7 @@ if ($tee == 'Z') {
           echo "<td nowrap align='right' valign='top'>$prow[kpl]</td>";
           echo "<td nowrap align='right' valign='top'>";
 
-          if ($prow['laji'] == 'tulo') {
+          if ($prow['laji'] == 'tulo' and $kulujen_laskeminen_hintoihin) {
             echo hintapyoristys(hinta_kuluineen($tuoterow["tuoteno"], $prow["kplhinta"]));
           }
           else {
@@ -2254,10 +2260,22 @@ if ($tee == 'Z') {
             echo "<td nowrap align='right' valign='top'>$prow[tilalehinta]</td>";
           }
 
+          # Jos katsotaan tulotapahtumia ja halutaan n‰hd‰ kulut hinnoissa
+          # Ei n‰ytet‰ selite-kentt‰‰
+          # Koska selite-kentt‰ on informatiivinen kentt‰
+          if ($prow['laji'] == 'tulo' and $kulujen_laskeminen_hintoihin) {
+            $prow['selite'] = "";
+          }
+
           echo "<td valign='top'>$prow[selite]";
 
           if ($prow["laji"] == "tulo" and $prow["lasku2tunnus"] != "") {
-            echo "<br><a href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[lasku2tunnus]&lopetus=$tkysy_lopetus'>".t("N‰yt‰ saapuminen")." $prow[lasku2laskunro]</a>";
+
+            if (trim($prow['selite']) != '') {
+              echo "<br />";
+            }
+
+            echo "<a href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[lasku2tunnus]&lopetus=$tkysy_lopetus'>".t("N‰yt‰ saapuminen")." $prow[lasku2laskunro]</a>";
           }
 
           if (trim($prow["tapapaikka"]) != "" and $prow["tapahtuma_hyllyalue"] != "!!M") echo "<br>".t("Varastopaikka").": $prow[tapapaikka]";

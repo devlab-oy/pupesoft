@@ -27,7 +27,8 @@ else {
 
 $ohjausmerkkilisa = '';
 
-//jos tilaustyyppi on 2 ja ohjausmerkki on tyhj‰‰, niin pistet‰‰n ohjausmerkiksi tilaustyypin selkokielinen nimi
+# jos kyseess‰ on generoitu siirtolista ja ohjausmerkki on tyhj‰‰, niin pistet‰‰n ohjausmerkiksi
+# varastot‰ydennys
 if ($laskurow['chn'] == "GEN" and trim($laskurow['ohjausmerkki']) == "") {
   $ohjausmerkkilisa = ", ohjausmerkki = 'Varastot‰ydennys'";
   $laskurow["ohjausmerkki"] = "Varastot‰ydennys";

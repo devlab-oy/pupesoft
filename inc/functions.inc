@@ -28302,17 +28302,7 @@ if (!function_exists("hinnan_kuluprosentti")) {
     if ($row['kulujen_laskeminen_hintoihin'] == 'E') {
       return false;
     }
-    $query = "  SELECT tunnus
-          FROM yhtion_toimipaikat_parametrit
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND toimipaikka = '{$kukarow['toimipaikka']}'
-          AND parametri = 'kulujen_laskeminen_hintoihin'
-          AND arvo = 'E'";
-    $result = pupe_query($query);
 
-    if (mysql_num_rows($result) > 0) {
-      return false;
-    }
     return $yhtiorow['kuluprosentti'];
   }
 }

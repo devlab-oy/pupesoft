@@ -3606,11 +3606,25 @@ if ($tee == '') {
     echo "<br>";
 
     echo "<table>";
-    echo "<tr><th>",t("Sisäinen viesti"),"</th></tr>";
+
+    if (strpos($laskurow['sisviesti3'], '|||') !== false) {
+     echo "<tr>;"
+     echo "<th>",t("Tuoteno"),"</th>";
+     echo "<th>",t("Kpl"),"</th>";
+     echo "<th>",t("Nimitys"),"</th>";
+     echo "<th>",t("Rekno"),"</th>";
+     echo "<th>",t("Lisäinfo"),"</th>";
+     echo "</tr>";
+    }
+    else {
+      echo "<tr><th>",t("Sisäinen viesti"),"</th></tr>";
+    }
 
     foreach (explode("\n", $laskurow['sisviesti3']) as $_sisviesti3) {
-      $_sisviesti3 = str_replace("|||", " ", $_sisviesti3);
-      echo "<tr><td>{$_sisviesti3}</td></tr>";
+      $_sisviesti3 = str_replace("|||", "</td><td>", $_sisviesti3);
+      echo "<tr>";
+      echo "<td>{$_sisviesti3}</td>";
+      echo "</tr>";
     }
 
     echo "</table>";

@@ -405,12 +405,11 @@ if (mysql_field_name($result, $i) == "laskun_erittely") {
 
 if (mysql_field_name($result, $i) == "kulujen_laskeminen_hintoihin") {
 
-  $selK = ($trow[$i] == 'K' ? "selected" : "");
-  $selE = ($trow[$i] == 'E' ? "selected" : "");
+  $sel = $trow[$i] == 'E' ? "selected" : "";
 
-  $ulos  = "<td><select name='$nimi'>";
-  $ulos .= "<option value='K' $selK>" . t("Hintoihin lasketaan kuluprosentti") . "</option>";
-  $ulos .= "<option value='E' $selE>" . t("Hintoihin ei lasketa kuluprosenttia") . "</option>";
+  $ulos  = "<td><select name='{$nimi}'>";
+  $ulos .= "<option value=''>".t("Hintoihin lasketaan kuluprosentti")."</option>";
+  $ulos .= "<option value='E' {$sel}>".t("Hintoihin ei lasketa kuluprosenttia")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

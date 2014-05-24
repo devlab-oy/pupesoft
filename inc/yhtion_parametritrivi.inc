@@ -143,14 +143,12 @@ if ($fieldname == "lahetteen_tulostustapa") {
 
 if ($fieldname == "kulujen_laskeminen_hintoihin") {
 
-  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-  $sel = array();
-  $apu = $trow[$i];
-  $sel[$apu] = "SELECTED";
+  $sel = $trow[$i] == 'E' ? "selected" : "";
 
-  $ulos .= "<option value = 'E' {$sel['E']}>".t("Hintoihin ei lis‰t‰ kuluja kuluprosentin mukaan")."</option>";
-  $ulos .= "<option value = 'K' {$sel['K']}>".t("Hintoihin lis‰t‰‰n kulut kuluprosentin mukaan")."</option>";
+  $ulos .= "<option value = ''>".t("Hintoihin lis‰t‰‰n kulut kuluprosentin mukaan")."</option>";
+  $ulos .= "<option value = 'E' {$sel}>".t("Hintoihin ei lis‰t‰ kuluja kuluprosentin mukaan")."</option>";
 
   $ulos .= "</select></td>";
 

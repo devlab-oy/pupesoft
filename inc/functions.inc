@@ -28235,17 +28235,9 @@ if (!function_exists("tuotteiden_kulutarkistus")) {
   function tuotteiden_kulutarkistus() {
     global $kukarow, $yhtiorow;
 
-    $query = "  SELECT tunnus
-          FROM yhtion_toimipaikat_parametrit
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND toimipaikka = '{$kukarow['toimipaikka']}'
-          AND parametri = 'kulujen_laskeminen_hintoihin'
-          AND arvo = 'E'";
-    $result = pupe_query($query);
-
     $kulujen_laskeminen_hintoihin = true;
 
-    if (mysql_num_rows($result) > 0) {
+    if ($yhtiorow['kulujen_laskeminen_hintoihin'] == 'E') {
       $kulujen_laskeminen_hintoihin = false;
     }
 

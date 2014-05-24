@@ -929,13 +929,12 @@ if ($tee == 'MUUTA') {
       echo "<option value='-1' {$sel2}>",t("Hintoja ei näytetä"),"</option>";
       echo "</select></td></tr>";
 
-      $selK = ($krow["kulujen_laskeminen_hintoihin"] == 'K' ? "selected" : "");
-      $selE = ($krow["kulujen_laskeminen_hintoihin"] == 'E' ? "selected" : "");
+      $sel = $krow['kulujen_laskeminen_hintoihin'] == 'E' ? "selected" : "";
 
-      echo "<tr><th align='left'>" . t("kuluprosentin esittäminen") . ":</th>";
+      echo "<tr><th align='left'>",t("kuluprosentin esittäminen"),":</th>";
       echo "<td><select name='kulujen_laskeminen_hintoihin'>";
-      echo "<option value='K' $selK>" . t("Hintoihin lasketaan kuluprosentti") . "</option>";
-      echo "<option value='E' $selE>" . t("Hintoihin ei lasketa kuluprosenttia") . "</option>";
+      echo "<option value=''>",t("Hintoihin lasketaan kuluprosentti"),"</option>";
+      echo "<option value='E' {$sel}>",t("Hintoihin ei lasketa kuluprosenttia"),"</option>";
       echo "</select></td></tr>";
 
       if ($toim == 'extranet') {

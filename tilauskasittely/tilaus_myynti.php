@@ -3608,13 +3608,14 @@ if ($tee == '') {
     echo "<table>";
 
     if (strpos($laskurow['sisviesti3'], '|||') !== false) {
-     echo "<tr>;"
-     echo "<th>",t("Tuoteno"),"</th>";
-     echo "<th>",t("Kpl"),"</th>";
-     echo "<th>",t("Nimitys"),"</th>";
-     echo "<th>",t("Rekno"),"</th>";
-     echo "<th>",t("Lisäinfo"),"</th>";
-     echo "</tr>";
+      echo "<tr><th colspan='5'>",t("Selvitettävät lisärivit"),"</th></tr>";
+      echo "<tr>";
+      echo "<th>",t("Tuoteno"),"</th>";
+      echo "<th>",t("Kpl"),"</th>";
+      echo "<th>",t("Nimitys"),"</th>";
+      echo "<th>",t("Rekno"),"</th>";
+      echo "<th>",t("Lisäinfo"),"</th>";
+      echo "</tr>";
     }
     else {
       echo "<tr><th>",t("Sisäinen viesti"),"</th></tr>";

@@ -2223,6 +2223,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     $toim == "hyvityssaannot" or
     $toim == "varaston_hyllypaikat" or
     $toim == "tuotteen_orginaalit" or
+    $toim == "yhtion_toimipaikat_parametrit" or
     $toim == "kohde" or
     ($toim == "liitetiedostot" and $poistolukko == "") or
     ($toim == "tuote" and $poistolukko == "") or

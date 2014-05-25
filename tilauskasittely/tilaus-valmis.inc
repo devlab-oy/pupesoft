@@ -1811,7 +1811,7 @@ else {
 
           $lahtorow = mysql_fetch_assoc($result);
 
-          if ($yhtiorow_chk['kerayserat'] != 'K') continue;
+          if ($yhtiorow['kerayserat'] != 'K') continue;
 
           // Tilaustyyppi 2, eli varastot‰ydennys, siirret‰‰n aina yhden p‰iv‰n eteenp‰in
           $eteenpain = ($lahtorow["tilaustyyppi"] == 2) ? 1 : 0;

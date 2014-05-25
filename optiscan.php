@@ -216,6 +216,7 @@
               $lasku_temp = hae_lasku($o);
               if ($lasku_temp['tila'] == 'G') {
                 $query = "UPDATE lasku SET
+                          alatila     = 'A',
                           lahetepvm   = now(),
                           kerayslista = '{$kerayslistatunnus}'
                           WHERE yhtio = '{$kukarow['yhtio']}'

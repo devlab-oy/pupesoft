@@ -1194,14 +1194,15 @@ for ($i=0; $i<=$count; $i++) {
     }
 
     $ulisa .= "&haku[$i]=".urlencode($haku[$i]);
-    }
-    elseif (!isset($haku[$i])) {
-      if ($toim == 'asiakas' and $yhtiorow['toimipaikkakasittely'] == 'L' and trim($array[$i]) == "toimipaikka") {
-      if ($kukarow['toimipaikka'] != 0) $lisa .= " AND asiakas.toimipaikka = '{$kukarow['toimipaikka']}' ";
-    }
-
+  }
+  elseif (!isset($haku[$i])) {
+    if ($toim == 'asiakas' and $yhtiorow['toimipaikkakasittely'] == 'L' and trim($array[$i]) == "toimipaikka") {
+      if ($kukarow['toimipaikka'] != 0) {
+        $lisa .= " AND asiakas.toimipaikka = '{$kukarow['toimipaikka']}' ";
+      }
     }
   }
+}
 
   //  Säilytetään ohjeen tila
 if ($from != "") {
@@ -1319,7 +1320,18 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
         <input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
         <input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>
         <input type = 'hidden' name = 'laji' value = '$laji'>
-        <input type = 'submit' value = '".t("Näytä kaikki")."'></form>";
+        <input type = 'submit' value = '".t("Näytä kaikki")."'>";
+
+    if ($toim == "asiakas" and $yhtiorow['toimipaikkakasittely'] == 'L') {
+      for ($i = 1; $i < mysql_num_fields($result); $i++) {
+        if (mysql_field_name($result, $i) == "toimipaikka" and $haku[$i] != 'kaikki') {
+          echo "<input type = 'hidden' name = 'haku[$i]' value = '@{$haku[$i]}'>";
+          break;
+        }
+      }
+    }
+
+    echo "</form>";
   }
 
   if ($toim == "asiakas" or $toim == "maksuehto" or $toim == "toimi" or $toim == "tuote" or $toim == "yriti" or $toim == "kustannuspaikka" or $toim == "lahdot" or $toim == "toimitustavan_lahdot") {
@@ -2211,6 +2223,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     $toim == "hyvityssaannot" or
     $toim == "varaston_hyllypaikat" or
     $toim == "tuotteen_orginaalit" or
+    $toim == "yhtion_toimipaikat_parametrit" or
     $toim == "kohde" or
     ($toim == "liitetiedostot" and $poistolukko == "") or
     ($toim == "tuote" and $poistolukko == "") or

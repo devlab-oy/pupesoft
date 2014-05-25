@@ -28265,7 +28265,7 @@ if (!function_exists("tuotteiden_kulutarkistus")) {
           continue;
         }
 
-        if ($tuote['kulujen_laskeminen_hintoihin'] == 'E') {
+        if (empty($tuote['kulujen_laskeminen_hintoihin'])) {
           $tuotteet[$tuote['tuoteno']] = false;
           continue;
         }

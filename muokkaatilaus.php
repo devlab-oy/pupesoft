@@ -751,10 +751,10 @@ else {
       echo "<th>",t("Toimipaikka"),"</th>";
 
       echo "<td><select name='toimipaikka' onchange='submit();'>";
-      echo "<option value=''>",t("Valitse"),"</option>";
+      echo "<option value='kaikki'>",t("Kaikki toimipaikat"),"</option>";
 
       $sel = "";
-      $toimipaikka_requestista = (isset($toimipaikka) and $toimipaikka == 0);
+      $toimipaikka_requestista = (isset($toimipaikka) and $toimipaikka != "kaikki" and $toimipaikka == 0);
       $toimipaikka_kayttajalta = (!isset($toimipaikka) and $kukarow['toimipaikka'] == 0);
       if ($toimipaikka_requestista or $toimipaikka_kayttajalta) {
         $sel = "selected";
@@ -840,7 +840,7 @@ else {
 
     $sumhaku = '';
 
-    if (isset($toimipaikka) and $toimipaikka != "") {
+    if (isset($toimipaikka) and $toimipaikka != "kaikki") {
 
       $toimipaikka = (int) $toimipaikka;
 

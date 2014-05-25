@@ -145,10 +145,10 @@ if ($fieldname == "kulujen_laskeminen_hintoihin") {
 
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-  $sel = $trow[$i] == 'E' ? "selected" : "";
+  $sel = $trow[$i] == 'K' ? "selected" : "";
 
-  $ulos .= "<option value = ''>".t("Hintoihin lis‰t‰‰n kulut kuluprosentin mukaan")."</option>";
-  $ulos .= "<option value = 'E' {$sel}>".t("Hintoihin ei lis‰t‰ kuluja kuluprosentin mukaan")."</option>";
+  $ulos .= "<option value = ''>".t("Hintoihin ei lis‰t‰ kuluja kuluprosentin mukaan")."</option>";
+  $ulos .= "<option value = 'K' {$sel}>".t("Hintoihin lis‰t‰‰n kulut kuluprosentin mukaan")."</option>";
 
   $ulos .= "</select></td>";
 

@@ -28235,10 +28235,10 @@ if (!function_exists("tuotteiden_kulutarkistus")) {
   function tuotteiden_kulutarkistus() {
     global $kukarow, $yhtiorow;
 
-    $kulujen_laskeminen_hintoihin = true;
+    $kulujen_laskeminen_hintoihin = false;
 
-    if ($yhtiorow['kulujen_laskeminen_hintoihin'] == 'E') {
-      $kulujen_laskeminen_hintoihin = false;
+    if ($yhtiorow['kulujen_laskeminen_hintoihin'] == 'K') {
+      $kulujen_laskeminen_hintoihin = true;
     }
 
     $query = "SELECT toimi.kulujen_laskeminen_hintoihin,
@@ -28256,25 +28256,29 @@ if (!function_exists("tuotteiden_kulutarkistus")) {
 
     while($tuote = mysql_fetch_assoc($result)) {
 
-      if (($yhtiorow['kulujen_laskeminen_hintoihin'] == 'E' or $kukarow['kulujen_laskeminen_hintoihin'] == 'E') and !isset($tuotteet[$tuote['tuoteno']])) {
-        $tuotteet[$tuote['tuoteno']] = false;
-        continue;
-      }
+      $_not_isset_tuote = !isset($tuotteet[$tuote['tuoteno']]);
 
-      if ($tuote['kulujen_laskeminen_hintoihin'] == 'E' and !isset($tuotteet[$tuote['tuoteno']])) {
-        $tuotteet[$tuote['tuoteno']] = false;
-        continue;
-      }
+      if ($_not_isset_tuote) {
 
-      if (!$kulujen_laskeminen_hintoihin and !isset($tuotteet[$tuote['tuoteno']])) {
-        $tuotteet[$tuote['tuoteno']] = false;
-        continue;
-      }
+        if (empty($yhtiorow['kulujen_laskeminen_hintoihin']) or empty($kukarow['kulujen_laskeminen_hintoihin'])) {
+          $tuotteet[$tuote['tuoteno']] = false;
+          continue;
+        }
 
-      if (!isset($tuotteet[$tuote['tuoteno']])) {
+        if ($tuote['kulujen_laskeminen_hintoihin'] == 'E') {
+          $tuotteet[$tuote['tuoteno']] = false;
+          continue;
+        }
+
+        if (!$kulujen_laskeminen_hintoihin) {
+          $tuotteet[$tuote['tuoteno']] = false;
+          continue;
+        }
+
         $tuotteet[$tuote['tuoteno']] = $yhtiorow['kuluprosentti'];
       }
     }
+
     return $tuotteet;
   }
 }
@@ -28283,7 +28287,7 @@ if (!function_exists("hinnan_kuluprosentti")) {
   function hinnan_kuluprosentti($tuotenumero) {
     global $kukarow, $yhtiorow;
 
-    if ($yhtiorow['kulujen_laskeminen_hintoihin'] == 'E' or $kukarow['kulujen_laskeminen_hintoihin'] == 'E') {
+    if (empty($yhtiorow['kulujen_laskeminen_hintoihin']) or empty($kukarow['kulujen_laskeminen_hintoihin'])) {
       return false;
     }
 
@@ -28300,7 +28304,7 @@ if (!function_exists("hinnan_kuluprosentti")) {
     $result = pupe_query($query);
     $row = mysql_fetch_assoc($result);
 
-    if ($row['kulujen_laskeminen_hintoihin'] == 'E') {
+    if (empty($row['kulujen_laskeminen_hintoihin'])) {
       return false;
     }
 

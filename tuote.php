@@ -1940,10 +1940,10 @@ if ($tee == 'Z') {
       if ($tapahtumalaji == "poistettupaikka")   $sel8="SELECTED";
       if ($tapahtumalaji == "uusipaikka")     $sel9="SELECTED";
 
-      $kulujen_laskeminen_hintoihin = ($yhtiorow['kulujen_laskeminen_hintoihin'] == '');
+      $kulujen_laskeminen_hintoihin = ($yhtiorow['kulujen_laskeminen_hintoihin'] == 'K');
 
       if (!$kulujen_laskeminen_hintoihin) {
-        $kulujen_laskeminen_hintoihin = ($kukarow['kulujen_laskeminen_hintoihin'] == '');
+        $kulujen_laskeminen_hintoihin = ($kukarow['kulujen_laskeminen_hintoihin'] == 'K');
       }
 
       if ($tilalehinta != '') {

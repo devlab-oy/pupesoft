@@ -43,7 +43,7 @@ if ($ajax_request) {
   if ($action == 'paivita_tyomaaraysten_tyojonot') {
     if (!empty($lasku_tunnukset)) {
       $params = array(
-        'tyojono' => $tyojono,
+          'tyojono' => $tyojono,
       );
       $ok = paivita_tyojono_ja_tyostatus_tyomaarayksille($lasku_tunnukset, $params);
 
@@ -70,15 +70,15 @@ echo $css;
 enable_ajax();
 
 $request = array(
-  'ala_tee'       => $ala_tee,
-  'toim'         => $toim,
-  'lasku_tunnukset'   => $lasku_tunnukset,
-  'laite_tunnus'     => $laite_tunnus,
-  'asiakas_tunnus'   => $asiakas_tunnus,
-  'kohde_tunnus'     => $kohde_tunnus,
-  'tyojono'       => $tyojono,
-  'tyostatus'       => $tyostatus,
-  'toimitusaika'     => $toimitusaika,
+    'ala_tee'         => $ala_tee,
+    'toim'            => $toim,
+    'lasku_tunnukset' => $lasku_tunnukset,
+    'laite_tunnus'    => $laite_tunnus,
+    'asiakas_tunnus'  => $asiakas_tunnus,
+    'kohde_tunnus'    => $kohde_tunnus,
+    'tyojono'         => $tyojono,
+    'tyostatus'       => $tyostatus,
+    'toimitusaika'    => $toimitusaika,
 );
 
 if (!isset($request['toimitusaika'])) {

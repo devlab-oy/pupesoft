@@ -212,7 +212,7 @@ function generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltos
 
     foreach ($huollettavien_laitteiden_huoltosyklirivit as $huollettavien_laitteiden_huoltosyklirivi) {
       if (!empty($huollettavien_laitteiden_huoltosyklirivi['toimenpide_tuotteen_tyyppi'])) {
-        echo "Laitteelle: {$huollettavien_laitteiden_huoltosyklirivi['laite_tunnus']} generoidaan: {$huollettavien_laitteiden_huoltosyklirivi['toimenpide_tuotteen_tyyppi']}";
+        echo "Kohde: {$huollettavien_laitteiden_huoltosyklirivi['kohde_nimi']} Paikka: {$huollettavien_laitteiden_huoltosyklirivi['paikka_nimi']} Laite: {$huollettavien_laitteiden_huoltosyklirivi['tuoteno']} generoidaan: {$huollettavien_laitteiden_huoltosyklirivi['toimenpide_tuotteen_tyyppi']}";
         echo "<br/>";
       }
       else {
@@ -229,6 +229,11 @@ function generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltos
     }
     echo "<br/>";
     echo "<br/>";
+  }
+
+  if ($debug) {
+    $proggress_bar = new ProgressBar(t('Tyˆm‰‰r‰ykset'));
+    $proggress_bar->initialize(count($huollettavien_laitteiden_huoltosyklirivit));
   }
 
   $edellinen_kohde_tunnus = 0;
@@ -277,6 +282,10 @@ function generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltos
     generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_huoltosyklirivit_joita_ei_huolleta, '', $lisaa_kulut);
 
     $edellinen_kohde_tunnus = $huollettavan_laitteen_huoltosyklirivi['kohde_tunnus'];
+
+    if (isset($proggress_bar)) {
+      $proggress_bar->increase();
+    }
   }
 }
 
@@ -465,14 +474,6 @@ function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_
 
   if (!empty($laitteiden_huoltosyklirivit_joita_ei_huolleta)) {
     paivita_laitteen_muiden_jonossa_olevien_huoltosyklien_viimeinen_tapahtumapaiva($laitteiden_huoltosyklirivit_joita_ei_huolleta, $huollettavan_laitteen_huoltosyklirivi['laite_tunnus']);
-  }
-
-  if ($debug) {
-    echo "Lis‰t‰‰n toimenpidetuote rivit";
-    echo "<br/>";
-    var_dump($rivit);
-    echo "<br/>";
-    echo "<br/>";
   }
 
   return $tyomaarays_tunnus;

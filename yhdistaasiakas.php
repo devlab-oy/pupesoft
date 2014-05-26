@@ -839,6 +839,8 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
             echo "<font class='ok'>".t("Löytyi huoltoja asiakkaalta")."</font><br>";
             while ($ahrow = mysql_fetch_assoc($hresult)) {
 
+              $ahrow = array_map('add_slashes', $ahrow);
+
               $tarksql = "SELECT *
                           FROM huolto
                           WHERE yhtio = '{$kukarow['yhtio']}'
@@ -902,6 +904,8 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
             echo "<font class='ok'>".t("Löytyi huolto asiakkaita asiakkaalta")."</font><br>";
             while ($ahrow = mysql_fetch_assoc($hresult)) {
 
+              $ahrow = array_map('add_slashes', $ahrow);
+
               $tarksql = "SELECT *
                           FROM huolto_asiakas
                           WHERE yhtio = '{$kukarow['yhtio']}'
@@ -956,6 +960,9 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
           else {
             echo "<font class='ok'>".t("Löytyi huolto asiakkaita asiakkaalta")."</font><br>";
             while ($ahrow = mysql_fetch_assoc($hresult)) {
+
+              $ahrow = array_map('add_slashes', $ahrow);
+
               $tarksql = "SELECT *
                           FROM huolto_asiakas_omarivi
                           WHERE yhtio = '{$kukarow['yhtio']}'
@@ -1020,6 +1027,9 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
           else {
             echo "<font class='ok'>".t("Löytyi huolto autoja asiakkaalta")."</font><br>";
             while ($ahrow = mysql_fetch_assoc($hresult)) {
+
+              $ahrow = array_map('add_slashes', $ahrow);
+
               $tarksql = "SELECT *
                           FROM huolto_auto
                           WHERE yhtio = '{$kukarow['yhtio']}'
@@ -1076,6 +1086,9 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
           else {
             echo "<font class='ok'>".t("Löytyi huolto rivejä asiakkaalta")."</font><br>";
             while ($ahrow = mysql_fetch_assoc($hresult)) {
+
+              $ahrow = array_map('add_slashes', $ahrow);
+
               $tarksql = "SELECT *
                           FROM huolto_rivi
                           WHERE yhtio = '{$kukarow['yhtio']}'
@@ -1134,6 +1147,9 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
           else {
             echo "<font class='ok'>".t("Löytyi huolto rivi tuotteita asiakkaalta")."</font><br>";
             while ($ahrow = mysql_fetch_assoc($hresult)) {
+
+              $ahrow = array_map('add_slashes', $ahrow);
+              
               $tarksql = "SELECT *
                           FROM huolto_rivi_tuote
                           WHERE yhtio = '{$kukarow['yhtio']}'
@@ -1285,4 +1301,8 @@ function hae_asiakastunnus($tunnukset) {
     if ($tunnus != '') return $tunnus;
   }
   return false;
+}
+
+function add_slashes($str) {
+  return addslashes($str);
 }

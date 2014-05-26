@@ -452,7 +452,11 @@ if (isset($jatka)) {
     $yhtio_toimipaikka = $kukarow['toimipaikka'];
   }
 
-  $prioriteettinro = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selite='{$luokka}'", "", "", "selitetark_3");
+  $prioriteettinro = t_avainsana("VARASTOLUOKKA", "", " and avainsana.selite='{$luokka}'", "", "", "selitetark_3");
+
+  if (!is_numeric($prioriteettinro)) {
+    $prioriteettinro = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selite='{$luokka}'", "", "", "selitetark_3");
+  }
 
   // Default 9 myös kannassa, niin laitetaan tännekki 9 jos avainsanoista ei löydy prioa
   if (!is_numeric($prioriteettinro)) $prioriteettinro = 9;

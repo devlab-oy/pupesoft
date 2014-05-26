@@ -236,6 +236,10 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
     $jresult = pupe_query($jquery);
     $jrow = mysql_fetch_assoc($jresult);
 
+    if (empty($jrow)) {
+      return t('Asiakasta johon oltiin yhdistämässä ei löytynyt');
+    }
+
     echo "<br>".t("Jätetään asiakas").": $jrow[ytunnus] $jrow[nimi] ".$jrow['osoite']." ".$jrow['postino']." ".$jrow['postitp']."<br>";
 
     // Otetaan jätettävä pois poistettavista jos se on sinne ruksattu

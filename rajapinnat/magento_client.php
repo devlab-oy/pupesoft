@@ -196,8 +196,6 @@ class MagentoClient {
     
     $selected_category = $this->_kategoriat;
 
-    $category_ids = array ();
-
     // Tuote countteri
     $count = 0;
 
@@ -220,6 +218,8 @@ class MagentoClient {
     // Lis‰t‰‰n tuotteet eriss‰
     foreach ($dnstuote as $tuote) {
       $tuote_clean = $tuote['tuoteno'];
+
+      $category_ids = array ();
 
       if (is_numeric($tuote['tuoteno'])) $tuote['tuoteno'] = "SKU_".$tuote['tuoteno'];
 
@@ -374,10 +374,10 @@ class MagentoClient {
 
     $selected_category = $this->_kategoriat;
 
-    $category_ids = array ();
-
     // Lis‰t‰‰n tuotteet
     foreach ($dnslajitelma as $nimitys => $tuotteet) {
+      
+      $category_ids = array ();
 
       // Jos lyhytkuvaus on tyhj‰, k‰ytet‰‰n kuvausta?
       if ($tuotteet[0]['lyhytkuvaus'] == '') {

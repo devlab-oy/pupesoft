@@ -414,20 +414,20 @@ class MagentoClient {
 
       // Configurable tuotteen tiedot
       $configurable = array(
-        'categories'      => $category_ids,
-        'websites'        => explode(" ", $tuotteet[0]['nakyvyys']),
-        'name'          => utf8_encode($tuotteet[0]['nimitys']),
+        'categories'            => $category_ids,
+        'websites'              => explode(" ", $tuotteet[0]['nakyvyys']),
+        'name'                  => utf8_encode($tuotteet[0]['nimitys']),
         'description'           => utf8_encode($tuotteet[0]['kuvaus']),
         'short_description'     => utf8_encode($tuotteet[0]['lyhytkuvaus']),
         'campaign_code'         => utf8_encode($tuotteet[0]['campaign_code']),
         'onsale'                => utf8_encode($tuotteet[0]['onsale']),
         'target'                => utf8_encode($tuotteet[0]['target']),
-        'featured_priority'    => utf8_encode($tuotteet[0]['jarjestys']),
+        'featured_priority'     => utf8_encode($tuotteet[0]['jarjestys']),
         'weight'                => $tuotteet[0]['tuotemassa'],
         'status'                => self::ENABLED,
         'visibility'            => self::CATALOG_SEARCH, # Configurablet nakyy kaikkialla
         'price'                 => $tuotteet[0][$hintakentta],
-        'special_price'      => $tuotteet[0]['kuluprosentti'],
+        'special_price'         => $tuotteet[0]['kuluprosentti'],
         'tax_class_id'          => $this->getTaxClassID(), # 24%
         'meta_title'            => '',
         'meta_keyword'          => '',
@@ -452,12 +452,13 @@ class MagentoClient {
             $multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
           }
 
-          $simple_tuote_data = array(  'price'          => $tuote[$hintakentta],
-                        'short_description'    => utf8_encode($tuote['lyhytkuvaus']),
-                        'featured_priority'    => utf8_encode($tuote['jarjestys']),
-                        'visibility'      => self::NOT_VISIBLE_INDIVIDUALLY,
-                        'additional_attributes' => array('multi_data' => $multi_data),
-                        );
+          $simple_tuote_data = array(  
+            'price'                 => $tuote[$hintakentta],
+            'short_description'     => utf8_encode($tuote['lyhytkuvaus']),
+            'featured_priority'     => utf8_encode($tuote['jarjestys']),
+            'visibility'            => self::NOT_VISIBLE_INDIVIDUALLY,
+            'additional_attributes' => array('multi_data' => $multi_data),
+          );
 
           // Päivitetään Simple tuote
           $result = $this->_proxy->call(  $this->_session,

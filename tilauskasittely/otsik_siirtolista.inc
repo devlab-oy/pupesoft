@@ -452,6 +452,11 @@ if (isset($jatka)) {
     $yhtio_toimipaikka = $kukarow['toimipaikka'];
   }
 
+  $prioriteettinro = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selite='{$luokka}'", "", "", "selitetark_3");
+
+  // Default 9 myös kannassa, niin laitetaan tännekki 9 jos avainsanoista ei löydy prioa
+  if (!is_numeric($prioriteettinro)) $prioriteettinro = 9;
+
   $query .= "  lasku SET
         yhtio_nimi      = '$yhtiorow[nimi]',
         yhtio_osoite    = '$yhtiorow[osoite]',
@@ -483,6 +488,7 @@ if (isset($jatka)) {
         alatila       = '$alatila',
         varasto       = '$varasto',
         hyvaksynnanmuutos   = '$luokka',
+        prioriteettinro     = '$prioriteettinro',
         tunnusnippu      = '$tunnusnippu',
         kohde        = '$valmistuslinja',
         toimitustapa    = '$toimitustapa'";

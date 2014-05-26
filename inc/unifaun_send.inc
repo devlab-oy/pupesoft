@@ -504,7 +504,13 @@ class Unifaun {
         #$uni_shi_val = $uni_shipment->addChild('val', ""); # Defines the legal sender (not printed on shipping documents).
         #$uni_shi_val->addAttribute('n', "legalfrom");
 
-        $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->asiakasrow["tunnus"])); # Defines the receiver. Refers to rcvid value for receiver.
+        if (empty($this->asiakasrow['tunnus'])) {
+          $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->postirow["yhtio_toimipaikka"])); # Defines the receiver. Refers to rcvid value for receiver.
+        }
+        else {
+          $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->asiakasrow["tunnus"])); # Defines the receiver. Refers to rcvid value for receiver.
+        }
+
         $uni_shi_val->addAttribute('n', "to");
 
         #$uni_shi_val = $uni_shipment->addChild('val', ""); # Defines the legal receiver (not printed on shipping documents).

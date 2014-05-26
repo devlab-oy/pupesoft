@@ -24854,17 +24854,31 @@ if (!function_exists('paivita_ohjausmerkki')) {
 
         // Tarkistetaan löytyykö kyseinen ohjausmerkkiteksti otsikolta
         // Ei haluta lisätä tekstiä kahteen kertaan
-        if (stripos($laskurow['ohjausmerkki'], $chkrow['ohjausmerkki']) === FALSE) {
 
-          if ($laskurow['ohjausmerkki'] != "") {
+        $updlisa = "";
+        $laskurow['ohjausmerkki'] = trim($laskurow['ohjausmerkki']);
+
+        if ($laskurow['ohjausmerkki'] != "") {
+
+          $_lisataanko = true;
+
+          $_ohjausmerkki = explode(" / ", $laskurow['ohjausmerkki']);
+
+          if ($_ohjausmerkki[0] === $chkrow['ohjausmerkki']) {
+            $_lisataanko = false;
+          }
+
+          if ($_lisataanko) {
             $updlisa = " ohjausmerkki = CONCAT('{$chkrow['ohjausmerkki']}', ' / ', ohjausmerkki)";
             $laskurow['ohjausmerkki'] = "{$chkrow['ohjausmerkki']} / {$laskurow['ohjausmerkki']}";
           }
-          else {
-            $updlisa = " ohjausmerkki = '{$chkrow['ohjausmerkki']}'";
-            $laskurow['ohjausmerkki'] = $chkrow['ohjausmerkki'];
-          }
+        }
+        else {
+          $updlisa = " ohjausmerkki = '{$chkrow['ohjausmerkki']}'";
+          $laskurow['ohjausmerkki'] = $chkrow['ohjausmerkki'];
+        }
 
+        if (trim($updlisa) != "") {
           $query = "UPDATE lasku SET
                     {$updlisa}
                     WHERE yhtio = '{$kukarow['yhtio']}'

@@ -774,7 +774,6 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               WHERE yhtio    = '{$kukarow['yhtio']}'
               AND isatuoteno = (SELECT tuoteno FROM tilausrivi WHERE tunnus = $perheid) LIMIT 1";
     $einayres = mysql_fetch_assoc(pupe_query($query));
-    //$ei_nayteta = $einayres["ei_nayteta"];
   }
 
   //Kaikkien arrayden indeksien äiti
@@ -2045,7 +2044,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     $kpl = $puu_kpl[$i];
     $var = $puu_var[$i];
 
-    //jos ei olla käyty tossa ylläällä niin katotaan onko $ei_nayteta settattu ja laitetaan $puu_ein = $ei_nayteta jos se on viel tyhjä
+    //jos ei olla käyty tossa ylläällä niin katotaan onko $einayres["ei_nayteta"] settattu ja laitetaan $puu_ein = $einayres["ei_nayteta"] jos se on viel tyhjä
     if ($puu_ein[$i] == "" AND isset($einayres["ei_nayteta"])) {
       $puu_ein[$i] = $einayres["ei_nayteta"];
     }

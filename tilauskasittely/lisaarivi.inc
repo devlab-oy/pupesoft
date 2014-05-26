@@ -774,7 +774,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               WHERE yhtio    = '{$kukarow['yhtio']}'
               AND isatuoteno = (SELECT tuoteno FROM tilausrivi WHERE tunnus = $perheid) LIMIT 1";
     $einayres = mysql_fetch_assoc(pupe_query($query));
-    $ei_nayteta = $einayres["ei_nayteta"];
+    //$ei_nayteta = $einayres["ei_nayteta"];
   }
 
   //Kaikkien arrayden indeksien äiti
@@ -1695,11 +1695,11 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 $myy_erikoistoimitus[$indeksi] = "";
               }
 
-              if (!isset($myy_lapsi_ein[$indeksi]) AND !isset($ei_nayteta)) {
+              if (!isset($myy_lapsi_ein[$indeksi]) AND !isset($einayres["ei_nayteta"])) {
                 $myy_lapsi_ein[$indeksi] = "";
               }
-              elseif (isset($ei_nayteta)) {
-                $myy_lapsi_ein[$indeksi] = $ei_nayteta;
+              elseif (isset($einayres["ei_nayteta"])) {
+                $myy_lapsi_ein[$indeksi] = $einayres["ei_nayteta"];
               }
 
               $tlisatied_lisa2 = "";
@@ -2033,15 +2033,22 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       $puu_var[]    = $var;
     }
   }
-
-  //jos ei olla käyty tossa ylläällä niin katotaan onko $ei_nayteta settattu ja laitetaan $puu_ein = $ei_nayteta jos se on viel tyhjä
-  if ($puu_ein[$i] == "" AND isset($ei_nayteta)) {
-    $puu_ein[$i] = $ei_nayteta;
+  elseif ($perheid != 0) {
+    $query = "SELECT ei_nayteta
+              FROM tuoteperhe
+              WHERE yhtio    = '{$kukarow['yhtio']}'
+              AND isatuoteno = (SELECT tuoteno FROM tilausrivi WHERE tunnus = $perheid) LIMIT 1";
+    $einayres = mysql_fetch_assoc(pupe_query($query));
   }
 
   foreach ($puu_tuoteno as $i => $tuoteno) {
     $kpl = $puu_kpl[$i];
     $var = $puu_var[$i];
+
+    //jos ei olla käyty tossa ylläällä niin katotaan onko $ei_nayteta settattu ja laitetaan $puu_ein = $ei_nayteta jos se on viel tyhjä
+    if ($puu_ein[$i] == "" AND isset($einayres["ei_nayteta"])) {
+      $puu_ein[$i] = $einayres["ei_nayteta"];
+    }
 
     if (!$kvkasittely) {
 

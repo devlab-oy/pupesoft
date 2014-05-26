@@ -207,20 +207,13 @@ if ($alisa != "" and $llisa != "") {
 
         // Milloin rivit on viety saldoille keskim‰‰rin
         $query = "SELECT
-                  round(AVG(DATE_FORMAT(laskutettuaika, '%Y'))) vuosi,
-                  round(AVG(DATE_FORMAT(laskutettuaika, '%m'))) kuukausi,
-                  round(AVG(DATE_FORMAT(laskutettuaika, '%d'))) paiva
+                  DATE_FORMAT(FROM_UNIXTIME(AVG(UNIX_TIMESTAMP(laskutettuaika))),'%Y-%m-%d') AS laskutettuaika
                   FROM tilausrivi
                   WHERE yhtio     = '{$kukarow['yhtio']}'
                   AND uusiotunnus = {$keikrow['tunnus']}
                   AND tyyppi      = 'O'";
         $rivires = pupe_query($query);
         $rivirow = mysql_fetch_assoc($rivires);
-        
-        $rivirow["kuukausi"] = (strlen($rivirow["kuukausi"]) == 2) ? $rivirow["kuukausi"] : "0".$rivirow["kuukausi"];
-        $rivirow["paiva"] = (strlen($rivirow["paiva"]) == 2) ? $rivirow["paiva"] : "0".$rivirow["paiva"];  
-        
-        $rivirow["laskutettuaika"] = $rivirow["vuosi"].$rivirow["kuukausi"].$rivirow["paiva"];
 
         // Toimittajan toimitusehto
         $query = "SELECT toimitusehto
@@ -240,7 +233,7 @@ if ($alisa != "" and $llisa != "") {
       echo "<td align='right'>$yhtiorow[valkoodi]</td>";
       echo "<td>{$keikrow["laskunro"]}</td>";
       echo "<td>".tv1dateconv($keikrow["mapvm"])."</td>";
-      echo "<td>".tv1dateconv(tv3dateconv($rivirow["laskutettuaika"], TRUE))."</td>";
+      echo "<td>".tv1dateconv($rivirow["laskutettuaika"])."</td>";
       echo "<td>$toimirow[toimitusehto]</td>";
       echo "</tr>";
 

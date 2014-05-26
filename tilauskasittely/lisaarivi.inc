@@ -2032,7 +2032,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       $puu_var[]    = $var;
     }
   }
-  elseif ($perheid != 0) {
+  elseif ($perheid != 0 AND !isset($einayres["ei_nayteta"])) {
     $query = "SELECT ei_nayteta
               FROM tuoteperhe
               WHERE yhtio    = '{$kukarow['yhtio']}'

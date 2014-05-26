@@ -206,13 +206,21 @@ if ($alisa != "" and $llisa != "") {
         $keikrow = mysql_fetch_assoc($keikres);
 
         // Milloin rivit on viety saldoille keskim‰‰rin
-        $query = "SELECT round(AVG(DATE_FORMAT(laskutettuaika, '%Y%m%d'))) laskutettuaika
+        $query = "SELECT
+                  round(AVG(DATE_FORMAT(laskutettuaika, '%Y'))) vuosi,
+                  round(AVG(DATE_FORMAT(laskutettuaika, '%m'))) kuukausi,
+                  round(AVG(DATE_FORMAT(laskutettuaika, '%d'))) paiva
                   FROM tilausrivi
                   WHERE yhtio     = '{$kukarow['yhtio']}'
                   AND uusiotunnus = {$keikrow['tunnus']}
                   AND tyyppi      = 'O'";
         $rivires = pupe_query($query);
         $rivirow = mysql_fetch_assoc($rivires);
+        
+        $rivirow["kuukausi"] = (strlen($rivirow["kuukausi"]) == 2) ? $rivirow["kuukausi"] : "0".$rivirow["kuukausi"];
+        $rivirow["paiva"] = (strlen($rivirow["paiva"]) == 2) ? $rivirow["paiva"] : "0".$rivirow["paiva"];  
+        
+        $rivirow["laskutettuaika"] = $rivirow["vuosi"].$rivirow["kuukausi"].$rivirow["paiva"];
 
         // Toimittajan toimitusehto
         $query = "SELECT toimitusehto

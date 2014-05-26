@@ -3,24 +3,24 @@
 if (!function_exists("pupesoft_login")) {
   function pupesoft_login($params) {
 
-    $user     = $params['user'];
+    $user       = $params['user'];
     $salasana   = $params['salasana'];
-    $salamd5   = $params['salamd5'];
-    $mikayhtio   = $params['mikayhtio'];
-    $uusi1     = $params['uusi1'];
-    $uusi2     = $params['uusi2'];
-    $yhtio     = $params['yhtio'];
-    $browkieli   = $params['browkieli'];
+    $salamd5    = $params['salamd5'];
+    $mikayhtio  = $params['mikayhtio'];
+    $uusi1      = $params['uusi1'];
+    $uusi2      = $params['uusi2'];
+    $yhtio      = $params['yhtio'];
+    $browkieli  = $params['browkieli'];
     $palvelin   = $params['palvelin'];
-    $palvelin2   = $params['palvelin2'];
-    $mobile   = $params['mobile'];
+    $palvelin2  = $params['palvelin2'];
+    $mobile     = $params['mobile'];
 
     $session = "";
     $usea    = 0;
 
     $return = array(
-      'status' => false,
-      'error' => '',
+      'status'  => false,
+      'error'   => '',
       'message' => ''
     );
 
@@ -49,9 +49,9 @@ if (!function_exists("pupesoft_login")) {
         while ($vaihdarow = mysql_fetch_assoc($result)) {
 
           if ($mikayhtio != $vaihdarow["yhtio"]) {
-            $krow = $vaihdarow;
+            $krow  = $vaihdarow;
             $yhtio = $vaihdarow["yhtio"];
-            $usea = 0;
+            $usea  = 0;
           }
         }
       }
@@ -11071,7 +11071,7 @@ if (!function_exists("hae_yhtion_parametrit")) {
 
     // Jos meillä on toimipaikka, ylikirjataan yhtion parametrit toimipaikan parametreillä
     if ($toimipaikka > 0) {
-      $query = "SELECT *
+      $query = "SELECT *, tunnus yhtion_toimipaikat_tunnus
                 FROM yhtion_toimipaikat
                 WHERE yhtio = '$yhtio'
                 and tunnus  = '$toimipaikka'";
@@ -11079,6 +11079,8 @@ if (!function_exists("hae_yhtion_parametrit")) {
 
       if (mysql_num_rows($result) == 1) {
         $yhtion_toimipaikkarow = mysql_fetch_assoc($result);
+
+        unset($yhtion_toimipaikkarow["tunnus"]);
 
         if (trim($yhtion_toimipaikkarow['postittaja_email']) == '') {
           $yhtion_toimipaikkarow['postittaja_email'] = $yhtion_parametritrow['postittaja_email'];
@@ -11099,7 +11101,7 @@ if (!function_exists("hae_yhtion_parametrit")) {
         while ($yhtion_toimipaikka_paramrow = mysql_fetch_assoc($result)) {
           $yhtiorow[$yhtion_toimipaikka_paramrow['parametri']] = $yhtion_toimipaikka_paramrow['arvo'];
         }
-       }
+      }
     }
 
     return $yhtiorow;

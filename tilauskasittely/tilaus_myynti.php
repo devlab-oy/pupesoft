@@ -1768,7 +1768,8 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' and $tee == 'VASTAANOT
   $tee        = '';
   $tilausnumero    = '';
   $laskurow      = '';
-  $kukarow['kesken']  = '';
+
+  aseta_kukarow_kesken(0);
 
   if ($kukarow["extranet"] == "" and $lopetus != '') {
     lopetus($lopetus, "META");

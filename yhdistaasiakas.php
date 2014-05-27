@@ -699,7 +699,8 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
                         and liitostunnus = '$jrow[tunnus]'
                         and kieli        = '$ahrow[kieli]'
                         and laji         = '$ahrow[laji]'
-                        and avainsana    = '$ahrow[avainsana]'";
+                        and avainsana    = '$ahrow[avainsana]'
+                        and tarkenne     = '$ahrow[tarkenne]'";
             $tarkesult = pupe_query($tarksql);
             $ahy = mysql_num_rows($tarkesult);
 
@@ -710,6 +711,7 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
                            kieli        = '$ahrow[kieli]',
                            laji         = '$ahrow[laji]',
                            avainsana    = '$ahrow[avainsana]',
+                           tarkenne     = '$ahrow[tarkenne]',
                            laatija      = '$kukarow[kuka]',
                            luontiaika   = now()";
               $ahinsertresult = pupe_query($ahinsert);

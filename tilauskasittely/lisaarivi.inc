@@ -2614,8 +2614,10 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
               $varattu   = $kpl;
               $jt     = 0;
             }
-
-            $var  = "J";
+            $saldo_myytavissa = saldo_myytavissa($trow["tuoteno"], '', $varasto[0]);
+            if ($saldo_myytavissa[1] < $kpl) {
+              $var  = "J";
+            }
           }
           // Terminaalitoimitukset tai ostoskorit; var tyhjää ja varattu normisti
           elseif ($rivityyppi == 'Z' or $rivityyppi == 'B' or $rivityyppi == 'E' or $rivityyppi == 'F') {

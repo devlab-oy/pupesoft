@@ -153,8 +153,6 @@ if ( ( !isset($jataminut) and !isset($yhdista) ) and (!isset($_FILES['userfile']
       $jarjestys = $ojarj;
     }
 
-    $lisa .= " and asiakas.laji != 'P' ";
-
     $query = "SELECT
               asiakas.tunnus,
               asiakas.ytunnus,
@@ -1149,7 +1147,7 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
             while ($ahrow = mysql_fetch_assoc($hresult)) {
 
               $ahrow = array_map('add_slashes', $ahrow);
-              
+
               $tarksql = "SELECT *
                           FROM huolto_rivi_tuote
                           WHERE yhtio = '{$kukarow['yhtio']}'
@@ -1281,14 +1279,12 @@ function hae_asiakastunnus($tunnukset) {
     $query = "SELECT tunnus
               FROM asiakas
               WHERE yhtio  = '{$kukarow['yhtio']}'
-              AND laji    != 'P'
               AND tunnus   = '{$tunnukset['ASIAKASTUNNUS']}'";
   }
   else{
     $query = "SELECT tunnus
               FROM asiakas
               WHERE yhtio         = '{$kukarow['yhtio']}'
-              AND laji           != 'P'
               AND ytunnus         = '{$tunnukset['YTUNNUS']}'
               AND ovttunnus       = '{$tunnukset['OVTTUNNUS']}'
               AND toim_ovttunnus  = '{$tunnukset['TOIM_OVTTUNNUS']}'";

@@ -1557,7 +1557,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
         if ($tilauksesta_valmistustilaus != '') echo "$tilauksesta_valmistustilaus<br><br>";
       }
 
-      if ($kukarow["extranet"] == "" and $yhtiorow["tee_siirtolista_myyntitilaukselta"] == 'K' and $laskurow['tila'] == 'N' and $laskurow['alatila'] == '') {
+      if ($kukarow["extranet"] == "" and $yhtiorow["tee_siirtolista_myyntitilaukselta"] == 'K' and $laskurow['tila'] == 'N' and in_array($laskurow['alatila'], array('','F'))) {
         require 'tilauksesta_varastosiirto.inc';
 
         tilauksesta_varastosiirto($laskurow['tunnus'], 'N');

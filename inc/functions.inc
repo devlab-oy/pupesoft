@@ -27300,7 +27300,7 @@ if (!function_exists('tee_kirjanpidollinen_varastosiirto')) {
     $varastot       = array_column($varastot, 'tunnus');
 
     // Yhtiön toimipaikalla voi olla monta varastoa.
-    if (count($varastot) > 0 and !in_array($myyntitilaus['varasto'], $varastot) and $myyntitilaus['varasto'] != 0) {
+    if ($myyntitilaus['varasto'] != 0 and count($varastot) > 0 and !in_array($myyntitilaus['varasto'], $varastot)) {
       require 'tilauskasittely/tilauksesta_varastosiirto.inc';
 
       //Myyntitilaukselle valittu varasto ei ole yhtion toimipaikan varastoissa. Tällöin tehdään kirjanpidollinen varastosiirto

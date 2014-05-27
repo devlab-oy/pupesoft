@@ -312,17 +312,6 @@ if (!function_exists('luo_varastosiirto')) {
     $varasto      = $lahdevarasto_tunnus;
     $toim         = "SIIRTOLISTA";
 
-    # haetaan luokka myyntitilaukselta
-    $query = "SELECT *
-              FROM lasku
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus = '{$myyntitilaus_tunnus}'";
-    $luokka_chk_res = pupe_query($query);
-    $luokka_chk_row = mysql_fetch_assoc($luokka_chk_res);
-
-    # luokka-tieto tallennetaan 'hyvaksynnanmuutos'-kentt‰‰n
-    $luokka = $luokka_chk_row['hyvaksynnanmuutos'];
-
     $lahdevarasto = hae_varasto($lahdevarasto_tunnus);
     $yhtio_toimipaikka = $lahdevarasto['toimipaikka'];
 

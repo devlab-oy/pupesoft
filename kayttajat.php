@@ -147,7 +147,7 @@ if ($tee == 'delkesken') {
 if ($tee == 'deloikeu') {
   $query = "UPDATE kuka
             SET profiilit   = '',
-            aktiivinen = 1,
+            aktiivinen = 0,
             muuttaja   = '{$kukarow['kuka']}',
             muutospvm  = now()
             WHERE kuka = '{$selkuka}'
@@ -1579,12 +1579,12 @@ if ($tee == "") {
             FROM kuka
             WHERE kuka.yhtio  = '{$kukarow['yhtio']}'
             AND kuka.extranet = '{$extrsel}'
-            ORDER BY kuka.aktiivinen, kuka.nimi";
+            ORDER BY kuka.aktiivinen DESC, kuka.nimi";
   $kukares = pupe_query($query);
 
   echo "<optgroup label='",t("Aktiiviset käyttäjät"),"'>";
 
-  $edakt = 0;
+  $edakt = 1;
   $poislisa = "";
 
   while ($kurow = mysql_fetch_assoc($kukares)) {

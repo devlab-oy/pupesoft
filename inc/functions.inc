@@ -303,14 +303,14 @@ if (!function_exists("paivita_aktiiviset_kayttajat")) {
     if ($klisa != "") {
       if ($aktikukarow['tunnukset'] != "") {
         $query = "UPDATE kuka
-                  SET aktiivinen = 0
+                  SET aktiivinen = 1
                   WHERE {$ylisa}
                   {$klisa}";
         pupe_query($query);
       }
       else {
         $query = "UPDATE kuka
-                  SET aktiivinen = 1
+                  SET aktiivinen = 0
                   WHERE {$ylisa}
                   {$klisa}";
         pupe_query($query);
@@ -318,13 +318,13 @@ if (!function_exists("paivita_aktiiviset_kayttajat")) {
     }
     elseif ($aktikukarow['tunnukset'] != "") {
       $query = "UPDATE kuka
-                SET aktiivinen = 0
+                SET aktiivinen = 1
                 WHERE {$ylisa}
                 AND tunnus in ({$aktikukarow['tunnukset']})";
       pupe_query($query);
 
       $query = "UPDATE kuka
-                SET aktiivinen = 1
+                SET aktiivinen = 0
                 WHERE {$ylisa}
                 AND tunnus not in ({$aktikukarow['tunnukset']})";
       pupe_query($query);

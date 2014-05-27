@@ -305,10 +305,18 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
     $vares = pupe_query($query);
 
     while ($varow = mysql_fetch_array($vares)) {
-      if (($varow["tyyppi"] == '') or ($kukarow["varasto"] == $varow["tunnus"]) or ($varow['tunnus']==$srow["varasto"]) or ($kukarow['oletus_ostovarasto'] == $varow['tunnus'])) {
+      if (   $varow["tyyppi"] == ''
+          or $kukarow["varasto"] == $varow["tunnus"]
+          or $varow['tunnus']==$srow["varasto"]
+          or $kukarow['oletus_ostovarasto'] == $varow['tunnus']) {
 
         // Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan se
-        if ($varow['tunnus']==$srow["varasto"] or ($kukarow['oletus_ostovarasto'] == $varow['tunnus'] and $srow['varasto'] == '') or ($varow['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '' and $kukarow['oletus_ostovarasto'] == 0)) {
+        if (    $varow['tunnus']==$srow["varasto"]
+            or (    $kukarow['oletus_ostovarasto'] == $varow['tunnus']
+                and $srow['varasto'] == '')
+            or (    $varow['tunnus'] == $kukarow['varasto']
+                and $srow['varasto'] == ''
+                and $kukarow['oletus_ostovarasto'] == 0)) {
           $selectoitu_varasto_toimipaikka = $varow['toimipaikka'];
           break;
         }
@@ -322,14 +330,29 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
       echo "<tr><td></td><td></td><td>".t("Tilaava toimipiste").":</td>";
       echo "<td valign='middle'>";
       echo "<select name='toimipiste'>";
-      echo "<option value=''>".t("Ei poikkeavaa toimipistettä")."</option>";
+      echo "<option value=''";
+
+      if ($srow['vanhatunnus'] == 0) {
+        echo 'selected';
+      }
+
+      echo ">";
+      echo t("Ei poikkeavaa toimipistettä");
+      echo "</option>";
 
       while($row = mysql_fetch_array($yresult)) {
         $sel = "";
 
-        if ($srow["vanhatunnus"] == $row["tunnus"] or ($srow['vanhatunnus'] == 0 and $kukarow['toimipaikka'] == $row['tunnus'])) $sel = "selected";
+        if (    $srow["vanhatunnus"] == $row["tunnus"]
+            or (!isset($srow['vanhatunnus']) and $kukarow['toimipaikka'] == $row['tunnus'])) {
+          $sel = "selected";
+        }
 
-        if ($sel == '' and $srow['vanhatunnus'] == 0 and $selectoitu_varasto_toimipaikka == $row['tunnus']) $sel = "selected";
+        if (    $sel == ''
+            and $srow['vanhatunnus'] == 0
+            and $selectoitu_varasto_toimipaikka == $row['tunnus']) {
+          $sel = "selected";
+        }
 
         echo "<option value='$row[tunnus]' $sel>$row[nimi] ($row[ovtlisa])</option>";
       }
@@ -552,15 +575,17 @@ if (isset($jatka)) {
 
   // katotaan ollaanko valittu tietty varasto johon kamat tilataan
   if ($varasto > 0) {
-    $edique  = "SELECT *
+    $edique = " SELECT *
                 FROM varastopaikat
-                WHERE yhtio = '$kukarow[yhtio]'
-                and tunnus  = '$varasto'";
+                WHERE yhtio  = '$kukarow[yhtio]'
+                AND tunnus   = '$varasto'";
     $vares = mysql_query($edique) or pupe_error($edique);
     $varow = mysql_fetch_array($vares);
 
     if ($yhtiorow['pakollinen_varasto'] == 'K' and isset($toimipiste) and (trim($toimipiste) == '' or $toimipiste == 0) and $varow['toimipaikka'] != 0) {
       $toimipiste = $varow['toimipaikka'];
+
+      echo "<font class='message'>",t("Tilaava toimipiste haettiin varaston takaa"),".</font><br /><br />";
     }
 
     if ($varow["nimi"] != "" and $varow["osoite"] != "") {
@@ -577,10 +602,10 @@ if (isset($jatka)) {
 
   // katotaan ollaanko valittu tilaajaksi joku muu toimipiste
   if ($toimipiste > 0 and strlen(trim($tnimi)) == 0) {
-    $edique  = "SELECT *
-                from yhtion_toimipaikat
-                where yhtio = '$kukarow[yhtio]'
-                and tunnus  = '$toimipiste'";
+    $edique = " SELECT *
+                FROM yhtion_toimipaikat
+                WHERE yhtio  = '$kukarow[yhtio]'
+                AND tunnus  = '$toimipiste'";
     $ediotr = mysql_query($edique) or pupe_error($edique);
     $edioro = mysql_fetch_array($ediotr);
 

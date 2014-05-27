@@ -16,6 +16,8 @@ if (!isset($ppl)) $ppl = date("d");
 if (!isset($nayta)) $nayta = '';
 if (!isset($tee)) $tee = '';
 
+if (!isset($varasto)) $varasto = 0;
+
 echo "<font class='head'>",t("Keräyspoikkeamat"),":</font><hr>";
 
 if ($tee != '') {
@@ -31,12 +33,26 @@ if ($tee != '') {
                and tilausrivi.kerattyaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'";
   }
 
+  if (!empty($varasto)) {
+
+    $varasto = (int) $varasto;
+
+    $varastolisa = "JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
+              and concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
+              and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
+              and varastopaikat.tunnus = '{$varasto}')";
+  }
+  else {
+    $varastolisa = "";
+  }
+
   $query = "SELECT lasku.nimi asiakas, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilkpl, tilausrivi.kpl, tilausrivi.keratty,
             concat_ws(' ',tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) tuotepaikka,
             tilausrivi.nimitys, tilausrivi.yksikko, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllytaso, tilausrivi.hyllyvali,
             concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
             FROM tilausrivi
             JOIN lasku ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)
+            {$varastolisa}
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
             {$aikalisa}
             and tilausrivi.var     not in ('P','J','O','S')
@@ -62,7 +78,12 @@ if ($tee != '') {
 
       if ($nayta == 'ei_ylijaamia' and $row['tilkpl'] < $row['kpl']) continue;
 
-      list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"]);
+      if (!empty($varasto)) {
+        list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', $row["hyllyalue"], $row["hyllynro"], $row["hyllyvali"], $row["hyllytaso"]);
+      }
+      else {
+        list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"]);
+      }
 
       //saldolaskentaa tulevaisuuteen
       $query = "SELECT sum(varattu) varattu,
@@ -123,6 +144,38 @@ $sel = $rivien_aika == 'laskutettuaika' ? ' selected' : '';
 echo "<option value='laskutettuaika'{$sel}>",t("Laskutettuaika"),"</option>";
 echo "</select></td>";
 echo "</tr>";
+
+echo "<tr><th>",t("Rajaa varastolla"),"</th>";
+
+echo "<td><select name='varasto'>";
+
+$sel = "";
+
+$query = "SELECT *
+          FROM varastopaikat
+          WHERE yhtio     = '{$kukarow['yhtio']}'
+          AND tyyppi      != 'P'
+          ORDER BY nimitys, tyyppi";
+$varastopaikat_result = pupe_query($query);
+
+echo "<option value='0'>",t("Kaikki varastot"),"</option>";
+
+while($_varasto = mysql_fetch_assoc($varastopaikat_result)) {
+
+  if (!empty($varasto) and $varasto == $_varasto['tunnus']) {
+    $sel = "selected";
+  }
+  elseif ($sel == "" and $kukarow['oletus_varasto'] == $_varasto['tunnus']) {
+    $sel = "selected";
+  }
+  else {
+    $sel = "";
+  }
+
+  echo "<option value='{$_varasto['tunnus']}' {$sel}>{$_varasto['nimitys']}</option>";
+}
+
+echo "</select></td></tr>";
 
 echo "<tr><th>",t("Syötä alkupäivämäärä (pp-kk-vvvv)"),"</th>
     <td><input type='text' name='ppa' value='{$ppa}' size='3'>

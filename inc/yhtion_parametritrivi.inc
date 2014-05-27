@@ -141,6 +141,20 @@ if ($fieldname == "lahetteen_tulostustapa") {
   $jatko = 0;
 }
 
+if ($fieldname == "kulujen_laskeminen_hintoihin") {
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'K' ? "selected" : "";
+
+  $ulos .= "<option value = ''>".t("Hintoihin ei lis‰t‰ kuluja kuluprosentin mukaan")."</option>";
+  $ulos .= "<option value = 'K' {$sel}>".t("Hintoihin lis‰t‰‰n kulut kuluprosentin mukaan")."</option>";
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "myyntitilin_tulostustapa") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

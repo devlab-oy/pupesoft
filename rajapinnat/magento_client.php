@@ -169,115 +169,6 @@ class MagentoClient {
   }
 
   /**
-   * Lisää kaikki tuotepuun kategoriat Magento-verkkokauppaan.
-   *
-   * @param  array  $dnstuotepuu  Pupesoftin tuote_exportin palauttama array
-   * @return int                  Lisättyjen kategorioiden määrä
-   */
-  public function lisaa_tuotepuu(array $dnstuotepuu) {
-
-    $this->log("Lisätään tuotepuun kategoriat");
-
-    $categoryaccesscontrol = $this->_categoryaccesscontrol;
-
-    $count = 0;
-    $mary = $this->checkSubCategory(array ("kissa"));
-    exit;
-    // Loopataan osastot ja tuoteryhmat
-    foreach ($dnstuotepuu as $alakategoria) {
-
-      try {
-        // Haetaan kategoriat joka kerta koska lisättäessä puu muuttuu
-        $category_tree = $this->getCategories();
-
-        $alakategoria['nimi'] = utf8_encode($alakategoria['nimi']);
-        $syvyys               = count($alakategoria['ancestors']);
-
-        $parent_ids   = array ();
-        $parent_names = array ();
-        // Root-tasolla ei ole ancestoreita
-        if ($syvyys > 0) {
-          if ($syvyys == 1) {
-            // Root-tasolle jos ancestoreita 1
-            $parent_ids = array ($this->_parent_id);
-
-          }
-          else {
-
-            // Haetaan ancestorien tunnukset
-            if (count($alakategoria['ancestors']) > 2) {
-            list($parent_ids, $parent_names) = $this->getCategoryTree($alakategoria['nimi'],
-                                                                      $alakategoria['ancestors'],
-                                                                      $category_tree['children'][0]['children']);
-            echo "Palautui\n";
-            var_dump($parent_ids);
-            var_dump($parent_names);
-          }
-
-
-          }
-
-          // Koitetaan perustaa tuoteryhmä tai koko ketju
-          foreach ($parent_ids as $key => $value) {
-            // Haetaan kategoriat joka kerta koska lisättäessä puu muuttuu
-            $category_tree = $this->getCategories();
-
-            $parent_id = $value;
-
-            // Katsotaan pitääkö kategoria piilottaa menusta ---Yli 3-tason(tästäkin parami salasanat.php?) alakategoriat pitäisi piilottaa menusta
-            $inclusion = $syvyys > 3  ? 0 : 1;
-
-            $alakategoria['nimi'] = count($parent_ids) > 1 ? utf8_encode($parent_names[$key]) : $alakategoria['nimi'];
-            // Tarkistetaan onko kategoriaa magentossa
-            if ($syvyys > 1) {
-              $found = $syvyys == count($parent_ids) ? TRUE : FALSE;
-            }
-            else {
-              $found = $this->findCategory($alakategoria['nimi'], $category_tree['children']);
-            }
-            // Jos kategoria löytyy niin mennään seuraavaan soluun
-            if ($found) continue;
-
-            // Lisätään kategoria, jos ei löytynyt
-            $sub_category_data = array(
-              'name'                  => $alakategoria['nimi'],
-              'is_active'             => 1,
-              'position'              => 1,
-              'default_sort_by'       => 'position',
-              'available_sort_by'     => 'position',
-              'include_in_menu'       => $inclusion
-            );
-
-            if ($categoryaccesscontrol) {
-              // HUOM: Vain jos "Category access control"-moduli on asennettu
-              $sub_category_data['accesscontrol_show_group'] = 0;
-            }
-
-            // Kutsutaan soap rajapintaa
-            $category_id = $this->_proxy->call($this->_session, 'catalog_category.create',
-              array($parent_id, $sub_category_data)
-            );
-
-            $count++;
-
-            $this->log("Lisättiin tuotepuun kategoria {$alakategoria['nimi']} syvyyteen {$syvyys}");
-          }
-        }
-      }
-      catch (Exception $e) {
-        $this->_error_count++;
-        $this->log("Virhe! Tuotepuun kategoriaa {$alakategoria['nimi']}
-                    ei voitu lisätä syvyyteen {$syvyys} ", $e);
-      }
-    }
-
-    $this->_category_tree = $this->getCategories();
-    $this->log("$count tuotepuun kategoriaa lisätty");
-
-    return $count;
-  }
-
-  /**
    * Lisää päivitettyjä Simple tuotteita Magento-verkkokauppaan.
    *
    * @param  array  $dnstuote   Pupesoftin tuote_exportin palauttama tuote array
@@ -322,9 +213,8 @@ class MagentoClient {
 
       $tuote['kuluprosentti'] = ($tuote['kuluprosentti'] == 0) ? '' : $tuote['kuluprosentti'];
 
-      $category_ids = array();
       // Etsitään kategoria_id tuoteryhmällä
-      $category_ids[] = $this->findCategory(utf8_encode($tuote['try_nimi']), $category_tree['children']);
+      $category_id = $this->findCategory(utf8_encode($tuote['try_nimi']), $category_tree['children']);
 
       // Jos tuote ei oo osa configurable_grouppia, niin niitten kuuluu olla visibleja.
       if (isset($individual_tuotteet[$tuote_clean])) {
@@ -338,24 +228,9 @@ class MagentoClient {
         array('website' => 1, 'customer_group_id' => 1, 'qty' => 2,'price' => 50.00),
         //array('website_id' => 'lexxa', 'cust_group' => 1, 'qty' => 1,'price' => 400),
       );
-      $palikat = $tuote['breadcrumbs'];
-      // Lisätään myös tuotepuun kategoriat
-      if (isset($palikat) and count($palikat) > 0) {
-
-        //DEBUG
-        $kuntti = count($palikat);
-        echo "Palikoita oli: $kuntti \n";
-
-        $loppu = $this->checkSubCategory($palikat);
-        echo "Loppusitaatti: \n";
-        var_dump($loppu);
-        exit;
-        //endDEBUG
-        //$category_ids[] =
-      }
 
       $tuote_data = array(
-          'categories'            => $category_ids,
+          'categories'            => $category_id,
           'websites'              => explode(" ", $tuote['nakyvyys']),
           'name'                  => utf8_encode($tuote['nimi']),
           'description'           => utf8_encode($tuote['kuvaus']),
@@ -911,107 +786,6 @@ class MagentoClient {
 
     // Mitään ei löytyny
     return $category_id;
-  }
-
-  /**
-   * Etsii alakategoriaketjua Magenton kategoriapuusta
-   * Jos ei löydy niin luo puuttuvat solut
-   * parametreiksi etsittävä breadcrumbs array
-   * Palauttaa: ketjun viimeisen solun magento id:n
-   */
-  private function checkSubCategory($breadcrumbs) {
-
-    $final_category_id = 0;
-    // Haetaan kategoriat
-    $category_tree = $this->getCategories();
-    // Skipataan "root" taso myös magentosta
-    $category_tree = $category_tree['children'][0]['children'];
-
-
-    //$breadcrumbs = array(utf8_encode("ASENNUSTARVIKKEET"), utf8_encode("PUTKITUSTARVIKKEET"));
-    // Perustettava ketju
-    $category_chains_to_create = array ();
-    $isi = '';
-    foreach ($breadcrumbs as $cat) {
-      $category_tree = $this->getCategories();
-      $category_tree = $category_tree['children'][0]['children'];
-
-      $cat = utf8_encode($cat);
-      $found = FALSE;
-      echo "etsitään $cat \n";
-      $counter = 0;
-      $jou = $this->findCategory($cat, $category_tree);
-
-      $category_chains_to_create[] = $jou;
-      /*while (!is_numeric($category_tree)) {
-        if (is_numeric($isi)) $category_tree[$isi]['children'];
-        $category_tree = $this->getSubCategoryIdFromArray($cat, $category_tree);
-        if (is_array($category_tree) and count($category_tree) == 0 or empty($category_tree)) {
-          $category_chains_to_create[] = $cat;
-          $found = TRUE;
-        }
-        if (is_numeric($category_tree) and (int) $category_tree > 0) {
-          $category_chains_to_create[] = $category_tree;
-          echo "löytyi $category_tree \n";
-          $isit[$category_tree];
-          $found = TRUE;
-        }
-        $counter++;
-        if($counter > 50) break;
-      }
-      */
-
-    }
-    echo "löytyi $jou";
-    var_dump($category_chains_to_create);
-    //$keykala = end(array_keys($category_chains_to_create));
-    $vika = $category_chains_to_create[count($category_chains_to_create) - 1];
-    if (is_numeric($vika)) {
-      return $vika;
-    }
-    else {
-      //return $this->createSubCategory($category_chains_to_create);
-    }
-
-  }
-
-  //
-  private function getSubCategoryIdFromArray($needle, $haystack) {
-
-    foreach($haystack as $i => $category) {
-      if (strcasecmp($needle, $category['name']) == 0) {
-        return $category['category_id'];
-      }
-    }
-    if (count($haystack) > 0 and isset($haystack['children'])) {
-      return $haystack['children'];
-    }
-    else return array ();
-
-  }
-
-  /**
-   * Perustaa kategorian Magenton kategoriapuuhun
-   * parametreiksi koko perustettavan kategoriaketjun nimet arrayssa
-   * alkaen ykköstasolta, key =
-   * Palauttaa:
-   */
-  private function createSubCategory($category_chain) {
-
-    echo "tultiin createSubCategory";
-    var_dump($category_chain);
-    // Skipataan "root" taso myös magentosta
-    // $category_tree = $category_tree['children'][0]['children'];
-    //
-    //     $foundthis = '';
-    //
-    //     if (count($foundthis) > 0 and $searchname != '') {
-    //
-    //      // list($parent_ids,$parent_names) = $this->getCategoryTree($name, $ancestors, $foundthis, $taso);
-    //     }
-    //
-    // Palautetaan syvimmän luodun keijon id
-    //return array($parent_ids, $parent_names);
   }
 
   /**

@@ -80,7 +80,7 @@ $datetime_checkpoint = $datetime_checkpoint_row['selite']; // Mikä tilanne on jo
 $datetime_checkpoint_uusi = date('Y-m-d H:i:s'); // Timestamp nyt
 
 // alustetaan arrayt
-$dnstuote = $dnsryhma = $dnstuoteryhma = $dnstock = $dnsasiakas = $dnshinnasto = $dnslajitelma = $kaikki_tuotteet = $individual_tuotteet = $dnstuotepuu = array();
+$dnstuote = $dnsryhma = $dnstuoteryhma = $dnstock = $dnsasiakas = $dnshinnasto = $dnslajitelma = $kaikki_tuotteet = $individual_tuotteet = array();
 
 if ($ajetaanko_kaikki == "NO") {
   $muutoslisa = "AND (tuote.muutospvm >= '{$datetime_checkpoint}'
@@ -149,41 +149,6 @@ while ($row = mysql_fetch_array($res)) {
     $myymalahinta_veroton       = hintapyoristys($row["myymalahinta"] / (1+($row["alv"]/100)));
   }
 
-  // Jos tuote kuuluu tuotepuuhun niin etsitään kategoria_idt myös kaikille tuotepuun kategorioille
-  $query = "SELECT t0.nimi node, t0.lft,
-            tuote.tuoteno,
-            GROUP_CONCAT(t5.nimi SEPARATOR '\n') children,
-            (SELECT GROUP_CONCAT(t6.nimi SEPARATOR '\n')
-             FROM dynaaminen_puu t6
-             WHERE t6.lft<t0.lft AND t6.rgt>t0.rgt
-             AND t6.laji      = 'tuote'
-             ORDER BY t6.lft) ancestors
-            FROM dynaaminen_puu t0
-            LEFT JOIN
-            (SELECT *
-             FROM (SELECT t1.lft node,
-             MAX(t2.lft) nodeparent
-             FROM dynaaminen_puu t1
-             INNER JOIN
-             dynaaminen_puu t2 ON t1.lft>t2.lft AND t1.rgt<t2.rgt
-             GROUP BY t1.lft) t3
-             LEFT JOIN
-             dynaaminen_puu t4 ON t3.node=t4.lft) t5 ON t0.lft=t5.nodeparent
-            LEFT JOIN puun_alkio ON puun_alkio.puun_tunnus = t0.tunnus AND puun_alkio.yhtio = t0.yhtio
-             JOIN tuote ON tuote.tuoteno = puun_alkio.liitos AND tuote.yhtio = puun_alkio.yhtio
-            WHERE t0.yhtio ='{$kukarow['yhtio']}'
-            AND t0.laji       = 'tuote'
-            AND tuote.tuoteno = '{$row['tuoteno']}'
-            GROUP BY t0.nimi
-            ORDER BY t0.lft";
-  $result_tp = pupe_query($query);
-  $tuotepuurow = mysql_fetch_assoc($result_tp);
-  var_dump($tuotepuurow['ancestors']);
-  var_dump($tuotepuurow['node']);
-  $breadcrumbs = empty($tuotepuurow['ancestors']) ? array () : explode("\n",$tuotepuurow['ancestors']);
-  $breadcrumbs[] = $tuotepuurow['node'];
-  array_shift($breadcrumbs);
-  var_dump($breadcrumbs);
   $dnstuote[] = array('tuoteno'        => $row["tuoteno"],
             'nimi'          => $row["nimitys"],
             'kuvaus'        => $row["kuvaus"],
@@ -207,7 +172,6 @@ while ($row = mysql_fetch_array($res)) {
             'target'        => $row["target"],
             'onsale'        => $row["onsale"],
             'tunnus'        => $row['tunnus'],
-            'breadcrumbs' => $breadcrumbs, //Tuotepuun oksien nimet
             );
 }
 
@@ -365,45 +329,6 @@ while ($row = mysql_fetch_assoc($try_result)) {
                       );
 }
 
-/*  echo date("d.m.Y @ G:i:s")." - Haetaan dynaaminen tuotepuu.\n";
-
-$query = "SELECT t0.nimi node,
-          t0.lft,
-          GROUP_CONCAT(t5.nimi SEPARATOR '\n') children,
-          (SELECT GROUP_CONCAT(t6.nimi SEPARATOR '\n')
-           FROM dynaaminen_puu t6
-           WHERE t6.lft<t0.lft
-           AND t6.rgt>t0.rgt
-           AND t6.laji   = 'tuote'
-           ORDER BY t6.lft) ancestors
-          FROM dynaaminen_puu t0
-          LEFT JOIN
-          (SELECT *
-           FROM (SELECT t1.lft node,
-                 MAX(t2.lft) nodeparent
-                 FROM dynaaminen_puu t1
-                 INNER JOIN
-                 dynaaminen_puu t2 ON (t1.lft>t2.lft AND t1.rgt<t2.rgt)
-                 GROUP BY t1.lft) t3
-          LEFT JOIN
-          dynaaminen_puu t4 ON t3.node=t4.lft) t5 ON t0.lft=t5.nodeparent
-          WHERE t0.yhtio = '{$kukarow['yhtio']}'
-          AND t0.laji    = 'tuote'
-          GROUP BY t0.nimi
-          ORDER BY t0.lft";
-
-$dynpuu_result = pupe_query($query);
-
-while ($row = mysql_fetch_assoc($dynpuu_result)) {
-  $children = empty($row['children']) ? array () : explode("\n",$row['children']);
-  $ancestors = empty($row['ancestors']) ? array () : explode("\n",$row['ancestors']);
-  $dnstuotepuu[] = array(
-                         'nimi'    => $row['node'],
-                         'children'  => $children,
-                         'ancestors' => $ancestors,
-                        );
-}
-*/
 if ($ajetaanko_kaikki == "NO") {
   $muutoslisa = "AND asiakas.muutospvm >= '{$datetime_checkpoint}'";
 }
@@ -687,13 +612,6 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
     echo date("d.m.Y @ G:i:s")." - Päivitetään tuotekategoriat\n";
     $count = $magento_client->lisaa_kategoriat($dnstuoteryhma);
     echo date("d.m.Y @ G:i:s")." - Päivitettiin $count kategoriaa\n";
-  }
-
-  // Dynaaminen tuotepuu
-  if (count($dnstuotepuu) > 0) {
-    echo date("d.m.Y @ G:i:s")." - Päivitetään dynaamisen tuotepuun kategoriat\n";
-    $count = $magento_client->lisaa_tuotepuu($dnstuotepuu);
-    echo date("d.m.Y @ G:i:s")." - Päivitettiin $count tuotepuun kategoriaa\n";
   }
 
   // Tuotteet (Simple)

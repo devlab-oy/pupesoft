@@ -183,7 +183,7 @@ if (isset($ajetaan)) {
   }
 
   // Varaston arvo
-  $query = "SELECT
+  $query = "SELECT tuote.tuoteno,
             $selectlisa
             sum(
               if(  tuote.sarjanumeroseuranta = 'S' or tuote.sarjanumeroseuranta = 'U',
@@ -255,11 +255,11 @@ if (isset($ajetaan)) {
 
   while ($row = mysql_fetch_assoc($result)) {
     // netto- ja bruttovarastoarvo
-    $varvo  = $row["varasto"];
-    $bvarvo = $row["bruttovarasto"];
+    $varvo  = hinta_kuluineen( $row["tuoteno"], $row["varasto"] );
+    $bvarvo = hinta_kuluineen( $row["tuoteno"], $row["bruttovarasto"] );
 
-    $varastosumma += $row["varasto"];
-    $bruttovarastosumma += $row["bruttovarasto"];
+    $varastosumma += hinta_kuluineen( $row["tuoteno"], $row["varasto"] );
+    $bruttovarastosumma += hinta_kuluineen( $row["tuoteno"], $row["bruttovarasto"] );
 
     echo "<tr>";
 

@@ -6771,7 +6771,8 @@ if ($tee == '') {
 
                 // Kate = Hinta - Ostohinta
                 if ($kotisumma_alviton != 0) {
-                  $kate = sprintf('%.2f', 100*($kotisumma_alviton - ($ostohinta * $kpl))/$kotisumma_alviton)."%";
+                  $kehahin = hinta_kuluineen($row["tuoteno"], $row["kehahin"]);
+                  $kate = round((100 * ($kotisumma_alviton - ($kehahin*($row["varattu"]+$row["jt"]))) / $kotisumma_alviton),2) ."%";
                 }
                 elseif (($ostohinta * $kpl) != 0) {
                   $kate = "-100.00%";
@@ -6812,7 +6813,8 @@ if ($tee == '') {
                   $sarjares1 = pupe_query($query);
                   $sarjarow1 = mysql_fetch_assoc($sarjares1);
 
-                  $ostohinta += $sarjarow1["ostohinta"];
+                  $oh = hinta_kuluineen($arow['tuoteno'], $sarjarow1['ostohinta']);
+                  $ostohinta += $oh;
                 }
 
                 // Kate = Hinta - Alkuper‰inen ostohinta
@@ -6829,17 +6831,18 @@ if ($tee == '') {
             }
             elseif ($kukarow['extranet'] == '') {
               if ($kotisumma_alviton != 0) {
-                $kate = sprintf('%.2f', 100*($kotisumma_alviton - ($row["kehahin"]*($row["varattu"]+$row["jt"])))/$kotisumma_alviton)."%";
+                $khh = hinta_kuluineen($row['tuoteno'], $row["kehahin"]);
+                $kate = round(100 * ($kotisumma_alviton - ($khh * ($row["varattu"] + $row["jt"])))/$kotisumma_alviton, 2);
               }
               elseif ($row["kehahin"] != 0 and ($row["varattu"]+$row["jt"]) > 0) {
-                $kate = "-100.00%";
+                $kate = "-100.00";
               }
               elseif ($row["kehahin"] != 0 and ($row["varattu"]+$row["jt"]) < 0) {
-                $kate = "100.00%";
+                $kate = "100.00";
               }
             }
 
-            echo "<td $class align='right' valign='top' nowrap>$kate</td>";
+            echo "<td $class align='right' valign='top' nowrap>$kate%</td>";
           }
 
           if ($classlisa != "") {
@@ -7530,19 +7533,20 @@ if ($tee == '') {
               if ($arow["varattu"] > 0) {
                 //Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on myynti‰
                 $ostohinta = sarjanumeron_ostohinta("myyntirivitunnus", $arow["tunnus"]);
+                $ostohinta = hinta_kuluineen($arow['tuoteno'], $ostohinta);
 
                 // Kate = Hinta - Ostohinta
-                $rivikate     = $arow["kotirivihinta"] - ($ostohinta * $arow["varattu"]);
+                $rivikate = $arow["kotirivihinta"] - ($ostohinta * $arow["varattu"]);
                 $rivikate_eieri = $arow["kotirivihinta_ei_erikoisaletta"] - ($ostohinta * $arow["varattu"]);
               }
               elseif ($arow["varattu"] < 0 and $arow["osto_vai_hyvitys"] == "O") {
                 //Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on OSTOA
 
                 // Kate = 0
-                $rivikate     = 0;
+                $rivikate  = 0;
                 $rivikate_eieri = 0;
 
-                $ostot     += $arow["kotirivihinta"];
+                $ostot += $arow["kotirivihinta"];
                 $ostot_eieri += $arow["kotirivihinta_ei_erikoisaletta"];
               }
               elseif ($arow["varattu"] < 0 and $arow["osto_vai_hyvitys"] == "") {
@@ -7551,8 +7555,8 @@ if ($tee == '') {
                 //T‰h‰n hyvitysriviin liitetyt sarjanumerot
                 $query = "SELECT sarjanumero, kaytetty
                           FROM sarjanumeroseuranta
-                          WHERE yhtio        = '$kukarow[yhtio]'
-                          and ostorivitunnus = '$arow[tunnus]'";
+                          WHERE yhtio = '$kukarow[yhtio]'
+                          AND ostorivitunnus = '$arow[tunnus]'";
                 $sarjares = pupe_query($query);
 
                 $ostohinta = 0;
@@ -7574,10 +7578,11 @@ if ($tee == '') {
                   $sarjares1 = pupe_query($query);
                   $sarjarow1 = mysql_fetch_assoc($sarjares1);
 
-                  $ostohinta += $sarjarow1["ostohinta"];
+                  $oh = hinta_kuluineen($arow['tuoteno'], $sarjarow1['ostohinta']);
+                  $ostohinta += $oh;
                 }
 
-                $rivikate     = $arow["kotirivihinta"] - $ostohinta;
+                $rivikate = $arow["kotirivihinta"] - $ostohinta;
                 $rivikate_eieri = $arow["kotirivihinta_ei_erikoisaletta"] - $ostohinta;
               }
               else {
@@ -7586,8 +7591,9 @@ if ($tee == '') {
               }
             }
             else {
-              $rivikate     = $arow["kotirivihinta"]  - ($arow["kehahin"]*$arow["varattu"]);
-              $rivikate_eieri = $arow["kotirivihinta_ei_erikoisaletta"]  - ($arow["kehahin"]*$arow["varattu"]);
+              $khh = hinta_kuluineen($arow['tuoteno'], $arow["kehahin"]);
+              $rivikate = $arow["kotirivihinta"] - ($khh*$arow["varattu"]);
+              $rivikate_eieri = $arow["kotirivihinta_ei_erikoisaletta"] - ($khh*$arow["varattu"]);
             }
 
             if ($arow['varattu'] > 0) {
@@ -7656,7 +7662,7 @@ if ($tee == '') {
                 <td class='spec' align='right'>".sprintf("%.2f", $arvo_kotimaa_eieri)."</td>";
 
             if ($kukarow['extranet'] == '' and $kotiarvo_kotimaa_eieri != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
-              echo "<td class='spec' align='right' nowrap>".sprintf("%.2f", 100*$kate_kotimaa_eieri/($kotiarvo_kotimaa_eieri-$ostot_eieri))."%</td>";
+              echo "<td class='spec' align='right' nowrap>" . round(100 * $kate_eieri / ($kotiarvo_eieri-$ostot_eieri), 2) . "%</td>";
             }
             elseif ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
               echo "<td class='spec' align='right' nowrap>&nbsp;</td>";

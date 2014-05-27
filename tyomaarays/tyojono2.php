@@ -14,20 +14,27 @@ if (isset($livesearch_tee) and $livesearch_tee == "KOHDEHAKU") {
   exit;
 }
 
-if (!isset($tee))
+if (!isset($tee)) {
   $tee = '';
-if (!isset($ala_tee))
+}
+if (!isset($ala_tee)) {
   $ala_tee = '';
-if (!isset($toim))
+}
+if (!isset($toim)) {
   $toim = '';
-if (!isset($lasku_tunnukset))
+}
+if (!isset($lasku_tunnukset)) {
   $lasku_tunnukset = '';
-if (!isset($toimitusaika_haku))
+}
+if (!isset($toimitusaika_haku)) {
   $toimitusaika_haku = '';
-if (!isset($laite_tunnus))
+}
+if (!isset($laite_tunnus)) {
   $laite_tunnus = '';
-if (!isset($ajax_request))
+}
+if (!isset($ajax_request)) {
   $ajax_request = '';
+}
 
 if ($tee == 'lataa_tiedosto') {
   $filepath = "/tmp/".$tmpfilenimi;

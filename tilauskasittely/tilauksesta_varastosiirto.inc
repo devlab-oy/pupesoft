@@ -436,19 +436,19 @@ if (!function_exists('hae_tilausrivit')) {
             AND varaston_hyllypaikat.hyllyvali = t.hyllyvali
             AND varaston_hyllypaikat.hyllytaso = t.hyllytaso)';
 
-      $select = '  v_lahdevarasto.tunnus AS lahdevarasto_tunnus,
-            v_kohdevarasto.tunnus AS kohdevarasto_tunnus,
-            a.selitetark_2 AS toimitustapa_tunnus,
-            varaston_hyllypaikat.keraysvyohyke AS keraysvyohyke,';
+      $select = ' v_lahdevarasto.tunnus AS lahdevarasto_tunnus,
+                  v_kohdevarasto.tunnus AS kohdevarasto_tunnus,
+                  a.selitetark_2 AS toimitustapa_tunnus,
+                  varaston_hyllypaikat.keraysvyohyke AS keraysvyohyke,';
     }
     else {
       //Kirjanpidollinen ja palautus tähän haaraan
       $tilausrivi_where = " AND t.var not in ('P','J','O','S')";
 
       if ($varastosiirtotyyppi == 'P') {
-        $lasku_join   = "JOIN lasku AS l
-                ON ( l.yhtio = t.yhtio
-                  AND l.tunnus = t.otunnus )";
+        $lasku_join   = " JOIN lasku AS l
+                          ON ( l.yhtio = t.yhtio
+                            AND l.tunnus = t.otunnus )";
         $select     = "l.varasto AS varasto, ";
         $tilausrivi_where .= " AND tl.palautus_varasto != 0 ";
       }

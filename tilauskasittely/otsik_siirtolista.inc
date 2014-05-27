@@ -293,6 +293,17 @@ if ($tila == 'Muuta' and !isset($jatka)) {
     $tresult = t_avainsana("ASIAKASLUOKKA");
   }
 
+  if (empty($srow['luokka'])) {
+    # haetaan oletusprioriteetti
+    $oletusluokka = t_avainsana("VARASTOLUOKKA", "", " and avainsana.selitetark_2 != ''", "", "", "selitetark_3");
+
+    if (empty($oletusluokka)) {
+      $oletusluokka = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selitetark_2 != ''", "", "", "selitetark_3");
+    }
+
+    $srow['luokka'] = $oletusluokka;
+  }
+
   echo "<select name='luokka'><option value=''>".t("Oletus")."</option>";
 
   while ($row = mysql_fetch_array($tresult)) {

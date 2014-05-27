@@ -304,7 +304,6 @@ if (!function_exists('luo_varastosiirto')) {
     $jatka        = 'joo';
     $tilausnumero = 0;
     $clearing     = $kohdevaraston_tunnus;
-    $chn          = 'GEN'; // tällä erotellaan "tulosta siirtolista"-kohdassa generoidut ja käsin tehdyt siirtolistat
     $toimpp       = $kerpp = date("j");
     $toimkk       = $kerkk = date("n");
     $toimvv       = $kervv = date("Y");

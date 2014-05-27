@@ -49,9 +49,9 @@ if (!function_exists("pupesoft_login")) {
         while ($vaihdarow = mysql_fetch_assoc($result)) {
 
           if ($mikayhtio != $vaihdarow["yhtio"]) {
-            $krow = $vaihdarow;
+            $krow  = $vaihdarow;
             $yhtio = $vaihdarow["yhtio"];
-            $usea = 0;
+            $usea  = 0;
           }
         }
       }
@@ -11071,7 +11071,7 @@ if (!function_exists("hae_yhtion_parametrit")) {
 
     // Jos meillä on toimipaikka, ylikirjataan yhtion parametrit toimipaikan parametreillä
     if ($toimipaikka > 0) {
-      $query = "SELECT *
+      $query = "SELECT *, tunnus yhtion_toimipaikat_tunnus
                 FROM yhtion_toimipaikat
                 WHERE yhtio = '$yhtio'
                 and tunnus  = '$toimipaikka'";
@@ -11079,6 +11079,8 @@ if (!function_exists("hae_yhtion_parametrit")) {
 
       if (mysql_num_rows($result) == 1) {
         $yhtion_toimipaikkarow = mysql_fetch_assoc($result);
+
+        unset($yhtion_toimipaikkarow["tunnus"]);
 
         if (trim($yhtion_toimipaikkarow['postittaja_email']) == '') {
           $yhtion_toimipaikkarow['postittaja_email'] = $yhtion_parametritrow['postittaja_email'];
@@ -24905,17 +24907,31 @@ if (!function_exists('paivita_ohjausmerkki')) {
 
         // Tarkistetaan löytyykö kyseinen ohjausmerkkiteksti otsikolta
         // Ei haluta lisätä tekstiä kahteen kertaan
-        if (stripos($laskurow['ohjausmerkki'], $chkrow['ohjausmerkki']) === FALSE) {
 
-          if ($laskurow['ohjausmerkki'] != "") {
+        $updlisa = "";
+        $laskurow['ohjausmerkki'] = trim($laskurow['ohjausmerkki']);
+
+        if ($laskurow['ohjausmerkki'] != "") {
+
+          $_lisataanko = true;
+
+          $_ohjausmerkki = explode(" / ", $laskurow['ohjausmerkki']);
+
+          if ($_ohjausmerkki[0] === $chkrow['ohjausmerkki']) {
+            $_lisataanko = false;
+          }
+
+          if ($_lisataanko) {
             $updlisa = " ohjausmerkki = CONCAT('{$chkrow['ohjausmerkki']}', ' / ', ohjausmerkki)";
             $laskurow['ohjausmerkki'] = "{$chkrow['ohjausmerkki']} / {$laskurow['ohjausmerkki']}";
           }
-          else {
-            $updlisa = " ohjausmerkki = '{$chkrow['ohjausmerkki']}'";
-            $laskurow['ohjausmerkki'] = $chkrow['ohjausmerkki'];
-          }
+        }
+        else {
+          $updlisa = " ohjausmerkki = '{$chkrow['ohjausmerkki']}'";
+          $laskurow['ohjausmerkki'] = $chkrow['ohjausmerkki'];
+        }
 
+        if (trim($updlisa) != "") {
           $query = "UPDATE lasku SET
                     {$updlisa}
                     WHERE yhtio = '{$kukarow['yhtio']}'

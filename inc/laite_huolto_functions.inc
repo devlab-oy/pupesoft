@@ -88,7 +88,8 @@ function hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy() {
               AND kohde.tunnus = paikka.kohde )
             JOIN asiakas
             ON ( asiakas.yhtio = kohde.yhtio
-              AND asiakas.tunnus = kohde.asiakas )
+              AND asiakas.tunnus = kohde.asiakas
+              AND asiakas.nimi LIKE '%Testi%')
             JOIN tuote
             ON ( tuote.yhtio = laite.yhtio
               AND tuote.tuoteno = huoltosykli.toimenpide )
@@ -380,7 +381,7 @@ function generoi_tyomaarays_temp($huollettavan_laitteen_huoltosyklirivi) {
  * tyojono
  * viimeinen_tapahtuma (optional)
  */
-function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_huoltosyklirivit_joita_ei_huolleta = array(), $toivottu_toimitusaika = '', $lisaa_kulut = false) {
+function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_huoltosyklirivit_joita_ei_huolleta = array(), $lisaa_kulut = false) {
   global $kukarow, $yhtiorow, $debug;
 
   $kukarow['kesken'] = 0;
@@ -388,9 +389,11 @@ function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_
   $huoltovalit = huoltovali_options();
   $huollettavan_laitteen_huoltovali = $huoltovalit[$huollettavan_laitteen_huoltosyklirivi['huoltovali']];
 
+  $toimitusaika = date("Y-m-d", strtotime($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma']." + {$huollettavan_laitteen_huoltovali['years']} years"));
+
   $edellinen_tyomaarays = hae_laitteen_edellinen_tyomaarays($huollettavan_laitteen_huoltosyklirivi['laite_tunnus']);
   $asiakas = hae_asiakas($huollettavan_laitteen_huoltosyklirivi['asiakas_tunnus']);
-  $tyomaarays_tunnus = luo_tyomaarays($asiakas, date("Y-m-d", strtotime($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma']." + {$huollettavan_laitteen_huoltovali['years']} years")), 0.00, $huollettavan_laitteen_huoltosyklirivi['kohde_vastuuhenkilo']);
+  $tyomaarays_tunnus = luo_tyomaarays($asiakas, $toimitusaika, 0.00, $huollettavan_laitteen_huoltosyklirivi['kohde_vastuuhenkilo']);
 
   //jos uusi laite, niin laitetaan työmääräyksen toimitusajankohta NOW
   //HUOM jos huoltosyklirivin toimenpide_tuotteen_tyyppi = koeponnistus niin viimeinen_tapahtuma ei ole ikinä tyhjä. Luonti vaiheessa sinne asetetaan laite.valm_pvm
@@ -398,15 +401,7 @@ function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_
     aseta_tyomaarayksen_toimitusajankohta($tyomaarays_tunnus, date("Y-m-d", strtotime('now')));
   }
   else {
-    //poikkeus_paiva annetaan importissa. Normi generoinnissa tähän iffiin mennään aina
-    if ($toivottu_toimitusaika == '') {
-      //merkataan toimitusajankohdaksi viimeinen_tapahtuma + huoltovali
-      aseta_tyomaarayksen_toimitusajankohta($tyomaarays_tunnus, date("Y-m-d", strtotime($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma']." + {$huollettavan_laitteen_huoltovali['years']} years")));
-    }
-  }
-
-  if ($toivottu_toimitusaika != '') {
-    aseta_tyomaarayksen_toimitusajankohta($tyomaarays_tunnus, $toivottu_toimitusaika);
+    aseta_tyomaarayksen_toimitusajankohta($tyomaarays_tunnus, $toimitusaika);
   }
 
   if ($debug and !empty($tyomaarays_tunnus)) {
@@ -466,11 +461,7 @@ function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_
 
   paivita_laite_tunnus_toimenpiteen_tilausriville($huollettavan_laitteen_huoltosyklirivi, $rivit);
   paivita_tyojono_ja_tyostatus_tyomaarayksille($tyomaarays_tunnus, $huollettavan_laitteen_huoltosyklirivi);
-  paivita_viimenen_tapahtuma_laitteen_huoltosyklille($huollettavan_laitteen_huoltosyklirivi['laite_tunnus'], $huollettavan_laitteen_huoltosyklirivi['huoltosykli_tunnus'], $toivottu_toimitusaika);
-
-  if ($toivottu_toimitusaika != '') {
-    aseta_tyomaarayksen_tilausrivien_toimaika($tyomaarays_tunnus, $toivottu_toimitusaika);
-  }
+  paivita_viimenen_tapahtuma_laitteen_huoltosyklille($huollettavan_laitteen_huoltosyklirivi['laite_tunnus'], $huollettavan_laitteen_huoltosyklirivi['huoltosykli_tunnus'], $toimitusaika);
 
   if (!empty($edellinen_tyomaarays) and $edellinen_tyomaarays['tyostatus'] == 'K') {
     $kommentti = t('Edellisellä kerralla')." ({$edellinen_tyomaarays['toimitettuaika']}) ".t('laitteelle ei voitu suorittaa toimenpidettä')." {$edellinen_tyomaarays['toimenpidetuote_nimitys']} ".t('koska laitetta ei löytynyt');

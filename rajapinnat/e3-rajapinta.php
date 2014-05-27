@@ -711,7 +711,6 @@ function xf01($tanaan) {
            AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
            AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
            AND varastopaikat.tyyppi      = ''
-           AND varastopaikat.toimipaikka = 0)
            WHERE tilausrivi.yhtio        = '$yhtiorow[yhtio]'
            AND tilausrivi.tyyppi         = 'L'
            AND tilausrivi.tuoteno        = '$tuoterow[tuoteno]'
@@ -728,7 +727,6 @@ function xf01($tanaan) {
            AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
            AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
            AND varastopaikat.tyyppi       = ''
-           AND varastopaikat.toimipaikka  = 0)
            WHERE tilausrivi.yhtio         = '$yhtiorow[yhtio]'
            AND tilausrivi.tyyppi          = 'L'
            AND tilausrivi.tuoteno         = '$tuoterow[tuoteno]'

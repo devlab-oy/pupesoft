@@ -290,7 +290,6 @@ for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix
 
 if ($kukarow["extranet"] == "" and in_array($trow["status"], array("P", "X")) and !in_array($row["var2"], array("OK", "PK"))) {
   $varaosavirhe .= t("HUOM: Tämä on poistuva tuote!")."<br>";
-  $riviok++;
 }
 
 if (in_array($trow["status"], array("P", "X")) and $row["var"] == "J") {

@@ -305,7 +305,9 @@ function generoi_tyomaarays_temp($huollettavan_laitteen_huoltosyklirivi) {
   }
   else {
     //merkataan toimitusajankohdaksi viimeinen_tapahtuma + huoltovali
-    aseta_tyomaarayksen_toimitusajankohta_temp($tyomaarays_tunnus, date("Y-m-d", strtotime($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma']." + {$huollettavan_laitteen_huoltosyklirivi['huoltovali']} days")));
+    $huoltovalit = huoltovali_options();
+    $huollettavan_laitteen_huoltovali = $huoltovalit[$huollettavan_laitteen_huoltosyklirivi['huoltovali']];
+    aseta_tyomaarayksen_toimitusajankohta_temp($tyomaarays_tunnus, date("Y-m-d", strtotime($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma']." + {$huollettavan_laitteen_huoltovali['years']} years")));
   }
 
   if ($debug and !empty($tyomaarays_tunnus)) {
@@ -383,9 +385,12 @@ function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_
 
   $kukarow['kesken'] = 0;
 
+  $huoltovalit = huoltovali_options();
+  $huollettavan_laitteen_huoltovali = $huoltovalit[$huollettavan_laitteen_huoltosyklirivi['huoltovali']];
+
   $edellinen_tyomaarays = hae_laitteen_edellinen_tyomaarays($huollettavan_laitteen_huoltosyklirivi['laite_tunnus']);
   $asiakas = hae_asiakas($huollettavan_laitteen_huoltosyklirivi['asiakas_tunnus']);
-  $tyomaarays_tunnus = luo_tyomaarays($asiakas, date("Y-m-d", strtotime($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma']." + {$huollettavan_laitteen_huoltosyklirivi['huoltovali']} days")), 0.00, $huollettavan_laitteen_huoltosyklirivi['kohde_vastuuhenkilo']);
+  $tyomaarays_tunnus = luo_tyomaarays($asiakas, date("Y-m-d", strtotime($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma']." + {$huollettavan_laitteen_huoltovali['years']} years")), 0.00, $huollettavan_laitteen_huoltosyklirivi['kohde_vastuuhenkilo']);
 
   //jos uusi laite, niin laitetaan tyˆm‰‰r‰yksen toimitusajankohta NOW
   //HUOM jos huoltosyklirivin toimenpide_tuotteen_tyyppi = koeponnistus niin viimeinen_tapahtuma ei ole ikin‰ tyhj‰. Luonti vaiheessa sinne asetetaan laite.valm_pvm
@@ -396,7 +401,7 @@ function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_
     //poikkeus_paiva annetaan importissa. Normi generoinnissa t‰h‰n iffiin menn‰‰n aina
     if ($toivottu_toimitusaika == '') {
       //merkataan toimitusajankohdaksi viimeinen_tapahtuma + huoltovali
-      aseta_tyomaarayksen_toimitusajankohta($tyomaarays_tunnus, date("Y-m-d", strtotime($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma']." + {$huollettavan_laitteen_huoltosyklirivi['huoltovali']} days")));
+      aseta_tyomaarayksen_toimitusajankohta($tyomaarays_tunnus, date("Y-m-d", strtotime($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma']." + {$huollettavan_laitteen_huoltovali['years']} years")));
     }
   }
 
@@ -1074,7 +1079,9 @@ function huoltosykli_rivi($tyyppi, $request) {
   echo "<input type='hidden' id='paiva_ei_validi' value='<font class=\"error\">".t('P‰iv‰m‰‰r‰ v‰‰rin')."</font>' />";
   $seuraava_tuleva_tapahtuma = '';
   if (!empty($laitteen_huoltosykli['viimeinen_tapahtuma'])) {
-    $seuraava_tuleva_tapahtuma = date('d.m.Y', strtotime("{$laitteen_huoltosykli['viimeinen_tapahtuma']} + {$laitteen_huoltosykli['huoltovali']} days"));
+    $huoltovalit = huoltovali_options();
+    $huollettavan_laitteen_huoltovali = $huoltovalit[$laitteen_huoltosykli['huoltovali']];
+    $seuraava_tuleva_tapahtuma = date('d.m.Y', strtotime("{$laitteen_huoltosykli['viimeinen_tapahtuma']} + {$huollettavan_laitteen_huoltovali['years']} years"));
   }
   else {
     $seuraava_tuleva_tapahtuma = $laitteen_huoltosykli['seuraava_tuleva_tapahtuma'];

@@ -460,6 +460,15 @@ if (isset($jatka)) {
       $prioriteettinro = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selite='{$luokka}'", "", "", "selitetark_3");
     }
   }
+  else {
+
+    # haetaan oletusprioriteetti
+    $prioriteettinro = t_avainsana("VARASTOLUOKKA", "", " and avainsana.selitetark_2 != ''", "", "", "selitetark_3");
+
+    if (empty($prioriteettinro)) {
+      $prioriteettinro = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selitetark_2 != ''", "", "", "selitetark_3");
+    }
+  }
 
   // Default 9 myös kannassa, niin laitetaan tännekki 9 jos avainsanoista ei löydy prioa
   if (!is_numeric($prioriteettinro)) $prioriteettinro = 9;

@@ -786,7 +786,8 @@ class MagentoClient {
                            'position'              => 1,
                            'default_sort_by'       => 'position',
                            'available_sort_by'     => 'position',
-                           'include_in_menu'       => 1
+                           'include_in_menu'       => 1,
+                           'is_anchor'             => 1
                            );
 
     if ($categoryaccesscontrol) {
@@ -806,7 +807,7 @@ class MagentoClient {
   }
 
   /**
-   *
+   *  Tonkii arraysta key->value pairia ja jos löytyy nii palauttaa sen
    */
   private function getParentArray($tree, $parent_cat_id) {
     //etsitään keytä "category_id" valuella isatunnus ja return sen lapset

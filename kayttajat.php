@@ -1584,7 +1584,7 @@ if ($tee == "") {
 
   echo "<optgroup label='",t("Aktiiviset käyttäjät"),"'>";
 
-  $edakt = 0;
+  $edakt = 1;
   $poislisa = "";
 
   while ($kurow = mysql_fetch_assoc($kukares)) {

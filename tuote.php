@@ -572,7 +572,7 @@ if ($tee == 'Z') {
       );
 
       list($_hinta, $_netto, $_ale, $_valuutta) = alehinta_osto ($_laskurow, $tuoterow, 1, '', '', array());
-
+      $_hinta = hinta_kuluineen($tuoterow['tuoteno'], $_hinta);
       echo "<span style='font-weight:bold;'>",hintapyoristys($_hinta, 6, TRUE)," {$_valuutta}</span> / ";
 
       foreach ($_ale as $key => $val) {
@@ -585,7 +585,8 @@ if ($tee == 'Z') {
       echo "<br />";
     }
     echo "</td>";
-    echo "<td valign='top' align='right' style='font-weight:bold;'>".hintapyoristys($tuoterow["kehahin"], 6, TRUE);
+    $_kehahin = hinta_kuluineen($tuoterow['tuoteno'], $tuoterow['kehahin']);
+    echo "<td valign='top' align='right' style='font-weight:bold;'>".hintapyoristys($_kehahin, 6, TRUE);
 
     if ($tuoterow["myyntihinta_maara"] != 0) {
       echo " $tuoterow[yksikko]<br>";
@@ -598,7 +599,8 @@ if ($tee == 'Z') {
     }
 
     echo "</td>";
-    echo "<td valign='top' align='right' style='font-weight:bold;'>".hintapyoristys($tuoterow["vihahin"], 6, TRUE);
+    $_vihahin = hinta_kuluineen($tuoterow['tuoteno'], $tuoterow['vihahin']);
+    echo "<td valign='top' align='right' style='font-weight:bold;'>".hintapyoristys($_vihahin, 6, TRUE);
 
     if ($tuoterow["myyntihinta_maara"] != 0) {
       echo " $tuoterow[yksikko]<br>";
@@ -906,8 +908,9 @@ if ($tee == 'Z') {
         $query = "SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa, varastopaikat.toimipaikka AS varasto_toimipaikka,
                   tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
                   concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
-                  varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
-                   FROM tuote
+                  varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
+                  '' as era
+                  FROM tuote
                   JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
                   JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
                   and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
@@ -1388,27 +1391,40 @@ if ($tee == 'Z') {
           $toimipaikkarajaus = "";
         }
 
-        $query = "SELECT
-                  ROUND(SUM(IF(tilausrivi.laskutettuaika >= DATE_SUB(now(), INTERVAL 30 DAY), tilausrivi.rivihinta,0)), {$yhtiorow['hintapyoristys']}) summa30,
-                  ROUND(SUM(IF(tilausrivi.laskutettuaika >= DATE_SUB(now(), INTERVAL 30 DAY), tilausrivi.kate,0)), {$yhtiorow['hintapyoristys']}) kate30,
-                  SUM(IF(tilausrivi.laskutettuaika >= DATE_SUB(now(), INTERVAL 30 DAY), tilausrivi.kpl, 0)) kpl30,
-                  ROUND(SUM(IF(tilausrivi.laskutettuaika >= DATE_SUB(now(), INTERVAL 90 DAY), tilausrivi.rivihinta, 0)), {$yhtiorow['hintapyoristys']}) summa90,
-                  ROUND(SUM(IF(tilausrivi.laskutettuaika >= DATE_SUB(now(), INTERVAL 90 DAY), tilausrivi.kate, 0)), {$yhtiorow['hintapyoristys']}) kate90,
-                  SUM(IF(tilausrivi.laskutettuaika >= DATE_SUB(now(), INTERVAL 90 DAY), tilausrivi.kpl, 0)) kpl90,
-                  ROUND(SUM(IF(YEAR(tilausrivi.laskutettuaika) = '{$taavuosi}', tilausrivi.rivihinta, 0)), {$yhtiorow['hintapyoristys']})  summaVA,
-                  ROUND(SUM(IF(YEAR(tilausrivi.laskutettuaika) = '{$taavuosi}', tilausrivi.kate, 0)), {$yhtiorow['hintapyoristys']}) kateVA,
-                  SUM(IF(YEAR(tilausrivi.laskutettuaika) = '{$taavuosi}', tilausrivi.kpl, 0))  kplVA,
-                  ROUND(SUM(IF(YEAR(tilausrivi.laskutettuaika) = '{$edvuosi}', tilausrivi.rivihinta, 0)), {$yhtiorow['hintapyoristys']}) summaEDV,
-                  ROUND(SUM(IF(YEAR(tilausrivi.laskutettuaika) = '{$edvuosi}', tilausrivi.kate, 0)), {$yhtiorow['hintapyoristys']}) kateEDV,
-                  SUM(IF(YEAR(tilausrivi.laskutettuaika) = '{$edvuosi}', tilausrivi.kpl, 0)) kplEDV
+        $query = "SELECT tilausrivi.yhtio,
+                  tilausrivi.tuoteno,
+                  tilausrivi.rivihinta,
+                  IF(tilausrivi.laskutettuaika >= DATE_SUB(now(), INTERVAL 30 DAY), tilausrivi.rivihinta,0) summa30,
+                  IF(tilausrivi.laskutettuaika >= DATE_SUB(now(), INTERVAL 30 DAY), tilausrivi.kate,0) kate30,
+                  IF(tilausrivi.laskutettuaika >= DATE_SUB(now(), INTERVAL 30 DAY), tilausrivi.kpl,0) kpl30,
+                  IF(tilausrivi.laskutettuaika >= DATE_SUB(now(), INTERVAL 90 DAY), tilausrivi.rivihinta,0) summa90,
+                  IF(tilausrivi.laskutettuaika >= DATE_SUB(now(), INTERVAL 90 DAY), tilausrivi.kate,0) kate90,
+                  IF(tilausrivi.laskutettuaika >= DATE_SUB(now(), INTERVAL 90 DAY), tilausrivi.kpl,0) kpl90,
+                  IF(YEAR(tilausrivi.laskutettuaika) = '{$taavuosi}', tilausrivi.rivihinta,0) summaVA,
+                  IF(YEAR(tilausrivi.laskutettuaika) = '{$taavuosi}', tilausrivi.kate,0) kateVA,
+                  IF(YEAR(tilausrivi.laskutettuaika) = '{$taavuosi}', tilausrivi.kpl,0) kplVA,
+                  IF(YEAR(tilausrivi.laskutettuaika) = '{$edvuosi}', tilausrivi.rivihinta,0) summaEDV,
+                  IF(YEAR(tilausrivi.laskutettuaika) = '{$edvuosi}', tilausrivi.kate,0) kateEDV,
+                  IF(YEAR(tilausrivi.laskutettuaika) = '{$edvuosi}', tilausrivi.kpl,0) kplEDV
                   FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika)
                   {$toimipaikkarajaus}
-                  WHERE tilausrivi.yhtio        = '{$kukarow['yhtio']}'
-                  AND tilausrivi.tyyppi         = 'L'
-                  AND tilausrivi.tuoteno        = '{$tuoteno}'
+                  WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                  AND tilausrivi.tyyppi = 'L'
+                  AND tilausrivi.tuoteno = '{$tuoteno}'
                   AND tilausrivi.laskutettuaika >= '{$edvuosi}-01-01'";
         $result3 = pupe_query($query);
-        $lrow = mysql_fetch_assoc($result3);
+
+        $parametrit = array(
+          "result" => $result3,
+          "sum" => array("summa30", "kate30", "kpl30", "summa90", "kate90", "kpl90", "summaVA", "kateVA", "kplVA", "summaEDV", "kateEDV", "kplEDV"),
+          "group_by" => array("yhtio"),
+          "order_by" => array(),
+          "select" => array("rivihinta"),
+          "lisaa_kulut" => array("kate30", "kate90", "kateVA", "kateEDV")
+        );
+
+        $lrow = tilausrivin_tarkistus_riveittain($parametrit);
+        $lrow = $lrow[0];
 
         echo "<tr>
             <th>".t("Myynti").":</th>
@@ -1924,6 +1940,12 @@ if ($tee == 'Z') {
       if ($tapahtumalaji == "poistettupaikka")   $sel8="SELECTED";
       if ($tapahtumalaji == "uusipaikka")     $sel9="SELECTED";
 
+      $kulujen_laskeminen_hintoihin = ($yhtiorow['kulujen_laskeminen_hintoihin'] == 'K');
+
+      if (!$kulujen_laskeminen_hintoihin) {
+        $kulujen_laskeminen_hintoihin = ($kukarow['kulujen_laskeminen_hintoihin'] == 'K');
+      }
+
       if ($tilalehinta != '') {
         $check = "CHECKED";
       }
@@ -2054,7 +2076,8 @@ if ($tee == 'Z') {
                 tapahtuma.hyllyalue tapahtuma_hyllyalue,
                 concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
                 tilausrivi.hyllyalue tilausrivi_hyllyalue,
-                round(100*tilausrivi.kate/tilausrivi.rivihinta, 2) katepros,
+                tilausrivi.kate,
+                tilausrivi.rivihinta,
                 tilausrivi.tunnus trivitunn,
                 tilausrivi.perheid,
                 tilausrivin_lisatiedot.osto_vai_hyvitys,
@@ -2080,16 +2103,17 @@ if ($tee == 'Z') {
         $kokonaissaldo_tapahtumalle = $sarjanumero_kpl;
       }
 
-      $vararvo_nyt = sprintf('%.2f',$kokonaissaldo_tapahtumalle*$tuoterow["kehahin"]);
+      $_kehahin = hinta_kuluineen($tuoterow["tuoteno"],$tuoterow["kehahin"]);
+      $vararvo_nyt = sprintf('%.2f',$kokonaissaldo_tapahtumalle*$_kehahin);
       $saldo_nyt = $kokonaissaldo_tapahtumalle;
 
       if ($tuoterow["ei_saldoa"] == "") {
         echo "<tr class='aktiivi'>";
         echo "<td colspan='5'>".t("Varastonarvo nyt").":</td>";
-        echo "<td align='right'>$tuoterow[kehahin]</td>";
+        echo "<td align='right'>".$_kehahin."</td>";
         echo "<td align='right'></td>";
         echo "<td align='right'>$vararvo_nyt</td>";
-        echo "<td align='right'>".sprintf('%.2f',$kokonaissaldo_tapahtumalle*$tuoterow["kehahin"])."</td>";
+        echo "<td align='right'>".sprintf('%.2f',$kokonaissaldo_tapahtumalle*$_kehahin)."</td>";
         echo "<td align='right'>".sprintf('%.2f', $saldo_nyt)."</td>";
         echo "<td></td>";
 
@@ -2199,11 +2223,23 @@ if ($tee == 'Z') {
           echo "</td>";
 
           echo "<td nowrap align='right' valign='top'>$prow[kpl]</td>";
-          echo "<td nowrap align='right' valign='top'>".hintapyoristys($prow["kplhinta"])."</td>";
-          echo "<td nowrap align='right' valign='top'>$prow[hinta]</td>";
+          echo "<td nowrap align='right' valign='top'>";
+
+          if ($prow['laji'] == 'tulo' and $kulujen_laskeminen_hintoihin) {
+            echo hintapyoristys(hinta_kuluineen($tuoterow["tuoteno"], $prow["kplhinta"]));
+          }
+          else {
+            echo hintapyoristys($prow["kplhinta"]);
+          }
+
+          echo "</td>";
+          $_hinta = hinta_kuluineen($tuoterow['tuoteno'], $prow['hinta']);
+          echo "<td nowrap align='right' valign='top'>".$_hinta."</td>";
 
           if ($prow["laji"] == "laskutus") {
-            echo "<td nowrap align='right' valign='top'>$prow[katepros]%</td>";
+            $kate = kate_kuluineen($prow['tuoteno'], $prow['rivihinta'], $prow['hinta'] );
+            $katepros = 100*$kate/$prow['rivihinta'];
+            echo "<td nowrap align='right' valign='top'>".round($katepros,2)."%</td>";
           }
           else {
             echo "<td nowrap align='right' valign='top'></td>";
@@ -2224,10 +2260,22 @@ if ($tee == 'Z') {
             echo "<td nowrap align='right' valign='top'>$prow[tilalehinta]</td>";
           }
 
+          # Jos katsotaan tulotapahtumia ja halutaan n‰hd‰ kulut hinnoissa
+          # Ei n‰ytet‰ selite-kentt‰‰
+          # Koska selite-kentt‰ on informatiivinen kentt‰
+          if ($prow['laji'] == 'tulo' and $kulujen_laskeminen_hintoihin) {
+            $prow['selite'] = "";
+          }
+
           echo "<td valign='top'>$prow[selite]";
 
           if ($prow["laji"] == "tulo" and $prow["lasku2tunnus"] != "") {
-            echo "<br><a href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[lasku2tunnus]&lopetus=$tkysy_lopetus'>".t("N‰yt‰ saapuminen")." $prow[lasku2laskunro]</a>";
+
+            if (trim($prow['selite']) != '') {
+              echo "<br />";
+            }
+
+            echo "<a href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[lasku2tunnus]&lopetus=$tkysy_lopetus'>".t("N‰yt‰ saapuminen")." $prow[lasku2laskunro]</a>";
           }
 
           if (trim($prow["tapapaikka"]) != "" and $prow["tapahtuma_hyllyalue"] != "!!M") echo "<br>".t("Varastopaikka").": $prow[tapapaikka]";

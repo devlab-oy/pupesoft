@@ -469,7 +469,7 @@ function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_
   }
 
   if (!empty($laitteiden_huoltosyklirivit_joita_ei_huolleta)) {
-    paivita_laitteen_muiden_jonossa_olevien_huoltosyklien_viimeinen_tapahtumapaiva($laitteiden_huoltosyklirivit_joita_ei_huolleta, $huollettavan_laitteen_huoltosyklirivi['laite_tunnus']);
+    paivita_laitteen_muiden_jonossa_olevien_huoltosyklien_viimeinen_tapahtumapaiva($laitteiden_huoltosyklirivit_joita_ei_huolleta, $huollettavan_laitteen_huoltosyklirivi['laite_tunnus'], $toimitusaika);
   }
 
   return $tyomaarays_tunnus;
@@ -681,7 +681,7 @@ function paivita_viimenen_tapahtuma_laitteen_huoltosyklille($laite_tunnus, $huol
   pupe_query($query);
 }
 
-function paivita_laitteen_muiden_jonossa_olevien_huoltosyklien_viimeinen_tapahtumapaiva(&$laitteiden_huoltosyklirivit_joita_ei_huolleta, $laite_tunnus) {
+function paivita_laitteen_muiden_jonossa_olevien_huoltosyklien_viimeinen_tapahtumapaiva(&$laitteiden_huoltosyklirivit_joita_ei_huolleta, $laite_tunnus, $toimitusaika) {
   global $kukarow, $yhtiorow;
 
   //Haetaan $laitteiden_huoltosyklirivit_joita_ei_huolleta resultista laite_tunnuksella huoltosyklirivit, joille p‰ivitet‰‰n viimeiseksi_tapahtumap‰iv‰ksi t‰m‰ p‰iv‰,
@@ -690,7 +690,7 @@ function paivita_laitteen_muiden_jonossa_olevien_huoltosyklien_viimeinen_tapahtu
   $huoltosyklirivit = search_array_key_for_value_recursive($laitteiden_huoltosyklirivit_joita_ei_huolleta, 'laite_tunnus', $laite_tunnus);
 
   foreach ($huoltosyklirivit as $huoltosyklirivi) {
-    paivita_viimenen_tapahtuma_laitteen_huoltosyklille($laite_tunnus, $huoltosyklirivi['huoltosykli_tunnus']);
+    paivita_viimenen_tapahtuma_laitteen_huoltosyklille($laite_tunnus, $huoltosyklirivi['huoltosykli_tunnus'], $toimitusaika);
   }
 }
 

@@ -892,6 +892,13 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
       }
     }
   }
+  elseif ($perheid != 0) {
+    $query = "SELECT ei_nayteta
+              FROM tuoteperhe
+              WHERE yhtio    = '{$kukarow['yhtio']}'
+              AND isatuoteno = (SELECT tuoteno FROM tilausrivi WHERE tunnus = $perheid) LIMIT 1";
+    $einayres = mysql_fetch_assoc(pupe_query($query));
+  }
 
   //Kaikkien arrayden indeksien äiti
   $i = 0;
@@ -1823,8 +1830,11 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 $myy_erikoistoimitus[$indeksi] = "";
               }
 
-              if (!isset($myy_lapsi_ein[$indeksi])) {
+              if (!isset($myy_lapsi_ein[$indeksi]) AND !isset($einayres["ei_nayteta"])) {
                 $myy_lapsi_ein[$indeksi] = "";
+              }
+              elseif (isset($einayres["ei_nayteta"])) {
+                $myy_lapsi_ein[$indeksi] = $einayres["ei_nayteta"];
               }
 
               $tlisatied_lisa2 = "";
@@ -2161,10 +2171,22 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       $puu_var[]    = $var;
     }
   }
+  elseif ($perheid != 0 AND !isset($einayres["ei_nayteta"])) {
+    $query = "SELECT ei_nayteta
+              FROM tuoteperhe
+              WHERE yhtio    = '{$kukarow['yhtio']}'
+              AND isatuoteno = (SELECT tuoteno FROM tilausrivi WHERE tunnus = $perheid) LIMIT 1";
+    $einayres = mysql_fetch_assoc(pupe_query($query));
+  }
 
   foreach ($puu_tuoteno as $i => $tuoteno) {
     $kpl = $puu_kpl[$i];
     $var = $puu_var[$i];
+
+    //jos ei olla käyty tossa ylläällä niin katotaan onko $einayres["ei_nayteta"] settattu ja laitetaan $puu_ein = $einayres["ei_nayteta"] jos se on viel tyhjä
+    if ($puu_ein[$i] == "" AND isset($einayres["ei_nayteta"])) {
+      $puu_ein[$i] = $einayres["ei_nayteta"];
+    }
 
     if (!$kvkasittely) {
 
@@ -3120,8 +3142,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
                 {$kohde_varasto_update}
                 rekisterinumero      = '{$rekisterinumero}',
                 muutospvm            = now(),
-                muuttaja             = '$kukarow[kuka]',
-                ei_nayteta           = '{$puu_ein[$i]}'
+                muuttaja             = '$kukarow[kuka]'
                 {$tlisatied_lisa}
                 {$tlisatied_lisa2}
                 {$jt_manual_lisa}

@@ -530,15 +530,20 @@ if ($tee == 'valmis') {
                   and tuoteno   = '$tilausrivirow[tuoteno]'";
         $presult = pupe_query($query);
 
-        if (mysql_num_rows($presult) != 1) {
+        if (mysql_num_rows($presult) == 0) {
           if ($echotaanko) {
             echo "<font style='error'>".t("VIRHE: Antavaa varastopaikkaa ei löydy")."$tuoteno!</font>";
+            exit;
           }
-          exit;
+          else {
+            // jos antavaa paikka ei löydy, niin lisätään se jos ajetan komentoriviltä
+            echo "<font style='error'>".t("VIRHE: Antavaa varastopaikkaa ei löydy")."$tuoteno!</font>";
+            $lisatty_paikka = lisaa_tuotepaikka($tilausrivirow["tuoteno"], $tilausrivirow["hyllyalue"], $tilausrivirow["hyllynro"], $tilausrivirow["hyllyvali"], $tilausrivirow["hyllytaso"], 'Varastosiirron vastaanotossa, koska lähdepaikka oli kateissa', '', 0, 0, 0);
+            $mista = $lisatty_paikka["tuotepaikan_tunnus"];
+          }
         }
         else {
           $prow = mysql_fetch_assoc($presult);
-
           $mista = $prow["tunnus"];
         }
 
@@ -771,7 +776,6 @@ if ($tee == 'valmis') {
 
     if ($_jt_toimita_toimitus) {
       jt_toimita("", "", "", "", "", "dummy", "TOIMITA");
-
     }
   }
 

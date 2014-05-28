@@ -83,14 +83,14 @@ if ($php_cli) {
     $eiketjut = "";
 
     // jos komentorivin kolmas arg on "eilinen" niin edelliselle laskutus p‰iv‰lle, ohitetaan laskutusviikonp‰iv‰t
-    if ($argv[3] == "eilinen") {
+    if (isset($argv[3]) and $argv[3] == "eilinen") {
       $laskkk  = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
       $laskpp  = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
       $laskvv  = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
     }
 
     // jos komentorivin kolmas arg on "eilinen" niin edelliselle laskutus p‰iv‰lle
-    if ($argv[3] == "eilinen_eikaikki") {
+    if (isset($argv[3]) and $argv[3] == "eilinen_eikaikki") {
       $laskkk  = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
       $laskpp  = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
       $laskvv  = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
@@ -98,19 +98,19 @@ if ($php_cli) {
     }
 
     // jos komentorivin kolmas arg on "eiketjut"
-    if ($argv[3] == "eiketjut") {
+    if (isset($argv[3]) and $argv[3] == "eiketjut") {
       $eiketjut = "KYLLA";
     }
 
     // jos komentorivin kolmas arg on "kaikki"
-    if ($argv[3] == "kaikki") {
+    if (isset($argv[3]) and $argv[3] == "kaikki") {
       $laskutakaikki = "ON";
     }
 
     // jos kuukausilaskutus on p‰‰ll‰ (cron.monthly), niin ei v‰ltt‰m‰tt‰ haluta ajaa p‰iv‰laskutusta
     // kukauden vikana p‰iv‰n‰, koska silloin asiakkaalle saattaa menn‰ kaksi laskua vikana p‰iv‰n‰ jos
     // laskutusviikonp‰iv‰t osuu sillai kivasti
-    if ($argv[3] == "skippaa_kuukauden_vikapaiva" and date("d") == date("t")) {
+    if (isset($argv[3]) and $argv[3] == "skippaa_kuukauden_vikapaiva" and date("d") == date("t")) {
       echo "HUOM: P‰iv‰laskutusta ei ajeta kuukauden vikana p‰iv‰n‰!<br>\n";
       exit;
     }

@@ -5,6 +5,7 @@ if (!isset($echotaanko) or (isset($echotaanko) and $echotaanko) ) {
 }
 
 if (!isset($tee))           $tee = "";
+if (!isset($toim))          $toim = "";
 if (!isset($etsi))          $etsi = "";
 if (!isset($id))            $id = "";
 if (!isset($boob))          $boob = "";
@@ -328,7 +329,7 @@ if ($tee == 'paikat' and $vainlistaus == '') {
     elseif ($tilausrivirow["ei_saldoa"] == "") {
 
       // Jaahas mit‰s tuotepaikalle pit‰isi tehd‰
-      if (($rivivarasto[$tun] != 'x') and ($rivivarasto[$tun] != '')) {  //Varastopaikka vaihdettiin pop-upista, siell‰ on paikan tunnus
+      if (isset($rivivarasto[$tun]) and $rivivarasto[$tun] != 'x' and $rivivarasto[$tun] != '') {  //Varastopaikka vaihdettiin pop-upista, siell‰ on paikan tunnus
         $query = "SELECT tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso, inventointilista_aika
                   from tuotepaikat
                   WHERE yhtio = '$kukarow[yhtio]'
@@ -435,7 +436,7 @@ if ($tee == 'paikat' and $vainlistaus == '') {
       }
     }
 
-    if ($eankoodi[$tun] != '') {
+    if (isset($eankoodi[$tun]) and $eankoodi[$tun] != '') {
       $query = "UPDATE tuote
                 SET eankoodi = '$eankoodi[$tun]',
                 muuttaja      = '$kukarow[kuka]',
@@ -617,7 +618,7 @@ if ($tee == 'valmis') {
 
         require "muuvarastopaikka.php";
 
-        if ($eancheck[$tun] != '' and (int) $kirjoitin > 0) {
+        if (isset($eancheck[$tun]) and $eancheck[$tun] != '' and (int) $kirjoitin > 0) {
           $query = "SELECT komento from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus = '$kirjoitin'";
           $komres = pupe_query($query);
           $komrow = mysql_fetch_assoc($komres);
@@ -629,7 +630,7 @@ if ($tee == 'valmis') {
         }
 
         if ($tee != 'X') {
-          if ($oletuspaiv != '') {
+          if (isset($oletuspaiv) and $oletuspaiv != '') {
             if ($echotaanko) {
               echo "<font class='message'>".t("Siirret‰‰n oletuspaikka")."</font><br><br>";
             }
@@ -810,7 +811,7 @@ if ($tee == 'valmis') {
 // Tulostetaan vastaanotetut listaus
 if (($tee == "OK" or $tee == "paikat") and $id != '0' and $toim != "MYYNTITILI") {
 
-  if ((int) $listaus > 0) {
+  if (isset($listaus) and (int) $listaus > 0) {
 
     $_id = explode(",", $id);
 

@@ -1107,7 +1107,7 @@ if ($tee == 'Z') {
     if ($onkolaajattoimipaikat) {
 
       $sel = '';
-      if ($toimipaikka == 0 or $kukarow['toimipaikka'] == 0) {
+      if ($toimipaikka != 'kaikki' and ($toimipaikka == 0 or $kukarow['toimipaikka'] == 0)) {
         $sel = 'selected';
       }
 

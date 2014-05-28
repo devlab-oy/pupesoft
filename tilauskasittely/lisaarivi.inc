@@ -2615,9 +2615,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
               $jt     = 0;
             }
 
-            if (!isset($tilausrivi) or !isset($tilausrivi['palautus_varasto']) or $tilausrivi['palautus_varasto'] < 1) {
               $var  = "J";
-            }
           }
           // Terminaalitoimitukset tai ostoskorit; var tyhjää ja varattu normisti
           elseif ($rivityyppi == 'Z' or $rivityyppi == 'B' or $rivityyppi == 'E' or $rivityyppi == 'F') {

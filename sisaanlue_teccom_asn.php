@@ -157,11 +157,11 @@ function loop_packet($xml_element, $parameters) {
 
       $parameters = array(
         "tavarantoimittajanumero"   => $tavarantoimittajanumero,
-        "asn_numero"        => $asn_numero,
-        "toimituspvm"        => $toimituspvm,
-        "vastaanottaja"        => $vastaanottaja,
-        "pakkauslista"        => $pakkauslista,
-        "pakettinumero"        => $pakettinumero,
+        "asn_numero"                => $asn_numero,
+        "toimituspvm"               => $toimituspvm,
+        "vastaanottaja"             => $vastaanottaja,
+        "pakkauslista"              => $pakkauslista,
+        "pakettinumero"             => $pakettinumero,
       );
 
       if (isset($element->PkgId->PkgIdentNumber) and $tavarantoimittajanumero != "123007") {

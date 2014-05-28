@@ -1557,7 +1557,23 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
         if ($tilauksesta_valmistustilaus != '') echo "$tilauksesta_valmistustilaus<br><br>";
       }
 
-      if ($kukarow["extranet"] == "" and $yhtiorow["tee_siirtolista_myyntitilaukselta"] == 'K' and $laskurow['tila'] == 'N' and $laskurow['alatila'] == '') {
+      //Tarkistetaan onko myyntitilaukselle tehty varastosiirto ja jos ei ole niin tehdään
+      $_tehdaan_varastosiirto = false;
+
+      if ($kukarow["extranet"] == "" and $yhtiorow["tee_siirtolista_myyntitilaukselta"] == 'K' and $laskurow['tila'] == 'N') {
+        $query = "SELECT tilausrivi.tunnus
+                  FROM tilausrivi
+                  WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                  AND tilausrivi.otunnus = {$laskurow['tunnus']}
+                  AND tilausrivi.var = 'S'";
+        $varastosiirto_result = pupe_query($query);
+
+        if (mysql_num_rows($varastosiirto_result) > 0) {
+          $_tehdaan_varastosiirto = true;
+        }
+      }
+
+      if ($_tehdaan_varastosiirto) {
         require 'tilauksesta_varastosiirto.inc';
 
         tilauksesta_varastosiirto($laskurow['tunnus'], 'N');

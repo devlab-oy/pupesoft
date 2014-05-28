@@ -3713,6 +3713,7 @@ if (!function_exists("alehinta")) {
     else {
       $alehi_asrow = array(
         'ryhma' => $asiakasryhma,
+        'piiri' => "",
       );
       $aperuste .= t("Asiakasta ei löytynyt").". ";
     }

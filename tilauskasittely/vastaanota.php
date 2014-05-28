@@ -103,7 +103,7 @@ echo "  <script type='text/javascript'>
             $('#yhdistaformi').submit();
           }
           else {
-            alert('",t("Valitse vähintään 2 siirtolistaa"),"');
+            alert('", t("Valitse vähintään 2 siirtolistaa"), "');
           }
         });
       });
@@ -196,8 +196,8 @@ if ($tee == 'mikrotila') {
 
 if ($tee == 'failista') {
   if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
-    $timeparts = explode(" ",microtime());
-    $starttime = $timeparts[1].substr($timeparts[0],1);
+    $timeparts = explode(" ", microtime());
+    $starttime = $timeparts[1].substr($timeparts[0], 1);
 
     $path_parts = pathinfo($_FILES['userfile']['name']);
     $name  = strtoupper($path_parts['filename']);
@@ -211,7 +211,7 @@ if ($tee == 'failista') {
       die ("<font class='error'><br>".t("Tiedosto on tyhjä")."!</font>");
     }
 
-    $file=fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus epäonnistui")."!");
+    $file=fopen($_FILES['userfile']['tmp_name'], "r") or die (t("Tiedoston avaus epäonnistui")."!");
 
     // luetaan tiedosto alusta loppuun...
     $rivi = fgets($file, 4096);
@@ -623,7 +623,7 @@ if ($tee == 'valmis') {
           $komrow = mysql_fetch_assoc($komres);
           $komento = $komrow['komento'];
 
-          for($a = 0; $a < $tkpl; $a++) {
+          for ($a = 0; $a < $tkpl; $a++) {
             require "inc/tulosta_tuotetarrat_tec.inc";
           }
         }
@@ -714,7 +714,7 @@ if ($tee == 'valmis') {
     $varastoon = '';
     $automaaginen = 'tosi_automaaginen';
 
-    if ($yhtiorow['automaattinen_jt_toimitus_siirtolista'] == 'S') {
+    if ($yhtiorow['automaattinen_jt_toimitus_siirtolista'] == 'S' and !empty($tunnus)) {
 
       $automaaginen = 'vakisin';
 
@@ -1045,30 +1045,30 @@ if ($id == '0' and $echotaanko) {
     echo "<tr>";
 
     if ($toim == "") {
-      echo "<th align='left'>",t("Vastaanottonumero"),"<br>";
+      echo "<th align='left'>", t("Vastaanottonumero"), "<br>";
       echo "<form id='yhdistaformi' method='post' action=''>";
       echo "<input type='hidden' name='toim' value='' />";
       echo "<input type='hidden' name='tee' value='yhdista' />";
       echo "<input type='hidden' id='yhdistettavat_siirtolistat' name='yhdistettavat_siirtolistat' value='' />";
-      echo "<input type='button' id='yhdistabutton' value='",t("Yhdistä"),"' /> ";
+      echo "<input type='button' id='yhdistabutton' value='", t("Yhdistä"), "' /> ";
       echo "<input type='checkbox' id='yhdista_kaikki' value='' />";
       echo "</form>";
       echo "</th>";
 
       if ($yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {
-        echo "<th align='left'>",t("Lähtö"),"</th>";
+        echo "<th align='left'>", t("Lähtö"), "</th>";
       }
     }
 
-    echo "<th align='left'>",t($qnimi1),"</th>";
-    echo "<th align='left'>",t($qnimi2),"</th>";
+    echo "<th align='left'>", t($qnimi1), "</th>";
+    echo "<th align='left'>", t($qnimi2), "</th>";
 
     if ($toim == "") {
-      echo "<th align='left'>",t("Viite"),"</th>";
+      echo "<th align='left'>", t("Viite"), "</th>";
     }
 
-    echo "<th align='left'>",t("Laadittu"),"</th>";
-    echo "<th align='left'>",t("Laatija"),"</th>";
+    echo "<th align='left'>", t("Laadittu"), "</th>";
+    echo "<th align='left'>", t("Laatija"), "</th>";
 
     echo "</tr>";
   }
@@ -1137,7 +1137,7 @@ if ($id == '0' and $echotaanko) {
           echo "<td>{$row['viite']}</td>";
         }
 
-        echo "<td>",tv1dateconv($row['laadittu']),"</td>";
+        echo "<td>", tv1dateconv($row['laadittu']), "</td>";
         echo "<td>{$row['laatija']}</td>";
 
         if ($toim == "" and ($yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K' or $row['siirtolistan_vastaanotto'] != '')) {
@@ -1259,7 +1259,7 @@ if ($id != '0') {
   echo "<tr>";
 
   for ($y=0; $y < mysql_num_fields($result)-1; $y++) {
-    echo "<th align='left'>".t(mysql_field_name($result,$y))."</th>";
+    echo "<th align='left'>".t(mysql_field_name($result, $y))."</th>";
   }
 
   if ($toim == "") {
@@ -1398,7 +1398,7 @@ if ($id != '0') {
   echo "<tr>";
 
   if ($toim == "" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {
-    echo "<th>",t("Siirtolista"),"</th>";
+    echo "<th>", t("Siirtolista"), "</th>";
   }
 
   echo "<th>".t("Nimitys")."</th>";
@@ -1493,7 +1493,7 @@ if ($id != '0') {
       $asiakasrow = mysql_fetch_assoc($asiakasresult);
       echo "<td>{$asiakasrow["asiakkaan_nimi"]}</td>";
     }
-    else  {
+    else {
       echo "<td>$rivirow[paikka]</td>";
     }
 
@@ -1591,7 +1591,7 @@ if ($id != '0') {
 
     if ($toim == "" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') $_colspan++;
 
-    echo "<tr><td colspan='{$_colspan}' class='back' align='right' valign='center'>",t("Täytä kaikki kentät"),":</td>";
+    echo "<tr><td colspan='{$_colspan}' class='back' align='right' valign='center'>", t("Täytä kaikki kentät"), ":</td>";
     echo "<td><input type='text' id='taytasarake_t1' maxlength='5' size='5'></td>";
     echo "<td><input type='text' id='taytasarake_t2' maxlength='5' size='5'></td>";
     echo "<td><input type='text' id='taytasarake_t3' maxlength='5' size='5'></td>";

@@ -295,10 +295,10 @@ if ($tila == 'Muuta' and !isset($jatka)) {
 
   if (empty($srow['luokka'])) {
     # haetaan oletusprioriteetti
-    $oletusluokka = t_avainsana("VARASTOLUOKKA", "", " and avainsana.selitetark_2 != ''", "", "", "selitetark_3");
+    $oletusluokka = t_avainsana("VARASTOLUOKKA", "", " and avainsana.selitetark_2 != ''", "", "", "selite");
 
     if (empty($oletusluokka)) {
-      $oletusluokka = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selitetark_2 != ''", "", "", "selitetark_3");
+      $oletusluokka = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selitetark_2 != ''", "", "", "selite");
     }
 
     $srow['luokka'] = $oletusluokka;

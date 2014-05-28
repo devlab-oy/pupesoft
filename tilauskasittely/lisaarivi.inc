@@ -2615,7 +2615,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
               $jt     = 0;
             }
 
-              $var  = "J";
+            $var  = "J";
           }
           // Terminaalitoimitukset tai ostoskorit; var tyhj‰‰ ja varattu normisti
           elseif ($rivityyppi == 'Z' or $rivityyppi == 'B' or $rivityyppi == 'E' or $rivityyppi == 'F') {

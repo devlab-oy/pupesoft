@@ -693,26 +693,32 @@ if ($tee == 'valmis') {
     }
   }
 
-  $query = "SELECT paivitys
-            FROM oikeu
-            WHERE yhtio = '$kukarow[yhtio]'
-            and kuka    = '$kukarow[kuka]'
-            and nimi    = 'tilauskasittely/jtselaus.php'
-            and alanimi = ''";
-  $jtoikeudetres = pupe_query($query);
+  $_jt_toimita_t = ($yhtiorow["automaattinen_jt_toimitus_siirtolista"] == "T");
 
-  $_jtoikeus              = (mysql_num_rows($jtoikeudetres) <> 0);
+  if ($_jt_toimita_t) {
+    $query = "SELECT paivitys
+              FROM oikeu
+              WHERE yhtio = '$kukarow[yhtio]'
+              and kuka    = '$kukarow[kuka]'
+              and nimi    = 'tilauskasittely/jtselaus.php'
+              and alanimi = ''";
+    $jtoikeudetres = pupe_query($query);
+    $_jtoikeus = (mysql_num_rows($jtoikeudetres));
+  }
+  else {
+    $_jtoikeus = TRUE;
+  }
+
   $_jt_toimita            = ($yhtiorow["automaattinen_jt_toimitus_siirtolista"] != "");
-  $_jt_toimita_j          = ($yhtiorow["automaattinen_jt_toimitus_siirtolista"] == "J");
-  $_jt_toimitus_sallittu  = (($_jtoikeus and $_jt_toimita) or $_jt_toimita_j);
+  $_jt_toimita_toimitus   = ($yhtiorow["automaattinen_jt_toimitus_siirtolista"] != "K");
+  $_jt_toimita_sallittu   = ($_jtoikeus and $_jt_toimita);
   $_normisiirto           = (!isset($_kirjanpidollinen_varastosiirto) or $_kirjanpidollinen_varastosiirto == false);
 
-  if ($_jt_toimitus_sallittu and $_normisiirto) {
-    $jtoikeudetrow  = mysql_fetch_assoc($jtoikeudetres);
-    $jtrivit = array();
-    $jtrivit_paikat   = array();
-    $varastoon = '';
-    $automaaginen = 'tosi_automaaginen';
+  if ($_jt_toimita_sallittu and $_normisiirto) {
+    $jtrivit              = array();
+    $jtrivit_paikat       = array();
+    $varastoon            = '';
+    $automaaginen         = 'tosi_automaaginen';
 
     if ($yhtiorow['automaattinen_jt_toimitus_siirtolista'] == 'S' and !empty($tunnus)) {
 
@@ -762,10 +768,7 @@ if ($tee == 'valmis') {
 
     jt_toimita("", "", $varastoon, $jtrivit, $jtrivit_paikat, $automaaginen, "JATKA", '', '', '', '');
 
-    if ( ($jtoikeudetrow["paivitys"] == 1
-        and ($yhtiorow["automaattinen_jt_toimitus_siirtolista"] == "T" or $yhtiorow["automaattinen_jt_toimitus_siirtolista"] == "S")
-      )
-      or $yhtiorow["automaattinen_jt_toimitus_siirtolista"] == "J") {
+    if ($_jt_toimita_toimitus) {
       jt_toimita("", "", "", "", "", "dummy", "TOIMITA");
 
     }

@@ -4,13 +4,13 @@ if (!isset($echotaanko) or (isset($echotaanko) and $echotaanko) ) {
   require "../inc/parametrit.inc";
 }
 
-if (!isset($tee))       $tee = "";
-if (!isset($etsi))       $etsi = "";
-if (!isset($id))       $id = "";
-if (!isset($boob))       $boob = "";
-if (!isset($maa))       $maa = "";
-if (!isset($varastorajaus))  $varastorajaus = 0;
-if (!isset($echotaanko))  $echotaanko = true;
+if (!isset($tee))           $tee = "";
+if (!isset($etsi))          $etsi = "";
+if (!isset($id))            $id = "";
+if (!isset($boob))          $boob = "";
+if (!isset($maa))           $maa = "";
+if (!isset($varastorajaus)) $varastorajaus = 0;
+if (!isset($echotaanko))    $echotaanko = true;
 
 if ($tee == 'yhdista') {
 
@@ -70,7 +70,8 @@ if ($tee == 'yhdista') {
   $tee = '';
 }
 
-echo "  <script type='text/javascript'>
+if ($echotaanko) {
+  echo "  <script type='text/javascript'>
       $(function() {
 
         $('#siirtotable').on('click', '#yhdista_kaikki', function() {
@@ -109,7 +110,6 @@ echo "  <script type='text/javascript'>
       });
     </script>";
 
-if ($echotaanko) {
   if ($toim == "MYYNTITILI") {
     echo "<font class='head'>".t("Toimita myyntitili asiakkaalle").":</font><hr>";
   }

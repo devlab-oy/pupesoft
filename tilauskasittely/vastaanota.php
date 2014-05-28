@@ -4,12 +4,12 @@ if (!isset($echotaanko) or (isset($echotaanko) and $echotaanko) ) {
   require "../inc/parametrit.inc";
 }
 
-if (!isset($tee))           $tee = "";
+if (!isset($tee))           $tee  = "";
 if (!isset($toim))          $toim = "";
 if (!isset($etsi))          $etsi = "";
-if (!isset($id))            $id = "";
+if (!isset($id))            $id   = 0;
 if (!isset($boob))          $boob = "";
-if (!isset($maa))           $maa = "";
+if (!isset($maa))           $maa  = "";
 if (!isset($varastorajaus)) $varastorajaus = 0;
 if (!isset($echotaanko))    $echotaanko = true;
 
@@ -123,7 +123,7 @@ if ($echotaanko) {
 }
 
 if ($tee == 'kommentista') {
-  if ($id != '') {
+  if (!empty($id)) {
 
     $query = "SELECT tunnus, kommentti
               from tilausrivi
@@ -809,7 +809,7 @@ if ($tee == 'valmis') {
 }
 
 // Tulostetaan vastaanotetut listaus
-if (($tee == "OK" or $tee == "paikat") and $id != '0' and $toim != "MYYNTITILI") {
+if (($tee == "OK" or $tee == "paikat") and !empty($id) and $toim != "MYYNTITILI") {
 
   if (isset($listaus) and (int) $listaus > 0) {
 
@@ -830,18 +830,16 @@ if (($tee == "OK" or $tee == "paikat") and $id != '0' and $toim != "MYYNTITILI")
     require 'tulosta_purkulista.inc';
   }
 
-  $id    = 0;
+  $id      = 0;
   $varasto = "";
 }
-elseif ($tee == "OK" and $id != '0' and $toim == "MYYNTITILI") {
-  $id    = 0;
+elseif ($tee == "OK" and !empty($id) and $toim == "MYYNTITILI") {
+  $id      = 0;
   $varasto = "";
 }
-
-if ($id == '') $id = 0;
 
 // meillä ei ole valittua tilausta
-if ($id == '0' and $echotaanko) {
+if (empty($id) and $echotaanko) {
 
   $formi  = "find";
   $kentta = "etsi";
@@ -1205,7 +1203,7 @@ if ($id == '0' and $echotaanko) {
   }
 }
 
-if ($id != '0') {
+if (!empty($id) and $echotaanko) {
 
   if ($toim == "MYYNTITILI") {
     $qnimi1 = 'Myyntitili';

@@ -1229,12 +1229,12 @@ else {
             $addtil = pupe_query($query);
 
             if ($silent == "") {
-              $tulos_ulos .= "<tr><td>".t("Lisättiin rahtikulut")."</td><td>$laskurow[tunnus]</td><td>$laskurow[toimitustapa]</td><td>$rahtihinta</td><td>$yhtiorow[valkoodi]</td><td>$pakka[kilot] kg</td></tr>\n";
+              $tulos_ulos .= "<tr><td>".t("Lisättiin rahtikulut")."</td><td>$laskurow[tunnus]</td><td>$laskurow[toimitustapa]</td><td>$rah_hinta</td><td>$yhtiorow[valkoodi]</td><td>$pakka[kilot] kg</td></tr>\n";
             }
 
             $rah++;
           }
-          elseif ($rahtihinta != 0 and $silent == "") {
+          elseif ($rah_hinta != 0 and $silent == "") {
             $tulos_ulos .= "<tr><td>".t("Rahtimaksua ei osattu lisätä!")." $virhe</td><td>$otsikot</td><td>$laskurow[toimitustapa]</td><td></td><td></td><td>$pakka[kilot] kg</td></tr>\n";
           }
         }

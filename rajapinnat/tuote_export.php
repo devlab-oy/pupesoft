@@ -148,6 +148,29 @@ while ($row = mysql_fetch_array($res)) {
     $myymalahinta          = $row["myymalahinta"];
     $myymalahinta_veroton       = hintapyoristys($row["myymalahinta"] / (1+($row["alv"]/100)));
   }
+  
+  $query = "SELECT 
+            avainsana.selitetark AS asiakasryhma,
+            asiakashinta.tuoteno, 
+            asiakashinta.hinta 
+            FROM asiakas 
+            JOIN avainsana ON (avainsana.yhtio = asiakas.yhtio 
+              AND avainsana.selite = asiakas.ryhma AND avainsana.laji = 'asiakasryhma') 
+            JOIN asiakashinta ON (asiakashinta.yhtio = asiakas.yhtio 
+              AND asiakashinta.asiakas_ryhma = asiakas.ryhma) 
+            WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
+            AND asiakashinta.tuoteno ='{$row['tuoteno']}' 
+            GROUP BY 1,2,3";
+  $asiakashintares = pupe_query($query);
+  $asiakashinnat = array ();
+
+  while ($asiakashintarow = mysql_fetch_assoc($asiakashintares)) {
+    $asiakashinnat[] = array(
+      'asiakasryhma' => $asiakashintarow['asiakasryhma'],
+      'tuoteno'      => $asiakashintarow['tuoteno'],
+      'hinta'        => $asiakashintarow['hinta'],
+    );
+  }
 
   $dnstuote[] = array('tuoteno'        => $row["tuoteno"],
             'nimi'          => $row["nimitys"],
@@ -172,6 +195,7 @@ while ($row = mysql_fetch_array($res)) {
             'target'        => $row["target"],
             'onsale'        => $row["onsale"],
             'tunnus'        => $row['tunnus'],
+            'asiakashinnat' => $asiakashinnat,
             );
 }
 
@@ -594,7 +618,7 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
   if ($magento_client->getErrorCount() > 0) {
     exit;
   }
-
+  
   // tax_class_id, magenton API ei anna hakea tätä mistään. Pitää käydä katsomassa magentosta
   $magento_client->setTaxClassID($magento_tax_class_id);
 

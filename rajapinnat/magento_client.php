@@ -224,10 +224,26 @@ class MagentoClient {
         $visibility = self::NOT_VISIBLE_INDIVIDUALLY;
       }
 
-      $tuote_ryhmahinta_data = array(
-        array('website' => 1, 'customer_group_id' => 1, 'qty' => 2,'price' => 50.00),
-        //array('website_id' => 'lexxa', 'cust_group' => 1, 'qty' => 1,'price' => 400),
-      );
+      $tuote_ryhmahinta_data = array ();
+
+      if (isset($tuote['asiakashinnat']) and count($tuote['asiakashinnat'])> 0) {
+        foreach ($tuote['asiakashinnat'] as $asiakashintarivi) {
+
+          $asiakasryhma_nimi = $asiakashintarivi['asiakasryhma'];
+          $asiakashinta = $asiakashintarivi['hinta'];
+
+          $asiakasryhma_tunnus = $this->findCustomerGroup(utf8_encode($asiakasryhma_nimi));
+
+          if ($asiakasryhma_tunnus != 0) {
+            $tuote_ryhmahinta_data[] = array(
+              'websites' => explode(" ", $tuote['nakyvyys']), 
+              'customer_group_id' => $asiakasryhma_tunnus, 
+              'qty' => 1,
+              'price' => $asiakashinta
+            );
+          } 
+        }  
+      }
 
       $tuote_data = array(
           'categories'            => $category_id,
@@ -247,7 +263,7 @@ class MagentoClient {
           'campaign_code'         => utf8_encode($tuote['campaign_code']),
           'onsale'                => utf8_encode($tuote['onsale']),
           'target'                => utf8_encode($tuote['target']),
-          #'tier_price'      => $tuote_ryhmahinta_data,
+          'tier_price'            => $tuote_ryhmahinta_data,
         );
 
       // Lisätään tai päivitetään tuote
@@ -758,7 +774,6 @@ class MagentoClient {
 
   /**
    * Etsii kategoriaa nimeltä Magenton kategoria puusta.
-   * $father paramilla voi hakea alakategoriaa jos tietää sen isäkategorian
    */
   private function findCategory($name, $root) {
     $category_id = false;
@@ -786,6 +801,24 @@ class MagentoClient {
 
     // Mitään ei löytyny
     return $category_id;
+  }
+
+  // Etsii asiakasryhmää nimen perusteella Magentosta, palauttaa id:n
+  private function findCustomerGroup($name) {
+
+    $customer_groups = $this->_proxy->call(
+      $this->_session,
+      'customer_group.list');
+      
+      $id = 0;
+      foreach ($customer_groups as $asryhma) {
+        if (strcasecmp($asryhma['customer_group_code'], $name) == 0) {
+          $id = $asryhma['customer_group_id'];
+          break;
+        }
+      }
+
+      return $id;
   }
 
   /**

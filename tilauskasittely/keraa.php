@@ -2663,6 +2663,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
     }
 
     $query = "SELECT
+              tilausrivi.tyyppi,
               concat_ws(' ',tilausrivi.tuoteno, tilausrivi.nimitys) tuoteno,
               tilausrivi.tuoteno puhdas_tuoteno,
               tilausrivi.hyllyalue hyllyalue,
@@ -3014,7 +3015,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
             $tunken2 = "myyntirivitunnus";
           }
 
-          if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "T" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "V") {
+          if ($row["tyyppi"] != "W" AND ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "T" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "V")) {
 
             $query = "SELECT count(*) kpl, min(sarjanumero) sarjanumero
                       from sarjanumeroseuranta

@@ -1921,7 +1921,7 @@ while ($tietue = fgets($fd)) {
             else {
               $hyvityssaannon_palautuskielto = "";
             }
-
+            $tilrivinumero = $rivinumero;
             require ("lisaarivi.inc");
 
             $edi_ulos .= "\n";
@@ -1975,6 +1975,7 @@ while ($tietue = fgets($fd)) {
       $editilaus_hinta  = "";
       $editilaus_alennus  = "";
       $rivikommentti    = "";
+      $tilrivinumero = "";
       break;
 
     case 'OMSG__END' :

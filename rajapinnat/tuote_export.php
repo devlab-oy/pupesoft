@@ -365,7 +365,9 @@ echo date("d.m.Y @ G:i:s")." - Haetaan asiakkaat.\n";
 $muutoslisa = '';
 // Haetaan kaikki asiakkaat
 // Asiakassiirtoa varten poimitaan myös lisäkenttiä asiakkaan_avainsanat ja yhteyshenkilo-tauluista
-$query = "SELECT asiakas.*,
+$query = "SELECT 
+          avainsana.selitetark as asiakasryhma,
+          asiakas.*,
           asiakkaan_avainsanat.tarkenne magento_id,
           yhteyshenkilo.nimi yhenk_nimi,
           yhteyshenkilo.email yhenk_email,
@@ -373,6 +375,7 @@ $query = "SELECT asiakas.*,
           FROM asiakas
           LEFT JOIN asiakkaan_avainsanat ON (asiakkaan_avainsanat.yhtio = asiakas.yhtio AND asiakkaan_avainsanat.liitostunnus = asiakas.tunnus AND asiakkaan_avainsanat.avainsana = 'magento_tunnus')
           LEFT JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakas.yhtio AND yhteyshenkilo.liitostunnus = asiakas.tunnus AND yhteyshenkilo.rooli = 'magento')
+          LEFT JOIN avainsana ON (avainsana.yhtio = asiakas.yhtio AND avainsana.selite = asiakas.ryhma AND avainsana.laji = 'asiakasryhma')
           WHERE asiakas.yhtio      = '{$kukarow["yhtio"]}'
           AND asiakas.laji        != 'P'
           and yhteyshenkilo.rooli  = 'magento'
@@ -395,7 +398,7 @@ while ($row = mysql_fetch_array($res)) {
               'yhtio'    => $row["ayhtio"],
 
               'magento_website_id'=> $magento_website_id,
-              'magento_store_id'  => $magento_store_id,
+              #'magento_store_id'  => $magento_store_id,
 
               'toimitus_nimi'    => $row["toim_nimi"],
               'toimitus_osoite'  => $row["toim_osoite"],
@@ -410,7 +413,7 @@ while ($row = mysql_fetch_array($res)) {
               'yhenk_nimi'    => $row["yhenk_nimi"],
               'yhenk_email'    => $row["yhenk_email"],
               'magento_id'    => $row["magento_id"],
-              // lisäksi joku kenttä mistä löytyy tieto kuuluuko asiakas magenton piiriin eli kuuluuko siirtää
+              'asiakasryhma'  => $row['asiakasryhma'],
               );
 }
 

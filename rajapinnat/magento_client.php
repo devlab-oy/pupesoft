@@ -1039,16 +1039,19 @@ class MagentoClient {
 
     // Lisätään asiakkaat ja osoitteet erissä
     foreach ($dnsasiakas as $asiakas) {
+      
+      
+      $asiakasryhma_id = $this->findCustomerGroup(utf8_encode($asiakas['asiakasryhma']));
+
       $asiakas_data = array(
           'email'          => $asiakas['yhenk_email'],
           'firstname'        => $asiakas['nimi'],
           'lastname'        => $asiakas['nimi'],
           'website_id'      => $asiakas['magento_website_id'],
-          'store_id'        => $asiakas['magento_store_id'],
+          #'store_id'        => $asiakas['magento_store_id'],
           'taxvat'        => $asiakas['ytunnus'],
           'external_id'      => $asiakas['asiakasnro'],
-          'group_id'        => 1,
-          //'group_id'        => $asiakas['aleryhma'],
+          'group_id'        => $asiakasryhma_id,
       );
 
       $laskutus_osoite_data = array(
@@ -1135,7 +1138,7 @@ class MagentoClient {
         }
       }
 
-      if (isset($laskutus_osoite_data['firstname'])) {
+      if (isset($laskutus_osoite_data['firstname']) and !empty($laskutus_osoite_data['firstname'])) {
         try {
           // Lisätään laskutusosoite
           $result = $this->_proxy->call(
@@ -1148,7 +1151,7 @@ class MagentoClient {
         }
       }
 
-      if (isset($toimitus_osoite_data['firstname'])) {
+      if (isset($toimitus_osoite_data['firstname']) and !empty($toimitus_osoite_data['firstname'])) {
         try {
           // Lisätään toimitusosoite
           $result = $this->_proxy->call(

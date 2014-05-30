@@ -259,17 +259,16 @@ if (!function_exists('luo_varastosiirtorivi')) {
     //Laitetaan tuote oletusvaraston tuotepaikalle
     $tuotteen_oletuspaikka = hae_tuotteen_tuotepaikat($tilausrivi['tuoteno'], $tilausrivi['kohdevarasto_tunnus']);
 
-    if (!empty($tuotteen_oletuspaikka)) {
-      // otetaan eka löytynyt tuotepaikka kohdetuotepaikaksi
-      $kohde_alue   = $tuotteen_oletuspaikka[0]['hyllyalue'];
-      $kohde_nro    = $tuotteen_oletuspaikka[0]['hyllynro'];
-      $kohde_vali   = $tuotteen_oletuspaikka[0]['hyllyvali'];
-      $kohde_taso   = $tuotteen_oletuspaikka[0]['hyllytaso'];
-    }
-    else {
+    if (empty($tuotteen_oletuspaikka)) {
       //Jos tuotteella ei ole tuotepaikkaa kohdevarastossa, luodaan se
-      lisaa_tuotepaikka($tuoteno, "", "", "", "", "", "", 0, 0, $tilausrivi['kohdevarasto_tunnus']);
+      $tuotteen_oletuspaikka[0] = lisaa_tuotepaikka($tuoteno, "", "", "", "", "", "", 0, 0, $tilausrivi['kohdevarasto_tunnus']);
     }
+
+    // otetaan eka löytynyt tuotepaikka kohdetuotepaikaksi
+    $kohde_alue   = $tuotteen_oletuspaikka[0]['hyllyalue'];
+    $kohde_nro    = $tuotteen_oletuspaikka[0]['hyllynro'];
+    $kohde_vali   = $tuotteen_oletuspaikka[0]['hyllyvali'];
+    $kohde_taso   = $tuotteen_oletuspaikka[0]['hyllytaso'];
 
     for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
       ${'ale'.$alepostfix} = "";

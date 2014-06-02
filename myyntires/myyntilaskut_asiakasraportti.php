@@ -134,6 +134,10 @@ if ($tee == "") {
   if ($ytunnus != '' and (int) $asiakasid == 0) {
     $tila = "tee_raportti";
 
+    if ($yhtiorow['toimipaikkakasittely'] == "L" and empty($toimipaikka_rajaus)) {
+      $toimipaikka_rajaus = 'X';
+    }
+
     require ("inc/asiakashaku.inc");
 
     if ($ytunnus == "") {

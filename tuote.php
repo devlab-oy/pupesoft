@@ -1035,6 +1035,27 @@ if ($tee == 'Z') {
 
     echo "</td><td class='back' valign='top' style='padding:0px; margin:0px;height:0px;'>";
 
+    if ($_tp_kasittely) {
+
+      $query = "SELECT GROUP_CONCAT(tunnus) tunnukset
+                FROM varastopaikat
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tyyppi != 'P'
+                AND toimipaikka = '{$kukarow['toimipaikka']}'";
+      $toimipaikka_varasto_res = pupe_query($query);
+      $toimipaikka_varasto_row = mysql_fetch_assoc($toimipaikka_varasto_res);
+
+      if ($toimipaikka_varasto_row['tunnukset'] == '' and !empty($kukarow['toimipaikka'])) {
+        $query = "SELECT GROUP_CONCAT(tunnus) tunnukset
+                  FROM varastopaikat
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tyyppi != 'P'
+                  AND toimipaikka = 0";
+        $toimipaikka_varasto_res = pupe_query($query);
+        $toimipaikka_varasto_row = mysql_fetch_assoc($toimipaikka_varasto_res);
+      }
+    }
+
     // Korvaavat tuotteet
     require "korvaavat.class.php";
     $korvaavat = new Korvaavat($tuoteno);
@@ -1076,23 +1097,6 @@ if ($tee == 'Z') {
           echo "<td align='right'>".sprintf("%.2f", $myytavissa)."</td>";
 
           if ($_tp_kasittely) {
-            $query = "SELECT GROUP_CONCAT(tunnus) tunnukset
-                      FROM varastopaikat
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND tyyppi != 'P'
-                      AND toimipaikka = '{$kukarow['toimipaikka']}'";
-            $toimipaikka_varasto_res = pupe_query($query);
-            $toimipaikka_varasto_row = mysql_fetch_assoc($toimipaikka_varasto_res);
-
-            if ($toimipaikka_varasto_row['tunnukset'] == '' and !empty($kukarow['toimipaikka'])) {
-              $query = "SELECT GROUP_CONCAT(tunnus) tunnukset
-                        FROM varastopaikat
-                        WHERE yhtio = '{$kukarow['yhtio']}'
-                        AND tyyppi != 'P'
-                        AND toimipaikka = 0";
-              $toimipaikka_varasto_res = pupe_query($query);
-              $toimipaikka_varasto_row = mysql_fetch_assoc($toimipaikka_varasto_res);
-            }
 
             $_foreach_yhteensa = 0;
 
@@ -1189,23 +1193,6 @@ if ($tee == 'Z') {
           echo "</td>";
 
           if ($_tp_kasittely) {
-            $query = "SELECT GROUP_CONCAT(tunnus) tunnukset
-                      FROM varastopaikat
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND tyyppi != 'P'
-                      AND toimipaikka = '{$kukarow['toimipaikka']}'";
-            $toimipaikka_varasto_res = pupe_query($query);
-            $toimipaikka_varasto_row = mysql_fetch_assoc($toimipaikka_varasto_res);
-
-            if ($toimipaikka_varasto_row['tunnukset'] == '' and !empty($kukarow['toimipaikka'])) {
-              $query = "SELECT GROUP_CONCAT(tunnus) tunnukset
-                        FROM varastopaikat
-                        WHERE yhtio = '{$kukarow['yhtio']}'
-                        AND tyyppi != 'P'
-                        AND toimipaikka = 0";
-              $toimipaikka_varasto_res = pupe_query($query);
-              $toimipaikka_varasto_row = mysql_fetch_assoc($toimipaikka_varasto_res);
-            }
 
             $_foreach_yhteensa = 0;
 

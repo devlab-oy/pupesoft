@@ -470,17 +470,19 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
     $lisatiedot = "";
 
     if ($yhtiorow["osoitelappu_lisatiedot"] == "") {
-      if ($laskurow['yhteyshenkilo'] != "")       $lisatiedot .= $laskurow['yhteyshenkilo'].".";
-      if ($laskurow['asiakkaan_tilausnumero'] != "")  $lisatiedot .= $laskurow['asiakkaan_tilausnumero'].".";
-    }    
-    if ($laskurow['viesti'] != "")  $lisatiedot .= $laskurow['viesti'].".";
-    if ($viestirarrow['viesti'] != "")  $lisatiedot .= $viestirarrow['viesti'].".";
+      if ($laskurow['yhteyshenkilo'] != "")       $lisatiedot .= $laskurow['yhteyshenkilo'].". ";
+      if ($laskurow['asiakkaan_tilausnumero'] != "")  $lisatiedot .= $laskurow['asiakkaan_tilausnumero'].". ";
+    }
 
     if ($rahtikirja_tulostus == "yep") {
+      if ($viestirarrow['viesti'] != "")  $lisatiedot .= $viestirarrow['viesti'].". ";
+
       $salakalapala -= 5;
       $pdf->draw_text(mm_pt(5), mm_pt($salakalapala), trim($lisatiedot),  $firstpage, $kirj);
     }
     else {
+      if ($laskurow['viesti'] != "")  $lisatiedot .= $laskurow['viesti'].". ";
+
       $salakalapala -= 5;
       $pdf->draw_text(mm_pt(5), mm_pt($salakalapala), trim($lisatiedot),    $firstpage, $kirj);
     }

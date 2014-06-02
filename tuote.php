@@ -1088,11 +1088,13 @@ if ($tee == 'Z') {
 
             $_foreach_yhteensa = 0;
 
-            foreach (explode(",", $toimipaikka_varasto_row['tunnukset']) as $_var_tun) {
-              list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuote["tuoteno"], 'KAIKKI', $_var_tun, '', '', '', '', '', '', $saldoaikalisa);
+            if (!empty($toimipaikka_varasto_row['tunnukset'])) {
+              foreach (explode(",", $toimipaikka_varasto_row['tunnukset']) as $_var_tun) {
+                list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuote["tuoteno"], 'KAIKKI', $_var_tun, '', '', '', '', '', '', $saldoaikalisa);
 
-              $_foreach_yhteensa += $myytavissa;
-              $_tp_yhteensa += $myytavissa;
+                $_foreach_yhteensa += $myytavissa;
+                $_tp_yhteensa += $myytavissa;
+              }
             }
 
             echo "<td align='right'>".sprintf("%.2f", $_foreach_yhteensa)."</td>";
@@ -1199,11 +1201,13 @@ if ($tee == 'Z') {
 
             $_foreach_yhteensa = 0;
 
-            foreach (explode(",", $toimipaikka_varasto_row['tunnukset']) as $_var_tun) {
-              list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($_tuote["tuoteno"], 'KAIKKI', $_var_tun, '', '', '', '', '', '', $saldoaikalisa);
+            if (!empty($toimipaikka_varasto_row['tunnukset'])) {
+              foreach (explode(",", $toimipaikka_varasto_row['tunnukset']) as $_var_tun) {
+                list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($_tuote["tuoteno"], 'KAIKKI', $_var_tun, '', '', '', '', '', '', $saldoaikalisa);
 
-              $_foreach_yhteensa += $myytavissa;
-              $_tp_yhteensa += $myytavissa;
+                $_foreach_yhteensa += $myytavissa;
+                $_tp_yhteensa += $myytavissa;
+              }
             }
 
             echo "<td align='right'>".sprintf("%.2f", $_foreach_yhteensa)."</td>";

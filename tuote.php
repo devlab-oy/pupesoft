@@ -907,12 +907,20 @@ if ($tee == 'Z') {
                   ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
       }
       else {
+
+        if ($_tp_kasittely) {
+          $_tp_sort_lisa = ", if(varastopaikat.toimipaikka = '{$kukarow['toimipaikka']}', 0, 1) toimipaikka_sorttaus";
+        }
+        else {
+          $_tp_sort_lisa = ", 0 toimipaikka_sorttaus";
+        }
+
         $query = "SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa, varastopaikat.toimipaikka AS varasto_toimipaikka,
                   tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
                   concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
                   varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
-                  '' as era,
-                  if(varastopaikat.toimipaikka = '{$kukarow['toimipaikka']}', 0, 1) toimipaikka_sorttaus
+                  '' as era
+                  {$_tp_sort_lisa}
                   FROM tuote
                   JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
                   JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
@@ -1076,7 +1084,7 @@ if ($tee == 'Z') {
             $toimipaikka_varasto_res = pupe_query($query);
             $toimipaikka_varasto_row = mysql_fetch_assoc($toimipaikka_varasto_res);
 
-            if ($toimipaikka_varasto_row['tunnukset'] == '') {
+            if ($toimipaikka_varasto_row['tunnukset'] == '' and !empty($kukarow['toimipaikka'])) {
               $query = "SELECT GROUP_CONCAT(tunnus) tunnukset
                         FROM varastopaikat
                         WHERE yhtio = '{$kukarow['yhtio']}'
@@ -1189,7 +1197,7 @@ if ($tee == 'Z') {
             $toimipaikka_varasto_res = pupe_query($query);
             $toimipaikka_varasto_row = mysql_fetch_assoc($toimipaikka_varasto_res);
 
-            if ($toimipaikka_varasto_row['tunnukset'] == '') {
+            if ($toimipaikka_varasto_row['tunnukset'] == '' and !empty($kukarow['toimipaikka'])) {
               $query = "SELECT GROUP_CONCAT(tunnus) tunnukset
                         FROM varastopaikat
                         WHERE yhtio = '{$kukarow['yhtio']}'

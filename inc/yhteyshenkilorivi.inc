@@ -39,8 +39,7 @@ if (mysql_field_name($result, $i) == "rooli") {
     if ($row["selite"] == $trow[$i]) $sel = 'selected';
     $ulos .= "<option value='$row[selite]' $sel> $row[selite] - $row[selitetark]</option>";
   }
-//KISSA - poist
-$ulos .= "<option value='Magento'>Magento</option>";
+
   $ulos .= "</select></td>";
   $jatko = 0;
 }

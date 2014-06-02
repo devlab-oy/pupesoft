@@ -36,7 +36,7 @@ if ($php_cli) {
 }
 
 if (!function_exists('jt_toimita_editilaus')) {
-  function jt_toimita_editilaus ($asiakasno, $asiakasid, $asiakasmaa) {
+  function jt_toimita_editilaus ($asiakasno, $asiakasid, $asiakasmaa, $toimipaikka = 0) {
     global $yhtiorow, $kukarow, $edi_ulos, $php_cli;
 
     $automaaginen             = "automaaginen";
@@ -53,16 +53,33 @@ if (!function_exists('jt_toimita_editilaus')) {
     $from_varastoon_inc         = "editilaus_in.inc";
     $ei_tehdastoimitus_tuotteita  = "EI";
     $automaattinen_poiminta      = "JOO";
+    $toimipaikka = (int) $toimipaikka;
 
     if ($asiakasmaa != '') {
-      $asiakasmaalisa = "and (varastopaikat.sallitut_maat like '%$asiakasmaa%' or varastopaikat.sallitut_maat = '')";
+      $asiakasmaalisa = "and (varastopaikat.sallitut_maat like '%{$asiakasmaa}%' or varastopaikat.sallitut_maat = '')";
+    }
+
+    # Tarkistetaan onko toimipaikalle varastoja
+    if (!empty($toimipaikka)) {
+      $query = "SELECT *
+                FROM varastopaikat
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tyyppi = ''
+                AND toimipaikka = '{$toimipaikka}'
+                {$asiakasmaalisa}";
+      $tp_var_chk_res = pupe_query($query);
+
+      if (mysql_num_rows($tp_var_chk_res) == 0) {
+        $toimipaikka = 0;
+      }
     }
 
     $query = "SELECT *
               FROM varastopaikat
-              WHERE yhtio = '$kukarow[yhtio]'
+              WHERE yhtio = '{$kukarow['yhtio']}'
               and tyyppi  = ''
-              $asiakasmaalisa";
+              and toimipaikka = '{$toimipaikka}'
+              {$asiakasmaalisa}";
     $vtresult = pupe_query($query);
 
     $varastosta = array();
@@ -2051,9 +2068,16 @@ while ($tietue = fgets($fd)) {
         if ($editilaus_tila != "Z" and $editilaus_tilaustyyppi != 3 and $editilaus_tilaustyyppi != 'K') {
 
           if (in_array($yhtiorow['jt_automatiikka'], array('Y','W','K'))) {
+
             //lis‰t‰‰n tilaukseen ne jt-rivit jotka riitt‰v‰t kaikille
             $edi_ulos .= "\n";
-            jt_toimita_editilaus($laskurow["ytunnus"], $laskurow["liitostunnus"], $laskurow["maa"]);
+
+            $_ytunnus = $laskurow['ytunnus'];
+            $_ltun = $laskurow['liitostunnus'];
+            $_maa = $laskurow['maa'];
+            $_ytp = $laskurow['yhtio_toimipaikka'];
+
+            jt_toimita_editilaus($_ytunnus, $_ltun, $_maa, $_ytp);
             $edi_ulos .= "\n";
           }
 

@@ -669,7 +669,7 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
   }
 
   // Päivitetaan magento-asiakkaat ja osoitetiedot kauppaan
-  if (count($dnsasiakas) > 0) {
+  if (count($dnsasiakas) > 0 and isset($verkkokauppa_siirretaan_asiakkaat)) {
     echo date("d.m.Y @ G:i:s")." - Päivitetään asiakkaat\n";
     $count = $magento_client->lisaa_asiakkaat($dnsasiakas);
     echo date("d.m.Y @ G:i:s")." - Päivitettiin $count asiakkaan tiedot\n";

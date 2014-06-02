@@ -48,17 +48,16 @@ if ($laskurow["tila"] == 'G' and !isset($kohde_alue) and isset($tuoteno)) {
   //Laitetaan tuote oletusvaraston tuotepaikalle
   $tuotteen_oletuspaikka = hae_tuotteen_tuotepaikat($tuoteno, $laskurow['clearing']);
 
-  if (!empty($tuotteen_oletuspaikka)) {
-    // otetaan eka löytynyt tuotepaikka kohdetuotepaikaksi
-    $kohde_alue   = $tuotteen_oletuspaikka[0]['hyllyalue'];
-    $kohde_nro    = $tuotteen_oletuspaikka[0]['hyllynro'];
-    $kohde_vali   = $tuotteen_oletuspaikka[0]['hyllyvali'];
-    $kohde_taso   = $tuotteen_oletuspaikka[0]['hyllytaso'];
-  }
-  else {
+  if (empty($tuotteen_oletuspaikka)) {
     //Jos tuotteella ei ole tuotepaikkaa kohdevarastossa, luodaan se
-    lisaa_tuotepaikka($tuoteno, "", "", "", "", "", "", 0, 0, $laskurow['clearing']);
+    $tuotteen_oletuspaikka[0] = lisaa_tuotepaikka($tuoteno, "", "", "", "", "", "", 0, 0, $laskurow['clearing']);
   }
+
+  // otetaan eka löytynyt tuotepaikka kohdetuotepaikaksi
+  $kohde_alue   = $tuotteen_oletuspaikka[0]['hyllyalue'];
+  $kohde_nro    = $tuotteen_oletuspaikka[0]['hyllynro'];
+  $kohde_vali   = $tuotteen_oletuspaikka[0]['hyllyvali'];
+  $kohde_taso   = $tuotteen_oletuspaikka[0]['hyllytaso'];
 }
 
 if (!isset($indeksi)) {
@@ -2478,7 +2477,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       }
     }
 
-    if ($yhtiorow['rivinumero_syotto'] != '') {
+    if ($yhtiorow['rivinumero_syotto'] != '' and $kutsuja != "EDITILAUS") {
       if (!isset($tilrivinumero) or (int) $tilrivinumero == 0) {
         $query = "SELECT max(tilaajanrivinro) as trivinro from tilausrivi where yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]'";
         $triviresult = pupe_query($query);

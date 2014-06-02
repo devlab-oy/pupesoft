@@ -830,6 +830,8 @@ if ($tee == 'Z') {
       echo "<br>";
     }
 
+    $_tp_kasittely = ($yhtiorow['toimipaikkakasittely'] == "L");
+
     // Saldot, korvaavat ja vastaavat
     echo "<table><tr><td class='back' valign='top' style='padding:0px; margin:0px;height:0px;'>";
 
@@ -905,11 +907,20 @@ if ($tee == 'Z') {
                   ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
       }
       else {
+
+        if ($_tp_kasittely) {
+          $_tp_sort_lisa = ", if(varastopaikat.toimipaikka = '{$kukarow['toimipaikka']}', 0, 1) toimipaikka_sorttaus";
+        }
+        else {
+          $_tp_sort_lisa = ", 0 toimipaikka_sorttaus";
+        }
+
         $query = "SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa, varastopaikat.toimipaikka AS varasto_toimipaikka,
                   tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
                   concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
                   varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
                   '' as era
+                  {$_tp_sort_lisa}
                   FROM tuote
                   JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
                   JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
@@ -917,12 +928,15 @@ if ($tee == 'Z') {
                   and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
                   WHERE tuote.yhtio in ('".implode("','", $yhtiot)."')
                   and tuote.tuoteno = '$tuoteno'
-                  ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
+                  ORDER BY toimipaikka_sorttaus, tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
       }
 
       $sresult = pupe_query($query);
 
       if (mysql_num_rows($sresult) > 0) {
+
+        $_tp_yhteensa = array();
+
         while ($saldorow = mysql_fetch_assoc ($sresult)) {
 
           list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($saldorow["tuoteno"], '', '', $saldorow["yhtio"], $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"], '', $saldoaikalisa, $saldorow["era"]);
@@ -932,11 +946,30 @@ if ($tee == 'Z') {
           $kokonaishyllyssa += $hyllyssa;
           $kokonaismyytavissa += $myytavissa;
 
+          if ($_tp_kasittely and $kukarow['toimipaikka'] == $saldorow['varasto_toimipaikka']) {
+            $_class = 'tumma';
+
+            if (!isset($_tp_yhteensa[$saldorow['nimitys']])) {
+              $_tp_yhteensa[$saldorow['nimitys']] = array(
+                'saldo' => 0,
+                'hyllyssa' => 0,
+                'myytavissa' => 0,
+              );
+            }
+
+            $_tp_yhteensa[$saldorow['nimitys']]['saldo'] += $saldo;
+            $_tp_yhteensa[$saldorow['nimitys']]['hyllyssa'] += $hyllyssa;
+            $_tp_yhteensa[$saldorow['nimitys']]['myytavissa'] += $myytavissa;
+          }
+          else {
+            $_class = '';
+          }
+
           if ($saldorow["yhtio"] == $kukarow["yhtio"] and (($toimipaikka == $saldorow['varasto_toimipaikka']) or $toimipaikka == 'kaikki' )) {
             $kokonaissaldo_tapahtumalle += $saldo;
           }
 
-          echo "<tr>";
+          echo "<tr class='{$_class}'>";
           echo "<td>$saldorow[nimitys] $saldorow[tyyppi] $saldorow[era]</td>";
 
           if ($saldorow["hyllyalue"] == "!!M") {
@@ -978,6 +1011,18 @@ if ($tee == 'Z') {
         $kokonaismyytavissa += $myytavissa;
       }
 
+      if (!empty($_tp_yhteensa)) {
+
+        foreach ($_tp_yhteensa as $_tp_varasto_nimi => $_tp_saldot) {
+          echo "<tr>
+              <th colspan='2'>",t("Yhteensä")," {$_tp_varasto_nimi}</th>
+              <th style='text-align:right;'>".sprintf("%.2f", $_tp_saldot['saldo'])."</th>
+              <th style='text-align:right;'>".sprintf("%.2f", $_tp_saldot['hyllyssa'])."</th>
+              <th style='text-align:right;'>".sprintf("%.2f", $_tp_saldot['myytavissa'])."</th>
+              </tr>";
+        }
+      }
+
       echo "<tr>
           <th colspan='2'>".t("Yhteensä")."</th>
           <th style='text-align:right;'>".sprintf("%.2f", $kokonaissaldo)."</th>
@@ -989,6 +1034,27 @@ if ($tee == 'Z') {
     }
 
     echo "</td><td class='back' valign='top' style='padding:0px; margin:0px;height:0px;'>";
+
+    if ($_tp_kasittely) {
+
+      $query = "SELECT GROUP_CONCAT(tunnus) tunnukset
+                FROM varastopaikat
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tyyppi != 'P'
+                AND toimipaikka = '{$kukarow['toimipaikka']}'";
+      $toimipaikka_varasto_res = pupe_query($query);
+      $toimipaikka_varasto_row = mysql_fetch_assoc($toimipaikka_varasto_res);
+
+      if ($toimipaikka_varasto_row['tunnukset'] == '' and !empty($kukarow['toimipaikka'])) {
+        $query = "SELECT GROUP_CONCAT(tunnus) tunnukset
+                  FROM varastopaikat
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tyyppi != 'P'
+                  AND toimipaikka = 0";
+        $toimipaikka_varasto_res = pupe_query($query);
+        $toimipaikka_varasto_row = mysql_fetch_assoc($toimipaikka_varasto_res);
+      }
+    }
 
     // Korvaavat tuotteet
     require "korvaavat.class.php";
@@ -1009,19 +1075,56 @@ if ($tee == 'Z') {
       echo "<tr>";
       echo "<th>".t("Tuotenumero")."</th>";
       echo "<th>".t("Myytävissä")."</th>";
+
+      if ($_tp_kasittely) {
+        echo "<th>",t("Oma myytävissä"),"</th>";
+      }
+
       echo "</tr>";
+
+      $kokonaismyytavissa = 0;
+      $_tp_yhteensa = 0;
 
       // Listataan korvaavat ketju
       foreach (array_reverse($korvaavat->tuotteet()) as $tuote) {
         if ($tuoterow["tuoteno"] != $tuote["tuoteno"]) {
           list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuote["tuoteno"], 'KAIKKI', '', '', '', '', '', '', '', $saldoaikalisa);
 
+          $kokonaismyytavissa += $myytavissa;
+
           echo "<tr>";
           echo "<td><a href='$PHP_SELF?toim=$toim&tee=Z&tuoteno=".urlencode($tuote["tuoteno"])."&lopetus=$lopetus'>$tuote[tuoteno]</a></td>";
           echo "<td align='right'>".sprintf("%.2f", $myytavissa)."</td>";
+
+          if ($_tp_kasittely) {
+
+            $_foreach_yhteensa = 0;
+
+            if (!empty($toimipaikka_varasto_row['tunnukset'])) {
+              foreach (explode(",", $toimipaikka_varasto_row['tunnukset']) as $_var_tun) {
+                list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuote["tuoteno"], 'KAIKKI', $_var_tun, '', '', '', '', '', '', $saldoaikalisa);
+
+                $_foreach_yhteensa += $myytavissa;
+                $_tp_yhteensa += $myytavissa;
+              }
+            }
+
+            echo "<td align='right'>".sprintf("%.2f", $_foreach_yhteensa)."</td>";
+          }
+
           echo "</tr>";
         }
       }
+
+      echo "<tr>
+          <th>",t("Yhteensä"),"</th>
+          <th style='text-align:right;'>".sprintf("%.2f", $kokonaismyytavissa)."</th>";
+
+      if ($_tp_kasittely) {
+        echo "<th style='text-align:right;'>".sprintf("%.2f", $_tp_yhteensa)."</th>";
+      }
+
+      echo "</tr>";
 
       echo "</table>";
     }
@@ -1044,20 +1147,38 @@ if ($tee == 'Z') {
 
       // Ketjujen id:t
       foreach (explode(",", $vastaavat->getIDt()) as $ketju) {
+
+        $_colspan = 3;
+
+        if ($_tp_kasittely) {
+          $_colspan++;
+        }
+
         echo "<table>";
-        echo "<tr><th colspan='3'>".t("Ketju").": $ketju.</th></tr>";
+        echo "<tr><th colspan='{$_colspan}'>".t("Ketju").": $ketju.</th></tr>";
         echo "<tr>";
         echo "<th>".t("Tuotenumero")."</th>";
         echo "<th>".t("Myytävissä")."</th>";
         echo "<th>".t("Vaihtoehtoinen")."</th>";
+
+        if ($_tp_kasittely) {
+          echo "<th>",t("Oma myytävissä"),"</th>";
+        }
+
         echo "</tr>";
 
         // Haetaan tuotteet ketjukohtaisesti
         $_tuotteet = $vastaavat->tuotteet($ketju, $options);
 
+        $kokonaismyytavissa = 0;
+        $_tp_yhteensa = 0;
+
         // Lisätään löydetyt vastaavat mahdollisten myytävien joukkoon
         foreach ($_tuotteet as $_tuote) {
+
           list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($_tuote["tuoteno"], 'KAIKKI', '', '', '', '', '', '', '', $saldoaikalisa);
+
+          $kokonaismyytavissa += $myytavissa;
 
           echo "<tr>";
           echo "<td><a href='$PHP_SELF?toim=$toim&tee=Z&tuoteno=".urlencode($_tuote["tuoteno"])."&lopetus=$lopetus'>$_tuote[tuoteno]</a></td>";
@@ -1070,8 +1191,37 @@ if ($tee == 'Z') {
           }
 
           echo "</td>";
+
+          if ($_tp_kasittely) {
+
+            $_foreach_yhteensa = 0;
+
+            if (!empty($toimipaikka_varasto_row['tunnukset'])) {
+              foreach (explode(",", $toimipaikka_varasto_row['tunnukset']) as $_var_tun) {
+                list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($_tuote["tuoteno"], 'KAIKKI', $_var_tun, '', '', '', '', '', '', $saldoaikalisa);
+
+                $_foreach_yhteensa += $myytavissa;
+                $_tp_yhteensa += $myytavissa;
+              }
+            }
+
+            echo "<td align='right'>".sprintf("%.2f", $_foreach_yhteensa)."</td>";
+          }
+
           echo "</tr>";
         }
+
+        echo "<tr>
+            <th>",t("Yhteensä"),"</th>
+            <th style='text-align:right;'>".sprintf("%.2f", $kokonaismyytavissa)."</th>
+            <th></th>";
+
+        if ($_tp_kasittely) {
+          echo "<th style='text-align:right;'>".sprintf("%.2f", $_tp_yhteensa)."</th>";
+        }
+
+        echo "</tr>";
+
         echo "</table>";
       }
     }

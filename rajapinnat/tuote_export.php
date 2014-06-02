@@ -361,8 +361,7 @@ else {
 }
 
 echo date("d.m.Y @ G:i:s")." - Haetaan asiakkaat.\n";
-//KISSA - poist
-$muutoslisa = '';
+
 // Haetaan kaikki asiakkaat
 // Asiakassiirtoa varten poimitaan myös lisäkenttiä asiakkaan_avainsanat ja yhteyshenkilo-tauluista
 $query = "SELECT 
@@ -398,7 +397,6 @@ while ($row = mysql_fetch_array($res)) {
               'yhtio'    => $row["ayhtio"],
 
               'magento_website_id'=> $magento_website_id,
-              #'magento_store_id'  => $magento_store_id,
 
               'toimitus_nimi'    => $row["toim_nimi"],
               'toimitus_osoite'  => $row["toim_osoite"],

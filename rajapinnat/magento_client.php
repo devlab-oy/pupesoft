@@ -1048,7 +1048,6 @@ class MagentoClient {
           'firstname'        => $asiakas['nimi'],
           'lastname'        => $asiakas['nimi'],
           'website_id'      => $asiakas['magento_website_id'],
-          #'store_id'        => $asiakas['magento_store_id'],
           'taxvat'        => $asiakas['ytunnus'],
           'external_id'      => $asiakas['asiakasnro'],
           'group_id'        => $asiakasryhma_id,

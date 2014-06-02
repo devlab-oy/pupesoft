@@ -467,18 +467,22 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
 
   if ($laskurow["viesti"] != "" or $laskurow['yhteyshenkilo'] != "" or $viestirarrow["viesti"] != "" or $laskurow['asiakkaan_tilausnumero'] != "") {
 
-    if ($laskurow['yhteyshenkilo'] != "")       $laskurow['yhteyshenkilo'] .= ".";
-    if ($laskurow['asiakkaan_tilausnumero'] != "")   $laskurow['asiakkaan_tilausnumero']  .= ".";
-    if ($laskurow['viesti'] != "")           $laskurow['viesti'] .= ".";
-    if ($viestirarrow['viesti'] != "")         $viestirarrow['viesti']  .= ".";
+    $lisatiedot = "";
+
+    if ($yhtiorow["osoitelappu_lisatiedot"] == "") {
+      if ($laskurow['yhteyshenkilo'] != "")       $lisatiedot .= $laskurow['yhteyshenkilo'].".";
+      if ($laskurow['asiakkaan_tilausnumero'] != "")  $lisatiedot .= $laskurow['asiakkaan_tilausnumero'].".";
+    }    
+    if ($laskurow['viesti'] != "")  $lisatiedot .= $laskurow['viesti'].".";
+    if ($viestirarrow['viesti'] != "")  $lisatiedot .= $viestirarrow['viesti'].".";
 
     if ($rahtikirja_tulostus == "yep") {
       $salakalapala -= 5;
-      $pdf->draw_text(mm_pt(5), mm_pt($salakalapala), trim($laskurow['yhteyshenkilo']." ".$laskurow['asiakkaan_tilausnumero']." ".$viestirarrow["viesti"]),  $firstpage, $kirj);
+      $pdf->draw_text(mm_pt(5), mm_pt($salakalapala), trim($lisatiedot),  $firstpage, $kirj);
     }
     else {
       $salakalapala -= 5;
-      $pdf->draw_text(mm_pt(5), mm_pt($salakalapala), trim($laskurow['yhteyshenkilo']." ".$laskurow['asiakkaan_tilausnumero']." ".$laskurow["viesti"]),    $firstpage, $kirj);
+      $pdf->draw_text(mm_pt(5), mm_pt($salakalapala), trim($lisatiedot),    $firstpage, $kirj);
     }
   }
 

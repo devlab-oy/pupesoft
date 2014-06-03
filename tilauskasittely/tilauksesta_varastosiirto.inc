@@ -256,10 +256,6 @@ if (!function_exists('luo_varastosiirtorivi')) {
       $var = '';
     }
 
-    if (!empty($tilausrivi['palautus_varasto'])) {
-     $varataan_saldoa = 'EI';
-    }
-
     //Laitetaan tuote oletusvaraston tuotepaikalle
     $tuotteen_oletuspaikka = hae_tuotteen_tuotepaikat($tilausrivi['tuoteno'], $tilausrivi['kohdevarasto_tunnus']);
 

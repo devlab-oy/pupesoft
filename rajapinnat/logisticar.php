@@ -21,8 +21,8 @@ ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(_
 error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
 ini_set("display_errors", 0);
 
-require('inc/connect.inc');
-require('inc/functions.inc');
+require 'inc/connect.inc';
+require 'inc/functions.inc';
 
 $path = "/tmp/logisticar_siirto_$yhtio/";
 
@@ -76,8 +76,8 @@ myynti($limit);
 ftpsiirto($path);
 
 // sambajakosiirto, ei käytössä tällä hetkellä.
-function siirto ($path) {
-  GLOBAL $logisticar, $yhtio;
+function siirto($path) {
+  global $logisticar, $yhtio;
 
   $path_localdir    = "/mnt/logisticar_siirto/";
   $user_logisticar = $logisticar[$yhtio]["user"];
@@ -110,8 +110,8 @@ function siirto ($path) {
 }
 
 // ftp-siirto
-function ftpsiirto ($path) {
-  GLOBAL $logisticar, $yhtio;
+function ftpsiirto($path) {
+  global $logisticar, $yhtio;
 
   if ($handle = opendir($path)) {
     while (($file = readdir($handle)) !== FALSE) {
@@ -128,7 +128,7 @@ function ftpsiirto ($path) {
         $ftpfile  = realpath($path."/".$file);
         $ftptmpr  = FALSE;
 
-        require ("inc/ftp-send.inc");
+        require "inc/ftp-send.inc";
       }
     }
   }
@@ -472,7 +472,7 @@ function varastotapahtumat($limit = '') {
             $pvmlisa
             ORDER BY tapahtumapaiva, nimiketunnus ASC
             $limit";
-    $res = pupe_query($query);
+  $res = pupe_query($query);
 
   $rows = mysql_num_rows($res);
   $row = 0;
@@ -500,63 +500,63 @@ function varastotapahtumat($limit = '') {
   // tehdään otsikot
   create_headers($fp, array_keys($headers));
 
-    while ($trow = mysql_fetch_assoc($res)) {
+  while ($trow = mysql_fetch_assoc($res)) {
     $row++;
 
-    switch(strtolower($trow['tapahtumalaji'])) {
+    switch (strtolower($trow['tapahtumalaji'])) {
       // ostot
-      case 'tulo':
+    case 'tulo':
 
-        // 1 = saapuminen tai oston palautus
-        $trow['tapahtumalaji'] = 1;
-        $trow['tapahtumatyyppi'] = 'O';
+      // 1 = saapuminen tai oston palautus
+      $trow['tapahtumalaji'] = 1;
+      $trow['tapahtumatyyppi'] = 'O';
 
-        // myyntiarvo on 0
-        $trow['myyntiarvo'] = 0;
-        $trow['ostoarvo'] = (-1 * $trow['ostoarvo']);
+      // myyntiarvo on 0
+      $trow['myyntiarvo'] = 0;
+      $trow['ostoarvo'] = (-1 * $trow['ostoarvo']);
 
-        // jos kpl alle 0 niin tämä on oston palautus
-        // jolloin hinta myös miinus
-        if ($trow['tapahtumamaara'] < 0) {
-          // tapahtumamaara on aina positiivinen logisticarissa
-          $trow['tapahtumamaara'] = (-1 * $trow['tapahtumamaara']);
-        }
+      // jos kpl alle 0 niin tämä on oston palautus
+      // jolloin hinta myös miinus
+      if ($trow['tapahtumamaara'] < 0) {
+        // tapahtumamaara on aina positiivinen logisticarissa
+        $trow['tapahtumamaara'] = (-1 * $trow['tapahtumamaara']);
+      }
 
-            break;
+      break;
 
       // myynnit
-      case 'laskutus':
+    case 'laskutus':
 
-        // 2 = otto tai myynninpalautus
-        $trow['tapahtumalaji'] = 2;
-        $trow['tapahtumatyyppi'] = 'L';
+      // 2 = otto tai myynninpalautus
+      $trow['tapahtumalaji'] = 2;
+      $trow['tapahtumatyyppi'] = 'L';
 
-        // ostoarvo
-        $trow['ostoarvo'] = $trow['myyntiarvo'] - $trow['kate'];
+      // ostoarvo
+      $trow['ostoarvo'] = $trow['myyntiarvo'] - $trow['kate'];
 
-        // tämä on myynninpalautus eli myyntiarvo on negatiivinen
-        if ($trow['tapahtumamaara'] < 0) {
-          // tapahtumamaara on aina positiivinen logisticarissa
-          $trow['tapahtumamaara'] = (-1 * $trow['tapahtumamaara']);
-        }
+      // tämä on myynninpalautus eli myyntiarvo on negatiivinen
+      if ($trow['tapahtumamaara'] < 0) {
+        // tapahtumamaara on aina positiivinen logisticarissa
+        $trow['tapahtumamaara'] = (-1 * $trow['tapahtumamaara']);
+      }
 
-        break;
+      break;
 
       // varastosiirrot
-      case 'siirto':
+    case 'siirto':
 
-        if ($trow['tapahtumamaara'] < 0) {
-          $trow['tapahtumalaji'] = 2;
-          $trow['tapahtumatyyppi'] = 'S';
-          $trow['tapahtumamaara'] = (-1 * $trow['tapahtumamaara']);
-        }
-        else {
-          $trow['tapahtumalaji'] = 1;
-          $trow['tapahtumatyyppi'] = 'S';
+      if ($trow['tapahtumamaara'] < 0) {
+        $trow['tapahtumalaji'] = 2;
+        $trow['tapahtumatyyppi'] = 'S';
+        $trow['tapahtumamaara'] = (-1 * $trow['tapahtumamaara']);
+      }
+      else {
+        $trow['tapahtumalaji'] = 1;
+        $trow['tapahtumatyyppi'] = 'S';
 
-          $trow['toimitusasiakas'] = $trow['varastotunnus'];
-          $trow['varastotunnus'] = $trow['asiakastunnus'];
-        }
+        $trow['toimitusasiakas'] = $trow['varastotunnus'];
+        $trow['varastotunnus'] = $trow['asiakastunnus'];
+      }
 
 
     }
@@ -570,7 +570,7 @@ function varastotapahtumat($limit = '') {
       echo "Failed writing row.\n";
       die();
     }
-    }
+  }
 
   fclose($fp);
   echo "Done.\n";
@@ -589,7 +589,7 @@ function myynti($limit = '') {
 
   $query_ale_lisa = generoi_alekentta('M');
 
-    $query = "SELECT
+  $query = "SELECT
               tilausrivi.tuoteno nimiketunnus,
               lasku.liitostunnus asiakastunnus,
               lasku.liitostunnus toimitusasiakas,
@@ -651,50 +651,50 @@ function myynti($limit = '') {
     $row++;
 
     switch (strtoupper($trow['tapahtumalaji'])) {
-      case 'G':
-        // kirjoitetaan fileen vain avoimia siirtolistoja eli toimitettu pitää olla tyhjää
-        if ($trow['toimitettu'] != '') {
-          continue;
-        }
+    case 'G':
+      // kirjoitetaan fileen vain avoimia siirtolistoja eli toimitettu pitää olla tyhjää
+      if ($trow['toimitettu'] != '') {
+        continue;
+      }
 
-        // laji 3 = saapuva tilaus
-        $trow['tapahtumalaji']   = '3';
-        $trow['myyntiarvo']   = 0;
+      // laji 3 = saapuva tilaus
+      $trow['tapahtumalaji']   = '3';
+      $trow['myyntiarvo']   = 0;
 
-        $trow['toimitusasiakas'] = $trow['varastotunnus'];
-        $trow['varastotunnus'] = $trow['asiakastunnus'];
+      $trow['toimitusasiakas'] = $trow['varastotunnus'];
+      $trow['varastotunnus'] = $trow['asiakastunnus'];
 
-        // ei haluta toimitettu-saraketta mukaan
-        unset($trow['toimitettu']);
+      // ei haluta toimitettu-saraketta mukaan
+      unset($trow['toimitettu']);
 
-        $data = array_merge($headers, $trow);
-        $data = implode("\t", $data);
+      $data = array_merge($headers, $trow);
+      $data = implode("\t", $data);
 
-        if (! fwrite($fp, $data . "\n")) {
-          echo "Failed writing row.\n";
-          die();
-        }
+      if (! fwrite($fp, $data . "\n")) {
+        echo "Failed writing row.\n";
+        die();
+      }
 
-        // laji 4 = varattu
-        $trow['tapahtumalaji'] = '4';
+      // laji 4 = varattu
+      $trow['tapahtumalaji'] = '4';
 
-        $trow['varastotunnus'] = $trow['toimitusasiakas'];
-        $trow['toimitusasiakas'] = $trow['asiakastunnus'];
+      $trow['varastotunnus'] = $trow['toimitusasiakas'];
+      $trow['toimitusasiakas'] = $trow['asiakastunnus'];
 
-        break;
-      case 'L':
-        $trow['tapahtumalaji']  = '4';
+      break;
+    case 'L':
+      $trow['tapahtumalaji']  = '4';
 
-        // ei haluta toimitettu-saraketta mukaan
-        unset($trow['toimitettu']);
-        break;
-      case 'O':
-        $trow['tapahtumalaji']   = '3';
-        $trow['myyntiarvo']   = 0;
+      // ei haluta toimitettu-saraketta mukaan
+      unset($trow['toimitettu']);
+      break;
+    case 'O':
+      $trow['tapahtumalaji']   = '3';
+      $trow['myyntiarvo']   = 0;
 
-        // ei haluta toimitettu-saraketta mukaan
-        unset($trow['toimitettu']);
-        break;
+      // ei haluta toimitettu-saraketta mukaan
+      unset($trow['toimitettu']);
+      break;
     }
 
     $data = array_merge($headers, $trow);
@@ -704,7 +704,7 @@ function myynti($limit = '') {
       echo "Failed writing row.\n";
       die();
     }
-    }
+  }
 
   fclose($fp);
   echo "Done.\n";

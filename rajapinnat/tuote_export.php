@@ -16,8 +16,8 @@ if (!$php_cli) {
 
 $pupe_root_polku = dirname(dirname(__FILE__));
 
-require ("{$pupe_root_polku}/inc/connect.inc");
-require ("{$pupe_root_polku}/inc/functions.inc");
+require "{$pupe_root_polku}/inc/connect.inc";
+require "{$pupe_root_polku}/inc/functions.inc";
 
 $lock_params = array(
   "locktime" => 5400,
@@ -27,7 +27,7 @@ $lock_params = array(
 // Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
 pupesoft_flock($lock_params);
 
-require ("{$pupe_root_polku}/rajapinnat/magento_client.php");
+require "{$pupe_root_polku}/rajapinnat/magento_client.php";
 
 // Laitetaan unlimited execution time
 ini_set("max_execution_time", 0);
@@ -150,29 +150,29 @@ while ($row = mysql_fetch_array($res)) {
   }
 
   $dnstuote[] = array('tuoteno'        => $row["tuoteno"],
-            'nimi'          => $row["nimitys"],
-            'kuvaus'        => $row["kuvaus"],
-            'lyhytkuvaus'      => $row["lyhytkuvaus"],
-            'yksikko'        => $row["yksikko"],
-            'tuotemassa'      => $row["tuotemassa"],
-            'myyntihinta'      => $myyntihinta,
-            'myyntihinta_veroton'  => $myyntihinta_veroton,
-            'myymalahinta'      => $myymalahinta,
-            'myymalahinta_veroton'  => $myymalahinta_veroton,
-            'kuluprosentti'      => $row['kuluprosentti'],
-            'ean'          => $row["eankoodi"],
-            'osasto'        => $row["osasto"],
-            'try'          => $row["try"],
-            'try_nimi'        => $row["try_nimi"],
-            'alv'          => $row["alv"],
-            'nakyvyys'        => $row["nakyvyys"],
-            'nimi_swe'        => $row["nimi_swe"],
-            'nimi_eng'        => $row["nimi_eng"],
-            'campaign_code'      => $row["campaign_code"],
-            'target'        => $row["target"],
-            'onsale'        => $row["onsale"],
-            'tunnus'        => $row['tunnus'],
-            );
+    'nimi'          => $row["nimitys"],
+    'kuvaus'        => $row["kuvaus"],
+    'lyhytkuvaus'      => $row["lyhytkuvaus"],
+    'yksikko'        => $row["yksikko"],
+    'tuotemassa'      => $row["tuotemassa"],
+    'myyntihinta'      => $myyntihinta,
+    'myyntihinta_veroton'  => $myyntihinta_veroton,
+    'myymalahinta'      => $myymalahinta,
+    'myymalahinta_veroton'  => $myymalahinta_veroton,
+    'kuluprosentti'      => $row['kuluprosentti'],
+    'ean'          => $row["eankoodi"],
+    'osasto'        => $row["osasto"],
+    'try'          => $row["try"],
+    'try_nimi'        => $row["try_nimi"],
+    'alv'          => $row["alv"],
+    'nakyvyys'        => $row["nakyvyys"],
+    'nimi_swe'        => $row["nimi_swe"],
+    'nimi_eng'        => $row["nimi_eng"],
+    'campaign_code'      => $row["campaign_code"],
+    'target'        => $row["target"],
+    'onsale'        => $row["onsale"],
+    'tunnus'        => $row['tunnus'],
+  );
 }
 
 // Magentoa varten pitää hakea kaikki tuotteet, jotta voidaan poistaa ne jota ei ole olemassa
@@ -261,12 +261,12 @@ $query =  "(SELECT tapahtuma.tuoteno,
 $result = pupe_query($query);
 
 while ($row = mysql_fetch_assoc($result)) {
-  list(,,$myytavissa) = saldo_myytavissa($row["tuoteno"], '', $verkkokauppa_saldo_varasto);
+  list(, , $myytavissa) = saldo_myytavissa($row["tuoteno"], '', $verkkokauppa_saldo_varasto);
 
   $dnstock[] = array(  'tuoteno'    => $row["tuoteno"],
-            'ean'      => $row["eankoodi"],
-            'myytavissa'  => $myytavissa,
-            );
+    'ean'      => $row["eankoodi"],
+    'myytavissa'  => $myytavissa,
+  );
 }
 
 if ($ajetaanko_kaikki == "NO") {
@@ -312,21 +312,21 @@ while ($row = mysql_fetch_assoc($try_result)) {
 
   // Osasto/tuoteryhmä array
   $dnsryhma[$row["osasto"]][$row["try"]] = array(  'osasto'  => $row["osasto"],
-                          'try'    => $row["try"],
-                          'osasto_fi'  => $row["osasto_fi_nimi"],
-                          'try_fi'  => $row["try_fi_nimi"],
-                          'osasto_se'  => $row["osasto_se_nimi"],
-                          'try_se'  => $row["try_se_nimi"],
-                          'osasto_en' => $row["osasto_en_nimi"],
-                          'try_en'  => $row["try_en_nimi"],
-                          );
+    'try'    => $row["try"],
+    'osasto_fi'  => $row["osasto_fi_nimi"],
+    'try_fi'  => $row["try_fi_nimi"],
+    'osasto_se'  => $row["osasto_se_nimi"],
+    'try_se'  => $row["try_se_nimi"],
+    'osasto_en' => $row["osasto_en_nimi"],
+    'try_en'  => $row["try_en_nimi"],
+  );
 
   // Kerätään myös pelkät tuotenumerot Magentoa varten
   $dnstuoteryhma[$row["try"]] = array(  'try'    => $row["try"],
-                      'try_fi'  => $row["try_fi_nimi"],
-                      'try_se'  => $row["try_se_nimi"],
-                      'try_en'  => $row["try_en_nimi"],
-                      );
+    'try_fi'  => $row["try_fi_nimi"],
+    'try_se'  => $row["try_se_nimi"],
+    'try_en'  => $row["try_en_nimi"],
+  );
 }
 
 if ($ajetaanko_kaikki == "NO") {
@@ -353,11 +353,11 @@ $res = pupe_query($query);
 // pyöräytetään asiakkaat läpi
 while ($row = mysql_fetch_array($res)) {
   $dnsasiakas[] = array(  'nimi'    => $row["nimi"],
-              'osoite'  => $row["osoite"],
-              'postino'  => $row["postino"],
-              'postitp'  => $row["postitp"],
-              'email'    => $row["email"],
-              );
+    'osoite'  => $row["osoite"],
+    'postino'  => $row["postino"],
+    'postitp'  => $row["postitp"],
+    'email'    => $row["email"],
+  );
 }
 
 if ($ajetaanko_kaikki == "NO") {
@@ -405,12 +405,12 @@ while ($row = mysql_fetch_array($res)) {
   }
 
   $dnshinnasto[] = array(  'tuoteno'        => $row["tuoteno"],
-              'selite'        => $row["selite"],
-              'alkupvm'        => $row["alkupvm"],
-              'loppupvm'        => $row["loppupvm"],
-              'hinta'          => $hinta,
-              'hinta_veroton'      => $hinta_veroton,
-              );
+    'selite'        => $row["selite"],
+    'alkupvm'        => $row["alkupvm"],
+    'loppupvm'        => $row["loppupvm"],
+    'hinta'          => $hinta,
+    'hinta_veroton'      => $hinta_veroton,
+  );
 }
 
 echo date("d.m.Y @ G:i:s")." - Haetaan tuotteiden variaatiot.\n";
@@ -506,8 +506,8 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
 
     while ($syvinrow = mysql_fetch_assoc($alinres)) {
       $properties[] = array(  "nimi" => $syvinrow["selitetark"],
-                  "option_name" => $syvinrow["option_name"],
-                   "arvo" => $syvinrow["selite"]);
+        "option_name" => $syvinrow["option_name"],
+        "arvo" => $syvinrow["selite"]);
     }
 
     // Jos yhtiön hinnat eivät sisällä alv:tä
@@ -527,26 +527,26 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
     }
 
     $dnslajitelma[$rowselite["selite"]][] = array(  'tuoteno'         => $alirow["tuoteno"],
-                            'tunnus'        => $alirow["tunnus"],
-                            'nimitys'        => $alirow["nimitys"],
-                            'kuvaus'        => $alirow["kuvaus"],
-                            'lyhytkuvaus'      => $alirow["lyhytkuvaus"],
-                            'tuotemassa'      => $alirow["tuotemassa"],
-                            'nakyvyys'        => $alirow["nakyvyys"],
-                            'try_nimi'        => $alirow["try_nimi"],
-                            'nimi_swe'        => $alirow["nimi_swe"],
-                            'nimi_eng'        => $alirow["nimi_eng"],
-                            'campaign_code'      => $alirow["campaign_code"],
-                            'target'        => $alirow["target"],
-                            'onsale'        => $alirow["onsale"],
-                            'jarjestys'        => $alirow["jarjestys"],
-                            'myyntihinta'      => $myyntihinta,
-                            'myyntihinta_veroton'  => $myyntihinta_veroton,
-                            'myymalahinta'      => $myymalahinta,
-                            'myymalahinta_veroton'  => $myymalahinta_veroton,
-                            'kuluprosentti'      => $alirow['kuluprosentti'],
-                            'ean'          => $alirow["eankoodi"],
-                            'parametrit'      => $properties);
+      'tunnus'        => $alirow["tunnus"],
+      'nimitys'        => $alirow["nimitys"],
+      'kuvaus'        => $alirow["kuvaus"],
+      'lyhytkuvaus'      => $alirow["lyhytkuvaus"],
+      'tuotemassa'      => $alirow["tuotemassa"],
+      'nakyvyys'        => $alirow["nakyvyys"],
+      'try_nimi'        => $alirow["try_nimi"],
+      'nimi_swe'        => $alirow["nimi_swe"],
+      'nimi_eng'        => $alirow["nimi_eng"],
+      'campaign_code'      => $alirow["campaign_code"],
+      'target'        => $alirow["target"],
+      'onsale'        => $alirow["onsale"],
+      'jarjestys'        => $alirow["jarjestys"],
+      'myyntihinta'      => $myyntihinta,
+      'myyntihinta_veroton'  => $myyntihinta_veroton,
+      'myymalahinta'      => $myymalahinta,
+      'myymalahinta_veroton'  => $myymalahinta_veroton,
+      'kuluprosentti'      => $alirow['kuluprosentti'],
+      'ean'          => $alirow["eankoodi"],
+      'parametrit'      => $properties);
   }
 
 }
@@ -642,27 +642,27 @@ elseif (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "anvia") {
   $tulos_ulos = "";
 
   if (count($dnstuote) > 0) {
-    require ("{$pupe_root_polku}/rajapinnat/tuotexml.inc");
+    require "{$pupe_root_polku}/rajapinnat/tuotexml.inc";
   }
 
   if (count($dnstock) > 0) {
-    require ("{$pupe_root_polku}/rajapinnat/varastoxml.inc");
+    require "{$pupe_root_polku}/rajapinnat/varastoxml.inc";
   }
 
   if (count($dnsryhma) > 0) {
-    require ("{$pupe_root_polku}/rajapinnat/ryhmaxml.inc");
+    require "{$pupe_root_polku}/rajapinnat/ryhmaxml.inc";
   }
 
   if (count($dnsasiakas) > 0) {
-    require ("{$pupe_root_polku}/rajapinnat/asiakasxml.inc");
+    require "{$pupe_root_polku}/rajapinnat/asiakasxml.inc";
   }
 
   if (count($dnshinnasto) > 0) {
-    require ("{$pupe_root_polku}/rajapinnat/hinnastoxml.inc");
+    require "{$pupe_root_polku}/rajapinnat/hinnastoxml.inc";
   }
 
   if (count($dnslajitelma) > 0) {
-    require ("{$pupe_root_polku}/rajapinnat/lajitelmaxml.inc");
+    require "{$pupe_root_polku}/rajapinnat/lajitelmaxml.inc";
   }
 }
 

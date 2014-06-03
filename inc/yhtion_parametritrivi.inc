@@ -3002,6 +3002,7 @@ if (mysql_field_name($result, $i) == "varastoonvientipaiva") {
 
   $ulos .= "<option value = ''>".t("Tavaran varastoonvientipäivä on saapumisen varastoonvientipäivä");
   $ulos .= "<option value = 'K' $sel>".t("Tavaran varastoonvientipäivä voidaan syöttää saapumisen varastoonviennissä");
+  $ulos .= "<option value = 'R' $sel>".t("Tavaran varastoonvientipäivä asetetaan automaattisesti ennen miinuksellemyyntitapahtumaa");
   $ulos .= "</select></td>";
 
   $jatko = 0;

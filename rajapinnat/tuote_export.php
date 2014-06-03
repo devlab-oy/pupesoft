@@ -371,7 +371,8 @@ if (isset($magento_siirretaan_asiakkaat)) {
   $asiakasselectlisa = " avainsana.selitetark as asiakasryhma, 
                          asiakkaan_avainsanat.tarkenne magento_tunnus,
                          yhteyshenkilo.nimi yhenk_nimi,
-                         yhteyshenkilo.email yhenk_email, ";
+                         yhteyshenkilo.email yhenk_email,
+                         yhteyshenkilo.puh yhenk_puh,";
 
   $asiakasjoinilisa = " LEFT JOIN asiakkaan_avainsanat ON (asiakkaan_avainsanat.yhtio = asiakas.yhtio AND asiakkaan_avainsanat.liitostunnus = asiakas.tunnus AND asiakkaan_avainsanat.avainsana = 'magento_tunnus')
                         JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakas.yhtio AND yhteyshenkilo.liitostunnus = asiakas.tunnus AND yhteyshenkilo.rooli = 'magento')
@@ -403,14 +404,14 @@ $res = pupe_query($query);
 // pyöräytetään asiakkaat läpi
 while ($row = mysql_fetch_array($res)) {
   // Osoite laskutusosoitteeksi jos tyhjä
-  if (!isset($row['laskutus_nimi'])) {
+  if (empty($row['laskutus_nimi'])) {
     $row["laskutus_nimi"]    = $row['nimi'];
     $row["laskutus_osoite"]  = $row['osoite'];
     $row["laskutus_postino"] = $row['postino'];
     $row["laskutus_postitp"] = $row['postitp'];
   }
   // Osoite toimitusosoitteeksi jos tyhjä
-  if (!isset($row['toim_nimi'])) {
+  if (empty($row['toim_nimi'])) {
     $row['toim_nimi']    = $row['nimi'];
     $row["toim_osoite"]  = $row['osoite'];
     $row["toim_postino"] = $row['postino'];
@@ -444,6 +445,7 @@ while ($row = mysql_fetch_array($res)) {
 
     'yhenk_nimi'    => $row["yhenk_nimi"],
     'yhenk_email'    => $row["yhenk_email"],
+    'yhenk_puh'     => $row["yhenk_puh"],
     'magento_tunnus'    => $row["magento_tunnus"],
     'asiakasryhma'  => $row['asiakasryhma'],
   );

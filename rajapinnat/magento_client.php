@@ -1060,7 +1060,7 @@ class MagentoClient {
           'postcode'        => $asiakas['laskutus_postino'],
           'city'          => $asiakas['laskutus_postitp'],
           'country_id'      => $asiakas['maa'],
-          'telephone'        => '111-2222',
+          'telephone'        => $asiakas['yhenk_puh'],
           'company'        => $asiakas['nimi'],
           'is_default_billing'    => true,
       );
@@ -1072,7 +1072,7 @@ class MagentoClient {
           'postcode'        => $asiakas['toimitus_postino'],
           'city'          => $asiakas['toimitus_postitp'],
           'country_id'      => $asiakas['maa'],
-          'telephone'        => '111-3333',
+          'telephone'        => $asiakas['yhenk_puh'],
           'company'        => $asiakas['nimi'],
           'is_default_shipping' => true
       );

@@ -319,9 +319,9 @@ class MagentoClient {
           $this->log("Tuote '{$tuote['tuoteno']}' päivitetty (simple) " . print_r($tuote_data, true));
 
           // Update tier prices
-          $result = $this->_proxy->call($this->_session, 'product_tier_price.update', array($tuote['tuoteno'], $tuote_ryhmahinta_data));
+          /*$result = $this->_proxy->call($this->_session, 'product_tier_price.update', array($tuote['tuoteno'], $tuote_ryhmahinta_data));
 
-          $this->log("Tuotteen '{$tuote['tuoteno']}' erikoishinnasto $result päivitetty " . print_r($tuote_ryhmahinta_data, true));
+          $this->log("Tuotteen '{$tuote['tuoteno']}' erikoishinnasto $result päivitetty " . print_r($tuote_ryhmahinta_data, true));*/
         }
         catch (Exception $e) {
           $this->_error_count++;
@@ -1079,8 +1079,8 @@ class MagentoClient {
 
       // Lisätään tai päivitetään asiakas
 
-      // Jos asiakasta ei ole olemassa (sillä ei ole pupessa magento_id:tä) niin lisätään se
-      if (empty($asiakas['magento_id'])) {
+      // Jos asiakasta ei ole olemassa (sillä ei ole pupessa magento_tunnus:ta) niin lisätään se
+      if (empty($asiakas['magento_tunnus'])) {
         try {
           $result = $this->_proxy->call(
             $this->_session,
@@ -1090,15 +1090,36 @@ class MagentoClient {
             ));
 
           $this->log("Asiakas '{$asiakas['tunnus']}' / {$result} lisätty " . print_r($asiakas_data, true));
-          $asiakas['magento_id'] = $result;
+          $asiakas['magento_tunnus'] = $result;
 
-          // Päivitetään magento_id pupeen
-          $query = "UPDATE asiakkaan_avainsanat
-                    SET tarkenne = '{$result}'
-                    WHERE yhtio      = '{$asiakas['yhtio']}'
-                    AND liitostunnus = '{$asiakas['tunnus']}'
-                    AND avainsana    = 'magento_tunnus'";
-          pupe_query($query);
+          // Päivitetään magento_tunnus pupeen
+          $tarksql = "SELECT *
+                      FROM asiakkaan_avainsanat
+                      WHERE yhtio      = '{$asiakas['yhtio']}'
+                      AND liitostunnus = '{$asiakas['tunnus']}'
+                      AND avainsana    = 'magento_tunnus'";
+          $tarkesult = pupe_query($tarksql);
+          $ahy = mysql_num_rows($tarkesult);
+
+          if ($ahy == 0) {
+            $ahinsert = "INSERT INTO asiakkaan_avainsanat SET
+                         yhtio        = '{$asiakas['yhtio']}',
+                         liitostunnus = '{$asiakas['tunnus']}',
+                         tarkenne     = '{$asiakas['magento_tunnus']}',
+                         avainsana    = 'magento_tunnus',
+                         laatija      = 'Magento',
+                         luontiaika   = now(),
+                         muutospvm    = now()";
+            pupe_query($ahinsert);
+          }
+          else {
+            $query = "UPDATE asiakkaan_avainsanat
+                      SET tarkenne = '{$asiakas['magento_tunnus']}'
+                      WHERE yhtio      = '{$asiakas['yhtio']}'
+                      AND liitostunnus = '{$asiakas['tunnus']}'
+                      AND avainsana    = 'magento_tunnus'";
+            pupe_query($query);
+          }
         }
         catch (Exception $e) {
           $this->_error_count++;
@@ -1112,11 +1133,11 @@ class MagentoClient {
             $this->_session,
             'customer.update',
              array(
-                    $asiakas['magento_id'],
+                    $asiakas['magento_tunnus'],
                     $asiakas_data
           ));
 
-          $this->log("Asiakas '{$asiakas['tunnus']}' / {$asiakas['magento_id']} päivitetty " . print_r($asiakas_data, true));
+          $this->log("Asiakas '{$asiakas['tunnus']}' / {$asiakas['magento_tunnus']} päivitetty " . print_r($asiakas_data, true));
         }
         catch (Exception $e) {
           $this->_error_count++;
@@ -1128,7 +1149,7 @@ class MagentoClient {
       $address_array = $this->_proxy->call(
         $this->_session,
         'customer_address.list',
-         $asiakas['magento_id']);
+         $asiakas['magento_tunnus']);
       // Ja poistetaan ne
       if (count($address_array) > 0) {
         foreach ($address_array as $address) {
@@ -1143,7 +1164,7 @@ class MagentoClient {
           $result = $this->_proxy->call(
             $this->_session,
             'customer_address.create',
-            array('customerId' => $asiakas['magento_id'], 'addressdata' => ($laskutus_osoite_data)));
+            array('customerId' => $asiakas['magento_tunnus'], 'addressdata' => ($laskutus_osoite_data)));
         }
         catch (Exception $e) {
           $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' laskutusosoitteen päivitys epäonnistui " . print_r($laskutus_osoite_data, true), $e);
@@ -1156,7 +1177,7 @@ class MagentoClient {
           $result = $this->_proxy->call(
             $this->_session,
             'customer_address.create',
-            array('customerId' => $asiakas['magento_id'], 'addressdata' => ($toimitus_osoite_data)));
+            array('customerId' => $asiakas['magento_tunnus'], 'addressdata' => ($toimitus_osoite_data)));
         }
         catch (Exception $e) {
           $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' toimitusosoitteen päivitys epäonnistui " . print_r($toimitus_osoite_data, true), $e);

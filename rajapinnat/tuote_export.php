@@ -149,29 +149,32 @@ while ($row = mysql_fetch_array($res)) {
     $myymalahinta_veroton       = hintapyoristys($row["myymalahinta"] / (1+($row["alv"]/100)));
   }
   
-  $query = "SELECT 
-            avainsana.selitetark AS asiakasryhma,
-            asiakashinta.tuoteno, 
-            asiakashinta.hinta 
-            FROM asiakas 
-            JOIN avainsana ON (avainsana.yhtio = asiakas.yhtio 
-              AND avainsana.selite = asiakas.ryhma AND avainsana.laji = 'asiakasryhma') 
-            JOIN asiakashinta ON (asiakashinta.yhtio = asiakas.yhtio 
-              AND asiakashinta.asiakas_ryhma = asiakas.ryhma) 
-            WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
-            AND asiakashinta.tuoteno ='{$row['tuoteno']}' 
-            GROUP BY 1,2,3";
-  $asiakashintares = pupe_query($query);
+  
   $asiakashinnat = array ();
+  if (isset($tuotteiden_asiakashinnat_magentoon)) {
+    
+    $query = "SELECT 
+              avainsana.selitetark AS asiakasryhma,
+              asiakashinta.tuoteno, 
+              asiakashinta.hinta 
+              FROM asiakas 
+              JOIN avainsana ON (avainsana.yhtio = asiakas.yhtio 
+                AND avainsana.selite = asiakas.ryhma AND avainsana.laji = 'asiakasryhma') 
+              JOIN asiakashinta ON (asiakashinta.yhtio = asiakas.yhtio 
+                AND asiakashinta.asiakas_ryhma = asiakas.ryhma) 
+              WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
+                AND asiakashinta.tuoteno ='{$row['tuoteno']}' 
+              GROUP BY 1,2,3";
+    $asiakashintares = pupe_query($query);
 
-  while ($asiakashintarow = mysql_fetch_assoc($asiakashintares)) {
-    $asiakashinnat[] = array(
-      'asiakasryhma' => $asiakashintarow['asiakasryhma'],
-      'tuoteno'      => $asiakashintarow['tuoteno'],
-      'hinta'        => $asiakashintarow['hinta'],
-    );
+    while ($asiakashintarow = mysql_fetch_assoc($asiakashintares)) {
+      $asiakashinnat[] = array(
+        'asiakasryhma' => $asiakashintarow['asiakasryhma'],
+        'tuoteno'      => $asiakashintarow['tuoteno'],
+        'hinta'        => $asiakashintarow['hinta'],
+      );
+    }
   }
-
   $dnstuote[] = array('tuoteno'        => $row["tuoteno"],
             'nimi'          => $row["nimitys"],
             'kuvaus'        => $row["kuvaus"],
@@ -362,23 +365,38 @@ else {
 
 echo date("d.m.Y @ G:i:s")." - Haetaan asiakkaat.\n";
 
+$asiakasselectlisa = $asiakasjoinilisa = $asiakaswherelisa = "";
+
+if (isset($magento_siirretaan_asiakkaat)) {
+  $asiakasselectlisa = " avainsana.selitetark as asiakasryhma, 
+                         asiakkaan_avainsanat.tarkenne magento_tunnus,
+                         yhteyshenkilo.nimi yhenk_nimi,
+                         yhteyshenkilo.email yhenk_email, ";
+
+  $asiakasjoinilisa = " LEFT JOIN asiakkaan_avainsanat ON (asiakkaan_avainsanat.yhtio = asiakas.yhtio AND asiakkaan_avainsanat.liitostunnus = asiakas.tunnus AND asiakkaan_avainsanat.avainsana = 'magento_tunnus')
+                        JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakas.yhtio AND yhteyshenkilo.liitostunnus = asiakas.tunnus AND yhteyshenkilo.rooli = 'magento')
+                        LEFT JOIN avainsana ON (avainsana.yhtio = asiakas.yhtio AND avainsana.selite = asiakas.ryhma AND avainsana.laji = 'asiakasryhma')";
+
+  $asiakaswherelisa = " AND yhteyshenkilo.rooli  = 'magento'
+                        AND yhteyshenkilo.email != ''";
+
+  if (!empty($muutoslisa)) {
+    $muutoslisa .= " OR asiakkaan_avainsanat.muutospvm >= '{$datetime_checkpoint}'
+                     OR yhteyshenkilo.muutospvm >= '{$datetime_checkpoint}'";
+  } 
+}
+
 // Haetaan kaikki asiakkaat
 // Asiakassiirtoa varten poimitaan myös lisäkenttiä asiakkaan_avainsanat ja yhteyshenkilo-tauluista
 $query = "SELECT 
-          avainsana.selitetark as asiakasryhma,
           asiakas.*,
-          asiakkaan_avainsanat.tarkenne magento_id,
-          yhteyshenkilo.nimi yhenk_nimi,
-          yhteyshenkilo.email yhenk_email,
+          $asiakasselectlisa
           asiakas.yhtio ayhtio
           FROM asiakas
-          LEFT JOIN asiakkaan_avainsanat ON (asiakkaan_avainsanat.yhtio = asiakas.yhtio AND asiakkaan_avainsanat.liitostunnus = asiakas.tunnus AND asiakkaan_avainsanat.avainsana = 'magento_tunnus')
-          LEFT JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakas.yhtio AND yhteyshenkilo.liitostunnus = asiakas.tunnus AND yhteyshenkilo.rooli = 'magento')
-          LEFT JOIN avainsana ON (avainsana.yhtio = asiakas.yhtio AND avainsana.selite = asiakas.ryhma AND avainsana.laji = 'asiakasryhma')
+          $asiakasjoinilisa
           WHERE asiakas.yhtio      = '{$kukarow["yhtio"]}'
           AND asiakas.laji        != 'P'
-          and yhteyshenkilo.rooli  = 'magento'
-          and yhteyshenkilo.email != ''
+          $asiakaswherelisa
           $muutoslisa";
 $res = pupe_query($query);
 
@@ -410,7 +428,7 @@ while ($row = mysql_fetch_array($res)) {
 
               'yhenk_nimi'    => $row["yhenk_nimi"],
               'yhenk_email'    => $row["yhenk_email"],
-              'magento_id'    => $row["magento_id"],
+              'magento_tunnus'    => $row["magento_tunnus"],
               'asiakasryhma'  => $row['asiakasryhma'],
               );
 }
@@ -669,7 +687,7 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
   }
 
   // Päivitetaan magento-asiakkaat ja osoitetiedot kauppaan
-  if (count($dnsasiakas) > 0 and isset($verkkokauppa_siirretaan_asiakkaat)) {
+  if (count($dnsasiakas) > 0 and isset($magento_siirretaan_asiakkaat)) {
     echo date("d.m.Y @ G:i:s")." - Päivitetään asiakkaat\n";
     $count = $magento_client->lisaa_asiakkaat($dnsasiakas);
     echo date("d.m.Y @ G:i:s")." - Päivitettiin $count asiakkaan tiedot\n";

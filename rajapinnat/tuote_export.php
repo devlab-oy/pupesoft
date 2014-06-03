@@ -402,35 +402,51 @@ $res = pupe_query($query);
 
 // pyöräytetään asiakkaat läpi
 while ($row = mysql_fetch_array($res)) {
-  $dnsasiakas[] = array(  'nimi'    => $row["nimi"],
-              'osoite'  => $row["osoite"],
-              'postino'  => $row["postino"],
-              'postitp'  => $row["postitp"],
-              'email'    => $row["email"],
-              'aleryhma'  => $row["ryhma"],
-              'asiakasnro'=> $row["asiakasnro"],
-              'ytunnus'  => $row["ytunnus"],
-              'tunnus'  => $row["tunnus"],
-              'maa'    => $row["maa"],
-              'yhtio'    => $row["ayhtio"],
+  // Osoite laskutusosoitteeksi jos tyhjä
+  if (!isset($row['laskutus_nimi'])) {
+    $row["laskutus_nimi"]    = $row['nimi'];
+    $row["laskutus_osoite"]  = $row['osoite'];
+    $row["laskutus_postino"] = $row['postino'];
+    $row["laskutus_postitp"] = $row['postitp'];
+  }
+  // Osoite toimitusosoitteeksi jos tyhjä
+  if (!isset($row['toim_nimi'])) {
+    $row['toim_nimi']    = $row['nimi'];
+    $row["toim_osoite"]  = $row['osoite'];
+    $row["toim_postino"] = $row['postino'];
+    $row["toim_postitp"] = $row['postitp'];
+  }
 
-              'magento_website_id'=> $magento_website_id,
+  $dnsasiakas[] = array(  
+    'nimi'    => $row["nimi"],
+    'osoite'  => $row["osoite"],
+    'postino'  => $row["postino"],
+    'postitp'  => $row["postitp"],
+    'email'    => $row["email"],
+    'aleryhma'  => $row["ryhma"],
+    'asiakasnro'=> $row["asiakasnro"],
+    'ytunnus'  => $row["ytunnus"],
+    'tunnus'  => $row["tunnus"],
+    'maa'    => $row["maa"],
+    'yhtio'    => $row["ayhtio"],
 
-              'toimitus_nimi'    => $row["toim_nimi"],
-              'toimitus_osoite'  => $row["toim_osoite"],
-              'toimitus_postino'  => $row["toim_postino"],
-              'toimitus_postitp'  => $row["toim_postitp"],
+    'magento_website_id'=> $magento_website_id,
 
-              'laskutus_nimi'    => $row["laskutus_nimi"],
-              'laskutus_osoite'  => $row["laskutus_osoite"],
-              'laskutus_postino'  => $row["laskutus_postino"],
-              'laskutus_postitp'  => $row["laskutus_postitp"],
+    'toimitus_nimi'    => $row["toim_nimi"],
+    'toimitus_osoite'  => $row["toim_osoite"],
+    'toimitus_postino'  => $row["toim_postino"],
+    'toimitus_postitp'  => $row["toim_postitp"],
 
-              'yhenk_nimi'    => $row["yhenk_nimi"],
-              'yhenk_email'    => $row["yhenk_email"],
-              'magento_tunnus'    => $row["magento_tunnus"],
-              'asiakasryhma'  => $row['asiakasryhma'],
-              );
+    'laskutus_nimi'    => $row["laskutus_nimi"],
+    'laskutus_osoite'  => $row["laskutus_osoite"],
+    'laskutus_postino'  => $row["laskutus_postino"],
+    'laskutus_postitp'  => $row["laskutus_postitp"],
+
+    'yhenk_nimi'    => $row["yhenk_nimi"],
+    'yhenk_email'    => $row["yhenk_email"],
+    'magento_tunnus'    => $row["magento_tunnus"],
+    'asiakasryhma'  => $row['asiakasryhma'],
+  );
 }
 
 if ($ajetaanko_kaikki == "NO") {

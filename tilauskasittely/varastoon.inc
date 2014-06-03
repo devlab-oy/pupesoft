@@ -101,22 +101,8 @@ if (!function_exists("etsi_tuotteen_miinuksellemyyntipaiva")) {
 
     }
     //tapahtumat
-    if ($historia == '4') {
-      $maara = "";
-      $ehto  = "";
-    }
-    elseif (strpos($historia,'TK') !== FALSE) {
-      $query = "SELECT tilikausi_alku, tilikausi_loppu FROM tilikaudet WHERE yhtio = '$kukarow[yhtio]' and tunnus = '".substr($historia,2)."'";
-      $tkresult = pupe_query($query);
-      $tkrow = mysql_fetch_assoc($tkresult);
-
-      $maara = "";
-      $ehto  = " and tapahtuma.laadittu >= '$tkrow[tilikausi_alku]' and tapahtuma.laadittu <= '$tkrow[tilikausi_loppu]' ";
-    }
-    else {
-      $maara = "LIMIT 20";
-      $ehto  = "";
-    }
+    $maara = "";
+    $ehto  = "";
 
     $ale_query_concat_lisa = 'concat(';
 
@@ -220,7 +206,7 @@ if (!function_exists("etsi_tuotteen_miinuksellemyyntipaiva")) {
             }
       }
     }
-
+    echo "kokonaissaldo $kokonaissaldo $ressuyhteensa";
     //Tarkistetaan onko löydetty päivämäärä sallittu
     $laadittuaika = "'$yyyy-$mm-$dd 23:59:59'";
     $query = "SELECT *

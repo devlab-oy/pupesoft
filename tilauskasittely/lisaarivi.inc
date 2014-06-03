@@ -1750,7 +1750,12 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 $var2 = 'PK';
               }
 
-              if (isset($myy_hyllyalue_temp) and $myy_hyllyalue_temp != '') {
+              $_hyllyalue_tmp = (isset($myy_hyllyalue_temp) and $myy_hyllyalue_temp != '');
+              $_hyllynro_tmp = (isset($myy_hyllynro_temp) and $myy_hyllynro_temp != '');
+              $_hyllyvali_tmp = (isset($myy_hyllyvali_temp) and $myy_hyllyvali_temp != '');
+              $_hyllytaso_tmp = (isset($myy_hyllytaso_temp) and $myy_hyllytaso_temp != '');
+
+              if ($_hyllyalue_tmp and $_hyllynro_tmp and $_hyllyvali_tmp and $_hyllytaso_tmp) {
                 $myy_hyllyalue[$indeksi] = $myy_hyllyalue_temp;
                 $myy_hyllynro[$indeksi] = $myy_hyllynro_temp;
                 $myy_hyllytaso[$indeksi] = $myy_hyllytaso_temp;

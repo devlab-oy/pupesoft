@@ -1893,6 +1893,27 @@ if ($fieldname == "vienti_erittelyn_tulostus") {
   $jatko = 0;
 }
 
+if ($fieldname == "siirtolistan_lahete") {
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel0 = "";
+  $sel1 = "";
+
+  if ($trow[$i] == 'E') {
+    $sel0 = "selected";
+  }
+  elseif ($trow[$i] == 'K') {
+    $sel1 = "selected";
+  }
+
+  $ulos .= "<option value='E' $sel0>".t("Siirtolistasta ei tulosteta lähetettä.")."</option>";
+  $ulos .= "<option value='K' $sel1>".t("Siirtolistatsta tulostetaan lähete.")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "oletus_lahetekpl") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

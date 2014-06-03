@@ -3022,6 +3022,12 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       $p_hyllyvali = $myy_hyllyvali_temp;
     }
 
+    //jos on reklamaatiosta tehty siirtolista, niin varataankin saldoa
+    if (isset($tilausrivi['palautus_varasto']) and $tilausrivi['palautus_varasto'] != '') {
+      $varattu = $kpl;
+      $var = '';
+    }
+
     // lis‰t‰‰n puuterivi
     $query = "INSERT into tilausrivi set
               hyllyalue       = '$p_hyllyalue',

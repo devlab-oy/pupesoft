@@ -28358,16 +28358,15 @@ if (!function_exists("tuotteiden_kulutarkistus")) {
       $kulujen_laskeminen_hintoihin = true;
     }
 
-    $query = "SELECT toimi.kulujen_laskeminen_hintoihin,
-          tuotteen_toimittajat.tuoteno
-          FROM tuotteen_toimittajat
-          JOIN toimi ON ( toimi.yhtio = tuotteen_toimittajat.yhtio
-          AND toimi.tunnus = tuotteen_toimittajat.liitostunnus )
-          WHERE tuotteen_toimittajat.yhtio =  '{$kukarow['yhtio']}'
-          AND toimi.kulujen_laskeminen_hintoihin = 'K'
-          ORDER BY
-          if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys) ASC,
-          tuotteen_toimittajat.tunnus ASC";
+    $query = "SELECT toimi.kulujen_laskeminen_hintoihin, tuotteen_toimittajat.tuoteno
+              FROM tuotteen_toimittajat
+              JOIN toimi ON ( toimi.yhtio = tuotteen_toimittajat.yhtio
+              AND toimi.tunnus = tuotteen_toimittajat.liitostunnus )
+              WHERE tuotteen_toimittajat.yhtio =  '{$kukarow['yhtio']}'
+              AND toimi.kulujen_laskeminen_hintoihin = 'K'
+              ORDER BY
+              if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys) ASC,
+              tuotteen_toimittajat.tunnus ASC";
     $result = pupe_query($query);
 
     $tuotteet = array();
@@ -28387,16 +28386,16 @@ if (!function_exists("hinnan_kuluprosentti")) {
       return false;
     }
 
-    $query = "  SELECT toimi.kulujen_laskeminen_hintoihin, toimi.tunnus
-          FROM tuotteen_toimittajat
-          JOIN toimi ON ( toimi.yhtio = tuotteen_toimittajat.yhtio
-          AND toimi.tunnus = tuotteen_toimittajat.liitostunnus )
-          WHERE tuotteen_toimittajat.yhtio =  '{$kukarow['yhtio']}'
-          AND tuotteen_toimittajat.tuoteno = '{$tuotenumero}'
-          ORDER BY
-          if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys) ASC,
-          tuotteen_toimittajat.tunnus ASC
-          LIMIT 1";
+    $query = "SELECT toimi.kulujen_laskeminen_hintoihin
+              FROM tuotteen_toimittajat
+              JOIN toimi ON ( toimi.yhtio = tuotteen_toimittajat.yhtio
+              AND toimi.tunnus = tuotteen_toimittajat.liitostunnus )
+              WHERE tuotteen_toimittajat.yhtio =  '{$kukarow['yhtio']}'
+              AND tuotteen_toimittajat.tuoteno = '{$tuotenumero}'
+              ORDER BY
+              if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys) ASC,
+              tuotteen_toimittajat.tunnus ASC
+              LIMIT 1";
     $result = pupe_query($query);
     $row = mysql_fetch_assoc($result);
 

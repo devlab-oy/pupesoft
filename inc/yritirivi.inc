@@ -32,10 +32,10 @@ if (mysql_field_name($result, $i) == "kaytossa") {
 }
 
 if (mysql_field_name($result, $i) == "valkoodi") { //valuutta
-  $query = "  SELECT nimi, tunnus
-        FROM valuu
-        WHERE yhtio = '$kukarow[yhtio]'
-        ORDER BY jarjestys";
+  $query = "SELECT nimi, tunnus
+            FROM valuu
+            WHERE yhtio = '$kukarow[yhtio]'
+            ORDER BY jarjestys";
   $vresult = mysql_query($query) or pupe_error($query);
 
   $ulos = "<td><select name='$nimi'>";
@@ -76,9 +76,9 @@ if (mysql_field_name($result, $i) == "factoring") {
 
  if (mysql_field_name($result, $i) == "hyvak") { //hyväksyjät
   $query = "SELECT kuka, nimi
-        FROM kuka
-        WHERE yhtio = '$kukarow[yhtio]'
-        ORDER BY nimi";
+            FROM kuka
+            WHERE yhtio = '$kukarow[yhtio]'
+            ORDER BY nimi";
   $vresult = mysql_query($query) or pupe_error($query);
   $ulos = "<td><select name='$nimi'><option value=''>".t("Ei kukaan");
 
@@ -97,12 +97,12 @@ if (mysql_field_name($result, $i) == "factoring") {
 }
 
 if (mysql_field_name($result, $i) == "oletus_kustp") {
-  $query = "  SELECT tunnus, nimi
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and kaytossa != 'E'
-        and tyyppi = 'K'
-        ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, nimi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and kaytossa != 'E'
+            and tyyppi    = 'K'
+            ORDER BY koodi+0, koodi, nimi";
   $vresult = mysql_query($query) or pupe_error($query);
   $ulos = "<td><select name='$nimi'><option value=' '>".t("Ei kustannuspaikkaa")."</option>";
 
@@ -118,12 +118,12 @@ if (mysql_field_name($result, $i) == "oletus_kustp") {
 }
 
 if (mysql_field_name($result, $i) == "oletus_kohde") {
-  $query = "  SELECT tunnus, nimi
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and kaytossa != 'E'
-        and tyyppi = 'O'
-        ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, nimi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and kaytossa != 'E'
+            and tyyppi    = 'O'
+            ORDER BY koodi+0, koodi, nimi";
   $vresult = mysql_query($query) or pupe_error($query);
   $ulos = "<td><select name='$nimi'><option value=' '>".t("Ei kohdetta")."</option>";
 
@@ -139,12 +139,12 @@ if (mysql_field_name($result, $i) == "oletus_kohde") {
 }
 
 if (mysql_field_name($result, $i) == "oletus_projekti") {
-  $query = "  SELECT tunnus, nimi
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and kaytossa != 'E'
-        and tyyppi = 'P'
-        ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, nimi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and kaytossa != 'E'
+            and tyyppi    = 'P'
+            ORDER BY koodi+0, koodi, nimi";
   $vresult = mysql_query($query) or pupe_error($query);
   $ulos = "<td><select name='$nimi'><option value=' '>".t("Ei projektia")."</option>";
 
@@ -169,9 +169,9 @@ if  (mysql_field_name($result, $i) == "oletus_kulutili" or
   }
   else {
     $ulos = "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
-    $query = "  SELECT nimi
-          FROM tili
-          WHERE yhtio='$kukarow[yhtio]' and tilino = '$trow[$i]'";
+    $query = "SELECT nimi
+              FROM tili
+              WHERE yhtio='$kukarow[yhtio]' and tilino = '$trow[$i]'";
     $vresult = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($vresult) == 1) {

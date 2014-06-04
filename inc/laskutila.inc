@@ -2,17 +2,17 @@
 echo "<font class='head'>".t("Laskut per tila")."</font><hr>";
 
 if (!isset($erittely)) {
-  $query = "  SELECT tila,
-        alatila,
-        round(sum(lasku.summa * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi)), 2) summa,
-        count(*) kpl,
-        min(erpcm) erpcm,
-        max(erpcm) maxerpcm
-        FROM lasku use index (tila_index)
-        LEFT JOIN valuu ON valuu.yhtio = lasku.yhtio and lasku.valkoodi  = valuu.nimi
-        WHERE lasku.yhtio  = '$kukarow[yhtio]'
-        and lasku.tila in ('H','M','P','Q')
-        GROUP BY tila, alatila";
+  $query = "SELECT tila,
+            alatila,
+            round(sum(lasku.summa * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi)), 2) summa,
+            count(*) kpl,
+            min(erpcm) erpcm,
+            max(erpcm) maxerpcm
+            FROM lasku use index (tila_index)
+            LEFT JOIN valuu ON valuu.yhtio = lasku.yhtio and lasku.valkoodi  = valuu.nimi
+            WHERE lasku.yhtio = '$kukarow[yhtio]'
+            and lasku.tila    in ('H','M','P','Q')
+            GROUP BY tila, alatila";
   $result = mysql_query($query) or pupe_error($query);
 
   echo "<table>";
@@ -42,12 +42,12 @@ if (!isset($erittely)) {
 }
 
 if (isset($erittely)) {
-  $query = "  SELECT lasku.tapvm, lasku.kapvm, lasku.erpcm, if (lasku.comments!='',concat_ws('<br>', lasku.nimi, lasku.comments), lasku.nimi) nimi, lasku.postitp,
-        round(lasku.summa * lasku.vienti_kurssi, 2) 'kotisumma', lasku.summa, lasku.valkoodi, lasku.ebid, lasku.tunnus, yriti.nimi tilinimi, yriti.tunnus maksutili, if(lasku.laskunro = 0, '', lasku.laskunro) laskunro
-        FROM lasku
-        left join yriti on lasku.yhtio=yriti.yhtio and lasku.maksu_tili=yriti.tunnus
-        WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila = '$erittely' and lasku.alatila = '$alatila'
-        ORDER BY lasku.tapvm";
+  $query = "SELECT lasku.tapvm, lasku.kapvm, lasku.erpcm, if (lasku.comments!='',concat_ws('<br>', lasku.nimi, lasku.comments), lasku.nimi) nimi, lasku.postitp,
+            round(lasku.summa * lasku.vienti_kurssi, 2) 'kotisumma', lasku.summa, lasku.valkoodi, lasku.ebid, lasku.tunnus, yriti.nimi tilinimi, yriti.tunnus maksutili, if(lasku.laskunro = 0, '', lasku.laskunro) laskunro
+            FROM lasku
+            left join yriti on lasku.yhtio=yriti.yhtio and lasku.maksu_tili=yriti.tunnus
+            WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila = '$erittely' and lasku.alatila = '$alatila'
+            ORDER BY lasku.tapvm";
   $result = mysql_query($query) or pupe_error($query);
 
   echo "<table><tr>";

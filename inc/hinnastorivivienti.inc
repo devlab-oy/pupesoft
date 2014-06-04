@@ -6,11 +6,11 @@ function hinnastorivi($tuote, $laskurow) {
     static $rivi = 1;
 
   //haetaan aleryhmän tunnus
-  $query = "  SELECT b.tunnus, b.ryhma
-        FROM tuote a
-        LEFT JOIN perusalennus b ON a.yhtio = b.yhtio and a.aleryhma = b.ryhma
-        WHERE a.tuoteno = '$tuote[tuoteno]'
-        and a.yhtio = '$kukarow[yhtio]'";
+  $query = "SELECT b.tunnus, b.ryhma
+            FROM tuote a
+            LEFT JOIN perusalennus b ON a.yhtio = b.yhtio and a.aleryhma = b.ryhma
+            WHERE a.tuoteno = '$tuote[tuoteno]'
+            and a.yhtio     = '$kukarow[yhtio]'";
   $aleresult = mysql_query($query) or pupe_error($query);
   $alerow = mysql_fetch_array($aleresult);
 

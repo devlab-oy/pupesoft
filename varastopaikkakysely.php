@@ -110,32 +110,32 @@ if ($tee == "V") {
 
   # Jos haettu sscc koodilla
   if (!empty($sscc)) {
-    $query = "  SELECT tuotepaikat.*, suuntalavat.sscc
-          FROM tuotepaikat
-          JOIN tilausrivi on (
-            tilausrivi.yhtio=tuotepaikat.yhtio
-            AND tilausrivi.suuntalava > 0
-            AND tilausrivi.tyyppi='O'
-            AND tilausrivi.tuoteno=tuotepaikat.tuoteno
-            AND tilausrivi.hyllyalue=tuotepaikat.hyllyalue
-            AND tilausrivi.hyllynro=tuotepaikat.hyllynro
-            AND tilausrivi.hyllyvali=tuotepaikat.hyllyvali
-            AND tilausrivi.hyllytaso=tuotepaikat.hyllytaso)
-          JOIN suuntalavat on (suuntalavat.yhtio=tilausrivi.yhtio and suuntalavat.tunnus=tilausrivi.suuntalava)
-          WHERE tuotepaikat.yhtio='{$kukarow['yhtio']}'
-          AND tuotepaikat.tyyppi='S'
-          AND suuntalavat.sscc='{$sscc}'
-          GROUP BY tuotepaikat.tuoteno";
+    $query = "SELECT tuotepaikat.*, suuntalavat.sscc
+              FROM tuotepaikat
+              JOIN tilausrivi on (
+                tilausrivi.yhtio=tuotepaikat.yhtio
+                AND tilausrivi.suuntalava > 0
+                AND tilausrivi.tyyppi='O'
+                AND tilausrivi.tuoteno=tuotepaikat.tuoteno
+                AND tilausrivi.hyllyalue=tuotepaikat.hyllyalue
+                AND tilausrivi.hyllynro=tuotepaikat.hyllynro
+                AND tilausrivi.hyllyvali=tuotepaikat.hyllyvali
+                AND tilausrivi.hyllytaso=tuotepaikat.hyllytaso)
+              JOIN suuntalavat on (suuntalavat.yhtio=tilausrivi.yhtio and suuntalavat.tunnus=tilausrivi.suuntalava)
+              WHERE tuotepaikat.yhtio='{$kukarow['yhtio']}'
+              AND tuotepaikat.tyyppi='S'
+              AND suuntalavat.sscc='{$sscc}'
+              GROUP BY tuotepaikat.tuoteno";
     $result = pupe_query($query);
   }
   else {
     # Haetaan tuotteet varastopaikka haulla
-    $query = "  SELECT tuotepaikat.*
-          FROM tuotepaikat
-          WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
-          AND concat(tuotepaikat.hyllyalue,'-',tuotepaikat.hyllynro,'-',tuotepaikat.hyllyvali,'-',tuotepaikat.hyllytaso) = '$varastopaikka'
-          order by tuotepaikat.tuoteno
-          $limit";
+    $query = "SELECT tuotepaikat.*
+              FROM tuotepaikat
+              WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
+              AND concat(tuotepaikat.hyllyalue,'-',tuotepaikat.hyllynro,'-',tuotepaikat.hyllyvali,'-',tuotepaikat.hyllytaso) = '$varastopaikka'
+              order by tuotepaikat.tuoteno
+              $limit";
     $result = pupe_query($query);
   }
 
@@ -181,16 +181,16 @@ if ($tee == "V") {
     # Haetaan suuntalavan sscc, jos tuotepaikan tyyppi on 'S'
     if ($rivi['tyyppi'] == 'S') {
       $s_query = "SELECT group_concat(distinct(sscc)) as sscc
-            FROM tilausrivi
-            join suuntalavat on (tilausrivi.yhtio=suuntalavat.yhtio AND tilausrivi.suuntalava=suuntalavat.tunnus)
-            WHERE tilausrivi.yhtio='{$kukarow['yhtio']}'
-            AND tilausrivi.tyyppi='O'
-            AND suuntalava > 0
-            AND tuoteno='$rivi[tuoteno]'
-            AND hyllyalue='$rivi[hyllyalue]'
-            AND hyllynro='$rivi[hyllynro]'
-            AND hyllyvali='$rivi[hyllyvali]'
-            AND hyllytaso='$rivi[hyllytaso]'";
+                  FROM tilausrivi
+                  join suuntalavat on (tilausrivi.yhtio=suuntalavat.yhtio AND tilausrivi.suuntalava=suuntalavat.tunnus)
+                  WHERE tilausrivi.yhtio='{$kukarow['yhtio']}'
+                  AND tilausrivi.tyyppi='O'
+                  AND suuntalava > 0
+                  AND tuoteno='$rivi[tuoteno]'
+                  AND hyllyalue='$rivi[hyllyalue]'
+                  AND hyllynro='$rivi[hyllynro]'
+                  AND hyllyvali='$rivi[hyllyvali]'
+                  AND hyllytaso='$rivi[hyllytaso]'";
 
       $lava_result = pupe_query($s_query);
       $lava_result = mysql_fetch_assoc($lava_result);
@@ -250,46 +250,46 @@ if ($tee == "W") {
     $asaldo = $saldot[$key];
 
     // Minne varastoon tarkistus
-    $query = "  SELECT tunnus
-          FROM tuotepaikat
-          WHERE yhtio   = '$kukarow[yhtio]'
-          and tuoteno    = '$tuoteno'
-          and hyllyalue  = '$thyllyalue'
-          and hyllynro   = '$thyllynro'
-          and hyllyvali   = '$thyllyvali'
-          and hyllytaso  = '$thyllytaso'";
+    $query = "SELECT tunnus
+              FROM tuotepaikat
+              WHERE yhtio   = '$kukarow[yhtio]'
+              and tuoteno   = '$tuoteno'
+              and hyllyalue = '$thyllyalue'
+              and hyllynro  = '$thyllynro'
+              and hyllyvali = '$thyllyvali'
+              and hyllytaso = '$thyllytaso'";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
       echo "<font class='message'>".("Luodaan uusi varastopaikka tuotteelle").": $tuoteno ($thyllyalue, $thyllynro, $thyllyvali, $thyllytaso)</font><br>";
 
-      $query = "  INSERT into tuotepaikat set
-            yhtio    = '$kukarow[yhtio]',
-            hyllyalue  = '$thyllyalue',
-            hyllynro  = '$thyllynro',
-            hyllyvali  = '$thyllyvali',
-            hyllytaso  = '$thyllytaso',
-            oletus    = '',
-            tuoteno    = '$tuoteno',
-            laatija    = '$kukarow[kuka]',
-            luontiaika  = now()";
+      $query = "INSERT into tuotepaikat set
+                yhtio      = '$kukarow[yhtio]',
+                hyllyalue  = '$thyllyalue',
+                hyllynro   = '$thyllynro',
+                hyllyvali  = '$thyllyvali',
+                hyllytaso  = '$thyllytaso',
+                oletus     = '',
+                tuoteno    = '$tuoteno',
+                laatija    = '$kukarow[kuka]',
+                luontiaika = now()";
       $result = mysql_query($query) or pupe_error($query);
       $minne = mysql_insert_id();
 
-      $query = "  INSERT into tapahtuma set
-            yhtio     = '$kukarow[yhtio]',
-            tuoteno   = '$tuoteno',
-            kpl     = '0',
-            kplhinta  = '0',
-            hinta     = '0',
-            laji     = 'uusipaikka',
-            hyllyalue  = '$thyllyalue',
-            hyllynro   = '$thyllynro',
-            hyllyvali  = '$thyllyvali',
-            hyllytaso  = '$thyllytaso',
-            selite     = '".t("Lisättiin tuotepaikka")." $thyllyalue $thyllynro $thyllyvali $thyllytaso',
-            laatija   = '$kukarow[kuka]',
-            laadittu   = now()";
+      $query = "INSERT into tapahtuma set
+                yhtio     = '$kukarow[yhtio]',
+                tuoteno   = '$tuoteno',
+                kpl       = '0',
+                kplhinta  = '0',
+                hinta     = '0',
+                laji      = 'uusipaikka',
+                hyllyalue = '$thyllyalue',
+                hyllynro  = '$thyllynro',
+                hyllyvali = '$thyllyvali',
+                hyllytaso = '$thyllytaso',
+                selite    = '".t("Lisättiin tuotepaikka")." $thyllyalue $thyllynro $thyllyvali $thyllytaso',
+                laatija   = '$kukarow[kuka]',
+                laadittu  = now()";
       $result = mysql_query($query) or pupe_error($query);
     }
     else {

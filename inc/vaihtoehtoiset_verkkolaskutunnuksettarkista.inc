@@ -35,11 +35,11 @@ if (!function_exists("vaihtoehtoiset_verkkolaskutunnuksettarkista")) {
       }
       else {
         //tarkistetaan, että kyseistä arvoa ei ole jo kannassa
-        $query = "  SELECT *
-              FROM vaihtoehtoiset_verkkolaskutunnukset
-              WHERE yhtio    = '{$kukarow['yhtio']}'
-              AND kohde_sarake = '$tem_kohdesarake'
-              AND arvo     = '{$t[$i]}'";
+        $query = "SELECT *
+                  FROM vaihtoehtoiset_verkkolaskutunnukset
+                  WHERE yhtio      = '{$kukarow['yhtio']}'
+                  AND kohde_sarake = '$tem_kohdesarake'
+                  AND arvo         = '{$t[$i]}'";
         $arvo_result = pupe_query($query);
         $vaihtoehtoinen_verkkolaskutunnus = mysql_fetch_assoc($arvo_result);
 

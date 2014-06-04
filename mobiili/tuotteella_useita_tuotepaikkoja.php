@@ -73,19 +73,19 @@ $orderby = "1";
 $ascdesc = "desc";
 
 if ($hae_hyllypaikalla and !$hae_tuotenumerolla and !$hae_viivakoodilla) {
-  $query = "  SELECT tuotepaikat.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuotepaikat.tunnus
-        FROM tuotepaikat
-        WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
-        {$query_lisa}
-        ORDER BY {$orderby} {$ascdesc}";
+  $query = "SELECT tuotepaikat.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuotepaikat.tunnus
+            FROM tuotepaikat
+            WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+            {$query_lisa}
+            ORDER BY {$orderby} {$ascdesc}";
 }
 else {
-  $query = "  SELECT tuote.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuotepaikat.tunnus
-        FROM tuote
-        JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio AND tuotepaikat.tuoteno = tuote.tuoteno)
-        WHERE tuote.yhtio = '{$kukarow['yhtio']}'
-        {$query_lisa}
-        ORDER BY {$orderby} {$ascdesc}";
+  $query = "SELECT tuote.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuotepaikat.tunnus
+            FROM tuote
+            JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio AND tuotepaikat.tuoteno = tuote.tuoteno)
+            WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+            {$query_lisa}
+            ORDER BY {$orderby} {$ascdesc}";
 }
 
 $result = pupe_query($query);

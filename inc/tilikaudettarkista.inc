@@ -6,12 +6,12 @@ if(!function_exists("tilikaudettarkista")) {
 
     if (mysql_field_name($result, $i) == "avaava_tase") {
       if ($t[$i] > 0) {
-        $query = "  SELECT tunnus
-              FROM lasku
-              WHERE yhtio  = '{$kukarow['yhtio']}'
-              AND tila   = 'X'
-              AND alatila = 'A'
-              AND tunnus  = '{$t[$i]}'";
+        $query = "SELECT tunnus
+                  FROM lasku
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tila    = 'X'
+                  AND alatila = 'A'
+                  AND tunnus  = '{$t[$i]}'";
         $res = pupe_query($query);
 
         // jos t‰m‰ on v‰‰r‰nlainen tosite, niin nollataan tieto

@@ -28,12 +28,12 @@ if (!function_exists('alku_dgd')) {
     $pdf->pages[$sivu]->drawText(maa($yhtiorow["maa"], $kieli), mm_pt(15), mm_pt(250), 'LATIN1');
 
     // Rakirno
-    $query = "  SELECT r2.rahtikirjanro, group_concat(DISTINCT r2.otsikkonro) otsikkonro
-          FROM rahtikirjat r1
-          JOIN rahtikirjat r2 ON r1.yhtio=r2.yhtio and r1.rahtikirjanro=r2.rahtikirjanro and r2.rahtikirjanro!=0 and r2.otsikkonro>0
-          WHERE r1.otsikkonro = '$laskurow[tunnus]'
-                AND r1.yhtio = '$kukarow[yhtio]'
-          GROUP BY 1";
+    $query = "SELECT r2.rahtikirjanro, group_concat(DISTINCT r2.otsikkonro) otsikkonro
+              FROM rahtikirjat r1
+              JOIN rahtikirjat r2 ON r1.yhtio=r2.yhtio and r1.rahtikirjanro=r2.rahtikirjanro and r2.rahtikirjanro!=0 and r2.otsikkonro>0
+              WHERE r1.otsikkonro = '$laskurow[tunnus]'
+                    AND r1.yhtio  = '$kukarow[yhtio]'
+              GROUP BY 1";
       $res = mysql_query($query) or pupe_error($query);
       $rahtikirjanro = mysql_fetch_assoc($res);
 
@@ -70,10 +70,10 @@ if (!function_exists('alku_dgd')) {
       $nimirow = array("nimi" => "Virpi Kivelä");
     }
     else {
-      $query = "  SELECT nimi
-            FROM kuka
-            WHERE yhtio  = '$kukarow[yhtio]'
-            and tunnus   = '$laskurow[myyja]'";
+      $query = "SELECT nimi
+                FROM kuka
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tunnus  = '$laskurow[myyja]'";
       $nimires = pupe_query($query);
       $nimirow = mysql_fetch_assoc($nimires);
     }

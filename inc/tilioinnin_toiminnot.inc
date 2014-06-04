@@ -3,11 +3,11 @@
 if ($_POST['ajax_toiminto'] == 'tilin_oletusalv') {
   $tili = mysql_real_escape_string($_POST['tilino']);
 
-  $query = "  SELECT oletus_alv
-        FROM tili
-        WHERE tilino = '{$tili}'
-        AND yhtio = '{$kukarow['yhtio']}'
-        AND oletus_alv IS NOT NULL;";
+  $query = "SELECT oletus_alv
+            FROM tili
+            WHERE tilino = '{$tili}'
+            AND yhtio    = '{$kukarow['yhtio']}'
+            AND oletus_alv IS NOT NULL;";
 
   $result = pupe_query($query);
 

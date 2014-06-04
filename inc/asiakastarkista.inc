@@ -20,11 +20,11 @@ if(!function_exists("asiakastarkista")) {
       if ($ytunnus_select != '') {
         // Jos selectoitu drop downista niin katotaan, että tämä on vielä vapaa
         //jos konsernin asiakkaat synkronoidaan niin asiakkaiden yksilöivät tiedot on oltava konsernitasolla-yksilölliset
-        $query = "  SELECT group_concat(concat('\'',yhtio.yhtio,'\'')) yhtiot
-              FROM yhtio
-              JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
-              where konserni   = '$yhtiorow[konserni]'
-              and (synkronoi = '$toim' or synkronoi like '$toim,%' or synkronoi like '%,$toim,%' or synkronoi like '%,$toim')";
+        $query = "SELECT group_concat(concat('\'',yhtio.yhtio,'\'')) yhtiot
+                  FROM yhtio
+                  JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
+                  where konserni = '$yhtiorow[konserni]'
+                  and (synkronoi = '$toim' or synkronoi like '$toim,%' or synkronoi like '%,$toim,%' or synkronoi like '%,$toim')";
         $sresult = pupe_query($query);
         $srowapu = mysql_fetch_array($sresult);
 
@@ -97,11 +97,11 @@ if(!function_exists("asiakastarkista")) {
       if ($asiakasnro_select != '') {
         // Jos selectoitu drop downista niin katotaan, että tämä on vielä vapaa
         //jos konsernin asiakkaat synkronoidaan niin asiakkaiden yksilöivät tiedot on oltava konsernitasolla-yksilölliset
-        $query = "  SELECT ifnull(group_concat(concat('\'',yhtio.yhtio,'\'')), '') yhtiot
-              FROM yhtio
-              JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
-              where konserni   = '$yhtiorow[konserni]'
-              and (synkronoi = '$toim' or synkronoi like '$toim,%' or synkronoi like '%,$toim,%' or synkronoi like '%,$toim')";
+        $query = "SELECT ifnull(group_concat(concat('\'',yhtio.yhtio,'\'')), '') yhtiot
+                  FROM yhtio
+                  JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
+                  where konserni = '$yhtiorow[konserni]'
+                  and (synkronoi = '$toim' or synkronoi like '$toim,%' or synkronoi like '%,$toim,%' or synkronoi like '%,$toim')";
         $sresult = pupe_query($query);
         $srowapu = mysql_fetch_array($sresult);
 
@@ -192,10 +192,10 @@ if(!function_exists("asiakastarkista")) {
       mysql_field_name($result, $i) == "tilino_marginaali" or
       mysql_field_name($result, $i) == "tilino_osto_marginaali") and $t[$i] != '') {
 
-      $query = "  SELECT yhtio
-            FROM tili
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tilino = '$t[$i]'";
+      $query = "SELECT yhtio
+                FROM tili
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tilino  = '$t[$i]'";
       $sresult = pupe_query($query);
 
       if (mysql_num_rows($sresult) != 1) {
@@ -238,11 +238,11 @@ if(!function_exists("asiakastarkista")) {
 
     if (mysql_field_name($result, $i) == "maksuehto" and $t[$i] > 0) {
 
-      $query = "  SELECT tunnus
-            from maksuehto
-            where yhtio='$kukarow[yhtio]'
-            and tunnus='$t[$i]'
-            and (sallitut_maat = '' or sallitut_maat like '%$apu_maa%')";
+      $query = "SELECT tunnus
+                from maksuehto
+                where yhtio='$kukarow[yhtio]'
+                and tunnus='$t[$i]'
+                and (sallitut_maat = '' or sallitut_maat like '%$apu_maa%')";
       $sresult = pupe_query($query);
 
       if (mysql_num_rows($sresult) == 0) {
@@ -253,9 +253,9 @@ if(!function_exists("asiakastarkista")) {
     if (mysql_field_name($result, $i) == "toimitustapa" and trim($t[$i]) != '') {
 
       $query   = "SELECT tunnus
-            from toimitustapa
-            where yhtio='$kukarow[yhtio]' and selite='$t[$i]'
-            and (sallitut_maat = '' or sallitut_maat like '%$apu_toim_maa%')";
+                  from toimitustapa
+                  where yhtio='$kukarow[yhtio]' and selite='$t[$i]'
+                  and (sallitut_maat = '' or sallitut_maat like '%$apu_toim_maa%')";
       $sresult = pupe_query($query);
 
       if (mysql_num_rows($sresult) == 0) {
@@ -265,12 +265,12 @@ if(!function_exists("asiakastarkista")) {
 
     if (mysql_field_name($result, $i) == "toimitusvahvistus" and trim($t[$i]) == 'editilaus_out_futur.inc') {
 
-      $query = "  SELECT *
-            FROM asiakkaan_avainsanat
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND liitostunnus = '{$tunnus}'
-            AND laji IN ('futur_host','futur_path')
-            AND avainsana != ''";
+      $query = "SELECT *
+                FROM asiakkaan_avainsanat
+                WHERE yhtio       = '{$kukarow['yhtio']}'
+                AND liitostunnus  = '{$tunnus}'
+                AND laji          IN ('futur_host','futur_path')
+                AND avainsana    != ''";
       $chk_res = pupe_query($query);
 
       if (mysql_num_rows($chk_res) != 2) {

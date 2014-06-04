@@ -43,14 +43,14 @@ else {
   $yhtiolisa = "yhtio.yhtio = '$kukarow[yhtio]'";
 }
 
-$query = "   SELECT kuka.nimi, group_concat(DISTINCT kuka.puhno SEPARATOR ' ') puhno, group_concat(DISTINCT kuka.eposti SEPARATOR ' ') eposti, group_concat(DISTINCT kuka.osasto SEPARATOR ' ') osasto, group_concat(DISTINCT yhtio.nimi SEPARATOR ' ') yhtio
-      FROM kuka
-      JOIN yhtio ON kuka.yhtio = yhtio.yhtio and $yhtiolisa
-      WHERE extranet = ''
-      and  (puhno != '' or eposti != '')
-      $lisa
-      group by kuka.kuka
-      $sort";
+$query = "SELECT kuka.nimi, group_concat(DISTINCT kuka.puhno SEPARATOR ' ') puhno, group_concat(DISTINCT kuka.eposti SEPARATOR ' ') eposti, group_concat(DISTINCT kuka.osasto SEPARATOR ' ') osasto, group_concat(DISTINCT yhtio.nimi SEPARATOR ' ') yhtio
+          FROM kuka
+          JOIN yhtio ON kuka.yhtio = yhtio.yhtio and $yhtiolisa
+          WHERE extranet = ''
+          and  (puhno != '' or eposti != '')
+          $lisa
+          group by kuka.kuka
+          $sort";
 $result = mysql_query($query) or pupe_error($query);
 
 echo "<table>";

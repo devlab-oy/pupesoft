@@ -369,10 +369,10 @@ function sepa_credittransfer($laskurow, $popvm_nyt, $netotetut_rivit = '') {
     // jos t‰m‰ muuttuja on setattu, on t‰m‰ ko. lasku/tapahtuma netotettu n‰ist‰ tunnuksista!
     if ($netotetut_rivit != "") {
 
-      $query = "  SELECT *
-            FROM lasku
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND tunnus in ($netotetut_rivit)";
+      $query = "SELECT *
+                FROM lasku
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND tunnus  in ($netotetut_rivit)";
       $result = pupe_query($query);
 
       while ($nettorow = mysql_fetch_assoc($result)) {
@@ -468,15 +468,15 @@ else {
 }
 
 // Haetaan poimitut maksut (HUOM: sama selecti alempana!!!!)
-$haku_query = "  SELECT lasku.*, if(lasku.ultilno_maa != '', lasku.ultilno_maa, lasku.maa) iban_maa,
-        yriti.iban yriti_iban, yriti.bic yriti_bic, yriti.asiakastunnus yriti_asiakastunnus,
-        date_format(lasku.popvm, '%d.%m.%y.%H.%i.%s') popvm_dmy
-        FROM lasku
-        JOIN valuu ON (valuu.yhtio = lasku.yhtio AND valuu.nimi = lasku.valkoodi)
-        JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili AND yriti.kaytossa = '')
-        WHERE lasku.yhtio  = '$kukarow[yhtio]'
-        $lisa
-        ORDER BY maksu_tili, olmapvm, ultilno";
+$haku_query = "SELECT lasku.*, if(lasku.ultilno_maa != '', lasku.ultilno_maa, lasku.maa) iban_maa,
+               yriti.iban yriti_iban, yriti.bic yriti_bic, yriti.asiakastunnus yriti_asiakastunnus,
+               date_format(lasku.popvm, '%d.%m.%y.%H.%i.%s') popvm_dmy
+               FROM lasku
+               JOIN valuu ON (valuu.yhtio = lasku.yhtio AND valuu.nimi = lasku.valkoodi)
+               JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili AND yriti.kaytossa = '')
+               WHERE lasku.yhtio = '$kukarow[yhtio]'
+               $lisa
+               ORDER BY maksu_tili, olmapvm, ultilno";
 $result = pupe_query($haku_query);
 
 if ($tee == "") {
@@ -597,26 +597,26 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
   $netotettava_summa  = array();
 
   // Tarkistetaan ensin mahdolliset netotettavat hyvitykset
-  $query = "  SELECT maksu_tili, ultilno, olmapvm, valkoodi
-        FROM lasku
-        WHERE yhtio  = '$kukarow[yhtio]'
-        $lisa
-        AND summa < 0
-        GROUP BY maksu_tili, ultilno, olmapvm, valkoodi";
+  $query = "SELECT maksu_tili, ultilno, olmapvm, valkoodi
+            FROM lasku
+            WHERE yhtio = '$kukarow[yhtio]'
+            $lisa
+            AND summa   < 0
+            GROUP BY maksu_tili, ultilno, olmapvm, valkoodi";
   $result = pupe_query($query);
 
   while ($laskurow = mysql_fetch_assoc($result)) {
 
     // Etsit‰‰n samalle p‰iv‰lle tarpeeksi veloituksia, haetaan ensin kaikki miinukset, sitten summan mukaan desc
-    $query = "  SELECT lasku.tunnus laskutunnus, if(lasku.alatila = 'K', summa - kasumma, summa) maksettavasumma
-          FROM lasku
-          WHERE yhtio   = '$kukarow[yhtio]'
-          $lisa
-          AND ultilno    = '$laskurow[ultilno]'
-          AND valkoodi  = '$laskurow[valkoodi]'
-          AND maksu_tili  = '$laskurow[maksu_tili]'
-          AND olmapvm   = '$laskurow[olmapvm]'
-          ORDER BY if(summa < 0, 1, 2), summa DESC";
+    $query = "SELECT lasku.tunnus laskutunnus, if(lasku.alatila = 'K', summa - kasumma, summa) maksettavasumma
+              FROM lasku
+              WHERE yhtio    = '$kukarow[yhtio]'
+              $lisa
+              AND ultilno    = '$laskurow[ultilno]'
+              AND valkoodi   = '$laskurow[valkoodi]'
+              AND maksu_tili = '$laskurow[maksu_tili]'
+              AND olmapvm    = '$laskurow[olmapvm]'
+              ORDER BY if(summa < 0, 1, 2), summa DESC";
     $nettolaskures = pupe_query($query);
 
     // T‰ll‰ lasketaan monta laskua tarvitaan mukaan
@@ -674,13 +674,13 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
 
   // Tehd‰‰n netotetut tapahtumat
   foreach ($netotettava_laskut as $i => $tunnukset) {
-    $query = "  SELECT lasku.*, if(lasku.ultilno_maa != '', lasku.ultilno_maa, lasku.maa) iban_maa,
-          yriti.iban yriti_iban, yriti.bic yriti_bic, yriti.asiakastunnus yriti_asiakastunnus
-          FROM lasku
-          JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili AND yriti.kaytossa = '')
-          WHERE lasku.yhtio = '$kukarow[yhtio]'
-          AND lasku.tunnus in ($tunnukset)
-          LIMIT 1";
+    $query = "SELECT lasku.*, if(lasku.ultilno_maa != '', lasku.ultilno_maa, lasku.maa) iban_maa,
+              yriti.iban yriti_iban, yriti.bic yriti_bic, yriti.asiakastunnus yriti_asiakastunnus
+              FROM lasku
+              JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili AND yriti.kaytossa = '')
+              WHERE lasku.yhtio = '$kukarow[yhtio]'
+              AND lasku.tunnus  in ($tunnukset)
+              LIMIT 1";
     $result = pupe_query($query);
     $nettorow = mysql_fetch_assoc($result);
 
@@ -698,11 +698,11 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
 
     if ($tee == "KIRJOITA") {
       // p‰ivitet‰‰n laskut "odottaa suoritusta" tilaan
-      $query = "  UPDATE lasku
-            SET tila = 'Q',
-            popvm = '$popvm_nyt'
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND tunnus in ($tunnukset)";
+      $query = "UPDATE lasku
+                SET tila = 'Q',
+                popvm       = '$popvm_nyt'
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND tunnus  in ($tunnukset)";
       $uresult = pupe_query($query);
     }
   }
@@ -714,14 +714,14 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
     $lisa .= " and lasku.tunnus not in ($netotetut_laskut) ";
   }
 
-  $haku_query = "  SELECT lasku.*, if(lasku.ultilno_maa != '', lasku.ultilno_maa, lasku.maa) iban_maa,
-          yriti.iban yriti_iban, yriti.bic yriti_bic, yriti.asiakastunnus yriti_asiakastunnus
-          FROM lasku
-          JOIN valuu ON (valuu.yhtio = lasku.yhtio AND valuu.nimi = lasku.valkoodi)
-          JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili AND yriti.kaytossa = '')
-          WHERE lasku.yhtio  = '$kukarow[yhtio]'
-          $lisa
-          ORDER BY maksu_tili, olmapvm, ultilno";
+  $haku_query = "SELECT lasku.*, if(lasku.ultilno_maa != '', lasku.ultilno_maa, lasku.maa) iban_maa,
+                 yriti.iban yriti_iban, yriti.bic yriti_bic, yriti.asiakastunnus yriti_asiakastunnus
+                 FROM lasku
+                 JOIN valuu ON (valuu.yhtio = lasku.yhtio AND valuu.nimi = lasku.valkoodi)
+                 JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili AND yriti.kaytossa = '')
+                 WHERE lasku.yhtio = '$kukarow[yhtio]'
+                 $lisa
+                 ORDER BY maksu_tili, olmapvm, ultilno";
   $result = pupe_query($haku_query);
 
   while ($laskurow = mysql_fetch_assoc($result)) {
@@ -746,11 +746,11 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
 
     if ($tee == "KIRJOITA") {
       // p‰ivitet‰‰n lasku "odottaa suoritusta" tilaan
-      $query = "  UPDATE lasku
-            SET tila = 'Q',
-            popvm = '$popvm_nyt'
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND tunnus = '$laskurow[tunnus]'";
+      $query = "UPDATE lasku
+                SET tila = 'Q',
+                popvm       = '$popvm_nyt'
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND tunnus  = '$laskurow[tunnus]'";
       $uresult = pupe_query($query);
     }
   }

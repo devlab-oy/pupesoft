@@ -18,11 +18,11 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
 echo "<font class='head'>".t("Matkallaolevat laskuittain")."</font><hr>";
 
 if (!isset($vv) or !isset($lvv)) {
-  $query = "  SELECT *
-        FROM tilikaudet
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tilikausi_alku <= current_date
-        and tilikausi_loppu >= current_date";
+  $query = "SELECT *
+            FROM tilikaudet
+            WHERE yhtio         = '$kukarow[yhtio]'
+            and tilikausi_alku  <= current_date
+            and tilikausi_loppu >= current_date";
   $result = pupe_query($query);
   $tilikausirow = mysql_fetch_assoc($result);
 
@@ -43,10 +43,10 @@ $llisa = "";
 $alisa = "";
 
 if (isset($tkausi) and $tkausi > 0) {
-  $query = "  SELECT *
-        FROM tilikaudet
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tunnus  = '$tkausi'";
+  $query = "SELECT *
+            FROM tilikaudet
+            WHERE yhtio = '$kukarow[yhtio]'
+            and tunnus  = '$tkausi'";
   $vresult = pupe_query($query);
   $tilikaudetrow = mysql_fetch_array($vresult);
 
@@ -76,10 +76,10 @@ else {
 echo "<form method='post'>";
 echo "<table>";
 
-$query = "  SELECT *
-      FROM tilikaudet
-      WHERE yhtio = '{$kukarow["yhtio"]}'
-      ORDER BY tilikausi_alku DESC";
+$query = "SELECT *
+          FROM tilikaudet
+          WHERE yhtio = '{$kukarow["yhtio"]}'
+          ORDER BY tilikausi_alku DESC";
 $vresult = pupe_query($query);
 
 echo "<tr>";
@@ -125,16 +125,16 @@ echo "<br><br>";
 
 if ($alisa != "" and $llisa != "") {
 
-  $query = "  SELECT lasku.tunnus, if(lasku.tila = 'X', '".t("Tosite")."', lasku.nimi) nimi, lasku.summa, lasku.valkoodi, lasku.tapvm, sum(tiliointi.summa) matkalla
-        FROM lasku
-        JOIN tiliointi on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.tilino = '$yhtiorow[matkalla_olevat]' AND tiliointi.tapvm >= '$alisa' AND tiliointi.tapvm <= '$llisa' AND tiliointi.korjattu = '')
-        WHERE lasku.yhtio = '$kukarow[yhtio]'
-        AND (lasku.tila in ('H', 'Y', 'M', 'P', 'Q') or (lasku.tila = 'X' and lasku.alatila != 'A'))
-        AND lasku.tapvm >= '$alisa'
-        AND lasku.tapvm <= '$llisa'
-        GROUP BY lasku.tunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm
-        HAVING matkalla != 0
-        ORDER BY lasku.nimi, lasku.tapvm, lasku.summa";
+  $query = "SELECT lasku.tunnus, if(lasku.tila = 'X', '".t("Tosite")."', lasku.nimi) nimi, lasku.summa, lasku.valkoodi, lasku.tapvm, sum(tiliointi.summa) matkalla
+            FROM lasku
+            JOIN tiliointi on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.tilino = '$yhtiorow[matkalla_olevat]' AND tiliointi.tapvm >= '$alisa' AND tiliointi.tapvm <= '$llisa' AND tiliointi.korjattu = '')
+            WHERE lasku.yhtio = '$kukarow[yhtio]'
+            AND (lasku.tila in ('H', 'Y', 'M', 'P', 'Q') or (lasku.tila = 'X' and lasku.alatila != 'A'))
+            AND lasku.tapvm   >= '$alisa'
+            AND lasku.tapvm   <= '$llisa'
+            GROUP BY lasku.tunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm
+            HAVING matkalla != 0
+            ORDER BY lasku.nimi, lasku.tapvm, lasku.summa";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -187,38 +187,39 @@ if ($alisa != "" and $llisa != "") {
       $toimirow = array();
 
       // Onko lasku liitetty saapumiseen?
-      $query = "  SELECT laskunro
-            FROM lasku
-            WHERE yhtio    = '$kukarow[yhtio]'
-            AND tila    = 'K'
-            AND vanhatunnus  = $row[tunnus]";
+      $query = "SELECT laskunro
+                FROM lasku
+                WHERE yhtio     = '$kukarow[yhtio]'
+                AND tila        = 'K'
+                AND vanhatunnus = $row[tunnus]";
       $liotsres = pupe_query($query);
 
       while ($liotsrow = mysql_fetch_assoc($liotsres)) {
         // Virallinen varastoonvientip‰iv‰
-        $query = "  SELECT laskunro, tunnus, mapvm, liitostunnus
-              FROM lasku
-              WHERE yhtio    = '$kukarow[yhtio]'
-              AND tila    = 'K'
-              AND vanhatunnus  = 0
-              AND laskunro    = '{$liotsrow['laskunro']}'";
+        $query = "SELECT laskunro, tunnus, mapvm, liitostunnus
+                  FROM lasku
+                  WHERE yhtio     = '$kukarow[yhtio]'
+                  AND tila        = 'K'
+                  AND vanhatunnus = 0
+                  AND laskunro    = '{$liotsrow['laskunro']}'";
         $keikres = pupe_query($query);
         $keikrow = mysql_fetch_assoc($keikres);
 
         // Milloin rivit on viety saldoille keskim‰‰rin
-        $query = "  SELECT round(AVG(DATE_FORMAT(laskutettuaika, '%Y%m%d'))) laskutettuaika
-              FROM tilausrivi
-              WHERE yhtio   = '{$kukarow['yhtio']}'
-              AND uusiotunnus = {$keikrow['tunnus']}
-              AND tyyppi     = 'O'";
+        $query = "SELECT
+                  DATE_FORMAT(FROM_UNIXTIME(AVG(UNIX_TIMESTAMP(laskutettuaika))),'%Y-%m-%d') AS laskutettuaika
+                  FROM tilausrivi
+                  WHERE yhtio     = '{$kukarow['yhtio']}'
+                  AND uusiotunnus = {$keikrow['tunnus']}
+                  AND tyyppi      = 'O'";
         $rivires = pupe_query($query);
         $rivirow = mysql_fetch_assoc($rivires);
 
         // Toimittajan toimitusehto
-        $query = "  SELECT toimitusehto
-              FROM toimi
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus  = {$keikrow['liitostunnus']}";
+        $query = "SELECT toimitusehto
+                  FROM toimi
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus  = {$keikrow['liitostunnus']}";
         $toimires = pupe_query($query);
         $toimirow = mysql_fetch_assoc($toimires);
       }
@@ -232,7 +233,7 @@ if ($alisa != "" and $llisa != "") {
       echo "<td align='right'>$yhtiorow[valkoodi]</td>";
       echo "<td>{$keikrow["laskunro"]}</td>";
       echo "<td>".tv1dateconv($keikrow["mapvm"])."</td>";
-      echo "<td>".tv1dateconv(tv3dateconv($rivirow["laskutettuaika"], TRUE))."</td>";
+      echo "<td>".tv1dateconv($rivirow["laskutettuaika"])."</td>";
       echo "<td>$toimirow[toimitusehto]</td>";
       echo "</tr>";
 

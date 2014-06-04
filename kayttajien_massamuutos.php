@@ -5,12 +5,12 @@ require ("inc/parametrit.inc");
 function massamuuttaja ($taulu, $sarake, $korvattava, $korvaava) {
   global $yhtiorow, $kukarow;
 
-  $paivityslause  = " UPDATE $taulu SET
-            $sarake = '$korvaava',
-            muuttaja = '$kukarow[kuka]',
-            muutospvm = now()
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND $sarake = '$korvattava'";
+  $paivityslause  = "UPDATE $taulu SET
+                     $sarake = '$korvaava',
+                     muuttaja    = '$kukarow[kuka]',
+                     muutospvm   = now()
+                     WHERE yhtio = '$kukarow[yhtio]'
+                     AND $sarake = '$korvattava'";
   $resultpaivitys  = mysql_query($paivityslause) or pupe_error($paivityslause);
 
   return mysql_affected_rows();
@@ -22,17 +22,17 @@ $totalupdate = 0;
 
 if ($MassaMuutos != '') {
 
-  $tarkistus = "  SELECT DISTINCT kuka.kuka, kuka.myyja, kuka.yhtio, kuka.nimi
-          FROM kuka
-          WHERE kuka.yhtio = '$kukarow[yhtio]'
-          AND kuka.kuka = '$tokuka'";
+  $tarkistus = "SELECT DISTINCT kuka.kuka, kuka.myyja, kuka.yhtio, kuka.nimi
+                FROM kuka
+                WHERE kuka.yhtio = '$kukarow[yhtio]'
+                AND kuka.kuka    = '$tokuka'";
   $resulttarkista1 = mysql_query($tarkistus) or pupe_error($tarkistus);
   $tarkistusrow1 = mysql_fetch_assoc($resulttarkista1);
 
-  $tarkistus = "  SELECT DISTINCT kuka.kuka, kuka.myyja, kuka.yhtio, kuka.nimi
-          FROM kuka
-          WHERE kuka.yhtio = '$kukarow[yhtio]'
-          AND kuka.kuka = '$fromkuka'";
+  $tarkistus = "SELECT DISTINCT kuka.kuka, kuka.myyja, kuka.yhtio, kuka.nimi
+                FROM kuka
+                WHERE kuka.yhtio = '$kukarow[yhtio]'
+                AND kuka.kuka    = '$fromkuka'";
   $resulttarkista2 = mysql_query($tarkistus) or pupe_error($tarkistus);
   $tarkistusrow2 = mysql_fetch_assoc($resulttarkista2);
 
@@ -122,11 +122,11 @@ echo "<font class='message'>".t("Kuka korvataan ").":</font>";
 
 // tehd‰‰n k‰ytt‰j‰listaukset
 
-$query = "  SELECT distinct kuka.nimi, kuka.kuka
-      FROM kuka
-      WHERE kuka.extranet = ''
-      AND kuka.yhtio = '$kukarow[yhtio]'
-      ORDER BY kuka.nimi";
+$query = "SELECT distinct kuka.nimi, kuka.kuka
+          FROM kuka
+          WHERE kuka.extranet = ''
+          AND kuka.yhtio      = '$kukarow[yhtio]'
+          ORDER BY kuka.nimi";
 $kukar = mysql_query($query) or pupe_error($query);
 
 echo "<table><tr><th align='left'>".t("K‰ytt‰j‰").":</th><td>
@@ -147,11 +147,11 @@ echo "</table>";
 echo "<br><br><font class='message'>".t("Kenell‰ korvataan").":</font>";
 
 // tehd‰‰n k‰ytt‰j‰listaukset
-$query = "  SELECT distinct kuka.nimi, kuka.kuka
-      FROM kuka
-      WHERE kuka.extranet = ''
-      AND kuka.yhtio = '$kukarow[yhtio]'
-      ORDER BY kuka.nimi";
+$query = "SELECT distinct kuka.nimi, kuka.kuka
+          FROM kuka
+          WHERE kuka.extranet = ''
+          AND kuka.yhtio      = '$kukarow[yhtio]'
+          ORDER BY kuka.nimi";
 $kukar = mysql_query($query) or pupe_error($query);
 
 echo "<table><tr><th align='left'>".t("K‰ytt‰j‰").":</th><td>

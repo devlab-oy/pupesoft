@@ -56,24 +56,24 @@ if (!empty($alusta_tunnus) and $yhtiorow['suuntalavat'] != "") {
 }
 elseif (isset($tullaan) and $tullaan == 'tuotteen_hyllypaikan_muutos') {
 
-  $query = "  SELECT tuotepaikat.*, tuote.yksikko
-        FROM tuotepaikat
-        JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno)
-        WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
-        AND tuotepaikat.tunnus = '{$tuotepaikan_tunnus}'";
+  $query = "SELECT tuotepaikat.*, tuote.yksikko
+            FROM tuotepaikat
+            JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno)
+            WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+            AND tuotepaikat.tunnus  = '{$tuotepaikan_tunnus}'";
   $res = pupe_query($query);
   $row = mysql_fetch_assoc($res);
 
 }
 // Ilman suuntalavaa
 else {
-  $query = "  SELECT
-        tilausrivi.*,
-        tuotteen_toimittajat.toim_tuoteno
-        FROM tilausrivi
-        LEFT JOIN tuotteen_toimittajat on (tuotteen_toimittajat.tuoteno=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno)
-        WHERE tilausrivi.tunnus = '{$tilausrivi}'
-        AND tilausrivi.yhtio    = '{$kukarow['yhtio']}'";
+  $query = "SELECT
+            tilausrivi.*,
+            tuotteen_toimittajat.toim_tuoteno
+            FROM tilausrivi
+            LEFT JOIN tuotteen_toimittajat on (tuotteen_toimittajat.tuoteno=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno)
+            WHERE tilausrivi.tunnus = '{$tilausrivi}'
+            AND tilausrivi.yhtio    = '{$kukarow['yhtio']}'";
   $row = mysql_fetch_assoc(pupe_query($query));
 }
 
@@ -136,10 +136,10 @@ if (isset($submit) and trim($submit) != '') {
       }
 
       // Ei sarjanumerollisia tuotteita
-      $query = "  SELECT sarjanumeroseuranta
-            FROM tuote
-            WHERE yhtio='{$kukarow['yhtio']}'
-            AND tuoteno='{$row['tuoteno']}'";
+      $query = "SELECT sarjanumeroseuranta
+                FROM tuote
+                WHERE yhtio='{$kukarow['yhtio']}'
+                AND tuoteno='{$row['tuoteno']}'";
       $result = pupe_query($query);
       $tuote = mysql_fetch_assoc($result);
 
@@ -189,13 +189,13 @@ if (isset($submit) and trim($submit) != '') {
           );
 
         // Tarkistetaan onko syötetty hyllypaikka jo tälle tuotteelle
-        $tuotteen_oma_hyllypaikka = "  SELECT * FROM tuotepaikat
-                        WHERE tuoteno = '$row[tuoteno]'
-                        AND yhtio     = '{$kukarow['yhtio']}'
-                        AND hyllyalue = '$hyllyalue'
-                        AND hyllynro  = '$hyllynro'
-                        AND hyllyvali = '$hyllyvali'
-                        AND hyllytaso = '$hyllytaso'";
+        $tuotteen_oma_hyllypaikka = "SELECT * FROM tuotepaikat
+                                     WHERE tuoteno = '$row[tuoteno]'
+                                     AND yhtio     = '{$kukarow['yhtio']}'
+                                     AND hyllyalue = '$hyllyalue'
+                                     AND hyllynro  = '$hyllynro'
+                                     AND hyllyvali = '$hyllyvali'
+                                     AND hyllytaso = '$hyllytaso'";
         $oma_paikka = mysql_query($tuotteen_oma_hyllypaikka);
 
         // Jos syötettyä paikkaa ei ole tämän tuotteen, lisätään uusi tuotepaikka
@@ -212,14 +212,14 @@ if (isset($submit) and trim($submit) != '') {
         }
         else {
           // Nollataan poistettava kenttä varmuuden vuoksi
-          $query = "  UPDATE tuotepaikat SET
-                poistettava   = ''
-                WHERE tuoteno   = '{$row['tuoteno']}'
-                AND yhtio       = '{$kukarow['yhtio']}'
-                AND hyllyalue   = '$hyllyalue'
-                AND hyllynro    = '$hyllynro'
-                AND hyllyvali   = '$hyllyvali'
-                AND hyllytaso   = '$hyllytaso'";
+          $query = "UPDATE tuotepaikat SET
+                    poistettava   = ''
+                    WHERE tuoteno = '{$row['tuoteno']}'
+                    AND yhtio     = '{$kukarow['yhtio']}'
+                    AND hyllyalue = '$hyllyalue'
+                    AND hyllynro  = '$hyllynro'
+                    AND hyllyvali = '$hyllyvali'
+                    AND hyllytaso = '$hyllytaso'";
           pupe_query($query);
         }
 
@@ -232,19 +232,19 @@ if (isset($submit) and trim($submit) != '') {
 
             // Lukitaan taulut saldojen siirtoa varten
             $query = "LOCK TABLE
-                  tuotepaikat WRITE";
+                      tuotepaikat WRITE";
             $result = pupe_query($query);
 
-            $query = "  UPDATE tuotepaikat SET
-                  muuttaja      = '{$kukarow['kuka']}',
-                  muutospvm     = now(),
-                  poistettava   = 'D'
-                  WHERE tuoteno = '{$row['tuoteno']}'
-                  AND yhtio     = '{$kukarow['yhtio']}'
-                  AND hyllyalue = '{$row['hyllyalue']}'
-                  AND hyllynro  = '{$row['hyllynro']}'
-                  AND hyllyvali = '{$row['hyllyvali']}'
-                  AND hyllytaso = '{$row['hyllytaso']}'";
+            $query = "UPDATE tuotepaikat SET
+                      muuttaja      = '{$kukarow['kuka']}',
+                      muutospvm     = now(),
+                      poistettava   = 'D'
+                      WHERE tuoteno = '{$row['tuoteno']}'
+                      AND yhtio     = '{$kukarow['yhtio']}'
+                      AND hyllyalue = '{$row['hyllyalue']}'
+                      AND hyllynro  = '{$row['hyllynro']}'
+                      AND hyllyvali = '{$row['hyllyvali']}'
+                      AND hyllytaso = '{$row['hyllytaso']}'";
             $result = pupe_query($query);
 
             // Unlock tables
@@ -258,21 +258,21 @@ if (isset($submit) and trim($submit) != '') {
 
             // Lukitaan taulut saldojen siirtoa varten
             $query = "LOCK TABLE
-                  tuotepaikat WRITE,
-                  tapahtuma WRITE,
-                  tuote READ,
-                  tilausrivi WRITE";
+                      tuotepaikat WRITE,
+                      tapahtuma WRITE,
+                      tuote READ,
+                      tilausrivi WRITE";
             $result = pupe_query($query);
 
             // Tarkistetaan löytyykö tuotepaikka MISTÄ saldot siirretään
             $query = "SELECT *
-                  FROM tuotepaikat
-                  WHERE yhtio='{$kukarow['yhtio']}'
-                  AND tuoteno='{$row['tuoteno']}'
-                  AND hyllyalue = '{$row['hyllyalue']}'
-                  AND hyllynro  = '{$row['hyllynro']}'
-                  AND hyllyvali = '{$row['hyllyvali']}'
-                  AND hyllytaso = '{$row['hyllytaso']}'";
+                      FROM tuotepaikat
+                      WHERE yhtio='{$kukarow['yhtio']}'
+                      AND tuoteno='{$row['tuoteno']}'
+                      AND hyllyalue = '{$row['hyllyalue']}'
+                      AND hyllynro  = '{$row['hyllynro']}'
+                      AND hyllyvali = '{$row['hyllyvali']}'
+                      AND hyllytaso = '{$row['hyllytaso']}'";
             $result = pupe_query($query);
 
             if (mysql_num_rows($result) == 0) {
@@ -282,13 +282,13 @@ if (isset($submit) and trim($submit) != '') {
 
             // Tarkistetaan löytyykö tuotepaikka MIHIN saldot siirretään
             $query = "SELECT *
-                  FROM tuotepaikat
-                  WHERE yhtio='{$kukarow['yhtio']}'
-                  AND tuoteno='{$row['tuoteno']}'
-                  AND hyllyalue = '{$hyllyalue}'
-                  AND hyllynro  = '{$hyllynro}'
-                  AND hyllyvali = '{$hyllyvali}'
-                  AND hyllytaso = '{$hyllytaso}'";
+                      FROM tuotepaikat
+                      WHERE yhtio='{$kukarow['yhtio']}'
+                      AND tuoteno='{$row['tuoteno']}'
+                      AND hyllyalue = '{$hyllyalue}'
+                      AND hyllynro  = '{$hyllynro}'
+                      AND hyllyvali = '{$hyllyvali}'
+                      AND hyllytaso = '{$hyllytaso}'";
             $result = pupe_query($query);
 
             if (mysql_num_rows($result) == 0) {
@@ -299,53 +299,53 @@ if (isset($submit) and trim($submit) != '') {
             // Siirretään saldot vanhasta oletuspaikasta uuteen oletuspaikkaan
             // Poistetaan VANHALTA tuotepaikalta siirrettävä määrä
             // Saldojen siirroissa vanha tuotepaikka merkataan aina poistettavaksi
-            $query = "  UPDATE tuotepaikat SET
-                  saldo         = saldo - {$saldo['myytavissa']},
-                  saldoaika     = now(),
-                  muuttaja      = '{$kukarow['kuka']}',
-                  muutospvm     = now(),
-                  poistettava   = 'D'
-                  WHERE tuoteno = '{$row['tuoteno']}'
-                  AND yhtio     = '{$kukarow['yhtio']}'
-                  AND hyllyalue = '{$row['hyllyalue']}'
-                  AND hyllynro  = '{$row['hyllynro']}'
-                  AND hyllyvali = '{$row['hyllyvali']}'
-                  AND hyllytaso = '{$row['hyllytaso']}'";
+            $query = "UPDATE tuotepaikat SET
+                      saldo         = saldo - {$saldo['myytavissa']},
+                      saldoaika     = now(),
+                      muuttaja      = '{$kukarow['kuka']}',
+                      muutospvm     = now(),
+                      poistettava   = 'D'
+                      WHERE tuoteno = '{$row['tuoteno']}'
+                      AND yhtio     = '{$kukarow['yhtio']}'
+                      AND hyllyalue = '{$row['hyllyalue']}'
+                      AND hyllynro  = '{$row['hyllynro']}'
+                      AND hyllyvali = '{$row['hyllyvali']}'
+                      AND hyllytaso = '{$row['hyllytaso']}'";
             $result = pupe_query($query);
 
             // Lisätään UUTEEN tuotepaikkaan siirrettävä määrä
-            $query = "  UPDATE tuotepaikat SET
-                  saldo         = saldo + {$saldo['myytavissa']},
-                  saldoaika     = now(),
-                  muuttaja      = '{$kukarow['kuka']}',
-                  muutospvm     = now(),
-                  poistettava   = ''
-                  WHERE tuoteno = '{$row['tuoteno']}'
-                  AND yhtio     = '{$kukarow['yhtio']}'
-                  AND hyllyalue = '{$hyllyalue}'
-                  AND hyllynro  = '{$hyllynro}'
-                  AND hyllyvali = '{$hyllyvali}'
-                  AND hyllytaso = '{$hyllytaso}'";
+            $query = "UPDATE tuotepaikat SET
+                      saldo         = saldo + {$saldo['myytavissa']},
+                      saldoaika     = now(),
+                      muuttaja      = '{$kukarow['kuka']}',
+                      muutospvm     = now(),
+                      poistettava   = ''
+                      WHERE tuoteno = '{$row['tuoteno']}'
+                      AND yhtio     = '{$kukarow['yhtio']}'
+                      AND hyllyalue = '{$hyllyalue}'
+                      AND hyllynro  = '{$hyllynro}'
+                      AND hyllyvali = '{$hyllyvali}'
+                      AND hyllytaso = '{$hyllytaso}'";
             $result = pupe_query($query);
 
             $mista = "{$row['hyllyalue']} {$row['hyllynro']} {$row['hyllyvali']} {$row['hyllytaso']}";
             $minne = "$hyllyalue $hyllynro $hyllyvali $hyllytaso";
 
             // Keskihankintahinta
-            $kehahin_query = "  SELECT tuote.sarjanumeroseuranta,
-                      round(if (tuote.epakurantti100pvm = '0000-00-00',
-                          if (tuote.epakurantti75pvm = '0000-00-00',
-                            if (tuote.epakurantti50pvm = '0000-00-00',
-                              if (tuote.epakurantti25pvm = '0000-00-00',
-                                tuote.kehahin,
-                              tuote.kehahin * 0.75),
-                            tuote.kehahin * 0.5),
-                          tuote.kehahin * 0.25),
-                        0),
-                      6) kehahin
-                      FROM tuote
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      and tuoteno = '{$row['tuoteno']}'";
+            $kehahin_query = "SELECT tuote.sarjanumeroseuranta,
+                              round(if (tuote.epakurantti100pvm = '0000-00-00',
+                                  if (tuote.epakurantti75pvm = '0000-00-00',
+                                    if (tuote.epakurantti50pvm = '0000-00-00',
+                                      if (tuote.epakurantti25pvm = '0000-00-00',
+                                        tuote.kehahin,
+                                      tuote.kehahin * 0.75),
+                                    tuote.kehahin * 0.5),
+                                  tuote.kehahin * 0.25),
+                                0),
+                              6) kehahin
+                              FROM tuote
+                              WHERE yhtio = '{$kukarow['yhtio']}'
+                              and tuoteno = '{$row['tuoteno']}'";
             $kehahin_result = mysql_query($kehahin_query) or pupe_error($kehahin_query);
             $kehahin_row = mysql_fetch_array($kehahin_result);
             $keskihankintahinta = $kehahin_row['kehahin'];
@@ -353,52 +353,52 @@ if (isset($submit) and trim($submit) != '') {
             // Tapahtumat
             // insert into tapahtumat "vähennettiin"
             $tapahtuma_query = "INSERT INTO tapahtuma SET
-                      yhtio     = '{$kukarow['yhtio']}',
-                      tuoteno   = '{$row['tuoteno']}',
-                      kpl     = {$saldo['myytavissa']} * -1,
-                      hinta     = '$keskihankintahinta',
-                      laji     = 'siirto',
-                      hyllyalue  = '{$row['hyllyalue']}',
-                      hyllynro   = '{$row['hyllynro']}',
-                      hyllyvali  = '{$row['hyllyvali']}',
-                      hyllytaso  = '{$row['hyllytaso']}',
-                      rivitunnus  = '0',
-                      selite     = '".t("Paikasta")." $mista ".t("vähennettiin")." {$saldo['myytavissa']}',
-                      laatija   = '$kukarow[kuka]',
-                      laadittu   = now()";
+                                yhtio      = '{$kukarow['yhtio']}',
+                                tuoteno    = '{$row['tuoteno']}',
+                                kpl        = {$saldo['myytavissa']} * -1,
+                                hinta      = '$keskihankintahinta',
+                                laji       = 'siirto',
+                                hyllyalue  = '{$row['hyllyalue']}',
+                                hyllynro   = '{$row['hyllynro']}',
+                                hyllyvali  = '{$row['hyllyvali']}',
+                                hyllytaso  = '{$row['hyllytaso']}',
+                                rivitunnus = '0',
+                                selite     = '".t("Paikasta")." $mista ".t("vähennettiin")." {$saldo['myytavissa']}',
+                                laatija    = '$kukarow[kuka]',
+                                laadittu   = now()";
             $result = pupe_query($tapahtuma_query);
 
             // insert into tapahtumat "lisättiin"
             $tapahtuma_query = "INSERT INTO tapahtuma SET
-                      yhtio     = '{$kukarow['yhtio']}',
-                      tuoteno   = '{$row['tuoteno']}',
-                      kpl     = {$saldo['myytavissa']},
-                      hinta     = '$keskihankintahinta',
-                      laji     = 'siirto',
-                      hyllyalue  = '$hyllyalue',
-                      hyllynro   = '$hyllynro',
-                      hyllyvali  = '$hyllyvali',
-                      hyllytaso  = '$hyllytaso',
-                      rivitunnus  = '0',
-                      selite     = '".t("Paikalle")." $minne ".t("lisättiin")." {$saldo['myytavissa']}',
-                      laatija   = '$kukarow[kuka]',
-                      laadittu   = now()";
+                                yhtio      = '{$kukarow['yhtio']}',
+                                tuoteno    = '{$row['tuoteno']}',
+                                kpl        = {$saldo['myytavissa']},
+                                hinta      = '$keskihankintahinta',
+                                laji       = 'siirto',
+                                hyllyalue  = '$hyllyalue',
+                                hyllynro   = '$hyllynro',
+                                hyllyvali  = '$hyllyvali',
+                                hyllytaso  = '$hyllytaso',
+                                rivitunnus = '0',
+                                selite     = '".t("Paikalle")." $minne ".t("lisättiin")." {$saldo['myytavissa']}',
+                                laatija    = '$kukarow[kuka]',
+                                laadittu   = now()";
             $result = pupe_query($tapahtuma_query);
 
             // Päivitetään vanhan tuotepaikan avoimet tulouttamattomat ostot uudelle paikalle
             $ostot_query = "UPDATE tilausrivi SET
-                    hyllyalue     = '$hyllyalue',
-                    hyllynro      = '$hyllynro',
-                    hyllyvali     = '$hyllyvali',
-                    hyllytaso     = '$hyllytaso'
-                    WHERE yhtio   = '{$kukarow['yhtio']}'
-                    AND tyyppi    = 'O'
-                    AND varattu   > 0
-                    AND tuoteno   = '{$row['tuoteno']}'
-                    AND hyllyalue = '{$row['hyllyalue']}'
-                    AND hyllynro  = '{$row['hyllynro']}'
-                    AND hyllyvali = '{$row['hyllyvali']}'
-                    AND hyllytaso = '{$row['hyllytaso']}'";
+                            hyllyalue     = '$hyllyalue',
+                            hyllynro      = '$hyllynro',
+                            hyllyvali     = '$hyllyvali',
+                            hyllytaso     = '$hyllytaso'
+                            WHERE yhtio   = '{$kukarow['yhtio']}'
+                            AND tyyppi    = 'O'
+                            AND varattu   > 0
+                            AND tuoteno   = '{$row['tuoteno']}'
+                            AND hyllyalue = '{$row['hyllyalue']}'
+                            AND hyllynro  = '{$row['hyllynro']}'
+                            AND hyllyvali = '{$row['hyllyvali']}'
+                            AND hyllytaso = '{$row['hyllytaso']}'";
             $result = pupe_query($ostot_query);
 
             // Unlock tables

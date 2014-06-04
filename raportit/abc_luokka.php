@@ -161,17 +161,17 @@ if ($luokka != "") {
   list($ryhmanimet, $ryhmaprossat, $kiertonopeus_tavoite, $palvelutaso_tavoite, $varmuusvarasto_pv, $toimittajan_toimitusaika_pv) = hae_ryhmanimet($abcchar);
 
   //kauden yhteismyynnit ja katteet
-  $query = "  SELECT
-        sum(abc_aputaulu.summa) yhtmyynti,
-        sum(abc_aputaulu.kate) yhtkate
-        FROM abc_aputaulu
-        {$analyysin_join}
-        WHERE abc_aputaulu.yhtio = '{$kukarow["yhtio"]}'
-        and abc_aputaulu.tyyppi = '$abcchar'
-        and abc_aputaulu.luokka = '$luokka'
-        $abc_lisa
-        $lisa
-        $saapumispvmlisa";
+  $query = "SELECT
+            sum(abc_aputaulu.summa) yhtmyynti,
+            sum(abc_aputaulu.kate) yhtkate
+            FROM abc_aputaulu
+            {$analyysin_join}
+            WHERE abc_aputaulu.yhtio = '{$kukarow["yhtio"]}'
+            and abc_aputaulu.tyyppi  = '$abcchar'
+            and abc_aputaulu.luokka  = '$luokka'
+            $abc_lisa
+            $lisa
+            $saapumispvmlisa";
   $sumres = pupe_query($query);
   $sumrow = mysql_fetch_assoc($sumres);
 
@@ -180,20 +180,20 @@ if ($luokka != "") {
   }
 
   //haetaan rivien arvot
-  $query = "  SELECT *,
-        if ({$sumrow["yhtkate"]} = 0, 0, abc_aputaulu.kate / {$sumrow["yhtkate"]} * 100) kateosuus,
-        abc_aputaulu.katepros * abc_aputaulu.varaston_kiertonop kate_kertaa_kierto,
-        abc_aputaulu.kate - abc_aputaulu.kustannus_yht total
-        FROM abc_aputaulu
-        {$analyysin_join}
-        WHERE abc_aputaulu.yhtio = '{$kukarow["yhtio"]}'
-        and abc_aputaulu.tyyppi = '$abcchar'
-        and abc_aputaulu.luokka = '$luokka'
-        $saapumispvmlisa
-        $abc_lisa
-        $lisa
-        $hav
-        ORDER BY $jarjestys";
+  $query = "SELECT *,
+            if ({$sumrow["yhtkate"]} = 0, 0, abc_aputaulu.kate / {$sumrow["yhtkate"]} * 100) kateosuus,
+            abc_aputaulu.katepros * abc_aputaulu.varaston_kiertonop kate_kertaa_kierto,
+            abc_aputaulu.kate - abc_aputaulu.kustannus_yht total
+            FROM abc_aputaulu
+            {$analyysin_join}
+            WHERE abc_aputaulu.yhtio = '{$kukarow["yhtio"]}'
+            and abc_aputaulu.tyyppi  = '$abcchar'
+            and abc_aputaulu.luokka  = '$luokka'
+            $saapumispvmlisa
+            $abc_lisa
+            $lisa
+            $hav
+            ORDER BY $jarjestys";
   $res = pupe_query($query);
 
   echo "<br><table>";
@@ -312,10 +312,10 @@ if ($luokka != "") {
 
       //haetaan asiakkaan tiedot
       if ($asiakasanalyysi) {
-        $query = "  SELECT *
-              FROM asiakas
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tunnus = '$row[tuoteno]'";
+        $query = "SELECT *
+                  FROM asiakas
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and tunnus  = '$row[tuoteno]'";
         $asres = pupe_query($query);
         $asrow = mysql_fetch_assoc($asres);
 
@@ -346,23 +346,23 @@ if ($luokka != "") {
         echo "<td valign='top'>$row[malli]</td>";
         echo "<td valign='top'>$row[mallitarkenne]</td>";
 
-        $query = "  SELECT distinct myyja, nimi
-              FROM kuka
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND myyja = '$row[myyjanro]'
-              AND myyja > 0
-              ORDER BY myyja";
+        $query = "SELECT distinct myyja, nimi
+                  FROM kuka
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND myyja   = '$row[myyjanro]'
+                  AND myyja   > 0
+                  ORDER BY myyja";
         $sresult = pupe_query($query);
         $srow = mysql_fetch_assoc($sresult);
 
         echo "<td valign='top'>$srow[nimi]</td>";
 
-        $query = "  SELECT distinct myyja, nimi
-              FROM kuka
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND myyja = '$row[ostajanro]'
-              AND myyja > 0
-              ORDER BY myyja";
+        $query = "SELECT distinct myyja, nimi
+                  FROM kuka
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND myyja   = '$row[ostajanro]'
+                  AND myyja   > 0
+                  ORDER BY myyja";
         $sresult = pupe_query($query);
         $srow = mysql_fetch_assoc($sresult);
 

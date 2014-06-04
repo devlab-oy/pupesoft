@@ -19,54 +19,54 @@ if ($tila == "lisaa_kaikki_jaksotukseen") {
   }
   else {
     //  Varmistetaan että kaikki otsikot on nipussa
-    $query = "  UPDATE lasku
-          SET jaksotettu=(if (tunnusnippu=0,tunnus,tunnusnippu))
-          WHERE yhtio = '$kukarow[yhtio]'
-          and if (tunnusnippu = 0,tunnus=$laskurow[tunnus], tunnusnippu=$laskurow[tunnusnippu])
-          and jaksotettu = 0
-          and tila in ($sallitut_tilat)
-          and alatila != 'X'";
+    $query = "UPDATE lasku
+              SET jaksotettu=(if (tunnusnippu=0,tunnus,tunnusnippu))
+              WHERE yhtio     = '$kukarow[yhtio]'
+              and if (tunnusnippu = 0,tunnus=$laskurow[tunnus], tunnusnippu=$laskurow[tunnusnippu])
+              and jaksotettu  = 0
+              and tila        in ($sallitut_tilat)
+              and alatila    != 'X'";
     $result = mysql_query($query) or pupe_error($query);
 
     //  Varmistetaan, että kaikki vanhatunnukset on sopparilla
     if ($laskurow["vanhatunnus"] > 0) {
-      $query = "  UPDATE lasku
-            SET jaksotettu = '$laskurow[jaksotettu]'
-            WHERE yhtio   = '$kukarow[yhtio]'
-            and vanhatunnus = '$laskurow[vanhatunnus]'
-            and tila IN ($sallitut_tilat)
-            and alatila != 'X'";
+      $query = "UPDATE lasku
+                SET jaksotettu = '$laskurow[jaksotettu]'
+                WHERE yhtio      = '$kukarow[yhtio]'
+                and vanhatunnus  = '$laskurow[vanhatunnus]'
+                and tila         IN ($sallitut_tilat)
+                and alatila     != 'X'";
       $result = mysql_query($query) or pupe_error($query);
     }
 
     //  Haetaan kaikki tunnukset
-    $query = "  SELECT group_concat(distinct tunnus) tunnukset
-          FROM lasku
-          WHERE yhtio = '$kukarow[yhtio]'
-          and jaksotettu  = '$laskurow[jaksotettu]'
-          and tila IN ($sallitut_tilat)
-          and alatila != 'X'";
+    $query = "SELECT group_concat(distinct tunnus) tunnukset
+              FROM lasku
+              WHERE yhtio     = '$kukarow[yhtio]'
+              and jaksotettu  = '$laskurow[jaksotettu]'
+              and tila        IN ($sallitut_tilat)
+              and alatila    != 'X'";
     $result = mysql_query($query) or pupe_error($query);
     $posrow = mysql_fetch_array($result);
 
     $ltunnukset  = $posrow["tunnukset"];
 
-    $query = "  UPDATE tilausrivi
-          SET jaksotettu = '$laskurow[jaksotettu]'
-          WHERE yhtio = '$kukarow[yhtio]'
-          and otunnus in ($ltunnukset)";
+    $query = "UPDATE tilausrivi
+              SET jaksotettu = '$laskurow[jaksotettu]'
+              WHERE yhtio = '$kukarow[yhtio]'
+              and otunnus in ($ltunnukset)";
     $result = mysql_query($query) or pupe_error($query);
   }
 }
 
 if ($tila == "uusi") {
   if ($laskurow["jaksotettu"] == 0) {
-    $query = "  UPDATE lasku
-          SET jaksotettu=(if(tunnusnippu=0,tunnus,tunnusnippu))
-          WHERE yhtio = '$kukarow[yhtio]'
-          and if(tunnusnippu = 0,tunnus=$laskurow[tunnus],tunnusnippu=$laskurow[tunnusnippu])
-          and tila in ($sallitut_tilat)
-          and alatila != 'X'";
+    $query = "UPDATE lasku
+              SET jaksotettu=(if(tunnusnippu=0,tunnus,tunnusnippu))
+              WHERE yhtio  = '$kukarow[yhtio]'
+              and if(tunnusnippu = 0,tunnus=$laskurow[tunnus],tunnusnippu=$laskurow[tunnusnippu])
+              and tila     in ($sallitut_tilat)
+              and alatila != 'X'";
     $result = mysql_query($query) or pupe_error($query);
 
     // Tässä meidän on hieman fiilattava tätä muuttujaa
@@ -79,20 +79,20 @@ if ($tila == "uusi") {
 
     // Jos tilaus on slittaantunut useaksi osaksi laitetaan maksusoppari koskemaan kaikkia splittejä jotka periytyvät samalta tilaukselta
     if ($laskurow["vanhatunnus"] > 0) {
-      $query = "  UPDATE lasku
-            SET jaksotettu = '$laskurow[jaksotettu]'
-            WHERE yhtio   = '$kukarow[yhtio]'
-            and vanhatunnus = '$laskurow[vanhatunnus]'
-            and tila IN ($sallitut_tilat)
-            and alatila != 'X'";
+      $query = "UPDATE lasku
+                SET jaksotettu = '$laskurow[jaksotettu]'
+                WHERE yhtio      = '$kukarow[yhtio]'
+                and vanhatunnus  = '$laskurow[vanhatunnus]'
+                and tila         IN ($sallitut_tilat)
+                and alatila     != 'X'";
       $result = mysql_query($query) or pupe_error($query);
 
-      $query = "  SELECT group_concat(distinct tunnus) tunnukset
-            FROM lasku
-            WHERE yhtio = '$kukarow[yhtio]'
-            and jaksotettu  = '$laskurow[jaksotettu]'
-            and tila IN ($sallitut_tilat)
-            and alatila != 'X'";
+      $query = "SELECT group_concat(distinct tunnus) tunnukset
+                FROM lasku
+                WHERE yhtio     = '$kukarow[yhtio]'
+                and jaksotettu  = '$laskurow[jaksotettu]'
+                and tila        IN ($sallitut_tilat)
+                and alatila    != 'X'";
       $result = mysql_query($query) or pupe_error($query);
       $posrow = mysql_fetch_array($result);
 
@@ -102,48 +102,48 @@ if ($tila == "uusi") {
       $ltunnukset = $laskurow["tunnus"];
     }
 
-    $query = "  UPDATE tilausrivi
-          SET jaksotettu = '$laskurow[jaksotettu]'
-          WHERE yhtio = '$kukarow[yhtio]'
-          and otunnus in ($ltunnukset)";
+    $query = "UPDATE tilausrivi
+              SET jaksotettu = '$laskurow[jaksotettu]'
+              WHERE yhtio = '$kukarow[yhtio]'
+              and otunnus in ($ltunnukset)";
     $result = mysql_query($query) or pupe_error($query);
   }
 
-  $query = "  INSERT INTO maksupositio
-        SET yhtio   = '$kukarow[yhtio]',
-        otunnus   = '$laskurow[jaksotettu]',
-        luotu    = now(),
-        luonut    = '$kukarow[kuka]'";
+  $query = "INSERT INTO maksupositio
+            SET yhtio   = '$kukarow[yhtio]',
+            otunnus = '$laskurow[jaksotettu]',
+            luotu   = now(),
+            luonut  = '$kukarow[kuka]'";
   $result = mysql_query($query) or pupe_error($query);
 }
 
 if ($tila == "tallenna") {
 
-  $query = "  SELECT
-        sum(if (tilausrivi.jaksotettu='$laskurow[jaksotettu]', round(tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa},2), 0)) jaksotettavaa_veroton,
-        sum(if (tilausrivi.jaksotettu='$laskurow[jaksotettu]', round(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa},2), 0)) jaksotettavaa_verolli
-        FROM lasku
-        JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D' and tilausrivi.jaksotettu='$laskurow[jaksotettu]'
-        WHERE lasku.yhtio     = '$kukarow[yhtio]'
-        and lasku.tila       IN ($sallitut_tilat)
-        and lasku.jaksotettu   = '$laskurow[jaksotettu]'";
+  $query = "SELECT
+            sum(if (tilausrivi.jaksotettu='$laskurow[jaksotettu]', round(tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa},2), 0)) jaksotettavaa_veroton,
+            sum(if (tilausrivi.jaksotettu='$laskurow[jaksotettu]', round(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa},2), 0)) jaksotettavaa_verolli
+            FROM lasku
+            JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D' and tilausrivi.jaksotettu='$laskurow[jaksotettu]'
+            WHERE lasku.yhtio    = '$kukarow[yhtio]'
+            and lasku.tila       IN ($sallitut_tilat)
+            and lasku.jaksotettu = '$laskurow[jaksotettu]'";
   $result = mysql_query($query) or pupe_error($query);
   $rivrow = mysql_fetch_array($result);
 
-  $query = "  SELECT *
-        FROM maksupositio
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tunnus  = '$maksupositio'";
+  $query = "SELECT *
+            FROM maksupositio
+            WHERE yhtio = '$kukarow[yhtio]'
+            and tunnus  = '$maksupositio'";
   $result = mysql_query($query) or pupe_error($query);
   $posrow = mysql_fetch_array($result);
 
   $summa = str_replace(",", ".", $summa);
   $osuus = str_replace(",", ".", $osuus);
 
-  $query = "  SELECT *
-        FROM tuote
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'";
+  $query = "SELECT *
+            FROM tuote
+            WHERE yhtio = '$kukarow[yhtio]'
+            and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'";
   $result = mysql_query($query) or pupe_error($query);
   $tuoterow = mysql_fetch_array($result);
 
@@ -199,17 +199,17 @@ if ($tila == "tallenna") {
   $lisatiedot = pupesoft_cleanstring($lisatiedot);
   $ohje = pupesoft_cleanstring($ohje);
 
-  $query = "  UPDATE maksupositio SET
-        osuus     = '$osuus',
-        summa      = '$summa',
-        kuvaus     = '$kuvaus',
-        erpcm    = '$erpcmvv-$erpcmkk-$erpcmpp',
-        maksuehto   = '$mehto',
-        lisatiedot   = '$lisatiedot',
-        ohje     = '$ohje'
-        WHERE yhtio = '$kukarow[yhtio]'
-        and otunnus = '$laskurow[jaksotettu]'
-        and tunnus  = '$maksupositio'";
+  $query = "UPDATE maksupositio SET
+            osuus       = '$osuus',
+            summa       = '$summa',
+            kuvaus      = '$kuvaus',
+            erpcm       = '$erpcmvv-$erpcmkk-$erpcmpp',
+            maksuehto   = '$mehto',
+            lisatiedot  = '$lisatiedot',
+            ohje        = '$ohje'
+            WHERE yhtio = '$kukarow[yhtio]'
+            and otunnus = '$laskurow[jaksotettu]'
+            and tunnus  = '$maksupositio'";
   $result = mysql_query($query) or pupe_error($query);
 
   $erpcmpp = "";
@@ -219,50 +219,50 @@ if ($tila == "tallenna") {
 
 if ($tila == "poista") {
 
-  $query = "  DELETE
-        FROM maksupositio
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tunnus = '$maksupositio'";
+  $query = "DELETE
+            FROM maksupositio
+            WHERE yhtio = '$kukarow[yhtio]'
+            and tunnus  = '$maksupositio'";
   $result = mysql_query($query) or pupe_error($query);
 
-  $query = "  SELECT *
-        FROM maksupositio
-        WHERE yhtio = '$kukarow[yhtio]'
-        and otunnus = '$laskurow[jaksotettu]'";
+  $query = "SELECT *
+            FROM maksupositio
+            WHERE yhtio = '$kukarow[yhtio]'
+            and otunnus = '$laskurow[jaksotettu]'";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) == 0) {
-    $query = "  SELECT group_concat(tunnus) tunnukset
-          FROM lasku USE INDEX (yhtio_jaksotettu)
-          WHERE yhtio = '$kukarow[yhtio]'
-          and jaksotettu = '$laskurow[jaksotettu]'";
+    $query = "SELECT group_concat(tunnus) tunnukset
+              FROM lasku USE INDEX (yhtio_jaksotettu)
+              WHERE yhtio    = '$kukarow[yhtio]'
+              and jaksotettu = '$laskurow[jaksotettu]'";
     $result = mysql_query($query) or pupe_error($query);
     $jaksorow = mysql_fetch_array($result);
 
-    $query = "  UPDATE lasku USE INDEX (yhtio_jaksotettu)
-          SET jaksotettu = 0
-          WHERE yhtio = '$kukarow[yhtio]'
-          and jaksotettu = '$laskurow[jaksotettu]'";
+    $query = "UPDATE lasku USE INDEX (yhtio_jaksotettu)
+              SET jaksotettu = 0
+              WHERE yhtio    = '$kukarow[yhtio]'
+              and jaksotettu = '$laskurow[jaksotettu]'";
     $result = mysql_query($query) or pupe_error($query);
 
     $laskurow["jaksotettu"] = 0;
 
-    $query = "  UPDATE tilausrivi USE INDEX (yhtio_otunnus)
-          SET jaksotettu = 0
-          WHERE yhtio = '$kukarow[yhtio]'
-          and jaksotettu = '$laskurow[jaksotettu]'
-          and otunnus in ($jaksorow[tunnukset])";
+    $query = "UPDATE tilausrivi USE INDEX (yhtio_otunnus)
+              SET jaksotettu = 0
+              WHERE yhtio    = '$kukarow[yhtio]'
+              and jaksotettu = '$laskurow[jaksotettu]'
+              and otunnus    in ($jaksorow[tunnukset])";
     $result = mysql_query($query) or pupe_error($query);
   }
 }
 
 // Maksopositiot
-$query = "  SELECT *
-      FROM maksuehto
-      WHERE yhtio = '$kukarow[yhtio]'
-      and tunnus  = '$laskurow[maksuehto]'
-      and jaksotettu != ''
-      and kaytossa = ''";
+$query = "SELECT *
+          FROM maksuehto
+          WHERE yhtio     = '$kukarow[yhtio]'
+          and tunnus      = '$laskurow[maksuehto]'
+          and jaksotettu != ''
+          and kaytossa    = ''";
 $result = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($result) == 1) {
@@ -293,10 +293,10 @@ if (mysql_num_rows($result) == 1) {
 
   $tot = 0;
 
-  $query  = "  SELECT *
-        FROM asiakas
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tunnus  = '$laskurow[liitostunnus]'";
+  $query  = "SELECT *
+             FROM asiakas
+             WHERE yhtio = '$kukarow[yhtio]'
+             and tunnus  = '$laskurow[liitostunnus]'";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) == 1) {
@@ -304,19 +304,19 @@ if (mysql_num_rows($result) == 1) {
   }
 
   // Haetaan laskun summat
-  $query = "  SELECT
-        group_concat(distinct lasku.tunnus) tilaukset,
-        sum(if (tilausrivi.jaksotettu='$laskurow[jaksotettu]', round(tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa},2), 0)) jaksotettavaa_veroton,
-        sum(if (tilausrivi.jaksotettu='$laskurow[jaksotettu]', round(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa},2), 0)) jaksotettavaa_verolli,
-        round(sum(if (tilausrivi.jaksotettu=0 , tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)),2) loput_veroton,
-        round(sum(if (tilausrivi.jaksotettu=0 , tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)),2) loput_verolli
-        FROM lasku
-        JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D'
-        WHERE lasku.yhtio    = '$kukarow[yhtio]'
-        and lasku.jaksotettu  = '$laskurow[jaksotettu]'
-        and lasku.tila       IN ($sallitut_tilat)
-        and lasku.jaksotettu   > 0
-        GROUP by lasku.jaksotettu";
+  $query = "SELECT
+            group_concat(distinct lasku.tunnus) tilaukset,
+            sum(if (tilausrivi.jaksotettu='$laskurow[jaksotettu]', round(tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa},2), 0)) jaksotettavaa_veroton,
+            sum(if (tilausrivi.jaksotettu='$laskurow[jaksotettu]', round(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa},2), 0)) jaksotettavaa_verolli,
+            round(sum(if (tilausrivi.jaksotettu=0 , tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)),2) loput_veroton,
+            round(sum(if (tilausrivi.jaksotettu=0 , tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)),2) loput_verolli
+            FROM lasku
+            JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D'
+            WHERE lasku.yhtio    = '$kukarow[yhtio]'
+            and lasku.jaksotettu = '$laskurow[jaksotettu]'
+            and lasku.tila       IN ($sallitut_tilat)
+            and lasku.jaksotettu > 0
+            GROUP by lasku.jaksotettu";
   $result = mysql_query($query) or pupe_error($query);
   $rivrow = mysql_fetch_array($result);
 
@@ -334,11 +334,11 @@ if (mysql_num_rows($result) == 1) {
   }
 
   // Haetaan kaikki tämän tilauksen laskutuspositiot (HUOM: Positioiden summ on veroton tai verollinen riippuen yhtiön myyntihinnoista)
-  $query = "  SELECT *
-        FROM maksupositio
-        WHERE yhtio = '$kukarow[yhtio]'
-        and otunnus = '$laskurow[jaksotettu]'
-        ORDER BY tunnus";
+  $query = "SELECT *
+            FROM maksupositio
+            WHERE yhtio = '$kukarow[yhtio]'
+            and otunnus = '$laskurow[jaksotettu]'
+            ORDER BY tunnus";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -349,12 +349,12 @@ if (mysql_num_rows($result) == 1) {
 
     $kuvares = t_avainsana("LASKUKUVAUS");
 
-    $query = "  SELECT *
-          FROM maksuehto
-          WHERE yhtio = '$kukarow[yhtio]'
-          and jaksotettu = ''
-          and kaytossa = ''
-          ORDER BY jarjestys";
+    $query = "SELECT *
+              FROM maksuehto
+              WHERE yhtio    = '$kukarow[yhtio]'
+              and jaksotettu = ''
+              and kaytossa   = ''
+              ORDER BY jarjestys";
     $mresult = mysql_query($query) or pupe_error($query);
 
     echo "<table>
@@ -376,10 +376,10 @@ if (mysql_num_rows($result) == 1) {
       $todellinen_osuus = round($row["summa"] / $jaksotettavaa * 100, 4);
 
       if ($row["osuus"] != $todellinen_osuus) {
-        $maposupdate_query = "  UPDATE maksupositio SET
-                    osuus = '$todellinen_osuus'
-                    WHERE yhtio = '$kukarow[yhtio]'
-                    AND tunnus = '$row[tunnus]'";
+        $maposupdate_query = "UPDATE maksupositio SET
+                              osuus       = '$todellinen_osuus'
+                              WHERE yhtio = '$kukarow[yhtio]'
+                              AND tunnus  = '$row[tunnus]'";
         $maposupdate = mysql_query($maposupdate_query) or pupe_error($maposupdate_query);
 
         $row["osuus"] = $todellinen_osuus;
@@ -421,10 +421,10 @@ if (mysql_num_rows($result) == 1) {
 
         echo "<td><input type='text' size='31' name='lisatiedot' value='$row[lisatiedot]'></td>";
 
-        $query = "  SELECT *
-              FROM tuote
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'";
+        $query = "SELECT *
+                  FROM tuote
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'";
         $tuoteresult = mysql_query($query) or pupe_error($query);
         $tuoterow = mysql_fetch_array($tuoteresult);
 

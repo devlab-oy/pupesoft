@@ -83,10 +83,10 @@ if ($tee != '' and isset($painoinnappia)) {
 
   if ($konserni != "") {
     // Haetaan konsernin kaikki yhtiot ja tehdään mysql lauseke muuttujaan yhtiot
-    $query = "  SELECT group_concat(concat('\'',yhtio,'\'')) yhtiot
-          from yhtio
-          where konserni = '$yhtiorow[konserni]'
-          and konserni != ''";
+    $query = "SELECT group_concat(concat('\'',yhtio,'\'')) yhtiot
+              from yhtio
+              where konserni  = '$yhtiorow[konserni]'
+              and konserni   != ''";
     $result = mysql_query($query) or pupe_error($query);
     $rivi = mysql_fetch_assoc($result);
 
@@ -143,19 +143,19 @@ if ($tee != '' and isset($painoinnappia)) {
     $edellisvuosi = $vvl-1;
     $toissavuosi  = $vvl-2;
 
-    $query = "  SELECT
-          $q_yhtio
-          lasku.piiri,
-          tilausrivi.osasto,
-          tilausrivi.try,
-          round(sum(if(tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}', tilausrivi.rivihinta, 0)), 2) aikavalilla,
-          round(sum(if(tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}', tilausrivi.kate, 0)), 2) kate_aikavalilla,
-          round(sum(if(tilausrivi.laskutettuaika >= '{$vvl}-01-01' and tilausrivi.laskutettuaika <= '{$vvl}-12-31', tilausrivi.rivihinta, 0)), 2) summaVA,
-          round(sum(if(tilausrivi.laskutettuaika >= '{$vvl}-01-01' and tilausrivi.laskutettuaika <= '{$vvl}-12-31', tilausrivi.kate, 0)), 2) kateVA,
-          round(sum(if(tilausrivi.laskutettuaika >= '{$edellisvuosi}-01-01' and tilausrivi.laskutettuaika <= '{$edellisvuosi}-12-31', tilausrivi.rivihinta, 0)), 2) edvuodenmyynti,
-          round(sum(if(tilausrivi.laskutettuaika >= '{$edellisvuosi}-01-01' and tilausrivi.laskutettuaika <= '{$edellisvuosi}-12-31', tilausrivi.kate, 0)), 2) edvuodenkate,
-          round(sum(if(tilausrivi.laskutettuaika >= '{$toissavuosi}-01-01' and tilausrivi.laskutettuaika <= '{$toissavuosi}-12-31', tilausrivi.rivihinta, 0)), 2) toissavuodenmyynti,
-          round(sum(if(tilausrivi.laskutettuaika >= '{$toissavuosi}-01-01' and tilausrivi.laskutettuaika <= '{$toissavuosi}-12-31', tilausrivi.kate, 0)), 2) toissavuodenkate";
+    $query = "SELECT
+              $q_yhtio
+              lasku.piiri,
+              tilausrivi.osasto,
+              tilausrivi.try,
+              round(sum(if(tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}', tilausrivi.rivihinta, 0)), 2) aikavalilla,
+              round(sum(if(tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}', tilausrivi.kate, 0)), 2) kate_aikavalilla,
+              round(sum(if(tilausrivi.laskutettuaika >= '{$vvl}-01-01' and tilausrivi.laskutettuaika <= '{$vvl}-12-31', tilausrivi.rivihinta, 0)), 2) summaVA,
+              round(sum(if(tilausrivi.laskutettuaika >= '{$vvl}-01-01' and tilausrivi.laskutettuaika <= '{$vvl}-12-31', tilausrivi.kate, 0)), 2) kateVA,
+              round(sum(if(tilausrivi.laskutettuaika >= '{$edellisvuosi}-01-01' and tilausrivi.laskutettuaika <= '{$edellisvuosi}-12-31', tilausrivi.rivihinta, 0)), 2) edvuodenmyynti,
+              round(sum(if(tilausrivi.laskutettuaika >= '{$edellisvuosi}-01-01' and tilausrivi.laskutettuaika <= '{$edellisvuosi}-12-31', tilausrivi.kate, 0)), 2) edvuodenkate,
+              round(sum(if(tilausrivi.laskutettuaika >= '{$toissavuosi}-01-01' and tilausrivi.laskutettuaika <= '{$toissavuosi}-12-31', tilausrivi.rivihinta, 0)), 2) toissavuodenmyynti,
+              round(sum(if(tilausrivi.laskutettuaika >= '{$toissavuosi}-01-01' and tilausrivi.laskutettuaika <= '{$toissavuosi}-12-31', tilausrivi.kate, 0)), 2) toissavuodenkate";
 
     $q_lisa = "  GROUP BY $q_yhtio lasku.piiri+0,tilausrivi.osasto,tilausrivi.try
           ORDER BY $q_yhtio lasku.piiri+0,tilausrivi.osasto,tilausrivi.try";
@@ -172,14 +172,14 @@ if ($tee != '' and isset($painoinnappia)) {
       $q_osatry = ",tilausrivi.osasto,tilausrivi.try";
     }
 
-    $query = "  SELECT
-          $q_yhtio
-          lasku.piiri,
-          round(sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.rivihinta,0)),2) myyntinyt,
-          round(sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.rivihinta,0)),2) myyntied,
-          round(sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kate,0)),2) katenyt,
-          round(sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.kate,0)),2) kateed
-          $q_osatry";
+    $query = "SELECT
+              $q_yhtio
+              lasku.piiri,
+              round(sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.rivihinta,0)),2) myyntinyt,
+              round(sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.rivihinta,0)),2) myyntied,
+              round(sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kate,0)),2) katenyt,
+              round(sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.kate,0)),2) kateed
+              $q_osatry";
 
     $q_lisa = "  GROUP BY lasku.piiri+0 $q_osatry
           ORDER BY lasku.piiri+0 $q_osatry";
@@ -196,17 +196,17 @@ if ($tee != '' and isset($painoinnappia)) {
       $q_osatry = ",tilausrivi.osasto,tilausrivi.try";
     }
 
-    $query = "  SELECT
-          $q_yhtio
-          lasku.ytunnus,
-          lasku.nimi,
-          lasku.nimitark,
-          lasku.piiri,
-          round(sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl', tilausrivi.kate,0)),2) kateed,
-          round(sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl', tilausrivi.rivihinta,0)),2) myyntied,
-          round(sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl',  tilausrivi.kate,0)),2) katenyt,
-          round(sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl',  tilausrivi.rivihinta,0)),2) myyntinyt
-          $q_osatry";
+    $query = "SELECT
+              $q_yhtio
+              lasku.ytunnus,
+              lasku.nimi,
+              lasku.nimitark,
+              lasku.piiri,
+              round(sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl', tilausrivi.kate,0)),2) kateed,
+              round(sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl', tilausrivi.rivihinta,0)),2) myyntied,
+              round(sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl',  tilausrivi.kate,0)),2) katenyt,
+              round(sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl',  tilausrivi.rivihinta,0)),2) myyntinyt
+              $q_osatry";
 
     $q_lisa = "  GROUP BY $q_yhtio lasku.piiri+0 $q_osatry,lasku.ytunnus,lasku.nimi,lasku.nimitark
           ORDER BY $q_yhtio lasku.piiri+0 $q_osatry,lasku.ytunnus,lasku.nimi,lasku.nimitark";

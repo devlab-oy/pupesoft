@@ -9,7 +9,7 @@ $xmlstr .= '</groups>';
 $xml = new SimpleXMLElement($xmlstr);
 
 $customer = $xml->addChild('customer');
-$customer->addChild('case','pupesoft');
+$customer->addChild('case', 'pupesoft');
 $customer->addChild('name', utf8_encode(xmlentities($yhtiorow["nimi"])));
 $customer->addChild('address', utf8_encode(xmlentities($yhtiorow["osoite"])));
 $customer->addChild('timestamp', date("Y-m-d H:i"));
@@ -20,7 +20,7 @@ foreach ($dnsryhma as $key => $osasto) {
 
   // Osasto on joka rivillä sama, otetaan ekalta riviltä tiedot
   $group = $information->addChild('group');
-  $group->addAttribute('extSystemID',$key);
+  $group->addAttribute('extSystemID', $key);
   // setataan muuttuja joka seuraavassa luupissa Osaston vaihtuessa tehdään yhden kerran groupname-xml kirjoitus
   $vain_ekalla = 1;
 
@@ -28,19 +28,19 @@ foreach ($dnsryhma as $key => $osasto) {
   foreach ($osasto as $try) {
 
     if ($vain_ekalla == 1) {
-      $group->addChild('groupname',utf8_encode(xmlentities($try["osasto_fi"])));
-      $group->addChild('groupnameswe',utf8_encode(xmlentities($try["osasto_se"])));
-      $group->addChild('groupnameeng',utf8_encode(xmlentities($try["osasto_en"])));
+      $group->addChild('groupname', utf8_encode(xmlentities($try["osasto_fi"])));
+      $group->addChild('groupnameswe', utf8_encode(xmlentities($try["osasto_se"])));
+      $group->addChild('groupnameeng', utf8_encode(xmlentities($try["osasto_en"])));
     }
 
     $vain_ekalla = 2;
 
     $subgroup = $group->addChild('subgroup');
-    $subgroup->addAttribute('extSystemID',$try["try"]);
-      $subgroup->addChild('subgroupcode',$try["try"]);
-      $subgroup->addChild('subgroupname',    utf8_encode(xmlentities($try["try_fi"])));
-      $subgroup->addChild('subgroupnameswe',  utf8_encode(xmlentities($try["try_se"])));
-      $subgroup->addChild('subgroupnameeng',  utf8_encode(xmlentities($try["try_en"])));
+    $subgroup->addAttribute('extSystemID', $try["try"]);
+    $subgroup->addChild('subgroupcode', $try["try"]);
+    $subgroup->addChild('subgroupname',    utf8_encode(xmlentities($try["try_fi"])));
+    $subgroup->addChild('subgroupnameswe',  utf8_encode(xmlentities($try["try_se"])));
+    $subgroup->addChild('subgroupnameeng',  utf8_encode(xmlentities($try["try_en"])));
   }
 }
 
@@ -48,4 +48,4 @@ $xml->asXML($tiedoston_sijainti);
 
 $ftpfile = realpath($tiedoston_sijainti);
 $todnimi = basename($tiedoston_sijainti);
-require ("{$pupe_root_polku}/inc/ftp-send.inc");
+require "{$pupe_root_polku}/inc/ftp-send.inc";

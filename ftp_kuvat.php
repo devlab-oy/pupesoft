@@ -107,13 +107,13 @@ if ($tee == "aja") {
   else {
 
     //tehd‰‰n kysely t‰ss‰, ettei tule timeouttia
-    $query = "  SELECT liitetiedostot.*
-          FROM liitetiedostot
-          JOIN tuote ON tuote.yhtio = liitetiedostot.yhtio and tuote.hinnastoon = 'W' and tuote.tunnus = liitetiedostot.liitostunnus
-          WHERE liitetiedostot.yhtio = '$kyhtio'
-          and liitetiedostot.liitos = 'tuote'
-          and liitetiedostot.kayttotarkoitus in ('TK','MU')
-          ORDER BY liitetiedostot.kayttotarkoitus ASC";
+    $query = "SELECT liitetiedostot.*
+              FROM liitetiedostot
+              JOIN tuote ON tuote.yhtio = liitetiedostot.yhtio and tuote.hinnastoon = 'W' and tuote.tunnus = liitetiedostot.liitostunnus
+              WHERE liitetiedostot.yhtio         = '$kyhtio'
+              and liitetiedostot.liitos          = 'tuote'
+              and liitetiedostot.kayttotarkoitus in ('TK','MU')
+              ORDER BY liitetiedostot.kayttotarkoitus ASC";
     $result = pupe_query($query);
 
     //l‰hetet‰‰n tiedosto

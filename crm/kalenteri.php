@@ -82,12 +82,12 @@ else {
   $kons = 0;
 }
 
-$query = "  SELECT yhtio
-      FROM oikeu
-      WHERE yhtio  = '$kukarow[yhtio]'
-      and kuka  = '$kukarow[kuka]'
-      and nimi like '%asiakasmemo.php'
-      and alanimi = ''";
+$query = "SELECT yhtio
+          FROM oikeu
+          WHERE yhtio = '$kukarow[yhtio]'
+          and kuka    = '$kukarow[kuka]'
+          and nimi    like '%asiakasmemo.php'
+          and alanimi = ''";
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) > 0) {
@@ -102,10 +102,10 @@ else {
 if( isset($poista_liite) and (int) $poista_liite > 0 ) {
   $poista_liite = (int) $poista_liite;
 
-  $query = "  DELETE FROM liitetiedostot
-        WHERE tunnus = $poista_liite
-        AND liitos = 'kalenterimerkintä'
-        AND yhtio = '$kukarow[yhtio]'";
+  $query = "DELETE FROM liitetiedostot
+            WHERE tunnus = $poista_liite
+            AND liitos   = 'kalenterimerkintä'
+            AND yhtio    = '$kukarow[yhtio]'";
   pupe_query($query);
 }
 
@@ -187,10 +187,10 @@ if ($tee == 'LISAA') {
     $tunnus = (int) $tunnus;
 
     if ($tunnus > 0) {
-      $query = "  DELETE
-            FROM kalenteri
-            WHERE tunnus=$tunnus
-            $konsernit";
+      $query = "DELETE
+                FROM kalenteri
+                WHERE tunnus=$tunnus
+                $konsernit";
       pupe_query($query);
     }
 
@@ -215,16 +215,16 @@ if ($tee == 'LISAA') {
       $lkello = $lkello.":00";
     }
 
-    $query = "  INSERT INTO kalenteri
-          SET
-          yhtio     = '$kyhtio',
-          laatija    = '$kukarow[kuka]',
-          kuka     = '$kenelle',
-          pvmalku   = '$year-$kuu-$paiva $kello:00',
-          pvmloppu   = '$lyear-$lkuu-$lpaiva $lkello',
-          asiakas   = '$ytunnus',
-          liitostunnus = '$asiakasid',
-          kentta01   = '$viesti',";
+    $query = "INSERT INTO kalenteri
+              SET
+              yhtio        = '$kyhtio',
+              laatija      = '$kukarow[kuka]',
+              kuka         = '$kenelle',
+              pvmalku      = '$year-$kuu-$paiva $kello:00',
+              pvmloppu     = '$lyear-$lkuu-$lpaiva $lkello',
+              asiakas      = '$ytunnus',
+              liitostunnus = '$asiakasid',
+              kentta01     = '$viesti',";
 
     if ($toim == 'TYOMAARAYS_ASENTAJA' or $tyomaarays != '') {
       $query .= "kentta02  = '$tyomaarays',";
@@ -244,11 +244,11 @@ if ($tee == 'LISAA') {
     // tapahtuu poistamalla vanha merkintä ja lisäämällä uusi päivitetty
     // versio merkinnästä.
     if ($tunnus > 0 and $uusi_tunnus > 0) {
-      $query = "  UPDATE liitetiedostot
-            SET liitostunnus = $uusi_tunnus
-            WHERE liitostunnus = $tunnus
-            AND liitos = 'kalenterimerkintä'
-            AND yhtio = '{$kukarow['yhtio']}'";
+      $query = "UPDATE liitetiedostot
+                SET liitostunnus = $uusi_tunnus
+                WHERE liitostunnus = $tunnus
+                AND liitos         = 'kalenterimerkintä'
+                AND yhtio          = '{$kukarow['yhtio']}'";
       pupe_query($query);
     }
 
@@ -263,16 +263,16 @@ if ($tee == 'LISAA') {
 if ($tee == "POISTA" and (int) $tunnus > 0) {
   $tunnus = (int) $tunnus;
 
-  $query = "  DELETE FROM kalenteri
-        WHERE tunnus = $tunnus
-        $konsernit";
+  $query = "DELETE FROM kalenteri
+            WHERE tunnus = $tunnus
+            $konsernit";
   pupe_query($query);
 
   // Poistetaan myös liitetiedostot tälle kalenterimerkinnälle
-  $query = "  DELETE FROM liitetiedostot
-        WHERE liitostunnus = {$tunnus}
-        AND liitos = 'kalenterimerkintä'
-        AND yhtio = '{$kukarow['yhtio']}'";
+  $query = "DELETE FROM liitetiedostot
+            WHERE liitostunnus = {$tunnus}
+            AND liitos         = 'kalenterimerkintä'
+            AND yhtio          = '{$kukarow['yhtio']}'";
   pupe_query($query);
 }
 
@@ -281,19 +281,19 @@ if($tee == "SYOTA") {
   if ($tunnus != '') {
     $kukalisa = $toim == 'TYOMAARAYS_ASENTAJA' ? " AND kuka = '$kukarow[kuka]' " : '';
 
-    $query = "  SELECT *,
-          if(asiakas='0','',asiakas) asiakas,
-          if(liitostunnus=0,'',liitostunnus) liitostunnus,
-          Year(pvmalku) lyear,
-          Month(pvmalku) lkuu,
-          Day(pvmalku) lpaiva,
-          right(pvmalku,8) lkello,
-          right(pvmloppu,8) lopkello
-          FROM kalenteri
-          WHERE tunnus = '$tunnus'
-          $konsernit
-          $kukalisa
-          and tyyppi = 'kalenteri'";
+    $query = "SELECT *,
+              if(asiakas='0','',asiakas) asiakas,
+              if(liitostunnus=0,'',liitostunnus) liitostunnus,
+              Year(pvmalku) lyear,
+              Month(pvmalku) lkuu,
+              Day(pvmalku) lpaiva,
+              right(pvmalku,8) lkello,
+              right(pvmloppu,8) lopkello
+              FROM kalenteri
+              WHERE tunnus = '$tunnus'
+              $konsernit
+              $kukalisa
+              and tyyppi   = 'kalenteri'";
     $res  = pupe_query($query);
     $irow = mysql_fetch_assoc($res);
 
@@ -410,14 +410,14 @@ if($tee == "SYOTA") {
     $lisays .= "<tr><td>".t("Kalenteri")."</td><td><select name='kenelle'>";
     $lisays .= "<option value='$kukarow[kuka]'>".t("Oma")."</option>";
 
-    $query = "  SELECT distinct kuka.nimi, kuka.kuka
-          FROM kuka, oikeu
-          WHERE kuka.yhtio  = '$kukarow[yhtio]'
-          and oikeu.yhtio    = kuka.yhtio
-          and oikeu.kuka    = kuka.kuka
-          and oikeu.nimi    = 'crm/kalenteri.php'
-          and kuka.tunnus <> '$kukarow[tunnus]'
-          ORDER BY kuka.nimi";
+    $query = "SELECT distinct kuka.nimi, kuka.kuka
+              FROM kuka, oikeu
+              WHERE kuka.yhtio = '$kukarow[yhtio]'
+              and oikeu.yhtio  = kuka.yhtio
+              and oikeu.kuka   = kuka.kuka
+              and oikeu.nimi   = 'crm/kalenteri.php'
+              and kuka.tunnus  <> '$kukarow[tunnus]'
+              ORDER BY kuka.nimi";
     $result = pupe_query($query);
 
     while ($row = mysql_fetch_assoc($result)) {
@@ -454,11 +454,11 @@ if($tee == "SYOTA") {
           </td>
           </tr>";
 
-  $query = "  SELECT *
-        from liitetiedostot
-        where yhtio = '$kukarow[yhtio]'
-        and liitos  = 'kalenterimerkintä'
-        and liitostunnus = '$tunnus'";
+  $query = "SELECT *
+            from liitetiedostot
+            where yhtio      = '$kukarow[yhtio]'
+            and liitos       = 'kalenterimerkintä'
+            and liitostunnus = '$tunnus'";
   $liiteres = pupe_query($query);
 
   if (mysql_num_rows($liiteres) > 0) {
@@ -507,16 +507,16 @@ if ($toim != 'TYOMAARAYS_ASENTAJA') {
   echo "<td class='back' valign='top' nowrap>";
 
   //listataan paivan muistutukset
-  $query = "  SELECT kalenteri.tunnus tunnus, left(pvmalku,10) Muistutukset, asiakas.nimi Asiakas, yhteyshenkilo.nimi Yhteyshenkilo, kalenteri.kentta01 Kommentit, kalenteri.tapa Tapa, kuka.nimi Nimi, kalenteri.yhtio
-        FROM kalenteri
-        LEFT JOIN kuka ON kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka
-        LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.yhtio=kalenteri.yhtio and yhteyshenkilo.tyyppi = 'A'
-        LEFT JOIN asiakas ON asiakas.tunnus=kalenteri.liitostunnus and asiakas.yhtio=kalenteri.yhtio
-        WHERE kalenteri.kuka in ($vertaa)
-        and kalenteri.tyyppi='Muistutus'
-        and kalenteri.kuittaus='K'
-        $konsernit
-        ORDER BY kalenteri.pvmalku desc";
+  $query = "SELECT kalenteri.tunnus tunnus, left(pvmalku,10) Muistutukset, asiakas.nimi Asiakas, yhteyshenkilo.nimi Yhteyshenkilo, kalenteri.kentta01 Kommentit, kalenteri.tapa Tapa, kuka.nimi Nimi, kalenteri.yhtio
+            FROM kalenteri
+            LEFT JOIN kuka ON kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka
+            LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.yhtio=kalenteri.yhtio and yhteyshenkilo.tyyppi = 'A'
+            LEFT JOIN asiakas ON asiakas.tunnus=kalenteri.liitostunnus and asiakas.yhtio=kalenteri.yhtio
+            WHERE kalenteri.kuka in ($vertaa)
+            and kalenteri.tyyppi='Muistutus'
+            and kalenteri.kuittaus='K'
+            $konsernit
+            ORDER BY kalenteri.pvmalku desc";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -597,13 +597,13 @@ for ($i=1; $i <= days_in_month($kuu, $year); $i++) {
   $paiv = sprintf("%02d", $i);
   $kuu2 = sprintf("%02d", $kuu);
 
-  $query = "  SELECT tunnus
-        from kalenteri
-        where
-        ((left(pvmalku,10) = '$year-$kuu2-$paiv') or (left(pvmalku,10) < '$year-$kuu2-$paiv' and left(pvmloppu,10) >= '$year-$kuu2-$paiv'))
-        and kuka in ($vertaa)
-        $konsernit
-        and tyyppi = 'kalenteri'";
+  $query = "SELECT tunnus
+            from kalenteri
+            where
+            ((left(pvmalku,10) = '$year-$kuu2-$paiv') or (left(pvmalku,10) < '$year-$kuu2-$paiv' and left(pvmloppu,10) >= '$year-$kuu2-$paiv'))
+            and kuka   in ($vertaa)
+            $konsernit
+            and tyyppi = 'kalenteri'";
   $result = pupe_query($query);
 
   //väritetään tämän päivän pvm omalla värillä...
@@ -678,14 +678,14 @@ if ($yhtiorow["monikayttajakalenteri"] == "" or $kukarow["asema"] == "MP") {
       <table width='100%'>
       <tr><td width='1%'><input type='checkbox' name='kalen[]' value = '$kukarow[kuka]' $checked onclick='submit()'></td><td>".t("Oma")."</td></tr>";
 
-  $query = "  SELECT distinct kuka.nimi, kuka.kuka
-        FROM kuka, oikeu
-        WHERE kuka.yhtio  = '$kukarow[yhtio]'
-        and oikeu.yhtio    = kuka.yhtio
-        and oikeu.kuka    = kuka.kuka
-        and oikeu.nimi    = 'crm/kalenteri.php'
-        and kuka.tunnus <> '$kukarow[tunnus]'
-        ORDER BY kuka.nimi";
+  $query = "SELECT distinct kuka.nimi, kuka.kuka
+            FROM kuka, oikeu
+            WHERE kuka.yhtio = '$kukarow[yhtio]'
+            and oikeu.yhtio  = kuka.yhtio
+            and oikeu.kuka   = kuka.kuka
+            and oikeu.nimi   = 'crm/kalenteri.php'
+            and kuka.tunnus  <> '$kukarow[tunnus]'
+            ORDER BY kuka.nimi";
   $result = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($result)) {
@@ -706,17 +706,17 @@ echo "</tr>";
 echo "<tr>";
 echo "<td class='back' valign='top' nowrap>";
 
-$query = "  SELECT kalenteri.asiakas, kalenteri.liitostunnus, kentta01, tapa, kuka.nimi, kalenteri.tunnus, pvmalku, pvmloppu, kalenteri.yhtio
-      FROM kalenteri, kuka
-      WHERE kalenteri.kuka in ($vertaa)
-      and kalenteri.kuka  = kuka.kuka
-      and kalenteri.yhtio = kuka.yhtio
-      and kalenteri.tyyppi= 'kalenteri'
-      and pvmalku >= '$year-$kuu-$paiva 00:00:00'
-      and pvmalku <= '$year-$kuu-$paiva 23:59:00'
-      and kokopaiva != ''
-      $konsernit
-      order by pvmalku";
+$query = "SELECT kalenteri.asiakas, kalenteri.liitostunnus, kentta01, tapa, kuka.nimi, kalenteri.tunnus, pvmalku, pvmloppu, kalenteri.yhtio
+          FROM kalenteri, kuka
+          WHERE kalenteri.kuka  in ($vertaa)
+          and kalenteri.kuka    = kuka.kuka
+          and kalenteri.yhtio   = kuka.yhtio
+          and kalenteri.tyyppi= 'kalenteri'
+          and pvmalku           >= '$year-$kuu-$paiva 00:00:00'
+          and pvmalku           <= '$year-$kuu-$paiva 23:59:00'
+          and kokopaiva        != ''
+          $konsernit
+          order by pvmalku";
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) > 0) {
@@ -728,10 +728,10 @@ if (mysql_num_rows($result) > 0) {
   while ($prow = mysql_fetch_assoc ($result)) {
 
     //haetaan asiakkaan tiedot
-    $query = "  SELECT *
-          from asiakas
-          where yhtio = '$prow[yhtio]'
-          and tunnus  = '$prow[liitostunnus]'";
+    $query = "SELECT *
+              from asiakas
+              where yhtio = '$prow[yhtio]'
+              and tunnus  = '$prow[liitostunnus]'";
     $asres = pupe_query($query);
     $asiak = mysql_fetch_assoc($asres);
 
@@ -812,17 +812,17 @@ while ($date != $whileloppu) {
   $paiva = sprintf("%02d", $paiva);
   $kuu   = sprintf("%02d", $kuu);
 
-  $query = "  SELECT
-        if((pvmalku < '$year-$kuu-$paiva ".$AIKA_ARRAY[0].":00' and pvmalku  > '$year-$kuu-$paiva 00:00:00') or (pvmalku  < '$year-$kuu-$paiva 00:00:00' and pvmloppu > '$year-$kuu-$paiva 00:00:00'), '$year-$kuu-$paiva ".$AIKA_ARRAY[0].":00', pvmalku) pvmalku,
-        if((pvmloppu > '$year-$kuu-$paiva $vikaloppu:00' and pvmloppu <= '$year-$kuu-$paiva 23:59:59') or (pvmloppu = '$year-$kuu-$paiva 00:00:00') or (pvmalku  < '$year-$kuu-$paiva 00:00:00' and pvmloppu > '$year-$kuu-$paiva 23:59:59'), '$year-$kuu-$paiva $vikaloppu:00', pvmloppu) pvmloppu
-        FROM kalenteri
-        LEFT JOIN kuka ON kalenteri.kuka = kuka.kuka and kalenteri.yhtio = kuka.yhtio
-        WHERE kalenteri.kuka in ($vertaa)
-        $konsernit
-        and kalenteri.tyyppi in ('kalenteri', 'asennuskalenteri')
-        and pvmalku  <= '$year-$kuu-$paiva $date:00'
-        and pvmloppu >= '$year-$kuu-$paiva $date:00'
-        and kokopaiva = ''";
+  $query = "SELECT
+            if((pvmalku < '$year-$kuu-$paiva ".$AIKA_ARRAY[0].":00' and pvmalku  > '$year-$kuu-$paiva 00:00:00') or (pvmalku  < '$year-$kuu-$paiva 00:00:00' and pvmloppu > '$year-$kuu-$paiva 00:00:00'), '$year-$kuu-$paiva ".$AIKA_ARRAY[0].":00', pvmalku) pvmalku,
+            if((pvmloppu > '$year-$kuu-$paiva $vikaloppu:00' and pvmloppu <= '$year-$kuu-$paiva 23:59:59') or (pvmloppu = '$year-$kuu-$paiva 00:00:00') or (pvmalku  < '$year-$kuu-$paiva 00:00:00' and pvmloppu > '$year-$kuu-$paiva 23:59:59'), '$year-$kuu-$paiva $vikaloppu:00', pvmloppu) pvmloppu
+            FROM kalenteri
+            LEFT JOIN kuka ON kalenteri.kuka = kuka.kuka and kalenteri.yhtio = kuka.yhtio
+            WHERE kalenteri.kuka in ($vertaa)
+            $konsernit
+            and kalenteri.tyyppi in ('kalenteri', 'asennuskalenteri')
+            and pvmalku          <= '$year-$kuu-$paiva $date:00'
+            and pvmloppu         >= '$year-$kuu-$paiva $date:00'
+            and kokopaiva        = ''";
   $result = pupe_query($query);
 
   while ($row=mysql_fetch_assoc($result)) {
@@ -851,39 +851,39 @@ while ($kello_nyt != $whileloppu) {
   $paiva     = sprintf("%02d", $paiva);
   $kuu       = sprintf("%02d", $kuu);
 
-  $query = "  SELECT kalenteri.asiakas, kalenteri.liitostunnus, kentta01, tapa, kuka.nimi, kalenteri.kuka, kalenteri.tunnus,
-        if((pvmalku  < '$year-$kuu-$paiva ".$AIKA_ARRAY[0].":00' and pvmalku > '$year-$kuu-$paiva 00:00:00') or (pvmalku  < '$year-$kuu-$paiva 00:00:00' and pvmloppu > '$year-$kuu-$paiva 00:00:00'), '$year-$kuu-$paiva ".$AIKA_ARRAY[0].":00', pvmalku) pvmalku,
-        if((pvmloppu > '$year-$kuu-$paiva $vikaloppu:00' and pvmloppu <= '$year-$kuu-$paiva 23:59:59') or (pvmloppu = '$year-$kuu-$paiva 00:00:00') or (pvmalku  < '$year-$kuu-$paiva 00:00:00' and pvmloppu > '$year-$kuu-$paiva 23:59:59'),  '$year-$kuu-$paiva $vikaloppu:00', pvmloppu) pvmloppu,
-        TIME_TO_SEC(if((pvmloppu > '$year-$kuu-$paiva $vikaloppu:00') or (pvmloppu = '$year-$kuu-$paiva 00:00:00'),'$vikaloppu:59', right(pvmloppu,8))) - TIME_TO_SEC(if(right(pvmalku,8) < '".$AIKA_ARRAY[0].":00' or pvmalku < '$year-$kuu-$paiva 00:00:00','".$AIKA_ARRAY[0].":00', right(pvmalku,8))) kesto,
-        kalenteri.yhtio yhtio,
-        kalenteri.kuka kuka,
-        kalenteri.laatija laatija,
-        kalenteri.kuittaus,
-        kalenteri.tyyppi
-        FROM kalenteri
-        LEFT JOIN kuka ON kalenteri.kuka = kuka.kuka and kalenteri.yhtio = kuka.yhtio
-        WHERE kalenteri.kuka in ($vertaa)
-        and kalenteri.tyyppi in ($tyyppi)
-        and kokopaiva = ''
-        $konsernit
-        HAVING pvmalku  = '$year-$kuu-$paiva $kello_nyt:00'
-        order by kesto desc, pvmalku";
+  $query = "SELECT kalenteri.asiakas, kalenteri.liitostunnus, kentta01, tapa, kuka.nimi, kalenteri.kuka, kalenteri.tunnus,
+            if((pvmalku  < '$year-$kuu-$paiva ".$AIKA_ARRAY[0].":00' and pvmalku > '$year-$kuu-$paiva 00:00:00') or (pvmalku  < '$year-$kuu-$paiva 00:00:00' and pvmloppu > '$year-$kuu-$paiva 00:00:00'), '$year-$kuu-$paiva ".$AIKA_ARRAY[0].":00', pvmalku) pvmalku,
+            if((pvmloppu > '$year-$kuu-$paiva $vikaloppu:00' and pvmloppu <= '$year-$kuu-$paiva 23:59:59') or (pvmloppu = '$year-$kuu-$paiva 00:00:00') or (pvmalku  < '$year-$kuu-$paiva 00:00:00' and pvmloppu > '$year-$kuu-$paiva 23:59:59'),  '$year-$kuu-$paiva $vikaloppu:00', pvmloppu) pvmloppu,
+            TIME_TO_SEC(if((pvmloppu > '$year-$kuu-$paiva $vikaloppu:00') or (pvmloppu = '$year-$kuu-$paiva 00:00:00'),'$vikaloppu:59', right(pvmloppu,8))) - TIME_TO_SEC(if(right(pvmalku,8) < '".$AIKA_ARRAY[0].":00' or pvmalku < '$year-$kuu-$paiva 00:00:00','".$AIKA_ARRAY[0].":00', right(pvmalku,8))) kesto,
+            kalenteri.yhtio yhtio,
+            kalenteri.kuka kuka,
+            kalenteri.laatija laatija,
+            kalenteri.kuittaus,
+            kalenteri.tyyppi
+            FROM kalenteri
+            LEFT JOIN kuka ON kalenteri.kuka = kuka.kuka and kalenteri.yhtio = kuka.yhtio
+            WHERE kalenteri.kuka in ($vertaa)
+            and kalenteri.tyyppi in ($tyyppi)
+            and kokopaiva        = ''
+            $konsernit
+            HAVING pvmalku  = '$year-$kuu-$paiva $kello_nyt:00'
+            order by kesto desc, pvmalku";
   $result = pupe_query($query);
 
   //lasketaan montako päällekkäistä on tähän kellonaikaan
-  $aquery = "  SELECT
-        if((pvmalku < '$year-$kuu-$paiva ".$AIKA_ARRAY[0].":00' and pvmalku > '$year-$kuu-$paiva 00:00:00') or (pvmalku < '$year-$kuu-$paiva 00:00:00' and pvmloppu > '$year-$kuu-$paiva 00:00:00'), '$year-$kuu-$paiva ".$AIKA_ARRAY[0].":00', pvmalku) pvmalku,
-        if((pvmloppu > '$year-$kuu-$paiva $vikaloppu:00' and pvmloppu <= '$year-$kuu-$paiva 23:59:59') or (pvmloppu = '$year-$kuu-$paiva 00:00:00') or (pvmalku  < '$year-$kuu-$paiva 00:00:00' and pvmloppu > '$year-$kuu-$paiva 23:59:59'), '$year-$kuu-$paiva $vikaloppu:00', pvmloppu) pvmloppu
-        FROM kalenteri
-        LEFT JOIN kuka ON kalenteri.kuka = kuka.kuka and kalenteri.yhtio = kuka.yhtio
-        WHERE kalenteri.kuka in ($vertaa)
-        $konsernit
-        and kalenteri.tyyppi in ($tyyppi)
-        and kokopaiva = ''
-        HAVING
-        pvmalku  <= '$year-$kuu-$paiva $kello_nyt:00'
-        and pvmalku > '$year-$kuu-$paiva 00:00:00'
-        and pvmloppu >  '$year-$kuu-$paiva $kello_nyt:00'";
+  $aquery = "SELECT
+             if((pvmalku < '$year-$kuu-$paiva ".$AIKA_ARRAY[0].":00' and pvmalku > '$year-$kuu-$paiva 00:00:00') or (pvmalku < '$year-$kuu-$paiva 00:00:00' and pvmloppu > '$year-$kuu-$paiva 00:00:00'), '$year-$kuu-$paiva ".$AIKA_ARRAY[0].":00', pvmalku) pvmalku,
+             if((pvmloppu > '$year-$kuu-$paiva $vikaloppu:00' and pvmloppu <= '$year-$kuu-$paiva 23:59:59') or (pvmloppu = '$year-$kuu-$paiva 00:00:00') or (pvmalku  < '$year-$kuu-$paiva 00:00:00' and pvmloppu > '$year-$kuu-$paiva 23:59:59'), '$year-$kuu-$paiva $vikaloppu:00', pvmloppu) pvmloppu
+             FROM kalenteri
+             LEFT JOIN kuka ON kalenteri.kuka = kuka.kuka and kalenteri.yhtio = kuka.yhtio
+             WHERE kalenteri.kuka in ($vertaa)
+             $konsernit
+             and kalenteri.tyyppi in ($tyyppi)
+             and kokopaiva        = ''
+             HAVING
+             pvmalku              <= '$year-$kuu-$paiva $kello_nyt:00'
+             and pvmalku          > '$year-$kuu-$paiva 00:00:00'
+             and pvmloppu         >  '$year-$kuu-$paiva $kello_nyt:00'";
   $aresult = pupe_query($aquery);
 
   $nyt = mysql_num_rows($aresult);
@@ -906,9 +906,9 @@ while ($kello_nyt != $whileloppu) {
 
         //haetaan asiakkaan tiedot
         if ($row["liitostunnus"] > 0 and $row['tyyppi'] == 'kalenteri') {
-          $query = "  SELECT *
-                from asiakas
-                where tunnus = '$row[liitostunnus]' ".str_ireplace("kalenteri.", "", $konsernit);
+          $query = "SELECT *
+                    from asiakas
+                    where tunnus = '$row[liitostunnus]' ".str_ireplace("kalenteri.", "", $konsernit);
           $asres = pupe_query($query);
           $asiak = mysql_fetch_assoc($asres);
         }
@@ -937,10 +937,10 @@ while ($kello_nyt != $whileloppu) {
         $varilisa = "";
 
         if ($row['tyyppi'] == 'kalenteri') {
-          $query = "  SELECT selitetark_2
-                FROM avainsana
-                WHERE laji = 'KALETAPA' and selitetark='$row[tapa]' ".str_ireplace("kalenteri.", "", $konsernit)."
-                ORDER BY selite+0, laji, jarjestys, selite";
+          $query = "SELECT selitetark_2
+                    FROM avainsana
+                    WHERE laji = 'KALETAPA' and selitetark='$row[tapa]' ".str_ireplace("kalenteri.", "", $konsernit)."
+                    ORDER BY selite+0, laji, jarjestys, selite";
           $varires = pupe_query($query);
           $varirow = mysql_fetch_assoc($varires);
 
@@ -971,11 +971,11 @@ while ($kello_nyt != $whileloppu) {
 
         echo "<br>$row[kentta01]<br />";
 
-        $query = "  SELECT *
-              from liitetiedostot
-              where yhtio = '$kukarow[yhtio]'
-              and liitos  = 'kalenterimerkintä'
-              and liitostunnus = '$row[tunnus]'";
+        $query = "SELECT *
+                  from liitetiedostot
+                  where yhtio      = '$kukarow[yhtio]'
+                  and liitos       = 'kalenterimerkintä'
+                  and liitostunnus = '$row[tunnus]'";
         $liiteres = pupe_query($query);
 
         if (mysql_num_rows($liiteres) > 0) {

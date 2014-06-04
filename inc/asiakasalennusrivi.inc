@@ -9,9 +9,9 @@ if ($i == 0) { //yhtiötä ei näytetä
 }
 
 if (mysql_field_name($result, $i) == "piiri") {
-  $preq = "  SELECT avainsana.selite piiri, avainsana.selitetark selitetark
-        FROM avainsana
-        WHERE  avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='piiri'";
+  $preq = "SELECT avainsana.selite piiri, avainsana.selitetark selitetark
+           FROM avainsana
+           WHERE  avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='piiri'";
   $preres = mysql_query($preq) or pupe_error($preq);
 
   $ulos = "<td><select id='piiri' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
@@ -31,14 +31,14 @@ if (mysql_field_name($result, $i) == "piiri") {
 
 if (mysql_field_name($result, $i) == "asiakas_segmentti") {
 
-  $preq = "  SELECT CONCAT(REPEAT('&raquo;', COUNT(parent.tunnus) - 1), ' ', ifnull(node.koodi, ''), ' ', node.nimi) AS name, node.koodi koodi, node.tunnus
-        FROM dynaaminen_puu AS node
-        JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft)
-        WHERE node.yhtio = '$kukarow[yhtio]'
-        AND node.lft > 0
-        AND node.laji = 'asiakas'
-        GROUP BY node.tunnus
-        ORDER BY node.lft";
+  $preq = "SELECT CONCAT(REPEAT('&raquo;', COUNT(parent.tunnus) - 1), ' ', ifnull(node.koodi, ''), ' ', node.nimi) AS name, node.koodi koodi, node.tunnus
+           FROM dynaaminen_puu AS node
+           JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft)
+           WHERE node.yhtio = '$kukarow[yhtio]'
+           AND node.lft     > 0
+           AND node.laji    = 'asiakas'
+           GROUP BY node.tunnus
+           ORDER BY node.lft";
   $preres = mysql_query($preq) or pupe_error($preq);
 
   $ulos = "<td><select id='asiakas_segmentti' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
@@ -57,10 +57,10 @@ if (mysql_field_name($result, $i) == "asiakas_segmentti") {
 
 if (mysql_field_name($result, $i) == "ryhma") {
 
-  $query = "  SELECT ryhma, if (ryhma!=selite, concat_ws(' - ', ryhma, selite), ryhma) selitetark
-        FROM perusalennus
-        WHERE yhtio='$kukarow[yhtio]'
-        ORDER BY ryhma";
+  $query = "SELECT ryhma, if (ryhma!=selite, concat_ws(' - ', ryhma, selite), ryhma) selitetark
+            FROM perusalennus
+            WHERE yhtio='$kukarow[yhtio]'
+            ORDER BY ryhma";
   $sresult = mysql_query($query) or pupe_error($query);
 
   $ulos = "<td><select id='ryhma' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
@@ -139,9 +139,9 @@ elseif (mysql_field_name($result, $i) == "asiakas" and isset($alasveto[$i])) {
 }
 elseif (mysql_field_name($result, $i) == "asiakas") {
   if ((int) $trow[$i] > 0) {
-    $query  = "  SELECT *
-          FROM asiakas
-          WHERE yhtio='$kukarow[yhtio]' and tunnus='$trow[$i]'";
+    $query  = "SELECT *
+               FROM asiakas
+               WHERE yhtio='$kukarow[yhtio]' and tunnus='$trow[$i]'";
     $sresult = mysql_query($query) or pupe_error($query);
     $srow = mysql_fetch_array($sresult);
     $ssize = strlen($trow[$i])+2;

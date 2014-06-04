@@ -221,12 +221,12 @@ if (count($tuotetiedot) > 0) {
     // tuotekoodi
     $rtuoteno[$i]["tuoteno"] = utf8_decode($tuotetieto->ProductId->ProductNumber);
 
-    $query = "  SELECT tt.*
-          FROM tuotteen_toimittajat AS tt
-          JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}' AND toimi.tyyppi != 'P')
-          JOIN tuote ON (tuote.yhtio = tt.yhtio AND tuote.tuoteno = tt.tuoteno AND tuote.status != 'P')
-          WHERE tt.yhtio = 'artr'
-          AND tt.toim_tuoteno = '{$rtuoteno[$i]['tuoteno']}'";
+    $query = "SELECT tt.*
+              FROM tuotteen_toimittajat AS tt
+              JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}' AND toimi.tyyppi != 'P')
+              JOIN tuote ON (tuote.yhtio = tt.yhtio AND tuote.tuoteno = tt.tuoteno AND tuote.status != 'P')
+              WHERE tt.yhtio      = 'artr'
+              AND tt.toim_tuoteno = '{$rtuoteno[$i]['tuoteno']}'";
     $chk_res = pupe_query($query);
 
     if (mysql_num_rows($chk_res) == 0) {
@@ -294,17 +294,17 @@ if (count($tuotetiedot) > 0) {
 
       $rtuoteno[$i]["hinta"] = round($rtuoteno[$i]["rivihinta"]  / $rtuoteno[$i]["kpl"], 2);
 
-      $query = "  SELECT tuotteen_toimittajat.tuotekerroin
-            FROM toimi
-            JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
-                          AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
-                          AND tuotteen_toimittajat.toim_tuoteno = '{$rtuoteno[$i]['tuoteno']}'
-                          AND tuotteen_toimittajat.toim_tuoteno != '')
-            JOIN tuote ON (tuote.yhtio = toimi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
-            WHERE toimi.yhtio = 'artr'
-            AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
-            AND toimi.tyyppi != 'P'
-            AND toimi.asn_sanomat IN ('K', 'L')";
+      $query = "SELECT tuotteen_toimittajat.tuotekerroin
+                FROM toimi
+                JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
+                              AND tuotteen_toimittajat.liitostunnus  = toimi.tunnus
+                              AND tuotteen_toimittajat.toim_tuoteno  = '{$rtuoteno[$i]['tuoteno']}'
+                              AND tuotteen_toimittajat.toim_tuoteno != '')
+                JOIN tuote ON (tuote.yhtio = toimi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
+                WHERE toimi.yhtio                                    = 'artr'
+                AND toimi.toimittajanro                              = '{$laskuttajan_toimittajanumero}'
+                AND toimi.tyyppi                                    != 'P'
+                AND toimi.asn_sanomat                                IN ('K', 'L')";
       $tuotekerroin_chk_res = pupe_query($query);
 
       if (mysql_num_rows($tuotekerroin_chk_res) > 0) {
@@ -398,22 +398,22 @@ if (count($tuotetiedot) > 0) {
               (in_array($laskuttajan_toimittajanumero, array("123084","123007")) and strpos($charge_description, "core value") !== FALSE)) {
 
               // Jos rivillä tulee runkoveloitus, niin pitää tehdä rungosta oma lapsirivi
-              $query = "  SELECT tuote.tuoteno, tuote.nimitys
-                    FROM toimi
-                    JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
-                      AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
-                      AND tuotteen_toimittajat.toim_tuoteno = '{$rtuoteno[$i]['tuoteno']}'
-                      AND tuotteen_toimittajat.toim_tuoteno != '')
-                    JOIN tuote t1 ON (t1.yhtio = tuotteen_toimittajat.yhtio AND t1.tuoteno = tuotteen_toimittajat.tuoteno AND t1.status != 'P')
-                    JOIN tuoteperhe ON (tuoteperhe.yhtio = tuotteen_toimittajat.yhtio
-                      AND tuoteperhe.isatuoteno = tuotteen_toimittajat.tuoteno
-                      AND tuoteperhe.tyyppi IN ('P','')
-                      AND tuoteperhe.ohita_kerays != '')
-                    JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio AND tuote.tuoteno = tuoteperhe.tuoteno AND tuote.status != 'P')
-                    WHERE toimi.yhtio = 'artr'
-                    AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
-                    AND toimi.tyyppi != 'P'
-                    AND toimi.asn_sanomat IN ('K', 'L')";
+              $query = "SELECT tuote.tuoteno, tuote.nimitys
+                        FROM toimi
+                        JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
+                          AND tuotteen_toimittajat.liitostunnus  = toimi.tunnus
+                          AND tuotteen_toimittajat.toim_tuoteno  = '{$rtuoteno[$i]['tuoteno']}'
+                          AND tuotteen_toimittajat.toim_tuoteno != '')
+                        JOIN tuote t1 ON (t1.yhtio = tuotteen_toimittajat.yhtio AND t1.tuoteno = tuotteen_toimittajat.tuoteno AND t1.status != 'P')
+                        JOIN tuoteperhe ON (tuoteperhe.yhtio = tuotteen_toimittajat.yhtio
+                          AND tuoteperhe.isatuoteno              = tuotteen_toimittajat.tuoteno
+                          AND tuoteperhe.tyyppi                  IN ('P','')
+                          AND tuoteperhe.ohita_kerays           != '')
+                        JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio AND tuote.tuoteno = tuoteperhe.tuoteno AND tuote.status != 'P')
+                        WHERE toimi.yhtio                        = 'artr'
+                        AND toimi.toimittajanro                  = '{$laskuttajan_toimittajanumero}'
+                        AND toimi.tyyppi                        != 'P'
+                        AND toimi.asn_sanomat                    IN ('K', 'L')";
               $child_chk_res = pupe_query($query);
 
               if (mysql_num_rows($child_chk_res) > 0) {

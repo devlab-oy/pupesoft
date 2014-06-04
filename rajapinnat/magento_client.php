@@ -272,13 +272,13 @@ class MagentoClient {
 
           if ($asiakasryhma_tunnus != 0) {
             $tuote_ryhmahinta_data[] = array(
-              'websites' => explode(" ", $tuote['nakyvyys']), 
-              'customer_group_id' => $asiakasryhma_tunnus, 
+              'websites' => explode(" ", $tuote['nakyvyys']),
+              'customer_group_id' => $asiakasryhma_tunnus,
               'qty' => 1,
               'price' => $asiakashinta
             );
-          } 
-        }  
+          }
+        }
       }
 
       $multi_data = array();
@@ -955,7 +955,7 @@ class MagentoClient {
     $customer_groups = $this->_proxy->call(
       $this->_session,
       'customer_group.list');
-      
+
       $id = 0;
       foreach ($customer_groups as $asryhma) {
         if (strcasecmp($asryhma['customer_group_code'], $name) == 0) {
@@ -1222,8 +1222,8 @@ class MagentoClient {
 
     // Lisätään asiakkaat ja osoitteet erissä
     foreach ($dnsasiakas as $asiakas) {
-      
-      
+
+
       $asiakasryhma_id = $this->findCustomerGroup(utf8_encode($asiakas['asiakasryhma']));
 
       $asiakas_data = array(

@@ -2314,7 +2314,7 @@ if (!function_exists('alvierittely')) {
 
       if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
         $pyoristys = $kassa_ale != '' ? $laskurow["pyoristys_valuutassa"] * (1-$kassa_ale/100) : $laskurow["pyoristys_valuutassa"];
-        $pdf_lasku->draw_text(360, $kala, t("Laskulla", $kieli).":",          $thispage, $norm);
+        $pdf_lasku->draw_text(360, $kala, t("Rahoituksella / Osamaksulla", $kieli).":",          $thispage, $norm);
         $summeli = sprintf('%.2f', $laskurow["summa_valuutassa"]-$laskurow["saldo_maksettu_valuutassa"]);
         $oikpos = $pdf_lasku->strlen($summeli, $norm);
         $pdf_lasku->draw_text(535-$oikpos, $kala, sprintf('%.2f', $summeli - $pyoristys * -1),$thispage, $norm);
@@ -2322,7 +2322,7 @@ if (!function_exists('alvierittely')) {
       }
       else {
         $pyoristys = $kassa_ale != '' ? $laskurow["pyoristys"] * (1-$kassa_ale/100) : $laskurow["pyoristys"];
-        $pdf_lasku->draw_text(360, $kala, t("Laskulla", $kieli).":",          $thispage, $norm);
+        $pdf_lasku->draw_text(360, $kala, t("Rahoituksella / Osamaksulla", $kieli).":",          $thispage, $norm);
         $summeli = sprintf('%.2f', $laskurow["summa"]-$laskurow["saldo_maksettu"]);
         $oikpos = $pdf_lasku->strlen($summeli, $norm);
         $pdf_lasku->draw_text(535-$oikpos, $kala, sprintf('%.2f', $summeli - $pyoristys * -1),$thispage, $norm);

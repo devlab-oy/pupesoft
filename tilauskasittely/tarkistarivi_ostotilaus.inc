@@ -137,11 +137,13 @@ if ($oikeusostohintapaiv !== FALSE and (float) $prow["hinta"] != (float) $trow['
       $varaosavirhe .= "<input type='hidden' name='alv'     value = '$alv'>";
       $varaosavirhe .= "<input type='hidden' name='kommentti' value = '$kommentti'>";
     }
-
-    $varaosavirhe .= "  <font class='message'>".t("Päivitä tuotteen ostohinta").":<br> ".hintapyoristys($trow["ostohinta"])." $trow[valuutta] -> ".hintapyoristys($prow["hinta"])." $trow[valuutta]</font><br>
-              <input type='submit' name='JOPA' value='".t("Päivitä")."'>
-              <input type='submit' name='ALPA' value='".t("Älä päivitä")."'>
-              </form>";
+    
+    if (hintapyoristys($trow["ostohinta"]) != hintapyoristys($prow["hinta"])) {
+      $varaosavirhe .= "  <font class='message'>".t("Päivitä tuotteen ostohinta").":<br> ".hintapyoristys($trow["ostohinta"])." $trow[valuutta] -> ".hintapyoristys($prow["hinta"])." $trow[valuutta]</font><br>
+                <input type='submit' name='JOPA' value='".t("Päivitä")."'>
+                  <input type='submit' name='ALPA' value='".t("Älä päivitä")."'>
+                  </form>";
+    }
   }
 }
 

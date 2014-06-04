@@ -63,6 +63,7 @@ class Edi {
     $edi_order .= "OSTOTIL.OT_VEROMAARA:".$order['tax_amount']."\n";
     $edi_order .= "OSTOTIL.OT_SUMMA:".$grand_total."\n";
     $edi_order .= "OSTOTIL.OT_VALUUTTAKOODI:".$order['order_currency_code']."\n";
+    $edi_order .= "OSTOTIL.VERKKOKAUPPA:".str_replace("\n", " ", $order['store_name'])."\n";
     $edi_order .= "OSTOTIL.OT_KLAUSUULI1:\n";
     $edi_order .= "OSTOTIL.OT_KLAUSUULI2:\n";
     $edi_order .= "OSTOTIL.OT_KULJETUSOHJE:\n";
@@ -75,6 +76,7 @@ class Edi {
 
     //Asiakkaan ovt_tunnus MUISTA MUUTTAA
     $edi_order .= "OSTOTIL.OT_ASIAKASNRO:".$verkkokauppa_asiakasnro."\n";
+    $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_ASIAKASNRO:".$order['customer_id']."\n";
     $edi_order .= "OSTOTIL.OT_YRITYS:".$order['billing_address']['company']."\n";
     $edi_order .= "OSTOTIL.OT_KATUOSOITE:".$billingadress."\n";
     $edi_order .= "OSTOTIL.OT_POSTITOIMIPAIKKA:".$order['billing_address']['city']."\n";

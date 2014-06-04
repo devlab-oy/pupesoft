@@ -290,8 +290,7 @@ class MagentoClient {
         $multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
       }
 
-
-
+      // Lis‰t‰‰n tai p‰ivitet‰‰n tuote
       $tuote_data = array(
         'categories'            => $category_ids,
         'websites'              => explode(" ", $tuote['nakyvyys']),
@@ -302,6 +301,7 @@ class MagentoClient {
         'status'                => self::ENABLED,
         'visibility'            => $visibility,
         'price'                 => sprintf('%0.2f', $tuote[$hintakentta]),
+        'dealer_hinta'          => $tuote['myyntihinta'],
         'special_price'         => $tuote['kuluprosentti'],
         'tax_class_id'          => $this->getTaxClassID(),
         'meta_title'            => '',
@@ -315,8 +315,6 @@ class MagentoClient {
         'name2'                 => utf8_encode("Secondary name"),
         'pickup_product'        => TRUE,
       );
-
-      // Lis‰t‰‰n tai p‰ivitet‰‰n tuote
 
       // Jos tuotetta ei ole olemassa niin lis‰t‰‰n se
       if (!in_array($tuote['tuoteno'], $skus_in_store)) {

@@ -6,7 +6,7 @@ if (isset($_POST["tee"])) {
 }
 
 ///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
-$useslave = 1;
+$useslave = 2;
 
 // Ei k‰ytet‰ pakkausta
 $compression = FALSE;

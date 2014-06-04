@@ -695,8 +695,13 @@ if ($tee == "ETSILASKU") {
 
   if ($toim == "KERAYSLISTA") {
 
-    //myyntitilaus. Tulostetaan lähete.
-    $where1 .= " lasku.tila in ('L','N','V') ";
+    if ($yhtiorow['kerayserat'] == 'K' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
+      $where1 .= " lasku.tila in ('L','N','V','G') ";
+    }
+    else {
+      //myyntitilaus. Tulostetaan lähete.
+      $where1 .= " lasku.tila in ('L','N','V') ";
+    }
 
     if (strlen($ytunnus) > 0 and substr($ytunnus, 0, 1) == '£') {
       $where2 .= $wherenimi;

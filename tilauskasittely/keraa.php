@@ -1563,12 +1563,11 @@ if ($tee == 'P') {
           $alatilak = "C";
         }
 
-        $_siirtolista = ($laskurow['tila'] == 'G');
-        $_kerayserat_paalla = ($yhtiorow['kerayserat'] == 'K');
+        $_siirtolista         = ($laskurow['tila'] == 'G');
         $_siirrolla_ei_lahtoa = ($laskurow['toimitustavan_lahto'] == 0);
-        $_laaja_toimipaikka = ($yhtiorow['toimipaikkakasittely'] == "L");
+        $_laaja_toimipaikka   = ($yhtiorow['toimipaikkakasittely'] == "L");
 
-        if ($_siirtolista and $_kerayserat_paalla and $_siirrolla_ei_lahtoa and $_laaja_toimipaikka) {
+        if ($_siirtolista and $_siirrolla_ei_lahtoa and $_laaja_toimipaikka) {
           paivita_siirtolistan_toimipaikka($laskurow['tunnus']);
         }
 
@@ -2667,6 +2666,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
     }
 
     $query = "SELECT
+              tilausrivi.tyyppi,
               concat_ws(' ',tilausrivi.tuoteno, tilausrivi.nimitys) tuoteno,
               tilausrivi.tuoteno puhdas_tuoteno,
               tilausrivi.hyllyalue hyllyalue,
@@ -3018,7 +3018,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
             $tunken2 = "myyntirivitunnus";
           }
 
-          if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "T" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "V") {
+          if ($row["tyyppi"] != "W" AND ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "T" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "V")) {
 
             $query = "SELECT count(*) kpl, min(sarjanumero) sarjanumero
                       from sarjanumeroseuranta

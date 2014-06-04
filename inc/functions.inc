@@ -3713,6 +3713,7 @@ if (!function_exists("alehinta")) {
     else {
       $alehi_asrow = array(
         'ryhma' => $asiakasryhma,
+        'piiri' => "",
       );
       $aperuste .= t("Asiakasta ei löytynyt").". ";
     }
@@ -27300,7 +27301,7 @@ if (!function_exists('tee_kirjanpidollinen_varastosiirto')) {
     $varastot       = array_column($varastot, 'tunnus');
 
     // Yhtiön toimipaikalla voi olla monta varastoa.
-    if (count($varastot) > 0 and !in_array($myyntitilaus['varasto'], $varastot)) {
+    if ($myyntitilaus['varasto'] != 0 and count($varastot) > 0 and !in_array($myyntitilaus['varasto'], $varastot)) {
       require 'tilauskasittely/tilauksesta_varastosiirto.inc';
 
       //Myyntitilaukselle valittu varasto ei ole yhtion toimipaikan varastoissa. Tällöin tehdään kirjanpidollinen varastosiirto

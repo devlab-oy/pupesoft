@@ -51,6 +51,7 @@ if (mysql_field_name($result, $i) == "selitetark_3" and
     $avain_sel['TYOM_TYOKENTAT'] == "SELECTED" or
     $avain_sel['TYOM_TYOSTATUS'] == "SELECTED" or
     $avain_sel["SAHKTILTUN"] == "SELECTED" or
+    $avain_sel['VARASTOLUOKKA'] == "SELECTED" or
     $avain_sel['Y'] == "SELECTED")) {
   $tyyppi = 1;
 }
@@ -92,6 +93,7 @@ if (mysql_field_name($result, $i) == "selitetark_2" and
     $avain_sel['TYOM_TYOLINJA'] == "SELECTED" or
     $avain_sel['TYOM_TYOSTATUS'] == "SELECTED" or
     $avain_sel['VALMISTUSLINJA'] == "SELECTED" or
+    $avain_sel['VARASTOLUOKKA'] == "SELECTED" or
     $avain_sel["SAHKTILTUN"] == "SELECTED" or
     $avain_sel["OSTOTIL_TILTYYP"] == "SELECTED" or
     $avain_sel['Y'] == "SELECTED")) {

@@ -159,6 +159,33 @@ while ($row = mysql_fetch_array($res)) {
     $myymalahinta_veroton       = hintapyoristys($row["myymalahinta"] / (1+($row["alv"]/100)));
   }
 
+
+  $asiakashinnat = array ();
+  if (isset($tuotteiden_asiakashinnat_magentoon)) {
+
+    $query = "SELECT
+              avainsana.selitetark AS asiakasryhma,
+              asiakashinta.tuoteno,
+              asiakashinta.hinta
+              FROM asiakas
+              JOIN avainsana ON (avainsana.yhtio = asiakas.yhtio
+                AND avainsana.selite = asiakas.ryhma AND avainsana.laji = 'asiakasryhma')
+              JOIN asiakashinta ON (asiakashinta.yhtio = asiakas.yhtio
+                AND asiakashinta.asiakas_ryhma = asiakas.ryhma)
+              WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
+                AND asiakashinta.tuoteno ='{$row['tuoteno']}'
+              GROUP BY 1,2,3";
+    $asiakashintares = pupe_query($query);
+
+    while ($asiakashintarow = mysql_fetch_assoc($asiakashintares)) {
+      $asiakashinnat[] = array(
+        'asiakasryhma' => $asiakashintarow['asiakasryhma'],
+        'tuoteno'      => $asiakashintarow['tuoteno'],
+        'hinta'        => $asiakashintarow['hinta'],
+      );
+    }
+  }
+
   // Haetaan kaikki tuotteen atribuutit
   $parametritquery = "SELECT
                       tuotteen_avainsanat.selite,
@@ -248,6 +275,7 @@ while ($row = mysql_fetch_array($res)) {
                       'target'               => $row["target"],
                       'onsale'               => $row["onsale"],
                       'tunnus'               => $row['tunnus'],
+                      'asiakashinnat'        => $asiakashinnat,
                       'tuotepuun_nodet'      => $tuotepuun_nodet,
                       'tuotteen_parametrit'  => $tuotteen_parametrit
                       );
@@ -435,27 +463,86 @@ else {
 
 echo date("d.m.Y @ G:i:s")." - Haetaan asiakkaat.\n";
 
+$asiakasselectlisa = $asiakasjoinilisa = $asiakaswherelisa = "";
+
+if (isset($magento_siirretaan_asiakkaat)) {
+  $asiakasselectlisa = " avainsana.selitetark as asiakasryhma,
+                         asiakkaan_avainsanat.tarkenne magento_tunnus,
+                         yhteyshenkilo.nimi yhenk_nimi,
+                         yhteyshenkilo.email yhenk_email,
+                         yhteyshenkilo.puh yhenk_puh,";
+
+  $asiakasjoinilisa = " LEFT JOIN asiakkaan_avainsanat ON (asiakkaan_avainsanat.yhtio = asiakas.yhtio AND asiakkaan_avainsanat.liitostunnus = asiakas.tunnus AND asiakkaan_avainsanat.avainsana = 'magento_tunnus')
+                        JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakas.yhtio AND yhteyshenkilo.liitostunnus = asiakas.tunnus AND yhteyshenkilo.rooli = 'magento')
+                        LEFT JOIN avainsana ON (avainsana.yhtio = asiakas.yhtio AND avainsana.selite = asiakas.ryhma AND avainsana.laji = 'asiakasryhma')";
+
+  $asiakaswherelisa = " AND yhteyshenkilo.rooli  = 'magento'
+                        AND yhteyshenkilo.email != ''";
+
+  if (!empty($muutoslisa)) {
+    $muutoslisa .= " OR asiakkaan_avainsanat.muutospvm >= '{$datetime_checkpoint}'
+                     OR yhteyshenkilo.muutospvm >= '{$datetime_checkpoint}'";
+  }
+}
+
 // Haetaan kaikki asiakkaat
-$query = "SELECT asiakas.nimi,
-          asiakas.osoite,
-          asiakas.postino,
-          asiakas.postitp,
-          asiakas.email
+// Asiakassiirtoa varten poimitaan myös lisäkenttiä asiakkaan_avainsanat ja yhteyshenkilo-tauluista
+$query = "SELECT
+          asiakas.*,
+          $asiakasselectlisa
+          asiakas.yhtio ayhtio
           FROM asiakas
-          WHERE asiakas.yhtio  = '{$kukarow["yhtio"]}'
-          AND asiakas.laji    != 'P'
+          $asiakasjoinilisa
+          WHERE asiakas.yhtio      = '{$kukarow["yhtio"]}'
+          AND asiakas.laji        != 'P'
+          $asiakaswherelisa
           $muutoslisa";
 $res = pupe_query($query);
 
 // pyöräytetään asiakkaat läpi
 while ($row = mysql_fetch_array($res)) {
+  // Osoite laskutusosoitteeksi jos tyhjä
+  if (empty($row['laskutus_nimi'])) {
+    $row["laskutus_nimi"]    = $row['nimi'];
+    $row["laskutus_osoite"]  = $row['osoite'];
+    $row["laskutus_postino"] = $row['postino'];
+    $row["laskutus_postitp"] = $row['postitp'];
+  }
+  // Osoite toimitusosoitteeksi jos tyhjä
+  if (empty($row['toim_nimi'])) {
+    $row['toim_nimi']    = $row['nimi'];
+    $row["toim_osoite"]  = $row['osoite'];
+    $row["toim_postino"] = $row['postino'];
+    $row["toim_postitp"] = $row['postitp'];
+  }
+
   $dnsasiakas[] = array(
-                        'nimi'    => $row["nimi"],
-                        'osoite'   => $row["osoite"],
-                        'postino'  => $row["postino"],
-                        'postitp'  => $row["postitp"],
-                        'email'    => $row["email"],
-                        );
+    'nimi'               => $row["nimi"],
+    'osoite'             => $row["osoite"],
+    'postino'            => $row["postino"],
+    'postitp'            => $row["postitp"],
+    'email'              => $row["email"],
+    'aleryhma'           => $row["ryhma"],
+    'asiakasnro'         => $row["asiakasnro"],
+    'ytunnus'            => $row["ytunnus"],
+    'tunnus'             => $row["tunnus"],
+    'maa'                => $row["maa"],
+    'yhtio'              => $row["ayhtio"],
+    'magento_website_id' => $magento_website_id,
+    'toimitus_nimi'      => $row["toim_nimi"],
+    'toimitus_osoite'    => $row["toim_osoite"],
+    'toimitus_postino'   => $row["toim_postino"],
+    'toimitus_postitp'   => $row["toim_postitp"],
+    'laskutus_nimi'      => $row["laskutus_nimi"],
+    'laskutus_osoite'    => $row["laskutus_osoite"],
+    'laskutus_postino'   => $row["laskutus_postino"],
+    'laskutus_postitp'   => $row["laskutus_postitp"],
+    'yhenk_nimi'         => $row["yhenk_nimi"],
+    'yhenk_email'        => $row["yhenk_email"],
+    'yhenk_puh'          => $row["yhenk_puh"],
+    'magento_tunnus'     => $row["magento_tunnus"],
+    'asiakasryhma'       => $row['asiakasryhma'],
+  );
 }
 
 if ($ajetaanko_kaikki == "NO") {
@@ -771,6 +858,13 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
     // HUOM, tähän passataan **KAIKKI** verkkokauppatuotteet, methodi katsoo että kaikki nämä on kaupassa, muut paitsi gifcard-tuotteet dellataan!
     $count = $magento_client->poista_poistetut($kaikki_tuotteet, true);
     echo date("d.m.Y @ G:i:s")." - Poistettiin $count tuotetta\n";
+  }
+
+  // Päivitetaan magento-asiakkaat ja osoitetiedot kauppaan
+  if (count($dnsasiakas) > 0 and isset($magento_siirretaan_asiakkaat)) {
+    echo date("d.m.Y @ G:i:s")." - Päivitetään asiakkaat\n";
+    $count = $magento_client->lisaa_asiakkaat($dnsasiakas);
+    echo date("d.m.Y @ G:i:s")." - Päivitettiin $count asiakkaan tiedot\n";
   }
 
   $tuote_export_error_count = $magento_client->getErrorCount();

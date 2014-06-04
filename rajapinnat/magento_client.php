@@ -9,7 +9,6 @@
  * Hakee maksettuja tilauksia pupesoftiin.
  */
 
-
 class MagentoClient {
 
   /**
@@ -150,7 +149,6 @@ class MagentoClient {
         $category_tree = $this->getCategories();
 
         $kategoria['try_fi'] = utf8_encode($kategoria['try_fi']);
-
         // Kasotaan löytyykö tuoteryhmä
         if (!$this->findCategory($kategoria['try_fi'], $category_tree['children'])) {
 
@@ -158,7 +156,7 @@ class MagentoClient {
           $category_data = array(
             'name'                  => $kategoria['try_fi'],
             'is_active'             => 1,
-            'position'               => 1,
+            'position'              => 1,
             'default_sort_by'       => 'position',
             'available_sort_by'     => 'position',
             'include_in_menu'       => 1
@@ -168,7 +166,6 @@ class MagentoClient {
             // HUOM: Vain jos "Category access control"-moduli on asennettu
             $category_data['accesscontrol_show_group'] = 0;
           }
-
           // Kutsutaan soap rajapintaa
           $category_id = $this->_proxy->call($this->_session, 'catalog_category.create',
             array($parent_id, $category_data)
@@ -263,6 +260,27 @@ class MagentoClient {
         $visibility = self::NOT_VISIBLE_INDIVIDUALLY;
       }
 
+      $tuote_ryhmahinta_data = array ();
+
+      if (isset($tuote['asiakashinnat']) and count($tuote['asiakashinnat'])> 0) {
+        foreach ($tuote['asiakashinnat'] as $asiakashintarivi) {
+
+          $asiakasryhma_nimi = $asiakashintarivi['asiakasryhma'];
+          $asiakashinta = $asiakashintarivi['hinta'];
+
+          $asiakasryhma_tunnus = $this->findCustomerGroup(utf8_encode($asiakasryhma_nimi));
+
+          if ($asiakasryhma_tunnus != 0) {
+            $tuote_ryhmahinta_data[] = array(
+              'websites' => explode(" ", $tuote['nakyvyys']), 
+              'customer_group_id' => $asiakasryhma_tunnus, 
+              'qty' => 1,
+              'price' => $asiakashinta
+            );
+          } 
+        }  
+      }
+
       $multi_data = array();
 
       // Simple tuotteiden parametrit kuten koko ja väri
@@ -282,7 +300,7 @@ class MagentoClient {
           'weight'                => $tuote['tuotemassa'],
           'status'                => self::ENABLED,
           'visibility'            => $visibility,
-          'price'                 => $tuote[$hintakentta],
+          'price'                 => sprintf('%0.2f', $tuote[$hintakentta]),
           'special_price'         => $tuote['kuluprosentti'],
           'tax_class_id'          => $this->getTaxClassID(),
           'meta_title'            => '',
@@ -291,6 +309,7 @@ class MagentoClient {
           'campaign_code'         => utf8_encode($tuote['campaign_code']),
           'onsale'                => utf8_encode($tuote['onsale']),
           'target'                => utf8_encode($tuote['target']),
+          'tier_price'            => $tuote_ryhmahinta_data,
           'additional_attributes' => array('multi_data' => $multi_data),
           'name2'                 => utf8_encode("Secondary name"),
           'pickup_product'        => TRUE,
@@ -347,6 +366,11 @@ class MagentoClient {
           $product_id = $result['product_id'];
 
           $this->log("Tuote '{$tuote['tuoteno']}' päivitetty (simple) " . print_r($tuote_data, true));
+
+          // Update tier prices
+          /*$result = $this->_proxy->call($this->_session, 'product_tier_price.update', array($tuote['tuoteno'], $tuote_ryhmahinta_data));
+
+          $this->log("Tuotteen '{$tuote['tuoteno']}' erikoishinnasto $result päivitetty " . print_r($tuote_ryhmahinta_data, true));*/
         }
         catch (Exception $e) {
           $this->_error_count++;
@@ -898,7 +922,6 @@ class MagentoClient {
    * Etsii kategoriaa nimeltä Magenton kategoria puusta.
    */
   private function findCategory($name, $root) {
-
     $category_id = false;
 
     foreach ($root as $i => $category) {
@@ -924,6 +947,24 @@ class MagentoClient {
 
     // Mitään ei löytyny
     return $category_id;
+  }
+
+  // Etsii asiakasryhmää nimen perusteella Magentosta, palauttaa id:n
+  private function findCustomerGroup($name) {
+
+    $customer_groups = $this->_proxy->call(
+      $this->_session,
+      'customer_group.list');
+      
+      $id = 0;
+      foreach ($customer_groups as $asryhma) {
+        if (strcasecmp($asryhma['customer_group_code'], $name) == 0) {
+          $id = $asryhma['customer_group_id'];
+          break;
+        }
+      }
+
+      return $id;
   }
 
   /**
@@ -1167,6 +1208,174 @@ class MagentoClient {
     return $tuotekuvat;
   }
 
+  /**
+   * Lisää päivitettyjä asiakkaita Magento-verkkokauppaan.
+   *
+   * @param  array  $dnsasiakas   Pupesoftin tuote_exportin palauttama asiakas array
+   * @return int               Lisättyjen asiakkaiden määrä
+  */
+  public function lisaa_asiakkaat(array $dnsasiakas) {
+
+    $this->log("Lisätään asiakkaita");
+    // Asiakas countteri
+    $count = 0;
+
+    // Lisätään asiakkaat ja osoitteet erissä
+    foreach ($dnsasiakas as $asiakas) {
+      
+      
+      $asiakasryhma_id = $this->findCustomerGroup(utf8_encode($asiakas['asiakasryhma']));
+
+      $asiakas_data = array(
+          'email'          => $asiakas['yhenk_email'],
+          'firstname'        => $asiakas['nimi'],
+          'lastname'        => $asiakas['nimi'],
+          'website_id'      => $asiakas['magento_website_id'],
+          'taxvat'        => $asiakas['ytunnus'],
+          'external_id'      => $asiakas['asiakasnro'],
+          'group_id'        => $asiakasryhma_id,
+      );
+
+      $laskutus_osoite_data = array(
+          'firstname'        => $asiakas['laskutus_nimi'],
+          'lastname'        => $asiakas['laskutus_nimi'],
+          'street'        => array($asiakas['laskutus_osoite']),
+          'postcode'        => $asiakas['laskutus_postino'],
+          'city'          => $asiakas['laskutus_postitp'],
+          'country_id'      => $asiakas['maa'],
+          'telephone'        => $asiakas['yhenk_puh'],
+          'company'        => $asiakas['nimi'],
+          'is_default_billing'    => true,
+      );
+
+      $toimitus_osoite_data = array(
+          'firstname'        => $asiakas['toimitus_nimi'],
+          'lastname'        => $asiakas['toimitus_nimi'],
+          'street'        => array($asiakas['toimitus_osoite']),
+          'postcode'        => $asiakas['toimitus_postino'],
+          'city'          => $asiakas['toimitus_postitp'],
+          'country_id'      => $asiakas['maa'],
+          'telephone'        => $asiakas['yhenk_puh'],
+          'company'        => $asiakas['nimi'],
+          'is_default_shipping' => true
+      );
+
+      // Lisätään tai päivitetään asiakas
+
+      // Jos asiakasta ei ole olemassa (sillä ei ole pupessa magento_tunnus:ta) niin lisätään se
+      if (empty($asiakas['magento_tunnus'])) {
+        try {
+          $result = $this->_proxy->call(
+            $this->_session,
+            'customer.create',
+             array(
+                    $asiakas_data
+            ));
+
+          $this->log("Asiakas '{$asiakas['tunnus']}' / {$result} lisätty " . print_r($asiakas_data, true));
+          $asiakas['magento_tunnus'] = $result;
+
+          // Päivitetään magento_tunnus pupeen
+          $tarksql = "SELECT *
+                      FROM asiakkaan_avainsanat
+                      WHERE yhtio      = '{$asiakas['yhtio']}'
+                      AND liitostunnus = '{$asiakas['tunnus']}'
+                      AND avainsana    = 'magento_tunnus'";
+          $tarkesult = pupe_query($tarksql);
+          $ahy = mysql_num_rows($tarkesult);
+
+          if ($ahy == 0) {
+            $ahinsert = "INSERT INTO asiakkaan_avainsanat SET
+                         yhtio        = '{$asiakas['yhtio']}',
+                         liitostunnus = '{$asiakas['tunnus']}',
+                         tarkenne     = '{$asiakas['magento_tunnus']}',
+                         avainsana    = 'magento_tunnus',
+                         laatija      = 'Magento',
+                         luontiaika   = now(),
+                         muutospvm    = now()";
+            pupe_query($ahinsert);
+          }
+          else {
+            $query = "UPDATE asiakkaan_avainsanat
+                      SET tarkenne = '{$asiakas['magento_tunnus']}'
+                      WHERE yhtio      = '{$asiakas['yhtio']}'
+                      AND liitostunnus = '{$asiakas['tunnus']}'
+                      AND avainsana    = 'magento_tunnus'";
+            pupe_query($query);
+          }
+        }
+        catch (Exception $e) {
+          $this->_error_count++;
+          $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' lisäys epäonnistui " . print_r($asiakas_data, true), $e);
+        }
+      }
+      // Asiakas on jo olemassa, päivitetään
+      else {
+        try {
+          $result = $this->_proxy->call(
+            $this->_session,
+            'customer.update',
+             array(
+                    $asiakas['magento_tunnus'],
+                    $asiakas_data
+          ));
+
+          $this->log("Asiakas '{$asiakas['tunnus']}' / {$asiakas['magento_tunnus']} päivitetty " . print_r($asiakas_data, true));
+        }
+        catch (Exception $e) {
+          $this->_error_count++;
+          $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' päivitys epäonnistui " . print_r($asiakas_data, true), $e);
+        }
+      }
+
+      // Haetaan ensin asiakkaan laskutus- ja toimitusosoitteet
+      $address_array = $this->_proxy->call(
+        $this->_session,
+        'customer_address.list',
+         $asiakas['magento_tunnus']);
+      // Ja poistetaan ne
+      if (count($address_array) > 0) {
+        foreach ($address_array as $address) {
+          $result = $this->_proxy->call(
+            $this->_session, 'customer_address.delete', $address['customer_address_id']);
+        }
+      }
+
+      if (isset($laskutus_osoite_data['firstname']) and !empty($laskutus_osoite_data['firstname'])) {
+        try {
+          // Lisätään laskutusosoite
+          $result = $this->_proxy->call(
+            $this->_session,
+            'customer_address.create',
+            array('customerId' => $asiakas['magento_tunnus'], 'addressdata' => ($laskutus_osoite_data)));
+        }
+        catch (Exception $e) {
+          $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' laskutusosoitteen päivitys epäonnistui " . print_r($laskutus_osoite_data, true), $e);
+        }
+      }
+
+      if (isset($toimitus_osoite_data['firstname']) and !empty($toimitus_osoite_data['firstname'])) {
+        try {
+          // Lisätään toimitusosoite
+          $result = $this->_proxy->call(
+            $this->_session,
+            'customer_address.create',
+            array('customerId' => $asiakas['magento_tunnus'], 'addressdata' => ($toimitus_osoite_data)));
+        }
+        catch (Exception $e) {
+          $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' toimitusosoitteen päivitys epäonnistui " . print_r($toimitus_osoite_data, true), $e);
+        }
+      }
+      // Lisätään asiakas countteria
+      $count++;
+
+    }
+
+    $this->log("$count asiakasta päivitetty");
+
+    // Palautetaan pävitettyjen asiakkaiden määrä
+    return $count;
+  }
   /**
    * Asettaa tax_class_id:n
    * Oletus 0

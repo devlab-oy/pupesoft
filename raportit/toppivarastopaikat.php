@@ -5,7 +5,7 @@ ini_set('implicit_flush', 1);
 ob_implicit_flush(1);
 
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
-$useslave = 1;
+$useslave = 2;
 
 // Ei k‰ytet‰ pakkausta
 $compression = FALSE;

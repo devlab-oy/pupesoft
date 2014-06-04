@@ -206,7 +206,8 @@ if ($alisa != "" and $llisa != "") {
         $keikrow = mysql_fetch_assoc($keikres);
 
         // Milloin rivit on viety saldoille keskim‰‰rin
-        $query = "SELECT round(AVG(DATE_FORMAT(laskutettuaika, '%Y%m%d'))) laskutettuaika
+        $query = "SELECT
+                  DATE_FORMAT(FROM_UNIXTIME(AVG(UNIX_TIMESTAMP(laskutettuaika))),'%Y-%m-%d') AS laskutettuaika
                   FROM tilausrivi
                   WHERE yhtio     = '{$kukarow['yhtio']}'
                   AND uusiotunnus = {$keikrow['tunnus']}
@@ -232,7 +233,7 @@ if ($alisa != "" and $llisa != "") {
       echo "<td align='right'>$yhtiorow[valkoodi]</td>";
       echo "<td>{$keikrow["laskunro"]}</td>";
       echo "<td>".tv1dateconv($keikrow["mapvm"])."</td>";
-      echo "<td>".tv1dateconv(tv3dateconv($rivirow["laskutettuaika"], TRUE))."</td>";
+      echo "<td>".tv1dateconv($rivirow["laskutettuaika"])."</td>";
       echo "<td>$toimirow[toimitusehto]</td>";
       echo "</tr>";
 

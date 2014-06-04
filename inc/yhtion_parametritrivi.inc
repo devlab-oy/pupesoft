@@ -1995,6 +1995,27 @@ if (mysql_field_name($result, $i) == "oslapp_rakir_logo") {
   $jatko = 0;
 }
 
+if (mysql_field_name($result, $i) == "osoitelappu_lisatiedot") {
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel1="";
+  $sel2="";
+
+  if ($trow[$i] == "") {
+    $sel1 = "selected";
+  }
+  else {
+    $sel2 = "selected";
+  }
+
+  $ulos .= "<option value=''  $sel1>".t("Asiaakkaan tilausnumero ja tilausyhteyshenkilö tulostetaan osoitelapulle")."</option>";
+  $ulos .= "<option value='X' $sel2>".t("Asiakkaan tilausnumeroa tai tilausyhteyshenkilöä EI tulosteta osoitelapulle")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if (mysql_field_name($result, $i) == "ytunnus_tarkistukset") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

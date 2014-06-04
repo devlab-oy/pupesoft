@@ -1,7 +1,7 @@
 <?php
 
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
-$useslave = 1;
+$useslave = 2;
 
 // Ei käytetä pakkausta
 $compression = FALSE;

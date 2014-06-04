@@ -23,8 +23,8 @@ if ($php_cli) {
   ini_set("display_errors", 0);
 
   // otetaan tietokanta connect
-  require("inc/connect.inc");
-  require("inc/functions.inc");
+  require "inc/connect.inc";
+  require "inc/functions.inc";
 
   // hmm.. j‰nn‰‰
   $kukarow['yhtio'] = $argv[1];
@@ -70,7 +70,7 @@ $ajopaiva = 1;
 $weekday = date("N");
 $weekday = $weekday-$ajopaiva;
 
-if ($weekday <= 0 OR $weekday == 6 OR $weekday == 7) {
+if ($weekday <= 0 or $weekday == 6 or $weekday == 7) {
   // t‰ll‰ hetkell‰ aineiston saa ainoastaan ma-pe p‰ivilt‰
   echo "\n\nT‰t‰ skripti‰ voi ajaa vain arkip‰ivilt‰!\n\n";
   die;
@@ -95,7 +95,7 @@ $toimirajaus   = " AND toimi.oletus_vienti in ('C','F','I')";
 $path = "/home/e3_rajapinta/e3siirto_siirto_".date("Ymd")."_$yhtiorow[yhtio]/";
 //  $path = "/tmp/e3_rajapinta/e3siirto_siirto_".date("Ymd")."_$yhtiorow[yhtio]/";
 
-# siivotaan yli 7 p‰iv‰‰ vanhat aineistot
+// siivotaan yli 7 p‰iv‰‰ vanhat aineistot
 system("find /home/e3_rajapinta/ -mtime +7 -delete");
 
 // Teh‰‰n uysi dirikka
@@ -130,15 +130,15 @@ siirto($path_xlto,  "E3XLT0NP");
 siirto($path_wswp,  "E3XSWPMWNP");
 siirto("", "", "RCMD E3nattsbm");
 
-function siirto ($ftpfile, $renameftpfile, $komento = "") {
-  GLOBAL $e3_params, $yhtiorow;
+function siirto($ftpfile, $renameftpfile, $komento = "") {
+  global $e3_params, $yhtiorow;
 
   $ftphost   = $e3_params[$yhtiorow["yhtio"]]["ftphost"];
   $ftpuser   = $e3_params[$yhtiorow["yhtio"]]["ftpuser"];
   $ftppass   = $e3_params[$yhtiorow["yhtio"]]["ftppass"];
   $ftppath   = $e3_params[$yhtiorow["yhtio"]]["ftppath"];
   $ftpport   = "";
-    $ftpfail   = "";
+  $ftpfail   = "";
   $ftpsucc   = "";
   $syy    = "";
   $palautus  = 0;
@@ -212,20 +212,20 @@ function siirto ($ftpfile, $renameftpfile, $komento = "") {
   if ($palautus != 0) {
     // ncftpput:in exit valuet
     switch ($palautus) {
-      case  1:
-        $syy = "Could not connect to remote host. ($ftphost)";
-        break;
-      case  2:
-        $syy = "Could not login to remote host ($ftpuser, $ftppass)";
-        break;
-      case  3:
-        $syy = "Transfer failed ($ftppath, ".realpath($ftpfile).")";
-        break;
-      case  4:
-        $syy = "Rename failed ($ftppath, {$ftppath}{$filenimi} --> {$ftppath}{$renameftpfile})";
-        break;
-      default:
-        $syy = t("Tuntematon errorkoodi")." ($palautus)!!";
+    case  1:
+      $syy = "Could not connect to remote host. ($ftphost)";
+      break;
+    case  2:
+      $syy = "Could not login to remote host ($ftpuser, $ftppass)";
+      break;
+    case  3:
+      $syy = "Transfer failed ($ftppath, ".realpath($ftpfile).")";
+      break;
+    case  4:
+      $syy = "Rename failed ($ftppath, {$ftppath}{$filenimi} --> {$ftppath}{$renameftpfile})";
+      break;
+    default:
+      $syy = t("Tuntematon errorkoodi")." ($palautus)!!";
     }
 
     $rivi  = "$PHP_SELF\n";
@@ -457,11 +457,11 @@ function xswp($tanaan, $korvatut) {
 
     if ($korvatut != "") {
       // laitetaan xf02 loppuun tieto mik‰ tuote on poistettu. toimittaja ja tuoteno.
-      $xf02loppulause .= "$tuto2[toimittaja] ".str_pad($korvaava['tuoteno'],17)." 001000000000000000000000000000000000000000000000000000000                                                        D\n";
+      $xf02loppulause .= "$tuto2[toimittaja] ".str_pad($korvaava['tuoteno'], 17)." 001000000000000000000000000000000000000000000000000000000                                                        D\n";
     }
     else {
       // eka korvatun toimittaja + tuoteno, sitten korvaavan toimittaja ja tuoteno
-      $lause = "E3T001$tuto2[toimittaja] ".str_pad($korvaava['tuoteno'],17)." 001$tuto[toimittaja] ".str_pad($korvaavat['tuoteno'],17)." U1    000000000000000000000000000AYNY";
+      $lause = "E3T001$tuto2[toimittaja] ".str_pad($korvaava['tuoteno'], 17)." 001$tuto[toimittaja] ".str_pad($korvaavat['tuoteno'], 17)." U1    000000000000000000000000000AYNY";
 
       if (!fwrite($fp, $lause . "\n")) {
         echo "Failed writing row.\n";
@@ -602,13 +602,13 @@ function xf04($tanaan) {
 
     if ($tuto['toimittaja'] == '' or $tuto['tyyppi'] == 'P') continue;
 
-       $out    = sprintf("%-8.8s", $tuto['toimittaja']);    //XVNDR
-    $out     .= sprintf("%-18.18s",$xf04['tuoteno']);    //XITEM
+    $out    = sprintf("%-8.8s", $tuto['toimittaja']);    //XVNDR
+    $out     .= sprintf("%-18.18s", $xf04['tuoteno']);    //XITEM
     $out   .= sprintf("%-3.3s", "001");          //XWHSE
-    $out   .= sprintf("%-4.4s","");            //XSUBV
-    $out   .= sprintf("%-3.3s","");            //XREGON
-    $out   .= sprintf("%-25.25s",$tuto['ttuoteno']);    //XMFGID
-    $out   .= sprintf("%-10.10s",$xf04['yksikko']);    //XPKSIZ
+    $out   .= sprintf("%-4.4s", "");            //XSUBV
+    $out   .= sprintf("%-3.3s", "");            //XREGON
+    $out   .= sprintf("%-25.25s", $tuto['ttuoteno']);    //XMFGID
+    $out   .= sprintf("%-10.10s", $xf04['yksikko']);    //XPKSIZ
     $out   .= sprintf("%-15.15s", "");            //XUPC
     $out   .= sprintf("%-10.10s", "");            //XTIEHI
     $out   .= sprintf("%07.7s", "0");            //XQRSVR
@@ -633,12 +633,12 @@ function xf04($tanaan) {
     $out   .= sprintf("%03.3s", "0");            //XSRVGL
     $out   .= sprintf("%05.5s", "0");            //XPODIV
     $out   .= sprintf("%0-2.2s", "0");            //XPOUOM
-    $out   .= sprintf("%-5.5s",substr($xf04['try'],0,1));  //XGRP1
-    $out   .= sprintf("%-5.5s",substr($xf04['try'],1,2));  //XGRP2
-    $out   .= sprintf("%-5.5s",substr($xf04['try'],3,6));  //XGRP3
-    $out   .= sprintf("%-5.5s",$xf04['POKEABC']);      //XGRP4 $xf04['MYYNNINABC']);
-    $out   .= sprintf("%-5.5s",$xf04['MYYNNINABC']);    //XGRP5 $xf04['POKEABC']);
-    $out   .= sprintf("%-5.5s","");            //XGRP6
+    $out   .= sprintf("%-5.5s", substr($xf04['try'], 0, 1));  //XGRP1
+    $out   .= sprintf("%-5.5s", substr($xf04['try'], 1, 2));  //XGRP2
+    $out   .= sprintf("%-5.5s", substr($xf04['try'], 3, 6));  //XGRP3
+    $out   .= sprintf("%-5.5s", $xf04['POKEABC']);      //XGRP4 $xf04['MYYNNINABC']);
+    $out   .= sprintf("%-5.5s", $xf04['MYYNNINABC']);    //XGRP5 $xf04['POKEABC']);
+    $out   .= sprintf("%-5.5s", "");            //XGRP6
     $out   .= sprintf("%0-3.3s", "0");            //XOOPNT
 
     if (!fwrite($fp, $out . "\n")) {
@@ -672,7 +672,7 @@ function xf01($tanaan) {
            JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
            AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
            AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-           AND varastopaikat.tyyppi = '')
+           AND varastopaikat.tyyppi = '' AND varastopaikat.toimipaikka = 0)
            WHERE tuotepaikat.yhtio  = tuote.yhtio
            AND tuotepaikat.tuoteno  = tuote.tuoteno
          ) saldo
@@ -710,7 +710,8 @@ function xf01($tanaan) {
            JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
            AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
            AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
-           AND varastopaikat.tyyppi      = '')
+           AND varastopaikat.tyyppi      = ''
+           AND varastopaikat.toimipaikka = 0)
            WHERE tilausrivi.yhtio        = '$yhtiorow[yhtio]'
            AND tilausrivi.tyyppi         = 'L'
            AND tilausrivi.tuoteno        = '$tuoterow[tuoteno]'
@@ -726,7 +727,8 @@ function xf01($tanaan) {
            JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
            AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
            AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
-           AND varastopaikat.tyyppi       = '')
+           AND varastopaikat.tyyppi       = ''
+           AND varastopaikat.toimipaikka  = 0)
            WHERE tilausrivi.yhtio         = '$yhtiorow[yhtio]'
            AND tilausrivi.tyyppi          = 'L'
            AND tilausrivi.tuoteno         = '$tuoterow[tuoteno]'
@@ -862,7 +864,7 @@ function xf02($tanaan, $xf02loppulause) {
     $tuote_row = array();
     $tuote_row["tuoteno"]    = $xf02["tuoteno"];
 
-    list($hinta,$netto,$ale,$valuutta) = alehinta_osto($laskurow, $tuote_row, 1, "", "", "");
+    list($hinta, $netto, $ale, $valuutta) = alehinta_osto($laskurow, $tuote_row, 1, "", "", "");
 
     // Muutetaan valuuttahinta euroiksi.
     if (trim(strtoupper($valuutta)) != trim(strtoupper($yhtiorow["valkoodi"]))) {
@@ -879,14 +881,14 @@ function xf02($tanaan, $xf02loppulause) {
     }
     else {
       $tilavuus = $tilavuus*1000;
-      $tilavuus = str_replace('.','',$tilavuus);
+      $tilavuus = str_replace('.', '', $tilavuus);
     }
 
     $KA_myynti_hinta = $xf02['KAhinta'];
 
     if ($KA_myynti_hinta == '') {
       if ($ostonetto == 999999999) { $KA_myynti_hinta = 999999999; }
-      else {$KA_myynti_hinta = sprintf("%.4f",$ostonetto * 1.30);  }
+      else {$KA_myynti_hinta = sprintf("%.4f", $ostonetto * 1.30);  }
     }
 
     if ($xf02['status'] == 'T') {
@@ -904,11 +906,11 @@ function xf02($tanaan, $xf02loppulause) {
     $out  = sprintf("%-8.8s",  $toim_row['toimittajanro']);        //XVNDR
     $out .= sprintf("%-18.18s",  $xf02['tuoteno']);                    //XITEM
     $out .= sprintf("%-3.3s",  "001");                        //XWHSE
-    $out .= sprintf("%013.13s",  str_replace('.','',$ostonetto));         //XPCHP
-    $out .= sprintf("%013.13s",  str_replace('.','',$KA_myynti_hinta));     //XSLSP
+    $out .= sprintf("%013.13s",  str_replace('.', '', $ostonetto));         //XPCHP
+    $out .= sprintf("%013.13s",  str_replace('.', '', $KA_myynti_hinta));     //XSLSP
     $out .= sprintf("%07.7s",  $toim_row['ostokpl']);                //XPACK
     $out .= sprintf("%07.7s",  "1");                        //XMINQ
-    $out .= sprintf("%07.7s",  str_replace('.','',$xf02['tuotemassa']));   //XWGHT
+    $out .= sprintf("%07.7s",  str_replace('.', '', $xf02['tuotemassa']));   //XWGHT
     $out .= sprintf("%07.7s",  $tilavuus);                      //XVOLM
     $out .= sprintf("%-35.35s",  trim($xf02['nimitys']));               //XNAME
     $out .= sprintf("%-2.2s",  "");                           //XUOMS

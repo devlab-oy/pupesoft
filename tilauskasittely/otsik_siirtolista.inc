@@ -47,16 +47,16 @@ if ($tila == 'Muuta' and !isset($jatka)) {
 
   if($kopioitava_otsikko > 0 or $kukarow["kesken"] > 0) {
     if ($kopioitava_otsikko > 0) {
-      $squery = "  SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokkaa
-            FROM lasku
-            LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
-            LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
-            WHERE lasku.tunnus = '$kopioitava_otsikko'";
+      $squery = "SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokkaa
+                 FROM lasku
+                 LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
+                 LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
+                 WHERE lasku.tunnus = '$kopioitava_otsikko'";
 
       //  T‰m‰ on teht‰v‰, jottemme vain p‰ivit‰ vanhaa!
-      $query = "  UPDATE kuka
-            SET kesken = 0
-            WHERE session = '$session'";
+      $query = "UPDATE kuka
+                SET kesken = 0
+                WHERE session = '$session'";
       $result = mysql_query($query) or pupe_error($query);
 
       $kukarow['kesken']   = 0;
@@ -64,10 +64,10 @@ if ($tila == 'Muuta' and !isset($jatka)) {
 
     }
     elseif ($kukarow["kesken"] != 0) {
-      $squery = "  SELECT *, hyvaksynnanmuutos as luokka
-            FROM lasku
-            $qlisa
-            WHERE tunnus = '$kukarow[kesken]'";
+      $squery = "SELECT *, hyvaksynnanmuutos as luokka
+                 FROM lasku
+                 $qlisa
+                 WHERE tunnus = '$kukarow[kesken]'";
     }
     $sresult = mysql_query($squery) or pupe_error($squery);
     $srow = mysql_fetch_array($sresult);
@@ -95,10 +95,10 @@ if ($tila == 'Muuta' and !isset($jatka)) {
     echo "<tr><th>".t("Valitse l‰hdevarasto").":</th>";
   }
 
-  $query = "  SELECT *
-        FROM varastopaikat
-        WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
-        ORDER BY tyyppi, nimitys";
+  $query = "SELECT *
+            FROM varastopaikat
+            WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
+            ORDER BY tyyppi, nimitys";
   $vtresult = mysql_query($query) or pupe_error($query);
 
   echo "<form method='post'>";
@@ -146,10 +146,10 @@ if ($tila == 'Muuta' and !isset($jatka)) {
 
     echo "<td><select name='clearing'>";
 
-    $query  = "  SELECT *
-          FROM varastopaikat
-          WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
-          ORDER BY tyyppi, nimitys";
+    $query  = "SELECT *
+               FROM varastopaikat
+               WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
+               ORDER BY tyyppi, nimitys";
     $vares = mysql_query($query) or pupe_error($query);
 
     while ($varow = mysql_fetch_array($vares)) {
@@ -289,11 +289,11 @@ if ($tila == 'Muuta' and !isset($jatka)) {
     echo "<tr>";
     echo "<th>".t("Toimitustapa")."</th><td>";
 
-    $query = "  SELECT tunnus, selite
-          FROM toimitustapa
-          WHERE yhtio = '$kukarow[yhtio]'
-          and (sallitut_maat = '' or sallitut_maat like '%$srow[toim_maa]%')
-          ORDER BY jarjestys, selite";
+    $query = "SELECT tunnus, selite
+              FROM toimitustapa
+              WHERE yhtio = '$kukarow[yhtio]'
+              and (sallitut_maat = '' or sallitut_maat like '%$srow[toim_maa]%')
+              ORDER BY jarjestys, selite";
     $tresult = mysql_query($query) or pupe_error($query);
 
     echo "<select name='toimitustapa'>";
@@ -358,25 +358,25 @@ if (isset($jatka)) {
   }
   else {
     // Pidet‰‰n huolta tilausrivien toimitusp‰ivist‰ ja kerayspaivasta
-    $query = "  UPDATE tilausrivi
-          SET kerayspvm = '$kervv-$kerkk-$kerpp'
-          WHERE otunnus = '$kukarow[kesken]' and kerayspvm='$vkerayspvm' and yhtio='$kukarow[yhtio]'";
+    $query = "UPDATE tilausrivi
+              SET kerayspvm = '$kervv-$kerkk-$kerpp'
+              WHERE otunnus = '$kukarow[kesken]' and kerayspvm='$vkerayspvm' and yhtio='$kukarow[yhtio]'";
     $result = mysql_query($query) or pupe_error($query);
 
-    $query = "  UPDATE tilausrivi
-          SET toimaika = '$toimvv-$toimkk-$toimpp'
-          WHERE otunnus = '$kukarow[kesken]' and toimaika='$vtoimaika' and yhtio='$kukarow[yhtio]'";
+    $query = "UPDATE tilausrivi
+              SET toimaika = '$toimvv-$toimkk-$toimpp'
+              WHERE otunnus = '$kukarow[kesken]' and toimaika='$vtoimaika' and yhtio='$kukarow[yhtio]'";
     $result = mysql_query($query) or pupe_error($query);
 
     if ($yhtiorow['valmistuksien_kasittely'] == 'Y' and ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON")) {
-      $query = "  UPDATE tilausrivi
-            JOIN tilausrivin_lisatiedot
-            ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
-            SET tilausrivin_lisatiedot.positio = '{$valmistuslinja}'
-            WHERE tilausrivi.otunnus = '{$kukarow['kesken']}'
-            AND tilausrivin_lisatiedot.positio = '{$vvalmistuslinja}'
-            AND tilausrivi.yhtio = '{$kukarow['yhtio']}'";
+      $query = "UPDATE tilausrivi
+                JOIN tilausrivin_lisatiedot
+                ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+                  AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
+                SET tilausrivin_lisatiedot.positio = '{$valmistuslinja}'
+                WHERE tilausrivi.otunnus                      = '{$kukarow['kesken']}'
+                AND tilausrivin_lisatiedot.positio            = '{$vvalmistuslinja}'
+                AND tilausrivi.yhtio                          = '{$kukarow['yhtio']}'";
       $result = mysql_query($query) or pupe_error($query);
     }
 
@@ -390,10 +390,10 @@ if (isset($jatka)) {
   $crlf = array("\r","\n"); // poistetaan rivinvaihdot kommentista
   $comments = str_replace($crlf, " ", $comments);
 
-  $aquery = "  SELECT *
-        FROM varastopaikat
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tunnus = '$clearing'";
+  $aquery = "SELECT *
+             FROM varastopaikat
+             WHERE yhtio = '$kukarow[yhtio]'
+             and tunnus  = '$clearing'";
   $vtresult = mysql_query($aquery) or pupe_error($aquery);
   $vtrow = mysql_fetch_array($vtresult);
 
@@ -484,11 +484,11 @@ if (isset($jatka)) {
   $id = mysql_insert_id();
 
   if (!isset($nokeskupdate) and (int) $kukarow["kesken"] == 0 and $id != 0 and $id !== FALSE and $session != "") {
-    $query = "  UPDATE kuka
-          SET kesken = '$id'
-          WHERE yhtio = '$kukarow[yhtio]' AND
-          kuka = '$kukarow[kuka]' AND
-          session = '$session'";
+    $query = "UPDATE kuka
+              SET kesken = '$id'
+              WHERE yhtio = '$kukarow[yhtio]' AND
+              kuka        = '$kukarow[kuka]' AND
+              session     = '$session'";
     $result = mysql_query($query) or pupe_error($query);
 
     $kukarow["kesken"] = $id;
@@ -533,9 +533,9 @@ if (isset($jatka)) {
     if ($tee == '' or $kopioitava_otsikko != 0) {
       //p‰ivitet‰‰n kukarow[kesken] kun k‰ytt‰j‰ tekee uutta tilausta
       if ($tila == '' and !isset($jatka)) {
-        $query = "  UPDATE kuka
-              SET kesken=0
-              WHERE session = '$session'";
+        $query = "UPDATE kuka
+                  SET kesken=0
+                  WHERE session = '$session'";
         $result = mysql_query($query) or pupe_error($query);
 
         $kukarow['kesken']   = 0;

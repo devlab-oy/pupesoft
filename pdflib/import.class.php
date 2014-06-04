@@ -657,11 +657,11 @@ class import
                         $r[$l] = $state[0];
                         $state = array();
                     }
-                } else if (substr($w, 0, 1) == '(' && $w{strlen($w) - 1} == ')') {
+                } elseif (substr($w, 0, 1) == '(' && $w{strlen($w) - 1} == ')') {
                     // We've got a string
                     echo "Assigning string value '$w' to [$l]<br>\n";
                     $r[$l] = $w;
-                } else if ($w == 'R') {
+                } elseif ($w == 'R') {
                     $ir = $state[0] . ' ' . $state[1] . ' R';
                     echo "Stored IR $ir<br>\n";
                     $r[$l] = $ir;

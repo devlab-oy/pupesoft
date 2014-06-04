@@ -56,10 +56,10 @@ $yhtiorow = hae_yhtion_parametrit($mista_yhtio);
 $mihin_yhtiorow = hae_yhtion_parametrit($mihin_yhtio);
 
 // Haetaan kukarow
-$query = "  SELECT *
-      FROM kuka
-      WHERE yhtio = '{$mista_yhtio}'
-      AND kuka = 'admin'";
+$query = "SELECT *
+          FROM kuka
+          WHERE yhtio = '{$mista_yhtio}'
+          AND kuka    = 'admin'";
 $kukares = pupe_query($query);
 
 if (mysql_num_rows($kukares) != 1) {
@@ -79,10 +79,10 @@ $datetime_checkpoint_row = mysql_fetch_assoc($datetime_checkpoint_res);
 $datetime_checkpoint = $datetime_checkpoint_row['selite']; // Mikä tilanne on jo käsitelty
 $datetime_checkpoint_uusi = date('Y-m-d H:i:s'); // Timestamp nyt
 
-$query = "  SELECT *
-      FROM asiakas
-      WHERE yhtio = '{$mista_yhtio}'
-      AND tunnus = $mihin_yhtion_asiakkaan_tunnus";
+$query = "SELECT *
+          FROM asiakas
+          WHERE yhtio = '{$mista_yhtio}'
+          AND tunnus  = $mihin_yhtion_asiakkaan_tunnus";
 $asiakasres = pupe_query($query);
 
 if (mysql_num_rows($asiakasres) != 1) {
@@ -100,34 +100,34 @@ $laskurow = array(
 
 $tuotteet = $ryhmat = array();
 
-$query = "  SELECT group_concat(parent.tunnus) tunnukset
-      FROM puun_alkio
-      JOIN dynaaminen_puu AS node ON (puun_alkio.yhtio = node.yhtio and puun_alkio.laji = node.laji and puun_alkio.puun_tunnus = node.tunnus)
-      JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft AND parent.lft > 0)
-      WHERE puun_alkio.yhtio = '{$mista_yhtio}'
-      AND puun_alkio.laji    = 'ASIAKAS'
-      AND puun_alkio.liitos  = '{$asiakasrow['tunnus']}'";
+$query = "SELECT group_concat(parent.tunnus) tunnukset
+          FROM puun_alkio
+          JOIN dynaaminen_puu AS node ON (puun_alkio.yhtio = node.yhtio and puun_alkio.laji = node.laji and puun_alkio.puun_tunnus = node.tunnus)
+          JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft AND parent.lft > 0)
+          WHERE puun_alkio.yhtio = '{$mista_yhtio}'
+          AND puun_alkio.laji    = 'ASIAKAS'
+          AND puun_alkio.liitos  = '{$asiakasrow['tunnus']}'";
 $result2 = pupe_query($query);
 $puun_tunnukset = mysql_fetch_assoc($result2);
 
 $asiakkaan_puiden_tunnukset = $puun_tunnukset !== NULL ? " OR asiakas_segmentti IN ({$puun_tunnukset['tunnukset']})" : "";
 
 // Haetaan muuttuneet asiakashinnat
-$query = "  SELECT hinta, ryhma, tuoteno, laji
-      FROM asiakashinta
-      WHERE yhtio = '{$mista_yhtio}'
-      AND ((asiakas = {$asiakasrow['tunnus']} and asiakas != 0)
-        OR (ytunnus = '{$asiakasrow['ytunnus']}' and ytunnus != '')
-        OR (asiakas_ryhma = '{$asiakasrow['ryhma']}' and asiakas_ryhma != '')
-        OR (piiri = '{$asiakasrow['piiri']}' and piiri != '')
-        {$asiakkaan_puiden_tunnukset})
-        AND (tuoteno IN (SELECT tuoteno FROM tuotteen_toimittajat WHERE yhtio = '{$mihin_yhtio}' AND liitostunnus = {$mista_yhtion_toimittajan_tunnus}) or tuoteno = '')
-      AND minkpl < 2
-      AND (
-        (alkupvm > LEFT('{$datetime_checkpoint}', 10) AND alkupvm <= CURRENT_DATE) OR
-        (loppupvm < CURRENT_DATE AND LEFT('{$datetime_checkpoint}', 10) <= loppupvm) OR
-        muutospvm >= '{$datetime_checkpoint}'
-        )";
+$query = "SELECT hinta, ryhma, tuoteno, laji
+          FROM asiakashinta
+          WHERE yhtio = '{$mista_yhtio}'
+          AND ((asiakas = {$asiakasrow['tunnus']} and asiakas != 0)
+            OR (ytunnus = '{$asiakasrow['ytunnus']}' and ytunnus != '')
+            OR (asiakas_ryhma = '{$asiakasrow['ryhma']}' and asiakas_ryhma != '')
+            OR (piiri = '{$asiakasrow['piiri']}' and piiri != '')
+            {$asiakkaan_puiden_tunnukset})
+            AND (tuoteno IN (SELECT tuoteno FROM tuotteen_toimittajat WHERE yhtio = '{$mihin_yhtio}' AND liitostunnus = {$mista_yhtion_toimittajan_tunnus}) or tuoteno = '')
+          AND minkpl  < 2
+          AND (
+            (alkupvm > LEFT('{$datetime_checkpoint}', 10) AND alkupvm <= CURRENT_DATE) OR
+            (loppupvm < CURRENT_DATE AND LEFT('{$datetime_checkpoint}', 10) <= loppupvm) OR
+            muutospvm >= '{$datetime_checkpoint}'
+            )";
 $asiakashinta_res = pupe_query($query);
 
 while ($asiakashinta_row = mysql_fetch_assoc($asiakashinta_res)) {
@@ -140,21 +140,21 @@ while ($asiakashinta_row = mysql_fetch_assoc($asiakashinta_res)) {
 }
 
 // Haetaan muuttuneet asiakasalennukset
-$query = "  SELECT ryhma, tuoteno
-      FROM asiakasalennus
-      WHERE yhtio = '{$mista_yhtio}'
-      AND ((asiakas = {$asiakasrow['tunnus']} and asiakas != 0)
-        OR (ytunnus = '{$asiakasrow['ytunnus']}' and ytunnus != '')
-        OR (asiakas_ryhma = '{$asiakasrow['ryhma']}' and asiakas_ryhma != '')
-        OR (piiri = '{$asiakasrow['piiri']}' and piiri != '')
-        {$asiakkaan_puiden_tunnukset})
-        AND (tuoteno IN (SELECT tuoteno FROM tuotteen_toimittajat WHERE yhtio = '{$mihin_yhtio}' AND liitostunnus = {$mista_yhtion_toimittajan_tunnus}) or tuoteno = '')
-      AND minkpl < 2
-      AND (
-        (alkupvm > LEFT('{$datetime_checkpoint}', 10) AND alkupvm <= CURRENT_DATE) OR
-        (loppupvm < CURRENT_DATE AND LEFT('{$datetime_checkpoint}', 10) <= loppupvm) OR
-        muutospvm >= '{$datetime_checkpoint}'
-        )";
+$query = "SELECT ryhma, tuoteno
+          FROM asiakasalennus
+          WHERE yhtio = '{$mista_yhtio}'
+          AND ((asiakas = {$asiakasrow['tunnus']} and asiakas != 0)
+            OR (ytunnus = '{$asiakasrow['ytunnus']}' and ytunnus != '')
+            OR (asiakas_ryhma = '{$asiakasrow['ryhma']}' and asiakas_ryhma != '')
+            OR (piiri = '{$asiakasrow['piiri']}' and piiri != '')
+            {$asiakkaan_puiden_tunnukset})
+            AND (tuoteno IN (SELECT tuoteno FROM tuotteen_toimittajat WHERE yhtio = '{$mihin_yhtio}' AND liitostunnus = {$mista_yhtion_toimittajan_tunnus}) or tuoteno = '')
+          AND minkpl  < 2
+          AND (
+            (alkupvm > LEFT('{$datetime_checkpoint}', 10) AND alkupvm <= CURRENT_DATE) OR
+            (loppupvm < CURRENT_DATE AND LEFT('{$datetime_checkpoint}', 10) <= loppupvm) OR
+            muutospvm >= '{$datetime_checkpoint}'
+            )";
 $asiakasalennus_res = pupe_query($query);
 
 while ($asiakasalennus_row = mysql_fetch_assoc($asiakasalennus_res)) {
@@ -167,16 +167,16 @@ while ($asiakasalennus_row = mysql_fetch_assoc($asiakasalennus_res)) {
 }
 
 // Haetaan muuttuneet hinnastohinnat
-$query = "  SELECT tuoteno
-      FROM hinnasto
-      WHERE yhtio = '{$mista_yhtio}'
-      AND minkpl < 2
-      AND tuoteno IN (SELECT tuoteno FROM tuotteen_toimittajat WHERE yhtio = '{$mihin_yhtio}' AND liitostunnus = {$mista_yhtion_toimittajan_tunnus})
-      AND (
-        (alkupvm > LEFT('{$datetime_checkpoint}', 10) AND alkupvm <= CURRENT_DATE) OR
-        (loppupvm < CURRENT_DATE AND LEFT('{$datetime_checkpoint}', 10) <= loppupvm) OR
-        muutospvm >= '{$datetime_checkpoint}'
-        )";
+$query = "SELECT tuoteno
+          FROM hinnasto
+          WHERE yhtio = '{$mista_yhtio}'
+          AND minkpl  < 2
+          AND tuoteno IN (SELECT tuoteno FROM tuotteen_toimittajat WHERE yhtio = '{$mihin_yhtio}' AND liitostunnus = {$mista_yhtion_toimittajan_tunnus})
+          AND (
+            (alkupvm > LEFT('{$datetime_checkpoint}', 10) AND alkupvm <= CURRENT_DATE) OR
+            (loppupvm < CURRENT_DATE AND LEFT('{$datetime_checkpoint}', 10) <= loppupvm) OR
+            muutospvm >= '{$datetime_checkpoint}'
+            )";
 $hinnasto_res = pupe_query($query);
 
 while ($hinnasto_row = mysql_fetch_assoc($hinnasto_res)) {
@@ -186,13 +186,13 @@ while ($hinnasto_row = mysql_fetch_assoc($hinnasto_res)) {
 // Käydään läpi kaikki muuttuneet alennusryhmät, lisätään niiden tuotteet tuote arrayseen
 foreach ($ryhmat as $ryhma => $devnull) {
 
-  $query = "  SELECT tuoteno
-        FROM tuote
-        WHERE yhtio = '{$mista_yhtio}'
-        AND status != 'P'
-        AND tuotetyyppi NOT in ('A','B')
-        AND aleryhma = '{$ryhma}'
-        AND tuoteno IN (SELECT tuoteno FROM tuotteen_toimittajat WHERE yhtio = '{$mihin_yhtio}' AND liitostunnus = {$mista_yhtion_toimittajan_tunnus})";
+  $query = "SELECT tuoteno
+            FROM tuote
+            WHERE yhtio      = '{$mista_yhtio}'
+            AND status      != 'P'
+            AND tuotetyyppi  NOT in ('A','B')
+            AND aleryhma     = '{$ryhma}'
+            AND tuoteno      IN (SELECT tuoteno FROM tuotteen_toimittajat WHERE yhtio = '{$mihin_yhtio}' AND liitostunnus = {$mista_yhtion_toimittajan_tunnus})";
   $ryhmares = pupe_query($query);
 
   while ($ryhmarow = mysql_fetch_assoc($ryhmares)) {
@@ -204,14 +204,14 @@ foreach ($ryhmat as $ryhma => $devnull) {
 unset($ryhmat);
 
 // Haetaan kaikki muuttuneet tuotteet ja lisätään ne arrayseen
-$query = "  SELECT *
-      FROM tuote
-      WHERE yhtio = '{$mista_yhtio}'
-      AND status != 'P'
-      AND tuotetyyppi NOT in ('A','B')
-      AND muutospvm >= '{$datetime_checkpoint}'
-      AND tuoteno IN (SELECT tuoteno FROM tuotteen_toimittajat WHERE yhtio = '{$mihin_yhtio}' AND liitostunnus = {$mista_yhtion_toimittajan_tunnus})
-      ORDER BY muutospvm, tuoteno";
+$query = "SELECT *
+          FROM tuote
+          WHERE yhtio      = '{$mista_yhtio}'
+          AND status      != 'P'
+          AND tuotetyyppi  NOT in ('A','B')
+          AND muutospvm    >= '{$datetime_checkpoint}'
+          AND tuoteno      IN (SELECT tuoteno FROM tuotteen_toimittajat WHERE yhtio = '{$mihin_yhtio}' AND liitostunnus = {$mista_yhtion_toimittajan_tunnus})
+          ORDER BY muutospvm, tuoteno";
 $tuoteres = pupe_query($query);
 
 while ($tuoterow = mysql_fetch_assoc($tuoteres)) {
@@ -222,10 +222,10 @@ while ($tuoterow = mysql_fetch_assoc($tuoteres)) {
 foreach ($tuotteet as $tuoteno => $devnull) {
 
   // Haetaan tuotteen tiedot $mista_yhtio
-  $query = "  SELECT *
-        FROM tuote
-        WHERE yhtio = '{$mista_yhtio}'
-        AND tuoteno = '{$tuoteno}'";
+  $query = "SELECT *
+            FROM tuote
+            WHERE yhtio = '{$mista_yhtio}'
+            AND tuoteno = '{$tuoteno}'";
   $tuoteres = pupe_query($query);
   $tuoterow = mysql_fetch_assoc($tuoteres);
 
@@ -241,18 +241,18 @@ foreach ($tuotteet as $tuoteno => $devnull) {
   }
 
   // Päivitetään myyntihinta $mihin_yhtio
-  $query = "  UPDATE tuote SET
-        myyntihinta = '{$tuoterow['myyntihinta']}'
-        WHERE yhtio = '{$mihin_yhtio}'
-        AND tuoteno = '{$tuoteno}'";
+  $query = "UPDATE tuote SET
+            myyntihinta = '{$tuoterow['myyntihinta']}'
+            WHERE yhtio = '{$mihin_yhtio}'
+            AND tuoteno = '{$tuoteno}'";
   pupe_query($query);
 
   // Haetaan tuotteen toimittajan liitos $mihin_yhtio
-  $query = "  SELECT tunnus
-        FROM tuotteen_toimittajat
-        WHERE yhtio = '{$mihin_yhtio}'
-        AND tuoteno = '{$tuoteno}'
-        AND liitostunnus = {$mista_yhtion_toimittajan_tunnus}";
+  $query = "SELECT tunnus
+            FROM tuotteen_toimittajat
+            WHERE yhtio      = '{$mihin_yhtio}'
+            AND tuoteno      = '{$tuoteno}'
+            AND liitostunnus = {$mista_yhtion_toimittajan_tunnus}";
   $mihin_tuoteres = pupe_query($query);
 
   while ($mihin_tuoterow2 = mysql_fetch_assoc($mihin_tuoteres)) {
@@ -265,59 +265,59 @@ foreach ($tuotteet as $tuoteno => $devnull) {
     }
 
     // Päivitetään ostohinta
-    $query = "  UPDATE tuotteen_toimittajat SET
-          ostohinta = '{$hinta}'
-          WHERE yhtio = '{$mihin_yhtio}'
-          AND tunnus = '{$mihin_tuoterow2['tunnus']}'";
+    $query = "UPDATE tuotteen_toimittajat SET
+              ostohinta   = '{$hinta}'
+              WHERE yhtio = '{$mihin_yhtio}'
+              AND tunnus  = '{$mihin_tuoterow2['tunnus']}'";
     pupe_query($query);
   }
 }
 
 // Haetaan saldot tuotteille, joille on tehty tietyn ajan sisällä tilausrivi tai tapahtuma
 $query =  "(SELECT DISTINCT tapahtuma.tuoteno
-      FROM tapahtuma
-      JOIN tuote ON (tuote.yhtio = tapahtuma.yhtio
-        AND tuote.tuoteno = tapahtuma.tuoteno
-        AND tuote.status != 'P'
-        AND tuote.tuotetyyppi NOT in ('A','B')
-        AND tuote.tuoteno != ''
-        AND tuote.ei_saldoa = '')
-      WHERE tapahtuma.yhtio = '{$mista_yhtio}'
-      AND tapahtuma.tuoteno IN (SELECT tuoteno FROM tuotteen_toimittajat WHERE yhtio = '{$mihin_yhtio}' AND liitostunnus = {$mista_yhtion_toimittajan_tunnus})
-      AND tapahtuma.laadittu >= '{$datetime_checkpoint}')
+            FROM tapahtuma
+            JOIN tuote ON (tuote.yhtio = tapahtuma.yhtio
+              AND tuote.tuoteno      = tapahtuma.tuoteno
+              AND tuote.status      != 'P'
+              AND tuote.tuotetyyppi  NOT in ('A','B')
+              AND tuote.tuoteno     != ''
+              AND tuote.ei_saldoa    = '')
+            WHERE tapahtuma.yhtio    = '{$mista_yhtio}'
+            AND tapahtuma.tuoteno    IN (SELECT tuoteno FROM tuotteen_toimittajat WHERE yhtio = '{$mihin_yhtio}' AND liitostunnus = {$mista_yhtion_toimittajan_tunnus})
+            AND tapahtuma.laadittu   >= '{$datetime_checkpoint}')
 
-      UNION
+            UNION
 
-      (SELECT DISTINCT tilausrivi.tuoteno
-      FROM tilausrivi
-      JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
-        AND tuote.tuoteno = tilausrivi.tuoteno
-        AND tuote.status != 'P'
-        AND tuote.tuotetyyppi NOT in ('A','B')
-        AND tuote.tuoteno != ''
-        AND tuote.ei_saldoa = '')
-      WHERE tilausrivi.yhtio = '{$mista_yhtio}'
-      AND tilausrivi.tyyppi NOT IN ('D','O')
-      AND tilausrivi.tuoteno IN (SELECT tuoteno FROM tuotteen_toimittajat WHERE yhtio = '{$mihin_yhtio}' AND liitostunnus = {$mista_yhtion_toimittajan_tunnus})
-      AND tilausrivi.laadittu >= '{$datetime_checkpoint}')";
+            (SELECT DISTINCT tilausrivi.tuoteno
+            FROM tilausrivi
+            JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
+              AND tuote.tuoteno      = tilausrivi.tuoteno
+              AND tuote.status      != 'P'
+              AND tuote.tuotetyyppi  NOT in ('A','B')
+              AND tuote.tuoteno     != ''
+              AND tuote.ei_saldoa    = '')
+            WHERE tilausrivi.yhtio   = '{$mista_yhtio}'
+            AND tilausrivi.tyyppi    NOT IN ('D','O')
+            AND tilausrivi.tuoteno   IN (SELECT tuoteno FROM tuotteen_toimittajat WHERE yhtio = '{$mihin_yhtio}' AND liitostunnus = {$mista_yhtion_toimittajan_tunnus})
+            AND tilausrivi.laadittu  >= '{$datetime_checkpoint}')";
 $result = pupe_query($query);
 
 while ($row = mysql_fetch_assoc($result)) {
   list($saldo, $hyllyssa, $myytavissa, $devnull) = saldo_myytavissa($row['tuoteno']);
 
-  $query = "  UPDATE tuotteen_toimittajat SET
-        tehdas_saldo = '{$myytavissa}'
-        WHERE yhtio = '{$mihin_yhtio}'
-        AND tuoteno = '{$row['tuoteno']}'
-        AND liitostunnus = {$mista_yhtion_toimittajan_tunnus}";
+  $query = "UPDATE tuotteen_toimittajat SET
+            tehdas_saldo     = '{$myytavissa}'
+            WHERE yhtio      = '{$mihin_yhtio}'
+            AND tuoteno      = '{$row['tuoteno']}'
+            AND liitostunnus = {$mista_yhtion_toimittajan_tunnus}";
   pupe_query($query);
 }
 
 // Kun kaikki onnistui, päivitetään lopuksi timestamppi talteen
-$query = "  UPDATE avainsana SET
-      selite = '{$datetime_checkpoint_uusi}'
-      WHERE yhtio = '{$mista_yhtio}'
-      AND laji = 'HINNAT_CRON'";
+$query = "UPDATE avainsana SET
+          selite      = '{$datetime_checkpoint_uusi}'
+          WHERE yhtio = '{$mista_yhtio}'
+          AND laji    = 'HINNAT_CRON'";
 pupe_query($query);
 
 if (mysql_affected_rows() != 1) {

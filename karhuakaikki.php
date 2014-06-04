@@ -32,9 +32,9 @@ $yhtiores = mysql_query($query) or pupe_error($query);
 if(mysql_num_rows($yhtiores) == 0) die("Firmaa ei löyry!\n");
 $yhtiorow = mysql_fetch_array($yhtiores);
 
-$query = "  SELECT *
-      FROM yhtion_parametrit
-      WHERE yhtio='$kukarow[yhtio]'";
+$query = "SELECT *
+          FROM yhtion_parametrit
+          WHERE yhtio='$kukarow[yhtio]'";
 $result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
 
 if (mysql_num_rows($result) == 1) {

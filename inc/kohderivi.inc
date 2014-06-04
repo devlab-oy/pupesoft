@@ -33,9 +33,9 @@ elseif (mysql_field_name($result, $i) == "asiakas" and isset($alasveto[$i])) {
 }
 elseif (mysql_field_name($result, $i) == "asiakas") {
   if ((int) $trow[$i] > 0) {
-    $query  = "  SELECT *
-          FROM asiakas
-          WHERE yhtio='$kukarow[yhtio]' and tunnus='$trow[$i]'";
+    $query  = "SELECT *
+               FROM asiakas
+               WHERE yhtio='$kukarow[yhtio]' and tunnus='$trow[$i]'";
     $sresult = mysql_query($query) or pupe_error($query);
     $srow = mysql_fetch_array($sresult);
     $ssize = strlen($trow[$i])+2;
@@ -52,9 +52,9 @@ elseif (mysql_field_name($result, $i) == "asiakas") {
   }
 }
    if (mysql_field_name($result, $i) == "tyyppi") {
-      $preq = "  SELECT avainsana.selite tyyppi, avainsana.selitetark selitetark
-        FROM avainsana
-        WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='kohde_tyyppi'";
+      $preq = "SELECT avainsana.selite tyyppi, avainsana.selitetark selitetark
+               FROM avainsana
+               WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='kohde_tyyppi'";
   $preres = mysql_query($preq) or pupe_error($preq);
 
       if (mysql_num_rows($preres) > 0) {

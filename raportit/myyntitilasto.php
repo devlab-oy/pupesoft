@@ -62,27 +62,27 @@ if (!function_exists("tuoteryhman_varastonarvo")) {
     }
 
     // saldo nyt
-    $query = "  SELECT sum(saldo) saldo_nyt
-          FROM tuote
-          JOIN tuotepaikat on (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno)
-          WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
-          AND tuote.osasto = '{$osasto}'
-          AND tuote.try = '{$try}'";
+    $query = "SELECT sum(saldo) saldo_nyt
+              FROM tuote
+              JOIN tuotepaikat on (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno)
+              WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
+              AND tuote.osasto  = '{$osasto}'
+              AND tuote.try     = '{$try}'";
     $result = pupe_query($query);
     $arvo = mysql_fetch_assoc($result);
 
     $saldo_nyt = $arvo['saldo_nyt'];
 
     // varastonmuutos
-     $query = "  SELECT
-          sum(if(tapahtuma.laadittu >= '$pvm1 00:00:00', tapahtuma.kpl, 0)) muutoskpl1,
-          sum(if(tapahtuma.laadittu >= '$pvm2 00:00:00', tapahtuma.kpl, 0)) muutoskpl2
-           FROM tuote
-          JOIN tapahtuma on (tuote.yhtio = tapahtuma.yhtio AND tuote.tuoteno = tapahtuma.tuoteno and tapahtuma.laadittu >= '$pvm2 00:00:00' and tapahtuma.laji != 'Epäkurantti')
-          WHERE tuote.yhtio   = '$kukarow[yhtio]'
-           AND tuote.osasto   = '{$osasto}'
-          AND tuote.try     = '{$try}'
-          ORDER BY tapahtuma.laadittu desc, tapahtuma.tunnus desc";
+     $query = "SELECT
+               sum(if(tapahtuma.laadittu >= '$pvm1 00:00:00', tapahtuma.kpl, 0)) muutoskpl1,
+               sum(if(tapahtuma.laadittu >= '$pvm2 00:00:00', tapahtuma.kpl, 0)) muutoskpl2
+                FROM tuote
+               JOIN tapahtuma on (tuote.yhtio = tapahtuma.yhtio AND tuote.tuoteno = tapahtuma.tuoteno and tapahtuma.laadittu >= '$pvm2 00:00:00' and tapahtuma.laji != 'Epäkurantti')
+               WHERE tuote.yhtio = '$kukarow[yhtio]'
+                AND tuote.osasto = '{$osasto}'
+               AND tuote.try     = '{$try}'
+               ORDER BY tapahtuma.laadittu desc, tapahtuma.tunnus desc";
     $muutosres = pupe_query($query);
     $row = mysql_fetch_assoc($muutosres);
 
@@ -134,27 +134,27 @@ if ($tee != '' and isset($painoinnappia)) {
   echo "<th nowrap>".t("Varasto")."<br>{$vvl}-{$kkl}-{$ppl}</th>";
   echo "<th nowrap>".t("Varasto")."<br>{$edellisvuosi}-{$kkl}-{$ppl}</th>";
 
-  $query = "  SELECT
-        tilausrivi.osasto,
-        tilausrivi.try,
-        round(sum(if(tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}', tilausrivi.rivihinta, 0))) myyntiVA,
-        round(sum(if(tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}', tilausrivi.kate, 0))) kateVA,
-        round(sum(if(tilausrivi.laskutettuaika >= '{$edellisvuosi}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$edellisvuosi}-{$kkl}-{$ppl}', tilausrivi.rivihinta, 0))) myyntiEDVA,
-        round(sum(if(tilausrivi.laskutettuaika >= '{$edellisvuosi}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$edellisvuosi}-{$kkl}-{$ppl}', tilausrivi.kate, 0))) kateEDVA,
-        round(sum(if(tilausrivi.laskutettuaika >= '{$edellisvuosi}-01-01' and tilausrivi.laskutettuaika <= '{$edellisvuosi}-12-31', tilausrivi.rivihinta, 0))) myyntiED,
-        round(sum(if(tilausrivi.laskutettuaika >= '{$edellisvuosi}-01-01' and tilausrivi.laskutettuaika <= '{$edellisvuosi}-12-31', tilausrivi.kate, 0))) kateED,
-        round(sum(if(tilausrivi.laskutettuaika >= date_sub('{$vvl}-{$kkl}-{$ppl}', interval 12 month), tilausrivi.rivihinta, 0))) myynti12,
-        round(sum(if(tilausrivi.laskutettuaika >= date_sub('{$vvl}-{$kkl}-{$ppl}', interval 12 month), tilausrivi.kate, 0))) kate12
-        FROM lasku
-        JOIN tilausrivi on (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
-        WHERE lasku.yhtio  = '$kukarow[yhtio]'
-        and lasku.tila    = 'U'
-        and lasku.alatila   = 'X'
-        $lisa
-        and  lasku.tapvm   >= '{$edellisvuosi}-01-01'
-        and  lasku.tapvm   <= '{$vvl}-{$kkl}-{$ppl}'
-        GROUP BY tilausrivi.osasto, tilausrivi.try
-        ORDER BY tilausrivi.osasto, tilausrivi.try";
+  $query = "SELECT
+            tilausrivi.osasto,
+            tilausrivi.try,
+            round(sum(if(tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}', tilausrivi.rivihinta, 0))) myyntiVA,
+            round(sum(if(tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}', tilausrivi.kate, 0))) kateVA,
+            round(sum(if(tilausrivi.laskutettuaika >= '{$edellisvuosi}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$edellisvuosi}-{$kkl}-{$ppl}', tilausrivi.rivihinta, 0))) myyntiEDVA,
+            round(sum(if(tilausrivi.laskutettuaika >= '{$edellisvuosi}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$edellisvuosi}-{$kkl}-{$ppl}', tilausrivi.kate, 0))) kateEDVA,
+            round(sum(if(tilausrivi.laskutettuaika >= '{$edellisvuosi}-01-01' and tilausrivi.laskutettuaika <= '{$edellisvuosi}-12-31', tilausrivi.rivihinta, 0))) myyntiED,
+            round(sum(if(tilausrivi.laskutettuaika >= '{$edellisvuosi}-01-01' and tilausrivi.laskutettuaika <= '{$edellisvuosi}-12-31', tilausrivi.kate, 0))) kateED,
+            round(sum(if(tilausrivi.laskutettuaika >= date_sub('{$vvl}-{$kkl}-{$ppl}', interval 12 month), tilausrivi.rivihinta, 0))) myynti12,
+            round(sum(if(tilausrivi.laskutettuaika >= date_sub('{$vvl}-{$kkl}-{$ppl}', interval 12 month), tilausrivi.kate, 0))) kate12
+            FROM lasku
+            JOIN tilausrivi on (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
+            WHERE lasku.yhtio = '$kukarow[yhtio]'
+            and lasku.tila    = 'U'
+            and lasku.alatila = 'X'
+            $lisa
+            and  lasku.tapvm  >= '{$edellisvuosi}-01-01'
+            and  lasku.tapvm  <= '{$vvl}-{$kkl}-{$ppl}'
+            GROUP BY tilausrivi.osasto, tilausrivi.try
+            ORDER BY tilausrivi.osasto, tilausrivi.try";
   $eresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($eresult)) {

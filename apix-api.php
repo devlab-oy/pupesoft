@@ -52,11 +52,11 @@
   }
 
   // Haetaan api_keyt yhtion_parametreistä
-  $sql_query = "  SELECT yhtion_parametrit.apix_tunnus, yhtion_parametrit.apix_avain, yhtio.nimi
-          FROM yhtio
-          JOIN yhtion_parametrit USING (yhtio)
-          WHERE yhtion_parametrit.apix_tunnus != ''
-          AND yhtion_parametrit.apix_avain != ''";
+  $sql_query = "SELECT yhtion_parametrit.apix_tunnus, yhtion_parametrit.apix_avain, yhtio.nimi
+                FROM yhtio
+                JOIN yhtion_parametrit USING (yhtio)
+                WHERE yhtion_parametrit.apix_tunnus != ''
+                AND yhtion_parametrit.apix_avain    != ''";
   $apix_result = mysql_query($sql_query) or die("Virhe SQL kyselyssä");
 
   while ($apix_keys = mysql_fetch_assoc($apix_result)) {

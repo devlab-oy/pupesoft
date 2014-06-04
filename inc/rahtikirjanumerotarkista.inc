@@ -11,11 +11,11 @@ if(!function_exists("rahtikirjanumerotarkista")) {
         $virhe[$i] = t("Tieto ei saa olla tyhjä")."!";
       }
       else {
-        $query  = "  SELECT tunnus
-                FROM rahtikirjanumero
-                WHERE yhtio = '$kukarow[yhtio]'
-                and rahtikirjanro = '$t[$i]'
-              and tunnus != '$tunnus'";
+        $query  = "SELECT tunnus
+                   FROM rahtikirjanumero
+                   WHERE yhtio        = '$kukarow[yhtio]'
+                   and rahtikirjanro  = '$t[$i]'
+                   and tunnus        != '$tunnus'";
           $sresult = pupe_query($query);
 
         if (mysql_num_rows($sresult) != 0) {

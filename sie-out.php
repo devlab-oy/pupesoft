@@ -39,9 +39,9 @@ if ($kausi != '') {
     //Tilikartta
     echo "<font class='message'>".t("Tilikartta")."</font><br>";
 
-    $query = "  SELECT tilino, nimi
-          FROM tili
-          WHERE yhtio = '$kukarow[yhtio]'";
+    $query = "SELECT tilino, nimi
+              FROM tili
+              WHERE yhtio = '$kukarow[yhtio]'";
     $result = pupe_query($query);
 
     $ulos = '';
@@ -55,11 +55,11 @@ if ($kausi != '') {
     //Kustannuspaikan koodien haku
     echo "<font class='message'>".t("Tarkenteet")."</font><br>";
 
-    $query = "  SELECT tunnus, nimi
-          FROM kustannuspaikka
-          WHERE yhtio = '$kukarow[yhtio]'
-          and kaytossa != 'E'
-          ORDER BY tyyppi, koodi+0, koodi, nimi";
+    $query = "SELECT tunnus, nimi
+              FROM kustannuspaikka
+              WHERE yhtio   = '$kukarow[yhtio]'
+              and kaytossa != 'E'
+              ORDER BY tyyppi, koodi+0, koodi, nimi";
     $result = pupe_query($query);
 
     $ulos = '';
@@ -74,25 +74,25 @@ if ($kausi != '') {
   echo "<font class='message'>".t("Tapahtumat")."</font><br>";
 
   //Itse tapahtumat
-  $query  = "  SELECT date_format(tiliointi.tapvm, '%Y%m%d') tapvm,
-        tiliointi.tilino,
-        tiliointi.kustp,
-        tiliointi.projekti,
-        tiliointi.summa summa,
-        tiliointi.selite,
-        lasku.ytunnus,
-        tiliointi.ltunnus,
-        lasku.mapvm,
-        tiliointi.tunnus tunnus,
-        lasku.laskunro laskunro,
-        lasku.nimi
-        FROM tiliointi
-        JOIN lasku ON (tiliointi.yhtio=lasku.yhtio and lasku.tunnus=tiliointi.ltunnus)
-        WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-        and left(tiliointi.tapvm, 7) = '$kausi'
-        and tiliointi.korjattu = ''
-        and tiliointi.tosite = ''
-        ORDER BY tiliointi.ltunnus, tiliointi.tapvm, tiliointi.tilino, tiliointi.kustp, tiliointi.projekti";
+  $query  = "SELECT date_format(tiliointi.tapvm, '%Y%m%d') tapvm,
+             tiliointi.tilino,
+             tiliointi.kustp,
+             tiliointi.projekti,
+             tiliointi.summa summa,
+             tiliointi.selite,
+             lasku.ytunnus,
+             tiliointi.ltunnus,
+             lasku.mapvm,
+             tiliointi.tunnus tunnus,
+             lasku.laskunro laskunro,
+             lasku.nimi
+             FROM tiliointi
+             JOIN lasku ON (tiliointi.yhtio=lasku.yhtio and lasku.tunnus=tiliointi.ltunnus)
+             WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
+             and left(tiliointi.tapvm, 7) = '$kausi'
+             and tiliointi.korjattu = ''
+             and tiliointi.tosite   = ''
+             ORDER BY tiliointi.ltunnus, tiliointi.tapvm, tiliointi.tilino, tiliointi.kustp, tiliointi.projekti";
   $result = pupe_query($query);
 
   while ($trow = mysql_fetch_assoc($result)) {

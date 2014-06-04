@@ -31,16 +31,16 @@ else {
 
             $solu = (float) $solu;
 
-            $query = "  SELECT summa
-                  FROM budjetti
-                  WHERE yhtio  = '$kukarow[yhtio]'
-                  AND kausi    = '$u_kausi'
-                  AND tyyppi   = '$tasotyyppi'
-                  AND taso    = '$u_taso'
-                  AND tili    = '$u_tili'
-                  AND kustp    = '$vkustp'
-                  AND kohde    = '$vkohde'
-                  AND projekti = '$vproj'";
+            $query = "SELECT summa
+                      FROM budjetti
+                      WHERE yhtio  = '$kukarow[yhtio]'
+                      AND kausi    = '$u_kausi'
+                      AND tyyppi   = '$tasotyyppi'
+                      AND taso     = '$u_taso'
+                      AND tili     = '$u_tili'
+                      AND kustp    = '$vkustp'
+                      AND kohde    = '$vkohde'
+                      AND projekti = '$vproj'";
             $result = pupe_query($query);
 
             if (mysql_num_rows($result) == 1) {
@@ -50,47 +50,47 @@ else {
               if ($budjrow['summa'] != $solu) {
 
                 if ($solu == 0) {
-                  $query = "  DELETE FROM budjetti
-                        WHERE yhtio  = '$kukarow[yhtio]'
-                        AND kausi    = '$u_kausi'
-                        AND tyyppi   = '$tasotyyppi'
-                        AND taso    = '$u_taso'
-                        AND tili    = '$u_tili'
-                        AND kustp    = '$vkustp'
-                        AND kohde    = '$vkohde'
-                        AND projekti = '$vproj'";
+                  $query = "DELETE FROM budjetti
+                            WHERE yhtio  = '$kukarow[yhtio]'
+                            AND kausi    = '$u_kausi'
+                            AND tyyppi   = '$tasotyyppi'
+                            AND taso     = '$u_taso'
+                            AND tili     = '$u_tili'
+                            AND kustp    = '$vkustp'
+                            AND kohde    = '$vkohde'
+                            AND projekti = '$vproj'";
                 }
                 else {
-                  $query  = "  UPDATE budjetti SET
-                        summa = $solu,
-                        muuttaja = '$kukarow[kuka]',
-                        muutospvm = now()
-                        WHERE yhtio  = '$kukarow[yhtio]'
-                        AND tyyppi   = '$tasotyyppi'
-                        AND kausi    = '$u_kausi'
-                        AND taso    = '$u_taso'
-                        AND tili    = '$u_tili'
-                        AND kustp    = '$vkustp'
-                        AND kohde    = '$vkohde'
-                        AND projekti = '$vproj'";
+                  $query  = "UPDATE budjetti SET
+                             summa        = $solu,
+                             muuttaja     = '$kukarow[kuka]',
+                             muutospvm    = now()
+                             WHERE yhtio  = '$kukarow[yhtio]'
+                             AND tyyppi   = '$tasotyyppi'
+                             AND kausi    = '$u_kausi'
+                             AND taso     = '$u_taso'
+                             AND tili     = '$u_tili'
+                             AND kustp    = '$vkustp'
+                             AND kohde    = '$vkohde'
+                             AND projekti = '$vproj'";
                 }
                 $result = pupe_query($query);
                 $paiv++;
               }
             }
             elseif ($solu != 0) {
-              $query = "  INSERT INTO budjetti SET
-                    summa     = $solu,
-                    tyyppi    = '$tasotyyppi',
-                    yhtio     = '$kukarow[yhtio]',
-                    kausi     = '$u_kausi',
-                    taso     = '$u_taso',
-                    tili     = '$u_tili',
-                    kustp     = '$vkustp',
-                    kohde     = '$vkohde',
-                    projekti   = '$vproj',
-                    laatija   = '$kukarow[kuka]',
-                    luontiaika  = now()";
+              $query = "INSERT INTO budjetti SET
+                        summa      = $solu,
+                        tyyppi     = '$tasotyyppi',
+                        yhtio      = '$kukarow[yhtio]',
+                        kausi      = '$u_kausi',
+                        taso       = '$u_taso',
+                        tili       = '$u_tili',
+                        kustp      = '$vkustp',
+                        kohde      = '$vkohde',
+                        projekti   = '$vproj',
+                        laatija    = '$kukarow[kuka]',
+                        luontiaika = now()";
               $result = pupe_query($query);
               $lisaa++;
             }
@@ -144,10 +144,10 @@ else {
 
   echo "<tr><th>".t("Tilikausi");
 
-  $query = "  SELECT *
-        FROM tilikaudet
-        WHERE yhtio = '$kukarow[yhtio]'
-        ORDER BY tilikausi_alku desc";
+  $query = "SELECT *
+            FROM tilikaudet
+            WHERE yhtio = '$kukarow[yhtio]'
+            ORDER BY tilikausi_alku desc";
   $vresult = pupe_query($query);
 
   echo "</th><td><select name='tkausi'>";
@@ -164,12 +164,12 @@ else {
 
   echo "<tr><th>".t("Kustannuspaikka")."</th>";
 
-  $query = "  SELECT tunnus, nimi
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and kaytossa != 'E'
-        and tyyppi = 'K'
-        ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, nimi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and kaytossa != 'E'
+            and tyyppi    = 'K'
+            ORDER BY koodi+0, koodi, nimi";
   $vresult = pupe_query($query);
 
   echo "<td><select name='kustp'><option value='0'>".t("Ei valintaa")."</option>";
@@ -185,12 +185,12 @@ else {
   echo "</tr>";
   echo "<tr><th>".t("Kohde")."</th>";
 
-  $query = "  SELECT tunnus, nimi
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and kaytossa != 'E'
-        and tyyppi = 'O'
-        ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, nimi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and kaytossa != 'E'
+            and tyyppi    = 'O'
+            ORDER BY koodi+0, koodi, nimi";
   $vresult = pupe_query($query);
 
   echo "<td><select name='kohde'><option value='0'>".t("Ei valintaa")."</option>";
@@ -207,12 +207,12 @@ else {
   echo "</tr>";
   echo "<tr><th>".t("Projekti")."</th>";
 
-  $query = "  SELECT tunnus, nimi
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and kaytossa != 'E'
-        and tyyppi = 'P'
-        ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, nimi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and kaytossa != 'E'
+            and tyyppi    = 'P'
+            ORDER BY koodi+0, koodi, nimi";
   $vresult = pupe_query($query);
 
   echo "<td><select name='proj'><option value='0'>".t("Ei valintaa")."</option>";
@@ -233,9 +233,9 @@ else {
   echo "<tr><th valign='top'>".t("Budjetointitaso")."</th>
       <td><select name='rtaso'>";
 
-  $query = "  SELECT max(length(taso)) taso
-        from taso
-        where yhtio = '$kukarow[yhtio]'";
+  $query = "SELECT max(length(taso)) taso
+            from taso
+            where yhtio = '$kukarow[yhtio]'";
   $vresult = pupe_query($query);
   $vrow = mysql_fetch_assoc($vresult);
 
@@ -275,13 +275,13 @@ else {
   echo "<input type='hidden' name='tasotyyppi' value='$tasotyyppi'>";
 
   // Haetaan kaikki tasot ja rakennetaan tuloslaskelma-array
-  $query = "  SELECT *
-        FROM taso
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tyyppi   = '$tasotyyppi'
-        and LEFT(taso, 1) in (BINARY '$tyyppi')
-        and taso != ''
-        ORDER BY taso";
+  $query = "SELECT *
+            FROM taso
+            WHERE yhtio  = '$kukarow[yhtio]'
+            and tyyppi   = '$tasotyyppi'
+            and LEFT(taso, 1) in (BINARY '$tyyppi')
+            and taso    != ''
+            ORDER BY taso";
   $tasores = pupe_query($query);
 
   // Jos meill‰ on tasoja piirret‰‰n taulukko
@@ -301,10 +301,10 @@ else {
   }
 
   if (isset($tkausi)) {
-    $query = "  SELECT *
-          FROM tilikaudet
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tunnus = '$tkausi'";
+    $query = "SELECT *
+              FROM tilikaudet
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tunnus  = '$tkausi'";
     $vresult = pupe_query($query);
 
     if (mysql_num_rows($vresult) == 1) {
@@ -399,13 +399,13 @@ else {
       $excelsarake++;
 
       // Haetaan budjetit
-      $query = "  SELECT *
-            from budjetti
-            where yhtio    = '$kukarow[yhtio]'
-            and kausi     = '$vuosi$kk'
-            and kustp    = '$kustp'
-            and kohde    = '$kohde'
-            and projekti  = '$proj'";
+      $query = "SELECT *
+                from budjetti
+                where yhtio  = '$kukarow[yhtio]'
+                and kausi    = '$vuosi$kk'
+                and kustp    = '$kustp'
+                and kohde    = '$kohde'
+                and projekti = '$proj'";
       $xresult = pupe_query($query);
 
       while ($brow = mysql_fetch_assoc($xresult)) {
@@ -438,11 +438,11 @@ else {
 
           $class = "tumma";
 
-          $query = "  SELECT tilino, nimi
-                FROM tili
-                WHERE yhtio = '$kukarow[yhtio]'
-                AND $tilityyppi = '$key'
-                ORDER BY 1,2";
+          $query = "SELECT tilino, nimi
+                    FROM tili
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    AND $tilityyppi = '$key'
+                    ORDER BY 1,2";
           $tiliresult = pupe_query($query);
 
           while ($tilirow = mysql_fetch_assoc($tiliresult)) {

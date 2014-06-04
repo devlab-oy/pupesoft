@@ -14,29 +14,29 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
       $rakir_row = $osoitelappurow;
     }
     else {
-      $query = "  SELECT *
-            from lasku
-            where yhtio = '$kukarow[yhtio]'
-            and tunnus in ($otunnukset)
-            order by tunnus
-            limit 1";
+      $query = "SELECT *
+                from lasku
+                where yhtio = '$kukarow[yhtio]'
+                and tunnus  in ($otunnukset)
+                order by tunnus
+                limit 1";
       $tempr = mysql_query($query) or pupe_error($query);
       $postirow = mysql_fetch_assoc($tempr);
     }
 
     // Maksuehdon tiedot
-    $query = "  SELECT *
-          FROM maksuehto
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tunnus  = '{$postirow['maksuehto']}'";
+    $query = "SELECT *
+              FROM maksuehto
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = '{$postirow['maksuehto']}'";
     $mehto_res = pupe_query($query);
     $mehto = mysql_fetch_assoc($mehto_res);
 
     // Kirjoittimen unifaun-nimi
-    $query = "  SELECT unifaun_nimi
-          FROM kirjoittimet
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tunnus = '{$reittietikettitulostin}'";
+    $query = "SELECT unifaun_nimi
+              FROM kirjoittimet
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = '{$reittietikettitulostin}'";
     $kirjoitin_res = pupe_query($query);
     $kirjoitin_row = mysql_fetch_assoc($kirjoitin_res);
 
@@ -72,12 +72,12 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
       $kuutiot[$indeksi] = round($kuutiot[$indeksi]/$kollit[$indeksi], 2);
 
       // Napataan pakkauksen tiedot
-      $query = "  SELECT pakkaus.leveys, pakkaus.korkeus, pakkaus.syvyys, pakkaus.pakkauskuvaus, ifnull(pakkauskoodit.koodi, pakkaus.pakkaus) koodi, pakkaus.pakkaus
-            FROM pakkaus
-            LEFT JOIN pakkauskoodit ON (pakkaus.yhtio=pakkauskoodit.yhtio AND pakkaus.tunnus=pakkauskoodit.pakkaus AND pakkauskoodit.rahdinkuljettaja = '{$toitarow['rahdinkuljettaja']}')
-            WHERE pakkaus.yhtio     = '$kukarow[yhtio]'
-            and pakkaus.pakkaus     = '{$pakkaus[$indeksi]}'
-            and pakkaus.pakkauskuvaus = '{$pakkauskuvaus[$indeksi]}'";
+      $query = "SELECT pakkaus.leveys, pakkaus.korkeus, pakkaus.syvyys, pakkaus.pakkauskuvaus, ifnull(pakkauskoodit.koodi, pakkaus.pakkaus) koodi, pakkaus.pakkaus
+                FROM pakkaus
+                LEFT JOIN pakkauskoodit ON (pakkaus.yhtio=pakkauskoodit.yhtio AND pakkaus.tunnus=pakkauskoodit.pakkaus AND pakkauskoodit.rahdinkuljettaja = '{$toitarow['rahdinkuljettaja']}')
+                WHERE pakkaus.yhtio       = '$kukarow[yhtio]'
+                and pakkaus.pakkaus       = '{$pakkaus[$indeksi]}'
+                and pakkaus.pakkauskuvaus = '{$pakkauskuvaus[$indeksi]}'";
       $pakkaus_res = pupe_query($query);
       $pakkaus_row = mysql_fetch_assoc($pakkaus_res);
 

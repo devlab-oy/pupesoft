@@ -74,10 +74,10 @@ if ($_viivakoodi == $viivakoodi) $viivakoodi = "";
 
 # Tarkistetaan onko k‰ytt‰j‰ll‰ kesken saapumista
 $keskeneraiset_query = "SELECT kuka.kesken FROM lasku
-            JOIN kuka ON (lasku.tunnus=kuka.kesken and lasku.yhtio=kuka.yhtio)
-            WHERE kuka='{$kukarow['kuka']}'
-            and kuka.yhtio='{$kukarow['yhtio']}'
-            and lasku.tila='K'";
+                        JOIN kuka ON (lasku.tunnus=kuka.kesken and lasku.yhtio=kuka.yhtio)
+                        WHERE kuka='{$kukarow['kuka']}'
+                        and kuka.yhtio='{$kukarow['yhtio']}'
+                        and lasku.tila='K'";
 $keskeneraiset = mysql_fetch_assoc(pupe_query($keskeneraiset_query));
 
 # Jos kuka.kesken on saapuminen, k‰ytet‰‰n sit‰
@@ -104,37 +104,37 @@ if (isset($sort_by)) {
 }
 
 # Haetaan ostotilaukset
-$query = "  SELECT
-      lasku.tunnus as ostotilaus,
-      lasku.liitostunnus,
-      tilausrivi.tunnus,
-      tilausrivi.otunnus,
-      tilausrivi.tuoteno,
-      tilausrivi.varattu,
-      tilausrivi.kpl,
-      (tilausrivi.varattu + tilausrivi.kpl) as sorttaus_kpl,
-      tilausrivi.tilkpl,
-      tilausrivi.uusiotunnus,
-      concat_ws('-',tilausrivi.hyllyalue,tilausrivi.hyllynro,tilausrivi.hyllyvali,tilausrivi.hyllytaso) as hylly,
-      IF(tuotteen_toimittajat.tuotekerroin = 0, 1, tuotteen_toimittajat.tuotekerroin) tuotekerroin,
-      tuotteen_toimittajat.liitostunnus,
-      IF(IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, 'NORM') = '', 'JT', IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, '')) as tilausrivi_tyyppi
-      FROM lasku
-      JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio AND tilausrivi.otunnus=lasku.tunnus AND tilausrivi.tyyppi='O'
-        AND tilausrivi.varattu != 0 AND (tilausrivi.uusiotunnus = 0 OR tilausrivi.suuntalava = 0)
-      JOIN tuote on tuote.tuoteno=tilausrivi.tuoteno AND tuote.yhtio=tilausrivi.yhtio
-      JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio
-        AND tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
-        AND tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
-      LEFT JOIN tilausrivin_lisatiedot
-      ON ( tilausrivin_lisatiedot.yhtio = lasku.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
-      WHERE lasku.tila = 'O'
-      AND lasku.alatila = 'A'
-      AND lasku.yhtio='{$kukarow['yhtio']}'
-      AND lasku.vanhatunnus = '{$kukarow['toimipaikka']}'
-      {$query_lisa}
-      ORDER BY {$orderby} {$ascdesc}
-    ";
+$query = "SELECT
+          lasku.tunnus as ostotilaus,
+          lasku.liitostunnus,
+          tilausrivi.tunnus,
+          tilausrivi.otunnus,
+          tilausrivi.tuoteno,
+          tilausrivi.varattu,
+          tilausrivi.kpl,
+          (tilausrivi.varattu + tilausrivi.kpl) as sorttaus_kpl,
+          tilausrivi.tilkpl,
+          tilausrivi.uusiotunnus,
+          concat_ws('-',tilausrivi.hyllyalue,tilausrivi.hyllynro,tilausrivi.hyllyvali,tilausrivi.hyllytaso) as hylly,
+          IF(tuotteen_toimittajat.tuotekerroin = 0, 1, tuotteen_toimittajat.tuotekerroin) tuotekerroin,
+          tuotteen_toimittajat.liitostunnus,
+          IF(IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, 'NORM') = '', 'JT', IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, '')) as tilausrivi_tyyppi
+          FROM lasku
+          JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio AND tilausrivi.otunnus=lasku.tunnus AND tilausrivi.tyyppi='O'
+            AND tilausrivi.varattu != 0 AND (tilausrivi.uusiotunnus = 0 OR tilausrivi.suuntalava = 0)
+          JOIN tuote on tuote.tuoteno=tilausrivi.tuoteno AND tuote.yhtio=tilausrivi.yhtio
+          JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio
+            AND tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
+            AND tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
+          LEFT JOIN tilausrivin_lisatiedot
+          ON ( tilausrivin_lisatiedot.yhtio = lasku.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
+          WHERE lasku.tila          = 'O'
+          AND lasku.alatila         = 'A'
+          AND lasku.yhtio='{$kukarow['yhtio']}'
+          AND lasku.vanhatunnus     = '{$kukarow['toimipaikka']}'
+          {$query_lisa}
+          ORDER BY {$orderby} {$ascdesc}
+          ";
 $result = pupe_query($query);
 $tilausten_lukumaara = mysql_num_rows($result);
 
@@ -149,37 +149,37 @@ if ($tilausten_lukumaara == 0 and (isset($_viivakoodi) and $_viivakoodi != "") a
 
   $query_lisa = " AND ".implode($params, " AND ");
 
-  $query = "  SELECT
-        lasku.tunnus as ostotilaus,
-        lasku.liitostunnus,
-        tilausrivi.tunnus,
-        tilausrivi.otunnus,
-        tilausrivi.tuoteno,
-        tilausrivi.varattu,
-        tilausrivi.kpl,
-        (tilausrivi.varattu + tilausrivi.kpl) as sorttaus_kpl,
-        tilausrivi.tilkpl,
-        tilausrivi.uusiotunnus,
-        concat_ws('-',tilausrivi.hyllyalue,tilausrivi.hyllynro,tilausrivi.hyllyvali,tilausrivi.hyllytaso) as hylly,
-        IF(tuotteen_toimittajat.tuotekerroin = 0, 1, tuotteen_toimittajat.tuotekerroin) tuotekerroin,
-        tuotteen_toimittajat.liitostunnus,
-        IF(IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, 'NORM') = '', 'JT', IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, '')) as tilausrivi_tyyppi
-        FROM lasku
-        JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio AND tilausrivi.otunnus=lasku.tunnus AND tilausrivi.tyyppi='O'
-          AND tilausrivi.varattu != 0 AND (tilausrivi.uusiotunnus = 0 OR tilausrivi.suuntalava = 0)
-        JOIN tuote on tuote.tuoteno=tilausrivi.tuoteno AND tuote.yhtio=tilausrivi.yhtio
-        JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio
-          AND tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
-          AND tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
-        LEFT JOIN tilausrivin_lisatiedot
-        ON ( tilausrivin_lisatiedot.yhtio = lasku.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
-        WHERE lasku.tila = 'O'
-        AND lasku.alatila = 'A'
-        AND lasku.yhtio='{$kukarow['yhtio']}'
-        AND lasku.vanhatunnus = '{$kukarow['toimipaikka']}'
-        {$query_lisa}
-        ORDER BY {$orderby} {$ascdesc}
-      ";
+  $query = "SELECT
+            lasku.tunnus as ostotilaus,
+            lasku.liitostunnus,
+            tilausrivi.tunnus,
+            tilausrivi.otunnus,
+            tilausrivi.tuoteno,
+            tilausrivi.varattu,
+            tilausrivi.kpl,
+            (tilausrivi.varattu + tilausrivi.kpl) as sorttaus_kpl,
+            tilausrivi.tilkpl,
+            tilausrivi.uusiotunnus,
+            concat_ws('-',tilausrivi.hyllyalue,tilausrivi.hyllynro,tilausrivi.hyllyvali,tilausrivi.hyllytaso) as hylly,
+            IF(tuotteen_toimittajat.tuotekerroin = 0, 1, tuotteen_toimittajat.tuotekerroin) tuotekerroin,
+            tuotteen_toimittajat.liitostunnus,
+            IF(IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, 'NORM') = '', 'JT', IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, '')) as tilausrivi_tyyppi
+            FROM lasku
+            JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio AND tilausrivi.otunnus=lasku.tunnus AND tilausrivi.tyyppi='O'
+              AND tilausrivi.varattu != 0 AND (tilausrivi.uusiotunnus = 0 OR tilausrivi.suuntalava = 0)
+            JOIN tuote on tuote.tuoteno=tilausrivi.tuoteno AND tuote.yhtio=tilausrivi.yhtio
+            JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio
+              AND tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
+              AND tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
+            LEFT JOIN tilausrivin_lisatiedot
+            ON ( tilausrivin_lisatiedot.yhtio = lasku.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
+            WHERE lasku.tila          = 'O'
+            AND lasku.alatila         = 'A'
+            AND lasku.yhtio='{$kukarow['yhtio']}'
+            AND lasku.vanhatunnus     = '{$kukarow['toimipaikka']}'
+            {$query_lisa}
+            ORDER BY {$orderby} {$ascdesc}
+            ";
   $result = pupe_query($query);
   $tilausten_lukumaara = mysql_num_rows($result);
 }

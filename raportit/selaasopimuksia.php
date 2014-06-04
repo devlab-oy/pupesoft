@@ -54,31 +54,31 @@ echo "</tr>";
 echo "</thead>";
 echo "<tbody>";
 
-$query = "  SELECT lasku.tunnus tilaus,
-      concat(lasku.ytunnus, '<br>', lasku.nimi) asiakas,
-      lasku.asiakkaan_tilausnumero,
-      lasku.valkoodi,
-      laskun_lisatiedot.sopimus_alkupvm,
-      laskun_lisatiedot.sopimus_loppupvm,
-      if (tilausrivi.kerayspvm = '0000-00-00', if(laskun_lisatiedot.sopimus_loppupvm = '0000-00-00', '', laskun_lisatiedot.sopimus_loppupvm), tilausrivi.kerayspvm) rivinsopimus_alku,
-      if (tilausrivi.toimaika = '0000-00-00', if(laskun_lisatiedot.sopimus_alkupvm = '0000-00-00', '', laskun_lisatiedot.sopimus_loppupvm), tilausrivi.toimaika) rivinsopimus_loppu,
-      tilausrivi.nimitys,
-      tilausrivi.tuoteno,
-      round(tilausrivi.hinta * tilausrivi.varattu * {$query_ale_lisa}, {$yhtiorow["hintapyoristys"]}) rivihinta,
-      tilausrivi.varattu,
-      tilausrivi.hinta,
-      tilausrivi.kommentti,
-      tilausrivin_lisatiedot.sopimuksen_lisatieto1 sarjanumero,
-      tilausrivin_lisatiedot.sopimuksen_lisatieto2 vasteaika,
-      laskun_lisatiedot.sopimus_lisatietoja sisainen_kommentti
-      FROM lasku use index (tila_index)
-      JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus and (laskun_lisatiedot.sopimus_loppupvm >= now() or laskun_lisatiedot.sopimus_loppupvm = '0000-00-00'))
-      JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = '0')
-      JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
-      WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-      AND tila = '0'
-      AND alatila != 'D'
-      ORDER by lasku.tunnus, rivinsopimus_alku ASC, rivinsopimus_loppu ASC";
+$query = "SELECT lasku.tunnus tilaus,
+          concat(lasku.ytunnus, '<br>', lasku.nimi) asiakas,
+          lasku.asiakkaan_tilausnumero,
+          lasku.valkoodi,
+          laskun_lisatiedot.sopimus_alkupvm,
+          laskun_lisatiedot.sopimus_loppupvm,
+          if (tilausrivi.kerayspvm = '0000-00-00', if(laskun_lisatiedot.sopimus_loppupvm = '0000-00-00', '', laskun_lisatiedot.sopimus_loppupvm), tilausrivi.kerayspvm) rivinsopimus_alku,
+          if (tilausrivi.toimaika = '0000-00-00', if(laskun_lisatiedot.sopimus_alkupvm = '0000-00-00', '', laskun_lisatiedot.sopimus_loppupvm), tilausrivi.toimaika) rivinsopimus_loppu,
+          tilausrivi.nimitys,
+          tilausrivi.tuoteno,
+          round(tilausrivi.hinta * tilausrivi.varattu * {$query_ale_lisa}, {$yhtiorow["hintapyoristys"]}) rivihinta,
+          tilausrivi.varattu,
+          tilausrivi.hinta,
+          tilausrivi.kommentti,
+          tilausrivin_lisatiedot.sopimuksen_lisatieto1 sarjanumero,
+          tilausrivin_lisatiedot.sopimuksen_lisatieto2 vasteaika,
+          laskun_lisatiedot.sopimus_lisatietoja sisainen_kommentti
+          FROM lasku use index (tila_index)
+          JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus and (laskun_lisatiedot.sopimus_loppupvm >= now() or laskun_lisatiedot.sopimus_loppupvm = '0000-00-00'))
+          JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = '0')
+          JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+          WHERE lasku.yhtio  = '{$kukarow["yhtio"]}'
+          AND tila           = '0'
+          AND alatila       != 'D'
+          ORDER by lasku.tunnus, rivinsopimus_alku ASC, rivinsopimus_loppu ASC";
 $result = pupe_query($query);
 
 while ($rivit = mysql_fetch_assoc($result)) {

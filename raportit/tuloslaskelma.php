@@ -81,12 +81,12 @@ else {
     }
 
     // Katsotaan, että kaikilla tileillä on tasot kunnossa
-    $query = "  SELECT tili.*, taso.tunnus tasotunnus
-                 FROM tili
-          LEFT JOIN taso ON taso.yhtio=tili.yhtio and tili.{$sisulk}_taso=taso.taso
-                WHERE tili.yhtio = '$kukarow[yhtio]'
-          $tililisa
-          and taso.tunnus is null";
+    $query = "SELECT tili.*, taso.tunnus tasotunnus
+              FROM tili
+              LEFT JOIN taso ON taso.yhtio=tili.yhtio and tili.{$sisulk}_taso=taso.taso
+              WHERE tili.yhtio = '$kukarow[yhtio]'
+              $tililisa
+              and taso.tunnus is null";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) > 0 ) {
@@ -148,11 +148,11 @@ else {
   echo "</td></tr>";
 
   if (!isset($plvv)) {
-    $query = "  SELECT *
-          FROM tilikaudet
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tilikausi_alku <= now()
-          and tilikausi_loppu >= now()";
+    $query = "SELECT *
+              FROM tilikaudet
+              WHERE yhtio         = '$kukarow[yhtio]'
+              and tilikausi_alku  <= now()
+              and tilikausi_loppu >= now()";
     $result = pupe_query($query);
     $tilikausirow = mysql_fetch_assoc($result);
 
@@ -261,10 +261,10 @@ else {
 
   echo "<tr><th valign='top'>".t("tai koko tilikausi")."</th>";
 
-  $query = "  SELECT *
-        FROM tilikaudet
-        WHERE yhtio = '$kukarow[yhtio]'
-        ORDER BY tilikausi_alku DESC";
+  $query = "SELECT *
+            FROM tilikaudet
+            WHERE yhtio = '$kukarow[yhtio]'
+            ORDER BY tilikausi_alku DESC";
   $vresult = pupe_query($query);
 
   echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa");
@@ -285,9 +285,9 @@ else {
   echo "<tr><th valign='top'>".t("Raportointitaso")."</th>
       <td><select name='rtaso'>";
 
-  $query = "  SELECT max(length(taso)) taso
-        from taso
-        where yhtio = '$kukarow[yhtio]'";
+  $query = "SELECT max(length(taso)) taso
+            from taso
+            where yhtio = '$kukarow[yhtio]'";
   $vresult = pupe_query($query);
   $vrow = mysql_fetch_assoc($vresult);
 
@@ -455,9 +455,9 @@ else {
     $tilisumma      = array();
 
     if ((int) $tkausi > 0) {
-      $query = "  SELECT tilikausi_alku, tilikausi_loppu
-            FROM tilikaudet
-            WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tkausi'";
+      $query = "SELECT tilikausi_alku, tilikausi_loppu
+                FROM tilikaudet
+                WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tkausi'";
       $result = pupe_query($query);
       $tkrow = mysql_fetch_assoc($result);
 
@@ -501,12 +501,12 @@ else {
       $vertailubu = "";
 
       // Näitä tarvitaan kun piirretään headerit
-      $query = "  SELECT tunnus, concat_ws(' - ', if (koodi='', NULL, koodi), nimi) nimi
-            FROM kustannuspaikka
-            WHERE yhtio = '$kukarow[yhtio]'
-            and kaytossa != 'E'
-            and tyyppi = 'K'
-            ORDER BY koodi+0, koodi, nimi";
+      $query = "SELECT tunnus, concat_ws(' - ', if (koodi='', NULL, koodi), nimi) nimi
+                FROM kustannuspaikka
+                WHERE yhtio   = '$kukarow[yhtio]'
+                and kaytossa != 'E'
+                and tyyppi    = 'K'
+                ORDER BY koodi+0, koodi, nimi";
       $vresult = pupe_query($query);
 
       while ($vrow = mysql_fetch_assoc($vresult)) {
@@ -522,12 +522,12 @@ else {
       $vertailubu = "";
 
       // Näitä tarvitaan kun piirretään headerit
-      $query = "  SELECT tunnus, concat_ws(' - ', if (koodi='', NULL, koodi), nimi) nimi
-            FROM kustannuspaikka
-            WHERE yhtio = '$kukarow[yhtio]'
-            and kaytossa != 'E'
-            and tyyppi = 'O'
-            ORDER BY koodi+0, koodi, nimi";
+      $query = "SELECT tunnus, concat_ws(' - ', if (koodi='', NULL, koodi), nimi) nimi
+                FROM kustannuspaikka
+                WHERE yhtio   = '$kukarow[yhtio]'
+                and kaytossa != 'E'
+                and tyyppi    = 'O'
+                ORDER BY koodi+0, koodi, nimi";
       $vresult = pupe_query($query);
 
       while ($vrow = mysql_fetch_assoc($vresult)) {
@@ -543,12 +543,12 @@ else {
       $vertailubu = "";
 
       // Näitä tarvitaan kun piirretään headerit
-      $query = "  SELECT tunnus, concat_ws(' - ', if (koodi='', NULL, koodi), nimi) nimi
-            FROM kustannuspaikka
-            WHERE yhtio = '$kukarow[yhtio]'
-            and kaytossa != 'E'
-            and tyyppi = 'P'
-            ORDER BY koodi+0, koodi, nimi";
+      $query = "SELECT tunnus, concat_ws(' - ', if (koodi='', NULL, koodi), nimi) nimi
+                FROM kustannuspaikka
+                WHERE yhtio   = '$kukarow[yhtio]'
+                and kaytossa != 'E'
+                and tyyppi    = 'P'
+                ORDER BY koodi+0, koodi, nimi";
       $vresult = pupe_query($query);
 
       while ($vrow = mysql_fetch_assoc($vresult)) {
@@ -636,10 +636,10 @@ else {
     }
 
     // Haetaan yhtiön tulostili
-    $query = "  SELECT tunnus, tilino
-          FROM tili
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          and tunnus  = '{$yhtiorow["tilikauden_tulos"]}'";
+    $query = "SELECT tunnus, tilino
+              FROM tili
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              and tunnus  = '{$yhtiorow["tilikauden_tulos"]}'";
     $tulostilires = pupe_query($query);
 
     if (mysql_num_rows($tulostilires) == 1) {
@@ -647,12 +647,12 @@ else {
     }
 
     // Tehdäänkö linkit päiväkirjaan
-    $query = "  SELECT yhtio
-          FROM oikeu
-          WHERE yhtio  = '$kukarow[yhtio]'
-          and kuka  = '$kukarow[kuka]'
-          and nimi  = 'raportit.php'
-          and alanimi = 'paakirja'";
+    $query = "SELECT yhtio
+              FROM oikeu
+              WHERE yhtio = '$kukarow[yhtio]'
+              and kuka    = '$kukarow[kuka]'
+              and nimi    = 'raportit.php'
+              and alanimi = 'paakirja'";
     $oikresult = pupe_query($query);
 
     if (mysql_num_rows($oikresult) > 0) {
@@ -786,20 +786,20 @@ else {
     }
 
     // Haetaan kaikki tiliöinnit
-    $query = "  SELECT tiliointi.tilino, $groupsarake groupsarake, $alkuquery1
-                 FROM tiliointi USE INDEX (yhtio_tapvm_tilino)
-                $laskujoini
-                $asiakasjoini
-                $konsernijoini
-          $tilijoini
-                WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-                and tiliointi.korjattu = ''
-                and tiliointi.tapvm >= '$totalalku'
-                and tiliointi.tapvm <= '$totalloppu'
-                $konsernilisa
-                $lisa
-                GROUP BY tiliointi.tilino, groupsarake
-          ORDER BY tiliointi.tilino, groupsarake";
+    $query = "SELECT tiliointi.tilino, $groupsarake groupsarake, $alkuquery1
+              FROM tiliointi USE INDEX (yhtio_tapvm_tilino)
+              $laskujoini
+              $asiakasjoini
+              $konsernijoini
+              $tilijoini
+              WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
+              and tiliointi.korjattu = ''
+              and tiliointi.tapvm    >= '$totalalku'
+              and tiliointi.tapvm    <= '$totalloppu'
+              $konsernilisa
+              $lisa
+              GROUP BY tiliointi.tilino, groupsarake
+              ORDER BY tiliointi.tilino, groupsarake";
     $tilires = pupe_query($query);
 
     $tilioinnit = array();
@@ -820,30 +820,30 @@ else {
 
       $tulokset = array();
 
-      $query = "  SELECT group_concat(concat('\'',tilino,'\'')) tilit
-             FROM tili
-            WHERE yhtio = '$kukarow[yhtio]'
-            and LEFT(tili.ulkoinen_taso, 1) = BINARY '3'";
+      $query = "SELECT group_concat(concat('\'',tilino,'\'')) tilit
+                FROM tili
+                WHERE yhtio = '$kukarow[yhtio]'
+                and LEFT(tili.ulkoinen_taso, 1) = BINARY '3'";
       $tulosres = pupe_query($query);
       $tulosrow = mysql_fetch_assoc($tulosres);
 
       if ($tulosrow['tilit'] != '') {
         // Haetaan firman tulos
-        $query = "  SELECT $groupsarake groupsarake, $alkuquery1
-                     FROM tiliointi USE INDEX (yhtio_tapvm_tilino)
-                    $laskujoini
-                    $asiakasjoini
-                    $konsernijoini
-              $tilijoini
-                    WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-                    and tiliointi.korjattu = ''
-                    and tiliointi.tapvm >= '$totalalku'
-                    and tiliointi.tapvm <= '$totalloppu'
-              and tiliointi.tilino in ({$tulosrow['tilit']})
-                    $konsernilisa
-                    $lisa
-                    GROUP BY groupsarake
-              ORDER BY groupsarake";
+        $query = "SELECT $groupsarake groupsarake, $alkuquery1
+                  FROM tiliointi USE INDEX (yhtio_tapvm_tilino)
+                  $laskujoini
+                  $asiakasjoini
+                  $konsernijoini
+                  $tilijoini
+                  WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
+                  and tiliointi.korjattu = ''
+                  and tiliointi.tapvm    >= '$totalalku'
+                  and tiliointi.tapvm    <= '$totalloppu'
+                  and tiliointi.tilino   in ({$tulosrow['tilit']})
+                  $konsernilisa
+                  $lisa
+                  GROUP BY groupsarake
+                  ORDER BY groupsarake";
         $tulosres = pupe_query($query);
 
         while ($tulosrow = mysql_fetch_assoc($tulosres)) {
@@ -859,15 +859,15 @@ else {
     }
 
     // Haetaan kaikki budjetit
-    $query = "  SELECT budjetti.taso, budjetti.yhtio groupsarake, $alkuquery2
-           FROM budjetti
-          JOIN budjetti tili ON (tili.yhtio = budjetti.yhtio and tili.tunnus = budjetti.tunnus)
-          LEFT JOIN tiliointi USE INDEX (PRIMARY) ON (tiliointi.tunnus = 0)
-          WHERE budjetti.yhtio = '$kukarow[yhtio]'
-          AND budjetti.tyyppi = '$kirjain'
-          $bulisa
-          GROUP BY budjetti.taso, groupsarake
-          ORDER BY budjetti.taso, groupsarake";
+    $query = "SELECT budjetti.taso, budjetti.yhtio groupsarake, $alkuquery2
+              FROM budjetti
+              JOIN budjetti tili ON (tili.yhtio = budjetti.yhtio and tili.tunnus = budjetti.tunnus)
+              LEFT JOIN tiliointi USE INDEX (PRIMARY) ON (tiliointi.tunnus = 0)
+              WHERE budjetti.yhtio = '$kukarow[yhtio]'
+              AND budjetti.tyyppi  = '$kirjain'
+              $bulisa
+              GROUP BY budjetti.taso, groupsarake
+              ORDER BY budjetti.taso, groupsarake";
     $tilires = pupe_query($query);
 
     $budjetit = array();
@@ -877,13 +877,13 @@ else {
     }
 
     // Haetaan kaikki tasot ja rakennetaan tuloslaskelma-array
-    $query = "  SELECT *
-          FROM taso
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tyyppi   = '$kirjain'
-          and LEFT(taso, 1) in (BINARY '$aputyyppi')
-          and taso != ''
-          ORDER BY taso";
+    $query = "SELECT *
+              FROM taso
+              WHERE yhtio  = '$kukarow[yhtio]'
+              and tyyppi   = '$kirjain'
+              and LEFT(taso, 1) in (BINARY '$aputyyppi')
+              and taso    != ''
+              ORDER BY taso";
     $tasores = pupe_query($query);
 
     while ($tasorow = mysql_fetch_assoc($tasores)) {
@@ -910,11 +910,11 @@ else {
         $taso[$i] = substr($tasorow["taso"], 0, $i+1);
       }
 
-      $query = "  SELECT tilino, nimi, tunnus
-             FROM tili
-            WHERE yhtio = '$kukarow[yhtio]'
-            and $tilikarttataso = BINARY '$tasorow[taso]'
-            ORDER BY tilino";
+      $query = "SELECT tilino, nimi, tunnus
+                FROM tili
+                WHERE yhtio = '$kukarow[yhtio]'
+                and $tilikarttataso = BINARY '$tasorow[taso]'
+                ORDER BY tilino";
       $tilires = pupe_query($query);
 
       if (mysql_num_rows($tilires) > 0) {
@@ -1215,12 +1215,12 @@ else {
 
         for ($i = $alkukausi; $i < count($kaudet); $i++) {
           foreach ($sarakkeet as $sarake) {
-            $query = "  SELECT summattava_taso
-                  FROM taso
-                  WHERE yhtio      = '$kukarow[yhtio]'
-                  and taso        = BINARY '$key'
-                  and summattava_taso != ''
-                  and tyyppi        = '$kirjain'";
+            $query = "SELECT summattava_taso
+                      FROM taso
+                      WHERE yhtio          = '$kukarow[yhtio]'
+                      and taso             = BINARY '$key'
+                      and summattava_taso != ''
+                      and tyyppi           = '$kirjain'";
             $summares = pupe_query($query);
 
             // Budjettia ei summata

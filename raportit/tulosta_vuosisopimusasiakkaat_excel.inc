@@ -165,7 +165,7 @@ class vuosisopimus_asiakkaat_excel {
     if ($tyyppi == 'tuoteryhmittain') {
       $temp = $this->get_summat_tuoteryhmittain();
     }
-    else if ($tyyppi == 'osastoittain') {
+    elseif ($tyyppi == 'osastoittain') {
       $temp = $this->get_summat_osastoittain();
     }
 

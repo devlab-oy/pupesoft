@@ -34,21 +34,21 @@ $poistettu = 0;
 echo "Päivitetään korvaavuusketjun nimitykset ...\n\n";
 
 // Haetaan tuoteketjut
-$select = "  SELECT distinct id
-      FROM korvaavat
-      WHERE yhtio='{$kukarow['yhtio']}'";
+$select = "SELECT distinct id
+           FROM korvaavat
+           WHERE yhtio='{$kukarow['yhtio']}'";
 $result = pupe_query($select);
 
 // Loopataan ketjut läpi
 while($ketju = mysql_fetch_assoc($result)) {
 
   // Haetaan ketjun tuotteet
-  $tuotteet_query = "  SELECT korvaavat.id, korvaavat.tuoteno, korvaavat.jarjestys, tuote.nimitys
-            FROM korvaavat
-            JOIN tuote ON (tuote.yhtio = korvaavat.yhtio AND tuote.tuoteno = korvaavat.tuoteno)
-            WHERE korvaavat.yhtio='{$kukarow['yhtio']}'
-            AND korvaavat.id='{$ketju['id']}'
-            ORDER BY if(korvaavat.jarjestys=0, 9999, korvaavat.jarjestys), korvaavat.tuoteno";
+  $tuotteet_query = "SELECT korvaavat.id, korvaavat.tuoteno, korvaavat.jarjestys, tuote.nimitys
+                     FROM korvaavat
+                     JOIN tuote ON (tuote.yhtio = korvaavat.yhtio AND tuote.tuoteno = korvaavat.tuoteno)
+                     WHERE korvaavat.yhtio='{$kukarow['yhtio']}'
+                     AND korvaavat.id='{$ketju['id']}'
+                     ORDER BY if(korvaavat.jarjestys=0, 9999, korvaavat.jarjestys), korvaavat.tuoteno";
   $tuotteet_result = pupe_query($tuotteet_query);
 
   // Poislukien päätuote
@@ -73,18 +73,18 @@ while($ketju = mysql_fetch_assoc($result)) {
       // Huomioidaan vain tuotteet joilla saldo on nolla
       if ($myytavissa[0] == 0) {
 
-        $muutos_query = "  UPDATE tuote SET
-                  nimitys='$uusi_nimitys'
-                  WHERE yhtio='{$kukarow['yhtio']}'
-                  AND tuoteno='{$tuote['tuoteno']}'";
+        $muutos_query = "UPDATE tuote SET
+                         nimitys='$uusi_nimitys'
+                         WHERE yhtio='{$kukarow['yhtio']}'
+                         AND tuoteno='{$tuote['tuoteno']}'";
 
         // Ajetaan päivitysquery ja poistetaan tuote vastaavuusketjuista
         if (pupe_query($muutos_query)) {
           $muutettu++;
 
-          $poista_vastaavat_query = "  DELETE FROM vastaavat
-                        WHERE yhtio='{$kukarow['yhtio']}'
-                        AND tuoteno='{$tuote['tuoteno']}'";
+          $poista_vastaavat_query = "DELETE FROM vastaavat
+                                     WHERE yhtio='{$kukarow['yhtio']}'
+                                     AND tuoteno='{$tuote['tuoteno']}'";
 
           if (pupe_query($poista_vastaavat_query)) {
              $poistettu++;

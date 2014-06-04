@@ -5,9 +5,9 @@ echo "<font class='head'>".t("Manuaaliset menot")."</font><hr>";
 
 if ($tee == 'P') {
   // Olemassaolevaa maksua muutetaan, joten poistetaan rivi ja annetaan perustettavaksi
-      $query = "  SELECT tapvm, summa, selite
-                   FROM maksu
-                  WHERE tunnus = '$tunnus'";
+      $query = "SELECT tapvm, summa, selite
+                FROM maksu
+                WHERE tunnus = '$tunnus'";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -21,15 +21,15 @@ if ($tee == 'P') {
   $selite = $maksurow[2];
   $ok = 1;
 
-  $query = "  DELETE from maksu
-          WHERE tunnus = '$tunnus'";
+  $query = "DELETE from maksu
+            WHERE tunnus = '$tunnus'";
   $result = mysql_query($query) or pupe_error($query);
 }
 
 if ($tee == 'M') {
 
   $query = "UPDATE maksu set maksettu = '1'
-                        WHERE tunnus = '$tunnus'";
+            WHERE tunnus = '$tunnus'";
   $result = mysql_query($query) or pupe_error($query);
 }
 
@@ -37,8 +37,8 @@ if ($tee == 'U') {
   // Lisätään maksurivi
   if ($ok != 1) {
     $query = "SELECT konserni
-          FROM yhtio
-          WHERE yhtio = '$kukarow[yhtio]'";
+              FROM yhtio
+              WHERE yhtio = '$kukarow[yhtio]'";
     $result = mysql_query($query) or pupe_error($query);
     if (mysql_num_rows($result) == 0) {
       echo t("Yritystä ei löydy")."!";
@@ -47,23 +47,23 @@ if ($tee == 'U') {
     $yrow=mysql_fetch_array($result);
 
           $query = "INSERT into maksu values (
-        '$kukarow[yhtio]',
-        '$yrow[0]',
-        '$kukarow[kuka]',
-        '$tapvm',
-        'MU',
-        '$summa',
-        '$selite',
-        '',
-        '')";
+                    '$kukarow[yhtio]',
+                    '$yrow[0]',
+                    '$kukarow[kuka]',
+                    '$tapvm',
+                    'MU',
+                    '$summa',
+                    '$selite',
+                    '',
+                    '')";
           $result = mysql_query($query) or pupe_error($query);
   }
 }
 
 $query = "SELECT tapvm, summa, selite, tunnus
-      FROM maksu
-      WHERE yhtio ='$kukarow[yhtio]' and tyyppi = 'MU' and maksettu <> '1'
-      ORDER BY tapvm";
+          FROM maksu
+          WHERE yhtio ='$kukarow[yhtio]' and tyyppi = 'MU' and maksettu <> '1'
+          ORDER BY tapvm";
 
 $result = mysql_query($query) or pupe_error($query);
 

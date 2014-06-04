@@ -235,18 +235,18 @@ if ($kasitellaan_tiedosto) {
       // Tarkistetaan onko ketjun tuotteita jo miss‰‰n ketjussa
       // Tuote voi kuulua useampaan vastaavuusketjuun, kunhan se ei ole p‰‰tuote
       if ($table == "vastaavat") {
-        $fquery = "  SELECT distinct id
-              FROM $table
-              WHERE tuoteno = '$vastaava_paatuote'
-              AND jarjestys = 1
-              and yhtio     = '{$kukarow['yhtio']}'";
+        $fquery = "SELECT distinct id
+                   FROM $table
+                   WHERE tuoteno = '$vastaava_paatuote'
+                   AND jarjestys = 1
+                   and yhtio     = '{$kukarow['yhtio']}'";
       }
       // Korvaavissa tuote voi kuulu vain yhteen ketjuun
       else {
-        $fquery = "  SELECT distinct id
-              FROM $table
-              WHERE tuoteno in ($haku)
-              and yhtio = '{$kukarow['yhtio']}'";
+        $fquery = "SELECT distinct id
+                   FROM $table
+                   WHERE tuoteno in ($haku)
+                   and yhtio     = '{$kukarow['yhtio']}'";
       }
       $hresult = pupe_query($fquery);
 
@@ -260,9 +260,9 @@ if ($kasitellaan_tiedosto) {
           $id = 0;
         }
         else {
-          $fquery = "  SELECT max(id)
-                FROM $table
-                WHERE yhtio = '{$kukarow['yhtio']}'";
+          $fquery = "SELECT max(id)
+                     FROM $table
+                     WHERE yhtio = '{$kukarow['yhtio']}'";
           $fresult = pupe_query($fquery);
           $frow =  mysql_fetch_array($fresult);
 
@@ -327,19 +327,19 @@ if ($kasitellaan_tiedosto) {
             $vaihtoehtoinen_lisa = ($table == 'vastaavat') ? "vaihtoehtoinen = '$vaihtoehtoinen'," : '';
 
             //katotaan, ett‰ tuote lˆytyy
-            $tquery = "  SELECT tuoteno
-                  FROM tuote
-                  WHERE tuoteno = '$rivi[$j]'
-                  and yhtio = '{$kukarow['yhtio']}'";
+            $tquery = "SELECT tuoteno
+                       FROM tuote
+                       WHERE tuoteno = '$rivi[$j]'
+                       and yhtio     = '{$kukarow['yhtio']}'";
             $tresult = pupe_query($tquery);
 
             if (mysql_num_rows($tresult) > 0) {
               //katotaan, onko tuote jo jossain ketjussa
-              $kquery = "  SELECT tuoteno
-                    FROM $table
-                    WHERE tuoteno = '$rivi[$j]'
-                    and id = '$id'
-                    and yhtio = '{$kukarow['yhtio']}'";
+              $kquery = "SELECT tuoteno
+                         FROM $table
+                         WHERE tuoteno = '$rivi[$j]'
+                         and id        = '$id'
+                         and yhtio     = '{$kukarow['yhtio']}'";
               $kresult = pupe_query($kquery);
 
               if ($toiminto == 'LISAA') {
@@ -355,14 +355,14 @@ if ($kasitellaan_tiedosto) {
 
                   // P‰ivitet‰‰n j‰rjestyksi‰ jonossa +1 jos j‰rjestys ei ole nolla, mutta ei kuitenkaan kosketa j‰rjestys=0 riveihin
                   if ($jarjestys != 0) {
-                    $uquery = "  UPDATE $table SET
-                          jarjestys = jarjestys+1,
-                          muuttaja  = '{$kukarow['kuka']}',
-                          muutospvm = now()
-                          WHERE jarjestys != 0
-                          AND id          = '$id'
-                          AND yhtio       = '{$kukarow['yhtio']}'
-                          AND jarjestys   >= $jarjestys";
+                    $uquery = "UPDATE $table SET
+                               jarjestys        = jarjestys+1,
+                               muuttaja         = '{$kukarow['kuka']}',
+                               muutospvm        = now()
+                               WHERE jarjestys != 0
+                               AND id           = '$id'
+                               AND yhtio        = '{$kukarow['yhtio']}'
+                               AND jarjestys    >= $jarjestys";
                     $result = pupe_query($uquery);
                   }
 
@@ -387,16 +387,16 @@ if ($kasitellaan_tiedosto) {
                   echo t("Poistettiin ketjusta")," $id {$rivi[$j]}! ";
                 }
                 elseif ($table == "vastaavat") {
-                  $fquery = "  SELECT id
-                        FROM $table
-                        WHERE id = '$id'
-                        AND yhtio = '{$kukarow['yhtio']}'";
+                  $fquery = "SELECT id
+                             FROM $table
+                             WHERE id  = '$id'
+                             AND yhtio = '{$kukarow['yhtio']}'";
                   $hresult = pupe_query($fquery);
 
                   if (mysql_num_rows($hresult) == 1) {
-                    $query = "  DELETE FROM $table
-                          WHERE yhtio = '{$kukarow['yhtio']}'
-                           AND id = '$id' ";
+                    $query = "DELETE FROM $table
+                              WHERE yhtio = '{$kukarow['yhtio']}'
+                               AND id     = '$id' ";
                     $presult = pupe_query($query);
 
                     echo t("Poistettiin ketju")," $id ",t("p‰‰tuote:"),"{$rivi[$j]}! ";
@@ -414,24 +414,24 @@ if ($kasitellaan_tiedosto) {
 
                   if ($jarjestys > 0) {
                     // Korjataan muut j‰rjestykset ja tehd‰‰n tilaa p‰ivitett‰v‰lle tuotteelle
-                    $kquery = "  SELECT tunnus, if(jarjestys=0, 999, jarjestys) jarj
-                          FROM $table
-                          WHERE yhtio = '{$kukarow['yhtio']}'
-                          and id = '$id'
-                          and tuoteno != '$rivi[$j]'
-                          and (jarjestys >= $jarjestys or jarjestys = 0)
-                          ORDER BY jarj, tuoteno";
+                    $kquery = "SELECT tunnus, if(jarjestys=0, 999, jarjestys) jarj
+                               FROM $table
+                               WHERE yhtio  = '{$kukarow['yhtio']}'
+                               and id       = '$id'
+                               and tuoteno != '$rivi[$j]'
+                               and (jarjestys >= $jarjestys or jarjestys = 0)
+                               ORDER BY jarj, tuoteno";
                     $iresult = pupe_query($kquery);
 
                     $siirtojarj = $jarjestys+1;
 
                     while ($irow = mysql_fetch_assoc($iresult)) {
-                      $kquery = "  UPDATE $table
-                            SET jarjestys = $siirtojarj,
-                            muuttaja = '$kukarow[kuka]',
-                            muutospvm = now()
-                            WHERE tunnus = '$irow[tunnus]'
-                            and jarjestys != 0";
+                      $kquery = "UPDATE $table
+                                 SET jarjestys = $siirtojarj,
+                                 muuttaja       = '$kukarow[kuka]',
+                                 muutospvm      = now()
+                                 WHERE tunnus   = '$irow[tunnus]'
+                                 and jarjestys != 0";
                       $updres = pupe_query($kquery);
 
                       $siirtojarj++;
@@ -440,14 +440,14 @@ if ($kasitellaan_tiedosto) {
                     $jupdate = " jarjestys = $jarjestys, ";
                   }
 
-                  $kquery = "  UPDATE $table
-                        SET {$jupdate}
-                        {$vaihtoehtoinen_lisa}
-                        muuttaja = '$kukarow[kuka]',
-                        muutospvm = now()
-                        WHERE tuoteno = '$rivi[$j]'
-                        and id = '$id'
-                        and yhtio = '{$kukarow['yhtio']}'";
+                  $kquery = "UPDATE $table
+                             SET {$jupdate}
+                             {$vaihtoehtoinen_lisa}
+                             muuttaja      = '$kukarow[kuka]',
+                             muutospvm     = now()
+                             WHERE tuoteno = '$rivi[$j]'
+                             and id        = '$id'
+                             and yhtio     = '{$kukarow['yhtio']}'";
                   $iresult = pupe_query($kquery);
 
                   $lask++;
@@ -483,10 +483,10 @@ if ($kasitellaan_tiedosto) {
         // jos k‰sitell‰‰n is‰tuote-kentt‰‰n
         if (strtoupper(trim($headers[$r])) == "ISATUOTENO") {
 
-          $query = "  SELECT tunnus
-                FROM tuote
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tuoteno = '{$rivi[$r]}'";
+          $query = "SELECT tunnus
+                    FROM tuote
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tuoteno = '{$rivi[$r]}'";
           $result = pupe_query($query);
 
           //kun poistetaan tuoteperheit‰ ei oo niin v‰li‰ vaikka tuotteita ei oiskaan olemassa
@@ -498,11 +498,11 @@ if ($kasitellaan_tiedosto) {
             $isatuote = $rivi[$r];
           }
 
-          $query = "  SELECT *
-                FROM tuoteperhe
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND isatuoteno = '{$rivi[$r]}'
-                AND tyyppi = '$tyyppi'";
+          $query = "SELECT *
+                    FROM tuoteperhe
+                    WHERE yhtio    = '{$kukarow['yhtio']}'
+                    AND isatuoteno = '{$rivi[$r]}'
+                    AND tyyppi     = '$tyyppi'";
           $result = pupe_query($query);
 
           if (mysql_num_rows($result) == 0 and strtoupper(trim($rivi[$postoiminto])) == 'MUUTA') {
@@ -520,10 +520,10 @@ if ($kasitellaan_tiedosto) {
         }
 
         if (strtoupper(trim($headers[$r])) == "TUOTENO" AND strtoupper(trim($rivi[$postoiminto])) != 'POISTA') {
-          $query = "  SELECT tunnus
-                FROM tuote
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tuoteno = '{$rivi[$r]}'";
+          $query = "SELECT tunnus
+                    FROM tuote
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tuoteno = '{$rivi[$r]}'";
           $result = pupe_query($query);
 
           if (mysql_num_rows($result) == 0) {
@@ -540,33 +540,33 @@ if ($kasitellaan_tiedosto) {
 
         if (strtoupper(trim($rivi[$postoiminto])) != 'POISTA') {
           // poistetaan eka kaikki.. heh, jos ei olla poistamassa tuotteita!
-          $query = "  DELETE FROM tuoteperhe
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND isatuoteno = '$isatuote'
-                AND tyyppi = '$tyyppi'";
+          $query = "DELETE FROM tuoteperhe
+                    WHERE yhtio    = '{$kukarow['yhtio']}'
+                    AND isatuoteno = '$isatuote'
+                    AND tyyppi     = '$tyyppi'";
           $result = pupe_query($query);
         }
 
         for ($r = 0; $r < count($headers); $r++) {
           if (strtoupper(trim($rivi[$postoiminto])) != 'POISTA' and strtoupper(trim($headers[$r])) == "TUOTENO") {
-            $query  = "  INSERT INTO tuoteperhe SET
-                  yhtio     = '{$kukarow['yhtio']}',
-                  isatuoteno   = '$isatuote',
-                  tuoteno   = '{$rivi[$r]}',
-                  tyyppi     = '$tyyppi',
-                  laatija   = '$kukarow[kuka]',
-                  luontiaika   = now(),
-                  muuttaja   = '$kukarow[kuka]',
-                  muutospvm   = now()";
+            $query  = "INSERT INTO tuoteperhe SET
+                       yhtio      = '{$kukarow['yhtio']}',
+                       isatuoteno = '$isatuote',
+                       tuoteno    = '{$rivi[$r]}',
+                       tyyppi     = '$tyyppi',
+                       laatija    = '$kukarow[kuka]',
+                       luontiaika = now(),
+                       muuttaja   = '$kukarow[kuka]',
+                       muutospvm  = now()";
             $result = pupe_query($query);
             $lask++;
           }
           elseif (strtoupper(trim($headers[$r])) == "TUOTENO") {
-            $query  = "  DELETE FROM tuoteperhe
-                  WHERE yhtio    = '{$kukarow['yhtio']}'
-                  AND isatuoteno   = '$isatuote'
-                  AND tuoteno   = '{$rivi[$r]}'
-                  AND tyyppi     = '$tyyppi'";
+            $query  = "DELETE FROM tuoteperhe
+                       WHERE yhtio    = '{$kukarow['yhtio']}'
+                       AND isatuoteno = '$isatuote'
+                       AND tuoteno    = '{$rivi[$r]}'
+                       AND tyyppi     = '$tyyppi'";
             $result = pupe_query($query);
             $lask++;
           }

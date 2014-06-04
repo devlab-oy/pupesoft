@@ -8,12 +8,12 @@ $lock_params = array(
 
 pupesoft_flock($lock_params);
 
-$query  = "  SELECT *
-      FROM lasku
-      WHERE tunnus = '$otunnus'
-      AND yhtio   = '$kukarow[yhtio]'
-      AND tila   = 'K'
-      AND alatila   = ''";
+$query  = "SELECT *
+           FROM lasku
+           WHERE tunnus = '$otunnus'
+           AND yhtio    = '$kukarow[yhtio]'
+           AND tila     = 'K'
+           AND alatila  = ''";
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) == 1) {
@@ -46,21 +46,21 @@ if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
       }
 
       //merkataan ne rivit joita ei haluta vied‰ varastoon
-      $query = "  UPDATE tilausrivi
-            SET varastoon = 0
-            WHERE uusiotunnus = '$laskurow[tunnus]'
-            and yhtio       = '$kukarow[yhtio]'
-            and kpl       = 0";
+      $query = "UPDATE tilausrivi
+                SET varastoon = 0
+                WHERE uusiotunnus = '$laskurow[tunnus]'
+                and yhtio         = '$kukarow[yhtio]'
+                and kpl           = 0";
       pupe_query($query);
 
       if (count($varastoonko) > 0) {
         foreach ($varastoonko as $varas) {
-          $query = "  UPDATE tilausrivi
-                SET varastoon  = 1
-                WHERE tunnus   = '$varas'
-                and uusiotunnus = '$laskurow[tunnus]'
-                and yhtio     = '$kukarow[yhtio]'
-                and kpl     = 0";
+          $query = "UPDATE tilausrivi
+                    SET varastoon  = 1
+                    WHERE tunnus    = '$varas'
+                    and uusiotunnus = '$laskurow[tunnus]'
+                    and yhtio       = '$kukarow[yhtio]'
+                    and kpl         = 0";
           pupe_query($query);
         }
       }
@@ -75,12 +75,12 @@ if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
             echo "<font class='error'>".t("VIRHE: Virheellinen p‰iv‰m‰‰r‰")." $vuosi-$kuukausi-$paiva</font><br>";
           }
           else {
-            $query = "  UPDATE tilausrivi
-                  SET toimitettuaika = '$vuosi-$kuukausi-$paiva 00:00:10',
-                  toimitettu = '$kukarow[kuka]'
-                  WHERE tunnus   = '$varas'
-                  and uusiotunnus = '$laskurow[tunnus]'
-                  and yhtio     = '$kukarow[yhtio]'";
+            $query = "UPDATE tilausrivi
+                      SET toimitettuaika = '$vuosi-$kuukausi-$paiva 00:00:10',
+                      toimitettu      = '$kukarow[kuka]'
+                      WHERE tunnus    = '$varas'
+                      and uusiotunnus = '$laskurow[tunnus]'
+                      and yhtio       = '$kukarow[yhtio]'";
             pupe_query($query);
           }
         }
@@ -123,10 +123,10 @@ if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
       echo "<th>",t("Tulosta tavaraetiketti"),"</th>";
 
       echo "<td><select name='komento[Tavaraetiketti]'>";
-      $query = "  SELECT *
-            FROM kirjoittimet
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            ORDER BY kirjoitin";
+      $query = "SELECT *
+                FROM kirjoittimet
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                ORDER BY kirjoitin";
       $kires = pupe_query($query);
 
       echo "<option value=''>",t("Ei kirjoitinta"),"</option>";

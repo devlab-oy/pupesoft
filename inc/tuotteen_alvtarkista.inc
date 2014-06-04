@@ -9,10 +9,10 @@ if(!function_exists("tuotteen_alvtarkista")) {
 
       $t[$i] = trim($t[$i]);
 
-      $query = "  SELECT yhtio
-            FROM tuote
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tuoteno = '$t[$i]'";
+      $query = "SELECT yhtio
+                FROM tuote
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tuoteno = '$t[$i]'";
       $chkressiresult = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($chkressiresult) == 0) {
@@ -43,10 +43,10 @@ if(!function_exists("tuotteen_alvtarkista")) {
       mysql_field_name($result, $i) == "tilino_marginaali" or
       mysql_field_name($result, $i) == "tilino_osto_marginaali") and $t[$i] != 0) {
 
-      $query = "  SELECT nimi
-            FROM tili
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tilino  = '$t[$i]'";
+      $query = "SELECT nimi
+                FROM tili
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tilino  = '$t[$i]'";
       $sresult = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($sresult) != 1) {
@@ -56,12 +56,12 @@ if(!function_exists("tuotteen_alvtarkista")) {
 
     if (mysql_field_name($result, $i) == "tunnus") {
 
-      $query = "  SELECT tunnus
-            FROM tuotteen_alv
-            WHERE yhtio = '$kukarow[yhtio]'
-            and maa   = '$tem_maa'
-            and tuoteno = '$tem_tuoteno'
-            and tunnus != '$trow[$i]'";
+      $query = "SELECT tunnus
+                FROM tuotteen_alv
+                WHERE yhtio  = '$kukarow[yhtio]'
+                and maa      = '$tem_maa'
+                and tuoteno  = '$tem_tuoteno'
+                and tunnus  != '$trow[$i]'";
       $sresult = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($sresult) > 0) {

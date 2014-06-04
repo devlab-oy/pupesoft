@@ -95,9 +95,9 @@ if (!function_exists('elmaedi_rivi')) {
   function elmaedi_rivi($tootedi, $tilrow, $rivinumero) {
     global $yhtiorow;
 
-    $query = "  SELECT eankoodi
-          from tuote
-          where yhtio='$yhtiorow[yhtio]' and tuoteno='$tilrow[tuoteno]'";
+    $query = "SELECT eankoodi
+              from tuote
+              where yhtio='$yhtiorow[yhtio]' and tuoteno='$tilrow[tuoteno]'";
     $eanres = pupe_query($query);
     $eanrow = mysql_fetch_assoc($eanres);
 

@@ -19,17 +19,17 @@ if (isset($tee)) {
     if ($blvk == 0) $blvk = 1;
     if ($blvp == 0) $blvp = 1;
 
-    $query = "  SELECT *
-          FROM tilikaudet
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND '$alvv-$blvk-$blvp' >= tilikausi_alku
-          AND '$alvv-$blvk-$blvp' <= tilikausi_loppu";
+    $query = "SELECT *
+              FROM tilikaudet
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND '$alvv-$blvk-$blvp' >= tilikausi_alku
+              AND '$alvv-$blvk-$blvp' <= tilikausi_loppu";
     $result = mysql_query($query) or pupe_error($query);
   }
   else {
-    $query = "  SELECT *
-          FROM tilikaudet
-          WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tkausi'";
+    $query = "SELECT *
+              FROM tilikaudet
+              WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tkausi'";
     $result = mysql_query($query) or pupe_error($query);
   }
 
@@ -86,33 +86,33 @@ if (isset($tee)) {
 
   //jos tili on valittu lasketaan sen alkusaldo
   if (strlen(trim($tili)) > 0) {
-    $query = "  SELECT sum(summa) saldo
-          FROM tiliointi
-          WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-          and tiliointi.korjattu = ''
-          and tiliointi.tapvm >= '$tilikaudetrow[tilikausi_alku]'
-          and $lisa2";
+    $query = "SELECT sum(summa) saldo
+              FROM tiliointi
+              WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
+              and tiliointi.korjattu = ''
+              and tiliointi.tapvm    >= '$tilikaudetrow[tilikausi_alku]'
+              and $lisa2";
     $result   = mysql_query($query) or pupe_error($query);
     $alkurow  = mysql_fetch_array ($result);
     $kumsumma = $alkurow["saldo"];
   }
 
-  $query = "  SELECT CONCAT_WS(' ', tiliointi.tilino, tili.nimi) Tili,
-        DATE_FORMAT(tiliointi.tapvm,'%d.%m.%Y') tapvm,
-        tiliointi.kustp,
-        tiliointi.kohde,
-        tiliointi.projekti,
-        CONCAT_WS(' ', selite, lasku.nimi) selite,
-        tiliointi.summa,
-        tiliointi.vero,
-        tiliointi.ltunnus
-        FROM tiliointi
-        LEFT JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus)
-        LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio AND tili.tilino = tiliointi.tilino)
-        WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-        AND tiliointi.korjattu = ''
-        AND $lisa
-        ORDER BY tiliointi.tilino, tiliointi.tapvm, tiliointi.summa";
+  $query = "SELECT CONCAT_WS(' ', tiliointi.tilino, tili.nimi) Tili,
+            DATE_FORMAT(tiliointi.tapvm,'%d.%m.%Y') tapvm,
+            tiliointi.kustp,
+            tiliointi.kohde,
+            tiliointi.projekti,
+            CONCAT_WS(' ', selite, lasku.nimi) selite,
+            tiliointi.summa,
+            tiliointi.vero,
+            tiliointi.ltunnus
+            FROM tiliointi
+            LEFT JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus)
+            LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio AND tili.tilino = tiliointi.tilino)
+            WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
+            AND tiliointi.korjattu = ''
+            AND $lisa
+            ORDER BY tiliointi.tilino, tiliointi.tapvm, tiliointi.summa";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -244,9 +244,9 @@ if (isset($tee)) {
           else {
             // Selväkieliset tarkenteet
             if (($i > 1) and ($i < 5) and ($trow[$i] > 0)) {
-              $query = "  SELECT nimi
-                    FROM kustannuspaikka
-                    WHERE tunnus = '$trow[$i]'";
+              $query = "SELECT nimi
+                        FROM kustannuspaikka
+                        WHERE tunnus = '$trow[$i]'";
               $vresult = mysql_query($query) or pupe_error($query);
               $vrow = mysql_fetch_array($vresult);
               $trow[$i] = $vrow[0];
@@ -388,10 +388,10 @@ if (isset($tee)) {
 
   echo "<tr><th>".t("tai koko tilikausi")."</th>";
 
-  $query = "  SELECT *
-        FROM tilikaudet
-        WHERE yhtio = '$kukarow[yhtio]'
-        ORDER BY tilikausi_alku";
+  $query = "SELECT *
+            FROM tilikaudet
+            WHERE yhtio = '$kukarow[yhtio]'
+            ORDER BY tilikausi_alku";
   $vresult = mysql_query($query) or pupe_error($query);
 
   echo "<td><select name='tkausi'>
@@ -415,12 +415,12 @@ if (isset($tee)) {
   echo "<tr>
       <th>".t("Vain kustannuspaikka")."</th>";
 
-  $query = "  SELECT tunnus, nimi
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and kaytossa != 'E'
-        and tyyppi = 'K'
-        ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, nimi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and kaytossa != 'E'
+            and tyyppi    = 'K'
+            ORDER BY koodi+0, koodi, nimi";
   $vresult = mysql_query($query) or pupe_error($query);
 
   echo "<td><select name='kustp'>
@@ -439,12 +439,12 @@ if (isset($tee)) {
   echo "<tr>";
   echo "<th>".t("Vain kohde")."</th>";
 
-  $query = "  SELECT tunnus, nimi
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and kaytossa != 'E'
-        and tyyppi = 'O'
-        ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, nimi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and kaytossa != 'E'
+            and tyyppi    = 'O'
+            ORDER BY koodi+0, koodi, nimi";
   $vresult = mysql_query($query) or pupe_error($query);
 
   echo "<td>
@@ -463,12 +463,12 @@ if (isset($tee)) {
   echo "<tr>
       <th>".t("Vain projekti")."</th>";
 
-  $query = "  SELECT tunnus, nimi
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and kaytossa != 'E'
-        and tyyppi = 'P'
-        ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, nimi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and kaytossa != 'E'
+            and tyyppi    = 'P'
+            ORDER BY koodi+0, koodi, nimi";
   $vresult = mysql_query($query) or pupe_error($query);
 
   echo "<td>

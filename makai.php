@@ -10,16 +10,16 @@ require("inc/parametrit.inc");
 if ($tee == "") {
   echo "<font class='head'>".t("Maksuaineistot")."</font><hr>";
 
-  $query = "  SELECT lasku.tunnus
-        FROM lasku, valuu, yriti
-        WHERE lasku.yhtio     = '$kukarow[yhtio]'
-        and valuu.yhtio     = lasku.yhtio
-        and valuu.yhtio     = yriti.yhtio
-        and lasku.maksu_tili   = yriti.tunnus
-        and yriti.kaytossa    = ''
-        and lasku.tila       = 'P'
-        and lasku.valkoodi     = valuu.nimi
-        and lasku.maksaja     = '$kukarow[kuka]'";
+  $query = "SELECT lasku.tunnus
+            FROM lasku, valuu, yriti
+            WHERE lasku.yhtio    = '$kukarow[yhtio]'
+            and valuu.yhtio      = lasku.yhtio
+            and valuu.yhtio      = yriti.yhtio
+            and lasku.maksu_tili = yriti.tunnus
+            and yriti.kaytossa   = ''
+            and lasku.tila       = 'P'
+            and lasku.valkoodi   = valuu.nimi
+            and lasku.maksaja    = '$kukarow[kuka]'";
   $result = mysql_query($query) or pupe_error($query);
 
   echo "<br>";
@@ -82,11 +82,11 @@ if ($tee == "KIRJOITA") {
   if ($kotimaa == "FI") {
 
     // Tarkistetaan yrityksen pankkitilien oikeellisuudet
-    $query = "  SELECT tilino, nimi, tunnus, asiakastunnus
-            FROM yriti
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tilino != ''
-          and yriti.kaytossa = ''";
+    $query = "SELECT tilino, nimi, tunnus, asiakastunnus
+              FROM yriti
+              WHERE yhtio         = '$kukarow[yhtio]'
+              and tilino         != ''
+              and yriti.kaytossa  = ''";
     $result = mysql_query($query) or pupe_error($query);
 
     //Haetaan funktio joka tuo pankin tietoja
@@ -117,13 +117,13 @@ if ($tee == "KIRJOITA") {
 
   // --- LM03/Eli kotimaan maksujen aineisto
   // Tutkitaan onko kotimaan aineistossa monta maksup‰iv‰‰?
-  $query = "  SELECT distinct(olmapvm)
-        FROM lasku
-        WHERE yhtio  = '$kukarow[yhtio]'
-        and tila  = 'P'
-        and maa    = '$kotimaa'
-        and maksaja  = '$kukarow[kuka]'
-        ORDER BY 1";
+  $query = "SELECT distinct(olmapvm)
+            FROM lasku
+            WHERE yhtio = '$kukarow[yhtio]'
+            and tila    = 'P'
+            and maa     = '$kotimaa'
+            and maksaja = '$kukarow[kuka]'
+            ORDER BY 1";
   $pvmresult = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($pvmresult) == 0) {
@@ -144,28 +144,28 @@ if ($tee == "KIRJOITA") {
     $tilinoarray = array();
 
     //Tutkitaan onko kotimaan aineistossa hyvityslaskuja
-    $query = "  SELECT maksu_tili, tilinumero, nimi
-          FROM lasku
-          WHERE yhtio  = '$kukarow[yhtio]'
-          and tila    = 'P'
-          and maa     = '$kotimaa'
-          and summa    < 0
-          and maksaja  = '$kukarow[kuka]'
-          and olmapvm  = '$pvmrow[olmapvm]'
-          GROUP BY maksu_tili, tilinumero";
+    $query = "SELECT maksu_tili, tilinumero, nimi
+              FROM lasku
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tila    = 'P'
+              and maa     = '$kotimaa'
+              and summa   < 0
+              and maksaja = '$kukarow[kuka]'
+              and olmapvm = '$pvmrow[olmapvm]'
+              GROUP BY maksu_tili, tilinumero";
     $result = mysql_query($query) or pupe_error($query);
 
     //Lˆytyykˆ hyvityksi‰?
     while ($laskurow = mysql_fetch_array ($result)) {
-      $query = "  SELECT *
-            FROM lasku
-            WHERE yhtio   = '$kukarow[yhtio]'
-            and tila     = 'P'
-            and maa       = '$kotimaa'
-            and maksaja   = '$kukarow[kuka]'
-            and tilinumero  = '$laskurow[tilinumero]'
-            and maksu_tili  = '$laskurow[maksu_tili]'
-            and olmapvm   = '$pvmrow[olmapvm]'";
+      $query = "SELECT *
+                FROM lasku
+                WHERE yhtio    = '$kukarow[yhtio]'
+                and tila       = 'P'
+                and maa        = '$kotimaa'
+                and maksaja    = '$kukarow[kuka]'
+                and tilinumero = '$laskurow[tilinumero]'
+                and maksu_tili = '$laskurow[maksu_tili]'
+                and olmapvm    = '$pvmrow[olmapvm]'";
       $xresult = mysql_query($query) or pupe_error($query);
 
       $hyvityssumma = 0;
@@ -194,17 +194,17 @@ if ($tee == "KIRJOITA") {
     }
 
     // --- LM03 AINEISTO MAKSUTILIT
-    $query = "  SELECT yriti.tunnus, yriti.tilino, yriti.nimi nimi
-          FROM lasku, yriti
-          WHERE lasku.yhtio   = '$kukarow[yhtio]'
-          and tila       = 'P'
-          and maa         = '$kotimaa'
-          and yriti.tunnus   = maksu_tili
-          and yriti.yhtio   = lasku.yhtio
-          and yriti.kaytossa  = ''
-          and maksaja     = '$kukarow[kuka]'
-          and olmapvm     = '$pvmrow[olmapvm]'
-          GROUP BY yriti.tilino";
+    $query = "SELECT yriti.tunnus, yriti.tilino, yriti.nimi nimi
+              FROM lasku, yriti
+              WHERE lasku.yhtio  = '$kukarow[yhtio]'
+              and tila           = 'P'
+              and maa            = '$kotimaa'
+              and yriti.tunnus   = maksu_tili
+              and yriti.yhtio    = lasku.yhtio
+              and yriti.kaytossa = ''
+              and maksaja        = '$kukarow[kuka]'
+              and olmapvm        = '$pvmrow[olmapvm]'
+              GROUP BY yriti.tilino";
     $yritiresult = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($yritiresult) != 0) {
@@ -260,24 +260,24 @@ if ($tee == "KIRJOITA") {
         }
 
         // Yrit‰mme nyt v‰litt‰‰ maksupointterin $laskusis1:ss‰ --> $laskurow[9] --> lasku.tunnus
-        $query = "  SELECT maksu_tili,
-              lasku.nimi, lasku.nimitark, lasku.pankki_haltija,
-              left(concat_ws(' ', osoite, osoitetark),20) osoite,
-              left(concat_ws(' ', postino, postitp),20) postitp,
-              summa, lasku.valkoodi, viite, viesti,
-              tilinumero, lasku.tunnus, sisviesti2,
-              yriti.tilino ytilino, alatila, kasumma, laskunro
-              FROM lasku, yriti
-              WHERE lasku.yhtio   = '$kukarow[yhtio]'
-              and tila       = 'P'
-              and maa         = '$kotimaa'
-              and yriti.tunnus   = maksu_tili
-              and yriti.yhtio   = lasku.yhtio
-              and yriti.kaytossa  = ''
-              and maksaja     = '$kukarow[kuka]'
-              and maksu_tili     = $yritirow[tunnus]
-              and olmapvm     = '$pvmrow[olmapvm]'
-              ORDER BY tilinumero, summa desc";
+        $query = "SELECT maksu_tili,
+                  lasku.nimi, lasku.nimitark, lasku.pankki_haltija,
+                  left(concat_ws(' ', osoite, osoitetark),20) osoite,
+                  left(concat_ws(' ', postino, postitp),20) postitp,
+                  summa, lasku.valkoodi, viite, viesti,
+                  tilinumero, lasku.tunnus, sisviesti2,
+                  yriti.tilino ytilino, alatila, kasumma, laskunro
+                  FROM lasku, yriti
+                  WHERE lasku.yhtio  = '$kukarow[yhtio]'
+                  and tila           = 'P'
+                  and maa            = '$kotimaa'
+                  and yriti.tunnus   = maksu_tili
+                  and yriti.yhtio    = lasku.yhtio
+                  and yriti.kaytossa = ''
+                  and maksaja        = '$kukarow[kuka]'
+                  and maksu_tili     = $yritirow[tunnus]
+                  and olmapvm        = '$pvmrow[olmapvm]'
+                  ORDER BY tilinumero, summa desc";
         $result = mysql_query($query) or pupe_error($query);
 
         while ($laskurow = mysql_fetch_array ($result)) {
@@ -370,16 +370,16 @@ if ($tee == "KIRJOITA") {
           }
         }
 
-        $query = "  UPDATE lasku SET
-              tila = 'Q',
-              popvm = '$popvm_nyt'
-                    WHERE yhtio   = '$kukarow[yhtio]'
-                    and tila     = 'P'
-              and maa       = '$kotimaa'
-                    and maksaja   = '$kukarow[kuka]'
-                    and maksu_tili  = '$yritirow[tunnus]'
-                    and olmapvm   = '$pvmrow[olmapvm]'
-                    ORDER BY yhtio, tila";
+        $query = "UPDATE lasku SET
+                  tila                 = 'Q',
+                  popvm                = '$popvm_nyt'
+                        WHERE yhtio    = '$kukarow[yhtio]'
+                        and tila       = 'P'
+                  and maa              = '$kotimaa'
+                        and maksaja    = '$kukarow[kuka]'
+                        and maksu_tili = '$yritirow[tunnus]'
+                        and olmapvm    = '$pvmrow[olmapvm]'
+                        ORDER BY yhtio, tila";
         $result = mysql_query($query) or pupe_error($query);
 
         $makskpl   = 0;
@@ -440,16 +440,16 @@ if ($tee == "KIRJOITA") {
   $generaatio = 1;
 
   //Etsit‰‰n aineistot
-  $query = "  SELECT maksu_tili, lasku.valkoodi, yriti.tilino ytilino, yriti.nimi tilinimi
-        FROM lasku, yriti
-        WHERE lasku.yhtio = '$kukarow[yhtio]'
-        and tila = 'P'
-        and maa <> '$kotimaa'
-        and maksaja = '$kukarow[kuka]'
-        and yriti.tunnus = maksu_tili
-        and yriti.yhtio = lasku.yhtio
-        and yriti.kaytossa = ''
-        GROUP BY maksu_tili, lasku.valkoodi";
+  $query = "SELECT maksu_tili, lasku.valkoodi, yriti.tilino ytilino, yriti.nimi tilinimi
+            FROM lasku, yriti
+            WHERE lasku.yhtio  = '$kukarow[yhtio]'
+            and tila           = 'P'
+            and maa            <> '$kotimaa'
+            and maksaja        = '$kukarow[kuka]'
+            and yriti.tunnus   = maksu_tili
+            and yriti.yhtio    = lasku.yhtio
+            and yriti.kaytossa = ''
+            GROUP BY maksu_tili, lasku.valkoodi";
   $pvmresult = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($pvmresult) != 0) {
@@ -485,54 +485,54 @@ if ($tee == "KIRJOITA") {
       echo "<tr><th>".t("Valuutta")."</th><td>$pvmrow[valkoodi]</td></tr>";
 
       //Maksetaan hyvityslaskut alta pois, jos niit‰ on
-      $query = "  SELECT maksu_tili, valkoodi, olmapvm, ultilno, swift, pankki1, pankki2, pankki3, pankki4, sisviesti1, sum(if(alatila='K', summa-kasumma, summa)) summa
-            FROM lasku
-            WHERE lasku.yhtio = '$kukarow[yhtio]'
-            and tila = 'P'
-            and maa <> '$kotimaa'
-            and maksaja = '$kukarow[kuka]'
-            and summa < 0
-            and maksu_tili = '$pvmrow[maksu_tili]'
-            and valkoodi = '$pvmrow[valkoodi]'
-            GROUP BY maksu_tili, valkoodi, olmapvm, ultilno, swift, pankki1, pankki2, pankki3, pankki4, sisviesti1";
+      $query = "SELECT maksu_tili, valkoodi, olmapvm, ultilno, swift, pankki1, pankki2, pankki3, pankki4, sisviesti1, sum(if(alatila='K', summa-kasumma, summa)) summa
+                FROM lasku
+                WHERE lasku.yhtio = '$kukarow[yhtio]'
+                and tila          = 'P'
+                and maa           <> '$kotimaa'
+                and maksaja       = '$kukarow[kuka]'
+                and summa         < 0
+                and maksu_tili    = '$pvmrow[maksu_tili]'
+                and valkoodi      = '$pvmrow[valkoodi]'
+                GROUP BY maksu_tili, valkoodi, olmapvm, ultilno, swift, pankki1, pankki2, pankki3, pankki4, sisviesti1";
       $hyvitysresult = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($hyvitysresult) > 0 ) {
 
         while ($hyvitysrow = mysql_fetch_array($hyvitysresult)) {
-          $query = "  SELECT maksu_tili,
-                lasku.nimi, lasku.nimitark, lasku.pankki_haltija,
-                left(concat_ws(' ', osoite, osoitetark),45) osoite,
-                left(concat_ws(' ', postino, postitp),45) postitp,
-                sum(if(alatila='K', summa-kasumma, summa)) summa, lasku.valkoodi,
-                group_concat(distinct viite) viite,
-                group_concat(distinct viesti) viesti,
-                group_concat(distinct laskunro) laskunro,
-                ultilno, group_concat(lasku.tunnus) tunnus,
-                yriti.tilino ytilino, yriti.nimi tilinimi,
-                maa, pankki1, pankki2, pankki3, pankki4,
-                swift, ytunnus, yriti.valkoodi yritivalkoodi, lasku.olmapvm
-                FROM lasku, yriti, valuu
-                WHERE lasku.yhtio = '$kukarow[yhtio]'
-                and tila = 'P'
-                and maa <> '$kotimaa'
-                and yriti.tunnus = maksu_tili
-                and yriti.yhtio = lasku.yhtio
-                and valuu.nimi = lasku.valkoodi
-                and valuu.yhtio = lasku.yhtio
-                and maksaja = '$kukarow[kuka]'
-                and maksu_tili = '$pvmrow[maksu_tili]'
-                and lasku.valkoodi = '$pvmrow[valkoodi]'
-                and olmapvm = '$hyvitysrow[olmapvm]'
-                and maksu_tili = '$hyvitysrow[maksu_tili]'
-                and ultilno = '$hyvitysrow[ultilno]'
-                and swift = '$hyvitysrow[swift]'
-                and pankki1 = '$hyvitysrow[pankki1]'
-                and pankki2 = '$hyvitysrow[pankki2]'
-                and pankki3 = '$hyvitysrow[pankki3]'
-                and pankki4 = '$hyvitysrow[pankki4]'
-                and sisviesti1 = '$hyvitysrow[sisviesti1]'
-                GROUP BY maksu_tili, lasku.valkoodi, olmapvm, ultilno, swift, pankki1, pankki2, pankki3, pankki4, sisviesti1";
+          $query = "SELECT maksu_tili,
+                    lasku.nimi, lasku.nimitark, lasku.pankki_haltija,
+                    left(concat_ws(' ', osoite, osoitetark),45) osoite,
+                    left(concat_ws(' ', postino, postitp),45) postitp,
+                    sum(if(alatila='K', summa-kasumma, summa)) summa, lasku.valkoodi,
+                    group_concat(distinct viite) viite,
+                    group_concat(distinct viesti) viesti,
+                    group_concat(distinct laskunro) laskunro,
+                    ultilno, group_concat(lasku.tunnus) tunnus,
+                    yriti.tilino ytilino, yriti.nimi tilinimi,
+                    maa, pankki1, pankki2, pankki3, pankki4,
+                    swift, ytunnus, yriti.valkoodi yritivalkoodi, lasku.olmapvm
+                    FROM lasku, yriti, valuu
+                    WHERE lasku.yhtio  = '$kukarow[yhtio]'
+                    and tila           = 'P'
+                    and maa            <> '$kotimaa'
+                    and yriti.tunnus   = maksu_tili
+                    and yriti.yhtio    = lasku.yhtio
+                    and valuu.nimi     = lasku.valkoodi
+                    and valuu.yhtio    = lasku.yhtio
+                    and maksaja        = '$kukarow[kuka]'
+                    and maksu_tili     = '$pvmrow[maksu_tili]'
+                    and lasku.valkoodi = '$pvmrow[valkoodi]'
+                    and olmapvm        = '$hyvitysrow[olmapvm]'
+                    and maksu_tili     = '$hyvitysrow[maksu_tili]'
+                    and ultilno        = '$hyvitysrow[ultilno]'
+                    and swift          = '$hyvitysrow[swift]'
+                    and pankki1        = '$hyvitysrow[pankki1]'
+                    and pankki2        = '$hyvitysrow[pankki2]'
+                    and pankki3        = '$hyvitysrow[pankki3]'
+                    and pankki4        = '$hyvitysrow[pankki4]'
+                    and sisviesti1     = '$hyvitysrow[sisviesti1]'
+                    GROUP BY maksu_tili, lasku.valkoodi, olmapvm, ultilno, swift, pankki1, pankki2, pankki3, pankki4, sisviesti1";
           $maksuresult = mysql_query($query) or pupe_error($query);
 
           if (mysql_num_rows($maksuresult) > 0 ) {
@@ -618,23 +618,23 @@ if ($tee == "KIRJOITA") {
               $maksulk += $ulklaskusumma;  //viritet‰‰n bgutrivi.inc-failissa
             }
 
-            $query = "  UPDATE lasku SET
-                  tila = 'Q',
-                  popvm = '$popvm_nyt'
-                  WHERE lasku.yhtio = '$kukarow[yhtio]'
-                  and tila = 'P'
-                  and maa <> '$kotimaa'
-                  and maksaja = '$kukarow[kuka]'
-                  and olmapvm = '$hyvitysrow[olmapvm]'
-                  and maksu_tili = '$hyvitysrow[maksu_tili]'
-                  and ultilno = '$hyvitysrow[ultilno]'
-                  and swift = '$hyvitysrow[swift]'
-                  and pankki1 = '$hyvitysrow[pankki1]'
-                  and pankki2 = '$hyvitysrow[pankki2]'
-                  and pankki3 = '$hyvitysrow[pankki3]'
-                  and pankki4 = '$hyvitysrow[pankki4]'
-                  and sisviesti1 = '$hyvitysrow[sisviesti1]'
-                    ORDER BY yhtio, tila";
+            $query = "UPDATE lasku SET
+                      tila              = 'Q',
+                      popvm             = '$popvm_nyt'
+                      WHERE lasku.yhtio = '$kukarow[yhtio]'
+                      and tila          = 'P'
+                      and maa           <> '$kotimaa'
+                      and maksaja       = '$kukarow[kuka]'
+                      and olmapvm       = '$hyvitysrow[olmapvm]'
+                      and maksu_tili    = '$hyvitysrow[maksu_tili]'
+                      and ultilno       = '$hyvitysrow[ultilno]'
+                      and swift         = '$hyvitysrow[swift]'
+                      and pankki1       = '$hyvitysrow[pankki1]'
+                      and pankki2       = '$hyvitysrow[pankki2]'
+                      and pankki3       = '$hyvitysrow[pankki3]'
+                      and pankki4       = '$hyvitysrow[pankki4]'
+                      and sisviesti1    = '$hyvitysrow[sisviesti1]'
+                        ORDER BY yhtio, tila";
             $result = mysql_query($query) or pupe_error($query);
           }
           else {
@@ -645,28 +645,28 @@ if ($tee == "KIRJOITA") {
       }
 
       // Yrit‰mme nyt v‰litt‰‰ maksupointterin $laskusis1:ss‰ --> $laskurow[9] --> tunnus
-      $query = "  SELECT maksu_tili,
-            lasku.nimi, lasku.nimitark, lasku.pankki_haltija,
-            left(concat_ws(' ', osoite, osoitetark),45) osoite,
-            left(concat_ws(' ', postino, postitp),45) postitp,
-            summa, lasku.valkoodi, viite, viesti, laskunro,
-            ultilno, lasku.tunnus, sisviesti2, sisviesti1,
-            yriti.tilino ytilino, yriti.nimi tilinimi,
-            maa, pankki1, pankki2, pankki3, pankki4,
-            swift, alatila, kasumma, kurssi, ytunnus, yriti.valkoodi yritivalkoodi, lasku.olmapvm
-            FROM lasku, yriti, valuu
-            WHERE lasku.yhtio = '$kukarow[yhtio]'
-            and tila = 'P'
-            and maa <> '$kotimaa'
-            and yriti.tunnus = maksu_tili
-            and yriti.yhtio = lasku.yhtio
-            and yriti.kaytossa = ''
-            and valuu.nimi = lasku.valkoodi
-            and valuu.yhtio = lasku.yhtio
-            and maksaja = '$kukarow[kuka]'
-            and maksu_tili = '$pvmrow[maksu_tili]'
-            and lasku.valkoodi = '$pvmrow[valkoodi]'
-            ORDER BY summa";
+      $query = "SELECT maksu_tili,
+                lasku.nimi, lasku.nimitark, lasku.pankki_haltija,
+                left(concat_ws(' ', osoite, osoitetark),45) osoite,
+                left(concat_ws(' ', postino, postitp),45) postitp,
+                summa, lasku.valkoodi, viite, viesti, laskunro,
+                ultilno, lasku.tunnus, sisviesti2, sisviesti1,
+                yriti.tilino ytilino, yriti.nimi tilinimi,
+                maa, pankki1, pankki2, pankki3, pankki4,
+                swift, alatila, kasumma, kurssi, ytunnus, yriti.valkoodi yritivalkoodi, lasku.olmapvm
+                FROM lasku, yriti, valuu
+                WHERE lasku.yhtio  = '$kukarow[yhtio]'
+                and tila           = 'P'
+                and maa            <> '$kotimaa'
+                and yriti.tunnus   = maksu_tili
+                and yriti.yhtio    = lasku.yhtio
+                and yriti.kaytossa = ''
+                and valuu.nimi     = lasku.valkoodi
+                and valuu.yhtio    = lasku.yhtio
+                and maksaja        = '$kukarow[kuka]'
+                and maksu_tili     = '$pvmrow[maksu_tili]'
+                and lasku.valkoodi = '$pvmrow[valkoodi]'
+                ORDER BY summa";
       $result = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($result) > 0) {
@@ -744,11 +744,11 @@ if ($tee == "KIRJOITA") {
 
                 if ($tinoalut == $swiftmaa) {
                   //onko EU maksun saaja EU alueella?
-                  $query = "  SELECT koodi
-                        FROM maat
-                        WHERE koodi = '$laskumaakoodi'
-                        and eu != ''
-                        and ryhma_tunnus = ''";
+                  $query = "SELECT koodi
+                            FROM maat
+                            WHERE koodi       = '$laskumaakoodi'
+                            and eu           != ''
+                            and ryhma_tunnus  = ''";
                   $aburesult = mysql_query($query) or pupe_error($query);
 
                   if (mysql_num_rows($aburesult) == 1) {
@@ -846,16 +846,16 @@ if ($tee == "KIRJOITA") {
           }
         }
 
-        $query = "  UPDATE lasku SET
-              tila = 'Q',
-              popvm = '$popvm_nyt'
-              WHERE lasku.yhtio = '$kukarow[yhtio]'
-              and tila = 'P'
-              and maa <> '$kotimaa'
-              and maksaja = '$kukarow[kuka]'
-              and maksu_tili = '$pvmrow[maksu_tili]'
-              and valkoodi = '$pvmrow[valkoodi]'
-                ORDER BY yhtio, tila";
+        $query = "UPDATE lasku SET
+                  tila              = 'Q',
+                  popvm             = '$popvm_nyt'
+                  WHERE lasku.yhtio = '$kukarow[yhtio]'
+                  and tila          = 'P'
+                  and maa           <> '$kotimaa'
+                  and maksaja       = '$kukarow[kuka]'
+                  and maksu_tili    = '$pvmrow[maksu_tili]'
+                  and valkoodi      = '$pvmrow[valkoodi]'
+                    ORDER BY yhtio, tila";
         $result = mysql_query($query) or pupe_error($query);
       }
     }

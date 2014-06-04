@@ -224,12 +224,12 @@ for ($i = 1; $i < 32; $i++) {
 
 echo "</select></td><td class='back'>&nbsp;</td></tr>";
 
-$query = "  SELECT tunnus
-      FROM kustannuspaikka
-      WHERE yhtio = '$kukarow[yhtio]'
-      and tyyppi = 'K'
-      and kaytossa != 'E'
-      LIMIT 1";
+$query = "SELECT tunnus
+          FROM kustannuspaikka
+          WHERE yhtio   = '$kukarow[yhtio]'
+          and tyyppi    = 'K'
+          and kaytossa != 'E'
+          LIMIT 1";
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) > 0) {
@@ -322,16 +322,16 @@ if ($tee != '') {
     $tiliointilisa = '';
   }
 
-  $query = "  SELECT DISTINCT lasku.tapvm, lasku.erpcm, concat_ws('<br>', lasku.nimi, lasku.nimitark) nimi,
-        lasku.summa, lasku.valkoodi, lasku.vienti, concat_ws(' ', lasku.viite, lasku.viesti) 'viite/viesti',
-        lasku.ebid, lasku.tila, lasku.alatila, lasku.tunnus, if(lasku.laskunro = 0, '', lasku.laskunro) laskunro
-          FROM lasku $index
-        $tiliointilisa
-          WHERE $ehto
-        and lasku.yhtio = '$kukarow[yhtio]'
-        $lisa
-          ORDER BY $jarj
-          LIMIT $alku, 50";
+  $query = "SELECT DISTINCT lasku.tapvm, lasku.erpcm, concat_ws('<br>', lasku.nimi, lasku.nimitark) nimi,
+            lasku.summa, lasku.valkoodi, lasku.vienti, concat_ws(' ', lasku.viite, lasku.viesti) 'viite/viesti',
+            lasku.ebid, lasku.tila, lasku.alatila, lasku.tunnus, if(lasku.laskunro = 0, '', lasku.laskunro) laskunro
+              FROM lasku $index
+            $tiliointilisa
+              WHERE $ehto
+            and lasku.yhtio = '$kukarow[yhtio]'
+            $lisa
+              ORDER BY $jarj
+              LIMIT $alku, 50";
   $result = mysql_query($query) or pupe_error($query);
   $seraavako = mysql_num_rows($result);
 

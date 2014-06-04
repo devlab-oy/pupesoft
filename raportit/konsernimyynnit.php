@@ -24,17 +24,17 @@ if ($tee != "") {
 
 if ($tee == 'X') {
 
-  $query = "  SELECT lasku.ytunnus, lasku.nimi, sum(lasku.arvo) summa, sum(lasku.kate) kate
-        FROM asiakas
-        JOIN lasku ON (lasku.yhtio = asiakas.yhtio
-          AND lasku.liitostunnus = asiakas.tunnus
-          AND lasku.tila = 'U'
-          AND lasku.alatila = 'X'
-          AND  lasku.tapvm <= '$alvv-$alvk-$alvp'
-          AND lasku.tapvm >= '$plvv-$plvk-$plvp')
-        WHERE asiakas.yhtio = '$kukarow[yhtio]'
-        AND asiakas.konserniyhtio != ''
-        GROUP BY lasku.ytunnus, lasku.nimi";
+  $query = "SELECT lasku.ytunnus, lasku.nimi, sum(lasku.arvo) summa, sum(lasku.kate) kate
+            FROM asiakas
+            JOIN lasku ON (lasku.yhtio = asiakas.yhtio
+              AND lasku.liitostunnus   = asiakas.tunnus
+              AND lasku.tila           = 'U'
+              AND lasku.alatila        = 'X'
+              AND  lasku.tapvm         <= '$alvv-$alvk-$alvp'
+              AND lasku.tapvm          >= '$plvv-$plvk-$plvp')
+            WHERE asiakas.yhtio        = '$kukarow[yhtio]'
+            AND asiakas.konserniyhtio != ''
+            GROUP BY lasku.ytunnus, lasku.nimi";
   $result = mysql_query($query) or pupe_error($query);
 
   echo "<table>";

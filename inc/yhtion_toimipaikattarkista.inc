@@ -13,18 +13,18 @@ if(!function_exists("yhtion_toimipaikattarkista")) {
       (mysql_field_name($result, $i) == "tilino_osto_marginaali") or
       (mysql_field_name($result, $i) == "toim_alv")) and trim($t[$i]) != '') {
 
-      $query = "  SELECT nimi
-            FROM tili
-            WHERE yhtio='$kukarow[yhtio]' and tilino = '$t[$i]'";
+      $query = "SELECT nimi
+                FROM tili
+                WHERE yhtio='$kukarow[yhtio]' and tilino = '$t[$i]'";
       $sresult = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($sresult) != 1) {
         //Olisiko siellä nimi
         if ($t[$i] != '') {
-          $query = "  SELECT nimi, tilino
-                FROM tili
-                WHERE yhtio = '$kukarow[yhtio]' and nimi like '%$t[$i]%'
-                ORDER BY tilino";
+          $query = "SELECT nimi, tilino
+                    FROM tili
+                    WHERE yhtio = '$kukarow[yhtio]' and nimi like '%$t[$i]%'
+                    ORDER BY tilino";
           $sresult = mysql_query($query) or pupe_error($query);
 
           if (mysql_num_rows($sresult) > 0) {
@@ -98,21 +98,21 @@ if(!function_exists("yhtion_toimipaikattarkista")) {
       }
 
       if ($tem_vatnumero != "") {
-        $query = "  SELECT selite
-              FROM avainsana
-              WHERE yhtio = '$kukarow[yhtio]' and laji = 'alvulk' and selitetark_2 = '$tem_maa'";
+        $query = "SELECT selite
+                  FROM avainsana
+                  WHERE yhtio = '$kukarow[yhtio]' and laji = 'alvulk' and selitetark_2 = '$tem_maa'";
         $vresult = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($vresult) == 0) {
           $virhe[$tem_vatnumeroind] = $virhe[$i] = t("Yrityksen ALV-prosentit puuttuvat tälle maalle (%s)! Käy perustamassa ensin ne avainsanoihin.", "", $tem_maa);
         }
 
-        $query = "  SELECT *
-              FROM yhtion_toimipaikat
-              WHERE yhtio     = '$kukarow[yhtio]'
-              and maa         = '$tem_maa'
-              and tunnus     != '$tunnus'
-              and vat_numero != ''";
+        $query = "SELECT *
+                  FROM yhtion_toimipaikat
+                  WHERE yhtio     = '$kukarow[yhtio]'
+                  and maa         = '$tem_maa'
+                  and tunnus     != '$tunnus'
+                  and vat_numero != ''";
         $vresult = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($vresult) != 0) {

@@ -238,14 +238,14 @@ if ($tee == 'go') {
             echo "<td align='right'><b>".str_replace(".",",",$kateosuus)."%</b></td>";
 
 
-            $query = "  SELECT sum(tuotepaikat.saldo*if(epakurantti50pvm='0000-00-00', kehahin, kehahin/2)) varasto
-                  FROM tuotepaikat, tuote
-                  WHERE tuote.tuoteno     = tuotepaikat.tuoteno
-                  and tuote.yhtio       = '$kukarow[yhtio]'
-                  and tuotepaikat.yhtio     = '$kukarow[yhtio]'
-                  and tuote.osasto       = '$yhtrow[osasto]'
-                  and tuote.ei_saldoa     = ''
-                  and tuote.epakurantti100pvm = '0000-00-00'";
+            $query = "SELECT sum(tuotepaikat.saldo*if(epakurantti50pvm='0000-00-00', kehahin, kehahin/2)) varasto
+                      FROM tuotepaikat, tuote
+                      WHERE tuote.tuoteno         = tuotepaikat.tuoteno
+                      and tuote.yhtio             = '$kukarow[yhtio]'
+                      and tuotepaikat.yhtio       = '$kukarow[yhtio]'
+                      and tuote.osasto            = '$yhtrow[osasto]'
+                      and tuote.ei_saldoa         = ''
+                      and tuote.epakurantti100pvm = '0000-00-00'";
             $vresult = mysql_query($query) or pupe_error($query);
             $vrow = mysql_fetch_array($vresult);
 
@@ -297,15 +297,15 @@ if ($tee == 'go') {
           echo "<td align='right'>".str_replace(".",",",$indkate)."</td>";
           echo "<td align='right'>".str_replace(".",",",$kateosuus)."%</td>";
 
-          $query = "  SELECT sum(tuotepaikat.saldo*if(epakurantti75pvm='0000-00-00', if(epakurantti50pvm='0000-00-00', if(epakurantti25pvm='0000-00-00', kehahin, kehahin*0.75), kehahin*0.5), kehahin*0.25)) varasto
-                FROM tuotepaikat, tuote
-                WHERE tuote.tuoteno     = tuotepaikat.tuoteno
-                and tuote.yhtio       = '$kukarow[yhtio]'
-                and tuotepaikat.yhtio     = '$kukarow[yhtio]'
-                and tuote.osasto       = '$yhtrow[osasto]'
-                and tuote.try         = '$yhtrow[try]'
-                and tuote.ei_saldoa     = ''
-                and tuote.epakurantti100pvm = '0000-00-00'";
+          $query = "SELECT sum(tuotepaikat.saldo*if(epakurantti75pvm='0000-00-00', if(epakurantti50pvm='0000-00-00', if(epakurantti25pvm='0000-00-00', kehahin, kehahin*0.75), kehahin*0.5), kehahin*0.25)) varasto
+                    FROM tuotepaikat, tuote
+                    WHERE tuote.tuoteno         = tuotepaikat.tuoteno
+                    and tuote.yhtio             = '$kukarow[yhtio]'
+                    and tuotepaikat.yhtio       = '$kukarow[yhtio]'
+                    and tuote.osasto            = '$yhtrow[osasto]'
+                    and tuote.try               = '$yhtrow[try]'
+                    and tuote.ei_saldoa         = ''
+                    and tuote.epakurantti100pvm = '0000-00-00'";
           $vresult = mysql_query($query) or pupe_error($query);
           $vrow = mysql_fetch_array($vresult);
 
@@ -400,9 +400,9 @@ echo "<tr><th>".t("Syötä alkupäivämäärä (pp-kk-vvvv)")."</th>
 if ($kukarow["extranet"] == '') {
   echo "<tr><th>".t("Valitse asiakkaan maa (jos et, ajetaan kaikki yhteensä)")."</th><td colspan = '3'>";
 
-  $query = "  SELECT distinct b.nimi, a.maa
-        FROM asiakas a, maat b
-        WHERE a.yhtio='$kukarow[yhtio]' and a.maa = b.koodi order by 1";
+  $query = "SELECT distinct b.nimi, a.maa
+            FROM asiakas a, maat b
+            WHERE a.yhtio='$kukarow[yhtio]' and a.maa = b.koodi order by 1";
   $sresult = mysql_query($query) or pupe_error($query);
 
   echo "<select name='maa'>";
@@ -421,9 +421,9 @@ if ($kukarow["extranet"] == '') {
   echo "</td></tr>
       <tr><th>".t("tai asiakkaan osasto (jos et, ajetaan kaikki yhteensä)")."</th><td colspan = '3'>";
 
-  $query = "  SELECT distinct osasto
-        FROM asiakas
-        WHERE yhtio='$kukarow[yhtio]' and osasto != '' order by 1";
+  $query = "SELECT distinct osasto
+            FROM asiakas
+            WHERE yhtio='$kukarow[yhtio]' and osasto != '' order by 1";
   $asosresult = mysql_query($query) or pupe_error($query);
 
   echo "<select name='asos'>";

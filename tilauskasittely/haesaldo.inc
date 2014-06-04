@@ -20,19 +20,19 @@ $srow  = mysql_fetch_array($sres);
 $ennakkopoistot  = $srow[0];
 
 //jälkitoimituksessa olevat
-$query = "  SELECT sum(jt) jt, lasku.ytunnus ytunnus
-      FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus), lasku use index (PRIMARY)
-      WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-      and tilausrivi.tyyppi='L'
-      and tilausrivi.var='J'
-      and tilausrivi.tuoteno = '$tuotenumero'
-      and tilausrivi.tunnus <> '$rivi'
-      and lasku.yhtio=tilausrivi.yhtio
-      and tilausrivi.otunnus=lasku.tunnus
-      and tilausrivi.varattu=0
-      and tilausrivi.kpl=0
-      and tilausrivi.jt!=0
-      GROUP BY lasku.ytunnus";
+$query = "SELECT sum(jt) jt, lasku.ytunnus ytunnus
+          FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus), lasku use index (PRIMARY)
+          WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+          and tilausrivi.tyyppi='L'
+          and tilausrivi.var='J'
+          and tilausrivi.tuoteno = '$tuotenumero'
+          and tilausrivi.tunnus  <> '$rivi'
+          and lasku.yhtio=tilausrivi.yhtio
+          and tilausrivi.otunnus=lasku.tunnus
+          and tilausrivi.varattu=0
+          and tilausrivi.kpl=0
+          and tilausrivi.jt!=0
+          GROUP BY lasku.ytunnus";
 $jsres  = mysql_query($query) or pupe_error($query);
 
 $jtssa = "";

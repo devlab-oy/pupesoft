@@ -85,11 +85,11 @@ echo "<option value='ei'{$sel}>",t("Ei näytetä"),"</option>";
 echo "</select></td>";
 echo "</tr>";
 
-$query = "  SELECT tunnus
-      FROM lahdot
-      WHERE yhtio = '{$kukarow['yhtio']}'
-      AND aktiivi = ''
-      LIMIT 1";
+$query = "SELECT tunnus
+          FROM lahdot
+          WHERE yhtio = '{$kukarow['yhtio']}'
+          AND aktiivi = ''
+          LIMIT 1";
 $lahdot_chk_res = pupe_query($query);
 
 if (mysql_num_rows($lahdot_chk_res) == 1) {
@@ -169,10 +169,10 @@ if ($tee != '') {
 
   if ($laskutusajo_tuotteet != '') {
 
-    $query = "  SELECT GROUP_CONCAT(DISTINCT kuljetusvakuutus_tuotenumero SEPARATOR '\',\'') kuljetusvakuutus_tuotenumerot
-          FROM toimitustapa
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND kuljetusvakuutus_tuotenumero != ''";
+    $query = "SELECT GROUP_CONCAT(DISTINCT kuljetusvakuutus_tuotenumero SEPARATOR '\',\'') kuljetusvakuutus_tuotenumerot
+              FROM toimitustapa
+              WHERE yhtio                       = '{$kukarow['yhtio']}'
+              AND kuljetusvakuutus_tuotenumero != ''";
     $toimitustapa_res = pupe_query($query);
     $toimitustapa_row = mysql_fetch_assoc($toimitustapa_res);
 
@@ -221,24 +221,24 @@ if ($tee != '') {
     $tilaustyyppilisa = " AND lasku.tilaustyyppi IN ('".implode("','", $tilaustyyppi)."')";
   }
 
-  $query = "  SELECT {$aikamaarelisa}
-        COUNT(*) yhteensa_riveja,
-        ROUND(SUM(kpl + varattu + jt)) yhteensa_nimikkeita,
-        {$vientilisa}
-        SUM(IF(lasku.ohjelma_moduli IN ('EDIFACT911', 'FUTURSOFT', 'MAGENTO'), 1, 0)) sahkoisia_riveja,
-        ROUND(SUM(IF(lasku.ohjelma_moduli IN ('EDIFACT911', 'FUTURSOFT', 'MAGENTO'), kpl + varattu + jt, 0))) sahkoisia_nimikkeita,
-        GROUP_CONCAT(lasku.tunnus) tunnukset
-        FROM tilausrivi USE INDEX ({$ajoindex})
-        JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.tila = 'L' {$tilaustyyppilisa})
-        {$lahdotlisa}
-        {$saldotonjoin}
-        WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-        AND {$ajotapa} >= '{$vva}-{$kka}-{$ppa} 00:00:00'
-        AND {$ajotapa} <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
-        AND tilausrivi.tyyppi = 'L'
-        {$ei_laskutusajo_tuotteita}
-        GROUP BY 1
-        ORDER BY 1";
+  $query = "SELECT {$aikamaarelisa}
+            COUNT(*) yhteensa_riveja,
+            ROUND(SUM(kpl + varattu + jt)) yhteensa_nimikkeita,
+            {$vientilisa}
+            SUM(IF(lasku.ohjelma_moduli IN ('EDIFACT911', 'FUTURSOFT', 'MAGENTO'), 1, 0)) sahkoisia_riveja,
+            ROUND(SUM(IF(lasku.ohjelma_moduli IN ('EDIFACT911', 'FUTURSOFT', 'MAGENTO'), kpl + varattu + jt, 0))) sahkoisia_nimikkeita,
+            GROUP_CONCAT(lasku.tunnus) tunnukset
+            FROM tilausrivi USE INDEX ({$ajoindex})
+            JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.tila = 'L' {$tilaustyyppilisa})
+            {$lahdotlisa}
+            {$saldotonjoin}
+            WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+            AND {$ajotapa} >= '{$vva}-{$kka}-{$ppa} 00:00:00'
+            AND {$ajotapa} <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
+            AND tilausrivi.tyyppi  = 'L'
+            {$ei_laskutusajo_tuotteita}
+            GROUP BY 1
+            ORDER BY 1";
   $res = pupe_query($query);
 
   echo "<br /><br />";
@@ -291,26 +291,26 @@ if ($tee != '') {
     echo "<td align='right'>{$row['sahkoisia_nimikkeita']}</td>";
     echo "</tr>";
 
-    $query = "  SELECT {$aikamaarelisa}
-          TRIM(CONCAT(lasku.nimi, ' ', lasku.nimitark)) asiakas,
-          COUNT(*) yhteensa_riveja,
-          ROUND(SUM(kpl + varattu + jt)) yhteensa_nimikkeita,
-          {$vientilisa}
-          SUM(IF(lasku.ohjelma_moduli IN ('EDIFACT911', 'FUTURSOFT', 'MAGENTO'), 1, 0)) sahkoisia_riveja,
-          ROUND(SUM(IF(lasku.ohjelma_moduli IN ('EDIFACT911', 'FUTURSOFT', 'MAGENTO'), kpl + varattu + jt, 0))) sahkoisia_nimikkeita
-          FROM tilausrivi USE INDEX ({$ajoindex})
-          JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.tila = 'L' AND lasku.tunnus IN ({$row['tunnukset']}) {$tilaustyyppilisa})
-          JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
-          {$lahdotlisa}
-          {$saldotonjoin}
-          WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-          AND {$ajotapa} >= '{$vva}-{$kka}-{$ppa} 00:00:00'
-          AND {$ajotapa} <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
-          AND tilausrivi.tyyppi = 'L'
-          {$ei_laskutusajo_tuotteita}
-          GROUP BY 1,2,3
-          HAVING kello = '{$row['kello']}'
-          ORDER BY 1,2,3";
+    $query = "SELECT {$aikamaarelisa}
+              TRIM(CONCAT(lasku.nimi, ' ', lasku.nimitark)) asiakas,
+              COUNT(*) yhteensa_riveja,
+              ROUND(SUM(kpl + varattu + jt)) yhteensa_nimikkeita,
+              {$vientilisa}
+              SUM(IF(lasku.ohjelma_moduli IN ('EDIFACT911', 'FUTURSOFT', 'MAGENTO'), 1, 0)) sahkoisia_riveja,
+              ROUND(SUM(IF(lasku.ohjelma_moduli IN ('EDIFACT911', 'FUTURSOFT', 'MAGENTO'), kpl + varattu + jt, 0))) sahkoisia_nimikkeita
+              FROM tilausrivi USE INDEX ({$ajoindex})
+              JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.tila = 'L' AND lasku.tunnus IN ({$row['tunnukset']}) {$tilaustyyppilisa})
+              JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
+              {$lahdotlisa}
+              {$saldotonjoin}
+              WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+              AND {$ajotapa} >= '{$vva}-{$kka}-{$ppa} 00:00:00'
+              AND {$ajotapa} <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
+              AND tilausrivi.tyyppi  = 'L'
+              {$ei_laskutusajo_tuotteita}
+              GROUP BY 1,2,3
+              HAVING kello = '{$row['kello']}'
+              ORDER BY 1,2,3";
     $res_per_asiakas = pupe_query($query);
 
     while ($row_per_asiakas = mysql_fetch_assoc($res_per_asiakas)) {
@@ -344,21 +344,21 @@ if ($tee != '') {
   }
 
   ///* Yhteensärivi, annetaan tietokannan tehä työ, en jakssa summata while loopissa t. juppe*///
-  $query = "  SELECT
-        count(*) yhteensa_riveja,
-        round(sum(kpl + varattu + jt)) yhteensa_nimikkeita,
-        {$vientilisa}
-        SUM(IF(lasku.ohjelma_moduli IN ('EDIFACT911', 'FUTURSOFT', 'MAGENTO'), 1, 0)) sahkoisia_riveja,
-        ROUND(SUM(IF(lasku.ohjelma_moduli IN ('EDIFACT911', 'FUTURSOFT', 'MAGENTO'), kpl + varattu + jt, 0))) sahkoisia_nimikkeita
-        FROM tilausrivi USE INDEX ($ajoindex)
-        JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.tila = 'L' {$tilaustyyppilisa})
-        {$lahdotlisa}
-        {$saldotonjoin}
-        WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-        AND $ajotapa >= '$vva-$kka-$ppa 00:00:00'
-        AND $ajotapa <= '$vvl-$kkl-$ppl 23:59:59'
-        AND tilausrivi.tyyppi = 'L'
-        {$ei_laskutusajo_tuotteita}";
+  $query = "SELECT
+            count(*) yhteensa_riveja,
+            round(sum(kpl + varattu + jt)) yhteensa_nimikkeita,
+            {$vientilisa}
+            SUM(IF(lasku.ohjelma_moduli IN ('EDIFACT911', 'FUTURSOFT', 'MAGENTO'), 1, 0)) sahkoisia_riveja,
+            ROUND(SUM(IF(lasku.ohjelma_moduli IN ('EDIFACT911', 'FUTURSOFT', 'MAGENTO'), kpl + varattu + jt, 0))) sahkoisia_nimikkeita
+            FROM tilausrivi USE INDEX ($ajoindex)
+            JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.tila = 'L' {$tilaustyyppilisa})
+            {$lahdotlisa}
+            {$saldotonjoin}
+            WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+            AND $ajotapa >= '$vva-$kka-$ppa 00:00:00'
+            AND $ajotapa <= '$vvl-$kkl-$ppl 23:59:59'
+            AND tilausrivi.tyyppi  = 'L'
+            {$ei_laskutusajo_tuotteita}";
   $res = pupe_query($query);
   $row = mysql_fetch_array($res);
 

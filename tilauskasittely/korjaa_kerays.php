@@ -12,45 +12,45 @@ if ($yhtiorow['kerayserat'] == 'K') {
 
 if ($tee == 'KORJAA') {
 
-  $query = "  SELECT tunnus
-        FROM lasku
-        where yhtio = '{$kukarow['yhtio']}'
-        and tila  = 'L'
-        and alatila in ('C','A' $alatilalisa)
-        AND tunnus   = '$tunnus'";
+  $query = "SELECT tunnus
+            FROM lasku
+            where yhtio = '{$kukarow['yhtio']}'
+            and tila    = 'L'
+            and alatila in ('C','A' $alatilalisa)
+            AND tunnus  = '$tunnus'";
   $tilre = pupe_query($query);
 
   if (mysql_num_rows($tilre) > 0) {
 
-    $query = "  UPDATE tilausrivi
-          JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
-          SET tilausrivi.keratty = '',
-          tilausrivi.kerattyaika = ''
-          WHERE tilausrivi.otunnus = '$tunnus'
-          and tilausrivi.yhtio    = '{$kukarow['yhtio']}'
-          AND tilausrivi.tyyppi   != 'D'
-          AND tilausrivi.var not in ('P','J','O')";
+    $query = "UPDATE tilausrivi
+              JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
+              SET tilausrivi.keratty = '',
+              tilausrivi.kerattyaika    = ''
+              WHERE tilausrivi.otunnus  = '$tunnus'
+              and tilausrivi.yhtio      = '{$kukarow['yhtio']}'
+              AND tilausrivi.tyyppi    != 'D'
+              AND tilausrivi.var        not in ('P','J','O')";
     $result = pupe_query($query);
 
-    $query  = "  UPDATE lasku
-          SET alatila = 'A'
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tunnus   = '$tunnus'
-          AND tila   = 'L'
-          and alatila in ('C','A' $alatilalisa)";
+    $query  = "UPDATE lasku
+               SET alatila = 'A'
+               WHERE yhtio = '{$kukarow['yhtio']}'
+               AND tunnus  = '$tunnus'
+               AND tila    = 'L'
+               and alatila in ('C','A' $alatilalisa)";
     $result = mysql_query($query) or pupe_error($query);
 
     if ($yhtiorow['kerayserat'] == 'K') {
-      $query  = "  DELETE FROM rahtikirjat
-            WHERE yhtio    = '{$kukarow['yhtio']}'
-            and otsikkonro = '$tunnus'";
+      $query  = "DELETE FROM rahtikirjat
+                 WHERE yhtio    = '{$kukarow['yhtio']}'
+                 and otsikkonro = '$tunnus'";
       $query = pupe_query($query);
 
-      $query = "  UPDATE kerayserat
-            SET tila = 'K',
-            ohjelma_moduli = 'PUPESOFT'
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND otunnus = '$tunnus'";
+      $query = "UPDATE kerayserat
+                SET tila = 'K',
+                ohjelma_moduli = 'PUPESOFT'
+                WHERE yhtio    = '{$kukarow['yhtio']}'
+                AND otunnus    = '$tunnus'";
       $tila_upd_res = pupe_query($query);
     }
   }
@@ -89,17 +89,17 @@ if ($tee == '') {
   $vvl = date("Y");
   $ppl = date("d");
 
-  $query = "  SELECT distinct lasku.yhtio yhtio, lasku.tunnus, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, date_format(lasku.luontiaika, '%Y-%m-%d') laadittu, lasku.laatija
-        FROM lasku
-        JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
-                  and tilausrivi.otunnus = lasku.tunnus
-                  and tilausrivi.var != 'J'
-                  and tilausrivi.kerattyaika >= '$vva-$kka-$ppa 00:00:00'
-                  and tilausrivi.kerattyaika <= '$vvl-$kkl-$ppl 23:59:59')
-        WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-        AND lasku.tila     = 'L'
-        AND lasku.alatila in ('C','A' $alatilalisa)
-        $haku";
+  $query = "SELECT distinct lasku.yhtio yhtio, lasku.tunnus, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, date_format(lasku.luontiaika, '%Y-%m-%d') laadittu, lasku.laatija
+            FROM lasku
+            JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
+                      and tilausrivi.otunnus      = lasku.tunnus
+                      and tilausrivi.var         != 'J'
+                      and tilausrivi.kerattyaika  >= '$vva-$kka-$ppa 00:00:00'
+                      and tilausrivi.kerattyaika  <= '$vvl-$kkl-$ppl 23:59:59')
+            WHERE lasku.yhtio                     = '{$kukarow['yhtio']}'
+            AND lasku.tila                        = 'L'
+            AND lasku.alatila                     in ('C','A' $alatilalisa)
+            $haku";
   $tilre = pupe_query($query);
 
   if (mysql_num_rows($tilre) > 0) {

@@ -15,11 +15,11 @@ if (!file_exists($tilvahvfilenimi)) {
   if (!$toot = fopen($tilvahvfilenimi, "w")) die("TILAUSVAHVISTUS: Tiedoston luonti ei onnistu!");
 
   if ($yhtiorow["tilausvahvistus_lahetys"] == 1 and $laskurow["vanhatunnus"] > 0) {
-    $query = "   SELECT group_concat(tunnus) tunnukset
-          FROM lasku use index (yhtio_vanhatunnus)
-          WHERE yhtio    = '$kukarow[yhtio]'
-          and vanhatunnus = '$laskurow[vanhatunnus]'
-          and tila IN ('N','L','A')";
+    $query = "SELECT group_concat(tunnus) tunnukset
+              FROM lasku use index (yhtio_vanhatunnus)
+              WHERE yhtio     = '$kukarow[yhtio]'
+              and vanhatunnus = '$laskurow[vanhatunnus]'
+              and tila        IN ('N','L','A')";
     $abures = pupe_query($query);
     $aburow = mysql_fetch_assoc($abures);
 
@@ -33,11 +33,11 @@ if (!file_exists($tilvahvfilenimi)) {
     }
   }
   elseif ($laskurow["tunnusnippu"] > 0 and $laskurow["clearing"] != "JT-TILAUS") {
-    $query = "  SELECT group_concat(tunnus) tunnukset
-          FROM lasku
-          WHERE yhtio   = '$kukarow[yhtio]'
-          and tunnusnippu = '$laskurow[tunnusnippu]'
-          and tila IN ('N','L','A')";
+    $query = "SELECT group_concat(tunnus) tunnukset
+              FROM lasku
+              WHERE yhtio     = '$kukarow[yhtio]'
+              and tunnusnippu = '$laskurow[tunnusnippu]'
+              and tila        IN ('N','L','A')";
     $abures = pupe_query($query);
     $aburow = mysql_fetch_assoc($abures);
 
@@ -75,16 +75,16 @@ if (!file_exists($tilvahvfilenimi)) {
     $tulostettava_tunnus = $laskurow['tunnus'];
   }
 
-  $query = "  SELECT tilausrivi.tunnus, tuote.eankoodi,
-        tilausrivi.tuoteno, tilausrivi.varattu, tilausrivi.toimaika, tilausrivi.kommentti, tilausrivi.tilkpl, tilausrivi.alv, tilausrivi.nimitys,
-        tilausrivi.hinta, {$ale_query_select_lisa} tilausrivi.kommentti, tilausrivi.laatija, tilausrivi.tilaajanrivinro, tilausrivi.yksikko
-        FROM tilausrivi
-        LEFT JOIN tuote USING (yhtio, tuoteno)
-        WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-        $tyyppilisa
-        and $wherelisa
-        and tilausrivi.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}'
-        ORDER BY tilausrivi.tunnus";
+  $query = "SELECT tilausrivi.tunnus, tuote.eankoodi,
+            tilausrivi.tuoteno, tilausrivi.varattu, tilausrivi.toimaika, tilausrivi.kommentti, tilausrivi.tilkpl, tilausrivi.alv, tilausrivi.nimitys,
+            tilausrivi.hinta, {$ale_query_select_lisa} tilausrivi.kommentti, tilausrivi.laatija, tilausrivi.tilaajanrivinro, tilausrivi.yksikko
+            FROM tilausrivi
+            LEFT JOIN tuote USING (yhtio, tuoteno)
+            WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
+            $tyyppilisa
+            and $wherelisa
+            and tilausrivi.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}'
+            ORDER BY tilausrivi.tunnus";
   $tilvahresult = pupe_query($query);
 
   //Myyjän email

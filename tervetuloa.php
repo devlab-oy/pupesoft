@@ -29,25 +29,25 @@ if (!isset($tee) or $tee == '') {
   echo "<td class='back' valign='top' width='450'>";
 
   // haetaan kaikki yritykset, jonne t‰m‰ k‰ytt‰j‰ p‰‰see
-  $query  = "  SELECT distinct yhtio.yhtio, yhtio.nimi
-        FROM kuka
-        JOIN yhtio using (yhtio)
-        WHERE kuka = '$kukarow[kuka]'";
+  $query  = "SELECT distinct yhtio.yhtio, yhtio.nimi
+             FROM kuka
+             JOIN yhtio using (yhtio)
+             WHERE kuka = '$kukarow[kuka]'";
   $kukres = mysql_query($query) or pupe_error($query);
 
   while ($kukrow = mysql_fetch_array($kukres)) {
 
-    $query = "  SELECT count(*)
-          FROM lasku
-          WHERE hyvaksyja_nyt = '$kukarow[kuka]' and yhtio = '$kukrow[yhtio]' and alatila = 'H' and tila!='D'
-          ORDER BY erpcm";
+    $query = "SELECT count(*)
+              FROM lasku
+              WHERE hyvaksyja_nyt = '$kukarow[kuka]' and yhtio = '$kukrow[yhtio]' and alatila = 'H' and tila!='D'
+              ORDER BY erpcm";
     $result = mysql_query($query) or pupe_error($query);
     $piilorow = mysql_fetch_array ($result);
 
-    $query = "  SELECT tapvm, erpcm, ytunnus, nimi, round(summa * vienti_kurssi, 2) 'kotisumma', if(erpcm<=now(), 1, 0) wanha
-          FROM lasku
-          WHERE hyvaksyja_nyt = '$kukarow[kuka]' and yhtio = '$kukrow[yhtio]' and alatila!='H' and tila!='D'
-          ORDER BY erpcm";
+    $query = "SELECT tapvm, erpcm, ytunnus, nimi, round(summa * vienti_kurssi, 2) 'kotisumma', if(erpcm<=now(), 1, 0) wanha
+              FROM lasku
+              WHERE hyvaksyja_nyt = '$kukarow[kuka]' and yhtio = '$kukrow[yhtio]' and alatila!='H' and tila!='D'
+              ORDER BY erpcm";
     $result = mysql_query($query) or pupe_error($query);
 
     if ((mysql_num_rows($result) > 0) or ($piilorow[0] > 0)) {
@@ -99,13 +99,13 @@ if (!isset($tee) or $tee == '') {
       echo "</table><br><br>";
     }
 
-    $query = "  SELECT tunnus, nimi, luontiaika
-          FROM lasku use index (tila_index)
-          WHERE yhtio = '$kukrow[yhtio]'
-          and myyja = '$kukarow[tunnus]'
-          and tila in ('N','L')
-          and alatila != 'X'
-          and chn = '999'";
+    $query = "SELECT tunnus, nimi, luontiaika
+              FROM lasku use index (tila_index)
+              WHERE yhtio  = '$kukrow[yhtio]'
+              and myyja    = '$kukarow[tunnus]'
+              and tila     in ('N','L')
+              and alatila != 'X'
+              and chn      = '999'";
     $result = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($result) > 0) {
@@ -143,16 +143,16 @@ if (!isset($tee) or $tee == '') {
 
   $selectlisa = $yhtiorow['tyomaarays_asennuskalenteri_muistutus'] == 'K' ? ", kalenteri.pvmloppu, kalenteri.kentta02 " : '';
 
-  $query = "  SELECT kalenteri.tunnus tunnus, left(pvmalku,10) Muistutukset, asiakas.nimi Asiakas, yhteyshenkilo.nimi Yhteyshenkilo,
-        kalenteri.kentta01 Kommentit, kalenteri.tapa Tapa $selectlisa
-        FROM kalenteri
-        LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.yhtio=kalenteri.yhtio and yhteyshenkilo.tyyppi = 'A'
-        LEFT JOIN asiakas ON asiakas.tunnus=kalenteri.liitostunnus and asiakas.yhtio=kalenteri.yhtio
-        WHERE kalenteri.kuka = '$kukarow[kuka]'
-        and kalenteri.tyyppi = 'Muistutus'
-        and kalenteri.kuittaus = 'K'
-        and kalenteri.yhtio = '$kukarow[yhtio]'
-        ORDER BY kalenteri.pvmalku desc";
+  $query = "SELECT kalenteri.tunnus tunnus, left(pvmalku,10) Muistutukset, asiakas.nimi Asiakas, yhteyshenkilo.nimi Yhteyshenkilo,
+            kalenteri.kentta01 Kommentit, kalenteri.tapa Tapa $selectlisa
+            FROM kalenteri
+            LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.yhtio=kalenteri.yhtio and yhteyshenkilo.tyyppi = 'A'
+            LEFT JOIN asiakas ON asiakas.tunnus=kalenteri.liitostunnus and asiakas.yhtio=kalenteri.yhtio
+            WHERE kalenteri.kuka   = '$kukarow[kuka]'
+            and kalenteri.tyyppi   = 'Muistutus'
+            and kalenteri.kuittaus = 'K'
+            and kalenteri.yhtio    = '$kukarow[yhtio]'
+            ORDER BY kalenteri.pvmalku desc";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -170,19 +170,19 @@ if (!isset($tee) or $tee == '') {
           continue;
         }
 
-        $query = "  SELECT *
-              FROM kalenteri
-              WHERE tyyppi = 'kalenteri'
-              AND pvmalku like '$prow[Muistutukset]%'
-              AND kentta02 = '$prow[kentta02]'";
+        $query = "SELECT *
+                  FROM kalenteri
+                  WHERE tyyppi = 'kalenteri'
+                  AND pvmalku  like '$prow[Muistutukset]%'
+                  AND kentta02 = '$prow[kentta02]'";
         $asentajien_merkkaukset_res = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($asentajien_merkkaukset_res) > 0) {
 
-          $query = "  UPDATE kalenteri SET
-                kuittaus = ''
-                WHERE yhtio = '$kukarow[yhtio]'
-                AND tunnus = '$prow[tunnus]'";
+          $query = "UPDATE kalenteri SET
+                    kuittaus    = ''
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    AND tunnus  = '$prow[tunnus]'";
           $muistutus_kuittaus_res = mysql_query($query) or pupe_error($query);
 
           continue;
@@ -200,20 +200,20 @@ if (!isset($tee) or $tee == '') {
   }
 
   // N‰ytet‰‰n k‰ytt‰j‰kohtaiset tyˆm‰‰r‰ykset
-  $tyojonosql = "  SELECT lasku.tunnus,
-          lasku.nimi,
-          lasku.toimaika,
-          a2.selitetark tyostatus,
-          a2.selitetark_2 tyostatusvari,
-          a5.selitetark tyom_prioriteetti
-          FROM lasku
-          JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus AND tyomaarays.tyojono != '' AND tyomaarays.suorittaja = '{$kukarow["kuka"]}')
-          LEFT JOIN avainsana a2 ON (a2.yhtio=tyomaarays.yhtio and a2.laji='TYOM_TYOSTATUS' and a2.selite=tyomaarays.tyostatus)
-          LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti)
-          WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-          AND lasku.tila in ('A','L','N','S','C')
-          AND lasku.alatila != 'X'
-          ORDER BY ifnull(a5.jarjestys, 9999), ifnull(a2.jarjestys, 9999), lasku.toimaika asc, a2.selitetark";
+  $tyojonosql = "SELECT lasku.tunnus,
+                 lasku.nimi,
+                 lasku.toimaika,
+                 a2.selitetark tyostatus,
+                 a2.selitetark_2 tyostatusvari,
+                 a5.selitetark tyom_prioriteetti
+                 FROM lasku
+                 JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus AND tyomaarays.tyojono != '' AND tyomaarays.suorittaja = '{$kukarow["kuka"]}')
+                 LEFT JOIN avainsana a2 ON (a2.yhtio=tyomaarays.yhtio and a2.laji='TYOM_TYOSTATUS' and a2.selite=tyomaarays.tyostatus)
+                 LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti)
+                 WHERE lasku.yhtio  = '{$kukarow["yhtio"]}'
+                 AND lasku.tila     in ('A','L','N','S','C')
+                 AND lasku.alatila != 'X'
+                 ORDER BY ifnull(a5.jarjestys, 9999), ifnull(a2.jarjestys, 9999), lasku.toimaika asc, a2.selitetark";
   $tyoresult = pupe_query($tyojonosql);
 
   if (mysql_num_rows($tyoresult) > 0) {
@@ -261,11 +261,11 @@ if (!isset($tee) or $tee == '') {
     $ulos = '';
 
     // Katsotaan pienin tilikausi, josta l‰het‰‰n esitt‰m‰‰n
-    $min_query = "  SELECT date_format(ifnull(min(tilikausi_alku), '9999-01-01'), '%Y%m') min
-            FROM tilikaudet
-            WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND tilikausi_alku >= '2010-11-01'
-            AND tilikausi_alku >= date_sub('{$yhtiorow['tilikausi_alku']}', interval 1 month)";
+    $min_query = "SELECT date_format(ifnull(min(tilikausi_alku), '9999-01-01'), '%Y%m') min
+                  FROM tilikaudet
+                  WHERE yhtio        = '{$kukarow["yhtio"]}'
+                  AND tilikausi_alku >= '2010-11-01'
+                  AND tilikausi_alku >= date_sub('{$yhtiorow['tilikausi_alku']}', interval 1 month)";
     $min_result = pupe_query($min_query);
     $min_row = mysql_fetch_assoc($min_result);
 
@@ -277,14 +277,14 @@ if (!isset($tee) or $tee == '') {
 
       $alvpvm = date("Y-m-d", mktime(0, 0, 0, (substr($i,4)+1), 0, substr($i, 0, 4)));
 
-      $query = "  SELECT lasku.tunnus
-            FROM lasku
-            JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus)
-            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND lasku.tapvm = '$alvpvm'
-            AND lasku.tila = 'X'
-            AND lasku.nimi = 'ALVTOSITEMAKSUUN$alvpvm'
-            LIMIT 1";
+      $query = "SELECT lasku.tunnus
+                FROM lasku
+                JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus)
+                WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+                AND lasku.tapvm   = '$alvpvm'
+                AND lasku.tila    = 'X'
+                AND lasku.nimi    = 'ALVTOSITEMAKSUUN$alvpvm'
+                LIMIT 1";
       $tositelinkki_result = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($tositelinkki_result) == 0) {
@@ -304,14 +304,14 @@ if (!isset($tee) or $tee == '') {
   }
 
   ///* RUOKALISTA *///
-  $query = "  SELECT *, kalenteri.tunnus tun, year(pvmalku) vva, month(pvmalku) kka, dayofmonth(pvmalku) ppa, year(pvmloppu) vvl, month(pvmloppu) kkl, dayofmonth(pvmloppu) ppl
-        from kalenteri
-        left join kuka on kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka
-        where tyyppi='ruokalista'
-        and kalenteri.yhtio='$kukarow[yhtio]'
-        and pvmalku<=now()
-        and pvmloppu>=now()
-        LIMIT 1";
+  $query = "SELECT *, kalenteri.tunnus tun, year(pvmalku) vva, month(pvmalku) kka, dayofmonth(pvmalku) ppa, year(pvmloppu) vvl, month(pvmloppu) kkl, dayofmonth(pvmloppu) ppl
+            from kalenteri
+            left join kuka on kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka
+            where tyyppi='ruokalista'
+            and kalenteri.yhtio='$kukarow[yhtio]'
+            and pvmalku<=now()
+            and pvmloppu>=now()
+            LIMIT 1";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) > 0) {

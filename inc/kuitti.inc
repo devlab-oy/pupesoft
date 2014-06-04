@@ -1,11 +1,11 @@
 <?php
 
 // Haetaan tiedot kuittia varten lasku & kassa-tiliointi
-$query = "  SELECT nimi, selite, l.tapvm, sum(t.summa) summa
-      from lasku l
-      left join tiliointi t on t.yhtio=l.yhtio and t.ltunnus=l.tunnus and tilino = '$yhtiorow[kassa]'
-      where l.yhtio='$kukarow[yhtio]' and l.tunnus = '$tunnus'
-      group by 1,2,3";
+$query = "SELECT nimi, selite, l.tapvm, sum(t.summa) summa
+          from lasku l
+          left join tiliointi t on t.yhtio=l.yhtio and t.ltunnus=l.tunnus and tilino = '$yhtiorow[kassa]'
+          where l.yhtio='$kukarow[yhtio]' and l.tunnus = '$tunnus'
+          group by 1,2,3";
 $tempr = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($tempr) == 0) {
@@ -15,10 +15,10 @@ if (mysql_num_rows($tempr) == 0) {
 $kuittirow = mysql_fetch_array($tempr);
 
 //Haetaan kirjoitin
-$query = "  SELECT komento
-      from kirjoittimet
-      where yhtio = '$kukarow[yhtio]'
-      and tunnus = '$kukarow[kirjoitin]'";
+$query = "SELECT komento
+          from kirjoittimet
+          where yhtio = '$kukarow[yhtio]'
+          and tunnus  = '$kukarow[kirjoitin]'";
 $tempr = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($tempr) == 0) {

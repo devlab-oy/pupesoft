@@ -113,13 +113,13 @@ if ($tee == 'LISAA') {
         $postquery = " WHERE tunnus = '$tunnus' ";
       }
       else {
-        $query = "  INSERT INTO kalenteri
-              SET
-              kuka     = '$kukarow[kuka]',
-              tyyppi     = '$tyyppi',
-              yhtio     = '$kukarow[yhtio]',
-              pvmalku   = now(),
-              luontiaika  = now(),";
+        $query = "INSERT INTO kalenteri
+                  SET
+                  kuka       = '$kukarow[kuka]',
+                  tyyppi     = '$tyyppi',
+                  yhtio      = '$kukarow[yhtio]',
+                  pvmalku    = now(),
+                  luontiaika = now(),";
           $postquery = "";
       }
 
@@ -168,9 +168,9 @@ if ($tee == "SYOTA") {
   $rivi["pvmalku"] = date('Y-m-d');
 
   if ($tunnus > 0) {
-    $query  = "  SELECT *
-          from kalenteri
-          where tyyppi='$tyyppi' and tunnus='$tunnus' and yhtio='$kukarow[yhtio]' $kulisa";
+    $query  = "SELECT *
+               from kalenteri
+               where tyyppi='$tyyppi' and tunnus='$tunnus' and yhtio='$kukarow[yhtio]' $kulisa";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 1) {
@@ -367,9 +367,9 @@ if ($tee == "SYOTA") {
 }
 
 if ($tee == "POISTA") {
-  $query  = "  UPDATE kalenteri
-        SET tyyppi = concat('DELETED ',tyyppi)
-        WHERE tyyppi='$tyyppi' and tunnus='$tunnus' and kuka='$kukarow[kuka]' and yhtio='$kukarow[yhtio]'";
+  $query  = "UPDATE kalenteri
+             SET tyyppi = concat('DELETED ',tyyppi)
+             WHERE tyyppi='$tyyppi' and tunnus='$tunnus' and kuka='$kukarow[kuka]' and yhtio='$kukarow[yhtio]'";
   $result = pupe_query($query);
 
   $tee = "";
@@ -387,12 +387,12 @@ if ($tee == "PRINTTAA") {
     //-->
     </script>";
 
-  $query = "  SELECT *, kalenteri.tunnus tun, kalenteri.kuka toimittaja
-        from kalenteri
-        left join kuka on kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka
-        where tyyppi='$tyyppi'
-        and kalenteri.yhtio='$kukarow[yhtio]'
-        and kalenteri.tunnus='$tun'";
+  $query = "SELECT *, kalenteri.tunnus tun, kalenteri.kuka toimittaja
+            from kalenteri
+            left join kuka on kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka
+            where tyyppi='$tyyppi'
+            and kalenteri.yhtio='$kukarow[yhtio]'
+            and kalenteri.tunnus='$tun'";
   $result = pupe_query($query);
   $row = mysql_fetch_array($result);
 
@@ -506,13 +506,13 @@ if ($tee == '') {
     $querylisa_tapa = "  and tapa != 'automanual_uutinen' ";
   }
 
-  $query = "  SELECT *, kalenteri.tunnus tun, kalenteri.kuka toimittaja
-        from kalenteri
-        left join kuka on kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka
-        where tyyppi='$tyyppi' $lisa and $ehto
-        $querylisa_tapa
-        order by kokopaiva desc, pvmalku desc, kalenteri.tunnus desc
-        $limit";
+  $query = "SELECT *, kalenteri.tunnus tun, kalenteri.kuka toimittaja
+            from kalenteri
+            left join kuka on kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka
+            where tyyppi='$tyyppi' $lisa and $ehto
+            $querylisa_tapa
+            order by kokopaiva desc, pvmalku desc, kalenteri.tunnus desc
+            $limit";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -533,9 +533,9 @@ if ($tee == '') {
 
       if ($uutinen["kentta03"] != "") {
 
-        $query  = "  SELECT *
-              from liitetiedostot
-              where tunnus = '$uutinen[kentta03]'";
+        $query  = "SELECT *
+                   from liitetiedostot
+                   where tunnus = '$uutinen[kentta03]'";
         $lisatietores = pupe_query($query);
 
         if (mysql_num_rows($lisatietores) > 0) {
@@ -605,9 +605,9 @@ if ($tee == '') {
           foreach($matches as $m) {
 
             //  Haetaan tuotenumero
-            $query = "  SELECT tuoteno, nimitys
-                   FROM tuote
-                  WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$m[1]'";
+            $query = "SELECT tuoteno, nimitys
+                      FROM tuote
+                      WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$m[1]'";
             $tres = pupe_query($query);
 
             //  Tämä me korvataan aina!

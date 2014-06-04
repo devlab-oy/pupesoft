@@ -77,21 +77,21 @@ if ($kausi1!='' and $kausi2!='' and $osasto!='' and $try!='') {
 
 
     // haetaan tietod molemmille kausille
-    $query = "  SELECT
-          sum(if(laskutettuaika>='$mkausi1' and laskutettuaika<='$mkausi1l', rivihinta,0)) myynti1,
-                sum(if(laskutettuaika>='$mkausi1' and laskutettuaika<='$mkausi1l', kate,0)) kate1,
-          sum(if(laskutettuaika>='$mkausi1' and laskutettuaika<='$mkausi1l', kpl,0)) kpl1,
-          sum(if(laskutettuaika>='$mkausi2' and laskutettuaika<='$mkausi2l', rivihinta,0)) myynti2,
-                sum(if(laskutettuaika>='$mkausi2' and laskutettuaika<='$mkausi2l', kate,0)) kate2,
-          sum(if(laskutettuaika>='$mkausi2' and laskutettuaika<='$mkausi2l', kpl,0)) kpl2,
-          osasto, try
-          FROM tilausrivi use index (yhtio_tyyppi_osasto_try_laskutettuaika)
-          WHERE yhtio='$kukarow[yhtio]'
-          and try in ($tryt)
-          and osasto in ($osastot)
-          and tyyppi='L'
-          and ((laskutettuaika>='$mkausi1' and laskutettuaika<='$mkausi1l') or (laskutettuaika>='$mkausi2' and laskutettuaika<='$mkausi2l'))
-          GROUP BY osasto, try ";
+    $query = "SELECT
+              sum(if(laskutettuaika>='$mkausi1' and laskutettuaika<='$mkausi1l', rivihinta,0)) myynti1,
+                    sum(if(laskutettuaika>='$mkausi1' and laskutettuaika<='$mkausi1l', kate,0)) kate1,
+              sum(if(laskutettuaika>='$mkausi1' and laskutettuaika<='$mkausi1l', kpl,0)) kpl1,
+              sum(if(laskutettuaika>='$mkausi2' and laskutettuaika<='$mkausi2l', rivihinta,0)) myynti2,
+                    sum(if(laskutettuaika>='$mkausi2' and laskutettuaika<='$mkausi2l', kate,0)) kate2,
+              sum(if(laskutettuaika>='$mkausi2' and laskutettuaika<='$mkausi2l', kpl,0)) kpl2,
+              osasto, try
+              FROM tilausrivi use index (yhtio_tyyppi_osasto_try_laskutettuaika)
+              WHERE yhtio='$kukarow[yhtio]'
+              and try    in ($tryt)
+              and osasto in ($osastot)
+              and tyyppi='L'
+              and ((laskutettuaika>='$mkausi1' and laskutettuaika<='$mkausi1l') or (laskutettuaika>='$mkausi2' and laskutettuaika<='$mkausi2l'))
+              GROUP BY osasto, try ";
     $res  = mysql_query ($query) or pupe_error($query);
 
     $kate1 ='';
@@ -239,17 +239,17 @@ if ($kausi1!='' and $kausi2!='' and $osasto!='' and $try!='') {
 
 echo "<form method='post'>";
 
-$query = "  SELECT min(selite+0) minosasto, max(selite+0) maxosasto
-      FROM avainsana
-      WHERE yhtio = '$kukarow[yhtio]'
-      and laji  = 'OSASTO'";
+$query = "SELECT min(selite+0) minosasto, max(selite+0) maxosasto
+          FROM avainsana
+          WHERE yhtio = '$kukarow[yhtio]'
+          and laji    = 'OSASTO'";
 $al_res = mysql_query($query) or pupe_error($query);
 $os_row = mysql_fetch_array($al_res);
 
-$query = "  SELECT min(selite+0) minosasto, max(selite+0) maxosasto
-      FROM avainsana
-      WHERE yhtio = '$kukarow[yhtio]'
-      and laji  = 'TRY'";
+$query = "SELECT min(selite+0) minosasto, max(selite+0) maxosasto
+          FROM avainsana
+          WHERE yhtio = '$kukarow[yhtio]'
+          and laji    = 'TRY'";
 $al_res = mysql_query($query) or pupe_error($query);
 $try_row = mysql_fetch_array($al_res);
 

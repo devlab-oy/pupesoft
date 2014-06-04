@@ -10,10 +10,10 @@ if ($i == 0) {
 }
 
 if (mysql_field_name($result, $i) == "valkoodi") {
-  $query = "  SELECT nimi, tunnus
-                FROM valuu
-               WHERE yhtio = '$kukarow[yhtio]'
-                 ORDER BY jarjestys";
+  $query = "SELECT nimi, tunnus
+            FROM valuu
+            WHERE yhtio = '$kukarow[yhtio]'
+             ORDER BY jarjestys";
   $vresult = mysql_query($query) or pupe_error($query);
 
   $ulos = "<td><select name='$nimi'>";
@@ -59,10 +59,10 @@ if (mysql_field_name($result, $i) == "laji") {
 
 if (mysql_field_name($result, $i) == "maa") {
 
-  $query = "  SELECT distinct koodi, nimi
-        FROM maat
-        where nimi != ''
-        ORDER BY koodi";
+  $query = "SELECT distinct koodi, nimi
+            FROM maat
+            where nimi != ''
+            ORDER BY koodi";
   $vresult = mysql_query($query) or pupe_error($query);
 
   $ulos =  "<td><select name='$nimi'>";

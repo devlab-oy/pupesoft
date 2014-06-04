@@ -20,12 +20,12 @@ if ($tee == '') {
 
   echo "<tr><th>".t("Vain kustannuspaikka")."</th>";
 
-  $query = "  SELECT tunnus, nimi
-              FROM kustannuspaikka
-              WHERE yhtio = '$kukarow[yhtio]'
-              and kaytossa != 'E'
-              and tyyppi = 'K'
-              ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, nimi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and kaytossa != 'E'
+            and tyyppi    = 'K'
+            ORDER BY koodi+0, koodi, nimi";
   $vresult = mysql_query($query) or pupe_error($query);
 
   echo "<td><select name='kustp'><option value=' '>".t("Ei valintaa");
@@ -44,9 +44,9 @@ if ($tee == '') {
 
   $query = "SELECT tunnus, nimi
             FROM kustannuspaikka
-            WHERE yhtio = '$kukarow[yhtio]'
+            WHERE yhtio   = '$kukarow[yhtio]'
             and kaytossa != 'E'
-            and tyyppi = 'O'
+            and tyyppi    = 'O'
             ORDER BY koodi+0, koodi, nimi";
   $vresult = mysql_query($query) or pupe_error($query);
 
@@ -66,9 +66,9 @@ if ($tee == '') {
 
   $query = "SELECT tunnus, nimi
             FROM kustannuspaikka
-            WHERE yhtio = '$kukarow[yhtio]'
+            WHERE yhtio   = '$kukarow[yhtio]'
             and kaytossa != 'E'
-            and tyyppi = 'P'
+            and tyyppi    = 'P'
             ORDER BY koodi+0, koodi, nimi";
   $vresult = mysql_query($query) or pupe_error($query);
 
@@ -130,14 +130,14 @@ while ($tilirow = mysql_fetch_array($result)) {
   $alku  = $alvv."-01-01";
   $loppu = $alvv*1+1 ."-01-01";
 
-  $query = " SELECT DATE_FORMAT(tapvm, '%Y-%m') kausi, tiliointi.tilino, sum(tiliointi.summa) summa
-             FROM tiliointi
-             WHERE tilino = '$tilirow[tilino]'
-             and yhtio  = '$kukarow[yhtio]'
-             and korjattu=''
-             and tapvm>='$alku' and tapvm<'$loppu'
-             $lisa
-              GROUP BY DATE_FORMAT(tapvm, '%Y-%m')";
+  $query = "SELECT DATE_FORMAT(tapvm, '%Y-%m') kausi, tiliointi.tilino, sum(tiliointi.summa) summa
+            FROM tiliointi
+            WHERE tilino = '$tilirow[tilino]'
+            and yhtio    = '$kukarow[yhtio]'
+            and korjattu=''
+            and tapvm>='$alku' and tapvm<'$loppu'
+            $lisa
+             GROUP BY DATE_FORMAT(tapvm, '%Y-%m')";
   $aresult = mysql_query($query) or pupe_error($query);
 
   $kausi='';

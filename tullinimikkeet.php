@@ -157,10 +157,10 @@ if ($tee == "synkronoi") {
   echo t("P‰ivitet‰‰n muuttuneet tullinimikkeet tuotteille")."...<br>";
 
   foreach ($muunnosavaimet as $vanha => $uusi) {
-    $query  = "  UPDATE tuote set
-          tullinimike1 = '$uusi'
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND tullinimike1 = '$vanha'";
+    $query  = "UPDATE tuote set
+               tullinimike1     = '$uusi'
+               WHERE yhtio      = '$kukarow[yhtio]'
+               AND tullinimike1 = '$vanha'";
     $result = mysql_query($query) or pupe_error($query);
   }
 
@@ -174,17 +174,17 @@ if ($tee == "synkronoi") {
 
     $dm = preg_replace("/([^A-Z0-9ˆ‰Â≈ƒ÷ \.,\-_\:\/\!\|\?\+\(\)%#]|È)/i", "", $dm);
 
-    $query  = "  INSERT INTO tullinimike SET
-          yhtio      = '$kukarow[yhtio]',
-          cnkey      = '$cnkey',
-          cn        = '$cn',
-          dashes      = '$dashes',
-          dm        = '$dm',
-          su        = '$su',
-          su_vientiilmo  = '$su_vientiilmo',
-          kieli      = '$kieli',
-          laatija      = '$kukarow[kuka]',
-          luontiaika    = now()";
+    $query  = "INSERT INTO tullinimike SET
+               yhtio         = '$kukarow[yhtio]',
+               cnkey         = '$cnkey',
+               cn            = '$cn',
+               dashes        = '$dashes',
+               dm            = '$dm',
+               su            = '$su',
+               su_vientiilmo = '$su_vientiilmo',
+               kieli         = '$kieli',
+               laatija       = '$kukarow[kuka]',
+               luontiaika    = now()";
     $result = mysql_query($query) or pupe_error($query);
   }
 
@@ -220,11 +220,11 @@ if ($tullinimike1 != "") {
   if ($tullinimike2 != "") $lisa = " and tullinimike2='$tullinimike2'";
   else $lisa = "";
 
-  $query = "  SELECT *
-        from tuote use index (yhtio_tullinimike)
-        where yhtio = '$kukarow[yhtio]'
-        and tullinimike1 = '$tullinimike1' $lisa
-        order by tuoteno";
+  $query = "SELECT *
+            from tuote use index (yhtio_tullinimike)
+            where yhtio      = '$kukarow[yhtio]'
+            and tullinimike1 = '$tullinimike1' $lisa
+            order by tuoteno";
   $resul = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($resul) == 0) {

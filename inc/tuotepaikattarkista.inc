@@ -6,10 +6,10 @@ if (!function_exists("tuotepaikattarkista")) {
     static $tmp_hyllyalue, $tmp_hyllynro, $tmp_tuotenoind;
 
     if (mysql_field_name($result, $i) == "tuoteno") {
-      $query = "  SELECT *
-            FROM tuote
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tuoteno = '$t[$i]'";
+      $query = "SELECT *
+                FROM tuote
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tuoteno = '$t[$i]'";
       $chktuote = mysql_query($query) or pupe_error($query);
 
       $tmp_tuotenoind = $i;

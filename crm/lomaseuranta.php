@@ -24,11 +24,11 @@ echo "<th>".t("Valitse käyttäjä").":</th>";
 echo "<form method='POST'>";
 echo "<td><select name='kuka' onchange='submit()'><option value=''>".t("Valitse käyttäjä")."</option>";
 
-$query  = "  SELECT distinct kuka, nimi
-      FROM kuka
-      WHERE $lisa2
-      AND aktiivinen = 1
-      AND extranet = ''";
+$query  = "SELECT distinct kuka, nimi
+           FROM kuka
+           WHERE $lisa2
+           AND aktiivinen = 1
+           AND extranet   = ''";
 $vares = mysql_query($query) or pupe_error($query);
 
 while ($varow = mysql_fetch_array($vares)) {
@@ -53,17 +53,17 @@ if ($kuka != '') {
   echo "</table><br><br>";
 
   //* listataan muistutukset *///
-  $query = "  SELECT kalenteri.tunnus, left(pvmalku,10) pvmalku, right(pvmalku,8) aikaalku,
-        left(pvmloppu,10) pvmloppu, right(pvmloppu,8) aikaloppu, kuka.nimi, kalenteri.tapa, kentta01, kuka.osasto, kuittaus, kalenteri.yhtio,
-        (datediff(pvmalku,pvmloppu)*-1)+1 ero
-        FROM kalenteri, kuka
-        where kalenteri.$lisa2
-        and kuka.yhtio=kalenteri.yhtio
-        and kalenteri.tyyppi = 'kalenteri'
-        and kalenteri.tapa in ('Kesäloma','Talviloma')
-        and kalenteri.kuka=kuka.kuka
-        and kuka.kuka='$kuka'
-        ORDER BY kalenteri.kuka, kalenteri.tapa, kalenteri.pvmalku";
+  $query = "SELECT kalenteri.tunnus, left(pvmalku,10) pvmalku, right(pvmalku,8) aikaalku,
+            left(pvmloppu,10) pvmloppu, right(pvmloppu,8) aikaloppu, kuka.nimi, kalenteri.tapa, kentta01, kuka.osasto, kuittaus, kalenteri.yhtio,
+            (datediff(pvmalku,pvmloppu)*-1)+1 ero
+            FROM kalenteri, kuka
+            where kalenteri.$lisa2
+            and kuka.yhtio=kalenteri.yhtio
+            and kalenteri.tyyppi = 'kalenteri'
+            and kalenteri.tapa   in ('Kesäloma','Talviloma')
+            and kalenteri.kuka=kuka.kuka
+            and kuka.kuka='$kuka'
+            ORDER BY kalenteri.kuka, kalenteri.tapa, kalenteri.pvmalku";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) > 0) {

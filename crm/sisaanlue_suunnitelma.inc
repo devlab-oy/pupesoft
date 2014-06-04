@@ -133,11 +133,11 @@ if ($tee == "FILE") {
         $paluu = "00:00:00";
       }
 
-      $query = "  SELECT yhtio, tunnus, ytunnus
-            FROM asiakas
-            WHERE yhtio   = '$yhtio'
-            and asiakasnro  = '$asiakasnro'
-            and ytunnus   = '$ytunnus'";
+      $query = "SELECT yhtio, tunnus, ytunnus
+                FROM asiakas
+                WHERE yhtio    = '$yhtio'
+                and asiakasnro = '$asiakasnro'
+                and ytunnus    = '$ytunnus'";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 0) {
@@ -149,93 +149,93 @@ if ($tee == "FILE") {
       }
 
       if ($virhe == 0) {
-        $query = "  SELECT yhtio
-              FROM kalenteri
-              WHERE
-              yhtio        = '$yhtio'
-              and kuka      = '$kukarow[kuka]'
-              and pvmalku    = '$kpvm $lahto'
-              and pvmloppu    = '$kpvm $paluu'
-              and asiakas    = '$asiakasrow[ytunnus]'
-              and liitostunnus = '$asiakasrow[tunnus]'
-              and tapa      = '$kumpi'
-              and tyyppi     = 'kalenteri'";
+        $query = "SELECT yhtio
+                  FROM kalenteri
+                  WHERE
+                  yhtio            = '$yhtio'
+                  and kuka         = '$kukarow[kuka]'
+                  and pvmalku      = '$kpvm $lahto'
+                  and pvmloppu     = '$kpvm $paluu'
+                  and asiakas      = '$asiakasrow[ytunnus]'
+                  and liitostunnus = '$asiakasrow[tunnus]'
+                  and tapa         = '$kumpi'
+                  and tyyppi       = 'kalenteri'";
         $result = pupe_query($query);
 
         if (mysql_num_rows($result) == 0) {
 
           if ($kumpi == "Asiakaskäynti") {
 
-            $query = "  SELECT tunnus
-                  FROM kalenteri
-                  WHERE
-                  yhtio           = '$yhtio'
-                  and kuka         = '$kukarow[kuka]'
-                  and left(pvmalku,10)   = '$suunpvm'
-                  and left(pvmloppu,10)   = '$suunpvm'
-                  and asiakas        = '$asiakasrow[ytunnus]'
-                  and liitostunnus     = '$asiakasrow[tunnus]'
-                  and tapa         = 'Viikkosuunnitelma'
-                  and tyyppi        = 'kalenteri'";
+            $query = "SELECT tunnus
+                      FROM kalenteri
+                      WHERE
+                      yhtio            = '$yhtio'
+                      and kuka         = '$kukarow[kuka]'
+                      and left(pvmalku,10)   = '$suunpvm'
+                      and left(pvmloppu,10)   = '$suunpvm'
+                      and asiakas      = '$asiakasrow[ytunnus]'
+                      and liitostunnus = '$asiakasrow[tunnus]'
+                      and tapa         = 'Viikkosuunnitelma'
+                      and tyyppi       = 'kalenteri'";
             $result = pupe_query($query);
 
             if (mysql_num_rows($result) != 0) {
 
               $prow = mysql_fetch_array($result);
 
-              $query = "  UPDATE kalenteri
-                    SET
-                    tyyppi     = 'memo'
-                    WHERE yhtio = '$yhtio'
-                    and tunnus   = '$prow[tunnus]'";
+              $query = "UPDATE kalenteri
+                        SET
+                        tyyppi      = 'memo'
+                        WHERE yhtio = '$yhtio'
+                        and tunnus  = '$prow[tunnus]'";
               $result = pupe_query($query);
             }
           }
 
-          $query = "  INSERT INTO kalenteri
-                SET
-                yhtio      = '$yhtio',
-                kuka      = '$kukarow[kuka]',
-                pvmalku    = '$kpvm $lahto',
-                pvmloppu    = '$kpvm $paluu',
-                asiakas    = '$asiakasrow[ytunnus]',
-                liitostunnus = '$asiakasrow[tunnus]',
-                kentta01    = '$kommentit',
-                tapa      = '$kumpi',
-                kentta02   = '$kampanjat',
-                kentta03   = '$kilsat',
-                kentta04   = '$pvrahat',
-                kokopaiva   = 'x',
-                tyyppi      = 'kalenteri',
-                laatija     = '$kukarow[kuka]',
-                luontiaika   =  now()";
+          $query = "INSERT INTO kalenteri
+                    SET
+                    yhtio        = '$yhtio',
+                    kuka         = '$kukarow[kuka]',
+                    pvmalku      = '$kpvm $lahto',
+                    pvmloppu     = '$kpvm $paluu',
+                    asiakas      = '$asiakasrow[ytunnus]',
+                    liitostunnus = '$asiakasrow[tunnus]',
+                    kentta01     = '$kommentit',
+                    tapa         = '$kumpi',
+                    kentta02     = '$kampanjat',
+                    kentta03     = '$kilsat',
+                    kentta04     = '$pvrahat',
+                    kokopaiva    = 'x',
+                    tyyppi       = 'kalenteri',
+                    laatija      = '$kukarow[kuka]',
+                    luontiaika   =  now()";
           $result = pupe_query($query);
         }
         elseif ($kumpi == "Asiakaskäynti") {
-          $query = "  UPDATE kalenteri
-                SET
-                yhtio      = '$yhtio',
-                kuka      = '$kukarow[kuka]',
-                pvmalku    = '$kpvm $lahto',
-                pvmloppu    = '$kpvm $paluu',
-                asiakas    = '$asiakasrow[ytunnus]',
-                liitostunnus = '$asiakasrow[tunnus]',
-                kentta01    = '$kommentit',
-                tapa      = '$kumpi',
-                kentta02   = '$kampanjat',
-                kentta03   = '$kilsat',
-                kentta04   = '$pvrahat',
-                tyyppi      = 'kalenteri',
-                muuttaja   = '$kukarow[kuka]',
-                muutospvm   = now()
-                WHERE yhtio     = '$yhtio'
-                and kuka       = '$kukarow[kuka]'
-                and pvmalku     = '$kpvm $lahto'
-                and pvmloppu    = '$kpvm $paluu'
-                and asiakas    = '$asiakasrow[ytunnus]'
-                and liitostunnus = '$asiakasrow[tunnus]'
-                and tapa       = '$kumpi'
-                and tyyppi      = 'kalenteri'";
+          $query = "UPDATE kalenteri
+                    SET
+                    yhtio            = '$yhtio',
+                    kuka             = '$kukarow[kuka]',
+                    pvmalku          = '$kpvm $lahto',
+                    pvmloppu         = '$kpvm $paluu',
+                    asiakas          = '$asiakasrow[ytunnus]',
+                    liitostunnus     = '$asiakasrow[tunnus]',
+                    kentta01         = '$kommentit',
+                    tapa             = '$kumpi',
+                    kentta02         = '$kampanjat',
+                    kentta03         = '$kilsat',
+                    kentta04         = '$pvrahat',
+                    tyyppi           = 'kalenteri',
+                    muuttaja         = '$kukarow[kuka]',
+                    muutospvm        = now()
+                    WHERE yhtio      = '$yhtio'
+                    and kuka         = '$kukarow[kuka]'
+                    and pvmalku      = '$kpvm $lahto'
+                    and pvmloppu     = '$kpvm $paluu'
+                    and asiakas      = '$asiakasrow[ytunnus]'
+                    and liitostunnus = '$asiakasrow[tunnus]'
+                    and tapa         = '$kumpi'
+                    and tyyppi       = 'kalenteri'";
           $result = pupe_query($query);
         }
         else {

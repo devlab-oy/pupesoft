@@ -8,34 +8,34 @@ echo "<font class='head'>".t("Muistutukset")."</font><hr>";
 
 if($tee == 'B') {
   if ($muuta != "") {
-    $query = "  SELECT yhteyshenkilo.tunnus yhenkilo, kalenteri.*
-          FROM kalenteri
-          LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.tyyppi = 'A'
-          WHERE kalenteri.tunnus  = '$kaletunnus'
-          and kalenteri.yhtio    = '$kukarow[yhtio]'";
+    $query = "SELECT yhteyshenkilo.tunnus yhenkilo, kalenteri.*
+              FROM kalenteri
+              LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.tyyppi = 'A'
+              WHERE kalenteri.tunnus = '$kaletunnus'
+              and kalenteri.yhtio    = '$kukarow[yhtio]'";
     $result = mysql_query($query) or pupe_error($query);
     $prow = mysql_fetch_array ($result);
 
     $viesti = $kukarow["nimi"]." ".t("kuittasi").": ".$muuta;
 
-    $kysely = "  INSERT INTO kalenteri
-          SET asiakas    = '$prow[asiakas]',
-          liitostunnus   = '$prow[liitostunnus]',
-          henkilo      = '$prow[yhenkilo]',
-          kuka         = '$kukarow[kuka]',
-          yhtio        = '$kukarow[yhtio]',
-          tyyppi       = 'Kuittaus',
-          tapa         = '$prow[tapa]',
-          kentta01     = '$viesti',
-          kuittaus     = '',
-          pvmalku      = now(),
-          perheid     = '$kaletunnus'";
+    $kysely = "INSERT INTO kalenteri
+               SET asiakas    = '$prow[asiakas]',
+               liitostunnus = '$prow[liitostunnus]',
+               henkilo      = '$prow[yhenkilo]',
+               kuka         = '$kukarow[kuka]',
+               yhtio        = '$kukarow[yhtio]',
+               tyyppi       = 'Kuittaus',
+               tapa         = '$prow[tapa]',
+               kentta01     = '$viesti',
+               kuittaus     = '',
+               pvmalku      = now(),
+               perheid      = '$kaletunnus'";
     $result = mysql_query($kysely) or pupe_error($kysely);
 
-    $query = "  UPDATE kalenteri
-          SET kuittaus   = ''
-          WHERE tunnus  = '$kaletunnus'
-          and yhtio    = '$kukarow[yhtio]'";
+    $query = "UPDATE kalenteri
+              SET kuittaus   = ''
+              WHERE tunnus = '$kaletunnus'
+              and yhtio    = '$kukarow[yhtio]'";
     $result = mysql_query($query) or pupe_error($query);
 
     $tee = "";
@@ -46,11 +46,11 @@ if($tee == 'B') {
 }
 
 if($tee == 'A') {
-  $query = "  SELECT yhteyshenkilo.nimi yhteyshenkilo, kalenteri.*
-        FROM kalenteri
-        LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.yhtio=kalenteri.yhtio and yhteyshenkilo.tyyppi = 'A'
-        WHERE kalenteri.tunnus  = '$kaletunnus'
-        and kalenteri.yhtio    = '$kukarow[yhtio]'";
+  $query = "SELECT yhteyshenkilo.nimi yhteyshenkilo, kalenteri.*
+            FROM kalenteri
+            LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.yhtio=kalenteri.yhtio and yhteyshenkilo.tyyppi = 'A'
+            WHERE kalenteri.tunnus = '$kaletunnus'
+            and kalenteri.yhtio    = '$kukarow[yhtio]'";
   $result = mysql_query($query) or pupe_error($query);
 
   echo "<table>";
@@ -66,10 +66,10 @@ if($tee == 'A') {
   $prow = mysql_fetch_array ($result);
 
   if ($prow["liitostunnus"] > 0) {
-    $query = "  SELECT nimi
-          FROM asiakas
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tunnus  = '$prow[liitostunnus]'";
+    $query = "SELECT nimi
+              FROM asiakas
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tunnus  = '$prow[liitostunnus]'";
     $asresult = mysql_query($query) or pupe_error($query);
     $asrow = mysql_fetch_array($asresult);
 
@@ -112,23 +112,23 @@ if($tee == "LISAAMUISTUTUS") {
       $pvmalku  = "now()";
     }
 
-    $kysely = "  INSERT INTO kalenteri
-          SET kuka = '$kuka',
-          yhtio    = '$kukarow[yhtio]',
-          tyyppi   = 'Muistutus',
-          tapa     = '$tapa',
-          kentta01 = '$viesti',
-          kuittaus = '$kuittaus',
-          pvmalku  = $pvmalku";
+    $kysely = "INSERT INTO kalenteri
+               SET kuka = '$kuka',
+               yhtio    = '$kukarow[yhtio]',
+               tyyppi   = 'Muistutus',
+               tapa     = '$tapa',
+               kentta01 = '$viesti',
+               kuittaus = '$kuittaus',
+               pvmalku  = $pvmalku";
     $result = mysql_query($kysely) or pupe_error($kysely);
     $muist = mysql_insert_id();
 
     echo t("Lisätty muistutus päivälle:")."  <b>$pvmalku</b><br><br>";
 
-    $query = "  SELECT *
-          FROM kuka
-          WHERE yhtio  = '$kukarow[yhtio]'
-          and kuka  = '$kuka'";
+    $query = "SELECT *
+              FROM kuka
+              WHERE yhtio = '$kukarow[yhtio]'
+              and kuka    = '$kuka'";
     $result = mysql_query($query) or pupe_error($query);
     $row = mysql_fetch_array($result);
 
@@ -179,14 +179,14 @@ if($tee == "MUISTUTUS") {
     <td colspan='2'><select name='kuka'>
     <option value='$kukarow[kuka]'>".t("Itse")."</option>";
 
-  $query = "  SELECT distinct kuka.tunnus, kuka.nimi, kuka.kuka
-        FROM kuka, oikeu
-        WHERE kuka.yhtio  = '$kukarow[yhtio]'
-        and oikeu.yhtio    = kuka.yhtio
-        and oikeu.kuka    = kuka.kuka
-        and oikeu.nimi    = 'crm/kalenteri.php'
-        and kuka.kuka     <> '$kukarow[kuka]'
-        ORDER BY kuka.nimi";
+  $query = "SELECT distinct kuka.tunnus, kuka.nimi, kuka.kuka
+            FROM kuka, oikeu
+            WHERE kuka.yhtio = '$kukarow[yhtio]'
+            and oikeu.yhtio  = kuka.yhtio
+            and oikeu.kuka   = kuka.kuka
+            and oikeu.nimi   = 'crm/kalenteri.php'
+            and kuka.kuka    <> '$kukarow[kuka]'
+            ORDER BY kuka.nimi";
   $result = mysql_query($query) or pupe_error($query);
 
   while ($row = mysql_fetch_array($result)) {
@@ -274,14 +274,14 @@ if ($tee == "") {
         <td><select name='kuka' onchange='submit()'>
         <option value='$kukarow[kuka]'>$kukarow[nimi]</option>";
 
-    $query = "  SELECT distinct kuka.tunnus, kuka.nimi, kuka.kuka
-          FROM kuka, oikeu
-          WHERE kuka.yhtio  = '$kukarow[yhtio]'
-          and oikeu.yhtio    = kuka.yhtio
-          and oikeu.kuka    = kuka.kuka
-          and oikeu.nimi    = 'crm/kalenteri.php'
-          and kuka.tunnus <> '$kukarow[tunnus]'
-          ORDER BY kuka.nimi";
+    $query = "SELECT distinct kuka.tunnus, kuka.nimi, kuka.kuka
+              FROM kuka, oikeu
+              WHERE kuka.yhtio = '$kukarow[yhtio]'
+              and oikeu.yhtio  = kuka.yhtio
+              and oikeu.kuka   = kuka.kuka
+              and oikeu.nimi   = 'crm/kalenteri.php'
+              and kuka.tunnus  <> '$kukarow[tunnus]'
+              ORDER BY kuka.nimi";
     $result = mysql_query($query) or pupe_error($query);
 
     while ($row = mysql_fetch_array($result)) {
@@ -304,22 +304,22 @@ if ($tee == "") {
   }
 
   //* listataan muistutukset *///
-  $query = "  SELECT yhteyshenkilo.nimi yhteyshenkilo, kuka1.nimi nimi1, kuka2.nimi nimi2,
-        lasku.tunnus laskutunnus, lasku.tila laskutila, lasku.alatila laskualatila, kuka3.nimi laskumyyja, lasku.muutospvm laskumpvm,
-        kalenteri.*,
-        date_format(pvmalku, '%Y%m%d%H%i%s') voimassa
-        FROM kalenteri
-        LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.yhtio=kalenteri.yhtio and yhteyshenkilo.tyyppi = 'A'
-        LEFT JOIN kuka as kuka1 ON (kuka1.yhtio=kalenteri.yhtio and kuka1.kuka=kalenteri.kuka)
-        LEFT JOIN kuka as kuka2 ON (kuka2.yhtio=kalenteri.yhtio and kuka2.kuka=kalenteri.myyntipaallikko)
-        LEFT JOIN lasku ON kalenteri.yhtio=lasku.yhtio and kalenteri.otunnus=lasku.tunnus
-        LEFT JOIN kuka as kuka3 ON (kuka3.yhtio = lasku.yhtio and kuka3.tunnus = lasku.myyja)
-        where (kalenteri.kuka = '$kuka' or kalenteri.myyntipaallikko = '$kuka')
-        and kalenteri.tyyppi in ('Muistutus','Lead')
-        and kuittaus     = 'K'
-        and kalenteri.yhtio  = '$kukarow[yhtio]'
-        and left(kalenteri.tyyppi,7) != 'DELETED'
-        ORDER BY kalenteri.pvmalku desc";
+  $query = "SELECT yhteyshenkilo.nimi yhteyshenkilo, kuka1.nimi nimi1, kuka2.nimi nimi2,
+            lasku.tunnus laskutunnus, lasku.tila laskutila, lasku.alatila laskualatila, kuka3.nimi laskumyyja, lasku.muutospvm laskumpvm,
+            kalenteri.*,
+            date_format(pvmalku, '%Y%m%d%H%i%s') voimassa
+            FROM kalenteri
+            LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.yhtio=kalenteri.yhtio and yhteyshenkilo.tyyppi = 'A'
+            LEFT JOIN kuka as kuka1 ON (kuka1.yhtio=kalenteri.yhtio and kuka1.kuka=kalenteri.kuka)
+            LEFT JOIN kuka as kuka2 ON (kuka2.yhtio=kalenteri.yhtio and kuka2.kuka=kalenteri.myyntipaallikko)
+            LEFT JOIN lasku ON kalenteri.yhtio=lasku.yhtio and kalenteri.otunnus=lasku.tunnus
+            LEFT JOIN kuka as kuka3 ON (kuka3.yhtio = lasku.yhtio and kuka3.tunnus = lasku.myyja)
+            where (kalenteri.kuka = '$kuka' or kalenteri.myyntipaallikko = '$kuka')
+            and kalenteri.tyyppi in ('Muistutus','Lead')
+            and kuittaus         = 'K'
+            and kalenteri.yhtio  = '$kukarow[yhtio]'
+            and left(kalenteri.tyyppi,7) != 'DELETED'
+            ORDER BY kalenteri.pvmalku desc";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -339,10 +339,10 @@ if ($tee == "") {
       unset($asrow);
 
       if ($prow["liitostunnus"] > 0) {
-        $query = "  SELECT nimi
-              FROM asiakas
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tunnus  = '$prow[liitostunnus]'";
+        $query = "SELECT nimi
+                  FROM asiakas
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and tunnus  = '$prow[liitostunnus]'";
         $asresult = mysql_query($query) or pupe_error($query);
         $asrow = mysql_fetch_array($asresult);
 

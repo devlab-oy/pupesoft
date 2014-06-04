@@ -41,9 +41,9 @@ while ($rivi = fgets($fd)) {
         require("tilaus-valmis.inc");
       }
 
-       $query = "  UPDATE kuka
-            SET kesken = 0
-            WHERE session = '$session'";
+       $query = "UPDATE kuka
+                 SET kesken = 0
+                 WHERE session = '$session'";
       $result = pupe_query($query);
 
       $kukarow['kesken']   = 0;
@@ -56,12 +56,12 @@ while ($rivi = fgets($fd)) {
         $toim_lis = "";
       }
 
-      $query = "  SELECT tunnus
-             FROM asiakas
-             WHERE yhtio = '$kukarow[yhtio]'
-            and ytunnus = '$ytunnus'
-            $toim_lis
-            and laji not in ('P','R')";
+      $query = "SELECT tunnus
+                FROM asiakas
+                WHERE yhtio = '$kukarow[yhtio]'
+                and ytunnus = '$ytunnus'
+                $toim_lis
+                and laji    not in ('P','R')";
        $result = pupe_query($query);
 
        if (mysql_num_rows($result) == 0) {
@@ -84,18 +84,18 @@ while ($rivi = fgets($fd)) {
        echo "Tehtiin tilaus $id asiakkaalle $ytunnus<br>";
 
        // haetaan tilauksen tiedot
-       $query = "  SELECT *
-            FROM lasku
-            WHERE tunnus = '$id'
-            AND yhtio    = '$kukarow[yhtio]'";
+       $query = "SELECT *
+                 FROM lasku
+                 WHERE tunnus = '$id'
+                 AND yhtio    = '$kukarow[yhtio]'";
        $result   = pupe_query($query);
        $laskurow = mysql_fetch_assoc($result);
      }
 
-     $query = "  SELECT *
-           FROM tuote
-           WHERE tuoteno = '$tuoteno'
-          and yhtio     = '$kukarow[yhtio]'";
+     $query = "SELECT *
+               FROM tuote
+               WHERE tuoteno = '$tuoteno'
+               and yhtio     = '$kukarow[yhtio]'";
      $rarresult = pupe_query($query);
 
      if (mysql_num_rows($rarresult) == 1) {

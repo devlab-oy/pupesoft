@@ -57,10 +57,10 @@ if ($ytunnus != '' and $toimittajaid == 0) {
 
 # Toimittajan tiedot
 if ($toimittajaid > 0) {
-    $toimittaja_query = "  SELECT *
-              FROM toimi
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus  = '$toimittajaid'";
+    $toimittaja_query = "SELECT *
+                         FROM toimi
+                         WHERE yhtio = '{$kukarow['yhtio']}'
+                         AND tunnus  = '$toimittajaid'";
     $toimittaja_result = pupe_query($toimittaja_query);
     $toimittaja = mysql_fetch_assoc($toimittaja_result);
 }
@@ -87,14 +87,14 @@ if ($tee == "raportoi" and $alkupvm != "" and $loppupvm != "") {
   $query_lisa .= " AND mapvm BETWEEN '$alkupvm' AND '$loppupvm'";
 
   # Haetaan kaikki saapumiset
-  $saapumiset_query = "  SELECT *
-              FROM lasku
-              WHERE tila    = 'K'
-              AND vanhatunnus  = 0
-              AND alatila    = 'X'
-              $query_lisa
-              AND yhtio     = '{$kukarow['yhtio']}'
-              ORDER BY nimi ASC";
+  $saapumiset_query = "SELECT *
+                       FROM lasku
+                       WHERE tila      = 'K'
+                       AND vanhatunnus = 0
+                       AND alatila     = 'X'
+                       $query_lisa
+                       AND yhtio       = '{$kukarow['yhtio']}'
+                       ORDER BY nimi ASC";
   $saapumiset_result = pupe_query($saapumiset_query);
 
   echo "<table>";
@@ -129,32 +129,32 @@ if ($tee == "raportoi" and $alkupvm != "" and $loppupvm != "") {
       </tr>";
     }
 
-    $query = "  SELECT group_concat(vanhatunnus) as vanhatunnus
-          FROM lasku
-          WHERE tila     = 'K'
-          AND vanhatunnus != 0
-          AND laskunro   = {$tama_rivi['laskunro']}
-          AND yhtio     = '{$kukarow['yhtio']}'";
+    $query = "SELECT group_concat(vanhatunnus) as vanhatunnus
+              FROM lasku
+              WHERE tila       = 'K'
+              AND vanhatunnus != 0
+              AND laskunro     = {$tama_rivi['laskunro']}
+              AND yhtio        = '{$kukarow['yhtio']}'";
     $vanhatunnus = mysql_fetch_assoc(pupe_query($query));
 
     $vols["summa"] = 0;
     if ($vanhatunnus['vanhatunnus'] != "") {
       #vols, Vaihto-omaisuuslaskujen summa
-      $vols_query = "  SELECT round(sum(summa),2) as summa
-              FROM tiliointi
-              WHERE ltunnus IN ({$vanhatunnus['vanhatunnus']})
-              AND korjattu = ''
-              AND tilino = '{$yhtiorow['varasto']}'
-              AND yhtio = '{$kukarow['yhtio']}'";
+      $vols_query = "SELECT round(sum(summa),2) as summa
+                     FROM tiliointi
+                     WHERE ltunnus IN ({$vanhatunnus['vanhatunnus']})
+                     AND korjattu  = ''
+                     AND tilino    = '{$yhtiorow['varasto']}'
+                     AND yhtio     = '{$kukarow['yhtio']}'";
       $vols = mysql_fetch_assoc(pupe_query($vols_query));
     }
 
     if ($tama_rivi['tunnus'] != "") {
       #sks, Saapumisen kokonaissumma
-      $sks_query = "  SELECT round(sum(tilausrivi.rivihinta),2) as saapumisen_summa
-              FROM tilausrivi
-              WHERE uusiotunnus  = {$tama_rivi['tunnus']}
-              AND yhtio      = '{$kukarow['yhtio']}'";
+      $sks_query = "SELECT round(sum(tilausrivi.rivihinta),2) as saapumisen_summa
+                    FROM tilausrivi
+                    WHERE uusiotunnus = {$tama_rivi['tunnus']}
+                    AND yhtio         = '{$kukarow['yhtio']}'";
       $sks = mysql_fetch_assoc(pupe_query($sks_query));
 
       echo "<tr class='aktiivi'>";

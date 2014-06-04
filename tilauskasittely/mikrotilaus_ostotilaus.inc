@@ -54,33 +54,33 @@ if ($tee == "file") {
 
         ///* Toimittajan tuotenumerospecial*///
         if (substr($tuoteno,0,1) == '?') {
-          $query = "  SELECT *
-                FROM tuotteen_toimittajat
-                JOIN tuote USING (yhtio, tuoteno)
-                WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
-                AND tuotteen_toimittajat.toim_tuoteno = '".substr($tuoteno,1)."'
-                AND tuotteen_toimittajat.liitostunnus = '{$laskurow['liitostunnus']}'
-                AND tuote.status != 'P'
-                ORDER BY IF(tuotteen_toimittajat.jarjestys=0, 99999999999, tuotteen_toimittajat.jarjestys), tuote.tuoteno
-                LIMIT 1";
+          $query = "SELECT *
+                    FROM tuotteen_toimittajat
+                    JOIN tuote USING (yhtio, tuoteno)
+                    WHERE tuotteen_toimittajat.yhtio       = '{$kukarow['yhtio']}'
+                    AND tuotteen_toimittajat.toim_tuoteno  = '".substr($tuoteno,1)."'
+                    AND tuotteen_toimittajat.liitostunnus  = '{$laskurow['liitostunnus']}'
+                    AND tuote.status                      != 'P'
+                    ORDER BY IF(tuotteen_toimittajat.jarjestys=0, 99999999999, tuotteen_toimittajat.jarjestys), tuote.tuoteno
+                    LIMIT 1";
         }
-        else if (substr($tuoteno,0,1) != '?' and $tiedoston_tuoteno == 'toimittajan_tuoteno') {
-          $query = "  SELECT *
-                FROM tuotteen_toimittajat
-                JOIN tuote USING (yhtio, tuoteno)
-                WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
-                AND tuotteen_toimittajat.toim_tuoteno = '$tuoteno'
-                AND tuotteen_toimittajat.liitostunnus = '{$laskurow['liitostunnus']}'
-                AND tuote.status != 'P'
-                ORDER BY IF(tuotteen_toimittajat.jarjestys=0, 99999999999, tuotteen_toimittajat.jarjestys), tuote.tuoteno
-                LIMIT 1";
+        elseif (substr($tuoteno,0,1) != '?' and $tiedoston_tuoteno == 'toimittajan_tuoteno') {
+          $query = "SELECT *
+                    FROM tuotteen_toimittajat
+                    JOIN tuote USING (yhtio, tuoteno)
+                    WHERE tuotteen_toimittajat.yhtio       = '{$kukarow['yhtio']}'
+                    AND tuotteen_toimittajat.toim_tuoteno  = '$tuoteno'
+                    AND tuotteen_toimittajat.liitostunnus  = '{$laskurow['liitostunnus']}'
+                    AND tuote.status                      != 'P'
+                    ORDER BY IF(tuotteen_toimittajat.jarjestys=0, 99999999999, tuotteen_toimittajat.jarjestys), tuote.tuoteno
+                    LIMIT 1";
         }
         else {
-          $query = "  SELECT *, tuote.tuoteno as tuoteno
-                FROM tuote
-                LEFT JOIN tuotepaikat ON tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.oletus!=''
-                WHERE tuote.yhtio='$kukarow[yhtio]'
-                and tuote.tuoteno='$tuoteno'";
+          $query = "SELECT *, tuote.tuoteno as tuoteno
+                    FROM tuote
+                    LEFT JOIN tuotepaikat ON tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.oletus!=''
+                    WHERE tuote.yhtio='$kukarow[yhtio]'
+                    and tuote.tuoteno='$tuoteno'";
         }
         $result = mysql_query($query) or pupe_error($query);
 

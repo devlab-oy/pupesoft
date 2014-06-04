@@ -17,11 +17,11 @@ if(!function_exists("toimittajahintatarkista")) {
 
       // Ei tsekata turhaan kun rivi dellataan luedatasta
       if ($chytunnus != '' and (!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA")) {
-        $query = "  SELECT ytunnus
-              FROM toimi
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tyyppi != 'P'
-              and ytunnus = '$t[$i]'";
+        $query = "SELECT ytunnus
+                  FROM toimi
+                  WHERE yhtio  = '$kukarow[yhtio]'
+                  and tyyppi  != 'P'
+                  and ytunnus  = '$t[$i]'";
         $sresult = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($sresult) == 0) {
@@ -39,11 +39,11 @@ if(!function_exists("toimittajahintatarkista")) {
         unset($chasresult);
 
         if (is_numeric($chastunn) and $chastunn > 0) {
-          $query  = "  SELECT *
-                FROM toimi
-                WHERE yhtio = '$kukarow[yhtio]'
-                and tyyppi != 'P'
-                and tunnus = '$chastunn'";
+          $query  = "SELECT *
+                     FROM toimi
+                     WHERE yhtio  = '$kukarow[yhtio]'
+                     and tyyppi  != 'P'
+                     and tunnus   = '$chastunn'";
           $chasresult = mysql_query($query) or pupe_error($query);
         }
 
@@ -78,9 +78,9 @@ if(!function_exists("toimittajahintatarkista")) {
 
       // Ei tsekata turhaan kun rivi dellataan luedatasta
       if ($chtuoteno != '' and (!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA")) {
-        $query = "  SELECT tuoteno
-              FROM tuote
-              WHERE yhtio='$kukarow[yhtio]' and tuoteno = '$t[$i]'";
+        $query = "SELECT tuoteno
+                  FROM tuote
+                  WHERE yhtio='$kukarow[yhtio]' and tuoteno = '$t[$i]'";
         $sresult = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($sresult) != 1) {
@@ -107,9 +107,9 @@ if(!function_exists("toimittajahintatarkista")) {
 
       // Ei tsekata turhaan kun rivi dellataan luedatasta
       if ($chryhma != '' and (!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA")) {
-        $query = "  SELECT tunnus
-              FROM perusalennus
-              WHERE yhtio='$kukarow[yhtio]' and ryhma = '$t[$i]'";
+        $query = "SELECT tunnus
+                  FROM perusalennus
+                  WHERE yhtio='$kukarow[yhtio]' and ryhma = '$t[$i]'";
         $sresult = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($sresult) != 1) {
@@ -195,15 +195,15 @@ if(!function_exists("toimittajahintatarkista")) {
       $chminkpl = (int) $chminkpl;
       $chmaxkpl = (int) $chmaxkpl;
 
-      $aquery = "  SELECT ytunnus
-            FROM toimittajahinta
-            WHERE yhtio='$kukarow[yhtio]'
-            $and
-            AND alkupvm = '$chalkupvm'
-            AND loppupvm = '$chloppupvm'
-            AND minkpl = $chminkpl
-            AND maxkpl = $chmaxkpl
-            AND tunnus != '$trow[$i]'";
+      $aquery = "SELECT ytunnus
+                 FROM toimittajahinta
+                 WHERE yhtio='$kukarow[yhtio]'
+                 $and
+                 AND alkupvm   = '$chalkupvm'
+                 AND loppupvm  = '$chloppupvm'
+                 AND minkpl    = $chminkpl
+                 AND maxkpl    = $chmaxkpl
+                 AND tunnus   != '$trow[$i]'";
       $dsresult = mysql_query($aquery) OR pupe_error($aquery);
 
       if (mysql_num_rows($dsresult) > 0) {

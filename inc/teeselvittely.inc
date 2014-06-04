@@ -13,12 +13,12 @@ if (round($maara, 2) != 0) {
   // Kirjoitetaan lasku, jos sellaista ei ole vielä tehty
   if ($laskuid == 0) {
 
-    $query = "  INSERT into lasku set
-          yhtio     = '$yritirow[yhtio]',
-          tapvm     = '$tpv-$tpk-$tpp',
-          tila     = 'X',
-          laatija   = 'tiliote',
-          luontiaika   = now()";
+    $query = "INSERT into lasku set
+              yhtio      = '$yritirow[yhtio]',
+              tapvm      = '$tpv-$tpk-$tpp',
+              tila       = 'X',
+              laatija    = 'tiliote',
+              luontiaika = now()";
     $result = pupe_query($query);
     $laskuid = mysql_insert_id ($link);
 
@@ -31,22 +31,22 @@ if (round($maara, 2) != 0) {
     list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yritirow["oletus_rahatili"]);
 
     // Rahatili
-    $query = "  INSERT into tiliointi set
-                  yhtio         = '$yritirow[yhtio]',
-                  ltunnus       = '$laskuid',
-                  tilino         = '$yritirow[oletus_rahatili]',
-                  kustp          = '{$kustp_ins}',
-          kohde         = '{$kohde_ins}',
-          projekti       = '{$projekti_ins}',
-                  tapvm         = '$tpv-$tpk-$tpp',
-                  summa         = '$vastavienti',
-          summa_valuutassa  = '$vastavienti_valuutassa',
-          valkoodi       = '$tilinvaluutta',
-                  vero         = 0,
-                  lukko         = '',
-          selite         = 'Vastavienti rahatilille',
-                  laatija       = 'tiliote',
-                  laadittu       = now()";
+    $query = "INSERT into tiliointi set
+              yhtio            = '$yritirow[yhtio]',
+              ltunnus          = '$laskuid',
+              tilino           = '$yritirow[oletus_rahatili]',
+              kustp            = '{$kustp_ins}',
+              kohde            = '{$kohde_ins}',
+              projekti         = '{$projekti_ins}',
+              tapvm            = '$tpv-$tpk-$tpp',
+              summa            = '$vastavienti',
+              summa_valuutassa = '$vastavienti_valuutassa',
+              valkoodi         = '$tilinvaluutta',
+              vero             = 0,
+              lukko            = '',
+              selite           = 'Vastavienti rahatilille',
+              laatija          = 'tiliote',
+              laadittu         = now()";
     $result = pupe_query($query);
 
     $vastavienti       = 0;
@@ -76,43 +76,43 @@ if (round($maara, 2) != 0) {
       list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tiliointisaantorow["tilino2"], $tiliointisaantorow["kustp2"]);
 
       // Kulutili 2
-      $query = "  INSERT into tiliointi set
-                    yhtio         = '$yritirow[yhtio]',
-                    ltunnus       = '$laskuid',
-                    tilino         = '$tiliointisaantorow[tilino2]',
-                    kustp          = '{$kustp_ins}',
-            kohde         = '{$kohde_ins}',
-            projekti       = '{$projekti_ins}',
-                    tapvm         = '$tpv-$tpk-$tpp',
-                    summa         = $palkkio * -1,
-            summa_valuutassa   = round($palkkio * $kurssi * -1, 2),
-            valkoodi       = '$tilinvaluutta',
-                    vero         = 0,
-                    lukko         = '',
-            selite         = '$vientiselite',
-                    laatija       = 'tiliote',
-                    laadittu       = now()";
+      $query = "INSERT into tiliointi set
+                yhtio            = '$yritirow[yhtio]',
+                ltunnus          = '$laskuid',
+                tilino           = '$tiliointisaantorow[tilino2]',
+                kustp            = '{$kustp_ins}',
+                kohde            = '{$kohde_ins}',
+                projekti         = '{$projekti_ins}',
+                tapvm            = '$tpv-$tpk-$tpp',
+                summa            = $palkkio * -1,
+                summa_valuutassa = round($palkkio * $kurssi * -1, 2),
+                valkoodi         = '$tilinvaluutta',
+                vero             = 0,
+                lukko            = '',
+                selite           = '$vientiselite',
+                laatija          = 'tiliote',
+                laadittu         = now()";
       $result = pupe_query($query);
 
       list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tiliointisaantorow["tilino"], $tiliointisaantorow["kustp"]);
 
       // Kulutili 1
-      $query = "  INSERT into tiliointi set
-                    yhtio         = '$yritirow[yhtio]',
-                    ltunnus       = '$laskuid',
-                    tilino         = '$tiliointisaantorow[tilino]',
-                    kustp          = '{$kustp_ins}',
-            kohde         = '{$kohde_ins}',
-            projekti       = '{$projekti_ins}',
-                    tapvm         = '$tpv-$tpk-$tpp',
-                    summa         = $kanta * -1,
-            summa_valuutassa  = round($kanta * $kurssi * -1, 2),
-            valkoodi       = '$tilinvaluutta',
-                    vero         = 0,
-                    lukko         = '',
-            selite         = '$vientiselite',
-                    laatija       = 'tiliote',
-                    laadittu       = now()";
+      $query = "INSERT into tiliointi set
+                yhtio            = '$yritirow[yhtio]',
+                ltunnus          = '$laskuid',
+                tilino           = '$tiliointisaantorow[tilino]',
+                kustp            = '{$kustp_ins}',
+                kohde            = '{$kohde_ins}',
+                projekti         = '{$projekti_ins}',
+                tapvm            = '$tpv-$tpk-$tpp',
+                summa            = $kanta * -1,
+                summa_valuutassa = round($kanta * $kurssi * -1, 2),
+                valkoodi         = '$tilinvaluutta',
+                vero             = 0,
+                lukko            = '',
+                selite           = '$vientiselite',
+                laatija          = 'tiliote',
+                laadittu         = now()";
       $result = pupe_query($query);
     }
     else {
@@ -120,37 +120,37 @@ if (round($maara, 2) != 0) {
       list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tiliointisaantorow["tilino"], $tiliointisaantorow["kustp"]);
 
       // Kulutili
-      $query = "  INSERT into tiliointi set
-                    yhtio         = '$yritirow[yhtio]',
-                    ltunnus       = '$laskuid',
-                    tilino         = '$tiliointisaantorow[tilino]',
-                    kustp          = '{$kustp_ins}',
-            kohde         = '{$kohde_ins}',
-            projekti       = '{$projekti_ins}',
-                    tapvm         = '$tpv-$tpk-$tpp',
-                    summa         = $maara * -1,
-            summa_valuutassa   = $kohdm * -1,
-            valkoodi       = '$tilinvaluutta',
-                    vero         = 0,
-                    lukko         = '',
-            selite         = '$vientiselite',
-                    laatija       = 'tiliote',
-                    laadittu       = now()";
+      $query = "INSERT into tiliointi set
+                yhtio            = '$yritirow[yhtio]',
+                ltunnus          = '$laskuid',
+                tilino           = '$tiliointisaantorow[tilino]',
+                kustp            = '{$kustp_ins}',
+                kohde            = '{$kohde_ins}',
+                projekti         = '{$projekti_ins}',
+                tapvm            = '$tpv-$tpk-$tpp',
+                summa            = $maara * -1,
+                summa_valuutassa = $kohdm * -1,
+                valkoodi         = '$tilinvaluutta',
+                vero             = 0,
+                lukko            = '',
+                selite           = '$vientiselite',
+                laatija          = 'tiliote',
+                laadittu         = now()";
       $result = pupe_query($query);
     }
 
-        $query = "  UPDATE tiliotedata
-          SET kasitelty = now(),
-          tiliointitunnus = ".mysql_insert_id ($link)."
-          WHERE tunnus = '$tiliotedataid'";
+        $query = "UPDATE tiliotedata
+                  SET kasitelty = now(),
+                  tiliointitunnus = ".mysql_insert_id ($link)."
+                  WHERE tunnus    = '$tiliotedataid'";
     $dummyresult = pupe_query($query);
 
     if ($loydettiinko_sopiva_tili != '') {
-      $query = "  UPDATE tiliotedata
-            SET kuitattu = 'tiliote',
-            kuitattuaika = now()
-            WHERE yhtio = '$yritirow[yhtio]'
-            and perheid = '$tiliotedatape'";
+      $query = "UPDATE tiliotedata
+                SET kuitattu = 'tiliote',
+                kuitattuaika = now()
+                WHERE yhtio  = '$yritirow[yhtio]'
+                and perheid  = '$tiliotedatape'";
       $dummyresult = pupe_query($query);
     }
 
@@ -166,22 +166,22 @@ if (round($maara, 2) != 0) {
       list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yritirow["oletus_rahatili"]);
 
       // Rahatili
-      $query = "  INSERT into tiliointi set
-                    yhtio         = '$yritirow[yhtio]',
-                    ltunnus       = '$laskuid',
-                    tilino         = '$yritirow[oletus_rahatili]',
-                    kustp          = '{$kustp_ins}',
-            kohde         = '{$kohde_ins}',
-            projekti       = '{$projekti_ins}',
-                    tapvm         = '$tpv-$tpk-$tpp',
-                    summa         = '$maara',
-            summa_valuutassa  = '$kohdm',
-            valkoodi       = '$tilinvaluutta',
-                    vero         = 0,
-                    lukko         = '',
-            selite         = 'Vastavienti rahatilille',
-                    laatija       = 'tiliote',
-                    laadittu       = now()";
+      $query = "INSERT into tiliointi set
+                yhtio            = '$yritirow[yhtio]',
+                ltunnus          = '$laskuid',
+                tilino           = '$yritirow[oletus_rahatili]',
+                kustp            = '{$kustp_ins}',
+                kohde            = '{$kohde_ins}',
+                projekti         = '{$projekti_ins}',
+                tapvm            = '$tpv-$tpk-$tpp',
+                summa            = '$maara',
+                summa_valuutassa = '$kohdm',
+                valkoodi         = '$tilinvaluutta',
+                vero             = 0,
+                lukko            = '',
+                selite           = 'Vastavienti rahatilille',
+                laatija          = 'tiliote',
+                laadittu         = now()";
       $result = pupe_query($query);
 
       $vastavienti       = 0;

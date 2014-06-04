@@ -16,11 +16,11 @@ if (mysql_field_name($result, $i) == "maa") {
 
   $maa=$trow[$i];
 
-  $query = "  SELECT distinct koodi, nimi
-        FROM maat
-        WHERE nimi != ''
-        and koodi != '{$yhtiorow["maakoodi"]}'
-        ORDER BY koodi";
+  $query = "SELECT distinct koodi, nimi
+            FROM maat
+            WHERE nimi != ''
+            and koodi  != '{$yhtiorow["maakoodi"]}'
+            ORDER BY koodi";
   $vresult = mysql_query($query) or pupe_error($query);
 
   $ulos = "<td><select name='$nimi' onchange='submit();'>";
@@ -39,12 +39,12 @@ if (mysql_field_name($result, $i) == "maa") {
 }
 
 if (mysql_field_name($result, $i) == "kustp") {
-  $query = "  SELECT tunnus, nimi
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and kaytossa != 'E'
-        and tyyppi = 'K'
-        ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, nimi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and kaytossa != 'E'
+            and tyyppi    = 'K'
+            ORDER BY koodi+0, koodi, nimi";
   $vresult = mysql_query($query) or pupe_error($query);
   $ulos = "<td><select name='$nimi'><option value=' '>".t("Ei kustannuspaikkaa")."</option>";
 
@@ -60,12 +60,12 @@ if (mysql_field_name($result, $i) == "kustp") {
 }
 
 if (mysql_field_name($result, $i) == "kohde") {
-  $query = "  SELECT tunnus, nimi
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and kaytossa != 'E'
-        and tyyppi = 'O'
-        ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, nimi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and kaytossa != 'E'
+            and tyyppi    = 'O'
+            ORDER BY koodi+0, koodi, nimi";
   $vresult = mysql_query($query) or pupe_error($query);
   $ulos = "<td><select name='$nimi'><option value=' '>".t("Ei kohdetta")."</option>";
 
@@ -81,12 +81,12 @@ if (mysql_field_name($result, $i) == "kohde") {
 }
 
 if (mysql_field_name($result, $i) == "projekti") {
-  $query = "  SELECT tunnus, nimi
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and kaytossa != 'E'
-        and tyyppi = 'P'
-        ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, nimi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and kaytossa != 'E'
+            and tyyppi    = 'P'
+            ORDER BY koodi+0, koodi, nimi";
   $vresult = mysql_query($query) or pupe_error($query);
   $ulos = "<td><select name='$nimi'><option value=' '>".t("Ei projektia")."</option>";
 
@@ -105,9 +105,9 @@ if (mysql_field_name($result, $i) == "alv") {
 
   if($maa!="") {
     //  Onko tämä viranomaistuote? Näille voidaan antaa alv vaikkei meillä ole toimipaikkaa ko. maassa
-    $query = "  SELECT tunnus
-          FROM tuote
-          WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno' and tuotetyyppi='B'";
+    $query = "SELECT tunnus
+              FROM tuote
+              WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno' and tuotetyyppi='B'";
     $vresult = mysql_query($query) or pupe_error($query);
     if(mysql_num_rows($vresult)==1) {
       $lisa="lista";

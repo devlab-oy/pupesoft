@@ -250,11 +250,11 @@ if ($handle = opendir($verkkolaskuvirheet_vaarat)) {
 
           if ($laskun_toimitunnus > 0) {
             // 0 etsitään toimittaja tunnuksella
-            $query  = "  SELECT *
-                  FROM toimi
-                  WHERE tunnus = '{$laskun_toimitunnus}'
-                  and yhtio = '{$kukarow["yhtio"]}'
-                  and tyyppi != 'P'";
+            $query  = "SELECT *
+                       FROM toimi
+                       WHERE tunnus  = '{$laskun_toimitunnus}'
+                       and yhtio     = '{$kukarow["yhtio"]}'
+                       and tyyppi   != 'P'";
             $result = pupe_query($query);
 
             while ($trow = mysql_fetch_assoc($result)) {
@@ -264,12 +264,12 @@ if ($handle = opendir($verkkolaskuvirheet_vaarat)) {
 
           if (!isset($trow) and $laskuttajan_ovt != "") {
             // 1 etsitään toimittaja ovttunnuksella
-            $query  = "  SELECT *
-                  FROM toimi
-                  WHERE ovttunnus = '$laskuttajan_ovt'
-                  and ovttunnus not in ('','0')
-                  and yhtio = '{$kukarow["yhtio"]}'
-                  and tyyppi != 'P'";
+            $query  = "SELECT *
+                       FROM toimi
+                       WHERE ovttunnus  = '$laskuttajan_ovt'
+                       and ovttunnus    not in ('','0')
+                       and yhtio        = '{$kukarow["yhtio"]}'
+                       and tyyppi      != 'P'";
             $result = pupe_query($query);
 
             while ($trow = mysql_fetch_assoc($result)) {
@@ -281,12 +281,12 @@ if ($handle = opendir($verkkolaskuvirheet_vaarat)) {
             // 2 etsitään toimittaja ovt-tunnuksella ilman tarkenteita
             $yovt = substr($laskuttajan_ovt, 0, 12); // Poistetaan mahdolliset ovt-tunnuksen tarkenteet
 
-            $query  = "  SELECT *
-                  FROM toimi
-                  WHERE ovttunnus = '$yovt'
-                  and ovttunnus not in ('','0')
-                  and yhtio = '{$kukarow["yhtio"]}'
-                  and tyyppi != 'P'";
+            $query  = "SELECT *
+                       FROM toimi
+                       WHERE ovttunnus  = '$yovt'
+                       and ovttunnus    not in ('','0')
+                       and yhtio        = '{$kukarow["yhtio"]}'
+                       and tyyppi      != 'P'";
             $result = pupe_query($query);
 
             while ($trow = mysql_fetch_assoc($result)) {
@@ -296,12 +296,12 @@ if ($handle = opendir($verkkolaskuvirheet_vaarat)) {
 
           if (!isset($trow) and $laskuttajan_vat != "") {
             // 3 etsitään toimittaja vat-numerolla
-            $query  = "  SELECT *
-                  FROM toimi
-                  WHERE ovttunnus = '$laskuttajan_vat'
-                  and ovttunnus not in ('','0')
-                  and yhtio = '{$kukarow["yhtio"]}'
-                  and tyyppi != 'P'";
+            $query  = "SELECT *
+                       FROM toimi
+                       WHERE ovttunnus  = '$laskuttajan_vat'
+                       and ovttunnus    not in ('','0')
+                       and yhtio        = '{$kukarow["yhtio"]}'
+                       and tyyppi      != 'P'";
             $result = pupe_query($query);
 
             while ($trow = mysql_fetch_assoc($result)) {
@@ -311,12 +311,12 @@ if ($handle = opendir($verkkolaskuvirheet_vaarat)) {
 
           if (!isset($trow) and $laskuttajan_vat != "") {
             // 4 etsitään toimittaja vat-numerolla
-            $query  = "  SELECT *
-                  FROM toimi
-                  WHERE ytunnus = '$laskuttajan_vat'
-                  and ytunnus not in ('','0')
-                  and yhtio = '{$kukarow["yhtio"]}'
-                  and tyyppi != 'P'";
+            $query  = "SELECT *
+                       FROM toimi
+                       WHERE ytunnus  = '$laskuttajan_vat'
+                       and ytunnus    not in ('','0')
+                       and yhtio      = '{$kukarow["yhtio"]}'
+                       and tyyppi    != 'P'";
             $result = pupe_query($query);
 
             while ($trow = mysql_fetch_assoc($result)) {
@@ -329,12 +329,12 @@ if ($handle = opendir($verkkolaskuvirheet_vaarat)) {
             $yovt1 = substr(str_replace("0037", "", $laskuttajan_ovt), 0, 8); // mahdollisella etunollalla
             $yovt2 = (int) $yovt1; // ilman etunollaa
 
-            $query  = "  SELECT *
-                  FROM toimi
-                  WHERE ytunnus in ('$yovt1', '$yovt2')
-                  and ytunnus not in ('','0')
-                  and yhtio = '{$kukarow["yhtio"]}'
-                  and tyyppi != 'P'";
+            $query  = "SELECT *
+                       FROM toimi
+                       WHERE ytunnus  in ('$yovt1', '$yovt2')
+                       and ytunnus    not in ('','0')
+                       and yhtio      = '{$kukarow["yhtio"]}'
+                       and tyyppi    != 'P'";
             $result = pupe_query($query);
 
             while ($trow = mysql_fetch_assoc($result)) {
@@ -347,12 +347,12 @@ if ($handle = opendir($verkkolaskuvirheet_vaarat)) {
             $intvat2 = (int) $intvat; // ilman etunollaa
 
             // 6 etsitään toimittaja vat-numerolla ilman FI-etuliitettä
-            $query  = "  SELECT *
-                  FROM toimi
-                  WHERE REPLACE(REPLACE(REPLACE(ytunnus,'FI',''),'fi',''),'-','') in ('$intvat', '$intvat2')
-                  and ytunnus not in ('','0')
-                  and yhtio = '{$kukarow["yhtio"]}'
-                  and tyyppi != 'P'";
+            $query  = "SELECT *
+                       FROM toimi
+                       WHERE REPLACE(REPLACE(REPLACE(ytunnus,'FI',''),'fi',''),'-','') in ('$intvat', '$intvat2')
+                       and ytunnus  not in ('','0')
+                       and yhtio    = '{$kukarow["yhtio"]}'
+                       and tyyppi  != 'P'";
             $result = pupe_query($query);
 
             while ($trow = mysql_fetch_assoc($result)) {
@@ -362,11 +362,11 @@ if ($handle = opendir($verkkolaskuvirheet_vaarat)) {
 
           if (!isset($trow) and $laskuttajan_toimittajanumero != "") {
             // 9 etsitään toimittaja teccomi-specific
-            $query = "  SELECT *
-                  FROM toimi
-                  WHERE yhtio = '{$kukarow["yhtio"]}'
-                  and toimittajanro = '$laskuttajan_toimittajanumero'
-                  and tyyppi != 'P'";
+            $query = "SELECT *
+                      FROM toimi
+                      WHERE yhtio        = '{$kukarow["yhtio"]}'
+                      and toimittajanro  = '$laskuttajan_toimittajanumero'
+                      and tyyppi        != 'P'";
             $result = pupe_query($query);
 
             while ($trow = mysql_fetch_assoc($result)) {
@@ -376,12 +376,12 @@ if ($handle = opendir($verkkolaskuvirheet_vaarat)) {
 
           if (!isset($trow) and $laskuttajan_nimi != "") {
             // 7 etsitään toimittaja nimellä
-            $query = "  SELECT *
-                  FROM toimi
-                  WHERE yhtio = '{$kukarow["yhtio"]}'
-                  and nimi = '$laskuttajan_nimi'
-                  and nimi not in ('','0')
-                  and tyyppi != 'P'";
+            $query = "SELECT *
+                      FROM toimi
+                      WHERE yhtio  = '{$kukarow["yhtio"]}'
+                      and nimi     = '$laskuttajan_nimi'
+                      and nimi     not in ('','0')
+                      and tyyppi  != 'P'";
             $result = pupe_query($query);
 
             while ($trow = mysql_fetch_assoc($result)) {
@@ -394,12 +394,12 @@ if ($handle = opendir($verkkolaskuvirheet_vaarat)) {
             $laskuttajan_nimi = str_replace(" ", "", $laskuttajan_nimi);
 
             // 8 etsitään IBAN-numerolla. (Maventa special: Jos laskulta puuttuu ytunnus, niin IBAN-työnnetaan laskun nimi-kenttään...)
-            $query = "  SELECT *
-                  FROM toimi
-                  WHERE yhtio = '{$kukarow["yhtio"]}'
-                  and ultilno = '$laskuttajan_nimi'
-                  and ultilno not in ('','0')
-                  and tyyppi != 'P'";
+            $query = "SELECT *
+                      FROM toimi
+                      WHERE yhtio  = '{$kukarow["yhtio"]}'
+                      and ultilno  = '$laskuttajan_nimi'
+                      and ultilno  not in ('','0')
+                      and tyyppi  != 'P'";
             $result = pupe_query($query);
 
             while ($trow = mysql_fetch_assoc($result)) {
@@ -416,20 +416,20 @@ if ($handle = opendir($verkkolaskuvirheet_vaarat)) {
             );
 
             foreach ($poikkeus_arvot as $poikkeus_sarake => $poikkeus_arvo) {
-              $query = "  SELECT *
-                    FROM vaihtoehtoiset_verkkolaskutunnukset
-                    WHERE yhtio    = '{$kukarow["yhtio"]}'
-                    AND kohde_sarake = '{$poikkeus_sarake}'
-                    AND arvo      = '{$poikkeus_arvo}'";
+              $query = "SELECT *
+                        FROM vaihtoehtoiset_verkkolaskutunnukset
+                        WHERE yhtio      = '{$kukarow["yhtio"]}'
+                        AND kohde_sarake = '{$poikkeus_sarake}'
+                        AND arvo         = '{$poikkeus_arvo}'";
               $result = pupe_query($query);
               $poikkeus = mysql_fetch_assoc($result);
 
               if (!empty($poikkeus)) {
-                $query = "  SELECT *
-                      FROM toimi
-                      WHERE yhtio = '{$kukarow["yhtio"]}'
-                      and tunnus  = '{$poikkeus['toimi_tunnus']}'
-                      and tyyppi != 'P'";
+                $query = "SELECT *
+                          FROM toimi
+                          WHERE yhtio  = '{$kukarow["yhtio"]}'
+                          and tunnus   = '{$poikkeus['toimi_tunnus']}'
+                          and tyyppi  != 'P'";
                 $result = pupe_query($query);
 
                 if (mysql_num_rows($result) == 1) {

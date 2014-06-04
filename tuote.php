@@ -1541,40 +1541,29 @@ if ($tee == 'Z') {
           $toimipaikkarajaus = "";
         }
 
-        $query = "SELECT tilausrivi.yhtio,
-                  tilausrivi.tuoteno,
-                  tilausrivi.rivihinta,
-                  IF(tilausrivi.laskutettuaika >= DATE_SUB(now(), INTERVAL 30 DAY), tilausrivi.rivihinta,0) summa30,
-                  IF(tilausrivi.laskutettuaika >= DATE_SUB(now(), INTERVAL 30 DAY), tilausrivi.kate,0) kate30,
-                  IF(tilausrivi.laskutettuaika >= DATE_SUB(now(), INTERVAL 30 DAY), tilausrivi.kpl,0) kpl30,
-                  IF(tilausrivi.laskutettuaika >= DATE_SUB(now(), INTERVAL 90 DAY), tilausrivi.rivihinta,0) summa90,
-                  IF(tilausrivi.laskutettuaika >= DATE_SUB(now(), INTERVAL 90 DAY), tilausrivi.kate,0) kate90,
-                  IF(tilausrivi.laskutettuaika >= DATE_SUB(now(), INTERVAL 90 DAY), tilausrivi.kpl,0) kpl90,
-                  IF(YEAR(tilausrivi.laskutettuaika) = '{$taavuosi}', tilausrivi.rivihinta,0) summaVA,
-                  IF(YEAR(tilausrivi.laskutettuaika) = '{$taavuosi}', tilausrivi.kate,0) kateVA,
-                  IF(YEAR(tilausrivi.laskutettuaika) = '{$taavuosi}', tilausrivi.kpl,0) kplVA,
-                  IF(YEAR(tilausrivi.laskutettuaika) = '{$edvuosi}', tilausrivi.rivihinta,0) summaEDV,
-                  IF(YEAR(tilausrivi.laskutettuaika) = '{$edvuosi}', tilausrivi.kate,0) kateEDV,
-                  IF(YEAR(tilausrivi.laskutettuaika) = '{$edvuosi}', tilausrivi.kpl,0) kplEDV
+        $query = "SELECT tilausrivi.tuoteno,
+                  ROUND(SUM(IF(tilausrivi.laskutettuaika >= DATE_SUB(now(), INTERVAL 30 DAY), tilausrivi.rivihinta,0)), {$yhtiorow['hintapyoristys']}) summa30,
+                  ROUND(SUM(IF(tilausrivi.laskutettuaika >= DATE_SUB(now(), INTERVAL 30 DAY), tilausrivi.kate,0)), {$yhtiorow['hintapyoristys']}) kate30,
+                  SUM(IF(tilausrivi.laskutettuaika >= DATE_SUB(now(), INTERVAL 30 DAY), tilausrivi.kpl, 0)) kpl30,
+                  ROUND(SUM(IF(tilausrivi.laskutettuaika >= DATE_SUB(now(), INTERVAL 90 DAY), tilausrivi.rivihinta, 0)), {$yhtiorow['hintapyoristys']}) summa90,
+                  ROUND(SUM(IF(tilausrivi.laskutettuaika >= DATE_SUB(now(), INTERVAL 90 DAY), tilausrivi.kate, 0)), {$yhtiorow['hintapyoristys']}) kate90,
+                  SUM(IF(tilausrivi.laskutettuaika >= DATE_SUB(now(), INTERVAL 90 DAY), tilausrivi.kpl, 0)) kpl90,
+                  ROUND(SUM(IF(YEAR(tilausrivi.laskutettuaika) = '{$taavuosi}', tilausrivi.rivihinta, 0)), {$yhtiorow['hintapyoristys']})  summaVA,
+                  ROUND(SUM(IF(YEAR(tilausrivi.laskutettuaika) = '{$taavuosi}', tilausrivi.kate, 0)), {$yhtiorow['hintapyoristys']}) kateVA,
+                  SUM(IF(YEAR(tilausrivi.laskutettuaika) = '{$taavuosi}', tilausrivi.kpl, 0))  kplVA,
+                  ROUND(SUM(IF(YEAR(tilausrivi.laskutettuaika) = '{$edvuosi}', tilausrivi.rivihinta, 0)), {$yhtiorow['hintapyoristys']}) summaEDV,
+                  ROUND(SUM(IF(YEAR(tilausrivi.laskutettuaika) = '{$edvuosi}', tilausrivi.kate, 0)), {$yhtiorow['hintapyoristys']}) kateEDV,
+                  SUM(IF(YEAR(tilausrivi.laskutettuaika) = '{$edvuosi}', tilausrivi.kpl, 0)) kplEDV
                   FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika)
                   {$toimipaikkarajaus}
-                  WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                  AND tilausrivi.tyyppi = 'L'
-                  AND tilausrivi.tuoteno = '{$tuoteno}'
+                  WHERE tilausrivi.yhtio        = '{$kukarow['yhtio']}'
+                  AND tilausrivi.tyyppi         = 'L'
+                  AND tilausrivi.tuoteno        = '{$tuoteno}'
                   AND tilausrivi.laskutettuaika >= '{$edvuosi}-01-01'";
+
+
         $result3 = pupe_query($query);
-
-        $parametrit = array(
-          "result" => $result3,
-          "sum" => array("summa30", "kate30", "kpl30", "summa90", "kate90", "kpl90", "summaVA", "kateVA", "kplVA", "summaEDV", "kateEDV", "kplEDV"),
-          "group_by" => array("yhtio"),
-          "order_by" => array(),
-          "select" => array("rivihinta"),
-          "lisaa_kulut" => array("kate30", "kate90", "kateVA", "kateEDV")
-        );
-
-        $lrow = tilausrivin_tarkistus_riveittain($parametrit);
-        $lrow = $lrow[0];
+        $lrow = mysql_fetch_assoc($result3);
 
         echo "<tr>
             <th>".t("Myynti").":</th>
@@ -1596,25 +1585,71 @@ if ($tee == 'Z') {
             <td align='right' nowrap>$lrow[kplVA]  ".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."</td>
             <td align='right' nowrap>$lrow[kplEDV] ".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."</td></tr>";
 
+
+            if ($lrow['summa30'] <= 0) {
+              $kate30 = '0.00';
+            }
+            else{
+              $kate30 = round(kate_kuluineen($lrow['tuoteno'], $lrow['summa30'], $lrow['kate30']), 2);
+            }
+
+            if ($lrow['summa90'] <= 0) {
+              $kate90 = '0.00';
+            }
+            else{
+              $kate90 = round(kate_kuluineen($lrow['tuoteno'], $lrow['summa90'], $lrow['kate90']), 2);
+            }
+
+            if ($lrow['summaVA'] <= 0) {
+              $kateVA = '0.00';
+            }
+            else{
+              $kateVA = round(kate_kuluineen($lrow['tuoteno'], $lrow['summaVA'], $lrow['kateVA']), 2);
+            }
+
+            if ($lrow['summaEDV'] <= 0) {
+              $kateEDV = '0.00';
+            }
+            else{
+              $kateEDV = round(kate_kuluineen($lrow['tuoteno'], $lrow['summaEDV'], $lrow['kateEDV']), 2) ;
+            }
+
+
         echo "<tr><th align='left'>".t("Kate").":</th>
-            <td align='right' nowrap>$lrow[kate30] $yhtiorow[valkoodi]</td>
-            <td align='right' nowrap>$lrow[kate90] $yhtiorow[valkoodi]</td>
-            <td align='right' nowrap>$lrow[kateVA] $yhtiorow[valkoodi]</td>
-            <td align='right' nowrap>$lrow[kateEDV] $yhtiorow[valkoodi]</td></tr>";
+            <td align='right' nowrap>$kate30 $yhtiorow[valkoodi]</td>
+            <td align='right' nowrap>$kate90 $yhtiorow[valkoodi]</td>
+            <td align='right' nowrap>$kateVA $yhtiorow[valkoodi]</td>
+            <td align='right' nowrap>$kateEDV $yhtiorow[valkoodi]</td></tr>";
 
         echo "<tr><th align='left'>".t("Katepros").":</th>";
 
-        if ($lrow["summa30"] > 0)
-          $kate30pros = round($lrow["kate30"]/$lrow["summa30"]*100,2);
+        if ($lrow["summa30"] > 0) {
+          $kate30pros = round($kate30/$lrow["summa30"]*100,2);
+        }
+        else{
+         $kate30pros = '0.00';
+        }
 
-        if ($lrow["summa90"] > 0)
-          $kate90pros = round($lrow["kate90"]/$lrow["summa90"]*100,2);
+        if ($lrow["summa90"] > 0) {
+          $kate90pros = round($kate90/$lrow["summa90"]*100,2);
+        }
+        else{
+          $kate90pros = '0.00';
+        }
 
-        if ($lrow["summaVA"] > 0)
-          $kateVApros = round($lrow["kateVA"]/$lrow["summaVA"]*100,2);
+        if ($lrow["summaVA"] > 0) {
+          $kateVApros = round($kateVA/$lrow["summaVA"]*100,2);
+        }
+        else{
+          $kateVApros = '0.00';
+        }
 
-        if ($lrow["summaEDV"] > 0)
-          $kateEDVpros = round($lrow["kateEDV"]/$lrow["summaEDV"]*100,2);
+        if ($lrow["summaEDV"] > 0) {
+          $kateEDVpros = round($kateEDV/$lrow["summaEDV"]*100,2);
+        }
+        else{
+         $kateEDVpros = '0.00';
+        }
 
         echo "<td align='right' nowrap>$kate30pros %</td>";
         echo "<td align='right' nowrap>$kate90pros %</td>";

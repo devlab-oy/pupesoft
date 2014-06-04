@@ -21,11 +21,11 @@ if ($tee == 'tulosta_sscc') {
   $kappalemaara = trim($kappalemaara);
   $kirjoitin = trim($kirjoitin);
 
-  $query = "  SELECT komento
-        FROM kirjoittimet
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tunnus = '{$kirjoitin}'
-        ORDER BY kirjoitin";
+  $query = "SELECT komento
+            FROM kirjoittimet
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus  = '{$kirjoitin}'
+            ORDER BY kirjoitin";
   $kires = pupe_query($query);
   $kirow = mysql_fetch_assoc($kires);
   $komento = $kirow['komento'];
@@ -46,10 +46,10 @@ if ($tee == 'tulosta_sscc') {
 
       $suuntalavan_tunnus = (int) $suuntalavan_tunnus;
 
-      $query = "  SELECT sscc
-            FROM suuntalavat
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = '{$suuntalavan_tunnus}'";
+      $query = "SELECT sscc
+                FROM suuntalavat
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$suuntalavan_tunnus}'";
       $sscc_fetch_res = pupe_query($query);
       $sscc_fetch_row = mysql_fetch_assoc($sscc_fetch_res);
 
@@ -102,12 +102,12 @@ if ($tee == '' and (!isset($suuntalavat_ei_kayttoliittymaa) or $suuntalavat_ei_k
   echo "<tr><th>",t("Valitse tulostin"),"</th><td><select name='kirjoitin'>";
   echo "<option value=''>",t("Ei kirjoitinta"),"</option>";
 
-  $query = "  SELECT *
-        FROM kirjoittimet
-        WHERE yhtio  = '{$kukarow['yhtio']}'
-        AND komento != 'email'
-        AND komento != 'edi'
-        ORDER BY kirjoitin";
+  $query = "SELECT *
+            FROM kirjoittimet
+            WHERE yhtio  = '{$kukarow['yhtio']}'
+            AND komento != 'email'
+            AND komento != 'edi'
+            ORDER BY kirjoitin";
   $kires = mysql_query($query) or pupe_error($query);
 
   while ($kirow = mysql_fetch_assoc($kires)) {

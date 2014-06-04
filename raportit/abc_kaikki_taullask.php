@@ -165,13 +165,13 @@ if ($aja == "AJA" and isset($ajoon)) {
     $luokkalisa = " and luokka = '$luokka' ";
   }
 
-  $query = "  SELECT
-        distinct luokka
-        FROM abc_aputaulu
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tyyppi  = '$abcchar'
-        $luokkalisa
-        ORDER BY luokka";
+  $query = "SELECT
+            distinct luokka
+            FROM abc_aputaulu
+            WHERE yhtio = '$kukarow[yhtio]'
+            and tyyppi  = '$abcchar'
+            $luokkalisa
+            ORDER BY luokka";
   $luokkares = pupe_query($query);
 
   // nämä määrittää kumpaan tauluun Joinataan, asiakas vai tuote
@@ -191,86 +191,86 @@ if ($aja == "AJA" and isset($ajoon)) {
   while ($luokkarow = mysql_fetch_assoc($luokkares)) {
 
     //kauden yhteismyynnit ja katteet
-    $query = "  SELECT
-          sum(abc_aputaulu.summa) yhtmyynti,
-          sum(abc_aputaulu.kate) yhtkate
-          FROM abc_aputaulu
-          {$analyysin_join}
-          WHERE abc_aputaulu.yhtio = '{$kukarow["yhtio"]}'
-          and abc_aputaulu.tyyppi = '$abcchar'
-          and abc_aputaulu.luokka = '{$luokkarow["luokka"]}'
-          $abc_lisa
-          $lisa
-          $saapumispvmlisa";
+    $query = "SELECT
+              sum(abc_aputaulu.summa) yhtmyynti,
+              sum(abc_aputaulu.kate) yhtkate
+              FROM abc_aputaulu
+              {$analyysin_join}
+              WHERE abc_aputaulu.yhtio = '{$kukarow["yhtio"]}'
+              and abc_aputaulu.tyyppi  = '$abcchar'
+              and abc_aputaulu.luokka  = '{$luokkarow["luokka"]}'
+              $abc_lisa
+              $lisa
+              $saapumispvmlisa";
     $sumres = pupe_query($query);
     $sumrow = mysql_fetch_assoc($sumres);
 
     $sumrow['yhtkate'] = (float) $sumrow['yhtkate'];
     $sumrow['yhtmyynti'] = (float) $sumrow['yhtmyynti'];
 
-    $query = "  SELECT abc_aputaulu.*,
-          if ({$sumrow["yhtkate"]} = 0, 0, abc_aputaulu.kate / {$sumrow["yhtkate"]} * 100) kateosuus,
-          abc_aputaulu.katepros * abc_aputaulu.varaston_kiertonop kate_kertaa_kierto,
-          abc_aputaulu.kate - abc_aputaulu.kustannus_yht total
-          FROM abc_aputaulu
-          {$analyysin_join}
-          WHERE abc_aputaulu.yhtio = '{$kukarow["yhtio"]}'
-          and abc_aputaulu.tyyppi  = '$abcchar'
-          and abc_aputaulu.luokka  = '{$luokkarow["luokka"]}'
-          $saapumispvmlisa
-          $abc_lisa
-          $lisa
-          $hav
-          ORDER BY $abcwhat desc";
+    $query = "SELECT abc_aputaulu.*,
+              if ({$sumrow["yhtkate"]} = 0, 0, abc_aputaulu.kate / {$sumrow["yhtkate"]} * 100) kateosuus,
+              abc_aputaulu.katepros * abc_aputaulu.varaston_kiertonop kate_kertaa_kierto,
+              abc_aputaulu.kate - abc_aputaulu.kustannus_yht total
+              FROM abc_aputaulu
+              {$analyysin_join}
+              WHERE abc_aputaulu.yhtio = '{$kukarow["yhtio"]}'
+              and abc_aputaulu.tyyppi  = '$abcchar'
+              and abc_aputaulu.luokka  = '{$luokkarow["luokka"]}'
+              $saapumispvmlisa
+              $abc_lisa
+              $lisa
+              $hav
+              ORDER BY $abcwhat desc";
     $res = pupe_query($query);
 
     while ($row = mysql_fetch_assoc($res)) {
 
       if (!$asiakasanalyysi) {
-        $query = "  SELECT group_concat(distinct toim_tuoteno) toim_tuoteno
-              FROM tuotteen_toimittajat
-              WHERE tuoteno = '$row[tuoteno]'
-              and yhtio = '$kukarow[yhtio]'";
+        $query = "SELECT group_concat(distinct toim_tuoteno) toim_tuoteno
+                  FROM tuotteen_toimittajat
+                  WHERE tuoteno = '$row[tuoteno]'
+                  and yhtio     = '$kukarow[yhtio]'";
         $tuoresult = pupe_query($query);
         $tuorow = mysql_fetch_assoc($tuoresult);
 
-        $query = "  SELECT distinct myyja, nimi
-              FROM kuka
-              WHERE yhtio='$kukarow[yhtio]'
-              AND myyja = '$row[myyjanro]'
-              AND myyja > 0
-              ORDER BY myyja";
+        $query = "SELECT distinct myyja, nimi
+                  FROM kuka
+                  WHERE yhtio='$kukarow[yhtio]'
+                  AND myyja = '$row[myyjanro]'
+                  AND myyja > 0
+                  ORDER BY myyja";
         $myyjaresult = pupe_query($query);
         $myyjarow = mysql_fetch_assoc($myyjaresult);
 
-        $query = "  SELECT distinct myyja, nimi
-              FROM kuka
-              WHERE yhtio='$kukarow[yhtio]'
-              AND myyja = '$row[ostajanro]'
-              AND myyja > 0
-              ORDER BY myyja";
+        $query = "SELECT distinct myyja, nimi
+                  FROM kuka
+                  WHERE yhtio='$kukarow[yhtio]'
+                  AND myyja = '$row[ostajanro]'
+                  AND myyja > 0
+                  ORDER BY myyja";
         $ostajaresult = pupe_query($query);
         $ostajarow = mysql_fetch_assoc($ostajaresult);
       }
 
       //haetaan varastopaikat ja saldot
       if ($asiakasanalyysi) {
-        $query = "  SELECT ytunnus, nimi
-              FROM asiakas
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tunnus = '$row[tuoteno]'";
+        $query = "SELECT ytunnus, nimi
+                  FROM asiakas
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and tunnus  = '$row[tuoteno]'";
       }
       elseif ($paikoittain == 'JOO') {
-        $query = "  SELECT concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, saldo
-              from tuotepaikat
-              where tuoteno   = '$row[tuoteno]'
-              and yhtio     = '$kukarow[yhtio]'";
+        $query = "SELECT concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, saldo
+                  from tuotepaikat
+                  where tuoteno = '$row[tuoteno]'
+                  and yhtio     = '$kukarow[yhtio]'";
       }
       else {
-        $query = "  SELECT sum(saldo) saldo
-              from tuotepaikat
-              where tuoteno  = '$row[tuoteno]'
-              and yhtio     = '$kukarow[yhtio]'";
+        $query = "SELECT sum(saldo) saldo
+                  from tuotepaikat
+                  where tuoteno = '$row[tuoteno]'
+                  and yhtio     = '$kukarow[yhtio]'";
 
       }
       $paikresult = pupe_query($query);

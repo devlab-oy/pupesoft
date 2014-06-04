@@ -441,40 +441,40 @@ if ($tee == 'GO') {
           }
 
           // poistetaan vanhat kuvat ja ...
-          $query = "  DELETE FROM liitetiedostot
-                WHERE yhtio       = '$kukarow[yhtio]'
-                and liitos         = '$taulu'
-                and liitostunnus     = '$apurow[tunnus]'
-                and kayttotarkoitus   = '$kayttotarkoitus'
-                and filename      = '$apukuva'";
+          $query = "DELETE FROM liitetiedostot
+                    WHERE yhtio         = '$kukarow[yhtio]'
+                    and liitos          = '$taulu'
+                    and liitostunnus    = '$apurow[tunnus]'
+                    and kayttotarkoitus = '$kayttotarkoitus'
+                    and filename        = '$apukuva'";
           $delresult = pupe_query($query);
 
           // lis‰t‰‰n uusi
-          $query = "  INSERT INTO liitetiedostot SET
-                yhtio          = '$kukarow[yhtio]',
-                liitos         = '$taulu',
-                liitostunnus     = '$apurow[tunnus]',
-                data           = '$data',
-                selite         = '$kuvaselite',
-                kieli        = '$mikakieli',
-                filename       = '$apukuva',
-                filesize       = '$filesize',
-                filetype       = '$filetype',
-                image_width      = '$image_width',
-                image_height    = '$image_height',
-                image_bits      = '$image_bits',
-                image_channels    = '$image_channels',
-                kayttotarkoitus    = '$kayttotarkoitus',
-                jarjestys      = '$jarjestys',
-                laatija        = '$kukarow[kuka]',
-                luontiaika      = now()";
+          $query = "INSERT INTO liitetiedostot SET
+                    yhtio           = '$kukarow[yhtio]',
+                    liitos          = '$taulu',
+                    liitostunnus    = '$apurow[tunnus]',
+                    data            = '$data',
+                    selite          = '$kuvaselite',
+                    kieli           = '$mikakieli',
+                    filename        = '$apukuva',
+                    filesize        = '$filesize',
+                    filetype        = '$filetype',
+                    image_width     = '$image_width',
+                    image_height    = '$image_height',
+                    image_bits      = '$image_bits',
+                    image_channels  = '$image_channels',
+                    kayttotarkoitus = '$kayttotarkoitus',
+                    jarjestys       = '$jarjestys',
+                    laatija         = '$kukarow[kuka]',
+                    luontiaika      = now()";
           $insre = pupe_query($query);
 
-          $query = "  UPDATE $taulu
-                SET muutospvm = now(),
-                muuttaja = '$kukarow[kuka]'
-                WHERE yhtio = '$kukarow[yhtio]'
-                and tunnus = '$apurow[tunnus]'";
+          $query = "UPDATE $taulu
+                    SET muutospvm = now(),
+                    muuttaja    = '$kukarow[kuka]'
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    and tunnus  = '$apurow[tunnus]'";
           $insre = pupe_query($query);
 
           echo "$apurow[tuoteno] ";
@@ -503,10 +503,10 @@ if ($tee == 'DUMPPAA' and $mitkadumpataan != '') {
     exit;
   }
 
-  $query = "  SELECT *
-        FROM liitetiedostot
-        WHERE yhtio = '$kukarow[yhtio]'
-        and liitos = '$mitkadumpataan'";
+  $query = "SELECT *
+            FROM liitetiedostot
+            WHERE yhtio = '$kukarow[yhtio]'
+            and liitos  = '$mitkadumpataan'";
   $result = pupe_query($query);
 
   $dumpattuja = 0;

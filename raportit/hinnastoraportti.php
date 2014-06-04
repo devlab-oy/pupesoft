@@ -48,15 +48,15 @@ if ($raptee == "AJA") {
     $order_extra = 'tuoteno';
   }
 
-  $productquery = "  SELECT tuote.tuoteno, tuote.try, tuote.nimitys, tuote.kehahin, tuote.myyntihinta, tuote.eankoodi
-            $jarjestys_sel
-            FROM tuote
-            $jarjestys_join
-            WHERE tuote.yhtio = '$kukarow[yhtio]'
-            AND tuote.hinnastoon != 'E'
-            AND tuote.tuotetyyppi not in ('A','B')
-            AND (tuote.status != 'P' or (SELECT sum(tuotepaikat.saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
-            ORDER BY $order_extra";
+  $productquery = "SELECT tuote.tuoteno, tuote.try, tuote.nimitys, tuote.kehahin, tuote.myyntihinta, tuote.eankoodi
+                   $jarjestys_sel
+                   FROM tuote
+                   $jarjestys_join
+                   WHERE tuote.yhtio      = '$kukarow[yhtio]'
+                   AND tuote.hinnastoon  != 'E'
+                   AND tuote.tuotetyyppi  not in ('A','B')
+                   AND (tuote.status != 'P' or (SELECT sum(tuotepaikat.saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+                   ORDER BY $order_extra";
   $productqueryresult = mysql_query($productquery) or pupe_error($productquery);
 
   $showprod = TRUE;

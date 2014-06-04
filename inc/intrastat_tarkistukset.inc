@@ -19,11 +19,11 @@ if ($row["tullinimike1"] == '' or $row["tullinimike1"] == 0) {
   }
 }
 elseif ($row["tullinimike1"] != "") {
-  $query = "  SELECT cn
-        FROM tullinimike
-        WHERE cn = '$row[tullinimike1]'
-        AND kieli = '$yhtiorow[kieli]'
-        AND cn != ''";
+  $query = "SELECT cn
+            FROM tullinimike
+            WHERE cn   = '$row[tullinimike1]'
+            AND kieli  = '$yhtiorow[kieli]'
+            AND cn    != ''";
   $tulserul = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($tulserul) == 0) {
@@ -62,9 +62,9 @@ elseif ($row["alkuperamaa"] == $yhtiorow["maa"] and $tapa != "vienti") {
   }
 }
 else {
-  $query = "  SELECT distinct koodi
-        FROM maat
-        WHERE koodi = '$row[alkuperamaa]'";
+  $query = "SELECT distinct koodi
+            FROM maat
+            WHERE koodi = '$row[alkuperamaa]'";
   $maaresult = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($maaresult) == 0) {
@@ -79,13 +79,13 @@ else {
 
 
 // k‰yd‰‰n l‰pi kaikki laskut
-$query = "  SELECT lasku.*,
-      if(lasku.maa_lahetys = '', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
-      if(lasku.maa_maara = '', lasku.toim_maa, lasku.maa_maara) maamaara
-       FROM lasku
-      LEFT JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto)
-      WHERE lasku.yhtio = '$kukarow[yhtio]'
-      AND lasku.tunnus in ($row[kaikkitunnukset])";
+$query = "SELECT lasku.*,
+          if(lasku.maa_lahetys = '', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
+          if(lasku.maa_maara = '', lasku.toim_maa, lasku.maa_maara) maamaara
+           FROM lasku
+          LEFT JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto)
+          WHERE lasku.yhtio = '$kukarow[yhtio]'
+          AND lasku.tunnus  in ($row[kaikkitunnukset])";
 $intrlasres = mysql_query($query) or pupe_error($query);
 
 while ($intrlasrow = mysql_fetch_array($intrlasres)) {
@@ -131,9 +131,9 @@ while ($intrlasrow = mysql_fetch_array($intrlasres)) {
       $virhe++;
     }
     else {
-      $query = "  SELECT distinct koodi, eu
-            FROM maat
-            WHERE koodi = '$intrlasrow[maalahetys]'";
+      $query = "SELECT distinct koodi, eu
+                FROM maat
+                WHERE koodi = '$intrlasrow[maalahetys]'";
       $maaresult = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($maaresult) == 0) {
@@ -163,9 +163,9 @@ while ($intrlasrow = mysql_fetch_array($intrlasres)) {
       $virhe++;
     }
     else {
-      $query = "  SELECT distinct koodi, eu
-            FROM maat
-            WHERE koodi = '$intrlasrow[maamaara]'";
+      $query = "SELECT distinct koodi, eu
+                FROM maat
+                WHERE koodi = '$intrlasrow[maamaara]'";
       $maaresult = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($maaresult) == 0) {

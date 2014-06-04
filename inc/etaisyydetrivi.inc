@@ -8,10 +8,10 @@ if ($i == 0) {   //yhtiötä ei näytetä
 }
 
 if (mysql_field_name($result, $i) == "varasto_postino") {
-  $query = "  SELECT DISTINCT postino, postitp
-        FROM varastopaikat
-        WHERE yhtio='$kukarow[yhtio]' AND postino != '' AND tyyppi != 'P'
-        ORDER BY postino";
+  $query = "SELECT DISTINCT postino, postitp
+            FROM varastopaikat
+            WHERE yhtio='$kukarow[yhtio]' AND postino != '' AND tyyppi != 'P'
+            ORDER BY postino";
   $varastoresult = mysql_query($query) or pupe_error($query);
   $ulos = "<td><select name='$nimi'>";
   $ulos .= "<option value = '' >".t("Ei varastoa")."</option>";

@@ -6,10 +6,10 @@ else {
   include_once("phppdflib.class.php");
 }
 
-$query = "  SELECT *
-      FROM lasku
-      WHERE yhtio = '{$kukarow['yhtio']}'
-      AND tunnus = '{$tunnus}'";
+$query = "SELECT *
+          FROM lasku
+          WHERE yhtio = '{$kukarow['yhtio']}'
+          AND tunnus  = '{$tunnus}'";
 $laskures = mysql_query($query) or pupe_error($query);
 $laskurow = mysql_fetch_assoc($laskures);
 
@@ -53,36 +53,36 @@ if (!function_exists('tulosta_maksusopimus')) {
 
     tulosta_logo_pdf($pdf, $page, $laskurow);
 
-    $query = "  SELECT *
-          FROM maksupositio
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          and otunnus = '{$laskurow['jaksotettu']}'
-          and uusiotunnus = 0
-          ORDER BY tunnus";
+    $query = "SELECT *
+              FROM maksupositio
+              WHERE yhtio     = '{$kukarow['yhtio']}'
+              and otunnus     = '{$laskurow['jaksotettu']}'
+              and uusiotunnus = 0
+              ORDER BY tunnus";
     $posres = mysql_query($query) or pupe_error($query);
 
     $query_ale_lisa = generoi_alekentta('M');
 
     // Lasketaan maksusopimuksen arvo verokannoittain jotta voidaan laskuttaa ennakot oikeissa alveissa
     // ja lis‰t‰‰n ennakkolaskutusrivi laskulle, vain jaksotetut rivit!
-    $query = "  SELECT
-          sum(if (tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if ('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)) jaksotettavaa
-          FROM lasku
-          JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi in ('L','T') and (tilausrivi.varattu+tilausrivi.jt) > 0 and tilausrivi.jaksotettu=lasku.jaksotettu
-          WHERE lasku.yhtio     = '{$kukarow['yhtio']}'
-          and lasku.jaksotettu    = '{$laskurow['jaksotettu']}'
-          GROUP by lasku.jaksotettu";
+    $query = "SELECT
+              sum(if (tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if ('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)) jaksotettavaa
+              FROM lasku
+              JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi in ('L','T') and (tilausrivi.varattu+tilausrivi.jt) > 0 and tilausrivi.jaksotettu=lasku.jaksotettu
+              WHERE lasku.yhtio    = '{$kukarow['yhtio']}'
+              and lasku.jaksotettu = '{$laskurow['jaksotettu']}'
+              GROUP by lasku.jaksotettu";
     $result = mysql_query($query) or pupe_error($query);
     $sumrow = mysql_fetch_array($result);
 
-    $query = "  SELECT
-          sum(if (tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if ('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)) summa,
-          if (tilausrivi.alv>=500, 0, tilausrivi.alv) alv
-          FROM lasku
-          JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi in ('L','T') and (tilausrivi.varattu+tilausrivi.jt) > 0 and tilausrivi.jaksotettu=lasku.jaksotettu)
-          WHERE lasku.yhtio     = '{$kukarow['yhtio']}'
-          and lasku.jaksotettu    = '{$laskurow['jaksotettu']}'
-          GROUP BY lasku.jaksotettu, alv";
+    $query = "SELECT
+              sum(if (tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if ('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)) summa,
+              if (tilausrivi.alv>=500, 0, tilausrivi.alv) alv
+              FROM lasku
+              JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi in ('L','T') and (tilausrivi.varattu+tilausrivi.jt) > 0 and tilausrivi.jaksotettu=lasku.jaksotettu)
+              WHERE lasku.yhtio    = '{$kukarow['yhtio']}'
+              and lasku.jaksotettu = '{$laskurow['jaksotettu']}'
+              GROUP BY lasku.jaksotettu, alv";
     $sresult = mysql_query($query) or pupe_error($query);
     $tot = 0;
 

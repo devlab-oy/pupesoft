@@ -4,15 +4,15 @@ require ("../inc/parametrit.inc");
 echo "<font class='head'>".t("L‰het‰ factoringaineisto").":</font><hr>";
 
 
-$query = "  SELECT lasku.*
-      FROM lasku
-      JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.factoring='SEB'
-      WHERE lasku.yhtio    = '$kukarow[yhtio]'
-      and lasku.tila      = 'U'
-      and lasku.alatila    = 'X'
-      and lasku.vienti    = ''
-      and lasku.factoringsiirtonumero = 0
-      ORDER BY lasku.laskunro";
+$query = "SELECT lasku.*
+          FROM lasku
+          JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.factoring='SEB'
+          WHERE lasku.yhtio               = '$kukarow[yhtio]'
+          and lasku.tila                  = 'U'
+          and lasku.alatila               = 'X'
+          and lasku.vienti                = ''
+          and lasku.factoringsiirtonumero = 0
+          ORDER BY lasku.laskunro";
 $res = mysql_query($query) or pupe_error($query);
 
 echo "<br><br><table>";
@@ -21,30 +21,30 @@ echo "<tr><th>#</th><th>".t("Laskunumero")."</th><th>".t("P‰iv‰m‰‰r‰")."</th><th
 $factlask=1;
 $factoring_sisalto="";
 
-$query = "  SELECT max(factoringsiirtonumero)+1 seuraava
-      FROM lasku
-      WHERE lasku.yhtio    = '$kukarow[yhtio]'
-      and lasku.tila      = 'U'
-      and lasku.alatila    = 'X'
-      and lasku.vienti    = ''
-      and lasku.factoringsiirtonumero > 0";
+$query = "SELECT max(factoringsiirtonumero)+1 seuraava
+          FROM lasku
+          WHERE lasku.yhtio               = '$kukarow[yhtio]'
+          and lasku.tila                  = 'U'
+          and lasku.alatila               = 'X'
+          and lasku.vienti                = ''
+          and lasku.factoringsiirtonumero > 0";
 $aresult = mysql_query ($query) or pupe_error($query);
 $arow = mysql_fetch_array($aresult);
 
 while ($laskurow = mysql_fetch_array($res)) {
 
-  $query  = "  SELECT *
-        from maksuehto
-        where yhtio    = '$kukarow[yhtio]'
-        and tunnus    = '$laskurow[maksuehto]'";
+  $query  = "SELECT *
+             from maksuehto
+             where yhtio = '$kukarow[yhtio]'
+             and tunnus  = '$laskurow[maksuehto]'";
   $result = mysql_query($query) or pupe_error($query);
   $masrow = mysql_fetch_array($result);
 
-  $query = "  SELECT *
-        FROM factoring
-        WHERE yhtio = '$kukarow[yhtio]'
-        and factoringyhtio = 'SEB'
-        and valkoodi = '$laskurow[valkoodi]'";
+  $query = "SELECT *
+            FROM factoring
+            WHERE yhtio        = '$kukarow[yhtio]'
+            and factoringyhtio = 'SEB'
+            and valkoodi       = '$laskurow[valkoodi]'";
   $fres = mysql_query($query) or pupe_error($query);
   $frow = mysql_fetch_array($fres);
 

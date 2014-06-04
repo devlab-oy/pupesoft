@@ -12,11 +12,11 @@ if(!function_exists("extranet_kayttajan_lisatiedottarkista")) {
         $virhe[$i] = t("Tieto puuttuu");
       }
       else {
-        $query = "  SELECT tunnus
-              FROM kuka
-              WHERE yhtio = '$kukarow[yhtio]'
-              and extranet != ''
-              and tunnus = $t[$i]";
+        $query = "SELECT tunnus
+                  FROM kuka
+                  WHERE yhtio   = '$kukarow[yhtio]'
+                  and extranet != ''
+                  and tunnus    = $t[$i]";
         $sresult = pupe_query($query);
 
         if (mysql_num_rows($sresult) == 0) {

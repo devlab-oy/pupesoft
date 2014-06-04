@@ -45,10 +45,10 @@ if ($asiakasid != "") {
   if($tyyppi == "") $tyyppi = "ytunnus";
 
   # Haetaan asiakas
-  $asiakas_query = "  SELECT *
-            FROM asiakas
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = '$asiakasid'";
+  $asiakas_query = "SELECT *
+                    FROM asiakas
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus  = '$asiakasid'";
   $asiakas_result = pupe_query($asiakas_query);
 
   if (mysql_num_rows($asiakas_result) != 1) {
@@ -202,16 +202,16 @@ if ($tee == 'lisaa' or $tee == 'uusi') {
         if ($loppupvm[$i] == "") {
           $loppupvm[$i] = "0000-00-00";
         }
-        $poista_query = "   DELETE FROM asiakasalennus
-                  WHERE yhtio    = '{$kukarow['yhtio']}'
-                  AND $query_lisa
-                  AND ryhma    = '$poistettava_ryhma'
-                  AND alennus     = '{$alennus[$i]}'
-                  AND alennuslaji = '{$alennuslaji[$i]}'
-                  AND minkpl    = '{$minkpl[$i]}'
-                  AND monikerta  = '{$monikerta[$i]}'
-                  AND alkupvm    = '{$alkupvm[$i]}'
-                  AND loppupvm  = '{$loppupvm[$i]}'";
+        $poista_query = "DELETE FROM asiakasalennus
+                         WHERE yhtio     = '{$kukarow['yhtio']}'
+                         AND $query_lisa
+                         AND ryhma       = '$poistettava_ryhma'
+                         AND alennus     = '{$alennus[$i]}'
+                         AND alennuslaji = '{$alennuslaji[$i]}'
+                         AND minkpl      = '{$minkpl[$i]}'
+                         AND monikerta   = '{$monikerta[$i]}'
+                         AND alkupvm     = '{$alkupvm[$i]}'
+                         AND loppupvm    = '{$loppupvm[$i]}'";
         $poista_result = pupe_query($poista_query);
         $poista[$i] = NULL;
       }
@@ -226,37 +226,37 @@ if ($tee == 'lisaa' or $tee == 'uusi') {
       foreach ($ryhmat as $ryhma) {
         # P‰ivitet‰‰n jos tunnus on setattu
         if (!empty($tunnus[$j])) {
-          $query = "  UPDATE asiakasalennus SET
-                yhtio    = '{$kukarow['yhtio']}',
-                ryhma    = '$ryhma',
-                $query_lisa,
-                alennus    = '{$alennus[$i]}',
-                alennuslaji = '{$alennuslaji[$i]}',
-                minkpl    = '{$minkpl[$i]}',
-                monikerta   = '{$monikerta[$i]}',
-                alkupvm    = '{$alkupvm[$i]}',
-                loppupvm  = '{$loppupvm[$i]}',
-                muutospvm   = now(),
-                muuttaja  = '{$kukarow['kuka']}'
-                WHERE tunnus = '{$tunnus[$j]}'";
+          $query = "UPDATE asiakasalennus SET
+                    yhtio        = '{$kukarow['yhtio']}',
+                    ryhma        = '$ryhma',
+                    $query_lisa,
+                    alennus      = '{$alennus[$i]}',
+                    alennuslaji  = '{$alennuslaji[$i]}',
+                    minkpl       = '{$minkpl[$i]}',
+                    monikerta    = '{$monikerta[$i]}',
+                    alkupvm      = '{$alkupvm[$i]}',
+                    loppupvm     = '{$loppupvm[$i]}',
+                    muutospvm    = now(),
+                    muuttaja     = '{$kukarow['kuka']}'
+                    WHERE tunnus = '{$tunnus[$j]}'";
           $j++;
           $update_query = pupe_query($query);
         }
         else {
-          $query = "  INSERT INTO asiakasalennus SET
-                yhtio    = '{$kukarow['yhtio']}',
-                ryhma    = '$ryhma',
-                $query_lisa,
-                alennus    = '{$alennus[$i]}',
-                alennuslaji  = '{$alennuslaji[$i]}',
-                minkpl    = '{$minkpl[$i]}',
-                monikerta  = '{$monikerta[$i]}',
-                alkupvm    = '{$alkupvm[$i]}',
-                loppupvm  = '{$loppupvm[$i]}',
-                laatija    = '{$kukarow['kuka']}',
-                luontiaika  = now(),
-                muutospvm  = now(),
-                muuttaja  = '{$kukarow['kuka']}'";
+          $query = "INSERT INTO asiakasalennus SET
+                    yhtio       = '{$kukarow['yhtio']}',
+                    ryhma       = '$ryhma',
+                    $query_lisa,
+                    alennus     = '{$alennus[$i]}',
+                    alennuslaji = '{$alennuslaji[$i]}',
+                    minkpl      = '{$minkpl[$i]}',
+                    monikerta   = '{$monikerta[$i]}',
+                    alkupvm     = '{$alkupvm[$i]}',
+                    loppupvm    = '{$loppupvm[$i]}',
+                    laatija     = '{$kukarow['kuka']}',
+                    luontiaika  = now(),
+                    muutospvm   = now(),
+                    muuttaja    = '{$kukarow['kuka']}'";
           $lisaa_result = pupe_query($query);
         }
       }
@@ -304,21 +304,21 @@ if ($tee == "alennustaulukko") {
 
   $query_lisa = ($tyyppi == 'ytunnus') ? "AND asiakasalennus.ytunnus = '$ytunnus'" : "AND asiakasalennus.asiakas = '$asiakasid'";
 
-  $query = "  SELECT asiakasalennus.asiakas,
-        perusalennus.ryhma,
-        asiakasalennus.alennuslaji,
-        asiakasalennus.minkpl,
-        asiakasalennus.monikerta,
-        asiakasalennus.alkupvm,
-        asiakasalennus.loppupvm,
-        asiakasalennus.tunnus,
-        ifnull(asiakasalennus.alennus, perusalennus.alennus) alennus
-        FROM perusalennus
-        LEFT JOIN asiakasalennus ON (perusalennus.ryhma = asiakasalennus.ryhma
-          AND perusalennus.yhtio = asiakasalennus.yhtio
-          $query_lisa)
-        WHERE perusalennus.yhtio = '{$kukarow["yhtio"]}'
-        ORDER BY perusalennus.ryhma";
+  $query = "SELECT asiakasalennus.asiakas,
+            perusalennus.ryhma,
+            asiakasalennus.alennuslaji,
+            asiakasalennus.minkpl,
+            asiakasalennus.monikerta,
+            asiakasalennus.alkupvm,
+            asiakasalennus.loppupvm,
+            asiakasalennus.tunnus,
+            ifnull(asiakasalennus.alennus, perusalennus.alennus) alennus
+            FROM perusalennus
+            LEFT JOIN asiakasalennus ON (perusalennus.ryhma = asiakasalennus.ryhma
+              AND perusalennus.yhtio = asiakasalennus.yhtio
+              $query_lisa)
+            WHERE perusalennus.yhtio = '{$kukarow["yhtio"]}'
+            ORDER BY perusalennus.ryhma";
   $result = pupe_query($query);
 
   $edellinen_rivi = "";
@@ -471,10 +471,10 @@ if ($tee == "alennustaulukko") {
 function hae_ryhmat($alkuryhma, $loppuryhma) {
   global $kukarow;
 
-  $ryhmat_query = "  SELECT distinct(ryhma)
-            FROM perusalennus
-            WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND ryhma BETWEEN '$alkuryhma' AND '$loppuryhma'";
+  $ryhmat_query = "SELECT distinct(ryhma)
+                   FROM perusalennus
+                   WHERE yhtio = '{$kukarow["yhtio"]}'
+                   AND ryhma BETWEEN '$alkuryhma' AND '$loppuryhma'";
   $ryhmat_result = pupe_query($ryhmat_query);
 
   while($row = mysql_fetch_array($ryhmat_result)) {

@@ -15,16 +15,16 @@ if (!function_exists('tulosta_ostotilaus')) {
     }
 
     // Haetaan laskun tiedot
-    $query = "  SELECT lasku.*, lasku.tunnus tunnus, lasku.nimi nimi, lasku.luontiaika päiväys, lasku.tunnusnippu projekti, lasku.tunnus tilaus, lasku.tunnus toimitus, viesti viite, comments lisätiedot,
-          concat_ws(' ', postino, postitp) postiosoite,
-          concat_ws(' ', toim_postino, toim_postitp) toim_postiosoite,
-          SUBSTRING(lasku_maa.nimi FROM 5) maa,
-          SUBSTRING(toim_maa.nimi FROM 5) toim_maa
-          FROM lasku
-          LEFT JOIN maat lasku_maa ON lasku_maa.koodi=lasku.maa
-          LEFT JOIN maat toim_maa ON toim_maa.koodi=lasku.toim_maa
-          WHERE lasku.yhtio = '$kukarow[yhtio]'
-          $otunnuslisa";
+    $query = "SELECT lasku.*, lasku.tunnus tunnus, lasku.nimi nimi, lasku.luontiaika päiväys, lasku.tunnusnippu projekti, lasku.tunnus tilaus, lasku.tunnus toimitus, viesti viite, comments lisätiedot,
+              concat_ws(' ', postino, postitp) postiosoite,
+              concat_ws(' ', toim_postino, toim_postitp) toim_postiosoite,
+              SUBSTRING(lasku_maa.nimi FROM 5) maa,
+              SUBSTRING(toim_maa.nimi FROM 5) toim_maa
+              FROM lasku
+              LEFT JOIN maat lasku_maa ON lasku_maa.koodi=lasku.maa
+              LEFT JOIN maat toim_maa ON toim_maa.koodi=lasku.toim_maa
+              WHERE lasku.yhtio = '$kukarow[yhtio]'
+              $otunnuslisa";
     $result = mysql_query($query) or pupe_error($query);
     $laskurow = mysql_fetch_array($result);
 
@@ -134,17 +134,17 @@ if (!function_exists('tulosta_ostotilaus')) {
     $ale_select_lisa = generoi_alekentta_select('erikseen', 'O');
 
     //  Käsitellään tilausrivit
-    $query = "  SELECT otunnus, toim_tuoteno, toim_nimitys, tuote.tuoteno, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu, toimaika,
-          tilausrivi.hinta, {$ale_select_lisa} round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta, kommentti
-          FROM tilausrivi
-          join tuote USING (yhtio, tuoteno)
-          join tuotteen_toimittajat on tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
-          WHERE $otunnuslisa
-          and tilausrivi.yhtio='$kukarow[yhtio]'
-          and tyyppi = 'O'
-          and tilausrivi.varattu   > '0'
-          and tilausrivi.jaksotettu = '0'
-          ORDER BY tilausrivi.otunnus, tilausrivi.toimaika, toim_tuoteno";
+    $query = "SELECT otunnus, toim_tuoteno, toim_nimitys, tuote.tuoteno, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu, toimaika,
+              tilausrivi.hinta, {$ale_select_lisa} round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta, kommentti
+              FROM tilausrivi
+              join tuote USING (yhtio, tuoteno)
+              join tuotteen_toimittajat on tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
+              WHERE $otunnuslisa
+              and tilausrivi.yhtio='$kukarow[yhtio]'
+              and tyyppi                = 'O'
+              and tilausrivi.varattu    > '0'
+              and tilausrivi.jaksotettu = '0'
+              ORDER BY tilausrivi.otunnus, tilausrivi.toimaika, toim_tuoteno";
     $grand_total=0;
     $riresult = mysql_query($query) or pupe_error($query);
 
@@ -230,12 +230,12 @@ if (!function_exists('tulosta_ostotilaus')) {
         }
 
         //  Tarkastetaan olisiko toimittajalla yksikkö!
-        $query = "  SELECT toim_yksikko
-              FROM tuotteen_toimittajat
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tuoteno = '$row[tuoteno]'
-              and liitostunnus = '$laskurow[liitostunnus]'
-              LIMIT 1";
+        $query = "SELECT toim_yksikko
+                  FROM tuotteen_toimittajat
+                  WHERE yhtio      = '$kukarow[yhtio]'
+                  and tuoteno      = '$row[tuoteno]'
+                  and liitostunnus = '$laskurow[liitostunnus]'
+                  LIMIT 1";
         $rarres = mysql_query($query) or pupe_error($query);
         $rarrow   = mysql_fetch_array($rarres);
 

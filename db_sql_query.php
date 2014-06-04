@@ -52,13 +52,13 @@ else {
     }
 
     // Oletusaliakset ja onko niissä pakollisia
-    $query = "  SELECT distinct selite
-          FROM avainsana
-          WHERE yhtio = '$kukarow[yhtio]'
-          and laji = 'MYSQLALIAS'
-          and selite like '{$table}.%'
-          and selitetark_2 = ''
-          and selitetark_3 = 'PAKOLLINEN'";
+    $query = "SELECT distinct selite
+              FROM avainsana
+              WHERE yhtio      = '$kukarow[yhtio]'
+              and laji         = 'MYSQLALIAS'
+              and selite       like '{$table}.%'
+              and selitetark_2 = ''
+              and selitetark_3 = 'PAKOLLINEN'";
     $al_res = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($al_res) > 0) {
@@ -169,11 +169,11 @@ else {
     $selecti = substr(trim($selecti), 0, -1);
 
     $sqlhaku = "SELECT $selecti
-FROM $table
-$joinit
-WHERE $table.yhtio = '$kukarow[yhtio]'
-$where
-$order";
+                FROM $table
+                $joinit
+                WHERE $table.yhtio = '$kukarow[yhtio]'
+                $where
+                $order";
     $result = mysql_query($sqlhaku) or pupe_error($sqlhaku);
 
     echo "<font class='message'><pre>$sqlhaku</pre><br>".t("Haun tulos")." ".mysql_num_rows($result)." ".t("riviä").".</font><br><br>";
@@ -294,11 +294,11 @@ $order";
 
       $kielet = array("FI", "SE", "NO", "EN", "DE", "DK", "RU", "EE");
 
-      $query = "  SELECT DISTINCT selite
-            FROM avainsana
-            WHERE yhtio = '$kukarow[yhtio]'
-            and avainsana.laji = 'PARAMETRI'
-            ORDER BY selite";
+      $query = "SELECT DISTINCT selite
+                FROM avainsana
+                WHERE yhtio        = '$kukarow[yhtio]'
+                and avainsana.laji = 'PARAMETRI'
+                ORDER BY selite";
       $al_res = mysql_query($query) or pupe_error($query);
 
       foreach ($kielet as $kieli) {
@@ -336,13 +336,13 @@ $order";
     $data = "\"table\";s:".strlen($table).":\"$table\"";
 
     //Haetaan tallennetut kyselyt
-    $query = "  SELECT distinct kuka.nimi, kuka.kuka, tallennetut_parametrit.nimitys
-          FROM tallennetut_parametrit
-          JOIN kuka on (kuka.yhtio = tallennetut_parametrit.yhtio and kuka.kuka = tallennetut_parametrit.kuka)
-          WHERE tallennetut_parametrit.yhtio = '$kukarow[yhtio]'
-          and tallennetut_parametrit.sovellus = '$_SERVER[SCRIPT_NAME]'
-          and tallennetut_parametrit.data like '%$data%'
-          ORDER BY tallennetut_parametrit.nimitys";
+    $query = "SELECT distinct kuka.nimi, kuka.kuka, tallennetut_parametrit.nimitys
+              FROM tallennetut_parametrit
+              JOIN kuka on (kuka.yhtio = tallennetut_parametrit.yhtio and kuka.kuka = tallennetut_parametrit.kuka)
+              WHERE tallennetut_parametrit.yhtio  = '$kukarow[yhtio]'
+              and tallennetut_parametrit.sovellus = '$_SERVER[SCRIPT_NAME]'
+              and tallennetut_parametrit.data     like '%$data%'
+              ORDER BY tallennetut_parametrit.nimitys";
     $sresult = mysql_query($query) or pupe_error($query);
 
     echo "<select name='kysely' onchange='submit()'>";

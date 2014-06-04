@@ -59,17 +59,17 @@ if ($ytunnus != '' or $ytunnus == 'TULKAIKKI') {
 
   $query_ale_lisa = generoi_alekentta('M');
 
-  $query = "  SELECT lasku.tunnus, lasku.nimi, lasku.toimaika, lasku.valkoodi, lasku.ytunnus,
-        count(*) maara,
-        sum(tilausrivi.varattu+tilausrivi.jt) tilattu,
-        round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) arvo,
-        round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) jt_arvo
-        FROM lasku
-        JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D')
-        WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('L', 'N') and lasku.alatila != 'X'
-        $lisa
-        GROUP BY 1,2,3,4,5
-        ORDER BY lasku.toimaika $suunta, lasku.nimi, lasku.tunnus";
+  $query = "SELECT lasku.tunnus, lasku.nimi, lasku.toimaika, lasku.valkoodi, lasku.ytunnus,
+            count(*) maara,
+            sum(tilausrivi.varattu+tilausrivi.jt) tilattu,
+            round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) arvo,
+            round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) jt_arvo
+            FROM lasku
+            JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D')
+            WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('L', 'N') and lasku.alatila != 'X'
+            $lisa
+            GROUP BY 1,2,3,4,5
+            ORDER BY lasku.toimaika $suunta, lasku.nimi, lasku.tunnus";
   $result = mysql_query($query) or pupe_error($query);
 
   if ($vain_excel != '' or $vain_excel_kaikki != '') {

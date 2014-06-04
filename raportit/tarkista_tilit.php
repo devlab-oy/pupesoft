@@ -1,29 +1,29 @@
 <?php
 
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
-$useslave = 1;
+$useslave = 2;
 
 require("../inc/parametrit.inc");
 
 echo "<br><font class='head'>".t("Tiliöintien tilit")."</font><hr><br>";
 
-$query = "  SELECT distinct tili.tilino t, tiliointi.tilino
-      FROM tiliointi
-      LEFT JOIN tili ON tili.yhtio=tiliointi.yhtio and tili.tilino=tiliointi.tilino
-      WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-      and tiliointi.korjattu = ''
-      and tiliointi.tilino > 0
-      HAVING t IS NULL";
+$query = "SELECT distinct tili.tilino t, tiliointi.tilino
+          FROM tiliointi
+          LEFT JOIN tili ON tili.yhtio=tiliointi.yhtio and tili.tilino=tiliointi.tilino
+          WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
+          and tiliointi.korjattu = ''
+          and tiliointi.tilino   > 0
+          HAVING t IS NULL";
 $result = mysql_query($query) or pupe_error($query);
 
 while ($tili = mysql_fetch_array($result)) {
-  $query = "  SELECT tapvm viimeisin, selite
-        FROM tiliointi
-        WHERE yhtio    = '$kukarow[yhtio]'
-        and tilino     = $tili[tilino]
-        and korjattu  = ''
-        ORDER BY tapvm asc
-        LIMIT 1";
+  $query = "SELECT tapvm viimeisin, selite
+            FROM tiliointi
+            WHERE yhtio  = '$kukarow[yhtio]'
+            and tilino   = $tili[tilino]
+            and korjattu = ''
+            ORDER BY tapvm asc
+            LIMIT 1";
   $res = mysql_query($query) or pupe_error($query);
   $viimrow = mysql_fetch_array($res);
 
@@ -48,16 +48,16 @@ while($table = mysql_fetch_array($result)) {
     while($col = mysql_fetch_array($res)) {
       if (in_array($col[0], $columnit)) {
         foreach ($columnit as $c) {
-          $query = "  SELECT $c
-                FROM $table[0]
-                WHERE yhtio = '$kukarow[yhtio]'
-                and $c != ''";
+          $query = "SELECT $c
+                    FROM $table[0]
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    and $c != ''";
           $haku = mysql_query($query);
 
           while ($row = mysql_fetch_array($haku)) {
-            $query = "  SELECT tunnus
-                  FROM tili
-                  WHERE yhtio = '$kukarow[yhtio]' and tilino = '".$row[$c]."'";
+            $query = "SELECT tunnus
+                      FROM tili
+                      WHERE yhtio = '$kukarow[yhtio]' and tilino = '".$row[$c]."'";
             $tarkresr = mysql_query($query) or pupe_error($query);
 
             if(mysql_num_rows($tarkresr) == 0) {

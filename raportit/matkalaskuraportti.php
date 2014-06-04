@@ -148,17 +148,17 @@ function generoi_matkalaskuraportti_rivit($request_params) {
   $kuka_join         = generoi_kuka_join($request_params);
   $kustannuspaikka_join   = generoi_kustannuspaikka_join($request_params);
 
-  $query = "  SELECT
-        {$select}
-        FROM lasku
-        JOIN tilausrivi ON ( tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi = 'M')
-        JOIN tilausrivin_lisatiedot ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
-        JOIN tuote {$tuote_join}
-        JOIN toimi {$toimi_join}
-        {$kuka_join}
-        LEFT JOIN kustannuspaikka {$kustannuspaikka_join}
-        {$where}
-        {$group}";
+  $query = "SELECT
+            {$select}
+            FROM lasku
+            JOIN tilausrivi ON ( tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi = 'M')
+            JOIN tilausrivin_lisatiedot ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
+            JOIN tuote {$tuote_join}
+            JOIN toimi {$toimi_join}
+            {$kuka_join}
+            LEFT JOIN kustannuspaikka {$kustannuspaikka_join}
+            {$where}
+            {$group}";
 
   if ($request_params['debug'] == 1) {
     echo "<pre>";

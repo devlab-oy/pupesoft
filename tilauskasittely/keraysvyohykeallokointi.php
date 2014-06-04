@@ -83,10 +83,10 @@ echo "  <script type='text/javascript'>
 
 echo "<font class='head'>",t("Keräysvyöhykeallokointi"),"</font><hr>";
 
-$query = "  SELECT *
-      FROM keraysvyohyke
-      WHERE yhtio = '{$kukarow['yhtio']}'
-      ORDER BY nimitys";
+$query = "SELECT *
+          FROM keraysvyohyke
+          WHERE yhtio = '{$kukarow['yhtio']}'
+          ORDER BY nimitys";
 $keraysvyohyke_res = pupe_query($query);
 
 if (mysql_num_rows($keraysvyohyke_res) > 0) {
@@ -121,12 +121,12 @@ if (mysql_num_rows($keraysvyohyke_res) > 0) {
   echo "</tr>";
   echo "</thead>";
 
-  $query = "  SELECT *
-        FROM kuka
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND extranet = ''
-        AND keraajanro != 0
-        ORDER BY nimi";
+  $query = "SELECT *
+            FROM kuka
+            WHERE yhtio     = '{$kukarow['yhtio']}'
+            AND extranet    = ''
+            AND keraajanro != 0
+            ORDER BY nimi";
   $kuka_res = pupe_query($query);
 
   while ($kuka_row = mysql_fetch_assoc($kuka_res)) {

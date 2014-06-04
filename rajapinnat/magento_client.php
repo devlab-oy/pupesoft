@@ -85,6 +85,7 @@ class MagentoClient {
    * Configurable-tuotteella k‰ytett‰v‰ nimityskentt‰, oletuksena nimitys
    */
   private $_configurable_tuote_nimityskentta = "nimitys";
+
   /**
    * T‰m‰n yhteyden aikana sattuneiden virheiden m‰‰r‰
    */

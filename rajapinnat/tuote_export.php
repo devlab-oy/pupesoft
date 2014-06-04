@@ -733,8 +733,9 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
   if (isset($categoryaccesscontrol)) $magento_client->setCategoryaccesscontrol($categoryaccesscontrol);
 
   // Mitä tuotteen kenttää käytetään configurable-tuotteen nimityksenä
-  if (isset($magento_configurable_tuote_nimityskentta)
-      and !empty($magento_configurable_tuote_nimityskentta)) $magento_client->setConfigurableNimityskentta($magento_configurable_tuote_nimityskentta);
+  if (isset($magento_configurable_tuote_nimityskentta) and !empty($magento_configurable_tuote_nimityskentta)) {
+    $magento_client->setConfigurableNimityskentta($magento_configurable_tuote_nimityskentta);
+  }
 
   // lisaa_kategoriat
   if (count($dnstuoteryhma) > 0) {

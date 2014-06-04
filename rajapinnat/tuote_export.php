@@ -120,22 +120,22 @@ $query = "SELECT tuote.tuoteno,
           try_fi.selitetark try_nimi
           FROM tuote
           LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio
-            and try_fi.selite = tuote.try
-            and try_fi.laji = 'try'
-            and try_fi.kieli = 'fi')
+            and try_fi.selite        = tuote.try
+            and try_fi.laji          = 'try'
+            and try_fi.kieli         = 'fi')
           LEFT JOIN tuotteen_avainsanat as ta_nimitys_se on tuote.yhtio = ta_nimitys_se.yhtio
-            and tuote.tuoteno = ta_nimitys_se.tuoteno
-            and ta_nimitys_se.laji = 'nimitys'
-            and ta_nimitys_se.kieli = 'se'
+            and tuote.tuoteno        = ta_nimitys_se.tuoteno
+            and ta_nimitys_se.laji   = 'nimitys'
+            and ta_nimitys_se.kieli  = 'se'
           LEFT JOIN tuotteen_avainsanat as ta_nimitys_en on tuote.yhtio = ta_nimitys_en.yhtio
-            and tuote.tuoteno = ta_nimitys_en.tuoteno
-            and ta_nimitys_en.laji = 'nimitys'
-            and ta_nimitys_en.kieli = 'en'
-          WHERE tuote.yhtio      = '{$kukarow["yhtio"]}'
-            AND tuote.status      != 'P'
-            AND tuote.tuotetyyppi  NOT in ('A','B')
-            AND tuote.tuoteno     != ''
-            AND tuote.nakyvyys    != ''
+            and tuote.tuoteno        = ta_nimitys_en.tuoteno
+            and ta_nimitys_en.laji   = 'nimitys'
+            and ta_nimitys_en.kieli  = 'en'
+          WHERE tuote.yhtio          = '{$kukarow["yhtio"]}'
+            AND tuote.status        != 'P'
+            AND tuote.tuotetyyppi    NOT in ('A','B')
+            AND tuote.tuoteno       != ''
+            AND tuote.nakyvyys      != ''
             $muutoslisa
           ORDER BY tuote.tuoteno";
 $res = pupe_query($query);
@@ -169,10 +169,10 @@ while ($row = mysql_fetch_array($res)) {
               asiakashinta.hinta
               FROM asiakas
               JOIN avainsana ON (avainsana.yhtio = asiakas.yhtio
-                AND avainsana.selite = asiakas.ryhma AND avainsana.laji = 'asiakasryhma')
+                AND avainsana.selite           = asiakas.ryhma AND avainsana.laji = 'asiakasryhma')
               JOIN asiakashinta ON (asiakashinta.yhtio = asiakas.yhtio
                 AND asiakashinta.asiakas_ryhma = asiakas.ryhma)
-              WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
+              WHERE asiakas.yhtio              = '{$kukarow['yhtio']}'
                 AND asiakashinta.tuoteno ='{$row['tuoteno']}'
               GROUP BY 1,2,3";
     $asiakashintares = pupe_query($query);
@@ -193,14 +193,14 @@ while ($row = mysql_fetch_array($res)) {
                       avainsana.selite option_name
                       FROM tuotteen_avainsanat USE INDEX (yhtio_tuoteno)
                       JOIN avainsana USE INDEX (yhtio_laji_selite) ON (avainsana.yhtio = tuotteen_avainsanat.yhtio
-                        AND avainsana.laji = 'PARAMETRI'
-                        AND avainsana.selite = SUBSTRING(tuotteen_avainsanat.laji, 11))
+                        AND avainsana.laji             = 'PARAMETRI'
+                        AND avainsana.selite           = SUBSTRING(tuotteen_avainsanat.laji, 11))
                       WHERE tuotteen_avainsanat.yhtio='{$kukarow['yhtio']}'
-                      AND tuotteen_avainsanat.laji != 'parametri_variaatio'
-                      AND tuotteen_avainsanat.laji != 'parametri_variaatio_jako'
-                      AND tuotteen_avainsanat.laji like 'parametri_%'
-                      AND tuotteen_avainsanat.tuoteno = '{$row['tuoteno']}'
-                      AND tuotteen_avainsanat.kieli = 'fi'
+                      AND tuotteen_avainsanat.laji    != 'parametri_variaatio'
+                      AND tuotteen_avainsanat.laji    != 'parametri_variaatio_jako'
+                      AND tuotteen_avainsanat.laji     like 'parametri_%'
+                      AND tuotteen_avainsanat.tuoteno  = '{$row['tuoteno']}'
+                      AND tuotteen_avainsanat.kieli    = 'fi'
                       ORDER by tuotteen_avainsanat.jarjestys, tuotteen_avainsanat.laji";
   $parametritres = pupe_query($parametritquery);
   $tuotteen_parametrit = array();
@@ -212,7 +212,7 @@ while ($row = mysql_fetch_array($res)) {
             (SELECT GROUP_CONCAT(t6.nimi SEPARATOR '\n')
              FROM dynaaminen_puu t6
              WHERE t6.lft<t0.lft AND t6.rgt>t0.rgt
-             AND t6.laji = 'tuote'
+             AND t6.laji      = 'tuote'
              ORDER BY t6.lft) ancestors
             FROM dynaaminen_puu t0
             LEFT JOIN
@@ -228,7 +228,7 @@ while ($row = mysql_fetch_array($res)) {
             LEFT JOIN puun_alkio ON puun_alkio.puun_tunnus = t0.tunnus AND puun_alkio.yhtio = t0.yhtio
              JOIN tuote ON tuote.tuoteno = puun_alkio.liitos AND tuote.yhtio = puun_alkio.yhtio
             WHERE t0.yhtio ='{$kukarow['yhtio']}'
-            AND t0.laji = 'tuote'
+            AND t0.laji       = 'tuote'
             AND tuote.tuoteno = '{$row['tuoteno']}'
             GROUP BY t0.nimi
             ORDER BY t0.lft";
@@ -401,34 +401,34 @@ $query = "SELECT DISTINCT  tuote.osasto,
           osasto_en.selitetark osasto_en_nimi
           FROM tuote
           LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio
-            and try_fi.selite = tuote.try
-            and try_fi.laji   = 'try'
-            and try_fi.kieli  = 'fi')
+            and try_fi.selite     = tuote.try
+            and try_fi.laji       = 'try'
+            and try_fi.kieli      = 'fi')
           LEFT JOIN avainsana as try_se ON (try_se.yhtio = tuote.yhtio
-            and try_se.selite = tuote.try
-            and try_se.laji   = 'try'
-            and try_se.kieli  = 'se')
+            and try_se.selite     = tuote.try
+            and try_se.laji       = 'try'
+            and try_se.kieli      = 'se')
           LEFT JOIN avainsana as try_en ON (try_en.yhtio = tuote.yhtio
-            and try_en.selite = tuote.try
-            and try_en.laji   = 'try'
-            and try_en.kieli  = 'en')
+            and try_en.selite     = tuote.try
+            and try_en.laji       = 'try'
+            and try_en.kieli      = 'en')
           LEFT JOIN avainsana as osasto_fi ON (osasto_fi.yhtio = tuote.yhtio
-            and osasto_fi.selite = tuote.osasto
-            and osasto_fi.laji   = 'osasto'
-            and osasto_fi.kieli  = 'fi')
+            and osasto_fi.selite  = tuote.osasto
+            and osasto_fi.laji    = 'osasto'
+            and osasto_fi.kieli   = 'fi')
           LEFT JOIN avainsana as osasto_se ON (osasto_se.yhtio = tuote.yhtio
-            and osasto_se.selite = tuote.osasto
-            and osasto_se.laji   = 'osasto'
-            and osasto_se.kieli  = 'se')
+            and osasto_se.selite  = tuote.osasto
+            and osasto_se.laji    = 'osasto'
+            and osasto_se.kieli   = 'se')
           LEFT JOIN avainsana as osasto_en ON (osasto_en.yhtio = tuote.yhtio
-            and osasto_en.selite = tuote.osasto
-            and osasto_en.laji   = 'osasto'
-            and osasto_en.kieli  = 'en')
-          WHERE tuote.yhtio      = '{$kukarow["yhtio"]}'
-          AND tuote.status      != 'P'
-          AND tuote.tuotetyyppi  NOT in ('A','B')
-          AND tuote.tuoteno     != ''
-          AND tuote.nakyvyys    != ''
+            and osasto_en.selite  = tuote.osasto
+            and osasto_en.laji    = 'osasto'
+            and osasto_en.kieli   = 'en')
+          WHERE tuote.yhtio       = '{$kukarow["yhtio"]}'
+          AND tuote.status       != 'P'
+          AND tuote.tuotetyyppi   NOT in ('A','B')
+          AND tuote.tuoteno      != ''
+          AND tuote.nakyvyys     != ''
           $muutoslisa
           ORDER BY 1, 2";
 $try_result = pupe_query($query);
@@ -493,8 +493,8 @@ $query = "SELECT
           asiakas.yhtio ayhtio
           FROM asiakas
           $asiakasjoinilisa
-          WHERE asiakas.yhtio      = '{$kukarow["yhtio"]}'
-          AND asiakas.laji        != 'P'
+          WHERE asiakas.yhtio  = '{$kukarow["yhtio"]}'
+          AND asiakas.laji    != 'P'
           $asiakaswherelisa
           $muutoslisa";
 $res = pupe_query($query);
@@ -563,16 +563,16 @@ $query = "SELECT hinnasto.tuoteno,
           tuote.alv
           FROM hinnasto
           JOIN tuote on (tuote.yhtio = hinnasto.yhtio
-            AND tuote.tuoteno        = hinnasto.tuoteno
-            AND tuote.status        != 'P'
+            AND tuote.tuoteno      = hinnasto.tuoteno
+            AND tuote.status      != 'P'
             AND tuote.tuotetyyppi  NOT in ('A','B')
             AND tuote.tuoteno     != ''
             AND tuote.nakyvyys    != '')
           WHERE hinnasto.yhtio     = '{$kukarow["yhtio"]}'
           AND (hinnasto.minkpl     = 0 AND hinnasto.maxkpl = 0)
           AND hinnasto.laji       != 'O'
-          AND hinnasto.maa        IN ('FI', '')
-          AND hinnasto.valkoodi   in ('EUR', '')
+          AND hinnasto.maa         IN ('FI', '')
+          AND hinnasto.valkoodi    in ('EUR', '')
           $muutoslisa";
 $res = pupe_query($query);
 
@@ -655,26 +655,26 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
                 tuote.muuta
                 FROM tuotteen_avainsanat
                 JOIN tuote on (tuote.yhtio = tuotteen_avainsanat.yhtio
-                  AND tuote.tuoteno  = tuotteen_avainsanat.tuoteno
-                  AND tuote.status  != 'P'
-                  AND tuote.tuotetyyppi NOT in ('A','B')
-                  AND tuote.tuoteno != ''
+                  AND tuote.tuoteno              = tuotteen_avainsanat.tuoteno
+                  AND tuote.status              != 'P'
+                  AND tuote.tuotetyyppi          NOT in ('A','B')
+                  AND tuote.tuoteno             != ''
                   $nakyvyys_lisa)
                 LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio
-                  and try_fi.selite = tuote.try
-                  and try_fi.laji   = 'try'
-                  and try_fi.kieli  = 'fi')
+                  and try_fi.selite              = tuote.try
+                  and try_fi.laji                = 'try'
+                  and try_fi.kieli               = 'fi')
                 LEFT JOIN tuotteen_avainsanat as ta_nimitys_se on (tuote.yhtio = ta_nimitys_se.yhtio
-                  and tuote.tuoteno       = ta_nimitys_se.tuoteno
-                  and ta_nimitys_se.laji  = 'nimitys'
-                  and ta_nimitys_se.kieli = 'se')
+                  and tuote.tuoteno              = ta_nimitys_se.tuoteno
+                  and ta_nimitys_se.laji         = 'nimitys'
+                  and ta_nimitys_se.kieli        = 'se')
                 LEFT JOIN tuotteen_avainsanat as ta_nimitys_en on (tuote.yhtio = ta_nimitys_en.yhtio
-                  and tuote.tuoteno       = ta_nimitys_en.tuoteno
-                  and ta_nimitys_en.laji  = 'nimitys'
-                  and ta_nimitys_en.kieli = 'en')
-                WHERE tuotteen_avainsanat.yhtio = '{$kukarow['yhtio']}'
-                AND tuotteen_avainsanat.laji    = 'parametri_variaatio'
-                AND tuotteen_avainsanat.selite  = '{$rowselite['selite']}'
+                  and tuote.tuoteno              = ta_nimitys_en.tuoteno
+                  and ta_nimitys_en.laji         = 'nimitys'
+                  and ta_nimitys_en.kieli        = 'en')
+                WHERE tuotteen_avainsanat.yhtio  = '{$kukarow['yhtio']}'
+                AND tuotteen_avainsanat.laji     = 'parametri_variaatio'
+                AND tuotteen_avainsanat.selite   = '{$rowselite['selite']}'
                 {$muutoslisa}
                 ORDER BY tuote.tuoteno";
   $alires = pupe_query($aliselect);
@@ -688,14 +688,14 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
                    avainsana.selite option_name
                    FROM tuotteen_avainsanat USE INDEX (yhtio_tuoteno)
                    JOIN avainsana USE INDEX (yhtio_laji_selite) ON (avainsana.yhtio = tuotteen_avainsanat.yhtio
-                     AND avainsana.laji = 'PARAMETRI'
-                     AND avainsana.selite = SUBSTRING(tuotteen_avainsanat.laji, 11))
+                     AND avainsana.laji             = 'PARAMETRI'
+                     AND avainsana.selite           = SUBSTRING(tuotteen_avainsanat.laji, 11))
                    WHERE tuotteen_avainsanat.yhtio ='{$kukarow['yhtio']}'
-                   AND tuotteen_avainsanat.laji   != 'parametri_variaatio'
-                   AND tuotteen_avainsanat.laji   != 'parametri_variaatio_jako'
-                   AND tuotteen_avainsanat.laji   like 'parametri_%'
-                   AND tuotteen_avainsanat.tuoteno = '{$alirow['tuoteno']}'
-                   AND tuotteen_avainsanat.kieli   = 'fi'
+                   AND tuotteen_avainsanat.laji    != 'parametri_variaatio'
+                   AND tuotteen_avainsanat.laji    != 'parametri_variaatio_jako'
+                   AND tuotteen_avainsanat.laji     like 'parametri_%'
+                   AND tuotteen_avainsanat.tuoteno  = '{$alirow['tuoteno']}'
+                   AND tuotteen_avainsanat.kieli    = 'fi'
                    ORDER by tuotteen_avainsanat.jarjestys, tuotteen_avainsanat.laji";
     $alinres = pupe_query($alinselect);
     $properties = array();
@@ -731,7 +731,7 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
               (SELECT GROUP_CONCAT(t6.nimi SEPARATOR '\n')
                FROM dynaaminen_puu t6
                WHERE t6.lft<t0.lft AND t6.rgt>t0.rgt
-               AND t6.laji = 'tuote'
+               AND t6.laji      = 'tuote'
                ORDER BY t6.lft) ancestors
               FROM dynaaminen_puu t0
               LEFT JOIN
@@ -747,7 +747,7 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
               LEFT JOIN puun_alkio ON puun_alkio.puun_tunnus = t0.tunnus AND puun_alkio.yhtio = t0.yhtio
                JOIN tuote ON tuote.tuoteno = puun_alkio.liitos AND tuote.yhtio = puun_alkio.yhtio
               WHERE t0.yhtio ='{$kukarow['yhtio']}'
-              AND t0.laji = 'tuote'
+              AND t0.laji       = 'tuote'
               AND tuote.tuoteno = '{$alirow['tuoteno']}'
               GROUP BY t0.nimi
               ORDER BY t0.lft";

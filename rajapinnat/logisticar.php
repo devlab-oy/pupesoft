@@ -590,36 +590,36 @@ function myynti($limit = '') {
   $query_ale_lisa = generoi_alekentta('M');
 
   $query = "SELECT
-              tilausrivi.tuoteno nimiketunnus,
-              lasku.liitostunnus asiakastunnus,
-              lasku.liitostunnus toimitusasiakas,
-              if(tilausrivi.tyyppi = 'G', lasku.clearing, lasku.liitostunnus) asiakastunnus,
-              if(tilausrivi.tyyppi = 'G', lasku.clearing, lasku.liitostunnus) toimitusasiakas,
-              tilausrivi.toimaika toimituspaiva,
-              tilausrivi.tyyppi tapahtumalaji,
-              round(tilausrivi.hinta  / if('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, $yhtiorow[hintapyoristys]) myyntiarvo,
-              (tilausrivi.varattu+tilausrivi.jt) * tuote.kehahin ostoarvo,
-              tilausrivi.varattu tapahtumamaara,
-              lasku.tunnus tilausnro,
-              kuka.kuka myyjatunnus,
-              lasku.yhtio_toimipaikka  toimipaikka,
-              varastopaikat.tunnus varastotunnus,
-              tilausrivi.toimitettu
-              FROM tilausrivi
-              JOIN lasku USE INDEX (PRIMARY) ON lasku.tunnus=tilausrivi.otunnus and lasku.yhtio=tilausrivi.yhtio
-              JOIN tuote ON tuote.tuoteno = tilausrivi.tuoteno and tuote.yhtio = tilausrivi.yhtio
-              JOIN tuotepaikat USE INDEX (tuote_index) ON tuotepaikat.tuoteno=tilausrivi.tuoteno and tuotepaikat.hyllyvali=tilausrivi.hyllyvali and tuotepaikat.hyllytaso=tilausrivi.hyllytaso AND tilausrivi.hyllyalue=tuotepaikat.hyllyalue and tilausrivi.hyllynro=tuotepaikat.hyllynro and tilausrivi.yhtio=tuotepaikat.yhtio
-              JOIN varastopaikat ON
-              concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
-              concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-              and varastopaikat.yhtio=tuotepaikat.yhtio
-              LEFT JOIN kuka ON kuka.tunnus=lasku.myyja and kuka.yhtio=lasku.yhtio
-              WHERE tilausrivi.varattu      != 0
-              AND tilausrivi.tyyppi          IN ('L','O','G')
-              AND tilausrivi.laskutettuaika  = '0000-00-00'
-              AND tilausrivi.yhtio           = '$yhtio'
-              ORDER BY tilausrivi.laadittu
-              $limit";
+            tilausrivi.tuoteno nimiketunnus,
+            lasku.liitostunnus asiakastunnus,
+            lasku.liitostunnus toimitusasiakas,
+            if(tilausrivi.tyyppi = 'G', lasku.clearing, lasku.liitostunnus) asiakastunnus,
+            if(tilausrivi.tyyppi = 'G', lasku.clearing, lasku.liitostunnus) toimitusasiakas,
+            tilausrivi.toimaika toimituspaiva,
+            tilausrivi.tyyppi tapahtumalaji,
+            round(tilausrivi.hinta  / if('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, $yhtiorow[hintapyoristys]) myyntiarvo,
+            (tilausrivi.varattu+tilausrivi.jt) * tuote.kehahin ostoarvo,
+            tilausrivi.varattu tapahtumamaara,
+            lasku.tunnus tilausnro,
+            kuka.kuka myyjatunnus,
+            lasku.yhtio_toimipaikka  toimipaikka,
+            varastopaikat.tunnus varastotunnus,
+            tilausrivi.toimitettu
+            FROM tilausrivi
+            JOIN lasku USE INDEX (PRIMARY) ON lasku.tunnus=tilausrivi.otunnus and lasku.yhtio=tilausrivi.yhtio
+            JOIN tuote ON tuote.tuoteno = tilausrivi.tuoteno and tuote.yhtio = tilausrivi.yhtio
+            JOIN tuotepaikat USE INDEX (tuote_index) ON tuotepaikat.tuoteno=tilausrivi.tuoteno and tuotepaikat.hyllyvali=tilausrivi.hyllyvali and tuotepaikat.hyllytaso=tilausrivi.hyllytaso AND tilausrivi.hyllyalue=tuotepaikat.hyllyalue and tilausrivi.hyllynro=tuotepaikat.hyllynro and tilausrivi.yhtio=tuotepaikat.yhtio
+            JOIN varastopaikat ON
+            concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
+            concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+            and varastopaikat.yhtio=tuotepaikat.yhtio
+            LEFT JOIN kuka ON kuka.tunnus=lasku.myyja and kuka.yhtio=lasku.yhtio
+            WHERE tilausrivi.varattu      != 0
+            AND tilausrivi.tyyppi          IN ('L','O','G')
+            AND tilausrivi.laskutettuaika  = '0000-00-00'
+            AND tilausrivi.yhtio           = '$yhtio'
+            ORDER BY tilausrivi.laadittu
+            $limit";
   $res = pupe_query($query);
 
   $rows = mysql_num_rows($res);

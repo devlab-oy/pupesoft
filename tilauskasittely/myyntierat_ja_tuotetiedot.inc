@@ -215,7 +215,7 @@ elseif(isset($lajit) and count($lajit) > 0) {
     $worksheet->write($excelrivi, $excelsarake++, str_replace(".", ",", $tuoterowi['myynti_era']));
     // yksikkö
     $worksheet->write($excelrivi, $excelsarake++, $tuoterowi['yksikko']);
-    
+
     // asiakashinta
     $worksheet->write($excelrivi, $excelsarake++, str_replace(".", ",", hintapyoristys($tilausrivi['hinta'])));
     // asiakkaan valuutta

@@ -72,9 +72,19 @@ class MagentoClient {
   private $_hintakentta = "myymalahinta";
 
   /**
+   * Verkkokaupassa käytettävät tuoteryhmät, default tuoteryhmä tai tuotepuu
+   */
+  private $_kategoriat = "tuoteryhma";
+
+  /**
    * Onko "Category access control"-moduli on asennettu? Oletukena ei oo.
    */
   private $_categoryaccesscontrol = FALSE;
+
+  /**
+   * Configurable-tuotteella käytettävä nimityskenttä, oletuksena nimitys
+   */
+  private $_configurable_tuote_nimityskentta = "nimitys";
 
   /**
    * Tämän yhteyden aikana sattuneiden virheiden määrä
@@ -122,6 +132,13 @@ class MagentoClient {
 
     $categoryaccesscontrol = $this->_categoryaccesscontrol;
 
+    $selected_category = $this->_kategoriat;
+
+    if ($selected_category != 'tuoteryhma') {
+      $this->log("Ohitetaan kategorioiden luonti. Kategoriatyypiksi valittu tuotepuu.");
+      return 0;
+    }
+
     $parent_id = $this->_parent_id; // Magento kategorian tunnus, jonka alle kaikki tuoteryhmät lisätään (pitää katsoa magentosta)
     $count = 0;
 
@@ -133,7 +150,6 @@ class MagentoClient {
         $category_tree = $this->getCategories();
 
         $kategoria['try_fi'] = utf8_encode($kategoria['try_fi']);
-
         // Kasotaan löytyykö tuoteryhmä
         if (!$this->findCategory($kategoria['try_fi'], $category_tree['children'])) {
 
@@ -141,7 +157,7 @@ class MagentoClient {
           $category_data = array(
             'name'                  => $kategoria['try_fi'],
             'is_active'             => 1,
-            'position'               => 1,
+            'position'              => 1,
             'default_sort_by'       => 'position',
             'available_sort_by'     => 'position',
             'include_in_menu'       => 1
@@ -151,7 +167,6 @@ class MagentoClient {
             // HUOM: Vain jos "Category access control"-moduli on asennettu
             $category_data['accesscontrol_show_group'] = 0;
           }
-
           // Kutsutaan soap rajapintaa
           $category_id = $this->_proxy->call($this->_session, 'catalog_category.create',
             array($parent_id, $category_data)
@@ -186,6 +201,8 @@ class MagentoClient {
 
     $hintakentta = $this->_hintakentta;
 
+    $selected_category = $this->_kategoriat;
+
     // Tuote countteri
     $count = 0;
 
@@ -209,6 +226,8 @@ class MagentoClient {
     foreach ($dnstuote as $tuote) {
       $tuote_clean = $tuote['tuoteno'];
 
+      $category_ids = array ();
+
       if (is_numeric($tuote['tuoteno'])) $tuote['tuoteno'] = "SKU_".$tuote['tuoteno'];
 
       // Lyhytkuvaus ei saa olla magentossa tyhjä.
@@ -220,8 +239,20 @@ class MagentoClient {
       $tuote['kuluprosentti'] = ($tuote['kuluprosentti'] == 0) ? '' : $tuote['kuluprosentti'];
 
       // Etsitään kategoria_id tuoteryhmällä
-      $category_id = $this->findCategory(utf8_encode($tuote['try_nimi']), $category_tree['children']);
+      if ($selected_category == 'tuoteryhma') {
+        $category_ids[] = $this->findCategory(utf8_encode($tuote['try_nimi']), $category_tree['children']);
+      }
+      else {
+        // Etsitään kategoria_id:t tuotepuun tuotepolulla
+        $tuotepuun_nodet = $tuote['tuotepuun_nodet'];
 
+        // Lisätään myös tuotepuun kategoriat
+        if (isset($tuotepuun_nodet) and count($tuotepuun_nodet) > 0) {
+          foreach ($tuotepuun_nodet as $tuotepolku) {
+            $category_ids[] = $this->createCategoryTree($tuotepolku);
+          }
+        }
+      }
       // Jos tuote ei oo osa configurable_grouppia, niin niitten kuuluu olla visibleja.
       if (isset($individual_tuotteet[$tuote_clean])) {
         $visibility = self::CATALOG_SEARCH;
@@ -230,8 +261,39 @@ class MagentoClient {
         $visibility = self::NOT_VISIBLE_INDIVIDUALLY;
       }
 
+      $tuote_ryhmahinta_data = array ();
+
+      if (isset($tuote['asiakashinnat']) and count($tuote['asiakashinnat'])> 0) {
+        foreach ($tuote['asiakashinnat'] as $asiakashintarivi) {
+
+          $asiakasryhma_nimi = $asiakashintarivi['asiakasryhma'];
+          $asiakashinta = $asiakashintarivi['hinta'];
+
+          $asiakasryhma_tunnus = $this->findCustomerGroup(utf8_encode($asiakasryhma_nimi));
+
+          if ($asiakasryhma_tunnus != 0) {
+            $tuote_ryhmahinta_data[] = array(
+              'websites' => explode(" ", $tuote['nakyvyys']),
+              'customer_group_id' => $asiakasryhma_tunnus,
+              'qty' => 1,
+              'price' => $asiakashinta
+            );
+          }
+        }
+      }
+
+      $multi_data = array();
+
+      // Simple tuotteiden parametrit kuten koko ja väri
+      foreach ($tuote['tuotteen_parametrit'] as $parametri) {
+        $key = $parametri['option_name'];
+        $multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
+      }
+
+
+
       $tuote_data = array(
-        'categories'            => array($category_id),
+        'categories'            => $category_ids,
         'websites'              => explode(" ", $tuote['nakyvyys']),
         'name'                  => utf8_encode($tuote['nimi']),
         'description'           => utf8_encode($tuote['kuvaus']),
@@ -239,7 +301,7 @@ class MagentoClient {
         'weight'                => $tuote['tuotemassa'],
         'status'                => self::ENABLED,
         'visibility'            => $visibility,
-        'price'                 => $tuote[$hintakentta],
+        'price'                 => sprintf('%0.2f', $tuote[$hintakentta]),
         'special_price'         => $tuote['kuluprosentti'],
         'tax_class_id'          => $this->getTaxClassID(),
         'meta_title'            => '',
@@ -248,6 +310,10 @@ class MagentoClient {
         'campaign_code'         => utf8_encode($tuote['campaign_code']),
         'onsale'                => utf8_encode($tuote['onsale']),
         'target'                => utf8_encode($tuote['target']),
+        'tier_price'            => $tuote_ryhmahinta_data,
+        'additional_attributes' => array('multi_data' => $multi_data),
+        'name2'                 => utf8_encode("Secondary name"),
+        'pickup_product'        => TRUE,
       );
 
       // Lisätään tai päivitetään tuote
@@ -301,6 +367,11 @@ class MagentoClient {
           $product_id = $result['product_id'];
 
           $this->log("Tuote '{$tuote['tuoteno']}' päivitetty (simple) " . print_r($tuote_data, true));
+
+          // Update tier prices
+          /*$result = $this->_proxy->call($this->_session, 'product_tier_price.update', array($tuote['tuoteno'], $tuote_ryhmahinta_data));
+
+          $this->log("Tuotteen '{$tuote['tuoteno']}' erikoishinnasto $result päivitetty " . print_r($tuote_ryhmahinta_data, true));*/
         }
         catch (Exception $e) {
           $this->_error_count++;
@@ -348,8 +419,15 @@ class MagentoClient {
 
     $hintakentta = $this->_hintakentta;
 
+    // Mitä kenttää käytetään configurable_tuotteen nimenä
+    $configurable_tuote_nimityskentta = $this->_configurable_tuote_nimityskentta;
+
+    $selected_category = $this->_kategoriat;
+
     // Lisätään tuotteet
     foreach ($dnslajitelma as $nimitys => $tuotteet) {
+
+      $category_ids = array ();
 
       // Jos lyhytkuvaus on tyhjä, käytetään kuvausta?
       if ($tuotteet[0]['lyhytkuvaus'] == '') {
@@ -359,9 +437,21 @@ class MagentoClient {
       // Erikoishinta
       $tuotteet[0]['kuluprosentti'] = ($tuotteet[0]['kuluprosentti'] == 0) ? '' : $tuotteet[0]['kuluprosentti'];
 
-      // Etsitään kategoria mihin tuote lisätään
-      $category_id = $this->findCategory($tuotteet[0]['try_nimi'], $category_tree['children']);
+      // Etsitään kategoria_id tuoteryhmällä
+      if ($selected_category == 'tuoteryhma') {
+        $category_ids[] = $this->findCategory($tuotteet[0]['try_nimi'], $category_tree['children']);
+      }
+      else {
+        // Etsitään kategoria_id:t tuotepuun tuotepolulla
+        $tuotepuun_nodet = $tuotteet[0]['tuotepuun_nodet'];
 
+        // Lisätään myös tuotepuun kategoriat
+        if (isset($tuotepuun_nodet) and count($tuotepuun_nodet) > 0) {
+          foreach ($tuotepuun_nodet as $tuotepolku) {
+            $category_ids[] = $this->createCategoryTree($tuotepolku);
+          }
+        }
+      }
       // Tehdään 'associated_skus' -kenttä
       // Vaatii, että Magentoon asennetaan 'magento-improve-api' -moduli: https://github.com/jreinke/magento-improve-api
       $lapsituotteet_array = array();
@@ -374,24 +464,25 @@ class MagentoClient {
 
       // Configurable tuotteen tiedot
       $configurable = array(
-        'categories'      => array($category_id),
-        'websites'        => explode(" ", $tuotteet[0]['nakyvyys']),
-        'name'          => utf8_encode($tuotteet[0]['nimitys']),
+        'categories'            => $category_ids,
+        'websites'              => explode(" ", $tuotteet[0]['nakyvyys']),
+        'name'                  => utf8_encode($tuotteet[0][$configurable_tuote_nimityskentta]),
         'description'           => utf8_encode($tuotteet[0]['kuvaus']),
         'short_description'     => utf8_encode($tuotteet[0]['lyhytkuvaus']),
         'campaign_code'         => utf8_encode($tuotteet[0]['campaign_code']),
         'onsale'                => utf8_encode($tuotteet[0]['onsale']),
         'target'                => utf8_encode($tuotteet[0]['target']),
-        'featured_priority'    => utf8_encode($tuotteet[0]['jarjestys']),
+        'featured_priority'     => utf8_encode($tuotteet[0]['jarjestys']),
         'weight'                => $tuotteet[0]['tuotemassa'],
         'status'                => self::ENABLED,
         'visibility'            => self::CATALOG_SEARCH, // Configurablet nakyy kaikkialla
         'price'                 => $tuotteet[0][$hintakentta],
-        'special_price'      => $tuotteet[0]['kuluprosentti'],
+        'special_price'         => $tuotteet[0]['kuluprosentti'],
         'tax_class_id'          => $this->getTaxClassID(), // 24%
         'meta_title'            => '',
         'meta_keyword'          => '',
         'meta_description'      => '',
+        'color'                 => "Magenta",
         'associated_skus'       => $lapsituotteet_array,
       );
 
@@ -412,10 +503,11 @@ class MagentoClient {
             $multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
           }
 
-          $simple_tuote_data = array(  'price'          => $tuote[$hintakentta],
-            'short_description'    => utf8_encode($tuote['lyhytkuvaus']),
-            'featured_priority'    => utf8_encode($tuote['jarjestys']),
-            'visibility'      => self::NOT_VISIBLE_INDIVIDUALLY,
+          $simple_tuote_data = array(
+            'price'                 => $tuote[$hintakentta],
+            'short_description'     => utf8_encode($tuote['lyhytkuvaus']),
+            'featured_priority'     => utf8_encode($tuote['jarjestys']),
+            'visibility'            => self::NOT_VISIBLE_INDIVIDUALLY,
             'additional_attributes' => array('multi_data' => $multi_data),
           );
 
@@ -701,6 +793,82 @@ class MagentoClient {
   /// Private functions ///
 
   /**
+   * Parametrinä tulee yhden tuotteen koko tuotepolku
+   * eli tuotepuun tuoteryhmät järjestyksessä rootista lähtien
+   *
+   * @return syvimmän kategorian id
+   */
+  private function createCategoryTree($ancestors) {
+
+    $cat_id = $this->_parent_id;
+
+    foreach ($ancestors as $nimi) {
+      $cat_id = $this->createSubCategory($nimi, $cat_id);
+    }
+
+    return $cat_id;
+  }
+
+  /**
+   * Lisää tuotepuun kategorian annettun category_id:n alle
+   * jos sellaista ei ole jo olemassa
+   *
+   * @return luodun tai löydetyn kategorian id
+   */
+  private function createSubCategory($name, $parent_cat_id) {
+
+    // otetaan koko tuotepuu, valitaan siitä eka solu idn perusteella
+    // sen lapsista etsitään nimeä, jos ei löydy, luodaan viimeisimmän idn alle
+    // lopuksi palautetaan id
+    $name = utf8_encode($name);
+    $categoryaccesscontrol = $this->_categoryaccesscontrol;
+    $magento_tree = $this->getCategories();
+    $results = $this->getParentArray($magento_tree, "$parent_cat_id");
+
+    // Etsitään kategoriaa
+    foreach ($results[0]['children'] as $k => $v) {
+      if (strcasecmp($name, $v['name']) == 0) {
+        return $v['category_id'];
+      }
+    }
+
+    // Lisätään kategoria, jos ei löytynyt
+    $category_data = array(
+      'name'                  => $name,
+      'is_active'             => 1,
+      'position'              => 1,
+      'default_sort_by'       => 'position',
+      'available_sort_by'     => 'position',
+      'include_in_menu'       => 1,
+      'is_anchor'             => 1
+    );
+
+    if ($categoryaccesscontrol) {
+      // HUOM: Vain jos "Category access control"-moduli on asennettu
+      $category_data['accesscontrol_show_group'] = 0;
+    }
+
+    // Kutsutaan soap rajapintaa
+    $category_id = $this->_proxy->call($this->_session, 'catalog_category.create',
+      array($parent_cat_id, $category_data)
+    );
+    $this->log("Lisättiin tuotepuun kategoria:$name tunnuksella: $category_id");
+
+    unset($this->_category_tree);
+
+    return $category_id;
+  }
+
+  /**
+   *  Tonkii arraysta key->value pairia ja jos löytyy nii palauttaa sen
+   */
+  private function getParentArray($tree, $parent_cat_id) {
+    //etsitään keytä "category_id" valuella isatunnus ja return sen lapset
+    return search_array_key_for_value_recursive($tree, 'category_id', $parent_cat_id);
+
+  }
+
+  /**
    * Hakee oletus attribuuttisetin
    *
    * @return AttributeSet
@@ -757,7 +925,6 @@ class MagentoClient {
    * Etsii kategoriaa nimeltä Magenton kategoria puusta.
    */
   private function findCategory($name, $root) {
-
     $category_id = false;
 
     foreach ($root as $i => $category) {
@@ -785,6 +952,24 @@ class MagentoClient {
     return $category_id;
   }
 
+  // Etsii asiakasryhmää nimen perusteella Magentosta, palauttaa id:n
+  private function findCustomerGroup($name) {
+
+    $customer_groups = $this->_proxy->call(
+      $this->_session,
+      'customer_group.list');
+
+    $id = 0;
+    foreach ($customer_groups as $asryhma) {
+      if (strcasecmp($asryhma['customer_group_code'], $name) == 0) {
+        $id = $asryhma['customer_group_id'];
+        break;
+      }
+    }
+
+    return $id;
+  }
+
   /**
    * Palauttaa attribuutin option id:n
    *
@@ -804,6 +989,7 @@ class MagentoClient {
     foreach ($attribute_list as $attribute) {
       if (strcasecmp($attribute['code'], $name) == 0) {
         $attribute_id = $attribute['attribute_id'];
+        $attribute_type = $attribute['type'];
         break;
       }
     }
@@ -819,11 +1005,46 @@ class MagentoClient {
         $attribute_id
       )
     );
-
     // Etitään optionsin value
     foreach ($options as $option) {
       if (strcasecmp($option['label'], $value) == 0) {
         return $option['value'];
+      }
+    }
+
+    // Jos optionssia ei ole mutta tyyppi on select niin luodaan se
+    if ($attribute_type == "select") {
+      $optionToAdd = array(
+        "label" => array(
+          array(
+            "store_id" => 0,
+            "value" => $value
+          )
+        ),
+        "is_default" => 0
+      );
+      $this->_proxy->call($this->_session,
+        "product_attribute.addOption",
+        array(
+          $attribute_id,
+          $optionToAdd
+        )
+      );
+      echo "Luotiin uusi attribuutti $value optioid $attribute_id";
+
+      // Haetaan kaikki attribuutin optionssit uudestaan..
+      $options = $this->_proxy->call(
+        $this->_session,
+        "product_attribute.options",
+        array(
+          $attribute_id
+        )
+      );
+      // Etitään optionsin value uudestaan..
+      foreach ($options as $option) {
+        if (strcasecmp($option['label'], $value) == 0) {
+          return $option['value'];
+        }
       }
     }
 
@@ -991,6 +1212,175 @@ class MagentoClient {
   }
 
   /**
+   * Lisää päivitettyjä asiakkaita Magento-verkkokauppaan.
+   *
+   * @param array   $dnsasiakas Pupesoftin tuote_exportin palauttama asiakas array
+   * @return int               Lisättyjen asiakkaiden määrä
+   */
+  public function lisaa_asiakkaat(array $dnsasiakas) {
+
+    $this->log("Lisätään asiakkaita");
+    // Asiakas countteri
+    $count = 0;
+
+    // Lisätään asiakkaat ja osoitteet erissä
+    foreach ($dnsasiakas as $asiakas) {
+
+
+      $asiakasryhma_id = $this->findCustomerGroup(utf8_encode($asiakas['asiakasryhma']));
+
+      $asiakas_data = array(
+        'email'          => $asiakas['yhenk_email'],
+        'firstname'        => $asiakas['nimi'],
+        'lastname'        => $asiakas['nimi'],
+        'website_id'      => $asiakas['magento_website_id'],
+        'taxvat'        => $asiakas['ytunnus'],
+        'external_id'      => $asiakas['asiakasnro'],
+        'group_id'        => $asiakasryhma_id,
+      );
+
+      $laskutus_osoite_data = array(
+        'firstname'        => $asiakas['laskutus_nimi'],
+        'lastname'        => $asiakas['laskutus_nimi'],
+        'street'        => array($asiakas['laskutus_osoite']),
+        'postcode'        => $asiakas['laskutus_postino'],
+        'city'          => $asiakas['laskutus_postitp'],
+        'country_id'      => $asiakas['maa'],
+        'telephone'        => $asiakas['yhenk_puh'],
+        'company'        => $asiakas['nimi'],
+        'is_default_billing'    => true,
+      );
+
+      $toimitus_osoite_data = array(
+        'firstname'        => $asiakas['toimitus_nimi'],
+        'lastname'        => $asiakas['toimitus_nimi'],
+        'street'        => array($asiakas['toimitus_osoite']),
+        'postcode'        => $asiakas['toimitus_postino'],
+        'city'          => $asiakas['toimitus_postitp'],
+        'country_id'      => $asiakas['maa'],
+        'telephone'        => $asiakas['yhenk_puh'],
+        'company'        => $asiakas['nimi'],
+        'is_default_shipping' => true
+      );
+
+      // Lisätään tai päivitetään asiakas
+
+      // Jos asiakasta ei ole olemassa (sillä ei ole pupessa magento_tunnus:ta) niin lisätään se
+      if (empty($asiakas['magento_tunnus'])) {
+        try {
+          $result = $this->_proxy->call(
+            $this->_session,
+            'customer.create',
+            array(
+              $asiakas_data
+            ));
+
+          $this->log("Asiakas '{$asiakas['tunnus']}' / {$result} lisätty " . print_r($asiakas_data, true));
+          $asiakas['magento_tunnus'] = $result;
+
+          // Päivitetään magento_tunnus pupeen
+          $tarksql = "SELECT *
+                      FROM asiakkaan_avainsanat
+                      WHERE yhtio      = '{$asiakas['yhtio']}'
+                      AND liitostunnus = '{$asiakas['tunnus']}'
+                      AND avainsana    = 'magento_tunnus'";
+          $tarkesult = pupe_query($tarksql);
+          $ahy = mysql_num_rows($tarkesult);
+
+          if ($ahy == 0) {
+            $ahinsert = "INSERT INTO asiakkaan_avainsanat SET
+                         yhtio        = '{$asiakas['yhtio']}',
+                         liitostunnus = '{$asiakas['tunnus']}',
+                         tarkenne     = '{$asiakas['magento_tunnus']}',
+                         avainsana    = 'magento_tunnus',
+                         laatija      = 'Magento',
+                         luontiaika   = now(),
+                         muutospvm    = now()";
+            pupe_query($ahinsert);
+          }
+          else {
+            $query = "UPDATE asiakkaan_avainsanat
+                      SET tarkenne = '{$asiakas['magento_tunnus']}'
+                      WHERE yhtio      = '{$asiakas['yhtio']}'
+                      AND liitostunnus = '{$asiakas['tunnus']}'
+                      AND avainsana    = 'magento_tunnus'";
+            pupe_query($query);
+          }
+        }
+        catch (Exception $e) {
+          $this->_error_count++;
+          $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' lisäys epäonnistui " . print_r($asiakas_data, true), $e);
+        }
+      }
+      // Asiakas on jo olemassa, päivitetään
+      else {
+        try {
+          $result = $this->_proxy->call(
+            $this->_session,
+            'customer.update',
+            array(
+              $asiakas['magento_tunnus'],
+              $asiakas_data
+            ));
+
+          $this->log("Asiakas '{$asiakas['tunnus']}' / {$asiakas['magento_tunnus']} päivitetty " . print_r($asiakas_data, true));
+        }
+        catch (Exception $e) {
+          $this->_error_count++;
+          $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' päivitys epäonnistui " . print_r($asiakas_data, true), $e);
+        }
+      }
+
+      // Haetaan ensin asiakkaan laskutus- ja toimitusosoitteet
+      $address_array = $this->_proxy->call(
+        $this->_session,
+        'customer_address.list',
+        $asiakas['magento_tunnus']);
+      // Ja poistetaan ne
+      if (count($address_array) > 0) {
+        foreach ($address_array as $address) {
+          $result = $this->_proxy->call(
+            $this->_session, 'customer_address.delete', $address['customer_address_id']);
+        }
+      }
+
+      if (isset($laskutus_osoite_data['firstname']) and !empty($laskutus_osoite_data['firstname'])) {
+        try {
+          // Lisätään laskutusosoite
+          $result = $this->_proxy->call(
+            $this->_session,
+            'customer_address.create',
+            array('customerId' => $asiakas['magento_tunnus'], 'addressdata' => ($laskutus_osoite_data)));
+        }
+        catch (Exception $e) {
+          $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' laskutusosoitteen päivitys epäonnistui " . print_r($laskutus_osoite_data, true), $e);
+        }
+      }
+
+      if (isset($toimitus_osoite_data['firstname']) and !empty($toimitus_osoite_data['firstname'])) {
+        try {
+          // Lisätään toimitusosoite
+          $result = $this->_proxy->call(
+            $this->_session,
+            'customer_address.create',
+            array('customerId' => $asiakas['magento_tunnus'], 'addressdata' => ($toimitus_osoite_data)));
+        }
+        catch (Exception $e) {
+          $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' toimitusosoitteen päivitys epäonnistui " . print_r($toimitus_osoite_data, true), $e);
+        }
+      }
+      // Lisätään asiakas countteria
+      $count++;
+
+    }
+
+    $this->log("$count asiakasta päivitetty");
+
+    // Palautetaan pävitettyjen asiakkaiden määrä
+    return $count;
+  }
+
+  /**
    * Asettaa tax_class_id:n
    * Oletus 0
    *
@@ -1021,13 +1411,34 @@ class MagentoClient {
   }
 
   /**
+   * Asettaa _kategoriat-muuttujan, parametri säätelee
+   * perustetaanko magenton tuoteryhmärakenne tuoteryhmien vai tuotepuun pohjalta
+   * Oletus 'tuoteryhma', vaihtoehtoisesti tuotepuu
+   *
+   * @param string  $magento_kategoriat
+   */
+  public function setKategoriat($magento_kategoriat) {
+    $this->_kategoriat = $magento_kategoriat;
+  }
+
+  /**
    * Asettaa categoryaccesscontrol-muuttujan
    * Oletus FALSE
    *
-   * @param string  $$categoryaccesscontrol BOOLEAN
+   * @param string  $categoryaccesscontrol BOOLEAN
    */
   public function setCategoryaccesscontrol($categoryaccesscontrol) {
     $this->_categoryaccesscontrol = $categoryaccesscontrol;
+  }
+
+  /**
+   * Asettaa configurable_nimityskentta-muuttujan
+   * Oletus 'nimitys'
+   *
+   * @param string  $configurable_nimityskentta
+   */
+  public function setConfigurableNimityskentta($configurable_tuote_nimityskentta) {
+    $this->_configurable_tuote_nimityskentta = $configurable_tuote_nimityskentta;
   }
 
   /**

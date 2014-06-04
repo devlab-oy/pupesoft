@@ -3117,7 +3117,7 @@ if (isset($jatka)) {
 
   list($varasto, $varastot) = palauta_varasto($args);
 
-  if ($toim == 'PIKATILAUS') {
+  if ($toim == 'PIKATILAUS' or ($toim == 'EXTRANET' and !empty($eilahe_osatoim))) {
 
     $_yhtiorow_talteen = $yhtiorow;
     $_yhtiotoimipaikka = hae_varaston_toimipaikka($varasto);

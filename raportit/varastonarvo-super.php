@@ -16,7 +16,7 @@ if (isset($_POST["tee"])) {
 }
 
 // T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta
-$useslave = 1;
+$useslave = 2;
 
 if (!$php_cli) {
   require("../inc/parametrit.inc");
@@ -860,7 +860,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
         $summaus_lisa = "";
       }
 
-      $query = "SELECT
+      $query = "SELECT tuotepaikat.tuoteno,
                 sum(tuotepaikat.saldo) saldo,
                 sum(tuotepaikat.saldo*if(tuote.epakurantti100pvm = '0000-00-00', if(tuote.epakurantti75pvm = '0000-00-00', if(tuote.epakurantti50pvm = '0000-00-00', if(tuote.epakurantti25pvm = '0000-00-00', tuote.kehahin, tuote.kehahin * 0.75), tuote.kehahin * 0.5), tuote.kehahin * 0.25), 0)) varasto,
                 sum(tuotepaikat.saldo*tuote.kehahin) bruttovarasto
@@ -878,8 +878,8 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       $vararvorow = mysql_fetch_assoc($vararvores);
 
       $kpl = (float) $vararvorow["saldo"];
-      $varaston_arvo = (float) $vararvorow["varasto"];
-      $bruttovaraston_arvo = (float) $vararvorow["bruttovarasto"];
+      $varaston_arvo = hinta_kuluineen( $vararvorow["tuoteno"], (float) $vararvorow["varasto"] );
+      $bruttovaraston_arvo = hinta_kuluineen( $vararvorow["tuoteno"], (float) $vararvorow["bruttovarasto"] );
     }
 
     // jos summaustaso on per paikka, otetaan varastonmuutos vain silt‰ paikalta

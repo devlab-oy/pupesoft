@@ -83,14 +83,14 @@ if ($php_cli) {
     $eiketjut = "";
 
     // jos komentorivin kolmas arg on "eilinen" niin edelliselle laskutus p‰iv‰lle, ohitetaan laskutusviikonp‰iv‰t
-    if ($argv[3] == "eilinen") {
+    if (isset($argv[3]) and $argv[3] == "eilinen") {
       $laskkk  = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
       $laskpp  = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
       $laskvv  = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
     }
 
     // jos komentorivin kolmas arg on "eilinen" niin edelliselle laskutus p‰iv‰lle
-    if ($argv[3] == "eilinen_eikaikki") {
+    if (isset($argv[3]) and $argv[3] == "eilinen_eikaikki") {
       $laskkk  = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
       $laskpp  = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
       $laskvv  = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
@@ -98,19 +98,19 @@ if ($php_cli) {
     }
 
     // jos komentorivin kolmas arg on "eiketjut"
-    if ($argv[3] == "eiketjut") {
+    if (isset($argv[3]) and $argv[3] == "eiketjut") {
       $eiketjut = "KYLLA";
     }
 
     // jos komentorivin kolmas arg on "kaikki"
-    if ($argv[3] == "kaikki") {
+    if (isset($argv[3]) and $argv[3] == "kaikki") {
       $laskutakaikki = "ON";
     }
 
     // jos kuukausilaskutus on p‰‰ll‰ (cron.monthly), niin ei v‰ltt‰m‰tt‰ haluta ajaa p‰iv‰laskutusta
     // kukauden vikana p‰iv‰n‰, koska silloin asiakkaalle saattaa menn‰ kaksi laskua vikana p‰iv‰n‰ jos
     // laskutusviikonp‰iv‰t osuu sillai kivasti
-    if ($argv[3] == "skippaa_kuukauden_vikapaiva" and date("d") == date("t")) {
+    if (isset($argv[3]) and $argv[3] == "skippaa_kuukauden_vikapaiva" and date("d") == date("t")) {
       echo "HUOM: P‰iv‰laskutusta ei ajeta kuukauden vikana p‰iv‰n‰!<br>\n";
       exit;
     }
@@ -1229,12 +1229,12 @@ else {
             $addtil = pupe_query($query);
 
             if ($silent == "") {
-              $tulos_ulos .= "<tr><td>".t("Lis‰ttiin rahtikulut")."</td><td>$laskurow[tunnus]</td><td>$laskurow[toimitustapa]</td><td>$rahtihinta</td><td>$yhtiorow[valkoodi]</td><td>$pakka[kilot] kg</td></tr>\n";
+              $tulos_ulos .= "<tr><td>".t("Lis‰ttiin rahtikulut")."</td><td>$laskurow[tunnus]</td><td>$laskurow[toimitustapa]</td><td>$rah_hinta</td><td>$yhtiorow[valkoodi]</td><td>$pakka[kilot] kg</td></tr>\n";
             }
 
             $rah++;
           }
-          elseif ($rahtihinta != 0 and $silent == "") {
+          elseif ($rah_hinta != 0 and $silent == "") {
             $tulos_ulos .= "<tr><td>".t("Rahtimaksua ei osattu lis‰t‰!")." $virhe</td><td>$otsikot</td><td>$laskurow[toimitustapa]</td><td></td><td></td><td>$pakka[kilot] kg</td></tr>\n";
           }
         }

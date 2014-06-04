@@ -147,7 +147,7 @@ if ($tee == 'delkesken') {
 if ($tee == 'deloikeu') {
   $query = "UPDATE kuka
             SET profiilit   = '',
-            aktiivinen = 1,
+            aktiivinen = 0,
             muuttaja   = '{$kukarow['kuka']}',
             muutospvm  = now()
             WHERE kuka = '{$selkuka}'
@@ -574,6 +574,7 @@ if ($tee == 'MUUTA') {
               taso                          = '{$taso}',
               tilaus_valmis                 = '{$tilaus_valmis}',
               hinnat                        = '{$hinnat}',
+              kulujen_laskeminen_hintoihin  = '{$kulujen_laskeminen_hintoihin}',
               saatavat                      = '{$saatavat}',
               keraajanro                    = '{$keraajanro}',
               myyja                         = '{$myyja}',
@@ -925,6 +926,14 @@ if ($tee == 'MUUTA') {
       echo "<option value='0'  {$sel0}>",t("Normaali"),"</option>";
       echo "<option value='1'  {$sel1}>",t("N‰ytet‰‰n vain tuotteen myyntihinta"),"</option>";
       echo "<option value='-1' {$sel2}>",t("Hintoja ei n‰ytet‰"),"</option>";
+      echo "</select></td></tr>";
+
+      $sel = $krow['kulujen_laskeminen_hintoihin'] == 'K' ? "selected" : "";
+
+      echo "<tr><th align='left'>",t("kuluprosentin esitt‰minen"),":</th>";
+      echo "<td><select name='kulujen_laskeminen_hintoihin'>";
+      echo "<option value=''>",t("Hintoihin ei lasketa kuluprosenttia"),"</option>";
+      echo "<option value='K' {$sel}>",t("Hintoihin lasketaan kuluprosentti"),"</option>";
       echo "</select></td></tr>";
 
       if ($toim == 'extranet') {
@@ -1570,12 +1579,12 @@ if ($tee == "") {
             FROM kuka
             WHERE kuka.yhtio  = '{$kukarow['yhtio']}'
             AND kuka.extranet = '{$extrsel}'
-            ORDER BY kuka.aktiivinen, kuka.nimi";
+            ORDER BY kuka.aktiivinen DESC, kuka.nimi";
   $kukares = pupe_query($query);
 
   echo "<optgroup label='",t("Aktiiviset k‰ytt‰j‰t"),"'>";
 
-  $edakt = 0;
+  $edakt = 1;
   $poislisa = "";
 
   while ($kurow = mysql_fetch_assoc($kukares)) {

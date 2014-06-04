@@ -314,9 +314,11 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
     $komm .= "$kuljetusohjeet";
   }
 
-  if ($postirow['tilausyhteyshenkilo'] != '' or $postirow['asiakkaan_tilausnumero'] != '') $komm .= "\n";
-  $komm .= $postirow['tilausyhteyshenkilo'] != '' ? t("Tilaaja").": {$postirow['tilausyhteyshenkilo']}. " : '';
-  $komm .= $postirow['asiakkaan_tilausnumero'] != '' ? t("Tilaus").": {$postirow['asiakkaan_tilausnumero']}. " : '';
+  if ($yhtiorow["osoitelappu_lisatiedot"] == "") {
+    if ($postirow['tilausyhteyshenkilo'] != '' or $postirow['asiakkaan_tilausnumero'] != '') $komm .= "\n";
+    $komm .= $postirow['tilausyhteyshenkilo'] != '' ? t("Tilaaja").": {$postirow['tilausyhteyshenkilo']}. " : '';
+    $komm .= $postirow['asiakkaan_tilausnumero'] != '' ? t("Tilaus").": {$postirow['asiakkaan_tilausnumero']}. " : '';
+  }
 
   $pdf->draw_paragraph(70, 18, 15, 380, $komm, $firstpage, $isobold);
 

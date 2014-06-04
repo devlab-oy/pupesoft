@@ -758,6 +758,7 @@ else {
       $toimipaikka_kayttajalta = (!isset($toimipaikka) and $kukarow['toimipaikka'] == 0);
       if ($toimipaikka_requestista or $toimipaikka_kayttajalta) {
         $sel = "selected";
+        $toimipaikka = 0;
       }
 
       echo "<option value='0' {$sel}>".t('Ei toimipaikkaa')."</option>";
@@ -840,7 +841,7 @@ else {
 
     $sumhaku = '';
 
-    if (isset($toimipaikka) and $toimipaikka != "kaikki") {
+    if (isset($toimipaikka) and "{$toimipaikka}" != "kaikki") {
 
       $toimipaikka = (int) $toimipaikka;
 

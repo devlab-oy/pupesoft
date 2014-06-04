@@ -1039,18 +1039,18 @@ if ($tee == 'Z') {
 
       $query = "SELECT GROUP_CONCAT(tunnus) tunnukset
                 FROM varastopaikat
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tyyppi != 'P'
-                AND toimipaikka = '{$kukarow['toimipaikka']}'";
+                WHERE yhtio      = '{$kukarow['yhtio']}'
+                AND tyyppi      != 'P'
+                AND toimipaikka  = '{$kukarow['toimipaikka']}'";
       $toimipaikka_varasto_res = pupe_query($query);
       $toimipaikka_varasto_row = mysql_fetch_assoc($toimipaikka_varasto_res);
 
       if ($toimipaikka_varasto_row['tunnukset'] == '' and !empty($kukarow['toimipaikka'])) {
         $query = "SELECT GROUP_CONCAT(tunnus) tunnukset
                   FROM varastopaikat
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tyyppi != 'P'
-                  AND toimipaikka = 0";
+                  WHERE yhtio      = '{$kukarow['yhtio']}'
+                  AND tyyppi      != 'P'
+                  AND toimipaikka  = 0";
         $toimipaikka_varasto_res = pupe_query($query);
         $toimipaikka_varasto_row = mysql_fetch_assoc($toimipaikka_varasto_res);
       }

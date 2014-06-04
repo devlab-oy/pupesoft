@@ -10910,8 +10910,8 @@ if (!function_exists("t_maanimi")) {
     }
 
     $query = "SELECT {$kieli} AS haettu, fi
-                  FROM sanakirja
-                  WHERE fi LIKE BINARY '{$maa} - %'";
+              FROM sanakirja
+              WHERE fi LIKE BINARY '{$maa} - %'";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) > 0) {
@@ -15928,12 +15928,12 @@ if (!function_exists("hae_hyvityshinta")) {
 
               // haetaan asiakkaan segmentit
               $query = "SELECT parent.tunnus
-                          FROM puun_alkio
-                          JOIN dynaaminen_puu AS node ON (puun_alkio.yhtio = node.yhtio and puun_alkio.laji = node.laji and puun_alkio.puun_tunnus = node.tunnus)
-                          JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft AND parent.lft > 0)
-                          WHERE puun_alkio.yhtio = '$kukarow[yhtio]'
-                          AND puun_alkio.laji    = 'asiakas'
-                          AND puun_alkio.liitos  = '{$liitostunnus}'";
+                        FROM puun_alkio
+                        JOIN dynaaminen_puu AS node ON (puun_alkio.yhtio = node.yhtio and puun_alkio.laji = node.laji and puun_alkio.puun_tunnus = node.tunnus)
+                        JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft AND parent.lft > 0)
+                        WHERE puun_alkio.yhtio = '$kukarow[yhtio]'
+                        AND puun_alkio.laji    = 'asiakas'
+                        AND puun_alkio.liitos  = '{$liitostunnus}'";
               $as_seg_res = pupe_query($query);
 
               $segmentti = false;
@@ -20476,11 +20476,11 @@ if (!function_exists('onko_suoratoimitus')) {
     $rivitunnus = (int) $rivitunnus;
 
     $query = "SELECT tilausrivi.otunnus, lasku.nimi, tilausrivin_lisatiedot.suoraan_laskutukseen
-                 FROM tilausrivin_lisatiedot
-                 JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
-                 JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
-                 WHERE tilausrivi.yhtio                      = '{$kukarow['yhtio']}'
-                 and tilausrivin_lisatiedot.tilausrivilinkki = '{$rivitunnus}'";
+              FROM tilausrivin_lisatiedot
+              JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
+              JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
+              WHERE tilausrivi.yhtio                      = '{$kukarow['yhtio']}'
+              and tilausrivin_lisatiedot.tilausrivilinkki = '{$rivitunnus}'";
     $varastoon_result = pupe_query($query);
 
     return $varastoon_result;
@@ -21223,27 +21223,27 @@ if (!function_exists('uusi_saapuminen')) {
 
     // meill‰ on $toimittajarow haettuna ylh‰‰ll‰
     $query = "INSERT into lasku set
-                  yhtio                   = '$kukarow[yhtio]',
-                  laskunro                = '$id',
-                  ytunnus                 = '$toimittajarow[ytunnus]',
-                  nimi                    = '$toimittajarow[nimi]',
-                  valkoodi                = '$toimittajarow[oletus_valkoodi]',
-                  vienti                  = '$toimittajarow[oletus_vienti]',
-                  vienti_kurssi           = '$kurssi',
-                  toimitusehto            = '$toimittajarow[toimitusehto]',
-                  osoite                  = '$toimittajarow[osoite]',
-                  postitp                 = '$toimittajarow[postitp]',
-                  maa                     = '$toimittajarow[maa]',
-                  maa_lahetys             = '$maa_lahetys',
-                  kauppatapahtuman_luonne = '$toimittajarow[kauppatapahtuman_luonne]',
-                  kuljetusmuoto           = '$toimittajarow[kuljetusmuoto]',
-                  rahti                   = '$toimittajarow[oletus_kulupros]',
-                  swift                   = '$toimittajarow[swift]',
-                  liitostunnus            = '$toimittajarow[tunnus]',
-                  yhtio_toimipaikka       = '{$toimipaikka}',
-                  tila                    = 'K',
-                  luontiaika              = now(),
-                  laatija                 = '$kukarow[kuka]'";
+              yhtio                   = '$kukarow[yhtio]',
+              laskunro                = '$id',
+              ytunnus                 = '$toimittajarow[ytunnus]',
+              nimi                    = '$toimittajarow[nimi]',
+              valkoodi                = '$toimittajarow[oletus_valkoodi]',
+              vienti                  = '$toimittajarow[oletus_vienti]',
+              vienti_kurssi           = '$kurssi',
+              toimitusehto            = '$toimittajarow[toimitusehto]',
+              osoite                  = '$toimittajarow[osoite]',
+              postitp                 = '$toimittajarow[postitp]',
+              maa                     = '$toimittajarow[maa]',
+              maa_lahetys             = '$maa_lahetys',
+              kauppatapahtuman_luonne = '$toimittajarow[kauppatapahtuman_luonne]',
+              kuljetusmuoto           = '$toimittajarow[kuljetusmuoto]',
+              rahti                   = '$toimittajarow[oletus_kulupros]',
+              swift                   = '$toimittajarow[swift]',
+              liitostunnus            = '$toimittajarow[tunnus]',
+              yhtio_toimipaikka       = '{$toimipaikka}',
+              tila                    = 'K',
+              luontiaika              = now(),
+              laatija                 = '$kukarow[kuka]'";
     $result = pupe_query($query);
 
     $return = mysql_insert_id();
@@ -22873,20 +22873,20 @@ if (!function_exists('tarkista_kampanja_ehto')) {
 
     case 'asiakaskategoria':
       $query = "SELECT liitostunnus
-                  FROM lasku
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus  = '{$tilausnumero}'";
+                FROM lasku
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$tilausnumero}'";
       $result = pupe_query($query);
 
       while ($lasku = mysql_fetch_assoc($result)) {
 
         $query = "SELECT group_concat(parent.tunnus) tunnukset
-                    FROM puun_alkio
-                    JOIN dynaaminen_puu AS node ON (puun_alkio.yhtio = node.yhtio and puun_alkio.laji = node.laji and puun_alkio.puun_tunnus = node.tunnus)
-                    JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft AND parent.lft > 0)
-                    WHERE puun_alkio.yhtio = '$kukarow[yhtio]'
-                    AND puun_alkio.laji    = 'ASIAKAS'
-                    AND puun_alkio.liitos  = '{$lasku['liitostunnus']}'";
+                  FROM puun_alkio
+                  JOIN dynaaminen_puu AS node ON (puun_alkio.yhtio = node.yhtio and puun_alkio.laji = node.laji and puun_alkio.puun_tunnus = node.tunnus)
+                  JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft AND parent.lft > 0)
+                  WHERE puun_alkio.yhtio = '$kukarow[yhtio]'
+                  AND puun_alkio.laji    = 'ASIAKAS'
+                  AND puun_alkio.liitos  = '{$lasku['liitostunnus']}'";
         $result2 = pupe_query($query);
 
         $puun_tunnukset = mysql_fetch_assoc($result2);
@@ -22915,19 +22915,19 @@ if (!function_exists('tarkista_kampanja_ehto')) {
       }
 
       $query = "SELECT group_concat(DISTINCT concat('\'', t2.tuoteno, '\'')) tuotteet
-                  FROM dynaaminen_puu AS node
-                  JOIN dynaaminen_puu AS child ON (child.yhtio = node.yhtio
-                    AND child.laji             = node.laji
-                    AND child.lft              >= node.lft
-                    AND child.rgt              <= node.rgt)
-                  JOIN puun_alkio ON (puun_alkio.yhtio = child.yhtio
-                    AND puun_alkio.laji        = child.laji
-                    AND puun_alkio.puun_tunnus = child.tunnus)
-                  JOIN tilausrivi as t2 ON (t2.yhtio = puun_alkio.yhtio
-                    AND t2.tuoteno             = puun_alkio.liitos
-                    AND t2.otunnus             = {$tilausnumero})
-                  WHERE  node.yhtio            = '{$kukarow['yhtio']}'
-                  AND node.tunnus              = {$kampanja_ehto['arvo']}";
+                FROM dynaaminen_puu AS node
+                JOIN dynaaminen_puu AS child ON (child.yhtio = node.yhtio
+                  AND child.laji             = node.laji
+                  AND child.lft              >= node.lft
+                  AND child.rgt              <= node.rgt)
+                JOIN puun_alkio ON (puun_alkio.yhtio = child.yhtio
+                  AND puun_alkio.laji        = child.laji
+                  AND puun_alkio.puun_tunnus = child.tunnus)
+                JOIN tilausrivi as t2 ON (t2.yhtio = puun_alkio.yhtio
+                  AND t2.tuoteno             = puun_alkio.liitos
+                  AND t2.otunnus             = {$tilausnumero})
+                WHERE  node.yhtio            = '{$kukarow['yhtio']}'
+                AND node.tunnus              = {$kampanja_ehto['arvo']}";
       $result = pupe_query($query);
 
       $row = mysql_fetch_assoc($result);
@@ -23142,72 +23142,72 @@ if (!function_exists('hae_ehdon_tai_aliehdon_kohteen_resurssi')) {
     switch ($ehto['kohde']) {
     case 'asiakas':
       $query = "SELECT asiakas.*,
-                  concat_ws(' - ', asiakas.nimi, asiakas.ytunnus, asiakas.asiakasnro) as info
-                  FROM asiakas
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus  = '{$ehto['arvo']}'";
+                concat_ws(' - ', asiakas.nimi, asiakas.ytunnus, asiakas.asiakasnro) as info
+                FROM asiakas
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$ehto['arvo']}'";
       break;
     case 'asiakas_ytunnus':
       $query = "SELECT asiakas.*,
-                  concat_ws(' - ', asiakas.nimi, asiakas.ytunnus, asiakas.asiakasnro) as info
-                  FROM asiakas
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND ytunnus = '{$ehto['arvo']}'";
+                concat_ws(' - ', asiakas.nimi, asiakas.ytunnus, asiakas.asiakasnro) as info
+                FROM asiakas
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND ytunnus = '{$ehto['arvo']}'";
       break;
     case 'asiakaskategoria':
       $query = "SELECT dynaaminen_puu.*,
-                  group_concat(parent.nimi SEPARATOR ' &raquo; ') polku,
-                  dynaaminen_puu.nimi as info
-                  FROM dynaaminen_puu
-                  JOIN dynaaminen_puu AS parent
-                  ON ( parent.yhtio = dynaaminen_puu.yhtio
-                    AND parent.laji           = dynaaminen_puu.laji
-                    AND parent.lft            <= dynaaminen_puu.lft
-                    AND parent.rgt            >= dynaaminen_puu.lft
-                    AND parent.lft            > 0
-                    AND parent.syvyys        != 0 )
-                  WHERE dynaaminen_puu.yhtio  = '{$kukarow['yhtio']}'
-                  AND dynaaminen_puu.laji     = 'Asiakas'
-                  AND dynaaminen_puu.tunnus   = '{$ehto['arvo']}'";
+                group_concat(parent.nimi SEPARATOR ' &raquo; ') polku,
+                dynaaminen_puu.nimi as info
+                FROM dynaaminen_puu
+                JOIN dynaaminen_puu AS parent
+                ON ( parent.yhtio = dynaaminen_puu.yhtio
+                  AND parent.laji           = dynaaminen_puu.laji
+                  AND parent.lft            <= dynaaminen_puu.lft
+                  AND parent.rgt            >= dynaaminen_puu.lft
+                  AND parent.lft            > 0
+                  AND parent.syvyys        != 0 )
+                WHERE dynaaminen_puu.yhtio  = '{$kukarow['yhtio']}'
+                AND dynaaminen_puu.laji     = 'Asiakas'
+                AND dynaaminen_puu.tunnus   = '{$ehto['arvo']}'";
       break;
     case 'tuote':
       $query = "SELECT tuote.*,
-                  tuote.nimitys as info
-                  FROM tuote
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tuoteno = '{$ehto['arvo']}'";
+                tuote.nimitys as info
+                FROM tuote
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tuoteno = '{$ehto['arvo']}'";
       break;
     case 'tuotekategoria':
       $query = "SELECT dynaaminen_puu.*,
-                  group_concat(parent.nimi SEPARATOR ' &raquo; ') polku,
-                  dynaaminen_puu.nimi as info
-                  FROM dynaaminen_puu
-                  JOIN dynaaminen_puu AS parent
-                  ON ( parent.yhtio = dynaaminen_puu.yhtio
-                    AND parent.laji           = dynaaminen_puu.laji
-                    AND parent.lft            <= dynaaminen_puu.lft
-                    AND parent.rgt            >= dynaaminen_puu.lft
-                    AND parent.lft            > 0
-                    AND parent.syvyys        != 0 )
-                  WHERE dynaaminen_puu.yhtio  = '{$kukarow['yhtio']}'
-                  AND dynaaminen_puu.laji     = 'Tuote'
-                  AND dynaaminen_puu.tunnus   = '{$ehto['arvo']}'";
+                group_concat(parent.nimi SEPARATOR ' &raquo; ') polku,
+                dynaaminen_puu.nimi as info
+                FROM dynaaminen_puu
+                JOIN dynaaminen_puu AS parent
+                ON ( parent.yhtio = dynaaminen_puu.yhtio
+                  AND parent.laji           = dynaaminen_puu.laji
+                  AND parent.lft            <= dynaaminen_puu.lft
+                  AND parent.rgt            >= dynaaminen_puu.lft
+                  AND parent.lft            > 0
+                  AND parent.syvyys        != 0 )
+                WHERE dynaaminen_puu.yhtio  = '{$kukarow['yhtio']}'
+                AND dynaaminen_puu.laji     = 'Tuote'
+                AND dynaaminen_puu.tunnus   = '{$ehto['arvo']}'";
       break;
     case 'tuoteosasto':
       $query = "SELECT avainsana.*,
-                  avainsana.selitetark as info
-                  FROM avainsana
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND laji    = 'OSASTO'
-                  AND selite  = '{$ehto['arvo']}'";
+                avainsana.selitetark as info
+                FROM avainsana
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND laji    = 'OSASTO'
+                AND selite  = '{$ehto['arvo']}'";
       break;
     case 'tuoteryhma':
       $query = "SELECT avainsana.*,
-                  avainsana.selitetark as info
-                  FROM avainsana
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND laji    = 'TRY'
-                  AND selite  = '{$ehto['arvo']}'";
+                avainsana.selitetark as info
+                FROM avainsana
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND laji    = 'TRY'
+                AND selite  = '{$ehto['arvo']}'";
       break;
     case 'kappaleet':
       return false;
@@ -23356,11 +23356,11 @@ if (!function_exists('tiivista_vastaavat_tuoteketju')) {
 
     // Haetaan tiivistett‰v‰ ketju
     $query = "SELECT *
-                FROM vastaavat
-                WHERE yhtio    = '{$kukarow['yhtio']}'
-                AND id         = '$ketju_id'
-                AND jarjestys != 0
-                ORDER BY jarjestys";
+              FROM vastaavat
+              WHERE yhtio    = '{$kukarow['yhtio']}'
+              AND id         = '$ketju_id'
+              AND jarjestys != 0
+              ORDER BY jarjestys";
     $result = pupe_query($query);
 
     // Loopataan ketjun tuotteet l‰pi
@@ -23379,8 +23379,8 @@ if (!function_exists('tiivista_vastaavat_tuoteketju')) {
       // Ei p‰ivitet‰ j‰rjestyst‰ turhaan. Jos j‰rjestys on sama
       if ($tuote['jarjestys'] <> $uusi_jarjestys) {
         $query = "UPDATE vastaavat
-                        SET jarjestys = $uusi_jarjestys, muutospvm = now()
-                        WHERE yhtio='{$kukarow['yhtio']}' AND tunnus={$tuote['tunnus']}";
+                  SET jarjestys = $uusi_jarjestys, muutospvm = now()
+                  WHERE yhtio='{$kukarow['yhtio']}' AND tunnus={$tuote['tunnus']}";
         if ( ! pupe_query($query) ) {
           exit("Virhe ketjujen uudelleenj‰rjestelyss‰");
         }
@@ -23869,12 +23869,12 @@ if (!function_exists("hae_kayttajaan_liitetyn_asiakkaan_extranet_tarjoukset")) {
     }
 
     $query = "SELECT count(*) as luku
-                  FROM lasku
-                  WHERE yhtio      = '{$kukarow['yhtio']}'
-                  AND tila         = 'T'
-                  AND alatila      = ''
-                  AND liitostunnus = '{$oletus_asiakas}'
-                  AND clearing     = 'EXTTARJOUS'";
+              FROM lasku
+              WHERE yhtio      = '{$kukarow['yhtio']}'
+              AND tila         = 'T'
+              AND alatila      = ''
+              AND liitostunnus = '{$oletus_asiakas}'
+              AND clearing     = 'EXTTARJOUS'";
     $result = pupe_query($query);
 
     $tarjousten_lukumaara = mysql_fetch_assoc($result);
@@ -23891,12 +23891,12 @@ if (!function_exists("hae_kayttajaan_liitetyn_asiakkaan_extranet_ennakot")) {
     }
 
     $query = "SELECT count(*) as luku
-                  FROM lasku
-                  WHERE yhtio      = '{$kukarow['yhtio']}'
-                  AND tila         = 'N'
-                  AND alatila      = ''
-                  AND liitostunnus = '{$oletus_asiakas}'
-                  AND clearing     = 'EXTENNAKKO'";
+              FROM lasku
+              WHERE yhtio      = '{$kukarow['yhtio']}'
+              AND tila         = 'N'
+              AND alatila      = ''
+              AND liitostunnus = '{$oletus_asiakas}'
+              AND clearing     = 'EXTENNAKKO'";
     $result = pupe_query($query);
 
     $ennakoiden_lukumaara = mysql_fetch_assoc($result);
@@ -27166,7 +27166,7 @@ if (!function_exists('hae_yhtion_toimipaikan_varastot')) {
     // sortataan tyypin ja nimityksen mukaan varastot
     $query = "SELECT *
               FROM varastopaikat
-              WHERE yhtio     = '{$kukarow['yhtio']}'
+              WHERE yhtio          = '{$kukarow['yhtio']}'
                   AND toimipaikka  = '{$yhtio_toimipaikka}'
                   AND tyyppi      != 'P'
                   ORDER BY if(tyyppi = '', 0, if(tyyppi = 'V', 1, 2)), nimitys";
@@ -28361,8 +28361,8 @@ if (!function_exists("tuotteiden_kulutarkistus")) {
     $query = "SELECT toimi.kulujen_laskeminen_hintoihin, tuotteen_toimittajat.tuoteno
               FROM tuotteen_toimittajat
               JOIN toimi ON ( toimi.yhtio = tuotteen_toimittajat.yhtio
-              AND toimi.tunnus = tuotteen_toimittajat.liitostunnus )
-              WHERE tuotteen_toimittajat.yhtio =  '{$kukarow['yhtio']}'
+              AND toimi.tunnus                       = tuotteen_toimittajat.liitostunnus )
+              WHERE tuotteen_toimittajat.yhtio       =  '{$kukarow['yhtio']}'
               AND toimi.kulujen_laskeminen_hintoihin = 'K'
               ORDER BY
               if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys) ASC,
@@ -28389,7 +28389,7 @@ if (!function_exists("hinnan_kuluprosentti")) {
     $query = "SELECT toimi.kulujen_laskeminen_hintoihin
               FROM tuotteen_toimittajat
               JOIN toimi ON ( toimi.yhtio = tuotteen_toimittajat.yhtio
-              AND toimi.tunnus = tuotteen_toimittajat.liitostunnus )
+              AND toimi.tunnus                 = tuotteen_toimittajat.liitostunnus )
               WHERE tuotteen_toimittajat.yhtio =  '{$kukarow['yhtio']}'
               AND tuotteen_toimittajat.tuoteno = '{$tuotenumero}'
               ORDER BY

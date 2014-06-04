@@ -164,12 +164,12 @@ if ($tee != '' and isset($painoinnappia)) {
                 tilausrivi.kate, 0) kate12
             FROM lasku
             JOIN tilausrivi ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
-            WHERE lasku.yhtio = '$kukarow[yhtio]'
-            AND lasku.tila    = 'U'
-            AND lasku.alatila   = 'X'
+            WHERE lasku.yhtio                   = '$kukarow[yhtio]'
+            AND lasku.tila                      = 'U'
+            AND lasku.alatila                   = 'X'
             $lisa
-            AND lasku.tapvm   >= '{$edellisvuosi}-01-01'
-            AND lasku.tapvm   <= '{$vvl}-{$kkl}-{$ppl}'";
+            AND lasku.tapvm                     >= '{$edellisvuosi}-01-01'
+            AND lasku.tapvm                     <= '{$vvl}-{$kkl}-{$ppl}'";
   $eresult = pupe_query($query);
 
   $group_by = array();

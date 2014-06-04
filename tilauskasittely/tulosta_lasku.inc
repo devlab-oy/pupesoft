@@ -1736,7 +1736,7 @@ if (!function_exists('loppu')) {
         $pdf_lasku->draw_text(490, 92+$vientikala + $barcode_korkeus,  sprintf('%.2f', $summa),      $thispage, $boldi);
       }
       elseif ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-        $oikpos = $pdf_lasku->strlen(sprintf('%.2f', $laskurow["summa_valuutassa"], $boldi));
+        $oikpos = $pdf_lasku->strlen(sprintf('%.2f', $laskurow["summa_valuutassa"]), $boldi);
         $pdf_lasku->draw_text(535-$oikpos, 92+$vientikala+$barcode_korkeus, sprintf('%.2f', $laskurow["summa_valuutassa"]), $thispage, $boldi);
       }
       else {

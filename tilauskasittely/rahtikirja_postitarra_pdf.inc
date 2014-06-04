@@ -18,10 +18,10 @@ require_once("rahtikirja_postitarra_otsikkotiedot.inc");
 require_once("pdflib/phppdflib.class.php");
 
 // jos php-gd on installoitu niin loidataab barcode library
-if (in_array("gd", get_loaded_extensions())) {
+/*if (in_array("gd", get_loaded_extensions())) {
   if (@include_once("viivakoodi/Barcode.php"));
   else include_once("Barcode.php");
-}
+}*/
 
 //PDF parametrit
 $pdf = new pdffile;
@@ -62,10 +62,10 @@ $lask = 1;
 $sivu = 1;
 
 $tulostakolli = $tulostuskpl;
-
+    
 // tulostetaan niin monta lappua kun on kollejakin
 for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
-
+ 
   $kuka = sprintf("%02s", $tulostuskpl);     // laitetaan tulostuskpl alkuun niin jokalapulla on uniikki viiva
 
   if (substr(trim($rivi["rahtikirjanro"]), 0, 4) == "JJFI") {

@@ -81,7 +81,7 @@ $datetime_checkpoint_uusi = date('Y-m-d H:i:s'); // Timestamp nyt
 
 // alustetaan arrayt
 $dnstuote = $dnsryhma = $dnstuoteryhma = $dnstock = $dnsasiakas = $dnshinnasto = $dnslajitelma =
-$kaikki_tuotteet = $individual_tuotteet = array();
+  $kaikki_tuotteet = $individual_tuotteet = array();
 
 if ($ajetaanko_kaikki == "NO") {
   $muutoslisa = "AND (tuote.muutospvm >= '{$datetime_checkpoint}'
@@ -237,48 +237,48 @@ while ($row = mysql_fetch_array($res)) {
   $tuotepuun_nodet = array ();
 
   while ($tuotepuurow = mysql_fetch_assoc($result_tp)) {
-    $breadcrumbs = empty($tuotepuurow['ancestors']) ? array () : explode("\n",$tuotepuurow['ancestors']);
+    $breadcrumbs = empty($tuotepuurow['ancestors']) ? array () : explode("\n", $tuotepuurow['ancestors']);
     $breadcrumbs[] = $tuotepuurow['node'];
     if (count($breadcrumbs) > 1) array_shift($breadcrumbs);
     $tuotepuun_nodet[] = $breadcrumbs;
   }
 
-   while ($parametrirow = mysql_fetch_assoc($parametritres)) {
+  while ($parametrirow = mysql_fetch_assoc($parametritres)) {
     $tuotteen_parametrit[] = array(
-                                   "nimi"        => $parametrirow["selitetark"],
-                                   "option_name" => $parametrirow["option_name"],
-                                   "arvo"        => $parametrirow["selite"]
-                                   );
+      "nimi"        => $parametrirow["selitetark"],
+      "option_name" => $parametrirow["option_name"],
+      "arvo"        => $parametrirow["selite"]
+    );
   }
 
   $dnstuote[] = array(
-                      'tuoteno'              => $row["tuoteno"],
-                      'nimi'                 => $row["nimitys"],
-                      'kuvaus'               => $row["kuvaus"],
-                      'lyhytkuvaus'          => $row["lyhytkuvaus"],
-                      'yksikko'              => $row["yksikko"],
-                      'tuotemassa'           => $row["tuotemassa"],
-                      'myyntihinta'          => $myyntihinta,
-                      'myyntihinta_veroton'  => $myyntihinta_veroton,
-                      'myymalahinta'         => $myymalahinta,
-                      'myymalahinta_veroton' => $myymalahinta_veroton,
-                      'kuluprosentti'        => $row['kuluprosentti'],
-                      'ean'                  => $row["eankoodi"],
-                      'osasto'               => $row["osasto"],
-                      'try'                  => $row["try"],
-                      'try_nimi'             => $row["try_nimi"],
-                      'alv'                  => $row["alv"],
-                      'nakyvyys'             => $row["nakyvyys"],
-                      'nimi_swe'             => $row["nimi_swe"],
-                      'nimi_eng'             => $row["nimi_eng"],
-                      'campaign_code'        => $row["campaign_code"],
-                      'target'               => $row["target"],
-                      'onsale'               => $row["onsale"],
-                      'tunnus'               => $row['tunnus'],
-                      'asiakashinnat'        => $asiakashinnat,
-                      'tuotepuun_nodet'      => $tuotepuun_nodet,
-                      'tuotteen_parametrit'  => $tuotteen_parametrit
-                      );
+    'tuoteno'              => $row["tuoteno"],
+    'nimi'                 => $row["nimitys"],
+    'kuvaus'               => $row["kuvaus"],
+    'lyhytkuvaus'          => $row["lyhytkuvaus"],
+    'yksikko'              => $row["yksikko"],
+    'tuotemassa'           => $row["tuotemassa"],
+    'myyntihinta'          => $myyntihinta,
+    'myyntihinta_veroton'  => $myyntihinta_veroton,
+    'myymalahinta'         => $myymalahinta,
+    'myymalahinta_veroton' => $myymalahinta_veroton,
+    'kuluprosentti'        => $row['kuluprosentti'],
+    'ean'                  => $row["eankoodi"],
+    'osasto'               => $row["osasto"],
+    'try'                  => $row["try"],
+    'try_nimi'             => $row["try_nimi"],
+    'alv'                  => $row["alv"],
+    'nakyvyys'             => $row["nakyvyys"],
+    'nimi_swe'             => $row["nimi_swe"],
+    'nimi_eng'             => $row["nimi_eng"],
+    'campaign_code'        => $row["campaign_code"],
+    'target'               => $row["target"],
+    'onsale'               => $row["onsale"],
+    'tunnus'               => $row['tunnus'],
+    'asiakashinnat'        => $asiakashinnat,
+    'tuotepuun_nodet'      => $tuotepuun_nodet,
+    'tuotteen_parametrit'  => $tuotteen_parametrit
+  );
 }
 
 // Magentoa varten pitää hakea kaikki tuotteet, jotta voidaan poistaa ne jota ei ole olemassa
@@ -370,10 +370,10 @@ while ($row = mysql_fetch_assoc($result)) {
   list(, , $myytavissa) = saldo_myytavissa($row["tuoteno"], '', $verkkokauppa_saldo_varasto);
 
   $dnstock[] = array(
-                     'tuoteno'     => $row["tuoteno"],
-                     'ean'         => $row["eankoodi"],
-                     'myytavissa'  => $myytavissa,
-                    );
+    'tuoteno'     => $row["tuoteno"],
+    'ean'         => $row["eankoodi"],
+    'myytavissa'  => $myytavissa,
+  );
 }
 
 if ($ajetaanko_kaikki == "NO") {
@@ -702,10 +702,10 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
 
     while ($syvinrow = mysql_fetch_assoc($alinres)) {
       $properties[] = array(
-                            "nimi" => $syvinrow["selitetark"],
-                            "option_name" => $syvinrow["option_name"],
-                            "arvo" => $syvinrow["selite"]
-                            );
+        "nimi" => $syvinrow["selitetark"],
+        "option_name" => $syvinrow["option_name"],
+        "arvo" => $syvinrow["selite"]
+      );
     }
 
     // Jos yhtiön hinnat eivät sisällä alv:tä
@@ -756,7 +756,7 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
     $tuotepuun_nodet = array ();
 
     while ($tuotepuurow = mysql_fetch_assoc($result_tp)) {
-      $breadcrumbs = empty($tuotepuurow['ancestors']) ? array () : explode("\n",$tuotepuurow['ancestors']);
+      $breadcrumbs = empty($tuotepuurow['ancestors']) ? array () : explode("\n", $tuotepuurow['ancestors']);
       $breadcrumbs[] = $tuotepuurow['node'];
       if (count($breadcrumbs) > 1) array_shift($breadcrumbs);
       $tuotepuun_nodet[] = $breadcrumbs;

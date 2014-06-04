@@ -3759,7 +3759,7 @@ if ($tee == '') {
 
       $tilausrivi = mysql_fetch_assoc($result);
 
-      if ($tapa == "VAIHDAJAPOISTA" and $tilausrivi["perheid"] == 0) {
+      if ($tapa == "VAIHDAJAPOISTA" and $tilausrivi["perheid"] != 0) {
         $tapa = "JT";
       }
 
@@ -4127,7 +4127,7 @@ if ($tee == '') {
     elseif (@include("tuotehaku.inc"));
     else exit;
   }
-
+echo "4130 tila $tila tapa $tapa <br><br> ";
   //Lis‰t‰‰n rivi tai jos ollaan muuttamassa toimitettavaksi (POISJTSTA) tai puutteeksi niin silloin vain p‰ivitell‰‰n rivin tiedot ei olla poistettu rivi‰ joten ei myˆsk‰‰n tarvi lis‰t‰ sit‰ uuestaan & jos ollaan perheellinen ja tehh‰‰n koko perheest‰ JT-rivej‰
   if ((trim($tuoteno) != '' or is_array($tuoteno_array)) and ($kpl != '' or is_array($kpl_array)) and ($tila != "MUUTA" and $tila != "VARMUUTOS") and $ulos == '' and ($variaatio_tuoteno == "" or (is_array($kpl_array) and array_sum($kpl_array) != 0))) {
     if (!is_array($tuoteno_array) and trim($tuoteno) != "") {

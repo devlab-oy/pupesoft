@@ -4,10 +4,10 @@ require ("../inc/parametrit.inc");
 echo "<font class='head'>".t("Kuittaamattomat lomat")."</font><hr>";
 
 if($tee == "kuittaa") {       //lisataan tapahtuma kalenteriin
-  $query = "  UPDATE kalenteri
-        SET kuittaus = '$kukarow[nimi]'
-        WHERE tunnus='$tunnus'
-        and yhtio='$yhtio'";
+  $query = "UPDATE kalenteri
+            SET kuittaus = '$kukarow[nimi]'
+            WHERE tunnus='$tunnus'
+            and yhtio='$yhtio'";
   $result = mysql_query($query) or pupe_error($query);
 
   echo t("Loma kuitattu hyväksytyksi")."!<br><br>";
@@ -15,10 +15,10 @@ if($tee == "kuittaa") {       //lisataan tapahtuma kalenteriin
 }
 
 if($tee == "ei_kuittaa") {       //lisataan tapahtuma kalenteriin
-  $query = "  UPDATE kalenteri
-        SET kuittaus = ''
-        WHERE tunnus='$tunnus'
-        and yhtio='$yhtio'";
+  $query = "UPDATE kalenteri
+            SET kuittaus = ''
+            WHERE tunnus='$tunnus'
+            and yhtio='$yhtio'";
   $result = mysql_query($query) or pupe_error($query);
 
   echo t("Loman hyväksyntä peruttu")."!<br><br>";
@@ -80,18 +80,18 @@ if ($tee == "") {
 
   if ($osasto != '') {
     //* listataan muistutukset *///
-    $query = "  SELECT kalenteri.tunnus, left(pvmalku,10) pvmalku, right(pvmalku,8) aikaalku,
-          left(pvmloppu,10) pvmloppu, right(pvmloppu,8) aikaloppu, kuka.nimi, kalenteri.tapa, kentta01, kuka.osasto, kuittaus, kalenteri.yhtio,
-          datediff(pvmalku,now()) ero
-          FROM kalenteri, kuka
-          where $lisa2
-          and kuka.yhtio=kalenteri.yhtio
-          and kalenteri.tyyppi = 'kalenteri'
-          and kalenteri.tapa in ('Palkaton vapaa','Sairasloma','Kesäloma','Talviloma','Ylityövapaa')
-          and kalenteri.kuka=kuka.kuka
-          $lisa1
-          and kuka.osasto='$osasto'
-          ORDER BY kalenteri.kuka, kalenteri.tapa, kalenteri.pvmalku";
+    $query = "SELECT kalenteri.tunnus, left(pvmalku,10) pvmalku, right(pvmalku,8) aikaalku,
+              left(pvmloppu,10) pvmloppu, right(pvmloppu,8) aikaloppu, kuka.nimi, kalenteri.tapa, kentta01, kuka.osasto, kuittaus, kalenteri.yhtio,
+              datediff(pvmalku,now()) ero
+              FROM kalenteri, kuka
+              where $lisa2
+              and kuka.yhtio=kalenteri.yhtio
+              and kalenteri.tyyppi = 'kalenteri'
+              and kalenteri.tapa   in ('Palkaton vapaa','Sairasloma','Kesäloma','Talviloma','Ylityövapaa')
+              and kalenteri.kuka=kuka.kuka
+              $lisa1
+              and kuka.osasto='$osasto'
+              ORDER BY kalenteri.kuka, kalenteri.tapa, kalenteri.pvmalku";
     $result = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($result) > 0) {

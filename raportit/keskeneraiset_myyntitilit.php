@@ -133,29 +133,29 @@ if ($tee != "" and isset($painoinnappia)) {
   }
 
   // Etsitään kaikki myyntitili-/siirtolistarivit, joissa on jotain keskeneräistä
-  $query = "  SELECT lasku.tilaustyyppi,
-        lasku.tunnus,
-        left(lasku.luontiaika, 10) luontiaika,
-        lasku.ytunnus,
-        lasku.nimi,
-        tuote.osasto,
-        tuote.try,
-        tuote.tuoteno,
-        tuote.nimitys,
-        tilausrivi.kpl + tilausrivi.varattu + tilausrivi.jt AS kpl
-        FROM lasku use index (tila_index)
-        JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
-          AND tilausrivi.otunnus = lasku.tunnus
-          AND tilausrivi.tyyppi != 'D')
-        JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
-          AND tuote.tuoteno = tilausrivi.tuoteno
-          {$lisa})
-        WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-        AND lasku.tila = 'G'
-        AND lasku.luontiaika >= '{$vva}-{$kka}-{$ppa} 00:00:00'
-        AND lasku.luontiaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
-        {$rajaus}
-        ORDER BY lasku.liitostunnus, lasku.luontiaika DESC";
+  $query = "SELECT lasku.tilaustyyppi,
+            lasku.tunnus,
+            left(lasku.luontiaika, 10) luontiaika,
+            lasku.ytunnus,
+            lasku.nimi,
+            tuote.osasto,
+            tuote.try,
+            tuote.tuoteno,
+            tuote.nimitys,
+            tilausrivi.kpl + tilausrivi.varattu + tilausrivi.jt AS kpl
+            FROM lasku use index (tila_index)
+            JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus  = lasku.tunnus
+              AND tilausrivi.tyyppi  != 'D')
+            JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
+              AND tuote.tuoteno       = tilausrivi.tuoteno
+              {$lisa})
+            WHERE lasku.yhtio         = '{$kukarow["yhtio"]}'
+            AND lasku.tila            = 'G'
+            AND lasku.luontiaika      >= '{$vva}-{$kka}-{$ppa} 00:00:00'
+            AND lasku.luontiaika      <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
+            {$rajaus}
+            ORDER BY lasku.liitostunnus, lasku.luontiaika DESC";
   $result = pupe_query($query);
   $total_rows = mysql_num_rows($result);
 

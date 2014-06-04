@@ -2,12 +2,12 @@
 
 //Ohjelma vatii muuttujan $otunnus joka viittaa ostolaskuun johon rivit on kohdistettu.
 
-$query = "  SELECT tuote.tuoteno, tuote.yksikko, if(tuote.tarrakpl>0,tuote.tarrakpl,1) tarrakpl, tilausrivi.varattu+tilausrivi.kpl varattu, tuote.tarrakerroin
-      FROM tilausrivi
-      JOIN tuote ON tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
-      WHERE tilausrivi.uusiotunnus = '$otunnus'
-      and tilausrivi.yhtio='$kukarow[yhtio]'
-      ORDER BY tuote.tuoteno";
+$query = "SELECT tuote.tuoteno, tuote.yksikko, if(tuote.tarrakpl>0,tuote.tarrakpl,1) tarrakpl, tilausrivi.varattu+tilausrivi.kpl varattu, tuote.tarrakerroin
+          FROM tilausrivi
+          JOIN tuote ON tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
+          WHERE tilausrivi.uusiotunnus = '$otunnus'
+          and tilausrivi.yhtio='$kukarow[yhtio]'
+          ORDER BY tuote.tuoteno";
 $res= mysql_query($query) or pupe_error($query);
 
 list($usec, $sec) = explode(' ', microtime());

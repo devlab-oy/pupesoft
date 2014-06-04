@@ -37,17 +37,17 @@ if ($tee == 'uusi_ekirje') {
 if ($tee == "uusi_ekirjekierros") {
   $tee_pdf = "tulosta_karhu";
 
-  $query = "  SELECT GROUP_CONCAT(DISTINCT lasku.tunnus) karhuttavat,
-        sum(lasku.summa-lasku.saldo_maksettu) karhuttava_summa
-        FROM karhukierros
-        JOIN karhu_lasku ON (karhukierros.tunnus = karhu_lasku.ktunnus)
-        JOIN lasku ON (lasku.tunnus = karhu_lasku.ltunnus and lasku.mapvm = '0000-00-00')
-        JOIN asiakas ON lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus
-        WHERE karhukierros.yhtio = '$kukarow[yhtio]'
-        and karhukierros.tyyppi = '$tyyppi'
-        and karhukierros.tunnus = '$kierros'
-        GROUP BY asiakas.ytunnus, asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.postitp
-        HAVING karhuttava_summa > 0";
+  $query = "SELECT GROUP_CONCAT(DISTINCT lasku.tunnus) karhuttavat,
+            sum(lasku.summa-lasku.saldo_maksettu) karhuttava_summa
+            FROM karhukierros
+            JOIN karhu_lasku ON (karhukierros.tunnus = karhu_lasku.ktunnus)
+            JOIN lasku ON (lasku.tunnus = karhu_lasku.ltunnus and lasku.mapvm = '0000-00-00')
+            JOIN asiakas ON lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus
+            WHERE karhukierros.yhtio = '$kukarow[yhtio]'
+            and karhukierros.tyyppi  = '$tyyppi'
+            and karhukierros.tunnus  = '$kierros'
+            GROUP BY asiakas.ytunnus, asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.postitp
+            HAVING karhuttava_summa > 0";
   $uek_res = pupe_query($query);
 
   $uek_lask = 0;
@@ -84,20 +84,20 @@ if (isset($_POST['poista_tratta'])) {
     $poista_tratta_tunnus = (int) $poista_tratta_tunnus;
     $ltunnus = (int) $ltunnus;
 
-    $query = "  SELECT *
-          FROM karhu_lasku
-          WHERE ktunnus = $poista_tratta_tunnus
-          AND ltunnus = $ltunnus";
+    $query = "SELECT *
+              FROM karhu_lasku
+              WHERE ktunnus = $poista_tratta_tunnus
+              AND ltunnus   = $ltunnus";
     $res = pupe_query($query);
 
     while ($row = mysql_fetch_assoc($res)) {
       // "poistetaan" haluttu tratta näkyvistä kertomalla laskuntunnus -1:llä
       $ltun = $row['ltunnus'] * -1;
 
-      $query = "  UPDATE karhu_lasku SET
-            ltunnus = $ltun
-            WHERE ktunnus = $poista_tratta_tunnus
-            AND ltunnus = $row[ltunnus]";
+      $query = "UPDATE karhu_lasku SET
+                ltunnus       = $ltun
+                WHERE ktunnus = $poista_tratta_tunnus
+                AND ltunnus   = $row[ltunnus]";
       $kres = pupe_query($query);
 
       echo "<font class='message'>",t("Tratta poistettu laskulta")," $row[ltunnus] (",t("kierros")," $poista_tratta_tunnus)</font><br/>";
@@ -153,12 +153,12 @@ if ((isset($tee_hae) and $tee_hae != "") or (isset($tee_kaikki) and $tee_kaikki 
   }
 
   // haetaan uusin karhukierros/karhukerta
-  $query = "  SELECT ifnull(group_concat(distinct karhu_lasku.ktunnus), 0) as tunnus, ifnull(group_concat(distinct liitostunnus), 0) as liitostunnus
-        FROM karhu_lasku
-        JOIN lasku ON (lasku.tunnus = karhu_lasku.ltunnus and lasku.yhtio = '$kukarow[yhtio]')
-        JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus and karhukierros.yhtio = lasku.yhtio and karhukierros.tyyppi = '$tyyppi')
-        WHERE $where
-        $limit";
+  $query = "SELECT ifnull(group_concat(distinct karhu_lasku.ktunnus), 0) as tunnus, ifnull(group_concat(distinct liitostunnus), 0) as liitostunnus
+            FROM karhu_lasku
+            JOIN lasku ON (lasku.tunnus = karhu_lasku.ltunnus and lasku.yhtio = '$kukarow[yhtio]')
+            JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus and karhukierros.yhtio = lasku.yhtio and karhukierros.tyyppi = '$tyyppi')
+            WHERE $where
+            $limit";
   $res = pupe_query($query);
 
   if (mysql_num_rows($res) > 0) {
@@ -192,15 +192,15 @@ if ((isset($tee_hae) and $tee_hae != "") or (isset($tee_kaikki) and $tee_kaikki 
 
     echo "</tr>";
 
-    $query = "  SELECT lasku.laskunro, lasku.summa, lasku.saldo_maksettu, lasku.liitostunnus, karhu_lasku.ktunnus,
-          if(lasku.nimi != lasku.toim_nimi and lasku.toim_nimi != '', concat_ws('<br>', lasku.nimi, lasku.toim_nimi), lasku.nimi) nimi,
-          karhukierros.pvm, lasku.erpcm, lasku.mapvm, lasku.ytunnus, karhu_lasku.ltunnus
-          FROM karhu_lasku
-          JOIN lasku ON (lasku.tunnus = karhu_lasku.ltunnus and lasku.liitostunnus in ($ktunnus[liitostunnus]))
-          JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus and karhukierros.yhtio = '$kukarow[yhtio]' and karhukierros.tyyppi = '$tyyppi')
-          WHERE karhu_lasku.ktunnus in ($ktunnus[tunnus])
-          $malisa
-          ORDER BY ytunnus, pvm, laskunro";
+    $query = "SELECT lasku.laskunro, lasku.summa, lasku.saldo_maksettu, lasku.liitostunnus, karhu_lasku.ktunnus,
+              if(lasku.nimi != lasku.toim_nimi and lasku.toim_nimi != '', concat_ws('<br>', lasku.nimi, lasku.toim_nimi), lasku.nimi) nimi,
+              karhukierros.pvm, lasku.erpcm, lasku.mapvm, lasku.ytunnus, karhu_lasku.ltunnus
+              FROM karhu_lasku
+              JOIN lasku ON (lasku.tunnus = karhu_lasku.ltunnus and lasku.liitostunnus in ($ktunnus[liitostunnus]))
+              JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus and karhukierros.yhtio = '$kukarow[yhtio]' and karhukierros.tyyppi = '$tyyppi')
+              WHERE karhu_lasku.ktunnus in ($ktunnus[tunnus])
+              $malisa
+              ORDER BY ytunnus, pvm, laskunro";
     $res = pupe_query($query);
 
     $laskuri = 0;
@@ -209,18 +209,18 @@ if ((isset($tee_hae) and $tee_hae != "") or (isset($tee_kaikki) and $tee_kaikki 
 
       $laskuri++;
 
-      $query = "  SELECT count(distinct ktunnus) as kertoja
-            FROM karhu_lasku
-            JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus AND karhukierros.tyyppi = '$tyyppi')
-            WHERE ltunnus = $row[ltunnus]";
+      $query = "SELECT count(distinct ktunnus) as kertoja
+                FROM karhu_lasku
+                JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus AND karhukierros.tyyppi = '$tyyppi')
+                WHERE ltunnus = $row[ltunnus]";
       $ka_res = mysql_query($query);
       $karhuttu = mysql_fetch_assoc($ka_res);
 
-      $query = "  SELECT group_concat(karhu_lasku.ltunnus) laskutunnukset
-            FROM karhu_lasku
-            JOIN lasku ON (lasku.tunnus = karhu_lasku.ltunnus and lasku.liitostunnus = $row[liitostunnus])
-            JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus and karhukierros.yhtio = '$kukarow[yhtio]' and karhukierros.tyyppi = '$tyyppi')
-            WHERE karhu_lasku.ktunnus = '$row[ktunnus]'";
+      $query = "SELECT group_concat(karhu_lasku.ltunnus) laskutunnukset
+                FROM karhu_lasku
+                JOIN lasku ON (lasku.tunnus = karhu_lasku.ltunnus and lasku.liitostunnus = $row[liitostunnus])
+                JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus and karhukierros.yhtio = '$kukarow[yhtio]' and karhukierros.tyyppi = '$tyyppi')
+                WHERE karhu_lasku.ktunnus = '$row[ktunnus]'";
       $la_res = pupe_query($query);
       $tunnukset = mysql_fetch_assoc($la_res);
 
@@ -314,19 +314,19 @@ if ((isset($tee_hae) and $tee_hae != "") or (isset($tee_kaikki) and $tee_kaikki 
   }
 }
 elseif (isset($tee_kiekat)) {
-  $query = "  SELECT karhukierros.pvm, karhukierros.tunnus kierros,
-        count(DISTINCT concat(asiakas.ytunnus, asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.postitp)) kpl,
-        sum(if(lasku.mapvm='0000-00-00', 1, 0)) avoimet,
-        GROUP_CONCAT(distinct lasku.tunnus) karhuttavat
-        FROM karhukierros
-        JOIN karhu_lasku ON (karhukierros.tunnus = karhu_lasku.ktunnus)
-        JOIN lasku ON (lasku.tunnus = karhu_lasku.ltunnus)
-        JOIN asiakas ON lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus
-        WHERE karhukierros.yhtio = '$kukarow[yhtio]'
-        and karhukierros.tyyppi = '$tyyppi'
-        and datediff(now(), karhukierros.pvm) <= 180
-        GROUP BY karhukierros.pvm
-        ORDER BY karhukierros.pvm DESC";
+  $query = "SELECT karhukierros.pvm, karhukierros.tunnus kierros,
+            count(DISTINCT concat(asiakas.ytunnus, asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.postitp)) kpl,
+            sum(if(lasku.mapvm='0000-00-00', 1, 0)) avoimet,
+            GROUP_CONCAT(distinct lasku.tunnus) karhuttavat
+            FROM karhukierros
+            JOIN karhu_lasku ON (karhukierros.tunnus = karhu_lasku.ktunnus)
+            JOIN lasku ON (lasku.tunnus = karhu_lasku.ltunnus)
+            JOIN asiakas ON lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus
+            WHERE karhukierros.yhtio = '$kukarow[yhtio]'
+            and karhukierros.tyyppi  = '$tyyppi'
+            and datediff(now(), karhukierros.pvm) <= 180
+            GROUP BY karhukierros.pvm
+            ORDER BY karhukierros.pvm DESC";
   $res = pupe_query($query);
 
   echo "<br><br><font class='info'>".t("Maksukehotuskierrokset").":</font>";

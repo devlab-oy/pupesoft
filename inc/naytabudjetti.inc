@@ -20,12 +20,12 @@ if ($tee == '') { // Tämä on käyttöliittymä
 
   echo "<tr><td>".t("Vain kustannuspaikka")."</td>";
 
-  $query = "  SELECT tunnus, nimi
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and kaytossa != 'E'
-        and tyyppi = 'K'
-        ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, nimi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and kaytossa != 'E'
+            and tyyppi    = 'K'
+            ORDER BY koodi+0, koodi, nimi";
   $vresult = mysql_query($query) or pupe_error($query);
 
   echo "<td><select name='kustp'><option value=' '>".t("Ei valintaa");
@@ -42,12 +42,12 @@ if ($tee == '') { // Tämä on käyttöliittymä
   echo "</tr>";
   echo "<tr><td>".t("Vain kohde")."</td>";
 
-  $query = "  SELECT tunnus, nimi
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and kaytossa != 'E'
-        and tyyppi = 'O'
-        ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, nimi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and kaytossa != 'E'
+            and tyyppi    = 'O'
+            ORDER BY koodi+0, koodi, nimi";
   $vresult = mysql_query($query) or pupe_error($query);
 
   echo "<td><select name='kohde'><option value=' '>".t("Ei valintaa");
@@ -64,12 +64,12 @@ if ($tee == '') { // Tämä on käyttöliittymä
   echo "</tr>";
   echo "<tr><td>".t("Vain projekti")."</td>";
 
-  $query = "  SELECT tunnus, nimi
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and kaytossa != 'E'
-        and tyyppi = 'P'
-        ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, nimi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and kaytossa != 'E'
+            and tyyppi    = 'P'
+            ORDER BY koodi+0, koodi, nimi";
   $vresult = mysql_query($query) or pupe_error($query);
 
   echo "<td><select name='proj'><option value=' '>".t("Ei valintaa");
@@ -113,12 +113,12 @@ if (strlen(trim($kohde)) > 0) {
   $lisa .= " and kohde = '$kohde'";
 }
 
-$query = "  SELECT taso
-      FROM budjetti
-      WHERE yhtio='$kukarow[yhtio]'
-      and left(kausi,4) = '$alvv'
-      $lisa
-      ORDER BY taso";
+$query = "SELECT taso
+          FROM budjetti
+          WHERE yhtio='$kukarow[yhtio]'
+          and left(kausi,4) = '$alvv'
+          $lisa
+          ORDER BY taso";
 $result = mysql_query($query) or pupe_error($query);
 
 $timeparts = explode(" ",microtime());
@@ -144,22 +144,22 @@ $taso32 = 0;
 
 while ($budjrow = mysql_fetch_array ($result)) {
 
-  $query = "  SELECT summa
-        FROM budjetti
-        WHERE yhtio = '$kukarow[yhtio]'
-        and taso = '$budjrow[0]'
-        and left(kausi,4) = '$alvv'
-        $lisa
-        GROUP BY kausi";
+  $query = "SELECT summa
+            FROM budjetti
+            WHERE yhtio = '$kukarow[yhtio]'
+            and taso    = '$budjrow[0]'
+            and left(kausi,4) = '$alvv'
+            $lisa
+            GROUP BY kausi";
   $aresult = mysql_query($query) or pupe_error($query);
 
   // Vähän otsikoita peliin...
-  $query = "  SELECT nimi
-        FROM taso
-        WHERE yhtio = '$kukarow[yhtio]'
-        and taso = '$budjrow[0]'
-        and laji = 'O'
-        and tyyppi = 'S'";
+  $query = "SELECT nimi
+            FROM taso
+            WHERE yhtio = '$kukarow[yhtio]'
+            and taso    = '$budjrow[0]'
+            and laji    = 'O'
+            and tyyppi  = 'S'";
   $xresult = mysql_query($query) or pupe_error($query);
 
   $tasorow[0] = "Taso '$hakutaso'";

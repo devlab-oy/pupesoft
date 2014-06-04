@@ -9,23 +9,23 @@ echo "<font class='head'>".t("Merivakuutuslistaus")."</font><hr>";
 
 if ($tee != '') {
 
-  $query = "  SELECT tunnus, laskunro, nimi, ytunnus, toimitusehto, kuljetusmuoto,
-        summa,
-        rahti,
-        rahti_etu,
-        rahti_huolinta,
-        pyoristys_erot,
-        saldo_maksettu,
-        vienti_kurssi,
-        mapvm
-        FROM lasku
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tapvm >= '$vva-$kka-$ppa 00:00:00'
-        and tapvm <= '$vvl-$kkl-$ppl 23:59:59'
-        and tila = 'K'
-        and vienti in ('C','F','I')
-        and kuljetusmuoto = '$kuljetusmuoto'
-        order by laskunro";
+  $query = "SELECT tunnus, laskunro, nimi, ytunnus, toimitusehto, kuljetusmuoto,
+            summa,
+            rahti,
+            rahti_etu,
+            rahti_huolinta,
+            pyoristys_erot,
+            saldo_maksettu,
+            vienti_kurssi,
+            mapvm
+            FROM lasku
+            WHERE yhtio       = '$kukarow[yhtio]'
+            and tapvm         >= '$vva-$kka-$ppa 00:00:00'
+            and tapvm         <= '$vvl-$kkl-$ppl 23:59:59'
+            and tila          = 'K'
+            and vienti        in ('C','F','I')
+            and kuljetusmuoto = '$kuljetusmuoto'
+            order by laskunro";
   $result = mysql_query($query) or pupe_error($query);
 
   echo "<table><tr>

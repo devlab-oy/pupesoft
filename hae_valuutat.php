@@ -32,22 +32,22 @@ if ($xml !== FALSE) {
     echo "<tr><td>$valkoodi</td><td align='right'>$kurssi</td><td align='right'>".sprintf("%.9f", (1/$kurssi))."</td>";
 
     if ($tee == "PAIVITA") {
-        $query = "  UPDATE valuu SET
-            kurssi    = round(1 / $kurssi, 9),
-            muutospvm = now(),
-            muuttaja  = '$kukarow[kuka]'
-            WHERE yhtio         = '$kukarow[yhtio]'
-            AND nimi         = '$valkoodi'
-            AND automaattipaivitys = ''";
+        $query = "UPDATE valuu SET
+                  kurssi                 = round(1 / $kurssi, 9),
+                  muutospvm              = now(),
+                  muuttaja               = '$kukarow[kuka]'
+                  WHERE yhtio            = '$kukarow[yhtio]'
+                  AND nimi               = '$valkoodi'
+                  AND automaattipaivitys = ''";
       $result = pupe_query($query);
 
       if (mysql_affected_rows() != 0) {
         echo "<td class='back'>".t("Kurssi päivitetty").".</td>";
       }
 
-      $query = "  INSERT INTO valuu_historia (kotivaluutta, valuutta, kurssi, kurssipvm)
-            VALUES ('EUR', '$valkoodi', round(1 / $kurssi, 9), '$pvm_mysql')
-              ON DUPLICATE KEY UPDATE kurssi = round(1 / $kurssi, 9)";
+      $query = "INSERT INTO valuu_historia (kotivaluutta, valuutta, kurssi, kurssipvm)
+                VALUES ('EUR', '$valkoodi', round(1 / $kurssi, 9), '$pvm_mysql')
+                  ON DUPLICATE KEY UPDATE kurssi = round(1 / $kurssi, 9)";
       $result = mysql_query($query) or pupe_error($query);
     }
 

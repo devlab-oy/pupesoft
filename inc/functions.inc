@@ -8685,6 +8685,121 @@ if (!function_exists("palauta_intrastat_tiedot")) {
   }
 }
 
+if (!function_exists("livesearch_asiakkaantilausnumero")) {
+  function livesearch_asiakkaantilausnumero($toim) {
+    global $yhtiorow, $kukarow, $palvelin2;
+
+    $tee = $_REQUEST["livesearch_tee"];
+    $nimi = $_REQUEST["livesearch_nimi"];
+    $formi = $_REQUEST["livesearch_form"];
+    $hakuid = $_REQUEST["livesearch_hakuid"];
+    $submit = $_REQUEST["livesearch_submit"];
+    $haku = trim($_REQUEST["livesearch_haku"]);
+
+    if (substr($toim, 0, 8) == "KONSERNI") {
+      $logistiikka_yhtio = '';
+      $logistiikka_yhtiolisa = '';
+      $lasku_yhtio_originaali = $kukarow['yhtio'];
+      $konserni = "KONSERNIVARASTO";
+
+      if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
+        $logistiikka_yhtio = $konsernivarasto_yhtiot;
+        $logistiikka_yhtiolisa = "yhtio in ($logistiikka_yhtio)";
+
+        if ($lasku_yhtio != '') {
+          $kukarow['yhtio'] = mysql_real_escape_string($lasku_yhtio);
+          $yhtiorow = hae_yhtion_parametrit($lasku_yhtio);
+        }
+      }
+      else {
+        $logistiikka_yhtiolisa = "yhtio = '$kukarow[yhtio]'";
+      }
+
+      $cleantoim = substr($toim, 8);
+    }
+    else {
+      $logistiikka_yhtio = '';
+      $logistiikka_yhtiolisa = "yhtio = '$kukarow[yhtio]'";
+      $lasku_yhtio_originaali = $kukarow['yhtio'];
+
+      $cleantoim = $toim;
+    }
+
+    if (strlen($haku) >= 2) {
+
+      echo "
+      <script TYPE='text/javascript' LANGUAGE='JavaScript'>
+        document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
+      </script>";
+
+      $haku_array = explode(" ", $haku);
+      $haku_query = "";
+
+      foreach ($haku_array as $haku) {
+        $haku = mysql_real_escape_string($haku);
+        $haku_query .= "and asiakkaan_tilausnumero like ('$haku%') ";
+      }
+
+      $query = "SELECT tunnus, asiakkaan_tilausnumero, nimi, luontiaika, tunnus
+                FROM lasku use index (yhtio_asiakkaan_tilausnumero)
+                WHERE tila in ('L','U','N','R','E','D')
+                and DATEDIFF(luontiaika,NOW()) <= 365
+                $haku_query
+                and $logistiikka_yhtiolisa";
+      $result = pupe_query($query);
+
+      $limit = 0;
+      if (mysql_num_rows($result) > 0) {
+        while ($row = mysql_fetch_assoc($result)) {
+          echo "  <div id='asiakastilausnumero_valinta_$hakuid$row[tunnus]'
+                name='selectOptions$hakuid'
+                onmouseover=\"this.className='liveSearchSelectedItem';
+                  keyStrokeIndex = -1;
+                  var aEls = document.getElementsByName('selectOptions$hakuid');
+                  for (var iEl = 0; iEl < aEls.length; iEl++) {
+                    if (aEls[iEl].id.substring(0,14) == 'asiakastilausnumero_valinta_$hakuid' && aEls[iEl].id != 'asiakastilausnumero_valinta_$hakuid$row[tunnus]') {
+                      document.getElementById(aEls[iEl].id).className='';
+                    }
+                  } \"
+                onmouseout=\"this.className='';\"
+                onclick=\"document.getElementById('$hakuid').value='$row[tunnus]';";
+
+                if ($submit == "") {
+                  echo "document.$formi.submit();";
+                  echo "console.log(document.$formi);";
+                }
+                else {
+                  echo "document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';";
+                  echo "console.log(document.$formi);";
+                }
+                $laadittu = tv1dateconv($row["luontiaika"]);
+                echo "\"
+                style='padding:2px;'>
+                <font style='font-weight:bold'>$row[asiakkaan_tilausnumero]</font> &raquo; $row[nimi] - $laadittu
+              </div><div name='selectValues$hakuid' id='$row[tunnus]'></div>";
+          $limit++;
+
+          if ($limit > 49) {
+            break;
+          }
+        }
+
+        echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>".t("Haulla löytyi")." ".mysql_num_rows($result). " ",t("tilausta")," ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
+      }
+      else {
+        echo "<div style='padding:2px'><font class='message'>".t("Ei tilauksia.")."</font></div>";
+      }
+    }
+    else {
+      echo "
+      <script TYPE='text/javascript' LANGUAGE='JavaScript'>
+        document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
+        document.getElementById('livesearch_$hakuid').style.innerHTML = '';
+      </script>";
+    }
+  }
+}
+
 if (!function_exists("livesearch_tilihaku")) {
   function livesearch_tilihaku() {
     global $yhtiorow, $kukarow, $palvelin2;
@@ -8721,13 +8836,13 @@ if (!function_exists("livesearch_tilihaku")) {
       $limit = 0;
       if (mysql_num_rows($result) > 0) {
         while ($row = mysql_fetch_assoc($result)) {
-          echo "  <div id='tuote_valinta_$hakuid$row[tunnus]'
+          echo "  <div id='tili_valinta_$hakuid$row[tunnus]'
                 name='selectOptions$hakuid'
                 onmouseover=\"this.className='liveSearchSelectedItem';
                   keyStrokeIndex = -1;
                   var aEls = document.getElementsByName('selectOptions$hakuid');
                   for (var iEl = 0; iEl < aEls.length; iEl++) {
-                    if (aEls[iEl].id.substring(0,14) == 'tuote_valinta_$hakuid' && aEls[iEl].id != 'tuote_valinta_$hakuid$row[tunnus]') {
+                    if (aEls[iEl].id.substring(0,14) == 'tili_valinta_$hakuid' && aEls[iEl].id != 'tili_valinta_$hakuid$row[tunnus]') {
                       document.getElementById(aEls[iEl].id).className='';
                     }
                   } \"
@@ -9675,7 +9790,6 @@ if (!function_exists("livesearch_toimittajahaku")) {
 }
 
 if (!function_exists("livesearch_sarjanumerohaku")) {
-
   function livesearch_sarjanumerohaku($toim = '') {
     global $yhtiorow, $kukarow, $palvelin2;
 

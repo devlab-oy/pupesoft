@@ -128,13 +128,13 @@ if ($tee == "RetrieveTransferID") {
     if ($transfer_id != "" and $transfer_key != "") {
       $status_message2 .= "<font class='ok'>Päivitys onnistui, APIX laskutus käyttöönotettu!</font>";
 
-      $query = "  UPDATE yhtion_parametrit SET
-            apix_tunnus = '$transfer_id',
-            apix_avain = '$transfer_key',
-            verkkolasku_lah = 'apix',
-            finvoice_senderpartyid = '$yhtiorow[ovttunnus]',
-            finvoice_senderintermediator = '003723327487'
-            WHERE yhtio = '$kukarow[yhtio]'";
+      $query = "UPDATE yhtion_parametrit SET
+                apix_tunnus                  = '$transfer_id',
+                apix_avain                   = '$transfer_key',
+                verkkolasku_lah              = 'apix',
+                finvoice_senderpartyid       = '$yhtiorow[ovttunnus]',
+                finvoice_senderintermediator = '003723327487'
+                WHERE yhtio                  = '$kukarow[yhtio]'";
       $query = mysql_query($query) or pupe_error($query);
     }
     else {

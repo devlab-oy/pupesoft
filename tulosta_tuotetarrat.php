@@ -26,10 +26,10 @@ $lets = '';
 $uusean = '';
 
 if ($updateean != '' and $uuseankoodi != '' and $tee != '' and $toim != 'YKS') {
-  $query = "  UPDATE tuote
-        SET eankoodi = '$uuseankoodi'
-        WHERE yhtio  = '$kukarow[yhtio]'
-        and tuoteno  = '$tuoteno'";
+  $query = "UPDATE tuote
+            SET eankoodi = '$uuseankoodi'
+            WHERE yhtio = '$kukarow[yhtio]'
+            and tuoteno = '$tuoteno'";
   $resulteankoodi = mysql_query($query) or pupe_error($query);
 }
 
@@ -55,12 +55,12 @@ if ($tee == 'H') {
   if ($tee == 'H') {
 
     $sql = "SELECT tuotepaikat.tuoteno tuoteno
-        FROM tuotepaikat
-        WHERE tuotepaikat.yhtio = '$kukarow[yhtio]' and
-        concat(rpad(upper(hyllyalue),  5, '0'),lpad(upper(hyllynro),  5, '0'),lpad(upper(hyllyvali),  5, '0'),lpad(upper(hyllytaso),  5, '0')) >= concat(rpad(upper('$ahyllyalue'), 5, '0'),lpad(upper('$ahyllynro'), 5, '0'),lpad(upper('$ahyllyvali'), 5, '0'),lpad(upper('$ahyllytaso'), 5, '0')) and
-        concat(rpad(upper(hyllyalue),  5, '0'),lpad(upper(hyllynro),  5, '0'),lpad(upper(hyllyvali),  5, '0'),lpad(upper(hyllytaso),  5, '0')) <= concat(rpad(upper('$lhyllyalue'), 5, '0'),lpad(upper('$lhyllynro'), 5, '0'),lpad(upper('$lhyllyvali'), 5, '0'),lpad(upper('$lhyllytaso'), 5, '0'))
-        $lisa
-        ORDER BY 1";
+            FROM tuotepaikat
+            WHERE tuotepaikat.yhtio = '$kukarow[yhtio]' and
+            concat(rpad(upper(hyllyalue),  5, '0'),lpad(upper(hyllynro),  5, '0'),lpad(upper(hyllyvali),  5, '0'),lpad(upper(hyllytaso),  5, '0')) >= concat(rpad(upper('$ahyllyalue'), 5, '0'),lpad(upper('$ahyllynro'), 5, '0'),lpad(upper('$ahyllyvali'), 5, '0'),lpad(upper('$ahyllytaso'), 5, '0')) and
+            concat(rpad(upper(hyllyalue),  5, '0'),lpad(upper(hyllynro),  5, '0'),lpad(upper(hyllyvali),  5, '0'),lpad(upper(hyllytaso),  5, '0')) <= concat(rpad(upper('$lhyllyalue'), 5, '0'),lpad(upper('$lhyllynro'), 5, '0'),lpad(upper('$lhyllyvali'), 5, '0'),lpad(upper('$lhyllytaso'), 5, '0'))
+            $lisa
+            ORDER BY 1";
     $res = mysql_query($sql) or pupe_error($sql);
 
     $tuotteet = array();
@@ -126,10 +126,10 @@ $tkpl = $tulostakappale;
 if (($tee == 'Z' or $tee == 'H') and $ulos == '') {
 
   if ($lets == 'go') {
-    $query = "  SELECT komento
-          FROM kirjoittimet
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tunnus = '$kirjoitin'";
+    $query = "SELECT komento
+              FROM kirjoittimet
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tunnus  = '$kirjoitin'";
     $komres = mysql_query($query) or pupe_error($query);
     $komrow = mysql_fetch_array($komres);
     $komento = $komrow['komento'];
@@ -222,11 +222,11 @@ if (!isset($nayta_pdf)) {
   echo "<td><select name='kirjoitin'>";
   echo "<option value=''>".t("Ei kirjoitinta")."</option>";
 
-  $query = "  SELECT *
-        FROM kirjoittimet
-        WHERE yhtio = '$kukarow[yhtio]'
-        and komento != 'email'
-        order by kirjoitin";
+  $query = "SELECT *
+            FROM kirjoittimet
+            WHERE yhtio  = '$kukarow[yhtio]'
+            and komento != 'email'
+            order by kirjoitin";
   $kires = mysql_query($query) or pupe_error($query);
 
   while ($kirow = mysql_fetch_array($kires)) {

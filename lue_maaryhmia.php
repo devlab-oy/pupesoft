@@ -34,18 +34,18 @@ while (!feof($file)) {
     if ($rivi[$i] != '') {
 
       //hateaan maa
-      $query  = "  SELECT *
-            FROM maat
-            WHERE koodi = '$rivi[$i]'";
+      $query  = "SELECT *
+                 FROM maat
+                 WHERE koodi = '$rivi[$i]'";
       $result = mysql_query($query) or pupe_error($query);
       $maarow = mysql_fetch_array($result);
 
 
-      $query = "  INSERT into maat
-            SET
-            koodi       = '$rivi[$i]',
-            nimi      = '$maarow[nimi]',
-            ryhma_tunnus   = '$ryhmakoodi'";
+      $query = "INSERT into maat
+                SET
+                koodi        = '$rivi[$i]',
+                nimi         = '$maarow[nimi]',
+                ryhma_tunnus = '$ryhmakoodi'";
       $result = mysql_query($query) or pupe_error($query);
 
       //echo "$lask $query\n\n";

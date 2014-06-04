@@ -121,17 +121,17 @@ if ($tee != "" and isset($painoinnappia)) {
     $excelrivi++;
   }
 
-  $query = "  SELECT tuote.tuoteno, tuote.nimitys, tuote.osasto, tuote.try
-        FROM tuote
-        {$toimittaja_join}
-        WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
-        {$lisa}
-        AND (tuote.status != 'P' OR (  SELECT sum(tuotepaikat.saldo)
-                        FROM tuotepaikat
-                        WHERE tuotepaikat.yhtio = tuote.yhtio
-                        AND tuotepaikat.tuoteno = tuote.tuoteno
-                        AND tuotepaikat.saldo > 0) > 0)
-        ORDER BY tuote.osasto, tuote.try, tuote.tuoteno";
+  $query = "SELECT tuote.tuoteno, tuote.nimitys, tuote.osasto, tuote.try
+            FROM tuote
+            {$toimittaja_join}
+            WHERE tuote.yhtio                       = '{$kukarow["yhtio"]}'
+            {$lisa}
+            AND (tuote.status != 'P' OR (  SELECT sum(tuotepaikat.saldo)
+                            FROM tuotepaikat
+                            WHERE tuotepaikat.yhtio = tuote.yhtio
+                            AND tuotepaikat.tuoteno = tuote.tuoteno
+                            AND tuotepaikat.saldo   > 0) > 0)
+            ORDER BY tuote.osasto, tuote.try, tuote.tuoteno";
   $eresult = pupe_query($query);
 
   $total_rows = mysql_num_rows($eresult);
@@ -150,28 +150,28 @@ if ($tee != "" and isset($painoinnappia)) {
       $bar->increase();
 
       // ostopuoli
-      $query = "  SELECT min(toimaika) toimaika,
-            sum(varattu) tulossa
-            FROM tilausrivi
-            WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND tuoteno = '{$row["tuoteno"]}'
-            AND tyyppi   = 'O'
-            AND varattu > 0";
+      $query = "SELECT min(toimaika) toimaika,
+                sum(varattu) tulossa
+                FROM tilausrivi
+                WHERE yhtio = '{$kukarow["yhtio"]}'
+                AND tuoteno = '{$row["tuoteno"]}'
+                AND tyyppi  = 'O'
+                AND varattu > 0";
       $ostoresult = pupe_query($query);
       $ostorivi = mysql_fetch_assoc($ostoresult);
 
       // Ajetaan saldomyytävissä niin, että JT-rivejä ei huomioida suuntaaan eikä toiseen
       list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], 'JTSPEC');
 
-      $query = "  SELECT sum(jt $lisavarattu) jt
-            FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-            WHERE yhtio  = '{$kukarow["yhtio"]}'
-            and tyyppi   in ('L','G')
-            and tuoteno  = '{$row["tuoteno"]}'
-            and laskutettuaika = '0000-00-00'
-            and jt $lisavarattu > 0
-            and kpl    = 0
-            and var    = 'J'";
+      $query = "SELECT sum(jt $lisavarattu) jt
+                FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
+                WHERE yhtio        = '{$kukarow["yhtio"]}'
+                and tyyppi         in ('L','G')
+                and tuoteno        = '{$row["tuoteno"]}'
+                and laskutettuaika = '0000-00-00'
+                and jt $lisavarattu > 0
+                and kpl            = 0
+                and var            = 'J'";
       $juresult = pupe_query($query);
       $jurow    = mysql_fetch_assoc($juresult);
 

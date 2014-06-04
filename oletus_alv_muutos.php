@@ -32,17 +32,17 @@ else {
   $query = "LOCK TABLES yhtion_parametrit WRITE, asiakashinta WRITE, hinnasto WRITE, toimitustapa WRITE, rahtimaksut WRITE, tilausrivi WRITE, tuote WRITE, maksupositio WRITE, lasku READ, avainsana READ";
   $locre = mysql_query($query) or pupe_error($query);
 
-  $query  = " UPDATE yhtion_parametrit
-        SET alv_kasittely = '$yhtion_para'
-        WHERE yhtio = '{$kukarow["yhtio"]}'";
+  $query  = "UPDATE yhtion_parametrit
+             SET alv_kasittely = '$yhtion_para'
+             WHERE yhtio = '{$kukarow["yhtio"]}'";
   $result = pupe_query($query);
 
   //yhtiön oletusalvi!
-  $query = "  SELECT selite
-        FROM avainsana
-        where yhtio = '{$kukarow["yhtio"]}'
-        and laji = 'alv'
-        and selitetark != ''";
+  $query = "SELECT selite
+            FROM avainsana
+            where yhtio     = '{$kukarow["yhtio"]}'
+            and laji        = 'alv'
+            and selitetark != ''";
   $wtres  = pupe_query($query);
 
   if (mysql_num_rows($wtres) == 1) {
@@ -69,27 +69,27 @@ else {
           if ($tables[0] == "asiakashinta" and  $fields[0] == "hinta") {
             echo "<tr><th>$tables[0]</th><th>$fields[0]</th><th>$teksti</th></tr>";
 
-            $query  = "  UPDATE asiakashinta
-                  JOIN tuote on tuote.yhtio=asiakashinta.yhtio and tuote.tuoteno=asiakashinta.tuoteno
-                  SET asiakashinta.hinta = round(asiakashinta.hinta {$oper} (1 + (tuote.alv / 100)), {$yhtiorow['hintapyoristys']})
-                  where asiakashinta.yhtio = '{$kukarow["yhtio"]}'
-                  and asiakashinta.tuoteno != ''";
+            $query  = "UPDATE asiakashinta
+                       JOIN tuote on tuote.yhtio=asiakashinta.yhtio and tuote.tuoteno=asiakashinta.tuoteno
+                       SET asiakashinta.hinta = round(asiakashinta.hinta {$oper} (1 + (tuote.alv / 100)), {$yhtiorow['hintapyoristys']})
+                       where asiakashinta.yhtio  = '{$kukarow["yhtio"]}'
+                       and asiakashinta.tuoteno != ''";
             $result = pupe_query($query);
 
-            $query  = "  UPDATE asiakashinta
-                  SET asiakashinta.hinta = round(asiakashinta.hinta {$oper} (1 + ($alv / 100)), {$yhtiorow['hintapyoristys']})
-                  where asiakashinta.yhtio = '{$kukarow["yhtio"]}'
-                  and asiakashinta.tuoteno = ''";
+            $query  = "UPDATE asiakashinta
+                       SET asiakashinta.hinta = round(asiakashinta.hinta {$oper} (1 + ($alv / 100)), {$yhtiorow['hintapyoristys']})
+                       where asiakashinta.yhtio = '{$kukarow["yhtio"]}'
+                       and asiakashinta.tuoteno = ''";
             $result = pupe_query($query);
           }
           elseif ($tables[0] == "hinnasto" and $fields[0] == "hinta") {
             echo "<tr><th>$tables[0]</th><th>$fields[0]</th><th>$teksti</th></tr>";
 
-            $query  = " UPDATE hinnasto
-                  JOIN tuote on tuote.yhtio=hinnasto.yhtio and tuote.tuoteno=hinnasto.tuoteno
-                  SET hinnasto.hinta = round(hinnasto.hinta {$oper} (1 + (tuote.alv / 100)), {$yhtiorow['hintapyoristys']})
-                  WHERE hinnasto.yhtio  = '{$kukarow["yhtio"]}'
-                  AND hinnasto.valkoodi = '{$yhtiorow["valkoodi"]}'";
+            $query  = "UPDATE hinnasto
+                       JOIN tuote on tuote.yhtio=hinnasto.yhtio and tuote.tuoteno=hinnasto.tuoteno
+                       SET hinnasto.hinta = round(hinnasto.hinta {$oper} (1 + (tuote.alv / 100)), {$yhtiorow['hintapyoristys']})
+                       WHERE hinnasto.yhtio  = '{$kukarow["yhtio"]}'
+                       AND hinnasto.valkoodi = '{$yhtiorow["valkoodi"]}'";
             $result = pupe_query($query);
           }
           elseif ($tables[0] == "toimitustapa" and $fields[0] == "jvkulu") {
@@ -98,10 +98,10 @@ else {
             $updalv = $alv;
 
             if ($yhtiorow["jalkivaatimus_tuotenumero"] != "") {
-              $query  = "  SELECT alv
-                    FROM tuote
-                    WHERE yhtio = '{$kukarow["yhtio"]}'
-                    AND tuoteno = '{$yhtiorow["jalkivaatimus_tuotenumero"]}'";
+              $query  = "SELECT alv
+                         FROM tuote
+                         WHERE yhtio = '{$kukarow["yhtio"]}'
+                         AND tuoteno = '{$yhtiorow["jalkivaatimus_tuotenumero"]}'";
               $tuotenores = pupe_query($query);
 
               if (mysql_num_rows($tuotenores) == 1) {
@@ -110,9 +110,9 @@ else {
               }
             }
 
-            $query  = " UPDATE toimitustapa
-                  SET jvkulu = round(jvkulu {$oper} (1 + ({$updalv} / 100)), {$yhtiorow['hintapyoristys']})
-                  WHERE yhtio = '{$kukarow["yhtio"]}'";
+            $query  = "UPDATE toimitustapa
+                       SET jvkulu = round(jvkulu {$oper} (1 + ({$updalv} / 100)), {$yhtiorow['hintapyoristys']})
+                       WHERE yhtio = '{$kukarow["yhtio"]}'";
             $result = pupe_query($query);
           }
           elseif ($tables[0] == "toimitustapa" and $fields[0] == "erilliskasiteltavakulu") {
@@ -121,10 +121,10 @@ else {
             $updalv = $alv;
 
             if ($yhtiorow["erilliskasiteltava_tuotenumero"] != "") {
-              $query  = "  SELECT alv
-                    FROM tuote
-                    WHERE yhtio = '{$kukarow["yhtio"]}'
-                    AND tuoteno = '{$yhtiorow["erilliskasiteltava_tuotenumero"]}'";
+              $query  = "SELECT alv
+                         FROM tuote
+                         WHERE yhtio = '{$kukarow["yhtio"]}'
+                         AND tuoteno = '{$yhtiorow["erilliskasiteltava_tuotenumero"]}'";
               $tuotenores = pupe_query($query);
 
               if (mysql_num_rows($tuotenores) == 1) {
@@ -133,9 +133,9 @@ else {
               }
             }
 
-            $query  = " UPDATE toimitustapa
-                  SET erilliskasiteltavakulu = round(erilliskasiteltavakulu {$oper} (1 + ({$updalv} / 100)), {$yhtiorow['hintapyoristys']})
-                  WHERE yhtio = '{$kukarow["yhtio"]}'";
+            $query  = "UPDATE toimitustapa
+                       SET erilliskasiteltavakulu = round(erilliskasiteltavakulu {$oper} (1 + ({$updalv} / 100)), {$yhtiorow['hintapyoristys']})
+                       WHERE yhtio = '{$kukarow["yhtio"]}'";
             $result = pupe_query($query);
           }
           elseif ($tables[0] == "rahtimaksut" and  $fields[0] == "rahtihinta") {
@@ -144,10 +144,10 @@ else {
             $updalv = $alv;
 
             if ($yhtiorow["rahti_tuotenumero"] != "") {
-              $query  = "  SELECT alv
-                    FROM tuote
-                    WHERE yhtio = '{$kukarow["yhtio"]}'
-                    AND tuoteno = '{$yhtiorow["rahti_tuotenumero"]}'";
+              $query  = "SELECT alv
+                         FROM tuote
+                         WHERE yhtio = '{$kukarow["yhtio"]}'
+                         AND tuoteno = '{$yhtiorow["rahti_tuotenumero"]}'";
               $tuotenores = pupe_query($query);
 
               if (mysql_num_rows($tuotenores) == 1) {
@@ -156,47 +156,47 @@ else {
               }
             }
 
-            $query  = " UPDATE rahtimaksut
-                  SET rahtihinta = round(rahtihinta {$oper} (1 + ({$updalv} / 100)), {$yhtiorow['hintapyoristys']})
-                  WHERE yhtio = '{$kukarow["yhtio"]}'";
+            $query  = "UPDATE rahtimaksut
+                       SET rahtihinta = round(rahtihinta {$oper} (1 + ({$updalv} / 100)), {$yhtiorow['hintapyoristys']})
+                       WHERE yhtio = '{$kukarow["yhtio"]}'";
             $result = pupe_query($query);
           }
           elseif ($tables[0] == "tilausrivi" and ($fields[0] == "hinta" or $fields[0] == "hinta_valuutassa")) {
             echo "<tr><th>$tables[0]</th><th>$fields[0]</th><th>$teksti</th></tr>";
 
-            $query = "  UPDATE tilausrivi
-                  SET $fields[0] = round($fields[0] {$oper} (1 + (alv / 100)), {$yhtiorow['hintapyoristys']})
-                  WHERE yhtio = '{$kukarow["yhtio"]}'
-                  and tyyppi in ('0','B','E','F','G','L','M','N','T','V','W','Z')
-                  and alv > 0
-                  and alv < 500";
+            $query = "UPDATE tilausrivi
+                      SET $fields[0] = round($fields[0] {$oper} (1 + (alv / 100)), {$yhtiorow['hintapyoristys']})
+                      WHERE yhtio = '{$kukarow["yhtio"]}'
+                      and tyyppi  in ('0','B','E','F','G','L','M','N','T','V','W','Z')
+                      and alv     > 0
+                      and alv     < 500";
             $result = pupe_query($query);
           }
           elseif ($tables[0] == "tuote" and ($fields[0] == "myyntihinta" or $fields[0] == "myymalahinta" or $fields[0] == "nettohinta" or $fields[0] == "rahtivapaa_alarajasumma" or $fields[0] == "tuntihinta")) {
 
             echo "<tr><th>$tables[0]</th><th>$fields[0]</th><th>$teksti</th></tr>";
 
-            $query = "  UPDATE tuote
-                  SET {$fields[0]} = round({$fields[0]} {$oper} (1 + (alv / 100)), {$yhtiorow['hintapyoristys']})
-                  WHERE yhtio = '{$kukarow["yhtio"]}'";
+            $query = "UPDATE tuote
+                      SET {$fields[0]} = round({$fields[0]} {$oper} (1 + (alv / 100)), {$yhtiorow['hintapyoristys']})
+                      WHERE yhtio = '{$kukarow["yhtio"]}'";
             $result = pupe_query($query);
           }
           elseif ($tables[0] == "maksupositio" and  $fields[0] == "summa") {
             echo "<tr><th>$tables[0]</th><th>$fields[0]</th><th>$teksti</th></tr>";
 
-            $query  = "  SELECT *
-                  FROM maksupositio
-                  where yhtio = '{$kukarow["yhtio"]}'";
+            $query  = "SELECT *
+                       FROM maksupositio
+                       where yhtio = '{$kukarow["yhtio"]}'";
             $posres = pupe_query($query);
 
             while ($posrow = mysql_fetch_array($posres)) {
 
               $updalv = $alv;
 
-              $query  = "  SELECT alv
-                    FROM lasku
-                    WHERE yhtio = '{$kukarow["yhtio"]}'
-                    AND tunnus = '{$posrow["otunnus"]}'";
+              $query  = "SELECT alv
+                         FROM lasku
+                         WHERE yhtio = '{$kukarow["yhtio"]}'
+                         AND tunnus  = '{$posrow["otunnus"]}'";
               $laskures = pupe_query($query);
 
               if (mysql_num_rows($tuotenores) == 1) {
@@ -204,19 +204,19 @@ else {
                 $updalv = $laskurow["alv"];
               }
 
-              $query = "  UPDATE maksupositio
-                    SET summa = round(summa {$oper} (1 + ({$updalv} / 100)), {$yhtiorow['hintapyoristys']})
-                    WHERE yhtio = '{$kukarow["yhtio"]}'
-                    and tunnus  = '{$posrow["tunnus"]}'";
+              $query = "UPDATE maksupositio
+                        SET summa = round(summa {$oper} (1 + ({$updalv} / 100)), {$yhtiorow['hintapyoristys']})
+                        WHERE yhtio = '{$kukarow["yhtio"]}'
+                        and tunnus  = '{$posrow["tunnus"]}'";
               $result = pupe_query($query);
             }
           }
           elseif ($tables[0] == "yhtion_parametrit" and ($fields[0] == "erikoisvarastomyynti_alarajasumma_rivi" or $fields[0] == "korvaavan_hinta_ylaraja")) {
             echo "<tr><th>$tables[0]</th><th>$fields[0]</th><th>$teksti</th></tr>";
 
-            $query  = " UPDATE yhtion_parametrit
-                  SET $fields[0] = round($fields[0] {$oper} (1 + ({$updalv} / 100)), {$yhtiorow['hintapyoristys']})
-                  WHERE yhtio = '{$kukarow["yhtio"]}'";
+            $query  = "UPDATE yhtion_parametrit
+                       SET $fields[0] = round($fields[0] {$oper} (1 + ({$updalv} / 100)), {$yhtiorow['hintapyoristys']})
+                       WHERE yhtio = '{$kukarow["yhtio"]}'";
             $result = pupe_query($query);
           }
           else {

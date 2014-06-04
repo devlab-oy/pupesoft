@@ -12,15 +12,15 @@ if (file_exists($filename)) {
     $pvm = $yy . "-" . $kk . "-" . $pv;
 
     $query = "INSERT into maksu values (
-        '$inyhtio',
-        '$inkonserni',
-        'External',
-        '$pvm',
-        'MY',
-        '$summa',
-        'Myyntireskontra',
-        '',
-        '')";
+              '$inyhtio',
+              '$inkonserni',
+              'External',
+              '$pvm',
+              'MY',
+              '$summa',
+              'Myyntireskontra',
+              '',
+              '')";
     $xresult = mysql_query($query) or pupe_error($query);
   }
   fclose ($fp);

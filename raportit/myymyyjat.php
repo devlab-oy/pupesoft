@@ -49,21 +49,21 @@ echo "<br>";
 if ($tee != '') {
 
   // myynnit
-  $query = "  SELECT lasku.myyja,
-        kuka.nimi,
-        date_format(lasku.tapvm,'%Y/%m') kausi,
-        round(sum(lasku.arvo),0) summa,
-        round(sum(lasku.kate),0) kate
-        FROM lasku use index (yhtio_tila_tapvm)
-        LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.tunnus = lasku.myyja)
-        WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-        and lasku.tila = 'L'
-        and lasku.alatila = 'X'
-        and lasku.tapvm >= '$pvmalku'
-        and lasku.tapvm <= '$pvmloppu'
-        GROUP BY myyja, nimi, kausi
-        HAVING summa <> 0 OR kate <> 0
-        ORDER BY myyja";
+  $query = "SELECT lasku.myyja,
+            kuka.nimi,
+            date_format(lasku.tapvm,'%Y/%m') kausi,
+            round(sum(lasku.arvo),0) summa,
+            round(sum(lasku.kate),0) kate
+            FROM lasku use index (yhtio_tila_tapvm)
+            LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.tunnus = lasku.myyja)
+            WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
+            and lasku.tila    = 'L'
+            and lasku.alatila = 'X'
+            and lasku.tapvm   >= '$pvmalku'
+            and lasku.tapvm   <= '$pvmloppu'
+            GROUP BY myyja, nimi, kausi
+            HAVING summa <> 0 OR kate <> 0
+            ORDER BY myyja";
   $result = pupe_query($query);
 
   $summa = array();

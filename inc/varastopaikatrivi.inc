@@ -12,11 +12,11 @@ if (substr(mysql_field_name($result,$i),0,9) == 'printteri') {
 
   $ulos = "<td><select name='$nimi'>";
 
-  $query = "  SELECT *
-        from kirjoittimet
-        where yhtio = '$kukarow[yhtio]'
-        AND komento != 'EDI'
-        ORDER BY kirjoitin";
+  $query = "SELECT *
+            from kirjoittimet
+            where yhtio  = '$kukarow[yhtio]'
+            AND komento != 'EDI'
+            ORDER BY kirjoitin";
   $kires = pupe_query($query);
 
   $ulos .= "<option value=''>".t("Ei kirjoitinta")."</option>";
@@ -68,10 +68,10 @@ if (mysql_field_name($result, $i) == "nouto") {
 }
 
 if (mysql_field_name($result, $i) == "maa") {
-  $query = "  SELECT distinct koodi, nimi
-        FROM maat
-        WHERE nimi != ''
-        ORDER BY koodi";
+  $query = "SELECT distinct koodi, nimi
+            FROM maat
+            WHERE nimi != ''
+            ORDER BY koodi";
   $vresult = pupe_query($query);
   $ulos = "<td><select name='$nimi'>";
 
@@ -182,11 +182,11 @@ if (mysql_field_name($result, $i) == "toimipaikka") {
   $ulos = "<td><select name='$nimi'>";
   $ulos .= "<option value = ''>".t("Valitse toimipaikka")."</option>";
 
-  $query = "  SELECT *
-        FROM yhtion_toimipaikat
-        WHERE yhtio    = '{$kukarow['yhtio']}'
-        AND vat_numero = ''
-        ORDER BY nimi";
+  $query = "SELECT *
+            FROM yhtion_toimipaikat
+            WHERE yhtio    = '{$kukarow['yhtio']}'
+            AND vat_numero = ''
+            ORDER BY nimi";
   $vresult = pupe_query($query);
 
   while ($vrow = mysql_fetch_assoc($vresult)) {
@@ -228,12 +228,12 @@ if (mysql_field_name($result, $i) == "projekti" or mysql_field_name($result, $i)
   if (mysql_field_name($result, $i) == "kohde")   $kptyyppi = "O";
   if (mysql_field_name($result, $i) == "kustp")   $kptyyppi = "K";
 
-  $tpque = "  SELECT tunnus, nimi, koodi
-        from kustannuspaikka
-        where yhtio = '$kukarow[yhtio]'
-        and tyyppi = '$kptyyppi'
-        and kaytossa != 'E'
-        ORDER BY koodi+0, koodi, nimi";
+  $tpque = "SELECT tunnus, nimi, koodi
+            from kustannuspaikka
+            where yhtio   = '$kukarow[yhtio]'
+            and tyyppi    = '$kptyyppi'
+            and kaytossa != 'E'
+            ORDER BY koodi+0, koodi, nimi";
   $vresult = mysql_query($tpque) or pupe_error($tpque);
 
   $sel="";

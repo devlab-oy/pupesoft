@@ -22,9 +22,9 @@ $yhtiores = mysql_query($query) or die($query);
 if (mysql_num_rows($yhtiores)==1) {
   $yhtiorow = mysql_fetch_array($yhtiores);
 
-  $query = "  SELECT *
-        FROM yhtion_parametrit
-        WHERE yhtio='$kukarow[yhtio]'";
+  $query = "SELECT *
+            FROM yhtion_parametrit
+            WHERE yhtio='$kukarow[yhtio]'";
   $result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
 
   if (mysql_num_rows($result) == 1) {
@@ -55,11 +55,11 @@ echo "--------------------------------------------\n";
 
 while ($myyjarow = mysql_fetch_array ($myyre)) {
 
-  $query = "  SELECT tunnus, ytunnus, nimi
-        from asiakas
-        where yhtio = '$kukarow[yhtio]'
-        and myyjanro = '$myyjarow[myyjanro]'
-        AND myyjanro > 0";
+  $query = "SELECT tunnus, ytunnus, nimi
+            from asiakas
+            where yhtio  = '$kukarow[yhtio]'
+            and myyjanro = '$myyjarow[myyjanro]'
+            AND myyjanro > 0";
   $asire = mysql_query($query) or die($query);
 
   // merkit kelataan kalkuun
@@ -82,16 +82,16 @@ while ($myyjarow = mysql_fetch_array ($myyre)) {
     $sivu .= "$asiakasrow[ytunnus]\t$asiakasrow[nimi]\t";
 
     $query = "SELECT
-        sum(if(lasku.tapvm >= DATE_SUB(now(),INTERVAL 1 YEAR),tilausrivi.rivihinta,0)) ceur,
-        sum(if(lasku.tapvm < DATE_SUB(now(),INTERVAL 1 YEAR),tilausrivi.rivihinta,0)) eeur
-        FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
-        JOIN tilausrivi use index (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
-        JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
-        WHERE lasku.yhtio = '$kukarow[yhtio]' and
-        lasku.tila = 'U' and
-        lasku.alatila = 'X' and
-        lasku.liitostunnus = '$asiakasrow[tunnus]' and
-        lasku.tapvm > date_sub(now(), INTERVAL 2 YEAR)";
+              sum(if(lasku.tapvm >= DATE_SUB(now(),INTERVAL 1 YEAR),tilausrivi.rivihinta,0)) ceur,
+              sum(if(lasku.tapvm < DATE_SUB(now(),INTERVAL 1 YEAR),tilausrivi.rivihinta,0)) eeur
+              FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
+              JOIN tilausrivi use index (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
+              JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
+              WHERE lasku.yhtio  = '$kukarow[yhtio]' and
+              lasku.tila         = 'U' and
+              lasku.alatila      = 'X' and
+              lasku.liitostunnus = '$asiakasrow[tunnus]' and
+              lasku.tapvm        > date_sub(now(), INTERVAL 2 YEAR)";
     $sumsumres = mysql_query($query) or die($query);
     $sumsumrow = mysql_fetch_array ($sumsumres);
 
@@ -102,16 +102,16 @@ while ($myyjarow = mysql_fetch_array ($myyre)) {
     while ($merkkirow = mysql_fetch_array ($merre)) {
 
       $query = "SELECT
-          sum(if(lasku.tapvm >= DATE_SUB(now(),INTERVAL 1 YEAR),tilausrivi.rivihinta,0)) ceur,
-          sum(if(lasku.tapvm < DATE_SUB(now(),INTERVAL 1 YEAR),tilausrivi.rivihinta,0)) eeur
-          FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
-          JOIN tilausrivi use index (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
-          JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.tuotemerkki = '$merkkirow[tuotemerkki]')
-          WHERE lasku.yhtio = '$kukarow[yhtio]' and
-          lasku.tila = 'U' and
-          lasku.alatila = 'X' and
-          lasku.liitostunnus = '$asiakasrow[tunnus]' and
-          lasku.tapvm > date_sub(now(),INTERVAL 2 YEAR)";
+                sum(if(lasku.tapvm >= DATE_SUB(now(),INTERVAL 1 YEAR),tilausrivi.rivihinta,0)) ceur,
+                sum(if(lasku.tapvm < DATE_SUB(now(),INTERVAL 1 YEAR),tilausrivi.rivihinta,0)) eeur
+                FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
+                JOIN tilausrivi use index (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
+                JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.tuotemerkki = '$merkkirow[tuotemerkki]')
+                WHERE lasku.yhtio  = '$kukarow[yhtio]' and
+                lasku.tila         = 'U' and
+                lasku.alatila      = 'X' and
+                lasku.liitostunnus = '$asiakasrow[tunnus]' and
+                lasku.tapvm        > date_sub(now(),INTERVAL 2 YEAR)";
       $sumres = mysql_query($query) or die($query);
       $sumrow = mysql_fetch_array ($sumres);
 
@@ -123,11 +123,11 @@ while ($myyjarow = mysql_fetch_array ($myyre)) {
     $sivu .= "\n";
   }
 
-  $query = "  SELECT eposti, nimi
-        from kuka
-        where yhtio = '$kukarow[yhtio]'
-        and myyja = '$myyjarow[myyjanro]'
-        AND myyja > 0";
+  $query = "SELECT eposti, nimi
+            from kuka
+            where yhtio = '$kukarow[yhtio]'
+            and myyja   = '$myyjarow[myyjanro]'
+            AND myyja   > 0";
   $kukre = mysql_query($query) or die($query);
   $kukro = mysql_fetch_array ($kukre);
 

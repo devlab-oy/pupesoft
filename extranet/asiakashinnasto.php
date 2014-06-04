@@ -1,7 +1,7 @@
 <?php
 
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
-$useslave = 1;
+$useslave = 2;
 
 // Ei käytetä pakkausta
 $compression = FALSE;
@@ -45,9 +45,9 @@ else {
   }
   elseif ($tee != '' and $kukarow["extranet"] != '') {
     //Haetaan asiakkaan tunnuksella
-    $query  = "  SELECT *
-          FROM asiakas
-          WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
+    $query  = "SELECT *
+               FROM asiakas
+               WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 1) {
@@ -129,22 +129,22 @@ else {
       $kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$sallitut_maat%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$sallitut_maat%' ";
     }
 
-    $query = "  SELECT kurssi
-          FROM valuu
-          WHERE nimi = '$asiakasrow[valkoodi]'
-          and yhtio  = '$kukarow[yhtio]'";
+    $query = "SELECT kurssi
+              FROM valuu
+              WHERE nimi = '$asiakasrow[valkoodi]'
+              and yhtio  = '$kukarow[yhtio]'";
     $asres = pupe_query($query);
     $kurssi = mysql_fetch_assoc($asres);
 
-    $query = "  SELECT *
-          FROM tuote
-          WHERE tuote.yhtio = '$kukarow[yhtio]'
-          and tuote.status NOT IN ('P','X')
-          and tuote.tuotetyyppi NOT IN ('A', 'B')
-          and tuote.hinnastoon != 'E'
-          $kieltolisa
-          $lisa
-          ORDER BY tuote.osasto, tuote.try, tuote.tuoteno";
+    $query = "SELECT *
+              FROM tuote
+              WHERE tuote.yhtio      = '$kukarow[yhtio]'
+              and tuote.status       NOT IN ('P','X')
+              and tuote.tuotetyyppi  NOT IN ('A', 'B')
+              and tuote.hinnastoon  != 'E'
+              $kieltolisa
+              $lisa
+              ORDER BY tuote.osasto, tuote.try, tuote.tuoteno";
     $rresult = pupe_query($query);
 
     // KAUTTALASKUTUSKIKKARE
@@ -212,10 +212,10 @@ else {
       $bar->increase();
 
       if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $GLOBALS['koti_yhtio'] == $kukarow['yhtio']) {
-        $query = "  SELECT *
-              FROM tuote
-              WHERE yhtio = '{$GLOBALS["eta_yhtio"]}'
-              AND tuoteno = '$rrow[tuoteno]'";
+        $query = "SELECT *
+                  FROM tuote
+                  WHERE yhtio = '{$GLOBALS["eta_yhtio"]}'
+                  AND tuoteno = '$rrow[tuoteno]'";
         $tres_eta = pupe_query($query);
         $alehinrrow = mysql_fetch_assoc($tres_eta);
         $yhtiorow = $yhtiorow_eta;

@@ -15,12 +15,12 @@ if ($_REQUEST["tee"] == "login") {
     $session = "";
     $user = mysql_real_escape_string(trim($user));
 
-    $query = "  SELECT kuka, session, salasana
-          FROM kuka
-          WHERE kuka        = '{$user}'
-          AND yhtio        = '{$verkkokauppa}'
-          AND extranet     != ''
-          AND oletus_asiakas   != ''";
+    $query = "SELECT kuka, session, salasana
+              FROM kuka
+              WHERE kuka          = '{$user}'
+              AND yhtio           = '{$verkkokauppa}'
+              AND extranet       != ''
+              AND oletus_asiakas != ''";
     $result = pupe_query($query);
     $krow = mysql_fetch_array($result);
 
@@ -42,13 +42,13 @@ if ($_REQUEST["tee"] == "login") {
         $session = $session . chr(rand(65,90)) ;
       }
 
-      $query = "  UPDATE kuka
-            SET session = '{$session}',
-            lastlogin = now()
-            WHERE kuka        = '{$user}'
-            AND yhtio        = '{$verkkokauppa}'
-            AND extranet    != ''
-            AND oletus_asiakas  != ''";
+      $query = "UPDATE kuka
+                SET session = '{$session}',
+                lastlogin           = now()
+                WHERE kuka          = '{$user}'
+                AND yhtio           = '{$verkkokauppa}'
+                AND extranet       != ''
+                AND oletus_asiakas != ''";
       $result = pupe_query($query);
 
       $bool = setcookie("pupesoft_session", $session, time()+43200, "/");
@@ -93,11 +93,11 @@ if (!function_exists("tilaus")) {
   function tilaus($tunnus, $muokkaa = "") {
     global $yhtiorow, $kukarow, $verkkokauppa, $verkkokauppa_tuotemerkit, $verkkokauppa_saldotsk, $verkkokauppa_anon;
 
-    $query = "  SELECT *
-          FROM lasku
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tunnus = '{$tunnus}'
-          AND liitostunnus = '{$kukarow['oletus_asiakas']}'";
+    $query = "SELECT *
+              FROM lasku
+              WHERE yhtio      = '{$kukarow['yhtio']}'
+              AND tunnus       = '{$tunnus}'
+              AND liitostunnus = '{$kukarow['oletus_asiakas']}'";
     $result = pupe_query($query);
     $laskurow = mysql_fetch_array($result);
 
@@ -160,10 +160,10 @@ if (!function_exists("menu")) {
     unset($vierow);
 
     if ($kukarow["kesken"] > 0) {
-      $query  = "  SELECT IF(toim_maa != '', toim_maa, maa) maa
-            FROM lasku
-            WHERE yhtio  = '{$kukarow['yhtio']}'
-            AND tunnus  = '{$kukarow['kesken']}'";
+      $query  = "SELECT IF(toim_maa != '', toim_maa, maa) maa
+                 FROM lasku
+                 WHERE yhtio = '{$kukarow['yhtio']}'
+                 AND tunnus  = '{$kukarow['kesken']}'";
       $vieres = pupe_query($query);
       $vierow = mysql_fetch_array($vieres);
     }
@@ -245,23 +245,23 @@ if (!function_exists("menu")) {
     elseif ($try == "" and ($verkkokauppa_anon or $kukarow["kuka"] != "www")) {
       $val = "<table class='menutable'>";
 
-      $query = "  SELECT DISTINCT avainsana.selite try,
-            IFNULL((SELECT avainsana_kieli.selitetark
-                FROM avainsana AS avainsana_kieli
-                WHERE avainsana_kieli.yhtio = avainsana.yhtio
-                AND avainsana_kieli.laji = avainsana.laji
-                AND avainsana_kieli.perhe = avainsana.perhe
-                AND avainsana_kieli.kieli = '{$kukarow['kieli']}' LIMIT 1), avainsana.selitetark) trynimi
-            FROM tuote
-            JOIN avainsana ON (avainsana.yhtio = tuote.yhtio AND tuote.try = avainsana.selite AND avainsana.laji = 'TRY' AND avainsana.kieli IN ('{$yhtiorow['kieli']}', '') AND avainsana.nakyvyys = '')
-            WHERE tuote.yhtio = '{$kukarow['yhtio']}'
-            AND tuote.osasto = '{$osasto}'
-            {$kieltolisa}
-            {$tuotemerkkilis}
-            AND tuote.status != 'P'
-            AND tuote.tuotetyyppi NOT IN ('A', 'B')
-            AND tuote.hinnastoon IN ('W', 'V')
-            ORDER BY avainsana.jarjestys, avainsana.selite+0";
+      $query = "SELECT DISTINCT avainsana.selite try,
+                IFNULL((SELECT avainsana_kieli.selitetark
+                    FROM avainsana AS avainsana_kieli
+                    WHERE avainsana_kieli.yhtio  = avainsana.yhtio
+                    AND avainsana_kieli.laji     = avainsana.laji
+                    AND avainsana_kieli.perhe    = avainsana.perhe
+                    AND avainsana_kieli.kieli    = '{$kukarow['kieli']}' LIMIT 1), avainsana.selitetark) trynimi
+                FROM tuote
+                JOIN avainsana ON (avainsana.yhtio = tuote.yhtio AND tuote.try = avainsana.selite AND avainsana.laji = 'TRY' AND avainsana.kieli IN ('{$yhtiorow['kieli']}', '') AND avainsana.nakyvyys = '')
+                WHERE tuote.yhtio                = '{$kukarow['yhtio']}'
+                AND tuote.osasto                 = '{$osasto}'
+                {$kieltolisa}
+                {$tuotemerkkilis}
+                AND tuote.status                != 'P'
+                AND tuote.tuotetyyppi            NOT IN ('A', 'B')
+                AND tuote.hinnastoon             IN ('W', 'V')
+                ORDER BY avainsana.jarjestys, avainsana.selite+0";
       $tryres = pupe_query($query);
 
       while ($tryrow = mysql_fetch_array($tryres)) {
@@ -270,16 +270,16 @@ if (!function_exists("menu")) {
         $ok = 0;
 
         //  Tarkastetaan onko täällä sopivia tuotteita
-        $query = "  SELECT *
-               FROM tuote
-              WHERE yhtio   = '{$kukarow['yhtio']}'
-              AND osasto     = '{$osasto}'
-              AND try     = '{$tryrow['try']}'
-              {$kieltolisa}
-              {$tuotemerkkilis}
-              AND status      != 'P'
-              AND tuotetyyppi NOT IN ('A', 'B')
-              AND hinnastoon IN ('W','V')";
+        $query = "SELECT *
+                  FROM tuote
+                  WHERE yhtio      = '{$kukarow['yhtio']}'
+                  AND osasto       = '{$osasto}'
+                  AND try          = '{$tryrow['try']}'
+                  {$kieltolisa}
+                  {$tuotemerkkilis}
+                  AND status      != 'P'
+                  AND tuotetyyppi  NOT IN ('A', 'B')
+                  AND hinnastoon   IN ('W','V')";
         $res = pupe_query($query);
 
         while ($trow = mysql_fetch_array($res) and $ok == 0) {
@@ -288,10 +288,10 @@ if (!function_exists("menu")) {
           if ($trow["hinnastoon"] == "V" or $kukarow["naytetaan_tuotteet"] == "A") {
 
             if (!is_array($asiakasrow)) {
-              $query = "  SELECT *
-                    FROM asiakas
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus = '{$kukarow['oletus_asiakas']}'";
+              $query = "SELECT *
+                        FROM asiakas
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND tunnus  = '{$kukarow['oletus_asiakas']}'";
               $asres = pupe_query($query);
               $asiakasrow = mysql_fetch_array($asres);
             }
@@ -338,24 +338,24 @@ if (!function_exists("menu")) {
     elseif ($verkkokauppa_tuotemerkit and ($verkkokauppa_anon or $kukarow["kuka"] != "www")) {
       $val = "<table class='menutable'>";
 
-      $query = "  SELECT DISTINCT avainsana.selite AS tuotemerkki,
-            IFNULL((SELECT avainsana_kieli.selite
-                FROM avainsana AS avainsana_kieli
-                WHERE avainsana_kieli.yhtio = avainsana.yhtio
-                AND avainsana_kieli.laji = avainsana.laji
-                AND avainsana_kieli.perhe = avainsana.perhe
-                AND avainsana_kieli.kieli = '{$kukarow['kieli']}' LIMIT 1), avainsana.selite) selite
-            FROM tuote
-            JOIN avainsana ON (avainsana.yhtio = tuote.yhtio AND tuote.tuotemerkki = avainsana.selite AND avainsana.laji = 'TUOTEMERKKI' AND avainsana.nakyvyys = '')
-            WHERE tuote.yhtio = '{$kukarow['yhtio']}'
-            AND tuote.osasto = '{$osasto}'
-            AND tuote.try = '{$try}'
-            {$kieltolisa}
-            {$tuotemerkkilis}
-            AND tuote.status != 'P'
-            AND tuote.tuotetyyppi NOT IN ('A', 'B')
-            AND tuote.hinnastoon IN ('W', 'V')
-            ORDER BY avainsana.jarjestys, avainsana.selite";
+      $query = "SELECT DISTINCT avainsana.selite AS tuotemerkki,
+                IFNULL((SELECT avainsana_kieli.selite
+                    FROM avainsana AS avainsana_kieli
+                    WHERE avainsana_kieli.yhtio  = avainsana.yhtio
+                    AND avainsana_kieli.laji     = avainsana.laji
+                    AND avainsana_kieli.perhe    = avainsana.perhe
+                    AND avainsana_kieli.kieli    = '{$kukarow['kieli']}' LIMIT 1), avainsana.selite) selite
+                FROM tuote
+                JOIN avainsana ON (avainsana.yhtio = tuote.yhtio AND tuote.tuotemerkki = avainsana.selite AND avainsana.laji = 'TUOTEMERKKI' AND avainsana.nakyvyys = '')
+                WHERE tuote.yhtio                = '{$kukarow['yhtio']}'
+                AND tuote.osasto                 = '{$osasto}'
+                AND tuote.try                    = '{$try}'
+                {$kieltolisa}
+                {$tuotemerkkilis}
+                AND tuote.status                != 'P'
+                AND tuote.tuotetyyppi            NOT IN ('A', 'B')
+                AND tuote.hinnastoon             IN ('W', 'V')
+                ORDER BY avainsana.jarjestys, avainsana.selite";
       $meres = pupe_query($query);
 
       while ($merow = mysql_fetch_array($meres)) {
@@ -364,16 +364,16 @@ if (!function_exists("menu")) {
         $ok = 0;
 
         //  Tarkastetaan onko täällä sopivia tuotteita
-        $query = "  SELECT *
-               FROM tuote
-              WHERE yhtio   = '{$kukarow['yhtio']}'
-              AND osasto     = '{$osasto}'
-              AND try     = '{$try}'
-              AND tuotemerkki = '{$merow['tuotemerkki']}'
-              {$kieltolisa}
-              AND status      != 'P'
-              AND tuotetyyppi NOT IN ('A', 'B')
-              AND hinnastoon IN ('W', 'V')";
+        $query = "SELECT *
+                  FROM tuote
+                  WHERE yhtio      = '{$kukarow['yhtio']}'
+                  AND osasto       = '{$osasto}'
+                  AND try          = '{$try}'
+                  AND tuotemerkki  = '{$merow['tuotemerkki']}'
+                  {$kieltolisa}
+                  AND status      != 'P'
+                  AND tuotetyyppi  NOT IN ('A', 'B')
+                  AND hinnastoon   IN ('W', 'V')";
         $res = pupe_query($query);
 
         while ($trow = mysql_fetch_array($res) and $ok == 0) {
@@ -382,10 +382,10 @@ if (!function_exists("menu")) {
           if ($trow["hinnastoon"] == "V" or $kukarow["naytetaan_tuotteet"] == "A") {
 
             if (!is_array($asiakasrow)) {
-              $query = "  SELECT *
-                    FROM asiakas
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus = '{$kukarow['oletus_asiakas']}'";
+              $query = "SELECT *
+                        FROM asiakas
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND tunnus  = '{$kukarow['oletus_asiakas']}'";
               $asres = pupe_query($query);
               $asiakasrow = mysql_fetch_array($asres);
             }
@@ -447,11 +447,11 @@ if (!function_exists("uutiset")) {
     // Ekotetaan avoin kori
     $val = avoin_kori();
 
-    $query = "  SELECT *
-          FROM kalenteri
-          WHERE yhtio = '$kukarow[yhtio]'  $lisa
-          ORDER BY kokopaiva DESC, luontiaika DESC
-          LIMIT 8";
+    $query = "SELECT *
+              FROM kalenteri
+              WHERE yhtio = '$kukarow[yhtio]'  $lisa
+              ORDER BY kokopaiva DESC, luontiaika DESC
+              LIMIT 8";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) > 0) {
@@ -479,13 +479,13 @@ if (!function_exists("uutiset")) {
           foreach($matches as $m) {
 
             //  Haetaan tuotenumero
-            $query = "  SELECT tuoteno, nimitys
-                   FROM tuote
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and tuoteno like ('$m[1]%')
-                  AND status != 'P'
-                  AND tuotetyyppi NOT IN ('A', 'B')
-                  AND hinnastoon IN ('W', 'V')";
+            $query = "SELECT tuoteno, nimitys
+                      FROM tuote
+                      WHERE yhtio      = '$kukarow[yhtio]'
+                      and tuoteno      like ('$m[1]%')
+                      AND status      != 'P'
+                      AND tuotetyyppi  NOT IN ('A', 'B')
+                      AND hinnastoon   IN ('W', 'V')";
             $tres = pupe_query($query);
 
             //  Tämä me korvataan aina!
@@ -528,9 +528,9 @@ if ($tee == "monistalasku") {
   function monistalasku($laskunro) {
     global $yhtiorow, $kukarow;
 
-    $query = "  SELECT tunnus
-          FROM lasku
-          WHERE yhtio='$kukarow[yhtio]' and liitostunnus='$kukarow[oletus_asiakas]' and laskunro = '$laskunro' and tila = 'U'";
+    $query = "SELECT tunnus
+              FROM lasku
+              WHERE yhtio='$kukarow[yhtio]' and liitostunnus='$kukarow[oletus_asiakas]' and laskunro = '$laskunro' and tila = 'U'";
     $result = pupe_query($query);
     if (mysql_num_rows($result)==1) {
       $row = mysql_fetch_array($result);
@@ -584,13 +584,13 @@ if ($tee == "uutiset") {
 
 if ($tee == "tuotteen_lisatiedot") {
 
-  $query = "  SELECT kuvaus, lyhytkuvaus
-        FROM tuote
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tuoteno = '$tuoteno'
-        AND status != 'P'
-        AND tuotetyyppi NOT IN ('A', 'B')
-        AND hinnastoon IN ('W', 'V')";
+  $query = "SELECT kuvaus, lyhytkuvaus
+            FROM tuote
+            WHERE yhtio      = '$kukarow[yhtio]'
+            and tuoteno      = '$tuoteno'
+            AND status      != 'P'
+            AND tuotetyyppi  NOT IN ('A', 'B')
+            AND hinnastoon   IN ('W', 'V')";
   $result = pupe_query($query);
   $row = mysql_fetch_array($result);
 
@@ -638,17 +638,17 @@ if ($tee == "tuotteen_lisatiedot") {
   }
 
   //  Haetaan kaikki liitetiedostot
-  $query = "  SELECT liitetiedostot.tunnus, liitetiedostot.selite, liitetiedostot.kayttotarkoitus, avainsana.selitetark, avainsana.selitetark_2,
-        (select tunnus from liitetiedostot l where l.yhtio=liitetiedostot.yhtio and l.liitos=liitetiedostot.liitos and l.liitostunnus=liitetiedostot.liitostunnus and l.kayttotarkoitus='TH' and l.filename=liitetiedostot.filename ORDER BY l.tunnus DESC LIMIT 1) peukalokuva
-        FROM tuote
-        JOIN liitetiedostot ON liitetiedostot.yhtio = tuote.yhtio and liitos = 'TUOTE' and liitetiedostot.liitostunnus=tuote.tunnus
-        JOIN avainsana ON avainsana.yhtio = liitetiedostot.yhtio and avainsana.laji = 'LITETY' and avainsana.selite!='TH' and avainsana.selite=liitetiedostot.kayttotarkoitus
-        WHERE tuote.yhtio = '$kukarow[yhtio]'
-        and tuote.tuoteno = '$tuoteno'
-        and tuote.hinnastoon in ('W','V')
-        and tuote.tuotetyyppi NOT IN ('A', 'B')
-        and tuote.status != 'P'
-        ORDER BY liitetiedostot.kayttotarkoitus IN ('TK') DESC, liitetiedostot.selite";
+  $query = "SELECT liitetiedostot.tunnus, liitetiedostot.selite, liitetiedostot.kayttotarkoitus, avainsana.selitetark, avainsana.selitetark_2,
+            (select tunnus from liitetiedostot l where l.yhtio=liitetiedostot.yhtio and l.liitos=liitetiedostot.liitos and l.liitostunnus=liitetiedostot.liitostunnus and l.kayttotarkoitus='TH' and l.filename=liitetiedostot.filename ORDER BY l.tunnus DESC LIMIT 1) peukalokuva
+            FROM tuote
+            JOIN liitetiedostot ON liitetiedostot.yhtio = tuote.yhtio and liitos = 'TUOTE' and liitetiedostot.liitostunnus=tuote.tunnus
+            JOIN avainsana ON avainsana.yhtio = liitetiedostot.yhtio and avainsana.laji = 'LITETY' and avainsana.selite!='TH' and avainsana.selite=liitetiedostot.kayttotarkoitus
+            WHERE tuote.yhtio      = '$kukarow[yhtio]'
+            and tuote.tuoteno      = '$tuoteno'
+            and tuote.hinnastoon   in ('W','V')
+            and tuote.tuotetyyppi  NOT IN ('A', 'B')
+            and tuote.status      != 'P'
+            ORDER BY liitetiedostot.kayttotarkoitus IN ('TK') DESC, liitetiedostot.selite";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -692,12 +692,12 @@ if ($tee == "tuotteen_lisatiedot") {
 }
 
 if ($tee == "poistakori") {
-  $query = "  SELECT tunnus
-        FROM lasku
-        WHERE yhtio = '$kukarow[yhtio]' and
-        tila = 'N' and
-        tunnus = '$kukarow[kesken]' and
-        alatila=''";
+  $query = "SELECT tunnus
+            FROM lasku
+            WHERE yhtio = '$kukarow[yhtio]' and
+            tila        = 'N' and
+            tunnus      = '$kukarow[kesken]' and
+            alatila=''";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 1) {
@@ -705,21 +705,21 @@ if ($tee == "poistakori") {
     //$ostoskori = mysql_fetch_array($result);
     $kalakori = mysql_fetch_array($result);
 
-    $query = "  UPDATE tilausrivi SET
-          tyyppi = 'D',
-          kommentti = trim(concat(kommentti, ' Käyttäjä $kukarow[kuka] mitätöi tilausrivin laskulta $kalakori[tunnus].'))
-          where yhtio = '$kukarow[yhtio]' and
-          tyyppi = 'L' and
-          otunnus = '$kalakori[tunnus]'";
+    $query = "UPDATE tilausrivi SET
+              tyyppi      = 'D',
+              kommentti   = trim(concat(kommentti, ' Käyttäjä $kukarow[kuka] mitätöi tilausrivin laskulta $kalakori[tunnus].'))
+              where yhtio = '$kukarow[yhtio]' and
+              tyyppi      = 'L' and
+              otunnus     = '$kalakori[tunnus]'";
     $result = pupe_query($query);
 
-    $query = "  UPDATE lasku SET
-          alatila = tila,
-          tila = 'D',
-          comments = trim(concat(comments, ' Käyttäjä $kukarow[kuka] mitätöi laskun $kalakori[tunnus].'))
-          where yhtio = '$kukarow[yhtio]' and
-          tila = 'N' and
-          tunnus = '$kalakori[tunnus]'";
+    $query = "UPDATE lasku SET
+              alatila     = tila,
+              tila        = 'D',
+              comments    = trim(concat(comments, ' Käyttäjä $kukarow[kuka] mitätöi laskun $kalakori[tunnus].'))
+              where yhtio = '$kukarow[yhtio]' and
+              tila        = 'N' and
+              tunnus      = '$kalakori[tunnus]'";
     $result = pupe_query($query);
 
     $query = "  UPDATE kuka SET kesken = '' WHERE yhtio ='$kukarow[yhtio]' and kuka = '$kukarow[kuka]'";
@@ -731,12 +731,12 @@ if ($tee == "poistakori") {
 }
 
 if ($tee == "poistarivi") {
-  $query = "  SELECT tunnus
-        FROM lasku
-        WHERE yhtio = '$kukarow[yhtio]' and
-        tila = 'N' and
-        tunnus = '$kukarow[kesken]' and
-        alatila=''";
+  $query = "SELECT tunnus
+            FROM lasku
+            WHERE yhtio = '$kukarow[yhtio]' and
+            tila        = 'N' and
+            tunnus      = '$kukarow[kesken]' and
+            alatila=''";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 1) {
@@ -744,10 +744,10 @@ if ($tee == "poistarivi") {
     //$ostoskori = mysql_fetch_array($result);
     $kalakori = mysql_fetch_array($result);
 
-    $query = "  UPDATE tilausrivi SET
-          tyyppi = 'D',
-          kommentti = trim(concat(kommentti, ' Käyttäjä $kukarow[kuka] mitätöi tilausrivin laskulta $kukarow[kesken].'))
-          WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'L' and tunnus = '$rivitunnus' LIMIT 1";
+    $query = "UPDATE tilausrivi SET
+              tyyppi      = 'D',
+              kommentti   = trim(concat(kommentti, ' Käyttäjä $kukarow[kuka] mitätöi tilausrivin laskulta $kukarow[kesken].'))
+              WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'L' and tunnus = '$rivitunnus' LIMIT 1";
     $result = pupe_query($query);
   }
 
@@ -755,35 +755,35 @@ if ($tee == "poistarivi") {
 }
 
 if ($tee == "tallenna_osoite") {
-  $query = "  SELECT tunnus, toimaika
-        FROM lasku
-        WHERE yhtio = '$kukarow[yhtio]' and
-        tila = 'N' and
-        tunnus = '$kukarow[kesken]' and
-        alatila=''";
+  $query = "SELECT tunnus, toimaika
+            FROM lasku
+            WHERE yhtio = '$kukarow[yhtio]' and
+            tila        = 'N' and
+            tunnus      = '$kukarow[kesken]' and
+            alatila=''";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 1) {
     $kalakori = mysql_fetch_array($result);
 
-    $query = "  UPDATE lasku SET
-            toim_nimi         = '$toim_nimi',
-            toim_nimitark       = '$toim_nimitark',
-            toim_osoite       = '$toim_osoite',
-            toim_postino       = '$toim_postino',
-            toim_postitp       = '$toim_postitp',
-            tilausyhteyshenkilo    = '$tilausyhteyshenkilo',
-            asiakkaan_tilausnumero  = '$asiakkaan_tilausnumero',
-            kohde          = '$kohde',
-            viesti          = '$viesti',
-            comments        = '$comments',
-            toimaika        = '$toimvv-$toimkk-$toimpp'
-          WHERE yhtio = '$kukarow[yhtio]' and tila = 'N' and tunnus = '$kukarow[kesken]' LIMIT 1";
+    $query = "UPDATE lasku SET
+              toim_nimi              = '$toim_nimi',
+              toim_nimitark          = '$toim_nimitark',
+              toim_osoite            = '$toim_osoite',
+              toim_postino           = '$toim_postino',
+              toim_postitp           = '$toim_postitp',
+              tilausyhteyshenkilo    = '$tilausyhteyshenkilo',
+              asiakkaan_tilausnumero = '$asiakkaan_tilausnumero',
+              kohde                  = '$kohde',
+              viesti                 = '$viesti',
+              comments               = '$comments',
+              toimaika               = '$toimvv-$toimkk-$toimpp'
+              WHERE yhtio            = '$kukarow[yhtio]' and tila = 'N' and tunnus = '$kukarow[kesken]' LIMIT 1";
     $result = pupe_query($query);
 
-    $query = "  UPDATE tilausrivi
-          SET toimaika = '".$toimvv."-".$toimkk."-".$toimpp."'
-          WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$kalakori[tunnus]' and toimaika = '$kalakori[toimaika]'";
+    $query = "UPDATE tilausrivi
+              SET toimaika = '".$toimvv."-".$toimkk."-".$toimpp."'
+              WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$kalakori[tunnus]' and toimaika = '$kalakori[toimaika]'";
     $result = pupe_query($query);
   }
 
@@ -791,12 +791,12 @@ if ($tee == "tallenna_osoite") {
 }
 
 if ($tee == "tilaa") {
-  $query = "  SELECT *
-        FROM lasku
-        WHERE yhtio = '$kukarow[yhtio]' and
-        tila = 'N' and
-        tunnus = '$kukarow[kesken]' and
-        alatila=''";
+  $query = "SELECT *
+            FROM lasku
+            WHERE yhtio = '$kukarow[yhtio]' and
+            tila        = 'N' and
+            tunnus      = '$kukarow[kesken]' and
+            alatila=''";
   $result = pupe_query($query);
   if (mysql_num_rows($result) == 1) {
 
@@ -804,13 +804,13 @@ if ($tee == "tilaa") {
 
     //  Hyväksynnän kautta
     if ($kukarow["tilaus_valmis"] == 2) {
-      $query  = "  UPDATE lasku set
-            tila = 'N',
-            alatila='F'
-            WHERE yhtio='$kukarow[yhtio]'
-            and tunnus='$kukarow[kesken]'
-            and tila = 'N'
-            and alatila = ''";
+      $query  = "UPDATE lasku set
+                 tila        = 'N',
+                 alatila='F'
+                 WHERE yhtio='$kukarow[yhtio]'
+                 and tunnus='$kukarow[kesken]'
+                 and tila    = 'N'
+                 and alatila = ''";
       $result = pupe_query($query);
     }
     else {
@@ -834,12 +834,12 @@ if ($tee == "tilaa") {
 
 if ($tee == "tilatut") {
 
-  $query = "  SELECT *
-        FROM lasku
-        WHERE yhtio = '$kukarow[yhtio]' and
-        tila = 'N' and
-        tunnus = '$kukarow[kesken]' and
-        alatila = ''";
+  $query = "SELECT *
+            FROM lasku
+            WHERE yhtio = '$kukarow[yhtio]' and
+            tila        = 'N' and
+            tunnus      = '$kukarow[kesken]' and
+            alatila     = ''";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -854,9 +854,9 @@ if ($tee == "tilatut") {
       $ulos .= "<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki')\">".t("Takaisin selaimelle")."</a>&nbsp;&nbsp;";
     }
 
-    $query = "  SELECT count(*) rivei
-          FROM tilausrivi
-          WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]' and tyyppi = 'L'";
+    $query = "SELECT count(*) rivei
+              FROM tilausrivi
+              WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]' and tyyppi = 'L'";
     $result = pupe_query($query);
     $row = mysql_fetch_array($result);
 
@@ -884,11 +884,11 @@ if ($tee == "asiakastiedot") {
   if ($nayta == "") $nayta = "asiakastiedot";
 
   if ($nayta == "asiakastiedot") {
-    $query = "  SELECT *,
+    $query = "SELECT *,
               concat_ws('<br>', nimi, nimitark, osoite, postino, postitp) laskutusosoite,
               concat_ws('<br>', toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp) toimitusosoite
-          FROM asiakas
-          WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
+              FROM asiakas
+              WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
     $result = pupe_query($query);
     $asiakasrow = mysql_fetch_array($result);
 
@@ -997,16 +997,16 @@ if ($tee == "asiakastiedot") {
 
       $query_ale_lisa = generoi_alekentta('M');
 
-      $query = "  SELECT lasku.*, date_format($aika, '%d. %m. %Y') aika,
-            (  SELECT sum(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa})
-              FROM tilausrivi
-              WHERE tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tyyppi != 'D'
-            ) summa
-            FROM lasku
-            WHERE yhtio = '$kukarow[yhtio]'
-            and liitostunnus = '$kukarow[oletus_asiakas]'
-            $vainlisa
-            $where";
+      $query = "SELECT lasku.*, date_format($aika, '%d. %m. %Y') aika,
+                (  SELECT sum(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa})
+                  FROM tilausrivi
+                  WHERE tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tyyppi != 'D'
+                ) summa
+                FROM lasku
+                WHERE yhtio      = '$kukarow[yhtio]'
+                and liitostunnus = '$kukarow[oletus_asiakas]'
+                $vainlisa
+                $where";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) > 0) {

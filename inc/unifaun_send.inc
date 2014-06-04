@@ -61,10 +61,10 @@ class Unifaun {
 
   private function setAsiakasRow() {
     //  Haetaan asiakastiedot
-    $query = "  SELECT *
-          FROM asiakas
-          WHERE yhtio = '{$this->kukarow['yhtio']}'
-          and tunnus  = '{$this->postirow['liitostunnus']}'";
+    $query = "SELECT *
+              FROM asiakas
+              WHERE yhtio = '{$this->kukarow['yhtio']}'
+              and tunnus  = '{$this->postirow['liitostunnus']}'";
     $asres = mysql_query($query);
     $this->asiakasrow = mysql_fetch_assoc($asres);
   }
@@ -73,12 +73,12 @@ class Unifaun {
     $this->postirow = $postirow;
 
     // haetaan varaston osoitetiedot, käytetään niitä lähetystietoina
-    $query = "  SELECT nimi, nimitark, osoite, postino, postitp, maa
-          FROM varastopaikat
-          WHERE yhtio = '{$this->kukarow['yhtio']}'
-          AND tunnus  = '{$this->postirow['varasto']}'
-          AND nimi != ''
-          AND osoite != ''";
+    $query = "SELECT nimi, nimitark, osoite, postino, postitp, maa
+              FROM varastopaikat
+              WHERE yhtio  = '{$this->kukarow['yhtio']}'
+              AND tunnus   = '{$this->postirow['varasto']}'
+              AND nimi    != ''
+              AND osoite  != ''";
     $tempr = mysql_query($query);
     $postirow_varasto = mysql_fetch_assoc($tempr);
 
@@ -192,10 +192,10 @@ class Unifaun {
 
     $xmlstr  = '<?xml version="1.0" encoding="UTF-8"?><printserver></printserver>';
 
-    $query = "  SELECT *
-          FROM rahdinkuljettajat
-          WHERE yhtio = '{$this->kukarow['yhtio']}'
-          AND koodi = '{$this->toitarow['rahdinkuljettaja']}'";
+    $query = "SELECT *
+              FROM rahdinkuljettajat
+              WHERE yhtio = '{$this->kukarow['yhtio']}'
+              AND koodi   = '{$this->toitarow['rahdinkuljettaja']}'";
     $rahdinkuljettaja_res = pupe_query($query);
     $rahdinkuljettaja_row = mysql_fetch_assoc($rahdinkuljettaja_res);
 
@@ -313,14 +313,14 @@ class Unifaun {
           $uni_receiver_partner = $uni_receiver->addChild('partner'); # Attribute parid corresponds to carrier's ID. See SUP-112-Services-en.xls.
           $uni_receiver_partner->addAttribute('parid', utf8_encode($this->toitarow['rahdinkuljettaja']));
 
-          $query = "  SELECT rahtisopimus
-                FROM rahtisopimukset
-                WHERE yhtio = '{$this->kukarow['yhtio']}'
-                AND (asiakas = '{$this->postirow['liitostunnus']}' OR ytunnus = '{$this->postirow['ytunnus']}')
-                AND toimitustapa = '{$this->toitarow['selite']}'
-                AND rahtisopimus != ''
-                ORDER BY asiakas DESC
-                LIMIT 1";
+          $query = "SELECT rahtisopimus
+                    FROM rahtisopimukset
+                    WHERE yhtio       = '{$this->kukarow['yhtio']}'
+                    AND (asiakas = '{$this->postirow['liitostunnus']}' OR ytunnus = '{$this->postirow['ytunnus']}')
+                    AND toimitustapa  = '{$this->toitarow['selite']}'
+                    AND rahtisopimus != ''
+                    ORDER BY asiakas DESC
+                    LIMIT 1";
           $rahtisopimus_res = pupe_query($query);
           $rahtisopimus_row = mysql_fetch_assoc($rahtisopimus_res);
 
@@ -776,10 +776,10 @@ class Unifaun {
     $uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['paino'])); # Weight
     $uni_par_val->addAttribute('n', "weight");
 
-    $query = "  SELECT koodi, pakkauksen_sarman_minimimitta
-          FROM rahdinkuljettajat
-          WHERE yhtio = '{$this->kukarow['yhtio']}'
-          AND koodi   = '{$this->toitarow['rahdinkuljettaja']}'";
+    $query = "SELECT koodi, pakkauksen_sarman_minimimitta
+              FROM rahdinkuljettajat
+              WHERE yhtio = '{$this->kukarow['yhtio']}'
+              AND koodi   = '{$this->toitarow['rahdinkuljettaja']}'";
     $rahdinkuljettajat_result = pupe_query($query);
     $rahdinkuljettaja_rivi = mysql_fetch_assoc($rahdinkuljettajat_result);
 

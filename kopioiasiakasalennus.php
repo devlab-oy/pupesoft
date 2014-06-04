@@ -19,50 +19,50 @@ if ($tee == "write") {
   }
   else {
 
-    $query = "  SELECT tunnus
-          FROM asiakas
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND ((ytunnus = '{$uusiytunnus}' AND ytunnus != '') OR (tunnus = '{$uusitunnus}'))";
+    $query = "SELECT tunnus
+              FROM asiakas
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND ((ytunnus = '{$uusiytunnus}' AND ytunnus != '') OR (tunnus = '{$uusitunnus}'))";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) > 0) {
-          $query = "  (SELECT DISTINCT if(asiakasalennus.asiakas = 0, '', asiakasalennus.asiakas) asiakas, asiakasalennus.ytunnus, asiakasalennus.tuoteno, asiakasalennus.ryhma, asiakasalennus.alennus, asiakasalennus.alennuslaji, asiakasalennus.minkpl, asiakasalennus.alkupvm, asiakasalennus.loppupvm
-            FROM asiakas
-            JOIN asiakasalennus USE INDEX (yhtio_asiakas_ryhma) ON (asiakasalennus.yhtio = asiakasalennus.yhtio
-              AND asiakasalennus.asiakas = asiakas.tunnus
-              and asiakasalennus.asiakas != '')
-            WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
-            AND asiakas.tunnus = '{$tunnus}'
-            AND asiakas.laji != 'P')
+          $query = "(SELECT DISTINCT if(asiakasalennus.asiakas = 0, '', asiakasalennus.asiakas) asiakas, asiakasalennus.ytunnus, asiakasalennus.tuoteno, asiakasalennus.ryhma, asiakasalennus.alennus, asiakasalennus.alennuslaji, asiakasalennus.minkpl, asiakasalennus.alkupvm, asiakasalennus.loppupvm
+                     FROM asiakas
+                     JOIN asiakasalennus USE INDEX (yhtio_asiakas_ryhma) ON (asiakasalennus.yhtio = asiakasalennus.yhtio
+                       AND asiakasalennus.asiakas  = asiakas.tunnus
+                       and asiakasalennus.asiakas != '')
+                     WHERE asiakas.yhtio           = '{$kukarow['yhtio']}'
+                     AND asiakas.tunnus            = '{$tunnus}'
+                     AND asiakas.laji             != 'P')
 
-            UNION
+                     UNION
 
-            (SELECT DISTINCT if(asiakasalennus.asiakas = 0, '', asiakasalennus.asiakas) asiakas, asiakasalennus.ytunnus, asiakasalennus.tuoteno, asiakasalennus.ryhma, asiakasalennus.alennus, asiakasalennus.alennuslaji, asiakasalennus.minkpl, asiakasalennus.alkupvm, asiakasalennus.loppupvm
-            FROM asiakas
-            JOIN asiakasalennus USE INDEX (yhtio_ytunnus_ryhma) ON (asiakasalennus.yhtio = asiakasalennus.yhtio
-              AND asiakasalennus.ytunnus = asiakas.ytunnus
-              AND asiakasalennus.ytunnus != '')
-            WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
-            AND asiakas.tunnus = '{$tunnus}'
-            AND asiakas.laji != 'P')
+                     (SELECT DISTINCT if(asiakasalennus.asiakas = 0, '', asiakasalennus.asiakas) asiakas, asiakasalennus.ytunnus, asiakasalennus.tuoteno, asiakasalennus.ryhma, asiakasalennus.alennus, asiakasalennus.alennuslaji, asiakasalennus.minkpl, asiakasalennus.alkupvm, asiakasalennus.loppupvm
+                     FROM asiakas
+                     JOIN asiakasalennus USE INDEX (yhtio_ytunnus_ryhma) ON (asiakasalennus.yhtio = asiakasalennus.yhtio
+                       AND asiakasalennus.ytunnus  = asiakas.ytunnus
+                       AND asiakasalennus.ytunnus != '')
+                     WHERE asiakas.yhtio           = '{$kukarow['yhtio']}'
+                     AND asiakas.tunnus            = '{$tunnus}'
+                     AND asiakas.laji             != 'P')
 
-            ORDER BY 2";
+                     ORDER BY 2";
       $result = pupe_query($query);
 
       while ($trow = mysql_fetch_assoc($result)) {
-        $query = "  INSERT INTO asiakasalennus SET
-              yhtio    = '{$kukarow['yhtio']}',
-              ytunnus    = '{$uusiytunnus}',
-              asiakas    = '{$uusitunnus}',
-              ryhma    = '{$trow['ryhma']}',
-              tuoteno    = '{$trow['tuoteno']}',
-              alennus   = '{$trow['alennus']}',
-              alennuslaji = '{$trow['alennuslaji']}',
-              minkpl    = '{$trow['minkpl']}',
-              alkupvm    = '{$trow['alkupvm']}',
-              loppupvm  = '{$trow['loppupvm']}',
-              laatija    = '{$kukarow['kuka']}',
-              luontiaika  = now()";
+        $query = "INSERT INTO asiakasalennus SET
+                  yhtio       = '{$kukarow['yhtio']}',
+                  ytunnus     = '{$uusiytunnus}',
+                  asiakas     = '{$uusitunnus}',
+                  ryhma       = '{$trow['ryhma']}',
+                  tuoteno     = '{$trow['tuoteno']}',
+                  alennus     = '{$trow['alennus']}',
+                  alennuslaji = '{$trow['alennuslaji']}',
+                  minkpl      = '{$trow['minkpl']}',
+                  alkupvm     = '{$trow['alkupvm']}',
+                  loppupvm    = '{$trow['loppupvm']}',
+                  laatija     = '{$kukarow['kuka']}',
+                  luontiaika  = now()";
         $insresult = pupe_query($query);
       }
 
@@ -78,27 +78,27 @@ if ($tee == "write") {
 
 if ($tee == "edit") {
 
-      $query = "  (SELECT DISTINCT if(asiakasalennus.asiakas = 0, '', asiakasalennus.asiakas) asiakas, asiakasalennus.ytunnus, asiakasalennus.tuoteno, asiakasalennus.ryhma, asiakasalennus.alennus, asiakasalennus.alennuslaji, if(asiakasalennus.minkpl != 0, asiakasalennus.minkpl, '') minkpl, if(asiakasalennus.alkupvm != '0000-00-00', asiakasalennus.alkupvm, '') alkupvm, if(asiakasalennus.loppupvm != '0000-00-00', asiakasalennus.loppupvm, '') loppupvm
-        FROM asiakas
-        JOIN asiakasalennus USE INDEX (yhtio_asiakas_ryhma) ON (asiakasalennus.yhtio = asiakasalennus.yhtio
-          AND asiakasalennus.asiakas = asiakas.tunnus
-          and asiakasalennus.asiakas != '')
-        WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
-        AND asiakas.tunnus = '{$tunnus}'
-        AND asiakas.laji != 'P')
+      $query = "(SELECT DISTINCT if(asiakasalennus.asiakas = 0, '', asiakasalennus.asiakas) asiakas, asiakasalennus.ytunnus, asiakasalennus.tuoteno, asiakasalennus.ryhma, asiakasalennus.alennus, asiakasalennus.alennuslaji, if(asiakasalennus.minkpl != 0, asiakasalennus.minkpl, '') minkpl, if(asiakasalennus.alkupvm != '0000-00-00', asiakasalennus.alkupvm, '') alkupvm, if(asiakasalennus.loppupvm != '0000-00-00', asiakasalennus.loppupvm, '') loppupvm
+                 FROM asiakas
+                 JOIN asiakasalennus USE INDEX (yhtio_asiakas_ryhma) ON (asiakasalennus.yhtio = asiakasalennus.yhtio
+                   AND asiakasalennus.asiakas  = asiakas.tunnus
+                   and asiakasalennus.asiakas != '')
+                 WHERE asiakas.yhtio           = '{$kukarow['yhtio']}'
+                 AND asiakas.tunnus            = '{$tunnus}'
+                 AND asiakas.laji             != 'P')
 
-        UNION
+                 UNION
 
-        (SELECT DISTINCT if(asiakasalennus.asiakas = 0, '', asiakasalennus.asiakas) asiakas, asiakasalennus.ytunnus, asiakasalennus.tuoteno, asiakasalennus.ryhma, asiakasalennus.alennus, asiakasalennus.alennuslaji, if(asiakasalennus.minkpl != 0, asiakasalennus.minkpl, '') minkpl, if(asiakasalennus.alkupvm != '0000-00-00', asiakasalennus.alkupvm, '') alkupvm, if(asiakasalennus.loppupvm != '0000-00-00', asiakasalennus.loppupvm, '') loppupvm
-        FROM asiakas
-        JOIN asiakasalennus USE INDEX (yhtio_ytunnus_ryhma) ON (asiakasalennus.yhtio = asiakasalennus.yhtio
-          AND asiakasalennus.ytunnus = asiakas.ytunnus
-          AND asiakasalennus.ytunnus != '')
-        WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
-        AND asiakas.tunnus = '{$tunnus}'
-        AND asiakas.laji != 'P')
+                 (SELECT DISTINCT if(asiakasalennus.asiakas = 0, '', asiakasalennus.asiakas) asiakas, asiakasalennus.ytunnus, asiakasalennus.tuoteno, asiakasalennus.ryhma, asiakasalennus.alennus, asiakasalennus.alennuslaji, if(asiakasalennus.minkpl != 0, asiakasalennus.minkpl, '') minkpl, if(asiakasalennus.alkupvm != '0000-00-00', asiakasalennus.alkupvm, '') alkupvm, if(asiakasalennus.loppupvm != '0000-00-00', asiakasalennus.loppupvm, '') loppupvm
+                 FROM asiakas
+                 JOIN asiakasalennus USE INDEX (yhtio_ytunnus_ryhma) ON (asiakasalennus.yhtio = asiakasalennus.yhtio
+                   AND asiakasalennus.ytunnus  = asiakas.ytunnus
+                   AND asiakasalennus.ytunnus != '')
+                 WHERE asiakas.yhtio           = '{$kukarow['yhtio']}'
+                 AND asiakas.tunnus            = '{$tunnus}'
+                 AND asiakas.laji             != 'P')
 
-        ORDER BY 1, 2, 3, 4";
+                 ORDER BY 1, 2, 3, 4";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -161,39 +161,39 @@ if ($tee == '') {
 
   pupe_DataTables(array(array($pupe_DataTables, 7, 7)));
 
-      $query = "  (SELECT DISTINCT
-        asiakas.tunnus,
-        concat(asiakas.nimi, '<br>', asiakas.toim_nimi) nimi,
-        concat(asiakas.nimitark, '<br>', asiakas.toim_nimitark) nimitark,
-        concat(asiakas.postitp, '<br>', asiakas.toim_postitp) postitp,
-        concat(asiakas.ytunnus) ytunnus,
-        concat(asiakas.ovttunnus, '<br>', asiakas.toim_ovttunnus) ovttunnus,
-        asiakas.asiakasnro
-        FROM asiakas
-        JOIN asiakasalennus USE INDEX (yhtio_asiakas_ryhma) ON (asiakasalennus.yhtio = asiakasalennus.yhtio
-          AND asiakasalennus.asiakas = asiakas.tunnus
-          AND asiakasalennus.asiakas != '')
-        WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
-        AND asiakas.laji != 'P')
+      $query = "(SELECT DISTINCT
+                 asiakas.tunnus,
+                 concat(asiakas.nimi, '<br>', asiakas.toim_nimi) nimi,
+                 concat(asiakas.nimitark, '<br>', asiakas.toim_nimitark) nimitark,
+                 concat(asiakas.postitp, '<br>', asiakas.toim_postitp) postitp,
+                 concat(asiakas.ytunnus) ytunnus,
+                 concat(asiakas.ovttunnus, '<br>', asiakas.toim_ovttunnus) ovttunnus,
+                 asiakas.asiakasnro
+                 FROM asiakas
+                 JOIN asiakasalennus USE INDEX (yhtio_asiakas_ryhma) ON (asiakasalennus.yhtio = asiakasalennus.yhtio
+                   AND asiakasalennus.asiakas  = asiakas.tunnus
+                   AND asiakasalennus.asiakas != '')
+                 WHERE asiakas.yhtio           = '{$kukarow['yhtio']}'
+                 AND asiakas.laji             != 'P')
 
-        UNION
+                 UNION
 
-        (SELECT DISTINCT
-        asiakas.tunnus,
-        concat(asiakas.nimi, '<br>', asiakas.toim_nimi) nimi,
-        concat(asiakas.nimitark, '<br>', asiakas.toim_nimitark) nimitark,
-        concat(asiakas.postitp, '<br>', asiakas.toim_postitp) postitp,
-        concat(asiakas.ytunnus) ytunnus,
-        concat(asiakas.ovttunnus, '<br>', asiakas.toim_ovttunnus) ovttunnus,
-        asiakas.asiakasnro
-        FROM asiakas
-        JOIN asiakasalennus USE INDEX (yhtio_ytunnus_ryhma) ON (asiakasalennus.yhtio = asiakasalennus.yhtio
-          AND asiakasalennus.ytunnus = asiakas.ytunnus
-          AND asiakasalennus.ytunnus != '')
-        WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
-        AND asiakas.laji != 'P')
+                 (SELECT DISTINCT
+                 asiakas.tunnus,
+                 concat(asiakas.nimi, '<br>', asiakas.toim_nimi) nimi,
+                 concat(asiakas.nimitark, '<br>', asiakas.toim_nimitark) nimitark,
+                 concat(asiakas.postitp, '<br>', asiakas.toim_postitp) postitp,
+                 concat(asiakas.ytunnus) ytunnus,
+                 concat(asiakas.ovttunnus, '<br>', asiakas.toim_ovttunnus) ovttunnus,
+                 asiakas.asiakasnro
+                 FROM asiakas
+                 JOIN asiakasalennus USE INDEX (yhtio_ytunnus_ryhma) ON (asiakasalennus.yhtio = asiakasalennus.yhtio
+                   AND asiakasalennus.ytunnus  = asiakas.ytunnus
+                   AND asiakasalennus.ytunnus != '')
+                 WHERE asiakas.yhtio           = '{$kukarow['yhtio']}'
+                 AND asiakas.laji             != 'P')
 
-        ORDER BY 2";
+                 ORDER BY 2";
   $result = pupe_query($query);
 
   echo "<table class='display dataTable' id='{$pupe_DataTables}'>";

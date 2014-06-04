@@ -62,15 +62,15 @@ if ($tee == "AJA") {
         list($lhyllyalue, $lhyllynro, $lhyllyvali, $lhyllytaso) = explode("-", $lahdevarastopk);
 
         // Tarkistetaan onko tuotepaikka ja tuote olemassa
-        $query = "  SELECT tuotepaikat.*
-              FROM tuotepaikat use index (tuote_index)
-              JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno)
-              WHERE tuotepaikat.yhtio    = '$kukarow[yhtio]'
-              and tuotepaikat.tuoteno    = '$tuoteno'
-              and tuotepaikat.hyllyalue = '$lhyllyalue'
-              and tuotepaikat.hyllynro  = '$lhyllynro'
-              and tuotepaikat.hyllyvali = '$lhyllyvali'
-              and tuotepaikat.hyllytaso = '$lhyllytaso'";
+        $query = "SELECT tuotepaikat.*
+                  FROM tuotepaikat use index (tuote_index)
+                  JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno)
+                  WHERE tuotepaikat.yhtio   = '$kukarow[yhtio]'
+                  and tuotepaikat.tuoteno   = '$tuoteno'
+                  and tuotepaikat.hyllyalue = '$lhyllyalue'
+                  and tuotepaikat.hyllynro  = '$lhyllynro'
+                  and tuotepaikat.hyllyvali = '$lhyllyvali'
+                  and tuotepaikat.hyllytaso = '$lhyllytaso'";
         $tvresult = pupe_query($query);
 
         if (mysql_num_rows($tvresult) == 0) {
@@ -109,14 +109,14 @@ if ($tee == "AJA") {
         }
 
         // Onko kohdetuotepaikka olemassa
-        $query_ktp = "  SELECT *
-                FROM tuotepaikat use index (tuote_index)
-                WHERE tuoteno = '$tuoteno'
-                AND yhtio    = '$kukarow[yhtio]'
-                AND hyllyalue = '$ahyllyalue'
-                AND hyllynro  = '$ahyllynro'
-                AND hyllyvali = '$ahyllyvali'
-                AND hyllytaso = '$ahyllytaso'";
+        $query_ktp = "SELECT *
+                      FROM tuotepaikat use index (tuote_index)
+                      WHERE tuoteno = '$tuoteno'
+                      AND yhtio     = '$kukarow[yhtio]'
+                      AND hyllyalue = '$ahyllyalue'
+                      AND hyllynro  = '$ahyllynro'
+                      AND hyllyvali = '$ahyllyvali'
+                      AND hyllytaso = '$ahyllytaso'";
         $kvresult = pupe_query($query_ktp);
 
         // Jos kohdetuotepaikkaa ei löydy, yritetään perustaa sellainen
@@ -191,12 +191,12 @@ if ($tee == "AJA") {
 
       // Merkataan vielä lähdevarastopaikka poistettavaksi jos se ei ole oletuspaikka
       if ($poistetaanko_lahde == 'X') {
-        $query = "  UPDATE tuotepaikat
-              SET poistettava = 'D'
-              WHERE tuoteno   = '{$tuoteno}'
-              AND yhtio     = '{$kukarow['yhtio']}'
-              AND tunnus     = '$mista'
-              AND oletus     = ''";
+        $query = "UPDATE tuotepaikat
+                  SET poistettava = 'D'
+                  WHERE tuoteno = '{$tuoteno}'
+                  AND yhtio     = '{$kukarow['yhtio']}'
+                  AND tunnus    = '$mista'
+                  AND oletus    = ''";
         pupe_query($query);
 
         if (mysql_affected_rows() != 0) {
@@ -220,12 +220,12 @@ if ($tee == "AJA") {
 
 if ($tee == "") {
 
-  $query = "  SELECT *
-        FROM varastopaikat
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND nimitys != ''
-        AND tyyppi != 'P'
-        ORDER BY tyyppi,nimitys";
+  $query = "SELECT *
+            FROM varastopaikat
+            WHERE yhtio  = '{$kukarow['yhtio']}'
+            AND nimitys != ''
+            AND tyyppi  != 'P'
+            ORDER BY tyyppi,nimitys";
   $vresult = pupe_query($query);
 
   echo "  <form name='varasto' method='post'>

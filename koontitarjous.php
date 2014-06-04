@@ -98,11 +98,11 @@ if ($submit and (trim($asiakasnimi) != '' or trim($asiakasytunnus) != '' or trim
     $wherelisa .= " and asiakas.tunnus = '".(int) trim($asiakastunnus)."' ";
   }
 
-  $query = "  SELECT nimi, nimitark, ytunnus, asiakasnro, tunnus
-        FROM asiakas
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        and laji != 'P'
-        $wherelisa";
+  $query = "SELECT nimi, nimitark, ytunnus, asiakasnro, tunnus
+            FROM asiakas
+            WHERE yhtio  = '{$kukarow['yhtio']}'
+            and laji    != 'P'
+            $wherelisa";
   $asiakasres = mysql_query($query) or pupe_error($query);
 
   echo "<table>";
@@ -139,17 +139,17 @@ if ($submit and (trim($asiakasnimi) != '' or trim($asiakasytunnus) != '' or trim
 
     $query_ale_lisa = generoi_alekentta('M');
 
-    $query = "  SELECT lasku.tunnus, lasku.luontiaika, lasku.valkoodi,
-          sum(round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa}, $yhtiorow[hintapyoristys])) rivihinta
-          FROM lasku
-          JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
-          WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-          AND lasku.liitostunnus = '{$asiakasrow['tunnus']}'
-          AND lasku.tila = 'T'
-          AND lasku.alatila IN ('', 'A')
-          $tarjouslisa
-          GROUP BY lasku.tunnus
-          LIMIT 100";
+    $query = "SELECT lasku.tunnus, lasku.luontiaika, lasku.valkoodi,
+              sum(round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa}, $yhtiorow[hintapyoristys])) rivihinta
+              FROM lasku
+              JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
+              WHERE lasku.yhtio      = '{$kukarow['yhtio']}'
+              AND lasku.liitostunnus = '{$asiakasrow['tunnus']}'
+              AND lasku.tila         = 'T'
+              AND lasku.alatila      IN ('', 'A')
+              $tarjouslisa
+              GROUP BY lasku.tunnus
+              LIMIT 100";
     $tarjousres = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($tarjousres) > 0) {

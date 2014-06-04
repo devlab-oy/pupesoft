@@ -10,9 +10,9 @@ echo "<font class='head'>".t("Kopioi asiakas").":</font><hr>";
 if ($tee == "write") {
 
   // Luodaan puskuri, jotta saadaan taulukot kuntoon
-  $query = "  SELECT *
-        FROM asiakas
-        WHERE tunnus = '$id'";
+  $query = "SELECT *
+            FROM asiakas
+            WHERE tunnus = '$id'";
   $result = pupe_query($query);
   $trow = mysql_fetch_array($result);
 
@@ -73,9 +73,9 @@ if ($tee == "edit") {
   echo "<input type = 'hidden' name = 'id' value ='$id'>";
 
   // Kokeillaan geneeristä
-  $query = "  SELECT *
-        FROM asiakas
-        WHERE tunnus='$id' and yhtio='$kukarow[yhtio]'";
+  $query = "SELECT *
+            FROM asiakas
+            WHERE tunnus='$id' and yhtio='$kukarow[yhtio]'";
   $result = pupe_query($query);
   $trow = mysql_fetch_array($result);
   echo "<table>";
@@ -188,19 +188,19 @@ if ($tee == '') {
     $jarjestys = $ojarj;
   }
 
-  $query = "  SELECT asiakas.tunnus,
-        concat(if(asiakas.nimi='', '**N/A**', asiakas.nimi), '<br>', asiakas.toim_nimi) nimi,
-        concat(asiakas.nimitark, '<br>', asiakas.toim_nimitark) nimitark,
-        concat(asiakas.postitp, '<br>', asiakas.toim_postitp) postitp,
-        concat(asiakas.ytunnus) ytunnus,
-        concat(asiakas.ovttunnus, '<br>', asiakas.toim_ovttunnus) ovttunnus,
-        asiakas.asiakasnro
-        FROM asiakas
-        WHERE yhtio = '$kukarow[yhtio]'
-        $lisa
-        $ryhma
-        ORDER BY $jarjestys
-        LIMIT 100";
+  $query = "SELECT asiakas.tunnus,
+            concat(if(asiakas.nimi='', '**N/A**', asiakas.nimi), '<br>', asiakas.toim_nimi) nimi,
+            concat(asiakas.nimitark, '<br>', asiakas.toim_nimitark) nimitark,
+            concat(asiakas.postitp, '<br>', asiakas.toim_postitp) postitp,
+            concat(asiakas.ytunnus) ytunnus,
+            concat(asiakas.ovttunnus, '<br>', asiakas.toim_ovttunnus) ovttunnus,
+            asiakas.asiakasnro
+            FROM asiakas
+            WHERE yhtio = '$kukarow[yhtio]'
+            $lisa
+            $ryhma
+            ORDER BY $jarjestys
+            LIMIT 100";
   $result = pupe_query($query);
 
   echo "<form action = '$PHP_SELF' method = 'post'>";

@@ -35,10 +35,10 @@ if ($tee == 'PERUSTA') {
     $hakyhtio = $kukarow["yhtio"];
   }
 
-  $query = "  SELECT tunnus
-        FROM tuote
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tuoteno = '$uustuoteno'";
+  $query = "SELECT tunnus
+            FROM tuote
+            WHERE yhtio = '$kukarow[yhtio]'
+            and tuoteno = '$uustuoteno'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 0 ) {
@@ -46,10 +46,10 @@ if ($tee == 'PERUSTA') {
     $varaosavirhe = t("VIRHE: Uudella tuotenumerolla")." $uustuoteno ".t("löytyy jo tuote, ei voida perustaa")."!";
   }
   else {
-    $query = "  SELECT *
-          FROM tuote
-          WHERE yhtio = '$hakyhtio'
-          and tuoteno = '$tuoteno'";
+    $query = "SELECT *
+              FROM tuote
+              WHERE yhtio = '$hakyhtio'
+              and tuoteno = '$tuoteno'";
     $stresult = pupe_query($query);
 
     if (mysql_num_rows($stresult) == 0) {
@@ -109,10 +109,10 @@ if ($tee == 'PERUSTA') {
       //  Tämä funktio tekee myös oikeustarkistukset!
       synkronoi($kukarow["yhtio"], "tuote", $tuote_id, "", "");
 
-      $query = "  SELECT *
-            FROM tuotteen_toimittajat
-            WHERE yhtio = '$hakyhtio'
-            and tuoteno = '$tuoteno'";
+      $query = "SELECT *
+                FROM tuotteen_toimittajat
+                WHERE yhtio = '$hakyhtio'
+                and tuoteno = '$tuoteno'";
       $stresult = pupe_query($query);
 
       if (mysql_num_rows($stresult) != 0 ) {
@@ -161,11 +161,11 @@ if ($tee == 'PERUSTA') {
       }
 
       // kopioidaan dynaamisen puun tiedot uudelle tuotteelle
-      $query = "  SELECT *
-            FROM puun_alkio
-            WHERE yhtio = '$hakyhtio'
-            and laji    = 'tuote'
-            and liitos  = '$tuoteno'";
+      $query = "SELECT *
+                FROM puun_alkio
+                WHERE yhtio = '$hakyhtio'
+                and laji    = 'tuote'
+                and liitos  = '$tuoteno'";
       $stresult = pupe_query($query);
 
       if (mysql_num_rows($stresult) != 0) {
@@ -220,9 +220,9 @@ if ($tee == 'PERUSTA') {
         $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
         $header .= "MIME-Version: 1.0\n" ;
 
-        $query = "  SELECT *
-              FROM yhtio
-              WHERE yhtio = '$hakyhtio'";
+        $query = "SELECT *
+                  FROM yhtio
+                  WHERE yhtio = '$hakyhtio'";
         $yres = pupe_query($query);
         $yrow = mysql_fetch_array($yres);
 
@@ -244,10 +244,10 @@ if ($tee == 'PERUSTA') {
 
 if ($tee == 'HAKU') {
 
-  $query = "  SELECT tunnus
-        FROM tuote
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tuoteno = '$tuoteno'";
+  $query = "SELECT tunnus
+            FROM tuote
+            WHERE yhtio = '$kukarow[yhtio]'
+            and tuoteno = '$tuoteno'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 1) {

@@ -2,9 +2,9 @@
 
 $tulosta_ostotilaus_ulos = "";
 
-$query = "  SELECT *
-      FROM lasku
-      WHERE tunnus = '$otunnus' and yhtio='$kukarow[yhtio]'";
+$query = "SELECT *
+          FROM lasku
+          WHERE tunnus = '$otunnus' and yhtio='$kukarow[yhtio]'";
 $sresult = pupe_query($query);
 $laskurow = mysql_fetch_array($sresult);
 
@@ -17,16 +17,16 @@ if ($laskurow['tila'] != 'O' and $laskurow['tila'] != 'D' and $laskurow['tilaust
 if ($komento['Ostotilaus'] == 'edi') {
 
   // haetaan toimittajan tiedot
-  $query = "  SELECT *
-        FROM toimi
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND tunnus  = '$laskurow[liitostunnus]'";
+  $query = "SELECT *
+            FROM toimi
+            WHERE yhtio = '$kukarow[yhtio]'
+            AND tunnus  = '$laskurow[liitostunnus]'";
   $toimires = pupe_query($query);
   $toimirow = mysql_fetch_array($toimires);
 
   if (!preg_match("/(excel|wabco|xml|sendorder)/", $toimirow['edi_kuvaus']) and
-      ($toimirow['edi_palvelin'] == '' or $toimirow['edi_kayttaja'] == '' or $toimirow['edi_salasana'] == '' or $toimirow['edi_kuvaus'] == '' or $toimirow['edi_polku'] == '') and
-      ($toimirow['edi_palvelin'] != "localhost" or $toimirow["edi_polku"] == '')) {
+    ($toimirow['edi_palvelin'] == '' or $toimirow['edi_kayttaja'] == '' or $toimirow['edi_salasana'] == '' or $toimirow['edi_kuvaus'] == '' or $toimirow['edi_polku'] == '') and
+    ($toimirow['edi_palvelin'] != "localhost" or $toimirow["edi_polku"] == '')) {
     $tulosta_ostotilaus_ulos .= "<font class='error'>".t("Edi-tilauksen lähettämiseen tarvittavia tietoja ei ole syötetty")."! ".t("Tarkista toimittajan %s tiedot", "", trim("{$toimirow['nimi']} {$toimirow['nimitark']}"))."!</font><br />";
   }
   else {
@@ -47,10 +47,10 @@ if ($komento['Ostotilaus'] == 'edi') {
     if ($toimirow['edi_kuvaus'] == 'sendorder_out_futur') {
       $luo = 'sendorder';
 
-      require("inc/sahkoinen_tilausliitanta.inc");
+      require "inc/sahkoinen_tilausliitanta.inc";
     }
     else {
-      require($toimirow['edi_kuvaus']);
+      require $toimirow['edi_kuvaus'];
     }
 
     $tee = '';
@@ -59,7 +59,7 @@ if ($komento['Ostotilaus'] == 'edi') {
 //muuten siitä tehdään peedeeäffä
 else {
 
-  require_once("pdflib/phppdflib.class.php");
+  require_once "pdflib/phppdflib.class.php";
 
   if ($kieli== '') {
     $querykiel = "SELECT kieli FROM asiakas WHERE yhtio = '$kukarow[yhtio]' and ytunnus = '$laskurow[ytunnus]'";
@@ -91,7 +91,7 @@ else {
   $rectparam["width"] = 0.3;
 
   if (!function_exists('alku')) {
-    function alku ($params) {
+    function alku($params) {
       global $yhtiorow, $kukarow;
 
       // Luodaan muuttujat
@@ -110,7 +110,7 @@ else {
 
       tulosta_logo_pdf($pdf, $thispage, $laskurow);
 
-      $pdf->draw_text(310,815, t("Ostotilaus", $kieli),     $thispage, $iso);
+      $pdf->draw_text(310, 815, t("Ostotilaus", $kieli),     $thispage, $iso);
       $pdf->draw_text(310, 803, t("Sivu", $kieli),       $thispage, $norm);
 
       //Vasen sarake
@@ -138,11 +138,11 @@ else {
         $pdf->draw_text(50, 604, $maan_tiedot["nimi"],     $thispage, $norm);
       }
 
-      $query = "  SELECT *
-            FROM toimi
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tunnus   = '$laskurow[liitostunnus]'
-            LIMIT 1";
+      $query = "SELECT *
+                FROM toimi
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tunnus  = '$laskurow[liitostunnus]'
+                LIMIT 1";
       $rarres = pupe_query($query);
       $toimirow = mysql_fetch_array($rarres);
 
@@ -166,25 +166,25 @@ else {
         if ($ytunpit > 0) {
           $uytunnus = $yhtiorow["ytunnus"];
           while ($ytunpit > 0) {
-              $uytunnus = "0".$uytunnus; $ytunpit--;
+            $uytunnus = "0".$uytunnus; $ytunpit--;
           }
         }
         else {
           $uytunnus = $yhtiorow["ytunnus"];
         }
 
-        $uytunnus = substr($uytunnus,0,7)."-".substr($uytunnus,7,1);
+        $uytunnus = substr($uytunnus, 0, 7)."-".substr($uytunnus, 7, 1);
       }
       else {
         $uytunnus = $yhtiorow["ytunnus"];
       }
 
-          if ($laskurow['yhtio_ovttunnus'] != $yhtiorow['ovttunnus'] and $laskurow['yhtio_ovttunnus'] != '') {
-              $uytunnus = $laskurow['yhtio_ovttunnus'];
-          }
+      if ($laskurow['yhtio_ovttunnus'] != $yhtiorow['ovttunnus'] and $laskurow['yhtio_ovttunnus'] != '') {
+        $uytunnus = $laskurow['yhtio_ovttunnus'];
+      }
       else {
-          $uytunnus = $yhtiorow["maa"]."-".$uytunnus;
-          }
+        $uytunnus = $yhtiorow["maa"]."-".$uytunnus;
+      }
 
       $pdf->draw_text(310, 761, $uytunnus, $thispage, $norm);
       $pdf->draw_text(430, 771, t("Päiväys", $kieli), $thispage, $pieni);
@@ -195,9 +195,9 @@ else {
       $pdf->draw_text(310, 750, t("Asiaa hoitaa", $kieli), $thispage, $pieni);
 
       //etsitään myyjän nimi
-      $query  = "  SELECT nimi
-            FROM kuka
-            WHERE tunnus='$laskurow[myyja]' AND yhtio='$kukarow[yhtio]'";
+      $query  = "SELECT nimi
+                 FROM kuka
+                 WHERE tunnus='$laskurow[myyja]' AND yhtio='$kukarow[yhtio]'";
       $myyresult = pupe_query($query);
       $myyrow = mysql_fetch_array($myyresult);
 
@@ -255,10 +255,10 @@ else {
 
       // suoratoimituksissa verkkotunnus-kenttään tallentuu vastaanottajan liitostunnus
       if ($laskurow['verkkotunnus'] != '' and $laskurow['suoraveloitus'] != '') {
-        $query = "  SELECT if(gsm != '', gsm, if(tyopuhelin != '', tyopuhelin, puhelin)) puh
-              FROM asiakas
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus = '{$laskurow['verkkotunnus']}'";
+        $query = "SELECT if(gsm != '', gsm, if(tyopuhelin != '', tyopuhelin, puhelin)) puh
+                  FROM asiakas
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus  = '{$laskurow['verkkotunnus']}'";
         $puhelinres = pupe_query($query);
         $puhelinrow = mysql_fetch_assoc($puhelinres);
 
@@ -278,7 +278,7 @@ else {
       $komm = "";
 
       if (trim($laskurow['viesti']) != '') {
-        $komm .= "\n".t("Tilausviite", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['viesti']), 90, "\n###");
+        $komm .= "\n".t("Tilausviite", $kieli).":###".wordwrap(str_replace("\n", "\n###", $laskurow['viesti']), 90, "\n###");
       }
 
       if ($laskurow['erikoisale'] != 0) {
@@ -286,7 +286,7 @@ else {
       }
 
       if (trim($laskurow['sisviesti1']) != '') {
-        $komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti1']), 90, "\n###");
+        $komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n", "\n###", $laskurow['sisviesti1']), 90, "\n###");
       }
 
       //Tulostetaan laskun kommentti
@@ -296,7 +296,7 @@ else {
         $pohja  = 577;
         $maxoik = 0;
 
-        foreach($kommentit as $kommentti) {
+        foreach ($kommentit as $kommentti) {
           if (strpos($kommentti, "###") !== FALSE) {
             list($o, $v) = explode("###", $kommentti);
 
@@ -308,7 +308,7 @@ else {
           }
         }
 
-        foreach($kommentit as $kommentti) {
+        foreach ($kommentit as $kommentti) {
 
           if (strpos($kommentti, "###") !== false) {
             list($o, $v) = explode("###", $kommentti);
@@ -411,7 +411,7 @@ else {
 
       $pdf->draw_line($x, $y, $thispage, $rectparam);
 
-      $pdf->draw_text(25,  $kala, $rivinumerot[$row["tunnus"]],$thispage, $pieni);
+      $pdf->draw_text(25,  $kala, $rivinumerot[$row["tunnus"]], $thispage, $pieni);
 
       if ($toim == "HAAMU") {
         $pdf->draw_text(45, $kala, $row["tuoteno"],  $thispage, $norm);
@@ -420,14 +420,14 @@ else {
 
         if ($row["toim_tuoteno"] != "") {
           list($ff_string, $ff_font) = pdf_fontfit($row["toim_tuoteno"], 140, $pdf, $norm);
-          $pdf->draw_text(45,  $kala, $ff_string,$thispage, $ff_font);
+          $pdf->draw_text(45,  $kala, $ff_string, $thispage, $ff_font);
         }
         else {
           list($ff_string, $ff_font) = pdf_fontfit($row["tuoteno"], 140, $pdf, $norm);
           $pdf->draw_text(45,  $kala, $ff_string, $thispage, $ff_font);
         }
 
-        if (strtoupper($row["toim_tuoteno"]) != strtoupper($row["tuoteno"]) AND strtoupper($row["toim_tuoteno"] != "")) {
+        if (!$pitkattuotteet and strtoupper($row["toim_tuoteno"]) != strtoupper($row["tuoteno"]) and strtoupper($row["toim_tuoteno"] != "")) {
           list($ff_string, $ff_font) = pdf_fontfit("(".$row["tuoteno"].")", 110, $pdf, $pieni);
           $oikpos = $pdf->strlen($ff_string, $ff_font);
           $pdf->draw_text(290-$oikpos, $kala, $ff_string, $thispage, $ff_font);
@@ -439,12 +439,12 @@ else {
       }
 
       //  Tarkastetaan olisiko toimittajalla yksikkö!
-      $query = "  SELECT toim_yksikko
-            FROM tuotteen_toimittajat
-            WHERE yhtio     = '$kukarow[yhtio]'
-            AND tuoteno     = '$row[tuoteno]'
-            AND liitostunnus   = '$laskurow[liitostunnus]'
-            LIMIT 1";
+      $query = "SELECT toim_yksikko
+                FROM tuotteen_toimittajat
+                WHERE yhtio      = '$kukarow[yhtio]'
+                AND tuoteno      = '$row[tuoteno]'
+                AND liitostunnus = '$laskurow[liitostunnus]'
+                LIMIT 1";
       $rarres = pupe_query($query);
       $rarrow   = mysql_fetch_array($rarres);
 
@@ -471,21 +471,26 @@ else {
       $oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"]), $norm);
       $pdf->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta"]), $thispage, $norm);
 
-            if ((isset($nimitykset) and $nimitykset != "") or (!isset($nimitykset) and $yhtiorow['ostotilaustyyppi'] == 'A') or $toim == "HAAMU") {
+      if ($pitkattuotteet and strtoupper($row["toim_tuoteno"]) != strtoupper($row["tuoteno"]) and strtoupper($row["toim_tuoteno"] != "")) {
+        $kala = $kala - 15;
+        $pdf->draw_text(45, $kala, "(".$row["tuoteno"].")", $thispage, $norm);
+      }
 
-         //Käännetään nimitys
+      if ((isset($nimitykset) and $nimitykset != "") or (!isset($nimitykset) and $yhtiorow['ostotilaustyyppi'] == 'A') or $toim == "HAAMU") {
+
+        //Käännetään nimitys
         $row['nimitys'] = t_tuotteen_avainsanat($row, 'nimitys', $kieli);
 
         // jos meillä on toimittajan nimitys syötetty käytetään sitä aina
         if ($row["toim_nimitys"] != "") $row["nimitys"] = $row["toim_nimitys"];
 
-                $kala = $kala - 15;
-                $pdf->draw_text(45,  $kala, $row["nimitys"], $thispage, $norm);
-                $lask++;
-            }
+        $kala = $kala - 15;
+        $pdf->draw_text(45,  $kala, $row["nimitys"], $thispage, $norm);
+        $lask++;
+      }
 
       if (trim($row["kommentti"]) != '') {
-        foreach(explode("\n", wordwrap(trim($row["kommentti"]), 90, "\n")) as $kommentti) {
+        foreach (explode("\n", wordwrap(trim($row["kommentti"]), 90, "\n")) as $kommentti) {
           $kala = $kala - 15;
           $pdf->draw_text(45,  $kala, $kommentti,  $thispage, $norm);
           $lask++;
@@ -502,19 +507,19 @@ else {
   }
 
   if (!function_exists('loppu')) {
-    function loppu ($params) {
+    function loppu($params) {
       //global $pdf, $laskurow, $yhtiorow, $kukarow, $page, $sivu, $rectparam, $kieli, $kala, $norm, $pieni;
       global $yhtiorow, $kukarow;
 
       // Luodaan muuttujat
       extract($params);
 
-      if($yhtiorow['lomakkeiden_allekirjoitus'] == 'X') {
-        $allekirjoitus_query = "  SELECT nimi,
-                      asema
-                      FROM kuka
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND tunnus = '{$laskurow['allekirjoittaja']}'";
+      if ($yhtiorow['lomakkeiden_allekirjoitus'] == 'X') {
+        $allekirjoitus_query = "SELECT nimi,
+                                asema
+                                FROM kuka
+                                WHERE yhtio = '{$kukarow['yhtio']}'
+                                AND tunnus  = '{$laskurow['allekirjoittaja']}'";
         $allekirjoitus_result = pupe_query($allekirjoitus_query);
         $allekirjoitus_row = mysql_fetch_assoc($allekirjoitus_result);
 
@@ -535,7 +540,7 @@ else {
       $pdf->draw_text(30, 25, $maan_tiedot["nimi"], $thispage, $pieni);
 
       $pdf->draw_text(217, 55, t("Puhelin", $kieli).":", $thispage, $pieni);
-      $pdf->draw_text(257, 55, $yhtiorow["puhelin"],$thispage, $pieni);
+      $pdf->draw_text(257, 55, $yhtiorow["puhelin"], $thispage, $pieni);
       $pdf->draw_text(217, 45, t("Telefax", $kieli).":", $thispage, $pieni);
       $pdf->draw_text(257, 45, $yhtiorow["fax"], $thispage, $pieni);
       $pdf->draw_text(217, 35, t("Sähköposti", $kieli).":", $thispage, $pieni);
@@ -549,25 +554,25 @@ else {
         if ($ytunpit > 0) {
           $uytunnus = $yhtiorow["ytunnus"];
           while ($ytunpit > 0) {
-              $uytunnus = "0".$uytunnus; $ytunpit--;
+            $uytunnus = "0".$uytunnus; $ytunpit--;
           }
         }
         else {
           $uytunnus = $yhtiorow["ytunnus"];
         }
 
-        $uytunnus = substr($uytunnus,0,7)."-".substr($uytunnus,7,1);
+        $uytunnus = substr($uytunnus, 0, 7)."-".substr($uytunnus, 7, 1);
       }
       else {
         $uytunnus = $yhtiorow["ytunnus"];
       }
 
-          if ($laskurow['yhtio_ovttunnus'] != $yhtiorow['ovttunnus'] and $laskurow['yhtio_ovttunnus'] != '') {
-              $uytunnus = $laskurow['yhtio_ovttunnus'];
-          }
+      if ($laskurow['yhtio_ovttunnus'] != $yhtiorow['ovttunnus'] and $laskurow['yhtio_ovttunnus'] != '') {
+        $uytunnus = $laskurow['yhtio_ovttunnus'];
+      }
       else {
-          $uytunnus = $yhtiorow["maa"]."-".$uytunnus;
-          }
+        $uytunnus = $yhtiorow["maa"]."-".$uytunnus;
+      }
 
       $pdf->draw_text(404, 55, t("Y-tunnus", $kieli).":", $thispage, $pieni);
       $pdf->draw_text(454, 55, $uytunnus, $thispage, $pieni);
@@ -580,8 +585,8 @@ else {
       if ($laitetaanko_yhteensarivi == 1 and $total != 0) {
         $pdf->draw_text(430, 82, t("Yhteensä", $kieli).":", $thispage, $norm);
 
-        $oikpos = $pdf->strlen(sprintf('%.2f',$total)." ".$laskurow["valkoodi"], $norm);
-        $pdf->draw_text(555-$oikpos, 82, sprintf('%.2f',$total)." ".$laskurow["valkoodi"], $thispage, $norm);
+        $oikpos = $pdf->strlen(sprintf('%.2f', $total)." ".$laskurow["valkoodi"], $norm);
+        $pdf->draw_text(555-$oikpos, 82, sprintf('%.2f', $total)." ".$laskurow["valkoodi"], $thispage, $norm);
       }
 
       if ($laitetaanko_yhteensarivi != 1) {
@@ -600,14 +605,14 @@ else {
           $pdf->draw_text(330, 803, "$pp / $sivu", $page[$pp], $norm);
         }
       }
-        // Luodaan palautettavat
-        $return = compact(array_keys($params));
-        return $return;
+      // Luodaan palautettavat
+      $return = compact(array_keys($params));
+      return $return;
     }
   }
 
   if (!function_exists('print_pdf')) {
-    function print_pdf ($params) {
+    function print_pdf($params) {
       global $kukarow, $yhtiorow, $komento, $tee, $tulosta_ostotilaus_ulos;
 
       // Luodaan muuttujat
@@ -633,19 +638,19 @@ else {
             $kutsu .= ", ".trim($laskurow["nimi"]).", ".trim($laskurow["toim_nimi"]);
           }
 
-          require("inc/sahkoposti.inc");
+          require "inc/sahkoposti.inc";
           $tulosta_ostotilaus_ulos .= t("Tilaus tulostuu")."...<br>";
         }
         elseif ($tee == 'NAYTATILAUS') {
-                //Työnnetään tuo pdf vaan putkeen!
-                echo file_get_contents($pdffilenimi);
-              }
+          //Työnnetään tuo pdf vaan putkeen!
+          echo file_get_contents($pdffilenimi);
+        }
         elseif ($komento["Ostotilaus"] != '') {
           $line = exec("$komento[Ostotilaus] $pdffilenimi");
-            $tulosta_ostotilaus_ulos .= t("Tilaus tulostuu")."...<br>";
+          $tulosta_ostotilaus_ulos .= t("Tilaus tulostuu")."...<br>";
         }
 
-              $tee = "";
+        $tee = "";
         //poistetaan tmp file samantien kuleksimasta...
         system("rm -f $pdffilenimi");
       }
@@ -659,41 +664,41 @@ else {
 
   if ($toim != "HAAMU") {
     if ($mista == 'tulostakopio') {
-      $query = "  SELECT tilausrivi.tunnus, toim_tuoteno, toim_nimitys, tuote.tuoteno, round(tilausrivi.tilkpl*if (tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu,
-            tilausrivi.hinta, {$query_ale_select_lisa} round(tilausrivi.tilkpl*if (tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*{$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
-            substring(tuote.nimitys,1,80) nimitys, kommentti, tilausrivi.yksikko, toimaika, substring(tilausrivi.nimitys,1,80) rivinimitys,
-            $sorttauskentta
-            FROM tilausrivi
-            join tuote USING (yhtio, tuoteno)
-            join tuotteen_toimittajat on tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
-            WHERE tilausrivi.otunnus = '$otunnus'
-            and tilausrivi.yhtio   = '$kukarow[yhtio]'
-            and tilausrivi.tyyppi  != 'D'
-            ORDER BY sorttauskentta $yhtiorow[ostotilauksen_jarjestys_suunta], tilausrivi.tunnus";
+      $query = "SELECT tilausrivi.tunnus, toim_tuoteno, toim_nimitys, tuote.tuoteno, round(tilausrivi.tilkpl*if (tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu,
+                tilausrivi.hinta, {$query_ale_select_lisa} round(tilausrivi.tilkpl*if (tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*{$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
+                substring(tuote.nimitys,1,80) nimitys, kommentti, tilausrivi.yksikko, toimaika, substring(tilausrivi.nimitys,1,80) rivinimitys,
+                $sorttauskentta
+                FROM tilausrivi
+                join tuote USING (yhtio, tuoteno)
+                join tuotteen_toimittajat on tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
+                WHERE tilausrivi.otunnus  = '$otunnus'
+                and tilausrivi.yhtio      = '$kukarow[yhtio]'
+                and tilausrivi.tyyppi    != 'D'
+                ORDER BY sorttauskentta $yhtiorow[ostotilauksen_jarjestys_suunta], tilausrivi.tunnus";
     }
     else {
-      $query = "  SELECT tilausrivi.tunnus, toim_tuoteno, toim_nimitys, tuote.tuoteno, round(tilausrivi.varattu*if (tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu,
-            tilausrivi.hinta, {$query_ale_select_lisa} round(tilausrivi.varattu*if (tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*{$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
-            substring(tuote.nimitys,1,80) nimitys, kommentti, tilausrivi.yksikko, toimaika, substring(tilausrivi.nimitys,1,80) rivinimitys,
-            $sorttauskentta
-            FROM tilausrivi
-            join tuote USING (yhtio, tuoteno)
-            join tuotteen_toimittajat on tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
-            WHERE tilausrivi.otunnus = '$otunnus'
-            and tilausrivi.yhtio   = '$kukarow[yhtio]'
-            and tilausrivi.tyyppi  != 'D'
-            ORDER BY sorttauskentta $yhtiorow[ostotilauksen_jarjestys_suunta], tilausrivi.tunnus";
+      $query = "SELECT tilausrivi.tunnus, toim_tuoteno, toim_nimitys, tuote.tuoteno, round(tilausrivi.varattu*if (tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu,
+                tilausrivi.hinta, {$query_ale_select_lisa} round(tilausrivi.varattu*if (tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*{$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
+                substring(tuote.nimitys,1,80) nimitys, kommentti, tilausrivi.yksikko, toimaika, substring(tilausrivi.nimitys,1,80) rivinimitys,
+                $sorttauskentta
+                FROM tilausrivi
+                join tuote USING (yhtio, tuoteno)
+                join tuotteen_toimittajat on tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
+                WHERE tilausrivi.otunnus  = '$otunnus'
+                and tilausrivi.yhtio      = '$kukarow[yhtio]'
+                and tilausrivi.tyyppi    != 'D'
+                ORDER BY sorttauskentta $yhtiorow[ostotilauksen_jarjestys_suunta], tilausrivi.tunnus";
     }
   }
   else {
-    $query = "  SELECT tilausrivi.tunnus, tilausrivi.tuoteno toim_tuoteno, tilausrivi.nimitys toim_nimitys, tuote.tuoteno, round(tilausrivi.varattu, 2) varattu,
-          tilausrivi.hinta, {$query_ale_select_lisa} round(tilausrivi.varattu*tilausrivi.hinta*{$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
-          substring(tuote.nimitys,1,80) nimitys, kommentti, tilausrivi.yksikko, toimaika, substring(tilausrivi.nimitys,1,80) rivinimitys
-          FROM tilausrivi
-          join tuote USING (yhtio, tuoteno)
-          WHERE tilausrivi.otunnus = '$otunnus'
-          and tilausrivi.yhtio   = '$kukarow[yhtio]'
-          ORDER BY tilausrivi.tunnus";
+    $query = "SELECT tilausrivi.tunnus, tilausrivi.tuoteno toim_tuoteno, tilausrivi.nimitys toim_nimitys, tuote.tuoteno, round(tilausrivi.varattu, 2) varattu,
+              tilausrivi.hinta, {$query_ale_select_lisa} round(tilausrivi.varattu*tilausrivi.hinta*{$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
+              substring(tuote.nimitys,1,80) nimitys, kommentti, tilausrivi.yksikko, toimaika, substring(tilausrivi.nimitys,1,80) rivinimitys
+              FROM tilausrivi
+              join tuote USING (yhtio, tuoteno)
+              WHERE tilausrivi.otunnus = '$otunnus'
+              and tilausrivi.yhtio     = '$kukarow[yhtio]'
+              ORDER BY tilausrivi.tunnus";
   }
 
   $result = pupe_query($query);
@@ -719,7 +724,7 @@ else {
     }
   }
 
-  mysql_data_seek($result,0);
+  mysql_data_seek($result, 0);
 
   unset($pdf);
   unset($page);
@@ -728,36 +733,57 @@ else {
   $total = 0;
 
   $params = array(
-          'boldi'            => $boldi,
-          'iso'            => $iso,
-          'kala'            => 0,
-          'kieli'            => $kieli,
-          'laskurow'          => $laskurow,
-          'norm'            => $norm,
-          'page'            => NULL,
-          'pdf'            => $pdf,
-          'pieni'            => $pieni,
-          'pieni_boldi'        => $pieni_boldi,
-          'rectparam'          => $rectparam,
-          'row'            => '',
-          'sivu'            => 1,
-          'tee'            => $tee,
-          'nimitykset'        => $nimitykset,
-          'thispage'          => NULL,
-          'toim'            => $toim,
-          'rivinumerot'        => $rivinumerot,
-          'laitetaanko_yhteensarivi'  => 0,
-          'total'            => 0,
+    'boldi'                     => $boldi,
+    'iso'                       => $iso,
+    'kala'                      => 0,
+    'kieli'                     => $kieli,
+    'laskurow'                  => $laskurow,
+    'norm'                      => $norm,
+    'page'                      => NULL,
+    'pdf'                       => $pdf,
+    'pieni'                     => $pieni,
+    'pieni_boldi'               => $pieni_boldi,
+    'rectparam'                 => $rectparam,
+    'row'                       => '',
+    'sivu'                      => 1,
+    'tee'                       => $tee,
+    'nimitykset'                => $nimitykset,
+    'thispage'                  => NULL,
+    'toim'                      => $toim,
+    'rivinumerot'               => $rivinumerot,
+    'laitetaanko_yhteensarivi'  => 0,
+    'total'                     => 0,
   );
 
   // Aloitellaan lähetteen teko
   $params = alku($params);
 
+  $pitkattuotteet = FALSE;
+
+  // tutkitaan onko pitkät tuotekoodit
+  while ($row = mysql_fetch_assoc($result)) {
+    if (strtoupper($row["toim_tuoteno"]) != strtoupper($row["tuoteno"]) and strtoupper($row["toim_tuoteno"] != "")) {
+
+      list($ff_string, $ff_font) = pdf_fontfit("(".$row["tuoteno"].")", 110, $params['pdf'], $params['pieni']);
+
+      // Jos tuoteno on katkaistu
+      if ($ff_string != "(".$row["tuoteno"].")") {
+        $pitkattuotteet = TRUE;
+        break;
+      }
+    }
+  }
+
+  mysql_data_seek($result, 0);
+
   while ($row = mysql_fetch_array($result)) {
     if (($row["tuoteno"] == "99" or $yhtiorow["nimityksen_muutos_tilauksella"] == "Y") and $row["rivinimitys"] != "" ) {
       $row["nimitys"] = $row["rivinimitys"];
     }
+
     $params["row"] = $row;
+    $params["pitkattuotteet"] = $pitkattuotteet;
+
     $params = rivi($params);
     $total += $row["rivihinta"];
   }

@@ -42,11 +42,11 @@ require ("tilauskasittely/monivalintalaatikot.inc");
 echo "</td></tr>";
 
 if (!isset($alkukausi_vv)) {
-  $query = "  SELECT *
-        FROM tilikaudet
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        and tilikausi_alku <= now()
-        and tilikausi_loppu >= now()";
+  $query = "SELECT *
+            FROM tilikaudet
+            WHERE yhtio         = '{$kukarow['yhtio']}'
+            and tilikausi_alku  <= now()
+            and tilikausi_loppu >= now()";
   $result = pupe_query($query);
   $tilikausirow = mysql_fetch_assoc($result);
 
@@ -169,10 +169,10 @@ echo "<tr><th>",t("Tilin loppu"),"</th><td width='200' valign='top'>",livesearch
 
 echo "<tr><th>",t("Laskentaprosentti"),"</th><td><input type='text' name='prosentti' value='{$prosentti}' /></td></tr>";
 
-$query = "  SELECT nimi, tunnus
-      FROM valuu
-      WHERE yhtio = '{$kukarow['yhtio']}'
-      ORDER BY jarjestys";
+$query = "SELECT nimi, tunnus
+          FROM valuu
+          WHERE yhtio = '{$kukarow['yhtio']}'
+          ORDER BY jarjestys";
 $vresult = pupe_query($query);
 
 echo "<tr><th>",t("Valuutta"),"</th><td><select name='valkoodi'>";
@@ -234,17 +234,17 @@ if ($tee == 'laske') {
       $tilinloppu = $swap;
     }
 
-    $query = "  SELECT tiliointi.tilino, tiliointi.kustp, SUM(tiliointi.summa) tilisaldo
-          FROM tiliointi
-          LEFT JOIN kustannuspaikka ON (kustannuspaikka.yhtio = tiliointi.yhtio AND kustannuspaikka.tunnus = tiliointi.kustp)
-          WHERE tiliointi.yhtio  = '{$kukarow['yhtio']}'
-          AND tiliointi.korjattu = ''
-          AND tiliointi.tilino BETWEEN '{$tilinalku}' AND '{$tilinloppu}'
-          AND tiliointi.tapvm >= '{$alkukausi_vv}-{$alkukausi_kk}-{$alkukausi_pp}'
-          AND tiliointi.tapvm <= '{$loppukausi_vv}-{$loppukausi_kk}-{$loppukausi_pp}'
-          GROUP BY tiliointi.tilino, tiliointi.kustp
-          HAVING tilisaldo != 0
-          ORDER BY tiliointi.tilino, kustannuspaikka.koodi+0 ASC";
+    $query = "SELECT tiliointi.tilino, tiliointi.kustp, SUM(tiliointi.summa) tilisaldo
+              FROM tiliointi
+              LEFT JOIN kustannuspaikka ON (kustannuspaikka.yhtio = tiliointi.yhtio AND kustannuspaikka.tunnus = tiliointi.kustp)
+              WHERE tiliointi.yhtio  = '{$kukarow['yhtio']}'
+              AND tiliointi.korjattu = ''
+              AND tiliointi.tilino BETWEEN '{$tilinalku}' AND '{$tilinloppu}'
+              AND tiliointi.tapvm    >= '{$alkukausi_vv}-{$alkukausi_kk}-{$alkukausi_pp}'
+              AND tiliointi.tapvm    <= '{$loppukausi_vv}-{$loppukausi_kk}-{$loppukausi_pp}'
+              GROUP BY tiliointi.tilino, tiliointi.kustp
+              HAVING tilisaldo != 0
+              ORDER BY tiliointi.tilino, kustannuspaikka.koodi+0 ASC";
     $result = pupe_query($query);
 
     $prosentti = (float) $prosentti;
@@ -280,10 +280,10 @@ if ($tee == 'laske') {
 
         if ($row['kustp'] != '') {
 
-          $query2 = "  SELECT nimi, koodi
-                FROM kustannuspaikka
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus = '{$row['kustp']}'";
+          $query2 = "SELECT nimi, koodi
+                     FROM kustannuspaikka
+                     WHERE yhtio = '{$kukarow['yhtio']}'
+                     AND tunnus  = '{$row['kustp']}'";
           $result2 = pupe_query($query2);
           $tarkenne_row = mysql_fetch_assoc($result2);
 
@@ -358,10 +358,10 @@ if ($tee == 'laske') {
             echo "<td>{$tilino}</td>";
             echo "<td>{$arvo}</td>";
 
-            $query2 = "  SELECT nimi, koodi, tunnus
-                  FROM kustannuspaikka
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND koodi = '{$koodi}'";
+            $query2 = "SELECT nimi, koodi, tunnus
+                       FROM kustannuspaikka
+                       WHERE yhtio = '{$kukarow['yhtio']}'
+                       AND koodi   = '{$koodi}'";
             $result2 = pupe_query($query2);
             $tarkenne_row = mysql_fetch_assoc($result2);
 

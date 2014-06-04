@@ -148,12 +148,12 @@ if (!function_exists('text_alku')) {
       $toimitettuaikak = " toimitettuaika ";
     }
 
-    $query = "  SELECT date_format($toimitettuaikak, '%Y-%m-%d') toimitettupaiva
-          FROM tilausrivi
-          WHERE yhtio='$kukarow[yhtio]'
-          and $where
-          and toimitettuaika!='0000-00-00'
-          GROUP BY toimitettupaiva";
+    $query = "SELECT date_format($toimitettuaikak, '%Y-%m-%d') toimitettupaiva
+              FROM tilausrivi
+              WHERE yhtio='$kukarow[yhtio]'
+              and $where
+              and toimitettuaika!='0000-00-00'
+              GROUP BY toimitettupaiva";
     $toimaikares=mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($toimaikares) > 1) {
@@ -301,19 +301,19 @@ if (!function_exists('text_alvierittely')) {
     $sisalto .= sprintf('%-15.15s', $laskurow["arvo"]);
     $sisalto .= sprintf('%-8.8s', $laskurow["valkoodi"]);
 
-    $alvquery = "  SELECT distinct alv
-            FROM tilausrivi
-            WHERE uusiotunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]'
-            ORDER BY alv";
+    $alvquery = "SELECT distinct alv
+                 FROM tilausrivi
+                 WHERE uusiotunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]'
+                 ORDER BY alv";
     $alvresult = mysql_query($alvquery) or pupe_error($alvquery);
 
     $factoringlask++;
 
     while ($alvrow = mysql_fetch_array($alvresult)) {
-      $aquery = "  SELECT round(sum(rivihinta*(alv/100)),2) alvrivihinta, sum(rivihinta) rivihinta
-            FROM tilausrivi
-            WHERE uusiotunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]' and alv='$alvrow[alv]'
-            ORDER BY alv";
+      $aquery = "SELECT round(sum(rivihinta*(alv/100)),2) alvrivihinta, sum(rivihinta) rivihinta
+                 FROM tilausrivi
+                 WHERE uusiotunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]' and alv='$alvrow[alv]'
+                 ORDER BY alv";
       $aresult = mysql_query($aquery) or pupe_error($aquery);
       $arow = mysql_fetch_array($aresult);
       $sisalto .= "\r\n";

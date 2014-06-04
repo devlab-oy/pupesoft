@@ -31,15 +31,15 @@ if(!function_exists("asiakkaan_avainsanattarkista")) {
 
     if (mysql_field_name($result, $i) == 'tunnus') {
 
-      $query = "  SELECT tunnus
-            FROM asiakkaan_avainsanat
-            WHERE yhtio     = '$kukarow[yhtio]'
-            AND liitostunnus     = '$tem_liitostunnus'
-            AND kieli       = '$tem_kieli'
-            AND laji        = '$tem_laji'
-            AND avainsana      = '$tem_avainsana'
-            AND tarkenne      = '$tem_tarkenne'
-            and tunnus        != '$tunnus'";
+      $query = "SELECT tunnus
+                FROM asiakkaan_avainsanat
+                WHERE yhtio       = '$kukarow[yhtio]'
+                AND liitostunnus  = '$tem_liitostunnus'
+                AND kieli         = '$tem_kieli'
+                AND laji          = '$tem_laji'
+                AND avainsana     = '$tem_avainsana'
+                AND tarkenne      = '$tem_tarkenne'
+                and tunnus       != '$tunnus'";
       $results = pupe_query($query);
 
       if (mysql_num_rows($results) > 0) {

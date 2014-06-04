@@ -1,11 +1,11 @@
 <?php
 
-$query  = "  SELECT *
-      FROM lasku
-      WHERE tunnus = '$otunnus'
-      AND yhtio    = '$kukarow[yhtio]'
-      AND tila    = 'K'
-      AND alatila != 'X'";
+$query  = "SELECT *
+           FROM lasku
+           WHERE tunnus  = '$otunnus'
+           AND yhtio     = '$kukarow[yhtio]'
+           AND tila      = 'K'
+           AND alatila  != 'X'";
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) == 1) {
@@ -108,44 +108,44 @@ if ($tee == "update") {
 
   $toimipaikka = isset($toimipaikka) ? $toimipaikka : 0;
 
-  $query = "  UPDATE lasku
-        SET maa_lahetys      = '$maa_lahetys',
-        maa_maara        = '$maa_maara',
-        kauppatapahtuman_luonne = '$ktapahtuman_luonne',
-        kuljetusmuoto      = '$kuljetusmuoto',
-        bruttopaino        = '$bruttopaino',
-        rahti_huolinta      = '$rahti_huolinta',
-        rahti_etu         = '$rahti_etu',
-        rahti_etu_alv      = '$rahti_etu_alv',
-        rahti           = '$rahti',
-        pyoristys_erot      = '$pyoristys_erot',
-        pyoristys_erot_alv    = '$pyoristys_erot_alv',
-        erikoisale_saapuminen  = '$erikoisale_saapuminen',
-        toimaika        = '$toimaika',
-        kohdistettu        = '$kohdistettu',
-        comments        = '$kommentti',
-        ultilno          = '$ultilno',
-        yhtio_toimipaikka    = '{$toimipaikka}'
-        WHERE tunnus = '$otunnus'
-        and yhtio    = '$kukarow[yhtio]'";
+  $query = "UPDATE lasku
+            SET maa_lahetys      = '$maa_lahetys',
+            maa_maara               = '$maa_maara',
+            kauppatapahtuman_luonne = '$ktapahtuman_luonne',
+            kuljetusmuoto           = '$kuljetusmuoto',
+            bruttopaino             = '$bruttopaino',
+            rahti_huolinta          = '$rahti_huolinta',
+            rahti_etu               = '$rahti_etu',
+            rahti_etu_alv           = '$rahti_etu_alv',
+            rahti                   = '$rahti',
+            pyoristys_erot          = '$pyoristys_erot',
+            pyoristys_erot_alv      = '$pyoristys_erot_alv',
+            erikoisale_saapuminen   = '$erikoisale_saapuminen',
+            toimaika                = '$toimaika',
+            kohdistettu             = '$kohdistettu',
+            comments                = '$kommentti',
+            ultilno                 = '$ultilno',
+            yhtio_toimipaikka       = '{$toimipaikka}'
+            WHERE tunnus            = '$otunnus'
+            and yhtio               = '$kukarow[yhtio]'";
   $result = pupe_query($query);
 
-  $query_erikoisale = "  UPDATE tilausrivi
-              SET erikoisale_saapuminen = '{$erikoisale_saapuminen}'
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND uusiotunnus = '{$otunnus}'
-              AND netto  != 'N'
-              AND tyyppi != 'D'";
+  $query_erikoisale = "UPDATE tilausrivi
+                       SET erikoisale_saapuminen = '{$erikoisale_saapuminen}'
+                       WHERE yhtio      = '{$kukarow['yhtio']}'
+                       AND uusiotunnus  = '{$otunnus}'
+                       AND netto       != 'N'
+                       AND tyyppi      != 'D'";
   $upd_erikoisale_res = pupe_query($query_erikoisale);
 
   foreach ($tilauksen_erikoisale as $etil => $eale) {
-    $query_erikoisale = "  UPDATE tilausrivi
-                SET erikoisale = '{$eale}'
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND uusiotunnus = '{$otunnus}'
-                AND otunnus = '{$etil}'
-                AND netto  != 'N'
-                AND tyyppi != 'D'";
+    $query_erikoisale = "UPDATE tilausrivi
+                         SET erikoisale = '{$eale}'
+                         WHERE yhtio      = '{$kukarow['yhtio']}'
+                         AND uusiotunnus  = '{$otunnus}'
+                         AND otunnus      = '{$etil}'
+                         AND netto       != 'N'
+                         AND tyyppi      != 'D'";
     $upd_erikoisale_res = pupe_query($query_erikoisale);
   }
 
@@ -205,10 +205,10 @@ if ($tee == "") {
   echo "<tr><th>".t("L‰hetysmaa").":</th><td colspan='3'>
       <select name='maa_lahetys'>";
 
-  $query = "  SELECT distinct koodi, nimi
-        FROM maat
-        where nimi != ''
-        ORDER BY koodi";
+  $query = "SELECT distinct koodi, nimi
+            FROM maat
+            where nimi != ''
+            ORDER BY koodi";
   $result = pupe_query($query);
   echo "<option value=''>".t("Valitse")."</option>";
 
@@ -233,24 +233,24 @@ if ($tee == "") {
   echo "  <tr><th>".t("M‰‰r‰maan koodi").":</th>
       <td colspan='3'><select name='maa_maara'>";
 
-  $query = "  SELECT distinct koodi, nimi
-        FROM maat
-        where nimi != ''
-        ORDER BY koodi";
+  $query = "SELECT distinct koodi, nimi
+            FROM maat
+            where nimi != ''
+            ORDER BY koodi";
   $result = pupe_query($query);
 
   if ($laskurow["maa_maara"] == "") {
-    $query = "  SELECT varastopaikat.maa, count(*) kpl
-          FROM lasku
-          JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.uusiotunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D')
-          JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio
-            AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
-            AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0')))
-          WHERE lasku.yhtio = '$kukarow[yhtio]'
-          AND lasku.tunnus = '$laskurow[tunnus]'
-          GROUP BY varastopaikat.maa
-          ORDER BY kpl DESC
-          LIMIT 1";
+    $query = "SELECT varastopaikat.maa, count(*) kpl
+              FROM lasku
+              JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.uusiotunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D')
+              JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio
+                AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
+                AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0')))
+              WHERE lasku.yhtio = '$kukarow[yhtio]'
+              AND lasku.tunnus  = '$laskurow[tunnus]'
+              GROUP BY varastopaikat.maa
+              ORDER BY kpl DESC
+              LIMIT 1";
     $maaresult = pupe_query($query);
 
     if ($maarow = mysql_fetch_array($maaresult)) {
@@ -321,12 +321,12 @@ if ($tee == "") {
   }
 
   if ($laskurow["bruttopaino"] == 0) {
-    $query  = "  SELECT round(sum(tuotemassa*(varattu+kpl)),2) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
-          FROM tilausrivi
-          JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
-          WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-          AND tilausrivi.uusiotunnus = '$laskurow[tunnus]'
-          AND tilausrivi.tyyppi != 'D'";
+    $query  = "SELECT round(sum(tuotemassa*(varattu+kpl)),2) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
+               FROM tilausrivi
+               JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
+               WHERE tilausrivi.yhtio      = '$kukarow[yhtio]'
+               AND tilausrivi.uusiotunnus  = '$laskurow[tunnus]'
+               AND tilausrivi.tyyppi      != 'D'";
     $painoresult = pupe_query($query);
     $painorow = mysql_fetch_array($painoresult);
 
@@ -400,13 +400,13 @@ if ($tee == "") {
 
   echo "<tr><td class='back'><br>".t("Ostotilausten erikoisalennukset").":</td></tr>";
 
-  $query  = "  SELECT otunnus, round(avg(erikoisale), 2) erikoisale
-        FROM tilausrivi
-        WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-        AND tilausrivi.uusiotunnus = '$laskurow[tunnus]'
-        AND tilausrivi.tyyppi != 'D'
-        GROUP BY 1
-        ORDER BY 1";
+  $query  = "SELECT otunnus, round(avg(erikoisale), 2) erikoisale
+             FROM tilausrivi
+             WHERE tilausrivi.yhtio      = '$kukarow[yhtio]'
+             AND tilausrivi.uusiotunnus  = '$laskurow[tunnus]'
+             AND tilausrivi.tyyppi      != 'D'
+             GROUP BY 1
+             ORDER BY 1";
   $painoresult = pupe_query($query);
 
   while ($painorow = mysql_fetch_array($painoresult)) {

@@ -25,11 +25,11 @@ if (mysql_field_name($result, $i) == "liitostunnus") {
 
     $liitostunnus = $trow["liitostunnus"] > 0 ? $trow["liitostunnus"] : (int) $t[$i];
 
-    $query = "  SELECT *
-          from toimi
-          where yhtio = '$kukarow[yhtio]'
-          and tyyppi != 'P'
-          and tunnus = '$liitostunnus'";
+    $query = "SELECT *
+              from toimi
+              where yhtio  = '$kukarow[yhtio]'
+              and tyyppi  != 'P'
+              and tunnus   = '$liitostunnus'";
     $sresult = pupe_query($query);
 
     if (mysql_num_rows($sresult) == 1) {
@@ -44,10 +44,10 @@ if (mysql_field_name($result, $i) == "liitostunnus") {
 }
 
 if (mysql_field_name($result, $i) == "alkuperamaa") {
-  $query = "  SELECT distinct koodi, nimi
-        FROM maat
-        WHERE nimi != ''
-        ORDER BY koodi";
+  $query = "SELECT distinct koodi, nimi
+            FROM maat
+            WHERE nimi != ''
+            ORDER BY koodi";
   $vresult = pupe_query($query);
   $ulos = "<td><select name='$nimi'>";
 
@@ -66,10 +66,10 @@ if (mysql_field_name($result, $i) == "alkuperamaa") {
 }
 
 if (mysql_field_name($result, $i) == "valuutta") {
-  $query = "  SELECT nimi, tunnus
-        FROM valuu
-        WHERE yhtio = '$kukarow[yhtio]'
-        ORDER BY jarjestys";
+  $query = "SELECT nimi, tunnus
+            FROM valuu
+            WHERE yhtio = '$kukarow[yhtio]'
+            ORDER BY jarjestys";
   $vresult = pupe_query($query);
   $ulos = "<td><select name='$nimi'>";
 
@@ -86,11 +86,11 @@ if (mysql_field_name($result, $i) == "valuutta") {
 }
 
 if (mysql_field_name($result, $i) == "osto_alv") {
-  $query = "  SELECT distinct selite
-        FROM avainsana
-        WHERE yhtio = '$kukarow[yhtio]'
-        and laji = 'ALV'
-        ORDER BY selite+0, laji, jarjestys, selite";
+  $query = "SELECT distinct selite
+            FROM avainsana
+            WHERE yhtio = '$kukarow[yhtio]'
+            and laji    = 'ALV'
+            ORDER BY selite+0, laji, jarjestys, selite";
   $vresult = pupe_query($query);
   $ulos = "<td><select name='$nimi'>";
 

@@ -5,25 +5,25 @@ if (count($tilinoarray[$yritirow['tunnus']]) > 0) {
   foreach ($tilinoarray[$yritirow['tunnus']] as $hyvitystilino) {
 
     // haetaan kaikki laskut t‰lle tilille, ensin kaikki miinukset sitten summan mukaan desc
-    $query = "  SELECT maksu_tili,
-           left(concat_ws(' ', lasku.nimi, nimitark),30) nimi,
-           left(concat_ws(' ', osoite, osoitetark),20) osoite,
-           left(concat_ws(' ', postino, postitp),20) postitp,
-           summa, lasku.valkoodi, viite, viesti,
-          tilinumero, lasku.tunnus, sisviesti2,
-          yriti.tilino ytilino, alatila, kasumma,
-          lasku.tunnus laskutunnus,
-          if (lasku.alatila = 'K', summa - kasumma, summa) maksettavasumma
-            FROM lasku
-          JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = maksu_tili)
-            WHERE lasku.yhtio    = '$kukarow[yhtio]'
-          and lasku.tila       = 'P'
-          and lasku.maa       = '$kotimaa'
-          and lasku.maksaja     = '$kukarow[kuka]'
-          and lasku.tilinumero  = '$hyvitystilino'
-          and lasku.maksu_tili  = '$yritirow[tunnus]'
-          and lasku.olmapvm     = '$pvmrow[olmapvm]'
-            ORDER BY if(summa < 0, 1, 2), summa desc";
+    $query = "SELECT maksu_tili,
+              left(concat_ws(' ', lasku.nimi, nimitark),30) nimi,
+              left(concat_ws(' ', osoite, osoitetark),20) osoite,
+              left(concat_ws(' ', postino, postitp),20) postitp,
+              summa, lasku.valkoodi, viite, viesti,
+              tilinumero, lasku.tunnus, sisviesti2,
+              yriti.tilino ytilino, alatila, kasumma,
+              lasku.tunnus laskutunnus,
+              if (lasku.alatila = 'K', summa - kasumma, summa) maksettavasumma
+               FROM lasku
+              JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = maksu_tili)
+               WHERE lasku.yhtio   = '$kukarow[yhtio]'
+              and lasku.tila       = 'P'
+              and lasku.maa        = '$kotimaa'
+              and lasku.maksaja    = '$kukarow[kuka]'
+              and lasku.tilinumero = '$hyvitystilino'
+              and lasku.maksu_tili = '$yritirow[tunnus]'
+              and lasku.olmapvm    = '$pvmrow[olmapvm]'
+               ORDER BY if(summa < 0, 1, 2), summa desc";
     $nettolaskures = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($nettolaskures) == 0) {
@@ -52,28 +52,28 @@ if (count($tilinoarray[$yritirow['tunnus']]) > 0) {
     $nettolaskujen_tunnukset = substr($nettolaskujen_tunnukset, 0, -1);
 
     // Haetaan netotettavat laskut, tehd‰‰n nettotietue vai tarvittavista laskuista
-    $query = "  SELECT lasku.maksu_tili,
-           left(concat_ws(' ', lasku.nimi, lasku.nimitark),30) nimi,
-           left(concat_ws(' ', lasku.osoite, lasku.osoitetark),20) osoite,
-           left(concat_ws(' ', lasku.postino, lasku.postitp),20) postitp,
-           lasku.summa,
-          lasku.valkoodi,
-          lasku.viite,
-          lasku.viesti,
-          lasku.laskunro,
-          lasku.tilinumero,
-          lasku.tunnus,
-          lasku.sisviesti2,
-          yriti.tilino ytilino,
-          lasku.alatila,
-          lasku.kasumma,
-          lasku.tunnus laskutunnus,
-          if (lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) maksettavasumma
-            FROM lasku
-          JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili)
-            WHERE lasku.yhtio = '$kukarow[yhtio]'
-          and lasku.tunnus in ($nettolaskujen_tunnukset)
-            ORDER BY if(summa < 0, 1, 2), summa desc";
+    $query = "SELECT lasku.maksu_tili,
+              left(concat_ws(' ', lasku.nimi, lasku.nimitark),30) nimi,
+              left(concat_ws(' ', lasku.osoite, lasku.osoitetark),20) osoite,
+              left(concat_ws(' ', lasku.postino, lasku.postitp),20) postitp,
+              lasku.summa,
+              lasku.valkoodi,
+              lasku.viite,
+              lasku.viesti,
+              lasku.laskunro,
+              lasku.tilinumero,
+              lasku.tunnus,
+              lasku.sisviesti2,
+              yriti.tilino ytilino,
+              lasku.alatila,
+              lasku.kasumma,
+              lasku.tunnus laskutunnus,
+              if (lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) maksettavasumma
+               FROM lasku
+              JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili)
+               WHERE lasku.yhtio = '$kukarow[yhtio]'
+              and lasku.tunnus   in ($nettolaskujen_tunnukset)
+               ORDER BY if(summa < 0, 1, 2), summa desc";
     $xresult = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($xresult) == 0) {
@@ -169,10 +169,10 @@ if (count($tilinoarray[$yritirow['tunnus']]) > 0) {
         require ("inc/lm03viesti.inc");
       }
 
-      $query = "  UPDATE lasku
-            SET tila = 'Q',
-            popvm = '$popvm_nyt'
-            WHERE tunnus = $laskurow[tunnus]";
+      $query = "UPDATE lasku
+                SET tila = 'Q',
+                popvm        = '$popvm_nyt'
+                WHERE tunnus = $laskurow[tunnus]";
       $uresult = mysql_query($query) or pupe_error($query);
     }
   }

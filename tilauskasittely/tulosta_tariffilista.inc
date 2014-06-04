@@ -103,15 +103,15 @@ if (!function_exists('print_pdf_tariffi')) {
   }
 }
 
-  $query = "  SELECT tuotteen_toimittajat.toim_tuoteno, tuote.tuoteno, tuote.nimitys, tilausrivi.varattu+tilausrivi.kpl varattu, tilausrivi.hinta,
-      round(if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*(tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.kpl)), 2) rivihinta, tuote.tullinimike1, tuote.tullinimike2,
-      tuote.tullikohtelu, tuotteen_toimittajat.alkuperamaa
-      FROM tilausrivi
-      JOIN tuote USING (yhtio, tuoteno)
-      JOIN tuotteen_toimittajat ON tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
-      WHERE tilausrivi.uusiotunnus = '$otunnus'
-      and tilausrivi.yhtio='$kukarow[yhtio]'
-      ORDER BY tilausrivi.toimaika, tuotteen_toimittajat.toim_tuoteno";
+  $query = "SELECT tuotteen_toimittajat.toim_tuoteno, tuote.tuoteno, tuote.nimitys, tilausrivi.varattu+tilausrivi.kpl varattu, tilausrivi.hinta,
+            round(if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*(tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.kpl)), 2) rivihinta, tuote.tullinimike1, tuote.tullinimike2,
+            tuote.tullikohtelu, tuotteen_toimittajat.alkuperamaa
+            FROM tilausrivi
+            JOIN tuote USING (yhtio, tuoteno)
+            JOIN tuotteen_toimittajat ON tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
+            WHERE tilausrivi.uusiotunnus = '$otunnus'
+            and tilausrivi.yhtio='$kukarow[yhtio]'
+            ORDER BY tilausrivi.toimaika, tuotteen_toimittajat.toim_tuoteno";
   $result = mysql_query($query) or pupe_error($query);
 
 $kala = 490;

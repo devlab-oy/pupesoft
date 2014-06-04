@@ -20,12 +20,19 @@ if [ -z ${DBKANTA} ] || [ -z ${DBKAYTTAJA} ] || [ -z ${DBSALASANA} ]; then
 fi
 
 if [ -n "${DBHOST}" ]; then
-  DBHOSTLISA=" -h ${DBHOST} "
+  # Katsotaan jos meillä on annettu poikkeava portti hostnamessa
+  host_array=(${DBHOST//:/ })
+
+  if [ -n "${host_array[1]}" ]; then
+    DBHOSTLISA="--host=${host_array[0]} --port=${host_array[1]}"
+  else
+    DBHOSTLISA="--host=${DBHOST}"
+  fi
 else
   DBHOSTLISA=""
 fi
 
-YHTIOT=`mysql ${DBHOSTLISA} -u ${DBKAYTTAJA} --password=${DBSALASANA} ${DBKANTA} -B -N -e "SELECT yhtio FROM yhtio"`
+YHTIOT=`mysql ${DBHOSTLISA} --user=${DBKAYTTAJA} --password=${DBSALASANA} ${DBKANTA} -B -N -e "SELECT yhtio FROM yhtio"`
 
 for YHTIO in $YHTIOT
 do

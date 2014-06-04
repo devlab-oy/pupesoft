@@ -13,23 +13,23 @@ if (isset($lisaa) and isset($polttoainelisa) and isset($toimitustapa)) {
     echo "<font class='error'>",t("Polttoainelisän hintakerroin on syötettävä"),"!</font><br/><br/>";
   }
   else {
-    $query = "  SELECT *
-          FROM rahtimaksut
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND rahtihinta != 0
-          AND toimitustapa = '$toimitustapa'";
+    $query = "SELECT *
+              FROM rahtimaksut
+              WHERE yhtio       = '{$kukarow['yhtio']}'
+              AND rahtihinta   != 0
+              AND toimitustapa  = '$toimitustapa'";
     $rahtimaksut_res = mysql_query($query) or pupe_error($query);
 
     while ($rahtimaksut_row = mysql_fetch_assoc($rahtimaksut_res)) {
 
       $rahtimaksu = round($rahtimaksut_row['rahtihinta'] * $polttoainelisa, 2);
 
-      $query = "  UPDATE rahtimaksut SET
-            rahtihinta = '$rahtimaksu',
-            muutospvm = now(),
-            muuttaja = '{$kukarow['kuka']}'
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = '{$rahtimaksut_row['tunnus']}'";
+      $query = "UPDATE rahtimaksut SET
+                rahtihinta  = '$rahtimaksu',
+                muutospvm   = now(),
+                muuttaja    = '{$kukarow['kuka']}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$rahtimaksut_row['tunnus']}'";
       $update_res = mysql_query($query) or pupe_error($query);
     }
 
@@ -37,12 +37,12 @@ if (isset($lisaa) and isset($polttoainelisa) and isset($toimitustapa)) {
   }
 }
 
-$query = "  SELECT DISTINCT rahtimaksut.toimitustapa
-      FROM rahtimaksut
-      JOIN toimitustapa ON (toimitustapa.yhtio = rahtimaksut.yhtio AND toimitustapa.selite = rahtimaksut.toimitustapa)
-      WHERE rahtimaksut.yhtio = '{$kukarow['yhtio']}'
-      AND rahtimaksut.rahtihinta != ''
-      ORDER BY rahtimaksut.toimitustapa ASC";
+$query = "SELECT DISTINCT rahtimaksut.toimitustapa
+          FROM rahtimaksut
+          JOIN toimitustapa ON (toimitustapa.yhtio = rahtimaksut.yhtio AND toimitustapa.selite = rahtimaksut.toimitustapa)
+          WHERE rahtimaksut.yhtio     = '{$kukarow['yhtio']}'
+          AND rahtimaksut.rahtihinta != ''
+          ORDER BY rahtimaksut.toimitustapa ASC";
 $toimitustapa_res = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($toimitustapa_res) == 0) {

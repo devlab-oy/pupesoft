@@ -13,8 +13,8 @@ error_reporting(E_ALL ^E_NOTICE);
 ini_set("display_errors", 0);
 ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
 
-require ("inc/connect.inc");
-require ("inc/functions.inc");
+require "inc/connect.inc";
+require "inc/functions.inc";
 
 function rest_virhe_header($viesti) {
   // Mik‰li kutsutaan esimerkiksi "asiakastarkista-funktiota" ja se palauttaa tekstimuodossa virheen, niin $virhe pit‰‰ myˆs utf8-encodata, tai tulee "500"-virhett‰.
@@ -46,7 +46,7 @@ function rest_tilaa($params) {
   $toim        = "RIVISYOTTO";
 
   // M‰‰ritell‰‰n luo_myyntitilausotsikko -funkkari
-  require("tilauskasittely/luo_myyntitilausotsikko.inc");
+  require "tilauskasittely/luo_myyntitilausotsikko.inc";
 
   if ($tuoteno == "") {
     rest_virhe_header("Tuotenumero puuttuu");
@@ -147,7 +147,7 @@ function rest_tilaa($params) {
     ${"ale".$alepostfix} = "";
   }
 
-  require("tilauskasittely/lisaarivi.inc");
+  require "tilauskasittely/lisaarivi.inc";
 
   rest_ok_header($tilausnumero);
 }
@@ -211,7 +211,7 @@ elseif ($tyyppi == "customer") {
     }
   }
 
-  if(count($api_kentat) == 0) {
+  if (count($api_kentat) == 0) {
     rest_virhe_header("Data puuttuu");
   }
 
@@ -219,7 +219,7 @@ elseif ($tyyppi == "customer") {
   $api_kentat[0][] = "TOIMINTO";
   $api_kentat[1][] = $toiminto;
 
-  require("lue_data.php");
+  require "lue_data.php";
 
   $api_output = utf8_encode(strip_tags($api_output));
 

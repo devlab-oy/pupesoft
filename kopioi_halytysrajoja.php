@@ -124,10 +124,10 @@ if ($tee == "paivita") {
       if ($edtuote == "" or $edtuote != $kopioitavatuoteno[$tunnus]) {
         foreach ($kohde as $paikkatunnus => $tuotetunnus) {
           if ($kopioitavatuoteno[$tunnus] == $tuotetunnus) {
-            $query = "  UPDATE tuotepaikat SET
-                   halytysraja = '$kohdehaly[$paikkatunnus]'
-                  WHERE yhtio = '$kukarow[yhtio]' and
-                  tunnus = '$paikkatunnus'";
+            $query = "UPDATE tuotepaikat SET
+                      halytysraja = '$kohdehaly[$paikkatunnus]'
+                      WHERE yhtio = '$kukarow[yhtio]' and
+                      tunnus      = '$paikkatunnus'";
             $result = pupe_query($query);
 
             $laskuri++;
@@ -225,10 +225,10 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
     $abcjoin = " LEFT JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio and abc_aputaulu.tuoteno = tuote.tuoteno and abc_aputaulu.tyyppi = '$abcrajaustapa') ";
   }
 
-  $query = "  SELECT *
-        FROM varastopaikat
-        WHERE yhtio = '$kukarow[yhtio]' and (tunnus = '$kopioitavavarasto' or tunnus = '$kohdevarasto')
-        ORDER BY tyyppi, nimitys";
+  $query = "SELECT *
+            FROM varastopaikat
+            WHERE yhtio = '$kukarow[yhtio]' and (tunnus = '$kopioitavavarasto' or tunnus = '$kohdevarasto')
+            ORDER BY tyyppi, nimitys";
   $result = pupe_query($query);
 
   echo "<tr><th>".t("Varastosta varastoon")."</th><td>";
@@ -259,36 +259,36 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
   $erorow = mysql_fetch_array($result);
 
   // t‰ss‰ on itse query
-  $query = "  SELECT
-        tuote.tuoteno,
-        tuote.nimitys,
-        tuote.status,
-        ifnull(abc_aputaulu.luokka, 8) abcluokka,
-        ifnull(abc_aputaulu.luokka_osasto, 8) abcluokka_osasto,
-        ifnull(abc_aputaulu.luokka_try, 8) abcluokka_try,
-        varastopaikat.alkuhyllyalue,
-        varastopaikat.alkuhyllynro,
-        varastopaikat.loppuhyllyalue,
-        varastopaikat.loppuhyllynro,
-        varastopaikat.tunnus,
-        varastopaikat.nimitys varastonnimi,
-        tuotepaikat.tilausmaara,
-        tuotepaikat.halytysraja,
-        tuotepaikat.tunnus paikkatunnus
-        FROM tuote
-        $lisaa2
-        $abcjoin
-        JOIN tuotepaikat ON (tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno)
-        JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-        and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-        and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-        $lisa_varastot)
-        WHERE
-        tuote.yhtio = '$kukarow[yhtio]'
-        $lisaa
-        and tuote.ei_saldoa = ''
-        group by tuote.tuoteno, varastopaikat.tunnus, tuotepaikat.tunnus
-        $jarjestys";
+  $query = "SELECT
+            tuote.tuoteno,
+            tuote.nimitys,
+            tuote.status,
+            ifnull(abc_aputaulu.luokka, 8) abcluokka,
+            ifnull(abc_aputaulu.luokka_osasto, 8) abcluokka_osasto,
+            ifnull(abc_aputaulu.luokka_try, 8) abcluokka_try,
+            varastopaikat.alkuhyllyalue,
+            varastopaikat.alkuhyllynro,
+            varastopaikat.loppuhyllyalue,
+            varastopaikat.loppuhyllynro,
+            varastopaikat.tunnus,
+            varastopaikat.nimitys varastonnimi,
+            tuotepaikat.tilausmaara,
+            tuotepaikat.halytysraja,
+            tuotepaikat.tunnus paikkatunnus
+            FROM tuote
+            $lisaa2
+            $abcjoin
+            JOIN tuotepaikat ON (tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno)
+            JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+            and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+            and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+            $lisa_varastot)
+            WHERE
+            tuote.yhtio         = '$kukarow[yhtio]'
+            $lisaa
+            and tuote.ei_saldoa = ''
+            group by tuote.tuoteno, varastopaikat.tunnus, tuotepaikat.tunnus
+            $jarjestys";
   $res = pupe_query($query);
 
   echo "<form method='post' autocomplete='off'>
@@ -368,32 +368,32 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
     echo "<td>$ryhmanimet[$a] $ryhmanimet[$b] $ryhmanimet[$c]</td>";
 
     // tutkaillaan myynti
-    $query = "  SELECT
-          sum(if (laadittu >= '$vva1-$kka1-$ppa1' and laadittu <= '$vvl1-$kkl1-$ppl1' and var='P', tilkpl,0)) puutekpl1,
-             sum(if (laadittu >= '$vva2-$kka2-$ppa2' and laadittu <= '$vvl2-$kkl2-$ppl2' and var='P', tilkpl,0)) puutekpl2,
-             sum(if (laadittu >= '$vva3-$kka3-$ppa3' and laadittu <= '$vvl3-$kkl3-$ppl3' and var='P', tilkpl,0)) puutekpl3,
-             sum(if (laadittu >= '$vva4-$kka4-$ppa4' and laadittu <= '$vvl4-$kkl4-$ppl4' and var='P', tilkpl,0)) puutekpl4,
-             sum(if (laskutettuaika >= '$vva1-$kka1-$ppa1' and laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,kpl,0)) kpl1,
-             sum(if (laskutettuaika >= '$vva2-$kka2-$ppa2' and laskutettuaika <= '$vvl2-$kkl2-$ppl2' ,kpl,0)) kpl2,
-             sum(if (laskutettuaika >= '$vva3-$kka3-$ppa3' and laskutettuaika <= '$vvl3-$kkl3-$ppl3' ,kpl,0)) kpl3,
-             sum(if (laskutettuaika >= '$vva4-$kka4-$ppa4' and laskutettuaika <= '$vvl4-$kkl4-$ppl4' ,kpl,0)) kpl4,
-          sum(if (laskutettuaika >= '$vva1-$kka1-$ppa1' and laskutettuaika <= '$vvl1-$kkl1-$ppl1' and
-              concat(rpad(upper('$row[alkuhyllyalue]')  ,5,'0'),lpad(upper('$row[alkuhyllynro]')  ,5,'0')) <= concat(rpad(upper(hyllyalue) ,5,'0'),lpad(upper(hyllynro) ,5,'0')) and
-              concat(rpad(upper('$row[loppuhyllyalue]') ,5,'0'),lpad(upper('$row[loppuhyllynro]') ,5,'0')) >= concat(rpad(upper(hyllyalue) ,5,'0'),lpad(upper(hyllynro) ,5,'0')), kpl, 0)) varastonkpl1,
-          sum(if (laskutettuaika >= '$vva2-$kka2-$ppa2' and laskutettuaika <= '$vvl2-$kkl2-$ppl2' and
-              concat(rpad(upper('$row[alkuhyllyalue]')  ,5,'0'),lpad(upper('$row[alkuhyllynro]')  ,5,'0')) <= concat(rpad(upper(hyllyalue) ,5,'0'),lpad(upper(hyllynro) ,5,'0')) and
-              concat(rpad(upper('$row[loppuhyllyalue]') ,5,'0'),lpad(upper('$row[loppuhyllynro]') ,5,'0')) >= concat(rpad(upper(hyllyalue) ,5,'0'),lpad(upper(hyllynro) ,5,'0')), kpl, 0)) varastonkpl2,
-          sum(if (laskutettuaika >= '$vva3-$kka3-$ppa3' and laskutettuaika <= '$vvl3-$kkl3-$ppl3' and
-              concat(rpad(upper('$row[alkuhyllyalue]')  ,5,'0'),lpad(upper('$row[alkuhyllynro]')  ,5,'0')) <= concat(rpad(upper(hyllyalue) ,5,'0'),lpad(upper(hyllynro) ,5,'0')) and
-              concat(rpad(upper('$row[loppuhyllyalue]') ,5,'0'),lpad(upper('$row[loppuhyllynro]') ,5,'0')) >= concat(rpad(upper(hyllyalue) ,5,'0'),lpad(upper(hyllynro) ,5,'0')), kpl, 0)) varastonkpl3,
-          sum(if (laskutettuaika >= '$vva4-$kka4-$ppa4' and laskutettuaika <= '$vvl4-$kkl4-$ppl4' and
-              concat(rpad(upper('$row[alkuhyllyalue]')  ,5,'0'),lpad(upper('$row[alkuhyllynro]')  ,5,'0')) <= concat(rpad(upper(hyllyalue) ,5,'0'),lpad(upper(hyllynro) ,5,'0')) and
-              concat(rpad(upper('$row[loppuhyllyalue]') ,5,'0'),lpad(upper('$row[loppuhyllynro]') ,5,'0')) >= concat(rpad(upper(hyllyalue) ,5,'0'),lpad(upper(hyllynro) ,5,'0')), kpl, 0)) varastonkpl4
-             FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-             WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-             and tyyppi = 'L'
-             and tuoteno = '$row[tuoteno]'
-             and ((laskutettuaika >= '$apvm' and laskutettuaika <= '$lpvm') or laskutettuaika = '0000-00-00')";
+    $query = "SELECT
+              sum(if (laadittu >= '$vva1-$kka1-$ppa1' and laadittu <= '$vvl1-$kkl1-$ppl1' and var='P', tilkpl,0)) puutekpl1,
+                 sum(if (laadittu >= '$vva2-$kka2-$ppa2' and laadittu <= '$vvl2-$kkl2-$ppl2' and var='P', tilkpl,0)) puutekpl2,
+                 sum(if (laadittu >= '$vva3-$kka3-$ppa3' and laadittu <= '$vvl3-$kkl3-$ppl3' and var='P', tilkpl,0)) puutekpl3,
+                 sum(if (laadittu >= '$vva4-$kka4-$ppa4' and laadittu <= '$vvl4-$kkl4-$ppl4' and var='P', tilkpl,0)) puutekpl4,
+                 sum(if (laskutettuaika >= '$vva1-$kka1-$ppa1' and laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,kpl,0)) kpl1,
+                 sum(if (laskutettuaika >= '$vva2-$kka2-$ppa2' and laskutettuaika <= '$vvl2-$kkl2-$ppl2' ,kpl,0)) kpl2,
+                 sum(if (laskutettuaika >= '$vva3-$kka3-$ppa3' and laskutettuaika <= '$vvl3-$kkl3-$ppl3' ,kpl,0)) kpl3,
+                 sum(if (laskutettuaika >= '$vva4-$kka4-$ppa4' and laskutettuaika <= '$vvl4-$kkl4-$ppl4' ,kpl,0)) kpl4,
+              sum(if (laskutettuaika >= '$vva1-$kka1-$ppa1' and laskutettuaika <= '$vvl1-$kkl1-$ppl1' and
+                  concat(rpad(upper('$row[alkuhyllyalue]')  ,5,'0'),lpad(upper('$row[alkuhyllynro]')  ,5,'0')) <= concat(rpad(upper(hyllyalue) ,5,'0'),lpad(upper(hyllynro) ,5,'0')) and
+                  concat(rpad(upper('$row[loppuhyllyalue]') ,5,'0'),lpad(upper('$row[loppuhyllynro]') ,5,'0')) >= concat(rpad(upper(hyllyalue) ,5,'0'),lpad(upper(hyllynro) ,5,'0')), kpl, 0)) varastonkpl1,
+              sum(if (laskutettuaika >= '$vva2-$kka2-$ppa2' and laskutettuaika <= '$vvl2-$kkl2-$ppl2' and
+                  concat(rpad(upper('$row[alkuhyllyalue]')  ,5,'0'),lpad(upper('$row[alkuhyllynro]')  ,5,'0')) <= concat(rpad(upper(hyllyalue) ,5,'0'),lpad(upper(hyllynro) ,5,'0')) and
+                  concat(rpad(upper('$row[loppuhyllyalue]') ,5,'0'),lpad(upper('$row[loppuhyllynro]') ,5,'0')) >= concat(rpad(upper(hyllyalue) ,5,'0'),lpad(upper(hyllynro) ,5,'0')), kpl, 0)) varastonkpl2,
+              sum(if (laskutettuaika >= '$vva3-$kka3-$ppa3' and laskutettuaika <= '$vvl3-$kkl3-$ppl3' and
+                  concat(rpad(upper('$row[alkuhyllyalue]')  ,5,'0'),lpad(upper('$row[alkuhyllynro]')  ,5,'0')) <= concat(rpad(upper(hyllyalue) ,5,'0'),lpad(upper(hyllynro) ,5,'0')) and
+                  concat(rpad(upper('$row[loppuhyllyalue]') ,5,'0'),lpad(upper('$row[loppuhyllynro]') ,5,'0')) >= concat(rpad(upper(hyllyalue) ,5,'0'),lpad(upper(hyllynro) ,5,'0')), kpl, 0)) varastonkpl3,
+              sum(if (laskutettuaika >= '$vva4-$kka4-$ppa4' and laskutettuaika <= '$vvl4-$kkl4-$ppl4' and
+                  concat(rpad(upper('$row[alkuhyllyalue]')  ,5,'0'),lpad(upper('$row[alkuhyllynro]')  ,5,'0')) <= concat(rpad(upper(hyllyalue) ,5,'0'),lpad(upper(hyllynro) ,5,'0')) and
+                  concat(rpad(upper('$row[loppuhyllyalue]') ,5,'0'),lpad(upper('$row[loppuhyllynro]') ,5,'0')) >= concat(rpad(upper(hyllyalue) ,5,'0'),lpad(upper(hyllynro) ,5,'0')), kpl, 0)) varastonkpl4
+                 FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
+                 WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+                 and tyyppi             = 'L'
+                 and tuoteno            = '$row[tuoteno]'
+                 and ((laskutettuaika >= '$apvm' and laskutettuaika <= '$lpvm') or laskutettuaika = '0000-00-00')";
     $result   = pupe_query($query);
     $summarow = mysql_fetch_array($result);
 
@@ -480,10 +480,10 @@ if ($tee == "" or !isset($ehdotusnappi)) {
   echo "<table>";
 
   //Tehd‰‰n varastot
-  $query = "  SELECT *
-        FROM varastopaikat
-        WHERE yhtio = '$kukarow[yhtio]'
-        ORDER BY tyyppi, nimitys";
+  $query = "SELECT *
+            FROM varastopaikat
+            WHERE yhtio = '$kukarow[yhtio]'
+            ORDER BY tyyppi, nimitys";
   $vtresult = pupe_query($query);
 
   echo "<tr><th>Kopioitava varasto</th>\n";
@@ -571,10 +571,10 @@ if ($tee == "" or !isset($ehdotusnappi)) {
   echo "<tr><th>".t("Tuotemerkki")."</th><td>";
 
   //Tehd‰‰n osasto & tuoteryhm‰ pop-upit
-  $query = "  SELECT distinct tuotemerkki
-        FROM tuote
-        WHERE yhtio='$kukarow[yhtio]' and tuotemerkki != ''
-        ORDER BY tuotemerkki";
+  $query = "SELECT distinct tuotemerkki
+            FROM tuote
+            WHERE yhtio='$kukarow[yhtio]' and tuotemerkki != ''
+            ORDER BY tuotemerkki";
   $sresult = pupe_query($query);
 
   echo "<select name='tuotemerkki'>\n";

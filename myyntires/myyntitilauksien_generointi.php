@@ -28,10 +28,10 @@ if (php_sapi_name() == 'cli') {
   $yhtiorow = hae_yhtion_parametrit($yhtio);
 
   // Haetaan käyttäjän tiedot
-  $query = "  SELECT *
-        FROM kuka
-        WHERE yhtio = '$yhtio'
-        AND kuka = 'admin'";
+  $query = "SELECT *
+            FROM kuka
+            WHERE yhtio = '$yhtio'
+            AND kuka    = 'admin'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -177,10 +177,10 @@ function merkkaa_myyntitilaukset_lahetetyksi($myyntitilaukset) {
 
     $myyntitilaus_tunnukset = substr($myyntitilaus_tunnukset, 0, -1);
 
-    $query = "  UPDATE lasku
-                SET noutaja = 'X'
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus IN ({$myyntitilaus_tunnukset})";
+    $query = "UPDATE lasku
+              SET noutaja = 'X'
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  IN ({$myyntitilaus_tunnukset})";
     pupe_query($query);
 }
 

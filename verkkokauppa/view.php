@@ -12,10 +12,10 @@ else {
 
 $id = (int) $_GET["id"];
 
-$query = "  SELECT *
-      from liitetiedostot
-      where tunnus = '$id'
-      and liitos in ('kalenteri','tuote','sarjanumeron_lisatiedot')";
+$query = "SELECT *
+          from liitetiedostot
+          where tunnus = '$id'
+          and liitos   in ('kalenteri','tuote','sarjanumeron_lisatiedot')";
 $liiteres = mysql_query($query) or die(mysql_error());
 
 if (mysql_num_rows($liiteres) > 0) {

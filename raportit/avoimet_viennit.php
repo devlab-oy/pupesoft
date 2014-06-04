@@ -24,16 +24,16 @@ if ($tee == '') {
   $query_ale_lisa = generoi_alekentta('M');
 
   //listataan tuoreet tilausket
-  $query = "  SELECT lasku.tunnus tilaus, lasku.vienti, lasku.luontiaika laadittu, lasku.laatija, lasku.ytunnus, lasku.nimi, lasku.nimitark, round(sum(varattu * tilausrivi.hinta * {$query_ale_lisa}), 2) summa
-        FROM lasku, tilausrivi
-        WHERE lasku.yhtio='$kukarow[yhtio]'
-        AND lasku.yhtio=tilausrivi.yhtio
-        AND lasku.tunnus=tilausrivi.otunnus
-        AND lasku.tila='L'
-        AND lasku.alatila in ('B','D','E','A','C')
-        AND lasku.vienti in ('K','E')
-        GROUP by 1,2,3,4,5,6,7
-        ORDER by 1,2,3,4,5,6,7";
+  $query = "SELECT lasku.tunnus tilaus, lasku.vienti, lasku.luontiaika laadittu, lasku.laatija, lasku.ytunnus, lasku.nimi, lasku.nimitark, round(sum(varattu * tilausrivi.hinta * {$query_ale_lisa}), 2) summa
+            FROM lasku, tilausrivi
+            WHERE lasku.yhtio='$kukarow[yhtio]'
+            AND lasku.yhtio=tilausrivi.yhtio
+            AND lasku.tunnus=tilausrivi.otunnus
+            AND lasku.tila='L'
+            AND lasku.alatila in ('B','D','E','A','C')
+            AND lasku.vienti  in ('K','E')
+            GROUP by 1,2,3,4,5,6,7
+            ORDER by 1,2,3,4,5,6,7";
   $result = mysql_query($query) or pupe_error($query);
 
   echo "<table><tr>";

@@ -56,11 +56,11 @@ if ($tee == "TEE") {
   foreach ($taulut as $taulujaalias) {
     list($taul, $alia) = explode("###", $taulujaalias);
 
-    $sanakirjaquery = "  DELETE FROM avainsana
-              WHERE yhtio = '$kukarow[yhtio]'
-              and laji = 'MYSQLALIAS'
-              and selite like '$taul%'
-              and selitetark_2 = '$alia'";
+    $sanakirjaquery = "DELETE FROM avainsana
+                       WHERE yhtio      = '$kukarow[yhtio]'
+                       and laji         = 'MYSQLALIAS'
+                       and selite       like '$taul%'
+                       and selitetark_2 = '$alia'";
     $sanakirjaresult = mysql_query($sanakirjaquery) or pupe_error($sanakirjaquery);
   }
 
@@ -70,12 +70,12 @@ if ($tee == "TEE") {
   foreach ($rivit as $rivi) {
     list($perhe, $kieli, $selite, $selitetark, $selitetark_2, $selitetark_3, $selitetark_4, $jarjestys, $nakyvyys) = explode("\t", trim($rivi));
 
-    $sanakirjaquery = "  SELECT *
-              FROM avainsana
-              WHERE yhtio = '$kukarow[yhtio]'
-              and laji = 'MYSQLALIAS'
-              and selite = '$selite'
-              and selitetark_2 = '$selitetark_2'";
+    $sanakirjaquery = "SELECT *
+                       FROM avainsana
+                       WHERE yhtio      = '$kukarow[yhtio]'
+                       and laji         = 'MYSQLALIAS'
+                       and selite       = '$selite'
+                       and selitetark_2 = '$selitetark_2'";
     $sanakirjaresult = mysql_query($sanakirjaquery) or pupe_error($sanakirjaquery);
 
     if (mysql_num_rows($sanakirjaresult) > 0) {
@@ -83,19 +83,19 @@ if ($tee == "TEE") {
     }
     else {
       $sanakirjaquery  = "INSERT INTO avainsana SET
-                yhtio      = '$kukarow[yhtio]',
-                laji       = 'MYSQLALIAS',
-                perhe      = '$perhe',
-                kieli      = '$kieli',
-                nakyvyys    = '$nakyvyys',
-                selite      = '$selite',
-                selitetark    = '$selitetark',
-                selitetark_2  = '$selitetark_2',
-                selitetark_3  = '$selitetark_3',
-                selitetark_4  = '$selitetark_4',
-                jarjestys    = '$jarjestys',
-                laatija      = '$kukarow[kuka]',
-                luontiaika    = now()";
+                          yhtio        = '$kukarow[yhtio]',
+                          laji         = 'MYSQLALIAS',
+                          perhe        = '$perhe',
+                          kieli        = '$kieli',
+                          nakyvyys     = '$nakyvyys',
+                          selite       = '$selite',
+                          selitetark   = '$selitetark',
+                          selitetark_2 = '$selitetark_2',
+                          selitetark_3 = '$selitetark_3',
+                          selitetark_4 = '$selitetark_4',
+                          jarjestys    = '$jarjestys',
+                          laatija      = '$kukarow[kuka]',
+                          luontiaika   = now()";
       $sanakirjaresult = mysql_query($sanakirjaquery, $link) or pupe_error($sanakirjaquery);
 
       echo "<tr><th>".t("Lis‰t‰‰n mysqlalias")."</th><td>$selite</td><td>".htmlentities($selitetark)."</td><td>$selitetark_2</td></tr>";

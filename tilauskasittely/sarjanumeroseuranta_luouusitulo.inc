@@ -4,33 +4,33 @@
 if ($luousitee == "") {
   $kehahin = 0;
 
-  $query  = "  SELECT sarjanumeroseuranta
-        from tuote
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tuoteno = '$tuoteno'";
+  $query  = "SELECT sarjanumeroseuranta
+             from tuote
+             WHERE yhtio = '$kukarow[yhtio]'
+             and tuoteno = '$tuoteno'";
   $result = mysql_query($query) or pupe_error($query);
   $tuoterow = mysql_fetch_array($result);
 
   if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "G" or $tuoterow["sarjanumeroseuranta"] == "U") {
     // Jos tuote on sarjanumeroseurannassa niin kehahinta lasketaan yksilöiden ostohinnoista (ostetut yksilöt jotka eivät vielä ole myyty(=laskutettu)
-    $query  = "  SELECT avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl) kehahin
-          FROM sarjanumeroseuranta
-          LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
-          LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
-          WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
-          and sarjanumeroseuranta.tuoteno = '$tuoteno'
-          and sarjanumeroseuranta.myyntirivitunnus != -1
-          and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
-          and tilausrivi_osto.laskutettuaika != '0000-00-00'";
+    $query  = "SELECT avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl) kehahin
+               FROM sarjanumeroseuranta
+               LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
+               LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+               WHERE sarjanumeroseuranta.yhtio           = '$kukarow[yhtio]'
+               and sarjanumeroseuranta.tuoteno           = '$tuoteno'
+               and sarjanumeroseuranta.myyntirivitunnus != -1
+               and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
+               and tilausrivi_osto.laskutettuaika       != '0000-00-00'";
     $result = mysql_query($query) or pupe_error($query);
     $ikrow  = mysql_fetch_array($result);
 
     $kehahin = sprintf('%.2f', $ikrow["kehahin"]);
 
     if ($kehahin == 0) {
-      $query = "  SELECT kehahin
-            FROM tuote
-            WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
+      $query = "SELECT kehahin
+                FROM tuote
+                WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
       $result = mysql_query($query) or pupe_error($query);
       $ikrow  = mysql_fetch_array ($result);
 
@@ -95,9 +95,9 @@ else {
   $tanaan = date("Y-m-d");
 
   // Inventoiduille sarjanumerotuotteille luodaan K I otsikko per päivä
-  $query  = "  SELECT *
-        FROM lasku
-        WHERE yhtio = '$kukarow[yhtio]' and tila='K' and alatila='I' and tapvm='$tanaan'";
+  $query  = "SELECT *
+             FROM lasku
+             WHERE yhtio = '$kukarow[yhtio]' and tila='K' and alatila='I' and tapvm='$tanaan'";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -107,27 +107,27 @@ else {
     $row    = mysql_fetch_array($result);
     $lid  = $row[0];
 
-    $query = "  INSERT into lasku set
-          yhtio        = '$kukarow[yhtio]',
-          laskunro     = '$lid',
-          ytunnus       = 'Invent',
-          nimi         = '".t("Inventointi")."',
-          liitostunnus = '0',
-          tila         = 'K',
-          alatila      = 'I',
-          tapvm     = '$tanaan',
-          luontiaika   = now(),
-          laatija     = 'Invent'";
+    $query = "INSERT into lasku set
+              yhtio        = '$kukarow[yhtio]',
+              laskunro     = '$lid',
+              ytunnus      = 'Invent',
+              nimi         = '".t("Inventointi")."',
+              liitostunnus = '0',
+              tila         = 'K',
+              alatila      = 'I',
+              tapvm        = '$tanaan',
+              luontiaika   = now(),
+              laatija      = 'Invent'";
     $result = mysql_query($query) or pupe_error($query);
     $lid = mysql_insert_id();
 
-    $query  = "  SELECT *
-          from lasku
-          where tunnus  = '$lid'
-          and yhtio    = '$kukarow[yhtio]'
-          and tila    = 'K'
-          and alatila     = 'I'
-          and tapvm    = '$tanaan'";
+    $query  = "SELECT *
+               from lasku
+               where tunnus = '$lid'
+               and yhtio    = '$kukarow[yhtio]'
+               and tila     = 'K'
+               and alatila  = 'I'
+               and tapvm    = '$tanaan'";
     $result = mysql_query($query) or pupe_error($query);
     $ikrow = mysql_fetch_array($result);
   }
@@ -136,10 +136,10 @@ else {
   }
 
   //Haetaan tuotteen tiedot
-  $query = "  SELECT *
-        FROM tuote
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tuoteno = '$tuoteno'";
+  $query = "SELECT *
+            FROM tuote
+            WHERE yhtio = '$kukarow[yhtio]'
+            and tuoteno = '$tuoteno'";
   $result  = mysql_query($query) or pupe_error($query);
   $trow = mysql_fetch_array($result);
 
@@ -158,39 +158,39 @@ else {
     $ale_query_insert_lisa .= " ale{$alepostfix} = 0, ";
   }
 
-  $query = "  INSERT into tilausrivi set
-        varattu     = '0',
-        tilkpl       = '$skpl',
-        kpl        = '$skpl',
-        jt        = '0',
-        hinta      = '$kehahin',
-        rivihinta    = '$kehahin',
-        hyllyalue    = '$hyllyalue',
-        hyllynro     = '$hyllynro',
-        hyllyvali     = '$hyllyvali',
-        hyllytaso     = '$hyllytaso',
-        uusiotunnus    = '$ikrow[tunnus]',
-        otunnus     = '$ikrow[tunnus]',
-        var        = '',
-        keratty      = 'Invent',
-        kerattyaika    = '',
-        kerayspvm     = '',
-        laatija      = 'Invent',
-        laadittu    = now(),
-        toimaika     = now(),
-        laskutettu    = 'Invent',
-        laskutettuaika  = '0000-00-00',
-        yhtio       = '$kukarow[yhtio]',
-        tuoteno     = '$tuoteno',
-        {$ale_query_insert_lisa}
-        netto       = '',
-        yksikko     = '$trow[yksikko]',
-        try       = '$trow[try]',
-        osasto       = '$trow[osasto]',
-        alv       = '0',
-        nimitys     = '$trow[nimitys]',
-        tyyppi       = 'O',
-        kommentti     = '$kukarow[nimi] lisäsi inventoimalla.'";
+  $query = "INSERT into tilausrivi set
+            varattu        = '0',
+            tilkpl         = '$skpl',
+            kpl            = '$skpl',
+            jt             = '0',
+            hinta          = '$kehahin',
+            rivihinta      = '$kehahin',
+            hyllyalue      = '$hyllyalue',
+            hyllynro       = '$hyllynro',
+            hyllyvali      = '$hyllyvali',
+            hyllytaso      = '$hyllytaso',
+            uusiotunnus    = '$ikrow[tunnus]',
+            otunnus        = '$ikrow[tunnus]',
+            var            = '',
+            keratty        = 'Invent',
+            kerattyaika    = '',
+            kerayspvm      = '',
+            laatija        = 'Invent',
+            laadittu       = now(),
+            toimaika       = now(),
+            laskutettu     = 'Invent',
+            laskutettuaika = '0000-00-00',
+            yhtio          = '$kukarow[yhtio]',
+            tuoteno        = '$tuoteno',
+            {$ale_query_insert_lisa}
+            netto          = '',
+            yksikko        = '$trow[yksikko]',
+            try            = '$trow[try]',
+            osasto         = '$trow[osasto]',
+            alv            = '0',
+            nimitys        = '$trow[nimitys]',
+            tyyppi         = 'O',
+            kommentti      = '$kukarow[nimi] lisäsi inventoimalla.'";
   $result = mysql_query($query) or pupe_error($query);
   $lid = mysql_insert_id();
 

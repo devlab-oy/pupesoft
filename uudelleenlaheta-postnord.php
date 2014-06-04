@@ -11,12 +11,12 @@ if ($tee == "laheta" and $tilaukset != "") {
 
   $tilaukset = pupesoft_cleanstring(str_replace(array("\r","\n"), "", $tilaukset));
 
-  $query = "  SELECT distinct lasku.tunnus
-              FROM lasku
-        JOIN varastopaikat ON (lasku.yhtio=varastopaikat.yhtio AND lasku.varasto=varastopaikat.tunnus AND varastopaikat.ulkoinen_jarjestelma = 'P')
-              WHERE lasku.yhtio = '$kukarow[yhtio]'
-              AND lasku.tila   in ('L','N')
-              AND lasku.tunnus in ($tilaukset)";
+  $query = "SELECT distinct lasku.tunnus
+            FROM lasku
+            JOIN varastopaikat ON (lasku.yhtio=varastopaikat.yhtio AND lasku.varasto=varastopaikat.tunnus AND varastopaikat.ulkoinen_jarjestelma = 'P')
+            WHERE lasku.yhtio = '$kukarow[yhtio]'
+            AND lasku.tila    in ('L','N')
+            AND lasku.tunnus  in ($tilaukset)";
   $res  = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {

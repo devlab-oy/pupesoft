@@ -15,13 +15,13 @@ if ($yhtiorow["ytunnus_tarkistukset"] != "E") {
 
   $rajaus = "";
 
-  $asiakasQuery = "  SELECT 'asiakas' taulu, ytunnus, nimi, tunnus
-            FROM asiakas
-            WHERE yhtio = '{$kukarow["yhtio"]}' and laji = ''";
+  $asiakasQuery = "SELECT 'asiakas' taulu, ytunnus, nimi, tunnus
+                   FROM asiakas
+                   WHERE yhtio = '{$kukarow["yhtio"]}' and laji = ''";
 
-  $toimittajaQuery = "  SELECT 'toimi' taulu, ytunnus, nimi, tunnus
-              FROM toimi
-              WHERE yhtio = '{$kukarow["yhtio"]}'";
+  $toimittajaQuery = "SELECT 'toimi' taulu, ytunnus, nimi, tunnus
+                      FROM toimi
+                      WHERE yhtio = '{$kukarow["yhtio"]}'";
 
   if ($yhtiorow["ytunnus_tarkistukset"] == "") {
     $query = "  (

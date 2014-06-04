@@ -56,11 +56,11 @@ if ($tee != '') {
   }
 
   // Löytyykö oikea tilikausi?
-  $query = "  SELECT *
-        FROM tilikaudet
-        WHERE yhtio = '$kukarow[yhtio]'
-        and '$pvm' >= tilikausi_alku
-        and '$pvm' <= tilikausi_loppu";
+  $query = "SELECT *
+            FROM tilikaudet
+            WHERE yhtio = '$kukarow[yhtio]'
+            and '$pvm' >= tilikausi_alku
+            and '$pvm' <= tilikausi_loppu";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 1) {
@@ -144,10 +144,10 @@ echo "  <tr>
     <td colspan='3'><input type = 'text' name = 'ytunnus' value='".tarkistahetu($ytunnus)."'>";
 
 if ($asiakasid > 0) {
-  $query = "  SELECT *
-        FROM asiakas
-        WHERE yhtio = '{$kukarow["yhtio"]}'
-        AND tunnus = '$asiakasid'";
+  $query = "SELECT *
+            FROM asiakas
+            WHERE yhtio = '{$kukarow["yhtio"]}'
+            AND tunnus  = '$asiakasid'";
   $result = pupe_query($query);
   $asiakasrow = mysql_fetch_assoc($result);
 
@@ -173,10 +173,10 @@ echo "  <tr>
     <td colspan='3'><input type = 'checkbox' name = 'naytetaankokommentit' $komsel></td>
     </tr>";
 
-$query = "  SELECT nimi, tunnus
-      FROM valuu
-      WHERE yhtio = '$kukarow[yhtio]'
-      ORDER BY jarjestys";
+$query = "SELECT nimi, tunnus
+          FROM valuu
+          WHERE yhtio = '$kukarow[yhtio]'
+          ORDER BY jarjestys";
 $vresult = pupe_query($query);
 
 echo "<tr><th>".t('Näytä vain valuutta') .":</th><td colspan=3><select name='savalkoodi'>";
@@ -219,10 +219,10 @@ echo "</select></td></tr>";
 
 echo "<tr><th>".t('Maa').":</th><td colspan=3><select name='maa'>";
 
-$query = "  SELECT distinct maa
-      FROM asiakas
-      WHERE yhtio = '$kukarow[yhtio]'
-      AND maa != ''";
+$query = "SELECT distinct maa
+          FROM asiakas
+          WHERE yhtio  = '$kukarow[yhtio]'
+          AND maa     != ''";
 $res = pupe_query($query);
 
 echo "<option value=''>".t('Kaikki')."</option>";
@@ -245,10 +245,10 @@ if (substr($laji, 0, 1) != 'O') {
   echo "<td colspan='3'><select name='maksuehto'>";
   echo "<option value=''>".t("Ei valintaa");
 
-  $query = "  SELECT *
-        FROM maksuehto
-        WHERE yhtio = '$kukarow[yhtio]'
-        ORDER BY jarjestys, teksti, tunnus";
+  $query = "SELECT *
+            FROM maksuehto
+            WHERE yhtio = '$kukarow[yhtio]'
+            ORDER BY jarjestys, teksti, tunnus";
   $mresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($mresult)) {
@@ -362,43 +362,43 @@ if ($tee != '' AND isset($ajaraportti)) {
     else           $tili = "'".$yhtiorow['ostovelat']."'";
 
     if ($asitoimittain == "AT") {
-      $query = "  SELECT
-            lasku.liitostunnus,
-            lasku.ytunnus,
-            lasku.maa,
-            lasku.valkoodi,
-            group_concat(lasku.comments) comments,
-            concat_ws(' ', min(lasku.erpcm), max(lasku.erpcm)) erpcm,
-            concat_ws(' ', min(lasku.mapvm), max(lasku.mapvm)) mapvm,
-            max(lasku.nimi) nimi,
-            concat_ws(' ', min(lasku.olmapvm), max(lasku.olmapvm)) olmapvm,
-            concat_ws(' ', min(lasku.laskunro), max(lasku.laskunro)) laskunro,
-            concat_ws(' ', min(lasku.tapvm), max(lasku.tapvm)) tapvm,
-            max(lasku.tunnus) tunnus,
-            concat_ws(' ', min(concat_ws(' ', viite, viesti)), max(concat_ws(' ', viite, viesti))) maksutieto,
-            sum(tiliointi.summa * -1) avoinsaldo,
-            sum(round(lasku.summa * lasku.vienti_kurssi, 2)) laskun_summa,
-            sum(lasku.summa) summa";
+      $query = "SELECT
+                lasku.liitostunnus,
+                lasku.ytunnus,
+                lasku.maa,
+                lasku.valkoodi,
+                group_concat(lasku.comments) comments,
+                concat_ws(' ', min(lasku.erpcm), max(lasku.erpcm)) erpcm,
+                concat_ws(' ', min(lasku.mapvm), max(lasku.mapvm)) mapvm,
+                max(lasku.nimi) nimi,
+                concat_ws(' ', min(lasku.olmapvm), max(lasku.olmapvm)) olmapvm,
+                concat_ws(' ', min(lasku.laskunro), max(lasku.laskunro)) laskunro,
+                concat_ws(' ', min(lasku.tapvm), max(lasku.tapvm)) tapvm,
+                max(lasku.tunnus) tunnus,
+                concat_ws(' ', min(concat_ws(' ', viite, viesti)), max(concat_ws(' ', viite, viesti))) maksutieto,
+                sum(tiliointi.summa * -1) avoinsaldo,
+                sum(round(lasku.summa * lasku.vienti_kurssi, 2)) laskun_summa,
+                sum(lasku.summa) summa";
 
       $groupby = "GROUP BY 1,2,3,4";
     }
     else {
-      $query = "  SELECT
-            lasku.ytunnus,
-            lasku.maa,
-            lasku.valkoodi,
-            lasku.comments,
-            lasku.erpcm,
-            lasku.mapvm,
-            lasku.nimi,
-            lasku.olmapvm,
-            if(lasku.laskunro = 0, '', laskunro) laskunro,
-            lasku.tapvm,
-            lasku.tunnus,
-            concat_ws(' ', viite, viesti) maksutieto,
-            tiliointi.summa * -1 avoinsaldo,
-            round(lasku.summa * lasku.vienti_kurssi, 2) laskun_summa,
-            lasku.summa";
+      $query = "SELECT
+                lasku.ytunnus,
+                lasku.maa,
+                lasku.valkoodi,
+                lasku.comments,
+                lasku.erpcm,
+                lasku.mapvm,
+                lasku.nimi,
+                lasku.olmapvm,
+                if(lasku.laskunro = 0, '', laskunro) laskunro,
+                lasku.tapvm,
+                lasku.tunnus,
+                concat_ws(' ', viite, viesti) maksutieto,
+                tiliointi.summa * -1 avoinsaldo,
+                round(lasku.summa * lasku.vienti_kurssi, 2) laskun_summa,
+                lasku.summa";
 
       $groupby = "";
     }
@@ -593,14 +593,14 @@ if ($tee != '' AND isset($ajaraportti)) {
       if(!in_array($val, $kaikkival)) $kaikkival[] = $val;
     }
 
-    $query = "  SELECT sum(summa) saldo
-          FROM tiliointi
-          WHERE yhtio   = '$kukarow[yhtio]'
-          and korjattu = ''
-          and tapvm  >= '$tilikausirow[tilikausi_alku]'
-          and tapvm  <= '$pvm'
-          and tilino  IN ($tili)
-           {$tiliointilisa}";
+    $query = "SELECT sum(summa) saldo
+              FROM tiliointi
+              WHERE yhtio  = '$kukarow[yhtio]'
+              and korjattu = ''
+              and tapvm    >= '$tilikausirow[tilikausi_alku]'
+              and tapvm    <= '$pvm'
+              and tilino   IN ($tili)
+               {$tiliointilisa}";
     $result = pupe_query($query);
     $trow = mysql_fetch_assoc ($result);
 
@@ -649,17 +649,17 @@ if ($tee != '' AND isset($ajaraportti)) {
 
     if ($karhuja > 0) {
 
-      $query = "  SELECT count(karhu_lasku.ltunnus) as karhukerrat,
-            group_concat(karhu_lasku.ltunnus) as karhutunnukset
-            FROM lasku
-            JOIN karhu_lasku ON (lasku.tunnus = karhu_lasku.ltunnus)
-            JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus and karhukierros.yhtio = lasku.yhtio and karhukierros.tyyppi = '')
-            WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-            AND lasku.tila = 'U'
-            AND lasku.alatila = 'X'
-            AND lasku.mapvm = '0000-00-00'
-            GROUP BY karhu_lasku.ltunnus
-            HAVING karhukerrat >= $karhuja";
+      $query = "SELECT count(karhu_lasku.ltunnus) as karhukerrat,
+                group_concat(karhu_lasku.ltunnus) as karhutunnukset
+                FROM lasku
+                JOIN karhu_lasku ON (lasku.tunnus = karhu_lasku.ltunnus)
+                JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus and karhukierros.yhtio = lasku.yhtio and karhukierros.tyyppi = '')
+                WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
+                AND lasku.tila    = 'U'
+                AND lasku.alatila = 'X'
+                AND lasku.mapvm   = '0000-00-00'
+                GROUP BY karhu_lasku.ltunnus
+                HAVING karhukerrat >= $karhuja";
       $tunnusres = pupe_query($query);
 
       if (mysql_num_rows($tunnusres) > 0) {
@@ -674,43 +674,43 @@ if ($tee != '' AND isset($ajaraportti)) {
     }
 
     if ($asitoimittain == "AT") {
-      $query = "  SELECT
-            lasku.liitostunnus,
-            lasku.ytunnus,
-            if(asiakas.asiakasnro = 0 or asiakas.asiakasnro = asiakas.ytunnus, '', asiakas.asiakasnro) asiakasnro,
-            lasku.maa,
-            lasku.valkoodi,
-            max(lasku.tunnus) tunnus,
-            concat_ws(' ', min(lasku.erpcm), max(lasku.erpcm)) erpcm,
-            max(lasku.liitostunnus) liitostunnus,
-            concat_ws(' ', min(lasku.mapvm), max(lasku.mapvm)) mapvm,
-            max(concat_ws('<br>', concat(lasku.nimi,' ',lasku.nimitark), concat(lasku.toim_nimi,' ',lasku.toim_nimitark))) nimi,
-            concat_ws(' ', min(lasku.tapvm), max(lasku.tapvm)) tapvm,
-            concat_ws(' ', min(lasku.laskunro), max(lasku.laskunro)) maksutieto,
-            sum(lasku.summa-lasku.saldo_maksettu) laskuavoinsaldo,
-            sum(lasku.summa_valuutassa-lasku.saldo_maksettu_valuutassa) laskuavoinsaldo_valuutassa,
-            sum(lasku.summa) laskusumma,
-            sum(lasku.summa_valuutassa) laskusumma_valuutassa,";
+      $query = "SELECT
+                lasku.liitostunnus,
+                lasku.ytunnus,
+                if(asiakas.asiakasnro = 0 or asiakas.asiakasnro = asiakas.ytunnus, '', asiakas.asiakasnro) asiakasnro,
+                lasku.maa,
+                lasku.valkoodi,
+                max(lasku.tunnus) tunnus,
+                concat_ws(' ', min(lasku.erpcm), max(lasku.erpcm)) erpcm,
+                max(lasku.liitostunnus) liitostunnus,
+                concat_ws(' ', min(lasku.mapvm), max(lasku.mapvm)) mapvm,
+                max(concat_ws('<br>', concat(lasku.nimi,' ',lasku.nimitark), concat(lasku.toim_nimi,' ',lasku.toim_nimitark))) nimi,
+                concat_ws(' ', min(lasku.tapvm), max(lasku.tapvm)) tapvm,
+                concat_ws(' ', min(lasku.laskunro), max(lasku.laskunro)) maksutieto,
+                sum(lasku.summa-lasku.saldo_maksettu) laskuavoinsaldo,
+                sum(lasku.summa_valuutassa-lasku.saldo_maksettu_valuutassa) laskuavoinsaldo_valuutassa,
+                sum(lasku.summa) laskusumma,
+                sum(lasku.summa_valuutassa) laskusumma_valuutassa,";
 
       $groupby = "GROUP BY 1,2,3,4,5";
     }
     else {
-      $query = "  SELECT
-            lasku.ytunnus,
-            if(asiakas.asiakasnro = 0 or asiakas.asiakasnro = asiakas.ytunnus, '', asiakas.asiakasnro) asiakasnro,
-            lasku.maa,
-            lasku.valkoodi,
-            lasku.tunnus,
-            lasku.erpcm,
-            lasku.liitostunnus,
-            lasku.mapvm,
-            lasku.nimi,
-            lasku.tapvm,
-            lasku.laskunro maksutieto,
-            lasku.summa-lasku.saldo_maksettu laskuavoinsaldo,
-            lasku.summa_valuutassa-lasku.saldo_maksettu_valuutassa laskuavoinsaldo_valuutassa,
-            lasku.summa laskusumma,
-            lasku.summa_valuutassa laskusumma_valuutassa,";
+      $query = "SELECT
+                lasku.ytunnus,
+                if(asiakas.asiakasnro = 0 or asiakas.asiakasnro = asiakas.ytunnus, '', asiakas.asiakasnro) asiakasnro,
+                lasku.maa,
+                lasku.valkoodi,
+                lasku.tunnus,
+                lasku.erpcm,
+                lasku.liitostunnus,
+                lasku.mapvm,
+                lasku.nimi,
+                lasku.tapvm,
+                lasku.laskunro maksutieto,
+                lasku.summa-lasku.saldo_maksettu laskuavoinsaldo,
+                lasku.summa_valuutassa-lasku.saldo_maksettu_valuutassa laskuavoinsaldo_valuutassa,
+                lasku.summa laskusumma,
+                lasku.summa_valuutassa laskusumma_valuutassa,";
 
       $groupby = "GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15";
     }
@@ -891,30 +891,30 @@ if ($tee != '' AND isset($ajaraportti)) {
     // Ei listata kohdistamattomia mikäli ollaan haettu karhuttuja laskuja
     if (trim($karhuja) == '' or $karhuja == 0) {
       //Listataan vielä kohdistamattomat
-      $query = "  SELECT asiakas.tunnus,
-            asiakas.ytunnus,
-            if(asiakas.asiakasnro = 0 or asiakas.asiakasnro = asiakas.ytunnus, '', asiakas.asiakasnro) asiakasnro,
-            if(asiakas.nimi is not null, asiakas.nimi, suoritus.nimi_maksaja) nimi_maksaja,
-            asiakas.maa,
-            suoritus.viite,
-            suoritus.kirjpvm,
-            tiliointi.summa tiliointisumma,
-            tiliointi.summa_valuutassa tiliointisumma_valuutassa,
-            round(suoritus.summa * if(suoritus.kurssi = 0, 1, suoritus.kurssi), 2) * -1 suoritussumma,
-            tiliointi.ltunnus,
-            suoritus.summa * -1 summa,
-            suoritus.valkoodi
-              FROM suoritus
-            JOIN tiliointi ON (suoritus.yhtio = tiliointi.yhtio and tiliointi.tunnus = suoritus.ltunnus and tiliointi.korjattu = '' and tiliointi.tilino in ($tili) {$tiliointilisa})
-              LEFT JOIN asiakas ON (suoritus.yhtio = asiakas.yhtio and suoritus.asiakas_tunnus = asiakas.tunnus $av_lisa3)
-              WHERE suoritus.yhtio  = '$kukarow[yhtio]'
-            and (suoritus.kohdpvm = '0000-00-00' or suoritus.kohdpvm > '$pvm')
-            and suoritus.ltunnus  > 0
-            and suoritus.kirjpvm <= '$pvm'
-            $av_lisa2
-            $valkoodi2
-            $maalisa2
-              ORDER BY asiakas.ytunnus";
+      $query = "SELECT asiakas.tunnus,
+                asiakas.ytunnus,
+                if(asiakas.asiakasnro = 0 or asiakas.asiakasnro = asiakas.ytunnus, '', asiakas.asiakasnro) asiakasnro,
+                if(asiakas.nimi is not null, asiakas.nimi, suoritus.nimi_maksaja) nimi_maksaja,
+                asiakas.maa,
+                suoritus.viite,
+                suoritus.kirjpvm,
+                tiliointi.summa tiliointisumma,
+                tiliointi.summa_valuutassa tiliointisumma_valuutassa,
+                round(suoritus.summa * if(suoritus.kurssi = 0, 1, suoritus.kurssi), 2) * -1 suoritussumma,
+                tiliointi.ltunnus,
+                suoritus.summa * -1 summa,
+                suoritus.valkoodi
+                  FROM suoritus
+                JOIN tiliointi ON (suoritus.yhtio = tiliointi.yhtio and tiliointi.tunnus = suoritus.ltunnus and tiliointi.korjattu = '' and tiliointi.tilino in ($tili) {$tiliointilisa})
+                  LEFT JOIN asiakas ON (suoritus.yhtio = asiakas.yhtio and suoritus.asiakas_tunnus = asiakas.tunnus $av_lisa3)
+                  WHERE suoritus.yhtio = '$kukarow[yhtio]'
+                and (suoritus.kohdpvm = '0000-00-00' or suoritus.kohdpvm > '$pvm')
+                and suoritus.ltunnus   > 0
+                and suoritus.kirjpvm   <= '$pvm'
+                $av_lisa2
+                $valkoodi2
+                $maalisa2
+                  ORDER BY asiakas.ytunnus";
       $result = pupe_query($query);
 
       while ($trow = mysql_fetch_assoc ($result)) {
@@ -1030,14 +1030,14 @@ if ($tee != '' AND isset($ajaraportti)) {
     // ei rajauksia, voidaan näyttää erotus kirjanpitoon
     if ($av_lisa1 == "" and $av_lisa3 == "" and $valkoodi == "" and $maa == "" and $karhuja == 0) {
 
-          $query = "  SELECT sum(summa) saldo
-            FROM tiliointi
-            WHERE yhtio = '$kukarow[yhtio]'
-            and korjattu = ''
-            and tapvm >= '$tilikausirow[tilikausi_alku]'
-            and tapvm <= '$pvm'
-            and tilino in ($tili)
-            {$tiliointilisa}";
+          $query = "SELECT sum(summa) saldo
+                    FROM tiliointi
+                    WHERE yhtio  = '$kukarow[yhtio]'
+                    and korjattu = ''
+                    and tapvm    >= '$tilikausirow[tilikausi_alku]'
+                    and tapvm    <= '$pvm'
+                    and tilino   in ($tili)
+                    {$tiliointilisa}";
       $result = pupe_query($query);
       $trow = mysql_fetch_assoc ($result);
 

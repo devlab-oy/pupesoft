@@ -206,22 +206,22 @@ if ($tee2 == 'TULOSTA') {
       $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
       // katsotaan, ettei tilaus ole kenell‰k‰‰n auki ruudulla
-      $query = "  SELECT *
-            FROM kuka
-            WHERE kesken in ($tilausnumeroita)
-            and yhtio='$kukarow[yhtio]'";
+      $query = "SELECT *
+                FROM kuka
+                WHERE kesken in ($tilausnumeroita)
+                and yhtio='$kukarow[yhtio]'";
       $keskenresult = mysql_query($query) or pupe_error($query);
 
       //jos kaikki on ok...
       if (mysql_num_rows($keskenresult)==0) {
 
-        $query    = "  SELECT *
-                from lasku
-                where tunnus in ($tilausnumeroita)
-                and ((tila = '$tila' and alatila = '$lalatila') $tila_lalatila_lisa)
-                and yhtio  = '$kukarow[yhtio]'
-                ORDER BY clearing DESC
-                LIMIT 1";
+        $query    = "SELECT *
+                     from lasku
+                     where tunnus in ($tilausnumeroita)
+                     and ((tila = '$tila' and alatila = '$lalatila') $tila_lalatila_lisa)
+                     and yhtio    = '$kukarow[yhtio]'
+                     ORDER BY clearing DESC
+                     LIMIT 1";
         $result   = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($result) > 0) {
@@ -230,10 +230,10 @@ if ($tee2 == 'TULOSTA') {
 
           // jos tulostetaan kaikki ruudun ker‰yslistat, k‰ytet‰‰n ainoastaa EIPAKKAAMOA oletusta
           if ($tulostukseen_kaikki == "KYLLA") {
-            $query = "  SELECT ei_pakkaamoa
-                  FROM toimitustapa
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  AND selite = '$laskurow[toimitustapa]'";
+            $query = "SELECT ei_pakkaamoa
+                      FROM toimitustapa
+                      WHERE yhtio = '$kukarow[yhtio]'
+                      AND selite  = '$laskurow[toimitustapa]'";
             $ei_pakkaamoa_res = mysql_query($query) or pupe_error($query);
             $ei_pakkaamoa_row = mysql_fetch_assoc($ei_pakkaamoa_res);
 
@@ -311,31 +311,31 @@ if ($tee2 == 'TULOSTA') {
 if ($tee2 == 'VALITSE') {
 
   //Haetaan sopivat tilaukset
-  $query = "  SELECT lasku.tunnus, lasku.ytunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto,
-        if (lasku.hyvaksynnanmuutos = '', 'X', lasku.hyvaksynnanmuutos) prioriteetti,
-        if (min(lasku.clearing)='','N',if (min(lasku.clearing)='JT-TILAUS','J',if (min(lasku.clearing)='ENNAKKOTILAUS','E',''))) t_tyyppi,
-        left(min(lasku.kerayspvm),10) kerayspvm,
-        left(min(lasku.toimaika),10) toimaika,
-        min(keraysvko) keraysvko,
-        min(toimvko) toimvko,
-        varastopaikat.nimitys varastonimi,
-        varastopaikat.tunnus varastotunnus,
-        lasku.tunnus otunnus,
-        lasku.viesti,
-        GROUP_CONCAT(DISTINCT if(lasku.comments!='',lasku.comments, NULL) SEPARATOR '\n') comments,
-        GROUP_CONCAT(DISTINCT if(lasku.sisviesti2!='',lasku.sisviesti2, NULL) SEPARATOR '\n') sisviesti2,
-        GROUP_CONCAT(DISTINCT if(tilausrivi.kommentti!='',tilausrivi.kommentti, NULL) SEPARATOR '\n') kommentti,
-        count(*) riveja,
-        lasku.yhtio yhtio,
-        lasku.yhtio_nimi yhtio_nimi
-        FROM lasku
-        JOIN tilausrivi ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi != 'D')
-        LEFT JOIN varastopaikat ON varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto
-        WHERE lasku.yhtio = '$kukarow[yhtio]'
-        and lasku.tunnus in ($tilaukset)
-        $tilaustyyppi
-        GROUP BY lasku.tunnus
-        ORDER BY prioriteetti, kerayspvm";
+  $query = "SELECT lasku.tunnus, lasku.ytunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto,
+            if (lasku.hyvaksynnanmuutos = '', 'X', lasku.hyvaksynnanmuutos) prioriteetti,
+            if (min(lasku.clearing)='','N',if (min(lasku.clearing)='JT-TILAUS','J',if (min(lasku.clearing)='ENNAKKOTILAUS','E',''))) t_tyyppi,
+            left(min(lasku.kerayspvm),10) kerayspvm,
+            left(min(lasku.toimaika),10) toimaika,
+            min(keraysvko) keraysvko,
+            min(toimvko) toimvko,
+            varastopaikat.nimitys varastonimi,
+            varastopaikat.tunnus varastotunnus,
+            lasku.tunnus otunnus,
+            lasku.viesti,
+            GROUP_CONCAT(DISTINCT if(lasku.comments!='',lasku.comments, NULL) SEPARATOR '\n') comments,
+            GROUP_CONCAT(DISTINCT if(lasku.sisviesti2!='',lasku.sisviesti2, NULL) SEPARATOR '\n') sisviesti2,
+            GROUP_CONCAT(DISTINCT if(tilausrivi.kommentti!='',tilausrivi.kommentti, NULL) SEPARATOR '\n') kommentti,
+            count(*) riveja,
+            lasku.yhtio yhtio,
+            lasku.yhtio_nimi yhtio_nimi
+            FROM lasku
+            JOIN tilausrivi ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi != 'D')
+            LEFT JOIN varastopaikat ON varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto
+            WHERE lasku.yhtio = '$kukarow[yhtio]'
+            and lasku.tunnus  in ($tilaukset)
+            $tilaustyyppi
+            GROUP BY lasku.tunnus
+            ORDER BY prioriteetti, kerayspvm";
   $tilre = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($tilre)==0) {
@@ -346,10 +346,10 @@ if ($tee2 == 'VALITSE') {
   }
   else {
     // katsotaan, ettei tilaus ole kenell‰k‰‰n auki ruudulla
-    $query = "  SELECT *
-          FROM kuka
-          WHERE kesken in ($tilaukset)
-          and yhtio='$kukarow[yhtio]'";
+    $query = "SELECT *
+              FROM kuka
+              WHERE kesken in ($tilaukset)
+              and yhtio='$kukarow[yhtio]'";
     $keskenresult = mysql_query($query) or pupe_error($query);
 
     //jos kaikki on ok...
@@ -522,10 +522,10 @@ if ($tee2 == 'VALITSE') {
             $tilrow = mysql_fetch_array($tilre);
           }
 
-          $query = "  SELECT ei_pakkaamoa
-                FROM toimitustapa
-                WHERE yhtio = '$kukarow[yhtio]'
-                AND selite = '$tilrow[toimitustapa]'";
+          $query = "SELECT ei_pakkaamoa
+                    FROM toimitustapa
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    AND selite  = '$tilrow[toimitustapa]'";
           $ei_pakkaamoa_res = mysql_query($query) or pupe_error($query);
           $ei_pakkaamoa_row = mysql_fetch_assoc($ei_pakkaamoa_res);
 
@@ -541,10 +541,10 @@ if ($tee2 == 'VALITSE') {
       }
 
       //haetaan ker‰yslistan oletustulostin
-      $query = "  SELECT *
-            FROM varastopaikat
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND tunnus = '$tul_varastoon'";
+      $query = "SELECT *
+                FROM varastopaikat
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND tunnus  = '$tul_varastoon'";
       $prires = mysql_query($query) or pupe_error($query);
       $prirow = mysql_fetch_array($prires);
       $kirjoitin = $toim == 'VASTAANOTA_REKLAMAATIO' ? $prirow['printteri9'] : $prirow['printteri0'];
@@ -558,11 +558,11 @@ if ($tee2 == 'VALITSE') {
       echo "<th>",t("Tulostin"),"</th>";
       echo "<td>";
 
-      $query = "  SELECT *
-            FROM kirjoittimet
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND komento != 'EDI'
-            ORDER by kirjoitin";
+      $query = "SELECT *
+                FROM kirjoittimet
+                WHERE yhtio  = '$kukarow[yhtio]'
+                AND komento != 'EDI'
+                ORDER by kirjoitin";
       $kirre = mysql_query($query) or pupe_error($query);
 
       echo "<select name='valittu_tulostin'>";
@@ -684,11 +684,11 @@ if ($tee2 == '') {
   }
 
   if ($tumaa != '') {
-    $query = "  SELECT group_concat(tunnus) tunnukset
-          FROM varastopaikat
-          WHERE maa != ''
-          and $logistiikka_yhtiolisa
-          and maa = '$tumaa'";
+    $query = "SELECT group_concat(tunnus) tunnukset
+              FROM varastopaikat
+              WHERE maa != ''
+              and $logistiikka_yhtiolisa
+              and maa    = '$tumaa'";
     $maare = mysql_query($query) or pupe_error($query);
     $maarow = mysql_fetch_array($maare);
     $haku .= " and lasku.varasto in ($maarow[tunnukset]) ";
@@ -731,12 +731,12 @@ if ($tee2 == '') {
 
   echo "<tr><th>".t("Valitse varasto:")."</th><td><select name='tuvarasto' onchange='submit()'>";
 
-  $query = "  SELECT lasku.yhtio_nimi, varastopaikat.tunnus, varastopaikat.nimitys, lasku.tulostusalue, count(*) kpl
-        FROM varastopaikat
-        JOIN lasku ON (varastopaikat.yhtio = lasku.yhtio and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi and lasku.varasto = varastopaikat.tunnus)
-        WHERE varastopaikat.$logistiikka_yhtiolisa AND varastopaikat.tyyppi != 'P'
-        GROUP BY lasku.yhtio_nimi, varastopaikat.tunnus, varastopaikat.nimitys, lasku.tulostusalue
-        ORDER BY varastopaikat.tyyppi, varastopaikat.nimitys, lasku.tulostusalue, varastopaikat.yhtio";
+  $query = "SELECT lasku.yhtio_nimi, varastopaikat.tunnus, varastopaikat.nimitys, lasku.tulostusalue, count(*) kpl
+            FROM varastopaikat
+            JOIN lasku ON (varastopaikat.yhtio = lasku.yhtio and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi and lasku.varasto = varastopaikat.tunnus)
+            WHERE varastopaikat.$logistiikka_yhtiolisa AND varastopaikat.tyyppi != 'P'
+            GROUP BY lasku.yhtio_nimi, varastopaikat.tunnus, varastopaikat.nimitys, lasku.tulostusalue
+            ORDER BY varastopaikat.tyyppi, varastopaikat.nimitys, lasku.tulostusalue, varastopaikat.yhtio";
   $result = mysql_query($query) or pupe_error($query);
 
   echo "<option value='KAIKKI'>".t("N‰yt‰ kaikki")."</option>";
@@ -761,12 +761,12 @@ if ($tee2 == '') {
   }
   echo "</select>";
 
-  $query = "  SELECT varastopaikat.maa, count(*) kpl
-        FROM varastopaikat
-        JOIN lasku ON (varastopaikat.yhtio = lasku.yhtio and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi and lasku.varasto = varastopaikat.tunnus)
-        WHERE varastopaikat.maa != '' and varastopaikat.$logistiikka_yhtiolisa AND varastopaikat.tyyppi != 'P'
-        GROUP BY varastopaikat.maa
-        ORDER BY varastopaikat.maa";
+  $query = "SELECT varastopaikat.maa, count(*) kpl
+            FROM varastopaikat
+            JOIN lasku ON (varastopaikat.yhtio = lasku.yhtio and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi and lasku.varasto = varastopaikat.tunnus)
+            WHERE varastopaikat.maa != '' and varastopaikat.$logistiikka_yhtiolisa AND varastopaikat.tyyppi != 'P'
+            GROUP BY varastopaikat.maa
+            ORDER BY varastopaikat.maa";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) > 1) {
@@ -785,12 +785,12 @@ if ($tee2 == '') {
 
   echo "<th>".t("Valitse tilaustyyppi:")."</th><td><select name='tutyyppi' onchange='submit()'>";
 
-  $query = "  SELECT IF(sisviesti2 = 'Tehty valmistuksen kautta' and clearing = 'JT-TILAUS', 'VALMISTUS', clearing) AS clearing, count(*) kpl
-        FROM lasku
-        WHERE {$logistiikka_yhtiolisa}
-        and ((tila = '{$tila}' and alatila = '{$lalatila}') {$tila_lalatila_lisa}) {$tilaustyyppi}
-        GROUP BY clearing
-        ORDER by clearing";
+  $query = "SELECT IF(sisviesti2 = 'Tehty valmistuksen kautta' and clearing = 'JT-TILAUS', 'VALMISTUS', clearing) AS clearing, count(*) kpl
+            FROM lasku
+            WHERE {$logistiikka_yhtiolisa}
+            and ((tila = '{$tila}' and alatila = '{$lalatila}') {$tila_lalatila_lisa}) {$tilaustyyppi}
+            GROUP BY clearing
+            ORDER by clearing";
   $result = pupe_query($query);
 
   echo "<option value='KAIKKI'>",t("N‰yt‰ kaikki"),"</option>";
@@ -823,12 +823,12 @@ if ($tee2 == '') {
   echo "<td>";
   echo "<select name='tutoimtapa' onchange='submit()'>";
 
-  $query = "  SELECT toimitustapa.selite, count(*) kpl, MIN(toimitustapa.tunnus) tunnus
-        FROM toimitustapa
-        JOIN lasku ON (toimitustapa.yhtio = lasku.yhtio and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi and lasku.toimitustapa = toimitustapa.selite)
-        WHERE toimitustapa.$logistiikka_yhtiolisa
-        GROUP BY toimitustapa.selite
-        ORDER BY toimitustapa.selite";
+  $query = "SELECT toimitustapa.selite, count(*) kpl, MIN(toimitustapa.tunnus) tunnus
+            FROM toimitustapa
+            JOIN lasku ON (toimitustapa.yhtio = lasku.yhtio and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi and lasku.toimitustapa = toimitustapa.selite)
+            WHERE toimitustapa.$logistiikka_yhtiolisa
+            GROUP BY toimitustapa.selite
+            ORDER BY toimitustapa.selite";
   $result = mysql_query($query) or pupe_error($query);
 
   echo "<option value='KAIKKI'>".t("N‰yt‰ kaikki")."</option>";
@@ -954,46 +954,46 @@ if ($tee2 == '') {
     $valmistuslinja_where = "  AND lasku.kohde = '{$valmistuslinja}'";
   }
 
-  $query = "  SELECT lasku.yhtio, lasku.yhtio_nimi, lasku.ytunnus, lasku.toim_ovttunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.varasto,
-        if (tila = 'V', lasku.viesti, lasku.toimitustapa) toimitustapa,
-        if (maksuehto.jv!='', lasku.tunnus, '') jvgrouppi,
-        if (lasku.vienti!='', lasku.tunnus, '') vientigrouppi,
-        varastopaikat.nimitys varastonimi,
-        varastopaikat.tunnus varastotunnus,
-        week(lasku.kerayspvm, 3) keraysviikko,
-        min(if (lasku.hyvaksynnanmuutos = '', 'X', lasku.hyvaksynnanmuutos)) prioriteetti,
-        max(if (lasku.clearing = '', 'N', if (lasku.clearing = 'JT-TILAUS', 'J', if (lasku.clearing = 'ENNAKKOTILAUS', 'E', '')))) t_tyyppi,
-        $selectlisa
-        min(lasku.luontiaika) laadittu,
-        min(lasku.h1time) h1time,
-        min(lasku.kerayspvm) kerayspvm,
-        min(lasku.toimaika) toimaika,
-        min(lasku.keraysvko) keraysvko,
-        min(lasku.toimvko) toimvko,
-        GROUP_CONCAT(distinct lasku.tunnus SEPARATOR ',') otunnus,
-        GROUP_CONCAT(distinct lasku.tunnus SEPARATOR '_') div_id,
-        count(distinct otunnus) tilauksia,
-        count(*) riveja,
-        GROUP_CONCAT(DISTINCT if(lasku.comments!='',lasku.comments, NULL) SEPARATOR '\n') comments,
-        GROUP_CONCAT(DISTINCT if(lasku.sisviesti2!='',lasku.sisviesti2, NULL) SEPARATOR '\n') sisviesti2,
-        GROUP_CONCAT(DISTINCT if(tilausrivi.kommentti!='',tilausrivi.kommentti, NULL) SEPARATOR '\n') kommentti,
-        lasku.mapvm
-        FROM lasku
-        JOIN tilausrivi
-        ON ( tilausrivi.yhtio = lasku.yhtio
-          AND tilausrivi.otunnus = lasku.tunnus
-          AND tilausrivi.tyyppi != 'D'
-          {$tilausrivi_tuoteno_join})
-        LEFT JOIN varastopaikat ON varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto
-        LEFT JOIN maksuehto ON maksuehto.yhtio=lasku.yhtio and lasku.maksuehto=maksuehto.tunnus
-        WHERE
-        lasku.$logistiikka_yhtiolisa
-        and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa)
-        $valmistuslinja_where
-        $haku
-        $tilaustyyppi
-        $grouppi
-        $jarjx";
+  $query = "SELECT lasku.yhtio, lasku.yhtio_nimi, lasku.ytunnus, lasku.toim_ovttunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.varasto,
+            if (tila = 'V', lasku.viesti, lasku.toimitustapa) toimitustapa,
+            if (maksuehto.jv!='', lasku.tunnus, '') jvgrouppi,
+            if (lasku.vienti!='', lasku.tunnus, '') vientigrouppi,
+            varastopaikat.nimitys varastonimi,
+            varastopaikat.tunnus varastotunnus,
+            week(lasku.kerayspvm, 3) keraysviikko,
+            min(if (lasku.hyvaksynnanmuutos = '', 'X', lasku.hyvaksynnanmuutos)) prioriteetti,
+            max(if (lasku.clearing = '', 'N', if (lasku.clearing = 'JT-TILAUS', 'J', if (lasku.clearing = 'ENNAKKOTILAUS', 'E', '')))) t_tyyppi,
+            $selectlisa
+            min(lasku.luontiaika) laadittu,
+            min(lasku.h1time) h1time,
+            min(lasku.kerayspvm) kerayspvm,
+            min(lasku.toimaika) toimaika,
+            min(lasku.keraysvko) keraysvko,
+            min(lasku.toimvko) toimvko,
+            GROUP_CONCAT(distinct lasku.tunnus SEPARATOR ',') otunnus,
+            GROUP_CONCAT(distinct lasku.tunnus SEPARATOR '_') div_id,
+            count(distinct otunnus) tilauksia,
+            count(*) riveja,
+            GROUP_CONCAT(DISTINCT if(lasku.comments!='',lasku.comments, NULL) SEPARATOR '\n') comments,
+            GROUP_CONCAT(DISTINCT if(lasku.sisviesti2!='',lasku.sisviesti2, NULL) SEPARATOR '\n') sisviesti2,
+            GROUP_CONCAT(DISTINCT if(tilausrivi.kommentti!='',tilausrivi.kommentti, NULL) SEPARATOR '\n') kommentti,
+            lasku.mapvm
+            FROM lasku
+            JOIN tilausrivi
+            ON ( tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus  = lasku.tunnus
+              AND tilausrivi.tyyppi  != 'D'
+              {$tilausrivi_tuoteno_join})
+            LEFT JOIN varastopaikat ON varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto
+            LEFT JOIN maksuehto ON maksuehto.yhtio=lasku.yhtio and lasku.maksuehto=maksuehto.tunnus
+            WHERE
+            lasku.$logistiikka_yhtiolisa
+            and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa)
+            $valmistuslinja_where
+            $haku
+            $tilaustyyppi
+            $grouppi
+            $jarjx";
 
   if ($valid) {
     $tilre = mysql_query($query) or pupe_error($query);
@@ -1157,10 +1157,10 @@ if ($tee2 == '') {
       }
       else {
         //haetaan ker‰yslistan oletustulostin
-        $query = "  SELECT *
-              from varastopaikat
-              where yhtio = '$kukarow[yhtio]'
-              and tunnus = '$tilrow[varasto]'";
+        $query = "SELECT *
+                  from varastopaikat
+                  where yhtio = '$kukarow[yhtio]'
+                  and tunnus  = '$tilrow[varasto]'";
         $prires = mysql_query($query) or pupe_error($query);
         $prirow = mysql_fetch_array($prires);
         $kirjoitin = $toim == 'VASTAANOTA_REKLAMAATIO' ? $prirow['printteri9'] : $prirow['printteri0'];
@@ -1181,10 +1181,10 @@ if ($tee2 == '') {
           }
 
           if ($tila == 'N') {
-            $query = "  SELECT ei_pakkaamoa
-                  FROM toimitustapa
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  AND selite  = '$tilrow[toimitustapa]'";
+            $query = "SELECT ei_pakkaamoa
+                      FROM toimitustapa
+                      WHERE yhtio = '$kukarow[yhtio]'
+                      AND selite  = '$tilrow[toimitustapa]'";
             $ei_pakkaamoa_res = mysql_query($query) or pupe_error($query);
             $ei_pakkaamoa_row = mysql_fetch_assoc($ei_pakkaamoa_res);
 
@@ -1201,11 +1201,11 @@ if ($tee2 == '') {
           echo "<$ero></$ero>";
         }
 
-        $query = "  SELECT *
-              FROM kirjoittimet
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND komento != 'EDI'
-              ORDER BY kirjoitin";
+        $query = "SELECT *
+                  FROM kirjoittimet
+                  WHERE yhtio  = '$kukarow[yhtio]'
+                  AND komento != 'EDI'
+                  ORDER BY kirjoitin";
         $kirre = mysql_query($query) or pupe_error($query);
 
         echo "<$ero valign='top'><select name='valittu_tulostin'>";
@@ -1310,12 +1310,12 @@ if ($tee2 == '') {
         $logistiikka_yhtio = $konsernivarasto_yhtiot;
       }
 
-      $query = "  SELECT komento, min(kirjoitin) kirjoitin, min(tunnus) tunnus
-            FROM kirjoittimet
-            WHERE $logistiikka_yhtiolisa
-            AND komento != 'EDI'
-            GROUP BY komento
-            ORDER BY jarjestys, kirjoitin";
+      $query = "SELECT komento, min(kirjoitin) kirjoitin, min(tunnus) tunnus
+                FROM kirjoittimet
+                WHERE $logistiikka_yhtiolisa
+                AND komento != 'EDI'
+                GROUP BY komento
+                ORDER BY jarjestys, kirjoitin";
       $kirre = mysql_query($query) or pupe_error($query);
 
       echo "<tr><td><select name='valittu_tulostin'>";

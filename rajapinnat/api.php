@@ -13,8 +13,8 @@ error_reporting(E_ALL ^E_NOTICE);
 ini_set("display_errors", 0);
 ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
 
-require ("inc/connect.inc");
-require ("inc/functions.inc");
+require "inc/connect.inc";
+require "inc/functions.inc";
 
 function rest_virhe_header($viesti) {
   // Mikäli kutsutaan esimerkiksi "asiakastarkista-funktiota" ja se palauttaa tekstimuodossa virheen, niin $virhe pitää myös utf8-encodata, tai tulee "500"-virhettä.
@@ -46,7 +46,7 @@ function rest_tilaa($params) {
   $toim        = "RIVISYOTTO";
 
   // Määritellään luo_myyntitilausotsikko -funkkari
-  require("tilauskasittely/luo_myyntitilausotsikko.inc");
+  require "tilauskasittely/luo_myyntitilausotsikko.inc";
 
   if ($tuoteno == "") {
     rest_virhe_header("Tuotenumero puuttuu");
@@ -63,10 +63,10 @@ function rest_tilaa($params) {
 
   // asiakas tarkistus
   // Haetaan asiakkaan tiedot
-  $query = "  SELECT *
-        FROM asiakas
-        WHERE yhtio = '{$kukarow["yhtio"]}'
-        AND tunnus = '{$tunnus}'";
+  $query = "SELECT *
+            FROM asiakas
+            WHERE yhtio = '{$kukarow["yhtio"]}'
+            AND tunnus  = '{$tunnus}'";
   $tulos = pupe_query($query);
 
   if (mysql_num_rows($tulos) == 0) {
@@ -74,10 +74,10 @@ function rest_tilaa($params) {
   }
 
   // haetaan tuotteen tiedot
-  $query = "  SELECT *
-        FROM tuote
-        WHERE yhtio = '{$kukarow["yhtio"]}'
-        AND tuoteno = '$tuoteno'";
+  $query = "SELECT *
+            FROM tuote
+            WHERE yhtio = '{$kukarow["yhtio"]}'
+            AND tuoteno = '$tuoteno'";
   $tuoteres = pupe_query($query);
 
   if (mysql_num_rows($tuoteres) == 0) {
@@ -92,10 +92,10 @@ function rest_tilaa($params) {
     // varmistetaan, että käyttäjällä ei ole mitään kesken
     $kukarow["kesken"] = 0;
 
-    $query  = "  UPDATE kuka
-          SET kesken = 0
-          WHERE yhtio = '{$kukarow["yhtio"]}'
-          AND kuka   = '{$kukarow["kuka"]}'";
+    $query  = "UPDATE kuka
+               SET kesken = 0
+               WHERE yhtio = '{$kukarow["yhtio"]}'
+               AND kuka    = '{$kukarow["kuka"]}'";
     $update = pupe_query($query);
 
     // tässä kaattuuu
@@ -104,13 +104,13 @@ function rest_tilaa($params) {
 
   $kukarow["kesken"] = $tilausnumero;
 
-  $query = "  SELECT *
-        FROM lasku
-        WHERE yhtio     = '{$kukarow["yhtio"]}'
-        AND laatija     = '{$kukarow["kuka"]}'
-        AND liitostunnus   = '{$tunnus}'
-        AND tila       = 'N'
-        AND tunnus       = '{$tilausnumero}'";
+  $query = "SELECT *
+            FROM lasku
+            WHERE yhtio      = '{$kukarow["yhtio"]}'
+            AND laatija      = '{$kukarow["kuka"]}'
+            AND liitostunnus = '{$tunnus}'
+            AND tila         = 'N'
+            AND tunnus       = '{$tilausnumero}'";
   $kesken = pupe_query($query);
 
   if (mysql_num_rows($kesken) == 0) {
@@ -147,7 +147,7 @@ function rest_tilaa($params) {
     ${"ale".$alepostfix} = "";
   }
 
-  require("tilauskasittely/lisaarivi.inc");
+  require "tilauskasittely/lisaarivi.inc";
 
   rest_ok_header($tilausnumero);
 }
@@ -169,13 +169,13 @@ function rest_login($params) {
   // Vasta virhetarkistuksien jälkeen.
   // haetaan ensin käyttäjätiedot, sen jälkeen yhtiön kaikki tiedot ja yhtion_parametrit
 
-  $query = "  SELECT kuka.*
-        FROM kuka
-        WHERE kuka.yhtio = '{$yhtio}'
-        AND kuka.kuka = '{$user}'
-        AND kuka.salasana = '{$pass}'
-        AND kuka.kuka !=''
-        AND kuka.salasana !=''";
+  $query = "SELECT kuka.*
+            FROM kuka
+            WHERE kuka.yhtio  = '{$yhtio}'
+            AND kuka.kuka     = '{$user}'
+            AND kuka.salasana = '{$pass}'
+            AND kuka.kuka !=''
+            AND kuka.salasana !=''";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -211,7 +211,7 @@ elseif ($tyyppi == "customer") {
     }
   }
 
-  if(count($api_kentat) == 0) {
+  if (count($api_kentat) == 0) {
     rest_virhe_header("Data puuttuu");
   }
 
@@ -219,7 +219,7 @@ elseif ($tyyppi == "customer") {
   $api_kentat[0][] = "TOIMINTO";
   $api_kentat[1][] = $toiminto;
 
-  require("lue_data.php");
+  require "lue_data.php";
 
   $api_output = utf8_encode(strip_tags($api_output));
 

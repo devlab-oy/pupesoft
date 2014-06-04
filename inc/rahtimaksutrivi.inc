@@ -10,9 +10,9 @@ if (mysql_field_name($result, $i) == "tunnus" or
 }
 
 if (mysql_field_name($result, $i) == "toimitustapa") {
-  $query = "  SELECT *
-        from toimitustapa
-        WHERE yhtio='$kukarow[yhtio]'";
+  $query = "SELECT *
+            from toimitustapa
+            WHERE yhtio='$kukarow[yhtio]'";
   $sresult = mysql_query($query) or pupe_error($query);
 
   $ulos = "<td><select name='$nimi'>";

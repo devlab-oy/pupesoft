@@ -35,9 +35,9 @@ elseif($tee == "vie") {
   $blvp = 0;
 
   if ($tkausi > 0) {
-    $query = "  SELECT *
-          FROM tilikaudet
-          WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tkausi'";
+    $query = "SELECT *
+              FROM tilikaudet
+              WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tkausi'";
     $result = pupe_query($query);
     if (mysql_num_rows($result) != 1) {
       echo "<font class='error'>".t("Sopivaa yrityksen tilikautta ei löytynyt")."</font>";
@@ -79,15 +79,15 @@ elseif($tee == "vie") {
 
   if($aineisto == "O") {
 
-    $query = "  SELECT   lasku.*, if(viite='', viesti, viite) laskun_viite, lasku.summa laskun_summa,
+    $query = "SELECT   lasku.*, if(viite='', viesti, viite) laskun_viite, lasku.summa laskun_summa,
               date_format(tiliointi.tapvm, '%d.%m.%Y') maksettu_paiva, tiliointi.summa maksettu_summa, tiliointi.tilino, tiliointi.selite tiliointi_selite,
               tili.nimi tili_nimi
-          FROM lasku
-          JOIN yriti ON yriti.yhtio = lasku.yhtio and yriti.tunnus = lasku.maksu_tili
-          JOIN tiliointi ON tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and korjattu = '' and $lisa
-          LEFT JOIN tili ON tiliointi.yhtio = tili.yhtio and tili.tilino = tiliointi.tilino
-          WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila IN ('Y')
-          ORDER BY lasku.mapvm, lasku.tunnus, tiliointi.tilino";
+              FROM lasku
+              JOIN yriti ON yriti.yhtio = lasku.yhtio and yriti.tunnus = lasku.maksu_tili
+              JOIN tiliointi ON tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and korjattu = '' and $lisa
+              LEFT JOIN tili ON tiliointi.yhtio = tili.yhtio and tili.tilino = tiliointi.tilino
+              WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila IN ('Y')
+              ORDER BY lasku.mapvm, lasku.tunnus, tiliointi.tilino";
     $result = pupe_query($query);
     if(mysql_num_rows($result)>0) {
 
@@ -139,9 +139,9 @@ elseif($tee == "vie") {
 
           echo "<font class='message'>".t("Käsitellään liitteet laskulle")." $row[tunnus] $row[nimi] $row[summa]@$row[mapvm]</font><br>";
           $kuvaok = 0;
-          $query = "  SELECT *
-                FROM liitetiedostot
-                WHERE liitos = 'lasku' and liitostunnus = '$row[tunnus]'";
+          $query = "SELECT *
+                    FROM liitetiedostot
+                    WHERE liitos = 'lasku' and liitostunnus = '$row[tunnus]'";
           $lres = pupe_query($query);
 
           if(mysql_num_rows($lres)>0) {
@@ -244,9 +244,9 @@ else {
   echo "<tr><th>".t("tai koko tilikausi")."</th>";
 
   $query = "SELECT *
-        FROM tilikaudet
-        WHERE yhtio = '$kukarow[yhtio]'
-        ORDER BY tilikausi_alku";
+            FROM tilikaudet
+            WHERE yhtio = '$kukarow[yhtio]'
+            ORDER BY tilikausi_alku";
   $vresult = pupe_query($query);
 
   echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa");
@@ -269,12 +269,12 @@ else {
 
   echo "<tr><th>".t("Vain kustannuspaikka")."</th>";
 
-  $query = "  SELECT tunnus, nimi
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and kaytossa != 'E'
-        and tyyppi = 'K'
-        ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, nimi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and kaytossa != 'E'
+            and tyyppi    = 'K'
+            ORDER BY koodi+0, koodi, nimi";
   $vresult = pupe_query($query);
 
   echo "<td><select name='kustp'><option value=' '>".t("Ei valintaa");
@@ -304,12 +304,12 @@ else {
   echo "</tr>";
   echo "<tr><th>".t("Vain kohde")."</th>";
 
-   $query = "  SELECT tunnus, nimi
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and kaytossa != 'E'
-        and tyyppi = 'O'
-        ORDER BY koodi+0, koodi, nimi";
+   $query = "SELECT tunnus, nimi
+             FROM kustannuspaikka
+             WHERE yhtio   = '$kukarow[yhtio]'
+             and kaytossa != 'E'
+             and tyyppi    = 'O'
+             ORDER BY koodi+0, koodi, nimi";
   $vresult = pupe_query($query);
 
   echo "<td><select name='kohde'><option value=' '>".t("Ei valintaa");
@@ -326,12 +326,12 @@ else {
   echo "</tr>";
   echo "<tr><th>".t("Vain projekti")."</th>";
 
-  $query = "  SELECT tunnus, nimi
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and kaytossa != 'E'
-        and tyyppi = 'P'
-        ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, nimi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and kaytossa != 'E'
+            and tyyppi    = 'P'
+            ORDER BY koodi+0, koodi, nimi";
   $vresult = pupe_query($query);
 
   echo "<td><select name='proj'><option value=' '>".t("Ei valintaa");

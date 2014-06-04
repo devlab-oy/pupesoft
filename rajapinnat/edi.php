@@ -5,9 +5,11 @@ class Edi {
   /**
    * Luo edi tilauksen
    *
-   * @param  array $order  Tilauksen tiedot ja tilauserivit
+   * @param array   $order Tilauksen tiedot ja tilauserivit
    * @return true/false
    */
+
+
   static function create($order) {
 
     // require 'magento_salasanat.php' muuttujat
@@ -36,17 +38,17 @@ class Edi {
     }
 
     // Miten storen nimi?
-    #$storenimi = (isset($_COOKIE["store_name"])) ? $_COOKIE["store_name"] : "";
+    //$storenimi = (isset($_COOKIE["store_name"])) ? $_COOKIE["store_name"] : "";
     $storenimi = 'default';
 
-       //tilauksen otsikko
-       //return $order->getUpdatedAt();
-       $edi_order  = "*IS from:721111720-1 to:IKH,ORDERS*id:".$order['increment_id']." version:AFP-1.0 *MS\n";
-       $edi_order .= "*MS ".$order['increment_id']."\n";
-       $edi_order .= "*RS OSTOTIL\n";
-       $edi_order .= "OSTOTIL.OT_NRO:".$order['increment_id']."\n";
+    //tilauksen otsikko
+    //return $order->getUpdatedAt();
+    $edi_order  = "*IS from:721111720-1 to:IKH,ORDERS*id:".$order['increment_id']." version:AFP-1.0 *MS\n";
+    $edi_order .= "*MS ".$order['increment_id']."\n";
+    $edi_order .= "*RS OSTOTIL\n";
+    $edi_order .= "OSTOTIL.OT_NRO:".$order['increment_id']."\n";
     //Yrityksen ovt_tunnus MUISTA MUUTTAA
-       $edi_order .= "OSTOTIL.OT_TOIMITTAJANRO:".$ovt_tunnus."\n";
+    $edi_order .= "OSTOTIL.OT_TOIMITTAJANRO:".$ovt_tunnus."\n";
     $edi_order .= "OSTOTIL.OT_TILAUSTYYPPI:$pupesoft_tilaustyyppi\n";
     $edi_order .= "OSTOTIL.OT_TILAUSAIKA:\n";
     $edi_order .= "OSTOTIL.OT_KASITTELIJA:\n";
@@ -95,13 +97,13 @@ class Edi {
     $edi_order .= "OSTOTIL.OT_TOIMITUS_POSTINRO:".$order['shipping_address']['postcode']."\n";
     $edi_order .= "OSTOTIL.OT_TOIMITUS_MAAKOODI:".$order['shipping_address']['country_id']."\n";
     $edi_order .= "OSTOTIL.OT_TOIMITUS_PUH:".$order['customer_phone']."\n";
-       $edi_order .= "*RE OSTOTIL\n";
+    $edi_order .= "*RE OSTOTIL\n";
 
-    #$items = $order->getItemsCollection();
+    //$items = $order->getItemsCollection();
 
-       $i = 1;
-       foreach ($order['items'] as $item) {
-         $product_id = $item['product_id'];
+    $i = 1;
+    foreach ($order['items'] as $item) {
+      $product_id = $item['product_id'];
 
       if ($item['product_type'] != "configurable") {
 
@@ -144,38 +146,38 @@ class Edi {
         // Veroton rivihinta
         $rivihinta_veroton = round(($veroton_hinta * $kpl) * (1 - $alennusprosentti / 100), 2);
 
-           $edi_order .= "*RS OSTOTILRIV $i\n";
-          $edi_order .= "OSTOTILRIV.OTR_NRO:".$order['increment_id']."\n";
-          $edi_order .= "OSTOTILRIV.OTR_RIVINRO:$i\n";
-          $edi_order .= "OSTOTILRIV.OTR_TOIMITTAJANRO:\n";
-          $edi_order .= "OSTOTILRIV.OTR_TUOTEKOODI:$tuoteno\n";
-          $edi_order .= "OSTOTILRIV.OTR_NIMI:$nimitys\n";
+        $edi_order .= "*RS OSTOTILRIV $i\n";
+        $edi_order .= "OSTOTILRIV.OTR_NRO:".$order['increment_id']."\n";
+        $edi_order .= "OSTOTILRIV.OTR_RIVINRO:$i\n";
+        $edi_order .= "OSTOTILRIV.OTR_TOIMITTAJANRO:\n";
+        $edi_order .= "OSTOTILRIV.OTR_TUOTEKOODI:$tuoteno\n";
+        $edi_order .= "OSTOTILRIV.OTR_NIMI:$nimitys\n";
 
         $edi_order .= "OSTOTILRIV.OTR_TILATTUMAARA:$kpl\n";
 
         // Verottomat hinnat
-          $edi_order .= "OSTOTILRIV.OTR_RIVISUMMA:$rivihinta_veroton\n";
-          $edi_order .= "OSTOTILRIV.OTR_OSTOHINTA:$veroton_hinta\n";
-          $edi_order .= "OSTOTILRIV.OTR_ALENNUS:$alennusprosentti\n";
+        $edi_order .= "OSTOTILRIV.OTR_RIVISUMMA:$rivihinta_veroton\n";
+        $edi_order .= "OSTOTILRIV.OTR_OSTOHINTA:$veroton_hinta\n";
+        $edi_order .= "OSTOTILRIV.OTR_ALENNUS:$alennusprosentti\n";
         $edi_order .= "OSTOTILRIV.OTR_VEROKANTA:$alvprosentti\n";
 
         $edi_order .= "OSTOTILRIV.OTR_VIITE:\n";
-          $edi_order .= "OSTOTILRIV.OTR_OSATOIMITUSKIELTO:\n";
-          $edi_order .= "OSTOTILRIV.OTR_JALKITOIMITUSKIELTO:\n";
-          $edi_order .= "OSTOTILRIV.OTR_YKSIKKO:\n";
+        $edi_order .= "OSTOTILRIV.OTR_OSATOIMITUSKIELTO:\n";
+        $edi_order .= "OSTOTILRIV.OTR_JALKITOIMITUSKIELTO:\n";
+        $edi_order .= "OSTOTILRIV.OTR_YKSIKKO:\n";
 
-        #$stock = Mage::getModel('cataloginventory/stock_item')->loadByProduct($product_id);
+        //$stock = Mage::getModel('cataloginventory/stock_item')->loadByProduct($product_id);
 
 
-          #if ($stock->getQty() - $item->getQtyOrdered() <= 0 && $stock->getBackorders() != 0) {
-          #  $edi_order .= "OSTOTILRIV.OTR_SALLITAANJT:1\n";
-          #}
-          #else {
-          $edi_order .= "OSTOTILRIV.OTR_SALLITAANJT:0\n";
-          #}
+        //if ($stock->getQty() - $item->getQtyOrdered() <= 0 && $stock->getBackorders() != 0) {
+        //  $edi_order .= "OSTOTILRIV.OTR_SALLITAANJT:1\n";
+        //}
+        //else {
+        $edi_order .= "OSTOTILRIV.OTR_SALLITAANJT:0\n";
+        //}
 
-          $edi_order .= "*RE  OSTOTILRIV $i\n";
-          $i++;
+        $edi_order .= "*RE  OSTOTILRIV $i\n";
+        $i++;
       }
     }
 
@@ -191,29 +193,29 @@ class Edi {
       $rahti_alvpros = round((($rahti / $rahti_veroton) - 1) * 100);
 
       $edi_order .= "*RS OSTOTILRIV $i\n";
-         $edi_order .= "OSTOTILRIV.OTR_NRO:".$order['increment_id']."\n";
-         $edi_order .= "OSTOTILRIV.OTR_RIVINRO:$i\n";
-         $edi_order .= "OSTOTILRIV.OTR_TOIMITTAJANRO:\n";
-         $edi_order .= "OSTOTILRIV.OTR_TUOTEKOODI:$rahtikulu_tuoteno\n";
-         $edi_order .= "OSTOTILRIV.OTR_NIMI:$rahtikulu_nimitys\n";
-         $edi_order .= "OSTOTILRIV.OTR_TILATTUMAARA:1\n";
-         $edi_order .= "OSTOTILRIV.OTR_RIVISUMMA:$rahti_veroton\n";
-         $edi_order .= "OSTOTILRIV.OTR_OSTOHINTA:$rahti_veroton\n";
+      $edi_order .= "OSTOTILRIV.OTR_NRO:".$order['increment_id']."\n";
+      $edi_order .= "OSTOTILRIV.OTR_RIVINRO:$i\n";
+      $edi_order .= "OSTOTILRIV.OTR_TOIMITTAJANRO:\n";
+      $edi_order .= "OSTOTILRIV.OTR_TUOTEKOODI:$rahtikulu_tuoteno\n";
+      $edi_order .= "OSTOTILRIV.OTR_NIMI:$rahtikulu_nimitys\n";
+      $edi_order .= "OSTOTILRIV.OTR_TILATTUMAARA:1\n";
+      $edi_order .= "OSTOTILRIV.OTR_RIVISUMMA:$rahti_veroton\n";
+      $edi_order .= "OSTOTILRIV.OTR_OSTOHINTA:$rahti_veroton\n";
       $edi_order .= "OSTOTILRIV.OTR_ALENNUS:0\n";
-         $edi_order .= "OSTOTILRIV.OTR_VEROKANTA:$rahti_alvpros\n";
-         $edi_order .= "OSTOTILRIV.OTR_VIITE:\n";
-         $edi_order .= "OSTOTILRIV.OTR_OSATOIMITUSKIELTO:\n";
-         $edi_order .= "OSTOTILRIV.OTR_JALKITOIMITUSKIELTO:\n";
-         $edi_order .= "OSTOTILRIV.OTR_YKSIKKO:\n";
-         $edi_order .= "*RE  OSTOTILRIV $i\n";
+      $edi_order .= "OSTOTILRIV.OTR_VEROKANTA:$rahti_alvpros\n";
+      $edi_order .= "OSTOTILRIV.OTR_VIITE:\n";
+      $edi_order .= "OSTOTILRIV.OTR_OSATOIMITUSKIELTO:\n";
+      $edi_order .= "OSTOTILRIV.OTR_JALKITOIMITUSKIELTO:\n";
+      $edi_order .= "OSTOTILRIV.OTR_YKSIKKO:\n";
+      $edi_order .= "*RE  OSTOTILRIV $i\n";
     }
 
-       $edi_order .= "*ME\n";
-       $edi_order .= "*IE";
+    $edi_order .= "*ME\n";
+    $edi_order .= "*IE";
 
-       $edi_order = iconv("UTF-8", "ISO-8859-1//TRANSLIT", $edi_order);
+    $edi_order = iconv("UTF-8", "ISO-8859-1//TRANSLIT", $edi_order);
 
-    $filename = $magento_api_ana_edi."/magento-order-{$order['increment_id']}-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
+    $filename = $magento_api_ana_edi."/magento-order-{$order['increment_id']}-".date("Ymd")."-".md5(uniqid(rand(), true)).".txt";
     file_put_contents($filename, $edi_order);
 
     return true;

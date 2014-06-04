@@ -1941,7 +1941,7 @@ if ($tee == 'nayta') {
         $row['nimitys'] = $trow['nimitys'];
       }
 
-      if (!is_null($row['tilausrivi'])) {
+      if (!is_null($row['tilausrivi']) and !empty($row['tilausrivi'])) {
         $query = "SELECT hinta, otunnus FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus IN ({$row['tilausrivi']})";
         $hinta_chk_res = pupe_query($query);
         $hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);

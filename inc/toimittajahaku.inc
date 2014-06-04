@@ -12,11 +12,11 @@ if ($tee == 'A') {
   if (!isset($aikalisa)) $aikalisa ='';
 
   if ($laji == 'O') {
-    $query = "  SELECT toimi.ytunnus, concat_ws(' ', if(toimi.tyyppi='K' and kuka.nimi is not null, kuka.nimi, toimi.nimi), toimi.nimitark) nimi, toimi.postitp
-          FROM toimi
-          LEFT JOIN kuka ON (kuka.yhtio = toimi.yhtio and kuka.kuka = toimi.nimi and toimi.tyyppi='K')
-          WHERE toimi.tunnus = '$tunnus'
-          and toimi.yhtio = '$kukarow[yhtio]'";
+    $query = "SELECT toimi.ytunnus, concat_ws(' ', if(toimi.tyyppi='K' and kuka.nimi is not null, kuka.nimi, toimi.nimi), toimi.nimitark) nimi, toimi.postitp
+              FROM toimi
+              LEFT JOIN kuka ON (kuka.yhtio = toimi.yhtio and kuka.kuka = toimi.nimi and toimi.tyyppi='K')
+              WHERE toimi.tunnus = '$tunnus'
+              and toimi.yhtio    = '$kukarow[yhtio]'";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
@@ -94,13 +94,13 @@ if ($tee == 'A') {
       $kentta = "lasku.tapvm";
     }
 
-    $query = "  SELECT $kentta ajalta, sum(lasku.summa) ostot, round(sum(lasku.summa*if(lasku.maksu_kurssi=0,lasku.vienti_kurssi,lasku.maksu_kurssi)),2) $yhtiorow[valkoodi]
-            FROM lasku
-            WHERE lasku.yhtio='$kukarow[yhtio]'
-          and lasku.liitostunnus = '$tunnus'
-          $th_lisa
-            and lasku.tila in ('H', 'M', 'P', 'Q', 'Y')
-            GROUP BY 1";
+    $query = "SELECT $kentta ajalta, sum(lasku.summa) ostot, round(sum(lasku.summa*if(lasku.maksu_kurssi=0,lasku.vienti_kurssi,lasku.maksu_kurssi)),2) $yhtiorow[valkoodi]
+              FROM lasku
+              WHERE lasku.yhtio='$kukarow[yhtio]'
+              and lasku.liitostunnus = '$tunnus'
+              $th_lisa
+              and lasku.tila         in ('H', 'M', 'P', 'Q', 'Y')
+              GROUP BY 1";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
@@ -134,22 +134,22 @@ if ($tee == 'A') {
 
     if ($ytunnus != "") {
       //Jos taas p‰‰ss‰t‰‰n $ytunnusta niin haetaan sen perusteella
-      $query = "  SELECT toimi.ytunnus, concat_ws(' ', if(toimi.tyyppi='K' and kuka.nimi is not null, kuka.nimi, toimi.nimi), toimi.nimitark) nimi, toimi.postitp
-            FROM toimi
-            LEFT JOIN kuka ON (kuka.yhtio = toimi.yhtio and kuka.kuka = toimi.nimi and toimi.tyyppi='K')
-            WHERE toimi.ytunnus   = '$ytunnus'
-            and toimi.yhtio     = '$kukarow[yhtio]'
-            ORDER by toimi.nimi";
+      $query = "SELECT toimi.ytunnus, concat_ws(' ', if(toimi.tyyppi='K' and kuka.nimi is not null, kuka.nimi, toimi.nimi), toimi.nimitark) nimi, toimi.postitp
+                FROM toimi
+                LEFT JOIN kuka ON (kuka.yhtio = toimi.yhtio and kuka.kuka = toimi.nimi and toimi.tyyppi='K')
+                WHERE toimi.ytunnus = '$ytunnus'
+                and toimi.yhtio     = '$kukarow[yhtio]'
+                ORDER by toimi.nimi";
 
       $toimiliilisa = " and lasku.ytunnus = '$ytunnus' ";
     }
     else {
       //Jos k‰ytet‰‰n $tunnusta niin k‰ytet‰‰n liitostunnusta
-      $query = "  SELECT toimi.ytunnus, concat_ws(' ', if(toimi.tyyppi='K' and kuka.nimi is not null, kuka.nimi, toimi.nimi), toimi.nimitark) nimi, toimi.postitp
-            FROM toimi
-            LEFT JOIN kuka ON (kuka.yhtio = toimi.yhtio and kuka.kuka = toimi.nimi and toimi.tyyppi='K')
-            WHERE toimi.tunnus   = '$tunnus'
-            and toimi.yhtio   = '$kukarow[yhtio]'";
+      $query = "SELECT toimi.ytunnus, concat_ws(' ', if(toimi.tyyppi='K' and kuka.nimi is not null, kuka.nimi, toimi.nimi), toimi.nimitark) nimi, toimi.postitp
+                FROM toimi
+                LEFT JOIN kuka ON (kuka.yhtio = toimi.yhtio and kuka.kuka = toimi.nimi and toimi.tyyppi='K')
+                WHERE toimi.tunnus = '$tunnus'
+                and toimi.yhtio    = '$kukarow[yhtio]'";
 
       $toimiliilisa = " and lasku.liitostunnus = '$tunnus' ";
     }
@@ -217,12 +217,12 @@ if ($tee == 'A') {
       echo "<input type='text' name='vv2' value='$vv2' size='4'>";
       echo "</td>";
 
-      $query = "  SELECT tunnus
-            FROM kustannuspaikka
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tyyppi = 'K'
-            and kaytossa != 'E'
-            LIMIT 1";
+      $query = "SELECT tunnus
+                FROM kustannuspaikka
+                WHERE yhtio   = '$kukarow[yhtio]'
+                and tyyppi    = 'K'
+                and kaytossa != 'E'
+                LIMIT 1";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) > 0) {
@@ -285,19 +285,19 @@ if ($tee == 'A') {
         $tiliointilisa = '';
       }
 
-      $query = "  SELECT DISTINCT lasku.tapvm, lasku.erpcm, lasku.summa, lasku.valkoodi, lasku.vienti,
-            concat_ws(' ', lasku.viite, lasku.viesti) 'viite/viesti', lasku.ebid, lasku.tila, lasku.tunnus,
-            if(lasku.laskunro = 0, '', lasku.laskunro) laskunro,
-            round(lasku.summa * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi), 2) kotisumma
-              FROM lasku
-            {$tiliointilisa}
-              WHERE lasku.yhtio = '$kukarow[yhtio]'
-              $toimiliilisa
-            $th_lisa
-            $aikalisa
-              and lasku.tila in ('H', 'M', 'P', 'Q', 'Y')
-              ORDER BY lasku.tapvm desc
-            $limlis";
+      $query = "SELECT DISTINCT lasku.tapvm, lasku.erpcm, lasku.summa, lasku.valkoodi, lasku.vienti,
+                concat_ws(' ', lasku.viite, lasku.viesti) 'viite/viesti', lasku.ebid, lasku.tila, lasku.tunnus,
+                if(lasku.laskunro = 0, '', lasku.laskunro) laskunro,
+                round(lasku.summa * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi), 2) kotisumma
+                  FROM lasku
+                {$tiliointilisa}
+                  WHERE lasku.yhtio = '$kukarow[yhtio]'
+                  $toimiliilisa
+                $th_lisa
+                $aikalisa
+                  and lasku.tila    in ('H', 'M', 'P', 'Q', 'Y')
+                  ORDER BY lasku.tapvm desc
+                $limlis";
       $result = pupe_query($query);
       $seraavako = mysql_num_rows($result);
 
@@ -364,15 +364,15 @@ if ($tee == 'A') {
         echo "<td valign='top'>";
 
         if ($trow["vienti"] != "A" and $trow["vienti"] != "D" and $trow["vienti"] != "G") {
-          $query = "  SELECT keikka.laskunro, keikka.tunnus
-                FROM lasku
-                JOIN lasku AS keikka on lasku.yhtio = keikka.yhtio
-                AND lasku.laskunro = keikka.laskunro
-                AND keikka.tila = 'K'
-                AND keikka.vanhatunnus = 0
-                WHERE lasku.yhtio     = '$kukarow[yhtio]'
-                AND lasku.tila       = 'K'
-                AND lasku.vanhatunnus = '$trow[tunnus]'";
+          $query = "SELECT keikka.laskunro, keikka.tunnus
+                    FROM lasku
+                    JOIN lasku AS keikka on lasku.yhtio = keikka.yhtio
+                    AND lasku.laskunro     = keikka.laskunro
+                    AND keikka.tila        = 'K'
+                    AND keikka.vanhatunnus = 0
+                    WHERE lasku.yhtio      = '$kukarow[yhtio]'
+                    AND lasku.tila         = 'K'
+                    AND lasku.vanhatunnus  = '$trow[tunnus]'";
           $keikka_res = pupe_query($query);
 
           while ($keikka_row = mysql_fetch_array($keikka_res)) {
@@ -462,14 +462,14 @@ if ($tee == 'T') { // T = toimittajanro
 }
 
 if ($th_lisat != '') {
-  $query = "  SELECT toimi.tunnus, toimi.ytunnus, concat_ws(' ', if(toimi.tyyppi='K' and kuka.nimi is not null, kuka.nimi, toimi.nimi), toimi.nimitark) nimi, toimi.postitp, round(sum(summa*if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi)),2) avoimet
-        FROM toimi
-        LEFT JOIN kuka ON (kuka.yhtio = toimi.yhtio and kuka.kuka = toimi.nimi and toimi.tyyppi='K')
-        LEFT JOIN lasku ON toimi.yhtio = lasku.yhtio and toimi.tunnus = lasku.liitostunnus and tila in ('H','M')
-        WHERE toimi.yhtio = '$kukarow[yhtio]'
-        $th_lisat
-        GROUP BY toimi.tunnus
-        ORDER BY toimi.selaus, toimi.nimi";
+  $query = "SELECT toimi.tunnus, toimi.ytunnus, concat_ws(' ', if(toimi.tyyppi='K' and kuka.nimi is not null, kuka.nimi, toimi.nimi), toimi.nimitark) nimi, toimi.postitp, round(sum(summa*if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi)),2) avoimet
+            FROM toimi
+            LEFT JOIN kuka ON (kuka.yhtio = toimi.yhtio and kuka.kuka = toimi.nimi and toimi.tyyppi='K')
+            LEFT JOIN lasku ON toimi.yhtio = lasku.yhtio and toimi.tunnus = lasku.liitostunnus and tila in ('H','M')
+            WHERE toimi.yhtio = '$kukarow[yhtio]'
+            $th_lisat
+            GROUP BY toimi.tunnus
+            ORDER BY toimi.selaus, toimi.nimi";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {

@@ -96,22 +96,22 @@ else {
       $group  = "lasku.ytunnus";
     }
 
-    $query = "  SELECT $select
-          sum(tilausrivi.rivihinta) summa,
-          sum(tilausrivi.kate) kate,
-          sum(tilausrivi.kpl) kpl
-          FROM lasku
-          JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and tilausrivi.tyyppi = 'L')
-          JOIN asiakas ON (asiakas.yhtio = tilausrivi.yhtio and asiakas.tunnus = lasku.liitostunnus)
-          JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
-          WHERE lasku.yhtio = '$kukarow[yhtio]'
-          and lasku.tila = 'U'
-          and lasku.alatila = 'X'
-          and lasku.tapvm >= '$vva-$kka-$ppa'
-          and lasku.tapvm <= '$vvl-$kkl-$ppl'
-          $lisa
-          GROUP BY $group
-          ORDER BY nimi, nimitark, ytunnus";
+    $query = "SELECT $select
+              sum(tilausrivi.rivihinta) summa,
+              sum(tilausrivi.kate) kate,
+              sum(tilausrivi.kpl) kpl
+              FROM lasku
+              JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and tilausrivi.tyyppi = 'L')
+              JOIN asiakas ON (asiakas.yhtio = tilausrivi.yhtio and asiakas.tunnus = lasku.liitostunnus)
+              JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
+              WHERE lasku.yhtio = '$kukarow[yhtio]'
+              and lasku.tila    = 'U'
+              and lasku.alatila = 'X'
+              and lasku.tapvm   >= '$vva-$kka-$ppa'
+              and lasku.tapvm   <= '$vvl-$kkl-$ppl'
+              $lisa
+              GROUP BY $group
+              ORDER BY nimi, nimitark, ytunnus";
     $result = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($result) < 2000) {
@@ -167,9 +167,9 @@ else {
         }
 
         //haetaan tuoteryhmmän alennusryhmä
-        $query = "  SELECT alennus, alennuslaji
-              FROM asiakasalennus
-              WHERE yhtio='$kukarow[yhtio]' and ryhma = '$lrow[aleryhma]' and ytunnus = '$lrow[ytunnus]'";
+        $query = "SELECT alennus, alennuslaji
+                  FROM asiakasalennus
+                  WHERE yhtio='$kukarow[yhtio]' and ryhma = '$lrow[aleryhma]' and ytunnus = '$lrow[ytunnus]'";
         $hresult = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($hresult) != 0) {
@@ -181,9 +181,9 @@ else {
         }
         else {
           // Pudotaan perusalennukseen
-          $query = "  SELECT alennus
-                FROM perusalennus
-                WHERE yhtio='$kukarow[yhtio]' and ryhma = '$lrow[aleryhma]'";
+          $query = "SELECT alennus
+                    FROM perusalennus
+                    WHERE yhtio='$kukarow[yhtio]' and ryhma = '$lrow[aleryhma]'";
           $hresult = mysql_query($query) or pupe_error($query);
 
           if (mysql_num_rows($hresult) != 0) {

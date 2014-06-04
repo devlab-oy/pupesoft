@@ -192,56 +192,56 @@ function validoi_kampanja_ehto_tai_aliehto($ehto) {
   $echo = "";
   switch ($ehto['kohde']) {
     case 'asiakas':
-      $query = "  SELECT *
-            FROM asiakas
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = '{$ehto['arvo']}'";
+      $query = "SELECT *
+                FROM asiakas
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$ehto['arvo']}'";
       $echo = t('Asiakasta ei löydy');
       break;
     case 'asiakas_ytunnus':
-      $query = "  SELECT *
-            FROM asiakas
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND ytunnus = '{$ehto['arvo']}'";
+      $query = "SELECT *
+                FROM asiakas
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND ytunnus = '{$ehto['arvo']}'";
       $echo = t('Asiakasta ei löydy');
       break;
     case 'asiakaskategoria':
-      $query = "  SELECT *
-            FROM dynaaminen_puu
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND laji = 'Asiakas'
-            AND tunnus = '{$ehto['arvo']}'";
+      $query = "SELECT *
+                FROM dynaaminen_puu
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND laji    = 'Asiakas'
+                AND tunnus  = '{$ehto['arvo']}'";
       $echo = t('Asiakaskategoriaa ei löydy');
       break;
     case 'tuote':
-      $query = "  SELECT *
-            FROM tuote
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tuoteno = '{$ehto['arvo']}'";
+      $query = "SELECT *
+                FROM tuote
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tuoteno = '{$ehto['arvo']}'";
       $echo = t('Tuotetta ei löydy');
       break;
     case 'tuotekategoria':
-      $query = "  SELECT *
-            FROM dynaaminen_puu
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND laji = 'Tuote'
-            AND tunnus = '{$ehto['arvo']}'";
+      $query = "SELECT *
+                FROM dynaaminen_puu
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND laji    = 'Tuote'
+                AND tunnus  = '{$ehto['arvo']}'";
       $echo = t('Tuotekategoriaa ei löydy');
       break;
     case 'tuoteosasto':
-      $query = "  SELECT *
-            FROM avainsana
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND laji = 'OSASTO'
-            AND selite = '{$ehto['arvo']}'";
+      $query = "SELECT *
+                FROM avainsana
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND laji    = 'OSASTO'
+                AND selite  = '{$ehto['arvo']}'";
       $echo = t('Tuoteosastoa ei löydy');
       break;
     case 'tuoteryhma':
-      $query = "  SELECT *
-            FROM avainsana
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND laji = 'TRY'
-            AND selite = '{$ehto['arvo']}'";
+      $query = "SELECT *
+                FROM avainsana
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND laji    = 'TRY'
+                AND selite  = '{$ehto['arvo']}'";
       $echo = t('Tuoteryhmää ei löydy');
       break;
     case 'kappaleet':
@@ -277,10 +277,10 @@ function validoi_kampanja_ehto_tai_aliehto($ehto) {
 function validoi_palkinto_rivi($palkinto_rivi) {
   global $kukarow, $yhtiorow;
 
-  $query = "  SELECT *
-        FROM tuote
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tuoteno = '{$palkinto_rivi['tuoteno']}'";
+  $query = "SELECT *
+            FROM tuote
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tuoteno = '{$palkinto_rivi['tuoteno']}'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -299,11 +299,11 @@ function validoi_palkinto_rivi($palkinto_rivi) {
 function luo_kampanja_otsikko($kampanja_nimi) {
   global $kukarow, $yhtiorow;
 
-  $query = "  INSERT INTO kampanjat
-        SET yhtio = '{$kukarow['yhtio']}',
-        nimi = '{$kampanja_nimi}',
-        laatija = '{$kukarow['kuka']}',
-        luontiaika = CURRENT_DATE";
+  $query = "INSERT INTO kampanjat
+            SET yhtio = '{$kukarow['yhtio']}',
+            nimi       = '{$kampanja_nimi}',
+            laatija    = '{$kukarow['kuka']}',
+            luontiaika = CURRENT_DATE";
   pupe_query($query);
 
   return mysql_insert_id();
@@ -312,15 +312,15 @@ function luo_kampanja_otsikko($kampanja_nimi) {
 function luo_kampanja_ehto($kampanja_ehto, $kampanja_tunnus) {
   global $kukarow, $yhtiorow;
 
-  $query = "  INSERT INTO kampanja_ehdot
-        SET yhtio = '{$kukarow['yhtio']}',
-        kampanja = '{$kampanja_tunnus}',
-        isatunnus = 0,
-        kohde = '{$kampanja_ehto['kohde']}',
-        rajoitin = '{$kampanja_ehto['rajoitin']}',
-        arvo = '{$kampanja_ehto['arvo']}',
-        laatija = '{$kukarow['kuka']}',
-        luontiaika = CURRENT_DATE";
+  $query = "INSERT INTO kampanja_ehdot
+            SET yhtio = '{$kukarow['yhtio']}',
+            kampanja   = '{$kampanja_tunnus}',
+            isatunnus  = 0,
+            kohde      = '{$kampanja_ehto['kohde']}',
+            rajoitin   = '{$kampanja_ehto['rajoitin']}',
+            arvo       = '{$kampanja_ehto['arvo']}',
+            laatija    = '{$kukarow['kuka']}',
+            luontiaika = CURRENT_DATE";
   pupe_query($query);
 
   return mysql_insert_id();
@@ -329,15 +329,15 @@ function luo_kampanja_ehto($kampanja_ehto, $kampanja_tunnus) {
 function luo_kampanja_aliehto($kampanja_aliehto, $kampanja_ehto_tunnus) {
   global $kukarow, $yhtiorow;
 
-  $query = "  INSERT INTO kampanja_ehdot
-        SET yhtio = '{$kukarow['yhtio']}',
-        kampanja = 0,
-        isatunnus = {$kampanja_ehto_tunnus},
-        kohde = '{$kampanja_aliehto['kohde']}',
-        rajoitin = '{$kampanja_aliehto['rajoitin']}',
-        arvo = '{$kampanja_aliehto['arvo']}',
-        laatija = '{$kukarow['kuka']}',
-        luontiaika = CURRENT_DATE";
+  $query = "INSERT INTO kampanja_ehdot
+            SET yhtio = '{$kukarow['yhtio']}',
+            kampanja   = 0,
+            isatunnus  = {$kampanja_ehto_tunnus},
+            kohde      = '{$kampanja_aliehto['kohde']}',
+            rajoitin   = '{$kampanja_aliehto['rajoitin']}',
+            arvo       = '{$kampanja_aliehto['arvo']}',
+            laatija    = '{$kukarow['kuka']}',
+            luontiaika = CURRENT_DATE";
   pupe_query($query);
 
   return mysql_insert_id();
@@ -346,13 +346,13 @@ function luo_kampanja_aliehto($kampanja_aliehto, $kampanja_ehto_tunnus) {
 function luo_palkinto_rivi($palkinto_rivi, $kampanja_tunnus) {
   global $kukarow, $yhtiorow;
 
-  $query = "  INSERT INTO kampanja_palkinnot
-        SET yhtio = '{$kukarow['yhtio']}',
-        kampanja = '{$kampanja_tunnus}',
-        tuoteno = '{$palkinto_rivi['tuoteno']}',
-        kpl = '{$palkinto_rivi['kpl']}',
-        laatija = '{$kukarow['kuka']}',
-        luontiaika = CURRENT_DATE";
+  $query = "INSERT INTO kampanja_palkinnot
+            SET yhtio = '{$kukarow['yhtio']}',
+            kampanja   = '{$kampanja_tunnus}',
+            tuoteno    = '{$palkinto_rivi['tuoteno']}',
+            kpl        = '{$palkinto_rivi['kpl']}',
+            laatija    = '{$kukarow['kuka']}',
+            luontiaika = CURRENT_DATE";
   pupe_query($query);
 }
 
@@ -384,12 +384,12 @@ function muokkaa_kampanjaa($request) {
     }
   }
 
-  $query = "  UPDATE kampanjat
-        SET nimi = '{$request['kampanja_nimi']}',
-        muuttaja = '{$kukarow['kuka']}',
-        muutospvm = CURRENT_DATE
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tunnus = '{$request['kampanja_tunnus']}'";
+  $query = "UPDATE kampanjat
+            SET nimi = '{$request['kampanja_nimi']}',
+            muuttaja    = '{$kukarow['kuka']}',
+            muutospvm   = CURRENT_DATE
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus  = '{$request['kampanja_tunnus']}'";
   pupe_query($query);
 
   poista_kampanja_ehdot($request['kampanja_tunnus']);
@@ -416,9 +416,9 @@ function muokkaa_kampanjaa($request) {
 function poista_kampanja_otsikko($kampanja_tunnus) {
   global $kukarow, $yhtiorow;
 
-  $query = "  DELETE FROM kampanjat
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tunnus = '{$kampanja_tunnus}'";
+  $query = "DELETE FROM kampanjat
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus  = '{$kampanja_tunnus}'";
 
   pupe_query($query);
 }
@@ -427,31 +427,31 @@ function poista_kampanja_ehdot($kampanja_tunnus) {
   global $kukarow, $yhtiorow;
 
   //Poistetaan aliehdot
-  $query = "  SELECT tunnus
-        FROM kampanja_ehdot
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND kampanja = '{$kampanja_tunnus}'";
+  $query = "SELECT tunnus
+            FROM kampanja_ehdot
+            WHERE yhtio  = '{$kukarow['yhtio']}'
+            AND kampanja = '{$kampanja_tunnus}'";
   $result = pupe_query($query);
   while ($kampanja = mysql_fetch_assoc($result)) {
-    $query = "  DELETE FROM kampanja_ehdot
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND isatunnus = '{$kampanja['tunnus']}'";
+    $query = "DELETE FROM kampanja_ehdot
+              WHERE yhtio   = '{$kukarow['yhtio']}'
+              AND isatunnus = '{$kampanja['tunnus']}'";
     pupe_query($query);
   }
 
   //Poistetaan ehdot
-  $query = "  DELETE FROM kampanja_ehdot
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND kampanja = '{$kampanja_tunnus}'";
+  $query = "DELETE FROM kampanja_ehdot
+            WHERE yhtio  = '{$kukarow['yhtio']}'
+            AND kampanja = '{$kampanja_tunnus}'";
   pupe_query($query);
 }
 
 function poista_kampanja_palkinnot($kampanja_tunnus) {
   global $kukarow, $yhtiorow;
 
-  $query = "  DELETE FROM kampanja_palkinnot
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND kampanja = '{$kampanja_tunnus}'";
+  $query = "DELETE FROM kampanja_palkinnot
+            WHERE yhtio  = '{$kukarow['yhtio']}'
+            AND kampanja = '{$kampanja_tunnus}'";
   pupe_query($query);
 }
 
@@ -790,30 +790,30 @@ function hae_liveseach_kentta($kohde, $tyyppi, $ehto_index, $aliehto_index = 0, 
     if ($kohde == 'asiakas') {
       $return = livesearch_kentta("eisaaollaoikeaforminnimi", "ASIAKASHAKU", "kampanja_ehdot[{$ehto_index}][arvo]", 140, $value, '', '', 'ehto_arvo', 'ei_break_all');
     }
-    else if ($kohde == 'asiakas_ytunnus') {
+    elseif ($kohde == 'asiakas_ytunnus') {
       $return = livesearch_kentta("eisaaollaoikeaforminnimi", "ASIAKASYTUNNUSHAKU", "kampanja_ehdot[{$ehto_index}][arvo]", 140, $value, '', '', 'ehto_arvo', 'ei_break_all');
     }
-    else if ($kohde == 'asiakaskategoria') {
+    elseif ($kohde == 'asiakaskategoria') {
       $return = livesearch_kentta("eisaaollaoikeaforminnimi", "ASIAKASKATEGORIAHAKU", "kampanja_ehdot[{$ehto_index}][arvo]", 140, $value, '', '', 'ehto_arvo', 'ei_break_all');
     }
-    else if ($kohde == 'tuote') {
+    elseif ($kohde == 'tuote') {
       $return = livesearch_kentta("eisaaollaoikeaforminnimi", "TUOTEHAKU", "kampanja_ehdot[{$ehto_index}][arvo]", 140, $value, '', '', 'ehto_arvo', 'ei_break_all');
     }
-    else if ($kohde == 'tuotekategoria') {
+    elseif ($kohde == 'tuotekategoria') {
       $return = livesearch_kentta("eisaaollaoikeaforminnimi", "TUOTEKATEGORIAHAKU", "kampanja_ehdot[{$ehto_index}][arvo]", 140, $value, '', '', 'ehto_arvo', 'ei_break_all');
     }
     else {
       $return = "<input type='text' class='ehto_arvo' name='kampanja_ehdot[{$ehto_index}][arvo]' value='{$value}' />";
     }
   }
-  else if ($tyyppi == 'aliehto') {
+  elseif ($tyyppi == 'aliehto') {
     if ($kohde == 'asiakas') {
       $return = livesearch_kentta("eisaaollaoikeaforminnimi", "ASIAKASHAKU", "kampanja_ehdot[{$ehto_index}][aliehdot][{$aliehto_index}][arvo]", 140, $value, '', '', 'aliehto_arvo', 'ei_break_all');
     }
-    else if ($kohde == 'tuote') {
+    elseif ($kohde == 'tuote') {
       $return = livesearch_kentta("eisaaollaoikeaforminnimi", "TUOTEHAKU", "kampanja_ehdot[{$ehto_index}][aliehdot][{$aliehto_index}][arvo]", 140, $value, '', '', 'aliehto_arvo', 'ei_break_all');
     }
-    else if ($kohde == 'tuotekategoria') {
+    elseif ($kohde == 'tuotekategoria') {
       $return = livesearch_kentta("eisaaollaoikeaforminnimi", "TUOTEKATEGORIAHAKU", "kampanja_ehdot[{$ehto_index}][aliehdot][{$aliehto_index}][arvo]", 140, $value, '', '', 'ehto_arvo', 'ei_break_all');
     }
     else {
@@ -893,10 +893,10 @@ function hae_ehdon_rajoittimet() {
 function hae_kampanja($kampanja_tunnus) {
   global $kukarow, $yhtirow;
 
-  $query = "  SELECT *
-        FROM kampanjat
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tunnus = '{$kampanja_tunnus}'";
+  $query = "SELECT *
+            FROM kampanjat
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus  = '{$kampanja_tunnus}'";
   $result = pupe_query($query);
 
   $kampanja = mysql_fetch_assoc($result);

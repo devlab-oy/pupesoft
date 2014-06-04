@@ -78,24 +78,24 @@ if ($tee != '' and isset($painoinnappia)) {
   echo "<th>".t("Myynti")."<br>$vvl</th>";
   echo "<th>".t("Myynti")."<br>".t("aikavälillä")."</th>";
 
-  $query = "  SELECT
-        lasku.piiri,
-        tilausrivi.osasto,
-        tilausrivi.try,
-        round(sum(if(tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}', tilausrivi.rivihinta, 0)), 2) aikavalilla,
-        round(sum(if(tilausrivi.laskutettuaika >= '{$vvl}-01-01' and tilausrivi.laskutettuaika <= '{$vvl}-12-31', tilausrivi.rivihinta, 0)), 2) myyntiVA,
-        round(sum(if(tilausrivi.laskutettuaika >= '{$edellisvuosi}-01-01' and tilausrivi.laskutettuaika <= '{$edellisvuosi}-12-31', tilausrivi.rivihinta, 0)), 2) edvuodenmyynti,
-        round(sum(if(tilausrivi.laskutettuaika >= '{$toissavuosi}-01-01' and tilausrivi.laskutettuaika <= '{$toissavuosi}-12-31', tilausrivi.rivihinta, 0)), 2) toissavuodenmyynti
-        FROM lasku
-        JOIN tilausrivi on (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
-        WHERE lasku.yhtio   = '$kukarow[yhtio]'
-        and lasku.tila     = 'U'
-        and lasku.alatila   = 'X'
-        $lisa
-        and  lasku.tapvm   >= '{$toissavuosi}-{01}-{01}'
-        and  lasku.tapvm   <= '{$vvl}-{$kkl}-{$ppl}'
-        GROUP BY lasku.piiri, tilausrivi.osasto, tilausrivi.try
-        ORDER BY lasku.piiri, tilausrivi.osasto, tilausrivi.try";
+  $query = "SELECT
+            lasku.piiri,
+            tilausrivi.osasto,
+            tilausrivi.try,
+            round(sum(if(tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}', tilausrivi.rivihinta, 0)), 2) aikavalilla,
+            round(sum(if(tilausrivi.laskutettuaika >= '{$vvl}-01-01' and tilausrivi.laskutettuaika <= '{$vvl}-12-31', tilausrivi.rivihinta, 0)), 2) myyntiVA,
+            round(sum(if(tilausrivi.laskutettuaika >= '{$edellisvuosi}-01-01' and tilausrivi.laskutettuaika <= '{$edellisvuosi}-12-31', tilausrivi.rivihinta, 0)), 2) edvuodenmyynti,
+            round(sum(if(tilausrivi.laskutettuaika >= '{$toissavuosi}-01-01' and tilausrivi.laskutettuaika <= '{$toissavuosi}-12-31', tilausrivi.rivihinta, 0)), 2) toissavuodenmyynti
+            FROM lasku
+            JOIN tilausrivi on (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
+            WHERE lasku.yhtio = '$kukarow[yhtio]'
+            and lasku.tila    = 'U'
+            and lasku.alatila = 'X'
+            $lisa
+            and  lasku.tapvm  >= '{$toissavuosi}-{01}-{01}'
+            and  lasku.tapvm  <= '{$vvl}-{$kkl}-{$ppl}'
+            GROUP BY lasku.piiri, tilausrivi.osasto, tilausrivi.try
+            ORDER BY lasku.piiri, tilausrivi.osasto, tilausrivi.try";
   $eresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($eresult)) {

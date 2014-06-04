@@ -17,14 +17,14 @@ elseif ($tee == 'vanhat') {
 }
 
 if ($tee == '') {
-  $query = "  SELECT lasku.ytunnus, lasku.nimi, lasku.toim_nimi, count(tilausrivi.tunnus) riveja, sum(tilausrivi.tilkpl) myyntieria
-        FROM lasku
-        JOIN tilausrivi ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi = 'Z'
-        WHERE lasku.yhtio = '$kukarow[yhtio]'
-        and lasku.tila = 'Z'
-        and lasku.alatila = 'A'
-        GROUP BY 1,2,3
-        ORDER BY 1,2,3";
+  $query = "SELECT lasku.ytunnus, lasku.nimi, lasku.toim_nimi, count(tilausrivi.tunnus) riveja, sum(tilausrivi.tilkpl) myyntieria
+            FROM lasku
+            JOIN tilausrivi ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi = 'Z'
+            WHERE lasku.yhtio = '$kukarow[yhtio]'
+            and lasku.tila    = 'Z'
+            and lasku.alatila = 'A'
+            GROUP BY 1,2,3
+            ORDER BY 1,2,3";
   $tarrares = mysql_query($query) or pupe_error($query);
 
   echo "<font class='message'>".t("Tulostamattomat")."</font><br><br>";
@@ -48,9 +48,9 @@ if ($tee == '') {
     echo "<tr><td colspan='3'>".t("Yhteensä").":</td><td>$yhtriveja</td><td>$yhteria</td></tr>";
     echo "</table><br>";
 
-    $query = "  SELECT *
-          from kirjoittimet
-          where yhtio = '$kukarow[yhtio]'";
+    $query = "SELECT *
+              from kirjoittimet
+              where yhtio = '$kukarow[yhtio]'";
     $kires = mysql_query($query) or pupe_error($query);
 
     echo "<select name='kirjoitin'>";
@@ -72,15 +72,15 @@ if ($tee == '') {
 
   echo "<br><br><font class='head'>".t("Tulostetut keräyserätarrat")."</font><hr>";
 
-  $query = "  SELECT DATE_FORMAT(lasku.luontiaika, '%Y-%m-%d %H:%i') luontiaika, lasku.toimaika, lasku.ytunnus, lasku.nimi, lasku.toim_nimi, group_concat(lasku.tunnus) laskutunnukset, count(tilausrivi.tunnus) riveja, sum(tilausrivi.tilkpl) myyntieria
-        FROM lasku
-        JOIN tilausrivi ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi = 'Z'
-        WHERE lasku.yhtio = '$kukarow[yhtio]'
-        and lasku.tila = 'Z'
-        and lasku.alatila = 'X'
-        and lasku.luontiaika >= date_sub(now(), INTERVAL 30 DAY)
-        GROUP BY 1,2,3,4,5
-        ORDER BY 1 DESC,2 DESC,3,4,5";
+  $query = "SELECT DATE_FORMAT(lasku.luontiaika, '%Y-%m-%d %H:%i') luontiaika, lasku.toimaika, lasku.ytunnus, lasku.nimi, lasku.toim_nimi, group_concat(lasku.tunnus) laskutunnukset, count(tilausrivi.tunnus) riveja, sum(tilausrivi.tilkpl) myyntieria
+            FROM lasku
+            JOIN tilausrivi ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi = 'Z'
+            WHERE lasku.yhtio    = '$kukarow[yhtio]'
+            and lasku.tila       = 'Z'
+            and lasku.alatila    = 'X'
+            and lasku.luontiaika >= date_sub(now(), INTERVAL 30 DAY)
+            GROUP BY 1,2,3,4,5
+            ORDER BY 1 DESC,2 DESC,3,4,5";
   $tarrares = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($tarrares) > 0) {
@@ -94,9 +94,9 @@ if ($tee == '') {
     $yhtriveja  = 0;
     $yhteria  = 0;
 
-    $query = "  SELECT *
-          from kirjoittimet
-          where yhtio = '$kukarow[yhtio]'";
+    $query = "SELECT *
+              from kirjoittimet
+              where yhtio = '$kukarow[yhtio]'";
     $kires2 = mysql_query($query) or pupe_error($query);
 
     while ($tarrarow = mysql_fetch_array($tarrares)) {

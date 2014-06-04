@@ -110,10 +110,10 @@ if (mysql_field_name($result, $i) == "sisviesti1") {
 if (mysql_field_name($result, $i) == "maa" or
   mysql_field_name($result, $i) == "toim_maa") {
 
-  $query = "  SELECT distinct koodi, nimi
-        FROM maat
-        WHERE nimi != ''
-        ORDER BY koodi";
+  $query = "SELECT distinct koodi, nimi
+            FROM maat
+            WHERE nimi != ''
+            ORDER BY koodi";
   $vresult = mysql_query($query) or pupe_error($query);
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 

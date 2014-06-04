@@ -30,24 +30,24 @@ elseif (@include("parametrit.inc")) {
 else exit;
 
 if ($tee == 'tarjous') {
-  $query = "  SELECT lasku.tunnus laskutunnus, asiakas.*
-        from lasku, asiakas
-        where lasku.yhtio   = asiakas.yhtio and
-        lasku.liitostunnus   = asiakas.tunnus and
-        lasku.yhtio     = '$kukarow[yhtio]' and
-        lasku.tila       = 'B' and
-        lasku.liitostunnus   = '$kukarow[oletus_asiakas]' and
-        lasku.alatila    = '$ostoskori'";
+  $query = "SELECT lasku.tunnus laskutunnus, asiakas.*
+            from lasku, asiakas
+            where lasku.yhtio  = asiakas.yhtio and
+            lasku.liitostunnus = asiakas.tunnus and
+            lasku.yhtio        = '$kukarow[yhtio]' and
+            lasku.tila         = 'B' and
+            lasku.liitostunnus = '$kukarow[oletus_asiakas]' and
+            lasku.alatila      = '$ostoskori'";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) == 1) {
     $laskurow = mysql_fetch_array($result);
 
-    $query = "  SELECT *, concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
-          FROM tilausrivi
-          WHERE otunnus = '$laskurow[laskutunnus]'
-          and yhtio = '$kukarow[yhtio]'
-          ORDER BY tunnus";
+    $query = "SELECT *, concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
+              FROM tilausrivi
+              WHERE otunnus = '$laskurow[laskutunnus]'
+              and yhtio     = '$kukarow[yhtio]'
+              ORDER BY tunnus";
     $result = mysql_query($query) or pupe_error($query);
 
     //kuollaan jos yhtään riviä ei löydy
@@ -94,12 +94,12 @@ if ($tee == 'tarjous') {
 
 
 if ($tee == "poistakori") {
-  $query = "  SELECT tunnus
-        from lasku
-        where yhtio = '$kukarow[yhtio]' and
-        tila = 'B' and
-        liitostunnus = '$kukarow[oletus_asiakas]' and
-        alatila='$ostoskori'";
+  $query = "SELECT tunnus
+            from lasku
+            where yhtio  = '$kukarow[yhtio]' and
+            tila         = 'B' and
+            liitostunnus = '$kukarow[oletus_asiakas]' and
+            alatila='$ostoskori'";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) == 1) {
@@ -107,16 +107,16 @@ if ($tee == "poistakori") {
     //$ostoskori = mysql_fetch_array($result);
     $kalakori = mysql_fetch_array($result);
 
-    $query = "  DELETE from tilausrivi
-          where yhtio = '$kukarow[yhtio]' and
-          tyyppi = 'B' and
-          otunnus = '$kalakori[tunnus]'";
+    $query = "DELETE from tilausrivi
+              where yhtio = '$kukarow[yhtio]' and
+              tyyppi      = 'B' and
+              otunnus     = '$kalakori[tunnus]'";
     $result = mysql_query($query) or pupe_error($query);
 
-    $query = "  DELETE from lasku
-          where yhtio = '$kukarow[yhtio]' and
-          tila = 'B' and
-          tunnus = '$kalakori[tunnus]'";
+    $query = "DELETE from lasku
+              where yhtio = '$kukarow[yhtio]' and
+              tila        = 'B' and
+              tunnus      = '$kalakori[tunnus]'";
     $result = mysql_query($query) or pupe_error($query);
 
     echo "<font class='message'>".t("Ostoskori tyhjennetty").".</font><br>";
@@ -129,11 +129,11 @@ if ($tee == "poistakori") {
 }
 
 if ($tee == "poistarivi") {
-  $query = "  SELECT tunnus from lasku
-        where yhtio = '$kukarow[yhtio]' and
-        tila = 'B' and
-        liitostunnus = '$kukarow[oletus_asiakas]' and
-        alatila='$ostoskori'";
+  $query = "SELECT tunnus from lasku
+            where yhtio  = '$kukarow[yhtio]' and
+            tila         = 'B' and
+            liitostunnus = '$kukarow[oletus_asiakas]' and
+            alatila='$ostoskori'";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) == 1) {
@@ -141,10 +141,10 @@ if ($tee == "poistarivi") {
     //$ostoskori = mysql_fetch_array($result);
     $kalakori = mysql_fetch_array($result);
 
-    $query = "  DELETE from tilausrivi
-          where yhtio = '$kukarow[yhtio]' and
-          tyyppi = 'B' and
-          tunnus = '$rivitunnus'";
+    $query = "DELETE from tilausrivi
+              where yhtio = '$kukarow[yhtio]' and
+              tyyppi      = 'B' and
+              tunnus      = '$rivitunnus'";
     $result = mysql_query($query) or pupe_error($query);
   }
   else {
@@ -168,13 +168,13 @@ if ($tee == "") {
 
 
   if ($ostoskori != '') {
-    $query = "  SELECT lasku.tunnus
-          from lasku, tilausrivi
-          where lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and
-          lasku.yhtio = '$kukarow[yhtio]' and
-          tila = 'B' and
-          liitostunnus = '$kukarow[oletus_asiakas]' and
-          alatila='$ostoskori'";
+    $query = "SELECT lasku.tunnus
+              from lasku, tilausrivi
+              where lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and
+              lasku.yhtio       = '$kukarow[yhtio]' and
+              tila              = 'B' and
+              liitostunnus      = '$kukarow[oletus_asiakas]' and
+              alatila='$ostoskori'";
     $result = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($result) > 0 and file_exists("tulosta_tarjous.inc")) {
@@ -196,16 +196,16 @@ if ($tee == "") {
     $lisa = "";
   }
 
-  $query = "  SELECT lasku.*, count(*) rivit
-        FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
-        JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'B')
-        WHERE lasku.yhtio = '$kukarow[yhtio]' and
-        lasku.tila = 'B' and
-        lasku.liitostunnus = '$kukarow[oletus_asiakas]'
-        $lisa
-        GROUP BY lasku.tunnus
-        HAVING rivit > 0
-        ORDER BY alatila";
+  $query = "SELECT lasku.*, count(*) rivit
+            FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
+            JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'B')
+            WHERE lasku.yhtio  = '$kukarow[yhtio]' and
+            lasku.tila         = 'B' and
+            lasku.liitostunnus = '$kukarow[oletus_asiakas]'
+            $lisa
+            GROUP BY lasku.tunnus
+            HAVING rivit > 0
+            ORDER BY alatila";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -239,11 +239,11 @@ if ($tee == "") {
       echo "<th>".t("Poista")."</th>";
       echo "</tr>";
 
-      $query = "  SELECT *
-            FROM tilausrivi
-            WHERE yhtio = '$kukarow[yhtio]' and
-            otunnus = '$ostoskori[tunnus]' and
-            tyyppi = 'B'";
+      $query = "SELECT *
+                FROM tilausrivi
+                WHERE yhtio = '$kukarow[yhtio]' and
+                otunnus     = '$ostoskori[tunnus]' and
+                tyyppi      = 'B'";
       $riviresult = mysql_query($query) or pupe_error($query);
 
       while ($koririvi = mysql_fetch_array($riviresult)) {

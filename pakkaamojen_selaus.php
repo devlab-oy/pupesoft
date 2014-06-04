@@ -25,10 +25,10 @@ if ($tee == "nollaa") {
   }
 
   if ($tunnukset != "") {
-    $query = "   UPDATE lasku
-          SET pakkaamo = 0
-          WHERE $logistiikka_yhtiolisa
-          AND tunnus in($tunnukset)";
+    $query = "UPDATE lasku
+              SET pakkaamo = 0
+              WHERE $logistiikka_yhtiolisa
+              AND tunnus in($tunnukset)";
     $nollausres = mysql_query($query) or pupe_error($query);
 
     echo t("Lokerot nollattiin tilauksista")." : ".$tunnukset;
@@ -44,10 +44,10 @@ echo "<form name='find' method='post'>";
 
 echo "<tr><td>".t("Valitse pakkaamo:")."</td><td><select name='tupakkaamo' onchange='submit()'>";
 
-$query = "  SELECT distinct nimi
-      FROM pakkaamo
-      WHERE $logistiikka_yhtiolisa
-      ORDER BY nimi";
+$query = "SELECT distinct nimi
+          FROM pakkaamo
+          WHERE $logistiikka_yhtiolisa
+          ORDER BY nimi";
 $result = mysql_query($query) or pupe_error($query);
 
 echo "<option value='KAIKKI'>".t("Näytä kaikki")."</option>";
@@ -74,10 +74,10 @@ echo "</select></td></tr>";
 echo "</form></table>";
 
 if ($tupakkaamo == '' and $kukarow['oletus_pakkaamo'] != '') {
-  $query = "  SELECT group_concat(tunnus SEPARATOR ',') tunnukset
-          FROM pakkaamo
-        WHERE $logistiikka_yhtiolisa
-        AND nimi = '$kukarow[oletus_pakkaamo]'";
+  $query = "SELECT group_concat(tunnus SEPARATOR ',') tunnukset
+            FROM pakkaamo
+            WHERE $logistiikka_yhtiolisa
+            AND nimi = '$kukarow[oletus_pakkaamo]'";
   $etsire = mysql_query($query) or pupe_error($query);
   $etsirow = mysql_fetch_array($etsire);
 
@@ -85,18 +85,18 @@ if ($tupakkaamo == '' and $kukarow['oletus_pakkaamo'] != '') {
 
 }
 elseif ($tupakkaamo != '' and $tupakkaamo != 'KAIKKI') {
-  $query = "  SELECT group_concat(tunnus SEPARATOR ',') tunnukset
-          FROM pakkaamo
-        WHERE $logistiikka_yhtiolisa
-        AND nimi = '$tupakkaamo'";
+  $query = "SELECT group_concat(tunnus SEPARATOR ',') tunnukset
+            FROM pakkaamo
+            WHERE $logistiikka_yhtiolisa
+            AND nimi = '$tupakkaamo'";
   $etsire = mysql_query($query) or pupe_error($query);
   $etsirow = mysql_fetch_array($etsire);
 
   $haku .= " and lasku.pakkaamo in($etsirow[tunnukset])";
 }
 
-$query = "  SELECT   pakkaamo.nimi pakkaamo,
-           pakkaamo.lokero,
+$query = "SELECT   pakkaamo.nimi pakkaamo,
+          pakkaamo.lokero,
           lasku.ytunnus,
           lasku.tunnus,
           lasku.lahetepvm,
@@ -106,8 +106,8 @@ $query = "  SELECT   pakkaamo.nimi pakkaamo,
           FROM lasku
           JOIN pakkaamo ON (pakkaamo.yhtio = lasku.yhtio and pakkaamo.tunnus = lasku.pakkaamo)
           WHERE lasku.$logistiikka_yhtiolisa
-          AND lasku.tila in ('L','G')
-          AND lasku.alatila in ('A','C')
+          AND lasku.tila     in ('L','G')
+          AND lasku.alatila  in ('A','C')
           AND lasku.pakkaamo > 0
           $haku
           GROUP BY pakkaamo.nimi, pakkaamo.lokero, lasku.ytunnus, lasku.tunnus, lasku.lahetepvm, lasku.yhtio, lasku.yhtio_nimi, asnimi
@@ -162,13 +162,13 @@ if (mysql_num_rows($pakkaamore) != 0) {
 
     }
 
-    $query = "  SELECT min(tilausrivi.kerattyaika) kerayspvm
-          FROM tilausrivi USE INDEX (yhtio_otunnus)
-          JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa = '')
-          WHERE tilausrivi.$logistiikka_yhtiolisa
-          and tilausrivi.otunnus = '$row[tunnus]'
-          and tilausrivi.kerattyaika != '0000-00-00 00:00:00'
-          and tilausrivi.var not in ('P','J','O')";
+    $query = "SELECT min(tilausrivi.kerattyaika) kerayspvm
+              FROM tilausrivi USE INDEX (yhtio_otunnus)
+              JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa = '')
+              WHERE tilausrivi.$logistiikka_yhtiolisa
+              and tilausrivi.otunnus      = '$row[tunnus]'
+              and tilausrivi.kerattyaika != '0000-00-00 00:00:00'
+              and tilausrivi.var          not in ('P','J','O')";
     $kerayspvmres = mysql_query($query) or pupe_error($query);
     $kerayspvmrow = mysql_fetch_array($kerayspvmres);
 

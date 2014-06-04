@@ -120,17 +120,17 @@ function echo_myyntiseuranta_table() {
 function hae_tulos_ja_liikevaihto($nykyinen_kvartaali) {
   global $kukarow;
 
-  $query = "  SELECT
-        IFNULL(round(Sum(if (tili.sisainen_taso != '3A', summa, 0)) * -1, 2), 0) AS tulos,
-        IFNULL(round(Sum(if (tili.sisainen_taso LIKE '31%', summa, 0)) * -1, 2), 0) AS liikevaihto
-        FROM tiliointi
-        JOIN tili ON (tili.yhtio = tiliointi.yhtio
-          AND tili.tilino = tiliointi.tilino
-          AND tili.sisainen_taso LIKE '3%')
-        WHERE tiliointi.yhtio = '{$kukarow['yhtio']}'
-        AND tiliointi.korjattu = ''
-        AND tiliointi.tapvm >= '{$nykyinen_kvartaali['start_date']}'
-        AND tiliointi.tapvm <= '{$nykyinen_kvartaali['end_date']}'";
+  $query = "SELECT
+            IFNULL(round(Sum(if (tili.sisainen_taso != '3A', summa, 0)) * -1, 2), 0) AS tulos,
+            IFNULL(round(Sum(if (tili.sisainen_taso LIKE '31%', summa, 0)) * -1, 2), 0) AS liikevaihto
+            FROM tiliointi
+            JOIN tili ON (tili.yhtio = tiliointi.yhtio
+              AND tili.tilino        = tiliointi.tilino
+              AND tili.sisainen_taso LIKE '3%')
+            WHERE tiliointi.yhtio    = '{$kukarow['yhtio']}'
+            AND tiliointi.korjattu   = ''
+            AND tiliointi.tapvm      >= '{$nykyinen_kvartaali['start_date']}'
+            AND tiliointi.tapvm      <= '{$nykyinen_kvartaali['end_date']}'";
   $result = pupe_query($query);
 
   return mysql_fetch_assoc($result);
@@ -142,16 +142,16 @@ function hae_avoimet_tilaukset($kuka_tunnus) {
   $query_ale_lisa = generoi_alekentta('M');
   $query_myyntihinta = "if(lasku.alatila='X', 0, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa})";
 
-  $sumquery = "  SELECT
-          IFNULL(round(sum($query_myyntihinta), 2), 0) arvo,
-          IFNULL(round(sum(if(lasku.myyja = '$kuka_tunnus', $query_myyntihinta, 0)), 2), 0) myyjan_arvo
-          FROM lasku use index (tila_index)
-          JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio = lasku.yhtio
-            and tilausrivi.otunnus = lasku.tunnus
-            and tilausrivi.tyyppi != 'D')
-          WHERE lasku.yhtio = '$kukarow[yhtio]'
-          and lasku.tila in ('L', 'N')
-          and lasku.alatila != 'X'";
+  $sumquery = "SELECT
+               IFNULL(round(sum($query_myyntihinta), 2), 0) arvo,
+               IFNULL(round(sum(if(lasku.myyja = '$kuka_tunnus', $query_myyntihinta, 0)), 2), 0) myyjan_arvo
+               FROM lasku use index (tila_index)
+               JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio = lasku.yhtio
+                 and tilausrivi.otunnus  = lasku.tunnus
+                 and tilausrivi.tyyppi  != 'D')
+               WHERE lasku.yhtio         = '$kukarow[yhtio]'
+               and lasku.tila            in ('L', 'N')
+               and lasku.alatila        != 'X'";
   $sumresult = pupe_query($sumquery);
 
   return mysql_fetch_assoc($sumresult);
@@ -160,15 +160,15 @@ function hae_avoimet_tilaukset($kuka_tunnus) {
 function hae_myyjan_myynti_ja_kate($aika, $kuka_tunnus) {
   global $kukarow;
 
-  $query = "  SELECT IFNULL(round(sum(lasku.arvo),0), 0) myynti,
-        IFNULL(round(sum(lasku.kate),0), 0) kate
-        FROM lasku use index (yhtio_tila_tapvm)
-        WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-        and lasku.tila = 'L'
-        and lasku.alatila = 'X'
-        and lasku.tapvm >= '{$aika['start_date']}'
-        and lasku.tapvm <= '{$aika['end_date']}'
-        and lasku.myyja = '{$kuka_tunnus}'";
+  $query = "SELECT IFNULL(round(sum(lasku.arvo),0), 0) myynti,
+            IFNULL(round(sum(lasku.kate),0), 0) kate
+            FROM lasku use index (yhtio_tila_tapvm)
+            WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
+            and lasku.tila    = 'L'
+            and lasku.alatila = 'X'
+            and lasku.tapvm   >= '{$aika['start_date']}'
+            and lasku.tapvm   <= '{$aika['end_date']}'
+            and lasku.myyja   = '{$kuka_tunnus}'";
   $result = pupe_query($query);
 
   return mysql_fetch_assoc($result);

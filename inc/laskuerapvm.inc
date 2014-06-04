@@ -39,14 +39,14 @@ if ($aika != '') {
   if ($aika == 'kk') {
     $tapa = "LEFT(erpcm,7)";
   }
-  $query = "  SELECT $tapa aika, sum(summa * valuu.kurssi) summa, count(*) kpl
-        FROM lasku, valuu
-        WHERE lasku.yhtio = '$kukarow[yhtio]'
-        and valuu.yhtio = '$kukarow[yhtio]'
-        and lasku.valkoodi = valuu.nimi
-        and lasku.tila in ('H','M','P','Q')
-        GROUP BY Aika
-        ORDER BY Aika";
+  $query = "SELECT $tapa aika, sum(summa * valuu.kurssi) summa, count(*) kpl
+            FROM lasku, valuu
+            WHERE lasku.yhtio  = '$kukarow[yhtio]'
+            and valuu.yhtio    = '$kukarow[yhtio]'
+            and lasku.valkoodi = valuu.nimi
+            and lasku.tila     in ('H','M','P','Q')
+            GROUP BY Aika
+            ORDER BY Aika";
   $result = mysql_query($query) or pupe_error($query);
 
   echo "<table>";

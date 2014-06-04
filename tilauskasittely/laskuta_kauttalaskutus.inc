@@ -16,11 +16,11 @@ $asiytunnus4 = str_replace("-", "", $GLOBALS["toim_asiakkaantiedot"]["ytunnus"])
 
 // KAUTTALASKUTUSKIKKARE
 $asquery = "SELECT tunnus
-      FROM asiakas
-      WHERE yhtio = '$kukarow[yhtio]'
-      AND laji != 'P'
-      AND ytunnus in ('$asiytunnus1','$asiytunnus2', '$asiytunnus3','$asiytunnus4','$osrow[maa]$asiytunnus1','$osrow[maa]$asiytunnus2', '$osrow[maa]$asiytunnus3','$osrow[maa]$asiytunnus4')
-      AND toim_ovttunnus  = '{$GLOBALS["toim_asiakkaantiedot"]["toim_ovttunnus"]}'";
+            FROM asiakas
+            WHERE yhtio         = '$kukarow[yhtio]'
+            AND laji           != 'P'
+            AND ytunnus         in ('$asiytunnus1','$asiytunnus2', '$asiytunnus3','$asiytunnus4','$osrow[maa]$asiytunnus1','$osrow[maa]$asiytunnus2', '$osrow[maa]$asiytunnus3','$osrow[maa]$asiytunnus4')
+            AND toim_ovttunnus  = '{$GLOBALS["toim_asiakkaantiedot"]["toim_ovttunnus"]}'";
 $result = mysql_query($asquery) or pupe_error($asquery);
 $asirow = mysql_fetch_assoc($result);
 
@@ -39,22 +39,22 @@ if ((int) $tilausnumero == 0) {
 
   $kaikkimeniok = "";
 
-  $query = "  INSERT into lasku set
-        yhtio_nimi      = '$yhtiorow[nimi]',
-        yhtio_osoite    = '$yhtiorow[osoite]',
-        yhtio_postino    = '$yhtiorow[postino]',
-        yhtio_postitp    = '$yhtiorow[postitp]',
-        yhtio_maa      = '$yhtiorow[maa]',
-        yhtio_ovttunnus    = '$yhtiorow[ovttunnus]',
-        yhtio_kotipaikka  = '$yhtiorow[kotipaikka]',
-        yhtio_toimipaikka  = '',
-        alv_tili      = '$yhtiorow[alv]',
-        yhtio            = '$kukarow[yhtio]',
-        tila             = 'N',
-        ytunnus           = '*',
-        alv             = '".alv_oletus()."',
-        laatija          = 'verkkolas',
-        luontiaika       = now()";
+  $query = "INSERT into lasku set
+            yhtio_nimi        = '$yhtiorow[nimi]',
+            yhtio_osoite      = '$yhtiorow[osoite]',
+            yhtio_postino     = '$yhtiorow[postino]',
+            yhtio_postitp     = '$yhtiorow[postitp]',
+            yhtio_maa         = '$yhtiorow[maa]',
+            yhtio_ovttunnus   = '$yhtiorow[ovttunnus]',
+            yhtio_kotipaikka  = '$yhtiorow[kotipaikka]',
+            yhtio_toimipaikka = '',
+            alv_tili          = '$yhtiorow[alv]',
+            yhtio             = '$kukarow[yhtio]',
+            tila              = 'N',
+            ytunnus           = '*',
+            alv               = '".alv_oletus()."',
+            laatija           = 'verkkolas',
+            luontiaika        = now()";
   $result = mysql_query($query) or pupe_error($query);
   $tilausnumero = mysql_insert_id();
 }
@@ -63,21 +63,21 @@ if ((int) $tilausnumero == 0) {
 $kukarow["kesken"] = $tilausnumero;
 
 // Nämä laskut menevät suoraan laskutukseen eikä niitä ketjuteta
-$query = "  UPDATE lasku SET
-      eilahetetta  = 'o',
-      ketjutus  = 'o',
-      viesti    = '$osrow[sisviesti1]',
-      rahtivapaa  = 'o',
-      kohdistettu = 'K'
-      WHERE yhtio = '$kukarow[yhtio]'
-      and tunnus = '$tilausnumero'";
+$query = "UPDATE lasku SET
+          eilahetetta = 'o',
+          ketjutus    = 'o',
+          viesti      = '$osrow[sisviesti1]',
+          rahtivapaa  = 'o',
+          kohdistettu = 'K'
+          WHERE yhtio = '$kukarow[yhtio]'
+          and tunnus  = '$tilausnumero'";
 $result = mysql_query($query) or pupe_error($query);
 
 //Laitetaan alkuperäinen ostolasku liitteeksi OLETETAAN ETTÄ SE ON FINVOISSIA...
-$query = "  SELECT ebid, nimi, summa, valkoodi
-      FROM lasku
-      WHERE yhtio = '$kukarow[yhtio]'
-      and tunnus = '$tunnus'";
+$query = "SELECT ebid, nimi, summa, valkoodi
+          FROM lasku
+          WHERE yhtio = '$kukarow[yhtio]'
+          and tunnus  = '$tunnus'";
 $kuvalaskures = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($kuvalaskures) > 0) {
@@ -92,52 +92,52 @@ if (mysql_num_rows($kuvalaskures) > 0) {
     $filesize = strlen($GLOBALS["xmlstr"]);
     $filename = array_pop(explode("/", $GLOBALS["file"]));
 
-    $query = "  INSERT INTO liitetiedostot SET
-          yhtio          = '$kukarow[yhtio]',
-          liitos         = 'lasku',
-          liitostunnus     = '$tilausnumero',
-          data           = '$GLOBALS[xmlstr]',
-          selite         = '$selite',
-          kieli        = '$yhtiorow[kieli]',
-          filename       = '$filename',
-          filesize       = '$filesize',
-          filetype       = 'text/xml',
-          image_width      = '',
-          image_height    = '',
-          image_bits      = '',
-          image_channels    = '',
-          kayttotarkoitus    = '',
-          jarjestys      = '1',
-          laatija        = 'verkkolas',
-          luontiaika      = now()";
+    $query = "INSERT INTO liitetiedostot SET
+              yhtio           = '$kukarow[yhtio]',
+              liitos          = 'lasku',
+              liitostunnus    = '$tilausnumero',
+              data            = '$GLOBALS[xmlstr]',
+              selite          = '$selite',
+              kieli           = '$yhtiorow[kieli]',
+              filename        = '$filename',
+              filesize        = '$filesize',
+              filetype        = 'text/xml',
+              image_width     = '',
+              image_height    = '',
+              image_bits      = '',
+              image_channels  = '',
+              kayttotarkoitus = '',
+              jarjestys       = '1',
+              laatija         = 'verkkolas',
+              luontiaika      = now()";
     $Xresult = mysql_query($query) or pupe_error($query);
   }
 }
 
-$query = "  SELECT *
-      from lasku
-      where yhtio = '$kukarow[yhtio]'
-      and tunnus  = '$tilausnumero'";
+$query = "SELECT *
+          from lasku
+          where yhtio = '$kukarow[yhtio]'
+          and tunnus  = '$tilausnumero'";
 $result = mysql_query($query) or pupe_error($query);
 $laskurow = mysql_fetch_assoc($result);
 
 for ($i=0; $i<count($rtuoteno); $i++) {
 
-  $query = "  SELECT *
-        FROM tuote
-        where yhtio = '$kukarow[yhtio]'
-        and tuoteno = '".$rtuoteno[$i]["tuoteno"]."'";
+  $query = "SELECT *
+            FROM tuote
+            where yhtio = '$kukarow[yhtio]'
+            and tuoteno = '".$rtuoteno[$i]["tuoteno"]."'";
   $result = mysql_query($query) or pupe_error($query);
   $rivirow = mysql_fetch_assoc($result);
 
   if ($rtuoteno[$i]["saldoton"] == "") {
     // Aina oletuspaikalta
-    $query = "  SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso
-          FROM tuotepaikat
-          WHERE yhtio  = '$kukarow[yhtio]'
-              and tuoteno  = '".$rtuoteno[$i]["tuoteno"]."'
-              and oletus != ''
-              LIMIT 1";
+    $query = "SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso
+              FROM tuotepaikat
+              WHERE yhtio      = '$kukarow[yhtio]'
+                  and tuoteno  = '".$rtuoteno[$i]["tuoteno"]."'
+                  and oletus  != ''
+                  LIMIT 1";
     $olpares = mysql_query($query) or pupe_error($query);
     $olparow = mysql_fetch_assoc($olpares);
   }
@@ -187,40 +187,40 @@ for ($i=0; $i<count($rtuoteno); $i++) {
     $ale_query_insert_lisa .= " ale{$alepostfix} = '".$lis_ale["ale{$alepostfix}"]."', ";
   }
 
-  $query = "  INSERT into tilausrivi set
-        hyllyalue     = '$olparow[hyllyalue]',
-        hyllynro     = '$olparow[hyllynro]',
-        hyllyvali     = '$olparow[hyllyvali]',
-        hyllytaso     = '$olparow[hyllytaso]',
-        tilaajanrivinro = '".$rtuoteno[$i]["tilaajanrivinro"]."',
-        laatija     = 'verkkolas',
-        laadittu     = now(),
-        yhtio       = '$kukarow[yhtio]',
-        tuoteno     = '".$rtuoteno[$i]["tuoteno"]."',
-        varattu     = '".$rtuoteno[$i]["kpl"]."',
-        yksikko     = '".$rtuoteno[$i]["yksikko"]."',
-        kpl       = 0,
-        kpl2      = 0,
-        tilkpl       = '".$rtuoteno[$i]["kpl"]."',
-        jt        = 0,
-        {$ale_query_insert_lisa}
-        alv       = '$lis_alv',
-        netto      = '$lis_netto',
-        hinta       = '$lis_hinta',
-        rivihinta    = '',
-        kerayspvm     = '',
-        otunnus     = '$tilausnumero',
-        uusiotunnus   = '',
-        tyyppi       = 'L',
-        toimaika     = now(),
-        kommentti     = '".$tilausrivin_kommentti."',
-        var       = '',
-        try        = '$rivirow[try]',
-        osasto      = '$rivirow[osasto]',
-        perheid      = '',
-        perheid2    = '',
-        nimitys     = '".$rtuoteno[$i]["nimitys"]."',
-        jaksotettu    = ''";
+  $query = "INSERT into tilausrivi set
+            hyllyalue       = '$olparow[hyllyalue]',
+            hyllynro        = '$olparow[hyllynro]',
+            hyllyvali       = '$olparow[hyllyvali]',
+            hyllytaso       = '$olparow[hyllytaso]',
+            tilaajanrivinro = '".$rtuoteno[$i]["tilaajanrivinro"]."',
+            laatija         = 'verkkolas',
+            laadittu        = now(),
+            yhtio           = '$kukarow[yhtio]',
+            tuoteno         = '".$rtuoteno[$i]["tuoteno"]."',
+            varattu         = '".$rtuoteno[$i]["kpl"]."',
+            yksikko         = '".$rtuoteno[$i]["yksikko"]."',
+            kpl             = 0,
+            kpl2            = 0,
+            tilkpl          = '".$rtuoteno[$i]["kpl"]."',
+            jt              = 0,
+            {$ale_query_insert_lisa}
+            alv             = '$lis_alv',
+            netto           = '$lis_netto',
+            hinta           = '$lis_hinta',
+            rivihinta       = '',
+            kerayspvm       = '',
+            otunnus         = '$tilausnumero',
+            uusiotunnus     = '',
+            tyyppi          = 'L',
+            toimaika        = now(),
+            kommentti       = '".$tilausrivin_kommentti."',
+            var             = '',
+            try             = '$rivirow[try]',
+            osasto          = '$rivirow[osasto]',
+            perheid         = '',
+            perheid2        = '',
+            nimitys         = '".$rtuoteno[$i]["nimitys"]."',
+            jaksotettu      = ''";
   $result = mysql_query($query) or pupe_error($query);
 }
 

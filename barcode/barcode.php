@@ -174,7 +174,7 @@ define("BCD_C128_BAR_4"              ,   4);
       }
       if ($this->mStyle & BCS_IMAGE_PNG) {
         ImagePng($this->mImg, $filename);
-      } else if ($this->mStyle & BCS_IMAGE_JPEG) {
+      } elseif ($this->mStyle & BCS_IMAGE_JPEG) {
         ImageJpeg($this->mImg, $filename);
       }
       // else __DEBUG__("FlushObject: No output type");

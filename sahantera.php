@@ -31,11 +31,11 @@ echo "<td><input type='text' name='tulostakappale' size='3' value='$tulostakappa
 echo "<td><select name='kirjoitin'>";
 echo "<option value=''>".t("Ei kirjoitinta")."</option>";
 
-$query = "  SELECT *
-      FROM kirjoittimet
-      WHERE yhtio = '$kukarow[yhtio]'
-      and komento != 'email'
-      order by kirjoitin";
+$query = "SELECT *
+          FROM kirjoittimet
+          WHERE yhtio  = '$kukarow[yhtio]'
+          and komento != 'email'
+          order by kirjoitin";
 $kires = mysql_query($query) or pupe_error($query);
 
 while ($kirow = mysql_fetch_array($kires)) {
@@ -55,10 +55,10 @@ echo "<br>";
 // Virhetarkastukset
 if ($tee == "hae") {
 
-  $query = "  SELECT *
-        FROM tuote
-        WHERE yhtio = '{$kukarow["yhtio"]}'
-        and tuoteno = '{$tuoteno}'";
+  $query = "SELECT *
+            FROM tuote
+            WHERE yhtio = '{$kukarow["yhtio"]}'
+            and tuoteno = '{$tuoteno}'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 1) {
@@ -119,10 +119,10 @@ if ($tee == "jatka") {
 
 if ($tee == "tulosta") {
 
-  $query = "  SELECT komento, kirjoitin
-        FROM kirjoittimet
-        WHERE yhtio = '{$kukarow["yhtio"]}'
-        AND tunnus = '{$kirjoitin}'";
+  $query = "SELECT komento, kirjoitin
+            FROM kirjoittimet
+            WHERE yhtio = '{$kukarow["yhtio"]}'
+            AND tunnus  = '{$kirjoitin}'";
   $result = pupe_query($query);
   $krivi = mysql_fetch_assoc($result);
 

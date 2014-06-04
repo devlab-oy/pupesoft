@@ -162,17 +162,17 @@ if ($tee == "TULOSTA") {
   while ($row = mysql_fetch_array($res)) {
 
     if ($yhtiorow["kalenterimerkinnat"] == "") {
-      $kysely = "  INSERT INTO kalenteri
-            SET tapa     = '".t("Osoitetarrat")."',
-            asiakas      = '$row[ytunnus]',
-            liitostunnus   = '$row[tunnus]',
-            kuka         = '$kukarow[kuka]',
-            yhtio        = '$kukarow[yhtio]',
-            tyyppi       = 'Memo',
-            pvmalku      = now(),
-            kentta01     = '$kukarow[nimi] tulosti osoitetarrat.\n$asmemo_viesti',
-            laatija      = '$kukarow[kuka]',
-            luontiaika    = now()";
+      $kysely = "INSERT INTO kalenteri
+                 SET tapa     = '".t("Osoitetarrat")."',
+                 asiakas      = '$row[ytunnus]',
+                 liitostunnus = '$row[tunnus]',
+                 kuka         = '$kukarow[kuka]',
+                 yhtio        = '$kukarow[yhtio]',
+                 tyyppi       = 'Memo',
+                 pvmalku      = now(),
+                 kentta01     = '$kukarow[nimi] tulosti osoitetarrat.\n$asmemo_viesti',
+                 laatija      = '$kukarow[kuka]',
+                 luontiaika   = now()";
       $result = mysql_query($kysely) or pupe_error($kysely);
     }
 

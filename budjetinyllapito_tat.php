@@ -7,7 +7,7 @@ $_REQUEST["kaunisnimi"] = isset($_REQUEST["kaunisnimi"]) ? str_replace("/", "", 
 ini_set("memory_limit", "5G");
 
 ///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
-$useslave = 1;
+$useslave = 2;
 
 require ("inc/parametrit.inc");
 

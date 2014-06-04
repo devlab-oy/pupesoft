@@ -93,12 +93,12 @@ if (!function_exists("tuotetarkista")) {
       if ($fieldname == "kohde")    $kptyyppi = "O";
       if ($fieldname == "kustp")    $kptyyppi = "K";
 
-      $tpque = "  SELECT tunnus
-            from kustannuspaikka
-            where yhtio = '$kukarow[yhtio]'
-            and tyyppi = '$kptyyppi'
-            and kaytossa != 'E'
-            and tunnus = '$t[$i]'";
+      $tpque = "SELECT tunnus
+                from kustannuspaikka
+                where yhtio   = '$kukarow[yhtio]'
+                and tyyppi    = '$kptyyppi'
+                and kaytossa != 'E'
+                and tunnus    = '$t[$i]'";
       $tpres = pupe_query($tpque);
 
       if (mysql_num_rows($tpres) == 0) {

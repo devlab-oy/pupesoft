@@ -18,8 +18,8 @@ if (!$php_cli) {
 
 $pupe_root_polku = dirname(dirname(__FILE__));
 
-require ("{$pupe_root_polku}/inc/connect.inc");
-require ("{$pupe_root_polku}/inc/functions.inc");
+require "{$pupe_root_polku}/inc/connect.inc";
+require "{$pupe_root_polku}/inc/functions.inc";
 
 $lock_params = array(
   "locktime" => 5400,
@@ -29,8 +29,8 @@ $lock_params = array(
 // Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
 pupesoft_flock($lock_params);
 
-require ("{$pupe_root_polku}/rajapinnat/magento_client.php");
-require ("{$pupe_root_polku}/rajapinnat/edi.php");
+require "{$pupe_root_polku}/rajapinnat/magento_client.php";
+require "{$pupe_root_polku}/rajapinnat/edi.php";
 
 if (empty($magento_api_ana_edi)
   or empty($magento_api_ana_url)

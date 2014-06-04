@@ -4,20 +4,20 @@ if ($kollityht > 0) {
 
   if ($toitarow['logy_rahtikirjanumerot'] != "" and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
 
-    $logyq = "  SELECT min(rahtikirjanro) rahtikirjanro
-          FROM rahtikirjanumero
-          WHERE yhtio = '$kukarow[yhtio]'
-          and kaytettyaika = '0000-00-00 00:00:00'";
+    $logyq = "SELECT min(rahtikirjanro) rahtikirjanro
+              FROM rahtikirjanumero
+              WHERE yhtio      = '$kukarow[yhtio]'
+              and kaytettyaika = '0000-00-00 00:00:00'";
     $logyres = pupe_query($logyq);
     $logyrow = mysql_fetch_assoc($logyres);
 
     $rahtikirjanro = $logyrow["rahtikirjanro"];
 
-    $logyq = "  UPDATE rahtikirjanumero
-          SET kayttaja = '$kukarow[kuka]',
-          kaytettyaika = now()
-          WHERE yhtio = '$kukarow[yhtio]'
-          and rahtikirjanro = '$logyrow[rahtikirjanro]'";
+    $logyq = "UPDATE rahtikirjanumero
+              SET kayttaja = '$kukarow[kuka]',
+              kaytettyaika      = now()
+              WHERE yhtio       = '$kukarow[yhtio]'
+              and rahtikirjanro = '$logyrow[rahtikirjanro]'";
     $logyres = pupe_query($logyq);
   }
   elseif (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {

@@ -22,11 +22,11 @@ if ($php_cli) {
   ini_set("display_errors", 0);
 
   // otetaan tietokanta connect
-  require("inc/connect.inc");
-  require("inc/functions.inc");
+  require "inc/connect.inc";
+  require "inc/functions.inc";
 
   $lock_params = array(
-      "locktime" => 900,
+    "locktime" => 900,
   );
 
   // Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
@@ -56,14 +56,14 @@ if ($php_cli) {
 
   // Avataan kansio
   if ($handle = opendir($e3_ehdotuskansio)) {
-      while (false !== ($file = readdir($handle))) {
+    while (false !== ($file = readdir($handle))) {
       // Napataan headerfilet arrayseen
       if (substr($file, 0, 1) == "h") {
         $filet[] = $file;
       }
-      }
+    }
 
-      closedir($handle);
+    closedir($handle);
   }
 
   if (count($filet) > 0) {
@@ -72,7 +72,7 @@ if ($php_cli) {
 
 }
 else {
-  require('../inc/parametrit.inc');
+  require '../inc/parametrit.inc';
 
   echo "<font class='head'>".t("E3-ostoehdotuksen sisäänluku")."</font><hr>";
 }
@@ -119,36 +119,36 @@ function datansisalto_e3($e3_ehdotuskansio, $dfile, $otunnus, $toimituspaiva) {
 
     if ($tuote_row['tuoteno'] == '') {
       echo "<br>";
-      echo "<font class='error'>".t("Tiedostosta %s tuotetietoja tuotteelle %s ei löydy tuotehallinnasta. Tuotetta ei lisätty ostoehdotukseen.", "", $file,$tuoteno)."</font>";
+      echo "<font class='error'>".t("Tiedostosta %s tuotetietoja tuotteelle %s ei löydy tuotehallinnasta. Tuotetta ei lisätty ostoehdotukseen.", "", $file, $tuoteno)."</font>";
       echo "<br>";
     }
     else {
 
-      list($hinta,$netto,$ale,) = alehinta_osto($laskurow, $tuote_row, $kpl);
+      list($hinta, $netto, $ale, ) = alehinta_osto($laskurow, $tuote_row, $kpl);
 
       $insert_query = "INSERT INTO tilausrivi SET
-       yhtio     = '$kukarow[yhtio]',
-       tyyppi    = 'O',
-       toimaika  = '$toimituspaiva',
-       otunnus   = '$otunnus',
-       tuoteno   = '$tuoteno',
-       try       = '$tuote_row[try]',
-       osasto    = '$tuote_row[osasto]',
-       nimitys   = '$tuote_row[nimitys]',
-       tilkpl    = '$kpl',
-       yksikko   = '$tuote_row[yksikko]',
-       varattu   = '$kpl',
-       hinta     = '$hinta',
-       netto     = '$netto',
-       ale1      = '$ale[ale1]',
-       ale2      = '$ale[ale2]',
-       ale3      = '$ale[ale3]',
-       laatija   = 'E3',
-       laadittu  = now(),
-       hyllyalue = '$tuote_row[hyllyalue]',
-       hyllynro  = '$tuote_row[hyllynro]',
-       hyllytaso = '$tuote_row[hyllytaso]',
-       hyllyvali = '$tuote_row[hyllyvali]'";
+                       yhtio     = '$kukarow[yhtio]',
+                       tyyppi    = 'O',
+                       toimaika  = '$toimituspaiva',
+                       otunnus   = '$otunnus',
+                       tuoteno   = '$tuoteno',
+                       try       = '$tuote_row[try]',
+                       osasto    = '$tuote_row[osasto]',
+                       nimitys   = '$tuote_row[nimitys]',
+                       tilkpl    = '$kpl',
+                       yksikko   = '$tuote_row[yksikko]',
+                       varattu   = '$kpl',
+                       hinta     = '$hinta',
+                       netto     = '$netto',
+                       ale1      = '$ale[ale1]',
+                       ale2      = '$ale[ale2]',
+                       ale3      = '$ale[ale3]',
+                       laatija   = 'E3',
+                       laadittu  = now(),
+                       hyllyalue = '$tuote_row[hyllyalue]',
+                       hyllynro  = '$tuote_row[hyllynro]',
+                       hyllytaso = '$tuote_row[hyllytaso]',
+                       hyllyvali = '$tuote_row[hyllyvali]'";
       $insertdata = mysql_query($insert_query) or pupe_error($insert_query);
     }
   }
@@ -230,7 +230,7 @@ if (isset($tee) and trim($tee) == 'aja') {
         echo "<br><br>";
       }
       else {
-         $trow = mysql_fetch_array($result);
+        $trow = mysql_fetch_array($result);
 
         $vquery = "SELECT nimi, kurssi, tunnus
                    FROM valuu
@@ -279,7 +279,7 @@ if (isset($tee) and trim($tee) == 'aja') {
       echo "<br>";
       echo "<font class='error'>".t("Ostoehdotus %s ei löydy palvelimelta tai tilausrivitiedostoa %s ei löydy palvelimelta", "", $filu, $dfile)."</font>";
       echo "<br><br>";
-     }
+    }
   }
 }
 

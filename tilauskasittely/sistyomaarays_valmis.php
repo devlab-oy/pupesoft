@@ -26,20 +26,20 @@ if ($tee == "VALMIS") {
   }
   else {
     // lock tables
-    $query = "  LOCK TABLES lasku WRITE,
-          tapahtuma WRITE,
-          tiliointi WRITE,
-          tilausrivi WRITE,
-          tilausrivi as tilausrivi2 WRITE,
-          sanakirja WRITE,
-          tilausrivi as tilausrivi_osto READ,
-          tuote READ,
-          sarjanumeroseuranta WRITE,
-          sarjanumeroseuranta_arvomuutos READ,
-          tuotepaikat WRITE,
-          tilausrivin_lisatiedot WRITE,
-          avainsana as avainsana_kieli READ,
-          tili WRITE";
+    $query = "LOCK TABLES lasku WRITE,
+              tapahtuma WRITE,
+              tiliointi WRITE,
+              tilausrivi WRITE,
+              tilausrivi as tilausrivi2 WRITE,
+              sanakirja WRITE,
+              tilausrivi as tilausrivi_osto READ,
+              tuote READ,
+              sarjanumeroseuranta WRITE,
+              sarjanumeroseuranta_arvomuutos READ,
+              tuotepaikat WRITE,
+              tilausrivin_lisatiedot WRITE,
+              avainsana as avainsana_kieli READ,
+              tili WRITE";
     $locre = pupe_query($query);
 
     $query = "SELECT *

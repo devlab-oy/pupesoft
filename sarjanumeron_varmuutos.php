@@ -25,22 +25,22 @@ if ($oikeurow["paivitys"] != '1') { // Saako p‰ivitt‰‰
 
 
 // lukitaan tableja
-$query = "  LOCK TABLES tuotepaikat WRITE,
-      tapahtuma WRITE,
-      lasku WRITE,
-      tiliointi WRITE,
-      sanakirja WRITE,
-      tilausrivi as tilausrivi_upd WRITE,
-      tuote READ,
-      tilausrivi READ,
-      tuotteen_avainsanat READ,
-      sarjanumeroseuranta WRITE,
-      sarjanumeroseuranta_arvomuutos READ,
-      tilausrivi as tilausrivi_myynti READ,
-      tilausrivi as tilausrivi_osto READ,
-      tuotepaikat as tt READ,
-      avainsana as avainsana_kieli READ,
-      tili READ";
+$query = "LOCK TABLES tuotepaikat WRITE,
+          tapahtuma WRITE,
+          lasku WRITE,
+          tiliointi WRITE,
+          sanakirja WRITE,
+          tilausrivi as tilausrivi_upd WRITE,
+          tuote READ,
+          tilausrivi READ,
+          tuotteen_avainsanat READ,
+          sarjanumeroseuranta WRITE,
+          sarjanumeroseuranta_arvomuutos READ,
+          tilausrivi as tilausrivi_myynti READ,
+          tilausrivi as tilausrivi_osto READ,
+          tuotepaikat as tt READ,
+          avainsana as avainsana_kieli READ,
+          tili READ";
 $result = pupe_query($query);
 
 //tuotteen varastostatus

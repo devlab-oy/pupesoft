@@ -2150,7 +2150,7 @@ if ($tee == "JATKA") {
               unset($lapsires);
             }
 
-            if ($kukarow['extranet'] == '' and (!isset($php_cli) or !$php_cli)) {
+            if ($kukarow['extranet'] == '' and (!isset($php_cli) or !$php_cli) and $automaaginen == '') {
               // Korvaavat tuotteet //
               $query  = "SELECT * from korvaavat where tuoteno='$jtrow[tuoteno]' and yhtio='$kukarow[yhtio]'";
               $korvaresult = pupe_query($query);

@@ -41,7 +41,7 @@ if ($upd == 1) {
         $nakyvyys = "X";
       }
 
-      $xotsikko = str_replace("(BR)", "<br>", trim($mysqlalias[$al_nimi]));
+      $xotsikko = str_replace("<br>", "(BR)", trim($mysqlalias[$al_nimi]));
 
       $query = "INSERT INTO avainsana
                 SET yhtio     = '$kukarow[yhtio]',
@@ -252,8 +252,8 @@ if ($taulu != "") {
     $query = "SELECT *
               FROM avainsana
               WHERE yhtio      = '$kukarow[yhtio]'
-              and laji='MYSQLALIAS'
-              and selite='$taulu.$al_nimi'
+              and laji         = 'MYSQLALIAS'
+              and selite       = '$taulu.$al_nimi'
               and selitetark_2 = '$alias_set'";
     $al_res = pupe_query($query);
 
@@ -261,6 +261,7 @@ if ($taulu != "") {
       $al_row = mysql_fetch_array($al_res);
 
       $otsikko = str_replace("<br>", "(BR)", $al_row["selitetark"]);
+
       $box = $al_row['nakyvyys'] != '' ? "CHECKED" : "";
       $pakollisuusbox = $al_row['selitetark_3'] == 'PAKOLLINEN' ? "CHECKED" : "";
       $oletusarvo = $al_row['selitetark_4'];

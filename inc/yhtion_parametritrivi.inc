@@ -1995,6 +1995,27 @@ if (mysql_field_name($result, $i) == "oslapp_rakir_logo") {
   $jatko = 0;
 }
 
+if (mysql_field_name($result, $i) == "osoitelappu_lisatiedot") {
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel1="";
+  $sel2="";
+
+  if ($trow[$i] == "") {
+    $sel1 = "selected";
+  }
+  else {
+    $sel2 = "selected";
+  }
+
+  $ulos .= "<option value=''  $sel1>".t("Asiaakkaan tilausnumero ja tilausyhteyshenkilö tulostetaan osoitelapulle")."</option>";
+  $ulos .= "<option value='X' $sel2>".t("Asiakkaan tilausnumeroa tai tilausyhteyshenkilöä EI tulosteta osoitelapulle")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if (mysql_field_name($result, $i) == "ytunnus_tarkistukset") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -3895,6 +3916,18 @@ if (mysql_field_name($result, $i) == 'suoratoimitusvarasto') {
     $ulos .= "<option value = '{$varow['tunnus']}' {$sel}>{$varow['nimitys']}</option>";
   }
 
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if (mysql_field_name($result, $i) == 'yhdistetaan_identtiset_laskulla') {
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'k' ? 'selected' : '';
+
+  $ulos .= "<option value = ''>".t("Samalta tilaukselta löytyviä jakaantuneita tilausrivejä ei yhdistetä laskulla")."</option>";
+  $ulos .= "<option value = 'k' {$sel}>".t("Samalta tilaukselta löytyvät jakaantuneet tilausrivit yhdistetään laskulla")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

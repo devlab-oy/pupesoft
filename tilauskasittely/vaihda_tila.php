@@ -23,15 +23,15 @@ if ($tunnus != "" and $tee == "vaihda") {
     $tila_row = mysql_fetch_assoc($tila_result);
 
     // lock tables
-    $query = "  LOCK TABLES lasku WRITE,
-          sanakirja WRITE,
-          tilausrivi WRITE,
-          rahtikirjat WRITE,
-          tuote WRITE,
-          sarjanumeroseuranta WRITE,
-          kerayserat WRITE,
-          sarjanumeroseuranta_arvomuutos READ,
-          avainsana as avainsana_kieli READ";
+    $query = "LOCK TABLES lasku WRITE,
+              sanakirja WRITE,
+              tilausrivi WRITE,
+              rahtikirjat WRITE,
+              tuote WRITE,
+              sarjanumeroseuranta WRITE,
+              kerayserat WRITE,
+              sarjanumeroseuranta_arvomuutos READ,
+              avainsana as avainsana_kieli READ";
     $locre = pupe_query($query);
 
     if ($tila_row['tila'] == "C") {

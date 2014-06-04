@@ -47,7 +47,7 @@ $query = "SELECT lasku.*,
                       AND tilausrivi.otunnus      = lasku.tunnus
                       and tilausrivi.var         != 'O'
                       AND tilausrivi.tyyppi      != 'D')) alv
-          
+
           FROM lasku
           LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
           WHERE lasku.tunnus                      = '$tunnus'
@@ -1524,11 +1524,11 @@ else {
 
         $tilauksessa = "SELECT sum(tilausrivi.varattu) tulossa
                         FROM tilausrivi
-                        WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
-                        AND tilausrivi.tuoteno = '{$row["tuoteno"]}'
-                        AND tilausrivi.tyyppi = 'O'
-                        and tilausrivi.var != 'O'
-                        AND tilausrivi.varattu > 0";
+                        WHERE tilausrivi.yhtio  = '{$kukarow["yhtio"]}'
+                        AND tilausrivi.tuoteno  = '{$row["tuoteno"]}'
+                        AND tilausrivi.tyyppi   = 'O'
+                        and tilausrivi.var     != 'O'
+                        AND tilausrivi.varattu  > 0";
         $tilres = pupe_query($tilauksessa);
         $tilrivi = mysql_fetch_assoc($tilres);
 

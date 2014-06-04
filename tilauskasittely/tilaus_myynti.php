@@ -2095,11 +2095,11 @@ if ($tee == '') {
     (isset($maksutapa) and $maksutapa != ''))) {
 
     if ((int) $myyjanro > 0) {
-      $apuqu = "  SELECT *
-            FROM kuka use index (yhtio_myyja)
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND myyja = '$myyjanro'
-            AND myyja > 0";
+      $apuqu = "SELECT *
+                FROM kuka use index (yhtio_myyja)
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND myyja   = '$myyjanro'
+                AND myyja   > 0";
       $meapu = pupe_query($apuqu);
 
       if (mysql_num_rows($meapu) == 1) {
@@ -2126,10 +2126,10 @@ if ($tee == '') {
     }
 
     // haetaan maksuehdoen tiedot tarkastuksia varten
-    $apuqu = "  SELECT *
-          FROM maksuehto
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND tunnus  = '$laskurow[maksuehto]'";
+    $apuqu = "SELECT *
+              FROM maksuehto
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND tunnus  = '$laskurow[maksuehto]'";
     $meapu = pupe_query($apuqu);
 
     $kassalipas = "";
@@ -2141,21 +2141,21 @@ if ($tee == '') {
       // jos kyseess‰ oli k‰teinen
       if ($meapurow["kateinen"] != "") {
         // haetaan toimitustavan tiedot tarkastuksia varten
-        $apuqu2 = "  SELECT *
-              FROM toimitustapa
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND selite  = '$toimitustapa'";
+        $apuqu2 = "SELECT *
+                   FROM toimitustapa
+                   WHERE yhtio = '$kukarow[yhtio]'
+                   AND selite  = '$toimitustapa'";
         $meapu2 = pupe_query($apuqu2);
         $meapu2row = mysql_fetch_assoc($meapu2);
 
         // ja toimitustapa ei ole nouto laitetaan toimitustavaksi nouto... hakee j‰rjestyksess‰ ekan
         if ($meapu2row["nouto"] == "") {
-          $apuqu = "  SELECT *
-                FROM toimitustapa
-                WHERE yhtio = '$kukarow[yhtio]'
-                AND nouto != ''
-                ORDER BY jarjestys
-                LIMIT 1";
+          $apuqu = "SELECT *
+                    FROM toimitustapa
+                    WHERE yhtio  = '$kukarow[yhtio]'
+                    AND nouto   != ''
+                    ORDER BY jarjestys
+                    LIMIT 1";
           $meapu = pupe_query($apuqu);
           $apuro = mysql_fetch_assoc($meapu);
 
@@ -2169,10 +2169,10 @@ if ($tee == '') {
     }
 
     if ($toimitustapa != $laskurow["toimitustapa"]) {
-      $apuqu2 = "  SELECT merahti
-            FROM toimitustapa
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND selite  = '$toimitustapa'";
+      $apuqu2 = "SELECT merahti
+                 FROM toimitustapa
+                 WHERE yhtio = '$kukarow[yhtio]'
+                 AND selite  = '$toimitustapa'";
       $meapu2 = pupe_query($apuqu2);
       $meapu2row = mysql_fetch_assoc($meapu2);
 
@@ -2737,9 +2737,9 @@ if ($tee == '') {
 
     //  Tarkistetaan, ettei asiakas ole prospekti, tarjoukselle voi liitt‰‰ prospektiasiakkaan, josta voi tehd‰ suoraan tilauksen. Herjataan siis jos asiakas pit‰‰ p‰ivitt‰‰ ja tarkistaa
     if (($toim != "TARJOUS" and $toim != "EXTTARJOUS")) {
-      $prosque = "  SELECT tunnus
-              FROM asiakas
-              WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]' and laji='R'";
+      $prosque = "SELECT tunnus
+                  FROM asiakas
+                  WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]' and laji='R'";
       $prosres = pupe_query($prosque);
       if (mysql_num_rows($prosres)==1) {
         $asiakasOnProspekti = "JOO";
@@ -3597,17 +3597,17 @@ if ($tee == '') {
         $ok = 0;
 
         if ($yhtiorow["kalenterimerkinnat"] == "") {
-          $kysely = "  INSERT INTO kalenteri
-                SET tapa     = '".t("Teksiviesti")."',
-                asiakas      = '$laskurow[ytunnus]',
-                liitostunnus   = '$laskurow[liitostunnus]',
-                kuka         = '$kukarow[kuka]',
-                yhtio        = '$kukarow[yhtio]',
-                tyyppi       = 'Memo',
-                pvmalku      = now(),
-                kentta01     = '$smsnumero\n$smsviesti',
-                laatija      = '$kukarow[kuka]',
-                luontiaika    = now()";
+          $kysely = "INSERT INTO kalenteri
+                     SET tapa     = '".t("Teksiviesti")."',
+                     asiakas      = '$laskurow[ytunnus]',
+                     liitostunnus = '$laskurow[liitostunnus]',
+                     kuka         = '$kukarow[kuka]',
+                     yhtio        = '$kukarow[yhtio]',
+                     tyyppi       = 'Memo',
+                     pvmalku      = now(),
+                     kentta01     = '$smsnumero\n$smsviesti',
+                     laatija      = '$kukarow[kuka]',
+                     luontiaika   = now()";
           $result = pupe_query($kysely);
         }
 
@@ -7607,11 +7607,11 @@ if ($tee == '') {
 
         echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
 
-        $as_que = "  SELECT rahtivapaa_alarajasumma
-              FROM asiakas
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND tunnus = '$laskurow[liitostunnus]'
-              AND rahtivapaa_alarajasumma > 0";
+        $as_que = "SELECT rahtivapaa_alarajasumma
+                   FROM asiakas
+                   WHERE yhtio                 = '$kukarow[yhtio]'
+                   AND tunnus                  = '$laskurow[liitostunnus]'
+                   AND rahtivapaa_alarajasumma > 0";
         $as_res = pupe_query($as_que);
 
         $rahtivapaa_alarajasumma = 0;

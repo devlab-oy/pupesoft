@@ -1524,11 +1524,11 @@ else {
 
         $tilauksessa = "SELECT sum(tilausrivi.varattu) tulossa
                         FROM tilausrivi
-                        WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
-                        AND tilausrivi.tuoteno = '{$row["tuoteno"]}'
-                        AND tilausrivi.tyyppi = 'O'
-                        and tilausrivi.var != 'O'
-                        AND tilausrivi.varattu > 0";
+                        WHERE tilausrivi.yhtio  = '{$kukarow["yhtio"]}'
+                        AND tilausrivi.tuoteno  = '{$row["tuoteno"]}'
+                        AND tilausrivi.tyyppi   = 'O'
+                        and tilausrivi.var     != 'O'
+                        AND tilausrivi.varattu  > 0";
         $tilres = pupe_query($tilauksessa);
         $tilrivi = mysql_fetch_assoc($tilres);
 

@@ -200,20 +200,20 @@ if (!isset($tee) or $tee == '') {
   }
 
   // Näytetään käyttäjäkohtaiset työmääräykset
-  $tyojonosql = "  SELECT lasku.tunnus,
-          lasku.nimi,
-          lasku.toimaika,
-          a2.selitetark tyostatus,
-          a2.selitetark_2 tyostatusvari,
-          a5.selitetark tyom_prioriteetti
-          FROM lasku
-          JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus AND tyomaarays.tyojono != '' AND tyomaarays.suorittaja = '{$kukarow["kuka"]}')
-          LEFT JOIN avainsana a2 ON (a2.yhtio=tyomaarays.yhtio and a2.laji='TYOM_TYOSTATUS' and a2.selite=tyomaarays.tyostatus)
-          LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti)
-          WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-          AND lasku.tila in ('A','L','N','S','C')
-          AND lasku.alatila != 'X'
-          ORDER BY ifnull(a5.jarjestys, 9999), ifnull(a2.jarjestys, 9999), lasku.toimaika asc, a2.selitetark";
+  $tyojonosql = "SELECT lasku.tunnus,
+                 lasku.nimi,
+                 lasku.toimaika,
+                 a2.selitetark tyostatus,
+                 a2.selitetark_2 tyostatusvari,
+                 a5.selitetark tyom_prioriteetti
+                 FROM lasku
+                 JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus AND tyomaarays.tyojono != '' AND tyomaarays.suorittaja = '{$kukarow["kuka"]}')
+                 LEFT JOIN avainsana a2 ON (a2.yhtio=tyomaarays.yhtio and a2.laji='TYOM_TYOSTATUS' and a2.selite=tyomaarays.tyostatus)
+                 LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti)
+                 WHERE lasku.yhtio  = '{$kukarow["yhtio"]}'
+                 AND lasku.tila     in ('A','L','N','S','C')
+                 AND lasku.alatila != 'X'
+                 ORDER BY ifnull(a5.jarjestys, 9999), ifnull(a2.jarjestys, 9999), lasku.toimaika asc, a2.selitetark";
   $tyoresult = pupe_query($tyojonosql);
 
   if (mysql_num_rows($tyoresult) > 0) {

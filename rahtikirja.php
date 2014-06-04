@@ -260,13 +260,13 @@ if (count($erikoispakkaus) > 0) {
 }
 
 if ($id > 0 and $tunnukset != "") {
-  $tark = "  SELECT count(DISTINCT lasku.toimitustapa) toimitustapoja,
-        count(DISTINCT if(toimitustapa.tulostustapa = 'K' or toimitustapa.tulostustapa = 'L', 'koonti', lasku.liitostunnus)) asiakkaita,
-        count(DISTINCT if(toimitustapa.tulostustapa = 'K' or toimitustapa.tulostustapa = 'L', 'koonti', concat(lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa))) toim_osoitteita
-        FROM lasku
-        JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio and toimitustapa.selite = lasku.toimitustapa)
-        WHERE lasku.yhtio = '$kukarow[yhtio]'
-        AND lasku.tunnus in ($tunnukset)";
+  $tark = "SELECT count(DISTINCT lasku.toimitustapa) toimitustapoja,
+           count(DISTINCT if(toimitustapa.tulostustapa = 'K' or toimitustapa.tulostustapa = 'L', 'koonti', lasku.liitostunnus)) asiakkaita,
+           count(DISTINCT if(toimitustapa.tulostustapa = 'K' or toimitustapa.tulostustapa = 'L', 'koonti', concat(lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa))) toim_osoitteita
+           FROM lasku
+           JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio and toimitustapa.selite = lasku.toimitustapa)
+           WHERE lasku.yhtio = '$kukarow[yhtio]'
+           AND lasku.tunnus  in ($tunnukset)";
   $tarkres = pupe_query($tark);
   $tarkistus_row = mysql_fetch_assoc($tarkres);
 
@@ -2195,10 +2195,10 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
 
   // vaihdetaan merahti toimitustavan oletuksen mukaan, kun toimitustapa vaihdetaan
   if ($toimitustapa != "" and $toimitustapa != $ed_toimtapa) {
-    $apuqu2 = "  SELECT merahti
-          FROM toimitustapa
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND selite  = '$toimitustapa'";
+    $apuqu2 = "SELECT merahti
+               FROM toimitustapa
+               WHERE yhtio = '$kukarow[yhtio]'
+               AND selite  = '$toimitustapa'";
     $meapu2 = pupe_query($apuqu2);
     $meapu2row = mysql_fetch_assoc($meapu2);
 

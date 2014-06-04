@@ -154,9 +154,9 @@ if(!function_exists("asiakasalennustarkista")) {
 
       // Ei tsekata turhaan kun rivi dellataan luedatasta
       if ($chpiiri != '' and (!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA")) {
-        $preq = "  SELECT avainsana.selite, avainsana.selitetark
-              FROM avainsana
-              WHERE avainsana.selite='{$chpiiri}' AND avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='piiri'";
+        $preq = "SELECT avainsana.selite, avainsana.selitetark
+                 FROM avainsana
+                 WHERE avainsana.selite='{$chpiiri}' AND avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='piiri'";
         $preres = pupe_query($preq);
 
         if (mysql_num_rows($preres) != 1) {

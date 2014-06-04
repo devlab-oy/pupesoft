@@ -533,11 +533,11 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
   // Katsotaan onko maksuehto jälkivaatimus, koska silloin ei toimiteta erikoisvarastoista vaikka erikoistoimitus_alarajasumma ylittyisi
   if (!isset($jvtsekres)) {
-    $apuqu = "  SELECT tunnus
-          FROM maksuehto
-          WHERE yhtio  = '$kukarow[yhtio]'
-          AND tunnus  = '$laskurow[maksuehto]'
-          AND jv      != ''";
+    $apuqu = "SELECT tunnus
+              FROM maksuehto
+              WHERE yhtio  = '$kukarow[yhtio]'
+              AND tunnus   = '$laskurow[maksuehto]'
+              AND jv      != ''";
     $jvtsekres = pupe_query($apuqu);
 
     if (mysql_num_rows($jvtsekres) > 0) {
@@ -547,11 +547,11 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
   // Vientiasiakkaille ei myydä erikoisvarastoista jos toimitustapa on nouto
   if (!isset($tntsekres)) {
-    $apuqu = "  SELECT tunnus
-          FROM toimitustapa
-          WHERE yhtio  = '$kukarow[yhtio]'
-          AND selite  = '$laskurow[toimitustapa]'
-          AND nouto  != ''";
+    $apuqu = "SELECT tunnus
+              FROM toimitustapa
+              WHERE yhtio  = '$kukarow[yhtio]'
+              AND selite   = '$laskurow[toimitustapa]'
+              AND nouto   != ''";
     $tntsekres = pupe_query($apuqu);
 
     if (mysql_num_rows($tntsekres) > 0) {
@@ -767,6 +767,13 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
         $rivityyppi = 'L'; // Myyntitilausrivi
       }
     }
+  }
+  elseif ($perheid != 0) {
+    $query = "SELECT ei_nayteta
+              FROM tuoteperhe
+              WHERE yhtio    = '{$kukarow['yhtio']}'
+              AND isatuoteno = (SELECT tuoteno FROM tilausrivi WHERE tunnus = $perheid) LIMIT 1";
+    $einayres = mysql_fetch_assoc(pupe_query($query));
   }
 
   //Kaikkien arrayden indeksien äiti
@@ -1687,8 +1694,11 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 $myy_erikoistoimitus[$indeksi] = "";
               }
 
-              if (!isset($myy_lapsi_ein[$indeksi])) {
+              if (!isset($myy_lapsi_ein[$indeksi]) AND !isset($einayres["ei_nayteta"])) {
                 $myy_lapsi_ein[$indeksi] = "";
+              }
+              elseif (isset($einayres["ei_nayteta"])) {
+                $myy_lapsi_ein[$indeksi] = $einayres["ei_nayteta"];
               }
 
               $tlisatied_lisa2 = "";
@@ -2022,10 +2032,22 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       $puu_var[]    = $var;
     }
   }
+  elseif ($perheid != 0 AND !isset($einayres["ei_nayteta"])) {
+    $query = "SELECT ei_nayteta
+              FROM tuoteperhe
+              WHERE yhtio    = '{$kukarow['yhtio']}'
+              AND isatuoteno = (SELECT tuoteno FROM tilausrivi WHERE tunnus = $perheid) LIMIT 1";
+    $einayres = mysql_fetch_assoc(pupe_query($query));
+  }
 
   foreach ($puu_tuoteno as $i => $tuoteno) {
     $kpl = $puu_kpl[$i];
     $var = $puu_var[$i];
+
+    //jos ei olla käyty tossa ylläällä niin katotaan onko $einayres["ei_nayteta"] settattu ja laitetaan $puu_ein = $einayres["ei_nayteta"] jos se on viel tyhjä
+    if ($puu_ein[$i] == "" AND isset($einayres["ei_nayteta"])) {
+      $puu_ein[$i] = $einayres["ei_nayteta"];
+    }
 
     if (!$kvkasittely) {
 
@@ -2255,7 +2277,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       }
     }
 
-    if ($yhtiorow['rivinumero_syotto'] != '') {
+    if ($yhtiorow['rivinumero_syotto'] != '' and $kutsuja != "EDITILAUS") {
       if (!isset($tilrivinumero) or (int) $tilrivinumero == 0) {
         $query = "SELECT max(tilaajanrivinro) as trivinro from tilausrivi where yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]'";
         $triviresult = pupe_query($query);
@@ -2674,10 +2696,10 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           list(, , $vmyytavissa) = saldo_myytavissa($edirow["tuoteno"]);
 
           if ($vmyytavissa > 0) {
-            $tvsql = "  SELECT *
-                  FROM tuote
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  AND tuoteno = '$edirow[tuoteno]'";
+            $tvsql = "SELECT *
+                      FROM tuote
+                      WHERE yhtio = '$kukarow[yhtio]'
+                      AND tuoteno = '$edirow[tuoteno]'";
             $tvresult = pupe_query($tvsql);
             $tvrow = mysql_fetch_assoc($tvresult);
 
@@ -2904,8 +2926,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
                 toimittajan_tunnus   = '$toimittajan_tunnus',
                 rekisterinumero      = '{$rekisterinumero}',
                 muutospvm            = now(),
-                muuttaja             = '$kukarow[kuka]',
-                ei_nayteta           = '{$puu_ein[$i]}'
+                muuttaja             = '$kukarow[kuka]'
                 {$tlisatied_lisa}
                 {$tlisatied_lisa2}
                 {$jt_manual_lisa}

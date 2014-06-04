@@ -1264,11 +1264,11 @@ if ($tee == 'MONISTA') {
               // jos meillä on lasku menossa ulkomaille
               if (isset($asiakrow["maa"]) and $asiakrow["maa"] != "" and $asiakrow["maa"] != $yhtiorow["maa"]) {
                 // tutkitaan ollaanko siellä alv-rekisteröity
-                $alhqur = "  SELECT *
-                      FROM yhtion_toimipaikat
-                      WHERE yhtio     = '$kukarow[yhtio]'
-                      AND maa         = '$asiakrow[maa]'
-                      AND vat_numero != ''";
+                $alhqur = "SELECT *
+                           FROM yhtion_toimipaikat
+                           WHERE yhtio     = '$kukarow[yhtio]'
+                           AND maa         = '$asiakrow[maa]'
+                           AND vat_numero != ''";
                 $alhire = pupe_query($alhqur);
 
                 // ollaan alv-rekisteröity, aina kotimaa myynti ja alvillista
@@ -1399,9 +1399,9 @@ if ($tee == 'MONISTA') {
 
       //  Päivitetään myös tunnusnippu jotta tätä voidaan versioida..
       if ($toim == "TARJOUS" and $yhtiorow["tarjouksen_voi_versioida"] != "") {
-        $kysely = "  UPDATE lasku SET
-              tunnusnippu = tunnus
-              WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$utunnus}'";
+        $kysely = "UPDATE lasku SET
+                   tunnusnippu = tunnus
+                   WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$utunnus}'";
         $updres = pupe_query($kysely);
       }
 
@@ -1440,10 +1440,10 @@ if ($tee == 'MONISTA') {
           }
 
           //  Päivitetään jaksotettu myös laskulle
-          $kysely = "  UPDATE lasku SET
-                jaksotettu = '{$utunnus}'
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus = '{$utunnus}'";
+          $kysely = "UPDATE lasku SET
+                     jaksotettu  = '{$utunnus}'
+                     WHERE yhtio = '{$kukarow['yhtio']}'
+                     AND tunnus  = '{$utunnus}'";
           $updres = pupe_query($kysely);
         }
       }
@@ -1761,11 +1761,11 @@ if ($tee == 'MONISTA') {
         if (mysql_num_rows($monistares2) > 0) {
           $monistarow2 = mysql_fetch_array($monistares2);
 
-          $kysely = "  INSERT INTO tilausrivin_lisatiedot
-                SET yhtio       = '{$kukarow['yhtio']}',
-                laatija        = '{$kukarow['kuka']}',
-                luontiaika       = now(),
-                tilausrivitunnus  = {$insid},";
+          $kysely = "INSERT INTO tilausrivin_lisatiedot
+                     SET yhtio       = '{$kukarow['yhtio']}',
+                     laatija          = '{$kukarow['kuka']}',
+                     luontiaika       = now(),
+                     tilausrivitunnus = {$insid},";
 
           for ($i = 0; $i < mysql_num_fields($monistares2) - 1; $i++) { // Ei monisteta tunnusta
             switch (mysql_field_name($monistares2, $i)) {

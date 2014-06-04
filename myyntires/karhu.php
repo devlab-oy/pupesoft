@@ -588,9 +588,9 @@ if ($tee == "") {
 
   echo "<table>";
 
-  $apuqu = "  SELECT concat(nimitys,' ', valkoodi, ' (',sopimusnumero,')') nimi, tunnus
-        from factoring
-        where yhtio = '$kukarow[yhtio]'";
+  $apuqu = "SELECT concat(nimitys,' ', valkoodi, ' (',sopimusnumero,')') nimi, tunnus
+            from factoring
+            where yhtio = '$kukarow[yhtio]'";
   $meapu = pupe_query($apuqu);
 
   if (mysql_num_rows($meapu) > 0) {
@@ -629,15 +629,15 @@ if ($tee == "") {
   echo "</select></td>";
   echo "</tr>";
 
-  $apuqu = "  SELECT kuka, nimi, puhno, eposti, tunnus
-        FROM kuka
-        WHERE yhtio    = '$kukarow[yhtio]'
-        AND aktiivinen = 1
-        AND nimi      != ''
-        AND puhno     != ''
-        AND eposti    != ''
-        AND extranet  = ''
-        ORDER BY nimi";
+  $apuqu = "SELECT kuka, nimi, puhno, eposti, tunnus
+            FROM kuka
+            WHERE yhtio     = '$kukarow[yhtio]'
+            AND aktiivinen  = 1
+            AND nimi       != ''
+            AND puhno      != ''
+            AND eposti     != ''
+            AND extranet    = ''
+            ORDER BY nimi";
   $meapu = pupe_query($apuqu);
 
   echo "<tr><th>".t("Yhteyshenkilö")."</th>";

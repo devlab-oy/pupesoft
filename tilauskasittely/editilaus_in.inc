@@ -2004,10 +2004,10 @@ while ($tietue = fgets($fd)) {
       $olinsapi          = "";
       $olinvarasto       = "";
       $edi_nimitys       = "";
-      $sallitaanjt     = "";
-      $editilaus_hinta  = "";
-      $editilaus_alennus  = "";
-      $rivikommentti    = "";
+      $sallitaanjt       = "";
+      $editilaus_hinta   = "";
+      $editilaus_alennus = "";
+      $rivikommentti     = "";
       break;
 
     case 'OMSG__END' :

@@ -1,7 +1,7 @@
 <?php
 
 if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
-  require ("../inc/parametrit.inc");
+  require "../inc/parametrit.inc";
 
   //Jos ylläpidossa on luotu uusi asiakas
   if ($yllapidossa == "asiakas" and $yllapidontunnus != '') {
@@ -12,7 +12,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
 echo "<font class='head'>".t("Asiakasmemo")."</font><hr>";
 
 if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
-    if ($ytunnus == '' and (int) $asiakasid == 0) {
+  if ($ytunnus == '' and (int) $asiakasid == 0) {
 
     js_popup(-100);
 
@@ -20,7 +20,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
     echo "<tr>
         <th>".t("Asiakas").":</th>
         <form method = 'post'>
-        <td><input type='text' size='30' name='ytunnus'> ",asiakashakuohje(),"</td>
+        <td><input type='text' size='30' name='ytunnus'> ", asiakashakuohje(), "</td>
         <td class='back'><input type='submit' value='".t("Jatka")."'></td>
         </tr>";
     echo "</form>";
@@ -31,7 +31,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
     $kutsuja   = "asiakasemo.php";
     $ahlopetus   = "{$palvelin2}crm/asiakasmemo.php////";
 
-    require ("inc/asiakashaku.inc");
+    require "inc/asiakashaku.inc";
   }
 }
 
@@ -69,10 +69,10 @@ if ($ytunnus != '') {
       $meili .= t("Asiakasnumero").": $row[asiakasnro]\n";
       $meili .= t("Asiakas").": $row[nimi] $row[nimitark] $row[toim_nimi] $row[toim_nimitark]\n";
       $meili .= t("Pävämäärä").": ".tv1dateconv($row["pvmalku"])."\n\n";
-      $meili .= t("Viesti").":\n".str_replace("\r\n","\n", $row["kentta01"])."\n\n";
+      $meili .= t("Viesti").":\n".str_replace("\r\n", "\n", $row["kentta01"])."\n\n";
       $meili .= "-----------------------\n\n";
 
-      $tulos = mail($email, mb_encode_mimeheader(t("Asiakasmemo")." $yhtiorow[nimi]", "ISO-8859-1", "Q"), $meili,"From: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <$kukarow[eposti]>\nReply-To: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$kukarow["eposti"].">\n", "-f $yhtiorow[postittaja_email]");
+      $tulos = mail($email, mb_encode_mimeheader(t("Asiakasmemo")." $yhtiorow[nimi]", "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <$kukarow[eposti]>\nReply-To: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$kukarow["eposti"].">\n", "-f $yhtiorow[postittaja_email]");
 
       if ($row["tyyppi"] == "Lead") {
         $eviesti = "$kukarow[nimi] lähetti leadin käyttäjälle: $enimi / $email";
@@ -81,36 +81,36 @@ if ($ytunnus != '') {
         $eviesti = "$kukarow[nimi] lähetti memon käyttäjälle: $enimi / $email";
       }
 
-      $kysely = "  INSERT INTO kalenteri
-            SET tapa     = '$row[tapa]',
-            asiakas      = '$row[asiakas]',
-            liitostunnus   = '$row[liitostunnus]',
-            henkilo      = '$row[henkilo]',
-            kuka         = '$kukarow[kuka]',
-            yhtio        = '$kukarow[yhtio]',
-            tyyppi       = 'Memo',
-            pvmalku      = now(),
-            kentta01     = '$eviesti',
-            perheid     = '$row[tunnus]',
-            laatija      = '$kukarow[kuka]',
-            luontiaika    = now()";
+      $kysely = "INSERT INTO kalenteri
+                 SET tapa     = '$row[tapa]',
+                 asiakas      = '$row[asiakas]',
+                 liitostunnus = '$row[liitostunnus]',
+                 henkilo      = '$row[henkilo]',
+                 kuka         = '$kukarow[kuka]',
+                 yhtio        = '$kukarow[yhtio]',
+                 tyyppi       = 'Memo',
+                 pvmalku      = now(),
+                 kentta01     = '$eviesti',
+                 perheid      = '$row[tunnus]',
+                 laatija      = '$kukarow[kuka]',
+                 luontiaika   = now()";
       $result = pupe_query($kysely);
 
       if ($row["tyyppi"] == "Lead") {
-        $kysely = "  INSERT INTO kalenteri
-              SET tapa     = '$row[tapa]',
-              asiakas      = '$row[asiakas]',
-              liitostunnus   = '$row[liitostunnus]',
-              henkilo      = '$row[henkilo]',
-              kuka         = '$ekuka',
-              myyntipaallikko  = '$row[myyntipaallikko]',
-              yhtio        = '$kukarow[yhtio]',
-              tyyppi       = '$row[tyyppi]',
-              pvmalku      = '$row[pvmalku]',
-              kentta01     = '$row[kentta01]',
-              kuittaus     = '$row[kuittaus]',
-              laatija      = '$kukarow[kuka]',
-              luontiaika    = now()";
+        $kysely = "INSERT INTO kalenteri
+                   SET tapa     = '$row[tapa]',
+                   asiakas         = '$row[asiakas]',
+                   liitostunnus    = '$row[liitostunnus]',
+                   henkilo         = '$row[henkilo]',
+                   kuka            = '$ekuka',
+                   myyntipaallikko = '$row[myyntipaallikko]',
+                   yhtio           = '$kukarow[yhtio]',
+                   tyyppi          = '$row[tyyppi]',
+                   pvmalku         = '$row[pvmalku]',
+                   kentta01        = '$row[kentta01]',
+                   kuittaus        = '$row[kuittaus]',
+                   laatija         = '$kukarow[kuka]',
+                   luontiaika      = now()";
         $result = pupe_query($kysely);
       }
       //echo "<br>Sähköposti lähetetty osoitteeseen: $email<br><br>";
@@ -175,20 +175,20 @@ if ($ytunnus != '') {
 
     if ($korjaus == '') {
       if ($viesti != '') {
-        $kysely = "  INSERT INTO kalenteri
-              SET tapa     = '$tapa',
-              asiakas      = '$ytunnus',
-              liitostunnus   = '$asiakasid',
-              henkilo      = '$yhtunnus',
-              kuka         = '$kuka',
-              myyntipaallikko  = '$myyntipaallikko',
-              yhtio        = '$kukarow[yhtio]',
-              tyyppi       = '$tyyppi',
-              pvmalku      = $pvmalku,
-              kentta01     = '$viesti',
-              kuittaus     = '$kuittaus',
-              laatija      = '$kukarow[kuka]',
-              luontiaika    = now()";
+        $kysely = "INSERT INTO kalenteri
+                   SET tapa        = '$tapa',
+                   asiakas         = '$ytunnus',
+                   liitostunnus    = '$asiakasid',
+                   henkilo         = '$yhtunnus',
+                   kuka            = '$kuka',
+                   myyntipaallikko = '$myyntipaallikko',
+                   yhtio           = '$kukarow[yhtio]',
+                   tyyppi          = '$tyyppi',
+                   pvmalku         = $pvmalku,
+                   kentta01        = '$viesti',
+                   kuittaus        = '$kuittaus',
+                   laatija         = '$kukarow[kuka]',
+                   luontiaika      = now()";
         $result = pupe_query($kysely);
         $muist = mysql_insert_id();
 
@@ -238,21 +238,21 @@ if ($ytunnus != '') {
       }
     }
     else {
-      $kysely = "  UPDATE kalenteri
-            SET tapa     = '$tapa',
-            asiakas      = '$ytunnus',
-            liitostunnus   = '$asiakasid',
-            henkilo      = '$yhtunnus',
-            kuka         = '$kuka',
-            myyntipaallikko  = '$myyntipaallikko',
-            yhtio        = '$kukarow[yhtio]',
-            tyyppi       = '$tyyppi',
-            pvmalku      = $pvmalku,
-            kentta01     = '$viesti',
-            kuittaus     = '$kuittaus',
-            muuttaja    = '$kukarow[kuka]',
-            muutospvm    = now()
-            WHERE tunnus = '$korjaus'";
+      $kysely = "UPDATE kalenteri
+                 SET tapa        = '$tapa',
+                 asiakas         = '$ytunnus',
+                 liitostunnus    = '$asiakasid',
+                 henkilo         = '$yhtunnus',
+                 kuka            = '$kuka',
+                 myyntipaallikko = '$myyntipaallikko',
+                 yhtio           = '$kukarow[yhtio]',
+                 tyyppi          = '$tyyppi',
+                 pvmalku         = $pvmalku,
+                 kentta01        = '$viesti',
+                 kuittaus        = '$kuittaus',
+                 muuttaja        = '$kukarow[kuka]',
+                 muutospvm       = now()
+                 WHERE tunnus    = '$korjaus'";
       $result = pupe_query($kysely);
 
       $aputyyppi       = $tyyppi;
@@ -291,43 +291,43 @@ if ($ytunnus != '') {
 
   if ($tee == "LISAAASANALYYSI") {
     if ($esilla != '' || $yleisilme != '') {
-      $kysely = "  INSERT INTO kalenteri
-            SET tapa = 'asiakasanalyysi',
-            asiakas  = '$ytunnus',
-            liitostunnus = '$asiakasid',
-            henkilo  = '$yhtunnus',
-            kuka     = '$kukarow[kuka]',
-            yhtio    = '$kukarow[yhtio]',
-            kentta01 = '$esilla',
-            kentta02 = '$yleisilme',
-            kentta03 = '$puvut',
-            kentta04 = '$kyparat',
-            kentta05 = '$saappaat',
-            kentta06 = '$hanskat',
-            kentta07 = '$muuta',
-            kentta08 = '$extrat',
-            tyyppi   = 'Memo',
-            pvmalku  = now()";
+      $kysely = "INSERT INTO kalenteri
+                 SET tapa     = 'asiakasanalyysi',
+                 asiakas      = '$ytunnus',
+                 liitostunnus = '$asiakasid',
+                 henkilo      = '$yhtunnus',
+                 kuka         = '$kukarow[kuka]',
+                 yhtio        = '$kukarow[yhtio]',
+                 kentta01     = '$esilla',
+                 kentta02     = '$yleisilme',
+                 kentta03     = '$puvut',
+                 kentta04     = '$kyparat',
+                 kentta05     = '$saappaat',
+                 kentta06     = '$hanskat',
+                 kentta07     = '$muuta',
+                 kentta08     = '$extrat',
+                 tyyppi       = 'Memo',
+                 pvmalku      = now()";
       $result = pupe_query($kysely);
     }
     $tee = '';
   }
 
   if ($tee == "POISTAMEMO") {
-    $kysely = "  UPDATE kalenteri
-          SET
-          tyyppi = concat('DELETED ',tyyppi)
-          WHERE tunnus    = '$tunnus'
-          and yhtio      = '$kukarow[yhtio]'
-          and asiakas      = '$ytunnus'
-          and liitostunnus   = '$asiakasid'";
+    $kysely = "UPDATE kalenteri
+               SET
+               tyyppi           = concat('DELETED ',tyyppi)
+               WHERE tunnus     = '$tunnus'
+               and yhtio        = '$kukarow[yhtio]'
+               and asiakas      = '$ytunnus'
+               and liitostunnus = '$asiakasid'";
     $result = pupe_query($kysely);
 
-    $kysely = "  UPDATE liitetiedostot
-          SET   liitos = concat('DELETED ',liitos)
-          WHERE   liitostunnus   = '$tunnus'
-          AND   liitos      = '$liitostyyppi'
-          and   yhtio      = '$kukarow[yhtio]'";
+    $kysely = "UPDATE liitetiedostot
+               SET liitos = concat('DELETED ',liitos)
+               WHERE liitostunnus = '$tunnus'
+               AND liitos         = '$liitostyyppi'
+               and yhtio          = '$kukarow[yhtio]'";
 
     $result = pupe_query($kysely);
 
@@ -354,12 +354,12 @@ if ($ytunnus != '') {
     $yhtunnus       = $korjrow["henkilo"];
     $tunnus         = $korjrow["tunnus"];
     $tyyppi           = $korjrow["tyyppi"];
-    $mvva         = substr($korjrow["pvmalku"],0,4);
-    $mkka         = substr($korjrow["pvmalku"],5,2);
-    $mppa         = substr($korjrow["pvmalku"],8,2);
+    $mvva         = substr($korjrow["pvmalku"], 0, 4);
+    $mkka         = substr($korjrow["pvmalku"], 5, 2);
+    $mppa         = substr($korjrow["pvmalku"], 8, 2);
 
-    $mhh         = substr($korjrow["pvmalku"],11,2);
-    $mmm         = substr($korjrow["pvmalku"],14,2);
+    $mhh         = substr($korjrow["pvmalku"], 11, 2);
+    $mmm         = substr($korjrow["pvmalku"], 14, 2);
 
     $kuka        = $korjrow["kuka"];
     $kuittaus       = $korjrow["kuittaus"];
@@ -376,10 +376,11 @@ if ($ytunnus != '') {
     $tee2 = $tee;
     $tee = '';
 
-    $query_update = "UPDATE asiakas SET tila = '$astila'
-           WHERE yhtio                 = '$kukarow[yhtio]'
-                           and ytunnus = '$ytunnus'
-                           and tunnus  = '$asiakasid'";
+    $query_update = "UPDATE asiakas
+                     SET tila = '$astila'
+                     WHERE yhtio = '$kukarow[yhtio]'
+                     and ytunnus = '$ytunnus'
+                     and tunnus  = '$asiakasid'";
     $result_update = pupe_query($query_update);
 
     echo t("Vaihdettiin asiakkaan tila")."<br/>";
@@ -406,7 +407,7 @@ if ($ytunnus != '') {
 
       while ($row = mysql_fetch_array($result)) {
 
-        if($yhtunnus == $row["tunnus"]) {
+        if ($yhtunnus == $row["tunnus"]) {
           $sel      = 'SELECTED';
           $yemail   = $row["email"];
           $ynimi    = $row["nimi"];
@@ -463,7 +464,7 @@ if ($ytunnus != '') {
       echo "<td>$asiakasrow[nimi]";
 
       if ($asylloik) {
-        echo "&nbsp;&nbsp;<a href='{$palvelin2}yllapito.php?toim=asiakas&tunnus=$asiakasid&lopetus=$asmemo_lopetus'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='",t("Muokkaa"),"' title='",t("Muuta asiakkaan tietoja"),"' /></a>";
+        echo "&nbsp;&nbsp;<a href='{$palvelin2}yllapito.php?toim=asiakas&tunnus=$asiakasid&lopetus=$asmemo_lopetus'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='", t("Muokkaa"), "' title='", t("Muuta asiakkaan tietoja"), "' /></a>";
       }
 
       echo "</td>";
@@ -493,9 +494,9 @@ if ($ytunnus != '') {
       echo "<td>$asiakasrow[osoite]</td><td>$asiakasrow[toim_osoite]</td><td>".t("Fax").": $yfax</td>";
 
       // Päivämäärät rappareita varten
-      $kka = date("m",mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
-      $vva = date("Y",mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
-      $ppa = date("d",mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
+      $kka = date("m", mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
+      $vva = date("Y", mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
+      $ppa = date("d", mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
       $kkl = date("m");
       $vvl = date("Y");
       $ppl = date("d");
@@ -554,10 +555,10 @@ if ($ytunnus != '') {
       while ($asosrow = mysql_fetch_array($asosresult)) {
         $sel2 = '';
         if ($astila == $asosrow["selite"]) {
-                            $sel2 = "selected";
+          $sel2 = "selected";
         }
         echo "<option value='$asosrow[selite]' $sel2>$asosrow[selite] - $asosrow[selitetark]</option>";
-          }
+      }
 
       echo "</select></form>";
       echo "</td><td><a href='{$palvelin2}budjetinyllapito_tat.php?toim=ASIAKAS&ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&submit_button=joo&alkuvv=".date("Y")."&alkukk=01&loppuvv=".date("Y")."&loppukk=12&lopetus=$asmemo_lopetus'>".t("Asiakkaan myyntitavoitteet")."</a></td></tr>";
@@ -732,9 +733,9 @@ if ($ytunnus != '') {
         }
         echo "</select></td></tr>";
 
-        if (!isset($lkka)) $lkka = date("m",mktime(0, 0, 0, date("m"), date("d")+7, date("Y")));
-        if (!isset($lvva)) $lvva = date("Y",mktime(0, 0, 0, date("m"), date("d")+7, date("Y")));
-        if (!isset($lppa)) $lppa = date("d",mktime(0, 0, 0, date("m"), date("d")+7, date("Y")));
+        if (!isset($lkka)) $lkka = date("m", mktime(0, 0, 0, date("m"), date("d")+7, date("Y")));
+        if (!isset($lvva)) $lvva = date("Y", mktime(0, 0, 0, date("m"), date("d")+7, date("Y")));
+        if (!isset($lppa)) $lppa = date("d", mktime(0, 0, 0, date("m"), date("d")+7, date("Y")));
         if (!isset($lhh))  $lhh = "10";
         if (!isset($lmm))  $lmm = "00";
 
@@ -836,7 +837,7 @@ if ($ytunnus != '') {
               <th>".t("Tapa").": $memorow[tapa]</th>
               <th>".t("Yhteyshenkilö").": $memorow[yhteyshenkilo]</th>";
 
-          if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and substr($memorow['tyyppi'],0,7) != 'DELETED') {
+          if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and substr($memorow['tyyppi'], 0, 7) != 'DELETED') {
             echo "<th><a href='$PHP_SELF?tunnus=$memorow[tunnus]&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&tee=POISTAMEMO&liitostyyppi=$memorow[tyyppi]&lopetus=$lopetus'>".t("Poista")."</a></th>";
           }
           else {
@@ -895,7 +896,7 @@ if ($ytunnus != '') {
 
       echo "</td></tr>";
 
-      $liitetiedostot = listaaliitetiedostot($memorow['tunnus'],$memorow['tyyppi']);
+      $liitetiedostot = listaaliitetiedostot($memorow['tunnus'], $memorow['tyyppi']);
 
       if ($liitetiedostot != '') {
         echo "<tr><th colspan='2'>".t("Liitetiedosto")."</th><td colspan='4'>".$liitetiedostot."</td></tr>";
@@ -915,14 +916,14 @@ if ($ytunnus != '') {
       }
     }
   }
-   }
-
-if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
-  require ("../inc/footer.inc");
 }
 
-function listaaliitetiedostot($kalenteritunnus,$tyyppi) {
-  GLOBAL $palvelin2,$kukarow;
+if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
+  require "inc/footer.inc";
+}
+
+function listaaliitetiedostot($kalenteritunnus, $tyyppi) {
+  global $palvelin2, $kukarow;
   $out = "";
 
   $query = "SELECT tunnus, filename

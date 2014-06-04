@@ -88,9 +88,28 @@ if [ "$jatketaanko" = "k" ]; then
   cd $pupedir
   git fetch origin        # paivitetaan lokaali repo remoten tasolle
   git checkout .          # revertataan kaikki local muutokset
-  git checkout master     # varmistetaan, etta on master branchi kaytossa
-  git pull origin master  # paivitetaan master branchi
+
+  BRANCHFILE="/home/devlab/pupe_branch"
+
+  # Onko spessubranchi käytössä?
+  if [[ -f "$BRANCHFILE" && -r "$BRANCHFILE" ]]; then
+    pupebranch=$(cat $BRANCHFILE | tr -d '\n')
+
+    git checkout $pupebranch
+    git pull origin $pupebranch
+  else
+    git checkout master     # varmistetaan, etta on master branchi kaytossa
+    git pull origin master  # paivitetaan master branchi
+  fi
+
   git remote prune origin # poistetaan ylimääriset branchit
+
+  NRFILE="/home/devlab/newrelic_trigger"
+
+  # Onko triggeri käytössä?
+  if [[ -x "$NRFILE" ]]; then
+    eval $NRFILE
+  fi
 
   echo "${green}Pupesoft päivitetty!${normal}"
 else

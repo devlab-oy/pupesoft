@@ -28227,15 +28227,21 @@ if (!function_exists('paivita_siirtolistan_toimipaikka')) {
 }
 
 if (!function_exists("tilausrivin_tarkistus_riveittain")) {
-  function tilausrivin_tarkistus_riveittain($parametrit) {
+  function tilausrivin_tarkistus_riveittain($parametrit, $jarjestys = false) {
+    global $kukarow, $yhtiorow;
 
     $ryhmitetty_array = array();
+    $tuote_temp = array();
 
-    $tuote_temp = tuotteiden_kulutarkistus();
+    if ($yhtiorow['kulujen_laskeminen_hintoihin'] == 'K' and $kukarow['kulujen_laskeminen_hintoihin'] == 'K') {
+      $tuote_temp = tuotteiden_kulutarkistus();
+    }
+
+    mysql_data_seek($parametrit['result'], 0);
 
     while ($row = mysql_fetch_assoc($parametrit['result'])) {
 
-      $ryhmitys = '1';
+      $ryhmitys = '';
 
       foreach ($parametrit['group_by'] as $value) {
         if (isset($row[$value])) {
@@ -28243,47 +28249,87 @@ if (!function_exists("tilausrivin_tarkistus_riveittain")) {
         }
       }
 
-      foreach ($parametrit['select'] as $k) {
-        if (isset($row[$k])) {
-          $ryhmitetty_array[$ryhmitys][$k] = $row[$k];
-        }
-      }
-
       if (array_key_exists($ryhmitys, $ryhmitetty_array)) {
         foreach ($parametrit['sum'] as $k) {
 
-          if (!isset($ryhmitetty_array[$ryhmitys][$k])) {$ryhmitetty_array[$ryhmitys][$k] = 0;}
+          if (!isset($ryhmitetty_array[$ryhmitys][$k])) {
+            $ryhmitetty_array[$ryhmitys][$k] = 0;
+          }
 
-          if (  isset($row[$k])
-            and in_array($k, $parametrit['lisaa_kulut'])
-            and isset($tuote_temp[$row['tuoteno']])
-            and $tuote_temp[$row['tuoteno']] !== false) {
+          if (    isset($row[$k])
+              and isset($tuote_temp)) {
 
-            $ostohinta = $row['rivihinta'] - $row[$k];
-            $ostohinta = $ostohinta / ((100 - $tuote_temp[$row['tuoteno']]) / 100);
-            $row[$k] = $row['rivihinta'] - $ostohinta;
+            if (in_array($k, $parametrit['laske_kate'])) {
+
+              $b = str_replace('kate', 'myynti', $k);
+              $hinta = $row[$b];
+
+              $row[$k] = kate_kuluineen($row['tuoteno'], $hinta, $row[$k]);
+
+            }
+
           }
 
           if (isset($row[$k])) {
             $ryhmitetty_array[$ryhmitys][$k] = $row[$k] + $ryhmitetty_array[$ryhmitys][$k];
           }
+
         }
       }
       else {
         foreach ($parametrit['sum'] as $k) {
 
-          if (  isset($row[$k])
-            and in_array($k, $parametrit['lisaa_kulut'])
-            and isset($tuote_temp[$row['tuoteno']])
-            and $tuote_temp[$row['tuoteno']] !== false ) {
+          if (    isset($row[$k])
+              and isset($tuote_temp)) {
 
-            $ostohinta = $row['rivihinta'] - $row[$k];
-            $ostohinta = $ostohinta / ((100 - $tuote_temp[$row['tuoteno']]) / 100);
-            $row[$k] = $row['rivihinta'] - $ostohinta;
+            if (in_array($k, $parametrit['laske_kate'])) {
+
+              $b = str_replace('kate', 'myynti', $k);
+              $hinta = $row[$b];
+
+              $row[$k] = kate_kuluineen($row['tuoteno'], $hinta, $row[$k]);
+
+            }
+
           }
 
-          if (isset($row[$k])) { $ryhmitetty_array[$ryhmitys][$k] =  $row[$k]; }
+          if (isset($row[$k])) {
+            $ryhmitetty_array[$ryhmitys][$k] =  $row[$k];
+          }
+
         }
+      }
+
+      foreach ($parametrit['select'] as $k) {
+        if (isset($row[$k])) {
+          $ryhmitetty_array[$ryhmitys][$k] = $row[$k];
+        }
+        else{
+         $ryhmitetty_array[$ryhmitys][$k] = '';
+        }
+      }
+
+      if ($jarjestys) {
+        $apu1 = array();
+        $apu2 = array();
+        $apu3 = array();
+        $order = $parametrit['group_by'];
+
+        foreach ($order as $value) {
+          $apu3[$value] = $value;
+        }
+
+        $order = $apu3;
+
+        foreach ($ryhmitetty_array[$ryhmitys] as $key => $value) {
+          if (array_key_exists($key, $order)) {
+            $apu1[$order[$key]] = $ryhmitetty_array[$ryhmitys][$key];
+          }
+          else{
+           $apu2[$key] = $ryhmitetty_array[$ryhmitys][$key];
+          }
+        }
+        $ryhmitetty_array[$ryhmitys] = array_merge($apu1,$apu2);
       }
     }
 
@@ -28292,12 +28338,12 @@ if (!function_exists("tilausrivin_tarkistus_riveittain")) {
     $sorttaajat = $parametrit['order_by'];
 
     usort($ryhmitetty_array, function($a, $b) use ($sorttaajat) {
-        foreach ($sorttaajat as $sorttaaja) {
-          if ($a[$sorttaaja] > $b[$sorttaaja]) return 1;
-          if ($a[$sorttaaja] < $b[$sorttaaja]) return -1;
-        }
-        return 0;
-      });
+      foreach ($sorttaajat as $sorttaaja) {
+        if ($a[$sorttaaja] > $b[$sorttaaja]) return 1;
+        if ($a[$sorttaaja] < $b[$sorttaaja]) return -1;
+      }
+      return 0;
+    });
     return $ryhmitetty_array;
   }
 }
@@ -28318,6 +28364,7 @@ if (!function_exists("tuotteiden_kulutarkistus")) {
           JOIN toimi ON ( toimi.yhtio = tuotteen_toimittajat.yhtio
           AND toimi.tunnus = tuotteen_toimittajat.liitostunnus )
           WHERE tuotteen_toimittajat.yhtio =  '{$kukarow['yhtio']}'
+          AND toimi.kulujen_laskeminen_hintoihin = 'K'
           ORDER BY
           if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys) ASC,
           tuotteen_toimittajat.tunnus ASC";
@@ -28326,30 +28373,8 @@ if (!function_exists("tuotteiden_kulutarkistus")) {
     $tuotteet = array();
 
     while ($tuote = mysql_fetch_assoc($result)) {
-
-      $_not_isset_tuote = !isset($tuotteet[$tuote['tuoteno']]);
-
-      if ($_not_isset_tuote) {
-
-        if (empty($yhtiorow['kulujen_laskeminen_hintoihin']) or empty($kukarow['kulujen_laskeminen_hintoihin'])) {
-          $tuotteet[$tuote['tuoteno']] = false;
-          continue;
-        }
-
-        if (empty($tuote['kulujen_laskeminen_hintoihin'])) {
-          $tuotteet[$tuote['tuoteno']] = false;
-          continue;
-        }
-
-        if (!$kulujen_laskeminen_hintoihin) {
-          $tuotteet[$tuote['tuoteno']] = false;
-          continue;
-        }
-
-        $tuotteet[$tuote['tuoteno']] = $yhtiorow['kuluprosentti'];
-      }
+      $tuotteet[] = $tuote['tuoteno'];
     }
-
     return $tuotteet;
   }
 }
@@ -28362,7 +28387,7 @@ if (!function_exists("hinnan_kuluprosentti")) {
       return false;
     }
 
-    $query = "  SELECT toimi.kulujen_laskeminen_hintoihin
+    $query = "  SELECT toimi.kulujen_laskeminen_hintoihin, toimi.tunnus
           FROM tuotteen_toimittajat
           JOIN toimi ON ( toimi.yhtio = tuotteen_toimittajat.yhtio
           AND toimi.tunnus = tuotteen_toimittajat.liitostunnus )
@@ -28386,9 +28411,11 @@ if (!function_exists("hinnan_kuluprosentti")) {
 if (!function_exists("hinta_kuluineen")) {
   function hinta_kuluineen($tuotenumero, $hinta) {
     global $kukarow, $yhtiorow;
+
     $kuluprosentti = hinnan_kuluprosentti($tuotenumero);
     if ($kuluprosentti === false) { return $hinta; }
     $tulos = $hinta / ((100 - $kuluprosentti) / 100);
+
     return $tulos;
   }
 }
@@ -28396,9 +28423,11 @@ if (!function_exists("hinta_kuluineen")) {
 if (!function_exists("kate_kuluineen")) {
   function kate_kuluineen($tuoteno, $hinta, $kate) {
     global $kukarow, $yhtiorow;
+
     $ostohinta = $hinta - $kate;
-    $ostohinta = hinta_kuluineen($tuoteno, $ostohinta);
-    $kate = $hinta - $ostohinta;
-    return $kate;
+    $uusi_ostohinta = hinta_kuluineen($tuoteno, $ostohinta);
+    $uusi_kate = $hinta - $uusi_ostohinta;
+
+    return $uusi_kate;
   }
 }

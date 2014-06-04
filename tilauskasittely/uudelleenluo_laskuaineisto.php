@@ -1058,7 +1058,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       echo "</table>";
     }
 
-    if (file_exists(realpath($nimiedi))) {      
+    if (file_exists(realpath($nimiedi))) {
       //siirretaan laskutiedosto operaattorille
       $ftphost = $edi_ftphost;
       $ftpuser = $edi_ftpuser;

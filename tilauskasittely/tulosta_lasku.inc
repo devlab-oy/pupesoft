@@ -2222,9 +2222,9 @@ if (!function_exists('alvierittely')) {
       $tilinolisa = '';
       $kassa_arska = $pankkikortti_arska = $luottokortti_arska = array();
       // Katsotaan onko laskun tunnuksella olevilla tiliöinneillä kustannuspaikkaa
-      $query = "SELECT group_concat(DISTINCT kustp) kustannuspaikat 
-                FROM tiliointi USE INDEX (tositerivit_index) 
-                WHERE yhtio='$kukarow[yhtio]' 
+      $query = "SELECT group_concat(DISTINCT kustp) kustannuspaikat
+                FROM tiliointi USE INDEX (tositerivit_index)
+                WHERE yhtio='$kukarow[yhtio]'
                 AND ltunnus   = $laskurow[tunnus]
                 AND korjattu  = ''
                 AND kustp    != 0";
@@ -2234,9 +2234,9 @@ if (!function_exists('alvierittely')) {
 
         $kustpro = mysql_fetch_assoc($kustpre);
         // Jos laskun tiliöinneiltä löytyy kustannuspaikka voidaan etsiä sen perusteella kassalipastilinumeroita
-        $query = "SELECT DISTINCT kustp,kassa,pankkikortti,luottokortti 
-                  FROM kassalipas 
-                  WHERE yhtio='$kukarow[yhtio]' 
+        $query = "SELECT DISTINCT kustp,kassa,pankkikortti,luottokortti
+                  FROM kassalipas
+                  WHERE yhtio='$kukarow[yhtio]'
                   AND kustp IN ({$kustpro['kustannuspaikat']})";
         $keijo = pupe_query($query);
 

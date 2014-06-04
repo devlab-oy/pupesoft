@@ -80,7 +80,8 @@ $datetime_checkpoint = $datetime_checkpoint_row['selite']; // Mikä tilanne on jo
 $datetime_checkpoint_uusi = date('Y-m-d H:i:s'); // Timestamp nyt
 
 // alustetaan arrayt
-$dnstuote = $dnsryhma = $dnstuoteryhma = $dnstock = $dnsasiakas = $dnshinnasto = $dnslajitelma = $kaikki_tuotteet = $individual_tuotteet = array();
+$dnstuote = $dnsryhma = $dnstuoteryhma = $dnstock = $dnsasiakas = $dnshinnasto = $dnslajitelma =
+$kaikki_tuotteet = $individual_tuotteet = array();
 
 if ($ajetaanko_kaikki == "NO") {
   $muutoslisa = "AND (tuote.muutospvm >= '{$datetime_checkpoint}'
@@ -118,16 +119,25 @@ $query = "SELECT tuote.tuoteno,
           ta_nimitys_en.selite nimi_eng,
           try_fi.selitetark try_nimi
           FROM tuote
-          LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio and try_fi.selite = tuote.try and try_fi.laji = 'try' and try_fi.kieli = 'fi')
-          LEFT JOIN tuotteen_avainsanat as ta_nimitys_se on tuote.yhtio = ta_nimitys_se.yhtio and tuote.tuoteno = ta_nimitys_se.tuoteno and ta_nimitys_se.laji = 'nimitys' and ta_nimitys_se.kieli = 'se'
-          LEFT JOIN tuotteen_avainsanat as ta_nimitys_en on tuote.yhtio = ta_nimitys_en.yhtio and tuote.tuoteno = ta_nimitys_en.tuoteno and ta_nimitys_en.laji = 'nimitys' and ta_nimitys_en.kieli = 'en'
+          LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio
+            and try_fi.selite = tuote.try
+            and try_fi.laji = 'try'
+            and try_fi.kieli = 'fi')
+          LEFT JOIN tuotteen_avainsanat as ta_nimitys_se on tuote.yhtio = ta_nimitys_se.yhtio
+            and tuote.tuoteno = ta_nimitys_se.tuoteno
+            and ta_nimitys_se.laji = 'nimitys'
+            and ta_nimitys_se.kieli = 'se'
+          LEFT JOIN tuotteen_avainsanat as ta_nimitys_en on tuote.yhtio = ta_nimitys_en.yhtio
+            and tuote.tuoteno = ta_nimitys_en.tuoteno
+            and ta_nimitys_en.laji = 'nimitys'
+            and ta_nimitys_en.kieli = 'en'
           WHERE tuote.yhtio      = '{$kukarow["yhtio"]}'
-          AND tuote.status      != 'P'
-          AND tuote.tuotetyyppi  NOT in ('A','B')
-          AND tuote.tuoteno     != ''
-          AND tuote.nakyvyys    != ''
-          $muutoslisa
-           ORDER BY tuote.tuoteno";
+            AND tuote.status      != 'P'
+            AND tuote.tuotetyyppi  NOT in ('A','B')
+            AND tuote.tuoteno     != ''
+            AND tuote.nakyvyys    != ''
+            $muutoslisa
+          ORDER BY tuote.tuoteno";
 $res = pupe_query($query);
 
 // Pyöräytetään muuttuneet tuotteet läpi
@@ -149,8 +159,27 @@ while ($row = mysql_fetch_array($res)) {
     $myymalahinta_veroton       = hintapyoristys($row["myymalahinta"] / (1+($row["alv"]/100)));
   }
 
+  // Haetaan kaikki tuotteen atribuutit
+  $parametritquery = "SELECT
+                      tuotteen_avainsanat.selite,
+                      avainsana.selitetark,
+                      avainsana.selite option_name
+                      FROM tuotteen_avainsanat USE INDEX (yhtio_tuoteno)
+                      JOIN avainsana USE INDEX (yhtio_laji_selite) ON (avainsana.yhtio = tuotteen_avainsanat.yhtio
+                        AND avainsana.laji = 'PARAMETRI'
+                        AND avainsana.selite = SUBSTRING(tuotteen_avainsanat.laji, 11))
+                      WHERE tuotteen_avainsanat.yhtio='{$kukarow['yhtio']}'
+                      AND tuotteen_avainsanat.laji != 'parametri_variaatio'
+                      AND tuotteen_avainsanat.laji != 'parametri_variaatio_jako'
+                      AND tuotteen_avainsanat.laji like 'parametri_%'
+                      AND tuotteen_avainsanat.tuoteno = '{$row['tuoteno']}'
+                      AND tuotteen_avainsanat.kieli = 'fi'
+                      ORDER by tuotteen_avainsanat.jarjestys, tuotteen_avainsanat.laji";
+  $parametritres = pupe_query($parametritquery);
+  $tuotteen_parametrit = array();
+
   // Jos tuote kuuluu tuotepuuhun niin etsitään kategoria_idt myös kaikille tuotepuun kategorioille
-  $query = "SELECT t0.nimi node, t0.lft, 
+  $query = "SELECT t0.nimi node, t0.lft,
             tuote.tuoteno,
             GROUP_CONCAT(t5.nimi SEPARATOR '\n') children,
             (SELECT GROUP_CONCAT(t6.nimi SEPARATOR '\n')
@@ -166,7 +195,7 @@ while ($row = mysql_fetch_array($res)) {
              FROM dynaaminen_puu t1
              INNER JOIN
              dynaaminen_puu t2 ON t1.lft>t2.lft AND t1.rgt<t2.rgt
-             GROUP BY t1.lft) t3 
+             GROUP BY t1.lft) t3
              LEFT JOIN
              dynaaminen_puu t4 ON t3.node=t4.lft) t5 ON t0.lft=t5.nodeparent
             LEFT JOIN puun_alkio ON puun_alkio.puun_tunnus = t0.tunnus AND puun_alkio.yhtio = t0.yhtio
@@ -179,38 +208,49 @@ while ($row = mysql_fetch_array($res)) {
   $result_tp = pupe_query($query);
 
   $tuotepuun_nodet = array ();
-  
+
   while ($tuotepuurow = mysql_fetch_assoc($result_tp)) {
     $breadcrumbs = empty($tuotepuurow['ancestors']) ? array () : explode("\n",$tuotepuurow['ancestors']);
     $breadcrumbs[] = $tuotepuurow['node'];
     if (count($breadcrumbs) > 1) array_shift($breadcrumbs);
     $tuotepuun_nodet[] = $breadcrumbs;
   }
-  $dnstuote[] = array('tuoteno'        => $row["tuoteno"],
-            'nimi'          => $row["nimitys"],
-            'kuvaus'        => $row["kuvaus"],
-            'lyhytkuvaus'      => $row["lyhytkuvaus"],
-            'yksikko'        => $row["yksikko"],
-            'tuotemassa'      => $row["tuotemassa"],
-            'myyntihinta'      => $myyntihinta,
-            'myyntihinta_veroton'  => $myyntihinta_veroton,
-            'myymalahinta'      => $myymalahinta,
-            'myymalahinta_veroton'  => $myymalahinta_veroton,
-            'kuluprosentti'      => $row['kuluprosentti'],
-            'ean'          => $row["eankoodi"],
-            'osasto'        => $row["osasto"],
-            'try'          => $row["try"],
-            'try_nimi'        => $row["try_nimi"],
-            'alv'          => $row["alv"],
-            'nakyvyys'        => $row["nakyvyys"],
-            'nimi_swe'        => $row["nimi_swe"],
-            'nimi_eng'        => $row["nimi_eng"],
-            'campaign_code'      => $row["campaign_code"],
-            'target'        => $row["target"],
-            'onsale'        => $row["onsale"],
-            'tunnus'        => $row['tunnus'],
-            'tuotepuun_nodet' => $tuotepuun_nodet
-            );
+
+   while ($parametrirow = mysql_fetch_assoc($parametritres)) {
+    $tuotteen_parametrit[] = array(
+                                   "nimi"        => $parametrirow["selitetark"],
+                                   "option_name" => $parametrirow["option_name"],
+                                   "arvo"        => $parametrirow["selite"]
+                                   );
+  }
+
+  $dnstuote[] = array(
+                      'tuoteno'              => $row["tuoteno"],
+                      'nimi'                 => $row["nimitys"],
+                      'kuvaus'               => $row["kuvaus"],
+                      'lyhytkuvaus'          => $row["lyhytkuvaus"],
+                      'yksikko'              => $row["yksikko"],
+                      'tuotemassa'           => $row["tuotemassa"],
+                      'myyntihinta'          => $myyntihinta,
+                      'myyntihinta_veroton'  => $myyntihinta_veroton,
+                      'myymalahinta'         => $myymalahinta,
+                      'myymalahinta_veroton' => $myymalahinta_veroton,
+                      'kuluprosentti'        => $row['kuluprosentti'],
+                      'ean'                  => $row["eankoodi"],
+                      'osasto'               => $row["osasto"],
+                      'try'                  => $row["try"],
+                      'try_nimi'             => $row["try_nimi"],
+                      'alv'                  => $row["alv"],
+                      'nakyvyys'             => $row["nakyvyys"],
+                      'nimi_swe'             => $row["nimi_swe"],
+                      'nimi_eng'             => $row["nimi_eng"],
+                      'campaign_code'        => $row["campaign_code"],
+                      'target'               => $row["target"],
+                      'onsale'               => $row["onsale"],
+                      'tunnus'               => $row['tunnus'],
+                      'tuotepuun_nodet'      => $tuotepuun_nodet,
+                      'tuotteen_parametrit'  => $tuotteen_parametrit
+                      );
 }
 
 // Magentoa varten pitää hakea kaikki tuotteet, jotta voidaan poistaa ne jota ei ole olemassa
@@ -246,9 +286,9 @@ if ($verkkokauppatyyppi == 'magento') {
 echo date("d.m.Y @ G:i:s")." - Haetaan saldot.\n";
 
 if ($ajetaanko_kaikki == "NO") {
-  $muutoslisa1 = "AND tapahtuma.laadittu >= '{$datetime_checkpoint}'";
+  $muutoslisa1 = "AND tapahtuma.laadittu  >= '{$datetime_checkpoint}'";
   $muutoslisa2 = "AND tilausrivi.laadittu >= '{$datetime_checkpoint}'";
-  $muutoslisa3 = "AND tuote.muutospvm >= '{$datetime_checkpoint}'";
+  $muutoslisa3 = "AND tuote.muutospvm     >= '{$datetime_checkpoint}'";
 }
 else {
   $muutoslisa1 = "";
@@ -301,19 +341,20 @@ $result = pupe_query($query);
 while ($row = mysql_fetch_assoc($result)) {
   list(, , $myytavissa) = saldo_myytavissa($row["tuoteno"], '', $verkkokauppa_saldo_varasto);
 
-  $dnstock[] = array(  'tuoteno'    => $row["tuoteno"],
-    'ean'      => $row["eankoodi"],
-    'myytavissa'  => $myytavissa,
-  );
+  $dnstock[] = array(
+                     'tuoteno'     => $row["tuoteno"],
+                     'ean'         => $row["eankoodi"],
+                     'myytavissa'  => $myytavissa,
+                    );
 }
 
 if ($ajetaanko_kaikki == "NO") {
-  $muutoslisa = "AND (try_fi.muutospvm >= '{$datetime_checkpoint}'
-    OR try_se.muutospvm >= '{$datetime_checkpoint}'
-    OR try_en.muutospvm >= '{$datetime_checkpoint}'
-    OR osasto_fi.muutospvm >= '{$datetime_checkpoint}'
-    OR osasto_se.muutospvm >= '{$datetime_checkpoint}'
-    OR osasto_en.muutospvm >= '{$datetime_checkpoint}')";
+  $muutoslisa = "AND (try_fi.muutospvm    >= '{$datetime_checkpoint}'
+                   OR try_se.muutospvm    >= '{$datetime_checkpoint}'
+                   OR try_en.muutospvm    >= '{$datetime_checkpoint}'
+                   OR osasto_fi.muutospvm >= '{$datetime_checkpoint}'
+                   OR osasto_se.muutospvm >= '{$datetime_checkpoint}'
+                   OR osasto_en.muutospvm >= '{$datetime_checkpoint}')";
 }
 else {
   $muutoslisa = "";
@@ -331,12 +372,30 @@ $query = "SELECT DISTINCT  tuote.osasto,
           osasto_se.selitetark osasto_se_nimi,
           osasto_en.selitetark osasto_en_nimi
           FROM tuote
-          LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio and try_fi.selite = tuote.try and try_fi.laji = 'try' and try_fi.kieli = 'fi')
-          LEFT JOIN avainsana as try_se ON (try_se.yhtio = tuote.yhtio and try_se.selite = tuote.try and try_se.laji = 'try' and try_se.kieli = 'se')
-          LEFT JOIN avainsana as try_en ON (try_en.yhtio = tuote.yhtio and try_en.selite = tuote.try and try_en.laji = 'try' and try_en.kieli = 'en')
-          LEFT JOIN avainsana as osasto_fi ON (osasto_fi.yhtio = tuote.yhtio and osasto_fi.selite = tuote.osasto and osasto_fi.laji = 'osasto' and osasto_fi.kieli = 'fi')
-          LEFT JOIN avainsana as osasto_se ON (osasto_se.yhtio = tuote.yhtio and osasto_se.selite = tuote.osasto and osasto_se.laji = 'osasto' and osasto_se.kieli = 'se')
-          LEFT JOIN avainsana as osasto_en ON (osasto_en.yhtio = tuote.yhtio and osasto_en.selite = tuote.osasto and osasto_en.laji = 'osasto' and osasto_en.kieli = 'en')
+          LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio
+            and try_fi.selite = tuote.try
+            and try_fi.laji   = 'try'
+            and try_fi.kieli  = 'fi')
+          LEFT JOIN avainsana as try_se ON (try_se.yhtio = tuote.yhtio
+            and try_se.selite = tuote.try
+            and try_se.laji   = 'try'
+            and try_se.kieli  = 'se')
+          LEFT JOIN avainsana as try_en ON (try_en.yhtio = tuote.yhtio
+            and try_en.selite = tuote.try
+            and try_en.laji   = 'try'
+            and try_en.kieli  = 'en')
+          LEFT JOIN avainsana as osasto_fi ON (osasto_fi.yhtio = tuote.yhtio
+            and osasto_fi.selite = tuote.osasto
+            and osasto_fi.laji   = 'osasto'
+            and osasto_fi.kieli  = 'fi')
+          LEFT JOIN avainsana as osasto_se ON (osasto_se.yhtio = tuote.yhtio
+            and osasto_se.selite = tuote.osasto
+            and osasto_se.laji   = 'osasto'
+            and osasto_se.kieli  = 'se')
+          LEFT JOIN avainsana as osasto_en ON (osasto_en.yhtio = tuote.yhtio
+            and osasto_en.selite = tuote.osasto
+            and osasto_en.laji   = 'osasto'
+            and osasto_en.kieli  = 'en')
           WHERE tuote.yhtio      = '{$kukarow["yhtio"]}'
           AND tuote.status      != 'P'
           AND tuote.tuotetyyppi  NOT in ('A','B')
@@ -390,12 +449,13 @@ $res = pupe_query($query);
 
 // pyöräytetään asiakkaat läpi
 while ($row = mysql_fetch_array($res)) {
-  $dnsasiakas[] = array(  'nimi'    => $row["nimi"],
-    'osoite'  => $row["osoite"],
-    'postino'  => $row["postino"],
-    'postitp'  => $row["postitp"],
-    'email'    => $row["email"],
-  );
+  $dnsasiakas[] = array(
+                        'nimi'    => $row["nimi"],
+                        'osoite'   => $row["osoite"],
+                        'postino'  => $row["postino"],
+                        'postitp'  => $row["postitp"],
+                        'email'    => $row["email"],
+                        );
 }
 
 if ($ajetaanko_kaikki == "NO") {
@@ -416,16 +476,16 @@ $query = "SELECT hinnasto.tuoteno,
           tuote.alv
           FROM hinnasto
           JOIN tuote on (tuote.yhtio = hinnasto.yhtio
-            AND tuote.tuoteno      = hinnasto.tuoteno
-            AND tuote.status      != 'P'
+            AND tuote.tuoteno        = hinnasto.tuoteno
+            AND tuote.status        != 'P'
             AND tuote.tuotetyyppi  NOT in ('A','B')
             AND tuote.tuoteno     != ''
             AND tuote.nakyvyys    != '')
           WHERE hinnasto.yhtio     = '{$kukarow["yhtio"]}'
-          AND (hinnasto.minkpl = 0 AND hinnasto.maxkpl = 0)
+          AND (hinnasto.minkpl     = 0 AND hinnasto.maxkpl = 0)
           AND hinnasto.laji       != 'O'
-          AND hinnasto.maa         IN ('FI', '')
-          AND hinnasto.valkoodi    in ('EUR', '')
+          AND hinnasto.maa        IN ('FI', '')
+          AND hinnasto.valkoodi   in ('EUR', '')
           $muutoslisa";
 $res = pupe_query($query);
 
@@ -504,20 +564,30 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
                 tuote.mallitarkenne campaign_code,
                 tuote.malli target,
                 tuote.leimahduspiste onsale,
-                try_fi.selitetark try_nimi
+                try_fi.selitetark try_nimi,
+                tuote.muuta
                 FROM tuotteen_avainsanat
                 JOIN tuote on (tuote.yhtio = tuotteen_avainsanat.yhtio
-                  AND tuote.tuoteno              = tuotteen_avainsanat.tuoteno
-                  AND tuote.status              != 'P'
-                  AND tuote.tuotetyyppi          NOT in ('A','B')
-                  AND tuote.tuoteno             != ''
+                  AND tuote.tuoteno  = tuotteen_avainsanat.tuoteno
+                  AND tuote.status  != 'P'
+                  AND tuote.tuotetyyppi NOT in ('A','B')
+                  AND tuote.tuoteno != ''
                   $nakyvyys_lisa)
-                LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio and try_fi.selite = tuote.try and try_fi.laji = 'try' and try_fi.kieli = 'fi')
-                LEFT JOIN tuotteen_avainsanat as ta_nimitys_se on (tuote.yhtio = ta_nimitys_se.yhtio and tuote.tuoteno = ta_nimitys_se.tuoteno and ta_nimitys_se.laji = 'nimitys' and ta_nimitys_se.kieli = 'se')
-                LEFT JOIN tuotteen_avainsanat as ta_nimitys_en on (tuote.yhtio = ta_nimitys_en.yhtio and tuote.tuoteno = ta_nimitys_en.tuoteno and ta_nimitys_en.laji = 'nimitys' and ta_nimitys_en.kieli = 'en')
-                WHERE tuotteen_avainsanat.yhtio  = '{$kukarow['yhtio']}'
-                AND tuotteen_avainsanat.laji     = 'parametri_variaatio'
-                AND tuotteen_avainsanat.selite   = '{$rowselite['selite']}'
+                LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio
+                  and try_fi.selite = tuote.try
+                  and try_fi.laji   = 'try'
+                  and try_fi.kieli  = 'fi')
+                LEFT JOIN tuotteen_avainsanat as ta_nimitys_se on (tuote.yhtio = ta_nimitys_se.yhtio
+                  and tuote.tuoteno       = ta_nimitys_se.tuoteno
+                  and ta_nimitys_se.laji  = 'nimitys'
+                  and ta_nimitys_se.kieli = 'se')
+                LEFT JOIN tuotteen_avainsanat as ta_nimitys_en on (tuote.yhtio = ta_nimitys_en.yhtio
+                  and tuote.tuoteno       = ta_nimitys_en.tuoteno
+                  and ta_nimitys_en.laji  = 'nimitys'
+                  and ta_nimitys_en.kieli = 'en')
+                WHERE tuotteen_avainsanat.yhtio = '{$kukarow['yhtio']}'
+                AND tuotteen_avainsanat.laji    = 'parametri_variaatio'
+                AND tuotteen_avainsanat.selite  = '{$rowselite['selite']}'
                 {$muutoslisa}
                 ORDER BY tuote.tuoteno";
   $alires = pupe_query($aliselect);
@@ -525,25 +595,26 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
   while ($alirow = mysql_fetch_assoc($alires)) {
 
     // Haetaan kaikki tuotteen atribuutit
-    $alinselect = "SELECT tuotteen_avainsanat.selite,
+    $alinselect = "SELECT
+                   tuotteen_avainsanat.selite,
                    avainsana.selitetark,
                    avainsana.selite option_name
                    FROM tuotteen_avainsanat USE INDEX (yhtio_tuoteno)
                    JOIN avainsana USE INDEX (yhtio_laji_selite) ON (avainsana.yhtio = tuotteen_avainsanat.yhtio
-                     AND avainsana.laji             = 'PARAMETRI'
-                     AND avainsana.selite           = SUBSTRING(tuotteen_avainsanat.laji, 11))
-                   WHERE tuotteen_avainsanat.yhtio='{$kukarow['yhtio']}'
-                   AND tuotteen_avainsanat.laji    != 'parametri_variaatio'
-                   AND tuotteen_avainsanat.laji    != 'parametri_variaatio_jako'
-                   AND tuotteen_avainsanat.laji     like 'parametri_%'
-                   AND tuotteen_avainsanat.tuoteno  = '{$alirow['tuoteno']}'
-                   AND tuotteen_avainsanat.kieli    = 'fi'
+                     AND avainsana.laji = 'PARAMETRI'
+                     AND avainsana.selite = SUBSTRING(tuotteen_avainsanat.laji, 11))
+                   WHERE tuotteen_avainsanat.yhtio ='{$kukarow['yhtio']}'
+                   AND tuotteen_avainsanat.laji   != 'parametri_variaatio'
+                   AND tuotteen_avainsanat.laji   != 'parametri_variaatio_jako'
+                   AND tuotteen_avainsanat.laji   like 'parametri_%'
+                   AND tuotteen_avainsanat.tuoteno = '{$alirow['tuoteno']}'
+                   AND tuotteen_avainsanat.kieli   = 'fi'
                    ORDER by tuotteen_avainsanat.jarjestys, tuotteen_avainsanat.laji";
     $alinres = pupe_query($alinselect);
     $properties = array();
 
     while ($syvinrow = mysql_fetch_assoc($alinres)) {
-      $properties[] = array(  
+      $properties[] = array(
                             "nimi" => $syvinrow["selitetark"],
                             "option_name" => $syvinrow["option_name"],
                             "arvo" => $syvinrow["selite"]
@@ -567,7 +638,7 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
     }
 
     // Jos tuote kuuluu tuotepuuhun niin etsitään kategoria_idt myös kaikille tuotepuun kategorioille
-    $query = "SELECT t0.nimi node, t0.lft, 
+    $query = "SELECT t0.nimi node, t0.lft,
               tuote.tuoteno,
               GROUP_CONCAT(t5.nimi SEPARATOR '\n') children,
               (SELECT GROUP_CONCAT(t6.nimi SEPARATOR '\n')
@@ -583,7 +654,7 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
                FROM dynaaminen_puu t1
                INNER JOIN
                dynaaminen_puu t2 ON t1.lft>t2.lft AND t1.rgt<t2.rgt
-               GROUP BY t1.lft) t3 
+               GROUP BY t1.lft) t3
                LEFT JOIN
                dynaaminen_puu t4 ON t3.node=t4.lft) t5 ON t0.lft=t5.nodeparent
               LEFT JOIN puun_alkio ON puun_alkio.puun_tunnus = t0.tunnus AND puun_alkio.yhtio = t0.yhtio
@@ -604,7 +675,7 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
       $tuotepuun_nodet[] = $breadcrumbs;
     }
 
-    $dnslajitelma[$rowselite["selite"]][] = array(  
+    $dnslajitelma[$rowselite["selite"]][] = array(
       'tuoteno'               => $alirow["tuoteno"],
       'tunnus'                => $alirow["tunnus"],
       'nimitys'               => $alirow["nimitys"],
@@ -625,11 +696,11 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
       'myymalahinta_veroton'  => $myymalahinta_veroton,
       'kuluprosentti'         => $alirow['kuluprosentti'],
       'ean'                   => $alirow["eankoodi"],
+      'muuta'                 => $alirow['muuta'],
       'parametrit'            => $properties,
       'tuotepuun_nodet'       => $tuotepuun_nodet
     );
   }
-
 }
 
 $tuote_export_error_count = 0;
@@ -654,12 +725,17 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
 
   // Verkkokaupanhintakenttä, joko myyntihinta tai myymalahinta
   if (isset($magento_hintakentta)) $magento_client->setHintakentta($magento_hintakentta);
-  
+
   // Käytetäänkö tuoteryhminä tuoteryhmiä(default) vai tuotepuuta
   if (isset($magento_kategoriat)) $magento_client->setKategoriat($magento_kategoriat);
 
   // Onko "Category access control"-moduli on asennettu
   if (isset($categoryaccesscontrol)) $magento_client->setCategoryaccesscontrol($categoryaccesscontrol);
+
+  // Mitä tuotteen kenttää käytetään configurable-tuotteen nimityksenä
+  if (isset($magento_configurable_tuote_nimityskentta) and !empty($magento_configurable_tuote_nimityskentta)) {
+    $magento_client->setConfigurableNimityskentta($magento_configurable_tuote_nimityskentta);
+  }
 
   // lisaa_kategoriat
   if (count($dnstuoteryhma) > 0) {

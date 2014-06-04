@@ -955,9 +955,6 @@ elseif (
   }
 
   $paikat = "<select name='paikka' style='width:120px;' onchange='submit();'>".$paikat."</select>";
-} elseif ($trow["ei_saldoa"] != "") {
-  //jos on saldoton tuote niin viimeist‰‰n t‰ss‰ setataan tuo $selpaikkamyytavissa = tilkpl niin voidaan sitten k‰sitell‰ tuotteen statusta helpommin
-  $selpaikkamyytavissa = $row["tilkpl"];
 }
 
 //  Onko t‰t‰ varattuna siirtolistalla?

@@ -70,6 +70,11 @@ class MagentoClient {
    * Verkkokaupan "hinta"-kenttä, joko myymalahinta tai myyntihinta
    */
   private $_hintakentta = "myymalahinta";
+  
+  /**
+   * Verkkokaupassa käytettävät tuoteryhmät, default tuoteryhmä tai tuotepuu 
+   */
+  private $_kategoriat = "tuoteryhma";
 
   /**
    * Onko "Category access control"-moduli on asennettu? Oletukena ei oo.
@@ -121,6 +126,13 @@ class MagentoClient {
     $this->log("Lisätään kategoriat");
 
     $categoryaccesscontrol = $this->_categoryaccesscontrol;
+    
+    $selected_category = $this->_kategoriat;
+    
+    if ($selected_category != 'tuoteryhma') {
+      $this->log("Ohitetaan kategorioiden luonti. Kategoriatyypiksi valittu tuotepuu.");
+      return 0;
+    } 
 
     $parent_id = $this->_parent_id; // Magento kategorian tunnus, jonka alle kaikki tuoteryhmät lisätään (pitää katsoa magentosta)
     $count = 0;
@@ -185,6 +197,8 @@ class MagentoClient {
     $this->log("Lisätään tuotteita (simple)");
 
     $hintakentta = $this->_hintakentta;
+    
+    $selected_category = $this->_kategoriat;
 
     // Tuote countteri
     $count = 0;
@@ -209,6 +223,8 @@ class MagentoClient {
     foreach ($dnstuote as $tuote) {
       $tuote_clean = $tuote['tuoteno'];
 
+      $category_ids = array ();
+
       if (is_numeric($tuote['tuoteno'])) $tuote['tuoteno'] = "SKU_".$tuote['tuoteno'];
 
       // Lyhytkuvaus ei saa olla magentossa tyhjä.
@@ -220,8 +236,20 @@ class MagentoClient {
       $tuote['kuluprosentti'] = ($tuote['kuluprosentti'] == 0) ? '' : $tuote['kuluprosentti'];
 
       // Etsitään kategoria_id tuoteryhmällä
-      $category_id = $this->findCategory(utf8_encode($tuote['try_nimi']), $category_tree['children']);
+      if ($selected_category == 'tuoteryhma') {
+        $category_ids[] = $this->findCategory(utf8_encode($tuote['try_nimi']), $category_tree['children']);
+      }
+      else {
+        // Etsitään kategoria_id:t tuotepuun tuotepolulla
+        $tuotepuun_nodet = $tuote['tuotepuun_nodet'];
 
+        // Lisätään myös tuotepuun kategoriat
+        if (isset($tuotepuun_nodet) and count($tuotepuun_nodet) > 0) {
+          foreach ($tuotepuun_nodet as $tuotepolku) {
+            $category_ids[] = $this->createCategoryTree($tuotepolku);
+          }
+        }
+      }
       // Jos tuote ei oo osa configurable_grouppia, niin niitten kuuluu olla visibleja.
       if (isset($individual_tuotteet[$tuote_clean])) {
         $visibility = self::CATALOG_SEARCH;
@@ -231,24 +259,24 @@ class MagentoClient {
       }
 
       $tuote_data = array(
-        'categories'            => array($category_id),
-        'websites'              => explode(" ", $tuote['nakyvyys']),
-        'name'                  => utf8_encode($tuote['nimi']),
-        'description'           => utf8_encode($tuote['kuvaus']),
-        'short_description'     => utf8_encode($tuote['lyhytkuvaus']),
-        'weight'                => $tuote['tuotemassa'],
-        'status'                => self::ENABLED,
-        'visibility'            => $visibility,
-        'price'                 => $tuote[$hintakentta],
-        'special_price'         => $tuote['kuluprosentti'],
-        'tax_class_id'          => $this->getTaxClassID(),
-        'meta_title'            => '',
-        'meta_keyword'          => '',
-        'meta_description'      => '',
-        'campaign_code'         => utf8_encode($tuote['campaign_code']),
-        'onsale'                => utf8_encode($tuote['onsale']),
-        'target'                => utf8_encode($tuote['target']),
-      );
+          'categories'            => $category_ids,
+          'websites'              => explode(" ", $tuote['nakyvyys']),
+          'name'                  => utf8_encode($tuote['nimi']),
+          'description'           => utf8_encode($tuote['kuvaus']),
+          'short_description'     => utf8_encode($tuote['lyhytkuvaus']),
+          'weight'                => $tuote['tuotemassa'],
+          'status'                => self::ENABLED,
+          'visibility'            => $visibility,
+          'price'                 => $tuote[$hintakentta],
+          'special_price'         => $tuote['kuluprosentti'],
+          'tax_class_id'          => $this->getTaxClassID(),
+          'meta_title'            => '',
+          'meta_keyword'          => '',
+          'meta_description'      => '',
+          'campaign_code'         => utf8_encode($tuote['campaign_code']),
+          'onsale'                => utf8_encode($tuote['onsale']),
+          'target'                => utf8_encode($tuote['target']),
+        );
 
       // Lisätään tai päivitetään tuote
 
@@ -348,8 +376,12 @@ class MagentoClient {
 
     $hintakentta = $this->_hintakentta;
 
+    $selected_category = $this->_kategoriat;
+
     // Lisätään tuotteet
     foreach ($dnslajitelma as $nimitys => $tuotteet) {
+      
+      $category_ids = array ();
 
       // Jos lyhytkuvaus on tyhjä, käytetään kuvausta?
       if ($tuotteet[0]['lyhytkuvaus'] == '') {
@@ -359,9 +391,21 @@ class MagentoClient {
       // Erikoishinta
       $tuotteet[0]['kuluprosentti'] = ($tuotteet[0]['kuluprosentti'] == 0) ? '' : $tuotteet[0]['kuluprosentti'];
 
-      // Etsitään kategoria mihin tuote lisätään
-      $category_id = $this->findCategory($tuotteet[0]['try_nimi'], $category_tree['children']);
+      // Etsitään kategoria_id tuoteryhmällä
+      if ($selected_category == 'tuoteryhma') {
+         $category_ids[] = $this->findCategory($tuotteet[0]['try_nimi'], $category_tree['children']);
+      }
+      else {
+        // Etsitään kategoria_id:t tuotepuun tuotepolulla
+        $tuotepuun_nodet = $tuotteet[0]['tuotepuun_nodet'];
 
+        // Lisätään myös tuotepuun kategoriat
+        if (isset($tuotepuun_nodet) and count($tuotepuun_nodet) > 0) {
+          foreach ($tuotepuun_nodet as $tuotepolku) {
+            $category_ids[] = $this->createCategoryTree($tuotepolku);
+          }
+        }
+      }
       // Tehdään 'associated_skus' -kenttä
       // Vaatii, että Magentoon asennetaan 'magento-improve-api' -moduli: https://github.com/jreinke/magento-improve-api
       $lapsituotteet_array = array();
@@ -374,21 +418,21 @@ class MagentoClient {
 
       // Configurable tuotteen tiedot
       $configurable = array(
-        'categories'      => array($category_id),
-        'websites'        => explode(" ", $tuotteet[0]['nakyvyys']),
-        'name'          => utf8_encode($tuotteet[0]['nimitys']),
+        'categories'            => $category_ids,
+        'websites'              => explode(" ", $tuotteet[0]['nakyvyys']),
+        'name'                  => utf8_encode($tuotteet[0]['nimitys']),
         'description'           => utf8_encode($tuotteet[0]['kuvaus']),
         'short_description'     => utf8_encode($tuotteet[0]['lyhytkuvaus']),
         'campaign_code'         => utf8_encode($tuotteet[0]['campaign_code']),
         'onsale'                => utf8_encode($tuotteet[0]['onsale']),
         'target'                => utf8_encode($tuotteet[0]['target']),
-        'featured_priority'    => utf8_encode($tuotteet[0]['jarjestys']),
+        'featured_priority'     => utf8_encode($tuotteet[0]['jarjestys']),
         'weight'                => $tuotteet[0]['tuotemassa'],
         'status'                => self::ENABLED,
         'visibility'            => self::CATALOG_SEARCH, // Configurablet nakyy kaikkialla
         'price'                 => $tuotteet[0][$hintakentta],
-        'special_price'      => $tuotteet[0]['kuluprosentti'],
-        'tax_class_id'          => $this->getTaxClassID(), // 24%
+        'special_price'         => $tuotteet[0]['kuluprosentti'],
+        'tax_class_id'          => $this->getTaxClassID(), # 24%
         'meta_title'            => '',
         'meta_keyword'          => '',
         'meta_description'      => '',
@@ -412,10 +456,11 @@ class MagentoClient {
             $multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
           }
 
-          $simple_tuote_data = array(  'price'          => $tuote[$hintakentta],
-            'short_description'    => utf8_encode($tuote['lyhytkuvaus']),
-            'featured_priority'    => utf8_encode($tuote['jarjestys']),
-            'visibility'      => self::NOT_VISIBLE_INDIVIDUALLY,
+          $simple_tuote_data = array(  
+            'price'                 => $tuote[$hintakentta],
+            'short_description'     => utf8_encode($tuote['lyhytkuvaus']),
+            'featured_priority'     => utf8_encode($tuote['jarjestys']),
+            'visibility'            => self::NOT_VISIBLE_INDIVIDUALLY,
             'additional_attributes' => array('multi_data' => $multi_data),
           );
 
@@ -699,6 +744,80 @@ class MagentoClient {
   }
 
   /// Private functions ///
+  
+  /**
+   * Parametrinä tulee yhden tuotteen koko tuotepolku
+   * eli tuotepuun tuoteryhmät järjestyksessä rootista lähtien
+   * @return syvimmän kategorian id
+   */
+  private function createCategoryTree($ancestors) {
+
+    $cat_id = $this->_parent_id;
+    
+    foreach ($ancestors as $nimi) {
+      $cat_id = $this->createSubCategory($nimi, $cat_id);
+    }
+    
+    return $cat_id;
+  }
+
+  /**
+   * Lisää tuotepuun kategorian annettun category_id:n alle
+   * jos sellaista ei ole jo olemassa
+   * @return luodun tai löydetyn kategorian id
+   */
+  private function createSubCategory($name, $parent_cat_id) {
+    
+    // otetaan koko tuotepuu, valitaan siitä eka solu idn perusteella
+    // sen lapsista etsitään nimeä, jos ei löydy, luodaan viimeisimmän idn alle
+    // lopuksi palautetaan id
+    $name = utf8_encode($name);
+    $categoryaccesscontrol = $this->_categoryaccesscontrol;
+    $magento_tree = $this->getCategories();
+    $results = $this->getParentArray($magento_tree, "$parent_cat_id");
+    
+    // Etsitään kategoriaa
+    foreach ($results[0]['children'] as $k => $v) {
+      if (strcasecmp($name, $v['name']) == 0) {
+        return $v['category_id'];
+      }
+    }
+
+    // Lisätään kategoria, jos ei löytynyt
+    $category_data = array(
+                           'name'                  => $name,
+                           'is_active'             => 1,
+                           'position'              => 1,
+                           'default_sort_by'       => 'position',
+                           'available_sort_by'     => 'position',
+                           'include_in_menu'       => 1,
+                           'is_anchor'             => 1
+                           );
+
+    if ($categoryaccesscontrol) {
+      // HUOM: Vain jos "Category access control"-moduli on asennettu
+      $category_data['accesscontrol_show_group'] = 0;
+    }
+
+    // Kutsutaan soap rajapintaa
+    $category_id = $this->_proxy->call($this->_session, 'catalog_category.create',
+      array($parent_cat_id, $category_data)
+    );
+    $this->log("Lisättiin tuotepuun kategoria:$name tunnuksella: $category_id");
+
+    unset($this->_category_tree);
+
+    return $category_id; 
+  }
+
+  /**
+   *  Tonkii arraysta key->value pairia ja jos löytyy nii palauttaa sen
+   */
+  private function getParentArray($tree, $parent_cat_id) {
+    //etsitään keytä "category_id" valuella isatunnus ja return sen lapset
+    return search_array_key_for_value_recursive($tree, 'category_id', $parent_cat_id);
+    
+  }
 
   /**
    * Hakee oletus attribuuttisetin
@@ -1019,12 +1138,23 @@ class MagentoClient {
   public function setHintakentta($hintakentta) {
     $this->_hintakentta = $hintakentta;
   }
+  
+  /**
+      * Asettaa _kategoriat-muuttujan, parametri säätelee
+      * perustetaanko magenton tuoteryhmärakenne tuoteryhmien vai tuotepuun pohjalta
+      * Oletus 'tuoteryhma', vaihtoehtoisesti tuotepuu
+      * 
+      * @param string $magento_kategoriat
+      */
+    public function setKategoriat($magento_kategoriat) {
+      $this->_kategoriat = $magento_kategoriat;
+    }
 
   /**
    * Asettaa categoryaccesscontrol-muuttujan
    * Oletus FALSE
    *
-   * @param string  $$categoryaccesscontrol BOOLEAN
+   * @param string $categoryaccesscontrol BOOLEAN
    */
   public function setCategoryaccesscontrol($categoryaccesscontrol) {
     $this->_categoryaccesscontrol = $categoryaccesscontrol;

@@ -1523,6 +1523,9 @@ else {
 
           if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and isset($toimitustavan_lahto[$varasto]) and $toimitustavan_lahto[$varasto] > 0) {
             $toimitustavan_lahto_arvo = $toimitustavan_lahto[$varasto];
+
+            $laskurow['toimitustavan_lahto'] = $toimitustavan_lahto_arvo;
+            $laskurow['ohjausmerkki'] = paivita_ohjausmerkki($laskurow);
           }
           else {
             $toimitustavan_lahto_arvo = 0;
@@ -1712,6 +1715,9 @@ else {
 
       if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and isset($toimitustavan_lahto[$varasto]) and $toimitustavan_lahto[$varasto] > 0) {
         $toimitustavan_lahto_arvo = $toimitustavan_lahto[$varasto];
+
+        $laskurow['toimitustavan_lahto'] = $toimitustavan_lahto_arvo;
+        $laskurow['ohjausmerkki'] = paivita_ohjausmerkki($laskurow);
       }
       else {
         $toimitustavan_lahto_arvo = 0;
@@ -1811,7 +1817,7 @@ else {
 
           $lahtorow = mysql_fetch_assoc($result);
 
-          if ($yhtiorow_chk['kerayserat'] != 'K') continue;
+          if ($yhtiorow['kerayserat'] != 'K') continue;
 
           // Tilaustyyppi 2, eli varastot‰ydennys, siirret‰‰n aina yhden p‰iv‰n eteenp‰in
           $eteenpain = ($lahtorow["tilaustyyppi"] == 2) ? 1 : 0;

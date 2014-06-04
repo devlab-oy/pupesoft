@@ -293,6 +293,17 @@ if ($tila == 'Muuta' and !isset($jatka)) {
     $tresult = t_avainsana("ASIAKASLUOKKA");
   }
 
+  if (empty($srow['luokka'])) {
+    # haetaan oletusprioriteetti
+    $oletusluokka = t_avainsana("VARASTOLUOKKA", "", " and avainsana.selitetark_2 != ''", "", "", "selite");
+
+    if (empty($oletusluokka)) {
+      $oletusluokka = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selitetark_2 != ''", "", "", "selite");
+    }
+
+    $srow['luokka'] = $oletusluokka;
+  }
+
   echo "<select name='luokka'><option value=''>".t("Oletus")."</option>";
 
   while ($row = mysql_fetch_array($tresult)) {
@@ -452,6 +463,27 @@ if (isset($jatka)) {
     $yhtio_toimipaikka = $kukarow['toimipaikka'];
   }
 
+  if (!empty($luokka)) {
+
+    $prioriteettinro = t_avainsana("VARASTOLUOKKA", "", " and avainsana.selite='{$luokka}'", "", "", "selitetark_3");
+
+    if (!is_numeric($prioriteettinro)) {
+      $prioriteettinro = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selite='{$luokka}'", "", "", "selitetark_3");
+    }
+  }
+  else {
+
+    # haetaan oletusprioriteetti
+    $prioriteettinro = t_avainsana("VARASTOLUOKKA", "", " and avainsana.selitetark_2 != ''", "", "", "selitetark_3");
+
+    if (empty($prioriteettinro)) {
+      $prioriteettinro = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selitetark_2 != ''", "", "", "selitetark_3");
+    }
+  }
+
+  // Default 9 myös kannassa, niin laitetaan tännekki 9 jos avainsanoista ei löydy prioa
+  if (!is_numeric($prioriteettinro)) $prioriteettinro = 9;
+
   $query .= "  lasku SET
         yhtio_nimi      = '$yhtiorow[nimi]',
         yhtio_osoite    = '$yhtiorow[osoite]',
@@ -483,6 +515,7 @@ if (isset($jatka)) {
         alatila       = '$alatila',
         varasto       = '$varasto',
         hyvaksynnanmuutos   = '$luokka',
+        prioriteettinro     = '$prioriteettinro',
         tunnusnippu      = '$tunnusnippu',
         kohde        = '$valmistuslinja',
         toimitustapa    = '$toimitustapa'";

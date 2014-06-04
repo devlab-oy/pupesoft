@@ -61,12 +61,27 @@ class Unifaun {
 
   private function setAsiakasRow() {
     //  Haetaan asiakastiedot
-    $query = "SELECT *
-              FROM asiakas
-              WHERE yhtio = '{$this->kukarow['yhtio']}'
-              and tunnus  = '{$this->postirow['liitostunnus']}'";
-    $asres = mysql_query($query);
-    $this->asiakasrow = mysql_fetch_assoc($asres);
+    if ($this->postirow['liitostunnus'] == '999999999') {
+
+      $this->asiakasrow = array(
+        'tunnus' => $this->postirow['clearing'],
+        'osoite' => $this->postirow['osoite'],
+        'postino' => $this->postirow['postino'],
+        'postitp' => $this->postirow['postitp'],
+        'toim_osoite' => $this->postirow['toim_osoite'],
+        'toim_postino' => $this->postirow['toim_postino'],
+        'toim_postitp' => $this->postirow['toim_postitp'],
+        'fax' => '',
+      );
+    }
+    else {
+      $query = "SELECT *
+                FROM asiakas
+                WHERE yhtio = '{$this->kukarow['yhtio']}'
+                and tunnus  = '{$this->postirow['liitostunnus']}'";
+      $asres = mysql_query($query);
+      $this->asiakasrow = mysql_fetch_assoc($asres);
+    }
   }
 
   public function setPostiRow($postirow) {
@@ -505,6 +520,7 @@ class Unifaun {
         #$uni_shi_val->addAttribute('n', "legalfrom");
 
         $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->asiakasrow["tunnus"])); # Defines the receiver. Refers to rcvid value for receiver.
+
         $uni_shi_val->addAttribute('n', "to");
 
         #$uni_shi_val = $uni_shipment->addChild('val', ""); # Defines the legal receiver (not printed on shipping documents).

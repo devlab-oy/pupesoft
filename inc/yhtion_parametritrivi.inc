@@ -141,6 +141,20 @@ if ($fieldname == "lahetteen_tulostustapa") {
   $jatko = 0;
 }
 
+if ($fieldname == "kulujen_laskeminen_hintoihin") {
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'K' ? "selected" : "";
+
+  $ulos .= "<option value = ''>".t("Hintoihin ei lisätä kuluja kuluprosentin mukaan")."</option>";
+  $ulos .= "<option value = 'K' {$sel}>".t("Hintoihin lisätään kulut kuluprosentin mukaan")."</option>";
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "myyntitilin_tulostustapa") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -2076,6 +2090,27 @@ if ($fieldname == "oslapp_rakir_logo") {
 
   $ulos .= "<option value=''  $sel1>".t("Logo tulostetaan rahtikirjaan ja osoitelappuun")."</option>";
   $ulos .= "<option value='X' $sel2>".t("Logoa ei tulosteta rahtikirjaan eikä osoitelappuun")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "osoitelappu_lisatiedot") {
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel1="";
+  $sel2="";
+
+  if ($trow[$i] == "") {
+    $sel1 = "selected";
+  }
+  else {
+    $sel2 = "selected";
+  }
+
+  $ulos .= "<option value=''  $sel1>".t("Asiaakkaan tilausnumero ja tilausyhteyshenkilö tulostetaan osoitelapulle")."</option>";
+  $ulos .= "<option value='X' $sel2>".t("Asiakkaan tilausnumeroa tai tilausyhteyshenkilöä EI tulosteta osoitelapulle")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

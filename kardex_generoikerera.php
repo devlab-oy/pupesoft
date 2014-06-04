@@ -58,14 +58,31 @@ else {
         $otunnukset = implode(",", $lisatyt_tilaukset);
         $kerayslistatunnus = array_shift(array_keys($lisatyt_tilaukset));
 
-        // tilaus on jo tilassa N A, p‰ivitet‰‰n nyt tilaus "ker‰yslista tulostettu" eli L A
-        $query = "UPDATE lasku SET
-                  tila        = 'L',
-                  lahetepvm   = now(),
-                  kerayslista = '{$kerayslistatunnus}'
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus  in ({$otunnukset})";
-        $upd_res = pupe_query($query);
+        // myyntitilaus on jo tilassa N A, p‰ivitet‰‰n nyt tilaus "ker‰yslista tulostettu" eli L A
+        // siirtolista on tilassa G J, p‰ivitet‰‰n G A
+        foreach ($lisatyt_tilaukset as $o) {
+
+          $lasku_temp = hae_lasku($o);
+
+          if ($lasku_temp['tila'] == 'G') {
+            $query = "UPDATE lasku SET
+                      alatila     = 'A',
+                      lahetepvm   = now(),
+                      kerayslista = '{$kerayslistatunnus}'
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tunnus  = {$o}";
+          }
+          else {
+            $query = "UPDATE lasku SET
+                      tila        = 'L',
+                      lahetepvm   = now(),
+                      kerayslista = '{$kerayslistatunnus}'
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tunnus  = {$o}";
+          }
+
+          $upd_res = pupe_query($query);
+        }
       }
     }
 

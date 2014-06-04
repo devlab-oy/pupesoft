@@ -13,7 +13,7 @@ foreach ($dnslajitelma as $key => $lajitelma) {
   $xml = new SimpleXMLElement($xmlstr);
 
   $customer = $xml->addChild('customer');
-  $customer->addChild('case','pupesoft');
+  $customer->addChild('case', 'pupesoft');
   $customer->addChild('name', utf8_encode(xmlentities($yhtiorow["nimi"])));
   $customer->addChild('address', utf8_encode(xmlentities($yhtiorow["osoite"])));
   $customer->addChild('timestamp', date("Y-m-d H:i"));
@@ -29,22 +29,22 @@ foreach ($dnslajitelma as $key => $lajitelma) {
   foreach ($lajitelma as $tiedot) {
 
     $assortment = $product->addChild('assortment');
-      $assortment->addChild('code', utf8_encode(xmlentities($tiedot["tuoteno"])));
-      $assortment->addChild('assortmentname', utf8_encode(xmlentities($tiedot["nimitys"])));
-      $assortment->addChild('assortmentnameswe', utf8_encode(xmlentities($tiedot["nimi_swe"])));
-      $assortment->addChild('assortmentnameeng', utf8_encode(xmlentities($tiedot["nimi_eng"])));
-      $assortment->addChild('ean', utf8_encode(xmlentities($tiedot["ean"])));
-      $assortment->addChild('assortmentprice',$tiedot["myyntihinta"]);
-      $assortment->addChild('kuluttajahinta',$tiedot["myymalahinta"]);
-      $properties = $assortment->addChild('properties');
+    $assortment->addChild('code', utf8_encode(xmlentities($tiedot["tuoteno"])));
+    $assortment->addChild('assortmentname', utf8_encode(xmlentities($tiedot["nimitys"])));
+    $assortment->addChild('assortmentnameswe', utf8_encode(xmlentities($tiedot["nimi_swe"])));
+    $assortment->addChild('assortmentnameeng', utf8_encode(xmlentities($tiedot["nimi_eng"])));
+    $assortment->addChild('ean', utf8_encode(xmlentities($tiedot["ean"])));
+    $assortment->addChild('assortmentprice', $tiedot["myyntihinta"]);
+    $assortment->addChild('kuluttajahinta', $tiedot["myymalahinta"]);
+    $properties = $assortment->addChild('properties');
 
-      // Loopataan lajitelman parametrit
-      foreach ($tiedot["parametrit"] as $parametrit) {
-        $propertytype = $properties->addChild('propertytype');
-          $propertytype->addChild('propertytypename', utf8_encode(xmlentities($parametrit["nimi"])));
-            $property = $propertytype->addChild('property');
-            $property->addChild('propertyname', utf8_encode(xmlentities($parametrit["arvo"])));
-      }
+    // Loopataan lajitelman parametrit
+    foreach ($tiedot["parametrit"] as $parametrit) {
+      $propertytype = $properties->addChild('propertytype');
+      $propertytype->addChild('propertytypename', utf8_encode(xmlentities($parametrit["nimi"])));
+      $property = $propertytype->addChild('property');
+      $property->addChild('propertyname', utf8_encode(xmlentities($parametrit["arvo"])));
+    }
   }
 
   $laskuri++;
@@ -54,5 +54,5 @@ foreach ($dnslajitelma as $key => $lajitelma) {
   $ftpfile = realpath($tiedoston_sijainti);
   $todnimi = basename($tiedoston_sijainti);
 
-  require ("{$pupe_root_polku}/inc/ftp-send.inc");
+  require "{$pupe_root_polku}/inc/ftp-send.inc";
 }

@@ -1,7 +1,7 @@
 <?php
 
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
-$useslave = 1;
+$useslave = 2;
 
 require('../inc/parametrit.inc');
 

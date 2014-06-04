@@ -16,7 +16,7 @@ if (isset($_POST["tee"])) {
 }
 
 // T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta
-$useslave = 1;
+$useslave = 2;
 
 if (!$php_cli) {
   require("../inc/parametrit.inc");

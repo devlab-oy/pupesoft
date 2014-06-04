@@ -188,7 +188,7 @@ if ($tee != '' and isset($painoinnappia)) {
     "group_by" => $group_by,
     "order_by" => array("osasto", "tuoteryhma"),
     "select" => array("osasto", "tuoteryhma"),
-    "lisaa_kulut" => array("kateVA", "kateEDVA", "kateED", "kate12")
+    "laske_kate" => array("kateVA", "kateEDVA", "kateED", "kate12")
   );
 
   $rows = tilausrivin_tarkistus_riveittain($parametrit);

@@ -3933,6 +3933,18 @@ if (mysql_field_name($result, $i) == 'yhdistetaan_identtiset_laskulla') {
   $jatko = 0;
 }
 
+if (mysql_field_name($result, $i) == 'sallitaanko_kateismyynti_laskulle') {
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'k' ? 'selected' : '';
+
+  $ulos .= "<option value = ''>".t("Ei sallita osamaksu / rahoitus (laskulle) maksutapaa käteismyynnissä")."</option>";
+  $ulos .= "<option value = 'k' {$sel}>".t("Sallitaan osamaksu / rahoitus (laskulle) maksutapa käteismyynnissä")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if (mysql_field_name($result, $i) == 'lapsituotteen_poiston_esto') {
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 

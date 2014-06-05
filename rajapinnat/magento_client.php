@@ -312,8 +312,6 @@ class MagentoClient {
         'target'                => utf8_encode($tuote['target']),
         'tier_price'            => $tuote_ryhmahinta_data,
         'additional_attributes' => array('multi_data' => $multi_data),
-        'name2'                 => utf8_encode("Secondary name"),
-        'pickup_product'        => TRUE,
       );
 
       // Lisätään tai päivitetään tuote
@@ -461,6 +459,12 @@ class MagentoClient {
 
         $lapsituotteet_array[] = $tuote['tuoteno'];
       }
+      // Configurable-tuotteelle myös ensimmäisen lapsen parametrit
+      $configurable_multi_data = array();
+      foreach ($tuotteet[0]['parametrit'] as $parametri) {
+          $key = $parametri['option_name'];
+          $configurable_multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
+      }
 
       // Configurable tuotteen tiedot
       $configurable = array(
@@ -482,7 +486,7 @@ class MagentoClient {
         'meta_title'            => '',
         'meta_keyword'          => '',
         'meta_description'      => '',
-        'color'                 => "Magenta",
+        'additional_attributes' => array('multi_data' => $configurable_multi_data),
         'associated_skus'       => $lapsituotteet_array,
       );
 
@@ -1013,7 +1017,7 @@ class MagentoClient {
     }
 
     // Jos optionssia ei ole mutta tyyppi on select niin luodaan se
-    if ($attribute_type == "select") {
+    if ($attribute_type == "select" or $attribute_type == "multiselect") {
       $optionToAdd = array(
         "label" => array(
           array(
@@ -1030,7 +1034,7 @@ class MagentoClient {
           $optionToAdd
         )
       );
-      echo "Luotiin uusi attribuutti $value optioid $attribute_id";
+      $this->log("Luotiin uusi attribuutti $value optioid $attribute_id");
 
       // Haetaan kaikki attribuutin optionssit uudestaan..
       $options = $this->_proxy->call(

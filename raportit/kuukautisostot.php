@@ -607,7 +607,7 @@ else {
     }
 
     ///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
-    $useslave = 1;
+    $useslave = 2;
 
     // Eli haetaan connect.inc uudestaan t‰ss‰
     require("../inc/connect.inc");

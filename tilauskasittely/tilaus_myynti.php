@@ -1235,9 +1235,9 @@ if ($tee == "VALMIS"
     echo "<tr><td>".t("Pankkikortilla")."</td><td><input type='text' name='kateismaksu[pankkikortti]' id='pankkikortti' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
     echo "<tr><td>".t("Luottokortilla")."</td><td><input type='text' name='kateismaksu[luottokortti]' id='luottokortti' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
 
-    if ($yhtiorow['sallitaanko_kateismyynti_laskulle'] != '') {
-      echo "<tr><td>".t("Laskulle")."</td><td><input type='text' name='kateismaksu[laskulle]' id='laskulle' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
-    }
+    $style = $yhtiorow['sallitaanko_kateismyynti_laskulle'] != '' ? '' : 'display: none;' ;
+    
+    echo "<tr style='$style'><td>".t("Laskulle")."</td><td><input type='text' name='kateismaksu[laskulle]' id='laskulle' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
 
     echo "<tr><th>".t("Erotus")."</th><td name='loppusumma' id='loppusumma' align='right'><strong>0.00</strong></td><td>$laskurow[valkoodi]</td></tr>";
     echo "<tr><td class='back'><input type='submit' name='hyvaksy_nappi' id='hyvaksy_nappi' value='".t("Hyväksy")."' disabled></td></tr>";

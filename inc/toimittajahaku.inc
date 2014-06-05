@@ -237,6 +237,27 @@ if ($tee == 'A') {
 
         echo "</td>";
       }
+      
+      $query = "SELECT tunnus
+                FROM kustannuspaikka
+                WHERE yhtio   = '$kukarow[yhtio]'
+                and tyyppi    = 'P'
+                and kaytossa != 'E'
+                LIMIT 1";
+      $result = pupe_query($query);
+      
+      if (mysql_num_rows($result) > 0) {
+
+        echo "</tr><tr><th>".t("Projekti")."</th><td>";
+
+        $monivalintalaatikot = array("PROJEKTI");
+        $noautosubmit = TRUE;
+        $piirra_otsikot = FALSE;
+
+        require ("tilauskasittely/monivalintalaatikot.inc");
+
+        echo "</td>";
+      }
 
       echo "<td class='back' style='vertical-align:bottom;'><input type='Submit' value='".t("Näytä")."'></td></tr>";
       echo "</table>";
@@ -277,7 +298,7 @@ if ($tee == 'A') {
         $limlis = " LIMIT $alku, 50 ";
       }
 
-      if (isset($lisa) and strpos($lisa, "tiliointi.kustp") !== FALSE) {
+      if (isset($lisa) and strpos($lisa, "tiliointi.kustp") or strpos($lisa, "tiliointi.projekti") !== FALSE) {
         $tiliointilisa = " JOIN tiliointi on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.korjattu='') ";
         $th_lisa .= $lisa;
       }

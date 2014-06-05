@@ -220,37 +220,16 @@ if ($tee == 'A') {
       $query = "SELECT tunnus
                 FROM kustannuspaikka
                 WHERE yhtio   = '$kukarow[yhtio]'
-                and tyyppi    = 'K'
+                and tyyppi    in ('K','P')
                 and kaytossa != 'E'
                 LIMIT 1";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) > 0) {
 
-        echo "</tr><tr><th>".t("Kustannuspaikka")."</th><td>";
+        echo "</tr><tr><th>".t("Kustannuspaikka/Projekti")."</th><td>";
 
-        $monivalintalaatikot = array("KUSTP");
-        $noautosubmit = TRUE;
-        $piirra_otsikot = FALSE;
-
-        require ("tilauskasittely/monivalintalaatikot.inc");
-
-        echo "</td>";
-      }
-      
-      $query = "SELECT tunnus
-                FROM kustannuspaikka
-                WHERE yhtio   = '$kukarow[yhtio]'
-                and tyyppi    = 'P'
-                and kaytossa != 'E'
-                LIMIT 1";
-      $result = pupe_query($query);
-      
-      if (mysql_num_rows($result) > 0) {
-
-        echo "</tr><tr><th>".t("Projekti")."</th><td>";
-
-        $monivalintalaatikot = array("PROJEKTI");
+        $monivalintalaatikot = array("KUSTP","PROJEKTI");
         $noautosubmit = TRUE;
         $piirra_otsikot = FALSE;
 

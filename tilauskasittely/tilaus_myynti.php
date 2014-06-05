@@ -2899,7 +2899,7 @@ if ($tee == '') {
   // jos asiakasnumero on annettu
   if ($laskurow["liitostunnus"] != 0 or ($laskurow["liitostunnus"] == 0 and $kukarow["kesken"] > 0 and $toim != "PIKATILAUS")) {
 
-    $query = "SELECT fakta, luokka, asiakasnro, osasto, laji, ryhma, verkkotunnus, chn
+    $query = "SELECT fakta, luokka, asiakasnro, osasto, laji, ryhma, verkkotunnus, chn, rahtivapaa_alarajasumma
               FROM asiakas
               WHERE yhtio = '{$kukarow['yhtio']}'
               and tunnus  = '{$laskurow['liitostunnus']}'";
@@ -5026,6 +5026,40 @@ if ($tee == '') {
 
   // jos ollaan jo saatu tilausnumero aikaan listataan kaikki tilauksen rivit..
   if ((int) $kukarow["kesken"] > 0) {
+
+    if ($kukarow['extranet'] != '' and $laskurow['rahtivapaa'] == '' and $faktarow['rahtivapaa'] == '' and ($faktarow['rahtivapaa_alarajasumma'] != 0 or $yhtiorow['rahtivapaa_alarajasumma'] != 0)) {
+
+      $query_ale_lisa = generoi_alekentta('M');
+
+      $query = "SELECT SUM(
+                (tuote.myyntihinta / if ('{$yhtiorow['alv_kasittely']}' = '', (1+tilausrivi.alv/100), 1) * {$query_ale_lisa} * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt))
+                +
+                (tuote.myyntihinta / if ('{$yhtiorow['alv_kasittely']}' = '', (1+tilausrivi.alv/100), 1) * {$query_ale_lisa} * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * (tilausrivi.alv/100))
+                ) rivihinta
+                FROM tilausrivi
+                JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+                WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                AND tilausrivi.otunnus = '{$kukarow['kesken']}'
+                AND tilausrivi.tuoteno NOT IN ('{$yhtiorow["rahti_tuotenumero"]}','{$yhtiorow["jalkivaatimus_tuotenumero"]}','{$yhtiorow["erilliskasiteltava_tuotenumero"]}')";
+      $tilriv_chk_res = pupe_query($query);
+      $tilriv_chk_row = mysql_fetch_assoc($tilriv_chk_res);
+
+      if ($tilriv_chk_row['rivihinta'] != '') {
+
+        $rahtivapaa_alarajasumma = $faktarow['rahtivapaa_alarajasumma'] != 0 ? $faktarow['rahtivapaa_alarajasumma'] : $yhtiorow['rahtivapaa_alarajasumma'];
+        $_jaljella = $rahtivapaa_alarajasumma - $tilriv_chk_row['rivihinta'];
+
+        echo "<br /><table>";
+        echo "<tr><th>",t("Rahtivapaaseen toimitukseen jäljellä"),"</th></tr>";
+        echo "<tr><td>";
+
+        echo $_jaljella > 0 ? sprintf("%.2f", $_jaljella) : 0;
+        echo " {$laskurow['valkoodi']}";
+
+        echo "</td></tr>";
+        echo "</table>";
+      }
+    }
 
     $laskentalisa_riveille = "";
 

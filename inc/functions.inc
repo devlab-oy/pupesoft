@@ -28412,7 +28412,11 @@ if (!function_exists("hinta_kuluineen")) {
     global $kukarow, $yhtiorow;
 
     $kuluprosentti = hinnan_kuluprosentti($tuotenumero);
-    if ($kuluprosentti === false) { return $hinta; }
+
+    if ($kuluprosentti === false) {
+      return $hinta;
+    }
+
     $tulos = $hinta / ((100 - $kuluprosentti) / 100);
 
     return $tulos;

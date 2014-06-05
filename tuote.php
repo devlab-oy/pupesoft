@@ -2,16 +2,16 @@
 
 require "inc/parametrit.inc";
 
-if (!isset($tee))         $tee = "";
-if (!isset($toim))         $toim = "";
-if (!isset($lopetus))       $lopetus = "";
-if (!isset($toim_kutsu))    $toim_kutsu = "";
-if (!isset($ulos))         $ulos = "";
+if (!isset($tee))            $tee = "";
+if (!isset($toim))           $toim = "";
+if (!isset($lopetus))        $lopetus = "";
+if (!isset($toim_kutsu))     $toim_kutsu = "";
+if (!isset($ulos))           $ulos = "";
 if (!isset($livesearch_tee)) $livesearch_tee = "";
 if (!isset($tapahtumalaji))  $tapahtumalaji = "";
-if (!isset($tilalehinta))     $tilalehinta = "";
-if (!isset($historia))     $historia = "";
-if (!isset($toimipaikka))   $toimipaikka = $kukarow['toimipaikka'] != 0 ? $kukarow['toimipaikka'] : 0;
+if (!isset($tilalehinta))    $tilalehinta = "";
+if (!isset($historia))       $historia = "";
+if (!isset($toimipaikka))    $toimipaikka = $kukarow['toimipaikka'] != 0 ? $kukarow['toimipaikka'] : 0;
 
 $onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
 
@@ -285,6 +285,10 @@ if ($tee == 'Z') {
         $tuoterow['kehahin'] = "";
       }
     }
+
+    // Lis‰t‰‰nkˆ kuluja varastonarvoon / katteeseen
+    $tuoterow['kehahin'] = hintapyoristys(hinta_kuluineen($tuoterow['tuoteno'], $tuoterow['kehahin']), 6, TRUE);
+    $tuoterow['vihahin'] = hintapyoristys(hinta_kuluineen($tuoterow['tuoteno'], $tuoterow['vihahin']), 6, TRUE);
 
     $alkuperainen_keskihankintahinta = $tuoterow["kehahin"];
 
@@ -571,9 +575,8 @@ if ($tee == 'Z') {
         'vienti_kurssi' => $kurssi_chk_row['kurssi']
       );
 
-      list($_hinta, $_netto, $_ale, $_valuutta) = alehinta_osto ($_laskurow, $tuoterow, 1, '', '', array());
-      $_hinta = hinta_kuluineen($tuoterow['tuoteno'], $_hinta);
-      echo "<span style='font-weight:bold;'>", hintapyoristys($_hinta, 6, TRUE), " {$_valuutta}</span> / ";
+      list($_hinta, $_netto, $_ale, $_valuutta) = alehinta_osto($_laskurow, $tuoterow, 1, '', '', array());
+      echo "<span style='font-weight:bold;'>", hintapyoristys(hinta_kuluineen($tuoterow['tuoteno'], $_hinta)), " {$_valuutta}</span> / ";
 
       foreach ($_ale as $key => $val) {
 
@@ -585,8 +588,7 @@ if ($tee == 'Z') {
       echo "<br />";
     }
     echo "</td>";
-    $_kehahin = hinta_kuluineen($tuoterow['tuoteno'], $tuoterow['kehahin']);
-    echo "<td valign='top' align='right' style='font-weight:bold;'>".hintapyoristys($_kehahin, 6, TRUE);
+    echo "<td valign='top' align='right' style='font-weight:bold;'>{$tuoterow['kehahin']}";
 
     if ($tuoterow["myyntihinta_maara"] != 0) {
       echo " $tuoterow[yksikko]<br>";
@@ -599,8 +601,7 @@ if ($tee == 'Z') {
     }
 
     echo "</td>";
-    $_vihahin = hinta_kuluineen($tuoterow['tuoteno'], $tuoterow['vihahin']);
-    echo "<td valign='top' align='right' style='font-weight:bold;'>".hintapyoristys($_vihahin, 6, TRUE);
+    echo "<td valign='top' align='right' style='font-weight:bold;'>{$tuoterow['vihahin']}";
 
     if ($tuoterow["myyntihinta_maara"] != 0) {
       echo " $tuoterow[yksikko]<br>";
@@ -1998,7 +1999,7 @@ if ($tee == 'Z') {
             echo sprintf('%.2f', $tuoterow['kehahin']);
           }
           else {
-            echo sprintf('%.2f', sarjanumeron_ostohinta("tunnus", $sarjarow["sarjatunnus"]));
+            echo sprintf('%.2f', hinta_kuluineen($tuoterow['tuoteno'], sarjanumeron_ostohinta("tunnus", $sarjarow["sarjatunnus"])));
           }
           echo "</td>
               <td>$sarjarow[myynimi] $fnlina1</td></tr>";
@@ -2115,21 +2116,15 @@ if ($tee == 'Z') {
       echo "<option value='4' $chk[4]> ".t("Kaikki tapahtumat")."</option>";
       echo "</select>";
 
-      if ($tapahtumalaji == "laskutus")       $sel1="SELECTED";
-      if ($tapahtumalaji == "tulo")         $sel2="SELECTED";
+      if ($tapahtumalaji == "laskutus")        $sel1="SELECTED";
+      if ($tapahtumalaji == "tulo")            $sel2="SELECTED";
       if ($tapahtumalaji == "valmistus")       $sel3="SELECTED";
-      if ($tapahtumalaji == "siirto")       $sel4="SELECTED";
-      if ($tapahtumalaji == "kulutus")       $sel5="SELECTED";
+      if ($tapahtumalaji == "siirto")          $sel4="SELECTED";
+      if ($tapahtumalaji == "kulutus")         $sel5="SELECTED";
       if ($tapahtumalaji == "Inventointi")     $sel6="SELECTED";
       if ($tapahtumalaji == "Ep‰kurantti")     $sel7="SELECTED";
-      if ($tapahtumalaji == "poistettupaikka")   $sel8="SELECTED";
-      if ($tapahtumalaji == "uusipaikka")     $sel9="SELECTED";
-
-      $kulujen_laskeminen_hintoihin = ($yhtiorow['kulujen_laskeminen_hintoihin'] == 'K');
-
-      if (!$kulujen_laskeminen_hintoihin) {
-        $kulujen_laskeminen_hintoihin = ($kukarow['kulujen_laskeminen_hintoihin'] == 'K');
-      }
+      if ($tapahtumalaji == "poistettupaikka") $sel8="SELECTED";
+      if ($tapahtumalaji == "uusipaikka")      $sel9="SELECTED";
 
       if ($tilalehinta != '') {
         $check = "CHECKED";
@@ -2288,17 +2283,16 @@ if ($tee == 'Z') {
         $kokonaissaldo_tapahtumalle = $sarjanumero_kpl;
       }
 
-      $_kehahin = hinta_kuluineen($tuoterow["tuoteno"], $tuoterow["kehahin"]);
-      $vararvo_nyt = sprintf('%.2f', $kokonaissaldo_tapahtumalle*$_kehahin);
+      $vararvo_nyt = sprintf('%.2f', $kokonaissaldo_tapahtumalle*$tuoterow["kehahin"]);
       $saldo_nyt = $kokonaissaldo_tapahtumalle;
 
       if ($tuoterow["ei_saldoa"] == "") {
         echo "<tr class='aktiivi'>";
         echo "<td colspan='5'>".t("Varastonarvo nyt").":</td>";
-        echo "<td align='right'>".$_kehahin."</td>";
+        echo "<td align='right'>{$tuoterow["kehahin"]}</td>";
         echo "<td align='right'></td>";
         echo "<td align='right'>$vararvo_nyt</td>";
-        echo "<td align='right'>".sprintf('%.2f', $kokonaissaldo_tapahtumalle*$_kehahin)."</td>";
+        echo "<td align='right'>".sprintf('%.2f', $kokonaissaldo_tapahtumalle*$tuoterow["kehahin"])."</td>";
         echo "<td align='right'>".sprintf('%.2f', $saldo_nyt)."</td>";
         echo "<td></td>";
 
@@ -2331,7 +2325,7 @@ if ($tee == 'Z') {
           $saldo_nyt -= $prow["kpl"];
         }
 
-        if ($tapahtumalaji == "" or strtoupper($tapahtumalaji)==strtoupper($prow["laji"])) {
+        if ($tapahtumalaji == "" or strtoupper($tapahtumalaji) == strtoupper($prow["laji"])) {
           echo "<tr class='aktiivi'>";
           echo "<td nowrap valign='top'>$prow[laatija]</td>";
           echo "<td nowrap valign='top'>".tv1dateconv($prow["laadittu"], "pitka")."</td>";
@@ -2410,21 +2404,29 @@ if ($tee == 'Z') {
           echo "<td nowrap align='right' valign='top'>$prow[kpl]</td>";
           echo "<td nowrap align='right' valign='top'>";
 
-          if ($prow['laji'] == 'tulo' and $kulujen_laskeminen_hintoihin) {
-            echo hintapyoristys(hinta_kuluineen($tuoterow["tuoteno"], $prow["kplhinta"]));
+          if ($prow['laji'] == 'tulo') {
+            $ohinta_kuluineen = hinta_kuluineen($tuoterow["tuoteno"], $prow["kplhinta"]);
+
+            echo hintapyoristys($ohinta_kuluineen);
+
+            // Jos katsotaan tulotapahtumia ja halutaan n‰hd‰ kulut hinnoissa
+            // Ei n‰ytet‰ selite-kentt‰‰
+            // Koska selite-kentt‰ on informatiivinen kentt‰
+            if ($ohinta_kuluineen != $prow["kplhinta"]) {
+              $prow['selite'] = "";
+            }
           }
           else {
             echo hintapyoristys($prow["kplhinta"]);
           }
 
           echo "</td>";
-          $_hinta = hinta_kuluineen($tuoterow['tuoteno'], $prow['hinta']);
-          echo "<td nowrap align='right' valign='top'>".$_hinta."</td>";
+
+          echo "<td nowrap align='right' valign='top'>".hintapyoristys(hinta_kuluineen($tuoterow['tuoteno'], $prow['hinta']), 6, FALSE)."</td>";
 
           if ($prow["laji"] == "laskutus") {
-            $kate = kate_kuluineen($prow['tuoteno'], $prow['rivihinta'], $prow['hinta'] );
-            $katepros = 100*$kate/$prow['rivihinta'];
-            echo "<td nowrap align='right' valign='top'>".round($katepros, 2)."%</td>";
+            $kate = kate_kuluineen($prow['tuoteno'], $prow['rivihinta'], $prow['hinta']);
+            echo "<td nowrap align='right' valign='top'>".round(100*$kate/$prow['rivihinta'], 2)."%</td>";
           }
           else {
             echo "<td nowrap align='right' valign='top'></td>";
@@ -2443,13 +2445,6 @@ if ($tee == 'Z') {
 
           if ($tilalehinta != '') {
             echo "<td nowrap align='right' valign='top'>$prow[tilalehinta]</td>";
-          }
-
-          // Jos katsotaan tulotapahtumia ja halutaan n‰hd‰ kulut hinnoissa
-          // Ei n‰ytet‰ selite-kentt‰‰
-          // Koska selite-kentt‰ on informatiivinen kentt‰
-          if ($prow['laji'] == 'tulo' and $kulujen_laskeminen_hintoihin) {
-            $prow['selite'] = "";
           }
 
           echo "<td valign='top'>$prow[selite]";
@@ -2491,7 +2486,7 @@ if ($tee == 'Z') {
             }
 
             $query = "SELECT distinct sarjanumero
-                      from sarjanumeroseuranta
+                      FROM sarjanumeroseuranta
                       where yhtio      = '$kukarow[yhtio]'
                       and tuoteno      = '$prow[tuoteno]'
                       and $sarjanutunnus='$prow[trivitunn]'

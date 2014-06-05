@@ -141,7 +141,7 @@ if (isset($tee) and $tee == "hae_raportti") {
       echo 'tuotepaikka';
       echo '</th>';
       echo '<th>';
-      echo 'hyllyssa';
+      echo 'myytavissa';
       echo '</th>';
       echo '<th>';
       echo 'haly';
@@ -155,9 +155,9 @@ if (isset($tee) and $tee == "hae_raportti") {
       foreach ($oletuspaikat as $row) {
 
         $saldo_info = saldo_myytavissa($row['tuoteno'], '', $row['varasto'], $kukarow['yhtio'], $row['alue'], $row['nro'], $row['vali'], $row['taso'] );
-        $row['hyllyssa'] = $saldo_info[1];
+        $row['myytavissa'] = $saldo_info[2];
 
-        if( $row['hyllyssa'] >= $row['haly'] ){
+        if( $row['myytavissa'] >= $row['haly'] ){
           continue;
         }
 
@@ -183,9 +183,9 @@ if (isset($tee) and $tee == "hae_raportti") {
         $result2 = pupe_query($query2);
         while ($row2 = mysql_fetch_assoc($result2)) {
           $saldo_info = saldo_myytavissa($row['tuoteno'], '', $row['varasto'], $kukarow['yhtio'], $row2['alue'], $row2['nro'], $row2['vali'], $row2['taso'] );
-          $row2['hyllyssa'] = $saldo_info[1];
+          $row2['myytavissa'] = $saldo_info[2];
 
-          if( $row2['hyllyssa'] < 1 ){
+          if( $row2['myytavissa'] < 1 ){
             continue;
           }
 
@@ -200,7 +200,7 @@ if (isset($tee) and $tee == "hae_raportti") {
           $varapaikka_echo .= $row2['tuotepaikka'];
           $varapaikka_echo .= '</td>';
           $varapaikka_echo .= '<td>';
-          $varapaikka_echo .= $row2['hyllyssa'];
+          $varapaikka_echo .= $row2['myytavissa'];
           $varapaikka_echo .= '</td>';
           $varapaikka_echo .= '<td>';
           $varapaikka_echo .= '';
@@ -232,7 +232,7 @@ if (isset($tee) and $tee == "hae_raportti") {
         echo $row['tuotepaikka'];
         echo '</td>';
         echo '<td>';
-        echo $row['hyllyssa'];
+        echo $row['myytavissa'];
         echo '</td>';
         echo '<td>';
         echo number_format($row['haly']);

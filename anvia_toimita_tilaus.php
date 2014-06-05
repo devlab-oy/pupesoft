@@ -1,5 +1,4 @@
 <?php
-echo "MORJENS";
 # Otetaan sisään:
 # $anvia_api_met = Toimitustapa
 # $anvia_api_rak = Rahtikirjanro

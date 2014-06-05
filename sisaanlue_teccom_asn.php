@@ -115,7 +115,6 @@ function loop_packet($xml_element, $parameters) {
   $toimituspvm             = $parameters["toimituspvm"];
   $vastaanottaja           = $parameters["vastaanottaja"];
   $pakkauslista            = $parameters["pakkauslista"];
-  $pakettinumero           = $parameters["pakettinumero"];
   $sscc                    = $parameters["sscc"];
   $laatikkoind             = $parameters["laatikkoind"];
 
@@ -225,7 +224,6 @@ function loop_packet($xml_element, $parameters) {
         "toimituspvm"               => $toimituspvm,
         "vastaanottaja"             => $vastaanottaja,
         "pakkauslista"              => $pakkauslista,
-        "pakettinumero"             => $pakettinumero,
       );
 
       list($_sscc, $_laatikkoind) = teccom_asn_paketti($element, $tavarantoimittajanumero, $asn_numero);

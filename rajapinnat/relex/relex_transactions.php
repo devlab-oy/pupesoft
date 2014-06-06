@@ -56,9 +56,13 @@ fwrite($fp, $header);
 $query = "SELECT
           date_format(tapahtuma.laadittu, '%Y-%m-%d') pvm,
           varastopaikat.nimitys varasto,
-          tapahtuma.tuoteno tuote,
-          tapahtuma.laji laji,
-          tapahtuma.kpl maara
+          tapahtuma.tuoteno,
+          tapahtuma.laji,
+          tapahtuma.kpl,
+          tapahtuma.kplhinta,
+          lasku.tilaustyyppi,
+          lasku.clearing vastaanottovarasto,
+          lasku.liitostunnus
           FROM tapahtuma
           JOIN tuote ON (tuote.yhtio = tapahtuma.yhtio
             AND tuote.tuoteno     = tapahtuma.tuoteno
@@ -66,6 +70,8 @@ $query = "SELECT
             AND tuote.ei_saldoa   = ''
             AND tuote.tuotetyyppi = ''
             AND tuote.ostoehdotus = '')
+          LEFT JOIN tilausrivi USE INDEX (PRIMARY) ON (tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus)
+          LEFT JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
           JOIN varastopaikat ON (varastopaikat.tunnus = tapahtuma.varasto)
           WHERE tapahtuma.yhtio   = '$yhtio'
           AND tapahtuma.laji     in ('tulo', 'laskutus', 'siirto', 'valmistus', 'kulutus','inventointi')
@@ -83,38 +89,63 @@ $k_rivi = 0;
 
 while ($row = mysql_fetch_assoc($res)) {
 
+  // Rivin arvo
+  $arvo = round($row['kplhinta']*$row['kpl'], 2);
+
   // M‰‰ritell‰‰n transaktiotyyppi
   switch (strtolower($row['laji'])) {
   case 'tulo':
-    $type = "DELIVERY";
+    $type    = "DELIVERY";
+    $partner = $row['liitostunnus'];
     break;
   case 'laskutus':
-    $type = "SALE";
+    $type    = "SALE";
+    $partner = $row['liitostunnus'];
+    $arvo   *= -1;
     break;
   case 'siirto':
-    $type = "TRANSFER";
+    $type    = "TRANSFER";
+    $partner = $row['vastaanottovarasto'];
     break;
   case 'inventointi':
-    $type = "INVENTORY_CHECK";
+    $type    = "INVENTORY_CHECK";
+    $partner = "";
     break;
   case 'valmistus':
-    $type = "DELIVERY";
+    $type    = "DELIVERY";
+
+    if ($row["tilaustyyppi"] == "V") {
+      // Asiakkaallevalmistus
+      $partner = $row['liitostunnus'];
+    }
+    else {
+      // Varastoonvalmistus
+      $partner = $row['vastaanottovarasto'];
+    }
     break;
   case 'kulutus':
-    $type = "SALE";
+    $type    = "SALE";
+    if ($row["tilaustyyppi"] == "V") {
+      // Asiakkaallevalmistus
+      $partner = $row['liitostunnus'];
+    }
+    else {
+      // Varastoonvalmistus
+      $partner = $row['vastaanottovarasto'];
+    }
   }
 
-  $rivi  = "{$row['pvm']};";     // Transaction posting date
-  $rivi .= "{$row['varasto']};"; // Inventory location code
-  $rivi .= "{$row['tuote']};";   // Item code
-  $rivi .= "{$type};";           // Transaction type
-  $rivi .= "{$row['maara']};";   // Transaction quantity in inventory units
-  $rivi .= ";";                  // Transaction value in currency
-  $rivi .= ";";                  // Purchase cost of sales transaction
-  $rivi .= ";";                  // Sales or purchase order number
-  $rivi .= ";";                  // Sales or purchase order row number
-  $rivi .= ";";                  // Additional subtype for sales and delivery transactions
-  $rivi .= ";";                  // Customer for sales transactions, Supplier for incoming deliveries, Sending/receiving warehouse for stock transfers
+  $rivi  = "{$row['pvm']};";      // Transaction posting date
+  $rivi .= "{$row['varasto']};";  // Inventory location code
+  $rivi .= "{$row['tuoteno']};";  // Item code
+  $rivi .= "{$type};";            // Transaction type
+  $rivi .= "{$row['kpl']};";      // Transaction quantity in inventory units
+  $rivi .= "{$arvo};";            // Transaction value in currency
+  $rivi .= ";";                   // Purchase cost of sales transaction
+  $rivi .= ";";                   // Sales or purchase order number
+  $rivi .= ";";                   // Sales or purchase order row number
+  $rivi .= ";";                   // Additional subtype for sales and delivery transactions
+  $rivi .= "{$partner};";         // Customer for sales transactions, Supplier for incoming deliveries, Sending/receiving warehouse for stock transfers
   $rivi .= "\n";
 
   fwrite($fp, $rivi);

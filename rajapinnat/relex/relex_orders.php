@@ -45,7 +45,7 @@ fwrite($fp, $header);
  ORDER = Open purchase order (can be linked to DELIVERY with a reference number)
 */
 
-// Haetaan avoimet ostoto ja myynnit
+// Haetaan avoimet ostot ja myynnit
 $query = "SELECT
           varastopaikat.nimitys varasto,
           tilausrivi.tuoteno tuote,
@@ -53,12 +53,13 @@ $query = "SELECT
           tilausrivi.varattu+tilausrivi.jt maara,
           tilausrivi.toimaika toimituspaiva
           FROM tilausrivi
-          JOIN tuote ON (tuote.yhtio = tapahtuma.yhtio
-            AND tuote.tuoteno     = tapahtuma.tuoteno
+          JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
+            AND tuote.tuoteno     = tilausrivi.tuoteno
             AND tuote.status     != 'P'
             AND tuote.ei_saldoa   = ''
             AND tuote.tuotetyyppi = ''
             AND tuote.ostoehdotus = '')
+
           JOIN varastopaikat ON (varastopaikat.tunnus = tilausrivi.varasto)
           WHERE tilausrivi.yhtio        = '$yhtio'
           AND tilausrivi.varattu       != 0

@@ -824,6 +824,14 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
     $magento_client->setConfigurableNimityskentta($magento_configurable_tuote_nimityskentta);
   }
 
+  // Miten configurable-tuotteen lapsituotteet n‰kyv‰t verkkokaupassa.
+  // Vaihtoehdot: NOT_VISIBLE_INDIVIDUALLY, CATALOG, SEARCH, CATALOG_SEARCH
+  // Default on NOT_VISIBLE_INDIVIDUALLY
+  if (isset($magento_configurable_lapsituote_nakyvyys) and !empty($magento_configurable_lapsituote_nakyvyys)) {
+    $magento_configurable_lapsituote_nakyvyys = strtoupper($magento_configurable_lapsituote_nakyvyys);
+    $magento_client->setConfigurableLapsituoteNakyvyys($magento_configurable_lapsituote_nakyvyys);
+  }
+
   // lisaa_kategoriat
   if (count($dnstuoteryhma) > 0) {
     echo date("d.m.Y @ G:i:s")." - P‰ivitet‰‰n tuotekategoriat\n";

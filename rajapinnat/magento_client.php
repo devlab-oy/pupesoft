@@ -87,6 +87,11 @@ class MagentoClient {
   private $_configurable_tuote_nimityskentta = "nimitys";
 
   /**
+   * Miten configurable-tuotteen lapsituotteet näytetään verkkokaupassa, oletuksena NOT_VISIBLE_INDIVIDUALLY
+   */
+  private $_configurable_lapsituote_nakyvyys = 'NOT_VISIBLE_INDIVIDUALLY';
+
+  /**
    * Tämän yhteyden aikana sattuneiden virheiden määrä
    */
   private $_error_count = 0;
@@ -511,7 +516,7 @@ class MagentoClient {
             'price'                 => $tuote[$hintakentta],
             'short_description'     => utf8_encode($tuote['lyhytkuvaus']),
             'featured_priority'     => utf8_encode($tuote['jarjestys']),
-            'visibility'            => self::NOT_VISIBLE_INDIVIDUALLY,
+            'visibility'            => constant("MagentoClient::{$this->_configurable_lapsituote_nakyvyys}"),
             'additional_attributes' => array('multi_data' => $multi_data),
           );
 
@@ -986,6 +991,7 @@ class MagentoClient {
    */
   private function get_option_id($name, $value) {
 
+    $name = utf8_encode($name);
     $attribute_list = $this->getAttributeList();
     $attribute_id = '';
 
@@ -1443,6 +1449,16 @@ class MagentoClient {
    */
   public function setConfigurableNimityskentta($configurable_tuote_nimityskentta) {
     $this->_configurable_tuote_nimityskentta = $configurable_tuote_nimityskentta;
+  }
+
+  /**
+   * Asettaa configurable_nimityskentta-muuttujan
+   * Oletus 'nimitys'
+   *
+   * @param string  $configurable_nimityskentta
+   */
+  public function setConfigurableLapsituoteNakyvyys($configurable_lapsituote_nakyvyys) {
+    $this->_configurable_lapsituote_nakyvyys = $configurable_lapsituote_nakyvyys;
   }
 
   /**

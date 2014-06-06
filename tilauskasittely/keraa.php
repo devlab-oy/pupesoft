@@ -3311,9 +3311,8 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
           }
         }
 
-        if ($toim == 'SIIRTOLISTA' and $yhtiorow['siirtolistan_lahete'] == 'E') {
-          $lahetekpl   = 0;
-          $sel_lahete = array();
+        if ($tila == 'G') {
+          $lahetekpl = $yhtiorow["oletus_lahetekpl_siirtolista"];
         }
 
         echo "<tr><th>".t("Lähete").":</th><th colspan='$spanni'>";

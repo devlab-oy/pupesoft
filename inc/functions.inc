@@ -24821,8 +24821,8 @@ if (!function_exists('hae_tilauksen_rekisterinumerot')) {
     $query = "SELECT tl.rekisterinumero
               FROM tilausrivi
               JOIN tilausrivin_lisatiedot AS tl ON (
-                tl.yhtio = tilausrivi.yhtio AND
-                tl.tilausrivitunnus = tilausrivi.tunnus
+                tl.yhtio             = tilausrivi.yhtio AND
+                tl.tilausrivitunnus  = tilausrivi.tunnus
                 {$joinlisa}
               )
               WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'

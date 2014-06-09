@@ -578,21 +578,21 @@ if (substr($paikka, 0, 3) == "¡¡S") {
 
       $query = "UPDATE tilausrivi
                 SET var = 'S',
-                hyllyalue = '{$lahdevarasto_tuotepaikka['hyllyalue']}',
-                hyllynro = '{$lahdevarasto_tuotepaikka['hyllynro']}',
-                hyllyvali = '{$lahdevarasto_tuotepaikka['hyllyvali']}',
-                hyllytaso = '{$lahdevarasto_tuotepaikka['hyllytaso']}'
+                hyllyalue   = '{$lahdevarasto_tuotepaikka['hyllyalue']}',
+                hyllynro    = '{$lahdevarasto_tuotepaikka['hyllynro']}',
+                hyllyvali   = '{$lahdevarasto_tuotepaikka['hyllyvali']}',
+                hyllytaso   = '{$lahdevarasto_tuotepaikka['hyllytaso']}'
                 WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus = {$lapsirivi['tunnus']}";
+                AND tunnus  = {$lapsirivi['tunnus']}";
       pupe_query($query);
 
       $query = "UPDATE tilausrivin_lisatiedot
                 SET toimittajan_tunnus = '{$toimittajan_tunnus}',
-                kohde_hyllyalue = '{$kohdevarasto_tuotepaikka['hyllyalue']}',
-                kohde_hyllynro = '{$kohdevarasto_tuotepaikka['hyllynro']}',
-                kohde_hyllyvali = '{$kohdevarasto_tuotepaikka['hyllyvali']}',
-                kohde_hyllytaso = '{$kohdevarasto_tuotepaikka['hyllytaso']}'
-                WHERE yhtio = '{$kukarow['yhtio']}'
+                kohde_hyllyalue      = '{$kohdevarasto_tuotepaikka['hyllyalue']}',
+                kohde_hyllynro       = '{$kohdevarasto_tuotepaikka['hyllynro']}',
+                kohde_hyllyvali      = '{$kohdevarasto_tuotepaikka['hyllyvali']}',
+                kohde_hyllytaso      = '{$kohdevarasto_tuotepaikka['hyllytaso']}'
+                WHERE yhtio          = '{$kukarow['yhtio']}'
                 AND tilausrivitunnus = {$lapsirivi['tunnus']}";
       pupe_query($query);
     }
@@ -645,21 +645,21 @@ elseif ($var == "S" and substr($paikka, 0, 3) != "¡¡S" and substr($paikka, 0, 3)
     }
     $query = "UPDATE tilausrivi
               SET var = '{$_var}',
-              hyllyalue = '{$lahdevarasto_tuotepaikka['hyllyalue']}',
-              hyllynro = '{$lahdevarasto_tuotepaikka['hyllynro']}',
-              hyllyvali = '{$lahdevarasto_tuotepaikka['hyllyvali']}',
-              hyllytaso = '{$lahdevarasto_tuotepaikka['hyllytaso']}'
+              hyllyalue   = '{$lahdevarasto_tuotepaikka['hyllyalue']}',
+              hyllynro    = '{$lahdevarasto_tuotepaikka['hyllynro']}',
+              hyllyvali   = '{$lahdevarasto_tuotepaikka['hyllyvali']}',
+              hyllytaso   = '{$lahdevarasto_tuotepaikka['hyllytaso']}'
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus = {$lapsirivi['tunnus']}";
+              AND tunnus  = {$lapsirivi['tunnus']}";
     pupe_query($query);
 
     $query = "UPDATE tilausrivin_lisatiedot
               SET toimittajan_tunnus = '{$toimittajan_tunnus}',
-              kohde_hyllyalue = '0',
-              kohde_hyllynro = '0',
-              kohde_hyllyvali = '0',
-              kohde_hyllytaso = '0'
-              WHERE yhtio = '{$kukarow['yhtio']}'
+              kohde_hyllyalue      = '0',
+              kohde_hyllynro       = '0',
+              kohde_hyllyvali      = '0',
+              kohde_hyllytaso      = '0'
+              WHERE yhtio          = '{$kukarow['yhtio']}'
               AND tilausrivitunnus = {$lapsirivi['tunnus']}";
     pupe_query($query);
   }

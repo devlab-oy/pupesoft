@@ -41,7 +41,7 @@ dbname=$(parse_salasanat '$dbkanta')
 # Katsotaan jos meillä on annettu poikkeava portti hostnamessa
 host_array=(${dbhost//:/ })
 
-if [ -n "${host_array[1]}" ]; then
+if [[ -n "${host_array[1]}" ]]; then
   dbport=${host_array[1]}
 else
   dbport="3306"
@@ -60,7 +60,7 @@ fi
 echo "Haetaan tietokantamuutokset.."
 
 # Katsotaan, onko parami syötetty
-if [ ! -z ${1} ]; then
+if [[ ! -z ${1} ]]; then
   jatketaan=${1}
 fi
 
@@ -90,7 +90,7 @@ else
     read jatketaanko
   fi
 
-  if [ "$jatketaanko" = "k" ]; then
+  if [[ "$jatketaanko" = "k" ]]; then
     ${mysql_komento} < ${mysqlkuvaus_file} 2> /dev/null
 
     if [[ $? -eq 0 ]]; then
@@ -114,7 +114,7 @@ else
   read jatketaanko
 fi
 
-if [ "${jatketaanko}" = "k" ]; then
+if [[ "${jatketaanko}" = "k" ]]; then
   branchfile="/home/devlab/pupe_branch"
 
   # Onko spessubranchi käytössä?
@@ -150,9 +150,3 @@ else
 fi
 
 echo
-
-###################################################################################
-# Nain luodaan Pupe-installaatio:
-# mkdir -p /var/www/html/pupesoft
-# git clone git://github.com/devlab-oy/pupesoft.git /var/www/html/pupesoft/
-###################################################################################

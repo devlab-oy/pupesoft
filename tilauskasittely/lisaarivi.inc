@@ -620,13 +620,13 @@ elseif ($var == "S" and substr($paikka, 0, 3) != "¡¡S" and substr($paikka, 0, 3)
     $_var = '';
     $_hae_tuotepaikka = true;
   }
-  else if (!empty($perheid) and empty($paikka) and substr($paikka, 0, 3) != "¡¡¡") {
+  elseif (!empty($perheid) and empty($paikka) and substr($paikka, 0, 3) != "¡¡¡") {
     $_varasto = $laskurow['varasto'];
     $toimittajan_tunnus = '';
     $_var = 'P';
     $_hae_tuotepaikka = true;
   }
-  else if (substr($paikka, 0, 3) == "¡¡¡") {
+  elseif (substr($paikka, 0, 3) == "¡¡¡") {
     $toimittajan_tunnus  = substr($paikka, 3);
     $lahdevarasto_tuotepaikka = array(
         'hyllyalue' => '',

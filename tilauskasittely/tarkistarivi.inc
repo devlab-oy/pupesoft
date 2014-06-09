@@ -888,7 +888,7 @@ if (
             'var' => $row['var'],
         );
       }
-      else if ($_onko_lapsituote) {
+      elseif ($_onko_lapsituote) {
         if ($_isa_saldot[$row['perheid']]['var'] == 'S') {
           $saldo_myytavissa = $_isa_saldot[$row['perheid']]['saldo_myytavissa'];
         }

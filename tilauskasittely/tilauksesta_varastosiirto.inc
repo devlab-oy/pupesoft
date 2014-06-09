@@ -245,7 +245,7 @@ if (!function_exists('luo_varastosiirtorivi')) {
     $hinta            = "";
     $netto            = "";
     $korvaavakielto   = 1;
-    $perhekielto      = $lapsituotteet == "" ? 1 : 0;
+    $perhekielto      = "";
     $orvoteikiinnosta = "EITOD";
 
     // Kirjanpidollisessa siirret‰‰n aina ne rivit jotka on tilauksella.

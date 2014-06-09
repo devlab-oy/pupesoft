@@ -2551,7 +2551,14 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
         $alemaara = $kpl;
       }
 
-      list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $alemaara, $netto, $hinta, $ale_kaikki_array, '', '', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
+      if (!empty($myy_tyyppi[$indeksi]) and $myy_tyyppi[$indeksi] == 'LAPSITUOTE') {
+        $_onko_lapsituote = 'X';
+      }
+      else {
+        $_onko_lapsituote = '';
+      }
+
+      list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $alemaara, $netto, $hinta, $ale_kaikki_array, '', '', $_onko_lapsituote);
       list($lis_hinta, $lis_alv) = alv($laskurow, $trow, $lis_hinta, $alv, $alehinta_alv);
     }
 

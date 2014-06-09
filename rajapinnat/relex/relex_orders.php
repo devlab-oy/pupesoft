@@ -47,7 +47,7 @@ fwrite($fp, $header);
 
 // Haetaan avoimet ostot ja myynnit
 $query = "SELECT
-          varastopaikat.nimitys varasto,
+          tilausrivi.varasto varasto,
           tilausrivi.tuoteno tuote,
           tilausrivi.tyyppi tyyppi,
           tilausrivi.varattu+tilausrivi.jt maara,
@@ -59,7 +59,6 @@ $query = "SELECT
             AND tuote.ei_saldoa   = ''
             AND tuote.tuotetyyppi = ''
             AND tuote.ostoehdotus = '')
-          JOIN varastopaikat ON (varastopaikat.tunnus = tilausrivi.varasto)
           WHERE tilausrivi.yhtio        = '$yhtio'
           AND tilausrivi.varattu       != 0
           AND tilausrivi.tyyppi        IN ('L','O')
@@ -95,7 +94,7 @@ while ($row = mysql_fetch_assoc($res)) {
   $rivi .= ";";                         // Sales or purchase order number
   $rivi .= ";";                         // Sales or purchase order row number
   $rivi .= ";";                         // Additional order type that can be used to distinct normal sales and deliveries from special sales and deliveries
-  $rivi .= ";";                         // Customer for sales orders and Supplier for purchase orders
+  $rivi .= "";                          // Customer for sales orders and Supplier for purchase orders
   $rivi .= "\n";
 
   fwrite($fp, $rivi);

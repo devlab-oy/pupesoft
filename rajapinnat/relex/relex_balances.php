@@ -42,11 +42,10 @@ fwrite($fp, $header);
 // Haetaan tuotteiden saldot per varasto
 $query = "SELECT
           tuotepaikat.tuoteno tuote,
-          varastopaikat.nimitys varasto,
+          tuotepaikat.varasto varasto,
           sum(tuotepaikat.saldo) saldo
           FROM tuote
           JOIN tuotepaikat ON (tuote.tuoteno = tuotepaikat.tuoteno and tuote.yhtio = tuotepaikat.yhtio)
-          JOIN varastopaikat ON (varastopaikat.tunnus = tuotepaikat.varasto)
           WHERE tuote.yhtio     = '$yhtio'
           AND tuote.status     != 'P'
           AND tuote.ei_saldoa   = ''

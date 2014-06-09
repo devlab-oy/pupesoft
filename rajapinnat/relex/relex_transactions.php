@@ -55,7 +55,7 @@ fwrite($fp, $header);
 // Haetaan tapahtumat
 $query = "SELECT
           date_format(tapahtuma.laadittu, '%Y-%m-%d') pvm,
-          varastopaikat.nimitys varasto,
+          tapahtuma.varasto varasto,
           tapahtuma.tuoteno,
           tapahtuma.laji,
           tapahtuma.kpl,
@@ -72,7 +72,6 @@ $query = "SELECT
             AND tuote.ostoehdotus = '')
           LEFT JOIN tilausrivi USE INDEX (PRIMARY) ON (tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus)
           LEFT JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
-          JOIN varastopaikat ON (varastopaikat.tunnus = tapahtuma.varasto)
           WHERE tapahtuma.yhtio   = '$yhtio'
           AND tapahtuma.laji     in ('tulo', 'laskutus', 'siirto', 'valmistus', 'kulutus','inventointi')
           AND tapahtuma.laadittu >= date_sub(now(), interval 1 year)
@@ -144,7 +143,7 @@ while ($row = mysql_fetch_assoc($res)) {
   $rivi .= ";";                   // Sales or purchase order number
   $rivi .= ";";                   // Sales or purchase order row number
   $rivi .= ";";                   // Additional subtype for sales and delivery transactions
-  $rivi .= "{$partner};";         // Customer for sales transactions, Supplier for incoming deliveries, Sending/receiving warehouse for stock transfers
+  $rivi .= "{$partner}";          // Customer for sales transactions, Supplier for incoming deliveries, Sending/receiving warehouse for stock transfers
   $rivi .= "\n";
 
   fwrite($fp, $rivi);

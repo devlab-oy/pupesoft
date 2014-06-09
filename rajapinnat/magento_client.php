@@ -1452,10 +1452,10 @@ class MagentoClient {
   }
 
   /**
-   * Asettaa configurable_nimityskentta-muuttujan
-   * Oletus 'nimitys'
+   * Asettaa configurable_lapsituote_nakyvyys-muuttujan
+   * Oletus 'NOT_VISIBLE_INDIVIDUALLY'
    *
-   * @param string  $configurable_nimityskentta
+   * @param string  $configurable_lapsituote_nakyvyys
    */
   public function setConfigurableLapsituoteNakyvyys($configurable_lapsituote_nakyvyys) {
     $this->_configurable_lapsituote_nakyvyys = $configurable_lapsituote_nakyvyys;

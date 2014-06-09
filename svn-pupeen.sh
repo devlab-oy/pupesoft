@@ -114,25 +114,22 @@ else
   read jatketaanko
 fi
 
-if [ "$jatketaanko" = "k" ]; then
-  cd $pupedir &&
-  git fetch origin &&     # paivitetaan lokaali repo remoten tasolle
-  git checkout . &&       # revertataan kaikki local muutokset
-
+if [ "${jatketaanko}" = "k" ]; then
   branchfile="/home/devlab/pupe_branch"
 
   # Onko spessubranchi käytössä?
-  if [[ -f "$branchfile" && -r "$branchfile" ]]; then
-    pupebranch=$(cat $branchfile | tr -d '\n')
-
-    git checkout $pupebranch &&
-    git pull origin $pupebranch &&
+  if [[ -f "${branchfile}" && -s "${branchfile}" ]]; then
+    pupebranch=$(cat ${branchfile} | tr -d '\n')
   else
-    git checkout master &&     # varmistetaan, etta on master branchi kaytossa
-    git pull origin master &&  # paivitetaan master branchi
+    pupebranch="master"
   fi
 
-  git remote prune origin # poistetaan ylimääriset branchit
+  cd ${pupedir} &&
+  git fetch origin &&               # paivitetaan lokaali repo remoten tasolle
+  git checkout . &&                 # revertataan kaikki local muutokset
+  git checkout ${pupebranch} &&     # varmistetaan, etta on master branchi kaytossa
+  git pull origin ${pupebranch} &&  # paivitetaan master branchi
+  git remote prune origin           # poistetaan ylimääriset branchit
 
   if [[ $? -eq 0 ]]; then
     echo "${green}Pupesoft päivitetty!${normal}"
@@ -143,8 +140,8 @@ if [ "$jatketaanko" = "k" ]; then
   nrfile="/home/devlab/newrelic_trigger"
 
   # Onko triggeri käytössä?
-  if [[ -x "$nrfile" ]]; then
-    eval $nrfile
+  if [[ -x "${nrfile}" ]]; then
+    eval ${nrfile}
   fi
 else
   echo "${red}Pupesoftia ei päivitetty!${normal}"

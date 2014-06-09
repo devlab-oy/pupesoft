@@ -17,7 +17,7 @@ if (!isset($argv[1]) or $argv[1] == '') {
   die("Yhtiˆ on annettava!!");
 }
 
-ini_set("memory_limit", "1G");
+ini_set("memory_limit", "5G");
 
 // Otetaan includepath aina rootista
 ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(dirname(__FILE__))).PATH_SEPARATOR."/usr/share/pear");
@@ -76,8 +76,7 @@ $query = "SELECT
           WHERE tapahtuma.yhtio   = '$yhtio'
           AND tapahtuma.laji     in ('tulo', 'laskutus', 'siirto', 'valmistus', 'kulutus','inventointi')
           AND tapahtuma.laadittu >= date_sub(now(), interval 1 year)
-          ORDER BY tapahtuma.laadittu, tapahtuma.tuoteno
-          LIMIT 1000";
+          ORDER BY tapahtuma.laadittu, tapahtuma.tuoteno";
 $res = pupe_query($query);
 
 // Kerrotaan montako rivi‰ k‰sitell‰‰n

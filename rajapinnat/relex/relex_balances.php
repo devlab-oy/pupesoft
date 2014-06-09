@@ -17,7 +17,7 @@ if (!isset($argv[1]) or $argv[1] == '') {
   die("Yhtiö on annettava!!");
 }
 
-ini_set("memory_limit", "1G");
+ini_set("memory_limit", "5G");
 
 // Otetaan includepath aina rootista
 ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(dirname(__FILE__))).PATH_SEPARATOR."/usr/share/pear");
@@ -53,8 +53,7 @@ $query = "SELECT
           AND tuote.tuotetyyppi = ''
           AND tuote.ostoehdotus = ''
           GROUP BY 1,2
-          ORDER BY 1,2
-          LIMIT 1000";
+          ORDER BY 1,2";
 $res = pupe_query($query);
 
 // Kerrotaan montako riviä käsitellään

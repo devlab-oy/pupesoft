@@ -60,7 +60,7 @@ if (!function_exists('jt_toimita_editilaus')) {
     }
 
     # Tarkistetaan onko toimipaikalle varastoja
-    if (!empty($toimipaikka)) {
+    if (!empty($toimipaikka) and $yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
       $query = "SELECT *
                 FROM varastopaikat
                 WHERE yhtio = '{$kukarow['yhtio']}'
@@ -74,11 +74,17 @@ if (!function_exists('jt_toimita_editilaus')) {
       }
     }
 
+    $toimipaikkalisa = "";
+
+    if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
+      $toimipaikkalisa = "and toimipaikka = '{$toimipaikka}'";
+    }
+
     $query = "SELECT *
               FROM varastopaikat
               WHERE yhtio = '{$kukarow['yhtio']}'
               and tyyppi  = ''
-              and toimipaikka = '{$toimipaikka}'
+              {$toimipaikkalisa}
               {$asiakasmaalisa}";
     $vtresult = pupe_query($query);
 

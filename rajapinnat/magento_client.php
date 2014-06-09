@@ -90,6 +90,11 @@ class MagentoClient {
    * Miten configurable-tuotteen lapsituotteet näytetään verkkokaupassa, oletuksena NOT_VISIBLE_INDIVIDUALLY
    */
   private $_configurable_lapsituote_nakyvyys = 'NOT_VISIBLE_INDIVIDUALLY';
+  
+  /**
+   * Tuotteen erikoisparametrit jotka tulevat jostain muualta kuin dynaamisista parametreistä
+   */
+  private $_verkkokauppatuotteet_erikoisparametrit = array ();
 
   /**
    * Tämän yhteyden aikana sattuneiden virheiden määrä
@@ -207,6 +212,8 @@ class MagentoClient {
     $hintakentta = $this->_hintakentta;
 
     $selected_category = $this->_kategoriat;
+    
+    $verkkokauppatuotteet_erikoisparametrit = $this->_verkkokauppatuotteet_erikoisparametrit;
 
     // Tuote countteri
     $count = 0;
@@ -294,8 +301,16 @@ class MagentoClient {
         $key = $parametri['option_name'];
         $multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
       }
-
-
+      
+      if (count($verkkokauppatuotteet_erikoisparametrit) > 0) {
+        foreach ($verkkokauppatuotteet_erikoisparametrit as $erikoisparametri) {
+          $key = $erikoisparametri['nimi'];
+          if (isset($tuote[$erikoisparametri['arvo']])) {
+            $multi_data[$key] = $this->get_option_id($key, $tuote[$erikoisparametri['arvo']]);
+          }
+        }
+      }
+      
 
       $tuote_data = array(
         'categories'            => $category_ids,
@@ -1007,6 +1022,11 @@ class MagentoClient {
     // Jos attribuuttia ei löytynyt niin turha ettiä option valuea
     if (empty($attribute_id)) return 0;
 
+    // Jos dynaaminen parametri on matkalla tekstikenttään niin idtä ei tarvita, palautetaan vaan arvo
+    if ($attribute_type == 'text' or $attribute_type == 'textarea') {
+        return $value;
+    }
+
     // Haetaan kaikki attribuutin optionssit
     $options = $this->_proxy->call(
       $this->_session,
@@ -1459,6 +1479,15 @@ class MagentoClient {
    */
   public function setConfigurableLapsituoteNakyvyys($configurable_lapsituote_nakyvyys) {
     $this->_configurable_lapsituote_nakyvyys = $configurable_lapsituote_nakyvyys;
+  }
+
+  /**
+   * Asettaa verkkokauppatuotteiden erikoisparametrit
+   *
+   * @param string  $verkkokauppatuotteet_erikoisparametrit
+   */
+  public function setVerkkokauppatuotteetErikoisparametrit($verkkokauppatuotteet_erikoisparametrit) {
+    $this->_verkkokauppatuotteet_erikoisparametrit = $verkkokauppatuotteet_erikoisparametrit;
   }
 
   /**

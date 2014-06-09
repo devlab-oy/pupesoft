@@ -111,6 +111,7 @@ $query = "SELECT tuote.tuoteno,
           tuote.alv,
           tuote.nakyvyys,
           tuote.tuotemassa,
+          tuote.tuotemerkki,
           tuote.tunnus,
           tuote.mallitarkenne campaign_code,
           tuote.malli target,
@@ -258,6 +259,7 @@ while ($row = mysql_fetch_array($res)) {
     'lyhytkuvaus'          => $row["lyhytkuvaus"],
     'yksikko'              => $row["yksikko"],
     'tuotemassa'           => $row["tuotemassa"],
+    'tuotemerkki'          => $row["tuotemerkki"],
     'myyntihinta'          => $myyntihinta,
     'myyntihinta_veroton'  => $myyntihinta_veroton,
     'myymalahinta'         => $myymalahinta,
@@ -830,6 +832,12 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
   if (isset($magento_configurable_lapsituote_nakyvyys) and !empty($magento_configurable_lapsituote_nakyvyys)) {
     $magento_configurable_lapsituote_nakyvyys = strtoupper($magento_configurable_lapsituote_nakyvyys);
     $magento_client->setConfigurableLapsituoteNakyvyys($magento_configurable_lapsituote_nakyvyys);
+  }
+  
+  // Asetetaan custom simple-tuotekentät jotka eivät tule dynaamisista parametreistä. Array joka sisältää jokaiselle erikoisparametrille
+  // array ('nimi' =>'magento_parametrin_nimi', 'arvo' = 'tuotteen_kentän_nimi_mistä_arvo_halutaan') esim. array ('nimi' => 'manufacturer', 'arvo' => 'tuotemerkki')
+  if (isset($verkkokauppatuotteet_erikoisparametrit) and count($verkkokauppatuotteet_erikoisparametrit) > 0) {
+    $magento_client->setVerkkokauppatuotteetErikoisparametrit($verkkokauppatuotteet_erikoisparametrit);
   }
 
   // lisaa_kategoriat

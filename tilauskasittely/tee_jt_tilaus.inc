@@ -681,8 +681,8 @@ if (!function_exists("tee_jt_tilaus")) {
             if ($lisataanrow["vanha_otunnus"] > 0) {
               $query = "SELECT tunnus, asiakkaan_tilausnumero, viesti, tilausyhteyshenkilo, sisviesti1, kohde
                         FROM lasku
-                        WHERE tunnus = '{$lisataanrow["vanha_otunnus"]}'
-                        AND tila    != 'T'";
+                        WHERE tunnus  = '{$lisataanrow["vanha_otunnus"]}'
+                        AND tila     != 'T'";
               $aresult = pupe_query($query);
 
               if (mysql_num_rows($aresult) > 0) {

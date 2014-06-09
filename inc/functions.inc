@@ -20646,7 +20646,7 @@ if (!function_exists('lisaa_tuotepaikka')) {
     $hyllyvali   = strtoupper(trim($hyllyvali));
     $hyllytaso   = strtoupper(trim($hyllytaso));
 
-    if (empty($hyllyalue) and !empty($varasto)) {
+    if ($hyllyalue == '' and !empty($varasto)) {
       //Hylly‰ ei ole annettu mutta varasto on. Luodaan annettuun varastoon tuotteelle default-tuotepaikka.
       $varasto = hae_varasto($varasto);
 
@@ -20655,7 +20655,7 @@ if (!function_exists('lisaa_tuotepaikka')) {
       $hyllyvali = 0;
       $hyllytaso = 0;
     }
-    elseif (empty($hyllyalue) and empty($varasto)) {
+    elseif ($hyllyalue == '' and empty($varasto)) {
       return false;
     }
 
@@ -24816,16 +24816,17 @@ if (!function_exists('hae_tilauksen_rekisterinumerot')) {
       return array();
     }
 
-    $joinlisa = $tyhjat_rekkarit_pois ? "AND tilausrivin_lisatiedot.rekisterinumero != ''" : "";
+    $joinlisa = $tyhjat_rekkarit_pois ? "AND tl.rekisterinumero != ''" : "";
 
-    //Tilausrivi pit‰‰ joinaa, jottei tule poistettuja rekisterinumeroita
-    $query = "SELECT tilausrivin_lisatiedot.rekisterinumero
-              FROM tilausrivin_lisatiedot
-              JOIN tilausrivi
-              ON ( tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
-                AND tilausrivi.tunnus                  = tilausrivin_lisatiedot.tilausrivitunnus {$joinlisa})
-              WHERE tilausrivin_lisatiedot.yhtio       = '{$kukarow['yhtio']}'
-              AND tilausrivin_lisatiedot.vanha_otunnus = '{$tilausnumero}'
+    $query = "SELECT tl.rekisterinumero
+              FROM tilausrivi
+              JOIN tilausrivin_lisatiedot AS tl ON (
+                tl.yhtio             = tilausrivi.yhtio AND
+                tl.tilausrivitunnus  = tilausrivi.tunnus
+                {$joinlisa}
+              )
+              WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+              AND tilausrivi.otunnus = '{$tilausnumero}'
               ORDER BY tilausrivi.tunnus DESC";
     $result = pupe_query($query);
 

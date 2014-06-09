@@ -941,14 +941,14 @@ if ($tee == 'tulosta') {
           require("magento_toimita_tilaus.php");
         }
       }
-      
+
       // Katsotaan onko anvia-verkkokauppa käytössä, silloin lähetetään toimituskuittaus Ftp:llä kun rahtikirja tulostetaan
       if (isset($anvia_ftphost, $anvia_ftpuser, $anvia_ftppass, $anvia_ftppath)) {
         $ftphost = $anvia_ftphost;
         $ftpuser = $anvia_ftpuser;
         $ftppass = $anvia_ftppass;
         $ftppath = $anvia_ftppath;
-        
+
         $query = "SELECT asiakkaan_tilausnumero, tunnus
                   FROM lasku
                   WHERE yhtio                 = '$kukarow[yhtio]'
@@ -963,7 +963,7 @@ if ($tee == 'tulosta') {
           $anvia_api_rak = $rahtikirjanro;
           $anvia_api_ord = $anviarow['asiakkaan_tilausnumero'];
           $anvia_api_til = $anviarow['tunnus'];
-          
+
           require("anvia_toimita_tilaus.php");
         }
       }

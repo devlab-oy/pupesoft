@@ -280,4 +280,3 @@ if ($tee != '' and isset($painoinnappia)) {
   echo "</table>";
 }
 require ("inc/footer.inc");
-?>

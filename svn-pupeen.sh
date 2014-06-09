@@ -132,8 +132,10 @@ if [ "${jatketaanko}" = "k" ]; then
   git remote prune origin           # poistetaan ylimääriset branchit
 
   if [[ $? -eq 0 ]]; then
+    echo
     echo "${green}Pupesoft päivitetty!${normal}"
   else
+    echo
     echo "${red}Pupesoft päivitys epäonnistui!${normal}"
   fi
 
@@ -147,8 +149,6 @@ else
   echo "${red}Pupesoftia ei päivitetty!${normal}"
 fi
 
-echo
-echo "${green}Valmis!${normal}"
 echo
 
 ###################################################################################

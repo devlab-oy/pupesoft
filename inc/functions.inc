@@ -20646,7 +20646,7 @@ if (!function_exists('lisaa_tuotepaikka')) {
     $hyllyvali   = strtoupper(trim($hyllyvali));
     $hyllytaso   = strtoupper(trim($hyllytaso));
 
-    if (empty($hyllyalue) and !empty($varasto)) {
+    if ($hyllyalue == '' and !empty($varasto)) {
       //Hyllyä ei ole annettu mutta varasto on. Luodaan annettuun varastoon tuotteelle default-tuotepaikka.
       $varasto = hae_varasto($varasto);
 
@@ -20655,7 +20655,7 @@ if (!function_exists('lisaa_tuotepaikka')) {
       $hyllyvali = 0;
       $hyllytaso = 0;
     }
-    elseif (empty($hyllyalue) and empty($varasto)) {
+    elseif ($hyllyalue == '' and empty($varasto)) {
       return false;
     }
 

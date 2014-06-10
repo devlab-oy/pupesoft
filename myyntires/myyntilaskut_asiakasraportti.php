@@ -554,6 +554,7 @@ if ($tee == "") {
 
       $query = "SELECT laskunro, tapvm, erpcm,
                 summa loppusumma,
+                kassalipas,
                 summa_valuutassa loppusumma_valuutassa,
                 if(mapvm!='0000-00-00', 0, summa-saldo_maksettu) avoinsumma,
                 if(mapvm!='0000-00-00', 0, summa_valuutassa-saldo_maksettu_valuutassa) avoinsumma_valuutassa,
@@ -770,60 +771,48 @@ if ($tee == "") {
             // KASSALIPAS-BLOKKI
             $tilinolisa = '';
             $kassa_arska = $pankkikortti_arska = $luottokortti_arska = array();
-            // Katsotaan onko laskun tunnuksella olevilla tiliöinneillä kustannuspaikkaa
-            $query = "SELECT group_concat(DISTINCT kustp) kustannuspaikat
-                      FROM tiliointi USE INDEX (tositerivit_index)
-                      WHERE yhtio='$kukarow[yhtio]'
-                      AND ltunnus   = $maksurow[tunnus]
-                      AND korjattu  = ''
-                      AND kustp    != 0";
-            $kustpre = pupe_query($query);
+            
+            // Etsitään kassalippaan tilinumerot
+            $query = "SELECT kassa,pankkikortti,luottokortti
+                      FROM kassalipas
+                      WHERE yhtio= '{$kukarow['yhtio']}'
+                      AND tunnus = '{$maksurow['kassalipas']}'";
+            $keijo = pupe_query($query);
 
-            if (mysql_num_rows($kustpre) == 1)  {
-
-              $kustpro = mysql_fetch_assoc($kustpre);
-              // Jos laskun tiliöinneiltä löytyy kustannuspaikka voidaan etsiä sen perusteella kassalipastilinumeroita
-              $query = "SELECT DISTINCT kustp,kassa,pankkikortti,luottokortti
-                        FROM kassalipas
-                        WHERE yhtio='$kukarow[yhtio]'
-                        AND kustp IN ({$kustpro['kustannuspaikat']})";
-              $keijo = pupe_query($query);
-
-              while ($ressukka = mysql_fetch_assoc($keijo)) {
-                $kassa_arska[] = $ressukka['kassa'];
-                $pankkikortti_arska[] = $ressukka['pankkikortti'];
-                $luottokortti_arska[] =  $ressukka['luottokortti'];
-              }
-
-              //siivous
-              $kassa_arska = array_unique($kassa_arska);
-              $pankkikortti_arska = array_unique($pankkikortti_arska);
-              $luottokortti_arska = array_unique($luottokortti_arska);
-
-              $dipoli = array_merge($kassa_arska, $pankkikortti_arska, $luottokortti_arska);
-              // wrapataan tilinumerot vielä hipsuilla jos sattuu olemaan ei-numeerisia
-              foreach ($dipoli as &$dip) {
-                $dip = "'".$dip."'";
-              }
-              if (count($dipoli) > 0) $tilinolisa = ",".implode(",", $dipoli);
+            while ($ressukka = mysql_fetch_assoc($keijo)) {
+              $kassa_arska[] = $ressukka['kassa'];
+              $pankkikortti_arska[] = $ressukka['pankkikortti'];
+              $luottokortti_arska[] =  $ressukka['luottokortti'];
             }
+
+            //siivous
+            $kassa_arska = array_unique($kassa_arska);
+            $pankkikortti_arska = array_unique($pankkikortti_arska);
+            $luottokortti_arska = array_unique($luottokortti_arska);
+
+            $dipoli = array_merge($kassa_arska, $pankkikortti_arska, $luottokortti_arska);
+            // wrapataan tilinumerot vielä hipsuilla jos sattuu olemaan ei-numeerisia
+            foreach ($dipoli as &$dip) {
+              $dip = "'".$dip."'";
+            }
+            if (count($dipoli) > 0) $tilinolisa = ",".implode(",", $dipoli);
 
             $query = "SELECT *
                       FROM tiliointi USE INDEX (tositerivit_index)
-                      WHERE yhtio = '$kukarow[yhtio]' and
-                      ltunnus     = '$maksurow[tunnus]' and
-                      tilino      in ({$ratiro['rahatilit']}{$tilinolisa}) and
-                      korjattu    = ''";
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND ltunnus = '{$maksurow['tunnus']}'
+                        AND tilino IN ({$ratiro['rahatilit']}{$tilinolisa})
+                        AND korjattu = ''";
             $lasktilitre = pupe_query($query);
 
             // listataan osasuoritukset jos maksupäivä on nollaa tai jos niitä on oli yks
-            if ($maksurow["mapvm"] == "0000-00-00" or mysql_num_rows($lasktilitre) > 1) {
+            if ($maksurow["mapvm"] == "0000-00-00" or mysql_num_rows($lasktilitre) > 0) {
 
               while ($lasktilitro = mysql_fetch_array($lasktilitre)) {
 
                 if (in_array($lasktilitro['tilino'], $kassa_arska)) echo t("Käteisellä").": ";
-                if (in_array($lasktilitro['tilino'], $pankkikortti_arska)) echo t("Pankkikortilla").": ";
-                if (in_array($lasktilitro['tilino'], $luottokortti_arska)) echo t("Luottokortilla").": ";
+                elseif (in_array($lasktilitro['tilino'], $pankkikortti_arska)) echo t("Pankkikortilla").": ";
+                elseif (in_array($lasktilitro['tilino'], $luottokortti_arska)) echo t("Luottokortilla").": ";
 
                 if ($lasktilitro["summa_valuutassa"] != 0 and $lasktilitro["valkoodi"] != $yhtiorow["valkoodi"] and $lasktilitro["valkoodi"] != "") {
                   echo "$lasktilitro[summa_valuutassa] $lasktilitro[valkoodi] ($lasktilitro[summa] $yhtiorow[valkoodi]) ", tv1dateconv($lasktilitro["tapvm"]), "<br>";

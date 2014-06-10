@@ -2221,93 +2221,80 @@ if (!function_exists('alvierittely')) {
 
       $tilinolisa = '';
       $kassa_arska = $pankkikortti_arska = $luottokortti_arska = array();
-      // Katsotaan onko laskun tunnuksella olevilla tiliöinneillä kustannuspaikkaa
-      $query = "SELECT group_concat(DISTINCT kustp) kustannuspaikat
-                FROM tiliointi USE INDEX (tositerivit_index)
-                WHERE yhtio='$kukarow[yhtio]'
-                AND ltunnus   = $laskurow[tunnus]
-                AND korjattu  = ''
-                AND kustp    != 0";
-      $kustpre = pupe_query($query);
 
-      if (mysql_num_rows($kustpre) == 1)  {
+      // Etsitään kassalippaan tilinumerot
+      $query = "SELECT kassa,pankkikortti,luottokortti
+                FROM kassalipas
+                WHERE yhtio= '{$kukarow['yhtio']}'
+                AND tunnus = '{$laskurow['kassalipas']}'";
+      $keijo = pupe_query($query);
 
-        $kustpro = mysql_fetch_assoc($kustpre);
-        // Jos laskun tiliöinneiltä löytyy kustannuspaikka voidaan etsiä sen perusteella kassalipastilinumeroita
-        $query = "SELECT DISTINCT kustp,kassa,pankkikortti,luottokortti
-                  FROM kassalipas
-                  WHERE yhtio='$kukarow[yhtio]'
-                  AND kustp IN ({$kustpro['kustannuspaikat']})";
-        $keijo = pupe_query($query);
-
-        while ($ressukka = mysql_fetch_assoc($keijo)) {
-          $kassa_arska[] = $ressukka['kassa'];
-          $pankkikortti_arska[] = $ressukka['pankkikortti'];
-          $luottokortti_arska[] =  $ressukka['luottokortti'];
-        }
-
-        //siivous
-        $kassa_arska = array_unique($kassa_arska);
-        $pankkikortti_arska = array_unique($pankkikortti_arska);
-        $luottokortti_arska = array_unique($luottokortti_arska);
-
-        $dipoli = array_merge($kassa_arska, $pankkikortti_arska, $luottokortti_arska);
-        // wrapataan tilinumerot vielä hipsuilla jos sattuu olemaan ei-numeerisia
-        foreach ($dipoli as &$dip) {
-          $dip = "'".$dip."'";
-        }
-
-        if (count($dipoli) > 0) $tilinolisa = implode(",", $dipoli);
+      while ($ressukka = mysql_fetch_assoc($keijo)) {
+        $kassa_arska[] = $ressukka['kassa'];
+        $pankkikortti_arska[] = $ressukka['pankkikortti'];
+        $luottokortti_arska[] =  $ressukka['luottokortti'];
       }
 
-      $query = "SELECT *
-                FROM tiliointi USE INDEX (tositerivit_index)
-                WHERE yhtio  = '$kukarow[yhtio]' and
-                ltunnus      = '$laskurow[tunnus]' and
-                tilino       in ({$tilinolisa}) and
-                korjattu     = '' and
-                tilino      != ''";
-      $lasktilitre = pupe_query($query);
+      //siivous
+      $kassa_arska = array_unique($kassa_arska);
+      $pankkikortti_arska = array_unique($pankkikortti_arska);
+      $luottokortti_arska = array_unique($luottokortti_arska);
 
-      // listataan osasuoritukset jos maksupäivä on nollaa tai jos niitä on
-      if ($laskurow["mapvm"] == "0000-00-00" or mysql_num_rows($lasktilitre) > 0) {
+      $dipoli = array_merge($kassa_arska, $pankkikortti_arska, $luottokortti_arska);
+      // wrapataan tilinumerot vielä hipsuilla jos sattuu olemaan ei-numeerisia
+      foreach ($dipoli as &$dip) {
+        $dip = "'".$dip."'";
+      }
 
-        while ($lasktilitro = mysql_fetch_array($lasktilitre)) {
-          $ueloes = '';
-          $paivvaa = tv1dateconv($lasktilitro["tapvm"]);
+      if (count($dipoli) > 0) $tilinolisa = implode(",", $dipoli);
+    }
 
-          // haetaan pisin osasuoritustavan nimitys
-          $olen_pena = 0;
-          foreach (array(t("Käteisellä"), t("Pankkikortilla"), t("Luottokortilla")) as $arggi) {
-            $pitkulainen = $pdf_lasku->strlen($arggi, $norm);
-            if ($pitkulainen > $olen_pena) $olen_pena = $pitkulainen;
-          }
+    $query = "SELECT *
+              FROM tiliointi USE INDEX (tositerivit_index)
+              WHERE yhtio   = '$kukarow[yhtio]'
+              AND ltunnus   = '$laskurow[tunnus]'
+              AND tilino    in ({$tilinolisa})
+              AND korjattu  = ''
+              AND tilino   != ''";
+    $lasktilitre = pupe_query($query);
 
-          if (in_array($lasktilitro['tilino'], $kassa_arska)) $ueloes = t("Käteisellä", $kieli);
-          if (in_array($lasktilitro['tilino'], $pankkikortti_arska)) $ueloes = t("Pankkikortilla", $kieli);
-          if (in_array($lasktilitro['tilino'], $luottokortti_arska)) $ueloes = t("Luottokortilla", $kieli);
+    // listataan osasuoritukset jos maksupäivä on nollaa tai jos niitä on
+    if ($laskurow["mapvm"] == "0000-00-00" or mysql_num_rows($lasktilitre) > 0) {
 
-          if ($lasktilitro["summa_valuutassa"] != 0 and $lasktilitro["valkoodi"] != $yhtiorow["valkoodi"] and $lasktilitro["valkoodi"] != "") {
-            $ueloesrivi = sprintf('%.2f', $lasktilitro['summa_valuutassa'] - $pyoristys * -1);
-            $pdf_lasku->draw_text(360, $kala, " - ".$ueloes, $thispage, $norm);
+      while ($lasktilitro = mysql_fetch_array($lasktilitre)) {
+        $ueloes = '';
+        $paivvaa = tv1dateconv($lasktilitro["tapvm"]);
 
-            $oikpos = $pdf_lasku->strlen($ueloesrivi, $norm);
-            $pdf_lasku->draw_text(535-$oikpos, $kala, $ueloesrivi ,$thispage, $norm);
-            $pdf_lasku->draw_text(550, $kala, $lasktilitro["valkoodi"], $thispage, $norm);
-          }
-          else {
-            $ueloesrivi = sprintf('%.2f', $lasktilitro['summa'] - $pyoristys * -1);
-            $pdf_lasku->draw_text(360, $kala, " - ".$ueloes, $thispage, $norm);
-            $oikpos = $pdf_lasku->strlen($paivvaa, $norm);
-            $pdf_lasku->draw_text(370+$olen_pena , $kala, $paivvaa, $thispage, $norm);
-            $oikpos = $pdf_lasku->strlen($ueloesrivi, $norm);
-            $pdf_lasku->draw_text(535-$oikpos, $kala, $ueloesrivi, $thispage, $norm);
-            $pdf_lasku->draw_text(550, $kala, $laskurow["valkoodi"], $thispage, $norm);
-          }
-
-          $kala -= 10;
+        // haetaan pisin osasuoritustavan nimitys
+        $olen_pena = 0;
+        foreach (array(t("Käteisellä"), t("Pankkikortilla"), t("Luottokortilla")) as $arggi) {
+          $pitkulainen = $pdf_lasku->strlen($arggi, $norm);
+          if ($pitkulainen > $olen_pena) $olen_pena = $pitkulainen;
         }
 
+        if (in_array($lasktilitro['tilino'], $kassa_arska)) $ueloes = t("Käteisellä", $kieli);
+        elseif (in_array($lasktilitro['tilino'], $pankkikortti_arska)) $ueloes = t("Pankkikortilla", $kieli);
+        elseif (in_array($lasktilitro['tilino'], $luottokortti_arska)) $ueloes = t("Luottokortilla", $kieli);
+
+        if ($lasktilitro["summa_valuutassa"] != 0 and $lasktilitro["valkoodi"] != $yhtiorow["valkoodi"] and $lasktilitro["valkoodi"] != "") {
+          $ueloesrivi = sprintf('%.2f', $lasktilitro['summa_valuutassa'] - $pyoristys * -1);
+          $pdf_lasku->draw_text(360, $kala, " - ".$ueloes, $thispage, $norm);
+
+          $oikpos = $pdf_lasku->strlen($ueloesrivi, $norm);
+          $pdf_lasku->draw_text(535-$oikpos, $kala, $ueloesrivi ,$thispage, $norm);
+          $pdf_lasku->draw_text(550, $kala, $lasktilitro["valkoodi"], $thispage, $norm);
+        }
+        else {
+          $ueloesrivi = sprintf('%.2f', $lasktilitro['summa'] - $pyoristys * -1);
+          $pdf_lasku->draw_text(360, $kala, " - ".$ueloes, $thispage, $norm);
+          $oikpos = $pdf_lasku->strlen($paivvaa, $norm);
+          $pdf_lasku->draw_text(370+$olen_pena , $kala, $paivvaa, $thispage, $norm);
+          $oikpos = $pdf_lasku->strlen($ueloesrivi, $norm);
+          $pdf_lasku->draw_text(535-$oikpos, $kala, $ueloesrivi, $thispage, $norm);
+          $pdf_lasku->draw_text(550, $kala, $laskurow["valkoodi"], $thispage, $norm);
+        }
+
+        $kala -= 10;
       }
 
       $kala -= 10;

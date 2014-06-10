@@ -7511,8 +7511,15 @@ if ($tee == '') {
                      FROM tilausrivi
                      LEFT JOIN varastopaikat ON (varastopaikat.yhtio =
                        IF(tilausrivi.var = 'S',
-                         IF((SELECT tyyppi_tieto FROM toimi WHERE yhtio = tilausrivi.yhtio and tunnus = tilausrivi.tilaajanrivinro) != '',
-                            (SELECT tyyppi_tieto FROM toimi WHERE yhtio = tilausrivi.yhtio and tunnus = tilausrivi.tilaajanrivinro), tilausrivi.yhtio),
+                         IF((SELECT tyyppi_tieto
+                             FROM toimi
+                             WHERE yhtio = tilausrivi.yhtio
+                             AND tunnus = tilausrivi.tilaajanrivinro) != '',
+                              (SELECT tyyppi_tieto
+                               FROM toimi
+                               WHERE yhtio = tilausrivi.yhtio
+                               AND tunnus = tilausrivi.tilaajanrivinro),
+                              tilausrivi.yhtio),
                          tilausrivi.yhtio)
                        AND varastopaikat.tunnus = tilausrivi.varasto)
                      WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'

@@ -2149,7 +2149,7 @@ if ($select_varasto > 0) {
                 AND tilausrivi.otunnus = lasku.tunnus
                 AND tilausrivi.tyyppi != 'D'
                 AND tilausrivi.var not in ('P','J','O','S')
-                AND tilausrivi.varasto = '{$select_varasto}')
+                AND tilausrivi.varasto = '{$select_varasto}'
                 {$ei_lapsia_lisa})
               JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
               WHERE lasku.yhtio        = '{$kukarow['yhtio']}'

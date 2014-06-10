@@ -2977,7 +2977,8 @@ if ($tila == "" and !isset($jatka)) {
     echo "<tr><td>".t("Kohde").":</td><td colspan = '1'><input type='text' size='43' name='kohde' value='$srow[kohde]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")."</td></tr>";
 
     if (isset($srow["tilaus_viesti"]) and $srow["tilaus_viesti"] != "") {
-      echo "<tr><td>".t("Tilausviite").":</td><td><textarea name='viesti'   rows='2' cols='40'>$srow[tilaus_viesti] $srow[viesti]</textarea></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")." + ".t("tarjous")."</td></tr>";
+      $tempviesti = $srow["tilaus_viesti"]." ".$srow["viesti"];
+      echo "<tr><td>".t("Tilausviite").":</td><td><input type='text' size='43' name='viesti' value='$tempviesti'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")." + ".t("tarjous")."</td></tr>";
     }
     else {
       echo "<tr><td>".t("Tilausviite").":</td><td><input type='text' size='43' name='viesti' value='$srow[viesti]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")." + ".t("tarjous")."</td></tr>";

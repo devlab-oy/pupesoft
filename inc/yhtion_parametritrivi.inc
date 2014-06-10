@@ -2005,7 +2005,7 @@ if ($fieldname == "oletus_rahtikirja_lahetekpl") {
   }
 
   $ulos .= "<option value='0' $sel0>".t("Lähetteestä tulostetaan 0 kopiota.")."</option>";
-  $ulos .= "<option value='1' $sel1>".t("Lähetteestä tulostetaan 1 kopiota.")."</option>";
+  $ulos .= "<option value='1' $sel1>".t("Lähetteestä tulostetaan 1 kopio.")."</option>";
   $ulos .= "<option value='2' $sel2>".t("Lähetteestä tulostetaan 2 kopiota.")."</option>";
   $ulos .= "<option value='3' $sel3>".t("Lähetteestä tulostetaan 3 kopiota.")."</option>";
   $ulos .= "</select></td>";
@@ -2034,7 +2034,7 @@ if ($fieldname == "oletus_rahtikirja_oslappkpl") {
   }
 
   $ulos .= "<option value='0' $sel0>".t("Osoitelapusta tulostetaan 0 kopiota.")."</option>";
-  $ulos .= "<option value='1' $sel1>".t("Osoitelapusta tulostetaan 1 kopiota.")."</option>";
+  $ulos .= "<option value='1' $sel1>".t("Osoitelapusta tulostetaan 1 kopio.")."</option>";
   $ulos .= "<option value='2' $sel2>".t("Osoitelapusta tulostetaan 2 kopiota.")."</option>";
   $ulos .= "<option value='3' $sel3>".t("Osoitelapusta tulostetaan 3 kopiota.")."</option>";
   $ulos .= "</select></td>";

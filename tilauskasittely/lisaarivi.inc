@@ -933,9 +933,8 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                   varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi, varastopaikat.erikoistoimitus_alarajasumma
                   FROM tuote
                   JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
-                  JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-                  and concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-                  and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+                  JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+                    AND varastopaikat.tunnus = tuotepaikat.varasto)
                   JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio
                   and sarjanumeroseuranta.tuoteno           = tuote.tuoteno
                   and sarjanumeroseuranta.hyllyalue         = tuotepaikat.hyllyalue
@@ -964,9 +963,8 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                   varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi, varastopaikat.erikoistoimitus_alarajasumma, '' era
                   FROM tuote
                   JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
-                  JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-                  and concat(rpad(upper(alkuhyllyalue), 5, '0'),lpad(upper(alkuhyllynro), 5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-                  and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+                  JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+                    AND varastopaikat.tunnus = tuotepaikat.varasto)
                   WHERE tuote.yhtio = '$kukarow[yhtio]'
                   and tuote.tuoteno = '$tuoteno'
                   $notfromvarasto
@@ -2695,11 +2693,8 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     else {
       // haetaan vielä tuotteen oletuspaikka puuteriville, jotta seuranta ois helpompaa
       //jos laskurow[varasto] on setattu niin yritetään löytää paikka siitä varastosta
-      $query = "SELECT tuotepaikat.*, varastopaikat.tunnus varastotunnus
+      $query = "SELECT tuotepaikat.*, tuotepaikat.varasto varastotunnus
                 FROM tuotepaikat
-                LEFT JOIN varastopaikat ON tuotepaikat.yhtio = varastopaikat.yhtio
-                and concat(rpad(upper(alkuhyllyalue) ,5,'0'),lpad(upper(alkuhyllynro) ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-                and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
                 where tuotepaikat.yhtio = '$kukarow[yhtio]'
                 and tuotepaikat.tuoteno = '$trow[tuoteno]'
                 ORDER BY tuotepaikat.oletus DESC";

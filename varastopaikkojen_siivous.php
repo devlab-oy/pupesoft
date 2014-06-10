@@ -358,11 +358,8 @@ if ($tee == 'LISTAATUNTEMATTOMAT') {
                            tuotepaikat.hyllytaso) paikka,
             varastopaikat.tunnus
             FROM tuotepaikat USE INDEX (tuote_index)
-            LEFT OUTER JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-            AND concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'), lpad(upper(varastopaikat.alkuhyllynro), 5, '0'))
-                                    <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'), lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-            AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'), lpad(upper(varastopaikat.loppuhyllynro), 5, '0'))
-                                    >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'), lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+            LEFT OUTER JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+              AND varastopaikat.tunnus = tuotepaikat.varasto)
             WHERE tuotepaikat.yhtio = '{$kukarow["yhtio"]}'
             AND varastopaikat.tunnus is null";
   $result = pupe_query($query);
@@ -538,11 +535,8 @@ if ($tee == 'LISTAA') {
             FROM tuotepaikat
             LEFT JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio
               and tuote.tuoteno     = tuotepaikat.tuoteno)
-            LEFT JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-              and concat(rpad(upper(alkuhyllyalue), 5, '0'), lpad(upper(alkuhyllynro), 5, '0'))
-                                    <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'), lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-              and concat(rpad(upper(loppuhyllyalue), 5, '0'), lpad(upper(loppuhyllynro), 5, '0'))
-                                    >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'), lpad(upper(tuotepaikat.hyllynro),5, '0'))
+            LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+              AND varastopaikat.tunnus = tuotepaikat.varasto)
             WHERE tuotepaikat.yhtio = '{$kukarow["yhtio"]}'
             $lisaa
             $lisaa2
@@ -656,10 +650,7 @@ if ($tee == "LISTAAVIRHEELLISETRIVIT") {
               and tuote.tuoteno    = tilausrivi.tuoteno
               and tuote.ei_saldoa  = '')
             LEFT OUTER JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
-              AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'), lpad(upper(varastopaikat.alkuhyllynro),  5, '0'))
-                                   <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'), lpad(upper(tilausrivi.hyllynro), 5, '0'))
-              AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'), lpad(upper(varastopaikat.loppuhyllynro), 5, '0'))
-                                   >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'), lpad(upper(tilausrivi.hyllynro), 5, '0')))
+              AND varastopaikat.tunnus = tuotepaikat.varasto)
             WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
             AND tilausrivi.tyyppi  in ('L','G','V')
             AND tilausrivi.jt + tilausrivi.varattu != 0
@@ -729,10 +720,7 @@ if ($tee == "LISTAATAPAHTUMATILMANPAIKKAA") {
               AND tuote.tuoteno   = tapahtuma.tuoteno
               AND tuote.ei_saldoa = '')
             LEFT OUTER JOIN varastopaikat ON (varastopaikat.yhtio = tapahtuma.yhtio
-              AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'), lpad(upper(varastopaikat.alkuhyllynro),  5, '0'))
-                                  <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'), lpad(upper(tapahtuma.hyllynro), 5, '0'))
-              AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'), lpad(upper(varastopaikat.loppuhyllynro), 5, '0'))
-                                  >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'), lpad(upper(tapahtuma.hyllynro), 5, '0')))
+              AND varastopaikat.tunnus = tuotepaikat.varasto)
             WHERE tapahtuma.yhtio = '{$kukarow["yhtio"]}'
             AND tapahtuma.laji    not in ('epäkurantti')
             AND varastopaikat.tunnus IS NULL

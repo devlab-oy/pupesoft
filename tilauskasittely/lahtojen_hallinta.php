@@ -2046,13 +2046,15 @@ if ($select_varasto > 0) {
   $query = "SELECT tilausrivi.perheid, tilausrivi.tuoteno, tilausrivi.tunnus
             FROM lasku
             JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('','P','T'))
-            JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.perheid != 0 AND tilausrivi.perheid != tilausrivi.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J','O','S'))
+            JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus = lasku.tunnus
+              AND tilausrivi.perheid != 0
+              AND tilausrivi.perheid != tilausrivi.tunnus
+              AND tilausrivi.tyyppi != 'D'
+              AND tilausrivi.var not in ('P','J','O','S')
+              AND tilausrivi.varasto = '{$select_varasto}')
             JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-            JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
-              and concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
-              and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
-            AND varastopaikat.tunnus = '{$select_varasto}')
-            WHERE lasku.yhtio        = '{$kukarow['yhtio']}'
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             {$lasku_where}";
   $result = pupe_query($query);
 
@@ -2143,12 +2145,13 @@ if ($select_varasto > 0) {
               JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('','P','T'))
               JOIN avainsana ON (avainsana.yhtio = lahdot.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selitetark_3 = lahdot.asiakasluokka)
               JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
-              JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J','O','S') {$ei_lapsia_lisa})
+              JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
+                AND tilausrivi.otunnus = lasku.tunnus
+                AND tilausrivi.tyyppi != 'D'
+                AND tilausrivi.var not in ('P','J','O','S')
+                AND tilausrivi.varasto = '{$select_varasto}')
+                {$ei_lapsia_lisa})
               JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-              JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
-                and concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
-                and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
-              AND varastopaikat.tunnus = '{$select_varasto}')
               WHERE lasku.yhtio        = '{$kukarow['yhtio']}'
               {$lasku_where}
               GROUP BY 1,2,3,4,5,6,7,8,9

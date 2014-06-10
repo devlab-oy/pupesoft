@@ -316,9 +316,8 @@ if (isset($generoi) and $generoi != "" and $tee == 'M' and $toimittajaid > 0 and
               JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno AND tuotteen_toimittajat.liitostunnus = '{$toimittajaid}')
               {$abcjoin}
               {$keraysvyohykelisa}
-              WHERE tuotepaikat.yhtio     = '{$kukarow['yhtio']}'
-              AND CONCAT(RPAD(UPPER('{$varow['alkuhyllyalue']}'),  5, '0'),LPAD(UPPER('{$varow['alkuhyllynro']}'),  5, '0')) <= CONCAT(RPAD(UPPER(tuotepaikat.hyllyalue), 5, '0'),LPAD(UPPER(tuotepaikat.hyllynro), 5, '0'))
-              AND CONCAT(RPAD(UPPER('{$varow['loppuhyllyalue']}'), 5, '0'),LPAD(UPPER('{$varow['loppuhyllynro']}'), 5, '0')) >= CONCAT(RPAD(UPPER(tuotepaikat.hyllyalue), 5, '0'),LPAD(UPPER(tuotepaikat.hyllynro), 5, '0'))
+              WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+              AND tuotepaikat.varasto = {$kohdevarasto}
               AND tuotepaikat.halytysraja > 0
               ORDER BY tuotepaikat.tuoteno";
     $resultti = pupe_query($query);
@@ -390,9 +389,8 @@ if (isset($generoi) and $generoi != "" and $tee == 'M' and $toimittajaid > 0 and
                                 {$abcjoin}
                                 {$keraysvyohykelisa}
                                 WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
-                                AND CONCAT(RPAD(UPPER('{$varow['alkuhyllyalue']}'),  5, '0'),LPAD(UPPER('{$varow['alkuhyllynro']}'),  5, '0')) <= CONCAT(RPAD(UPPER(tuotepaikat.hyllyalue), 5, '0'),LPAD(UPPER(tuotepaikat.hyllynro), 5, '0'))
-                                AND CONCAT(RPAD(UPPER('{$varow['loppuhyllyalue']}'), 5, '0'),LPAD(UPPER('{$varow['loppuhyllynro']}'), 5, '0')) >= CONCAT(RPAD(UPPER(tuotepaikat.hyllyalue), 5, '0'),LPAD(UPPER(tuotepaikat.hyllynro), 5, '0'))
-                                 AND tuote.tuoteno      = '{$_tuote['tuoteno']}'";
+                                AND tuotepaikat.varasto = {$kohdevarasto}
+                                AND tuote.tuoteno = '{$_tuote['tuoteno']}'";
                       $vasres = pupe_query($query);
 
                       while ($vasrow = mysql_fetch_assoc($vasres)) {

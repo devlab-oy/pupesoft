@@ -58,8 +58,8 @@ if (isset($tee) and $tee == "hae_raportti") {
                 )
               JOIN keraysvyohyke ON
                 (
-                  keraysvyohyke.yhtio = varastopaikat.yhtio
-                  AND keraysvyohyke.varasto = varastopaikat.tunnus
+                  keraysvyohyke.yhtio = tuotepaikat.yhtio
+                  AND keraysvyohyke.varasto = tuotepaikat.varasto
                   AND keraysvyohyke.tunnus = vh.keraysvyohyke
                 )";
 
@@ -71,7 +71,7 @@ if (isset($tee) and $tee == "hae_raportti") {
     }
 
     $query = "SELECT   tuotepaikat.tuoteno AS tuoteno,
-              varastopaikat.tunnus AS varasto,
+              tuotepaikat.varasto AS varasto,
               tuotepaikat.halytysraja AS haly,
               tuotepaikat.oletus AS oletus,
               CONCAT(tuotepaikat.hyllyalue, '-', tuotepaikat.hyllynro, '-', tuotepaikat.hyllyvali, '-', tuotepaikat.hyllytaso ) AS tuotepaikka,
@@ -80,38 +80,24 @@ if (isset($tee) and $tee == "hae_raportti") {
               tuotepaikat.hyllyvali AS vali,
               tuotepaikat.hyllytaso AS taso
               FROM tuotepaikat
-              JOIN varastopaikat ON
-                (
-                  varastopaikat.yhtio     = tuotepaikat.yhtio
-                  AND concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-                  AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-                )
               {$kv_join}
               WHERE tuotepaikat.yhtio     = '{$kukarow['yhtio']}'
               {$kv_and}
-              AND varastopaikat.tunnus    IN ({$varastot})
+              AND tuotepaikat.varasto    IN ({$varastot})
               AND tuotepaikat.halytysraja > 0
               AND tuotepaikat.oletus      = 'X'";
-
     $result = pupe_query($query);
 
     $oletuspaikat = array();
 
     while ($row = mysql_fetch_assoc($result)) {
 
-      $varapaikka_query = "SELECT COUNT(tp.tunnus) as count
-                           FROM tuotepaikat AS tp
-                           JOIN varastopaikat AS vp ON
-                             (
-                               vp.yhtio    = tp.yhtio
-                               AND concat(rpad(upper(vp.alkuhyllyalue),  5, '0'),lpad(upper(vp.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tp.hyllyalue), 5, '0'),lpad(upper(tp.hyllynro), 5, '0'))
-                               AND concat(rpad(upper(vp.loppuhyllyalue), 5, '0'),lpad(upper(vp.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tp.hyllyalue), 5, '0'),lpad(upper(tp.hyllynro), 5, '0'))
-                             )
-                           WHERE oletus   != 'X'
-                           AND tp.tuoteno  = '{$row['tuoteno']}'
-                           AND vp.tunnus   = {$row['varasto']}
-                           AND tp.yhtio    = '{$kukarow['yhtio']}'";
-
+      $varapaikka_query = "SELECT COUNT(*) as count
+                           FROM tuotepaikat
+                           WHERE oletus != 'X'
+                           AND tuoteno = '{$row['tuoteno']}'
+                           AND varasto = {$row['varasto']}
+                           AND yhtio = '{$kukarow['yhtio']}'";
       $varapaikka_result = pupe_query($varapaikka_query);
       $varapaikka_count = mysql_result($varapaikka_result, 0);
 
@@ -167,20 +153,15 @@ if (isset($tee) and $tee == "hae_raportti") {
                    hyllyvali AS vali,
                    hyllytaso AS taso
                    FROM tuotepaikat
-                   JOIN varastopaikat ON
-                     (
-                       varastopaikat.yhtio   = tuotepaikat.yhtio
-                       AND concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-                       AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-                     )
-                   WHERE tuoteno             = '{$row['tuoteno']}'
-                   AND tuotepaikat.yhtio     = '{$kukarow['yhtio']}'
-                   AND oletus               != 'X'
-                   AND varastopaikat.tunnus  = {$row['varasto']}";
+                   WHERE tuoteno = '{$row['tuoteno']}'
+                   AND yhtio = '{$kukarow['yhtio']}'
+                   AND oletus != 'X'
+                   AND varasto = {$row['varasto']}";
+        $result2 = pupe_query($query2);
 
         $varapaikka_echo = '';
         $varapaikat = array();
-        $result2 = pupe_query($query2);
+
         while ($row2 = mysql_fetch_assoc($result2)) {
           $saldo_info = saldo_myytavissa($row['tuoteno'], '', $row['varasto'], $kukarow['yhtio'], $row2['alue'], $row2['nro'], $row2['vali'], $row2['taso'] );
           $row2['myytavissa'] = $saldo_info[2];

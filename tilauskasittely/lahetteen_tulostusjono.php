@@ -977,11 +977,6 @@ if ($tee2 == '') {
     $valmistuslinja_where = "  AND lasku.kohde = '{$valmistuslinja}'";
   }
 
-  $siirtolista_where = '';
-  if ($toim == "SIIRTOLISTA" and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
-    $siirtolista_where = " AND lasku.toimitustavan_lahto = 0 ";
-  }
-
   $query = "SELECT lasku.yhtio, lasku.yhtio_nimi, lasku.ytunnus, lasku.toim_ovttunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.varasto,
             if (tila = 'V', lasku.viesti, lasku.toimitustapa) toimitustapa,
             if (maksuehto.jv!='', lasku.tunnus, '') jvgrouppi,
@@ -1017,8 +1012,8 @@ if ($tee2 == '') {
             WHERE
             lasku.$logistiikka_yhtiolisa
             and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa)
+            AND lasku.toimitustavan_lahto = 0
             $valmistuslinja_where
-            $siirtolista_where
             $haku
             $tilaustyyppi
             $grouppi

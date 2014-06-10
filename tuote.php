@@ -901,9 +901,8 @@ if ($tee == 'Z') {
                   varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
                    FROM tuote
                   JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
-                  JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-                  and concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-                  and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+                  JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+                    AND tuotepaikat.varasto = varastopaikat.tunnus)
                   JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio
                   and sarjanumeroseuranta.tuoteno           = tuote.tuoteno
                   and sarjanumeroseuranta.hyllyalue         = tuotepaikat.hyllyalue
@@ -934,9 +933,8 @@ if ($tee == 'Z') {
                   {$_tp_sort_lisa}
                   FROM tuote
                   JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
-                  JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-                  and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-                  and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+                  JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+                    AND tuotepaikat.varasto = varastopaikat.tunnus)
                   WHERE tuote.yhtio in ('".implode("','", $yhtiot)."')
                   and tuote.tuoteno = '$tuoteno'
                   ORDER BY toimipaikka_sorttaus, tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
@@ -1330,7 +1328,8 @@ if ($tee == 'Z') {
               FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
               LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
               JOIN lasku use index (PRIMARY) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus {$toimipaikkarajaus}
-              LEFT JOIN varastopaikat ON varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto
+              LEFT JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio
+                AND varastopaikat.tunnus = lasku.varasto)
               LEFT JOIN lasku as lasku2 ON lasku2.yhtio = tilausrivi.yhtio and lasku2.tunnus = tilausrivi.uusiotunnus
               LEFT JOIN asiakas ON asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus
               WHERE tilausrivi.yhtio         = '$kukarow[yhtio]'
@@ -1573,9 +1572,8 @@ if ($tee == 'Z') {
                   WHERE tilausrivi.yhtio        = '{$kukarow['yhtio']}'
                   AND tilausrivi.tyyppi         = 'L'
                   AND tilausrivi.tuoteno        = '{$tuoteno}'
-                  AND tilausrivi.laskutettuaika >= '{$edvuosi}-01-01'";
-
-
+                  AND tilausrivi.laskutettuaika >= '{$edvuosi}-01-01'
+                  GROUP BY tuoteno";
         $result3 = pupe_query($query);
         $lrow = mysql_fetch_assoc($result3);
 
@@ -1778,10 +1776,7 @@ if ($tee == 'Z') {
             }
 
             if (!empty($varow['tunnukset'])) {
-              $toimipaikkarajaus = "JOIN varastopaikat ON varastopaikat.yhtio = tapahtuma.yhtio
-              and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
-              and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
-              and varastopaikat.tunnus IN ({$varow['tunnukset']})";
+              $toimipaikkarajaus = "AND tilausrivi.varasto IN ({$varow['tunnukset']})";
               break;
             }
             else {
@@ -1795,8 +1790,9 @@ if ($tee == 'Z') {
         $query = "SELECT
                   {$select_summa}
                   FROM tapahtuma USE INDEX (yhtio_tuote_laadittu)
-                  JOIN tilausrivi ON (tilausrivi.yhtio = tapahtuma.yhtio AND tilausrivi.tunnus = tapahtuma.rivitunnus)
-                  {$toimipaikkarajaus}
+                  JOIN tilausrivi ON (tilausrivi.yhtio = tapahtuma.yhtio
+                    AND tilausrivi.tunnus = tapahtuma.rivitunnus
+                    {$toimipaikkarajaus})
                   WHERE tapahtuma.yhtio  = '{$kukarow['yhtio']}'
                   AND tapahtuma.tuoteno  = '{$tuoteno}'
                   AND tapahtuma.laadittu >= '{$ed}'
@@ -2250,10 +2246,7 @@ if ($tee == 'Z') {
           }
 
           if (!empty($varow['tunnukset'])) {
-            $toimipaikkarajaus = "JOIN varastopaikat ON varastopaikat.yhtio = tapahtuma.yhtio
-            and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
-            and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
-            and varastopaikat.tunnus IN ({$varow['tunnukset']})";
+            $toimipaikkarajaus = "AND tapahtuma.varasto IN ({$varow['tunnukset']})";
             break;
           }
           else {
@@ -2278,7 +2271,6 @@ if ($tee == 'Z') {
                 lasku2.laskunro lasku2laskunro,
                 concat_ws(' / ', round(tilausrivi.hinta, $yhtiorow[hintapyoristys]), $ale_query_concat_lisa round(tilausrivi.rivihinta, $yhtiorow[hintapyoristys])) tilalehinta
                 FROM tapahtuma use index (yhtio_tuote_laadittu)
-                {$toimipaikkarajaus}
                 LEFT JOIN tilausrivi use index (primary) ON (tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = ABS(tapahtuma.rivitunnus))
                 LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
                 LEFT JOIN lasku use index (primary) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
@@ -2286,6 +2278,7 @@ if ($tee == 'Z') {
                 LEFT JOIN kuka ON (kuka.yhtio = tapahtuma.yhtio AND kuka.kuka = tapahtuma.laatija)
                 WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
                 and tapahtuma.tuoteno = '$tuoteno'
+                {$toimipaikkarajaus}
                 $ehto
                 ORDER BY tapahtuma.laadittu desc, tapahtuma.tunnus desc
                 $maara";

@@ -476,7 +476,6 @@ else {
     $loppusumma_valuutassa = 0;
 
     foreach ($kateismaksu as $tili => $arvo) {
-
       $arvo = str_replace(",",".",$arvo);
 
       if ((float) $arvo != 0) {
@@ -514,7 +513,7 @@ else {
         $loppusumma_valuutassa += $arvo_valuutassa;
 
         // P‰ivitet‰‰n laskulle
-        if ($tili == "laskulle") {
+        if ($tili == "laskulle" and $yhtiorow['sallitaanko_kateismyynti_laskulle'] != '') {
           $query = "UPDATE lasku
                     SET saldo_maksettu = (summa - $arvo),
                     saldo_maksettu_valuutassa = (summa_valuutassa  - $arvo_valuutassa),

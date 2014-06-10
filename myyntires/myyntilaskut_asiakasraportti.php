@@ -10,11 +10,11 @@ if (isset($_POST['tiliote']) and $_POST['tiliote'] == '1') {
 // DataTables päälle
 $pupe_DataTables = "astilmyrerap";
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if ((isset($tiliote) and $tiliote == '1') or (!empty($tee) and $tee == 'TULOSTA_EMAIL' and !empty($asiakasid))) {
 
-  require('paperitiliote.php');
+  require 'paperitiliote.php';
 
   if (!empty($tee) and $tee == 'TULOSTA_EMAIL') {
 
@@ -55,18 +55,18 @@ if ((isset($tiliote) and $tiliote == '1') or (!empty($tee) and $tee == 'TULOSTA_
 
 if (!empty($tee) and $tee == 'TULOSTA_EMAIL_LASKUT' and !empty($laskunrot)) {
 
-  if (@include_once("tilauskasittely/tulosta_lasku.inc"));
-  elseif (@include_once("tulosta_lasku.inc"));
+  if (@include_once "tilauskasittely/tulosta_lasku.inc");
+  elseif (@include_once "tulosta_lasku.inc");
   else exit;
 
-  foreach(explode(",", $laskunrot) as $laskunro) {
+  foreach (explode(",", $laskunrot) as $laskunro) {
     tulosta_lasku("LASKU:{$laskunro}", $kieli, $tee, 'LASKU', "asiakasemail{$asiakasemail}", "", "");
   }
 
   echo "<font class='info'>";
 
-  if (strpos($laskunrot, ",") !== FALSE) echo t("Laskut lähetettiin osoitteeseen"),": {$asiakasemail}";
-  else echo t("Lasku lähetettiin osoitteeseen"),": {$asiakasemail}";
+  if (strpos($laskunrot, ",") !== FALSE) echo t("Laskut lähetettiin osoitteeseen"), ": {$asiakasemail}";
+  else echo t("Lasku lähetettiin osoitteeseen"), ": {$asiakasemail}";
 
   echo "</font><br /><br />";
 
@@ -134,7 +134,7 @@ if ($tee == "") {
   if ($ytunnus != '' and (int) $asiakasid == 0) {
     $tila = "tee_raportti";
 
-    require ("inc/asiakashaku.inc");
+    require "inc/asiakashaku.inc";
 
     if ($ytunnus == "") {
       $tila = "";
@@ -150,16 +150,16 @@ if ($tee == "") {
           var val = $('#valintra').val();
 
           if (val == 'eraantyneet') {
-            $('#infoteksti').html('",t("Erääntyneet laskut"),"');
+            $('#infoteksti').html('", t("Erääntyneet laskut"), "');
           }
           else if (val == 'maksetut') {
-            $('#infoteksti').html('",t("Maksetut laskut"),"');
+            $('#infoteksti').html('", t("Maksetut laskut"), "');
           }
           else if (val == 'kaikki') {
-            $('#infoteksti').html('",t("Kaikki laskut"),"');
+            $('#infoteksti').html('", t("Kaikki laskut"), "');
           }
           else {
-            $('#infoteksti').html('",t("Avoimet laskut"),"');
+            $('#infoteksti').html('", t("Avoimet laskut"), "');
           }
 
           $('#valintra').on('change', function() {
@@ -233,7 +233,7 @@ if ($tee == "") {
       js_openFormInNewWindow();
 
       $asiakasid   = $asiakasrow['tunnus'];
-        $ytunnus   = $asiakasrow['ytunnus'];
+      $ytunnus   = $asiakasrow['ytunnus'];
 
       if ($alatila == "T") {
         $tunnukset   = $asiakasid;
@@ -303,7 +303,7 @@ if ($tee == "") {
         $riveja = 1;
         if (mysql_num_rows($kaatoresult) != 0) {
           $kaato = mysql_fetch_array($kaatoresult);
-          mysql_data_seek($kaatoresult,0);
+          mysql_data_seek($kaatoresult, 0);
 
           if (strtoupper($yhtiorow['valkoodi']) != strtoupper($kaato['valkoodi'])) {
             $riveja = 2;
@@ -342,7 +342,7 @@ if ($tee == "") {
         $riveja = 1;
         if (mysql_num_rows($result) != 0) {
           $kok = mysql_fetch_array($result);
-          mysql_data_seek($result,0);
+          mysql_data_seek($result, 0);
           if (strtoupper($yhtiorow['valkoodi']) != strtoupper($kok['valkoodi'])) {
             $riveja = 2;
           }
@@ -374,7 +374,7 @@ if ($tee == "") {
         }
       }
 
-      if (mysql_num_rows($result) > 0) mysql_data_seek($result,0);
+      if (mysql_num_rows($result) > 0) mysql_data_seek($result, 0);
 
       echo "
         <tr>
@@ -412,7 +412,7 @@ if ($tee == "") {
 
       if ($asiakasrow['email'] != '') {
         echo "<tr>";
-        echo "<th>",t("Sähköpostiosoite"),"</th>";
+        echo "<th>", t("Sähköpostiosoite"), "</th>";
         echo "<td colspan='2'>{$asiakasrow['email']}</td>";
         echo "</tr>";
       }
@@ -439,7 +439,7 @@ if ($tee == "") {
       if (!isset($pp)) $pp = date("j");
 
       echo "<table>";
-      echo "<tr><th>",t("Tiliote päivälle"),"</th>
+      echo "<tr><th>", t("Tiliote päivälle"), "</th>
           <td>
           <form id='tulosta_tiliote' name='tulosta_tiliote' method='post'>
           <input type='hidden' name = 'tee' value = 'NAYTATILAUS'>
@@ -452,7 +452,7 @@ if ($tee == "") {
           <input type = 'text' name = 'vv' id = 'vv' value='{$vv}' size=5 class='date'>
           </td>
           <td class='back'>
-          <input type='submit' value='",t("Tulosta tiliote"),"' onClick=\"js_openFormInNewWindow('tulosta_tiliote', ''); return false;\">
+          <input type='submit' value='", t("Tulosta tiliote"), "' onClick=\"js_openFormInNewWindow('tulosta_tiliote', ''); return false;\">
           </form>
           </td>";
 
@@ -466,7 +466,7 @@ if ($tee == "") {
             <input type='hidden' name = 'pp' id='pp_hidden' value='{$pp}' size=2>
             <input type='hidden' name = 'kk' id='kk_hidden' value='{$kk}' size=2>
             <input type='hidden' name = 'vv' id='vv_hidden' value='{$vv}' size=4>
-            <input type='submit' value='",t("Lähetä tiliote asiakkaan sähköpostiin"),": {$asiakasrow['email']}' />
+            <input type='submit' value='", t("Lähetä tiliote asiakkaan sähköpostiin"), ": {$asiakasrow['email']}' />
             </form>
           </td>";
       }
@@ -691,8 +691,8 @@ if ($tee == "") {
         echo "<tbody>";
 
         $totaali = array();
-                $avoimet = array();
-         $korkoja = 0;
+        $avoimet = array();
+        $korkoja = 0;
 
         // haetaan kaikki yrityksen rahatilit mysql muodossa
         $query  = "SELECT concat(group_concat(distinct concat('\'',oletus_rahatili) SEPARATOR '\', '),'\'') rahatilit
@@ -749,7 +749,7 @@ if ($tee == "") {
             echo "</td>";
           }
           else {
-             echo "<td></td>";
+            echo "<td></td>";
           }
 
           if ($maksurow["mapvm"] != '0000-00-00') echo "<td align='right'>".pupe_DataTablesEchoSort($maksurow['mapvm']).tv1dateconv($maksurow["mapvm"])."</td>";
@@ -770,34 +770,25 @@ if ($tee == "") {
 
             // KASSALIPAS-BLOKKI
             $tilinolisa = '';
-            $kassa_arska = $pankkikortti_arska = $luottokortti_arska = array();
-            
+
             // Etsitään kassalippaan tilinumerot
-            $query = "SELECT kassa,pankkikortti,luottokortti
+            $query = "SELECT kassa, pankkikortti, luottokortti
                       FROM kassalipas
-                      WHERE yhtio= '{$kukarow['yhtio']}'
-                      AND tunnus = '{$maksurow['kassalipas']}'";
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tunnus  = '{$maksurow['kassalipas']}'";
             $keijo = pupe_query($query);
+            $ressukka = mysql_fetch_assoc($keijo);
 
-            while ($ressukka = mysql_fetch_assoc($keijo)) {
-              $kassa_arska[] = $ressukka['kassa'];
-              $pankkikortti_arska[] = $ressukka['pankkikortti'];
-              $luottokortti_arska[] =  $ressukka['luottokortti'];
-            }
-
-            $dipoli = array_merge($kassa_arska, $pankkikortti_arska, $luottokortti_arska);
-            // wrapataan tilinumerot vielä hipsuilla jos sattuu olemaan ei-numeerisia
-            foreach ($dipoli as &$dip) {
-              $dip = "'".$dip."'";
-            }
-            if (count($dipoli) > 0) $tilinolisa = ",".implode(",", $dipoli);
+            if (!empty($ressukka['kassa']))        $tilinolisa .= ",'{$ressukka['kassa']}'";
+            if (!empty($ressukka['pankkikortti'])) $tilinolisa .= ",'{$ressukka['pankkikortti']}'";
+            if (!empty($ressukka['luottokortti'])) $tilinolisa .= ",'{$ressukka['luottokortti']}'";
 
             $query = "SELECT *
                       FROM tiliointi USE INDEX (tositerivit_index)
                       WHERE yhtio = '{$kukarow['yhtio']}'
-                        AND ltunnus = '{$maksurow['tunnus']}'
-                        AND tilino IN ({$ratiro['rahatilit']}{$tilinolisa})
-                        AND korjattu = ''";
+                      AND ltunnus = '{$maksurow['tunnus']}'
+                      AND tilino IN ({$ratiro['rahatilit']}{$tilinolisa})
+                      AND korjattu = ''";
             $lasktilitre = pupe_query($query);
 
             // listataan osasuoritukset jos maksupäivä on nollaa tai jos niitä on oli yks
@@ -805,9 +796,9 @@ if ($tee == "") {
 
               while ($lasktilitro = mysql_fetch_array($lasktilitre)) {
 
-                if (in_array($lasktilitro['tilino'], $kassa_arska)) echo t("Käteisellä").": ";
-                elseif (in_array($lasktilitro['tilino'], $pankkikortti_arska)) echo t("Pankkikortilla").": ";
-                elseif (in_array($lasktilitro['tilino'], $luottokortti_arska)) echo t("Luottokortilla").": ";
+                if ($lasktilitro['tilino'] == $ressukka['kassa']) echo t("Käteisellä").": ";
+                elseif ($lasktilitro['tilino'] == $ressukka['pankkikortti']) echo t("Pankkikortilla").": ";
+                elseif ($lasktilitro['tilino'] == $ressukka['luottokortti']) echo t("Luottokortilla").": ";
 
                 if ($lasktilitro["summa_valuutassa"] != 0 and $lasktilitro["valkoodi"] != $yhtiorow["valkoodi"] and $lasktilitro["valkoodi"] != "") {
                   echo "$lasktilitro[summa_valuutassa] $lasktilitro[valkoodi] ($lasktilitro[summa] $yhtiorow[valkoodi]) ", tv1dateconv($lasktilitro["tapvm"]), "<br>";
@@ -816,7 +807,6 @@ if ($tee == "") {
                   echo "$lasktilitro[summa] $yhtiorow[valkoodi] ", tv1dateconv($lasktilitro["tapvm"]), "<br>";
                 }
               }
-
             }
           }
           echo "</td>";
@@ -876,8 +866,8 @@ if ($tee == "") {
         echo "<br><table>";
 
         if ($asiakasrow['email'] != '') {
-          echo "<tr><th style='width:200px;'>",t("Laskukopiot"),"</th>
-              <td><input class='laskunro_checkall' type='checkbox' /> ".t("Valitse kaikki listatut laskut"),"</td>
+          echo "<tr><th style='width:200px;'>", t("Laskukopiot"), "</th>
+              <td><input class='laskunro_checkall' type='checkbox' /> ".t("Valitse kaikki listatut laskut"), "</td>
               <td>
               <form id='tulosta_lasku_email' name='tulosta_lasku_email' method='post'>
               <input type='hidden' name = 'tee' value = 'TULOSTA_EMAIL_LASKUT'>
@@ -886,13 +876,13 @@ if ($tee == "") {
               <input type='hidden' name = 'asiakasid' value='{$asiakasrow['tunnus']}' />
               <input type='hidden' name = 'ytunnus' value='{$ytunnus}' />
               <input type='hidden' name = 'valintra' value='{$valintra}' />
-              <input type='submit' id='laskunrot_submit' value='",t("Lähetä laskukopiot valituista laskuista asiakkaan sähköpostiin"),": {$asiakasrow['email']}' />
+              <input type='submit' id='laskunrot_submit' value='", t("Lähetä laskukopiot valituista laskuista asiakkaan sähköpostiin"), ": {$asiakasrow['email']}' />
               </form>
               </td>
               </tr>";
         }
 
-        echo "<tr><th style='width:200px;'>",t("Laskuraportti"),"<br>(<span id='infoteksti'></span>)</th>
+        echo "<tr><th style='width:200px;'>", t("Laskuraportti"), "<br>(<span id='infoteksti'></span>)</th>
             <td>
               <form id='tulosta_myra' name='tulosta_myra' method='post'>
               <input type='hidden' name = 'tee' value = 'NAYTATILAUS'>
@@ -904,7 +894,7 @@ if ($tee == "") {
               <input type='hidden' name = 'alkupvm' value='{$alkupvm}' />
               <input type='hidden' name = 'loppupvm' value='{$loppupvm}' />
               <input type='hidden' name = 'laskuraportti' value='1' />
-              <input type='submit' value='",t("Tulosta"),"' onClick=\"js_openFormInNewWindow('tulosta_myra', ''); return false;\">
+              <input type='submit' value='", t("Tulosta"), "' onClick=\"js_openFormInNewWindow('tulosta_myra', ''); return false;\">
             </form>
             </td>";
 
@@ -918,7 +908,7 @@ if ($tee == "") {
             <input type='hidden' name = 'kk' id='kk_hidden' value='{$kk}' size=2>
             <input type='hidden' name = 'vv' id='vv_hidden' value='{$vv}' size=4>
             <input type='hidden' name = 'valintra' value='{$valintra}' />
-            <input type='submit' value='",t("Lähetä asiakkaan sähköpostiin"),": {$asiakasrow['email']}' />
+            <input type='submit' value='", t("Lähetä asiakkaan sähköpostiin"), ": {$asiakasrow['email']}' />
             </form>
             </td>";
         }
@@ -942,22 +932,22 @@ if ($tee == "") {
     echo "<br><form name='{$formi}' method='GET'>";
     echo "<input type='hidden' name='alatila' value='etsi'>";
     echo "<table>";
-    echo "<tr><th>",t("Asiakas"),":</th>";
-    echo "<td><input type='text' name='ytunnus'> ",asiakashakuohje(),"</td>";
+    echo "<tr><th>", t("Asiakas"), ":</th>";
+    echo "<td><input type='text' name='ytunnus'> ", asiakashakuohje(), "</td>";
     echo "<td class='back'></td></tr>";
 
     $sel = (!empty($alatila) and $alatila == 'T') ? "selected" : "";
 
-    echo "<tr><th>",t("Asiakasraportin rajaus"),":</th>";
+    echo "<tr><th>", t("Asiakasraportin rajaus"), ":</th>";
     echo "<td><select name='alatila'>
-      <option value='Y'>",t("Ytunnuksella"),"</option>
-      <option value='T' {$sel}>",t("Asiakkaalla"),"</option>
+      <option value='Y'>", t("Ytunnuksella"), "</option>
+      <option value='T' {$sel}>", t("Asiakkaalla"), "</option>
       </select></td>";
-    echo "<td class='back'><input type='submit' value='",t("Etsi"),"'></td></tr>";
+    echo "<td class='back'><input type='submit' value='", t("Etsi"), "'></td></tr>";
 
     echo "</table>";
     echo "</form>";
   }
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

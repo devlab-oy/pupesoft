@@ -818,9 +818,8 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       $query  = "SELECT sarjanumeroseuranta.tunnus, sarjanumeroseuranta.era_kpl
                  FROM sarjanumeroseuranta
                  JOIN varastopaikat ON (varastopaikat.yhtio = sarjanumeroseuranta.yhtio
-                   and concat(rpad(upper(alkuhyllyalue),  5, '0'), lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(sarjanumeroseuranta.hyllyalue), 5, '0'), lpad(upper(sarjanumeroseuranta.hyllynro), 5, '0'))
-                   and concat(rpad(upper(loppuhyllyalue), 5, '0'), lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(sarjanumeroseuranta.hyllyalue), 5, '0'), lpad(upper(sarjanumeroseuranta.hyllynro), 5, '0'))
-                   and varastopaikat.tunnus in ($mistavarastosta))
+                   AND varastopaikat.tunnus = sarjanumeroseuranta.varasto
+                   AND varastopaikat.tunnus in ($mistavarastosta))
                  JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON (tilausrivi_osto.yhtio = sarjanumeroseuranta.yhtio
                    AND tilausrivi_osto.tunnus              = sarjanumeroseuranta.ostorivitunnus
                    AND tilausrivi_osto.laskutettuaika     != '0000-00-00')
@@ -1282,9 +1281,8 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
         $query  = "SELECT sarjanumeroseuranta.tunnus, sarjanumeroseuranta.era_kpl era_kpl, tilausrivi_osto.nimitys, sarjanumeroseuranta.sarjanumero
                    FROM sarjanumeroseuranta
                    JOIN varastopaikat ON (varastopaikat.yhtio = sarjanumeroseuranta.yhtio
-                               and concat(rpad(upper(alkuhyllyalue),  5, '0'), lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(sarjanumeroseuranta.hyllyalue), 5, '0'), lpad(upper(sarjanumeroseuranta.hyllynro), 5, '0'))
-                               and concat(rpad(upper(loppuhyllyalue), 5, '0'), lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(sarjanumeroseuranta.hyllyalue), 5, '0'), lpad(upper(sarjanumeroseuranta.hyllynro), 5, '0'))
-                               and varastopaikat.tunnus in ($mistavarastosta))
+                     AND varastopaikat.tunnus = sarjanumeroseuranta.varasto
+                     AND varastopaikat.tunnus in ($mistavarastosta))
                    LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON (tilausrivi_myynti.yhtio = sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus = sarjanumeroseuranta.myyntirivitunnus)
                    LEFT JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON (tilausrivi_osto.yhtio = sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus = sarjanumeroseuranta.ostorivitunnus)
                    WHERE sarjanumeroseuranta.yhtio           = '$kukarow[yhtio]'

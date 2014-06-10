@@ -334,9 +334,8 @@ function hae_tuotteet() {
              LEFT JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON tilausrivi_osto.yhtio = sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus = sarjanumeroseuranta.ostorivitunnus
              LEFT JOIN lasku lasku_myynti use index (PRIMARY) ON lasku_myynti.yhtio = sarjanumeroseuranta.yhtio and lasku_myynti.tunnus = tilausrivi_myynti.otunnus
              LEFT JOIN lasku lasku_osto use index (PRIMARY) ON lasku_osto.yhtio = sarjanumeroseuranta.yhtio and lasku_osto.tunnus = tilausrivi_osto.otunnus
-             LEFT JOIN varastopaikat ON sarjanumeroseuranta.yhtio = varastopaikat.yhtio
-             AND concat(rpad(upper(varastopaikat.alkuhyllyalue)  ,5,'0'),lpad(upper(varastopaikat.alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(sarjanumeroseuranta.hyllyalue) ,5,'0'),lpad(upper(sarjanumeroseuranta.hyllynro) ,5,'0'))
-             AND concat(rpad(upper(varastopaikat.loppuhyllyalue) ,5,'0'),lpad(upper(varastopaikat.loppuhyllynro) ,5,'0')) >= concat(rpad(upper(sarjanumeroseuranta.hyllyalue) ,5,'0'),lpad(upper(sarjanumeroseuranta.hyllynro) ,5,'0'))
+             LEFT JOIN varastopaikat ON (sarjanumeroseuranta.yhtio = varastopaikat.yhtio
+               AND varastopaikat.tunnus = sarjanumeroseuranta.varasto)
              WHERE sarjanumeroseuranta.yhtio           = '$kukarow[yhtio]'
              AND sarjanumeroseuranta.myyntirivitunnus != -1
              AND (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')

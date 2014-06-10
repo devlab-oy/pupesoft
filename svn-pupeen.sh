@@ -20,6 +20,7 @@ fi
 
 pupedir=$(dirname ${0})
 salasanat=${pupedir}/inc/salasanat.php
+jatketaan=
 
 if [[ ! -f ${salasanat} ]]; then
   echo "${red}Salasanat.php ei löytynyt!${normal}"
@@ -47,22 +48,52 @@ else
   dbport="3306"
 fi
 
+# Loopataan kaikki argumentit, jos ollaan yliajettu joku
+while [[ "$1" != "" ]]; do
+
+  case $1 in
+    -h | --host )
+      shift
+      dbhost=$1
+      ;;
+    -P | --port )
+      shift
+      dbport=$1
+      ;;
+    -u | --user )
+      shift
+      dbuser=$1
+      ;;
+    -p | --password )
+      shift
+      dbpass=$1
+      ;;
+    -d | --database )
+      shift
+      dbname=$1
+      ;;
+    autopupe )
+      jatketaan="autopupe"
+      ;;
+    auto )
+      jatketaan="auto"
+      ;;
+  esac
+
+  shift
+done
+
 # Testataan tietokantayhteys
 mysql_komento="mysql --host=${dbhost} --user=${dbuser} --password=${dbpass} --database=${dbname} --port=${dbport} --verbose"
 ${mysql_komento} --execute="use ${dbname}" &> /dev/null
 
 if [[ $? -ne 0 ]]; then
-  echo "${red}Tietokantayhteys ei onnistu! Tarkista salasanat.php!${normal}"
+  echo "${red}Tietokantayhteys ei onnistu! Tarkista salasanat!${normal}"
   echo
   exit
 fi
 
 echo "Haetaan tietokantamuutokset.."
-
-# Katsotaan, onko parami syötetty
-if [[ ! -z ${1} ]]; then
-  jatketaan=${1}
-fi
 
 # Tutkitaan tietokantarakenne...
 mysqlkuvaus_file="/tmp/_mysqlkuvaus.tmp"
@@ -78,12 +109,10 @@ else
   cat ${mysqlkuvaus_file}
   echo
 
-  if [[ ! -z "${jatketaan}" && ("${jatketaan}" = "auto" || "${jatketaan}" = "autopupe") ]]; then
-    if [[ "${jatketaan}" = "autopupe" ]]; then
-      jatketaanko="e"
-    else
-      jatketaanko="k"
-    fi
+  if [[ "${jatketaan}" = "autopupe" ]]; then
+    jatketaanko="e"
+  elif [[ "${jatketaan}" = "auto" ]]; then
+    jatketaanko="k"
   else
     echo
     echo -n "${white}Tehdäänkö tietokantamuutokset (k/e)? ${normal}"
@@ -105,7 +134,7 @@ fi
 
 rm -f ${mysqlkuvaus_file}
 
-if [[ ! -z "${jatketaan}" && ("${jatketaan}" = "auto" || "${jatketaan}" = "autopupe") ]]; then
+if [[ "${jatketaan}" = "auto" || "${jatketaan}" = "autopupe" ]]; then
   jatketaanko="k"
   echo
 else

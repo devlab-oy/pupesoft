@@ -785,11 +785,6 @@ if ($tee == "") {
               $luottokortti_arska[] =  $ressukka['luottokortti'];
             }
 
-            //siivous
-            $kassa_arska = array_unique($kassa_arska);
-            $pankkikortti_arska = array_unique($pankkikortti_arska);
-            $luottokortti_arska = array_unique($luottokortti_arska);
-
             $dipoli = array_merge($kassa_arska, $pankkikortti_arska, $luottokortti_arska);
             // wrapataan tilinumerot vielä hipsuilla jos sattuu olemaan ei-numeerisia
             foreach ($dipoli as &$dip) {

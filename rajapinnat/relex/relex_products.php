@@ -2,7 +2,7 @@
 
 /*
  * Siirret‰‰n tuotemasterdata Relexiin
- * 4.2 PRODUCT MASTER DATA FILE
+ * 4.2 PRODUCT MASTER DATA
 */
 
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
@@ -39,7 +39,7 @@ if (!$fp = fopen($filepath, 'w+')) {
 $header = "code;name;supplier;group;order_quantity;purchase_price\n";
 fwrite($fp, $header);
 
-// Haetaan tuotteiden saldot per varasto
+// Haetaan tuotteet
 $query = "SELECT
           tuote.tuoteno,
           tuote.nimitys,
@@ -68,10 +68,9 @@ while ($row = mysql_fetch_assoc($res)) {
   $tulossa_query = "SELECT tuotteen_toimittajat.liitostunnus,
                     tuotteen_toimittajat.toim_tuoteno,
                     tuotteen_toimittajat.osto_era,
-                    tuotteen_toimittajat.pakkauskoko,
-                    tuotteen_toimittajat.tuotteen_toimittajat
+                    tuotteen_toimittajat.pakkauskoko
                     FROM tuotteen_toimittajat
-                    WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
+                    WHERE tuotteen_toimittajat.yhtio = '{$yhtio}'
                     AND tuotteen_toimittajat.tuoteno = '{$row['tuoteno']}'
                     ORDER BY if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys)
                     LIMIT 1";

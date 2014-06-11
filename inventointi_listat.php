@@ -3,6 +3,15 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
+if (isset($_POST["tee"])) {
+  if($_POST["tee"] == 'lataa_tiedosto') {
+    $lataa_tiedosto=1;
+  }
+  if($_POST["kaunisnimi"] != '') {
+    $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  }
+}
+
 require ("inc/parametrit.inc");
 
 if (strtolower($toim) == 'oletusvarasto') {
@@ -18,6 +27,11 @@ if (strtolower($toim) == 'oletusvarasto') {
 }
 else {
   $oletusvarasto_chk = 0;
+}
+
+if (isset($tee) and $tee == "lataa_tiedosto") {
+  readfile("/tmp/".$tmpfilenimi);
+  exit;
 }
 
 echo "<font class='head'>",t("Tulosta inventointilista"),"</font><hr>";
@@ -558,15 +572,19 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
     $sorttauskentan_jarjestys .= ')';
   }
 
-  //hakulause, t‰m‰ on sama kaikilla vaihtoehdolilla ja gorup by lause joka on sama kaikilla
+  //hakulause, t‰m‰ on sama kaikilla vaihtoehdolilla ja group by lause joka on sama kaikilla
   $select  = " tuote.tuoteno, tuote.nimitys, tuote.sarjanumeroseuranta, group_concat(distinct tuotteen_toimittajat.toim_tuoteno) toim_tuoteno, tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka, inventointiaika, tuotepaikat.saldo,
   $sorttauskentan_jarjestys sorttauskentta";
   $groupby = " tuote.tuoteno, tuote.nimitys, tuote.sarjanumeroseuranta, tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, varastopaikka, inventointiaika, tuotepaikat.saldo ";
 
   $joinlisa = "";
 
-  # Resrvipaikka ja ker‰ysvyˆhyke rajaus vain jos ker‰yser‰t parametri on asetettu.
-  if (($yhtiorow["varastopaikkojen_maarittely"] != '' and isset($reservipaikka)) or (isset($keraysvyohyke) and $yhtiorow["kerayserat"] == 'K')) {
+  # Reservipaikka ja ker‰ysvyˆhyke rajaus vain jos ker‰yser‰t parametri on asetettu.
+  $ehto = ($yhtiorow["varastopaikkojen_maarittely"] != '');
+  $sub_ehto1 = (isset($reservipaikka) and $yhtiorow["kerayserat"] == 'K');
+  $sub_ehto2 = (isset($keraysvyohyke) and $yhtiorow["kerayserat"] == 'K');
+
+  if ($ehto and ($sub_ehto1 or $sub_ehto2)) {
     $ressulisa = $reservipaikka != '' ? "varaston_hyllypaikat.reservipaikka = '".mysql_real_escape_string($reservipaikka)."' AND " : "";
     $vyohykelisa = $keraysvyohyke != '' ? "varaston_hyllypaikat.keraysvyohyke = '".mysql_real_escape_string($keraysvyohyke)."' AND " : "";
 
@@ -903,7 +921,17 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
     $listanro = $lrow["listanro"]+1;
     $listaaika = date("Y-m-d H:i:s");
 
+    $excelrivit = array();
+    $excelheaderit = array("paikka", "tuoteno");
+
     $ots  = t("Inventointilista")." $kutsu\t".t("Sivu")." <SIVUNUMERO>\n".t("Listanumero").": $listanro\t\t$yhtiorow[nimi]\t\t$pp.$kk.$vv - $kello\n\n";
+
+    $excel_info  = t("Inventointilista")."\n";
+    $excel_info .= trim($kutsu)."\n";
+    $excel_info .= t("Listanumero").": ".$listanro ."\n";
+    $excel_info .= $yhtiorow['nimi']."\n";
+    $excel_info .= "$pp.$kk.$vv - $kello";
+
     $ots .= sprintf ('%-18.14s',   t("Paikka"));
     $ots .= sprintf ('%-21.21s',   t("Tuoteno"));
 
@@ -911,21 +939,32 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
     if ($piilotaToim_tuoteno == "") {
       $ots .= sprintf ('%-21.21s',   t("Toim.Tuoteno"));
       $ots .= sprintf ('%-40.38s',   t("Nimitys"));
+
+      $excelheaderit[] = "toim.tuoteno";
+      $excelheaderit[] = "nimitys";
     }
     else {
       $ots .= sprintf ('%-60.58s',   t("Nimitys"));
+
+      $excelheaderit[] = "nimitys";
     }
 
     if ($naytasaldo == 'H') {
       $rivinleveys += 10;
       $ots .= sprintf ('%-10.10s',t("Hyllyss‰"));
       $katkoviiva = '__________';
+
+      $excelheaderit[] = "hyllyss‰";
     }
     elseif ($naytasaldo == 'S') {
       $rivinleveys += 10;
       $ots .= sprintf ('%-10.10s',t("Saldo"));
       $katkoviiva = '__________';
+
+      $excelheaderit[] = "saldo";
     }
+
+    array_push($excelheaderit, "m‰‰r‰", "yksikkˆ", "tilkpl", "varattu/ker");
 
     $ots .= sprintf ('%-7.7s',    t("M‰‰r‰"));
     $ots .= sprintf ('%-9.9s',     t("Yksikkˆ"));
@@ -1022,37 +1061,51 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
       if ($rivit > 1) $prn .= "\n";
 
       $prn .= sprintf ('%-18.14s',   $tuoterow["varastopaikka"]);
+      $excelrivit[$rivit]['varastopaikka'] =  $tuoterow["varastopaikka"];
+
       $prn .= sprintf ('%-21.21s',   $tuoterow["tuoteno"]);
+      $excelrivit[$rivit]['tuoteno'] =  $tuoterow["tuoteno"];
 
       // Jos valittu toim_tuoteno piilotus ei sit‰ piirret‰ (s‰‰stet‰‰n tilaa)
       if ($piilotaToim_tuoteno == "") {
         $prn .= sprintf ('%-21.21s',   $tuoterow["toim_tuoteno"]);
+        $excelrivit[$rivit]['toim_tuoteno'] =  $tuoterow["toim_tuoteno"];
+
         $prn .= sprintf ('%-40.38s',   t_tuotteen_avainsanat($tuoterow, 'nimitys'));
+        $excelrivit[$rivit]['nimitys'] =  t_tuotteen_avainsanat($tuoterow, 'nimitys');
       }
       else {
         // Jos toim_tuoteno ei nn‰ytet‰, t‰m‰ voi olla pidempi
         $prn .= sprintf ('%-60.58s',   t_tuotteen_avainsanat($tuoterow, 'nimitys'));
+        $excelrivit[$rivit]['nimitys'] =  t_tuotteen_avainsanat($tuoterow, 'nimitys');
       }
 
       if ($naytasaldo == 'H') {
         if ($rivipaikkahyllyssa != $rivivarastohyllyssa) {
           $prn .= sprintf ('%-10.10s', $rivipaikkahyllyssa."(".$rivivarastohyllyssa.")");
+          $excelrivit[$rivit]['hyllyss‰'] =  $rivipaikkahyllyssa."(".$rivivarastohyllyssa.")";
         }
         else {
           $prn .= sprintf ('%-10.10s', $rivipaikkahyllyssa);
+          $excelrivit[$rivit]['hyllyss‰'] =  $rivipaikkahyllyssa;
         }
       }
       elseif ($naytasaldo == 'S') {
         if ($rivipaikkasaldo != $rivivarastosaldo) {
           $prn .= sprintf ('%-10.10s', $rivipaikkasaldo."(".$rivivarastosaldo.")");
+          $excelrivit[$rivit]['saldo'] =  $rivipaikkasaldo."(".$rivivarastosaldo.")";
         }
         else {
           $prn .= sprintf ('%-10.10s', $rivipaikkasaldo);
+          $excelrivit[$rivit]['saldo'] =  $rivipaikkasaldo;
         }
       }
 
       $prn .= sprintf ('%-7.7s',   "_____");
+      $excelrivit[$rivit]['m‰‰r‰'] = ' ';
+
       $prn .= sprintf ('%-9.9s',   t_avainsana("Y", "", "and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite"));
+      $excelrivit[$rivit]['yksikkˆ'] = t_avainsana("Y", "", "and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite");
 
 
       //katsotaan onko tuotetta tilauksessa
@@ -1066,6 +1119,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
       $prow    = mysql_fetch_assoc($result1);
 
       $prn .= sprintf ('%-7.7d',   $prow["varattu"]);
+      $excelrivit[$rivit]['tilkpl'] = $prow["varattu"];
 
       //Haetaan ker‰tty m‰‰r‰
       $query = "SELECT ifnull(sum(if(keratty!='',tilausrivi.varattu,0)),0) keratty,  ifnull(sum(tilausrivi.varattu),0) ennpois
@@ -1086,6 +1140,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
       $hylrow['keratty'] = fmod($hylrow['keratty'], 1) == 0 ? round($hylrow['keratty']) : $hylrow['keratty'];
 
       $prn .= sprintf ('%-13.13s', "{$hylrow['ennpois']}/{$hylrow['keratty']}");
+      $excelrivit[$rivit]['varattu/ker'] = "{$hylrow['ennpois']}/{$hylrow['keratty']}";
 
       if ($tuoterow["sarjanumeroseuranta"] != "") {
         $query = "SELECT sarjanumeroseuranta.sarjanumero,
@@ -1165,7 +1220,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
 
     fclose($fh);
 
-    //k‰‰nnet‰‰n kaunniksi
+    //k‰‰nnet‰‰n kauniiksi
 
     if ($debug == '1') {
       echo "filenimi = {$filenimi}<br>";
@@ -1181,6 +1236,51 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
         $kutsu = t("Inventointilista")."_$listanro";
 
         require("inc/sahkoposti.inc");
+      }
+      elseif ($komento["Inventointi"] == 'excel') {
+
+        include('inc/pupeExcel.inc');
+
+        $worksheet    = new pupeExcel();
+        $excelrivi    = 0;
+        $excelsarake = 0;
+
+        $worksheet->writeString($excelrivi++, $excelsarake++, $excel_info, array("bold" => TRUE));
+
+        $excelrivi++;
+        $excelsarake = 0;
+
+        foreach ($excelheaderit as  $value) {
+          $worksheet->writeString($excelrivi, $excelsarake++, $value, array("bold" => TRUE));
+        }
+
+        $excelrivi++;
+        $excelsarake = 0;
+
+        foreach ($excelrivit as $key => $value) {
+          foreach ($excelrivit[$key] as $value) {
+            $worksheet->writeString($excelrivi, $excelsarake++, $value);
+          }
+          $excelrivi++;
+          $excelsarake = 0;
+        }
+
+        $excelnimi = $worksheet->close();
+
+        $lopullinen_nimi = $kutsu = t("Inventointilista") . "_" . $listanro . ".xlsx";
+
+        echo "<table>";
+        echo "<tr><th>".t("Tallenna Excel-tiedosto").":</th>";
+        echo "<form method='post' class='multisubmit'>";
+        echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+        echo "<input type='hidden' name='kaunisnimi' value='$lopullinen_nimi'>";
+        echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+        echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+        echo "</table><br>";
+
+        require ("inc/footer.inc");
+        die;
+
       }
       elseif ($komento["Inventointi"] != '') {
         // itse print komento...

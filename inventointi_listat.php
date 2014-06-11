@@ -975,7 +975,8 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
     fwrite($fh, str_replace("<SIVUNUMERO>","1",$ots));
     $ots = chr(12).$ots;
 
-    $rivit = 1;
+    // oma rivilaskuri excelille kun siin‰ ei vaihdeta sivua
+    $xr = $rivit = 1;
     $sivulaskuri = 1;
 
     while ($tuoterow = mysql_fetch_assoc($saldoresult)) {
@@ -1061,51 +1062,51 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
       if ($rivit > 1) $prn .= "\n";
 
       $prn .= sprintf ('%-18.14s',   $tuoterow["varastopaikka"]);
-      $excelrivit[$rivit]['varastopaikka'] =  $tuoterow["varastopaikka"];
+      $excelrivit[$xr]['varastopaikka'] =  $tuoterow["varastopaikka"];
 
       $prn .= sprintf ('%-21.21s',   $tuoterow["tuoteno"]);
-      $excelrivit[$rivit]['tuoteno'] =  $tuoterow["tuoteno"];
+      $excelrivit[$xr]['tuoteno'] =  $tuoterow["tuoteno"];
 
       // Jos valittu toim_tuoteno piilotus ei sit‰ piirret‰ (s‰‰stet‰‰n tilaa)
       if ($piilotaToim_tuoteno == "") {
         $prn .= sprintf ('%-21.21s',   $tuoterow["toim_tuoteno"]);
-        $excelrivit[$rivit]['toim_tuoteno'] =  $tuoterow["toim_tuoteno"];
+        $excelrivit[$xr]['toim_tuoteno'] =  $tuoterow["toim_tuoteno"];
 
         $prn .= sprintf ('%-40.38s',   t_tuotteen_avainsanat($tuoterow, 'nimitys'));
-        $excelrivit[$rivit]['nimitys'] =  t_tuotteen_avainsanat($tuoterow, 'nimitys');
+        $excelrivit[$xr]['nimitys'] =  t_tuotteen_avainsanat($tuoterow, 'nimitys');
       }
       else {
         // Jos toim_tuoteno ei nn‰ytet‰, t‰m‰ voi olla pidempi
         $prn .= sprintf ('%-60.58s',   t_tuotteen_avainsanat($tuoterow, 'nimitys'));
-        $excelrivit[$rivit]['nimitys'] =  t_tuotteen_avainsanat($tuoterow, 'nimitys');
+        $excelrivit[$xr]['nimitys'] =  t_tuotteen_avainsanat($tuoterow, 'nimitys');
       }
 
       if ($naytasaldo == 'H') {
         if ($rivipaikkahyllyssa != $rivivarastohyllyssa) {
           $prn .= sprintf ('%-10.10s', $rivipaikkahyllyssa."(".$rivivarastohyllyssa.")");
-          $excelrivit[$rivit]['hyllyss‰'] =  $rivipaikkahyllyssa."(".$rivivarastohyllyssa.")";
+          $excelrivit[$xr]['hyllyss‰'] =  $rivipaikkahyllyssa."(".$rivivarastohyllyssa.")";
         }
         else {
           $prn .= sprintf ('%-10.10s', $rivipaikkahyllyssa);
-          $excelrivit[$rivit]['hyllyss‰'] =  $rivipaikkahyllyssa;
+          $excelrivit[$xr]['hyllyss‰'] =  $rivipaikkahyllyssa;
         }
       }
       elseif ($naytasaldo == 'S') {
         if ($rivipaikkasaldo != $rivivarastosaldo) {
           $prn .= sprintf ('%-10.10s', $rivipaikkasaldo."(".$rivivarastosaldo.")");
-          $excelrivit[$rivit]['saldo'] =  $rivipaikkasaldo."(".$rivivarastosaldo.")";
+          $excelrivit[$xr]['saldo'] =  $rivipaikkasaldo."(".$rivivarastosaldo.")";
         }
         else {
           $prn .= sprintf ('%-10.10s', $rivipaikkasaldo);
-          $excelrivit[$rivit]['saldo'] =  $rivipaikkasaldo;
+          $excelrivit[$xr]['saldo'] =  $rivipaikkasaldo;
         }
       }
 
       $prn .= sprintf ('%-7.7s',   "_____");
-      $excelrivit[$rivit]['m‰‰r‰'] = ' ';
+      $excelrivit[$xr]['m‰‰r‰'] = ' ';
 
       $prn .= sprintf ('%-9.9s',   t_avainsana("Y", "", "and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite"));
-      $excelrivit[$rivit]['yksikkˆ'] = t_avainsana("Y", "", "and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite");
+      $excelrivit[$xr]['yksikkˆ'] = t_avainsana("Y", "", "and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite");
 
 
       //katsotaan onko tuotetta tilauksessa
@@ -1119,7 +1120,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
       $prow    = mysql_fetch_assoc($result1);
 
       $prn .= sprintf ('%-7.7d',   $prow["varattu"]);
-      $excelrivit[$rivit]['tilkpl'] = $prow["varattu"];
+      $excelrivit[$xr]['tilkpl'] = $prow["varattu"];
 
       //Haetaan ker‰tty m‰‰r‰
       $query = "SELECT ifnull(sum(if(keratty!='',tilausrivi.varattu,0)),0) keratty,  ifnull(sum(tilausrivi.varattu),0) ennpois
@@ -1140,7 +1141,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
       $hylrow['keratty'] = fmod($hylrow['keratty'], 1) == 0 ? round($hylrow['keratty']) : $hylrow['keratty'];
 
       $prn .= sprintf ('%-13.13s', "{$hylrow['ennpois']}/{$hylrow['keratty']}");
-      $excelrivit[$rivit]['varattu/ker'] = "{$hylrow['ennpois']}/{$hylrow['keratty']}";
+      $excelrivit[$xr]['varattu/ker'] = "{$hylrow['ennpois']}/{$hylrow['keratty']}";
 
       if ($tuoterow["sarjanumeroseuranta"] != "") {
         $query = "SELECT sarjanumeroseuranta.sarjanumero,
@@ -1216,6 +1217,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
 
       fwrite($fh, $prn);
       $rivit++;
+      $xr++;
     }
 
     fclose($fh);

@@ -2076,7 +2076,7 @@ if ($tee == 'Z') {
       }
     }
 
-    if ($toim == "TYOMAARAYS_ASENTAJA") {
+    if ($toim != "TYOMAARAYS_ASENTAJA") {
       // Varastotapahtumat
       echo "<font class='message'>".t("Tuotteen tapahtumat")."</font>";
 

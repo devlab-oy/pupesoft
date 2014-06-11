@@ -1805,7 +1805,6 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 $sres = pupe_query($query);
 
                 while ($srow = mysql_fetch_assoc($sres)) {
-
                   $query = "UPDATE sarjanumeroseuranta
                             SET $tunken      = '$lisatty_tun'
                             WHERE yhtio = '$kukarow[yhtio]'

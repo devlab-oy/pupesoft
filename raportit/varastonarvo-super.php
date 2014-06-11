@@ -801,6 +801,19 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       $mistavarastosta = $row["varastotunnus"];
     }
 
+    if ($mistavarastosta != "") {
+      $varasto_tapahtuma = "AND tapahtuma.varasto in ($mistavarastosta)";
+      $varasto_tuotepaikat = "AND tuotepaikat.varasto in ($mistavarastosta)";
+      $varasto_tilausrivi = "AND tilausrivi.varasto in ($mistavarastosta)";
+      $varasto_varastopaikat = "AND varastopaikat.tunnus in ($mistavarastosta)";
+    }
+    else {
+      $varasto_tapahtuma = "";
+      $varasto_tuotepaikat = "";
+      $varasto_tilausrivi = "";
+      $varasto_varastopaikat = "";
+    }
+
     // Jos tuote on sarjanumeroseurannassa niin varastonarvo lasketaan yksilöiden ostohinnoista (ostetut yksilöt jotka eivät vielä ole laskutettu)
     if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "G") {
 
@@ -819,7 +832,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
                  FROM sarjanumeroseuranta
                  JOIN varastopaikat ON (varastopaikat.yhtio = sarjanumeroseuranta.yhtio
                    AND varastopaikat.tunnus = sarjanumeroseuranta.varasto
-                   AND varastopaikat.tunnus in ($mistavarastosta))
+                   $varasto_varastopaikat)
                  JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON (tilausrivi_osto.yhtio = sarjanumeroseuranta.yhtio
                    AND tilausrivi_osto.tunnus              = sarjanumeroseuranta.ostorivitunnus
                    AND tilausrivi_osto.laskutettuaika     != '0000-00-00')
@@ -869,9 +882,8 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
                 JOIN tuote ON (tuote.tuoteno = tuotepaikat.tuoteno and tuote.yhtio = tuotepaikat.yhtio and tuote.ei_saldoa = '')
                 WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
                 and tuotepaikat.tuoteno = '{$row['tuoteno']}'
-                and tuotepaikat.varasto in ($mistavarastosta)
+                $varasto_tuotepaikat
                 $summaus_lisa";
-
       $vararvores = pupe_query($query);
       $vararvorow = mysql_fetch_assoc($vararvores);
 
@@ -915,7 +927,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
                 and tapahtuma.hyllyalue != ''
                 and tapahtuma.hyllynro  != ''
                 and tapahtuma.laji      != 'Epäkurantti'
-                and tapahtuma.varasto in ($mistavarastosta)
+                $varasto_tapahtuma
                 $summaus_lisa
                 GROUP BY tapahtuma.laadittu
                 ORDER BY tapahtuma.laadittu DESC, tapahtuma.tunnus desc";
@@ -1122,7 +1134,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
                      and tilausrivi.tuoteno        = '{$row['tuoteno']}'
                      and tilausrivi.laskutettuaika <= '$vv-$kk-$pp'
                      and tilausrivi.laskutettuaika >= date_sub('$vv-$kk-$pp', INTERVAL 12 month)
-                     and tilausrivi.varasto in ($mistavarastosta)
+                     $varasto_tilausrivi
                      $summaus_lisa";
           $xmyyres = pupe_query($query);
           $xmyyrow = mysql_fetch_assoc($xmyyres);
@@ -1235,7 +1247,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
                     WHERE tapahtuma.yhtio  = '$kukarow[yhtio]'
                     and tapahtuma.tuoteno  = '{$row['tuoteno']}'
                     and tapahtuma.laadittu >= date_sub('$vv-$kk-$pp', INTERVAL 12 month)
-                    and tapahtuma.varasto in ($mistavarastosta)
+                    $varasto_tapahtuma
                     and tapahtuma.laji     = 'tulo'";
         $result_a = pupe_query($query_a);
         $resultti_a = mysql_fetch_assoc($result_a);
@@ -1282,7 +1294,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
                    FROM sarjanumeroseuranta
                    JOIN varastopaikat ON (varastopaikat.yhtio = sarjanumeroseuranta.yhtio
                      AND varastopaikat.tunnus = sarjanumeroseuranta.varasto
-                     AND varastopaikat.tunnus in ($mistavarastosta))
+                     $varasto_varastopaikat)
                    LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON (tilausrivi_myynti.yhtio = sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus = sarjanumeroseuranta.myyntirivitunnus)
                    LEFT JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON (tilausrivi_osto.yhtio = sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus = sarjanumeroseuranta.ostorivitunnus)
                    WHERE sarjanumeroseuranta.yhtio           = '$kukarow[yhtio]'

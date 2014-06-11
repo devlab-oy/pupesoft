@@ -591,8 +591,23 @@ if ($id > 0) {
   echo "<option value=''>".t("Ei tulosteta")."</option>";
   echo "<option value='oletukselle' $sel>".t("Oletustulostimelle")."</option>";
 
+  # Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰
+  $avainsana_where = " and avainsana.selite = '{$row['varasto']}'
+                        and avainsana.selitetark = '{$row['yhtio_toimipaikka']}'
+                        and avainsana.selitetark_2 = 'printteri1'";
+
+  $tp_tulostin = t_avainsana("VARTOIMTULOSTIN", '', $avainsana_where, '', '', "selitetark_3");
+
+  if (!empty($tp_tulostin)) {
+    $_apuprintteri = $tp_tulostin;
+  }
+  else {
+    $_apuprintteri = "";
+  }
+
   while ($kirrow = mysql_fetch_array($kirre)) {
-    echo "<option value='$kirrow[tunnus]'>$kirrow[kirjoitin]</option>";
+    $sel = (!empty($_apuprintteri) and $kirrow['tunnus'] == $_apuprintteri) ? "selected" : "";
+    echo "<option value='$kirrow[tunnus]' {$sel}>$kirrow[kirjoitin]</option>";
   }
 
   echo "</select> ".t("Kpl").": <input type='text' size='4' name='lahetekpl' value='$lahetekpl'></td>";

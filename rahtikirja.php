@@ -3001,6 +3001,17 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
         $lahete_printteri = $prirow['printteri1'];
       }
 
+      # Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰
+      $avainsana_where = " and avainsana.selite = '{$otsik['varasto']}'
+                            and avainsana.selitetark = '{$otsik['yhtio_toimipaikka']}'
+                            and avainsana.selitetark_2 = 'printteri1'";
+
+      $tp_tulostin = t_avainsana("VARTOIMTULOSTIN", '', $avainsana_where, '', '', "selitetark_3");
+
+      if (!empty($tp_tulostin)) {
+        $lahete_printteri = $tp_tulostin;
+      }
+
       $oslappu_printteri = "";
       //osoitelappu
       if ($prirow['printteri3'] != '') {

@@ -1231,7 +1231,7 @@ if ($tee == "VALMIS"
             kateinen = Number(document.getElementById('kateismaksu').value.replace(\",\",\".\"));
             pankki = Number(document.getElementById('pankkikortti').value.replace(\",\",\".\"));
             luotto = Number(document.getElementById('luottokortti').value.replace(\",\",\".\"));
-            
+
             summa = kaikkiyhteensa - (kateinen + pankki + luotto);";
 
 
@@ -8823,6 +8823,17 @@ if ($tee == '') {
           }
           else {
             $apuprintteri = 0;
+          }
+
+          # Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰
+          $avainsana_where = " and avainsana.selite = '{$laskurow['varasto']}'
+                                and avainsana.selitetark = '{$laskurow['yhtio_toimipaikka']}'
+                                and avainsana.selitetark_2 = 'printteri1'";
+
+          $tp_tulostin = t_avainsana("VARTOIMTULOSTIN", '', $avainsana_where, '', '', "selitetark_3");
+
+          if (!empty($tp_tulostin)) {
+            $apuprintteri = $tp_tulostin;
           }
 
           echo "<select name='komento[L‰hete]'>";

@@ -619,6 +619,7 @@
         $valmis_era_chk_res = pupe_query($query);
 
         $keraysera_vyohyke = 0;
+        $keraysera_otunnukset = array();
 
         while ($valmis_era_chk_row = mysql_fetch_assoc($valmis_era_chk_res)) {
           $keraysera_maara[$valmis_era_chk_row['tunnus']] = $valmis_era_chk_row['kpl_keratty'];
@@ -639,6 +640,7 @@
           $vertaus_hylly[$valmis_era_chk_row['tilausrivi']] = $varattu_row['varastopaikka_rekla'];
 
           $keraysera_vyohyke = $valmis_era_chk_row["keraysvyohyke"];
+          array_push($keraysera_otunnukset, $valmis_era_chk_row['otunnus']);
         }
 
         $query = "SELECT printteri1, printteri3
@@ -658,6 +660,24 @@
         // vakadr-tulostin on aina sama kuin l‰hete-tulostin
         $valittu_tulostin = $vakadr_tulostin = $printteri_row['printteri1'];
         $valittu_oslapp_tulostin = $printteri_row['printteri3'];
+
+        # Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰
+        $query = "SELECT varasto, yhtio_toimipaikka
+                  FROM lasku
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus = {$keraysera_otunnukset[0]}";
+        $var_tp_res = pupe_query($query);
+        $var_tp_row = mysql_fetch_assoc($var_tp_res);
+
+        $avainsana_where = " and avainsana.selite = '{$var_tp_row['varasto']}'
+                              and avainsana.selitetark = '{$var_tp_row['yhtio_toimipaikka']}'
+                              and avainsana.selitetark_2 = 'printteri1'";
+
+        $tp_tulostin = t_avainsana("VARTOIMTULOSTIN", '', $avainsana_where, '', '', "selitetark_3");
+
+        if (!empty($tp_tulostin)) {
+          $valittu_tulostin = $vakadr_tulostin = $tp_tulostin;
+        }
 
         $lahetekpl = $vakadrkpl = $yhtiorow["oletus_lahetekpl"];
         $oslappkpl = $yhtiorow["oletus_oslappkpl"];

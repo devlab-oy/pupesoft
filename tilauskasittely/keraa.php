@@ -3311,6 +3311,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
           }
         }
 
+        # Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰
         $query = "SELECT varasto, yhtio_toimipaikka
                   FROM lasku
                   WHERE yhtio = '{$kukarow['yhtio']}'

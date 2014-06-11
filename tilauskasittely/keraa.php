@@ -3311,6 +3311,23 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
           }
         }
 
+        $query = "SELECT varasto, yhtio_toimipaikka
+                  FROM lasku
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus IN ({$tilausnumeroita})";
+        $var_tp_res = pupe_query($query);
+        $var_tp_row = mysql_fetch_assoc($var_tp_res);
+
+        $avainsana_where = " and avainsana.selite = '{$var_tp_row['varasto']}'
+                              and avainsana.selitetark = '{$var_tp_row['yhtio_toimipaikka']}'
+                              and avainsana.selitetark_2 = 'printteri1'";
+
+        $tp_tulostin = t_avainsana("VARTOIMTULOSTIN", '', $avainsana_where, '', '', "selitetark_3");
+
+        if (!empty($tp_tulostin)) {
+          $sel_lahete[$tp_tulostin] = "SELECTED";  // laskuprintteri
+        }
+
         echo "<tr><th>".t("Lähete").":</th><th colspan='$spanni'>";
 
         $query = "SELECT *

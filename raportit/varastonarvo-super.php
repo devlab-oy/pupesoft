@@ -1118,7 +1118,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
 
         $varastorajausjoini = '';
         if (isset($valitut_varastot_rajaus) and $valitut_varastot_rajaus != "") {
-          $varastorajausjoini = " and tapahtuma.varasto in ($mistavarastosta) ";
+          $varastorajausjoini = $varasto_tapahtuma;
         }
 
         if ($kiertoviilasku != "") {

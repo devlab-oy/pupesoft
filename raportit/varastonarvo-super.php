@@ -606,7 +606,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
         $jarjestys_sel
         FROM tuotepaikat USE INDEX (tuote_index)
         JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno AND tuote.ei_saldoa = '' $tuote_lisa)
-        JOIN varastopaikat ON  (varastopaikat.yhtio = tapahtuma.yhtio
+        JOIN varastopaikat ON  (varastopaikat.yhtio = tuotepaikat.yhtio
           AND varastopaikat.tunnus = tuotepaikat.varasto)
         $jarjestys_join
         WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'

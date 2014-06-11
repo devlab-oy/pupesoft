@@ -11,6 +11,7 @@ if (!isset($livesearch_tee)) $livesearch_tee = "";
 if (!isset($tapahtumalaji))  $tapahtumalaji = "";
 if (!isset($tilalehinta))    $tilalehinta = "";
 if (!isset($historia))       $historia = "";
+if (!isset($raportti))       $raportti = "";
 if (!isset($toimipaikka))    $toimipaikka = $kukarow['toimipaikka'] != 0 ? $kukarow['toimipaikka'] : 0;
 
 $onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
@@ -110,7 +111,10 @@ if ($kukarow["kesken"] > 0) {
   $laskurow = mysql_fetch_assoc($result);
 }
 else {
-  $laskurow = array();
+  $laskurow = array(
+    "tila" => "",
+    "maa_lahetys" => "",
+  );
 }
 
 if ($kukarow["kuka"] != "" and $laskurow["tila"] == "O") {
@@ -379,12 +383,13 @@ if ($tee == 'Z') {
       }
     }
 
+    $prossat = '';
+
     if ($tv_kaytossa and $tullirow1['cn'] != '') {
-      $alkuperamaat   = array();
+      $alkuperamaat = array();
       $alkuperamaat[] = explode(',', $tuoterow['alkuperamaa']);
-      $tuorow     = $tuoterow;
-      $prossat     = '';
-      $prossa_str   = '';
+      $tuorow = $tuoterow;
+      $prossa_str = '';
 
       foreach ($alkuperamaat as $alkuperamaa) {
         foreach ($alkuperamaa as $alkupmaa) {
@@ -1507,13 +1512,15 @@ if ($tee == 'Z') {
     }
 
     if ($toim != "TYOMAARAYS_ASENTAJA") {
-      if (!isset($raportti) or $raportti == "") {
-        if ($tuoterow["tuotetyyppi"] == "R") $raportti="KULUTUS";
-        else $raportti="MYYNTI";
+      if ($raportti == "") {
+        if ($tuoterow["tuotetyyppi"] == "R") $raportti = "KULUTUS";
+        else $raportti = "MYYNTI";
       }
 
-      if ($raportti == "KULUTUS") $sele["K"] = "checked";
-      else $sele["M"] = "checked";
+      $sele = array(
+        "K" => ($raportti == "KULUTUS") ? "checked" : "",
+        "M" => ($raportti != "KULUTUS") ? "checked" : "",
+      );
 
       echo "<form action='$PHP_SELF#Raportit' method='post'>
         <input type='hidden' name='toim' value='$toim'>
@@ -1792,8 +1799,22 @@ if ($tee == 'Z') {
         $lrow = mysql_fetch_assoc($result3);
 
         echo "<table><tr><th>".t("Tyyppi")."</th>$otsikkorivi<th>".t("Yhteensä")."</th></tr>";
-        $erittely=array();
-        $ed_erittely=array();
+        $erittely = array(
+          1 => 0,
+          2 => 0,
+          3 => 0,
+          4 => 0,
+          5 => 0,
+          6 => 0,
+          7 => 0,
+          8 => 0,
+          9 => 0,
+          10 => 0,
+          11 => 0,
+          12 => 0,
+        );
+
+        $ed_erittely = $erittely;
 
         foreach (array("myynti", "kulutus") as $tyyppi) {
           echo "<tr class='aktiivi'><td class='tumma'>".t(str_replace("_", " ", $tyyppi))."</td>";

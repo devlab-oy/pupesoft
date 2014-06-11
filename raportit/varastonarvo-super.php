@@ -610,9 +610,9 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
           AND varastopaikat.tunnus = tuotepaikat.varasto)
         $jarjestys_join
         WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
+        $varastontunnukset2
         $where_lisa
-        $where_lisa2
-        $varastontunnukset2)
+        $where_lisa2)
         ORDER BY $order_lisa";
   $result = pupe_query($query);
   $elements = mysql_num_rows($result);

@@ -42,7 +42,7 @@ fwrite($fp, $header);
 // Haetaan toimittajat
 $query = "SELECT
           toimi.tunnus,
-          concat_ws('', toimi.nimi, toimi.nimitark) nimi,
+          concat_ws(' ', toimi.nimi, toimi.nimitark) nimi,
           toimi.maa
           FROM toimi
           WHERE toimi.yhtio = '$yhtio'

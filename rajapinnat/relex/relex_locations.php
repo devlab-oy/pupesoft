@@ -42,7 +42,7 @@ fwrite($fp, $header);
 // Haetaan varastot
 $query = "SELECT
           varastopaikat.tunnus,
-          concat_ws('', varastopaikat.nimitys, varastopaikat.nimi, varastopaikat.nimitark) nimi,
+          concat_ws(' ', varastopaikat.nimitys, varastopaikat.nimi, varastopaikat.nimitark) nimi,
           varastopaikat.tyyppi
           FROM varastopaikat
           WHERE varastopaikat.yhtio  = '$yhtio'

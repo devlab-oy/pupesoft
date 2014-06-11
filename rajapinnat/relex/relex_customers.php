@@ -42,7 +42,7 @@ fwrite($fp, $header);
 // Haetaan asiakkaat
 $query = "SELECT
           asiakas.tunnus,
-          concat_ws('', asiakas.nimi, asiakas.nimitark) nimi,
+          concat_ws(' ', asiakas.nimi, asiakas.nimitark) nimi,
           asiakas.ryhma
           FROM asiakas
           WHERE asiakas.yhtio = '$yhtio'

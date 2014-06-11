@@ -1,8 +1,8 @@
 <?php
 
 /*
- * Siirretään varastosaldot Relexiin
- * 2.3 BALANCES
+ * Siirretään tuotemasterdata Relexiin
+ * 4.2 PRODUCT MASTER DATA FILE
 */
 
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
@@ -29,21 +29,22 @@ require 'inc/functions.inc';
 $yhtio = mysql_real_escape_string($argv[1]);
 
 // Tallannetan rivit tiedostoon
-$filepath = "/tmp/input_balances_{$yhtio}_".date("Y-m-d").".csv";
+$filepath = "/tmp/product_update_{$yhtio}_".date("Y-m-d").".csv";
 
 if (!$fp = fopen($filepath, 'w+')) {
   die("Tiedoston avaus epäonnistui: $filepath\n");
 }
 
 // Otsikkotieto
-$header = "location;product;quantity;type\n";
+$header = "code;name;supplier;group;order_quantity;purchase_price\n";
 fwrite($fp, $header);
 
 // Haetaan tuotteiden saldot per varasto
 $query = "SELECT
-          tuotepaikat.tuoteno tuote,
-          tuotepaikat.varasto varasto,
-          sum(tuotepaikat.saldo) saldo
+          tuote.tuoteno,
+          tuote.nimitys,
+          tuote.try,
+          tuote.kehahin
           FROM tuote
           JOIN tuotepaikat ON (tuote.tuoteno = tuotepaikat.tuoteno and tuote.yhtio = tuotepaikat.yhtio)
           WHERE tuote.yhtio     = '$yhtio'
@@ -58,15 +59,31 @@ $res = pupe_query($query);
 // Kerrotaan montako riviä käsitellään
 $rows = mysql_num_rows($res);
 
-echo "Saldorivejä {$rows} kappaletta.\n";
+echo "Tuoterivejä {$rows} kappaletta.\n";
 
 $k_rivi = 0;
 
 while ($row = mysql_fetch_assoc($res)) {
-  $rivi  = "{$row['varasto']};";
-  $rivi .= "{$row['tuote']};";
-  $rivi .= "{$row['saldo']};";
-  $rivi .= "BALANCE";
+  // Tuotteen päätoimittaja
+  $tulossa_query = "SELECT tuotteen_toimittajat.liitostunnus,
+                    tuotteen_toimittajat.toim_tuoteno,
+                    tuotteen_toimittajat.osto_era,
+                    tuotteen_toimittajat.pakkauskoko,
+                    tuotteen_toimittajat.tuotteen_toimittajat
+                    FROM tuotteen_toimittajat
+                    WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
+                    AND tuotteen_toimittajat.tuoteno = '{$row['tuoteno']}'
+                    ORDER BY if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys)
+                    LIMIT 1";
+  $toimres = pupe_query($tulossa_query);
+  $toimrow = mysql_fetch_assoc($toimres);
+
+  $rivi  = "{$row['tuoteno']};";
+  $rivi .= "{$row['nimitys']};";
+  $rivi .= "{$toimrow['liitostunnus']};";
+  $rivi .= "{$row['try']};";
+  $rivi .= "{$toimrow['osto_era']};";
+  $rivi .= "{$row['kehahin']}";
   $rivi .= "\n";
 
   fwrite($fp, $rivi);

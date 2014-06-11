@@ -1,8 +1,8 @@
 <?php
 
 /*
- * Siirretään varastosaldot Relexiin
- * 2.3 BALANCES
+ * Siirretään varastotiedot Relexiin
+ * 5.1 LOCATION DATA
 */
 
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
@@ -29,44 +29,46 @@ require 'inc/functions.inc';
 $yhtio = mysql_real_escape_string($argv[1]);
 
 // Tallannetan rivit tiedostoon
-$filepath = "/tmp/input_balances_{$yhtio}_".date("Y-m-d").".csv";
+$filepath = "/tmp/location_update_{$yhtio}_".date("Y-m-d").".csv";
 
 if (!$fp = fopen($filepath, 'w+')) {
   die("Tiedoston avaus epäonnistui: $filepath\n");
 }
 
 // Otsikkotieto
-$header = "location;product;quantity;type\n";
+$header = "code;name;replenished;chain_code\n";
 fwrite($fp, $header);
 
-// Haetaan tuotteiden saldot per varasto
+// Haetaan varastot
 $query = "SELECT
-          tuotepaikat.tuoteno tuote,
-          tuotepaikat.varasto varasto,
-          sum(tuotepaikat.saldo) saldo
-          FROM tuote
-          JOIN tuotepaikat ON (tuote.tuoteno = tuotepaikat.tuoteno and tuote.yhtio = tuotepaikat.yhtio)
-          WHERE tuote.yhtio     = '$yhtio'
-          AND tuote.status     != 'P'
-          AND tuote.ei_saldoa   = ''
-          AND tuote.tuotetyyppi = ''
-          AND tuote.ostoehdotus = ''
-          GROUP BY 1,2
-          ORDER BY 1,2";
+          varastopaikat.tunnus,
+          concat_ws('', varastopaikat.nimitys, varastopaikat.nimi, varastopaikat.nimitark) nimi,
+          varastopaikat.tyyppi
+          FROM varastopaikat
+          WHERE varastopaikat.yhtio  = '$yhtio'
+          AND varastopaikat.tyyppi  != 'P'
+          ORDER BY 1";
 $res = pupe_query($query);
 
 // Kerrotaan montako riviä käsitellään
 $rows = mysql_num_rows($res);
 
-echo "Saldorivejä {$rows} kappaletta.\n";
+echo "Varastorivejä {$rows} kappaletta.\n";
 
 $k_rivi = 0;
 
 while ($row = mysql_fetch_assoc($res)) {
-  $rivi  = "{$row['varasto']};";
-  $rivi .= "{$row['tuote']};";
-  $rivi .= "{$row['saldo']};";
-  $rivi .= "BALANCE";
+
+  $replensihed = "yes";
+
+  if ($row['tyyppi'] != "") {
+    $replensihed = "no";
+  }
+
+  $rivi  = "{$row['tunnus']};";
+  $rivi .= "{$row['nimi']};";
+  $rivi .= "{$replensihed};";
+  $rivi .= "";
   $rivi .= "\n";
 
   fwrite($fp, $rivi);

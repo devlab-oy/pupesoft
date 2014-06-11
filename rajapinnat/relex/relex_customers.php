@@ -1,8 +1,8 @@
 <?php
 
 /*
- * Siirretään varastosaldot Relexiin
- * 2.3 BALANCES
+ * Siirretään asiakastiedot Relexiin
+ * 5.3 CUSTOMER DATA
 */
 
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
@@ -29,44 +29,37 @@ require 'inc/functions.inc';
 $yhtio = mysql_real_escape_string($argv[1]);
 
 // Tallannetan rivit tiedostoon
-$filepath = "/tmp/input_balances_{$yhtio}_".date("Y-m-d").".csv";
+$filepath = "/tmp/customer_update_{$yhtio}_".date("Y-m-d").".csv";
 
 if (!$fp = fopen($filepath, 'w+')) {
   die("Tiedoston avaus epäonnistui: $filepath\n");
 }
 
 // Otsikkotieto
-$header = "location;product;quantity;type\n";
+$header = "code;name;customer_group\n";
 fwrite($fp, $header);
 
-// Haetaan tuotteiden saldot per varasto
+// Haetaan asiakkaat
 $query = "SELECT
-          tuotepaikat.tuoteno tuote,
-          tuotepaikat.varasto varasto,
-          sum(tuotepaikat.saldo) saldo
-          FROM tuote
-          JOIN tuotepaikat ON (tuote.tuoteno = tuotepaikat.tuoteno and tuote.yhtio = tuotepaikat.yhtio)
-          WHERE tuote.yhtio     = '$yhtio'
-          AND tuote.status     != 'P'
-          AND tuote.ei_saldoa   = ''
-          AND tuote.tuotetyyppi = ''
-          AND tuote.ostoehdotus = ''
-          GROUP BY 1,2
-          ORDER BY 1,2";
+          asiakas.tunnus,
+          concat_ws('', asiakas.nimi, asiakas.nimitark) nimi
+          asiakas.ryhma
+          FROM asiakas
+          WHERE asiakas.yhtio = '$yhtio'
+          AND asiakas.laji not in ('P','R')";
 $res = pupe_query($query);
 
 // Kerrotaan montako riviä käsitellään
 $rows = mysql_num_rows($res);
 
-echo "Saldorivejä {$rows} kappaletta.\n";
+echo "Asiakasrivejä {$rows} kappaletta.\n";
 
 $k_rivi = 0;
 
 while ($row = mysql_fetch_assoc($res)) {
-  $rivi  = "{$row['varasto']};";
-  $rivi .= "{$row['tuote']};";
-  $rivi .= "{$row['saldo']};";
-  $rivi .= "BALANCE";
+  $rivi  = "{$row['tunnus']};";
+  $rivi .= "{$row['nimi']};";
+  $rivi .= "{$row['ryhma']}";
   $rivi .= "\n";
 
   fwrite($fp, $rivi);

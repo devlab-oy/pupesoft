@@ -51,8 +51,10 @@ $query = "SELECT
           tilausrivi.tuoteno tuote,
           tilausrivi.tyyppi tyyppi,
           tilausrivi.varattu+tilausrivi.jt maara,
-          tilausrivi.toimaika toimituspaiva
+          tilausrivi.toimaika toimituspaiva,
+          lasku.liitostunnus partner
           FROM tilausrivi
+          JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
           JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
             AND tuote.tuoteno     = tilausrivi.tuoteno
             AND tuote.status     != 'P'
@@ -94,7 +96,7 @@ while ($row = mysql_fetch_assoc($res)) {
   $rivi .= ";";                         // Sales or purchase order number
   $rivi .= ";";                         // Sales or purchase order row number
   $rivi .= ";";                         // Additional order type that can be used to distinct normal sales and deliveries from special sales and deliveries
-  $rivi .= "";                          // Customer for sales orders and Supplier for purchase orders
+  $rivi .= "{$row['partner']}";         // Customer for sales orders and Supplier for purchase orders
   $rivi .= "\n";
 
   fwrite($fp, $rivi);

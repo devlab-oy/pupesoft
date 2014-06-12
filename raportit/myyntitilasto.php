@@ -164,12 +164,12 @@ if ($tee != '' and isset($painoinnappia)) {
                 tilausrivi.kate, 0) kate12
             FROM lasku
             JOIN tilausrivi ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
-            WHERE lasku.yhtio = '$kukarow[yhtio]'
-            AND lasku.tila    = 'U'
-            AND lasku.alatila   = 'X'
+            WHERE lasku.yhtio                   = '$kukarow[yhtio]'
+            AND lasku.tila                      = 'U'
+            AND lasku.alatila                   = 'X'
             $lisa
-            AND lasku.tapvm   >= '{$edellisvuosi}-01-01'
-            AND lasku.tapvm   <= '{$vvl}-{$kkl}-{$ppl}'";
+            AND lasku.tapvm                     >= '{$edellisvuosi}-01-01'
+            AND lasku.tapvm                     <= '{$vvl}-{$kkl}-{$ppl}'";
   $eresult = pupe_query($query);
 
   $group_by = array();
@@ -188,7 +188,7 @@ if ($tee != '' and isset($painoinnappia)) {
     "group_by" => $group_by,
     "order_by" => array("osasto", "tuoteryhma"),
     "select" => array("osasto", "tuoteryhma"),
-    "lisaa_kulut" => array("kateVA", "kateEDVA", "kateED", "kate12")
+    "laske_kate" => array("kateVA", "kateEDVA", "kateED", "kate12")
   );
 
   $rows = tilausrivin_tarkistus_riveittain($parametrit);
@@ -280,4 +280,3 @@ if ($tee != '' and isset($painoinnappia)) {
   echo "</table>";
 }
 require ("inc/footer.inc");
-?>

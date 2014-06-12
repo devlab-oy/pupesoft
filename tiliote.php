@@ -176,10 +176,10 @@ if ($ok == 1) {
 
           if ($onko_vipn) {
             $query = "SELECT tilino
-                                    FROM yriti
-                                    WHERE bic        =  'DABAFIHH'
-                                    AND   factoring != ''
-                                    LIMIT 1;";
+                      FROM yriti
+                      WHERE bic        =  'DABAFIHH'
+                      AND   factoring != ''
+                      LIMIT 1;";
             $f_result = pupe_query($query);
 
             if (mysql_num_rows($f_result) === 1) {

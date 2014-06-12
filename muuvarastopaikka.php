@@ -738,11 +738,14 @@ if ($tee == 'UUSIPAIKKA') {
 
       $kaikki_ok = true;
 
-      # Haetaan varaston toimipaikan parametrit
-      $_var_tp = hae_varaston_toimipaikka($_mihin_varastoon);
-      $_var_tp = (!empty($_var_tp) and is_array($_var_tp)) ? $_var_tp['tunnus'] : null;
-      
-      $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $_var_tp);
+      if ($yhtiorow['toimipaikkakasittely'] == "L") {
+        # Haetaan varaston toimipaikan parametrit
+        $_var_tp = hae_varaston_toimipaikka($_mihin_varastoon);
+        $_var_tp = (!empty($_var_tp) and is_array($_var_tp)) ? $_var_tp['tunnus'] : null;
+
+        $yhtiorow_alkuperainen = $yhtiorow;        
+        $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $_var_tp);
+      }
 
       if ($yhtiorow['kerayserat'] == 'K') {
 
@@ -759,7 +762,9 @@ if ($tee == 'UUSIPAIKKA') {
       }
 
       # Palautetaan yhtiön parametrit
-      $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+      if (!empty($yhtiorow_alkuperainen)) {
+        $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+      }
 
       if ($kaikki_ok) {
         echo "<font class='message'>".("Uusi varastopaikka luotiin tuotteelle").": $tuoteno ($ahyllyalue-$ahyllynro-$ahyllyvali-$ahyllytaso)</font><br>";

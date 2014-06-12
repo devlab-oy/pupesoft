@@ -788,9 +788,9 @@ if ($tee == 'Z') {
       $lisa = " and tuoteno = '$tuoteno' ";
 
       $query = "SELECT isatuoteno
-                        FROM tuoteperhe
-                        WHERE yhtio = '$kukarow[yhtio]'
-                        AND tuoteno = '$tuoteno'";
+                FROM tuoteperhe
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND tuoteno = '$tuoteno'";
       $tuoteperhe_result = pupe_query($query);
 
       if (mysql_num_rows($tuoteperhe_result) > 0) {
@@ -832,6 +832,16 @@ if ($tee == 'Z') {
     }
 
     $_tp_kasittely = ($yhtiorow['toimipaikkakasittely'] == "L");
+
+    if ($_tp_kasittely) {
+      $query = "SELECT GROUP_CONCAT(tunnus) tunnukset
+          FROM varastopaikat
+          WHERE yhtio      = '{$kukarow['yhtio']}'
+          AND tyyppi      != 'P'
+          AND toimipaikka  = '{$kukarow['toimipaikka']}'";
+      $toimipaikka_varasto_res = pupe_query($query);
+      $toimipaikka_varasto_row = mysql_fetch_assoc($toimipaikka_varasto_res);
+    }
 
     // Saldot, korvaavat ja vastaavat
     echo "<table><tr><td class='back' valign='top' style='padding:0px; margin:0px;height:0px;'>";
@@ -947,23 +957,34 @@ if ($tee == 'Z') {
           $kokonaishyllyssa += $hyllyssa;
           $kokonaismyytavissa += $myytavissa;
 
-          if ($_tp_kasittely and $kukarow['toimipaikka'] == $saldorow['varasto_toimipaikka']) {
-            $_class = 'tumma';
+          $_class = '';
 
-            if (!isset($_tp_yhteensa[$saldorow['nimitys']])) {
-              $_tp_yhteensa[$saldorow['nimitys']] = array(
-                'saldo' => 0,
-                'hyllyssa' => 0,
-                'myytavissa' => 0,
-              );
+          if ($_tp_kasittely) {
+
+            $_tp_chk_1 = ($kukarow['toimipaikka'] == $saldorow['varasto_toimipaikka']);
+
+            $_onko_toimipaikkatunnukset = ($toimipaikka_varasto_row['tunnukset'] == '');
+            $_kuka_tp = !empty($kukarow['toimipaikka']);
+            $_var_tp = ($saldorow['varasto_toimipaikka'] == 0);
+            $_tp_chk_2 = ($_onko_toimipaikkatunnukset and $_kuka_tp and $_var_tp);
+
+            $_tp_chk_3 = ($_tp_chk_1 or $_tp_chk_2);
+
+            if ($_tp_chk_3) {
+              $_class = 'tumma';
+
+              if (!isset($_tp_yhteensa[$saldorow['nimitys']])) {
+                $_tp_yhteensa[$saldorow['nimitys']] = array(
+                  'saldo' => 0,
+                  'hyllyssa' => 0,
+                  'myytavissa' => 0,
+                );
+              }
+
+              $_tp_yhteensa[$saldorow['nimitys']]['saldo'] += $saldo;
+              $_tp_yhteensa[$saldorow['nimitys']]['hyllyssa'] += $hyllyssa;
+              $_tp_yhteensa[$saldorow['nimitys']]['myytavissa'] += $myytavissa;
             }
-
-            $_tp_yhteensa[$saldorow['nimitys']]['saldo'] += $saldo;
-            $_tp_yhteensa[$saldorow['nimitys']]['hyllyssa'] += $hyllyssa;
-            $_tp_yhteensa[$saldorow['nimitys']]['myytavissa'] += $myytavissa;
-          }
-          else {
-            $_class = '';
           }
 
           if ($saldorow["yhtio"] == $kukarow["yhtio"] and (($toimipaikka == $saldorow['varasto_toimipaikka']) or $toimipaikka == 'kaikki' )) {
@@ -1037,14 +1058,6 @@ if ($tee == 'Z') {
     echo "</td><td class='back' valign='top' style='padding:0px; margin:0px;height:0px;'>";
 
     if ($_tp_kasittely) {
-
-      $query = "SELECT GROUP_CONCAT(tunnus) tunnukset
-                FROM varastopaikat
-                WHERE yhtio      = '{$kukarow['yhtio']}'
-                AND tyyppi      != 'P'
-                AND toimipaikka  = '{$kukarow['toimipaikka']}'";
-      $toimipaikka_varasto_res = pupe_query($query);
-      $toimipaikka_varasto_row = mysql_fetch_assoc($toimipaikka_varasto_res);
 
       if ($toimipaikka_varasto_row['tunnukset'] == '' and !empty($kukarow['toimipaikka'])) {
         $query = "SELECT GROUP_CONCAT(tunnus) tunnukset

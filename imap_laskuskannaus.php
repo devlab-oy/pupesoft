@@ -437,9 +437,13 @@ function showMessagesForMailbox($imapConnection, $in_box, $ok_box, $er_box, $dom
     $query = "UID FETCH $uid (BODY[HEADER.FIELDS (From)])";
     $fetch_from = sqimap_run_command_list($imapConnection, $query, true, $response, $message, '');
 
-    if (is_array($domain) and count($domain) > 0) {
-      $okdomain = FALSE;
+    // Onko lähettäjän domaini ok?
+    $okdomain = FALSE;
 
+    if (empty($domain)) {
+      $okdomain = TRUE;
+    }
+    elseif (is_array($domain) and count($domain) > 0) {
       foreach ($domain as $d_d) {
         if (preg_match("/[a-z\.]*?@$d_d/i", $fetch_from[0][1])) {
           $okdomain = TRUE;
@@ -453,10 +457,16 @@ function showMessagesForMailbox($imapConnection, $in_box, $ok_box, $er_box, $dom
         echo "domainista, ".$fetch_from[0][1]."\n";
       }
     }
-    elseif ($domain != '' and !preg_match("/[a-z\.]*?@$domain/i", $fetch_from[0][1])) {
-      echo "Laskuja hyväksytään vain $domain domainista, ".$fetch_from[0][1]."\n";
+    elseif (!is_array($domain) and $domain != '') {
+      if (preg_match("/[a-z\.]*?@$domain/i", $fetch_from[0][1])) {
+        $okdomain = TRUE;
+      }
+      else {
+        echo "Laskuja hyväksytään vain $domain domainista, ".$fetch_from[0][1]."\n";
+      }
     }
-    else {
+
+    if ($okdomain) {
       // Haetaan viestin BODYSTRUCTURE
       $query = "UID FETCH $uid (BODYSTRUCTURE)";
       $fetch_message = sqimap_run_command_list($imapConnection, $query, true, $response, $message, '');

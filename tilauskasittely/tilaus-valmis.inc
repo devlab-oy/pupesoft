@@ -576,7 +576,7 @@ else {
 
     if (!empty($sahkoinen_lahete) and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and !empty($sahkoinen_lahete_toim) and in_array($toim, $sahkoinen_lahete_toim)) {
 
-      require "inc/sahkoinen_lahete.class.inc";
+      require_once "inc/sahkoinen_lahete.class.inc";
 
       sahkoinen_lahete($laskurow);
     }
@@ -1023,7 +1023,7 @@ else {
 
         if (!empty($sahkoinen_lahete) and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and !empty($sahkoinen_lahete_toim) and in_array($toim, $sahkoinen_lahete_toim)) {
 
-          require "inc/sahkoinen_lahete.class.inc";
+          require_once "inc/sahkoinen_lahete.class.inc";
 
           sahkoinen_lahete($laskurow);
         }
@@ -1523,13 +1523,13 @@ else {
 
           if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and isset($toimitustavan_lahto[$varasto]) and $toimitustavan_lahto[$varasto] > 0) {
             $toimitustavan_lahto_arvo = $toimitustavan_lahto[$varasto];
-
             $laskurow['toimitustavan_lahto'] = $toimitustavan_lahto_arvo;
-            $laskurow['ohjausmerkki'] = paivita_ohjausmerkki($laskurow);
           }
           else {
             $toimitustavan_lahto_arvo = 0;
           }
+
+          $laskurow['ohjausmerkki'] = paivita_ohjausmerkki($laskurow);
 
           // Ei monisteta tunnusta
           for ($i=1; $i < mysql_num_fields($laskusplitres)-1; $i++) {
@@ -1715,13 +1715,13 @@ else {
 
       if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and isset($toimitustavan_lahto[$varasto]) and $toimitustavan_lahto[$varasto] > 0) {
         $toimitustavan_lahto_arvo = $toimitustavan_lahto[$varasto];
-
         $laskurow['toimitustavan_lahto'] = $toimitustavan_lahto_arvo;
-        $laskurow['ohjausmerkki'] = paivita_ohjausmerkki($laskurow);
       }
       else {
         $toimitustavan_lahto_arvo = 0;
       }
+
+      $laskurow['ohjausmerkki'] = paivita_ohjausmerkki($laskurow);
 
       $ohjausmerkkilisa = "";
 
@@ -1885,7 +1885,7 @@ else {
 
           if (!empty($sahkoinen_lahete) and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and !empty($sahkoinen_lahete_toim) and in_array($toim, $sahkoinen_lahete_toim)) {
 
-            require "inc/sahkoinen_lahete.class.inc";
+            require_once "inc/sahkoinen_lahete.class.inc";
 
             sahkoinen_lahete($laskurow);
           }
@@ -1928,7 +1928,7 @@ else {
 
           if (!empty($sahkoinen_lahete) and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and !empty($sahkoinen_lahete_toim) and in_array($toim, $sahkoinen_lahete_toim)) {
 
-            require "inc/sahkoinen_lahete.class.inc";
+            require_once "inc/sahkoinen_lahete.class.inc";
 
             sahkoinen_lahete($laskurow);
           }

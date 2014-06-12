@@ -11754,7 +11754,7 @@ if (!function_exists("hae_kaikki_alvit")) {
               selitetark_2
               FROM avainsana
               WHERE yhtio = '$kukarow[yhtio]' and laji = 'alv'
-              ORDER BY jarjestys, selite";
+              ORDER BY selitetark DESC, jarjestys, selite";
     $vresult = pupe_query($query);
 
     $alvit = array();

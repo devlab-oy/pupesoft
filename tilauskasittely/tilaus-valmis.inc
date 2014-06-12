@@ -576,7 +576,7 @@ else {
 
     if (!empty($sahkoinen_lahete) and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and !empty($sahkoinen_lahete_toim) and in_array($toim, $sahkoinen_lahete_toim)) {
 
-      require "inc/sahkoinen_lahete.class.inc";
+      require_once "inc/sahkoinen_lahete.class.inc";
 
       sahkoinen_lahete($laskurow);
     }
@@ -1023,7 +1023,7 @@ else {
 
         if (!empty($sahkoinen_lahete) and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and !empty($sahkoinen_lahete_toim) and in_array($toim, $sahkoinen_lahete_toim)) {
 
-          require "inc/sahkoinen_lahete.class.inc";
+          require_once "inc/sahkoinen_lahete.class.inc";
 
           sahkoinen_lahete($laskurow);
         }
@@ -1885,7 +1885,7 @@ else {
 
           if (!empty($sahkoinen_lahete) and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and !empty($sahkoinen_lahete_toim) and in_array($toim, $sahkoinen_lahete_toim)) {
 
-            require "inc/sahkoinen_lahete.class.inc";
+            require_once "inc/sahkoinen_lahete.class.inc";
 
             sahkoinen_lahete($laskurow);
           }
@@ -1928,7 +1928,7 @@ else {
 
           if (!empty($sahkoinen_lahete) and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and !empty($sahkoinen_lahete_toim) and in_array($toim, $sahkoinen_lahete_toim)) {
 
-            require "inc/sahkoinen_lahete.class.inc";
+            require_once "inc/sahkoinen_lahete.class.inc";
 
             sahkoinen_lahete($laskurow);
           }

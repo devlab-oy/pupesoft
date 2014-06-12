@@ -12,19 +12,57 @@ echo "<table><form method='post'>";
 echo "<input type='hidden' name='tee' value='nayta'>";
 echo "<tr><th>Tilausnumero:</th><td><input type='text' name='tilaus' value='$tilaus' size='15'></td></tr>";
 echo "<tr><th>Laskunumero:</th><td><input type='text' name='lasku' value='$lasku' size='15'></td></tr>";
-echo "<tr><th>Valitse päivä:</th>";
-echo "<td><select name='paiva'>";
 
-for ($y = 20120401; $y <= date("Ymd"); $y++) {
+echo "  <tr><th valign='top'>",t("Valitse päivä"),"</th>
+    <td><select name='paiva_vv'>";
 
-  $z = substr($y,0,4)."-".substr($y,4,2)."-".substr($y,6,2);
+$sel = array();
+$sel[$paiva_vv] = "SELECTED";
 
-  $sel = ($paiva == $z) ? "SELECTED" : "";
+for ($i = date("Y"); $i >= date("Y")-4; $i--) {
 
-  echo "<option value='$z' $sel>".substr($y,6,2).".".substr($y,4,2).".".substr($y,0,4)."</option>";
+  if (!isset($sel[$i])) {
+    $sel[$i] = "";
+  }
+
+  echo "<option value='{$i}' {$sel[$i]}>{$i}</option>";
 }
 
-echo "</select></td>";
+echo "</select>";
+
+$sel = array();
+$sel[$paiva_kk] = "SELECTED";
+
+echo "<select name='paiva_kk'>";
+
+for ($opt = 1; $opt <= 12; $opt++) {
+  $opt = sprintf("%02d", $opt);
+
+  if (!isset($sel[$opt])) {
+    $sel[$opt] = "";
+  }
+
+  echo "<option {$sel[$opt]} value = '{$opt}'>{$opt}</option>";
+}
+
+echo "</select>";
+
+$sel = array();
+$sel[$paiva_pp] = "SELECTED";
+
+echo "<select name='paiva_pp'>";
+
+for ($opt = 1; $opt <= 31; $opt++) {
+  $opt = sprintf("%02d", $opt);
+
+  if (!isset($sel[$opt])) {
+    $sel[$opt] = "";
+  }
+
+  echo "<option {$sel[$opt]} value = '{$opt}'>{$opt}</option>";
+}
+
+echo "</select></td></tr>";
 
 echo "<tr><th>Valitse virhelaji:</th>";
 echo "<td><select name='virhelaji'>";
@@ -129,6 +167,7 @@ if ($tee == "rahtisopparitilanne") {
 }
 
 if ($tee == "nayta") {
+  $paiva = $paiva_vv."-".$paiva_kk."-".$paiva_pp;
 
   $tilaus = mysql_real_escape_string($tilaus);
   $lasku = mysql_real_escape_string($lasku);

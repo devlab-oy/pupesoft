@@ -339,7 +339,7 @@ if ($tee == 'LISTAAOLETUKSET') {
     echo "</table><br><br>";
   }
   else {
-    echo t("Yhtään tuotetta ei löytynyt")."!<br><br>";
+    echo t("Ei yhtään virheellistä oletuspaikkaa")."!<br><br>";
     $tee = "";
   }
 }
@@ -402,7 +402,7 @@ if ($tee == 'LISTAATUNTEMATTOMAT') {
     echo "</table><br><br>";
   }
   else {
-    echo t("Yhtään tuotetta ei löytynyt")."!<br><br>";
+    echo t("Kaikkien tuotteiden varastopaikka kuuluu johonkin varastoon")."!<br><br>";
     $tee = "";
   }
 }
@@ -454,7 +454,7 @@ if ($tee == 'LISTAATUOTTEETTOMAT') {
 
   }
   else {
-    echo t("Yhtään tuotetta ei löytynyt")."!<br><br>";
+    echo t("Kaikkien tuotepaikkojen tuotteet löytyvät")."!<br><br>";
     $tee = "";
   }
 }
@@ -692,7 +692,7 @@ if ($tee == "LISTAAVIRHEELLISETRIVIT") {
     echo "<br><input type='submit' value='".t("Päivitä tilausriveille oletuspaikka")."'>";
   }
   else {
-    echo t("Yhtään tuotetta ei löytynyt")."!<br><br>";
+    echo t("Kaikki tilausrivien tuotepaikat löytyvät")."!<br><br>";
     $tee = "";
   }
   echo "</form>";

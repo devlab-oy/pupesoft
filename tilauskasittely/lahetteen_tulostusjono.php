@@ -978,7 +978,8 @@ if ($tee2 == '') {
   }
 
   $siirtolista_where = '';
-  if ($toim == "SIIRTOLISTA" and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
+
+  if ($toim == "SIIRTOLISTA") {
     $siirtolista_where = " AND lasku.toimitustavan_lahto = 0 ";
   }
 

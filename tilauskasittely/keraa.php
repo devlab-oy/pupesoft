@@ -3311,6 +3311,10 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
           }
         }
 
+        if (strpos($tila, 'G') !== false) {
+          $lahetekpl = $yhtiorow["oletus_lahetekpl_siirtolista"];
+        }
+
         echo "<tr><th>".t("Lähete").":</th><th colspan='$spanni'>";
 
         $query = "SELECT *

@@ -1058,24 +1058,11 @@ if (!function_exists("tee_jt_tilaus")) {
                   }
                 }
 
-                $kom_qry = "SELECT kommentti
-                            FROM tilausrivi
-                            WHERE yhtio = '$kukarow[yhtio]'
-                            AND tunnus  = '$tunnus_nyt'
-                            AND kpl     = 0";
-                $kom_res = pupe_query($kom_qry);
-                $kom_row = mysql_fetch_assoc($kom_res);
-                $kom = $kom_row['kommentti'];
-
-                $uusi_kommentti = "Toimitettu tilauksella:" . " " . $kukarow['kesken'];
-
-                if ($kom != '') {
-                  $uusi_kommentti = $kom . " / " . $uusi_kommentti;
-                }
+                $uusi_kommentti = t("Toimitettu tilauksella").": " . $kukarow['kesken'];
 
                 $query = "UPDATE tilausrivi SET
                           tyyppi      = 'D',
-                          kommentti = '$uusi_kommentti'
+                          kommentti = IF(kommentti = '', '$uusi_kommentti', CONCAT(kommentti, ' / ', '$uusi_kommentti'))
                           $poista_update_lisa
                           WHERE yhtio = '$kukarow[yhtio]'
                           and tunnus  = '$tunnus_nyt'

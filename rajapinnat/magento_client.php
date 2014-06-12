@@ -87,6 +87,16 @@ class MagentoClient {
   private $_configurable_tuote_nimityskentta = "nimitys";
 
   /**
+   * Miten configurable-tuotteen lapsituotteet näytetään verkkokaupassa, oletuksena NOT_VISIBLE_INDIVIDUALLY
+   */
+  private $_configurable_lapsituote_nakyvyys = 'NOT_VISIBLE_INDIVIDUALLY';
+  
+  /**
+   * Tuotteen erikoisparametrit jotka tulevat jostain muualta kuin dynaamisista parametreistä
+   */
+  private $_verkkokauppatuotteet_erikoisparametrit = array ();
+
+  /**
    * Tämän yhteyden aikana sattuneiden virheiden määrä
    */
   private $_error_count = 0;
@@ -202,6 +212,8 @@ class MagentoClient {
     $hintakentta = $this->_hintakentta;
 
     $selected_category = $this->_kategoriat;
+    
+    $verkkokauppatuotteet_erikoisparametrit = $this->_verkkokauppatuotteet_erikoisparametrit;
 
     // Tuote countteri
     $count = 0;
@@ -289,8 +301,16 @@ class MagentoClient {
         $key = $parametri['option_name'];
         $multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
       }
-
-
+      
+      if (count($verkkokauppatuotteet_erikoisparametrit) > 0) {
+        foreach ($verkkokauppatuotteet_erikoisparametrit as $erikoisparametri) {
+          $key = $erikoisparametri['nimi'];
+          if (isset($tuote[$erikoisparametri['arvo']])) {
+            $multi_data[$key] = $this->get_option_id($key, $tuote[$erikoisparametri['arvo']]);
+          }
+        }
+      }
+      
 
       $tuote_data = array(
         'categories'            => $category_ids,
@@ -312,8 +332,6 @@ class MagentoClient {
         'target'                => utf8_encode($tuote['target']),
         'tier_price'            => $tuote_ryhmahinta_data,
         'additional_attributes' => array('multi_data' => $multi_data),
-        'name2'                 => utf8_encode("Secondary name"),
-        'pickup_product'        => TRUE,
       );
 
       // Lisätään tai päivitetään tuote
@@ -461,6 +479,12 @@ class MagentoClient {
 
         $lapsituotteet_array[] = $tuote['tuoteno'];
       }
+      // Configurable-tuotteelle myös ensimmäisen lapsen parametrit
+      $configurable_multi_data = array();
+      foreach ($tuotteet[0]['parametrit'] as $parametri) {
+          $key = $parametri['option_name'];
+          $configurable_multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
+      }
 
       // Configurable tuotteen tiedot
       $configurable = array(
@@ -482,7 +506,7 @@ class MagentoClient {
         'meta_title'            => '',
         'meta_keyword'          => '',
         'meta_description'      => '',
-        'color'                 => "Magenta",
+        'additional_attributes' => array('multi_data' => $configurable_multi_data),
         'associated_skus'       => $lapsituotteet_array,
       );
 
@@ -507,7 +531,7 @@ class MagentoClient {
             'price'                 => $tuote[$hintakentta],
             'short_description'     => utf8_encode($tuote['lyhytkuvaus']),
             'featured_priority'     => utf8_encode($tuote['jarjestys']),
-            'visibility'            => self::NOT_VISIBLE_INDIVIDUALLY,
+            'visibility'            => constant("MagentoClient::{$this->_configurable_lapsituote_nakyvyys}"),
             'additional_attributes' => array('multi_data' => $multi_data),
           );
 
@@ -982,6 +1006,7 @@ class MagentoClient {
    */
   private function get_option_id($name, $value) {
 
+    $name = utf8_encode($name);
     $attribute_list = $this->getAttributeList();
     $attribute_id = '';
 
@@ -996,6 +1021,11 @@ class MagentoClient {
 
     // Jos attribuuttia ei löytynyt niin turha ettiä option valuea
     if (empty($attribute_id)) return 0;
+
+    // Jos dynaaminen parametri on matkalla tekstikenttään niin idtä ei tarvita, palautetaan vaan arvo
+    if ($attribute_type == 'text' or $attribute_type == 'textarea') {
+        return $value;
+    }
 
     // Haetaan kaikki attribuutin optionssit
     $options = $this->_proxy->call(
@@ -1013,7 +1043,7 @@ class MagentoClient {
     }
 
     // Jos optionssia ei ole mutta tyyppi on select niin luodaan se
-    if ($attribute_type == "select") {
+    if ($attribute_type == "select" or $attribute_type == "multiselect") {
       $optionToAdd = array(
         "label" => array(
           array(
@@ -1030,7 +1060,7 @@ class MagentoClient {
           $optionToAdd
         )
       );
-      echo "Luotiin uusi attribuutti $value optioid $attribute_id";
+      $this->log("Luotiin uusi attribuutti $value optioid $attribute_id");
 
       // Haetaan kaikki attribuutin optionssit uudestaan..
       $options = $this->_proxy->call(
@@ -1439,6 +1469,25 @@ class MagentoClient {
    */
   public function setConfigurableNimityskentta($configurable_tuote_nimityskentta) {
     $this->_configurable_tuote_nimityskentta = $configurable_tuote_nimityskentta;
+  }
+
+  /**
+   * Asettaa configurable_lapsituote_nakyvyys-muuttujan
+   * Oletus 'NOT_VISIBLE_INDIVIDUALLY'
+   *
+   * @param string  $configurable_lapsituote_nakyvyys
+   */
+  public function setConfigurableLapsituoteNakyvyys($configurable_lapsituote_nakyvyys) {
+    $this->_configurable_lapsituote_nakyvyys = $configurable_lapsituote_nakyvyys;
+  }
+
+  /**
+   * Asettaa verkkokauppatuotteiden erikoisparametrit
+   *
+   * @param string  $verkkokauppatuotteet_erikoisparametrit
+   */
+  public function setVerkkokauppatuotteetErikoisparametrit($verkkokauppatuotteet_erikoisparametrit) {
+    $this->_verkkokauppatuotteet_erikoisparametrit = $verkkokauppatuotteet_erikoisparametrit;
   }
 
   /**

@@ -37,27 +37,27 @@ $query = "SELECT lasku.*,
           if (lasku.tila = 'L' and lasku.laskunro > 0,
                 (   SELECT lasku.mapvm
                     FROM lasku l
-                    WHERE l.yhtio = lasku.yhtio
-                    AND l.laskunro = lasku.laskunro
-                    AND l.tila = 'U'
+                    WHERE l.yhtio               = lasku.yhtio
+                    AND l.laskunro              = lasku.laskunro
+                    AND l.tila                  = 'U'
                     LIMIT 1), lasku.mapvm) mapvm,
           if (lasku.tila = 'U',
                 (   SELECT group_concat(distinct alv SEPARATOR ' ')
                     FROM tilausrivi use index (uusiotunnus_index)
-                    WHERE tilausrivi.yhtio = lasku.yhtio
-                    AND tilausrivi.uusiotunnus = lasku.tunnus
-                    AND tilausrivi.var != 'O'
-                    AND tilausrivi.tyyppi != 'D'),
+                    WHERE tilausrivi.yhtio      = lasku.yhtio
+                    AND tilausrivi.uusiotunnus  = lasku.tunnus
+                    AND tilausrivi.var         != 'O'
+                    AND tilausrivi.tyyppi      != 'D'),
                 (   SELECT group_concat(distinct alv SEPARATOR ' ')
                     FROM tilausrivi use index (yhtio_otunnus)
-                    WHERE tilausrivi.yhtio = lasku.yhtio
-                    AND tilausrivi.otunnus = lasku.tunnus
-                    AND tilausrivi.var != 'O'
-                    AND tilausrivi.tyyppi != 'D')) alv
+                    WHERE tilausrivi.yhtio      = lasku.yhtio
+                    AND tilausrivi.otunnus      = lasku.tunnus
+                    AND tilausrivi.var         != 'O'
+                    AND tilausrivi.tyyppi      != 'D')) alv
           FROM lasku
           LEFT JOIN laskun_lisatiedot
           ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
-          WHERE lasku.tunnus = '$tunnus'
+          WHERE lasku.tunnus                    = '$tunnus'
           $lis
           and lasku.yhtio='$kukarow[yhtio]'";
 $aresult = pupe_query($query);

@@ -26,7 +26,12 @@ if ($tee != '') {
              avainsana as a2 READ,
              avainsana as a3 READ,
              avainsana as a4 READ,
-             yhtion_toimipaikat READ";
+             varastopaikat as v READ,
+             yhtion_toimipaikat AS yt READ,
+             yhtio READ,
+             yhtion_parametrit READ,
+             yhtion_toimipaikat READ,
+             yhtion_toimipaikat_parametrit READ";
   $result = pupe_query($query);
 }
 else {
@@ -735,6 +740,8 @@ if ($tee == 'UUSIPAIKKA') {
 
       # Haetaan varaston toimipaikan parametrit
       $_var_tp = hae_varaston_toimipaikka($_mihin_varastoon);
+      $_var_tp = (!empty($_var_tp) and is_array($_var_tp)) ? $_var_tp['tunnus'] : null;
+      
       $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $_var_tp);
 
       if ($yhtiorow['kerayserat'] == 'K') {

@@ -39,7 +39,7 @@ if ($handle = opendir($kansio)) {
     $kukarow = hae_kukarow('admin', $yhtio);
 
     // Jos lasku on liian vanha, ei k‰sitell‰, l‰hetet‰‰n maililla
-    if (onko_lasku_liian_vanha($lasku)) {
+    if (onko_lasku_liian_vanha($kansio.$lasku)) {
       continue;
     }
 
@@ -74,7 +74,7 @@ if ($handle = opendir($kansio)) {
     $kukarow = hae_kukarow('admin', $yhtio);
 
     // Jos lasku on liian vanha, ei k‰sitell‰, l‰hetet‰‰n maililla
-    if (onko_lasku_liian_vanha($lasku)) {
+    if (onko_lasku_liian_vanha($kansio.$lasku)) {
       continue;
     }
 
@@ -110,7 +110,7 @@ if ($handle = opendir($kansio)) {
     $kukarow = hae_kukarow('admin', $yhtio);
 
     // Jos lasku on liian vanha, ei k‰sitell‰, l‰hetet‰‰n maililla
-    if (onko_lasku_liian_vanha($lasku)) {
+    if (onko_lasku_liian_vanha($kansio.$lasku)) {
       continue;
     }
 
@@ -145,7 +145,7 @@ if ($handle = opendir($kansio)) {
     $kukarow = hae_kukarow('admin', $yhtio);
 
     // Jos lasku on liian vanha, ei k‰sitell‰, l‰hetet‰‰n maililla
-    if (onko_lasku_liian_vanha($lasku)) {
+    if (onko_lasku_liian_vanha($kansio.$lasku)) {
       continue;
     }
 
@@ -180,7 +180,7 @@ if ($handle = opendir($kansio)) {
     $kukarow = hae_kukarow('admin', $yhtio);
 
     // Jos lasku on liian vanha, ei k‰sitell‰, l‰hetet‰‰n maililla
-    if (onko_lasku_liian_vanha($lasku)) {
+    if (onko_lasku_liian_vanha($kansio.$lasku)) {
       continue;
     }
 
@@ -235,7 +235,7 @@ if ($handle = opendir($kansio)) {
     $kukarow = hae_kukarow('admin', $yhtio);
 
     // Jos lasku on liian vanha, ei k‰sitell‰, l‰hetet‰‰n maililla
-    if (onko_lasku_liian_vanha($lasku)) {
+    if (onko_lasku_liian_vanha($kansio.$lasku)) {
       continue;
     }
 

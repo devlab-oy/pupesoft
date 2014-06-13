@@ -16,6 +16,15 @@
       <td>
         <input type='text' name='maara' value='<?php echo $maara ?>' size='6' autofocus>
         <b><?php echo $tuote['yksikko'] ?><b>
+        <?php if( $tuote['inventointilista_naytamaara']!='' ) { ?>
+          <strong>
+            <?php if( $tuote['inventointilista_naytamaara']==='H' ) { ?>
+              (hyllyssä: <?php echo sprintf('%.2f', $tuote['saldo']-$hylrow['keratty']); ?>)
+            <?php } elseif( $tuote['inventointilista_naytamaara']==='S' ) { ?>
+              (saldo: <?php echo sprintf('%.2f', $tuote['saldo']); ?>)
+            <?php } ?>
+          </strong>
+        <?php } ?>
       </td>
     </tr>
     <?php if (!empty($tuote['tyyppi'])): ?>

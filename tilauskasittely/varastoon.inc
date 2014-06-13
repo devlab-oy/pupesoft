@@ -8,25 +8,25 @@ if (!function_exists("etsi_tuotteen_varastoonvientipaiva")) {
   function etsi_tuotteen_varastoonvientipaiva($tuotenumero) {
     global $kukarow, $yhtiorow;
 
-    $query = "SELECT tuote.tuoteno, sum(tuotepaikat.saldo) saldo
+    $siirtopaivamaara = time();
+
+    $vuosi = "2014";
+
+    // haetaan kaikki tulot ja valmistukset
+    $query = "SELECT tuote.tuoteno, tuote.kehahin, sum(tuotepaikat.saldo) saldo
               FROM tuotepaikat
               JOIN tuote USING (yhtio,tuoteno)
-              WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+              WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
               and tuote.tuoteno = '$tuotenumero'
-              GROUP BY 1";
-    $res = pupe_query($query);
-    $trow = mysql_fetch_assoc($res);
-    // Jos saldo on positiivinen niin varastoonvienti on t‰n‰‰n
-    if ($trow['saldo'] >= 0) {
-     return time();
-    }
-
-    query_dump($query);
+              GROUP BY 1,2
+              ORDER BY 1";
+    $result = pupe_query($query);
 
     echo "<table>";
     echo "<tr>";
     echo "<th>".t("Tuoteno")."</th>";
     echo "<th>".t("Saldo ennen tuloa")."</th>";
+    echo "<th>".t("Arvo ennen tuloa")."</th>";
     echo "<th>".t("M‰‰r‰")."</th>";
     echo "<th>".t("Eropros")."</th>";
     echo "<th>".t("Uusikehapvm")."</th>";
@@ -34,109 +34,105 @@ if (!function_exists("etsi_tuotteen_varastoonvientipaiva")) {
     echo "<th>".t("Laskenta")."</th>";
     echo "</tr>";
 
-    $saldo_nyt   = $saldo_nyt_alkup = $trow["saldo"];
+    while ($trow = mysql_fetch_assoc($result)) {
 
-    $query = "SELECT tunnus, tuoteno, kpl, kplhinta, hinta, laji, if (laji in ('tulo','valmistus'), kplhinta, hinta)*kpl arvo, laadittu
-              FROM tapahtuma
-              WHERE yhtio   = '$kukarow[yhtio]'
-              and tuoteno   = '$tuotenumero'
-              and laadittu >= '{$yhtiorow['tilikausi_alku']} 00:00:00'
-              ORDER BY laadittu desc
-              LIMIT 1";
-    $tresult = pupe_query($query);
-    query_dump($query);
-    $rivit       = array();
-    $tulo_siirto = array();
-    $lask        = 0;
+      $vararvo_nyt = $trow["saldo"] * $trow["kehahin"];
+      $saldo_nyt   = $saldo_nyt_alkup = $trow["saldo"];
+      echo "alkusaldo $saldo_nyt <br>";
 
-    while ($tarow = mysql_fetch_assoc($tresult)) {
+      $query = "SELECT tunnus, tuoteno, kpl, kplhinta, hinta, laji, if (laji in ('tulo','valmistus'), kplhinta, hinta)*kpl arvo, laadittu
+                FROM tapahtuma
+                WHERE yhtio   = '$kukarow[yhtio]'
+                and tuoteno   = '$trow[tuoteno]'
+                and laadittu >= '{$yhtiorow['tilikausi_alku']}'
+                ORDER BY laadittu desc";
+      $tresult = pupe_query($query);
+query_dump($query);
+      $rivit       = array();
+      $tulo_siirto = array();
+      $lask        = 0;
 
-      $rivit[$lask] = $tarow;
+      while ($tarow = mysql_fetch_assoc($tresult)) {
 
+        $rivit[$lask] = $tarow;
 
+        $vararvo_nyt -= $tarow["arvo"];
 
-      // Ep‰kuranteissa saldo ei muutu
-      if ($tarow["laji"] != "Ep‰kurantti") {
-        $saldo_nyt -= $tarow["kpl"];
+        // Ep‰kuranteissa saldo ei muutu
+        if ($tarow["laji"] != "Ep‰kurantti") {
+          echo " v‰hennet‰‰n {$tarow['kpl']} t‰st‰ $saldo_nyt ";
+          $saldo_nyt -= $tarow["kpl"];
+        }
+
+        // Siirret‰‰n vain edellisen vuoden tuloja
+        $vuosiloppu = ($vuosi*10000000000)+1231235959;
+//and $tarow["laji"] == "tulo"
+echo "saldonyt $saldo_nyt <br>";
+echo "<pre>";
+var_dump($tarow);
+echo "</pre>";
+        if ($saldo_nyt < 0 and preg_replace("/[^0-9]/", "", $tarow["laadittu"]) < $yhtiorow['tilikausi_loppu']) {
+          echo "<tr>";
+          echo "<td>$trow[tuoteno]</td>";
+          echo "<td>$saldo_nyt</td>";
+          echo "<td>$vararvo_nyt</td>";
+          echo "<td>$tarow[kpl]</td>";
+          echo "<td>$tarow[laji]</td>";
+          echo "<td>$tarow[laadittu]</td>";
+          echo "<td></td>";
+          echo "<td>$lask</td>";
+          echo "</tr>";
+
+          // T‰m‰ tulo pit‰isi siirt‰‰ jonnekkin jotta saldo ei menisi miinukselle
+          $tulo_siirto[] = array($tarow["tunnus"], ($saldo_nyt+$tarow["kpl"]), $lask, $tarow["laadittu"]);
+        }
+
+        $lask++;
       }
+      echo "<pre>";
+      var_dump($tulo_siirto);
+      echo "</pre>";
+      if (count($tulo_siirto) > 0) {
+        krsort($tulo_siirto);
 
-      if (true) {#$saldo_nyt < 0 and $tarow['laji'] == 'laskutus') {
-        echo "<tr>";
-        echo "<td>$tuotenumero</td>";
-        echo "<td>$saldo_nyt</td>";
-        echo "<td>$tarow[kpl]</td>";
-        echo "<td>$tarow[laji]</td>";
-        echo "<td>$tarow[laadittu]</td>";
-        echo "<td></td>";
-        echo "<td>$lask</td>";
-        echo "</tr>";
-        
-        // Varastoonvientip‰iv‰ pit‰isi laittaa ennen t‰t‰ tapahtumaa
-        $siirtopaivamaara = $tarow['laadittu'];
-      }
+        foreach ($tulo_siirto as $tulo) {
 
-      $lask++;
-    }
+          $tunnus    = $tulo[0];
+          $saldo_nyt  = $tulo[1];
+          $ind    = $tulo[2];
+          $pvm    = $tulo[3];
 
-    if (count($tulo_siirto) > 0) {
-      krsort($tulo_siirto);
+          ksort($rivit);
 
-      foreach ($tulo_siirto as $tulo) {
+          foreach ($rivit as $lask => $tarow) {
 
-        $tunnus    = $tulo[0];
-        $saldo_nyt  = $tulo[1];
-        $ind    = $tulo[2];
-        $pvm    = $tulo[3];
+            // Looptataan haluttuun kohtaan
+            if ($lask < $ind) {
+              continue;
+            }
 
-        ksort($rivit);
+            // Ep‰kuranteissa saldo ei muutu
+            if ($tarow["laji"] != "Ep‰kurantti") {
+              $saldo_nyt -= $tarow["kpl"];
+            }
 
-        foreach ($rivit as $lask => $tarow) {
-
-          // Looptataan haluttuun kohtaan
-          if ($lask < $ind) {
-            continue;
-          }
-
-          // Ep‰kuranteissa saldo ei muutu
-          if ($tarow["laji"] != "Ep‰kurantti") {
-            $saldo_nyt -= $tarow["kpl"];
-          }
-          // T‰m‰ tulo pit‰‰ siirt‰‰ t‰h‰n
-          if ($saldo_nyt < 0) {
-            echo "lˆytyi:{$tarow['laadittu']} <br>";
-            array_splice($rivit, $lask+1, 0, array(0 => $rivit[$ind]));
-            unset($rivit[$ind]);
-            break;
+            // T‰m‰ tulo pit‰‰ siirt‰‰ t‰h‰n
+            if ($saldo_nyt >= 0) {
+              echo "morjestamorjestaa <br>";
+              echo "<pre>";
+              var_dump($tarow);
+              echo "</pre>";
+              $siirtopaivamaara = $tarow['laadittu'] < $siirtopaivamaara ? $tarow['laadittu'] : $siirtopaivamaara;
+              array_splice($rivit, $lask+1, 0, array(0 => $rivit[$ind]));
+              unset($rivit[$ind]);
+              break;
+            }
           }
         }
       }
     }
-
-    echo "</table><br><br>";
     echo "DEBUG: Siirtop‰iv‰ksi haluttaisiin laittaa $siirtopaivamaara <br>";
-
-    //Tarkistetaan onko lˆydetty p‰iv‰m‰‰r‰ sallittu, onko sen j‰lkeen ollut inventointeja tai ep‰kurant.
-    $query = "SELECT *
-              FROM tapahtuma
-              WHERE yhtio  = '{$kukarow['yhtio']}'
-              and tuoteno  = '{$tuotenumero}'
-              and laji     IN ('ep‰kurantti','tulo')
-              and laadittu >= '{$siirtopaivamaara}'";
-    $ressu = pupe_query($query);
-    
-    if (mysql_num_rows($rest) == 0) {
-      query_dump($query);
-      return $siirtopaivamaara;
-    }
-    else {
-      return date();
-    }
-
-    $pp = "12";
-    $kk = "12";
-    $vv = "2015";
-    return array($pp, $kk, $vv);
-
+    return $siirtopaivamaara;
   }
 }
 # Muuttuja kun vied‰‰n tilausrivi kerrallaan.
@@ -1218,13 +1214,15 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
                 <input type='text' name='vva[$tilrivirow[tunnus]]' value='$vpvva' size='5'></td>";
     }
     elseif ($yhtiorow["varastoonvientipaiva"] == "R") {
-      list($vpppa, $vpkka, $vpvva) = etsi_tuotteen_varastoonvientipaiva($tilrivirow['tuoteno']);
+      //list($vpppa, $vpkka, $vpvva) = etsi_tuotteen_varastoonvientipaiva($tilrivirow['tuoteno']);
       //list($vpvva, $vpkka, $vpppa) = explode("-", substr(etsi_tuotteen_varastoonvientipaiva($tilrivirow['tuoteno']), 0, 10));
-      //$varastoonvienti = etsi_tuotteen_varastoonvientipaiva($tilrivirow['tuoteno']);
+      $varastoonvienti = etsi_tuotteen_varastoonvientipaiva($tilrivirow['tuoteno']);
+      //$pasdlas  = strtodate($pasdlas);
+      //var_dump($pasdlas);
       //echo "---".$varastoonvienti."---";
-      //list($vpppa, $vpkka, $vpvva) = explode("-",$varastoonvienti);
+      //list($vpppa, $vpkka, $vpvva) = explode("-",$varastoonvienti); $vpppa.$vpkka.$vpvva
       $varastoon_msg .= "<td valign='top' nowrap>
-                $vpppa.$vpkka.$vpvva({$yhtiorow['tilikausi_alku']})
+                $varastoonvienti---({$yhtiorow['tilikausi_alku']})
                 <input type='hidden' name='ppa[$tilrivirow[tunnus]]' value='$vpppa' size='3'>
                 <input type='hidden' name='kka[$tilrivirow[tunnus]]' value='$vpkka' size='3'>
                 <input type='hidden' name='vva[$tilrivirow[tunnus]]' value='$vpvva' size='5'></td>";

@@ -1777,6 +1777,7 @@ if ($tee == 'P') {
         $lahete_tulostus_emailiin   = 0;
         $laheteprintterinimi     = "";
         $onko_nouto         = "";
+        $lahetekpl_alkuperainen = $lahetekpl;
 
         while ($laskurow = mysql_fetch_assoc($lasresult)) {
 

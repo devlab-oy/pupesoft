@@ -1778,10 +1778,6 @@ if ($tee == 'P') {
         $laheteprintterinimi     = "";
         $onko_nouto         = "";
 
-        if ($pks_lahete) {
-          require 'inc/pks_lahete.inc';
-        }
-
         while ($laskurow = mysql_fetch_assoc($lasresult)) {
 
           // Nollataan tämä:
@@ -1829,6 +1825,10 @@ if ($tee == 'P') {
 
             $oslapp = $kirrow['komento'];
             $oslapp_mediatyyppi = $kirrow['mediatyyppi'];
+          }
+
+          if ($pks_lahete) {
+            require 'inc/pks_lahete.inc';
           }
 
           if (($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0)

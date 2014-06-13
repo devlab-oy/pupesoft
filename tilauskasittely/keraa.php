@@ -30,6 +30,8 @@ if (!isset($keraajalist))   $keraajalist   = '';
 if (!isset($sel_lahete))   $sel_lahete   = array();
 if (!isset($sel_oslapp))   $sel_oslapp   = array();
 
+$pks_lahete = @file_exists("../inc/pks_lahete.inc");
+
 $keraysvirhe = 0;
 $virherivi   = 0;
 $muuttuiko   = '';
@@ -1775,6 +1777,10 @@ if ($tee == 'P') {
         $lahete_tulostus_emailiin   = 0;
         $laheteprintterinimi     = "";
         $onko_nouto         = "";
+
+        if ($pks_lahete) {
+          require 'inc/pks_lahete.inc';
+        }
 
         while ($laskurow = mysql_fetch_assoc($lasresult)) {
 

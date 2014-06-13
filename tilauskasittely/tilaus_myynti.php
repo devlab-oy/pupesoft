@@ -32,6 +32,7 @@ if ($e1 and $e2 and $e3) {
 $sahkoinen_tilausliitanta = @file_exists("../inc/sahkoinen_tilausliitanta.inc");
 $sahkoinen_lahete = @file_exists("../inc/sahkoinen_lahete.class.inc");
 $sahkoinen_lahete_toim = array('RIVISYOTTO', 'PIKATILAUS');
+$pks_lahete = @file_exists("../inc/pks_lahete.inc");
 
 require 'validation/Validation.php';
 

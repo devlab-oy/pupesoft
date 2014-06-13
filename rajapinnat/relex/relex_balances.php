@@ -64,7 +64,7 @@ $k_rivi = 0;
 
 while ($row = mysql_fetch_assoc($res)) {
   $rivi  = "{$row['varasto']};";
-  $rivi .= "{$row['tuote']};";
+  $rivi .= pupesoft_csvstring($row['tuote']).";";
   $rivi .= "{$row['saldo']};";
   $rivi .= "BALANCE";
   $rivi .= "\n";

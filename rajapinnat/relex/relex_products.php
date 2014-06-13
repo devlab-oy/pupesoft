@@ -77,10 +77,10 @@ while ($row = mysql_fetch_assoc($res)) {
   $toimres = pupe_query($tulossa_query);
   $toimrow = mysql_fetch_assoc($toimres);
 
-  $rivi  = "{$row['tuoteno']};";
-  $rivi .= "{$row['nimitys']};";
+  $rivi  = pupesoft_csvstring($row['tuoteno']).";";
+  $rivi .= pupesoft_csvstring($row['nimitys']).";";
   $rivi .= "{$toimrow['liitostunnus']};";
-  $rivi .= "{$row['try']};";
+  $rivi .= pupesoft_csvstring($row['try']).";";
   $rivi .= "{$toimrow['osto_era']};";
   $rivi .= "{$row['kehahin']}";
   $rivi .= "\n";

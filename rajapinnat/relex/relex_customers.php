@@ -58,8 +58,8 @@ $k_rivi = 0;
 
 while ($row = mysql_fetch_assoc($res)) {
   $rivi  = "{$row['tunnus']};";
-  $rivi .= "{$row['nimi']};";
-  $rivi .= "{$row['ryhma']}";
+  $rivi .= pupesoft_csvstring($row['nimi']).";";
+  $rivi .= pupesoft_csvstring($row['ryhma']);
   $rivi .= "\n";
 
   fwrite($fp, $rivi);

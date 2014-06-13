@@ -87,16 +87,16 @@ while ($row = mysql_fetch_assoc($res)) {
     $type = "ORDER";
   }
 
-  $rivi  = "{$row['varasto']};";        // Inventory location code
-  $rivi .= "{$row['tuote']};";          // Item code
-  $rivi .= "{$type};";                  // Open order type
-  $rivi .= "{$row['maara']};";          // Open order quantity in inventory units
-  $rivi .= "{$row['toimituspaiva']};";  // Estimated delivery date of the order
-  $rivi .= ";";                         // Open order value in currency
-  $rivi .= ";";                         // Sales or purchase order number
-  $rivi .= ";";                         // Sales or purchase order row number
-  $rivi .= ";";                         // Additional order type that can be used to distinct normal sales and deliveries from special sales and deliveries
-  $rivi .= "{$row['partner']}";         // Customer for sales orders and Supplier for purchase orders
+  $rivi  = "{$row['varasto']};";                    // Inventory location code
+  $rivi .= pupesoft_csvstring($row['tuote']).";";   // Item code
+  $rivi .= "{$type};";                              // Open order type
+  $rivi .= "{$row['maara']};";                      // Open order quantity in inventory units
+  $rivi .= "{$row['toimituspaiva']};";              // Estimated delivery date of the order
+  $rivi .= ";";                                     // Open order value in currency
+  $rivi .= ";";                                     // Sales or purchase order number
+  $rivi .= ";";                                     // Sales or purchase order row number
+  $rivi .= ";";                                     // Additional order type that can be used to distinct normal sales and deliveries from special sales and deliveries
+  $rivi .= "{$row['partner']}";                     // Customer for sales orders and Supplier for purchase orders
   $rivi .= "\n";
 
   fwrite($fp, $rivi);

@@ -133,17 +133,17 @@ while ($row = mysql_fetch_assoc($res)) {
     }
   }
 
-  $rivi  = "{$row['pvm']};";      // Transaction posting date
-  $rivi .= "{$row['varasto']};";  // Inventory location code
-  $rivi .= "{$row['tuoteno']};";  // Item code
-  $rivi .= "{$type};";            // Transaction type
-  $rivi .= "{$row['kpl']};";      // Transaction quantity in inventory units
-  $rivi .= "{$arvo};";            // Transaction value in currency
-  $rivi .= ";";                   // Purchase cost of sales transaction
-  $rivi .= ";";                   // Sales or purchase order number
-  $rivi .= ";";                   // Sales or purchase order row number
-  $rivi .= ";";                   // Additional subtype for sales and delivery transactions
-  $rivi .= "{$partner}";          // Customer for sales transactions, Supplier for incoming deliveries, Sending/receiving warehouse for stock transfers
+  $rivi  = "{$row['pvm']};";                          // Transaction posting date
+  $rivi .= "{$row['varasto']};";                      // Inventory location code
+  $rivi .= pupesoft_csvstring($row['tuoteno']).";";   // Item code
+  $rivi .= "{$type};";                                // Transaction type
+  $rivi .= "{$row['kpl']};";                          // Transaction quantity in inventory units
+  $rivi .= "{$arvo};";                                // Transaction value in currency
+  $rivi .= ";";                                       // Purchase cost of sales transaction
+  $rivi .= ";";                                       // Sales or purchase order number
+  $rivi .= ";";                                       // Sales or purchase order row number
+  $rivi .= ";";                                       // Additional subtype for sales and delivery transactions
+  $rivi .= "{$partner}";                              // Customer for sales transactions, Supplier for incoming deliveries, Sending/receiving warehouse for stock transfers
   $rivi .= "\n";
 
   fwrite($fp, $rivi);

@@ -66,7 +66,7 @@ while ($row = mysql_fetch_assoc($res)) {
   }
 
   $rivi  = "{$row['tunnus']};";
-  $rivi .= "{$row['nimi']};";
+  $rivi .= pupesoft_csvstring($row['nimi']).";";
   $rivi .= "{$replensihed};";
   $rivi .= "";
   $rivi .= "\n";

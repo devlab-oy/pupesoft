@@ -657,6 +657,13 @@ if ($aja == "run") {
   }
 
   if ($poistettu > 0) echo date("d.m.Y @ G:i:s").": Poistettiin $poistettu poistettavaksi merkattua tuotepaikkaa.\n";
+
+
+  /**
+   * Synkataan uusimmat mysqlaliakset
+  */
+  require "synkronoi_mysqlaliakset.php";
+
 }
 
 if (!$php_cli) {

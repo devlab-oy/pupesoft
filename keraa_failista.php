@@ -191,17 +191,6 @@ if ($tee == "keraa") {
     $valittu_tulostin = $vakadr_tulostin = $prirow['printteri1'];
     $valittu_oslapp_tulostin = $prirow['printteri3'];
 
-    # Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰
-    $avainsana_where = " and avainsana.selite = '{$tilausrow['varasto']}'
-                          and avainsana.selitetark = '{$tilausrow['yhtio_toimipaikka']}'
-                          and avainsana.selitetark_2 = 'printteri1'";
-
-    $tp_tulostin = t_avainsana("VARTOIMTULOSTIN", '', $avainsana_where, '', '', "selitetark_3");
-
-    if (!empty($tp_tulostin)) {
-      $valittu_tulostin = $vakadr_tulostin = $tp_tulostin;
-    }
-
     $lasku_yhtio = "";
     $real_submit = "Merkkaa ker‰tyksi";
 

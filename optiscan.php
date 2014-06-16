@@ -651,33 +651,15 @@
         $printteri_row = mysql_fetch_assoc($printteri_res);
 
         // setataan muuttujat keraa.php:ta varten
-        $tee = "P";
-        $toim = "";
-        $id = $nro;
-        $keraajanro = "";
+        $tee         = "P";
+        $toim        = "";
+        $id          = $nro;
+        $keraajanro  = "";
         $keraajalist = $kukarow['kuka'];
 
         // vakadr-tulostin on aina sama kuin l‰hete-tulostin
         $valittu_tulostin = $vakadr_tulostin = $printteri_row['printteri1'];
         $valittu_oslapp_tulostin = $printteri_row['printteri3'];
-
-        # Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰
-        $query = "SELECT varasto, yhtio_toimipaikka
-                  FROM lasku
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus = {$keraysera_otunnukset[0]}";
-        $var_tp_res = pupe_query($query);
-        $var_tp_row = mysql_fetch_assoc($var_tp_res);
-
-        $avainsana_where = " and avainsana.selite = '{$var_tp_row['varasto']}'
-                              and avainsana.selitetark = '{$var_tp_row['yhtio_toimipaikka']}'
-                              and avainsana.selitetark_2 = 'printteri1'";
-
-        $tp_tulostin = t_avainsana("VARTOIMTULOSTIN", '', $avainsana_where, '', '', "selitetark_3");
-
-        if (!empty($tp_tulostin)) {
-          $valittu_tulostin = $vakadr_tulostin = $tp_tulostin;
-        }
 
         $lahetekpl = $vakadrkpl = $yhtiorow["oletus_lahetekpl"];
         $oslappkpl = $yhtiorow["oletus_oslappkpl"];

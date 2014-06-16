@@ -1954,7 +1954,7 @@ if ($tila == "" and !isset($jatka)) {
                 WHERE yhtio  = '{$kukarow['yhtio']}'
                 AND otunnus  = {$srow['tunnus']}
                 AND var     != 'P'
-                AND tyyppi != 'D'";
+                AND tyyppi  != 'D'";
       $tilausrivi_result = pupe_query($query);
       $tilausrivit = mysql_fetch_assoc($tilausrivi_result);
     }

@@ -1307,7 +1307,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
             $myy_hyllyvali[$i] = $zrow["hyllyvali"];
             $myy_hyllytaso[$i] = $zrow["hyllytaso"];
             $myy_varasto[$i]   = $zrow["varasto"];
-            $myy_era[$i]      = $zrow["era"];
+            $myy_era[$i]       = $zrow["era"];
 
             if (!in_array(strtoupper($tuoteno), $tuoteperhe)) {
 
@@ -3026,15 +3026,9 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
     if ($yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K' and $paivita_hyllyt_varastosiirto) {
       $p_hyllyalue = $myy_hyllyalue_temp;
-      $p_hyllynro = $myy_hyllynro_temp;
+      $p_hyllynro  = $myy_hyllynro_temp;
       $p_hyllytaso = $myy_hyllytaso_temp;
       $p_hyllyvali = $myy_hyllyvali_temp;
-    }
-
-    //jos on reklamaatiosta tehty siirtolista, niin varataankin saldoa
-    if (isset($tilausrivi['palautus_varasto']) and $tilausrivi['palautus_varasto'] != '') {
-      $varattu = $kpl;
-      $var = '';
     }
 
     // lis‰t‰‰n puuterivi

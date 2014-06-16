@@ -249,7 +249,8 @@ if (!function_exists('luo_varastosiirtorivi')) {
     $orvoteikiinnosta = "EITOD";
 
     // Kirjanpidollisessa siirret‰‰n aina ne rivit jotka on tilauksella.
-    if ($varastosiirtotyyppi == 'K') {
+    // Sama koskee reklaamaatiosta luotavaa siirtolistaa
+    if ($varastosiirtotyyppi == 'K' or $varastosiirtotyyppi == 'P') {
       $var = 'H';
     }
     else {

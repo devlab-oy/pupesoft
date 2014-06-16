@@ -955,7 +955,7 @@ if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] 
 
         if ($kukarow["extranet"] == "" and in_array($toim, $sahkoinen_lahete_toim) and $toimipaikat_row['liiketunnus'] != '') {
 
-          require "inc/sahkoinen_lahete.class.inc";
+          require_once "inc/sahkoinen_lahete.class.inc";
 
           sahkoinen_lahete($laskurow);
         }
@@ -1200,7 +1200,10 @@ if ($tee == "VALMIS"
   elseif ($kassamyyja_kesken == 'ei' and $seka == 'X') {
     $query_maksuehto = "SELECT *
                         FROM maksuehto
-                        WHERE yhtio='$kukarow[yhtio]' and kateinen != '' and kaytossa = '' and (maksuehto.sallitut_maat = '' or maksuehto.sallitut_maat like '%$laskurow[maa]%')";
+                        WHERE yhtio='$kukarow[yhtio]'
+                         AND kateinen != ''
+                         AND kaytossa  = ''
+                         AND (maksuehto.sallitut_maat = '' or maksuehto.sallitut_maat like '%$laskurow[maa]%')";
     $maksuehtores = pupe_query($query_maksuehto);
 
     $maksuehtorow = mysql_fetch_assoc($maksuehtores);
@@ -1229,11 +1232,17 @@ if ($tee == "VALMIS"
             pankki = Number(document.getElementById('pankkikortti').value.replace(\",\",\".\"));
             luotto = Number(document.getElementById('luottokortti').value.replace(\",\",\".\"));
 
-            summa = kaikkiyhteensa - (kateinen + pankki + luotto);
+            summa = kaikkiyhteensa - (kateinen + pankki + luotto);";
 
-            summa = Math.round(summa*100)/100;
 
-            if (summa == 0 && (document.getElementById('kateismaksu').value != '' || document.getElementById('pankkikortti').value != '' || document.getElementById('luottokortti').value != '')) {
+    if ($yhtiorow['sallitaanko_kateismyynti_laskulle'] != '') {
+      echo "laskulle = Number(document.getElementById('laskulle').value.replace(\",\",\".\"));
+            summa = summa - laskulle;";
+    }
+
+    echo "  summa = Math.round(summa*100)/100;
+
+            if (summa == 0 && (document.getElementById('kateismaksu').value != '' || document.getElementById('pankkikortti').value != '' || document.getElementById('luottokortti').value != '' || document.getElementById('laskulle').value != '')) {
               summa = 0.00;
               document.getElementById('hyvaksy_nappi').disabled = false;
               document.getElementById('seka').value = 'kylla';
@@ -1251,6 +1260,10 @@ if ($tee == "VALMIS"
     echo "<tr><td>".t("Käteisellä")."</td><td><input type='text' name='kateismaksu[kateinen]' id='kateismaksu' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
     echo "<tr><td>".t("Pankkikortilla")."</td><td><input type='text' name='kateismaksu[pankkikortti]' id='pankkikortti' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
     echo "<tr><td>".t("Luottokortilla")."</td><td><input type='text' name='kateismaksu[luottokortti]' id='luottokortti' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
+
+    if ($yhtiorow['sallitaanko_kateismyynti_laskulle'] != '') {
+      echo "<tr style='$style'><td>".t("Laskulle")."</td><td><input type='text' name='kateismaksu[laskulle]' id='laskulle' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
+    }
 
     echo "<tr><th>".t("Erotus")."</th><td name='loppusumma' id='loppusumma' align='right'><strong>0.00</strong></td><td>$laskurow[valkoodi]</td></tr>";
     echo "<tr><td class='back'><input type='submit' name='hyvaksy_nappi' id='hyvaksy_nappi' value='".t("Hyväksy")."' disabled></td></tr>";
@@ -2899,7 +2912,7 @@ if ($tee == '') {
   // jos asiakasnumero on annettu
   if ($laskurow["liitostunnus"] != 0 or ($laskurow["liitostunnus"] == 0 and $kukarow["kesken"] > 0 and $toim != "PIKATILAUS")) {
 
-    $query = "SELECT fakta, luokka, asiakasnro, osasto, laji, ryhma, verkkotunnus, chn
+    $query = "SELECT fakta, luokka, asiakasnro, osasto, laji, ryhma, verkkotunnus, chn, rahtivapaa_alarajasumma
               FROM asiakas
               WHERE yhtio = '{$kukarow['yhtio']}'
               and tunnus  = '{$laskurow['liitostunnus']}'";
@@ -5026,6 +5039,40 @@ if ($tee == '') {
 
   // jos ollaan jo saatu tilausnumero aikaan listataan kaikki tilauksen rivit..
   if ((int) $kukarow["kesken"] > 0) {
+
+    if ($kukarow['extranet'] != '' and $laskurow['rahtivapaa'] == '' and $faktarow['rahtivapaa'] == '' and ($faktarow['rahtivapaa_alarajasumma'] != 0 or $yhtiorow['rahtivapaa_alarajasumma'] != 0)) {
+
+      $query_ale_lisa = generoi_alekentta('M');
+
+      $query = "SELECT SUM(
+                (tuote.myyntihinta / if ('{$yhtiorow['alv_kasittely']}' = '', (1+tilausrivi.alv/100), 1) * {$query_ale_lisa} * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt))
+                +
+                (tuote.myyntihinta / if ('{$yhtiorow['alv_kasittely']}' = '', (1+tilausrivi.alv/100), 1) * {$query_ale_lisa} * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * (tilausrivi.alv/100))
+                ) rivihinta
+                FROM tilausrivi
+                JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+                WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                AND tilausrivi.otunnus = '{$kukarow['kesken']}'
+                AND tilausrivi.tuoteno NOT IN ('{$yhtiorow["rahti_tuotenumero"]}','{$yhtiorow["jalkivaatimus_tuotenumero"]}','{$yhtiorow["erilliskasiteltava_tuotenumero"]}')";
+      $tilriv_chk_res = pupe_query($query);
+      $tilriv_chk_row = mysql_fetch_assoc($tilriv_chk_res);
+
+      if ($tilriv_chk_row['rivihinta'] != '') {
+
+        $rahtivapaa_alarajasumma = $faktarow['rahtivapaa_alarajasumma'] != 0 ? $faktarow['rahtivapaa_alarajasumma'] : $yhtiorow['rahtivapaa_alarajasumma'];
+        $_jaljella = $rahtivapaa_alarajasumma - $tilriv_chk_row['rivihinta'];
+
+        echo "<br /><table>";
+        echo "<tr><th>",t("Rahtivapaaseen toimitukseen jäljellä"),"</th></tr>";
+        echo "<tr><td>";
+
+        echo $_jaljella > 0 ? sprintf("%.2f", $_jaljella) : 0;
+        echo " {$laskurow['valkoodi']}";
+
+        echo "</td></tr>";
+        echo "</table>";
+      }
+    }
 
     $laskentalisa_riveille = "";
 

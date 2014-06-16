@@ -90,7 +90,7 @@ class MagentoClient {
    * Miten configurable-tuotteen lapsituotteet näytetään verkkokaupassa, oletuksena NOT_VISIBLE_INDIVIDUALLY
    */
   private $_configurable_lapsituote_nakyvyys = 'NOT_VISIBLE_INDIVIDUALLY';
-  
+
   /**
    * Tuotteen erikoisparametrit jotka tulevat jostain muualta kuin dynaamisista parametreistä
    */
@@ -212,7 +212,7 @@ class MagentoClient {
     $hintakentta = $this->_hintakentta;
 
     $selected_category = $this->_kategoriat;
-    
+
     $verkkokauppatuotteet_erikoisparametrit = $this->_verkkokauppatuotteet_erikoisparametrit;
 
     // Tuote countteri
@@ -301,7 +301,7 @@ class MagentoClient {
         $key = $parametri['option_name'];
         $multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
       }
-      
+
       if (count($verkkokauppatuotteet_erikoisparametrit) > 0) {
         foreach ($verkkokauppatuotteet_erikoisparametrit as $erikoisparametri) {
           $key = $erikoisparametri['nimi'];
@@ -310,7 +310,7 @@ class MagentoClient {
           }
         }
       }
-      
+
 
       $tuote_data = array(
         'categories'            => $category_ids,

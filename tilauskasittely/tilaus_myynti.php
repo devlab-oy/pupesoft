@@ -1231,7 +1231,7 @@ if ($tee == "VALMIS"
             kateinen = Number(document.getElementById('kateismaksu').value.replace(\",\",\".\"));
             pankki = Number(document.getElementById('pankkikortti').value.replace(\",\",\".\"));
             luotto = Number(document.getElementById('luottokortti').value.replace(\",\",\".\"));
-            
+
             summa = kaikkiyhteensa - (kateinen + pankki + luotto);";
 
 

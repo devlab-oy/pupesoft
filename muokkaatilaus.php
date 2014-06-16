@@ -27,9 +27,20 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
               AND kuka    != '{$kukarow['kuka']}'";
     $result = pupe_query($query);
 
+    $query = "SELECT *
+              FROM lasku
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = '{$otunnus}'
+              AND tila = 'N'
+              AND alatila = 'F'";
+    $result_tila = pupe_query($query);
+
     if (mysql_num_rows($result) != 0) {
       $row = mysql_fetch_assoc($result);
       echo t("Tilaus on aktiivisena k‰ytt‰j‰ll‰")," {$row['nimi']} ({$row['kuka']}). ",t("Tilausta ei voi t‰ll‰ hetkell‰ muokata");
+    }
+    elseif (mysql_num_rows($result_tila) == 0) {
+      echo t("Tilaus ei ole en‰‰ kesken eik‰ odota hyv‰ksynt‰‰"),".";
     }
     else {
       echo false;

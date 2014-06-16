@@ -619,7 +619,6 @@
         $valmis_era_chk_res = pupe_query($query);
 
         $keraysera_vyohyke = 0;
-        $keraysera_otunnukset = array();
 
         while ($valmis_era_chk_row = mysql_fetch_assoc($valmis_era_chk_res)) {
           $keraysera_maara[$valmis_era_chk_row['tunnus']] = $valmis_era_chk_row['kpl_keratty'];
@@ -640,7 +639,6 @@
           $vertaus_hylly[$valmis_era_chk_row['tilausrivi']] = $varattu_row['varastopaikka_rekla'];
 
           $keraysera_vyohyke = $valmis_era_chk_row["keraysvyohyke"];
-          array_push($keraysera_otunnukset, $valmis_era_chk_row['otunnus']);
         }
 
         $query = "SELECT printteri1, printteri3

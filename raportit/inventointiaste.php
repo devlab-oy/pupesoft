@@ -1466,11 +1466,6 @@ function hae_inventoinnit(&$request) {
               AND avainsana.selite     = tuote.try
               AND avainsana.laji       = 'TRY'
               AND avainsana.kieli      = '{$yhtiorow['kieli']}')
-            JOIN varastopaikat
-            ON ( varastopaikat.yhtio = tapahtuma.yhtio
-              AND concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
-              AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
-              AND varastopaikat.tunnus IN (".implode(', ', $request['valitut_varastot']).") )
             LEFT JOIN kuka
             ON ( kuka.yhtio = tapahtuma.yhtio
               AND kuka.kuka            = tapahtuma.laatija )
@@ -1487,6 +1482,7 @@ function hae_inventoinnit(&$request) {
             WHERE tapahtuma.yhtio      = '{$yhtio}'
               AND tapahtuma.laadittu BETWEEN '{$request['alku_aika']}' AND '{$request['loppu_aika']}'
               AND tapahtuma.laji       = 'Inventointi'
+              AND tapahtuma.varasto IN (".implode(', ', $request['valitut_varastot']).")
             {$tapahtuma_where}
             {$inventointilaji_rajaus}
             {$ei_huomioida_lisa}

@@ -1891,8 +1891,7 @@ while ($tietue = fgets($fd)) {
                           JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
                             AND varastopaikat.tyyppi       != ''
                             AND varastopaikat.prioriteetti  > 0
-                            AND concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-                            AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+                            AND varastopaikat.tunnus = tuotepaikat.varasto
                             $verkkokauppavarasto_li)
                           WHERE tuotepaikat.yhtio           = '$kukarow[yhtio]'
                           AND tuotepaikat.tuoteno           = '$tuoteno'

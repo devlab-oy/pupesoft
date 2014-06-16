@@ -34,13 +34,8 @@ if ($tee != '') {
   }
 
   if (!empty($varasto)) {
-
     $varasto = (int) $varasto;
-
-    $varastolisa = "JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
-              and concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
-              and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
-              and varastopaikat.tunnus = '{$varasto}')";
+    $varastolisa = "and tilausrivi.varasto = {$varasto})";
   }
   else {
     $varastolisa = "";
@@ -52,9 +47,9 @@ if ($tee != '') {
             concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
             FROM tilausrivi
             JOIN lasku ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)
-            {$varastolisa}
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
             {$aikalisa}
+            {$varastolisa}
             and tilausrivi.var     not in ('P','J','O','S')
             and tilausrivi.tilkpl  <> tilausrivi.kpl
             ORDER BY sorttauskentta, tuoteno";

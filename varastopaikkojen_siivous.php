@@ -650,7 +650,7 @@ if ($tee == "LISTAAVIRHEELLISETRIVIT") {
               and tuote.tuoteno    = tilausrivi.tuoteno
               and tuote.ei_saldoa  = '')
             LEFT OUTER JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
-              AND varastopaikat.tunnus = tuotepaikat.varasto)
+              AND varastopaikat.tunnus = tilausrivi.varasto)
             WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
             AND tilausrivi.tyyppi  in ('L','G','V')
             AND tilausrivi.jt + tilausrivi.varattu != 0

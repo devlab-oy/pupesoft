@@ -591,18 +591,19 @@ if ($id > 0) {
   echo "<option value=''>".t("Ei tulosteta")."</option>";
   echo "<option value='oletukselle' $sel>".t("Oletustulostimelle")."</option>";
 
+   $_apuprintteri = "";
+
   # Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰
-  $avainsana_where = " and avainsana.selite = '{$row['varasto']}'
-                        and avainsana.selitetark = '{$row['yhtio_toimipaikka']}'
-                        and avainsana.selitetark_2 = 'printteri1'";
+  if (!empty($row['yhtio_toimipaikka'])) {
+    $avainsana_where = " and avainsana.selite       = '{$row['varasto']}'
+                         and avainsana.selitetark   = '{$row['yhtio_toimipaikka']}'
+                         and avainsana.selitetark_2 = 'printteri1'";
 
-  $tp_tulostin = t_avainsana("VARTOIMTULOSTIN", '', $avainsana_where, '', '', "selitetark_3");
+    $tp_tulostin = t_avainsana("VARTOIMTULOSTIN", '', $avainsana_where, '', '', "selitetark_3");
 
-  if (!empty($tp_tulostin)) {
-    $_apuprintteri = $tp_tulostin;
-  }
-  else {
-    $_apuprintteri = "";
+    if (!empty($tp_tulostin)) {
+      $_apuprintteri = $tp_tulostin;
+    }
   }
 
   while ($kirrow = mysql_fetch_array($kirre)) {

@@ -2963,8 +2963,8 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
       $query = "SELECT pakkaamo.printteri1, pakkaamo.printteri3, varastopaikat.printteri5
                 from pakkaamo
                 join varastopaikat ON pakkaamo.yhtio = varastopaikat.yhtio and varastopaikat.tunnus = '$otsik[varasto]'
-                where pakkaamo.yhtio='$kukarow[yhtio]'
-                and pakkaamo.tunnus='$otsik[pakkaamo]'
+                where pakkaamo.yhtio = '$kukarow[yhtio]'
+                and pakkaamo.tunnus  = '$otsik[pakkaamo]'
                 order by pakkaamo.tunnus";
     }
     elseif ($otsik['tulostusalue'] != '' and $otsik['varasto'] != '') {
@@ -2979,21 +2979,23 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
     elseif ($otsik["varasto"] == '') {
       $query = "SELECT *
                 from varastopaikat
-                where yhtio='$kukarow[yhtio]' AND tyyppi != 'P'
+                where yhtio = '$kukarow[yhtio]'
+                AND tyyppi != 'P'
                 order by alkuhyllyalue,alkuhyllynro
                 limit 1";
     }
     else {
       $query = "SELECT *
-                from varastopaikat
-                where yhtio='$kukarow[yhtio]' and tunnus='$otsik[varasto]'
-                order by alkuhyllyalue,alkuhyllynro";
+                FROM varastopaikat
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND tunnus  = '$otsik[varasto]'
+                ORDER BY alkuhyllyalue,alkuhyllynro";
     }
     $prires = pupe_query($query);
 
 
     if (mysql_num_rows($prires) > 0) {
-      $prirow= mysql_fetch_assoc($prires);
+      $prirow = mysql_fetch_assoc($prires);
 
       $lahete_printteri = "";
       //l‰hete
@@ -3002,14 +3004,16 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
       }
 
       # Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰
-      $avainsana_where = " and avainsana.selite = '{$otsik['varasto']}'
-                            and avainsana.selitetark = '{$otsik['yhtio_toimipaikka']}'
-                            and avainsana.selitetark_2 = 'printteri1'";
+      if (!empty($otsik['yhtio_toimipaikka'])) {
+        $avainsana_where = " and avainsana.selite       = '{$otsik['varasto']}'
+                             and avainsana.selitetark   = '{$otsik['yhtio_toimipaikka']}'
+                             and avainsana.selitetark_2 = 'printteri1'";
 
-      $tp_tulostin = t_avainsana("VARTOIMTULOSTIN", '', $avainsana_where, '', '', "selitetark_3");
+        $tp_tulostin = t_avainsana("VARTOIMTULOSTIN", '', $avainsana_where, '', '', "selitetark_3");
 
-      if (!empty($tp_tulostin)) {
-        $lahete_printteri = $tp_tulostin;
+        if (!empty($tp_tulostin)) {
+          $lahete_printteri = $tp_tulostin;
+        }
       }
 
       $oslappu_printteri = "";

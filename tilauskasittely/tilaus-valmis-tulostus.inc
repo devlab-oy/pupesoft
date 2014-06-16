@@ -460,16 +460,17 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     }
 
     # Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰
-    $avainsana_where = " and avainsana.selite = '{$laskurow['varasto']}'
-                          and avainsana.selitetark = '{$laskurow['yhtio_toimipaikka']}'
-                          and avainsana.selitetark_2 = 'printteri1'";
+    if (!empty($laskurow['yhtio_toimipaikka'])) {
+      $avainsana_where = " and avainsana.selite       = '{$laskurow['varasto']}'
+                           and avainsana.selitetark   = '{$laskurow['yhtio_toimipaikka']}'
+                           and avainsana.selitetark_2 = 'printteri1'";
 
-    $tp_tulostin = t_avainsana("VARTOIMTULOSTIN", '', $avainsana_where, '', '', "selitetark_3");
+      $tp_tulostin = t_avainsana("VARTOIMTULOSTIN", '', $avainsana_where, '', '', "selitetark_3");
 
-    if (!empty($tp_tulostin)) {
-      $apuprintteri = $tp_tulostin;
+      if (!empty($tp_tulostin)) {
+        $apuprintteri = $tp_tulostin;
+      }
     }
-
     // k‰sinvalittu printteri
     if (isset($valittu_tulostin) and $valittu_tulostin != '') {
       $apuprintteri = $valittu_tulostin;

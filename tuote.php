@@ -2438,7 +2438,7 @@ if ($tee == 'Z') {
           echo "<td nowrap align='right' valign='top'>".hintapyoristys(hinta_kuluineen($tuoterow['tuoteno'], $prow['hinta']), 6, FALSE)."</td>";
 
           if ($prow["laji"] == "laskutus") {
-            $kate = kate_kuluineen($prow['tuoteno'], $prow['rivihinta'], $prow['hinta'] );
+            $kate = kate_kuluineen($prow['tuoteno'], $prow['rivihinta'], $prow['kate'] );
             $katepros = 100 * (1 - ($kate/$prow['rivihinta']));
             echo "<td nowrap align='right' valign='top'>".round($katepros,2)."%</td>";
           }

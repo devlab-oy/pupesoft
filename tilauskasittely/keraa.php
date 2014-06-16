@@ -1825,6 +1825,10 @@ if ($tee == 'P') {
             $oslapp_mediatyyppi = $kirrow['mediatyyppi'];
           }
 
+          if ($laskurow['tila'] == 'G') {
+            $lahetekpl = $yhtiorow["oletus_lahetekpl_siirtolista"];
+          }
+
           if (($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0)
             or (
               (in_array($laskurow["keraysvahvistus_lahetys"], array('k', 'L', 'M', 'N', 'Q', 'P')) or (in_array($yhtiorow["keraysvahvistus_lahetys"], array('k', 'L', 'M', 'N', 'Q', 'P')) and $laskurow["keraysvahvistus_lahetys"] == ''))

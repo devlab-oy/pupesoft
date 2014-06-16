@@ -988,13 +988,14 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
         //p‰ivitet‰‰n tuotepaikan listanumero ja listaaika
         $query = "UPDATE tuotepaikat
                   SET inventointilista  = '{$listanro}',
-                  inventointilista_aika = '{$listaaika}'
-                  WHERE yhtio           = '{$kukarow['yhtio']}'
-                  AND tuoteno           = '{$tuoterow['tuoteno']}'
-                  AND hyllyalue         = '{$tuoterow['hyllyalue']}'
-                  AND hyllynro          = '{$tuoterow['hyllynro']}'
-                  AND hyllyvali         = '{$tuoterow['hyllyvali']}'
-                  AND hyllytaso         = '{$tuoterow['hyllytaso']}'";
+                  inventointilista_aika       = '{$listaaika}',
+                  inventointilista_naytamaara = '{$naytasaldo}'
+                  WHERE yhtio                 = '{$kukarow['yhtio']}'
+                  AND tuoteno                 = '{$tuoterow['tuoteno']}'
+                  AND hyllyalue               = '{$tuoterow['hyllyalue']}'
+                  AND hyllynro                = '{$tuoterow['hyllynro']}'
+                  AND hyllyvali               = '{$tuoterow['hyllyvali']}'
+                  AND hyllytaso               = '{$tuoterow['hyllytaso']}'";
         $munresult = pupe_query($query, $masterlink);
       }
 

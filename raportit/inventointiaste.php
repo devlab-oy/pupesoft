@@ -1,5 +1,21 @@
 <?php
 
+if(isset($_COOKIE['inventointiaste_vain_saldoa']) === false or isset($_POST['vain_saldoa'])) {
+  $vain_saldoa = true;
+  $_POST['vain_saldoa'] = 'On';
+  setcookie("inventointiaste_vain_saldoa", '1', strtotime('now + 10 years'));
+}
+else {
+  if (isset($_POST['tee'])) {
+    $vain_saldoa = false;
+  }
+  else {
+    $vain_saldoa = $_COOKIE['inventointiaste_vain_saldoa'] === '1' ? true : false;
+  }
+
+  setcookie("inventointiaste_vain_saldoa", $vain_saldoa ? '1' : '0', strtotime('now + 10 years'));
+}
+
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
@@ -592,6 +608,7 @@ gauge();
 $request = array(
   'tee'             => $tee,
   'tallenna_exceliin'       => $tallenna_exceliin,
+  'vain_saldoa'         => $vain_saldoa,
   'ppa'             => $ppa,
   'kka'             => $kka,
   'vva'             => $vva,
@@ -844,12 +861,12 @@ function echo_arvot(&$request) {
 
   echo "<table>";
   echo "<tr>";
-  echo "<th>".t("Tuotepaikkojen inventointeja pit‰‰ suorittaa per p‰iv‰")."</th>";
+  echo "<th>".t("Tuotteiden Inventointeja Pit‰‰ Suorittaa Per P‰iv‰")."</th>";
   echo "<td>".round($inventointeja_per_paiva, 0)."</td>";
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>".t("Tuotepaikkoja valituissa varastoissa")."</th>";
+  echo "<th>".t("Tuotteita Valituissa Varastoissa")."</th>";
   echo "<td>{$tuotepaikkojen_lukumaara}</td>";
   echo "</tr>";
 
@@ -1001,6 +1018,13 @@ function echo_kayttoliittyma($request) {
   echo "<th>".t("Tallenna exceliin")."</th>";
   echo "<td><input type='checkbox' name='tallenna_exceliin' ".(!empty($request['tallenna_exceliin']) ? 'checked="checked"' : '')."/></td>";
   echo "</tr>";
+
+  echo '<tr>';
+  echo '<th>'.t('N‰yt‰ vain tuotepaikat, joilla on saldoa').'</th>';
+  echo '<td><input type="checkbox" name="vain_saldoa" '.(!empty($request['vain_saldoa'])
+    ? 'checked="checked"' : '').' /></td>';
+  echo '</tr>';
+
   echo "<tr>";
   echo "<th>", t("Syˆt‰ alkup‰iv‰m‰‰r‰"), " (", t("pp-kk-vvvv"), ")</th>";
   echo "<td><input type='text' name='ppa' id='ppa' class='alku_aika' value='{$request['ppa']}' size='3'>";
@@ -1258,6 +1282,19 @@ function hae_inventoitavien_lukumaara(&$request, $aikavali_tyyppi = '') {
 
   $ei_huomioida_lisa = ei_huomioida_tuotepaikkoja_avainsanoista($request['ei_huomioida_tuotepaikkoja_avainsanoista'], 'tapahtuma');
 
+  $vain_saldoa_join = '';
+  if( $request['vain_saldoa'] ) {
+    $vain_saldoa_join = '
+      JOIN tuotepaikat
+      ON ( tuotepaikat.yhtio = tapahtuma.yhtio
+        AND tuotepaikat.tuoteno = tuote.tuoteno
+        AND tuotepaikat.hyllyalue = tapahtuma.hyllyalue
+        AND tuotepaikat.hyllynro = tapahtuma.hyllynro
+        AND tuotepaikat.hyllytaso = tapahtuma.hyllytaso
+        AND tuotepaikat.hyllyvali = tapahtuma.hyllyvali
+        AND tuotepaikat.saldo <> 0 )';
+  }
+
   $query = "SELECT tapahtuma.hyllyalue AS hyllyalue, tapahtuma.hyllynro AS hyllynro, COUNT(DISTINCT CONCAT(tapahtuma.tuoteno, tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso)) AS kpl
             FROM tapahtuma USE INDEX (yhtio_laji_laadittu)
             JOIN tuote
@@ -1265,6 +1302,7 @@ function hae_inventoitavien_lukumaara(&$request, $aikavali_tyyppi = '') {
               AND tuote.tuoteno   = tapahtuma.tuoteno
               AND tuote.ei_saldoa = ''
               {$status_where} )
+            {$vain_saldoa_join}
             WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
             AND tapahtuma.laadittu BETWEEN '{$request['alku_aika']}' AND '{$request['loppu_aika']}'
             AND tapahtuma.laji    = 'Inventointi'
@@ -1300,11 +1338,17 @@ function hae_tuotepaikkojen_lukumaara(&$request) {
 
   $ei_huomioida_lisa = ei_huomioida_tuotepaikkoja_avainsanoista($request['ei_huomioida_tuotepaikkoja_avainsanoista'], 'tuotepaikat');
 
+  $vain_saldoa_where = '';
+  if( $request['vain_saldoa'] ) {
+    $vain_saldoa_where = 'AND tuotepaikat.saldo <> 0.00';
+  }
+
   $query = "SELECT tuotepaikat.hyllyalue as hyllyalue, tuotepaikat.hyllynro as hyllynro, count(*) as kpl
             FROM tuote
             JOIN tuotepaikat
             USING (yhtio, tuoteno)
             WHERE tuote.yhtio   = '{$kukarow['yhtio']}'
+            {$vain_saldoa_where}
             AND tuote.ei_saldoa = ''
             {$status_where}
             {$ei_huomioida_lisa}
@@ -1382,6 +1426,19 @@ function hae_inventoinnit(&$request) {
 
   $ei_huomioida_lisa = ei_huomioida_tuotepaikkoja_avainsanoista($request['ei_huomioida_tuotepaikkoja_avainsanoista'], 'tapahtuma');
 
+  $vain_saldoa_join = '';
+  if ($request['vain_saldoa']) {
+    $vain_saldoa_join = '
+      JOIN tuotepaikat
+      ON ( tuotepaikat.yhtio = tapahtuma.yhtio
+        AND tuotepaikat.tuoteno = tuote.tuoteno
+        AND tuotepaikat.hyllyalue = tapahtuma.hyllyalue
+        AND tuotepaikat.hyllynro = tapahtuma.hyllynro
+        AND tuotepaikat.hyllytaso = tapahtuma.hyllytaso
+        AND tuotepaikat.hyllyvali = tapahtuma.hyllyvali
+        AND tuotepaikat.saldo <> 0 )';
+  }
+
   $query = "SELECT DATE(tapahtuma.laadittu) laadittu_pvm,
             tapahtuma.laadittu,
             YEAR(tapahtuma.laadittu) as vuosi,
@@ -1426,6 +1483,7 @@ function hae_inventoinnit(&$request) {
             LEFT JOIN keraysvyohyke
             ON ( keraysvyohyke.yhtio = vh.yhtio
               AND keraysvyohyke.tunnus = vh.keraysvyohyke )
+            {$vain_saldoa_join}
             WHERE tapahtuma.yhtio      = '{$yhtio}'
               AND tapahtuma.laadittu BETWEEN '{$request['alku_aika']}' AND '{$request['loppu_aika']}'
               AND tapahtuma.laji       = 'Inventointi'

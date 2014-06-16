@@ -505,7 +505,7 @@ if ($tee == 'valmis') {
 
     if (mysql_num_rows($result) != 1) {
       if ($echotaanko) {
-        echo "<font style='error'>".t("VIRHE: Riviä ei löydy tai se on jo siirretty uudelle paikalle")."!</font><br>";
+        echo "<font class='error'>".t("VIRHE: Riviä ei löydy tai se on jo siirretty uudelle paikalle")."!</font><br>";
       }
 
     }
@@ -1641,9 +1641,9 @@ if (!empty($id) and $echotaanko) {
     }
 
     echo "</select></td><td>";
-
     echo t("Vain listaus")."<br>";
-    echo "<input type='checkbox' name='vainlistaus'></td>";
+    echo "<input type='checkbox' name='vainlistaus'></td><td>";
+    echo t("Järjestä tuotenumeron mukaan")."<br><input type='checkbox' name='jarjestys'></td>";
     echo "</table>";
   }
   echo "<br>";

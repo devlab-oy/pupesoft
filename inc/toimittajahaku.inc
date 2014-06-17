@@ -20,9 +20,9 @@ if ($tee == 'A') {
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
-       echo "<b>".t("Haulla ei löytynyt yhtään toimittajaa")."</b>";
+      echo "<b>".t("Haulla ei löytynyt yhtään toimittajaa")."</b>";
     }
-     $trow = mysql_fetch_array ($result);
+    $trow = mysql_fetch_array($result);
 
     echo "<table>";
     echo "<tr>";
@@ -68,7 +68,7 @@ if ($tee == 'A') {
     if (!isset($kausi)) $kausi='';
 
     if ($kausi=='') {
-      $alku = substr($yhtiorow["tilikausi_alku"],04) - 2;
+      $alku = substr($yhtiorow["tilikausi_alku"], 04) - 2;
       $th_lisa = "and lasku.tapvm >= '$alku' and lasku.tapvm <= '$yhtiorow[tilikausi_loppu]'";
       $kentta = "left(lasku.tapvm,4)";
     }
@@ -79,8 +79,8 @@ if ($tee == 'A') {
     }
 
     if (strlen($kausi) == 7) {
-      $kk= (int) substr($kausi,-2);
-      $vv= (int) substr($kausi,0,4);
+      $kk= (int) substr($kausi, -2);
+      $vv= (int) substr($kausi, 0, 4);
       $kk++;
 
       if ($kk > 12) {
@@ -104,16 +104,16 @@ if ($tee == 'A') {
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
-       echo "<font class='error'>".t("Haulla ei löytynyt yhtään laskua")."</font>";
+      echo "<font class='error'>".t("Haulla ei löytynyt yhtään laskua")."</font>";
     }
 
     echo "<table><tr>";
     for ($i = 0; $i < mysql_num_fields($result); $i++) {
-      echo "<th>" . t(mysql_field_name($result,$i))."</th>";
+      echo "<th>" . t(mysql_field_name($result, $i))."</th>";
     }
     echo "</tr>";
 
-    while ($trow=mysql_fetch_array ($result)) {
+    while ($trow=mysql_fetch_array($result)) {
       echo "<tr class='aktiivi'>";
       for ($i=0; $i<mysql_num_fields($result); $i++) {
         if ($i==0) {
@@ -127,7 +127,7 @@ if ($tee == 'A') {
     }
     echo "</table><br><br>";
 
-    require ("footer.inc");
+    require "footer.inc";
     exit;
   }
   elseif ($laji == 'K' or $laji == 'H' or $laji == 'M' or $laji == 'Y' or $laji == 'Q' or $laji == 'o') {
@@ -157,7 +157,7 @@ if ($tee == 'A') {
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
-       echo "<b>".t("Haulla ei löytynyt yhtään toimittajaa")."</b>";
+      echo "<b>".t("Haulla ei löytynyt yhtään toimittajaa")."</b>";
     }
     else {
       echo "<table>";
@@ -167,7 +167,7 @@ if ($tee == 'A') {
       echo "<th>".t("Postitp")."</th>";
       echo "</tr>";
 
-       while ($trow = mysql_fetch_array($result)) {
+      while ($trow = mysql_fetch_array($result)) {
         echo "<tr>";
         echo "<td>".tarkistahetu($trow["ytunnus"])."</td>";
         echo "<td>$trow[nimi]</td><td>$trow[postitp]</td>";
@@ -217,23 +217,37 @@ if ($tee == 'A') {
       echo "<input type='text' name='vv2' value='$vv2' size='4'>";
       echo "</td>";
 
+      $monivalintalaatikot = array();
+
       $query = "SELECT tunnus
                 FROM kustannuspaikka
                 WHERE yhtio   = '$kukarow[yhtio]'
-                and tyyppi    in ('K','P')
+                and tyyppi    = 'K'
                 and kaytossa != 'E'
                 LIMIT 1";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) > 0) {
+        $monivalintalaatikot[] = "KUSTP";
+      }
 
-        echo "</tr><tr><th>".t("Kustannuspaikka/Projekti")."</th><td>";
+      $query = "SELECT tunnus
+                FROM kustannuspaikka
+                WHERE yhtio   = '$kukarow[yhtio]'
+                and tyyppi    = 'P'
+                and kaytossa != 'E'
+                LIMIT 1";
+      $result = pupe_query($query);
 
-        $monivalintalaatikot = array("KUSTP","PROJEKTI");
+      if (mysql_num_rows($result) > 0) {
+        $monivalintalaatikot[] = "PROJEKTI";
+      }
+
+      if (count($monivalintalaatikot) > 0) {
+        echo "</tr><tr><th>".t("Tarkenne")."</th><td>";
+
         $noautosubmit = TRUE;
-        $piirra_otsikot = FALSE;
-
-        require ("tilauskasittely/monivalintalaatikot.inc");
+        require "tilauskasittely/monivalintalaatikot.inc";
 
         echo "</td>";
       }
@@ -246,7 +260,7 @@ if ($tee == 'A') {
 
       $th_lisa = '';
 
-      if ($laji=='M'){
+      if ($laji=='M') {
         $th_lisa = " and lasku.tila < 'S'";
       }
       elseif ($laji != 'K') {
@@ -265,7 +279,7 @@ if ($tee == 'A') {
         echo "<p><font class='error'>".t("Alkupäivämäärä virheellinen!")."</font></p>";
       }
 
-              if (@checkdate($kk2, $pp2, $vv2)) {
+      if (@checkdate($kk2, $pp2, $vv2)) {
         $aikalisa .= " AND lasku.tapvm <='$vv2-$kk2-$pp2' ";
         $limit = "NO";
       }
@@ -302,7 +316,7 @@ if ($tee == 'A') {
       $seraavako = mysql_num_rows($result);
 
       if (mysql_num_rows($result) == 0) {
-         echo "<font class='error'>".t("Haulla ei löytynyt yhtään laskua")."</font>";
+        echo "<font class='error'>".t("Haulla ei löytynyt yhtään laskua")."</font>";
       }
 
       pupe_DataTables(array(array($pupe_DataTables, 8, 8)));
@@ -336,7 +350,7 @@ if ($tee == 'A') {
 
       $yhteensa = array();
 
-      while ($trow = mysql_fetch_array ($result)) {
+      while ($trow = mysql_fetch_array($result)) {
         echo "<tr class='aktiivi'>";
 
         if ($kukarow['taso'] != 1 and $kukarow['taso'] != 2 and $kukarow['taso'] != 3) {
@@ -432,13 +446,13 @@ if ($tee == 'A') {
 
       }
 
-      require ("footer.inc");
+      require "footer.inc";
       exit;
     }
   }
   else {
     echo "Virheellinen laji!";
-    require ("footer.inc");
+    require "footer.inc";
     exit;
   }
 }

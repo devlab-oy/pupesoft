@@ -1081,6 +1081,19 @@ if (!function_exists("verkkolasku_in")) {
       $hyvak[2] = trim($hyvak[2]);
       $hyvak[1] = trim($hyvak[1]);
 
+      // Katsotaan onko meillä "tuuraajia" hyväksynnässä
+      for ($tuuraaja_i = 1; $tuuraaja_i < 6; $tuuraaja_i++) {
+        $query = "SELECT if (tuuraaja != '', tuuraaja, kuka) kuka
+                  FROM kuka
+                  WHERE yhtio = '{$yhtio}'
+                  AND kuka    = '{$hyvak[$tuuraaja_i]}'
+                  AND kuka   != ''";
+        $result = pupe_query($query);
+        $hyvak_row = mysql_fetch_assoc($result);
+
+        $hyvak[$tuuraaja_i] = $hyvak_row['kuka'];
+      }
+
       if (strlen($hyvak[5]) > 0) {
         $hyvaksyja_nyt=$hyvak[5];
         $tila = "H";
@@ -1116,20 +1129,6 @@ if (!function_exists("verkkolasku_in")) {
       $osto_kulu_alv    = (!isset($osto_kulu_alv) or trim($osto_kulu_alv) == '') ? 0 : round($osto_kulu_alv, 2);
       $osto_rahti_alv   = (!isset($osto_rahti_alv) or trim($osto_rahti_alv) == '') ? 0 : round($osto_rahti_alv, 2);
       $osto_rivi_kulu_alv = (!isset($osto_rivi_kulu_alv) or trim($osto_rivi_kulu_alv) == '') ? 0 : round($osto_rivi_kulu_alv, 2);
-
-      // Katsotaan onko meillä "tuuraajia" hyväksynnässä
-      for ($tuuraaja_i = 1; $tuuraaja_i < 6; $tuuraaja_i++) {
-        $query = "SELECT if (tuuraaja != '', tuuraaja, kuka) kuka
-                  FROM kuka
-                  WHERE yhtio = '{$yhtio}'
-                  AND kuka    = '{$hyvak[$tuuraaja_i]}'
-                  AND kuka   != ''";
-        $result = pupe_query($query);
-        $hyvak_row = mysql_fetch_assoc($result);
-
-        $hyvak[$tuuraaja_i] = $hyvak_row['kuka'];
-      }
-
 
       // Kirjoitetaan lasku
       $query = "INSERT into lasku set

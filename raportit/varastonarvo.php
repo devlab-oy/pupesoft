@@ -131,7 +131,8 @@ if (isset($ajetaan)) {
 
   $selectlisa    = "";
   $epakurlisa    = "";
-  $varastojoini   = "";
+  $varastojoini  = "";
+  $varastorajaus = "";
 
   // $lisa -muuttuja tulee monivalintalaatikot-inc:stä
 
@@ -157,9 +158,9 @@ if (isset($ajetaan)) {
     $groupby   .= "varastopaikat.nimitys,";
     $orderby   .= "varastopaikat.nimitys,";
 
-    $varastojoini = "JOIN varastopaikat ON (varastopaikat.yhtio=tuotepaikat.yhtio AND varastopaikat.tunnus IN (".implode(",", $varastot).") AND
-            concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) AND
-            concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')))";
+    $varastojoini = "JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+                     AND varastopaikat.tunnus = tuotepaikat.varasto)";
+    $varastorajaus = "AND tuotepaikat.varasto IN (".implode(",", $varastot).")";
   }
 
   if ($groupby != "") {
@@ -219,8 +220,9 @@ if (isset($ajetaan)) {
             FROM tuotepaikat
             JOIN tuote ON (tuote.tuoteno = tuotepaikat.tuoteno and tuote.yhtio = tuotepaikat.yhtio and tuote.ei_saldoa = '' $epakurlisa $lisa)
             $varastojoini
-            WHERE tuotepaikat.yhtio                         = '$kukarow[yhtio]'
-            and tuotepaikat.saldo                           <> 0
+            WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
+            and tuotepaikat.saldo <> 0
+            $varastorajaus
             $groupby
             $orderby";
   $result = mysql_query($query) or pupe_error($query);

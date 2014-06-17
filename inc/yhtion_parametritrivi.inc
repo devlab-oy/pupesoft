@@ -3695,6 +3695,32 @@ if (mysql_field_name($result, $i) == 'ostolaskun_kulutilit_kayttaytyminen') {
   $jatko = 0;
 }
 
+if (mysql_field_name($result, $i) == 'ostotilaus_myohassa_email_toimittajan_tuotetiedot') {
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'K' ? "selected" : "";
+
+  $ulos .= "<option value = ''>".t("Myöhässä olevat ostotilaukset raporttiin ei tulosteta toimittajan tuotetietoja")."</option>";
+  $ulos .= "<option value = 'K' {$sel}>".t("Myöhässä olevat ostotilaukset raporttiin tulostetaan toimittajan tuotenumero ja nimitys")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if (mysql_field_name($result, $i) == 'ostotilaus_myohassa_email_raportti_kieli') {
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel1 = $trow[$i] == 'EN' ? "selected" : "";
+  $sel2 = $trow[$i] == 'EE' ? "selected" : "";
+
+  $ulos .= "<option value = ''>".t("Suomi")."</option>";
+  $ulos .= "<option value = 'EN' {$sel1}>".t("Englanti")."</option>";
+  $ulos .= "<option value = 'EE' {$sel2}>".t("Eesti")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if (mysql_field_name($result, $i) == 'maksusopimus_toimitus') {
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 

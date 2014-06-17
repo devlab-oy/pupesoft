@@ -43,6 +43,10 @@ $muutparametrit = "$pvm_alku#$pvm_loppu#$minimi_myynti#$luottorajauksia#$luottov
 
 if ($ytunnus != '') {
 
+  if ($yhtiorow['toimipaikkakasittely'] == "L" and empty($toimipaikka_rajaus)) {
+    $toimipaikka_rajaus = 'X';
+  }
+
   require ("inc/asiakashaku.inc");
 
   if ($ytunnus == '') {

@@ -134,7 +134,11 @@ if ($tee == "") {
   if ($ytunnus != '' and (int) $asiakasid == 0) {
     $tila = "tee_raportti";
 
-    require "inc/asiakashaku.inc";
+    if ($yhtiorow['toimipaikkakasittely'] == "L" and empty($toimipaikka_rajaus)) {
+      $toimipaikka_rajaus = 'X';
+    }
+
+    require ("inc/asiakashaku.inc");
 
     if ($ytunnus == "") {
       $tila = "";
@@ -785,9 +789,9 @@ if ($tee == "") {
 
             $query = "SELECT *
                       FROM tiliointi USE INDEX (tositerivit_index)
-                      WHERE yhtio  = '{$kukarow['yhtio']}'
-                      AND ltunnus  = '{$maksurow['tunnus']}'
-                      AND tilino   IN ({$ratiro['rahatilit']}{$tilinolisa})
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND ltunnus = '{$maksurow['tunnus']}'
+                      AND tilino IN ({$ratiro['rahatilit']}{$tilinolisa})
                       AND korjattu = ''";
             $lasktilitre = pupe_query($query);
 

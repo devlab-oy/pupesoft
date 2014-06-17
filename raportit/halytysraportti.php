@@ -2707,9 +2707,12 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
   if (isset($POISTA) and isset($rappari) and $rappari != "") {
     $query = "DELETE FROM avainsana
               WHERE yhtio = '{$kukarow['yhtio']}'
+              and laji    = 'HALYRAP'
               AND selite  = '$rappari'";
-    pupe_query($query);
+    pupe_query($query, $masterlink);
+
     $rappari = "";
+
     echo "<font class='error'>".t("Raporttipohja poistettu")."! </font><br>";
   }
 

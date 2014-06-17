@@ -474,9 +474,8 @@ if ($tee == 'M' and isset($generoi)) {
               JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno {$lisa})
               {$abcjoin}
               {$keraysvyohykelisa}
-              WHERE tuotepaikat.yhtio     = '{$kukarow['yhtio']}'
-              AND CONCAT(RPAD(UPPER('{$varow['alkuhyllyalue']}'),  5, '0'),LPAD(UPPER('{$varow['alkuhyllynro']}'),  5, '0')) <= CONCAT(RPAD(UPPER(tuotepaikat.hyllyalue), 5, '0'),LPAD(UPPER(tuotepaikat.hyllynro), 5, '0'))
-              AND CONCAT(RPAD(UPPER('{$varow['loppuhyllyalue']}'), 5, '0'),LPAD(UPPER('{$varow['loppuhyllynro']}'), 5, '0')) >= CONCAT(RPAD(UPPER(tuotepaikat.hyllyalue), 5, '0'),LPAD(UPPER(tuotepaikat.hyllynro), 5, '0'))
+              WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+              AND tuotepaikat.varasto = {$kohdevarasto}
               AND tuotepaikat.halytysraja > 0
               {$kohdepaikkalisa}
               ORDER BY tuotepaikat.tuoteno";

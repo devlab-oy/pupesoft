@@ -2008,9 +2008,7 @@ else {
         }
       }
 
-      if ($pks_lahete) {
-        require 'inc/pks_lahete.inc';
-      }
+      @include 'inc/pks_lahete.inc';
     }
   } // end jos yksikin rivi kerätty else haara
 }

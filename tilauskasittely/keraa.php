@@ -30,8 +30,6 @@ if (!isset($keraajalist))  $keraajalist  = '';
 if (!isset($sel_lahete))   $sel_lahete   = array();
 if (!isset($sel_oslapp))   $sel_oslapp   = array();
 
-$pks_lahete = @file_exists("../inc/pks_lahete.inc");
-
 $keraysvirhe = 0;
 $virherivi   = 0;
 $muuttuiko   = '';
@@ -1844,9 +1842,7 @@ if ($tee == 'P') {
             $oslapp_mediatyyppi = $kirrow['mediatyyppi'];
           }
 
-          if ($pks_lahete) {
-            require 'inc/pks_lahete.inc';
-          }
+          @include 'inc/pks_lahete.inc';
 
           if (($komento != "" and $lahetekpl > 0)
             or (

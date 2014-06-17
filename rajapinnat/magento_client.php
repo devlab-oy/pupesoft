@@ -322,7 +322,6 @@ class MagentoClient {
         'status'                => self::ENABLED,
         'visibility'            => $visibility,
         'price'                 => sprintf('%0.2f', $tuote[$hintakentta]),
-        'special_price'         => $tuote['kuluprosentti'],
         'tax_class_id'          => $this->getTaxClassID(),
         'meta_title'            => '',
         'meta_keyword'          => '',
@@ -436,6 +435,9 @@ class MagentoClient {
     $category_tree = $this->getCategories();
 
     $hintakentta = $this->_hintakentta;
+    
+    // Erikoisparametrit
+    $verkkokauppatuotteet_erikoisparametrit = $this->_verkkokauppatuotteet_erikoisparametrit;
 
     // Mitä kenttää käytetään configurable_tuotteen nimenä
     $configurable_tuote_nimityskentta = $this->_configurable_tuote_nimityskentta;
@@ -486,6 +488,19 @@ class MagentoClient {
           $configurable_multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
       }
 
+      // Configurable-tuotteelle myös ensimmäisen lapsen erikoisparametrit
+      if (count($verkkokauppatuotteet_erikoisparametrit) > 0) {
+        foreach ($verkkokauppatuotteet_erikoisparametrit as $erikoisparametri) {
+          $key = $erikoisparametri['nimi'];
+          if (isset($tuotteet[0][$erikoisparametri['arvo']])) {
+            $configurable_multi_data[$key] = $this->get_option_id($key, $tuotteet[0][$erikoisparametri['arvo']]);
+          }
+        }
+      }
+      
+      var_dump($configurable_multi_data);
+      exit;
+
       // Configurable tuotteen tiedot
       $configurable = array(
         'categories'            => $category_ids,
@@ -501,7 +516,6 @@ class MagentoClient {
         'status'                => self::ENABLED,
         'visibility'            => self::CATALOG_SEARCH, // Configurablet nakyy kaikkialla
         'price'                 => $tuotteet[0][$hintakentta],
-        'special_price'         => $tuotteet[0]['kuluprosentti'],
         'tax_class_id'          => $this->getTaxClassID(), // 24%
         'meta_title'            => '',
         'meta_keyword'          => '',
@@ -1022,8 +1036,8 @@ class MagentoClient {
     // Jos attribuuttia ei löytynyt niin turha ettiä option valuea
     if (empty($attribute_id)) return 0;
 
-    // Jos dynaaminen parametri on matkalla tekstikenttään niin idtä ei tarvita, palautetaan vaan arvo
-    if ($attribute_type == 'text' or $attribute_type == 'textarea') {
+    // Jos dynaaminen parametri on matkalla teksti- tai hintakenttään niin idtä ei tarvita, palautetaan vaan arvo
+    if ($attribute_type == 'text' or $attribute_type == 'textarea' or $attribute_type == 'price') {
         return $value;
     }
 

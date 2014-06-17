@@ -687,6 +687,7 @@ if ($tuoteno != '') {
                 FROM tapahtuma
                 WHERE yhtio = '$kukarow[yhtio]'
                 AND tuoteno = '$tuoteno'
+                AND rivitunnus >= 0
                 AND left(laadittu,10) = '$pvm'
                 AND laji    in ('tulo','valmistus')
                 LIMIT 1";
@@ -699,10 +700,10 @@ if ($tuoteno != '') {
       $query = "SELECT *
                 FROM tapahtuma
                 WHERE yhtio    = '$kukarow[yhtio]'
-                and laji       in ('tulo','valmistus')
-                and tuoteno    = '$tuoteno'
-                and rivitunnus = '$rivitunnus'
-                and tunnus     = '$tapahtumatunnus'";
+                AND laji       in ('tulo','valmistus')
+                AND tuoteno    = '$tuoteno'
+                AND rivitunnus = '$rivitunnus'
+                AND tunnus     = '$tapahtumatunnus'";
       $result = pupe_query($query);
     }
 
@@ -728,9 +729,10 @@ if ($tuoteno != '') {
       $query = "SELECT sum(kpl) saldomuutos, sum(if(laji='Epäkurantti',1,0)) epaku
                 FROM tapahtuma
                 WHERE yhtio  = '$kukarow[yhtio]'
-                and tuoteno  = '$tuoteno'
-                and laadittu >= '$pvm'
-                and kpl      <> 0";
+                AND tuoteno  = '$tuoteno'
+                AND laadittu >= '$pvm'
+                AND rivitunnus >= 0
+                AND kpl      <> 0";
       $result = pupe_query($query);
 
       if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
@@ -760,12 +762,14 @@ if ($tuoteno != '') {
         }
 
         // haetaan tuotteelle edellinen kehahin
+        // skipataan myös siirto, vaikka siellä voikin olla hinta (siirron aikana hinta ei voi muuttua)
         $query = "SELECT hinta, tunnus, rivitunnus
                   FROM tapahtuma
                   WHERE yhtio  = '$kukarow[yhtio]'
                   and tuoteno  = '$tuoteno'
                   and laadittu < '$pvm'
-                  and laji     not in ('poistettupaikka', 'uusipaikka')
+                  AND rivitunnus >= 0
+                  and laji     not in ('poistettupaikka', 'uusipaikka', 'siirto')
                   ORDER BY laadittu DESC, tunnus DESC
                   LIMIT 1";
         $result = pupe_query($query);
@@ -821,10 +825,11 @@ if ($tuoteno != '') {
           $query = "SELECT tuoteno, laadittu, laji, kpl, kplhinta, hinta, tunnus, rivitunnus
                     FROM tapahtuma
                     WHERE yhtio   = '$kukarow[yhtio]'
-                    and tuoteno   = '$tuoteno'
-                    and laadittu  >= '$pvm'
+                    AND tuoteno   = '$tuoteno'
+                    AND laadittu  >= '$pvm'
+                    AND rivitunnus >= 0
                     AND laji     != 'korjaus'
-                    and kpl       <> 0
+                    AND kpl       <> 0
                     ORDER BY laadittu, tunnus";
           $result = pupe_query($query);
 

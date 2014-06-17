@@ -334,24 +334,15 @@ if (!function_exists("tilauksesta_ostotilaus")) {
             if ($tilrivirow['perheid'] == 0) $perheid = 0;
 
             if ($oletusostovarasto != 0) {
-              $varastopaikat_lisa = "    JOIN varastopaikat ON
-                                (
-                                  varastopaikat.yhtio = tuotepaikat.yhtio
-                                  AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-                                  AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-                                  AND varastopaikat.tunnus = '{$oletusostovarasto}'
-                                )";
-              $oletuspaikka_lisa = "";
+              $oletuspaikka_lisa = "AND tuotepaikat.varasto = '{$oletusostovarasto}'";
             }
             else {
-              $varastopaikat_lisa = "";
               $oletuspaikka_lisa = "AND tuotepaikat.oletus != ''";
             }
 
             // haetaan oletuspaikan tiedot niin laitetaan se riville
             $query = "SELECT tuotepaikat.*
                       FROM tuotepaikat
-                      {$varastopaikat_lisa}
                       WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
                       AND tuotepaikat.tuoteno = '{$tilrivirow['tuoteno']}'
                       {$oletuspaikka_lisa}

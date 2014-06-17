@@ -832,9 +832,8 @@ else {
                 $lisaa2
                 $abcjoin
                 JOIN tuotepaikat ON tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno
-                LEFT JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-                and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-                and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+                LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+                  AND varastopaikat.tunnus = tuotepaikat.varasto)
                 LEFT JOIN korvaavat ON tuote.yhtio = korvaavat.yhtio and tuote.tuoteno = korvaavat.tuoteno
                 WHERE tuote.$yhtiot
                 $lisaa
@@ -1735,9 +1734,8 @@ else {
             // Korvaavien paikkojen valittujen varastojen paikkojen saldo yhteensä, mukaan tulee myös aina ne saldot jotka ei kuulu mihinkään varastoalueeseen
             $query = "SELECT sum(saldo) saldo, varastopaikat.tunnus
                       FROM tuotepaikat
-                      LEFT JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-                      and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-                      and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+                      LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+                        AND varastopaikat.tunnus = tuotepaikat.varasto)
                       WHERE tuotepaikat.$varastot_yhtiot
                       and tuotepaikat.tuoteno='$korvarow[tuoteno]'
                       GROUP BY varastopaikat.tunnus
@@ -2812,9 +2810,8 @@ function saldo_funktio($tuoteno, $varastot_yhtiot, $varastot, $paikoittain, $lis
     // Kaikkien valittujen varastojen paikkojen saldo yhteensä, mukaan tulee myös aina ne saldot jotka ei kuulu mihinkään varastoalueeseen
     $query = "SELECT sum(saldo) saldo, varastopaikat.tunnus
               FROM tuotepaikat
-              JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-              and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-              and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+              JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+                AND varastopaikat.tunnus = tuotepaikat.varasto)
               WHERE tuotepaikat.{$varastot_yhtiot}
               and tuotepaikat.tuoteno='{$tuoteno}'
               GROUP BY varastopaikat.tunnus

@@ -163,8 +163,7 @@ if ($tee == "tulosta") {
             JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
             LEFT JOIN tullinimike ON (tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != '')
             LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
-            and concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'), lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'), lpad(upper(tilausrivi.hyllynro), 5, '0'))
-            and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'), lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'), lpad(upper(tilausrivi.hyllynro), 5, '0')))
+              AND varastopaikat.tunnus = tilausrivi.varasto)
             LEFT JOIN valuu ON (lasku.yhtio=valuu.yhtio and lasku.valkoodi=valuu.nimi)
             WHERE lasku.kohdistettu = 'X'
             and lasku.tila = 'K'
@@ -181,8 +180,7 @@ if ($tee == "tulosta") {
             JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
             LEFT JOIN tullinimike ON (tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != '')
             LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
-            and concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'), lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'), lpad(upper(tilausrivi.hyllynro), 5, '0'))
-            and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'), lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'), lpad(upper(tilausrivi.hyllynro), 5, '0')))
+              AND varastopaikat.tunnus = tilausrivi.varasto)
             LEFT JOIN valuu ON (lasku.yhtio=valuu.yhtio and lasku.valkoodi=valuu.nimi)
             WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
             and tilausrivi.tyyppi = 'O'

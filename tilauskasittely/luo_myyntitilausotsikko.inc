@@ -136,10 +136,13 @@ if (!function_exists("luo_myyntitilausotsikko")) {
       $valkoodi       = $asiakasrow["valkoodi"];
       $sisviesti1      = $asiakasrow["sisviesti1"];
       $rahtivapaa     = $asiakasrow["rahtivapaa"];
-      $comments      = "";
 
       if ($asiakasrow["myynti_kommentti1"] != "") {
-        $comments = $asiakasrow["myynti_kommentti1"];
+        $comments = trim($comments." ".$asiakasrow["myynti_kommentti1"]);
+      }
+
+      if ($asiakasrow["tilaus_viesti"] != "") {
+        $viesti = trim($viesti." ".$asiakasrow["tilaus_viesti"]);
       }
 
       //annetaan extranet-tilaukselle aina paras prioriteetti, tämä on hyvä porkkana.

@@ -153,14 +153,14 @@ if (isset($tee) and $tee == 'TOIMITA_ENNAKKO' and $yhtiorow["ennakkotilausten_to
 
         if ($laskurow["varasto"] > 0 and $varastorotunnus != $laskurow["varasto"]) {
           // Katotaan, ett‰ rivit myyd‰‰n halutusta varastosta
-          $query = "SELECT tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllytaso, tuotepaikat.hyllyvali
+          $query = "SELECT tuotepaikat.hyllyalue,
+                    tuotepaikat.hyllynro,
+                    tuotepaikat.hyllytaso,
+                    tuotepaikat.hyllyvali
                     FROM tuotepaikat
-                    JOIN varastopaikat on (varastopaikat.yhtio=tuotepaikat.yhtio
-                     and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-                     and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')))
-                    WHERE tuotepaikat.yhtio  = '{$kukarow['yhtio']}'
-                    AND tuotepaikat.tuoteno  = '{$rivirow['tuoteno']}'
-                    and varastopaikat.tunnus = '{$laskurow["varasto"]}'
+                    WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+                    AND tuotepaikat.tuoteno = '{$rivirow['tuoteno']}'
+                    and tuotepaikat.varasto = '{$laskurow["varasto"]}'
                     ORDER BY saldo desc
                     LIMIT 1";
           $tuotepaikka_result = pupe_query($query);

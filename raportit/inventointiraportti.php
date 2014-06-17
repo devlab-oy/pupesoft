@@ -294,8 +294,7 @@ else {
                       and tapahtuma.laadittu >= '$vva-$kka-$ppa 00:00:00'
                       and tapahtuma.laadittu <= '$vvl-$kkl-$ppl 23:59:59')
             JOIN varastopaikat ON (varastopaikat.yhtio = tapahtuma.yhtio
-                      and concat(rpad(upper(alkuhyllyalue), 5, '0'),lpad(upper(alkuhyllynro), 5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
-                      and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0')))
+              AND varastopaikat.tunnus = tapahtuma.varasto)
             LEFT JOIN kuka ON (tapahtuma.yhtio = kuka.yhtio
                       and tapahtuma.laatija = kuka.kuka)
             WHERE tuote.yhtio in ($yhtio)

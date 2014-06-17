@@ -150,10 +150,11 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
   // scripti balloonien tekemiseen
   js_popup();
 
+  $lisa_varastot = "";
 
   //varastot queryyn
   if (!empty($kopioitavavarasto) && !empty($kohdevarasto)) {
-    $lisa_varastot = " and varastopaikat.tunnus IN ($kopioitavavarasto, $kohdevarasto)";
+    $lisa_varastot = " and tuotepaikat.varasto IN ($kopioitavavarasto, $kohdevarasto) ";
 
     if ($kopioitavavarasto >= $kohdevarasto) {
       $jarjestys = "ORDER BY tuote.tuoteno, varastopaikat.tunnus desc, tuotepaikat.tunnus";
@@ -161,7 +162,7 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
     else {
       $jarjestys = "ORDER BY tuote.tuoteno, varastopaikat.tunnus asc, tuotepaikat.tunnus";
     }
-    }
+  }
 
   echo "<table><tr><td class='back' valign='top'>";
   echo "<tr><th>Hälytysrajan laskenta</th><td>$tarve pv tarve</td></tr>";
@@ -278,11 +279,11 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
             FROM tuote
             $lisaa2
             $abcjoin
-            JOIN tuotepaikat ON (tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno)
+            JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio
+              and tuotepaikat.tuoteno = tuote.tuoteno
+              $lisa_varastot)
             JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-            and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-            and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-            $lisa_varastot)
+              AND varastopaikat.tunnus = tuotepaikat.varasto)
             WHERE
             tuote.yhtio         = '$kukarow[yhtio]'
             $lisaa

@@ -227,6 +227,13 @@ else {
   $orderlisa     = "";
 }
 
+if ($mista == "vastaanota" and !isset($jarjestys)) {
+  $orderlisa2 = " tilausrivin_lisatiedot.tilausrivilinkki, sorttauskentta, ";
+}
+else{
+ $orderlisa2 = " ";
+}
+
 if ($mista == "vastaanota" and $vainlistaus == '') {
   $query = "SELECT tuote.tuoteno,
             tuote.sarjanumeroseuranta,
@@ -256,7 +263,7 @@ if ($mista == "vastaanota" and $vainlistaus == '') {
             JOIN tilausrivin_lisatiedot on (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio  and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
             WHERE tilausrivi.otunnus IN ({$otunnus})
             and tilausrivi.yhtio='$kukarow[yhtio]'
-            ORDER BY tilausrivin_lisatiedot.tilausrivilinkki, sorttauskentta, tuote.tuoteno";
+            ORDER BY $orderlisa2 tuote.tuoteno";
 }
 elseif ($mista == "vastaanota" and $vainlistaus != '') {
   $query = "SELECT tuote.tuoteno,
@@ -282,7 +289,7 @@ elseif ($mista == "vastaanota" and $vainlistaus != '') {
             JOIN tilausrivin_lisatiedot on (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio  and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
             WHERE tilausrivi.otunnus IN ({$otunnus})
             and tilausrivi.yhtio='$kukarow[yhtio]'
-            ORDER BY tilausrivin_lisatiedot.tilausrivilinkki, sorttauskentta, tuote.tuoteno";
+            ORDER BY $orderlisa2 tuote.tuoteno";
 }
 else {
   $query = "SELECT tuotteen_toimittajat.toim_tuoteno,

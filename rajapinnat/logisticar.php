@@ -354,10 +354,8 @@ function varasto($limit = '') {
             varastopaikat.tunnus varastotunnus,
             (SELECT tuotteen_toimittajat.toimitusaika FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio = '$yhtio' AND tuotteen_toimittajat.tuoteno = tuotepaikat.tuoteno AND tuotteen_toimittajat.toimitusaika != '' LIMIT 1) toimitusaika
             FROM tuotepaikat
-            LEFT JOIN varastopaikat ON
-            concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
-            concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-            and varastopaikat.yhtio=tuotepaikat.yhtio
+            LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+              AND varastopaikat.tunnus = tuotepaikat.varasto)
             JOIN tuote ON tuote.tuoteno = tuotepaikat.tuoteno and tuote.yhtio = tuotepaikat.yhtio
             WHERE tuote.ei_saldoa = ''
             AND tuotepaikat.yhtio = '$yhtio'
@@ -462,10 +460,8 @@ function varastotapahtumat($limit = '') {
                                           tuotepaikat.hyllytaso = tapahtuma.hyllytaso and
                                           tuotepaikat.hyllyalue = tapahtuma.hyllyalue and
                                           tuotepaikat.hyllynro  = tapahtuma.hyllynro)
-            LEFT JOIN varastopaikat ON
-            concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
-            concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-            and varastopaikat.yhtio                             = tuotepaikat.yhtio
+            LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+              AND varastopaikat.tunnus = tuotepaikat.varasto)
             LEFT JOIN kuka ON kuka.tunnus=lasku.myyja and kuka.yhtio=lasku.yhtio
             WHERE tapahtuma.laji                                in ('tulo', 'laskutus', 'siirto', 'valmistus', 'kulutus')
             and tapahtuma.yhtio                                 = '$yhtio'
@@ -609,10 +605,8 @@ function myynti($limit = '') {
             JOIN lasku USE INDEX (PRIMARY) ON lasku.tunnus=tilausrivi.otunnus and lasku.yhtio=tilausrivi.yhtio
             JOIN tuote ON tuote.tuoteno = tilausrivi.tuoteno and tuote.yhtio = tilausrivi.yhtio
             JOIN tuotepaikat USE INDEX (tuote_index) ON tuotepaikat.tuoteno=tilausrivi.tuoteno and tuotepaikat.hyllyvali=tilausrivi.hyllyvali and tuotepaikat.hyllytaso=tilausrivi.hyllytaso AND tilausrivi.hyllyalue=tuotepaikat.hyllyalue and tilausrivi.hyllynro=tuotepaikat.hyllynro and tilausrivi.yhtio=tuotepaikat.yhtio
-            JOIN varastopaikat ON
-            concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
-            concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-            and varastopaikat.yhtio=tuotepaikat.yhtio
+            JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+              AND varastopaikat.tunnus = tuotepaikat.varasto)
             LEFT JOIN kuka ON kuka.tunnus=lasku.myyja and kuka.yhtio=lasku.yhtio
             WHERE tilausrivi.varattu      != 0
             AND tilausrivi.tyyppi          IN ('L','O','G')

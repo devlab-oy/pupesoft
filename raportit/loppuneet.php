@@ -22,7 +22,7 @@ if ($tee != '') {
       $varastot .= $var.",";
     }
     $varastot = substr($varastot,0,-1);
-    $varastot = " and varastopaikat.tunnus in ($varastot) ";
+    $varastot = " and tuotepaikat.varasto in ($varastot) ";
   }
 
   $query = "SELECT tuote.osasto, tuote.try, tuotepaikat.tuoteno, tuote.nimitys, tuotepaikat.saldoaika,
@@ -34,10 +34,6 @@ if ($tee != '') {
             JOIN tuote ON tuote.yhtio=tuotepaikat.yhtio  and tuote.tuoteno=tuotepaikat.tuoteno
             LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno
             LEFT JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
-            LEFT JOIN varastopaikat
-            ON varastopaikat.yhtio = tuotepaikat.yhtio
-            and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-            and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
             WHERE tuotepaikat.yhtio   = '$kukarow[yhtio]'
             and tuotepaikat.saldoaika >= '$vv-$kk-$pp 00:00:00'
             and tuotepaikat.saldo     <= 0

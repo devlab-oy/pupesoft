@@ -4861,10 +4861,9 @@ if ($tee == '') {
                       varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
                        FROM tuote
                       JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
-                      JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-                      $sallitut_maat_lisa
-                      and concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-                      and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+                      JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+                        AND varastopaikat.tunnus = tuotepaikat.varasto
+                        $sallitut_maat_lisa)
                       JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio
                       and sarjanumeroseuranta.tuoteno           = tuote.tuoteno
                       and sarjanumeroseuranta.hyllyalue         = tuotepaikat.hyllyalue
@@ -4885,10 +4884,9 @@ if ($tee == '') {
                       varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
                        FROM tuote
                       JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
-                      JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-                      $sallitut_maat_lisa
-                      and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-                      and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+                      JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+                        AND varastopaikat.tunnus = tuotepaikat.varasto
+                        $sallitut_maat_lisa)
                       WHERE tuote.yhtio = '$kukarow[yhtio]'
                       and tuote.tuoteno = '{$tuote['tuoteno']}'
                       ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
@@ -5561,6 +5559,8 @@ if ($tee == '') {
               $toimitustapa = search_array_key_for_value_recursive($toimitustavat, 'selite', $laskurow['toimitustapa']);
               $toimitustapa = $toimitustapa[0];
 
+              if (!empty($toimitustapa['tunnus'])) {
+
               $query = "SELECT *
                         FROM lahdot
                         WHERE yhtio              = '{$kukarow['yhtio']}'
@@ -5576,6 +5576,9 @@ if ($tee == '') {
                 echo "<font class='error'>".t("VIRHE: Tilauksen toimitustavalla ei ole")." {$varasto['nimitys']} ".t("varastossa lähtöjä")."!</font><br><br>";
                 $tilausok++;
               }
+
+              }
+
             }
           }
 
@@ -6515,8 +6518,7 @@ if ($tee == '') {
                         FROM sarjanumeroseuranta
                         JOIN tuotepaikat ON (tuotepaikat.yhtio = sarjanumeroseuranta.yhtio and tuotepaikat.tuoteno = sarjanumeroseuranta.tuoteno)
                         JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-                        and concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-                        and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')))
+                          AND varastopaikat.tunnus = tuotepaikat.varasto)
                         WHERE sarjanumeroseuranta.yhtio          = '{$kukarow['yhtio']}'
                         AND sarjanumeroseuranta.tuoteno          = '{$row['tuoteno']}'
                         AND sarjanumeroseuranta.hyllyalue        = tuotepaikat.hyllyalue
@@ -7525,9 +7527,19 @@ if ($tee == '') {
         // Laskeskellaan tilauksen loppusummaa (mitätöidyt ja raaka-aineet eivät kuulu jengiin)
         $alvquery = "SELECT IF(ISNULL(varastopaikat.maa) or varastopaikat.maa='', '$yhtiorow[maa]', varastopaikat.maa) maa, group_concat(tilausrivi.tunnus) rivit
                      FROM tilausrivi
-                          LEFT JOIN varastopaikat ON varastopaikat.yhtio = IF(tilausrivi.var='S', IF((SELECT tyyppi_tieto FROM toimi WHERE yhtio = tilausrivi.yhtio and tunnus = tilausrivi.tilaajanrivinro)!='', (SELECT tyyppi_tieto FROM toimi WHERE yhtio = tilausrivi.yhtio and tunnus = tilausrivi.tilaajanrivinro), tilausrivi.yhtio), tilausrivi.yhtio)
-                     and concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
-                     and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
+                     LEFT JOIN varastopaikat ON (varastopaikat.yhtio =
+                       IF(tilausrivi.var = 'S',
+                         IF((SELECT tyyppi_tieto
+                             FROM toimi
+                             WHERE yhtio = tilausrivi.yhtio
+                             AND tunnus = tilausrivi.tilaajanrivinro) != '',
+                              (SELECT tyyppi_tieto
+                               FROM toimi
+                               WHERE yhtio = tilausrivi.yhtio
+                               AND tunnus = tilausrivi.tilaajanrivinro),
+                              tilausrivi.yhtio),
+                         tilausrivi.yhtio)
+                       AND varastopaikat.tunnus = tilausrivi.varasto)
                      WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
                      and tilausrivi.tyyppi   in ($tilrivity)
                      and tilausrivi.tyyppi   not in ('D','V','M')
@@ -8823,6 +8835,19 @@ if ($tee == '') {
           }
           else {
             $apuprintteri = 0;
+          }
+
+          # Katsotaan onko avainsanoihin määritelty varaston toimipaikan läheteprintteriä
+          if (!empty($laskurow['yhtio_toimipaikka'])) {
+            $avainsana_where = " and avainsana.selite       = '{$laskurow['varasto']}'
+                                 and avainsana.selitetark   = '{$laskurow['yhtio_toimipaikka']}'
+                                 and avainsana.selitetark_2 = 'printteri1'";
+
+            $tp_tulostin = t_avainsana("VARTOIMTULOSTIN", '', $avainsana_where, '', '', "selitetark_3");
+
+            if (!empty($tp_tulostin)) {
+              $apuprintteri = $tp_tulostin;
+            }
           }
 
           echo "<select name='komento[Lähete]'>";

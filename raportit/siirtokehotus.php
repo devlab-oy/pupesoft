@@ -96,14 +96,14 @@ if (isset($tee) and $tee == "hae_raportti") {
 
   while ($row = mysql_fetch_assoc($result)) {
 
-    $varapaikka_query =  "SELECT COUNT(*) as count
+    $varapaikka_query =  "SELECT *
                           FROM tuotepaikat
                           WHERE oletus != 'X'
                           AND tuoteno = '{$row['tuoteno']}'
                           AND varasto = {$row['varasto']}
                           AND yhtio = '{$kukarow['yhtio']}'";
     $varapaikka_result = pupe_query($varapaikka_query);
-    $varapaikka_count = mysql_result($varapaikka_result, 0);
+    $varapaikka_count = mysql_num_rows($varapaikka_result);
 
     if( $varapaikka_count > 0 ){
       $oletuspaikat[] = $row;

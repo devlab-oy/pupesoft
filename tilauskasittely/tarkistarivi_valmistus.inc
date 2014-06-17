@@ -142,17 +142,14 @@ else  {
 
 if ($tee == 'UV') {
   //etsit‰‰n tuotteelle varastopaikka
-  $query = "SELECT *, varastopaikat.tunnus varasto, tuotepaikat.tunnus tuotepaikka
+  $query = "SELECT *, tuotepaikat.varasto varasto, tuotepaikat.tunnus tuotepaikka
             FROM tuotepaikat
-            LEFT JOIN varastopaikat
-            ON varastopaikat.yhtio = tuotepaikat.yhtio
-            and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-            and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
             WHERE tuotepaikat.tuoteno = '$tuoteno'
-            and tuotepaikat.yhtio     = '$kukarow[yhtio]'";
+            and tuotepaikat.yhtio = '$kukarow[yhtio]'";
   $qvresult = mysql_query($query) or pupe_error($query);
 
-  while ($zrow = mysql_fetch_array($qvresult)) { // K‰yd‰‰n kaikki varastopaikat l‰pi
+  // K‰yd‰‰n kaikki varastopaikat l‰pi
+  while ($zrow = mysql_fetch_array($qvresult)) {
 
     ///* Huomioidaan vain normaalivarastojen paikkoja, paitsi jos erikoisvarastok‰sittely on triggerˆity *///
     if ($zrow["tyyppi"] == '' or ($laskurow['varasto'] == $zrow["varasto"]) or ($naytakaikkipaikat == "ON")) {
@@ -160,8 +157,8 @@ if ($tee == 'UV') {
       $hyllynro[$i]      = $zrow['hyllynro'];
       $hyllyvali[$i]     = $zrow['hyllyvali'];
       $hyllytaso[$i]     = $zrow['hyllytaso'];
-      $hyllytunnus[$i]  = $zrow['tuotepaikka'];
-      $varastotunnus[$i]  = $zrow['varasto'];
+      $hyllytunnus[$i]   = $zrow['tuotepaikka'];
+      $varastotunnus[$i] = $zrow['varasto'];
 
       if ($zrow['oletus'] != '') {
         $oletuspaikka = $i;

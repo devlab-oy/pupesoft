@@ -1627,7 +1627,21 @@ else {
         $kommclass1 = "";
       }
 
-      echo "<td $kommclass1 colspan='$cspan' valign='top'>".t("Kommentti").":<br><font class='message'>".str_replace("\n", "<br>", $row["kommentti"])."</font></td>";
+      $rivikommentti = str_replace("\n", "<br>", $row["kommentti"]);
+
+      if (preg_match("/\bAlkuperäinen tilaus: ([0-9]+)\b/", $rivikommentti, $osumat)) {
+        $tilaustunnus = $osumat[1];
+        $linkki = "<a href='asiakkaantilaukset.php?tee=NAYTATILAUS&toim=MYYNTI&asiakasid=$asiakasid&lasku_yhtio=$lasku_yhtio&tunnus=$tilaustunnus&ytunnus=$ytunnus&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl'>" . $tilaustunnus . "</a>";
+        $rivikommentti = str_replace($tilaustunnus, $linkki, $rivikommentti);
+      }
+
+      if (preg_match("/\bToimitettu tilauksella: ([0-9]+)\b/", $rivikommentti, $osumat)) {
+        $tilaustunnus = $osumat[1];
+        $linkki = "<a href='asiakkaantilaukset.php?tee=NAYTATILAUS&toim=MYYNTI&asiakasid=$asiakasid&lasku_yhtio=$lasku_yhtio&tunnus=$tilaustunnus&ytunnus=$ytunnus&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl'>" . $tilaustunnus . "</a>";
+        $rivikommentti = str_replace($tilaustunnus, $linkki, $rivikommentti);
+      }
+
+      echo "<td $kommclass1 colspan='$cspan' valign='top'>".t("Kommentti").":<br><font class='message'>".$rivikommentti."</font></td>";
       echo "</tr>";
     }
   }

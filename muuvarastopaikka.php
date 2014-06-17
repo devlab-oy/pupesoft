@@ -26,7 +26,12 @@ if ($tee != '') {
              avainsana as a2 READ,
              avainsana as a3 READ,
              avainsana as a4 READ,
-             yhtion_toimipaikat READ";
+             varastopaikat as v READ,
+             yhtion_toimipaikat AS yt READ,
+             yhtio READ,
+             yhtion_parametrit READ,
+             yhtion_toimipaikat READ,
+             yhtion_toimipaikat_parametrit READ";
   $result = pupe_query($query);
 }
 else {
@@ -102,9 +107,8 @@ if ($tee == 'MUUTA') {
             varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
             concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
              FROM tuotepaikat
-            LEFT JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-            and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-            and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+            LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+              AND varastopaikat.tunnus = tuotepaikat.varasto)
             WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
             and tuotepaikat.tuoteno = '$tuoteno'
             ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
@@ -726,9 +730,21 @@ if ($tee == 'UUSIPAIKKA') {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
-    if (kuuluukovarastoon($ahyllyalue, $ahyllynro) != 0 and $ahyllyalue != '' and $ahyllynro != '' and $ahyllyvali != '' and $ahyllytaso != '' and $ahyllyalue != "!!M") {
+
+    $_mihin_varastoon = kuuluukovarastoon($ahyllyalue, $ahyllynro);
+
+    if ($_mihin_varastoon != 0 and $ahyllyalue != '' and $ahyllynro != '' and $ahyllyvali != '' and $ahyllytaso != '' and $ahyllyalue != "!!M") {
 
       $kaikki_ok = true;
+
+      if ($yhtiorow['toimipaikkakasittely'] == "L") {
+        # Haetaan varaston toimipaikan parametrit
+        $_var_tp = hae_varaston_toimipaikka($_mihin_varastoon);
+        $_var_tp = (!empty($_var_tp) and is_array($_var_tp)) ? $_var_tp['tunnus'] : null;
+
+        $yhtiorow_alkuperainen = $yhtiorow;        
+        $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $_var_tp);
+      }
 
       if ($yhtiorow['kerayserat'] == 'K') {
 
@@ -742,6 +758,11 @@ if ($tee == 'UUSIPAIKKA') {
 
       if ($yhtiorow['varastontunniste'] != '') {
         if (!isset($select_varastontunniste) or trim($select_varastontunniste) == "") $kaikki_ok = false;
+      }
+
+      # Palautetaan yhtiön parametrit
+      if (!empty($yhtiorow_alkuperainen)) {
+        $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
       }
 
       if ($kaikki_ok) {
@@ -874,9 +895,8 @@ if ($tee == 'M') {
             varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
             concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
              FROM tuotepaikat
-            LEFT JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-            and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-            and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+            LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+              AND varastopaikat.tunnus = tuotepaikat.varasto)
             WHERE tuotepaikat.yhtio    = '$kukarow[yhtio]'
             and tuotepaikat.tuoteno    = '$tuoteno'
             and tuotepaikat.hyllyalue != '!!M'
@@ -916,9 +936,8 @@ if ($tee == 'M') {
             varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
             concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
              FROM tuotepaikat
-            LEFT JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-            and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-            and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+            LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+              AND varastopaikat.tunnus = tuotepaikat.varasto)
             WHERE tuotepaikat.yhtio    = '$kukarow[yhtio]'
             and tuotepaikat.tuoteno    = '$tuoteno'
             and tuotepaikat.hyllyalue != '!!M'

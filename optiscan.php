@@ -649,10 +649,10 @@
         $printteri_row = mysql_fetch_assoc($printteri_res);
 
         // setataan muuttujat keraa.php:ta varten
-        $tee = "P";
-        $toim = "";
-        $id = $nro;
-        $keraajanro = "";
+        $tee         = "P";
+        $toim        = "";
+        $id          = $nro;
+        $keraajanro  = "";
         $keraajalist = $kukarow['kuka'];
 
         // vakadr-tulostin on aina sama kuin lähete-tulostin

@@ -933,9 +933,8 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                   varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi, varastopaikat.erikoistoimitus_alarajasumma
                   FROM tuote
                   JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
-                  JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-                  and concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-                  and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+                  JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+                    AND varastopaikat.tunnus = tuotepaikat.varasto)
                   JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio
                   and sarjanumeroseuranta.tuoteno           = tuote.tuoteno
                   and sarjanumeroseuranta.hyllyalue         = tuotepaikat.hyllyalue
@@ -964,9 +963,8 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                   varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi, varastopaikat.erikoistoimitus_alarajasumma, '' era
                   FROM tuote
                   JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
-                  JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-                  and concat(rpad(upper(alkuhyllyalue), 5, '0'),lpad(upper(alkuhyllynro), 5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-                  and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+                  JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+                    AND varastopaikat.tunnus = tuotepaikat.varasto)
                   WHERE tuote.yhtio = '$kukarow[yhtio]'
                   and tuote.tuoteno = '$tuoteno'
                   $notfromvarasto
@@ -1307,7 +1305,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
             $myy_hyllyvali[$i] = $zrow["hyllyvali"];
             $myy_hyllytaso[$i] = $zrow["hyllytaso"];
             $myy_varasto[$i]   = $zrow["varasto"];
-            $myy_era[$i]      = $zrow["era"];
+            $myy_era[$i]       = $zrow["era"];
 
             if (!in_array(strtoupper($tuoteno), $tuoteperhe)) {
 
@@ -1925,9 +1923,9 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               if (($trow["sarjanumeroseuranta"] == "S" or $trow["sarjanumeroseuranta"] == "T" or $trow["sarjanumeroseuranta"] == "U" or $trow["sarjanumeroseuranta"] == "V") and $myy_tyyppi[$indeksi] == "NORMAALI" and $myy_sarjatunnus != '') {
                 if ($varattu > 0) {
                   if ($laskurow["tila"] != 'G') {
-                    $tunken = "myyntirivitunnus";
-                  }
-                  else {
+                  $tunken = "myyntirivitunnus";
+                }
+                else {
                     $tunken = "siirtorivitunnus";
                   }
                 }
@@ -2055,12 +2053,12 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 }
               }
 
-              $rivitunnus         = 0;
-              $kommentti          = "";
-              $tuotenimitys       = "";
+              $rivitunnus      = 0;
+              $kommentti       = "";
+              $tuotenimitys     = "";
               $tuotenimitys_force = "";
               $omalle_tilaukselle = "";
-              $ale_peruste        = "";
+              $ale_peruste    = "";
 
             } // Tällä rundilla myydyt
           } // Jos tuoteperhettä löytyi riittävästi tai myytiin pelkää isää
@@ -2700,11 +2698,8 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     else {
       // haetaan vielä tuotteen oletuspaikka puuteriville, jotta seuranta ois helpompaa
       //jos laskurow[varasto] on setattu niin yritetään löytää paikka siitä varastosta
-      $query = "SELECT tuotepaikat.*, varastopaikat.tunnus varastotunnus
+      $query = "SELECT tuotepaikat.*, tuotepaikat.varasto varastotunnus
                 FROM tuotepaikat
-                LEFT JOIN varastopaikat ON tuotepaikat.yhtio = varastopaikat.yhtio
-                and concat(rpad(upper(alkuhyllyalue) ,5,'0'),lpad(upper(alkuhyllynro) ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-                and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
                 where tuotepaikat.yhtio = '$kukarow[yhtio]'
                 and tuotepaikat.tuoteno = '$trow[tuoteno]'
                 ORDER BY tuotepaikat.oletus DESC";
@@ -3026,7 +3021,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
     if ($yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K' and $paivita_hyllyt_varastosiirto) {
       $p_hyllyalue = $myy_hyllyalue_temp;
-      $p_hyllynro = $myy_hyllynro_temp;
+      $p_hyllynro  = $myy_hyllynro_temp;
       $p_hyllytaso = $myy_hyllytaso_temp;
       $p_hyllyvali = $myy_hyllyvali_temp;
     }

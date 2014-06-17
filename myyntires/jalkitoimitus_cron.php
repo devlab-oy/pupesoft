@@ -33,4 +33,8 @@ $oikeurow = array(
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow = hae_kukarow('admin', $yhtio);
 
+//poimitaan JT-rivit
 jt_toimita('', '', $varastot, array(), array(), 'tosi_automaaginen', '');
+
+//toimitettaan poimitut JT-rivit
+jt_toimita("", "", "", "", "", "dummy", "TOIMITA", '', '', "");

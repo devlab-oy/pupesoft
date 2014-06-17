@@ -465,10 +465,12 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
           concat(rpad(upper('$lhyllyalue'), 5, '0'),lpad(upper('$lhyllynro'), 5, '0'),lpad(upper('$lhyllyvali'), 5, '0'),lpad(upper('$lhyllytaso'),5, '0'))";
   }
 
-  $varasto_lisa = "";
+  $varasto_lisa1 = "";
+  $varasto_lisa2 = "";
 
   if (!empty($varastot)) {
-    $varasto_lisa = " AND varastopaikat.tunnus IN (".implode(",", $varastot).") ";
+    $varasto_lisa1 = " AND tuotepaikat.varasto IN (".implode(",", $varastot).") ";
+    $varasto_lisa2 = " AND tilausrivi.varasto IN (".implode(",", $varastot).") ";
   }
 
   $tuote_select = "";
@@ -557,10 +559,8 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
               JOIN tuote USE INDEX (tuoteno_index) ON (tuotepaikat.yhtio = tuote.yhtio
                 AND tuotepaikat.tuoteno  = tuote.tuoteno
                 AND tuote.ei_saldoa      = '')
-              JOIN varastopaikat ON ( varastopaikat.yhtio = tuotepaikat.yhtio
-                AND concat(rpad(upper(alkuhyllyalue), 5, '0'),lpad(upper(alkuhyllynro), 5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-                AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-                {$varasto_lisa} )
+              JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+                AND varastopaikat.tunnus = tuotepaikat.varasto)
               {$kerayksettomat_tuotepaikat_varaston_hyllypaikat_join}
               {$keraysvyohyke_join}
               LEFT JOIN tilausrivi ON ( tilausrivi.tyyppi = 'L'
@@ -573,6 +573,7 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
                 {$_date})
               WHERE tuotepaikat.yhtio    = '{$kukarow['yhtio']}'
               {$kerayksettomat_tuotepaikka_where}
+              {$varasto_lisa1}
               GROUP BY 1, {$kerayksettomat_tuotepaikat_group}
               ORDER BY kpl_valittu_aika DESC
               $lisa";
@@ -591,10 +592,8 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
               JOIN tuote USE INDEX (tuoteno_index) ON (tilausrivi.yhtio = tuote.yhtio
                 AND tilausrivi.tuoteno   = tuote.tuoteno
                 AND tuote.ei_saldoa      = '')
-              JOIN varastopaikat ON ( varastopaikat.yhtio = tilausrivi.yhtio
-                AND concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
-                AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0')
-                {$varasto_lisa} ) )
+              JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
+                AND varastopaikat.tunnus = tilausrivi.varasto)
               {$varaston_hyllypaikat_join}
               {$keraysvyohyke_join}
               LEFT JOIN tuotepaikat USE INDEX (yhtio_tuoteno_paikka) ON ( tilausrivi.yhtio = tuotepaikat.yhtio
@@ -607,6 +606,7 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
               AND tilausrivi.tyyppi      = 'L'
               {$tuotepaikka_where}
               {$_date}
+              {$varasto_lisa2}
               GROUP BY 1, {$group}
               ORDER BY kpl_valittu_aika DESC
               $lisa";

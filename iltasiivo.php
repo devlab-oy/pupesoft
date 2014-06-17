@@ -835,6 +835,11 @@ if ($poistettu > 0) {
   $iltasiivo .= is_log("Poistettiin $poistettu poistettavaksi merkattua tuotepaikkaa.");
 }
 
+/**
+ * Synkataan uusimmat mysqlaliakset
+*/
+require "synkronoi_mysqlaliakset.php";
+
 $iltasiivo .= is_log("Iltasiivo $yhtiorow[nimi]. Done!");
 
 if ($iltasiivo != "") {

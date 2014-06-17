@@ -33,10 +33,8 @@ if ($tee != '') {
             sum(if(tuotepaikat.oletus='X',1,0)) oletuspaikkoja,
             GROUP_CONCAT(if(tuotepaikat.oletus='X', concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso), '') SEPARATOR '') paikka
             FROM tuotepaikat
-            LEFT JOIN varastopaikat
-            ON varastopaikat.yhtio = tuotepaikat.yhtio
-            and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-            and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+            LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+              AND varastopaikat.tunnus = tuotepaikat.varasto)
             WHERE tuotepaikat.yhtio='$kukarow[yhtio]'
             $varastot
             GROUP BY tuotepaikat.tuoteno
@@ -55,10 +53,8 @@ if ($tee != '') {
               (SELECT tuoteno FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno LIMIT 1) toim_tuoteno
               FROM tuotepaikat
               JOIN tuote ON tuote.tuoteno=tuotepaikat.tuoteno and tuote.yhtio=tuotepaikat.yhtio
-              LEFT JOIN varastopaikat
-              ON varastopaikat.yhtio = tuotepaikat.yhtio
-              and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-              and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+              LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+                AND varastopaikat.tunnus = tuotepaikat.varasto)
               WHERE tuotepaikat.yhtio='$kukarow[yhtio]'
               and tuotepaikat.tuoteno='$row[tuoteno]'
               $varastot

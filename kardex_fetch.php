@@ -174,9 +174,9 @@ if ($kardex_handle = opendir($ftpget_dest[$operaattori])) {
             $printteri_row = mysql_fetch_assoc($printteri_res);
 
             // setataan muuttujat keraa.php:ta varten
-            $tee     = "P";
-            $toim     = "";
-            $id     = $keraysera_nro;
+            $tee        = "P";
+            $toim       = "";
+            $id         = $keraysera_nro;
             $keraajanro = "";
 
             // vakadr-tulostin on aina sama kuin lähete-tulostin

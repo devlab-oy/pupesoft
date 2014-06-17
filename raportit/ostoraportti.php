@@ -828,9 +828,9 @@ else {
                 WHERE tuote.$yhtiot
                 $lisa
                 $lisaa
-                and tuote.ei_saldoa   = ''
-                and tuote.tuotetyyppi NOT IN ('A', 'B')
-                and tuote.ostoehdotus = ''
+                and tuote.ei_saldoa        = ''
+                and tuote.tuotetyyppi      NOT IN ('A', 'B')
+                and tuote.ostoehdotus      = ''
                 $abcwhere
                 $varastot
                 order by id, tuote.tuoteno, varastopaikka";

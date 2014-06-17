@@ -87,7 +87,7 @@ if (isset($tee) and $tee == "hae_raportti") {
             {$kv_join}
             WHERE tuotepaikat.yhtio     = '{$kukarow['yhtio']}'
             {$kv_and}
-            AND tuotepaikat.varasto    IN ({$varastot})
+            AND tuotepaikat.varasto     IN ({$varastot})
             AND tuotepaikat.halytysraja > 0
             AND tuotepaikat.oletus      = 'X'";
   $result = pupe_query($query);
@@ -99,9 +99,9 @@ if (isset($tee) and $tee == "hae_raportti") {
     $varapaikka_query =  "SELECT *
                           FROM tuotepaikat
                           WHERE oletus != 'X'
-                          AND tuoteno = '{$row['tuoteno']}'
-                          AND varasto = {$row['varasto']}
-                          AND yhtio = '{$kukarow['yhtio']}'";
+                          AND tuoteno   = '{$row['tuoteno']}'
+                          AND varasto   = {$row['varasto']}
+                          AND yhtio     = '{$kukarow['yhtio']}'";
     $varapaikka_result = pupe_query($varapaikka_query);
     $varapaikka_count = mysql_num_rows($varapaikka_result);
 
@@ -155,10 +155,10 @@ if (isset($tee) and $tee == "hae_raportti") {
                   hyllyvali AS vali,
                   hyllytaso AS taso
                   FROM tuotepaikat
-                  WHERE tuoteno = '{$row['tuoteno']}'
-                  AND yhtio = '{$kukarow['yhtio']}'
-                  AND oletus != 'X'
-                  AND varasto = {$row['varasto']}";
+                  WHERE tuoteno  = '{$row['tuoteno']}'
+                  AND yhtio      = '{$kukarow['yhtio']}'
+                  AND oletus    != 'X'
+                  AND varasto    = {$row['varasto']}";
       $result2 = pupe_query($query2);
 
       $varapaikka_echo = '';

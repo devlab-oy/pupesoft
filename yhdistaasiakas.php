@@ -843,7 +843,7 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
         if (table_exists('huolto')) {
           $hquery = "SELECT *
                      FROM huolto
-                     WHERE yhtio = '{$kukarow['yhtio']}'
+                     WHERE yhtio        = '{$kukarow['yhtio']}'
                      AND asiakas_tunnus = '{$asrow['tunnus']}'";
           $hresult = pupe_query($hquery);
 
@@ -858,46 +858,46 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
 
               $tarksql = "SELECT *
                           FROM huolto
-                          WHERE yhtio = '{$kukarow['yhtio']}'
-                          AND tila = '{$ahrow['tila']}'
-                          AND kommentti = '{$ahrow['kommentti']}'
-                          AND mittarilukema = '{$ahrow['mittarilukema']}'
-                          AND kokohinta = '{$ahrow['kokohinta']}'
-                          AND lasku_tunnus = {$ahrow['lasku_tunnus']}
-                          AND laskuaika = '{$ahrow['laskuaika']}'
-                          AND asiakas_tunnus = {$jrow['tunnus']}
-                          AND huoltoauto_tunnus = {$ahrow['huoltoauto_tunnus']}
+                          WHERE yhtio              = '{$kukarow['yhtio']}'
+                          AND tila                 = '{$ahrow['tila']}'
+                          AND kommentti            = '{$ahrow['kommentti']}'
+                          AND mittarilukema        = '{$ahrow['mittarilukema']}'
+                          AND kokohinta            = '{$ahrow['kokohinta']}'
+                          AND lasku_tunnus         = {$ahrow['lasku_tunnus']}
+                          AND laskuaika            = '{$ahrow['laskuaika']}'
+                          AND asiakas_tunnus       = {$jrow['tunnus']}
+                          AND huoltoauto_tunnus    = {$ahrow['huoltoauto_tunnus']}
                           AND huoltoasiakas_tunnus = {$ahrow['huoltoasiakas_tunnus']}
-                          AND reknro = '{$ahrow['reknro']}'
-                          AND autoid = '{$ahrow['autoid']}'
-                          AND mid = '{$ahrow['mid']}'
-                          AND link_sg = '{$ahrow['link_sg']}'
-                          AND link_rt = '{$ahrow['link_rt']}'
-                          AND link_td = '{$ahrow['link_td']}'";
+                          AND reknro               = '{$ahrow['reknro']}'
+                          AND autoid               = '{$ahrow['autoid']}'
+                          AND mid                  = '{$ahrow['mid']}'
+                          AND link_sg              = '{$ahrow['link_sg']}'
+                          AND link_rt              = '{$ahrow['link_rt']}'
+                          AND link_td              = '{$ahrow['link_td']}'";
               $tarkesult = pupe_query($tarksql);
 
               if (mysql_num_rows($tarkesult) == 0) {
-                $ahinsert = " INSERT INTO huolto SET
-                              yhtio = '{$kukarow['yhtio']}',
-                              tila = '{$ahrow['tila']}',
-                              kommentti = '{$ahrow['kommentti']}',
-                              mittarilukema = '{$ahrow['mittarilukema']}',
-                              kokohinta = '{$ahrow['kokohinta']}',
-                              lasku_tunnus = {$ahrow['lasku_tunnus']},
-                              laskuaika = '{$ahrow['laskuaika']}',
-                              asiakas_tunnus = {$jrow['tunnus']},
-                              huoltoauto_tunnus = {$ahrow['huoltoauto_tunnus']},
-                              huoltoasiakas_tunnus = {$ahrow['huoltoasiakas_tunnus']},
-                              reknro = '{$ahrow['reknro']}',
-                              autoid = '{$ahrow['autoid']}',
-                              mid = '{$ahrow['mid']}',
-                              link_sg = '{$ahrow['link_sg']}',
-                              link_rt = '{$ahrow['link_rt']}',
-                              link_td = '{$ahrow['link_td']}',
-                              laatija = '{$kukarow['kuka']}',
-                              luontiaika = NOW(),
-                              muuttaja = '{$kukarow['kuka']}',
-                              muutosaika = NOW()";
+                $ahinsert = "INSERT INTO huolto SET
+                             yhtio                = '{$kukarow['yhtio']}',
+                             tila                 = '{$ahrow['tila']}',
+                             kommentti            = '{$ahrow['kommentti']}',
+                             mittarilukema        = '{$ahrow['mittarilukema']}',
+                             kokohinta            = '{$ahrow['kokohinta']}',
+                             lasku_tunnus         = {$ahrow['lasku_tunnus']},
+                             laskuaika            = '{$ahrow['laskuaika']}',
+                             asiakas_tunnus       = {$jrow['tunnus']},
+                             huoltoauto_tunnus    = {$ahrow['huoltoauto_tunnus']},
+                             huoltoasiakas_tunnus = {$ahrow['huoltoasiakas_tunnus']},
+                             reknro               = '{$ahrow['reknro']}',
+                             autoid               = '{$ahrow['autoid']}',
+                             mid                  = '{$ahrow['mid']}',
+                             link_sg              = '{$ahrow['link_sg']}',
+                             link_rt              = '{$ahrow['link_rt']}',
+                             link_td              = '{$ahrow['link_td']}',
+                             laatija              = '{$kukarow['kuka']}',
+                             luontiaika           = NOW(),
+                             muuttaja             = '{$kukarow['kuka']}',
+                             muutosaika           = NOW()";
                 pupe_query($ahinsert);
               }
             }
@@ -908,7 +908,7 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
         if (table_exists('huolto_asiakas')) {
           $hquery = "SELECT *
                      FROM huolto_asiakas
-                     WHERE yhtio = '{$kukarow['yhtio']}'
+                     WHERE yhtio        = '{$kukarow['yhtio']}'
                      AND asiakas_tunnus = '{$asrow['tunnus']}'";
           $hresult = pupe_query($hquery);
 
@@ -923,38 +923,38 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
 
               $tarksql = "SELECT *
                           FROM huolto_asiakas
-                          WHERE yhtio = '{$kukarow['yhtio']}'
-                          AND nimi = '{$ahrow['nimi']}'
-                          AND etunimi = '{$ahrow['etunimi']}'
-                          AND sukunimi = '{$ahrow['sukunimi']}'
-                          AND ytunnus = '{$ahrow['ytunnus']}'
-                          AND osoite = '{$ahrow['osoite']}'
-                          AND postino = '{$ahrow['postino']}'
-                          AND postitp = '{$ahrow['postitp']}'
-                          AND puhelin = '{$ahrow['puhelin']}'
-                          AND email = '{$ahrow['email']}'
-                          AND markkinointi = '{$ahrow['markkinointi']}'
+                          WHERE yhtio        = '{$kukarow['yhtio']}'
+                          AND nimi           = '{$ahrow['nimi']}'
+                          AND etunimi        = '{$ahrow['etunimi']}'
+                          AND sukunimi       = '{$ahrow['sukunimi']}'
+                          AND ytunnus        = '{$ahrow['ytunnus']}'
+                          AND osoite         = '{$ahrow['osoite']}'
+                          AND postino        = '{$ahrow['postino']}'
+                          AND postitp        = '{$ahrow['postitp']}'
+                          AND puhelin        = '{$ahrow['puhelin']}'
+                          AND email          = '{$ahrow['email']}'
+                          AND markkinointi   = '{$ahrow['markkinointi']}'
                           AND asiakas_tunnus = '{$jrow['tunnus']}'";
               $tarkesult = pupe_query($tarksql);
 
               if (mysql_num_rows($tarkesult) == 0) {
-                $ahinsert = " INSERT INTO huolto_asiakas SET
-                              yhtio = '{$kukarow['yhtio']}',
-                              nimi = '{$ahrow['nimi']}',
-                              etunimi = '{$ahrow['etunimi']}',
-                              sukunimi = '{$ahrow['sukunimi']}',
-                              ytunnus = '{$ahrow['ytunnus']}',
-                              osoite = '{$ahrow['osoite']}',
-                              postino = '{$ahrow['postino']}',
-                              postitp = '{$ahrow['postitp']}',
-                              puhelin = '{$ahrow['puhelin']}',
-                              email = '{$ahrow['email']}',
-                              markkinointi = '{$ahrow['markkinointi']}',
-                              asiakas_tunnus = '{$jrow['tunnus']}',
-                              laatija = '{$kukarow['kuka']}',
-                              luontiaika = NOW(),
-                              muuttaja = '{$kukarow['kuka']}',
-                              muutosaika = NOW()";
+                $ahinsert = "INSERT INTO huolto_asiakas SET
+                             yhtio          = '{$kukarow['yhtio']}',
+                             nimi           = '{$ahrow['nimi']}',
+                             etunimi        = '{$ahrow['etunimi']}',
+                             sukunimi       = '{$ahrow['sukunimi']}',
+                             ytunnus        = '{$ahrow['ytunnus']}',
+                             osoite         = '{$ahrow['osoite']}',
+                             postino        = '{$ahrow['postino']}',
+                             postitp        = '{$ahrow['postitp']}',
+                             puhelin        = '{$ahrow['puhelin']}',
+                             email          = '{$ahrow['email']}',
+                             markkinointi   = '{$ahrow['markkinointi']}',
+                             asiakas_tunnus = '{$jrow['tunnus']}',
+                             laatija        = '{$kukarow['kuka']}',
+                             luontiaika     = NOW(),
+                             muuttaja       = '{$kukarow['kuka']}',
+                             muutosaika     = NOW()";
                 pupe_query($ahinsert);
               }
             }
@@ -963,10 +963,10 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
 
         // !!!!!!!! HUOLTO_ASIAKAS_OMARIVI OSIO !!!!!!!!!!!!
         if (table_exists('huolto_asiakas_omarivi')) {
-          $hquery = " SELECT *
-                      FROM huolto_asiakas_omarivi
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND asiakas_tunnus = '{$asrow['tunnus']}'";
+          $hquery = "SELECT *
+                     FROM huolto_asiakas_omarivi
+                     WHERE yhtio        = '{$kukarow['yhtio']}'
+                     AND asiakas_tunnus = '{$asrow['tunnus']}'";
           $hresult = pupe_query($hquery);
 
           if (mysql_num_rows($hresult) == 0) {
@@ -980,48 +980,48 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
 
               $tarksql = "SELECT *
                           FROM huolto_asiakas_omarivi
-                          WHERE yhtio = '{$kukarow['yhtio']}'
-                          AND asiakas_tunnus = '{$jrow['tunnus']}'
-                          AND tyyppi = '{$ahrow['tyyppi']}'
-                          AND tuoteno = '{$ahrow['tuoteno']}'
-                          AND ref = '{$ahrow['ref']}'
-                          AND nimitys = '{$ahrow['nimitys']}'
-                          AND merkki = '{$ahrow['merkki']}'
-                          AND oljy_laatu = '{$ahrow['oljy_laatu']}'
-                          AND oljy_luokitus = '{$ahrow['oljy_luokitus']}'
-                          AND maara = '{$ahrow['maara']}'
-                          AND hinta = '{$ahrow['hinta']}'
-                          AND alv = '{$ahrow['alv']}'
-                          AND puh = '{$ahrow['puh']}'
-                          AND email = '{$ahrow['email']}'
+                          WHERE yhtio         = '{$kukarow['yhtio']}'
+                          AND asiakas_tunnus  = '{$jrow['tunnus']}'
+                          AND tyyppi          = '{$ahrow['tyyppi']}'
+                          AND tuoteno         = '{$ahrow['tuoteno']}'
+                          AND ref             = '{$ahrow['ref']}'
+                          AND nimitys         = '{$ahrow['nimitys']}'
+                          AND merkki          = '{$ahrow['merkki']}'
+                          AND oljy_laatu      = '{$ahrow['oljy_laatu']}'
+                          AND oljy_luokitus   = '{$ahrow['oljy_luokitus']}'
+                          AND maara           = '{$ahrow['maara']}'
+                          AND hinta           = '{$ahrow['hinta']}'
+                          AND alv             = '{$ahrow['alv']}'
+                          AND puh             = '{$ahrow['puh']}'
+                          AND email           = '{$ahrow['email']}'
                           AND omistaja_tunnus = '{$ahrow['omistaja_tunnus']}'
-                          AND info = '{$ahrow['info']}'
-                          AND myyntihinta = '{$ahrow['myyntihinta']}'";
+                          AND info            = '{$ahrow['info']}'
+                          AND myyntihinta     = '{$ahrow['myyntihinta']}'";
               $tarkesult = pupe_query($tarksql);
 
               if (mysql_num_rows($tarkesult) == 0) {
-                $ahinsert = " INSERT INTO huolto_asiakas_omarivi SET
-                              yhtio = '{$kukarow['yhtio']}',
-                              asiakas_tunnus = '{$jrow['tunnus']}',
-                              tyyppi = '{$ahrow['tyyppi']}',
-                              tuoteno = '{$ahrow['tuoteno']}',
-                              ref = '{$ahrow['ref']}',
-                              nimitys = '{$ahrow['nimitys']}',
-                              merkki = '{$ahrow['merkki']}',
-                              oljy_laatu = '{$ahrow['oljy_laatu']}',
-                              oljy_luokitus = '{$ahrow['oljy_luokitus']}',
-                              maara = '{$ahrow['maara']}',
-                              hinta = '{$ahrow['hinta']}',
-                              alv = '{$ahrow['alv']}',
-                              puh = '{$ahrow['puh']}',
-                              email = '{$ahrow['email']}',
-                              omistaja_tunnus = '{$ahrow['omistaja_tunnus']}',
-                              info = '{$ahrow['info']}',
-                              myyntihinta = '{$ahrow['myyntihinta']}',
-                              laatija = '{$kukarow['kuka']}',
-                              luontiaika = NOW(),
-                              muuttaja = '{$kukarow['kuka']}',
-                              muutosaika = NOW()";
+                $ahinsert = "INSERT INTO huolto_asiakas_omarivi SET
+                             yhtio           = '{$kukarow['yhtio']}',
+                             asiakas_tunnus  = '{$jrow['tunnus']}',
+                             tyyppi          = '{$ahrow['tyyppi']}',
+                             tuoteno         = '{$ahrow['tuoteno']}',
+                             ref             = '{$ahrow['ref']}',
+                             nimitys         = '{$ahrow['nimitys']}',
+                             merkki          = '{$ahrow['merkki']}',
+                             oljy_laatu      = '{$ahrow['oljy_laatu']}',
+                             oljy_luokitus   = '{$ahrow['oljy_luokitus']}',
+                             maara           = '{$ahrow['maara']}',
+                             hinta           = '{$ahrow['hinta']}',
+                             alv             = '{$ahrow['alv']}',
+                             puh             = '{$ahrow['puh']}',
+                             email           = '{$ahrow['email']}',
+                             omistaja_tunnus = '{$ahrow['omistaja_tunnus']}',
+                             info            = '{$ahrow['info']}',
+                             myyntihinta     = '{$ahrow['myyntihinta']}',
+                             laatija         = '{$kukarow['kuka']}',
+                             luontiaika      = NOW(),
+                             muuttaja        = '{$kukarow['kuka']}',
+                             muutosaika      = NOW()";
                 pupe_query($ahinsert);
               }
             }
@@ -1030,10 +1030,10 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
 
         // !!!!!!!! HUOLTO_AUTO OSIO !!!!!!!!!!!!
         if (table_exists('huolto_auto')) {
-          $hquery = " SELECT *
-                      FROM huolto_auto
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND asiakas_tunnus = '{$asrow['tunnus']}'";
+          $hquery = "SELECT *
+                     FROM huolto_auto
+                     WHERE yhtio        = '{$kukarow['yhtio']}'
+                     AND asiakas_tunnus = '{$asrow['tunnus']}'";
           $hresult = pupe_query($hquery);
 
           if (mysql_num_rows($hresult) == 0) {
@@ -1047,40 +1047,40 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
 
               $tarksql = "SELECT *
                           FROM huolto_auto
-                          WHERE yhtio = '{$kukarow['yhtio']}'
-                          AND reknro = '{$ahrow['reknro']}'
-                          AND valmistenumero = '{$ahrow['valmistenumero']}'
-                          AND nimi = '{$ahrow['nimi']}'
-                          AND atyyppi = '{$ahrow['atyyppi']}'
-                          AND autoid = '{$ahrow['autoid']}'
-                          AND mid = '{$ahrow['mid']}'
-                          AND mittarilukema = '{$ahrow['mittarilukema']}'
-                          AND link_sg = '{$ahrow['link_sg']}'
-                          AND link_rt = '{$ahrow['link_rt']}'
-                          AND link_td = '{$ahrow['link_td']}'
-                          AND asiakas_tunnus = '{$jrow['tunnus']}'
+                          WHERE yhtio              = '{$kukarow['yhtio']}'
+                          AND reknro               = '{$ahrow['reknro']}'
+                          AND valmistenumero       = '{$ahrow['valmistenumero']}'
+                          AND nimi                 = '{$ahrow['nimi']}'
+                          AND atyyppi              = '{$ahrow['atyyppi']}'
+                          AND autoid               = '{$ahrow['autoid']}'
+                          AND mid                  = '{$ahrow['mid']}'
+                          AND mittarilukema        = '{$ahrow['mittarilukema']}'
+                          AND link_sg              = '{$ahrow['link_sg']}'
+                          AND link_rt              = '{$ahrow['link_rt']}'
+                          AND link_td              = '{$ahrow['link_td']}'
+                          AND asiakas_tunnus       = '{$jrow['tunnus']}'
                           AND huoltoasiakas_tunnus = '{$ahrow['huoltoasiakas_tunnus']}'";
               $tarkesult = pupe_query($tarksql);
 
               if (mysql_num_rows($tarkesult) == 0) {
-                $ahinsert = " INSERT INTO huolto_auto SET
-                              yhtio = '{$kukarow['yhtio']}',
-                              reknro = '{$ahrow['reknro']}',
-                              valmistenumero = '{$ahrow['valmistenumero']}',
-                              nimi = '{$ahrow['nimi']}',
-                              atyyppi = '{$ahrow['atyyppi']}',
-                              autoid = '{$ahrow['autoid']}',
-                              mid = '{$ahrow['mid']}',
-                              mittarilukema = '{$ahrow['mittarilukema']}',
-                              link_sg = '{$ahrow['link_sg']}',
-                              link_rt = '{$ahrow['link_rt']}',
-                              link_td = '{$ahrow['link_td']}',
-                              asiakas_tunnus = '{$jrow['tunnus']}',
-                              huoltoasiakas_tunnus = '{$ahrow['huoltoasiakas_tunnus']}',
-                              laatija = '{$kukarow['kuka']}',
-                              luontiaika = NOW(),
-                              muuttaja = '{$kukarow['kuka']}',
-                              muutosaika = NOW()";
+                $ahinsert = "INSERT INTO huolto_auto SET
+                             yhtio                = '{$kukarow['yhtio']}',
+                             reknro               = '{$ahrow['reknro']}',
+                             valmistenumero       = '{$ahrow['valmistenumero']}',
+                             nimi                 = '{$ahrow['nimi']}',
+                             atyyppi              = '{$ahrow['atyyppi']}',
+                             autoid               = '{$ahrow['autoid']}',
+                             mid                  = '{$ahrow['mid']}',
+                             mittarilukema        = '{$ahrow['mittarilukema']}',
+                             link_sg              = '{$ahrow['link_sg']}',
+                             link_rt              = '{$ahrow['link_rt']}',
+                             link_td              = '{$ahrow['link_td']}',
+                             asiakas_tunnus       = '{$jrow['tunnus']}',
+                             huoltoasiakas_tunnus = '{$ahrow['huoltoasiakas_tunnus']}',
+                             laatija              = '{$kukarow['kuka']}',
+                             luontiaika           = NOW(),
+                             muuttaja             = '{$kukarow['kuka']}',
+                             muutosaika           = NOW()";
                 pupe_query($ahinsert);
               }
             }
@@ -1089,10 +1089,10 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
 
         // !!!!!!!! HUOLTO_RIVI OSIO !!!!!!!!!!!!
         if (table_exists('huolto_rivi')) {
-          $hquery = " SELECT *
-                      FROM huolto_rivi
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND asiakas_tunnus = '{$asrow['tunnus']}'";
+          $hquery = "SELECT *
+                     FROM huolto_rivi
+                     WHERE yhtio        = '{$kukarow['yhtio']}'
+                     AND asiakas_tunnus = '{$asrow['tunnus']}'";
           $hresult = pupe_query($hquery);
 
           if (mysql_num_rows($hresult) == 0) {
@@ -1106,42 +1106,42 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
 
               $tarksql = "SELECT *
                           FROM huolto_rivi
-                          WHERE yhtio = '{$kukarow['yhtio']}'
-                          AND tyyppi = '{$ahrow['tyyppi']}'
-                          AND link = '{$ahrow['link']}'
-                          AND seq = '{$ahrow['seq']}'
-                          AND addserv = '{$ahrow['addserv']}'
-                          AND op_ref = '{$ahrow['op_ref']}'
-                          AND group_id = '{$ahrow['group_id']}'
-                          AND kesto = '{$ahrow['kesto']}'
-                          AND tuntihinta = '{$ahrow['tuntihinta']}'
-                          AND nettohinta = '{$ahrow['nettohinta']}'
-                          AND alv = '{$ahrow['alv']}'
-                          AND otsikko = '{$ahrow['otsikko']}'
+                          WHERE yhtio        = '{$kukarow['yhtio']}'
+                          AND tyyppi         = '{$ahrow['tyyppi']}'
+                          AND link           = '{$ahrow['link']}'
+                          AND seq            = '{$ahrow['seq']}'
+                          AND addserv        = '{$ahrow['addserv']}'
+                          AND op_ref         = '{$ahrow['op_ref']}'
+                          AND group_id       = '{$ahrow['group_id']}'
+                          AND kesto          = '{$ahrow['kesto']}'
+                          AND tuntihinta     = '{$ahrow['tuntihinta']}'
+                          AND nettohinta     = '{$ahrow['nettohinta']}'
+                          AND alv            = '{$ahrow['alv']}'
+                          AND otsikko        = '{$ahrow['otsikko']}'
                           AND asiakas_tunnus = '{$jrow['tunnus']}'
-                          AND huolto_tunnus = '{$ahrow['huolto_tunnus']}'";
+                          AND huolto_tunnus  = '{$ahrow['huolto_tunnus']}'";
               $tarkesult = pupe_query($tarksql);
 
               if (mysql_num_rows($tarkesult) == 0) {
-                $ahinsert = " INSERT INTO huolto_rivi SET
-                              yhtio = '{$kukarow['yhtio']}',
-                              tyyppi = '{$ahrow['tyyppi']}',
-                              link = '{$ahrow['link']}',
-                              seq = '{$ahrow['seq']}',
-                              addserv = '{$ahrow['addserv']}',
-                              op_ref = '{$ahrow['op_ref']}',
-                              group_id = '{$ahrow['group_id']}',
-                              kesto = '{$ahrow['kesto']}',
-                              tuntihinta = '{$ahrow['tuntihinta']}',
-                              nettohinta = '{$ahrow['nettohinta']}',
-                              alv = '{$ahrow['alv']}',
-                              otsikko = '{$ahrow['otsikko']}',
-                              asiakas_tunnus = '{$jrow['tunnus']}',
-                              huolto_tunnus = '{$ahrow['huolto_tunnus']}',
-                              laatija = '{$kukarow['kuka']}',
-                              luontiaika = NOW(),
-                              muuttaja = '{$kukarow['kuka']}',
-                              muutosaika = NOW()";
+                $ahinsert = "INSERT INTO huolto_rivi SET
+                             yhtio          = '{$kukarow['yhtio']}',
+                             tyyppi         = '{$ahrow['tyyppi']}',
+                             link           = '{$ahrow['link']}',
+                             seq            = '{$ahrow['seq']}',
+                             addserv        = '{$ahrow['addserv']}',
+                             op_ref         = '{$ahrow['op_ref']}',
+                             group_id       = '{$ahrow['group_id']}',
+                             kesto          = '{$ahrow['kesto']}',
+                             tuntihinta     = '{$ahrow['tuntihinta']}',
+                             nettohinta     = '{$ahrow['nettohinta']}',
+                             alv            = '{$ahrow['alv']}',
+                             otsikko        = '{$ahrow['otsikko']}',
+                             asiakas_tunnus = '{$jrow['tunnus']}',
+                             huolto_tunnus  = '{$ahrow['huolto_tunnus']}',
+                             laatija        = '{$kukarow['kuka']}',
+                             luontiaika     = NOW(),
+                             muuttaja       = '{$kukarow['kuka']}',
+                             muutosaika     = NOW()";
                 pupe_query($ahinsert);
               }
             }
@@ -1150,10 +1150,10 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
 
         // !!!!!!!! HUOLTO_RIVI_TUOTE OSIO !!!!!!!!!!!!
         if (table_exists('huolto_rivi_tuote')) {
-          $hquery = " SELECT *
-                      FROM huolto_rivi_tuote
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND asiakas_tunnus = '{$asrow['tunnus']}'";
+          $hquery = "SELECT *
+                     FROM huolto_rivi_tuote
+                     WHERE yhtio        = '{$kukarow['yhtio']}'
+                     AND asiakas_tunnus = '{$asrow['tunnus']}'";
           $hresult = pupe_query($hquery);
 
           if (mysql_num_rows($hresult) == 0) {
@@ -1167,46 +1167,46 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
 
               $tarksql = "SELECT *
                           FROM huolto_rivi_tuote
-                          WHERE yhtio = '{$kukarow['yhtio']}'
-                          AND tyyppi = '{$ahrow['tyyppi']}'
-                          AND tuoteno = '{$ahrow['tuoteno']}'
-                          AND maara = '{$ahrow['maara']}'
-                          AND tilattu_maara = '{$ahrow['tilattu_maara']}'
-                          AND hinta = '{$ahrow['hinta']}'
-                          AND alv = '{$ahrow['alv']}'
-                          AND op_ref = '{$ahrow['op_ref']}'
-                          AND nimitys = '{$ahrow['nimitys']}'
-                          AND merkki = '{$ahrow['merkki']}'
-                          AND oljy_laatu = '{$ahrow['oljy_laatu']}'
-                          AND oljy_luokitus = '{$ahrow['oljy_luokitus']}'
-                          AND tilaaja = '{$ahrow['tilaaja']}'
-                          AND tilausaika = '{$ahrow['tilausaika']}'
-                          AND asiakas_tunnus = '{$jrow['tunnus']}'
+                          WHERE yhtio           = '{$kukarow['yhtio']}'
+                          AND tyyppi            = '{$ahrow['tyyppi']}'
+                          AND tuoteno           = '{$ahrow['tuoteno']}'
+                          AND maara             = '{$ahrow['maara']}'
+                          AND tilattu_maara     = '{$ahrow['tilattu_maara']}'
+                          AND hinta             = '{$ahrow['hinta']}'
+                          AND alv               = '{$ahrow['alv']}'
+                          AND op_ref            = '{$ahrow['op_ref']}'
+                          AND nimitys           = '{$ahrow['nimitys']}'
+                          AND merkki            = '{$ahrow['merkki']}'
+                          AND oljy_laatu        = '{$ahrow['oljy_laatu']}'
+                          AND oljy_luokitus     = '{$ahrow['oljy_luokitus']}'
+                          AND tilaaja           = '{$ahrow['tilaaja']}'
+                          AND tilausaika        = '{$ahrow['tilausaika']}'
+                          AND asiakas_tunnus    = '{$jrow['tunnus']}'
                           AND huoltorivi_tunnus = '{$ahrow['huoltorivi_tunnus']}'";
               $tarkesult = pupe_query($tarksql);
 
               if (mysql_num_rows($tarkesult) == 0) {
-                $ahinsert = " INSERT INTO huolto_rivi_tuote SET
-                              yhtio = '{$kukarow['yhtio']}',
-                              tyyppi = '{$ahrow['tyyppi']}',
-                              tuoteno = '{$ahrow['tuoteno']}',
-                              maara = '{$ahrow['maara']}',
-                              tilattu_maara = '{$ahrow['tilattu_maara']}',
-                              hinta = '{$ahrow['hinta']}',
-                              alv = '{$ahrow['alv']}',
-                              op_ref = '{$ahrow['op_ref']}',
-                              nimitys = '{$ahrow['nimitys']}',
-                              merkki = '{$ahrow['merkki']}',
-                              oljy_laatu = '{$ahrow['oljy_laatu']}',
-                              oljy_luokitus = '{$ahrow['oljy_luokitus']}',
-                              tilaaja = '{$ahrow['tilaaja']}',
-                              tilausaika = '{$ahrow['tilausaika']}',
-                              asiakas_tunnus = '{$jrow['tunnus']}',
-                              huoltorivi_tunnus = '{$ahrow['huoltorivi_tunnus']}',
-                              laatija = '{$kukarow['kuka']}',
-                              luontiaika = NOW(),
-                              muuttaja = '{$kukarow['kuka']}',
-                              muutosaika = NOW()";
+                $ahinsert = "INSERT INTO huolto_rivi_tuote SET
+                             yhtio             = '{$kukarow['yhtio']}',
+                             tyyppi            = '{$ahrow['tyyppi']}',
+                             tuoteno           = '{$ahrow['tuoteno']}',
+                             maara             = '{$ahrow['maara']}',
+                             tilattu_maara     = '{$ahrow['tilattu_maara']}',
+                             hinta             = '{$ahrow['hinta']}',
+                             alv               = '{$ahrow['alv']}',
+                             op_ref            = '{$ahrow['op_ref']}',
+                             nimitys           = '{$ahrow['nimitys']}',
+                             merkki            = '{$ahrow['merkki']}',
+                             oljy_laatu        = '{$ahrow['oljy_laatu']}',
+                             oljy_luokitus     = '{$ahrow['oljy_luokitus']}',
+                             tilaaja           = '{$ahrow['tilaaja']}',
+                             tilausaika        = '{$ahrow['tilausaika']}',
+                             asiakas_tunnus    = '{$jrow['tunnus']}',
+                             huoltorivi_tunnus = '{$ahrow['huoltorivi_tunnus']}',
+                             laatija           = '{$kukarow['kuka']}',
+                             luontiaika        = NOW(),
+                             muuttaja          = '{$kukarow['kuka']}',
+                             muutosaika        = NOW()";
                 pupe_query($ahinsert);
               }
             }
@@ -1295,16 +1295,16 @@ function hae_asiakastunnus($tunnukset) {
   if($tunnukset['ASIAKASTUNNUS'] != ''){
     $query = "SELECT tunnus
               FROM asiakas
-              WHERE yhtio  = '{$kukarow['yhtio']}'
-              AND tunnus   = '{$tunnukset['ASIAKASTUNNUS']}'";
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = '{$tunnukset['ASIAKASTUNNUS']}'";
   }
   else{
     $query = "SELECT tunnus
               FROM asiakas
-              WHERE yhtio         = '{$kukarow['yhtio']}'
-              AND ytunnus         = '{$tunnukset['YTUNNUS']}'
-              AND ovttunnus       = '{$tunnukset['OVTTUNNUS']}'
-              AND toim_ovttunnus  = '{$tunnukset['TOIM_OVTTUNNUS']}'";
+              WHERE yhtio        = '{$kukarow['yhtio']}'
+              AND ytunnus        = '{$tunnukset['YTUNNUS']}'
+              AND ovttunnus      = '{$tunnukset['OVTTUNNUS']}'
+              AND toim_ovttunnus = '{$tunnukset['TOIM_OVTTUNNUS']}'";
   }
 
   $result = pupe_query($query);

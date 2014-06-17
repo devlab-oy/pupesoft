@@ -253,14 +253,14 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
             $lisaa2
             $abcjoin
             JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio
-              and tuotepaikat.tuoteno = tuote.tuoteno
+              and tuotepaikat.tuoteno  = tuote.tuoteno
               $lisa_varastot)
             JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
               AND varastopaikat.tunnus = tuotepaikat.varasto)
             WHERE
-            tuote.yhtio         = '$kukarow[yhtio]'
+            tuote.yhtio                = '$kukarow[yhtio]'
             $lisaa
-            and tuote.ei_saldoa = ''
+            and tuote.ei_saldoa        = ''
             group by tuote.tuoteno, varastopaikat.tunnus, tuotepaikat.tunnus
             ORDER BY tuote.tuoteno, varastopaikat.tunnus, tuotepaikat.tunnus";
   $res = pupe_query($query);

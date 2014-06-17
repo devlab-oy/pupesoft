@@ -4862,7 +4862,7 @@ if ($tee == '') {
                        FROM tuote
                       JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
                       JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-                        AND varastopaikat.tunnus = tuotepaikat.varasto
+                        AND varastopaikat.tunnus                = tuotepaikat.varasto
                         $sallitut_maat_lisa)
                       JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio
                       and sarjanumeroseuranta.tuoteno           = tuote.tuoteno
@@ -4887,8 +4887,8 @@ if ($tee == '') {
                       JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
                         AND varastopaikat.tunnus = tuotepaikat.varasto
                         $sallitut_maat_lisa)
-                      WHERE tuote.yhtio = '$kukarow[yhtio]'
-                      and tuote.tuoteno = '{$tuote['tuoteno']}'
+                      WHERE tuote.yhtio          = '$kukarow[yhtio]'
+                      and tuote.tuoteno          = '{$tuote['tuoteno']}'
                       ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
           }
 
@@ -6518,7 +6518,7 @@ if ($tee == '') {
                         FROM sarjanumeroseuranta
                         JOIN tuotepaikat ON (tuotepaikat.yhtio = sarjanumeroseuranta.yhtio and tuotepaikat.tuoteno = sarjanumeroseuranta.tuoteno)
                         JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-                          AND varastopaikat.tunnus = tuotepaikat.varasto)
+                          AND varastopaikat.tunnus               = tuotepaikat.varasto)
                         WHERE sarjanumeroseuranta.yhtio          = '{$kukarow['yhtio']}'
                         AND sarjanumeroseuranta.tuoteno          = '{$row['tuoteno']}'
                         AND sarjanumeroseuranta.hyllyalue        = tuotepaikat.hyllyalue
@@ -7531,19 +7531,19 @@ if ($tee == '') {
                        IF(tilausrivi.var = 'S',
                          IF((SELECT tyyppi_tieto
                              FROM toimi
-                             WHERE yhtio = tilausrivi.yhtio
-                             AND tunnus = tilausrivi.tilaajanrivinro) != '',
+                             WHERE yhtio         = tilausrivi.yhtio
+                             AND tunnus          = tilausrivi.tilaajanrivinro) != '',
                               (SELECT tyyppi_tieto
                                FROM toimi
-                               WHERE yhtio = tilausrivi.yhtio
-                               AND tunnus = tilausrivi.tilaajanrivinro),
+                               WHERE yhtio       = tilausrivi.yhtio
+                               AND tunnus        = tilausrivi.tilaajanrivinro),
                               tilausrivi.yhtio),
                          tilausrivi.yhtio)
-                       AND varastopaikat.tunnus = tilausrivi.varasto)
-                     WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
-                     and tilausrivi.tyyppi   in ($tilrivity)
-                     and tilausrivi.tyyppi   not in ('D','V','M')
-                     and tilausrivi.var     != 'O'
+                       AND varastopaikat.tunnus  = tilausrivi.varasto)
+                     WHERE tilausrivi.yhtio      = '$kukarow[yhtio]'
+                     and tilausrivi.tyyppi       in ($tilrivity)
+                     and tilausrivi.tyyppi       not in ('D','V','M')
+                     and tilausrivi.var         != 'O'
                      $tunnuslisa
                      GROUP BY 1
                      ORDER BY 1";

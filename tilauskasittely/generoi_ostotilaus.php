@@ -316,8 +316,8 @@ if (isset($generoi) and $generoi != "" and $tee == 'M' and $toimittajaid > 0 and
               JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno AND tuotteen_toimittajat.liitostunnus = '{$toimittajaid}')
               {$abcjoin}
               {$keraysvyohykelisa}
-              WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
-              AND tuotepaikat.varasto = {$kohdevarasto}
+              WHERE tuotepaikat.yhtio     = '{$kukarow['yhtio']}'
+              AND tuotepaikat.varasto     = {$kohdevarasto}
               AND tuotepaikat.halytysraja > 0
               ORDER BY tuotepaikat.tuoteno";
     $resultti = pupe_query($query);
@@ -390,7 +390,7 @@ if (isset($generoi) and $generoi != "" and $tee == 'M' and $toimittajaid > 0 and
                                 {$keraysvyohykelisa}
                                 WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
                                 AND tuotepaikat.varasto = {$kohdevarasto}
-                                AND tuote.tuoteno = '{$_tuote['tuoteno']}'";
+                                AND tuote.tuoteno       = '{$_tuote['tuoteno']}'";
                       $vasres = pupe_query($query);
 
                       while ($vasrow = mysql_fetch_assoc($vasres)) {

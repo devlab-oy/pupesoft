@@ -283,7 +283,7 @@ if (!function_exists('alku_lahete')) {
             $query = "SELECT *
                       FROM lahdot
                       WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND tunnus = '{$laskurow['toimitustavan_lahto']}'";
+                      AND tunnus  = '{$laskurow['toimitustavan_lahto']}'";
             $lahto_res = pupe_query($query);
             $lahto_row = mysql_fetch_assoc($lahto_res);
 

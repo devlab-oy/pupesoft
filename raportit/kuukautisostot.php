@@ -837,8 +837,8 @@ else {
                 LEFT JOIN korvaavat ON tuote.yhtio = korvaavat.yhtio and tuote.tuoteno = korvaavat.tuoteno
                 WHERE tuote.$yhtiot
                 $lisaa
-                and tuote.ei_saldoa   = ''
-                AND tuote.tuotetyyppi NOT IN ('A', 'B')
+                and tuote.ei_saldoa        = ''
+                AND tuote.tuotetyyppi      NOT IN ('A', 'B')
                 $varastot
                 order by id, tuote.tuoteno, varastopaikka";
     }

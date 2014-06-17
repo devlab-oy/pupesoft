@@ -1062,7 +1062,7 @@ if (!function_exists("tee_jt_tilaus")) {
 
                 $query = "UPDATE tilausrivi SET
                           tyyppi      = 'D',
-                          kommentti = IF(kommentti = '', '$uusi_kommentti', CONCAT(kommentti, ' / ', '$uusi_kommentti'))
+                          kommentti   = IF(kommentti = '', '$uusi_kommentti', CONCAT(kommentti, ' / ', '$uusi_kommentti'))
                           $poista_update_lisa
                           WHERE yhtio = '$kukarow[yhtio]'
                           and tunnus  = '$tunnus_nyt'

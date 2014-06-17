@@ -191,9 +191,9 @@ function saldot($myynti_varasto = '', $myynti_maa = '') {
             JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
             AND varastopaikat.tunnus = tuotepaikat.varasto
             $varastotapa
-            WHERE tuotepaikat.yhtio in ($yhtiot)
+            WHERE tuotepaikat.yhtio  in ($yhtiot)
             $varastot
-            and tuotepaikat.tuoteno = '$row[tuoteno]'";
+            and tuotepaikat.tuoteno  = '$row[tuoteno]'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {

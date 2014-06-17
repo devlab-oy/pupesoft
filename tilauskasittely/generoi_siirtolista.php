@@ -474,8 +474,8 @@ if ($tee == 'M' and isset($generoi)) {
               JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno {$lisa})
               {$abcjoin}
               {$keraysvyohykelisa}
-              WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
-              AND tuotepaikat.varasto = {$kohdevarasto}
+              WHERE tuotepaikat.yhtio     = '{$kukarow['yhtio']}'
+              AND tuotepaikat.varasto     = {$kohdevarasto}
               AND tuotepaikat.halytysraja > 0
               {$kohdepaikkalisa}
               ORDER BY tuotepaikat.tuoteno";

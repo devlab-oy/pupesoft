@@ -934,7 +934,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                   FROM tuote
                   JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
                   JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-                    AND varastopaikat.tunnus = tuotepaikat.varasto)
+                    AND varastopaikat.tunnus                = tuotepaikat.varasto)
                   JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio
                   and sarjanumeroseuranta.tuoteno           = tuote.tuoteno
                   and sarjanumeroseuranta.hyllyalue         = tuotepaikat.hyllyalue
@@ -965,8 +965,8 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                   JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
                   JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
                     AND varastopaikat.tunnus = tuotepaikat.varasto)
-                  WHERE tuote.yhtio = '$kukarow[yhtio]'
-                  and tuote.tuoteno = '$tuoteno'
+                  WHERE tuote.yhtio          = '$kukarow[yhtio]'
+                  and tuote.tuoteno          = '$tuoteno'
                   $notfromvarasto
                   ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta
                   $limit";

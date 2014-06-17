@@ -145,7 +145,7 @@ if ($tee == 'UV') {
   $query = "SELECT *, tuotepaikat.varasto varasto, tuotepaikat.tunnus tuotepaikka
             FROM tuotepaikat
             WHERE tuotepaikat.tuoteno = '$tuoteno'
-            and tuotepaikat.yhtio = '$kukarow[yhtio]'";
+            and tuotepaikat.yhtio     = '$kukarow[yhtio]'";
   $qvresult = mysql_query($query) or pupe_error($query);
 
   // K‰yd‰‰n kaikki varastopaikat l‰pi

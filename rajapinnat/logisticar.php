@@ -357,8 +357,8 @@ function varasto($limit = '') {
             LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
               AND varastopaikat.tunnus = tuotepaikat.varasto)
             JOIN tuote ON tuote.tuoteno = tuotepaikat.tuoteno and tuote.yhtio = tuotepaikat.yhtio
-            WHERE tuote.ei_saldoa = ''
-            AND tuotepaikat.yhtio = '$yhtio'
+            WHERE tuote.ei_saldoa      = ''
+            AND tuotepaikat.yhtio      = '$yhtio'
             $where_logisticar[varasto_1]
             GROUP BY 1,3,4,5,6,7
             ORDER BY 1
@@ -461,7 +461,7 @@ function varastotapahtumat($limit = '') {
                                           tuotepaikat.hyllyalue = tapahtuma.hyllyalue and
                                           tuotepaikat.hyllynro  = tapahtuma.hyllynro)
             LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-              AND varastopaikat.tunnus = tuotepaikat.varasto)
+              AND varastopaikat.tunnus                          = tuotepaikat.varasto)
             LEFT JOIN kuka ON kuka.tunnus=lasku.myyja and kuka.yhtio=lasku.yhtio
             WHERE tapahtuma.laji                                in ('tulo', 'laskutus', 'siirto', 'valmistus', 'kulutus')
             and tapahtuma.yhtio                                 = '$yhtio'
@@ -606,7 +606,7 @@ function myynti($limit = '') {
             JOIN tuote ON tuote.tuoteno = tilausrivi.tuoteno and tuote.yhtio = tilausrivi.yhtio
             JOIN tuotepaikat USE INDEX (tuote_index) ON tuotepaikat.tuoteno=tilausrivi.tuoteno and tuotepaikat.hyllyvali=tilausrivi.hyllyvali and tuotepaikat.hyllytaso=tilausrivi.hyllytaso AND tilausrivi.hyllyalue=tuotepaikat.hyllyalue and tilausrivi.hyllynro=tuotepaikat.hyllynro and tilausrivi.yhtio=tuotepaikat.yhtio
             JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-              AND varastopaikat.tunnus = tuotepaikat.varasto)
+              AND varastopaikat.tunnus     = tuotepaikat.varasto)
             LEFT JOIN kuka ON kuka.tunnus=lasku.myyja and kuka.yhtio=lasku.yhtio
             WHERE tilausrivi.varattu      != 0
             AND tilausrivi.tyyppi          IN ('L','O','G')

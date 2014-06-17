@@ -244,8 +244,7 @@ if ($tee == "") {
               FROM lasku
               JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.uusiotunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D')
               JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio
-                AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
-                AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0')))
+                AND varastopaikat.tunnus = tilausrivi.varasto)
               WHERE lasku.yhtio = '$kukarow[yhtio]'
               AND lasku.tunnus  = '$laskurow[tunnus]'
               GROUP BY varastopaikat.maa

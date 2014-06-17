@@ -29,9 +29,8 @@ while ($row = mysql_fetch_array ($result)) {
             varastopaikat.nimitys
              FROM tuote
             JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
-            JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-            and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-            and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+            JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+              AND varastopaikat.tunnus = tuotepaikat.varasto)
             WHERE tuote.yhtio = '$kukarow[yhtio]'
             and tuote.tuoteno = '$row[tuoteno]'
             ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";

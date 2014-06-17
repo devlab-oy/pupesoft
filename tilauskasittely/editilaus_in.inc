@@ -36,7 +36,7 @@ if ($php_cli) {
 }
 
 if (!function_exists('jt_toimita_editilaus')) {
-  function jt_toimita_editilaus ($asiakasno, $asiakasid, $asiakasmaa) {
+  function jt_toimita_editilaus ($asiakasno, $asiakasid, $asiakasmaa, $toimipaikka = 0) {
     global $yhtiorow, $kukarow, $edi_ulos, $php_cli;
 
     $automaaginen             = "automaaginen";
@@ -53,16 +53,39 @@ if (!function_exists('jt_toimita_editilaus')) {
     $from_varastoon_inc         = "editilaus_in.inc";
     $ei_tehdastoimitus_tuotteita  = "EI";
     $automaattinen_poiminta      = "JOO";
+    $toimipaikka = (int) $toimipaikka;
 
     if ($asiakasmaa != '') {
-      $asiakasmaalisa = "and (varastopaikat.sallitut_maat like '%$asiakasmaa%' or varastopaikat.sallitut_maat = '')";
+      $asiakasmaalisa = "and (varastopaikat.sallitut_maat like '%{$asiakasmaa}%' or varastopaikat.sallitut_maat = '')";
+    }
+
+    # Tarkistetaan onko toimipaikalle varastoja
+    if (!empty($toimipaikka) and $yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
+      $query = "SELECT *
+                FROM varastopaikat
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tyyppi = ''
+                AND toimipaikka = '{$toimipaikka}'
+                {$asiakasmaalisa}";
+      $tp_var_chk_res = pupe_query($query);
+
+      if (mysql_num_rows($tp_var_chk_res) == 0) {
+        $toimipaikka = 0;
+      }
+    }
+
+    $toimipaikkalisa = "";
+
+    if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
+      $toimipaikkalisa = "and toimipaikka = '{$toimipaikka}'";
     }
 
     $query = "SELECT *
               FROM varastopaikat
-              WHERE yhtio = '$kukarow[yhtio]'
+              WHERE yhtio = '{$kukarow['yhtio']}'
               and tyyppi  = ''
-              $asiakasmaalisa";
+              {$toimipaikkalisa}
+              {$asiakasmaalisa}";
     $vtresult = pupe_query($query);
 
     $varastosta = array();
@@ -1868,8 +1891,7 @@ while ($tietue = fgets($fd)) {
                           JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
                             AND varastopaikat.tyyppi       != ''
                             AND varastopaikat.prioriteetti  > 0
-                            AND concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-                            AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+                            AND varastopaikat.tunnus = tuotepaikat.varasto
                             $verkkokauppavarasto_li)
                           WHERE tuotepaikat.yhtio           = '$kukarow[yhtio]'
                           AND tuotepaikat.tuoteno           = '$tuoteno'
@@ -2051,9 +2073,16 @@ while ($tietue = fgets($fd)) {
         if ($editilaus_tila != "Z" and $editilaus_tilaustyyppi != 3 and $editilaus_tilaustyyppi != 'K') {
 
           if (in_array($yhtiorow['jt_automatiikka'], array('Y','W','K'))) {
+
             //lis‰t‰‰n tilaukseen ne jt-rivit jotka riitt‰v‰t kaikille
             $edi_ulos .= "\n";
-            jt_toimita_editilaus($laskurow["ytunnus"], $laskurow["liitostunnus"], $laskurow["maa"]);
+
+            $_ytunnus = $laskurow['ytunnus'];
+            $_ltun = $laskurow['liitostunnus'];
+            $_maa = $laskurow['maa'];
+            $_ytp = $laskurow['yhtio_toimipaikka'];
+
+            jt_toimita_editilaus($_ytunnus, $_ltun, $_maa, $_ytp);
             $edi_ulos .= "\n";
           }
 

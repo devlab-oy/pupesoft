@@ -670,9 +670,9 @@ function xf01($tanaan) {
            SELECT ROUND(sum(tuotepaikat.saldo),0) saldo
            FROM tuotepaikat
            JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-           AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-           AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-           AND varastopaikat.tyyppi = '' AND varastopaikat.toimipaikka = 0)
+            AND varastopaikat.tunnus = tuotepaikat.varasto
+            AND varastopaikat.tyyppi = ''
+            AND varastopaikat.toimipaikka = 0)
            WHERE tuotepaikat.yhtio  = tuote.yhtio
            AND tuotepaikat.tuoteno  = tuote.tuoteno
          ) saldo
@@ -708,9 +708,8 @@ function xf01($tanaan) {
            JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus AND lasku.kauppatapahtuman_luonne != '21')
            JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus AND tilausrivin_lisatiedot.tilausrivilinkki = 0)
            JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
-           AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
-           AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
-           AND varastopaikat.tyyppi      = '')
+             AND varastopaikat.tunnus = tilausrivi.varasto
+             AND varastopaikat.tyyppi = '')
            WHERE tilausrivi.yhtio        = '$yhtiorow[yhtio]'
            AND tilausrivi.tyyppi         = 'L'
            AND tilausrivi.tuoteno        = '$tuoterow[tuoteno]'
@@ -724,9 +723,8 @@ function xf01($tanaan) {
            JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus AND lasku.kauppatapahtuman_luonne != '21')
            JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus AND tilausrivin_lisatiedot.tilausrivilinkki = 0)
            JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
-           AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
-           AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
-           AND varastopaikat.tyyppi       = '')
+             AND varastopaikat.tunnus = tilausrivi.varasto
+             AND varastopaikat.tyyppi = '')
            WHERE tilausrivi.yhtio         = '$yhtiorow[yhtio]'
            AND tilausrivi.tyyppi          = 'L'
            AND tilausrivi.tuoteno         = '$tuoterow[tuoteno]'

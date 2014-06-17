@@ -2007,6 +2007,8 @@ else {
           echo t("Lähetettiin jälkitoimitus-sähköposti")."...<br><br>";
         }
       }
+
+      @include 'inc/pks_lahete.inc';
     }
   } // end jos yksikin rivi kerätty else haara
 }

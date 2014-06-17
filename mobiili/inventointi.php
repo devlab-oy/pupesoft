@@ -65,10 +65,8 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
               concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
                     tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) tuotepaikka
               FROM tuotepaikat
-              JOIN varastopaikat
-              ON ( varastopaikat.yhtio = tuotepaikat.yhtio
-                AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-                AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+              JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+                AND varastopaikat.tunnus = tuotepaikat.varasto
                 AND varastopaikat.toimipaikka = '{$kukarow['toimipaikka']}')
               JOIN tuote on (tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno)
               WHERE tuotepaikat.yhtio         = '{$kukarow['yhtio']}'
@@ -221,7 +219,13 @@ if ($tee == 'laske' or $tee == 'inventoi') {
               tuote.nimitys,
               tuote.tuoteno,
               tuote.yksikko,
+              tuotepaikat.saldo,
+              tuotepaikat.hyllyalue,
+              tuotepaikat.hyllynro,
+              tuotepaikat.hyllyvali,
+              tuotepaikat.hyllytaso,
               tuotepaikat.inventointilista,
+              tuotepaikat.inventointilista_naytamaara,
               tuotepaikat.tyyppi,
                concat_ws('-', tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
                      tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) as tuotepaikka,
@@ -318,6 +322,23 @@ if ($tee == 'laske' or $tee == 'inventoi') {
     while($inventointi_selite = mysql_fetch_assoc($result)) {
       $inventointi_selitteet[] = $inventointi_selite;
     }
+
+    //Haetaan ker‰tty m‰‰r‰
+    $query = "SELECT ifnull(sum(if(keratty!='',tilausrivi.varattu,0)),0) keratty,  ifnull(sum(tilausrivi.varattu),0) ennpois
+              FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
+              WHERE yhtio    = '$kukarow[yhtio]'
+              and tyyppi     in ('L','G','V')
+              and tuoteno    = '$tuote[tuoteno]'
+              and varattu    <> 0
+              and laskutettu = ''
+              and hyllyalue  = '$tuote[hyllyalue]'
+              and hyllynro   = '$tuote[hyllynro]'
+              and hyllyvali  = '$tuote[hyllyvali]'
+              and hyllytaso  = '$tuote[hyllytaso]'";
+
+    $hylresult = pupe_query($query);
+    $hylrow = mysql_fetch_assoc($hylresult);
+
     include('views/inventointi/laske.php');
 
   }

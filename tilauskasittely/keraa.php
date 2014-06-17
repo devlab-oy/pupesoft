@@ -15,18 +15,18 @@ if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] !=
 $logistiikka_yhtio = '';
 $logistiikka_yhtiolisa = '';
 
-if (!isset($toim))       $toim       = '';
-if (!isset($id))       $id       = 0;
-if (!isset($tee))       $tee       = '';
-if (!isset($jarj))       $jarj       = '';
-if (!isset($etsi))       $etsi       = '';
-if (!isset($tuvarasto))   $tuvarasto     = '';
-if (!isset($tumaa))     $tumaa       = '';
+if (!isset($toim))         $toim         = '';
+if (!isset($id))           $id           = 0;
+if (!isset($tee))          $tee          = '';
+if (!isset($jarj))         $jarj         = '';
+if (!isset($etsi))         $etsi         = '';
+if (!isset($tuvarasto))    $tuvarasto    = '';
+if (!isset($tumaa))        $tumaa        = '';
 if (!isset($tutoimtapa))   $tutoimtapa   = '';
 if (!isset($tutyyppi))     $tutyyppi     = '';
-if (!isset($rahtikirjaan))   $rahtikirjaan   = '';
+if (!isset($rahtikirjaan)) $rahtikirjaan = '';
 if (!isset($sorttaus))     $sorttaus     = '';
-if (!isset($keraajalist))   $keraajalist   = '';
+if (!isset($keraajalist))  $keraajalist  = '';
 if (!isset($sel_lahete))   $sel_lahete   = array();
 if (!isset($sel_oslapp))   $sel_oslapp   = array();
 
@@ -1769,20 +1769,21 @@ if ($tee == 'P') {
                   and lasku.alatila  in ('C','D')";
         $lasresult = pupe_query($query);
 
-        $tilausnumeroita_backup   = $tilausnumeroita;
-        $lahete_tulostus_paperille   = 0;
+        $tilausnumeroita_backup        = $tilausnumeroita;
+        $lahete_tulostus_paperille     = 0;
         $lahete_tulostus_paperille_vak = 0;
-        $lahete_tulostus_emailiin   = 0;
-        $laheteprintterinimi     = "";
-        $onko_nouto         = "";
+        $lahete_tulostus_emailiin      = 0;
+        $laheteprintterinimi           = "";
+        $onko_nouto                    = "";
+        $lahetekpl_alkuperainen = $lahetekpl;
 
         while ($laskurow = mysql_fetch_assoc($lasresult)) {
 
           // Nollataan t‰m‰:
-          $komento    = "";
-          $oslapp      = "";
+          $komento        = "";
+          $oslapp         = "";
           $vakadr_komento = "";
-          $onko_nouto    = $laskurow['nouto'];
+          $onko_nouto     = $laskurow['nouto'];
 
           if ($yhtiorow["vak_erittely"] == "K" and $yhtiorow["kerayserat"] == "K" and $vakadrkpl > 0 and $vakadr_tulostin !='' and $toim == "") {
             //haetaan l‰hetteen tulostuskomento
@@ -1799,12 +1800,28 @@ if ($tee == 'P') {
             if ($vakadr_komento != 'email' and $onko_vak) $lahete_tulostus_paperille_vak++;
           }
 
-          if ($valittu_tulostin != "") {
-            //haetaan l‰hetteen tulostuskomento
+          // Valittu tulostin
+          $valittu_tulostin_valittu = $valittu_tulostin;
+
+          # Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰
+          if (!empty($laskurow['yhtio_toimipaikka'])) {
+            $avainsana_where = " and avainsana.selite       = '{$laskurow['varasto']}'
+                                 and avainsana.selitetark   = '{$laskurow['yhtio_toimipaikka']}'
+                                 and avainsana.selitetark_2 = 'printteri1'";
+
+            $tp_tulostin = t_avainsana("VARTOIMTULOSTIN", '', $avainsana_where, '', '', "selitetark_3");
+
+            if (!empty($tp_tulostin)) {
+              $valittu_tulostin_valittu = $tp_tulostin;
+            }
+          }
+
+          if ($valittu_tulostin_valittu != "") {
+            // haetaan l‰hetteen tulostuskomento
             $query   = "SELECT *
                         from kirjoittimet
                         where yhtio = '$kukarow[yhtio]'
-                        and tunnus  = '$valittu_tulostin'";
+                        and tunnus  = '$valittu_tulostin_valittu'";
             $kirres  = pupe_query($query);
             $kirrow  = mysql_fetch_assoc($kirres);
             $komento = $kirrow['komento'];
@@ -1825,7 +1842,9 @@ if ($tee == 'P') {
             $oslapp_mediatyyppi = $kirrow['mediatyyppi'];
           }
 
-          if (($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0)
+          @include 'inc/pks_lahete.inc';
+
+          if (($komento != "" and $lahetekpl > 0)
             or (
               (in_array($laskurow["keraysvahvistus_lahetys"], array('k', 'L', 'M', 'N', 'Q', 'P')) or (in_array($yhtiorow["keraysvahvistus_lahetys"], array('k', 'L', 'M', 'N', 'Q', 'P')) and $laskurow["keraysvahvistus_lahetys"] == ''))
               or (($laskurow["keraysvahvistus_lahetys"] == 'o' or ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["keraysvahvistus_lahetys"] == '')) and $laskurow['email'] != "")
@@ -1858,17 +1877,17 @@ if ($tee == 'P') {
               $kieli = (!isset($kieli)) ? "" : $kieli;
 
               $params = array(
-                'laskurow'          => $laskurow,
-                'sellahetetyyppi'       => $sellahetetyyppi,
-                'extranet_tilausvahvistus'   => "",
+                'laskurow'                 => $laskurow,
+                'sellahetetyyppi'          => $sellahetetyyppi,
+                'extranet_tilausvahvistus' => "",
                 'naytetaanko_rivihinta'    => "",
-                'tee'            => $tee,
-                'toim'            => $toim,
-                'komento'           => $komento,
-                'lahetekpl'          => $lahetekpl,
-                'kieli'           => $kieli,
-                'koontilahete'        => $koontilahete,
-                'koontilahete_tilausrivit'  => $koontilahete_tilausrivit,
+                'tee'                      => $tee,
+                'toim'                     => $toim,
+                'komento'                  => $komento,
+                'lahetekpl'                => $lahetekpl,
+                'kieli'                    => $kieli,
+                'koontilahete'             => $koontilahete,
+                'koontilahete_tilausrivit' => $koontilahete_tilausrivit,
               );
 
               pupesoft_tulosta_lahete($params);
@@ -3068,9 +3087,8 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
                       group_concat(sarjanumeroseuranta.ostorivitunnus) ostorivitunnus
                        FROM tuote
                       JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
-                      JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-                      and concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-                      and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+                      JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+                        AND varastopaikat.tunnus = tuotepaikat.varasto)
                       JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio
                       and sarjanumeroseuranta.tuoteno           = tuote.tuoteno
                       and sarjanumeroseuranta.hyllyalue         = tuotepaikat.hyllyalue
@@ -3309,6 +3327,24 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
             $sel_lahete[$prirow['printteri1']] = "SELECTED";  // laskuprintteri
             $sel_oslapp[$prirow['printteri3']] = "SELECTED";  // osoitelappuprintteri
           }
+        }
+
+        # Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰
+        $query = "SELECT varasto, yhtio_toimipaikka
+                  FROM lasku
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus IN ({$tilausnumeroita})";
+        $var_tp_res = pupe_query($query);
+        $var_tp_row = mysql_fetch_assoc($var_tp_res);
+
+        $avainsana_where = " and avainsana.selite       = '{$var_tp_row['varasto']}'
+                             and avainsana.selitetark   = '{$var_tp_row['yhtio_toimipaikka']}'
+                             and avainsana.selitetark_2 = 'printteri1'";
+
+        $tp_tulostin = t_avainsana("VARTOIMTULOSTIN", '', $avainsana_where, '', '', "selitetark_3");
+
+        if (!empty($tp_tulostin)) {
+          $sel_lahete[$tp_tulostin] = "SELECTED";  // laskuprintteri
         }
 
         if (strpos($tila, 'G') !== false) {

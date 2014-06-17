@@ -1058,8 +1058,11 @@ if (!function_exists("tee_jt_tilaus")) {
                   }
                 }
 
+                $uusi_kommentti = t("Toimitettu tilauksella").": " . $kukarow['kesken'];
+
                 $query = "UPDATE tilausrivi SET
-                          tyyppi      = 'D'
+                          tyyppi      = 'D',
+                          kommentti = IF(kommentti = '', '$uusi_kommentti', CONCAT(kommentti, ' / ', '$uusi_kommentti'))
                           $poista_update_lisa
                           WHERE yhtio = '$kukarow[yhtio]'
                           and tunnus  = '$tunnus_nyt'

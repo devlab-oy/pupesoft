@@ -1085,6 +1085,19 @@ if (!function_exists("verkkolasku_in")) {
       $hyvak[2] = trim($hyvak[2]);
       $hyvak[1] = trim($hyvak[1]);
 
+      // Katsotaan onko meillä "tuuraajia" hyväksynnässä
+      for ($tuuraaja_i = 1; $tuuraaja_i < 6; $tuuraaja_i++) {
+        $query = "SELECT if (tuuraaja != '', tuuraaja, kuka) kuka
+                  FROM kuka
+                  WHERE yhtio = '{$yhtio}'
+                  AND kuka    = '{$hyvak[$tuuraaja_i]}'
+                  AND kuka   != ''";
+        $result = pupe_query($query);
+        $hyvak_row = mysql_fetch_assoc($result);
+
+        $hyvak[$tuuraaja_i] = $hyvak_row['kuka'];
+      }
+
       if (strlen($hyvak[5]) > 0) {
         $hyvaksyja_nyt=$hyvak[5];
         $tila = "H";

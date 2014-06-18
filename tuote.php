@@ -2458,7 +2458,7 @@ if ($tee == 'Z') {
           if ($prow["laji"] == "laskutus") {
             $kate = $prow["kplhinta"] - $kehahinta;
             $katepros = 100 * ($kate/$prow['kplhinta']);
-            echo "<td nowrap align='right' valign='top'>".round($katepros,2)."%</td>";
+            echo "<td nowrap align='right' valign='top'>".round($katepros, 2)."%</td>";
           }
           else {
             echo "<td nowrap align='right' valign='top'></td>";

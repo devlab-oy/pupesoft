@@ -2267,8 +2267,16 @@ if ($tee == 'Z') {
         }
       }
 
-      $query = "SELECT tapahtuma.tuoteno, ifnull(kuka.nimi, tapahtuma.laatija) laatija, tapahtuma.laadittu, tapahtuma.laji, tapahtuma.kpl, tapahtuma.kplhinta, tapahtuma.hinta,
-                if (tapahtuma.laji in ('tulo','valmistus'), tapahtuma.kplhinta, tapahtuma.hinta)*tapahtuma.kpl arvo, tapahtuma.selite, lasku.tunnus laskutunnus,
+      $query = "SELECT tapahtuma.tuoteno,
+                ifnull(kuka.nimi, tapahtuma.laatija) laatija,
+                tapahtuma.laadittu,
+                tapahtuma.laji,
+                tapahtuma.kpl,
+                tapahtuma.kplhinta,
+                tapahtuma.hinta,
+                if (tapahtuma.laji in ('tulo','valmistus'), tapahtuma.kplhinta*tapahtuma.kpl, null) arvo,
+                tapahtuma.selite,
+                lasku.tunnus laskutunnus,
                 concat_ws(' ', tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso) tapapaikka,
                 tapahtuma.hyllyalue tapahtuma_hyllyalue,
                 concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
@@ -2335,6 +2343,12 @@ if ($tee == 'Z') {
 
       while ($prow = mysql_fetch_assoc($qresult)) {
 
+        $kehahinta = hinta_kuluineen($tuoterow['tuoteno'], $prow['hinta']);
+
+        if ($prow['arvo'] === null) {
+          $prow['arvo'] = $kehahinta * $prow['kpl'];
+        }
+
         $vararvo_nyt -= $prow["arvo"];
 
         // Epäkuranteissa saldo ei muutu
@@ -2344,8 +2358,8 @@ if ($tee == 'Z') {
 
         if ($tapahtumalaji == "" or strtoupper($tapahtumalaji) == strtoupper($prow["laji"])) {
           echo "<tr class='aktiivi'>";
-          echo "<td nowrap valign='top'>$prow[laatija]</td>";
-          echo "<td nowrap valign='top'>".tv1dateconv($prow["laadittu"], "pitka")."</td>";
+          echo "<td nowrap valign='top'>" . $prow['laatija'] . "</td>";
+          echo "<td nowrap valign='top'>" . tv1dateconv($prow["laadittu"], "pitka") . "</td>";
           echo "<td nowrap valign='top'>";
 
           if ($prow["laji"] == "laskutus" and $prow["laskutunnus"] != "") {
@@ -2418,7 +2432,8 @@ if ($tee == 'Z') {
 
           echo "</td>";
 
-          echo "<td nowrap align='right' valign='top'>$prow[kpl]</td>";
+          echo "<td nowrap align='right' valign='top'>" . $prow['kpl'] . "</td>";
+
           echo "<td nowrap align='right' valign='top'>";
 
           if ($prow['laji'] == 'tulo') {
@@ -2438,13 +2453,12 @@ if ($tee == 'Z') {
           }
 
           echo "</td>";
-
-          echo "<td nowrap align='right' valign='top'>".hintapyoristys(hinta_kuluineen($tuoterow['tuoteno'], $prow['hinta']), 6, FALSE)."</td>";
+          echo "<td nowrap align='right' valign='top'>" . hintapyoristys($kehahinta, 6, FALSE) . "</td>";
 
           if ($prow["laji"] == "laskutus") {
-            $kate = kate_kuluineen($prow['tuoteno'], $prow['rivihinta'], $prow['hinta']);
-            $kate_pros = $prow['rivihinta'] != 0 ? round(100 * $kate / $prow['rivihinta'], 2) : 0;
-            echo "<td nowrap align='right' valign='top'>{$kate_pros}%</td>";
+            $kate = $prow["kplhinta"] - $kehahinta;
+            $katepros = 100 * ($kate/$prow['kplhinta']);
+            echo "<td nowrap align='right' valign='top'>".round($katepros, 2)."%</td>";
           }
           else {
             echo "<td nowrap align='right' valign='top'></td>";

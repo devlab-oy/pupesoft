@@ -5061,7 +5061,7 @@ if ($tee == '') {
         $_jaljella = $rahtivapaa_alarajasumma - $tilriv_chk_row['rivihinta'];
 
         echo "<br /><table>";
-        echo "<tr><th>",t("Rahtivapaaseen toimitukseen j‰ljell‰"),"</th></tr>";
+        echo "<tr><th>", t("Rahtivapaaseen toimitukseen j‰ljell‰"), "</th></tr>";
         echo "<tr><td>";
 
         echo $_jaljella > 0 ? sprintf("%.2f", $_jaljella) : 0;
@@ -6836,18 +6836,18 @@ if ($tee == '') {
 
                 // Kate = Hinta - Ostohinta
                 if ($kotisumma_alviton != 0) {
-                  $kehahin = hinta_kuluineen($row["tuoteno"], $row["kehahin"]);
-                  $kate = round((100 * ($kotisumma_alviton - ($kehahin*($row["varattu"]+$row["jt"]))) / $kotisumma_alviton),2) ."%";
+                  $ostohinta = hinta_kuluineen($row["tuoteno"], $ostohinta);
+                  $kate = sprintf('%.2f', 100*($kotisumma_alviton - ($ostohinta * $kpl))/$kotisumma_alviton);
                 }
                 elseif (($ostohinta * $kpl) != 0) {
-                  $kate = "-100.00%";
+                  $kate = "-100.00";
                 }
               }
               elseif ($kpl < 0 and $row["osto_vai_hyvitys"] == "O") {
                 //Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on OSTOA
 
                 // Kate = 0
-                $kate = "0%";
+                $kate = "0";
               }
               elseif ($kpl < 0 and $row["osto_vai_hyvitys"] == "") {
                 //Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on HYVITYSTƒ
@@ -6884,10 +6884,10 @@ if ($tee == '') {
 
                 // Kate = Hinta - Alkuper‰inen ostohinta
                 if ($kotisumma_alviton != 0) {
-                  $kate = sprintf('%.2f', 100 * ($kotisumma_alviton * -1 - $ostohinta)/$kotisumma_alviton)."%";
+                  $kate = sprintf('%.2f', 100 * ($kotisumma_alviton * -1 - $ostohinta)/$kotisumma_alviton);
                 }
                 else {
-                  $kate = "100.00%";
+                  $kate = "100.00";
                 }
               }
               else {
@@ -6897,7 +6897,7 @@ if ($tee == '') {
             elseif ($kukarow['extranet'] == '') {
               if ($kotisumma_alviton != 0) {
                 $khh = hinta_kuluineen($row['tuoteno'], $row["kehahin"]);
-                $kate = round(100 * ($kotisumma_alviton - ($khh * ($row["varattu"] + $row["jt"])))/$kotisumma_alviton, 2);
+                $kate = sprintf('%.2f', 100*($kotisumma_alviton - ($khh * ($row["varattu"]+$row["jt"]))) / $kotisumma_alviton);
               }
               elseif ($row["kehahin"] != 0 and ($row["varattu"]+$row["jt"]) > 0) {
                 $kate = "-100.00";
@@ -8837,7 +8837,7 @@ if ($tee == '') {
             $apuprintteri = 0;
           }
 
-          # Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰
+          // Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰
           if (!empty($laskurow['yhtio_toimipaikka'])) {
             $avainsana_where = " and avainsana.selite       = '{$laskurow['varasto']}'
                                  and avainsana.selitetark   = '{$laskurow['yhtio_toimipaikka']}'

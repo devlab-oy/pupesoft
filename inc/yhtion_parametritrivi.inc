@@ -51,10 +51,10 @@ if (mysql_field_name($result, $i) == "verkkolasku_lah") {
   elseif ($trow[$i] == 'finvoice') {
     $sel2 = "selected";
   }
-  elseif($trow[$i] == 'maventa') {
+  elseif ($trow[$i] == 'maventa') {
     $sel5 = "selected";
   }
-  elseif($trow[$i] == 'servinet') {
+  elseif ($trow[$i] == 'servinet') {
     $sel6 = "selected";
   }
   else {
@@ -258,7 +258,7 @@ if (mysql_field_name($result, $i) == "laskutyyppi") {
   $ulos .= "<option value = '6'  $sel[6]>".t("Normaali laskupohja (Ei n‰ytet‰ tilausnumeroa/toimitusaikaa)")."</option>";
   $ulos .= "<option value = '7'  $sel[7]>".t("Normaali laskupohja (N‰ytet‰‰n tuotteen EAN koodi ja asiakaskommentti)")."</option>";
   $ulos .= "<option value = '1'  $sel[1]>".t("Pelkistetty laskupohja 1")."</option>";
-  #$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)")."</option>";
+  //$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)")."</option>";
   $ulos .= "<option value = '4'  $sel[4]>".t("Pelkistetty laskupohja 3")."</option>";
   $ulos .= "<option value = '8'  $sel[8]>".t("Ruotsin laskupohja")."</option>";
   $ulos .= "<option value = '10' $sel[10]>".t("Normaali laskupohja ilman rivihintoja (ei laillinen Suomessa)")."</option>";
@@ -306,21 +306,21 @@ if (mysql_field_name($result, $i) == "koontilaskut_yhdistetaan") {
 
 if (mysql_field_name($result, $i) == "tilausvahvistustyyppi") {
 
-    $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-    $apu = $trow[$i];
-    $sel = array();
-    $sel[$apu] = "selected";
+  $apu = $trow[$i];
+  $sel = array();
+  $sel[$apu] = "selected";
 
-    $ulos .= "<option value = '1' $sel[1]>".t("N‰ytet‰‰n asiakkaan hinta ja alennus")."</option>";
-    $ulos .= "<option value = '2' $sel[2]>".t("N‰ytet‰‰n tuotteen myyntihinta ja alennusryhm‰")."</option>";
-    $ulos .= "<option value = '3' $sel[3]>".t("Ei n‰ytet‰ hintoja eik‰ alennuksia")."</option>";
-    $ulos .= "<option value = '4' $sel[4]>".t("N‰ytet‰‰n asiakkaan hinta")."</option>";
-    #$ulos .= "<option value = '5' $sel[5]>".t("Haetaan hinnat toisesta pupesta")."</option>";
-    $ulos .= "<option value = '6' $sel[6]>".t("N‰ytet‰‰n asiakkaan hinta ja alennus, modifioitu tulostuspohja")."</option>";
+  $ulos .= "<option value = '1' $sel[1]>".t("N‰ytet‰‰n asiakkaan hinta ja alennus")."</option>";
+  $ulos .= "<option value = '2' $sel[2]>".t("N‰ytet‰‰n tuotteen myyntihinta ja alennusryhm‰")."</option>";
+  $ulos .= "<option value = '3' $sel[3]>".t("Ei n‰ytet‰ hintoja eik‰ alennuksia")."</option>";
+  $ulos .= "<option value = '4' $sel[4]>".t("N‰ytet‰‰n asiakkaan hinta")."</option>";
+  //$ulos .= "<option value = '5' $sel[5]>".t("Haetaan hinnat toisesta pupesta")."</option>";
+  $ulos .= "<option value = '6' $sel[6]>".t("N‰ytet‰‰n asiakkaan hinta ja alennus, modifioitu tulostuspohja")."</option>";
 
-    $ulos .= "</select></td>";
-    $jatko = 0;
+  $ulos .= "</select></td>";
+  $jatko = 0;
 } //Jamppa s‰‰t‰‰
 
 if (mysql_field_name($result, $i) == "tilausvahvistus_lahetys") {
@@ -373,13 +373,13 @@ if (mysql_field_name($result, $i) == "ostotilaustyyppi") {
 
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-  $sel = array_fill_keys(array($trow[$i]), 'selected') + array_fill_keys(array('0','A','B','C'), '');
+  $sel = array_fill_keys(array($trow[$i]), 'selected') + array_fill_keys(array('0', 'A', 'B', 'C'), '');
 
   $ulos .= "<option value = '0' {$sel[0]}>".t("Normaali ostotilauspohja");
   $ulos .= "<option value = 'A' {$sel['A']}>".t("Tulosta nimitykset, piilotetaan toimitusp‰iv‰")."</option>";
   $ulos .= "<option value = 'B' {$sel['B']}>".t("Piilota nimitykset, tulosta toimitusp‰iv‰")."</option>";
   $ulos .= "<option value = 'C' {$sel['C']}>".t("Piilota toimitusp‰iv‰ ja nimitykset")."</option>";
-  #$ulos .= "<option value = '1' $sel[1]>".t("Pelkistetty ostotilauspohja");
+  //$ulos .= "<option value = '1' $sel[1]>".t("Pelkistetty ostotilauspohja");
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -862,7 +862,7 @@ if (mysql_field_name($result, $i) == "tee_automaattinen_osto_myyntitilaukselta")
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-  $sel = array_fill_keys(array('X','U','V','Y','H','W'), '');
+  $sel = array_fill_keys(array('X', 'U', 'V', 'Y', 'H', 'W'), '');
   $sel[$trow[$i]] = " SELECTED";
 
   $ulos .= "<option value=''>".t("Myyntitilauksella ei voi luoda automaattisesti ostorivej‰")."</option>";
@@ -1424,7 +1424,7 @@ if (mysql_field_name($result, $i) == "lahetteen_jarjestys" or
   $ulos .= "<option value = '9' $sel[9]>".t("Tilausj‰rjestys");
   $ulos .= "<option value = 'M' $sel[M]>".t("K‰ytt‰j‰n asettama j‰rjestys");
 
-  if(  mysql_field_name($result, $i) == "valmistus_kerayslistan_jarjestys" or
+  if (  mysql_field_name($result, $i) == "valmistus_kerayslistan_jarjestys" or
     mysql_field_name($result, $i) == "kerayslistan_jarjestys") {
     $ulos .= "<option value = 'S' $sel[S]>".t("Rivit summattuina");
   }
@@ -1500,10 +1500,10 @@ if (mysql_field_name($result, $i) == "lahete_allekirjoitus") {
   elseif ($trow[$i] == 'A') {
     $selc = "selected";
   }
-  elseif($trow[$i] == 'E') {
+  elseif ($trow[$i] == 'E') {
     $seld = "selected";
   }
-  elseif($trow[$i] == 'S') {
+  elseif ($trow[$i] == 'S') {
     $sele = "selected";
   }
   else {
@@ -1521,7 +1521,7 @@ if (mysql_field_name($result, $i) == "lahete_allekirjoitus") {
   $jatko = 0;
 }
 
-if(mysql_field_name($result, $i) == "lomakkeiden_allekirjoitus") {
+if (mysql_field_name($result, $i) == "lomakkeiden_allekirjoitus") {
   $sela = $selb = "";
 
   if ($trow[$i] == 'X') {
@@ -2364,7 +2364,7 @@ if (mysql_field_name($result, $i) == "tilausvahvistus_tallenna") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "laskutuslisa" OR
+if (mysql_field_name($result, $i) == "laskutuslisa" or
   mysql_field_name($result, $i) == "kuljetusvakuutus") {
 
   if ($trow[$i] == 0) {
@@ -3025,7 +3025,7 @@ if (mysql_field_name($result, $i) == "varastontunniste") {
 
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-  $sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys(array(1,2,3), '');
+  $sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys(array(1, 2, 3), '');
 
   $ulos .= "<option value = ''>".t("Varaston tunnisteet ei ole k‰ytˆss‰")."</option>";
   $ulos .= "<option value = '1'{$sel[1]}>".t("Varaston tunnisteena k‰ytet‰‰n hyllyalueen ensimm‰ist‰ merkki‰")."</option>";
@@ -3256,7 +3256,7 @@ if (mysql_field_name($result, $i) == "myynnin_alekentat") {
 if (mysql_field_name($result, $i) == "myynnin_alekentat_muokkaus") {
   $ulos = "<td>";
 
-   $sel = array_fill_keys(explode(",", $trow[$i]), " checked") + array_fill(1, 3, '');
+  $sel = array_fill_keys(explode(",", $trow[$i]), " checked") + array_fill(1, 3, '');
 
   $ulos .= "<input type='hidden' name='{$nimi}[]' value='default' />";
 

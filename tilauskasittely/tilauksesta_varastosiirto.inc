@@ -247,8 +247,7 @@ if (!function_exists('luo_varastosiirtorivi')) {
     $korvaavakielto   = 1;
     $perhekielto      = $lapsituotteet == "" ? 1 : 0;
     $orvoteikiinnosta = "EITOD";
-    $var              = '';
-    $varataan_saldoa  = 'EI';
+    $var              = 'H';
 
     //Laitetaan tuote oletusvaraston tuotepaikalle
     $tuotteen_oletuspaikka = hae_tuotteen_tuotepaikat($tilausrivi['tuoteno'], $tilausrivi['kohdevarasto_tunnus']);

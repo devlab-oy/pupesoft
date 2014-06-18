@@ -23651,7 +23651,7 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
 
 if (!function_exists("lisaa_rivi")) {
   function lisaa_rivi($parametrit) {
-    global $kukarow, $yhtiorow;
+    global $kukarow, $yhtiorow, $lapsenlap_array;
 
     if (empty($kukarow['kesken'])) {
       echo "Kukarow kesken on pakollinen";

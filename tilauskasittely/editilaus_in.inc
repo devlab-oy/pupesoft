@@ -822,6 +822,11 @@ while ($tietue = fgets($fd)) {
       $ltoim_puh = trim($tieto);
       break;
 
+    case 'OSTOTIL.OT_TOIMITUS_EMAIL' :
+      // toimitusosoitteen email
+      $ltoim_email = trim($tieto);
+      break;
+
     case 'OSTOTIL.OT_YHTEYSHENKILONPUH' :
       // yhteyshenkilön puhelinnumero
       $yhteyshenkilon_puhelin = trim($tieto);
@@ -981,7 +986,8 @@ while ($tietue = fgets($fd)) {
           $arow["postino"]  = $lpostino;
           $arow["maa"]    = $ltoim_maa;
           $arow["toim_puh"]  = $ltoim_puh;
-           $arow["vienti"]    = "";
+          $arow["toim_email"] = $ltoim_email;
+          $arow["vienti"]    = "";
 
           $arow['laskutus_nimi']     = $lnimi;
           $arow['laskutus_nimitark']   = $lnimitark;
@@ -1309,6 +1315,7 @@ while ($tietue = fgets($fd)) {
                   toim_ovttunnus          = '$toimitetaan_tanne',
                   toim_postino            = '$arow[toim_postino]',
                   toim_postitp            = '$arow[toim_postitp]',
+                  toim_email              = '$arow[toim_email]',
                   tunnusnippu             = '',
                   valkoodi                = '$yhtiorow[valkoodi]',
                   varasto                 = '',

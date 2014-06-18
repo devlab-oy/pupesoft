@@ -247,15 +247,7 @@ if (!function_exists('luo_varastosiirtorivi')) {
     $korvaavakielto   = 1;
     $perhekielto      = $lapsituotteet == "" ? 1 : 0;
     $orvoteikiinnosta = "EITOD";
-
-    // Kirjanpidollisessa siirret‰‰n aina ne rivit jotka on tilauksella.
-    // Sama koskee reklaamaatiosta luotavaa siirtolistaa
-    if ($varastosiirtotyyppi == 'K' or $varastosiirtotyyppi == 'P') {
-      $var = 'H';
-    }
-    else {
-      $var = '';
-    }
+    $var              = 'H';
 
     //Laitetaan tuote oletusvaraston tuotepaikalle
     $tuotteen_oletuspaikka = hae_tuotteen_tuotepaikat($tilausrivi['tuoteno'], $tilausrivi['kohdevarasto_tunnus']);

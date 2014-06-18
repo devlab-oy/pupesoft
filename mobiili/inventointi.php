@@ -66,7 +66,7 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
                     tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) tuotepaikka
               FROM tuotepaikat
               JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-                AND varastopaikat.tunnus = tuotepaikat.varasto
+                AND varastopaikat.tunnus      = tuotepaikat.varasto
                 AND varastopaikat.toimipaikka = '{$kukarow['toimipaikka']}')
               JOIN tuote on (tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno)
               WHERE tuotepaikat.yhtio         = '{$kukarow['yhtio']}'

@@ -920,7 +920,7 @@ if ($tee == 'Z') {
                    FROM tuote
                   JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
                   JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-                    AND tuotepaikat.varasto = varastopaikat.tunnus)
+                    AND tuotepaikat.varasto                 = varastopaikat.tunnus)
                   JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio
                   and sarjanumeroseuranta.tuoteno           = tuote.tuoteno
                   and sarjanumeroseuranta.hyllyalue         = tuotepaikat.hyllyalue
@@ -953,8 +953,8 @@ if ($tee == 'Z') {
                   JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
                   JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
                     AND tuotepaikat.varasto = varastopaikat.tunnus)
-                  WHERE tuote.yhtio in ('".implode("','", $yhtiot)."')
-                  and tuote.tuoteno = '$tuoteno'
+                  WHERE tuote.yhtio         in ('".implode("','", $yhtiot)."')
+                  and tuote.tuoteno         = '$tuoteno'
                   ORDER BY toimipaikka_sorttaus, tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
       }
 
@@ -1324,7 +1324,7 @@ if ($tee == 'Z') {
               LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
               JOIN lasku use index (PRIMARY) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus {$toimipaikkarajaus}
               LEFT JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio
-                AND varastopaikat.tunnus = lasku.varasto)
+                AND varastopaikat.tunnus     = lasku.varasto)
               LEFT JOIN lasku as lasku2 ON lasku2.yhtio = tilausrivi.yhtio and lasku2.tunnus = tilausrivi.uusiotunnus
               LEFT JOIN asiakas ON asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus
               WHERE tilausrivi.yhtio         = '$kukarow[yhtio]'
@@ -1790,11 +1790,11 @@ if ($tee == 'Z') {
                   JOIN tilausrivi ON (tilausrivi.yhtio = tapahtuma.yhtio
                     AND tilausrivi.tunnus = tapahtuma.rivitunnus
                     {$toimipaikkarajaus})
-                  WHERE tapahtuma.yhtio  = '{$kukarow['yhtio']}'
-                  AND tapahtuma.tuoteno  = '{$tuoteno}'
-                  AND tapahtuma.laadittu >= '{$ed}'
+                  WHERE tapahtuma.yhtio   = '{$kukarow['yhtio']}'
+                  AND tapahtuma.tuoteno   = '{$tuoteno}'
+                  AND tapahtuma.laadittu  >= '{$ed}'
                   {$ehto_where}
-                  AND tilausrivi.tyyppi  IN ('L','W','V')";
+                  AND tilausrivi.tyyppi   IN ('L','W','V')";
         $result3 = pupe_query($query);
         $lrow = mysql_fetch_assoc($result3);
 

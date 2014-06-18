@@ -3088,7 +3088,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
                        FROM tuote
                       JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
                       JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-                        AND varastopaikat.tunnus = tuotepaikat.varasto)
+                        AND varastopaikat.tunnus                = tuotepaikat.varasto)
                       JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio
                       and sarjanumeroseuranta.tuoteno           = tuote.tuoteno
                       and sarjanumeroseuranta.hyllyalue         = tuotepaikat.hyllyalue
@@ -3333,7 +3333,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
         $query = "SELECT varasto, yhtio_toimipaikka
                   FROM lasku
                   WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus IN ({$tilausnumeroita})";
+                  AND tunnus  IN ({$tilausnumeroita})";
         $var_tp_res = pupe_query($query);
         $var_tp_row = mysql_fetch_assoc($var_tp_res);
 

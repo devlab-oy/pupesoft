@@ -2979,8 +2979,8 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
     elseif ($otsik["varasto"] == '') {
       $query = "SELECT *
                 from varastopaikat
-                where yhtio = '$kukarow[yhtio]'
-                AND tyyppi != 'P'
+                where yhtio  = '$kukarow[yhtio]'
+                AND tyyppi  != 'P'
                 order by alkuhyllyalue,alkuhyllynro
                 limit 1";
     }

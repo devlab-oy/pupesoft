@@ -449,16 +449,16 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
     $ppa = date("d", mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
 
     $query = "SELECT tuote.tuoteno, sum(rivihinta) summa
-                  FROM tilausrivi use index (yhtio_tyyppi_osasto_try_laskutettuaika)
-                  JOIN tuote use index (tuoteno_index) ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno $rajauslisatuote
-                  JOIN tuotepaikat use index (tuote_index) ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' $rajauslisa $invaamatta $extra
-                  WHERE tilausrivi.yhtio        = '$kukarow[yhtio]'
-                  and tilausrivi.tyyppi         = 'L'
-                  $where
-                  and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'
-                  GROUP BY 1
-                  ORDER BY summa desc
-                  LIMIT $top";
+              FROM tilausrivi use index (yhtio_tyyppi_osasto_try_laskutettuaika)
+              JOIN tuote use index (tuoteno_index) ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno $rajauslisatuote
+              JOIN tuotepaikat use index (tuote_index) ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' $rajauslisa $invaamatta $extra
+              WHERE tilausrivi.yhtio        = '$kukarow[yhtio]'
+              and tilausrivi.tyyppi         = 'L'
+              $where
+              and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'
+              GROUP BY 1
+              ORDER BY summa desc
+              LIMIT $top";
     $tuotresult = pupe_query($query);
 
     while ($tuotrow = mysql_fetch_assoc($tuotresult)) {
@@ -874,17 +874,17 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
   }
   elseif ($tila == "SIIVOUS") {
     $query = "SELECT {$select}
-                FROM tuotepaikat use index (primary)
-                {$joinlisa}
-                JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno AND tuote.ei_saldoa = '' {$rajauslisatuote})
-                LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno)
-                WHERE tuotepaikat.yhtio               = '{$kukarow['yhtio']}'
-                AND tuotepaikat.tunnus                IN ({$saldot})
-                {$rajauslisa}
-                {$invaamatta}
-                and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00'
-                GROUP BY {$groupby}
-                ORDER BY sorttauskentta, tuoteno";
+              FROM tuotepaikat use index (primary)
+              {$joinlisa}
+              JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno AND tuote.ei_saldoa = '' {$rajauslisatuote})
+              LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno)
+              WHERE tuotepaikat.yhtio               = '{$kukarow['yhtio']}'
+              AND tuotepaikat.tunnus                IN ({$saldot})
+              {$rajauslisa}
+              {$invaamatta}
+              and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00'
+              GROUP BY {$groupby}
+              ORDER BY sorttauskentta, tuoteno";
     $saldoresult = pupe_query($query);
   }
   else {
@@ -1020,8 +1020,8 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
                   JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
                     AND varastopaikat.tunnus = tuotepaikat.varasto
                     AND varastopaikat.tunnus = '{$rivipaikka}')
-                  WHERE tuote.yhtio = '{$kukarow['yhtio']}'
-                  AND tuote.tuoteno = '{$tuoterow['tuoteno']}'
+                  WHERE tuote.yhtio          = '{$kukarow['yhtio']}'
+                  AND tuote.tuoteno          = '{$tuoterow['tuoteno']}'
                   ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
         $sresult = pupe_query($query);
 

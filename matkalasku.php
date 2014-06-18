@@ -133,9 +133,9 @@ if ($tee == "UUSI") {
       for ($tuuraaja_i = 2; $tuuraaja_i < 6; $tuuraaja_i++) {
         $query = "SELECT if (tuuraaja != '', tuuraaja, kuka) kuka
                   FROM kuka
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND kuka    = '{$trow['oletus_hyvak'.$tuuraaja_i]}'
-                  AND kuka   != ''";
+                  WHERE yhtio  = '{$kukarow['yhtio']}'
+                  AND kuka     = '{$trow['oletus_hyvak'.$tuuraaja_i]}'
+                  AND kuka    != ''";
         $result = pupe_query($query);
         $hyvak_row = mysql_fetch_assoc($result);
 

@@ -109,8 +109,8 @@ if ($tee == 'MUUTA') {
              FROM tuotepaikat
             LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
               AND varastopaikat.tunnus = tuotepaikat.varasto)
-            WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
-            and tuotepaikat.tuoteno = '$tuoteno'
+            WHERE tuotepaikat.yhtio    = '$kukarow[yhtio]'
+            and tuotepaikat.tuoteno    = '$tuoteno'
             ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
   $paikatresult1 = pupe_query($query);
 
@@ -896,10 +896,10 @@ if ($tee == 'M') {
             concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
              FROM tuotepaikat
             LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-              AND varastopaikat.tunnus = tuotepaikat.varasto)
-            WHERE tuotepaikat.yhtio    = '$kukarow[yhtio]'
-            and tuotepaikat.tuoteno    = '$tuoteno'
-            and tuotepaikat.hyllyalue != '!!M'
+              AND varastopaikat.tunnus  = tuotepaikat.varasto)
+            WHERE tuotepaikat.yhtio     = '$kukarow[yhtio]'
+            and tuotepaikat.tuoteno     = '$tuoteno'
+            and tuotepaikat.hyllyalue  != '!!M'
             ORDER BY sorttauskentta";
   $paikatresult1 = pupe_query($query);
 
@@ -937,10 +937,10 @@ if ($tee == 'M') {
             concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
              FROM tuotepaikat
             LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-              AND varastopaikat.tunnus = tuotepaikat.varasto)
-            WHERE tuotepaikat.yhtio    = '$kukarow[yhtio]'
-            and tuotepaikat.tuoteno    = '$tuoteno'
-            and tuotepaikat.hyllyalue != '!!M'
+              AND varastopaikat.tunnus  = tuotepaikat.varasto)
+            WHERE tuotepaikat.yhtio     = '$kukarow[yhtio]'
+            and tuotepaikat.tuoteno     = '$tuoteno'
+            and tuotepaikat.hyllyalue  != '!!M'
             ORDER BY sorttauskentta";
   $paikatresult2 = pupe_query($query);
 

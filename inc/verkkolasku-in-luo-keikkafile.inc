@@ -2046,10 +2046,10 @@ if ($osrow["ebid"] == "TECCOM-INVOICE" or ($osrow['ebid'] == 'MAVENTAXML' and $t
               FROM lasku
               JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.uusiotunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D')
               JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio
-                AND varastopaikat.maa != ''
-                AND varastopaikat.tunnus = tilausrivi.varasto)
-              WHERE lasku.yhtio        = '{$kukarow['yhtio']}'
-              AND lasku.tunnus         = '{$_uusiotunnus}'
+                AND varastopaikat.maa    != ''
+                AND varastopaikat.tunnus  = tilausrivi.varasto)
+              WHERE lasku.yhtio           = '{$kukarow['yhtio']}'
+              AND lasku.tunnus            = '{$_uusiotunnus}'
               GROUP BY varastopaikat.maa
               ORDER BY kpl DESC
               LIMIT 1";

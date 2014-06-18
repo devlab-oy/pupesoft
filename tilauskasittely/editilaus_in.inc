@@ -63,8 +63,8 @@ if (!function_exists('jt_toimita_editilaus')) {
     if (!empty($toimipaikka) and $yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
       $query = "SELECT *
                 FROM varastopaikat
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tyyppi = ''
+                WHERE yhtio     = '{$kukarow['yhtio']}'
+                AND tyyppi      = ''
                 AND toimipaikka = '{$toimipaikka}'
                 {$asiakasmaalisa}";
       $tp_var_chk_res = pupe_query($query);
@@ -1891,7 +1891,7 @@ while ($tietue = fgets($fd)) {
                           JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
                             AND varastopaikat.tyyppi       != ''
                             AND varastopaikat.prioriteetti  > 0
-                            AND varastopaikat.tunnus = tuotepaikat.varasto
+                            AND varastopaikat.tunnus        = tuotepaikat.varasto
                             $verkkokauppavarasto_li)
                           WHERE tuotepaikat.yhtio           = '$kukarow[yhtio]'
                           AND tuotepaikat.tuoteno           = '$tuoteno'

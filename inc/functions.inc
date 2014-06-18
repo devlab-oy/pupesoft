@@ -1286,14 +1286,14 @@ if (!function_exists("tuoteperhe_myytavissa")) {
     $query = "SELECT distinct varastopaikat.tunnus, varastopaikat.nimitys, varastopaikat.tyyppi
               FROM tuote
               JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio
-                AND tuotepaikat.tuoteno = tuote.tuoteno
+                AND tuotepaikat.tuoteno   = tuote.tuoteno
                 $valinta2)
               JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-                AND varastopaikat.tunnus = tuotepaikat.varasto
+                AND varastopaikat.tunnus  = tuotepaikat.varasto
                 $valinta1)
-              WHERE tuote.yhtio  = '$yhtio'
-              and tuote.tuoteno  IN ($tuotteet_str)
-              and tuote.tuoteno != ''
+              WHERE tuote.yhtio           = '$yhtio'
+              and tuote.tuoteno           IN ($tuotteet_str)
+              and tuote.tuoteno          != ''
               $valinta3
               ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys";
     $varresult = pupe_query($query);
@@ -1487,7 +1487,7 @@ if (!function_exists("saldo_myytavissa")) {
                   {$kvjoini}
                   LEFT JOIN varastopaikat on (varastopaikat.yhtio = tuotepaikat.yhtio
                     and $valinta1
-                    varastopaikat.tunnus = tuotepaikat.varasto)
+                    varastopaikat.tunnus                    = tuotepaikat.varasto)
                   JOIN sarjanumeroseuranta  use index (yhtio_tuoteno_sarjanumero)  ON sarjanumeroseuranta.yhtio = tuotepaikat.yhtio
                   and sarjanumeroseuranta.tuoteno           = tuotepaikat.tuoteno
                   and sarjanumeroseuranta.hyllyalue         = tuotepaikat.hyllyalue
@@ -1514,7 +1514,7 @@ if (!function_exists("saldo_myytavissa")) {
                   {$kvjoini}
                   LEFT JOIN varastopaikat on (varastopaikat.yhtio = tuotepaikat.yhtio
                     and $valinta1
-                    varastopaikat.tunnus = tuotepaikat.varasto)
+                    varastopaikat.tunnus  = tuotepaikat.varasto)
                   WHERE tuotepaikat.yhtio = '$yhtiolisa'
                   and tuotepaikat.tuoteno = '$tuoteno'
                   $valinta2
@@ -1807,8 +1807,8 @@ if (!function_exists("saldo_myytavissa")) {
                         FROM tuotepaikat
                         LEFT JOIN varastopaikat on (varastopaikat.yhtio = tuotepaikat.yhtio
                           AND varastopaikat.tunnus = tuotepaikat.varasto)
-                        WHERE tuotepaikat.yhtio = '$yhtiolisa'
-                        and tuotepaikat.tuoteno = '$tuoteno'
+                        WHERE tuotepaikat.yhtio    = '$yhtiolisa'
+                        and tuotepaikat.tuoteno    = '$tuoteno'
                         GROUP BY varastopaikat.tyyppi
                         HAVING varastopaikat.tyyppi is null";
               $ennsaldoresult = pupe_query($query);
@@ -26887,12 +26887,12 @@ if (!function_exists('varaston_tuotepaikkojen_saldo')) {
               if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') AS tyyppi
               FROM tuote
               JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio
-                AND tuotepaikat.tuoteno = tuote.tuoteno
+                AND tuotepaikat.tuoteno  = tuote.tuoteno
                 $varastopaikat)
               JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
                 AND varastopaikat.tunnus = tuotepaikat.varasto)
-              WHERE tuote.yhtio         = '{$kukarow['yhtio']}'
-              AND tuote.tuoteno         = '{$tuoteno}'
+              WHERE tuote.yhtio          = '{$kukarow['yhtio']}'
+              AND tuote.tuoteno          = '{$tuoteno}'
               ORDER BY tuotepaikat.oletus DESC,
               varastopaikat.nimitys,
               sorttauskentta";
@@ -26922,11 +26922,11 @@ if (!function_exists('tuotteen_oletuspaikka')) {
               varastopaikat.nimitys AS varasto_nimitys
               FROM tuotepaikat
               JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-                AND varastopaikat.tunnus = tuotepaikat.varasto)
-              WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
-              AND tuotepaikat.oletus != ''
-              AND tuotepaikat.tuoteno = '{$tuoteno}'
-              AND tuotepaikat.varasto = {$varasto}";
+                AND varastopaikat.tunnus  = tuotepaikat.varasto)
+              WHERE tuotepaikat.yhtio     = '{$kukarow['yhtio']}'
+              AND tuotepaikat.oletus     != ''
+              AND tuotepaikat.tuoteno     = '{$tuoteno}'
+              AND tuotepaikat.varasto     = {$varasto}";
     $result = pupe_query($query);
 
     return mysql_fetch_assoc($result);

@@ -1924,7 +1924,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
                        FROM tuote
                       JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
                       JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-                        AND varastopaikat.tunnus = tuotepaikat.varasto
+                        AND varastopaikat.tunnus                = tuotepaikat.varasto
                         $sallitut_maat_lisa)
                       JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio
                       and sarjanumeroseuranta.tuoteno           = tuote.tuoteno
@@ -1949,8 +1949,8 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
                       JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
                         AND varastopaikat.tunnus = tuotepaikat.varasto
                         $sallitut_maat_lisa)
-                      WHERE tuote.yhtio in ('".implode("','", $yhtiot)."')
-                      and tuote.tuoteno = '$row[tuoteno]'
+                      WHERE tuote.yhtio          in ('".implode("','", $yhtiot)."')
+                      and tuote.tuoteno          = '$row[tuoteno]'
                       ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
           }
           $varresult = pupe_query($query);

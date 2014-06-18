@@ -2047,14 +2047,14 @@ if ($select_varasto > 0) {
             FROM lasku
             JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('','P','T'))
             JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
-              AND tilausrivi.otunnus = lasku.tunnus
+              AND tilausrivi.otunnus  = lasku.tunnus
               AND tilausrivi.perheid != 0
               AND tilausrivi.perheid != tilausrivi.tunnus
-              AND tilausrivi.tyyppi != 'D'
-              AND tilausrivi.var not in ('P','J','O','S')
-              AND tilausrivi.varasto = '{$select_varasto}')
+              AND tilausrivi.tyyppi  != 'D'
+              AND tilausrivi.var      not in ('P','J','O','S')
+              AND tilausrivi.varasto  = '{$select_varasto}')
             JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            WHERE lasku.yhtio         = '{$kukarow['yhtio']}'
             {$lasku_where}";
   $result = pupe_query($query);
 
@@ -2146,13 +2146,13 @@ if ($select_varasto > 0) {
               JOIN avainsana ON (avainsana.yhtio = lahdot.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selitetark_3 = lahdot.asiakasluokka)
               JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
               JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
-                AND tilausrivi.otunnus = lasku.tunnus
-                AND tilausrivi.tyyppi != 'D'
-                AND tilausrivi.var not in ('P','J','O','S')
-                AND tilausrivi.varasto = '{$select_varasto}'
+                AND tilausrivi.otunnus  = lasku.tunnus
+                AND tilausrivi.tyyppi  != 'D'
+                AND tilausrivi.var      not in ('P','J','O','S')
+                AND tilausrivi.varasto  = '{$select_varasto}'
                 {$ei_lapsia_lisa})
               JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-              WHERE lasku.yhtio        = '{$kukarow['yhtio']}'
+              WHERE lasku.yhtio         = '{$kukarow['yhtio']}'
               {$lasku_where}
               GROUP BY 1,2,3,4,5,6,7,8,9
               ORDER BY lahdot.pvm, lahdot.lahdon_kellonaika, lahdot.tunnus";

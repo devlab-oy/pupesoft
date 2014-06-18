@@ -513,7 +513,7 @@ if (
                FROM tuote
               JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
               JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-                AND varastopaikat.tunnus = tuotepaikat.varasto)
+                AND varastopaikat.tunnus                = tuotepaikat.varasto)
               JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio
               and sarjanumeroseuranta.tuoteno           = tuote.tuoteno
               and sarjanumeroseuranta.hyllyalue         = tuotepaikat.hyllyalue
@@ -536,8 +536,8 @@ if (
               JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
               JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
                 AND varastopaikat.tunnus = tuotepaikat.varasto)
-              WHERE tuote.yhtio = '$kukarow[yhtio]'
-              and tuote.tuoteno = '$row[tuoteno]'
+              WHERE tuote.yhtio          = '$kukarow[yhtio]'
+              and tuote.tuoteno          = '$row[tuoteno]'
               ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
   }
 
@@ -821,8 +821,8 @@ if (
                 JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
                 JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
                   AND varastopaikat.tunnus = tuotepaikat.varasto)
-                WHERE tuote.yhtio = '$kukarow[yhtio]'
-                and tuote.tuoteno = '$row[tuoteno]'";
+                WHERE tuote.yhtio          = '$kukarow[yhtio]'
+                and tuote.tuoteno          = '$row[tuoteno]'";
       $valmpaikatres = pupe_query($query);
 
       while ($valmpaikatrow  = mysql_fetch_assoc($valmpaikatres)) {
@@ -905,8 +905,8 @@ elseif (
             JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno and tuotepaikat.hyllyalue != '!!M'
             JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
               AND varastopaikat.tunnus = tuotepaikat.varasto)
-            WHERE tuote.yhtio = '$kukarow[yhtio]'
-            and tuote.tuoteno = '$row[tuoteno]'
+            WHERE tuote.yhtio          = '$kukarow[yhtio]'
+            and tuote.tuoteno          = '$row[tuoteno]'
             ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
   $omavarastores  = pupe_query($query);
 

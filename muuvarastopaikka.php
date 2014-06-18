@@ -742,7 +742,7 @@ if ($tee == 'UUSIPAIKKA') {
         $_var_tp = hae_varaston_toimipaikka($_mihin_varastoon);
         $_var_tp = (!empty($_var_tp) and is_array($_var_tp)) ? $_var_tp['tunnus'] : null;
 
-        $yhtiorow_alkuperainen = $yhtiorow;        
+        $yhtiorow_alkuperainen = $yhtiorow;
         $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $_var_tp);
       }
 

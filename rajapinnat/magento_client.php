@@ -95,6 +95,11 @@ class MagentoClient {
    * Tuotteen erikoisparametrit jotka tulevat jostain muualta kuin dynaamisista parametreistä
    */
   private $_verkkokauppatuotteet_erikoisparametrit = array ();
+  
+  /**
+   * Magentossa käsin hallitut kategoria id:t joita ei poisteta tuotteelta tuotepäivityksessä
+   */
+  private $_sticky_kategoriat = array ();
 
   /**
    * Tämän yhteyden aikana sattuneiden virheiden määrä
@@ -372,16 +377,29 @@ class MagentoClient {
       // Tuote on jo olemassa, päivitetään
       else {
         try {
+          
+          $sticky_kategoriat = $this->_sticky_kategoriat;
+
+          // Haetaan tuotteen Magenton ID ja nykyiset kategoriat
+          $result = $this->_proxy->call($this->_session, 'catalog_product.info', $tuote['tuoteno']);
+          $product_id = $result['product_id'];
+          $current_categories = $result['categories'];
+
+          // Jos tuotteelta löytyy näitä kategoriatunnuksia ennen updatea ne lisätään takaisin
+          if (count($sticky_kategoriat) > 0 and count($current_categories) > 0) {
+            foreach ($sticky_kategoriat as $stick) {
+              if(in_array($stick, $current_categories)) {
+                $tuote_data['categories'][] = $stick;
+              }
+            }
+          }
+
           $this->_proxy->call($this->_session, 'catalog_product.update',
 
             array(
               $tuote['tuoteno'], // sku
               $tuote_data)
           );
-
-          // Haetaan tuotteen Magenton ID
-          $result = $this->_proxy->call($this->_session, 'catalog_product.info', $tuote['tuoteno']);
-          $product_id = $result['product_id'];
 
           $this->log("Tuote '{$tuote['tuoteno']}' päivitetty (simple) " . print_r($tuote_data, true));
 
@@ -497,9 +515,6 @@ class MagentoClient {
           }
         }
       }
-      
-      var_dump($configurable_multi_data);
-      exit;
 
       // Configurable tuotteen tiedot
       $configurable = array(
@@ -571,6 +586,23 @@ class MagentoClient {
         }
         // Päivitetään olemassa olevaa configurablea
         else {
+
+          $sticky_kategoriat = $this->_sticky_kategoriat;
+
+          // Haetaan tuotteen Magenton ID ja nykyiset kategoriat
+          $result = $this->_proxy->call($this->_session, 'catalog_product.info', $nimitys);
+          $product_id = $result['product_id'];
+          $current_categories = $result['categories'];
+
+          // Jos tuotteelta löytyy näitä kategoriatunnuksia ennen updatea ne lisätään takaisin
+          if (count($sticky_kategoriat) > 0 and count($current_categories) > 0) {
+            foreach ($sticky_kategoriat as $stick) {
+              if(in_array($stick, $current_categories)) {
+                $configurable['categories'][] = $stick;
+              }
+            }
+          }
+
           $product_id = $this->_proxy->call($this->_session, 'catalog_product.update',
             array(
               $nimitys,
@@ -578,10 +610,6 @@ class MagentoClient {
             )
           );
           $this->log("Tuote '{$nimitys}' päivitetty (configurable) " . print_r($configurable, true));
-
-          // Haetaan tuotteen Magenton ID
-          $result = $this->_proxy->call($this->_session, 'catalog_product.info', $nimitys);
-          $product_id = $result['product_id'];
         }
 
         // Pitää käydä tekemässä vielä stock.update kutsu, että saadaan Manage Stock: YES
@@ -1502,6 +1530,13 @@ class MagentoClient {
    */
   public function setVerkkokauppatuotteetErikoisparametrit($verkkokauppatuotteet_erikoisparametrit) {
     $this->_verkkokauppatuotteet_erikoisparametrit = $verkkokauppatuotteet_erikoisparametrit;
+  }
+
+  /** 
+   * Magentossa käsin hallitut kategoriat joita ei poisteta tuotteelta tuotepäivityksessä
+   */
+  public function setStickyKategoriat($magento_sticky_kategoriat) {
+    $this->_sticky_kategoriat = $magento_sticky_kategoriat;
   }
 
   /**

@@ -851,6 +851,11 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
     $magento_client->setVerkkokauppatuotteetErikoisparametrit($verkkokauppatuotteet_erikoisparametrit);
   }
 
+  // Magentossa k‰sin hallitut kategoriat jotka s‰ilytet‰‰n aina tuotep‰ivityksess‰
+  if(isset($magento_sticky_kategoriat) and count($magento_sticky_kategoriat) > 0) {
+    $magento_client->setStickyKategoriat($magento_sticky_kategoriat);
+  }
+
   // lisaa_kategoriat
   if (count($dnstuoteryhma) > 0) {
     echo date("d.m.Y @ G:i:s")." - P‰ivitet‰‰n tuotekategoriat\n";

@@ -5536,7 +5536,7 @@ if ($tee == '') {
           $v_toimipaikka = hae_varaston_toimipaikka($tilausrivin_varasto);
           $varasto = hae_varasto($tilausrivin_varasto);
 
-          if (in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) and !empty($v_toimipaikka)) {
+          if (in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) and !empty($v_toimipaikka) and $varasto['tyyppi'] != 'E') {
 
             if ($v_toimipaikka['tunnus'] == 0) {
               $_toimipaikka = $kukarow['toimipaikka'];

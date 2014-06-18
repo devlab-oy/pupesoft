@@ -1844,6 +1844,10 @@ if ($tee == 'P') {
 
           @include 'inc/pks_lahete.inc';
 
+          if ($laskurow['tila'] == 'G' and !isset($valittu_uista)) {
+            $lahetekpl = $yhtiorow["oletus_lahetekpl_siirtolista"];
+          }
+
           if (($komento != "" and $lahetekpl > 0)
             or (
               (in_array($laskurow["keraysvahvistus_lahetys"], array('k', 'L', 'M', 'N', 'Q', 'P')) or (in_array($yhtiorow["keraysvahvistus_lahetys"], array('k', 'L', 'M', 'N', 'Q', 'P')) and $laskurow["keraysvahvistus_lahetys"] == ''))
@@ -3370,6 +3374,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
         }
 
         echo "</select> ".t("Kpl").": <input type='text' size='4' name='lahetekpl' value='$lahetekpl'>";
+        echo "<input type='hidden' name='valittu_uista' value='1' />";
 
         if ($yhtiorow["lahete_tyyppi_tulostus"] != '') {
           echo " ".t("Lähetetyyppi").": <select name='sellahetetyyppi'>";

@@ -41,13 +41,15 @@ fwrite($fp, $header);
 
 // Haetaan varastot
 $query = "SELECT
+          yhtio.maa,
           varastopaikat.tunnus,
           concat_ws(' ', varastopaikat.nimitys, varastopaikat.nimi, varastopaikat.nimitark) nimi,
           varastopaikat.tyyppi
           FROM varastopaikat
+          JOIN yhtio ON (varastopaikat.yhtio = yhtio.yhtio)
           WHERE varastopaikat.yhtio  = '$yhtio'
           AND varastopaikat.tyyppi  != 'P'
-          ORDER BY 1";
+          ORDER BY varastopaikat.tunnus";
 $res = pupe_query($query);
 
 // Kerrotaan montako rivi‰ k‰sitell‰‰n
@@ -65,7 +67,7 @@ while ($row = mysql_fetch_assoc($res)) {
     $replensihed = "no";
   }
 
-  $rivi  = "{$row['tunnus']};";
+  $rivi  = "{$row['maa']}-{$row['tunnus']};";
   $rivi .= pupesoft_csvstring($row['nimi']).";";
   $rivi .= "{$replensihed};";
   $rivi .= "";

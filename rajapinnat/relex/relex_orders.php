@@ -47,9 +47,10 @@ fwrite($fp, $header);
 
 // Haetaan avoimet ostot ja myynnit
 $query = "SELECT
-          tilausrivi.varasto varasto,
-          tilausrivi.tuoteno tuote,
-          tilausrivi.tyyppi tyyppi,
+          yhtio.maa,
+          tilausrivi.varasto,
+          tilausrivi.tuoteno,
+          tilausrivi.tyyppi,
           tilausrivi.varattu+tilausrivi.jt maara,
           tilausrivi.toimaika toimituspaiva,
           lasku.liitostunnus partner
@@ -61,6 +62,7 @@ $query = "SELECT
             AND tuote.ei_saldoa   = ''
             AND tuote.tuotetyyppi = ''
             AND tuote.ostoehdotus = '')
+          JOIN yhtio ON (tilausrivi.yhtio = yhtio.yhtio)
           WHERE tilausrivi.yhtio        = '$yhtio'
           AND tilausrivi.varattu       != 0
           AND tilausrivi.tyyppi        IN ('L','O')
@@ -87,8 +89,12 @@ while ($row = mysql_fetch_assoc($res)) {
     $type = "ORDER";
   }
 
-  $rivi  = "{$row['varasto']};";                    // Inventory location code
-  $rivi .= pupesoft_csvstring($row['tuote']).";";   // Item code
+  if ($row['partner'] > 0) {
+     $row['partner'] = $row['maa']."-".$row['partner'];
+  }
+
+  $rivi  = "{$row['maa']}-{$row['varasto']};";      // Inventory location code
+  $rivi .= pupesoft_csvstring($row['tuoteno']).";"; // Item code
   $rivi .= "{$type};";                              // Open order type
   $rivi .= "{$row['maara']};";                      // Open order quantity in inventory units
   $rivi .= "{$row['toimituspaiva']};";              // Estimated delivery date of the order

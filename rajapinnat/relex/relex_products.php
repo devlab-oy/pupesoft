@@ -36,24 +36,31 @@ if (!$fp = fopen($filepath, 'w+')) {
 }
 
 // Otsikkotieto
-$header = "code;name;supplier;group;order_quantity;purchase_price\n";
+$header = "code;name;supplier;group;order_quantity;purchase_price;suppliers_code;unit;ean;flag;product_height;product_width;product_length;product_weight\n";
 fwrite($fp, $header);
 
 // Haetaan tuotteet
 $query = "SELECT
+          yhtio.maa,
           tuote.tuoteno,
           tuote.nimitys,
           tuote.try,
-          tuote.kehahin
+          tuote.kehahin,
+          upper(tuote.yksikko) yksikko,
+          tuote.eankoodi,
+          tuote.tahtituote,
+          tuote.tuotekorkeus,
+          tuote.tuoteleveys,
+          tuote.tuotesyvyys,
+          tuote.tuotemassa
           FROM tuote
-          JOIN tuotepaikat ON (tuote.tuoteno = tuotepaikat.tuoteno and tuote.yhtio = tuotepaikat.yhtio)
+          JOIN yhtio ON (tuote.yhtio = yhtio.yhtio)
           WHERE tuote.yhtio     = '$yhtio'
           AND tuote.status     != 'P'
           AND tuote.ei_saldoa   = ''
           AND tuote.tuotetyyppi = ''
           AND tuote.ostoehdotus = ''
-          GROUP BY 1,2
-          ORDER BY 1,2";
+          ORDER BY tuote.tuoteno";
 $res = pupe_query($query);
 
 // Kerrotaan montako riviä käsitellään
@@ -68,7 +75,10 @@ while ($row = mysql_fetch_assoc($res)) {
   $tulossa_query = "SELECT tuotteen_toimittajat.liitostunnus,
                     tuotteen_toimittajat.toim_tuoteno,
                     tuotteen_toimittajat.osto_era,
-                    tuotteen_toimittajat.pakkauskoko
+                    tuotteen_toimittajat.pakkauskoko,
+                    tuotteen_toimittajat.ostohinta,
+                    tuotteen_toimittajat.alennus,
+                    tuotteen_toimittajat.toim_tuoteno
                     FROM tuotteen_toimittajat
                     WHERE tuotteen_toimittajat.yhtio = '{$yhtio}'
                     AND tuotteen_toimittajat.tuoteno = '{$row['tuoteno']}'
@@ -77,12 +87,24 @@ while ($row = mysql_fetch_assoc($res)) {
   $toimres = pupe_query($tulossa_query);
   $toimrow = mysql_fetch_assoc($toimres);
 
+  if ($toimrow['liitostunnus'] > 0) {
+     $toimrow['liitostunnus'] = $row['maa']."-".$toimrow['liitostunnus'];
+  }
+
   $rivi  = pupesoft_csvstring($row['tuoteno']).";";
   $rivi .= pupesoft_csvstring($row['nimitys']).";";
   $rivi .= "{$toimrow['liitostunnus']};";
   $rivi .= pupesoft_csvstring($row['try']).";";
   $rivi .= "{$toimrow['osto_era']};";
-  $rivi .= "{$row['kehahin']}";
+  $rivi .= "{$row['kehahin']};";
+  $rivi .= "{$toimrow['toim_tuoteno']};";
+  $rivi .= "{$row['yksikko']};";
+  $rivi .= "{$row['eankoodi']};";
+  $rivi .= "{$row['tahtituote']};";
+  $rivi .= "{$row['tuotekorkeus']};";
+  $rivi .= "{$row['tuoteleveys']};";
+  $rivi .= "{$row['tuotesyvyys']};";
+  $rivi .= "{$row['tuotemassa']}";
   $rivi .= "\n";
 
   fwrite($fp, $rivi);

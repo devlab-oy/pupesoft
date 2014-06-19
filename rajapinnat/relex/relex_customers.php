@@ -41,12 +41,15 @@ fwrite($fp, $header);
 
 // Haetaan asiakkaat
 $query = "SELECT
+          yhtio.maa,
           asiakas.tunnus,
           concat_ws(' ', asiakas.nimi, asiakas.nimitark) nimi,
           asiakas.ryhma
           FROM asiakas
+          JOIN yhtio ON (asiakas.yhtio = yhtio.yhtio)
           WHERE asiakas.yhtio = '$yhtio'
-          AND asiakas.laji not in ('P','R')";
+          AND asiakas.laji not in ('P','R')
+          ORDER BY asiakas.tunnus";
 $res = pupe_query($query);
 
 // Kerrotaan montako rivi‰ k‰sitell‰‰n
@@ -57,7 +60,7 @@ echo "Asiakasrivej‰ {$rows} kappaletta.\n";
 $k_rivi = 0;
 
 while ($row = mysql_fetch_assoc($res)) {
-  $rivi  = "{$row['tunnus']};";
+  $rivi  = "{$row['maa']}-{$row['tunnus']};";
   $rivi .= pupesoft_csvstring($row['nimi']).";";
   $rivi .= pupesoft_csvstring($row['ryhma']);
   $rivi .= "\n";

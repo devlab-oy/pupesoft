@@ -54,8 +54,9 @@ fwrite($fp, $header);
 
 // Haetaan tapahtumat
 $query = "SELECT
+          yhtio.maa,
           date_format(tapahtuma.laadittu, '%Y-%m-%d') pvm,
-          tapahtuma.varasto varasto,
+          tapahtuma.varasto,
           tapahtuma.tuoteno,
           tapahtuma.laji,
           tapahtuma.kpl,
@@ -70,11 +71,12 @@ $query = "SELECT
             AND tuote.ei_saldoa   = ''
             AND tuote.tuotetyyppi = ''
             AND tuote.ostoehdotus = '')
+          JOIN yhtio ON (tapahtuma.yhtio = yhtio.yhtio)
           LEFT JOIN tilausrivi USE INDEX (PRIMARY) ON (tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus)
           LEFT JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
           WHERE tapahtuma.yhtio   = '$yhtio'
           AND tapahtuma.laji     in ('tulo', 'laskutus', 'siirto', 'valmistus', 'kulutus','inventointi')
-          AND tapahtuma.laadittu >= date_sub(now(), interval 1 year)
+          #AND tapahtuma.laadittu >= date_sub(now(), interval 1 year)
           ORDER BY tapahtuma.laadittu, tapahtuma.tuoteno";
 $res = pupe_query($query);
 
@@ -133,8 +135,12 @@ while ($row = mysql_fetch_assoc($res)) {
     }
   }
 
+  if ($partner > 0) {
+     $partner = $row['maa']."-".$partner;
+  }
+
   $rivi  = "{$row['pvm']};";                          // Transaction posting date
-  $rivi .= "{$row['varasto']};";                      // Inventory location code
+  $rivi .= "{$row['maa']}-{$row['varasto']};";        // Inventory location code
   $rivi .= pupesoft_csvstring($row['tuoteno']).";";   // Item code
   $rivi .= "{$type};";                                // Transaction type
   $rivi .= "{$row['kpl']};";                          // Transaction quantity in inventory units

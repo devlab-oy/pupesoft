@@ -41,14 +41,17 @@ fwrite($fp, $header);
 
 // Haetaan toimittajat
 $query = "SELECT
+          yhtio.maa,
           toimi.tunnus,
           concat_ws(' ', toimi.nimi, toimi.nimitark) nimi,
-          toimi.maa
+          toimi.maa toimittajan_maa
           FROM toimi
+          JOIN yhtio ON (toimi.yhtio = yhtio.yhtio)
           WHERE toimi.yhtio = '$yhtio'
           AND toimi.oletus_vienti in ('C','F','I')
           AND toimi.toimittajanro not in ('0','')
-          AND toimi.tyyppi = ''";
+          AND toimi.tyyppi = ''
+          ORDER BY toimi.tunnus";
 $res = pupe_query($query);
 
 // Kerrotaan montako rivi‰ k‰sitell‰‰n
@@ -60,9 +63,9 @@ $k_rivi = 0;
 
 while ($row = mysql_fetch_assoc($res)) {
 
-  $rivi  = "{$row['tunnus']};";
+  $rivi  = "{$row['maa']}-{$row['tunnus']};";
   $rivi .= pupesoft_csvstring($row['nimi']).";";
-  $rivi .= pupesoft_csvstring($row['maa']);
+  $rivi .= pupesoft_csvstring($row['toimittajan_maa']);
   $rivi .= "\n";
 
   fwrite($fp, $rivi);

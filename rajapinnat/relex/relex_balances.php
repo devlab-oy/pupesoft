@@ -41,18 +41,21 @@ fwrite($fp, $header);
 
 // Haetaan tuotteiden saldot per varasto
 $query = "SELECT
-          tuotepaikat.tuoteno tuote,
-          tuotepaikat.varasto varasto,
+          yhtio.maa,
+          tuotepaikat.tuoteno,
+          tuotepaikat.varasto,
           sum(tuotepaikat.saldo) saldo
           FROM tuote
           JOIN tuotepaikat ON (tuote.tuoteno = tuotepaikat.tuoteno and tuote.yhtio = tuotepaikat.yhtio)
+          JOIN varastopaikat ON (varastopaikat.tunnus = tuotepaikat.varasto and varastopaikat.yhtio = tuotepaikat.yhtio)
+          JOIN yhtio ON (tuote.yhtio = yhtio.yhtio)
           WHERE tuote.yhtio     = '$yhtio'
           AND tuote.status     != 'P'
           AND tuote.ei_saldoa   = ''
           AND tuote.tuotetyyppi = ''
           AND tuote.ostoehdotus = ''
-          GROUP BY 1,2
-          ORDER BY 1,2";
+          GROUP BY 1,2,3
+          ORDER BY tuotepaikat.varasto, tuotepaikat.tuoteno";
 $res = pupe_query($query);
 
 // Kerrotaan montako rivi‰ k‰sitell‰‰n
@@ -63,8 +66,8 @@ echo "Saldorivej‰ {$rows} kappaletta.\n";
 $k_rivi = 0;
 
 while ($row = mysql_fetch_assoc($res)) {
-  $rivi  = "{$row['varasto']};";
-  $rivi .= pupesoft_csvstring($row['tuote']).";";
+  $rivi  = "{$row['maa']}-{$row['varasto']};";
+  $rivi .= pupesoft_csvstring($row['tuoteno']).";";
   $rivi .= "{$row['saldo']};";
   $rivi .= "BALANCE";
   $rivi .= "\n";

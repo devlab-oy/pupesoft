@@ -832,13 +832,18 @@ if (!function_exists("tee_jt_tilaus")) {
               //K‰ytet‰‰n alkuper‰isen JT-rivin otsikon valuuttakurssia
               $hinta = laskuval($hinta, $isarivirow["vienti_kurssi"]);
             }
-
+echo "835 lisaarivi lisataanrow "; var_dump($lisataanrow); echo "perheid $perheid <br><br>"; var_dump($isarivirow); echo "<br><br>";
             require("lisaarivi.inc");
+            
+            if ($lisataanrow["tunnus"] == $perheid) {
+              $uusperheid = $lisatyt_rivit1[0];
+              echo "840 $uusperheid lisatyt {$lisatyt_rivit1[0]} <br><br>";
+            }
 
             $kpl = $talteen_kpl; // lis‰‰rivi rikko t‰n, otetaan haltuun
 
             if ($debug==1) echo t("Lis‰ttiin tuote").": $tuoteno kpl: $lisataanrow_kpl<br>";
-
+echo "841 lisatyt rivit"; var_dump($lisatyt_rivit1); echo "<br><br>";
             // Pidet‰‰n muistissa kaikki lis‰tyt rivit
             if (count($lisatyt_rivit1) > 0) {
               // Myyntihaara
@@ -1035,7 +1040,7 @@ if (!function_exists("tee_jt_tilaus")) {
                     $poista_update_lisa = ", varattu = '0', jt = '0' ";
                   }
                 }
-
+echo "1038 tunnus_nyt $tunnus_nyt <br><br>";
                 $query = "UPDATE tilausrivi SET
                           tyyppi      = 'D'
                           $poista_update_lisa
@@ -1043,7 +1048,7 @@ if (!function_exists("tee_jt_tilaus")) {
                           and tunnus  = '$tunnus_nyt'
                           and kpl     = 0";
                 $tresult = pupe_query($query);
-
+echo "1046 $query <br><br>";
                 if ($debug==1) echo t("Poistetaan loput rivilt‰").": $tunnus_nyt<br>";
               }
             }
@@ -1103,8 +1108,12 @@ if (!function_exists("tee_jt_tilaus")) {
               }
             }
 
+            if (!isset($uusperheid)) {
+              $uusperheid = 0;
+            }
+
             //Korjataan perheid:t uusilla riveill‰
-            $query = "SELECT perheid, min(tunnus) uusiperheid
+            $query = "SELECT perheid, if ($uusperheid != 0, $uusperheid, min(tunnus)) uusiperheid
                       FROM tilausrivi
                       WHERE yhtio  = '$kukarow[yhtio]'
                       and otunnus  = '$id'
@@ -1113,12 +1122,14 @@ if (!function_exists("tee_jt_tilaus")) {
             $copresult = pupe_query($query);
 
             while ($coprivirow = mysql_fetch_assoc($copresult)) {
+
               $query = "UPDATE tilausrivi
                         SET perheid = '$coprivirow[uusiperheid]'
                         WHERE yhtio = '$kukarow[yhtio]'
                         and otunnus = '$id'
                         and perheid = '$coprivirow[perheid]'";
               $cores = pupe_query($query);
+
             }
 
             //Korjataan perheid2:t uusilla riveill‰

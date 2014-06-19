@@ -1122,14 +1122,12 @@ if (!function_exists("tee_jt_tilaus")) {
             $copresult = pupe_query($query);
 
             while ($coprivirow = mysql_fetch_assoc($copresult)) {
-
               $query = "UPDATE tilausrivi
                         SET perheid = '$coprivirow[uusiperheid]'
                         WHERE yhtio = '$kukarow[yhtio]'
                         and otunnus = '$id'
                         and perheid = '$coprivirow[perheid]'";
               $cores = pupe_query($query);
-
             }
 
             //Korjataan perheid2:t uusilla riveillä

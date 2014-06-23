@@ -62,14 +62,14 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
         }
 
         foreach ($GLOBALS["sanakirja_kielet"] as $sanakirja_kieli => $sanakirja_kieli_nimi) {
-          if (trim($sanakirja_kieli) == trim($t[$i])) {
+          if ($sanakirja_kieli == $t[$i]) {
             $loytyyko = TRUE;
             break;
           }
         }
 
         if (!$loytyyko) {
-          $virhe[$i] = t("$kissa $koira Virheellinen kieli")."!";
+          $virhe[$i] = t("Virheellinen kieli")."!";
         }
       }
     }

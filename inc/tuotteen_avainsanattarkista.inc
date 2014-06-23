@@ -49,15 +49,27 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
       else {
         $loytyyko = FALSE;
 
+        if (!isset($GLOBALS["sanakirja_kielet"])){
+          $sanakirja_kielet = array("fi" => "Suomi",
+                "en" => "Englanti",
+                "se" => "Ruotsi",
+                "ee" => "Viro",
+                "de" => "Saksa",
+                "dk" => "Tanska",
+                "no" => "Norja",
+                "ru" => "Venäjä");
+          $GLOBALS["sanakirja_kielet"] = $sanakirja_kielet;
+        }
+
         foreach ($GLOBALS["sanakirja_kielet"] as $sanakirja_kieli => $sanakirja_kieli_nimi) {
-          if ($sanakirja_kieli == $t[$i]) {
+          if (trim($sanakirja_kieli) == trim($t[$i])) {
             $loytyyko = TRUE;
             break;
           }
         }
 
         if (!$loytyyko) {
-          $virhe[$i] = t("Virheellinen kieli")."!";
+          $virhe[$i] = t("$kissa $koira Virheellinen kieli")."!";
         }
       }
     }

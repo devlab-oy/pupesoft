@@ -28,6 +28,9 @@ require 'inc/functions.inc';
 // Yhtiö
 $yhtio = mysql_real_escape_string($argv[1]);
 
+$yhtiorow = hae_yhtion_parametrit($yhtio);
+$kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
+
 // Tallannetan rivit tiedostoon
 $filepath = "/tmp/input_balances_{$yhtio}_".date("Y-m-d").".csv";
 

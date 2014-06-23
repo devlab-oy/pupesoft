@@ -83,6 +83,7 @@ $header .= "ostajanro;";
 $header .= "tuotepaallikko;";
 $header .= "tuotetunnus;";
 $header .= "rekisteriosumat;";
+$header .= "elinkaari;";
 $header .= "supplier;";
 $header .= "suppliers_code;";
 $header .= "suppliers_name;";
@@ -196,6 +197,23 @@ while ($row = mysql_fetch_assoc($res)) {
   }
   else {
     $rivi .= "0;";
+  }
+
+  // Tuotteen elinkaari
+  $ttq = "SELECT tuotteen_avainsanat.selite elinkaari
+          FROM tuotteen_avainsanat
+          WHERE tuotteen_avainsanat.yhtio = '{$yhtio}'
+          AND tuotteen_avainsanat.laji    = 'Elinkaari'
+          AND tuotteen_avainsanat.tuoteno = '{$row['tuoteno']}'
+          LIMIT 1";
+  $ttres = pupe_query($ttq);
+
+  if (mysql_num_rows($ttres) == 1) {
+    $ttrow = mysql_fetch_assoc($ttres);
+    $rivi .= "{$ttrow['elinkaari']};";
+  }
+  else {
+    $rivi .= ";";
   }
 
   // Tuotteen p‰‰toimittaja

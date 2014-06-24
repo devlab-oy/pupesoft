@@ -12,8 +12,20 @@ if (php_sapi_name() == 'cli') {
   require("inc/connect.inc");
   require("inc/functions.inc");
 
-  $yhtio = trim($argv[1]);
+  $yhtio          = trim($argv[1]);
   $paivamaararaja = trim($argv[2]);
+
+  $kieli = "";
+
+  if (isset($argv[3])) {
+    $kieli = trim($argv[3]);
+  }
+
+  $toimittajan_tuotetiedot = "";
+
+  if (isset($argv[4])) {
+    $toimittajan_tuotetiedot = trim($argv[4]);
+  }
 
   //yhtiötä tai sähköpostia ei ole annettu
   if (empty($yhtio) or empty($paivamaararaja)) {
@@ -37,8 +49,7 @@ if (php_sapi_name() == 'cli') {
   // Adminin oletus
   $kukarow = mysql_fetch_assoc($result);
 
-  $tee = "hae_ostotilaukset";
-
+  $tee     = "hae_ostotilaukset";
   $php_cli = true;
 }
 else {
@@ -47,25 +58,23 @@ else {
 
   echo "<font class='head'>".t('Myöhässä olevien ostotilausten lähetys sähköpostiin')."</font><hr>";
 
-  $tee = "hae_ostotilaukset";
-  $paivamaararaja = 3;
-
-  $php_cli = false;
+  $tee                     = "hae_ostotilaukset";
+  $paivamaararaja          = 3;
+  $kieli                   = "";
+  $toimittajan_tuotetiedot = "";
+  $php_cli                 = false;
 }
-
-//haetaan yhtiön raporteista raportissa käytettävä kieli ja setataan $kieli muuttuja
-$kieli = $yhtiorow["ostotilaus_myohassa_email_raportti_kieli"];
 
 if ($tee == 'hae_ostotilaukset') {
   $ostotilaukset = hae_myohassa_olevat_ostotilaukset($paivamaararaja);
 
   if (!empty($ostotilaukset)) {
     $ostotilaukset_ostajittain = kasittele_ostotilaukset($ostotilaukset, 'ostaja');
-    $email_bodys = generoi_email_body($ostotilaukset_ostajittain, $kieli);
+    $email_bodys = generoi_email_body($ostotilaukset_ostajittain, $kieli, $toimittajan_tuotetiedot);
     laheta_sahkopostit($email_bodys, $kieli);
 
     $ostotilaukset_vastuuostajittain = kasittele_ostotilaukset($ostotilaukset, 'vastuuostaja');
-    $email_bodys = generoi_email_body($ostotilaukset_vastuuostajittain, $kieli);
+    $email_bodys = generoi_email_body($ostotilaukset_vastuuostajittain, $kieli, $toimittajan_tuotetiedot);
     laheta_sahkopostit($email_bodys, $kieli);
   }
 }
@@ -158,7 +167,7 @@ function kasittele_ostotilaukset($ostotilaukset, $ostaja_tyyppi) {
  * @param array $ostotilaukset
  * @return array
  */
-function generoi_email_body($ostotilaukset, $kieli) {
+function generoi_email_body($ostotilaukset, $kieli, $toimittajan_tuotetiedot) {
   global $yhtiorow;
 
   $email_bodys = array();
@@ -172,7 +181,7 @@ function generoi_email_body($ostotilaukset, $kieli) {
       //toimittaja voidaan hakea rivin ekalta solulta koska se on ostotilauksen kaikille riveille aina sama
       $email_bodys[$ostaja] .= t("Toimittaja", $kieli)." {$ostotilaus['rivit'][0]['toimittaja']}\n\n";
 
-      if ($yhtiorow["ostotilaus_myohassa_email_toimittajan_tuotetiedot"] != "") {
+      if ($toimittajan_tuotetiedot != "") {
         $email_bodys[$ostaja] .= t("Tuoteno", $kieli).', ';
         $email_bodys[$ostaja] .= t("Toimittajan tuoteno", $kieli).', ';
         $email_bodys[$ostaja] .= t("Toimittajan nimitys", $kieli).', ';

@@ -835,11 +835,6 @@ if (!function_exists("tee_jt_tilaus")) {
 
             require("lisaarivi.inc");
 
-            if ($lisataanrow["tunnus"] == $perheid) {
-              $uusperheid = $lisatyt_rivit1[0];
-              echo "840 $uusperheid lisatyt {$lisatyt_rivit1[0]} <br><br>";
-            }
-
             $kpl = $talteen_kpl; // lis‰‰rivi rikko t‰n, otetaan haltuun
 
             if ($debug==1) echo t("Lis‰ttiin tuote").": $tuoteno kpl: $lisataanrow_kpl<br>";
@@ -1108,16 +1103,13 @@ if (!function_exists("tee_jt_tilaus")) {
               }
             }
 
-            if (!isset($uusperheid)) {
-              $uusperheid = 0;
-            }
-
             //Korjataan perheid:t uusilla riveill‰
-            $query = "SELECT perheid, if ($uusperheid != 0, $uusperheid, min(tunnus)) uusiperheid
+            $query = "SELECT perheid, min(tunnus) uusiperheid
                       FROM tilausrivi
                       WHERE yhtio  = '$kukarow[yhtio]'
                       and otunnus  = '$id'
                       and perheid != 0
+                      and tyyppi != 'D'
                       GROUP by perheid";
             $copresult = pupe_query($query);
 

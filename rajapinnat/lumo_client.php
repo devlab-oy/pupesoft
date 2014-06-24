@@ -1,7 +1,8 @@
 <?php
 
 /**
- * LUMO-API maksupääteclient 
+ * LUMO-API simple TCP/IP maksupääteclient, jolla voi lähettää ja vastaanottaa XML-sanomia
+ * maksupäätteelle
  */
 
 class LumoClient {
@@ -12,8 +13,14 @@ class LumoClient {
   const LOGGING = true;
 
   /**
-   *  
+   *  Avattu socket
    */
+  private $_socket = false;
+  
+  /**
+   *  Yhteyden tila
+   */
+  private $_connection = false;
    
   /**
    * Tämän yhteyden aikana sattuneiden virheiden määrä
@@ -23,46 +30,30 @@ class LumoClient {
   /**
    * Constructor
    *
-   * @param string  $address  IP address where Lumo is listening
+   * @param string  $address          IP address where Lumo is listening
    * @param string  $service_port     PORT number where Lumo is listening
    */
   function __construct($address, $service_port) {
 
     try {
-      //$this->_proxy = new LumoClient($address, $service_port, $socket);
-      $this->log("Maksupääteyhteys avattiin\n");
 
-      $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-      if ($socket === false) {
+      $this->log("Maksupääteyhteys avattiin\n");
+      set_time_limit(0);
+      ob_implicit_flush();
+
+      $this->_socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+      if ($this->_socket === false) {
         $this->log("socket_create() failed: reason: " . socket_strerror(socket_last_error()) . "\n");
-      }
-      else {
         $this->_error_count++;
       }
 
       $this->log("Attempting to connect to '$address' on port '$service_port'...");
-      $result = socket_connect($socket, $address, $service_port);
-      if ($result === false) {
-        $this->log("socket_connect() failed.\nReason: ($result) " . socket_strerror(socket_last_error($socket)) . "\n");
-      }
-      else {
+      $this->_connection = socket_connect($this->_socket, $address, $service_port);
+      if ($this->_connection === false) {
+        $this->log("socket_connect() failed.\nReason: ($this->_connection) " . socket_strerror(socket_last_error($this->_socket)) . "\n");
         $this->_error_count++;
       }
 
-      $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'> 
-      <MakeTransaction><TransactionType>0</TransactionType></MakeTransaction></EMVLumo>";
-      $out = '';
-
-      $this->log("Sending XML request...\n");
-      socket_write($socket, $in, strlen($in));
-
-      $this->log("Reading response:\n");
-      while ($out = socket_read($socket, 2048)) {
-        echo $out;
-      }
-
-      $this->log("Closing socket...");
-      socket_close($socket);
     }
     catch (Exception $e) {
       $this->_error_count++;
@@ -75,6 +66,49 @@ class LumoClient {
    */
   function __destruct() {
     $this->log("Maksupääteyhteys suljettiin\n");
+    $this->log("Closing socket...");
+    socket_close($this->_socket);
+  }
+  
+  /**
+   * Start transaction
+   */
+  function startTransaction($amount, $transaction_type = 0) {
+    $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'> 
+    <MakeTransaction>
+      <MessagesInTransactionDialog>true</MessagesInTransactionDialog> 
+      <TransactionType>{$transaction_type}</TransactionType>
+      <Amount>{$amount}</Amount>
+    </MakeTransaction></EMVLumo>\0";
+
+    $out = '';
+
+    $this->log("Sending XML request StartTransaction...\n");
+    socket_write($this->_socket, $in, strlen($in));
+    $this->log($in);
+    $this->log("Reading response:\n");
+    echo "start transaction response: \n";
+    var_dump(socket_read($this->_socket, 2048));
+    while ($out = socket_read($this->_socket, 2048)) {
+      echo $out;
+    }
+    
+  }
+  
+  /**
+   * Cancel transaction
+   */
+  function cancelTransaction() {
+    $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'> 
+    <CancelTransaction /></EMVLumo>\0";
+    $this->log("Sending XML request CancelTransaction...\n");
+    socket_write($this->_socket, $in, strlen($in));
+
+    $this->log("Reading response:\n");
+    echo "cancel transaction response:\n";
+    var_dump(socket_read($this->_socket, 2048));
+    if (socket_read($this->_socket, 2048) === true) echo "CANCELLED";
+    else echo "PERSE";
   }
   
   /**

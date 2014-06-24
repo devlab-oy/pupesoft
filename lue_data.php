@@ -29,6 +29,15 @@ if (php_sapi_name() == 'cli') {
   $cli = true;
   ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear".PATH_SEPARATOR."/usr/share/php/");
 
+  $sanakirja_kielet = array("fi" => "Suomi",
+                            "en" => "Englanti",
+                            "se" => "Ruotsi",
+                            "ee" => "Viro",
+                            "de" => "Saksa",
+                            "dk" => "Tanska",
+                            "no" => "Norja",
+                            "ru" => "Venäjä");
+
   if (trim($argv[1]) != '') {
     $kukarow['yhtio'] = mysql_real_escape_string($argv[1]);
     $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);

@@ -49,18 +49,6 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
       else {
         $loytyyko = FALSE;
 
-        if (!isset($GLOBALS["sanakirja_kielet"])){
-          $sanakirja_kielet = array("fi" => "Suomi",
-                "en" => "Englanti",
-                "se" => "Ruotsi",
-                "ee" => "Viro",
-                "de" => "Saksa",
-                "dk" => "Tanska",
-                "no" => "Norja",
-                "ru" => "Venäjä");
-          $GLOBALS["sanakirja_kielet"] = $sanakirja_kielet;
-        }
-
         foreach ($GLOBALS["sanakirja_kielet"] as $sanakirja_kieli => $sanakirja_kieli_nimi) {
           if ($sanakirja_kieli == $t[$i]) {
             $loytyyko = TRUE;

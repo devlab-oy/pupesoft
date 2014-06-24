@@ -19044,6 +19044,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
     mysql_data_seek($riresult, 0);
 
     unset($sscc);
+    $otsikoitu = false;
 
     while ($row = mysql_fetch_assoc($riresult)) {
 
@@ -19054,16 +19055,20 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 
         if ($row['sscc'] != 0) {
           $params_lahete = kollirivi_lahete($params_lahete);
-          $params_lahete['kala'] = $params_lahete['kala'] -= 5;
+          $siirto =  5;
         }
         elseif (isset($sscc)) {
-          $params_lahete['kala'] = $params_lahete['kala'] -= 60;
+          $siirto = 60;
         }
         else {
-          $params_lahete['kala'] = $params_lahete['kala'] -= 20;
+          $siirto = 20;
         }
 
-        $params_lahete = rivi_otsikot_lahete($params_lahete);
+        if($otsikoitu === false or $yhtiorow['koontilahete_kerayserissa'] == 'K'){
+          $params_lahete['kala'] = $params_lahete['kala'] -= $siirto;
+          $params_lahete = rivi_otsikot_lahete($params_lahete);
+          $otsikoitu = true;
+        }
       }
 
       $params_lahete = rivi_lahete($params_lahete);

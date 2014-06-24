@@ -116,7 +116,8 @@ function hae_myohassa_olevat_ostotilaukset($paivamaararaja) {
               AND tuote.tuoteno       = tilausrivi.tuoteno )
             JOIN tuotteen_toimittajat
             ON ( tuotteen_toimittajat.yhtio = tilausrivi.yhtio
-              AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno)
+              AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
+              AND tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
             WHERE lasku.yhtio         = '{$kukarow['yhtio']}'
             AND lasku.tila            = 'O'
             AND lasku.alatila         = 'A'

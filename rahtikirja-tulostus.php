@@ -358,7 +358,8 @@ if ($tee == 'tulosta') {
               maksuehto READ,
               rahtikirjat WRITE,
               rahtisopimukset READ,
-              tilausrivi WRITE";
+              tilausrivi WRITE,
+              tuote READ";
     $res = pupe_query($query);
   }
 

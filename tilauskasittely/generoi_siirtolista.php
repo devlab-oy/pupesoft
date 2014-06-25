@@ -687,6 +687,9 @@ if ($tee == 'M' and isset($generoi)) {
               $varasto     = $lahdevarasto;
               $toimitustapa   = $toimitustapa;
               $toim      = "SIIRTOLISTA";
+              $alatila = "";
+              $luokka = "";
+              $tunnusnippu = "";
 
               require ("otsik_siirtolista.inc");
 

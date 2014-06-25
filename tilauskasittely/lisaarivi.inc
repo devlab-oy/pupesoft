@@ -1654,7 +1654,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               $tilattu = $myy_kpl[$indeksi];
               $varattu = $myy_kpl[$indeksi];
 
-              if ($yhtiorow['myyntiera_pyoristys'] == 'K' and $kutsuja == "EDITILAUS" and $edi_tyyppi != "magento" and $myyntierahuomatus) {
+              if ($yhtiorow['myyntiera_pyoristys'] == 'K' and (isset($kutsuja) and $kutsuja == "EDITILAUS") and $edi_tyyppi != "magento" and $myyntierahuomatus) {
                 if (strpos($kommentti, t("HUOM: Rivin määrä on pyöristetty täyteen myyntierään! Myyntierä on")) === FALSE) {
                   $kommentti .= " ".t("HUOM: Rivin määrä on pyöristetty täyteen myyntierään! Myyntierä on").": $trow[myynti_era]";
                 }

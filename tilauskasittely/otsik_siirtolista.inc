@@ -125,7 +125,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
   echo "<input type='hidden' name='ylatila' value='$ylatila'>";
   echo "<input type='hidden' name='alatila' value='$alatila'>";
 
-  echo "<td><select name='varasto'>";
+  echo "<td><select name='varasto' onchange='submit()' >";
 
   if ($toim == "SIIRTOLISTA") {
     if ($laaja_toim_kasittely) {
@@ -144,7 +144,14 @@ if ($tila == 'Muuta' and !isset($jatka)) {
 
   while ($vrow = mysql_fetch_array($vtresult)) {
     $sel='';
-    if ($vrow['tunnus'] == $srow["varasto"]) $sel = 'selected';
+
+    if ($varasto > 0 and $vrow['tunnus'] == $varasto) {
+      $sel = 'selected';
+    }
+
+    if ($varasto < 1 and $vrow['tunnus'] == $srow["varasto"]) {
+       $sel = 'selected';
+    }
 
     $varastomaa = '';
     if (strtoupper($vrow['maa']) != strtoupper($yhtiorow['maa'])) {
@@ -163,7 +170,8 @@ if ($tila == 'Muuta' and !isset($jatka)) {
       echo "<tr><th>".t("Valmisteiden kohdevarasto").":</th>";
     }
 
-    echo "<td><select name='clearing'>";
+    echo "<td><select name='clearing' onchange='submit()' >";
+    echo "<option value=''>".t("Valitse")."</option>";
 
     $query  = "SELECT *
                FROM varastopaikat
@@ -174,8 +182,13 @@ if ($tila == 'Muuta' and !isset($jatka)) {
     while ($varow = mysql_fetch_array($vares)) {
 
       $sel = '';
+
+      if ($clearing > 0 and $varow['tunnus'] == $clearing) {
+        $sel = 'selected';
+      }
+
       // Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan se
-      if ($varow['tunnus'] == $srow["clearing"] or ((int) $kukarow["kesken"] == 0 and $varow['tunnus'] == $kukarow["oletus_varasto"])) {
+      if ($clearing < 1 and $varow['tunnus'] == $srow["clearing"] or ((int) $kukarow["kesken"] == 0 and $varow['tunnus'] == $kukarow["oletus_varasto"])) {
         $sel = 'selected';
       }
 
@@ -316,6 +329,37 @@ if ($tila == 'Muuta' and !isset($jatka)) {
   echo "</td></tr>";
 
   if ($toim == "SIIRTOLISTA") {
+
+    if ($toimitustapa == '' and $srow['toimitustapa'] == '') {
+      $toimitustapa = 'Ei toimitustapaa';
+    }
+
+    $tt_vaihdettu = false;
+
+    if ($varasto > 0 and $clearing > 0) {
+      $ttqry = "SELECT tpa.selite AS toimitustapa
+                FROM avainsana AS ana
+                JOIN toimitustapa AS tpa
+                ON ( ana.yhtio = tpa.yhtio AND ana.selitetark_2 = tpa.tunnus )
+                WHERE ana.yhtio = '$kukarow[yhtio]'
+                AND ana.laji = 'SIIRTOVARASTOT'
+                AND ana.selite = $varasto
+                AND selitetark = $clearing";
+      $ttresult = mysql_query($ttqry) or pupe_error($ttqry);
+
+      if (mysql_num_rows($ttresult) > 0) {
+        $ttrow = mysql_fetch_assoc($ttresult);
+        $def_toimitustapa = $ttrow['toimitustapa'];
+      }
+      else{
+       $def_toimitustapa = 'Ei toimitustapaa';
+      }
+
+      if ($def_toimitustapa != $toimitustapa) {
+        $tt_vaihdettu = true;
+      }
+    }
+
     echo "<tr>";
     echo "<th>".t("Toimitustapa")."</th><td>";
 
@@ -330,9 +374,18 @@ if ($tila == 'Muuta' and !isset($jatka)) {
 
     while ($row = mysql_fetch_array($tresult)) {
       $sel = "";
-      if ($row["selite"] == $srow["toimitustapa"]) $sel = 'selected';
 
-      echo "<option value='$row[selite]' $sel>".t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV")."</option>";
+      if (isset($def_toimitustapa) and $def_toimitustapa == $row["selite"]) {
+        $sel = 'selected';
+      }
+
+      if (!isset($def_toimitustapa) and (isset($toimitustapa) and $toimitustapa == $row["selite"])) {
+        $sel = 'selected';
+      }
+
+      if ((empty($toimitustapa) and empty($def_toimitustapa)) and $row["selite"] == $srow["toimitustapa"]) $sel = 'selected';
+
+      echo "<option value='$row[selite]' $sel>". $row['selite'] ."</option>";
     }
     echo "</select>";
 
@@ -370,6 +423,11 @@ if ($tila == 'Muuta' and !isset($jatka)) {
   }
 
   echo "<br><input type='submit' name='jatka' value='".t("Jatka")."'></form>";
+
+  if ($tt_vaihdettu === true) {
+    echo "<font class='error' style='margin-left:10px;'>",t("Toimitustapa vaihdettiin automaattisesti"),"!</font><br />";
+  }
+
 }
 
 if (isset($jatka)) {

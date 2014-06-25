@@ -69,89 +69,40 @@ class LumoClient {
     $this->log("Closing socket...");
     socket_close($this->_socket);
   }
-  
-  function setVariables($amount, $transaction_type = 0) {
-    //<?xml version='1.0' encoding='utf-8'
-    $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'> 
-      <SetTransactionType><Value>{$transaction_type}</Value></SetTransactionType></EMVLumo>\0";
-    $out = '';
-    $this->log("Sending XML request SetTransactionType...\n");
-    socket_write($this->_socket, $in, strlen($in));
-    while ($out = socket_read($this->_socket, 2048)) {
-      echo $out;
-      //$xml = @simplexml_load_string($out);
-      //var_dump($xml);
-      /*foreach ($xml as $lel) {
-        var_dump($lel);
-      }*/
-    }
-    $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'> 
-      <SetAmount><Value>{$transaction_type}</Value></SetAmount></EMVLumo>\0";
-    $out = '';
-    $this->log("Sending XML request SetAmount...\n");
-    socket_write($this->_socket, $in, strlen($in));
-    while ($out = socket_read($this->_socket, 2048)) {
-      echo $out;
-      //$xml = @simplexml_load_string($out);
-      //var_dump($xml);
-      /*foreach ($xml as $lel) {
-        var_dump($lel);
-      }*/
-    }
-    
-  }
-  
+
   /**
    * Start transaction
    */
   function startTransaction($amount, $transaction_type = 0) {
 
+    // Setataan transaction amount
     $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'> 
       <SetAmount><Value>{$amount}</Value></SetAmount></EMVLumo>\0";
 
-    $this->log("Sending XML request SetAmount...\n");
+    $this->log("Lähetetään maksupäätteelle summa\n");
     $this->log($in);
     socket_write($this->_socket, $in, strlen($in));
 
     $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'><MakeTransaction><TransactionType>0</TransactionType></MakeTransaction></EMVLumo>\0";
     $out = '';
 
-    $this->log("Sending XML request StartTransaction...\n");
+    $this->log("Aloitetaan maksutapahtuma\n");
     socket_write($this->_socket, $in, strlen($in));
     $this->log($in);
-    $this->log("Reading response:\n");
-    //echo "start transaction response: \n";
+
     while ($out = socket_read($this->_socket, 2048)) {
-      //echo $out;
+
       $xml = @simplexml_load_string($out);
-      $saddka = $xml->MakeTransaction->Result;
-      if(isset($saddka)) echo "MORO".$saddka;
-      /*foreach ($xml->MakeTransaction->Result as $asd) {
-        echo "MORO".$asd;
-      }*/
+      if (isset($xml)) {
+        if (isset($xml->MakeTransaction->Result)) {
+          $arvo = $xml->MakeTransaction->Result == "True" ? "OK" : "HYLÄTTIIN";
+          $this->log("Maksutapahtuma $arvo");
+        }
+      }
       var_dump($xml);
-      /*foreach ($xml as $lel) {
-        var_dump($lel);
-      }*/
     }
-    
   }
-  
-  /**
-   * Cancel transaction
-   */
-  function cancelTransaction() {
-    $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'> 
-    <CancelTransaction /></EMVLumo>\0";
-    $this->log("Sending XML request CancelTransaction...\n");
-    socket_write($this->_socket, $in, strlen($in));
 
-    $this->log("Reading response:\n");
-    echo "cancel transaction response:\n";
-
-    var_dump(socket_read($this->_socket, 2048));
-  }
-  
   /**
    * Hakee error_countin:n
    *

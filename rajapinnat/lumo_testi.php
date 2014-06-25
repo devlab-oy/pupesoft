@@ -28,8 +28,8 @@ if(isset($lumo_service_address) and isset($lumo_service_port)) {
   if ($clientti->getErrorCount() > 0) {
     exit;
   }
-
-  //$clientti->cancelTransaction();
+  
+  $clientti->startTransaction(10001);
 
   echo "skripti loppu";
 }

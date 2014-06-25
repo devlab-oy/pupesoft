@@ -384,7 +384,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "") {
   }
 
   // N‰ytet‰‰n ruudulla
-  $query = "SELECT tilausrivi.*, {$ale_query_select_lisa} alennuksetyht, tilausrivin_lisatiedot.poikkeava_tulliprosentti, tuote.tullinimike1, tuote.tullinimike2
+  $query = "SELECT tilausrivi.*, {$ale_query_select_lisa} alennuksetyht, tilausrivin_lisatiedot.poikkeava_tulliprosentti, tuote.*
             FROM tilausrivi
             JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
             LEFT JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
@@ -651,7 +651,10 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
   }
 
   // Varastoonvientip‰iv‰
-  if ($tilrivirow["toimitettuaika"] == "0000-00-00 00:00:00") {
+  if ($yhtiorow["varastoonvientipaiva"] == "R") {
+    $varastoonvientipva = etsi_tuotteelle_korjaava_varastoonvientipaiva($tilrivirow['tuoteno']);
+  }
+  elseif ($tilrivirow["toimitettuaika"] == "0000-00-00 00:00:00") {
     $varastoonvientipva = date("Y-m-d H:i:s");
   }
   else {
@@ -1080,6 +1083,9 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
                 <input type='text' name='ppa[$tilrivirow[tunnus]]' value='$vpppa' size='3'>
                 <input type='text' name='kka[$tilrivirow[tunnus]]' value='$vpkka' size='3'>
                 <input type='text' name='vva[$tilrivirow[tunnus]]' value='$vpvva' size='5'></td>";
+    }
+    elseif ($yhtiorow["varastoonvientipaiva"] == "R") {
+      $varastoon_msg .= "<td valign='top' nowrap>$varastoonvientipva</td>";
     }
     else {
       $varastoon_msg .= "<td valign='top' nowrap>".tv1dateconv("$vpvva-$vpkka-$vpppa")."</td>";

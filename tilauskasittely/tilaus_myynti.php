@@ -6853,7 +6853,7 @@ if ($tee == '') {
                 </form>";
           }
 
-          if ($row["var"] == "J" and ($row["ei_saldoa"] != "" or ($selpaikkamyytavissa >= $kpl_ruudulle and $kukarow['extranet'] == ''))) {
+          if ($row["var"] == "J" and (($row["ei_saldoa"] != "" or $selpaikkamyytavissa >= $kpl_ruudulle) and $kukarow['extranet'] == '')) {
             echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='toimita'>
                 <input type='hidden' name='toim'       value = '$toim'>
                 <input type='hidden' name='lopetus'     value = '$lopetus'>

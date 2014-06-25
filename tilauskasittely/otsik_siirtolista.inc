@@ -6,7 +6,7 @@ if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero!='' or $kukarow["kesk
   exit;
 }
 
-if ($tila == '') {
+if (empty($tila)) {
   $tila = 'Muuta';
 }
 
@@ -52,7 +52,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
   }
 
   if ((isset($kopioitava_otsikko) and $kopioitava_otsikko > 0) or $kukarow["kesken"] > 0) {
-    if ($kopioitava_otsikko > 0) {
+    if (isset($kopioitava_otsikko) and $kopioitava_otsikko > 0) {
       $squery = "SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokkaa
                  FROM lasku
                  LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
@@ -83,7 +83,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
     $ylatila="";
 
     //  Jos meillä on kopioitu otsikko, ei kopioida alatilaa!
-    if ($kopioitava_otsikko == 0 and $srow['alatila'] != '') {
+    if (isset($kopioitava_otsikko) and $kopioitava_otsikko == 0 and $srow['alatila'] != '') {
       $alatila=$srow['alatila'];
     }
     if ($srow['tila'] != '')    $ylatila=$srow['tila'];
@@ -183,12 +183,12 @@ if ($tila == 'Muuta' and !isset($jatka)) {
 
       $sel = '';
 
-      if ($clearing > 0 and $varow['tunnus'] == $clearing) {
+      if (isset($clearing) and $clearing > 0 and $varow['tunnus'] == $clearing) {
         $sel = 'selected';
       }
 
       // Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan se
-      if ($clearing < 1 and $varow['tunnus'] == $srow["clearing"] or ((int) $kukarow["kesken"] == 0 and $varow['tunnus'] == $kukarow["oletus_varasto"])) {
+      if (empty($clearing) and $varow['tunnus'] == $srow["clearing"] or ((int) $kukarow["kesken"] == 0 and $varow['tunnus'] == $kukarow["oletus_varasto"])) {
         $sel = 'selected';
       }
 
@@ -330,7 +330,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
 
   if ($toim == "SIIRTOLISTA") {
 
-    if ($toimitustapa == '' and $srow['toimitustapa'] == '') {
+    if (empty($toimitustapa) and empty($srow['toimitustapa'])) {
       $toimitustapa = 'Ei toimitustapaa';
     }
 
@@ -616,7 +616,7 @@ if (isset($jatka)) {
     $kukarow["kesken"] = $id;
     $tilausnumero = $id;
   }
-  elseif ($php_cli and strpos($_SERVER['SCRIPT_NAME'], "generoi_siirtolista.php") !== FALSE) {
+  elseif (isset($php_cli) and $php_cli === true and strpos($_SERVER['SCRIPT_NAME'], "generoi_siirtolista.php") !== FALSE) {
     // generoidaan siirtolistoja komentoriviltä
     $kukarow["kesken"] = $id;
     $tilausnumero = $id;

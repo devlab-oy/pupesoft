@@ -348,6 +348,7 @@ if (!$php_cli) {
   }
   echo "</select>";
 
+  $checked = '';
   if (isset($yliajo)) {
     $checked = 'checked';
   }
@@ -749,6 +750,9 @@ if ($tee == 'M' and isset($generoi)) {
               $perhekielto    = $lapsituotteet == "" ? 1 : 0;
               $orvoteikiinnosta  = "EITOD";
               $varataan_saldoa = "";
+              $kpl2 = "";
+              $toimittajan_tunnus = "";
+              $osatoimkielto = "";
 
               // Tallennetaan riville minne se on menossa
               $kohde_alue   = $pairow["hyllyalue"];

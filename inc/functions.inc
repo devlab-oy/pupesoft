@@ -721,9 +721,9 @@ if (!function_exists("maa")) {
       $kieli = $GLOBALS["kieli"];
     }
 
-      return ucfirst(strtolower(substr(t($maa['nimi'], $kieli), 5)));
-    }
+    return ucfirst(strtolower(substr(t($maa['nimi'], $kieli), 5)));
   }
+}
 
 if (!function_exists("alias")) {
   function alias($stringi, $taulu, $setti = '') {
@@ -11481,7 +11481,7 @@ if (!function_exists("pupesoft_cleanstring")) {
         if ($key !== FALSE) {
           unset($src[$key]);
           unset($rpl[$key]);
-    }
+        }
       }
     }
 
@@ -19125,8 +19125,11 @@ if (!function_exists("pupeFileReader")) {
       $file = fopen($file, "r") or die (t("Tiedoston avaus epäonnistui")."!");
 
       while ($rivi = fgets($file)) {
-            /** Luetaan CSV rivi tiedostosta **/
-          $rivi = str_getcsv($rivi);
+
+        /**
+         * Luetaan CSV rivi tiedostosta *
+         */
+        $rivi = str_getcsv($rivi);
 
         $excelrivit[] = $rivi;
       }

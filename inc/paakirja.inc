@@ -269,6 +269,14 @@ if ($excel != "") {
 }
 
 echo "<tr><th>".t("Raportti vain Exceliin")."</th><td colspan='3'><input type='checkbox' name='excel' value = 'YES' $sel></td></tr>";
+
+$alvsel="";
+if ($post_alv != "") {
+  $alvsel = "CHECKED";
+}
+
+echo "<tr><th>".t("Vain ALV-laskelman jälkeen tehdyt tiliöinnit")."</th><td colspan='3'><input type='checkbox' name='post_alv' value = 'YES' $alvsel> Toimii vain jos haetaan koko kuukaudelta!</td></tr>";
+
 echo "<tr><th valign='top'>".t("Konsernirajaus")."</th>";
 
 $konsel = array();
@@ -411,7 +419,7 @@ if ($tee != "") {
   }
 
   if ((int) $tkausi > 0) {
-        echo "<font class='head'>$nimi ".t("tilikaudelta")." ".tv1dateconv($tilikaudetrow["tilikausi_alku"])." - ".tv1dateconv($tilikaudetrow["tilikausi_loppu"])."</font><hr>";
+    echo "<font class='head'>$nimi ".t("tilikaudelta")." ".tv1dateconv($tilikaudetrow["tilikausi_alku"])." - ".tv1dateconv($tilikaudetrow["tilikausi_loppu"])."</font><hr>";
     $lisa1  = " and tiliointi.tapvm <= '$tilikaudetrow[tilikausi_loppu]' and tiliointi.tapvm >= '$tilikaudetrow[tilikausi_alku]'";
     $lisa2 = " and tiliointi.tapvm < '$tilikaudetrow[tilikausi_alku]'"; //hassua hassua
   }
@@ -441,6 +449,10 @@ if ($tee != "") {
     $alkupvm  = date("Y-m-d", mktime(0, 0, 0, $alvk, $alvp, $alvv));
     $lisa1  = " and tiliointi.tapvm = '$alkupvm'";
     $lisa2 = " and tiliointi.tapvm < '$alkupvm'";
+  }
+
+  if (isset($post_alv)) {
+    echo "<p>". t("Näytetään vain kauden jälkeen tehdyt tiliöinnit") ."</p>";
   }
 
   if (strlen(trim($tili)) > 0 and strlen(trim($tili2)) > 0) {
@@ -473,6 +485,26 @@ if ($tee != "") {
 
   if ($laatija != '') {
     $lisa1 .= " and tiliointi.laatija = '$laatija' ";
+  }
+
+  $post_alv_lisa = '';
+  if ($post_alv != '' and $alvp == 0 and $alvv != 0) {
+
+    $kuunvika = date("Y-m-t", strtotime($alvv.'-'.$alvk.'-11'));
+
+    $query = "SELECT luontiaika
+              FROM lasku
+              WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+              AND lasku.tapvm   = '{$kuunvika}'
+              AND lasku.tila    = 'X'
+              AND lasku.nimi    = 'ALVTOSITEMAKSUUN$kuunvika'";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) > 0) {
+      $luontiaikarow = mysql_fetch_assoc($result);
+      $laskelma_luotu = $luontiaikarow['luontiaika'];
+      $post_alv_lisa = " and tiliointi.laadittu >= '$laskelma_luotu' ";
+    }
   }
 
   if ($maarajaus != '') $lisa .= " and if(lasku.toim_maa!='', lasku.toim_maa, if(lasku.maa != '', lasku.maa, '$yhtiorow[maa]')) = '$maarajaus'  ";
@@ -521,6 +553,7 @@ if ($tee != "") {
             and tiliointi.korjattu = ''
             $lisa1
             $lisa
+            $post_alv_lisa
             $konsernilisa
             ORDER BY $jarj";
   $result = mysql_query($query) or pupe_error($query);

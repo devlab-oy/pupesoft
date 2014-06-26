@@ -208,7 +208,7 @@ class pdffile {
 
   // draw text
   function draw_text($left, $bottom, $text, $parent, $attrib = array(), $iconvdone) {
-    // Kâ€°â€°nnetâ€°â€°n merkistË† LATIN:iksi PDF-library ei hanskaa UTF-8:ia
+    // Käännetään merkistö LATIN:iksi PDF-library ei hanskaa UTF-8:ia
     if ($iconvdone != "DONE") {
       $text = iconv("UTF-8", "ISO-8859-15//TRANSLIT", $text);
     }
@@ -1099,7 +1099,7 @@ class pdffile {
   }
 
   function draw_paragraph($top, $left, $bottom, $right, $text, $page, $param = array()) {
-    // Kâ€°â€°nnetâ€°â€°n merkistË† LATIN:iksi PDF-library ei hanskaa UTF-8:ia
+    // Käännetään merkistö LATIN:iksi PDF-library ei hanskaa UTF-8:ia
     $text = iconv("UTF-8", "ISO-8859-15//TRANSLIT", $text);
 
     $paras = explode("\n", $text);

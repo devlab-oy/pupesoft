@@ -685,7 +685,6 @@ if ($tee == 'M' and isset($generoi)) {
               $comments     = $kukarow["nimi"]." ".t("Generoi hälytysrajojen perusteella");
               $viesti     = $kukarow["nimi"]." ".t("Generoi hälytysrajojen perusteella");
               $varasto     = $lahdevarasto;
-              $toimitustapa   = $toimitustapa;
               $toim      = "SIIRTOLISTA";
               $alatila = "";
               $luokka = "";

@@ -19899,7 +19899,6 @@ if (!function_exists('tulosta_vakadr_erittely')) {
 }
 
 if (!function_exists("pupesoft_sahkoposti")) {
-
   function pupesoft_sahkoposti($parametrit) {
 
     /* T‰ll‰ funktiolla l‰hetet‰‰n s‰hkˆposti, johon voidaan liitt‰‰ yksi tai useampi liitetiedosto.
@@ -19929,14 +19928,14 @@ if (!function_exists("pupesoft_sahkoposti")) {
     global $yhtiorow, $kukarow;
 
     // Tarvitaan seuraavat parametrit
-    $email_to    = isset($parametrit["to"]) ? $parametrit["to"] : "";
-    $email_cc    = isset($parametrit["cc"]) ? $parametrit["cc"] : "";
-    $email_subject  = isset($parametrit["subject"]) ? $parametrit["subject"] : "";
+    $email_to      = isset($parametrit["to"]) ? $parametrit["to"] : "";
+    $email_cc      = isset($parametrit["cc"]) ? $parametrit["cc"] : "";
+    $email_subject = isset($parametrit["subject"]) ? $parametrit["subject"] : "";
     $email_ctype   = isset($parametrit["ctype"]) ? strtoupper($parametrit["ctype"]) : "";
-    $email_body   = isset($parametrit["body"]) ? $parametrit["body"] : "";
+    $email_body    = isset($parametrit["body"]) ? $parametrit["body"] : "";
 
     // Liitetiedostoja tulee parametreiss‰ arrayna
-    $liitteet    = (isset($parametrit["attachements"]) and is_array($parametrit["attachements"])) ? $parametrit["attachements"] : "";
+    $liitteet      = (isset($parametrit["attachements"]) and is_array($parametrit["attachements"])) ? $parametrit["attachements"] : "";
 
     // Kaikki pit‰‰ tulla kunnossa (paitsi body ja cc)
     if ($email_to == "" or $email_subject == "" or $email_ctype == "") {
@@ -19945,23 +19944,25 @@ if (!function_exists("pupesoft_sahkoposti")) {
 
     $content = "";
     $bound = uniqid(time()."_") ;
-    $header = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <{$yhtiorow["postittaja_email"]}>\n";
+
+    $header = "MIME-Version: 1.0\n" ;
+    $header .= "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")."<{$yhtiorow["postittaja_email"]}>\n";
 
     if ($email_cc != "") {
       $header .= "Cc: $email_cc\n";
     }
 
-    $header .= "MIME-Version: 1.0\n" ;
-    $header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
+    $header .= "Content-Type: multipart/mixed; boundary=$bound\n" ;
 
     if ($email_body != "") {
       $content .= "--$bound\n";
       if ($email_ctype == "HTML") {
-        $content .= "Content-Type: text/html; charset=\"iso-8859-1\"\n";
+        $content .= "Content-Type: text/html; charset=ISO-8859-1\n";
       }
       else {
-        $content .= "Content-Type: text/plain; charset=\"iso-8859-1\"\n";
+        $content .= "Content-Type: text/plain; charset=ISO-8859-1\n";
       }
+
       $content .= "Content-Transfer-Encoding: quoted-printable\n\n";
 
       if ($email_ctype == "HTML") {
@@ -19970,7 +19971,7 @@ if (!function_exists("pupesoft_sahkoposti")) {
         $content .= "</head>\n";
       }
 
-      $content .= "$email_body\n\n";
+      $content .= $email_body."\n\n";
     }
 
     $content .= "--$bound";
@@ -19980,8 +19981,8 @@ if (!function_exists("pupesoft_sahkoposti")) {
 
         // Tarkistetaan $liite arrayn oikeellisuus
         $attachement_filename    = isset($liite["filename"]) ? $liite["filename"] : "";
-        $attachement_newfilename  = isset($liite["newfilename"]) ? $liite["newfilename"] : "";
-        $attachement_ctype      = isset($liite["ctype"]) ? strtoupper($liite["ctype"]) : "";
+        $attachement_newfilename = isset($liite["newfilename"]) ? $liite["newfilename"] : "";
+        $attachement_ctype       = isset($liite["ctype"]) ? strtoupper($liite["ctype"]) : "";
 
         // Jos tiedostoa ei lˆydy tai ctype on tyj‰‰, hyp‰t‰‰n filen yli.
         if (!file_exists($attachement_filename) or !is_readable($attachement_filename) or $attachement_ctype == "") {
@@ -20000,49 +20001,45 @@ if (!function_exists("pupesoft_sahkoposti")) {
         }
 
         // Boundin j‰lkeen aina rivinvaihto
-        $content .= "\n";
+        $content .= "\nContent-Type: ";
 
         if ($attachement_ctype == "TEXT") {
-          $content .= "Content-Type: text/plain; name=\"$attachement_name\"\n";
+          $content .= "text/plain;";
         }
         elseif ($attachement_ctype == "PS") {
-          $content .= "Content-Type: application/ps; name=\"$attachement_name\"\n";
+          $content .= "application/ps;";
         }
         elseif ($attachement_ctype == "JPG" or $attachement_ctype == "JPEG") {
-          $content .= "Content-Type: image/jpeg; name=\"$attachement_name\"\n";
+          $content .= "image/jpeg;";
         }
         elseif ($attachement_ctype == "PNG") {
-          $content .= "Content-Type: image/png; name=\"$attachement_name\"\n";
+          $content .= "image/png;";
         }
         elseif ($attachement_ctype == "GIF") {
-          $content .= "Content-Type: image/gif; name=\"$attachement_name\"\n";
+          $content .= "image/gif;";
         }
         elseif ($attachement_ctype == "TIF" or $attachement_ctype == "TIFF") {
-          $content .= "Content-Type: image/tiff; name=\"$attachement_name\"\n";
+          $content .= "image/tiff;";
         }
         elseif ($attachement_ctype == "BMP") {
-          $content .= "Content-Type: image/bmp; name=\"$attachement_name\"\n";
+          $content .= "image/bmp;";
         }
         elseif ($attachement_ctype == "EXCEL") {
-          $content .= "Content-Type: application/excel; name=\"$attachement_name\"\n";
+          $content .= "application/excel;";
         }
         elseif ($attachement_ctype == "PDF") {
-          $content .= "Content-Type: application/pdf; name=\"$attachement_name\"\n";
-        }
-        else {
-          //Defaulttina katotaa mit‰ tyyppi‰ tiedosto on ja laitetaa headerit sen mukaan
-          $mime_type = mime_content_type($attachement_filename);
-          $content .= "Content-Type: $mime_type; name=\"$attachement_name\"\n";
+          $content .= "application/pdf;";
         }
 
-        $content .= "Content-Transfer-Encoding: base64\n";
-        $content .= "Content-Disposition: attachment; filename=\"$attachement_name\"\n\n";
+        $content .= " name=\"".mb_encode_mimeheader($attachement_name, "ISO-8859-1", "Q")."\"\n";
+
+        $content .= "Content-Disposition: attachment; filename=\"".mb_encode_mimeheader($attachement_name, "ISO-8859-1", "Q")."\"\n";
+        $content .= "Content-Transfer-Encoding: base64\n\n";
         $content .= $attachement_content;
         $content .= "\n";
         $content .= "--$bound";
       }
     }
-
 
     // Vikassa boundissa pit‰‰ olla -- lopussa.
     $content .= "--\n";

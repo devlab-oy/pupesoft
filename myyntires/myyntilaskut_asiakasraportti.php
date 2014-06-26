@@ -792,7 +792,7 @@ if ($tee == "") {
             $lasktilitre = pupe_query($query);
 
             // listataan osasuoritukset jos maksupäivä on nollaa tai jos niitä on oli yks
-            if ($maksurow["mapvm"] == "0000-00-00" or mysql_num_rows($lasktilitre) > 0) {
+            if ($maksurow["mapvm"] == "0000-00-00" or mysql_num_rows($lasktilitre) > 1) {
 
               while ($lasktilitro = mysql_fetch_array($lasktilitre)) {
 

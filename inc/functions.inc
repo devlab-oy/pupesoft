@@ -720,12 +720,8 @@ if (!function_exists("maa")) {
     if ($kieli == "" and isset($GLOBALS["kieli"])) {
       $kieli = $GLOBALS["kieli"];
     }
-    if (function_exists("mb_strtolower")) {
-      return ucfirst(mb_strtolower(substr(t($maa['nimi'], $kieli), 5)));
-    }
-    else {
-      return ucfirst(strtolower(substr(t($maa['nimi'], $kieli), 5)));
-    }
+
+    return ucfirst(strtolower(substr(t($maa['nimi'], $kieli), 5)));
   }
 }
 
@@ -11479,13 +11475,21 @@ if (!function_exists("pupesoft_cleanstring")) {
 
     if (!is_numeric($string) and !is_string($string)) return "";
 
-    $illegal = array("\"","'","<",">","\\", ";");
+    $src = array("\"", "'", "<", ">", "\\", ";");
+    $rpl = array("{DOULEPRIME}" , "{PRIME}", "" , "", "", "");
 
     if (count($exclude) > 0) {
-      $illegal = array_diff($illegal, $exclude);
+      foreach ($exclude as $ex) {
+        $key = array_search($ex, $src);
+
+        if ($key !== FALSE) {
+          unset($src[$key]);
+          unset($rpl[$key]);
+        }
+      }
     }
 
-    return mysql_real_escape_string(trim(str_replace($illegal, "", $string)));
+    return mysql_real_escape_string(trim(str_replace($src, $rpl, $string)));
   }
 }
 

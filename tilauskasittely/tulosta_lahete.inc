@@ -4025,7 +4025,7 @@ if (!function_exists('kuittaus_lahete')) {
               WHERE lasku.yhtio       = '$kukarow[yhtio]' and lasku.tunnus = '{$params['laskurow']['tunnus']}'
               and toimitustapa.nouto != '' and maksuehto.kateinen = ''";
     $kures = pupe_query($query);
-#echo "4028 "; var_dump($params); echo "<br><br>"; exit;
+
     //toimitustapa on nouto ja lahete_allekirjoitus Tulostetaan erillinen allekirjoitussivu vain kun toimitustapa on nouto
     if(mysql_num_rows($kures) > 0 and $yhtiorow['lahete_allekirjoitus'] == 'K') {
       $params["sivu"]++;
@@ -4050,15 +4050,15 @@ if (!function_exists('kuittaus_lahete')) {
     elseif (mysql_num_rows($kures) > 0 and $yhtiorow['lahete_allekirjoitus'] == 'A') {
       // Luodaan muuttujat
       extract($params);
-      
+
       if ($kala < 90 ) {
         // Luodaan palautettavat
         $return = compact(array_keys($params));
-      
+
         $params = uusi_sivu_lahete($return);
-        
+
         $params = loppu_lahete($params);
-               
+
         // Luodaan muuttujat
         extract($params);
       }
@@ -4095,19 +4095,19 @@ if (!function_exists('kuittaus_lahete')) {
     elseif($yhtiorow['lahete_allekirjoitus'] == 'S')  {
       // Luodaan muuttujat
       extract($params);
-      
+
       if ($kala < 90 ) {
         // Luodaan palautettavat
         $return = compact(array_keys($params));
-      
+
         $params = uusi_sivu_lahete($return);
-        
+
         $params = loppu_lahete($params);
-               
+
         // Luodaan muuttujat
         extract($params);
       }
-      
+
       $pdf->draw_text(50, 90, t("Allekirjoitus", $kieli).": _______________________________",   $thispage, $norm);
       $pdf->draw_text(300, 90, t("Nimenselvennys", $kieli).": _______________________________",   $thispage, $norm);
 

@@ -3049,7 +3049,7 @@ function lahdot_joissa_tilauksia_keraamatta($lahdot) {
     $query = "SELECT lahdot.tunnus AS lahdon_tunnus,
               count(*) AS keraamatta
               FROM lahdot
-              JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus AND (lasku.tila = 'L' OR (lasku.tila = 'N' AND lasku.alatila = 'A')))
+              JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus AND (lasku.tila = 'L' OR (lasku.tila = 'N' AND lasku.alatila = 'A') OR lasku.tila = 'G'))
               JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.kerattyaika = '0000-00-00 00:00:00' AND tilausrivi.var not in ('P','J','O','S'))
               JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '' )
               JOIN tilausrivin_lisatiedot ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.ohita_kerays = '')

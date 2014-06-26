@@ -31,7 +31,7 @@ $yhtio = mysql_real_escape_string($argv[1]);
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
 
-// Tallannetan rivit tiedostoon
+// Tallennetaan rivit tiedostoon
 $filepath = "/tmp/input_balances_{$yhtio}_".date("Y-m-d").".csv";
 
 if (!$fp = fopen($filepath, 'w+')) {
@@ -39,7 +39,7 @@ if (!$fp = fopen($filepath, 'w+')) {
 }
 
 // Otsikkotieto
-$header = "location;product;quantity;type\n";
+$header = "location;product;clean_product;quantity;type\n";
 fwrite($fp, $header);
 
 // Haetaan tuotteiden saldot per varasto
@@ -70,6 +70,7 @@ $k_rivi = 0;
 
 while ($row = mysql_fetch_assoc($res)) {
   $rivi  = "{$row['maa']}-{$row['varasto']};";
+  $rivi .= "{$row['maa']}-".pupesoft_csvstring($row['tuoteno']).";";
   $rivi .= pupesoft_csvstring($row['tuoteno']).";";
   $rivi .= "{$row['saldo']};";
   $rivi .= "BALANCE";

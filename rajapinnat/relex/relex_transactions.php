@@ -31,7 +31,7 @@ $yhtio = mysql_real_escape_string($argv[1]);
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
 
-// Tallannetan rivit tiedostoon
+// Tallennetaan rivit tiedostoon
 $filepath = "/tmp/input_transactions_{$yhtio}_".date("Y-m-d").".csv";
 
 if (!$fp = fopen($filepath, 'w+')) {
@@ -39,7 +39,7 @@ if (!$fp = fopen($filepath, 'w+')) {
 }
 
 // Otsikkotieto
-$header = "date;location;product;type;quantity;value;sales_purchase_price;reference;order_row;order_type;partner_code\n";
+$header = "date;location;product;clean_product;type;quantity;value;sales_purchase_price;reference;order_row;order_type;partner_code\n";
 fwrite($fp, $header);
 
 /*
@@ -142,17 +142,18 @@ while ($row = mysql_fetch_assoc($res)) {
      $partner = $row['maa']."-".$partner;
   }
 
-  $rivi  = "{$row['pvm']};";                          // Transaction posting date
-  $rivi .= "{$row['maa']}-{$row['varasto']};";        // Inventory location code
-  $rivi .= pupesoft_csvstring($row['tuoteno']).";";   // Item code
-  $rivi .= "{$type};";                                // Transaction type
-  $rivi .= "{$row['kpl']};";                          // Transaction quantity in inventory units
-  $rivi .= "{$arvo};";                                // Transaction value in currency
-  $rivi .= ";";                                       // Purchase cost of sales transaction
-  $rivi .= ";";                                       // Sales or purchase order number
-  $rivi .= ";";                                       // Sales or purchase order row number
-  $rivi .= ";";                                       // Additional subtype for sales and delivery transactions
-  $rivi .= "{$partner}";                              // Customer for sales transactions, Supplier for incoming deliveries, Sending/receiving warehouse for stock transfers
+  $rivi  = "{$row['pvm']};";                                         // Transaction posting date
+  $rivi .= "{$row['maa']}-{$row['varasto']};";                       // Inventory location code
+  $rivi .= "{$row['maa']}-".pupesoft_csvstring($row['tuoteno']).";"; // Item code
+  $rivi .= pupesoft_csvstring($row['tuoteno']).";";                  // Clean Item code
+  $rivi .= "{$type};";                                               // Transaction type
+  $rivi .= "{$row['kpl']};";                                         // Transaction quantity in inventory units
+  $rivi .= "{$arvo};";                                               // Transaction value in currency
+  $rivi .= ";";                                                      // Purchase cost of sales transaction
+  $rivi .= ";";                                                      // Sales or purchase order number
+  $rivi .= ";";                                                      // Sales or purchase order row number
+  $rivi .= ";";                                                      // Additional subtype for sales and delivery transactions
+  $rivi .= "{$partner}";                                             // Customer for sales transactions, Supplier for incoming deliveries, Sending/receiving warehouse for stock transfers
   $rivi .= "\n";
 
   fwrite($fp, $rivi);

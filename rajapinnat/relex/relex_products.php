@@ -38,7 +38,7 @@ if (@include("inc/tecdoc.inc")) {
 }
 
 
-// Tallannetan rivit tiedostoon
+// Tallennetaan rivit tiedostoon
 $filepath = "/tmp/product_update_{$yhtio}_".date("Y-m-d").".csv";
 
 if (!$fp = fopen($filepath, 'w+')) {
@@ -47,6 +47,7 @@ if (!$fp = fopen($filepath, 'w+')) {
 
 // Otsikkotieto
 $header  = "code;";
+$header .= "clean_code;";
 $header .= "name;";
 $header .= "tuoteosasto;";
 $header .= "group;";
@@ -155,7 +156,8 @@ $k_rivi = 0;
 
 while ($row = mysql_fetch_assoc($res)) {
   // Tuotetiedot
-  $rivi  = pupesoft_csvstring($row['tuoteno']).";";
+  $rivi  = $row['maa']."-".pupesoft_csvstring($row['tuoteno']).";";
+  $rivi .= pupesoft_csvstring($row['tuoteno']).";";
   $rivi .= pupesoft_csvstring($row['nimitys']).";";
   $rivi .= "{$row['osasto']};";
   $rivi .= "{$row['try']};";
@@ -228,9 +230,13 @@ while ($row = mysql_fetch_assoc($res)) {
           toimi.oletus_valkoodi valuutta,
           tuotteen_toimittajat.toim_yksikko,
           if(tuotteen_toimittajat.tuotekerroin = 0, 1, tuotteen_toimittajat.tuotekerroin) tuotekerroin,
-          tuotteen_toimittajat.jarjestys
+          if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys) jarjestys
           FROM tuotteen_toimittajat
-          JOIN toimi ON (tuotteen_toimittajat.yhtio = toimi.yhtio AND tuotteen_toimittajat.liitostunnus = toimi.tunnus)
+          JOIN toimi ON (tuotteen_toimittajat.yhtio = toimi.yhtio
+            AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
+            AND toimi.oletus_vienti in ('C','F','I')
+            AND toimi.toimittajanro not in ('0','')
+            AND toimi.tyyppi = '')
           WHERE tuotteen_toimittajat.yhtio = '{$yhtio}'
           AND tuotteen_toimittajat.tuoteno = '{$row['tuoteno']}'
           ORDER BY if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys)

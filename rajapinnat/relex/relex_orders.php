@@ -31,7 +31,7 @@ $yhtio = mysql_real_escape_string($argv[1]);
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
 
-// Tallannetan rivit tiedostoon
+// Tallennetaan rivit tiedostoon
 $filepath = "/tmp/input_orders_{$yhtio}_".date("Y-m-d").".csv";
 
 if (!$fp = fopen($filepath, 'w+')) {
@@ -39,7 +39,7 @@ if (!$fp = fopen($filepath, 'w+')) {
 }
 
 // Otsikkotieto
-$header = "location;product;type;quantity;estimated_date;value;reference;order_row;order_type;partner_code\n";
+$header = "location;product;clean_product;type;quantity;estimated_date;value;reference;order_row;order_type;partner_code\n";
 fwrite($fp, $header);
 
 /*
@@ -96,16 +96,17 @@ while ($row = mysql_fetch_assoc($res)) {
      $row['partner'] = $row['maa']."-".$row['partner'];
   }
 
-  $rivi  = "{$row['maa']}-{$row['varasto']};";      // Inventory location code
-  $rivi .= pupesoft_csvstring($row['tuoteno']).";"; // Item code
-  $rivi .= "{$type};";                              // Open order type
-  $rivi .= "{$row['maara']};";                      // Open order quantity in inventory units
-  $rivi .= "{$row['toimituspaiva']};";              // Estimated delivery date of the order
-  $rivi .= ";";                                     // Open order value in currency
-  $rivi .= ";";                                     // Sales or purchase order number
-  $rivi .= ";";                                     // Sales or purchase order row number
-  $rivi .= ";";                                     // Additional order type that can be used to distinct normal sales and deliveries from special sales and deliveries
-  $rivi .= "{$row['partner']}";                     // Customer for sales orders and Supplier for purchase orders
+  $rivi  = "{$row['maa']}-{$row['varasto']};";                       // Inventory location code
+  $rivi .= "{$row['maa']}-".pupesoft_csvstring($row['tuoteno']).";"; // Item code
+  $rivi .= pupesoft_csvstring($row['tuoteno']).";";                  // Clean Item code
+  $rivi .= "{$type};";                                               // Open order type
+  $rivi .= "{$row['maara']};";                                       // Open order quantity in inventory units
+  $rivi .= "{$row['toimituspaiva']};";                               // Estimated delivery date of the order
+  $rivi .= ";";                                                      // Open order value in currency
+  $rivi .= ";";                                                      // Sales or purchase order number
+  $rivi .= ";";                                                      // Sales or purchase order row number
+  $rivi .= ";";                                                      // Additional order type that can be used to distinct normal sales and deliveries from special sales and deliveries
+  $rivi .= "{$row['partner']}";                                      // Customer for sales orders and Supplier for purchase orders
   $rivi .= "\n";
 
   fwrite($fp, $rivi);

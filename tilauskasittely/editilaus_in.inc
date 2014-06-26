@@ -135,6 +135,8 @@ $verkkokauppavarasto  = "";
 $verkkokauppavarasto_li  = "";
 $editilaus_loppuhinta  = "";
 $kieltolisa        = "";
+$verkkokauppa = "";
+$ot_verkkokauppa_asiakasnro = "";
 $OT_ASIAKASNRO      = "";
 $merkkitieto      = "";
 
@@ -377,6 +379,16 @@ while ($tietue = fgets($fd)) {
       $editilaus_tilaustyyppi = trim($tieto);
       break;
 
+    case 'OSTOTIL.VERKKOKAUPPA' :
+      // Verkkokaupan nimi
+      $verkkokauppa = $tieto;
+      break;
+
+    case 'OSTOTIL.OT_VERKKOKAUPPA_ASIAKASNRO' :
+      // Verkkokaupan asiakasnumero
+      $ot_verkkokauppa_asiakasnro = $tieto;
+      break;
+
     case 'OBGMIACKR' :
     //Edivastaus
       if ($tieto == "AB") {
@@ -573,6 +585,12 @@ while ($tietue = fgets($fd)) {
           // Koontikeississä ei haluta enää jatkaa ettei vahingossa ylikirjoiteta tilaavaa asiakasta
           break;
         }
+      }
+
+      // Käytetään Magenton asiakasnumeroa jos sellainen löytyy ennalta määritellyistä kaupoista tulevilla tilauksilla
+      // TODO kauppojen nimet ja tilaustyypit salasanat.phpstä
+      if ($edi_tyyppi == "magento" and (strpos($verkkokauppa, "stock") or strpos($verkkokauppa, "Prebook")) and $ot_verkkokauppa_asiakasnro != '') {
+        $tieto = $ot_verkkokauppa_asiakasnro;
       }
 
       // Otetaan talteen
@@ -1124,6 +1142,19 @@ while ($tietue = fgets($fd)) {
             $editilaus_alatila   = '';
           }
         }
+        
+        $tilaustyyppilisa = '';
+        //TODO kauppojen nimet ja tilaustyypit salasanat.phstä
+        if ($edi_tyyppi == "magento" and strpos($verkkokauppa, "stock")) {
+          // Tyyppi 2, varaston täydennys
+          $tilaustyyppilisa = 2;
+        }
+
+        if ($edi_tyyppi == "magento" and strpos($verkkokauppa, "Prebook")) {
+          // Tyyppi E, ennakko
+          $editilaus_tilaustyyppi = "E";
+          $tilaustyyppilisa = "E";
+        }
 
         // jos tilauksella on tullut lopullisen asikkaan tiedot, laitetaan ne talteen sisviesti ykköseen
         if ($lopnimi != "") {
@@ -1174,8 +1205,6 @@ while ($tietue = fgets($fd)) {
         }
 
         $til_vienti = $arow["vienti"];
-
-        $tilaustyyppilisa = '';
 
         if ($edi_tyyppi == 'futursoft' and ($editilaus_tilaustyyppi == 2 or $editilaus_tilaustyyppi == 3)) {
           $tilaustyyppilisa = $editilaus_tilaustyyppi;
@@ -1647,6 +1676,12 @@ while ($tietue = fgets($fd)) {
           $editilaus_hinta = round($editilaus_hinta * (1 + $laskurow["alv"]/100), 2);
         }
       }
+      // Tullaan varastotilauskaupasta tai ennakkotilauskaupasta 
+      // TODO kauppojen nimet ja parametrit salasanat.phpstä
+      if (strpos($verkkokauppa, "stock") or strpos($verkkokauppa, "Prebook")) {
+        $editilaus_hinta = 0;
+      }
+
       break;
 
     case 'OSTOTILRIV.OTR_ALENNUS' :

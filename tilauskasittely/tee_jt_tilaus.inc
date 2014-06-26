@@ -214,6 +214,11 @@ if (!function_exists("tee_jt_tilaus")) {
           $kohdistettulisa .= " and lasku.rahtivapaa = '{$otsikkorivi['rahtivapaa']}'";
         }
 
+        // Huomioidaanko asiakkaan_tilausnumero
+        if ($yhtiorow['jt_asiakkaan_tilausnumero'] == "K") {
+          $atlisa = " and lasku.asiakkaan_tilausnumero = '$otsikkorivi[asiakkaan_tilausnumero]' ";
+        }
+
         // Tarvitsemmeko uuden otsikon?
         $query = "SELECT lasku.*
                   FROM lasku
@@ -256,7 +261,8 @@ if (!function_exists("tee_jt_tilaus")) {
                   and laskun_lisatiedot.laskutus_maa      = '$lisatiedot_row[laskutus_maa]'
                   {$kohdistettulisa}
                   $erpcmlisa1
-                  $yhdlisa";
+                  $yhdlisa
+                  $atlisa";
         $stresult = pupe_query($query);
       }
 
@@ -398,17 +404,28 @@ if (!function_exists("tee_jt_tilaus")) {
           elseif ($fieldname == 'hyvaksyja_nyt' and $otsikkorivi['jtkielto'] == "Y") {
             $query .= $fieldname."='$otsikkorivi[tunnus]',";
           }
-          // n‰m‰ kent‰t tyhjennet‰‰n jos jtrivit kootaan yhdelle otsikolle (siis normikeissi)
+          elseif ($fieldname == 'asiakkaan_tilausnumero') {
+            // ei tyhjennet‰ asiakkaan tilausnumeroa jos halutaan niputtaa tilaukset sen mukaan
+            // tai ennakko tai jtkielto
+            if ($yhtiorow['jt_asiakkaan_tilausnumero'] == "K" or
+                $toim == "ENNAKKO" or
+                $otsikkorivi['jtkielto'] == "Y") {
+              $query .= $fieldname."='".$otsikkorivi[$fieldname]."',";
+            }
+            else {
+              // tyhjennet‰‰n jos jtrivit kootaan yhdelle otsikolle
+              $query .= $fieldname."='',";
+            }
+          }
           elseif ($fieldname == 'sisviesti1' or
               $fieldname == 'tilausyhteyshenkilo' or
-              $fieldname == 'asiakkaan_tilausnumero' or
               $fieldname == 'kohde' or
               $fieldname == 'viesti') {
-
             if ($toim == "ENNAKKO" or $otsikkorivi['jtkielto'] == "Y") {
               $query .= $fieldname."='".$otsikkorivi[$fieldname]."',";
             }
             else {
+              // tyhjennet‰‰n jos jtrivit kootaan yhdelle otsikolle
               $query .= $fieldname."='',";
             }
           }

@@ -8893,10 +8893,6 @@ if (!function_exists("livesearch_tuotehaku")) {
     $submit = $_REQUEST["livesearch_submit"];
     $haku = trim($_REQUEST["livesearch_haku"]);
 
-    if (mb_detect_encoding($haku, mb_detect_order(), TRUE) == "UTF-8") {
-      $haku = iconv("UTF-8", "latin1//TRANSLIT", $haku);
-    }
-
     if (strlen($haku) > 2 and substr($haku, 0, 1) != "*" and substr($haku, -1) != '*' and substr($haku, 0, 1) != "?" and substr($haku, 0, 1) != "#") {
 
       echo "
@@ -19119,14 +19115,7 @@ if (!function_exists("pupeFileReader")) {
 
           while ($rivi = fgets($file)) {
             /** Luetaan CSV rivi tiedostosta **/
-
-            // Katsotaan onko UTF-8 muodossa
-            if (mb_detect_encoding($rivi, 'UTF-8', true) !== FALSE) {
-              $rivi = str_getcsv(utf8_decode($rivi));
-            }
-            else {
-              $rivi = str_getcsv($rivi);
-            }
+            $rivi = str_getcsv($rivi);
 
             $excelrivit[] = $rivi;
           }

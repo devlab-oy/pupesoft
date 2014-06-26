@@ -37,7 +37,7 @@ class LumoClient {
 
     try {
 
-      $this->log("Maksupääteyhteys avattiin\n");
+      $this->log("Avataan maksupääteyhteyttä\n");
       set_time_limit(0);
       ob_implicit_flush();
 
@@ -47,7 +47,7 @@ class LumoClient {
         $this->_error_count++;
       }
 
-      $this->log("Attempting to connect to '$address' on port '$service_port'...");
+      $this->log("Yhdistetään '$address' porttiin '$service_port'...");
       $this->_connection = socket_connect($this->_socket, $address, $service_port);
       if ($this->_connection === false) {
         $this->log("socket_connect() failed.\nReason: ($this->_connection) " . socket_strerror(socket_last_error($this->_socket)) . "\n");
@@ -66,7 +66,6 @@ class LumoClient {
    */
   function __destruct() {
     $this->log("Maksupääteyhteys suljettiin\n");
-    $this->log("Closing socket...");
     socket_close($this->_socket);
   }
 
@@ -74,33 +73,32 @@ class LumoClient {
    * Start transaction
    */
   function startTransaction($amount, $transaction_type = 0) {
+    
+    $return = false;
 
     // Setataan transaction amount
     $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'> 
       <SetAmount><Value>{$amount}</Value></SetAmount></EMVLumo>\0";
 
-    $this->log("Lähetetään maksupäätteelle summa\n");
-    $this->log($in);
     socket_write($this->_socket, $in, strlen($in));
 
     $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'><MakeTransaction><TransactionType>0</TransactionType></MakeTransaction></EMVLumo>\0";
     $out = '';
 
-    $this->log("Aloitetaan maksutapahtuma\n");
+    $this->log("Aloitetaan maksutapahtuma\n\tTyyppi: $transaction_type\n\tSumma: $amount\n");
     socket_write($this->_socket, $in, strlen($in));
-    $this->log($in);
 
     while ($out = socket_read($this->_socket, 2048)) {
 
       $xml = @simplexml_load_string($out);
-      if (isset($xml)) {
-        if (isset($xml->MakeTransaction->Result)) {
-          $arvo = $xml->MakeTransaction->Result == "True" ? "OK" : "HYLÄTTIIN";
-          $this->log("Maksutapahtuma $arvo");
-        }
+      if (isset($xml) and isset($xml->MakeTransaction->Result)) {
+        $return = $xml->MakeTransaction->Result == "True" ? TRUE : FALSE;
+        $arvo = $return === TRUE ? "OK" : "HYLÄTTY";
+        $this->log("Maksutapahtuma $arvo");
       }
       var_dump($xml);
     }
+    return $return;
   }
 
   /**

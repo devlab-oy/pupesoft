@@ -1114,7 +1114,7 @@ if ($tee == "VALMIS"
 
     if (mysql_num_rows($maksuehtores) > 1) {
       echo "<table><tr><th>".t("Maksutapa").":</th>";
-
+      if (false) { #Maksup‰‰temyynniss‰ ohitetaan yksitt‰iset maksutavat
       while ($maksuehtorow = mysql_fetch_assoc($maksuehtores)) {
         echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
         echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
@@ -1132,6 +1132,7 @@ if ($tee == "VALMIS"
         echo "<td><input type='submit' value='".t_tunnus_avainsanat($maksuehtorow, "teksti", "MAKSUEHTOKV")."'></td>";
         echo "</form>";
       }
+    }
 
       echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
       echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
@@ -1210,7 +1211,7 @@ if ($tee == "VALMIS"
             kateinen = Number(document.getElementById('kateismaksu').value.replace(\",\",\".\"));
             pankki = Number(document.getElementById('pankkikortti').value.replace(\",\",\".\"));
             luotto = Number(document.getElementById('luottokortti').value.replace(\",\",\".\"));
-            
+
             summa = kaikkiyhteensa - (kateinen + pankki + luotto);";
 
 
@@ -1221,7 +1222,11 @@ if ($tee == "VALMIS"
 
     echo "  summa = Math.round(summa*100)/100;
 
-            if (summa == 0 && (document.getElementById('kateismaksu').value != '' || document.getElementById('pankkikortti').value != '' || document.getElementById('luottokortti').value != '' || document.getElementById('laskulle').value != '')) {
+            if (summa == 0 && (document.getElementById('kateismaksu').value != '' || 
+                document.getElementById('pankkikortti').value != '' || 
+                document.getElementById('luottokortti').value != '' || 
+                document.getElementById('laskulle').value != '')) {
+
               summa = 0.00;
               document.getElementById('hyvaksy_nappi').disabled = false;
               document.getElementById('seka').value = 'kylla';
@@ -1233,18 +1238,23 @@ if ($tee == "VALMIS"
           }
         -->
         </script>";
+      var_dump($_REQUEST);
 
     echo "<tr><th>".t("Laskun loppusumma")."</th><td align='right'>$kaikkiyhteensa</td><td>$laskurow[valkoodi]</td></tr>";
 
     echo "<tr><td>".t("K‰teisell‰")."</td><td><input type='text' name='kateismaksu[kateinen]' id='kateismaksu' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
-    echo "<tr><td>".t("Pankkikortilla")."</td><td><input type='text' name='kateismaksu[pankkikortti]' id='pankkikortti' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
-    echo "<tr><td>".t("Luottokortilla")."</td><td><input type='text' name='kateismaksu[luottokortti]' id='luottokortti' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
+    echo "<tr><td>".t("Pankkikortilla")."</td><td><input type='text' name='kateismaksu[pankkikortti]' id='pankkikortti' value='{$kateismaksu['pankkikortti']}' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
+    echo "<tr><td>".t("Luottokortilla")."</td><td><input type='text' name='kateismaksu[luottokortti]' id='luottokortti' value='{$kateismaksu['luottokortti']}' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
 
     if ($yhtiorow['sallitaanko_kateismyynti_laskulle'] != '') {
       echo "<tr style='$style'><td>".t("Laskulle")."</td><td><input type='text' name='kateismaksu[laskulle]' id='laskulle' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
     }
 
     echo "<tr><th>".t("Erotus")."</th><td name='loppusumma' id='loppusumma' align='right'><strong>0.00</strong></td><td>$laskurow[valkoodi]</td></tr>";
+    
+    if (true) {
+      echo "<tr><td class='back'><input type='button' name='lollaa_nappi' id='lollaa_nappi' value='".t("Tarkista")."'></td></tr>";
+    }
     echo "<tr><td class='back'><input type='submit' name='hyvaksy_nappi' id='hyvaksy_nappi' value='".t("Hyv‰ksy")."' disabled></td></tr>";
 
     echo "</form><br><br>";

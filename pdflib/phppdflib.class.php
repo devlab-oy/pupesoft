@@ -213,8 +213,13 @@ class pdffile
     }
 
     // draw text
-    function draw_text($left, $bottom, $text, $parent, $attrib = array())
+    function draw_text($left, $bottom, $text, $parent, $attrib = array(), $iconvdone)
     {
+        // Käännetään merkistö LATIN:iksi PDF-library ei hanskaa UTF-8:ia
+        if ($iconvdone != "DONE") {
+          $text = iconv("UTF-8", "ISO-8859-15//TRANSLIT", $text);
+        }
+
         if (!isset($this->objects[$parent]["type"]) or $this->objects[$parent]["type"] != "page") {
             $this->_push_std_error(6001);
             return false;
@@ -979,8 +984,12 @@ class pdffile
 
     function strlen($string , $params = false, $tabwidth = 4)
     {
+      return $this->mb_strlen($string , $params, $tabwidth);
+    }
+
+    function mb_strlen($string , $params = false, $tabwidth = 4)
+    {
         if ($this->needsset) {
-//            require_once(dirname(__FILE__) . '/strlen.inc.php');
             require(dirname(__FILE__) . '/strlen.inc.php');
         }
         if (empty($params["font"])) {
@@ -1099,7 +1108,7 @@ class pdffile
                 default :
                     $l = $left;
                 }
-                $this->draw_text($l, $top, $line, $page, $param);
+                $this->draw_text($l, $top, $line, $page, $param, "DONE");
             } else {
                 $top += $height;
                 break;
@@ -1114,6 +1123,9 @@ class pdffile
 
     function draw_paragraph($top, $left, $bottom, $right, $text, $page, $param = array())
     {
+        // Käännetään merkistö LATIN:iksi PDF-library ei hanskaa UTF-8:ia
+        $text = iconv("UTF-8", "ISO-8859-15//TRANSLIT", $text);
+
         $paras = explode("\n", $text);
         for ($i = 0; $i < count($paras); $i++) {
             $over = $this->draw_one_paragraph($top,

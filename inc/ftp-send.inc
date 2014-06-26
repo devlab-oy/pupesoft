@@ -39,6 +39,16 @@ $palautus_pyynto = isset($palautus_pyynto) ? trim($palautus_pyynto) : "";
 $filenimi     = basename($ftpfile);
 $ftptmpr     = !isset($ftptmpr) ? TRUE : $ftptmpr;
 
+// lähetetään oletuksena ISO-8859-15 merkistömuodossa
+if (!isset($ftputf8) or !$ftputf8) {
+  // Muutetaan UTF-8:ksi jos lasku on jossain toisessa merkistössä
+  $encoding = exec("file -b --mime-encoding $ftpfile");
+
+  if (mb_strtoupper($encoding) == 'UTF-8') {
+    exec("recode UTF8..ISO-8859-15 $ftpfile");
+  }
+}
+
 if ($ftphost == 'localhost' and $ftppath != '' and is_dir($ftppath) and is_writable($ftppath) and $ftpfile != '' and is_file($ftpfile) and is_writable($ftpfile)) {
 
   $ftppath = rtrim(realpath($ftppath), "/")."/";

@@ -1,14 +1,14 @@
 <?php
 
 /**
- * LUMO-API simple TCP/IP maksupÃ¤Ã¤teclient, jolla voi lÃ¤hettÃ¤Ã¤ ja vastaanottaa XML-sanomia
- * maksupÃ¤Ã¤tteelle
+ * LUMO-API simple TCP/IP maksupääteclient, jolla voi lähettää ja vastaanottaa XML-sanomia
+ * maksupäätteelle
  */
 
 class LumoClient {
 
   /**
-   * Logging pÃ¤Ã¤llÃ¤/pois
+   * Logging päällä/pois
    */
   const LOGGING = true;
 
@@ -23,7 +23,7 @@ class LumoClient {
   private $_connection = false;
    
   /**
-   * TÃ¤mÃ¤n yhteyden aikana sattuneiden virheiden mÃ¤Ã¤rÃ¤
+   * Tämän yhteyden aikana sattuneiden virheiden määrä
    */
   private $_error_count = 0;
 
@@ -37,7 +37,7 @@ class LumoClient {
 
     try {
 
-      $this->log("Avataan maksupÃ¤Ã¤teyhteyttÃ¤\n");
+      $this->log("Avataan maksupääteyhteyttä\n");
       set_time_limit(0);
       ob_implicit_flush();
 
@@ -47,7 +47,7 @@ class LumoClient {
         $this->_error_count++;
       }
 
-      $this->log("YhdistetÃ¤Ã¤n '$address' porttiin '$service_port'...");
+      $this->log("Yhdistetään '$address' porttiin '$service_port'...");
       $this->_connection = socket_connect($this->_socket, $address, $service_port);
       if ($this->_connection === false) {
         $this->log("socket_connect() failed.\nReason: ($this->_connection) " . socket_strerror(socket_last_error($this->_socket)) . "\n");
@@ -65,7 +65,7 @@ class LumoClient {
    * Destructor
    */
   function __destruct() {
-    $this->log("MaksupÃ¤Ã¤teyhteys suljettiin\n");
+    $this->log("Maksupääteyhteys suljettiin\n");
     socket_close($this->_socket);
   }
 
@@ -93,7 +93,7 @@ class LumoClient {
       $xml = @simplexml_load_string($out);
       if (isset($xml) and isset($xml->MakeTransaction->Result)) {
         $return = $xml->MakeTransaction->Result == "True" ? TRUE : FALSE;
-        $arvo = $return === TRUE ? "OK" : "HYLÃ„TTY";
+        $arvo = $return === TRUE ? "OK" : "HYLÄTTY";
         $this->log("Maksutapahtuma $arvo");
       }
       var_dump($xml);
@@ -141,7 +141,7 @@ class LumoClient {
   /**
    * Hakee error_countin:n
    *
-   * @return int  virheiden mÃ¤Ã¤rÃ¤
+   * @return int  virheiden määrä
    */
   public function getErrorCount() {
     return $this->_error_count;

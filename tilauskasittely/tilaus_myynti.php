@@ -1239,22 +1239,30 @@ if ($tee == "VALMIS"
         -->
         </script>";
       var_dump($_REQUEST);
-
+      if (isset($_REQUEST['hyvaksy_nappi2']) and $tilausnumero != '' and ($kateismaksu['pankkikortti'] != '' or $kateismaksu['luottokortti'] != '')) {
+        // Kutsutaan scriptaa jos on syötetty summia pankki tai luotto ruutuihin
+        $maksut = array ($kateismaksu['pankkikortti'], $kateismaksu['luottokortti']);
+        require("rajapinnat/lumo_handler.inc");
+      }
     echo "<tr><th>".t("Laskun loppusumma")."</th><td align='right'>$kaikkiyhteensa</td><td>$laskurow[valkoodi]</td></tr>";
 
-    echo "<tr><td>".t("Käteisellä")."</td><td><input type='text' name='kateismaksu[kateinen]' id='kateismaksu' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
-    echo "<tr><td>".t("Pankkikortilla")."</td><td><input type='text' name='kateismaksu[pankkikortti]' id='pankkikortti' value='{$kateismaksu['pankkikortti']}' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
-    echo "<tr><td>".t("Luottokortilla")."</td><td><input type='text' name='kateismaksu[luottokortti]' id='luottokortti' value='{$kateismaksu['luottokortti']}' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
+    echo "<tr><td>".t("Käteisellä")."</td><td><input type='text' name='kateismaksu[kateinen]' id='kateismaksu' value='{$kateismaksu['kateinen']}' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
+    echo "<tr><td>".t("Pankkikortilla")."</td><td><input type='text' name='kateismaksu[pankkikortti]' id='pankkikortti' value='{$kateismaksu['pankkikortti']}' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td> $salamuuttuja1</tr>";
+    echo "<tr><td>".t("Luottokortilla")."</td><td><input type='text' name='kateismaksu[luottokortti]' id='luottokortti' value='{$kateismaksu['luottokortti']}' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td> $salamuuttuja2</tr>";
 
     if ($yhtiorow['sallitaanko_kateismyynti_laskulle'] != '') {
       echo "<tr style='$style'><td>".t("Laskulle")."</td><td><input type='text' name='kateismaksu[laskulle]' id='laskulle' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
     }
-
-    echo "<tr><th>".t("Erotus")."</th><td name='loppusumma' id='loppusumma' align='right'><strong>0.00</strong></td><td>$laskurow[valkoodi]</td></tr>";
-    
-    if (true) {
-      echo "<tr><td class='back'><input type='button' name='lollaa_nappi' id='lollaa_nappi' value='".t("Tarkista")."'></td></tr>";
+    $totaalisumma = 0.00;
+    if ($kateismaksu['kateinen'] != '' or $kateismaksu['pankkikortti'] != '' or $kateismaksu['luottokortti'] != '') {
+      foreach ($kateismaksu as $kas) {
+        $valisumma += $kas;
+      }
+      $totaalisumma = $kaikkiyhteensa - $valisumma;
     }
+    echo "<tr><th>".t("Erotus")."</th><td name='loppusumma' id='loppusumma' align='right'><strong>$totaalisumma</strong></td><td>$laskurow[valkoodi]</td></tr>";
+    
+    echo "<tr><td class='back'><input type='submit' name='hyvaksy_nappi2' id='hyvaksy_nappi2' value='".t("LOSAUTAPPA")."'></td></tr>";
     echo "<tr><td class='back'><input type='submit' name='hyvaksy_nappi' id='hyvaksy_nappi' value='".t("Hyväksy")."' disabled></td></tr>";
 
     echo "</form><br><br>";

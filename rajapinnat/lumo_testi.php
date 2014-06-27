@@ -1,5 +1,5 @@
 <?php
-// Kutsutaanko CLI:stÃ¤
+// Kutsutaanko CLI:stä
 $php_cli = FALSE;
 
 if (php_sapi_name() == 'cli') {
@@ -8,9 +8,9 @@ if (php_sapi_name() == 'cli') {
 
 date_default_timezone_set('Europe/Helsinki');
 
-// Kutsutaanko CLI:stÃ¤
+// Kutsutaanko CLI:stä
 if (!$php_cli) {
-  die ("TÃ¤tÃ¤ scriptiÃ¤ voi ajaa vain komentoriviltÃ¤!");
+  die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 }
 
 $pupe_root_polku = dirname(dirname(__FILE__));
@@ -35,10 +35,10 @@ if(isset($lumo_service_address) and isset($lumo_service_port)) {
   echo "skripti loppu, palautti \n $onnistuuko \n";
   if ($onnistuuko) {
     
-    echo "kysytÃ¤Ã¤n kuittia \n";
+    echo "kysytään kuittia \n";
     echo $clientti->getCustomerReceipt(); 
     
-    //echo "kysytÃ¤Ã¤n 2kuittia \n";
+    //echo "kysytään 2kuittia \n";
     //echo $clientti->getMerchantReceipt();
   }
 }

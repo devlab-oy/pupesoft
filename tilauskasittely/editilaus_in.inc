@@ -77,6 +77,18 @@ if (!function_exists('jt_toimita_editilaus')) {
   }
 }
 
+if (!function_exists('hae_erikoiskaupan_parametrit')) {
+  function hae_erikoiskaupan_parametrit ($storename, $verkkokauppa_erikoiskasittely) {
+
+    foreach ($verkkokauppa_erikoiskasittely as $sp) {
+      if (strpos($storename, $sp[0])) {
+        return $sp;
+      }
+    }
+    return array();
+  }
+}
+
 // nollataan kaikki laskun muuttujat (nämä samat pitää tehdä whilen lopussa)
 unset($arow);
 unset($arow_viite);
@@ -588,9 +600,15 @@ while ($tietue = fgets($fd)) {
       }
 
       // Käytetään Magenton asiakasnumeroa jos sellainen löytyy ennalta määritellyistä kaupoista tulevilla tilauksilla
-      // TODO kauppojen nimet ja tilaustyypit salasanat.phpstä
-      if ($edi_tyyppi == "magento" and (strpos($verkkokauppa, "stock") or strpos($verkkokauppa, "Prebook")) and $ot_verkkokauppa_asiakasnro != '') {
-        $tieto = $ot_verkkokauppa_asiakasnro;
+      // ja on setattu $verkkokauppa_erikoiskasittely:n
+      if ($edi_tyyppi == "magento" and $ot_verkkokauppa_asiakasnro != ''
+        and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely) 
+        and count($verkkokauppa_erikoiskasittely) > 0) {
+    
+        $result = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
+        if (count($result) > 0) {
+          $tieto = $ot_verkkokauppa_asiakasnro;
+        }
       }
 
       // Otetaan talteen
@@ -1144,16 +1162,14 @@ while ($tietue = fgets($fd)) {
         }
         
         $tilaustyyppilisa = '';
-        //TODO kauppojen nimet ja tilaustyypit salasanat.phstä
-        if ($edi_tyyppi == "magento" and strpos($verkkokauppa, "stock")) {
-          // Tyyppi 2, varaston täydennys
-          $tilaustyyppilisa = 2;
-        }
 
-        if ($edi_tyyppi == "magento" and strpos($verkkokauppa, "Prebook")) {
-          // Tyyppi E, ennakko
-          $editilaus_tilaustyyppi = "E";
-          $tilaustyyppilisa = "E";
+        if ($edi_tyyppi == "magento" and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)
+          and count($verkkokauppa_erikoiskasittely) > 0) {
+          
+          list ($nimi, $editilaus_tilaustyyppi, $tilaustyyppilisa) = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
+          $edi_ulos .= "nimellä $nimi \n";
+          $edi_ulos .= "löytyi editilaus_tilaustyypiksi $editilaus_tilaustyyppi \n";
+          $edi_ulos .= "ja tilaustyyppilisaksi $tilaustyyppilisa \n\n";
         }
 
         // jos tilauksella on tullut lopullisen asikkaan tiedot, laitetaan ne talteen sisviesti ykköseen
@@ -1676,10 +1692,16 @@ while ($tietue = fgets($fd)) {
           $editilaus_hinta = round($editilaus_hinta * (1 + $laskurow["alv"]/100), 2);
         }
       }
-      // Tullaan varastotilauskaupasta tai ennakkotilauskaupasta 
-      // TODO kauppojen nimet ja parametrit salasanat.phpstä
-      if (strpos($verkkokauppa, "stock") or strpos($verkkokauppa, "Prebook")) {
-        $editilaus_hinta = 0;
+
+      // Jos tilaus tulee ennalta määritellyistä kaupoista 
+      // jotka on setattu $verkkokauppa_erikoiskasittely:n, nollataan hinta
+      if ($edi_tyyppi == "magento" and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely) 
+        and count($verkkokauppa_erikoiskasittely) > 0) {
+    
+        $result = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
+        if (count($result) > 0) {
+          $editilaus_hinta = 0;
+        }
       }
 
       break;

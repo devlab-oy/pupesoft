@@ -57,7 +57,7 @@ var_dump($value);
 $value[1] = "red";
 ```
 
-* Älä kirjoita `if` lausekkeita ilman kaarisulkuja.
+* Älä kirjoita `if` lausekkeita ilman aaltosulkuja.
 * Älä kirjoita `if` lausekkeita yhdelle riville.
 
 ```php

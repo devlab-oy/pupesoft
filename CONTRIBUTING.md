@@ -13,7 +13,7 @@
 
 # Commit
 
-* Committoi gittin usein.
+* Committoi kehitysvaiheessa muutoksesi mahdollisimman usein, pieninä kokonaisuuksina, omaan branchiisi.
 * Committoi asiakokonaisuuksia, kuvaa tehty muutos commit viestissä selkesti.
 * Commitin ensimmäisen rivin maksimipituus 50, jossa kuvaataan asiakokonaisuus.
 * Commitin seuraavilla riveillä ei ole maksimipituutta, vaan niillä voi kuvata vapaasti ominaisuuden tarkemmin.

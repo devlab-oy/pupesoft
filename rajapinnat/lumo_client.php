@@ -100,7 +100,44 @@ class LumoClient {
     }
     return $return;
   }
+  
+  /**
+   * Hakee edellisen tapahtuman asiakaskuitin
+   */
+  function getCustomerReceipt() {
+    
+    $return = '';
 
+    $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'><GetReceiptCustomer/></EMVLumo>\0";
+    socket_write($this->_socket, $in, strlen($in));
+    while ($out = socket_read($this->_socket, 2048)) {
+
+      $xml = @simplexml_load_string($out);
+      if (isset($xml) and isset($xml->GetReceiptCustomer->Result)) {
+        $return = $xml->GetReceiptCustomer->Result;
+      }
+    }
+    return $return;
+  }
+
+  /**
+   * Hakee edellisen tapahtuman kauppiaskuitin
+   */  
+  function getMerchantReceipt() {
+    
+    $return = '';
+
+    $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'><GetReceiptMerchant/></EMVLumo>\0";
+    socket_write($this->_socket, $in, strlen($in));
+    while ($out = socket_read($this->_socket, 2048)) {
+
+      $xml = @simplexml_load_string($out);
+      if (isset($xml) and isset($xml->GetReceiptMerchant->Result)) {
+        $return = $xml->GetReceiptMerchant->Result;
+      }
+    }
+    return $return;
+  }
   /**
    * Hakee error_countin:n
    *

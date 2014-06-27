@@ -29,7 +29,16 @@ if(isset($lumo_service_address) and isset($lumo_service_port)) {
     exit;
   }
   
-  $onnistuuko = $clientti->startTransaction(10001);
+  //$onnistuuko = $clientti->startTransaction(10001);
   $onnistuuko = $onnistuuko === TRUE ? "OK" : "HYLKY";
-  echo "skripti loppu, palautti \n $onnistuuko";
+
+  echo "skripti loppu, palautti \n $onnistuuko \n";
+  if ($onnistuuko) {
+    
+    echo "kysytään kuittia \n";
+    echo $clientti->getCustomerReceipt(); 
+    
+    //echo "kysytään 2kuittia \n";
+    //echo $clientti->getMerchantReceipt();
+  }
 }

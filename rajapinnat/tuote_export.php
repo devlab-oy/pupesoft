@@ -941,6 +941,7 @@ unset($link);
 $link = mysql_connect($dbhost, $dbuser, $dbpass, true) or die ("Ongelma tietokantapalvelimessa $dbhost (tuote_export)");
 mysql_select_db($dbkanta, $link) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (tuote_export)");
 mysql_set_charset("latin1", $link);
+mysql_query("set group_concat_max_len=1000000", $link);
 
 // Kun kaikki onnistui, päivitetään lopuksi timestamppi talteen
 $query = "UPDATE avainsana SET

@@ -3140,14 +3140,12 @@ if ($fieldname == "varastoonvientipaiva") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-  $sel = "";
-
-  if ($trow[$i] != "") {
-    $sel = "selected";
-  }
+  $sel = array();
+  $sel[$trow[$i]] = " selected";
 
   $ulos .= "<option value = ''>".t("Tavaran varastoonvientipäivä on saapumisen varastoonvientipäivä");
-  $ulos .= "<option value = 'K' $sel>".t("Tavaran varastoonvientipäivä voidaan syöttää saapumisen varastoonviennissä");
+  $ulos .= "<option value = 'K' {$sel['K']}>".t("Tavaran varastoonvientipäivä voidaan syöttää saapumisen varastoonviennissä");
+  $ulos .= "<option value = 'R' {$sel['R']}>".t("Tavaran varastoonvientipäivä korjataan automaattisesti edeltämään tapahtumaa joka aiheutti negatiivisen saldon");
   $ulos .= "</select></td>";
 
   $jatko = 0;

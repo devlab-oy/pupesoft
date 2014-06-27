@@ -37,6 +37,7 @@ if (isset($tempdbhost) and $tempdbhost != "") {
   $temporarylink = mysql_connect($tempdbhost, $tempdbuser, $tempdbpass) or die ("Ongelma tietokantapalvelimessa $tempdbhost");
   mysql_select_db($tempdbkanta, $temporarylink) or die ("Tietokantaa $tempdbkanta ei löydy palvelimelta $tempdbhost! (connect.inc)");
   mysql_set_charset("latin1", $temporarylink);
+  mysql_query("set group_concat_max_len=1000000", $temporarylink);
 }
 
 // Käytetään slave kantaa

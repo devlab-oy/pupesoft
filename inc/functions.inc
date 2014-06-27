@@ -5674,7 +5674,7 @@ if (!function_exists("generoi_alekentta_php")) {
   function generoi_alekentta_php($row, $tyyppi, $tapa = '', $ei_erikoisale = '') {
     global $yhtiorow;
 
-    if ($row["netto"] == "N") {
+    if (isset($row["netto"]) and $row["netto"] == "N") {
       if ($tapa == 'erikseen') {
         $ale = array();
         $ale["ale1"] = 0;
@@ -11471,6 +11471,13 @@ if (!function_exists("progress_bar")) {
     }
 
     $microtime_current_last = $microtime_current;
+  }
+}
+
+if (!function_exists("pupesoft_csvstring")) {
+  function pupesoft_csvstring($string) {
+    // Siivotaan veks kaikki non-printablet ja puolipisteet
+    return preg_replace("/([^[:print:]]|;)/", "X", $string);
   }
 }
 

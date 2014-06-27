@@ -65,7 +65,7 @@ $value[1] = "red";
 if ($value === true) echo "brown";
 
 // bad(ish)
-if ($value === true) { echo "brown" };
+if ($value === true) { echo "brown"; }
 
 // good
 if ($value === true) {

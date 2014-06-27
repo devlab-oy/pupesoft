@@ -5674,7 +5674,7 @@ if (!function_exists("generoi_alekentta_php")) {
   function generoi_alekentta_php ($row, $tyyppi, $tapa = '', $ei_erikoisale = '') {
     global $yhtiorow;
 
-    if ($row["netto"] == "N") {
+    if (isset($row["netto"]) and $row["netto"] == "N") {
       if ($tapa == 'erikseen') {
         $ale = array();
         $ale["ale1"] = 0;

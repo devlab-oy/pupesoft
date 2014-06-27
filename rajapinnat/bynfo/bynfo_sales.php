@@ -66,28 +66,22 @@ fwrite($fp, $header);
 
 // Haetaan tapahtumat
 $query = "SELECT
-          date_format(tapahtuma.laadittu, '%Y-%m-%d') pvm,
-          tapahtuma.varasto,
-          tapahtuma.tuoteno,
-          tapahtuma.laji,
-          tapahtuma.kpl,
-          tapahtuma.kplhinta,
-          lasku.tilaustyyppi,
-          lasku.liitostunnus,
+          tilausrivi.laskutettuaika,
+          tilausrivi.toimitettuaika,
+          tilausrivi.tuoteno,
+          tilausrivi.kpl,
+          tilausrivi.rivihinta,
+          tilausrivi.kate,
+
+          lasku.valkoodi,
+          lasku.maa,
           lasku.yhtio_toimipaikka,
-          tilausrivi.toimitettuaika
-          FROM tapahtuma
-          JOIN tuote ON (tuote.yhtio = tapahtuma.yhtio
-            AND tuote.tuoteno     = tapahtuma.tuoteno
-            AND tuote.status     != 'P'
-            AND tuote.ei_saldoa   = ''
-            AND tuote.tuotetyyppi = ''
-            AND tuote.ostoehdotus = '')
-          JOIN yhtio ON (tapahtuma.yhtio = yhtio.yhtio)
-          LEFT JOIN tilausrivi USE INDEX (PRIMARY) ON (tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus)
-          LEFT JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
-          WHERE tapahtuma.yhtio = '$yhtio'
-          AND tapahtuma.laji    = 'laskutus'
+
+          FROM tilausrivi
+          JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
+          WHERE tilausrivi.yhtio = '$yhtio'
+          AND tilausrivi.tyyppi  = 'L'
+          AND tilausrivi.laskutettuaika >= ''
           ORDER BY tapahtuma.laadittu, tapahtuma.tuoteno";
 $res = pupe_query($query);
 
@@ -102,10 +96,9 @@ while ($row = mysql_fetch_assoc($res)) {
 
   // Rivin arvo
   $arvo = round($row['kplhinta']*$row['kpl'], 2);
-  
+
   $rivi  = "{$row['pvm']};";
   $rivi .= "{$row['varasto']};";
-  $rivi .= "{$row['maa']}-".pupesoft_csvstring($row['tuoteno']).";";
   $rivi .= pupesoft_csvstring($row['tuoteno']).";";
   $rivi .= "{$type};";
   $rivi .= "{$row['kpl']};";

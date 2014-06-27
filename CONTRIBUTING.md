@@ -2,6 +2,7 @@
 
 * Tee omasta ominaisuudestasi uusi git feature branch Pupesoftin `master` branchistä.
 * Nimeä oma branchisi `omanimi/ominaisuus_lyhytkuvaus`.
+* Branchin nimessä sallitaan vain kirjaimet `a-z`, numerot `0-9` sekä merkit `_` ja `/`.
 * Kun ominaisuutesi on valmis, tee branchistäsi Pull Request Pupesoft `master` branchiin.
 
 # Pull Request
@@ -14,7 +15,7 @@
 # Commit
 
 * Committoi kehitysvaiheessa muutoksesi mahdollisimman usein, pieninä kokonaisuuksina, omaan branchiisi.
-* Committoi asiakokonaisuuksia, kuvaa tehty muutos commit viestissä selkesti.
+* Committoi asiakokonaisuuksia, kuvaa tehty muutos commit viestissä selkeästi.
 * Commitin ensimmäisen rivin maksimipituus 50, jossa kuvaataan asiakokonaisuus.
 * Commitin seuraavilla riveillä ei ole maksimipituutta, vaan niillä voi kuvata vapaasti ominaisuuden tarkemmin.
 

@@ -488,7 +488,7 @@ if ($tee != "") {
     $lisa2 = " and tiliointi.tapvm < '$alkupvm'";
   }
 
-  if (isset($post_alv)) {
+  if (isset($post_alv) and !isset($ei_alv)) {
     echo "<p>". t("Näytetään vain ALV-laskelman jälkeen tehdyt tiliöinnit") ."</p>";
   }
 

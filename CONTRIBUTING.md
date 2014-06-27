@@ -9,7 +9,7 @@
 * Pidä huoli, että ominaisuutesi branch on ajantasalla kun teet Pull Requestin.
 * Pull Requestin otsikon tulee selkeästi kuvata muutos. Otsikon maksimipituus 50 merkkiä.
 * Pull Requestin kommentissa tulee kuvata ominaisuus tarkemmin. Kommenttiriveillä ei ole maksimipituutta.
-* Tarvittaessa siisti branchisi committisi ennen Pull Requestiä `git rebase -i master`.
+* Tarvittaessa siisti branchisi commitit ennen Pull Requestiä `git rebase -i master`.
 
 # Commit
 

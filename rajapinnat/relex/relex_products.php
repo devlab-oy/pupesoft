@@ -17,6 +17,12 @@ if (!isset($argv[1]) or $argv[1] == '') {
   die("Yhtiˆ on annettava!!");
 }
 
+$paiva_ajo = FALSE;
+
+if (isset($argv[2]) and $argv[1] != '') {
+  $paiva_ajo = TRUE;
+}
+
 ini_set("memory_limit", "5G");
 
 // Otetaan includepath aina rootista
@@ -45,6 +51,49 @@ $filepath = "/tmp/product_update_{$yhtio}_".date("Y-m-d").".csv";
 
 if (!$fp = fopen($filepath, 'w+')) {
   die("Tiedoston avaus ep‰onnistui: $filepath\n");
+}
+
+$tuoterajaus = "";
+
+// P‰iv‰ajoon otetaan mukaan vain viimeisen vuorokauden aikana muuttuneet
+if ($paiva_ajo) {
+  $paivitetyt_tuotteet = "";
+  $namaonjotsekattu    = "";
+
+  $query = "SELECT group_concat(concat('\'',tuote.tuoteno,'\'')) tuotteet
+            FROM tuote
+            WHERE tuote.yhtio     = '$yhtio'
+            AND tuote.status     != 'P'
+            AND tuote.ei_saldoa   = ''
+            AND tuote.tuotetyyppi = ''
+            AND tuote.ostoehdotus = ''
+            AND (tuote.muutospvm  >= date_sub(now(), interval 24 HOUR) or tuote.luontiaika >= date_sub(now(), interval 24 HOUR))";
+  $res = pupe_query($query);
+  $row = mysql_fetch_assoc($res);
+
+  if ($row["tuotteet"] != "") {
+    $paivitetyt_tuotteet = $row["tuotteet"];
+    $namaonjotsekattu    = " AND tuotteen_toimittajat.tuoteno NOT IN ($paivitetyt_tuotteet) ";
+  }
+
+  $query = "SELECT group_concat(concat('\'',tuotteen_toimittajat.tuoteno,'\'')) tuotteet
+            FROM tuotteen_toimittajat
+            WHERE tuotteen_toimittajat.yhtio = '{$yhtio}'
+            AND (tuotteen_toimittajat.muutospvm  >= date_sub(now(), interval 24 HOUR) or tuotteen_toimittajat.luontiaika >= date_sub(now(), interval 24 HOUR))
+            {$namaonjotsekattu}";
+  $res = pupe_query($query);
+  $row = mysql_fetch_assoc($res);
+
+  if ($row["tuotteet"] != "") {
+    if ($paivitetyt_tuotteet != "") {
+      $paivitetyt_tuotteet = "$paivitetyt_tuotteet,{$row["tuotteet"]}";
+    }
+    else {
+      $paivitetyt_tuotteet = $row["tuotteet"];
+    }
+  }
+
+  $tuoterajaus = " AND tuote.tuoteno IN ($paivitetyt_tuotteet) ";
 }
 
 // Otsikkotieto
@@ -103,10 +152,10 @@ $header .= "\n";
 fwrite($fp, $header);
 
 // Tallennetaan tuotteentoimittajarivit tiedostoon
-$filepath = "/tmp/product_suppliers_update_{$yhtio}_".date("Y-m-d").".csv";
+$tfilepath = "/tmp/product_suppliers_update_{$yhtio}_".date("Y-m-d").".csv";
 
-if (!$tfp = fopen($filepath, 'w+')) {
-  die("Tiedoston avaus ep‰onnistui: $filepath\n");
+if (!$tfp = fopen($tfilepath, 'w+')) {
+  die("Tiedoston avaus ep‰onnistui: $tfilepath\n");
 }
 
 // Otsikkotieto
@@ -171,6 +220,7 @@ $query = "SELECT
           AND tuote.ei_saldoa   = ''
           AND tuote.tuotetyyppi = ''
           AND tuote.ostoehdotus = ''
+          {$tuoterajaus}
           ORDER BY tuote.tuoteno";
 $res = pupe_query($query);
 
@@ -408,5 +458,25 @@ while ($row = mysql_fetch_assoc($res)) {
 
 fclose($fp);
 fclose($tfp);
+
+// Tehd‰‰n FTP-siirto
+if ($paiva_ajo and !empty($relex_ftphost)) {
+  // Tuotetiedot
+  $ftphost = $relex_ftphost;
+  $ftpuser = $relex_ftpuser;
+  $ftppass = $relex_ftppass;
+  $ftppath = "/data/input";
+  $ftpfile = $filepath;
+  require("inc/ftp-send.inc");
+
+
+  // Tuotteen toimittajatiedot
+  $ftphost = $relex_ftphost;
+  $ftpuser = $relex_ftpuser;
+  $ftppass = $relex_ftppass;
+  $ftppath = "/data/input";
+  $ftpfile = $tfilepath;
+  require("inc/ftp-send.inc");
+}
 
 echo "Valmis.\n";

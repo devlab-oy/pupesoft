@@ -17,6 +17,12 @@ if (!isset($argv[1]) or $argv[1] == '') {
   die("Yhtiˆ on annettava!!");
 }
 
+$paiva_ajo = FALSE;
+
+if (isset($argv[2]) and $argv[1] != '') {
+  $paiva_ajo = TRUE;
+}
+
 ini_set("memory_limit", "5G");
 
 // Otetaan includepath aina rootista
@@ -55,6 +61,13 @@ fwrite($fp, $header);
  SPECIAL_DELIVERY = Used to distinct normal deliveries from quick special deliveries
 */
 
+$tapahtumarajaus = "";
+
+// Otetaan mukaan vain viimeisen vuorokauden j‰lkeen tehdyt
+if ($paiva_ajo) {
+  $tapahtumarajaus = " AND tapahtuma.laadittu >= date_sub(now(), interval 24 HOUR) ";
+}
+
 // Haetaan tapahtumat
 $query = "SELECT
           yhtio.maa,
@@ -77,9 +90,9 @@ $query = "SELECT
           JOIN yhtio ON (tapahtuma.yhtio = yhtio.yhtio)
           LEFT JOIN tilausrivi USE INDEX (PRIMARY) ON (tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus)
           LEFT JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
-          WHERE tapahtuma.yhtio   = '$yhtio'
-          AND tapahtuma.laji     in ('tulo', 'laskutus', 'siirto', 'valmistus', 'kulutus','inventointi')
-          #AND tapahtuma.laadittu >= date_sub(now(), interval 1 year)
+          WHERE tapahtuma.yhtio  = '$yhtio'
+          AND tapahtuma.laji    in ('tulo', 'laskutus', 'siirto', 'valmistus', 'kulutus','inventointi')
+          {$tapahtumarajaus}
           ORDER BY tapahtuma.laadittu, tapahtuma.tuoteno";
 $res = pupe_query($query);
 
@@ -166,5 +179,15 @@ while ($row = mysql_fetch_assoc($res)) {
 }
 
 fclose($fp);
+
+// Tehd‰‰n FTP-siirto
+if ($paiva_ajo and !empty($relex_ftphost)) {
+  $ftphost = $relex_ftphost;
+  $ftpuser = $relex_ftpuser;
+  $ftppass = $relex_ftppass;
+  $ftppath = "/data/input";
+  $ftpfile = $filepath;
+  require("inc/ftp-send.inc");
+}
 
 echo "Valmis.\n";

@@ -17,6 +17,12 @@ if (!isset($argv[1]) or $argv[1] == '') {
   die("Yhtiˆ on annettava!!");
 }
 
+$paiva_ajo = FALSE;
+
+if (isset($argv[2]) and $argv[1] != '') {
+  $paiva_ajo = TRUE;
+}
+
 ini_set("memory_limit", "5G");
 
 // Otetaan includepath aina rootista
@@ -42,6 +48,13 @@ if (!$fp = fopen($filepath, 'w+')) {
 $header = "code;name;customer_group\n";
 fwrite($fp, $header);
 
+$asiakasrajaus = "";
+
+// Otetaan mukaan vain viimeisen vuorokauden j‰lkeen muuttuneet
+if ($paiva_ajo) {
+  $asiakasrajaus = " AND (asiakas.muutospvm >= date_sub(now(), interval 24 HOUR) or asiakas.luontiaika >= date_sub(now(), interval 24 HOUR))";
+}
+
 // Haetaan asiakkaat
 $query = "SELECT
           yhtio.maa,
@@ -52,6 +65,7 @@ $query = "SELECT
           JOIN yhtio ON (asiakas.yhtio = yhtio.yhtio)
           WHERE asiakas.yhtio = '$yhtio'
           AND asiakas.laji not in ('P','R')
+          {$asiakasrajaus}
           ORDER BY asiakas.tunnus";
 $res = pupe_query($query);
 
@@ -78,5 +92,15 @@ while ($row = mysql_fetch_assoc($res)) {
 }
 
 fclose($fp);
+
+// Tehd‰‰n FTP-siirto
+if ($paiva_ajo and !empty($relex_ftphost)) {
+  $ftphost = $relex_ftphost;
+  $ftpuser = $relex_ftpuser;
+  $ftppass = $relex_ftppass;
+  $ftppath = "/data/input";
+  $ftpfile = $filepath;
+  require("inc/ftp-send.inc");
+}
 
 echo "Valmis.\n";

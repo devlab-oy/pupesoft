@@ -17,6 +17,12 @@ if (!isset($argv[1]) or $argv[1] == '') {
   die("Yhtiˆ on annettava!!");
 }
 
+$paiva_ajo = FALSE;
+
+if (isset($argv[2]) and $argv[1] != '') {
+  $paiva_ajo = TRUE;
+}
+
 ini_set("memory_limit", "5G");
 
 // Otetaan includepath aina rootista
@@ -53,10 +59,17 @@ $header .= "old_clean_product_code;";
 $header .= "state\n";
 fwrite($fp, $header);
 
+$korvaavatrajaus = "";
+
+// Otetaan mukaan vain viimeisen vuorokauden j‰lkeen muuttuneet
+if ($paiva_ajo) {
+  $korvaavatrajaus = " AND korvaavat.luontiaika >= date_sub(now(), interval 24 HOUR) ";
+}
+
 // Haetaan ketjut
 $query = "SELECT DISTINCT yhtio.maa, korvaavat.id
           FROM tuote
-          JOIN korvaavat ON (tuote.yhtio = korvaavat.yhtio AND tuote.tuoteno = korvaavat.tuoteno)
+          JOIN korvaavat ON (tuote.yhtio = korvaavat.yhtio AND tuote.tuoteno = korvaavat.tuoteno {$korvaavatrajaus})
           JOIN yhtio ON (tuote.yhtio = yhtio.yhtio)
           WHERE tuote.yhtio     = '$yhtio'
           AND tuote.status     != 'P'
@@ -80,6 +93,7 @@ while ($row = mysql_fetch_assoc($res)) {
              JOIN tuote on (tuote.yhtio = korvaavat.yhtio and tuote.tuoteno = korvaavat.tuoteno)
              WHERE korvaavat.yhtio = '{$yhtio}'
              AND korvaavat.id      = '{$row['id']}'
+             {$korvaavatrajaus}
              ORDER BY if(korvaavat.jarjestys=0, 9999, korvaavat.jarjestys), korvaavat.tuoteno";
   $kresult = pupe_query($kquery);
 
@@ -109,5 +123,15 @@ while ($row = mysql_fetch_assoc($res)) {
 }
 
 fclose($fp);
+
+// Tehd‰‰n FTP-siirto
+if ($paiva_ajo and !empty($relex_ftphost)) {
+  $ftphost = $relex_ftphost;
+  $ftpuser = $relex_ftpuser;
+  $ftppass = $relex_ftppass;
+  $ftppath = "/data/input";
+  $ftpfile = $filepath;
+  require("inc/ftp-send.inc");
+}
 
 echo "Valmis.\n";

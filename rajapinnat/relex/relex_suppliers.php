@@ -17,6 +17,12 @@ if (!isset($argv[1]) or $argv[1] == '') {
   die("Yhtiˆ on annettava!!");
 }
 
+$paiva_ajo = FALSE;
+
+if (isset($argv[2]) and $argv[1] != '') {
+  $paiva_ajo = TRUE;
+}
+
 ini_set("memory_limit", "5G");
 
 // Otetaan includepath aina rootista
@@ -42,6 +48,13 @@ if (!$fp = fopen($filepath, 'w+')) {
 $header = "code;name;country\n";
 fwrite($fp, $header);
 
+$toimittajarajaus = "";
+
+// Otetaan mukaan vain viimeisen vuorokauden j‰lkeen muuttuneet
+if ($paiva_ajo) {
+  $toimittajarajaus = " AND (toimi.muutospvm >= date_sub(now(), interval 24 HOUR) or toimi.luontiaika >= date_sub(now(), interval 24 HOUR))";
+}
+
 // Haetaan toimittajat
 $query = "SELECT
           yhtio.maa,
@@ -54,6 +67,7 @@ $query = "SELECT
           AND toimi.oletus_vienti in ('C','F','I')
           AND toimi.toimittajanro not in ('0','')
           AND toimi.tyyppi = ''
+          {$toimittajarajaus}
           ORDER BY toimi.tunnus";
 $res = pupe_query($query);
 
@@ -81,5 +95,15 @@ while ($row = mysql_fetch_assoc($res)) {
 }
 
 fclose($fp);
+
+// Tehd‰‰n FTP-siirto
+if ($paiva_ajo and !empty($relex_ftphost)) {
+  $ftphost = $relex_ftphost;
+  $ftpuser = $relex_ftpuser;
+  $ftppass = $relex_ftppass;
+  $ftppath = "/data/input";
+  $ftpfile = $filepath;
+  require("inc/ftp-send.inc");
+}
 
 echo "Valmis.\n";

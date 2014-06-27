@@ -29,7 +29,9 @@
 * Käytä konstattien nimissä `SCREAMING_SNAKE_CASE`.
 * Kirjoita aina kaikki PHP [avainsanat](http://php.net/manual/en/reserved.keywords.php) pienillä kirjaimilla. Esim. `and`, `or`, `if`, `while`, jne..
 * Kirjoita PHP konstantit `true`, `false` ja `null` pienillä kirjaimilla.
-* Käytä välilyöntejä operaattorien, pilkkujen, kaksoispisteiden sekä puolipisteiden ympärillä.
+* Käytä välilyöntejä operaattorien sekä kaksoispisteiden ympärillä.
+* Käytä välilöyntiä pilkkujen jälkeen.
+* Käytä välilyöntiä kaikkien PHP [control structure](http://www.php.net/manual/en/language.control-structures.php) avainsanojen jälkeen. Esim. `if`, `while`, `for`, jne..
 * Käytä välilyöntiä ennen avaavaa aaltosulkua `{`.
 * Kirjoita koodiblockin avaava aaltosulku `{` samalle riville.
 * Kirjoita `else` sekä sulkeva aaltosulku `}` omalle riville.

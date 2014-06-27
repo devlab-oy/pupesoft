@@ -37,8 +37,10 @@ if (@include("inc/tecdoc.inc")) {
   $tecd = TRUE;
 }
 
+// Vastaavat tuotteet infraa
+require "vastaavat.class.php";
 
-// Tallennetaan rivit tiedostoon
+// Tallennetaan tuoterivit tiedostoon
 $filepath = "/tmp/product_update_{$yhtio}_".date("Y-m-d").".csv";
 
 if (!$fp = fopen($filepath, 'w+')) {
@@ -95,8 +97,33 @@ $header .= "alennus;";
 $header .= "valuutta;";
 $header .= "suppliers_unit;";
 $header .= "tuotekerroin;";
-$header .= "jarjestys\n";
+$header .= "jarjestys;";
+$header .= "vastaavat";
+$header .= "\n";
 fwrite($fp, $header);
+
+// Tallennetaan tuotteentoimittajarivit tiedostoon
+$filepath = "/tmp/product_suppliers_update_{$yhtio}_".date("Y-m-d").".csv";
+
+if (!$tfp = fopen($filepath, 'w+')) {
+  die("Tiedoston avaus epäonnistui: $filepath\n");
+}
+
+// Otsikkotieto
+$header  = "code;";
+$header .= "clean_code;";
+$header .= "supplier;";
+$header .= "suppliers_code;";
+$header .= "suppliers_name;";
+$header .= "ostoera;";
+$header .= "pakkauskoko;";
+$header .= "purchase_price;";
+$header .= "alennus;";
+$header .= "valuutta;";
+$header .= "suppliers_unit;";
+$header .= "tuotekerroin;";
+$header .= "jarjestys\n";
+fwrite($tfp, $header);
 
 // Haetaan tuotteet
 $query = "SELECT
@@ -218,9 +245,10 @@ while ($row = mysql_fetch_assoc($res)) {
     $rivi .= ";";
   }
 
-  // Tuotteen päätoimittaja
+  // haetaan kaikki tuotteen toimittajat ja valitaan sitten edullisin
   $ttq = "SELECT
           toimi.tunnus toimittaja,
+          toimi.ytunnus ytunnus,
           tuotteen_toimittajat.toim_tuoteno,
           tuotteen_toimittajat.toim_nimitys,
           if(tuotteen_toimittajat.osto_era = 0, 1, tuotteen_toimittajat.osto_era) osto_era,
@@ -239,29 +267,136 @@ while ($row = mysql_fetch_assoc($res)) {
             AND toimi.tyyppi = '')
           WHERE tuotteen_toimittajat.yhtio = '{$yhtio}'
           AND tuotteen_toimittajat.tuoteno = '{$row['tuoteno']}'
-          ORDER BY if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys)
-          LIMIT 1";
+          ORDER BY if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys)";
   $ttres = pupe_query($ttq);
-  $ttrow = mysql_fetch_assoc($ttres);
 
-  if ($ttrow['toimittaja'] > 0) {
-     $ttrow['toimittaja'] = $row['maa']."-".$ttrow['toimittaja'];
+  $toimittajat_a_hinta = array();
+  $toimittajat_a       = array(0 => array(
+    'toimittaja'                      => '',
+    'toim_tuoteno'                    => '',
+    'toim_nimitys'                    => '',
+    'osto_era'                        => '',
+    'pakkauskoko'                     => '',
+    'ostohinta_oletusvaluutta'        => '',
+    'alennukset_oletusvaluutta_netto' => '',
+    'valuutta'                        => '',
+    'toim_yksikko'                    => '',
+    'tuotekerroin'                    => '',
+    'jarjestys'                       => '')
+  );
+
+  if (mysql_num_rows($ttres) > 0) {
+
+    // Nollataan defaultit pois
+    $toimittajat_a = array();
+
+    while ($ttrow = mysql_fetch_assoc($ttres)) {
+
+      // Hetaan kaikki ostohinnat yhtiön oletusvaluutassa
+      $laskurow = array(
+        'liitostunnus'  => $ttrow['toimittaja'],
+        'valkoodi'      => $yhtiorow["valkoodi"],
+        'vienti_kurssi' => 1,
+        'ytunnus'       => $ttrow['ytunnus'],
+      );
+
+      // Haetaan ostohinta
+      list($ostohinta, $netto, $alennus, $valuutta) = alehinta_osto($laskurow, array("tuoteno" => $row['tuoteno']), 1, '', '', '');
+
+      $alennukset      = 1;
+      $ostohinta_netto = $ostohinta;
+
+      // Nolla tai pienempi on virhe, laitetaan ne vikaks
+      if ($ostohinta <= 0) {
+        $ostohinta = $ostohinta_netto = 9999999999.99;
+        $netto     = "N";
+      }
+
+      // Jos ei ole nettohinta, niin lasketaan alennukset
+      if (empty($netto)) {
+        $alennukset = generoi_alekentta_php($alennus, 'O', 'kerto', 'EI');
+
+        $ostohinta_netto = $ostohinta_netto * $alennukset;
+      }
+
+      $ostohinta_netto = round($ostohinta_netto, 6);
+      $alennukset = round((1 - $alennukset) * 100, 2);
+
+      $ttrow['ostohinta_oletusvaluutta']        = $ostohinta;
+      $ttrow['ostohinta_oletusvaluutta_netto']  = $ostohinta_netto;
+      $ttrow['alennukset_oletusvaluutta_netto'] = $alennukset;
+
+      $toimittajat_a_hinta[] = $ostohinta_netto;
+      $toimittajat_a[]       = $ttrow;
+
+      // Tuotteen toimittajatiedot omaan failiin
+      $trivi  = $row['maa']."-".pupesoft_csvstring($row['tuoteno']).";";
+      $trivi .= pupesoft_csvstring($row['tuoteno']).";";
+      $trivi .= "{$row['maa']}-{$ttrow['toimittaja']};";
+      $trivi .= pupesoft_csvstring($ttrow['toim_tuoteno']).";";
+      $trivi .= pupesoft_csvstring($ttrow['toim_nimitys']).";";
+      $trivi .= "{$ttrow['osto_era']};";
+      $trivi .= "{$ttrow['pakkauskoko']};";
+      $trivi .= "{$ttrow['ostohinta_oletusvaluutta']};";
+      $trivi .= "{$ttrow['alennukset_oletusvaluutta_netto']};";
+      $trivi .= "{$yhtiorow["valkoodi"]};";
+      $trivi .= "{$ttrow['toim_yksikko']};";
+      $trivi .= "{$ttrow['tuotekerroin']};";
+      $trivi .= "{$ttrow['jarjestys']}";
+      $trivi .= "\n";
+
+      fwrite($tfp, $trivi);
+    }
+
+    // Valitaan edullisin toimittaja
+    array_multisort($toimittajat_a_hinta, SORT_ASC, $toimittajat_a);
   }
 
-  // Tuotteen päätoimittajan tiedot
-  $rivi .= "{$ttrow['toimittaja']};";
-  $rivi .= pupesoft_csvstring($ttrow['toim_tuoteno']).";";
-  $rivi .= pupesoft_csvstring($ttrow['toim_nimitys']).";";
-  $rivi .= "{$ttrow['osto_era']};";
-  $rivi .= "{$ttrow['pakkauskoko']};";
-  $rivi .= "{$ttrow['ostohinta']};";
-  $rivi .= "{$ttrow['alennus']};";
-  $rivi .= "{$ttrow['valuutta']};";
-  $rivi .= "{$ttrow['toim_yksikko']};";
-  $rivi .= "{$ttrow['tuotekerroin']};";
-  $rivi .= "{$ttrow['jarjestys']};";
-  $rivi .= "\n";
+  $parastoimittaja = $toimittajat_a[0];
 
+  if ($parastoimittaja['toimittaja'] > 0) {
+     $parastoimittaja['toimittaja'] = $row['maa']."-".$parastoimittaja['toimittaja'];
+  }
+
+  // Tuotteen toimittajan tiedot
+  $rivi .= "{$parastoimittaja['toimittaja']};";
+  $rivi .= pupesoft_csvstring($parastoimittaja['toim_tuoteno']).";";
+  $rivi .= pupesoft_csvstring($parastoimittaja['toim_nimitys']).";";
+  $rivi .= "{$parastoimittaja['osto_era']};";
+  $rivi .= "{$parastoimittaja['pakkauskoko']};";
+  $rivi .= "{$parastoimittaja['ostohinta_oletusvaluutta']};";
+  $rivi .= "{$parastoimittaja['alennukset_oletusvaluutta_netto']};";
+  $rivi .= "{$parastoimittaja['valuutta']};";
+  $rivi .= "{$parastoimittaja['toim_yksikko']};";
+  $rivi .= "{$parastoimittaja['tuotekerroin']};";
+  $rivi .= "{$parastoimittaja['jarjestys']};";
+
+  // Vastaavat tuotteet
+  $vastaavat = new Vastaavat($row['tuoteno']);
+
+  $vastaavat_t = "";
+
+  // Jos tuote kuulu useampaan kuin yhteen vastaavuusketjuun
+  if ($vastaavat->onkovastaavia()) {
+
+    // Ketjujen id:t
+    foreach (explode(",", $vastaavat->getIDt()) as $ketju) {
+
+      // Haetaan tuotteet ketjukohtaisesti
+      $_tuotteet = $vastaavat->tuotteet($ketju);
+
+      // Lisätään löydetyt vastaavat mahdollisten myytävien joukkoon
+      foreach ($_tuotteet as $_tuote) {
+        $vastaavat_t .= pupesoft_csvstring($_tuote["tuoteno"]).":";
+      }
+    }
+
+    // Vika : pois
+    $vastaavat_t = substr($vastaavat_t, 0, -1);
+  }
+
+  $rivi .= $vastaavat_t;
+  $rivi .= "\n";
   fwrite($fp, $rivi);
 
   $k_rivi++;
@@ -272,5 +407,6 @@ while ($row = mysql_fetch_assoc($res)) {
 }
 
 fclose($fp);
+fclose($tfp);
 
 echo "Valmis.\n";

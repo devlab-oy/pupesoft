@@ -41,7 +41,9 @@ if (!$fp = fopen($filepath, 'w+')) {
 $header  = "asiakasid;";
 $header .= "asiakasnumero;";
 $header .= "nimi;";
-$header .= "ryhmä";
+$header .= "ryhmä;";
+$header .= "kustannuspaikka;";
+$header .= "toimipaikka";
 $header .= "\n";
 fwrite($fp, $header);
 
@@ -50,10 +52,14 @@ $query = "SELECT
           asiakas.tunnus,
           asiakas.asiakasnro,
           concat_ws(' ', asiakas.nimi, asiakas.nimitark) nimi,
-          asiakas.ryhma
+          asiakas.ryhma,
+          kustannuspaikka.nimi kustannuspaikka,
+          asiakas.toimipaikka
           FROM asiakas
+          LEFT JOIN kustannuspaikka ON (kustannuspaikka.yhtio = asiakas.yhtio AND kustannuspaikka.tunnus = asiakas.kustannuspaikka)
           WHERE asiakas.yhtio = '$yhtio'
           AND asiakas.laji not in ('P','R')
+          AND asiakas.myynninseuranta = ''
           ORDER BY asiakas.tunnus";
 $res = pupe_query($query);
 
@@ -66,11 +72,12 @@ $k_rivi = 0;
 
 while ($row = mysql_fetch_assoc($res)) {
   $rivi  = "{$row['tunnus']};";
-  $rivi  = "{$row['asiakasnro']};";
+  $rivi .= "{$row['asiakasnro']};";
   $rivi .= pupesoft_csvstring($row['nimi']).";";
-  $rivi .= pupesoft_csvstring($row['ryhma']);
+  $rivi .= "{$row['ryhma']};";
+  $rivi .= pupesoft_csvstring($row['kustannuspaikka']).";";
+  $rivi .= "{$row['toimipaikka']}";
   $rivi .= "\n";
-
   fwrite($fp, $rivi);
 
   $k_rivi++;

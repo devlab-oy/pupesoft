@@ -38,51 +38,36 @@ if (!$fp = fopen($filepath, 'w+')) {
 }
 
 // Otsikkotieto
-// Otsikkotieto
-$header  = "tuoteno;";
-$header .= "nimitys;";
-$header .= "tuoteosasto;";
-$header .= "tuoteryhm‰;";
-$header .= "tuotemerkki;";
-$header .= "malli;";
-$header .= "mallitarkenne;";
-$header .= "kuvaus;";
-$header .= "lyhytkuvaus;";
-$header .= "mainosteksti;";
-$header .= "aleryhm‰;";
-$header .= "purkukommentti;";
-$header .= "keskihankintahinta;";
-$header .= "viimeisin_hankintahinta;";
-$header .= "viimeisin_hankintapaiva;";
-$header .= "yksikko;";
-$header .= "tuotetyyppi;";
-$header .= "hinnastoon;";
-$header .= "sarjanumeroseuranta;";
-$header .= "status;";
-$header .= "luontiaika;";
-$header .= "epakuranttipvm;";
+
+$header  = "laskunro;";
+$header .= "asiakasid;";
+$header .= "laskutuspvm;";
+$header .= "toimituspvm;";
+$header .= "tuoteno;";
+$header .= "m‰‰r‰;";
+$header .= "rivihinta;";
+$header .= "rivikate";
 $header .= "\n";
 fwrite($fp, $header);
 
 // Haetaan tapahtumat
 $query = "SELECT
+          lasku.laskunro,
+          lasku.liitostunnus,
           tilausrivi.laskutettuaika,
-          tilausrivi.toimitettuaika,
+          left(tilausrivi.toimitettuaika,10) toimitettuaika,
           tilausrivi.tuoteno,
           tilausrivi.kpl,
           tilausrivi.rivihinta,
-          tilausrivi.kate,
-
-          lasku.valkoodi,
-          lasku.maa,
-          lasku.yhtio_toimipaikka,
-
+          tilausrivi.kate
           FROM tilausrivi
+          JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.myynninseuranta = '')
           JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
+          JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.myynninseuranta = '')
           WHERE tilausrivi.yhtio = '$yhtio'
           AND tilausrivi.tyyppi  = 'L'
-          AND tilausrivi.laskutettuaika >= ''
-          ORDER BY tapahtuma.laadittu, tapahtuma.tuoteno";
+          AND tilausrivi.laskutettuaika >= '2012-01-01'
+          ORDER BY lasku.laskunro, tilausrivi.tuoteno";
 $res = pupe_query($query);
 
 // Kerrotaan montako rivi‰ k‰sitell‰‰n
@@ -94,20 +79,14 @@ $k_rivi = 0;
 
 while ($row = mysql_fetch_assoc($res)) {
 
-  // Rivin arvo
-  $arvo = round($row['kplhinta']*$row['kpl'], 2);
-
-  $rivi  = "{$row['pvm']};";
-  $rivi .= "{$row['varasto']};";
+  $rivi  = "{$row['laskunro']};";
+  $rivi .= "{$row['liitostunnus']};";
+  $rivi .= "{$row['laskutettuaika']};";
+  $rivi .= "{$row['toimitettuaika']};";
   $rivi .= pupesoft_csvstring($row['tuoteno']).";";
-  $rivi .= "{$type};";
   $rivi .= "{$row['kpl']};";
-  $rivi .= "{$arvo};";
-  $rivi .= ";";
-  $rivi .= ";";
-  $rivi .= ";";
-  $rivi .= ";";
-  $rivi .= "{$row['liitostunnus']}";
+  $rivi .= "{$row['rivihinta']};";
+  $rivi .= "{$row['kate']}";
   $rivi .= "\n";
 
   fwrite($fp, $rivi);

@@ -11474,6 +11474,13 @@ if (!function_exists("progress_bar")) {
   }
 }
 
+if (!function_exists("pupesoft_csvstring")) {
+  function pupesoft_csvstring($string) {
+    // Siivotaan veks kaikki non-printablet ja puolipisteet
+    return preg_replace("/([^[:print:]]|;)/", "X", $string);
+  }
+}
+
 if (!function_exists("pupesoft_cleanstring")) {
   function pupesoft_cleanstring($string, array $exclude = array()) {
 

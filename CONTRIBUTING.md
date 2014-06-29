@@ -127,7 +127,7 @@ $value = preg_replace("/[^a-z0-9]/i", "", $string);
 
 ```sql
 SELECT lasku.laskunro,
-CONCAT(asiakas.maa, asiakas.ryhma) as maaryhma,
+CONCAT(asiakas.maa, asiakas.ryhma) AS maaryhma,
 COUNT(*) kpl
 FROM lasku
 INNER JOIN asiakas ON (asiakas.id = lasku.asiakas_id

@@ -116,3 +116,26 @@ function do_stuff($params) {
 // rajapinta hajoaa isoista kirjaimista sekä erikoismerkeistä.
 $value = preg_replace("/[^a-z0-9]/i", "", $string);
 ```
+
+* Kirjoita SQL lausekkeiden avainsanat isoilla kirjaimilla.
+* Kirjoita SQL lausekkeissa yksi avainsana/ehto per rivi.
+* Sisennä joinien ehdot kahdella välilyönnillä.
+* Avaavat ja sulkevat kaarisulut samalle riville.
+* Käytä välilyöntejä operaattorien ympärillä.
+* Käytä välilyöntiä pilkun jälkeen.
+* Älä käytä välilöyntejä funktion ja avaavan kaarisulun välissä.
+
+```sql
+SELECT lasku.laskunro,
+CONCAT(asiakas.maa, asiakas.ryhma) as maaryhma,
+COUNT(*) kpl
+FROM lasku
+INNER JOIN asiakas ON (asiakas.id = lasku.asiakas_id
+  AND asiakas.nimi LIKE '%abc%'
+  AND asiakas.ryhma > 10)
+WHERE lasku.tunnus = 123
+AND lasku.tila = 'A'
+GROUP BY lasku.laskunro,
+maaryhma
+ORDER BY kpl
+```

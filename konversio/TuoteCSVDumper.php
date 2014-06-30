@@ -10,17 +10,17 @@ class TuoteCSVDumper extends CSVDumper {
     parent::__construct($kukarow);
 
     $konversio_array = array(
-      'tuoteno'     => 'KOODI',
-      'nimitys'     => 'NIMI',
-      'try'       => 'LUOKKA',
-      'aleryhma'     => 'LUOKKA',
-      'myyntihinta'   => 'HINTA',
-      'tuotetyyppi'   => 'RYHMA',
-      'ei_saldoa'     => 'RYHMA',
+        'tuoteno'     => 'KOODI',
+        'nimitys'     => 'NIMI',
+        'try'         => 'LUOKKA',
+        'aleryhma'    => 'LUOKKA',
+        'myyntihinta' => 'HINTA',
+        'tuotetyyppi' => 'RYHMA',
+        'ei_saldoa'   => 'RYHMA',
     );
     $required_fields = array(
-      'tuoteno',
-      'nimitys',
+        'tuoteno',
+        'nimitys',
     );
 
     $this->setFilepath("/tmp/konversio/VARAOSA.csv");
@@ -117,5 +117,4 @@ class TuoteCSVDumper extends CSVDumper {
   protected function tarkistukset() {
     echo "Ei tarkistuksia";
   }
-
 }

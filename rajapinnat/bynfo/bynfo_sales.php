@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Siirret‰‰n myynnit Relexiin
+ * Siirret‰‰n myynnit Bynfoon
 */
 
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
@@ -19,7 +19,7 @@ if (!isset($argv[1]) or $argv[1] == '') {
 ini_set("memory_limit", "5G");
 
 // Otetaan includepath aina rootista
-ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(dirname(__FILE__))).PATH_SEPARATOR."/usr/share/pear");
+ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(dirname(__FILE__))));
 
 require 'inc/connect.inc';
 require 'inc/functions.inc';
@@ -48,26 +48,32 @@ $header .= "m‰‰r‰;";
 $header .= "rivihinta;";
 $header .= "rivikate";
 $header .= "\n";
+
 fwrite($fp, $header);
 
 // Haetaan tapahtumat
-$query = "SELECT
-          lasku.laskunro,
+$query = "SELECT lasku.laskunro,
           lasku.liitostunnus,
           tilausrivi.laskutettuaika,
-          left(tilausrivi.toimitettuaika,10) toimitettuaika,
+          left(tilausrivi.toimitettuaika, 10) toimitettuaika,
           tilausrivi.tuoteno,
           tilausrivi.kpl,
           tilausrivi.rivihinta,
           tilausrivi.kate
           FROM tilausrivi
-          JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.myynninseuranta = '')
-          JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
-          JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.myynninseuranta = '')
-          WHERE tilausrivi.yhtio = '$yhtio'
-          AND tilausrivi.tyyppi  = 'L'
+          INNER JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
+            AND tuote.tuoteno = tilausrivi.tuoteno
+            AND tuote.myynninseuranta = '')
+          INNER JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio
+            AND lasku.tunnus = tilausrivi.otunnus)
+          INNER JOIN asiakas USE INDEX (PRIMARY) ON (asiakas.yhtio = lasku.yhtio
+            AND asiakas.tunnus = lasku.liitostunnus
+            AND asiakas.myynninseuranta = '')
+          WHERE tilausrivi.yhtio = '{$yhtio}'
+          AND tilausrivi.tyyppi = 'L'
           AND tilausrivi.laskutettuaika >= '2012-01-01'
-          ORDER BY lasku.laskunro, tilausrivi.tuoteno";
+          ORDER BY lasku.laskunro,
+          tilausrivi.tuoteno";
 $res = pupe_query($query);
 
 // Kerrotaan montako rivi‰ k‰sitell‰‰n

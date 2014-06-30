@@ -19,7 +19,7 @@ if (!isset($argv[1]) or $argv[1] == '') {
 ini_set("memory_limit", "5G");
 
 // Otetaan includepath aina rootista
-ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(dirname(__FILE__))).PATH_SEPARATOR."/usr/share/pear");
+ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(dirname(__FILE__))));
 
 require 'inc/connect.inc';
 require 'inc/functions.inc';
@@ -45,20 +45,21 @@ $header .= "ryhmä;";
 $header .= "kustannuspaikka;";
 $header .= "toimipaikka";
 $header .= "\n";
+
 fwrite($fp, $header);
 
 // Haetaan asiakkaat
-$query = "SELECT
-          asiakas.tunnus,
+$query = "SELECT asiakas.tunnus,
           asiakas.asiakasnro,
           concat_ws(' ', asiakas.nimi, asiakas.nimitark) nimi,
           asiakas.ryhma,
           kustannuspaikka.nimi kustannuspaikka,
           asiakas.toimipaikka
           FROM asiakas
-          LEFT JOIN kustannuspaikka ON (kustannuspaikka.yhtio = asiakas.yhtio AND kustannuspaikka.tunnus = asiakas.kustannuspaikka)
-          WHERE asiakas.yhtio = '$yhtio'
-          AND asiakas.laji not in ('P','R')
+          LEFT JOIN kustannuspaikka ON (kustannuspaikka.yhtio = asiakas.yhtio
+            AND kustannuspaikka.tunnus = asiakas.kustannuspaikka)
+          WHERE asiakas.yhtio = '{$yhtio}'
+          AND asiakas.laji NOT IN ('P','R')
           AND asiakas.myynninseuranta = ''
           ORDER BY asiakas.tunnus";
 $res = pupe_query($query);
@@ -78,6 +79,7 @@ while ($row = mysql_fetch_assoc($res)) {
   $rivi .= pupesoft_csvstring($row['kustannuspaikka']).";";
   $rivi .= "{$row['toimipaikka']}";
   $rivi .= "\n";
+
   fwrite($fp, $rivi);
 
   $k_rivi++;

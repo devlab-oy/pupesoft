@@ -19,7 +19,7 @@ if (!isset($argv[1]) or $argv[1] == '') {
 ini_set("memory_limit", "5G");
 
 // Otetaan includepath aina rootista
-ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(dirname(__FILE__))).PATH_SEPARATOR."/usr/share/pear");
+ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(dirname(__FILE__))));
 
 require 'inc/connect.inc';
 require 'inc/functions.inc';
@@ -61,11 +61,11 @@ $header .= "status;";
 $header .= "luontiaika;";
 $header .= "epakuranttipvm;";
 $header .= "\n";
+
 fwrite($fp, $header);
 
 // Haetaan tuotteet
-$query = "SELECT
-          tuote.tuoteno,
+$query = "SELECT tuote.tuoteno,
           tuote.nimitys,
           tuote.osasto,
           tuote.try,
@@ -91,9 +91,9 @@ $query = "SELECT
           tuote.tuotepaallikko,
           tuote.tunnus
           FROM tuote
-          WHERE tuote.yhtio         = '$yhtio'
-          AND tuote.status         != 'P'
-          AND tuote.ei_saldoa       = ''
+          WHERE tuote.yhtio = '{$yhtio}'
+          AND tuote.status != 'P'
+          AND tuote.ei_saldoa = ''
           AND tuote.myynninseuranta = ''
           ORDER BY tuote.tuoteno";
 $res = pupe_query($query);
@@ -131,6 +131,7 @@ while ($row = mysql_fetch_assoc($res)) {
   $rivi .= "{$row['luontiaika']};";
   $rivi .= "{$row['epakurantti25pvm']}";
   $rivi .= "\n";
+
   fwrite($fp, $rivi);
 
   $k_rivi++;

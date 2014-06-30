@@ -58,6 +58,7 @@ function hae_laitteelle_mahdolliset_huoltosyklit($laite_tyyppi = '', $laite_koko
 function hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy() {
   global $kukarow;
 
+  //@TODO poista AND asiakas.nimi LIKE '%Testi%')
   $query = "SELECT laite.tuoteno,
             huoltosyklit_laitteet.viimeinen_tapahtuma,
             laite.tunnus AS laite_tunnus,
@@ -402,11 +403,6 @@ function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_
   }
   else {
     aseta_tyomaarayksen_toimitusajankohta($tyomaarays_tunnus, $toimitusaika);
-  }
-
-  if ($debug and !empty($tyomaarays_tunnus)) {
-    echo "Tyom‰‰r‰ys ".$tyomaarays_tunnus." luotu";
-    echo "<br/>";
   }
 
   if (empty($tyomaarays_tunnus)) {

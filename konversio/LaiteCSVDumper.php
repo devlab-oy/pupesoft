@@ -10,23 +10,23 @@ class LaiteCSVDumper extends CSVDumper {
     parent::__construct($kukarow);
 
     $konversio_array = array(
-      'tuoteno'     => 'MALLI',
-      'nimitys'     => 'NIMI',
-      'tyyppi'     => 'TYYPPI',
-      'koko'       => 'PAINO',
-      'sarjanro'     => 'MITAT',
-      'valm_pvm'     => 'DATA10',
-      'oma_numero'   => 'DATA20',
-      'paikka'     => 'LISASIJAINTI',
-      'sijainti'     => 'LISASIJAINTI',
-      'koodi'       => 'KOODI',
-      'kohde'       => 'SIJAINTI', //jos paikalla ei ole nimeä, muodostetaan nimi SIJAINTI - TASO3, nämä pitää unsettaa ennen dumppia
-      'paikka_tark'   => 'TASO3', //jos paikalla ei ole nimeä, muodostetaan nimi SIJAINTI - TASO3, nämä pitää unsettaa ennen dumppia
-      'asiakas_nimi'   => 'KUSTPAIKKA', //koska paikan ja kohteen nimien yhdistelmä ei ole uniikki pitää aineistosta lukea myös asiakkaan nimi, jonka avulla laite saadaa lisättyä paikkaan. nämä pitää unsettaa ennen dumppia
+        'tuoteno'      => 'MALLI',
+        'nimitys'      => 'NIMI',
+        'tyyppi'       => 'TYYPPI',
+        'koko'         => 'PAINO',
+        'sarjanro'     => 'MITAT',
+        'valm_pvm'     => 'DATA10',
+        'oma_numero'   => 'DATA20',
+        'paikka'       => 'LISASIJAINTI',
+        'sijainti'     => 'LISASIJAINTI',
+        'koodi'        => 'KOODI',
+        'kohde'        => 'SIJAINTI', //jos paikalla ei ole nimeä, muodostetaan nimi SIJAINTI - TASO3, nämä pitää unsettaa ennen dumppia
+        'paikka_tark'  => 'TASO3', //jos paikalla ei ole nimeä, muodostetaan nimi SIJAINTI - TASO3, nämä pitää unsettaa ennen dumppia
+        'asiakas_nimi' => 'KUSTPAIKKA', //koska paikan ja kohteen nimien yhdistelmä ei ole uniikki pitää aineistosta lukea myös asiakkaan nimi, jonka avulla laite saadaa lisättyä paikkaan. nämä pitää unsettaa ennen dumppia
     );
     $required_fields = array(
-      'tuoteno',
-      'paikka',
+        'tuoteno',
+        'paikka',
     );
 
     $this->setFilepath("/tmp/konversio/LAITE.csv");
@@ -76,7 +76,7 @@ class LaiteCSVDumper extends CSVDumper {
 
           $rivi_temp[$konvertoitu_header] = $tuoteno;
         }
-        else if ($konvertoitu_header == 'valm_pvm')  {
+        else if ($konvertoitu_header == 'valm_pvm') {
           $rivi_temp[$konvertoitu_header] = "{$rivi[$csv_header]}-01-01";
         }
         else {
@@ -312,32 +312,31 @@ class LaiteCSVDumper extends CSVDumper {
     $kpl = count($paikat) - count($laitteiden_paikat);
 
     echo "{$kpl} paikkaa ilman laitetta!!!!";
-    
+
     /*
-     * 
-//Kuinka monta laitetta per asiakkaan kohde
-SELECT asiakas.tunnus,
-       asiakas.nimi,
-       kohde.tunnus,
-       kohde.nimi,
-       Count(*) AS laite_kpl
-FROM   laite
-       JOIN paikka
-         ON ( paikka.yhtio = laite.yhtio
-              AND paikka.tunnus = laite.paikka )
-       JOIN kohde
-         ON ( kohde.yhtio = paikka.yhtio
-              AND kohde.tunnus = paikka.kohde )
-       JOIN asiakas
-         ON ( asiakas.yhtio = kohde.yhtio
-              AND asiakas.tunnus = kohde.asiakas )
-WHERE  laite.yhtio = '{$this->kukarow['yhtio']}'
-GROUP  BY 1,
-          2,
-          3,
-          4
-ORDER  BY laite_kpl DESC;
+     *
+      //Kuinka monta laitetta per asiakkaan kohde
+      SELECT asiakas.tunnus,
+      asiakas.nimi,
+      kohde.tunnus,
+      kohde.nimi,
+      Count(*) AS laite_kpl
+      FROM   laite
+      JOIN paikka
+      ON ( paikka.yhtio = laite.yhtio
+      AND paikka.tunnus = laite.paikka )
+      JOIN kohde
+      ON ( kohde.yhtio = paikka.yhtio
+      AND kohde.tunnus = paikka.kohde )
+      JOIN asiakas
+      ON ( asiakas.yhtio = kohde.yhtio
+      AND asiakas.tunnus = kohde.asiakas )
+      WHERE  laite.yhtio = '{$this->kukarow['yhtio']}'
+      GROUP  BY 1,
+      2,
+      3,
+      4
+      ORDER  BY laite_kpl DESC;
      */
   }
-
 }

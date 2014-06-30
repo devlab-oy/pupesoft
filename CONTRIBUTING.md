@@ -30,7 +30,7 @@
 * Käytä konstattien nimissä `SCREAMING_SNAKE_CASE`.
 * Kirjoita PHP [avainsanat](http://php.net/manual/en/reserved.keywords.php) pienillä kirjaimilla. Esim. `and`, `or`, `if`, `while`, jne..
 * Kirjoita PHP konstantit `true`, `false` ja `null` pienillä kirjaimilla.
-* Käytä välilyöntejä operaattorien sekä kaksoispisteiden ympärillä.
+* Käytä välilyöntejä operaattorien, pisteiden sekä kaksoispisteiden ympärillä.
 * Käytä välilöyntiä pilkkujen jälkeen.
 * Käytä välilyöntiä PHP [kontrolli](http://www.php.net/manual/en/language.control-structures.php) avainsanojen jälkeen. Esim. `if`, `while`, `for`, `return`, jne..
 * Käytä välilyöntiä ennen avaavaa aaltosulkua `{`.
@@ -121,16 +121,19 @@ $value = preg_replace("/[^a-z0-9]/i", "", $string);
 * Kirjoita SQL lausekkeiden [avainsanat](http://dev.mysql.com/doc/mysql/en/sql-syntax.html) isoilla kirjaimilla.
 * Kirjoita SQL [funktiot](http://dev.mysql.com/doc/mysql/en/functions.html) pienillä kirjaimilla.
 * Kirjoita SQL kyselyissä yksi avainsana/ehto/arvo per rivi.
+* Kirjoita SELECT -lausekkeissa aluksi groupattavat kentät, sen jälkeen group funktiot.
+* Käytä AS -avainsanaa jos haluat antaa kentälle/tietokantataululle aliaksen.
 * Sisennä joinien ehdot kahdella välilyönnillä.
-* Avaavat ja sulkevat kaarisulut samalle riville.
+* Joineissa avaavat ja sulkevat kaarisulut samalle riville.
 * Käytä välilyöntejä operaattorien ympärillä.
 * Käytä välilyöntiä pilkun jälkeen.
-* Älä käytä välilöyntejä funktion ja avaavan kaarisulun välissä.
+* Älä käytä välilyöntiä funktion ja avaavan kaarisulun välissä.
+* Älä käytä välilyöntiä avaavan kaarisulun jälkeen `(` eikä ennen sulkevaa kaarisulkua `)`.
 
 ```sql
 SELECT lasku.laskunro,
 concat(asiakas.maa, asiakas.ryhma) AS maaryhma,
-count(*) kpl
+count(*) AS kpl
 FROM lasku
 INNER JOIN asiakas ON (asiakas.id = lasku.asiakas_id
   AND asiakas.nimi LIKE '%abc%'

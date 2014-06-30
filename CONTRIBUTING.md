@@ -95,6 +95,16 @@ $email_with_name = $name . " <" . $email . ">";
 
 // good
 $email_with_name = "${name} <${email}>";
+
+// bad
+$output = "date is ".date("Ymd");
+
+// bad(ish)
+$output = "date is " . date("Ymd");
+
+// good
+$_today = date("Ymd");
+$output = "date is {$_today}";
 ```
 
 * Käytä tyhjiä rivejä erottelemaan koodi loogisiin kappaleisiin.

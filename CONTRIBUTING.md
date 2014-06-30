@@ -117,8 +117,9 @@ function do_stuff($params) {
 $value = preg_replace("/[^a-z0-9]/i", "", $string);
 ```
 
-* Kirjoita SQL lausekkeiden avainsanat isoilla kirjaimilla.
-* Kirjoita SQL lausekkeissa yksi avainsana/ehto per rivi.
+* Kirjoita SQL lausekkeiden [avainsanat](http://dev.mysql.com/doc/mysql/en/sql-syntax.html) isoilla kirjaimilla.
+* Kirjoita SQL [funktiot](http://dev.mysql.com/doc/mysql/en/functions.html) pienillä kirjaimilla.
+* Kirjoita SQL kyselyissä yksi avainsana/ehto/arvo per rivi.
 * Sisennä joinien ehdot kahdella välilyönnillä.
 * Avaavat ja sulkevat kaarisulut samalle riville.
 * Käytä välilyöntejä operaattorien ympärillä.
@@ -127,8 +128,8 @@ $value = preg_replace("/[^a-z0-9]/i", "", $string);
 
 ```sql
 SELECT lasku.laskunro,
-CONCAT(asiakas.maa, asiakas.ryhma) AS maaryhma,
-COUNT(*) kpl
+concat(asiakas.maa, asiakas.ryhma) AS maaryhma,
+count(*) kpl
 FROM lasku
 INNER JOIN asiakas ON (asiakas.id = lasku.asiakas_id
   AND asiakas.nimi LIKE '%abc%'

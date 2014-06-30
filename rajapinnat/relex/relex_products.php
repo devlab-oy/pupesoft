@@ -57,8 +57,8 @@ $tuoterajaus = "";
 
 // Päiväajoon otetaan mukaan vain viimeisen vuorokauden aikana muuttuneet
 if ($paiva_ajo) {
-  $paivitetyt_tuotteet = "";
-  $namaonjotsekattu    = "";
+  $tuotelista = "null";
+  $namaonjotsekattu = "";
 
   $query = "SELECT group_concat(concat('\'',tuote.tuoteno,'\'')) tuotteet
             FROM tuote
@@ -67,33 +67,30 @@ if ($paiva_ajo) {
             AND tuote.ei_saldoa   = ''
             AND tuote.tuotetyyppi = ''
             AND tuote.ostoehdotus = ''
-            AND (tuote.muutospvm  >= date_sub(now(), interval 24 HOUR) or tuote.luontiaika >= date_sub(now(), interval 24 HOUR))";
+            AND (tuote.muutospvm  >= date_sub(now(), interval 24 HOUR)
+              OR tuote.luontiaika >= date_sub(now(), interval 24 HOUR))";
   $res = pupe_query($query);
   $row = mysql_fetch_assoc($res);
 
   if ($row["tuotteet"] != "") {
-    $paivitetyt_tuotteet = $row["tuotteet"];
-    $namaonjotsekattu    = " AND tuotteen_toimittajat.tuoteno NOT IN ($paivitetyt_tuotteet) ";
+    $namaonjotsekattu = "AND tuotteen_toimittajat.tuoteno NOT IN ({$row["tuotteet"]})";
+    $tuotelista .= ", {$row["tuotteet"]}";
   }
 
   $query = "SELECT group_concat(concat('\'',tuotteen_toimittajat.tuoteno,'\'')) tuotteet
             FROM tuotteen_toimittajat
             WHERE tuotteen_toimittajat.yhtio = '{$yhtio}'
-            AND (tuotteen_toimittajat.muutospvm  >= date_sub(now(), interval 24 HOUR) or tuotteen_toimittajat.luontiaika >= date_sub(now(), interval 24 HOUR))
+            AND (tuotteen_toimittajat.muutospvm  >= date_sub(now(), interval 24 HOUR)
+              OR tuotteen_toimittajat.luontiaika >= date_sub(now(), interval 24 HOUR))
             {$namaonjotsekattu}";
   $res = pupe_query($query);
   $row = mysql_fetch_assoc($res);
 
   if ($row["tuotteet"] != "") {
-    if ($paivitetyt_tuotteet != "") {
-      $paivitetyt_tuotteet = "$paivitetyt_tuotteet,{$row["tuotteet"]}";
-    }
-    else {
-      $paivitetyt_tuotteet = $row["tuotteet"];
-    }
+    $tuotelista .= ", {$row["tuotteet"]}";
   }
 
-  $tuoterajaus = " AND tuote.tuoteno IN ($paivitetyt_tuotteet) ";
+  $tuoterajaus = " AND tuote.tuoteno IN ({$tuotelista}) ";
 }
 
 // Otsikkotieto
@@ -468,7 +465,6 @@ if ($paiva_ajo and !empty($relex_ftphost)) {
   $ftppath = "/data/input";
   $ftpfile = $filepath;
   require("inc/ftp-send.inc");
-
 
   // Tuotteen toimittajatiedot
   $ftphost = $relex_ftphost;

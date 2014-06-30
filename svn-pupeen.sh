@@ -104,6 +104,13 @@ if [ "$jatketaanko" = "k" ]; then
 
   git remote prune origin # poistetaan ylimääriset branchit
 
+  NRFILE="/home/devlab/newrelic_trigger"
+
+  # Onko triggeri käytössä?
+  if [[ -x "$NRFILE" ]]; then
+    eval $NRFILE
+  fi
+
   echo "${green}Pupesoft päivitetty!${normal}"
 else
   echo "${red}Pupesoftia ei päivitetty!${normal}"

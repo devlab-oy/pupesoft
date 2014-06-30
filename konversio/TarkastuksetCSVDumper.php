@@ -93,9 +93,6 @@ class TarkastuksetCSVDumper extends CSVDumper {
             $rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
           }
         }
-        else if ($konvertoitu_header == 'hinta') {
-          $rivi_temp[$konvertoitu_header] = str_replace(',', '.', $rivi[$csv_header]);
-        }
         else {
           $rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
         }

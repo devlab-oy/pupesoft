@@ -25,6 +25,7 @@
 * Pidä rivipituus alle 100 merkkiä.
 * Varmista, että rivin lopussa ei ole välilyöntejä.
 * Varmista, että tiedoston lopussa on yksi tyhjä rivi, eikä sulkevaa PHP tagia `?>`.
+* Älä avaa/sulje PHP tageja kesken tiedoston `<?php` / `?>`.
 * Käytä funktioiden ja muuttujien nimissä `snake_case`.
 * Käytä konstattien nimissä `SCREAMING_SNAKE_CASE`.
 * Kirjoita PHP [avainsanat](http://php.net/manual/en/reserved.keywords.php) pienillä kirjaimilla. Esim. `and`, `or`, `if`, `while`, jne..

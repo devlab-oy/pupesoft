@@ -118,6 +118,7 @@ $value = preg_replace("/[^a-z0-9]/i", "", $string);
 ```
 
 * Kirjoita SQL lausekkeiden avainsanat isoilla kirjaimilla.
+* Kirjoita SQL fuktiot pienillä kirjaimilla.
 * Kirjoita SQL lausekkeissa yksi avainsana/ehto per rivi.
 * Sisennä joinien ehdot kahdella välilyönnillä.
 * Avaavat ja sulkevat kaarisulut samalle riville.
@@ -127,8 +128,8 @@ $value = preg_replace("/[^a-z0-9]/i", "", $string);
 
 ```sql
 SELECT lasku.laskunro,
-CONCAT(asiakas.maa, asiakas.ryhma) AS maaryhma,
-COUNT(*) kpl
+concat(asiakas.maa, asiakas.ryhma) AS maaryhma,
+count(*) kpl
 FROM lasku
 INNER JOIN asiakas ON (asiakas.id = lasku.asiakas_id
   AND asiakas.nimi LIKE '%abc%'

@@ -106,8 +106,9 @@ if ($tee == "file" and $laheta != "") {
     }
 
     if (!is_executable("/usr/bin/ssconvert") and $kasitellaan_tiedosto_tyyppi == "XLS") {
-      echo "<font class='error'>".t("Gnumeric (ssconvert) ei ole asennettu").
-            ", ".t("joten XLS tiedostoja ei voida lukea sis‰‰n")."! ".t(" Vain XLSX tiedostot ovat sallittuja")."!</font><br>\n";
+      echo "<font class='error'>".t("Gnumeric (ssconvert) ei ole asennettu").", "
+            .t("joten XLS tiedostoja ei voida lukea sis‰‰n")."! "
+            .t(" Vain XLSX tiedostot ovat sallittuja")."!</font><br>\n";
       $kasitellaan_tiedosto = FALSE;
     }
 

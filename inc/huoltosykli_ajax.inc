@@ -9,8 +9,7 @@ if ($action == 'hae_huoltovali_options') {
 
   $options_string = "<option value='0'>Ei huoltoväliä</option>";
 
-  foreach( $huoltovali_options as $key => $val ){
-
+  foreach ($huoltovali_options as $key => $val) {
     if ($key == $oletus['days']) {
       $selected = 'selected';
     }
@@ -27,25 +26,24 @@ if ($action == 'hae_huoltosykli_options') {
 
   if ($tuoteno == 'MUISTUTUS') {
     $sammutin = array(
-      'tyyppi' => 'muistutus',
-      'koko' => '',
-     );
-    error_log('lol');
+        'tyyppi' => 'muistutus',
+        'koko'   => '',
+    );
   }
   else {
-    $query = "  SELECT sammutin_tyyppi.selite AS tyyppi,
-          sammutin_koko.selite AS koko
-          FROM tuote
-          JOIN tuotteen_avainsanat AS sammutin_tyyppi
-          ON ( sammutin_tyyppi.yhtio = tuote.yhtio
-            AND sammutin_tyyppi.tuoteno = tuote.tuoteno
-            AND sammutin_tyyppi.laji = 'sammutin_tyyppi' )
-          JOIN tuotteen_avainsanat AS sammutin_koko
-          ON ( sammutin_koko.yhtio = tuote.yhtio
-            AND sammutin_koko.tuoteno = tuote.tuoteno
-            AND sammutin_koko.laji = 'sammutin_koko' )
-          WHERE tuote.yhtio = '{$kukarow['yhtio']}'
-          AND tuote.tuoteno = '{$tuoteno}'";
+    $query = "SELECT sammutin_tyyppi.selite AS tyyppi,
+              sammutin_koko.selite AS koko
+              FROM tuote
+              JOIN tuotteen_avainsanat AS sammutin_tyyppi
+              ON ( sammutin_tyyppi.yhtio = tuote.yhtio
+                AND sammutin_tyyppi.tuoteno = tuote.tuoteno
+                AND sammutin_tyyppi.laji = 'sammutin_tyyppi' )
+              JOIN tuotteen_avainsanat AS sammutin_koko
+              ON ( sammutin_koko.yhtio = tuote.yhtio
+                AND sammutin_koko.tuoteno = tuote.tuoteno
+                AND sammutin_koko.laji = 'sammutin_koko' )
+              WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+              AND tuote.tuoteno = '{$tuoteno}'";
     $result = pupe_query($query);
     $sammutin = mysql_fetch_assoc($result);
   }
@@ -54,7 +52,7 @@ if ($action == 'hae_huoltosykli_options') {
     $huoltosykli_options = hae_huoltosyklit_tyyppi_koko($sammutin['tyyppi'], $sammutin['koko'], $tyyppi);
     $options_string = "<option value='0'>Ei huoltosykliä</option>";
 
-    foreach( $huoltosykli_options as  $val ){
+    foreach ($huoltosykli_options as $val) {
       $options_string .= "<option value='{$val['tunnus']}'>{$val['dropdown_text']}</option>";
     }
   }

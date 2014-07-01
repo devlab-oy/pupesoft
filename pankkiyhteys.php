@@ -12,17 +12,29 @@ echo var_dump($_POST);
 echo "<br><br>Request<br>";
 echo var_dump($_REQUEST);
 echo "<br><br>Files<br>";
-echo var_dump($_FILES["certificate"]);
+echo var_dump($_FILES["certificate"]["tmp_name"]);
 
 if (isset($tee) and $tee == "lataa_sertifikaatti") {
-  echo "<form action='pankkiyhteys.php' method='post' enctype='multipart/form-data'>";
-  echo "<label for='private_key'>" . t('Yksityinen avain') . "</label>";
-  echo "<input type='file' name='private_key' id='private_key'>";
-  echo "<br>";
-  echo "<label for='certificate'>" . t('Sertifikaatti') . "</label>";
-  echo "<input type='file' name='certificate' id='certificate'/>";
-  echo "<input type='submit' name='submit' value='" . t('Lähetä') . "'>";
-  echo "</form>";
+  if ($_FILES["certificate"]) {
+    $sertifikaatti = file_get_contents($_FILES["certificate"]["tmp_name"]);
+
+    $query = "UPDATE yriti
+              SET certificate='{$sertifikaatti}'
+              WHERE tunnus=65";
+
+    pupe_query($query);
+  }
+  else {
+    echo "<form action='pankkiyhteys.php' method='post' enctype='multipart/form-data'>";
+    echo "<input type='hidden' name='tee' value='lataa_sertifikaatti'/>";
+    echo "<label for='private_key'>" . t('Yksityinen avain') . "</label>";
+    echo "<input type='file' name='private_key' id='private_key'>";
+    echo "<br>";
+    echo "<label for='certificate'>" . t('Sertifikaatti') . "</label>";
+    echo "<input type='file' name='certificate' id='certificate'/>";
+    echo "<input type='submit' name='submit' value='" . t('Lähetä') . "'>";
+    echo "</form>";
+  }
 }
 else {
   echo "<form method='post' action='pankkiyhteys.php'>";

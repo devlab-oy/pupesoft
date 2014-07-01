@@ -2173,14 +2173,14 @@
     }
 
     if ($toim == 'laite') {
-      $query = "  SELECT DISTINCT selite
-            FROM tuotteen_avainsanat
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND laji = 'tyomaarayksen_ryhmittely'";
+      $query = "SELECT DISTINCT selite
+                FROM tuotteen_avainsanat
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND laji = 'tyomaarayksen_ryhmittely'";
       $result = pupe_query($query);
 
       $request = array(
-          'tuoteno' => $t[1],
+          'tuoteno'      => $t[1],
           'huoltosyklit' => $huoltosyklit
       );
       while ($selite = mysql_fetch_assoc($result)) {

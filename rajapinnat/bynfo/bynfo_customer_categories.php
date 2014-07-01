@@ -38,18 +38,20 @@ if (!$fp = fopen($filepath, 'w+')) {
 }
 
 // Otsikkotieto
-$header  = "asiakasryhma;";
+$header  = "ryhma;";
 $header .= "kuvaus;";
+$header .= "laji;";
 $header .= "\n";
 
 fwrite($fp, $header);
 
 // Haetaan asiakasryhmät
 $query = "SELECT avainsana.selite,
-          avainsana.selitetark
+          avainsana.selitetark,
+          lower(avainsana.laji) AS laji
           FROM avainsana
           WHERE avainsana.yhtio = '{$yhtio}'
-          AND avainsana.laji = 'asiakasryhma'";
+          AND avainsana.laji IN ('asiakasryhma', 'asiakasosasto')";
 $res = pupe_query($query);
 
 // Kerrotaan montako riviä käsitellään
@@ -60,6 +62,7 @@ echo "Asiakasryhmärivejä {$rows} kappaletta.\n";
 while ($row = mysql_fetch_assoc($res)) {
   $rivi  = "{$row['selite']};";
   $rivi .= pupesoft_csvstring($row['selitetark']).";";
+  $rivi .= "{$row['laji']};";
   $rivi .= "\n";
 
   fwrite($fp, $rivi);

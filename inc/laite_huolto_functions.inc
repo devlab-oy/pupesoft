@@ -1,7 +1,7 @@
 <?php
 
 $filepath = dirname(__FILE__);
-if (file_exists($filepath.'/../tilauskasittely/luo_myyntitilausotsikko.inc')) {
+if (file_exists($filepath . '/../tilauskasittely/luo_myyntitilausotsikko.inc')) {
   require_once("{$filepath}/../tilauskasittely/luo_myyntitilausotsikko.inc");
 }
 else {
@@ -208,7 +208,7 @@ function generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltos
   global $kukarow, $yhtiorow, $debug;
 
   if ($debug) {
-    echo "Tyˆm‰‰r‰yksi‰ pit‰isi tulla ".count($huollettavien_laitteiden_huoltosyklirivit).' kappaletta';
+    echo "Tyˆm‰‰r‰yksi‰ pit‰isi tulla " . count($huollettavien_laitteiden_huoltosyklirivit) . ' kappaletta';
     echo "<br/>";
     echo "<br/>";
 
@@ -253,7 +253,7 @@ function generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltos
     $onko_tyomaarays_jo_luotu_talle_laitteelle = tarkista_loytyyko_tyomaarays($huollettavan_laitteen_huoltosyklirivi);
     if ($onko_tyomaarays_jo_luotu_talle_laitteelle) {
       if ($debug) {
-        echo "T‰lle laitteelle ".$huollettavan_laitteen_huoltosyklirivi['laite_tunnus']." on jo luotu tyˆm‰‰r‰ys";
+        echo "T‰lle laitteelle " . $huollettavan_laitteen_huoltosyklirivi['laite_tunnus'] . " on jo luotu tyˆm‰‰r‰ys";
         echo "<br/>";
       }
       continue;
@@ -263,7 +263,7 @@ function generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltos
     $onko_toimenpide_tuote_saldoton = tarkista_toimenpide_saldo($huollettavan_laitteen_huoltosyklirivi);
     if (!$onko_toimenpide_tuote_saldoton) {
       if ($debug) {
-        echo "Toimenpide tuote ".$huollettavan_laitteen_huoltosyklirivi['laite_tunnus']." pit‰‰ olla saldoton! Tyˆm‰‰r‰yst‰ t‰lle tuotteelle ei lis‰tty";
+        echo "Toimenpide tuote " . $huollettavan_laitteen_huoltosyklirivi['laite_tunnus'] . " pit‰‰ olla saldoton! Tyˆm‰‰r‰yst‰ t‰lle tuotteelle ei lis‰tty";
         echo "<br/>";
       }
       continue;
@@ -309,11 +309,11 @@ function generoi_tyomaarays_temp($huollettavan_laitteen_huoltosyklirivi) {
     //merkataan toimitusajankohdaksi viimeinen_tapahtuma + huoltovali
     $huoltovalit = huoltovali_options();
     $huollettavan_laitteen_huoltovali = $huoltovalit[$huollettavan_laitteen_huoltosyklirivi['huoltovali']];
-    aseta_tyomaarayksen_toimitusajankohta_temp($tyomaarays_tunnus, date("Y-m-d", strtotime($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma']." + {$huollettavan_laitteen_huoltovali['years']} years")));
+    aseta_tyomaarayksen_toimitusajankohta_temp($tyomaarays_tunnus, date("Y-m-d", strtotime($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma'] . " + {$huollettavan_laitteen_huoltovali['years']} years")));
   }
 
   if ($debug and !empty($tyomaarays_tunnus)) {
-    echo "Tyom‰‰r‰ys ".$tyomaarays_tunnus." luotu";
+    echo "Tyom‰‰r‰ys " . $tyomaarays_tunnus . " luotu";
     echo "<br/>";
   }
 
@@ -390,7 +390,7 @@ function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_
   $huoltovalit = huoltovali_options();
   $huollettavan_laitteen_huoltovali = $huoltovalit[$huollettavan_laitteen_huoltosyklirivi['huoltovali']];
 
-  $toimitusaika = date("Y-m-d", strtotime($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma']." + {$huollettavan_laitteen_huoltovali['years']} years"));
+  $toimitusaika = date("Y-m-d", strtotime($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma'] . " + {$huollettavan_laitteen_huoltovali['years']} years"));
 
   $edellinen_tyomaarays = hae_laitteen_edellinen_tyomaarays($huollettavan_laitteen_huoltosyklirivi['laite_tunnus']);
   $asiakas = hae_asiakas($huollettavan_laitteen_huoltosyklirivi['asiakas_tunnus']);
@@ -460,7 +460,7 @@ function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_
   paivita_viimenen_tapahtuma_laitteen_huoltosyklille($huollettavan_laitteen_huoltosyklirivi['laite_tunnus'], $huollettavan_laitteen_huoltosyklirivi['huoltosykli_tunnus'], $toimitusaika);
 
   if (!empty($edellinen_tyomaarays) and $edellinen_tyomaarays['tyostatus'] == 'K') {
-    $kommentti = t('Edellisell‰ kerralla')." ({$edellinen_tyomaarays['toimitettuaika']}) ".t('laitteelle ei voitu suorittaa toimenpidett‰')." {$edellinen_tyomaarays['toimenpidetuote_nimitys']} ".t('koska laitetta ei lˆytynyt');
+    $kommentti = t('Edellisell‰ kerralla') . " ({$edellinen_tyomaarays['toimitettuaika']}) " . t('laitteelle ei voitu suorittaa toimenpidett‰') . " {$edellinen_tyomaarays['toimenpidetuote_nimitys']} " . t('koska laitetta ei lˆytynyt');
     paivita_tilausrivin_kommentti($rivit[0][0], $kommentti);
   }
 
@@ -631,7 +631,7 @@ function paivita_tyojono_ja_tyostatus_tyomaarayksille($tyomaarays_tunnukset, $la
   $query = "UPDATE tyomaarays SET
             {$update}
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND otunnus IN ('".implode("','", $tyomaarays_tunnukset)."')";
+            AND otunnus IN ('" . implode("','", $tyomaarays_tunnukset) . "')";
   pupe_query($query);
 
   return true;
@@ -664,7 +664,7 @@ function paivita_viimenen_tapahtuma_laitteen_huoltosyklille($laite_tunnus, $huol
     $huoltosyklit_laitteet_update = "viimeinen_tapahtuma = CURRENT_DATE";
   }
   else {
-    $huoltosyklit_laitteet_update = "viimeinen_tapahtuma = '".date('Y-m-d', strtotime($viimeinen_tapahtuma))."'";
+    $huoltosyklit_laitteet_update = "viimeinen_tapahtuma = '" . date('Y-m-d', strtotime($viimeinen_tapahtuma)) . "'";
   }
 
   $query = "UPDATE huoltosyklit_laitteet
@@ -700,7 +700,7 @@ function paivita_tilausrivin_kommentti($tilausrivi_tunnus, $kommentti) {
   $result = pupe_query($query);
   $tilausrivi = mysql_fetch_assoc($result);
 
-  $kommentti = $tilausrivi['kommentti'].' '.$kommentti;
+  $kommentti = $tilausrivi['kommentti'] . ' ' . $kommentti;
   $query = "UPDATE tilausrivi
             SET kommentti = '{$kommentti}'
             WHERE yhtio = '{$kukarow['yhtio']}'
@@ -801,7 +801,7 @@ function aseta_tyomaaraysten_status($lasku_tunnukset, $status) {
   $query = "UPDATE tyomaarays
             SET tyostatus = '{$status}'
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tyomaarays.otunnus IN ('".implode("','", $lasku_tunnukset)."')";
+            AND tyomaarays.otunnus IN ('" . implode("','", $lasku_tunnukset) . "')";
   pupe_query($query);
 }
 
@@ -853,7 +853,7 @@ function merkkaa_tyomaarays_tehdyksi($request) {
             SET tila = 'L',
             alatila = 'D'
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus IN ('".implode("','", $request['lasku_tunnukset'])."')";
+            AND tunnus IN ('" . implode("','", $request['lasku_tunnukset']) . "')";
   pupe_query($query);
 
   //Toimitettuaika manual setti‰ k‰ytet‰‰n konversio-ajossa
@@ -861,14 +861,14 @@ function merkkaa_tyomaarays_tehdyksi($request) {
     $toimitettuaika_update = "toimitettuaika = NOW()";
   }
   else {
-    $toimitettuaika_update = "toimitettuaika = '".date('Y-m-d H:i:s', strtotime($request['toimitettuaika']))."'";
+    $toimitettuaika_update = "toimitettuaika = '" . date('Y-m-d H:i:s', strtotime($request['toimitettuaika'])) . "'";
   }
 
   $query = "UPDATE tilausrivi
             SET toimitettu = '{$kukarow['kuka']}',
             {$toimitettuaika_update}
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND otunnus IN ('".implode("','", $request['lasku_tunnukset'])."')";
+            AND otunnus IN ('" . implode("','", $request['lasku_tunnukset']) . "')";
   pupe_query($query);
 
   foreach ($request['lasku_tunnukset'] as $lasku_tunnus) {
@@ -1006,14 +1006,14 @@ function huoltosykli_rivi($tyyppi, $request) {
   }
 
   echo "<tr>";
-  echo "<th>".t('Huoltosykli')." <br /> {$tyyppi}";
+  echo "<th>" . t('Huoltosykli') . " <br /> {$tyyppi}";
   echo "<input type='hidden' name='huoltosyklit[{$tyyppi}][huoltosykli_laite_tunnus]' value='{$laitteen_huoltosykli['huoltosykli_laite_tunnus']}' />";
   echo"</th>";
   echo "<td>";
 
   echo "<table>";
   echo "<tr>";
-  echo "<th>".t('Huoltosykli')."</th>";
+  echo "<th>" . t('Huoltosykli') . "</th>";
   echo "<td>";
   echo "<select class='huoltosykli_select' id='huoltosykli_select_{$tyyppi}' name='huoltosyklit[{$tyyppi}][huoltosykli_tunnus]'>";
 
@@ -1025,7 +1025,7 @@ function huoltosykli_rivi($tyyppi, $request) {
       if ($laitteen_huoltosykli['huoltosykli_tunnus'] == $huoltosykli['tunnus']) {
         $sel = "SELECTED";
       }
-      echo "<option value='{$huoltosykli['tunnus']}' {$sel}>".$huoltosykli['dropdown_text']."</option>";
+      echo "<option value='{$huoltosykli['tunnus']}' {$sel}>" . $huoltosykli['dropdown_text'] . "</option>";
       $sel = "";
     }
   }
@@ -1035,7 +1035,7 @@ function huoltosykli_rivi($tyyppi, $request) {
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>".t('Huoltovali')."</th>";
+  echo "<th>" . t('Huoltovali') . "</th>";
   echo "<td>";
 
   echo "<select class='huoltovali_select' id='huoltovali_select_{$tyyppi}' name='huoltosyklit[{$tyyppi}][huoltovali]'>";
@@ -1061,9 +1061,9 @@ function huoltosykli_rivi($tyyppi, $request) {
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>".t('Seuraava tuleva huolto')." (pp.kk.vvvv)</th>";
+  echo "<th>" . t('Seuraava tuleva huolto') . " (pp.kk.vvvv)</th>";
   echo "<td>";
-  echo "<input type='hidden' id='paiva_ei_validi' value='<font class=\"error\">".t('P‰iv‰m‰‰r‰ v‰‰rin')."</font>' />";
+  echo "<input type='hidden' id='paiva_ei_validi' value='<font class=\"error\">" . t('P‰iv‰m‰‰r‰ v‰‰rin') . "</font>' />";
   $seuraava_tuleva_tapahtuma = '';
   if (!empty($laitteen_huoltosykli['viimeinen_tapahtuma'])) {
     $huoltovalit = huoltovali_options();
@@ -1140,7 +1140,7 @@ function hae_laitteen_huoltosyklit($laitetunnus, $tyyppi = '') {
 function hae_mahdolliset_huoltosyklit(array $args) {
   global $kukarow;
 
-  $laite_tunnus = (isset($args['laite_tunnus'])) ? (int)$args['laite_tunnus'] : 0;
+  $laite_tunnus = (isset($args['laite_tunnus'])) ? (int) $args['laite_tunnus'] : 0;
   $tyyppi = (isset($args['tyyppi'])) ? $args['tyyppi'] : '';
   $tuoteno = (isset($args['tuoteno'])) ? $args['tuoteno'] : '';
 
@@ -1227,8 +1227,8 @@ function hae_huoltosyklit_tyyppi_koko($sammutin_tyyppi, $sammutin_koko, $tyyppi 
 
   return $huoltosyklit;
 }
-
 if (!function_exists('hae_sammuttimien_koot')) {
+
   function hae_sammuttimien_koot() {
     global $kukarow, $yhtiorow;
 
@@ -1248,6 +1248,7 @@ if (!function_exists('hae_sammuttimien_koot')) {
 }
 
 if (!function_exists('hae_sammuttimien_tyypit')) {
+
   function hae_sammuttimien_tyypit() {
     global $kukarow, $yhtiorow;
 
@@ -1267,6 +1268,7 @@ if (!function_exists('hae_sammuttimien_tyypit')) {
 }
 
 if (!function_exists('hae_mahdolliset_sammutin_tyypit')) {
+
   function hae_mahdolliset_sammutin_tyypit() {
     return array(
         'jauhesammutin'         => t('Jauhesammutin'),
@@ -1281,96 +1283,97 @@ if (!function_exists('hae_mahdolliset_sammutin_tyypit')) {
 }
 
 if (!function_exists("huoltovali_options")) {
+
   function huoltovali_options($huoltosykli_tunnus = '') {
     global $kukarow;
 
     $huoltovali_options = array(
         3650 => array(
-            'dropdown_text' => '10 '.t('vuotta'),
+            'dropdown_text' => '10 ' . t('vuotta'),
             'days'          => 3650,
             'months'        => 120,
             'years'         => 10,
         ),
         1825 => array(
-            'dropdown_text' => '5 '.t('vuotta'),
+            'dropdown_text' => '5 ' . t('vuotta'),
             'days'          => 1825,
             'months'        => 60,
             'years'         => 5,
         ),
         730  => array(
-            'dropdown_text' => '2 '.t('vuotta'),
+            'dropdown_text' => '2 ' . t('vuotta'),
             'days'          => 730,
             'months'        => 24,
             'years'         => 2,
         ),
         365  => array(
-            'dropdown_text' => '1 '.t('vuotta'),
+            'dropdown_text' => '1 ' . t('vuotta'),
             'days'          => 365,
             'months'        => 12,
             'years'         => 1,
         ),
         330  => array(
-            'dropdown_text' => '11 '.t('kuukautta'),
+            'dropdown_text' => '11 ' . t('kuukautta'),
             'days'          => 330,
             'months'        => 11,
             'years'         => 11 / 12,
         ),
         300  => array(
-            'dropdown_text' => '10 '.t('kuukautta'),
+            'dropdown_text' => '10 ' . t('kuukautta'),
             'days'          => 300,
             'months'        => 10,
             'years'         => 10 / 12,
         ),
         270  => array(
-            'dropdown_text' => '9 '.t('kuukautta'),
+            'dropdown_text' => '9 ' . t('kuukautta'),
             'days'          => 270,
             'months'        => 9,
             'years'         => 9 / 12,
         ),
         240  => array(
-            'dropdown_text' => '8 '.t('kuukautta'),
+            'dropdown_text' => '8 ' . t('kuukautta'),
             'days'          => 240,
             'months'        => 8,
             'years'         => 8 / 12,
         ),
         210  => array(
-            'dropdown_text' => '7 '.t('kuukautta'),
+            'dropdown_text' => '7 ' . t('kuukautta'),
             'days'          => 210,
             'months'        => 7,
             'years'         => 7 / 12,
         ),
         180  => array(
-            'dropdown_text' => '6 '.t('kuukautta'),
+            'dropdown_text' => '6 ' . t('kuukautta'),
             'days'          => 180,
             'months'        => 6,
             'years'         => 6 / 12,
         ),
         150  => array(
-            'dropdown_text' => '5 '.t('kuukautta'),
+            'dropdown_text' => '5 ' . t('kuukautta'),
             'days'          => 150,
             'months'        => 5,
             'years'         => 5 / 12,
         ),
         120  => array(
-            'dropdown_text' => '4 '.t('kuukautta'),
+            'dropdown_text' => '4 ' . t('kuukautta'),
             'days'          => 120,
             'months'        => 4,
             'years'         => 4 / 12,
         ),
         90   => array(
-            'dropdown_text' => '3 '.t('kuukautta'),
+            'dropdown_text' => '3 ' . t('kuukautta'),
             'days'          => 90,
             'months'        => 3,
             'years'         => 3 / 12,
         ),
         60   => array(
-            'dropdown_text' => '2 '.t('kuukautta'),
+            'dropdown_text' => '2 ' . t('kuukautta'),
             'days'          => 60,
             'months'        => 2,
             'years'         => 2 / 12,
         ),
         30   => array(
-            'dropdown_text' => '1 '.t('kuukautta'),
+            'dropdown_text' => '1 ' . t('kuukautta'),
             'days'          => 30,
             'months'        => 1,
             'years'         => 1 / 12,

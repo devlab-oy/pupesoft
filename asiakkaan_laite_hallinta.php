@@ -17,15 +17,15 @@ if (isset($_POST["tee"])) {
 }
 
 $filepath = dirname(__FILE__);
-if (file_exists($filepath.'/inc/parametrit.inc')) {
-  require_once($filepath.'/inc/parametrit.inc');
-  require_once($filepath.'/inc/tyojono2_functions.inc');
-  require_once($filepath.'/inc/laite_huolto_functions.inc');
+if (file_exists($filepath . '/inc/parametrit.inc')) {
+  require_once($filepath . '/inc/parametrit.inc');
+  require_once($filepath . '/inc/tyojono2_functions.inc');
+  require_once($filepath . '/inc/laite_huolto_functions.inc');
 }
 else {
-  require_once($filepath.'/parametrit.inc');
-  require_once($filepath.'/tyojono2_functions.inc');
-  require_once($filepath.'/laite_huolto_functions.inc');
+  require_once($filepath . '/parametrit.inc');
+  require_once($filepath . '/tyojono2_functions.inc');
+  require_once($filepath . '/laite_huolto_functions.inc');
 }
 
 if (!empty($kukarow['extranet'])) {
@@ -36,13 +36,13 @@ if (!empty($kukarow['extranet'])) {
 }
 
 if ($tee == 'lataa_tiedosto') {
-  $filepath = "/tmp/".$tmpfilenimi;
+  $filepath = "/tmp/" . $tmpfilenimi;
   if (file_exists($filepath)) {
     readfile($filepath);
     unlink($filepath);
   }
   else {
-    echo "<font class='error'>".t("Tiedostoa ei ole olemassa")."</font>";
+    echo "<font class='error'>" . t("Tiedostoa ei ole olemassa") . "</font>";
   }
   exit;
 }
@@ -52,7 +52,7 @@ if ($ajax_request) {
   exit;
 }
 
-echo "<font class='head'>".t("Laitehallinta")."</font><hr>";
+echo "<font class='head'>" . t("Laitehallinta") . "</font><hr>";
 ?>
 <style>
   .paikka_tr_hidden {
@@ -93,12 +93,12 @@ echo "<font class='head'>".t("Laitehallinta")."</font><hr>";
 </script>
 <?php
 $request = array(
-  'ytunnus'       => $ytunnus,
-  'asiakasid'       => $asiakasid,
-  'asiakas_tunnus'   => $asiakas_tunnus,
-  'ala_tee'       => $ala_tee,
-  'lasku_tunnukset'   => $lasku_tunnukset,
-  'huoltosyklit'     => $huoltosyklit,
+    'ytunnus'         => $ytunnus,
+    'asiakasid'       => $asiakasid,
+    'asiakas_tunnus'  => $asiakas_tunnus,
+    'ala_tee'         => $ala_tee,
+    'lasku_tunnukset' => $lasku_tunnukset,
+    'huoltosyklit'    => $huoltosyklit,
 );
 
 $request['laitteen_tilat'] = hae_laitteen_tilat();
@@ -152,7 +152,7 @@ if (!empty($request['haettu_asiakas'])) {
   }
   else if ($request['ala_tee'] == 'paivita_huoltosyklit') {
     $updated = paivita_huoltosyklit();
-    echo "<font class='message'>".$updated." kpl päivitetty onnistuneesti</font>";
+    echo "<font class='message'>" . $updated . " kpl päivitetty onnistuneesti</font>";
     echo "<br/>";
     echo "<br/>";
   }
@@ -186,7 +186,7 @@ if (!empty($request['haettu_asiakas'])) {
   else if (empty($kukarow['extranet']) and !empty($pdf_tiedostot)) {
     foreach ($pdf_tiedostot as $pdf_tiedosto) {
       if (!empty($pdf_tiedosto)) {
-        
+
         echo_tallennus_formi($pdf_tiedosto, $pdf_nimi, 'pdf');
       }
     }
@@ -232,15 +232,15 @@ function echo_kayttoliittyma($request = array()) {
 
   echo "<input type='hidden' id='down_arrow' value='{$palvelin2}pics/lullacons/bullet-arrow-down.png' />";
   echo "<input type='hidden' id='right_arrow' value='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />";
-  echo "<input type='hidden' id='oletko_varma_confirm_message' value='".t("Oletko varma")."' />";
-  echo "<input type='hidden' id='poisto_epaonnistui_message' value='".t("Poisto epäonnistui")."' />";
-  echo "<input type='hidden' id='poistettu_message' value='".t("Poistettu")."' />";
+  echo "<input type='hidden' id='oletko_varma_confirm_message' value='" . t("Oletko varma") . "' />";
+  echo "<input type='hidden' id='poisto_epaonnistui_message' value='" . t("Poisto epäonnistui") . "' />";
+  echo "<input type='hidden' id='poistettu_message' value='" . t("Poistettu") . "' />";
 
   echo "<form method='POST' action='' name='asiakas_haku'>";
 
   echo "<input type='hidden' id='tee' name='tee' value='hae_asiakas' />";
   echo "<input type='text' id='ytunnus' name='ytunnus' />";
-  echo "<input type='submit' value='".t("Hae")."' />";
+  echo "<input type='submit' value='" . t("Hae") . "' />";
 
   echo "</form>";
 }
@@ -252,7 +252,7 @@ function echo_kalustoraportti_form($haettu_asiakas) {
   echo "<input type='hidden' id='tee' name='tee' value='hae_asiakas' />";
   echo "<input type='hidden' id='ala_tee' name='ala_tee' value='tulosta_kalustoraportti' />";
   echo "<input type='hidden' id='asiakasid' name='asiakasid' value='{$haettu_asiakas['tunnus']}' />";
-  echo "<input type='submit' value='".t("Tallenna kalustoraportti PDF")."' />";
+  echo "<input type='submit' value='" . t("Tallenna kalustoraportti PDF") . "' />";
   echo "</form>";
 
   $lopetus = "{$palvelin2}asiakkaan_laite_hallinta.php////tee=hae_asiakas//asiakasid={$haettu_asiakas['tunnus']}";
@@ -263,7 +263,7 @@ function echo_kalustoraportti_form($haettu_asiakas) {
     echo "<input type='hidden' id='lopetus' name='lopetus' value='{$lopetus}' />";
     echo "<input type='hidden' id='ala_tee' name='ala_tee' value='echo_massapaivitys_form' />";
     echo "<input type='hidden' id='asiakasid' name='asiakasid' value='{$haettu_asiakas['tunnus']}' />";
-    echo "<input type='submit' value='".t("Huoltovälien massapäivitys")."' />";
+    echo "<input type='submit' value='" . t("Huoltovälien massapäivitys") . "' />";
     echo "</form>";
   }
 }
@@ -279,9 +279,9 @@ function echo_massapaivitys_form($laitteiden_huoltosyklit, $asiakas) {
   echo "<table>";
   echo "<tr>";
   echo "<th><input type='checkbox' id='massapaivitys_select_all' checked ></th>";
-  echo "<th>".t("Huoltosykli")."</th>";
-  echo "<th>".t("Toimenpide")."</th>";
-  echo "<th>".t("Huoltoväli")."</th>";
+  echo "<th>" . t("Huoltosykli") . "</th>";
+  echo "<th>" . t("Toimenpide") . "</th>";
+  echo "<th>" . t("Huoltoväli") . "</th>";
   echo "</tr>";
 
   if (!empty($laitteiden_huoltosyklit)) {
@@ -294,8 +294,8 @@ function echo_massapaivitys_form($laitteiden_huoltosyklit, $asiakas) {
       echo "</td>";
 
       echo "<td>";
-      echo "<input type='hidden' name='huoltosyklit[$index][tunnukset]' value='".$sykli['tunnukset']."' />";
-      echo "<input type='hidden' name='huoltosyklit[$index][huoltosykli_tunnus]' value='".$sykli['huoltosykli_tunnus']."' />";
+      echo "<input type='hidden' name='huoltosyklit[$index][tunnukset]' value='" . $sykli['tunnukset'] . "' />";
+      echo "<input type='hidden' name='huoltosyklit[$index][huoltosykli_tunnus]' value='" . $sykli['huoltosykli_tunnus'] . "' />";
       echo $sykli['kuvaus'];
       echo "</td>";
 
@@ -308,7 +308,7 @@ function echo_massapaivitys_form($laitteiden_huoltosyklit, $asiakas) {
 
       $huoltovali_options = huoltovali_options($sykli['huoltosykli_tunnus']);
       foreach ($huoltovali_options as $key => $val) {
-        echo "<option value='".$key."'>".$val['dropdown_text']."</option>";
+        echo "<option value='" . $key . "'>" . $val['dropdown_text'] . "</option>";
       }
 
       echo "</select>";
@@ -319,7 +319,7 @@ function echo_massapaivitys_form($laitteiden_huoltosyklit, $asiakas) {
     }
   }
   echo "</table>";
-  echo "<input type='submit' value='".t("Päivitä")."' />";
+  echo "<input type='submit' value='" . t("Päivitä") . "' />";
   echo "</form>";
 }
 
@@ -387,15 +387,15 @@ function echo_kohteet_table($asiakkaan_kohteet = array(), $request = array()) {
   echo "<table>";
 
   echo "<tr>";
-  echo "<th>".t("Kohteen nimi")."</th>";
-  echo "<th>".t("Paikan nimi")."</th>";
-  echo "<th>".t("Laitteet")."</th>";
+  echo "<th>" . t("Kohteen nimi") . "</th>";
+  echo "<th>" . t("Paikan nimi") . "</th>";
+  echo "<th>" . t("Laitteet") . "</th>";
   echo "</tr>";
 
   echo "<tr>";
   echo "<td>";
   if (empty($kukarow['extranet'])) {
-    echo "<a href='yllapito.php?toim=kohde&uusi=1&lopetus={$lopetus}&valittu_asiakas={$haettu_asiakas['tunnus']}'><button>".t("Luo uusi kohde")."</button></a>";
+    echo "<a href='yllapito.php?toim=kohde&uusi=1&lopetus={$lopetus}&valittu_asiakas={$haettu_asiakas['tunnus']}'><button>" . t("Luo uusi kohde") . "</button></a>";
   }
   echo "</td>";
 
@@ -423,12 +423,12 @@ function echo_kohde_tr($kohde_index, $kohde, $asiakas_tunnus) {
 
   echo "<td>";
   if (empty($kukarow['extranet'])) {
-    echo "<button class='poista_kohde'>".t("Poista kohde")."</button>";
+    echo "<button class='poista_kohde'>" . t("Poista kohde") . "</button>";
   }
   echo "&nbsp";
   echo "<input type='hidden' class='kohde_tunnus' value='{$kohde_index}' />";
   if (empty($kukarow['extranet'])) {
-    echo "<a href='yllapito.php?toim=kohde&lopetus={$lopetus}&tunnus={$kohde_index}'>".$kohde['kohde_nimi']."</a>";
+    echo "<a href='yllapito.php?toim=kohde&lopetus={$lopetus}&tunnus={$kohde_index}'>" . $kohde['kohde_nimi'] . "</a>";
   }
   else {
     echo $kohde['kohde_nimi'];
@@ -438,7 +438,7 @@ function echo_kohde_tr($kohde_index, $kohde, $asiakas_tunnus) {
 
   if ($kohde['kohde_poistettu'] == 1) {
     echo "<br/>";
-    echo '<font class="error">'.t('Poistettu').'</font>';
+    echo '<font class="error">' . t('Poistettu') . '</font>';
   }
   echo "</td>";
 
@@ -461,7 +461,7 @@ function echo_paikka_tr($kohde_index, $asiakas_tunnus, $paikat = array()) {
   echo "<tr class='paikka_tr_hidden paikat_{$kohde_index}'>";
   echo "<td>";
   if (empty($kukarow['extranet'])) {
-    echo "<a href='yllapito.php?toim=paikka&uusi=1&&lopetus={$lopetus}&valittu_kohde={$kohde_index}'><button>".t("Luo kohteelle uusi paikka")."</button></a>";
+    echo "<a href='yllapito.php?toim=paikka&uusi=1&&lopetus={$lopetus}&valittu_kohde={$kohde_index}'><button>" . t("Luo kohteelle uusi paikka") . "</button></a>";
   }
   echo "</td>";
 
@@ -491,18 +491,18 @@ function echo_paikka_tr($kohde_index, $asiakas_tunnus, $paikat = array()) {
       echo "<img class='porautumis_img' src='{$palvelin2}pics/lullacons/bullet-arrow-down.png' />";
       echo "<br/>";
       if (empty($kukarow['extranet'])) {
-        echo "<button class='poista_paikka'>".t("Poista paikka")."</button>";
+        echo "<button class='poista_paikka'>" . t("Poista paikka") . "</button>";
       }
 
       if ($paikka['paikka_poistettu'] == 1) {
         echo "<br/>";
-        echo '<font class="error">'.t('Poistettu').'</font>';
+        echo '<font class="error">' . t('Poistettu') . '</font>';
       }
       echo "</td>";
 
       echo "<td>";
       if (empty($kukarow['extranet'])) {
-        echo "<a href='yllapito.php?toim=laite&asiakas_tunnus={$asiakas_tunnus}&uusi=1&lopetus={$lopetus}&valittu_paikka={$paikka_index}'><button>".t("Luo paikkaan uusi laite")."</button></a>";
+        echo "<a href='yllapito.php?toim=laite&asiakas_tunnus={$asiakas_tunnus}&uusi=1&lopetus={$lopetus}&valittu_paikka={$paikka_index}'><button>" . t("Luo paikkaan uusi laite") . "</button></a>";
       }
       echo "<br/>";
       echo_laitteet_table($paikka['laitteet']);
@@ -518,20 +518,20 @@ function echo_laitteet_table($laitteet = array()) {
 
   echo "<table class='laitteet_table_hidden'>";
   echo "<tr>";
-  echo "<th>".t("Oma numero")."</th>";
-  echo "<th>".t("Tuotenumero")."</th>";
-  echo "<th>".t("Tuotteen nimi")."</th>";
-  echo "<th>".t("Sijainti")."</th>";
-  echo "<th>".t("Tila")."</th>";
+  echo "<th>" . t("Oma numero") . "</th>";
+  echo "<th>" . t("Tuotenumero") . "</th>";
+  echo "<th>" . t("Tuotteen nimi") . "</th>";
+  echo "<th>" . t("Sijainti") . "</th>";
+  echo "<th>" . t("Tila") . "</th>";
   if (empty($kukarow['extranet'])) {
-    echo "<th>".t("Kopioi")."</th>";
-    echo "<th>".t("Poista")."</th>";
+    echo "<th>" . t("Kopioi") . "</th>";
+    echo "<th>" . t("Poista") . "</th>";
   }
   echo "</tr>";
 
   foreach ($laitteet as $laite) {
     echo "<tr>";
-    
+
     echo "<td>";
     echo $laite['oma_numero'];
     echo "</td>";
@@ -561,7 +561,7 @@ function echo_laitteet_table($laitteet = array()) {
       echo "<td>";
       if (!empty($laite['laite_tunnus'])) {
         echo "<form method='POST' action='{$palvelin2}yllapito.php?toim=laite&kopioi_rivi=on&asiakas_tunnus={$laite['asiakas_tunnus']}&lopetus={$lopetus}&tunnus={$laite['laite_tunnus']}'>";
-        echo "<input type='submit' value='".t('Kopioi laite')."' />";
+        echo "<input type='submit' value='" . t('Kopioi laite') . "' />";
         echo "</form>";
       }
       echo "</td>";
@@ -569,7 +569,7 @@ function echo_laitteet_table($laitteet = array()) {
       echo "<td>";
       if (!empty($laite['laite_tunnus'])) {
         echo "<input type='hidden' class='laite_tunnus' value='{$laite['laite_tunnus']}' />";
-        echo "<button class='poista_laite'>".t("Poista laite")."</button>";
+        echo "<button class='poista_laite'>" . t("Poista laite") . "</button>";
       }
       echo "</td>";
     }

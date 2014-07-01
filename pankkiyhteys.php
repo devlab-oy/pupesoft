@@ -7,12 +7,21 @@ echo "<hr>";
 
 $tee = $_REQUEST["tee"];
 
-echo "Post:<br>";
-echo var_dump($_POST);
-echo "<br><br>Request<br>";
-echo var_dump($_REQUEST);
-echo "<br><br>Files<br>";
-echo var_dump($_FILES["certificate"]["tmp_name"]);
+/**
+ * @param $data
+ * @param $salasana
+ * @return string
+ */
+function salaa($data, $salasana)
+{
+  $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC);
+  echo "kissa";
+  $iv = mcrypt_create_iv($iv_size, MCRYPT_RAND);
+  $salattu_sertifikaatti = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $salasana, $data, MCRYPT_MODE_ECB);
+  var_dump($salattu_sertifikaatti);
+  $salattu_sertifikaatti = $iv . $salattu_sertifikaatti;
+  return base64_encode($salattu_sertifikaatti);
+}
 
 if (isset($tee) and $tee == "lataa_sertifikaatti") {
   if ($_FILES["certificate"] and $_FILES["private_key"]) {
@@ -21,7 +30,7 @@ if (isset($tee) and $tee == "lataa_sertifikaatti") {
 
     $query = "UPDATE yriti
               SET private_key='{$private_key}', certificate='{$sertifikaatti}'
-              WHERE tunnus=65";
+              WHERE tunnus=66";
 
     pupe_query($query);
   }
@@ -33,6 +42,10 @@ if (isset($tee) and $tee == "lataa_sertifikaatti") {
     echo "<br>";
     echo "<label for='certificate'>" . t('Sertifikaatti') . "</label>";
     echo "<input type='file' name='certificate' id='certificate'/>";
+    echo "<br/>";
+    echo "<label for='salasana'>" . t("Salasana, jolla tiedot suojataan") . "</label>";
+    echo "<input type='password' name='salasana' id='salasana'/>";
+    echo "<br/>";
     echo "<input type='submit' name='submit' value='" . t('Lähetä') . "'>";
     echo "</form>";
   }

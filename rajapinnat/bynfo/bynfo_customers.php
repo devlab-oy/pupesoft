@@ -42,6 +42,7 @@ $header  = "asiakasid;";
 $header .= "asiakasnumero;";
 $header .= "nimi;";
 $header .= "ryhmä;";
+$header .= "osasto;";
 $header .= "kustannuspaikka;";
 $header .= "toimipaikka";
 $header .= "\n";
@@ -51,9 +52,10 @@ fwrite($fp, $header);
 // Haetaan asiakkaat
 $query = "SELECT asiakas.tunnus,
           asiakas.asiakasnro,
-          concat_ws(' ', asiakas.nimi, asiakas.nimitark) nimi,
+          concat_ws(' ', asiakas.nimi, asiakas.nimitark) AS nimi,
           asiakas.ryhma,
-          kustannuspaikka.nimi kustannuspaikka,
+          asiakas.osasto,
+          kustannuspaikka.nimi AS kustannuspaikka,
           asiakas.toimipaikka
           FROM asiakas
           LEFT JOIN kustannuspaikka ON (kustannuspaikka.yhtio = asiakas.yhtio
@@ -75,7 +77,8 @@ while ($row = mysql_fetch_assoc($res)) {
   $rivi  = "{$row['tunnus']};";
   $rivi .= "{$row['asiakasnro']};";
   $rivi .= pupesoft_csvstring($row['nimi']).";";
-  $rivi .= "{$row['ryhma']};";
+  $rivi .= pupesoft_csvstring($row['ryhma']).";";
+  $rivi .= pupesoft_csvstring($row['osasto']).";";
   $rivi .= pupesoft_csvstring($row['kustannuspaikka']).";";
   $rivi .= "{$row['toimipaikka']}";
   $rivi .= "\n";

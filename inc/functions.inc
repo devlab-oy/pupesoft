@@ -20646,6 +20646,7 @@ if (!function_exists('tarkista_varaston_hyllypaikka')) {
               AND hyllytaso='{$hyllytaso}'
               ";
 
+$result = pupe_query($query);
     // Sallitut kyselyn ehdot
     $acceptable_options = array('varmistuskoodi', 'reservipaikka');
     $query_lisa = array();
@@ -20662,7 +20663,6 @@ if (!function_exists('tarkista_varaston_hyllypaikka')) {
       $query .= "AND $query_lisa";
     }
 
-    $result = pupe_query($query);
     return (mysql_num_rows($result) == 0) ? false : true;
   }
 }
@@ -24641,8 +24641,10 @@ if (!function_exists('laske_siirrettava_maara')) {
                  t1.varattu         > 0
                )
                WHERE l1.yhtio       = '{$kukarow['yhtio']}'
-               AND l1.tila          = 'N'
+               AND ((l1.tila          = 'N'
                AND l1.alatila      != 'X')
+               OR (l1.tila = 'G'
+               AND l1.alatila IN ('', 'J'))))
                UNION
                (SELECT t2.tunnus, t2.otunnus, t2.jt + t2.varattu AS varattu
                FROM tilausrivi AS t2

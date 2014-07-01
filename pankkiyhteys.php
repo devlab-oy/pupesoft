@@ -22,7 +22,7 @@ function salaa($data, $salasana)
 }
 
 if (isset($tee) and $tee == "lataa_sertifikaatti") {
-  if ($_FILES["certificate"] and $_FILES["private_key"]) {
+  if ($_FILES["certificate"] and $_FILES["private_key"] and $_POST["salasana"]) {
     $tili = $_POST["tili"];
     $salasana = $_POST["salasana"];
 

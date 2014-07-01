@@ -32,19 +32,7 @@ if (isset($tee) and $tee == "lataa_sertifikaatti") {
     }
   }
   else {
-    $query = "SELECT tunnus, nimi
-              FROM yriti";
-
-    $result = pupe_query($query);
-
-    $tilit = array();
-
-    while ($rivi = mysql_fetch_assoc($result)) {
-      $tili = array();
-      array_push($tili, $rivi["tunnus"]);
-      array_push($tili, $rivi["nimi"]);
-      array_push($tilit, $tili);
-    }
+    $tilit = hae_tilit();
 
     echo "<form action='pankkiyhteys.php' method='post' enctype='multipart/form-data'>";
     echo "<input type='hidden' name='tee' value='lataa_sertifikaatti'/>";
@@ -70,6 +58,8 @@ if (isset($tee) and $tee == "lataa_sertifikaatti") {
 }
 elseif (isset($tee) and $tee == "hae_tiliote") {
   if ($_POST["salasana"]) {
+    $salasana = $_POST["salasana"];
+
     $parameters = array(
       "method" => "POST",
       "data" => array(
@@ -90,8 +80,17 @@ elseif (isset($tee) and $tee == "hae_tiliote") {
     echo base64_decode($vastaus[1]["data"]);
   }
   else {
+    $tilit = hae_tilit();
+
     echo "<form method='post' action='pankkiyhteys.php'>";
     echo "<input type='hidden' name='tee' value='hae_tiliote'/>";
+    echo "<label for='tili'>" . t("Tili") . "</label>";
+    echo "<select name='tili'>";
+    foreach ($tilit as $tili) {
+      echo "<option value='" . $tili[0] . "'>" . $tili[1] . "</option>";
+    }
+    echo "</select>";
+    echo "<br/>";
     echo "<label for='salasana'>" . t("Salasana, jolla salasit tunnukset") . "</label>";
     echo "<input type='password' name='salasana' id='salasana'/>";
     echo "<br/>";
@@ -130,4 +129,25 @@ function salaa($data, $salasana)
   $salattu_data = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $salasana, $data, MCRYPT_MODE_ECB);
   $salattu_data = $iv . $salattu_data;
   return base64_encode($salattu_data);
+}
+
+/**
+ * @return array
+ */
+function hae_tilit()
+{
+  $query = "SELECT tunnus, nimi
+              FROM yriti";
+
+  $result = pupe_query($query);
+
+  $tilit = array();
+
+  while ($rivi = mysql_fetch_assoc($result)) {
+    $tili = array();
+    array_push($tili, $rivi["tunnus"]);
+    array_push($tili, $rivi["nimi"]);
+    array_push($tilit, $tili);
+  }
+  return $tilit;
 }

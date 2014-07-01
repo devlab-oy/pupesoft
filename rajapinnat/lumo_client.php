@@ -96,7 +96,6 @@ class LumoClient {
         $arvo = $return === TRUE ? "OK" : "HYLÄTTY";
         $this->log("Maksutapahtuma $arvo");
       }
-      //var_dump($xml);
     }
     return $return;
   }

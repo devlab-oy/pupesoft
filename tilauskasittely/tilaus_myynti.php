@@ -5580,7 +5580,12 @@ if ($tee == '') {
       while ($row = mysql_fetch_assoc($result)) {
 
         if ($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K" and $row["tyyppi"] != "V" and isset($tuotteenpainotettukehayht["keha"])) {
-          echo "<tr>$jarjlisa<td class='back' colspan='".($sarakkeet_alku-6)."'>&nbsp;</td><th colspan='5' align='right'>".t("Valmisteen {$tuotteenpainotettukehayht["tuoteno"]} kehahinta * kpl yhteensä").":</th><td class='spec' align='right'>".sprintf("%.2f",$tuotteenpainotettukehayht["keha"])."</td>";
+          echo "<tr>$jarjlisa<td class='back' colspan='"
+                .($sarakkeet_alku-6).
+                "'>&nbsp;</td><th colspan='5' align='right'>"
+                .t("Valmisteen {$tuotteenpainotettukehayht["tuoteno"]} kehahinta * kpl yhteensä").
+                ":</th><td class='spec' align='right'>"
+                .sprintf("%.2f",$tuotteenpainotettukehayht["keha"])."</td>";
 
           $tuotteenpainotettukehayht["keha"] = 0;
         }
@@ -6040,7 +6045,7 @@ if ($tee == '') {
         }
         elseif (isset($pkrow[1]) and $borderlask == $pkrow[1] and $pkrow[1] > 0) {
           $classlisa = $class." style='border-top: 1px solid; border-right: 1px solid;' ";
-          $class    .= " style='border-top: 1px solid;'";
+          $class    .= " style='border-top: 1px solid;' ";
 
           $borderlask--;
         }
@@ -6059,7 +6064,6 @@ if ($tee == '') {
         elseif ($borderlask > 0 and $borderlask <= $pknum) {
           $classlisa = $class." style='font-style:italic; border-right: 1px solid;' ";
           $class    .= " style='font-style:italic;' ";
-
           $borderlask--;
         }
 
@@ -7374,7 +7378,12 @@ if ($tee == '') {
       }
 
       if ($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K") {
-        echo "<tr>$jarjlisa<td class='back' colspan='".($sarakkeet_alku-6)."'>&nbsp;</td><th colspan='5' align='right'>".t("Valmisteen {$tuotteenpainotettukehayht["tuoteno"]} Kehahinta * kpl yhteensä").":</th><td class='spec' align='right'>".sprintf("%.2f",$tuotteenpainotettukehayht["keha"])."</td>";
+        echo "<tr>$jarjlisa<td class='back' colspan='"
+              .($sarakkeet_alku-6).
+              "'>&nbsp;</td><th colspan='5' align='right'>"
+              .t("Valmisteen {$tuotteenpainotettukehayht["tuoteno"]} Kehahinta * kpl yhteensä").
+              ":</th><td class='spec' align='right'>".
+              sprintf("%.2f",$tuotteenpainotettukehayht["keha"])."</td>";
 
         $tuotteenpainotettukehayht["keha"] = 0;
       }

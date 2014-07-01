@@ -5579,7 +5579,8 @@ if ($tee == '') {
 
       while ($row = mysql_fetch_assoc($result)) {
 
-        if ($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K" and $row["tyyppi"] != "V" and isset($tuotteenpainotettukehayht["keha"])) {
+        if ($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K"
+            and $row["tyyppi"] != "V" and isset($tuotteenpainotettukehayht["keha"])) {
           echo "<tr>$jarjlisa<td class='back' colspan='"
                 .($sarakkeet_alku-6).
                 "'>&nbsp;</td><th colspan='5' align='right'>"
@@ -6590,7 +6591,8 @@ if ($tee == '') {
           }
         }
 
-        if (($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K") or ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA")) {
+        if (($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K")
+            or ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA")) {
           $classvar = $class;
         }
         else {
@@ -8279,7 +8281,12 @@ if ($tee == '') {
 
       }
       elseif ($toim == "VALMISTAVARASTOON") {
-        echo "<tr>$jarjlisa<td class='back' colspan='".($sarakkeet_alku-6)."'>&nbsp;</td><th colspan='5' align='right'>".t("Koko valmistuksen Kehahinta * kpl yhteensä").":</th><td class='spec' align='right'>".sprintf("%.2f",$painotettukehayhteensa)."</td>";
+        echo "<tr>$jarjlisa<td class='back' colspan='"
+              .($sarakkeet_alku-6).
+              "'>&nbsp;</td><th colspan='5' align='right'>"
+              .t("Koko valmistuksen Kehahinta * kpl yhteensä").
+              ":</th><td class='spec' align='right'>"
+              .sprintf("%.2f",$painotettukehayhteensa)."</td>";
       }
 
       echo "</table>";

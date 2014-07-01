@@ -8280,7 +8280,7 @@ if ($tee == '') {
         }
 
       }
-      elseif ($toim == "VALMISTAVARASTOON") {
+      elseif ($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K") {
         echo "<tr>$jarjlisa<td class='back' colspan='"
               .($sarakkeet_alku-6).
               "'>&nbsp;</td><th colspan='5' align='right'>"

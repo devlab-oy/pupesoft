@@ -20646,7 +20646,6 @@ if (!function_exists('tarkista_varaston_hyllypaikka')) {
               AND hyllytaso='{$hyllytaso}'
               ";
 
-$result = pupe_query($query);
     // Sallitut kyselyn ehdot
     $acceptable_options = array('varmistuskoodi', 'reservipaikka');
     $query_lisa = array();
@@ -20663,6 +20662,7 @@ $result = pupe_query($query);
       $query .= "AND $query_lisa";
     }
 
+    $result = pupe_query($query);
     return (mysql_num_rows($result) == 0) ? false : true;
   }
 }

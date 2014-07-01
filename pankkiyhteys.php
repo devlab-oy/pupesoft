@@ -15,28 +15,59 @@ $tee = $_REQUEST["tee"];
 function salaa($data, $salasana)
 {
   $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC);
-  echo "kissa";
   $iv = mcrypt_create_iv($iv_size, MCRYPT_RAND);
-  $salattu_sertifikaatti = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $salasana, $data, MCRYPT_MODE_ECB);
-  var_dump($salattu_sertifikaatti);
-  $salattu_sertifikaatti = $iv . $salattu_sertifikaatti;
-  return base64_encode($salattu_sertifikaatti);
+  $salattu_data = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $salasana, $data, MCRYPT_MODE_ECB);
+  $salattu_data = $iv . $salattu_data;
+  return base64_encode($salattu_data);
 }
 
 if (isset($tee) and $tee == "lataa_sertifikaatti") {
   if ($_FILES["certificate"] and $_FILES["private_key"]) {
+    $tili = $_POST["tili"];
+
     $sertifikaatti = file_get_contents($_FILES["certificate"]["tmp_name"]);
+    $salattu_sertifikaatti = salaa($sertifikaatti, "salasana");
+
     $private_key = file_get_contents($_FILES["private_key"]["tmp_name"]);
+    $salattu_private_key = salaa($private_key, "salasana");
 
     $query = "UPDATE yriti
-              SET private_key='{$private_key}', certificate='{$sertifikaatti}'
-              WHERE tunnus=66";
+              SET private_key='{$salattu_private_key}', certificate='{$salattu_sertifikaatti}'
+              WHERE tunnus={$tili}";
 
-    pupe_query($query);
+    $result = pupe_query($query);
+
+    if ($result) {
+      echo "Tunnukset lisätty";
+    }
+    else {
+      echo "Tunnukset eivät tallentuneet tietokantaan";
+    }
   }
   else {
+    $query = "SELECT tunnus, nimi
+              FROM yriti";
+
+    $result = pupe_query($query);
+
+    $tilit = array();
+
+    while ($rivi = mysql_fetch_assoc($result)) {
+      $tili = array();
+      array_push($tili, $rivi["tunnus"]);
+      array_push($tili, $rivi["nimi"]);
+      array_push($tilit, $tili);
+    }
+
     echo "<form action='pankkiyhteys.php' method='post' enctype='multipart/form-data'>";
     echo "<input type='hidden' name='tee' value='lataa_sertifikaatti'/>";
+    echo "<label for='tili'>" . t("Tili, jolle sertifikaatti on") . "</label>";
+    echo "<select name='tili'>";
+    foreach ($tilit as $tili) {
+      echo "<option value='" . $tili[0] . "'>" . $tili[1] . "</option>";
+    }
+    echo "</select>";
+    echo "<br/>";
     echo "<label for='private_key'>" . t('Yksityinen avain') . "</label>";
     echo "<input type='file' name='private_key' id='private_key'>";
     echo "<br>";

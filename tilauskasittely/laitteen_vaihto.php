@@ -11,7 +11,7 @@ if (isset($livesearch_tee) and $livesearch_tee == "TUOTEHAKU") {
 
 enable_ajax();
 
-echo "<font class='head'>".t("Laitteen vaihto").":</font>";
+echo "<font class='head'>" . t("Laitteen vaihto") . ":</font>";
 echo "<hr/>";
 echo "<br/>";
 ?>
@@ -25,11 +25,11 @@ echo "<br/>";
 <?php
 
 $request = array(
-  'tee'         => $tee,
-  'tilausrivi_tunnus'   => $tilausrivi_tunnus,
-  'lasku_tunnus'     => $lasku_tunnus,
-  'uusi_laite'     => $uusi_laite,
-  'vanha_laite_tunnus' => $vanha_laite_tunnus,
+    'tee'                => $tee,
+    'tilausrivi_tunnus'  => $tilausrivi_tunnus,
+    'lasku_tunnus'       => $lasku_tunnus,
+    'uusi_laite'         => $uusi_laite,
+    'vanha_laite_tunnus' => $vanha_laite_tunnus,
 );
 
 $request['laite'] = hae_laite_ja_asiakastiedot($request['tilausrivi_tunnus']);
@@ -106,7 +106,7 @@ if ($request['tee'] == 'vaihda_laite') {
   }
 
 
-  echo '<font class="message">'.t("Laite vaihdettu").'</font>';
+  echo '<font class="message">' . t("Laite vaihdettu") . '</font>';
   echo "<br/>";
   echo "<br/>";
 
@@ -116,7 +116,7 @@ if ($request['tee'] == 'vaihda_laite') {
   if (!empty($poistetut_tilaukset)) {
     $poistetut_tilaukset = implode(', ', $poistetut_tilaukset);
     $poistetut_tilaukset = substr($poistetut_tilaukset, 0, -2);
-    echo t('Seuraavat työmääräykset poistettiin, koska niihin liitetty laite on kadonnut/hajonnut').': '.$poistetut_tilaukset;
+    echo t('Seuraavat työmääräykset poistettiin, koska niihin liitetty laite on kadonnut/hajonnut') . ': ' . $poistetut_tilaukset;
   }
   else {
     echo t('Laitteella ei ollut muita poistettavia työmääräyksiä');
@@ -158,8 +158,8 @@ function luo_uusi_laite($uusi_laite) {
 
   $uusi_laite['yhtio'] = $kukarow['yhtio'];
   $query = "  INSERT INTO
-        laite (".implode(", ", array_keys($uusi_laite)).")
-        VALUES('".implode("', '", array_values($uusi_laite))."')";
+        laite (" . implode(", ", array_keys($uusi_laite)) . ")
+        VALUES('" . implode("', '", array_values($uusi_laite)) . "')";
   pupe_query($query);
 
   $laite_tunnus = mysql_insert_id();
@@ -376,8 +376,6 @@ function hae_paikat() {
   return $paikat;
 }
 
-
-
 function aseta_vanhan_laitteen_tyomaarays_rivit_poistettu_tilaan($vanha_laite_tunnus) {
   global $kukarow, $yhtiorow;
 
@@ -407,7 +405,7 @@ function aseta_vanhan_laitteen_tyomaarays_rivit_poistettu_tilaan($vanha_laite_tu
           JOIN tilausrivi
           ON ( tilausrivi.yhtio = lasku.yhtio
             AND tilausrivi.otunnus = lasku.tunnus
-            AND tilausrivi.tunnus IN ('".implode("','", $poistettavat_tilausrivit)."') )
+            AND tilausrivi.tunnus IN ('" . implode("','", $poistettavat_tilausrivit) . "') )
           SET tyomaarays.tyostatus = 'V',
           tilausrivi.var = 'P'
           WHERE tyomaarays.yhtio = '{$kukarow['yhtio']}'";
@@ -425,7 +423,7 @@ function echo_laitteen_vaihto_form($request = array()) {
   if (!empty($request['virheet'])) {
     $virhe_message = implode('<br/>', $request['virheet']);
 
-    echo '<font class="error">'.$virhe_message.'</font>';
+    echo '<font class="error">' . $virhe_message . '</font>';
     echo '<br/>';
   }
 
@@ -448,48 +446,48 @@ function echo_laitteen_vaihto_form($request = array()) {
   echo "<table>";
 
   echo "<tr>";
-  echo "<th>".t("Asiakas")."</th>";
+  echo "<th>" . t("Asiakas") . "</th>";
   echo "<td>{$request['laite']['asiakas_nimi']}</td>";
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>".t("Kohde")."</th>";
+  echo "<th>" . t("Kohde") . "</th>";
   echo "<td>{$request['laite']['kohde_nimi']}</td>";
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>".t("Paikka")."</th>";
+  echo "<th>" . t("Paikka") . "</th>";
   echo "<td>{$request['laite']['paikka_nimi']}</td>";
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>".t("Vaihdettava laite")."</th>";
+  echo "<th>" . t("Vaihdettava laite") . "</th>";
   echo "<td>{$request['laite']['tuoteno']}</td>";
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>".t("Uusi laite")."</th>";
+  echo "<th>" . t("Uusi laite") . "</th>";
   echo "<td>";
 
   echo "<table>";
   echo "<tbody>";
 
   echo "<tr>";
-  echo '<th align="left">'.t("Tuotenumero").'</th>';
+  echo '<th align="left">' . t("Tuotenumero") . '</th>';
   echo "<td>";
   echo livesearch_kentta('uusi_laite_form', 'TUOTEHAKU', 'uusi_laite[tuoteno]', '226', $request['uusi_laite']['tuoteno'], 'NOSUBMIT');
   echo "</td>";
   echo "</tr>";
 
   echo "<tr>";
-  echo '<th align="left">'.t("Sarjanumero").'</th>';
+  echo '<th align="left">' . t("Sarjanumero") . '</th>';
   echo "<td>";
-  echo '<input type="text" name="uusi_laite[sarjanro]" value="'.$sarjanro.'" size="35" maxlength="60" />';
+  echo '<input type="text" name="uusi_laite[sarjanro]" value="' . $sarjanro . '" size="35" maxlength="60" />';
   echo "</td>";
   echo "</tr>";
 
   echo "<tr>";
-  echo '<th align="left">'.t("Valmistus päivä").'</th>';
+  echo '<th align="left">' . t("Valmistus päivä") . '</th>';
   echo "<td>";
   $vva = substr($request['uusi_laite']['valm_pvm'], 0, 4);
   $kka = substr($request['uusi_laite']['valm_pvm'], 5, 2);
@@ -523,21 +521,21 @@ function echo_laitteen_vaihto_form($request = array()) {
   echo "</tr>";
 
   echo "<tr>";
-  echo '<th align="left">'.t("Oma numero").'</th>';
+  echo '<th align="left">' . t("Oma numero") . '</th>';
   echo "<td>";
-  echo '<input type="text" name="uusi_laite[oma_numero]" value="'.$oma_numero.'" size="35" maxlength="20" />';
+  echo '<input type="text" name="uusi_laite[oma_numero]" value="' . $oma_numero . '" size="35" maxlength="20" />';
   echo "</td>";
   echo "</tr>";
 
   echo "<tr>";
-  echo '<th align="left">'.t("Omistaja").'</th>';
+  echo '<th align="left">' . t("Omistaja") . '</th>';
   echo "<td>";
-  echo '<input type="text" name="uusi_laite[omistaja]" value="'.$request['uusi_laite']['omistaja'].'" size="35" maxlength="60" />';
+  echo '<input type="text" name="uusi_laite[omistaja]" value="' . $request['uusi_laite']['omistaja'] . '" size="35" maxlength="60" />';
   echo "</td>";
   echo "</tr>";
 
   echo "<tr>";
-  echo '<th align="left">'.t("Paikka").'</th>';
+  echo '<th align="left">' . t("Paikka") . '</th>';
   echo "<td>";
   echo "<select name='uusi_laite[paikka]>";
   foreach ($request['paikat'] as $paikka) {
@@ -549,28 +547,28 @@ function echo_laitteen_vaihto_form($request = array()) {
   echo "</tr>";
 
   echo "<tr>";
-  echo '<th align="left">'.t("Sijainti").'</th>';
+  echo '<th align="left">' . t("Sijainti") . '</th>';
   echo "<td>";
-  echo '<input type="text" name="uusi_laite[sijainti]" value="'.$sijainti.'" size="35" maxlength="60" />';
+  echo '<input type="text" name="uusi_laite[sijainti]" value="' . $sijainti . '" size="35" maxlength="60" />';
   echo "</td>";
   echo "</tr>";
 
   echo "<tr>";
-  echo '<th align="left">'.t("Kommentti").'</th>';
+  echo '<th align="left">' . t("Kommentti") . '</th>';
   echo "<td>";
-  echo '<input type="text" name="uusi_laite[kommentti]" value="'.$request['uusi_laite']['kommentti'].'" size="35" maxlength="60" />';
+  echo '<input type="text" name="uusi_laite[kommentti]" value="' . $request['uusi_laite']['kommentti'] . '" size="35" maxlength="60" />';
   echo "</td>";
   echo "</tr>";
 
   echo "<tr>";
-  echo '<th align="left">'.t("Varalaite").'</th>';
+  echo '<th align="left">' . t("Varalaite") . '</th>';
   echo "<td>";
 
   $varalaite_chk = '';
   if (!empty($request['uusi_laite']['varalaite'])) {
     $varalaite_chk = 'CHECKED';
   }
-  echo '<input type="checkbox" name="uusi_laite[varalaite]" '.$varalaite_chk.'/>';
+  echo '<input type="checkbox" name="uusi_laite[varalaite]" ' . $varalaite_chk . '/>';
   echo "</td>";
   echo "</tr>";
 
@@ -586,13 +584,13 @@ function echo_laitteen_vaihto_form($request = array()) {
       $pakollisuus_chk = "CHECKED";
     }
     echo "<tr>";
-    echo "<th>".t('Huoltosykli')."</th>";
+    echo "<th>" . t('Huoltosykli') . "</th>";
     echo "<td>";
 
     echo "<table>";
 
     echo "<tr>";
-    echo "<th>".t('Huoltosykli')."</th>";
+    echo "<th>" . t('Huoltosykli') . "</th>";
     echo "<td>";
 
     echo "<select name='uusi_laite[huoltosyklit][{$i}][huoltosykli_tunnus]'>";
@@ -609,14 +607,14 @@ function echo_laitteen_vaihto_form($request = array()) {
     echo "</tr>";
 
     echo "<tr>";
-    echo "<th>".t('Huoltovali')."</th>";
+    echo "<th>" . t('Huoltovali') . "</th>";
     echo "<td>";
     echo "<input type='text' name='uusi_laite[huoltosyklit][{$i}][huoltovali]' value='{$request['uusi_laite']['huoltosyklit'][$i]['huoltovali']}' />";
     echo "</td>";
     echo "</tr>";
 
     echo "<tr>";
-    echo "<th>".t('Pakollisuus')."</th>";
+    echo "<th>" . t('Pakollisuus') . "</th>";
     echo "<td>";
     echo "<input type='checkbox' name='uusi_laite[huoltosyklit][{$i}][pakollisuus]' {$pakollisuus_chk} />";
     echo "</td>";
@@ -630,6 +628,6 @@ function echo_laitteen_vaihto_form($request = array()) {
 
   echo "</table>";
 
-  echo "<input type='submit' value='".t("Vaihda laite")."' />";
+  echo "<input type='submit' value='" . t("Vaihda laite") . "' />";
   echo "</form>";
 }

@@ -15,11 +15,12 @@ echo "<br><br>Files<br>";
 echo var_dump($_FILES["certificate"]["tmp_name"]);
 
 if (isset($tee) and $tee == "lataa_sertifikaatti") {
-  if ($_FILES["certificate"]) {
+  if ($_FILES["certificate"] and $_FILES["private_key"]) {
     $sertifikaatti = file_get_contents($_FILES["certificate"]["tmp_name"]);
+    $private_key = file_get_contents($_FILES["private_key"]["tmp_name"]);
 
     $query = "UPDATE yriti
-              SET certificate='{$sertifikaatti}'
+              SET private_key='{$private_key}', certificate='{$sertifikaatti}'
               WHERE tunnus=65";
 
     pupe_query($query);

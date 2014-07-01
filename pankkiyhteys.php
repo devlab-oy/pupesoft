@@ -24,12 +24,13 @@ function salaa($data, $salasana)
 if (isset($tee) and $tee == "lataa_sertifikaatti") {
   if ($_FILES["certificate"] and $_FILES["private_key"]) {
     $tili = $_POST["tili"];
+    $salasana = $_POST["salasana"];
 
     $sertifikaatti = file_get_contents($_FILES["certificate"]["tmp_name"]);
-    $salattu_sertifikaatti = salaa($sertifikaatti, "salasana");
+    $salattu_sertifikaatti = salaa($sertifikaatti, $salasana);
 
     $private_key = file_get_contents($_FILES["private_key"]["tmp_name"]);
-    $salattu_private_key = salaa($private_key, "salasana");
+    $salattu_private_key = salaa($private_key, $salasana);
 
     $query = "UPDATE yriti
               SET private_key='{$salattu_private_key}', certificate='{$salattu_sertifikaatti}'

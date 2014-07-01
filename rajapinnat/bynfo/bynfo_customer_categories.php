@@ -60,7 +60,7 @@ $rows = mysql_num_rows($res);
 echo "Asiakasryhmärivejä {$rows} kappaletta.\n";
 
 while ($row = mysql_fetch_assoc($res)) {
-  $rivi  = "{$row['selite']};";
+  $rivi  = pupesoft_csvstring($row['selite']).";";
   $rivi .= pupesoft_csvstring($row['selitetark']).";";
   $rivi .= "{$row['laji']};";
   $rivi .= "\n";

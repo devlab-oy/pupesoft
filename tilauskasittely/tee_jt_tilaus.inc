@@ -1128,6 +1128,7 @@ if (!function_exists("tee_jt_tilaus")) {
                       WHERE yhtio   = '$kukarow[yhtio]'
                       and otunnus   = '$id'
                       and perheid2 != 0
+                      and tyyppi != 'D'
                       GROUP by perheid2";
             $copresult = pupe_query($query);
 

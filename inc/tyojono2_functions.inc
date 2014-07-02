@@ -59,7 +59,7 @@ function hae_tyomaaraykset($request) {
   $lasku_where = "";
   $kohde_join = "";
   if (!empty($request['lasku_tunnukset'])) {
-    $lasku_where = "AND lasku.tunnus IN ('".implode("','", $request['lasku_tunnukset'])."')";
+    $lasku_where = "AND lasku.tunnus IN ('" . implode("','", $request['lasku_tunnukset']) . "')";
   }
 
   //tämä käytössä asiakaan_laite_hallinta.php
@@ -121,84 +121,84 @@ function hae_tyomaaraykset($request) {
     $tmp = "_temp";
   }
 
-  $query = "  SELECT
-        lasku.tunnus AS lasku_tunnus,
-        lasku.ytunnus AS asiakas_ytunnus,
-        lasku.nimi AS asiakas_nimi,
-        kohde.tunnus AS kohde_tunnus,
-        kohde.nimi AS kohde_nimi,
-        paikka.nimi AS paikka_nimi,
-        a3.selitetark AS paikka_olosuhde,
-        laite.tuoteno,
-        laite.oma_numero,
-        laite.sarjanro AS sarjanumero,
-        laite.sijainti AS laite_sijainti,
-        laite.tunnus AS laite_tunnus,
-        tuote.nimitys AS tuote_nimi,
-        lasku.toimaika,
-        a1.selite AS tyojonokoodi,
-        a1.selitetark AS tyojono,
-        a2.selite AS tyostatus_koodi,
-        a2.selitetark AS tyostatus,
-        a2.selitetark_2 AS tyostatusvari,
-        tilausrivi.tunnus AS tilausrivi_tunnus,
-        tilausrivi.nimitys AS tehtava_tyo,
-        tilausrivi.kommentti AS tilausrivi_kommentti,
-        tilausrivin_lisatiedot.tilausrivilinkki AS poikkeus_tunnus,
-        IF(tilausrivin_lisatiedot.tilausrivilinkki != 0, CONCAT_WS(' -> ', poikkeus_rivi.nimitys, tilausrivi.nimitys), '') AS poikkeus_teksti,
-        poistettu_laite.tuoteno AS poistettu_laite
-        FROM lasku{$tmp} AS lasku
-        JOIN tyomaarays{$tmp} AS tyomaarays
-        ON ( tyomaarays.yhtio = lasku.yhtio
-          AND tyomaarays.otunnus = lasku.tunnus
-          {$tyomaarays_join} )
-        JOIN tilausrivi{$tmp} AS tilausrivi
-        ON ( tilausrivi.yhtio = lasku.yhtio
-          AND tilausrivi.otunnus = lasku.tunnus
-          AND tilausrivi.var != 'P' )
-        JOIN tilausrivin_lisatiedot{$tmp} AS tilausrivin_lisatiedot
-        ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-          AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
-        LEFT JOIN tilausrivi AS poikkeus_rivi
-        ON ( poikkeus_rivi.yhtio = tilausrivin_lisatiedot.yhtio
-          AND poikkeus_rivi.tunnus = tilausrivin_lisatiedot.tilausrivilinkki )
-        LEFT JOIN tilausrivin_lisatiedot AS poikkeus_toimenpide_tilausrivi_lisatiedot
-        ON ( poikkeus_toimenpide_tilausrivi_lisatiedot.yhtio = poikkeus_rivi.yhtio
-          AND poikkeus_toimenpide_tilausrivi_lisatiedot.tilausrivitunnus = poikkeus_rivi.tunnus )
-        LEFT JOIN laite AS poistettu_laite
-        ON ( poistettu_laite.yhtio = poikkeus_toimenpide_tilausrivi_lisatiedot.yhtio
-          AND poistettu_laite.tunnus = poikkeus_toimenpide_tilausrivi_lisatiedot.asiakkaan_positio )
-        JOIN laite
-        ON ( laite.yhtio = tilausrivin_lisatiedot.yhtio
-          AND laite.tunnus = tilausrivin_lisatiedot.asiakkaan_positio
-          AND laite.tila != 'P' )
-        JOIN tuote
-        ON ( tuote.yhtio = laite.yhtio
-          AND tuote.tuoteno = laite.tuoteno )
-        JOIN paikka
-        ON ( paikka.yhtio = laite.yhtio
-          AND paikka.tunnus = laite.paikka )
-        JOIN avainsana a3
-        ON ( a3.yhtio = paikka.yhtio
-          AND a3.selite = paikka.olosuhde
-          AND a3.laji = 'OLOSUHDE')
-        JOIN kohde
-        ON ( kohde.yhtio = paikka.yhtio
-          AND kohde.tunnus = paikka.kohde
-          {$kohde_join})
-        LEFT JOIN avainsana a1
-        ON ( a1.yhtio = tyomaarays.yhtio
-          AND a1.laji = 'TYOM_TYOJONO'
-          AND a1.selite = tyomaarays.tyojono )
-        LEFT JOIN avainsana a2
-        ON ( a2.yhtio = tyomaarays.yhtio
-          AND a2.laji = 'TYOM_TYOSTATUS'
-          AND a2.selite = tyomaarays.tyostatus )
-        WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-        {$lasku_where}
-        ORDER BY {$lasku_order}
-        kohde.tunnus ASC,
-        laite.oma_numero ASC";
+  $query = "SELECT
+            lasku.tunnus AS lasku_tunnus,
+            lasku.ytunnus AS asiakas_ytunnus,
+            lasku.nimi AS asiakas_nimi,
+            kohde.tunnus AS kohde_tunnus,
+            kohde.nimi AS kohde_nimi,
+            paikka.nimi AS paikka_nimi,
+            a3.selitetark AS paikka_olosuhde,
+            laite.tuoteno,
+            laite.oma_numero,
+            laite.sarjanro AS sarjanumero,
+            laite.sijainti AS laite_sijainti,
+            laite.tunnus AS laite_tunnus,
+            tuote.nimitys AS tuote_nimi,
+            lasku.toimaika,
+            a1.selite AS tyojonokoodi,
+            a1.selitetark AS tyojono,
+            a2.selite AS tyostatus_koodi,
+            a2.selitetark AS tyostatus,
+            a2.selitetark_2 AS tyostatusvari,
+            tilausrivi.tunnus AS tilausrivi_tunnus,
+            tilausrivi.nimitys AS tehtava_tyo,
+            tilausrivi.kommentti AS tilausrivi_kommentti,
+            tilausrivin_lisatiedot.tilausrivilinkki AS poikkeus_tunnus,
+            IF(tilausrivin_lisatiedot.tilausrivilinkki != 0, CONCAT_WS(' -> ', poikkeus_rivi.nimitys, tilausrivi.nimitys), '') AS poikkeus_teksti,
+            poistettu_laite.tuoteno AS poistettu_laite
+            FROM lasku{$tmp} AS lasku
+            JOIN tyomaarays{$tmp} AS tyomaarays
+            ON ( tyomaarays.yhtio = lasku.yhtio
+              AND tyomaarays.otunnus = lasku.tunnus
+              {$tyomaarays_join} )
+            JOIN tilausrivi{$tmp} AS tilausrivi
+            ON ( tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus = lasku.tunnus
+              AND tilausrivi.var != 'P' )
+            JOIN tilausrivin_lisatiedot{$tmp} AS tilausrivin_lisatiedot
+            ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
+            LEFT JOIN tilausrivi AS poikkeus_rivi
+            ON ( poikkeus_rivi.yhtio = tilausrivin_lisatiedot.yhtio
+              AND poikkeus_rivi.tunnus = tilausrivin_lisatiedot.tilausrivilinkki )
+            LEFT JOIN tilausrivin_lisatiedot AS poikkeus_toimenpide_tilausrivi_lisatiedot
+            ON ( poikkeus_toimenpide_tilausrivi_lisatiedot.yhtio = poikkeus_rivi.yhtio
+              AND poikkeus_toimenpide_tilausrivi_lisatiedot.tilausrivitunnus = poikkeus_rivi.tunnus )
+            LEFT JOIN laite AS poistettu_laite
+            ON ( poistettu_laite.yhtio = poikkeus_toimenpide_tilausrivi_lisatiedot.yhtio
+              AND poistettu_laite.tunnus = poikkeus_toimenpide_tilausrivi_lisatiedot.asiakkaan_positio )
+            JOIN laite
+            ON ( laite.yhtio = tilausrivin_lisatiedot.yhtio
+              AND laite.tunnus = tilausrivin_lisatiedot.asiakkaan_positio
+              AND laite.tila != 'P' )
+            JOIN tuote
+            ON ( tuote.yhtio = laite.yhtio
+              AND tuote.tuoteno = laite.tuoteno )
+            JOIN paikka
+            ON ( paikka.yhtio = laite.yhtio
+              AND paikka.tunnus = laite.paikka )
+            JOIN avainsana a3
+            ON ( a3.yhtio = paikka.yhtio
+              AND a3.selite = paikka.olosuhde
+              AND a3.laji = 'OLOSUHDE')
+            JOIN kohde
+            ON ( kohde.yhtio = paikka.yhtio
+              AND kohde.tunnus = paikka.kohde
+              {$kohde_join})
+            LEFT JOIN avainsana a1
+            ON ( a1.yhtio = tyomaarays.yhtio
+              AND a1.laji = 'TYOM_TYOJONO'
+              AND a1.selite = tyomaarays.tyojono )
+            LEFT JOIN avainsana a2
+            ON ( a2.yhtio = tyomaarays.yhtio
+              AND a2.laji = 'TYOM_TYOSTATUS'
+              AND a2.selite = tyomaarays.tyostatus )
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            {$lasku_where}
+            ORDER BY {$lasku_order}
+            kohde.tunnus ASC,
+            laite.oma_numero ASC";
   $result = pupe_query($query);
 
   $tyomaaraykset = array();
@@ -216,17 +216,17 @@ function kasittele_tyomaaraykset($request) {
   foreach ($request['tyomaaraykset'] as $tyomaarays) {
 
     if (!empty($tyomaarays['poistettu_laite'])) {
-      $tyomaarays['poikkeus_teksti'] .= '<br/>'.$tyomaarays['poistettu_laite'].' -> '.$tyomaarays['tuoteno'];
+      $tyomaarays['poikkeus_teksti'] .= '<br/>' . $tyomaarays['poistettu_laite'] . ' -> ' . $tyomaarays['tuoteno'];
     }
 
     $toimaika = $tyomaarays['toimaika'];
 
     if (!isset($tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']])) {
       $tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']] = array(
-        'asiakas_ytunnus'   => $tyomaarays['asiakas_ytunnus'],
-        'asiakas_nimi'     => $tyomaarays['asiakas_nimi'],
-        'kohde_tunnus'     => $tyomaarays['kohde_tunnus'],
-        'kohde_nimi'     => $tyomaarays['kohde_nimi'],
+          'asiakas_ytunnus' => $tyomaarays['asiakas_ytunnus'],
+          'asiakas_nimi'    => $tyomaarays['asiakas_nimi'],
+          'kohde_tunnus'    => $tyomaarays['kohde_tunnus'],
+          'kohde_nimi'      => $tyomaarays['kohde_nimi'],
       );
     }
 
@@ -277,33 +277,33 @@ function kasittele_tyomaaraykset($request) {
 function echo_tyojono_kayttoliittyma($request) {
 
   $toimitusaika_haku_array = array(
-    ''   => t('Näytä kaikki'),
-    'X'   => t('Näytä myöhässä olevat'),
-    7   => t('1 viikon päästä erääntyvät'),
-    14   => t('2 viikon päästä erääntyvät'),
-    21   => t('3 viikon päästä erääntyvät'),
-    28   => t('4 viikon päästä erääntyvät'),
+      ''  => t('Näytä kaikki'),
+      'X' => t('Näytä myöhässä olevat'),
+      7   => t('1 viikon päästä erääntyvät'),
+      14  => t('2 viikon päästä erääntyvät'),
+      21  => t('3 viikon päästä erääntyvät'),
+      28  => t('4 viikon päästä erääntyvät'),
   );
 
   echo "<form method='POST' action='' name='tyojono_haku'>";
   echo "<table>";
 
   echo "<tr>";
-  echo "<th>".t('Asiakas')."</th>";
+  echo "<th>" . t('Asiakas') . "</th>";
   echo "<td>";
   echo livesearch_kentta('tyojono_haku', 'ASIAKASHAKU', 'asiakas_tunnus', 300, $request['asiakas_tunnus'], 'NOAUTOSUBMIT');
   echo "</td>";
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>".t('Kohde')."</th>";
+  echo "<th>" . t('Kohde') . "</th>";
   echo "<td>";
   echo livesearch_kentta('tyojono_haku', 'KOHDEHAKU', 'kohde_tunnus', 300, $request['kohde_tunnus'], 'NOAUTOSUBMIT');
   echo "</td>";
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>".t('Toimitus')."</th>";
+  echo "<th>" . t('Toimitus') . "</th>";
   echo "<td>";
   echo "<select id='toimitusaika_select' name='toimitusaika'>";
   foreach ($toimitusaika_haku_array as $toimitusaika_value => $toimitusaika) {
@@ -318,7 +318,7 @@ function echo_tyojono_kayttoliittyma($request) {
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>".t('Työjono')."</th>";
+  echo "<th>" . t('Työjono') . "</th>";
   echo "<td>";
   echo "<select name='tyojono' class='tyojono_sort'>";
   foreach ($request['tyojonot'] as $tyojono) {
@@ -333,7 +333,7 @@ function echo_tyojono_kayttoliittyma($request) {
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>".t('Työstatus')."</th>";
+  echo "<th>" . t('Työstatus') . "</th>";
   echo "<td>";
   echo "<select name='tyostatus' class='tyostatus_sort'>";
   foreach ($request['tyostatukset'] as $tyostatus) {
@@ -349,7 +349,7 @@ function echo_tyojono_kayttoliittyma($request) {
 
   echo "</table>";
 
-  echo "<input type='submit' value='".t('Hae')."' />";
+  echo "<input type='submit' value='" . t('Hae') . "' />";
   echo "</form>";
 }
 
@@ -364,21 +364,21 @@ function echo_tyomaaraykset_table($request = array()) {
     $toimitus_string = "Toimitettu";
   }
   echo "<tr>";
-  echo "<th>".t("Kpl")."</th>";
-  echo "<th>".t("Ytunnus")."<br>".t("Asiakas")."</th>";
-  echo "<th>".t("Kohde")."</th>";
-  echo "<th>".t($toimitus_string)."</th>";
-  echo "<th>".t("Työjono")."/<br>".t("Työstatus")."</th>";
+  echo "<th>" . t("Kpl") . "</th>";
+  echo "<th>" . t("Ytunnus") . "<br>" . t("Asiakas") . "</th>";
+  echo "<th>" . t("Kohde") . "</th>";
+  echo "<th>" . t($toimitus_string) . "</th>";
+  echo "<th>" . t("Työjono") . "/<br>" . t("Työstatus") . "</th>";
   echo "<th>";
   if (!empty($request['tyomaaraykset']) and $request['toim'] != 'TEHDYT_TYOT') {
     echo "<form class='multisubmit' name='tulosta_tyolistat' method='POST'>";
     echo "<input type='hidden' name='ala_tee' value='tulosta_tyolista' />";
     foreach ($request['tyomaaraykset'] as $tyomaarays_per_paiva) {
       foreach ($tyomaarays_per_paiva as $tyomaarays) {
-        echo '<input type="hidden" name="lasku_tunnukset[]" value="'.implode(',', $tyomaarays['lasku_tunnukset']).'">';
+        echo '<input type="hidden" name="lasku_tunnukset[]" value="' . implode(',', $tyomaarays['lasku_tunnukset']) . '">';
       }
     }
-    echo "<input type='submit' value='".t("Tallenna tyolistat PDF")."' />";
+    echo "<input type='submit' value='" . t("Tallenna tyolistat PDF") . "' />";
     echo "</form>";
   }
   echo "</th>";
@@ -397,7 +397,7 @@ function echo_tyomaaraykset_table($request = array()) {
       echo "</td>";
 
       echo "<td>";
-      echo $tyomaarays['asiakas_ytunnus'].'<br/>'.$tyomaarays['asiakas_nimi'];
+      echo $tyomaarays['asiakas_ytunnus'] . '<br/>' . $tyomaarays['asiakas_nimi'];
       echo "</td>";
 
       echo "<td>";
@@ -407,11 +407,12 @@ function echo_tyomaaraykset_table($request = array()) {
       echo "<td>";
       $unique_values = array_unique($tyomaarays['toimajat']);
       $fn = function($values) {
-            $return = array();
-            foreach ($values as $value)
-              $return[] = date('d.m.Y', strtotime($value));
-            return $return;
-          };
+                $return = array();
+                foreach ($values as $value) {
+                  $return[] = date('d.m.Y', strtotime($value));
+                }
+                return $return;
+              };
       echo implode('<br/>', $fn($unique_values));
       echo "</td>";
 
@@ -426,15 +427,15 @@ function echo_tyomaaraykset_table($request = array()) {
         echo "<form class='multisubmit' name='tulosta_tarkastuspoytakirja'>";
         echo "<input type='hidden' name='ala_tee' value='tulosta_tarkastuspoytakirja' />";
         echo "<input type='hidden' name='toim' value='{$request['toim']}' />";
-        echo "<input type='hidden' name='lasku_tunnukset' value='".implode(',', $tyomaarays['lasku_tunnukset'])."' />";
-        echo "<input type='submit' value='".t("Tallenna tarkastuspyötäkirja PDF")."' />";
+        echo "<input type='hidden' name='lasku_tunnukset' value='" . implode(',', $tyomaarays['lasku_tunnukset']) . "' />";
+        echo "<input type='submit' value='" . t("Tallenna tarkastuspyötäkirja PDF") . "' />";
         echo "</form>";
         echo "<br/>";
         echo "<form class='multisubmit' name='tulosta_laskutuspoytakirja'>";
         echo "<input type='hidden' name='ala_tee' value='tulosta_laskutuspoytakirja' />";
         echo "<input type='hidden' name='toim' value='{$request['toim']}' />";
-        echo "<input type='hidden' name='lasku_tunnukset' value='".implode(',', $tyomaarays['lasku_tunnukset'])."' />";
-        echo "<input type='submit' value='".t("Tallenna laskutuspyötäkirja PDF")."' />";
+        echo "<input type='hidden' name='lasku_tunnukset' value='" . implode(',', $tyomaarays['lasku_tunnukset']) . "' />";
+        echo "<input type='submit' value='" . t("Tallenna laskutuspyötäkirja PDF") . "' />";
         echo "</form>";
         echo "</td>";
       }
@@ -466,8 +467,8 @@ function echo_tyomaaraykset_table($request = array()) {
         echo "<td>";
         echo "<form class='multisubmit' name='tulosta_tyolista'>";
         echo "<input type='hidden' name='ala_tee' value='tulosta_tyolista' />";
-        echo "<input type='hidden' class='lasku_tunnukset' name='lasku_tunnukset' value='".implode(',', $tyomaarays['lasku_tunnukset'])."' />";
-        echo "<input type='submit' value='".t("Tallenna työlista PDF")."' />";
+        echo "<input type='hidden' class='lasku_tunnukset' name='lasku_tunnukset' value='" . implode(',', $tyomaarays['lasku_tunnukset']) . "' />";
+        echo "<input type='submit' value='" . t("Tallenna työlista PDF") . "' />";
         echo "</form>";
         echo "</td>";
       }
@@ -480,7 +481,7 @@ function echo_tyomaaraykset_table($request = array()) {
 
   if (empty($request['tyomaaraykset'])) {
     echo "<tr>";
-    echo "<td colspan = '6' align='center'>".t('Ei työmääräyksiä')."</td>";
+    echo "<td colspan = '6' align='center'>" . t('Ei työmääräyksiä') . "</td>";
     echo "</tr>";
   }
 
@@ -509,16 +510,16 @@ function echo_tyomaarays_rivi($request, $laitteet) {
     echo "<input type='checkbox' class='select_kaikki' />";
   }
   echo "</th>";
-  echo "<th>".t("Oma numero")."</th>";
-  echo "<th>".t("Sarjanumero")."</th>";
-  echo "<th>".t("Laite")."</th>";
-  echo "<th>".t("Paikka")."</th>";
-  echo "<th>".t("Sijainti")."</th>";
-  echo "<th>".t("Tehtävä työ")."</th>";
-  echo "<th>".t("Kommentti")."</th>";
-  echo "<th>".t("Poikkeus")."</th>";
-  echo "<th>".t("Työjono")."/<br>".t("Työstatus")."</th>";
-  echo "<th>".t("Poikkeama")."</th>";
+  echo "<th>" . t("Oma numero") . "</th>";
+  echo "<th>" . t("Sarjanumero") . "</th>";
+  echo "<th>" . t("Laite") . "</th>";
+  echo "<th>" . t("Paikka") . "</th>";
+  echo "<th>" . t("Sijainti") . "</th>";
+  echo "<th>" . t("Tehtävä työ") . "</th>";
+  echo "<th>" . t("Kommentti") . "</th>";
+  echo "<th>" . t("Poikkeus") . "</th>";
+  echo "<th>" . t("Työjono") . "/<br>" . t("Työstatus") . "</th>";
+  echo "<th>" . t("Poikkeama") . "</th>";
   echo "</tr>";
 
   foreach ($laitteet as $laite) {
@@ -557,7 +558,7 @@ function echo_tyomaarays_rivi($request, $laitteet) {
 
     echo "<td>";
     $kommentti = wordwrap($laite['tilausrivi_kommentti'], 40, '<br/>');
-    echo '<font class="error">'.$kommentti.'</font>';
+    echo '<font class="error">' . $kommentti . '</font>';
     echo "</td>";
 
     echo "<td>";
@@ -579,13 +580,13 @@ function echo_tyomaarays_rivi($request, $laitteet) {
 
       echo "<td>";
       if ($laite['poikkeus_tunnus']) {
-        echo "<font class='error'>".t("Poikkeus")."</font>";
+        echo "<font class='error'>" . t("Poikkeus") . "</font>";
         echo "<br/>";
         echo "<form class='multisubmit' name='tulosta_poikkeamaraportti' method='POST'>";
         echo "<input type='hidden' name='toim' value='{$request['toim']}' />";
         echo "<input type='hidden' name='ala_tee' value='tulosta_poikkeamaraportti' />";
         echo "<input type='hidden' name='lasku_tunnukset' value='{$laite['lasku_tunnus']}' />";
-        echo "<input type='submit' value='".t('Tulosta poikkeamaraportti')."' />";
+        echo "<input type='submit' value='" . t('Tulosta poikkeamaraportti') . "' />";
         echo "</form>";
       }
       echo "</td>";
@@ -616,12 +617,12 @@ function echo_tyomaarays_rivi($request, $laitteet) {
       echo "</td>";
 
       echo "<td>";
-      echo "<a href='{$palvelin2}tilauskasittely/laitteen_vaihto.php?tilausrivi_tunnus={$laite['tilausrivi_tunnus']}&lopetus={$palvelin2}tyomaarays/tyojono2.php'><button type='button'>".t("Laitteen vaihto")."</button></a>";
+      echo "<a href='{$palvelin2}tilauskasittely/laitteen_vaihto.php?tilausrivi_tunnus={$laite['tilausrivi_tunnus']}&lopetus={$palvelin2}tyomaarays/tyojono2.php'><button type='button'>" . t("Laitteen vaihto") . "</button></a>";
       echo "<br/>";
-      echo "<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=TYOMAARAYS&tilausnumero={$laite['lasku_tunnus']}&lopetus={$palvelin2}tyomaarays/tyojono2.php'><button type='button'>".t("Muu")."</button></a>";
+      echo "<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=TYOMAARAYS&tilausnumero={$laite['lasku_tunnus']}&lopetus={$palvelin2}tyomaarays/tyojono2.php'><button type='button'>" . t("Muu") . "</button></a>";
       echo "<br/>";
       //Vaikka lasku_tunnukset annetaan array:nä niin tarkoitus ei ole antaa ikinä enempää kuin yksi lasku_tunnus tämän linkin kautta
-      echo "<a href='{$palvelin2}tyomaarays/tyojono2.php?toim={$request['toim']}&ala_tee=merkkaa_kadonneeksi&lasku_tunnukset[]={$laite['lasku_tunnus']}&laite_tunnus={$laite['laite_tunnus']}'><button type='button'>".t("Kateissa")."</button></a>";
+      echo "<a href='{$palvelin2}tyomaarays/tyojono2.php?toim={$request['toim']}&ala_tee=merkkaa_kadonneeksi&lasku_tunnukset[]={$laite['lasku_tunnus']}&laite_tunnus={$laite['laite_tunnus']}'><button type='button'>" . t("Kateissa") . "</button></a>";
       echo "</td>";
     }
 
@@ -633,7 +634,7 @@ function echo_tyomaarays_rivi($request, $laitteet) {
 
   echo "<td>";
   if ($request['toim'] != 'TEHDYT_TYOT') {
-    echo "<input type='submit' value='".t("Merkkaa tehdyksi")."' />";
+    echo "<input type='submit' value='" . t("Merkkaa tehdyksi") . "' />";
   }
   echo "</td>";
 
@@ -655,12 +656,12 @@ function hae_tyojonot($request = array()) {
   $tyojono_result = t_avainsana("TYOM_TYOJONO");
   $tyojonot = array();
   $tyojonot[] = array(
-    'value'   => 'KAIKKI',
-    'text'   => t('Kaikki'),
+      'value' => 'KAIKKI',
+      'text'  => t('Kaikki'),
   );
   $tyojonot[] = array(
-    'value'   => 'EIJONOSSA',
-    'text'   => t('Ei jonossa'),
+      'value' => 'EIJONOSSA',
+      'text'  => t('Ei jonossa'),
   );
   while ($tyojono_row = mysql_fetch_assoc($tyojono_result)) {
     $tyojono_row['value'] = $tyojono_row['selite'];
@@ -677,12 +678,12 @@ function hae_tyostatukset($request = array()) {
   $tyostatus_result = t_avainsana("TYOM_TYOSTATUS");
   $tyostatukset = array();
   $tyostatukset[] = array(
-    'value'   => 'KAIKKI',
-    'text'   => t('Kaikki'),
+      'value' => 'KAIKKI',
+      'text'  => t('Kaikki'),
   );
   $tyostatukset[] = array(
-    'value'   => 'EISTATUSTA',
-    'text'   => t('Ei statusta'),
+      'value' => 'EISTATUSTA',
+      'text'  => t('Ei statusta'),
   );
   while ($tyostatus_row = mysql_fetch_assoc($tyostatus_result)) {
     $tyostatus_row['value'] = $tyostatus_row['selite'];
@@ -696,21 +697,21 @@ function hae_tyostatukset($request = array()) {
 function hae_laitteen_viimeiset_tapahtumat($laite_tunnus) {
   global $kukarow, $yhtiorow;
 
-  $query = "  SELECT huoltosyklit_laitteet.viimeinen_tapahtuma,
-        tuotteen_avainsanat.selite AS tapahtuman_tyyppi
-        FROM huoltosyklit_laitteet
-        JOIN huoltosykli
-        ON ( huoltosykli.yhtio = huoltosyklit_laitteet.yhtio
-          AND huoltosykli.tunnus = huoltosyklit_laitteet.huoltosykli_tunnus )
-        JOIN tuote as toimenpide_tuote
-        ON ( toimenpide_tuote.yhtio = huoltosykli.yhtio
-          AND toimenpide_tuote.tuoteno = huoltosykli.toimenpide )
-        JOIN tuotteen_avainsanat
-        ON ( tuotteen_avainsanat.yhtio = toimenpide_tuote.yhtio
-          AND tuotteen_avainsanat.tuoteno = toimenpide_tuote.tuoteno
-          AND tuotteen_avainsanat.laji = 'tyomaarayksen_ryhmittely')
-        WHERE huoltosyklit_laitteet.yhtio = '{$kukarow['yhtio']}'
-        AND huoltosyklit_laitteet.laite_tunnus = '{$laite_tunnus}'";
+  $query = "SELECT huoltosyklit_laitteet.viimeinen_tapahtuma,
+            tuotteen_avainsanat.selite AS tapahtuman_tyyppi
+            FROM huoltosyklit_laitteet
+            JOIN huoltosykli
+            ON ( huoltosykli.yhtio = huoltosyklit_laitteet.yhtio
+              AND huoltosykli.tunnus = huoltosyklit_laitteet.huoltosykli_tunnus )
+            JOIN tuote as toimenpide_tuote
+            ON ( toimenpide_tuote.yhtio = huoltosykli.yhtio
+              AND toimenpide_tuote.tuoteno = huoltosykli.toimenpide )
+            JOIN tuotteen_avainsanat
+            ON ( tuotteen_avainsanat.yhtio = toimenpide_tuote.yhtio
+              AND tuotteen_avainsanat.tuoteno = toimenpide_tuote.tuoteno
+              AND tuotteen_avainsanat.laji = 'tyomaarayksen_ryhmittely')
+            WHERE huoltosyklit_laitteet.yhtio = '{$kukarow['yhtio']}'
+            AND huoltosyklit_laitteet.laite_tunnus = '{$laite_tunnus}'";
   $result = pupe_query($query);
 
   $viimeiset_tapahtumat = array();
@@ -724,13 +725,13 @@ function hae_laitteen_viimeiset_tapahtumat($laite_tunnus) {
 function onko_laitteella_poikkeus($laite_tunnus) {
   global $kukarow, $yhtiorow;
 
-  $query = "  SELECT *
-        FROM tilausrivin_lisatiedot
-        JOIN tilausrivi as poikkeus_rivi
-        ON ( poikkeus_rivi.yhtio = tilausrivin_lisatiedot.yhtio
-          AND poikkeus_rivi.tunnus = tilausrivin_lisatiedot.tilausrivilinkki )
-        WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
-        AND tilausrivin_lisatiedot.asiakkaan_positio = '{$laite_tunnus}'";
+  $query = "SELECT *
+            FROM tilausrivin_lisatiedot
+            JOIN tilausrivi as poikkeus_rivi
+            ON ( poikkeus_rivi.yhtio = tilausrivin_lisatiedot.yhtio
+              AND poikkeus_rivi.tunnus = tilausrivin_lisatiedot.tilausrivilinkki )
+            WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
+            AND tilausrivin_lisatiedot.asiakkaan_positio = '{$laite_tunnus}'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {

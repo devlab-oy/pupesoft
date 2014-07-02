@@ -222,20 +222,32 @@ if ($tee == 'A') {
       $query = "SELECT tunnus
                 FROM kustannuspaikka
                 WHERE yhtio   = '$kukarow[yhtio]'
-                and tyyppi    = 'K'
-                and kaytossa != 'E'
+                AND tyyppi    = 'K'
+                AND kaytossa != 'E'
                 LIMIT 1";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) > 0) {
         $monivalintalaatikot[] = "KUSTP";
       }
+      
+      $query = "SELECT tunnus
+                FROM kustannuspaikka
+                WHERE yhtio = '{$kukarow["yhtio"]}'
+                AND tyyppi = 'O'
+                AND kaytossa != 'E'
+                LIMIT 1";
+      $result = pupe_query($query);
 
+      if (mysql_num_rows($result) > 0) {
+        $monivalintalaatikot[] = "KOHDE";
+      }
+      
       $query = "SELECT tunnus
                 FROM kustannuspaikka
                 WHERE yhtio   = '$kukarow[yhtio]'
-                and tyyppi    = 'P'
-                and kaytossa != 'E'
+                AND tyyppi    = 'P'
+                AND kaytossa != 'E'
                 LIMIT 1";
       $result = pupe_query($query);
 
@@ -244,12 +256,15 @@ if ($tee == 'A') {
       }
 
       if (count($monivalintalaatikot) > 0) {
-        echo "</tr><tr><th>".t("Tarkenne")."</th><td>";
+        echo "<tr>";
+        echo "<th>".t("Tarkenne")."</th>";
+        echo "<td>";
 
         $noautosubmit = TRUE;
         require "tilauskasittely/monivalintalaatikot.inc";
 
         echo "</td>";
+        echo "</tr>";
       }
 
       echo "<td class='back' style='vertical-align:bottom;'><input type='Submit' value='".t("Näytä")."'></td></tr>";

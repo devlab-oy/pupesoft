@@ -2315,7 +2315,7 @@ if (!function_exists('alvierittely')) {
       $result = pupe_query($query);
       $tilnorivi = mysql_fetch_assoc($result);
       $tilausnumerot = $tilnorivi['tilnot'];
-      
+
       $query = "SELECT
                 *
                 FROM maksupaatetapahtumat

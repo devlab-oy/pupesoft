@@ -56,15 +56,16 @@ if (isset($tee) and $tee == "lataa_sertifikaatti") {
 }
 elseif (isset($tee) and $tee == "hae_tiliote") {
   if ($salasana) {
-    $salattu_sertifikaatti = hae_sertifikaatti($tili, $kukarow["yhtio"]);
+    $salatut_tunnukset = hae_avain_ja_sertifikaatti($tili, $kukarow["yhtio"]);
 
-    $sertifikaatti = pura_salaus($salattu_sertifikaatti, $salasana);
+    $avain = pura_salaus($salatut_tunnukset["private_key"], $salasana);
+    $sertifikaatti = pura_salaus($salatut_tunnukset["certificate"], $salasana);
 
     $parameters = array(
       "method" => "POST",
       "data" => array(
         "cert" => base64_encode($sertifikaatti),
-        "private_key" => "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlDWFFJQkFBS0Jn\nUURDMFVSOEMxc200Yk5EREJHNlptUzlpSFlHTVpoV3dBeFI2SXEwNmQ3ZHRs\nSjZLeDhLCnI1TmVvdldBajB1aC9KNEJEMGord09icTB2elRLc1BtSnBKU3BX\nYm9EdmYweXlhbGIrTEpseFYvdWF6ekVBM24KVVJKU0EzcHFUQmtKVDJrZnJh\nZUFrT1BhQlN5UzFqUitteWhXd0JGMnU4NFdUUjlOSlJjcFozb3R0d0lEQVFB\nQgpBb0dCQUtyZmRkdis4ZUkya0U2OFpVaEN5eFZhZlhxTlFYckZVNGo4Rjd6\nNmJCbTI4cnhvMmY4N1pGemJQYzJXCjRkV2doczJUSklrZGxPeGVScGJJcWE1\nU0luK0hCZWw4KzZ3bzJnTE80ZzBiZlQ0NFkxYnFqUmtkaVBsU0NKVzAKUFYx\naFNkNVNSVnQ3KzB5R2ZDV3k1NTlGemhjL21RUVVraGt5dGMwelllRXdVTFl4\nQWtFQTN1VE43cnZadUVjRQpzUFVlaG1nOFB5QlVHWUs5S0ZrcjlGaUkwY0w4\nRnB4WjBsOXBXNURRSTdwVDlIV2hySnArNzhTS2FtY1Q4Y0hLCjFPTUJha3hl\nWFFKQkFOL0E1MndwdDJINklNOEN4emEzdG9RWmhxbzFtcTRiY2FyVVdxNjVJ\nSjVqbmZGdEdkUjIKOVhVaDY1WWxFbFVxeURXeXVXWFJGZGVVYWJ1MVF6bmo4\neU1DUUR6TEpVdnZHcFFEY3NrZElpVkF1dVh3MkY5WQo1R1RqNVhRd3phaUF5\nU2NWbi80Y0hlMW1rdzZibkpoNW1RNHQyVjltT09hS2xNc0VzMkRiUmFDTGtk\nVUNRR1dGCkdic3Fwa2l1KzBuUmdkK2l0UTMwb3ZRQlJFQXd0WDhEd0cwOEU3\nK3BoUlR3SW1NUzRrV1Y4VlQ3VnZrTFl6RngKK01wb2RsZU12L2hwd3FtMmNp\nOENRUUNVRWd3REJFcCtGTSsyWTVOMUt3U0d6R0JMOUx0cG5Bc3FjTEc5Snho\nTwpmNE13ejR4aFBYTVZsdnExd0VTTFByRFVGUXBaNGVPWjRYWDJNVG80R0gz\nOQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ==\n",
+        "private_key" => base64_encode($avain),
         "customer_id" => "11111111",
         "file_type" => "TITO",
         "file_reference" => "11111111A12006030329501800000014",
@@ -159,18 +160,18 @@ function hae_tilit($yhtio)
 /**
  * @param $tili
  * @param $yhtio
- * @return mixed
+ * @return array
  */
-function hae_sertifikaatti($tili, $yhtio)
+function hae_avain_ja_sertifikaatti($tili, $yhtio)
 {
-  $query = "SELECT certificate
+  $query = "SELECT private_key, certificate
               FROM yriti
               WHERE tunnus={$tili} AND yhtio='{$yhtio}'";
 
   $result = pupe_query($query);
   $rivi = mysql_fetch_assoc($result);
 
-  return $rivi["certificate"];
+  return $rivi;
 }
 
 /**

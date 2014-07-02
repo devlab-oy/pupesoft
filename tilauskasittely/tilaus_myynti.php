@@ -1188,7 +1188,7 @@ if ($tee == "VALMIS"
 
     $maksuehtorow = mysql_fetch_assoc($maksuehtores);
     
-    echo "<table><form name='laskuri' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
+    echo "<table><form name='laskuri' id='laskuri' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
 
     echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
     echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
@@ -1206,7 +1206,14 @@ if ($tee == "VALMIS"
 
     echo "  <script type='text/javascript' language='JavaScript'>
         <!--
-
+        paivitys = false;
+          $(document).ready(function () { 
+            $('#korttimaksunappi').click(function () {
+                document.getElementById('seka').value = 'X';
+                $('#laskuri').submit();
+            });
+          });
+          
           function update_summa(kaikkiyhteensa) {
 
             kateinen = Number(document.getElementById('kateismaksu').value.replace(\",\",\".\"));
@@ -1230,8 +1237,8 @@ if ($tee == "VALMIS"
 
               summa = 0.00;
               document.getElementById('hyvaksy_nappi').disabled = false;
-              KISSA//document.getElementById('seka').value = 'kylla';
               document.getElementById('korttimaksunappi').disabled = true;
+              document.getElementById('seka').value = 'kylla';
             } else {
               document.getElementById('hyvaksy_nappi').disabled = true;
               document.getElementById('korttimaksunappi').disabled = false;
@@ -1286,7 +1293,7 @@ if ($tee == "VALMIS"
     
     $kuitti1 = utf8_decode($kuitti1);
     if (!empty($kuitti1)) { var_dump($kuitti1); }
-    
+    echo "SEKA $seka <br>";
     echo "<tr><th>".t("Laskun loppusumma")."</th><td align='right'>$kaikkiyhteensa</td><td>$laskurow[valkoodi]</td></tr>";
 
     echo "<tr><td>".t("Käteisellä")."</td><td><input type='text' name='kateismaksu[kateinen]' id='kateismaksu' value='{$kateismaksu['kateinen']}' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
@@ -1319,7 +1326,7 @@ if ($tee == "VALMIS"
     }
     echo "<tr><th>".t("Erotus")."</th><td name='loppusumma' id='loppusumma' align='right'><strong>$totaalisumma</strong></td><td>$laskurow[valkoodi]</td></tr>";
     
-    echo "<tr><td class='back'><input type='submit' name='korttimaksunappi' id='korttimaksunappi' value='".t("Tee uusi korttimaksu")."'></td></tr>";
+    echo "<tr><td class='back'><input type='button' name='korttimaksunappi' id='korttimaksunappi' value='".t("Tee uusi korttimaksu")."'></td></tr>";
     echo "<tr><td class='back'><input type='submit' name='hyvaksy_nappi' id='hyvaksy_nappi' value='".t("Hyväksy")."' disabled></td></tr>";
 
     echo "</form><br><br>";

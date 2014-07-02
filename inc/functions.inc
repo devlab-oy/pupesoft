@@ -24089,7 +24089,6 @@ if (!function_exists('js_laite')) {
 
       function seuraava_tapahtuma_valm_pvm(huoltovali) {
         var today = new Date();
-        today.setDate(1);
         var date = new Date();
         date.setMonth(parseInt($('.valm_pvm_tkk').val() - 1));
         date.setFullYear(parseInt($('.valm_pvm_tvv').val()));
@@ -24101,7 +24100,6 @@ if (!function_exists('js_laite')) {
           var seuraava_tapahtuma = new Date();
           seuraava_tapahtuma.setMonth(parseInt($('.valm_pvm_tkk').val() - 1));
           seuraava_tapahtuma.setFullYear(parseInt($('.valm_pvm_tvv').val()));
-          seuraava_tapahtuma.setDate(1);
           if (huoltovali == 3650) {
             seuraava_tapahtuma.setFullYear(seuraava_tapahtuma.getFullYear() + 10);
           }

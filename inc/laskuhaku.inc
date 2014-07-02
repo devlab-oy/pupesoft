@@ -224,6 +224,8 @@ for ($i = 1; $i < 32; $i++) {
 
 echo "</select></td><td class='back'>&nbsp;</td></tr>";
 
+$monivalintalaatikot = array();
+
 $query = "SELECT tunnus
           FROM kustannuspaikka
           WHERE yhtio   = '$kukarow[yhtio]'
@@ -233,16 +235,28 @@ $query = "SELECT tunnus
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) > 0) {
+  $monivalintalaatikot[] = "KUSTP";
+}
 
-  echo "<tr><th>".t("Kustannuspaikka")."</th><td>";
+$query = "SELECT tunnus
+          FROM kustannuspaikka
+          WHERE yhtio   = '$kukarow[yhtio]'
+          and tyyppi    = 'P'
+          and kaytossa != 'E'
+          LIMIT 1";
+$result = pupe_query($query);
 
-  $monivalintalaatikot = array("KUSTP");
+if (mysql_num_rows($result) > 0) {
+  $monivalintalaatikot[] = "PROJEKTI";
+}
+
+if (count($monivalintalaatikot) > 0) {
+  echo "</tr><tr><th>".t("Tarkenne")."</th><td>";
+
   $noautosubmit = TRUE;
-  $piirra_otsikot = FALSE;
+  require "tilauskasittely/monivalintalaatikot.inc";
 
-  require ("tilauskasittely/monivalintalaatikot.inc");
-
-  echo "</td></tr>";
+  echo "</td>";
 }
 
 $sel = array_fill_keys(array($laskuntyyppi), " selected") + array_fill_keys(array('H', 'Y', 'M', 'P', 'Q', 'K'), '');

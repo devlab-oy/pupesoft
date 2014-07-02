@@ -156,6 +156,8 @@ if (!isset($nayta_sostolisateksti)) $nayta_sostolisateksti = "";
 if (!isset($sarjanumero_dropdown))   $sarjanumero_dropdown = "";
 if (!isset($kommentti_select))     $kommentti_select = '';
 if (!isset($yksi_suoratoimittaja))   $yksi_suoratoimittaja = '';
+if (!isset($tuotteenpainotettukehayht)) $tuotteenpainotettukehayht = array();
+if (!isset($painotettukehayhteensa)) $painotettukehayhteensa = 0;
 
 // Setataan lopetuslinkki, jotta p‰‰semme takaisin tilaukselle jos k‰yd‰‰n jossain muualla
 $tilmyy_lopetus = "{$palvelin2}{$tilauskaslisa}tilaus_myynti.php////toim=$toim//projektilla=$projektilla//tilausnumero=$tilausnumero//ruutulimit=$ruutulimit//tilausrivi_alvillisuus=$tilausrivi_alvillisuus//mista=$mista";
@@ -1210,7 +1212,7 @@ if ($tee == "VALMIS"
             kateinen = Number(document.getElementById('kateismaksu').value.replace(\",\",\".\"));
             pankki = Number(document.getElementById('pankkikortti').value.replace(\",\",\".\"));
             luotto = Number(document.getElementById('luottokortti').value.replace(\",\",\".\"));
-            
+
             summa = kaikkiyhteensa - (kateinen + pankki + luotto);";
 
 
@@ -5342,6 +5344,12 @@ if ($tee == '') {
     $headerit .= "<th>".t("Tuotenumero")."</th><th>".t("M‰‰r‰")."</th><th>".t("Var")."</th>";
     $sarakkeet += 3;
 
+    if ($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K") {
+      $headerit .= "<th>".t("Keha")."</th>";
+      $headerit .="<th>".t("Keha * kpl")."</th>";
+      $sarakkeet += 2;
+    }
+
     if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA") {
 
       $headerit .= "<th>".t("Netto")."</th>";
@@ -5570,6 +5578,23 @@ if ($tee == '') {
       }
 
       while ($row = mysql_fetch_assoc($result)) {
+
+        if ($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K"
+          and $row["tyyppi"] != "V" and isset($tuotteenpainotettukehayht["keha"])) {
+
+          $_colspan = $sarakkeet_alku - 6;
+
+          echo "<tr>{$jarjlisa}";
+          echo "<td class='back' colspan='{$_colspan}'>&nbsp;</td>";
+          echo "<th colspan='5' align='right'>";
+          echo t("Valmisteen %s kehahinta * kpl yhteens‰", '', $tuotteenpainotettukehayht["tuoteno"]);
+          echo "</th>";
+          echo "<td class='spec' align='right'>";
+          echo sprintf("%.2f", $tuotteenpainotettukehayht["keha"]);
+          echo "</td>";
+
+          $tuotteenpainotettukehayht["keha"] = 0;
+        }
 
         // Tuoteperheen lapset, jotka on merkitty puutteeksi
         if ($kukarow['extranet'] != '' and $row['tunnus'] != $row['perheid'] and strtoupper($row['var']) == 'P' and $row['perheid'] != 0) {
@@ -5907,7 +5932,6 @@ if ($tee == '') {
               $tuoteperhe_kayty = $row['perheid'];
             }
             echo "<td valign='top' rowspan='$pknum' $class style='border-top: 1px solid; border-left: 1px solid; border-bottom: 1px solid;'>$echorivino";
-
 
             if (($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] == 'S') or $yhtiorow["salli_jyvitys_myynnissa"] == "S") {
               echo "<br/>";
@@ -6477,7 +6501,6 @@ if ($tee == '') {
             $kpl_ruudulle = $row['varattu'] * 1;
           }
 
-
           if ($muokkauslukko_rivi == "" and $kpl_ruudulle < 0 and ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "G")) {
 
             echo "<td $class align='right' valign='top' nowrap>";
@@ -6572,7 +6595,8 @@ if ($tee == '') {
           }
         }
 
-        if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA") {
+        if (($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K")
+            or ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA")) {
           $classvar = $class;
         }
         else {
@@ -6599,6 +6623,32 @@ if ($tee == '') {
         }
 
         echo "<td $classvar align='center' valign='top'>$var_temp&nbsp;</td>";
+
+        if ($toim == "VALMISTAVARASTOON" and $yhtiorow['kehahinta_valmistuksella'] == "K") {
+          echo "<td {$class} align='right' valign='top' nowrap>";
+          echo "{$row["kehahin"]}";
+          echo "</td>";
+
+          $painotettukeha = $kpl_ruudulle * $row["kehahin"];
+          if ($row["tyyppi"] == "V") {
+            $tuotteenpainotettukehayht["keha"] += $painotettukeha;
+            $painotettukehayhteensa += $painotettukeha;
+          }
+          else {
+            $tuotteenpainotettukehayht["tuoteno"] = $row["tuoteno"];
+          }
+
+          if ($classlisa != "") {
+            $classvar = $classlisa;
+          }
+          else {
+            $classvar = $class;
+          }
+
+          echo "<td {$classvar} align='right' valign='top' nowrap>";
+          echo "{$painotettukeha}";
+          echo "</td>";
+        }
 
         if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA") {
 
@@ -7331,6 +7381,21 @@ if ($tee == '') {
           echo "</tr>";
 
         }
+      }
+
+      if ($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K") {
+        $_colspan = $sarakkeet_alku - 6;
+
+        echo "<tr>{$jarjlisa}";
+        echo "<td class='back' colspan='{$_colspan}'>&nbsp;</td>";
+        echo "<th colspan='5' align='right'>";
+        echo t("Valmisteen %s kehahinta * kpl yhteens‰", '', $tuotteenpainotettukehayht["tuoteno"]);
+        echo "</th>";
+        echo "<td class='spec' align='right'>";
+        echo sprintf("%.2f", $tuotteenpainotettukehayht["keha"]);
+        echo "</td>";
+
+        $tuotteenpainotettukehayht["keha"] = 0;
       }
 
       $summa           = 0;   // Tilauksen verollinen loppusumma tilauksen valuutassa
@@ -8222,6 +8287,18 @@ if ($tee == '') {
           echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
         }
 
+      }
+      elseif ($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K") {
+        $_colspan = $sarakkeet_alku - 6;
+
+        echo "<tr>{$jarjlisa}";
+        echo "<td class='back' colspan='{$_colspan}'>&nbsp;</td>";
+        echo "<th colspan='5' align='right'>";
+        echo t("Koko valmistuksen Kehahinta * kpl yhteens‰");
+        echo "</th>";
+        echo "<td class='spec' align='right'>";
+        echo sprintf("%.2f", $painotettukehayhteensa);
+        echo "</td>";
       }
 
       echo "</table>";

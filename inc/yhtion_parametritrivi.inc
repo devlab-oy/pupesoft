@@ -3465,6 +3465,18 @@ if (mysql_field_name($result, $i) == 'valmistuksien_kasittely') {
   $jatko = 0;
 }
 
+if (mysql_field_name($result, $i) == 'kehahinta_valmistuksella') {
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'K' ? ' selected' : '';
+
+  $ulos .= "<option value = ''>".t("Valmistuksella ei n‰ytet‰ keskihankintahintoja")."</option>";
+  $ulos .= "<option value = 'K' $sel>".t("Valmistuksella n‰ytet‰‰n keskihankintahinnat")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if (mysql_field_name($result, $i) == 'tulosta_valmistus_tulosteet') {
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 

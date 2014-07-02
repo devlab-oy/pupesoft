@@ -5,6 +5,34 @@ require("inc/parametrit.inc");
 echo "<font class='head'>" . t('SEPA-pankkiyhteys') . "</font>";
 echo "<hr>";
 
+/**
+ * @param $tunnukset
+ * @param $maksuaineisto
+ * @return array
+ */
+function laheta_maksuaineisto($tunnukset, $maksuaineisto)
+{
+  $parameters = array(
+    "method" => "POST",
+    "data" => array(
+      "cert" => base64_encode($tunnukset["sertifikaatti"]),
+      "private_key" => base64_encode($tunnukset["avain"]),
+      "customer_id" => "11111111",
+      "file_type" => "NDCORPAYS",
+      "target_id" => "11111111A1",
+      "content" => $maksuaineisto
+    ),
+    "url" => "https://sepa.devlab.fi/api/nordea/upload_file",
+    "headers" => array(
+      "Content-Type: application/json",
+      "Authorization: Token token=Vl2E1xahRJz4vO4J28QSQn2mbkrM"
+    )
+  );
+
+  $vastaus = pupesoft_rest($parameters);
+  return $vastaus;
+}
+
 if (isset($tee) and $tee == "lataa_sertifikaatti") {
   if (avaimet_ja_salasana_kunnossa($salasana, $salasanan_vahvistus)) {
     $sertifikaatti = file_get_contents($_FILES["certificate"]["tmp_name"]);
@@ -121,6 +149,31 @@ elseif (isset($tee) and $tee == "hae_viiteaineisto") {
     tiliformi("hae_viiteaineisto", $kukarow);
   }
 }
+elseif (isset($tee) and $tee == "laheta_maksuaineisto") {
+  if ($salasana and $_FILES["maksuaineisto"]["tmp_name"]) {
+    $maksuaineisto = file_get_contents($_FILES["maksuaineisto"]["tmp_name"]);
+    $tunnukset = hae_tunnukset_ja_pura_salaus($tili, $kukarow, $salasana);
+
+    $vastaus = laheta_maksuaineisto($tunnukset, $maksuaineisto);
+
+    echo "<table>";
+    echo "<tbody>";
+
+    foreach ($vastaus[1] as $key => $value) {
+      echo "<tr>";
+      echo "<td>{$key}</td>";
+      echo "<td>{$value}</td>";
+      echo "</tr>";
+    }
+
+    echo "</tbody";
+    echo "</table>";
+
+  }
+  else {
+    tiliformi("laheta_maksuaineisto", $kukarow);
+  }
+}
 else {
   echo "<form method='post' action='pankkiyhteys.php'>";
   echo "<table>";
@@ -132,6 +185,7 @@ else {
   echo "<option value='lataa_sertifikaatti'>" . t('Lataa sertifikaatti') . "</option>";
   echo "<option value='hae_tiliote'>" . t("Hae tiliote") . "</option>";
   echo "<option value='hae_viiteaineisto'>" . t("Hae viiteaineisto") . "</option>";
+  echo "<option value='laheta_maksuaineisto'>" . t("Lähetä maksuaineisto") . "</option>";
   echo "</select>";
   echo "</td>";
   echo "</tr>";
@@ -313,7 +367,14 @@ function tiliformi($komento, $kukarow)
 {
   $tilit = hae_tilit($kukarow["yhtio"]);
 
-  echo "<form method='post' action='pankkiyhteys.php'>";
+  if ($komento == "laheta_maksuaineisto") {
+    $enctype = "enctype='multipart/form-data'";
+  }
+  else {
+    $enctype = "";
+  }
+
+  echo "<form method='post' action='pankkiyhteys.php' {$enctype}>";
   echo "<input type='hidden' name='tee' value='{$komento}'/>";
   echo "<table>";
   echo "<tbody>";
@@ -337,6 +398,17 @@ function tiliformi($komento, $kukarow)
   echo "<input type='password' name='salasana' id='salasana'/>";
   echo "</td>";
   echo "</tr>";
+
+  if ($komento == "laheta_maksuaineisto") {
+    echo "<tr>";
+    echo "<td>";
+    echo "<label for='maksuainesto'>" . t("Maksuaineisto") . "</label>";
+    echo "</td>";
+    echo "<td>";
+    echo "<input type='file' name='maksuaineisto' id='maksuaineisto'/>";
+    echo "</td>";
+    echo "</tr>";
+  }
   echo "<tr>";
   echo "<td class='back'>";
   echo "<input type='submit'/>";

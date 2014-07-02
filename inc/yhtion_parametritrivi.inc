@@ -1132,6 +1132,23 @@ if (mysql_field_name($result, $i) == "dynaaminen_kassamyynti") {
   $jatko = 0;
 }
 
+if (mysql_field_name($result, $i) == "maksupaate_kassamyynti") {
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel1="";
+
+  if ($trow[$i] != "") {
+    $sel1 = "selected";
+  }
+
+  $ulos .= "<option value=''>".t("Ei k‰ytet‰ maksup‰‰tett‰ kassamyynniss‰")."</option>";
+  $ulos .= "<option value='K' $sel1>".t("K‰ytet‰‰n maksup‰‰tett‰ kassamyynniss‰")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if (mysql_field_name($result, $i) == "kerayspoikkeama_kasittely") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

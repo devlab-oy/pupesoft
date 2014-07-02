@@ -2,7 +2,7 @@
 
 /**
  * Lumo-handler ajaa taustalla maksup‰‰tetapahtumia ja tallentaa liikkuvat tiedot kantaan.
- * Tarvitaan $tilausnumero, $maksut array (pankkikorttisumma, luottokorttisumma)
+ * Tarvitaan $tilausnumero, $korttimaksu (summa)
  * Maksutapahtuman tila tarkastetaan ensin aina tietokannasta ja ajetaan vasta sitten maksup‰‰tteelle
  * Settaa lopuksi muuttujat k‰yttˆliittym‰‰ varten 
  **/
@@ -12,9 +12,8 @@ require_once("rajapinnat/lumo_client.php");
 $korttimaksu = str_replace(",",".", $korttimaksu);
 $korttimaksu_f = $korttimaksu * 100;
 
-$suoritukset = array (1,2);
-
-
+// 1 = tee maksutapahtuma, 2 = hae asiakkaan kuitti, 3 = hae kauppiaan kuitti
+$suoritukset = array (1,2,3);
 
 // Tarkistetaan onko onnistuneita suorituksia
 $query = "SELECT *
@@ -41,28 +40,35 @@ while ($ruutu = mysql_fetch_assoc($result)) {
 $kaikkiyhteensa_int = $kaikkiyhteensa * 100;
 $vertailtava_summa_int = ($maksettu_pkortilla + $maksettu_lkortilla) * 100;
 
-echo "suorituksia yhteensa kaikkiaan $kaikkiyhteensa_int <br>";
-echo "vertailtavasummaint $vertailtava_summa_int <br>";
-
 $maksupaate_maksetut['luottokortti'] = $maksettu_lkortilla;
 $maksupaate_maksetut['pankkikortti'] = $maksettu_pkortilla;
-// Jos kirjatut suoritukset kattavat jo koko vertailtavan summan ei tehd‰ lis‰‰ maksup‰‰tetapahtumia
+// Jos kirjatut suoritukset kattavat jo koko avoinna olevan summan ei tehd‰ lis‰‰ maksup‰‰tetapahtumia
 if ($vertailtava_summa_int >= $kaikkiyhteensa_int) {
   return 0;
 }
 
-echo "maksut ei riitt‰ny viel‰ <br>";
-
-
 foreach($suoritukset as $suoritus) {
 
-  if(isset($lumo_service_address) and isset($lumo_service_port) and is_numeric($korttimaksu_f) and $korttimaksu_f > 0) {
+  // Jos salasanat.phpst‰ puuttuu lumon osoite tai portti
+  if(!isset($lumo_service_address) or !isset($lumo_service_port)) {
+    $onnistuuko = t("Maksup‰‰tett‰ ei ole konfiguroitu oikein");
+    break;
+  }
+
+  // Jos puuttuu jostain syyst‰ tilausnumero
+  if(!isset($tilausnumero) or trim($tilausnumero) == '') {
+    $onnistuuko = t("Tilausnumero kadonnut, maksutapahtumaa ei voi tehd‰");
+    break;
+  }
+
+  // Jos summa on v‰hint‰‰n 0.01 EUR voidaan tehd‰ maksutapahtuma
+  if(is_numeric($korttimaksu_f) and $korttimaksu_f >= 1) {
     
     $clientti = new LumoClient($lumo_service_address, $lumo_service_port);
 
     if ($clientti->getErrorCount() > 0) {
-      $onnistuuko = t("HYLƒTTY");
-      exit;
+      $onnistuuko = t("Ei yhteytt‰ maksup‰‰tteeseen");
+      break;
     }
     
     switch ($suoritus) {
@@ -72,22 +78,20 @@ foreach($suoritukset as $suoritus) {
         break;
     
       case '2':
-        if ($onnistuuko != 'VELOITETTU') break;
+        if ($onnistuuko != t("VELOITETTU")) break;
         $kuitti1 = $clientti->getCustomerReceipt();
         $kuitti1 = utf8_decode($kuitti1);
         $pankkivailuotto = '';
         if (strpos($kuitti1, "LUOTTOKORTTI") !== FALSE) {
-          echo "<br>MAKSU TEHTIIN LUOTTOKORTILLA<br>";
           $pankkivailuotto = 'LUOTTOKORTTI';
           $maksupaate_maksetut['luottokortti'] += $korttimaksu;
         }
         elseif (strpos($kuitti1, "PANKKIKORTTI") !== FALSE) {
-          echo "<br>MAKSU TEHTIIN PANKKIKORTILLA<br>";
           $pankkivailuotto = 'PANKKIKORTTI';
           $maksupaate_maksetut['pankkikortti'] += $korttimaksu;
         }
         else {
-          // Ehk‰ t‰ss‰ keississ‰ pit‰‰ feilata kokonaan kun tarkoittaa periaatteessa sit‰ ett‰ kuittia ei tule
+          // Failsafe jos kuitilta ei jostain syyst‰ lˆydy pankki/luottokorttiteksti‰ Suomeksi
           $pankkivailuotto = 'PANKKIKORTTI';
           $maksupaate_maksetut['pankkikortti'] += $korttimaksu;
         }
@@ -95,17 +99,20 @@ foreach($suoritukset as $suoritus) {
         break;
     
       case '3':
+        if ($onnistuuko != t("VELOITETTU")) break;
         $kuitti2 = $clientti->getMerchantReceipt();
+        $kuitti2 = utf8_decode($kuitti2);
+
         break;
     }
 
     // Tuhotaan objekti ett‰ socketti sulkeutuu
     unset($clientti);
   }
+  else {
+    $onnistuuko = t("Tarkista summa");
+  }
 }
-
-
-
 
 $status = $onnistuuko == "VELOITETTU" ? 'K' : '';
 // P‰ivitet‰‰n suoritus kantaan jos se onnistui
@@ -137,7 +144,12 @@ if ($status == 'K') {
   $korttimaksu = '';
 }
 else {
-  $salamuuttuja1 = "<td>$onnistuuko</td>";
+  $korttimaksutapahtuman_status = $onnistuuko;
 }
-//$maksupaate_maksetut['luottokortti'] += $korttimaksu;
-//$maksupaate_maksetut['pankkikortti'];
+// Tyhjennet‰‰n handlerissa setattavat muuttujat jotka eiv‰t mene k‰yttˆliittym‰‰n
+unset($kuittilisa);
+unset($kuitti1);
+unset($kuitti2);
+unset($onnistuuko);
+unset($status);
+unset($pankkivailuotto);

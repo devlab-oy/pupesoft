@@ -2283,7 +2283,7 @@ if (!function_exists('alvierittely')) {
       }
 
       $kala -= 10;
-
+      
       if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
         $pyoristys = $kassa_ale != '' ? $laskurow["pyoristys_valuutassa"] * (1-$kassa_ale/100) : $laskurow["pyoristys_valuutassa"];
         $pdf_lasku->draw_text(360, $kala, t("Rahoituksella / Osamaksulla", $kieli).":",          $thispage, $norm);
@@ -2304,6 +2304,43 @@ if (!function_exists('alvierittely')) {
       $kala -= 10;
     }
 
+    if ($yhtiorow['maksupaate_kassamyynti'] != '') {
+      // Jos maksupääte on enabloitu, tarvitaan myös maksupäätetapahtumien kuitit
+      $query = "SELECT ifnull(group_concat(distinct tunnus SEPARATOR ', '), 0) tilnot
+                FROM lasku
+                WHERE yhtio   = '$kukarow[yhtio]'
+                and laskunro  = '$laskurow[laskunro]'
+                and tila      = 'L'
+                and laskunro != 0";
+      $result = pupe_query($query);
+      $tilnorivi = mysql_fetch_assoc($result);
+      $tilausnumerot = $tilnorivi['tilnot'];
+      
+      $query = "SELECT
+                *
+                FROM maksupaatetapahtumat
+                WHERE yhtio ='{$yhtiorow['yhtio']}'
+                AND tilausnumero IN ($tilausnumerot)
+                AND maksutapa != ''
+                AND status != ''
+                AND tilausnumero != 0";
+      $result = pupe_query($query);
+      
+      if (mysql_affected_rows() > 0) {
+        $pdf_lasku->draw_text(20, $kala, t("Maksupäätetapahtumat"), $thispage, $norm);
+        $kala -= 10;
+      }
+
+      while ($maksupaatetapahtuma = mysql_fetch_assoc($result)) {
+        $tapahtuman_kaikki_rivit = explode("\n", $maksupaatetapahtuma['asiakkaan_kuitti']);
+        foreach ($tapahtuman_kaikki_rivit as $yksittainen_tapahtumarivi) {
+          $pdf_lasku->draw_text(20, $kala, $yksittainen_tapahtumarivi, $thispage, $pieni);
+          $kala -= 7;
+        }
+      }
+
+      $kala -= 10;
+    }
     return $kala;
   }
 }

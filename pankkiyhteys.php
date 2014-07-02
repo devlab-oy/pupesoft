@@ -103,17 +103,35 @@ elseif (isset($tee) and $tee == "hae_tiliote") {
 
     echo "<form method='post' action='pankkiyhteys.php'>";
     echo "<input type='hidden' name='tee' value='hae_tiliote'/>";
+    echo "<table>";
+    echo "<tbody>";
+    echo "<tr>";
+    echo "<td>";
     echo "<label for='tili'>" . t("Tili") . "</label>";
+    echo "</td>";
+    echo "<td>";
     echo "<select name='tili'>";
     foreach ($tilit as $tili) {
       echo "<option value='" . $tili["tunnus"] . "'>" . $tili["nimi"] . "</option>";
     }
     echo "</select>";
-    echo "<br/>";
+    echo "</td>";
+    echo "</tr>";
+    echo "<tr>";
+    echo "<td>";
     echo "<label for='salasana'>" . t("Salasana, jolla salasit tunnukset") . "</label>";
+    echo "</td>";
+    echo "<td>";
     echo "<input type='password' name='salasana' id='salasana'/>";
-    echo "<br/>";
+    echo "</td>";
+    echo "</tr>";
+    echo "<tr>";
+    echo "<td class='back'>";
     echo "<input type='submit'/>";
+    echo "</td>";
+    echo "</tr>";
+    echo "</tbody>";
+    echo "</table>";
     echo "</form>";
   }
 }

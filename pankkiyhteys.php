@@ -61,53 +61,9 @@ elseif (isset($tee) and $tee == "hae_tiliote") {
     $avain = pura_salaus($salatut_tunnukset["private_key"], $salasana);
     $sertifikaatti = pura_salaus($salatut_tunnukset["certificate"], $salasana);
 
-    $parameters = array(
-      "method" => "POST",
-      "data" => array(
-        "cert" => base64_encode($sertifikaatti),
-        "private_key" => base64_encode($avain),
-        "customer_id" => "11111111",
-        "file_type" => "TITO",
-        "target_id" => "11111111A1"
-      ),
-      "url" => "https://sepa.devlab.fi/api/nordea/download_file_list",
-      "headers" => array(
-        "Content-Type: application/json",
-        "Authorization: Token token=Vl2E1xahRJz4vO4J28QSQn2mbkrM"
-      )
-    );
+    $viitteet = hae_viitteet($sertifikaatti, $avain);
 
-    $vastaus = pupesoft_rest($parameters);
-    $tiedostot = $vastaus[1]["files"];
-    $viitteet = array();
-
-    foreach ($tiedostot as $tiedosto) {
-      array_push($viitteet, $tiedosto["fileReference"]);
-    }
-
-    $datat = array();
-
-    foreach ($viitteet as $viite) {
-      $parameters = array(
-        "method" => "POST",
-        "data" => array(
-          "cert" => base64_encode($sertifikaatti),
-          "private_key" => base64_encode($avain),
-          "customer_id" => "11111111",
-          "file_type" => "TITO",
-          "target_id" => "11111111A1",
-          "file_reference" => $viite
-        ),
-        "url" => "https://sepa.devlab.fi/api/nordea/download_file",
-        "headers" => array(
-          "Content-Type: application/json",
-          "Authorization: Token token=Vl2E1xahRJz4vO4J28QSQn2mbkrM"
-        )
-      );
-
-      $vastaus = pupesoft_rest($parameters);
-      file_put_contents("/tmp/{$viite}", base64_decode($vastaus[1]["data"]));
-    }
+    lataa_tiedostot($viitteet, $sertifikaatti, $avain);
   }
   else {
     $tilit = hae_tilit($kukarow["yhtio"]);
@@ -231,4 +187,67 @@ function avaimet_ja_salasana_kunnossa($salasana, $salasanan_vahvistus)
 {
   return $_FILES["certificate"]["tmp_name"] and $_FILES["private_key"]["tmp_name"] and !empty($salasana) and
   $salasana == $salasanan_vahvistus;
+}
+
+/**
+ * @param $sertifikaatti
+ * @param $avain
+ * @return array
+ */
+function hae_viitteet($sertifikaatti, $avain)
+{
+  $parameters = array(
+    "method" => "POST",
+    "data" => array(
+      "cert" => base64_encode($sertifikaatti),
+      "private_key" => base64_encode($avain),
+      "customer_id" => "11111111",
+      "file_type" => "TITO",
+      "target_id" => "11111111A1"
+    ),
+    "url" => "https://sepa.devlab.fi/api/nordea/download_file_list",
+    "headers" => array(
+      "Content-Type: application/json",
+      "Authorization: Token token=Vl2E1xahRJz4vO4J28QSQn2mbkrM"
+    )
+  );
+
+  $vastaus = pupesoft_rest($parameters);
+  $tiedostot = $vastaus[1]["files"];
+  $viitteet = array();
+
+  foreach ($tiedostot as $tiedosto) {
+    array_push($viitteet, $tiedosto["fileReference"]);
+  }
+  return $viitteet;
+}
+
+/**
+ * @param $viitteet
+ * @param $sertifikaatti
+ * @param $avain
+ */
+function lataa_tiedostot($viitteet, $sertifikaatti, $avain)
+{
+  foreach ($viitteet as $viite) {
+    $parameters = array(
+      "method" => "POST",
+      "data" => array(
+        "cert" => base64_encode($sertifikaatti),
+        "private_key" => base64_encode($avain),
+        "customer_id" => "11111111",
+        "file_type" => "TITO",
+        "target_id" => "11111111A1",
+        "file_reference" => $viite
+      ),
+      "url" => "https://sepa.devlab.fi/api/nordea/download_file",
+      "headers" => array(
+        "Content-Type: application/json",
+        "Authorization: Token token=Vl2E1xahRJz4vO4J28QSQn2mbkrM"
+      )
+    );
+
+    $vastaus = pupesoft_rest($parameters);
+    file_put_contents("/tmp/{$viite}", base64_decode($vastaus[1]["data"]));
+  }
 }

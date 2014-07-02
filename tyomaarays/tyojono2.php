@@ -110,7 +110,7 @@ echo "<br/>";
 echo "<br/>";
 echo "</div>";
 
-if (is_string($request['lasku_tunnukset'])) {
+if (is_string($request['lasku_tunnukset']) and !empty($request['lasku_tunnukset'])) {
   $request['lasku_tunnukset'] = explode(',', $lasku_tunnukset);
 }
 
@@ -136,8 +136,11 @@ if ($toim == 'TEHDYT_TYOT') {
   }
 }
 else {
-  if ($request['ala_tee'] == 'merkkaa_tehdyksi') {
+  if ($request['ala_tee'] == 'merkkaa_tehdyksi' and !empty($request['lasku_tunnukset'])) {
     merkkaa_tyomaarays_tehdyksi($request);
+  }
+  else if ($request['ala_tee'] == 'merkkaa_tehdyksi' and empty($request['lasku_tunnukset'])) {
+    echo "<font class='error'>".t('Yhtään työtä ei merkattu tehdyksi')."</font>";
   }
 
   if ($request['ala_tee'] == 'merkkaa_kadonneeksi') {

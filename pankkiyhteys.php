@@ -68,17 +68,46 @@ elseif (isset($tee) and $tee == "hae_tiliote") {
         "private_key" => base64_encode($avain),
         "customer_id" => "11111111",
         "file_type" => "TITO",
-        "file_reference" => "11111111A12006030329501800000014",
         "target_id" => "11111111A1"
       ),
-      "url" => "https://sepa.devlab.fi/api/nordea/download_file",
+      "url" => "https://sepa.devlab.fi/api/nordea/download_file_list",
       "headers" => array(
         "Content-Type: application/json",
         "Authorization: Token token=Vl2E1xahRJz4vO4J28QSQn2mbkrM"
       )
     );
+
     $vastaus = pupesoft_rest($parameters);
-    echo base64_decode($vastaus[1]["data"]);
+    $tiedostot = $vastaus[1]["files"];
+    $viitteet = array();
+
+    foreach ($tiedostot as $tiedosto) {
+      array_push($viitteet, $tiedosto["fileReference"]);
+    }
+
+    $datat = array();
+
+    foreach ($viitteet as $viite) {
+      $parameters = array(
+        "method" => "POST",
+        "data" => array(
+          "cert" => base64_encode($sertifikaatti),
+          "private_key" => base64_encode($avain),
+          "customer_id" => "11111111",
+          "file_type" => "TITO",
+          "target_id" => "11111111A1",
+          "file_reference" => $viite
+        ),
+        "url" => "https://sepa.devlab.fi/api/nordea/download_file",
+        "headers" => array(
+          "Content-Type: application/json",
+          "Authorization: Token token=Vl2E1xahRJz4vO4J28QSQn2mbkrM"
+        )
+      );
+
+      $vastaus = pupesoft_rest($parameters);
+      file_put_contents("/tmp/{$viite}", base64_decode($vastaus[1]["data"]));
+    }
   }
   else {
     $tilit = hae_tilit($kukarow["yhtio"]);

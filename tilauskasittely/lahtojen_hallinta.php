@@ -3012,9 +3012,14 @@ function hae_suljetut_lahdot($toimitustavan_tunnukset, $ajax_request) {
             group_concat(DISTINCT lasku.tunnus) AS 'tilaukset',
             concat(varastopaikat.nimitys, ' - ', toimitustapa.selite, ' - ', lahdot.pvm, ' - ', substring(lahdot.lahdon_kellonaika, 1, 5)) AS dropdown_text
             FROM lahdot
-            JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus AND lasku.tila = 'L' )
-            JOIN varastopaikat ON (varastopaikat.yhtio = lahdot.yhtio AND varastopaikat.tunnus = lahdot.varasto)
-            JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa AND toimitustapa.tunnus IN ( ".($ajax_request == 1 ? $toimitustavan_tunnukset : implode(',', $toimitustavan_tunnukset))." ) )
+            JOIN lasku ON (lasku.yhtio = lahdot.yhtio 
+              AND lasku.toimitustavan_lahto = lahdot.tunnus 
+              AND lasku.tila = 'L' )
+            JOIN varastopaikat ON (varastopaikat.yhtio = lahdot.yhtio 
+              AND varastopaikat.tunnus = lahdot.varasto)
+            JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio 
+              AND toimitustapa.selite = lasku.toimitustapa 
+              AND toimitustapa.tunnus IN ( ".($ajax_request == 1 ? $toimitustavan_tunnukset : implode(',', $toimitustavan_tunnukset))." ) )
             WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
             AND lahdot.aktiivi = 'S'
             AND lahdot.pvm     > date_sub(now(), INTERVAL 14 day)
@@ -3049,10 +3054,21 @@ function lahdot_joissa_tilauksia_keraamatta($lahdot) {
     $query = "SELECT lahdot.tunnus AS lahdon_tunnus,
               count(*) AS keraamatta
               FROM lahdot
-              JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus AND (lasku.tila = 'L' OR (lasku.tila = 'N' AND lasku.alatila = 'A') OR lasku.tila = 'G'))
-              JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.kerattyaika = '0000-00-00 00:00:00' AND tilausrivi.var not in ('P','J','O','S'))
-              JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '' )
-              JOIN tilausrivin_lisatiedot ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.ohita_kerays = '')
+              JOIN lasku ON (lasku.yhtio = lahdot.yhtio 
+                AND lasku.toimitustavan_lahto = lahdot.tunnus 
+                AND (lasku.tila = 'L' 
+                  OR (lasku.tila = 'N' AND lasku.alatila = 'A') OR lasku.tila = 'G'))
+              JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio 
+                AND tilausrivi.otunnus = lasku.tunnus 
+                AND tilausrivi.tyyppi != 'D' 
+                AND tilausrivi.kerattyaika = '0000-00-00 00:00:00' 
+                AND tilausrivi.var not in ('P','J','O','S'))
+              JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio 
+                AND tuote.tuoteno = tilausrivi.tuoteno 
+                AND tuote.ei_saldoa = '' )
+              JOIN tilausrivin_lisatiedot ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio 
+                AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus 
+                AND tilausrivin_lisatiedot.ohita_kerays = '')
               WHERE  lahdot.yhtio = '{$kukarow['yhtio']}'
               AND lahdot.tunnus   IN ({$lahdot})
               GROUP BY lahdot.tunnus";

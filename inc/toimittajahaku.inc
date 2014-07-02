@@ -216,6 +216,7 @@ if ($tee == 'A') {
       echo "<input type='text' name='kk2' value='$kk2' size='4'>";
       echo "<input type='text' name='vv2' value='$vv2' size='4'>";
       echo "</td>";
+      echo "</tr>";
 
       $monivalintalaatikot = array();
 
@@ -267,7 +268,12 @@ if ($tee == 'A') {
         echo "</tr>";
       }
 
-      echo "<td class='back' style='vertical-align:bottom;'><input type='Submit' value='".t("Näytä")."'></td></tr>";
+      echo "<tr>";
+      echo "<td class='back' style='vertical-align:bottom;'>";
+      echo "<input type='Submit' value='".t("Näytä")."'>";
+      echo "</td>";
+      echo "</tr>";
+
       echo "</table>";
       echo "</form>";
 

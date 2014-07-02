@@ -6,7 +6,7 @@ echo "<font class='head'>" . t('SEPA-pankkiyhteys') . "</font>";
 echo "<hr>";
 
 if (isset($tee) and $tee == "lataa_sertifikaatti") {
-  if ($_FILES["certificate"] and $_FILES["private_key"] and $salasana) {
+  if (avaimet_ja_salasana_kunnossa($salasana, $salasanan_vahvistus)) {
     $sertifikaatti = file_get_contents($_FILES["certificate"]["tmp_name"]);
     $salattu_sertifikaatti = salaa($sertifikaatti, $salasana);
 
@@ -46,6 +46,9 @@ if (isset($tee) and $tee == "lataa_sertifikaatti") {
     echo "<br/>";
     echo "<label for='salasana'>" . t("Salasana, jolla tiedot suojataan") . "</label>";
     echo "<input type='password' name='salasana' id='salasana'/>";
+    echo "<br/>";
+    echo "<label for='salasanan_vahvistus'>" . t("Salasanan vahvistus") . "</label>";
+    echo "<input type='password' name='salasanan_vahvistus' id='salasanan_vahvistus'/>";
     echo "<br/>";
     echo "<input type='submit' name='submit' value='" . t('Lähetä') . "'>";
     echo "</form>";
@@ -158,6 +161,7 @@ function hae_tilit($yhtio)
 
 /**
  * @param $tili
+ * @param $yhtio
  * @return mixed
  */
 function hae_sertifikaatti($tili, $yhtio)
@@ -172,6 +176,11 @@ function hae_sertifikaatti($tili, $yhtio)
   return $rivi["certificate"];
 }
 
+/**
+ * @param $salattu_data
+ * @param $salasana
+ * @return string
+ */
 function pura_salaus($salattu_data, $salasana)
 {
   $avain = hash("SHA256", $salasana, true);
@@ -184,4 +193,15 @@ function pura_salaus($salattu_data, $salasana)
   $salattu_data_binaari = substr($salattu_data_binaari, $iv_size);
 
   return mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $avain, $salattu_data_binaari, MCRYPT_MODE_CBC, $iv);
+}
+
+/**
+ * @param $salasana
+ * @param $salasanan_vahvistus
+ * @return bool
+ */
+function avaimet_ja_salasana_kunnossa($salasana, $salasanan_vahvistus)
+{
+  return $_FILES["certificate"]["tmp_name"] and $_FILES["private_key"]["tmp_name"] and !empty($salasana) and
+  $salasana == $salasanan_vahvistus;
 }

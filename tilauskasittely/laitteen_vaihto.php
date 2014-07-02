@@ -11,6 +11,8 @@ if (isset($livesearch_tee) and $livesearch_tee == "TUOTEHAKU") {
 
 enable_ajax();
 
+js_laite();
+
 echo "<font class='head'>" . t("Laitteen vaihto") . ":</font>";
 echo "<hr/>";
 echo "<br/>";
@@ -474,7 +476,7 @@ function echo_laitteen_vaihto_form($request = array()) {
 
   echo "<tr>";
   echo '<th align="left">' . t("Tuotenumero") . '</th>';
-  echo "<td>";
+  echo "<td id='tuoteno_td'>";
   echo livesearch_kentta('uusi_laite_form', 'TUOTEHAKU', 'uusi_laite[tuoteno]', '226', $request['uusi_laite']['tuoteno'], 'NOSUBMIT');
   echo "</td>";
   echo "</tr>";
@@ -491,8 +493,8 @@ function echo_laitteen_vaihto_form($request = array()) {
   echo "<td>";
   $vva = substr($request['uusi_laite']['valm_pvm'], 0, 4);
   $kka = substr($request['uusi_laite']['valm_pvm'], 5, 2);
-  echo "<input type='hidden' name='uusi_laite[pp]' value='1' />";
-  echo "<select name='uusi_laite[kk]'>";
+  echo "<input type='hidden' class='valm_pvm_tpp' name='uusi_laite[pp]' value='1' />";
+  echo "<select name='uusi_laite[kk]' class='valm_pvm_tkk'>";
   $sel = "";
   foreach (range(1, 12) as $kuukausi) {
     if ($kka == $kuukausi) {
@@ -502,7 +504,7 @@ function echo_laitteen_vaihto_form($request = array()) {
     $sel = "";
   }
   echo "</select>";
-  echo "<select name='uusi_laite[vv]'>";
+  echo "<select name='uusi_laite[vv]' class='valm_pvm_tvv'>";
   $sel = "";
   if (empty($vuosi_vaihteluvali)) {
     $vuosi_vaihteluvali['min'] = 1970;
@@ -517,7 +519,6 @@ function echo_laitteen_vaihto_form($request = array()) {
   }
   echo "</select>";
   echo "</td>";
-//  echo '<input type="text" name="uusi_laite[valm_pvm]" value="'.$request['uusi_laite']['valm_pvm'].'" size="10" maxlength="10" />';
   echo "</tr>";
 
   echo "<tr>";
@@ -578,52 +579,19 @@ function echo_laitteen_vaihto_form($request = array()) {
   echo "</td>";
   echo "</tr>";
 
-  for ($i = 0; $i <= 2; $i++) {
-    $pakollisuus_chk = "";
-    if ($request['uusi_laite']['huoltosyklit'][$i]['huoltovali'] != '') {
-      $pakollisuus_chk = "CHECKED";
-    }
-    echo "<tr>";
-    echo "<th>" . t('Huoltosykli') . "</th>";
-    echo "<td>";
+  $query = "SELECT DISTINCT selite
+            FROM tuotteen_avainsanat
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND laji = 'tyomaarayksen_ryhmittely'";
+  $result = pupe_query($query);
 
-    echo "<table>";
+  $req = array(
+      'tuoteno'      => $request['uusi_laite']['tuoteno'],
+      'huoltosyklit' => $huoltosyklit
+  );
 
-    echo "<tr>";
-    echo "<th>" . t('Huoltosykli') . "</th>";
-    echo "<td>";
-
-    echo "<select name='uusi_laite[huoltosyklit][{$i}][huoltosykli_tunnus]'>";
-    $sel = "";
-    foreach ($huoltosyklit as $huoltosykli) {
-      if ($request['uusi_laite']['huoltosyklit'][$i]['huoltosykli_tunnus'] == $huoltosykli['tunnus']) {
-        $sel = "SELECTED";
-      }
-      echo "<option value='{$huoltosykli['tunnus']}' {$sel}>{$huoltosykli['dropdown_text']}</option>";
-      $sel = "";
-    }
-    echo "</select>";
-    echo "</td>";
-    echo "</tr>";
-
-    echo "<tr>";
-    echo "<th>" . t('Huoltovali') . "</th>";
-    echo "<td>";
-    echo "<input type='text' name='uusi_laite[huoltosyklit][{$i}][huoltovali]' value='{$request['uusi_laite']['huoltosyklit'][$i]['huoltovali']}' />";
-    echo "</td>";
-    echo "</tr>";
-
-    echo "<tr>";
-    echo "<th>" . t('Pakollisuus') . "</th>";
-    echo "<td>";
-    echo "<input type='checkbox' name='uusi_laite[huoltosyklit][{$i}][pakollisuus]' {$pakollisuus_chk} />";
-    echo "</td>";
-    echo "</tr>";
-
-    echo "</table>";
-
-    echo "</td>";
-    echo "</tr>";
+  while ($selite = mysql_fetch_assoc($result)) {
+    huoltosykli_rivi($selite['selite'], $req, true);
   }
 
   echo "</table>";

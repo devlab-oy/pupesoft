@@ -505,7 +505,7 @@
       else {
         if ($toim == 'laite') {
           $huoltovalit = huoltovali_options();
-          foreach ($huoltosyklit as $tyyppi => $sykli) {
+          foreach ($laite['huoltosyklit'] as $tyyppi => $sykli) {
 
               $huoltosykli_laite_tunnus = $sykli['huoltosykli_laite_tunnus'];
               $huoltosykli_tunnus = $sykli['huoltosykli_tunnus'];
@@ -617,7 +617,7 @@
         if (empty($kopioi_rivi) and $toim == 'laite') {
 
           $huoltovalit = huoltovali_options();
-          foreach ($huoltosyklit as $sykli) {
+          foreach ($laite['huoltosyklit'] as $sykli) {
 
             if($sykli['huoltosykli_tunnus'] != 0) {
 
@@ -2181,7 +2181,7 @@
 
       $request = array(
           'tuoteno'      => $t[1],
-          'huoltosyklit' => $huoltosyklit
+          'huoltosyklit' => $laite['huoltosyklit']
       );
       while ($selite = mysql_fetch_assoc($result)) {
         huoltosykli_rivi($selite['selite'], $request);

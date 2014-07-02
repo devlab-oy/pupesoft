@@ -979,7 +979,7 @@ function aseta_tyomaarays_status($status, $tilausrivi_tunnus = '', $lasku_tunnus
 }
 
 //luodaan huoltosyklirivi huoltosyklityypin perusteella
-function huoltosykli_rivi($tyyppi, $request) {
+function huoltosykli_rivi($tyyppi, $request, $tyojono = false) {
   global $tunnus;
 
   $laite_tunnus = $tunnus;
@@ -1005,17 +1005,24 @@ function huoltosykli_rivi($tyyppi, $request) {
     $pakollisuus_chk = "CHECKED";
   }
 
+  if ($tyojono) {
+    $nimi = 'uusi_laite[huoltosyklit]';
+  }
+  else {
+    $nimi = 'laite[huoltosyklit]';
+  }
+
   echo "<tr>";
   echo "<th>" . t('Huoltosykli') . " <br /> {$tyyppi}";
-  echo "<input type='hidden' name='huoltosyklit[{$tyyppi}][huoltosykli_laite_tunnus]' value='{$laitteen_huoltosykli['huoltosykli_laite_tunnus']}' />";
-  echo"</th>";
+  echo "<input type='hidden' name='{$nimi}[{$tyyppi}][huoltosykli_laite_tunnus]' value='{$laitteen_huoltosykli['huoltosykli_laite_tunnus']}' />";
+  echo "</th>";
   echo "<td>";
 
   echo "<table>";
   echo "<tr>";
-  echo "<th>" . t('Huoltosykli') . "</th>";
+  echo "<th>" . t("{$tyyppi}sykli") . "</th>";
   echo "<td>";
-  echo "<select class='huoltosykli_select' id='huoltosykli_select_{$tyyppi}' name='huoltosyklit[{$tyyppi}][huoltosykli_tunnus]'>";
+  echo "<select class='huoltosykli_select' id='huoltosykli_select_{$tyyppi}' name='{$nimi}[{$tyyppi}][huoltosykli_tunnus]'>";
 
   $sel = "";
   echo "<option value='0'>Ei huoltosykli‰</option>";
@@ -1035,10 +1042,10 @@ function huoltosykli_rivi($tyyppi, $request) {
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>" . t('Huoltovali') . "</th>";
+  echo "<th>" . t("{$tyyppi}vali") . "</th>";
   echo "<td>";
 
-  echo "<select class='huoltovali_select' id='huoltovali_select_{$tyyppi}' name='huoltosyklit[{$tyyppi}][huoltovali]'>";
+  echo "<select class='huoltovali_select' id='huoltovali_select_{$tyyppi}' name='{$nimi}[{$tyyppi}][huoltovali]'>";
 
   if ($huoltosyklit) {
 
@@ -1061,7 +1068,7 @@ function huoltosykli_rivi($tyyppi, $request) {
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>" . t('Seuraava tuleva huolto') . " (pp.kk.vvvv)</th>";
+  echo "<th>" . t("Seuraava tuleva {$tyyppi}") . " (pp.kk.vvvv)</th>";
   echo "<td>";
   echo "<input type='hidden' id='paiva_ei_validi' value='<font class=\"error\">" . t('P‰iv‰m‰‰r‰ v‰‰rin') . "</font>' />";
   $seuraava_tuleva_tapahtuma = '';
@@ -1073,7 +1080,7 @@ function huoltosykli_rivi($tyyppi, $request) {
   else {
     $seuraava_tuleva_tapahtuma = $laitteen_huoltosykli['seuraava_tuleva_tapahtuma'];
   }
-  echo "<input type='text' id='tuleva_toimenpide_{$tyyppi}' class='tuleva_toimenpide' name='huoltosyklit[{$tyyppi}][seuraava_tuleva_tapahtuma]' value='{$seuraava_tuleva_tapahtuma}'/>";
+  echo "<input type='text' id='tuleva_toimenpide_{$tyyppi}' class='tuleva_toimenpide' name='{$nimi}[{$tyyppi}][seuraava_tuleva_tapahtuma]' value='{$seuraava_tuleva_tapahtuma}'/>";
   echo "<div class='tuleva_toimenpide_error'>";
   echo "</div>";
   echo "</td>";

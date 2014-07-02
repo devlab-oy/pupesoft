@@ -17482,12 +17482,12 @@ if (!function_exists("tee_keraysera")) {
 
       $ohjausmerkki = $jiivee = array();
 
-      $query = "  SELECT lasku.tunnus, 
+      $query = "  SELECT lasku.tunnus,
             LOWER(TRIM(lasku.ohjausmerkki)) AS ohjausmerkki,
              IFNULL(maksuehto.jv, '') jv
             FROM lasku
-            LEFT JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio AND maksuehto.tunnus = lasku.maksuehto) 
-            WHERE lasku.yhtio = '{$kukarow['yhtio']}' 
+            LEFT JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio AND maksuehto.tunnus = lasku.maksuehto)
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.tunnus IN ({$tilaukset})";
       $ohjausmerkki_res = pupe_query($query);
 
@@ -17764,7 +17764,7 @@ if (!function_exists("tee_keraysera")) {
 
       $ed_ohjausmerkki = '种种种种种种种种';
       $ed_jiivee = "种种种种种种种种";
-      
+
       $ed_tuote = '';
 
       foreach ($inner_main_array as $inner_key => &$tuoterow) {
@@ -23988,8 +23988,12 @@ if (!function_exists('hae_laitteen_oletus_huoltosyklit')) {
 
 if (!function_exists('js_laite')) {
   function js_laite() {
+    global $palvelin2;
+
     ?>
     <script>
+      var palvelin2 = '<?php echo $palvelin2 ?>';
+
       $(document).ready(function() {
         bind_huoltosykli_change();
 
@@ -24016,7 +24020,7 @@ if (!function_exists('js_laite')) {
         $.ajax({
           async: false,
           type: 'GET',
-          url: 'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltovali_options&huoltosykli_tunnus=' + huoltosykli_tunnus
+          url: palvelin2 + 'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltovali_options&huoltosykli_tunnus=' + huoltosykli_tunnus
         }).done(function(response) {
           $('#'+select_id).html(response);
         }).fail(function(data){
@@ -24046,7 +24050,7 @@ if (!function_exists('js_laite')) {
         $.ajax({
           async: true,
           type: 'GET',
-          url: 'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltosykli_options&tuoteno=' + tuoteno + '&tyyppi=' +tyyppi
+          url: palvelin2 + 'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltosykli_options&tuoteno=' + tuoteno + '&tyyppi=' +tyyppi
         }).done(function(response) {
           $('#'+select_id).html(response);
           $('#'+select_id).change();
@@ -24144,17 +24148,20 @@ if (!function_exists('js_laite')) {
         dtDay= dtArray[1];
         dtYear = dtArray[3];
 
-        if (dtMonth < 1 || dtMonth > 12)
+        if (dtMonth < 1 || dtMonth > 12) {
           return false;
-        else if (dtDay < 1 || dtDay> 31)
+        }
+        else if (dtDay < 1 || dtDay> 31) {
           return false;
-        else if ((dtMonth==4 || dtMonth==6 || dtMonth==9 || dtMonth==11) && dtDay ==31)
+        }
+        else if ((dtMonth==4 || dtMonth==6 || dtMonth==9 || dtMonth==11) && dtDay ==31) {
           return false;
-        else if (dtMonth == 2)
-        {
+        }
+        else if (dtMonth == 2) {
            var isleap = (dtYear % 4 == 0 && (dtYear % 100 != 0 || dtYear % 400 == 0));
-           if (dtDay> 29 || (dtDay ==29 && !isleap))
+           if (dtDay> 29 || (dtDay ==29 && !isleap)) {
             return false;
+           }
         }
         return true;
       }
@@ -24230,7 +24237,7 @@ if (!function_exists('kirjoita_json_tiedosto')) {
     array_walk_recursive($data, 'array_utf8_encode');
 
     $ok = file_put_contents($filepath, json_encode($data));
-    
+
     if (!$ok) {
       return false;
     }

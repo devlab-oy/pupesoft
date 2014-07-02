@@ -97,16 +97,18 @@ if ($tee == "file" and $laheta != "") {
     $path_parts = pathinfo($_FILES['userfile']['name']);
     $kasitellaan_tiedosto_tyyppi = strtoupper($path_parts['extension']);
 
+    $sallitut_tyypit = array("XLSX", "DATAIMPORT");
+
+    // Jos meillä on ssconvert asennettuna, voidaan käsitellä myös XLS tiedostoja
+    if (is_executable("/usr/bin/ssconvert")) {
+      $sallitut_tyypit[] = "XLS";
+    }
+
     // Vain Excel!
-    $return = tarkasta_liite("userfile", array("XLSX","XLS","DATAIMPORT"));
+    $return = tarkasta_liite("userfile", $sallitut_tyypit);
 
     if ($return !== TRUE) {
       echo "<font class='error'>$return</font>\n";
-      $kasitellaan_tiedosto = FALSE;
-    }
-
-    if (!is_executable("/usr/bin/ssconvert") and $kasitellaan_tiedosto_tyyppi == "XLS") {
-      echo "<font class='error'>".t("Gnumeric (ssconvert) ei ole asennettu")."!</font><br>\n";
       $kasitellaan_tiedosto = FALSE;
     }
 

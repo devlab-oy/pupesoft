@@ -59,6 +59,14 @@ if (isset($tee) and $tee == "lataa_sertifikaatti") {
 elseif (isset($tee) and $tee == "hae_tiliote") {
   if ($_POST["salasana"]) {
     $salasana = $_POST["salasana"];
+    $tili = $_POST["tili"];
+
+    $salattu_sertifikaatti = hae_sertifikaatti($tili);
+
+    $sertifikaatti = pura_salaus($salattu_sertifikaatti, $salasana);
+
+    echo $sertifikaatti;
+
 
     $parameters = array(
       "method" => "POST",
@@ -124,10 +132,14 @@ else {
  */
 function salaa($data, $salasana)
 {
+  $avain = hash("SHA256", $salasana, true);
+
   $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC);
   $iv = mcrypt_create_iv($iv_size, MCRYPT_RAND);
-  $salattu_data = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $salasana, $data, MCRYPT_MODE_ECB);
+
+  $salattu_data = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $avain, $data, MCRYPT_MODE_CBC, $iv);
   $salattu_data = $iv . $salattu_data;
+
   return base64_encode($salattu_data);
 }
 
@@ -150,4 +162,34 @@ function hae_tilit()
     array_push($tilit, $tili);
   }
   return $tilit;
+}
+
+/**
+ * @param $tili
+ * @return mixed
+ */
+function hae_sertifikaatti($tili)
+{
+  $query = "SELECT certificate
+              FROM yriti
+              WHERE tunnus={$tili}";
+
+  $result = pupe_query($query);
+  $rivi = mysql_fetch_assoc($result);
+
+  return $rivi["certificate"];
+}
+
+function pura_salaus($salattu_data, $salasana)
+{
+  $avain = hash("SHA256", $salasana, true);
+
+  $salattu_data_binaari = base64_decode($salattu_data);
+
+  $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC);
+  $iv = substr($salattu_data_binaari, 0, $iv_size);
+
+  $salattu_data_binaari = substr($salattu_data_binaari, $iv_size);
+
+  return mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $avain, $salattu_data_binaari, MCRYPT_MODE_CBC, $iv);
 }

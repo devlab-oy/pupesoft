@@ -251,12 +251,15 @@ if (mysql_num_rows($result) > 0) {
 }
 
 if (count($monivalintalaatikot) > 0) {
-  echo "</tr><tr><th>".t("Tarkenne")."</th><td>";
+  echo "<tr>";
+  echo "<th>".t("Tarkenne")."</th>";
+  echo "<td>";
 
   $noautosubmit = TRUE;
   require "tilauskasittely/monivalintalaatikot.inc";
 
   echo "</td>";
+  echo "</tr>";
 }
 
 $sel = array_fill_keys(array($laskuntyyppi), " selected") + array_fill_keys(array('H', 'Y', 'M', 'P', 'Q', 'K'), '');

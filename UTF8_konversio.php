@@ -12,6 +12,11 @@ if (!$php_cli) {
   die;
 }
 
+if (!`which recode`) {
+  echo "Tarvitaan recode -ohjelma!\n";
+  die;
+}
+
 $vain_recode = FALSE;
 
 if (isset($argv[1]) and $argv[1] != '') {

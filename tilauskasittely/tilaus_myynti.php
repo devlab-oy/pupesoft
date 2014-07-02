@@ -85,10 +85,13 @@ for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix
   if (!isset(${'ale'.$alepostfix})) { ${'ale'.$alepostfix} = "";}
   if (!isset(${'ale_array'.$alepostfix})) { ${'ale_array'.$alepostfix} = "";}
 }
+
+if (!isset($alatila)) {$alatila='';}
 if (!isset($alv)) {$alv="";}
 if (!isset($alv_array)) {$alv_array="";}
 if (!isset($asiakasid)) {$asiakasid="";}
 if (!isset($asiakasOnProspekti)) {$asiakasOnProspekti="";}
+if (!isset($etayhtio_totaalisumma)) {$etayhtio_totaalisumma=0;}
 if (!isset($from)) {$from="";}
 if (!isset($hinta)) {$hinta="";}
 if (!isset($hinta_array)) {$hinta_array="";}
@@ -101,77 +104,77 @@ if (!isset($kerayskka)) {$kerayskka=0;}
 if (!isset($keraysppa)) {$keraysppa=0;}
 if (!isset($kerayspvm)) {$kerayspvm="";}
 if (!isset($keraysvva)) {$keraysvva=0;}
+if (!isset($kommentti_select)) {$kommentti_select='';}
 if (!isset($kpl)) {$kpl="";}
 if (!isset($kpl2)) {$kpl2="";}
 if (!isset($kpl_array)) {$kpl_array="";}
 if (!isset($kutsuja)) {$kutsuja="";}
 if (!isset($lead)) {$lead="";}
 if (!isset($lisavarusteita)) {$lisavarusteita="";}
+if (!isset($lisax)) {$lisax='';}
 if (!isset($livesearch_tee)) {$livesearch_tee="";}
 if (!isset($lopetus)) {$lopetus="";}
 if (!isset($luotunnusnippu)) {$luotunnusnippu="";}
 if (!isset($maksutapa)) {$maksutapa="";}
 if (!isset($menutila)) {$menutila="";}
+if (!isset($mista)) {$mista='';}
 if (!isset($myos_prospektit)) {$myos_prospektit="";}
 if (!isset($myy_sarjatunnus)) {$myy_sarjatunnus="";}
+if (!isset($nayta_sostolisateksti)) {$nayta_sostolisateksti="";}
+if (!isset($netto)) {$netto='';}
 if (!isset($netto_array)) {$netto_array="";}
 if (!isset($olpaikalta)) {$olpaikalta="";}
+if (!isset($omalle_tilaukselle)) {$omalle_tilaukselle='';}
+if (!isset($orig_alatila)) {$orig_alatila='';}
+if (!isset($orig_tila)) {$orig_tila='';}
 if (!isset($osatoimkielto)) {$osatoimkielto="";}
 if (!isset($paikka)) {$paikka="";}
 if (!isset($paikka_array)) {$paikka_array="";}
+if (!isset($painotettukehayhteensa)) $painotettukehayhteensa = 0;
 if (!isset($perheid)) {$perheid="";}
 if (!isset($pika_paiv_merahti)) {$pika_paiv_merahti="";}
 if (!isset($pkrow)) {$pkrow="";}
 if (!isset($projektilla)) {$projektilla="";}
 if (!isset($rahtihinta)) {$rahtihinta="";}
+if (!isset($rahtisopimus)) {$rahtisopimus='';}
 if (!isset($ruutulimit)) {$ruutulimit="";}
+if (!isset($saako_liitaa_laskuja_tilaukseen)) {$saako_liitaa_laskuja_tilaukseen="";}
+if (!isset($sarjanumero_dropdown)) {$sarjanumero_dropdown="";}
 if (!isset($smsnumero)) {$smsnumero="";}
 if (!isset($syotetty_ytunnus)) {$syotetty_ytunnus="";}
 if (!isset($tapa)) {$tapa="";}
 if (!isset($tee)) {$tee="";}
 if (!isset($tiedot_laskulta)) {$tiedot_laskulta="";}
 if (!isset($tila)) {$tila="";}
+if (!isset($tilausnumero)) {$tilausnumero='';}
+if (!isset($tilausrivi_alvillisuus)) {$tilausrivi_alvillisuus=isset($_COOKIE["tilausrivi_alvillisuus"])?$_COOKIE["tilausrivi_alvillisuus"]:$tilausrivi_alvillisuus;}
 if (!isset($tilausrivilinkki)) {$tilausrivilinkki="";}
+if (!isset($tilaustyyppi)) {$tilaustyyppi='';}
+if (!isset($toim_kutsu)) {$toim_kutsu='';}
 if (!isset($toimaika)) {$toimaika="";}
 if (!isset($toimittajan_tunnus)) {$toimittajan_tunnus="";}
 if (!isset($toimkka)) {$toimkka=0;}
 if (!isset($toimppa)) {$toimppa=0;}
 if (!isset($toimvva)) {$toimvva=0;}
 if (!isset($trivtyrow)) {$trivtyrow="";}
+if (!isset($tulostetaan)) {$tulostetaan='';}
 if (!isset($tuotenimitys)) {$tuotenimitys="";}
 if (!isset($tuotenimitys_force)) {$tuotenimitys_force="";}
 if (!isset($tuoteno)) {$tuoteno="";}
 if (!isset($tuoteno_array)) {$tuoteno_array="";}
+if (!isset($tuotteenpainotettukehayht)) $tuotteenpainotettukehayht = array();
 if (!isset($tyojono)) {$tyojono="";}
 if (!isset($ulos)) {$ulos="";}
 if (!isset($uusitoimitus)) {$uusitoimitus="";}
 if (!isset($valitsetoimitus)) {$valitsetoimitus="";}
+if (!isset($valitsetoimitus_vaihdarivi)) {$valitsetoimitus_vaihdarivi="";}
+if (!isset($var)) {$var='';}
+if (!isset($var_array)) {$var_array="";}
 if (!isset($varaosakommentti)) {$varaosakommentti="";}
 if (!isset($varasto)) {$varasto="";}
 if (!isset($variaatio_tuoteno)) {$variaatio_tuoteno="";}
-if (!isset($var_array)) {$var_array="";}
-if (!isset($tilausrivi_alvillisuus)) {$tilausrivi_alvillisuus=isset($_COOKIE["tilausrivi_alvillisuus"])?$_COOKIE["tilausrivi_alvillisuus"]:$tilausrivi_alvillisuus;}
-if (!isset($valitsetoimitus_vaihdarivi)) {$valitsetoimitus_vaihdarivi="";}
-if (!isset($saako_liitaa_laskuja_tilaukseen)) {$saako_liitaa_laskuja_tilaukseen="";}
-if (!isset($omalle_tilaukselle)) {$omalle_tilaukselle='';}
-if (!isset($lisax)) {$lisax='';}
-if (!isset($etayhtio_totaalisumma)) {$etayhtio_totaalisumma=0;}
-if (!isset($nayta_sostolisateksti)) {$nayta_sostolisateksti="";}
-if (!isset($sarjanumero_dropdown)) {$sarjanumero_dropdown="";}
-if (!isset($kommentti_select)) {$kommentti_select='';}
 if (!isset($yksi_suoratoimittaja)) {$yksi_suoratoimittaja='';}
-if (!isset($tilausnumero)) {$tilausnumero='';}
-if (!isset($mista)) {$mista='';}
-if (!isset($orig_alatila)) {$orig_alatila='';}
-if (!isset($orig_tila)) {$orig_tila='';}
 if (!isset($ylatila)) {$ylatila='';}
-if (!isset($alatila)) {$alatila='';}
-if (!isset($tilaustyyppi)) {$tilaustyyppi='';}
-if (!isset($rahtisopimus)) {$rahtisopimus='';}
-if (!isset($netto)) {$netto='';}
-if (!isset($var)) {$var='';}
-if (!isset($toim_kutsu)) {$toim_kutsu='';}
-if (!isset($tulostetaan)) {$tulostetaan='';}
 
 // Setataan lopetuslinkki, jotta p‰‰semme takaisin tilaukselle jos k‰yd‰‰n jossain muualla
 $tilmyy_lopetus = "{$palvelin2}{$tilauskaslisa}tilaus_myynti.php////toim=$toim//projektilla=$projektilla//tilausnumero=$tilausnumero//ruutulimit=$ruutulimit//tilausrivi_alvillisuus=$tilausrivi_alvillisuus//mista=$mista";
@@ -5459,6 +5462,12 @@ if ($tee == '') {
     $headerit .= "<th>".t("Tuotenumero")."</th><th>".t("M‰‰r‰")."</th><th>".t("Var")."</th>";
     $sarakkeet += 3;
 
+    if ($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K") {
+      $headerit .= "<th>".t("Keha")."</th>";
+      $headerit .="<th>".t("Keha * kpl")."</th>";
+      $sarakkeet += 2;
+    }
+
     if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA") {
 
       $headerit .= "<th>".t("Netto")."</th>";
@@ -5746,6 +5755,23 @@ if ($tee == '') {
       }
 
       while ($row = mysql_fetch_assoc($result)) {
+
+        if ($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K"
+          and $row["tyyppi"] != "V" and isset($tuotteenpainotettukehayht["keha"])) {
+
+          $_colspan = $sarakkeet_alku - 6;
+
+          echo "<tr>{$jarjlisa}";
+          echo "<td class='back' colspan='{$_colspan}'>&nbsp;</td>";
+          echo "<th colspan='5' align='right'>";
+          echo t("Valmisteen %s kehahinta * kpl yhteens‰", '', $tuotteenpainotettukehayht["tuoteno"]);
+          echo "</th>";
+          echo "<td class='spec' align='right'>";
+          echo sprintf("%.2f", $tuotteenpainotettukehayht["keha"]);
+          echo "</td>";
+
+          $tuotteenpainotettukehayht["keha"] = 0;
+        }
 
         // Tuoteperheen lapset, jotka on merkitty puutteeksi
         if ($kukarow['extranet'] != '' and $row['tunnus'] != $row['perheid'] and strtoupper($row['var']) == 'P' and $row['perheid'] != 0) {
@@ -6813,7 +6839,8 @@ if ($tee == '') {
           }
         }
 
-        if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA") {
+        if (($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K")
+            or ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA")) {
           $classvar = $class;
         }
         else {
@@ -6840,6 +6867,32 @@ if ($tee == '') {
         }
 
         echo "<td $classvar align='center' valign='top'>$var_temp&nbsp;</td>";
+
+        if ($toim == "VALMISTAVARASTOON" and $yhtiorow['kehahinta_valmistuksella'] == "K") {
+          echo "<td {$class} align='right' valign='top' nowrap>";
+          echo "{$row["kehahin"]}";
+          echo "</td>";
+
+          $painotettukeha = $kpl_ruudulle * $row["kehahin"];
+          if ($row["tyyppi"] == "V") {
+            $tuotteenpainotettukehayht["keha"] += $painotettukeha;
+            $painotettukehayhteensa += $painotettukeha;
+          }
+          else {
+            $tuotteenpainotettukehayht["tuoteno"] = $row["tuoteno"];
+          }
+
+          if ($classlisa != "") {
+            $classvar = $classlisa;
+          }
+          else {
+            $classvar = $class;
+          }
+
+          echo "<td {$classvar} align='right' valign='top' nowrap>";
+          echo "{$painotettukeha}";
+          echo "</td>";
+        }
 
         if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA") {
 
@@ -7574,6 +7627,21 @@ if ($tee == '') {
           echo "</tr>";
 
         }
+      }
+
+      if ($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K") {
+        $_colspan = $sarakkeet_alku - 6;
+
+        echo "<tr>{$jarjlisa}";
+        echo "<td class='back' colspan='{$_colspan}'>&nbsp;</td>";
+        echo "<th colspan='5' align='right'>";
+        echo t("Valmisteen %s kehahinta * kpl yhteens‰", '', $tuotteenpainotettukehayht["tuoteno"]);
+        echo "</th>";
+        echo "<td class='spec' align='right'>";
+        echo sprintf("%.2f", $tuotteenpainotettukehayht["keha"]);
+        echo "</td>";
+
+        $tuotteenpainotettukehayht["keha"] = 0;
       }
 
       $summa           = 0;   // Tilauksen verollinen loppusumma tilauksen valuutassa
@@ -8464,6 +8532,18 @@ if ($tee == '') {
           echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
         }
 
+      }
+      elseif ($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K") {
+        $_colspan = $sarakkeet_alku - 6;
+
+        echo "<tr>{$jarjlisa}";
+        echo "<td class='back' colspan='{$_colspan}'>&nbsp;</td>";
+        echo "<th colspan='5' align='right'>";
+        echo t("Koko valmistuksen Kehahinta * kpl yhteens‰");
+        echo "</th>";
+        echo "<td class='spec' align='right'>";
+        echo sprintf("%.2f", $painotettukehayhteensa);
+        echo "</td>";
       }
 
       echo "</table>";

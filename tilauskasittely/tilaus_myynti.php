@@ -5580,17 +5580,21 @@ if ($tee == '') {
       while ($row = mysql_fetch_assoc($result)) {
 
         if ($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K"
-            and $row["tyyppi"] != "V" and isset($tuotteenpainotettukehayht["keha"])) {
-          echo "<tr>$jarjlisa<td class='back' colspan='"
-                .($sarakkeet_alku-6).
-                "'>&nbsp;</td><th colspan='5' align='right'>"
-                .t("Valmisteen {$tuotteenpainotettukehayht["tuoteno"]} kehahinta * kpl yhteensä").
-                ":</th><td class='spec' align='right'>"
-                .sprintf("%.2f",$tuotteenpainotettukehayht["keha"])."</td>";
+          and $row["tyyppi"] != "V" and isset($tuotteenpainotettukehayht["keha"])) {
+
+          $_colspan = $sarakkeet_alku - 6;
+
+          echo "<tr>{$jarjlisa}";
+          echo "<td class='back' colspan='{$_colspan}'>&nbsp;</td>";
+          echo "<th colspan='5' align='right'>";
+          echo t("Valmisteen %s kehahinta * kpl yhteensä", '', $tuotteenpainotettukehayht["tuoteno"]);
+          echo "</th>";
+          echo "<td class='spec' align='right'>";
+          echo sprintf("%.2f", $tuotteenpainotettukehayht["keha"]);
+          echo "</td>";
 
           $tuotteenpainotettukehayht["keha"] = 0;
         }
-
 
         // Tuoteperheen lapset, jotka on merkitty puutteeksi
         if ($kukarow['extranet'] != '' and $row['tunnus'] != $row['perheid'] and strtoupper($row['var']) == 'P' and $row['perheid'] != 0) {
@@ -7380,12 +7384,16 @@ if ($tee == '') {
       }
 
       if ($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K") {
-        echo "<tr>$jarjlisa<td class='back' colspan='"
-              .($sarakkeet_alku-6).
-              "'>&nbsp;</td><th colspan='5' align='right'>"
-              .t("Valmisteen {$tuotteenpainotettukehayht["tuoteno"]} Kehahinta * kpl yhteensä").
-              ":</th><td class='spec' align='right'>".
-              sprintf("%.2f",$tuotteenpainotettukehayht["keha"])."</td>";
+        $_colspan = $sarakkeet_alku - 6;
+
+        echo "<tr>{$jarjlisa}";
+        echo "<td class='back' colspan='{$_colspan}'>&nbsp;</td>";
+        echo "<th colspan='5' align='right'>";
+        echo t("Valmisteen %s kehahinta * kpl yhteensä", '', $tuotteenpainotettukehayht["tuoteno"]);
+        echo "</th>";
+        echo "<td class='spec' align='right'>";
+        echo sprintf("%.2f", $tuotteenpainotettukehayht["keha"]);
+        echo "</td>";
 
         $tuotteenpainotettukehayht["keha"] = 0;
       }
@@ -8281,12 +8289,16 @@ if ($tee == '') {
 
       }
       elseif ($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K") {
-        echo "<tr>$jarjlisa<td class='back' colspan='"
-              .($sarakkeet_alku-6).
-              "'>&nbsp;</td><th colspan='5' align='right'>"
-              .t("Koko valmistuksen Kehahinta * kpl yhteensä").
-              ":</th><td class='spec' align='right'>"
-              .sprintf("%.2f",$painotettukehayhteensa)."</td>";
+        $_colspan = $sarakkeet_alku - 6;
+
+        echo "<tr>{$jarjlisa}";
+        echo "<td class='back' colspan='{$_colspan}'>&nbsp;</td>";
+        echo "<th colspan='5' align='right'>";
+        echo t("Koko valmistuksen Kehahinta * kpl yhteensä");
+        echo "</th>";
+        echo "<td class='spec' align='right'>";
+        echo sprintf("%.2f", $painotettukehayhteensa);
+        echo "</td>";
       }
 
       echo "</table>";

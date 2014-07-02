@@ -27,7 +27,7 @@ if (isset($tee) and $tee == "lataa_sertifikaatti") {
     }
   }
   else {
-    $tilit = hae_tilit();
+    $tilit = hae_tilit($kukarow["yhtio"]);
 
     echo "<form action='pankkiyhteys.php' method='post' enctype='multipart/form-data'>";
     echo "<input type='hidden' name='tee' value='lataa_sertifikaatti'/>";
@@ -53,7 +53,7 @@ if (isset($tee) and $tee == "lataa_sertifikaatti") {
 }
 elseif (isset($tee) and $tee == "hae_tiliote") {
   if ($salasana) {
-    $salattu_sertifikaatti = hae_sertifikaatti($tili);
+    $salattu_sertifikaatti = hae_sertifikaatti($tili, $kukarow["yhtio"]);
 
     $sertifikaatti = pura_salaus($salattu_sertifikaatti, $salasana);
 
@@ -80,7 +80,7 @@ elseif (isset($tee) and $tee == "hae_tiliote") {
     echo base64_decode($vastaus[1]["data"]);
   }
   else {
-    $tilit = hae_tilit();
+    $tilit = hae_tilit($kukarow["yhtio"]);
 
     echo "<form method='post' action='pankkiyhteys.php'>";
     echo "<input type='hidden' name='tee' value='hae_tiliote'/>";
@@ -136,12 +136,14 @@ function salaa($data, $salasana)
 }
 
 /**
+ * @param $yhtio
  * @return array
  */
-function hae_tilit()
+function hae_tilit($yhtio)
 {
   $query = "SELECT tunnus, nimi
-              FROM yriti";
+            FROM yriti
+            WHERE yhtio='{$yhtio}'";
 
   $result = pupe_query($query);
 
@@ -158,11 +160,11 @@ function hae_tilit()
  * @param $tili
  * @return mixed
  */
-function hae_sertifikaatti($tili)
+function hae_sertifikaatti($tili, $yhtio)
 {
   $query = "SELECT certificate
               FROM yriti
-              WHERE tunnus={$tili}";
+              WHERE tunnus={$tili} AND yhtio='{$yhtio}'";
 
   $result = pupe_query($query);
   $rivi = mysql_fetch_assoc($result);

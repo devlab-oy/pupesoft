@@ -34,7 +34,7 @@ if (isset($tee) and $tee == "lataa_sertifikaatti") {
     echo "<label for='tili'>" . t("Tili, jolle sertifikaatti on") . "</label>";
     echo "<select name='tili'>";
     foreach ($tilit as $tili) {
-      echo "<option value='" . $tili[0] . "'>" . $tili[1] . "</option>";
+      echo "<option value='" . $tili["tunnus"] . "'>" . $tili["nimi"] . "</option>";
     }
     echo "</select>";
     echo "<br/>";
@@ -87,7 +87,7 @@ elseif (isset($tee) and $tee == "hae_tiliote") {
     echo "<label for='tili'>" . t("Tili") . "</label>";
     echo "<select name='tili'>";
     foreach ($tilit as $tili) {
-      echo "<option value='" . $tili[0] . "'>" . $tili[1] . "</option>";
+      echo "<option value='" . $tili["tunnus"] . "'>" . $tili["nimi"] . "</option>";
     }
     echo "</select>";
     echo "<br/>";
@@ -148,11 +148,9 @@ function hae_tilit()
   $tilit = array();
 
   while ($rivi = mysql_fetch_assoc($result)) {
-    $tili = array();
-    array_push($tili, $rivi["tunnus"]);
-    array_push($tili, $rivi["nimi"]);
-    array_push($tilit, $tili);
+    array_push($tilit, $rivi);
   }
+
   return $tilit;
 }
 

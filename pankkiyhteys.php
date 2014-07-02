@@ -15,7 +15,7 @@ if (isset($tee) and $tee == "lataa_sertifikaatti") {
 
     $query = "UPDATE yriti
               SET private_key='{$salattu_private_key}', certificate='{$salattu_sertifikaatti}'
-              WHERE tunnus={$tili}";
+              WHERE tunnus={$tili} AND yhtio='{$kukarow['yhtio']}'";
 
     $result = pupe_query($query);
 

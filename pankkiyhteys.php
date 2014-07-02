@@ -89,14 +89,11 @@ if (isset($tee) and $tee == "lataa_sertifikaatti") {
 }
 elseif (isset($tee) and $tee == "hae_tiliote") {
   if ($salasana) {
-    $salatut_tunnukset = hae_avain_ja_sertifikaatti($tili, $kukarow["yhtio"]);
+    $tunnukset = hae_tunnukset_ja_pura_salaus($tili, $kukarow, $salasana);
 
-    $avain = pura_salaus($salatut_tunnukset["private_key"], $salasana);
-    $sertifikaatti = pura_salaus($salatut_tunnukset["certificate"], $salasana);
+    $viitteet = hae_viitteet("TITO", $tunnukset["sertifikaatti"], $tunnukset["avain"]);
 
-    $viitteet = hae_viitteet($sertifikaatti, $avain);
-
-    if (lataa_tiedostot($viitteet, $sertifikaatti, $avain)) {
+    if (lataa_tiedostot($viitteet, $tunnukset["sertifikaatti"], $tunnukset["avain"])) {
       echo "Tiedostot ladattu";
     }
     else {
@@ -104,40 +101,24 @@ elseif (isset($tee) and $tee == "hae_tiliote") {
     }
   }
   else {
-    $tilit = hae_tilit($kukarow["yhtio"]);
+    tiliformi("hae_tiliote", $kukarow);
+  }
+}
+elseif (isset($tee) and $tee == "hae_viiteaineisto") {
+  if ($salasana) {
+    $tunnukset = hae_tunnukset_ja_pura_salaus($tili, $kukarow, $salasana);
 
-    echo "<form method='post' action='pankkiyhteys.php'>";
-    echo "<input type='hidden' name='tee' value='hae_tiliote'/>";
-    echo "<table>";
-    echo "<tbody>";
-    echo "<tr>";
-    echo "<td>";
-    echo "<label for='tili'>" . t("Tili") . "</label>";
-    echo "</td>";
-    echo "<td>";
-    echo "<select name='tili'>";
-    foreach ($tilit as $tili) {
-      echo "<option value='" . $tili["tunnus"] . "'>" . $tili["nimi"] . "</option>";
+    $viitteet = hae_viitteet("KTL", $tunnukset["sertifikaatti"], $tunnukset["avain"]);
+
+    if (lataa_tiedostot($viitteet, $tunnukset["sertifikaatti"], $tunnukset["avain"])) {
+      echo "Tiedostot ladattu";
     }
-    echo "</select>";
-    echo "</td>";
-    echo "</tr>";
-    echo "<tr>";
-    echo "<td>";
-    echo "<label for='salasana'>" . t("Salasana, jolla salasit tunnukset") . "</label>";
-    echo "</td>";
-    echo "<td>";
-    echo "<input type='password' name='salasana' id='salasana'/>";
-    echo "</td>";
-    echo "</tr>";
-    echo "<tr>";
-    echo "<td class='back'>";
-    echo "<input type='submit'/>";
-    echo "</td>";
-    echo "</tr>";
-    echo "</tbody>";
-    echo "</table>";
-    echo "</form>";
+    else {
+      echo "Tiedostojen lataaminen ei onnistunut";
+    }
+  }
+  else {
+    tiliformi("hae_viiteaineisto", $kukarow);
   }
 }
 else {
@@ -150,6 +131,7 @@ else {
   echo "<select name='tee'>";
   echo "<option value='lataa_sertifikaatti'>" . t('Lataa sertifikaatti') . "</option>";
   echo "<option value='hae_tiliote'>" . t("Hae tiliote") . "</option>";
+  echo "<option value='hae_viiteaineisto'>" . t("Hae viiteaineisto") . "</option>";
   echo "</select>";
   echo "</td>";
   echo "</tr>";
@@ -246,11 +228,12 @@ function avaimet_ja_salasana_kunnossa($salasana, $salasanan_vahvistus)
 }
 
 /**
+ * @param $tiedostotyyppi
  * @param $sertifikaatti
  * @param $avain
  * @return array
  */
-function hae_viitteet($sertifikaatti, $avain)
+function hae_viitteet($tiedostotyyppi, $sertifikaatti, $avain)
 {
   $parameters = array(
     "method" => "POST",
@@ -258,7 +241,7 @@ function hae_viitteet($sertifikaatti, $avain)
       "cert" => base64_encode($sertifikaatti),
       "private_key" => base64_encode($avain),
       "customer_id" => "11111111",
-      "file_type" => "TITO",
+      "file_type" => $tiedostotyyppi,
       "target_id" => "11111111A1"
     ),
     "url" => "https://sepa.devlab.fi/api/nordea/download_file_list",
@@ -320,4 +303,65 @@ function lataa_tiedostot($viitteet, $sertifikaatti, $avain)
   }
 
   return false;
+}
+
+/**
+ * @param $komento
+ * @param $kukarow
+ */
+function tiliformi($komento, $kukarow)
+{
+  $tilit = hae_tilit($kukarow["yhtio"]);
+
+  echo "<form method='post' action='pankkiyhteys.php'>";
+  echo "<input type='hidden' name='tee' value='{$komento}'/>";
+  echo "<table>";
+  echo "<tbody>";
+  echo "<tr>";
+  echo "<td>";
+  echo "<label for='tili'>" . t("Tili") . "</label>";
+  echo "</td>";
+  echo "<td>";
+  echo "<select name='tili'>";
+  foreach ($tilit as $tili) {
+    echo "<option value='" . $tili["tunnus"] . "'>" . $tili["nimi"] . "</option>";
+  }
+  echo "</select>";
+  echo "</td>";
+  echo "</tr>";
+  echo "<tr>";
+  echo "<td>";
+  echo "<label for='salasana'>" . t("Salasana, jolla salasit tunnukset") . "</label>";
+  echo "</td>";
+  echo "<td>";
+  echo "<input type='password' name='salasana' id='salasana'/>";
+  echo "</td>";
+  echo "</tr>";
+  echo "<tr>";
+  echo "<td class='back'>";
+  echo "<input type='submit'/>";
+  echo "</td>";
+  echo "</tr>";
+  echo "</tbody>";
+  echo "</table>";
+  echo "</form>";
+}
+
+/**
+ * @param $tili
+ * @param $kukarow
+ * @param $salasana
+ * @return array
+ */
+function hae_tunnukset_ja_pura_salaus($tili, $kukarow, $salasana)
+{
+  $salatut_tunnukset = hae_avain_ja_sertifikaatti($tili, $kukarow["yhtio"]);
+
+  $avain = pura_salaus($salatut_tunnukset["private_key"], $salasana);
+  $sertifikaatti = pura_salaus($salatut_tunnukset["certificate"], $salasana);
+
+  return array(
+    "avain" => $avain,
+    "sertifikaatti" => $sertifikaatti
+  );
 }

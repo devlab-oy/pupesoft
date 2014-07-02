@@ -96,7 +96,12 @@ elseif (isset($tee) and $tee == "hae_tiliote") {
 
     $viitteet = hae_viitteet($sertifikaatti, $avain);
 
-    lataa_tiedostot($viitteet, $sertifikaatti, $avain);
+    if (lataa_tiedostot($viitteet, $sertifikaatti, $avain)) {
+      echo "Tiedostot ladattu";
+    }
+    else {
+      echo "Tiedostojen lataaminen ei onnistunut";
+    }
   }
   else {
     $tilit = hae_tilit($kukarow["yhtio"]);
@@ -277,9 +282,12 @@ function hae_viitteet($sertifikaatti, $avain)
  * @param $viitteet
  * @param $sertifikaatti
  * @param $avain
+ * @return bool
  */
 function lataa_tiedostot($viitteet, $sertifikaatti, $avain)
 {
+  $onnistuneet = 0;
+
   foreach ($viitteet as $viite) {
     $parameters = array(
       "method" => "POST",
@@ -299,6 +307,17 @@ function lataa_tiedostot($viitteet, $sertifikaatti, $avain)
     );
 
     $vastaus = pupesoft_rest($parameters);
+
+    if ($vastaus[0] == 200) {
+      $onnistuneet++;
+    }
+
     file_put_contents("/tmp/{$viite}", base64_decode($vastaus[1]["data"]));
   }
+
+  if (count($viitteet) == $onnistuneet) {
+    return true;
+  }
+
+  return false;
 }

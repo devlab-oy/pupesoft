@@ -30,6 +30,7 @@
 * Käytä konstattien nimissä `SCREAMING_SNAKE_CASE`.
 * Kirjoita PHP [avainsanat](http://php.net/manual/en/reserved.keywords.php) pienillä kirjaimilla. Esim. `and`, `or`, `if`, `while`, jne..
 * Kirjoita PHP konstantit `true`, `false` ja `null` pienillä kirjaimilla.
+* Käytä kommentoimiseen `//` notaatiota.
 * Käytä välilyöntejä operaattorien, pisteiden sekä kaksoispisteiden ympärillä.
 * Käytä välilöyntiä pilkkujen jälkeen.
 * Käytä välilyöntiä PHP [kontrolli](http://www.php.net/manual/en/language.control-structures.php) avainsanojen jälkeen. Esim. `if`, `while`, `for`, `return`, jne..
@@ -121,6 +122,7 @@ function do_stuff($params) {
 
 * Kommentoi **miksi** logiikka suoritetaan.
 * Kommentoi **mitä** monimutkainen logiikka tekee.
+* Käytä välilyöntiä `//` jälkeen.
 
 ```php
 // Sallitaan vain pienet kirjaimet ja numerot, koska

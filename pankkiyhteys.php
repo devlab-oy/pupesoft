@@ -5,13 +5,8 @@ require("inc/parametrit.inc");
 echo "<font class='head'>" . t('SEPA-pankkiyhteys') . "</font>";
 echo "<hr>";
 
-$tee = $_REQUEST["tee"];
-
 if (isset($tee) and $tee == "lataa_sertifikaatti") {
-  if ($_FILES["certificate"] and $_FILES["private_key"] and $_POST["salasana"]) {
-    $tili = $_POST["tili"];
-    $salasana = $_POST["salasana"];
-
+  if ($_FILES["certificate"] and $_FILES["private_key"] and $salasana) {
     $sertifikaatti = file_get_contents($_FILES["certificate"]["tmp_name"]);
     $salattu_sertifikaatti = salaa($sertifikaatti, $salasana);
 
@@ -57,10 +52,7 @@ if (isset($tee) and $tee == "lataa_sertifikaatti") {
   }
 }
 elseif (isset($tee) and $tee == "hae_tiliote") {
-  if ($_POST["salasana"]) {
-    $salasana = $_POST["salasana"];
-    $tili = $_POST["tili"];
-
+  if ($salasana) {
     $salattu_sertifikaatti = hae_sertifikaatti($tili);
 
     $sertifikaatti = pura_salaus($salattu_sertifikaatti, $salasana);

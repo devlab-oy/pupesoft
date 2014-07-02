@@ -107,7 +107,7 @@ if (isset($tee) and $tee == "lataa_sertifikaatti") {
     echo "</tr>";
     echo "<tr>";
     echo "<td class='back'>";
-    echo "<input type='submit' name='submit' value='" . t('L‰het‰') . "'/>";
+    echo "<input type='submit' name='submit' value='" . t('Tallenna tunnukset') . "'/>";
     echo "</td>";
     echo "</tr>";
     echo "</tbody>";
@@ -179,10 +179,10 @@ else {
   echo "<table>";
   echo "<tbody>";
   echo "<tr>";
-  echo "<td>Mita haluat tehd‰?</td>";
+  echo "<td>Mit‰ haluat tehd‰?</td>";
   echo "<td>";
   echo "<select name='tee'>";
-  echo "<option value='lataa_sertifikaatti'>" . t('Lataa sertifikaatti') . "</option>";
+  echo "<option value='lataa_sertifikaatti'>" . t('Lataa sertifikaatti j‰rjestelm‰‰n') . "</option>";
   echo "<option value='hae_tiliote'>" . t("Hae tiliote") . "</option>";
   echo "<option value='hae_viiteaineisto'>" . t("Hae viiteaineisto") . "</option>";
   echo "<option value='laheta_maksuaineisto'>" . t("L‰het‰ maksuaineisto") . "</option>";
@@ -411,7 +411,7 @@ function tiliformi($komento, $kukarow)
   }
   echo "<tr>";
   echo "<td class='back'>";
-  echo "<input type='submit'/>";
+  echo "<input type='submit' value='" . t("Hae") . "'/>";
   echo "</td>";
   echo "</tr>";
   echo "</tbody>";

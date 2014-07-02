@@ -791,7 +791,8 @@ if ($tee == "") {
                       AND korjattu = ''";
             $lasktilitre = pupe_query($query);
 
-            // listataan osasuoritukset jos maksupäivä on nollaa tai jos suorituksia on//oli enemmän kuin yksi (eli silloin kun lasku on osasuoritettu//tullaan osasuorittamaan)
+            // listataan osasuoritukset jos maksupäivä on nollaa tai jos suorituksia on//oli enemmän kuin yksi 
+            //(eli silloin kun lasku on osasuoritettu//tullaan osasuorittamaan)
             if ($maksurow["mapvm"] == "0000-00-00" or mysql_num_rows($lasktilitre) > 1) {
 
               while ($lasktilitro = mysql_fetch_array($lasktilitre)) {

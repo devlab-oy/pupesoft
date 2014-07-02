@@ -31,26 +31,59 @@ if (isset($tee) and $tee == "lataa_sertifikaatti") {
 
     echo "<form action='pankkiyhteys.php' method='post' enctype='multipart/form-data'>";
     echo "<input type='hidden' name='tee' value='lataa_sertifikaatti'/>";
+    echo "<table>";
+    echo "<tbody>";
+    echo "<tr>";
+    echo "<td>";
     echo "<label for='tili'>" . t("Tili, jolle sertifikaatti on") . "</label>";
+    echo "</td>";
+    echo "<td>";
     echo "<select name='tili'>";
     foreach ($tilit as $tili) {
       echo "<option value='" . $tili["tunnus"] . "'>" . $tili["nimi"] . "</option>";
     }
     echo "</select>";
-    echo "<br/>";
+    echo "</td>";
+    echo "</tr>";
+    echo "<tr>";
+    echo "<td>";
     echo "<label for='private_key'>" . t('Yksityinen avain') . "</label>";
+    echo "</td>";
+    echo "<td>";
     echo "<input type='file' name='private_key' id='private_key'>";
-    echo "<br>";
+    echo "</td>";
+    echo "</tr>";
+    echo "<tr>";
+    echo "<td>";
     echo "<label for='certificate'>" . t('Sertifikaatti') . "</label>";
+    echo "</td>";
+    echo "<td>";
     echo "<input type='file' name='certificate' id='certificate'/>";
-    echo "<br/>";
+    echo "</td>";
+    echo "</tr>";
+    echo "<tr>";
+    echo "<td>";
     echo "<label for='salasana'>" . t("Salasana, jolla tiedot suojataan") . "</label>";
+    echo "</td>";
+    echo "<td>";
     echo "<input type='password' name='salasana' id='salasana'/>";
-    echo "<br/>";
+    echo "</td>";
+    echo "</tr>";
+    echo "<tr>";
+    echo "<td>";
     echo "<label for='salasanan_vahvistus'>" . t("Salasanan vahvistus") . "</label>";
+    echo "</td>";
+    echo "<td>";
     echo "<input type='password' name='salasanan_vahvistus' id='salasanan_vahvistus'/>";
-    echo "<br/>";
-    echo "<input type='submit' name='submit' value='" . t('Lähetä') . "'>";
+    echo "</td>";
+    echo "</tr>";
+    echo "<tr>";
+    echo "<td class='back'>";
+    echo "<input type='submit' name='submit' value='" . t('Lähetä') . "'/>";
+    echo "</td>";
+    echo "</tr>";
+    echo "</tbody>";
+    echo "</table";
     echo "</form>";
   }
 }

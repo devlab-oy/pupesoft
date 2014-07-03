@@ -2322,7 +2322,8 @@ if (!function_exists('alvierittely')) {
                 WHERE yhtio ='{$yhtiorow['yhtio']}'
                 AND tilausnumero IN ($tilausnumerot)
                 AND maksutapa != ''
-                AND status != ''
+                AND tila != ''
+                AND asiakkaan_kuitti != ''
                 AND tilausnumero != 0";
       $result = pupe_query($query);
       

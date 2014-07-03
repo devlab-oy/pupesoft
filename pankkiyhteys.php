@@ -13,36 +13,9 @@ require("inc/parametrit.inc");
 echo "<font class='head'>" . t('SEPA-pankkiyhteys') . "</font>";
 echo "<hr>";
 
-/**
- * @param $tunnukset
- * @param $maksuaineisto
- * @return array
- */
-function laheta_maksuaineisto($tunnukset, $maksuaineisto)
-{
-  $parameters = array(
-    "method" => "POST",
-    "data" => array(
-      "cert" => base64_encode($tunnukset["sertifikaatti"]),
-      "private_key" => base64_encode($tunnukset["avain"]),
-      "customer_id" => "11111111",
-      "file_type" => "NDCORPAYS",
-      "target_id" => "11111111A1",
-      "content" => $maksuaineisto
-    ),
-    "url" => "https://sepa.devlab.fi/api/nordea/upload_file",
-    "headers" => array(
-      "Content-Type: application/json",
-      "Authorization: Token token=Vl2E1xahRJz4vO4J28QSQn2mbkrM"
-    )
-  );
-
-  $vastaus = pupesoft_rest($parameters);
-  return $vastaus;
-}
-
 if (isset($tee) and $tee == "lataa_sertifikaatti") {
-  if (avaimet_ja_salasana_kunnossa($salasana, $salasanan_vahvistus)) {
+  if ($_POST["submit"] and avaimet_ja_salasana_kunnossa()) {
+
     $sertifikaatti = file_get_contents($_FILES["certificate"]["tmp_name"]);
     $salattu_sertifikaatti = salaa($sertifikaatti, $salasana);
 
@@ -279,14 +252,34 @@ function pura_salaus($salattu_data, $salasana)
 }
 
 /**
- * @param $salasana
- * @param $salasanan_vahvistus
  * @return bool
  */
-function avaimet_ja_salasana_kunnossa($salasana, $salasanan_vahvistus)
+function avaimet_ja_salasana_kunnossa()
 {
-  return $_FILES["certificate"]["tmp_name"] and $_FILES["private_key"]["tmp_name"] and !empty($salasana) and
-  $salasana == $salasanan_vahvistus;
+  $virheet_maara = 0;
+
+  if (!$_FILES["certificate"]["tmp_name"]) {
+    $virheet_maara++;
+    echo "<font class='error'>Sertifikaatti täytyy antaa</font><br/>";
+  }
+  if (!$_FILES["private_key"]["tmp_name"]) {
+    $virheet_maara++;
+    echo "<font class='error'>Avain täytyy antaa</font><br/>";
+  }
+  if (empty($_POST["salasana"])) {
+    $virheet_maara++;
+    echo "<font class='error'>Salasana täytyy antaa</font><br/>";
+  }
+  if (!$_POST["salasana"] == $_POST["salasanan_vahvistus"]) {
+    $virheet_maara++;
+    echo "<font class='error'>Salasanan vahvistus ei vastannut salasanaa</font><br/>";
+  }
+
+  if ($virheet_maara == 0) {
+    return true;
+  }
+
+  return false;
 }
 
 /**
@@ -449,4 +442,32 @@ function hae_tunnukset_ja_pura_salaus($tili, $kukarow, $salasana)
     "avain" => $avain,
     "sertifikaatti" => $sertifikaatti
   );
+}
+
+/**
+ * @param $tunnukset
+ * @param $maksuaineisto
+ * @return array
+ */
+function laheta_maksuaineisto($tunnukset, $maksuaineisto)
+{
+  $parameters = array(
+    "method" => "POST",
+    "data" => array(
+      "cert" => base64_encode($tunnukset["sertifikaatti"]),
+      "private_key" => base64_encode($tunnukset["avain"]),
+      "customer_id" => "11111111",
+      "file_type" => "NDCORPAYS",
+      "target_id" => "11111111A1",
+      "content" => $maksuaineisto
+    ),
+    "url" => "https://sepa.devlab.fi/api/nordea/upload_file",
+    "headers" => array(
+      "Content-Type: application/json",
+      "Authorization: Token token=Vl2E1xahRJz4vO4J28QSQn2mbkrM"
+    )
+  );
+
+  $vastaus = pupesoft_rest($parameters);
+  return $vastaus;
 }

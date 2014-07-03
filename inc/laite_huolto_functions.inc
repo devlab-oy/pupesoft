@@ -125,6 +125,7 @@ function hae_laitteet_ja_niiden_huoltosyklit_ajalta($start, $end, $asiakas) {
     $asiakas_and = "AND asiakas.tunnus = {$asiakas} ";
   }
 
+  $huoltovalit = huoltovali_options();
 
   $query = "SELECT laite.tuoteno,
             huoltosyklit_laitteet.viimeinen_tapahtuma,
@@ -135,6 +136,7 @@ function hae_laitteet_ja_niiden_huoltosyklit_ajalta($start, $end, $asiakas) {
             huoltosykli.huoltovali AS toimenpide_oletus_huoltovali,
             asiakas.tunnus AS asiakas_tunnus,
             kohde.nimi AS kohde_nimi,
+            kohde.vastuuhenkilo AS vastuuhenkilo,
             paikka.nimi AS paikka_nimi,
             tuotteen_avainsanat.selite AS toimenpide_tuotteen_tyyppi,
             tuotteen_avainsanat.selitetark AS toimenpide_tuotteen_prioriteetti
@@ -173,9 +175,18 @@ function hae_laitteet_ja_niiden_huoltosyklit_ajalta($start, $end, $asiakas) {
 
   $laitteet = array();
   while ($laite = mysql_fetch_assoc($result)) {
-    //@TODO suorittajan m‰‰ritt‰miseen pit‰‰ tehd‰ algoritmi jne jne.
-    $laite['tyojono'] = 'joonas';
-    $laitteet[$laite['laite_tunnus']][] = $laite;
+    $laite['tyojono'] = $laite['vastuuhenkilo'];
+    $laite['tyostatus'] = 'A';
+    $huoltovali = search_array_key_for_value_recursive($huoltovalit, days, $laite['huoltovali']);
+    $huoltovali = $huoltovali[0];
+    $laite['seuraava_tapahtuma'] = date('Y-m-d', strtotime("{$laite['viimeinen_tapahtuma']} + {$huoltovali['years']} years"));
+
+    //Resultti groupataan laite_tunnukset ja seuraavan tapahtuman mukaan, jotta erip‰ivin‰
+    //tapahtuvat tapahtumat osataan erottaa toisistaan.
+    //Esim. jos koeponnistus 2014-01-01 ja tarkastus 2014-02-01 niin koeponnistus ei saa yliajaa tarkastusta
+    if (empty($laitteet[$laite['laite_tunnus']][$laite['seuraava_tapahtuma']])) {
+      $laitteet[$laite['laite_tunnus']][$laite['seuraava_tapahtuma']] = $laite;
+    }
   }
 
   return $laitteet;
@@ -1404,5 +1415,51 @@ if (!function_exists("huoltovali_options")) {
       }
     }
     return $huoltovali_options;
+  }
+}
+
+if (!function_exists('echo_kust_tulevat_tyot_kayttoliittyma')) {
+
+  function echo_kust_tulevat_tyot_kayttoliittyma($request) {
+    global $kukarow, $yhtiorow, $toim;
+
+    echo "<div>";
+
+    echo "<form name='tulevat_tyot' method = 'post'>";
+    echo "<input type='hidden' name='toim' value='{$toim}'>";
+    echo "<input type='hidden' name='ala_tee' value='hae_tyomaaraykset'>";
+
+    echo "<table>";
+
+    echo "<tr>";
+    echo "<th>" . t("Asiakas") . "</th>";
+    echo "<td colspan='3'>";
+
+    echo livesearch_kentta("asiakashinnasto_haku_form", "ASIAKASHAKU", "valittu_asiakas", 315, $request['valittu_asiakas'], 'EISUBMIT', '', 'valittu_asiakas', 'ei_break_all');
+
+    echo "</td>";
+    echo "</tr>";
+
+    echo "<tr>";
+    echo "<th>" . t("Alku pvm. Muodossa pp-kk-vvvv") . "</th>";
+    echo "<td><input type='text' name='ppa' value='" . $request['ppa'] . "' size='3' /></td>";
+    echo "<td><input type='text' name='kka' value='" . $request['kka'] . "' size='3' /></td>";
+    echo "<td><input type='text' name='vva' value='" . $request['vva'] . "' size='5' /></td>";
+    echo "</tr>";
+
+    echo "<tr>";
+    echo "<th>" . t("Loppu pvm. Muodossa pp-kk-vvvv") . "</th>";
+    echo "<td><input type='text' name='ppl' value='" . $request['ppl'] . "' size='3' /></td>";
+    echo "<td><input type='text' name='kkl' value='" . $request['kkl'] . "' size='3' /></td>";
+    echo "<td><input type='text' name='vvl' value='" . $request['vvl'] . "' size='5' /></td>";
+    echo "</tr>";
+
+    echo "</table>";
+
+    echo "<br />";
+    echo "<input type='submit' value='" . t("Hae") . "'>";
+    echo "</form>";
+
+    echo "</div>";
   }
 }

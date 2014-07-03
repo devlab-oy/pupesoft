@@ -1,5 +1,7 @@
 <?php
 
+const SEPA_OSOITE = "https://sepa.devlab.fi/api/";
+
 if (!isset($_SERVER['HTTPS']) || !$_SERVER['HTTPS']) {
   $url = 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 
@@ -306,7 +308,7 @@ function hae_viitteet($tiedostotyyppi, $sertifikaatti, $avain)
       "file_type" => $tiedostotyyppi,
       "target_id" => "11111111A1"
     ),
-    "url" => "https://sepa.devlab.fi/api/nordea/download_file_list",
+    "url" => "" . SEPA_OSOITE . "nordea/download_file_list",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token=Vl2E1xahRJz4vO4J28QSQn2mbkrM"
@@ -345,7 +347,7 @@ function lataa_tiedostot($viitteet, $tiedostotyyppi, $sertifikaatti, $avain)
         "target_id" => "11111111A1",
         "file_reference" => $viite
       ),
-      "url" => "https://sepa.devlab.fi/api/nordea/download_file",
+      "url" => "" . SEPA_OSOITE . "nordea/download_file",
       "headers" => array(
         "Content-Type: application/json",
         "Authorization: Token token=Vl2E1xahRJz4vO4J28QSQn2mbkrM"
@@ -468,7 +470,7 @@ function laheta_maksuaineisto($tunnukset, $maksuaineisto)
       "target_id" => "11111111A1",
       "content" => $maksuaineisto
     ),
-    "url" => "https://sepa.devlab.fi/api/nordea/upload_file",
+    "url" => "" . SEPA_OSOITE . "nordea/upload_file",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token=Vl2E1xahRJz4vO4J28QSQn2mbkrM"

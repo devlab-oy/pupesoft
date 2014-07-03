@@ -2560,7 +2560,7 @@
                 if ($ken_nimi != "asiakaslista" and $ken_nimi != "tuotelista") $worksheet->write($excelrivi, $excelsarake++, ucfirst(t($ken_nimi)), $format_bold);
               }
 
-              if (isset($ytun_yhteyshenk) and $ytun_yhteyshenk != '') {
+              if (isset($ytun_yhteyshenk) and $ytun_yhteyshenk != '' and isset($asiakas_tunnukset_sarja)) {
                 // Haetaan maksimi yhteyshenkilöiden määrä per ytunnus
                 $query = "  SELECT COUNT(*) AS maara FROM yhteyshenkilo
                       WHERE yhtio = '$yhtiorow[yhtio]'

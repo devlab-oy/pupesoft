@@ -1218,6 +1218,10 @@ if ($tee == "VALMIS"
                 $('#maksustatus').text('');
                 $('#laskuri').submit();
             });
+            $('#hyvaksy_nappi').click(function () {
+                $('#seka').val('kylla');
+                $('#laskuri').submit();
+            });
           });
           
           function update_summa(kaikkiyhteensa) {
@@ -1242,20 +1246,17 @@ if ($tee == "VALMIS"
                 document.getElementById('laskulle').value != '')) {
 
               summa = 0.00;
-              document.getElementById('hyvaksy_nappi').disabled = false;";
-
-    if ($yhtiorow['maksupaate_kassamyynti'] != '') {
-      echo "  document.getElementById('korttimaksunappi').disabled = true;
+              document.getElementById('hyvaksy_nappi').disabled = false;
+              if(document.getElementById('korttimaksunappi')){
+                  document.getElementById('korttimaksunappi').disabled = true;
+              }
+   
               document.getElementById('seka').value = 'kylla';
             } else {
               document.getElementById('hyvaksy_nappi').disabled = true;
-              document.getElementById('korttimaksunappi').disabled = false;";  
-    }
-    else {
-      echo "  document.getElementById('seka').value = 'kylla';
-            } else {
-              document.getElementById('hyvaksy_nappi').disabled = true;";
-    } 
+              if(document.getElementById('korttimaksunappi')){
+                  document.getElementById('korttimaksunappi').disabled = false;
+              }";
 
     echo "  }
             document.getElementById('loppusumma').innerHTML = '<b>' + summa.toFixed(2) + '</b>';
@@ -1371,7 +1372,7 @@ if ($tee == "VALMIS"
       echo "<input type='button' name='korttimaksunappi' id='korttimaksunappi' value='".t("Tee uusi korttimaksu")."'></td></tr>";
     }
 
-    echo "<tr><td class='back'><input type='submit' name='hyvaksy_nappi' id='hyvaksy_nappi' value='".t("Hyväksy")."' $disabloi_hyvaksy></td></tr>";
+    echo "<tr><td class='back'><input type='button' name='hyvaksy_nappi' id='hyvaksy_nappi' value='".t("Hyväksy")."' $disabloi_hyvaksy></td></tr>";
 
     echo "</form><br><br>";
 

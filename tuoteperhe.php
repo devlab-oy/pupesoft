@@ -97,6 +97,7 @@ if ($tee == "KOPIOI") {
 
         if ($toim == "PERHE") {
           echo "<input type='hidden' name='kop_ohita_kerays[$kop_index]' value='$kop_ohita_kerays[$kop_index]'>";
+          echo "<input type='hidden' name='kop_ei_nayteta[$kop_index]' value='$kop_ei_nayteta[$kop_index]'>";
         }
       }
 
@@ -123,6 +124,7 @@ if ($tee == "KOPIOI") {
 
           if ($toim == "PERHE") {
             $insert_lisa = "ohita_kerays = '{$kop_ohita_kerays[$kop_index]}',";
+            $insert_lisa .= "ei_nayteta = '{$kop_ei_nayteta[$kop_index]}',";
           }
 
           $query = "INSERT into  tuoteperhe set
@@ -424,15 +426,16 @@ if ($tee == 'TALLENNAFAKTA' and $oikeurow['paivitys'] == '1') {
   $result = pupe_query($query);
 
   echo "<br><br><font class='message'>".t("Reseptin tiedot tallennettu")."!</font><br>";
+  if (isset($ei_nayteta)) {
+    $query = "UPDATE tuoteperhe
+              SET ei_nayteta = '$ei_nayteta'
+              WHERE yhtio    = '$kukarow[yhtio]'
+              and tyyppi     = '$hakutyyppi'
+              and isatuoteno = '$isatuoteno'";
+    $result = pupe_query($query);
 
-  $query = "UPDATE tuoteperhe
-            SET ei_nayteta = '$ei_nayteta'
-            WHERE yhtio    = '$kukarow[yhtio]'
-            and tyyppi     = '$hakutyyppi'
-            and isatuoteno = '$isatuoteno'";
-  $result = pupe_query($query);
-
-  echo "<font class='message'>".t("Esitysmuoto tallennettu")."!</font><br>";
+    echo "<font class='message'>".t("Esitysmuoto tallennettu")."!</font><br>";
+  }
 
   $tee = '';
 }
@@ -498,6 +501,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       echo "<th>".t("Tuoteno")."</th><th>".t("M‰‰r‰kerroin")."</th><th>".t("Hintakerroin")."</th><th>".t("Alennuskerroin")."</th>";
       if ($toim == "PERHE") {
         echo "<th>".t("Ohita Ker‰ys")."</th>";
+        echo "<th>".t("Ei n‰ytet‰")."</th>";
       }
       #echo "<th>".t("Rivikommentti")."</th>";
       echo "<td class='back'></td></tr>";
@@ -523,6 +527,8 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         if($toim == "PERHE") {
           echo "<td><input type='checkbox' name='ohita_kerays' {$chk_ohita_kerays}></td>";
           echo "<input type='hidden' name='tallenna_keksiin' value='joo'>";
+
+          echo "<td><input type='checkbox' name='ei_nayteta' value='E' {$chk_ei_nayteta}></td>";
         }
         #echo "  <td><input type='text' name='rivikommentti' size='20'></td>";
       }
@@ -703,7 +709,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       if ($toim == "PERHE") {
         echo "<th>".t("Lapset")."</th><th>".t("Nimitys")."</th><th>".t("M‰‰r‰kerroin")."</th><th>".t("Hintakerroin")."</th><th>".t("Alennuskerroin")."</th>";
         #echo "<th>".t("Rivikommentti")."</th>";
-        echo "<th>".t("Kehahin")."</th><th>".t("Kehahin*Kerroin")."</th><th>",t("Ohita ker‰ys"),"</th><td class='back'></td></tr>";
+        echo "<th>".t("Kehahin")."</th><th>".t("Kehahin*Kerroin")."</th><th>".t("Ohita ker‰ys")."</th><th>".t("Ei n‰ytet‰")."</th><td class='back'></td></tr>";
 
         $worksheet->writeString($excelrivi, $excelsarake++, t("Lapset"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
@@ -713,6 +719,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         $worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin*Kerroin"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Ohita ker‰ys"));
+        $worksheet->writeString($excelrivi, $excelsarake++, t("Ei n‰ytet‰"));
 
       }
       elseif ($toim == "LISAVARUSTE") {
@@ -778,6 +785,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       $kop_rivikom = array();
       $kop_fakta   = array();
       $kop_ohita_kerays = array();
+      $kop_ei_nayteta = array();
 
       if ($tunnus == "") {
         echo "  <form method='post' action='tuoteperhe.php' name='lisaa' autocomplete='off'>
@@ -812,6 +820,10 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           echo "<input type='hidden' name='tallenna_keksiin' value='joo'>";
         }
 
+        if ($toim == "PERHE") {
+          echo "<td><input type='checkbox' name='ei_nayteta' value='E' {$chk_ei_nayteta}></td>";
+        }
+
         echo "<td class='back'>";
         if ($oikeurow['paivitys'] == '1') echo "<input type='submit' value='".t("Lis‰‰")."'>";
         echo "</td></form></tr>";
@@ -843,6 +855,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 
           if ($toim == "PERHE") {
             $kop_ohita_kerays[$kop_index] = $prow['ohita_kerays'];
+            $kop_ei_nayteta[$kop_index] = $prow['ei_nayteta'];
           }
 
           $kop_index++;
@@ -887,6 +900,10 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
             $chk_ohita_kerays = (isset($prow['ohita_kerays']) and trim($prow['ohita_kerays']) != '') ? t("Kyll‰") : t("Ei");
             echo "<td>{$chk_ohita_kerays}</td>";
             $worksheet->writeString($excelrivi, $excelsarake++, $chk_ohita_kerays);
+
+            $chk_ei_nayteta = (isset($prow['ei_nayteta']) and trim($prow['ei_nayteta']) != '') ? t("Ei n‰ytet‰") : t("N‰ytet‰‰n");
+            echo "<td>{$chk_ei_nayteta}</td>";
+            $worksheet->writeString($excelrivi, $excelsarake++, $chk_ei_nayteta);
           }
 
           if ($toim == "RESEPTI") {
@@ -975,6 +992,9 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
             $chk_ohita_kerays = (isset($zrow['ohita_kerays']) and trim($zrow['ohita_kerays']) != '') ? " checked" : "";
             echo "<td><input type='checkbox' name='ohita_kerays' {$chk_ohita_kerays}></td>";
             echo "<input type='hidden' name='tallenna_keksiin' value='joo'>";
+
+            $chk_ei_nayteta = (isset($zrow['ei_nayteta']) and trim($zrow['ei_nayteta']) != '') ? " checked" : "";
+            echo "<td><input type='checkbox' name='ei_nayteta' value='E' {$chk_ei_nayteta}></td>";
           }
 
           if ($toim == "RESEPTI") {
@@ -1052,6 +1072,8 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 
           if ($toim == "PERHE") {
             echo "<input type='hidden' name='kop_ohita_kerays[$kop_index]' value='$kop_ohita_kerays[$kop_index]'>";
+
+            echo "<input type='hidden' name='kop_ei_nayteta[$kop_index]' value='$kop_ei_nayteta[$kop_index]'>";
           }
         }
 

@@ -1,6 +1,7 @@
 <?php
 
 const SEPA_OSOITE = "https://sepa.devlab.fi/api/";
+const ACCESS_TOKEN = "Bexvxb10H1XBT36x42Lv8jEEKnA6";
 
 if (!isset($_SERVER['HTTPS']) || !$_SERVER['HTTPS']) {
   $url = 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
@@ -311,7 +312,7 @@ function hae_viitteet($tiedostotyyppi, $sertifikaatti, $avain)
     "url" => "" . SEPA_OSOITE . "nordea/download_file_list",
     "headers" => array(
       "Content-Type: application/json",
-      "Authorization: Token token=Vl2E1xahRJz4vO4J28QSQn2mbkrM"
+      "Authorization: Token token=" . ACCESS_TOKEN
     )
   );
 
@@ -350,7 +351,7 @@ function lataa_tiedostot($viitteet, $tiedostotyyppi, $sertifikaatti, $avain)
       "url" => "" . SEPA_OSOITE . "nordea/download_file",
       "headers" => array(
         "Content-Type: application/json",
-        "Authorization: Token token=Vl2E1xahRJz4vO4J28QSQn2mbkrM"
+        "Authorization: Token token=" . ACCESS_TOKEN
       )
     );
 
@@ -473,7 +474,7 @@ function laheta_maksuaineisto($tunnukset, $maksuaineisto)
     "url" => "" . SEPA_OSOITE . "nordea/upload_file",
     "headers" => array(
       "Content-Type: application/json",
-      "Authorization: Token token=Vl2E1xahRJz4vO4J28QSQn2mbkrM"
+      "Authorization: Token token=" . ACCESS_TOKEN
     )
   );
 

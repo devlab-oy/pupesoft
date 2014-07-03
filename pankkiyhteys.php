@@ -110,6 +110,8 @@ elseif (isset($tee) and $tee == "hae_tiliote") {
     }
   }
   else {
+    tarkista_salasana();
+
     tiliformi("hae_tiliote", $kukarow);
   }
 }
@@ -127,6 +129,8 @@ elseif (isset($tee) and $tee == "hae_viiteaineisto") {
     }
   }
   else {
+    tarkista_salasana();
+
     tiliformi("hae_viiteaineisto", $kukarow);
   }
 }
@@ -152,6 +156,9 @@ elseif (isset($tee) and $tee == "laheta_maksuaineisto") {
 
   }
   else {
+    tarkista_salasana();
+    tarkista_maksuaineisto();
+
     tiliformi("laheta_maksuaineisto", $kukarow);
   }
 }
@@ -470,4 +477,18 @@ function laheta_maksuaineisto($tunnukset, $maksuaineisto)
 
   $vastaus = pupesoft_rest($parameters);
   return $vastaus;
+}
+
+function tarkista_salasana()
+{
+  if (isset($_POST["salasana"]) and empty($_POST["salasana"])) {
+    echo "<font class='error'>Salasana täytyy antaa</font><br/>";
+  }
+}
+
+function tarkista_maksuaineisto()
+{
+  if (isset($_FILES["maksuaineisto"]) and !$_FILES["maksuaineisto"]["tmp_name"]) {
+    echo "<font class='error'>Maksuaineisto puuttuu</font><br/>";
+  }
 }

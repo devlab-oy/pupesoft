@@ -1122,10 +1122,11 @@ if ($tee == 'P' or $tee == 'E') {
 
       // Katsotaan onko meillä "tuuraajia" hyväksynnässä
       for ($tuuraaja_i = 1; $tuuraaja_i < 6; $tuuraaja_i++) {
-        $query = "SELECT if (kuka.tuuraaja != '', kuka.tuuraaja, kuka.kuka) kuka
+        $query = "SELECT if (tuuraaja != '', tuuraaja, kuka) kuka
                   FROM kuka
-                  WHERE kuka.yhtio = '{$kukarow['yhtio']}'
-                  AND kuka.kuka    = '{$trow['oletus_hyvak'.$tuuraaja_i]}'";
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND kuka    = '{$trow['oletus_hyvak'.$tuuraaja_i]}'
+                  AND kuka   != ''";
         $result = pupe_query($query);
         $hyvak_row = mysql_fetch_assoc($result);
         $hyvak[$tuuraaja_i] = $hyvak_row['kuka'];

@@ -20,34 +20,38 @@ if ($livesearch_tee == "TUOTEHAKU") {
 // Enaboidaan ajax kikkare
 enable_ajax();
 
+echo "<font class='head'>";
+
 if ($toim == "PERHE") {
-  echo "<font class='head'>".t("Tuoteperheet")." (".t("Vain is‰tuotetta voi tilata").")</font><hr>";
+  echo t("Tuoteperheet")." (".t("Vain is‰tuotetta voi tilata").")";
   $hakutyyppi = "P";
 }
 elseif ($toim == "OSALUETTELO") {
-  echo "<font class='head'>".t("Tuotteen osaluettelo")." (".t("Kaikkia tuotteita voi tilata").")</font><hr>";
+  echo t("Tuotteen osaluettelo")." (".t("Kaikkia tuotteita voi tilata").")";
   $hakutyyppi = "O";
 }
 elseif ($toim == "TUOTEKOOSTE") {
-  echo "<font class='head'>".t("Tuotteen koosteluettelo")." (".t("Vain lapsituotteita voi tilata").")</font><hr>";
+  echo t("Tuotteen koosteluettelo")." (".t("Vain lapsituotteita voi tilata").")";
   $hakutyyppi = "V";
 }
 elseif ($toim == "LISAVARUSTE") {
-  echo "<font class='head'>".t("Tuotteen lis‰varusteet")."</font><hr>";
+  echo t("Tuotteen lis‰varusteet");
   $hakutyyppi = "L";
 }
 elseif ($toim == "VSUUNNITTELU") {
-  echo "<font class='head'>".t("Samankaltaisten tuotteiden m‰‰rittely")."</font><hr>";
+  echo t("Samankaltaisten tuotteiden m‰‰rittely");
   $hakutyyppi = "S";
 }
 elseif ($toim == "RESEPTI") {
-  echo "<font class='head'>".t("Tuotereseptit")."</font><hr>";
+  echo t("Tuotereseptit");
   $hakutyyppi = "R";
 }
 else {
-  echo "<font class='error'>".t("Tuntematon toiminto")."</font><hr>";
+  echo t("Tuntematon toiminto");
   exit;
 }
+
+echo "</font><hr>";
 
 if ($toim == "PERHE") {
   // Haetaan viimeisin valinta keksist‰
@@ -89,19 +93,22 @@ if ($tee == "KOPIOI") {
         echo t("Syˆt‰ valmiste jolle resepti kopioidaan");
       }
 
-      echo "</th><td>".livesearch_kentta("valinta", "TUOTEHAKU", "kop_isatuo", 140, $kop_isatuo, 'X')."</td>";
+      echo "</th>";
 
-      foreach ($kop_tuoteno as $kop_index => $tuoteno) {
-        echo "<input type='hidden' name='kop_tuoteno[$kop_index]' value='$kop_tuoteno[$kop_index]'>";
-        echo "<input type='hidden' name='kop_kerroin[$kop_index]' value='$kop_kerroin[$kop_index]'>";
-        echo "<input type='hidden' name='kop_hinkerr[$kop_index]' value='$kop_hinkerr[$kop_index]'>";
-        echo "<input type='hidden' name='kop_alekerr[$kop_index]' value='$kop_alekerr[$kop_index]'>";
-        #echo "<input type='hidden' name='kop_rivikom[$kop_index]' value='$kop_rivikom[$kop_index]'>";
-        echo "<input type='hidden' name='kop_fakta[$kop_index]' value='$kop_fakta[$kop_index]'>";
+      echo "<td>";
+      echo livesearch_kentta("valinta", "TUOTEHAKU", "kop_isatuo", 140, $kop_isatuo, 'X');
+      echo "</td>";
+
+      foreach ($kop_tuoteno as $_i => $tuoteno) {
+        echo "<input type='hidden' name='kop_tuoteno[$_i]' value='$kop_tuoteno[$_i]'>";
+        echo "<input type='hidden' name='kop_kerroin[$_i]' value='$kop_kerroin[$_i]'>";
+        echo "<input type='hidden' name='kop_hinkerr[$_i]' value='$kop_hinkerr[$_i]'>";
+        echo "<input type='hidden' name='kop_alekerr[$_i]' value='$kop_alekerr[$_i]'>";
+        echo "<input type='hidden' name='kop_fakta[$_i]' value='$kop_fakta[$_i]'>";
 
         if ($toim == "PERHE") {
-          echo "<input type='hidden' name='kop_ohita_kerays[$kop_index]' value='$kop_ohita_kerays[$kop_index]'>";
-          echo "<input type='hidden' name='kop_ei_nayteta[$kop_index]' value='$kop_ei_nayteta[$kop_index]'>";
+          echo "<input type='hidden' name='kop_ohita_kerays[$_i]' value='$kop_ohita_kerays[$_i]'>";
+          echo "<input type='hidden' name='kop_ei_nayteta[$_i]' value='$kop_ei_nayteta[$_i]'>";
         }
       }
 
@@ -111,13 +118,16 @@ if ($tee == "KOPIOI") {
   }
   else {
 
-    $query  = "SELECT tuote.*, tuoteperhe.isatuoteno isa
-               from tuote
-               LEFT JOIN tuoteperhe ON tuote.yhtio=tuoteperhe.yhtio and tuote.tuoteno=tuoteperhe.isatuoteno and tuoteperhe.tyyppi='$hakutyyppi'
-               where tuote.tuoteno = '$kop_isatuo'
-               and tuote.yhtio     = '$kukarow[yhtio]'
-               and tuote.status    NOT IN ('P','X')
-               HAVING isa is null";
+    $query = "SELECT tuote.*,
+              tuoteperhe.isatuoteno isa
+              FROM tuote
+              LEFT JOIN tuoteperhe ON (tuote.yhtio = tuoteperhe.yhtio
+               AND tuote.tuoteno = tuoteperhe.isatuoteno
+               AND tuoteperhe.tyyppi = '$hakutyyppi')
+              WHERE tuote.tuoteno = '$kop_isatuo'
+              AND tuote.yhtio = '$kukarow[yhtio]'
+              AND tuote.status NOT IN ('P','X')
+              AND tuoteperhe.isatuoteno is null";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 1) {
@@ -294,12 +304,23 @@ if ($tee == 'LISAA' and $oikeurow['paivitys'] == '1') {
 
       //Jos tunnus on erisuuri kuin tyhj‰ niin ollan p‰ivitt‰m‰ss‰ olemassa olevaaa kombinaatiota
       if (mysql_num_rows($result) > 0 and $tunnus == "") {
+
         if ($yhtiorow["tuoteperhe_kasittely"] == "") {
-          echo "<font class='error'>".t("T‰m‰ tuoteperhekombinaatio on jo olemassa, sit‰ ei voi lis‰t‰ toiseen kertaan")."</font><br>";
+          echo "<font class='error'>";
+          echo t("T‰m‰ tuoteperhekombinaatio on jo olemassa, sit‰ ei voi lis‰t‰ toiseen kertaan");
+          echo "</font>";
+          echo "<br>";
           $ok = 0;
         }
         else {
-          echo "<font class='message'>".t("HUOM: T‰m‰ tuoteperhekombinaatio on jo olemassa, laspsituote lˆytyy t‰st‰ perheest‰ %s kertaa", "", (mysql_num_rows($result)+1))."!</font><br>";
+          $_count = mysql_num_rows($result) + 1;
+          $_str = "HUOM: T‰m‰ tuoteperhekombinaatio on jo olemassa,";
+          $_str .= " laspsituote lˆytyy t‰st‰ perheest‰ %s kertaa";
+
+          echo "<font class='message'>";
+          echo t($_str, "", $_count);
+          echo "</font>";
+          echo "<br>";
         }
       }
     }
@@ -308,15 +329,35 @@ if ($tee == 'LISAA' and $oikeurow['paivitys'] == '1') {
       //tarkistetaan tuotteiden olemassaolo
       $error = '';
 
-      $query   = "SELECT * from tuote where tuoteno='$isatuoteno' and yhtio='$kukarow[yhtio]'";
-      $res     = pupe_query($query);
+      $query   = "SELECT *
+                  FROM tuote
+                  WHERE tuoteno = '$isatuoteno'
+                  AND yhtio = '$kukarow[yhtio]'";
+      $res = pupe_query($query);
       $isatrow = mysql_fetch_assoc($res);
-      if (mysql_num_rows($res)==0) $error .= "<font class='error'>".t("Tuotenumero")." $isatuoteno ".t("ei ole tuoterekisteriss‰, rivi‰ ei voida lis‰t‰")."!</font><br>";
 
-      $query   = "SELECT * from tuote where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
-      $res     = pupe_query($query);
+      if (mysql_num_rows($res) == 0) {
+        $error .= "<font class='error'>";
+        $error .= t("Tuotenumero");
+        $error .= "{$isatuoteno} ";
+        $error .= t("ei ole tuoterekisteriss‰, rivi‰ ei voida lis‰t‰");
+        $error .= "</font><br>";
+      }
+
+      $query = "SELECT *
+                FROM tuote
+                WHERE tuoteno = '$tuoteno'
+                AND yhtio = '$kukarow[yhtio]'";
+      $res = pupe_query($query);
       $laptrow = mysql_fetch_assoc($res);
-      if (mysql_num_rows($res)==0) $error .= "<font class='error'>".t("Tuotenumero")." $tuoteno ".t("ei ole tuoterekisteriss‰, rivi‰ ei voida lis‰t‰")."!</font><br>";
+
+      if (mysql_num_rows($res) == 0) {
+        $error .= "<font class='error'>";
+        $error .= t("Tuotenumero");
+        $error .= " {$tuoteno} ";
+        $error .= t("ei ole tuoterekisteriss‰, rivi‰ ei voida lis‰t‰");
+        $error .= "</font><br>";
+      }
 
       if ($error == '') {
         $kerroin     = str_replace(',', '.', $kerroin);
@@ -492,28 +533,58 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       echo "<input type='hidden' name='hakutuoteno' value='$hakutuoteno'>";
 
       if ($toim == "PERHE") {
-        echo "<br><font class='error'>".t("Tuotenumeroa")." $hakutuoteno ".t("ei lˆydy mist‰‰n tuoteperheest‰")."!</font><br>";
-        echo "<br><font class='head'>".t("Perusta uusi tuoteperhe tuotteelle").": $hakutuoteno</font><hr><br>";
+        echo "<br><font class='error'>";
+        echo t("Tuotenumeroa") . " $hakutuoteno " . t("ei lˆydy mist‰‰n tuoteperheest‰");
+        echo "!</font><br>";
+
+        echo "<br><font class='head'>";
+        echo t("Perusta uusi tuoteperhe tuotteelle");
+        echo ": $hakutuoteno</font><hr><br>";
       }
       elseif ($toim == "LISAVARUSTE") {
-        echo "<br><font class='error'>".t("Lis‰varusteita ei ole m‰‰ritelty tuotteelle")." $hakutuoteno!</font><br>";
-        echo "<br><font class='head'>".t("Lis‰‰ lis‰varuste tuotteelle").": $hakutuoteno</font><hr><br>";
+        echo "<br><font class='error'>";
+        echo t("Lis‰varusteita ei ole m‰‰ritelty tuotteelle") . " $hakutuoteno!";
+        echo "</font><br>";
+
+        echo "<br><font class='head'>";
+        echo t("Lis‰‰ lis‰varuste tuotteelle") . ": $hakutuoteno";
+        echo "</font><hr><br>";
       }
       elseif ($toim == "OSALUETTELO") {
-        echo "<br><font class='error'>".t("Tuotenumeroa")." $hakutuoteno ".t("ei lˆydy mist‰‰n osaluettelosta")."!</font><br>";
-        echo "<br><font class='head'>".t("Perusta uusi osaluettelo tuotteelle").": $hakutuoteno</font><hr><br>";
+        echo "<br><font class='error'>";
+        echo t("Tuotenumeroa") . " $hakutuoteno " . t("ei lˆydy mist‰‰n osaluettelosta");
+        echo "!</font><br>";
+
+        echo "<br><font class='head'>";
+        echo t("Perusta uusi osaluettelo tuotteelle") . ": $hakutuoteno";
+        echo "</font><hr><br>";
       }
       elseif ($toim == "TUOTEKOOSTE") {
-        echo "<br><font class='error'>".t("Tuotekoostetta ei ole m‰‰ritelty tuotteelle")." $hakutuoteno!</font><br>";
-        echo "<br><font class='head'>".t("Lis‰‰ tuotekooste tuotteelle").": $hakutuoteno</font><hr><br>";
+        echo "<br><font class='error'>";
+        echo t("Tuotekoostetta ei ole m‰‰ritelty tuotteelle") . " $hakutuoteno!";
+        echo "</font><br>";
+
+        echo "<br><font class='head'>";
+        echo t("Lis‰‰ tuotekooste tuotteelle") . ": $hakutuoteno";
+        echo "</font><hr><br>";
       }
       elseif ($toim == "VSUUNNITTELU") {
-        echo "<br><font class='error'>".t("Samankaltaisuutta ei ole m‰‰ritelty tuotteelle")." $hakutuoteno!</font><br>";
-        echo "<br><font class='head'>".t("Lis‰‰ samankaltaisuus tuotteelle").": $hakutuoteno</font><hr><br>";
+        echo "<br><font class='error'>";
+        echo t("Samankaltaisuutta ei ole m‰‰ritelty tuotteelle") . " $hakutuoteno!";
+        echo "</font><br>";
+
+        echo "<br><font class='head'>";
+        echo t("Lis‰‰ samankaltaisuus tuotteelle") . ": $hakutuoteno";
+        echo "</font><hr><br>";
       }
-      else{
-        echo "<br><font class='error'>".t("Tuotenumeroa")." $hakutuoteno ".t("ei lˆydy mist‰‰n tuotereseptist‰")."!</font><br>";
-        echo "<br><font class='head'>".t("Lis‰‰ raaka-aine valmisteelle").": $hakutuoteno</font><hr><br>";
+      else {
+        echo "<br><font class='error'>";
+        echo t("Tuotenumeroa") . " $hakutuoteno " . t("ei lˆydy mist‰‰n tuotereseptist‰") . "!";
+        echo "</font><br>";
+
+        echo "<br><font class='head'>";
+        echo t("Lis‰‰ raaka-aine valmisteelle") . ": $hakutuoteno";
+        echo "</font><hr><br>";
       }
 
       echo "<table>";
@@ -1084,8 +1155,13 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           }
 
           if ($toim == "PERHE") {
-            echo "<td><input type='text' name='hintakerroin' size='10' value='$zrow[hintakerroin]'></td>";
-            echo "<td><input type='text' name='alekerroin' size='10' value='$zrow[alekerroin]'></td>";
+            echo "<td>";
+            echo "<input type='text' name='hintakerroin' size='10' value='$zrow[hintakerroin]'>";
+            echo "</td>";
+
+            echo "<td>";
+            echo "<input type='text' name='alekerroin' size='10' value='$zrow[alekerroin]'>";
+            echo "</td>";
           }
 
           if ($toim != "VSUUNNITTELU") {
@@ -1094,13 +1170,22 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           }
 
           if ($toim == "PERHE") {
-            $chk_ohita_kerays = (isset($zrow['ohita_kerays']) and trim($zrow['ohita_kerays']) != '') ? " checked" : "";
+            $chk_ohita_kerays = "";
+            $chk_ei_nayteta = "";
+
+            if (isset($zrow['ohita_kerays']) and trim($zrow['ohita_kerays']) != '') {
+              $chk_ohita_kerays = " checked";
+            }
+
+            if (isset($zrow['ei_nayteta']) and trim($zrow['ei_nayteta']) != '') {
+              $chk_ei_nayteta = " checked";
+            }
+
             echo "<td>";
             echo "<input type='checkbox' name='ohita_kerays' {$chk_ohita_kerays}>";
             echo "<input type='hidden' name='tallenna_keksiin' value='joo'>";
             echo "</td>";
 
-            $chk_ei_nayteta = (isset($zrow['ei_nayteta']) and trim($zrow['ei_nayteta']) != '') ? " checked" : "";
             echo "<td><input type='checkbox' name='ei_nayteta' value='E' {$chk_ei_nayteta}></td>";
           }
 
@@ -1116,8 +1201,15 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 
             echo "<td>";
             echo "<select name='kpl2' style='width: 150px;'>";
-            echo "<option value='' $sel1>".t("M‰‰r‰‰ kerrotaan vaihdettaessa is‰tuotteen pituutta/m‰‰r‰‰ (kpl2)")."</option>";
-            echo "<option value='X' $sel2>".t("M‰‰r‰‰ ei kerrota vaihdettaessa is‰tuotteen pituutta/m‰‰r‰‰ (kpl2)")."</option>";
+
+            echo "<option value='' $sel1>";
+            echo t("M‰‰r‰‰ kerrotaan vaihdettaessa is‰tuotteen pituutta/m‰‰r‰‰ (kpl2)");
+            echo "</option>";
+
+            echo "<option value='X' $sel2>";
+            echo t("M‰‰r‰‰ ei kerrota vaihdettaessa is‰tuotteen pituutta/m‰‰r‰‰ (kpl2)");
+            echo "</option>";
+
             echo "</select>";
             echo "</td>";
           }
@@ -1215,11 +1307,11 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         $res = pupe_query($query);
 
         $_isatuoteno = urlencode($row["isatuoteno"]);
+        $_href = "$PHP_SELF?toim=$toim&isatuoteno={$_isatuoteno}&hakutuoteno={$_isatuoteno}";
 
         echo "<tr>";
-
         echo "<td>";
-        echo "<a href='$PHP_SELF?toim=$toim&isatuoteno={$_isatuoteno}&hakutuoteno={$_isatuoteno}'>$row[isatuoteno]</a>";
+        echo "<a href='{$_href}'>{$row["isatuoteno"]}</a>";
         echo "</td>";
 
         while ($prow = mysql_fetch_array($res)) {
@@ -1260,17 +1352,24 @@ elseif ($tee == "") {
     $lisa1 .= " and tuoteperhe.tuoteno like '%$tuoteno_haku%' ";
   }
 
-  $query  = "SELECT tuoteperhe.isatuoteno, ti.nimitys,
-             group_concat(concat(tuoteperhe.tuoteno, ' ' , tl.nimitys) order by tuoteperhe.tuoteno, tuoteperhe.tunnus separator '<br>') tuotteet
-             from tuoteperhe
-             join tuote ti on ti.yhtio=tuoteperhe.yhtio and ti.tuoteno=tuoteperhe.isatuoteno
-             join tuote tl on tl.yhtio=tuoteperhe.yhtio and tl.tuoteno=tuoteperhe.tuoteno
-             where tuoteperhe.yhtio = '$kukarow[yhtio]'
-             and tuoteperhe.tyyppi  = '$hakutyyppi'
-             $lisa1
-             group by tuoteperhe.isatuoteno
-             order by $lisalimit tuoteperhe.isatuoteno, tuoteperhe.tuoteno
-             $limitteri";
+  $query = "SELECT tuoteperhe.isatuoteno,
+            ti.nimitys,
+            group_concat(
+              concat(tuoteperhe.tuoteno, ' ' , tl.nimitys) ORDER BY tuoteperhe.tuoteno,
+              tuoteperhe.tunnus separator '<br>') AS tuotteet
+            FROM tuoteperhe
+            JOIN tuote ti ON (ti.yhtio = tuoteperhe.yhtio
+              AND ti.tuoteno = tuoteperhe.isatuoteno)
+            JOIN tuote tl ON (tl.yhtio = tuoteperhe.yhtio
+              AND tl.tuoteno = tuoteperhe.tuoteno)
+            WHERE tuoteperhe.yhtio = '$kukarow[yhtio]'
+            AND tuoteperhe.tyyppi = '$hakutyyppi'
+            $lisa1
+            GROUP BY tuoteperhe.isatuoteno
+            ORDER BY $lisalimit
+            tuoteperhe.isatuoteno,
+            tuoteperhe.tuoteno
+            $limitteri";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -1293,7 +1392,13 @@ elseif ($tee == "") {
     echo "</tr>";
 
     while ($prow = mysql_fetch_array($result)) {
-      echo "<tr class='aktiivi'><td><a href='$PHP_SELF?toim=$toim&isatuoteno=".urlencode($prow["isatuoteno"])."&hakutuoteno=".urlencode($prow["isatuoteno"])."'>$prow[isatuoteno] $prow[nimitys]</a></td><td>$prow[tuotteet] $prow[nimitykset]</td></tr>";
+      $_isatuoteno = urlencode($prow["isatuoteno"]);
+      $_href = "{$PHP_SELF}?toim={$toim}&isatuoteno={$_isatuoteno}&hakutuoteno={$_isatuoteno}";
+
+      echo "<tr class='aktiivi'>";
+      echo "<td><a href='{$_href}'>{$prow["isatuoteno"]} {$prow["nimitys"]}</a></td>";
+      echo "<td>{$prow["tuotteet"]} {$prow["nimitykset"]}</td>";
+      echo "</tr>";
     }
 
     echo "</table>";

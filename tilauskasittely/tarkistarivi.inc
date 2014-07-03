@@ -398,7 +398,7 @@ $paikat  = "";
 
 if (
   $trow["ei_saldoa"] == ""
-  and !in_array($row["tyyppi"], array('E', 'W'))
+  and !in_array($row["tyyppi"], array('E'))
   and (
     !in_array($row["var"], array('T', 'U'))
     or $yhtiorow['tuoteperhe_suoratoimitus'] == ''

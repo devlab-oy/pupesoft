@@ -24640,11 +24640,9 @@ if (!function_exists('laske_siirrettava_maara')) {
                  t1.kpl             = 0 AND
                  t1.varattu         > 0
                )
-               WHERE l1.yhtio       = '{$kukarow['yhtio']}'
-               AND ((l1.tila          = 'N'
-               AND l1.alatila      != 'X')
-               OR (l1.tila = 'G'
-               AND l1.alatila IN ('', 'J'))))
+               WHERE l1.yhtio = '{$kukarow['yhtio']}'
+               AND ((l1.tila = 'N' AND l1.alatila != 'X')
+                 OR (l1.tila = 'G' AND l1.alatila IN ('', 'J'))))
                UNION
                (SELECT t2.tunnus, t2.otunnus, t2.jt + t2.varattu AS varattu
                FROM tilausrivi AS t2

@@ -484,7 +484,9 @@ if ($tee == 'TALLENNAFAKTA' and $oikeurow['paivitys'] == '1') {
     $result = pupe_query($query);
   }
 
-  echo "<br><font class='message'>".t("Tiedot tallennettu")."!</font><br>";
+  echo "<br>";
+  echo "<font class='message'>".t("Tiedot tallennettu")."!</font>";
+  echo "<br><br>";
 
   $tee = '';
 }
@@ -651,7 +653,6 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         $isarow = mysql_fetch_array($res);
       }
 
-      echo "<br>";
       echo "<table>";
       echo "<tr>";
 

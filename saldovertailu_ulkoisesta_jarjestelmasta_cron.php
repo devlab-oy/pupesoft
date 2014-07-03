@@ -99,6 +99,22 @@ if ($handle = opendir($path)) {
 
             list($saldo, $hyllyssa, $myytavissa, $devnull) = saldo_myytavissa($tuoterow["tuoteno"], "KAIKKI", $varastorow['tunnus']);
 
+            // Lasketaan viel‰ Magentosta tulleet tilausrivit jotka ovat ker‰‰m‰tt‰ ja lasketaan ne mukaan Pupen hyllyss‰ olevaan m‰‰r‰‰n
+            $query = "SELECT ifnull(sum(tilausrivi.tilkpl),0) keraamatta
+                      FROM tilausrivi
+                      WHERE yhtio = yhtio
+                      AND tuoteno = '{$tuoterow['tuoteno']}'
+                      AND varasto = '{$varastorow['tunnus']}'
+                      AND var = ''
+                      AND kerattyaika = '0000-00-00 00:00:00'
+                      AND keratty = ''
+                      AND tyyppi = 'L'
+                      AND laatija = 'Magento'";
+            $ker_result = pupe_query($query);
+            $ker_rivi = mysql_fetch_assoc($ker_result);
+
+            $hyllyssa += $ker_rivi['keraamatta'];
+
             // Vertailukonversio
             $a = (int) $kpl * 10000;
             $b = (int) $hyllyssa * 10000;

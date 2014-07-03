@@ -121,7 +121,7 @@ elseif (isset($tee) and $tee == "hae_tiliote") {
 
     $viitteet = hae_viitteet("TITO", $tunnukset["sertifikaatti"], $tunnukset["avain"]);
 
-    if (lataa_tiedostot($viitteet, $tunnukset["sertifikaatti"], $tunnukset["avain"])) {
+    if (lataa_tiedostot($viitteet, "TITO", $tunnukset["sertifikaatti"], $tunnukset["avain"])) {
       echo "Tiedostot ladattu";
     }
     else {
@@ -138,7 +138,7 @@ elseif (isset($tee) and $tee == "hae_viiteaineisto") {
 
     $viitteet = hae_viitteet("KTL", $tunnukset["sertifikaatti"], $tunnukset["avain"]);
 
-    if (lataa_tiedostot($viitteet, $tunnukset["sertifikaatti"], $tunnukset["avain"])) {
+    if (lataa_tiedostot($viitteet, "KTL", $tunnukset["sertifikaatti"], $tunnukset["avain"])) {
       echo "Tiedostot ladattu";
     }
     else {
@@ -317,11 +317,12 @@ function hae_viitteet($tiedostotyyppi, $sertifikaatti, $avain)
 
 /**
  * @param $viitteet
+ * @param $tiedostotyyppi
  * @param $sertifikaatti
  * @param $avain
  * @return bool
  */
-function lataa_tiedostot($viitteet, $sertifikaatti, $avain)
+function lataa_tiedostot($viitteet, $tiedostotyyppi, $sertifikaatti, $avain)
 {
   $onnistuneet = 0;
 
@@ -332,7 +333,7 @@ function lataa_tiedostot($viitteet, $sertifikaatti, $avain)
         "cert" => base64_encode($sertifikaatti),
         "private_key" => base64_encode($avain),
         "customer_id" => "11111111",
-        "file_type" => "TITO",
+        "file_type" => $tiedostotyyppi,
         "target_id" => "11111111A1",
         "file_reference" => $viite
       ),
@@ -349,7 +350,11 @@ function lataa_tiedostot($viitteet, $sertifikaatti, $avain)
       $onnistuneet++;
     }
 
-    file_put_contents("/tmp/{$viite}", base64_decode($vastaus[1]["data"]));
+    if (!is_dir("/tmp/{$tiedostotyyppi}")) {
+      mkdir("/tmp/{$tiedostotyyppi}");
+    }
+
+    file_put_contents("/tmp/{$tiedostotyyppi}/{$viite}", base64_decode($vastaus[1]["data"]));
   }
 
   if (count($viitteet) == $onnistuneet) {

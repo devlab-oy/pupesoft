@@ -2521,7 +2521,7 @@
             }
 
             // Haetaan yhteyshenkilot erillisellä queryllä jos tarvitaan.
-            if (isset($ytun_yhteyshenk) and $ytun_yhteyshenk != '') {
+            if (isset($ytun_yhteyshenk) and $ytun_yhteyshenk != '' and count($rows) > 0) {
               $asiakas_tunnukset = array();
               foreach ($rows as $row) {
                 $asiakas_tunnukset[] = $row['tunnus'];

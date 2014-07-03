@@ -10,6 +10,8 @@ if (isset($_POST["tee"])) {
 }
 
 require_once('../inc/parametrit.inc');
+require_once('tilauskasittely/kustannusarvio_pdf.php');
+require_once("inc/laite_huolto_functions.inc");
 
 if (isset($tee) and $tee == 'lataa_tiedosto') {
   $filepath = "/tmp/" . $tmpfilenimi;
@@ -52,9 +54,6 @@ if (!isset($kkl)) {
 if (!isset($vvl)) {
   $vvl = date('Y') + 1;
 }
-
-require_once('tilauskasittely/kustannusarvio_pdf.php');
-require_once("inc/laite_huolto_functions.inc");
 
 echo "<font class='head'>" . t("Kustannusarvio") . ":</font>";
 echo "<hr/>";

@@ -19,39 +19,33 @@ function hae_kustannusarvio($asiakas, $alku, $loppu) {
   }
 }
 
-function hae_huollot($asiakas, $alku, $loppu) {
+function hae_huollot($asiakas, $start, $end) {
   global $kukarow, $yhtiorow;
 
-  if (empty($asiakas) or empty($alku) or empty($loppu)) {
+  if (empty($asiakas) or empty($start) or empty($end)) {
     return false;
   }
 
-  $alku = date('Y-m-d', strtotime($alku));
-  $loppu = date('Y-m-d', strtotime($loppu));
+  $huoltovalit = huoltovali_options();
 
-  $query = "SELECT kohde.tunnus AS kohde_tunnus,
+  $query = "SELECT laite.tunnus AS laite_tunnus,
+            kohde.tunnus AS kohde_tunnus,
             kohde.nimi AS kohde_nimi,
-            asiakas.nimi AS asiakas_nimi,
-            CAST(SUM(tilausrivi.tilkpl) AS UNSIGNED) AS toimenpide_kpl,
-            CAST(SUM(CASE WHEN toimenpidetuote_tyyppi.selite = 'tarkastus' THEN tilausrivi.tilkpl ELSE 0 END) AS UNSIGNED) AS tarkastus_kpl,
-            CAST(SUM(CASE WHEN toimenpidetuote_tyyppi.selite = 'huolto' THEN tilausrivi.tilkpl ELSE 0 END) AS UNSIGNED) AS huolto_kpl,
-            CAST(SUM(CASE WHEN toimenpidetuote_tyyppi.selite = 'koeponnistus' THEN tilausrivi.tilkpl ELSE 0 END) AS UNSIGNED) AS koeponnistus_kpl,
-            CAST(SUM(tilausrivi.hinta) AS DECIMAL(10,2)) AS hinta
-            FROM   lasku
-            JOIN tilausrivi
-            ON ( tilausrivi.yhtio = lasku.yhtio
-              AND tilausrivi.otunnus = lasku.tunnus
-              AND tilausrivi.tyyppi = 'L' )
-            JOIN tuotteen_avainsanat AS toimenpidetuote_tyyppi
-            ON ( toimenpidetuote_tyyppi.yhtio = tilausrivi.yhtio
-              AND toimenpidetuote_tyyppi.tuoteno = tilausrivi.tuoteno
-              AND toimenpidetuote_tyyppi.laji = 'tyomaarayksen_ryhmittely' )
-            JOIN tilausrivin_lisatiedot AS tl
-            ON ( tl.yhtio = tilausrivi.yhtio
-              AND tl.tilausrivitunnus = tilausrivi.tunnus )
-            JOIN laite
-            ON ( laite.yhtio = tl.yhtio
-              AND laite.tunnus = tl.asiakkaan_positio )
+            huoltosyklit_laitteet.viimeinen_tapahtuma,
+            huoltosyklit_laitteet.huoltovali AS huoltovali,
+            huoltosykli.toimenpide AS toimenpide_tuote,
+            toimenpide_tuote.myyntihinta AS myyntihinta,
+            tuotteen_avainsanat.selite AS toimenpide_tuotteen_tyyppi
+            FROM   laite
+            JOIN huoltosyklit_laitteet
+            ON ( huoltosyklit_laitteet.yhtio = laite.yhtio
+              AND huoltosyklit_laitteet.laite_tunnus = laite.tunnus )
+            JOIN huoltosykli
+            ON ( huoltosykli.yhtio = laite.yhtio
+              AND huoltosykli.tunnus = huoltosyklit_laitteet.huoltosykli_tunnus )
+            JOIN tuote AS toimenpide_tuote
+            ON ( toimenpide_tuote.yhtio = huoltosykli.yhtio
+              AND toimenpide_tuote.tuoteno = huoltosykli.toimenpide )
             JOIN paikka
             ON ( paikka.yhtio = laite.yhtio
               AND paikka.tunnus = laite.paikka )
@@ -60,34 +54,85 @@ function hae_huollot($asiakas, $alku, $loppu) {
               AND kohde.tunnus = paikka.kohde )
             JOIN asiakas
             ON ( asiakas.yhtio = kohde.yhtio
-              AND asiakas.tunnus = kohde.asiakas )
-            WHERE  lasku.yhtio = '{$kukarow['yhtio']}'
-            AND lasku.liitostunnus = {$asiakas}
-            AND lasku.toimaika >= '{$alku}'
-            AND lasku.toimaika <= '{$loppu}'
-            GROUP  BY kohde.tunnus,
-            kohde.nimi";
+              AND asiakas.tunnus = kohde.asiakas
+              AND asiakas.tunnus = {$asiakas})
+            JOIN tuote
+            ON ( tuote.yhtio = laite.yhtio
+              AND tuote.tuoteno = huoltosykli.toimenpide )
+            LEFT JOIN tuotteen_avainsanat
+            ON ( tuotteen_avainsanat.yhtio = tuote.yhtio
+              AND tuotteen_avainsanat.tuoteno = tuote.tuoteno
+              AND tuotteen_avainsanat.laji = 'tyomaarayksen_ryhmittely' )
+            WHERE  laite.yhtio = '{$kukarow['yhtio']}'
+            AND laite.tila IN ('N', 'V', 'K')/*Normaali, varalaite, kateissa*/
+            AND ( laite.omistaja = '' OR laite.omistaja IS NULL )
+            AND DATE_ADD( huoltosyklit_laitteet.viimeinen_tapahtuma, INTERVAL huoltosyklit_laitteet.huoltovali DAY) BETWEEN '{$start}' AND '{$end}'
+            ORDER BY laite_tunnus ASC,
+            tuotteen_avainsanat.selitetark ASC";
 
   $result = pupe_query($query);
 
-  $kohde_rivit = array();
+  $laitteet = array();
+  while ($laite = mysql_fetch_assoc($result)) {
+    $huoltovali = search_array_key_for_value_recursive($huoltovalit, days, $laite['huoltovali']);
+    $huoltovali = $huoltovali[0];
+    $laite['seuraava_tapahtuma'] = date('Y-m-d', strtotime("{$laite['viimeinen_tapahtuma']} + {$huoltovali['years']} years"));
+    $laite['myyntihinta'] = (float) $laite['myyntihinta'];
 
-  $kohde_rivit['alku'] = date('j.n.Y', strtotime($alku));
-  $kohde_rivit['loppu'] = date('j.n.Y', strtotime($loppu));
+    //Resultti groupataan laite_tunnukset ja seuraavan tapahtuman mukaan, jotta eripäivinä
+    //tapahtuvat tapahtumat osataan erottaa toisistaan.
+    //Esim. jos koeponnistus 2014-01-01 ja tarkastus 2014-02-01 niin koeponnistus ei saa yliajaa tarkastusta
+    if (empty($laitteet[$laite['laite_tunnus']][$laite['seuraava_tapahtuma']])) {
+      $laitteet[$laite['laite_tunnus']][$laite['seuraava_tapahtuma']] = $laite;
+    }
+  }
+
+  $kohde_rivit = array();
+  $kohde_rivit['total_hinta'] = 0;
+  foreach ($laitteet as $laitteen_huollot) {
+    foreach ($laitteen_huollot as $laitteen_huolto) {
+      if (!isset($kohde_rivit['rivit'][$laitteen_huolto['kohde_tunnus']])) {
+      if ($laitteen_huolto['toimenpide_tuotteen_tyyppi'] == 'koeponnistus') {
+        $kohde_rivit['rivit'][$laitteen_huolto['kohde_tunnus']]['koeponnistus_kpl'] = 1;
+        $kohde_rivit['rivit'][$laitteen_huolto['kohde_tunnus']]['huolto_kpl'] = 0;
+        $kohde_rivit['rivit'][$laitteen_huolto['kohde_tunnus']]['tarkastus_kpl'] = 0;
+      }
+      else if ($laitteen_huolto['toimenpide_tuotteen_tyyppi'] == 'huolto') {
+        $kohde_rivit['rivit'][$laitteen_huolto['kohde_tunnus']]['koeponnistus_kpl'] = 0;
+        $kohde_rivit['rivit'][$laitteen_huolto['kohde_tunnus']]['huolto_kpl'] = 1;
+        $kohde_rivit['rivit'][$laitteen_huolto['kohde_tunnus']]['tarkastus_kpl'] = 0;
+      }
+      else {
+        $kohde_rivit['rivit'][$laitteen_huolto['kohde_tunnus']]['koeponnistus_kpl'] = 0;
+        $kohde_rivit['rivit'][$laitteen_huolto['kohde_tunnus']]['huolto_kpl'] = 0;
+        $kohde_rivit['rivit'][$laitteen_huolto['kohde_tunnus']]['tarkastus_kpl'] = 1;
+      }
+      $kohde_rivit['rivit'][$laitteen_huolto['kohde_tunnus']]['hinta'] = $laitteen_huolto['myyntihinta'];
+      $kohde_rivit['rivit'][$laitteen_huolto['kohde_tunnus']]['kohde_nimi'] = $laitteen_huolto['kohde_nimi'];
+      $kohde_rivit['rivit'][$laitteen_huolto['kohde_tunnus']]['toimenpide_kpl'] = 1;
+    }
+    else {
+      if ($laitteen_huolto['toimenpide_tuotteen_tyyppi'] == 'koeponnistus') {
+        $kohde_rivit['rivit'][$laitteen_huolto['kohde_tunnus']]['koeponnistus_kpl']++;
+      }
+      else if ($laitteen_huolto['toimenpide_tuotteen_tyyppi'] == 'huolto') {
+        $kohde_rivit['rivit'][$laitteen_huolto['kohde_tunnus']]['huolto_kpl']++;
+      }
+      else {
+        $kohde_rivit['rivit'][$laitteen_huolto['kohde_tunnus']]['tarkastus_kpl']++;
+      }
+      $kohde_rivit['rivit'][$laitteen_huolto['kohde_tunnus']]['toimenpide_kpl']++;
+      $kohde_rivit['rivit'][$laitteen_huolto['kohde_tunnus']]['hinta'] = $kohde_rivit['rivit'][$laitteen_huolto['kohde_tunnus']]['hinta'] + $laitteen_huolto['myyntihinta'];
+    }
+    $kohde_rivit['total_hinta'] = $kohde_rivit['total_hinta'] + $laitteen_huolto['myyntihinta'];
+    }
+  }
+
+  $kohde_rivit['alku'] = date('j.n.Y', strtotime($start));
+  $kohde_rivit['loppu'] = date('j.n.Y', strtotime($end));
   $kohde_rivit['logo'] = base64_encode(hae_yhtion_lasku_logo());
   $kohde_rivit['asiakas'] = hae_asiakas($asiakas);
   $kohde_rivit['yhtio'] = hae_yhtion_parametrit($kukarow['yhtio']);
-
-  while ($kohde_rivi = mysql_fetch_assoc($result)) {
-    $kohde_rivit['rivit'][] = $kohde_rivi;
-  }
-
-  $total_hinta = 0;
-  foreach ($kohde_rivit['rivit'] as $rivi) {
-    $total_hinta = $total_hinta + $rivi['hinta'];
-  }
-
-  $kohde_rivit['total_hinta'] = number_format((float) $total_hinta, 2, '.', '');
 
   return $kohde_rivit;
 }

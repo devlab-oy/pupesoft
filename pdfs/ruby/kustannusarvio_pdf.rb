@@ -69,7 +69,7 @@ class KustannusarvioPDF
     row_headers pdf
     pdf.move_down 10
 
-    @data['rivit'].each do |row|
+    @data['rivit'].each do |i,row|
       row pdf, row
     end
 
@@ -142,7 +142,7 @@ class KustannusarvioPDF
   def row(pdf, row)
     table_cells = [
         pdf.make_cell(:content => @data['asiakas']['tunnus']),
-        pdf.make_cell(:content => row['asiakas_nimi']),
+        pdf.make_cell(:content => @data['asiakas']['nimi']),
         pdf.make_cell(:content => row['kohde_nimi']),
         pdf.make_cell(:content => row['toimenpide_kpl']),
         pdf.make_cell(:content => row['tarkastus_kpl']),

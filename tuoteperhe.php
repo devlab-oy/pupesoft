@@ -707,9 +707,16 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       $worksheet->writeString($excelrivi, $excelsarake++, t("Is‰tuote"));
 
       if ($toim == "PERHE") {
-        echo "<th>".t("Lapset")."</th><th>".t("Nimitys")."</th><th>".t("M‰‰r‰kerroin")."</th><th>".t("Hintakerroin")."</th><th>".t("Alennuskerroin")."</th>";
+        echo "<th>".t("Lapset")."</th>";
+        echo "<th>".t("Nimitys")."</th>";
+        echo "<th>".t("M‰‰r‰kerroin")."</th>";
+        echo "<th>".t("Hintakerroin")."</th>";
+        echo "<th>".t("Alennuskerroin")."</th>";
         #echo "<th>".t("Rivikommentti")."</th>";
-        echo "<th>".t("Kehahin")."</th><th>".t("Kehahin*Kerroin")."</th><th>".t("Ohita ker‰ys")."</th><th>".t("Ei n‰ytet‰")."</th><td class='back'></td></tr>";
+        echo "<th>".t("Kehahin")."</th>";
+        echo "<th>".t("Kehahin*Kerroin")."</th>";
+        echo "<th>".t("Ohita ker‰ys")."</th>";
+        echo "<th>".t("Ei n‰ytet‰")."</th><td class='back'></td></tr>";
 
         $worksheet->writeString($excelrivi, $excelsarake++, t("Lapset"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
@@ -901,7 +908,12 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
             echo "<td>{$chk_ohita_kerays}</td>";
             $worksheet->writeString($excelrivi, $excelsarake++, $chk_ohita_kerays);
 
-            $chk_ei_nayteta = (isset($prow['ei_nayteta']) and trim($prow['ei_nayteta']) != '') ? t("Ei n‰ytet‰") : t("N‰ytet‰‰n");
+            if (isset($prow['ei_nayteta']) and trim($prow['ei_nayteta']) != '') {
+              $chk_ei_nayteta = t("Ei n‰ytet‰");
+            }
+            else {
+              $chk_ei_nayteta = t("N‰ytet‰‰n");
+            }
             echo "<td>{$chk_ei_nayteta}</td>";
             $worksheet->writeString($excelrivi, $excelsarake++, $chk_ei_nayteta);
           }

@@ -1,27 +1,28 @@
 <?php
+
 namespace PDF\Kustannusarvio;
 
 $filepath = dirname(__FILE__);
-if (file_exists($filepath.'/../inc/parametrit.inc')) {
-  require_once($filepath.'/../inc/parametrit.inc');
+if (file_exists($filepath . '/../inc/parametrit.inc')) {
+  require_once($filepath . '/../inc/parametrit.inc');
 }
 else {
-  require_once($filepath.'/parametrit.inc');
+  require_once($filepath . '/parametrit.inc');
 }
 
 function hae_kustannusarvio($asiakas, $alku, $loppu) {
   if (!empty($asiakas)) {
-    $huollot = \PDF\Kustannusarvio\pdf_hae_huollot($asiakas, $alku, $loppu);
-    $filepath = kirjoita_json_tiedosto($huollot, "kustannusarvio_".uniqid()."");
+    $huollot = \PDF\Kustannusarvio\hae_huollot($asiakas, $alku, $loppu);
+    $filepath = kirjoita_json_tiedosto($huollot, "kustannusarvio_" . uniqid() . "");
     $pdf_tiedosto = aja_ruby($filepath, 'kustannusarvio_pdf');
     return $pdf_tiedosto;
   }
 }
 
-function pdf_hae_huollot($asiakas, $alku, $loppu) {
+function hae_huollot($asiakas, $alku, $loppu) {
   global $kukarow, $yhtiorow;
 
-  if (empty($asiakas) or empty($alku)  or empty($loppu) ) {
+  if (empty($asiakas) or empty($alku) or empty($loppu)) {
     return false;
   }
 
@@ -67,26 +68,26 @@ function pdf_hae_huollot($asiakas, $alku, $loppu) {
             GROUP  BY kohde.tunnus,
             kohde.nimi";
 
-    $result = pupe_query($query);
+  $result = pupe_query($query);
 
-    $kohde_rivit = array();
+  $kohde_rivit = array();
 
-    $kohde_rivit['alku'] = date('j.n.Y', strtotime($alku));
-    $kohde_rivit['loppu'] = date('j.n.Y', strtotime($loppu));
-    $kohde_rivit['logo'] = base64_encode(hae_yhtion_lasku_logo());
-    $kohde_rivit['asiakas'] = hae_asiakas($asiakas);
-    $kohde_rivit['yhtio'] = hae_yhtion_parametrit($kukarow['yhtio']);
+  $kohde_rivit['alku'] = date('j.n.Y', strtotime($alku));
+  $kohde_rivit['loppu'] = date('j.n.Y', strtotime($loppu));
+  $kohde_rivit['logo'] = base64_encode(hae_yhtion_lasku_logo());
+  $kohde_rivit['asiakas'] = hae_asiakas($asiakas);
+  $kohde_rivit['yhtio'] = hae_yhtion_parametrit($kukarow['yhtio']);
 
-    while ($kohde_rivi = mysql_fetch_assoc($result)) {
-      $kohde_rivit['rivit'][] = $kohde_rivi;
-    }
+  while ($kohde_rivi = mysql_fetch_assoc($result)) {
+    $kohde_rivit['rivit'][] = $kohde_rivi;
+  }
 
-    $total_hinta = 0;
-    foreach( $kohde_rivit['rivit'] as $rivi ){
-      $total_hinta = $total_hinta + $rivi['hinta'];
-    }
+  $total_hinta = 0;
+  foreach ($kohde_rivit['rivit'] as $rivi) {
+    $total_hinta = $total_hinta + $rivi['hinta'];
+  }
 
-    $kohde_rivit['total_hinta'] = number_format((float)$total_hinta, 2, '.', '');
+  $kohde_rivit['total_hinta'] = number_format((float) $total_hinta, 2, '.', '');
 
-    return $kohde_rivit;
+  return $kohde_rivit;
 }

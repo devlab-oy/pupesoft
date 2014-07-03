@@ -21,7 +21,7 @@ $query = "SELECT *
           WHERE yhtio = '{$kukarow['yhtio']}'
           AND tilausnumero = '$tilausnumero'
           AND maksutapa != ''
-          AND status != ''";
+          AND tila != ''";
 
 $result = pupe_query($query);
 
@@ -136,7 +136,7 @@ if ($status == 'K') {
             muutospvm   = now(),
             laatija = 'Lumo',
             valkoodi = '{$laskurow['valkoodi']}',
-            status = '{$status}',
+            tila = '{$status}',
             tilausnumero = '{$tilausnumero}',
             summa_valuutassa = $korttimaksu
             ";

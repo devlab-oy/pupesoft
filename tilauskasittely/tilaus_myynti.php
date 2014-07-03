@@ -1242,14 +1242,22 @@ if ($tee == "VALMIS"
                 document.getElementById('laskulle').value != '')) {
 
               summa = 0.00;
-              document.getElementById('hyvaksy_nappi').disabled = false;
-              document.getElementById('korttimaksunappi').disabled = true;
+              document.getElementById('hyvaksy_nappi').disabled = false;";
+
+    if ($yhtiorow['maksupaate_kassamyynti'] != '') {
+      echo "  document.getElementById('korttimaksunappi').disabled = true;
               document.getElementById('seka').value = 'kylla';
             } else {
               document.getElementById('hyvaksy_nappi').disabled = true;
-              document.getElementById('korttimaksunappi').disabled = false;
-            }
+              document.getElementById('korttimaksunappi').disabled = false;";  
+    }
+    else {
+      echo "  document.getElementById('seka').value = 'kylla';
+            } else {
+              document.getElementById('hyvaksy_nappi').disabled = true;";
+    } 
 
+    echo "  }
             document.getElementById('loppusumma').innerHTML = '<b>' + summa.toFixed(2) + '</b>';
           }
         -->
@@ -1265,7 +1273,7 @@ if ($tee == "VALMIS"
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tilausnumero = '$tilausnumero'
                 AND maksutapa != ''
-                AND status != ''";
+                AND tila != ''";
 
       $result = pupe_query($query);
 

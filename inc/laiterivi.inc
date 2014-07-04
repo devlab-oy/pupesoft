@@ -111,11 +111,11 @@ if (mysql_field_name($result, $i) == "valm_pvm") {
 }
 
 if (mysql_field_name($result, $i) == "tila") {
-  $query = "  SELECT *
-        FROM avainsana
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND laji = 'LAITE_TILA'
-        ORDER BY jarjestys ASC";
+  $query = "SELECT *
+            FROM avainsana
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND laji = 'LAITE_TILA'
+            ORDER BY jarjestys ASC";
   $tuote_tila_result = pupe_query($query);
   $tuote_tilat = array();
   while ($tuote_tila = mysql_fetch_assoc($tuote_tila_result)) {

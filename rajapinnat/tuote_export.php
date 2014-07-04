@@ -111,6 +111,7 @@ $query = "SELECT tuote.tuoteno,
           tuote.alv,
           tuote.nakyvyys,
           tuote.tuotemassa,
+          tuote.tuotemerkki,
           tuote.tunnus,
           tuote.mallitarkenne campaign_code,
           tuote.malli target,
@@ -258,6 +259,7 @@ while ($row = mysql_fetch_array($res)) {
     'lyhytkuvaus'          => $row["lyhytkuvaus"],
     'yksikko'              => $row["yksikko"],
     'tuotemassa'           => $row["tuotemassa"],
+    'tuotemerkki'          => $row["tuotemerkki"],
     'myyntihinta'          => $myyntihinta,
     'myyntihinta_veroton'  => $myyntihinta_veroton,
     'myymalahinta'         => $myymalahinta,
@@ -824,6 +826,20 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
     $magento_client->setConfigurableNimityskentta($magento_configurable_tuote_nimityskentta);
   }
 
+  // Miten configurable-tuotteen lapsituotteet näkyvät verkkokaupassa.
+  // Vaihtoehdot: NOT_VISIBLE_INDIVIDUALLY, CATALOG, SEARCH, CATALOG_SEARCH
+  // Default on NOT_VISIBLE_INDIVIDUALLY
+  if (isset($magento_configurable_lapsituote_nakyvyys) and !empty($magento_configurable_lapsituote_nakyvyys)) {
+    $magento_configurable_lapsituote_nakyvyys = strtoupper($magento_configurable_lapsituote_nakyvyys);
+    $magento_client->setConfigurableLapsituoteNakyvyys($magento_configurable_lapsituote_nakyvyys);
+  }
+
+  // Asetetaan custom simple-tuotekentät jotka eivät tule dynaamisista parametreistä. Array joka sisältää jokaiselle erikoisparametrille
+  // array ('nimi' =>'magento_parametrin_nimi', 'arvo' = 'tuotteen_kentän_nimi_mistä_arvo_halutaan') esim. array ('nimi' => 'manufacturer', 'arvo' => 'tuotemerkki')
+  if (isset($verkkokauppatuotteet_erikoisparametrit) and count($verkkokauppatuotteet_erikoisparametrit) > 0) {
+    $magento_client->setVerkkokauppatuotteetErikoisparametrit($verkkokauppatuotteet_erikoisparametrit);
+  }
+
   // lisaa_kategoriat
   if (count($dnstuoteryhma) > 0) {
     echo date("d.m.Y @ G:i:s")." - Päivitetään tuotekategoriat\n";
@@ -925,6 +941,7 @@ unset($link);
 $link = mysql_connect($dbhost, $dbuser, $dbpass, true) or die ("Ongelma tietokantapalvelimessa $dbhost (tuote_export)");
 mysql_select_db($dbkanta, $link) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (tuote_export)");
 mysql_set_charset("latin1", $link);
+mysql_query("set group_concat_max_len=1000000", $link);
 
 // Kun kaikki onnistui, päivitetään lopuksi timestamppi talteen
 $query = "UPDATE avainsana SET

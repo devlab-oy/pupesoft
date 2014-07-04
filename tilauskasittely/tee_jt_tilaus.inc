@@ -676,20 +676,34 @@ if (!function_exists("tee_jt_tilaus")) {
               $kommentti .= trim($lisataanrow['kommentti']);
             }
 
+            unset($orig_laskurow);
+
             if ($lisataanrow["vanha_otunnus"] > 0) {
-              $alkupotunnus = $lisataanrow["vanha_otunnus"];
-            }
-            else {
-              $alkupotunnus = $lisataanrow["otunnus"];
+              $query = "SELECT tunnus, asiakkaan_tilausnumero, viesti, tilausyhteyshenkilo, sisviesti1, kohde
+                        FROM lasku
+                        WHERE tunnus = '{$lisataanrow["vanha_otunnus"]}'
+                        AND tila    != 'T'";
+              $aresult = pupe_query($query);
+
+              if (mysql_num_rows($aresult) > 0) {
+                $orig_laskurow = mysql_fetch_assoc($aresult);
+                $alkupotunnus = $lisataanrow["vanha_otunnus"];
+              }
             }
 
-            $query = "SELECT tunnus, asiakkaan_tilausnumero, viesti, tilausyhteyshenkilo, sisviesti1, kohde
-                      FROM lasku
-                      WHERE tunnus = '$alkupotunnus'";
-            $aresult = pupe_query($query);
+            if (!isset($orig_laskurow)) {
+              $query = "SELECT tunnus, asiakkaan_tilausnumero, viesti, tilausyhteyshenkilo, sisviesti1, kohde
+                        FROM lasku
+                        WHERE tunnus = '{$lisataanrow["otunnus"]}'";
+              $aresult = pupe_query($query);
 
-            if (mysql_num_rows($aresult) > 0) {
-              $orig_laskurow = mysql_fetch_assoc($aresult);
+              if (mysql_num_rows($aresult) > 0) {
+                $orig_laskurow = mysql_fetch_assoc($aresult);
+                $alkupotunnus = $lisataanrow["otunnus"];
+              }
+            }
+
+            if (isset($orig_laskurow)) {
 
               // Katotaan onko alkuperäisellä tilauksella käsinsyötetty rahti joka tulisi nyt laskuttaa
               if ($yhtiorow["rahti_hinnoittelu"] == 'K' and $laskurow["rahtivapaa"] == "" and $laskurow["osatoimitus"] == "") {
@@ -1095,6 +1109,7 @@ if (!function_exists("tee_jt_tilaus")) {
                       WHERE yhtio  = '$kukarow[yhtio]'
                       and otunnus  = '$id'
                       and perheid != 0
+                      and tyyppi != 'D'
                       GROUP by perheid";
             $copresult = pupe_query($query);
 
@@ -1113,6 +1128,7 @@ if (!function_exists("tee_jt_tilaus")) {
                       WHERE yhtio   = '$kukarow[yhtio]'
                       and otunnus   = '$id'
                       and perheid2 != 0
+                      and tyyppi != 'D'
                       GROUP by perheid2";
             $copresult = pupe_query($query);
 

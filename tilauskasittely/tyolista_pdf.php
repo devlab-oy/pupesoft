@@ -118,10 +118,7 @@ function hae_tyolistan_rivit($lasku_tunnukset) {
               AND sammutin_tyyppi.laji = 'sammutin_tyyppi' )
             JOIN huoltosykli
             ON ( huoltosykli.yhtio = tilausrivi.yhtio
-              AND huoltosykli.toimenpide = tilausrivi.tuoteno
-              AND huoltosykli.olosuhde = paikka.olosuhde
-              AND huoltosykli.koko = sammutin_koko.selite
-              AND huoltosykli.tyyppi = sammutin_tyyppi.selite )
+              AND huoltosykli.toimenpide = tilausrivi.tuoteno )
             JOIN huoltosyklit_laitteet
             ON ( huoltosyklit_laitteet.yhtio = huoltosykli.yhtio
               AND huoltosyklit_laitteet.huoltosykli_tunnus = huoltosykli.tunnus

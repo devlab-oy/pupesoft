@@ -276,14 +276,25 @@ function kasittele_tyomaaraykset($request) {
 
 function echo_tyojono_kayttoliittyma($request) {
 
-  $toimitusaika_haku_array = array(
-      ''  => t('N‰yt‰ kaikki'),
-      'X' => t('N‰yt‰ myˆh‰ss‰ olevat'),
-      7   => t('1 viikon p‰‰st‰ er‰‰ntyv‰t'),
-      14  => t('2 viikon p‰‰st‰ er‰‰ntyv‰t'),
-      21  => t('3 viikon p‰‰st‰ er‰‰ntyv‰t'),
-      28  => t('4 viikon p‰‰st‰ er‰‰ntyv‰t'),
-  );
+  if ($request['toim'] == 'TEHDYT_TYOT') {
+    $toimitusaika_haku_array = array(
+        '' => t('N‰yt‰ kaikki'),
+        7  => t('1 viikko sitten tehdyt'),
+        14 => t('2 viikkoa sitten tehdyt'),
+        21 => t('3 viikkoa sitten tehdyt'),
+        28 => t('4 viikkoa sitten tehdyt'),
+    );
+  }
+  else {
+    $toimitusaika_haku_array = array(
+        ''  => t('N‰yt‰ kaikki'),
+        'X' => t('N‰yt‰ myˆh‰ss‰ olevat'),
+        7   => t('1 viikon p‰‰st‰ er‰‰ntyv‰t'),
+        14  => t('2 viikon p‰‰st‰ er‰‰ntyv‰t'),
+        21  => t('3 viikon p‰‰st‰ er‰‰ntyv‰t'),
+        28  => t('4 viikon p‰‰st‰ er‰‰ntyv‰t'),
+    );
+  }
 
   echo "<form method='POST' action='' name='tyojono_haku'>";
   echo "<input type='hidden' name='ala_tee' value='' />";
@@ -351,6 +362,11 @@ function echo_tyojono_kayttoliittyma($request) {
   echo "</table>";
 
   echo "<input type='submit' value='" . t('Hae') . "' />";
+  echo "</form>";
+
+  echo "<form method='POST' action='' name='tyojono_haku'>";
+  echo "<input type='hidden' name='ala_tee' value='tyhjenna_hakuehdot' />";
+  echo "<input type='submit' value='" . t('Tyhjenn‰') . "' />";
   echo "</form>";
 }
 
@@ -740,4 +756,30 @@ function onko_laitteella_poikkeus($laite_tunnus) {
   }
 
   return false;
+}
+
+function tyhjenna_sessio() {
+  global $kukarow, $yhtiorow;
+
+  unset($_SESSION['tyojono_hakuehdot']);
+}
+
+function tallenna_haut_sessioon($request) {
+  global $kukarow, $yhtiorow;
+
+  $_SESSION['tyojono_hakuehdot']['asiakas_tunnus'] = $request['asiakas_tunnus'];
+  $_SESSION['tyojono_hakuehdot']['kohde_tunnus'] = $request['kohde_tunnus'];
+  $_SESSION['tyojono_hakuehdot']['tyojono'] = $request['tyojono'];
+  $_SESSION['tyojono_hakuehdot']['tyostatus'] = $request['tyostatus'];
+  $_SESSION['tyojono_hakuehdot']['toimitusaika'] = $request['toimitusaika'];
+}
+
+function aseta_hakuehdot(&$request) {
+  global $kukarow, $yhtiorow;
+
+  $request['asiakas_tunnus'] = $_SESSION['tyojono_hakuehdot']['asiakas_tunnus'];
+  $request['kohde_tunnus'] = $_SESSION['tyojono_hakuehdot']['kohde_tunnus'];
+  $request['tyojono'] = $_SESSION['tyojono_hakuehdot']['tyojono'];
+  $request['tyostatus'] = $_SESSION['tyojono_hakuehdot']['tyostatus'];
+  $request['toimitusaika'] = $_SESSION['tyojono_hakuehdot']['toimitusaika'];
 }

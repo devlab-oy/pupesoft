@@ -1,5 +1,7 @@
 <?php
 
+session_start();
+
 require_once('../inc/parametrit.inc');
 require_once('inc/tyojono2_functions.inc');
 require_once('inc/laite_huolto_functions.inc');
@@ -37,7 +39,7 @@ if (!isset($ajax_request)) {
 }
 
 if ($tee == 'lataa_tiedosto') {
-  $filepath = "/tmp/".$tmpfilenimi;
+  $filepath = "/tmp/" . $tmpfilenimi;
   if (file_exists($filepath)) {
     readfile($filepath);
     unlink($filepath);
@@ -65,7 +67,7 @@ require_once('tilauskasittely/poikkeamaraportti_pdf.php');
 require_once('tilauskasittely/tyolista_pdf.php');
 require_once('tilauskasittely/laskutuspoytakirja_pdf.php');
 
-echo "<font class='head'>".t("Laitehuoltojen työjono").":</font>";
+echo "<font class='head'>" . t("Laitehuoltojen työjono") . ":</font>";
 echo "<hr/>";
 echo "<br/>";
 $js = hae_tyojono2_js();
@@ -99,16 +101,24 @@ $request['tyostatukset'] = hae_tyostatukset($request);
 echo "<div id='tyojono_wrapper'>";
 
 echo "<div id='message_box_success'>";
-echo '<font class="message">'.t('Päivitys onnistui').'</font>';
+echo '<font class="message">' . t('Päivitys onnistui') . '</font>';
 echo "<br/>";
 echo "<br/>";
 echo "</div>";
 
 echo "<div id='message_box_fail'>";
-echo '<font class="message">'.t('Päivitys epäonnistui').'</font>';
+echo '<font class="message">' . t('Päivitys epäonnistui') . '</font>';
 echo "<br/>";
 echo "<br/>";
 echo "</div>";
+
+if ($request['ala_tee'] == 'tyhjenna_hakuehdot') {
+  tyhjenna_sessio();
+}
+
+if (isset($_SESSION['tyojono_hakuehdot'])) {
+  aseta_hakuehdot($request);
+}
 
 if (is_string($request['lasku_tunnukset']) and !empty($request['lasku_tunnukset'])) {
   $request['lasku_tunnukset'] = explode(',', $lasku_tunnukset);
@@ -140,7 +150,7 @@ else {
     merkkaa_tyomaarays_tehdyksi($request);
   }
   else if ($request['ala_tee'] == 'merkkaa_tehdyksi' and empty($request['lasku_tunnukset'])) {
-    echo "<font class='error'>".t('Yhtään työtä ei merkattu tehdyksi')."</font>";
+    echo "<font class='error'>" . t('Yhtään työtä ei merkattu tehdyksi') . "</font>";
   }
 
   if ($request['ala_tee'] == 'merkkaa_kadonneeksi') {
@@ -177,7 +187,7 @@ else {
 
       if (strpos($pdf_tiedosto, '_')) {
         preg_match('~_(.*?).pdf~', $pdf_tiedosto, $osat);
-        $number = '_'.$osat[1];
+        $number = '_' . $osat[1];
         $uusi_nimi = 'Tyolista';
       }
       else {
@@ -201,6 +211,10 @@ echo_tyojono_kayttoliittyma($request);
 
 echo "<br/>";
 echo "<br/>";
+
+if ($request['ala_tee'] != 'tyhjenna_hakuehdot') {
+  tallenna_haut_sessioon($request);
+}
 
 $request['tyomaaraykset'] = hae_tyomaaraykset($request);
 $request['tyomaaraykset'] = kasittele_tyomaaraykset($request);

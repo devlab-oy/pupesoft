@@ -116,9 +116,9 @@ elseif (isset($tee) and $tee == "hae_tiliote") {
   if ($salasana) {
     $tunnukset = hae_tunnukset_ja_pura_salaus($tili, $kukarow, $salasana);
 
-    $viitteet = hae_viitteet("TITO", $tunnukset["sertifikaatti"], $tunnukset["avain"]);
+    $viitteet = hae_viitteet("TITO", $tunnukset);
 
-    if (lataa_tiedostot($viitteet, "TITO", $tunnukset["sertifikaatti"], $tunnukset["avain"])) {
+    if (lataa_tiedostot($viitteet, "TITO", $tunnukset)) {
       echo "Tiedostot ladattu";
     }
     else {
@@ -135,9 +135,9 @@ elseif (isset($tee) and $tee == "hae_viiteaineisto") {
   if ($salasana) {
     $tunnukset = hae_tunnukset_ja_pura_salaus($tili, $kukarow, $salasana);
 
-    $viitteet = hae_viitteet("KTL", $tunnukset["sertifikaatti"], $tunnukset["avain"]);
+    $viitteet = hae_viitteet("KTL", $tunnukset);
 
-    if (lataa_tiedostot($viitteet, "KTL", $tunnukset["sertifikaatti"], $tunnukset["avain"])) {
+    if (lataa_tiedostot($viitteet, "KTL", $tunnukset)) {
       echo "Tiedostot ladattu";
     }
     else {
@@ -243,9 +243,9 @@ function hae_tilit($yhtio)
  * @param $yhtio
  * @return array
  */
-function hae_avain_ja_sertifikaatti($tili, $yhtio)
+function hae_avain_sertifikaatti_ja_customer_id($tili, $yhtio)
 {
-  $query = "SELECT private_key, certificate
+  $query = "SELECT private_key, certificate, sepa_customer_id
               FROM yriti
               WHERE tunnus={$tili} AND yhtio='{$yhtio}'";
 
@@ -311,18 +311,17 @@ function avaimet_ja_salasana_kunnossa()
 
 /**
  * @param $tiedostotyyppi
- * @param $sertifikaatti
- * @param $avain
+ * @param $tunnukset
  * @return array
  */
-function hae_viitteet($tiedostotyyppi, $sertifikaatti, $avain)
+function hae_viitteet($tiedostotyyppi, $tunnukset)
 {
   $parameters = array(
     "method" => "POST",
     "data" => array(
-      "cert" => base64_encode($sertifikaatti),
-      "private_key" => base64_encode($avain),
-      "customer_id" => "11111111",
+      "cert" => base64_encode($tunnukset["sertifikaatti"]),
+      "private_key" => base64_encode($tunnukset["avain"]),
+      "customer_id" => $tunnukset["customer_id"],
       "file_type" => $tiedostotyyppi,
       "target_id" => "11111111A1"
     ),
@@ -346,11 +345,10 @@ function hae_viitteet($tiedostotyyppi, $sertifikaatti, $avain)
 /**
  * @param $viitteet
  * @param $tiedostotyyppi
- * @param $sertifikaatti
- * @param $avain
+ * @param $tunnukset
  * @return bool
  */
-function lataa_tiedostot($viitteet, $tiedostotyyppi, $sertifikaatti, $avain)
+function lataa_tiedostot($viitteet, $tiedostotyyppi, $tunnukset)
 {
   $onnistuneet = 0;
 
@@ -358,9 +356,9 @@ function lataa_tiedostot($viitteet, $tiedostotyyppi, $sertifikaatti, $avain)
     $parameters = array(
       "method" => "POST",
       "data" => array(
-        "cert" => base64_encode($sertifikaatti),
-        "private_key" => base64_encode($avain),
-        "customer_id" => "11111111",
+        "cert" => base64_encode($tunnukset["sertifikaatti"]),
+        "private_key" => base64_encode($tunnukset["avain"]),
+        "customer_id" => $tunnukset["customer_id"],
         "file_type" => $tiedostotyyppi,
         "target_id" => "11111111A1",
         "file_reference" => $viite
@@ -460,14 +458,16 @@ function tiliformi($komento, $kukarow)
  */
 function hae_tunnukset_ja_pura_salaus($tili, $kukarow, $salasana)
 {
-  $salatut_tunnukset = hae_avain_ja_sertifikaatti($tili, $kukarow["yhtio"]);
+  $haetut_tunnukset = hae_avain_sertifikaatti_ja_customer_id($tili, $kukarow["yhtio"]);
 
-  $avain = pura_salaus($salatut_tunnukset["private_key"], $salasana);
-  $sertifikaatti = pura_salaus($salatut_tunnukset["certificate"], $salasana);
+  $avain = pura_salaus($haetut_tunnukset["private_key"], $salasana);
+  $sertifikaatti = pura_salaus($haetut_tunnukset["certificate"], $salasana);
+  $customer_id = $haetut_tunnukset["sepa_customer_id"];
 
   return array(
     "avain" => $avain,
-    "sertifikaatti" => $sertifikaatti
+    "sertifikaatti" => $sertifikaatti,
+    "customer_id" => $customer_id
   );
 }
 
@@ -483,7 +483,7 @@ function laheta_maksuaineisto($tunnukset, $maksuaineisto)
     "data" => array(
       "cert" => base64_encode($tunnukset["sertifikaatti"]),
       "private_key" => base64_encode($tunnukset["avain"]),
-      "customer_id" => "11111111",
+      "customer_id" => $tunnukset["customer_id"],
       "file_type" => "NDCORPAYS",
       "target_id" => "11111111A1",
       "content" => $maksuaineisto

@@ -102,8 +102,7 @@ function pdf_hae_tyomaaraykset($lasku_tunnukset) {
               AND tilausrivi.var != 'P')
             JOIN tilausrivin_lisatiedot
             ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
-              )
+              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
             JOIN laite
             ON ( laite.yhtio = tilausrivin_lisatiedot.yhtio
               AND laite.tunnus = tilausrivin_lisatiedot.asiakkaan_positio )
@@ -153,6 +152,10 @@ function hae_tyomaarayksen_rivit($lasku_tunnus) {
             huoltosyklit_laitteet.huoltovali AS toimenpiteen_huoltovali,
             poikkeamarivi.tunnus AS poikkeamarivi_tunnus
             FROM tilausrivi
+            JOIN tyomaarays
+            ON ( tyomaarays.yhtio = tilausrivi.yhtio
+              AND tyomaarays.otunnus = tilausrivi.otunnus
+              AND tyomaarays.tyostatus != 'K')
             JOIN tilausrivin_lisatiedot
             ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
               AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus

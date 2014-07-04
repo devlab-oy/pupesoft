@@ -26,7 +26,8 @@ if (isset($tee) and $tee == "lataa_sertifikaatti") {
     $salattu_private_key = salaa($private_key, $salasana);
 
     $query = "UPDATE yriti
-              SET private_key='{$salattu_private_key}', certificate='{$salattu_sertifikaatti}'
+              SET private_key='{$salattu_private_key}', certificate='{$salattu_sertifikaatti}',
+                  sepa_customer_id='{$customer_id}'
               WHERE tunnus={$tili} AND yhtio='{$kukarow['yhtio']}'";
 
     $result = pupe_query($query);
@@ -45,6 +46,7 @@ if (isset($tee) and $tee == "lataa_sertifikaatti") {
     echo "<input type='hidden' name='tee' value='lataa_sertifikaatti'/>";
     echo "<table>";
     echo "<tbody>";
+
     echo "<tr>";
     echo "<td>";
     echo "<label for='tili'>" . t("Tili, jolle sertifikaatti on") . "</label>";
@@ -57,6 +59,7 @@ if (isset($tee) and $tee == "lataa_sertifikaatti") {
     echo "</select>";
     echo "</td>";
     echo "</tr>";
+
     echo "<tr>";
     echo "<td>";
     echo "<label for='private_key'>" . t('Yksityinen avain') . "</label>";
@@ -65,6 +68,7 @@ if (isset($tee) and $tee == "lataa_sertifikaatti") {
     echo "<input type='file' name='private_key' id='private_key'>";
     echo "</td>";
     echo "</tr>";
+
     echo "<tr>";
     echo "<td>";
     echo "<label for='certificate'>" . t('Sertifikaatti') . "</label>";
@@ -73,6 +77,12 @@ if (isset($tee) and $tee == "lataa_sertifikaatti") {
     echo "<input type='file' name='certificate' id='certificate'/>";
     echo "</td>";
     echo "</tr>";
+
+    echo "<tr>";
+    echo "<td><label for='customer_id'>Sertifikaattiin yhdistetty asiakastunnus</label></td>";
+    echo "<td><input type='text' name='customer_id' id='customer_id'/></td>";
+    echo "</tr>";
+
     echo "<tr>";
     echo "<td>";
     echo "<label for='salasana'>" . t("Salasana, jolla tiedot suojataan") . "</label>";
@@ -81,6 +91,7 @@ if (isset($tee) and $tee == "lataa_sertifikaatti") {
     echo "<input type='password' name='salasana' id='salasana'/>";
     echo "</td>";
     echo "</tr>";
+
     echo "<tr>";
     echo "<td>";
     echo "<label for='salasanan_vahvistus'>" . t("Salasanan vahvistus") . "</label>";
@@ -89,11 +100,13 @@ if (isset($tee) and $tee == "lataa_sertifikaatti") {
     echo "<input type='password' name='salasanan_vahvistus' id='salasanan_vahvistus'/>";
     echo "</td>";
     echo "</tr>";
+
     echo "<tr>";
     echo "<td class='back'>";
     echo "<input type='submit' name='submit' value='" . t('Tallenna tunnukset') . "'/>";
     echo "</td>";
     echo "</tr>";
+
     echo "</tbody>";
     echo "</table";
     echo "</form>";
@@ -275,6 +288,10 @@ function avaimet_ja_salasana_kunnossa()
   if (!$_FILES["private_key"]["tmp_name"]) {
     $virheet_maara++;
     echo "<font class='error'>Avain täytyy antaa</font><br/>";
+  }
+  if (!$_POST["customer_id"]) {
+    $virheet_maara++;
+    echo "<font class='error'>Asiakastunnus täytyy antaa</font><br/>";
   }
   if (empty($_POST["salasana"])) {
     $virheet_maara++;

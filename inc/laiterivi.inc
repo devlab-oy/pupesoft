@@ -18,7 +18,7 @@ if (mysql_field_name($result, $i) == "tuoteno") {
   $lopetus = "yllapito.php////toim=laite//uusi=1//valittu_paikka={$valittu_paikka}//lopetus_temp={$lopetus_temp}";
   $ulos = "<td id='tuoteno_td'>";
   $ulos .= livesearch_kentta('uusi_laite_form', 'TUOTEHAKU', $nimi, '226', $trow[$i], 'NOSUBMIT');
-  $ulos .= "<a href='{$palvelin2}yllapito.php?valittu_asiakas={$valittu_asiakas}&uusi=1&toim=tuote!!!tuote_pikaperustus!!!true&pikaperustus=1&lopetus={$lopetus}&js_open_yp=&limit=&nayta_poistetut=&nayta_eraantyneet=&laji=&'><button type='button'>".t('Tuote pikaperustus')."</button></a>";
+  $ulos .= "<a href='{$palvelin2}yllapito.php?valittu_asiakas={$valittu_asiakas}&uusi=1&toim=tuote!!!tuote_pikaperustus!!!true&pikaperustus=1&lopetus={$lopetus}&js_open_yp=&limit=&nayta_poistetut=&nayta_eraantyneet=&laji=&'><button type='button'>" . t('Tuote pikaperustus') . "</button></a>";
   $ulos .= "</td>";
   $jatko = 0;
 }
@@ -26,24 +26,24 @@ if (mysql_field_name($result, $i) == "tuoteno") {
 if (mysql_field_name($result, $i) == "paikka") {
   $join = "";
   if (!empty($asiakas_tunnus)) {
-    $join = "  JOIN kohde
-          ON ( kohde.yhtio = paikka.yhtio
-            AND kohde.tunnus = paikka.kohde )
-          JOIN asiakas
-          ON ( asiakas.yhtio = kohde.yhtio
-            AND asiakas.tunnus = kohde.asiakas
-            AND asiakas.tunnus = '{$asiakas_tunnus}')";
+    $join = " JOIN kohde
+              ON ( kohde.yhtio = paikka.yhtio
+                AND kohde.tunnus = paikka.kohde )
+              JOIN asiakas
+              ON ( asiakas.yhtio = kohde.yhtio
+                AND asiakas.tunnus = kohde.asiakas
+                AND asiakas.tunnus = '{$asiakas_tunnus}')";
   }
 
-  $query = "  SELECT paikka.tunnus,
-        concat_ws(' ', paikka.nimi, paikka.osoite, avainsana.selitetark) as dropdown_text
-        FROM paikka
-        JOIN avainsana
-        ON ( avainsana.yhtio = paikka.yhtio
-          AND avainsana.selite = paikka.olosuhde
-          AND avainsana.laji = 'OLOSUHDE' )
-        {$join}
-        WHERE paikka.yhtio = '{$kukarow['yhtio']}'";
+  $query = "SELECT paikka.tunnus,
+            concat_ws(' ', paikka.nimi, paikka.osoite, avainsana.selitetark) as dropdown_text
+            FROM paikka
+            JOIN avainsana
+            ON ( avainsana.yhtio = paikka.yhtio
+              AND avainsana.selite = paikka.olosuhde
+              AND avainsana.laji = 'OLOSUHDE' )
+            {$join}
+            WHERE paikka.yhtio = '{$kukarow['yhtio']}'";
   $paikka_result = pupe_query($query);
   $paikat = array();
   while ($paikka = mysql_fetch_assoc($paikka_result)) {
@@ -118,7 +118,7 @@ if (mysql_field_name($result, $i) == "tila") {
         ORDER BY jarjestys ASC";
   $tuote_tila_result = pupe_query($query);
   $tuote_tilat = array();
-  while($tuote_tila = mysql_fetch_assoc($tuote_tila_result)) {
+  while ($tuote_tila = mysql_fetch_assoc($tuote_tila_result)) {
     $tuote_tilat[] = $tuote_tila;
   }
 
@@ -145,16 +145,16 @@ if (!isset($redirect_echoed)) {
   $redirect_echoed = 1;
   if (!empty($valittu_paikka)) {
     //redirektiin tarvitaan valittu_asiakas joten haetaan paikan kohde, jolla on asiakas asiakas
-    $query = "  SELECT asiakas.tunnus
-          FROM asiakas
-          JOIN kohde
-          ON ( kohde.yhtio = asiakas.yhtio
-            AND kohde.asiakas = asiakas.tunnus)
-          JOIN paikka
-          ON ( paikka.yhtio = kohde.yhtio
-            AND paikka.kohde = kohde.tunnus
-            AND paikka.tunnus = '{$valittu_paikka}')
-          WHERE asiakas.yhtio = '{$kukarow['yhtio']}'";
+    $query = "SELECT asiakas.tunnus
+              FROM asiakas
+              JOIN kohde
+              ON ( kohde.yhtio = asiakas.yhtio
+                AND kohde.asiakas = asiakas.tunnus)
+              JOIN paikka
+              ON ( paikka.yhtio = kohde.yhtio
+                AND paikka.kohde = kohde.tunnus
+                AND paikka.tunnus = '{$valittu_paikka}')
+              WHERE asiakas.yhtio = '{$kukarow['yhtio']}'";
     $asiakas_result = pupe_query($query);
     $asiakas_row = mysql_fetch_assoc($asiakas_result);
     $valittu_asiakas = $asiakas_row['tunnus'];

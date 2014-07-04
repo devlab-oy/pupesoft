@@ -305,28 +305,13 @@ function generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltos
 function generoi_tyomaarays_temp($huollettavan_laitteen_huoltosyklirivi) {
   global $kukarow, $yhtiorow, $debug;
 
-
   $kukarow['kesken'] = 0;
 
-  $edellinen_tyomaarays = hae_laitteen_edellinen_tyomaarays($huollettavan_laitteen_huoltosyklirivi['laite_tunnus']);
+  $huoltovalit = huoltovali_options();
+  $huollettavan_laitteen_huoltovali = $huoltovalit[$huollettavan_laitteen_huoltosyklirivi['huoltovali']];
+  $toimaika = date("Y-m-d", strtotime($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma'] . " + {$huollettavan_laitteen_huoltovali['years']} years"));
 
-  $tyomaarays_tunnus = luo_myyntitilausotsikko("TYOMAARAYS", $huollettavan_laitteen_huoltosyklirivi['asiakas_tunnus']);
-
-  //HUOM jos huoltosyklirivin toimenpide_tuotteen_tyyppi = koeponnistus niin viimeinen_tapahtuma ei ole ikin‰ tyhj‰. Luonti vaiheessa sinne asetetaan laite.valm_pvm
-  if (empty($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma']) and $huollettavan_laitteen_huoltosyklirivi['toimenpide_tuotteen_tyyppi'] != 'koeponnistus') {
-    aseta_tyomaarayksen_toimitusajankohta_temp($tyomaarays_tunnus, date("Y-m-d", strtotime('now')));
-  }
-  else {
-    //merkataan toimitusajankohdaksi viimeinen_tapahtuma + huoltovali
-    $huoltovalit = huoltovali_options();
-    $huollettavan_laitteen_huoltovali = $huoltovalit[$huollettavan_laitteen_huoltosyklirivi['huoltovali']];
-    aseta_tyomaarayksen_toimitusajankohta_temp($tyomaarays_tunnus, date("Y-m-d", strtotime($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma'] . " + {$huollettavan_laitteen_huoltovali['years']} years")));
-  }
-
-  if ($debug and !empty($tyomaarays_tunnus)) {
-    echo "Tyom‰‰r‰ys " . $tyomaarays_tunnus . " luotu";
-    echo "<br/>";
-  }
+  $tyomaarays_tunnus = luo_tyomaarays($huollettavan_laitteen_huoltosyklirivi['asiakas_tunnus'], $toimaika, 0, false, $huollettavan_laitteen_huoltosyklirivi['vastuuhenkilo'], true);
 
   if (empty($tyomaarays_tunnus)) {
     echo t("Joku meni pieleen");
@@ -340,33 +325,9 @@ function generoi_tyomaarays_temp($huollettavan_laitteen_huoltosyklirivi) {
   //lis‰t‰‰n sammuttimen toimenpiteen palvelurivi
   $trow = hae_tuote($huollettavan_laitteen_huoltosyklirivi['toimenpide']);
 
-  if (isset($huollettavan_laitteen_huoltosyklirivi['tilausrivi_hinta']) and $huollettavan_laitteen_huoltosyklirivi['tilausrivi_hinta'] != '') {
-    $hinta = $huollettavan_laitteen_huoltosyklirivi['tilausrivi_hinta'];
-  }
-  else {
-    $hinta = $trow['hinta'];
-  }
+  $tilausrivi_tunnus = luo_tilausrivi($tyomaarays_tunnus, $trow, $huollettavan_laitteen_huoltosyklirivi['laite_tunnus'], $toimaika, '0000-00-00 00:00:00', false, true);
 
-  if (isset($huollettavan_laitteen_huoltosyklirivi['ale']) and $huollettavan_laitteen_huoltosyklirivi['ale'] != '') {
-    $ale = $huollettavan_laitteen_huoltosyklirivi['ale'];
-  }
-  else {
-    $ale = 0;
-  }
-
-  $parametrit = array(
-      'trow'     => $trow,
-      'laskurow' => $laskurow,
-      'kpl'      => 1,
-      'tuoteno'  => $trow['tuoteno'],
-      'hinta'    => $hinta,
-      'netto'    => '',
-      'ale1'     => $ale,
-  );
-
-  $rivit = lisaa_rivi($parametrit);
-
-  paivita_laite_tunnus_toimenpiteen_tilausriville_temp($huollettavan_laitteen_huoltosyklirivi, $rivit);
+  paivita_laite_tunnus_toimenpiteen_tilausriville_temp($huollettavan_laitteen_huoltosyklirivi, $tilausrivi_tunnus);
   paivita_tyojono_ja_tyostatus_tyomaaraykselle_temp($tyomaarays_tunnus, $huollettavan_laitteen_huoltosyklirivi);
 
   return $tyomaarays_tunnus;
@@ -482,7 +443,7 @@ function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_
   return $tyomaarays_tunnus;
 }
 
-function luo_tyomaarays($asiakas, $toimaika, $summa, $alv_23 = true, $vastuuhenkilo = '') {
+function luo_tyomaarays($asiakas, $toimaika, $summa, $alv_23 = true, $vastuuhenkilo = '', $temp = false) {
   global $kukarow, $yhtiorow;
 
   if ($alv_23) {
@@ -497,7 +458,16 @@ function luo_tyomaarays($asiakas, $toimaika, $summa, $alv_23 = true, $vastuuhenk
     $maksuehto['tunnus'] = 0;
   }
 
-  $query = "INSERT INTO lasku SET
+  $lasku = 'lasku';
+  $tyomaarays = 'tyomaarays';
+  $laskun_lisatiedot = 'laskun_lisatiedot';
+  if ($temp) {
+    $lasku = 'lasku_temp';
+    $tyomaarays = 'tyomaarays_temp';
+    $laskun_lisatiedot = 'laskun_lisatiedot_temp';
+  }
+
+  $query = "INSERT INTO {$lasku} SET
             yhtio = '{$kukarow['yhtio']}',
             yhtio_nimi = '{$yhtiorow['nimi']}',
             yhtio_osoite = '{$yhtiorow['osoite']}',
@@ -550,7 +520,7 @@ function luo_tyomaarays($asiakas, $toimaika, $summa, $alv_23 = true, $vastuuhenk
   pupe_query($query);
   $tunnus = mysql_insert_id();
 
-  $query = "INSERT INTO laskun_lisatiedot SET
+  $query = "INSERT INTO {$laskun_lisatiedot} SET
             yhtio = '{$kukarow['yhtio']}',
             otunnus = '{$tunnus}',
             kolm_ovttunnus = 'FI',
@@ -566,7 +536,7 @@ function luo_tyomaarays($asiakas, $toimaika, $summa, $alv_23 = true, $vastuuhenk
             luontiaika = NOW()";
   pupe_query($query);
 
-  $query = "INSERT INTO tyomaarays SET
+  $query = "INSERT INTO {$tyomaarays} SET
             yhtio = '{$kukarow['yhtio']}',
             laatija = '{$kukarow['kuka']}',
             luontiaika = NOW(),
@@ -578,17 +548,91 @@ function luo_tyomaarays($asiakas, $toimaika, $summa, $alv_23 = true, $vastuuhenk
   return $tunnus;
 }
 
-function paivita_laite_tunnus_toimenpiteen_tilausriville_temp($laite, $tilausrivit) {
+function luo_tilausrivi($tyomaarays_tunnus, $tuote, $laite_tunnus, $toimaika, $toimitettu, $alv_23 = true, $temp = false) {
   global $kukarow, $yhtiorow;
+
+  if ($alv_23) {
+    $alv = '23.00';
+  }
+  else {
+    $alv = '24.00';
+  }
+
+  $tilausrivi = 'tilausrivi';
+  $tilausrivin_lisatiedot = 'tilausrivin_lisatiedot';
+  if ($temp) {
+    $tilausrivi = 'tilausrivi_temp';
+    $tilausrivin_lisatiedot = 'tilausrivin_lisatiedot_temp';
+  }
+
+  $query = "INSERT INTO {$tilausrivi} SET
+            yhtio = '{$kukarow['yhtio']}',
+            tyyppi = 'L',
+            toimaika = '{$toimaika}',
+            kerayspvm = '{$toimaika}',
+            otunnus = '{$tyomaarays_tunnus}',
+            tuoteno = '{$tuote['tuoteno']}',
+            try = '{$tuote['try']}',
+            osasto = 0,
+            nimitys = '{$tuote['nimitys']}',
+            kpl = 0.00,
+            kpl2 = 0.00,
+            tilkpl = 1.00,
+            yksikko = '',
+            varattu = 1.00,
+            jt = 0.00,
+            hinta = {$tuote['myyntihinta']},
+            hinta_valuutassa = 0.00,
+            hinta_alkuperainen = 0.00,
+            alv = {$alv},
+            rivihinta = 0.00,
+            erikoisale = 0.00,
+            erikoisale_saapuminen = 0.00,
+            ale1 = 0.00,
+            ale2 = 0.00,
+            ale3 = 0.00,
+            kate = 0.00,
+            kommentti = '',
+            laatija = 'import',
+            laadittu = NOW(),
+            keratty = 'saldoton',
+            kerattyaika = NOW(),
+            toimitettu = 'import',
+            toimitettuaika = '{$toimitettu}',
+            varastoon = 1";
+
+  pupe_query($query);
+  $tunnus = mysql_insert_id();
+
+  $query = "INSERT INTO {$tilausrivin_lisatiedot} SET
+            yhtio = '{$kukarow['yhtio']}',
+            tilausrivitunnus = '{$tunnus}',
+            asiakkaan_positio = '{$laite_tunnus}',
+            vanha_otunnus = '{$tyomaarays_tunnus}',
+            luontiaika = NOW(),
+            laatija = 'import'";
+  pupe_query($query);
+
+  return $tunnus;
+}
+
+function paivita_laite_tunnus_toimenpiteen_tilausriville_temp($laite, $tilausrivi_tunnus) {
+  global $kukarow, $yhtiorow;
+
+  if (empty($tilausrivi_tunnus) or empty($laite['laite_tunnus'])) {
+    return false;
+  }
 
   $query = "UPDATE tilausrivin_lisatiedot_temp
             JOIN tilausrivi_temp
             ON ( tilausrivi_temp.yhtio = tilausrivin_lisatiedot_temp.yhtio
               AND tilausrivi_temp.tunnus = tilausrivin_lisatiedot_temp.tilausrivitunnus
-              AND tilausrivi_temp.tunnus = '{$tilausrivit[0][0]}')
+              AND tilausrivi_temp.tunnus = {$tilausrivi_tunnus} )
             SET asiakkaan_positio = {$laite['laite_tunnus']}
             WHERE tilausrivin_lisatiedot_temp.yhtio = '{$kukarow['yhtio']}'";
   pupe_query($query);
+
+  return true;
 }
 
 function paivita_tyojono_ja_tyostatus_tyomaaraykselle_temp($tyomaarays_tunnus, $laite) {

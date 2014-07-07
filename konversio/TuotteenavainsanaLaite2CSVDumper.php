@@ -234,7 +234,7 @@ class TuotteenavainsanaLaite2CSVDumper extends CSVDumper {
     $query = "SELECT tuote.tuoteno AS tuoteno,
               tuote.nimitys,
               t.tuoteno AS t
-              FROM   tuote
+              FROM tuote
               LEFT JOIN tuotteen_avainsanat AS t
               ON ( t.yhtio = tuote.yhtio
                 AND t.tuoteno = tuote.tuoteno
@@ -256,7 +256,7 @@ class TuotteenavainsanaLaite2CSVDumper extends CSVDumper {
     $query = "SELECT tuote.tuoteno AS tuoteno,
               tuote.nimitys,
               t.tuoteno AS t
-              FROM   tuote
+              FROM tuote
               LEFT JOIN tuotteen_avainsanat AS t
               ON ( t.yhtio = tuote.yhtio
                 AND t.tuoteno = tuote.tuoteno

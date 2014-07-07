@@ -46,21 +46,9 @@ if (isset($tee) and $tee == "lataa_sertifikaatti") {
 
     echo "<form action='pankkiyhteys.php' method='post' enctype='multipart/form-data'>";
     echo "<input type='hidden' name='tee' value='lataa_sertifikaatti'/>";
+    echo "<input type='hidden' name='tili' value='{$tili}'/>";
     echo "<table>";
     echo "<tbody>";
-
-    echo "<tr>";
-    echo "<td>";
-    echo "<label for='tili'>" . t("Tili, jolle sertifikaatti on") . "</label>";
-    echo "</td>";
-    echo "<td>";
-    echo "<select name='tili'>";
-    foreach ($tilit as $tili) {
-      echo "<option value='" . $tili["tunnus"] . "'>" . $tili["nimi"] . "</option>";
-    }
-    echo "</select>";
-    echo "</td>";
-    echo "</tr>";
 
     echo "<tr>";
     echo "<td>";
@@ -127,7 +115,7 @@ elseif (isset($tee) and $tee == "hae_tiliote") {
   else {
     tarkista_salasana();
 
-    tiliformi("hae_tiliote", $kukarow);
+    salasana_formi();
   }
 }
 elseif (isset($tee) and $tee == "hae_viiteaineisto") {
@@ -143,7 +131,7 @@ elseif (isset($tee) and $tee == "hae_viiteaineisto") {
   else {
     tarkista_salasana();
 
-    tiliformi("hae_viiteaineisto", $kukarow);
+    salasana_formi();
   }
 }
 elseif (isset($tee) and $tee == "laheta_maksuaineisto") {
@@ -172,11 +160,12 @@ elseif (isset($tee) and $tee == "laheta_maksuaineisto") {
     tarkista_salasana();
     tarkista_maksuaineisto();
 
-    tiliformi("laheta_maksuaineisto", $kukarow);
+    salasana_formi();
   }
 }
-else {
+elseif (isset($tee) and $tee == "valitse_komento") {
   echo "<form method='post' action='pankkiyhteys.php'>";
+  echo "<input type='hidden' name='tili' value='{$tili}'/>";
   echo "<table>";
   echo "<tbody>";
   echo "<tr>";
@@ -193,6 +182,40 @@ else {
   echo "</tbody>";
   echo "</table>";
   echo "<input type='submit' value='" . t('OK') . "'>";
+  echo "</form>";
+}
+else {
+  $query = "SELECT tunnus, nimi
+            FROM yriti
+            WHERE yhtio='{$kukarow["yhtio"]}' AND sepa_customer_id != ''";
+
+  $result = pupe_query($query);
+
+  $kaytossa_olevat_tilit = array();
+
+  while ($rivi = mysql_fetch_assoc($result)) {
+    array_push($kaytossa_olevat_tilit, $rivi);
+  }
+
+  echo "<form method='post' action='pankkiyhteys.php'>";
+  echo "<input type='hidden' name='tee' value='valitse_komento'/>";
+  echo "<table>";
+  echo "<tbody>";
+  echo "<tr>";
+  echo "<td>Käytössä olevat pankkiyhteydet</td>";
+  echo "<td>";
+  echo "<select name='tili'>";
+
+  foreach ($kaytossa_olevat_tilit as $tili) {
+    echo "<option value='{$tili["tunnus"]}'>{$tili["nimi"]}</option>";
+  }
+
+  echo "</select>";
+  echo "</td>";
+  echo "</tr>";
+  echo "</tbody>";
+  echo "</table>";
+  echo "<input type='submit' value='" . t('Valitse tili') . "'>";
   echo "</form>";
 }
 
@@ -392,13 +415,10 @@ function lataa_tiedostot($viitteet, $tiedostotyyppi, $tunnukset)
   return false;
 }
 
-/**
- * @param $komento
- * @param $kukarow
- */
-function tiliformi($komento, $kukarow)
+function salasana_formi()
 {
-  $tilit = hae_tilit($kukarow["yhtio"]);
+
+  $komento = $_POST["tee"];
 
   if ($komento == "laheta_maksuaineisto") {
     $enctype = "enctype='multipart/form-data'";
@@ -409,20 +429,10 @@ function tiliformi($komento, $kukarow)
 
   echo "<form method='post' action='pankkiyhteys.php' {$enctype}>";
   echo "<input type='hidden' name='tee' value='{$komento}'/>";
+  echo "<input type='hidden' name='tili' value='{$_POST["tili"]}'/>";
   echo "<table>";
   echo "<tbody>";
-  echo "<tr>";
-  echo "<td>";
-  echo "<label for='tili'>" . t("Tili") . "</label>";
-  echo "</td>";
-  echo "<td>";
-  echo "<select name='tili'>";
-  foreach ($tilit as $tili) {
-    echo "<option value='" . $tili["tunnus"] . "'>" . $tili["nimi"] . "</option>";
-  }
-  echo "</select>";
-  echo "</td>";
-  echo "</tr>";
+
   echo "<tr>";
   echo "<td>";
   echo "<label for='salasana'>" . t("Salasana, jolla salasit tunnukset") . "</label>";

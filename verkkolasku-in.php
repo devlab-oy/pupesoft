@@ -16,12 +16,12 @@ if ($php_cli) {
   ini_set("display_errors", 0);
 
   // otetaan tietokantayhteys
-  require ("inc/connect.inc");
-  require_once("inc/functions.inc");
+  require "inc/connect.inc";
+  require_once "inc/functions.inc";
 }
 
 $lock_params = array(
-    "locktime" => 5400,
+  "locktime" => 5400,
 );
 
 // Sallitaan vain yksi instanssi t‰st‰ skriptist‰ kerrallaan
@@ -53,11 +53,11 @@ elseif (strpos($_SERVER['SCRIPT_NAME'], "tiliote.php") !== FALSE and $verkkolask
   //Pupesoftista
   echo "Aloitetaan verkkolaskun sis‰‰nluku...<br>\n<br>\n";
 
-  // Kopsataan uploadatta faili verkkoalskudirikkaan
+  // Kopsataan uploadatta faili verkkolaskudirikkaan
   $copy_boob = copy($filenimi, $laskut."/".$userfile);
 
   if ($copy_boob === FALSE) {
-      echo "Kopiointi ep‰onnistui $filenimi $laskut/$userfile<br>\n";
+    echo "Kopiointi ep‰onnistui $filenimi $laskut/$userfile<br>\n";
     exit;
   }
 }
@@ -66,58 +66,58 @@ else {
   exit;
 }
 
-  require ("inc/verkkolasku-in.inc"); // t‰‰ll‰ on itse koodi
-  require ("inc/verkkolasku-in-erittele-laskut.inc"); // t‰‰ll‰ pilkotaan Finvoiceaineiston laskut omiksi tiedostoikseen
+require "inc/verkkolasku-in.inc"; // t‰‰ll‰ on itse koodi
+require "inc/verkkolasku-in-erittele-laskut.inc"; // t‰‰ll‰ pilkotaan Finvoiceaineiston laskut omiksi tiedostoikseen
 
 // K‰sitell‰‰n ensin kaikki Finvoicet
 if ($handle = opendir($laskut)) {
   while (($file = readdir($handle)) !== FALSE) {
-    if (is_file($laskut."/".$file)) {
+    if (!is_file($laskut."/".$file)) {
+      continue;
+    }
 
-      $nimi = $laskut."/".$file;
-      $luotiinlaskuja = erittele_laskut($nimi);
+    $nimi = $laskut."/".$file;
+    $luotiinlaskuja = erittele_laskut($nimi);
 
-      // Jos tiedostosta luotiin laskuja siirret‰‰n se tielt‰ pois
-      if ($luotiinlaskuja > 0) {
-        rename($laskut."/".$file, $origlaskut."/".$file);
-      }
+    // Jos tiedostosta luotiin laskuja siirret‰‰n se tielt‰ pois
+    if ($luotiinlaskuja > 0) {
+      rename($laskut."/".$file, $origlaskut."/".$file);
     }
   }
 }
 
 if ($handle = opendir($laskut)) {
-
   while (($file = readdir($handle)) !== FALSE) {
+    if (!is_file($laskut."/".$file)) {
+      continue;
+    }
 
-    if (is_file($laskut."/".$file)) {
+    // $yhtiorow ja $xmlstr
+    unset($yhtiorow);
+    unset($xmlstr);
 
-      // $yhtiorow ja $xmlstr
-      unset($yhtiorow);
-      unset($xmlstr);
+    $nimi = $laskut."/".$file;
+    $laskuvirhe = verkkolasku_in($nimi, TRUE);
 
-      $nimi = $laskut."/".$file;
-      $laskuvirhe = verkkolasku_in($nimi, TRUE);
+    if ($laskuvirhe == "") {
+      if (!$php_cli) {
+        echo "Verkkolasku vastaanotettu onnistuneesti!<br>\n<br>\n";
+      }
 
-        if ($laskuvirhe == "") {
-        if (!$php_cli)  {
-          echo "Verkkolasku vastaanotettu onnistuneesti!<br>\n<br>\n";
-        }
+      rename($laskut."/".$file, $oklaskut."/".$file);
+    }
+    else {
+      if (!$php_cli) {
+        echo "<font class='error'>Verkkolaskun vastaanotossa virhe:</font><br>\n<pre>$laskuvirhe</pre><br>\n";
+      }
+      $alku = $loppu = "";
+      list($alku, $loppu) = explode("####", $laskuvirhe);
 
-        rename($laskut."/".$file, $oklaskut."/".$file);
-        }
-        else {
-        if (!$php_cli)  {
-          echo "<font class='error'>Verkkolaskun vastaanotossa virhe:</font><br>\n<pre>$laskuvirhe</pre><br>\n";
-        }
-        $alku = $loppu = "";
-        list($alku,$loppu) = explode("####",$laskuvirhe);
-
-        if (trim($loppu) == "ASN") {
-          // ei tehd‰ mit‰‰n vaan annetaan j‰‰d‰ roikkumaan kansioon seuraavaan kierrokseen saakka, tai kunnes joku lukee postit.
-        }
-        else {
-          rename($laskut."/".$file, $errlaskut."/".$file);
-        }
+      if (trim($loppu) == "ASN") {
+        // ei tehd‰ mit‰‰n vaan annetaan j‰‰d‰ roikkumaan kansioon seuraavaan kierrokseen saakka, tai kunnes joku lukee postit.
+      }
+      else {
+        rename($laskut."/".$file, $errlaskut."/".$file);
       }
     }
   }

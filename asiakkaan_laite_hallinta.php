@@ -35,6 +35,16 @@ if (!empty($kukarow['extranet'])) {
   pupesoft_require('tilauskasittely/laskutuspoytakirja_pdf.php');
 }
 
+if (isset($livesearch_tee) and $livesearch_tee == "ASIAKASHAKU") {
+  livesearch_asiakashaku();
+  exit;
+}
+
+if (isset($livesearch_tee) and $livesearch_tee == "KOHDEHAKU") {
+  livesearch_kohdehaku();
+  exit;
+}
+
 if ($tee == 'lataa_tiedosto') {
   $filepath = "/tmp/" . $tmpfilenimi;
   if (file_exists($filepath)) {
@@ -51,6 +61,8 @@ if ($tee == 'lataa_tiedosto') {
 if ($ajax_request) {
   exit;
 }
+
+enable_ajax();
 
 echo "<font class='head'>" . t("Laitehallinta") . "</font><hr>";
 ?>
@@ -93,9 +105,12 @@ echo "<font class='head'>" . t("Laitehallinta") . "</font><hr>";
 </script>
 <?php
 $request = array(
-    'ytunnus'         => $ytunnus,
+    'tee'             => $tee,
     'asiakasid'       => $asiakasid,
     'asiakas_tunnus'  => $asiakas_tunnus,
+    'kohde_tunnus'    => $kohde_tunnus,
+    'omanumero'       => $omanumero,
+    'sarjanumero'     => $sarjanumero,
     'ala_tee'         => $ala_tee,
     'lasku_tunnukset' => $lasku_tunnukset,
     'huoltosyklit'    => $huoltosyklit,
@@ -103,7 +118,7 @@ $request = array(
 
 $request['laitteen_tilat'] = hae_laitteen_tilat();
 
-if (($tee == 'hae_asiakas' or ($tee == '' and !empty($valitse_asiakas))) and empty($kukarow['extranet'])) {
+if ($request['tee'] == 'hae_asiakas' and empty($kukarow['extranet'])) {
   $request['haettu_asiakas'] = hae_asiakas($request);
 }
 else {
@@ -118,6 +133,12 @@ if (!empty($request['haettu_asiakas'])) {
   echo "<br/>";
 }
 
+if (empty($kukarow['extranet']) and $request['ala_tee'] != 'echo_massapaivitys_form') {
+  echo_kayttoliittyma($request);
+
+  echo "<br/>";
+  echo "<br/>";
+}
 
 if (!empty($request['haettu_asiakas'])) {
   $asiakkaan_kohteet = hae_asiakkaan_kohteet_joissa_laitteita($request);
@@ -199,10 +220,6 @@ if (!empty($request['haettu_asiakas'])) {
   }
 }
 
-if (empty($kukarow['extranet']) and $request['ala_tee'] != 'echo_massapaivitys_form') {
-  echo_kayttoliittyma($request);
-}
-
 pupesoft_require("inc/footer.inc");
 
 function paivita_huoltosyklit() {
@@ -241,9 +258,40 @@ function echo_kayttoliittyma($request = array()) {
   echo "<input type='hidden' id='poistettu_message' value='" . t("Poistettu") . "' />";
 
   echo "<form method='POST' action='' name='asiakas_haku'>";
-
   echo "<input type='hidden' id='tee' name='tee' value='hae_asiakas' />";
-  echo "<input type='text' id='ytunnus' name='ytunnus' />";
+
+  echo "<table>";
+
+  echo "<tr>";
+  echo "<th>" . t('Asiakas') . "</th>";
+  echo "<td>";
+  echo livesearch_kentta('asiakas_haku', 'ASIAKASHAKU', 'asiakas_tunnus', 300, $request['asiakas_tunnus'], 'NOAUTOSUBMIT');
+  echo "</td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<th>" . t('Kohde') . "</th>";
+  echo "<td>";
+  echo livesearch_kentta('asiakas_haku', 'KOHDEHAKU', 'kohde_tunnus', 300, $request['kohde_tunnus'], 'NOAUTOSUBMIT');
+  echo "</td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<th>" . t('Omanumero') . "</th>";
+  echo "<td>";
+  echo "<input type='text' name='omanumero' value='{$request['omanumero']}' />";
+  echo "</td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<th>" . t('Sarjanumero') . "</th>";
+  echo "<td>";
+  echo "<input type='text' name='sarjanumero' value='{$request['sarjanumero']}' />";
+  echo "</td>";
+  echo "</tr>";
+
+  echo "</table>";
+
   echo "<input type='submit' value='" . t("Hae") . "' />";
 
   echo "</form>";
@@ -598,13 +646,59 @@ function hae_laitteen_tilat() {
 function hae_asiakas($request) {
   global $kukarow, $yhtiorow;
 
-  if ($request['ytunnus'] != '' or $request['asiakasid'] != '') {
-    $ytunnus = $request['ytunnus'];
-    $asiakasid = $request['asiakasid'];
-    require("inc/asiakashaku.inc");
+  $asiakas_tunnus = $request['asiakas_tunnus'];
+  if (!empty($request['asiakasid'])) {
+    $asiakas_tunnus = $request['asiakasid'];
   }
 
-  return $asiakasrow;
+  $where = "";
+  if (!empty($asiakas_tunnus)) {
+    $where = "AND asiakas.tunnus = $asiakas_tunnus";
+  }
+
+  if (!empty($request['kohde_tunnus'])) {
+    $kohde_join = " JOIN kohde AS k1
+                    ON ( k1.yhtio = asiakas.yhtio
+                        AND k1.asiakas = asiakas.tunnus
+                        AND k1.tunnus = {$request['kohde_tunnus']})";
+  }
+
+  $laite_join = "";
+  if (!empty($request['omanumero'])) {
+    $laite_join = " JOIN kohde AS k2
+                    ON (k2.yhtio = asiakas.yhtio
+                        AND k2.asiakas = asiakas.tunnus )
+                    JOIN paikka AS p
+                    ON ( p.yhtio = k2.yhtio
+                        AND p.kohde = k2.tunnus )
+                    JOIN laite AS l
+                    ON ( l.yhtio = p.yhtio
+                        AND l.paikka = p.tunnus
+                        AND l.omanumero = '{$request['omanumero']}' )";
+  }
+
+  if (!empty($request['sarjanumero'])) {
+    $laite_join .= "JOIN kohde AS k3
+                    ON (k3.yhtio = asiakas.yhtio
+                        AND k3.asiakas = asiakas.tunnus )
+                    JOIN paikka AS p1
+                    ON ( p1.yhtio = k3.yhtio
+                        AND p1.kohde = k3.tunnus )
+                    JOIN laite AS l1
+                    ON ( l1.yhtio = p1.yhtio
+                        AND l1.paikka = p1.tunnus
+                        AND l1.sarjanumero = '{$request['sarjanumero']}' )";
+  }
+
+  $query = "SELECT asiakas.*
+            FROM asiakas
+            {$kohde_join}
+            {$laite_join}
+            WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
+            {$where}";
+  $result = pupe_query($query);
+
+  return mysql_fetch_assoc($result);
 }
 
 function hae_asiakkaan_kohteet_joissa_laitteita($request) {

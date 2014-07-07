@@ -61,7 +61,7 @@ class LaiteCSVDumper extends CSVDumper {
     foreach ($this->konversio_array as $konvertoitu_header => $csv_header) {
       if (array_key_exists($csv_header, $rivi)) {
         if ($konvertoitu_header == 'tyyppi') {
-          $rivi_temp[$konvertoitu_header] = strtolower($rivi[$csv_header]).'sammutin';
+          $rivi_temp[$konvertoitu_header] = strtolower($rivi[$csv_header]) . 'sammutin';
         }
         else if ($konvertoitu_header == 'paino') {
           $rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
@@ -100,11 +100,11 @@ class LaiteCSVDumper extends CSVDumper {
           $paikan_nimi = $value;
         }
         else {
-          $paikka_tunnus = $this->hae_paikka_tunnus($rivi['kohde'].' - '.$rivi['paikka_tark'], $rivi['kohde'], $rivi['asiakas_nimi']);
-          $paikan_nimi = $rivi['kohde'].' - '.$rivi['paikka_tark'];
+          $paikka_tunnus = $this->hae_paikka_tunnus($rivi['kohde'] . ' - ' . $rivi['paikka_tark'], $rivi['kohde'], $rivi['asiakas_nimi']);
+          $paikan_nimi = $rivi['kohde'] . ' - ' . $rivi['paikka_tark'];
         }
         if ($paikka_tunnus == 0 and in_array($key, $this->required_fields)) {
-          $this->errors[$index][] = t('Paikkaa')." <b>{$paikan_nimi}</b> ".t('ei löydy').' '.$rivi['kohde'].' '.$rivi['asiakas_nimi'];
+          $this->errors[$index][] = t('Paikkaa') . " <b>{$paikan_nimi}</b> " . t('ei löydy') . ' ' . $rivi['kohde'] . ' ' . $rivi['asiakas_nimi'];
           $this->errors[$index][] = $rivi['koodi'];
           $valid = false;
         }
@@ -146,10 +146,10 @@ class LaiteCSVDumper extends CSVDumper {
   }
 
   private function loytyyko_tuote($tuoteno) {
-    $query = "  SELECT tunnus
-          FROM tuote
-          WHERE yhtio = '{$this->kukarow['yhtio']}'
-          AND tuoteno = '{$tuoteno}'";
+    $query = "SELECT tunnus
+              FROM tuote
+              WHERE yhtio = '{$this->kukarow['yhtio']}'
+              AND tuoteno = '{$tuoteno}'";
     $result = pupe_query($query);
     if (mysql_num_rows($result) == 1) {
       return true;
@@ -159,10 +159,10 @@ class LaiteCSVDumper extends CSVDumper {
   }
 
   private function loytyyko_tuote_nimella($nimitys) {
-    $query = "  SELECT tuoteno
-          FROM tuote
-          WHERE yhtio = '{$this->kukarow['yhtio']}'
-          AND nimitys = '{$nimitys}'";
+    $query = "SELECT tuoteno
+              FROM tuote
+              WHERE yhtio = '{$this->kukarow['yhtio']}'
+              AND nimitys = '{$nimitys}'";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 1) {
@@ -174,92 +174,92 @@ class LaiteCSVDumper extends CSVDumper {
   }
 
   private function luo_tuote($tuoteno, $tyyppi, $koko) {
-    $query = "  INSERT INTO tuote
-          SET yhtio = '{$this->kukarow['yhtio']}',
-          tuoteno = '{$tuoteno}',
-          nimitys = '{$tuoteno}',
-          try = '80',
-          tuotetyyppi = '',
-          ei_saldoa = '',
-          laatija = 'import',
-          luontiaika = NOW()";
+    $query = "INSERT INTO tuote
+              SET yhtio = '{$this->kukarow['yhtio']}',
+              tuoteno = '{$tuoteno}',
+              nimitys = '{$tuoteno}',
+              try = '80',
+              tuotetyyppi = '',
+              ei_saldoa = '',
+              laatija = 'import',
+              luontiaika = NOW()";
     pupe_query($query);
 
-    $query = "  SELECT *
-          FROM tuotteen_avainsanat
-          WHERE tuoteno = '{$tuoteno}'
-          AND selite = '".strtolower($tyyppi)."'";
+    $query = "SELECT *
+              FROM tuotteen_avainsanat
+              WHERE tuoteno = '{$tuoteno}'
+              AND selite = '" . strtolower($tyyppi) . "'";
     $result = pupe_query($query);
     if (mysql_num_rows($result) == 0) {
       $mahdolliset_sammutin_tyypit = hae_mahdolliset_sammutin_tyypit();
       if (in_array($tyyppi, array_keys($mahdolliset_sammutin_tyypit))) {
-        $query = '  INSERT INTO tuotteen_avainsanat
-              (
-                yhtio,
-                tuoteno,
-                kieli,
-                laji,
-                selite,
-                laatija,
-                luontiaika
-              )
-              VALUES
-              (
-                "'.$this->kukarow['yhtio'].'",
-                "'.$tuoteno.'",
-                "fi",
-                "sammutin_tyyppi",
-                "'.strtolower($tyyppi).'",
-                "import",
-                NOW()
-              )';
+        $query = 'INSERT INTO tuotteen_avainsanat
+                  (
+                    yhtio,
+                    tuoteno,
+                    kieli,
+                    laji,
+                    selite,
+                    laatija,
+                    luontiaika
+                  )
+                  VALUES
+                  (
+                    "' . $this->kukarow['yhtio'] . '",
+                    "' . $tuoteno . '",
+                    "fi",
+                    "sammutin_tyyppi",
+                    "' . strtolower($tyyppi) . '",
+                    "import",
+                    NOW()
+                  )';
         pupe_query($query);
       }
     }
 
-    $query = "  SELECT *
-          FROM tuotteen_avainsanat
-          WHERE tuoteno = '{$tuoteno}'
-          AND selite = '{$koko}'";
+    $query = "SELECT *
+              FROM tuotteen_avainsanat
+              WHERE tuoteno = '{$tuoteno}'
+              AND selite = '{$koko}'";
     $result = pupe_query($query);
     if (mysql_num_rows($result) == 0) {
-      $query = '  INSERT INTO tuotteen_avainsanat
-            (
-              yhtio,
-              tuoteno,
-              kieli,
-              laji,
-              selite,
-              laatija,
-              luontiaika
-            )
-            VALUES
-            (
-              "'.$this->kukarow['yhtio'].'",
-              "'.$tuoteno.'",
-              "fi",
-              "sammutin_koko",
-              "'.$koko.'",
-              "import",
-              NOW()
-            )';
+      $query = 'INSERT INTO tuotteen_avainsanat
+                (
+                  yhtio,
+                  tuoteno,
+                  kieli,
+                  laji,
+                  selite,
+                  laatija,
+                  luontiaika
+                )
+                VALUES
+                (
+                  "' . $this->kukarow['yhtio'] . '",
+                  "' . $tuoteno . '",
+                  "fi",
+                  "sammutin_koko",
+                  "' . $koko . '",
+                  "import",
+                  NOW()
+                )';
       pupe_query($query);
     }
   }
 
   private function hae_paikka_tunnus($paikan_nimi, $kohde_nimi, $asiakas_nimi) {
-    $asiakas_join = '  JOIN asiakas
-              ON ( asiakas.yhtio = kohde.yhtio
-                AND asiakas.tunnus = kohde.asiakas
-                AND asiakas.nimi = "'.$asiakas_nimi.'" )';
-    $query = '  SELECT paikka.tunnus
-          FROM paikka
-          JOIN kohde
-          ON ( kohde.yhtio = paikka.yhtio
-            AND kohde.tunnus = paikka.kohde
-            AND kohde.nimi = "'.$kohde_nimi.'" )
-          WHERE paikka.yhtio = "'.$this->kukarow['yhtio'].'"
-          AND paikka.nimi = "'.$paikan_nimi.'"';
+    $asiakas_join = ' JOIN asiakas
+                      ON ( asiakas.yhtio = kohde.yhtio
+                        AND asiakas.tunnus = kohde.asiakas
+                        AND asiakas.nimi = "' . $asiakas_nimi . '" )';
+    $query = 'SELECT paikka.tunnus
+              FROM paikka
+              JOIN kohde
+              ON ( kohde.yhtio = paikka.yhtio
+                AND kohde.tunnus = paikka.kohde
+                AND kohde.nimi = "' . $kohde_nimi . '" )
+              WHERE paikka.yhtio = "' . $this->kukarow['yhtio'] . '"
+              AND paikka.nimi = "' . $paikan_nimi . '"';
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
@@ -268,15 +268,15 @@ class LaiteCSVDumper extends CSVDumper {
 
     //jos paikan ja kohteen nimen yhdistelmä ei ole uniikki niin, kokeillaan lisätä asiakkaan nimi
     if (mysql_num_rows($result) != 1) {
-      $query = '  SELECT paikka.tunnus
-            FROM paikka
-            JOIN kohde
-            ON ( kohde.yhtio = paikka.yhtio
-              AND kohde.tunnus = paikka.kohde
-              AND kohde.nimi = "'.$kohde_nimi.'" )
-            '.$asiakas_join.'
-            WHERE paikka.yhtio = "'.$this->kukarow['yhtio'].'"
-            AND paikka.nimi = "'.$paikan_nimi.'"';
+      $query = 'SELECT paikka.tunnus
+                FROM paikka
+                JOIN kohde
+                ON ( kohde.yhtio = paikka.yhtio
+                  AND kohde.tunnus = paikka.kohde
+                  AND kohde.nimi = "' . $kohde_nimi . '" )
+                ' . $asiakas_join . '
+                WHERE paikka.yhtio = "' . $this->kukarow['yhtio'] . '"
+                AND paikka.nimi = "' . $paikan_nimi . '"';
       $result = pupe_query($query);
     }
 
@@ -290,9 +290,9 @@ class LaiteCSVDumper extends CSVDumper {
   }
 
   protected function tarkistukset() {
-    $query = "  SELECT paikka.tunnus
-          FROM paikka
-          WHERE yhtio = '{$this->kukarow['yhtio']}'";
+    $query = "SELECT paikka.tunnus
+              FROM paikka
+              WHERE yhtio = '{$this->kukarow['yhtio']}'";
     $result = pupe_query($query);
 
     $paikat = array();
@@ -300,9 +300,9 @@ class LaiteCSVDumper extends CSVDumper {
       $paikat[] = $paikka;
     }
 
-    $query = "  SELECT DISTINCT laite.paikka
-          FROM laite
-          WHERE yhtio = '{$this->kukarow['yhtio']}'";
+    $query = "SELECT DISTINCT laite.paikka
+              FROM laite
+              WHERE yhtio = '{$this->kukarow['yhtio']}'";
     $result = pupe_query($query);
     $laitteiden_paikat = array();
     while ($laitteen_paikka = mysql_fetch_assoc($result)) {

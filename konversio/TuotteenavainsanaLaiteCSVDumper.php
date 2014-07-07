@@ -10,14 +10,14 @@ class TuotteenavainsanaLaiteCSVDumper extends CSVDumper {
     parent::__construct($kukarow);
 
     $konversio_array = array(
-      'tuoteno'     => 'MALLI',
-      'tyyppi'     => 'TYYPPI',
-      'paino'       => 'PAINO',
-      'palo_luokka'   => 'TOIMNRO'
+        'tuoteno'     => 'MALLI',
+        'tyyppi'      => 'TYYPPI',
+        'paino'       => 'PAINO',
+        'palo_luokka' => 'TOIMNRO'
     );
     $required_fields = array(
-      'tuoteno',
-      'tyyppi',
+        'tuoteno',
+        'tyyppi',
 //      'paino', //paino ei ole sittenkään pakollinen koska palopostilla ei ole painoa
     );
 
@@ -58,7 +58,7 @@ class TuotteenavainsanaLaiteCSVDumper extends CSVDumper {
             $rivi_temp[$konvertoitu_header] = 'paloposti';
           }
           else {
-            $rivi_temp[$konvertoitu_header] = strtolower($rivi[$csv_header].'sammutin');
+            $rivi_temp[$konvertoitu_header] = strtolower($rivi[$csv_header] . 'sammutin');
           }
         }
         else if ($konvertoitu_header == 'paino') {
@@ -118,11 +118,11 @@ class TuotteenavainsanaLaiteCSVDumper extends CSVDumper {
   }
 
   protected function loytyyko_palo_luokka($tuoteno) {
-    $query = "  SELECT *
-          FROM tuotteen_avainsanat
-          WHERE yhtio = '{$this->kukarow['yhtio']}'
-          AND tuoteno = '{$tuoteno}'
-          AND laji = 'palo_luokka'";
+    $query = "SELECT *
+              FROM tuotteen_avainsanat
+              WHERE yhtio = '{$this->kukarow['yhtio']}'
+              AND tuoteno = '{$tuoteno}'
+              AND laji = 'palo_luokka'";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) > 0) {
@@ -133,10 +133,10 @@ class TuotteenavainsanaLaiteCSVDumper extends CSVDumper {
   }
 
   protected function dump_data() {
-    $progress_bar = new ProgressBar(t('Ajetaan rivit tietokantaan').' : '.count($this->rivit));
+    $progress_bar = new ProgressBar(t('Ajetaan rivit tietokantaan') . ' : ' . count($this->rivit));
     $progress_bar->initialize(count($this->rivit));
     foreach ($this->rivit as $rivi) {
-      $query = '  INSERT INTO '.$this->table.'
+      $query = '  INSERT INTO ' . $this->table . '
             (
               yhtio,
               tuoteno,
@@ -148,17 +148,17 @@ class TuotteenavainsanaLaiteCSVDumper extends CSVDumper {
             )
             VALUES
             (
-              "'.$rivi['yhtio'].'",
-              "'.$rivi['tuoteno'].'",
-              "'.$rivi['kieli'].'",
+              "' . $rivi['yhtio'] . '",
+              "' . $rivi['tuoteno'] . '",
+              "' . $rivi['kieli'] . '",
               "sammutin_tyyppi",
-              "'.$rivi['tyyppi'].'",
-              "'.$rivi['laatija'].'",
-              '.$rivi['luontiaika'].'
+              "' . $rivi['tyyppi'] . '",
+              "' . $rivi['laatija'] . '",
+              ' . $rivi['luontiaika'] . '
             )';
       pupe_query($query);
 
-      $query = '  INSERT INTO '.$this->table.'
+      $query = '  INSERT INTO ' . $this->table . '
             (
               yhtio,
               tuoteno,
@@ -170,18 +170,18 @@ class TuotteenavainsanaLaiteCSVDumper extends CSVDumper {
             )
             VALUES
             (
-              "'.$rivi['yhtio'].'",
-              "'.$rivi['tuoteno'].'",
-              "'.$rivi['kieli'].'",
+              "' . $rivi['yhtio'] . '",
+              "' . $rivi['tuoteno'] . '",
+              "' . $rivi['kieli'] . '",
               "sammutin_koko",
-              "'.$rivi['paino'].'",
-              "'.$rivi['laatija'].'",
-              '.$rivi['luontiaika'].'
+              "' . $rivi['paino'] . '",
+              "' . $rivi['laatija'] . '",
+              ' . $rivi['luontiaika'] . '
             )';
       pupe_query($query);
 
       if (!$this->loytyyko_palo_luokka($rivi['tuoteno'])) {
-        $query = '  INSERT INTO '.$this->table.'
+        $query = '  INSERT INTO ' . $this->table . '
               (
                 yhtio,
                 tuoteno,
@@ -193,13 +193,13 @@ class TuotteenavainsanaLaiteCSVDumper extends CSVDumper {
               )
               VALUES
               (
-                "'.$rivi['yhtio'].'",
-                "'.$rivi['tuoteno'].'",
-                "'.$rivi['kieli'].'",
+                "' . $rivi['yhtio'] . '",
+                "' . $rivi['tuoteno'] . '",
+                "' . $rivi['kieli'] . '",
                 "palo_luokka",
-                "'.$rivi['palo_luokka'].'",
-                "'.$rivi['laatija'].'",
-                '.$rivi['luontiaika'].'
+                "' . $rivi['palo_luokka'] . '",
+                "' . $rivi['laatija'] . '",
+                ' . $rivi['luontiaika'] . '
               )';
         pupe_query($query);
       }
@@ -211,5 +211,4 @@ class TuotteenavainsanaLaiteCSVDumper extends CSVDumper {
   protected function tarkistukset() {
     echo "Ei tarkistuksia";
   }
-
 }

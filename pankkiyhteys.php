@@ -47,7 +47,44 @@ if (isset($uusi_pankkiyhteys)) {
   echo "</form>";
 }
 elseif (isset($tee) and $tee == "generoi_tunnukset") {
-  echo "Generoi tunnukset";
+
+  $key_config = array(
+    "private_key_bits" => 2048,
+    "private_key_type" => OPENSSL_KEYTYPE_RSA
+  );
+
+  $csr_info = array(
+    "countryName" => $yhtiorow["maa"],
+    "localityName" => $yhtiorow["kotipaikka"],
+    "organizationName" => $yhtiorow["nimi"],
+    "commonName" => $yhtiorow["nimi"],
+    "emailAddress" => $yhtiorow["email"]
+  );
+
+
+  $key = openssl_pkey_new($key_config);
+  $csr = openssl_csr_new($csr_info, $key);
+
+  openssl_csr_export($csr, $csrout);
+
+  $parameters = array(
+    "method" => "POST",
+    "data" => array(
+      "pin" => "1234567890",
+      "customer_id" => "11111111",
+      "environment" => "TEST",
+      "csr" => base64_encode($csrout)
+    ),
+    "url" => "" . SEPA_OSOITE . "nordea/get_certificate",
+    "headers" => array(
+      "Content-Type: application/json",
+      "Authorization: Token token=" . ACCESS_TOKEN
+    )
+  );
+
+  $vastaus = pupesoft_rest($parameters);
+
+  var_dump($vastaus);
 }
 elseif (isset($tee) and $tee == "lataa_sertifikaatti") {
   if ($_POST["submit"] and avaimet_ja_salasana_kunnossa()) {

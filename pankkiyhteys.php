@@ -227,7 +227,7 @@ function hae_tilit($yhtio)
 {
   $query = "SELECT tunnus, nimi
             FROM yriti
-            WHERE yhtio='{$yhtio}'";
+            WHERE yhtio='{$yhtio}' AND bic != '' AND bic IS NOT NULL";
 
   $result = pupe_query($query);
 

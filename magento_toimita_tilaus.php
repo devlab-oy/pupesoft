@@ -12,8 +12,8 @@ if (!isset($magento_api_toimituskuittaus_viestit) or count($magento_api_toimitus
 }
 
 $default_kuittaukset = array(
-  "nouto"     => t("Tilauksesi on noudettavissa").".",
-  "toimitus"  => t("Your order is shipped")."!");
+  "nouto"     => "Tilauksesi on noudettavissa.",
+  "toimitus"  => "Your order is shipped!");
 $kuittaukset = array_merge($default_kuittaukset, $magento_api_toimituskuittaus_viestit);
 
 $magento_api_ord = (int) $magento_api_ord;
@@ -28,6 +28,15 @@ if ($magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "
   $canInvoice = TRUE;
   $magLinkurl = "";
 
+  // Make it complete!
+  // Päivitetään tilauksen tila että se on noudettu pupesoftiin
+  try {
+    $completed = $proxy->call($sessionId, 'sales_order.addComment', array($magento_api_ord, 'completed_pupesoft', 'Tilaus merkattu toimitetuksi Pupesoftista'));
+  }
+  catch(Exception $e) {
+    echo $e->faultstring."\n";
+    echo $e->faultcode."\n";
+  }
   // Create new shipment
   try {
 

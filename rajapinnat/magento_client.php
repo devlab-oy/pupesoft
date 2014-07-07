@@ -680,10 +680,16 @@ class MagentoClient {
     foreach ($fetched_orders as $order) {
 
       $this->log("Haetaan tilaus {$order['increment_id']}");
-
+      
       // Haetaan tilauksen tiedot (orders)
-      $orders[] = $this->_proxy->call($this->_session, 'sales_order.info', $order['increment_id']);
-
+      $temp_order = $this->_proxy->call($this->_session, 'sales_order.info', $order['increment_id']);
+      foreach ($temp_order['status_history'] as $historia) {
+        if ($historia['status'] == "processing_pupesoft") {
+          $this->log("Tilausta on käsitelty ".$historia['status']. " tilassa, ohitetaan sisäänluku");
+          continue;
+        }
+      }
+      $orders[] = $temp_order;
       // Päivitetään tilauksen tila että se on noudettu pupesoftiin
       $this->_proxy->call($this->_session, 'sales_order.addComment', array('orderIncrementId' => $order['increment_id'], 'status' => 'processing_pupesoft', 'Tilaus noudettu Pupesoftiin'));
     }

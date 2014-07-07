@@ -62,10 +62,10 @@ $lask = 1;
 $sivu = 1;
 
 $tulostakolli = $tulostuskpl;
-    
+
 // tulostetaan niin monta lappua kun on kollejakin
 for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
- 
+
   $kuka = sprintf("%02s", $tulostuskpl);     // laitetaan tulostuskpl alkuun niin jokalapulla on uniikki viiva
 
   if (substr(trim($rivi["rahtikirjanro"]), 0, 4) == "JJFI") {

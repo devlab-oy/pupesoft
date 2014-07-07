@@ -39,6 +39,11 @@ if (isset($uusi_pankkiyhteys)) {
   echo "</tr>";
 
   echo "<tr>";
+  echo "<td><label for='customer_id'>Asiakastunnus</label></td>";
+  echo "<td><input type='text' name='customer_id' id='customer_id'/></td>";
+  echo "</tr>";
+
+  echo "<tr>";
   echo "<td><label for='pin'>" . t("Pankilta saatu PIN-koodi") . "</label></td>";
   echo "<td><input type='text' name='pin' id='pin'/></td>";
   echo "</tr>";
@@ -76,7 +81,7 @@ elseif (isset($tee) and $tee == "generoi_tunnukset") {
     "method" => "POST",
     "data" => array(
       "pin" => $pin,
-      "customer_id" => "11111111",
+      "customer_id" => $customer_id,
       "environment" => "TEST",
       "csr" => base64_encode($csrout)
     ),

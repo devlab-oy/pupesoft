@@ -4,6 +4,7 @@
 # $magento_api_met = Toimitustapa
 # $magento_api_rak = Rahtikirjanro
 # $magento_api_ord = Asiakkaan_tilausnumero
+# $magento_api_noutokuittaus = Noutokuittaus, ilmoitetaan asiakkaalle tilaus noudettavissa
 
 $magento_api_ord = (int) $magento_api_ord;
 
@@ -15,6 +16,7 @@ if ($magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "
   $canShip   = TRUE;
   $canInvoice = TRUE;
   $magLinkurl = "";
+
   // Create new shipment
   try {
 
@@ -31,7 +33,13 @@ if ($magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "
       $magLinkurl = substr($magLinkurl, 0, -4); // vika br pois
     }
 
-    $comment = "Your order is shipped!<br><br>$magLinkurl";
+    // Shipment comment joka lisätään Magentosta asiakkaalle lähtevään sähköpostiin
+    if (isset($magento_api_noutokuittaus) and $magento_api_noutokuittaus == "JOO") {
+      $comment = "Tilauksesi on noudettavissa.";
+    }
+    else {
+      $comment = "Your order is shipped!<br><br>$magLinkurl";
+    }
 
     $newShipmentId = $proxy->call($sessionId, 'sales_order_shipment.create', array($magento_api_ord, array(), $comment, true, true));
   }

@@ -78,9 +78,9 @@ class HuoltosykliCSVDumper extends CSVDumper {
   protected function validoi_rivi(&$rivi, $index) {
     $valid = true;
 
-//    if ($rivi['hinta'] == 0 or $rivi['huoltovali'] == 0) {
-//      return false;
-//    }
+    if ($rivi['hinta'] == 0 or $rivi['huoltovali'] == 0) {
+      return false;
+    }
 
     foreach ($rivi as $key => $value) {
       if (in_array($key, $this->required_fields) and $value == '') {

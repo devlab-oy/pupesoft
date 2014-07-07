@@ -211,14 +211,18 @@ function paivita_huoltosyklit() {
   $count = 0;
   foreach ($request['huoltosyklit'] as $sykli) {
 
-    $query = "SELECT huoltovali FROM huoltosykli WHERE tunnus = {$sykli['huoltosykli_tunnus']}";
+    $query = "SELECT huoltovali
+              FROM huoltosykli
+              WHERE tunnus = {$sykli['huoltosykli_tunnus']}";
     $result = pupe_query($query);
     $max_huoltovali = mysql_result($result, 0);
 
     $uusi_huoltovali = $sykli['huoltovali'];
 
     if ($sykli['huoltovali'] <= $max_huoltovali and $sykli['update'] == 1) {
-      $query = "UPDATE huoltosyklit_laitteet SET huoltovali = {$uusi_huoltovali} WHERE tunnus IN ({$sykli['tunnukset']})";
+      $query = "UPDATE huoltosyklit_laitteet
+                SET huoltovali = {$uusi_huoltovali}
+                WHERE tunnus IN ({$sykli['tunnukset']})";
       $result = pupe_query($query);
       $count = $count + mysql_affected_rows();
     }
@@ -326,36 +330,36 @@ function echo_massapaivitys_form($laitteiden_huoltosyklit, $asiakas) {
 function hae_laitteiden_huoltosyklit($asiakas) {
   global $kukarow, $yhtiorow;
 
-  $query = "  SELECT CONCAT(t6.tyyppi, ' ', t6.koko, 'kg ', t8.selitetark) AS kuvaus,
-        t6.huoltovali,
-        t5.huoltosykli_tunnus,
-        t7.nimitys,
-        GROUP_CONCAT(t5.tunnus) AS tunnukset
-        FROM asiakas t1
-        JOIN kohde t2
-        ON ( t2.yhtio = t1.yhtio
-          AND t2.asiakas = t1.tunnus )
-        JOIN paikka t3
-          ON ( t3.yhtio = t2.yhtio
-          AND t3.kohde = t2.tunnus )
-        JOIN laite t4
-        ON ( t4.yhtio = t3.yhtio
-          AND t4.paikka = t3.tunnus )
-        JOIN huoltosyklit_laitteet t5
-        ON ( t5.yhtio = t4.yhtio
-          AND t5.laite_tunnus = t4.tunnus )
-        JOIN huoltosykli t6
-        ON ( t6.yhtio = t5.yhtio
-          AND t6.tunnus = t5.huoltosykli_tunnus )
-        JOIN tuote t7
-        ON ( t7.yhtio = t6.yhtio
-          AND t7.tuoteno = t6.toimenpide )
-        JOIN avainsana t8
-        ON ( t8.yhtio = t6.yhtio
-          AND t8.selite = t6.olosuhde)
-        WHERE t1.yhtio = '{$kukarow['yhtio']}'
-        AND t1.tunnus = {$asiakas['tunnus']}
-        GROUP BY CONCAT(t6.tyyppi,t6.koko,t6.olosuhde,t6.toimenpide)";
+  $query = "SELECT CONCAT(t6.tyyppi, ' ', t6.koko, 'kg ', t8.selitetark) AS kuvaus,
+            t6.huoltovali,
+            t5.huoltosykli_tunnus,
+            t7.nimitys,
+            GROUP_CONCAT(t5.tunnus) AS tunnukset
+            FROM asiakas t1
+            JOIN kohde t2
+            ON ( t2.yhtio = t1.yhtio
+              AND t2.asiakas = t1.tunnus )
+            JOIN paikka t3
+              ON ( t3.yhtio = t2.yhtio
+              AND t3.kohde = t2.tunnus )
+            JOIN laite t4
+            ON ( t4.yhtio = t3.yhtio
+              AND t4.paikka = t3.tunnus )
+            JOIN huoltosyklit_laitteet t5
+            ON ( t5.yhtio = t4.yhtio
+              AND t5.laite_tunnus = t4.tunnus )
+            JOIN huoltosykli t6
+            ON ( t6.yhtio = t5.yhtio
+              AND t6.tunnus = t5.huoltosykli_tunnus )
+            JOIN tuote t7
+            ON ( t7.yhtio = t6.yhtio
+              AND t7.tuoteno = t6.toimenpide )
+            JOIN avainsana t8
+            ON ( t8.yhtio = t6.yhtio
+              AND t8.selite = t6.olosuhde)
+            WHERE t1.yhtio = '{$kukarow['yhtio']}'
+            AND t1.tunnus = {$asiakas['tunnus']}
+            GROUP BY CONCAT(t6.tyyppi,t6.koko,t6.olosuhde,t6.toimenpide)";
 
   $result = pupe_query($query);
   $laitteiden_huoltosyklit = array();
@@ -610,56 +614,56 @@ function hae_asiakkaan_kohteet_joissa_laitteita($request) {
   $join = "";
   $group = "";
   if (!empty($request['ala_tee']) and $request['ala_tee'] != 'paivita_huoltosyklit') {
-    $select = "ta1.selite as sammutin_tyyppi,
-          ta2.selite as sammutin_koko,
-          huoltosykli.huoltovali as huoltovali,";
+    $select = " ta1.selite as sammutin_tyyppi,
+                ta2.selite as sammutin_koko,
+                huoltosykli.huoltovali as huoltovali,";
 
-    $join = "  LEFT JOIN tuotteen_avainsanat ta1
-          ON ( ta1.yhtio = tuote.yhtio
-            AND ta1.tuoteno = tuote.tuoteno
-            AND ta1.laji = 'sammutin_tyyppi' )
-          LEFT JOIN tuotteen_avainsanat ta2
-          ON ( ta2.yhtio = tuote.yhtio
-            AND ta2.tuoteno = tuote.tuoteno
-            AND ta2.laji = 'sammutin_koko' )
-          LEFT JOIN huoltosykli
-          ON ( huoltosykli.yhtio = laite.yhtio
-            AND huoltosykli.tyyppi = ta1.selite
-            AND huoltosykli.koko = ta2.selite
-            AND huoltosykli.olosuhde = paikka.olosuhde )";
+    $join = " LEFT JOIN tuotteen_avainsanat ta1
+              ON ( ta1.yhtio = tuote.yhtio
+                AND ta1.tuoteno = tuote.tuoteno
+                AND ta1.laji = 'sammutin_tyyppi' )
+              LEFT JOIN tuotteen_avainsanat ta2
+              ON ( ta2.yhtio = tuote.yhtio
+                AND ta2.tuoteno = tuote.tuoteno
+                AND ta2.laji = 'sammutin_koko' )
+              LEFT JOIN huoltosykli
+              ON ( huoltosykli.yhtio = laite.yhtio
+                AND huoltosykli.tyyppi = ta1.selite
+                AND huoltosykli.koko = ta2.selite
+                AND huoltosykli.olosuhde = paikka.olosuhde )";
 
     //groupataan laite_tunnuksen mukaan koska laitteella voi olla monta huoltosykliä
     $group = "GROUP BY laite.tunnus";
   }
 
-  $query = "  SELECT asiakas.tunnus as asiakas_tunnus,
-        kohde.tunnus as kohde_tunnus,
-        kohde.nimi as kohde_nimi,
-        kohde.poistettu as kohde_poistettu,
-        paikka.tunnus as paikka_tunnus,
-        paikka.nimi as paikka_nimi,
-        paikka.poistettu as paikka_poistettu,
-        tuote.nimitys as tuote_nimi,
-        laite.tunnus as laite_tunnus,
-        {$select}
-        laite.*
-        FROM kohde
-        JOIN asiakas
-        ON ( asiakas.yhtio = kohde.yhtio
-          AND asiakas.tunnus = kohde.asiakas )
-        LEFT JOIN paikka
-        ON ( paikka.yhtio = kohde.yhtio
-          AND paikka.kohde = kohde.tunnus )
-        LEFT JOIN laite
-        ON ( laite.yhtio = paikka.yhtio
-          AND laite.paikka = paikka.tunnus )
-        LEFT JOIN tuote
-        ON ( tuote.yhtio = laite.yhtio
-          AND tuote.tuoteno = laite.tuoteno )
-        {$join}
-        WHERE kohde.yhtio = '{$kukarow['yhtio']}'
-        AND kohde.asiakas = {$request['haettu_asiakas']['tunnus']}
-        {$group}";
+  $query = "SELECT asiakas.tunnus as asiakas_tunnus,
+            kohde.tunnus as kohde_tunnus,
+            kohde.nimi as kohde_nimi,
+            kohde.poistettu as kohde_poistettu,
+            paikka.tunnus as paikka_tunnus,
+            paikka.nimi as paikka_nimi,
+            paikka.poistettu as paikka_poistettu,
+            tuote.nimitys as tuote_nimi,
+            laite.tunnus as laite_tunnus,
+            {$select}
+            laite.*
+            FROM kohde
+            JOIN asiakas
+            ON ( asiakas.yhtio = kohde.yhtio
+              AND asiakas.tunnus = kohde.asiakas )
+            LEFT JOIN paikka
+            ON ( paikka.yhtio = kohde.yhtio
+              AND paikka.kohde = kohde.tunnus )
+            LEFT JOIN laite
+            ON ( laite.yhtio = paikka.yhtio
+              AND laite.paikka = paikka.tunnus )
+            LEFT JOIN tuote
+            ON ( tuote.yhtio = laite.yhtio
+              AND tuote.tuoteno = laite.tuoteno )
+            {$join}
+            WHERE kohde.yhtio = '{$kukarow['yhtio']}'
+            AND kohde.asiakas = {$request['haettu_asiakas']['tunnus']}
+            {$group}";
   $result = pupe_query($query);
 
   $asiakkaan_kohteet = array();

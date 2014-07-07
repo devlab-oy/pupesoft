@@ -36,12 +36,15 @@ if ($magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "
     // Shipment comment joka lisätään Magentosta asiakkaalle lähtevään sähköpostiin
     if (isset($magento_api_noutokuittaus) and $magento_api_noutokuittaus == "JOO") {
       $comment = "Tilauksesi on noudettavissa.";
+      $canShip = FALSE; // Ei tarvita
     }
     else {
       $comment = "Your order is shipped!<br><br>$magLinkurl";
     }
 
     $newShipmentId = $proxy->call($sessionId, 'sales_order_shipment.create', array($magento_api_ord, array(), $comment, true, true));
+    echo "shipmentid \n";
+    var_dump($newShipmentId);
   }
   catch (Exception $e) {
     $canShip = FALSE;
@@ -53,11 +56,15 @@ if ($magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "
   if ($canShip) {
     // Add tracking
     $newTrackId = $proxy->call($sessionId, 'sales_order_shipment.addTrack', array($newShipmentId, "custom", $magento_api_met, $magento_api_rak));
+    echo "trackid\n";
+    var_dump($newTrackId);
   }
 
   // Create new invoice
   try {
     $newInvoiceId = $proxy->call($sessionId, 'sales_order_invoice.create', array($magento_api_ord, array(), 'Invoice Created', false, false));
+    echo "invoiceid\n";
+    var_dump($newInvoiceId);
   }
   catch(Exception $e) {
     $canInvoice = FALSE;
@@ -69,6 +76,8 @@ if ($magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "
   if ($canInvoice) {
     try {
       $proxy->call($sessionId, 'sales_order_invoice.capture', $newInvoiceId);
+      echo "capture\n";
+      var_dump($proxy);
     }
     catch (Exception $e) {
       echo $e->faultstring."\n";

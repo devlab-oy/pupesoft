@@ -10,16 +10,16 @@ class TuotteenavainsanaLaite2CSVDumper extends CSVDumper {
     parent::__construct($kukarow);
 
     $konversio_array = array(
-      'tuoteno'     => 'KOODI',
-      'tyyppi'     => 'DATA9',
-      'koko'       => 'DATA7',
-      'palo_luokka'   => 'DATA10',
-      'tuotetyyppi'   => 'RYHMA'
+        'tuoteno'     => 'KOODI',
+        'tyyppi'      => 'DATA9',
+        'koko'        => 'DATA7',
+        'palo_luokka' => 'DATA10',
+        'tuotetyyppi' => 'RYHMA'
     );
     $required_fields = array(
-      'tuoteno',
-      'tyyppi',
-      'koko',
+        'tuoteno',
+        'tyyppi',
+        'koko',
     );
 
     $this->setFilepath("/tmp/konversio/VARAOSA.csv");
@@ -54,7 +54,7 @@ class TuotteenavainsanaLaite2CSVDumper extends CSVDumper {
     foreach ($this->konversio_array as $konvertoitu_header => $csv_header) {
       if (array_key_exists($csv_header, $rivi)) {
         if ($konvertoitu_header == 'tyyppi') {
-          $rivi_temp[$konvertoitu_header] = strtolower($rivi[$csv_header].'sammutin');
+          $rivi_temp[$konvertoitu_header] = strtolower($rivi[$csv_header] . 'sammutin');
         }
         else if ($konvertoitu_header == 'koko') {
           $rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
@@ -86,7 +86,7 @@ class TuotteenavainsanaLaite2CSVDumper extends CSVDumper {
     $mahdolliset_sammutin_tyypit = hae_mahdolliset_sammutin_tyypit();
     if ($valid and !in_array(strtolower($rivi['tyyppi']), array_keys($mahdolliset_sammutin_tyypit))) {
       $valid = false;
-      $this->errors[$index][] = t('Virheellinen tyyppi')." {$rivi['tyyppi']}";
+      $this->errors[$index][] = t('Virheellinen tyyppi') . " {$rivi['tyyppi']}";
     }
 
     $laitteen_avainsanat = array();
@@ -96,11 +96,11 @@ class TuotteenavainsanaLaite2CSVDumper extends CSVDumper {
 
     if (count($laitteen_avainsanat) > 0) {
       if ($valid and $laitteen_avainsanat['sammutin_tyyppi'] != $rivi['tyyppi']) {
-        $this->errors[$index][] = t('Kannassa eri tyyppi').": {$laitteen_avainsanat['sammutin_tyyppi']} aineisto -> {$rivi['tyyppi']}";
+        $this->errors[$index][] = t('Kannassa eri tyyppi') . ": {$laitteen_avainsanat['sammutin_tyyppi']} aineisto -> {$rivi['tyyppi']}";
       }
 
       if ($valid and $laitteen_avainsanat['sammutin_koko'] != $rivi['koko']) {
-        $this->errors[$index][] = t('Kannassa eri koko').": {$laitteen_avainsanat['sammutin_koko']} aineisto -> {$rivi['koko']}";
+        $this->errors[$index][] = t('Kannassa eri koko') . ": {$laitteen_avainsanat['sammutin_koko']} aineisto -> {$rivi['koko']}";
       }
     }
 
@@ -110,7 +110,7 @@ class TuotteenavainsanaLaite2CSVDumper extends CSVDumper {
     }
 
     if ($valid and count($laitteen_avainsanat) == 0) {
-      $this->errors[$index][] = t('Kannassa ei kokoa tai tyyppiä')." {$rivi['koko']} {$rivi['tyyppi']} {$rivi['tuoteno']} INSERTÖIDÄÄN";
+      $this->errors[$index][] = t('Kannassa ei kokoa tai tyyppiä') . " {$rivi['koko']} {$rivi['tyyppi']} {$rivi['tuoteno']} INSERTÖIDÄÄN";
     }
 
     return $valid;
@@ -124,11 +124,11 @@ class TuotteenavainsanaLaite2CSVDumper extends CSVDumper {
   }
 
   protected function hae_laitteen_avainsanat($tuoteno) {
-    $query = "  SELECT laji,
-          selite
-          FROM tuotteen_avainsanat
-          WHERE yhtio = '{$this->kukarow['yhtio']}'
-          AND tuoteno = '{$tuoteno}'";
+    $query = "SELECT laji,
+              selite
+              FROM tuotteen_avainsanat
+              WHERE yhtio = '{$this->kukarow['yhtio']}'
+              AND tuoteno = '{$tuoteno}'";
     $result = pupe_query($query);
     $avainsanat = array();
     while ($avainsana = mysql_fetch_assoc($result)) {
@@ -139,11 +139,11 @@ class TuotteenavainsanaLaite2CSVDumper extends CSVDumper {
   }
 
   protected function loytyyko_palo_luokka($tuoteno) {
-    $query = "  SELECT *
-          FROM tuotteen_avainsanat
-          WHERE yhtio = '{$this->kukarow['yhtio']}'
-          AND tuoteno = '{$tuoteno}'
-          AND laji = 'palo_luokka'";
+    $query = "SELECT *
+              FROM tuotteen_avainsanat
+              WHERE yhtio = '{$this->kukarow['yhtio']}'
+              AND tuoteno = '{$tuoteno}'
+              AND laji = 'palo_luokka'";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) > 0) {
@@ -154,10 +154,10 @@ class TuotteenavainsanaLaite2CSVDumper extends CSVDumper {
   }
 
   protected function dump_data() {
-    $progress_bar = new ProgressBar(t('Ajetaan rivit tietokantaan').' : '.count($this->rivit));
+    $progress_bar = new ProgressBar(t('Ajetaan rivit tietokantaan') . ' : ' . count($this->rivit));
     $progress_bar->initialize(count($this->rivit));
     foreach ($this->rivit as $rivi) {
-      $query = '  INSERT INTO '.$this->table.'
+      $query = '  INSERT INTO ' . $this->table . '
             (
               yhtio,
               tuoteno,
@@ -169,17 +169,17 @@ class TuotteenavainsanaLaite2CSVDumper extends CSVDumper {
             )
             VALUES
             (
-              "'.$rivi['yhtio'].'",
-              "'.$rivi['tuoteno'].'",
-              "'.$rivi['kieli'].'",
+              "' . $rivi['yhtio'] . '",
+              "' . $rivi['tuoteno'] . '",
+              "' . $rivi['kieli'] . '",
               "sammutin_tyyppi",
-              "'.$rivi['tyyppi'].'",
-              "'.$rivi['laatija'].'",
-              '.$rivi['luontiaika'].'
+              "' . $rivi['tyyppi'] . '",
+              "' . $rivi['laatija'] . '",
+              ' . $rivi['luontiaika'] . '
             )';
       pupe_query($query);
 
-      $query = '  INSERT INTO '.$this->table.'
+      $query = '  INSERT INTO ' . $this->table . '
             (
               yhtio,
               tuoteno,
@@ -191,18 +191,18 @@ class TuotteenavainsanaLaite2CSVDumper extends CSVDumper {
             )
             VALUES
             (
-              "'.$rivi['yhtio'].'",
-              "'.$rivi['tuoteno'].'",
-              "'.$rivi['kieli'].'",
+              "' . $rivi['yhtio'] . '",
+              "' . $rivi['tuoteno'] . '",
+              "' . $rivi['kieli'] . '",
               "sammutin_koko",
-              "'.$rivi['koko'].'",
-              "'.$rivi['laatija'].'",
-              '.$rivi['luontiaika'].'
+              "' . $rivi['koko'] . '",
+              "' . $rivi['laatija'] . '",
+              ' . $rivi['luontiaika'] . '
             )';
       pupe_query($query);
 
       if (!$this->loytyyko_palo_luokka($rivi['tuoteno'])) {
-        $query = '  INSERT INTO '.$this->table.'
+        $query = '  INSERT INTO ' . $this->table . '
               (
                 yhtio,
                 tuoteno,
@@ -214,13 +214,13 @@ class TuotteenavainsanaLaite2CSVDumper extends CSVDumper {
               )
               VALUES
               (
-                "'.$rivi['yhtio'].'",
-                "'.$rivi['tuoteno'].'",
-                "'.$rivi['kieli'].'",
+                "' . $rivi['yhtio'] . '",
+                "' . $rivi['tuoteno'] . '",
+                "' . $rivi['kieli'] . '",
                 "palo_luokka",
-                "'.$rivi['palo_luokka'].'",
-                "'.$rivi['laatija'].'",
-                '.$rivi['luontiaika'].'
+                "' . $rivi['palo_luokka'] . '",
+                "' . $rivi['laatija'] . '",
+                ' . $rivi['luontiaika'] . '
               )';
         pupe_query($query);
       }
@@ -231,48 +231,47 @@ class TuotteenavainsanaLaite2CSVDumper extends CSVDumper {
 
   protected function tarkistukset() {
     //Tuotteet joilta puuttuu sammun_tyyppi
-    $query = "  SELECT tuote.tuoteno AS tuoteno,
-          tuote.nimitys,
-          t.tuoteno AS t
-          FROM   tuote
-          LEFT JOIN tuotteen_avainsanat AS t
-          ON ( t.yhtio = tuote.yhtio
-            AND t.tuoteno = tuote.tuoteno
-            AND t.laji = 'sammutin_tyyppi' )
-          WHERE tuote.yhtio = '{$this->kukarow['yhtio']}'
-          AND tuote.tuotetyyppi = ''
-          AND t.tuoteno IS NULL
-          ORDER BY tuote.tuoteno ASC";
+    $query = "SELECT tuote.tuoteno AS tuoteno,
+              tuote.nimitys,
+              t.tuoteno AS t
+              FROM   tuote
+              LEFT JOIN tuotteen_avainsanat AS t
+              ON ( t.yhtio = tuote.yhtio
+                AND t.tuoteno = tuote.tuoteno
+                AND t.laji = 'sammutin_tyyppi' )
+              WHERE tuote.yhtio = '{$this->kukarow['yhtio']}'
+              AND tuote.tuotetyyppi = ''
+              AND t.tuoteno IS NULL
+              ORDER BY tuote.tuoteno ASC";
     $result = pupe_query($query);
-    echo "Seuraavilta tuotteilta puuttuu sammutin tyyppi (".mysql_num_rows($result).")";
+    echo "Seuraavilta tuotteilta puuttuu sammutin tyyppi (" . mysql_num_rows($result) . ")";
     echo "<br/>";
     echo "<br/>";
-    while($rivi = mysql_fetch_assoc($result)) {
+    while ($rivi = mysql_fetch_assoc($result)) {
       echo "{$rivi['nimitys']} - {$rivi['tuoteno']}";
       echo "<br/>";
     }
-    
+
     //Tuotteet joilta puuttuu sammutin_koko
-    $query = "  SELECT tuote.tuoteno AS tuoteno,
-          tuote.nimitys,
-          t.tuoteno AS t
-          FROM   tuote
-          LEFT JOIN tuotteen_avainsanat AS t
-          ON ( t.yhtio = tuote.yhtio
-            AND t.tuoteno = tuote.tuoteno
-            AND t.laji = 'sammutin_koko' )
-          WHERE tuote.yhtio = '{$this->kukarow['yhtio']}'
-          AND tuote.tuotetyyppi = ''
-          AND t.tuoteno IS NULL
-          ORDER BY tuote.tuoteno ASC";
+    $query = "SELECT tuote.tuoteno AS tuoteno,
+              tuote.nimitys,
+              t.tuoteno AS t
+              FROM   tuote
+              LEFT JOIN tuotteen_avainsanat AS t
+              ON ( t.yhtio = tuote.yhtio
+                AND t.tuoteno = tuote.tuoteno
+                AND t.laji = 'sammutin_koko' )
+              WHERE tuote.yhtio = '{$this->kukarow['yhtio']}'
+              AND tuote.tuotetyyppi = ''
+              AND t.tuoteno IS NULL
+              ORDER BY tuote.tuoteno ASC";
     $result = pupe_query($query);
-    echo "Seuraavilta tuotteilta puuttuu sammutin koko (".mysql_num_rows($result).")";
+    echo "Seuraavilta tuotteilta puuttuu sammutin koko (" . mysql_num_rows($result) . ")";
     echo "<br/>";
     echo "<br/>";
-    while($rivi = mysql_fetch_assoc($result)) {
+    while ($rivi = mysql_fetch_assoc($result)) {
       echo "{$rivi['nimitys']} - {$rivi['tuoteno']}";
       echo "<br/>";
     }
   }
-
 }

@@ -10,15 +10,15 @@ class PaikkaCSVDumper extends CSVDumper {
     parent::__construct($kukarow);
 
     $konversio_array = array(
-      'kohde'     => 'SIJAINTI',
-      'kohde_tark' => 'KUSTPAIKKA', //koska kohteen nimi ei ole uniikki niin paikka pitää liittää kohteeseen asiakkaan ja kohteen nimien avulla, unsettaa tämä ennen dumppia
-      'nimi'     => 'LISASIJAINTI',
-      'osoite'   => 'SIJAINTI',
-      'kuvaus'   => 'SIJAINTI',
-      'olosuhde'   => 'DATA7',
+        'kohde'      => 'SIJAINTI',
+        'kohde_tark' => 'KUSTPAIKKA', //koska kohteen nimi ei ole uniikki niin paikka pitää liittää kohteeseen asiakkaan ja kohteen nimien avulla, unsettaa tämä ennen dumppia
+        'nimi'       => 'LISASIJAINTI',
+        'osoite'     => 'SIJAINTI',
+        'kuvaus'     => 'SIJAINTI',
+        'olosuhde'   => 'DATA7',
     );
     $required_fields = array(
-      'kohde',
+        'kohde',
     );
 
     $this->setFilepath("/tmp/konversio/LAITE.csv");
@@ -65,7 +65,7 @@ class PaikkaCSVDumper extends CSVDumper {
         }
         else if ($konvertoitu_header == 'nimi') {
           if ($rivi[$csv_header] == '') {
-            $rivi_temp[$konvertoitu_header] = $rivi['SIJAINTI'].' - '.$rivi['TASO3'];
+            $rivi_temp[$konvertoitu_header] = $rivi['SIJAINTI'] . ' - ' . $rivi['TASO3'];
           }
           else {
             $rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
@@ -86,7 +86,7 @@ class PaikkaCSVDumper extends CSVDumper {
       if ($key == 'kohde') {
         $kohde_tunnus = $this->hae_kohde_tunnus($value, $rivi['kohde_tark']);
         if ($kohde_tunnus == 0 and in_array($key, $this->required_fields)) {
-          $this->errors[$index][] = t('Kohdetta')." <b>{$value}</b> ".t('ei löydy');
+          $this->errors[$index][] = t('Kohdetta') . " <b>{$value}</b> " . t('ei löydy');
           $valid = false;
         }
         else {
@@ -122,15 +122,15 @@ class PaikkaCSVDumper extends CSVDumper {
   }
 
   private function hae_kohde_tunnus($kohde_nimi, $asiakas_nimi) {
-    $query = '  SELECT kohde.tunnus
-          FROM kohde
-          JOIN asiakas
-          ON ( asiakas.yhtio = kohde.yhtio
-            AND asiakas.tunnus = kohde.asiakas
-            AND asiakas.nimi = "'.$asiakas_nimi.'" )
-          WHERE kohde.yhtio = "'.$this->kukarow['yhtio'].'"
-          AND kohde.nimi = "'.$kohde_nimi.'"
-          LIMIT 1';
+    $query = 'SELECT kohde.tunnus
+              FROM kohde
+              JOIN asiakas
+              ON ( asiakas.yhtio = kohde.yhtio
+                AND asiakas.tunnus = kohde.asiakas
+                AND asiakas.nimi = "' . $asiakas_nimi . '" )
+              WHERE kohde.yhtio = "' . $this->kukarow['yhtio'] . '"
+              AND kohde.nimi = "' . $kohde_nimi . '"
+              LIMIT 1';
     $result = pupe_query($query);
     $kohderow = mysql_fetch_assoc($result);
 
@@ -140,15 +140,15 @@ class PaikkaCSVDumper extends CSVDumper {
 
     //Kokeillaan hakea suoraan kohteen nimellä, jos se olisi uniikki
 
-    $query = "  SELECT kohde.tunnus
-          FROM kohde
-          WHERE kohde.yhtio = '{$this->kukarow['yhtio']}'
-          AND kohde.nimi = '{$kohde_nimi}'";
+    $query = "SELECT kohde.tunnus
+              FROM kohde
+              WHERE kohde.yhtio = '{$this->kukarow['yhtio']}'
+              AND kohde.nimi = '{$kohde_nimi}'";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 1) {
       $kohderow = mysql_fetch_assoc($result);
-      
+
       return $kohderow['tunnus'];
     }
 
@@ -156,10 +156,10 @@ class PaikkaCSVDumper extends CSVDumper {
   }
 
   protected function tarkistukset() {
-    $query = "  SELECT count(*) as kpl
-          FROM paikka
-          WHERE yhtio = '{$this->kukarow['yhtio']}'
-          AND olosuhde = ''";
+    $query = "SELECT count(*) as kpl
+              FROM paikka
+              WHERE yhtio = '{$this->kukarow['yhtio']}'
+              AND olosuhde = ''";
     $result = pupe_query($query);
     $ilman_olosuhdetta = mysql_fetch_assoc($result);
 
@@ -167,14 +167,13 @@ class PaikkaCSVDumper extends CSVDumper {
 
     echo "<br/>";
 
-    $query = "  SELECT count(*) as kpl
-          FROM paikka
-          WHERE yhtio = '{$this->kukarow['yhtio']}'
-          AND nimi = ''";
+    $query = "SELECT count(*) as kpl
+              FROM paikka
+              WHERE yhtio = '{$this->kukarow['yhtio']}'
+              AND nimi = ''";
     $result = pupe_query($query);
     $ilman_nimea = mysql_fetch_assoc($result);
 
     echo "{$ilman_nimea['kpl']} paikkaa ilman nimeä!!";
   }
-
 }

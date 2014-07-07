@@ -65,10 +65,18 @@ class PaikkaCSVDumper extends CSVDumper {
         }
         else if ($konvertoitu_header == 'nimi') {
           if ($rivi[$csv_header] == '') {
-            $rivi_temp[$konvertoitu_header] = $rivi['SIJAINTI'] . ' - ' . $rivi['TASO3'];
+            if ($rivi['DATA7'] == '12') {
+              $rivi_temp[$konvertoitu_header] = 'Paikaton ulkona / tärinässä';
+            }
+            else if ($rivi['DATA7'] == '24') {
+              $rivi_temp[$konvertoitu_header] = 'Paikaton sisällä';
+            }
+            else {
+              $rivi_temp[$konvertoitu_header] = 'Paikaton sisällä';
+            }
           }
           else {
-            $rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
+            $rivi_temp[$konvertoitu_header] = trim($rivi[$csv_header]);
           }
         }
         else {

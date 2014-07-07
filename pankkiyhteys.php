@@ -120,7 +120,7 @@ elseif (isset($tee) and $tee == "hae_tiliote") {
 
     $viitteet = hae_viitteet("TITO", $tunnukset);
 
-    if (lataa_tiedostot($viitteet, "TITO", $tunnukset)) {
+    if ($viitteet and lataa_tiedostot($viitteet, "TITO", $tunnukset)) {
       echo "Tiedostot ladattu";
     }
   }
@@ -136,7 +136,7 @@ elseif (isset($tee) and $tee == "hae_viiteaineisto") {
 
     $viitteet = hae_viitteet("KTL", $tunnukset);
 
-    if (lataa_tiedostot($viitteet, "KTL", $tunnukset)) {
+    if ($viitteet and lataa_tiedostot($viitteet, "KTL", $tunnukset)) {
       echo "Tiedostot ladattu";
     }
   }
@@ -153,19 +153,20 @@ elseif (isset($tee) and $tee == "laheta_maksuaineisto") {
 
     $vastaus = laheta_maksuaineisto($tunnukset, $maksuaineisto);
 
-    echo "<table>";
-    echo "<tbody>";
+    if ($vastaus) {
+      echo "<table>";
+      echo "<tbody>";
 
-    foreach ($vastaus[1] as $key => $value) {
-      echo "<tr>";
-      echo "<td>{$key}</td>";
-      echo "<td>{$value}</td>";
-      echo "</tr>";
+      foreach ($vastaus[1] as $key => $value) {
+        echo "<tr>";
+        echo "<td>{$key}</td>";
+        echo "<td>{$value}</td>";
+        echo "</tr>";
+      }
+
+      echo "</tbody";
+      echo "</table>";
     }
-
-    echo "</tbody";
-    echo "</table>";
-
   }
   else {
     tarkista_salasana();
@@ -330,8 +331,7 @@ function hae_viitteet($tiedostotyyppi, $tunnukset)
 
   $vastaus = pupesoft_rest($parameters);
 
-  if ($vastaus[0] == 500) {
-    echo "<font class='error'>Pankki ei vastaa kyselyyn, yritä myöhemmin uudestaan</font>";
+  if (!vastaus_kunnossa($vastaus)) {
     return false;
   }
 
@@ -499,13 +499,11 @@ function laheta_maksuaineisto($tunnukset, $maksuaineisto)
 
   $vastaus = pupesoft_rest($parameters);
 
-  if ($vastaus[0] == 500) {
-    echo "<font class='error'>Maksuaineistoa ei pystytty lähettämään, sillä pankin kanssa ";
-    echo "kommunikoinnissa ilmeni ongelmia, yritä myhöhemmin uudestaan</font>";
+  if (!vastaus_kunnossa($vastaus)) {
+    return false;
   }
-  else {
-    return $vastaus;
-  }
+
+  return $vastaus;
 }
 
 function tarkista_salasana()
@@ -547,4 +545,23 @@ function hae_target_id($sertifikaatti, $private_key, $customer_id)
   $vastaus = pupesoft_rest($parameters);
 
   return $vastaus[1]["userFileTypes"][0]["targetId"];
+}
+
+/**
+ * @param $vastaus
+ * @return bool
+ */
+function vastaus_kunnossa($vastaus)
+{
+  switch ($vastaus[0]) {
+    case 200:
+      return true;
+    case 500:
+      echo "<font class='error'>Pankki ei vastaa kyselyyn, yritä myöhemmin uudestaan</font>";
+      return false;
+    case 0:
+      echo "<font class='error'>Sepa-palvelimeen ei jostain syystä saada yhteyttä, ";
+      echo "yritä myöhemmin uudestaan</font>";
+      return false;
+  }
 }

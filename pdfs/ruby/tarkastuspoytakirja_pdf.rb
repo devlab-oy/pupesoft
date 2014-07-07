@@ -120,7 +120,7 @@ class TarkastuspoytakirjaPDF
     @other_data = [
         {
             :header => 'Pvm',
-            :value  => Time.new.strftime('%d.%m.%Y')
+            :value  => @data['toimitettuaika']
         },
         {
             :header => 'Tilausnumero',

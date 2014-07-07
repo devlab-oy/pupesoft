@@ -84,6 +84,7 @@ function pdf_hae_tyomaaraykset($lasku_tunnukset) {
       $tyomaarays['asiakas'] = \PDF\Tarkastuspoytakirja\hae_tyomaarayksen_asiakas($tyomaarays['liitostunnus']);
       $tyomaarays['yhtio'] = $yhtiorow;
       $tyomaarays['logo'] = base64_encode(hae_yhtion_lasku_logo());
+      $tyomaarays['toimitettuaika'] = date('d.m.Y', strtotime($tyomaarays['rivit'][0]['toimitettuaika']));
       $tyomaaraykset[$tyomaarays['kohde_tunnus']] = $tyomaarays;
     }
   }

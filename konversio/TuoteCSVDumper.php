@@ -98,7 +98,7 @@ class TuoteCSVDumper extends CSVDumper {
     $valid = true;
     foreach ($rivi as $key => $value) {
       if (in_array($key, $this->required_fields) and $value == '') {
-        $this->errors[$index][] = t('Pakollinen kenttä')." <b>{$key}</b> ".t('puuttuu');
+        $this->errors[$index][] = t('Pakollinen kenttä') . " <b>{$key}</b> " . t('puuttuu');
         $valid = false;
       }
     }
@@ -107,7 +107,7 @@ class TuoteCSVDumper extends CSVDumper {
       $this->unique_values[] = $rivi['tuoteno'];
     }
     else {
-      $this->errors[$index][] = t('Uniikki kenttä tuoteno')." <b>{$rivi['tuoteno']}</b> ".t('löytyy jo aineistosta');
+      $this->errors[$index][] = t('Uniikki kenttä tuoteno') . " <b>{$rivi['tuoteno']}</b> " . t('löytyy jo aineistosta');
       $valid = false;
     }
 

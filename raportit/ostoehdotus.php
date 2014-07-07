@@ -13,7 +13,7 @@ if (isset($_POST["tee"])) {
 
 require("../inc/parametrit.inc");
 
-if (isset($tee) and $tee == "lataa_tiedosto") {
+if (isset($tee) AND $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
   exit;
 }
@@ -23,7 +23,9 @@ $worksheet 	 = new pupeExcel();
 $format_bold = array("bold" => TRUE);
 $excelrivi = 0;
 
-//arrayt otsikoiden ja tuoterivien käsittelyyn - rivien kirjoitus tehdään arrayden kautta koska write komento haluaa tietää sarakkeen numeron ja sarakkeiden määrä on helponta vaan käsitellä loopilla
+// Arrayt otsikoiden ja tuoterivien käsittelyyn
+// Rivien kirjoitus tehdään arrayden kautta,
+// koska write komento haluaa tietää sarakkeen numeron ja sarakkeiden määrä on helponta vaan käsitellä loopilla.
 $headerivi = array();
 
 require_once ('inc/ProgressBar.class.php');
@@ -51,59 +53,59 @@ else {
 
 function myynnit($myynti_varasto = '', $myynti_maa = '') {
 
-  // otetaan kaikki muuttujat mukaan funktioon mitä on failissakin
+  // Otetaan kaikki muuttujat mukaan funktioon mitä on failissakin
   extract($GLOBALS);
 
   $laskuntoimmaa = "";
   $varastotapa   = "  JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio  AND varastopaikat.tunnus = tilausrivi.varasto) ";
 
   if ($myynti_varasto != "") {
-    $varastotapa .= " and varastopaikat.tunnus = '$myynti_varasto' ";
+    $varastotapa .= " AND varastopaikat.tunnus = '$myynti_varasto' ";
   }
   elseif ($erikoisvarastot != "") {
-    $varastotapa .= " and varastopaikat.tyyppi = '' ";
+    $varastotapa .= " AND varastopaikat.tyyppi = '' ";
   }
   else {
     $varastotapa = "";
   }
 
   if ($myynti_maa != "") {
-    $laskuntoimmaa = " and lasku.toim_maa = '$myynti_maa' ";
+    $laskuntoimmaa = " AND lasku.toim_maa = '$myynti_maa' ";
   }
 
-  // tutkaillaan myynti
+  // Tutkaillaan myynti
   $query = "SELECT
-            sum(if(tilausrivi.tyyppi = 'L' and laadittu >= '$vva1-$kka1-$ppa1 00:00:00' and laadittu <= '$vvl1-$kkl1-$ppl1 23:59:59' and var='P', tilkpl,0)) puutekpl1,
-            sum(if(tilausrivi.tyyppi = 'L' and laadittu >= '$vva2-$kka2-$ppa2 00:00:00' and laadittu <= '$vvl2-$kkl2-$ppl2 23:59:59' and var='P', tilkpl,0)) puutekpl2,
-            sum(if(tilausrivi.tyyppi = 'L' and laadittu >= '$vva3-$kka3-$ppa3 00:00:00' and laadittu <= '$vvl3-$kkl3-$ppl3 23:59:59' and var='P', tilkpl,0)) puutekpl3,
-            sum(if(tilausrivi.tyyppi = 'L' and laadittu >= '$vva4-$kka4-$ppa4 00:00:00' and laadittu <= '$vvl4-$kkl4-$ppl4 23:59:59' and var='P', tilkpl,0)) puutekpl4,
-            sum(if(tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva1-$kka1-$ppa1' and laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,kpl,0)) kpl1,
-            sum(if(tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva2-$kka2-$ppa2' and laskutettuaika <= '$vvl2-$kkl2-$ppl2' ,kpl,0)) kpl2,
-            sum(if(tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva3-$kka3-$ppa3' and laskutettuaika <= '$vvl3-$kkl3-$ppl3' ,kpl,0)) kpl3,
-            sum(if(tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva4-$kka4-$ppa4' and laskutettuaika <= '$vvl4-$kkl4-$ppl4' ,kpl,0)) kpl4,
-            sum(if(tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva1ed-$kka1ed-$ppa1ed' and laskutettuaika <= '$vvl1ed-$kkl1ed-$ppl1ed' ,kpl,0)) EDkpl1,
-            sum(if(tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva2ed-$kka2ed-$ppa2ed' and laskutettuaika <= '$vvl2ed-$kkl2ed-$ppl2ed' ,kpl,0)) EDkpl2,
-            sum(if(tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva3ed-$kka3ed-$ppa3ed' and laskutettuaika <= '$vvl3ed-$kkl3ed-$ppl3ed' ,kpl,0)) EDkpl3,
-            sum(if(tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva4ed-$kka4ed-$ppa4ed' and laskutettuaika <= '$vvl4ed-$kkl4ed-$ppl4ed' ,kpl,0)) EDkpl4,
-            sum(if(tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva1-$kka1-$ppa1' and laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,tilausrivi.kate,0)) kate1,
-            sum(if(tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva2-$kka2-$ppa2' and laskutettuaika <= '$vvl2-$kkl2-$ppl2' ,tilausrivi.kate,0)) kate2,
-            sum(if(tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva3-$kka3-$ppa3' and laskutettuaika <= '$vvl3-$kkl3-$ppl3' ,tilausrivi.kate,0)) kate3,
-            sum(if(tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva4-$kka4-$ppa4' and laskutettuaika <= '$vvl4-$kkl4-$ppl4' ,tilausrivi.kate,0)) kate4,
-            sum(if(tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva1-$kka1-$ppa1' and laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,rivihinta,0)) rivihinta1,
-            sum(if(tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva2-$kka2-$ppa2' and laskutettuaika <= '$vvl2-$kkl2-$ppl2' ,rivihinta,0)) rivihinta2,
-            sum(if(tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva3-$kka3-$ppa3' and laskutettuaika <= '$vvl3-$kkl3-$ppl3' ,rivihinta,0)) rivihinta3,
-            sum(if(tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva4-$kka4-$ppa4' and laskutettuaika <= '$vvl4-$kkl4-$ppl4' ,rivihinta,0)) rivihinta4,
-            sum(if((tilausrivi.tyyppi = 'L' or tilausrivi.tyyppi = 'V') and tilausrivi.var not in ('P','J','O','S'), tilausrivi.varattu, 0)) ennpois,
-            sum(if(tilausrivi.tyyppi = 'L' and tilausrivi.var in ('J','S'), tilausrivi.jt $lisavarattu, 0)) jt,
-            sum(if(tilausrivi.tyyppi = 'E' and tilausrivi.var != 'O', tilausrivi.varattu, 0)) ennakko
+            sum(if(tilausrivi.tyyppi = 'L' AND laadittu >= '$vva1-$kka1-$ppa1 00:00:00' AND laadittu <= '$vvl1-$kkl1-$ppl1 23:59:59' AND var='P', tilkpl,0)) puutekpl1,
+            sum(if(tilausrivi.tyyppi = 'L' AND laadittu >= '$vva2-$kka2-$ppa2 00:00:00' AND laadittu <= '$vvl2-$kkl2-$ppl2 23:59:59' AND var='P', tilkpl,0)) puutekpl2,
+            sum(if(tilausrivi.tyyppi = 'L' AND laadittu >= '$vva3-$kka3-$ppa3 00:00:00' AND laadittu <= '$vvl3-$kkl3-$ppl3 23:59:59' AND var='P', tilkpl,0)) puutekpl3,
+            sum(if(tilausrivi.tyyppi = 'L' AND laadittu >= '$vva4-$kka4-$ppa4 00:00:00' AND laadittu <= '$vvl4-$kkl4-$ppl4 23:59:59' AND var='P', tilkpl,0)) puutekpl4,
+            sum(if(tilausrivi.tyyppi = 'L' AND laskutettuaika >= '$vva1-$kka1-$ppa1' AND laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,kpl,0)) kpl1,
+            sum(if(tilausrivi.tyyppi = 'L' AND laskutettuaika >= '$vva2-$kka2-$ppa2' AND laskutettuaika <= '$vvl2-$kkl2-$ppl2' ,kpl,0)) kpl2,
+            sum(if(tilausrivi.tyyppi = 'L' AND laskutettuaika >= '$vva3-$kka3-$ppa3' AND laskutettuaika <= '$vvl3-$kkl3-$ppl3' ,kpl,0)) kpl3,
+            sum(if(tilausrivi.tyyppi = 'L' AND laskutettuaika >= '$vva4-$kka4-$ppa4' AND laskutettuaika <= '$vvl4-$kkl4-$ppl4' ,kpl,0)) kpl4,
+            sum(if(tilausrivi.tyyppi = 'L' AND laskutettuaika >= '$vva1ed-$kka1ed-$ppa1ed' AND laskutettuaika <= '$vvl1ed-$kkl1ed-$ppl1ed' ,kpl,0)) EDkpl1,
+            sum(if(tilausrivi.tyyppi = 'L' AND laskutettuaika >= '$vva2ed-$kka2ed-$ppa2ed' AND laskutettuaika <= '$vvl2ed-$kkl2ed-$ppl2ed' ,kpl,0)) EDkpl2,
+            sum(if(tilausrivi.tyyppi = 'L' AND laskutettuaika >= '$vva3ed-$kka3ed-$ppa3ed' AND laskutettuaika <= '$vvl3ed-$kkl3ed-$ppl3ed' ,kpl,0)) EDkpl3,
+            sum(if(tilausrivi.tyyppi = 'L' AND laskutettuaika >= '$vva4ed-$kka4ed-$ppa4ed' AND laskutettuaika <= '$vvl4ed-$kkl4ed-$ppl4ed' ,kpl,0)) EDkpl4,
+            sum(if(tilausrivi.tyyppi = 'L' AND laskutettuaika >= '$vva1-$kka1-$ppa1' AND laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,tilausrivi.kate,0)) kate1,
+            sum(if(tilausrivi.tyyppi = 'L' AND laskutettuaika >= '$vva2-$kka2-$ppa2' AND laskutettuaika <= '$vvl2-$kkl2-$ppl2' ,tilausrivi.kate,0)) kate2,
+            sum(if(tilausrivi.tyyppi = 'L' AND laskutettuaika >= '$vva3-$kka3-$ppa3' AND laskutettuaika <= '$vvl3-$kkl3-$ppl3' ,tilausrivi.kate,0)) kate3,
+            sum(if(tilausrivi.tyyppi = 'L' AND laskutettuaika >= '$vva4-$kka4-$ppa4' AND laskutettuaika <= '$vvl4-$kkl4-$ppl4' ,tilausrivi.kate,0)) kate4,
+            sum(if(tilausrivi.tyyppi = 'L' AND laskutettuaika >= '$vva1-$kka1-$ppa1' AND laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,rivihinta,0)) rivihinta1,
+            sum(if(tilausrivi.tyyppi = 'L' AND laskutettuaika >= '$vva2-$kka2-$ppa2' AND laskutettuaika <= '$vvl2-$kkl2-$ppl2' ,rivihinta,0)) rivihinta2,
+            sum(if(tilausrivi.tyyppi = 'L' AND laskutettuaika >= '$vva3-$kka3-$ppa3' AND laskutettuaika <= '$vvl3-$kkl3-$ppl3' ,rivihinta,0)) rivihinta3,
+            sum(if(tilausrivi.tyyppi = 'L' AND laskutettuaika >= '$vva4-$kka4-$ppa4' AND laskutettuaika <= '$vvl4-$kkl4-$ppl4' ,rivihinta,0)) rivihinta4,
+            sum(if((tilausrivi.tyyppi = 'L' OR tilausrivi.tyyppi = 'V') AND tilausrivi.var not in ('P','J','O','S'), tilausrivi.varattu, 0)) ennpois,
+            sum(if(tilausrivi.tyyppi = 'L' AND tilausrivi.var in ('J','S'), tilausrivi.jt $lisavarattu, 0)) jt,
+            sum(if(tilausrivi.tyyppi = 'E' AND tilausrivi.var != 'O', tilausrivi.varattu, 0)) ennakko
             FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-            JOIN lasku USE INDEX (PRIMARY) on (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus $laskuntoimmaa)
-            JOIN asiakas USE INDEX (PRIMARY) on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus $lisaa3)
+            JOIN lasku USE INDEX (PRIMARY) on (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus $laskuntoimmaa)
+            JOIN asiakas USE INDEX (PRIMARY) on (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus $lisaa3)
             $varastotapa
             WHERE tilausrivi.yhtio in ($yhtiot)
-            and tilausrivi.tyyppi  in ('L','V','E')
-            and tilausrivi.tuoteno = '$row[tuoteno]'
-            and ((tilausrivi.laskutettuaika >= '$apvm' and tilausrivi.laskutettuaika <= '$lpvm') or tilausrivi.laskutettuaika = '0000-00-00')";
+            AND tilausrivi.tyyppi  in ('L','V','E')
+            AND tilausrivi.tuoteno = '$row[tuoteno]'
+            AND ((tilausrivi.laskutettuaika >= '$apvm' AND tilausrivi.laskutettuaika <= '$lpvm') OR tilausrivi.laskutettuaika = '0000-00-00')";
   $result   = pupe_query($query);
   $laskurow = mysql_fetch_array($result);
 
@@ -158,23 +160,24 @@ function saldot($myynti_varasto = '', $myynti_maa = '') {
     $varastotapa = "";
 
     if ($myynti_varasto != "") {
-      $varastotapa = " and varastopaikat.tunnus = '$myynti_varasto' ";
+      $varastotapa = " AND varastopaikat.tunnus = '$myynti_varasto' ";
     }
     elseif ($erikoisvarastot != "") {
-      $varastotapa .= " and varastopaikat.tyyppi = '' ";
+      $varastotapa .= " AND varastopaikat.tyyppi = '' ";
     }
 
     if ($myynti_maa != "") {
-      $varastotapa .= " and varastopaikat.maa = '$myynti_maa' ";
+      $varastotapa .= " AND varastopaikat.maa = '$myynti_maa' ";
     }
 
     // Kaikkien valittujen varastojen saldo per maa
     $query = "SELECT ifnull(sum(saldo),0) saldo, ifnull(sum(halytysraja),0) halytysraja
               FROM tuotepaikat
-              JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio AND varastopaikat.tunnus = tuotepaikat.varasto)
+              JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+                AND varastopaikat.tunnus = tuotepaikat.varasto)
               $varastotapa
               WHERE tuotepaikat.yhtio in ($yhtiot)
-              and tuotepaikat.tuoteno = '$row[tuoteno]'";
+              AND tuotepaikat.tuoteno = '$row[tuoteno]'";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) > 0) {
@@ -198,27 +201,27 @@ function ostot($myynti_varasto = '', $myynti_maa = '') {
     if ($myynti_varasto != "") {
       $varastotapa .= " AND varastopaikat.tunnus = '$myynti_varasto' ";
     }
-    elseif ($erikoisvarastot != "" and $myynti_maa == "") {
+    elseif ($erikoisvarastot != "" AND $myynti_maa == "") {
       $query    = "SELECT group_concat(tunnus) FROM varastopaikat WHERE yhtio IN ($yhtiot) AND tyyppi = ''";
       $result   = pupe_query($query);
       $laskurow = mysql_fetch_array($result);
 
       if ($laskurow[0] != "") {
-        $varastotapa .= " and varastopaikat.tunnus in ($laskurow[0]) ";
+        $varastotapa .= " AND varastopaikat.tunnus in ($laskurow[0]) ";
       }
     }
     elseif ($myynti_maa != "") {
       $query    = "SELECT group_concat(tunnus) FROM varastopaikat WHERE yhtio IN ($yhtiot) AND maa = '$myynti_maa'";
 
       if ($erikoisvarastot != "") {
-        $query .= " and tyyppi = '' ";
+        $query .= " AND tyyppi = '' ";
       }
 
       $result   = pupe_query($query);
       $laskurow = mysql_fetch_array($result);
 
       if ($laskurow[0] != "") {
-        $varastotapa .= " and varastopaikat.tunnus in ($laskurow[0]) ";
+        $varastotapa .= " AND varastopaikat.tunnus in ($laskurow[0]) ";
       }
     }
     else {
@@ -244,7 +247,7 @@ function ostot($myynti_varasto = '', $myynti_maa = '') {
     $tuoterivi[] = str_replace(".",",",$ostorow['tilattu']);
 }
 
-// org_rajausta tarvitaan yhdessä selectissä joka triggeröi taas toisen asian.
+// Org_rajausta tarvitaan yhdessä selectissä joka triggeröi taas toisen asian.
 $org_rajaus = $abcrajaus;
 list($abcrajaus,$abcrajaustapa) = explode("##",$abcrajaus);
 
@@ -281,7 +284,7 @@ if (!isset($kkl4)) $kkl4 = date("m");
 if (!isset($vvl4)) $vvl4 = date("Y");
 if (!isset($ppl4)) $ppl4 = date("d");
 
-//Edellisen vuoden vastaavat kaudet
+// Edellisen vuoden vastaavat kaudet
 $kka1ed = date("m",mktime(0, 0, 0, $kka1, $ppa1, $vva1-1));
 $vva1ed = date("Y",mktime(0, 0, 0, $kka1, $ppa1, $vva1-1));
 $ppa1ed = date("d",mktime(0, 0, 0, $kka1, $ppa1, $vva1-1));
@@ -310,7 +313,7 @@ $kkl4ed = date("m",mktime(0, 0, 0, $kkl4, $ppl4, $vvl4-1));
 $vvl4ed = date("Y",mktime(0, 0, 0, $kkl4, $ppl4, $vvl4-1));
 $ppl4ed = date("d",mktime(0, 0, 0, $kkl4, $ppl4, $vvl4-1));
 
-//katotaan pienin alkupvm ja isoin loppupvm
+// Katotaan pienin alkupvm ja isoin loppupvm
 $apaiva1 = (int) date('Ymd',mktime(0,0,0,$kka1,$ppa1,$vva1));
 $apaiva2 = (int) date('Ymd',mktime(0,0,0,$kka2,$ppa2,$vva2));
 $apaiva3 = (int) date('Ymd',mktime(0,0,0,$kka3,$ppa3,$vva3));
@@ -351,14 +354,14 @@ if ($lpaiva7 >= $lsuurin and $lpaiva7 != 19700101) $lsuurin = $lpaiva7;
 if ($lpaiva8 >= $lsuurin and $lpaiva8 != 19700101) $lsuurin = $lpaiva8;
 
 if ($apienin == 99999999 and $lsuurin == 0) {
-  $apienin = $lsuurin = date('Ymd'); // jos mitään ei löydy niin NOW molempiin. :)
+  $apienin = $lsuurin = date('Ymd'); // Jos mitään ei löydy niin NOW molempiin. :)
 }
 
 $apvm = substr($apienin,0,4)."-".substr($apienin,4,2)."-".substr($apienin,6,2);
 $lpvm = substr($lsuurin,0,4)."-".substr($lsuurin,4,2)."-".substr($lsuurin,6,2);
 
 
-// katsotaan tarvitaanko mennä toimittajahakuun
+// Katsotaan tarvitaanko mennä toimittajahakuun
 if (($ytunnus != "" and $toimittajaid == "") or ($edytunnus != $ytunnus)) {
   if ($edytunnus != $ytunnus) $toimittajaid = "";
   require ("inc/kevyt_toimittajahaku.inc");
@@ -366,60 +369,60 @@ if (($ytunnus != "" and $toimittajaid == "") or ($edytunnus != $ytunnus)) {
   $tee = "";
 }
 
-// tehdään itse raportti
+// Tehdään itse raportti
 if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
-  // haetaan nimitietoa
+  // Haetaan nimitietoa
   if ($tuoryh != '') {
-    // tehdään avainsana query
-    $sresult = t_avainsana("TRY", "", "and avainsana.selite ='$tuoryh'", $yhtiot);
+    // Tehdään avainsana query
+    $sresult = t_avainsana("TRY", "", "AND avainsana.selite ='$tuoryh'", $yhtiot);
     $trow1 = mysql_fetch_array($sresult);
   }
   if ($osasto != '') {
-    // tehdään avainsana query
-    $sresult = t_avainsana("OSASTO", "", "and avainsana.selite ='$osasto'", $yhtiot);
+    // Tehdään avainsana query
+    $sresult = t_avainsana("OSASTO", "", "AND avainsana.selite ='$osasto'", $yhtiot);
     $trow2 = mysql_fetch_array($sresult);
   }
   if ($toimittajaid != '') {
     $query = "SELECT nimi
               FROM toimi
-              WHERE yhtio in ($yhtiot) and tunnus='$toimittajaid'";
+              WHERE yhtio in ($yhtiot) AND tunnus='$toimittajaid'";
     $sresult = pupe_query($query);
     $trow3 = mysql_fetch_array($sresult);
   }
 
-  $lisaa  = ""; // tuote-rajauksia
-  $lisaa2 = ""; // toimittaja-rajauksia
-  $lisaa3 = ""; // asiakas-rajauksia
+  $lisaa  = ""; // Tuote-rajauksia
+  $lisaa2 = ""; // Toimittaja-rajauksia
+  $lisaa3 = ""; // Asiakas-rajauksia
 
   if ($osasto != '') {
-    $lisaa .= " and tuote.osasto = '$osasto' ";
+    $lisaa .= " AND tuote.osasto = '$osasto' ";
   }
   if ($tuoryh != '') {
-    $lisaa .= " and tuote.try = '$tuoryh' ";
+    $lisaa .= " AND tuote.try = '$tuoryh' ";
   }
   if ($tuotemerkki != '') {
-    $lisaa .= " and tuote.tuotemerkki = '$tuotemerkki' ";
+    $lisaa .= " AND tuote.tuotemerkki = '$tuotemerkki' ";
   }
   if ($poistetut != '') {
-    $lisaa .= " and tuote.status != 'P' ";
+    $lisaa .= " AND tuote.status != 'P' ";
   }
   if ($poistuva != '') {
-    $lisaa .= " and tuote.status != 'X' ";
+    $lisaa .= " AND tuote.status != 'X' ";
   }
   if ($eihinnastoon != '') {
-    $lisaa .= " and tuote.hinnastoon != 'E' ";
+    $lisaa .= " AND tuote.hinnastoon != 'E' ";
   }
   if ($vainuudet != '') {
-    $lisaa .= " and tuote.luontiaika >= date_sub(current_date, interval 12 month) ";
+    $lisaa .= " AND tuote.luontiaika >= date_sub(current_date, interval 12 month) ";
   }
   if ($eiuusia != '') {
-    $lisaa .= " and tuote.luontiaika < date_sub(current_date, interval 12 month) ";
+    $lisaa .= " AND tuote.luontiaika < date_sub(current_date, interval 12 month) ";
   }
   if ($toimittajaid != '') {
-    $lisaa2 .= " JOIN tuotteen_toimittajat ON (tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and liitostunnus = '$toimittajaid') ";
+    $lisaa2 .= " JOIN tuotteen_toimittajat ON (tuote.yhtio = tuotteen_toimittajat.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND liitostunnus = '$toimittajaid') ";
   }
   if ($eliminoikonserni != '') {
-    $lisaa3 .= " and asiakas.konserniyhtio = '' ";
+    $lisaa3 .= " AND asiakas.konserniyhtio = '' ";
   }
 
   $abcnimi = $ryhmanimet[$abcrajaus];
@@ -436,7 +439,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
   if (is_array($valitutmaat) and count($valitutmaat) > 0) {
     $varastot_maittain = "KYLLA";
 
-    // katsotaan valitut varastot
+    // Katsotaan valitut varastot
     $query = "SELECT *
               FROM varastopaikat
               WHERE yhtio in ($yhtiot)
@@ -453,14 +456,14 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
   $maa_varastot      = substr($maa_varastot,0,-1);
   $maa_varastot_yhtiot = substr($maa_varastot_yhtiot,0,-1);
 
-  // katotaan JT:ssä olevat tuotteet ABC-analyysiä varten, koska ne pitää includata aina!
-  $query = "SELECT group_concat(distinct concat(\"'\",tilausrivi.tuoteno,\"'\") separator ',')
+  // Katotaan JT:ssä olevat tuotteet ABC-analyysiä varten, koska ne pitää includata aina!
+  $query = "SELECT group_concat(DISTINCT concat(\"'\",tilausrivi.tuoteno,\"'\") separator ',')
             FROM tilausrivi USE INDEX (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
-            JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno $lisaa)
+            JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno $lisaa)
             WHERE tilausrivi.yhtio in ($yhtiot)
-            and tyyppi             IN  ('L','G')
-            and var                = 'J'
-            and jt $lisavarattu > 0";
+            AND tyyppi             IN  ('L','G')
+            AND var                = 'J'
+            AND jt $lisavarattu > 0";
   $vtresult = pupe_query($query);
   $vrow = mysql_fetch_array($vtresult);
 
@@ -471,17 +474,17 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
   }
 
   if ($abcrajaus != "") {
-    // joinataan ABC-aputaulu katteen mukaan lasketun luokan perusteella
+    // Joinataan ABC-aputaulu katteen mukaan lasketun luokan perusteella
     $abcjoin = " JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio
-          and abc_aputaulu.tuoteno = tuote.tuoteno
-          and abc_aputaulu.tyyppi = '$abcrajaustapa'
-          and (luokka <= '$abcrajaus' or luokka_osasto <= '$abcrajaus' or luokka_try <= '$abcrajaus' or tuote_luontiaika >= date_sub(current_date, interval 12 month) or abc_aputaulu.tuoteno in ($jt_tuotteet))) ";
+          AND abc_aputaulu.tuoteno = tuote.tuoteno
+          AND abc_aputaulu.tyyppi = '$abcrajaustapa'
+          AND (luokka <= '$abcrajaus' OR luokka_osasto <= '$abcrajaus' OR luokka_try <= '$abcrajaus' OR tuote_luontiaika >= date_sub(current_date, interval 12 month) OR abc_aputaulu.tuoteno in ($jt_tuotteet))) ";
   }
   else {
-    $abcjoin = " LEFT JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio and abc_aputaulu.tuoteno = tuote.tuoteno and abc_aputaulu.tyyppi = '$abcrajaustapa') ";
+    $abcjoin = " LEFT JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio AND abc_aputaulu.tuoteno = tuote.tuoteno AND abc_aputaulu.tyyppi = '$abcrajaustapa') ";
   }
 
-  // tässä haetaan sitten listalle soveltuvat tuotteet
+  // Tässä haetaan sitten listalle soveltuvat tuotteet
   $query = "SELECT
             group_concat(tuote.yhtio) yhtio,
             tuote.tuoteno,
@@ -507,13 +510,13 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
             FROM tuote
             $lisaa2
             $abcjoin
-            LEFT JOIN korvaavat ON (tuote.yhtio = korvaavat.yhtio and tuote.tuoteno = korvaavat.tuoteno)
+            LEFT JOIN korvaavat ON (tuote.yhtio = korvaavat.yhtio AND tuote.tuoteno = korvaavat.tuoteno)
             WHERE
             tuote.yhtio           in ($yhtiot)
             $lisaa
-            and tuote.ei_saldoa   = ''
-            and tuote.tuotetyyppi NOT IN ('A', 'B')
-            and tuote.ostoehdotus = ''
+            AND tuote.ei_saldoa   = ''
+            AND tuote.tuotetyyppi NOT IN ('A', 'B')
+            AND tuote.ostoehdotus = ''
             GROUP BY tuote.tuoteno
             ORDER BY id, tuote.tuoteno, yhtio";
   $res = pupe_query($query);
@@ -524,8 +527,8 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
   $rivi = "";
 
   $bar = new ProgressBar();
-  $elements = mysql_num_rows($res); //total number of elements to process
-  $bar->initialize($elements); //print the empty bar
+  $elements = mysql_num_rows($res); // Total number of elements to process
+  $bar->initialize($elements); // Print the empty bar
 
   // Laitetaan otsikkotiedot otsikkoarrayn sisään
   if ($useampi_yhtio > 1) {
@@ -559,10 +562,10 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
   $headerivi[] = ucfirst(t("aleryhmä"));
   $headerivi[] = ucfirst(t("keskihankintahinta"));
 
-  // rullataan läpä maittain
+  // Rullataan läpä maittain
   if ($varastot_maittain == "KYLLA") {
     foreach ($valitutmaat as $maa) {
-      //kirjoitetaan myyntiotsikot (myyntifunktioslle)
+      // Kirjoitetaan myyntiotsikot (myyntifunktioslle)
       // Myydyt kappaleet
       $headerivi[] = ucfirst(t("$maa kpl1"));
       $headerivi[] = ucfirst(t("$maa kpl2"));
@@ -600,14 +603,14 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 
       $varastotapa .= " AND varastopaikat.maa = '$maa'";
 
-      //kirjoitetaan saldo otsikot (saldofunkitolle)
+      // Kirjoitetaan saldo otsikot (saldofunkitolle)
       // Kaikkien valittujen varastojen saldo per maa
       $query = "SELECT ifnull(sum(saldo),0) saldo, ifnull(sum(halytysraja),0) halytysraja
                 FROM tuotepaikat
                 JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio AND varastopaikat.tunnus = tuotepaikat.varasto)
                 $varastotapa
                 WHERE tuotepaikat.yhtio in ($yhtiot)
-                and tuotepaikat.tuoteno = '$row[tuoteno]'";
+                AND tuotepaikat.tuoteno = '$row[tuoteno]'";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) > 0) {
@@ -621,22 +624,22 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
         $headerivi[] = ucfirst(t("$maa hälytysraja"));
       }
 
-      //kirjoitetaan osto otsikot (ostofunktille)
-      // siirtolista jt kpl
+      // Kirjoitetaan osto otsikot (ostofunktille)
+      // Siirtolista jt kpl
       $headerivi[] = ucfirst(t("$maa siirtojt kpl"));
-      // tilattu kpl
+      // Tilattu kpl
       $headerivi[] = ucfirst(t("$maa tilattu kpl"));
     }
   }
 
-  // sitten rullataan läpi varastoittain
+  // Sitten rullataan läpi varastoittain
   if ($varastot_paikoittain == "KYLLA") {
     foreach ($valitutvarastot as $varastotunnus) {
-      $query = "SELECT nimitys from varastopaikat where yhtio in ($yhtiot) and tunnus = '$varastotunnus'";
+      $query = "SELECT nimitys FROM varastopaikat WHERE yhtio in ($yhtiot) AND tunnus = '$varastotunnus'";
       $varastorow = mysql_fetch_array(pupe_query($query));
       $varastonimi = $varastorow["nimitys"];
 
-      //kirjoitetaan myyntiotsikot (myyntifunktioslle)
+      // Kirjoitetaan myyntiotsikot (myyntifunktioslle)
       // Myydyt kappaleet
       $headerivi[] = ucfirst(t("$varastonimi kpl1"));
       $headerivi[] = ucfirst(t("$varastonimi kpl2"));
@@ -668,8 +671,8 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
       $headerivi[] = ucfirst(t("$varastonimi jt kpl"));
       $headerivi[] = ucfirst(t("$varastonimi ennakkotilaus kpl"));
 
-      //kirjoitetaan saldo otsikot (saldofunkitolle)
-      $varastotapa = " and varastopaikat.tunnus = '$varastotunnus' ";
+      // Kirjoitetaan saldo otsikot (saldofunkitolle)
+      $varastotapa = " AND varastopaikat.tunnus = '$varastotunnus' ";
 
       // Kaikkien valittujen varastojen saldo
       $query = "SELECT ifnull(sum(saldo),0) saldo, ifnull(sum(halytysraja),0) halytysraja
@@ -677,7 +680,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
                 JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio AND varastopaikat.tunnus = tuotepaikat.varasto)
                 $varastotapa
                 WHERE tuotepaikat.yhtio in ($yhtiot)
-                and tuotepaikat.tuoteno = '$row[tuoteno]'";
+                AND tuotepaikat.tuoteno = '$row[tuoteno]'";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) > 0) {
@@ -691,16 +694,16 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
         $headerivi[] = ucfirst(t("$varastotunnus hälytysraja"));
       }
 
-      //kirjoitetaan osto otsikot (ostofunktille)
-      // siirtolista jt kpl
+      // Kirjoitetaan osto otsikot (ostofunktille)
+      // Siirtolista jt kpl
       $headerivi[] = ucfirst(t("$varastotunnus siirtojt kpl"));
-      // tilattu kpl
+      // Tilattu kpl
       $headerivi[] = ucfirst(t("$varastotunnus tilattu kpl"));
     }
   }
 
-  // sitte vielä totalit
-  //kirjoitetaan myyntiotsikot (myyntifunktiolle)
+  // Sitte vielä totalit
+  // Kirjoitetaan myyntiotsikot (myyntifunktiolle)
   // Myydyt kappaleet
   $headerivi[] = ucfirst(t("Total kpl1"));
   $headerivi[] = ucfirst(t("Total kpl2"));
@@ -732,7 +735,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
   $headerivi[] = ucfirst(t("Total jt kpl"));
   $headerivi[] = ucfirst(t("Total ennakkotilaus kpl"));
 
-  //kirjoitetaan saldo otsikot (saldofunkitolle)
+  // Kirjoitetaan saldo otsikot (saldofunkitolle)
   if ($erikoisvarastot != "") {
     $varastotapa = " AND varastopaikat.tyyppi = '' ";
   }
@@ -743,7 +746,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
             JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio AND varastopaikat.tunnus = tuotepaikat.varasto)
             $varastotapa
             WHERE tuotepaikat.yhtio in ($yhtiot)
-            and tuotepaikat.tuoteno = '$row[tuoteno]'";
+            AND tuotepaikat.tuoteno = '$row[tuoteno]'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -757,56 +760,56 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
     $headerivi[] = ucfirst(t("Total hälytysraja"));
   }
 
-  // kirjoitetaan osto otsikot (ostofunktille)
-  // siirtolista jt kpl
+  // Kirjoitetaan osto otsikot (ostofunktille)
+  // Siirtolista jt kpl
   $headerivi[] = ucfirst(t("Total siirtojt kpl"));
-  // tilattu kpl
+  // Tilattu kpl
   $headerivi[] = ucfirst(t("Total tilattu kpl"));
 
   //LOOP
-  //kirjoitetaan otsikot tiedostoon
+  // Kirjoitetaan otsikot tiedostoon
   for ($i=0; $i < count($headerivi); $i++) {
     $worksheet->write($excelrivi, $i, ucfirst(t($headerivi[$i])), $format_bold);
   }
-  
 
-  //siirrytään seuraavalle riville
+
+  // Siirrytään seuraavalle riville
   $excelrivi++;
 
-  // loopataan tuotteet läpi
+  // Loopataan tuotteet läpi
   while ($row = mysql_fetch_array($res)) {
 
     $toimilisa = "";
-    if ($toimittajaid != '') $toimilisa = " and tuotteen_toimittajat.liitostunnus = '$toimittajaid' ";
+    if ($toimittajaid != '') $toimilisa = " AND tuotteen_toimittajat.liitostunnus = '$toimittajaid' ";
 
-    // haetaan tuotteen toimittajatietoa
-    $query = "SELECT group_concat(toimi.ytunnus             order by tuotteen_toimittajat.tunnus separator '/') toimittaja,
-              group_concat(distinct tuotteen_toimittajat.osto_era   order by tuotteen_toimittajat.tunnus separator '/') osto_era,
-              group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '/') toim_tuoteno,
-              group_concat(distinct tuotteen_toimittajat.toim_nimitys order by tuotteen_toimittajat.tunnus separator '/') toim_nimitys,
-              group_concat(distinct tuotteen_toimittajat.ostohinta   order by tuotteen_toimittajat.tunnus separator '/') ostohinta,
-              group_concat(distinct tuotteen_toimittajat.tuotekerroin order by tuotteen_toimittajat.tunnus separator '/') tuotekerroin
+    // Haetaan tuotteen toimittajatietoa
+    $query = "SELECT group_concat(toimi.ytunnus             ORDER BY tuotteen_toimittajat.tunnus separator '/') toimittaja,
+              group_concat(DISTINCT tuotteen_toimittajat.osto_era   ORDER BY tuotteen_toimittajat.tunnus separator '/') osto_era,
+              group_concat(DISTINCT tuotteen_toimittajat.toim_tuoteno ORDER BY tuotteen_toimittajat.tunnus separator '/') toim_tuoteno,
+              group_concat(DISTINCT tuotteen_toimittajat.toim_nimitys ORDER BY tuotteen_toimittajat.tunnus separator '/') toim_nimitys,
+              group_concat(DISTINCT tuotteen_toimittajat.ostohinta   ORDER BY tuotteen_toimittajat.tunnus separator '/') ostohinta,
+              group_concat(DISTINCT tuotteen_toimittajat.tuotekerroin ORDER BY tuotteen_toimittajat.tunnus separator '/') tuotekerroin
               FROM tuotteen_toimittajat
               JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
               WHERE tuotteen_toimittajat.yhtio in ($yhtiot)
-              and tuotteen_toimittajat.tuoteno = '$row[tuoteno]'
+              AND tuotteen_toimittajat.tuoteno = '$row[tuoteno]'
               $toimilisa";
     $result   = pupe_query($query);
     $toimirow = mysql_fetch_array($result);
 
-    // kaunistellaan kenttiä
+    // Kaunistellaan kenttiä
     if ($row["luontiaika"] == "0000-00-00 00:00:00") $row["luontiaika"] = "";
     if ($row['epakurantti25pvm'] == '0000-00-00')     $row['epakurantti25pvm'] = "";
     if ($row['epakurantti50pvm'] == '0000-00-00')     $row['epakurantti50pvm'] = "";
     if ($row['epakurantti75pvm'] == '0000-00-00')     $row['epakurantti75pvm'] = "";
     if ($row['epakurantti100pvm'] == '0000-00-00')     $row['epakurantti50pvm'] = "";
 
-    // haetaan abc luokille nimet
+    // Hhaetaan abc luokille nimet
     $abcnimi = $ryhmanimet[$row["abcluokka"]];
     $abcnimi2 = $ryhmanimet[$row["abcluokka_osasto"]];
     $abcnimi3 = $ryhmanimet[$row["abcluokka_try"]];
 
-    // kirjoitetaan itse riviä;
+    // Kirjoitetaan itse riviä;
     if ($useampi_yhtio > 1) {
       $tuoterivi[] = $row["yhtio"];
     }
@@ -867,16 +870,16 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
     saldot();
     ostot();
 
-    //kirjoitetaan tuoterivin tiedot tiedostoon
+    // Kirjoitetaan tuoterivin tiedot tiedostoon
     for ($i=0; $i < count($tuoterivi); $i++) {
       $worksheet->write($excelrivi, $i, ucfirst(t($tuoterivi[$i])), $format_bold);
     }
 
-    //siirrytään seuraavalle riville
+    // Siirrytään seuraavalle riville
     $excelrivi++;
     $tuoterivi = array();
 
-    $bar->increase(); //calls the bar with every processed element
+    $bar->increase(); // Calls the bar with every processed element
 
   }
 
@@ -893,7 +896,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
     echo "</table><br>";
 }
 
-// näytetään käyttöliittymä..
+// Näytetään käyttöliittymä..
 if ($tee == "" or !isset($ehdotusnappi)) {
 
   $abcnimi = $ryhmanimet[$abcrajaus];
@@ -905,7 +908,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 
   echo "<tr><th>".t("Osasto")."</th><td colspan='3'>";
 
-  // tehdään avainsana query
+  // Tehdään avainsana query
   $sresult = t_avainsana("OSASTO", "", "", $yhtiot);
 
   echo "<select name='osasto'>";
@@ -923,7 +926,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
   echo "</td></tr>
       <tr><th>".t("Tuoteryhmä")."</th><td colspan='3'>";
 
-  // tehdään avainsana query
+  // Tehdään avainsana query
   $sresult = t_avainsana("TRY", "", "", $yhtiot);
 
   echo "<select name='tuoryh'>";
@@ -941,11 +944,11 @@ if ($tee == "" or !isset($ehdotusnappi)) {
   echo "</td></tr>
       <tr><th>".t("Tuotemerkki")."</th><td colspan='3'>";
 
-  //Tehdään osasto & tuoteryhmä pop-upit
-  $query = "SELECT distinct tuotemerkki
+  // Tehdään osasto & tuoteryhmä pop-upit
+  $query = "SELECT DISTINCT tuotemerkki
             FROM tuote
             WHERE yhtio      in ($yhtiot)
-            and tuotemerkki != ''
+            AND tuotemerkki != ''
             ORDER BY tuotemerkki";
   $sresult = pupe_query($query);
 
@@ -1100,11 +1103,11 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 
   echo "</table><table><br>";
 
-  // yhtiövalinnat
-  $query  = "SELECT distinct yhtio, nimi
-             from yhtio
-             where konserni  = '$yhtiorow[konserni]'
-             and konserni   != ''";
+  // Yhtiövalinnat
+  $query  = "SELECT DISTINCT yhtio, nimi
+             FROM yhtio
+             WHERE konserni  = '$yhtiorow[konserni]'
+             AND konserni   != ''";
   $presult = pupe_query($query);
 
   $useampi_yhtio = 0;
@@ -1117,7 +1120,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
     while ($prow = mysql_fetch_array($presult)) {
 
       $chk = "";
-      if (is_array($valitutyhtiot) and in_array($prow["yhtio"], $valitutyhtiot) != '') {
+      if (is_array($valitutyhtiot) AND in_array($prow["yhtio"], $valitutyhtiot) != '') {
         $chk = "CHECKED";
         $yhtiot .= "'$prow[yhtio]',";
         $useampi_yhtio++;
@@ -1136,15 +1139,15 @@ if ($tee == "" or !isset($ehdotusnappi)) {
     echo "</table><table><br>";
   }
 
-  // katsotaan onko firmalla varastoja useassa maassa
-  $query = "SELECT distinct maa
-            from varastopaikat
-            where maa != ''
-            and yhtio  in ($yhtiot)
-            order by yhtio, maa";
+  // Katsotaan onko firmalla varastoja useassa maassa
+  $query = "SELECT DISTINCT maa
+            FROM varastopaikat
+            WHERE maa != ''
+            AND yhtio  in ($yhtiot)
+            ORDER BY yhtio, maa";
   $vtresult = pupe_query($query);
 
-  // useampi maa löytyy, annetaan mahdollisuus tutkailla saldoja per maa
+  // Useampi maa löytyy, annetaan mahdollisuus tutkailla saldoja per maa
   if (mysql_num_rows($vtresult) > 1) {
 
     echo "<tr><th>".t("Huomioi saldot, myynnit ja ostot per varaston maa:")."</th></tr>";
@@ -1152,7 +1155,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
     while ($vrow = mysql_fetch_array($vtresult)) {
 
       $chk = "";
-      if (is_array($valitutmaat) and in_array($vrow["maa"], $valitutmaat) != '') {
+      if (is_array($valitutmaat) AND in_array($vrow["maa"], $valitutmaat) != '') {
         $chk = "CHECKED";
       }
 
@@ -1162,7 +1165,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
     echo "</table><table><br>";
   }
 
-  //Valitaan varastot joiden saldot huomioidaan
+  // Valitaan varastot joiden saldot huomioidaan
   $query = "SELECT *
             FROM varastopaikat
             WHERE yhtio in ($yhtiot)
@@ -1178,14 +1181,14 @@ if ($tee == "" or !isset($ehdotusnappi)) {
     while ($vrow = mysql_fetch_array($vtresult)) {
 
       $chk = "";
-      if (is_array($valitutvarastot) and in_array($vrow["tunnus"], $valitutvarastot) != '') {
+      if (is_array($valitutvarastot) AND in_array($vrow["tunnus"], $valitutvarastot) != '') {
         $chk = "CHECKED";
       }
 
       echo "<tr><td><input type='checkbox' name='valitutvarastot[]' value='$vrow[tunnus]' $chk>";
 
       if ($useampi_yhtio > 1) {
-        $query = "SELECT nimi from yhtio where yhtio='$vrow[yhtio]'";
+        $query = "SELECT nimi FROM yhtio WHERE yhtio='$vrow[yhtio]'";
         $yhtres = pupe_query($query);
         $yhtrow = mysql_fetch_array($yhtres);
         echo "$yhtrow[nimi]: ";

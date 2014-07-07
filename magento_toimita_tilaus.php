@@ -1,10 +1,20 @@
 <?php
 
-# Otetaan sis√§√§n:
+# Otetaan sis‰‰n:
 # $magento_api_met = Toimitustapa
 # $magento_api_rak = Rahtikirjanro
 # $magento_api_ord = Asiakkaan_tilausnumero
 # $magento_api_noutokuittaus = Noutokuittaus, ilmoitetaan asiakkaalle tilaus noudettavissa
+# $magento_api_toimituskuittaus_viestit (array) = Viesti joka liitet‰‰n noutotilauksiin (optional)
+
+if (!isset($magento_api_toimituskuittaus_viestit) or count($magento_api_toimituskuittaus_viestit) == 0) {
+  $magento_api_toimituskuittaus_viestit = array();
+}
+
+$default_kuittaukset = array(
+  "nouto"     => t("Tilauksesi on noudettavissa").".",
+  "toimitus"  => t("Your order is shipped")."!");
+$kuittaukset = array_merge($default_kuittaukset, $magento_api_toimituskuittaus_viestit);
 
 $magento_api_ord = (int) $magento_api_ord;
 
@@ -12,7 +22,8 @@ if ($magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "
 
   $proxy = new SoapClient($magento_api_url);
   $sessionId = $proxy->login($magento_api_usr, $magento_api_pas);
-
+  
+  $magento_api_met = utf8_encode($magento_api_met);
   $canShip   = TRUE;
   $canInvoice = TRUE;
   $magLinkurl = "";
@@ -33,13 +44,13 @@ if ($magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "
       $magLinkurl = substr($magLinkurl, 0, -4); // vika br pois
     }
 
-    // Shipment comment joka lis√§t√§√§n Magentosta asiakkaalle l√§htev√§√§n s√§hk√∂postiin
+    // Shipment comment joka lis‰t‰‰n Magentosta asiakkaalle l‰htev‰‰n s‰hkˆpostiin
     if (isset($magento_api_noutokuittaus) and $magento_api_noutokuittaus == "JOO") {
-      $comment = "Tilauksesi on noudettavissa.";
-      $canShip = FALSE; // Ei tarvita
+      $comment = $kuittaukset['nouto'];
+      //$canShip = FALSE; // Ei tarvita trackingia noutokeississ‰
     }
     else {
-      $comment = "Your order is shipped!<br><br>$magLinkurl";
+      $comment = $kuittaukset['toimitus']."<br><br>$magLinkurl";
     }
 
     $newShipmentId = $proxy->call($sessionId, 'sales_order_shipment.create', array($magento_api_ord, array(), $comment, true, true));
@@ -55,9 +66,14 @@ if ($magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "
 
   if ($canShip) {
     // Add tracking
-    $newTrackId = $proxy->call($sessionId, 'sales_order_shipment.addTrack', array($newShipmentId, "custom", $magento_api_met, $magento_api_rak));
-    echo "trackid\n";
-    var_dump($newTrackId);
+    try {
+      $newTrackId = $proxy->call($sessionId, 'sales_order_shipment.addTrack', array($newShipmentId, "custom", $magento_api_met, $magento_api_rak));
+      var_dump($newTrackId);
+    }
+    catch(Exception $e) {
+      echo $e->faultstring."\n";
+      echo $e->faultcode."\n";
+    }
   }
 
   // Create new invoice

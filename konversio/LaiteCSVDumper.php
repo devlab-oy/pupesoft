@@ -20,8 +20,8 @@ class LaiteCSVDumper extends CSVDumper {
         'paikka'       => 'LISASIJAINTI',
         'sijainti'     => 'LISASIJAINTI',
         'koodi'        => 'KOODI',
-        'kohde'        => 'SIJAINTI', //jos paikalla ei ole nimeä, muodostetaan nimi SIJAINTI - TASO3, nämä pitää unsettaa ennen dumppia
-        'paikka_tark'  => 'TASO3', //jos paikalla ei ole nimeä, muodostetaan nimi SIJAINTI - TASO3, nämä pitää unsettaa ennen dumppia
+        'olosuhde'     => 'DATA7',
+        'kohde'        => 'SIJAINTI', //jos paikalla ei ole nimeä, laitetaan laite Paikaton ulkona / sisällä
         'asiakas_nimi' => 'KUSTPAIKKA', //koska paikan ja kohteen nimien yhdistelmä ei ole uniikki pitää aineistosta lukea myös asiakkaan nimi, jonka avulla laite saadaa lisättyä paikkaan. nämä pitää unsettaa ennen dumppia
     );
     $required_fields = array(
@@ -79,6 +79,22 @@ class LaiteCSVDumper extends CSVDumper {
         else if ($konvertoitu_header == 'valm_pvm') {
           $rivi_temp[$konvertoitu_header] = "{$rivi[$csv_header]}-01-01";
         }
+        else if ($konvertoitu_header == 'paikka') {
+          if ($rivi[$csv_header] == '') {
+            if ($rivi['DATA7'] == '12') {
+              $rivi_temp[$konvertoitu_header] = 'Paikaton ulkona / tärinässä';
+            }
+            else if ($rivi['DATA7'] == '24') {
+              $rivi_temp[$konvertoitu_header] = 'Paikaton sisällä';
+            }
+            else {
+              $rivi_temp[$konvertoitu_header] = 'Paikaton sisällä';
+            }
+          }
+          else {
+            $rivi_temp[$konvertoitu_header] = trim($rivi[$csv_header]);
+          }
+        }
         else {
           $rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
         }
@@ -95,14 +111,9 @@ class LaiteCSVDumper extends CSVDumper {
 
     foreach ($rivi as $key => $value) {
       if ($key == 'paikka') {
-        if ($value != '') {
-          $paikka_tunnus = $this->hae_paikka_tunnus($value, $rivi['kohde'], $rivi['asiakas_nimi']);
-          $paikan_nimi = $value;
-        }
-        else {
-          $paikka_tunnus = $this->hae_paikka_tunnus($rivi['kohde'] . ' - ' . $rivi['paikka_tark'], $rivi['kohde'], $rivi['asiakas_nimi']);
-          $paikan_nimi = $rivi['kohde'] . ' - ' . $rivi['paikka_tark'];
-        }
+        $paikka_tunnus = $this->hae_paikka_tunnus($value, $rivi['kohde'], $rivi['asiakas_nimi']);
+        $paikan_nimi = $value;
+        
         if ($paikka_tunnus == 0 and in_array($key, $this->required_fields)) {
           $this->errors[$index][] = t('Paikkaa') . " <b>{$paikan_nimi}</b> " . t('ei löydy') . ' ' . $rivi['kohde'] . ' ' . $rivi['asiakas_nimi'];
           $this->errors[$index][] = $rivi['koodi'];
@@ -139,7 +150,7 @@ class LaiteCSVDumper extends CSVDumper {
     unset($rivi['koko']);
     unset($rivi['nimitys']);
     unset($rivi['kohde']);
-    unset($rivi['paikka_tark']);
+    unset($rivi['olosuhde']);
     unset($rivi['asiakas_nimi']);
 
     return $valid;

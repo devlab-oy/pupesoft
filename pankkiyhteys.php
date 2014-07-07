@@ -16,7 +16,40 @@ require("inc/parametrit.inc");
 echo "<font class='head'>" . t('SEPA-pankkiyhteys') . "</font>";
 echo "<hr>";
 
-if (isset($tee) and $tee == "lataa_sertifikaatti") {
+if (isset($uusi_pankkiyhteys)) {
+  $tilit = hae_uudet_tilit($kukarow["yhtio"]);
+
+  echo "<form action='pankkiyhteys.php' method='post'>";
+  echo "<input type='hidden' name='tee' value='generoi_tunnukset'/>";
+  echo "<table>";
+  echo "<tbody>";
+
+  echo "<tr>";
+  echo "<td><label for='tili'>" . t("Tili, jolle pankkiyhteys luodaan") . "</label></td>";
+  echo "<td>";
+  echo "<select name='tili' id='tili'>";
+
+  foreach ($tilit as $tili) {
+    echo "<option>{$tili["nimi"]}</option>";
+  }
+
+
+  echo "</select>";
+  echo "</td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<td class='back'><input type='submit' value='" . t("Luo pankkiyhteys") . "'/></td>";
+  echo "</tr>";
+
+  echo "</tbody>";
+  echo "</table>";
+  echo "</form>";
+}
+elseif (isset($tee) and $tee == "generoi_tunnukset") {
+  echo "Generoi tunnukset";
+}
+elseif (isset($tee) and $tee == "lataa_sertifikaatti") {
   if ($_POST["submit"] and avaimet_ja_salasana_kunnossa()) {
 
     $sertifikaatti = file_get_contents($_FILES["certificate"]["tmp_name"]);
@@ -216,6 +249,8 @@ else {
   echo "</tbody>";
   echo "</table>";
   echo "<input type='submit' value='" . t('Valitse tili') . "'>";
+  echo "<br/><br/>";
+  echo "<input type='submit' name='uusi_pankkiyhteys' value='" . t("Uusi pankkiyhteys") . "'/>";
   echo "</form>";
 }
 
@@ -246,6 +281,27 @@ function hae_tilit($yhtio)
   $query = "SELECT tunnus, nimi
             FROM yriti
             WHERE yhtio='{$yhtio}' AND bic != '' AND bic IS NOT NULL";
+
+  $result = pupe_query($query);
+
+  $tilit = array();
+
+  while ($rivi = mysql_fetch_assoc($result)) {
+    array_push($tilit, $rivi);
+  }
+
+  return $tilit;
+}
+
+/**
+ * @param $yhtio
+ * @return array
+ */
+function hae_uudet_tilit($yhtio)
+{
+  $query = "SELECT tunnus, nimi
+            FROM yriti
+            WHERE yhtio='{$yhtio}' AND bic != '' AND bic IS NOT NULL AND sepa_customer_id = ''";
 
   $result = pupe_query($query);
 

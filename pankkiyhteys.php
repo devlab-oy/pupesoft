@@ -123,9 +123,6 @@ elseif (isset($tee) and $tee == "hae_tiliote") {
     if (lataa_tiedostot($viitteet, "TITO", $tunnukset)) {
       echo "Tiedostot ladattu";
     }
-    else {
-      echo "Tiedostojen lataaminen ei onnistunut";
-    }
   }
   else {
     tarkista_salasana();
@@ -141,9 +138,6 @@ elseif (isset($tee) and $tee == "hae_viiteaineisto") {
 
     if (lataa_tiedostot($viitteet, "KTL", $tunnukset)) {
       echo "Tiedostot ladattu";
-    }
-    else {
-      echo "Tiedostojen lataaminen ei onnistunut";
     }
   }
   else {
@@ -335,6 +329,12 @@ function hae_viitteet($tiedostotyyppi, $tunnukset)
   );
 
   $vastaus = pupesoft_rest($parameters);
+
+  if ($vastaus[0] == 500) {
+    echo "<font class='error'>Pankki ei vastaa kyselyyn, yritä myöhemmin uudestaan</font>";
+    return false;
+  }
+
   $tiedostot = $vastaus[1]["files"];
   $viitteet = array();
 
@@ -498,7 +498,14 @@ function laheta_maksuaineisto($tunnukset, $maksuaineisto)
   );
 
   $vastaus = pupesoft_rest($parameters);
-  return $vastaus;
+
+  if ($vastaus[0] == 500) {
+    echo "<font class='error'>Maksuaineistoa ei pystytty lähettämään, sillä pankin kanssa ";
+    echo "kommunikoinnissa ilmeni ongelmia, yritä myhöhemmin uudestaan</font>";
+  }
+  else {
+    return $vastaus;
+  }
 }
 
 function tarkista_salasana()

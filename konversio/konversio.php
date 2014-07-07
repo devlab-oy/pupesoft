@@ -103,9 +103,9 @@ if ($request['action'] == 'aja_konversio') {
 
     case 'tarkastukset':
       $tiedostot = lue_tiedostot('/tmp/konversio/tarkastukset/');
-      echo "alku:".date('Y-m-d H:i:s');
+      echo "alku:" . date('Y-m-d H:i:s');
       foreach ($tiedostot as $tiedosto) {
-        echo $tiedosto.'<br/>';
+        echo $tiedosto . '<br/>';
         $output = exec("/Applications/MAMP/bin/php/php5.4.10/bin/php tarkastukset.php {$kukarow['yhtio']} {$tiedosto}", $arr, $ret);
 //        $output = exec("php tarkastukset.php {$kukarow['yhtio']} {$tiedosto}", $arr, $ret);
 //        echo "<pre>";
@@ -117,7 +117,7 @@ if ($request['action'] == 'aja_konversio') {
 //        $dumper = new TarkastuksetCSVDumper($request['kukarow'], $tiedosto);
 //        $dumper->aja();
       }
-      echo "loppu:".date('Y-m-d H:i:s');
+      echo "loppu:" . date('Y-m-d H:i:s');
       break;
 
     case 'paivita_tarkastukset':
@@ -126,67 +126,67 @@ if ($request['action'] == 'aja_konversio') {
 
     case 'kaikki':
       luo_kaato_tiedot();
-      echo t('Tuote').':';
+      echo t('Tuote') . ':';
       $dumper = new TuoteCSVDumper($request['kukarow']);
       $dumper->aja();
       echo "<br/>";
       echo "<br/>";
-      echo t('Toimenpidetuotteiden avainsanat').':';
+      echo t('Toimenpidetuotteiden avainsanat') . ':';
       $dumper = new TuotteenavainsanaToimenpideCSVDumper($request['kukarow']);
       $dumper->aja();
       echo "<br/>";
       echo "<br/>";
-      echo t('Tuoteryhmät').':';
+      echo t('Tuoteryhmät') . ':';
       $dumper = new TuoteryhmaCSVDumper($request['kukarow']);
       $dumper->aja();
       echo "<br/>";
       echo "<br/>";
-      echo t('Laite tuotteiden avainsanat').':';
+      echo t('Laite tuotteiden avainsanat') . ':';
       $dumper = new TuotteenavainsanaLaiteCSVDumper($request['kukarow']);
       $dumper->aja();
       echo "<br/>";
       echo "<br/>";
-      echo t('Laite tuotteiden avainsanat 2 (varmistus)').':';
+      echo t('Laite tuotteiden avainsanat 2 (varmistus)') . ':';
       $dumper = new TuotteenavainsanaLaite2CSVDumper($request['kukarow']);
       $dumper->aja();
       echo "<br/>";
       echo "<br/>";
-      echo t('Asiakkaat').':';
+      echo t('Asiakkaat') . ':';
       $dumper = new AsiakasCSVDumper($request['kukarow']);
       $dumper->aja();
       echo "<br/>";
       echo "<br/>";
-      echo t('Yhteyshenkilöt').':';
+      echo t('Yhteyshenkilöt') . ':';
       $dumper = new YhteyshenkiloCSVDumper($request['kukarow']);
       $dumper->aja();
       echo "<br/>";
       echo "<br/>";
-      echo t('Asiakasalennukset').':';
+      echo t('Asiakasalennukset') . ':';
       $dumper = new AsiakasalennusCSVDumper($request['kukarow']);
       $dumper->aja();
       echo "<br/>";
       echo "<br/>";
-      echo t('Kohteet').':';
+      echo t('Kohteet') . ':';
       $dumper = new KohdeCSVDumper($request['kukarow']);
       $dumper->aja();
       echo "<br/>";
       echo "<br/>";
-      echo t('Paikat').':';
+      echo t('Paikat') . ':';
       $dumper = new PaikkaCSVDumper($request['kukarow']);
       $dumper->aja();
       echo "<br/>";
       echo "<br/>";
-      echo t('Laitteet').':';
+      echo t('Laitteet') . ':';
       $dumper = new LaiteCSVDumper($request['kukarow']);
       $dumper->aja();
       echo "<br/>";
       echo "<br/>";
-      echo t('Huoltosyklit').':';
+      echo t('Huoltosyklit') . ':';
       $dumper = new HuoltosykliCSVDumper($request['kukarow']);
       $dumper->aja();
       echo "<br/>";
       echo "<br/>";
-      echo t('Tarkastukset').':';
+      echo t('Tarkastukset') . ':';
 //      $dumper = new TarkastuksetCSVDumper($request['kukarow']);
 //      $dumper->aja();
       break;
@@ -208,11 +208,11 @@ if ($request['action'] == 'aja_konversio') {
     $dumper = new TuotteenavainsanaToimenpideCSVDumper($request['kukarow']);
     $dumper->aja();
 
-//    $dumper = new TuoteryhmaCSVDumper($request['kukarow']);
-//    $dumper->aja();
-//
-//    $dumper = new TuotteenavainsanaLaiteCSVDumper($request['kukarow']);
-//    $dumper->aja();
+    $dumper = new TuoteryhmaCSVDumper($request['kukarow']);
+    $dumper->aja();
+
+    $dumper = new TuotteenavainsanaLaiteCSVDumper($request['kukarow']);
+    $dumper->aja();
 
     $dumper = new TuotteenavainsanaLaite2CSVDumper($request['kukarow']);
     $dumper->aja();
@@ -220,23 +220,23 @@ if ($request['action'] == 'aja_konversio') {
 }
 else if ($request['action'] == 'poista_konversio_aineisto_kannasta') {
   $query_array = array(
-      'DELETE FROM asiakas WHERE yhtio = "'.$kukarow['yhtio'].'"',
-      'DELETE FROM yhteyshenkilo WHERE yhtio = "'.$kukarow['yhtio'].'"',
-      'DELETE FROM tuote WHERE yhtio = "'.$kukarow['yhtio'].'"',
-      'DELETE FROM kohde WHERE yhtio = "'.$kukarow['yhtio'].'"',
-      'DELETE FROM paikka WHERE yhtio = "'.$kukarow['yhtio'].'"',
-      'DELETE FROM laite WHERE yhtio = "'.$kukarow['yhtio'].'"',
-      'DELETE FROM asiakasalennus WHERE yhtio = "'.$kukarow['yhtio'].'"',
-      'DELETE FROM tuotteen_avainsanat WHERE yhtio = "'.$kukarow['yhtio'].'"',
-      'DELETE FROM avainsana WHERE yhtio = "'.$kukarow['yhtio'].'" AND laji = "TRY"',
-      'DELETE FROM huoltosykli WHERE yhtio = "'.$kukarow['yhtio'].'"',
-      'DELETE FROM huoltosyklit_laitteet WHERE yhtio = "'.$kukarow['yhtio'].'"',
-      'DELETE FROM tyomaarays WHERE yhtio = "'.$kukarow['yhtio'].'"',
-      'DELETE FROM lasku WHERE yhtio = "'.$kukarow['yhtio'].'"',
-      'DELETE FROM laskun_lisatiedot WHERE yhtio = "'.$kukarow['yhtio'].'"',
-      'DELETE FROM tilausrivi WHERE yhtio = "'.$kukarow['yhtio'].'"',
-      'DELETE FROM tilausrivin_lisatiedot WHERE yhtio = "'.$kukarow['yhtio'].'"',
-      'DELETE FROM tiliointi WHERE yhtio = "'.$kukarow['yhtio'].'"',
+      'DELETE FROM asiakas WHERE yhtio = "' . $kukarow['yhtio'] . '"',
+      'DELETE FROM yhteyshenkilo WHERE yhtio = "' . $kukarow['yhtio'] . '"',
+      'DELETE FROM tuote WHERE yhtio = "' . $kukarow['yhtio'] . '"',
+      'DELETE FROM kohde WHERE yhtio = "' . $kukarow['yhtio'] . '"',
+      'DELETE FROM paikka WHERE yhtio = "' . $kukarow['yhtio'] . '"',
+      'DELETE FROM laite WHERE yhtio = "' . $kukarow['yhtio'] . '"',
+      'DELETE FROM asiakasalennus WHERE yhtio = "' . $kukarow['yhtio'] . '"',
+      'DELETE FROM tuotteen_avainsanat WHERE yhtio = "' . $kukarow['yhtio'] . '"',
+      'DELETE FROM avainsana WHERE yhtio = "' . $kukarow['yhtio'] . '" AND laji = "TRY"',
+      'DELETE FROM huoltosykli WHERE yhtio = "' . $kukarow['yhtio'] . '"',
+      'DELETE FROM huoltosyklit_laitteet WHERE yhtio = "' . $kukarow['yhtio'] . '"',
+      'DELETE FROM tyomaarays WHERE yhtio = "' . $kukarow['yhtio'] . '"',
+      'DELETE FROM lasku WHERE yhtio = "' . $kukarow['yhtio'] . '"',
+      'DELETE FROM laskun_lisatiedot WHERE yhtio = "' . $kukarow['yhtio'] . '"',
+      'DELETE FROM tilausrivi WHERE yhtio = "' . $kukarow['yhtio'] . '"',
+      'DELETE FROM tilausrivin_lisatiedot WHERE yhtio = "' . $kukarow['yhtio'] . '"',
+      'DELETE FROM tiliointi WHERE yhtio = "' . $kukarow['yhtio'] . '"',
   );
   foreach ($query_array as $query) {
     pupe_query($query);
@@ -261,13 +261,13 @@ function echo_kayttoliittyma($request) {
   echo "<table>";
 
   echo "<tr>";
-  echo "<th>".t('Tiedosto')."</th>";
+  echo "<th>" . t('Tiedosto') . "</th>";
   echo "<td>";
   echo "</td>";
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>".t('Konversio tyyppi')."</th>";
+  echo "<th>" . t('Konversio tyyppi') . "</th>";
   echo "<td>";
   echo "<select name='konversio_tyyppi'>";
   foreach ($request['konversio_tyypit'] as $konversio_tyyppi => $selitys) {
@@ -283,12 +283,12 @@ function echo_kayttoliittyma($request) {
 
   echo "</table>";
 
-  echo "<input type='submit' value='".t('Lähetä')."' />";
+  echo "<input type='submit' value='" . t('Lähetä') . "' />";
   echo "</form>";
 
   echo "<form action='' method='POST'>";
   echo "<input type='hidden' name='action' value='poista_konversio_aineisto_kannasta' />";
-  echo "<input type='submit' value='".t('Poista koko konversio aineisto')."' />";
+  echo "<input type='submit' value='" . t('Poista koko konversio aineisto') . "' />";
   echo "</form>";
 }
 
@@ -298,8 +298,8 @@ function lue_tiedostot($polku) {
   if ($handle) {
     while (false !== ($tiedosto = readdir($handle))) {
       if ($tiedosto != "." && $tiedosto != ".." && $tiedosto != '.DS_Store') {
-        if (is_file($polku.$tiedosto)) {
-          $tiedostot[] = $polku.$tiedosto;
+        if (is_file($polku . $tiedosto)) {
+          $tiedostot[] = $polku . $tiedosto;
         }
       }
     }
@@ -444,7 +444,7 @@ function tarkasta_tarkastukset() {
 
     if ($uusi_paiva != $vanha_tarkastus['ED']) {
       $vaarin++;
-      echo "Laite {$vanha_tarkastus['LAITE']} toimenpide {$vanha_tarkastus['TUOTENRO']} {$uusi_paiva} pitäisi olla {$vanha_tarkastus['ED']} vanha huoltovali: ".($vanha_tarkastus['VALI'] / 12).'v';
+      echo "Laite {$vanha_tarkastus['LAITE']} toimenpide {$vanha_tarkastus['TUOTENRO']} {$uusi_paiva} pitäisi olla {$vanha_tarkastus['ED']} vanha huoltovali: " . ($vanha_tarkastus['VALI'] / 12) . 'v';
       echo "<br/>";
     }
     else {
@@ -529,7 +529,7 @@ function hae_kaikkien_laitteiden_huoltosyklit() {
         $huoltosykli['seuraava_tapahtuma'] = "HUOLTOVÄLIÄ {$huoltosykli['huoltovali']} EI MAHDOLLINEN";
       }
       else {
-        $huoltosykli['seuraava_tapahtuma'] = date('Y-m-d', strtotime("{$huoltosykli['viimeinen_tapahtuma']} + {$huoltovalit[$huoltosykli['huoltovali']]['years']} years")).' 00:00:00';
+        $huoltosykli['seuraava_tapahtuma'] = date('Y-m-d', strtotime("{$huoltosykli['viimeinen_tapahtuma']} + {$huoltovalit[$huoltosykli['huoltovali']]['years']} years")) . ' 00:00:00';
       }
     }
     $huoltosyklit[$huoltosykli['laite_koodi']]['huoltosyklit'][$huoltosykli['toimenpide_tuoteno']] = $huoltosykli;
@@ -543,7 +543,7 @@ function hae_vanhat_tarkastukset($laite_koodit = array()) {
 
   $where = "";
   if (!empty($laite_koodit)) {
-    $where = " AND LAITE IN ('".implode("','", $laite_koodit)."')";
+    $where = " AND LAITE IN ('" . implode("','", $laite_koodit) . "')";
   }
   $query = "SELECT ID,
             LAITE,
@@ -620,13 +620,13 @@ function koeponnistus_tarkastus() {
         echo "<br/>";
         echo "vali: {$koeponnistus_rivi['vali']}";
         echo "<br/>";
-        echo "Laitteen edellinen tapahtuma: ".date('Y-m-d', strtotime($koeponnistus_rivi['ed']));
+        echo "Laitteen edellinen tapahtuma: " . date('Y-m-d', strtotime($koeponnistus_rivi['ed']));
         echo "<br/>";
-        echo "Tuleva tapahtuma pitäisi olla: ".date('Y-m-d', strtotime($koeponnistus_rivi['seuraava_tapahtuma']));
+        echo "Tuleva tapahtuma pitäisi olla: " . date('Y-m-d', strtotime($koeponnistus_rivi['seuraava_tapahtuma']));
         echo "<br/>";
-        echo "Tuleva tapahtuma onkin: ".date('Y-m-d', strtotime($ilmoitettu_koeponnistus['ed']));
+        echo "Tuleva tapahtuma onkin: " . date('Y-m-d', strtotime($ilmoitettu_koeponnistus['ed']));
         echo "<br/>";
-        echo "syklin todellinen pituus: ".abs($sykli);
+        echo "syklin todellinen pituus: " . abs($sykli);
         echo "<br/>";
         $vaarin++;
       }
@@ -686,7 +686,7 @@ function paivita_viimeinen_tapahtuma($huoltosyklit_laitteet_tunnus, $vanhan_jarj
 
   $query = "UPDATE huoltosyklit_laitteet SET
             {$huoltosyklit_laitteet_update}
-            viimeinen_tapahtuma = '".date('Y-m-d', strtotime($vanhan_jarjestelman_viimeinen_tapahtuma))."'
+            viimeinen_tapahtuma = '" . date('Y-m-d', strtotime($vanhan_jarjestelman_viimeinen_tapahtuma)) . "'
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND tunnus = '{$huoltosyklit_laitteet_tunnus}'";
 

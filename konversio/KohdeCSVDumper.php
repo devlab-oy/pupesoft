@@ -10,23 +10,23 @@ class KohdeCSVDumper extends CSVDumper {
     parent::__construct($kukarow);
 
     $konversio_array = array(
-      'asiakas'     => 'ASIAKAS',
-      'asiakas_nimi'   => 'NIMI', //tämä tarvitaan, jos kohteen asiakasta ei löydy. Tällöin asiakas pitää perustaa. Asiakkaan nimi pitää olla uudella asiakkaalla, koska muuten paikka import ei löydä kohdetta. Unsettaa tämä ennen dumppia
-      'nimi'       => 'LINJA',
-      'nimitark'     => 'KOODI',
-      'osoite'     => 'KATUOS',
-      'postitp'     => 'POSTIOS',
-      'postino'     => 'LISATIETO',
-      'puhelin'     => 'PUHELIN2',
-      'fax'       => 'FAX',
-      'email'       => 'LISATIETO2',
-      'yhteyshlo'     => 'YHTHENK2',
-      'kommentti'     => 'PUHELIN1',
+        'asiakas'      => 'ASIAKAS',
+        'asiakas_nimi' => 'NIMI', //tämä tarvitaan, jos kohteen asiakasta ei löydy. Tällöin asiakas pitää perustaa. Asiakkaan nimi pitää olla uudella asiakkaalla, koska muuten paikka import ei löydä kohdetta. Unsettaa tämä ennen dumppia
+        'nimi'         => 'LINJA',
+        'nimitark'     => 'KOODI',
+        'osoite'       => 'KATUOS',
+        'postitp'      => 'POSTIOS',
+        'postino'      => 'LISATIETO',
+        'puhelin'      => 'PUHELIN2',
+        'fax'          => 'FAX',
+        'email'        => 'LISATIETO2',
+        'yhteyshlo'    => 'YHTHENK2',
+        'kommentti'    => 'PUHELIN1',
     );
     $required_fields = array(
-      'asiakas',
-      'asiakas_nimi',
-      'nimi',
+        'asiakas',
+        'asiakas_nimi',
+        'nimi',
     );
 
     $this->setFilepath("/tmp/konversio/LINJA.csv");
@@ -85,14 +85,14 @@ class KohdeCSVDumper extends CSVDumper {
       }
       else {
         if (in_array($key, $this->required_fields) and $value == '') {
-          $this->errors[$index][] = t('Asiakasta')." <b>{$rivi['asiakas']} - {$rivi['asiakas_nimi']} - {$rivi['nimi']}</b> ".t('ei löydy');
+          $this->errors[$index][] = t('Asiakasta') . " <b>{$rivi['asiakas']} - {$rivi['asiakas_nimi']} - {$rivi['nimi']}</b> " . t('ei löydy');
           $valid = false;
         }
       }
     }
 
     if (!$this->all_required_keys_found($rivi)) {
-      $this->errors[$index][] = t('Epävalidi rivi')." <b>{$rivi['asiakas']} - {$rivi['asiakas_nimi']} - {$rivi['nimi']}</b> ";
+      $this->errors[$index][] = t('Epävalidi rivi') . " <b>{$rivi['asiakas']} - {$rivi['asiakas_nimi']} - {$rivi['nimi']}</b> ";
       $valid = false;
     }
 
@@ -102,10 +102,10 @@ class KohdeCSVDumper extends CSVDumper {
   }
 
   private function hae_asiakas_tunnus($asiakasnro) {
-    $query = "  SELECT tunnus
-          FROM asiakas
-          WHERE yhtio = '{$this->kukarow['yhtio']}'
-          AND asiakasnro = '{$asiakasnro}'";
+    $query = "SELECT tunnus
+              FROM asiakas
+              WHERE yhtio = '{$this->kukarow['yhtio']}'
+              AND asiakasnro = '{$asiakasnro}'";
     $result = pupe_query($query);
     $asiakasrow = mysql_fetch_assoc($result);
 
@@ -117,15 +117,15 @@ class KohdeCSVDumper extends CSVDumper {
   }
 
   private function luo_asiakas($asiakasnumero, $asiakas_nimi) {
-    $query = "  INSERT INTO asiakas
-          SET ytunnus = 'Kaato-asiakas',
-          nimi = '{$asiakas_nimi}',
-          asiakasnro = '{$asiakasnumero}',
-          toimitustapa = 'Nouto',
-          maa = 'FI',
-          laatija = 'import',
-          luontiaika = NOW(),
-          yhtio = '{$this->kukarow['yhtio']}'";
+    $query = "INSERT INTO asiakas
+              SET ytunnus = 'Kaato-asiakas',
+              nimi = '{$asiakas_nimi}',
+              asiakasnro = '{$asiakasnumero}',
+              toimitustapa = 'Nouto',
+              maa = 'FI',
+              laatija = 'import',
+              luontiaika = NOW(),
+              yhtio = '{$this->kukarow['yhtio']}'";
     pupe_query($query);
 
     return mysql_insert_id();
@@ -134,5 +134,4 @@ class KohdeCSVDumper extends CSVDumper {
   protected function tarkistukset() {
     echo "Ei tarkistuksia";
   }
-
 }

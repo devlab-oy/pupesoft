@@ -25,9 +25,11 @@ if (isset($tee) and $tee == "lataa_sertifikaatti") {
     $private_key = file_get_contents($_FILES["private_key"]["tmp_name"]);
     $salattu_private_key = salaa($private_key, $salasana);
 
+    $target_id = hae_target_id($sertifikaatti, $private_key, $customer_id);
+
     $query = "UPDATE yriti
               SET private_key='{$salattu_private_key}', certificate='{$salattu_sertifikaatti}',
-                  sepa_customer_id='{$customer_id}'
+                  sepa_customer_id='{$customer_id}', sepa_target_id='{$target_id}'
               WHERE tunnus={$tili} AND yhtio='{$kukarow['yhtio']}'";
 
     $result = pupe_query($query);
@@ -511,4 +513,31 @@ function tarkista_maksuaineisto()
   if (isset($_FILES["maksuaineisto"]) and !$_FILES["maksuaineisto"]["tmp_name"]) {
     echo "<font class='error'>Maksuaineisto puuttuu</font><br/>";
   }
+}
+
+/**
+ * @param $sertifikaatti
+ * @param $private_key
+ * @param $customer_id
+ * @return string
+ */
+function hae_target_id($sertifikaatti, $private_key, $customer_id)
+{
+  $parameters = array(
+    "method" => "POST",
+    "data" => array(
+      "cert" => base64_encode($sertifikaatti),
+      "private_key" => base64_encode($private_key),
+      "customer_id" => $customer_id
+    ),
+    "url" => "" . SEPA_OSOITE . "nordea/get_user_info",
+    "headers" => array(
+      "Content-Type: application/json",
+      "Authorization: Token token=" . ACCESS_TOKEN
+    )
+  );
+
+  $vastaus = pupesoft_rest($parameters);
+
+  return $vastaus[1]["userFileTypes"][0]["targetId"];
 }

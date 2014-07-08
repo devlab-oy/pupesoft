@@ -1,6 +1,6 @@
 <?php
 
-const SEPA_OSOITE = "https://sepa.devlab.fi/api/";
+const SEPA_OSOITE  = "https://sepa.devlab.fi/api/";
 const ACCESS_TOKEN = "Bexvxb10H1XBT36x42Lv8jEEKnA6";
 
 if (!isset($_SERVER['HTTPS']) || !$_SERVER['HTTPS']) {
@@ -69,17 +69,17 @@ if (isset($uusi_pankkiyhteys)) {
 elseif (isset($tee) and $tee == "generoi_tunnukset") {
 
   $key_config = array(
-    "digest_alg" => "sha1",
+    "digest_alg"       => "sha1",
     "private_key_bits" => 2048,
     "private_key_type" => OPENSSL_KEYTYPE_RSA
   );
 
   $csr_info = array(
-    "countryName" => $yhtiorow["maa"],
-    "localityName" => $yhtiorow["kotipaikka"],
+    "countryName"      => $yhtiorow["maa"],
+    "localityName"     => $yhtiorow["kotipaikka"],
     "organizationName" => $yhtiorow["nimi"],
-    "commonName" => $yhtiorow["nimi"],
-    "emailAddress" => $yhtiorow["email"]
+    "commonName"       => $yhtiorow["nimi"],
+    "emailAddress"     => $yhtiorow["email"]
   );
 
 
@@ -90,14 +90,14 @@ elseif (isset($tee) and $tee == "generoi_tunnukset") {
   openssl_pkey_export($key, $private_key);
 
   $parameters = array(
-    "method" => "POST",
-    "data" => array(
-      "pin" => $pin,
+    "method"  => "POST",
+    "data"    => array(
+      "pin"         => $pin,
       "customer_id" => $customer_id,
       "environment" => "TEST",
-      "csr" => base64_encode($csrout)
+      "csr"         => base64_encode($csrout)
     ),
-    "url" => "" . SEPA_OSOITE . "nordea/get_certificate",
+    "url"     => "" . SEPA_OSOITE . "nordea/get_certificate",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token=" . ACCESS_TOKEN
@@ -108,7 +108,7 @@ elseif (isset($tee) and $tee == "generoi_tunnukset") {
 
   $sertifikaatti = base64_decode($vastaus[1]["content"]);
 
-  $salattu_private_key = salaa($private_key, $salasana);
+  $salattu_private_key   = salaa($private_key, $salasana);
   $salattu_sertifikaatti = salaa($sertifikaatti, $salasana);
 
   $target_id = "11111111A1";
@@ -121,16 +121,17 @@ elseif (isset($tee) and $tee == "generoi_tunnukset") {
 elseif (isset($tee) and $tee == "lataa_sertifikaatti") {
   if ($_POST["submit"] and avaimet_ja_salasana_kunnossa()) {
 
-    $sertifikaatti = file_get_contents($_FILES["certificate"]["tmp_name"]);
+    $sertifikaatti         = file_get_contents($_FILES["certificate"]["tmp_name"]);
     $salattu_sertifikaatti = salaa($sertifikaatti, $salasana);
 
-    $private_key = file_get_contents($_FILES["private_key"]["tmp_name"]);
+    $private_key         = file_get_contents($_FILES["private_key"]["tmp_name"]);
     $salattu_private_key = salaa($private_key, $salasana);
 
     $target_id = hae_target_id($sertifikaatti, $private_key, $customer_id);
 
     if (tallenna_tunnukset($salattu_private_key, $salattu_sertifikaatti, $customer_id, $target_id,
-        $tili, $kukarow)) {
+      $tili, $kukarow)
+    ) {
       echo "Tunnukset lisätty";
     }
     else {
@@ -233,7 +234,7 @@ elseif (isset($tee) and $tee == "hae_viiteaineisto") {
 elseif (isset($tee) and $tee == "laheta_maksuaineisto") {
   if ($salasana and $_FILES["maksuaineisto"]["tmp_name"]) {
     $maksuaineisto = file_get_contents($_FILES["maksuaineisto"]["tmp_name"]);
-    $tunnukset = hae_tunnukset_ja_pura_salaus($tili, $kukarow, $salasana);
+    $tunnukset     = hae_tunnukset_ja_pura_salaus($tili, $kukarow, $salasana);
 
     $vastaus = laheta_maksuaineisto($tunnukset, $maksuaineisto);
 
@@ -320,6 +321,7 @@ else {
 /**
  * @param $data
  * @param $salasana
+ *
  * @return string
  */
 function salaa($data, $salasana)
@@ -327,7 +329,7 @@ function salaa($data, $salasana)
   $avain = hash("SHA256", $salasana, true);
 
   $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC);
-  $iv = mcrypt_create_iv($iv_size, MCRYPT_RAND);
+  $iv      = mcrypt_create_iv($iv_size, MCRYPT_RAND);
 
   $salattu_data = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $avain, $data, MCRYPT_MODE_CBC, $iv);
   $salattu_data = $iv . $salattu_data;
@@ -337,6 +339,7 @@ function salaa($data, $salasana)
 
 /**
  * @param $yhtio
+ *
  * @return array
  */
 function hae_tilit($yhtio)
@@ -358,6 +361,7 @@ function hae_tilit($yhtio)
 
 /**
  * @param $yhtio
+ *
  * @return array
  */
 function hae_uudet_tilit($yhtio)
@@ -380,6 +384,7 @@ function hae_uudet_tilit($yhtio)
 /**
  * @param $tili
  * @param $yhtio
+ *
  * @return array
  */
 function hae_avain_sertifikaatti_ja_customer_id($tili, $yhtio)
@@ -389,7 +394,7 @@ function hae_avain_sertifikaatti_ja_customer_id($tili, $yhtio)
               WHERE tunnus={$tili} AND yhtio='{$yhtio}'";
 
   $result = pupe_query($query);
-  $rivi = mysql_fetch_assoc($result);
+  $rivi   = mysql_fetch_assoc($result);
 
   return $rivi;
 }
@@ -397,6 +402,7 @@ function hae_avain_sertifikaatti_ja_customer_id($tili, $yhtio)
 /**
  * @param $salattu_data
  * @param $salasana
+ *
  * @return string
  */
 function pura_salaus($salattu_data, $salasana)
@@ -406,7 +412,7 @@ function pura_salaus($salattu_data, $salasana)
   $salattu_data_binaari = base64_decode($salattu_data);
 
   $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC);
-  $iv = substr($salattu_data_binaari, 0, $iv_size);
+  $iv      = substr($salattu_data_binaari, 0, $iv_size);
 
   $salattu_data_binaari = substr($salattu_data_binaari, $iv_size);
 
@@ -451,20 +457,21 @@ function avaimet_ja_salasana_kunnossa()
 /**
  * @param $tiedostotyyppi
  * @param $tunnukset
+ *
  * @return array
  */
 function hae_viitteet($tiedostotyyppi, $tunnukset)
 {
   $parameters = array(
-    "method" => "POST",
-    "data" => array(
-      "cert" => base64_encode($tunnukset["sertifikaatti"]),
+    "method"  => "POST",
+    "data"    => array(
+      "cert"        => base64_encode($tunnukset["sertifikaatti"]),
       "private_key" => base64_encode($tunnukset["avain"]),
       "customer_id" => $tunnukset["customer_id"],
-      "file_type" => $tiedostotyyppi,
-      "target_id" => "11111111A1"
+      "file_type"   => $tiedostotyyppi,
+      "target_id"   => "11111111A1"
     ),
-    "url" => "" . SEPA_OSOITE . "nordea/download_file_list",
+    "url"     => "" . SEPA_OSOITE . "nordea/download_file_list",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token=" . ACCESS_TOKEN
@@ -478,11 +485,12 @@ function hae_viitteet($tiedostotyyppi, $tunnukset)
   }
 
   $tiedostot = $vastaus[1]["files"];
-  $viitteet = array();
+  $viitteet  = array();
 
   foreach ($tiedostot as $tiedosto) {
     array_push($viitteet, $tiedosto["fileReference"]);
   }
+
   return $viitteet;
 }
 
@@ -490,6 +498,7 @@ function hae_viitteet($tiedostotyyppi, $tunnukset)
  * @param $viitteet
  * @param $tiedostotyyppi
  * @param $tunnukset
+ *
  * @return bool
  */
 function lataa_tiedostot($viitteet, $tiedostotyyppi, $tunnukset)
@@ -498,16 +507,16 @@ function lataa_tiedostot($viitteet, $tiedostotyyppi, $tunnukset)
 
   foreach ($viitteet as $viite) {
     $parameters = array(
-      "method" => "POST",
-      "data" => array(
-        "cert" => base64_encode($tunnukset["sertifikaatti"]),
-        "private_key" => base64_encode($tunnukset["avain"]),
-        "customer_id" => $tunnukset["customer_id"],
-        "file_type" => $tiedostotyyppi,
-        "target_id" => "11111111A1",
+      "method"  => "POST",
+      "data"    => array(
+        "cert"           => base64_encode($tunnukset["sertifikaatti"]),
+        "private_key"    => base64_encode($tunnukset["avain"]),
+        "customer_id"    => $tunnukset["customer_id"],
+        "file_type"      => $tiedostotyyppi,
+        "target_id"      => "11111111A1",
         "file_reference" => $viite
       ),
-      "url" => "" . SEPA_OSOITE . "nordea/download_file",
+      "url"     => "" . SEPA_OSOITE . "nordea/download_file",
       "headers" => array(
         "Content-Type: application/json",
         "Authorization: Token token=" . ACCESS_TOKEN
@@ -585,41 +594,43 @@ function salasana_formi()
  * @param $tili
  * @param $kukarow
  * @param $salasana
+ *
  * @return array
  */
 function hae_tunnukset_ja_pura_salaus($tili, $kukarow, $salasana)
 {
   $haetut_tunnukset = hae_avain_sertifikaatti_ja_customer_id($tili, $kukarow["yhtio"]);
 
-  $avain = pura_salaus($haetut_tunnukset["private_key"], $salasana);
+  $avain         = pura_salaus($haetut_tunnukset["private_key"], $salasana);
   $sertifikaatti = pura_salaus($haetut_tunnukset["certificate"], $salasana);
-  $customer_id = $haetut_tunnukset["sepa_customer_id"];
+  $customer_id   = $haetut_tunnukset["sepa_customer_id"];
 
   return array(
-    "avain" => $avain,
+    "avain"         => $avain,
     "sertifikaatti" => $sertifikaatti,
-    "customer_id" => $customer_id
+    "customer_id"   => $customer_id
   );
 }
 
 /**
  * @param $tunnukset
  * @param $maksuaineisto
+ *
  * @return array
  */
 function laheta_maksuaineisto($tunnukset, $maksuaineisto)
 {
   $parameters = array(
-    "method" => "POST",
-    "data" => array(
-      "cert" => base64_encode($tunnukset["sertifikaatti"]),
+    "method"  => "POST",
+    "data"    => array(
+      "cert"        => base64_encode($tunnukset["sertifikaatti"]),
       "private_key" => base64_encode($tunnukset["avain"]),
       "customer_id" => $tunnukset["customer_id"],
-      "file_type" => "NDCORPAYS",
-      "target_id" => "11111111A1",
-      "content" => $maksuaineisto
+      "file_type"   => "NDCORPAYS",
+      "target_id"   => "11111111A1",
+      "content"     => $maksuaineisto
     ),
-    "url" => "" . SEPA_OSOITE . "nordea/upload_file",
+    "url"     => "" . SEPA_OSOITE . "nordea/upload_file",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token=" . ACCESS_TOKEN
@@ -653,18 +664,19 @@ function tarkista_maksuaineisto()
  * @param $sertifikaatti
  * @param $private_key
  * @param $customer_id
+ *
  * @return string
  */
 function hae_target_id($sertifikaatti, $private_key, $customer_id)
 {
   $parameters = array(
-    "method" => "POST",
-    "data" => array(
-      "cert" => base64_encode($sertifikaatti),
+    "method"  => "POST",
+    "data"    => array(
+      "cert"        => base64_encode($sertifikaatti),
       "private_key" => base64_encode($private_key),
       "customer_id" => $customer_id
     ),
-    "url" => "" . SEPA_OSOITE . "nordea/get_user_info",
+    "url"     => "" . SEPA_OSOITE . "nordea/get_user_info",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token=" . ACCESS_TOKEN
@@ -678,6 +690,7 @@ function hae_target_id($sertifikaatti, $private_key, $customer_id)
 
 /**
  * @param $vastaus
+ *
  * @return bool
  */
 function vastaus_kunnossa($vastaus)
@@ -687,10 +700,12 @@ function vastaus_kunnossa($vastaus)
       return true;
     case 500:
       echo "<font class='error'>Pankki ei vastaa kyselyyn, yritä myöhemmin uudestaan</font>";
+
       return false;
     case 0:
       echo "<font class='error'>Sepa-palvelimeen ei jostain syystä saada yhteyttä, ";
       echo "yritä myöhemmin uudestaan</font>";
+
       return false;
   }
 }
@@ -702,6 +717,7 @@ function vastaus_kunnossa($vastaus)
  * @param $target_id
  * @param $tili
  * @param $kukarow
+ *
  * @return resource
  */
 function tallenna_tunnukset($salattu_private_key, $salattu_sertifikaatti, $customer_id, $target_id,
@@ -713,5 +729,6 @@ function tallenna_tunnukset($salattu_private_key, $salattu_sertifikaatti, $custo
               WHERE tunnus={$tili} AND yhtio='{$kukarow['yhtio']}'";
 
   $result = pupe_query($query);
+
   return $result;
 }

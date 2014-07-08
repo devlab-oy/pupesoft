@@ -31,13 +31,18 @@ elseif (isset($tee) and $tee == "generoi_tunnukset") {
         "sertifikaatti" => salaa($sertifikaatti, $salasana)
       );
 
-      $target_id = "11111111A1";
+      $target_id = hae_target_id($sertifikaatti, $generoidut_tunnukset["private_key"], $customer_id);
 
-      if (tallenna_tunnukset($salatut_tunnukset, $customer_id, $target_id, $tili, $kukarow)) {
-        echo "Tunnukset tallennettu";
+      if ($target_id) {
+        if (tallenna_tunnukset($salatut_tunnukset, $customer_id, $target_id, $tili, $kukarow)) {
+          echo "Tunnukset tallennettu";
+        }
+        else {
+          virhe("Tunnusten tallennus epäonnistui");
+        }
       }
       else {
-        virhe("Tunnusten tallennus epäonnistui");
+        virhe("Pankin kanssa kommunikointi epäonnistui, yritä myöhemmin uudestaan");
       }
     }
     else {
@@ -515,7 +520,13 @@ function hae_target_id($sertifikaatti, $private_key, $customer_id)
 
   $vastaus = pupesoft_rest($parameters);
 
-  return $vastaus[1]["userFileTypes"][0]["targetId"];
+  $target_id = $vastaus[1]["userFileTypes"][0]["targetId"];
+
+  if (empty($target_id)) {
+    return null;
+  }
+
+  return $target_id;
 }
 
 /**

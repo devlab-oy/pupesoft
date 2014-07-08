@@ -2580,7 +2580,7 @@ else {
               $maksimi_maara_row = mysql_fetch_assoc($maksimi_maara_result);
               $maksimi_maara = $maksimi_maara_row['maara'];
 
-              for($i = 0; $i < $maksimi_maara; $i++) {
+              for ($i = 0; $i < $maksimi_maara; $i++) {
                 $_yh = ($i + 1) . ". Yhteyshenkilön";
 
                 $worksheet->write($excelrivi, $excelsarake++, "{$_yh} nimi", $format_bold);

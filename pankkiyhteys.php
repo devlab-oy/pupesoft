@@ -30,9 +30,8 @@ if (isset($uusi_pankkiyhteys)) {
   echo "<select name='tili' id='tili'>";
 
   foreach ($tilit as $tili) {
-    echo "<option>{$tili["nimi"]}</option>";
+    echo "<option value='{$tili["tunnus"]}'>{$tili["nimi"]}</option>";
   }
-
 
   echo "</select>";
   echo "</td>";
@@ -49,6 +48,17 @@ if (isset($uusi_pankkiyhteys)) {
   echo "</tr>";
 
   echo "<tr>";
+  echo "<td><label for='salasana'>" . t("Salasana, jolla pankkiyhteystunnukset suojataan");
+  echo "</label></td>";
+  echo "<td><input type='password' name='salasana' id='salasana'/></td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<td><label for='salasanan_vahvistus'>" . t("Salasanan vahvistus") . "</label></td>";
+  echo "<td><input type='password' name='salasanan_vahvistus' id='salasanan_vahvistus'/></td>";
+  echo "</tr>";
+
+  echo "<tr>";
   echo "<td class='back'><input type='submit' value='" . t("Luo pankkiyhteys") . "'/></td>";
   echo "</tr>";
 
@@ -59,6 +69,7 @@ if (isset($uusi_pankkiyhteys)) {
 elseif (isset($tee) and $tee == "generoi_tunnukset") {
 
   $key_config = array(
+    "digest_alg" => "sha1",
     "private_key_bits" => 2048,
     "private_key_type" => OPENSSL_KEYTYPE_RSA
   );
@@ -76,6 +87,7 @@ elseif (isset($tee) and $tee == "generoi_tunnukset") {
   $csr = openssl_csr_new($csr_info, $key);
 
   openssl_csr_export($csr, $csrout);
+  openssl_pkey_export($key, $private_key);
 
   $parameters = array(
     "method" => "POST",
@@ -94,7 +106,17 @@ elseif (isset($tee) and $tee == "generoi_tunnukset") {
 
   $vastaus = pupesoft_rest($parameters);
 
-  var_dump($vastaus);
+  $sertifikaatti = base64_decode($vastaus[1]["content"]);
+
+  $salattu_private_key = salaa($private_key, $salasana);
+  $salattu_sertifikaatti = salaa($sertifikaatti, $salasana);
+
+  $target_id = "11111111A1";
+
+  $onnistui = tallenna_tunnukset($salattu_private_key, $salattu_sertifikaatti, $customer_id,
+    $target_id, $tili, $kukarow);
+
+  var_dump($onnistui);
 }
 elseif (isset($tee) and $tee == "lataa_sertifikaatti") {
   if ($_POST["submit"] and avaimet_ja_salasana_kunnossa()) {
@@ -107,14 +129,8 @@ elseif (isset($tee) and $tee == "lataa_sertifikaatti") {
 
     $target_id = hae_target_id($sertifikaatti, $private_key, $customer_id);
 
-    $query = "UPDATE yriti
-              SET private_key='{$salattu_private_key}', certificate='{$salattu_sertifikaatti}',
-                  sepa_customer_id='{$customer_id}', sepa_target_id='{$target_id}'
-              WHERE tunnus={$tili} AND yhtio='{$kukarow['yhtio']}'";
-
-    $result = pupe_query($query);
-
-    if ($result) {
+    if (tallenna_tunnukset($salattu_private_key, $salattu_sertifikaatti, $customer_id, $target_id,
+        $tili, $kukarow)) {
       echo "Tunnukset lisätty";
     }
     else {
@@ -677,4 +693,25 @@ function vastaus_kunnossa($vastaus)
       echo "yritä myöhemmin uudestaan</font>";
       return false;
   }
+}
+
+/**
+ * @param $salattu_private_key
+ * @param $salattu_sertifikaatti
+ * @param $customer_id
+ * @param $target_id
+ * @param $tili
+ * @param $kukarow
+ * @return resource
+ */
+function tallenna_tunnukset($salattu_private_key, $salattu_sertifikaatti, $customer_id, $target_id,
+                            $tili, $kukarow)
+{
+  $query = "UPDATE yriti
+              SET private_key='{$salattu_private_key}', certificate='{$salattu_sertifikaatti}',
+                  sepa_customer_id='{$customer_id}', sepa_target_id='{$target_id}'
+              WHERE tunnus={$tili} AND yhtio='{$kukarow['yhtio']}'";
+
+  $result = pupe_query($query);
+  return $result;
 }

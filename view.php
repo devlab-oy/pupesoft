@@ -1,7 +1,8 @@
 <?php
 
 // Tämä skripti käyttää slave-tietokantapalvelinta,
-// mutta katsotaan sessio aina masterilta, koska slave voi olla jäljessä ja sessio ei vielä voimassa.
+// mutta katsotaan sessio aina masterilta, 
+// koska slave voi olla jäljessä ja sessio ei vielä voimassa.
 unset($useslave);
 
 if (file_exists("inc/connect.inc")) {
@@ -45,7 +46,8 @@ if ($kuka_check_row['yhtio'] != $liiterow['yhtio'] and $liiterow['liitos'] != 'k
 
 if (mysql_num_rows($liiteres) > 0) {
   header("Content-type: $liiterow[filetype]");
-  header("Content-length: $liiterow[filesize]");
+  //  Tämä Content-length ei vain toimi Fillarikellarilla
+  # header("Content-length: $liiterow[filesize]");
   header("Content-Disposition: inline; filename=$liiterow[filename]");
   header("Content-Description: $liiterow[selite]");
 

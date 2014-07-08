@@ -3477,6 +3477,18 @@ if (mysql_field_name($result, $i) == 'kehahinta_valmistuksella') {
   $jatko = 0;
 }
 
+if (mysql_field_name($result, $i) == 'saldo_varastossa_valmistuksella') {
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'S' ? ' selected' : '';
+
+  $ulos .= "<option value = ''>".t("Valmistuksella ei n‰ytet‰ varastossa olevaa saldoa")."</option>";
+  $ulos .= "<option value = 'S' $sel>".t("Valmistuksella n‰ytet‰‰n varastossa oleva saldo")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if (mysql_field_name($result, $i) == 'tulosta_valmistus_tulosteet') {
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 

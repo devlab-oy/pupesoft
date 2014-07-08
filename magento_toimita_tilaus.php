@@ -37,11 +37,9 @@ if ($magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "
     echo $e->faultcode."\n";
   }*/
   
-  $message = "Toimitetaan tilaus ".$magento_api_ord." Magentoon";
-  $timestamp = date('d.m.y H:i:s');
-  echo "$message $timestamp\n";
-  error_log(utf8_encode($timestamp.": ".$message)."\n", 3, '/tmp/magento_order_log.txt');
-  error_log($message."\n", 3, '/tmp/magento_order_log.txt');
+  $message = "Toimitetaan tilaus {$magento_api_ord} Magentoon";
+  error_log(date('d.m.y H:i:s').": ".utf8_encode($message)."\n", 3, '/tmp/magento_order_log.txt');
+
   // Create new shipment
   try {
 

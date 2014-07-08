@@ -589,7 +589,10 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
         header("Content-Length: ".filesize($pankkitiedostot_polku.basename($pankkifilenimi)));
       }
       else {
-        header("Content-Length: ".strlen($file));
+        // Tässä on tarkoituksella monta spacea funktionimen ja avaavan kaarisulun välissä,
+        // jotta UTF8-konversio ei osu tähän riviin
+        $_file_size = strlen      ($file);
+        header("Content-Length: {$_file_size}");
       }
     }
   }

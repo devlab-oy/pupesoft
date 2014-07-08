@@ -11,8 +11,12 @@ if (isset($_REQUEST["tee"]) and $_REQUEST["tee"] == "NAYTATILAUS") {
   }
 
   if (isset($_REQUEST["pdf"])) {
+    // Tässä on tarkoituksella monta spacea funktionimen ja avaavan kaarisulun välissä,
+    // jotta UTF8-konversio ei osu tähän riviin
+    $pdf_size = strlen      (urldecode($_REQUEST["pdf"]));
+
     header("Content-type: application/pdf");
-    header("Content-length: ".strlen(urldecode($_REQUEST["pdf"])));
+    header("Content-length: {$pdf_size}");
     header("Content-Disposition: inline; filename=Pupesoft_lasku");
     header("Content-Description: Pupesoft_lasku");
   }

@@ -144,30 +144,7 @@ elseif (isset($tee) and $tee == "valitse_komento") {
   echo "</form>";
 }
 else {
-  $kaytossa_olevat_tilit = hae_kaytossa_olevat_tilit($kukarow);
-
-  echo "<form method='post' action='pankkiyhteys.php'>";
-  echo "<input type='hidden' name='tee' value='valitse_komento'/>";
-  echo "<table>";
-  echo "<tbody>";
-  echo "<tr>";
-  echo "<td>Käytössä olevat pankkiyhteydet</td>";
-  echo "<td>";
-  echo "<select name='tili'>";
-
-  foreach ($kaytossa_olevat_tilit as $tili) {
-    echo "<option value='{$tili["tunnus"]}'>{$tili["nimi"]}</option>";
-  }
-
-  echo "</select>";
-  echo "</td>";
-  echo "</tr>";
-  echo "</tbody>";
-  echo "</table>";
-  echo "<input type='submit' value='" . t('Valitse tili') . "'>";
-  echo "<br/><br/>";
-  echo "<input type='submit' name='uusi_pankkiyhteys' value='" . t("Uusi pankkiyhteys") . "'/>";
-  echo "</form>";
+  pankkiyhteyden_valinta_formi($kukarow);
 }
 
 /**
@@ -711,6 +688,7 @@ function uusi_pankkiyhteys_formi($kukarow)
   echo "<tr>";
   echo "<td><label for='target_id'>Aineistoryhmän tunnus</label></td>";
   echo "<td><input type='text' name='target_id' id='target_id'/></td>";
+  echo "<td class='back'>Jos kenttä jätetään tyhjäksi, arvo yritetään hakea pankista</td>";
   echo "</tr>";
 
   echo "<tr>";
@@ -840,4 +818,39 @@ function hae_kaytossa_olevat_tilit($kukarow)
   }
 
   return $kaytossa_olevat_tilit;
+}
+
+/**
+ * @param $kukarow
+ */
+function pankkiyhteyden_valinta_formi($kukarow)
+{
+  $kaytossa_olevat_tilit = hae_kaytossa_olevat_tilit($kukarow);
+
+  echo "<form method='post' action='pankkiyhteys.php'>";
+  echo "<input type='hidden' name='tee' value='valitse_komento'/>";
+  echo "<table>";
+  echo "<tbody>";
+
+  if ($kaytossa_olevat_tilit) {
+    echo "<tr>";
+    echo "<td>Käytössä olevat pankkiyhteydet</td>";
+    echo "<td>";
+    echo "<select name='tili'>";
+
+    foreach ($kaytossa_olevat_tilit as $tili) {
+      echo "<option value='{$tili["tunnus"]}'>{$tili["nimi"]}</option>";
+    }
+
+    echo "</select>";
+    echo "</td>";
+    echo "</tr>";
+    echo "</tbody>";
+    echo "</table>";
+    echo "<input type='submit' value='" . t('Valitse tili') . "'>";
+    echo "<br/><br/>";
+  }
+
+  echo "<input type='submit' name='uusi_pankkiyhteys' value='" . t("Uusi pankkiyhteys") . "'/>";
+  echo "</form>";
 }

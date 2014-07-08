@@ -81,7 +81,6 @@ echo "  <th>".t("Työm").".<br>".t("Viite")."</th>
     <th>".t("Toimitetaan")."</th>
     <th>".t("Myyjä")."<br>".t("Tyyppi")."</th>
     <th>".t("Työjono")."/<br>".t("Työstatus")."</th>
-    <th>".t("Muokkaa")."</th>
     <th style='visibility:hidden; display:none;'></th>
     </tr>";
 
@@ -133,8 +132,8 @@ while ($tyostatus_row = mysql_fetch_assoc($tyostatus_result)) {
 echo "</select>";
 echo "</td>";
 
-echo "<td><input type='hidden' class='search_field' name='search_muokkaa_haku'></td>";
-echo "<td style='visibility:hidden; display:none;'><input type='hidden' class='search_field' name='search_statusjono_haku'></td>";
+//echo "<td><input type='hidden' class='search_field' name='search_muokkaa_haku'></td>";
+//echo "<td style='visibility:hidden; display:none;'><input type='hidden' class='search_field' name='search_statusjono_haku'></td>";
 echo "</tr>";
 echo "</thead>";
 
@@ -289,18 +288,32 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
     $toimi = 'REKLAMAATIO';
   }
 
+  $olenko_asentaja_tassa_hommassa = FALSE;
+
   $lopetusx = "";
   if ($lopetus != "") $lopetusx = $lopetus;
   $lopetusx .= "/SPLIT/{$palvelin2}tyomaarays/tyojono.php////konserni=$konserni//toim=$toim";
+//KISSA - pitäis tunkata $olenko_asentaja truu setit tosta viiskyt riviä alempaa
+  if ($toim != 'TYOMAARAYS_ASENTAJA' or $olenko_asentaja_tassa_hommassa) {
+    if ($vrow["yhtioyhtio"] != $kukarow["yhtio"]) {
+      $muoklinkki = "<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?user=$kukarow[kuka]&pass=$kukarow[salasana]&yhtio=$vrow[yhtioyhtio]&toim=$toimi&tilausnumero=$vrow[tunnus]&lopetus=$lopetusx'>{$vrow['tunnus']}</a>";
+    }
+    else {
+      $muoklinkki = "<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=$toimi&tilausnumero=$vrow[tunnus]&tyojono=$tyojono&lopetus=$lopetusx'>{$vrow['tunnus']}</a>";
+    }
+  }
+  else {
+    $muoklinkki = "";
+  }
 
   if (trim($vrow["komm1"]) != "") {
     echo "<div id='div_$vrow[tunnus]' class='popup' style='width:500px;'>";
     echo t("Työmääräys"),": $vrow[tunnus]<br><br>".str_replace("\n", "<br>", $vrow["komm1"]."<br>".$vrow["komm2"]);
     echo "</div>";
-    echo "<td valign='top' class='tooltip' id='$vrow[tunnus]'><span class='tyom_id'>$vrow[tunnus]</span><br>$vrow[viesti]</td>";
+    echo "<td valign='top' class='tooltip' id='$vrow[tunnus]'><span class='tyom_id'>$muoklinkki</span><br>$vrow[viesti]</td>";
   }
   else {
-    echo "<td valign='top'><span class='tyom_id'>$vrow[tunnus]</span><br>$vrow[viesti]</td>";
+    echo "<td valign='top'><span class='tyom_id'>$muoklinkki</span><br>$vrow[viesti]</td>";
   }
 
   // Prioriteetti työjonoon
@@ -309,8 +322,6 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
   echo "<td valign='top'>$vrow[ytunnus]<br>$vrow[nimi]</td>";
 
   echo "<td valign='top' nowrap>";
-
-  $olenko_asentaja_tassa_hommassa = FALSE;
 
   if ($vrow["asennuskalenteri"] != "") {
 
@@ -446,20 +457,6 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
   }
 
   echo "</td>";
-
-  if ($toim != 'TYOMAARAYS_ASENTAJA' or $olenko_asentaja_tassa_hommassa) {
-    if ($vrow["yhtioyhtio"] != $kukarow["yhtio"]) {
-      $muoklinkki = "<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?user=$kukarow[kuka]&pass=$kukarow[salasana]&yhtio=$vrow[yhtioyhtio]&toim=$toimi&tilausnumero=$vrow[tunnus]&lopetus=$lopetusx'>".t("Muokkaa")."</a>";
-    }
-    else {
-      $muoklinkki = "<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=$toimi&tilausnumero=$vrow[tunnus]&tyojono=$tyojono&lopetus=$lopetusx'>".t("Muokkaa")."</a>";
-    }
-  }
-  else {
-    $muoklinkki = "";
-  }
-
-  echo "<td valign='top'>$muoklinkki</td>";
 
   if ($vrow["tyojono"] == "") {
     $vrow["tyojono"] = "EIJONOA";

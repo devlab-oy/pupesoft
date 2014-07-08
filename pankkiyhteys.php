@@ -156,7 +156,7 @@ function salaa($data, $salasana) {
   $avain = hash("SHA256", $salasana, true);
 
   $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC);
-  $iv      = mcrypt_create_iv($iv_size, MCRYPT_RAND);
+  $iv = mcrypt_create_iv($iv_size, MCRYPT_RAND);
 
   $salattu_data = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $avain, $data, MCRYPT_MODE_CBC, $iv);
   $salattu_data = $iv . $salattu_data;
@@ -165,16 +165,15 @@ function salaa($data, $salasana) {
 }
 
 /**
- * @param $yhtio
- *
  * @return array
  */
-function hae_uudet_tilit($yhtio)
-{
+function hae_uudet_tilit() {
   $query = "SELECT tunnus, nimi
             FROM yriti
-            WHERE yhtio='{$yhtio}' AND bic != '' AND bic IS NOT NULL AND sepa_customer_id = ''";
-
+            WHERE yhtio = '{$kukarow["yhtio"]}'
+            AND bic != ''
+            AND bic IS NOT NULL
+            AND sepa_customer_id = ''";
   $result = pupe_query($query);
 
   $tilit = array();
@@ -196,9 +195,9 @@ function hae_avain_sertifikaatti_ja_customer_id($tili) {
   global $yhtiorow, $kukarow;
 
   $query = "SELECT private_key, certificate, sepa_customer_id
-              FROM yriti
-              WHERE tunnus={$tili} AND yhtio='{$kukarow["yhtio"]}'";
-
+            FROM yriti
+            WHERE yhtio = '{$kukarow["yhtio"]}'
+            AND tunnus = {$tili}";
   $result = pupe_query($query);
   $rivi   = mysql_fetch_assoc($result);
 
@@ -211,14 +210,13 @@ function hae_avain_sertifikaatti_ja_customer_id($tili) {
  *
  * @return string
  */
-function pura_salaus($salattu_data, $salasana)
-{
+function pura_salaus($salattu_data, $salasana) {
   $avain = hash("SHA256", $salasana, true);
 
   $salattu_data_binaari = base64_decode($salattu_data);
 
   $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC);
-  $iv      = substr($salattu_data_binaari, 0, $iv_size);
+  $iv = substr($salattu_data_binaari, 0, $iv_size);
 
   $salattu_data_binaari = substr($salattu_data_binaari, $iv_size);
 
@@ -235,18 +233,22 @@ function avaimet_ja_salasana_kunnossa() {
     $virheet_maara++;
     virhe("Sertifikaatti täytyy antaa");
   }
+
   if (!$_FILES["private_key"]["tmp_name"]) {
     $virheet_maara++;
     virhe("Avain täytyy antaa");
   }
+
   if (!$_POST["customer_id"]) {
     $virheet_maara++;
     virhe("Asiakastunnus täytyy antaa");
   }
+
   if (empty($_POST["salasana"])) {
     $virheet_maara++;
     virhe("Salasana täytyy antaa");
   }
+
   if ($_POST["salasana"] != $_POST["salasanan_vahvistus"]) {
     $virheet_maara++;
     virhe("Salasanan vahvistus ei vastannut salasanaa");
@@ -425,8 +427,7 @@ function hae_tunnukset_ja_pura_salaus($tili, $salasana) {
  *
  * @return array
  */
-function laheta_maksuaineisto($tunnukset, $maksuaineisto)
-{
+function laheta_maksuaineisto($tunnukset, $maksuaineisto) {
   $parameters = array(
     "method"  => "POST",
     "data"    => array(
@@ -525,15 +526,12 @@ function vastaus_kunnossa($vastaus) {
       return true;
     case 500:
       virhe("Pankki ei vastaa kyselyyn, yritä myöhemmin uudestaan");
-
       return false;
     case 503:
       virhe("Pankki ei vastaa kyselyyn toivotulla tavalla, yritä myöhemmin uudestaan");
-
       return false;
     case 0:
       virhe("Sepa-palvelimeen ei jostain syystä saada yhteyttä, yritä myöhemmin uudestaan");
-
       return false;
   }
 }
@@ -549,13 +547,13 @@ function vastaus_kunnossa($vastaus) {
 function tallenna_tunnukset($salatut_tunnukset, $customer_id, $target_id, $tili) {
   global $yhtiorow, $kukarow;
 
-  $query = "UPDATE yriti
-              SET private_key='{$salatut_tunnukset["private_key"]}',
-                  certificate='{$salatut_tunnukset["sertifikaatti"]}',
-                  sepa_customer_id='{$customer_id}',
-                  sepa_target_id='{$target_id}'
-              WHERE tunnus={$tili} AND yhtio='{$kukarow['yhtio']}'";
-
+  $query = "UPDATE yriti SET
+            private_key = '{$salatut_tunnukset["private_key"]}',
+            certificate = '{$salatut_tunnukset["sertifikaatti"]}',
+            sepa_customer_id = '{$customer_id}',
+            sepa_target_id = '{$target_id}'
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = {$tili}";
   $result = pupe_query($query);
 
   return $result;
@@ -566,8 +564,7 @@ function tallenna_tunnukset($salatut_tunnukset, $customer_id, $target_id, $tili)
  *
  * @return array
  */
-function generoi_private_key_ja_csr($yhtiorow)
-{
+function generoi_private_key_ja_csr($yhtiorow) {
   $key_config = array(
     "digest_alg"       => "sha1",
     "private_key_bits" => 2048,
@@ -581,7 +578,6 @@ function generoi_private_key_ja_csr($yhtiorow)
     "commonName"       => $yhtiorow["nimi"],
     "emailAddress"     => $yhtiorow["email"]
   );
-
 
   $key = openssl_pkey_new($key_config);
   $csr = openssl_csr_new($csr_info, $key);
@@ -640,19 +636,21 @@ function pankkiyhteystiedot_kunnossa() {
     virhe("Salasana täytyy antaa");
     $virheet_count++;
   }
+
   if (empty($_POST["customer_id"])) {
     virhe("Asiakastunnus täytyy antaa");
     $virheet_count++;
   }
+
   if (empty($_POST["pin"])) {
     virhe("PIN-koodi täytyy antaa");
     $virheet_count++;
   }
+
   if ($_POST["salasana"] != $_POST["salasanan_vahvistus"]) {
     virhe("Salasanan vahvistus ei vastaa salasanaa");
     $virheet_count++;
   }
-
 
   if ($virheet_count == 0) {
     return true;
@@ -664,7 +662,7 @@ function pankkiyhteystiedot_kunnossa() {
 function uusi_pankkiyhteys_formi() {
   global $yhtiorow, $kukarow;
 
-  $tilit = hae_uudet_tilit($kukarow["yhtio"]);
+  $tilit = hae_uudet_tilit();
 
   echo "<form action='pankkiyhteys.php' method='post'>";
   echo "<input type='hidden' name='tee' value='generoi_tunnukset'/>";
@@ -812,8 +810,8 @@ function hae_kaytossa_olevat_tilit() {
 
   $query = "SELECT tunnus, nimi
             FROM yriti
-            WHERE yhtio='{$kukarow["yhtio"]}' AND sepa_customer_id != ''";
-
+            WHERE yhtio = '{$kukarow["yhtio"]}'
+            AND sepa_customer_id != ''";
   $result = pupe_query($query);
 
   $kaytossa_olevat_tilit = array();

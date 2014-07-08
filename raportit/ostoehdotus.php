@@ -29,8 +29,8 @@ $worksheet = new pupeExcel();
 $format_bold = array("bold" => TRUE);
 $excelrivi = 0;
 
-// Arrayt otsikoiden ja tuoterivien käsittelyyn
-// Rivien kirjoitus tehdään arrayden kautta,
+// Arrayt otsikoiden käsittelyyn
+// Otsikoiden kirjoitus tehdään arrayden kautta,
 // koska write komento haluaa tietää sarakkeen numeron
 // ja sarakkeiden määrän on helpointa vaan käsitellä loopilla.
 $headerivi = array();
@@ -191,35 +191,35 @@ function myynnit($myynti_varasto = '', $myynti_maa = '') {
   }
 
   // Myydyt kappaleet
-  $tuoterivi[] = str_replace(".", ", ", $laskurow['kpl1']);
-  $tuoterivi[] = str_replace(".", ", ", $laskurow['kpl2']);
-  $tuoterivi[] = str_replace(".", ", ", $laskurow['kpl3']);
-  $tuoterivi[] = str_replace(".", ", ", $laskurow['kpl4']);
-  $tuoterivi[] = str_replace(".", ", ", $laskurow['EDkpl1']);
-  $tuoterivi[] = str_replace(".", ", ", $laskurow['EDkpl2']);
-  $tuoterivi[] = str_replace(".", ", ", $laskurow['EDkpl3']);
-  $tuoterivi[] = str_replace(".", ", ", $laskurow['EDkpl4']);
+  $worksheet->writeNumber($excelrivi, $excelsarake++, $laskurow['kpl1']);
+  $worksheet->writeNumber($excelrivi, $excelsarake++, $laskurow['kpl2']);
+  $worksheet->writeNumber($excelrivi, $excelsarake++, $laskurow['kpl3']);
+  $worksheet->writeNumber($excelrivi, $excelsarake++, $laskurow['kpl4']);
+  $worksheet->writeNumber($excelrivi, $excelsarake++, $laskurow['EDkpl1']);
+  $worksheet->writeNumber($excelrivi, $excelsarake++, $laskurow['EDkpl2']);
+  $worksheet->writeNumber($excelrivi, $excelsarake++, $laskurow['EDkpl3']);
+  $worksheet->writeNumber($excelrivi, $excelsarake++, $laskurow['EDkpl4']);
 
   // Kate
-  $tuoterivi[] = str_replace(".", ", ", $laskurow['kate1']);
-  $tuoterivi[] = str_replace(".", ", ", $laskurow['kate2']);
-  $tuoterivi[] = str_replace(".", ", ", $laskurow['kate3']);
-  $tuoterivi[] = str_replace(".", ", ", $laskurow['kate4']);
-  $tuoterivi[] = str_replace(".", ", ", $katepros1);
-  $tuoterivi[] = str_replace(".", ", ", $katepros2);
-  $tuoterivi[] = str_replace(".", ", ", $katepros3);
-  $tuoterivi[] = str_replace(".", ", ", $katepros4);
+  $worksheet->writeNumber($excelrivi, $excelsarake++, $laskurow['kate1']);
+  $worksheet->writeNumber($excelrivi, $excelsarake++, $laskurow['kate2']);
+  $worksheet->writeNumber($excelrivi, $excelsarake++, $laskurow['kate3']);
+  $worksheet->writeNumber($excelrivi, $excelsarake++, $laskurow['kate4']);
+  $worksheet->writeNumber($excelrivi, $excelsarake++, $katepros1);
+  $worksheet->writeNumber($excelrivi, $excelsarake++, $katepros2);
+  $worksheet->writeNumber($excelrivi, $excelsarake++, $katepros3);
+  $worksheet->writeNumber($excelrivi, $excelsarake++, $katepros4);
 
   // Puute kappaleet
-  $tuoterivi[] = str_replace(".", ", ", $laskurow['puutekpl1']);
-  $tuoterivi[] = str_replace(".", ", ", $laskurow['puutekpl2']);
-  $tuoterivi[] = str_replace(".", ", ", $laskurow['puutekpl3']);
-  $tuoterivi[] = str_replace(".", ", ", $laskurow['puutekpl4']);
+  $worksheet->writeNumber($excelrivi, $excelsarake++, $laskurow['puutekpl1']);
+  $worksheet->writeNumber($excelrivi, $excelsarake++, $laskurow['puutekpl2']);
+  $worksheet->writeNumber($excelrivi, $excelsarake++, $laskurow['puutekpl3']);
+  $worksheet->writeNumber($excelrivi, $excelsarake++, $laskurow['puutekpl4']);
 
   // Ennakkopoistot ja jt:t
-  $tuoterivi[] = str_replace(".", ", ", $laskurow['ennpois']);
-  $tuoterivi[] = str_replace(".", ", ", $laskurow['jt']);
-  $tuoterivi[] = str_replace(".", ", ", $laskurow['ennakko']);
+  $worksheet->writeNumber($excelrivi, $excelsarake++, $laskurow['ennpois']);
+  $worksheet->writeNumber($excelrivi, $excelsarake++, $laskurow['jt']);
+  $worksheet->writeNumber($excelrivi, $excelsarake++, $laskurow['ennakko']);
 }
 
 function saldot($myynti_varasto = '', $myynti_maa = '') {
@@ -251,13 +251,13 @@ function saldot($myynti_varasto = '', $myynti_maa = '') {
 
   if (mysql_num_rows($result) > 0) {
     while ($varrow = mysql_fetch_array($result)) {
-      $tuoterivi[] = str_replace(".",",",$varrow['saldo']);
-      $tuoterivi[] = str_replace(".",",",$varrow['halytysraja']);
+      $worksheet->writeNumber($excelrivi, $excelsarake++, str_replace(".",",",$varrow['saldo']));
+      $worksheet->writeNumber($excelrivi, $excelsarake++, str_replace(".",",",$varrow['halytysraja']));
     }
   }
   else {
-    $tuoterivi[] = "0";
-    $tuoterivi[] = "0";
+    $worksheet->writeNumber($excelrivi, $excelsarake++, "0");
+    $worksheet->writeNumber($excelrivi, $excelsarake++, "0");
   }
 }
 
@@ -318,9 +318,9 @@ function ostot($myynti_varasto = '', $myynti_maa = '') {
   $ostorow = mysql_fetch_array($result);
 
   // Siirtolista jt kpl
-  $tuoterivi[] = str_replace(".",",",$ostorow['siirtojt']);
+  $worksheet->writeNumber($excelrivi, $excelsarake++, str_replace(".",",",$ostorow['siirtojt']));
   // Tilattu kpl
-  $tuoterivi[] = str_replace(".",",",$ostorow['tilattu']);
+  $worksheet->writeNumber($excelrivi, $excelsarake++, str_replace(".",",",$ostorow['tilattu']));
 }
 
 // Org_rajausta tarvitaan yhdessä selectissä joka triggeröi taas toisen asian.
@@ -1050,7 +1050,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
     }
 
     if ($row['epakurantti100pvm'] == '0000-00-00') {
-      $row['epakurantti50pvm'] = "";
+      $row['epakurantti100pvm'] = "";
     }
 
     // Hhaetaan abc luokille nimet
@@ -1058,37 +1058,39 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
     $abcnimi2 = $ryhmanimet[$row["abcluokka_osasto"]];
     $abcnimi3 = $ryhmanimet[$row["abcluokka_try"]];
 
+    $excelsarake = 0;
+
     // Kirjoitetaan itse riviä;
     if ($useampi_yhtio > 1) {
-      $tuoterivi[] = $row["yhtio"];
+      $worksheet->write($excelrivi, $excelsarake++, $row["yhtio"]);
     }
 
-    $tuoterivi[] = $row["tuoteno"];
-    $tuoterivi[] = $row["osasto"];
-    $tuoterivi[] = $row["try"];
-    $tuoterivi[] = $row["tuotemerkki"];
-    $tuoterivi[] = $row["tahtituote"];
-    $tuoterivi[] = $row["status"];
-    $tuoterivi[] = $abcnimi;
-    $tuoterivi[] = $abcnimi2;
-    $tuoterivi[] = $abcnimi3;
-    $tuoterivi[] = $row["luontiaika"];
-    $tuoterivi[] = str_replace(".", ", ", $row['halytysraja']);
-    $tuoterivi[] = $toimirow["osto_era"];
-    $tuoterivi[] = str_replace(".", ", ", $row['myynti_era']);
-    $tuoterivi[] = $toimirow["toimittaja"];
-    $tuoterivi[] = $toimirow["toim_tuoteno"];
-    $tuoterivi[] = t_tuotteen_avainsanat($row, 'nimitys');
-    $tuoterivi[] = $toimirow["toim_nimitys"];
-    $tuoterivi[] = str_replace(".", ", ", $toimirow['ostohinta']);
-    $tuoterivi[] = str_replace(".", ", ", $row['myyntihinta']);
-    $tuoterivi[] = $row["epakurantti25pvm"];
-    $tuoterivi[] = $row["epakurantti50pvm"];
-    $tuoterivi[] = $row["epakurantti75pvm"];
-    $tuoterivi[] = $row["epakurantti100pvm"];
-    $tuoterivi[] = str_replace(".", ", ", $toimirow['tuotekerroin']);
-    $tuoterivi[] = $row["aleryhma"];
-    $tuoterivi[] = str_replace(".", ", ", $row["kehahin"]);
+    $worksheet->write($excelrivi, $excelsarake++, $row["tuoteno"]);
+    $worksheet->write($excelrivi, $excelsarake++, $row["osasto"]);
+    $worksheet->write($excelrivi, $excelsarake++, $row["try"]);
+    $worksheet->write($excelrivi, $excelsarake++, $row["tuotemerkki"]);
+    $worksheet->write($excelrivi, $excelsarake++, $row["tahtituote"]);
+    $worksheet->write($excelrivi, $excelsarake++, $row["status"]);
+    $worksheet->write($excelrivi, $excelsarake++, $abcnimi);
+    $worksheet->write($excelrivi, $excelsarake++, $abcnimi2);
+    $worksheet->write($excelrivi, $excelsarake++, $abcnimi3);
+    $worksheet->writeDate($excelrivi, $excelsarake++, $row["luontiaika"]);
+    $worksheet->writeNumber($excelrivi, $excelsarake++, $row['halytysraja']);
+    $worksheet->writeNumber($excelrivi, $excelsarake++, $toimirow["osto_era"]);
+    $worksheet->writeNumber($excelrivi, $excelsarake++, $row['myynti_era']);
+    $worksheet->write($excelrivi, $excelsarake++, $toimirow["toimittaja"]);
+    $worksheet->write($excelrivi, $excelsarake++, $toimirow["toim_tuoteno"]);
+    $worksheet->write($excelrivi, $excelsarake++, t_tuotteen_avainsanat($row, 'nimitys'));
+    $worksheet->write($excelrivi, $excelsarake++, $toimirow["toim_nimitys"]);
+    $worksheet->writeNumber($excelrivi, $excelsarake++, $toimirow['ostohinta']);
+    $worksheet->writeNumber($excelrivi, $excelsarake++, $row['myyntihinta']);
+    $worksheet->writeDate($excelrivi, $excelsarake++, $row["epakurantti25pvm"]);
+    $worksheet->writeDate($excelrivi, $excelsarake++, $row["epakurantti50pvm"]);
+    $worksheet->writeDate($excelrivi, $excelsarake++, $row["epakurantti75pvm"]);
+    $worksheet->writeDate($excelrivi, $excelsarake++, $row["epakurantti100pvm"]);
+    $worksheet->writeNumber($excelrivi, $excelsarake++, $toimirow['tuotekerroin']);
+    $worksheet->writeNumber($excelrivi, $excelsarake++, $row["aleryhma"]);
+    $worksheet->writeNumber($excelrivi, $excelsarake++, $row["kehahin"]);
 
     // Rullataan läpä maittain
     if ($varastot_maittain == "KYLLA") {
@@ -1119,14 +1121,8 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
     saldot();
     ostot();
 
-    // Kirjoitetaan tuoterivin tiedot tiedostoon
-    for ($i = 0; $i < count($tuoterivi); $i++) {
-      $worksheet->write($excelrivi, $i, ucfirst(t($tuoterivi[$i])), $format_bold);
-    }
-
     // Siirrytään seuraavalle riville
     $excelrivi++;
-    $tuoterivi = array();
 
     $bar->increase(); // Calls the bar with every processed element
   }

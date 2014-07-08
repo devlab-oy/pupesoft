@@ -17,77 +17,35 @@ echo "<font class='head'>" . t('SEPA-pankkiyhteys') . "</font>";
 echo "<hr>";
 
 if (isset($uusi_pankkiyhteys)) {
-  $tilit = hae_uudet_tilit($kukarow["yhtio"]);
-
-  echo "<form action='pankkiyhteys.php' method='post'>";
-  echo "<input type='hidden' name='tee' value='generoi_tunnukset'/>";
-  echo "<table>";
-  echo "<tbody>";
-
-  echo "<tr>";
-  echo "<td><label for='tili'>" . t("Tili, jolle pankkiyhteys luodaan") . "</label></td>";
-  echo "<td>";
-  echo "<select name='tili' id='tili'>";
-
-  foreach ($tilit as $tili) {
-    echo "<option value='{$tili["tunnus"]}'>{$tili["nimi"]}</option>";
-  }
-
-  echo "</select>";
-  echo "</td>";
-  echo "</tr>";
-
-  echo "<tr>";
-  echo "<td><label for='customer_id'>Asiakastunnus</label></td>";
-  echo "<td><input type='text' name='customer_id' id='customer_id'/></td>";
-  echo "</tr>";
-
-  echo "<tr>";
-  echo "<td><label for='pin'>" . t("Pankilta saatu PIN-koodi") . "</label></td>";
-  echo "<td><input type='text' name='pin' id='pin'/></td>";
-  echo "</tr>";
-
-  echo "<tr>";
-  echo "<td><label for='salasana'>" . t("Salasana, jolla pankkiyhteystunnukset suojataan");
-  echo "</label></td>";
-  echo "<td><input type='password' name='salasana' id='salasana'/></td>";
-  echo "</tr>";
-
-  echo "<tr>";
-  echo "<td><label for='salasanan_vahvistus'>" . t("Salasanan vahvistus") . "</label></td>";
-  echo "<td><input type='password' name='salasanan_vahvistus' id='salasanan_vahvistus'/></td>";
-  echo "</tr>";
-
-  echo "<tr>";
-  echo "<td class='back'><input type='submit' value='" . t("Luo pankkiyhteys") . "'/></td>";
-  echo "</tr>";
-
-  echo "</tbody>";
-  echo "</table>";
-  echo "</form>";
+  uusi_pankkiyhteys_formi($kukarow);
 }
 elseif (isset($tee) and $tee == "generoi_tunnukset") {
-  $generoidut_tunnukset = generoi_private_key_ja_csr($yhtiorow);
+  if (pankkiyhteystiedot_kunnossa()) {
+    $generoidut_tunnukset = generoi_private_key_ja_csr($yhtiorow);
 
-  $sertifikaatti = hae_sertifikaatti_sepasta($pin, $customer_id, $generoidut_tunnukset);
+    $sertifikaatti = hae_sertifikaatti_sepasta($pin, $customer_id, $generoidut_tunnukset);
 
-  if ($sertifikaatti) {
-    $salatut_tunnukset = array(
-      "private_key"   => salaa($tunnukset["private_key"], $salasana),
-      "sertifikaatti" => salaa($sertifikaatti, $salasana)
-    );
+    if ($sertifikaatti) {
+      $salatut_tunnukset = array(
+        "private_key"   => salaa($tunnukset["private_key"], $salasana),
+        "sertifikaatti" => salaa($sertifikaatti, $salasana)
+      );
 
-    $target_id = "11111111A1";
+      $target_id = "11111111A1";
 
-    if (tallenna_tunnukset($salatut_tunnukset, $customer_id, $target_id, $tili, $kukarow)) {
-      echo "Tunnukset tallennettu";
+      if (tallenna_tunnukset($salatut_tunnukset, $customer_id, $target_id, $tili, $kukarow)) {
+        echo "Tunnukset tallennettu";
+      }
+      else {
+        echo "Tunnusten tallennus epäonnistui";
+      }
     }
     else {
-      echo "Tunnusten tallennus epäonnistui";
+      echo "Sertifikaatin hakeminen epäonnistui, tarkista PIN-koodi ja asiakastunnus";
     }
   }
   else {
-    echo "Sertifikaatin hakeminen epäonnistui, tarkista PIN-koodi ja asiakastunnus";
+    uusi_pankkiyhteys_formi($kukarow);
   }
 }
 elseif (isset($tee) and $tee == "lataa_sertifikaatti") {
@@ -772,4 +730,88 @@ function hae_sertifikaatti_sepasta($pin, $customer_id, $tunnukset)
   $sertifikaatti = base64_decode($vastaus[1]["content"]);
 
   return $sertifikaatti;
+}
+
+function pankkiyhteystiedot_kunnossa()
+{
+  $virheet_count = 0;
+
+  if (empty($_POST["salasana"])) {
+    echo "<font class='error'>Salasana täytyy antaa</font><br/>";
+    $virheet_count++;
+  }
+  if (empty($_POST["customer_id"])) {
+    echo "<font class='error'>Asiakastunnus täytyy antaa</font><br/>";
+    $virheet_count++;
+  }
+  if (empty($_POST["pin"])) {
+    echo "<font class='error'>PIN-koodi täytyy antaa</font><br/>";
+    $virheet_count++;
+  }
+  if ($_POST["salasana"] != $_POST["salasanan_vahvistus"]) {
+    echo "<font class='error'>Salasanan vahvistus ei vastaa salasanaa</font><br/>";
+    $virheet_count++;
+  }
+
+
+  if ($virheet_count == 0) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * @param $kukarow
+ */
+function uusi_pankkiyhteys_formi($kukarow)
+{
+  $tilit = hae_uudet_tilit($kukarow["yhtio"]);
+
+  echo "<form action='pankkiyhteys.php' method='post'>";
+  echo "<input type='hidden' name='tee' value='generoi_tunnukset'/>";
+  echo "<table>";
+  echo "<tbody>";
+
+  echo "<tr>";
+  echo "<td><label for='tili'>" . t("Tili, jolle pankkiyhteys luodaan") . "</label></td>";
+  echo "<td>";
+  echo "<select name='tili' id='tili'>";
+
+  foreach ($tilit as $tili) {
+    echo "<option value='{$tili["tunnus"]}'>{$tili["nimi"]}</option>";
+  }
+
+  echo "</select>";
+  echo "</td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<td><label for='customer_id'>Asiakastunnus</label></td>";
+  echo "<td><input type='text' name='customer_id' id='customer_id'/></td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<td><label for='pin'>" . t("Pankilta saatu PIN-koodi") . "</label></td>";
+  echo "<td><input type='text' name='pin' id='pin'/></td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<td><label for='salasana'>" . t("Salasana, jolla pankkiyhteystunnukset suojataan");
+  echo "</label></td>";
+  echo "<td><input type='password' name='salasana' id='salasana'/></td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<td><label for='salasanan_vahvistus'>" . t("Salasanan vahvistus") . "</label></td>";
+  echo "<td><input type='password' name='salasanan_vahvistus' id='salasanan_vahvistus'/></td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<td class='back'><input type='submit' value='" . t("Luo pankkiyhteys") . "'/></td>";
+  echo "</tr>";
+
+  echo "</tbody>";
+  echo "</table>";
+  echo "</form>";
 }

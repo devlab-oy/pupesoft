@@ -71,19 +71,23 @@ elseif (isset($tee) and $tee == "generoi_tunnukset") {
 
   $sertifikaatti = hae_sertifikaatti_sepasta($pin, $customer_id, $generoidut_tunnukset);
 
+  if ($sertifikaatti) {
+    $salatut_tunnukset = array(
+      "private_key"   => salaa($tunnukset["private_key"], $salasana),
+      "sertifikaatti" => salaa($sertifikaatti, $salasana)
+    );
 
-  $salatut_tunnukset = array(
-    "private_key"   => salaa($tunnukset["private_key"], $salasana),
-    "sertifikaatti" => salaa($sertifikaatti, $salasana)
-  );
+    $target_id = "11111111A1";
 
-  $target_id = "11111111A1";
-
-  if (tallenna_tunnukset($salatut_tunnukset, $customer_id, $target_id, $tili, $kukarow)) {
-    echo "Tunnukset tallennettu";
+    if (tallenna_tunnukset($salatut_tunnukset, $customer_id, $target_id, $tili, $kukarow)) {
+      echo "Tunnukset tallennettu";
+    }
+    else {
+      echo "Tunnusten tallennus epäonnistui";
+    }
   }
   else {
-    echo "Tunnusten tallennus epäonnistui";
+    echo "Sertifikaatin hakeminen epäonnistui, tarkista PIN-koodi ja asiakastunnus";
   }
 }
 elseif (isset($tee) and $tee == "lataa_sertifikaatti") {
@@ -760,6 +764,10 @@ function hae_sertifikaatti_sepasta($pin, $customer_id, $tunnukset)
   );
 
   $vastaus = pupesoft_rest($parameters);
+
+  if (!vastaus_kunnossa($vastaus)) {
+    return false;
+  }
 
   $sertifikaatti = base64_decode($vastaus[1]["content"]);
 

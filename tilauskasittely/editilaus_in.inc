@@ -1167,9 +1167,12 @@ while ($tietue = fgets($fd)) {
           and count($verkkokauppa_erikoiskasittely) > 0) {
           
           list ($nimi, $editilaus_tilaustyyppi, $tilaustyyppilisa) = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
-          $edi_ulos .= t("Tilauksen erikoiskäsittely nimellä").": $nimi \n";
-          $edi_ulos .= t("Tilaustyypiksi").": '$editilaus_tilaustyyppi' \n";
-          $edi_ulos .= t("Tilaustyyppilisaksi").": '$tilaustyyppilisa' \n\n";
+          // Jos löytyy erikoiskäsittely niin näytetään se myös käyttöliittymässä
+          if (isset($nimi) and !empty($nimi)) {
+            $edi_ulos .= t("Tilauksen erikoiskäsittely")."-> {$nimi},
+              ".t("tilaustyyppi").": {$editilaus_tilaustyyppi},
+              ".t("tilaustyyppilisä").": {$tilaustyyppilisa} \n\n";
+          }
         }
 
         // jos tilauksella on tullut lopullisen asikkaan tiedot, laitetaan ne talteen sisviesti ykköseen

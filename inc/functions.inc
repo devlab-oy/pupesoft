@@ -11468,8 +11468,10 @@ if (!function_exists("progress_bar")) {
 
 if (!function_exists("pupesoft_csvstring")) {
   function pupesoft_csvstring($string) {
-    // Siivotaan veks kaikki non-printablet ja puolipisteet
-    return preg_replace("/([^[:print:]]|;)/", "X", $string);
+    // Muutetaan X -merkiksi kaikki non-printable characterit
+    // Sallitaan merkit ja numerot: a-z A-Z 0-9
+    // Sallitaan välilyönti sekä merkit: äöåÄÖÅ#%&,:<>@=!-^$.,|?*+()[]{}/
+    return preg_replace("/([^a-zA-Z0-9 äöåÄÖÅ#%&,:<>@=!\-\^\$\.\,\|\?\*\+\(\)\[\]\{\}\/])/", "X", $string);
   }
 }
 

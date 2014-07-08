@@ -6,29 +6,22 @@ require("salasanat.php");
 // $link on linkki master- tai slave-kantaan. Jos slave on käytössä ja aktivoitu $useslave-muuttujalla niin silloin tuo pointaa siis slave-kantaan.
 // $temporarylink on linkki omaan kantaan johon pupe tekee temporary tablet. Jos $tempdbhost:ia ei oo määritelty, niin silloin $temporarylink pointaa master-kantaan.
 
+// Katsotaan halutaanko käyttää slavea
 if (isset($useslave)) {
-  $useslave = (int) $useslave;
+  $_useslave = (int) $useslave;
 }
 else {
-  $useslave = 0;
+  $_useslave = 0;
 }
 
-// tarkistetaan onko annettu slave oikea
-if ($useslave > 0) {
-  // katsotaan onko haluttu useslave setattu, jos ei ole tai se on tyhjää laitetaan ykkönen
-  if (!isset($slavedb[$useslave])) {
-    $useslave = 1;
-  }
-  elseif ($slavedb[$useslave] == '') {
-    $useslave = 1;
-  }
+// Default, ei käytetä slavea
+$useslave = 0;
 
-  // katsotaan onko haluttu useslave setattu, jos ei ole tai se on tyhjää laitetaan nolla eli masteri
-  if (!isset($slavedb[$useslave])) {
-    $useslave = 0;
-  }
-  elseif ($slavedb[$useslave] == '') {
-    $useslave = 0;
+// Otetaan isoin mahdollinen slave käyttöön
+for ($_slave_i = $_useslave; $_slave_i > 0; $_slave_i--) {
+  if (!empty($slavedb[$_slave_i])) {
+    $useslave = $_slave_i;
+    break;
   }
 }
 

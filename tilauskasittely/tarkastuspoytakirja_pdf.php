@@ -224,8 +224,8 @@ function hae_rivin_laite($laite_tunnus) {
 
   $laite = mysql_fetch_assoc($result);
 
-  $laite['viimeinen_painekoe'] = hae_laitteen_viimeiset_tapahtumat($laite['tunnus']);
-  $laite['viimeinen_painekoe'] = date('my', strtotime($laite['viimeinen_painekoe']['koeponnistus']));
+  $laite['tapahtumat'] = hae_laitteen_viimeiset_ja_seuraavat_tapahtumat($laite['tunnus']);
+  $laite['viimeinen_painekoe'] = date('my', strtotime($laite['tapahtumat']['koeponnistus']['viimeinen_tapahtuma']));
 
   return $laite;
 }

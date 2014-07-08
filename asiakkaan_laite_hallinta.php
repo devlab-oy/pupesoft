@@ -94,7 +94,7 @@ $request = array(
     'asiakasid'       => $asiakasid,
     'asiakas_tunnus'  => $asiakas_tunnus,
     'kohde_tunnus'    => $kohde_tunnus,
-    'omanumero'       => $omanumero,
+    'oma_numero'      => $oma_numero,
     'sarjanumero'     => $sarjanumero,
     'ala_tee'         => $ala_tee,
     'lasku_tunnukset' => $lasku_tunnukset,
@@ -264,7 +264,7 @@ function echo_kayttoliittyma($request = array()) {
   echo "<tr>";
   echo "<th>" . t('Omanumero') . "</th>";
   echo "<td>";
-  echo "<input type='text' name='omanumero' value='{$request['omanumero']}' />";
+  echo "<input type='text' name='oma_numero' value='{$request['oma_numero']}' />";
   echo "</td>";
   echo "</tr>";
 
@@ -413,10 +413,12 @@ function tulosta_kalustoraportti($kohteet) {
 function echo_kohteet_table($laitteet = array(), $request = array()) {
   global $palvelin2, $lopetus, $kukarow;
 
+  $huoltovalit = huoltovali_options();
+
   $haettu_asiakas = $request['haettu_asiakas'];
 
   $lopetus = "{$palvelin2}asiakkaan_laite_hallinta.php////tee=hae_asiakas//asiakasid={$haettu_asiakas['tunnus']}";
-  $colspan = 7;
+  $colspan = 10;
 
   echo_kalustoraportti_form($haettu_asiakas);
   echo "<br/>";
@@ -428,12 +430,16 @@ function echo_kohteet_table($laitteet = array(), $request = array()) {
   echo "<th>" . t("Kohteen nimi") . "</th>";
   echo "<th>" . t("Paikan nimi") . "</th>";
   echo "<th>" . t("Oma numero") . "</th>";
+  echo "<th>" . t("Sarjanumero") . "</th>";
   echo "<th>" . t("Tuotenumero") . "</th>";
   echo "<th>" . t("Tuotteen nimi") . "</th>";
+  echo "<th>" . t("Valmistuspäivä") . "</th>";
   echo "<th>" . t("Sijainti") . "</th>";
   echo "<th>" . t("Tila") . "</th>";
+  $tapahtumat_string = t("Seuraavat tulevat tapahtumat") . '<br/>' . t('Tarkastus') . '<br/>' . t("Huolto") . '<br/>' . t("Koeponnistus");
+  echo "<th>{$tapahtumat_string}</th>";
   if (empty($kukarow['extranet'])) {
-    $colspan = 9;
+    $colspan = 12;
     echo "<th>" . t("Kopioi") . "</th>";
     echo "<th>" . t("Poista") . "</th>";
   }
@@ -498,6 +504,10 @@ function echo_kohteet_table($laitteet = array(), $request = array()) {
     echo "</td>";
 
     echo "<td>";
+    echo $laite['sarjanro'];
+    echo "</td>";
+
+    echo "<td>";
     if (empty($kukarow['extranet'])) {
       echo "<a href='yllapito.php?toim=laite&asiakas_tunnus={$laite['asiakas_tunnus']}&lopetus={$lopetus}&tunnus={$laite['laite_tunnus']}'>{$laite['tuoteno']}</a>";
     }
@@ -511,11 +521,26 @@ function echo_kohteet_table($laitteet = array(), $request = array()) {
     echo "</td>";
 
     echo "<td>";
+    echo date('d.m.Y', strtotime($laite['valm_pvm']));
+    echo "</td>";
+
+    echo "<td>";
     echo $laite['sijainti'];
     echo "</td>";
 
     echo "<td class='tila'>";
     echo $laite['tilan_selite'];
+    echo "</td>";
+
+    echo "<td>";
+    foreach ($laite['tapahtumat'] as $tapahtuma_tyyppi => $tapahtuma) {
+      $huoltovali = search_array_key_for_value_recursive($huoltovalit, 'days', $laite['huoltovali']);
+      $huoltovali = $huoltovali[0];
+      $seuraava_tapahtuma = date('d.m.Y', strtotime("{$tapahtuma['seuraava_tapahtuma']}"));
+      //echo ucfirst($tapahtuma_tyyppi).": {$seuraava_tapahtuma}";
+      echo "$seuraava_tapahtuma";
+      echo "<br/>";
+    }
     echo "</td>";
 
     if (empty($kukarow['extranet'])) {
@@ -577,7 +602,7 @@ function hae_asiakas($request) {
   }
 
   $laite_join = "";
-  if (!empty($request['omanumero'])) {
+  if (!empty($request['oma_numero'])) {
     $laite_join = " JOIN kohde AS k2
                     ON (k2.yhtio = asiakas.yhtio
                         AND k2.asiakas = asiakas.tunnus )
@@ -587,7 +612,7 @@ function hae_asiakas($request) {
                     JOIN laite AS l
                     ON ( l.yhtio = p.yhtio
                         AND l.paikka = p.tunnus
-                        AND l.omanumero = '{$request['omanumero']}' )";
+                        AND l.oma_numero = '{$request['oma_numero']}' )";
   }
 
   if (!empty($request['sarjanumero'])) {
@@ -600,7 +625,7 @@ function hae_asiakas($request) {
                     JOIN laite AS l1
                     ON ( l1.yhtio = p1.yhtio
                         AND l1.paikka = p1.tunnus
-                        AND l1.sarjanumero = '{$request['sarjanumero']}' )";
+                        AND l1.sarjanro = '{$request['sarjanumero']}' )";
   }
 
   $query = "SELECT asiakas.*
@@ -676,16 +701,14 @@ function hae_asiakkaan_kohteet_joissa_laitteita($request) {
             laite.oma_numero ASC";
   $result = pupe_query($query);
 
-
   $laitteet = array();
   while ($laite = mysql_fetch_assoc($result)) {
     $laitteen_tila = search_array_key_for_value_recursive($request['laitteen_tilat'], 'selite', $laite['tila']);
     //key:llä on tarkoitus löytyä vain yksi resultti, siksi voidaan viitata indeksillä.
     $laite['tilan_selite'] = $laitteen_tila[0]['selitetark'];
+    $laite['tapahtumat'] = hae_laitteen_viimeiset_ja_seuraavat_tapahtumat($laite['laite_tunnus']);
 
     if ($request['ala_tee'] == 'tulosta_kalustoraportti') {
-      $laite['viimeiset_tapahtumat'] = hae_laitteen_viimeiset_tapahtumat($laite['laite_tunnus']);
-
       if (onko_laitteella_poikkeus($laite['laite_tunnus'])) {
         $laite['poikkeus'] = 'X';
       }

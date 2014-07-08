@@ -711,10 +711,13 @@ function hae_tyostatukset($request = array()) {
   return $tyostatukset;
 }
 
-function hae_laitteen_viimeiset_tapahtumat($laite_tunnus) {
+function hae_laitteen_viimeiset_ja_seuraavat_tapahtumat($laite_tunnus) {
   global $kukarow, $yhtiorow;
 
+  $huoltovalit = huoltovali_options();
+
   $query = "SELECT huoltosyklit_laitteet.viimeinen_tapahtuma,
+            huoltosyklit_laitteet.huoltovali,
             tuotteen_avainsanat.selite AS tapahtuman_tyyppi
             FROM huoltosyklit_laitteet
             JOIN huoltosykli
@@ -728,12 +731,16 @@ function hae_laitteen_viimeiset_tapahtumat($laite_tunnus) {
               AND tuotteen_avainsanat.tuoteno = toimenpide_tuote.tuoteno
               AND tuotteen_avainsanat.laji = 'tyomaarayksen_ryhmittely')
             WHERE huoltosyklit_laitteet.yhtio = '{$kukarow['yhtio']}'
-            AND huoltosyklit_laitteet.laite_tunnus = '{$laite_tunnus}'";
+            AND huoltosyklit_laitteet.laite_tunnus = '{$laite_tunnus}'
+            ORDER BY tuotteen_avainsanat.selitetark DESC";
   $result = pupe_query($query);
 
   $viimeiset_tapahtumat = array();
   while ($viimeinen_tapahtuma = mysql_fetch_assoc($result)) {
-    $viimeiset_tapahtumat[$viimeinen_tapahtuma['tapahtuman_tyyppi']] = $viimeinen_tapahtuma['viimeinen_tapahtuma'];
+    $huoltovali = $huoltovalit[$viimeinen_tapahtuma['huoltovali']];
+    $seuraava_tapahtuma = date('Y-m-d', strtotime("{$viimeinen_tapahtuma['viimeinen_tapahtuma']} + {$huoltovali['years']} years"));
+    $viimeiset_tapahtumat[$viimeinen_tapahtuma['tapahtuman_tyyppi']]['viimeinen_tapahtuma'] = $viimeinen_tapahtuma['viimeinen_tapahtuma'];
+    $viimeiset_tapahtumat[$viimeinen_tapahtuma['tapahtuman_tyyppi']]['seuraava_tapahtuma'] = $seuraava_tapahtuma;
   }
 
   return $viimeiset_tapahtumat;

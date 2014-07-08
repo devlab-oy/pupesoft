@@ -188,10 +188,10 @@ function hae_rivin_laite($laite_tunnus) {
 
   $laite = mysql_fetch_assoc($result);
 
-  $laite['viimeinen_painekoe'] = hae_laitteen_viimeiset_tapahtumat($laite['tunnus']);
+  $laite['tapahtumat'] = hae_laitteen_viimeiset_ja_seuraavat_tapahtumat($laite['tunnus']);
 
-  if (isset($laite['viimeinen_painekoe']['koeponnistus']) and $laite['viimeinen_painekoe']['koeponnistus'] != '') {
-    $laite['viimeinen_painekoe'] = date('my', strtotime($laite['viimeinen_painekoe']['koeponnistus']));
+  if (isset($laite['tapahtumat']['koeponnistus']['viimeinen_tapahtuma']) and $laite['tapahtumat']['koeponnistus']['viimeinen_tapahtuma'] != '') {
+    $laite['viimeinen_painekoe'] = date('my', strtotime($laite['tapahtumat']['koeponnistus']['viimeinen_tapahtuma']));
   }
   else {
     $laite['viimeinen_painekoe'] = '—';

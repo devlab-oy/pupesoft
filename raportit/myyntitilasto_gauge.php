@@ -316,6 +316,8 @@ if ((isset($ppa) and (int) $ppa == 0) or (isset($kka) and (int) $kka == 0) or (i
 
 if ($tee == 'laske') {
 
+
+  $arr = $arr_kustp = $arr_kustp_osasto = $arr_kustp_osasto_try = $arr_osasto = $arr_try = $yhteensa_kustp = $yhteensa_osasto = $yhteensa_try = $yhteensa_kustp_osasto = $yhteensa_kustp_osasto_try = array();
   $query_yhtiot = implode("','", $yhtiot);
 
   $ppa = (int) $ppa;
@@ -325,17 +327,53 @@ if ($tee == 'laske') {
   $kkl = (int) $kkl;
   $vvl = (int) $vvl;
 
-  if ($naytetaan_tulos == 'weekly') {
-    $pvmlisa = "WEEK(SUBSTRING(tilausrivi.laadittu, 1, 10), 3)";
-  }
-  elseif ($naytetaan_tulos == 'monthly') {
-    $pvmlisa = "MONTH(SUBSTRING(tilausrivi.laadittu, 1, 10))";
-  }
-  else {
-    $pvmlisa = "SUBSTRING(tilausrivi.laadittu, 1, 10)";
-  }
+  $alku = "{$vva}-{$kka}-{$ppa}";
+  $loppu = "{$vvl}-{$kkl}-{$ppl}";
 
-  $query = "SELECT {$pvmlisa} AS 'pvm',
+  $query = "SELECT kausi,
+            asiakkaan_tunnus,
+            try,
+            summa,
+            tunnus
+            FROM budjetti_asiakas
+            WHERE yhtio = 'turva'
+            AND kausi >= DATE_FORMAT('{$alku}', '%Y%m')
+            AND kausi <= DATE_FORMAT('{$loppu}','%Y%m')";
+  $result = pupe_query($query);
+
+  while ($row = mysql_fetch_assoc($result)) {
+
+        $vuosi = substr($row['kausi'], 0, 4);
+        $kuu = substr($row['kausi'], 5, 2);
+
+        if ($naytetaan_tulos == 'monthly') {
+          $tpvm = "{$kuu}-{$vuosi}";
+          if (!isset($arr[$tpvm]['tavoite'])) {
+            $arr[$tpvm]['tavoite'] = 0;
+          }
+          $arr[$tpvm]['tavoite'] += $row['summa'];
+        }
+
+
+        if ($naytetaan_tulos == 'daily') {
+          $aikoja = cal_days_in_month(CAL_GREGORIAN,$kuu,$vuosi);
+
+          for ($i=0; $i < $aikoja; $i++) {
+
+            $paiva = $i+1;
+            $tpvm = "{$paiva}-{$kuu}-{$vuosi}";
+
+            if (!isset($arr[$tpvm]['tavoite'])) {
+              $arr[$tpvm]['tavoite'] = 0;
+            }
+
+            $arr[$tpvm]['tavoite'] += $row['summa'] / $aikoja;
+          }
+        }
+      }
+
+
+  $query = "SELECT tilausrivi.laadittu AS 'pvm',
             if(tilausrivi.laskutettu != '', tilausrivi.kate, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt))) AS 'tilatut_kate',
             if(tilausrivi.laskutettu != '', tilausrivi.rivihinta, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)) AS tilatut_eurot,
             kustannuspaikka.nimi AS kustannuspaikka,
@@ -369,6 +407,7 @@ if ($tee == 'laske') {
   echo "<th>",t("Laskutetut")," $_k{$yhtiorow["valkoodi"]}</th>";
   echo "<th>",t("Laskutetut Kate%"),"</th>";
   echo "<th>",t("Laskutetut Rivit"),"</th>";
+  echo "<th>",t("Tavoite"),"</th>";
   echo "</tr>";
 
   $yhteensa = array(
@@ -380,11 +419,22 @@ if ($tee == 'laske') {
     'laskutetut_rivit' => 0,
   );
 
-  $arr = $arr_kustp = $arr_kustp_osasto = $arr_kustp_osasto_try = $arr_osasto = $arr_try = $yhteensa_kustp = $yhteensa_osasto = $yhteensa_try = $yhteensa_kustp_osasto = $yhteensa_kustp_osasto_try = array();
+
 
   while ($row = mysql_fetch_assoc($result)) {
 
-    $pvm = $row['pvm'];
+    $aikaleima = strtotime($row['pvm']);
+
+    if ($naytetaan_tulos == 'weekly') {
+      $pvm = ltrim(date("W-Y", $aikaleima),0);
+    }
+    elseif ($naytetaan_tulos == 'monthly') {
+      $pvm = date("n-Y", $aikaleima);
+    }
+    else {
+      $pvm = date("j-n-Y", $aikaleima);
+    }
+
     $kustp = $row['kustannuspaikka'];
     $osasto = $row['osasto'];
     $try = $row['try'];
@@ -439,38 +489,47 @@ if ($tee == 'laske') {
   }
 
 
-$alku = "{$vva}-{$kka}-{$ppa} 00:00:00";
-$loppu = "{$vvl}-{$kkl}-{$ppl} 23:59:59";
-
-  $query = "SELECT kausi, try, sum(summa) AS tavoite
-            FROM budjetti_asiakas
-            WHERE yhtio = 'turva'
-            AND kausi >= DATE_FORMAT('{$alku}', '%Y%m')
-            AND kausi <= DATE_FORMAT('{$loppu}','%Y%m')
-            GROUP BY kausi, try";
-
-
-          echo $query;
 
 
 
 
 
+/*
+      if (!in_array($tunniste.$kustp, $laitetut_kustp) and in_array($row['tavoite_atunnus'], $kustannuspaikan_asiakkaat[$kustp])) {
+        $arr_kustp[$pvm][$kustp]['tavoite'] += $row['tavoite'];
+        $laitetut_kustp[] = $tunniste.$kustp;
+      }
+
+      if (!in_array($tunniste.$kustp.$osasto, $laitetut_kustp_osasto) and in_array($row['tavoite_atunnus'], $kustannuspaikan_asiakkaat[$kustp]) and in_array($tavoite_try, $osaston_tuoteryhmat[$osasto])) {
+        $arr_kustp_osasto[$pvm][$kustp][$osasto]['tavoite'] += $row['tavoite'];
+        $laitetut_kustp_osasto[] = $tunniste.$kustp.$osasto;
+        $arr_kustp_osasto[$pvm][$kustp][$osasto]['tavoite_try'] = $tavoite_try;
+        $arr_kustp_osasto[$pvm][$kustp][$osasto]['tavoitetunnus'] = $row['tavoitetunnus'];
+      }
+
+      if (!in_array($tunniste.$kustp.$osasto.$try, $laitetut_kustp_osasto_try) and in_array($tavoite_try, $osaston_tuoteryhmat[$osasto]) and $try == $tavoite_try) {
+        $arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['tavoite'] += $row['tavoite'];
+        $laitetut_kustp_osasto_try[] = $tunniste.$kustp.$osasto.$try;
+      }
+
+      if (!in_array($tunniste.$osasto, $laitetut_osasto) and in_array($tavoite_try, $osaston_tuoteryhmat[$osasto])) {
+        $arr_osasto[$pvm][$osasto]['tavoite'] += $row['tavoite'];
+        $laitetut_osasto[] = $tunniste.$osasto;
+      }
+
+      if (!in_array($tunniste, $laitetut_osasto_try) and $try == $tavoite_try) {
+        $arr_try[$pvm][$osasto][$try]['tavoite'] += $row['tavoite'];
+        $laitetut_osasto_try[] = $tunniste;
+      }
+*/
 
 
 
 
-  if ($naytetaan_tulos == 'weekly') {
-    $pvmlisa = "WEEK(SUBSTRING(tilausrivi.laskutettuaika, 1, 10), 3)";
-  }
-  elseif ($naytetaan_tulos == 'monthly') {
-    $pvmlisa = "MONTH(SUBSTRING(tilausrivi.laskutettuaika, 1, 10))";
-  }
-  else {
-    $pvmlisa = "SUBSTRING(tilausrivi.laskutettuaika, 1, 10)";
-  }
 
-  $query = "SELECT {$pvmlisa} AS 'pvm',
+
+
+  $query = "SELECT tilausrivi.laskutettuaika AS 'pvm',
             tilausrivi.kate AS 'laskutetut_kate',
             tilausrivi.rivihinta AS 'laskutetut_eurot',
             kustannuspaikka.nimi AS kustannuspaikka,
@@ -490,7 +549,18 @@ $loppu = "{$vvl}-{$kkl}-{$ppl} 23:59:59";
 
   while ($row = mysql_fetch_assoc($result)) {
 
-    $pvm = $row['pvm'];
+    $aikaleima = strtotime($row['pvm']);
+
+    if ($naytetaan_tulos == 'weekly') {
+      $pvm = ltrim(date("W-Y", $aikaleima),0);
+    }
+    elseif ($naytetaan_tulos == 'monthly') {
+      $pvm = date("n-Y", $aikaleima);
+    }
+    else {
+      $pvm = date("j-n-Y", $aikaleima);
+    }
+
     $kustp = $row['kustannuspaikka'];
     $osasto = $row['osasto'];
     $try = $row['try'];
@@ -548,10 +618,7 @@ $loppu = "{$vvl}-{$kkl}-{$ppl} 23:59:59";
 
     $_pvm = $pvm;
 
-    if ($naytetaan_tulos == 'daily') {
-      list($v, $k, $p) = explode("-", $pvm);
-      $_pvm = $p.".".$k;
-    }
+
 
     $yhteensa['tilatut_eurot']     += $arvot['tilatut_eurot'];
     $yhteensa['tilatut_kate']     += $arvot['tilatut_kate'];
@@ -588,6 +655,7 @@ $loppu = "{$vvl}-{$kkl}-{$ppl} 23:59:59";
     echo "<td align='right'>{$arvot['laskutetut_eurot']}</td>";
     echo "<td align='right'>{$laskutetut_katepros}</td>";
     echo "<td align='right'>{$arvot['laskutetut_rivit']}</td>";
+    echo "<td align='right'>".round($arvot['tavoite'],2)."</td>";
     echo "</tr>";
 
     ksort($arr_kustp[$pvm]);
@@ -643,6 +711,7 @@ $loppu = "{$vvl}-{$kkl}-{$ppl} 23:59:59";
       echo "<td align='right'>{$vals['laskutetut_eurot']}</td>";
       echo "<td align='right'>{$laskutetut_katepros}</td>";
       echo "<td align='right'>{$vals['laskutetut_rivit']}</td>";
+      echo "<td align='right'>".round($arvot['tavoite'],2)."</td>";
       echo "</tr>";
 
       ksort($arr_kustp_osasto[$pvm][$kustp]);

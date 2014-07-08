@@ -305,7 +305,10 @@ else {
       <option value='laskulta' {$ytun_mistatiedot_sel}>",t("Laskuilta"),"</option>
       </select></td></tr>
       <tr><td class='spec'>".t("Näytä laajat asiakastiedot").":</td><td><input type='checkbox' name='ytun_laajattied' value='laajat' {$ytun_laajattiedchk}></td></tr>
-      <tr><td class='spec'>".t("Näytä yhteyshenkilöiden tiedot (Vain Excel)").":</td><td><input type='checkbox' name='ytun_yhteyshenk' value='yhteyshenkilot' {$ytun_yhteyshenkchk}></td></tr>
+      <tr>
+        <td class='spec'>".t("Näytä yhteyshenkilöiden tiedot (Vain Excel)").":</td>
+        <td><input type='checkbox' name='ytun_yhteyshenk' value='yhteyshenkilot' {$ytun_yhteyshenkchk}></td>
+      </tr>
       </table>
       </tr>
       <tr>
@@ -1017,7 +1020,7 @@ else {
             $select .= "{$ytgfe}concat_ws('<br>',concat_ws(' ',{$etuliite}.nimi,{$etuliite}.nimitark),if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi,concat_ws(' ',{$etuliite}.toim_nimi,{$etuliite}.toim_nimitark),NULL)){$ytgft} nimi, ";
             $select .= "{$ytgfe}concat_ws('<br>',{$etuliite}.postitp,if({$etuliite}.toim_postitp!='' and {$etuliite}.postitp!={$etuliite}.toim_postitp,{$etuliite}.toim_postitp,NULL)){$ytgft} postitp, ";
           }
-          
+
           if (isset($ytun_yhteyshenk) and $ytun_yhteyshenk != '') {
             $select .= 'asiakas.tunnus AS tunnus,';
           }
@@ -2523,21 +2526,24 @@ else {
           // Haetaan yhteyshenkilot erillisellä queryllä jos tarvitaan.
           if (isset($ytun_yhteyshenk) and $ytun_yhteyshenk != '' and count($rows) > 0) {
             $asiakas_tunnukset = array();
+
             foreach ($rows as $row) {
               $asiakas_tunnukset[] = $row['tunnus'];
             }
 
             $asiakas_tunnukset_sarja = implode(',', $asiakas_tunnukset);
-            $query = "  SELECT * FROM yhteyshenkilo
-                  WHERE yhtio = '$yhtiorow[yhtio]'
-                  AND tyyppi = 'A'
-                  AND liitostunnus IN ($asiakas_tunnukset_sarja)";
-
+            $query = "SELECT *
+                      FROM yhteyshenkilo
+                      WHERE yhtio = '$yhtiorow[yhtio]'
+                      AND tyyppi = 'A'
+                      AND liitostunnus IN ($asiakas_tunnukset_sarja)";
             $yhteyshenkilo_result = pupe_query($query);
             $yhteyshenkilot = array();
+
             while ($yhteyshenkilo_row = mysql_fetch_assoc($yhteyshenkilo_result)) {
-              if (isset($yhteyshenkilot[$yhteyshenkilo_row['liitostunnus']])===false)
+              if (!isset($yhteyshenkilot[$yhteyshenkilo_row['liitostunnus']])) {
                 $yhteyshenkilot[$yhteyshenkilo_row['liitostunnus']] = array();
+              }
 
               $yhteyshenkilot[$yhteyshenkilo_row['liitostunnus']][] = $yhteyshenkilo_row;
             }
@@ -2562,29 +2568,31 @@ else {
 
             if (isset($ytun_yhteyshenk) and $ytun_yhteyshenk != '' and isset($asiakas_tunnukset_sarja)) {
               // Haetaan maksimi yhteyshenkilöiden määrä per ytunnus
-              $query = "SELECT COUNT(*) AS maara FROM yhteyshenkilo
+              $query = "SELECT COUNT(*) AS maara
+                        FROM yhteyshenkilo
                         WHERE yhtio = '$yhtiorow[yhtio]'
                         AND tyyppi = 'A'
                         AND liitostunnus IN ($asiakas_tunnukset_sarja)
                         GROUP BY liitostunnus
                         ORDER BY maara DESC
                         LIMIT 1";
-
               $maksimi_maara_result = pupe_query($query);
               $maksimi_maara_row = mysql_fetch_assoc($maksimi_maara_result);
               $maksimi_maara = $maksimi_maara_row['maara'];
 
-              for($i=0; $i<$maksimi_maara; $i++) {
-                $worksheet->write($excelrivi, $excelsarake++, ($i+1).'. Yhteyshenkilön nimi', $format_bold);
-                $worksheet->write($excelrivi, $excelsarake++, ($i+1).'. Yhteyshenkilön rooli', $format_bold);
-                $worksheet->write($excelrivi, $excelsarake++, ($i+1).'. Yhteyshenkilön nimitarkennekenne', $format_bold);
-                $worksheet->write($excelrivi, $excelsarake++, ($i+1).'. Yhteyshenkilön osoiteite', $format_bold);
-                $worksheet->write($excelrivi, $excelsarake++, ($i+1).'. Yhteyshenkilön postinomero', $format_bold);
-                $worksheet->write($excelrivi, $excelsarake++, ($i+1).'. Yhteyshenkilön postitpimipaikka', $format_bold);
-                $worksheet->write($excelrivi, $excelsarake++, ($i+1).'. Yhteyshenkilön suoramarkkinointirkkinointi', $format_bold);
-                $worksheet->write($excelrivi, $excelsarake++, ($i+1).'. Yhteyshenkilön email', $format_bold);
-                $worksheet->write($excelrivi, $excelsarake++, ($i+1).'. Yhteyshenkilön fakta', $format_bold);
-                $worksheet->write($excelrivi, $excelsarake++, ($i+1).'. Yhteyshenkilön tilausyhteyshenkilohteyshenkilo', $format_bold);
+              for($i = 0; $i < $maksimi_maara; $i++) {
+                $_yh = ($i + 1) . ". Yhteyshenkilön";
+
+                $worksheet->write($excelrivi, $excelsarake++, "{$_yh} nimi", $format_bold);
+                $worksheet->write($excelrivi, $excelsarake++, "{$_yh} rooli", $format_bold);
+                $worksheet->write($excelrivi, $excelsarake++, "{$_yh} nimitarkenne", $format_bold);
+                $worksheet->write($excelrivi, $excelsarake++, "{$_yh} osoite", $format_bold);
+                $worksheet->write($excelrivi, $excelsarake++, "{$_yh} postinumero", $format_bold);
+                $worksheet->write($excelrivi, $excelsarake++, "{$_yh} postitp", $format_bold);
+                $worksheet->write($excelrivi, $excelsarake++, "{$_yh} suoramarkkinointi", $format_bold);
+                $worksheet->write($excelrivi, $excelsarake++, "{$_yh} email", $format_bold);
+                $worksheet->write($excelrivi, $excelsarake++, "{$_yh} fakta", $format_bold);
+                $worksheet->write($excelrivi, $excelsarake++, "{$_yh} tilausyhteyshenkilo", $format_bold);
               }
             }
 

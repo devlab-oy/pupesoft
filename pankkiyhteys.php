@@ -16,7 +16,7 @@ if (!isset($_SERVER["HTTPS"]) or $_SERVER["HTTPS"] != 'on') {
 }
 
 if (isset($uusi_pankkiyhteys)) {
-  uusi_pankkiyhteys_formi($kukarow);
+  uusi_pankkiyhteys_formi();
 }
 elseif (isset($tee) and $tee == "generoi_tunnukset") {
   if (pankkiyhteystiedot_kunnossa()) {
@@ -36,7 +36,7 @@ elseif (isset($tee) and $tee == "generoi_tunnukset") {
       }
 
       if ($target_id) {
-        if (tallenna_tunnukset($salatut_tunnukset, $customer_id, $target_id, $tili, $kukarow)) {
+        if (tallenna_tunnukset($salatut_tunnukset, $customer_id, $target_id, $tili)) {
           echo "Tunnukset tallennettu";
         }
         else {
@@ -52,7 +52,7 @@ elseif (isset($tee) and $tee == "generoi_tunnukset") {
     }
   }
   else {
-    uusi_pankkiyhteys_formi($kukarow);
+    uusi_pankkiyhteys_formi();
   }
 }
 elseif (isset($tee) and $tee == "lataa_sertifikaatti") {
@@ -68,7 +68,7 @@ elseif (isset($tee) and $tee == "lataa_sertifikaatti") {
 
     $target_id = hae_target_id($sertifikaatti, $private_key, $customer_id);
 
-    if (tallenna_tunnukset($salatut_tunnukset, $customer_id, $target_id, $tili, $kukarow)) {
+    if (tallenna_tunnukset($salatut_tunnukset, $customer_id, $target_id, $tili)) {
       echo "Tunnukset lisätty";
     }
     else {
@@ -81,7 +81,7 @@ elseif (isset($tee) and $tee == "lataa_sertifikaatti") {
 }
 elseif (isset($tee) and $tee == "hae_tiliote") {
   if (isset($salasana) and salasana_kunnossa()) {
-    lataa_kaikki("TITO", $kukarow);
+    lataa_kaikki("TITO");
   }
   else {
     salasana_formi();
@@ -89,7 +89,7 @@ elseif (isset($tee) and $tee == "hae_tiliote") {
 }
 elseif (isset($tee) and $tee == "hae_viiteaineisto") {
   if (isset($salasana) and salasana_kunnossa()) {
-    lataa_kaikki("KTL", $kukarow);
+    lataa_kaikki("KTL");
   }
   else {
     salasana_formi();
@@ -98,7 +98,7 @@ elseif (isset($tee) and $tee == "hae_viiteaineisto") {
 elseif (isset($tee) and $tee == "laheta_maksuaineisto") {
   if ($salasana and salasana_kunnossa() and maksuaineisto_kunnossa()) {
     $maksuaineisto = file_get_contents($_FILES["maksuaineisto"]["tmp_name"]);
-    $tunnukset     = hae_tunnukset_ja_pura_salaus($tili, $kukarow, $salasana);
+    $tunnukset     = hae_tunnukset_ja_pura_salaus($tili, $salasana);
 
     $vastaus = laheta_maksuaineisto($tunnukset, $maksuaineisto);
 
@@ -143,7 +143,7 @@ elseif (isset($tee) and $tee == "valitse_komento") {
   echo "</form>";
 }
 else {
-  pankkiyhteyden_valinta_formi($kukarow);
+  pankkiyhteyden_valinta_formi();
 }
 
 /**
@@ -152,8 +152,7 @@ else {
  *
  * @return string
  */
-function salaa($data, $salasana)
-{
+function salaa($data, $salasana) {
   $avain = hash("SHA256", $salasana, true);
 
   $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC);
@@ -193,11 +192,12 @@ function hae_uudet_tilit($yhtio)
  *
  * @return array
  */
-function hae_avain_sertifikaatti_ja_customer_id($tili, $yhtio)
-{
+function hae_avain_sertifikaatti_ja_customer_id($tili) {
+  global $yhtiorow, $kukarow;
+
   $query = "SELECT private_key, certificate, sepa_customer_id
               FROM yriti
-              WHERE tunnus={$tili} AND yhtio='{$yhtio}'";
+              WHERE tunnus={$tili} AND yhtio='{$kukarow["yhtio"]}'";
 
   $result = pupe_query($query);
   $rivi   = mysql_fetch_assoc($result);
@@ -228,8 +228,7 @@ function pura_salaus($salattu_data, $salasana)
 /**
  * @return bool
  */
-function avaimet_ja_salasana_kunnossa()
-{
+function avaimet_ja_salasana_kunnossa() {
   $virheet_maara = 0;
 
   if (!$_FILES["certificate"]["tmp_name"]) {
@@ -266,8 +265,9 @@ function avaimet_ja_salasana_kunnossa()
  *
  * @return array
  */
-function hae_viitteet($tiedostotyyppi, $tunnukset)
-{
+function hae_viitteet($tiedostotyyppi, $tunnukset) {
+  global $yhtiorow, $kukarow;
+
   $parameters = array(
     "method"  => "POST",
     "data"    => array(
@@ -307,8 +307,9 @@ function hae_viitteet($tiedostotyyppi, $tunnukset)
  *
  * @return bool
  */
-function lataa_tiedostot($viitteet, $tiedostotyyppi, $tunnukset)
-{
+function lataa_tiedostot($viitteet, $tiedostotyyppi, $tunnukset) {
+  global $yhtiorow, $kukarow;
+
   $onnistuneet = 0;
 
   foreach ($viitteet as $viite) {
@@ -349,8 +350,8 @@ function lataa_tiedostot($viitteet, $tiedostotyyppi, $tunnukset)
   return false;
 }
 
-function salasana_formi()
-{
+function salasana_formi() {
+  global $yhtiorow, $kukarow;
 
   $komento = $_POST["tee"];
 
@@ -398,14 +399,14 @@ function salasana_formi()
 
 /**
  * @param $tili
- * @param $kukarow
  * @param $salasana
  *
  * @return array
  */
-function hae_tunnukset_ja_pura_salaus($tili, $kukarow, $salasana)
-{
-  $haetut_tunnukset = hae_avain_sertifikaatti_ja_customer_id($tili, $kukarow["yhtio"]);
+function hae_tunnukset_ja_pura_salaus($tili, $salasana) {
+  global $yhtiorow, $kukarow;
+
+  $haetut_tunnukset = hae_avain_sertifikaatti_ja_customer_id($tili);
 
   $avain         = pura_salaus($haetut_tunnukset["private_key"], $salasana);
   $sertifikaatti = pura_salaus($haetut_tunnukset["certificate"], $salasana);
@@ -452,8 +453,9 @@ function laheta_maksuaineisto($tunnukset, $maksuaineisto)
   return $vastaus;
 }
 
-function salasana_kunnossa()
-{
+function salasana_kunnossa() {
+  global $yhtiorow, $kukarow;
+
   if (isset($_POST["salasana"]) and empty($_POST["salasana"])) {
     virhe("Salasana täytyy antaa");
 
@@ -463,8 +465,9 @@ function salasana_kunnossa()
   return true;
 }
 
-function maksuaineisto_kunnossa()
-{
+function maksuaineisto_kunnossa() {
+  global $yhtiorow, $kukarow;
+
   if (isset($_FILES["maksuaineisto"]) and !$_FILES["maksuaineisto"]["tmp_name"]) {
     virhe("Maksuaineisto puuttuu");
 
@@ -481,8 +484,9 @@ function maksuaineisto_kunnossa()
  *
  * @return string
  */
-function hae_target_id($sertifikaatti, $private_key, $customer_id)
-{
+function hae_target_id($sertifikaatti, $private_key, $customer_id) {
+  global $yhtiorow, $kukarow;
+
   $parameters = array(
     "method"  => "POST",
     "data"    => array(
@@ -513,8 +517,9 @@ function hae_target_id($sertifikaatti, $private_key, $customer_id)
  *
  * @return bool
  */
-function vastaus_kunnossa($vastaus)
-{
+function vastaus_kunnossa($vastaus) {
+  global $yhtiorow, $kukarow;
+
   switch ($vastaus[0]) {
     case 200:
       return true;
@@ -538,12 +543,12 @@ function vastaus_kunnossa($vastaus)
  * @param $customer_id
  * @param $target_id
  * @param $tili
- * @param $kukarow
  *
  * @return resource
  */
-function tallenna_tunnukset($salatut_tunnukset, $customer_id, $target_id, $tili, $kukarow)
-{
+function tallenna_tunnukset($salatut_tunnukset, $customer_id, $target_id, $tili) {
+  global $yhtiorow, $kukarow;
+
   $query = "UPDATE yriti
               SET private_key='{$salatut_tunnukset["private_key"]}',
                   certificate='{$salatut_tunnukset["sertifikaatti"]}',
@@ -597,8 +602,9 @@ function generoi_private_key_ja_csr($yhtiorow)
  *
  * @return string
  */
-function hae_sertifikaatti_sepasta($pin, $customer_id, $tunnukset)
-{
+function hae_sertifikaatti_sepasta($pin, $customer_id, $tunnukset) {
+  global $yhtiorow, $kukarow;
+
   $parameters = array(
     "method"  => "POST",
     "data"    => array(
@@ -625,8 +631,9 @@ function hae_sertifikaatti_sepasta($pin, $customer_id, $tunnukset)
   return $sertifikaatti;
 }
 
-function pankkiyhteystiedot_kunnossa()
-{
+function pankkiyhteystiedot_kunnossa() {
+  global $yhtiorow, $kukarow;
+
   $virheet_count = 0;
 
   if (empty($_POST["salasana"])) {
@@ -654,11 +661,9 @@ function pankkiyhteystiedot_kunnossa()
   return false;
 }
 
-/**
- * @param $kukarow
- */
-function uusi_pankkiyhteys_formi($kukarow)
-{
+function uusi_pankkiyhteys_formi() {
+  global $yhtiorow, $kukarow;
+
   $tilit = hae_uudet_tilit($kukarow["yhtio"]);
 
   echo "<form action='pankkiyhteys.php' method='post'>";
@@ -716,8 +721,9 @@ function uusi_pankkiyhteys_formi($kukarow)
   echo "</form>";
 }
 
-function sertifikaatin_lataus_formi()
-{
+function sertifikaatin_lataus_formi() {
+  global $yhtiorow, $kukarow;
+
   echo "<form action='pankkiyhteys.php' method='post' enctype='multipart/form-data'>";
   echo "<input type='hidden' name='tee' value='lataa_sertifikaatti'/>";
   echo "<input type='hidden' name='tili' value='{$_POST["tili"]}'/>";
@@ -777,18 +783,19 @@ function sertifikaatin_lataus_formi()
   echo "</form>";
 }
 
-function virhe($viesti)
-{
+function virhe($viesti) {
+  global $yhtiorow, $kukarow;
+
   echo "<font class='error'>{$viesti}</font><br/>";
 }
 
 /**
  * @param $tiedostotyyppi
- * @param $kukarow
  */
-function lataa_kaikki($tiedostotyyppi, $kukarow)
-{
-  $tunnukset = hae_tunnukset_ja_pura_salaus($_POST["tili"], $kukarow, $_POST["salasana"]);
+function lataa_kaikki($tiedostotyyppi) {
+  global $yhtiorow, $kukarow;
+
+  $tunnukset = hae_tunnukset_ja_pura_salaus($_POST["tili"], $_POST["salasana"]);
 
   $viitteet = hae_viitteet($tiedostotyyppi, $tunnukset);
 
@@ -798,12 +805,11 @@ function lataa_kaikki($tiedostotyyppi, $kukarow)
 }
 
 /**
- * @param $kukarow
- *
  * @return array
  */
-function hae_kaytossa_olevat_tilit($kukarow)
-{
+function hae_kaytossa_olevat_tilit() {
+  global $yhtiorow, $kukarow;
+
   $query = "SELECT tunnus, nimi
             FROM yriti
             WHERE yhtio='{$kukarow["yhtio"]}' AND sepa_customer_id != ''";
@@ -819,12 +825,10 @@ function hae_kaytossa_olevat_tilit($kukarow)
   return $kaytossa_olevat_tilit;
 }
 
-/**
- * @param $kukarow
- */
-function pankkiyhteyden_valinta_formi($kukarow)
-{
-  $kaytossa_olevat_tilit = hae_kaytossa_olevat_tilit($kukarow);
+function pankkiyhteyden_valinta_formi() {
+  global $yhtiorow, $kukarow;
+
+  $kaytossa_olevat_tilit = hae_kaytossa_olevat_tilit();
 
   echo "<form method='post' action='pankkiyhteys.php'>";
   echo "<input type='hidden' name='tee' value='valitse_komento'/>";

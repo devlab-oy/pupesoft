@@ -89,7 +89,6 @@ if (mysql_num_rows($kuvalaskures) > 0) {
 
   if ($ebid == "FINVOICEXML") {
 
-    $filesize = strlen($GLOBALS["xmlstr"]);
     $filename = array_pop(explode("/", $GLOBALS["file"]));
 
     $query = "INSERT INTO liitetiedostot SET
@@ -100,7 +99,7 @@ if (mysql_num_rows($kuvalaskures) > 0) {
               selite          = '$selite',
               kieli           = '$yhtiorow[kieli]',
               filename        = '$filename',
-              filesize        = '$filesize',
+              filesize        = length(data),
               filetype        = 'text/xml',
               image_width     = '',
               image_height    = '',

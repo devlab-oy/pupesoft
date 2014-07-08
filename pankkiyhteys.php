@@ -67,71 +67,39 @@ if (isset($uusi_pankkiyhteys)) {
   echo "</form>";
 }
 elseif (isset($tee) and $tee == "generoi_tunnukset") {
+  $generoidut_tunnukset = generoi_private_key_ja_csr($yhtiorow);
 
-  $key_config = array(
-    "digest_alg"       => "sha1",
-    "private_key_bits" => 2048,
-    "private_key_type" => OPENSSL_KEYTYPE_RSA
+  $sertifikaatti = hae_sertifikaatti_sepasta($pin, $customer_id, $generoidut_tunnukset);
+
+
+  $salatut_tunnukset = array(
+    "private_key"   => salaa($tunnukset["private_key"], $salasana),
+    "sertifikaatti" => salaa($sertifikaatti, $salasana)
   );
-
-  $csr_info = array(
-    "countryName"      => $yhtiorow["maa"],
-    "localityName"     => $yhtiorow["kotipaikka"],
-    "organizationName" => $yhtiorow["nimi"],
-    "commonName"       => $yhtiorow["nimi"],
-    "emailAddress"     => $yhtiorow["email"]
-  );
-
-
-  $key = openssl_pkey_new($key_config);
-  $csr = openssl_csr_new($csr_info, $key);
-
-  openssl_csr_export($csr, $csrout);
-  openssl_pkey_export($key, $private_key);
-
-  $parameters = array(
-    "method"  => "POST",
-    "data"    => array(
-      "pin"         => $pin,
-      "customer_id" => $customer_id,
-      "environment" => "TEST",
-      "csr"         => base64_encode($csrout)
-    ),
-    "url"     => "" . SEPA_OSOITE . "nordea/get_certificate",
-    "headers" => array(
-      "Content-Type: application/json",
-      "Authorization: Token token=" . ACCESS_TOKEN
-    )
-  );
-
-  $vastaus = pupesoft_rest($parameters);
-
-  $sertifikaatti = base64_decode($vastaus[1]["content"]);
-
-  $salattu_private_key   = salaa($private_key, $salasana);
-  $salattu_sertifikaatti = salaa($sertifikaatti, $salasana);
 
   $target_id = "11111111A1";
 
-  $onnistui = tallenna_tunnukset($salattu_private_key, $salattu_sertifikaatti, $customer_id,
-    $target_id, $tili, $kukarow);
-
-  var_dump($onnistui);
+  if (tallenna_tunnukset($salatut_tunnukset, $customer_id, $target_id, $tili, $kukarow)) {
+    echo "Tunnukset tallennettu";
+  }
+  else {
+    echo "Tunnusten tallennus epäonnistui";
+  }
 }
 elseif (isset($tee) and $tee == "lataa_sertifikaatti") {
   if ($_POST["submit"] and avaimet_ja_salasana_kunnossa()) {
 
-    $sertifikaatti         = file_get_contents($_FILES["certificate"]["tmp_name"]);
-    $salattu_sertifikaatti = salaa($sertifikaatti, $salasana);
+    $private_key   = file_get_contents($_FILES["private_key"]["tmp_name"]);
+    $sertifikaatti = file_get_contents($_FILES["certificate"]["tmp_name"]);
 
-    $private_key         = file_get_contents($_FILES["private_key"]["tmp_name"]);
-    $salattu_private_key = salaa($private_key, $salasana);
+    $salatut_tunnukset = array(
+      "private_key"   => salaa($private_key, $salasana),
+      "sertifikaatti" => salaa($sertifikaatti, $salasana)
+    );
 
     $target_id = hae_target_id($sertifikaatti, $private_key, $customer_id);
 
-    if (tallenna_tunnukset($salattu_private_key, $salattu_sertifikaatti, $customer_id, $target_id,
-      $tili, $kukarow)
-    ) {
+    if (tallenna_tunnukset($salatut_tunnukset, $customer_id, $target_id, $tili, $kukarow)) {
       echo "Tunnukset lisätty";
     }
     else {
@@ -711,8 +679,7 @@ function vastaus_kunnossa($vastaus)
 }
 
 /**
- * @param $salattu_private_key
- * @param $salattu_sertifikaatti
+ * @param $salatut_tunnukset
  * @param $customer_id
  * @param $target_id
  * @param $tili
@@ -720,15 +687,81 @@ function vastaus_kunnossa($vastaus)
  *
  * @return resource
  */
-function tallenna_tunnukset($salattu_private_key, $salattu_sertifikaatti, $customer_id, $target_id,
-                            $tili, $kukarow)
+function tallenna_tunnukset($salatut_tunnukset, $customer_id, $target_id, $tili, $kukarow)
 {
   $query = "UPDATE yriti
-              SET private_key='{$salattu_private_key}', certificate='{$salattu_sertifikaatti}',
-                  sepa_customer_id='{$customer_id}', sepa_target_id='{$target_id}'
+              SET private_key='{$salatut_tunnukset["private_key"]}',
+                  certificate='{$salatut_tunnukset["sertifikaatti"]}',
+                  sepa_customer_id='{$customer_id}',
+                  sepa_target_id='{$target_id}'
               WHERE tunnus={$tili} AND yhtio='{$kukarow['yhtio']}'";
 
   $result = pupe_query($query);
 
   return $result;
+}
+
+/**
+ * @param $yhtiorow
+ *
+ * @return array
+ */
+function generoi_private_key_ja_csr($yhtiorow)
+{
+  $key_config = array(
+    "digest_alg"       => "sha1",
+    "private_key_bits" => 2048,
+    "private_key_type" => OPENSSL_KEYTYPE_RSA
+  );
+
+  $csr_info = array(
+    "countryName"      => $yhtiorow["maa"],
+    "localityName"     => $yhtiorow["kotipaikka"],
+    "organizationName" => $yhtiorow["nimi"],
+    "commonName"       => $yhtiorow["nimi"],
+    "emailAddress"     => $yhtiorow["email"]
+  );
+
+
+  $key = openssl_pkey_new($key_config);
+  $csr = openssl_csr_new($csr_info, $key);
+
+  openssl_pkey_export($key, $private_key);
+  openssl_csr_export($csr, $csrout);
+
+  return array(
+    "private_key" => $private_key,
+    "csr"         => $csrout
+  );
+}
+
+/**
+ * @param $pin
+ * @param $customer_id
+ * @param $tunnukset
+ *
+ * @return string
+ */
+function hae_sertifikaatti_sepasta($pin, $customer_id, $tunnukset)
+{
+  $parameters = array(
+    "method"  => "POST",
+    "data"    => array(
+      "pin"         => $pin,
+      "customer_id" => $customer_id,
+      "environment" => "TEST",
+      "csr"         => base64_encode($tunnukset["csr"])
+    ),
+    "url"     => "" . SEPA_OSOITE . "nordea/get_certificate",
+    "headers" => array(
+      "Content-Type: application/json",
+      "Authorization: Token token=" . ACCESS_TOKEN
+    )
+  );
+
+  $vastaus = pupesoft_rest($parameters);
+
+  $sertifikaatti = base64_decode($vastaus[1]["content"]);
+
+  return $sertifikaatti;
 }

@@ -3,18 +3,17 @@
 const SEPA_OSOITE  = "https://sepa.devlab.fi/api/";
 const ACCESS_TOKEN = "Bexvxb10H1XBT36x42Lv8jEEKnA6";
 
-if (!isset($_SERVER['HTTPS']) || !$_SERVER['HTTPS']) {
-  $url = 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-
-  header('Location: ' . $url);
-
-  exit;
-}
-
 require("inc/parametrit.inc");
 
 echo "<font class='head'>" . t('SEPA-pankkiyhteys') . "</font>";
 echo "<hr>";
+
+if (!isset($_SERVER["HTTPS"]) or $_SERVER["HTTPS"] != 'on') {
+  echo "<font class='error'>";
+  echo t("Voit k‰ytt‰‰ pankkiyhteytt‰ vain salatulla yhteydell‰!");
+  echo "</font>";
+  exit;
+}
 
 if (isset($uusi_pankkiyhteys)) {
   uusi_pankkiyhteys_formi($kukarow);

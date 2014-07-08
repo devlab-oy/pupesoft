@@ -15,10 +15,12 @@ if (!isset($_SERVER["HTTPS"]) or $_SERVER["HTTPS"] != 'on') {
   exit;
 }
 
+$tee = isset($tee) ? $tee : '';
+
 if (isset($uusi_pankkiyhteys)) {
   uusi_pankkiyhteys_formi();
 }
-elseif (isset($tee) and $tee == "generoi_tunnukset") {
+elseif ($tee == "generoi_tunnukset") {
   if (pankkiyhteystiedot_kunnossa()) {
     $generoidut_tunnukset = generoi_private_key_ja_csr($yhtiorow);
 
@@ -55,7 +57,7 @@ elseif (isset($tee) and $tee == "generoi_tunnukset") {
     uusi_pankkiyhteys_formi();
   }
 }
-elseif (isset($tee) and $tee == "lataa_sertifikaatti") {
+elseif ($tee == "lataa_sertifikaatti") {
   if ($_POST["submit"] and avaimet_ja_salasana_kunnossa()) {
 
     $private_key   = file_get_contents($_FILES["private_key"]["tmp_name"]);
@@ -79,7 +81,7 @@ elseif (isset($tee) and $tee == "lataa_sertifikaatti") {
     sertifikaatin_lataus_formi();
   }
 }
-elseif (isset($tee) and $tee == "hae_tiliote") {
+elseif ($tee == "hae_tiliote") {
   if (isset($salasana) and salasana_kunnossa()) {
     lataa_kaikki("TITO");
   }
@@ -87,7 +89,7 @@ elseif (isset($tee) and $tee == "hae_tiliote") {
     salasana_formi();
   }
 }
-elseif (isset($tee) and $tee == "hae_viiteaineisto") {
+elseif ($tee == "hae_viiteaineisto") {
   if (isset($salasana) and salasana_kunnossa()) {
     lataa_kaikki("KTL");
   }
@@ -95,7 +97,7 @@ elseif (isset($tee) and $tee == "hae_viiteaineisto") {
     salasana_formi();
   }
 }
-elseif (isset($tee) and $tee == "laheta_maksuaineisto") {
+elseif ($tee == "laheta_maksuaineisto") {
   if ($salasana and salasana_kunnossa() and maksuaineisto_kunnossa()) {
     $maksuaineisto = file_get_contents($_FILES["maksuaineisto"]["tmp_name"]);
     $tunnukset     = hae_tunnukset_ja_pura_salaus($tili, $salasana);
@@ -121,7 +123,7 @@ elseif (isset($tee) and $tee == "laheta_maksuaineisto") {
     salasana_formi();
   }
 }
-elseif (isset($tee) and $tee == "valitse_komento") {
+elseif ($tee == "valitse_komento") {
   echo "<form method='post' action='pankkiyhteys.php'>";
   echo "<input type='hidden' name='tili' value='{$tili}'/>";
   echo "<table>";
@@ -168,6 +170,8 @@ function salaa($data, $salasana) {
  * @return array
  */
 function hae_uudet_tilit() {
+  global $yhtiorow, $kukarow;
+
   $query = "SELECT tunnus, nimi
             FROM yriti
             WHERE yhtio = '{$kukarow["yhtio"]}'

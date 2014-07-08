@@ -70,8 +70,6 @@ if ($magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "
   catch (Exception $e) {
     $canShip = FALSE;
 
-    // echo $e->faultstring."\n";
-    // echo $e->faultcode."\n";
     $message = "Lähetyksen luonti epäonnistui";
     $message .= " (" . $e->faultstring . ") faultcode: " . $e->faultcode;
     error_log(date('d.m.y H:i:s').": ".utf8_encode($message)."\n", 3, '/tmp/magento_order_log.txt');
@@ -83,8 +81,6 @@ if ($magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "
       $newTrackId = $proxy->call($sessionId, 'sales_order_shipment.addTrack', array($newShipmentId, "custom", $magento_api_met, $magento_api_rak));
     }
     catch(Exception $e) {
-      //echo $e->faultstring."\n";
-      //echo $e->faultcode."\n";
       $message = "Lähetyksenseurannan luonti epäonnistui";
       $message .= " (" . $e->faultstring . ") faultcode: " . $e->faultcode;
       error_log(date('d.m.y H:i:s').": ".utf8_encode($message)."\n", 3, '/tmp/magento_order_log.txt');
@@ -98,8 +94,6 @@ if ($magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "
   catch(Exception $e) {
     $canInvoice = FALSE;
 
-    //echo $e->faultstring."\n";
-    //echo $e->faultcode."\n";
     $message = "Laskun luonti epäonnistui";
     $message .= " (" . $e->faultstring . ") faultcode: " . $e->faultcode;
     error_log(date('d.m.y H:i:s').": ".utf8_encode($message)."\n", 3, '/tmp/magento_order_log.txt');
@@ -110,8 +104,6 @@ if ($magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "
       $proxy->call($sessionId, 'sales_order_invoice.capture', $newInvoiceId);
     }
     catch (Exception $e) {
-      //echo $e->faultstring."\n";
-      //echo $e->faultcode."\n";
       $message = "Laskun capture epäonnistui";
       $message .= " (" . $e->faultstring . ") faultcode: " . $e->faultcode;
       error_log(date('d.m.y H:i:s').": ".utf8_encode($message)."\n", 3, '/tmp/magento_order_log.txt');

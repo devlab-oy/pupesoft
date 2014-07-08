@@ -31,7 +31,10 @@ elseif (isset($tee) and $tee == "generoi_tunnukset") {
         "sertifikaatti" => salaa($sertifikaatti, $salasana)
       );
 
-      $target_id = hae_target_id($sertifikaatti, $generoidut_tunnukset["private_key"], $customer_id);
+      if (!isset($target_id)) {
+        $target_id = hae_target_id($sertifikaatti, $generoidut_tunnukset["private_key"],
+          $customer_id);
+      }
 
       if ($target_id) {
         if (tallenna_tunnukset($salatut_tunnukset, $customer_id, $target_id, $tili, $kukarow)) {
@@ -42,7 +45,7 @@ elseif (isset($tee) and $tee == "generoi_tunnukset") {
         }
       }
       else {
-        virhe("Pankin kanssa kommunikointi epäonnistui, yritä myöhemmin uudestaan");
+        virhe("Tiedon hakeminen pankista epäonnistui, yritä myöhemmin uudestaan");
       }
     }
     else {
@@ -706,6 +709,11 @@ function uusi_pankkiyhteys_formi($kukarow)
   echo "</tr>";
 
   echo "<tr>";
+  echo "<td><label for='target_id'>Aineistoryhmän tunnus</label></td>";
+  echo "<td><input type='text' name='target_id' id='target_id'/></td>";
+  echo "</tr>";
+
+  echo "<tr>";
   echo "<td><label for='pin'>" . t("Pankilta saatu PIN-koodi") . "</label></td>";
   echo "<td><input type='text' name='pin' id='pin'/></td>";
   echo "</tr>";
@@ -714,6 +722,7 @@ function uusi_pankkiyhteys_formi($kukarow)
   echo "<td><label for='salasana'>" . t("Salasana, jolla pankkiyhteystunnukset suojataan");
   echo "</label></td>";
   echo "<td><input type='password' name='salasana' id='salasana'/></td>";
+  echo "<td class='back'>Huom. salasanaa ei voi mitenkään palauttaa, jos se unohtuu</td>";
   echo "</tr>";
 
   echo "<tr>";
@@ -730,10 +739,6 @@ function uusi_pankkiyhteys_formi($kukarow)
   echo "</form>";
 }
 
-/**
- * @param $kukarow
- * @param $tili
- */
 function sertifikaatin_lataus_formi()
 {
   echo "<form action='pankkiyhteys.php' method='post' enctype='multipart/form-data'>";
@@ -772,6 +777,7 @@ function sertifikaatin_lataus_formi()
   echo "<td>";
   echo "<input type='password' name='salasana' id='salasana'/>";
   echo "</td>";
+  echo "<td class='back'>Huom. salasanaa ei voi mitenkään palauttaa, jos se unohtuu</td>";
   echo "</tr>";
 
   echo "<tr>";

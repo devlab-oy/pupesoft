@@ -95,7 +95,7 @@ $request = array(
     'asiakas_tunnus'  => $asiakas_tunnus,
     'kohde_tunnus'    => $kohde_tunnus,
     'oma_numero'      => $oma_numero,
-    'sarjanumero'     => $sarjanumero,
+    'sarjanro'        => $sarjanro,
     'ala_tee'         => $ala_tee,
     'lasku_tunnukset' => $lasku_tunnukset,
     'huoltosyklit'    => $huoltosyklit,
@@ -271,7 +271,7 @@ function echo_kayttoliittyma($request = array()) {
   echo "<tr>";
   echo "<th>" . t('Sarjanumero') . "</th>";
   echo "<td>";
-  echo "<input type='text' name='sarjanumero' value='{$request['sarjanumero']}' />";
+  echo "<input type='text' name='sarjanro' value='{$request['sarjanro']}' />";
   echo "</td>";
   echo "</tr>";
 
@@ -456,7 +456,11 @@ function echo_kohteet_table($laitteet = array(), $request = array()) {
   $edellinen_kohde_nimi = "";
   $edellinen_paikka_nimi = "";
   foreach ($laitteet as $laite) {
-    echo "<tr>";
+    $class = '';
+    if (!empty($laite['class'])) {
+      $class = 'class="tumma"';
+    }
+    echo "<tr {$class}>";
 
     echo "<td>";
     if ($edellinen_kohde_nimi != $laite['kohde_nimi']) {
@@ -464,9 +468,9 @@ function echo_kohteet_table($laitteet = array(), $request = array()) {
       if (empty($kukarow['extranet'])) {
         echo "<a href='yllapito.php?toim=kohde&lopetus={$lopetus}&tunnus={$laite['kohde_tunnus']}'>" . $laite['kohde_nimi'] . "</a>";
         echo "<br/>";
-        echo "<a href='yllapito.php?toim=paikka&uusi=1&&lopetus={$lopetus}&valittu_kohde={$laite['kohde_tunnus']}'><button>" . t("Uusi paikka") . "</button></a>";
-        echo "<br/>";
         echo "<button class='poista_kohde'>" . t("Poista kohde") . "</button>";
+        echo "<br/>";
+        echo "<a href='yllapito.php?toim=paikka&uusi=1&&lopetus={$lopetus}&valittu_kohde={$laite['kohde_tunnus']}'><button>" . t("Uusi paikka") . "</button></a>";
       }
       else {
         echo $laite['kohde_nimi'];
@@ -615,7 +619,7 @@ function hae_asiakas($request) {
                         AND l.oma_numero = '{$request['oma_numero']}' )";
   }
 
-  if (!empty($request['sarjanumero'])) {
+  if (!empty($request['sarjanro'])) {
     $laite_join .= "JOIN kohde AS k3
                     ON (k3.yhtio = asiakas.yhtio
                         AND k3.asiakas = asiakas.tunnus )
@@ -625,7 +629,7 @@ function hae_asiakas($request) {
                     JOIN laite AS l1
                     ON ( l1.yhtio = p1.yhtio
                         AND l1.paikka = p1.tunnus
-                        AND l1.sarjanro = '{$request['sarjanumero']}' )";
+                        AND l1.sarjanro = '{$request['sarjanro']}' )";
   }
 
   $query = "SELECT asiakas.*
@@ -703,6 +707,15 @@ function hae_asiakkaan_kohteet_joissa_laitteita($request) {
 
   $laitteet = array();
   while ($laite = mysql_fetch_assoc($result)) {
+    $laite['class'] = '';
+    if (!empty($request['oma_numero']) and $request['oma_numero'] === $laite['oma_numero']) {
+      $laite['class'] = 'tumma';
+    }
+
+    if (!empty($request['sarjanro']) and $request['sarjanro'] === $laite['sarjanro']) {
+      $laite['class'] = 'tumma';
+    }
+
     $laitteen_tila = search_array_key_for_value_recursive($request['laitteen_tilat'], 'selite', $laite['tila']);
     //key:llä on tarkoitus löytyä vain yksi resultti, siksi voidaan viitata indeksillä.
     $laite['tilan_selite'] = $laitteen_tila[0]['selitetark'];

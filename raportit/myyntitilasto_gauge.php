@@ -438,6 +438,28 @@ if ($tee == 'laske') {
     $arr_try[$pvm][$osasto][$try]['tilatut_rivit']++;
   }
 
+
+$alku = "{$vva}-{$kka}-{$ppa} 00:00:00";
+$loppu = "{$vvl}-{$kkl}-{$ppl} 23:59:59";
+
+  $query = "SELECT kausi, try, sum(summa) AS tavoite
+            FROM budjetti_asiakas
+            WHERE yhtio = 'turva'
+            AND kausi >= DATE_FORMAT('{$alku}', '%Y%m')
+            AND kausi <= DATE_FORMAT('{$loppu}','%Y%m')
+            GROUP BY kausi, try";
+
+
+          echo $query;
+
+
+
+
+
+
+
+
+
   if ($naytetaan_tulos == 'weekly') {
     $pvmlisa = "WEEK(SUBSTRING(tilausrivi.laskutettuaika, 1, 10), 3)";
   }

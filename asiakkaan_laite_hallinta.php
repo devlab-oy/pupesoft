@@ -456,10 +456,12 @@ function echo_kohteet_table($laitteet = array(), $request = array()) {
   $edellinen_kohde_nimi = "";
   $edellinen_paikka_nimi = "";
   foreach ($laitteet as $laite) {
-    $class = '';
+    $class = "class='kohde_{$laite['kohde_tunnus']} paikka_{$laite['paikka_tunnus']}";
     if (!empty($laite['class'])) {
-      $class = 'class="tumma"';
+      $class .= ' tumma';
     }
+    $class .= "'";
+
     echo "<tr {$class}>";
 
     echo "<td>";
@@ -486,6 +488,7 @@ function echo_kohteet_table($laitteet = array(), $request = array()) {
     echo "<td>";
     if ($edellinen_paikka_nimi != $laite['paikka_nimi']) {
       if (empty($kukarow['extranet'])) {
+        echo "<input type='hidden' class='paikka_tunnus' value='{$laite['paikka_tunnus']}' />";
         echo "<a href='yllapito.php?toim=paikka&lopetus={$lopetus}&tunnus={$laite['paikka_tunnus']}'>{$laite['paikka_nimi']}</a>";
         echo "<br/>";
         echo "<button class='poista_paikka'>" . t("Poista paikka") . "</button>";
@@ -525,7 +528,9 @@ function echo_kohteet_table($laitteet = array(), $request = array()) {
     echo "</td>";
 
     echo "<td>";
-    echo date('d.m.Y', strtotime($laite['valm_pvm']));
+    if (!empty($laite['valm_pvm'])) {
+      echo date('d.m.Y', strtotime($laite['valm_pvm']));
+    }
     echo "</td>";
 
     echo "<td>";

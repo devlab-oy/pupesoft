@@ -18,11 +18,7 @@
             if (console && console.log) {
               console.log('Kohteen poisto onnistui');
             }
-            //poistetaan kohde_tr:n paikka_tr:t
-            $button.parent().parent().parent().find('.paikat_' + kohde_tunnus).remove();
-
-            //poistetaan itse kohde_tr
-            $button.parent().parent().remove();
+            $('.kohde_'+kohde_tunnus).find('.tila').html($('#poistettu_message').val());
 
           }).fail(function() {
             if (console && console.log) {
@@ -49,8 +45,7 @@
             if (console && console.log) {
               console.log('Paikan poisto onnistui');
             }
-            $button.parent().parent().remove();
-
+            $('.paikka_'+paikka_tunnus).find('.tila').html($('#poistettu_message').val());
           }).fail(function() {
             if (console && console.log) {
               console.log('Paikan poisto EPÄONNISTUI');

@@ -5341,7 +5341,8 @@ if ($tee == '') {
       $sarakkeet++;
     }
 
-    if ($yhtiorow["saldo_varastossa_valmistuksella"] != "" and ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE")) {
+    if ($yhtiorow["saldo_varastossa_valmistuksella"] != ""
+      and ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE")) {
       $headerit .= "<th>".t("Saldo varastossa")."</th>";
       $sarakkeet++;
     }
@@ -6343,7 +6344,8 @@ if ($tee == '') {
           }
         }
 
-        if ($yhtiorow["saldo_varastossa_valmistuksella"] != "" and ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE")) {
+        if ($yhtiorow["saldo_varastossa_valmistuksella"] != ""
+          and ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE")) {
           // Haetaan varastossa oleva saldo
           $query = "SELECT saldo
                     FROM tuotepaikat

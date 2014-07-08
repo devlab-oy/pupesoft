@@ -29,7 +29,7 @@ class KalustoraporttiPDF
       Prawn::Document.generate(filepath,
                                { :page_size   => 'A4',
                                  :page_layout => :landscape,
-                                 :margin      => [100, @margin, @margin, @margin]
+                                 :margin      => [140, @margin, @margin, @margin]
                                }) do |pdf|
         @pdf = pdf
         @pdf.font 'Helvetica', :style => :normal, :size => 8
@@ -51,13 +51,6 @@ class KalustoraporttiPDF
       @pdf.font 'Helvetica', :style => :normal, :size => 8
       header unless header_called
 
-      @pdf.move_down 75
-      @pdf.font 'Helvetica', :size => 8
-
-      header_info
-
-      @pdf.move_down 20
-
       spot_devices
 
       'Kalustoraportit.pdf'
@@ -71,6 +64,10 @@ class KalustoraporttiPDF
       logo
 
       company_info
+
+      @pdf.font 'Helvetica', :size => 8
+
+      header_info
     end
   end
 
@@ -79,15 +76,17 @@ class KalustoraporttiPDF
     File.open(filepath, 'a+') { |file|
       file.write Base64.decode64 @logo
     }
-    @pdf.image filepath, :width => 139, :height => 76
+    @pdf.float do
+      @pdf.image filepath, :width => 139, :height => 76, :at => [0, 555.28]
+    end
   end
 
   def company_info
     @pdf.font 'Helvetica', :size => 10
-    @pdf.text @company['nimi']
+    @pdf.draw_text @company['nimi'], :at => [0, 470]
 
     @pdf.move_down 25
-    @pdf.text 'KALUSTORAPORTTI', :style => :bold
+    @pdf.draw_text 'KALUSTORAPORTTI', :style => :bold, :at => [0, 445]
   end
 
   def header_info
@@ -107,11 +106,13 @@ class KalustoraporttiPDF
         },
     ]
 
-    @pdf.indent(200) do
-      header_table(customer_data)
+    x = 200
+    y = 470
+    customer_data.each do |value|
+      @pdf.draw_text value[:header], :style => :bold, :at => [x, y]
+      @pdf.draw_text value[:value], :style => :normal, :at => [x + 100, y]
+      y = y - 10
     end
-
-    @pdf.move_up y_temp - @pdf.y
 
     other_data = [
         {
@@ -124,20 +125,12 @@ class KalustoraporttiPDF
         },
     ]
 
-    @pdf.indent(400) do
-      header_table(other_data)
-    end
-  end
-
-  def header_table(data)
-    data.each do |value|
-      @pdf.float do
-        @pdf.text value[:header], :style => :bold
-      end
-      @pdf.indent(100) do
-        @pdf.text value[:value], :style => :normal
-      end
-      @pdf.move_down 10
+    x = 500
+    y = 470
+    other_data.each do |value|
+      @pdf.draw_text value[:header], :style => :bold, :at => [x, y]
+      @pdf.draw_text value[:value], :style => :normal, :at => [x + 100, y]
+      y = y - 10
     end
   end
 
@@ -295,7 +288,7 @@ if !ARGV[0].empty?
   margin        = 20
   _pdf          = Prawn::Document.new(:page_size   => 'A4',
                                       :page_layout => :landscape,
-                                      :margin      => margin
+                                      :margin      => [140, margin, margin, margin]
   )
   i             = 0
   header_called = false

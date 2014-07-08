@@ -3,59 +3,6 @@
     var element = $(element);
     var obj = this;
 
-    this.bind_kohde_tr_click = function() {
-      var kohde_tr = $(element).find('.kohde_tr');
-      $(kohde_tr).live('click', function(event) {
-        if (event.target.nodeName === 'TD' || event.target.nodeName === 'IMG') {
-          var paikat = '.paikat_' + $(this).find('.kohde_tunnus').val();
-
-          if ($(this).hasClass('hidden')) {
-            //TODO yhteinäistä bind_tr_click logiikka. ei yhdistä vaan _yhtenäistä_
-            $(this).parent().find(paikat).removeClass('paikka_tr_hidden');
-            $(this).parent().find(paikat).addClass('paikka_tr_not_hidden');
-
-            $(this).addClass('not_hidden');
-            $(this).removeClass('hidden');
-
-            $(this).find('.porautumis_img').attr('src', $('#right_arrow').val());
-          }
-          else {
-            $(this).parent().find(paikat).removeClass('paikka_tr_not_hidden');
-            $(this).parent().find(paikat).addClass('paikka_tr_hidden');
-
-            $(this).addClass('hidden');
-            $(this).removeClass('not_hidden');
-
-            $(this).find('.porautumis_img').attr('src', $('#down_arrow').val());
-          }
-        }
-
-
-      });
-    };
-
-    this.bind_paikka_tr_click = function() {
-      var paikat_tr = $(element).find('.paikat_tr');
-      $(paikat_tr).bind('click', function(event) {
-        //paikat_tr sisällä on buttoni uuden laitteen luomiseen paikalle. jos sitä klikataan, emme halua triggeröidä tätä.
-        if (event.target.nodeName === 'TD' || event.target.nodeName === 'IMG') {
-          if ($(this).children().find('.laitteet_table_hidden').length > 0) {
-            $(this).children().find('.laitteet_table_hidden').addClass('laitteet_table_not_hidden');
-            $(this).children().find('.laitteet_table_hidden').removeClass('laitteet_table_hidden');
-
-            $(this).find('.porautumis_img').attr('src', $('#right_arrow').val());
-          }
-          else {
-            $(this).children().find('.laitteet_table_not_hidden').addClass('laitteet_table_hidden');
-            $(this).children().find('.laitteet_table_hidden').removeClass('laitteet_table_not_hidden');
-
-            $(this).find('.porautumis_img').attr('src', $('#down_arrow').val());
-          }
-        }
-
-      });
-    };
-
     this.bind_poista_kohde_button = function() {
       var poista_kohde = $(element).find('.poista_kohde');
       $(poista_kohde).click(function() {

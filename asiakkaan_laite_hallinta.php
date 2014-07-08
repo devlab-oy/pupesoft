@@ -67,19 +67,6 @@ enable_ajax();
 echo "<font class='head'>" . t("Laitehallinta") . "</font><hr>";
 ?>
 <style>
-  .paikka_tr_hidden {
-    display: none;
-  }
-
-  .laitteet_table_hidden {
-    display: none;
-  }
-
-  .paikka_tr_not_hidden {
-  }
-
-  .laiteet_table_not_hidden {
-  }
 </style>
 <script src='<?php echo $palvelin2 ?>js/asiakas/asiakkaan_laite_puu.js'></script>
 <script src='<?php echo $palvelin2 ?>js/tyomaarays/tyojono2.js'></script>
@@ -88,8 +75,6 @@ echo "<font class='head'>" . t("Laitehallinta") . "</font><hr>";
     massapaivitys_select_all();
     $('#laite_puu_wrapper').laitePuuPlugin();
     var laite_puu_plugin = $('#laite_puu_wrapper').data('laitePuuPlugin');
-    laite_puu_plugin.bind_kohde_tr_click();
-    laite_puu_plugin.bind_paikka_tr_click();
     laite_puu_plugin.bind_poista_kohde_button();
     laite_puu_plugin.bind_poista_paikka_button();
     laite_puu_plugin.bind_poista_laite_button();
@@ -425,12 +410,13 @@ function tulosta_kalustoraportti($kohteet) {
   return aja_ruby($filepath, 'kalustoraportti');
 }
 
-function echo_kohteet_table($asiakkaan_kohteet = array(), $request = array()) {
+function echo_kohteet_table($laitteet = array(), $request = array()) {
   global $palvelin2, $lopetus, $kukarow;
 
   $haettu_asiakas = $request['haettu_asiakas'];
 
   $lopetus = "{$palvelin2}asiakkaan_laite_hallinta.php////tee=hae_asiakas//asiakasid={$haettu_asiakas['tunnus']}";
+  $colspan = 7;
 
   echo_kalustoraportti_form($haettu_asiakas);
   echo "<br/>";
@@ -441,148 +427,71 @@ function echo_kohteet_table($asiakkaan_kohteet = array(), $request = array()) {
   echo "<tr>";
   echo "<th>" . t("Kohteen nimi") . "</th>";
   echo "<th>" . t("Paikan nimi") . "</th>";
-  echo "<th>" . t("Laitteet") . "</th>";
-  echo "</tr>";
-
-  echo "<tr>";
-  echo "<td>";
-  if (empty($kukarow['extranet'])) {
-    echo "<a href='yllapito.php?toim=kohde&uusi=1&lopetus={$lopetus}&valittu_asiakas={$haettu_asiakas['tunnus']}'><button>" . t("Luo uusi kohde") . "</button></a>";
-  }
-  echo "</td>";
-
-  echo "<td>";
-  echo "</td>";
-
-  echo "<td>";
-  echo "</td>";
-
-  echo "</tr>";
-
-  if (!empty($asiakkaan_kohteet['kohteet'])) {
-    foreach ($asiakkaan_kohteet['kohteet'] as $kohde_index => $kohde) {
-      echo_kohde_tr($kohde_index, $kohde, $kohde['asiakas_tunnus']);
-    }
-  }
-
-  echo "</table>";
-}
-
-function echo_kohde_tr($kohde_index, $kohde, $asiakas_tunnus) {
-  global $palvelin2, $lopetus, $kukarow;
-
-  echo "<tr class='kohde_tr hidden'>";
-
-  echo "<td>";
-  if (empty($kukarow['extranet'])) {
-    echo "<button class='poista_kohde'>" . t("Poista kohde") . "</button>";
-  }
-  echo "&nbsp";
-  echo "<input type='hidden' class='kohde_tunnus' value='{$kohde_index}' />";
-  if (empty($kukarow['extranet'])) {
-    echo "<a href='yllapito.php?toim=kohde&lopetus={$lopetus}&tunnus={$kohde_index}'>" . $kohde['kohde_nimi'] . "</a>";
-  }
-  else {
-    echo $kohde['kohde_nimi'];
-  }
-  echo "&nbsp";
-  echo "<img class='porautumis_img' src='{$palvelin2}pics/lullacons/bullet-arrow-down.png' />";
-
-  if ($kohde['kohde_poistettu'] == 1) {
-    echo "<br/>";
-    echo '<font class="error">' . t('Poistettu') . '</font>';
-  }
-  echo "</td>";
-
-  echo "<td>";
-  //paikan nimi tyhjä
-  echo "</td>";
-
-  echo "<td>";
-  //laitteet tyhjä
-  echo "</td>";
-
-  echo "</tr>";
-  echo_paikka_tr($kohde_index, $asiakas_tunnus, $kohde['paikat']);
-}
-
-function echo_paikka_tr($kohde_index, $asiakas_tunnus, $paikat = array()) {
-  global $palvelin2, $lopetus, $kukarow;
-
-
-  echo "<tr class='paikka_tr_hidden paikat_{$kohde_index}'>";
-  echo "<td>";
-  if (empty($kukarow['extranet'])) {
-    echo "<a href='yllapito.php?toim=paikka&uusi=1&&lopetus={$lopetus}&valittu_kohde={$kohde_index}'><button>" . t("Luo kohteelle uusi paikka") . "</button></a>";
-  }
-  echo "</td>";
-
-  echo "<td>";
-  echo "</td>";
-
-  echo "<td>";
-  echo "</td>";
-
-  echo "</tr>";
-  if (!empty($paikat)) {
-    foreach ($paikat as $paikka_index => $paikka) {
-      echo "<tr class='paikat_tr paikka_tr_hidden paikat_{$kohde_index}'>";
-
-      echo "<td>";
-      echo "<input type='hidden' class='paikka_tunnus' value='{$paikka_index}' />";
-      echo "</td>";
-
-      echo "<td>";
-      if (empty($kukarow['extranet'])) {
-        echo "<a href='yllapito.php?toim=paikka&lopetus={$lopetus}&tunnus={$paikka_index}'>{$paikka['paikka_nimi']}</a>";
-      }
-      else {
-        echo $paikka['paikka_nimi'];
-      }
-      echo "&nbsp";
-      echo "<img class='porautumis_img' src='{$palvelin2}pics/lullacons/bullet-arrow-down.png' />";
-      echo "<br/>";
-      if (empty($kukarow['extranet'])) {
-        echo "<button class='poista_paikka'>" . t("Poista paikka") . "</button>";
-      }
-
-      if ($paikka['paikka_poistettu'] == 1) {
-        echo "<br/>";
-        echo '<font class="error">' . t('Poistettu') . '</font>';
-      }
-      echo "</td>";
-
-      echo "<td>";
-      if (empty($kukarow['extranet'])) {
-        echo "<a href='yllapito.php?toim=laite&asiakas_tunnus={$asiakas_tunnus}&uusi=1&lopetus={$lopetus}&valittu_paikka={$paikka_index}'><button>" . t("Luo paikkaan uusi laite") . "</button></a>";
-      }
-      echo "<br/>";
-      echo_laitteet_table($paikka['laitteet']);
-      echo "</td>";
-
-      echo "</tr>";
-    }
-  }
-}
-
-function echo_laitteet_table($laitteet = array()) {
-  global $palvelin2, $lopetus, $kukarow;
-
-  echo "<table class='laitteet_table_hidden'>";
-  echo "<tr>";
   echo "<th>" . t("Oma numero") . "</th>";
   echo "<th>" . t("Tuotenumero") . "</th>";
   echo "<th>" . t("Tuotteen nimi") . "</th>";
   echo "<th>" . t("Sijainti") . "</th>";
   echo "<th>" . t("Tila") . "</th>";
   if (empty($kukarow['extranet'])) {
+    $colspan = 9;
     echo "<th>" . t("Kopioi") . "</th>";
     echo "<th>" . t("Poista") . "</th>";
   }
   echo "</tr>";
 
+  echo "<tr>";
+  echo "<td colspan='{$colspan}'>";
+  if (empty($kukarow['extranet'])) {
+    echo "<a href='yllapito.php?toim=kohde&uusi=1&lopetus={$lopetus}&valittu_asiakas={$haettu_asiakas['tunnus']}'><button>" . t("Uusi kohde") . "</button></a>";
+  }
+  echo "</td>";
+  echo "</tr>";
+
+  $edellinen_kohde_nimi = "";
+  $edellinen_paikka_nimi = "";
   foreach ($laitteet as $laite) {
     echo "<tr>";
+
+    echo "<td>";
+    if ($edellinen_kohde_nimi != $laite['kohde_nimi']) {
+      echo "<input type='hidden' class='kohde_tunnus' value='{$laite['kohde_tunnus']}' />";
+      if (empty($kukarow['extranet'])) {
+        echo "<a href='yllapito.php?toim=kohde&lopetus={$lopetus}&tunnus={$laite['kohde_tunnus']}'>" . $laite['kohde_nimi'] . "</a>";
+        echo "<br/>";
+        echo "<a href='yllapito.php?toim=paikka&uusi=1&&lopetus={$lopetus}&valittu_kohde={$laite['kohde_tunnus']}'><button>" . t("Uusi paikka") . "</button></a>";
+        echo "<br/>";
+        echo "<button class='poista_kohde'>" . t("Poista kohde") . "</button>";
+      }
+      else {
+        echo $laite['kohde_nimi'];
+      }
+
+      if ($laite['kohde_poistettu'] == 1) {
+        echo "<br/>";
+        echo '<font class="error">' . t('Poistettu') . '</font>';
+      }
+    }
+    echo "</td>";
+
+    echo "<td>";
+    if ($edellinen_paikka_nimi != $laite['paikka_nimi']) {
+      if (empty($kukarow['extranet'])) {
+        echo "<a href='yllapito.php?toim=paikka&lopetus={$lopetus}&tunnus={$laite['paikka_tunnus']}'>{$laite['paikka_nimi']}</a>";
+        echo "<br/>";
+        echo "<button class='poista_paikka'>" . t("Poista paikka") . "</button>";
+        echo "<br/>";
+        echo "<a href='yllapito.php?toim=laite&asiakas_tunnus={$laite['asiakas_tunnus']}&uusi=1&lopetus={$lopetus}&valittu_paikka={$laite['paikka_tunnus']}'><button>" . t("Uusi laite") . "</button></a>";
+      }
+      else {
+        echo $laite['paikka_nimi'];
+      }
+
+      if ($laite['paikka_poistettu'] == 1) {
+        echo "<br/>";
+        echo '<font class="error">' . t('Poistettu') . '</font>';
+      }
+    }
+    echo "</td>";
 
     echo "<td>";
     echo $laite['oma_numero'];
@@ -627,7 +536,11 @@ function echo_laitteet_table($laitteet = array()) {
     }
 
     echo "</tr>";
+
+    $edellinen_kohde_nimi = $laite['kohde_nimi'];
+    $edellinen_paikka_nimi = $laite['paikka_nimi'];
   }
+
   echo "</table>";
 }
 
@@ -757,42 +670,40 @@ function hae_asiakkaan_kohteet_joissa_laitteita($request) {
             {$join}
             WHERE kohde.yhtio = '{$kukarow['yhtio']}'
             AND kohde.asiakas = {$request['haettu_asiakas']['tunnus']}
-            {$group}";
+            {$group}
+            ORDER BY kohde.nimi ASC,
+            paikka.nimi ASC,
+            laite.oma_numero ASC";
   $result = pupe_query($query);
 
-  $asiakkaan_kohteet = array();
-  while ($kohde = mysql_fetch_assoc($result)) {
-    $laitteen_tila = search_array_key_for_value_recursive($request['laitteen_tilat'], 'selite', $kohde['tila']);
+
+  $laitteet = array();
+  while ($laite = mysql_fetch_assoc($result)) {
+    $laitteen_tila = search_array_key_for_value_recursive($request['laitteen_tilat'], 'selite', $laite['tila']);
     //key:llä on tarkoitus löytyä vain yksi resultti, siksi voidaan viitata indeksillä.
-    $kohde['tilan_selite'] = $laitteen_tila[0]['selitetark'];
-    $asiakkaan_kohteet['kohteet'][$kohde['kohde_tunnus']]['kohde_nimi'] = $kohde['kohde_nimi'];
-    $asiakkaan_kohteet['kohteet'][$kohde['kohde_tunnus']]['kohde_tunnus'] = $kohde['kohde_tunnus'];
-    $asiakkaan_kohteet['kohteet'][$kohde['kohde_tunnus']]['kohde_poistettu'] = $kohde['kohde_poistettu'];
-    $asiakkaan_kohteet['kohteet'][$kohde['kohde_tunnus']]['asiakas_tunnus'] = $kohde['asiakas_tunnus'];
+    $laite['tilan_selite'] = $laitteen_tila[0]['selitetark'];
 
-    if ($request['ala_tee'] == 'tulosta_kalustoraportti' and !empty($kohde['laite_tunnus'])) {
-      $kohde['viimeiset_tapahtumat'] = hae_laitteen_viimeiset_tapahtumat($kohde['laite_tunnus']);
-    }
+    if ($request['ala_tee'] == 'tulosta_kalustoraportti') {
+      $laite['viimeiset_tapahtumat'] = hae_laitteen_viimeiset_tapahtumat($laite['laite_tunnus']);
 
-    if (!empty($kohde['paikka_tunnus']) and $request['ala_tee'] != 'tulosta_kalustoraportti') {
-      $asiakkaan_kohteet['kohteet'][$kohde['kohde_tunnus']]['paikat'][$kohde['paikka_tunnus']]['laitteet'][] = $kohde;
-      $asiakkaan_kohteet['kohteet'][$kohde['kohde_tunnus']]['paikat'][$kohde['paikka_tunnus']]['paikka_nimi'] = $kohde['paikka_nimi'];
-      $asiakkaan_kohteet['kohteet'][$kohde['kohde_tunnus']]['paikat'][$kohde['paikka_tunnus']]['paikka_poistettu'] = $kohde['paikka_poistettu'];
-    }
-    else if (!empty($kohde['paikka_tunnus']) and $request['ala_tee'] == 'tulosta_kalustoraportti') {
-      if (!empty($kohde['laite_tunnus'])) {
-        if (onko_laitteella_poikkeus($kohde['laite_tunnus'])) {
-          $kohde['poikkeus'] = 'X';
-        }
-        else {
-          $kohde['poikkeus'] = '';
-        }
-        $asiakkaan_kohteet['kohteet'][$kohde['kohde_tunnus']]['paikat'][$kohde['paikka_tunnus']]['laitteet'][] = $kohde;
-        $asiakkaan_kohteet['kohteet'][$kohde['kohde_tunnus']]['paikat'][$kohde['paikka_tunnus']]['paikka_nimi'] = $kohde['paikka_nimi'];
-        $asiakkaan_kohteet['kohteet'][$kohde['kohde_tunnus']]['paikat'][$kohde['paikka_tunnus']]['paikka_poistettu'] = $kohde['paikka_poistettu'];
+      if (onko_laitteella_poikkeus($laite['laite_tunnus'])) {
+        $laite['poikkeus'] = 'X';
       }
+      else {
+        $laite['poikkeus'] = '';
+      }
+      $laitteet['kohteet'][$laite['kohde_tunnus']]['paikat'][$laite['paikka_tunnus']]['laitteet'][] = $laite;
+      $laitteet['kohteet'][$laite['kohde_tunnus']]['paikat'][$laite['paikka_tunnus']]['paikka_nimi'] = $laite['paikka_nimi'];
+      $laitteet['kohteet'][$laite['kohde_tunnus']]['paikat'][$laite['paikka_tunnus']]['paikka_poistettu'] = $laite['paikka_poistettu'];
+      $laitteet['kohteet'][$laite['kohde_tunnus']]['kohde_nimi'] = $laite['kohde_nimi'];
+      $laitteet['kohteet'][$laite['kohde_tunnus']]['kohde_tunnus'] = $laite['kohde_tunnus'];
+      $laitteet['kohteet'][$laite['kohde_tunnus']]['kohde_poistettu'] = $laite['kohde_poistettu'];
+      $laitteet['kohteet'][$laite['kohde_tunnus']]['asiakas_tunnus'] = $laite['asiakas_tunnus'];
+    }
+    else {
+      $laitteet[] = $laite;
     }
   }
 
-  return $asiakkaan_kohteet;
+  return $laitteet;
 }

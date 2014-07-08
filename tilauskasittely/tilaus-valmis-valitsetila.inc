@@ -380,7 +380,7 @@ if ($asirow['toimitusvahvistus'] != '') {
 }
 
 // Magento-noutotilausten kuittausblokki
-if ($kutsuja == 'keraa.php' and $asirow['toimitusvahvistus'] != '' and $toitarow['nouto'] != '' 
+if ($kutsuja == 'keraa.php' and $asirow['toimitusvahvistus'] == 'Magento' and $toitarow['nouto'] != '' 
     and isset($magento_api_url) and $magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "") {
 
   $query = "SELECT asiakkaan_tilausnumero

@@ -22,21 +22,26 @@ if ($magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "
 
   $proxy = new SoapClient($magento_api_url);
   $sessionId = $proxy->login($magento_api_usr, $magento_api_pas);
-  
+
   $magento_api_met = utf8_encode($magento_api_met);
   $canShip   = TRUE;
   $canInvoice = TRUE;
   $magLinkurl = "";
 
-  // Make it complete!
-  // Päivitetään tilauksen tila että se on noudettu pupesoftiin
-  try {
+  // Päivitetään tilauksen tilaksi 'completed_pupesoft'
+  /*try {
     $completed = $proxy->call($sessionId, 'sales_order.addComment', array($magento_api_ord, 'completed_pupesoft', 'Tilaus merkattu toimitetuksi Pupesoftista'));
   }
   catch(Exception $e) {
     echo $e->faultstring."\n";
     echo $e->faultcode."\n";
-  }
+  }*/
+  
+  $message = "Toimitetaan tilaus ".$magento_api_ord." Magentoon";
+  $timestamp = date('d.m.y H:i:s');
+  echo "$message $timestamp\n";
+  error_log(utf8_encode($timestamp.": ".$message)."\n", 3, '/tmp/magento_order_log.txt');
+  error_log($message."\n", 3, '/tmp/magento_order_log.txt');
   // Create new shipment
   try {
 
@@ -63,50 +68,55 @@ if ($magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "
     }
 
     $newShipmentId = $proxy->call($sessionId, 'sales_order_shipment.create', array($magento_api_ord, array(), $comment, true, true));
-    echo "shipmentid \n";
-    var_dump($newShipmentId);
   }
   catch (Exception $e) {
     $canShip = FALSE;
 
-    echo $e->faultstring."\n";
-    echo $e->faultcode."\n";
+    // echo $e->faultstring."\n";
+    // echo $e->faultcode."\n";
+    $message = "Lähetyksen luonti epäonnistui";
+    $message .= " (" . $e->faultstring . ") faultcode: " . $e->faultcode;
+    error_log(date('d.m.y H:i:s').": ".utf8_encode($message)."\n", 3, '/tmp/magento_order_log.txt');
   }
 
   if ($canShip) {
     // Add tracking
     try {
       $newTrackId = $proxy->call($sessionId, 'sales_order_shipment.addTrack', array($newShipmentId, "custom", $magento_api_met, $magento_api_rak));
-      var_dump($newTrackId);
     }
     catch(Exception $e) {
-      echo $e->faultstring."\n";
-      echo $e->faultcode."\n";
+      //echo $e->faultstring."\n";
+      //echo $e->faultcode."\n";
+      $message = "Lähetyksenseurannan luonti epäonnistui";
+      $message .= " (" . $e->faultstring . ") faultcode: " . $e->faultcode;
+      error_log(date('d.m.y H:i:s').": ".utf8_encode($message)."\n", 3, '/tmp/magento_order_log.txt');
     }
   }
 
   // Create new invoice
   try {
     $newInvoiceId = $proxy->call($sessionId, 'sales_order_invoice.create', array($magento_api_ord, array(), 'Invoice Created', false, false));
-    echo "invoiceid\n";
-    var_dump($newInvoiceId);
   }
   catch(Exception $e) {
     $canInvoice = FALSE;
 
-    echo $e->faultstring."\n";
-    echo $e->faultcode."\n";
+    //echo $e->faultstring."\n";
+    //echo $e->faultcode."\n";
+    $message = "Laskun luonti epäonnistui";
+    $message .= " (" . $e->faultstring . ") faultcode: " . $e->faultcode;
+    error_log(date('d.m.y H:i:s').": ".utf8_encode($message)."\n", 3, '/tmp/magento_order_log.txt');
   }
 
   if ($canInvoice) {
     try {
       $proxy->call($sessionId, 'sales_order_invoice.capture', $newInvoiceId);
-      echo "capture\n";
-      var_dump($proxy);
     }
     catch (Exception $e) {
-      echo $e->faultstring."\n";
-      echo $e->faultcode."\n";
+      //echo $e->faultstring."\n";
+      //echo $e->faultcode."\n";
+      $message = "Laskun capture epäonnistui";
+      $message .= " (" . $e->faultstring . ") faultcode: " . $e->faultcode;
+      error_log(date('d.m.y H:i:s').": ".utf8_encode($message)."\n", 3, '/tmp/magento_order_log.txt');
     }
   }
 }

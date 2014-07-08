@@ -315,7 +315,6 @@ class MagentoClient {
           }
         }
       }
-      
 
       $tuote_data = array(
         'categories'            => $category_ids,
@@ -655,7 +654,7 @@ class MagentoClient {
    */
   public function hae_tilaukset($status = 'processing') {
 
-    $this->log("Haetaan tilauksia");
+    $this->log("Haetaan tilauksia", '', $type = 'order');
 
     $orders = array();
 
@@ -679,13 +678,13 @@ class MagentoClient {
 
     foreach ($fetched_orders as $order) {
 
-      $this->log("Haetaan tilaus {$order['increment_id']}");
-      
+      $this->log("Haetaan tilaus {$order['increment_id']}", '', $type = 'order');
+
       // Haetaan tilauksen tiedot (orders)
       $temp_order = $this->_proxy->call($this->_session, 'sales_order.info', $order['increment_id']);
       foreach ($temp_order['status_history'] as $historia) {
         if ($historia['status'] == "processing_pupesoft") {
-          $this->log("Tilausta on käsitelty ".$historia['status']. " tilassa, ohitetaan sisäänluku");
+          $this->log("Tilausta on käsitelty ".$historia['status']. " tilassa, ohitetaan sisäänluku", '', $type = 'order');
           continue;
         }
       }
@@ -693,7 +692,8 @@ class MagentoClient {
       // Päivitetään tilauksen tila että se on noudettu pupesoftiin
       $this->_proxy->call($this->_session, 'sales_order.addComment', array('orderIncrementId' => $order['increment_id'], 'status' => 'processing_pupesoft', 'Tilaus noudettu Pupesoftiin'));
     }
-
+    // Kirjataan kumpaankin logiin
+    $this->log(count($orders) . " tilausta haettu", '', $type = 'order');
     $this->log(count($orders) . " tilausta haettu");
 
     // Palautetaan löydetyt tilaukset
@@ -1637,8 +1637,9 @@ class MagentoClient {
    *
    * @param string  $message   Virheviesti
    * @param exception $exception Exception
+   * @param string $type Kirjataanko tuote vai tilauslogiin
    */
-  private function log($message, $exception = '') {
+  private function log($message, $exception = '', $type = 'product') {
 
     if (self::LOGGING == true) {
       $timestamp = date('d.m.y H:i:s');
@@ -1649,7 +1650,8 @@ class MagentoClient {
       }
 
       $message .= "\n";
-      error_log("{$timestamp}: {$message}", 3, '/tmp/magento_log.txt');
+      $log_location = $type == 'product' ? '/tmp/magento_log.txt' : '/tmp/magento_order_log.txt';
+      error_log("{$timestamp}: {$message}", 3, $log_location);
     }
   }
 }

@@ -27,7 +27,7 @@ elseif (isset($tee) and $tee == "generoi_tunnukset") {
 
     if ($sertifikaatti) {
       $salatut_tunnukset = array(
-        "private_key"   => salaa($tunnukset["private_key"], $salasana),
+        "private_key"   => salaa($generoidut_tunnukset["private_key"], $salasana),
         "sertifikaatti" => salaa($sertifikaatti, $salasana)
       );
 
@@ -37,11 +37,11 @@ elseif (isset($tee) and $tee == "generoi_tunnukset") {
         echo "Tunnukset tallennettu";
       }
       else {
-        echo "Tunnusten tallennus epäonnistui";
+        virhe("Tunnusten tallennus epäonnistui");
       }
     }
     else {
-      echo "Sertifikaatin hakeminen epäonnistui, tarkista PIN-koodi ja asiakastunnus";
+      virhe("Sertifikaatin hakeminen epäonnistui, tarkista PIN-koodi ja asiakastunnus");
     }
   }
   else {
@@ -301,23 +301,23 @@ function avaimet_ja_salasana_kunnossa()
 
   if (!$_FILES["certificate"]["tmp_name"]) {
     $virheet_maara++;
-    echo "<font class='error'>Sertifikaatti täytyy antaa</font><br/>";
+    virhe("Sertifikaatti täytyy antaa");
   }
   if (!$_FILES["private_key"]["tmp_name"]) {
     $virheet_maara++;
-    echo "<font class='error'>Avain täytyy antaa</font><br/>";
+    virhe("Avain täytyy antaa");
   }
   if (!$_POST["customer_id"]) {
     $virheet_maara++;
-    echo "<font class='error'>Asiakastunnus täytyy antaa</font><br/>";
+    virhe("Asiakastunnus täytyy antaa");
   }
   if (empty($_POST["salasana"])) {
     $virheet_maara++;
-    echo "<font class='error'>Salasana täytyy antaa</font><br/>";
+    virhe("Salasana täytyy antaa");
   }
   if (!$_POST["salasana"] == $_POST["salasanan_vahvistus"]) {
     $virheet_maara++;
-    echo "<font class='error'>Salasanan vahvistus ei vastannut salasanaa</font><br/>";
+    virhe("Salasanan vahvistus ei vastannut salasanaa");
   }
 
   if ($virheet_maara == 0) {
@@ -522,14 +522,14 @@ function laheta_maksuaineisto($tunnukset, $maksuaineisto)
 function tarkista_salasana()
 {
   if (isset($_POST["salasana"]) and empty($_POST["salasana"])) {
-    echo "<font class='error'>Salasana täytyy antaa</font><br/>";
+    virhe("Salasana täytyy antaa");
   }
 }
 
 function tarkista_maksuaineisto()
 {
   if (isset($_FILES["maksuaineisto"]) and !$_FILES["maksuaineisto"]["tmp_name"]) {
-    echo "<font class='error'>Maksuaineisto puuttuu</font><br/>";
+    virhe("Maksuaineisto puuttuu");
   }
 }
 
@@ -572,12 +572,15 @@ function vastaus_kunnossa($vastaus)
     case 200:
       return true;
     case 500:
-      echo "<font class='error'>Pankki ei vastaa kyselyyn, yritä myöhemmin uudestaan</font>";
+      virhe("Pankki ei vastaa kyselyyn, yritä myöhemmin uudestaan");
+
+      return false;
+    case 503:
+      virhe("Pankki ei vastaa kyselyyn toivotulla tavalla, yritä myöhemmin uudestaan");
 
       return false;
     case 0:
-      echo "<font class='error'>Sepa-palvelimeen ei jostain syystä saada yhteyttä, ";
-      echo "yritä myöhemmin uudestaan</font>";
+      virhe("Sepa-palvelimeen ei jostain syystä saada yhteyttä, yritä myöhemmin uudestaan");
 
       return false;
   }
@@ -680,19 +683,19 @@ function pankkiyhteystiedot_kunnossa()
   $virheet_count = 0;
 
   if (empty($_POST["salasana"])) {
-    echo "<font class='error'>Salasana täytyy antaa</font><br/>";
+    virhe("Salasana täytyy antaa");
     $virheet_count++;
   }
   if (empty($_POST["customer_id"])) {
-    echo "<font class='error'>Asiakastunnus täytyy antaa</font><br/>";
+    virhe("Asiakastunnus täytyy antaa");
     $virheet_count++;
   }
   if (empty($_POST["pin"])) {
-    echo "<font class='error'>PIN-koodi täytyy antaa</font><br/>";
+    virhe("PIN-koodi täytyy antaa");
     $virheet_count++;
   }
   if ($_POST["salasana"] != $_POST["salasanan_vahvistus"]) {
-    echo "<font class='error'>Salasanan vahvistus ei vastaa salasanaa</font><br/>";
+    virhe("Salasanan vahvistus ei vastaa salasanaa");
     $virheet_count++;
   }
 
@@ -821,4 +824,9 @@ function sertifikaatin_lataus_formi($kukarow, $tili)
   echo "</tbody>";
   echo "</table";
   echo "</form>";
+}
+
+function virhe($viesti)
+{
+  echo "<font class='error'>{$viesti}</font><br/>";
 }

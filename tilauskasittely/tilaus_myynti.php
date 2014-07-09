@@ -1,5 +1,7 @@
 <?php
 
+session_start();
+
 if (isset($_REQUEST['tulosta_maksusopimus']) and is_numeric(trim($_REQUEST['tulosta_maksusopimus']))) {
   $nayta_pdf = 1;
   $ohje = 'off';
@@ -200,6 +202,10 @@ if ((int) $luotunnusnippu > 0 and $tilausnumero == $kukarow["kesken"] and (int) 
 
 if ($kukarow["extranet"] == "" and in_array($toim, array("PIKATILAUS","RIVISYOTTO","TARJOUS")) and file_exists($pupe_root_polku . '/tilauskasittely/ostoskorin_haku.inc')) {
   require_once('tilauskasittely/ostoskorin_haku.inc');
+}
+
+if ($yhtiorow['laite_huolto'] == 'X' and !empty($laite_tunnus)) {
+  $_SESSION['laite_tunnus'] = $laite_tunnus;
 }
 
 // Vaihdetaan tietyn projektin toiseen toimitukseen
@@ -4403,25 +4409,35 @@ if ($tee == '') {
         require ('lisaarivi.inc');
       }
 
-      if (!empty($vaihdettava_rivi)) {
-        $query = "  SELECT asiakkaan_positio
-              FROM tilausrivin_lisatiedot
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tilausrivitunnus = '{$vaihdettava_rivi}'";
-        $lisatiedot_result = pupe_query($query);
-        $tilausrivin_lisatiedot = mysql_fetch_assoc($lisatiedot_result);
-        $query = "  UPDATE tilausrivin_lisatiedot
-              SET tilausrivilinkki = '{$vaihdettava_rivi}',
-              asiakkaan_positio = '{$tilausrivin_lisatiedot['asiakkaan_positio']}'
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tilausrivitunnus = '{$lisatty_tun}'";
+      if (!empty($vaihdettava_rivi) or $_SESSION['laite_tunnus']) {
+        if (!empty($vaihdettava_rivi)) {
+          $query = "SELECT asiakkaan_positio
+                    FROM tilausrivin_lisatiedot
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tilausrivitunnus = '{$vaihdettava_rivi}'";
+          $lisatiedot_result = pupe_query($query);
+          $tilausrivin_lisatiedot = mysql_fetch_assoc($lisatiedot_result);
+
+
+          $query = "UPDATE tilausrivin_lisatiedot
+                    SET asiakkaan_positio = 0
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tilausrivitunnus = '{$vaihdettava_rivi}'";
+          pupe_query($query);
+
+          $_asiakkaan_positio = $tilausrivin_lisatiedot['asiakkaan_positio'];
+        }
+        else {
+          $_asiakkaan_positio = $_SESSION['laite_tunnus'];
+        }
+
+        $query = "UPDATE tilausrivin_lisatiedot
+                  SET tilausrivilinkki = '{$vaihdettava_rivi}',
+                  asiakkaan_positio = '{$_asiakkaan_positio}'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tilausrivitunnus = '{$lisatty_tun}'";
         pupe_query($query);
 
-        $query = "  UPDATE tilausrivin_lisatiedot
-              SET asiakkaan_positio = 0
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tilausrivitunnus = '{$vaihdettava_rivi}'";
-        pupe_query($query);
       }
 
       $hinta   = '';

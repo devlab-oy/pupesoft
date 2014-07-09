@@ -444,14 +444,14 @@ function echo_tyomaaraykset_table($request = array()) {
         echo "<form class='multisubmit' name='tulosta_tarkastuspoytakirja'>";
         echo "<input type='hidden' name='ala_tee' value='tulosta_tarkastuspoytakirja' />";
         echo "<input type='hidden' name='toim' value='{$request['toim']}' />";
-        echo "<input type='hidden' name='lasku_tunnukset' value='" . implode(',', $tyomaarays['lasku_tunnukset']) . "' />";
+        echo "<input type='hidden' name='lasku_tunnukset' value='" . implode(',', array_unique($tyomaarays['lasku_tunnukset'])) . "' />";
         echo "<input type='submit' value='" . t("Tallenna tarkastuspyˆt‰kirja PDF") . "' />";
         echo "</form>";
         echo "<br/>";
         echo "<form class='multisubmit' name='tulosta_laskutuspoytakirja'>";
         echo "<input type='hidden' name='ala_tee' value='tulosta_laskutuspoytakirja' />";
         echo "<input type='hidden' name='toim' value='{$request['toim']}' />";
-        echo "<input type='hidden' name='lasku_tunnukset' value='" . implode(',', $tyomaarays['lasku_tunnukset']) . "' />";
+        echo "<input type='hidden' name='lasku_tunnukset' value='" . implode(',', array_unique($tyomaarays['lasku_tunnukset'])) . "' />";
         echo "<input type='submit' value='" . t("Tallenna laskutuspyˆt‰kirja PDF") . "' />";
         echo "</form>";
         echo "</td>";
@@ -636,7 +636,7 @@ function echo_tyomaarays_rivi($request, $laitteet) {
       echo "<td>";
       echo "<a href='{$palvelin2}tilauskasittely/laitteen_vaihto.php?tilausrivi_tunnus={$laite['tilausrivi_tunnus']}&lopetus={$palvelin2}tyomaarays/tyojono2.php'><button type='button'>" . t("Laitteen vaihto") . "</button></a>";
       echo "<br/>";
-      echo "<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=TYOMAARAYS&tilausnumero={$laite['lasku_tunnus']}&lopetus={$palvelin2}tyomaarays/tyojono2.php'><button type='button'>" . t("Muu") . "</button></a>";
+      echo "<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=TYOMAARAYS&tilausnumero={$laite['lasku_tunnus']}&laite_tunnus={$laite['laite_tunnus']}&lopetus={$palvelin2}tyomaarays/tyojono2.php'><button type='button'>" . t("Muu") . "</button></a>";
       echo "<br/>";
       //Vaikka lasku_tunnukset annetaan array:n‰ niin tarkoitus ei ole antaa ikin‰ enemp‰‰ kuin yksi lasku_tunnus t‰m‰n linkin kautta
       echo "<a href='{$palvelin2}tyomaarays/tyojono2.php?toim={$request['toim']}&ala_tee=merkkaa_kadonneeksi&lasku_tunnukset[]={$laite['lasku_tunnus']}&laite_tunnus={$laite['laite_tunnus']}'><button type='button'>" . t("Kateissa") . "</button></a>";

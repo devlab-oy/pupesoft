@@ -90,7 +90,7 @@ function hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy() {
             JOIN asiakas
             ON ( asiakas.yhtio = kohde.yhtio
               AND asiakas.tunnus = kohde.asiakas
-              AND asiakas.nimi LIKE '%Testi%')
+              AND asiakas.nimi LIKE '%Test%')
             JOIN tuote
             ON ( tuote.yhtio = laite.yhtio
               AND tuote.tuoteno = huoltosykli.toimenpide )

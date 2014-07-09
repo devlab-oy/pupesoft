@@ -18,12 +18,21 @@ if (!isset($_SERVER["HTTPS"]) or $_SERVER["HTTPS"] != 'on') {
 $tee = isset($tee) ? $tee : '';
 $target_id = isset($target_id) ? $target_id : '';
 
-if ($tee == "laheta" and $hae_tiliotteet == "on") {
-  if (isset($salasana) and salasana_kunnossa()) {
-    lataa_kaikki("TITO");
+if ($tee == "laheta") {
+  if (!salasana_kunnossa()) {
     $tee = "";
   }
-  else {
+}
+
+if ($tee == "laheta") {
+  if ($hae_tiliotteet == "on") {
+    lataa_kaikki("TITO");
+  }
+}
+
+if ($tee == "laheta") {
+  if ($hae_viitteet == "on") {
+    lataa_kaikki("KTL");
     $tee = "";
   }
 }
@@ -32,15 +41,6 @@ if ($tee == "laheta") {
   virhe("Et antanut mit‰‰n komentoja");
 
   $tee = "";
-}
-
-if ($tee == "hae_viiteaineisto") {
-  if (isset($salasana) and salasana_kunnossa()) {
-    lataa_kaikki("KTL");
-  }
-  else {
-    $tee = "";
-  }
 }
 
 if ($tee == "laheta_maksuaineisto") {
@@ -413,6 +413,8 @@ function formi() {
     echo "<td>";
     echo "<label for='hae_tiliotteet'>" . t("Hae tiliotteet") . "</label>";
     echo "<input type='checkbox' name='hae_tiliotteet' id='hae_tiliotteet'/>";
+    echo "<label for='hae_viitteet'>" . t("Hae viitteet") . "</label>";
+    echo "<input type='checkbox' name='hae_viitteet' id='hae_viitteet'/>";
     echo "</td>";
     echo "</tr>";
 

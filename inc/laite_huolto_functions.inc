@@ -250,6 +250,8 @@ function generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltos
 
     //laitteen toimenpide tuotteen tuotteen_avainsana: tyomaarayksen ryhmittely pitää olla asetettu, myös prioriteetti (selitetark) pitää olla asetettu
     if (empty($huollettavan_laitteen_huoltosyklirivi['toimenpide_tuotteen_tyyppi']) or $huollettavan_laitteen_huoltosyklirivi['toimenpide_tuotteen_prioriteetti'] == null) {
+      echo 'laitteen toimenpide tuotteen tuotteen_avainsana: tyomaarayksen ryhmittely pitää olla asetettu, myös prioriteetti (selitetark) pitää olla asetettu';
+      echo "<br/>";
       continue;
     }
 

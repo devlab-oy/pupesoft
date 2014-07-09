@@ -90,12 +90,12 @@ class MagentoClient {
    * Miten configurable-tuotteen lapsituotteet näytetään verkkokaupassa, oletuksena NOT_VISIBLE_INDIVIDUALLY
    */
   private $_configurable_lapsituote_nakyvyys = 'NOT_VISIBLE_INDIVIDUALLY';
-  
+
   /**
    * Tuotteen erikoisparametrit jotka tulevat jostain muualta kuin dynaamisista parametreistä
    */
   private $_verkkokauppatuotteet_erikoisparametrit = array ();
-  
+
   /**
    * Magentossa käsin hallitut kategoria id:t joita ei poisteta tuotteelta tuotepäivityksessä
    */
@@ -217,7 +217,7 @@ class MagentoClient {
     $hintakentta = $this->_hintakentta;
 
     $selected_category = $this->_kategoriat;
-    
+
     $verkkokauppatuotteet_erikoisparametrit = $this->_verkkokauppatuotteet_erikoisparametrit;
 
     // Tuote countteri
@@ -306,7 +306,7 @@ class MagentoClient {
         $key = $parametri['option_name'];
         $multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
       }
-      
+
       if (count($verkkokauppatuotteet_erikoisparametrit) > 0) {
         foreach ($verkkokauppatuotteet_erikoisparametrit as $erikoisparametri) {
           $key = $erikoisparametri['nimi'];
@@ -376,7 +376,7 @@ class MagentoClient {
       // Tuote on jo olemassa, päivitetään
       else {
         try {
-          
+
           $sticky_kategoriat = $this->_sticky_kategoriat;
 
           // Haetaan tuotteen Magenton ID ja nykyiset kategoriat
@@ -452,7 +452,7 @@ class MagentoClient {
     $category_tree = $this->getCategories();
 
     $hintakentta = $this->_hintakentta;
-    
+
     // Erikoisparametrit
     $verkkokauppatuotteet_erikoisparametrit = $this->_verkkokauppatuotteet_erikoisparametrit;
 
@@ -677,24 +677,40 @@ class MagentoClient {
     // Haetaan laskut (invoices.state = 'paid')
 
     foreach ($fetched_orders as $order) {
-
       $this->log("Haetaan tilaus {$order['increment_id']}", '', $type = 'order');
 
       // Haetaan tilauksen tiedot (orders)
       $temp_order = $this->_proxy->call($this->_session, 'sales_order.info', $order['increment_id']);
+
+      // Looptaan tilauksen statukset
       foreach ($temp_order['status_history'] as $historia) {
-        if ($historia['status'] == "processing_pupesoft") {
-          $this->log("Tilausta on käsitelty ".$historia['status']. " tilassa, ohitetaan sisäänluku", '', $type = 'order');
-          continue;
+        // Jos tilaus on ollut kerran jo processing_pupesoft, ei haeta sitä enää
+        $_status = $historia['status'];
+
+        if ($_status == "processing_pupesoft") {
+          $this->log("Tilausta on käsitelty {$_status} tilassa, ohitetaan sisäänluku", '', $type = 'order');
+          // Skipataan tämä $order
+          continue 2;
         }
       }
+
       $orders[] = $temp_order;
+
       // Päivitetään tilauksen tila että se on noudettu pupesoftiin
-      $this->_proxy->call($this->_session, 'sales_order.addComment', array('orderIncrementId' => $order['increment_id'], 'status' => 'processing_pupesoft', 'Tilaus noudettu Pupesoftiin'));
+      $_data = array(
+        'orderIncrementId' => $order['increment_id'],
+        'status' => 'processing_pupesoft',
+        'Tilaus noudettu Pupesoftiin',
+      );
+
+      $this->_proxy->call($this->_session, 'sales_order.addComment', $_data);
     }
+
     // Kirjataan kumpaankin logiin
-    $this->log(count($orders) . " tilausta haettu", '', $type = 'order');
-    $this->log(count($orders) . " tilausta haettu");
+    $_count = count($orders);
+
+    $this->log("{$_count} tilausta haettu", '', $type = 'order');
+    $this->log("{$_count} tilausta haettu");
 
     // Palautetaan löydetyt tilaukset
     return $orders;
@@ -1538,7 +1554,7 @@ class MagentoClient {
     $this->_verkkokauppatuotteet_erikoisparametrit = $verkkokauppatuotteet_erikoisparametrit;
   }
 
-  /** 
+  /**
    * Magentossa käsin hallitut kategoriat joita ei poisteta tuotteelta tuotepäivityksessä
    */
   public function setStickyKategoriat($magento_sticky_kategoriat) {

@@ -402,6 +402,11 @@ if ($tee == 'laske') {
         $pvm = "{$paiva}-{$kuu}-{$vuosi}";
 
         if (strtotime($alku) <= strtotime("{$vuosi}-{$kuu}-{$paiva}") and strtotime($loppu) >= strtotime("{$vuosi}-{$kuu}-{$paiva}")) {
+
+          $kustp = $row['kp_nimi'];
+          $osasto = $row['osasto'];
+          $try = $row['try'];
+
           if (!isset($arr[$pvm]['tavoite'])) {
             $arr[$pvm]['tavoite'] = 0;
           }
@@ -420,10 +425,6 @@ if ($tee == 'laske') {
           if (!isset($arr_try[$pvm][$osasto][$try]['tavoite'])) {
             $arr_try[$pvm][$osasto][$try]['tavoite'] = 0;
           }
-
-          $kustp = $row['kp_nimi'];
-          $osasto = $row['osasto'];
-          $try = $row['try'];
 
           $arr[$pvm]['tavoite'] += $row['summa'] / $paivia;
           $arr_kustp[$pvm][$kustp]['tavoite'] += $row['summa'] / $paivia;
@@ -445,58 +446,118 @@ if ($tee == 'laske') {
       for ($i = 0; $i < $paivia; $i++) {
 
         $paiva = $i+1;
-        $pvm = "{$paiva}-{$kuu}-{$vuosi}";
         $pvmx = strtotime("{$vuosi}-{$kuu}-{$paiva}");
 
         if (strtotime($alku) <= strtotime("{$vuosi}-{$kuu}-{$paiva}") and strtotime($loppu) >= strtotime("{$vuosi}-{$kuu}-{$paiva}")) {
-
-          if (!isset($xarr[$pvmx]['tavoite'])) {
-            $xarr[$pvmx]['tavoite'] = 0;
-          }
-          if (!isset($xarr_kustp[$pvmx][$kustp]['tavoite'])) {
-            $xarr_kustp[$pvmx][$kustp]['tavoite'] = 0;
-          }
-          if (!isset($xarr_kustp_osasto[$pvmx][$kustp][$osasto]['tavoite'])) {
-            $xarr_kustp_osasto[$pvmx][$kustp][$osasto]['tavoite'] = 0;
-          }
-          if (!isset($xarr_kustp_osasto_try[$pvmx][$kustp][$osasto][$try]['tavoite'])) {
-            $xarr_kustp_osasto_try[$pvmx][$kustp][$osasto][$try]['tavoite'] = 0;
-          }
-          if (!isset($xarr_osasto[$pvmx][$osasto]['tavoite'])) {
-            $xarr_osasto[$pvmx][$osasto]['tavoite'] = 0;
-          }
-          if (!isset($xarr_try[$pvmx][$osasto][$try]['tavoite'])) {
-            $xarr_try[$pvmx][$osasto][$try]['tavoite'] = 0;
-          }
 
           $kustp = $row['kp_nimi'];
           $osasto = $row['osasto'];
           $try = $row['try'];
 
-          $xarr[$pvmx]['tavoite'] += $row['summa'] / $paivia;
-          $xarr_kustp[$pvmx][$kustp]['tavoite'] += $row['summa'] / $paivia;
-          $xarr_kustp_osasto[$pvmx][$kustp][$osasto]['tavoite'] += $row['summa'] / $paivia;
-          $xarr_kustp_osasto_try[$pvmx][$kustp][$osasto][$try]['tavoite'] += $row['summa'] / $paivia;
-          $xarr_osasto[$pvmx][$osasto]['tavoite'] += $row['summa'] / $paivia;
-          $xarr_try[$pvmx][$osasto][$try]['tavoite'] += $row['summa'] / $paivia;
+          if (!isset($xarr[$pvmx])) {
+            $xarr[$pvmx] = 0;
+          }
+          if (!isset($xarr_kustp[$pvmx][$kustp])) {
+            $xarr_kustp[$pvmx][$kustp] = 0;
+          }
+          if (!isset($xarr_kustp_osasto[$pvmx][$kustp][$osasto])) {
+            $xarr_kustp_osasto[$pvmx][$kustp][$osasto] = 0;
+          }
+          if (!isset($xarr_kustp_osasto_try[$pvmx][$kustp][$osasto][$try])) {
+            $xarr_kustp_osasto_try[$pvmx][$kustp][$osasto][$try] = 0;
+          }
+          if (!isset($xarr_osasto[$pvmx][$osasto])) {
+            $xarr_osasto[$pvmx][$osasto] = 0;
+          }
+          if (!isset($xarr_try[$pvmx][$osasto][$try])) {
+            $xarr_try[$pvmx][$osasto][$try] = 0;
+          }
+
+          $xarr[$pvmx] += $row['summa'] / $paivia;
+          $xarr_kustp[$pvmx][$kustp] += $row['summa'] / $paivia;
+          $xarr_kustp_osasto[$pvmx][$kustp][$osasto] += $row['summa'] / $paivia;
+          $xarr_kustp_osasto_try[$pvmx][$kustp][$osasto][$try] += $row['summa'] / $paivia;
+          $xarr_osasto[$pvmx][$osasto] += $row['summa'] / $paivia;
+          $xarr_try[$pvmx][$osasto][$try] += $row['summa'] / $paivia;
         }
       }
 
-      $xx = array('arr' => $xarr, 'arr_kustp' => $xarr_kustp, 'arr_kustp_osasto' => $xarr_kustp_osasto,'arr_kustp_osasto_try' => $xarr_kustp_osasto_try, 'arr_osasto' => $xarr_osasto, 'arr_try' => $xarr_try);
 
+      foreach ($xarr as $aik => $sum) {
+        $pvm = ltrim(date("W-Y", $aik),0);
+        $kustp = $row['kp_nimi'];
+        $osasto = $row['osasto'];
+        $try = $row['try'];
+        if (!isset($arr[$pvm]['tavoite'])) {
+          $arr[$pvm]['tavoite'] = 0;
+        }
+        $arr[$pvm]['tavoite'] += $sum;
+      }
+
+      foreach ($xarr_kustp as $aik => $sum) {
+        $pvm = ltrim(date("W-Y", $aik),0);
+        $kustp = $row['kp_nimi'];
+        $osasto = $row['osasto'];
+        $try = $row['try'];
+        if (!isset($arr[$pvm]['tavoite'])) {
+          $arr_kustp[$pvm]['tavoite'] = 0;
+        }
+        $arr_kustp[$pvm]['tavoite'] += $sum;
+      }
+
+      foreach ($xarr_kustp_osasto as $aik => $sum) {
+        $pvm = ltrim(date("W-Y", $aik),0);
+        $kustp = $row['kp_nimi'];
+        $osasto = $row['osasto'];
+        $try = $row['try'];
+        if (!isset($arr[$pvm]['tavoite'])) {
+          $arr_kustp_osasto[$pvm]['tavoite'] = 0;
+        }
+        $arr_kustp_osasto[$pvm]['tavoite'] += $sum;
+      }
+
+      foreach ($xarr_kustp_osasto_try as $aik => $sum) {
+        $pvm = ltrim(date("W-Y", $aik),0);
+        $kustp = $row['kp_nimi'];
+        $osasto = $row['osasto'];
+        $try = $row['try'];
+        if (!isset($arr[$pvm]['tavoite'])) {
+          $arr_kustp_osasto_try[$pvm]['tavoite'] = 0;
+        }
+        $arr_kustp_osasto_try[$pvm]['tavoite'] += $sum;
+      }
+
+      foreach ($xarr_osasto as $aik => $sum) {
+        $pvm = ltrim(date("W-Y", $aik),0);
+        $kustp = $row['kp_nimi'];
+        $osasto = $row['osasto'];
+        $try = $row['try'];
+        if (!isset($arr[$pvm]['tavoite'])) {
+          $arr_osasto[$pvm]['tavoite'] = 0;
+        }
+        $arr_osasto[$pvm]['tavoite'] += $sum;
+      }
+
+      foreach ($xarr_try as $aik => $sum) {
+        $pvm = ltrim(date("W-Y", $aik),0);
+        $kustp = $row['kp_nimi'];
+        $osasto = $row['osasto'];
+        $try = $row['try'];
+        if (!isset($arr[$pvm]['tavoite'])) {
+          $arr_try[$pvm]['tavoite'] = 0;
+        }
+        $arr_try[$pvm]['tavoite'] += $sum;
+      }
     }
 
 
 
-
-
-
-
-
-
-
-
     if ($naytetaan_tulos == 'monthly') {
+
+      $pvm = "{$kuu}-{$vuosi}";
+      $kustp = $row['kp_nimi'];
+      $osasto = $row['osasto'];
+      $try = $row['try'];
 
       if (!isset($arr[$pvm]['tavoite'])) {
         $arr[$pvm]['tavoite'] = 0;
@@ -517,11 +578,6 @@ if ($tee == 'laske') {
         $arr_try[$pvm][$osasto][$try]['tavoite'] = 0;
       }
 
-      $pvm = "{$kuu}-{$vuosi}";
-      $kustp = $row['kp_nimi'];
-      $osasto = $row['osasto'];
-      $try = $row['try'];
-
       $arr[$pvm]['tavoite'] += $row['summa'];
       $arr_kustp[$pvm][$kustp]['tavoite'] += $row['summa'];
       $arr_kustp_osasto[$pvm][$kustp][$osasto]['tavoite'] += $row['summa'];
@@ -533,8 +589,8 @@ if ($tee == 'laske') {
   }
 
 
-  print_r($xx);
-  die;
+  print_r($arr);
+  echo '<hr>';
 
 
   $query = "SELECT tilausrivi.laadittu AS 'pvm',

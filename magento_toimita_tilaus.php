@@ -27,7 +27,7 @@ $kuittaukset = array_merge($default_kuittaukset, $magento_api_toimituskuittaus_v
 
 $magento_api_ord = (int) $magento_api_ord;
 
-if ($magento_api_url == "" or $magento_api_usr == "" or  $magento_api_pas == "" or $magento_api_ord <= 0) {
+if ($magento_kaytossa === FALSE or $magento_api_ord <= 0) {
   exit;
 }
 

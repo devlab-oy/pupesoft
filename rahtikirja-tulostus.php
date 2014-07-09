@@ -914,8 +914,8 @@ if ($tee == 'tulosta') {
         paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi(array('otunnukset' => $otunnukset, 'kilotyht' => $kilotyht));
       }
 
-      // Katsotaan onko magento-API konffattu, eli verkkokauppa käytössä, silloin merkataan tilaus toimitetuksi Magentossa kun rahtikirja tulostetaan
-      if (isset($magento_api_url) and $magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "") {
+      // Katsotaan onko Magento käytössä, silloin merkataan tilaus toimitetuksi Magentoon kun rahtikirja tulostetaan
+      if ($magento_kaytossa === TRUE) {
         $query = "SELECT asiakkaan_tilausnumero
                   FROM lasku
                   WHERE yhtio                 = '$kukarow[yhtio]'

@@ -232,6 +232,9 @@ function generoi_tyomaaraykset_huoltosykleista($laitteet, $laitteiden_huoltosykl
       if ($debug) {
         $virheet[$laite['laite_tunnus']][] = "Tälle laitteelle " . $laite['laite_tunnus'] . " on jo luotu työmääräys";
       }
+      if (isset($proggress_bar)) {
+        $proggress_bar->increase();
+      }
       continue;
     }
 
@@ -241,12 +244,18 @@ function generoi_tyomaaraykset_huoltosykleista($laitteet, $laitteiden_huoltosykl
       if ($debug) {
         $virheet[$laite['laite_tunnus']][] = "Toimenpide tuote " . $laite['laite_tunnus'] . " pitää olla saldoton! Työmääräystä tälle tuotteelle ei lisätty";
       }
+      if (isset($proggress_bar)) {
+        $proggress_bar->increase();
+      }
       continue;
     }
 
     //laitteen toimenpide tuotteen tuotteen_avainsana: tyomaarayksen ryhmittely pitää olla asetettu, myös prioriteetti (selitetark) pitää olla asetettu
     if (empty($laite['toimenpide_tuotteen_tyyppi']) or $laite['toimenpide_tuotteen_prioriteetti'] == null) {
       $virheet[$laite['laite_tunnus']][] = 'laitteen toimenpide tuotteen tuotteen_avainsana: tyomaarayksen ryhmittely pitää olla asetettu, myös prioriteetti (selitetark) pitää olla asetettu';
+      if (isset($proggress_bar)) {
+        $proggress_bar->increase();
+      }
       continue;
     }
 
@@ -267,9 +276,13 @@ function generoi_tyomaaraykset_huoltosykleista($laitteet, $laitteiden_huoltosykl
   }
 
   if ($debug) {
+    $kpl = count($laitteet) - count($virheet);
+    echo "Työmääräyksiä tuli {$kpl}";
+    echo "<br/>";
     foreach($virheet as $laitteen_virheet) {
       foreach ($laitteen_virheet as $laitteen_virhe) {
         echo $laitteen_virhe;
+        echo "<br/>";
       }
     }
   }

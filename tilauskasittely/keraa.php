@@ -1324,7 +1324,7 @@ if ($tee == 'P') {
       $ptilarow = mysql_fetch_assoc($res);
       $ptila = $ptilarow['tila'];
 
-      if($ptila = 'G') {
+      if($ptila == 'G') {
 
         $query = "SELECT
                   lasku.*,

@@ -356,7 +356,6 @@ if (!function_exists("tee_jt_tilaus")) {
               $fieldname == 'maksuaika' or
               $fieldname == 'lahetepvm' or
               $fieldname == 'h1time' or
-              $fieldname == 'viite' or
               $fieldname == 'laskunro' or
               $fieldname == 'mapvm' or
               $fieldname == 'kerayslista' or
@@ -404,9 +403,9 @@ if (!function_exists("tee_jt_tilaus")) {
           elseif ($fieldname == 'hyvaksyja_nyt' and $otsikkorivi['jtkielto'] == "Y") {
             $query .= $fieldname."='$otsikkorivi[tunnus]',";
           }
-          elseif ($fieldname == 'asiakkaan_tilausnumero') {
-            // ei tyhjennetä asiakkaan tilausnumeroa jos halutaan niputtaa tilaukset sen mukaan
-            // tai ennakko tai jtkielto
+          elseif ($fieldname == 'asiakkaan_tilausnumero' or $fieldname == 'viite') {
+            // ei tyhjennetä asiakkaan tilausnumeroa ja viitettä jos halutaan niputtaa tilaukset
+            // sen mukaan tai ennakko tai jtkielto
             if ($yhtiorow['jt_asiakkaan_tilausnumero'] == "K" or
                 $toim == "ENNAKKO" or
                 $otsikkorivi['jtkielto'] == "Y") {

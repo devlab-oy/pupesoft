@@ -242,20 +242,42 @@ if (!function_exists("pupe_error")) {
 
     if (ob_get_level() > 1) {
       $fleur = ob_get_contents();
-
-      // Onko nagios monitor asennettu?
-      if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
-        file_put_contents("/home/nagios/nagios-pupesoft.log", "-----------------------------------------------\n$fleur\n$puperror\n-----------------------------------------------\n", FILE_APPEND);
-      }
-
       ob_end_clean();
-
-      die("1, Tietokantayhteydessä virhe\r\n\r\n");
     }
     else {
-      // kuollaan pois
-      exit(nl2br($puperror));
+      $fleur = "";
     }
+
+    // Onko nagios monitor asennettu?
+    if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
+      $_msg  = "-----------------------------------------------\n";
+      $_msg .= "{$fleur}\n";
+      $_msg .= "{$puperror}\n";
+      $_msg .= "-----------------------------------------------\n";
+
+      file_put_contents("/home/nagios/nagios-pupesoft.log", $_msg, FILE_APPEND);
+    }
+
+    $_display = ini_get("display_errors");
+    $_cli = (php_sapi_name() == 'cli');
+
+    if (!$_cli and isset($yhtiorow['css'])) {
+      echo "<style type = 'text/css'>";
+      echo $yhtiorow['css'];
+      echo "</style>";
+
+      echo "<font class = 'error'>";
+    }
+
+    if ($_display == '1') {
+      echo nl2br($puperror);
+    }
+    else {
+      echo t("Tietokantayhteydessä virhe!");
+    }
+
+    // kuollaan pois
+    exit(1);
   }
 }
 

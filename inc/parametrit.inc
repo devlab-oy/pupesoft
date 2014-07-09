@@ -213,6 +213,10 @@ unset($tee_keraysera_debugdir);
 
 unset($loginkieli);
 
+unset($magento_api_url);
+unset($magento_api_usr);
+unset($magento_api_pas);
+
 $pupe_query_debug = 0;
 $aika_debug_array = array();
 $quer_debug_array = array();
@@ -273,6 +277,14 @@ $sanakirja_kielet = array("fi" => "Suomi",
 //Initioidaan pari muuttujaa
 if (!isset($login))    $login = "";
 if (!isset($extranet))   $extranet = "";
+
+// Katsotaan onko Pupesoftissa Magento rajapinta asetettuna, eli verkkokauppa käytössä
+if (empty($magento_api_url) or empty($magento_api_usr) or empty($magento_api_pas)) {
+  $magento_kaytossa = false;
+}
+else {
+  $magento_kaytossa = true;
+}
 
 // jos saamme nämä muuttujat getissä, kokeillaan logata niillä sisään
 if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_GET["yhtio"] != "") {

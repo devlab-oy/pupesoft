@@ -102,7 +102,7 @@ if ($handle = opendir($path)) {
             // Lasketaan viel‰ Magentosta tulleet tilausrivit jotka ovat ker‰‰m‰tt‰ ja lasketaan ne mukaan Pupen hyllyss‰ olevaan m‰‰r‰‰n
             $query = "SELECT ifnull(sum(tilausrivi.tilkpl),0) keraamatta
                       FROM tilausrivi
-                      WHERE yhtio = yhtio
+                      WHERE yhtio = '{$kukarow['yhtio']}'
                       AND tuoteno = '{$tuoterow['tuoteno']}'
                       AND varasto = '{$varastorow['tunnus']}'
                       AND var = ''

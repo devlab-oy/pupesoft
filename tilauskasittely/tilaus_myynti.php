@@ -6346,18 +6346,9 @@ if ($tee == '') {
 
         if ($yhtiorow["saldo_varastossa_valmistuksella"] != ""
           and ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE")) {
-          // Haetaan varastossa oleva saldo
-          $query = "SELECT saldo
-                    FROM tuotepaikat
-                    WHERE yhtio = '{$yhtiorow["yhtio"]}'
-                    AND tuoteno = '{$row["tuoteno"]}'
-                    AND hyllyalue = '{$row["hyllyalue"]}'
-                    AND hyllynro = '{$row["hyllynro"]}'
-                    AND hyllyvali = '{$row["hyllyvali"]}'
-                    AND hyllytaso = '{$row["hyllytaso"]}'";
-          $saldorow = mysql_fetch_assoc(pupe_query($query));
+          list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', $row["varasto"], $yhtiorow["yhtio"], $row["hyllyalue"], $row["hyllynro"], $row["hyllyvali"], $row["hyllytaso"]);
 
-          echo "<td $class align='left' valign='top'>{$saldorow["saldo"]}</td>";
+          echo "<td $class align='left' valign='top'>$hyllyssa</td>";
         }
 
         if ($kukarow['extranet'] == '' and $tuotekyslinkki != "") {

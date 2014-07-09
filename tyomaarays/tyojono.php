@@ -74,15 +74,16 @@ if (trim($konserni) != '') {
   echo "<th>".t("Yhtiö")."</th>";
 }
 
-echo "  <th>".t("Työm").".<br>".t("Viite")."</th>
-    <th>".t("Prio")."</th>
-    <th>".t("Ytunnus")."<br>".t("Asiakas")."</th>
-    <th>".t("Työaika")."<br>".t("Työn suorittaja")."</th>
-    <th>".t("Toimitetaan")."</th>
-    <th>".t("Myyjä")."<br>".t("Tyyppi")."</th>
-    <th>".t("Työjono")."/<br>".t("Työstatus")."</th>
-    <th style='visibility:hidden; display:none;'></th>
-    </tr>";
+echo "<th>".t("Työm").".<br>".t("Viite")."</th>
+      <th>".t("Prio")."</th>
+      <th>".t("Ytunnus")."<br>".t("Asiakas")."</th>
+      <th>".t("Työaika")."<br>".t("Työn suorittaja")."</th>
+      <th>".t("Toimitetaan")."</th>
+      <th>".t("Myyjä")."<br>".t("Tyyppi")."</th>
+      <th>".t("Työjono")."/<br>".t("Työstatus")."</th>
+      <th style='visibility:hidden; display:none;'></th>
+      <th style='visibility:hidden; display:none;'></th>
+      </tr>";
 
 echo "<tr>";
 
@@ -132,8 +133,8 @@ while ($tyostatus_row = mysql_fetch_assoc($tyostatus_result)) {
 echo "</select>";
 echo "</td>";
 
-//echo "<td><input type='hidden' class='search_field' name='search_muokkaa_haku'></td>";
-//echo "<td style='visibility:hidden; display:none;'><input type='hidden' class='search_field' name='search_statusjono_haku'></td>";
+echo "<td style='visibility:hidden; display:none;'><input type='hidden' class='search_field' name='search_muokkaa_haku'></td>";
+echo "<td style='visibility:hidden; display:none;'><input type='hidden' class='search_field' name='search_statusjono_haku'></td>";
 echo "</tr>";
 echo "</thead>";
 

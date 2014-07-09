@@ -210,58 +210,56 @@ function paata_mitka_huollot_tehdaan($laitteiden_huoltosyklirivit) {
   return array($huollettavien_laitteiden_huoltosyklirivit, $laitteiden_huoltosyklirivit_joita_ei_huolleta);
 }
 
-function generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltosyklirivit, $laitteiden_huoltosyklirivit_joita_ei_huolleta) {
+function generoi_tyomaaraykset_huoltosykleista($laitteet, $laitteiden_huoltosyklirivit_joita_ei_huolleta) {
   global $kukarow, $yhtiorow, $debug;
 
   if ($debug) {
-    echo "Työmääräyksiä pitäisi tulla " . count($huollettavien_laitteiden_huoltosyklirivit) . ' kappaletta';
+    echo "Työmääräyksiä pitäisi tulla " . count($laitteet) . ' kappaletta';
     echo "<br/>";
     echo "<br/>";
   }
 
   if ($debug) {
     $proggress_bar = new ProgressBar(t('Työmääräykset'));
-    $proggress_bar->initialize(count($huollettavien_laitteiden_huoltosyklirivit));
+    $proggress_bar->initialize(count($laitteet));
   }
 
   $edellinen_kohde_tunnus = 0;
-  foreach ($huollettavien_laitteiden_huoltosyklirivit as $huollettavan_laitteen_huoltosyklirivi) {
-    $onko_tyomaarays_jo_luotu_talle_laitteelle = tarkista_loytyyko_tyomaarays($huollettavan_laitteen_huoltosyklirivi);
+  $virheet = array();
+  foreach ($laitteet as $laite) {
+    $onko_tyomaarays_jo_luotu_talle_laitteelle = tarkista_loytyyko_tyomaarays($laite);
     if ($onko_tyomaarays_jo_luotu_talle_laitteelle) {
       if ($debug) {
-        echo "Tälle laitteelle " . $huollettavan_laitteen_huoltosyklirivi['laite_tunnus'] . " on jo luotu työmääräys";
-        echo "<br/>";
+        $virheet[$laite['laite_tunnus']][] = "Tälle laitteelle " . $laite['laite_tunnus'] . " on jo luotu työmääräys";
       }
       continue;
     }
 
     //laitteen toimenpidetuote pitää olla saldoton
-    $onko_toimenpide_tuote_saldoton = tarkista_toimenpide_saldo($huollettavan_laitteen_huoltosyklirivi);
+    $onko_toimenpide_tuote_saldoton = tarkista_toimenpide_saldo($laite);
     if (!$onko_toimenpide_tuote_saldoton) {
       if ($debug) {
-        echo "Toimenpide tuote " . $huollettavan_laitteen_huoltosyklirivi['laite_tunnus'] . " pitää olla saldoton! Työmääräystä tälle tuotteelle ei lisätty";
-        echo "<br/>";
+        $virheet[$laite['laite_tunnus']][] = "Toimenpide tuote " . $laite['laite_tunnus'] . " pitää olla saldoton! Työmääräystä tälle tuotteelle ei lisätty";
       }
       continue;
     }
 
     //laitteen toimenpide tuotteen tuotteen_avainsana: tyomaarayksen ryhmittely pitää olla asetettu, myös prioriteetti (selitetark) pitää olla asetettu
-    if (empty($huollettavan_laitteen_huoltosyklirivi['toimenpide_tuotteen_tyyppi']) or $huollettavan_laitteen_huoltosyklirivi['toimenpide_tuotteen_prioriteetti'] == null) {
-      echo 'laitteen toimenpide tuotteen tuotteen_avainsana: tyomaarayksen ryhmittely pitää olla asetettu, myös prioriteetti (selitetark) pitää olla asetettu';
-      echo "<br/>";
+    if (empty($laite['toimenpide_tuotteen_tyyppi']) or $laite['toimenpide_tuotteen_prioriteetti'] == null) {
+      $virheet[$laite['laite_tunnus']][] = 'laitteen toimenpide tuotteen tuotteen_avainsana: tyomaarayksen ryhmittely pitää olla asetettu, myös prioriteetti (selitetark) pitää olla asetettu';
       continue;
     }
 
-    if ($edellinen_kohde_tunnus == 0 or $edellinen_kohde_tunnus != $huollettavan_laitteen_huoltosyklirivi['kohde_tunnus']) {
+    if ($edellinen_kohde_tunnus == 0 or $edellinen_kohde_tunnus != $laite['kohde_tunnus']) {
       $lisaa_kulut = true;
     }
     else {
       $lisaa_kulut = false;
     }
 
-    generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_huoltosyklirivit_joita_ei_huolleta, '', $lisaa_kulut);
+    generoi_tyomaarays($laite, $laitteiden_huoltosyklirivit_joita_ei_huolleta, '', $lisaa_kulut);
 
-    $edellinen_kohde_tunnus = $huollettavan_laitteen_huoltosyklirivi['kohde_tunnus'];
+    $edellinen_kohde_tunnus = $laite['kohde_tunnus'];
 
     if (isset($proggress_bar)) {
       $proggress_bar->increase();
@@ -269,7 +267,15 @@ function generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltos
   }
 
   if ($debug) {
-    foreach ($huollettavien_laitteiden_huoltosyklirivit as $huollettavien_laitteiden_huoltosyklirivi) {
+    foreach($virheet as $laitteen_virheet) {
+      foreach ($laitteen_virheet as $laitteen_virhe) {
+        echo $laitteen_virhe;
+      }
+    }
+  }
+
+  if (false) {
+    foreach ($laitteet as $huollettavien_laitteiden_huoltosyklirivi) {
       if (!empty($huollettavien_laitteiden_huoltosyklirivi['toimenpide_tuotteen_tyyppi'])) {
         echo "Kohde: {$huollettavien_laitteiden_huoltosyklirivi['kohde_nimi']} Paikka: {$huollettavien_laitteiden_huoltosyklirivi['paikka_nimi']} Laite: {$huollettavien_laitteiden_huoltosyklirivi['tuoteno']} generoidaan: {$huollettavien_laitteiden_huoltosyklirivi['toimenpide_tuotteen_tyyppi']}";
         echo "<br/>";

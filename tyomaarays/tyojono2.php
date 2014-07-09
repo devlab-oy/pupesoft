@@ -116,7 +116,8 @@ if ($request['ala_tee'] == 'tyhjenna_hakuehdot') {
   tyhjenna_sessio();
 }
 
-if (isset($_SESSION['tyojono_hakuehdot'])) {
+//ei aseteta sessiosta hakuehtoja jos ollaan submitattu hakuformi
+if (isset($_SESSION['tyojono_hakuehdot']) and $request['ala_tee'] != 'hae') {
   aseta_hakuehdot($request);
 }
 
@@ -212,7 +213,7 @@ echo_tyojono_kayttoliittyma($request);
 echo "<br/>";
 echo "<br/>";
 
-if ($request['ala_tee'] != 'tyhjenna_hakuehdot') {
+if ($request['ala_tee'] == 'hae') {
   tallenna_haut_sessioon($request);
 }
 

@@ -297,7 +297,7 @@ function echo_tyojono_kayttoliittyma($request) {
   }
 
   echo "<form method='POST' action='' name='tyojono_haku'>";
-  echo "<input type='hidden' name='ala_tee' value='' />";
+  echo "<input type='hidden' name='ala_tee' value='hae' />";
   echo "<table>";
 
   echo "<tr>";

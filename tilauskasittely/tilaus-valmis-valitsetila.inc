@@ -368,61 +368,57 @@ elseif ($kutsuja != 'keraa.php') {
 $query = "SELECT toimitusvahvistus
           FROM asiakas
           WHERE yhtio = '$kukarow[yhtio]'
-          and tunnus  = '$laskurow[liitostunnus]'";
+          and tunnus = '$laskurow[liitostunnus]'";
 $tresult = pupe_query($query);
 $asirow = mysql_fetch_array($tresult);
 
 if ($asirow['toimitusvahvistus'] != '') {
   // haetaan toimitustavan tiedot
-  $query    = "SELECT * from toimitustapa where yhtio = '$kukarow[yhtio]' and selite = '$laskurow[toimitustapa]'";
+  $query = "SELECT *,
+            if(virallinen_selite != '', virallinen_selite, selite) as selite_text
+            FROM toimitustapa
+            WHERE yhtio = '$kukarow[yhtio]'
+            AND selite = '$laskurow[toimitustapa]'";
   $toitares = pupe_query($query);
   $toitarow = mysql_fetch_assoc($toitares);
-}
 
-// Magento-noutotilausten kuittausblokki
-if ($kutsuja == 'keraa.php' and $asirow['toimitusvahvistus'] == 'Magento' and $toitarow['nouto'] != '' 
-    and isset($magento_api_url) and $magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "") {
+  // Jos Magento on käytössä, halutaan toimitusvahvistus, tämä on noutotilaus ja tullut Magentosta
+  $_magento_tv = ($asirow['toimitusvahvistus'] == 'Magento' and $toitarow['nouto'] != '');
+  $_magento_tilaus = ($laskurow['laatija'] == 'Magento');
 
-  $query = "SELECT asiakkaan_tilausnumero
-            FROM lasku
-            WHERE yhtio                 = '$kukarow[yhtio]'
-            AND tunnus                  = '{$laskurow['tunnus']}'
-            AND laatija                 = 'Magento'
-            AND asiakkaan_tilausnumero != ''";
-  $mageres = pupe_query($query);
-
-  while ($magerow = mysql_fetch_assoc($mageres)) {
-    $magento_api_met = $toitarow['virallinen_selite'] != '' ? $toitarow['virallinen_selite'] : $toitarow['selite'];
+  if ($magento_kaytossa and $_magento_tilaus and $_magento_tv and $kutsuja == 'keraa.php') {
+    $magento_api_met = $toitarow['selite_text'];
     $magento_api_rak = '';
-    $magento_api_ord = $magerow["asiakkaan_tilausnumero"];
+    $magento_api_ord = $laskurow["asiakkaan_tilausnumero"];
     $magento_api_noutokuittaus = "JOO";
 
     require("magento_toimita_tilaus.php");
   }
-}
 
-if ($toimitusvahvitus_laheta and $asirow['toimitusvahvistus'] != '') {
+  if ($toimitusvahvitus_laheta) {
 
-  $otunnukset    = $laskurow["tunnus"];
-  $tunnukset    = 0;
-  $rahtikirjanro  = 0;
+    $otunnukset = $laskurow["tunnus"];
+    $tunnukset = 0;
+    $rahtikirjanro = 0;
 
-  if ($asirow["toimitusvahvistus"] == "toimitusvahvistus_desadv_una.inc") {
-    $desadv_version = "una";
-    $asirow["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
-  }
-  elseif ($asirow["toimitusvahvistus"] == "toimitusvahvistus_desadv_fi0089.inc") {
-    $desadv_version = "fi0089";
-    $asirow["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
-  }
-  else {
-    $desadv_version = "";
-  }
+    if ($asirow["toimitusvahvistus"] == "toimitusvahvistus_desadv_una.inc") {
+      $desadv_version = "una";
+      $asirow["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
+    }
+    elseif ($asirow["toimitusvahvistus"] == "toimitusvahvistus_desadv_fi0089.inc") {
+      $desadv_version = "fi0089";
+      $asirow["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
+    }
+    else {
+      $desadv_version = "";
+    }
 
-  @include("tilauskasittely/$asirow[toimitusvahvistus]");
+    @include("tilauskasittely/$asirow[toimitusvahvistus]");
 
-  if ($toimitusvahvistus_desadv_lahetys === true) {
-    $tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksesta %s lähetettiin toimitusvahvistus."), $laskurow["tunnus"])."</font><br><br>\n";
+    if ($toimitusvahvistus_desadv_lahetys === true) {
+      $_msg = sprintf(t("Tilauksesta %s lähetettiin toimitusvahvistus."), $laskurow["tunnus"]);
+      $tilaus_valmis_message .= "<font class='message'>{$_msg}</font><br><br>\n";
+    }
   }
 }
 

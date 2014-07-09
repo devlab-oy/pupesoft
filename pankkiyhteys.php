@@ -18,41 +18,6 @@ if (!isset($_SERVER["HTTPS"]) or $_SERVER["HTTPS"] != 'on') {
 $tee = isset($tee) ? $tee : '';
 $target_id = isset($target_id) ? $target_id : '';
 
-if ($tee == "uusi_pankkiyhteys") {
-  uusi_pankkiyhteys_formi();
-}
-
-if ($tee == "tarkista_lataa_sertifikaatti_formi") {
-  if (!avaimet_ja_salasana_kunnossa()) {
-    $tee = "lataa_sertifikaatti_formi";
-  }
-
-  $tee = "lataa_sertifikaatti";
-}
-
-if ($tee == "lataa_sertifikaatti") {
-  $private_key = file_get_contents($_FILES["private_key"]["tmp_name"]);
-  $sertifikaatti = file_get_contents($_FILES["certificate"]["tmp_name"]);
-
-  $salatut_tunnukset = array(
-    "private_key"   => salaa($private_key, $salasana),
-    "sertifikaatti" => salaa($sertifikaatti, $salasana)
-  );
-
-  $target_id = hae_target_id($sertifikaatti, $private_key, $customer_id);
-
-  if (tallenna_tunnukset($salatut_tunnukset, $customer_id, $target_id, $tili)) {
-    echo "Tunnukset lis‰tty";
-  }
-  else {
-    virhe("Tunnukset eiv‰t tallentuneet tietokantaan");
-  }
-}
-
-if ($tee == "lataa_sertifikaatti_formi") {
-  sertifikaatin_lataus_formi();
-}
-
 if ($tee == "hae_tiliote") {
   if (isset($salasana) and salasana_kunnossa()) {
     lataa_kaikki("TITO");
@@ -107,7 +72,6 @@ if ($tee == "valitse_komento") {
   echo "<td>Mit‰ haluat tehd‰?</td>";
   echo "<td>";
   echo "<select name='tee'>";
-  echo "<option value='lataa_sertifikaatti_formi'>" . t('Lataa sertifikaatti j‰rjestelm‰‰n') . "</option>";
   echo "<option value='hae_tiliote'>" . t("Hae tiliote") . "</option>";
   echo "<option value='hae_viiteaineisto'>" . t("Hae viiteaineisto") . "</option>";
   echo "<option value='laheta_maksuaineisto'>" . t("L‰het‰ maksuaineisto") . "</option>";
@@ -126,7 +90,6 @@ if ($tee == "") {
 
 /**
  * @param $tili
- * @param $yhtio
  *
  * @return array
  */
@@ -161,44 +124,6 @@ function pura_salaus($salattu_data, $salasana) {
   $salattu_data_binaari = substr($salattu_data_binaari, $iv_size);
 
   return mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $avain, $salattu_data_binaari, MCRYPT_MODE_CBC, $iv);
-}
-
-/**
- * @return bool
- */
-function avaimet_ja_salasana_kunnossa() {
-  $virheet_maara = 0;
-
-  if (!$_FILES["certificate"]["tmp_name"]) {
-    $virheet_maara++;
-    virhe("Sertifikaatti t‰ytyy antaa");
-  }
-
-  if (!$_FILES["private_key"]["tmp_name"]) {
-    $virheet_maara++;
-    virhe("Avain t‰ytyy antaa");
-  }
-
-  if (!$_POST["customer_id"]) {
-    $virheet_maara++;
-    virhe("Asiakastunnus t‰ytyy antaa");
-  }
-
-  if (empty($_POST["salasana"])) {
-    $virheet_maara++;
-    virhe("Salasana t‰ytyy antaa");
-  }
-
-  if ($_POST["salasana"] != $_POST["salasanan_vahvistus"]) {
-    $virheet_maara++;
-    virhe("Salasanan vahvistus ei vastannut salasanaa");
-  }
-
-  if ($virheet_maara == 0) {
-    return true;
-  }
-
-  return false;
 }
 
 /**
@@ -444,68 +369,6 @@ function vastaus_kunnossa($vastaus) {
   }
 }
 
-function sertifikaatin_lataus_formi() {
-  global $yhtiorow, $kukarow;
-
-  echo "<form action='pankkiyhteys.php' method='post' enctype='multipart/form-data'>";
-  echo "<input type='hidden' name='tee' value='tarkista_lataa_sertifikaatti_formi'/>";
-  echo "<input type='hidden' name='tili' value='{$_POST["tili"]}'/>";
-  echo "<table>";
-  echo "<tbody>";
-
-  echo "<tr>";
-  echo "<td>";
-  echo "<label for='private_key'>" . t('Yksityinen avain') . "</label>";
-  echo "</td>";
-  echo "<td>";
-  echo "<input type='file' name='private_key' id='private_key'>";
-  echo "</td>";
-  echo "</tr>";
-
-  echo "<tr>";
-  echo "<td>";
-  echo "<label for='certificate'>" . t('Sertifikaatti') . "</label>";
-  echo "</td>";
-  echo "<td>";
-  echo "<input type='file' name='certificate' id='certificate'/>";
-  echo "</td>";
-  echo "</tr>";
-
-  echo "<tr>";
-  echo "<td><label for='customer_id'>Sertifikaattiin yhdistetty asiakastunnus</label></td>";
-  echo "<td><input type='text' name='customer_id' id='customer_id'/></td>";
-  echo "</tr>";
-
-  echo "<tr>";
-  echo "<td>";
-  echo "<label for='salasana'>" . t("Salasana, jolla tiedot suojataan") . "</label>";
-  echo "</td>";
-  echo "<td>";
-  echo "<input type='password' name='salasana' id='salasana'/>";
-  echo "</td>";
-  echo "<td class='back'>Huom. salasanaa ei voi mitenk‰‰n palauttaa, jos se unohtuu</td>";
-  echo "</tr>";
-
-  echo "<tr>";
-  echo "<td>";
-  echo "<label for='salasanan_vahvistus'>" . t("Salasanan vahvistus") . "</label>";
-  echo "</td>";
-  echo "<td>";
-  echo "<input type='password' name='salasanan_vahvistus' id='salasanan_vahvistus'/>";
-  echo "</td>";
-  echo "</tr>";
-
-  echo "<tr>";
-  echo "<td class='back'>";
-  echo "<input type='submit' name='submit' value='" . t('Tallenna tunnukset') . "'/>";
-  echo "</td>";
-  echo "</tr>";
-
-  echo "</tbody>";
-  echo "</table";
-  echo "</form>";
-}
-
 function virhe($viesti) {
   echo "<font class='error'>{$viesti}</font><br/>";
 }
@@ -533,7 +396,7 @@ function lataa_kaikki($tiedostotyyppi) {
  * @return array
  */
 function hae_kaytossa_olevat_tilit() {
-  global $yhtiorow, $kukarow;
+  global $kukarow;
 
   $query = "SELECT tunnus, nimi
             FROM yriti
@@ -551,8 +414,6 @@ function hae_kaytossa_olevat_tilit() {
 }
 
 function pankkiyhteyden_valinta_formi() {
-  global $yhtiorow, $kukarow;
-
   $kaytossa_olevat_tilit = hae_kaytossa_olevat_tilit();
 
   echo "<form method='post' action='pankkiyhteys.php'>";
@@ -583,6 +444,5 @@ function pankkiyhteyden_valinta_formi() {
 
   echo "<form method='post' action='pankkiyhteys.php'>";
   echo "<input type='hidden' name='tee' value='uusi_pankkiyhteys'/>";
-  echo "<input type='submit' name='uusi_pankkiyhteys' value='" . t("Uusi pankkiyhteys") . "'/>";
   echo "</form>";
 }

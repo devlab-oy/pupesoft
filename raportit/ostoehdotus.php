@@ -18,7 +18,7 @@ if (isset($_POST["tee"])) {
 
 require '../inc/parametrit.inc';
 
-if (isset($tee) AND $tee == "lataa_tiedosto") {
+if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
   exit;
 }
@@ -28,6 +28,7 @@ require 'inc/pupeExcel.inc';
 $worksheet = new pupeExcel();
 $format_bold = array("bold" => TRUE);
 $excelrivi = 0;
+$excelsarake = 0;
 
 // Arrayt otsikoiden k‰sittelyyn
 // Otsikoiden kirjoitus tehd‰‰n arrayden kautta,
@@ -61,7 +62,7 @@ else {
   $lisavarattu = "";
 }
 
-function myynnit($myynti_varasto = '', $myynti_maa = '') {
+function myynnit($myynti_varasto = '', $myynti_maa = '', $excelsarake) {
   // Otetaan kaikki muuttujat mukaan funktioon mit‰ on failissakin
   extract($GLOBALS);
 
@@ -169,6 +170,12 @@ function myynnit($myynti_varasto = '', $myynti_maa = '') {
   $result = pupe_query($query);
   $laskurow = mysql_fetch_array($result);
 
+  foreach ($laskurow as &$laskusarake) {
+    if (is_null($laskusarake) or !isset($laskusarake)) {
+      $laskusarake = 0;
+    }
+  }
+
   $katepros1 = 0;
   $katepros2 = 0;
   $katepros3 = 0;
@@ -220,9 +227,11 @@ function myynnit($myynti_varasto = '', $myynti_maa = '') {
   $worksheet->writeNumber($excelrivi, $excelsarake++, $laskurow['ennpois']);
   $worksheet->writeNumber($excelrivi, $excelsarake++, $laskurow['jt']);
   $worksheet->writeNumber($excelrivi, $excelsarake++, $laskurow['ennakko']);
+
+  return $excelsarake;
 }
 
-function saldot($myynti_varasto = '', $myynti_maa = '') {
+function saldot($myynti_varasto = '', $myynti_maa = '', $excelsarake) {
   // Otetaan kaikki muuttujat mukaan funktioon mit‰ on failissakin
   extract($GLOBALS);
 
@@ -251,17 +260,19 @@ function saldot($myynti_varasto = '', $myynti_maa = '') {
 
   if (mysql_num_rows($result) > 0) {
     while ($varrow = mysql_fetch_array($result)) {
-      $worksheet->writeNumber($excelrivi, $excelsarake++, str_replace(".",",",$varrow['saldo']));
-      $worksheet->writeNumber($excelrivi, $excelsarake++, str_replace(".",",",$varrow['halytysraja']));
+      $worksheet->writeNumber($excelrivi, $excelsarake++, $varrow['saldo']);
+      $worksheet->writeNumber($excelrivi, $excelsarake++, $varrow['halytysraja']);
     }
   }
   else {
     $worksheet->writeNumber($excelrivi, $excelsarake++, "0");
     $worksheet->writeNumber($excelrivi, $excelsarake++, "0");
   }
+
+  return $excelsarake;
 }
 
-function ostot($myynti_varasto = '', $myynti_maa = '') {
+function ostot($myynti_varasto = '', $myynti_maa = '', $excelsarake) {
   // Otetaan kaikki muuttujat mukaan funktioon mit‰ on failissakin
   extract($GLOBALS);
 
@@ -271,7 +282,7 @@ function ostot($myynti_varasto = '', $myynti_maa = '') {
   if ($myynti_varasto != "") {
     $varastotapa .= " AND varastopaikat.tunnus = '$myynti_varasto' ";
   }
-  elseif ($erikoisvarastot != "" AND $myynti_maa == "") {
+  elseif ($erikoisvarastot != "" and $myynti_maa == "") {
     $query = "SELECT group_concat(tunnus)
               FROM varastopaikat
               WHERE yhtio IN ($yhtiot)
@@ -317,10 +328,18 @@ function ostot($myynti_varasto = '', $myynti_maa = '') {
   $result = pupe_query($query);
   $ostorow = mysql_fetch_array($result);
 
+  foreach ($ostorow as &$ostosarake) {
+    if (is_null($ostosarake) or !isset($ostosarake)) {
+      $ostosarake = 0;
+    }
+  }
+
   // Siirtolista jt kpl
-  $worksheet->writeNumber($excelrivi, $excelsarake++, str_replace(".",",",$ostorow['siirtojt']));
+  $worksheet->writeNumber($excelrivi, $excelsarake++, $ostorow['siirtojt']);
   // Tilattu kpl
-  $worksheet->writeNumber($excelrivi, $excelsarake++, str_replace(".",",",$ostorow['tilattu']));
+  $worksheet->writeNumber($excelrivi, $excelsarake++, $ostorow['tilattu']);
+
+  return $excelsarake;
 }
 
 // Org_rajausta tarvitaan yhdess‰ selectiss‰ joka triggerˆi taas toisen asian.
@@ -896,35 +915,15 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
       $headerivi[] = ucfirst(t("$varastonimi jt kpl"));
       $headerivi[] = ucfirst(t("$varastonimi ennakkotilaus kpl"));
 
-      // Kirjoitetaan saldo otsikot (saldofunkitolle)
-      $varastotapa = " AND varastopaikat.tunnus = '$varastotunnus' ";
 
-      // Kaikkien valittujen varastojen saldo
-      $query = "SELECT ifnull(sum(saldo), 0) saldo, ifnull(sum(halytysraja), 0) halytysraja
-                FROM tuotepaikat
-                JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-                  AND varastopaikat.tunnus = tuotepaikat.varasto)
-                $varastotapa
-                WHERE tuotepaikat.yhtio IN ($yhtiot)
-                AND tuotepaikat.tuoteno = '$row[tuoteno]'";
-      $result = pupe_query($query);
-
-      if (mysql_num_rows($result) > 0) {
-        while ($varrow = mysql_fetch_array($result)) {
-          $headerivi[] = ucfirst(t("$varastotunnus saldo"));
-          $headerivi[] = ucfirst(t("$varastotunnus h‰lytysraja"));
-        }
-      }
-      else {
-        $headerivi[] = ucfirst(t("$varastotunnus saldo"));
-        $headerivi[] = ucfirst(t("$varastotunnus h‰lytysraja"));
-      }
+      $headerivi[] = ucfirst(t("$varastonimi saldo"));
+      $headerivi[] = ucfirst(t("$varastonimi h‰lytysraja"));
 
       // Kirjoitetaan osto otsikot (ostofunktille)
       // Siirtolista jt kpl
-      $headerivi[] = ucfirst(t("$varastotunnus siirtojt kpl"));
+      $headerivi[] = ucfirst(t("$varastonimi siirtojt kpl"));
       // Tilattu kpl
-      $headerivi[] = ucfirst(t("$varastotunnus tilattu kpl"));
+      $headerivi[] = ucfirst(t("$varastonimi tilattu kpl"));
     }
   }
 
@@ -1096,11 +1095,11 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
     if ($varastot_maittain == "KYLLA") {
       foreach ($valitutmaat as $maa) {
         // Haetaan tuotteen myyntitiedot
-        myynnit('', $maa);
+        $excelsarake = myynnit('', $maa, $excelsarake);
         // Haetaan tuotteen saldotiedot
-        saldot('', $maa);
+        $excelsarake = saldot('', $maa, $excelsarake);
         // Haetaan tuotteen ostotiedot
-        ostot('', $maa);
+        $excelsarake = ostot('', $maa, $excelsarake);
       }
     }
 
@@ -1108,18 +1107,18 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
     if ($varastot_paikoittain == "KYLLA") {
       foreach ($valitutvarastot as $varastotunnus) {
         // Haetaan tuotteen myyntitiedot
-        myynnit($varastotunnus);
+        $excelsarake = myynnit($varastotunnus, '', $excelsarake);
         // Haetaan tuotteen saldotiedot
-        saldot($varastotunnus);
+        $excelsarake = saldot($varastotunnus, '', $excelsarake);
         // Haetaan tuotteen ostotiedot
-        ostot($varastotunnus);
+        $excelsarake = ostot($varastotunnus, '', $excelsarake);
       }
     }
 
     // Sitten viel‰ totalit
-    myynnit();
-    saldot();
-    ostot();
+    $excelsarake = myynnit('', '', $excelsarake);
+    $excelsarake = saldot('', '', $excelsarake);
+    $excelsarake = ostot('', '', $excelsarake);
 
     // Siirryt‰‰n seuraavalle riville
     $excelrivi++;
@@ -1423,7 +1422,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
     while ($prow = mysql_fetch_array($presult)) {
 
       $chk = "";
-      if (is_array($valitutyhtiot) AND in_array($prow["yhtio"], $valitutyhtiot) != '') {
+      if (is_array($valitutyhtiot) and in_array($prow["yhtio"], $valitutyhtiot) != '') {
         $chk = "CHECKED";
         $yhtiot .= "'$prow[yhtio]',";
         $useampi_yhtio++;
@@ -1463,7 +1462,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
     while ($vrow = mysql_fetch_array($vtresult)) {
 
       $chk = "";
-      if (is_array($valitutmaat) AND in_array($vrow["maa"], $valitutmaat) != '') {
+      if (is_array($valitutmaat) and in_array($vrow["maa"], $valitutmaat) != '') {
         $chk = "CHECKED";
       }
 
@@ -1492,7 +1491,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
     while ($vrow = mysql_fetch_array($vtresult)) {
 
       $chk = "";
-      if (is_array($valitutvarastot) AND in_array($vrow["tunnus"], $valitutvarastot) != '') {
+      if (is_array($valitutvarastot) and in_array($vrow["tunnus"], $valitutvarastot) != '') {
         $chk = "CHECKED";
       }
 

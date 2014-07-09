@@ -438,7 +438,7 @@ if ($tee != "") {
     if (mysql_num_rows($result) > 0) {
       $luontiaikarow = mysql_fetch_assoc($result);
       $laskelma_luotu = $luontiaikarow['luontiaika'];
-      $post_alv_lisa = " and tiliointi.laadittu >= '$laskelma_luotu' ";
+      $post_alv_lisa = " and tiliointi.laadittu >= '$laskelma_luotu' and tiliointi.vero > 0";
     }
     else{
       $post_alv_lisa = " and tiliointi.laadittu < 0.1";
@@ -577,6 +577,7 @@ if ($tee != "") {
             $post_alv_lisa
             $konsernilisa
             ORDER BY $jarj";
+echo "$query <br><br>";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) > 0) {

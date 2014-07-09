@@ -1350,7 +1350,7 @@ if (!function_exists('print_pdf_kerayslista')) {
     if ($kerayslistatyyppi == 'EXCEL1' or $kerayslistatyyppi == 'EXCEL2') {
       $excelnimi = $thispage->close();
 
-      $liite['excel'] = $excelnimi;
+      $liite['excel'] = "/tmp/".$excelnimi;
       $ctype['excel']= "excel";
 
       if ($tyyppi == "SIIRTOLISTA") {

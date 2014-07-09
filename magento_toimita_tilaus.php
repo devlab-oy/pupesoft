@@ -7,6 +7,15 @@
 # $magento_api_noutokuittaus = Noutokuittaus, ilmoitetaan asiakkaalle tilaus noudettavissa
 # $magento_api_toimituskuittaus_viestit (array) = Viesti joka liitetään noutotilauksiin (optional)
 
+if (!function_exists("log_message")) {
+  function log_message($message) {
+    $now = date('d.m.y H:i:s');
+    $message = utf8_encode($message);
+
+    error_log("{$now}: {$message}\n", 3, '/tmp/magento_order_log.txt');
+  }
+}
+
 if (!isset($magento_api_toimituskuittaus_viestit) or count($magento_api_toimituskuittaus_viestit) == 0) {
   $magento_api_toimituskuittaus_viestit = array();
 }
@@ -36,9 +45,9 @@ if ($magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "
     echo $e->faultstring."\n";
     echo $e->faultcode."\n";
   }*/
-  
+
   $message = "Toimitetaan tilaus {$magento_api_ord} Magentoon";
-  error_log(date('d.m.y H:i:s').": ".utf8_encode($message)."\n", 3, '/tmp/magento_order_log.txt');
+  log_message($message);
 
   // Create new shipment
   try {
@@ -72,7 +81,7 @@ if ($magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "
 
     $message = "Lähetyksen luonti epäonnistui";
     $message .= " (" . $e->faultstring . ") faultcode: " . $e->faultcode;
-    error_log(date('d.m.y H:i:s').": ".utf8_encode($message)."\n", 3, '/tmp/magento_order_log.txt');
+    log_message($message);
   }
 
   if ($canShip) {
@@ -83,7 +92,7 @@ if ($magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "
     catch(Exception $e) {
       $message = "Lähetyksenseurannan luonti epäonnistui";
       $message .= " (" . $e->faultstring . ") faultcode: " . $e->faultcode;
-      error_log(date('d.m.y H:i:s').": ".utf8_encode($message)."\n", 3, '/tmp/magento_order_log.txt');
+      log_message($message);
     }
   }
 
@@ -96,7 +105,7 @@ if ($magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "
 
     $message = "Laskun luonti epäonnistui";
     $message .= " (" . $e->faultstring . ") faultcode: " . $e->faultcode;
-    error_log(date('d.m.y H:i:s').": ".utf8_encode($message)."\n", 3, '/tmp/magento_order_log.txt');
+    log_message($message);
   }
 
   if ($canInvoice) {
@@ -106,7 +115,7 @@ if ($magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "
     catch (Exception $e) {
       $message = "Laskun capture epäonnistui";
       $message .= " (" . $e->faultstring . ") faultcode: " . $e->faultcode;
-      error_log(date('d.m.y H:i:s').": ".utf8_encode($message)."\n", 3, '/tmp/magento_order_log.txt');
+      log_message($message);
     }
   }
 }

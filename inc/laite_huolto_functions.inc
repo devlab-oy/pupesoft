@@ -665,19 +665,6 @@ function paivita_tyojono_ja_tyostatus_tyomaaraykselle_temp($tyomaarays_tunnus, $
   pupe_query($query);
 }
 
-function paivita_laite_tunnus_toimenpiteen_tilausriville($laite, $tilausrivit) {
-  global $kukarow, $yhtiorow;
-
-  $query = "UPDATE tilausrivin_lisatiedot
-            JOIN tilausrivi
-            ON ( tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
-              AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-              AND tilausrivi.tunnus = '{$tilausrivit[0][0]}')
-            SET asiakkaan_positio = {$laite['laite_tunnus']}
-            WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'";
-  pupe_query($query);
-}
-
 function paivita_tyojono_ja_tyostatus_tyomaarayksille($tyomaarays_tunnukset, $laite) {
   global $kukarow, $yhtiorow;
 

@@ -226,6 +226,10 @@ unset($tee_keraysera_debugdir);
 
 unset($loginkieli);
 
+unset($magento_api_url);
+unset($magento_api_usr);
+unset($magento_api_pas);
+
 $pupe_query_debug = 0;
 $aika_debug_array = array();
 $quer_debug_array = array();

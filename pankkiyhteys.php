@@ -1,6 +1,6 @@
 <?php
 
-const SEPA_OSOITE  = "https://sepa.devlab.fi/api/";
+const SEPA_OSOITE = "https://sepa.devlab.fi/api/";
 const ACCESS_TOKEN = "Bexvxb10H1XBT36x42Lv8jEEKnA6";
 
 require("inc/parametrit.inc");
@@ -16,72 +16,86 @@ if (!isset($_SERVER["HTTPS"]) or $_SERVER["HTTPS"] != 'on') {
 }
 
 $tee = isset($tee) ? $tee : '';
+$target_id = isset($target_id) ? $target_id : '';
 
-if (isset($uusi_pankkiyhteys)) {
+if ($tee == "tarkista_pankkiyhteys_formi") {
+  if (!pankkiyhteystiedot_kunnossa()) {
+    $tee = "uusi_pankkiyhteys";
+  }
+
+  $generoidut_tunnukset = generoi_private_key_ja_csr($yhtiorow);
+  $sertifikaatti = hae_sertifikaatti_sepasta($pin, $customer_id, $generoidut_tunnukset);
+
+  if ($sertifikaatti === false) {
+    virhe("Sertifikaatin hakeminen epäonnistui, tarkista PIN-koodi ja asiakastunnus");
+    $tee = "uusi_pankkiyhteys";
+  }
+
+  $salatut_tunnukset = array(
+    "private_key"   => salaa($generoidut_tunnukset["private_key"], $salasana),
+    "sertifikaatti" => salaa($sertifikaatti, $salasana)
+  );
+
+  $tee = "generoi_tunnukset";
+}
+
+// Jos käyttäjä ei ole antanut target id:tä, haetaan se pankista
+if ($tee == "generoi_tunnukset" and $target_id == '') {
+  $target_id = hae_target_id($sertifikaatti, $generoidut_tunnukset["private_key"], $customer_id);
+
+  if ($target_id === false) {
+    virhe("Tiedon hakeminen pankista epäonnistui, yritä myöhemmin uudestaan");
+    $tee = "uusi_pankkiyhteys";
+  }
+}
+
+if ($tee == "generoi_tunnukset") {
+  if (tallenna_tunnukset($salatut_tunnukset, $customer_id, $target_id, $tili)) {
+    ok("Tunnukset tallennettu");
+    $tee = "";
+  }
+  else {
+    virhe("Tunnusten tallennus epäonnistui");
+    $tee = "uusi_pankkiyhteys";
+  }
+}
+
+if ($tee == "uusi_pankkiyhteys") {
   uusi_pankkiyhteys_formi();
 }
-elseif ($tee == "generoi_tunnukset") {
-  if (pankkiyhteystiedot_kunnossa()) {
-    $generoidut_tunnukset = generoi_private_key_ja_csr($yhtiorow);
 
-    $sertifikaatti = hae_sertifikaatti_sepasta($pin, $customer_id, $generoidut_tunnukset);
+if ($tee == "tarkista_lataa_sertifikaatti_formi") {
+  if (!avaimet_ja_salasana_kunnossa()) {
+    $tee = "lataa_sertifikaatti_formi";
+  }
 
-    if ($sertifikaatti) {
-      $salatut_tunnukset = array(
-        "private_key"   => salaa($generoidut_tunnukset["private_key"], $salasana),
-        "sertifikaatti" => salaa($sertifikaatti, $salasana)
-      );
+  $tee = "lataa_sertifikaatti";
+}
 
-      if (!isset($target_id)) {
-        $target_id = hae_target_id($sertifikaatti, $generoidut_tunnukset["private_key"],
-          $customer_id);
-      }
+if ($tee == "lataa_sertifikaatti") {
+  $private_key = file_get_contents($_FILES["private_key"]["tmp_name"]);
+  $sertifikaatti = file_get_contents($_FILES["certificate"]["tmp_name"]);
 
-      if ($target_id) {
-        if (tallenna_tunnukset($salatut_tunnukset, $customer_id, $target_id, $tili)) {
-          echo "Tunnukset tallennettu";
-        }
-        else {
-          virhe("Tunnusten tallennus epäonnistui");
-        }
-      }
-      else {
-        virhe("Tiedon hakeminen pankista epäonnistui, yritä myöhemmin uudestaan");
-      }
-    }
-    else {
-      virhe("Sertifikaatin hakeminen epäonnistui, tarkista PIN-koodi ja asiakastunnus");
-    }
+  $salatut_tunnukset = array(
+    "private_key"   => salaa($private_key, $salasana),
+    "sertifikaatti" => salaa($sertifikaatti, $salasana)
+  );
+
+  $target_id = hae_target_id($sertifikaatti, $private_key, $customer_id);
+
+  if (tallenna_tunnukset($salatut_tunnukset, $customer_id, $target_id, $tili)) {
+    echo "Tunnukset lisätty";
   }
   else {
-    uusi_pankkiyhteys_formi();
+    virhe("Tunnukset eivät tallentuneet tietokantaan");
   }
 }
-elseif ($tee == "lataa_sertifikaatti") {
-  if ($_POST["submit"] and avaimet_ja_salasana_kunnossa()) {
 
-    $private_key   = file_get_contents($_FILES["private_key"]["tmp_name"]);
-    $sertifikaatti = file_get_contents($_FILES["certificate"]["tmp_name"]);
-
-    $salatut_tunnukset = array(
-      "private_key"   => salaa($private_key, $salasana),
-      "sertifikaatti" => salaa($sertifikaatti, $salasana)
-    );
-
-    $target_id = hae_target_id($sertifikaatti, $private_key, $customer_id);
-
-    if (tallenna_tunnukset($salatut_tunnukset, $customer_id, $target_id, $tili)) {
-      echo "Tunnukset lisätty";
-    }
-    else {
-      virhe("Tunnukset eivät tallentuneet tietokantaan");
-    }
-  }
-  else {
-    sertifikaatin_lataus_formi();
-  }
+if ($tee == "lataa_sertifikaatti_formi") {
+  sertifikaatin_lataus_formi();
 }
-elseif ($tee == "hae_tiliote") {
+
+if ($tee == "hae_tiliote") {
   if (isset($salasana) and salasana_kunnossa()) {
     lataa_kaikki("TITO");
   }
@@ -89,7 +103,8 @@ elseif ($tee == "hae_tiliote") {
     salasana_formi();
   }
 }
-elseif ($tee == "hae_viiteaineisto") {
+
+if ($tee == "hae_viiteaineisto") {
   if (isset($salasana) and salasana_kunnossa()) {
     lataa_kaikki("KTL");
   }
@@ -97,10 +112,11 @@ elseif ($tee == "hae_viiteaineisto") {
     salasana_formi();
   }
 }
-elseif ($tee == "laheta_maksuaineisto") {
+
+if ($tee == "laheta_maksuaineisto") {
   if ($salasana and salasana_kunnossa() and maksuaineisto_kunnossa()) {
     $maksuaineisto = file_get_contents($_FILES["maksuaineisto"]["tmp_name"]);
-    $tunnukset     = hae_tunnukset_ja_pura_salaus($tili, $salasana);
+    $tunnukset = hae_tunnukset_ja_pura_salaus($tili, $salasana);
 
     $vastaus = laheta_maksuaineisto($tunnukset, $maksuaineisto);
 
@@ -123,7 +139,8 @@ elseif ($tee == "laheta_maksuaineisto") {
     salasana_formi();
   }
 }
-elseif ($tee == "valitse_komento") {
+
+if ($tee == "valitse_komento") {
   echo "<form method='post' action='pankkiyhteys.php'>";
   echo "<input type='hidden' name='tili' value='{$tili}'/>";
   echo "<table>";
@@ -132,7 +149,7 @@ elseif ($tee == "valitse_komento") {
   echo "<td>Mitä haluat tehdä?</td>";
   echo "<td>";
   echo "<select name='tee'>";
-  echo "<option value='lataa_sertifikaatti'>" . t('Lataa sertifikaatti järjestelmään') . "</option>";
+  echo "<option value='lataa_sertifikaatti_formi'>" . t('Lataa sertifikaatti järjestelmään') . "</option>";
   echo "<option value='hae_tiliote'>" . t("Hae tiliote") . "</option>";
   echo "<option value='hae_viiteaineisto'>" . t("Hae viiteaineisto") . "</option>";
   echo "<option value='laheta_maksuaineisto'>" . t("Lähetä maksuaineisto") . "</option>";
@@ -144,7 +161,8 @@ elseif ($tee == "valitse_komento") {
   echo "<input type='submit' value='" . t('OK') . "'>";
   echo "</form>";
 }
-else {
+
+if ($tee == "") {
   pankkiyhteyden_valinta_formi();
 }
 
@@ -203,7 +221,8 @@ function hae_avain_sertifikaatti_ja_customer_id($tili) {
             WHERE yhtio = '{$kukarow["yhtio"]}'
             AND tunnus = {$tili}";
   $result = pupe_query($query);
-  $rivi   = mysql_fetch_assoc($result);
+
+  $rivi = mysql_fetch_assoc($result);
 
   return $rivi;
 }
@@ -297,7 +316,7 @@ function hae_viitteet($tiedostotyyppi, $tunnukset) {
   }
 
   $tiedostot = $vastaus[1]["files"];
-  $viitteet  = array();
+  $viitteet = array();
 
   foreach ($tiedostot as $tiedosto) {
     array_push($viitteet, $tiedosto["fileReference"]);
@@ -414,9 +433,9 @@ function hae_tunnukset_ja_pura_salaus($tili, $salasana) {
 
   $haetut_tunnukset = hae_avain_sertifikaatti_ja_customer_id($tili);
 
-  $avain         = pura_salaus($haetut_tunnukset["private_key"], $salasana);
+  $avain = pura_salaus($haetut_tunnukset["private_key"], $salasana);
   $sertifikaatti = pura_salaus($haetut_tunnukset["certificate"], $salasana);
-  $customer_id   = $haetut_tunnukset["sepa_customer_id"];
+  $customer_id = $haetut_tunnukset["sepa_customer_id"];
 
   return array(
     "avain"         => $avain,
@@ -530,12 +549,15 @@ function vastaus_kunnossa($vastaus) {
       return true;
     case 500:
       virhe("Pankki ei vastaa kyselyyn, yritä myöhemmin uudestaan");
+
       return false;
     case 503:
       virhe("Pankki ei vastaa kyselyyn toivotulla tavalla, yritä myöhemmin uudestaan");
+
       return false;
     case 0:
       virhe("Sepa-palvelimeen ei jostain syystä saada yhteyttä, yritä myöhemmin uudestaan");
+
       return false;
   }
 }
@@ -669,7 +691,7 @@ function uusi_pankkiyhteys_formi() {
   $tilit = hae_uudet_tilit();
 
   echo "<form action='pankkiyhteys.php' method='post'>";
-  echo "<input type='hidden' name='tee' value='generoi_tunnukset'/>";
+  echo "<input type='hidden' name='tee' value='tarkista_pankkiyhteys_formi'/>";
   echo "<table>";
   echo "<tbody>";
 
@@ -727,7 +749,7 @@ function sertifikaatin_lataus_formi() {
   global $yhtiorow, $kukarow;
 
   echo "<form action='pankkiyhteys.php' method='post' enctype='multipart/form-data'>";
-  echo "<input type='hidden' name='tee' value='lataa_sertifikaatti'/>";
+  echo "<input type='hidden' name='tee' value='tarkista_lataa_sertifikaatti_formi'/>";
   echo "<input type='hidden' name='tili' value='{$_POST["tili"]}'/>";
   echo "<table>";
   echo "<tbody>";
@@ -786,9 +808,11 @@ function sertifikaatin_lataus_formi() {
 }
 
 function virhe($viesti) {
-  global $yhtiorow, $kukarow;
-
   echo "<font class='error'>{$viesti}</font><br/>";
+}
+
+function ok($viesti) {
+  echo "<font class='ok'>{$viesti}</font><br/>";
 }
 
 /**
@@ -856,6 +880,10 @@ function pankkiyhteyden_valinta_formi() {
     echo "<br/><br/>";
   }
 
+  echo "</form>";
+
+  echo "<form method='post' action='pankkiyhteys.php'>";
+  echo "<input type='hidden' name='tee' value='uusi_pankkiyhteys'/>";
   echo "<input type='submit' name='uusi_pankkiyhteys' value='" . t("Uusi pankkiyhteys") . "'/>";
   echo "</form>";
 }

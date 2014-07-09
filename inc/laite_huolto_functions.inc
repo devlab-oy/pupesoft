@@ -220,26 +220,6 @@ function generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltos
     echo "Työmääräyksiä pitäisi tulla " . count($huollettavien_laitteiden_huoltosyklirivit) . ' kappaletta';
     echo "<br/>";
     echo "<br/>";
-
-    foreach ($huollettavien_laitteiden_huoltosyklirivit as $huollettavien_laitteiden_huoltosyklirivi) {
-      if (!empty($huollettavien_laitteiden_huoltosyklirivi['toimenpide_tuotteen_tyyppi'])) {
-        echo "Kohde: {$huollettavien_laitteiden_huoltosyklirivi['kohde_nimi']} Paikka: {$huollettavien_laitteiden_huoltosyklirivi['paikka_nimi']} Laite: {$huollettavien_laitteiden_huoltosyklirivi['tuoteno']} generoidaan: {$huollettavien_laitteiden_huoltosyklirivi['toimenpide_tuotteen_tyyppi']}";
-        echo "<br/>";
-      }
-      else {
-        echo "<font class='error'>HUOM!! Laitteen: {$huollettavien_laitteiden_huoltosyklirivi['laite_tunnus']} huoltosyklin toimenpide tuotteen: {$huollettavien_laitteiden_huoltosyklirivi['toimenpide']} tuotteen avainsana (ryhmittely) on päivittämättä </font>";
-        echo "<br/>";
-      }
-    }
-
-    foreach ($laitteiden_huoltosyklirivit_joita_ei_huolleta as $laite_tunnus => $laitteen_huoltosyklirivit_joita_ei_huolleta) {
-      foreach ($laitteen_huoltosyklirivit_joita_ei_huolleta as $laitteen_huoltosyklirivi_jota_ei_huolleta) {
-        echo "Laitteelle: {$laite_tunnus} EI generoida huoltoa: {$laitteen_huoltosyklirivi_jota_ei_huolleta['toimenpide_tuotteen_tyyppi']}";
-        echo "<br/>";
-      }
-    }
-    echo "<br/>";
-    echo "<br/>";
   }
 
   if ($debug) {
@@ -298,6 +278,28 @@ function generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltos
       $proggress_bar->increase();
     }
   }
+
+  if ($debug) {
+    foreach ($huollettavien_laitteiden_huoltosyklirivit as $huollettavien_laitteiden_huoltosyklirivi) {
+      if (!empty($huollettavien_laitteiden_huoltosyklirivi['toimenpide_tuotteen_tyyppi'])) {
+        echo "Kohde: {$huollettavien_laitteiden_huoltosyklirivi['kohde_nimi']} Paikka: {$huollettavien_laitteiden_huoltosyklirivi['paikka_nimi']} Laite: {$huollettavien_laitteiden_huoltosyklirivi['tuoteno']} generoidaan: {$huollettavien_laitteiden_huoltosyklirivi['toimenpide_tuotteen_tyyppi']}";
+        echo "<br/>";
+      }
+      else {
+        echo "<font class='error'>HUOM!! Laitteen: {$huollettavien_laitteiden_huoltosyklirivi['laite_tunnus']} huoltosyklin toimenpide tuotteen: {$huollettavien_laitteiden_huoltosyklirivi['toimenpide']} tuotteen avainsana (ryhmittely) on päivittämättä </font>";
+        echo "<br/>";
+      }
+    }
+
+    foreach ($laitteiden_huoltosyklirivit_joita_ei_huolleta as $laite_tunnus => $laitteen_huoltosyklirivit_joita_ei_huolleta) {
+      foreach ($laitteen_huoltosyklirivit_joita_ei_huolleta as $laitteen_huoltosyklirivi_jota_ei_huolleta) {
+        echo "Laitteelle: {$laite_tunnus} EI generoida huoltoa: {$laitteen_huoltosyklirivi_jota_ei_huolleta['toimenpide_tuotteen_tyyppi']}";
+        echo "<br/>";
+      }
+    }
+    echo "<br/>";
+    echo "<br/>";
+  }
 }
 
 function generoi_tyomaarays_temp($huollettavan_laitteen_huoltosyklirivi) {
@@ -323,7 +325,16 @@ function generoi_tyomaarays_temp($huollettavan_laitteen_huoltosyklirivi) {
   //lisätään sammuttimen toimenpiteen palvelurivi
   $trow = hae_tuote($huollettavan_laitteen_huoltosyklirivi['toimenpide']);
 
-  $tilausrivi_tunnus = luo_tilausrivi($tyomaarays_tunnus, $trow, $huollettavan_laitteen_huoltosyklirivi['laite_tunnus'], $toimaika, '0000-00-00 00:00:00', false, true);
+  $params = array(
+      'tyomaarays_tunnus' => $tyomaarays_tunnus,
+      'trow'              => $trow,
+      'laite_tunnus'      => $huollettavan_laitteen_huoltosyklirivi['laite_tunnus'],
+      'toimaika'          => $toimaika,
+      'toimitettuaika'    => '0000-00-00 00:00:00',
+      'alv_23'            => false,
+      'temp'              => true,
+  );
+  $tilausrivi_tunnus = luo_tilausrivi($params);
 
   paivita_laite_tunnus_toimenpiteen_tilausriville_temp($huollettavan_laitteen_huoltosyklirivi, $tilausrivi_tunnus);
   paivita_tyojono_ja_tyostatus_tyomaaraykselle_temp($tyomaarays_tunnus, $huollettavan_laitteen_huoltosyklirivi);
@@ -400,38 +411,42 @@ function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_
     $ale = 0;
   }
 
-  $parametrit = array(
-      'trow'     => $trow,
-      'laskurow' => $laskurow,
-      'kpl'      => 1,
-      'tuoteno'  => $trow['tuoteno'],
-      'hinta'    => $hinta,
-      'netto'    => '',
-      'ale1'     => $ale,
+  $toimitettu = '0000-00-00 00:00:00';
+  $params = array(
+      'tyomaarays_tunnus' => $laskurow['tunnus'],
+      'tuote'             => $trow,
+      'laite_tunnus'      => $huollettavan_laitteen_huoltosyklirivi['laite_tunnus'],
+      'toimaika'          => $toimitusaika,
+      'toimitettu'        => $toimitettu,
+      'alv_23'            => false,
+      'temp'              => false,
+      'hinta'             => $hinta,
+      'ale1'              => $ale,
   );
-  $rivit = lisaa_rivi($parametrit);
+  $tilausrivi_tunnus = luo_tilausrivi($params);
 
   if ($lisaa_kulut) {
     $kaynti_trow = hae_tuote('KAYNTI');
-    $parametrit = array(
-        'trow'     => $kaynti_trow,
-        'laskurow' => $laskurow,
-        'kpl'      => 1,
-        'tuoteno'  => $kaynti_trow['tuoteno'],
-        'hinta'    => 0,
-        'netto'    => '',
-        'ale1'     => 0,
+    $params = array(
+        'tyomaarays_tunnus' => $laskurow['tunnus'],
+        'tuote'             => $kaynti_trow,
+        'laite_tunnus'      => $huollettavan_laitteen_huoltosyklirivi['laite_tunnus'],
+        'toimaika'          => $toimitusaika,
+        'toimitettu'        => $toimitettu,
+        'alv_23'            => false,
+        'temp'              => false,
+        'hinta'             => 0,
+        'ale1'              => 0,
     );
-    lisaa_rivi($parametrit);
+    luo_tilausrivi($params);
   }
 
-  paivita_laite_tunnus_toimenpiteen_tilausriville($huollettavan_laitteen_huoltosyklirivi, $rivit);
   paivita_tyojono_ja_tyostatus_tyomaarayksille($tyomaarays_tunnus, $huollettavan_laitteen_huoltosyklirivi);
   paivita_viimenen_tapahtuma_laitteen_huoltosyklille($huollettavan_laitteen_huoltosyklirivi['laite_tunnus'], $huollettavan_laitteen_huoltosyklirivi['huoltosykli_tunnus'], $toimitusaika);
 
   if (!empty($edellinen_tyomaarays) and $edellinen_tyomaarays['tyostatus'] == 'K') {
     $kommentti = t('Edellisellä kerralla') . " ({$edellinen_tyomaarays['toimitettuaika']}) " . t('laitteelle ei voitu suorittaa toimenpidettä') . " {$edellinen_tyomaarays['toimenpidetuote_nimitys']} " . t('koska laitetta ei löytynyt');
-    paivita_tilausrivin_kommentti($rivit[0][0], $kommentti);
+    paivita_tilausrivin_kommentti($tilausrivi_tunnus, $kommentti);
   }
 
   if (!empty($laitteiden_huoltosyklirivit_joita_ei_huolleta)) {
@@ -546,14 +561,36 @@ function luo_tyomaarays($asiakas, $toimaika, $summa, $alv_23 = true, $vastuuhenk
   return $tunnus;
 }
 
-function luo_tilausrivi($tyomaarays_tunnus, $tuote, $laite_tunnus, $toimaika, $toimitettu, $alv_23 = true, $temp = false) {
+function luo_tilausrivi(array $params) {
   global $kukarow, $yhtiorow;
 
+  $tyomaarays_tunnus = $params['tyomaarays_tunnus'];
+  $tuote = $params['tuote'];
+  $laite_tunnus = $params['laite_tunnus'];
+  $toimaika = $params['toimaika'];
+  $toimitettu = $params['toimitettu'];
+  $temp = $params['temp'];
+
+  $alv_23 = $params['alv_23'];
+  if (!isset($params['alv_23'])) {
+    $alv_23 = false;
+  }
+
+  $hinta = $params['hinta'];
+  if (!isset($params['hinta'])) {
+    $hinta = $tuote['myyntihinta'];
+  }
+
+  $ale1 = $params['ale1'];
+  if (!isset($params['ale1'])) {
+    $ale1 = 0;
+  }
+
   if ($alv_23) {
-    $alv = '23.00';
+    $alv = 23;
   }
   else {
-    $alv = '24.00';
+    $alv = 24;
   }
 
   $tilausrivi = 'tilausrivi';
@@ -586,7 +623,7 @@ function luo_tilausrivi($tyomaarays_tunnus, $tuote, $laite_tunnus, $toimaika, $t
             rivihinta = 0.00,
             erikoisale = 0.00,
             erikoisale_saapuminen = 0.00,
-            ale1 = 0.00,
+            ale1 = {$ale1},
             ale2 = 0.00,
             ale3 = 0.00,
             kate = 0.00,

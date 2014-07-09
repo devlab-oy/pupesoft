@@ -18,13 +18,20 @@ if (!isset($_SERVER["HTTPS"]) or $_SERVER["HTTPS"] != 'on') {
 $tee = isset($tee) ? $tee : '';
 $target_id = isset($target_id) ? $target_id : '';
 
-if ($tee == "hae_tiliote") {
+if ($tee == "laheta" and $hae_tiliotteet == "on") {
   if (isset($salasana) and salasana_kunnossa()) {
     lataa_kaikki("TITO");
+    $tee = "";
   }
   else {
-    salasana_formi();
+    $tee = "";
   }
+}
+
+if ($tee == "laheta") {
+  virhe("Et antanut mitään komentoja");
+
+  $tee = "";
 }
 
 if ($tee == "hae_viiteaineisto") {
@@ -32,7 +39,7 @@ if ($tee == "hae_viiteaineisto") {
     lataa_kaikki("KTL");
   }
   else {
-    salasana_formi();
+    $tee = "";
   }
 }
 
@@ -63,29 +70,8 @@ if ($tee == "laheta_maksuaineisto") {
   }
 }
 
-if ($tee == "valitse_komento") {
-  echo "<form method='post' action='pankkiyhteys.php'>";
-  echo "<input type='hidden' name='tili' value='{$tili}'/>";
-  echo "<table>";
-  echo "<tbody>";
-  echo "<tr>";
-  echo "<td>Mitä haluat tehdä?</td>";
-  echo "<td>";
-  echo "<select name='tee'>";
-  echo "<option value='hae_tiliote'>" . t("Hae tiliote") . "</option>";
-  echo "<option value='hae_viiteaineisto'>" . t("Hae viiteaineisto") . "</option>";
-  echo "<option value='laheta_maksuaineisto'>" . t("Lähetä maksuaineisto") . "</option>";
-  echo "</select>";
-  echo "</td>";
-  echo "</tr>";
-  echo "</tbody>";
-  echo "</table>";
-  echo "<input type='submit' value='" . t('OK') . "'>";
-  echo "</form>";
-}
-
 if ($tee == "") {
-  pankkiyhteyden_valinta_formi();
+  formi();
 }
 
 /**
@@ -94,7 +80,7 @@ if ($tee == "") {
  * @return array
  */
 function hae_avain_sertifikaatti_ja_customer_id($tili) {
-  global $yhtiorow, $kukarow;
+  global $kukarow;
 
   $query = "SELECT private_key, certificate, sepa_customer_id
             FROM yriti
@@ -133,8 +119,6 @@ function pura_salaus($salattu_data, $salasana) {
  * @return array
  */
 function hae_viitteet($tiedostotyyppi, $tunnukset) {
-  global $yhtiorow, $kukarow;
-
   $parameters = array(
     "method"  => "POST",
     "data"    => array(
@@ -175,8 +159,6 @@ function hae_viitteet($tiedostotyyppi, $tunnukset) {
  * @return bool
  */
 function lataa_tiedostot($viitteet, $tiedostotyyppi, $tunnukset) {
-  global $yhtiorow, $kukarow;
-
   $onnistuneet = 0;
 
   foreach ($viitteet as $viite) {
@@ -218,8 +200,6 @@ function lataa_tiedostot($viitteet, $tiedostotyyppi, $tunnukset) {
 }
 
 function salasana_formi() {
-  global $yhtiorow, $kukarow;
-
   $komento = $_POST["tee"];
 
   if ($komento == "laheta_maksuaineisto") {
@@ -271,8 +251,6 @@ function salasana_formi() {
  * @return array
  */
 function hae_tunnukset_ja_pura_salaus($tili, $salasana) {
-  global $yhtiorow, $kukarow;
-
   $haetut_tunnukset = hae_avain_sertifikaatti_ja_customer_id($tili);
 
   $avain = pura_salaus($haetut_tunnukset["private_key"], $salasana);
@@ -320,8 +298,6 @@ function laheta_maksuaineisto($tunnukset, $maksuaineisto) {
 }
 
 function salasana_kunnossa() {
-  global $yhtiorow, $kukarow;
-
   if (isset($_POST["salasana"]) and empty($_POST["salasana"])) {
     virhe("Salasana täytyy antaa");
 
@@ -332,8 +308,6 @@ function salasana_kunnossa() {
 }
 
 function maksuaineisto_kunnossa() {
-  global $yhtiorow, $kukarow;
-
   if (isset($_FILES["maksuaineisto"]) and !$_FILES["maksuaineisto"]["tmp_name"]) {
     virhe("Maksuaineisto puuttuu");
 
@@ -349,8 +323,6 @@ function maksuaineisto_kunnossa() {
  * @return bool
  */
 function vastaus_kunnossa($vastaus) {
-  global $yhtiorow, $kukarow;
-
   switch ($vastaus[0]) {
     case 200:
       return true;
@@ -381,14 +353,12 @@ function ok($viesti) {
  * @param $tiedostotyyppi
  */
 function lataa_kaikki($tiedostotyyppi) {
-  global $yhtiorow, $kukarow;
-
   $tunnukset = hae_tunnukset_ja_pura_salaus($_POST["tili"], $_POST["salasana"]);
 
   $viitteet = hae_viitteet($tiedostotyyppi, $tunnukset);
 
   if ($viitteet and lataa_tiedostot($viitteet, $tiedostotyyppi, $tunnukset)) {
-    echo "Tiedostot ladattu";
+    ok("Tiedostot ladattu");
   }
 }
 
@@ -413,17 +383,18 @@ function hae_kaytossa_olevat_tilit() {
   return $kaytossa_olevat_tilit;
 }
 
-function pankkiyhteyden_valinta_formi() {
+function formi() {
   $kaytossa_olevat_tilit = hae_kaytossa_olevat_tilit();
 
   echo "<form method='post' action='pankkiyhteys.php'>";
-  echo "<input type='hidden' name='tee' value='valitse_komento'/>";
+  echo "<input type='hidden' name='tee' value='laheta'/>";
   echo "<table>";
   echo "<tbody>";
 
   if ($kaytossa_olevat_tilit) {
+
     echo "<tr>";
-    echo "<td>Käytössä olevat pankkiyhteydet</td>";
+    echo "<td>Valitse tili</td>";
     echo "<td>";
     echo "<select name='tili'>";
 
@@ -434,15 +405,26 @@ function pankkiyhteyden_valinta_formi() {
     echo "</select>";
     echo "</td>";
     echo "</tr>";
+
+    echo "<tr>";
+    echo "<td><label>";
+    echo t("Mitä haluat tehdä?");
+    echo "</label></td>";
+    echo "<td>";
+    echo "<label for='hae_tiliotteet'>" . t("Hae tiliotteet") . "</label>";
+    echo "<input type='checkbox' name='hae_tiliotteet' id='hae_tiliotteet'/>";
+    echo "</td>";
+    echo "</tr>";
+
+    echo "<tr>";
+    echo "<td><label for='salasana'>" . t("Salasana") . "</label></td>";
+    echo "<td><input type='password' name='salasana' id='salasana'/></td>";
+    echo "</tr>";
+
     echo "</tbody>";
     echo "</table>";
-    echo "<input type='submit' value='" . t('Valitse tili') . "'>";
-    echo "<br/><br/>";
+    echo "<input type='submit' value='" . t('Lähetä') . "'>";
   }
 
-  echo "</form>";
-
-  echo "<form method='post' action='pankkiyhteys.php'>";
-  echo "<input type='hidden' name='tee' value='uusi_pankkiyhteys'/>";
   echo "</form>";
 }

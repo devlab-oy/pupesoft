@@ -106,8 +106,8 @@ if ($request['action'] == 'aja_konversio') {
       echo "alku:" . date('Y-m-d H:i:s');
       foreach ($tiedostot as $tiedosto) {
         echo $tiedosto . '<br/>';
-        $output = exec("/Applications/MAMP/bin/php/php5.4.10/bin/php tarkastukset.php {$kukarow['yhtio']} {$tiedosto}", $arr, $ret);
-//        $output = exec("php tarkastukset.php {$kukarow['yhtio']} {$tiedosto}", $arr, $ret);
+//        $output = exec("/Applications/MAMP/bin/php/php5.4.10/bin/php tarkastukset.php {$kukarow['yhtio']} {$tiedosto}", $arr, $ret);
+        $output = exec("php tarkastukset.php {$kukarow['yhtio']} {$tiedosto}", $arr, $ret);
 //        echo "<pre>";
 //        var_dump($arr);
 //        echo $ret;

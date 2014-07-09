@@ -101,7 +101,7 @@ if ($handle = opendir($path)) {
         paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi(array('otunnukset' => $tilausnumero, 'kilotyht' => $kilotrow['kilotyht']));
 
         // Katsotaan onko Magento käytössä, silloin merkataan tilaus toimitetuksi Magentoon kun rahtikirja tulostetaan
-        if ($magento_kaytossa === TRUE) {
+        if ($magento_kaytossa) {
 
           $query = "SELECT toimitustapa
                     FROM rahtikirjat

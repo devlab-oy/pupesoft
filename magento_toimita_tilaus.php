@@ -27,7 +27,7 @@ $kuittaukset = array_merge($default_kuittaukset, $magento_api_toimituskuittaus_v
 
 $magento_api_ord = (int) $magento_api_ord;
 
-if ($magento_kaytossa === FALSE or $magento_api_ord <= 0) {
+if ($magento_kaytossa === false or $magento_api_ord <= 0) {
   exit;
 }
 
@@ -35,8 +35,8 @@ $proxy = new SoapClient($magento_api_url);
 $sessionId = $proxy->login($magento_api_usr, $magento_api_pas);
 
 $magento_api_met = utf8_encode($magento_api_met);
-$canShip   = TRUE;
-$canInvoice = TRUE;
+$canShip   = true;
+$canInvoice = true;
 $magLinkurl = "";
 
 // Päivitetään tilauksen tilaksi 'completed_pupesoft'
@@ -54,7 +54,7 @@ log_message($message);
 // Create new shipment
 try {
 
-  if (stripos($magento_api_rak,"JJFI") !== FALSE) {
+  if (stripos($magento_api_rak,"JJFI") !== false) {
     $magLinkurl = "Tracking number: ";
 
     preg_match_all("/JJFI ?[0-9]{6} ?[0-9]{11}/", $magento_api_rak, $match);
@@ -79,7 +79,7 @@ try {
   $newShipmentId = $proxy->call($sessionId, 'sales_order_shipment.create', array($magento_api_ord, array(), $comment, true, true));
 }
 catch (Exception $e) {
-  $canShip = FALSE;
+  $canShip = false;
 
   $message = "Lähetyksen luonti epäonnistui";
   $message .= " (" . $e->faultstring . ") faultcode: " . $e->faultcode;
@@ -103,7 +103,7 @@ try {
   $newInvoiceId = $proxy->call($sessionId, 'sales_order_invoice.create', array($magento_api_ord, array(), 'Invoice Created', false, false));
 }
 catch(Exception $e) {
-  $canInvoice = FALSE;
+  $canInvoice = false;
 
   $message = "Laskun luonti epäonnistui";
   $message .= " (" . $e->faultstring . ") faultcode: " . $e->faultcode;

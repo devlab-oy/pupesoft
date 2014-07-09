@@ -915,7 +915,7 @@ if ($tee == 'tulosta') {
       }
 
       // Katsotaan onko Magento käytössä, silloin merkataan tilaus toimitetuksi Magentoon kun rahtikirja tulostetaan
-      if ($magento_kaytossa === TRUE) {
+      if ($magento_kaytossa) {
         $query = "SELECT asiakkaan_tilausnumero
                   FROM lasku
                   WHERE yhtio                 = '$kukarow[yhtio]'

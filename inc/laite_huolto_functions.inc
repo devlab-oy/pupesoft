@@ -58,7 +58,6 @@ function hae_laitteelle_mahdolliset_huoltosyklit($laite_tyyppi = '', $laite_koko
 function hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy() {
   global $kukarow;
 
-  //@TODO poista AND asiakas.nimi LIKE '%Testi%')
   $query = "SELECT laite.tuoteno,
             huoltosyklit_laitteet.viimeinen_tapahtuma,
             laite.tunnus AS laite_tunnus,
@@ -89,8 +88,7 @@ function hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy() {
               AND kohde.tunnus = paikka.kohde )
             JOIN asiakas
             ON ( asiakas.yhtio = kohde.yhtio
-              AND asiakas.tunnus = kohde.asiakas
-              AND asiakas.nimi LIKE '%Test%')
+              AND asiakas.tunnus = kohde.asiakas )
             JOIN tuote
             ON ( tuote.yhtio = laite.yhtio
               AND tuote.tuoteno = huoltosykli.toimenpide )

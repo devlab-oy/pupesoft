@@ -62,7 +62,7 @@ else {
   $lisavarattu = "";
 }
 
-function myynnit($myynti_varasto = '', $myynti_maa = '', $excelsarake) {
+function myynnit($myynti_varasto = '', $myynti_maa = '') {
   // Otetaan kaikki muuttujat mukaan funktioon mit‰ on failissakin
   extract($GLOBALS);
 
@@ -231,7 +231,7 @@ function myynnit($myynti_varasto = '', $myynti_maa = '', $excelsarake) {
   return $excelsarake;
 }
 
-function saldot($myynti_varasto = '', $myynti_maa = '', $excelsarake) {
+function saldot($myynti_varasto = '', $myynti_maa = '') {
   // Otetaan kaikki muuttujat mukaan funktioon mit‰ on failissakin
   extract($GLOBALS);
 
@@ -272,7 +272,7 @@ function saldot($myynti_varasto = '', $myynti_maa = '', $excelsarake) {
   return $excelsarake;
 }
 
-function ostot($myynti_varasto = '', $myynti_maa = '', $excelsarake) {
+function ostot($myynti_varasto = '', $myynti_maa = '') {
   // Otetaan kaikki muuttujat mukaan funktioon mit‰ on failissakin
   extract($GLOBALS);
 
@@ -1095,11 +1095,11 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
     if ($varastot_maittain == "KYLLA") {
       foreach ($valitutmaat as $maa) {
         // Haetaan tuotteen myyntitiedot
-        $excelsarake = myynnit('', $maa, $excelsarake);
+        $excelsarake = myynnit('', $maa);
         // Haetaan tuotteen saldotiedot
-        $excelsarake = saldot('', $maa, $excelsarake);
+        $excelsarake = saldot('', $maa);
         // Haetaan tuotteen ostotiedot
-        $excelsarake = ostot('', $maa, $excelsarake);
+        $excelsarake = ostot('', $maa);
       }
     }
 
@@ -1107,18 +1107,18 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
     if ($varastot_paikoittain == "KYLLA") {
       foreach ($valitutvarastot as $varastotunnus) {
         // Haetaan tuotteen myyntitiedot
-        $excelsarake = myynnit($varastotunnus, '', $excelsarake);
+        $excelsarake = myynnit($varastotunnus);
         // Haetaan tuotteen saldotiedot
-        $excelsarake = saldot($varastotunnus, '', $excelsarake);
+        $excelsarake = saldot($varastotunnus);
         // Haetaan tuotteen ostotiedot
-        $excelsarake = ostot($varastotunnus, '', $excelsarake);
+        $excelsarake = ostot($varastotunnus);
       }
     }
 
     // Sitten viel‰ totalit
-    $excelsarake = myynnit('', '', $excelsarake);
-    $excelsarake = saldot('', '', $excelsarake);
-    $excelsarake = ostot('', '', $excelsarake);
+    $excelsarake = myynnit();
+    $excelsarake = saldot();
+    $excelsarake = ostot();
 
     // Siirryt‰‰n seuraavalle riville
     $excelrivi++;

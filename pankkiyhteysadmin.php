@@ -23,7 +23,7 @@ if ($tee == "luo") {
   }
 }
 
-if ($tee == "luo") {
+if ($tee == "luo" and !empty($pin)) {
   $generoidut_tunnukset = generoi_private_key_ja_csr();
   $sertifikaatti = hae_sertifikaatti_sepasta($pin, $customer_id, $generoidut_tunnukset);
 
@@ -35,6 +35,16 @@ if ($tee == "luo") {
   $salatut_tunnukset = array(
     "private_key"   => salaa($generoidut_tunnukset["private_key"], $salasana),
     "sertifikaatti" => salaa($sertifikaatti, $salasana)
+  );
+}
+
+if ($tee == "luo" and !$pin) {
+  $private_key = file_get_contents($_FILES["private_key"]["tmp_name"]);
+  $certificate = file_get_contents($_FILES["certificate"]["tmp_name"]);
+
+  $salatut_tunnukset = array(
+    "private_key"   => salaa($private_key, $salasana),
+    "sertifikaatti" => salaa($certificate, $salasana)
   );
 }
 
@@ -71,7 +81,7 @@ function uusi_pankkiyhteys_formi() {
     return viesti("Kaikille tileille on jo luotu yhteydet");
   }
 
-  echo "<form action='pankkiyhteysadmin.php' method='post'>";
+  echo "<form action='pankkiyhteysadmin.php' method='post' enctype='multipart/form-data'>";
   echo "<input type='hidden' name='tee' value='luo'/>";
   echo "<table>";
   echo "<tbody>";
@@ -101,8 +111,39 @@ function uusi_pankkiyhteys_formi() {
   echo "</tr>";
 
   echo "<tr>";
+  echo "<td class='back'></td>";
+  echo "</tr>";
+
+  echo "<tr>";
   echo "<td><label for='pin'>" . t("Pankilta saatu PIN-koodi") . "</label></td>";
   echo "<td><input type='text' name='pin' id='pin'/></td>";
+  echo "<td class='back'>T‰yt‰, jos olet saanut pankista PIN-koodin ja aiot nyt hakea tunnukset</td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<td class='back'></td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<td><label for='private_key'>";
+  echo t("Yksityinen avain");
+  echo "</label></td>";
+  echo "<td><input type='file' name='private_key' id='private_key'/></td>";
+  echo "<td class='back'>";
+  echo "T‰yt‰ n‰m‰ kent‰t vain, jos olet jo saanut tunnukset pankista";
+  echo " ja haluat nyt ladata ne j‰rjestelm‰‰n";
+  echo "</td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<td><label for='certificate'>";
+  echo t("Sertifikaatti");
+  echo "</label></td>";
+  echo "<td><input type='file' name='certificate' id='certificate'/></td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<td class='back'></td>";
   echo "</tr>";
 
   echo "<tr>";
@@ -165,8 +206,10 @@ function pankkiyhteystiedot_kunnossa() {
     $virheet_count++;
   }
 
-  if (empty($_POST["pin"])) {
-    virhe("PIN-koodi t‰ytyy antaa");
+  $filet_tyhjat = empty($_FILES["private_key"]["name"]) or empty($_FILES["certificate"]["name"]);
+
+  if (empty($_POST["pin"]) and $filet_tyhjat) {
+    virhe("PIN-koodi tai yksityinen avain ja sertifikaatti t‰ytyy antaa");
     $virheet_count++;
   }
 

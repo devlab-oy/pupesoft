@@ -33,18 +33,11 @@ if ($tee == "laheta") {
 if ($tee == "laheta") {
   if ($hae_viitteet == "on") {
     lataa_kaikki("KTL");
-    $tee = "";
   }
 }
 
 if ($tee == "laheta") {
-  virhe("Et antanut mit‰‰n komentoja");
-
-  $tee = "";
-}
-
-if ($tee == "laheta_maksuaineisto") {
-  if ($salasana and salasana_kunnossa() and maksuaineisto_kunnossa()) {
+  if ($laheta_maksuaineisto == "on") {
     $maksuaineisto = file_get_contents($_FILES["maksuaineisto"]["tmp_name"]);
     $tunnukset = hae_tunnukset_ja_pura_salaus($tili, $salasana);
 
@@ -61,13 +54,14 @@ if ($tee == "laheta_maksuaineisto") {
         echo "</tr>";
       }
 
-      echo "</tbody";
+      echo "</tbody>";
       echo "</table>";
+
+      ok("Maksuaineisto l‰hetetty, vastaus on yll‰");
     }
   }
-  else {
-    salasana_formi();
-  }
+
+  $tee = "";
 }
 
 if ($tee == "") {
@@ -386,7 +380,7 @@ function hae_kaytossa_olevat_tilit() {
 function formi() {
   $kaytossa_olevat_tilit = hae_kaytossa_olevat_tilit();
 
-  echo "<form method='post' action='pankkiyhteys.php'>";
+  echo "<form method='post' action='pankkiyhteys.php' enctype='multipart/form-data'>";
   echo "<input type='hidden' name='tee' value='laheta'/>";
   echo "<table>";
   echo "<tbody>";
@@ -415,7 +409,15 @@ function formi() {
     echo "<input type='checkbox' name='hae_tiliotteet' id='hae_tiliotteet'/>";
     echo "<label for='hae_viitteet'>" . t("Hae viitteet") . "</label>";
     echo "<input type='checkbox' name='hae_viitteet' id='hae_viitteet'/>";
+    echo "<label for='laheta_maksuaineisto'>" . t("L‰het‰ maksuaineisto") . "</label>";
+    echo "<input type='checkbox' name='laheta_maksuaineisto' id='laheta_maksuaineisto'/>";
     echo "</td>";
+    echo "</tr>";
+
+    echo "<tr>";
+    echo "<td><label for='maksuaineisto'>" . t("Maksuaineisto") . "</label></td>";
+    echo "<td><input type='file' name='maksuaineisto' id='maksuaineisto'/></td>";
+    echo "<td class='back'>" . t("T‰yt‰ vain, jos aiot l‰hett‰‰ maksuaineiston") . "</td>";
     echo "</tr>";
 
     echo "<tr>";

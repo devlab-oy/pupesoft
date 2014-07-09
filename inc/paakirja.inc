@@ -577,7 +577,6 @@ if ($tee != "") {
             $post_alv_lisa
             $konsernilisa
             ORDER BY $jarj";
-echo "$query <br><br>";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) > 0) {

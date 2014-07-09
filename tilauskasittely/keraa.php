@@ -1315,17 +1315,24 @@ if ($tee == 'P') {
   if ($muuttuiko == 'kylsemuuttu') {
     foreach ($poikkeamat as $poikkeamatilaus => $poikkeamatilausrivit) {
 
-      if($tila == "'G'") {
+      $qry = "SELECT tila
+              FROM lasku
+              WHERE yhtio = = '$kukarow[yhtio]'
+              AND tunnus = $poikkeamatilaus";
+      $res = pupe_query($qry);
+
+      $ptilarow = mysql_fetch_assoc($res);
+      $ptila = $ptilarow['tila'];
+
+      if($ptila = 'G') {
 
         $query = "SELECT
                   lasku.*,
                   kuka.kieli AS kieli,
                   kuka.nimi AS kukanimi,
                   kuka.eposti AS kukamail,
-                  kuka_ext.nimi AS kuka_ext_nimi
                   FROM lasku
                   LEFT JOIN kuka ON (kuka.yhtio=lasku.yhtio AND kuka.kuka=lasku.hyvak1 AND kuka.extranet = '')
-                  LEFT JOIN kuka AS kuka_ext ON (kuka_ext.yhtio = lasku.yhtio AND kuka_ext.kuka = lasku.hyvak1 AND kuka_ext.extranet != '')
                   WHERE lasku.tunnus = '$poikkeamatilaus'
                   AND lasku.yhtio    = '$kukarow[yhtio]'";
 

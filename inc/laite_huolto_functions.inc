@@ -229,16 +229,6 @@ function generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltos
 
   $edellinen_kohde_tunnus = 0;
   foreach ($huollettavien_laitteiden_huoltosyklirivit as $huollettavan_laitteen_huoltosyklirivi) {
-    if ($huollettavan_laitteen_huoltosyklirivi['toimenpide_tuotteen_tyyppi'] == 'koeponnistus' and !empty($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma'])) {
-      $sekunttia_edellisesta_koeponnistuksesta = strtotime(date('Y-m-d')) - strtotime($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma']);
-      $paivaa_edellisesta_koeponnistuksesta = $sekunttia_edellisesta_koeponnistuksesta / 86400;
-      $paivaa_seuraavaan_koeponnistukseen = $huollettavan_laitteen_huoltosyklirivi['huoltovali'] - $paivaa_edellisesta_koeponnistuksesta;
-      //jos seuraavaan koeponnistukseen on enemmän kuin 2kk aikaa, ei generoida työmääräystä.
-      if ($paivaa_seuraavaan_koeponnistukseen > 90) {
-        continue;
-      }
-    }
-
     $onko_tyomaarays_jo_luotu_talle_laitteelle = tarkista_loytyyko_tyomaarays($huollettavan_laitteen_huoltosyklirivi);
     if ($onko_tyomaarays_jo_luotu_talle_laitteelle) {
       if ($debug) {

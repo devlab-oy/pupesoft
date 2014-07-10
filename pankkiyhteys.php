@@ -26,13 +26,17 @@ if ($tee == "laheta") {
 
 if ($tee == "laheta") {
   if ($hae_tiliotteet == "on") {
-    lataa_kaikki("TITO");
+    if (!lataa_kaikki("TITO")) {
+      $tee = "";
+    }
   }
 }
 
 if ($tee == "laheta") {
   if ($hae_viitteet == "on") {
-    lataa_kaikki("KTL");
+    if (!lataa_kaikki("KTL")) {
+      $tee = "";
+    }
   }
 }
 
@@ -256,6 +260,13 @@ function hae_tunnukset_ja_pura_salaus($tili, $salasana) {
   $haetut_tunnukset = hae_avain_sertifikaatti_ja_customer_id($tili);
 
   $avain = pura_salaus($haetut_tunnukset["private_key"], $salasana);
+
+  if (!openssl_pkey_get_private($avain)) {
+    virhe("Annoit v‰‰r‰n salasanan");
+
+    return false;
+  }
+
   $sertifikaatti = pura_salaus($haetut_tunnukset["certificate"], $salasana);
   $customer_id = $haetut_tunnukset["sepa_customer_id"];
 
@@ -350,9 +361,15 @@ function viesti($viesti) {
 
 /**
  * @param $tiedostotyyppi
+ *
+ * @return bool
  */
 function lataa_kaikki($tiedostotyyppi) {
   $tunnukset = hae_tunnukset_ja_pura_salaus($_POST["tili"], $_POST["salasana"]);
+
+  if (!$tunnukset) {
+    return false;
+  }
 
   $viitteet = hae_viitteet($tiedostotyyppi, $tunnukset);
 

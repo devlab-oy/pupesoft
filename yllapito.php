@@ -1854,6 +1854,9 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
         case "printteri10":
           $otsikko = t("Lämpösiirto");
           break;
+        case "isa_varasto":
+          $otsikko = t("Isävarasto");
+          break;
         default:
           if (isset($mysqlaliasarraysetti) and isset($mysqlaliasarray[$mysqlaliasarraysetti][mysql_field_name($result, $i)])) {
             $otsikko = t($mysqlaliasarray[$mysqlaliasarraysetti][mysql_field_name($result, $i)]);

@@ -23994,6 +23994,7 @@ if (!function_exists('js_laite')) {
     <script>
       var palvelin2 = '<?php echo $palvelin2 ?>';
 
+      var huoltovalit_req_obj = hae_huoltovalit();
       $(document).ready(function() {
         bind_huoltosykli_change();
 
@@ -24009,9 +24010,11 @@ if (!function_exists('js_laite')) {
           if ($(this).val() != 0) {
             var huoltovali_select_id = $(this).attr('id').replace("sykli","vali");
             hae_huoltosyklin_huoltovali($(this).val(), huoltovali_select_id);
-
+            var huoltovali_days = $('#'+huoltovali_select_id).val();
             var tapahtuma_select_id = $(this).attr('id').replace('huoltosykli_select_',"tuleva_toimenpide_");
-            muuta_seuraava_tapahtuma($('#'+huoltovali_select_id).val(), tapahtuma_select_id);
+            huoltovalit_req_obj.done(function(huoltovalit) {
+              muuta_seuraava_tapahtuma(huoltovalit[huoltovali_days], tapahtuma_select_id);
+            });
           }
         });
       }
@@ -24083,7 +24086,7 @@ if (!function_exists('js_laite')) {
 
       function laske_default_seuraava_tapahtuma(valittu_huoltovali) {
         var date = new Date();
-        date.setDate(date.getDate() + parseInt(valittu_huoltovali));
+        date.setFullYear(date.getFullYear() + parseInt(valittu_huoltovali['years']));
         return date;
       }
 
@@ -24091,21 +24094,15 @@ if (!function_exists('js_laite')) {
         var today = new Date();
         var date = new Date();
         date.setMonth(parseInt($('.valm_pvm_tkk').val() - 1));
-        date.setFullYear(parseInt($('.valm_pvm_tvv').val()));
-        date.setDate(parseInt($('.valm_pvm_tpp').val()) + parseInt(huoltovali));
+        date.setDate(parseInt($('.valm_pvm_tpp').val()));
+        date.setFullYear(parseInt($('.valm_pvm_tvv').val()) + parseInt(huoltovali['years']));
 
         if (date >= today) {
-          //@TODO korjaa seuraavan tapahtuman päivämäärä logiikka
-          //halutaan, että seuraava päivä on valm_pvm + huoltovali
           var seuraava_tapahtuma = new Date();
           seuraava_tapahtuma.setMonth(parseInt($('.valm_pvm_tkk').val() - 1));
           seuraava_tapahtuma.setFullYear(parseInt($('.valm_pvm_tvv').val()));
-          if (huoltovali == 3650) {
-            seuraava_tapahtuma.setFullYear(seuraava_tapahtuma.getFullYear() + 10);
-          }
-          else if (huoltovali == 1825) {
-            seuraava_tapahtuma.setFullYear(seuraava_tapahtuma.getFullYear() + 5);
-          }
+
+          seuraava_tapahtuma.setFullYear(seuraava_tapahtuma.getFullYear() + parseInt(huoltovali['years']));
         }
         else {
           //Jos nykyhetki on kauempana tulevaisuudessa kuin valm_pvm + huoltoväli niin ei voida tietää seuraavaa tulevaa tapahtumaa
@@ -24125,6 +24122,20 @@ if (!function_exists('js_laite')) {
           }
           else {
             $(this).parent().find('.tuleva_toimenpide_error').html('');
+          }
+        });
+      }
+
+      function hae_huoltovalit() {
+        return $.ajax({
+          async: true,
+          type: 'GET',
+          dataType: 'JSON',
+          url: palvelin2 + 'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltovalit&tuoteno'
+        }).fail(function(data){
+          if (console && console.log) {
+            console.log('Huoltovälieni haku EPÄONNISTUI');
+            console.log(data);
           }
         });
       }

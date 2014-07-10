@@ -63,4 +63,16 @@ if ($action == 'hae_huoltosykli_options') {
   echo $options_string;
 }
 
+if ($action == 'hae_huoltovalit') {
+  $huoltovalit = huoltovali_options();
+
+  array_walk_recursive($huoltovalit, function(&$value, $key) {
+            if (is_string($value)) {
+              $value = utf8_encode($value);
+            }
+          });
+
+  echo json_encode($huoltovalit);
+}
+
 exit;

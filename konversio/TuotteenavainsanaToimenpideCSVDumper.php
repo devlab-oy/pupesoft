@@ -48,15 +48,15 @@ class TuotteenavainsanaToimenpideCSVDumper extends CSVDumper{
     foreach ($this->konversio_array as $konvertoitu_header => $csv_header) {
       if (array_key_exists($csv_header, $rivi)) {
         if ($konvertoitu_header == 'selite') {
-          if ($rivi[$csv_header] == '3') {
+          if ($rivi[$csv_header] == '3' or $rivi[$csv_header] == 'tarkastus') {
             $rivi_temp[$konvertoitu_header] = 'tarkastus';
             $rivi_temp['selitetark'] = 3;
           }
-          else if ($rivi[$csv_header] == '2') {
+          else if ($rivi[$csv_header] == '2' or $rivi[$csv_header] == 'huolto') {
             $rivi_temp[$konvertoitu_header] = 'huolto';
             $rivi_temp['selitetark'] = 2;
           }
-          else if ($rivi[$csv_header] == '1') {
+          else if ($rivi[$csv_header] == '1' or $rivi[$csv_header] == 'koeponnistus') {
             $rivi_temp[$konvertoitu_header] = 'koeponnistus';
             $rivi_temp['selitetark'] = 1;
           }

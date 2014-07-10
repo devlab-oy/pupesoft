@@ -340,8 +340,6 @@ if ($tee == 'laske') {
   $kkl = (int) $kkl;
   $vvl = (int) $vvl;
 
-
-
 if ($tavoitteet) {
 
     $alku = "{$vva}-{$kka}-{$ppa}";
@@ -369,7 +367,7 @@ if ($tavoitteet) {
     while ($row = mysql_fetch_assoc($result)) {
 
       $vuosi = substr($row['kausi'], 0, 4);
-      $kuu = substr($row['kausi'], 5, 2);
+      $kuu = substr($row['kausi'], 4, 2);
 
       if ($naytetaan_tulos == 'daily') {
 
@@ -378,6 +376,7 @@ if ($tavoitteet) {
         for ($i = 0; $i < $paivia; $i++) {
 
           $paiva = $i+1;
+          $paiva = str_pad($paiva,2,"0",STR_PAD_LEFT);
           $pvm = "{$paiva}-{$kuu}-{$vuosi}";
 
           if (strtotime($alku) <= strtotime("{$vuosi}-{$kuu}-{$paiva}") and strtotime($loppu) >= strtotime("{$vuosi}-{$kuu}-{$paiva}")) {
@@ -422,6 +421,7 @@ if ($tavoitteet) {
         for ($i = 0; $i < $paivia; $i++) {
 
           $paiva = $i+1;
+          $paiva = str_pad($paiva,2,"0",STR_PAD_LEFT);
           $pvmx = strtotime("{$vuosi}-{$kuu}-{$paiva}");
 
           if (strtotime($alku) <= strtotime("{$vuosi}-{$kuu}-{$paiva}") and strtotime($loppu) >= strtotime("{$vuosi}-{$kuu}-{$paiva}")) {
@@ -459,7 +459,7 @@ if ($tavoitteet) {
         }
 
         foreach ($xarr as $aik => $sum) {
-          $pvm = ltrim(date("W-Y", $aik),0);
+          $pvm = date("W-Y", $aik);
           $kustp = $row['kp_nimi'];
           $osasto = $row['osasto'];
           $try = $row['try'];
@@ -470,7 +470,7 @@ if ($tavoitteet) {
         }
 
         foreach ($xarr_kustp as $aik => $sum) {
-          $pvm = ltrim(date("W-Y", $aik),0);
+          $pvm = date("W-Y", $aik);
           $kustp = $row['kp_nimi'];
           $osasto = $row['osasto'];
           $try = $row['try'];
@@ -481,7 +481,7 @@ if ($tavoitteet) {
         }
 
         foreach ($xarr_kustp_osasto as $aik => $sum) {
-          $pvm = ltrim(date("W-Y", $aik),0);
+          $pvm = date("W-Y", $aik);
           $kustp = $row['kp_nimi'];
           $osasto = $row['osasto'];
           $try = $row['try'];
@@ -492,7 +492,7 @@ if ($tavoitteet) {
         }
 
         foreach ($xarr_kustp_osasto_try as $aik => $sum) {
-          $pvm = ltrim(date("W-Y", $aik),0);
+          $pvm = date("W-Y", $aik);
           $kustp = $row['kp_nimi'];
           $osasto = $row['osasto'];
           $try = $row['try'];
@@ -503,7 +503,7 @@ if ($tavoitteet) {
         }
 
         foreach ($xarr_osasto as $aik => $sum) {
-          $pvm = ltrim(date("W-Y", $aik),0);
+          $pvm = date("W-Y", $aik);
           $kustp = $row['kp_nimi'];
           $osasto = $row['osasto'];
           $try = $row['try'];
@@ -514,7 +514,7 @@ if ($tavoitteet) {
         }
 
         foreach ($xarr_try as $aik => $sum) {
-          $pvm = ltrim(date("W-Y", $aik),0);
+          $pvm = date("W-Y", $aik);
           $kustp = $row['kp_nimi'];
           $osasto = $row['osasto'];
           $try = $row['try'];
@@ -617,15 +617,23 @@ if ($tavoitteet) {
   while ($row = mysql_fetch_assoc($result)) {
 
     $aikaleima = strtotime($row['pvm']);
+    $pai = date('d', $aikaleima);
+    $vuo = date('Y', $aikaleima);
+    $vko = (int) date('W', $aikaleima);
+    $kuu = (int) date('m', $aikaleima);
+    $vko = $vko == 1 ? ($kuu == 12 ? 52 : 1) : ($vko >= 51 ? ($kuu == 1 ? 0 : $vko) : $vko);
+
+    $kuu = str_pad($kuu,2,"0",STR_PAD_LEFT);
+    $vko = str_pad($vko,2,"0",STR_PAD_LEFT);
 
     if ($naytetaan_tulos == 'weekly') {
-      $pvm = ltrim(date("W-Y", $aikaleima),0);
+      $pvm = "{$vko}-{$vuo}";
     }
     elseif ($naytetaan_tulos == 'monthly') {
-      $pvm = date("n-Y", $aikaleima);
+      $pvm = "{$kuu}-{$vuo}";
     }
     else {
-      $pvm = date("j-n-Y", $aikaleima);
+      $pvm = "{$pai}-{$kuu}-{$vuo}";
     }
 
     $kustp = $row['kustannuspaikka'];
@@ -702,15 +710,23 @@ if ($tavoitteet) {
   while ($row = mysql_fetch_assoc($result)) {
 
     $aikaleima = strtotime($row['pvm']);
+    $pai = date('d', $aikaleima);
+    $vuo = date('Y', $aikaleima);
+    $vko = (int) date('W', $aikaleima);
+    $kuu = (int) date('m', $aikaleima);
+    $vko = $vko == 1 ? ($kuu == 12 ? 52 : 1) : ($vko >= 51 ? ($kuu == 1 ? 0 : $vko) : $vko);
+
+    $kuu = str_pad($kuu,2,"0",STR_PAD_LEFT);
+    $vko = str_pad($vko,2,"0",STR_PAD_LEFT);
 
     if ($naytetaan_tulos == 'weekly') {
-      $pvm = ltrim(date("W-Y", $aikaleima),0);
+      $pvm = "{$vko}-{$vuo}";
     }
     elseif ($naytetaan_tulos == 'monthly') {
-      $pvm = date("n-Y", $aikaleima);
+      $pvm = "{$kuu}-{$vuo}";
     }
     else {
-      $pvm = date("j-n-Y", $aikaleima);
+      $pvm = "{$pai}-{$kuu}-{$vuo}";
     }
 
     $kustp = $row['kustannuspaikka'];
@@ -765,6 +781,45 @@ if ($tavoitteet) {
     $arr_try[$pvm][$osasto][$try]['laskutetut_kate'] += $row['laskutetut_kate'];
     $arr_try[$pvm][$osasto][$try]['laskutetut_rivit']++;
   }
+
+  function aikasorttaus($a,$b) {
+    global $naytetaan_tulos;
+
+    if ($naytetaan_tulos == 'weekly') {
+      $a_vuo = substr($a, 3, 4);
+      $a_vko = substr($a, 0, 2);
+      $a = strtotime("{$a_vuo}W{$a_vko}");
+
+      $b_vuo = substr($b, 3, 4);
+      $b_vko = substr($b, 0, 2);
+      $b = strtotime("{$b_vuo}W{$b_vko}");
+    }
+    elseif ($naytetaan_tulos == 'monthly') {
+      $a_vuo = substr($a, 3, 4);
+      $a_kuu = substr($a, 0, 2);
+      $a = strtotime("{$a_vuo}-{$a_kuu}");
+
+      $b_vuo = substr($b, 3, 4);
+      $b_kuu = substr($b, 0, 2);
+      $b = strtotime("{$b_vuo}-{$b_kuu}");
+    }
+    else {
+      $a_vuo = substr($a, 6, 4);
+      $a_kuu = substr($a, 3, 2);
+      $a_pai = substr($a, 0, 2);
+      $a = strtotime("{$a_vuo}-{$a_kuu}-{$a_pai}");
+
+      $b_vuo = substr($b, 3, 4);
+      $b_kuu = substr($b, 0, 2);
+      $b_pai = substr($b, 0, 2);
+      $b = strtotime("{$b_vuo}-{$b_kuu}-{$b_pai}");
+    }
+
+    if ($a==$b) return 0;
+       return ($a<$b)?-1:1;
+  }
+
+  uksort($arr, "aikasorttaus");
 
   foreach ($arr as $pvm => $arvot) {
 

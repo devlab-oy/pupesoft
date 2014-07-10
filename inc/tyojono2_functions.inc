@@ -88,12 +88,12 @@ function hae_tyomaaraykset($request) {
   if (!empty($request['toimitusaika'])) {
     if (is_numeric($request['toimitusaika'])) {
       if ($request['toim'] == 'TEHDYT_TYOT') {
-        $lasku_where .= "  AND lasku.toimaika > DATE_SUB(CURRENT_DATE, INTERVAL {$request['toimitusaika']} DAY)
-                  AND lasku.toimaika < CURRENT_DATE";
+        $lasku_where .= " AND lasku.toimaika > DATE_SUB(CURRENT_DATE, INTERVAL {$request['toimitusaika']} DAY)
+                          AND lasku.toimaika <= CURRENT_DATE";
       }
       else {
-        $lasku_where .= "  AND lasku.toimaika < DATE_ADD(CURRENT_DATE, INTERVAL {$request['toimitusaika']} DAY)
-                  AND lasku.toimaika > DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY)";
+        $lasku_where .= " AND lasku.toimaika < DATE_ADD(CURRENT_DATE, INTERVAL {$request['toimitusaika']} DAY)
+                          AND lasku.toimaika > DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY)";
       }
     }
     else if ($request['toimitusaika'] == 'X') {

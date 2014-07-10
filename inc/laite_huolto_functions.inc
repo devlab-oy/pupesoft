@@ -277,6 +277,7 @@ function generoi_tyomaaraykset_huoltosykleista($laitteet, $laitteiden_huoltosykl
 
   if ($debug) {
     $kpl = count($laitteet) - count($virheet);
+    echo "<br/>";
     echo "Työmääräyksiä tuli {$kpl}";
     echo "<br/>";
     foreach($virheet as $laitteen_virheet) {

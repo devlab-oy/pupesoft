@@ -14,7 +14,7 @@ if (mysql_field_type($result, $i) == "blob") {
 }
 
 if (mysql_field_name($result, $i) == "tuoteno") {
-  $lopetus_temp = base64_encode(urlencode("{$palvelin2}asiakkaan_laite_hallinta.php////tee=hae_asiakas//asiakasid={$valittu_asiakas}"));
+  $lopetus_temp = base64_encode(urlencode("{$palvelin2}asiakkaan_laite_hallinta.php////tee=hae_asiakas//asiakas_tunnus={$valittu_asiakas}"));
   $lopetus = "yllapito.php////toim=laite//uusi=1//valittu_paikka={$valittu_paikka}//lopetus_temp={$lopetus_temp}";
   $ulos = "<td id='tuoteno_td'>";
   $ulos .= livesearch_kentta('uusi_laite_form', 'TUOTEHAKU', $nimi, '226', $trow[$i], 'NOSUBMIT');

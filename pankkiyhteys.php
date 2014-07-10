@@ -52,6 +52,7 @@ if ($tee == "laheta") {
     $vastaus = laheta_maksuaineisto($tunnukset, $maksuaineisto);
 
     if ($vastaus) {
+      ok("Maksuaineisto lähetetty, vastaus pankista:");
       echo "<table>";
       echo "<tbody>";
 
@@ -64,8 +65,7 @@ if ($tee == "laheta") {
 
       echo "</tbody>";
       echo "</table>";
-
-      ok("Maksuaineisto lähetetty, vastaus on yllä");
+      echo "<br/><br/>";
     }
   }
 
@@ -360,7 +360,13 @@ function lataa_kaikki($tiedostotyyppi) {
   $viitteet = hae_viitteet($tiedostotyyppi, $tunnukset);
 
   if ($viitteet and lataa_tiedostot($viitteet, $tiedostotyyppi, $tunnukset)) {
-    ok("Tiedostot ladattu");
+    if ($tiedostotyyppi == "TITO") {
+      ok("Tiliotteet ladattu");
+    }
+
+    elseif ($tiedostotyyppi == "KTL") {
+      ok("Viitteet ladattu");
+    }
   }
 }
 

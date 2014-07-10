@@ -270,12 +270,17 @@ if ($excel != "") {
 
 echo "<tr><th>".t("Raportti vain Exceliin")."</th><td colspan='3'><input type='checkbox' name='excel' value = 'YES' $sel></td></tr>";
 
-$alvsel="";
-if ($post_alv != "") {
-  $alvsel = "CHECKED";
-}
+$alvsel = ($post_alv != "") ? "CHECKED" : "";
 
-echo "<tr><th>".t("Vain ALV-laskelman jälkeen tehdyt tiliöinnit")."</th><td colspan='3'><input type='checkbox' name='post_alv' value = 'YES' $alvsel> Toimii vain jos haetaan koko kuukaudelta!</td></tr>";
+echo "<tr>";
+echo "<th>";
+echo t("Vain ALV-laskelman jälkeen tehdyt tiliöinnit");
+echo "</th>";
+echo "<td colspan='3'>";
+echo "<input type = 'checkbox' name = 'post_alv' value = 'YES' {$alvsel}> ";
+echo t("Toimii vain jos haetaan koko kuukaudelta!");
+echo "</td>";
+echo "</tr>";
 
 echo "<tr><th valign='top'>".t("Konsernirajaus")."</th>";
 
@@ -341,15 +346,26 @@ if ($tee != "") {
   $blvp = 0;
 
   if (isset($post_alv) and $alvk < 1) {
-    echo "<font class='error'>".t("ALV-Laskelman jälkeen tehtyjä tiliöintejä haettaessa pitää valita kuukausi.")."</font><br><br>";
+    echo "<font class='error'>";
+    echo t("ALV-Laskelman jälkeen tehtyjä tiliöintejä haettaessa pitää valita kuukausi.");
+    echo "</font>";
+    echo "<br><br>";
     $tee = "";
   }
-  elseif (isset($post_alv) and $alvp > 0) {
-    echo "<font class='error'>".t("ALV-Laskelman jälkeen tehtyjä tiliöintejä haettaessa pitää valita koko kuukausi.")."</font><br><br>";
+
+  if (isset($post_alv) and $alvp > 0) {
+    echo "<font class='error'>";
+    echo t("ALV-Laskelman jälkeen tehtyjä tiliöintejä haettaessa pitää valita koko kuukausi.");
+    echo "</font>";
+    echo "<br><br>";
     $tee = "";
   }
-  elseif (isset($post_alv) and $tkausi > 0) {
-    echo "<font class='error'>".t("ALV-Laskelman jälkeen tehtyjä tiliöintejä haettaessa ei voi valita tilikautta.")."</font><br><br>";
+
+  if (isset($post_alv) and $tkausi > 0) {
+    echo "<font class='error'>";
+    echo t("ALV-Laskelman jälkeen tehtyjä tiliöintejä haettaessa ei voi valita tilikautta.");
+    echo "</font>";
+    echo "<br><br>";
     $tee = "";
   }
 
@@ -423,9 +439,10 @@ if ($tee != "") {
   }
 
   $post_alv_lisa = '';
+
   if ($post_alv != '' and $alvp == 0 and $alvk != 0) {
 
-    $kuunvika = date("Y-m-t", strtotime($alvv.'-'.$alvk.'-11'));
+    $kuunvika = date("Y-m-t", strtotime("{$alvv}-{$alvk}-01"));
 
     $query = "SELECT luontiaika
               FROM lasku
@@ -440,7 +457,7 @@ if ($tee != "") {
       $laskelma_luotu = $luontiaikarow['luontiaika'];
       $post_alv_lisa = " and tiliointi.laadittu >= '$laskelma_luotu' and tiliointi.vero > 0";
     }
-    else{
+    else {
       $post_alv_lisa = " and tiliointi.laadittu < 0.1";
       $ei_alv = 'X';
     }
@@ -456,7 +473,16 @@ if ($tee != "") {
   }
 
   if ((int) $tkausi > 0) {
-    echo "<font class='head'>$nimi ".t("tilikaudelta")." ".tv1dateconv($tilikaudetrow["tilikausi_alku"])." - ".tv1dateconv($tilikaudetrow["tilikausi_loppu"])."</font><hr>";
+    $_ta = tv1dateconv($tilikaudetrow["tilikausi_alku"]);
+    $_tl = tv1dateconv($tilikaudetrow["tilikausi_loppu"]);
+
+    echo "<font class='head'>";
+    echo "{$nimi} ";
+    echo t("tilikaudelta");
+    echo " {$_ta} - {$_tl}";
+    echo "</font>";
+    echo "<hr>";
+
     $lisa1  = " and tiliointi.tapvm <= '$tilikaudetrow[tilikausi_loppu]' and tiliointi.tapvm >= '$tilikaudetrow[tilikausi_alku]'";
     $lisa2 = " and tiliointi.tapvm < '$tilikaudetrow[tilikausi_alku]'"; //hassua hassua
   }

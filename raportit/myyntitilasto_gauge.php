@@ -368,10 +368,11 @@ if ($tavoitteet) {
 
     while ($row = mysql_fetch_assoc($result)) {
 
+      $vuosi = substr($row['kausi'], 0, 4);
+      $kuu = substr($row['kausi'], 5, 2);
+
       if ($naytetaan_tulos == 'daily') {
 
-        $vuosi = substr($row['kausi'], 0, 4);
-        $kuu = substr($row['kausi'], 5, 2);
         $paivia = cal_days_in_month(CAL_GREGORIAN,$kuu,$vuosi);
 
         for ($i = 0; $i < $paivia; $i++) {
@@ -416,8 +417,6 @@ if ($tavoitteet) {
 
       if ($naytetaan_tulos == 'weekly') {
 
-        $vuosi = substr($row['kausi'], 0, 4);
-        $kuu = substr($row['kausi'], 5, 2);
         $paivia = cal_days_in_month(CAL_GREGORIAN,$kuu,$vuosi);
 
         for ($i = 0; $i < $paivia; $i++) {

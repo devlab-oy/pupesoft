@@ -288,6 +288,8 @@ function generoi_private_key_ja_csr() {
  * @return string
  */
 function hae_sertifikaatti_sepasta($pin, $customer_id, $tunnukset) {
+  global $sepa_pankkiyhteys_token;
+
   $parameters = array(
     "method"  => "POST",
     "data"    => array(
@@ -299,7 +301,7 @@ function hae_sertifikaatti_sepasta($pin, $customer_id, $tunnukset) {
     "url"     => "https://sepa.devlab.fi/api/nordea/get_certificate",
     "headers" => array(
       "Content-Type: application/json",
-      "Authorization: Token token={$sepa_pankkiyhteys_url}"
+      "Authorization: Token token={$sepa_pankkiyhteys_token}"
     )
   );
 
@@ -363,6 +365,8 @@ function salaa($data, $salasana) {
  * @return string
  */
 function hae_target_id($sertifikaatti, $private_key, $customer_id) {
+  global $sepa_pankkiyhteys_token;
+
   $parameters = array(
     "method"  => "POST",
     "data"    => array(
@@ -373,7 +377,7 @@ function hae_target_id($sertifikaatti, $private_key, $customer_id) {
     "url"     => "https://sepa.devlab.fi/api/nordea/get_user_info",
     "headers" => array(
       "Content-Type: application/json",
-      "Authorization: Token token={$sepa_pankkiyhteys_url}"
+      "Authorization: Token token={$sepa_pankkiyhteys_token}"
     )
   );
 

@@ -269,6 +269,19 @@ if ($excel != "") {
 }
 
 echo "<tr><th>".t("Raportti vain Exceliin")."</th><td colspan='3'><input type='checkbox' name='excel' value = 'YES' $sel></td></tr>";
+
+$alvsel = ($post_alv != "") ? "CHECKED" : "";
+
+echo "<tr>";
+echo "<th>";
+echo t("Vain ALV-laskelman jälkeen tehdyt tiliöinnit");
+echo "</th>";
+echo "<td colspan='3'>";
+echo "<input type = 'checkbox' name = 'post_alv' value = 'YES' {$alvsel}> ";
+echo t("Toimii vain jos haetaan koko kuukaudelta!");
+echo "</td>";
+echo "</tr>";
+
 echo "<tr><th valign='top'>".t("Konsernirajaus")."</th>";
 
 $konsel = array();
@@ -331,6 +344,30 @@ if ($tee != "") {
   // Tutkitaan ensiksi, mille tilikaudelle pyydettävä lista löytyy, jos lista on sopiva
   $blvk = 0;
   $blvp = 0;
+
+  if (isset($post_alv) and $alvk < 1) {
+    echo "<font class='error'>";
+    echo t("ALV-Laskelman jälkeen tehtyjä tiliöintejä haettaessa pitää valita kuukausi.");
+    echo "</font>";
+    echo "<br><br>";
+    $tee = "";
+  }
+
+  if (isset($post_alv) and $alvp > 0) {
+    echo "<font class='error'>";
+    echo t("ALV-Laskelman jälkeen tehtyjä tiliöintejä haettaessa pitää valita koko kuukausi.");
+    echo "</font>";
+    echo "<br><br>";
+    $tee = "";
+  }
+
+  if (isset($post_alv) and $tkausi > 0) {
+    echo "<font class='error'>";
+    echo t("ALV-Laskelman jälkeen tehtyjä tiliöintejä haettaessa ei voi valita tilikautta.");
+    echo "</font>";
+    echo "<br><br>";
+    $tee = "";
+  }
 
   if ($llvv > 0) {
     if ($alvv == 0 or $alvk == 0 or $alvp == 0 or $llvv == 0 or $llvk == 0 or $llvp == 0) {
@@ -401,6 +438,31 @@ if ($tee != "") {
     $mutositelink = FALSE;
   }
 
+  $post_alv_lisa = '';
+
+  if ($post_alv != '' and $alvp == 0 and $alvk != 0) {
+
+    $kuunvika = date("Y-m-t", strtotime("{$alvv}-{$alvk}-01"));
+
+    $query = "SELECT luontiaika
+              FROM lasku
+              WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+              AND lasku.tapvm   = '{$kuunvika}'
+              AND lasku.tila    = 'X'
+              AND lasku.nimi    = 'ALVTOSITEMAKSUUN$kuunvika'";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) > 0) {
+      $luontiaikarow = mysql_fetch_assoc($result);
+      $laskelma_luotu = $luontiaikarow['luontiaika'];
+      $post_alv_lisa = " and tiliointi.laadittu >= '$laskelma_luotu' and tiliointi.vero > 0";
+    }
+    else {
+      $post_alv_lisa = " and tiliointi.laadittu < 0.1";
+      $ei_alv = 'X';
+    }
+  }
+
   $nimi = t("Pääkirja");
   $jarj = "tiliointi.tilino, tiliointi.tapvm, tiliointi.laadittu, tiliointi.summa";
 
@@ -411,7 +473,16 @@ if ($tee != "") {
   }
 
   if ((int) $tkausi > 0) {
-        echo "<font class='head'>$nimi ".t("tilikaudelta")." ".tv1dateconv($tilikaudetrow["tilikausi_alku"])." - ".tv1dateconv($tilikaudetrow["tilikausi_loppu"])."</font><hr>";
+    $_ta = tv1dateconv($tilikaudetrow["tilikausi_alku"]);
+    $_tl = tv1dateconv($tilikaudetrow["tilikausi_loppu"]);
+
+    echo "<font class='head'>";
+    echo "{$nimi} ";
+    echo t("tilikaudelta");
+    echo " {$_ta} - {$_tl}";
+    echo "</font>";
+    echo "<hr>";
+
     $lisa1  = " and tiliointi.tapvm <= '$tilikaudetrow[tilikausi_loppu]' and tiliointi.tapvm >= '$tilikaudetrow[tilikausi_alku]'";
     $lisa2 = " and tiliointi.tapvm < '$tilikaudetrow[tilikausi_alku]'"; //hassua hassua
   }
@@ -441,6 +512,14 @@ if ($tee != "") {
     $alkupvm  = date("Y-m-d", mktime(0, 0, 0, $alvk, $alvp, $alvv));
     $lisa1  = " and tiliointi.tapvm = '$alkupvm'";
     $lisa2 = " and tiliointi.tapvm < '$alkupvm'";
+  }
+
+  if (isset($post_alv) and !isset($ei_alv)) {
+    echo "<p>". t("Näytetään vain ALV-laskelman jälkeen tehdyt tiliöinnit") ."</p>";
+  }
+
+  if (isset($post_alv) and isset($ei_alv)) {
+    echo "<font class='error'>". t("Valitun kuukauden ALV-laskelmaa ei ole lähetetty!") ."</font><br><br>";
   }
 
   if (strlen(trim($tili)) > 0 and strlen(trim($tili2)) > 0) {
@@ -521,6 +600,7 @@ if ($tee != "") {
             and tiliointi.korjattu = ''
             $lisa1
             $lisa
+            $post_alv_lisa
             $konsernilisa
             ORDER BY $jarj";
   $result = mysql_query($query) or pupe_error($query);

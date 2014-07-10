@@ -46,7 +46,7 @@ $maksupaate_maksetut['pankkikortti'] = $maksettu_pkortilla;
 if ($vertailtava_summa_int >= $kaikkiyhteensa_int) {
   return 0;
 }
-
+// TODO suoritustyyppi: maksu tai hyvitys/peruutus (cancel/refund, tarvitsee archiveid(aviite?, löytyy kuitilta))
 foreach($suoritukset as $suoritus) {
 
   // Jos salasanat.phpstä puuttuu lumon osoite tai portti
@@ -63,20 +63,20 @@ foreach($suoritukset as $suoritus) {
 
   // Jos summa on vähintään 0.01 EUR voidaan tehdä maksutapahtuma
   if(is_numeric($korttimaksu_f) and $korttimaksu_f >= 1) {
-    
+
     $clientti = new LumoClient($lumo_service_address, $lumo_service_port);
 
     if ($clientti->getErrorCount() > 0) {
       $onnistuuko = t("Ei yhteyttä maksupäätteeseen");
       break;
     }
-    
+
     switch ($suoritus) {
       case '1':
         $onnistuuko = $clientti->startTransaction($korttimaksu_f);
         $onnistuuko = $onnistuuko === TRUE ? t("VELOITETTU") : t("HYLÄTTY");
         break;
-    
+
       case '2':
         if ($onnistuuko != t("VELOITETTU")) break;
         $kuitti1 = $clientti->getCustomerReceipt();
@@ -95,9 +95,9 @@ foreach($suoritukset as $suoritus) {
           $pankkivailuotto = 'PANKKIKORTTI';
           $maksupaate_maksetut['pankkikortti'] += $korttimaksu;
         }
-        
+
         break;
-    
+
       case '3':
         if ($onnistuuko != t("VELOITETTU")) break;
         $kuitti2 = $clientti->getMerchantReceipt();

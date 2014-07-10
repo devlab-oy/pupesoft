@@ -72,8 +72,8 @@ class LumoClient {
   /**
    * Start transaction
    */
-  function startTransaction($amount, $transaction_type = 0) {
-    
+  function startTransaction($amount, $transaction_type = 0, $archive_id = '') {
+
     $return = false;
 
     // Setataan transaction amount
@@ -82,10 +82,16 @@ class LumoClient {
 
     socket_write($this->_socket, $in, strlen($in));
 
-    $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'><MakeTransaction><TransactionType>0</TransactionType></MakeTransaction></EMVLumo>\0";
+    // Jos kutsussa on setattu archive_id lisätään se myös sanomaan koska kyseessä on
+    // Peruutus/hyvitystapahtuma
+    if ($archive_id != '') {
+      
+    }
+
+    $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'><MakeTransaction><TransactionType>{$transaction_type}</TransactionType></MakeTransaction></EMVLumo>\0";
     $out = '';
 
-    $this->log("Aloitetaan maksutapahtuma\n\tTyyppi: $transaction_type\n\tSumma: $amount\n");
+    $this->log("Aloitetaan maksutapahtuma\n\tTyyppi: {$transaction_type} \n\tSumma: {$amount}\n\t Viite: {$archive_id} \n");
     socket_write($this->_socket, $in, strlen($in));
 
     while ($out = socket_read($this->_socket, 2048)) {
@@ -94,7 +100,7 @@ class LumoClient {
       if (isset($xml) and isset($xml->MakeTransaction->Result)) {
         $return = $xml->MakeTransaction->Result == "True" ? TRUE : FALSE;
         $arvo = $return === TRUE ? "OK" : "HYLÄTTY";
-        $this->log("Maksutapahtuma $arvo");
+        $this->log("Maksutapahtuma {$arvo} \n");
       }
     }
     return $return;

@@ -1,8 +1,5 @@
 <?php
 
-const SEPA_OSOITE = "https://sepa.devlab.fi/api/";
-const ACCESS_TOKEN = "Bexvxb10H1XBT36x42Lv8jEEKnA6";
-
 require("inc/parametrit.inc");
 
 echo "<font class='head'>" . t('SEPA-pankkiyhteys') . "</font>";
@@ -15,28 +12,28 @@ if (!isset($_SERVER["HTTPS"]) or $_SERVER["HTTPS"] != 'on') {
   exit;
 }
 
-$tee = isset($tee) ? $tee : '';
-$target_id = isset($target_id) ? $target_id : '';
+if (!isset($sepa_pankkiyhteys_token)) {
+  echo "<font class='error'>";
+  echo t("SEPA-palvelua ei ole aktivoitu.");
+  echo "</font>";
+  exit;
+}
 
-if ($tee == "laheta") {
-  if (!formi_kunnossa()) {
+$tee = empty($tee) ? '' : $tee;
+
+if ($tee == "laheta" and !formi_kunnossa()) {
+  $tee = "";
+}
+
+if ($tee == "laheta" and $hae_tiliotteet == "on") {
+  if (!lataa_kaikki("TITO")) {
     $tee = "";
   }
 }
 
-if ($tee == "laheta") {
-  if ($hae_tiliotteet == "on") {
-    if (!lataa_kaikki("TITO")) {
-      $tee = "";
-    }
-  }
-}
-
-if ($tee == "laheta") {
-  if ($hae_viitteet == "on") {
-    if (!lataa_kaikki("KTL")) {
-      $tee = "";
-    }
+if ($tee == "laheta" and $hae_viitteet == "on") {
+  if (!lataa_kaikki("KTL")) {
+    $tee = "";
   }
 }
 
@@ -49,28 +46,25 @@ if ($tee == "laheta" and $laheta_maksuaineisto == "on") {
   }
 }
 
-if ($tee == "laheta") {
-  if ($laheta_maksuaineisto == "on") {
-    $tunnukset = hae_tunnukset_ja_pura_salaus($tili, $salasana);
+if ($tee == "laheta" and $laheta_maksuaineisto == "on") {
+  $tunnukset = hae_tunnukset_ja_pura_salaus($tili, $salasana);
+  $vastaus = laheta_maksuaineisto($tunnukset, $maksuaineisto);
 
-    $vastaus = laheta_maksuaineisto($tunnukset, $maksuaineisto);
+  if ($vastaus) {
+    ok("Maksuaineisto l‰hetetty, vastaus pankista:");
+    echo "<table>";
+    echo "<tbody>";
 
-    if ($vastaus) {
-      ok("Maksuaineisto l‰hetetty, vastaus pankista:");
-      echo "<table>";
-      echo "<tbody>";
-
-      foreach ($vastaus[1] as $key => $value) {
-        echo "<tr>";
-        echo "<td>{$key}</td>";
-        echo "<td>{$value}</td>";
-        echo "</tr>";
-      }
-
-      echo "</tbody>";
-      echo "</table>";
-      echo "<br/><br/>";
+    foreach ($vastaus[1] as $key => $value) {
+      echo "<tr>";
+      echo "<td>{$key}</td>";
+      echo "<td>{$value}</td>";
+      echo "</tr>";
     }
+
+    echo "</tbody>";
+    echo "</table>";
+    echo "<br/><br/>";
   }
 
   $tee = "";
@@ -134,10 +128,10 @@ function hae_viitteet($tiedostotyyppi, $tunnukset) {
       "file_type"   => $tiedostotyyppi,
       "target_id"   => "11111111A1"
     ),
-    "url"     => "" . SEPA_OSOITE . "nordea/download_file_list",
+    "url"     => "https://sepa.devlab.fi/api/nordea/download_file_list",
     "headers" => array(
       "Content-Type: application/json",
-      "Authorization: Token token=" . ACCESS_TOKEN
+      "Authorization: Token token={$sepa_pankkiyhteys_url}"
     )
   );
 
@@ -178,10 +172,10 @@ function lataa_tiedostot($viitteet, $tiedostotyyppi, $tunnukset) {
         "target_id"      => "11111111A1",
         "file_reference" => $viite
       ),
-      "url"     => "" . SEPA_OSOITE . "nordea/download_file",
+      "url"     => "https://sepa.devlab.fi/api/nordea/download_file",
       "headers" => array(
         "Content-Type: application/json",
-        "Authorization: Token token=" . ACCESS_TOKEN
+        "Authorization: Token token={$sepa_pankkiyhteys_url}"
       )
     );
 
@@ -294,10 +288,10 @@ function laheta_maksuaineisto($tunnukset, $maksuaineisto) {
       "target_id"   => "11111111A1",
       "content"     => $maksuaineisto
     ),
-    "url"     => "" . SEPA_OSOITE . "nordea/upload_file",
+    "url"     => "https://sepa.devlab.fi/api/nordea/upload_file",
     "headers" => array(
       "Content-Type: application/json",
-      "Authorization: Token token=" . ACCESS_TOKEN
+      "Authorization: Token token={$sepa_pankkiyhteys_url}"
     )
   );
 
@@ -464,7 +458,7 @@ function formi() {
   }
 
   else {
-    viesti("Yht‰‰n pankkiyhteytt‰ ei ole viel‰ luotu");
+    viesti("Yht‰‰n pankkiyhteytt‰ ei ole viel‰ luotu.");
   }
 }
 

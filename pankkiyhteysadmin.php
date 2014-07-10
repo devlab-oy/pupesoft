@@ -1,14 +1,8 @@
 <?php
 
-const SEPA_OSOITE = "https://sepa.devlab.fi/api/";
-const ACCESS_TOKEN = "Bexvxb10H1XBT36x42Lv8jEEKnA6";
-
-// Voi olla joko "TEST" tai "PRODUCTION"
-const YMPARISTO = "TEST";
-
 require("inc/parametrit.inc");
 
-echo "<font class='head'>" . t('SEPA-pankkiyhteys Admin') . "</font>";
+echo "<font class='head'>" . t('SEPA-pankkiyhteys') . "</font>";
 echo "<hr>";
 
 if (!isset($_SERVER["HTTPS"]) or $_SERVER["HTTPS"] != 'on') {
@@ -18,15 +12,22 @@ if (!isset($_SERVER["HTTPS"]) or $_SERVER["HTTPS"] != 'on') {
   exit;
 }
 
-$tee = isset($tee) ? $tee : '';
-
-if ($tee == "luo") {
-  if (!pankkiyhteystiedot_kunnossa()) {
-    $tee = "";
-  }
+if (!isset($sepa_pankkiyhteys_token)) {
+  echo "<font class='error'>";
+  echo t("SEPA-palvelua ei ole aktivoitu.");
+  echo "</font>";
+  exit;
 }
 
-if ($tee == "luo" and !empty($pin)) {
+$tee = empty($tee) ? '' : $tee;
+$pin = empty($pin) ? '' : $pin;
+$target_id = empty($target_id) ? '' : $target_id;
+
+if ($tee == "luo" and !pankkiyhteystiedot_kunnossa()) {
+  $tee = "";
+}
+
+if ($tee == "luo" and $pin != '') {
   $generoidut_tunnukset = generoi_private_key_ja_csr();
 
   $certificate = hae_sertifikaatti_sepasta($pin, $customer_id, $generoidut_tunnukset);
@@ -43,7 +44,7 @@ if ($tee == "luo" and !empty($pin)) {
   );
 }
 
-if ($tee == "luo" and !$pin) {
+if ($tee == "luo" and $pin == '') {
   $private_key = file_get_contents($_FILES["private_key"]["tmp_name"]);
   $certificate = file_get_contents($_FILES["certificate"]["tmp_name"]);
 
@@ -53,7 +54,6 @@ if ($tee == "luo" and !$pin) {
     virhe("Et antanut oikeaa avainparia");
     $tee = "";
   }
-
   else {
     $salatut_tunnukset = array(
       "private_key"   => salaa($private_key, $salasana),
@@ -75,13 +75,12 @@ if ($tee == "luo" and $target_id == '') {
 if ($tee == "luo") {
   if (tallenna_tunnukset($salatut_tunnukset, $customer_id, $target_id, $tili)) {
     ok("Tunnukset tallennettu");
-    $tee = "";
   }
-
   else {
     virhe("Tunnusten tallennus epäonnistui");
-    $tee = "";
   }
+
+  $tee = "";
 }
 
 if ($tee == "") {
@@ -92,7 +91,7 @@ function uusi_pankkiyhteys_formi() {
   $tilit = hae_uudet_tilit();
 
   if (count($tilit) == 0) {
-    return viesti("Kaikille tileille on jo luotu yhteydet");
+    return viesti("Kaikille tileille on jo luotu yhteydet.");
   }
 
   echo "<form action='pankkiyhteysadmin.php' method='post' enctype='multipart/form-data'>";
@@ -190,8 +189,6 @@ function hae_uudet_tilit() {
   $query = "SELECT tunnus, nimi
             FROM yriti
             WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND bic != ''
-            AND bic IS NOT NULL
             AND sepa_customer_id = ''";
   $result = pupe_query($query);
 
@@ -296,13 +293,13 @@ function hae_sertifikaatti_sepasta($pin, $customer_id, $tunnukset) {
     "data"    => array(
       "pin"         => $pin,
       "customer_id" => $customer_id,
-      "environment" => YMPARISTO,
+      "environment" => "PRODUCTION", // Voi olla joko "TEST" tai "PRODUCTION"
       "csr"         => base64_encode($tunnukset["csr"])
     ),
-    "url"     => SEPA_OSOITE . "nordea/get_certificate",
+    "url"     => "https://sepa.devlab.fi/api/nordea/get_certificate",
     "headers" => array(
       "Content-Type: application/json",
-      "Authorization: Token token=" . ACCESS_TOKEN
+      "Authorization: Token token={$sepa_pankkiyhteys_url}"
     )
   );
 
@@ -373,10 +370,10 @@ function hae_target_id($sertifikaatti, $private_key, $customer_id) {
       "private_key" => base64_encode($private_key),
       "customer_id" => $customer_id
     ),
-    "url"     => SEPA_OSOITE . "nordea/get_user_info",
+    "url"     => "https://sepa.devlab.fi/api/nordea/get_user_info",
     "headers" => array(
       "Content-Type: application/json",
-      "Authorization: Token token=" . ACCESS_TOKEN
+      "Authorization: Token token={$sepa_pankkiyhteys_url}"
     )
   );
 

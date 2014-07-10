@@ -69,7 +69,7 @@ class TuoteCSVDumper extends CSVDumper {
           }
         }
         else if ($konvertoitu_header == 'ei_saldoa') {
-          if (trim(strtolower($rivi[$csv_header])) == 'palvelutuote' or trim(strtolower($rivi[$csv_header])) == 'o') {
+          if (trim(strtolower($rivi[$csv_header])) == 'palvelutuote' or trim(strtolower($rivi[$csv_header])) == 'o' or trim($rivi[$csv_header]) == 'K') {
             $rivi_temp[$konvertoitu_header] = 'o';
           }
           else {

@@ -382,6 +382,8 @@ function lataa_kaikki($tiedostotyyppi) {
       ok("Viitteet ladattu");
     }
   }
+
+  return true;
 }
 
 /**

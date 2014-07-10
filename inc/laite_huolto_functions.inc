@@ -266,7 +266,7 @@ function generoi_tyomaaraykset_huoltosykleista($laitteet, $laitteiden_huoltosykl
       $lisaa_kulut = false;
     }
 
-    generoi_tyomaarays($laite, $laitteiden_huoltosyklirivit_joita_ei_huolleta, '', $lisaa_kulut);
+    generoi_tyomaarays($laite, $laitteiden_huoltosyklirivit_joita_ei_huolleta, $lisaa_kulut);
 
     $edellinen_kohde_tunnus = $laite['kohde_tunnus'];
 
@@ -435,7 +435,7 @@ function generoi_tyomaarays($laite, $laitteiden_huoltosyklirivit_joita_ei_huolle
     $params = array(
         'tyomaarays_tunnus' => $laskurow['tunnus'],
         'tuote'             => $kaynti_trow,
-        'laite_tunnus'      => $laite['laite_tunnus'],
+        'laite_tunnus'      => 0,
         'toimaika'          => $toimitusaika,
         'toimitettu'        => $toimitettu,
         'alv_23'            => false,

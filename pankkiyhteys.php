@@ -29,9 +29,6 @@ if ($tee == "laheta" and $hae_tiliotteet == "on") {
   $tiedostot = lataa_kaikki("TITO");
 
   viesti("Ladatut tiliotteet:");
-
-  echo "<br/>";
-
   tiedostot_table($tiedostot);
 }
 
@@ -39,9 +36,6 @@ if ($tee == "laheta" and $hae_viitteet == "on") {
   $tiedostot = lataa_kaikki("KTL");
 
   viesti("Ladatut viitteet:");
-
-  echo "<br/>";
-
   tiedostot_table($tiedostot);
 }
 
@@ -358,7 +352,6 @@ function viesti($viesti) {
   echo "<font class='message'>{$viesti}</font><br/>";
 }
 
-
 /**
  * @param $tiedostotyyppi
  *
@@ -468,11 +461,9 @@ function formi_kunnossa() {
   if ($_POST["hae_tiliotteet"] == "on") {
     $komennot_count++;
   }
-
   elseif ($_POST["hae_viitteet"] == "on") {
     $komennot_count++;
   }
-
   elseif ($_POST["laheta_maksuaineisto"] == "on") {
     $komennot_count++;
   }
@@ -515,30 +506,27 @@ function salasana_kunnossa() {
  * @param $tiedostot
  */
 function tiedostot_table($tiedostot) {
+  echo "<br/>";
+
   echo "<table>";
 
   echo "<thead>";
-
   echo "<tr>";
   echo "<th>" . t("Viite") . "</th>";
   echo "<th>" . t("Status") . "</th>";
   echo "</tr>";
-
   echo "</thead>";
 
   echo "<tbody>";
 
   foreach ($tiedostot as $tiedosto) {
     echo "<tr>";
-
     echo "<td>{$tiedosto["viite"]}</td>";
     echo "<td>{$tiedosto["status"]}</td>";
-
     echo "</tr>";
   }
 
-
-  echo "</tobdy>";
+  echo "</tbody>";
   echo "</table>";
 
   echo "<br/><br/>";

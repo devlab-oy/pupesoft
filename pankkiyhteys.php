@@ -353,15 +353,6 @@ function laheta_maksuaineisto($tunnukset, $maksuaineisto) {
   return $vastaus;
 }
 
-function maksuaineisto_kunnossa() {
-  if (isset($_FILES["maksuaineisto"]) and !$_FILES["maksuaineisto"]["tmp_name"]) {
-    virhe("Maksuaineisto puuttuu");
-    return false;
-  }
-
-  return true;
-}
-
 /**
  * @param $vastaus
  *

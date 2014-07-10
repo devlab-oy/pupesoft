@@ -19,7 +19,7 @@ $tee = isset($tee) ? $tee : '';
 $target_id = isset($target_id) ? $target_id : '';
 
 if ($tee == "laheta") {
-  if (!salasana_kunnossa()) {
+  if (!formi_kunnossa()) {
     $tee = "";
   }
 }
@@ -299,16 +299,6 @@ function laheta_maksuaineisto($tunnukset, $maksuaineisto) {
   return $vastaus;
 }
 
-function salasana_kunnossa() {
-  if (isset($_POST["salasana"]) and empty($_POST["salasana"])) {
-    virhe("Salasana t‰ytyy antaa");
-
-    return false;
-  }
-
-  return true;
-}
-
 function maksuaineisto_kunnossa() {
   if (isset($_FILES["maksuaineisto"]) and !$_FILES["maksuaineisto"]["tmp_name"]) {
     virhe("Maksuaineisto puuttuu");
@@ -457,4 +447,37 @@ function formi() {
   else {
     viesti("Yht‰‰n pankkiyhteytt‰ ei ole viel‰ luotu");
   }
+}
+
+function formi_kunnossa() {
+  $komennot_count = 0;
+  $virheet_count = 0;
+
+  if ($_POST["hae_tiliotteet"] == "on") {
+    $komennot_count++;
+  }
+
+  elseif ($_POST["hae_viitteet"] == "on") {
+    $komennot_count++;
+  }
+
+  elseif ($_POST["laheta_maksuaineisto"] == "on") {
+    $komennot_count++;
+  }
+
+  if ($komennot_count == 0) {
+    virhe("Et valinnut yht‰‰n komentoa");
+    $virheet_count++;
+  }
+
+  if (empty($_POST["salasana"])) {
+    virhe("Salasana t‰ytyy antaa");
+    $virheet_count++;
+  }
+
+  if ($virheet_count == 0) {
+    return true;
+  }
+
+  return false;
 }

@@ -25,39 +25,6 @@ if ($tee == "laheta" and !formi_kunnossa()) {
   $tee = "";
 }
 
-/**
- * @param $tiedostot
- */
-function tiedostot_table($tiedostot) {
-  echo "<table>";
-
-  echo "<thead>";
-
-  echo "<tr>";
-  echo "<th>" . t("Viite") . "</th>";
-  echo "<th>" . t("Status") . "</th>";
-  echo "</tr>";
-
-  echo "</thead>";
-
-  echo "<tbody>";
-
-  foreach ($tiedostot as $tiedosto) {
-    echo "<tr>";
-
-    echo "<td>{$tiedosto["viite"]}</td>";
-    echo "<td>{$tiedosto["status"]}</td>";
-
-    echo "</tr>";
-  }
-
-
-  echo "</tobdy>";
-  echo "</table>";
-
-  echo "<br/><br/>";
-}
-
 if ($tee == "laheta" and $hae_tiliotteet == "on") {
   $tiedostot = lataa_kaikki("TITO");
 
@@ -542,4 +509,37 @@ function salasana_kunnossa() {
   }
 
   return true;
+}
+
+/**
+ * @param $tiedostot
+ */
+function tiedostot_table($tiedostot) {
+  echo "<table>";
+
+  echo "<thead>";
+
+  echo "<tr>";
+  echo "<th>" . t("Viite") . "</th>";
+  echo "<th>" . t("Status") . "</th>";
+  echo "</tr>";
+
+  echo "</thead>";
+
+  echo "<tbody>";
+
+  foreach ($tiedostot as $tiedosto) {
+    echo "<tr>";
+
+    echo "<td>{$tiedosto["viite"]}</td>";
+    echo "<td>{$tiedosto["status"]}</td>";
+
+    echo "</tr>";
+  }
+
+
+  echo "</tobdy>";
+  echo "</table>";
+
+  echo "<br/><br/>";
 }

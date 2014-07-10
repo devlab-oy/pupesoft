@@ -19,7 +19,7 @@ class TuotteenavainsanaLaite2CSVDumper extends CSVDumper {
     $required_fields = array(
         'tuoteno',
         'tyyppi',
-        'koko',
+            //'koko', koko ei ole pakollinen koska palopostilla ei ole kokoa
     );
 
     $this->setFilepath("/tmp/konversio/VARAOSA.csv");
@@ -54,13 +54,18 @@ class TuotteenavainsanaLaite2CSVDumper extends CSVDumper {
     foreach ($this->konversio_array as $konvertoitu_header => $csv_header) {
       if (array_key_exists($csv_header, $rivi)) {
         if ($konvertoitu_header == 'tyyppi') {
-          $rivi_temp[$konvertoitu_header] = strtolower($rivi[$csv_header] . 'sammutin');
+          if (!stristr($rivi[$csv_header], 'sammutin') and !stristr($rivi[$csv_header], 'paloposti')) {
+            $rivi_temp[$konvertoitu_header] = strtolower(trim($rivi[$csv_header]) . 'sammutin');
+          }
+          else {
+            $rivi_temp[$konvertoitu_header] = trim(strtolower($rivi[$csv_header]));
+          }
         }
         else if ($konvertoitu_header == 'koko') {
-          $rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
+          $rivi_temp[$konvertoitu_header] = trim($rivi[$csv_header]);
         }
         else if ($konvertoitu_header == 'tuoteno') {
-          $rivi_temp[$konvertoitu_header] = str_replace(' ', '', strtoupper($rivi[$csv_header]));
+          $rivi_temp[$konvertoitu_header] = str_replace(' ', '', trim(strtoupper($rivi[$csv_header])));
         }
         else {
           $rivi_temp[$konvertoitu_header] = trim($rivi[$csv_header]);
@@ -76,6 +81,7 @@ class TuotteenavainsanaLaite2CSVDumper extends CSVDumper {
     foreach ($rivi as $key => $value) {
       if (in_array($key, $this->required_fields) and $value == '') {
         $valid = false;
+        break;
       }
     }
 
@@ -84,7 +90,7 @@ class TuotteenavainsanaLaite2CSVDumper extends CSVDumper {
     }
 
     $mahdolliset_sammutin_tyypit = hae_mahdolliset_sammutin_tyypit();
-    if ($valid and !in_array(strtolower($rivi['tyyppi']), array_keys($mahdolliset_sammutin_tyypit))) {
+    if ($valid and !in_array(trim(strtolower($rivi['tyyppi'])), array_keys($mahdolliset_sammutin_tyypit))) {
       $valid = false;
       $this->errors[$index][] = t('Virheellinen tyyppi') . " {$rivi['tyyppi']}";
     }
@@ -157,72 +163,78 @@ class TuotteenavainsanaLaite2CSVDumper extends CSVDumper {
     $progress_bar = new ProgressBar(t('Ajetaan rivit tietokantaan') . ' : ' . count($this->rivit));
     $progress_bar->initialize(count($this->rivit));
     foreach ($this->rivit as $rivi) {
-      $query = '  INSERT INTO ' . $this->table . '
-            (
-              yhtio,
-              tuoteno,
-              kieli,
-              laji,
-              selite,
-              laatija,
-              luontiaika
-            )
-            VALUES
-            (
-              "' . $rivi['yhtio'] . '",
-              "' . $rivi['tuoteno'] . '",
-              "' . $rivi['kieli'] . '",
-              "sammutin_tyyppi",
-              "' . $rivi['tyyppi'] . '",
-              "' . $rivi['laatija'] . '",
-              ' . $rivi['luontiaika'] . '
-            )';
-      pupe_query($query);
+      $query = 'INSERT INTO ' . $this->table . '
+                (
+                  yhtio,
+                  tuoteno,
+                  kieli,
+                  laji,
+                  selite,
+                  laatija,
+                  luontiaika
+                )
+                VALUES
+                (
+                  "' . $rivi['yhtio'] . '",
+                  "' . $rivi['tuoteno'] . '",
+                  "' . $rivi['kieli'] . '",
+                  "sammutin_tyyppi",
+                  "' . $rivi['tyyppi'] . '",
+                  "' . $rivi['laatija'] . '",
+                  ' . $rivi['luontiaika'] . '
+                )';
+      if (!empty($rivi['tyyppi'])) {
+        pupe_query($query);
+      }
 
-      $query = '  INSERT INTO ' . $this->table . '
-            (
-              yhtio,
-              tuoteno,
-              kieli,
-              laji,
-              selite,
-              laatija,
-              luontiaika
-            )
-            VALUES
-            (
-              "' . $rivi['yhtio'] . '",
-              "' . $rivi['tuoteno'] . '",
-              "' . $rivi['kieli'] . '",
-              "sammutin_koko",
-              "' . $rivi['koko'] . '",
-              "' . $rivi['laatija'] . '",
-              ' . $rivi['luontiaika'] . '
-            )';
-      pupe_query($query);
+      $query = 'INSERT INTO ' . $this->table . '
+                (
+                  yhtio,
+                  tuoteno,
+                  kieli,
+                  laji,
+                  selite,
+                  laatija,
+                  luontiaika
+                )
+                VALUES
+                (
+                  "' . $rivi['yhtio'] . '",
+                  "' . $rivi['tuoteno'] . '",
+                  "' . $rivi['kieli'] . '",
+                  "sammutin_koko",
+                  "' . $rivi['koko'] . '",
+                  "' . $rivi['laatija'] . '",
+                  ' . $rivi['luontiaika'] . '
+                )';
+      if (!empty($rivi['koko'])) {
+        pupe_query($query);
+      }
 
       if (!$this->loytyyko_palo_luokka($rivi['tuoteno'])) {
-        $query = '  INSERT INTO ' . $this->table . '
-              (
-                yhtio,
-                tuoteno,
-                kieli,
-                laji,
-                selite,
-                laatija,
-                luontiaika
-              )
-              VALUES
-              (
-                "' . $rivi['yhtio'] . '",
-                "' . $rivi['tuoteno'] . '",
-                "' . $rivi['kieli'] . '",
-                "palo_luokka",
-                "' . $rivi['palo_luokka'] . '",
-                "' . $rivi['laatija'] . '",
-                ' . $rivi['luontiaika'] . '
-              )';
-        pupe_query($query);
+        $query = 'INSERT INTO ' . $this->table . '
+                  (
+                    yhtio,
+                    tuoteno,
+                    kieli,
+                    laji,
+                    selite,
+                    laatija,
+                    luontiaika
+                  )
+                  VALUES
+                  (
+                    "' . $rivi['yhtio'] . '",
+                    "' . $rivi['tuoteno'] . '",
+                    "' . $rivi['kieli'] . '",
+                    "palo_luokka",
+                    "' . $rivi['palo_luokka'] . '",
+                    "' . $rivi['laatija'] . '",
+                    ' . $rivi['luontiaika'] . '
+                  )';
+        if (!empty($rivi['palo_luokka'])) {
+          pupe_query($query);
+        }
       }
 
       $progress_bar->increase();

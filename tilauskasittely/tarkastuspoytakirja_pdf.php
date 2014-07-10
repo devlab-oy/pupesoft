@@ -62,7 +62,8 @@ function pdf_hae_tyomaaraykset($lasku_tunnukset) {
             ON ( kohde.yhtio = paikka.yhtio
               AND kohde.tunnus = paikka.kohde )
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND lasku.tunnus IN({$lasku_tunnukset})";
+            AND lasku.tunnus IN({$lasku_tunnukset})
+            GROUP BY lasku.tunnus";
 
   $result = pupe_query($query);
 

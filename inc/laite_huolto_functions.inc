@@ -219,7 +219,7 @@ function generoi_tyomaaraykset_huoltosykleista($laitteet, $laitteiden_huoltosykl
     echo "<br/>";
   }
 
-  if ($debug) {
+  if ($debug and count($laitteet) > 0) {
     $proggress_bar = new ProgressBar(t('Työmääräykset'));
     $proggress_bar->initialize(count($laitteet));
   }

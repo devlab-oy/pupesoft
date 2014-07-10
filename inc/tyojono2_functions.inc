@@ -213,13 +213,27 @@ function kasittele_tyomaaraykset($request) {
   global $kukarow, $yhtiorow;
 
   $tyomaaraykset_temp = array();
+  $kohteiden_toimajat = array();
   foreach ($request['tyomaaraykset'] as $tyomaarays) {
+    if (empty($kohteiden_toimajat[$tyomaarays['kohde_tunnus']])) {
+      $kohteiden_toimajat[$tyomaarays['kohde_tunnus']][] = $tyomaarays['toimaika'];
+    }
 
     if (!empty($tyomaarays['poistettu_laite'])) {
       $tyomaarays['poikkeus_teksti'] .= '<br/>' . $tyomaarays['poistettu_laite'] . ' -> ' . $tyomaarays['tuoteno'];
     }
 
-    $toimaika = $tyomaarays['toimaika'];
+    //Kohteen toimitusajoista viimeisin sinne insertöity toimaika
+    $kohteen_viimeisin_toimaika = end(array_values($kohteiden_toimajat[$tyomaarays['kohde_tunnus']]));
+    $paiva_temp = date('Y-m-d', strtotime("{$kohteen_viimeisin_toimaika} + 30 days"));
+    //Jos käsittelyssä oleva työmääräyksen toimaika on 30 päivän sisällä ensimmäisestä työmääräyksen toimajasta niin groupataan
+    if ($paiva_temp >= $tyomaarays['toimaika']) {
+      $toimaika = $kohteen_viimeisin_toimaika;
+    }
+    else {
+      $toimaika = $tyomaarays['toimaika'];
+      $kohteiden_toimajat[$tyomaarays['kohde_tunnus']][] = $tyomaarays['toimaika'];
+    }
 
     if (!isset($tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']])) {
       $tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']] = array(

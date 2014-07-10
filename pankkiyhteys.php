@@ -26,7 +26,39 @@ if ($tee == "laheta" and !formi_kunnossa()) {
 }
 
 if ($tee == "laheta" and $hae_tiliotteet == "on") {
-  lataa_kaikki("TITO");
+  $tiedostot = lataa_kaikki("TITO");
+
+  viesti("Ladatut tiliotteet:");
+
+  echo "<br/>";
+
+  echo "<table>";
+
+  echo "<thead>";
+
+  echo "<tr>";
+  echo "<th>" . t("Viite") . "</th>";
+  echo "<th>" . t("Status") . "</th>";
+  echo "</tr>";
+
+  echo "</thead>";
+
+  echo "<tbody>";
+
+  foreach ($tiedostot as $tiedosto) {
+    echo "<tr>";
+
+    echo "<td>{$tiedosto["viite"]}</td>";
+    echo "<td>{$tiedosto["status"]}</td>";
+
+    echo "</tr>";
+  }
+
+
+  echo "</tobdy>";
+  echo "</table>";
+
+  echo "<br/><br/>";
 }
 
 if ($tee == "laheta" and $hae_viitteet == "on") {
@@ -158,10 +190,10 @@ function download_file_list($tiedostotyyppi, $tunnukset) {
  *
  * @return bool
  */
-function download_file($viitteet, $tiedostotyyppi, $tunnukset) {
+function download_files($viitteet, $tiedostotyyppi, $tunnukset) {
   global $sepa_pankkiyhteys_token;
 
-  $onnistuneet = 0;
+  $tiedostot = array();
 
   foreach ($viitteet as $viite) {
     $parameters = array(
@@ -184,8 +216,19 @@ function download_file($viitteet, $tiedostotyyppi, $tunnukset) {
     $vastaus = pupesoft_rest($parameters);
 
     if ($vastaus[0] == 200) {
-      $onnistuneet++;
+      $tiedosto = array(
+        "viite"  => $viite,
+        "status" => "OK"
+      );
     }
+    else {
+      $tiedosto = array(
+        "viite"  => $viite,
+        "status" => "Virhe"
+      );
+    }
+
+    array_push($tiedostot, $tiedosto);
 
     if (!is_dir("/tmp/{$tiedostotyyppi}")) {
       mkdir("/tmp/{$tiedostotyyppi}");
@@ -194,11 +237,7 @@ function download_file($viitteet, $tiedostotyyppi, $tunnukset) {
     file_put_contents("/tmp/{$tiedostotyyppi}/{$viite}", base64_decode($vastaus[1]["data"]));
   }
 
-  if (count($viitteet) == $onnistuneet) {
-    return true;
-  }
-
-  return false;
+  return $tiedostot;
 }
 
 function salasana_formi() {
@@ -359,17 +398,13 @@ function lataa_kaikki($tiedostotyyppi) {
   }
 
   $viitteet = download_file_list($tiedostotyyppi, $tunnukset);
+  $tiedostot = download_files($viitteet, $tiedostotyyppi, $tunnukset);
 
-  if ($viitteet and download_file($viitteet, $tiedostotyyppi, $tunnukset)) {
-    if ($tiedostotyyppi == "TITO") {
-      ok("Tiliotteet ladattu");
-    }
-    elseif ($tiedostotyyppi == "KTL") {
-      ok("Viitteet ladattu");
-    }
+  if ($tiedostot) {
+    return $tiedostot;
   }
 
-  return true;
+  return false;
 }
 
 /**

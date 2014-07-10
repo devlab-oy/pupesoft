@@ -108,14 +108,6 @@ if ($request['action'] == 'aja_konversio') {
         echo $tiedosto . '<br/>';
 //        $output = exec("/Applications/MAMP/bin/php/php5.4.10/bin/php tarkastukset.php {$kukarow['yhtio']} {$tiedosto}", $arr, $ret);
         $output = exec("php tarkastukset.php {$kukarow['yhtio']} {$tiedosto}", $arr, $ret);
-//        echo "<pre>";
-//        var_dump($arr);
-//        echo $ret;
-//        echo "</pre>";
-//        echo "<br/>";
-//        echo "<br/>";
-//        $dumper = new TarkastuksetCSVDumper($request['kukarow'], $tiedosto);
-//        $dumper->aja();
       }
       echo "loppu:" . date('Y-m-d H:i:s');
       break;
@@ -184,11 +176,6 @@ if ($request['action'] == 'aja_konversio') {
       echo t('Huoltosyklit') . ':';
       $dumper = new HuoltosykliCSVDumper($request['kukarow']);
       $dumper->aja();
-      echo "<br/>";
-      echo "<br/>";
-      echo t('Tarkastukset') . ':';
-//      $dumper = new TarkastuksetCSVDumper($request['kukarow']);
-//      $dumper->aja();
       break;
 
     case 'dump':
@@ -208,11 +195,11 @@ if ($request['action'] == 'aja_konversio') {
     $dumper = new TuotteenavainsanaToimenpideCSVDumper($request['kukarow']);
     $dumper->aja();
 
-    $dumper = new TuoteryhmaCSVDumper($request['kukarow']);
-    $dumper->aja();
+//    $dumper = new TuoteryhmaCSVDumper($request['kukarow']);
+//    $dumper->aja();
 
-    $dumper = new TuotteenavainsanaLaiteCSVDumper($request['kukarow']);
-    $dumper->aja();
+//    $dumper = new TuotteenavainsanaLaiteCSVDumper($request['kukarow']);
+//    $dumper->aja();
 
     $dumper = new TuotteenavainsanaLaite2CSVDumper($request['kukarow']);
     $dumper->aja();

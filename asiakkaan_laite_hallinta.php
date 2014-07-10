@@ -416,7 +416,7 @@ function echo_kohteet_table($laitteet = array(), $request = array()) {
 
   $haettu_asiakas = $request['haettu_asiakas'];
 
-  $lopetus = "{$palvelin2}asiakkaan_laite_hallinta.php////tee=hae_asiakas//asiakas_tunnus={$haettu_asiakas['tunnus']}";
+  $lopetus = "{$palvelin2}asiakkaan_laite_hallinta.php////tee=hae_asiakas//asiakas_tunnus={$haettu_asiakas['tunnus']}//kohde_tunnus={$request['kohde_tunnus']}//oma_numero={$request['oma_numero']}//sarjanro={$request['sarjanro']}";
   $colspan = 10;
 
   echo_kalustoraportti_form($haettu_asiakas);

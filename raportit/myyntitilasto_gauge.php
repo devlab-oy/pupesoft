@@ -809,8 +809,8 @@ if ($tavoitteet) {
       $a_pai = substr($a, 0, 2);
       $a = strtotime("{$a_vuo}-{$a_kuu}-{$a_pai}");
 
-      $b_vuo = substr($b, 3, 4);
-      $b_kuu = substr($b, 0, 2);
+      $b_vuo = substr($b, 6, 4);
+      $b_kuu = substr($b, 3, 2);
       $b_pai = substr($b, 0, 2);
       $b = strtotime("{$b_vuo}-{$b_kuu}-{$b_pai}");
     }

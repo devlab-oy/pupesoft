@@ -36,9 +36,17 @@ if ($tee == "laheta") {
   }
 }
 
+if ($tee == "laheta" and $laheta_maksuaineisto == "on") {
+  $maksuaineisto = file_get_contents($_FILES["maksuaineisto"]["tmp_name"]);
+
+  if (!$maksuaineisto) {
+    virhe("Valitsit maksuaineiston lähetyksen, mutta et valinnut maksuaineistoa");
+    $tee = "";
+  }
+}
+
 if ($tee == "laheta") {
   if ($laheta_maksuaineisto == "on") {
-    $maksuaineisto = file_get_contents($_FILES["maksuaineisto"]["tmp_name"]);
     $tunnukset = hae_tunnukset_ja_pura_salaus($tili, $salasana);
 
     $vastaus = laheta_maksuaineisto($tunnukset, $maksuaineisto);

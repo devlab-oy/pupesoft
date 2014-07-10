@@ -353,6 +353,11 @@ function ok($viesti) {
   echo "<font class='ok'>{$viesti}</font><br/>";
 }
 
+function viesti($viesti) {
+  echo "<font class='message'>{$viesti}</font><br/>";
+}
+
+
 /**
  * @param $tiedostotyyppi
  */
@@ -396,12 +401,12 @@ function hae_kaytossa_olevat_tilit() {
 function formi() {
   $kaytossa_olevat_tilit = hae_kaytossa_olevat_tilit();
 
-  echo "<form method='post' action='pankkiyhteys.php' enctype='multipart/form-data'>";
-  echo "<input type='hidden' name='tee' value='laheta'/>";
-  echo "<table>";
-  echo "<tbody>";
-
   if ($kaytossa_olevat_tilit) {
+
+    echo "<form method='post' action='pankkiyhteys.php' enctype='multipart/form-data'>";
+    echo "<input type='hidden' name='tee' value='laheta'/>";
+    echo "<table>";
+    echo "<tbody>";
 
     echo "<tr>";
     echo "<td>Valitse tili</td>";
@@ -444,7 +449,12 @@ function formi() {
     echo "</tbody>";
     echo "</table>";
     echo "<input type='submit' value='" . t('L‰het‰') . "'>";
+
+    echo "</form>";
+
   }
 
-  echo "</form>";
+  else {
+    viesti("Yht‰‰n pankkiyhteytt‰ ei ole viel‰ luotu");
+  }
 }

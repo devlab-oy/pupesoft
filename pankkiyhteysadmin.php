@@ -47,10 +47,19 @@ if ($tee == "luo" and !$pin) {
   $private_key = file_get_contents($_FILES["private_key"]["tmp_name"]);
   $certificate = file_get_contents($_FILES["certificate"]["tmp_name"]);
 
-  $salatut_tunnukset = array(
-    "private_key"   => salaa($private_key, $salasana),
-    "sertifikaatti" => salaa($certificate, $salasana)
-  );
+  $oikeat_keyt = openssl_x509_check_private_key($certificate, $private_key);
+
+  if (!$oikeat_keyt) {
+    virhe("Et antanut oikeaa avainparia");
+    $tee = "";
+  }
+
+  else {
+    $salatut_tunnukset = array(
+      "private_key"   => salaa($private_key, $salasana),
+      "sertifikaatti" => salaa($certificate, $salasana)
+    );
+  }
 }
 
 // Jos käyttäjä ei ole antanut target id:tä, haetaan se pankista

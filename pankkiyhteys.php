@@ -26,15 +26,11 @@ if ($tee == "laheta" and !formi_kunnossa()) {
 }
 
 if ($tee == "laheta" and $hae_tiliotteet == "on") {
-  if (!lataa_kaikki("TITO")) {
-    $tee = "";
-  }
+  lataa_kaikki("TITO");
 }
 
 if ($tee == "laheta" and $hae_viitteet == "on") {
-  if (!lataa_kaikki("KTL")) {
-    $tee = "";
-  }
+  lataa_kaikki("KTL");
 }
 
 if ($tee == "laheta" and $laheta_maksuaineisto == "on") {
@@ -69,6 +65,8 @@ if ($tee == "laheta" and $laheta_maksuaineisto == "on") {
 
   $tee = "";
 }
+
+$tee = "";
 
 if ($tee == "") {
   formi();
@@ -119,6 +117,8 @@ function pura_salaus($salattu_data, $salasana) {
  * @return array
  */
 function download_file_list($tiedostotyyppi, $tunnukset) {
+  global $sepa_pankkiyhteys_token;
+
   $parameters = array(
     "method"  => "POST",
     "data"    => array(
@@ -131,7 +131,7 @@ function download_file_list($tiedostotyyppi, $tunnukset) {
     "url"     => "https://sepa.devlab.fi/api/nordea/download_file_list",
     "headers" => array(
       "Content-Type: application/json",
-      "Authorization: Token token={$sepa_pankkiyhteys_url}"
+      "Authorization: Token token={$sepa_pankkiyhteys_token}"
     )
   );
 
@@ -159,6 +159,8 @@ function download_file_list($tiedostotyyppi, $tunnukset) {
  * @return bool
  */
 function download_file($viitteet, $tiedostotyyppi, $tunnukset) {
+  global $sepa_pankkiyhteys_token;
+
   $onnistuneet = 0;
 
   foreach ($viitteet as $viite) {
@@ -175,7 +177,7 @@ function download_file($viitteet, $tiedostotyyppi, $tunnukset) {
       "url"     => "https://sepa.devlab.fi/api/nordea/download_file",
       "headers" => array(
         "Content-Type: application/json",
-        "Authorization: Token token={$sepa_pankkiyhteys_url}"
+        "Authorization: Token token={$sepa_pankkiyhteys_token}"
       )
     );
 
@@ -254,13 +256,6 @@ function hae_tunnukset_ja_pura_salaus($tili, $salasana) {
   $haetut_tunnukset = hae_avain_sertifikaatti_ja_customer_id($tili);
 
   $avain = pura_salaus($haetut_tunnukset["private_key"], $salasana);
-
-  if (!openssl_pkey_get_private($avain)) {
-    virhe("Annoit v‰‰r‰n salasanan");
-
-    return false;
-  }
-
   $sertifikaatti = pura_salaus($haetut_tunnukset["certificate"], $salasana);
   $customer_id = $haetut_tunnukset["sepa_customer_id"];
 
@@ -278,6 +273,8 @@ function hae_tunnukset_ja_pura_salaus($tili, $salasana) {
  * @return array
  */
 function laheta_maksuaineisto($tunnukset, $maksuaineisto) {
+  global $sepa_pankkiyhteys_token;
+
   $parameters = array(
     "method"  => "POST",
     "data"    => array(
@@ -291,7 +288,7 @@ function laheta_maksuaineisto($tunnukset, $maksuaineisto) {
     "url"     => "https://sepa.devlab.fi/api/nordea/upload_file",
     "headers" => array(
       "Content-Type: application/json",
-      "Authorization: Token token={$sepa_pankkiyhteys_url}"
+      "Authorization: Token token={$sepa_pankkiyhteys_token}"
     )
   );
 
@@ -481,9 +478,26 @@ function formi_kunnossa() {
     $virheet_count++;
   }
 
+  if (!salasana_kunnossa()) {
+    virhe("Antamasi salasana on v‰‰r‰");
+    $virheet_count++;
+  }
+
   if ($virheet_count == 0) {
     return true;
   }
 
   return false;
+}
+
+function salasana_kunnossa() {
+  $haetut_tunnukset = hae_avain_sertifikaatti_ja_customer_id($_POST["tili"]);
+
+  $avain = pura_salaus($haetut_tunnukset["private_key"], $_POST["salasana"]);
+
+  if (!openssl_pkey_get_private($avain)) {
+    return false;
+  }
+
+  return true;
 }

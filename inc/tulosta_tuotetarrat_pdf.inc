@@ -64,12 +64,12 @@ for ($i = 1; $i < $kappalemaara; $i++) {
     }
 
     $pdf->draw_text(mm_pt($x), mm_pt($y - 4), $nimitys2, $firstpage, $ff_font);
-    $pdf->draw_text(mm_pt($x), mm_pt($y - 8), " $eankoodirow[tuoteno]", $firstpage, $norm);
+    $pdf->draw_text(mm_pt($x), mm_pt($y - 8), t("Tuotenumero")." $eankoodirow[tuoteno]", $firstpage, $norm);
   }
   else {
     list($ff_string, $ff_font) = pdf_fontfit($eankoodirow['nimitys'], mm_pt($mm_pt), $pdf, $norm);
     $pdf->draw_text(mm_pt($x), mm_pt($y), $ff_string, $firstpage, $ff_font);
-    $pdf->draw_text(mm_pt($x), mm_pt($y - 4), " $eankoodirow[tuoteno]", $firstpage, $norm);
+    $pdf->draw_text(mm_pt($x), mm_pt($y - 4), t("Tuotenumero")." $eankoodirow[tuoteno]", $firstpage, $norm);
   }
 
   if ($koodi == 'eankoodi' and tarkista_ean13($eankoodirow['eankoodi']) !== FALSE) {

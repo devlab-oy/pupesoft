@@ -92,7 +92,10 @@ if ($tee == "laheta" and $laheta_maksuaineisto == "on") {
   $vastaus = laheta_maksuaineisto($tunnukset, $maksuaineisto);
 
   if ($vastaus) {
-    ok("Maksuaineisto lähetetty, vastaus pankista:");
+    viesti("Maksuaineisto lähetetty, vastaus pankista:");
+
+    echo "<br/>";
+
     echo "<table>";
     echo "<tbody>";
 

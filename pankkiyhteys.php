@@ -118,7 +118,7 @@ function pura_salaus($salattu_data, $salasana) {
  *
  * @return array
  */
-function hae_viitteet($tiedostotyyppi, $tunnukset) {
+function download_file_list($tiedostotyyppi, $tunnukset) {
   $parameters = array(
     "method"  => "POST",
     "data"    => array(
@@ -158,7 +158,7 @@ function hae_viitteet($tiedostotyyppi, $tunnukset) {
  *
  * @return bool
  */
-function lataa_tiedostot($viitteet, $tiedostotyyppi, $tunnukset) {
+function download_file($viitteet, $tiedostotyyppi, $tunnukset) {
   $onnistuneet = 0;
 
   foreach ($viitteet as $viite) {
@@ -365,9 +365,9 @@ function lataa_kaikki($tiedostotyyppi) {
     return false;
   }
 
-  $viitteet = hae_viitteet($tiedostotyyppi, $tunnukset);
+  $viitteet = download_file_list($tiedostotyyppi, $tunnukset);
 
-  if ($viitteet and lataa_tiedostot($viitteet, $tiedostotyyppi, $tunnukset)) {
+  if ($viitteet and download_file($viitteet, $tiedostotyyppi, $tunnukset)) {
     if ($tiedostotyyppi == "TITO") {
       ok("Tiliotteet ladattu");
     }

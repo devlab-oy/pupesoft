@@ -399,15 +399,12 @@ function vastaus_kunnossa($vastaus) {
       return true;
     case 500:
       virhe("Pankki ei vastaa kyselyyn, yritä myöhemmin uudestaan");
-
       return false;
     case 503:
       virhe("Pankki ei vastaa kyselyyn toivotulla tavalla, yritä myöhemmin uudestaan");
-
       return false;
     case 0:
       virhe("Sepa-palvelimeen ei jostain syystä saada yhteyttä, yritä myöhemmin uudestaan");
-
       return false;
   }
 }

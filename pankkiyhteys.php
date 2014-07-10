@@ -307,7 +307,6 @@ function laheta_maksuaineisto($tunnukset, $maksuaineisto) {
 function maksuaineisto_kunnossa() {
   if (isset($_FILES["maksuaineisto"]) and !$_FILES["maksuaineisto"]["tmp_name"]) {
     virhe("Maksuaineisto puuttuu");
-
     return false;
   }
 
@@ -325,15 +324,12 @@ function vastaus_kunnossa($vastaus) {
       return true;
     case 500:
       virhe("Pankki ei vastaa kyselyyn, yritä myöhemmin uudestaan");
-
       return false;
     case 503:
       virhe("Pankki ei vastaa kyselyyn toivotulla tavalla, yritä myöhemmin uudestaan");
-
       return false;
     case 0:
       virhe("Sepa-palvelimeen ei jostain syystä saada yhteyttä, yritä myöhemmin uudestaan");
-
       return false;
   }
 
@@ -371,7 +367,6 @@ function lataa_kaikki($tiedostotyyppi) {
     if ($tiedostotyyppi == "TITO") {
       ok("Tiliotteet ladattu");
     }
-
     elseif ($tiedostotyyppi == "KTL") {
       ok("Viitteet ladattu");
     }
@@ -454,9 +449,7 @@ function formi() {
     echo "<input type='submit' value='" . t('Lähetä') . "'>";
 
     echo "</form>";
-
   }
-
   else {
     viesti("Yhtään pankkiyhteyttä ei ole vielä luotu.");
   }

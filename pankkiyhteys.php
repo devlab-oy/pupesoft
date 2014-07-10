@@ -341,6 +341,8 @@ function vastaus_kunnossa($vastaus) {
 
       return false;
   }
+
+  return false;
 }
 
 function virhe($viesti) {

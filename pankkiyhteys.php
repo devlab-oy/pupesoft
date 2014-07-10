@@ -25,13 +25,10 @@ if ($tee == "laheta" and !formi_kunnossa()) {
   $tee = "";
 }
 
-if ($tee == "laheta" and $hae_tiliotteet == "on") {
-  $tiedostot = lataa_kaikki("TITO");
-
-  viesti("Ladatut tiliotteet:");
-
-  echo "<br/>";
-
+/**
+ * @param $tiedostot
+ */
+function tiedostot_table($tiedostot) {
   echo "<table>";
 
   echo "<thead>";
@@ -61,8 +58,24 @@ if ($tee == "laheta" and $hae_tiliotteet == "on") {
   echo "<br/><br/>";
 }
 
+if ($tee == "laheta" and $hae_tiliotteet == "on") {
+  $tiedostot = lataa_kaikki("TITO");
+
+  viesti("Ladatut tiliotteet:");
+
+  echo "<br/>";
+
+  tiedostot_table($tiedostot);
+}
+
 if ($tee == "laheta" and $hae_viitteet == "on") {
-  lataa_kaikki("KTL");
+  $tiedostot = lataa_kaikki("KTL");
+
+  viesti("Ladatut viitteet:");
+
+  echo "<br/>";
+
+  tiedostot_table($tiedostot);
 }
 
 if ($tee == "laheta" and $laheta_maksuaineisto == "on") {

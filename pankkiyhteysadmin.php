@@ -25,15 +25,17 @@ if ($tee == "luo") {
 
 if ($tee == "luo" and !empty($pin)) {
   $generoidut_tunnukset = generoi_private_key_ja_csr();
-  $sertifikaatti = hae_sertifikaatti_sepasta($pin, $customer_id, $generoidut_tunnukset);
 
-  if (!$sertifikaatti) {
+  $certificate = hae_sertifikaatti_sepasta($pin, $customer_id, $generoidut_tunnukset);
+  $private_key = $generoidut_tunnukset["private_key"];
+
+  if (!$certificate) {
     virhe("Sertifikaatin hakeminen epäonnistui, tarkista PIN-koodi ja asiakastunnus");
     $tee = "";
   }
 
   $salatut_tunnukset = array(
-    "private_key"   => salaa($generoidut_tunnukset["private_key"], $salasana),
+    "private_key"   => salaa($private_key, $salasana),
     "sertifikaatti" => salaa($sertifikaatti, $salasana)
   );
 }
@@ -50,7 +52,7 @@ if ($tee == "luo" and !$pin) {
 
 // Jos käyttäjä ei ole antanut target id:tä, haetaan se pankista
 if ($tee == "luo" and $target_id == '') {
-  $target_id = hae_target_id($sertifikaatti, $generoidut_tunnukset["private_key"], $customer_id);
+  $target_id = hae_target_id($certificate, $private_key, $customer_id);
 
   if (!$target_id) {
     virhe("Tiedon hakeminen pankista epäonnistui, yritä myöhemmin uudestaan");

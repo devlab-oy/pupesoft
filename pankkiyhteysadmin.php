@@ -3,6 +3,9 @@
 const SEPA_OSOITE = "https://sepa.devlab.fi/api/";
 const ACCESS_TOKEN = "Bexvxb10H1XBT36x42Lv8jEEKnA6";
 
+// Voi olla joko "TEST" tai "PRODUCTION"
+const YMPARISTO = "TEST";
+
 require("inc/parametrit.inc");
 
 echo "<font class='head'>" . t('SEPA-pankkiyhteys Admin') . "</font>";
@@ -284,7 +287,7 @@ function hae_sertifikaatti_sepasta($pin, $customer_id, $tunnukset) {
     "data"    => array(
       "pin"         => $pin,
       "customer_id" => $customer_id,
-      "environment" => "TEST",
+      "environment" => YMPARISTO,
       "csr"         => base64_encode($tunnukset["csr"])
     ),
     "url"     => SEPA_OSOITE . "nordea/get_certificate",

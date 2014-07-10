@@ -11587,7 +11587,7 @@ if (!function_exists("viivakoodi")) {
 
     // Ghostscript konversioon yksikkö kuntoon
     $leveys = round($leveys * 3.03);
-    $korkeus = round($korkeus * 4);
+    $korkeus = round($korkeus * 3.9);
 
     // Käännetään PostScript JPG:ksi
     shell_exec("gs -dSAFER -dBATCH -dNOPAUSE -r72x72 -g{$leveys}x{$korkeus} -sDEVICE=jpeg -sOutputFile=\"$image\" \"$postscript\"");

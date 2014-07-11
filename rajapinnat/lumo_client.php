@@ -97,7 +97,10 @@ class LumoClient {
     while ($out = socket_read($this->_socket, 2048)) {
 
       $xml = @simplexml_load_string($out);
-      $this->log($xml);
+      ob_start();
+      var_dump($xml);
+      $result = ob_get_clean();
+      $this->log($result);
       if (isset($xml) and isset($xml->MakeTransaction->Result)) {
         $return = $xml->MakeTransaction->Result == "True" ? TRUE : FALSE;
         $arvo = $return === TRUE ? "OK" : "HYLÄTTY";

@@ -1317,7 +1317,7 @@ if ($tee == 'P') {
 
       $qry = "SELECT tila
               FROM lasku
-              WHERE yhtio = = '$kukarow[yhtio]'
+              WHERE yhtio = '$kukarow[yhtio]'
               AND tunnus = $poikkeamatilaus";
       $res = pupe_query($qry);
 
@@ -1330,7 +1330,7 @@ if ($tee == 'P') {
                   lasku.*,
                   kuka.kieli AS kieli,
                   kuka.nimi AS kukanimi,
-                  kuka.eposti AS kukamail,
+                  kuka.eposti AS kukamail
                   FROM lasku
                   LEFT JOIN kuka ON (kuka.yhtio=lasku.yhtio AND kuka.kuka=lasku.hyvak1 AND kuka.extranet = '')
                   WHERE lasku.tunnus = '$poikkeamatilaus'

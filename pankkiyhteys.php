@@ -112,9 +112,12 @@ function pura_salaus($salattu_data, $salasana) {
   $salattu_data_binaari = base64_decode($salattu_data);
 
   $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC);
-  $iv = substr($salattu_data_binaari, 0, $iv_size);
 
-  $salattu_data_binaari = substr($salattu_data_binaari, $iv_size);
+  //  Pitaa olla monta spacee, jotta UTF-8 konversio ei riko toiminnallisuutta
+  $iv = substr    ($salattu_data_binaari, 0, $iv_size);
+
+  //  Pitaa olla monta spacee, jotta UTF-8 konversio ei riko toiminnallisuutta
+  $salattu_data_binaari = substr    ($salattu_data_binaari, $iv_size);
 
   return mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $avain, $salattu_data_binaari, MCRYPT_MODE_CBC, $iv);
 }

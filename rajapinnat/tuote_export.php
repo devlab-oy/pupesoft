@@ -87,6 +87,7 @@ if ($ajetaanko_kaikki == "NO") {
   $muutoslisa = "AND (tuote.muutospvm >= '{$datetime_checkpoint}'
             OR ta_nimitys_se.muutospvm >= '{$datetime_checkpoint}'
             OR ta_nimitys_en.muutospvm >= '{$datetime_checkpoint}'
+            OR hinnasto.muutospvm >= '{$datetime_checkpoint}'
             )";
 }
 else {
@@ -118,6 +119,8 @@ $query = "SELECT
             and tuote.tuoteno        = ta_nimitys_en.tuoteno
             and ta_nimitys_en.laji   = 'nimitys'
             and ta_nimitys_en.kieli  = 'en'
+          LEFT JOIN hinnasto on tuote.yhtio = hinnasto.yhtio
+            AND tuote.tuoteno        = hinnasto.tuoteno
           WHERE tuote.yhtio          = '{$kukarow["yhtio"]}'
             AND tuote.status        != 'P'
             AND tuote.tuotetyyppi    NOT in ('A','B')
@@ -244,7 +247,6 @@ while ($row = mysql_fetch_array($res)) {
             WHERE yhtio    = '{$kukarow['yhtio']}'
               AND tuoteno  = '{$row['tuoteno']}'
               AND maa      = '{$yhtiorow['maa']}'
-              AND laji     = ''
               AND ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
             ORDER BY ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
             LIMIT 1";
@@ -627,7 +629,8 @@ if ($ajetaanko_kaikki == "NO") {
             OR try_fi.muutospvm  >= '{$datetime_checkpoint}'
             OR ta_nimitys_se.muutospvm >= '{$datetime_checkpoint}'
             OR ta_nimitys_en.muutospvm >= '{$datetime_checkpoint}'
-            OR tuote.muutospvm  >= '{$datetime_checkpoint}')";
+            OR tuote.muutospvm  >= '{$datetime_checkpoint}'
+            OR hinnasto.muutospvm >= '{$datetime_checkpoint}')";
 }
 else {
   $muutoslisa = "";
@@ -666,6 +669,8 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
                   and tuote.tuoteno              = ta_nimitys_en.tuoteno
                   and ta_nimitys_en.laji         = 'nimitys'
                   and ta_nimitys_en.kieli        = 'en')
+                LEFT JOIN hinnasto on tuote.yhtio = hinnasto.yhtio
+                  AND tuote.tuoteno               = hinnasto.tuoteno
                 WHERE tuotteen_avainsanat.yhtio  = '{$kukarow['yhtio']}'
                 AND tuotteen_avainsanat.laji     = 'parametri_variaatio'
                 AND tuotteen_avainsanat.selite   = '{$rowselite['selite']}'
@@ -763,7 +768,6 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
               WHERE yhtio    = '{$kukarow['yhtio']}'
                 AND tuoteno  = '{$alirow['tuoteno']}'
                 AND maa      = '{$yhtiorow['maa']}'
-                AND laji     = ''
                 AND ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
               ORDER BY ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
               LIMIT 1";

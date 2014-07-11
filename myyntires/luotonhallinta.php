@@ -328,11 +328,6 @@ if ($tee == "1") {
     $myyntires = mysql_query($query) or pupe_error($query);
     $myyntirow = mysql_fetch_array($myyntires);
 
-    // Ei näytetä jos ei olla yli minimi myynnin
-    if (($luottorajauksia != "D" and $luottorajauksia != "Z" and $myyntirow["summa"] == 0) or ($myyntirow["summa"] < $minimi_myynti)) {
-      continue;
-    }
-
     // Näytä asiakkaat, joiden luottorajaa tulisi tarkistaa (myynnin/luottorajan ero yli muutosprosentin)
     if ($luottorajauksia == "A" and (abs(100 - ($myyntirow["summa"] / $asiakasrow["luottoraja"] * 100)) < $muutosprosentti or $asiakasrow["luottoraja"] == 0)) {
       continue;

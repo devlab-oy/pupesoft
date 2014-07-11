@@ -140,6 +140,7 @@ unset($thumb_size_y);
 
 unset($nrahdemo);
 
+unset($sepa_pankkiyhteys_token);
 unset($pankkitiedostot_polku);
 unset($maksuaineiston_siirto);
 unset($pankkiaineiston_haku);

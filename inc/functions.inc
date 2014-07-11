@@ -242,20 +242,42 @@ if (!function_exists("pupe_error")) {
 
     if (ob_get_level() > 1) {
       $fleur = ob_get_contents();
-
-      // Onko nagios monitor asennettu?
-      if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
-        file_put_contents("/home/nagios/nagios-pupesoft.log", "-----------------------------------------------\n$fleur\n$puperror\n-----------------------------------------------\n", FILE_APPEND);
-      }
-
       ob_end_clean();
-
-      die("1, Tietokantayhteydessä virhe\r\n\r\n");
     }
     else {
-      // kuollaan pois
-      exit(nl2br($puperror));
+      $fleur = "";
     }
+
+    // Onko nagios monitor asennettu?
+    if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
+      $_msg  = "-----------------------------------------------\n";
+      $_msg .= "{$fleur}\n";
+      $_msg .= "{$puperror}\n";
+      $_msg .= "-----------------------------------------------\n";
+
+      file_put_contents("/home/nagios/nagios-pupesoft.log", $_msg, FILE_APPEND);
+    }
+
+    $_display = ini_get("display_errors");
+    $_cli = (php_sapi_name() == 'cli');
+
+    if (!$_cli and isset($yhtiorow['css'])) {
+      echo "<style type = 'text/css'>";
+      echo $yhtiorow['css'];
+      echo "</style>";
+
+      echo "<font class = 'error'>";
+    }
+
+    if ($_display == '1') {
+      echo nl2br($puperror);
+    }
+    else {
+      echo t("Tietokantayhteydessä virhe!");
+    }
+
+    // kuollaan pois
+    exit(1);
   }
 }
 
@@ -11476,8 +11498,10 @@ if (!function_exists("progress_bar")) {
 
 if (!function_exists("pupesoft_csvstring")) {
   function pupesoft_csvstring($string) {
-    // Siivotaan veks kaikki non-printablet ja puolipisteet
-    return preg_replace("/([^[:print:]]|;)/", "X", $string);
+    // Muutetaan X -merkiksi kaikki non-printable characterit
+    // Sallitaan merkit ja numerot: a-z A-Z 0-9
+    // Sallitaan välilyönti sekä merkit: äöåÄÖÅ#%&,:<>@=!-^$.,|?*+()[]{}/
+    return preg_replace("/([^a-zA-Z0-9 äöåÄÖÅ#%&,:<>@=!\-\^\$\.\,\|\?\*\+\(\)\[\]\{\}\/])/", "X", $string);
   }
 }
 
@@ -24640,9 +24664,9 @@ if (!function_exists('laske_siirrettava_maara')) {
                  t1.kpl             = 0 AND
                  t1.varattu         > 0
                )
-               WHERE l1.yhtio       = '{$kukarow['yhtio']}'
-               AND l1.tila          = 'N'
-               AND l1.alatila      != 'X')
+               WHERE l1.yhtio = '{$kukarow['yhtio']}'
+               AND ((l1.tila = 'N' AND l1.alatila != 'X')
+                 OR (l1.tila = 'G' AND l1.alatila IN ('', 'J'))))
                UNION
                (SELECT t2.tunnus, t2.otunnus, t2.jt + t2.varattu AS varattu
                FROM tilausrivi AS t2

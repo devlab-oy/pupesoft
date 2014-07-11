@@ -25,11 +25,13 @@
 * Pidä rivipituus alle 100 merkkiä.
 * Varmista, että rivin lopussa ei ole välilyöntejä.
 * Varmista, että tiedoston lopussa on yksi tyhjä rivi, eikä sulkevaa PHP tagia `?>`.
+* Älä avaa/sulje PHP tageja kesken tiedoston `<?php` / `?>`.
 * Käytä funktioiden ja muuttujien nimissä `snake_case`.
 * Käytä konstattien nimissä `SCREAMING_SNAKE_CASE`.
 * Kirjoita PHP [avainsanat](http://php.net/manual/en/reserved.keywords.php) pienillä kirjaimilla. Esim. `and`, `or`, `if`, `while`, jne..
 * Kirjoita PHP konstantit `true`, `false` ja `null` pienillä kirjaimilla.
-* Käytä välilyöntejä operaattorien sekä kaksoispisteiden ympärillä.
+* Käytä kommentoimiseen `//` notaatiota.
+* Käytä välilyöntejä operaattorien, pisteiden sekä kaksoispisteiden ympärillä.
 * Käytä välilöyntiä pilkkujen jälkeen.
 * Käytä välilyöntiä PHP [kontrolli](http://www.php.net/manual/en/language.control-structures.php) avainsanojen jälkeen. Esim. `if`, `while`, `for`, `return`, jne..
 * Käytä välilyöntiä ennen avaavaa aaltosulkua `{`.
@@ -94,6 +96,16 @@ $email_with_name = $name . " <" . $email . ">";
 
 // good
 $email_with_name = "${name} <${email}>";
+
+// bad
+$output = "date is ".date("Ymd");
+
+// bad(ish)
+$output = "date is " . date("Ymd");
+
+// good
+$_today = date("Ymd");
+$output = "date is {$_today}";
 ```
 
 * Käytä tyhjiä rivejä erottelemaan koodi loogisiin kappaleisiin.
@@ -110,6 +122,7 @@ function do_stuff($params) {
 
 * Kommentoi **miksi** logiikka suoritetaan.
 * Kommentoi **mitä** monimutkainen logiikka tekee.
+* Käytä välilyöntiä `//` jälkeen.
 
 ```php
 // Sallitaan vain pienet kirjaimet ja numerot, koska
@@ -117,18 +130,22 @@ function do_stuff($params) {
 $value = preg_replace("/[^a-z0-9]/i", "", $string);
 ```
 
-* Kirjoita SQL lausekkeiden avainsanat isoilla kirjaimilla.
-* Kirjoita SQL lausekkeissa yksi avainsana/ehto per rivi.
+* Kirjoita SQL lausekkeiden [avainsanat](http://dev.mysql.com/doc/mysql/en/sql-syntax.html) isoilla kirjaimilla.
+* Kirjoita SQL [funktiot](http://dev.mysql.com/doc/mysql/en/functions.html) pienillä kirjaimilla.
+* Kirjoita SQL kyselyissä yksi avainsana/ehto/arvo per rivi.
+* Kirjoita SELECT -lausekkeissa aluksi groupattavat kentät, sen jälkeen group funktiot.
+* Käytä AS -avainsanaa jos haluat antaa kentälle/tietokantataululle aliaksen.
 * Sisennä joinien ehdot kahdella välilyönnillä.
-* Avaavat ja sulkevat kaarisulut samalle riville.
+* Joineissa avaavat ja sulkevat kaarisulut samalle riville.
 * Käytä välilyöntejä operaattorien ympärillä.
 * Käytä välilyöntiä pilkun jälkeen.
-* Älä käytä välilöyntejä funktion ja avaavan kaarisulun välissä.
+* Älä käytä välilyöntiä funktion ja avaavan kaarisulun välissä.
+* Älä käytä välilyöntiä avaavan kaarisulun jälkeen `(` eikä ennen sulkevaa kaarisulkua `)`.
 
 ```sql
 SELECT lasku.laskunro,
-CONCAT(asiakas.maa, asiakas.ryhma) AS maaryhma,
-COUNT(*) kpl
+concat(asiakas.maa, asiakas.ryhma) AS maaryhma,
+count(*) AS kpl
 FROM lasku
 INNER JOIN asiakas ON (asiakas.id = lasku.asiakas_id
   AND asiakas.nimi LIKE '%abc%'

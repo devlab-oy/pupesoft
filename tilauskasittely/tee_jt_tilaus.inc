@@ -403,7 +403,7 @@ if (!function_exists("tee_jt_tilaus")) {
           elseif ($fieldname == 'hyvaksyja_nyt' and $otsikkorivi['jtkielto'] == "Y") {
             $query .= $fieldname."='$otsikkorivi[tunnus]',";
           }
-          elseif ($fieldname == 'asiakkaan_tilausnumero' or $fieldname == 'viite') {
+          elseif ($fieldname == 'asiakkaan_tilausnumero' or $fieldname == 'viite' or $fieldname == 'viesti') {
             // ei tyhjennetä asiakkaan tilausnumeroa ja viitettä jos halutaan niputtaa tilaukset
             // sen mukaan tai ennakko tai jtkielto
             if ($yhtiorow['jt_asiakkaan_tilausnumero'] == "K" or

@@ -75,7 +75,7 @@ foreach($suoritukset as $suoritus) {
 
     switch ($suoritus) {
       case '1':
-        $onnistuuko = $clientti->startTransaction($korttimaksu_f);
+        $onnistuuko = $clientti->startTransaction($korttimaksu_f,1,140711001007);
         $onnistuuko = $onnistuuko === TRUE ? t("VELOITETTU") : t("HYLÄTTY");
         break;
 
@@ -96,11 +96,18 @@ foreach($suoritukset as $suoritus) {
           $pankkivailuotto = 'PANKKIKORTTI';
           $maksupaate_maksetut['pankkikortti'] += $korttimaksu;
         }
+        if (strpos($kuitti1, "PERUUTUS")) {
+          //TODO peruutustapahtumat kirjataan skötsibötsimötsilölölöö
+        }
+        
         break;
 
       case '3':
         $kuitti2 = $clientti->getMerchantReceipt();
         $kuitti2 = utf8_decode($kuitti2);
+        if (strpos($kuitti2, "ALLEKIRJOITUS")) {
+          //TODO tulostetaan kauppiaankuitti samantein allekirjoitusta varten
+        }
         break;
     }
 

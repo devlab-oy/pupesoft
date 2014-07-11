@@ -106,6 +106,10 @@ class LumoClient {
         $arvo = $return === TRUE ? "OK" : "HYLÄTTY";
         $this->log("Maksutapahtuma {$arvo} \n");
       }
+      if (isset($xml) and isset($xml->StatusUpdate->StatusInfo)) {
+        $leelo = $xml->StatusUpdate->StatusInfo;
+        if ($leelo == "CMD MANUAL_AUTH") $this->log("Käsivarmenne havaittu \n");
+      }
     }
     return $return;
   }
@@ -114,7 +118,7 @@ class LumoClient {
    * Hakee edellisen tapahtuman asiakaskuitin
    */
   function getCustomerReceipt() {
-    
+
     $return = '';
 
     $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'><GetReceiptCustomer/></EMVLumo>\0";
@@ -126,6 +130,8 @@ class LumoClient {
         $return = $xml->GetReceiptCustomer->Result;
       }
     }
+    $msg = $return == '' ? "Asiakkaan kuittia ei haettu" : "Asiakkaan kuitti haettu";
+    $this->log($msg."\n");
     return $return;
   }
 
@@ -133,7 +139,7 @@ class LumoClient {
    * Hakee edellisen tapahtuman kauppiaskuitin
    */  
   function getMerchantReceipt() {
-    
+
     $return = '';
 
     $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'><GetReceiptMerchant/></EMVLumo>\0";
@@ -145,6 +151,8 @@ class LumoClient {
         $return = $xml->GetReceiptMerchant->Result;
       }
     }
+    $msg = $return == '' ? "Kauppiaan kuittia ei haettu" : "Kauppiaan kuitti haettu";
+    $this->log($msg."\n");
     return $return;
   }
   /**

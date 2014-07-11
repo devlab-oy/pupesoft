@@ -189,7 +189,8 @@ function hae_uudet_tilit() {
   $query = "SELECT tunnus, nimi
             FROM yriti
             WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND sepa_customer_id = ''";
+            AND sepa_customer_id = ''
+            OR sepa_customer_id IS NULL";
   $result = pupe_query($query);
 
   $tilit = array();

@@ -63,6 +63,8 @@ foreach($suoritukset as $suoritus) {
 
   // Jos summa on vähintään 0.01 EUR voidaan tehdä maksutapahtuma
   if(is_numeric($korttimaksu_f) and $korttimaksu_f >= 1) {
+    // Jos maksutapahtuma epäonnistui niin ei tehdä mitään
+    if ($suoritus > 1 and $onnistuuko != t("VELOITETTU")) break;
 
     $clientti = new LumoClient($lumo_service_address, $lumo_service_port);
 
@@ -78,7 +80,6 @@ foreach($suoritukset as $suoritus) {
         break;
 
       case '2':
-        if ($onnistuuko != t("VELOITETTU")) break;
         $kuitti1 = $clientti->getCustomerReceipt();
         $kuitti1 = utf8_decode($kuitti1);
         $pankkivailuotto = '';
@@ -95,14 +96,11 @@ foreach($suoritukset as $suoritus) {
           $pankkivailuotto = 'PANKKIKORTTI';
           $maksupaate_maksetut['pankkikortti'] += $korttimaksu;
         }
-
         break;
 
       case '3':
-        if ($onnistuuko != t("VELOITETTU")) break;
         $kuitti2 = $clientti->getMerchantReceipt();
         $kuitti2 = utf8_decode($kuitti2);
-
         break;
     }
 

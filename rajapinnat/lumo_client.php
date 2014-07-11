@@ -91,12 +91,13 @@ class LumoClient {
     $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'><MakeTransaction><TransactionType>{$transaction_type}</TransactionType></MakeTransaction></EMVLumo>\0";
     $out = '';
 
-    $this->log("Aloitetaan maksutapahtuma\n\tTyyppi: {$transaction_type} \n\tSumma: {$amount}\n\t Viite: {$archive_id} \n");
+    $this->log("Aloitetaan maksutapahtuma\n\tTyyppi: {$transaction_type} \n\tSumma: {$amount}\n\tViite: {$archive_id} \n");
     socket_write($this->_socket, $in, strlen($in));
 
     while ($out = socket_read($this->_socket, 2048)) {
 
       $xml = @simplexml_load_string($out);
+      $this->log($xml);
       if (isset($xml) and isset($xml->MakeTransaction->Result)) {
         $return = $xml->MakeTransaction->Result == "True" ? TRUE : FALSE;
         $arvo = $return === TRUE ? "OK" : "HYLÄTTY";

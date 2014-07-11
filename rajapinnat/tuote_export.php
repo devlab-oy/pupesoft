@@ -88,6 +88,7 @@ if ($ajetaanko_kaikki == "NO") {
             OR ta_nimitys_se.muutospvm >= '{$datetime_checkpoint}'
             OR ta_nimitys_en.muutospvm >= '{$datetime_checkpoint}'
             OR hinnasto.muutospvm >= '{$datetime_checkpoint}'
+            OR tuotteen_avainsanat.muutospvm >= '{$datetime_checkpoint}'
             )";
 }
 else {
@@ -121,6 +122,11 @@ $query = "SELECT
             and ta_nimitys_en.kieli  = 'en'
           LEFT JOIN hinnasto on tuote.yhtio = hinnasto.yhtio
             AND tuote.tuoteno        = hinnasto.tuoteno
+          LEFT JOIN tuotteen_avainsanat on tuote.yhtio = tuotteen_avainsanat.yhtio
+            AND tuotteen_avainsanat.tuoteno  = tuote.tuoteno
+            AND tuotteen_avainsanat.laji    != 'parametri_variaatio'
+            AND tuotteen_avainsanat.laji    != 'parametri_variaatio_jako'
+            AND tuotteen_avainsanat.laji     like 'parametri_%' 
           WHERE tuote.yhtio          = '{$kukarow["yhtio"]}'
             AND tuote.status        != 'P'
             AND tuote.tuotetyyppi    NOT in ('A','B')

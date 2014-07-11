@@ -89,7 +89,7 @@ if ($tee == "") {
 function hae_avain_sertifikaatti_ja_customer_id($tili) {
   global $kukarow;
 
-  $query = "SELECT private_key, certificate, sepa_customer_id
+  $query = "SELECT private_key, certificate, sepa_customer_id, sepa_target_id
             FROM yriti
             WHERE yhtio = '{$kukarow["yhtio"]}'
             AND tunnus = {$tili}";
@@ -112,9 +112,12 @@ function pura_salaus($salattu_data, $salasana) {
   $salattu_data_binaari = base64_decode($salattu_data);
 
   $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC);
-  $iv = substr($salattu_data_binaari, 0, $iv_size);
 
-  $salattu_data_binaari = substr($salattu_data_binaari, $iv_size);
+  //  Pitaa olla monta spacee, jotta UTF-8 konversio ei riko toiminnallisuutta
+  $iv = substr    ($salattu_data_binaari, 0, $iv_size);
+
+  //  Pitaa olla monta spacee, jotta UTF-8 konversio ei riko toiminnallisuutta
+  $salattu_data_binaari = substr    ($salattu_data_binaari, $iv_size);
 
   return mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $avain, $salattu_data_binaari, MCRYPT_MODE_CBC, $iv);
 }
@@ -135,7 +138,7 @@ function download_file_list($tiedostotyyppi, $tunnukset) {
       "private_key" => base64_encode($tunnukset["avain"]),
       "customer_id" => $tunnukset["customer_id"],
       "file_type"   => $tiedostotyyppi,
-      "target_id"   => "11111111A1"
+      "target_id"   => $tunnukset["target_id"]
     ),
     "url"     => "https://sepa.devlab.fi/api/nordea/download_file_list",
     "headers" => array(
@@ -180,7 +183,7 @@ function download_files($viitteet, $tiedostotyyppi, $tunnukset) {
         "private_key"    => base64_encode($tunnukset["avain"]),
         "customer_id"    => $tunnukset["customer_id"],
         "file_type"      => $tiedostotyyppi,
-        "target_id"      => "11111111A1",
+        "target_id"      => $tunnukset["target_id"],
         "file_reference" => $viite
       ),
       "url"     => "https://sepa.devlab.fi/api/nordea/download_file",
@@ -274,11 +277,13 @@ function hae_tunnukset_ja_pura_salaus($tili, $salasana) {
   $avain = pura_salaus($haetut_tunnukset["private_key"], $salasana);
   $sertifikaatti = pura_salaus($haetut_tunnukset["certificate"], $salasana);
   $customer_id = $haetut_tunnukset["sepa_customer_id"];
+  $target_id = $haetut_tunnukset["sepa_target_id"];
 
   return array(
     "avain"         => $avain,
     "sertifikaatti" => $sertifikaatti,
-    "customer_id"   => $customer_id
+    "customer_id"   => $customer_id,
+    "target_id"     => $target_id
   );
 }
 
@@ -298,7 +303,7 @@ function laheta_maksuaineisto($tunnukset, $maksuaineisto) {
       "private_key" => base64_encode($tunnukset["avain"]),
       "customer_id" => $tunnukset["customer_id"],
       "file_type"   => "NDCORPAYS",
-      "target_id"   => "11111111A1",
+      "target_id"   => $tunnukset["target_id"],
       "content"     => $maksuaineisto
     ),
     "url"     => "https://sepa.devlab.fi/api/nordea/upload_file",

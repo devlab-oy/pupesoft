@@ -70,7 +70,7 @@ function hae_tyomaaraykset($request) {
   if ($request['toim'] == 'TEHDYT_TYOT') {
     $lasku_where .= "  AND lasku.tila = 'L'
               AND lasku.alatila = 'D'";
-    $lasku_order = " lasku.toimaika DESC,";
+    $lasku_order = " tilausrivi.toimitettuaika DESC,";
   }
   else {
     $lasku_where .= "  AND lasku.tila = 'A'";
@@ -144,6 +144,7 @@ function hae_tyomaaraykset($request) {
             tilausrivi.tunnus AS tilausrivi_tunnus,
             tilausrivi.nimitys AS tehtava_tyo,
             tilausrivi.kommentti AS tilausrivi_kommentti,
+            tilausrivi.toimitettuaika,
             tilausrivin_lisatiedot.tilausrivilinkki AS poikkeus_tunnus,
             IF(tilausrivin_lisatiedot.tilausrivilinkki != 0, CONCAT_WS(' -> ', poikkeus_rivi.nimitys, tilausrivi.nimitys), '') AS poikkeus_teksti,
             poistettu_laite.tuoteno AS poistettu_laite
@@ -215,8 +216,13 @@ function kasittele_tyomaaraykset($request) {
   $tyomaaraykset_temp = array();
   $kohteiden_toimajat = array();
   foreach ($request['tyomaaraykset'] as $tyomaarays) {
+    $key = 'toimaika';
+    if ($tyomaarays['tyostatus_koodi'] == 'X') {
+      $key = 'toimitettuaika';
+    }
+
     if (empty($kohteiden_toimajat[$tyomaarays['kohde_tunnus']])) {
-      $kohteiden_toimajat[$tyomaarays['kohde_tunnus']][] = $tyomaarays['toimaika'];
+      $kohteiden_toimajat[$tyomaarays['kohde_tunnus']][] = date('Y-m-d', strtotime($tyomaarays[$key]));
     }
 
     if (!empty($tyomaarays['poistettu_laite'])) {
@@ -227,12 +233,23 @@ function kasittele_tyomaaraykset($request) {
     $kohteen_viimeisin_toimaika = end(array_values($kohteiden_toimajat[$tyomaarays['kohde_tunnus']]));
     $paiva_temp = date('Y-m-d', strtotime("{$kohteen_viimeisin_toimaika} + 30 days"));
     //Jos käsittelyssä oleva työmääräyksen toimaika on 30 päivän sisällä ensimmäisestä työmääräyksen toimajasta niin groupataan
-    if ($paiva_temp >= $tyomaarays['toimaika']) {
-      $toimaika = $kohteen_viimeisin_toimaika;
+    if ($tyomaarays['tyostatus_koodi'] == 'X') {
+      if ($paiva_temp <= $tyomaarays[$key]) {
+        $toimaika = $kohteen_viimeisin_toimaika;
+      }
+      else {
+        $toimaika = $tyomaarays[$key];
+        $kohteiden_toimajat[$tyomaarays['kohde_tunnus']][] = $tyomaarays[$key];
+      }
     }
     else {
-      $toimaika = $tyomaarays['toimaika'];
-      $kohteiden_toimajat[$tyomaarays['kohde_tunnus']][] = $tyomaarays['toimaika'];
+      if ($paiva_temp >= $tyomaarays[$key]) {
+        $toimaika = $kohteen_viimeisin_toimaika;
+      }
+      else {
+        $toimaika = $tyomaarays[$key];
+        $kohteiden_toimajat[$tyomaarays['kohde_tunnus']][] = $tyomaarays[$key];
+      }
     }
 
     if (!isset($tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']])) {
@@ -244,7 +261,7 @@ function kasittele_tyomaaraykset($request) {
       );
     }
 
-    $tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']]['toimajat'][] = $tyomaarays['toimaika'];
+    $tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']]['toimajat'][] = $tyomaarays[$key];
 
     //jos kohteen kaikilla työmääräyksillä on sama työstatus, asetetaan se myös kohteelle, jotta se voidaan näyttää ylemmällä tasolla taulukko näkymässä
     if (isset($tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']]['tyostatus'])) {

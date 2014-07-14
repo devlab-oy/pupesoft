@@ -116,7 +116,8 @@ function hae_tyomaarayksen_rivit($lasku_tunnus) {
               AND toimenpiteen_tyyppi.laji = 'tyomaarayksen_ryhmittely' )
             JOIN laite
             ON ( laite.yhtio = tilausrivin_lisatiedot.yhtio
-              AND laite.tunnus = tilausrivin_lisatiedot.asiakkaan_positio )
+              AND laite.tunnus = tilausrivin_lisatiedot.asiakkaan_positio
+              AND laite.tila IN ('N','V','H'))
             JOIN paikka
             ON ( paikka.yhtio = laite.yhtio
               AND paikka.tunnus = laite.paikka )

@@ -336,7 +336,7 @@ function generoi_tyomaarays_temp($huollettavan_laitteen_huoltosyklirivi) {
 
   $params = array(
       'tyomaarays_tunnus' => $tyomaarays_tunnus,
-      'trow'              => $trow,
+      'tuote'              => $trow,
       'laite_tunnus'      => $huollettavan_laitteen_huoltosyklirivi['laite_tunnus'],
       'toimaika'          => $toimaika,
       'toimitettuaika'    => '0000-00-00 00:00:00',

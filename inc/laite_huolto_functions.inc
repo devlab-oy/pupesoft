@@ -584,6 +584,10 @@ function luo_tilausrivi(array $params) {
   if (!isset($params['hinta'])) {
     $hinta = $tuote['myyntihinta'];
   }
+  
+  if (!is_numeric($hinta)) {
+    $hinta = 0;
+  }
 
   $ale1 = $params['ale1'];
   if (!isset($params['ale1'])) {
@@ -620,7 +624,7 @@ function luo_tilausrivi(array $params) {
             yksikko = '',
             varattu = 1.00,
             jt = 0.00,
-            hinta = {$tuote['myyntihinta']},
+            hinta = {$hinta},
             hinta_valuutassa = 0.00,
             hinta_alkuperainen = 0.00,
             alv = {$alv},

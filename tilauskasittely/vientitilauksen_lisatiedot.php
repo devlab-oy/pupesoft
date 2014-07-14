@@ -786,10 +786,10 @@ elseif ($tee == '') {
       if ($tilrow['alatila'] == 'E'
         and $tilrow['vienti'] == 'K'
         and $tilrow['maa_maara'] != ''
-        and $tilrow['kuljetusmuoto'] != ''
+        and $tilrow['kuljetusmuoto'] > 0
         and $tilrow['kauppatapahtuman_luonne'] > 0
-        and $tilrow['sisamaan_kuljetus'] != 0
-        and $tilrow['sisamaan_kuljetusmuoto'] != ''
+        and $tilrow['sisamaan_kuljetus'] != ''
+        and $tilrow['sisamaan_kuljetusmuoto'] > 0
         and $tilrow['poistumistoimipaikka'] != ''
         and $tilrow['poistumistoimipaikka_koodi'] != '') {
         echo "<td><font color='#00FF00'>".t("OK")."</font></td>";
@@ -797,7 +797,7 @@ elseif ($tee == '') {
       elseif ($tilrow['alatila'] == 'E'
         and $tilrow['vienti'] == 'E'
         and $tilrow['maa_maara'] != ''
-        and $tilrow['kuljetusmuoto'] != 0
+        and $tilrow['kuljetusmuoto'] > 0
         and $tilrow['kauppatapahtuman_luonne'] > 0) {
         echo "<td><font color='#00FF00'>".t("OK")."</font></td>";
       }

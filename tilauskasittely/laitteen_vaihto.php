@@ -35,7 +35,7 @@ $request = array(
 );
 
 $request['laite'] = hae_laite_ja_asiakastiedot($request['tilausrivi_tunnus']);
-$request['paikat'] = hae_paikat();
+$request['paikat'] = hae_paikat($request['laite']['asiakas_tunnus']);
 
 if (!empty($request['uusi_laite'])) {
   if (!empty($request['uusi_laite']['varalaite'])) {
@@ -135,10 +135,10 @@ function validoi_uusi_laite($uusi_laite) {
 
   $virhe = array();
 
-  $query = "  SELECT *
-        FROM laite
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tunnus = ''";
+  $query = "SELECT *
+            FROM laite
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = ''";
   $result = pupe_query($query);
   $trow = mysql_fetch_assoc($result);
 
@@ -159,23 +159,23 @@ function luo_uusi_laite($uusi_laite) {
   unset($uusi_laite['huoltosyklit']);
 
   $uusi_laite['yhtio'] = $kukarow['yhtio'];
-  $query = "  INSERT INTO
-        laite (" . implode(", ", array_keys($uusi_laite)) . ")
-        VALUES('" . implode("', '", array_values($uusi_laite)) . "')";
+  $query = "INSERT INTO
+            laite (" . implode(", ", array_keys($uusi_laite)) . ")
+            VALUES('" . implode("', '", array_values($uusi_laite)) . "')";
   pupe_query($query);
 
   $laite_tunnus = mysql_insert_id();
 
-  $query = "  SELECT laite.*,
-        tuote.nimitys as tuote_nimitys,
-        tuote.myyntihinta as tuote_hinta,
-        tuote.try as tuote_try
-        FROM laite
-        JOIN tuote
-        ON ( tuote.yhtio = laite.yhtio
-          AND tuote.tuoteno = laite.tuoteno )
-        WHERE laite.yhtio = '{$kukarow['yhtio']}'
-        AND laite.tunnus = '{$laite_tunnus}'";
+  $query = "SELECT laite.*,
+            tuote.nimitys as tuote_nimitys,
+            tuote.myyntihinta as tuote_hinta,
+            tuote.try as tuote_try
+            FROM laite
+            JOIN tuote
+            ON ( tuote.yhtio = laite.yhtio
+              AND tuote.tuoteno = laite.tuoteno )
+            WHERE laite.yhtio = '{$kukarow['yhtio']}'
+            AND laite.tunnus = '{$laite_tunnus}'";
   $result = pupe_query($query);
 
   foreach ($huoltosyklit as $huoltosykli) {
@@ -193,80 +193,80 @@ function liita_huoltosykli_laitteeseen($laite_tunnus, $huoltosykli) {
     $pakollisuus = 1;
   }
 
-  $query = "  INSERT INTO huoltosyklit_laitteet
-        SET yhtio = '{$kukarow['yhtio']}',
-        huoltosykli_tunnus = '{$huoltosykli['huoltosykli_tunnus']}',
-        laite_tunnus = '{$laite_tunnus}',
-        huoltovali = '{$huoltosykli['huoltovali']}',
-        pakollisuus = '{$pakollisuus}',
-        viimeinen_tapahtuma = CURRENT_DATE,
-        laatija = '{$kukarow['kuka']}',
-        luontiaika = NOW()";
+  $query = "INSERT INTO huoltosyklit_laitteet
+            SET yhtio = '{$kukarow['yhtio']}',
+            huoltosykli_tunnus = '{$huoltosykli['huoltosykli_tunnus']}',
+            laite_tunnus = '{$laite_tunnus}',
+            huoltovali = '{$huoltosykli['huoltovali']}',
+            pakollisuus = '{$pakollisuus}',
+            viimeinen_tapahtuma = CURRENT_DATE,
+            laatija = '{$kukarow['kuka']}',
+            luontiaika = NOW()";
   pupe_query($query);
 }
 
 function aseta_uuden_tyomaarays_rivin_kommentti($tilausrivi_tunnus, $kommentti) {
   global $kukarow, $yhtiorow;
 
-  $query = "  UPDATE tilausrivi
-        SET kommentti = '{$kommentti}'
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tunnus = {$tilausrivi_tunnus}";
+  $query = "UPDATE tilausrivi
+            SET kommentti = '{$kommentti}'
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = {$tilausrivi_tunnus}";
   pupe_query($query);
 }
 
 function luo_uusi_tyomaarays_rivi($tuote, $lasku_tunnus) {
   global $kukarow, $yhtiorow;
 
-  $query = "  INSERT INTO tilausrivi
-        SET hyllyalue = '',
-        hyllynro = '',
-        hyllyvali = '',
-        hyllytaso = '',
-        tilaajanrivinro = '',
-        laatija = '{$kukarow['kuka']}',
-        laadittu = now(),
-        yhtio = '{$kukarow['yhtio']}',
-        tuoteno = '{$tuote['tuoteno']}',
-        varattu = '0',
-        yksikko = '',
-        kpl = '0',
-        kpl2 = '',
-        tilkpl = '1',
-        jt = '1',
-        ale1 = '0',
-        erikoisale = '0.00',
-        alv = '0',
-        netto = '',
-        hinta = '{$tuote['hinta']}',
-        kerayspvm = CURRENT_DATE,
-        otunnus = '{$lasku_tunnus}',
-        tyyppi = 'L',
-        toimaika = CURRENT_DATE,
-        kommentti = '',
-        var = 'J',
-        try= '{$tuote['try']}',
-        osasto = '0',
-        perheid = '0',
-        perheid2 = '0',
-        tunnus = '0',
-        nimitys = '{$tuote['tuote_nimitys']}',
-        jaksotettu = ''";
+  $query = "INSERT INTO tilausrivi
+            SET hyllyalue = '',
+            hyllynro = '',
+            hyllyvali = '',
+            hyllytaso = '',
+            tilaajanrivinro = '',
+            laatija = '{$kukarow['kuka']}',
+            laadittu = now(),
+            yhtio = '{$kukarow['yhtio']}',
+            tuoteno = '{$tuote['tuoteno']}',
+            varattu = '0',
+            yksikko = '',
+            kpl = '0',
+            kpl2 = '',
+            tilkpl = '1',
+            jt = '1',
+            ale1 = '0',
+            erikoisale = '0.00',
+            alv = '0',
+            netto = '',
+            hinta = '{$tuote['hinta']}',
+            kerayspvm = CURRENT_DATE,
+            otunnus = '{$lasku_tunnus}',
+            tyyppi = 'L',
+            toimaika = CURRENT_DATE,
+            kommentti = '',
+            var = 'J',
+            try= '{$tuote['try']}',
+            osasto = '0',
+            perheid = '0',
+            perheid2 = '0',
+            tunnus = '0',
+            nimitys = '{$tuote['tuote_nimitys']}',
+            jaksotettu = ''";
   pupe_query($query);
 
   $tilausrivi_tunnus = mysql_insert_id();
 
-  $query = "  INSERT INTO tilausrivin_lisatiedot
-        SET yhtio = '{$kukarow['yhtio']}',
-        positio = '',
-        toimittajan_tunnus = '',
-        tilausrivitunnus = '{$tilausrivi_tunnus}',
-        jarjestys = '0',
-        vanha_otunnus = '{$lasku_tunnus}',
-        ei_nayteta = '',
-        ohita_kerays = '',
-        luontiaika = now(),
-        laatija = '{$kukarow['kuka']}'";
+  $query = "INSERT INTO tilausrivin_lisatiedot
+            SET yhtio = '{$kukarow['yhtio']}',
+            positio = '',
+            toimittajan_tunnus = '',
+            tilausrivitunnus = '{$tilausrivi_tunnus}',
+            jarjestys = '0',
+            vanha_otunnus = '{$lasku_tunnus}',
+            ei_nayteta = '',
+            ohita_kerays = '',
+            luontiaika = now(),
+            laatija = '{$kukarow['kuka']}'";
   pupe_query($query);
 
   return $tilausrivi_tunnus;
@@ -275,36 +275,37 @@ function luo_uusi_tyomaarays_rivi($tuote, $lasku_tunnus) {
 function hae_laite_ja_asiakastiedot($tilausrivi_tunnus) {
   global $kukarow, $yhtiorow;
 
-  $query = "  SELECT laite.*,
-        laite.tunnus as laite_tunnus,
-        tilausrivi.tunnus as tilausrivi_tunnus,
-        paikka.nimi as paikka_nimi,
-        paikka.tunnus as paikka_tunnus,
-        paikka.olosuhde as paikka_olosuhde,
-        kohde.nimi as kohde_nimi,
-        asiakas.nimi as asiakas_nimi,
-        lasku.tunnus as lasku_tunnus
-        FROM tilausrivi
-        JOIN tilausrivin_lisatiedot
-        ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-          AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
-        JOIN lasku
-        ON ( lasku.yhtio = tilausrivi.yhtio
-          AND lasku.tunnus = tilausrivi.otunnus )
-        JOIN laite
-        ON ( laite.yhtio = tilausrivin_lisatiedot.yhtio
-          AND laite.tunnus = tilausrivin_lisatiedot.asiakkaan_positio )
-        JOIN paikka
-        ON ( paikka.yhtio = laite.yhtio
-          AND paikka.tunnus = laite.paikka )
-        JOIN kohde
-        ON ( kohde.yhtio = paikka.yhtio
-          AND kohde.tunnus = paikka.kohde )
-        JOIN asiakas
-        ON ( asiakas.yhtio = kohde.yhtio
-          AND asiakas.tunnus = kohde.asiakas )
-        WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-        AND tilausrivi.tunnus = '{$tilausrivi_tunnus}'";
+  $query = "SELECT laite.*,
+            laite.tunnus AS laite_tunnus,
+            tilausrivi.tunnus AS tilausrivi_tunnus,
+            paikka.nimi AS paikka_nimi,
+            paikka.tunnus AS paikka_tunnus,
+            paikka.olosuhde AS paikka_olosuhde,
+            kohde.nimi AS kohde_nimi,
+            asiakas.tunnus AS asiakas_tunnus,
+            asiakas.nimi AS asiakas_nimi,
+            lasku.tunnus AS lasku_tunnus
+            FROM tilausrivi
+            JOIN tilausrivin_lisatiedot
+            ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
+            JOIN lasku
+            ON ( lasku.yhtio = tilausrivi.yhtio
+              AND lasku.tunnus = tilausrivi.otunnus )
+            JOIN laite
+            ON ( laite.yhtio = tilausrivin_lisatiedot.yhtio
+              AND laite.tunnus = tilausrivin_lisatiedot.asiakkaan_positio )
+            JOIN paikka
+            ON ( paikka.yhtio = laite.yhtio
+              AND paikka.tunnus = laite.paikka )
+            JOIN kohde
+            ON ( kohde.yhtio = paikka.yhtio
+              AND kohde.tunnus = paikka.kohde )
+            JOIN asiakas
+            ON ( asiakas.yhtio = kohde.yhtio
+              AND asiakas.tunnus = kohde.asiakas )
+            WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+            AND tilausrivi.tunnus = '{$tilausrivi_tunnus}'";
   $result = pupe_query($query);
 
   return mysql_fetch_assoc($result);
@@ -313,11 +314,11 @@ function hae_laite_ja_asiakastiedot($tilausrivi_tunnus) {
 function hae_vaihtotoimenpide_tuote() {
   global $kukarow, $yhtiorow;
 
-  $query = "  SELECT tuote.*,
-        tuote.nimitys as tuote_nimitys
-        FROM tuote
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tuoteno = 'LAITTEEN_VAIHTO'";
+  $query = "SELECT tuote.*,
+            tuote.nimitys as tuote_nimitys
+            FROM tuote
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tuoteno = 'LAITTEEN_VAIHTO'";
   $result = pupe_query($query);
 
   return mysql_fetch_assoc($result);
@@ -326,48 +327,55 @@ function hae_vaihtotoimenpide_tuote() {
 function linkkaa_uusi_laite_vaihtotoimenpiteeseen($uusi_laite, $tilausrivi_tunnus) {
   global $kukarow, $yhtiorow;
 
-  $query = "  UPDATE tilausrivi
-        JOIN tilausrivin_lisatiedot
-        ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-          AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
-        SET tilausrivin_lisatiedot.asiakkaan_positio = '{$uusi_laite['tunnus']}'
-        WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-        AND tilausrivi.tunnus = '{$tilausrivi_tunnus}'";
+  $query = "UPDATE tilausrivi
+            JOIN tilausrivin_lisatiedot
+            ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
+            SET tilausrivin_lisatiedot.asiakkaan_positio = '{$uusi_laite['tunnus']}'
+            WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+            AND tilausrivi.tunnus = '{$tilausrivi_tunnus}'";
   pupe_query($query);
 }
 
 function nollaa_vanhan_toimenpiderivin_asiakas_positio($tilausrivi_tunnus) {
   global $kukarow, $yhtiorow;
 
-  $query = "  UPDATE tilausrivi
-        JOIN tilausrivin_lisatiedot
-        ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-          AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
-        SET tilausrivin_lisatiedot.asiakkaan_positio = '0'
-        WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-        AND tilausrivi.tunnus = '{$tilausrivi_tunnus}'";
+  $query = "UPDATE tilausrivi
+            JOIN tilausrivin_lisatiedot
+            ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
+            SET tilausrivin_lisatiedot.asiakkaan_positio = '0'
+            WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+            AND tilausrivi.tunnus = '{$tilausrivi_tunnus}'";
   pupe_query($query);
 }
 
 function paivita_uuden_toimenpide_rivin_tilausrivi_linkki($toimenpide_tilausrivi_tunnus, $vanha_tilausrivi_tunnus) {
   global $kukarow, $yhtiorow;
 
-  $query = "  UPDATE tilausrivi
-        JOIN tilausrivin_lisatiedot
-        ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-          AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
-        SET tilausrivin_lisatiedot.tilausrivilinkki = '{$vanha_tilausrivi_tunnus}'
-        WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-        AND tilausrivi.tunnus = '{$toimenpide_tilausrivi_tunnus}'";
+  $query = "UPDATE tilausrivi
+            JOIN tilausrivin_lisatiedot
+            ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
+            SET tilausrivin_lisatiedot.tilausrivilinkki = '{$vanha_tilausrivi_tunnus}'
+            WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+            AND tilausrivi.tunnus = '{$toimenpide_tilausrivi_tunnus}'";
   pupe_query($query);
 }
 
-function hae_paikat() {
+function hae_paikat($asiakas_tunnus) {
   global $kukarow, $yhtiorow;
 
-  $query = "  SELECT *
-        FROM paikka
-        WHERE yhtio = '{$kukarow['yhtio']}'";
+  $query = "SELECT paikka.*
+            FROM paikka
+            JOIN kohde
+            ON ( kohde.yhtio = paikka.yhtio
+              AND kohde.tunnus = paikka.kohde )
+            JOIN asiakas
+            ON ( asiakas.yhtio = kohde.yhtio
+              AND asiakas.tunnus = kohde.asiakas
+              AND asiakas.tunnus = '{$asiakas_tunnus}')
+            WHERE paikka.yhtio = '{$kukarow['yhtio']}'";
   $result = pupe_query($query);
 
   $paikat = array();
@@ -381,15 +389,15 @@ function hae_paikat() {
 function aseta_vanhan_laitteen_tyomaarays_rivit_poistettu_tilaan($vanha_laite_tunnus) {
   global $kukarow, $yhtiorow;
 
-  $query = "  SELECT tilausrivi.otunnus,
-        tilausrivi.tunnus AS tilausrivi_tunnus
-        FROM tilausrivi
-        JOIN tilausrivin_lisatiedot
-        ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-          AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
-          AND tilausrivin_lisatiedot.asiakkaan_positio = '{$vanha_laite_tunnus}' )
-        WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-        AND tilausrivi.var != 'P'";
+  $query = "SELECT tilausrivi.otunnus,
+            tilausrivi.tunnus AS tilausrivi_tunnus
+            FROM tilausrivi
+            JOIN tilausrivin_lisatiedot
+            ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
+              AND tilausrivin_lisatiedot.asiakkaan_positio = '{$vanha_laite_tunnus}' )
+            WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+            AND tilausrivi.var != 'P'";
   $result = pupe_query($query);
 
   $poistettavat_tilausrivit = array();
@@ -400,17 +408,17 @@ function aseta_vanhan_laitteen_tyomaarays_rivit_poistettu_tilaan($vanha_laite_tu
   }
 
   if (!empty($poistettavat_tilausrivit)) {
-    $query = "  UPDATE tyomaarays
-          JOIN lasku
-          ON ( lasku.yhtio = tyomaarays.yhtio
-            AND lasku.tunnus = tyomaarays.otunnus )
-          JOIN tilausrivi
-          ON ( tilausrivi.yhtio = lasku.yhtio
-            AND tilausrivi.otunnus = lasku.tunnus
-            AND tilausrivi.tunnus IN ('" . implode("','", $poistettavat_tilausrivit) . "') )
-          SET tyomaarays.tyostatus = 'V',
-          tilausrivi.var = 'P'
-          WHERE tyomaarays.yhtio = '{$kukarow['yhtio']}'";
+    $query = "UPDATE tyomaarays
+              JOIN lasku
+              ON ( lasku.yhtio = tyomaarays.yhtio
+                AND lasku.tunnus = tyomaarays.otunnus )
+              JOIN tilausrivi
+              ON ( tilausrivi.yhtio = lasku.yhtio
+                AND tilausrivi.otunnus = lasku.tunnus
+                AND tilausrivi.tunnus IN ('" . implode("','", $poistettavat_tilausrivit) . "') )
+              SET tyomaarays.tyostatus = 'V',
+              tilausrivi.var = 'P'
+              WHERE tyomaarays.yhtio = '{$kukarow['yhtio']}'";
     pupe_query($query);
   }
 

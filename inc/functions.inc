@@ -20051,8 +20051,28 @@ if (!function_exists("pupesoft_sahkoposti")) {
         $attachement_newfilename = isset($liite["newfilename"]) ? $liite["newfilename"] : "";
         $attachement_ctype       = isset($liite["ctype"]) ? strtoupper($liite["ctype"]) : "";
 
-        // Jos tiedostoa ei lˆydy tai ctype on tyj‰‰, hyp‰t‰‰n filen yli.
-        if (!file_exists($attachement_filename) or !is_readable($attachement_filename) or $attachement_ctype == "") {
+        // Selvitet‰‰n ctype jos ei annettu, PHP version mukaan
+        if ($attachement_ctype == "") {
+          // 5.3 version j‰lkeen pit‰‰ k‰ytt‰‰ finfo_open
+          if (version_compare(PHP_VERSION, '5.3', '>=')) {
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $attachement_ctype = finfo_file($finfo, $attachement_filename);
+          }
+          // ennen 5.2 versiota pit‰‰ k‰ytt‰‰ mime_content_type
+          elseif (version_compare(PHP_VERSION, '5.2', '<')) {
+            $attachement_ctype = mime_content_type($attachement_filename);
+          }
+          // versiossa 5.2 otetaan vain file extensio
+          else {
+            $path_parts = pathinfo($attachement_filename);
+            $attachement_ctype = $path_parts['extension'];
+          }
+
+          $attachement_ctype = strtoupper($attachement_ctype);
+        }
+
+        // Jos tiedostoa ei lˆydy tai sit‰ ei voi lukea, hyp‰t‰‰n filen yli.
+        if (!file_exists($attachement_filename) or !is_readable($attachement_filename)) {
           continue;
         }
 
@@ -20096,6 +20116,9 @@ if (!function_exists("pupesoft_sahkoposti")) {
         }
         elseif ($attachement_ctype == "PDF") {
           $content .= "application/pdf;";
+        }
+        else {
+          $content .= "application/octet-stream;";
         }
 
         $content .= " name=\"".mb_encode_mimeheader($attachement_name, "ISO-8859-1", "Q")."\"\n";

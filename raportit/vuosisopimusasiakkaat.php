@@ -650,21 +650,9 @@ function laheta_email($email_address, array $liitetiedostot_path = array()) {
     $hakemiston_syvyys = count($tiedosto_nimi);
     $tiedosto_nimi = $tiedosto_nimi[$hakemiston_syvyys - 1];
 
-    if(stristr(mime_content_type($liitetiedosto_path), 'pdf')) {
-      $ctype = 'pdf';
-    }
-    elseif(stristr(mime_content_type($liitetiedosto_path), 'xls')) {
-      $ctype = 'excel';
-    }
-    else {
-      //ctypessä pitää olla jotain muute sitä ei lähetetä. tässä laitetaan oletukseksi zippi
-      $ctype = 'zip';
-    }
-
     $liitetiedosto =  array(
       'filename' => $liitetiedosto_path,
       'newfilename' => t($tiedosto_nimi, $kieli),
-      'ctype' => $ctype,
     );
 
     $params['attachements'][] = $liitetiedosto;

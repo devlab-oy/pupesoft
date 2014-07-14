@@ -32,7 +32,6 @@ if ($tee == "laheta" and $hae_tiliotteet == "on") {
     viesti("Ladatut tiliotteet:");
     tiedostot_table($tiedostot);
   }
-
   else {
     viesti("Ladattavia tiliotteita ei ollut saatavilla");
   }
@@ -45,7 +44,6 @@ if ($tee == "laheta" and $hae_viitteet == "on") {
     viesti("Ladatut viitteet:");
     tiedostot_table($tiedostot);
   }
-
   else {
     viesti("Ladattavia viitteitä ei ollut saatavilla");
   }

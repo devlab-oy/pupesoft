@@ -89,8 +89,8 @@ if ($tee == "") {
 function hae_avain_sertifikaatti_ja_customer_id($tili) {
   global $kukarow;
 
-  $query = "SELECT private_key, certificate, sepa_customer_id, sepa_target_id
-            FROM yriti
+  $query = "SELECT private_key, certificate, customer_id, target_id
+            FROM pankkiyhteys
             WHERE yhtio = '{$kukarow["yhtio"]}'
             AND tunnus = {$tili}";
   $result = pupe_query($query);
@@ -276,8 +276,8 @@ function hae_tunnukset_ja_pura_salaus($tili, $salasana) {
 
   $avain = pura_salaus($haetut_tunnukset["private_key"], $salasana);
   $sertifikaatti = pura_salaus($haetut_tunnukset["certificate"], $salasana);
-  $customer_id = $haetut_tunnukset["sepa_customer_id"];
-  $target_id = $haetut_tunnukset["sepa_target_id"];
+  $customer_id = $haetut_tunnukset["customer_id"];
+  $target_id = $haetut_tunnukset["target_id"];
 
   return array(
     "avain"         => $avain,
@@ -382,13 +382,12 @@ function lataa_kaikki($tiedostotyyppi) {
 /**
  * @return array
  */
-function hae_kaytossa_olevat_tilit() {
+function hae_kaytossa_olevat_pankkiyhteydet() {
   global $kukarow;
 
-  $query = "SELECT tunnus, nimi
-            FROM yriti
-            WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND sepa_customer_id != ''";
+  $query = "SELECT tunnus, pankki
+            FROM pankkiyhteys
+            WHERE yhtio = '{$kukarow["yhtio"]}'";
   $result = pupe_query($query);
 
   $kaytossa_olevat_tilit = array();
@@ -401,9 +400,9 @@ function hae_kaytossa_olevat_tilit() {
 }
 
 function formi() {
-  $kaytossa_olevat_tilit = hae_kaytossa_olevat_tilit();
+  $kaytossa_olevat_pankkiyhteydet = hae_kaytossa_olevat_pankkiyhteydet();
 
-  if ($kaytossa_olevat_tilit) {
+  if ($kaytossa_olevat_pankkiyhteydet) {
 
     echo "<form method='post' action='pankkiyhteys.php' enctype='multipart/form-data'>";
     echo "<input type='hidden' name='tee' value='laheta'/>";
@@ -415,8 +414,8 @@ function formi() {
     echo "<td>";
     echo "<select name='tili'>";
 
-    foreach ($kaytossa_olevat_tilit as $tili) {
-      echo "<option value='{$tili["tunnus"]}'>{$tili["nimi"]}</option>";
+    foreach ($kaytossa_olevat_pankkiyhteydet as $pankkiyhteys) {
+      echo "<option value='{$pankkiyhteys["tunnus"]}'>{$pankkiyhteys["pankki"]}</option>";
     }
 
     echo "</select>";

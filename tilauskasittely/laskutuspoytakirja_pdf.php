@@ -16,6 +16,9 @@ function hae_laskutuspoytakirja($lasku_tunnukset) {
   if (!empty($lasku_tunnukset)) {
     $tyomaaraykset = \PDF\Laskutuspoytakirja\pdf_hae_tyomaaraykset($lasku_tunnukset);
 
+    sorttaa($tyomaaraykset);
+
+    die();
     foreach ($tyomaaraykset as $key1 => $value1) {
 
       foreach ($value1['rivit'] as $key2 => $value2) {
@@ -68,11 +71,42 @@ function hae_laskutuspoytakirja($lasku_tunnukset) {
   return $pdf_tiedosto;
 }
 
+function sorttaa($tyomaarays) {
+  global $kukarow, $yhtiorow;
+
+  $laskutuspoytakirja_rivit = array();
+  //SELECT DISTINCT tuoteno...
+  $unique_tuotenos = array_unique(array_column($tyomaarays['rivit'], 'tuoteno'));
+
+  foreach ($unique_tuotenos as $tuoteno) {
+    $rivit = search_array_key_for_value_recursive($tyomaarays['rivit'], 'tuoteno', $tuoteno);
+    
+    $params = array(
+        'direction' => 'y',
+        'key'       => 'hinta'
+    );
+    $hinta = sum_array($rivit, $params);
+    $params = array(
+        'direction' => 'y',
+        'key'       => 'tilkpl'
+    );
+    $kpl = sum_array($rivit, $params);
+    $laskutuspoytakirja_rivit[$tuoteno] = array(
+        'tuoteno' => $tuoteno,
+        'nimitys' => $rivit[0]['nimitys'],
+        'hinta' => $hinta,
+        'kpl' => $kpl,
+    );
+  }
+  
+  return $laskutuspoytakirja_rivit;
+}
+
 function kpl_sort($a, $b) {
   if ($a['kpl'] < $b['kpl']) {
     return 1;
   }
-  else if ($a['kpl,'] > $b['kpl']) {
+  else if ($a['kpl'] > $b['kpl']) {
     return -1;
   }
   else {
@@ -91,7 +125,7 @@ function pdf_hae_tyomaaraykset($lasku_tunnukset) {
     $lasku_tunnukset = implode(",", $lasku_tunnukset);
   }
 
-  //queryyn joinataan tauluja kohteeseen saakka, koska tarkastuspöytäkirjat halutaan tulostaa per kohde mutta työmääräykset on laite per työmääräin
+  //queryyn joinataan tauluja kohteeseen saakka, koska tarkastusp?yt?kirjat halutaan tulostaa per kohde mutta ty?m??r?ykset on laite per ty?m??r?in
   $query = "SELECT lasku.*,
             kohde.tunnus as kohde_tunnus,
             laite.tunnus as laite_tunnus
@@ -118,12 +152,35 @@ function pdf_hae_tyomaaraykset($lasku_tunnukset) {
 
   $result = pupe_query($query);
 
+  $tyomaarays = false;
+  $rivit = array();
+  while ($tyomaarays_temp = mysql_fetch_assoc($result)) {
+    if (!$tyomaarays) {
+      $tyomaarays['kohde'] = \PDF\Laskutuspoytakirja\hae_tyomaarayksen_kohde($tyomaarays_temp['laite_tunnus']);
+      $tyomaarays['asiakas'] = \PDF\Laskutuspoytakirja\hae_tyomaarayksen_asiakas($tyomaarays_temp['liitostunnus']);
+      $tyomaarays['yhtio'] = $yhtiorow;
+      $tyomaarays['logo'] = base64_encode(hae_yhtion_lasku_logo());
+      $tyomaarays['tyomaarays'] = $tyomaarays_temp;
+    }
+
+    $tyomaaraysrivit_temp = \PDF\Laskutuspoytakirja\hae_tyomaarayksen_rivit($tyomaarays_temp['tunnus']);
+    foreach ($tyomaaraysrivit_temp as $rivi_temp) {
+      $rivit[] = $rivi_temp;
+    }
+  }
+
+  $tyomaarays['rivit'] = $rivit;
+
+  return $tyomaarays;
+
+
+
   $tyomaaraykset = array();
   while ($tyomaarays = mysql_fetch_assoc($result)) {
-    //vaikka työmääräyksen kaikki tiedot saisi yllä olevasta querystä,
-    //haetaan ne silti erillisillä queryillä,
-    //koska ruby:lle pässättävästä arraystä halutaan multidimensional array.
-    //Tämä sen takia että pdf koodiin ei tarvitsisi koskea.
+    //vaikka ty?m??r?yksen kaikki tiedot saisi yll? olevasta queryst?,
+    //haetaan ne silti erillisill? queryill?,
+    //koska ruby:lle p?ss?tt?v?st? arrayst? halutaan multidimensional array.
+    //T?m? sen takia ett? pdf koodiin ei tarvitsisi koskea.
     if (isset($tyomaaraykset[$tyomaarays['kohde_tunnus']])) {
       $tyomaaraysrivit_temp = \PDF\Laskutuspoytakirja\hae_tyomaarayksen_rivit($tyomaarays['tunnus']);
       foreach ($tyomaaraysrivit_temp as $rivi_temp) {

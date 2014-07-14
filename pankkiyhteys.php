@@ -28,15 +28,25 @@ if ($tee == "laheta" and !formi_kunnossa()) {
 if ($tee == "laheta" and $hae_tiliotteet == "on") {
   $tiedostot = lataa_kaikki("TITO");
 
-  viesti("Ladatut tiliotteet:");
-  tiedostot_table($tiedostot);
+  if ($tiedostot) {
+    viesti("Ladatut tiliotteet:");
+    tiedostot_table($tiedostot);
+  }
+  else {
+    viesti("Ladattavia tiliotteita ei ollut saatavilla");
+  }
 }
 
 if ($tee == "laheta" and $hae_viitteet == "on") {
   $tiedostot = lataa_kaikki("KTL");
 
-  viesti("Ladatut viitteet:");
-  tiedostot_table($tiedostot);
+  if ($tiedostot) {
+    viesti("Ladatut viitteet:");
+    tiedostot_table($tiedostot);
+  }
+  else {
+    viesti("Ladattavia viitteitä ei ollut saatavilla");
+  }
 }
 
 if ($tee == "laheta" and $laheta_maksuaineisto == "on") {

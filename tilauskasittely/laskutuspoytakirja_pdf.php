@@ -16,9 +16,6 @@ function hae_laskutuspoytakirja($lasku_tunnukset) {
   if (!empty($lasku_tunnukset)) {
     $tyomaaraykset = \PDF\Laskutuspoytakirja\pdf_hae_tyomaaraykset($lasku_tunnukset);
 
-    sorttaa($tyomaaraykset);
-
-    die();
     foreach ($tyomaaraykset as $key1 => $value1) {
 
       foreach ($value1['rivit'] as $key2 => $value2) {
@@ -71,25 +68,11 @@ function hae_laskutuspoytakirja($lasku_tunnukset) {
   return $pdf_tiedosto;
 }
 
-function sorttaa($tyomaaraykset) {
-  global $kukarow, $yhtiorow;
-
-  $laskutuspoytakirja_rivit = array();
-  foreach ($tyomaaraykset as $kohde_tunnus => $tyomaarays) {
-    //SELECT DISTINCT tuoteno...
-    $unique_tuotenos = array_unique(array_column($tyomaaraykset['rivit'], 'tuoteno'));
-
-    foreach ($unique_tuotenos as $tuoteno) {
-      $rivit = search_array_key_for_value_recursive($tyomaarays['rivit'], 'tuoteno', $tuoteno);
-    }
-  }
-}
-
 function kpl_sort($a, $b) {
   if ($a['kpl'] < $b['kpl']) {
     return 1;
   }
-  else if ($a['kpl'] > $b['kpl']) {
+  else if ($a['kpl,'] > $b['kpl']) {
     return -1;
   }
   else {
@@ -134,29 +117,6 @@ function pdf_hae_tyomaaraykset($lasku_tunnukset) {
             GROUP BY lasku.tunnus";
 
   $result = pupe_query($query);
-
-  $tyomaarays = false;
-  $rivit = array();
-  while ($tyomaarays_temp = mysql_fetch_assoc($result)) {
-    if (!$tyomaarays) {
-      $tyomaarays['kohde'] = \PDF\Laskutuspoytakirja\hae_tyomaarayksen_kohde($tyomaarays_temp['laite_tunnus']);
-      $tyomaarays['asiakas'] = \PDF\Laskutuspoytakirja\hae_tyomaarayksen_asiakas($tyomaarays_temp['liitostunnus']);
-      $tyomaarays['yhtio'] = $yhtiorow;
-      $tyomaarays['logo'] = base64_encode(hae_yhtion_lasku_logo());
-      $tyomaarays['tyomaarays'] = $tyomaarays_temp;
-    }
-
-    $tyomaaraysrivit_temp = \PDF\Laskutuspoytakirja\hae_tyomaarayksen_rivit($tyomaarays_temp['tunnus']);
-    foreach ($tyomaaraysrivit_temp as $rivi_temp) {
-      $rivit[] = $rivi_temp;
-    }
-  }
-
-  $tyomaarays['rivit'] = $rivit;
-
-  return $tyomaarays;
-
-
 
   $tyomaaraykset = array();
   while ($tyomaarays = mysql_fetch_assoc($result)) {

@@ -73,7 +73,7 @@ if ($tee == "luo" and $target_id == '') {
 }
 
 if ($tee == "luo") {
-  if (tallenna_tunnukset($salatut_tunnukset, $customer_id, $target_id, $tili)) {
+  if (tallenna_tunnukset($pankki, $salatut_tunnukset, $customer_id, $target_id)) {
     ok("Tunnukset tallennettu");
   }
   else {
@@ -88,10 +88,10 @@ if ($tee == "") {
 }
 
 function uusi_pankkiyhteys_formi() {
-  $tilit = hae_uudet_tilit();
+  $mahdolliset_pankkiyhteydet = mahdolliset_pankkiyhteydet();
 
-  if (count($tilit) == 0) {
-    return viesti("Kaikille tileille on jo luotu yhteydet.");
+  if (empty($mahdolliset_pankkiyhteydet)) {
+    return viesti("Olet jo luonut kaikille pankeille yhteydet");
   }
 
   echo "<form action='pankkiyhteysadmin.php' method='post' enctype='multipart/form-data'>";
@@ -100,14 +100,13 @@ function uusi_pankkiyhteys_formi() {
   echo "<tbody>";
 
   echo "<tr>";
-  echo "<td><label for='tili'>" . t("Tili, jolle pankkiyhteys luodaan") . "</label></td>";
+  echo "<td><label for='pankki'>" . t("Pankki, jolle pankkiyhteys luodaan") . "</label></td>";
   echo "<td>";
-  echo "<select name='tili' id='tili'>";
+  echo "<select name='pankki' id='pankki'>";
 
-  foreach ($tilit as $tili) {
-    echo "<option value='{$tili["tunnus"]}'>{$tili["nimi"]}</option>";
+  foreach ($mahdolliset_pankkiyhteydet as $pankkiyhteys) {
+    echo "<option value='{$pankkiyhteys}'>{$pankkiyhteys}</option>";
   }
-
   echo "</select>";
   echo "</td>";
   echo "</tr>";
@@ -178,28 +177,6 @@ function uusi_pankkiyhteys_formi() {
   echo "</tbody>";
   echo "</table>";
   echo "</form>";
-}
-
-/**
- * @return array
- */
-function hae_uudet_tilit() {
-  global $kukarow;
-
-  $query = "SELECT tunnus, nimi
-            FROM yriti
-            WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND sepa_customer_id = ''
-            OR sepa_customer_id IS NULL";
-  $result = pupe_query($query);
-
-  $tilit = array();
-
-  while ($rivi = mysql_fetch_assoc($result)) {
-    array_push($tilit, $rivi);
-  }
-
-  return $tilit;
 }
 
 /**
@@ -318,23 +295,22 @@ function hae_sertifikaatti_sepasta($pin, $customer_id, $tunnukset) {
 }
 
 /**
+ * @param $pankki
  * @param $salatut_tunnukset
  * @param $customer_id
  * @param $target_id
- * @param $tili
  *
  * @return resource
  */
-function tallenna_tunnukset($salatut_tunnukset, $customer_id, $target_id, $tili) {
+function tallenna_tunnukset($pankki, $salatut_tunnukset, $customer_id, $target_id) {
   global $kukarow;
 
-  $query = "UPDATE yriti SET
-            private_key = '{$salatut_tunnukset["private_key"]}',
-            certificate = '{$salatut_tunnukset["sertifikaatti"]}',
-            sepa_customer_id = '{$customer_id}',
-            sepa_target_id = '{$target_id}'
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = {$tili}";
+  $query = "INSERT INTO pankkiyhteys (yhtio, pankki, private_key, certificate, customer_id, target_id)
+            VALUES
+            (
+              '{$kukarow['yhtio']}', '{$pankki}', '{$salatut_tunnukset['private_key']}',
+              '{$salatut_tunnukset['sertifikaatti']}', '{$customer_id}', '{$target_id}'
+            )";
   $result = pupe_query($query);
 
   return $result;
@@ -412,4 +388,31 @@ function vastaus_kunnossa($vastaus) {
       virhe("Sepa-palvelimeen ei jostain syystä saada yhteyttä, yritä myöhemmin uudestaan");
       return false;
   }
+}
+
+function mahdolliset_pankkiyhteydet() {
+  global $kukarow;
+
+  $pankit = array("Nordea", "Danske");
+
+  $luodut_pankkiyhteydet = array();
+
+  $query = "SELECT pankki
+            FROM pankkiyhteys
+            WHERE yhtio = '{$kukarow['yhtio']}'";
+  $result = pupe_query($query);
+
+  while ($rivi = mysql_fetch_assoc($result)) {
+      array_push($luodut_pankkiyhteydet, $rivi["pankki"]);
+  }
+
+  $mahdolliset_pankkiyhteydet = array();
+
+  foreach ($pankit as $pankki) {
+    if (!in_array($pankki, $luodut_pankkiyhteydet)) {
+      array_push($mahdolliset_pankkiyhteydet, $pankki);
+    }
+  }
+
+  return $mahdolliset_pankkiyhteydet;
 }

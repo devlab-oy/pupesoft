@@ -37,20 +37,20 @@ class LumoClient {
 
     try {
 
-      $this->log("Avataan maksupääteyhteyttä\n");
+      $this->log("Avataan maksupääteyhteyttä");
       set_time_limit(0);
       ob_implicit_flush();
 
       $this->_socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
       if ($this->_socket === false) {
-        $this->log("socket_create() failed: reason: " . socket_strerror(socket_last_error()) . "\n");
+        $this->log("socket_create() failed: reason: " . socket_strerror(socket_last_error()));
         $this->_error_count++;
       }
 
       $this->log("Yhdistetään '$address' porttiin '$service_port'...");
       $this->_connection = socket_connect($this->_socket, $address, $service_port);
       if ($this->_connection === false) {
-        $this->log("socket_connect() failed.\nReason: ($this->_connection) " . socket_strerror(socket_last_error($this->_socket)) . "\n");
+        $this->log("socket_connect() failed.\nReason: ($this->_connection) " . socket_strerror(socket_last_error($this->_socket)));
         $this->_error_count++;
       }
 
@@ -65,7 +65,7 @@ class LumoClient {
    * Destructor
    */
   function __destruct() {
-    $this->log("Maksupääteyhteys suljettiin\n");
+    $this->log("Maksupääteyhteys suljettiin");
     socket_close($this->_socket);
   }
 
@@ -78,20 +78,24 @@ class LumoClient {
 
     // Setataan transaction amount
     $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'> 
-      <SetAmount><Value>{$amount}</Value></SetAmount></EMVLumo>\0";
+      <SetAmount><Value>{$amount}</Value></SetAmount><SetArchiveID><Value>{$archive_id}</Value></SetArchiveID></EMVLumo>\0";
 
     socket_write($this->_socket, $in, strlen($in));
 
     // Jos kutsussa on setattu archive_id lisätään se myös sanomaan koska kyseessä on
     // Peruutus/hyvitystapahtuma
-    if ($archive_id != '') {
-      
+
+    if ($archive_id != '' and false) {
+      $bonusin = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'>
+        <SetArchiveID><Value>{$archive_id}</Value></SetArchiveID></EMVLumo>\0";
+        
+        socket_write($this->_socket, $in, strlen($in));
     }
 
     $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'><MakeTransaction><TransactionType>{$transaction_type}</TransactionType></MakeTransaction></EMVLumo>\0";
     $out = '';
 
-    $this->log("Aloitetaan maksutapahtuma\n\tTyyppi: {$transaction_type} \n\tSumma: {$amount}\n\tViite: {$archive_id} \n");
+    $this->log("Aloitetaan maksutapahtuma\n\tTyyppi: {$transaction_type} \n\tSumma: {$amount}\n\tViite: {$archive_id}");
     socket_write($this->_socket, $in, strlen($in));
 
     while ($out = socket_read($this->_socket, 2048)) {
@@ -104,11 +108,11 @@ class LumoClient {
       if (isset($xml) and isset($xml->MakeTransaction->Result)) {
         $return = $xml->MakeTransaction->Result == "True" ? TRUE : FALSE;
         $arvo = $return === TRUE ? "OK" : "HYLÄTTY";
-        $this->log("Maksutapahtuma {$arvo} \n");
+        $this->log("Maksutapahtuma {$arvo}");
       }
       if (isset($xml) and isset($xml->StatusUpdate->StatusInfo)) {
         $leelo = $xml->StatusUpdate->StatusInfo;
-        if ($leelo == "CMD MANUAL_AUTH") $this->log("Käsivarmenne havaittu \n");
+        if ($leelo == "CMD MANUAL_AUTH") $this->log("Käsivarmenne havaittu");
       }
     }
     return $return;
@@ -131,7 +135,7 @@ class LumoClient {
       }
     }
     $msg = $return == '' ? "Asiakkaan kuittia ei haettu" : "Asiakkaan kuitti haettu";
-    $this->log($msg."\n");
+    $this->log($msg);
     return $return;
   }
 
@@ -152,7 +156,7 @@ class LumoClient {
       }
     }
     $msg = $return == '' ? "Kauppiaan kuittia ei haettu" : "Kauppiaan kuitti haettu";
-    $this->log($msg."\n");
+    $this->log($msg);
     return $return;
   }
   /**

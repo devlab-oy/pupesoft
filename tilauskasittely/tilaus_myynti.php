@@ -1270,13 +1270,13 @@ if ($tee == "VALMIS"
     if ($yhtiorow['maksupaate_kassamyynti'] != '') {
       // Piilotetaan käyttöliittymästä erilliset pankki- ja luottokorttisarakkeet
       $styyli = " style='display: none;'";
-      // Tarkistetaan onko onnistuneita suorituksia
+      // Tarkistetaan onko onnistuneita suorituksia (K)-korttimaksut
       $query = "SELECT *
                 FROM maksupaatetapahtumat
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tilausnumero = '$tilausnumero'
                 AND maksutapa != ''
-                AND tila != ''";
+                AND tila IN ('K', 'H')";
 
       $result = pupe_query($query);
 
@@ -1333,7 +1333,7 @@ if ($tee == "VALMIS"
 
     if ($yhtiorow['maksupaate_kassamyynti'] != '') {
       // näytetään maksetut tapahtumat myös käyttöliittymässä
-      if ($maksupaate_maksetut['pankkikortti'] > 0) {
+      if ($maksupaate_maksetut['pankkikortti'] != 0) {
         echo "<tr>";
         echo "<td>".t("Pankkikortilla maksettu")."</td>";
         echo "<td align=right>".number_format($maksupaate_maksetut['pankkikortti'], $yhtiorow['hintapyoristys'], '.', '')."</td>";
@@ -1341,7 +1341,7 @@ if ($tee == "VALMIS"
         echo "</tr>";
       }
       
-      if ($maksupaate_maksetut['luottokortti'] > 0) {
+      if ($maksupaate_maksetut['luottokortti'] != 0) {
         echo "<tr>";
         echo "<td>".t("Luottokortilla maksettu")."</td>";
         echo "<td align=right>".number_format($maksupaate_maksetut['luottokortti'], $yhtiorow['hintapyoristys'], '.', '')."</td>";

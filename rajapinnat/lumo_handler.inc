@@ -21,7 +21,7 @@ $query = "SELECT *
           WHERE yhtio = '{$kukarow['yhtio']}'
           AND tilausnumero = '$tilausnumero'
           AND maksutapa != ''
-          AND tila != ''";
+          AND tila = 'K'";
 
 $result = pupe_query($query);
 
@@ -49,45 +49,57 @@ if ($vertailtava_summa_int >= $kaikkiyhteensa_int) {
 // TODO suoritustyyppi: maksu tai hyvitys/peruutus (cancel/refund, tarvitsee archiveid(aviite?, löytyy kuitilta))
 foreach($suoritukset as $suoritus) {
 
+  $onnistuuko = false;
+
   // Jos salasanat.phpstä puuttuu lumon osoite tai portti
   if(!isset($lumo_service_address) or !isset($lumo_service_port)) {
-    $onnistuuko = t("Maksupäätettä ei ole konfiguroitu oikein");
+    $onnistuuko = "Maksupäätettä ei ole konfiguroitu oikein";
     break;
   }
 
   // Jos puuttuu jostain syystä tilausnumero
   if(!isset($tilausnumero) or trim($tilausnumero) == '') {
-    $onnistuuko = t("Tilausnumero kadonnut, maksutapahtumaa ei voi tehdä");
+    $onnistuuko = "Tilausnumero kadonnut, maksutapahtumaa ei voi tehdä";
     break;
   }
 
   // Jos summa on vähintään 0.01 EUR voidaan tehdä maksutapahtuma
-  if(is_numeric($korttimaksu_f) and $korttimaksu_f >= 1) {
+  if(is_numeric($korttimaksu_f)) {# and $korttimaksu_f >= 1) {
     // Jos maksutapahtuma epäonnistui niin ei tehdä mitään
-    if ($suoritus > 1 and $onnistuuko != t("VELOITETTU")) break;
+    if ($suoritus > 1 and $onnistuuko != "VELOITETTU") break;
 
     $clientti = new LumoClient($lumo_service_address, $lumo_service_port);
 
     if ($clientti->getErrorCount() > 0) {
-      $onnistuuko = t("Ei yhteyttä maksupäätteeseen");
+      $onnistuuko = "Ei yhteyttä maksupäätteeseen";
       break;
     }
-
+    $maksutyyppi = '';
     switch ($suoritus) {
       case '1':
-        $onnistuuko = $clientti->startTransaction($korttimaksu_f,1,140711001007);
-        $onnistuuko = $onnistuuko === TRUE ? t("VELOITETTU") : t("HYLÄTTY");
+        if ($korttimaksu_f >= 1) {
+         $onnistuuko = $clientti->startTransaction($korttimaksu_f);
+        }
+        elseif($korttimaksu_f < 0) {
+          $transsuid = 140711001007;
+          $onnistuuko = $clientti->startTransaction($korttimaksu_f,1,$transsuid);
+        }
+        else {
+          $onnistuuko = "HYLÄTTY";
+        }
+        //$onnistuuko = $onnistuuko === true ? "VELOITETTU" : "HYLÄTTY";
         break;
 
       case '2':
         $kuitti1 = $clientti->getCustomerReceipt();
         $kuitti1 = utf8_decode($kuitti1);
         $pankkivailuotto = '';
-        if (strpos($kuitti1, "LUOTTOKORTTI") !== FALSE) {
+
+        if(strpos($kuitti1, "LUOTTOKORTTI") !== false) {
           $pankkivailuotto = 'LUOTTOKORTTI';
           $maksupaate_maksetut['luottokortti'] += $korttimaksu;
         }
-        elseif (strpos($kuitti1, "PANKKIKORTTI") !== FALSE) {
+        elseif(strpos($kuitti1, "PANKKIKORTTI") !== false) {
           $pankkivailuotto = 'PANKKIKORTTI';
           $maksupaate_maksetut['pankkikortti'] += $korttimaksu;
         }
@@ -96,10 +108,23 @@ foreach($suoritukset as $suoritus) {
           $pankkivailuotto = 'PANKKIKORTTI';
           $maksupaate_maksetut['pankkikortti'] += $korttimaksu;
         }
-        if (strpos($kuitti1, "PERUUTUS")) {
+
+        if(strpos($kuitti1, "PERUUTUS") !== false) {
           //TODO peruutustapahtumat kirjataan skötsibötsimötsilölölöö
+          $maksutyyppi = "PERUUTUS";
         }
-        
+        elseif(strpos($kuitti1, "HYVITYS") !== false) {
+          //TODO hyvitys kirjataan skötsibötsimötsilölölöö
+          $maksutyyppi = "HYVITYS";
+        }
+        elseif(strpos($kuitti1, "OSTO") !== false) {
+          //TODO normi osto kirjataan skötsibötsimötsilölölöö
+          $maksutyyppi = "OSTO";
+        }
+        else {
+          $maksutyyppi = "FAIL";
+        }
+
         break;
 
       case '3':
@@ -119,9 +144,16 @@ foreach($suoritukset as $suoritus) {
   }
 }
 
-$status = $onnistuuko == "VELOITETTU" ? 'K' : '';
+$status = '';
+
+// K - Korttimaksu
+$status = ($onnistuuko == "VELOITETTU" and ($maksutyyppi == 'OSTO')) ? 'K' : '';
+
+// H - Hyvitys
+$status = ($onnistuuko == "VELOITETTU" and ($maksutyyppi == 'PERUUTUS' or $maksutyyppi == "HYVITYS")) ? 'H' : '';
+
 // Päivitetään suoritus kantaan jos se onnistui
-if ($status == 'K') {
+if ($status == 'K' or $status == 'H') {
 
   $kuittilisa = "";
 
@@ -149,6 +181,7 @@ if ($status == 'K') {
   $korttimaksu = '';
 }
 else {
+  $onnistuuko = $onnistuuko === false ? "HYLÄTTY" : $onnistuuko;
   $korttimaksutapahtuman_status = $onnistuuko;
 }
 // Tyhjennetään handlerissa setattavat muuttujat jotka eivät mene käyttöliittymään
@@ -158,3 +191,4 @@ unset($kuitti2);
 unset($onnistuuko);
 unset($status);
 unset($pankkivailuotto);
+unset($maksutyyppi);

@@ -31,9 +31,9 @@ if ($tee == "luo" and $pin != '') {
   $generoidut_tunnukset = generoi_private_key_ja_csr();
 
   $params = array(
-    "pin" => $pin,
+    "pin"         => $pin,
     "customer_id" => $customer_id,
-    "tunnukset" => $generoidut_tunnukset
+    "tunnukset"   => $generoidut_tunnukset
   );
 
   $sertifikaatti = hae_sertifikaatti_sepasta($params);
@@ -86,10 +86,10 @@ if ($tee == "luo" and $target_id == '') {
 
 if ($tee == "luo") {
   $params = array(
-    "pankki" => $pankki,
+    "pankki"            => $pankki,
     "salatut_tunnukset" => $salatut_tunnukset,
-    "customer_id" => $customer_id,
-    "target_id" => $target_id
+    "customer_id"       => $customer_id,
+    "target_id"         => $target_id
   );
 
   if (tallenna_tunnukset($params)) {

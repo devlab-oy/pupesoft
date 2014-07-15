@@ -174,13 +174,19 @@ function download_file_list($tiedostotyyppi, $tunnukset) {
 }
 
 /**
- * @param $viitteet
- * @param $tiedostotyyppi
- * @param $tunnukset
+ * @param array $params
  *
- * @return bool
+ * @return array|bool
  */
-function download_files($viitteet, $tiedostotyyppi, $tunnukset) {
+function download_files($params) {
+  $viitteet = isset($params["viitteet"]) ? $params["viitteet"] : "";
+  $tiedostotyyppi = isset($params["tiedostotyyppi"]) ? $params["tiedostotyyppi"] : "";
+  $tunnukset = isset($params["tunnukset"]) ? $params["tunnukset"] : "";
+
+  if (empty($viitteet) or empty($tiedostotyyppi) or empty($tunnukset)) {
+    return false;
+  }
+
   global $sepa_pankkiyhteys_token;
 
   $tiedostot = array();
@@ -380,7 +386,14 @@ function lataa_kaikki($tiedostotyyppi) {
   }
 
   $viitteet = download_file_list($tiedostotyyppi, $tunnukset);
-  $tiedostot = download_files($viitteet, $tiedostotyyppi, $tunnukset);
+
+  $params = array(
+    "viitteet"       => $viitteet,
+    "tiedostotyyppi" => $tiedostotyyppi,
+    "tunnukset"      => $tunnukset
+  );
+
+  $tiedostot = download_files($params);
 
   if ($tiedostot) {
     return $tiedostot;

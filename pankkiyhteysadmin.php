@@ -512,7 +512,8 @@ function pankkiyhteydet_table() {
     echo "<td>{$pankkiyhteys["customer_id"]}</td>";
     echo "<td>{$pankkiyhteys["target_id"]}</td>";
     echo "<td>";
-    echo "<form method='post' action='pankkiyhteysadmin.php'>";
+    echo "<form class='multisubmit' method='post' action='pankkiyhteysadmin.php'
+                onsubmit='return confirm(\"Haluatko varmasti poistaa pankkiyhteyden?\");'>";
     echo "<input type='hidden' name='tee' value='poista'/>";
     echo "<input type='hidden' name='pankkiyhteys' value='{$pankkiyhteys["pankki"]}'/>";
     echo "<input type='submit' value='" . t("Poista") . "'/>";

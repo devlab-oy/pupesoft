@@ -55,8 +55,13 @@ function hae_laitteelle_mahdolliset_huoltosyklit($laite_tyyppi = '', $laite_koko
   return $huoltosyklit;
 }
 
-function hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy() {
+function hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy($asiakas_tunnus = 0) {
   global $kukarow;
+
+  $asiakas_join = "";
+  if (!empty($asiakas_tunnus)) {
+    $asiakas_join = " AND asiakas.tunnus = {$asiakas_tunnus}";
+  }
 
   $query = "SELECT laite.tuoteno,
             huoltosyklit_laitteet.viimeinen_tapahtuma,
@@ -88,7 +93,8 @@ function hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy() {
               AND kohde.tunnus = paikka.kohde )
             JOIN asiakas
             ON ( asiakas.yhtio = kohde.yhtio
-              AND asiakas.tunnus = kohde.asiakas )
+              AND asiakas.tunnus = kohde.asiakas
+              {$asiakas_join} )
             JOIN tuote
             ON ( tuote.yhtio = laite.yhtio
               AND tuote.tuoteno = huoltosykli.toimenpide )
@@ -584,7 +590,7 @@ function luo_tilausrivi(array $params) {
   if (!isset($params['hinta'])) {
     $hinta = $tuote['myyntihinta'];
   }
-  
+
   if (!is_numeric($hinta)) {
     $hinta = 0;
   }

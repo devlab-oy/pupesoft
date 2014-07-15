@@ -18,7 +18,7 @@ if (mysql_field_name($result, $i) == "tuoteno") {
   $lopetus = "yllapito.php////toim=laite//uusi=1//valittu_paikka={$valittu_paikka}//lopetus_temp={$lopetus_temp}";
   $ulos = "<td id='tuoteno_td'>";
   $ulos .= livesearch_kentta('uusi_laite_form', 'TUOTEHAKU', $nimi, '226', $trow[$i], 'NOSUBMIT');
-  $ulos .= "<a href='{$palvelin2}yllapito.php?valittu_asiakas={$valittu_asiakas}&uusi=1&toim=tuote!!!tuote_pikaperustus!!!true&pikaperustus=1&lopetus={$lopetus}&js_open_yp=&limit=&nayta_poistetut=&nayta_eraantyneet=&laji=&'><button type='button'>" . t('Tuote pikaperustus') . "</button></a>";
+  $ulos .= "<a href='{$palvelin2}yllapito.php?valittu_asiakas={$valittu_asiakas}&uusi=1&toim=tuote!!!SAMMUTINHUOLTO!!!true&pikaperustus=1&lopetus={$lopetus}&js_open_yp=&limit=&nayta_poistetut=&nayta_eraantyneet=&laji=&'><button type='button'>" . t('Tuote pikaperustus') . "</button></a>";
   $ulos .= "</td>";
   $jatko = 0;
 }

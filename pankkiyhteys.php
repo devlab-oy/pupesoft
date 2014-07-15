@@ -438,7 +438,9 @@ function formi() {
     echo "<select name='tili'>";
 
     foreach ($kaytossa_olevat_pankkiyhteydet as $pankkiyhteys) {
-      echo "<option value='{$pankkiyhteys["tunnus"]}'>{$pankkiyhteys["pankki"]}</option>";
+      echo "<option value='{$pankkiyhteys["tunnus"]}'>";
+      echo pankin_nimi($pankkiyhteys["pankki"]);
+      echo "</option>";
     }
 
     echo "</select>";
@@ -557,4 +559,20 @@ function tiedostot_table($tiedostot) {
   echo "</table>";
 
   echo "<br/><br/>";
+}
+
+/**
+ * @param $bic
+ *
+ * @return bool|string
+ */
+function pankin_nimi($bic) {
+  switch ($bic) {
+    case "NDEAFIHH":
+      return "Nordea";
+    case "DABAFIHX":
+      return "Danske Bank";
+    default:
+      return false;
+  }
 }

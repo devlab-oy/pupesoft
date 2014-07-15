@@ -305,12 +305,13 @@ function hae_sertifikaatti_sepasta($pin, $customer_id, $tunnukset) {
 function tallenna_tunnukset($pankki, $salatut_tunnukset, $customer_id, $target_id) {
   global $kukarow;
 
-  $query = "INSERT INTO pankkiyhteys (yhtio, pankki, private_key, certificate, customer_id, target_id)
-            VALUES
-            (
-              '{$kukarow['yhtio']}', '{$pankki}', '{$salatut_tunnukset['private_key']}',
-              '{$salatut_tunnukset['sertifikaatti']}', '{$customer_id}', '{$target_id}'
-            )";
+  $query = "INSERT INTO pankkiyhteys SET
+            yhtio = '{$kukarow['yhtio']}',
+            pankki = '{$pankki}',
+            private_key = '{$salatut_tunnukset['private_key']}',
+            certificate = '{$salatut_tunnukset['sertifikaatti']}',
+            customer_id = '{$customer_id}',
+            target_id = '{$target_id}'";
   $result = pupe_query($query);
 
   return $result;
@@ -390,6 +391,9 @@ function vastaus_kunnossa($vastaus) {
   }
 }
 
+/**
+ * @return array
+ */
 function mahdolliset_pankkiyhteydet() {
   global $kukarow;
 

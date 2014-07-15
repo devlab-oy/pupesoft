@@ -347,6 +347,9 @@ function vastaus_kunnossa($vastaus) {
   switch ($vastaus[0]) {
     case 200:
       return true;
+    case 400:
+      virhe("Palvelimelta saatiin virheilmoitus, tarkista, että antamasi tiedot ovat kunnossa");
+      return false;
     case 500:
       virhe("Pankki ei vastaa kyselyyn, yritä myöhemmin uudestaan");
       return false;

@@ -44,7 +44,7 @@ if (mysql_field_name($result, $i) == "olosuhde") {
   $olosuhde_result = t_avainsana('OLOSUHDE');
   $olosuhteet = array();
   while ($olosuhde = mysql_fetch_assoc($olosuhde_result)) {
-    if ($trow[$i] == $olosuhde['tunnus']) {
+    if ($trow[$i] == $olosuhde['selite']) {
       $olosuhde['selected'] = "SELECTED";
     }
     else {
@@ -79,7 +79,7 @@ if (mysql_field_name($result, $i) == "toimenpide") {
     else {
       $toimenpide['selected'] = "";
     }
-    
+
     $toimenpiteet[] = $toimenpide;
   }
 

@@ -473,30 +473,30 @@
         }
 
         if ($yhtiorow['laite_huolto'] == 'X' and $toim == 'tuote') {
-          if (isset($sammutin_tyyppi)) {
-            $query1 = "  INSERT INTO tuotteen_avainsanat
-                  SET yhtio = '{$kukarow['yhtio']}',
-                  tuoteno = '{$tuoteno_temp}',
-                  kieli = 'fi',
-                  laji = 'sammutin_tyyppi',
-                  selite = '{$sammutin_tyyppi}',
-                  laatija = '{$kukarow['kuka']}',
-                  muuttaja = '{$kukarow['kuka']}',
-                  luontiaika = NOW(),
-                  muutospvm = NOW()";
+          if (!empty($sammutin_tyyppi)) {
+            $query1 = " INSERT INTO tuotteen_avainsanat
+                        SET yhtio = '{$kukarow['yhtio']}',
+                        tuoteno = '{$tuoteno_temp}',
+                        kieli = 'fi',
+                        laji = 'sammutin_tyyppi',
+                        selite = '{$sammutin_tyyppi}',
+                        laatija = '{$kukarow['kuka']}',
+                        muuttaja = '{$kukarow['kuka']}',
+                        luontiaika = NOW(),
+                        muutospvm = NOW()";
             pupe_query($query1);
           }
           if (isset($sammutin_koko) and $sammutin_koko != '') {
-            $query1 = "  INSERT INTO tuotteen_avainsanat
-                  SET yhtio = '{$kukarow['yhtio']}',
-                  tuoteno = '{$tuoteno_temp}',
-                  kieli = 'fi',
-                  laji = 'sammutin_koko',
-                  selite = '{$sammutin_koko}',
-                  laatija = '{$kukarow['kuka']}',
-                  muuttaja = '{$kukarow['kuka']}',
-                  luontiaika = NOW(),
-                  muutospvm = NOW()";
+            $query1 = " INSERT INTO tuotteen_avainsanat
+                        SET yhtio = '{$kukarow['yhtio']}',
+                        tuoteno = '{$tuoteno_temp}',
+                        kieli = 'fi',
+                        laji = 'sammutin_koko',
+                        selite = '{$sammutin_koko}',
+                        laatija = '{$kukarow['kuka']}',
+                        muuttaja = '{$kukarow['kuka']}',
+                        luontiaika = NOW(),
+                        muutospvm = NOW()";
             pupe_query($query1);
           }
         }
@@ -2193,10 +2193,11 @@
       }
     }
 
-    if ($yhtiorow['laite_huolto'] == 'X' and $toim == 'tuote' and $pikaperustus == 1) {
+    if ($yhtiorow['laite_huolto'] == 'X' and stristr($toim, 'tuote')) {
       //quick fix
       //@TODO remove this
       $sammutin_tyypit = hae_mahdolliset_sammutin_tyypit();
+      array_unshift($sammutin_tyypit, t("Ei tyyppiä"));
       echo "<tr>";
       echo "<th>".t('Tyyppi')."</th>";
       echo "<td>";

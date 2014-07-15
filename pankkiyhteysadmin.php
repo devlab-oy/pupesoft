@@ -124,8 +124,8 @@ function uusi_pankkiyhteys_formi() {
   echo "<td>";
   echo "<select name='pankki' id='pankki'>";
 
-  foreach ($mahdolliset_pankkiyhteydet as $pankkiyhteys) {
-    echo "<option value='{$pankkiyhteys}'>{$pankkiyhteys}</option>";
+  foreach ($mahdolliset_pankkiyhteydet as $bic => $nimi) {
+    echo "<option value='{$bic}'>{$nimi}</option>";
   }
   echo "</select>";
   echo "</td>";
@@ -433,7 +433,10 @@ function vastaus_kunnossa($vastaus) {
  * @return array
  */
 function mahdolliset_pankkiyhteydet() {
-  $pankit = array("Nordea", "Danske");
+  $pankit = array(
+    "NDEAFIHH" => "Nordea",
+    "DABAFIHX" => "Danske Bank"
+  );
 
   $luodut_pankit = array();
 
@@ -443,9 +446,9 @@ function mahdolliset_pankkiyhteydet() {
 
   $mahdolliset_pankkiyhteydet = array();
 
-  foreach ($pankit as $pankki) {
-    if (!in_array($pankki, $luodut_pankit)) {
-      array_push($mahdolliset_pankkiyhteydet, $pankki);
+  foreach ($pankit as $bic => $nimi) {
+    if (!in_array($bic, $luodut_pankit)) {
+      $mahdolliset_pankkiyhteydet[$bic] = $nimi;
     }
   }
 

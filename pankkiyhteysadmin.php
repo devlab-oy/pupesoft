@@ -2,9 +2,6 @@
 
 require("inc/parametrit.inc");
 
-echo "<font class='head'>" . t('SEPA-pankkiyhteys') . "</font>";
-echo "<hr>";
-
 if (!isset($_SERVER["HTTPS"]) or $_SERVER["HTTPS"] != 'on') {
   echo "<font class='error'>";
   echo t("Voit k‰ytt‰‰ pankkiyhteytt‰ vain salatulla yhteydell‰!");
@@ -25,7 +22,7 @@ $target_id = empty($target_id) ? '' : $target_id;
 
 if ($tee == "poista") {
   if (poista_pankkiyhteys($pankkiyhteys)) {
-    viesti("Pankkiyhteys poistettu");
+    ok("Pankkiyhteys poistettu");
   }
   else {
     virhe("Pankkiyhteytt‰ ei poistettu");
@@ -122,8 +119,11 @@ function uusi_pankkiyhteys_formi() {
   $mahdolliset_pankkiyhteydet = mahdolliset_pankkiyhteydet();
 
   if (empty($mahdolliset_pankkiyhteydet)) {
-    return viesti("Olet jo luonut kaikille pankeille yhteydet");
+    return;
   }
+
+  echo "<font class='head'>" . t("Uusi pankkiyhteys") . "</font>";
+  echo "<hr>";
 
   echo "<form action='pankkiyhteysadmin.php' method='post' enctype='multipart/form-data'>";
   echo "<input type='hidden' name='tee' value='luo'/>";
@@ -487,6 +487,10 @@ function hae_pankkiyhteydet() {
 
 function pankkiyhteydet_table() {
   $pankkiyhteydet = hae_pankkiyhteydet();
+
+  if (empty($pankkiyhteydet)) {
+    return;
+  }
 
   echo "<br/>";
   echo "<font class='head'>" . t("Pankkiyhteydet") . "</font>";

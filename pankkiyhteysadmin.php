@@ -30,7 +30,13 @@ if ($tee == "luo" and !pankkiyhteystiedot_kunnossa()) {
 if ($tee == "luo" and $pin != '') {
   $generoidut_tunnukset = generoi_private_key_ja_csr();
 
-  $sertifikaatti = hae_sertifikaatti_sepasta($pin, $customer_id, $generoidut_tunnukset);
+  $params = array(
+    "pin" => $pin,
+    "customer_id" => $customer_id,
+    "tunnukset" => $generoidut_tunnukset
+  );
+
+  $sertifikaatti = hae_sertifikaatti_sepasta($params);
   $private_key = $generoidut_tunnukset["private_key"];
 
   if (!$sertifikaatti) {
@@ -64,7 +70,13 @@ if ($tee == "luo" and $pin == '') {
 
 // Jos käyttäjä ei ole antanut target id:tä, haetaan se pankista
 if ($tee == "luo" and $target_id == '') {
-  $target_id = hae_target_id($certificate, $private_key, $customer_id);
+  $params = array(
+    "certificate" => $certificate,
+    "private_key" => $private_key,
+    "customer_id" => $customer_id
+  );
+
+  $target_id = hae_target_id($params);
 
   if (!$target_id) {
     virhe("Tiedon hakeminen pankista epäonnistui, yritä myöhemmin uudestaan");
@@ -73,7 +85,14 @@ if ($tee == "luo" and $target_id == '') {
 }
 
 if ($tee == "luo") {
-  if (tallenna_tunnukset($pankki, $salatut_tunnukset, $customer_id, $target_id)) {
+  $params = array(
+    "pankki" => $pankki,
+    "salatut_tunnukset" => $salatut_tunnukset,
+    "customer_id" => $customer_id,
+    "target_id" => $target_id
+  );
+
+  if (tallenna_tunnukset($params)) {
     ok("Tunnukset tallennettu");
   }
   else {
@@ -259,13 +278,19 @@ function generoi_private_key_ja_csr() {
 }
 
 /**
- * @param $pin
- * @param $customer_id
- * @param $tunnukset
+ * @param $params
  *
- * @return string
+ * @return bool|string
  */
-function hae_sertifikaatti_sepasta($pin, $customer_id, $tunnukset) {
+function hae_sertifikaatti_sepasta($params) {
+  $pin = isset($params["pin"]) ? (string) $params["pin"] : "";
+  $customer_id = isset($params["customer_id"]) ? (string) $params["customer_id"] : "";
+  $tunnukset = isset($params["tunnukset"]) ? (array) $params["tunnukset"] : "";
+
+  if (empty($pin) or empty($customer_id) or empty($tunnukset)) {
+    return false;
+  }
+
   global $sepa_pankkiyhteys_token;
 
   $parameters = array(
@@ -273,7 +298,7 @@ function hae_sertifikaatti_sepasta($pin, $customer_id, $tunnukset) {
     "data"    => array(
       "pin"         => $pin,
       "customer_id" => $customer_id,
-      "environment" => "PRODUCTION", // Voi olla joko "TEST" tai "PRODUCTION"
+      "environment" => "TEST", // Voi olla joko "TEST" tai "PRODUCTION"
       "csr"         => base64_encode($tunnukset["csr"])
     ),
     "url"     => "https://sepa.devlab.fi/api/nordea/get_certificate",
@@ -295,14 +320,20 @@ function hae_sertifikaatti_sepasta($pin, $customer_id, $tunnukset) {
 }
 
 /**
- * @param $pankki
- * @param $salatut_tunnukset
- * @param $customer_id
- * @param $target_id
+ * @param array $params
  *
- * @return resource
+ * @return bool|resource
  */
-function tallenna_tunnukset($pankki, $salatut_tunnukset, $customer_id, $target_id) {
+function tallenna_tunnukset($params) {
+  $pankki = isset($params["pankki"]) ? $params["pankki"] : "";
+  $salatut_tunnukset = isset($params["salatut_tunnukset"]) ? $params["salatut_tunnukset"] : "";
+  $customer_id = isset($params["customer_id"]) ? $params["customer_id"] : "";
+  $target_id = isset($params["target_id"]) ? $params["target_id"] : "";
+
+  if (empty($pankki) or empty($salatut_tunnukset) or empty($customer_id) or empty($target_id)) {
+    return false;
+  }
+
   global $kukarow;
 
   $query = "INSERT INTO pankkiyhteys SET
@@ -336,19 +367,25 @@ function salaa($data, $salasana) {
 }
 
 /**
- * @param $sertifikaatti
- * @param $private_key
- * @param $customer_id
+ * @param $params
  *
- * @return string
+ * @return bool|string
  */
-function hae_target_id($sertifikaatti, $private_key, $customer_id) {
+function hae_target_id($params) {
+  $certificate = isset($params["certificate"]) ? $params["certificate"] : "";
+  $private_key = isset($params["private_key"]) ? $params["private_key"] : "";
+  $customer_id = isset($params["customer_id"]) ? $params["customer_id"] : "";
+
+  if (empty($certificate) or empty($private_key) or empty($customer_id)) {
+    return false;
+  }
+
   global $sepa_pankkiyhteys_token;
 
   $parameters = array(
     "method"  => "POST",
     "data"    => array(
-      "cert"        => base64_encode($sertifikaatti),
+      "cert"        => base64_encode($certificate),
       "private_key" => base64_encode($private_key),
       "customer_id" => $customer_id
     ),
@@ -364,7 +401,7 @@ function hae_target_id($sertifikaatti, $private_key, $customer_id) {
   $target_id = $vastaus[1]["userFileTypes"][0]["targetId"];
 
   if (empty($target_id)) {
-    return null;
+    return false;
   }
 
   return $target_id;
@@ -407,7 +444,7 @@ function mahdolliset_pankkiyhteydet() {
   $result = pupe_query($query);
 
   while ($rivi = mysql_fetch_assoc($result)) {
-      array_push($luodut_pankkiyhteydet, $rivi["pankki"]);
+    array_push($luodut_pankkiyhteydet, $rivi["pankki"]);
   }
 
   $mahdolliset_pankkiyhteydet = array();

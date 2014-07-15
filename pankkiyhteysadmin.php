@@ -104,6 +104,7 @@ if ($tee == "luo") {
 
 if ($tee == "") {
   uusi_pankkiyhteys_formi();
+  pankkiyhteydet_table();
 }
 
 function uusi_pankkiyhteys_formi() {
@@ -456,4 +457,27 @@ function mahdolliset_pankkiyhteydet() {
   }
 
   return $mahdolliset_pankkiyhteydet;
+}
+
+function pankkiyhteydet_table() {
+  echo "<br/>";
+  echo "<font class='head'>" . t("Pankkiyhteydet") . "</font>";
+  echo "<hr>";
+
+  echo "<table>";
+  echo "<thead>";
+
+  echo "<tr>";
+  echo "<th>" . t("Pankki") . "</th>";
+  echo "<th>" . t("Asiakastunnus") . "</th>";
+  echo "<th>" . t("Aineistoryhmän tunnus" . "</th>");
+  echo "<th></th>";
+  echo "</tr>";
+
+  echo "</thead>";
+
+  echo "<tbody>";
+
+  echo "</tbody>";
+  echo "</table>";
 }

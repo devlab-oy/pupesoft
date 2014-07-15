@@ -1762,11 +1762,16 @@
             echo "</a></td>";
           }
           else {
-            if (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int') {
+            if ($yhtiorow['laite_huolto'] != 'X' and (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int')) {
               echo "<td valign='top' style='text-align:right'>$fontlisa1 $trow[$i] $fontlisa2</td>";
             }
             elseif (mysql_field_name($result,$i) == 'koko') {
               echo "<td valign='top'>$fontlisa1 ".size_readable($trow[$i])." $fontlisa2</td>";
+            }
+            else if ($yhtiorow['laite_huolto'] == 'X' and $toim == 'huoltosykli' and mysql_field_name($result,$i) == 'huoltovali') {
+              $huoltovalit = huoltovali_options();
+              $huoltovali = $huoltovalit[$trow[$i]];
+              echo "<td valign='top'>$fontlisa1 {$huoltovali['months']} $fontlisa2</td>";
             }
             else {
 

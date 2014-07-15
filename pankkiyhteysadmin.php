@@ -433,25 +433,18 @@ function vastaus_kunnossa($vastaus) {
  * @return array
  */
 function mahdolliset_pankkiyhteydet() {
-  global $kukarow;
-
   $pankit = array("Nordea", "Danske");
 
-  $luodut_pankkiyhteydet = array();
+  $luodut_pankit = array();
 
-  $query = "SELECT pankki
-            FROM pankkiyhteys
-            WHERE yhtio = '{$kukarow['yhtio']}'";
-  $result = pupe_query($query);
-
-  while ($rivi = mysql_fetch_assoc($result)) {
-    array_push($luodut_pankkiyhteydet, $rivi["pankki"]);
+  foreach (hae_pankkiyhteydet() as $pankkiyhteys) {
+    array_push($luodut_pankit, $pankkiyhteys["pankki"]);
   }
 
   $mahdolliset_pankkiyhteydet = array();
 
   foreach ($pankit as $pankki) {
-    if (!in_array($pankki, $luodut_pankkiyhteydet)) {
+    if (!in_array($pankki, $luodut_pankit)) {
       array_push($mahdolliset_pankkiyhteydet, $pankki);
     }
   }
@@ -459,7 +452,28 @@ function mahdolliset_pankkiyhteydet() {
   return $mahdolliset_pankkiyhteydet;
 }
 
+/**
+ * @return array
+ */
+function hae_pankkiyhteydet() {
+  global $kukarow;
+
+  $luodut_pankkiyhteydet = array();
+
+  $query = "SELECT *
+            FROM pankkiyhteys
+            WHERE yhtio = '{$kukarow['yhtio']}'";
+  $result = pupe_query($query);
+
+  while ($rivi = mysql_fetch_assoc($result)) {
+    array_push($luodut_pankkiyhteydet, $rivi);
+  }
+  return $luodut_pankkiyhteydet;
+}
+
 function pankkiyhteydet_table() {
+  $pankkiyhteydet = hae_pankkiyhteydet();
+
   echo "<br/>";
   echo "<font class='head'>" . t("Pankkiyhteydet") . "</font>";
   echo "<hr>";
@@ -477,6 +491,15 @@ function pankkiyhteydet_table() {
   echo "</thead>";
 
   echo "<tbody>";
+
+  foreach ($pankkiyhteydet as $pankkiyhteys) {
+    echo "<tr>";
+    echo "<td>{$pankkiyhteys["pankki"]}</td>";
+    echo "<td>{$pankkiyhteys["customer_id"]}</td>";
+    echo "<td>{$pankkiyhteys["target_id"]}</td>";
+    echo "<td><button>" . t("Poista") . "</button></td>";
+    echo "</tr>";
+  }
 
   echo "</tbody>";
   echo "</table>";

@@ -347,14 +347,6 @@ if (!$php_cli) {
     echo "<option value='{$row['selite']}' {$sel}>",t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV"),"</option>";
   }
   echo "</select>";
-
-  $checked = '';
-  if (isset($yliajo)) {
-    $checked = 'checked';
-  }
-  echo "<input type='checkbox' style='margin-left:10px;' name='yliajo' {$checked} />";
-  echo "Yliaja siirtolistan toimitustapa oletustoimitustavalla.";
-
   echo "</td></tr>";
 
   if ($kesken == "X") {
@@ -498,7 +490,7 @@ if ($tee == 'M' and isset($generoi)) {
     foreach ($lahdevarastot as $lahdevarasto) {
 
       $tt_vaihdettu = false;
-      if (isset($yliajo)) {
+      if ($valittu_toimitustapa == 'Ei toimitustapaa') {
         $ttqry = "SELECT tpa.selite AS toimitustapa
                   FROM avainsana AS ana
                   JOIN toimitustapa AS tpa

@@ -30,10 +30,10 @@ if ($tee == "luo" and !pankkiyhteystiedot_kunnossa()) {
 if ($tee == "luo" and $pin != '') {
   $generoidut_tunnukset = generoi_private_key_ja_csr();
 
-  $certificate = hae_sertifikaatti_sepasta($pin, $customer_id, $generoidut_tunnukset);
+  $sertifikaatti = hae_sertifikaatti_sepasta($pin, $customer_id, $generoidut_tunnukset);
   $private_key = $generoidut_tunnukset["private_key"];
 
-  if (!$certificate) {
+  if (!$sertifikaatti) {
     virhe("Sertifikaatin hakeminen epäonnistui, tarkista PIN-koodi ja asiakastunnus");
     $tee = "";
   }

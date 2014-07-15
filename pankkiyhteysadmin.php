@@ -497,7 +497,7 @@ function pankkiyhteydet_table() {
 
   foreach ($pankkiyhteydet as $pankkiyhteys) {
     echo "<tr>";
-    echo "<td>{$pankkiyhteys["pankki"]}</td>";
+    echo "<td>" . pankin_nimi($pankkiyhteys["pankki"]) . "</td>";
     echo "<td>{$pankkiyhteys["customer_id"]}</td>";
     echo "<td>{$pankkiyhteys["target_id"]}</td>";
     echo "<td><button>" . t("Poista") . "</button></td>";
@@ -506,4 +506,20 @@ function pankkiyhteydet_table() {
 
   echo "</tbody>";
   echo "</table>";
+}
+
+/**
+ * @param $bic
+ *
+ * @return bool|string
+ */
+function pankin_nimi($bic) {
+  switch ($bic) {
+    case "NDEAFIHH":
+      return "Nordea";
+    case "DABAFIHX":
+      return "Danske Bank";
+    default:
+      return false;
+  }
 }

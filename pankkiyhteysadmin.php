@@ -552,8 +552,11 @@ function pankin_nimi($bic) {
  * @return resource
  */
 function poista_pankkiyhteys($pankki) {
+  global $kukarow;
+
   $query = "DELETE
-            FROM pankkiyhteys
-            WHERE pankki = '{$pankki}'";
+            FROM  pankkiyhteys
+            WHERE pankki = '{$pankki}'
+            AND   yhtio  = '{$kukarow["yhtio"]}'";
   return pupe_query($query);
 }

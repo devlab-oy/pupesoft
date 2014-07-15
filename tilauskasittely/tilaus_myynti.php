@@ -6346,7 +6346,7 @@ if ($tee == '') {
 
         if ($yhtiorow["saldo_varastossa_valmistuksella"] != ""
           and ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE")) {
-          list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"]);
+          list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', $row["varasto"]);
 
           echo "<td $class align='left' valign='top'>$myytavissa</td>";
         }

@@ -78,37 +78,37 @@ class LumoClient {
 
     // Setataan transaction amount
     $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'> 
-      <SetAmount><Value>{$amount}</Value></SetAmount><SetArchiveID><Value>{$archive_id}</Value></SetArchiveID></EMVLumo>\0";
+      <SetAmount><Value>{$amount}</Value></SetAmount></EMVLumo>\0";
 
     socket_write($this->_socket, $in, strlen($in));
 
     // Jos kutsussa on setattu archive_id lisätään se myös sanomaan koska kyseessä on
     // Peruutus/hyvitystapahtuma
-
-    if ($archive_id != '' and false) {
+    $tyyppi = 'maksu';
+    if ($archive_id != '') {
       $bonusin = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'>
         <SetArchiveID><Value>{$archive_id}</Value></SetArchiveID></EMVLumo>\0";
-        
-        socket_write($this->_socket, $in, strlen($in));
+      $tyyppi = 'hyvitys/peruutus';
+      socket_write($this->_socket, $bonusin, strlen($bonusin));
     }
 
     $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'><MakeTransaction><TransactionType>{$transaction_type}</TransactionType></MakeTransaction></EMVLumo>\0";
     $out = '';
-
-    $this->log("Aloitetaan maksutapahtuma\n\tTyyppi: {$transaction_type} \n\tSumma: {$amount}\n\tViite: {$archive_id}");
+    
+    $this->log("Aloitetaan {$tyyppi}tapahtuma\t/ Tyyppi: {$transaction_type}\t/ Summa:{$amount}\t/ Viite: {$archive_id}");
     socket_write($this->_socket, $in, strlen($in));
 
     while ($out = socket_read($this->_socket, 2048)) {
 
       $xml = @simplexml_load_string($out);
-      ob_start();
+      /*ob_start();
       var_dump($xml);
       $result = ob_get_clean();
-      $this->log($result);
+      $this->log($result);*/
       if (isset($xml) and isset($xml->MakeTransaction->Result)) {
         $return = $xml->MakeTransaction->Result == "True" ? TRUE : FALSE;
         $arvo = $return === TRUE ? "OK" : "HYLÄTTY";
-        $this->log("Maksutapahtuma {$arvo}");
+        $this->log("{$tyyppi}tapahtuma {$arvo}");
       }
       if (isset($xml) and isset($xml->StatusUpdate->StatusInfo)) {
         $leelo = $xml->StatusUpdate->StatusInfo;

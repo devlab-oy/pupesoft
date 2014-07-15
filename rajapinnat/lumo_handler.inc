@@ -49,7 +49,7 @@ if ($vertailtava_summa_int >= $kaikkiyhteensa_int) {
 // TODO suoritustyyppi: maksu tai hyvitys/peruutus (cancel/refund, tarvitsee archiveid(aviite?, löytyy kuitilta))
 foreach($suoritukset as $suoritus) {
 
-  $onnistuuko = false;
+  if ($suoritus == 1) $onnistuuko = false;
 
   // Jos salasanat.phpstä puuttuu lumon osoite tai portti
   if(!isset($lumo_service_address) or !isset($lumo_service_port)) {
@@ -74,26 +74,31 @@ foreach($suoritukset as $suoritus) {
       $onnistuuko = "Ei yhteyttä maksupäätteeseen";
       break;
     }
-    $maksutyyppi = '';
+    
     switch ($suoritus) {
       case '1':
         if ($korttimaksu_f >= 1) {
+          echo "ykkonen\n";
          $onnistuuko = $clientti->startTransaction($korttimaksu_f);
         }
         elseif($korttimaksu_f < 0) {
+          echo "kakkonen\n";
           $transsuid = 140711001007;
+          $korttimaksu_f = $korttimaksu_f * -1;
           $onnistuuko = $clientti->startTransaction($korttimaksu_f,1,$transsuid);
         }
         else {
+          echo "kolmonen\n";
           $onnistuuko = "HYLÄTTY";
         }
-        //$onnistuuko = $onnistuuko === true ? "VELOITETTU" : "HYLÄTTY";
+        $onnistuuko = $onnistuuko === true ? "VELOITETTU" : "HYLÄTTY";
         break;
 
       case '2':
         $kuitti1 = $clientti->getCustomerReceipt();
         $kuitti1 = utf8_decode($kuitti1);
         $pankkivailuotto = '';
+        $maksutyyppi = '';
 
         if(strpos($kuitti1, "LUOTTOKORTTI") !== false) {
           $pankkivailuotto = 'LUOTTOKORTTI';
@@ -108,7 +113,7 @@ foreach($suoritukset as $suoritus) {
           $pankkivailuotto = 'PANKKIKORTTI';
           $maksupaate_maksetut['pankkikortti'] += $korttimaksu;
         }
-
+       
         if(strpos($kuitti1, "PERUUTUS") !== false) {
           //TODO peruutustapahtumat kirjataan skötsibötsimötsilölölöö
           $maksutyyppi = "PERUUTUS";
@@ -145,7 +150,7 @@ foreach($suoritukset as $suoritus) {
 }
 
 $status = '';
-
+echo "onnistuuko $onnistuuko / maksutyyppi $maksutyyppi \n";
 // K - Korttimaksu
 $status = ($onnistuuko == "VELOITETTU" and ($maksutyyppi == 'OSTO')) ? 'K' : '';
 

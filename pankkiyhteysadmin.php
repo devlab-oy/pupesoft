@@ -23,6 +23,17 @@ $tee = empty($tee) ? '' : $tee;
 $pin = empty($pin) ? '' : $pin;
 $target_id = empty($target_id) ? '' : $target_id;
 
+if ($tee == "poista") {
+  if (poista_pankkiyhteys($pankkiyhteys)) {
+    viesti("Pankkiyhteys poistettu");
+  }
+  else {
+    virhe("Pankkiyhteyttä ei poistettu");
+  }
+
+  $tee = "";
+}
+
 if ($tee == "luo" and !pankkiyhteystiedot_kunnossa()) {
   $tee = "";
 }
@@ -500,7 +511,13 @@ function pankkiyhteydet_table() {
     echo "<td>" . pankin_nimi($pankkiyhteys["pankki"]) . "</td>";
     echo "<td>{$pankkiyhteys["customer_id"]}</td>";
     echo "<td>{$pankkiyhteys["target_id"]}</td>";
-    echo "<td><button>" . t("Poista") . "</button></td>";
+    echo "<td>";
+    echo "<form method='post' action='pankkiyhteysadmin.php'>";
+    echo "<input type='hidden' name='tee' value='poista'/>";
+    echo "<input type='hidden' name='pankkiyhteys' value='{$pankkiyhteys["pankki"]}'/>";
+    echo "<input type='submit' value='" . t("Poista") . "'/>";
+    echo "</form>";
+    echo "</td>";
     echo "</tr>";
   }
 
@@ -522,4 +539,16 @@ function pankin_nimi($bic) {
     default:
       return false;
   }
+}
+
+/**
+ * @param $pankki
+ *
+ * @return resource
+ */
+function poista_pankkiyhteys($pankki) {
+  $query = "DELETE
+            FROM pankkiyhteys
+            WHERE pankki = '{$pankki}'";
+  return pupe_query($query);
 }

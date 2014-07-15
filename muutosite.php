@@ -609,12 +609,12 @@ if (isset($tee_Y) or isset($tee_Z) or isset($tee_X) or isset($tee_XKAIKKI) or is
           $orgpvm_pankki = substr(str_replace("-", "", $orgpvm), 2);
 
           //viiteaineistom summa, sen tiliöinnit ovat suoraan myyntilaskuilla, joten niitä ei oikein tähän saa haettua
-          $subq = "SELECT sum(substring(tieto, 78, 10)/100) aineistosumma
+          $subq = "SELECT SUM(SUBSTRING(tieto, 78, 10)/100) AS aineistosumma
                    FROM tiliotedata
                    WHERE yhtio = '$kukarow[yhtio]'
                    and tyyppi  = '3'
                    and tilino  = '$trow[tilino]'
-                   and substr(tieto, 16, 6) = '$orgpvm_pankki'
+                   and SUBSTRING(tieto, 16, 6) = '$orgpvm_pankki'
                    and left(tieto, 1) = '3'";
           $subr = pupe_query($subq);
           $asumma = mysql_fetch_assoc($subr);

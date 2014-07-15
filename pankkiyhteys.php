@@ -21,10 +21,12 @@ if (!isset($sepa_pankkiyhteys_token)) {
 
 $tee = empty($tee) ? '' : $tee;
 
+// Oikellisuustarkistukset
 if ($tee == "laheta" and !formi_kunnossa()) {
   $tee = "";
 }
 
+// Tiliotteiden haku
 if ($tee == "laheta" and $hae_tiliotteet == "on") {
   $tiedostot = lataa_kaikki("TITO");
 
@@ -37,6 +39,7 @@ if ($tee == "laheta" and $hae_tiliotteet == "on") {
   }
 }
 
+// Viitteiden haku
 if ($tee == "laheta" and $hae_viitteet == "on") {
   $tiedostot = lataa_kaikki("KTL");
 
@@ -49,6 +52,7 @@ if ($tee == "laheta" and $hae_viitteet == "on") {
   }
 }
 
+// Maksuaineiston oikeellisuustarkistus
 if ($tee == "laheta" and $laheta_maksuaineisto == "on") {
   $maksuaineisto = file_get_contents($_FILES["maksuaineisto"]["tmp_name"]);
 
@@ -58,6 +62,7 @@ if ($tee == "laheta" and $laheta_maksuaineisto == "on") {
   }
 }
 
+// Maksuaineiston lähetys
 if ($tee == "laheta" and $laheta_maksuaineisto == "on") {
   $tunnukset = hae_tunnukset_ja_pura_salaus($tili, $salasana);
   $vastaus = laheta_maksuaineisto($tunnukset, $maksuaineisto);
@@ -85,19 +90,11 @@ if ($tee == "laheta" and $laheta_maksuaineisto == "on") {
   $tee = "";
 }
 
-$tee = "";
+// Käyttöliittymä
+formi();
 
-if ($tee == "") {
-  formi();
-}
-
-/**
- * @param $tili
- *
- * @return array
- */
 function hae_avain_sertifikaatti_ja_customer_id($tili) {
-  global $kukarow;
+  global $kukarow, $yhtiorow;
 
   $query = "SELECT private_key, certificate, customer_id, target_id
             FROM pankkiyhteys
@@ -110,12 +107,6 @@ function hae_avain_sertifikaatti_ja_customer_id($tili) {
   return $rivi;
 }
 
-/**
- * @param $salattu_data
- * @param $salasana
- *
- * @return string
- */
 function pura_salaus($salattu_data, $salasana) {
   $avain = hash("SHA256", $salasana, true);
 
@@ -132,14 +123,8 @@ function pura_salaus($salattu_data, $salasana) {
   return mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $avain, $salattu_data_binaari, MCRYPT_MODE_CBC, $iv);
 }
 
-/**
- * @param $tiedostotyyppi
- * @param $tunnukset
- *
- * @return array
- */
 function download_file_list($tiedostotyyppi, $tunnukset) {
-  global $sepa_pankkiyhteys_token;
+  global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
 
   $parameters = array(
     "method"  => "POST",
@@ -173,12 +158,9 @@ function download_file_list($tiedostotyyppi, $tunnukset) {
   return $viitteet;
 }
 
-/**
- * @param array $params
- *
- * @return array|bool
- */
 function download_files($params) {
+  global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
+
   $viitteet = isset($params["viitteet"]) ? $params["viitteet"] : "";
   $tiedostotyyppi = isset($params["tiedostotyyppi"]) ? $params["tiedostotyyppi"] : "";
   $tunnukset = isset($params["tunnukset"]) ? $params["tunnukset"] : "";
@@ -186,8 +168,6 @@ function download_files($params) {
   if (empty($viitteet) or empty($tiedostotyyppi) or empty($tunnukset)) {
     return false;
   }
-
-  global $sepa_pankkiyhteys_token;
 
   $tiedostot = array();
 
@@ -236,62 +216,13 @@ function download_files($params) {
   return $tiedostot;
 }
 
-function salasana_formi() {
-  $komento = $_POST["tee"];
-
-  if ($komento == "laheta_maksuaineisto") {
-    $enctype = "enctype='multipart/form-data'";
-  }
-  else {
-    $enctype = "";
-  }
-
-  echo "<form method='post' action='pankkiyhteys.php' {$enctype}>";
-  echo "<input type='hidden' name='tee' value='{$komento}'/>";
-  echo "<input type='hidden' name='tili' value='{$_POST["tili"]}'/>";
-  echo "<table>";
-  echo "<tbody>";
-
-  echo "<tr>";
-  echo "<td>";
-  echo "<label for='salasana'>" . t("Salasana, jolla salasit tunnukset") . "</label>";
-  echo "</td>";
-  echo "<td>";
-  echo "<input type='password' name='salasana' id='salasana'/>";
-  echo "</td>";
-  echo "</tr>";
-
-  if ($komento == "laheta_maksuaineisto") {
-    echo "<tr>";
-    echo "<td>";
-    echo "<label for='maksuainesto'>" . t("Maksuaineisto") . "</label>";
-    echo "</td>";
-    echo "<td>";
-    echo "<input type='file' name='maksuaineisto' id='maksuaineisto'/>";
-    echo "</td>";
-    echo "</tr>";
-  }
-  echo "<tr>";
-  echo "<td class='back'>";
-  echo "<input type='submit' value='" . t("Hae") . "'/>";
-  echo "</td>";
-  echo "</tr>";
-  echo "</tbody>";
-  echo "</table>";
-  echo "</form>";
-}
-
-/**
- * @param $tili
- * @param $salasana
- *
- * @return array
- */
 function hae_tunnukset_ja_pura_salaus($tili, $salasana) {
-  $haetut_tunnukset = hae_avain_sertifikaatti_ja_customer_id($tili);
+  global $kukarow, $yhtiorow;
 
+  $haetut_tunnukset = hae_avain_sertifikaatti_ja_customer_id($tili);
   $avain = pura_salaus($haetut_tunnukset["private_key"], $salasana);
   $sertifikaatti = pura_salaus($haetut_tunnukset["certificate"], $salasana);
+
   $customer_id = $haetut_tunnukset["customer_id"];
   $target_id = $haetut_tunnukset["target_id"];
 
@@ -303,14 +234,8 @@ function hae_tunnukset_ja_pura_salaus($tili, $salasana) {
   );
 }
 
-/**
- * @param $tunnukset
- * @param $maksuaineisto
- *
- * @return array
- */
 function laheta_maksuaineisto($tunnukset, $maksuaineisto) {
-  global $sepa_pankkiyhteys_token;
+  global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
 
   $parameters = array(
     "method"  => "POST",
@@ -338,11 +263,6 @@ function laheta_maksuaineisto($tunnukset, $maksuaineisto) {
   return $vastaus;
 }
 
-/**
- * @param $vastaus
- *
- * @return bool
- */
 function vastaus_kunnossa($vastaus) {
   switch ($vastaus[0]) {
     case 200:
@@ -365,23 +285,35 @@ function vastaus_kunnossa($vastaus) {
 }
 
 function virhe($viesti) {
-  echo "<font class='error'>{$viesti}</font><br/>";
+  global $kukarow, $yhtiorow;
+
+  echo "<font class='error'>";
+  echo t($viesti);
+  echo "</font>";
+  echo "<br/>";
 }
 
 function ok($viesti) {
-  echo "<font class='ok'>{$viesti}</font><br/>";
+  global $kukarow, $yhtiorow;
+
+  echo "<font class='ok'>";
+  echo t($viesti);
+  echo "</font>";
+  echo "<br/>";
 }
 
 function viesti($viesti) {
-  echo "<font class='message'>{$viesti}</font><br/>";
+  global $kukarow, $yhtiorow;
+
+  echo "<font class='message'>";
+  echo t($viesti);
+  echo "</font>";
+  echo "<br/>";
 }
 
-/**
- * @param $tiedostotyyppi
- *
- * @return bool
- */
 function lataa_kaikki($tiedostotyyppi) {
+  global $kukarow, $yhtiorow;
+
   $tunnukset = hae_tunnukset_ja_pura_salaus($_POST["tili"], $_POST["salasana"]);
 
   if (!$tunnukset) {
@@ -405,11 +337,8 @@ function lataa_kaikki($tiedostotyyppi) {
   return false;
 }
 
-/**
- * @return array
- */
 function hae_kaytossa_olevat_pankkiyhteydet() {
-  global $kukarow;
+  global $kukarow, $yhtiorow;
 
   $query = "SELECT tunnus, pankki
             FROM pankkiyhteys
@@ -426,6 +355,8 @@ function hae_kaytossa_olevat_pankkiyhteydet() {
 }
 
 function formi() {
+  global $kukarow, $yhtiorow;
+
   $kaytossa_olevat_pankkiyhteydet = hae_kaytossa_olevat_pankkiyhteydet();
 
   if ($kaytossa_olevat_pankkiyhteydet) {
@@ -487,6 +418,8 @@ function formi() {
 }
 
 function formi_kunnossa() {
+  global $kukarow, $yhtiorow;
+
   $komennot_count = 0;
   $virheet_count = 0;
 
@@ -534,9 +467,6 @@ function salasana_kunnossa() {
   return true;
 }
 
-/**
- * @param $tiedostot
- */
 function tiedostot_table($tiedostot) {
   echo "<br/>";
 
@@ -562,20 +492,4 @@ function tiedostot_table($tiedostot) {
   echo "</table>";
 
   echo "<br/><br/>";
-}
-
-/**
- * @param $bic
- *
- * @return bool|string
- */
-function pankin_nimi($bic) {
-  switch ($bic) {
-    case "NDEAFIHH":
-      return "Nordea";
-    case "DABAFIHX":
-      return "Danske Bank";
-    default:
-      return false;
-  }
 }

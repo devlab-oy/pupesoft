@@ -20,6 +20,7 @@ $tee = empty($tee) ? '' : $tee;
 $pin = empty($pin) ? '' : $pin;
 $target_id = empty($target_id) ? '' : $target_id;
 
+// Poistetaan pankkiyhteys
 if ($tee == "poista") {
   if (poista_pankkiyhteys($pankkiyhteys)) {
     ok("Pankkiyhteys poistettu");
@@ -31,10 +32,12 @@ if ($tee == "poista") {
   $tee = "";
 }
 
+// Uuden pankkiyhteyden oikeellisuustarkistus
 if ($tee == "luo" and !pankkiyhteystiedot_kunnossa()) {
   $tee = "";
 }
 
+// Haetaan sertifikaatti jos PIN on annettu
 if ($tee == "luo" and $pin != '') {
   $generoidut_tunnukset = generoi_private_key_ja_csr();
 
@@ -58,6 +61,7 @@ if ($tee == "luo" and $pin != '') {
   );
 }
 
+// Avainpari annettu käyttöliittymästä
 if ($tee == "luo" and $pin == '') {
   $private_key = file_get_contents($_FILES["private_key"]["tmp_name"]);
   $certificate = file_get_contents($_FILES["certificate"]["tmp_name"]);
@@ -92,6 +96,7 @@ if ($tee == "luo" and $target_id == '') {
   }
 }
 
+// Tallennetaan pankkiyhteys
 if ($tee == "luo") {
   $params = array(
     "pankki"            => $pankki,
@@ -110,12 +115,62 @@ if ($tee == "luo") {
   $tee = "";
 }
 
+// Käyttöliittymä
 if ($tee == "") {
   uusi_pankkiyhteys_formi();
   pankkiyhteydet_table();
 }
 
+function pankkiyhteydet_table() {
+  global $kukarow, $yhtiorow;
+
+  $pankkiyhteydet = hae_pankkiyhteydet();
+
+  if (empty($pankkiyhteydet)) {
+    return;
+  }
+
+  echo "<br/>";
+  echo "<font class='head'>" . t("Pankkiyhteydet") . "</font>";
+  echo "<hr>";
+
+  echo "<table>";
+  echo "<thead>";
+
+  echo "<tr>";
+  echo "<th>" . t("Pankki") . "</th>";
+  echo "<th>" . t("Asiakastunnus") . "</th>";
+  echo "<th>" . t("Aineistoryhmän tunnus") . "</th>";
+  echo "<th></th>";
+  echo "</tr>";
+
+  echo "</thead>";
+
+  echo "<tbody>";
+
+  foreach ($pankkiyhteydet as $pankkiyhteys) {
+    echo "<tr>";
+    echo "<td>" . pankin_nimi($pankkiyhteys["pankki"]) . "</td>";
+    echo "<td>{$pankkiyhteys["customer_id"]}</td>";
+    echo "<td>{$pankkiyhteys["target_id"]}</td>";
+    echo "<td>";
+    echo "<form class='multisubmit' method='post' action='pankkiyhteysadmin.php'
+                onsubmit='return confirm(\"Haluatko varmasti poistaa pankkiyhteyden?\");'>";
+    echo "<input type='hidden' name='tee' value='poista'/>";
+    echo "<input type='hidden' name='pankkiyhteys' value='{$pankkiyhteys["pankki"]}'/>";
+    echo "<input type='submit' value='" . t("Poista") . "'/>";
+    echo "</form>";
+    echo "</td>";
+    echo "</tr>";
+  }
+
+  echo "</tbody>";
+  echo "</table>";
+}
+
 function uusi_pankkiyhteys_formi() {
+  global $kukarow, $yhtiorow;
+
   $mahdolliset_pankkiyhteydet = mahdolliset_pankkiyhteydet();
 
   if (empty($mahdolliset_pankkiyhteydet)) {
@@ -210,10 +265,9 @@ function uusi_pankkiyhteys_formi() {
   echo "</form>";
 }
 
-/**
- * @return bool
- */
 function pankkiyhteystiedot_kunnossa() {
+  global $kukarow, $yhtiorow;
+
   $virheet_count = 0;
 
   if (empty($_POST["salasana"])) {
@@ -246,22 +300,34 @@ function pankkiyhteystiedot_kunnossa() {
 }
 
 function virhe($viesti) {
-  echo "<font class='error'>{$viesti}</font><br/>";
+  global $kukarow, $yhtiorow;
+
+  echo "<font class='error'>";
+  echo t($viesti);
+  echo "</font>";
+  echo "<br/>";
 }
 
 function ok($viesti) {
-  echo "<font class='ok'>{$viesti}</font><br/>";
+  global $kukarow, $yhtiorow;
+
+  echo "<font class='ok'>";
+  echo t($viesti);
+  echo "</font>";
+  echo "<br/>";
 }
 
 function viesti($viesti) {
-  echo "<font class='message'>{$viesti}</font><br/>";
+  global $kukarow, $yhtiorow;
+
+  echo "<font class='message'>";
+  echo t($viesti);
+  echo "</font>";
+  echo "<br/>";
 }
 
-/**
- * @return array
- */
 function generoi_private_key_ja_csr() {
-  global $yhtiorow;
+  global $kukarow, $yhtiorow;
 
   $key_config = array(
     "digest_alg"       => "sha1",
@@ -289,12 +355,9 @@ function generoi_private_key_ja_csr() {
   );
 }
 
-/**
- * @param $params
- *
- * @return bool|string
- */
 function hae_sertifikaatti_sepasta($params) {
+  global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
+
   $pin = isset($params["pin"]) ? (string) $params["pin"] : "";
   $customer_id = isset($params["customer_id"]) ? (string) $params["customer_id"] : "";
   $tunnukset = isset($params["tunnukset"]) ? (array) $params["tunnukset"] : "";
@@ -302,8 +365,6 @@ function hae_sertifikaatti_sepasta($params) {
   if (empty($pin) or empty($customer_id) or empty($tunnukset)) {
     return false;
   }
-
-  global $sepa_pankkiyhteys_token;
 
   $parameters = array(
     "method"  => "POST",
@@ -331,12 +392,9 @@ function hae_sertifikaatti_sepasta($params) {
   return $sertifikaatti;
 }
 
-/**
- * @param array $params
- *
- * @return bool|resource
- */
 function tallenna_tunnukset($params) {
+  global $kukarow, $yhtiorow;
+
   $pankki = isset($params["pankki"]) ? $params["pankki"] : "";
   $salatut_tunnukset = isset($params["salatut_tunnukset"]) ? $params["salatut_tunnukset"] : "";
   $customer_id = isset($params["customer_id"]) ? $params["customer_id"] : "";
@@ -345,8 +403,6 @@ function tallenna_tunnukset($params) {
   if (empty($pankki) or empty($salatut_tunnukset) or empty($customer_id) or empty($target_id)) {
     return false;
   }
-
-  global $kukarow;
 
   $query = "INSERT INTO pankkiyhteys SET
             yhtio = '{$kukarow['yhtio']}',
@@ -360,12 +416,6 @@ function tallenna_tunnukset($params) {
   return $result;
 }
 
-/**
- * @param $data
- * @param $salasana
- *
- * @return string
- */
 function salaa($data, $salasana) {
   $avain = hash("SHA256", $salasana, true);
 
@@ -378,12 +428,9 @@ function salaa($data, $salasana) {
   return base64_encode($salattu_data);
 }
 
-/**
- * @param $params
- *
- * @return bool|string
- */
 function hae_target_id($params) {
+  global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
+
   $certificate = isset($params["certificate"]) ? $params["certificate"] : "";
   $private_key = isset($params["private_key"]) ? $params["private_key"] : "";
   $customer_id = isset($params["customer_id"]) ? $params["customer_id"] : "";
@@ -391,8 +438,6 @@ function hae_target_id($params) {
   if (empty($certificate) or empty($private_key) or empty($customer_id)) {
     return false;
   }
-
-  global $sepa_pankkiyhteys_token;
 
   $parameters = array(
     "method"  => "POST",
@@ -419,12 +464,9 @@ function hae_target_id($params) {
   return $target_id;
 }
 
-/**
- * @param $vastaus
- *
- * @return bool
- */
 function vastaus_kunnossa($vastaus) {
+  global $kukarow, $yhtiorow;
+
   switch ($vastaus[0]) {
     case 200:
       return true;
@@ -440,13 +482,13 @@ function vastaus_kunnossa($vastaus) {
   }
 }
 
-/**
- * @return array
- */
 function mahdolliset_pankkiyhteydet() {
+  global $kukarow, $yhtiorow;
+
+  // Tuetut pankit
   $pankit = array(
     "NDEAFIHH" => "Nordea",
-    "DABAFIHX" => "Danske Bank"
+    "DABAFIHX" => "Danske Bank",
   );
 
   $luodut_pankit = array();
@@ -466,11 +508,8 @@ function mahdolliset_pankkiyhteydet() {
   return $mahdolliset_pankkiyhteydet;
 }
 
-/**
- * @return array
- */
 function hae_pankkiyhteydet() {
-  global $kukarow;
+  global $kukarow, $yhtiorow;
 
   $luodut_pankkiyhteydet = array();
 
@@ -482,77 +521,12 @@ function hae_pankkiyhteydet() {
   while ($rivi = mysql_fetch_assoc($result)) {
     array_push($luodut_pankkiyhteydet, $rivi);
   }
+
   return $luodut_pankkiyhteydet;
 }
 
-function pankkiyhteydet_table() {
-  $pankkiyhteydet = hae_pankkiyhteydet();
-
-  if (empty($pankkiyhteydet)) {
-    return;
-  }
-
-  echo "<br/>";
-  echo "<font class='head'>" . t("Pankkiyhteydet") . "</font>";
-  echo "<hr>";
-
-  echo "<table>";
-  echo "<thead>";
-
-  echo "<tr>";
-  echo "<th>" . t("Pankki") . "</th>";
-  echo "<th>" . t("Asiakastunnus") . "</th>";
-  echo "<th>" . t("Aineistoryhmän tunnus" . "</th>");
-  echo "<th></th>";
-  echo "</tr>";
-
-  echo "</thead>";
-
-  echo "<tbody>";
-
-  foreach ($pankkiyhteydet as $pankkiyhteys) {
-    echo "<tr>";
-    echo "<td>" . pankin_nimi($pankkiyhteys["pankki"]) . "</td>";
-    echo "<td>{$pankkiyhteys["customer_id"]}</td>";
-    echo "<td>{$pankkiyhteys["target_id"]}</td>";
-    echo "<td>";
-    echo "<form class='multisubmit' method='post' action='pankkiyhteysadmin.php'
-                onsubmit='return confirm(\"Haluatko varmasti poistaa pankkiyhteyden?\");'>";
-    echo "<input type='hidden' name='tee' value='poista'/>";
-    echo "<input type='hidden' name='pankkiyhteys' value='{$pankkiyhteys["pankki"]}'/>";
-    echo "<input type='submit' value='" . t("Poista") . "'/>";
-    echo "</form>";
-    echo "</td>";
-    echo "</tr>";
-  }
-
-  echo "</tbody>";
-  echo "</table>";
-}
-
-/**
- * @param $bic
- *
- * @return bool|string
- */
-function pankin_nimi($bic) {
-  switch ($bic) {
-    case "NDEAFIHH":
-      return "Nordea";
-    case "DABAFIHX":
-      return "Danske Bank";
-    default:
-      return false;
-  }
-}
-
-/**
- * @param $pankki
- *
- * @return resource
- */
 function poista_pankkiyhteys($pankki) {
-  global $kukarow;
+  global $kukarow, $yhtiorow;
 
   $query = "DELETE
             FROM  pankkiyhteys

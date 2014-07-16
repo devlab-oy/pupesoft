@@ -77,8 +77,14 @@ if ($tee == "laheta" and $laheta_maksuaineisto == "on") {
 
 // Maksuaineiston lähetys
 if ($tee == "laheta" and $laheta_maksuaineisto == "on") {
-  $tunnukset = hae_tunnukset_ja_pura_salaus($tili, $salasana);
-  $vastaus = laheta_maksuaineisto($tunnukset, $maksuaineisto);
+  $tunnukset = hae_tunnukset_ja_pura_salaus($pankkiyhteys_tunnus, $salasana);
+
+  $params = array(
+    "tunnukset"     => $tunnukset,
+    "maksuaineisto" => $maksuaineisto,
+  );
+
+  $vastaus = sepa_upload_file($params);
 
   if ($vastaus) {
     viesti("Maksuaineisto lähetetty, vastaus pankista:");

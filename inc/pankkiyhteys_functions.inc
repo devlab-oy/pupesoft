@@ -552,6 +552,13 @@ function sepa_download_files($params) {
 function sepa_upload_file($params) {
   global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
 
+  $tunnukset = isset($params["tunnukset"]) ? $params["tunnukset"] : "";
+  $maksuaineisto = isset($params["maksuaineisto"]) ? $params["maksuaineisto"] : "";
+
+  if (empty($tunnukset) or empty($maksuaineisto)) {
+    return false;
+  }
+
   $parameters = array(
     "method"  => "POST",
     "data"    => array(
@@ -654,10 +661,10 @@ function sepa_get_target_id($params) {
 
 // Sertifikaatti / salausfunktiot
 
-function hae_tunnukset_ja_pura_salaus($tili, $salasana) {
+function hae_tunnukset_ja_pura_salaus($pankkiyhteys_tunnus, $salasana) {
   global $kukarow, $yhtiorow;
 
-  $haetut_tunnukset = hae_avain_sertifikaatti_ja_customer_id($tili);
+  $haetut_tunnukset = hae_avain_sertifikaatti_ja_customer_id($pankkiyhteys_tunnus);
   $avain = pura_salaus($haetut_tunnukset["private_key"], $salasana);
   $sertifikaatti = pura_salaus($haetut_tunnukset["certificate"], $salasana);
 

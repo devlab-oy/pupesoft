@@ -367,6 +367,8 @@ function viesti($viesti) {
 function hae_pankkiyhteys($pankkiyhteys_tunnus) {
   global $kukarow, $yhtiorow;
 
+  $tuetut_pankit = tuetut_pankit();
+
   $query = "SELECT *
             FROM pankkiyhteys
             WHERE yhtio = '{$kukarow["yhtio"]}'
@@ -374,6 +376,7 @@ function hae_pankkiyhteys($pankkiyhteys_tunnus) {
   $result = pupe_query($query);
 
   $rivi = mysql_fetch_assoc($result);
+  $rivi["pankki_lyhyt_nimi"] = $tuetut_pankit[$rivi["pankki"]]["lyhyt_nimi"];
 
   return $rivi;
 }
@@ -395,7 +398,7 @@ function hae_pankkiyhteydet() {
   $result = pupe_query($query);
 
   while ($rivi = mysql_fetch_assoc($result)) {
-    $rivi["pankin_nimi"] = $tuetut_pankit[$rivi["pankki"]];
+    $rivi["pankin_nimi"] = $tuetut_pankit[$rivi["pankki"]]["nimi"];
     array_push($luodut_pankkiyhteydet, $rivi);
   }
 
@@ -420,9 +423,9 @@ function mahdolliset_pankkiyhteydet() {
 
   $mahdolliset_pankkiyhteydet = array();
 
-  foreach ($pankit as $bic => $nimi) {
+  foreach ($pankit as $bic => $nimet) {
     if (!in_array($bic, $luodut_pankit)) {
-      $mahdolliset_pankkiyhteydet[$bic] = $nimi;
+      $mahdolliset_pankkiyhteydet[$bic] = $nimet["nimi"];
     }
   }
 
@@ -485,22 +488,26 @@ function sepa_download_file_list($params) {
   global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
 
   $tiedostotyyppi = isset($params["tiedostotyyppi"]) ? $params["tiedostotyyppi"] : "";
-  $tunnukset = isset($params["tunnukset"]) ? $params["tunnukset"] : "";
+  $sertifikaatti = isset($params["sertifikaatti"]) ? $params["sertifikaatti"] : "";
+  $private_key = isset($params["private_key"]) ? $params["private_key"] : "";
+  $customer_id = isset($params["customer_id"]) ? $params["customer_id"] : "";
+  $target_id = isset($params["target_id"]) ? $params["target_id"] : "";
+  $pankki_lyhyt_nimi = isset($params["pankki_lyhyt_nimi"]) ? $params["pankki_lyhyt_nimi"] : "";
 
-  if (empty($tiedostotyyppi) or empty($tunnukset)) {
+  if (empty($tiedostotyyppi) or empty($sertifikaatti) or empty($private_key) or empty($customer_id) or empty($target_id) or empty($pankki_lyhyt_nimi)) {
     return false;
   }
 
   $parameters = array(
     "method"  => "POST",
     "data"    => array(
-      "cert"        => base64_encode($tunnukset["sertifikaatti"]),
-      "private_key" => base64_encode($tunnukset["avain"]),
-      "customer_id" => $tunnukset["customer_id"],
+      "cert"        => base64_encode($sertifikaatti),
+      "private_key" => base64_encode($private_key),
+      "customer_id" => $customer_id,
       "file_type"   => $tiedostotyyppi,
-      "target_id"   => $tunnukset["target_id"]
+      "target_id"   => $target_id
     ),
-    "url"     => "https://sepa.devlab.fi/api/nordea/download_file_list",
+    "url"     => "https://sepa.devlab.fi/api/{$pankki_lyhyt_nimi}/download_file_list",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -528,9 +535,13 @@ function sepa_download_files($params) {
 
   $viitteet = isset($params["viitteet"]) ? $params["viitteet"] : "";
   $tiedostotyyppi = isset($params["tiedostotyyppi"]) ? $params["tiedostotyyppi"] : "";
-  $tunnukset = isset($params["tunnukset"]) ? $params["tunnukset"] : "";
+  $sertifikaatti = isset($params["sertifikaatti"]) ? $params["sertifikaatti"] : "";
+  $private_key = isset($params["private_key"]) ? $params["private_key"] : "";
+  $customer_id = isset($params["customer_id"]) ? $params["customer_id"] : "";
+  $target_id = isset($params["target_id"]) ? $params["target_id"] : "";
+  $pankki_lyhyt_nimi = isset($params["pankki_lyhyt_nimi"]) ? $params["pankki_lyhyt_nimi"] : "";
 
-  if (empty($viitteet) or empty($tiedostotyyppi) or empty($tunnukset)) {
+  if (empty($viitteet) or empty($tiedostotyyppi) or empty($sertifikaatti) or empty($private_key) or empty($customer_id) or empty($target_id) or empty($pankki_lyhyt_nimi)) {
     return false;
   }
 
@@ -540,14 +551,14 @@ function sepa_download_files($params) {
     $parameters = array(
       "method"  => "POST",
       "data"    => array(
-        "cert"           => base64_encode($tunnukset["sertifikaatti"]),
-        "private_key"    => base64_encode($tunnukset["avain"]),
-        "customer_id"    => $tunnukset["customer_id"],
+        "cert"           => base64_encode($sertifikaatti),
+        "private_key"    => base64_encode($private_key),
+        "customer_id"    => $customer_id,
         "file_type"      => $tiedostotyyppi,
-        "target_id"      => $tunnukset["target_id"],
+        "target_id"      => $target_id,
         "file_reference" => $viite
       ),
-      "url"     => "https://sepa.devlab.fi/api/nordea/download_file",
+      "url"     => "https://sepa.devlab.fi/api/{$pankki_lyhyt_nimi}/download_file",
       "headers" => array(
         "Content-Type: application/json",
         "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -693,22 +704,14 @@ function sepa_get_target_id($params) {
 
 // Sertifikaatti / salausfunktiot
 
-function hae_tunnukset_ja_pura_salaus($pankkiyhteys_tunnus, $salasana) {
+function hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana) {
   global $kukarow, $yhtiorow;
 
   $pankkiyhteys = hae_pankkiyhteys($pankkiyhteys_tunnus);
-  $avain = pura_salaus($pankkiyhteys["private_key"], $salasana);
-  $sertifikaatti = pura_salaus($pankkiyhteys["certificate"], $salasana);
+  $pankkiyhteys["private_key"] = pura_salaus($pankkiyhteys["private_key"], $salasana);
+  $pankkiyhteys["sertifikaatti"] = pura_salaus($pankkiyhteys["certificate"], $salasana);
 
-  $customer_id = $pankkiyhteys["customer_id"];
-  $target_id = $pankkiyhteys["target_id"];
-
-  return array(
-    "avain"         => $avain,
-    "sertifikaatti" => $sertifikaatti,
-    "customer_id"   => $customer_id,
-    "target_id"     => $target_id
-  );
+  return $pankkiyhteys;
 }
 
 function lataa_kaikki($params) {
@@ -722,24 +725,24 @@ function lataa_kaikki($params) {
     return false;
   }
 
-  $tunnukset = hae_tunnukset_ja_pura_salaus($pankkiyhteys_tunnus, $salasana);
+  $pankkiyhteys = hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana);
 
-  if (!$tunnukset) {
+  if (!$pankkiyhteys) {
     return false;
   }
 
   $params = array(
-    "tiedostotyyppi" => $tiedostotyyppi,
-    "tunnukset"      => $tunnukset,
+    "pankki_lyhyt_nimi" => $pankkiyhteys["pankki_lyhyt_nimi"],
+    "tiedostotyyppi"    => $tiedostotyyppi,
+    "sertifikaatti"     => $pankkiyhteys["sertifikaatti"],
+    "private_key"       => $pankkiyhteys["private_key"],
+    "customer_id"       => $pankkiyhteys["customer_id"],
+    "target_id"         => $pankkiyhteys["target_id"]
   );
 
   $viitteet = sepa_download_file_list($params);
 
-  $params = array(
-    "viitteet"       => $viitteet,
-    "tiedostotyyppi" => $tiedostotyyppi,
-    "tunnukset"      => $tunnukset
-  );
+  $params["viitteet"] = $viitteet;
 
   $tiedostot = sepa_download_files($params);
 
@@ -825,7 +828,13 @@ function pura_salaus($salattu_data, $salasana) {
  */
 function tuetut_pankit() {
   return array(
-    "NDEAFIHH" => "Nordea",
-    "DABAFIHX" => "Danske Bank",
+    "NDEAFIHH" => array(
+      "nimi"       => "Nordea",
+      "lyhyt_nimi" => "nordea"
+    ),
+    "DABAFIHX" => array(
+      "nimi"       => "Danske Bank",
+      "lyhyt_nimi" => "danske"
+    ),
   );
 }

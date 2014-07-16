@@ -11461,6 +11461,16 @@ if (!function_exists("progress_bar")) {
     static $microtime_total = 0;
     static $microtime_remaining = 0;
 
+    // Nollalla voi resettaa barin
+    if ($current_item == 0 and $total_items == 0) {
+      $microtime_start = NULL;
+      $microtime_current = 0;
+      $microtime_current_last = 0;
+      $microtime_total = 0;
+      $microtime_remaining = 0;
+      return;
+    }
+
     if ($microtime_start === NULL) {
       $timeparts = explode(" ", microtime());
       $microtime_start = $timeparts[1].substr($timeparts[0], 1);

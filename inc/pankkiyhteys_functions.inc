@@ -2,6 +2,14 @@
 
 // Käyttöliittymän funktiot
 
+/**
+ * Tarkistaa sepa-palvelimelta tulleen vastauksen koodin ja palauttaa true tai false sen
+ * perusteella. Echottaa myos mahdollisen virheilmoituksen
+ *
+ * @param $vastaus
+ *
+ * @return bool
+ */
 function vastaus_kunnossa($vastaus) {
   switch ($vastaus[0]) {
     case 200:
@@ -23,6 +31,9 @@ function vastaus_kunnossa($vastaus) {
   return false;
 }
 
+/**
+ * Piirtaa formin, jolla voi hakea tiliotteet, viiteaineistot tai lahettaa maksuaineiston
+ */
 function formi() {
   global $kukarow, $yhtiorow;
 
@@ -84,6 +95,12 @@ function formi() {
   }
 }
 
+/**
+ * Tarkistaa pankkiyhteysformin ja palauttaa true tai false sen perusteella onko formi kunnossa vai
+ * ei. Echottaa myos mahdolliset virheet
+ *
+ * @return bool
+ */
 function formi_kunnossa() {
   global $kukarow, $yhtiorow;
 
@@ -122,6 +139,12 @@ function formi_kunnossa() {
   return false;
 }
 
+/**
+ * Piirtaa taulun palvelimelta ladatuille tiedostoille ja nayttaa siina tiedoston viitteen ja
+ * statuksen
+ *
+ * @param $tiedostot
+ */
 function tiedostot_table($tiedostot) {
   echo "<br/>";
 
@@ -149,6 +172,10 @@ function tiedostot_table($tiedostot) {
   echo "<br/><br/>";
 }
 
+/**
+ * Piirtaa luoduille pankkiyhteyksille taulun ja nayttaa siina pankin, asiakastunnuksen,
+ * aineistoryhman tunnuksen ja napin, josta pankkiyhteyden voi poistaa
+ */
 function pankkiyhteydet_table() {
   global $kukarow, $yhtiorow;
 
@@ -196,6 +223,10 @@ function pankkiyhteydet_table() {
   echo "</table>";
 }
 
+/**
+ * Piirtaa formin, jossa voi luoda uuden pankkiyhteyden, joko valmiilla avainparilla tai
+ * PIN-koodilla
+ */
 function uusi_pankkiyhteys_formi() {
   global $kukarow, $yhtiorow;
 
@@ -293,6 +324,12 @@ function uusi_pankkiyhteys_formi() {
   echo "</form>";
 }
 
+/**
+ * Tarkistaa uuden pankkiyhteysformin ja palauttaa true tai false sen perusteella onko formissa
+ * kaikki kunnossa. Echottaa myos mahdolliset virheet
+ *
+ * @return bool
+ */
 function pankkiyhteystiedot_kunnossa() {
   global $kukarow, $yhtiorow;
 
@@ -327,6 +364,9 @@ function pankkiyhteystiedot_kunnossa() {
   return false;
 }
 
+/**
+ * @param string $viesti
+ */
 function virhe($viesti) {
   global $kukarow, $yhtiorow;
 
@@ -336,6 +376,9 @@ function virhe($viesti) {
   echo "<br/>";
 }
 
+/**
+ * @param string $viesti
+ */
 function ok($viesti) {
   global $kukarow, $yhtiorow;
 
@@ -345,6 +388,9 @@ function ok($viesti) {
   echo "<br/>";
 }
 
+/**
+ * @param string $viesti
+ */
 function viesti($viesti) {
   global $kukarow, $yhtiorow;
 
@@ -358,7 +404,8 @@ function viesti($viesti) {
 // Pankkiyhteys tietokantafunktiot
 
 /**
- * Hakee pankkiyhteysrivin tietokannasta tunnuksen perusteella
+ * Hakee pankkiyhteysrivin tietokannasta tunnuksen perusteella ja lisaa riviin pankin lyhyen nimen,
+ * jota kaytetaan sepa-palvelimen urlissa
  *
  * @param string $pankkiyhteys_tunnus
  *
@@ -433,7 +480,7 @@ function mahdolliset_pankkiyhteydet() {
 }
 
 /**
- * @param $params
+ * @param array $params
  *
  * @return bool|resource
  */
@@ -462,7 +509,7 @@ function tallenna_pankkiyhteys($params) {
 }
 
 /**
- * @param $pankki
+ * @param string $pankki
  *
  * @return resource
  */
@@ -480,7 +527,10 @@ function poista_pankkiyhteys($pankki) {
 // SEPA API fuktiot
 
 /**
- * @param $params
+ * Lataa sepasta tiedostolistan yhdelle tiedostotyypille. Palauttaa listan tiedostojen
+ * viitenumeroita
+ *
+ * @param array $params
  *
  * @return array|bool
  */
@@ -526,6 +576,15 @@ function sepa_download_file_list($params) {
   return $viitteet;
 }
 
+/**
+ * Lataa pankista tiedostot annetuiden viitenumeroiden ja tiedostotyypin perusteella. Tallentaa
+ * tiedostot /tmp -kansioon tiedostotyypin nimisen kansion alle. Palauttaa myos arrayin tiedostojen
+ * viitteista ja siita onnistuiko niiden lataus vai ei.
+ *
+ * @param array $params
+ *
+ * @return array|bool
+ */
 function sepa_download_files($params) {
   global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
 
@@ -584,6 +643,13 @@ function sepa_download_files($params) {
   return $tiedostot;
 }
 
+/**
+ * Lahettaa maksuaineiston pankkiin. Talla hetkella ainut hyvaksyttava tyyppi on NDCORPAYS.
+ *
+ * @param array $params
+ *
+ * @return array|bool
+ */
 function sepa_upload_file($params) {
   global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
 
@@ -620,6 +686,14 @@ function sepa_upload_file($params) {
   return $vastaus;
 }
 
+/**
+ * Lataa pankin allekirjoittaman sertifikaatin pankista. Ottaa parametreissa certificate signing
+ * requestin ja pin koodin.
+ *
+ * @param array $params
+ *
+ * @return bool|string
+ */
 function sepa_get_certificate($params) {
   global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
 
@@ -658,6 +732,13 @@ function sepa_get_certificate($params) {
   return $sertifikaatti;
 }
 
+/**
+ * Hakee aineistoryhman tunnuksen (target_id) pankista
+ *
+ * @param array $params
+ *
+ * @return string|bool
+ */
 function sepa_get_target_id($params) {
   global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
 
@@ -697,6 +778,15 @@ function sepa_get_target_id($params) {
 
 // Sertifikaatti / salausfunktiot
 
+/**
+ * Hakee pankkiyhteysrivin tietokannasta ja purkaa private_keyn ja sertifikaatin salauksen.
+ * Palauttaa pankkiyhteys arrayn
+ *
+ * @param string $pankkiyhteys_tunnus
+ * @param string $salasana
+ *
+ * @return array
+ */
 function hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana) {
   global $kukarow, $yhtiorow;
 
@@ -707,6 +797,14 @@ function hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana) {
   return $pankkiyhteys;
 }
 
+/**
+ * Laitaa kaikki tietyn tyyppiset tiedostot pankista ja palauttaa arrayn tiedostojen viitteista ja
+ * statuksista
+ *
+ * @param array $params
+ *
+ * @return array|bool
+ */
 function lataa_kaikki($params) {
   global $kukarow, $yhtiorow;
 
@@ -742,6 +840,15 @@ function lataa_kaikki($params) {
   return false;
 }
 
+/**
+ * Tarkistaa pystyyko annetulla salasana decryptaamaan private_keyn pankkiyhteysrivista.
+ * Tarkistus perustuu siihen, saako salatusta datasta selvaa decryptauksen jalkeen
+ *
+ * @param string $pankkiyhteys_tunnus
+ * @param string $salasana
+ *
+ * @return bool
+ */
 function salasana_kunnossa($pankkiyhteys_tunnus, $salasana) {
   $pankkiyhteys = hae_pankkiyhteys($pankkiyhteys_tunnus);
   $avain = pura_salaus($pankkiyhteys["private_key"], $salasana);
@@ -753,6 +860,12 @@ function salasana_kunnossa($pankkiyhteys_tunnus, $salasana) {
   return true;
 }
 
+/**
+ * Genetoi private keyn ja certificate signing requestin. Tiedot signing requestiin haetaan
+ * yhtiorowista. Palauttaa arrayn, jossa private_key ja csr.
+ *
+ * @return array
+ */
 function generoi_private_key_ja_csr() {
   global $kukarow, $yhtiorow;
 
@@ -782,6 +895,14 @@ function generoi_private_key_ja_csr() {
   );
 }
 
+/**
+ * Salaa annetun datan annetulla salasanalla. Salaus on 256-bittinen AES-salaus.
+ *
+ * @param string $salattava_data
+ * @param string $salasana
+ *
+ * @return string
+ */
 function salaa($salattava_data, $salasana) {
   $avain = hash("SHA256", $salasana, true);
 
@@ -794,6 +915,14 @@ function salaa($salattava_data, $salasana) {
   return base64_encode($salattu_data);
 }
 
+/**
+ * Purkaa 256-bittisen AES-salauksen annetusta datasta annetulla salasanalla
+ *
+ * @param string $salattu_data
+ * @param string $salasana
+ *
+ * @return string
+ */
 function pura_salaus($salattu_data, $salasana) {
   $avain = hash("SHA256", $salasana, true);
 
@@ -811,7 +940,7 @@ function pura_salaus($salattu_data, $salasana) {
 }
 
 /**
- * Palauttaa arrayn tuetuista pankeista muodossa BIC => Pankin Nimi
+ * Palauttaa arrayn tuetuista pankeista muodossa BIC => [lyhyt_nimi, pitka_nimi]
  *
  * @return array
  */

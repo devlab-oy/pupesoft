@@ -55,6 +55,22 @@ if ($tyojono_muutos != '' and $tyomaarayksen_tunnus != '') {
   $update_tyom_res = pupe_query($query);
 }
 
+if (($tyojono_muutos != '' or $tyostatus_muutos != '') and $tyomaarayksen_tunnus != '') {
+  // Paivitetaan myös tyomaarayksen_tapahtumat-taulu
+  $tyojono_muutos = mysql_real_escape_string($tyojono_muutos);
+  $tyostatus_muutos = mysql_real_escape_string($tyostatus_muutos);
+  $tyomaarayksen_tunnus = (int) $tyomaarayksen_tunnus;
+  
+  $query = "INSERT INTO tyomaarayksen_tapahtumat SET
+            tyomaarays_tunnus = '$tyomaarayksen_tunnus',
+            tyojono_selite    = '$tyojono_muutos',
+            tyostatus_selite  = '$tyostatus_muutos',
+            yhtio             = '{$kukarow['yhtio']}',
+            laatija           = '{$kukarow['kuka']}',
+            luontiaika        = now()";
+  pupe_query($query);
+}
+
 $chk = "";
 if (trim($konserni) != '') {
   $chk = "CHECKED";

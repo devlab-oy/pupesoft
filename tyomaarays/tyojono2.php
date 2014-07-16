@@ -127,12 +127,9 @@ if (is_string($request['lasku_tunnukset']) and !empty($request['lasku_tunnukset'
 
 if ($toim == 'TEHDYT_TYOT') {
   if ($request['ala_tee'] == 'tulosta_tarkastuspoytakirja' or $request['ala_tee'] == 'tulosta_poikkeamaraportti') {
-    $pdf_tiedostot = ($request['ala_tee'] == 'tulosta_tarkastuspoytakirja' ? PDF\Tarkastuspoytakirja\hae_tarkastuspoytakirjat($request['lasku_tunnukset']) : PDF\Poikkeamaraportti\hae_poikkeamaraportit($request['lasku_tunnukset']));
-
-    foreach ($pdf_tiedostot as $pdf_tiedosto) {
-      if (!empty($pdf_tiedosto)) {
-        echo_tallennus_formi($pdf_tiedosto, ($request['ala_tee'] == 'tulosta_tarkastuspoytakirja' ? t("Tarkastuspöytakirja") : t("Poikkeamaraportti")), 'pdf');
-      }
+    $pdf_tiedosto =  \PDF\Tarkastuspoytakirja\hae_tarkastuspoytakirja($request['lasku_tunnukset']);
+    if (!empty($pdf_tiedosto)) {
+      echo_tallennus_formi($pdf_tiedosto, ($request['ala_tee'] == 'tulosta_tarkastuspoytakirja' ? t("Tarkastuspöytakirja") : t("Poikkeamaraportti")), 'pdf');
     }
   }
   if ($request['ala_tee'] == 'tulosta_laskutuspoytakirja') {

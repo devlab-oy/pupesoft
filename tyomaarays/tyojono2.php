@@ -78,6 +78,22 @@ echo $css;
 
 enable_ajax();
 
+if (!isset($asiakas_tunnus)) {
+  $asiakas_tunnus = '';
+}
+if (!isset($kohde_tunnus)) {
+  $kohde_tunnus = '';
+}
+if (!isset($tyojono)) {
+  $tyojono = '';
+}
+if (!isset($tyostatus)) {
+  $tyostatus = '';
+}
+if (!isset($toimitusaika)) {
+  $toimitusaika = '';
+}
+
 $request = array(
     'ala_tee'         => $ala_tee,
     'toim'            => $toim,

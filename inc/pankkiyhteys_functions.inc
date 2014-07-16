@@ -356,49 +356,21 @@ function viesti($viesti) {
   echo "<br/>";
 }
 
-function pankin_nimi($bic) {
-  switch ($bic) {
-    case "NDEAFIHH":
-      return "Nordea";
-    case "DABAFIHX":
-      return "Danske Bank";
-    default:
-      return false;
-  }
-}
-
 
 // Pankkiyhteys tietokantafunktiot
 
-function hae_avain_sertifikaatti_ja_customer_id($tili) {
+function hae_avain_sertifikaatti_ja_customer_id($pankkiyhteys_tunnus) {
   global $kukarow, $yhtiorow;
 
   $query = "SELECT private_key, certificate, customer_id, target_id
             FROM pankkiyhteys
             WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND tunnus = {$tili}";
+            AND tunnus = {$pankkiyhteys_tunnus}";
   $result = pupe_query($query);
 
   $rivi = mysql_fetch_assoc($result);
 
   return $rivi;
-}
-
-function hae_kaytossa_olevat_pankkiyhteydet() {
-  global $kukarow, $yhtiorow;
-
-  $query = "SELECT tunnus, pankki
-            FROM pankkiyhteys
-            WHERE yhtio = '{$kukarow["yhtio"]}'";
-  $result = pupe_query($query);
-
-  $kaytossa_olevat_tilit = array();
-
-  while ($rivi = mysql_fetch_assoc($result)) {
-    array_push($kaytossa_olevat_tilit, $rivi);
-  }
-
-  return $kaytossa_olevat_tilit;
 }
 
 function hae_pankkiyhteydet() {
@@ -481,23 +453,7 @@ function poista_pankkiyhteys($pankki) {
 
 // SEPA API fuktiot
 
-function pura_salaus($salattu_data, $salasana) {
-  $avain = hash("SHA256", $salasana, true);
-
-  $salattu_data_binaari = base64_decode($salattu_data);
-
-  $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC);
-
-  //  Pitaa olla monta spacee, jotta UTF-8 konversio ei riko toiminnallisuutta
-  $iv = substr    ($salattu_data_binaari, 0, $iv_size);
-
-  //  Pitaa olla monta spacee, jotta UTF-8 konversio ei riko toiminnallisuutta
-  $salattu_data_binaari = substr    ($salattu_data_binaari, $iv_size);
-
-  return mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $avain, $salattu_data_binaari, MCRYPT_MODE_CBC, $iv);
-}
-
-function download_file_list($tiedostotyyppi, $tunnukset) {
+function sepa_download_file_list($params) {
   global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
 
   $parameters = array(
@@ -532,7 +488,7 @@ function download_file_list($tiedostotyyppi, $tunnukset) {
   return $viitteet;
 }
 
-function download_files($params) {
+function sepa_download_files($params) {
   global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
 
   $viitteet = isset($params["viitteet"]) ? $params["viitteet"] : "";
@@ -590,25 +546,7 @@ function download_files($params) {
   return $tiedostot;
 }
 
-function hae_tunnukset_ja_pura_salaus($tili, $salasana) {
-  global $kukarow, $yhtiorow;
-
-  $haetut_tunnukset = hae_avain_sertifikaatti_ja_customer_id($tili);
-  $avain = pura_salaus($haetut_tunnukset["private_key"], $salasana);
-  $sertifikaatti = pura_salaus($haetut_tunnukset["certificate"], $salasana);
-
-  $customer_id = $haetut_tunnukset["customer_id"];
-  $target_id = $haetut_tunnukset["target_id"];
-
-  return array(
-    "avain"         => $avain,
-    "sertifikaatti" => $sertifikaatti,
-    "customer_id"   => $customer_id,
-    "target_id"     => $target_id
-  );
-}
-
-function laheta_maksuaineisto($tunnukset, $maksuaineisto) {
+function sepa_upload_file($params) {
   global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
 
   $parameters = array(
@@ -637,8 +575,106 @@ function laheta_maksuaineisto($tunnukset, $maksuaineisto) {
   return $vastaus;
 }
 
-function lataa_kaikki($tiedostotyyppi) {
+function sepa_get_certificate($params) {
+  global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
+
+  $pin = isset($params["pin"]) ? (string) $params["pin"] : "";
+  $customer_id = isset($params["customer_id"]) ? (string) $params["customer_id"] : "";
+  $tunnukset = isset($params["tunnukset"]) ? (array) $params["tunnukset"] : "";
+
+  if (empty($pin) or empty($customer_id) or empty($tunnukset)) {
+    return false;
+  }
+
+  $parameters = array(
+    "method"  => "POST",
+    "data"    => array(
+      "pin"         => $pin,
+      "customer_id" => $customer_id,
+      "environment" => "TEST", // Voi olla joko "TEST" tai "PRODUCTION"
+      "csr"         => base64_encode($tunnukset["csr"])
+    ),
+    "url"     => "https://sepa.devlab.fi/api/nordea/get_certificate",
+    "headers" => array(
+      "Content-Type: application/json",
+      "Authorization: Token token={$sepa_pankkiyhteys_token}"
+    )
+  );
+
+  $vastaus = pupesoft_rest($parameters);
+
+  if (!vastaus_kunnossa($vastaus)) {
+    return false;
+  }
+
+  $sertifikaatti = base64_decode($vastaus[1]["content"]);
+
+  return $sertifikaatti;
+}
+
+function sepa_get_user_info($params) {
+  global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
+
+  $certificate = isset($params["certificate"]) ? $params["certificate"] : "";
+  $private_key = isset($params["private_key"]) ? $params["private_key"] : "";
+  $customer_id = isset($params["customer_id"]) ? $params["customer_id"] : "";
+
+  if (empty($certificate) or empty($private_key) or empty($customer_id)) {
+    return false;
+  }
+
+  $parameters = array(
+    "method"  => "POST",
+    "data"    => array(
+      "cert"        => base64_encode($certificate),
+      "private_key" => base64_encode($private_key),
+      "customer_id" => $customer_id
+    ),
+    "url"     => "https://sepa.devlab.fi/api/nordea/get_user_info",
+    "headers" => array(
+      "Content-Type: application/json",
+      "Authorization: Token token={$sepa_pankkiyhteys_token}"
+    )
+  );
+
+  $vastaus = pupesoft_rest($parameters);
+
+  $target_id = $vastaus[1]["userFileTypes"][0]["targetId"];
+
+  if (empty($target_id)) {
+    return false;
+  }
+
+  return $target_id;
+}
+
+
+// Sertifikaatti / salausfunktiot
+
+function hae_tunnukset_ja_pura_salaus($tili, $salasana) {
   global $kukarow, $yhtiorow;
+
+  $haetut_tunnukset = hae_avain_sertifikaatti_ja_customer_id($tili);
+  $avain = pura_salaus($haetut_tunnukset["private_key"], $salasana);
+  $sertifikaatti = pura_salaus($haetut_tunnukset["certificate"], $salasana);
+
+  $customer_id = $haetut_tunnukset["customer_id"];
+  $target_id = $haetut_tunnukset["target_id"];
+
+  return array(
+    "avain"         => $avain,
+    "sertifikaatti" => $sertifikaatti,
+    "customer_id"   => $customer_id,
+    "target_id"     => $target_id
+  );
+}
+
+function lataa_kaikki($params) {
+  global $kukarow, $yhtiorow;
+
+  $tiedostotyyppi;
+  $tili;
+  $salasana;
 
   $tunnukset = hae_tunnukset_ja_pura_salaus($_POST["tili"], $_POST["salasana"]);
 
@@ -663,10 +699,9 @@ function lataa_kaikki($tiedostotyyppi) {
   return false;
 }
 
-function salasana_kunnossa() {
-  $haetut_tunnukset = hae_avain_sertifikaatti_ja_customer_id($_POST["tili"]);
-
-  $avain = pura_salaus($haetut_tunnukset["private_key"], $_POST["salasana"]);
+function salasana_kunnossa($pankkiyhteys_tunnus, $salasana) {
+  $haetut_tunnukset = hae_avain_sertifikaatti_ja_customer_id($pankkiyhteys_tunnus);
+  $avain = pura_salaus($haetut_tunnukset["private_key"], $salasana);
 
   if (!openssl_pkey_get_private($avain)) {
     return false;
@@ -704,44 +739,7 @@ function generoi_private_key_ja_csr() {
   );
 }
 
-function hae_sertifikaatti_sepasta($params) {
-  global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
-
-  $pin = isset($params["pin"]) ? (string) $params["pin"] : "";
-  $customer_id = isset($params["customer_id"]) ? (string) $params["customer_id"] : "";
-  $tunnukset = isset($params["tunnukset"]) ? (array) $params["tunnukset"] : "";
-
-  if (empty($pin) or empty($customer_id) or empty($tunnukset)) {
-    return false;
-  }
-
-  $parameters = array(
-    "method"  => "POST",
-    "data"    => array(
-      "pin"         => $pin,
-      "customer_id" => $customer_id,
-      "environment" => "TEST", // Voi olla joko "TEST" tai "PRODUCTION"
-      "csr"         => base64_encode($tunnukset["csr"])
-    ),
-    "url"     => "https://sepa.devlab.fi/api/nordea/get_certificate",
-    "headers" => array(
-      "Content-Type: application/json",
-      "Authorization: Token token={$sepa_pankkiyhteys_token}"
-    )
-  );
-
-  $vastaus = pupesoft_rest($parameters);
-
-  if (!vastaus_kunnossa($vastaus)) {
-    return false;
-  }
-
-  $sertifikaatti = base64_decode($vastaus[1]["content"]);
-
-  return $sertifikaatti;
-}
-
-function salaa($data, $salasana) {
+function salaa($salattava_data, $salasana) {
   $avain = hash("SHA256", $salasana, true);
 
   $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC);
@@ -753,38 +751,18 @@ function salaa($data, $salasana) {
   return base64_encode($salattu_data);
 }
 
-function hae_target_id($params) {
-  global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
+function pura_salaus($salattu_data, $salasana) {
+  $avain = hash("SHA256", $salasana, true);
 
-  $certificate = isset($params["certificate"]) ? $params["certificate"] : "";
-  $private_key = isset($params["private_key"]) ? $params["private_key"] : "";
-  $customer_id = isset($params["customer_id"]) ? $params["customer_id"] : "";
+  $salattu_data_binaari = base64_decode($salattu_data);
 
-  if (empty($certificate) or empty($private_key) or empty($customer_id)) {
-    return false;
-  }
+  $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC);
 
-  $parameters = array(
-    "method"  => "POST",
-    "data"    => array(
-      "cert"        => base64_encode($certificate),
-      "private_key" => base64_encode($private_key),
-      "customer_id" => $customer_id
-    ),
-    "url"     => "https://sepa.devlab.fi/api/nordea/get_user_info",
-    "headers" => array(
-      "Content-Type: application/json",
-      "Authorization: Token token={$sepa_pankkiyhteys_token}"
-    )
-  );
+  //  Pitaa olla monta spacee, jotta UTF-8 konversio ei riko toiminnallisuutta
+  $iv = substr    ($salattu_data_binaari, 0, $iv_size);
 
-  $vastaus = pupesoft_rest($parameters);
+  //  Pitaa olla monta spacee, jotta UTF-8 konversio ei riko toiminnallisuutta
+  $salattu_data_binaari = substr    ($salattu_data_binaari, $iv_size);
 
-  $target_id = $vastaus[1]["userFileTypes"][0]["targetId"];
-
-  if (empty($target_id)) {
-    return false;
-  }
-
-  return $target_id;
+  return mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $avain, $salattu_data_binaari, MCRYPT_MODE_CBC, $iv);
 }

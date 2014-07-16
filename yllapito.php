@@ -503,7 +503,7 @@
       }
       // Päivitetään
       else {
-        if ($toim == 'laite') {
+        if ($yhtiorow['laite_huolto'] == 'X' and $toim == 'laite') {
           $huoltovalit = huoltovali_options();
           foreach ($laite['huoltosyklit'] as $tyyppi => $sykli) {
 
@@ -544,12 +544,19 @@
               }
               elseif ($huoltosykli_laite_tunnus != 0 and $huoltosykli_tunnus == 0) {
                 $sykli_query = "DELETE FROM huoltosyklit_laitteet
-                        WHERE tunnus = $huoltosykli_laite_tunnus";
+                                WHERE tunnus = $huoltosykli_laite_tunnus";
               }
               if (isset($sykli_query)) {
                 pupe_query($sykli_query);
               }
               unset($sykli_query);
+          }
+
+          if (empty($errori)) {
+            $asiakas = hae_paikan_asiakas($t['paikka']);
+            $laitteet = hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy($asiakas['tunnus']);
+            list($huollettavien_laitteiden_huoltosyklirivit, $laitteiden_huoltosyklirivit_joita_ei_huolleta) = paata_mitka_huollot_tehdaan($laitteet);
+            $tyomaarays_kpl = generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltosyklirivit, $laitteiden_huoltosyklirivit_joita_ei_huolleta);
           }
         }
 
@@ -614,7 +621,7 @@
         $tunnus = mysql_insert_id();
 
         //lisätään myös huoltosyklit jos on kyse laitteesta
-        if (empty($kopioi_rivi) and $toim == 'laite') {
+        if ($toim == 'laite' and $yhtiorow['laite_huolto'] == 'X') {
 
           $huoltovalit = huoltovali_options();
           foreach ($laite['huoltosyklit'] as $sykli) {
@@ -653,26 +660,11 @@
           }
         }
 
-        if (!empty($kopioi_rivi) and $toim == 'laite') {
-          //Laitteen kopioinnissa, kopioidaan myös laitteeseen liitetyt huoltosyklit rivit
-          $query = "  SELECT *
-                FROM huoltosyklit_laitteet
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND laite_tunnus = '{$kopioitavan_rivin_tunnus}'";
-          $result = pupe_query($query);
-          while($huoltosyklit_laitteet_rivi = mysql_fetch_assoc($result)) {
-            unset($huoltosyklit_laitteet_rivi['tunnus']);
-            unset($huoltosyklit_laitteet_rivi['luontiaika']);
-            unset($huoltosyklit_laitteet_rivi['muuttaja']);
-            unset($huoltosyklit_laitteet_rivi['muutospvm']);
-            $huoltosyklit_laitteet_rivi['laatija'] = $kukarow['kuka'];
-            $huoltosyklit_laitteet_rivi['laite_tunnus'] = $tunnus;
-
-            $copy_query = "  INSERT INTO
-                    huoltosyklit_laitteet (".implode(", ", array_keys($huoltosyklit_laitteet_rivi)).", luontiaika)
-                    VALUES('".implode("', '", array_values($huoltosyklit_laitteet_rivi)). "', now())";
-            pupe_query($copy_query);
-          }
+        if ($yhtiorow['laite_huolto'] == 'X' and $toim == 'laite' and empty($errori)) {
+          $asiakas = hae_paikan_asiakas($t['paikka']);
+          $laitteet = hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy($asiakas['tunnus']);
+          list($huollettavien_laitteiden_huoltosyklirivit, $laitteiden_huoltosyklirivit_joita_ei_huolleta) = paata_mitka_huollot_tehdaan($laitteet);
+          $tyomaarays_kpl = generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltosyklirivit, $laitteiden_huoltosyklirivit_joita_ei_huolleta);
         }
       }
 
@@ -1128,6 +1120,11 @@
         //unohdetaan tämä jos loopatan takaisin yllapito.php:seen, eli silloin metasta ei ole mitään hyötyä
         if (strpos($lopetus, "yllapito.php") === FALSE) {
           $lopetus .= "//yllapidossa=$toim//yllapidontunnus=$tunnus";
+
+          if ($yhtiorow['laite_huolto'] == 'X' and isset($tyomaarays_kpl)) {
+            $lopetus .= "//tyomaarays_kpl={$tyomaarays_kpl}";
+          }
+
           lopetus($lopetus, "META");
         }
       }
@@ -2559,14 +2556,16 @@
         <input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form>";
   }
 
-  //redirect funktio kutsu pitää olla tässä, koska jos updatesta tulee virheitä niin ne pitää händälätä ja passata redirect funkkarille, jotta osataan echottaa / jättää echottama redirecti
-  $funktio = "echo_".$toim."_redirect";
+  //redirect funktio kutsu pitää olla tässä,
+  //koska jos updatesta tulee virheitä niin ne pitää händälätä ja passata redirect funkkarille,
+  //jotta osataan echottaa / jättää echottama redirecti
+  $funktio = "echo_" . $toim . "_redirect";
 
   if (function_exists($funktio)) {
     $params = array(
-      'redirect_to' => $redirect_to,
-      'errori' => $errori,
-      'valittu_asiakas' => $valittu_asiakas,
+        'redirect_to'     => $redirect_to,
+        'errori'          => $errori,
+        'valittu_asiakas' => $valittu_asiakas,
     );
 
     $funktio($params);

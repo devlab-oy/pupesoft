@@ -219,6 +219,10 @@ function paata_mitka_huollot_tehdaan($laitteiden_huoltosyklirivit) {
 function generoi_tyomaaraykset_huoltosykleista($laitteet, $laitteiden_huoltosyklirivit_joita_ei_huolleta) {
   global $kukarow, $yhtiorow, $debug;
 
+  if (!isset($debug)) {
+    $debug = false;
+  }
+
   if ($debug) {
     echo "Työmääräyksiä pitäisi tulla " . count($laitteet) . ' kappaletta';
     echo "<br/>";
@@ -281,10 +285,10 @@ function generoi_tyomaaraykset_huoltosykleista($laitteet, $laitteiden_huoltosykl
     }
   }
 
+  $tyomaarays_kpl = count($laitteet) - count($virheet);
   if ($debug) {
-    $kpl = count($laitteet) - count($virheet);
     echo "<br/>";
-    echo "Työmääräyksiä tuli {$kpl}";
+    echo "Työmääräyksiä tuli {$tyomaarays_kpl}";
     echo "<br/>";
     foreach($virheet as $laitteen_virheet) {
       foreach ($laitteen_virheet as $laitteen_virhe) {
@@ -315,6 +319,8 @@ function generoi_tyomaaraykset_huoltosykleista($laitteet, $laitteiden_huoltosykl
     echo "<br/>";
     echo "<br/>";
   }
+
+  return $tyomaarays_kpl;
 }
 
 function generoi_tyomaarays_temp($huollettavan_laitteen_huoltosyklirivi) {
@@ -1541,5 +1547,31 @@ if (!function_exists('echo_kust_tulevat_tyot_kayttoliittyma')) {
     echo "</form>";
 
     echo "</div>";
+  }
+}
+
+if (!function_exists('hae_paikan_asiakas')) {
+
+  function hae_paikan_asiakas($paikka_tunnus) {
+    global $kukarow, $yhtiorow;
+
+    if (empty($paikka_tunnus)) {
+      return false;
+    }
+
+    $query = "SELECT asiakas.*
+              FROM asiakas
+              JOIN kohde
+              ON ( kohde.yhtio = asiakas.yhtio
+                AND kohde.asiakas = asiakas.tunnus )
+              JOIN paikka
+              ON ( paikka.yhtio = kohde.yhtio
+                AND paikka.kohde = kohde.tunnus
+                AND paikka.tunnus = {$paikka_tunnus})
+              WHERE asiakas.yhtio = '{$kukarow['yhtio']}'";
+
+    $result = pupe_query($query);
+
+    return mysql_fetch_assoc($result);
   }
 }

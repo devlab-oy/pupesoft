@@ -98,6 +98,7 @@ $request = array(
     'ala_tee'         => $ala_tee,
     'lasku_tunnukset' => $lasku_tunnukset,
     'huoltosyklit'    => $huoltosyklit,
+    'tyomaarays_kpl'  => $tyomaarays_kpl, //Tämä muuttuja tulee yllapito.php:stä redirectin kautta
 );
 
 $request['laitteen_tilat'] = hae_laitteen_tilat();
@@ -113,6 +114,13 @@ else {
 
 if (!empty($request['haettu_asiakas'])) {
   echo "<font class='head'>{$request['haettu_asiakas']['nimi']}</font>";
+  echo "<br/>";
+  echo "<br/>";
+}
+
+//Kun perustetaan uusi laite niin ajetaan tyomaaraysten_generointi.
+if (isset($request['tyomaarays_kpl'])) {
+  echo "<font class='message'>" . t('Työmääräyksiä generoitiin muutosten pohjalta') . ": {$request['tyomaarays_kpl']} " . t('kappaletta') . "</font>";
   echo "<br/>";
   echo "<br/>";
 }

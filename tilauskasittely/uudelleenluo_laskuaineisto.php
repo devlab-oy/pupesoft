@@ -874,7 +874,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
   }
   else {
     // Muutetaan ISO-8859-15:ksi jos lasku on jossain toisessa merkistössä
-    exec("recode UTF8..ISO-8859-15 $nimixml");
+    exec("recode --force UTF8..ISO-8859-15 $nimixml");
   }
 
   if (filesize($nimifinvoice) == 0) {
@@ -882,7 +882,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
   }
   else {
     // Muutetaan ISO-8859-15:ksi jos lasku on jossain toisessa merkistössä
-    exec("recode UTF8..ISO-8859-15 $nimifinvoice");
+    exec("recode --force UTF8..ISO-8859-15 $nimifinvoice");
   }
 
   if (filesize($nimiedi) == 0) {
@@ -890,7 +890,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
   }
   else {
     // Muutetaan ISO-8859-15:ksi jos lasku on jossain toisessa merkistössä
-    exec("recode UTF8..ISO-8859-15 $nimiedi");
+    exec("recode --force UTF8..ISO-8859-15 $nimiedi");
   }
 
   if (filesize($nimisisainenfinvoice) == 0) {
@@ -898,7 +898,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
   }
   else {
     // Muutetaan ISO-8859-15:ksi jos lasku on jossain toisessa merkistössä
-    exec("recode UTF8..ISO-8859-15 $nimisisainenfinvoice");
+    exec("recode --force UTF8..ISO-8859-15 $nimisisainenfinvoice");
   }
 
   if (count($tulostettavat_apix) > 0) {

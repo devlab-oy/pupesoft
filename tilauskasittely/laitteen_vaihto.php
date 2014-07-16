@@ -565,13 +565,6 @@ function echo_laitteen_vaihto_form($request = array()) {
   echo "</tr>";
 
   echo "<tr>";
-  echo '<th align="left">' . t("Muu Omistaja") . '</th>';
-  echo "<td>";
-  echo '<input type="text" name="uusi_laite[omistaja]" value="' . $request['uusi_laite']['omistaja'] . '" size="35" maxlength="60" />';
-  echo "</td>";
-  echo "</tr>";
-
-  echo "<tr>";
   echo '<th align="left">' . t("Paikka") . '</th>';
   echo "<td>";
   echo "<select name='uusi_laite[paikka]'>";

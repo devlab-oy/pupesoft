@@ -51,7 +51,7 @@ if ($tee == "luo" and $pin != '') {
     "tunnukset"   => $generoidut_tunnukset
   );
 
-  $sertifikaatti = hae_sertifikaatti_sepasta($params);
+  $sertifikaatti = sepa_get_certificate($params);
   $private_key = $generoidut_tunnukset["private_key"];
 
   if (!$sertifikaatti) {

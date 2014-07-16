@@ -580,7 +580,7 @@ function sepa_get_certificate($params) {
 
   $pin = isset($params["pin"]) ? (string) $params["pin"] : "";
   $customer_id = isset($params["customer_id"]) ? (string) $params["customer_id"] : "";
-  $tunnukset = isset($params["tunnukset"]) ? (array) $params["tunnukset"] : "";
+  $tunnukset = isset($params["tunnukset"]) ? $params["tunnukset"] : "";
 
   if (empty($pin) or empty($customer_id) or empty($tunnukset)) {
     return false;
@@ -745,7 +745,7 @@ function salaa($salattava_data, $salasana) {
   $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC);
   $iv = mcrypt_create_iv($iv_size, MCRYPT_RAND);
 
-  $salattu_data = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $avain, $data, MCRYPT_MODE_CBC, $iv);
+  $salattu_data = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $avain, $salattava_data, MCRYPT_MODE_CBC, $iv);
   $salattu_data = $iv . $salattu_data;
 
   return base64_encode($salattu_data);

@@ -378,6 +378,11 @@ function hae_pankkiyhteys($pankkiyhteys_tunnus) {
   return $rivi;
 }
 
+/**
+ * Hakee kaikki yhtion pankkiyhteydet tietokannasta ja lisaa pankin nimen palautettavaan arrayhyn
+ *
+ * @return array
+ */
 function hae_pankkiyhteydet() {
   global $kukarow, $yhtiorow;
 
@@ -397,6 +402,11 @@ function hae_pankkiyhteydet() {
   return $luodut_pankkiyhteydet;
 }
 
+/**
+ * Hakee pankkiyhteydet, joita ei ole viela luotu kyseiselle yhtiolle
+ *
+ * @return array
+ */
 function mahdolliset_pankkiyhteydet() {
   global $kukarow, $yhtiorow;
 
@@ -419,6 +429,11 @@ function mahdolliset_pankkiyhteydet() {
   return $mahdolliset_pankkiyhteydet;
 }
 
+/**
+ * @param $params
+ *
+ * @return bool|resource
+ */
 function tallenna_pankkiyhteys($params) {
   global $kukarow, $yhtiorow;
 
@@ -443,6 +458,11 @@ function tallenna_pankkiyhteys($params) {
   return $result;
 }
 
+/**
+ * @param $pankki
+ *
+ * @return resource
+ */
 function poista_pankkiyhteys($pankki) {
   global $kukarow, $yhtiorow;
 
@@ -456,6 +476,11 @@ function poista_pankkiyhteys($pankki) {
 
 // SEPA API fuktiot
 
+/**
+ * @param $params
+ *
+ * @return array|bool
+ */
 function sepa_download_file_list($params) {
   global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
 

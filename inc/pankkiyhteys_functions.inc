@@ -401,28 +401,21 @@ function hae_kaytossa_olevat_pankkiyhteydet() {
   return $kaytossa_olevat_tilit;
 }
 
-function tallenna_tunnukset($params) {
+function hae_pankkiyhteydet() {
   global $kukarow, $yhtiorow;
 
-  $pankki = isset($params["pankki"]) ? $params["pankki"] : "";
-  $salatut_tunnukset = isset($params["salatut_tunnukset"]) ? $params["salatut_tunnukset"] : "";
-  $customer_id = isset($params["customer_id"]) ? $params["customer_id"] : "";
-  $target_id = isset($params["target_id"]) ? $params["target_id"] : "";
+  $luodut_pankkiyhteydet = array();
 
-  if (empty($pankki) or empty($salatut_tunnukset) or empty($customer_id) or empty($target_id)) {
-    return false;
-  }
-
-  $query = "INSERT INTO pankkiyhteys SET
-            yhtio = '{$kukarow['yhtio']}',
-            pankki = '{$pankki}',
-            private_key = '{$salatut_tunnukset['private_key']}',
-            certificate = '{$salatut_tunnukset['sertifikaatti']}',
-            customer_id = '{$customer_id}',
-            target_id = '{$target_id}'";
+  $query = "SELECT *
+            FROM pankkiyhteys
+            WHERE yhtio = '{$kukarow['yhtio']}'";
   $result = pupe_query($query);
 
-  return $result;
+  while ($rivi = mysql_fetch_assoc($result)) {
+    array_push($luodut_pankkiyhteydet, $rivi);
+  }
+
+  return $luodut_pankkiyhteydet;
 }
 
 function mahdolliset_pankkiyhteydet() {
@@ -451,21 +444,28 @@ function mahdolliset_pankkiyhteydet() {
   return $mahdolliset_pankkiyhteydet;
 }
 
-function hae_pankkiyhteydet() {
+function tallenna_pankkiyhteys($params) {
   global $kukarow, $yhtiorow;
 
-  $luodut_pankkiyhteydet = array();
+  $pankki = isset($params["pankki"]) ? $params["pankki"] : "";
+  $salatut_tunnukset = isset($params["salatut_tunnukset"]) ? $params["salatut_tunnukset"] : "";
+  $customer_id = isset($params["customer_id"]) ? $params["customer_id"] : "";
+  $target_id = isset($params["target_id"]) ? $params["target_id"] : "";
 
-  $query = "SELECT *
-            FROM pankkiyhteys
-            WHERE yhtio = '{$kukarow['yhtio']}'";
-  $result = pupe_query($query);
-
-  while ($rivi = mysql_fetch_assoc($result)) {
-    array_push($luodut_pankkiyhteydet, $rivi);
+  if (empty($pankki) or empty($salatut_tunnukset) or empty($customer_id) or empty($target_id)) {
+    return false;
   }
 
-  return $luodut_pankkiyhteydet;
+  $query = "INSERT INTO pankkiyhteys SET
+            yhtio = '{$kukarow['yhtio']}',
+            pankki = '{$pankki}',
+            private_key = '{$salatut_tunnukset['private_key']}',
+            certificate = '{$salatut_tunnukset['sertifikaatti']}',
+            customer_id = '{$customer_id}',
+            target_id = '{$target_id}'";
+  $result = pupe_query($query);
+
+  return $result;
 }
 
 function poista_pankkiyhteys($pankki) {

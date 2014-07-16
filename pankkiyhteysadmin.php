@@ -109,7 +109,7 @@ if ($tee == "luo") {
     "target_id"         => $target_id
   );
 
-  if (tallenna_tunnukset($params)) {
+  if (tallenna_pankkiyhteys($params)) {
     ok("Tunnukset tallennettu");
   }
   else {

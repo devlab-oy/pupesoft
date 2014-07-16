@@ -367,7 +367,8 @@ function pankin_nimi($bic) {
   }
 }
 
-// Pankkiyhteyden fuktiot
+
+// Pankkiyhteys tietokantafunktiot
 
 function hae_avain_sertifikaatti_ja_customer_id($tili) {
   global $kukarow, $yhtiorow;
@@ -382,6 +383,103 @@ function hae_avain_sertifikaatti_ja_customer_id($tili) {
 
   return $rivi;
 }
+
+function hae_kaytossa_olevat_pankkiyhteydet() {
+  global $kukarow, $yhtiorow;
+
+  $query = "SELECT tunnus, pankki
+            FROM pankkiyhteys
+            WHERE yhtio = '{$kukarow["yhtio"]}'";
+  $result = pupe_query($query);
+
+  $kaytossa_olevat_tilit = array();
+
+  while ($rivi = mysql_fetch_assoc($result)) {
+    array_push($kaytossa_olevat_tilit, $rivi);
+  }
+
+  return $kaytossa_olevat_tilit;
+}
+
+function tallenna_tunnukset($params) {
+  global $kukarow, $yhtiorow;
+
+  $pankki = isset($params["pankki"]) ? $params["pankki"] : "";
+  $salatut_tunnukset = isset($params["salatut_tunnukset"]) ? $params["salatut_tunnukset"] : "";
+  $customer_id = isset($params["customer_id"]) ? $params["customer_id"] : "";
+  $target_id = isset($params["target_id"]) ? $params["target_id"] : "";
+
+  if (empty($pankki) or empty($salatut_tunnukset) or empty($customer_id) or empty($target_id)) {
+    return false;
+  }
+
+  $query = "INSERT INTO pankkiyhteys SET
+            yhtio = '{$kukarow['yhtio']}',
+            pankki = '{$pankki}',
+            private_key = '{$salatut_tunnukset['private_key']}',
+            certificate = '{$salatut_tunnukset['sertifikaatti']}',
+            customer_id = '{$customer_id}',
+            target_id = '{$target_id}'";
+  $result = pupe_query($query);
+
+  return $result;
+}
+
+function mahdolliset_pankkiyhteydet() {
+  global $kukarow, $yhtiorow;
+
+  // Tuetut pankit
+  $pankit = array(
+    "NDEAFIHH" => "Nordea",
+    "DABAFIHX" => "Danske Bank",
+  );
+
+  $luodut_pankit = array();
+
+  foreach (hae_pankkiyhteydet() as $pankkiyhteys) {
+    array_push($luodut_pankit, $pankkiyhteys["pankki"]);
+  }
+
+  $mahdolliset_pankkiyhteydet = array();
+
+  foreach ($pankit as $bic => $nimi) {
+    if (!in_array($bic, $luodut_pankit)) {
+      $mahdolliset_pankkiyhteydet[$bic] = $nimi;
+    }
+  }
+
+  return $mahdolliset_pankkiyhteydet;
+}
+
+function hae_pankkiyhteydet() {
+  global $kukarow, $yhtiorow;
+
+  $luodut_pankkiyhteydet = array();
+
+  $query = "SELECT *
+            FROM pankkiyhteys
+            WHERE yhtio = '{$kukarow['yhtio']}'";
+  $result = pupe_query($query);
+
+  while ($rivi = mysql_fetch_assoc($result)) {
+    array_push($luodut_pankkiyhteydet, $rivi);
+  }
+
+  return $luodut_pankkiyhteydet;
+}
+
+function poista_pankkiyhteys($pankki) {
+  global $kukarow, $yhtiorow;
+
+  $query = "DELETE
+            FROM  pankkiyhteys
+            WHERE pankki = '{$pankki}'
+            AND   yhtio  = '{$kukarow["yhtio"]}'";
+  return pupe_query($query);
+}
+
+
+// SEPA API fuktiot
 
 function pura_salaus($salattu_data, $salasana) {
   $avain = hash("SHA256", $salasana, true);
@@ -565,23 +663,6 @@ function lataa_kaikki($tiedostotyyppi) {
   return false;
 }
 
-function hae_kaytossa_olevat_pankkiyhteydet() {
-  global $kukarow, $yhtiorow;
-
-  $query = "SELECT tunnus, pankki
-            FROM pankkiyhteys
-            WHERE yhtio = '{$kukarow["yhtio"]}'";
-  $result = pupe_query($query);
-
-  $kaytossa_olevat_tilit = array();
-
-  while ($rivi = mysql_fetch_assoc($result)) {
-    array_push($kaytossa_olevat_tilit, $rivi);
-  }
-
-  return $kaytossa_olevat_tilit;
-}
-
 function salasana_kunnossa() {
   $haetut_tunnukset = hae_avain_sertifikaatti_ja_customer_id($_POST["tili"]);
 
@@ -660,30 +741,6 @@ function hae_sertifikaatti_sepasta($params) {
   return $sertifikaatti;
 }
 
-function tallenna_tunnukset($params) {
-  global $kukarow, $yhtiorow;
-
-  $pankki = isset($params["pankki"]) ? $params["pankki"] : "";
-  $salatut_tunnukset = isset($params["salatut_tunnukset"]) ? $params["salatut_tunnukset"] : "";
-  $customer_id = isset($params["customer_id"]) ? $params["customer_id"] : "";
-  $target_id = isset($params["target_id"]) ? $params["target_id"] : "";
-
-  if (empty($pankki) or empty($salatut_tunnukset) or empty($customer_id) or empty($target_id)) {
-    return false;
-  }
-
-  $query = "INSERT INTO pankkiyhteys SET
-            yhtio = '{$kukarow['yhtio']}',
-            pankki = '{$pankki}',
-            private_key = '{$salatut_tunnukset['private_key']}',
-            certificate = '{$salatut_tunnukset['sertifikaatti']}',
-            customer_id = '{$customer_id}',
-            target_id = '{$target_id}'";
-  $result = pupe_query($query);
-
-  return $result;
-}
-
 function salaa($data, $salasana) {
   $avain = hash("SHA256", $salasana, true);
 
@@ -730,57 +787,4 @@ function hae_target_id($params) {
   }
 
   return $target_id;
-}
-
-function mahdolliset_pankkiyhteydet() {
-  global $kukarow, $yhtiorow;
-
-  // Tuetut pankit
-  $pankit = array(
-    "NDEAFIHH" => "Nordea",
-    "DABAFIHX" => "Danske Bank",
-  );
-
-  $luodut_pankit = array();
-
-  foreach (hae_pankkiyhteydet() as $pankkiyhteys) {
-    array_push($luodut_pankit, $pankkiyhteys["pankki"]);
-  }
-
-  $mahdolliset_pankkiyhteydet = array();
-
-  foreach ($pankit as $bic => $nimi) {
-    if (!in_array($bic, $luodut_pankit)) {
-      $mahdolliset_pankkiyhteydet[$bic] = $nimi;
-    }
-  }
-
-  return $mahdolliset_pankkiyhteydet;
-}
-
-function hae_pankkiyhteydet() {
-  global $kukarow, $yhtiorow;
-
-  $luodut_pankkiyhteydet = array();
-
-  $query = "SELECT *
-            FROM pankkiyhteys
-            WHERE yhtio = '{$kukarow['yhtio']}'";
-  $result = pupe_query($query);
-
-  while ($rivi = mysql_fetch_assoc($result)) {
-    array_push($luodut_pankkiyhteydet, $rivi);
-  }
-
-  return $luodut_pankkiyhteydet;
-}
-
-function poista_pankkiyhteys($pankki) {
-  global $kukarow, $yhtiorow;
-
-  $query = "DELETE
-            FROM  pankkiyhteys
-            WHERE pankki = '{$pankki}'
-            AND   yhtio  = '{$kukarow["yhtio"]}'";
-  return pupe_query($query);
 }

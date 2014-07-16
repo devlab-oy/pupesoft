@@ -12,32 +12,26 @@ else {
   require_once($filepath . '/tyojono2_functions.inc');
 }
 
-function hae_tarkastuspoytakirjat($lasku_tunnukset) {
+function hae_tarkastuspoytakirja($lasku_tunnukset) {
   $pdf_tiedostot = array();
   if (!empty($lasku_tunnukset)) {
-    $tyomaaraykset = \PDF\Tarkastuspoytakirja\pdf_hae_tyomaaraykset($lasku_tunnukset);
-
-    foreach ($tyomaaraykset as $tyomaarays) {
-      $filepath = kirjoita_json_tiedosto($tyomaarays, "tyomaarays_{$tyomaarays['tunnus']}");
-
-      //ajettavan tiedoston nimi on tarkastuspoytakirja_pdf.rb
-      $pdf_tiedostot[] = aja_ruby($filepath, 'tarkastuspoytakirja_pdf');
-    }
+    $tyomaarays = \PDF\Tarkastuspoytakirja\pdf_hae_tyomaarays($lasku_tunnukset);
+    $filepath = kirjoita_json_tiedosto($tyomaarays, "tyomaarays_{$tyomaarays['tunnus']}");
+    //ajettavan tiedoston nimi on tarkastuspoytakirja_pdf.rb
+    $pdf_tiedosto = aja_ruby($filepath, 'tarkastuspoytakirja_pdf');
   }
-
-  return $pdf_tiedostot;
+  return $pdf_tiedosto;
 }
 
-function pdf_hae_tyomaaraykset($lasku_tunnukset) {
+function pdf_hae_tyomaarays($lasku_tunnukset) {
   global $kukarow, $yhtiorow;
 
   if (empty($lasku_tunnukset)) {
     return false;
   }
 
-  if (is_array($lasku_tunnukset)) {
-    $lasku_tunnukset = implode(",", $lasku_tunnukset);
-  }
+  $_tunnukset = explode(",",$lasku_tunnukset);
+  $lasku_tunnus = $_tunnukset[0];
 
   //queryyn joinataan tauluja kohteeseen saakka, koska tarkastuspöytäkirjat halutaan tulostaa per kohde mutta työmääräykset on laite per työmääräin
   $query = "SELECT lasku.*,
@@ -62,36 +56,29 @@ function pdf_hae_tyomaaraykset($lasku_tunnukset) {
             ON ( kohde.yhtio = paikka.yhtio
               AND kohde.tunnus = paikka.kohde )
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND lasku.tunnus IN({$lasku_tunnukset})
-            GROUP BY lasku.tunnus";
-
+            AND lasku.tunnus = $lasku_tunnus
+            GROUP BY lasku.tunnus
+            ORDER BY laite.oma_numero";
   $result = pupe_query($query);
 
-  $tyomaaraykset = array();
-  while ($tyomaarays = mysql_fetch_assoc($result)) {
-    //vaikka työmääräyksen kaikki tiedot saisi yllä olevasta querystä,
-    //haetaan ne silti erillisillä queryillä,
-    //koska ruby:lle pässättävästä arraystä halutaan multidimensional array.
-    //Tämä sen takia että pdf koodiin ei tarvitsisi koskea.
-    if (isset($tyomaaraykset[$tyomaarays['kohde_tunnus']])) {
-      $tyomaaraysrivit_temp = \PDF\Tarkastuspoytakirja\hae_tyomaarayksen_rivit($tyomaarays['tunnus']);
-      foreach ($tyomaaraysrivit_temp as $rivi_temp) {
-        $tyomaaraykset[$tyomaarays['kohde_tunnus']]['rivit'][] = $rivi_temp;
-      }
-    }
-    else {
-      $tyomaarays['rivit'] = \PDF\Tarkastuspoytakirja\hae_tyomaarayksen_rivit($tyomaarays['tunnus']);
-      $tyomaarays['kohde'] = \PDF\Tarkastuspoytakirja\hae_tyomaarayksen_kohde($tyomaarays['laite_tunnus']);
-      $tyomaarays['asiakas'] = \PDF\Tarkastuspoytakirja\hae_tyomaarayksen_asiakas($tyomaarays['liitostunnus']);
-      $tyomaarays['yhtio'] = $yhtiorow;
-      $tyomaarays['logo'] = base64_encode(hae_yhtion_lasku_logo());
-      $tyomaarays['toimitettuaika'] = date('d.m.Y', strtotime($tyomaarays['rivit'][0]['toimitettuaika']));
-      $tyomaaraykset[$tyomaarays['kohde_tunnus']] = $tyomaarays;
-    }
-  }
+  $tyomaarays = array();
 
-  return $tyomaaraykset;
+  $tyomaarays['rivit'] = \PDF\Tarkastuspoytakirja\hae_tyomaarayksen_rivit($lasku_tunnukset);
+  $tyomaarays['kohde'] = \PDF\Tarkastuspoytakirja\hae_tyomaarayksen_kohde($tyomaarays['laite_tunnus']);
+  $tyomaarays['asiakas'] = \PDF\Tarkastuspoytakirja\hae_tyomaarayksen_asiakas($tyomaarays['liitostunnus']);
+  $tyomaarays['yhtio'] = $yhtiorow;
+  $tyomaarays['logo'] = base64_encode(hae_yhtion_lasku_logo());
+  $tyomaarays['toimitettuaika'] = date('d.m.Y', strtotime($tyomaarays['rivit'][0]['toimitettuaika']));
+  $tyomaarays[$tyomaarays['kohde_tunnus']] = $tyomaarays;
+
+  return $tyomaarays;
 }
+
+
+
+
+
+
 
 function hae_tyomaarayksen_rivit($lasku_tunnus) {
   global $kukarow, $yhtiorow;

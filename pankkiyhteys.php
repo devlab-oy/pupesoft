@@ -29,7 +29,13 @@ if ($tee == "laheta" and !formi_kunnossa()) {
 
 // Tiliotteiden haku
 if ($tee == "laheta" and $hae_tiliotteet == "on") {
-  $tiedostot = lataa_kaikki("TITO");
+  $params = array(
+    "tiedostotyyppi"      => "TITO",
+    "pankkiyhteys_tunnus" => $pankkiyhteys_tunnus,
+    "salasana"            => $salasana
+  );
+
+  $tiedostot = lataa_kaikki($params);
 
   if ($tiedostot) {
     viesti("Ladatut tiliotteet:");

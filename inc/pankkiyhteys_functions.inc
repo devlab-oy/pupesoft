@@ -26,7 +26,7 @@ function vastaus_kunnossa($vastaus) {
 function formi() {
   global $kukarow, $yhtiorow;
 
-  $kaytossa_olevat_pankkiyhteydet = hae_kaytossa_olevat_pankkiyhteydet();
+  $kaytossa_olevat_pankkiyhteydet = hae_pankkiyhteydet();
 
   if ($kaytossa_olevat_pankkiyhteydet) {
 
@@ -38,12 +38,10 @@ function formi() {
     echo "<tr>";
     echo "<td>Valitse tili</td>";
     echo "<td>";
-    echo "<select name='tili'>";
+    echo "<select name='pankkiyhteys_tunnus'>";
 
     foreach ($kaytossa_olevat_pankkiyhteydet as $pankkiyhteys) {
-      echo "<option value='{$pankkiyhteys["tunnus"]}'>";
-      echo pankin_nimi($pankkiyhteys["pankki"]);
-      echo "</option>";
+      echo "<option value='{$pankkiyhteys["tunnus"]}'>{$pankkiyhteys["pankin_nimi"]}</option>";
     }
 
     echo "</select>";
@@ -112,7 +110,7 @@ function formi_kunnossa() {
     $virheet_count++;
   }
 
-  if (!salasana_kunnossa()) {
+  if (!salasana_kunnossa($_POST["pankkiyhteys_tunnus"], $_POST["salasana"])) {
     virhe("Antamasi salasana on väärä");
     $virheet_count++;
   }
@@ -454,6 +452,13 @@ function poista_pankkiyhteys($pankki) {
 function sepa_download_file_list($params) {
   global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
 
+  $tiedostotyyppi = isset($params["tiedostotyyppi"]) ? $params["tiedostotyyppi"] : "";
+  $tunnukset = isset($params["tunnukset"]) ? $params["tunnukset"] : "";
+
+  if (empty($tiedostotyyppi) or empty($tunnukset)) {
+    return false;
+  }
+
   $parameters = array(
     "method"  => "POST",
     "data"    => array(
@@ -670,17 +675,26 @@ function hae_tunnukset_ja_pura_salaus($tili, $salasana) {
 function lataa_kaikki($params) {
   global $kukarow, $yhtiorow;
 
-  $tiedostotyyppi;
-  $tili;
-  $salasana;
+  $tiedostotyyppi = isset($params["tiedostotyyppi"]) ? $params["tiedostotyyppi"] : "";
+  $pankkiyhteys_tunnus = isset($params["pankkiyhteys_tunnus"]) ? $params["pankkiyhteys_tunnus"] : "";
+  $salasana = isset($params["salasana"]) ? $params["salasana"] : "";
 
-  $tunnukset = hae_tunnukset_ja_pura_salaus($_POST["tili"], $_POST["salasana"]);
+  if (empty($tiedostotyyppi) or empty($pankkiyhteys_tunnus) or empty($salasana)) {
+    return false;
+  }
+
+  $tunnukset = hae_tunnukset_ja_pura_salaus($pankkiyhteys_tunnus, $salasana);
 
   if (!$tunnukset) {
     return false;
   }
 
-  $viitteet = download_file_list($tiedostotyyppi, $tunnukset);
+  $params = array(
+    "tiedostotyyppi" => $tiedostotyyppi,
+    "tunnukset"      => $tunnukset,
+  );
+
+  $viitteet = sepa_download_file_list($params);
 
   $params = array(
     "viitteet"       => $viitteet,
@@ -688,7 +702,7 @@ function lataa_kaikki($params) {
     "tunnukset"      => $tunnukset
   );
 
-  $tiedostot = download_files($params);
+  $tiedostot = sepa_download_files($params);
 
   if ($tiedostot) {
     return $tiedostot;

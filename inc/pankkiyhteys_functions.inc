@@ -612,7 +612,7 @@ function sepa_get_certificate($params) {
   return $sertifikaatti;
 }
 
-function sepa_get_user_info($params) {
+function sepa_get_target_id($params) {
   global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
 
   $certificate = isset($params["certificate"]) ? $params["certificate"] : "";

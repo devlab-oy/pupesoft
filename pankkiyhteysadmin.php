@@ -92,7 +92,7 @@ if ($tee == "luo" and $target_id == '') {
     "customer_id" => $customer_id
   );
 
-  $target_id = hae_target_id($params);
+  $target_id = sepa_get_target_id($params);
 
   if (!$target_id) {
     virhe("Tiedon hakeminen pankista epäonnistui, yritä myöhemmin uudestaan");

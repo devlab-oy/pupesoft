@@ -127,7 +127,7 @@ function formi_kunnossa() {
     $virheet_count++;
   }
 
-  if (!salasana_kunnossa($_POST["pankkiyhteys_tunnus"], $_POST["salasana"])) {
+  if (!pankkiyhteys_salasana_kunnossa($_POST["pankkiyhteys_tunnus"], $_POST["salasana"])) {
     virhe("Antamasi salasana on v‰‰r‰");
     $virheet_count++;
   }
@@ -850,7 +850,7 @@ function lataa_kaikki($params) {
  *
  * @return bool
  */
-function salasana_kunnossa($pankkiyhteys_tunnus, $salasana) {
+function pankkiyhteys_salasana_kunnossa($pankkiyhteys_tunnus, $salasana) {
   $pankkiyhteys = hae_pankkiyhteys($pankkiyhteys_tunnus);
   $avain = pura_salaus($pankkiyhteys["private_key"], $salasana);
 

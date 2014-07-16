@@ -404,31 +404,6 @@ function viesti($viesti) {
 // Pankkiyhteys tietokantafunktiot
 
 /**
- * Hakee pankkiyhteysrivin tietokannasta tunnuksen perusteella ja lisaa riviin pankin lyhyen nimen,
- * jota kaytetaan sepa-palvelimen urlissa
- *
- * @param string $pankkiyhteys_tunnus
- *
- * @return array
- */
-function hae_pankkiyhteys($pankkiyhteys_tunnus) {
-  global $kukarow, $yhtiorow;
-
-  $tuetut_pankit = tuetut_pankit();
-
-  $query = "SELECT *
-            FROM pankkiyhteys
-            WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND tunnus = {$pankkiyhteys_tunnus}";
-  $result = pupe_query($query);
-
-  $rivi = mysql_fetch_assoc($result);
-  $rivi["pankki_lyhyt_nimi"] = $tuetut_pankit[$rivi["pankki"]]["lyhyt_nimi"];
-
-  return $rivi;
-}
-
-/**
  * Hakee kaikki yhtion pankkiyhteydet tietokannasta ja lisaa pankin nimen palautettavaan arrayhyn
  *
  * @return array
@@ -500,7 +475,7 @@ function tallenna_pankkiyhteys($params) {
             yhtio = '{$kukarow['yhtio']}',
             pankki = '{$pankki}',
             private_key = '{$salatut_tunnukset['private_key']}',
-            certificate = '{$salatut_tunnukset['sertifikaatti']}',
+            certificate = '{$salatut_tunnukset['certificate']}',
             customer_id = '{$customer_id}',
             target_id = '{$target_id}'";
   $result = pupe_query($query);
@@ -547,7 +522,7 @@ function sepa_download_file_list($params) {
   $parameters = array(
     "method"  => "POST",
     "data"    => array(
-      "cert"        => base64_encode($pankkiyhteys["sertifikaatti"]),
+      "cert"        => base64_encode($pankkiyhteys["certificate"]),
       "private_key" => base64_encode($pankkiyhteys["private_key"]),
       "customer_id" => $pankkiyhteys["customer_id"],
       "file_type"   => $tiedostotyyppi,
@@ -602,7 +577,7 @@ function sepa_download_files($params) {
     $parameters = array(
       "method"  => "POST",
       "data"    => array(
-        "cert"           => base64_encode($pankkiyhteys["sertifikaatti"]),
+        "cert"           => base64_encode($pankkiyhteys["certificate"]),
         "private_key"    => base64_encode($pankkiyhteys["private_key"]),
         "customer_id"    => $pankkiyhteys["customer_id"],
         "file_type"      => $tiedostotyyppi,
@@ -663,7 +638,7 @@ function sepa_upload_file($params) {
   $parameters = array(
     "method"  => "POST",
     "data"    => array(
-      "cert"        => base64_encode($pankkiyhteys["sertifikaatti"]),
+      "cert"        => base64_encode($pankkiyhteys["certificate"]),
       "private_key" => base64_encode($pankkiyhteys["private_key"]),
       "customer_id" => $pankkiyhteys["customer_id"],
       "file_type"   => "NDCORPAYS",
@@ -727,9 +702,9 @@ function sepa_get_certificate($params) {
     return false;
   }
 
-  $sertifikaatti = base64_decode($vastaus[1]["content"]);
+  $certificate = base64_decode($vastaus[1]["content"]);
 
-  return $sertifikaatti;
+  return $certificate;
 }
 
 /**
@@ -791,9 +766,18 @@ function sepa_get_target_id($params) {
 function hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana) {
   global $kukarow, $yhtiorow;
 
-  $pankkiyhteys = hae_pankkiyhteys($pankkiyhteys_tunnus);
+  $tuetut_pankit = tuetut_pankit();
+
+  $query = "SELECT *
+            FROM pankkiyhteys
+            WHERE yhtio = '{$kukarow["yhtio"]}'
+            AND tunnus = {$pankkiyhteys_tunnus}";
+  $result = pupe_query($query);
+
+  $pankkiyhteys = mysql_fetch_assoc($result);
+  $pankkiyhteys["pankki_lyhyt_nimi"] = $tuetut_pankit[$pankkiyhteys["pankki"]]["lyhyt_nimi"];
   $pankkiyhteys["private_key"] = pura_salaus($pankkiyhteys["private_key"], $salasana);
-  $pankkiyhteys["sertifikaatti"] = pura_salaus($pankkiyhteys["certificate"], $salasana);
+  $pankkiyhteys["certificate"] = pura_salaus($pankkiyhteys["certificate"], $salasana);
 
   return $pankkiyhteys;
 }
@@ -851,10 +835,9 @@ function lataa_kaikki($params) {
  * @return bool
  */
 function pankkiyhteys_salasana_kunnossa($pankkiyhteys_tunnus, $salasana) {
-  $pankkiyhteys = hae_pankkiyhteys($pankkiyhteys_tunnus);
-  $avain = pura_salaus($pankkiyhteys["private_key"], $salasana);
+  $pankkiyhteys = hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana);
 
-  if (!openssl_pkey_get_private($avain)) {
+  if (!openssl_pkey_get_private($pankkiyhteys["private_key"])) {
     return false;
   }
 
@@ -862,7 +845,7 @@ function pankkiyhteys_salasana_kunnossa($pankkiyhteys_tunnus, $salasana) {
 }
 
 /**
- * Genetoi private keyn ja certificate signing requestin. Tiedot signing requestiin haetaan
+ * Generoi private keyn ja certificate signing requestin. Tiedot signing requestiin haetaan
  * yhtiorowista. Palauttaa arrayn, jossa private_key ja csr.
  *
  * @return array

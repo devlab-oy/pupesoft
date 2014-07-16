@@ -54,17 +54,17 @@ if ($tee == "luo" and $pin != '') {
     "pankki_lyhyt_nimi" => $tuetut_pankit[$pankki]["lyhyt_nimi"]
   );
 
-  $sertifikaatti = sepa_get_certificate($params);
+  $certificate = sepa_get_certificate($params);
   $private_key = $generoidut_tunnukset["private_key"];
 
-  if (!$sertifikaatti) {
+  if (!$certificate) {
     virhe("Sertifikaatin hakeminen epäonnistui, tarkista PIN-koodi ja asiakastunnus");
     $tee = "";
   }
 
   $salatut_tunnukset = array(
     "private_key"   => salaa($private_key, $salasana),
-    "sertifikaatti" => salaa($sertifikaatti, $salasana)
+    "certificate" => salaa($certificate, $salasana)
   );
 }
 
@@ -82,7 +82,7 @@ if ($tee == "luo" and $pin == '') {
   else {
     $salatut_tunnukset = array(
       "private_key"   => salaa($private_key, $salasana),
-      "sertifikaatti" => salaa($certificate, $salasana)
+      "certificate" => salaa($certificate, $salasana)
     );
   }
 }

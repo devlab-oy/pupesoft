@@ -180,7 +180,7 @@ function pankkiyhteydet_table() {
 
   foreach ($pankkiyhteydet as $pankkiyhteys) {
     echo "<tr>";
-    echo "<td>" . pankin_nimi($pankkiyhteys["pankki"]) . "</td>";
+    echo "<td>{$pankkiyhteys["pankin_nimi"]}</td>";
     echo "<td>{$pankkiyhteys["customer_id"]}</td>";
     echo "<td>{$pankkiyhteys["target_id"]}</td>";
     echo "<td>";
@@ -377,6 +377,7 @@ function hae_pankkiyhteydet() {
   global $kukarow, $yhtiorow;
 
   $luodut_pankkiyhteydet = array();
+  $tuetut_pankit = tuetut_pankit();
 
   $query = "SELECT *
             FROM pankkiyhteys
@@ -384,6 +385,7 @@ function hae_pankkiyhteydet() {
   $result = pupe_query($query);
 
   while ($rivi = mysql_fetch_assoc($result)) {
+    $rivi["pankin_nimi"] = $tuetut_pankit[$rivi["pankki"]];
     array_push($luodut_pankkiyhteydet, $rivi);
   }
 
@@ -393,11 +395,7 @@ function hae_pankkiyhteydet() {
 function mahdolliset_pankkiyhteydet() {
   global $kukarow, $yhtiorow;
 
-  // Tuetut pankit
-  $pankit = array(
-    "NDEAFIHH" => "Nordea",
-    "DABAFIHX" => "Danske Bank",
-  );
+  $pankit = tuetut_pankit();
 
   $luodut_pankit = array();
 
@@ -765,4 +763,16 @@ function pura_salaus($salattu_data, $salasana) {
   $salattu_data_binaari = substr    ($salattu_data_binaari, $iv_size);
 
   return mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $avain, $salattu_data_binaari, MCRYPT_MODE_CBC, $iv);
+}
+
+/**
+ * Palauttaa arrayn tuetuista pankeista muodossa BIC => Pankin Nimi
+ *
+ * @return array
+ */
+function tuetut_pankit() {
+  return array(
+    "NDEAFIHH" => "Nordea",
+    "DABAFIHX" => "Danske Bank",
+  );
 }

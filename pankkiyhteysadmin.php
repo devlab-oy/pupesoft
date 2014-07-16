@@ -24,6 +24,8 @@ $tee = empty($tee) ? '' : $tee;
 $pin = empty($pin) ? '' : $pin;
 $target_id = empty($target_id) ? '' : $target_id;
 
+$tuetut_pankit = tuetut_pankit();
+
 // Poistetaan pankkiyhteys
 if ($tee == "poista") {
   if (poista_pankkiyhteys($pankkiyhteys)) {
@@ -44,8 +46,6 @@ if ($tee == "luo" and !pankkiyhteystiedot_kunnossa()) {
 // Haetaan sertifikaatti jos PIN on annettu
 if ($tee == "luo" and $pin != '') {
   $generoidut_tunnukset = generoi_private_key_ja_csr();
-
-  $tuetut_pankit = tuetut_pankit();
 
   $params = array(
     "pin"               => $pin,
@@ -90,9 +90,10 @@ if ($tee == "luo" and $pin == '') {
 // Jos käyttäjä ei ole antanut target id:tä, haetaan se pankista
 if ($tee == "luo" and $target_id == '') {
   $params = array(
-    "certificate" => $certificate,
-    "private_key" => $private_key,
-    "customer_id" => $customer_id
+    "certificate"       => $certificate,
+    "private_key"       => $private_key,
+    "customer_id"       => $customer_id,
+    "pankki_lyhyt_nimi" => $tuetut_pankit[$pankki]["lyhyt_nimi"]
   );
 
   $target_id = sepa_get_target_id($params);

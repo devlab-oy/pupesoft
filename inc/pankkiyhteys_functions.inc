@@ -745,8 +745,9 @@ function sepa_get_target_id($params) {
   $certificate = isset($params["certificate"]) ? $params["certificate"] : "";
   $private_key = isset($params["private_key"]) ? $params["private_key"] : "";
   $customer_id = isset($params["customer_id"]) ? $params["customer_id"] : "";
+  $pankki_lyhyt_nimi = isset($params["pankki_lyhyt_nimi"]) ? $params["pankki_lyhyt_nimi"] : "";
 
-  if (empty($certificate) or empty($private_key) or empty($customer_id)) {
+  if (empty($certificate) or empty($private_key) or empty($customer_id) or empty($pankki_lyhyt_nimi)) {
     return false;
   }
 
@@ -757,7 +758,7 @@ function sepa_get_target_id($params) {
       "private_key" => base64_encode($private_key),
       "customer_id" => $customer_id
     ),
-    "url"     => "https://sepa.devlab.fi/api/nordea/get_user_info",
+    "url"     => "https://sepa.devlab.fi/api/{$pankki_lyhyt_nimi}/get_user_info",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"

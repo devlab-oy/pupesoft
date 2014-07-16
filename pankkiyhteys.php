@@ -48,7 +48,13 @@ if ($tee == "laheta" and $hae_tiliotteet == "on") {
 
 // Viitteiden haku
 if ($tee == "laheta" and $hae_viitteet == "on") {
-  $tiedostot = lataa_kaikki("KTL");
+  $params = array(
+    "tiedostotyyppi"      => "KTL",
+    "pankkiyhteys_tunnus" => $pankkiyhteys_tunnus,
+    "salasana"            => $salasana
+  );
+
+  $tiedostot = lataa_kaikki($params);
 
   if ($tiedostot) {
     viesti("Ladatut viitteet:");

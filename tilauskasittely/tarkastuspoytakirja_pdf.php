@@ -13,7 +13,7 @@ else {
 }
 
 function hae_tarkastuspoytakirja($lasku_tunnukset) {
-  $pdf_tiedosto = array();
+  $pdf_tiedosto = null;
   if (!empty($lasku_tunnukset)) {
     $tyomaarays = \PDF\Tarkastuspoytakirja\pdf_hae_tyomaarays($lasku_tunnukset);
     $filepath = kirjoita_json_tiedosto($tyomaarays, "tyomaarays_{$tyomaarays['tunnus']}");
@@ -31,6 +31,9 @@ function pdf_hae_tyomaarays($lasku_tunnukset) {
     return false;
   }
 
+  //Käyttöliittymästä tulee monta lasku.tunnusta. Kaikille laskuille on generoitu tyomääräyksen
+  //generoinnissa yhtenevä otsikko. Tästä syystä voimme ottaa vain ensimmäisen lasku.tunnuksen
+  //käsittelyyn ja käyttää sitä otsikon hakemisessa.
   $lasku_tunnus = $lasku_tunnukset[0];
 
   //queryyn joinataan tauluja kohteeseen saakka, koska tarkastuspöytäkirjat halutaan tulostaa per kohde mutta työmääräykset on laite per työmääräin
@@ -41,11 +44,10 @@ function pdf_hae_tyomaarays($lasku_tunnukset) {
             JOIN tilausrivi
             ON ( tilausrivi.yhtio = lasku.yhtio
               AND tilausrivi.otunnus = lasku.tunnus
-              AND tilausrivi.var != 'P')
+              AND tilausrivi.var != 'P' )
             JOIN tilausrivin_lisatiedot
             ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
-              )
+              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
             JOIN laite
             ON ( laite.yhtio = tilausrivin_lisatiedot.yhtio
               AND laite.tunnus = tilausrivin_lisatiedot.asiakkaan_positio )
@@ -57,7 +59,6 @@ function pdf_hae_tyomaarays($lasku_tunnukset) {
               AND kohde.tunnus = paikka.kohde )
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.tunnus = $lasku_tunnus
-            GROUP BY lasku.tunnus
             LIMIT 1";
   $result = pupe_query($query);
 
@@ -69,6 +70,7 @@ function pdf_hae_tyomaarays($lasku_tunnukset) {
   $tyomaarays['yhtio'] = $yhtiorow;
   $tyomaarays['logo'] = base64_encode(hae_yhtion_lasku_logo());
   $tyomaarays['toimitettuaika'] = date('d.m.Y', strtotime($tyomaarays['rivit'][0]['toimitettuaika']));
+
   return $tyomaarays;
 }
 
@@ -76,6 +78,7 @@ function hae_tyomaarayksen_rivit($lasku_tunnukset) {
   global $kukarow, $yhtiorow;
 
   $lasku_tunnukset = implode(",",$lasku_tunnukset);
+
   $query = "SELECT tilausrivi.*,
             tilausrivin_lisatiedot.*,
             tilausrivin_lisatiedot.asiakkaan_positio AS laite_tunnus,
@@ -125,7 +128,7 @@ function hae_tyomaarayksen_rivit($lasku_tunnukset) {
               AND huoltosyklit_laitteet.huoltosykli_tunnus = huoltosykli.tunnus
               AND huoltosyklit_laitteet.laite_tunnus = laite.tunnus )
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-            AND tilausrivi.otunnus IN ($lasku_tunnukset)
+            AND tilausrivi.otunnus IN ({$lasku_tunnukset})
             AND tilausrivi.var != 'P'
             ORDER BY laite.oma_numero";
   $result = pupe_query($query);
@@ -206,6 +209,8 @@ function hae_rivin_laite($laite_tunnus) {
   $result = pupe_query($query);
 
   $laite = mysql_fetch_assoc($result);
+
+  $laite['sammutin_tyyppi'] = ucfirst(str_replace('sammutin', '', $laite['sammutin_tyyppi']));
 
   $laite['tapahtumat'] = hae_laitteen_viimeiset_ja_seuraavat_tapahtumat($laite['tunnus']);
   $laite['viimeinen_painekoe'] = date('my', strtotime($laite['tapahtumat']['koeponnistus']['viimeinen_tapahtuma']));

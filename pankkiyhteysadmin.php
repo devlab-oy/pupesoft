@@ -45,10 +45,13 @@ if ($tee == "luo" and !pankkiyhteystiedot_kunnossa()) {
 if ($tee == "luo" and $pin != '') {
   $generoidut_tunnukset = generoi_private_key_ja_csr();
 
+  $tuetut_pankit = tuetut_pankit();
+
   $params = array(
-    "pin"         => $pin,
-    "customer_id" => $customer_id,
-    "tunnukset"   => $generoidut_tunnukset
+    "pin"               => $pin,
+    "customer_id"       => $customer_id,
+    "tunnukset"         => $generoidut_tunnukset,
+    "pankki_lyhyt_nimi" => $tuetut_pankit[$pankki]["lyhyt_nimi"]
   );
 
   $sertifikaatti = sepa_get_certificate($params);

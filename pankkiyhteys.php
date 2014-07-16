@@ -77,10 +77,10 @@ if ($tee == "laheta" and $laheta_maksuaineisto == "on") {
 
 // Maksuaineiston lähetys
 if ($tee == "laheta" and $laheta_maksuaineisto == "on") {
-  $tunnukset = hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana);
+  $pankkiyhteys = hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana);
 
   $params = array(
-    "tunnukset"     => $tunnukset,
+    "pankkiyhteys"  => $pankkiyhteys,
     "maksuaineisto" => $maksuaineisto,
   );
 

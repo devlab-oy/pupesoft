@@ -120,6 +120,9 @@ function hae_tyomaaraykset($request) {
   if ($temp === 1) {
     $tmp = "_temp";
   }
+  else{
+   $tmp = "";
+  }
 
   $query = "SELECT
             lasku.tunnus AS lasku_tunnus,
@@ -230,7 +233,8 @@ function kasittele_tyomaaraykset($request) {
     }
 
     //Kohteen toimitusajoista viimeisin sinne insertöity toimaika
-    $kohteen_viimeisin_toimaika = end(array_values($kohteiden_toimajat[$tyomaarays['kohde_tunnus']]));
+    $toimajat = array_values($kohteiden_toimajat[$tyomaarays['kohde_tunnus']]);
+    $kohteen_viimeisin_toimaika = end($toimajat);
     $paiva_temp = date('Y-m-d', strtotime("{$kohteen_viimeisin_toimaika} + 30 days"));
     //Jos käsittelyssä oleva työmääräyksen toimaika on 30 päivän sisällä ensimmäisestä työmääräyksen toimajasta niin groupataan
     if ($tyomaarays['tyostatus_koodi'] == 'X') {

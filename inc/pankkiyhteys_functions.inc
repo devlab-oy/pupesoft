@@ -357,10 +357,17 @@ function viesti($viesti) {
 
 // Pankkiyhteys tietokantafunktiot
 
-function hae_avain_sertifikaatti_ja_customer_id($pankkiyhteys_tunnus) {
+/**
+ * Hakee pankkiyhteysrivin tietokannasta tunnuksen perusteella
+ *
+ * @param string $pankkiyhteys_tunnus
+ *
+ * @return array
+ */
+function hae_pankkiyhteys($pankkiyhteys_tunnus) {
   global $kukarow, $yhtiorow;
 
-  $query = "SELECT private_key, certificate, customer_id, target_id
+  $query = "SELECT *
             FROM pankkiyhteys
             WHERE yhtio = '{$kukarow["yhtio"]}'
             AND tunnus = {$pankkiyhteys_tunnus}";
@@ -664,12 +671,12 @@ function sepa_get_target_id($params) {
 function hae_tunnukset_ja_pura_salaus($pankkiyhteys_tunnus, $salasana) {
   global $kukarow, $yhtiorow;
 
-  $haetut_tunnukset = hae_avain_sertifikaatti_ja_customer_id($pankkiyhteys_tunnus);
-  $avain = pura_salaus($haetut_tunnukset["private_key"], $salasana);
-  $sertifikaatti = pura_salaus($haetut_tunnukset["certificate"], $salasana);
+  $pankkiyhteys = hae_pankkiyhteys($pankkiyhteys_tunnus);
+  $avain = pura_salaus($pankkiyhteys["private_key"], $salasana);
+  $sertifikaatti = pura_salaus($pankkiyhteys["certificate"], $salasana);
 
-  $customer_id = $haetut_tunnukset["customer_id"];
-  $target_id = $haetut_tunnukset["target_id"];
+  $customer_id = $pankkiyhteys["customer_id"];
+  $target_id = $pankkiyhteys["target_id"];
 
   return array(
     "avain"         => $avain,
@@ -719,8 +726,8 @@ function lataa_kaikki($params) {
 }
 
 function salasana_kunnossa($pankkiyhteys_tunnus, $salasana) {
-  $haetut_tunnukset = hae_avain_sertifikaatti_ja_customer_id($pankkiyhteys_tunnus);
-  $avain = pura_salaus($haetut_tunnukset["private_key"], $salasana);
+  $pankkiyhteys = hae_pankkiyhteys($pankkiyhteys_tunnus);
+  $avain = pura_salaus($pankkiyhteys["private_key"], $salasana);
 
   if (!openssl_pkey_get_private($avain)) {
     return false;

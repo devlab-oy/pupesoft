@@ -2751,6 +2751,33 @@ if ($tila == "" and !isset($jatka)) {
       }
     }
 
+    // Työmääräyksen tapahtumahistoria
+    if ($toim == "TYOMAARAYS") {
+      $query = "SELECT tyomaarayksen_tapahtumat.*,
+                tilataulu.selitetark tilassa,
+                jonotaulu.selitetark jonossa
+                FROM tyomaarayksen_tapahtumat
+                LEFT JOIN avainsana tilataulu ON tilataulu.yhtio = tyomaarayksen_tapahtumat.yhtio AND tilataulu.laji = 'TYOM_TYOSTATUS' AND tilataulu.selite = tyomaarayksen_tapahtumat.tyostatus_selite
+                LEFT JOIN avainsana jonotaulu ON jonotaulu.yhtio = tyomaarayksen_tapahtumat.yhtio AND jonotaulu.laji = 'TYOM_TYOJONO' AND jonotaulu.selite = tyomaarayksen_tapahtumat.tyojono_selite
+                WHERE tyomaarayksen_tapahtumat.yhtio = '{$kukarow['yhtio']}'
+                AND tyomaarayksen_tapahtumat.tyomaarays_tunnus = '$tilausnumero'
+                ORDER BY tyomaarayksen_tapahtumat.luontiaika desc";
+      $ress = pupe_query($query);
+
+      if (mysql_affected_rows() > 0) {
+        echo "<tr><font class='head'><td colspan='4'>Työjonon historia:</td></font></tr>";
+        echo "<tr><font class='head'><td>Tilassa:</td><td>Jonossa:</td><td>Muutosaika:</td><td>Muuttaja:</td></font></tr>";
+        while ($row = mysql_fetch_assoc($ress)) {
+          echo "<tr>";
+          echo "<td>{$row['tilassa']}</td>";
+          echo "<td>{$row['jonossa']}</td>";
+          echo "<td>{$row['luontiaika']}</td>";
+          echo "<td>{$row['laatija']}</td>";
+          echo "</tr>";
+        }
+      }
+    }
+
     if ($toim == "REKLAMAATIO" or ((($toim == 'TARJOUS' or $toim == 'EXTTARJOUS') or $srow["tilaustyyppi"] == "T") and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
       echo "  <tr>
           <td>".t("Työn kuvaus").":</td><td colspan='3'><textarea name='komm1' rows='6' cols='50'>$srow[komm1]</textarea></td>

@@ -32,6 +32,7 @@ $request = array(
     'lasku_tunnus'       => $lasku_tunnus,
     'uusi_laite'         => $uusi_laite,
     'vanha_laite_tunnus' => $vanha_laite_tunnus,
+    'asiakas_tunnus'     => $asiakas_tunnus,
 );
 
 $request['laite'] = hae_laite_ja_asiakastiedot($request['tilausrivi_tunnus']);
@@ -123,6 +124,13 @@ if ($request['tee'] == 'vaihda_laite') {
   else {
     echo t('Laitteella ei ollut muita poistettavia työmääräyksiä');
   }
+
+  $laitteet = hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy($request['asiakas_tunnus']);
+  list($huollettavien_laitteiden_huoltosyklirivit, $laitteiden_huoltosyklirivit_joita_ei_huolleta) = paata_mitka_huollot_tehdaan($laitteet);
+  $tyomaarays_kpl = generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltosyklirivit, $laitteiden_huoltosyklirivit_joita_ei_huolleta);
+
+  echo "<br/>";
+  echo "<font class='message'>" . t('Työmääräyksiä generoitiin muutosten pohjalta') . ": {$tyomaarays_kpl} " . t('kappaletta') . "</font>";
 }
 else {
   echo_laitteen_vaihto_form($request);
@@ -188,9 +196,22 @@ function luo_uusi_laite($uusi_laite) {
 function liita_huoltosykli_laitteeseen($laite_tunnus, $huoltosykli) {
   global $kukarow, $yhtiorow;
 
+  $huoltovalit = huoltovali_options();
   $pakollisuus = 0;
   if (!empty($huoltosykli['pakollisuus'])) {
     $pakollisuus = 1;
+  }
+
+  $huoltovali = $huoltovalit[$huoltosykli['huoltovali']];
+  $viimeinen_tapahtuma_query = "";
+  if (!empty($huoltosykli['seuraava_tuleva_tapahtuma'])) {
+    $seuraava_tuleva_tapahtuma = date('Y-m-d', strtotime($huoltosykli['seuraava_tuleva_tapahtuma']));
+    $viimeinen_tapahtuma = date('Y-m-d', strtotime("{$seuraava_tuleva_tapahtuma} - {$huoltovali['years']} years"));
+
+    $viimeinen_tapahtuma_query = "viimeinen_tapahtuma = '{$viimeinen_tapahtuma}',";
+  }
+  else {
+    $viimeinen_tapahtuma_query = "viimeinen_tapahtuma = CURRENT_DATE,";
   }
 
   $query = "INSERT INTO huoltosyklit_laitteet
@@ -199,7 +220,7 @@ function liita_huoltosykli_laitteeseen($laite_tunnus, $huoltosykli) {
             laite_tunnus = '{$laite_tunnus}',
             huoltovali = '{$huoltosykli['huoltovali']}',
             pakollisuus = '{$pakollisuus}',
-            viimeinen_tapahtuma = CURRENT_DATE,
+            {$viimeinen_tapahtuma_query}
             laatija = '{$kukarow['kuka']}',
             luontiaika = NOW()";
   pupe_query($query);
@@ -389,6 +410,7 @@ function hae_paikat($asiakas_tunnus) {
 function aseta_vanhan_laitteen_tyomaarays_rivit_poistettu_tilaan($vanha_laite_tunnus) {
   global $kukarow, $yhtiorow;
 
+  //Asetetaan vain sellaiset tilausrivit poistettu tilaan, jotka ovat avoimella työmääräyksellä
   $query = "SELECT tilausrivi.otunnus,
             tilausrivi.tunnus AS tilausrivi_tunnus
             FROM tilausrivi
@@ -396,6 +418,11 @@ function aseta_vanhan_laitteen_tyomaarays_rivit_poistettu_tilaan($vanha_laite_tu
             ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
               AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
               AND tilausrivin_lisatiedot.asiakkaan_positio = '{$vanha_laite_tunnus}' )
+            JOIN lasku
+            ON ( lasku.yhtio = tilausrivi.yhtio
+              AND lasku.tunnus = tilausrivi.otunnus
+              AND lasku.tila = 'A'
+              AND alatila = '')
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
             AND tilausrivi.var != 'P'";
   $result = pupe_query($query);
@@ -453,6 +480,7 @@ function echo_laitteen_vaihto_form($request = array()) {
   echo "<input type='hidden' name='tilausrivi_tunnus' value='{$request['laite']['tilausrivi_tunnus']}' />";
   echo "<input type='hidden' name='lasku_tunnus' value='{$request['laite']['lasku_tunnus']}' />";
   echo "<input type='hidden' name='vanha_laite_tunnus' value='{$request['laite']['laite_tunnus']}' />";
+  echo "<input type='hidden' name='asiakas_tunnus' value='{$request['laite']['asiakas_tunnus']}' />";
   echo "<table>";
 
   echo "<tr>";
@@ -537,7 +565,7 @@ function echo_laitteen_vaihto_form($request = array()) {
   echo "</tr>";
 
   echo "<tr>";
-  echo '<th align="left">' . t("Omistaja") . '</th>';
+  echo '<th align="left">' . t("Muu Omistaja") . '</th>';
   echo "<td>";
   echo '<input type="text" name="uusi_laite[omistaja]" value="' . $request['uusi_laite']['omistaja'] . '" size="35" maxlength="60" />';
   echo "</td>";
@@ -546,7 +574,7 @@ function echo_laitteen_vaihto_form($request = array()) {
   echo "<tr>";
   echo '<th align="left">' . t("Paikka") . '</th>';
   echo "<td>";
-  echo "<select name='uusi_laite[paikka]>";
+  echo "<select name='uusi_laite[paikka]'>";
   foreach ($request['paikat'] as $paikka) {
     $selected = ($paikka['tunnus'] == $request['laite']['paikka_tunnus']) ? 'SELECTED' : '';
     echo "<option value='{$paikka['tunnus']}' $selected>{$paikka['nimi']}</option>";

@@ -260,7 +260,9 @@ function uusi_pankkiyhteys_formi() {
   echo "<select name='pankki' id='pankki'>";
 
   foreach ($mahdolliset_pankkiyhteydet as $bic => $nimi) {
-    echo "<option value='{$bic}'>{$nimi}</option>";
+    $selected = $_POST["pankki"] == $bic ? "selected" : "";
+
+    echo "<option value='{$bic}' {$selected}>{$nimi}</option>";
   }
   echo "</select>";
   echo "</td>";
@@ -268,12 +270,16 @@ function uusi_pankkiyhteys_formi() {
 
   echo "<tr>";
   echo "<td><label for='customer_id'>Asiakastunnus</label></td>";
-  echo "<td><input type='text' name='customer_id' id='customer_id'/></td>";
+  echo "<td>";
+  echo "<input type='text' name='customer_id' id='customer_id' value='{$_POST["customer_id"]}'/>";
+  echo "</td>";
   echo "</tr>";
 
   echo "<tr>";
   echo "<td><label for='target_id'>Aineistoryhm‰n tunnus</label></td>";
-  echo "<td><input type='text' name='target_id' id='target_id'/></td>";
+  echo "<td>";
+  echo "<input type='text' name='target_id' id='target_id' value='{$_POST["target_id"]}'/>";
+  echo "</td>";
   echo "<td class='back'>Jos kentt‰ j‰tet‰‰n tyhj‰ksi, arvo yritet‰‰n hakea pankista</td>";
   echo "</tr>";
 
@@ -283,8 +289,10 @@ function uusi_pankkiyhteys_formi() {
 
   echo "<tr>";
   echo "<td><label for='pin'>" . t("Pankilta saatu PIN-koodi") . "</label></td>";
-  echo "<td><input type='text' name='pin' id='pin'/></td>";
-  echo "<td class='back'>T‰yt‰, jos olet saanut pankista PIN-koodin ja aiot nyt hakea tunnukset</td>";
+  echo "<td><input type='text' name='pin' id='pin' value='{$_POST["pin"]}'/></td>";
+  echo "<td class='back'>";
+  echo "T‰yt‰, jos olet saanut pankista PIN-koodin ja aiot nyt hakea tunnukset";
+  echo "</td>";
   echo "</tr>";
 
   echo "<tr>";

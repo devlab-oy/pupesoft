@@ -37,6 +37,21 @@ if (!isset($laite_tunnus)) {
 if (!isset($ajax_request)) {
   $ajax_request = '';
 }
+if (!isset($asiakas_tunnus)) {
+  $asiakas_tunnus = '';
+}
+if (!isset($kohde_tunnus)) {
+  $kohde_tunnus = '';
+}
+if (!isset($tyojono)) {
+  $tyojono = '';
+}
+if (!isset($tyostatus)) {
+  $tyostatus = '';
+}
+if (!isset($toimitusaika)) {
+  $toimitusaika = '';
+}
 
 if ($tee == 'lataa_tiedosto') {
   $filepath = "/tmp/" . $tmpfilenimi;
@@ -77,22 +92,6 @@ echo $js;
 echo $css;
 
 enable_ajax();
-
-if (!isset($asiakas_tunnus)) {
-  $asiakas_tunnus = '';
-}
-if (!isset($kohde_tunnus)) {
-  $kohde_tunnus = '';
-}
-if (!isset($tyojono)) {
-  $tyojono = '';
-}
-if (!isset($tyostatus)) {
-  $tyostatus = '';
-}
-if (!isset($toimitusaika)) {
-  $toimitusaika = '';
-}
 
 $request = array(
     'ala_tee'         => $ala_tee,

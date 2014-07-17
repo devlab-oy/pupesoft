@@ -491,9 +491,8 @@ if ($tee != "") {
   $_konsernivalinnasta = ($konsernirajaus == "A" or $konsernirajaus == "AT");
 
   if ($_monivalinnasta or $_konsernivalinnasta) {
-    $asiakasjoini = " LEFT JOIN asiakas ON (lasku.yhtio = asiakas.yhtio
-                      AND (asiakas.tunnus = lasku.liitostunnus
-                      OR (asiakas.tunnus = tiliointi.liitostunnus AND tiliointi.liitos = 'A'))) ";
+    $asiakasjoini = "LEFT JOIN asiakas ON (lasku.yhtio = asiakas.yhtio
+    AND asiakas.tunnus = if(tiliointi.liitos = 'A', tiliointi.liitostunnus, lasku.liitostunnus))";
   }
 
   // Tarvitaanko toimittajajoini joini
@@ -501,8 +500,7 @@ if ($tee != "") {
 
   if ($_konsernivalinnasta) {
     $toimittajajoini = " LEFT JOIN toimi ON (toimi.yhtio = lasku.yhtio
-                         AND (toimi.tunnus = lasku.liitostunnus
-                         OR (toimi.tunnus = tiliointi.liitostunnus AND tiliointi.liitos = 'T')))";
+    AND toimi.tunnus = = if(tiliointi.liitos = 'T', tiliointi.liitostunnus, lasku.liitostunnus))";
   }
 
   if ($konsernirajaus == "AT") {

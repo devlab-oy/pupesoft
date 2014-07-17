@@ -183,17 +183,19 @@ else {
       $worksheet->writeString($excelrivi,  2, t("Osasto", $hinkieli), $format_bold);
       $worksheet->writeString($excelrivi,  3, t("Tuoteryhmä", $hinkieli), $format_bold);
       $worksheet->writeString($excelrivi,  4, t("Nimitys", $hinkieli), $format_bold);
-      $worksheet->writeString($excelrivi,  5, t("Yksikkö", $hinkieli), $format_bold);
-      $worksheet->writeString($excelrivi,  6, t("Aleryhmä", $hinkieli), $format_bold);
-      $worksheet->writeString($excelrivi,  7, t("Veroton Myyntihinta", $hinkieli), $format_bold);
-      $worksheet->writeString($excelrivi,  8, t("Verollinen Myyntihinta", $hinkieli), $format_bold);
+      $worksheet->writeString($excelrivi,  5, t("Myyntierä", $hinkieli), $format_bold);
+      $worksheet->writeString($excelrivi,  6, t("Yksikkö", $hinkieli), $format_bold);
+      $worksheet->writeString($excelrivi,  7, t("Status", $hinkieli), $format_bold);
+      $worksheet->writeString($excelrivi,  8, t("Aleryhmä", $hinkieli), $format_bold);
+      $worksheet->writeString($excelrivi,  9, t("Veroton Myyntihinta", $hinkieli), $format_bold);
+      $worksheet->writeString($excelrivi, 10, t("Verollinen Myyntihinta", $hinkieli), $format_bold);
 
       for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-        $worksheet->writeString($excelrivi,  9, t("Alennus{$alepostfix}", $hinkieli), $format_bold);
+        $worksheet->writeString($excelrivi, 11, t("Alennus{$alepostfix}", $hinkieli), $format_bold);
       }
 
-      $worksheet->writeString($excelrivi, 10, t("Sinun veroton hinta", $hinkieli), $format_bold);
-      $worksheet->writeString($excelrivi, 11, t("Sinun verollinen hinta", $hinkieli), $format_bold);
+      $worksheet->writeString($excelrivi, 12, t("Sinun veroton hinta", $hinkieli), $format_bold);
+      $worksheet->writeString($excelrivi, 13, t("Sinun verollinen hinta", $hinkieli), $format_bold);
       $excelrivi++;
     }
 
@@ -306,22 +308,24 @@ else {
         $worksheet->writeString($excelrivi, 2, $rrow["osasto"]);
         $worksheet->writeString($excelrivi, 3, $rrow["try"]);
         $worksheet->writeString($excelrivi, 4, t_tuotteen_avainsanat($rrow, 'nimitys', $hinkieli));
-        $worksheet->writeString($excelrivi, 5, t_avainsana("Y", $hinkieli, "and avainsana.selite='$rrow[yksikko]'", "", "", "selite"));
-        $worksheet->writeString($excelrivi, 6, $rrow["aleryhma"]);
-        $worksheet->writeNumber($excelrivi, 7, $veroton);
-        $worksheet->writeNumber($excelrivi, 8, $verollinen);
+        $worksheet->writeString($excelrivi, 5, $rrow["myynti_era"]);
+        $worksheet->writeString($excelrivi, 6, t_avainsana("Y", $hinkieli, "and avainsana.selite='$rrow[yksikko]'", "", "", "selite"));
+        $worksheet->writeString($excelrivi, 7, $rrow["status"]);
+        $worksheet->writeString($excelrivi, 8, $rrow["aleryhma"]);
+        $worksheet->writeNumber($excelrivi, 9, $veroton);
+        $worksheet->writeNumber($excelrivi, 10, $verollinen);
 
         for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
           if ($netto != "") {
-            $worksheet->writeString($excelrivi, 9, t("Netto", $hinkieli));
+            $worksheet->writeString($excelrivi, 11, t("Netto", $hinkieli));
           }
           else {
-            $worksheet->writeNumber($excelrivi, 9, sprintf('%.2f',${'ale'.$alepostfix}));
+            $worksheet->writeNumber($excelrivi, 11, sprintf('%.2f',${'ale'.$alepostfix}));
           }
         }
 
-        $worksheet->writeNumber($excelrivi, 10, hintapyoristys($asiakashinta_veroton));
-        $worksheet->writeNumber($excelrivi, 11, hintapyoristys($asiakashinta_verollinen));
+        $worksheet->writeNumber($excelrivi, 12, hintapyoristys($asiakashinta_veroton));
+        $worksheet->writeNumber($excelrivi, 13, hintapyoristys($asiakashinta_verollinen));
         $excelrivi++;
       }
     }

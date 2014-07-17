@@ -2911,8 +2911,19 @@ if ($fieldname == "extranet_tilaus_varaa_saldoa") {
   $jatko = 0;
 }
 
-if ($fieldname == "tuoteperhe_suoratoimitus") {
+if ($fieldname == "extranet_saldo") {
+  $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
 
+  $sel = $trow[$i] == 'E' ? ' selected' : '';
+
+  $ulos .= "<option value = ''>" . t("Ei n‰ytet‰ saldoa extranetiss‰");
+  $ulos .= "<option value = 'E' $sel>" . t("N‰ytet‰‰n saldo extranetiss‰");
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "tuoteperhe_suoratoimitus") {
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
   $sel = array();

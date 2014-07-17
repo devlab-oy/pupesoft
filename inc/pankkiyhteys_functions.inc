@@ -10,8 +10,8 @@
  *
  * @return bool
  */
-function vastaus_kunnossa($vastaus) {
-  switch ($vastaus[0]) {
+function vastaus_kunnossa($koodi) {
+  switch ($koodi) {
     case 200:
       return true;
     case 400:
@@ -26,9 +26,10 @@ function vastaus_kunnossa($vastaus) {
     case 0:
       virhe("Sepa-palvelimeen ei jostain syystä saada yhteyttä, yritä myöhemmin uudestaan");
       return false;
+    default:
+      virhe("Tuntematon virhekoodi");
+      return false;
   }
-
-  return false;
 }
 
 /**
@@ -567,7 +568,7 @@ function sepa_download_file_list($params) {
 
   list($code, $response) = pupesoft_rest($parameters);
 
-  if ($code != "200") {
+  if (!vastaus_kunnossa($code)) {
     return false;
   }
 
@@ -633,26 +634,22 @@ function sepa_download_files($params) {
 
     list($code, $response) = pupesoft_rest($parameters);
 
-    if ($code == 200) {
+    if (vastaus_kunnossa($code)) {
       $tiedosto = array(
         "viite"  => $viite,
-        "status" => "OK"
+        "status" => "OK",
+        "data" => $response["data"]
       );
     }
     else {
       $tiedosto = array(
         "viite"  => $viite,
-        "status" => "Virhe"
+        "status" => "Virhe",
+        "data" => null
       );
     }
 
     array_push($tiedostot, $tiedosto);
-
-    if (!is_dir("/tmp/{$tiedostotyyppi}")) {
-      mkdir("/tmp/{$tiedostotyyppi}");
-    }
-
-    file_put_contents("/tmp/{$tiedostotyyppi}/{$viite}", base64_decode($response["data"]));
   }
 
   return $tiedostot;
@@ -705,7 +702,7 @@ function sepa_upload_file($params) {
 
   list($code, $response) = pupesoft_rest($parameters);
 
-  if ($code != "200") {
+  if (!vastaus_kunnossa($code)) {
     return false;
   }
 
@@ -752,7 +749,7 @@ function sepa_get_certificate($params) {
 
   list($code, $response) = pupesoft_rest($parameters);
 
-  if ($code != "200") {
+  if (!vastaus_kunnossa($code)) {
     return false;
   }
 
@@ -799,7 +796,7 @@ function sepa_get_target_id($params) {
 
   list($code, $response) = pupesoft_rest($parameters);
 
-  if ($code != "200") {
+  if (!vastaus_kunnossa($code)) {
     return false;
   }
 

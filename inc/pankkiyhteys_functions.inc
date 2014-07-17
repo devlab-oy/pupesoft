@@ -704,7 +704,7 @@ function sepa_get_certificate($params) {
     "data"    => array(
       "pin"         => $pin,
       "customer_id" => $customer_id,
-      "environment" => "TEST", // Voi olla joko "TEST" tai "PRODUCTION"
+      "environment" => "PRODUCTION", // Voi olla joko "TEST" tai "PRODUCTION"
       "csr"         => base64_encode($tunnukset["csr"])
     ),
     "url"     => "https://sepa.devlab.fi/api/{$pankki_lyhyt_nimi}/get_certificate",

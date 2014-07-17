@@ -52,7 +52,10 @@ function formi() {
     echo "<select name='pankkiyhteys_tunnus'>";
 
     foreach ($kaytossa_olevat_pankkiyhteydet as $pankkiyhteys) {
-      echo "<option value='{$pankkiyhteys["tunnus"]}'>{$pankkiyhteys["pankin_nimi"]}</option>";
+      $selected = $_POST["pankkiyhteys_tunnus"] == $pankkiyhteys["tunnus"] ? "selected" : "";
+
+      echo "<option value='{$pankkiyhteys["tunnus"]}' {$selected}>";
+      echo "{$pankkiyhteys["pankin_nimi"]}</option>";
     }
 
     echo "</select>";
@@ -64,12 +67,19 @@ function formi() {
     echo t("Mitä haluat tehdä?");
     echo "</label></td>";
     echo "<td>";
+
     echo "<label for='hae_tiliotteet'>" . t("Hae tiliotteet") . "</label>";
-    echo "<input type='checkbox' name='hae_tiliotteet' id='hae_tiliotteet'/>";
+    $checked = $_POST["hae_tiliotteet"] == "on" ? "checked" : "";
+    echo "<input type='checkbox' name='hae_tiliotteet' id='hae_tiliotteet' {$checked}/>";
+
     echo "<label for='hae_viitteet'>" . t("Hae viitteet") . "</label>";
-    echo "<input type='checkbox' name='hae_viitteet' id='hae_viitteet'/>";
+    $checked = $_POST["hae_viitteet"] == "on" ? "checked" : "";
+    echo "<input type='checkbox' name='hae_viitteet' id='hae_viitteet' {$checked}/>";
+
     echo "<label for='laheta_maksuaineisto'>" . t("Lähetä maksuaineisto") . "</label>";
-    echo "<input type='checkbox' name='laheta_maksuaineisto' id='laheta_maksuaineisto'/>";
+    $checked = $_POST["laheta_maksuaineisto"] == "on" ? "checked" : "";
+    echo "<input type='checkbox' name='laheta_maksuaineisto' id='laheta_maksuaineisto' {$checked}/>";
+
     echo "</td>";
     echo "</tr>";
 

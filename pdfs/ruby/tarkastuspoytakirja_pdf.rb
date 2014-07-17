@@ -121,7 +121,7 @@ class TarkastuspoytakirjaPDF
         },
         {
             :header => 'Tilausnumero',
-            :value  => @data['tunnus'].nil? ? '–' : @data['tunnus']
+            :value  => '-' #@data['tunnus'].nil? ? '–' : @data['tunnus']
         },
         {
             :header => 'Puh. nro',
@@ -339,7 +339,8 @@ class TarkastuspoytakirjaPDF
       @pdf.move_down 40
 
       @pdf.font 'Helvetica', :style => :bold, :size => 10
-      @pdf.draw_text "Tarkastuspöytäkirjan nro #{@data['tunnus']}", :at => [600, 515.28]
+      @pdf.draw_text "Tarkastuspöytäkirja", :at => [600, 515.28]
+      #@pdf.draw_text "Tarkastuspöytäkirjan nro #{@data['tunnus']}", :at => [600, 515.28]
       @pdf.font 'Helvetica', :style => :normal
     end
   end

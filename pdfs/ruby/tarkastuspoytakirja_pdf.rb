@@ -52,7 +52,7 @@ class TarkastuspoytakirjaPDF
   def init
     @logo   = @data['logo']
 
-    @posoite = @data['asiakas']['postino'] + ' ' + @data['asiakas']['postitp']
+    posoite = @data['asiakas']['postino'] + ' ' + @data['asiakas']['postitp']
 
     @customer_data = [
         {
@@ -69,7 +69,7 @@ class TarkastuspoytakirjaPDF
         },
         {
             :header => 'Postiosoite',
-            :value  => @posoite.delete(' ').nil? ? '–' : @posoite
+            :value  => posoite.delete(' ').nil? ? '–' : posoite
         },
         {
             :header => 'Yhteyshenkilö',
@@ -85,7 +85,7 @@ class TarkastuspoytakirjaPDF
         },
     ]
 
-    @posoite = @data['kohde']['postino'] + ' ' + @data['kohde']['postitp']
+    posoite = @data['kohde']['postino'] + ' ' + @data['kohde']['postitp']
 
     @spot_data = [
         {
@@ -102,7 +102,7 @@ class TarkastuspoytakirjaPDF
         },
         {
             :header => 'Postiosoite',
-            :value  => @posoite == ' ' ? '–' : @posoite
+            :value  => posoite == ' ' ? '–' : posoite
         },
         {
             :header => 'Yhteyshenkilö',

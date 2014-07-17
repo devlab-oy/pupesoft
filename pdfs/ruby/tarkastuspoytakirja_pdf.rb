@@ -52,68 +52,65 @@ class TarkastuspoytakirjaPDF
   def init
     @logo   = @data['logo']
 
-    #Space needs to be added if nil. Otherwise text() doesnt work as wanted
-    zipcode = @data['asiakas']['postino'].nil? ? ' ' : @data['asiakas']['postino']
-    city    = @data['asiakas']['postitp'].nil? ? ' ' : @data['asiakas']['postitp']
+    posoite = @data['asiakas']['postino'] + ' ' + @data['asiakas']['postitp']
 
     @customer_data = [
         {
-            :header => 'Asiakas nro',
-            :value  => @data['asiakas']['asiakasnro'].nil? ? ' ' : @data['asiakas']['asiakasnro']
+            :header => 'Asiakas',
+            :value  => @data['asiakas']['nimi'].nil? ? '–' : @data['asiakas']['nimi']
         },
         {
-            :header => 'Asiakas',
-            :value  => @data['asiakas']['nimi'].nil? ? ' ' : @data['asiakas']['nimi']
+            :header => 'Asiakas nro',
+            :value  => @data['asiakas']['asiakasnro'].nil? ? '–' : @data['asiakas']['asiakasnro']
         },
         {
             :header => 'Katuosoite',
-            :value  => @data['asiakas']['osoite'].nil? ? ' ' : @data['asiakas']['osoite']
+            :value  => @data['asiakas']['osoite'].nil? ? '–' : @data['asiakas']['osoite']
         },
         {
             :header => 'Postiosoite',
-            :value  => zipcode + ' ' + city
+            :value  => posoite.delete(' ').nil? ? '–' : posoite
         },
         {
             :header => 'Yhteyshenkilö',
-            :value  => @data['asiakas']['yhteyshenkilo'].nil? ? ' ' : @data['asiakas']['yhteyshenkilo']
+            :value  => @data['asiakas']['yhteyshenkilo'].nil? ? '–' : @data['asiakas']['yhteyshenkilo']
         },
         {
             :header => 'Puh. nro',
-            :value  => @data['asiakas']['puh'].nil? ? ' ' : @data['asiakas']['puh']
+            :value  => @data['asiakas']['puh'].nil? ? '–' : @data['asiakas']['puh']
         },
         {
             :header => 'Tilaus nro',
-            :value  => @data['tunnus'].nil? ? ' ' : @data['asiakas']['tunnus']
+            :value  => @data['tunnus'].nil? ? '–' : @data['asiakas']['tunnus']
         },
     ]
 
-    zipcode = @data['kohde']['postino'].nil? ? ' ' : @data['kohde']['postino']
-    city    = @data['kohde']['postitp'].nil? ? ' ' : @data['kohde']['postitp']
+    posoite = @data['kohde']['postino'] + ' ' + @data['kohde']['postitp']
 
     @spot_data = [
         {
             :header => 'Kust.paikka/merkki',
-            :value  => ' '
+            :value  => '–'
         },
         {
             :header => 'Kohde',
-            :value  => @data['kohde']['nimi'].nil? ? ' ' : @data['kohde']['nimi']
+            :value  => @data['kohde']['nimi'].nil? ? '–' : @data['kohde']['nimi']
         },
         {
             :header => 'Katuosoite',
-            :value  => (@data['kohde']['osoite'].nil? or @data['kohde']['osoite'] == '') ? ' ' : @data['kohde']['osoite']
+            :value  => (@data['kohde']['osoite'].nil? or @data['kohde']['osoite'] == '') ? '–' : @data['kohde']['osoite']
         },
         {
             :header => 'Postiosoite',
-            :value  => zipcode + ' ' + city
+            :value  => posoite == ' ' ? '–' : posoite
         },
         {
             :header => 'Yhteyshenkilö',
-            :value  => @data['kohde']['yhteyshenkilo'].nil? ? ' ' : @data['kohde']['yhteyshenkilo']
+            :value  => @data['kohde']['yhteyshenkilo'].nil? ? '–' : @data['kohde']['yhteyshenkilo']
         },
         {
             :header => 'Asiakasvastaava',
-            :value  => ' '
+            :value  => '–'
         },
     ]
 
@@ -124,15 +121,15 @@ class TarkastuspoytakirjaPDF
         },
         {
             :header => 'Tilausnumero',
-            :value  => @data['tunnus'].nil? ? ' ' : @data['tunnus']
+            :value  => '-' #@data['tunnus'].nil? ? '–' : @data['tunnus']
         },
         {
             :header => 'Puh. nro',
-            :value  => ' '
+            :value  => '–'
         },
         {
             :header => 'Puh. nro',
-            :value  => ' '
+            :value  => '–'
         },
     ]
   end
@@ -142,56 +139,54 @@ class TarkastuspoytakirjaPDF
       top_coordinate = @pdf.cursor
       @pdf.font 'Helvetica', :style => :normal, :size => 10
 
+      @pdf.move_down 10
       @pdf.text @data['yhtio']['nimi']
-      @pdf.move_down 10
+      @pdf.move_down 5
       @pdf.text @data['yhtio']['osoite']
-      @pdf.move_down 10
-      @pdf.text @data['yhtio']['postino'] + ' ' + @data['yhtio']['postitp']
       @pdf.move_down 5
       @pdf.text @data['yhtio']['puhelin']
 
-      @pdf.move_up top_coordinate - @pdf.cursor
       @pdf.font 'Helvetica', :style => :normal, :size => 8
 
-      @pdf.indent(200) do
-        @customer_data.each do |value|
-          @pdf.float do
-            @pdf.text value[:header], :style => :bold
+      @siirto = 105
+      @customer_data.each do |value|
+        if @pdf.width_of(value[:value]) > 150
+          until @pdf.width_of(value[:value]) < 140 do
+            value[:value].chop!
           end
-          @pdf.indent(80) do
-            @pdf.text value[:value], :style => :normal
-          end
-          @pdf.move_down 5
+          value[:value] = "#{value[:value]}..."
         end
+        @pdf.text_box value[:header], :width => 75, :align => :right, :at => [140, @siirto], :style => :bold
+        @pdf.text_box value[:value], :align => :left, :at => [220, @siirto]
+        @siirto = @siirto - 13
       end
 
-      @pdf.move_up top_coordinate - @pdf.cursor
-
-      @pdf.indent(400) do
-        @spot_data.each do |value|
-          @pdf.float do
-            @pdf.text value[:header], :style => :bold
+      @siirto = 105
+      @spot_data.each do |value|
+        if @pdf.width_of(value[:value]) > 150
+          until @pdf.width_of(value[:value]) < 140 do
+            value[:value].chop!
           end
-          @pdf.indent(80) do
-            @pdf.text value[:value], :style => :normal
-          end
-          @pdf.move_down 5
+          value[:value] = "#{value[:value]}..."
         end
+        @pdf.text_box value[:header], :width => 75, :align => :right, :at => [390, @siirto], :style => :bold
+        @pdf.text_box value[:value], :align => :left, :at => [470, @siirto]
+        @siirto = @siirto - 13
       end
 
-      @pdf.move_up top_coordinate - @pdf.cursor
-
-      @pdf.indent(600) do
-        @other_data.each do |value|
-          @pdf.float do
-            @pdf.text value[:header], :style => :bold
+      @siirto = 105
+      @other_data.each do |value|
+        if @pdf.width_of(value[:value]) > 150
+          until @pdf.width_of(value[:value]) < 148 do
+            value[:value].chop!
           end
-          @pdf.indent(80) do
-            @pdf.text value[:value], :style => :normal
-          end
-          @pdf.move_down 5
+          value[:value] = "#{value[:value]}..."
         end
+        @pdf.text_box value[:header], :width => 75, :align => :right, :at => [610, @siirto], :style => :bold
+        @pdf.text_box value[:value], :align => :left, :at => [690, @siirto]
+        @siirto = @siirto - 13
       end
+
     end
   end
 
@@ -344,14 +339,15 @@ class TarkastuspoytakirjaPDF
       @pdf.move_down 40
 
       @pdf.font 'Helvetica', :style => :bold, :size => 10
-      @pdf.draw_text "Tarkastuspöytäkirjan nro #{@data['tunnus']}", :at => [600, 515.28]
+      @pdf.draw_text "Tarkastuspöytäkirja", :at => [600, 515.28]
+      #@pdf.draw_text "Tarkastuspöytäkirjan nro #{@data['tunnus']}", :at => [600, 515.28]
       @pdf.font 'Helvetica', :style => :normal
     end
   end
 
   def logo
     filepath = '/tmp/logo.jpeg'
-    File.open(filepath, 'a+') { |file|
+    File.open(filepath, 'w+') { |file|
       file.write Base64.decode64 @logo
     }
     @pdf.float do

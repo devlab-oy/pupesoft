@@ -12,32 +12,33 @@ else {
   require_once($filepath . '/tyojono2_functions.inc');
 }
 
-function hae_tarkastuspoytakirjat($lasku_tunnukset) {
-  $pdf_tiedostot = array();
+function hae_tarkastuspoytakirja($lasku_tunnukset) {
+  //Poistetaan varmuuden vuoksi olemassa olevat pdf:t
+  $cmd = "rm -f /tmp/Tarkastuspoytakirja_*";
+  $return = exec($cmd, $output, $return_code);
+
+  $pdf_tiedosto = null;
   if (!empty($lasku_tunnukset)) {
-    $tyomaaraykset = \PDF\Tarkastuspoytakirja\pdf_hae_tyomaaraykset($lasku_tunnukset);
+    $tyomaarays = \PDF\Tarkastuspoytakirja\pdf_hae_tyomaarays($lasku_tunnukset);
+    $filepath = kirjoita_json_tiedosto($tyomaarays, "tyomaarays_{$tyomaarays['tunnus']}");
 
-    foreach ($tyomaaraykset as $tyomaarays) {
-      $filepath = kirjoita_json_tiedosto($tyomaarays, "tyomaarays_{$tyomaarays['tunnus']}");
-
-      //ajettavan tiedoston nimi on tarkastuspoytakirja_pdf.rb
-      $pdf_tiedostot[] = aja_ruby($filepath, 'tarkastuspoytakirja_pdf');
-    }
+    //ajettavan tiedoston nimi on tarkastuspoytakirja_pdf.rb
+    $pdf_tiedosto = aja_ruby($filepath, 'tarkastuspoytakirja_pdf');
   }
-
-  return $pdf_tiedostot;
+  return $pdf_tiedosto;
 }
 
-function pdf_hae_tyomaaraykset($lasku_tunnukset) {
+function pdf_hae_tyomaarays($lasku_tunnukset) {
   global $kukarow, $yhtiorow;
 
   if (empty($lasku_tunnukset)) {
     return false;
   }
 
-  if (is_array($lasku_tunnukset)) {
-    $lasku_tunnukset = implode(",", $lasku_tunnukset);
-  }
+  //Käyttöliittymästä tulee monta lasku.tunnusta. Kaikille laskuille on generoitu tyomääräyksen
+  //generoinnissa yhtenevä otsikko. Tästä syystä voimme ottaa vain ensimmäisen lasku.tunnuksen
+  //käsittelyyn ja käyttää sitä otsikon hakemisessa.
+  $lasku_tunnus = $lasku_tunnukset[0];
 
   //queryyn joinataan tauluja kohteeseen saakka, koska tarkastuspöytäkirjat halutaan tulostaa per kohde mutta työmääräykset on laite per työmääräin
   $query = "SELECT lasku.*,
@@ -47,11 +48,10 @@ function pdf_hae_tyomaaraykset($lasku_tunnukset) {
             JOIN tilausrivi
             ON ( tilausrivi.yhtio = lasku.yhtio
               AND tilausrivi.otunnus = lasku.tunnus
-              AND tilausrivi.var != 'P')
+              AND tilausrivi.var != 'P' )
             JOIN tilausrivin_lisatiedot
             ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
-              )
+              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
             JOIN laite
             ON ( laite.yhtio = tilausrivin_lisatiedot.yhtio
               AND laite.tunnus = tilausrivin_lisatiedot.asiakkaan_positio )
@@ -62,39 +62,26 @@ function pdf_hae_tyomaaraykset($lasku_tunnukset) {
             ON ( kohde.yhtio = paikka.yhtio
               AND kohde.tunnus = paikka.kohde )
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND lasku.tunnus IN({$lasku_tunnukset})
-            GROUP BY lasku.tunnus";
-
+            AND lasku.tunnus = $lasku_tunnus
+            LIMIT 1";
   $result = pupe_query($query);
 
-  $tyomaaraykset = array();
-  while ($tyomaarays = mysql_fetch_assoc($result)) {
-    //vaikka työmääräyksen kaikki tiedot saisi yllä olevasta querystä,
-    //haetaan ne silti erillisillä queryillä,
-    //koska ruby:lle pässättävästä arraystä halutaan multidimensional array.
-    //Tämä sen takia että pdf koodiin ei tarvitsisi koskea.
-    if (isset($tyomaaraykset[$tyomaarays['kohde_tunnus']])) {
-      $tyomaaraysrivit_temp = \PDF\Tarkastuspoytakirja\hae_tyomaarayksen_rivit($tyomaarays['tunnus']);
-      foreach ($tyomaaraysrivit_temp as $rivi_temp) {
-        $tyomaaraykset[$tyomaarays['kohde_tunnus']]['rivit'][] = $rivi_temp;
-      }
-    }
-    else {
-      $tyomaarays['rivit'] = \PDF\Tarkastuspoytakirja\hae_tyomaarayksen_rivit($tyomaarays['tunnus']);
-      $tyomaarays['kohde'] = \PDF\Tarkastuspoytakirja\hae_tyomaarayksen_kohde($tyomaarays['laite_tunnus']);
-      $tyomaarays['asiakas'] = \PDF\Tarkastuspoytakirja\hae_tyomaarayksen_asiakas($tyomaarays['liitostunnus']);
-      $tyomaarays['yhtio'] = $yhtiorow;
-      $tyomaarays['logo'] = base64_encode(hae_yhtion_lasku_logo());
-      $tyomaarays['toimitettuaika'] = date('d.m.Y', strtotime($tyomaarays['rivit'][0]['toimitettuaika']));
-      $tyomaaraykset[$tyomaarays['kohde_tunnus']] = $tyomaarays;
-    }
-  }
+  $tyomaarays = mysql_fetch_assoc($result);
 
-  return $tyomaaraykset;
+  $tyomaarays['rivit'] = \PDF\Tarkastuspoytakirja\hae_tyomaarayksen_rivit($lasku_tunnukset);
+  $tyomaarays['kohde'] = \PDF\Tarkastuspoytakirja\hae_tyomaarayksen_kohde($tyomaarays['laite_tunnus']);
+  $tyomaarays['asiakas'] = \PDF\Tarkastuspoytakirja\hae_tyomaarayksen_asiakas($tyomaarays['liitostunnus']);
+  $tyomaarays['yhtio'] = $yhtiorow;
+  $tyomaarays['logo'] = base64_encode(hae_yhtion_lasku_logo());
+  $tyomaarays['toimitettuaika'] = date('d.m.Y', strtotime($tyomaarays['rivit'][0]['toimitettuaika']));
+
+  return $tyomaarays;
 }
 
-function hae_tyomaarayksen_rivit($lasku_tunnus) {
+function hae_tyomaarayksen_rivit($lasku_tunnukset) {
   global $kukarow, $yhtiorow;
+
+  $lasku_tunnukset = implode(",",$lasku_tunnukset);
 
   $query = "SELECT tilausrivi.*,
             tilausrivin_lisatiedot.*,
@@ -145,8 +132,9 @@ function hae_tyomaarayksen_rivit($lasku_tunnus) {
               AND huoltosyklit_laitteet.huoltosykli_tunnus = huoltosykli.tunnus
               AND huoltosyklit_laitteet.laite_tunnus = laite.tunnus )
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-            AND tilausrivi.otunnus = '{$lasku_tunnus}'
-            AND tilausrivi.var != 'P'";
+            AND tilausrivi.otunnus IN ({$lasku_tunnukset})
+            AND tilausrivi.var != 'P'
+            ORDER BY laite.oma_numero";
   $result = pupe_query($query);
 
   $rivit = array();
@@ -225,6 +213,8 @@ function hae_rivin_laite($laite_tunnus) {
   $result = pupe_query($query);
 
   $laite = mysql_fetch_assoc($result);
+
+  $laite['sammutin_tyyppi'] = ucfirst(str_replace('sammutin', '', $laite['sammutin_tyyppi']));
 
   $laite['tapahtumat'] = hae_laitteen_viimeiset_ja_seuraavat_tapahtumat($laite['tunnus']);
   $laite['viimeinen_painekoe'] = date('my', strtotime($laite['tapahtumat']['koeponnistus']['viimeinen_tapahtuma']));

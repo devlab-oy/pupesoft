@@ -24300,10 +24300,10 @@ if (!function_exists('hae_yhtion_lasku_logo')) {
   function hae_yhtion_lasku_logo() {
     global $kukarow, $yhtiorow;
 
-    $query = "  SELECT data
-          FROM liitetiedostot
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND kayttotarkoitus = 'yhtion_parametrit.lasku_logo'";
+    $query = "SELECT data
+              FROM liitetiedostot
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND kayttotarkoitus = 'yhtion_parametrit.lasku_logo'";
     $result = pupe_query($query);
 
     $logo = mysql_fetch_assoc($result);

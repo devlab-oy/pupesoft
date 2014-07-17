@@ -24,6 +24,13 @@ if ($action == 'hae_huoltovali_options') {
 
 if ($action == 'hae_huoltosykli_options') {
 
+  $o_qry = "SELECT olosuhde
+            FROM paikka
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = $paikka";
+  $o_res = pupe_query($o_qry);
+  $olosuhde = mysql_result($o_res, 0);
+
   if ($tuoteno == 'MUISTUTUS') {
     $sammutin = array(
         'tyyppi' => 'muistutus',
@@ -52,8 +59,14 @@ if ($action == 'hae_huoltosykli_options') {
     $huoltosykli_options = hae_huoltosyklit_tyyppi_koko($sammutin['tyyppi'], $sammutin['koko'], $tyyppi);
     $options_string = "<option value='0'>Ei huoltosykliä</option>";
 
+    $sel = $set = '';
     foreach ($huoltosykli_options as $val) {
-      $options_string .= "<option value='{$val['tunnus']}'>{$val['dropdown_text']}</option>";
+      if ($val['olosuhde'] == $olosuhde and $val['koko'] == $sammutin['koko'] and $val['tyyppi'] == $sammutin['tyyppi'] and $set == '' ) {
+        $sel = 'selected';
+        $set = 1;
+      }
+      $options_string .= "<option value='{$val['tunnus']}' $sel>{$val['dropdown_text']}</option>";
+      $sel = '';
     }
   }
   else {

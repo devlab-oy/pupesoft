@@ -432,10 +432,10 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
   echo "<td $varilisa>";
 
   if ($toim != 'TYOMAARAYS_ASENTAJA') {
-    $tyostatus_result = t_avainsana("TYOM_TYOSTATUS");
+
     $tyojono_result = t_avainsana("TYOM_TYOJONO");
 
-    if (mysql_num_rows($tyostatus_result) > 0) {
+    if (mysql_num_rows($tyojono_result) > 0) {
       echo "<form method='post' id='tmform' name='tmform'>";
       echo "<input type='hidden' name='tyomaarayksen_tunnus' value='$vrow[tunnus]'>";
       echo "<input type='hidden' name='konserni' value='$konserni'>";
@@ -451,16 +451,48 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
       // Haetaan tyojonot
       echo "<select name='tyojono_muutos' onchange='submit();'>";
       echo "<option value='EIJONOA'>".t("Ei jonossa")."</option>";
-
+      $vammeli = '';
       while ($tyojono_row = mysql_fetch_assoc($tyojono_result)) {
-        $sel = $vrow['tyojono'] == $tyojono_row['selitetark'] ? ' SELECTED' : '';
+        $sel = ''; 
+        if ($vrow['tyojono'] == $tyojono_row['selitetark']) {
+          $sel = 'SELECTED';
+          $jonon_nimi = strtolower($tyojono_row['selitetark']);
+        }
         echo "<option value='$tyojono_row[selite]'$sel>$tyojono_row[selitetark]</option>";
       }
       echo "</select><br>";
 
       // Haetaan tyostatukset
       echo "<select name='tyostatus_muutos' onchange='submit();'>";
-      echo "<option value='EISTATUSTA'>".t("Ei statusta")."</option>";
+
+      // Jos halutaan rajata tyojonon statusvalikoimaa tapahtumahistorian perusteella
+      // haetaan ekaksi tilauksen tapahtumahistorian viimeisimmän tapahtuman järjestysnumero
+      if (isset($tyojonotyyppi) and $tyojonotyyppi == $jonon_nimi) {
+        $kveeri = "SELECT 
+                   ifnull(tyojono_selite, '') tyojono_selite,
+                   ifnull(tyostatus_selite, '') tyostatus_selite,
+                   ifnull(avainsana.jarjestys, 0) jarjestysnumero
+                   FROM tyomaarayksen_tapahtumat
+                   LEFT JOIN avainsana ON avainsana.yhtio = tyomaarayksen_tapahtumat.yhtio 
+                    AND avainsana.laji = 'TYOM_TYOSTATUS' 
+                    AND avainsana.selite = tyomaarayksen_tapahtumat.tyostatus_selite
+                   WHERE tyomaarayksen_tapahtumat.yhtio = '{$kukarow['yhtio']}'
+                   AND tyomaarayksen_tapahtumat.tyomaarays_tunnus = '{$vrow['tunnus']}'
+                   ORDER BY tyomaarayksen_tapahtumat.luontiaika DESC
+                   LIMIT 1";
+        $kvresult = pupe_query($kveeri);
+        $kvrivi = mysql_fetch_array($kvresult);
+
+        $hakunumero = 0;
+        if (!empty($kvrivi)) {
+          $hakunumero = $kvrivi['jarjestysnumero'];
+        }
+        $tyostatus_result = t_avainsana("TYOM_TYOSTATUS", "", " AND avainsana.jarjestys >= {$hakunumero} ");
+      }
+      else {
+        echo "<option value='EISTATUSTA'>".t("Ei statusta")."</option>";
+        $tyostatus_result = t_avainsana("TYOM_TYOSTATUS");
+      }
 
       while ($tyostatus_row = mysql_fetch_assoc($tyostatus_result)) {
         $sel = $vrow['tyostatus'] == $tyostatus_row['selitetark'] ? ' SELECTED' : '';

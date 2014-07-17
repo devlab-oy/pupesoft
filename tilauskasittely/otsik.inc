@@ -2772,18 +2772,28 @@ if ($tila == "" and !isset($jatka)) {
     }
 
     echo "</table><br>";
+
     // Työmääräyksen tapahtumahistoria
     if ($toim == "TYOMAARAYS") {
+
       $query = "SELECT tyomaarayksen_tapahtumat.*,
-                tilataulu.selitetark tilassa,
-                jonotaulu.selitetark jonossa
+                ifnull(tilataulu.selitetark, '') tilassa,
+                ifnull(jonotaulu.selitetark, '') jonossa
                 FROM tyomaarayksen_tapahtumat
-                LEFT JOIN avainsana tilataulu ON tilataulu.yhtio = tyomaarayksen_tapahtumat.yhtio AND tilataulu.laji = 'TYOM_TYOSTATUS' AND tilataulu.selite = tyomaarayksen_tapahtumat.tyostatus_selite
-                LEFT JOIN avainsana jonotaulu ON jonotaulu.yhtio = tyomaarayksen_tapahtumat.yhtio AND jonotaulu.laji = 'TYOM_TYOJONO' AND jonotaulu.selite = tyomaarayksen_tapahtumat.tyojono_selite
+                LEFT JOIN avainsana tilataulu ON tilataulu.yhtio = tyomaarayksen_tapahtumat.yhtio 
+                  AND tilataulu.laji = 'TYOM_TYOSTATUS'
+                  AND tilataulu.selite = tyomaarayksen_tapahtumat.tyostatus_selite
+                LEFT JOIN avainsana jonotaulu ON jonotaulu.yhtio = tyomaarayksen_tapahtumat.yhtio 
+                  AND jonotaulu.laji = 'TYOM_TYOJONO'
+                  AND jonotaulu.selite = tyomaarayksen_tapahtumat.tyojono_selite
                 WHERE tyomaarayksen_tapahtumat.yhtio = '{$kukarow['yhtio']}'
                 AND tyomaarayksen_tapahtumat.tyomaarays_tunnus = '$tilausnumero'
                 ORDER BY tyomaarayksen_tapahtumat.luontiaika desc";
       $ress = pupe_query($query);
+
+      // Otetaan uusin tapahtumarivi talteen
+      $eka_tuomaarays_row = mysql_fetch_assoc($ress);
+      mysql_data_seek($ress, 0);
 
       if (mysql_affected_rows() > 0) {
         echo "<table>";
@@ -2794,6 +2804,7 @@ if ($tila == "" and !isset($jatka)) {
         echo "<td>".t("Muutosaika").":</td>";
         echo "<td>".t("Muuttaja").":</td>";
         echo "</tr>";
+
         while ($row = mysql_fetch_assoc($ress)) {
           echo "<tr>";
           echo "<td>{$row['tilassa']}</td>";
@@ -2805,6 +2816,7 @@ if ($tila == "" and !isset($jatka)) {
         echo "</table><br>";
       }
     }
+
     // tehdään ylläpitosopimista varten laskutusaikataulu taulu
     if ($toim == "YLLAPITO") {
 
@@ -4026,6 +4038,38 @@ if (isset($jatka)) {
       if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or ((($toim == 'TARJOUS' or $toim == 'EXTTARJOUS') or $srow["tilaustyyppi"] == "T") and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
         $query2 .= ",  tyojono      = '$tyojono',
                 tyostatus    = '$tyostatus'";
+
+        // Jos käyttöliittymästä on muutettu työjonoa/työstatusta kirjataan se myös tyomaarayksen_tapahtumiin
+        if (isset($eka_tuomaarays_row) and !empty($eka_tuomaarays_row)) {
+          $lokin_tyojono = $eka_tuomaarays_row['tyojono_selite'];
+          $lokin_tyostatus = $eka_tuomaarays_row['tyostatus_selite'];
+        }
+        else {
+          $tilaquery = "SELECT
+                        ifnull(tyojono_selite, '') tyojono_selite,
+                        ifnull(tyostatus_selite,'') tyostatus_selite
+                        FROM tyomaarayksen_tapahtumat
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND tyomaarays_tunnus = '{$kukarow['kesken']}'
+                        ORDER BY luontiaika desc
+                        LIMIT 1"; 
+          $tilaresult = pupe_query($tilaquery);
+          $tilarivi = mysql_fetch_assoc($tilaresult);
+
+          $lokin_tyojono = $tilarivi['tyojono_selite'];
+          $lokin_tyostatus = $tilarivi['tyostatus_selite'];
+        }
+
+        if ($lokin_tyojono != $tyojono or $lokin_tyostatus != $tyostatus) {
+          $updquery = "INSERT INTO tyomaarayksen_tapahtumat SET
+                       tyomaarays_tunnus = '{$kukarow['kesken']}',
+                       tyojono_selite    = '$tyojono',
+                       tyostatus_selite  = '$tyostatus',
+                       yhtio             = '{$kukarow['yhtio']}',
+                       laatija           = '{$kukarow['kuka']}',
+                       luontiaika        = now()";
+          pupe_query($updquery);
+        }
       }
       $query2 .= $postquery2;
       $result = pupe_query($query2);

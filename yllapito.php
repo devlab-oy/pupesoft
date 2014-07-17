@@ -2432,7 +2432,14 @@
 
     echo "</td></tr>";
 
-    // M‰‰ritell‰‰n mit‰ tietueita saa poistaa
+    if ($yhtiorow['laite_huolto'] == 'X') {
+      $poistamattomat = array("kohde", "tuote", "paikka", "laite", "asiakas");
+      if ($kukarow['profiilit'] != 'admin' and in_array($toim, $poistamattomat)) {
+        $asioiden_poistokielto = true;
+      }
+    }
+
+    // Mââritellâân mitâ tietueita saa poistaa
     if ($toim == "auto_vari" or
       $toim == "auto_vari_tuote" or
       $toim == "auto_vari_korvaavat" or
@@ -2483,7 +2490,8 @@
       $toim == "huoltosyklit_laitteet" or
       ($toim == "liitetiedostot" and $poistolukko == "") or
       ($toim == "tuote" and $poistolukko == "") or
-      ($toim == "toimi" and $kukarow["taso"] == "3")) {
+      ($toim == "toimi" and $kukarow["taso"] == "3") and
+      !isset($asioiden_poistokielto)) {
 
       // Tehd‰‰n "poista tietue"-nappi
       if ($uusi != 1 and $toim != "yhtio" and $toim != "yhtion_parametrit") {

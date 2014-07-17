@@ -80,8 +80,13 @@ if ($tee == "laheta" and $laheta_maksuaineisto == "on") {
   $pankkiyhteys = hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana);
 
   $params = array(
-    "pankkiyhteys"  => $pankkiyhteys,
-    "maksuaineisto" => $maksuaineisto,
+    "bank" => $pankkiyhteys["pankki_lyhyt_nimi"],
+    "customer_id" => $pankkiyhteys["customer_id"],
+    "target_id" => $pankkiyhteys["target_id"],
+    "certificate" => $pankkiyhteys["certificate"],
+    "private_key" => $pankkiyhteys["private_key"],
+    "file_type" => "NDCORPAYS",
+    "maksuaineisto" => $maksuaineisto
   );
 
   $vastaus = sepa_upload_file($params);
@@ -94,7 +99,7 @@ if ($tee == "laheta" and $laheta_maksuaineisto == "on") {
     echo "<table>";
     echo "<tbody>";
 
-    foreach ($vastaus[1] as $key => $value) {
+    foreach ($vastaus as $key => $value) {
       echo "<tr>";
       echo "<td>{$key}</td>";
       echo "<td>{$value}</td>";

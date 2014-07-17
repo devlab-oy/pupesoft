@@ -48,10 +48,10 @@ if ($tee == "luo" and $pin != '') {
   $generoidut_tunnukset = generoi_private_key_ja_csr();
 
   $params = array(
-    "pin"               => $pin,
-    "customer_id"       => $customer_id,
-    "tunnukset"         => $generoidut_tunnukset,
-    "pankki_lyhyt_nimi" => $tuetut_pankit[$pankki]["lyhyt_nimi"]
+    "bank" => $tuetut_pankit[$pankki]["lyhyt_nimi"],
+    "customer_id" => $customer_id,
+    "pin" => $pin,
+    "csr" => $generoidut_tunnukset["csr"]
   );
 
   $certificate = sepa_get_certificate($params);
@@ -89,11 +89,12 @@ if ($tee == "luo" and $pin == '') {
 
 // Jos käyttäjä ei ole antanut target id:tä, haetaan se pankista
 if ($tee == "luo" and $target_id == '') {
+
   $params = array(
-    "certificate"       => $certificate,
-    "private_key"       => $private_key,
-    "customer_id"       => $customer_id,
-    "pankki_lyhyt_nimi" => $tuetut_pankit[$pankki]["lyhyt_nimi"]
+    "bank" => $tuetut_pankit[$pankki]["lyhyt_nimi"],
+    "certificate" => $certificate,
+    "private_key" => $private_key,
+    "customer_id" => $customer_id,
   );
 
   $target_id = sepa_get_target_id($params);

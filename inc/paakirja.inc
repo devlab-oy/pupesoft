@@ -345,7 +345,23 @@ if ($tee != "") {
   $blvk = 0;
   $blvp = 0;
 
-  if (isset($post_alv) and $alvk < 1) {
+  $alvk = (int) $alvk;
+  $alvp = (int) $alvp;
+  $alvv = (int) $alvv;
+  $llvk = (int) $llvk;
+  $llvp = (int) $llvp;
+  $llvv = (int) $llvv;
+  $tkausi = (int) $tkausi;
+
+  $tili = empty($tili) ? '' : trim($tili);
+  $tili2 = empty($tili2) ? '' : trim($tili2);
+  $lisa = empty($lisa) ? '' : trim($lisa);
+  $konsernirajaus = empty($konsernirajaus) ? '' : trim($konsernirajaus);
+
+  $post_alv = empty($post_alv) ? '' : trim($post_alv);
+  $post_alv_lisa = "";
+
+  if ($post_alv != "" and $alvk < 1) {
     echo "<font class='error'>";
     echo t("ALV-Laskelman jälkeen tehtyjä tiliöintejä haettaessa pitää valita kuukausi.");
     echo "</font>";
@@ -353,7 +369,7 @@ if ($tee != "") {
     $tee = "";
   }
 
-  if (isset($post_alv) and $alvp > 0) {
+  if ($post_alv != "" and $alvp > 0) {
     echo "<font class='error'>";
     echo t("ALV-Laskelman jälkeen tehtyjä tiliöintejä haettaessa pitää valita koko kuukausi.");
     echo "</font>";
@@ -361,12 +377,37 @@ if ($tee != "") {
     $tee = "";
   }
 
-  if (isset($post_alv) and $tkausi > 0) {
+  if ($post_alv != "" and $tkausi > 0) {
     echo "<font class='error'>";
     echo t("ALV-Laskelman jälkeen tehtyjä tiliöintejä haettaessa ei voi valita tilikautta.");
     echo "</font>";
     echo "<br><br>";
     $tee = "";
+  }
+
+  if ($post_alv != '' and $alvp == 0 and $alvk != 0) {
+    $kuunvika = date("Y-m-t", strtotime("{$alvv}-{$alvk}-01"));
+
+    $query = "SELECT luontiaika
+              FROM lasku
+              WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+              AND lasku.tapvm   = '{$kuunvika}'
+              AND lasku.tila    = 'X'
+              AND lasku.nimi    = 'ALVTOSITEMAKSUUN$kuunvika'";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) > 0) {
+      $luontiaikarow = mysql_fetch_assoc($result);
+      $laskelma_luotu = $luontiaikarow['luontiaika'];
+      $post_alv_lisa = " and tiliointi.laadittu >= '$laskelma_luotu' and tiliointi.vero > 0";
+    }
+    else {
+      echo "<font class='error'>";
+      echo t("Valitun kuukauden ALV-laskelmaa ei ole lähetetty!");
+      echo "</font>";
+      echo "<br><br>";
+      $tee = "";
+    }
   }
 
   if ($llvv > 0) {
@@ -422,46 +463,8 @@ if ($tee != "") {
   $lisa1 = ''; // aineiston hakemiseen
   $lisa2 = ''; // alkusaldon laskemiseen
 
-  $alvk = (int) $alvk;
-  $alvp = (int) $alvp;
-  $alvv = (int) $alvv;
-  $llvk = (int) $llvk;
-  $llvp = (int) $llvp;
-  $llvv = (int) $llvv;
-  $tkausi = (int) $tkausi;
-
-  $tili = empty($tili) ? '' : trim($tili);
-  $tili2 = empty($tili2) ? '' : trim($tili2);
-  $lisa = empty($lisa) ? '' : trim($lisa);
-  $konsernirajaus = empty($konsernirajaus) ? '' : trim($konsernirajaus);
-
   // Tehdäänkö linkit päiväkirjaan
   $mutositelink = tarkista_oikeus("muutosite.php");
-
-  $post_alv_lisa = '';
-
-  if ($post_alv != '' and $alvp == 0 and $alvk != 0) {
-
-    $kuunvika = date("Y-m-t", strtotime("{$alvv}-{$alvk}-01"));
-
-    $query = "SELECT luontiaika
-              FROM lasku
-              WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-              AND lasku.tapvm   = '{$kuunvika}'
-              AND lasku.tila    = 'X'
-              AND lasku.nimi    = 'ALVTOSITEMAKSUUN$kuunvika'";
-    $result = pupe_query($query);
-
-    if (mysql_num_rows($result) > 0) {
-      $luontiaikarow = mysql_fetch_assoc($result);
-      $laskelma_luotu = $luontiaikarow['luontiaika'];
-      $post_alv_lisa = " and tiliointi.laadittu >= '$laskelma_luotu' and tiliointi.vero > 0";
-    }
-    else {
-      $post_alv_lisa = " and tiliointi.laadittu < 0.1";
-      $ei_alv = 'X';
-    }
-  }
 
   $nimi = t("Pääkirja");
   $jarj = "tiliointi.tilino, tiliointi.tapvm, tiliointi.laadittu, tiliointi.summa";
@@ -493,12 +496,11 @@ if ($tee != "") {
     $loppupvm = $alkupvm;
   }
 
-  if (isset($post_alv) and !isset($ei_alv)) {
-    echo "<p>". t("Näytetään vain ALV-laskelman jälkeen tehdyt tiliöinnit") ."</p>";
-  }
-
-  if (isset($post_alv) and isset($ei_alv)) {
-    echo "<font class='error'>". t("Valitun kuukauden ALV-laskelmaa ei ole lähetetty!") ."</font><br><br>";
+  if ($post_alv != "") {
+    echo "<font class='message'>";
+    echo t("Näytetään vain ALV-laskelman jälkeen tehdyt tiliöinnit");
+    echo "</font>";
+    echo "<br><br>";
   }
 
   $lisa1 = " and tiliointi.tapvm >= '$alkupvm' AND tiliointi.tapvm <= '$loppupvm'";

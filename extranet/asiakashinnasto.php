@@ -159,29 +159,19 @@ else {
     echo "<br><br><font class='message'>".t("Asiakashinnastoa luodaan...")."</font><br>";
     flush();
 
-    require_once ('inc/ProgressBar.class.php');
+   require_once ('inc/ProgressBar.class.php');
     $bar = new ProgressBar();
     $elements = mysql_num_rows($rresult); // total number of elements to process
     $bar->initialize($elements); // print the empty bar
 
-    if (include('Spreadsheet/Excel/Writer.php')) {
+    include('inc/pupeExcel.inc'); 
 
-      //keksitään failille joku varmasti uniikki nimi:
-      list($usec, $sec) = explode(' ', microtime());
-      mt_srand((float) $sec + ((float) $usec * 100000));
-      $excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+    $worksheet 	 = new pupeExcel();
+    $format_bold = array("bold" => TRUE);
+    $excelrivi 	 = 0;
 
-      $workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-      $workbook->setVersion(8);
-      $worksheet = $workbook->addWorksheet('Sheet 1');
 
-      $format_bold = $workbook->addFormat();
-      $format_bold->setBold();
-
-      $excelrivi = 0;
-    }
-
-    if (isset($workbook)) {
+    if (isset($worksheet)) {
       $worksheet->writeString($excelrivi,  0, t("Ytunnus", $hinkieli).": $ytunnus", $format_bold);
       $excelrivi++;
 
@@ -310,7 +300,7 @@ else {
         $asiakashinta_verollinen = round(($asiakashinta*(1+$lis_alv/100)), 2);
       }
 
-      if (isset($workbook)) {
+      if (isset($worksheet)) {
         $worksheet->writeString($excelrivi, 0, $rrow["tuoteno"]);
         $worksheet->writeString($excelrivi, 1, $rrow["eankoodi"]);
         $worksheet->writeString($excelrivi, 2, $rrow["osasto"]);
@@ -336,16 +326,16 @@ else {
       }
     }
 
-    if (isset($workbook)) {
+    if (isset($worksheet)) {
 
-      // We need to explicitly close the workbook
-      $workbook->close();
+
+      $excelnimi = $worksheet->close();
 
       echo "<br><br><table>";
       echo "<tr><th>".t("Tallenna hinnasto").":</th>";
       echo "<form method='post' class='multisubmit'>";
       echo "<input type='hidden' name='tee_lataa' value='lataa_tiedosto'>";
-      echo "<input type='hidden' name='kaunisnimi' value='".t("Asiakashinnasto").".xls'>";
+      echo "<input type='hidden' name='kaunisnimi' value='".t("Asiakashinnasto").".xlsx'>";
       echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
       echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
       echo "</table><br>";

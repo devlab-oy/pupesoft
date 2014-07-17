@@ -544,6 +544,8 @@ function echo_tyomaaraykset_table($request = array()) {
 function echo_tyomaarays_rivi($request, $laitteet) {
   global $kukarow, $yhtiorow, $palvelin2;
 
+  $lopetus = "{$palvelin2}tyomaarays/tyojono2.php////tee=hae//asiakas_tunnus={$request['asiakas_tunnus']}//kohde_tunnus={$request['kohde_tunnus']}//tyojono={$request['tyojono']}//tyostatus={$request['tyostatus']}//toimitusaika={$request['toimitusaika']}";
+
   echo "<tr class='laite_table_tr_hidden'>";
 
   echo "<form class='multisubmit' name='merkkaa_tehdyksi'>";
@@ -589,7 +591,14 @@ function echo_tyomaarays_rivi($request, $laitteet) {
     echo "</td>";
 
     echo "<td>";
-    echo $laite['sarjanumero'];
+    if ($request['toim'] != 'TEHDYT_TYOT') {
+      echo "<a href='{$palvelin2}yllapito.php?toim=laite&asiakas_tunnus={$laite['asiakas_tunnus']}&lopetus={$lopetus}&tunnus={$laite['laite_tunnus']}'>";
+      echo $laite['sarjanumero'];
+      echo "</a>";
+    }
+    else {
+      echo $laite['sarjanumero'];
+    }
     echo "</td>";
 
     echo "<td>";

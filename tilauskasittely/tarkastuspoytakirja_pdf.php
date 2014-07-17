@@ -13,6 +13,10 @@ else {
 }
 
 function hae_tarkastuspoytakirja($lasku_tunnukset) {
+  //Poistetaan varmuuden vuoksi olemassa olevat pdf:t
+  $cmd = "rm -f /tmp/Tarkastuspoytakirja_*";
+  $return = exec($cmd, $output, $return_code);
+
   $pdf_tiedosto = null;
   if (!empty($lasku_tunnukset)) {
     $tyomaarays = \PDF\Tarkastuspoytakirja\pdf_hae_tyomaarays($lasku_tunnukset);

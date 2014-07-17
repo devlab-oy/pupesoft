@@ -35,7 +35,7 @@ if ($tee == "laheta" and $hae_tiliotteet == "on") {
     "salasana"            => $salasana
   );
 
-  $tiedostot = lataa_kaikki($params);
+  $tiedostot = sepa_lataa_kaikki_uudet_tiedostot($params);
 
   if ($tiedostot) {
     viesti("Ladatut tiliotteet:");
@@ -54,7 +54,7 @@ if ($tee == "laheta" and $hae_viitteet == "on") {
     "salasana"            => $salasana
   );
 
-  $tiedostot = lataa_kaikki($params);
+  $tiedostot = sepa_lataa_kaikki_uudet_tiedostot($params);
 
   if ($tiedostot) {
     viesti("Ladatut viitteet:");

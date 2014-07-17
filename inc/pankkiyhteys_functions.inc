@@ -536,13 +536,15 @@ function sepa_download_file_list($params) {
   $certificate = empty($params["certificate"]) ? "" : base64_encode($params["certificate"]);
   $private_key = empty($params["private_key"]) ? "" : base64_encode($params["private_key"]);
   $file_type   = empty($params["file_type"])   ? "" : $params["file_type"];
+  $status      = empty($params["status"])      ? "" : $params["status"];
 
   if (empty($bank)
       or empty($customer_id)
       or empty($target_id)
       or empty($certificate)
       or empty($private_key)
-      or empty($file_type)) {
+      or empty($file_type)
+      or empty($status)) {
     return false;
   }
 
@@ -554,6 +556,7 @@ function sepa_download_file_list($params) {
       "customer_id" => $customer_id,
       "file_type"   => $file_type,
       "target_id"   => $target_id,
+      "status"      => $status,
     ),
     "url"     => "https://sepa.devlab.fi/api/{$bank}/download_file_list",
     "headers" => array(
@@ -848,7 +851,7 @@ function hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana) {
  *
  * @return array|bool
  */
-function lataa_kaikki($params) {
+function sepa_lataa_kaikki_uudet_tiedostot($params) {
   global $kukarow, $yhtiorow;
 
   $tiedostotyyppi = isset($params["tiedostotyyppi"]) ? $params["tiedostotyyppi"] : "";
@@ -871,7 +874,8 @@ function lataa_kaikki($params) {
     "target_id" => $pankkiyhteys["target_id"],
     "certificate" => $pankkiyhteys["certificate"],
     "private_key" => $pankkiyhteys["private_key"],
-    "file_type" => $tiedostotyyppi
+    "file_type" => $tiedostotyyppi,
+    "status" => "NEW"
   );
 
   $viitteet = sepa_download_file_list($params);

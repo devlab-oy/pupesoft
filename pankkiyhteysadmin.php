@@ -115,12 +115,18 @@ if ($tee == "luo") {
 
   if (tallenna_pankkiyhteys($params)) {
     ok("Tunnukset tallennettu");
+    $tee = "tyhjenna_formi";
   }
   else {
     virhe("Tunnusten tallennus epäonnistui");
   }
+}
 
-  $tee = "";
+if ($tee == "tyhjenna_formi") {
+  $_POST["pankki"] = "";
+  $_POST["customer_id"] = "";
+  $_POST["target_id"] = "";
+  $_POST["pin"] = "";
 }
 
 // Käyttöliittymä

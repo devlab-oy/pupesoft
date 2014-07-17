@@ -23,7 +23,7 @@ if (!isset($sepa_pankkiyhteys_token)) {
 $tee = empty($tee) ? '' : $tee;
 
 // Oikellisuustarkistukset
-if ($tee == "laheta" and !formi_kunnossa()) {
+if ($tee == "laheta" and !($formi_kunnossa = formi_kunnossa())) {
   $tee = "";
 }
 
@@ -107,6 +107,12 @@ if ($tee == "laheta" and $laheta_maksuaineisto == "on") {
   }
 
   $tee = "";
+}
+
+if ($formi_kunnossa) {
+  $_POST["hae_tiliotteet"] = "";
+  $_POST["hae_viitteet"] = "";
+  $_POST["laheta_maksuaineisto"] = "";
 }
 
 // Käyttöliittymä

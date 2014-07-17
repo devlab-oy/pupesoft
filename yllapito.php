@@ -2440,7 +2440,8 @@
     }
 
     // M‰‰ritell‰‰n mit‰ tietueita saa poistaa
-    if ($toim == "auto_vari" or
+    if (!isset($asioiden_poistokielto) or
+      $toim == "auto_vari" or
       $toim == "auto_vari_tuote" or
       $toim == "auto_vari_korvaavat" or
       $toim == "autoid_lisatieto" or
@@ -2458,7 +2459,7 @@
       $toim == "perusalennus" or
       $toim == "yhteensopivuus_tuote" or
       $toim == "yhteensopivuus_tuote_lisatiedot" or
-       ($toim == "toimitustapa" and $poistolukko == "") or
+      ($toim == "toimitustapa" and $poistolukko == "") or
       $toim == "kirjoittimet" or
       $toim == "hinnasto" or
       $toim == "rahtimaksut" or
@@ -2490,8 +2491,7 @@
       $toim == "huoltosyklit_laitteet" or
       ($toim == "liitetiedostot" and $poistolukko == "") or
       ($toim == "tuote" and $poistolukko == "") or
-      ($toim == "toimi" and $kukarow["taso"] == "3") and
-      !isset($asioiden_poistokielto)) {
+      ($toim == "toimi" and $kukarow["taso"] == "3")) {
 
       // Tehdään "poista tietue"-nappi
       if ($uusi != 1 and $toim != "yhtio" and $toim != "yhtion_parametrit") {

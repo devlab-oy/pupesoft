@@ -24039,21 +24039,22 @@ if (!function_exists('js_laite')) {
           setTimeout(function() {
             var tuoteno = $('#tuoteno_td input').val();
             if( tuoteno.length > 2 ) {
+              var paikka = $('#paikka').val();
               $('.huoltosykli_select').each(function() {
                 var select_id = $(this).attr('id');
                 var tyyppi = select_id.replace("huoltosykli_select_","");
-                hae_tuotteen_huoltosyklit(tuoteno, select_id, tyyppi);
+                hae_tuotteen_huoltosyklit(tuoteno, select_id, tyyppi, paikka);
               });
             }
           }, 200);
         });
       }
 
-      function hae_tuotteen_huoltosyklit(tuoteno, select_id, tyyppi) {
+      function hae_tuotteen_huoltosyklit(tuoteno, select_id, tyyppi, paikka) {
         $.ajax({
           async: true,
           type: 'GET',
-          url: palvelin2 + 'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltosykli_options&tuoteno=' + tuoteno + '&tyyppi=' +tyyppi
+          url: palvelin2 + 'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltosykli_options&tuoteno=' + tuoteno + '&tyyppi=' +tyyppi + '&paikka=' + paikka
         }).done(function(response) {
           $('#'+select_id).html(response);
           $('#'+select_id).change();
@@ -24282,7 +24283,7 @@ if (!function_exists('aja_ruby')) {
 
 if (!function_exists('pupesoft_require')) {
   function pupesoft_require($filename) {
-    global $kukarow, $yhtiorow;
+    global $kukarow, $yhtiorow, $starttime;
 
     if (file_exists($filename)) {
       require_once($filename);

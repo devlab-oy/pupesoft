@@ -218,6 +218,9 @@ if (!function_exists("tee_jt_tilaus")) {
         if ($yhtiorow['jt_asiakkaan_tilausnumero'] == "K") {
           $atlisa = " and lasku.asiakkaan_tilausnumero = '$otsikkorivi[asiakkaan_tilausnumero]' ";
         }
+        else {
+          $atlisa = "";
+        }
 
         // Tarvitsemmeko uuden otsikon?
         $query = "SELECT lasku.*

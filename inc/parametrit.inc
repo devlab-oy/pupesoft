@@ -153,6 +153,7 @@ unset($thumb_size_y);
 
 unset($nrahdemo);
 
+unset($sepa_pankkiyhteys_token);
 unset($pankkitiedostot_polku);
 unset($maksuaineiston_siirto);
 unset($pankkiaineiston_haku);
@@ -226,6 +227,10 @@ unset($tee_keraysera_debugdir);
 
 unset($loginkieli);
 
+unset($magento_api_url);
+unset($magento_api_usr);
+unset($magento_api_pas);
+
 $pupe_query_debug = 0;
 $aika_debug_array = array();
 $quer_debug_array = array();
@@ -245,7 +250,8 @@ else exit;
 
 $link = @mysql_connect($dbhost, $dbuser, $dbpass) or die ("Tietokantapalvelimeen ei saada yhteyttä. Se on pois päältä tai käyttäjätietosi ovat virheelliset.");
 mysql_select_db($dbkanta) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (parametrit.inc)");
-mysql_set_charset("latin1");
+mysql_set_charset("latin1", $link);
+mysql_query("set group_concat_max_len=1000000", $link);
 
 // pupesoft_cleanstring ALL THE COOKIES!!
 $_COOKIE = array_map("pupesoft_cleanstring", $_COOKIE);
@@ -285,6 +291,14 @@ $sanakirja_kielet = array("fi" => "Suomi",
 //Initioidaan pari muuttujaa
 if (!isset($login))    $login = "";
 if (!isset($extranet))   $extranet = "";
+
+// Katsotaan onko Pupesoftissa Magento rajapinta asetettuna, eli verkkokauppa käytössä
+if (empty($magento_api_url) or empty($magento_api_usr) or empty($magento_api_pas)) {
+  $magento_kaytossa = false;
+}
+else {
+  $magento_kaytossa = true;
+}
 
 // jos saamme nämä muuttujat getissä, kokeillaan logata niillä sisään
 if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_GET["yhtio"] != "") {
@@ -477,15 +491,9 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
     }
 
     if ($phpnimi == 'generoi_siirtolista.php') {
-      if (isset($lapsituotteet)) {
-        setcookie('lapsituotteet', $lapsituotteet, time()+60*60*24*90, "/");
-      }
-      if (isset($myyntiera)) {
-        setcookie('myyntiera', $myyntiera, time()+60*60*24*90, "/");
-      }
-      if (isset($kesken)) {
-        setcookie('kesken', $kesken, time()+60*60*24*90, "/");
-      }
+      setcookie('lapsituotteet', $lapsituotteet, time()+60*60*24*90, "/");
+      setcookie('myyntiera', $myyntiera, time()+60*60*24*90, "/");
+      setcookie('kesken', $kesken, time()+60*60*24*90, "/");
     }
 
     // Unohdetaan tallennettu state jos tullaan suoraan indexsvassista

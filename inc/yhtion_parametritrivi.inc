@@ -3154,14 +3154,12 @@ if ($fieldname == "varastoonvientipaiva") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-  $sel = "";
-
-  if ($trow[$i] != "") {
-    $sel = "selected";
-  }
+  $sel = array();
+  $sel[$trow[$i]] = " selected";
 
   $ulos .= "<option value = ''>".t("Tavaran varastoonvientip‰iv‰ on saapumisen varastoonvientip‰iv‰");
-  $ulos .= "<option value = 'K' $sel>".t("Tavaran varastoonvientip‰iv‰ voidaan syˆtt‰‰ saapumisen varastoonvienniss‰");
+  $ulos .= "<option value = 'K' {$sel['K']}>".t("Tavaran varastoonvientip‰iv‰ voidaan syˆtt‰‰ saapumisen varastoonvienniss‰");
+  $ulos .= "<option value = 'R' {$sel['R']}>".t("Tavaran varastoonvientip‰iv‰ korjataan automaattisesti edelt‰m‰‰n tapahtumaa joka aiheutti negatiivisen saldon");
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -3621,6 +3619,30 @@ if ($fieldname == 'valmistuksien_kasittely') {
 
   $ulos .= "<option value = ''>".t("Valmistuksella voi olla useita valmisteita")."</option>";
   $ulos .= "<option value = 'Y' $sel>".t("Valmistuksella voi olla vain yksi valmiste")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == 'kehahinta_valmistuksella') {
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'K' ? ' selected' : '';
+
+  $ulos .= "<option value = ''>".t("Valmistuksella ei n‰ytet‰ keskihankintahintoja")."</option>";
+  $ulos .= "<option value = 'K' $sel>".t("Valmistuksella n‰ytet‰‰n keskihankintahinnat")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == 'saldo_varastossa_valmistuksella') {
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'S' ? ' selected' : '';
+
+  $ulos .= "<option value = ''>".t("Valmistuksella ei n‰ytet‰ varastossa olevaa saldoa")."</option>";
+  $ulos .= "<option value = 'S' $sel>".t("Valmistuksella n‰ytet‰‰n varastossa oleva saldo")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

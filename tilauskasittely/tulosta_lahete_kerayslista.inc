@@ -899,7 +899,7 @@ if (!function_exists('rivi_kerayslista')) {
         }
 
         // jos rekkulalla on suoraan toimittajalle palautettvia rivejä
-        if ($row['asiakkaan_positio'] > 0) {
+        if (isset($row['asiakkaan_positio']) and $row['asiakkaan_positio'] > 0) {
 
           $query = "SELECT nimi
                     FROM asiakas

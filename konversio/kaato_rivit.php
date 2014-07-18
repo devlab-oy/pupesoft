@@ -3,6 +3,17 @@
 function luo_kaato_tiedot() {
   global $kukarow, $yhtiorow;
 
+  $query = "SELECT *
+            FROM tuote
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tuoteno = 'kaato_tuote'";
+  $result = pupe_query($query);
+
+  //Ei ajeta kaato-tietoja uudelleen yhtiölle
+  if (mysql_num_rows($result) > 0) {
+    return false;
+  }
+
   $query = "INSERT INTO tuote
             SET yhtio = '{$kukarow['yhtio']}',
             laatija = 'import',

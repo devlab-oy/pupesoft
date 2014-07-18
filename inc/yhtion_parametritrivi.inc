@@ -2495,6 +2495,20 @@ if ($fieldname == "jt_manual") {
   $jatko = 0;
 }
 
+if ($fieldname == "jt_asiakkaan_tilausnumero") {
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $selE = $trow[$i] == 'E' ? "selected" : "";
+  $selK = $trow[$i] == 'K' ? "selected" : "";
+
+  $ulos .= "<option value = 'E' {$selK}>".t("Asiakkaan tilausnumeroa ei huomioida kun tutkitaan pitääkö perustaa uusi jt-tilaus.")."</option>";
+  $ulos .= "<option value = 'K' {$selK}>".t("Asiakkaan tilausnumero huomioidaan kun tutkitaan pitääkö perustaa uusi jt-tilaus.")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "tilausvahvistus_tallenna") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

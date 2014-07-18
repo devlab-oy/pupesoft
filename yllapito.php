@@ -1055,6 +1055,10 @@ for ($i=0; $i<=$count; $i++) {
       $tarkkahaku = TRUE;
       $hakuehto = " = '{$haku[$i]}' ";
     }
+    elseif ($toim == 'asiakas' and $array[$i] == "toimipaikka") {
+      $tarkkahaku = FALSE;
+      $hakuehto = " = '{$haku[$i]}' ";
+    }
     else {
       $tarkkahaku = FALSE;
       $hakuehto = " like '%{$haku[$i]}%' ";

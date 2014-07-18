@@ -337,10 +337,11 @@ class TarkastuksetCSVDumper extends CSVDumper {
       return $this->kaato_tilausrivi;
     }
 
+    //Kaato-tilausrivejä on vain yksi per yhtiö
     $query = "SELECT tilausrivi.*
               FROM tilausrivi
               WHERE tilausrivi.yhtio = '{$this->kukarow['yhtio']}'
-              AND tilausrivi.tunnus = '-1'";
+              AND tilausrivi.tuoteno = 'kaato_tuote'";
     $result = pupe_query($query);
 
     $kaato_tilausrivi = mysql_fetch_assoc($result);
@@ -357,8 +358,11 @@ class TarkastuksetCSVDumper extends CSVDumper {
 
     $query = "SELECT tilausrivin_lisatiedot.*
               FROM tilausrivin_lisatiedot
-              WHERE tilausrivin_lisatiedot.yhtio = '{$this->kukarow['yhtio']}'
-              AND tilausrivin_lisatiedot.tunnus = '-1'";
+              JOIN tilausrivi
+              ON ( tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
+                AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+                AND tilausrivi.tuoteno = 'kaato_tuote')
+              WHERE tilausrivin_lisatiedot.yhtio = '{$this->kukarow['yhtio']}'";
     $result = pupe_query($query);
 
     $kaato_tilausrivi = mysql_fetch_assoc($result);

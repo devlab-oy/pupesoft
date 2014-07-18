@@ -6,6 +6,7 @@ function hae_tyojono2_js() {
   ob_start();
   ?>
   <script src='<?php echo $palvelin2 ?>js/tyomaarays/tyojono2.js'></script>
+  <script src='<?php echo $palvelin2 ?>js/valid_date_plugin.js'></script>
   <script>
     $(document).ready(function() {
       if ($('#tyojono_wrapper').length > 0) {
@@ -13,6 +14,10 @@ function hae_tyojono2_js() {
         var tyojono_plugin = $('#tyojono_wrapper').data('tyojonoPlugin');
 
         tyojono_plugin.bind_all_events();
+
+        $('.toimitettuaika').validDatePlugin();
+        var validDatePlugin = $('.toimitettuaika').data('validDatePlugin');
+        validDatePlugin.validate_date();
       }
     });
   </script>
@@ -120,8 +125,8 @@ function hae_tyomaaraykset($request) {
   if ($temp === 1) {
     $tmp = "_temp";
   }
-  else{
-   $tmp = "";
+  else {
+    $tmp = "";
   }
 
   $query = "SELECT
@@ -544,6 +549,7 @@ function echo_tyomaaraykset_table($request = array()) {
 function echo_tyomaarays_rivi($request, $laitteet) {
   global $kukarow, $yhtiorow, $palvelin2;
 
+  $today = date('d.m.Y');
   $lopetus = "{$palvelin2}tyomaarays/tyojono2.php////tee=hae//asiakas_tunnus={$request['asiakas_tunnus']}//kohde_tunnus={$request['kohde_tunnus']}//tyojono={$request['tyojono']}//tyostatus={$request['tyostatus']}//toimitusaika={$request['toimitusaika']}";
 
   echo "<tr class='laite_table_tr_hidden'>";
@@ -695,7 +701,10 @@ function echo_tyomaarays_rivi($request, $laitteet) {
 
   echo "<td>";
   if ($request['toim'] != 'TEHDYT_TYOT') {
+    echo "<input type='text' class='toimitettuaika' name='toimitettuaika' value='{$today}' />";
+    echo "<br/>";
     echo "<input type='submit' value='" . t("Merkkaa tehdyksi") . "' />";
+    echo "<div class='error_element'></div>";
   }
   echo "</td>";
 

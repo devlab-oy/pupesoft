@@ -2911,13 +2911,13 @@ if ($fieldname == "extranet_tilaus_varaa_saldoa") {
   $jatko = 0;
 }
 
-if ($fieldname == "extranet_saldo") {
+if ($fieldname == "extranet_nayta_saldo") {
   $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
 
-  $sel = $trow[$i] == 'E' ? ' selected' : '';
+  $sel = $trow[$i] == 'Y' ? ' selected' : '';
 
   $ulos .= "<option value = ''>" . t("Ei n‰ytet‰ saldoa extranetiss‰");
-  $ulos .= "<option value = 'E' $sel>" . t("N‰ytet‰‰n saldo extranetiss‰");
+  $ulos .= "<option value = 'Y' $sel>" . t("N‰ytet‰‰n saldo extranetiss‰");
   $ulos .= "</select></td>";
 
   $jatko = 0;

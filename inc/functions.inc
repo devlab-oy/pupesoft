@@ -27693,8 +27693,33 @@ if (!function_exists('hae_toimitustavat')) {
 
     $asiakkaan_toimitustavat = hae_asiakkaan_toimitustavat($asiakas_tunnus);
 
-    $toimipaikan_toimitustavat   = hae_toimipaikan_toimitustavat($toimipaikka);
-    $toimipaikan_toimitustavat   = array_merge($toimipaikan_toimitustavat, $asiakkaan_toimitustavat);
+    $toimipaikan_toimitustavat = hae_toimipaikan_toimitustavat($toimipaikka);
+
+    // kohde- ja lähdevaraston väliset oletustoimitustavat
+    if (isset($params['kohdevarasto']) and isset($params['lahdevarasto'])) {
+
+      $lv = (int) $params['lahdevarasto'];
+      $kv = (int) $params['kohdevarasto'];
+
+      $ott_qry = "SELECT tpa.*
+                  FROM avainsana AS ana
+                  JOIN toimitustapa AS tpa
+                  ON ( ana.yhtio = tpa.yhtio AND ana.selitetark_2 = tpa.tunnus )
+                  WHERE ana.yhtio = '$kukarow[yhtio]'
+                  AND ana.laji = 'SIIRTOVARASTOT'
+                  AND ana.selite = $lv
+                  AND selitetark = $kv";
+      $ott_result = pupe_query($ott_qry);
+
+      $oletus_toimitustavat = array();
+      while ($toimitustapa = mysql_fetch_assoc($ott_result)) {
+        $oletus_toimitustavat[] = $toimitustapa;
+      }
+      $toimipaikan_toimitustavat = array_merge($toimipaikan_toimitustavat, $asiakkaan_toimitustavat, $oletus_toimitustavat);
+    }
+    else{
+      $toimipaikan_toimitustavat = array_merge($toimipaikan_toimitustavat, $asiakkaan_toimitustavat);
+    }
 
     $sort = array();
     foreach ($toimipaikan_toimitustavat as $index => $toimipaikan_toimitustapa) {

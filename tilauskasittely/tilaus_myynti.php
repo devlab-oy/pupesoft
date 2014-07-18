@@ -3065,7 +3065,9 @@ if ($tee == '') {
       $params = array(
         'asiakas_tunnus' => $laskurow['liitostunnus'],
         'lasku_toimipaikka' => $laskurow['yhtio_toimipaikka'],
-        'varasto_toimipaikka' => $_varasto['toimipaikka']
+        'varasto_toimipaikka' => $_varasto['toimipaikka'],
+        'kohdevarasto' => $laskurow['clearing'],
+        'lahdevarasto' => $laskurow['varasto']
       );
       $toimitustavat = hae_toimitustavat($params);
 

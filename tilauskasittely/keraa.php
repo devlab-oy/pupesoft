@@ -1320,44 +1320,42 @@ if ($tee == 'P') {
               WHERE yhtio = '$kukarow[yhtio]'
               AND tunnus = $poikkeamatilaus";
       $res = pupe_query($qry);
-
       $ptilarow = mysql_fetch_assoc($res);
       $ptila = $ptilarow['tila'];
 
-      if($ptila == 'G') {
-
-        $query = "SELECT
-                  lasku.*,
+      // Siirtolistoilla k‰ytt‰j‰ pit‰‰ joinata hyvak1 kent‰ll‰ (+ niiss‰ ei ole asiakasta)
+      if ($ptila == 'G') {
+        $query = "SELECT lasku.*,
                   kuka.kieli AS kieli,
                   kuka.nimi AS kukanimi,
                   kuka.eposti AS kukamail
                   FROM lasku
-                  LEFT JOIN kuka ON (kuka.yhtio=lasku.yhtio AND kuka.kuka=lasku.hyvak1 AND kuka.extranet = '')
+                  LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio
+                    AND kuka.kuka = lasku.hyvak1
+                    AND kuka.extranet = '')
                   WHERE lasku.tunnus = '$poikkeamatilaus'
-                  AND lasku.yhtio    = '$kukarow[yhtio]'";
-
+                  AND lasku.yhtio = '$kukarow[yhtio]'";
       }
-      else{
-
-        $query = "SELECT
-                  lasku.*,
+      else {
+        $query = "SELECT lasku.*,
                   asiakas.email,
                   asiakas.kerayspoikkeama,
                   asiakas.keraysvahvistus_lahetys,
+                  asiakas.kieli,
                   kuka.nimi AS kukanimi,
                   kuka.eposti AS kukamail,
-                  asiakas.kieli,
                   kuka_ext.nimi AS kuka_ext_nimi
                   FROM lasku
-                  JOIN asiakas
-                  ON asiakas.yhtio=lasku.yhtio AND asiakas.tunnus=lasku.liitostunnus
-                  LEFT JOIN kuka
-                  ON (kuka.yhtio=lasku.yhtio AND kuka.tunnus=lasku.myyja AND kuka.extranet = '')
-                  LEFT JOIN kuka AS kuka_ext
-                  ON (kuka_ext.yhtio = lasku.yhtio AND kuka_ext.kuka = lasku.laatija AND kuka_ext.extranet != '')
+                  JOIN asiakas ON (asiakas.yhtio = lasku.yhtio
+                    AND asiakas.tunnus = lasku.liitostunnus)
+                  LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio
+                    AND kuka.tunnus = lasku.myyja
+                    AND kuka.extranet = '')
+                  LEFT JOIN kuka AS kuka_ext ON (kuka_ext.yhtio = lasku.yhtio
+                    AND kuka_ext.kuka = lasku.laatija
+                    AND kuka_ext.extranet != '')
                   WHERE lasku.tunnus = '$poikkeamatilaus'
-                  AND lasku.yhtio    = '$kukarow[yhtio]'";
-
+                  AND lasku.yhtio = '$kukarow[yhtio]'";
       }
 
       $result = pupe_query($query);

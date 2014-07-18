@@ -151,6 +151,11 @@ if ($tee != "" and isset($painoinnappia)) {
       $varastotilasto_table .= "<th>".t("Tuoteno")."</th>";
       $varastotilasto_table .= "<th>".t("Nimitys")."</th>";
       $varastotilasto_table .= "<th>".t("Varastosaldo")."</th>";
+
+      if ($nayta_vapaa_saldo == "on") {
+        $varastotilasto_table .= "<th>" . t("Vapaa saldo") . "</th>";
+      }
+
       $varastotilasto_table .= "<th>".t("Varastonarvo")."</th>";
       $varastotilasto_table .= "<th>".t("Myyntihinta")."</th>";
       $varastotilasto_table .= "<th>".t("Varmuusvarasto")."</th>";
@@ -345,6 +350,11 @@ if ($tee != "" and isset($painoinnappia)) {
         $varastotilasto_table .= "<td><a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."'>$row[tuoteno]</a></td>";
         $varastotilasto_table .= "<td>$row[nimitys]</td>";
         $varastotilasto_table .= "<td align='right'>$saldo</td>";
+
+        if ($nayta_vapaa_saldo == "on") {
+          $varastotilasto_table .= "<td align='right'>{$myytavissa}</td>";
+        }
+
         $varastotilasto_table .= "<td align='right'>$varastonarvo</td>";
         $varastotilasto_table .= "<td align='right'>".hintapyoristys($row['myyntihinta'])."</td>";
         $varastotilasto_table .= "<td align='right'>$row[varmuus_varasto]</td>";

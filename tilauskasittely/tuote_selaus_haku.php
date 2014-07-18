@@ -1767,8 +1767,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
         // Tuoteperheen is‰t, mutta ei sarjanumerollisisa isi‰ (Normi, Extranet ja Verkkokauppa)
         if ($row["tuoteperhe"] == $row["tuoteno"] and $row["sarjanumeroseuranta"] != "S") {
           // Extranet ja verkkokauppa
-          if (($kukarow["extranet"] != "" and $yhtiorow["extranet_nayta_saldo"] == "")
-              or $verkkokauppa != "") {
+          if ($kukarow["extranet"] != "" or $verkkokauppa != "") {
 
             $saldot = tuoteperhe_myytavissa($row["tuoteno"], "KAIKKI", "", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
 
@@ -1779,12 +1778,16 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
             }
 
             if ($kokonaismyytavissa > 0) {
+              $naytettava_saldo = $yhtiorow["extranet_nayta_saldo"] == "" ? "On" : sprintf("%.2f", $kokonaismyytavissa)." ".t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite");
+
               echo "<td valign='top' class='$vari' $classrigh>";
-              echo ($hinta_rajaus != "") ? "<font class='green'>".t("P‰‰varasto").": ".t("On")."</font>": "<font class='green'>".t("On")."</font>";
+              echo ($hinta_rajaus != "") ? "<font class='green'>".t("P‰‰varasto").": ".t($naytettava_saldo)."</font>": "<font class='green'>".t($naytettava_saldo)."</font>";
               echo "</td>";
             }
             else {
-              echo "<td valign='top' class='$vari' $classrigh><font class='red'>".t("Ei")."</font></td>";
+              $naytettava_saldo = $yhtiorow["extranet_nayta_saldo"] == "" ? "Ei" : sprintf("%.2f", 0)." ".t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite");
+
+              echo "<td valign='top' class='$vari' $classrigh><font class='red'>".t($naytettava_saldo)."</font></td>";
             }
           }
           // Normipupe
@@ -1844,8 +1847,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
           }
         }
         // Normaalit saldolliset tuotteet (Extranet ja Verkkokauppa)
-        elseif (($kukarow["extranet"] != "" and $yhtiorow["extranet_nayta_saldo"] == "")
-                or $verkkokauppa != "") {
+        elseif ($kukarow["extranet"] != "" or $verkkokauppa != "") {
 
           $noutolisa = "";
 
@@ -1871,7 +1873,9 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
                 list($noutosaldo, $noutohyllyssa, $noutomyytavissa) = saldo_myytavissa($row["tuoteno"], "", $noutovarrow["tunnus"], "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
 
                 if ($noutomyytavissa > 0) {
-                  $noutolisa .= "<tr class='aktiivi'><td>".ucwords(strtolower($noutovarrow["nimitark"]))."</td><td><font class='green'>".t("On")."</font></td></tr>";
+                  $naytettava_saldo = $yhtiorow["extranet_nayta_saldo"] == "" ? "On" : sprintf("%.2f", $noutomyytavissa)." ".t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite");
+
+                  $noutolisa .= "<tr class='aktiivi'><td>".ucwords(strtolower($noutovarrow["nimitark"]))."</td><td><font class='green'>".t($naytettava_saldo)."</font></td></tr>";
                 }
               }
             }
@@ -1888,11 +1892,15 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
               echo "</font>";
             }
             else {
-              echo ($hinta_rajaus != "" and $myytavissa > 0) ? "<font class='green'>".t("P‰‰varasto").": ".t("On")."</font>": "<font class='green'>".t("On")."</font>";
+              $naytettava_saldo = $yhtiorow["extranet_nayta_saldo"] == "" ? "On" : sprintf("%.2f", $myytavissa)." ".t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite");
+
+              echo ($hinta_rajaus != "" and $myytavissa > 0) ? "<font class='green'>".t("P‰‰varasto").": ".t($naytettava_saldo)."</font>": "<font class='green'>".t($naytettava_saldo)."</font>";
             }
           }
           elseif ($row['status'] != 'T') {
-            echo "<font class='red'>".t("Ei")."</font>";
+            $naytettava_saldo = $yhtiorow["extranet_nayta_saldo"] == "" ? "Ei" : sprintf("%.2f", 0)." ".t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite");
+
+            echo "<font class='red'>".t($naytettava_saldo)."</font>";
           }
 
           if ($noutolisa != "") {

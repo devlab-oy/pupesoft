@@ -1767,7 +1767,8 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
         // Tuoteperheen isät, mutta ei sarjanumerollisisa isiä (Normi, Extranet ja Verkkokauppa)
         if ($row["tuoteperhe"] == $row["tuoteno"] and $row["sarjanumeroseuranta"] != "S") {
           // Extranet ja verkkokauppa
-          if ($kukarow["extranet"] != "" or $verkkokauppa != "") {
+          if (($kukarow["extranet"] != "" and $yhtiorow["extranet_nayta_saldo"] == "")
+              or $verkkokauppa != "") {
 
             $saldot = tuoteperhe_myytavissa($row["tuoteno"], "KAIKKI", "", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
 
@@ -1843,7 +1844,8 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
           }
         }
         // Normaalit saldolliset tuotteet (Extranet ja Verkkokauppa)
-        elseif ($kukarow["extranet"] != "" or $verkkokauppa != "") {
+        elseif (($kukarow["extranet"] != "" and $yhtiorow["extranet_nayta_saldo"] == "")
+                or $verkkokauppa != "") {
 
           $noutolisa = "";
 

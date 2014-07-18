@@ -3653,7 +3653,7 @@ if (!function_exists('loppu_lahete')) {
         $pdf->draw_text(200, $kala-38, t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli)." ".t("tai erillisen maksupostiohjelman mukaan", $kieli), $thispage, $norm);
 
         $pdf->draw_text(50,  $kala-51, t("Myynti- ja toimitusehdot", $kieli), $thispage, $boldi);
-        $pdf->draw_text(200, $kala-51, $yhtiorow['nimi'].t(":n yleiset kauppaehdot", $kieli), $thispage, $norm);
+        $pdf->draw_text(200, $kala-51, $yhtiorow['nimi'].t(":n yleiset kauppaehdot", $kieli)." 30.6.2014", $thispage, $norm);
 
         // Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
         if ($kala-253 <= 300) {

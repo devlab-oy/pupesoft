@@ -81,6 +81,14 @@ $nollapiilochk = "";
 if (isset($nollapiilo) and $nollapiilo != '') $nollapiilochk  = "CHECKED";
 echo "<tr><th>".t("Piilota nollarivit")."</th><td><input type='checkbox' name='nollapiilo' $nollapiilochk></td></tr>";
 
+// Checkbox, jolla valitaan naytentaanko vapaa saldo vai ei
+echo "<tr>";
+echo "<th>";
+echo t("Näytä vapaa saldo");
+echo "</th>";
+echo "<td><input type='checkbox' name='nayta_vapaa_saldo'/></td>";
+echo "</tr>";
+
 echo "</table>";
 echo "<br><input type='submit' value='".t("Aja raportti")."' name='painoinnappia'>";
 echo "</form>";

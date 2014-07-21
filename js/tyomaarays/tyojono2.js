@@ -6,7 +6,7 @@
     this.bind_kohde_tr_click = function() {
       var kohde_tr = $(element).find('.kohde_tr, .kohde_tr_hidden');
       $(kohde_tr).click(function(event) {
-        if (event.target.nodeName !== 'INPUT') {
+        if (event.target.nodeName !== 'INPUT' && event.target.nodeName !== 'SELECT') {
           var laite_table_tr = $(this).next();
           if ($(this).hasClass('kohde_tr_hidden')) {
             $(this).addClass('kohde_tr');

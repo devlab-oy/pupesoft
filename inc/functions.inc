@@ -23991,192 +23991,200 @@ if (!function_exists('js_laite')) {
     function js_laite() {
       global $palvelin2;
       ?>
-          <script src='<?php echo $palvelin2 ?>js/valid_date_plugin.js'></script>
-            <script>
-              var palvelin2 = '<?php echo $palvelin2 ?>';
+      <script src='<?php echo $palvelin2 ?>js/valid_date_plugin.js'></script>
+      <script>
+        var palvelin2 = '<?php echo $palvelin2 ?>';
 
-              var huoltovalit_req_obj = hae_huoltovalit();
-              $(document).ready(function() {
-                bind_huoltosykli_change();
+        var huoltovalit_req_obj = hae_huoltovalit();
+        $(document).ready(function() {
+          bind_huoltosykli_change();
 
-                bind_tuoteno_change();
+          bind_tuoteno_change();
 
-                bind_huoltovali_change();
+          bind_huoltovali_change();
 
-                bind_tuleva_toimenpide_change();
+          bind_tuleva_toimenpide_change();
+        });
+
+        function bind_huoltosykli_change() {
+          $('.huoltosykli_select').on('change', function() {
+            if ($(this).val() != 0) {
+              var huoltovali_select_id = $(this).attr('id').replace("sykli","vali");
+              hae_huoltosyklin_huoltovali($(this).val(), huoltovali_select_id);
+              var huoltovali_days = $('#'+huoltovali_select_id).val();
+              var tapahtuma_select_id = $(this).attr('id').replace('huoltosykli_select_',"tuleva_toimenpide_");
+              huoltovalit_req_obj.done(function(huoltovalit) {
+                muuta_seuraava_tapahtuma(huoltovalit[huoltovali_days], tapahtuma_select_id);
               });
+            }
+          });
+        }
 
-              function bind_huoltosykli_change() {
-                $('.huoltosykli_select').on('change', function() {
-                  if ($(this).val() != 0) {
-                    var huoltovali_select_id = $(this).attr('id').replace("sykli","vali");
-                    hae_huoltosyklin_huoltovali($(this).val(), huoltovali_select_id);
-                    var huoltovali_days = $('#'+huoltovali_select_id).val();
-                    var tapahtuma_select_id = $(this).attr('id').replace('huoltosykli_select_',"tuleva_toimenpide_");
-                    huoltovalit_req_obj.done(function(huoltovalit) {
-                      muuta_seuraava_tapahtuma(huoltovalit[huoltovali_days], tapahtuma_select_id);
-                    });
-                  }
+        function hae_huoltosyklin_huoltovali(huoltosykli_tunnus, select_id) {
+          var url = palvelin2 +
+                  'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltovali_options&' +
+                  'huoltosykli_tunnus=' + huoltosykli_tunnus;
+          $.ajax({
+            async: false,
+            type: 'GET',
+            url: url
+          }).done(function(response) {
+            $('#'+select_id).html(response);
+          }).fail(function(data){
+            if (console && console.log) {
+              console.log('Huoltoväli haku EPÄONNISTUI');
+              console.log(data);
+            }
+          });
+        }
+
+        function bind_tuoteno_change() {
+          $('#tuoteno_td input').on('change input paste', function() {
+            setTimeout(function() {
+              var tuoteno = $('#tuoteno_td input').val();
+              if( tuoteno.length > 2 ) {
+                var paikka = $('#paikka').val();
+                $('.huoltosykli_select').each(function() {
+                  var select_id = $(this).attr('id');
+                  var tyyppi = select_id.replace("huoltosykli_select_","");
+                  hae_tuotteen_huoltosyklit(tuoteno, select_id, tyyppi, paikka);
                 });
               }
+            }, 200);
+          });
+        }
 
-          function hae_huoltosyklin_huoltovali(huoltosykli_tunnus, select_id) {
-            var url = palvelin2 +
-                    'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltovali_options&' +
-                    'huoltosykli_tunnus=' + huoltosykli_tunnus;
-            $.ajax({
-              async: false,
-              type: 'GET',
-              url: url
-            }).done(function(response) {
-              $('#'+select_id).html(response);
-            }).fail(function(data){
-              if (console && console.log) {
-                console.log('Huoltoväli haku EPÄONNISTUI');
-                console.log(data);
-              }
-
-          function bind_tuoteno_change() {
-            $('#tuoteno_td input').on('change input paste', function() {
-              setTimeout(function() {
-                var tuoteno = $('#tuoteno_td input').val();
-                if( tuoteno.length > 2 ) {
-                  var paikka = $('#paikka').val();
-                  $('.huoltosykli_select').each(function() {
-                    var select_id = $(this).attr('id');
-                    var tyyppi = select_id.replace("huoltosykli_select_","");
-                    hae_tuotteen_huoltosyklit(tuoteno, select_id, tyyppi, paikka);
-                  });
-                }
-              }, 200);
-            });
-          }
-
-          function hae_tuotteen_huoltosyklit(tuoteno, select_id, tyyppi, paikka) {
+        function hae_tuotteen_huoltosyklit(tuoteno, select_id, tyyppi, paikka) {
           var url = palvelin2 +
                   'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltosykli_options'+
                   '&tuoteno=' + tuoteno +
                   '&tyyppi=' + tyyppi +
                   '&paikka=' + paikka;
-            $.ajax({
-              async: true,
-              type: 'GET',
-              url: url
-            }).done(function(response) {
-              $('#'+select_id).html(response);
-              $('#'+select_id).change();
-            }).fail(function(data){
-              if (console && console.log) {
-                console.log('Huoltoväli haku EPÄONNISTUI');
-                console.log(data);
-              }
+          $.ajax({
+            async: true,
+            type: 'GET',
+            url: url
+          }).done(function(response) {
+            $('#'+select_id).html(response);
+            $('#'+select_id).change();
+          }).fail(function(data) {
+            if (console && console.log) {
+              console.log('Huoltoväli haku EPÄONNISTUI');
+              console.log(data);
+            }
+          });
+        }
 
-              function bind_huoltovali_change() {
-                $('.huoltovali_select').on('change', function() {
-                  var tapahtuma_select_id = $(this).attr('id').replace('huoltovali_select_',"tuleva_toimenpide_");
-                  muuta_seuraava_tapahtuma($(this).val(), tapahtuma_select_id);
-                });
-              }
+        function bind_huoltovali_change() {
+          $('.huoltovali_select').on('change', function() {
+            var tapahtuma_select_id = $(this).attr('id').replace('huoltovali_select_',"tuleva_toimenpide_");
+            muuta_seuraava_tapahtuma($(this).val(), tapahtuma_select_id);
+          });
+        }
 
-              function muuta_seuraava_tapahtuma(huoltovali, tapahtuma_select_id) {
-                var seuraava_tapahtuma = laske_default_seuraava_tapahtuma(huoltovali);
+        function muuta_seuraava_tapahtuma(huoltovali, tapahtuma_select_id) {
+          var seuraava_tapahtuma = laske_default_seuraava_tapahtuma(huoltovali);
 
-              if (seuraava_tapahtuma instanceof Date) {
-                var onko_huolto = (tapahtuma_select_id.indexOf("huolto") != -1);
-                var onko_koeponnistus = (tapahtuma_select_id.indexOf("koeponnistus") != -1);
-                if (onko_huolto || onko_koeponnistus) {
-                  seuraava_tapahtuma = seuraava_tapahtuma_valm_pvm(huoltovali);
-                }
-                var date_string = seuraava_tapahtuma.getDate() +
-                        '.' + (seuraava_tapahtuma.getMonth() + 1) +
-                        '.' + seuraava_tapahtuma.getFullYear();
-                $('#'+tapahtuma_select_id).val(date_string);
-              }
+          if (seuraava_tapahtuma instanceof Date) {
+            var onko_huolto = (tapahtuma_select_id.indexOf("huolto") != -1);
+            var onko_koeponnistus = (tapahtuma_select_id.indexOf("koeponnistus") != -1);
+            if (onko_huolto || onko_koeponnistus) {
+              seuraava_tapahtuma = seuraava_tapahtuma_valm_pvm(huoltovali);
+            }
+            var date_string = seuraava_tapahtuma.getDate() +
+                    '.' + (seuraava_tapahtuma.getMonth() + 1) +
+                    '.' + seuraava_tapahtuma.getFullYear();
+            $('#'+tapahtuma_select_id).val(date_string);
+          }
+        }
 
-              function laske_default_seuraava_tapahtuma(valittu_huoltovali) {
-                var date = new Date();
-                date.setFullYear(date.getFullYear() + parseInt(valittu_huoltovali['years']));
-                return date;
-              }
+        function laske_default_seuraava_tapahtuma(valittu_huoltovali) {
+          var date = new Date();
+          date.setFullYear(date.getFullYear() + parseInt(valittu_huoltovali['years']));
+          return date;
+        }
 
-              function seuraava_tapahtuma_valm_pvm(huoltovali) {
-                var today = new Date();
-                var date = new Date();
-                date.setMonth(parseInt($('.valm_pvm_tkk').val() - 1));
-                date.setDate(parseInt($('.valm_pvm_tpp').val()));
-                date.setFullYear(parseInt($('.valm_pvm_tvv').val()) + parseInt(huoltovali['years']));
+        function seuraava_tapahtuma_valm_pvm(huoltovali) {
+          var today = new Date();
+          var date = new Date();
+          date.setMonth(parseInt($('.valm_pvm_tkk').val() - 1));
+          date.setDate(parseInt($('.valm_pvm_tpp').val()));
+          date.setFullYear(parseInt($('.valm_pvm_tvv').val()) + parseInt(huoltovali['years']));
 
-                if (date >= today) {
-                  var seuraava_tapahtuma = new Date();
-                  seuraava_tapahtuma.setMonth(parseInt($('.valm_pvm_tkk').val() - 1));
-                  seuraava_tapahtuma.setFullYear(parseInt($('.valm_pvm_tvv').val()));
+          if (date >= today) {
+            var seuraava_tapahtuma = new Date();
+            seuraava_tapahtuma.setMonth(parseInt($('.valm_pvm_tkk').val() - 1));
+            seuraava_tapahtuma.setFullYear(parseInt($('.valm_pvm_tvv').val()));
 
-                  seuraava_tapahtuma.setFullYear(seuraava_tapahtuma.getFullYear() + parseInt(huoltovali['years']));
-                }
-                else {
-                  //Jos nykyhetki on kauempana tulevaisuudessa kuin valm_pvm + huoltoväli niin ei voida tietää seuraavaa tulevaa tapahtumaa
-                  //palautetaan tämä päivä
-                  seuraava_tapahtuma = today;
-                }
+            seuraava_tapahtuma.setFullYear(seuraava_tapahtuma.getFullYear() + parseInt(huoltovali['years']));
+          }
+          else {
+            //Jos nykyhetki on kauempana tulevaisuudessa kuin valm_pvm + huoltoväli niin ei voida tietää seuraavaa tulevaa tapahtumaa
+            //palautetaan tämä päivä
+            seuraava_tapahtuma = today;
+          }
 
-                return seuraava_tapahtuma;
-              }
+          return seuraava_tapahtuma;
+        }
 
-              function bind_tuleva_toimenpide_change() {
-                $('.tuleva_toimenpide').validDatePlugin();
-                var validDatePlugin = $('.tuleva_toimenpide').data('validDatePlugin');
-                validDatePlugin.validate_date();
-              }
+        function bind_tuleva_toimenpide_change() {
+          $('.tuleva_toimenpide').validDatePlugin();
+          var validDatePlugin = $('.tuleva_toimenpide').data('validDatePlugin');
+          validDatePlugin.validate_date();
+        }
 
-          function hae_huoltovalit() {
-            var url = palvelin2 +
-                    'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltovalit';
-            return $.ajax({
-              async: true,
-              type: 'GET',
-              dataType: 'JSON',
-              url: url
-            }).fail(function(data){
-              if (console && console.log) {
-                console.log('Huoltovälieni haku EPÄONNISTUI');
-                console.log(data);
-              }
+        function hae_huoltovalit() {
+          var url = palvelin2 +
+                  'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltovalit';
 
-              function isValidDate(txtDate) {
-                var currVal = txtDate;
-                if(currVal == '') {
-                  return false;
-                }
+          return $.ajax({
+            async: true,
+            type: 'GET',
+            dataType: 'JSON',
+            url: url
+          }).fail(function(data){
+            if (console && console.log) {
+              console.log('Huoltovälieni haku EPÄONNISTUI');
+              console.log(data);
+            }
+          });
+        }
 
-                var rxDatePattern = /^(\d{1,2})[.-\/|](\d{1,2})[.-\/|](\d{4})$/;
-                var dtArray = currVal.match(rxDatePattern);
+        function isValidDate(txtDate) {
+          var currVal = txtDate;
+          if(currVal == '') {
+            return false;
+          }
 
-                if (dtArray == null)
-                   return false;
+          var rxDatePattern = /^(\d{1,2})[.-\/|](\d{1,2})[.-\/|](\d{4})$/;
+          var dtArray = currVal.match(rxDatePattern);
 
-                //Checks for dd/mm/yyyy format.
-                dtMonth = dtArray[2];
-                dtDay= dtArray[1];
-                dtYear = dtArray[3];
+          if (dtArray == null)
+             return false;
 
-                if (dtMonth < 1 || dtMonth > 12) {
-                  return false;
-                }
-                else if (dtDay < 1 || dtDay> 31) {
-                  return false;
-                }
-                else if ((dtMonth==4 || dtMonth==6 || dtMonth==9 || dtMonth==11) && dtDay ==31) {
-                  return false;
-                }
-                else if (dtMonth == 2) {
-                   var isleap = (dtYear % 4 == 0 && (dtYear % 100 != 0 || dtYear % 400 == 0));
-                   if (dtDay> 29 || (dtDay ==29 && !isleap)) {
-                    return false;
-                   }
-                }
-                return true;
-              }
-            </script>
+          //Checks for dd/mm/yyyy format.
+          dtMonth = dtArray[2];
+          dtDay= dtArray[1];
+          dtYear = dtArray[3];
+
+          if (dtMonth < 1 || dtMonth > 12) {
+            return false;
+          }
+          else if (dtDay < 1 || dtDay> 31) {
+            return false;
+          }
+          else if ((dtMonth==4 || dtMonth==6 || dtMonth==9 || dtMonth==11) && dtDay ==31) {
+            return false;
+          }
+          else if (dtMonth == 2) {
+             var isleap = (dtYear % 4 == 0 && (dtYear % 100 != 0 || dtYear % 400 == 0));
+             if (dtDay> 29 || (dtDay ==29 && !isleap)) {
+              return false;
+             }
+          }
+          return true;
+        }
+      </script>
     <?php
   }
 }

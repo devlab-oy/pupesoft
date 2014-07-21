@@ -451,7 +451,7 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
       // Haetaan tyojonot
       echo "<select name='tyojono_muutos' onchange='submit();'>";
       echo "<option value='EIJONOA'>".t("Ei jonossa")."</option>";
-      $vammeli = '';
+
       while ($tyojono_row = mysql_fetch_assoc($tyojono_result)) {
         $sel = ''; 
         if ($vrow['tyojono'] == $tyojono_row['selitetark']) {
@@ -465,8 +465,8 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
       // Haetaan tyostatukset
       echo "<select name='tyostatus_muutos' onchange='submit();'>";
 
-      // Jos halutaan rajata tyojonon statusvalikoimaa tapahtumahistorian perusteella
-      // haetaan ekaksi tilauksen tapahtumahistorian viimeisimmän tapahtuman järjestysnumero
+      // Jos halutaan rajata tietyn työjonon statusvalikoimaa tapahtumahistorian perusteella
+      // Haetaan ensin tilauksen tapahtumahistorian viimeisimmän tapahtuman järjestysnumero
       if (isset($tyojonotyyppi) and $tyojonotyyppi == $jonon_nimi) {
         $kveeri = "SELECT 
                    ifnull(tyojono_selite, '') tyojono_selite,
@@ -526,11 +526,11 @@ echo "<br><br>";
 $datatables_conf = array();
 
 if (trim($konserni) != '') {
-  $datatables_conf[] = array($pupe_DataTables[0],9,9,true,true);
+  $datatables_conf[] = array($pupe_DataTables[0],8,7,true,true);
 
 }
 else {
-  $datatables_conf[] = array($pupe_DataTables[0],9,9,true,true);
+  $datatables_conf[] = array($pupe_DataTables[0],8,7,true,true);
 }
 
 if (count($tyomaarays_tunti_yhteensa) > 0 and $toim == 'TYOMAARAYS_ASENTAJA') {

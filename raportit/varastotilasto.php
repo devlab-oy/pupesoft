@@ -394,6 +394,7 @@ if ($tee != "" and isset($painoinnappia)) {
       $varastonarvo = ((float) $varastonarvo == 0) ? "" : $varastonarvo;
       $varattu = ((int) $varattu == 0) ? "" : $varattu;
       $saldo = ((int) $saldo == 0) ? "" : $saldo;
+      $vapaa_saldo = ((int) $myytavissa == 0) ? "" : $myytavissa;
 
       if ($total_rows <= 1000) {
         $varastotilasto_table .= "<tr class='aktiivi'>";
@@ -404,7 +405,7 @@ if ($tee != "" and isset($painoinnappia)) {
         $varastotilasto_table .= "<td align='right'>$saldo</td>";
 
         if ($nayta_vapaa_saldo == "on") {
-          $varastotilasto_table .= "<td align='right'>{$myytavissa}</td>";
+          $varastotilasto_table .= "<td align='right'>{$vapaa_saldo}</td>";
         }
 
         $varastotilasto_table .= "<td align='right'>$varastonarvo</td>";
@@ -436,7 +437,7 @@ if ($tee != "" and isset($painoinnappia)) {
       $worksheet->writeNumber($excelrivi, $excelsarake++, $saldo);
 
       if ($nayta_vapaa_saldo == "on") {
-        $worksheet->writeNumber($excelrivi, $excelsarake++, $myytavissa);
+        $worksheet->writeNumber($excelrivi, $excelsarake++, $vapaa_saldo);
       }
 
       $worksheet->writeNumber($excelrivi, $excelsarake++, $varastonarvo);

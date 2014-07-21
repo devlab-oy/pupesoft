@@ -82,7 +82,7 @@ while ($varasto = mysql_fetch_assoc($result)) {
 echo "<tr>";
 echo "<th>Varasto</th>";
 echo "<td>";
-echo "<select multiple name='varasto'>";
+echo "<select multiple name='valitut_varastot[]'>";
 
 foreach ($varastot as $varasto) {
   echo "<option value='{$varasto["tunnus"]}'>{$varasto["nimitys"]}</option>";
@@ -127,6 +127,17 @@ if ($tee != "" and isset($painoinnappia) and $lisa == "" and $toimittajaid == ""
 
 if ($tee != "" and isset($painoinnappia)) {
 
+  if (isset($valitut_varastot)) {
+    $varastot = join(",", $valitut_varastot);
+    $tuotepaikka_join = "INNER JOIN tuotepaikat
+                         ON tuote.tuoteno = tuotepaikat.tuoteno";
+    $varasto_filter = "AND tuotepaikat.varasto in ({$varastot})";
+  }
+  else {
+    $tuotepaikka_join = "";
+    $varasto_filter = "";
+  }
+
   if ($toimittajaid != "") {
     $toimittaja_join = "  JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio
                 AND tuotteen_toimittajat.tuoteno = tuote.tuoteno
@@ -149,8 +160,10 @@ if ($tee != "" and isset($painoinnappia)) {
             tuote.epakurantti100pvm
             FROM tuote
             {$toimittaja_join}
+            {$tuotepaikka_join}
             WHERE tuote.yhtio                       = '{$kukarow["yhtio"]}'
             {$lisa}
+            {$varasto_filter}
             AND (tuote.status != 'P' OR (  SELECT sum(tuotepaikat.saldo)
                             FROM tuotepaikat
                             WHERE tuotepaikat.yhtio = tuote.yhtio

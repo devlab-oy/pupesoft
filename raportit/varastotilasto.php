@@ -113,7 +113,9 @@ echo "<tr>";
 echo "<th>";
 echo t("Näytä vapaa saldo");
 echo "</th>";
-echo "<td><input type='checkbox' name='nayta_vapaa_saldo'/></td>";
+
+$checked = (isset($nayta_vapaa_saldo) and $nayta_vapaa_saldo == "on") ? "checked" : "";
+echo "<td><input type='checkbox' name='nayta_vapaa_saldo' {$checked}/></td>";
 echo "</tr>";
 
 echo "</table>";

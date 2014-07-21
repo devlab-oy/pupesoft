@@ -1792,7 +1792,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                   $tunken = "ostorivitunnus";
                 }
 
-                $query = "SELECT sarjanumeroseuranta.tunnus, sarjanumeroseuranta.kaytetty
+                $query = "SELECT sarjanumeroseuranta.tunnus, sarjanumeroseuranta.kaytetty, sarjanumeroseuranta.sarjanumero
                           FROM sarjanumeroseuranta
                           LEFT JOIN tilausrivi ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.$tunken
                           LEFT JOIN lasku ON lasku.yhtio=sarjanumeroseuranta.yhtio and lasku.tunnus=tilausrivi.otunnus
@@ -1819,6 +1819,26 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                               and tunnus  = '$lisatty_tun'
                               and alv     < 500";
                     $sarjares = pupe_query($query);
+                  }
+
+                  $kveri = "UPDATE laite
+                            SET paikka = '{$srow['tunnus']}',
+                            muutospvm = now(),
+                            muuttaja = '{$kukarow['kuka']}'
+                            WHERE yhtio = '{$kukarow['yhtio']}'
+                            AND sarjanro = '{$srow['sarjanumero']}'
+                            AND tuoteno = '{$myy_tuoteno[$indeksi]}'";
+                  $kverires = pupe_query($kveri);
+
+                  if (mysql_affected_rows() == 0) {
+                    $kveri = "INSERT INTO laite
+                              SET yhtio = '{$kukarow['yhtio']}',
+                              luontiaika = now(),
+                              sarjanro = '{$srow['sarjanumero']}',
+                              paikka = '{$srow['tunnus']}',
+                              tuoteno = '{$myy_tuoteno[$indeksi]}',
+                              laatija = '{$kukarow['kuka']}'";
+                    pupe_query($kveri);
                   }
                 }
 
@@ -1868,6 +1888,8 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                           hyllyvali     = '$myy_hyllyvali[$indeksi]',
                           sarjanumero   = '$myy_era[$indeksi]'";
                 $lisa_res = pupe_query($query);
+                
+                //kissa
               }
 
               if ($myy_tyyppi[$indeksi] == "LAPSITUOTE") {

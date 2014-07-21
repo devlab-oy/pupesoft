@@ -26928,7 +26928,7 @@ if (!function_exists("etsi_tuotteelle_korjaava_varastoonvientipaiva")) {
 }
 
 if (!function_exists("tallenna_tiliote_viite")) {
-  function tallenna_tiliote_viite($filename) {
+  function tallenna_tiliote_viite($filenimi) {
     global $kukarow, $yhtiorow;
 
     // Otetaan koko aineisto muuttujaan jotta voidaan vertailla onko tämä jo koneella
@@ -27060,20 +27060,20 @@ if (!function_exists("tallenna_tiliote_viite")) {
         list($vv1,$kk1,$pp1) = explode("-", $yhtio_tsekrow["myyntireskontrakausi_alku"]);
         list($vv2,$kk2,$pp2) = explode("-", $yhtio_tsekrow["myyntireskontrakausi_loppu"]);
 
-        $myrealku  = (int) date('Ymd', mktime(0,0,0,$kk1,$pp1,$vv1));
-        $myreloppu = (int) date('Ymd', mktime(0,0,0,$kk2,$pp2,$vv2));
+        $myrealku  = (int) date('Ymd', mktime(0, 0, 0, (int) $kk1, (int) $pp1, (int) $vv1));
+        $myreloppu = (int) date('Ymd', mktime(0, 0, 0, (int) $kk2, (int) $pp2, (int) $vv2));
 
         list($vv1,$kk1,$pp1) = explode("-", $yhtio_tsekrow["ostoreskontrakausi_alku"]);
         list($vv2,$kk2,$pp2) = explode("-", $yhtio_tsekrow["ostoreskontrakausi_loppu"]);
 
-        $oresalku  = (int) date('Ymd', mktime(0,0,0,$kk1,$pp1,$vv1));
-        $oresloppu = (int) date('Ymd', mktime(0,0,0,$kk2,$pp2,$vv2));
+        $oresalku  = (int) date('Ymd', mktime(0, 0, 0, (int) $kk1, (int) $pp1, (int) $vv1));
+        $oresloppu = (int) date('Ymd', mktime(0, 0, 0, (int) $kk2, (int) $pp2, (int) $vv2));
 
         list($vv1,$kk1,$pp1) = explode("-", $yhtio_tsekrow["tilikausi_alku"]);
         list($vv2,$kk2,$pp2) = explode("-", $yhtio_tsekrow["tilikausi_loppu"]);
 
-        $tikaalku  = (int) date('Ymd', mktime(0,0,0,$kk1,$pp1,$vv1));
-        $tikaloppu = (int) date('Ymd', mktime(0,0,0,$kk2,$pp2,$vv2));
+        $tikaalku  = (int) date('Ymd', mktime(0, 0, 0, (int) $kk1, (int) $pp1, (int) $vv1));
+        $tikaloppu = (int) date('Ymd', mktime(0, 0, 0, (int) $kk2, (int) $pp2, (int) $vv2));
 
         // Onko tämä aineisto jo ajettu?
         $query = "SELECT *
@@ -27157,6 +27157,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
 
         // VVKKPP
         $tsekpvm = (int) "20".substr($tietue, 30, 6);
+
 
         if ($tsekpvm < $oresalku or $tsekpvm > $oresloppu or $tsekpvm < $myrealku or $tsekpvm > $myreloppu or $tsekpvm < $tikaalku or $tsekpvm > $tikaloppu) {
           echo "<font class='error'>VIRHE: Aineistossa on tapahtuma suljetulle kaudelle! (Tili: $tilino / Pvm: $tsekpvm / Yhtiö: $yritirow[yhtio])</font><br>\n";

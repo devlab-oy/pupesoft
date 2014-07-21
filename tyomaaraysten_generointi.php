@@ -22,6 +22,8 @@ if (php_sapi_name() == 'cli') {
   $yhtio = pupesoft_cleanstring($argv[1]);
 
   $kukarow = hae_kukarow('admin', $yhtio);
+
+  $debug = false;
 }
 else {
   require ("inc/parametrit.inc");
@@ -40,4 +42,8 @@ $laitteiden_huoltosyklirivit = hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto
 
 list($huollettavien_laitteiden_huoltosyklirivit, $laitteiden_huoltosyklirivit_joita_ei_huolleta) = paata_mitka_huollot_tehdaan($laitteiden_huoltosyklirivit);
 
-generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltosyklirivit, $laitteiden_huoltosyklirivit_joita_ei_huolleta);
+$tyomaarays_kpl = generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltosyklirivit, $laitteiden_huoltosyklirivit_joita_ei_huolleta);
+
+if (php_sapi_name() == 'cli') {
+  echo "Työmääräyksiä tuli {$tyomaarays_kpl}\n";
+}

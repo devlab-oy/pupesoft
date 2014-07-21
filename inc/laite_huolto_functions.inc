@@ -223,10 +223,15 @@ function generoi_tyomaaraykset_huoltosykleista($laitteet, $laitteiden_huoltosykl
     $debug = false;
   }
 
-  if ($debug) {
+  if ($debug or php_sapi_name() == 'cli') {
     echo "Työmääräyksiä pitäisi tulla " . count($laitteet) . ' kappaletta';
-    echo "<br/>";
-    echo "<br/>";
+    if (php_sapi_name() == 'cli') {
+      echo "\n";
+    }
+    else {
+      echo "<br/>";
+      echo "<br/>";
+    }
   }
 
   if ($debug and count($laitteet) > 0) {

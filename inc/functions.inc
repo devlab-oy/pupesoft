@@ -24020,10 +24020,13 @@ if (!function_exists('js_laite')) {
       }
 
       function hae_huoltosyklin_huoltovali(huoltosykli_tunnus, select_id) {
+        var url = palvelin2 +
+                'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltovali_options&' +
+                'huoltosykli_tunnus=' + huoltosykli_tunnus;
         $.ajax({
           async: false,
           type: 'GET',
-          url: palvelin2 + 'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltovali_options&huoltosykli_tunnus=' + huoltosykli_tunnus
+          url: url
         }).done(function(response) {
           $('#'+select_id).html(response);
         }).fail(function(data){
@@ -24051,10 +24054,15 @@ if (!function_exists('js_laite')) {
       }
 
       function hae_tuotteen_huoltosyklit(tuoteno, select_id, tyyppi, paikka) {
+      var url = palvelin2 +
+              'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltosykli_options'+
+              '&tuoteno=' + tuoteno +
+              '&tyyppi=' + tyyppi +
+              '&paikka=' + paikka;
         $.ajax({
           async: true,
           type: 'GET',
-          url: palvelin2 + 'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltosykli_options&tuoteno=' + tuoteno + '&tyyppi=' +tyyppi + '&paikka=' + paikka
+          url: url
         }).done(function(response) {
           $('#'+select_id).html(response);
           $('#'+select_id).change();
@@ -24077,10 +24085,14 @@ if (!function_exists('js_laite')) {
         var seuraava_tapahtuma = laske_default_seuraava_tapahtuma(huoltovali);
 
           if (seuraava_tapahtuma instanceof Date) {
-            if (tapahtuma_select_id.indexOf("huolto") != -1 || tapahtuma_select_id.indexOf("koeponnistus") != -1 ) {
+            var onko_huolto = (tapahtuma_select_id.indexOf("huolto") != -1);
+            var onko_koeponnistus = (tapahtuma_select_id.indexOf("koeponnistus") != -1);
+            if (onko_huolto || onko_koeponnistus) {
               seuraava_tapahtuma = seuraava_tapahtuma_valm_pvm(huoltovali);
             }
-            var date_string = seuraava_tapahtuma.getDate() + '.' + (seuraava_tapahtuma.getMonth() + 1) + '.' + seuraava_tapahtuma.getFullYear();
+            var date_string = seuraava_tapahtuma.getDate() +
+                    '.' + (seuraava_tapahtuma.getMonth() + 1) +
+                    '.' + seuraava_tapahtuma.getFullYear();
             $('#'+tapahtuma_select_id).val(date_string);
           }
       }
@@ -24128,11 +24140,13 @@ if (!function_exists('js_laite')) {
       }
 
       function hae_huoltovalit() {
+        var url = palvelin2 +
+                'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltovalit';
         return $.ajax({
           async: true,
           type: 'GET',
           dataType: 'JSON',
-          url: palvelin2 + 'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltovalit&tuoteno'
+          url: url
         }).fail(function(data){
           if (console && console.log) {
             console.log('Huoltovälieni haku EPÄONNISTUI');

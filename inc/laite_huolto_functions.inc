@@ -1310,7 +1310,10 @@ function hae_huoltosyklit_tyyppi_koko($sammutin_tyyppi, $sammutin_koko, $tyyppi 
               )
             ) as dropdown_text,
             huoltosykli.huoltovali,
-            huoltosykli.pakollisuus
+            huoltosykli.pakollisuus,
+            huoltosykli.tyyppi,
+            huoltosykli.koko,
+            huoltosykli.olosuhde
             FROM huoltosykli
             JOIN tuote
             ON ( tuote.yhtio = huoltosykli.yhtio

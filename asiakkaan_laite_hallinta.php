@@ -45,7 +45,7 @@ if (isset($livesearch_tee) and $livesearch_tee == "KOHDEHAKU") {
   exit;
 }
 
-if ($tee == 'lataa_tiedosto') {
+if (isset($tee) and $tee == 'lataa_tiedosto') {
   $filepath = "/tmp/" . $tmpfilenimi;
   if (file_exists($filepath)) {
     readfile($filepath);
@@ -58,7 +58,7 @@ if ($tee == 'lataa_tiedosto') {
 }
 
 //Tänne tämän tiedoston ajax requestit
-if ($ajax_request) {
+if (isset($ajax_request) and $ajax_request == true)  {
   exit;
 }
 
@@ -89,6 +89,32 @@ echo "<font class='head'>" . t("Laitehallinta") . "</font><hr>";
 
 </script>
 <?php
+
+if (!isset($asiakas_tunnus)) {
+ $asiakas_tunnus = '';
+}
+if (!isset($kohde_tunnus)) {
+ $kohde_tunnus = '';
+}
+if (!isset($oma_numero)) {
+ $oma_numero = '';
+}
+if (!isset($sarjanro)) {
+ $sarjanro = '';
+}
+if (!isset($ala_tee)) {
+ $ala_tee = '';
+}
+if (!isset($lasku_tunnukset)) {
+ $lasku_tunnukset = '';
+}
+if (!isset($huoltosyklit)) {
+ $huoltosyklit = '';
+}
+if (!isset($tyomaarays_kpl)) {
+ $tyomaarays_kpl = '';
+}
+
 $request = array(
     'tee'             => $tee,
     'asiakas_tunnus'  => $asiakas_tunnus,
@@ -119,7 +145,7 @@ if (!empty($request['haettu_asiakas'])) {
 }
 
 //Kun perustetaan uusi laite niin ajetaan tyomaaraysten_generointi.
-if (isset($request['tyomaarays_kpl'])) {
+if ($request['tyomaarays_kpl'] > 0) {
   echo "<font class='message'>" . t('Työmääräyksiä generoitiin muutosten pohjalta') . ": {$request['tyomaarays_kpl']} " . t('kappaletta') . "</font>";
   echo "<br/>";
   echo "<br/>";
@@ -550,10 +576,7 @@ function echo_kohteet_table($laitteet = array(), $request = array()) {
 
     echo "<td>";
     foreach ($laite['tapahtumat'] as $tapahtuma_tyyppi => $tapahtuma) {
-      $huoltovali = search_array_key_for_value_recursive($huoltovalit, 'days', $laite['huoltovali']);
-      $huoltovali = $huoltovali[0];
       $seuraava_tapahtuma = date('d.m.Y', strtotime("{$tapahtuma['seuraava_tapahtuma']}"));
-      //echo ucfirst($tapahtuma_tyyppi).": {$seuraava_tapahtuma}";
       echo "$seuraava_tapahtuma";
       echo "<br/>";
     }

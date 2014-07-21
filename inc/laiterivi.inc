@@ -68,7 +68,7 @@ if (mysql_field_name($result, $i) == "paikka") {
   }
 
   $ulos = "<td>";
-  $ulos .= "<select name='{$nimi}'>";
+  $ulos .= "<select name='{$nimi}' id='paikka'>";
   foreach ($paikat as $paikka) {
     $ulos .= "<option {$paikka['selected']} value='{$paikka['tunnus']}'>{$paikka['dropdown_text']}</option>";
   }

@@ -1914,28 +1914,25 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
           echo "<td valign='top' class='$vari' $classrigh>";
 
           if ($myytavissa > 0 or $noutolisa != "") {
+
             if ($verkkokauppa != "" and $verkkokauppa_saldoluku) {
-              echo "<font class='green'>";
-              echo $myytavissa;
-              echo "</font>";
+              $naytettava_saldo = $myytavissa;
+            }
+            elseif ($yhtiorow["extranet_nayta_saldo"] == "Y") {
+              $naytettava_saldo = sprintf("%.2f", $myytavissa). " {$rivin_yksikko}";
             }
             else {
-              if ($yhtiorow["extranet_nayta_saldo"] == "Y") {
-                $naytettava_saldo = sprintf("%.2f", $myytavissa). " {$rivin_yksikko}";
-              }
-              else {
-                $naytettava_saldo = t("On");
-              }
-
-              echo "<font class='green'>";
-
-              if ($hinta_rajaus != "" and $myytavissa > 0) {
-                echo t("P‰‰varasto") . ": ";
-              }
-
-              echo $naytettava_saldo;
-              echo "</font>";
+              $naytettava_saldo = t("On");
             }
+
+            echo "<font class='green'>";
+
+            if ($hinta_rajaus != "" and $myytavissa > 0) {
+              echo t("P‰‰varasto") . ": ";
+            }
+
+            echo $naytettava_saldo;
+            echo "</font>";
           }
           elseif ($row['status'] != 'T') {
             if ($yhtiorow["extranet_nayta_saldo"] == "Y") {

@@ -354,7 +354,10 @@ if ($tee != "" and isset($painoinnappia)) {
         $kulutusrivi = mysql_fetch_assoc($kulutusresult);
       }
 
-      list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"]);
+      $valitut_varastot = isset($valitut_varastot) ? $valitut_varastot : 0;
+
+      list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], "",
+                                                              $valitut_varastot);
       $varattu = $saldo - $myytavissa + $jalkitoimituksessa;
 
       // Jos kaikki luvut on nollaa, niin skipataan rivi

@@ -598,6 +598,9 @@ function echo_laitteen_vaihto_form($request = array()) {
   if (!empty($request['uusi_laite']['varalaite'])) {
     $varalaite_chk = 'CHECKED';
   }
+  else if (!isset($request['uusi_laite'])) {
+    $varalaite_chk = 'CHECKED';
+  }
   echo '<input type="checkbox" name="uusi_laite[varalaite]" ' . $varalaite_chk . '/>';
   echo "</td>";
   echo "</tr>";

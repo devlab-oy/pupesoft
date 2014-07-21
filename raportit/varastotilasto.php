@@ -182,6 +182,11 @@ if ($tee != "" and isset($painoinnappia)) {
       $varastotilasto_table .= "<td><input type='text' class='search_field' name='search_Tuoteno'></td>";
       $varastotilasto_table .= "<td><input type='text' class='search_field' name='search_Nimitys'></td>";
       $varastotilasto_table .= "<td><input type='text' class='search_field' name='search_Varastosaldo'></td>";
+
+      if ($nayta_vapaa_saldo == "on") {
+        $varastotilasto_table .= "<td><input type='text' class='search_field' name='search_Vapaasaldo'/></td>";
+      }
+
       $varastotilasto_table .= "<td><input type='text' class='search_field' name='search_Varastonarvo'></td>";
       $varastotilasto_table .= "<td><input type='text' class='search_field' name='search_Myyntihinta'></td>";
       $varastotilasto_table .= "<td><input type='text' class='search_field' name='search_Varmuusvarasto'></td>";
@@ -211,6 +216,11 @@ if ($tee != "" and isset($painoinnappia)) {
     $worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteno"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("Varastosaldo"));
+
+    if ($nayta_vapaa_saldo == "on") {
+      $worksheet->writeString($excelrivi, $excelsarake++, t("Vapaa saldo"));
+    }
+
     $worksheet->writeString($excelrivi, $excelsarake++, t("Varastonarvo"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("Myyntihinta"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("Varmuusvarasto"));
@@ -382,6 +392,11 @@ if ($tee != "" and isset($painoinnappia)) {
       $worksheet->writeString($excelrivi, $excelsarake++, $row["tuoteno"]);
       $worksheet->writeString($excelrivi, $excelsarake++, $row["nimitys"]);
       $worksheet->writeNumber($excelrivi, $excelsarake++, $saldo);
+
+      if ($nayta_vapaa_saldo == "on") {
+        $worksheet->writeNumber($excelrivi, $excelsarake++, $myytavissa);
+      }
+
       $worksheet->writeNumber($excelrivi, $excelsarake++, $varastonarvo);
       $worksheet->writeNumber($excelrivi, $excelsarake++, $row["myyntihinta"]);
       $worksheet->writeNumber($excelrivi, $excelsarake++, $row["varmuus_varasto"]);
@@ -426,10 +441,12 @@ if ($tee != "" and isset($painoinnappia)) {
     }
     else {
       if ($listaustyyppi == "kappaleet2"){
-        pupe_DataTables(array(array($pupe_DataTables, 19, 19, false, false)));
+        $sarakkeet = $nayta_vapaa_saldo == "on" ? 20 : 19;
+        pupe_DataTables(array(array($pupe_DataTables, $sarakkeet, $sarakkeet, false, false)));
       }
       else {
-        pupe_DataTables(array(array($pupe_DataTables, 15, 15, false, false)));
+        $sarakkeet = $nayta_vapaa_saldo == "on" ? 16 : 15;
+        pupe_DataTables(array(array($pupe_DataTables, $sarakkeet, $sarakkeet, false, false)));
       }
       echo "<br>", $varastotilasto_table;
     }

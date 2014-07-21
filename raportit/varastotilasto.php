@@ -85,7 +85,8 @@ echo "<td>";
 echo "<select multiple name='valitut_varastot[]'>";
 
 foreach ($varastot as $varasto) {
-  echo "<option value='{$varasto["tunnus"]}'>{$varasto["nimitys"]}</option>";
+  $selected = in_array($varasto["tunnus"], $valitut_varastot) ? "selected" : "";
+  echo "<option value='{$varasto["tunnus"]}' {$selected}>{$varasto["nimitys"]}</option>";
 }
 
 

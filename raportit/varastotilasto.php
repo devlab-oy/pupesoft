@@ -67,6 +67,32 @@ require ("tilauskasittely/monivalintalaatikot.inc");
 
 echo "</td></tr>";
 
+// Varastot
+$query = "SELECT tunnus, nimitys
+          FROM varastopaikat";
+$result = pupe_query($query);
+
+$varastot = array();
+
+while ($varasto = mysql_fetch_assoc($result)) {
+  array_push($varastot, $varasto);
+}
+
+// Varaston valinta
+echo "<tr>";
+echo "<th>Varasto</th>";
+echo "<td>";
+echo "<select multiple name='varasto'>";
+
+foreach ($varastot as $varasto) {
+  echo "<option value='{$varasto["tunnus"]}'>{$varasto["nimitys"]}</option>";
+}
+
+
+echo "</select>";
+echo "</td>";
+echo "</tr>";
+
 echo "<tr>";
 echo "<th>".t("Toimittaja")."</th>";
 echo "<td><input type='text' name='ytunnus' value='$ytunnus'> ";

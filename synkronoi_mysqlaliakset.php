@@ -62,7 +62,7 @@ if ($tee == "TEE" or strpos($_SERVER['SCRIPT_NAME'], "iltasiivo.php") !== FALSE)
 
     if (mysql_num_rows($sanakirjaresult) > 0) {
       $sanakirjaquery  = "UPDATE avainsana SET
-                          selitetark = '$selitetark'
+                          selitetark       = '$selitetark'
                           WHERE yhtio      = '$kukarow[yhtio]'
                           and laji         = 'MYSQLALIAS'
                           and selite       = '$selite'
@@ -92,9 +92,13 @@ if ($tee == "TEE" or strpos($_SERVER['SCRIPT_NAME'], "iltasiivo.php") !== FALSE)
     }
   }
 
-  if ($tee == "TEE") echo "</table><br><br>";
-
-  echo t("Mysqlaliakset synkronoitu onnistuneesti")."!\n";
+  if ($tee == "TEE") {
+    echo "</table><br>";
+    echo "<br>".t("Mysqlaliakset synkronoitu onnistuneesti")."!<br>";
+  }
+  else {
+    $iltasiivo .= is_log("Mysqlaliakset synkronoitu onnistuneesti.");
+  }
 }
 
 if (strpos($_SERVER['SCRIPT_NAME'], "synkronoi_mysqlaliakset.php") !== FALSE) {

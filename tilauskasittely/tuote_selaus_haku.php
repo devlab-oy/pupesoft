@@ -1898,9 +1898,12 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
                     $naytettava_saldo = t("On");
                   }
 
-                  $noutolisa .= "<tr class='aktiivi'><td>"
-                    . ucwords(strtolower($noutovarrow["nimitark"]))
-                    . "</td><td><font class='green'>{$naytettava_saldo}</font></td></tr>";
+                  $noutolisa .= "<tr class='aktiivi'>";
+                  $noutolisa .= "<td>";
+                  $noutolisa .= ucwords(strtolower($noutovarrow["nimitark"]));
+                  $noutolisa .= "</td>";
+                  $noutolisa .= "<td><font class='green'>{$naytettava_saldo}</font></td>";
+                  $noutolisa .= "</tr>";
                 }
               }
             }
@@ -1924,12 +1927,14 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
                 $naytettava_saldo = t("On");
               }
 
+              echo "<font class='green'>";
+
               if ($hinta_rajaus != "" and $myytavissa > 0) {
-                echo "<font class='green'>" . t("P‰‰varasto") . ": {$naytettava_saldo}</font>";
+                echo t("P‰‰varasto") . ": ";
               }
-              else {
-                echo "<font class='green'>{$naytettava_saldo}</font>";
-              }
+
+              echo $naytettava_saldo;
+              echo "</font>";
             }
           }
           elseif ($row['status'] != 'T') {

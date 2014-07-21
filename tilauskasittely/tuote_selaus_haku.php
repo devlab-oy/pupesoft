@@ -1467,6 +1467,8 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
         $hae_ja_selaa_asiakas = (int) $laskurow['liitostunnus'];
       }
 
+      $rivin_yksikko = t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite");
+
       //jos ollaan verkkokaupassa ja n‰ytet‰‰n vain aletuotteet asetus on p‰‰ll‰ niin pakotetaan saako_myyda_private_label tarkistamaan alet kaikilta tuotteilta, jotta n‰ytet‰‰n vain aletuotteet
       if ($hae_ja_selaa_asiakas != 0) {
         $vainaletuotteet = FALSE;
@@ -1777,39 +1779,29 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
               $kokonaismyytavissa += $myytavissa;
             }
 
-            if ($kokonaismyytavissa > 0) {
-              if ($yhtiorow["extranet_nayta_saldo"] == "") {
-                $naytettava_saldo = t("On");
-              }
-              else {
-                $naytettava_saldo = sprintf("%.2f", $kokonaismyytavissa)
-                  . " "
-                  . t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite");
-              }
-
-              echo "<td valign='top' class='$vari' $classrigh>";
-
-              if ($hinta_rajaus != "") {
-                echo "<font class='green'>" . t("P‰‰varasto") . ": {$naytettava_saldo}</font>";
-              }
-              else {
-                echo "<font class='green'>{$naytettava_saldo}</font>";
-              }
-              echo "</td>";
+            if ($yhtiorow["extranet_nayta_saldo"] == "Y") {
+              $naytettava_saldo = sprintf("%.2f", $kokonaismyytavissa) . " {$rivin_yksikko}";
+              $_vari = "";
+            }
+            elseif ($kokonaismyytavissa > 0) {
+              $naytettava_saldo = t("On");
+              $_vari = "green";
             }
             else {
-              if ($yhtiorow["extranet_nayta_saldo"] == "") {
-                $naytettava_saldo = t("Ei");
-              }
-              else {
-                $naytettava_saldo = sprintf("%.2f", 0)
-                  . " "
-                  . t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite");
-              }
-
-              echo "<td valign='top' class='$vari' $classrigh><font class='red'>";
-              echo "{$naytettava_saldo}</font></td>";
+              $naytettava_saldo = t("Ei");
+              $_vari = "red";
             }
+
+            echo "<td valign='top' class='$vari' $classrigh>";
+            echo "<font class='$_vari'>";
+
+            if ($hinta_rajaus != "") {
+              echo t("P‰‰varasto") . ": ";
+            }
+
+            echo $naytettava_saldo;
+            echo "</font>";
+            echo "</td>";
           }
           // Normipupe
           else {
@@ -1825,7 +1817,12 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
             foreach ($saldot as $varaso => $saldo) {
               if ($saldo != 0) {
                 $ei_tyhja = 'yes';
-                echo "<tr class='aktiivi'><td class='$vari' nowrap>$varaso</td><td class='$vari' align='right' nowrap>".sprintf("%.2f", $saldo)." ".t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite")."</td></tr>";
+                $_saldo = sprintf("%.2f", $saldo);
+
+                echo "<tr class='aktiivi'>";
+                echo "<td class='$vari' nowrap>$varaso</td>";
+                echo "<td class='$vari' align='right' nowrap>{$_saldo} {$rivin_yksikko}</td>";
+                echo "</tr>";
               }
             }
 
@@ -1894,14 +1891,11 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
                 list($noutosaldo, $noutohyllyssa, $noutomyytavissa) = saldo_myytavissa($row["tuoteno"], "", $noutovarrow["tunnus"], "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
 
                 if ($noutomyytavissa > 0) {
-                  if ($yhtiorow["extranet_nayta_saldo"] == "") {
-                    $naytettava_saldo = t("On");
+                  if ($yhtiorow["extranet_nayta_saldo"] == "Y") {
+                    $naytettava_saldo = sprintf("%.2f", $noutomyytavissa) . " {$rivin_yksikko}";
                   }
                   else {
-                    $naytettava_saldo = sprintf("%.2f", $noutomyytavissa)
-                      . " "
-                      . t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "",
-                                    "selite");
+                    $naytettava_saldo = t("On");
                   }
 
                   $noutolisa .= "<tr class='aktiivi'><td>"
@@ -1923,13 +1917,11 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
               echo "</font>";
             }
             else {
-              if ($yhtiorow["extranet_nayta_saldo"] == "") {
-                $naytettava_saldo = t("On");
+              if ($yhtiorow["extranet_nayta_saldo"] == "Y") {
+                $naytettava_saldo = sprintf("%.2f", $myytavissa). " {$rivin_yksikko}";
               }
               else {
-                $naytettava_saldo = sprintf("%.2f", $myytavissa)
-                  . " "
-                  . t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite");
+                $naytettava_saldo = t("On");
               }
 
               if ($hinta_rajaus != "" and $myytavissa > 0) {
@@ -1941,13 +1933,11 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
             }
           }
           elseif ($row['status'] != 'T') {
-            if ($yhtiorow["extranet_nayta_saldo"] == "") {
-              $naytettava_saldo = t("Ei");
+            if ($yhtiorow["extranet_nayta_saldo"] == "Y") {
+              $naytettava_saldo = sprintf("%.2f", 0) . " {$rivin_yksikko}";
             }
             else {
-              $naytettava_saldo = sprintf("%.2f", 0)
-                . " "
-                . t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite");
+              $naytettava_saldo = t("Ei");
             }
 
             echo "<font class='red'>{$naytettava_saldo}</font>";
@@ -2071,7 +2061,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
                     echo "<font class='green'>";
                   }
 
-                  echo sprintf("%.2f", $myytavissa)." ".t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite");
+                  echo sprintf("%.2f", $myytavissa)." ".$rivin_yksikko;
 
                   if ($hae_ja_selaa_row['selite'] == 'B') {
                     echo "</font>";

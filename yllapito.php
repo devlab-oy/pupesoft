@@ -2432,8 +2432,18 @@
 
     echo "</td></tr>";
 
-    // Määritellään mitä tietueita saa poistaa
-    if ($toim == "auto_vari" or
+    $saako_poistaa = true;
+    if ($yhtiorow['laite_huolto'] == 'X') {
+      $poistamattomat = array("kohde", "tuote", "paikka", "laite", "asiakas");
+      $onko_admin = stristr($kukarow['profiilit'], 'admin');
+      if (!$onko_admin and in_array($toim, $poistamattomat)) {
+        $saako_poistaa = false;
+      }
+    }
+
+    // M‰‰ritell‰‰n mit‰ tietueita saa poistaa
+    if ($saako_poistaa or
+      $toim == "auto_vari" or
       $toim == "auto_vari_tuote" or
       $toim == "auto_vari_korvaavat" or
       $toim == "autoid_lisatieto" or
@@ -2451,7 +2461,7 @@
       $toim == "perusalennus" or
       $toim == "yhteensopivuus_tuote" or
       $toim == "yhteensopivuus_tuote_lisatiedot" or
-       ($toim == "toimitustapa" and $poistolukko == "") or
+      ($toim == "toimitustapa" and $poistolukko == "") or
       $toim == "kirjoittimet" or
       $toim == "hinnasto" or
       $toim == "rahtimaksut" or
@@ -2476,9 +2486,6 @@
       $toim == "hyvityssaannot" or
       $toim == "varaston_hyllypaikat" or
       $toim == "tuotteen_orginaalit" or
-      $toim == "kohde" or
-      $toim == "paikka" or
-      $toim == "laite" or
       $toim == "huoltosykli" or
       $toim == "huoltosyklit_laitteet" or
       ($toim == "liitetiedostot" and $poistolukko == "") or

@@ -23987,37 +23987,38 @@ if (!function_exists('hae_laitteen_oletus_huoltosyklit')) {
 }
 
 if (!function_exists('js_laite')) {
-  function js_laite() {
-    global $palvelin2;
 
-    ?>
-    <script>
-      var palvelin2 = '<?php echo $palvelin2 ?>';
+    function js_laite() {
+      global $palvelin2;
+      ?>
+      <script src='<?php echo $palvelin2 ?>js/valid_date_plugin.js'></script>
+        <script>
+          var palvelin2 = '<?php echo $palvelin2 ?>';
 
-      var huoltovalit_req_obj = hae_huoltovalit();
-      $(document).ready(function() {
-        bind_huoltosykli_change();
+          var huoltovalit_req_obj = hae_huoltovalit();
+          $(document).ready(function() {
+            bind_huoltosykli_change();
 
-        bind_tuoteno_change();
+            bind_tuoteno_change();
 
-        bind_huoltovali_change();
+            bind_huoltovali_change();
 
-        bind_tuleva_toimenpide_change();
-      });
+            bind_tuleva_toimenpide_change();
+          });
 
-      function bind_huoltosykli_change() {
-        $('.huoltosykli_select').on('change', function() {
-          if ($(this).val() != 0) {
-            var huoltovali_select_id = $(this).attr('id').replace("sykli","vali");
-            hae_huoltosyklin_huoltovali($(this).val(), huoltovali_select_id);
-            var huoltovali_days = $('#'+huoltovali_select_id).val();
-            var tapahtuma_select_id = $(this).attr('id').replace('huoltosykli_select_',"tuleva_toimenpide_");
-            huoltovalit_req_obj.done(function(huoltovalit) {
-              muuta_seuraava_tapahtuma(huoltovalit[huoltovali_days], tapahtuma_select_id);
+          function bind_huoltosykli_change() {
+            $('.huoltosykli_select').on('change', function() {
+              if ($(this).val() != 0) {
+                var huoltovali_select_id = $(this).attr('id').replace("sykli","vali");
+                hae_huoltosyklin_huoltovali($(this).val(), huoltovali_select_id);
+                var huoltovali_days = $('#'+huoltovali_select_id).val();
+                var tapahtuma_select_id = $(this).attr('id').replace('huoltosykli_select_',"tuleva_toimenpide_");
+                huoltovalit_req_obj.done(function(huoltovalit) {
+                  muuta_seuraava_tapahtuma(huoltovalit[huoltovali_days], tapahtuma_select_id);
+                });
+              }
             });
           }
-        });
-      }
 
       function hae_huoltosyklin_huoltovali(huoltosykli_tunnus, select_id) {
         var url = palvelin2 +
@@ -24034,8 +24035,6 @@ if (!function_exists('js_laite')) {
             console.log('Huoltoväli haku EPÄONNISTUI');
             console.log(data);
           }
-        });
-      }
 
       function bind_tuoteno_change() {
         $('#tuoteno_td input').on('change input paste', function() {
@@ -24071,18 +24070,16 @@ if (!function_exists('js_laite')) {
             console.log('Huoltoväli haku EPÄONNISTUI');
             console.log(data);
           }
-        });
-      }
 
-      function bind_huoltovali_change() {
-        $('.huoltovali_select').on('change', function() {
-          var tapahtuma_select_id = $(this).attr('id').replace('huoltovali_select_',"tuleva_toimenpide_");
-          muuta_seuraava_tapahtuma($(this).val(), tapahtuma_select_id);
-        });
-      }
+          function bind_huoltovali_change() {
+            $('.huoltovali_select').on('change', function() {
+              var tapahtuma_select_id = $(this).attr('id').replace('huoltovali_select_',"tuleva_toimenpide_");
+              muuta_seuraava_tapahtuma($(this).val(), tapahtuma_select_id);
+            });
+          }
 
-      function muuta_seuraava_tapahtuma(huoltovali, tapahtuma_select_id) {
-        var seuraava_tapahtuma = laske_default_seuraava_tapahtuma(huoltovali);
+          function muuta_seuraava_tapahtuma(huoltovali, tapahtuma_select_id) {
+            var seuraava_tapahtuma = laske_default_seuraava_tapahtuma(huoltovali);
 
           if (seuraava_tapahtuma instanceof Date) {
             var onko_huolto = (tapahtuma_select_id.indexOf("huolto") != -1);
@@ -24095,49 +24092,41 @@ if (!function_exists('js_laite')) {
                     '.' + seuraava_tapahtuma.getFullYear();
             $('#'+tapahtuma_select_id).val(date_string);
           }
-      }
 
-      function laske_default_seuraava_tapahtuma(valittu_huoltovali) {
-        var date = new Date();
-        date.setFullYear(date.getFullYear() + parseInt(valittu_huoltovali['years']));
-        return date;
-      }
-
-      function seuraava_tapahtuma_valm_pvm(huoltovali) {
-        var today = new Date();
-        var date = new Date();
-        date.setMonth(parseInt($('.valm_pvm_tkk').val() - 1));
-        date.setDate(parseInt($('.valm_pvm_tpp').val()));
-        date.setFullYear(parseInt($('.valm_pvm_tvv').val()) + parseInt(huoltovali['years']));
-
-        if (date >= today) {
-          var seuraava_tapahtuma = new Date();
-          seuraava_tapahtuma.setMonth(parseInt($('.valm_pvm_tkk').val() - 1));
-          seuraava_tapahtuma.setFullYear(parseInt($('.valm_pvm_tvv').val()));
-
-          seuraava_tapahtuma.setFullYear(seuraava_tapahtuma.getFullYear() + parseInt(huoltovali['years']));
-        }
-        else {
-          //Jos nykyhetki on kauempana tulevaisuudessa kuin valm_pvm + huoltoväli niin ei voida tietää seuraavaa tulevaa tapahtumaa
-          //palautetaan tämä päivä
-          seuraava_tapahtuma = today;
-        }
-
-        return seuraava_tapahtuma;
-      }
-
-      function bind_tuleva_toimenpide_change() {
-        $('.tuleva_toimenpide').on('change input paste', function() {
-          var onko_validi = isValidDate($(this).val());
-
-          if (!onko_validi) {
-            $(this).parent().find('.tuleva_toimenpide_error').html($('#paiva_ei_validi').val());
+          function laske_default_seuraava_tapahtuma(valittu_huoltovali) {
+            var date = new Date();
+            date.setFullYear(date.getFullYear() + parseInt(valittu_huoltovali['years']));
+            return date;
           }
-          else {
-            $(this).parent().find('.tuleva_toimenpide_error').html('');
+
+          function seuraava_tapahtuma_valm_pvm(huoltovali) {
+            var today = new Date();
+            var date = new Date();
+            date.setMonth(parseInt($('.valm_pvm_tkk').val() - 1));
+            date.setDate(parseInt($('.valm_pvm_tpp').val()));
+            date.setFullYear(parseInt($('.valm_pvm_tvv').val()) + parseInt(huoltovali['years']));
+
+            if (date >= today) {
+              var seuraava_tapahtuma = new Date();
+              seuraava_tapahtuma.setMonth(parseInt($('.valm_pvm_tkk').val() - 1));
+              seuraava_tapahtuma.setFullYear(parseInt($('.valm_pvm_tvv').val()));
+
+              seuraava_tapahtuma.setFullYear(seuraava_tapahtuma.getFullYear() + parseInt(huoltovali['years']));
+            }
+            else {
+              //Jos nykyhetki on kauempana tulevaisuudessa kuin valm_pvm + huoltoväli niin ei voida tietää seuraavaa tulevaa tapahtumaa
+              //palautetaan tämä päivä
+              seuraava_tapahtuma = today;
+            }
+
+            return seuraava_tapahtuma;
           }
-        });
-      }
+
+          function bind_tuleva_toimenpide_change() {
+            $('.tuleva_toimenpide').validDatePlugin();
+            var validDatePlugin = $('.tuleva_toimenpide').data('validDatePlugin');
+            validDatePlugin.validate_date();
+          }
 
       function hae_huoltovalit() {
         var url = palvelin2 +
@@ -24152,44 +24141,42 @@ if (!function_exists('js_laite')) {
             console.log('Huoltovälieni haku EPÄONNISTUI');
             console.log(data);
           }
-        });
-      }
 
-      function isValidDate(txtDate) {
-        var currVal = txtDate;
-        if(currVal == '') {
-          return false;
-        }
+          function isValidDate(txtDate) {
+            var currVal = txtDate;
+            if(currVal == '') {
+              return false;
+            }
 
-        var rxDatePattern = /^(\d{1,2})[.-\/|](\d{1,2})[.-\/|](\d{4})$/;
-        var dtArray = currVal.match(rxDatePattern);
+            var rxDatePattern = /^(\d{1,2})[.-\/|](\d{1,2})[.-\/|](\d{4})$/;
+            var dtArray = currVal.match(rxDatePattern);
 
-        if (dtArray == null)
-           return false;
+            if (dtArray == null)
+               return false;
 
-        //Checks for dd/mm/yyyy format.
-        dtMonth = dtArray[2];
-        dtDay= dtArray[1];
-        dtYear = dtArray[3];
+            //Checks for dd/mm/yyyy format.
+            dtMonth = dtArray[2];
+            dtDay= dtArray[1];
+            dtYear = dtArray[3];
 
-        if (dtMonth < 1 || dtMonth > 12) {
-          return false;
-        }
-        else if (dtDay < 1 || dtDay> 31) {
-          return false;
-        }
-        else if ((dtMonth==4 || dtMonth==6 || dtMonth==9 || dtMonth==11) && dtDay ==31) {
-          return false;
-        }
-        else if (dtMonth == 2) {
-           var isleap = (dtYear % 4 == 0 && (dtYear % 100 != 0 || dtYear % 400 == 0));
-           if (dtDay> 29 || (dtDay ==29 && !isleap)) {
-            return false;
-           }
-        }
-        return true;
-      }
-    </script>
+            if (dtMonth < 1 || dtMonth > 12) {
+              return false;
+            }
+            else if (dtDay < 1 || dtDay> 31) {
+              return false;
+            }
+            else if ((dtMonth==4 || dtMonth==6 || dtMonth==9 || dtMonth==11) && dtDay ==31) {
+              return false;
+            }
+            else if (dtMonth == 2) {
+               var isleap = (dtYear % 4 == 0 && (dtYear % 100 != 0 || dtYear % 400 == 0));
+               if (dtDay> 29 || (dtDay ==29 && !isleap)) {
+                return false;
+               }
+            }
+            return true;
+          }
+        </script>
     <?php
   }
 }
@@ -24315,10 +24302,10 @@ if (!function_exists('hae_yhtion_lasku_logo')) {
   function hae_yhtion_lasku_logo() {
     global $kukarow, $yhtiorow;
 
-    $query = "  SELECT data
-          FROM liitetiedostot
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND kayttotarkoitus = 'yhtion_parametrit.lasku_logo'";
+    $query = "SELECT data
+              FROM liitetiedostot
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND kayttotarkoitus = 'yhtion_parametrit.lasku_logo'";
     $result = pupe_query($query);
 
     $logo = mysql_fetch_assoc($result);

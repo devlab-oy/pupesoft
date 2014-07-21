@@ -76,7 +76,7 @@ class LaskutuspoytakirjaPDF
 
     @pdf.float do
       @pdf.indent(250) do
-        @pdf.text "Asiakasnro./Kund nr. #{@data['kohde']['tunnus']}"
+        @pdf.text "Asiakasnro./Kund nr. #{@data['asiakas']['asiakasnro']}"
       end
     end
 

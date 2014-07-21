@@ -641,7 +641,7 @@
                 $viimeinen_tapahtuma_query = "viimeinen_tapahtuma = '{$viimeinen_tapahtuma}',";
               }
               else{
-                $viimeinen_tapahtuma_query = "viimeinen_tapahtuma = NOW(),";
+                $viimeinen_tapahtuma_query = "viimeinen_tapahtuma = CURRENT_DATE,";
               }
 
               $sykli_query = "INSERT INTO huoltosyklit_laitteet

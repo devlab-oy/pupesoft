@@ -953,12 +953,14 @@ function merkkaa_tyomaarays_tehdyksi($request) {
             AND tunnus IN ('" . implode("','", $request['lasku_tunnukset']) . "')";
   pupe_query($query);
 
-  //Toimitettuaika manual settiä käytetään konversio-ajossa
-  if (empty($request['toimitettuaika'])) {
-    $toimitettuaika_update = "toimitettuaika = NOW()";
+  //Toimitettuaika manual settiä käytetään konversio-ajossa sekä käyttöliittymässä
+  $valid = FormValidator::validateItem($request['toimitettuaika'], 'paiva');
+  if ($valid) {
+    $poikkeava_toimitettuaika = date('Y-m-d H:i:s', strtotime($request['toimitettuaika']));
+    $toimitettuaika_update = "toimitettuaika = '{$poikkeava_toimitettuaika}'";
   }
   else {
-    $toimitettuaika_update = "toimitettuaika = '" . date('Y-m-d H:i:s', strtotime($request['toimitettuaika'])) . "'";
+    $toimitettuaika_update = "toimitettuaika = NOW()";
   }
 
   $query = "UPDATE tilausrivi
@@ -1178,7 +1180,7 @@ function huoltosykli_rivi($tyyppi, $request, $tyojono = false) {
     $seuraava_tuleva_tapahtuma = $laitteen_huoltosykli['seuraava_tuleva_tapahtuma'];
   }
   echo "<input type='text' id='tuleva_toimenpide_{$tyyppi}' class='tuleva_toimenpide' name='{$nimi}[{$tyyppi}][seuraava_tuleva_tapahtuma]' value='{$seuraava_tuleva_tapahtuma}'/>";
-  echo "<div class='tuleva_toimenpide_error'>";
+  echo "<div class='error_element'>";
   echo "</div>";
   echo "</td>";
   echo "</tr>";

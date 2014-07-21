@@ -93,16 +93,6 @@ if (mysql_field_name($result, $i) == "oma_numero") {
 
 //Jos omistaja kentässä on jotain niin kyseiselle laitteelle ei generoida työmääräyksiä. Laitteet, jotka eivät kuulu huollon piiriin halutaan kuitenkin lisätä asiakkaan laitepuuhun, jotta huoltomies ei ihmettele ylimääräisiä laitteita huoltokierroksellaan.
 if (mysql_field_name($result, $i) == "omistaja") {
-  $ulos = "<tr>";
-  $ulos .= "<th align='left'>";
-  $ulos .= t('Muu omistaja');
-  $ulos .= "</th>";
-  $ulos .= "<td>";
-  $ulos .= "<input type='text' class='omistaja' name='t[{$i}]' value='{$trow[$i]}' size='35' maxlength='60' />";
-  $ulos .= "</td>";
-  $ulos .= "</tr>";
-
-  $jatko = 0;
   $tyyppi = 0;
 }
 

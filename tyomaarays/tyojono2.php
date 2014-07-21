@@ -5,6 +5,11 @@ session_start();
 require_once('../inc/parametrit.inc');
 require_once('inc/tyojono2_functions.inc');
 require_once('inc/laite_huolto_functions.inc');
+require_once('tilauskasittely/tarkastuspoytakirja_pdf.php');
+require_once('tilauskasittely/poikkeamaraportti_pdf.php');
+require_once('tilauskasittely/tyolista_pdf.php');
+require_once('tilauskasittely/laskutuspoytakirja_pdf.php');
+require('validation/Validation.php');
 
 if (isset($livesearch_tee) and $livesearch_tee == "ASIAKASHAKU") {
   livesearch_asiakashaku();
@@ -37,6 +42,24 @@ if (!isset($laite_tunnus)) {
 if (!isset($ajax_request)) {
   $ajax_request = '';
 }
+if (!isset($asiakas_tunnus)) {
+  $asiakas_tunnus = '';
+}
+if (!isset($kohde_tunnus)) {
+  $kohde_tunnus = '';
+}
+if (!isset($tyojono)) {
+  $tyojono = '';
+}
+if (!isset($tyostatus)) {
+  $tyostatus = '';
+}
+if (!isset($toimitusaika)) {
+  $toimitusaika = '';
+}
+if (!isset($toimitettuaika)) {
+  $toimitettuaika = '';
+}
 
 if ($tee == 'lataa_tiedosto') {
   $filepath = "/tmp/" . $tmpfilenimi;
@@ -62,14 +85,10 @@ if ($ajax_request) {
   exit;
 }
 
-require_once('tilauskasittely/tarkastuspoytakirja_pdf.php');
-require_once('tilauskasittely/poikkeamaraportti_pdf.php');
-require_once('tilauskasittely/tyolista_pdf.php');
-require_once('tilauskasittely/laskutuspoytakirja_pdf.php');
-
 echo "<font class='head'>" . t("Laitehuoltojen työjono") . ":</font>";
 echo "<hr/>";
 echo "<br/>";
+echo "<input type='hidden' id='paiva_ei_validi' value='<font class=\"error\">" . t('Päivämäärä väärin') . "</font>' />";
 $js = hae_tyojono2_js();
 $css = hae_tyojono2_css();
 
@@ -88,6 +107,7 @@ $request = array(
     'tyojono'         => $tyojono,
     'tyostatus'       => $tyostatus,
     'toimitusaika'    => $toimitusaika,
+    'toimitettuaika'  => $toimitettuaika,
 );
 
 if (!isset($request['toimitusaika'])) {
@@ -127,12 +147,9 @@ if (is_string($request['lasku_tunnukset']) and !empty($request['lasku_tunnukset'
 
 if ($toim == 'TEHDYT_TYOT') {
   if ($request['ala_tee'] == 'tulosta_tarkastuspoytakirja' or $request['ala_tee'] == 'tulosta_poikkeamaraportti') {
-    $pdf_tiedostot = ($request['ala_tee'] == 'tulosta_tarkastuspoytakirja' ? PDF\Tarkastuspoytakirja\hae_tarkastuspoytakirjat($request['lasku_tunnukset']) : PDF\Poikkeamaraportti\hae_poikkeamaraportit($request['lasku_tunnukset']));
-
-    foreach ($pdf_tiedostot as $pdf_tiedosto) {
-      if (!empty($pdf_tiedosto)) {
-        echo_tallennus_formi($pdf_tiedosto, ($request['ala_tee'] == 'tulosta_tarkastuspoytakirja' ? t("Tarkastuspöytakirja") : t("Poikkeamaraportti")), 'pdf');
-      }
+    $pdf_tiedosto = \PDF\Tarkastuspoytakirja\hae_tarkastuspoytakirja($request['lasku_tunnukset']);
+    if (!empty($pdf_tiedosto)) {
+      echo_tallennus_formi($pdf_tiedosto, ($request['ala_tee'] == 'tulosta_tarkastuspoytakirja' ? t("Tarkastuspöytakirja") : t("Poikkeamaraportti")), 'pdf');
     }
   }
   if ($request['ala_tee'] == 'tulosta_laskutuspoytakirja') {

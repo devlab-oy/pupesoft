@@ -6,6 +6,7 @@ function hae_tyojono2_js() {
   ob_start();
   ?>
   <script src='<?php echo $palvelin2 ?>js/tyomaarays/tyojono2.js'></script>
+  <script src='<?php echo $palvelin2 ?>js/valid_date_plugin.js'></script>
   <script>
     $(document).ready(function() {
       if ($('#tyojono_wrapper').length > 0) {
@@ -13,6 +14,10 @@ function hae_tyojono2_js() {
         var tyojono_plugin = $('#tyojono_wrapper').data('tyojonoPlugin');
 
         tyojono_plugin.bind_all_events();
+
+        $('.toimitettuaika').validDatePlugin();
+        var validDatePlugin = $('.toimitettuaika').data('validDatePlugin');
+        validDatePlugin.validate_date();
       }
     });
   </script>
@@ -119,6 +124,9 @@ function hae_tyomaaraykset($request) {
 
   if ($temp === 1) {
     $tmp = "_temp";
+  }
+  else {
+    $tmp = "";
   }
 
   $query = "SELECT
@@ -230,7 +238,8 @@ function kasittele_tyomaaraykset($request) {
     }
 
     //Kohteen toimitusajoista viimeisin sinne insertöity toimaika
-    $kohteen_viimeisin_toimaika = end(array_values($kohteiden_toimajat[$tyomaarays['kohde_tunnus']]));
+    $toimajat = array_values($kohteiden_toimajat[$tyomaarays['kohde_tunnus']]);
+    $kohteen_viimeisin_toimaika = end($toimajat);
     $paiva_temp = date('Y-m-d', strtotime("{$kohteen_viimeisin_toimaika} + 30 days"));
     //Jos käsittelyssä oleva työmääräyksen toimaika on 30 päivän sisällä ensimmäisestä työmääräyksen toimajasta niin groupataan
     if ($tyomaarays['tyostatus_koodi'] == 'X') {
@@ -540,6 +549,9 @@ function echo_tyomaaraykset_table($request = array()) {
 function echo_tyomaarays_rivi($request, $laitteet) {
   global $kukarow, $yhtiorow, $palvelin2;
 
+  $today = date('d.m.Y');
+  $lopetus = "{$palvelin2}tyomaarays/tyojono2.php////tee=hae//asiakas_tunnus={$request['asiakas_tunnus']}//kohde_tunnus={$request['kohde_tunnus']}//tyojono={$request['tyojono']}//tyostatus={$request['tyostatus']}//toimitusaika={$request['toimitusaika']}";
+
   echo "<tr class='laite_table_tr_hidden'>";
 
   echo "<form class='multisubmit' name='merkkaa_tehdyksi'>";
@@ -585,7 +597,14 @@ function echo_tyomaarays_rivi($request, $laitteet) {
     echo "</td>";
 
     echo "<td>";
-    echo $laite['sarjanumero'];
+    if ($request['toim'] != 'TEHDYT_TYOT') {
+      echo "<a href='{$palvelin2}yllapito.php?toim=laite&asiakas_tunnus={$laite['asiakas_tunnus']}&lopetus={$lopetus}&tunnus={$laite['laite_tunnus']}'>";
+      echo $laite['sarjanumero'];
+      echo "</a>";
+    }
+    else {
+      echo $laite['sarjanumero'];
+    }
     echo "</td>";
 
     echo "<td>";
@@ -682,7 +701,10 @@ function echo_tyomaarays_rivi($request, $laitteet) {
 
   echo "<td>";
   if ($request['toim'] != 'TEHDYT_TYOT') {
+    echo "<input type='text' class='toimitettuaika' name='toimitettuaika' value='{$today}' />";
+    echo "<br/>";
     echo "<input type='submit' value='" . t("Merkkaa tehdyksi") . "' />";
+    echo "<div class='error_element'></div>";
   }
   echo "</td>";
 

@@ -27369,6 +27369,9 @@ if (!function_exists("kasittele_tiliote_viite")) {
   function kasittele_tiliote_viite() {
     global $kukarow, $yhtiorow;
 
+    $tee_selvittely = false;
+    $tee_viitemaksu_kohdistus = false;
+
     // K‰sitell‰‰n uudet tietueet
     $query = "SELECT *
               FROM tiliotedata
@@ -27389,12 +27392,15 @@ if (!function_exists("kasittele_tiliote_viite")) {
       $tietue = $tiliotedatarow['tieto'];
 
       if ($tiliotedatarow['tyyppi'] == 1) {
+        $tee_selvittely = true;
         require("inc/tiliote.inc");
       }
       if ($tiliotedatarow['tyyppi'] == 2) {
+        $tee_selvittely = true;
         require("inc/LMP.inc");
       }
       if ($tiliotedatarow['tyyppi'] == 3) {
+        $tee_viitemaksu_kohdistus = true;
         require("inc/viitemaksut.inc");
       }
 
@@ -27407,7 +27413,7 @@ if (!function_exists("kasittele_tiliote_viite")) {
       $tilioterivilaskuri++;
     }
 
-    if ($xtyyppi == 1) {
+    if ($tee_selvittely) {
       $tkesken = 0;
       $maara = $vastavienti;
       $kohdm = $vastavienti_valuutassa;
@@ -27418,17 +27424,7 @@ if (!function_exists("kasittele_tiliote_viite")) {
       echo "</table><br>\n<br>\n";
     }
 
-    if ($xtyyppi == 2) {
-      $tkesken = 0;
-      $maara = $vastavienti;
-      $kohdm = $vastavienti_valuutassa;
-
-      require("inc/teeselvittely.inc");
-      echo "</table><br>\n<br>\n";
-    }
-
-    if ($xtyyppi == 3) {
-
+    if ($tee_viitemaksu_kohdistus) {
       # T‰ss‰ tarvitaan kukarow[yhtio], joten ajetaan t‰m‰ kaikille firmoille
       $query = "SELECT yhtio from yhtio";
       $yhtiores = pupe_query($query);

@@ -494,14 +494,21 @@ if ($tee != "" and isset($painoinnappia)) {
       echo "<font class='error'>", t("Hakutulos oli liian suuri"), ". " ,t("Tulos vain excelissä"), ".</font><br><br>";
     }
     else {
-      if ($listaustyyppi == "kappaleet2"){
-        $sarakkeet = $nayta_vapaa_saldo == "on" ? 20 : 19;
-        pupe_DataTables(array(array($pupe_DataTables, $sarakkeet, $sarakkeet, false, false)));
+      if ($listaustyyppi == "kappaleet2" and $nayta_vapaa_saldo == "on") {
+        $sarakkeet = 20;
+      }
+      elseif ($listaustyyppi == "kappaleet2") {
+        $sarakkeet = 19;
+      }
+      elseif ($nayta_vapaa_saldo == "on") {
+        $sarakkeet = 16;
       }
       else {
-        $sarakkeet = $nayta_vapaa_saldo == "on" ? 16 : 15;
-        pupe_DataTables(array(array($pupe_DataTables, $sarakkeet, $sarakkeet, false, false)));
+        $sarakkeet = 15;
       }
+
+      pupe_DataTables(array(array($pupe_DataTables, $sarakkeet, $sarakkeet, false, false)));
+
       echo "<br>", $varastotilasto_table;
     }
   }

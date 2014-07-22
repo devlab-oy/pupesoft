@@ -133,7 +133,8 @@ if ($tee != "" and isset($painoinnappia)) {
   if (isset($valitut_varastot)) {
     $varastot = join(",", $valitut_varastot);
     $tuotepaikka_join = "INNER JOIN tuotepaikat
-                         ON (tuote.tuoteno = tuotepaikat.tuoteno AND tuotepaikat.saldo > 0)";
+                         ON (tuote.tuoteno = tuotepaikat.tuoteno
+                         AND tuote.yhtio = tuotepaikat.yhtio)";
     $varasto_filter = "AND tuotepaikat.varasto in ({$varastot})";
   }
   else {

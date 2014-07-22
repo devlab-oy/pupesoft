@@ -12266,6 +12266,8 @@ if (!function_exists("luoiban")) {
     include "inc/pankkitiedot.inc";
 
     $iban = $tilino . "151800";
+    $vali = "";
+
     for ($ind = 0; $ind < 20; $ind += 7) {
       $vali .= substr($iban, $ind, 7);
       $vali = $vali % 97;
@@ -26931,6 +26933,8 @@ if (!function_exists("tallenna_tiliote_viite")) {
   function tallenna_tiliote_viite($filenimi, $forceta = false) {
     global $kukarow, $yhtiorow;
 
+    $php_cli = (php_sapi_name() == 'cli');
+
     // Otetaan koko aineisto muuttujaan jotta voidaan vertailla onko tämä jo koneella
     // koska joskus voi tulla esim kaksi LMP aineistoa samalle päivälle mutta eri sisällöllä
     $kokoaineisto = file_get_contents($filenimi);
@@ -27367,10 +27371,12 @@ if (!function_exists("tallenna_tiliote_viite")) {
 
 if (!function_exists("kasittele_tiliote_viite")) {
   function kasittele_tiliote_viite() {
-    global $kukarow, $yhtiorow;
+    global $kukarow, $yhtiorow, $palvelin2, $lopp_pvm, $lopp_tilino, $lopp_tyyppi, $kuitattu_checked;
 
     $tee_selvittely = false;
     $tee_viitemaksu_kohdistus = false;
+    $vastavienti = 0;
+    $vastavienti_valuutassa = 0;
 
     // Käsitellään uudet tietueet
     $query = "SELECT *

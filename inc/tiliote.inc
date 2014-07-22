@@ -1,11 +1,14 @@
 <?php
 
-if (!isset($lopetus))      $lopetus = "";
-if (!isset($lopetuslisa))    $lopetuslisa = "";
-if (!isset($silent))      $silent = "";
-if (!isset($tee))        $tee = "";
-if (!isset($tiliotejarjestys))  $tiliotejarjestys = "";
-if (!isset($td_perheid))    $td_perheid = $tiliotedatarow['perheid'];
+if (!isset($lopetus)) $lopetus = "";
+if (!isset($lopetuslisa)) $lopetuslisa = "";
+if (!isset($silent)) $silent = "";
+if (!isset($tee)) $tee = "";
+if (!isset($tiliotejarjestys)) $tiliotejarjestys = "";
+if (!isset($td_perheid)) $td_perheid = $tiliotedatarow['perheid'];
+if (!isset($maksu)) $maksu = 0;
+if (!isset($tkesken)) $tkesken = 0;
+if (!isset($tilinvaluutta)) $tilinvaluutta = "";
 
 $tunnus = substr($tietue, 0, 3);
 

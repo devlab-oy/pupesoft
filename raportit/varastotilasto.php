@@ -152,7 +152,7 @@ if ($tee != "" and isset($painoinnappia)) {
     $toimittaja_join = "";
   }
 
-  $query = "SELECT tuote.tuoteno,
+  $query = "SELECT DISTINCT tuote.tuoteno,
             tuote.nimitys,
             tuote.osasto,
             tuote.try,

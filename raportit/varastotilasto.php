@@ -137,10 +137,12 @@ if ($tee != "" and isset($painoinnappia)) {
                          ON (tuote.tuoteno = tuotepaikat.tuoteno
                          AND tuote.yhtio = tuotepaikat.yhtio)";
     $varasto_filter = "AND tuotepaikat.varasto in ({$varastot})";
+    $varasto_tilausrivi_filter = "AND tilausrivi.varasto in ({$varastot})";
   }
   else {
     $tuotepaikka_join = "";
     $varasto_filter = "";
+    $varasto_tilausrivi_filter = "";
   }
 
   if ($toimittajaid != "") {
@@ -302,7 +304,8 @@ if ($tee != "" and isset($painoinnappia)) {
                 WHERE yhtio = '{$kukarow["yhtio"]}'
                 AND tuoteno = '{$row["tuoteno"]}'
                 AND tyyppi  = 'O'
-                AND varattu > 0";
+                AND varattu > 0
+                {$varasto_tilausrivi_filter}";
       $ostoresult = pupe_query($query);
       $ostorivi = mysql_fetch_assoc($ostoresult);
 
@@ -316,7 +319,8 @@ if ($tee != "" and isset($painoinnappia)) {
                   AND tuoteno = '{$row["tuoteno"]}'
                   AND tyyppi  = 'L'
                   AND var     = 'J'
-                  AND jt      > 0";
+                  AND jt      > 0
+                  {$varasto_tilausrivi_filter}";
         $jt_result = pupe_query($query);
         $jt_rivi = mysql_fetch_assoc($jt_result);
         $jalkitoimituksessa = $jt_rivi["jt"];
@@ -335,7 +339,8 @@ if ($tee != "" and isset($painoinnappia)) {
                 AND tuoteno         = '{$row["tuoteno"]}'
                 AND tyyppi          = 'L'
                 and laskutettuaika  >= date_sub(CURDATE(), interval 12 month)
-                AND kpl            != 0";
+                AND kpl            != 0
+                {$varasto_tilausrivi_filter}";
       $myyntiresult = pupe_query($query);
       $myyntirivi = mysql_fetch_assoc($myyntiresult);
 
@@ -351,7 +356,8 @@ if ($tee != "" and isset($painoinnappia)) {
                   AND tuoteno         = '{$row["tuoteno"]}'
                   AND tyyppi          = 'V'
                   and toimitettuaika  >= date_sub(CURDATE(), interval 12 month)
-                  AND kpl            != 0";
+                  AND kpl            != 0
+                  {$varasto_tilausrivi_filter}";
         $kulutusresult = pupe_query($query);
         $kulutusrivi = mysql_fetch_assoc($kulutusresult);
       }

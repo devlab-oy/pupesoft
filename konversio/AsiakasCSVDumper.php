@@ -10,18 +10,18 @@ class AsiakasCSVDumper extends CSVDumper {
     parent::__construct($kukarow);
 
     $konversio_array = array(
-      'asiakasnro'     => 'KOODI',
-      'nimi'         => 'NIMI',
-      'osoite'       => 'KATUOS',
-      'postitp'       => 'POSTIOS',
-      'postino'       => 'LISATIETO',
-      'puhelin'       => 'PUHELIN',
-      'myynti_kommentti1'   => 'PUHELIN1',
-      'kuljetusohje'     => 'PUHELIN2',
+        'asiakasnro'        => 'KOODI',
+        'nimi'              => 'NIMI',
+        'osoite'            => 'KATUOS',
+        'postitp'           => 'POSTIOS',
+        'postino'           => 'LISATIETO',
+        'puhelin'           => 'PUHELIN',
+        'myynti_kommentti1' => 'PUHELIN1',
+        'kuljetusohje'      => 'PUHELIN2',
     );
     $required_fields = array(
-      'asiakasnro',
-      'nimi',
+        'asiakasnro',
+        'nimi',
     );
 
     $this->setFilepath("/tmp/konversio/ASIAKAS.csv");
@@ -66,7 +66,7 @@ class AsiakasCSVDumper extends CSVDumper {
     $valid = true;
     foreach ($rivi as $key => $value) {
       if (in_array($key, $this->required_fields) and $value == '') {
-        $this->errors[$index][] = t('Pakollinen kenttä')." <b>{$key}</b> ".t('puuttuu');
+        $this->errors[$index][] = t('Pakollinen kenttä') . " <b>{$key}</b> " . t('puuttuu');
         $valid = false;
       }
     }
@@ -75,7 +75,7 @@ class AsiakasCSVDumper extends CSVDumper {
       $this->unique_values[] = $rivi['asiakasnro'];
     }
     else {
-      $this->errors[$index][] = t('Uniikki kenttä asiakasnro')." <b>{$rivi['asiakasnro']}</b> ".t('löytyy jo aineistosta');
+      $this->errors[$index][] = t('Uniikki kenttä asiakasnro') . " <b>{$rivi['asiakasnro']}</b> " . t('löytyy jo aineistosta');
       $valid = false;
     }
 
@@ -93,5 +93,4 @@ class AsiakasCSVDumper extends CSVDumper {
   protected function tarkistukset() {
     echo "Ei tarkistuksia";
   }
-
 }

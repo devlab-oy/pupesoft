@@ -26928,7 +26928,7 @@ if (!function_exists("etsi_tuotteelle_korjaava_varastoonvientipaiva")) {
 }
 
 if (!function_exists("tallenna_tiliote_viite")) {
-  function tallenna_tiliote_viite($filenimi) {
+  function tallenna_tiliote_viite($filenimi, $forceta = false) {
     global $kukarow, $yhtiorow;
 
     // Otetaan koko aineisto muuttujaan jotta voidaan vertailla onko tämä jo koneella
@@ -26937,10 +26937,12 @@ if (!function_exists("tallenna_tiliote_viite")) {
 
     $fd = fopen($filenimi, "r");
 
-    if (!($fd)) {
+    if ($fd === false) {
       echo "<font class='message'>Tiedosto '$filenimi' ei auennut!</font>";
-      exit;
+      return false;
     }
+
+    $tietue = fgets($fd);
 
     // Tämä oli tiliote tai viiteaineisto
     $query = "LOCK TABLE tiliotedata WRITE, yriti READ, yhtio READ, sanakirja WRITE";
@@ -26959,6 +26961,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
     $repl = array("ä", "ö", "å", "Ä", "Ö" , "Å", " ");
 
     while (!feof($fd)) {
+
       $tietue = str_replace($serc, $repl, $tietue);
       $tietue_type = substr($tietue, 0, 3);
       $tietue_eka = substr($tietue, 0, 1);
@@ -26968,8 +26971,8 @@ if (!function_exists("tallenna_tiliote_viite")) {
         // Konekielinen tiliote
         if ($tietue_type == 'T00') {
           $xtyyppi = 1;
-          $alkupvm = dateconv(substr($tietue,26,6));
-          $loppupvm = dateconv(substr($tietue,32,6));
+          $alkupvm = dateconv(substr($tietue, 26, 6));
+          $loppupvm = dateconv(substr($tietue, 32, 6));
           $tilino = substr($tietue, 9, 14);
         }
 
@@ -26987,7 +26990,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
         // Saapuvat viitemaksut
         if ($tietue_eka == '0') {
           $xtyyppi = 3;
-          $alkupvm = "20".dateconv(substr($tietue,1,6));
+          $alkupvm = "20".dateconv(substr($tietue, 1, 6));
           $loppupvm = $alkupvm;
 
           // Luetaan tilinumero seuraavalta riviltä ja siirretään pointteri takaisin nykypaikkaan
@@ -27079,34 +27082,47 @@ if (!function_exists("tallenna_tiliote_viite")) {
         $query = "SELECT *
                   FROM tiliotedata
                   WHERE tilino = '$tilino'
-                  and alku     = '$alkupvm'
-                  and loppu    = '$loppupvm'
-                  and tyyppi   = '$xtyyppi'";
+                  AND alku = '$alkupvm'
+                  AND loppu = '$loppupvm'
+                  AND tyyppi = '$xtyyppi'";
         $tiliotedatares = pupe_query($query);
 
         if (mysql_num_rows($tiliotedatares) > 0) {
           $tiliotedatarow = mysql_fetch_assoc($tiliotedatares);
 
-          // OP-pankki toimittaa useita LMP aineistoja per päivä, eli tarkistetaan onko juuri tämä aineisto ajettu koneelle
-          // Koodataan tässä vaiheessa vain LMP:lle, mutta mikään ei estä etteikö saman tsekin vois tehdä myös vaikka tiliotteille jos joku pankki toimittaisi yhden päivän otteet useassa osassa.
+          // OP-pankki toimittaa useita LMP aineistoja per päivä,
+          // eli tarkistetaan onko juuri tämä aineisto ajettu koneelle
+          // Koodataan tässä vaiheessa vain LMP:lle, mutta mikään ei estä etteikö saman tsekin vois
+          // tehdä myös vaikka tiliotteille jos joku pankki toimittaisi yhden päivän otteet useassa osassa.
           if ($xtyyppi == 2) {
             // Group concatissa tulee kaikki tän päivän LMP:t
             $query = "SELECT group_concat(tieto SEPARATOR '') AS kantaaineisto
                       FROM tiliotedata
                       WHERE tilino = '$tilino'
-                      and alku     = '$alkupvm'
-                      and loppu    = '$loppupvm'
-                      and tyyppi   = '$xtyyppi'";
+                      AND alku = '$alkupvm'
+                      AND loppu = '$loppupvm'
+                      AND tyyppi = '$xtyyppi'";
             $tiliotedatares = pupe_query($query);
             $tiliotedatarow = mysql_fetch_assoc($tiliotedatares);
 
             // Otetaan kaikki failissa olevat LMP:t arrayseen. (Nollaindeksissä tyhjää...)
             $distinct_aineistot = explode("T03", str_replace($serc, $repl, $kokoaineisto));
+            $_to_aineitso = trim($tiliotedatarow["kantaaineisto"]);
 
-            if (trim($tiliotedatarow["kantaaineisto"]) != "") {
+            if ($_to_aineitso != "") {
               for ($xlmpmaa_i = $xlmpmaa; $xlmpmaa_i < count($distinct_aineistot); $xlmpmaa_i++) {
-                if (trim($distinct_aineistot[$xlmpmaa_i]) != "" and strpos(trim($tiliotedatarow["kantaaineisto"]), trim($distinct_aineistot[$xlmpmaa_i])) !== FALSE) {
-                  echo "<font class='error'>VIRHE: Tämä aineisto on jo aiemmin käsitelty!<br>\n<br>\nTili: $tilino<br>\nAjalta: $alkupvm - $loppupvm<br>\nYritys: $yritirow[yhtio]</font><br>\n<br>\n";
+
+                $_aineisto = trim($distinct_aineistot[$xlmpmaa_i]);
+
+                if ($_aineisto != "" and strpos($_to_aineitso, $_aineisto) !== false) {
+                  echo "<font class='error'>";
+                  echo "VIRHE: Tämä aineisto on jo aiemmin käsitelty!";
+                  echo "<br><br>";
+                  echo "Tili: $tilino<br>";
+                  echo "Ajalta: $alkupvm - $loppupvm<br>";
+                  echo "Yritys: $yritirow[yhtio]";
+                  echo "</font>";
+                  echo "<br><br>";
 
                   $xtyyppi=0;
                   $virhe++;
@@ -27116,7 +27132,12 @@ if (!function_exists("tallenna_tiliote_viite")) {
 
             // Tutkitaan, ettei sama aineisto ole montaa kertaa tässä failissa
             if (count($distinct_aineistot) != count(array_unique($distinct_aineistot))) {
-              echo "<font class='error'>VIRHE: Aineisto esiintyy tiedostossa moneen kertaan.<br>\nTiedosto viallinen, ei voida jatkaa, ota yhteyttä helpdeskiin! (Tili: $tilino / Pvm: $alkupvm / Yhtiö: $yritirow[yhtio])</font><br>\n<br>\n";
+              echo "<font class='error'>";
+              echo "VIRHE: Aineisto esiintyy tiedostossa moneen kertaan.<br>";
+              echo "Tiedosto viallinen, ei voida jatkaa, ota yhteyttä helpdeskiin!<br>";
+              echo "Tili: $tilino / Pvm: $alkupvm / Yhtiö: $yritirow[yhtio]";
+              echo "</font>";
+              echo "<br><br>";
 
               $xtyyppi=0;
               $virhe++;
@@ -27124,13 +27145,22 @@ if (!function_exists("tallenna_tiliote_viite")) {
           }
           else {
             if ($tiliotedatarow["aineisto"] == $aineistorow["aineisto"]) {
-              echo "<font class='error'>VIRHE: Aineisto esiintyy tiedostossa moneen kertaan.<br>\nTiedosto viallinen, ei voida jatkaa, ota yhteyttä helpdeskiin! (Tili: $tilino / Pvm: $alkupvm / Yhtiö: $yritirow[yhtio])</font><br>\n";
+              echo "<font class='error'>";
+              echo "VIRHE: Aineisto esiintyy tiedostossa moneen kertaan.<br>";
+              echo "Tiedosto viallinen, ei voida jatkaa, ota yhteyttä helpdeskiin!<br>";
+              echo "Tili: $tilino / Pvm: $alkupvm / Yhtiö: $yritirow[yhtio]";
+              echo "</font>";
+              echo "<br><br>";
 
               $xtyyppi=0;
               $virhe++;
             }
             elseif (!$forceta)  {
-              echo "<font class='error'>VIRHE: Tämä aineisto on jo aiemmin käsitelty! (Tili: $tilino / Pvm: $alkupvm / Yhtiö: $yritirow[yhtio])</font><br>\n<br>\n";
+              echo "<font class='error'>";
+              echo "VIRHE: Tämä aineisto on jo aiemmin käsitelty!<br>";
+              echo "Tili: $tilino / Pvm: $alkupvm / Yhtiö: $yritirow[yhtio]";
+              echo "</font>";
+              echo "<br><br>";
 
               if (!$php_cli) {
                 list($usec, $sec) = explode(' ', microtime());
@@ -27138,11 +27168,13 @@ if (!function_exists("tallenna_tiliote_viite")) {
                 $tmpfile = md5(uniqid(mt_rand(), true)).".txt";
 
                 file_put_contents("/tmp/".$tmpfile, $kokoaineisto);
+                $_sub = t("Käsittele aineisto vaikka kyseisen päivän/tilin aineisto on jo käsitelty");
 
                 echo "<form method='post' onSubmit='return verify();'>";
-                echo "<input type='hidden' name='virhe_file' value='$tmpfile'>
-                    <input type='submit' value='".t("Käsittele aineisto vaikka kyseisen päivän/tilin aineisto on jo käsitelty")."'>";
-                echo "</form><br>\n<br>\n";
+                echo "<input type='hidden' name='virhe_file' value='$tmpfile'>";
+                echo "<input type='submit' value='{$_sub}'>";
+                echo "</form>";
+                echo "<br><br>";
               }
 
               $xtyyppi=0;
@@ -27158,9 +27190,20 @@ if (!function_exists("tallenna_tiliote_viite")) {
         // VVKKPP
         $tsekpvm = (int) "20".substr($tietue, 30, 6);
 
+        // Päivämäärä pitää olla kaikkien kausien sisällä
+        $_tarkistus  = ($tsekpvm < $oresalku);
+        $_tarkistus &= ($tsekpvm > $oresloppu);
+        $_tarkistus &= ($tsekpvm < $myrealku);
+        $_tarkistus &= ($tsekpvm > $myreloppu);
+        $_tarkistus &= ($tsekpvm < $tikaalku);
+        $_tarkistus &= ($tsekpvm > $tikaloppu);
 
-        if ($tsekpvm < $oresalku or $tsekpvm > $oresloppu or $tsekpvm < $myrealku or $tsekpvm > $myreloppu or $tsekpvm < $tikaalku or $tsekpvm > $tikaloppu) {
-          echo "<font class='error'>VIRHE: Aineistossa on tapahtuma suljetulle kaudelle! (Tili: $tilino / Pvm: $tsekpvm / Yhtiö: $yritirow[yhtio])</font><br>\n";
+        if ($_tarkistus) {
+          echo "<font class='error'>";
+          echo "VIRHE: Aineistossa on tapahtuma suljetulle kaudelle!<br>";
+          echo "Tili: $tilino / Pvm: $tsekpvm / Yhtiö: $yritirow[yhtio]<br>";
+          echo "</font>";
+          echo "<br>";
 
           $xtyyppi=0;
           $virhe++;
@@ -27169,21 +27212,29 @@ if (!function_exists("tallenna_tiliote_viite")) {
         $arkistotunnari = substr($tietue, 12, 18);
         $taso = substr($tietue, 187, 1);
 
-        if (($taso == ' ') and ((!is_numeric($arkistotunnari) and trim($arkistotunnari) != "") or (is_numeric($arkistotunnari) and (int) $arkistotunnari != 0))) {
+        $_string = (!is_numeric($arkistotunnari) and trim($arkistotunnari) != "");
+        $_number = (is_numeric($arkistotunnari) and (int) $arkistotunnari != 0);
+
+        if ($taso == ' ' and ($_string or $_number)) {
           // Katsotaan löytyykö tällä tunnuksella suoritus
           $query = "SELECT alku
                     FROM tiliotedata
                     WHERE yhtio = '$yritirow[yhtio]'
-                    and tilino  = '$tilino'
-                    and tyyppi  = '$xtyyppi'
-                    and tieto   = '$tietue'
-                    and substring(tieto, 13, 18) = '$arkistotunnari'";
+                    AND tilino = '$tilino'
+                    AND tyyppi = '$xtyyppi'
+                    AND tieto = '$tietue'
+                    AND substring(tieto, 13, 18) = '$arkistotunnari'";
           $vchkres = pupe_query($query);
 
           if (mysql_num_rows($vchkres) > 0) {
             $vchkrow = mysql_fetch_assoc($vchkres);
 
-            echo "<font class='error'>VIRHE: Tiliotetapahtuma arkistointitunnuksella: '$arkistotunnari' löytyy jo järjestelmästä! (Tili: $tilino / Pvm: $vchkrow[alku] / Yhtiö: $yritirow[yhtio])</font><br>\n";
+            echo "<font class='error'>";
+            echo "VIRHE: Tiliotetapahtuma arkistointitunnuksella: ";
+            echo "'$arkistotunnari' löytyy jo järjestelmästä!<br>";
+            echo "Tili: $tilino / Pvm: $vchkrow[alku] / Yhtiö: $yritirow[yhtio]<br>";
+            echo "</font>";
+            echo "<br>";
 
             $xtyyppi=0;
             $virhe++;
@@ -27201,7 +27252,11 @@ if (!function_exists("tallenna_tiliote_viite")) {
         if ($pvm == '000000') $tsekpvm = $turvapvm;
 
         if ($tsekpvm < $oresalku or $tsekpvm > $oresloppu) {
-          echo "<font class='error'>VIRHE: Aineistossa on tapahtuma suljetulle kaudelle! (Tili: $tilino / Pvm: $tsekpvm / Yhtiö: $yritirow[yhtio])</font><br>\n";
+          echo "<font class='error'>";
+          echo "VIRHE: Aineistossa on tapahtuma suljetulle kaudelle!<br>";
+          echo "Tili: $tilino / Pvm: $tsekpvm / Yhtiö: $yritirow[yhtio]<br>";
+          echo "</font>";
+          echo "<br>";
 
           $xtyyppi=0;
           $virhe++;
@@ -27215,7 +27270,11 @@ if (!function_exists("tallenna_tiliote_viite")) {
         $tsekpvm = (int) "20".substr($tietue, 15, 6);
 
         if ($tsekpvm < $myrealku or $tsekpvm > $myreloppu) {
-          echo "<font class='error'>VIRHE: Aineistossa on viitesuoritus suljetulle kaudelle! (Tili: $tilino / Pvm: $tsekpvm / Yhtiö: $yritirow[yhtio])</font><br>\n";
+          echo "<font class='error'>";
+          echo "VIRHE: Aineistossa on viitesuoritus suljetulle kaudelle!<br>";
+          echo "Tili: $tilino / Pvm: $tsekpvm / Yhtiö: $yritirow[yhtio]<br>";
+          echo "</font>";
+          echo "<br>";
 
           $xtyyppi=0;
           $virhe++;
@@ -27223,7 +27282,10 @@ if (!function_exists("tallenna_tiliote_viite")) {
 
         $arkistotunnari = substr($tietue, 27, 16);
 
-        if ((!is_numeric($arkistotunnari) and trim($arkistotunnari) != "") or (is_numeric($arkistotunnari) and (int) $arkistotunnari != 0)) {
+        $_string = (!is_numeric($arkistotunnari) and trim($arkistotunnari) != "");
+        $_number = (is_numeric($arkistotunnari) and (int) $arkistotunnari != 0);
+
+        if ($_string or $_number) {
           // Katsotaan löytyykö tällä tunnuksella suoritus
           $query = "SELECT alku
                     FROM tiliotedata
@@ -27237,7 +27299,12 @@ if (!function_exists("tallenna_tiliote_viite")) {
           if (mysql_num_rows($vchkres) > 0) {
             $vchkrow = mysql_fetch_assoc($vchkres);
 
-            echo "<font class='error'>VIRHE: Viitesuoritus arkistointitunnuksella: '$arkistotunnari' löytyy jo järjestelmästä! (Tili: $tilino / Pvm: $vchkrow[alku] / Yhtiö: $yritirow[yhtio])</font><br>\n";
+            echo "<font class='error'>";
+            echo "VIRHE: Viitesuoritus arkistointitunnuksella: ";
+            echo "'$arkistotunnari' löytyy jo järjestelmästä!<br>";
+            echo "Tili: $tilino / Pvm: $vchkrow[alku] / Yhtiö: $yritirow[yhtio]<br>";
+            echo "</font>";
+            echo "<br>";
 
             $xtyyppi=0;
             $virhe++;
@@ -27264,8 +27331,8 @@ if (!function_exists("tallenna_tiliote_viite")) {
         }
 
         if ($td_perheid > 0) {
-          $query = "UPDATE tiliotedata
-                    SET perheid = $td_perheid
+          $query = "UPDATE tiliotedata SET
+                    perheid = $td_perheid
                     WHERE tunnus = $tiliote_id";
           $updateperheid = pupe_query($query);
         }
@@ -27276,12 +27343,13 @@ if (!function_exists("tallenna_tiliote_viite")) {
 
     fclose($fd);
 
-    //Jos meillä tuli virheitä
-    if ($virhe > 0) {
+    // Jos meillä tuli virheitä ja ei olla pakottamassa
+    if ($forceta === false and $virhe > 0) {
       echo "<br>\n<font class='error'>".t("Aineistoa ei tallennettu järjestelmään").".</font>";
 
       //Poistetaan aineistot tiliotedatasta
-      $query = "DELETE FROM tiliotedata WHERE aineisto ='$aineistorow[aineisto]'";
+      $query = "DELETE FROM tiliotedata
+                WHERE aineisto = '$aineistorow[aineisto]'";
       $tiliotedataresult = pupe_query($query);
 
       $query = "UNLOCK TABLES";

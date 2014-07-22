@@ -69,7 +69,8 @@ echo "</td></tr>";
 
 // Varastot
 $query = "SELECT tunnus, nimitys
-          FROM varastopaikat";
+          FROM varastopaikat
+          WHERE yhtio = '{$kukarow["yhtio"]}'";
 $result = pupe_query($query);
 
 $varastot = array();

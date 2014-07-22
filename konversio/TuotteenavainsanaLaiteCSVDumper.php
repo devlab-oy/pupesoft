@@ -85,7 +85,9 @@ class TuotteenavainsanaLaiteCSVDumper extends CSVDumper {
 
       if ($key == 'tyyppi') {
         //Näiden iffien tarkoitus on filtteröidä duplikaatit, sekä ne joiden arvo on eri kuin ensimmäisen rivin.
-        if ((isset($this->unique_values[$rivi['tuoteno']]['tyypit']) and in_array($value, $this->unique_values[$rivi['tuoteno']]['tyypit'])) or (isset($this->unique_values[$rivi['tuoteno']]['tyypit']) and $this->unique_values[$rivi['tuoteno']]['tyypit'][0] != $value)) {
+        $a = (isset($this->unique_values[$rivi['tuoteno']]['tyypit']) and in_array($value, $this->unique_values[$rivi['tuoteno']]['tyypit']));
+        $b = (isset($this->unique_values[$rivi['tuoteno']]['tyypit']) and $this->unique_values[$rivi['tuoteno']]['tyypit'][0] != $value);
+        if ($a or $b) {
           $valid = false;
         }
         else {
@@ -93,7 +95,9 @@ class TuotteenavainsanaLaiteCSVDumper extends CSVDumper {
         }
       }
       else if ($key == 'paino') {
-        if ((isset($this->unique_values[$rivi['tuoteno']]['painot']) and in_array($value, $this->unique_values[$rivi['tuoteno']]['painot'])) or (isset($this->unique_values[$rivi['tuoteno']]['painot']) and $this->unique_values[$rivi['tuoteno']]['painot'][0] != $value)) {
+        $a = (isset($this->unique_values[$rivi['tuoteno']]['painot']) and in_array($value, $this->unique_values[$rivi['tuoteno']]['painot']));
+        $b = (isset($this->unique_values[$rivi['tuoteno']]['painot']) and $this->unique_values[$rivi['tuoteno']]['painot'][0] != $value);
+        if ($a or $b) {
           $valid = false;
         }
         else {
@@ -136,76 +140,110 @@ class TuotteenavainsanaLaiteCSVDumper extends CSVDumper {
     $progress_bar = new ProgressBar(t('Ajetaan rivit tietokantaan') . ' : ' . count($this->rivit));
     $progress_bar->initialize(count($this->rivit));
     foreach ($this->rivit as $rivi) {
-      $query = '  INSERT INTO ' . $this->table . '
-            (
-              yhtio,
-              tuoteno,
-              kieli,
-              laji,
-              selite,
-              laatija,
-              luontiaika
-            )
-            VALUES
-            (
-              "' . $rivi['yhtio'] . '",
-              "' . $rivi['tuoteno'] . '",
-              "' . $rivi['kieli'] . '",
-              "sammutin_tyyppi",
-              "' . $rivi['tyyppi'] . '",
-              "' . $rivi['laatija'] . '",
-              ' . $rivi['luontiaika'] . '
-            )';
-      pupe_query($query);
+      $query = 'INSERT INTO ' . $this->table . '
+                (
+                  yhtio,
+                  tuoteno,
+                  kieli,
+                  laji,
+                  selite,
+                  laatija,
+                  luontiaika
+                )
+                VALUES
+                (
+                  "' . $rivi['yhtio'] . '",
+                  "' . $rivi['tuoteno'] . '",
+                  "' . $rivi['kieli'] . '",
+                  "sammutin_tyyppi",
+                  "' . $rivi['tyyppi'] . '",
+                  "' . $rivi['laatija'] . '",
+                  ' . $rivi['luontiaika'] . '
+                )';
+      if (!$this->loytyyko_tyyppi($rivi['tuoteno'])) {
+        pupe_query($query);
+      }
 
-      $query = '  INSERT INTO ' . $this->table . '
-            (
-              yhtio,
-              tuoteno,
-              kieli,
-              laji,
-              selite,
-              laatija,
-              luontiaika
-            )
-            VALUES
-            (
-              "' . $rivi['yhtio'] . '",
-              "' . $rivi['tuoteno'] . '",
-              "' . $rivi['kieli'] . '",
-              "sammutin_koko",
-              "' . $rivi['paino'] . '",
-              "' . $rivi['laatija'] . '",
-              ' . $rivi['luontiaika'] . '
-            )';
-      pupe_query($query);
+      $query = 'INSERT INTO ' . $this->table . '
+                (
+                  yhtio,
+                  tuoteno,
+                  kieli,
+                  laji,
+                  selite,
+                  laatija,
+                  luontiaika
+                )
+                VALUES
+                (
+                  "' . $rivi['yhtio'] . '",
+                  "' . $rivi['tuoteno'] . '",
+                  "' . $rivi['kieli'] . '",
+                  "sammutin_koko",
+                  "' . $rivi['paino'] . '",
+                  "' . $rivi['laatija'] . '",
+                  ' . $rivi['luontiaika'] . '
+                )';
+      if (!$this->loytyyko_koko($rivi['tuoteno'])) {
+        pupe_query($query);
+      }
 
+      $query = 'INSERT INTO ' . $this->table . '
+                (
+                  yhtio,
+                  tuoteno,
+                  kieli,
+                  laji,
+                  selite,
+                  laatija,
+                  luontiaika
+                )
+                VALUES
+                (
+                  "' . $rivi['yhtio'] . '",
+                  "' . $rivi['tuoteno'] . '",
+                  "' . $rivi['kieli'] . '",
+                  "palo_luokka",
+                  "' . $rivi['palo_luokka'] . '",
+                  "' . $rivi['laatija'] . '",
+                  ' . $rivi['luontiaika'] . '
+                )';
       if (!$this->loytyyko_palo_luokka($rivi['tuoteno'])) {
-        $query = '  INSERT INTO ' . $this->table . '
-              (
-                yhtio,
-                tuoteno,
-                kieli,
-                laji,
-                selite,
-                laatija,
-                luontiaika
-              )
-              VALUES
-              (
-                "' . $rivi['yhtio'] . '",
-                "' . $rivi['tuoteno'] . '",
-                "' . $rivi['kieli'] . '",
-                "palo_luokka",
-                "' . $rivi['palo_luokka'] . '",
-                "' . $rivi['laatija'] . '",
-                ' . $rivi['luontiaika'] . '
-              )';
         pupe_query($query);
       }
 
       $progress_bar->increase();
     }
+  }
+
+  private function loytyyko_tyyppi($tuoteno) {
+    $query = "SELECT *
+              FROM tuotteen_avainsanat
+              WHERE yhtio = '{$this->kukarow['yhtio']}'
+              AND tuoteno = '{$tuoteno}'
+              AND laji = 'sammutin_tyyppi'";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) > 0) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private function loytyyko_koko($tuoteno) {
+    $query = "SELECT *
+              FROM tuotteen_avainsanat
+              WHERE yhtio = '{$this->kukarow['yhtio']}'
+              AND tuoteno = '{$tuoteno}'
+              AND laji = 'sammutin_koko'";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) > 0) {
+      return true;
+    }
+
+    return false;
   }
 
   protected function tarkistukset() {

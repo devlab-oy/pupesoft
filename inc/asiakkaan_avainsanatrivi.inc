@@ -69,6 +69,25 @@ if (mysql_field_name($result, $i) == "avainsana") {
     $ulos .= "</select></td>";
     $jatko = 0;
   }
+  elseif (stripos($asavainsanalaji, "oletusmyyntivarasto") !== FALSE) {
+
+    $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
+
+    $varasto_query = "SELECT tunnus, nimitys
+                      FROM varastopaikat
+                      WHERE yhtio  = '{$kukarow['yhtio']}'
+                      AND tyyppi  != 'P'";
+
+    $varasto_res = pupe_query($varasto_query);
+
+    while ($varasto_row = mysql_fetch_assoc($varasto_res)) {
+      $sel = $trow[$i] == $varasto_row['tunnus'] ? " selected" : "";
+      $ulos .= "<option value='{$varasto_row['tunnus']}'{$sel}>{$varasto_row['nimitys']}</option>";
+    }
+
+    $ulos .= "</select></td>";
+    $jatko = 0;
+  }
   elseif (stripos($asavainsanatyyppi, "TOIMITUSTAPA") !== FALSE) {
     $query = "SELECT *
               FROM toimitustapa

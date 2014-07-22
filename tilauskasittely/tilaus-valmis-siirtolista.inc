@@ -1,6 +1,6 @@
 <?php
 
-require_once('tilauskasittely/luo_myyntitilausotsikko.inc');
+require_once 'tilauskasittely/luo_myyntitilausotsikko.inc';
 
 if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
   $tvs_tila     = "V";
@@ -25,9 +25,38 @@ else {
   $lisasalker = " ";
 }
 
+$ohjausmerkkilisa = '';
+
+# jos kyseess‰ on generoitu siirtolista ja ohjausmerkki on tyhj‰‰, niin pistet‰‰n ohjausmerkiksi
+# varastot‰ydennys
+if ($laskurow['chn'] == "GEN" and trim($laskurow['ohjausmerkki']) == "") {
+  $ohjausmerkkilisa = ", ohjausmerkki = 'Varastot‰ydennys'";
+  $laskurow["ohjausmerkki"] = "Varastot‰ydennys";
+}
+
+$laskurow['ohjausmerkki'] = paivita_ohjausmerkki($laskurow);
+
+// jos siirtolistan varasto on setattu ja on laaja toimipaikkak‰sittely,
+// tutkitaan eroaako varaston toimipaikka tilauksen toimipaikasta. Jos, haetaan $yhtiorow uusiksi.
+if ($laskurow['varasto'] != 0 and $yhtiorow['toimipaikkakasittely'] == 'L') {
+
+  $query = "SELECT toimipaikka
+            FROM varastopaikat
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus  = {$laskurow['varasto']}";
+  $_tp_res = pupe_query($query);
+  $_tp_row = mysql_fetch_assoc($_tp_res);
+
+  if ($_tp_row['toimipaikka'] != $laskurow['yhtio_toimipaikka']) {
+    $kukarow['toimipaikka'] = $_tp_row['toimipaikka'];
+    $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+  }
+}
+
 // p‰ivitet‰‰n vanhatunnus laskulle
 $query  = "UPDATE lasku SET
            vanhatunnus     = tunnus
+           $ohjausmerkkilisa
            WHERE yhtio     = '$kukarow[yhtio]'
            AND tunnus      = '$laskurow[tunnus]'
            AND vanhatunnus = 0";
@@ -106,15 +135,42 @@ else {
     $result = mysql_query($query) or pupe_error($query);
     $maehrowx = mysql_fetch_array($result);
 
+    if ($yhtiorow['kerayserat'] == 'K') {
+      $kerayserat_select = " vh.keraysvyohyke, ";
+      $kerayserat_join = "LEFT JOIN varaston_hyllypaikat AS vh
+                          ON (vh.yhtio = tilausrivi.yhtio
+                          AND vh.hyllyalue = tilausrivi.hyllyalue
+                          AND vh.hyllynro = tilausrivi.hyllynro
+                          AND vh.hyllyvali = tilausrivi.hyllyvali
+                          AND vh.hyllytaso = tilausrivi.hyllytaso) ";
+      $sorttaus = " vh.keraysvyohyke, sorttauskentta ";
+    }
+    else {
+      $kerayserat_select = "";
+      $kerayserat_join = "";
+      $sorttaus = " sorttauskentta ";
+    }
+
     //haetaan kaikkien tilausrivien varastopaikat
-    $query = "SELECT otunnus, tunnus, hyllyalue, hyllynro, hyllyvali, hyllytaso,
-              concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
+    $query = "SELECT tilausrivi.otunnus,
+              tilausrivi.tunnus,
+              tilausrivi.hyllyalue,
+              tilausrivi.hyllynro,
+              tilausrivi.hyllyvali,
+              tilausrivi.hyllytaso,
+              $kerayserat_select
+              concat( rpad(upper(tilausrivi.hyllyalue), 5, '0'),
+                      lpad(upper(tilausrivi.hyllynro), 5, '0'),
+                      lpad(upper(tilausrivi.hyllyvali), 5, '0'),
+                      lpad(upper(tilausrivi.hyllytaso), 5, '0')
+              ) sorttauskentta
               FROM tilausrivi
-              WHERE otunnus  = '$laskurow[tunnus]'
-              and yhtio      = '$kukarow[yhtio]'
-              and hyllyalue != ''
-              and tyyppi    != 'D'
-              ORDER BY sorttauskentta";
+              $kerayserat_join
+              WHERE tilausrivi.otunnus  = '$laskurow[tunnus]'
+              and tilausrivi.yhtio      = '$kukarow[yhtio]'
+              and tilausrivi.hyllyalue != ''
+              and tilausrivi.tyyppi    != 'D'
+              ORDER BY $sorttaus";
     $result = mysql_query($query) or pupe_error($query);
 
     //t‰ss‰ muuttujassa on sit kaikki tunnukset splitin j‰lkeen
@@ -122,23 +178,68 @@ else {
     $tvs_tilausnumerot[] = $laskurow["tunnus"];
 
     //mihin varastoon l‰hete kuuluu. aluksi x
-    $varasto   = 'x';
-    $edvarasto = 'x';
-    $tulostusalue = $edtulostusalue = "x";
+    $varasto  = $edvarasto = $tulostusalue = $edtulostusalue = $keraysvyohyke = $edkeraysvyohyke = "x";
     unset($laskusplitres);
 
-    while ($row = mysql_fetch_array($result)) {
+    if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and is_string($toimitustavan_lahto)) {
+      $toimitustavan_lahto = unserialize(urldecode($toimitustavan_lahto));
+    }
+
+    if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and isset($toimitustavan_lahto[$varasto]) and $toimitustavan_lahto[$varasto] > 0) {
+      $toimitustavan_lahto_arvo = $toimitustavan_lahto[$varasto];
+    }
+    else {
+      $toimitustavan_lahto_arvo = 0;
+    }
+
+    while ($row = mysql_fetch_assoc($result)) {
       // Mihin varastoon
       $varasto = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"]);
 
+      $varasto_row = hae_varasto($varasto);
+      $varasto_toimipaikka = $varasto_row['toimipaikka'];
+
       // Mik‰ tulostusalue
       $tulostusalue = onkotulostusalueita($row["hyllyalue"], $row["hyllynro"], $varasto);
+
+      if ($yhtiorow['kerayserat'] == 'K') {
+        // Mik‰ ker‰ysvyˆhyke
+        $keraysvyohyke = $row['keraysvyohyke'];
+      }
 
       // Intrastat-tiedot
       $laskurow = palauta_intrastat_tiedot($laskurow, $varasto);
 
       //varasto vaihtuu, splitataan tilaus, paitsi jos spliauskielto on trigattu
-      if ((($varasto != $edvarasto and $edvarasto != 'x') or ($tulostusalue != $edtulostusalue and $edtulostusalue != 'x' and $edtulostusalue != '' and $toim == "SIIRTOLISTA")) and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E" and $toim != "SIIRTOTYOMAARAYS" and $toim != "VALMISTAASIAKKAALLE" and $toim != "VALMISTAVARASTOON") {
+      if  (
+        (
+          (
+            $varasto != $edvarasto
+            and $edvarasto != 'x'
+            and $edvarasto != ''
+          )
+          or (
+            $toim == "SIIRTOLISTA"
+            and $tulostusalue != $edtulostusalue
+            and $edtulostusalue != 'x'
+            and $edtulostusalue != ''
+          )
+          or (
+            $keraysvyohyke != $edkeraysvyohyke
+            and $edkeraysvyohyke != 'x'
+            and $edkeraysvyohyke != ''
+          )
+        )
+        and (
+          $maehrowx["jv"] == ''
+          or $totarowx["tulostustapa"] != 'H'
+        )
+        and (   $laskurow["splittauskielto"] != "E"
+          and $toim != "SIIRTOTYOMAARAYS"
+          and $toim != "VALMISTAASIAKKAALLE"
+          and $toim != "VALMISTAVARASTOON"
+        )
+      ) {
         //Koska ollaan t‰‰ll‰‰ olaan juuri splittaamassa tilaus, eli halutaan tulostaa kaikkien splittauksessa syntyvien varastosiirojen siirtolistat
         $splitattiin = TRUE;
 
@@ -157,25 +258,31 @@ else {
         // Ei monisteta tunnusta
         for ($i=1; $i < mysql_num_fields($laskusplitres)-1; $i++) {
 
-          $fieldname = mysql_field_name($laskusplitres,$i);
+          $fieldname = mysql_field_name($laskusplitres, $i);
 
           $fields .= ", ".$fieldname;
 
           switch ($fieldname) {
-            case 'vanhatunnus':
-              $values .= ", '$alkuplaskutunnus'";
-              break;
-            case 'varasto':
-              $values .= ", '$varasto'";
-              break;
-            case 'tulostusalue':
-              $values .= ", '$tulostusalue'";
-              break;
-            case 'kate_korjattu':
-              $values .= ", NULL";
-              break;
-            default:
-              $values .= ", '".$laskurow[$fieldname]."'";
+          case 'vanhatunnus':
+            $values .= ", '$alkuplaskutunnus'";
+            break;
+          case 'yhtio_toimipaikka':
+            $values .= ", '$varasto_toimipaikka'";
+            break;
+          case 'varasto':
+            $values .= ", '$varasto'";
+            break;
+          case 'tulostusalue':
+            $values .= ", '$tulostusalue'";
+            break;
+          case 'toimitustavan_lahto':
+            $values .= ", '$toimitustavan_lahto_arvo'";
+            break;
+          case 'kate_korjattu':
+            $values .= ", NULL";
+            break;
+          default:
+            $values .= ", '".$laskurow[$fieldname]."'";
           }
         }
 
@@ -206,11 +313,11 @@ else {
             $fields .= ", ".$fieldname;
 
             switch ($fieldname) {
-              case 'otunnus':
-                $values .= ", '$laskurow[tunnus]'";
-                break;
-              default:
-                $values .= ", '".$lisatiedot_row[$fieldname]."'";
+            case 'otunnus':
+              $values .= ", '$laskurow[tunnus]'";
+              break;
+            default:
+              $values .= ", '".$lisatiedot_row[$fieldname]."'";
             }
           }
 
@@ -223,6 +330,8 @@ else {
         $query  ="UPDATE lasku SET
                   varasto                          = '$varasto',
                   tulostusalue                     = '$tulostusalue',
+                  toimitustavan_lahto              = '$toimitustavan_lahto_arvo',
+                  yhtio_toimipaikka                = '$varasto_toimipaikka',
                   ultilno                          = '$laskurow[ultilno]',
                   maa_maara                        = '$laskurow[maa_maara]',
                   maa_lahetys                      = '$laskurow[maa_lahetys]',
@@ -252,6 +361,9 @@ else {
       // edellinen tulostusalue talteen
       $edtulostusalue = $tulostusalue;
 
+      // edellinen keraysvyohyke
+      $edkeraysvyohyke = $keraysvyohyke;
+
       //jos tilausrivin laskunumero on eri
       if ($row['otunnus'] != $laskurow['tunnus']) {
         $query = "UPDATE tilausrivi set otunnus='$laskurow[tunnus]' where tunnus='$row[tunnus]' and yhtio='$kukarow[yhtio]'";
@@ -265,15 +377,14 @@ else {
     if (mysql_num_rows($result) > 1) {
       $tilauksia = 1;
       $montakotilausta = mysql_num_rows($result);
-      $numerot = implode(', ',$tvs_tilausnumerot);
+      $numerot = implode(', ', $tvs_tilausnumerot);
 
+      $splitatut = array();
       while ($row = mysql_fetch_array($result)) {
-
         $upviesti = $row["sisviesti2"]." ".t("Tilaus jakaantunut")." $montakotilausta ".t("tilaukseksi").": ".$numerot." ".t("Tilaus").": ".$tilauksia."/".$montakotilausta;
-
         $query = "UPDATE lasku set sisviesti2 = '$upviesti' where yhtio = '$kukarow[yhtio]' and tunnus = '$row[tunnus]'";
         $upresult = mysql_query($query) or pupe_error($query);
-
+        $splitatut[] = $row['tunnus'];
         $tilauksia++;
       }
     }
@@ -281,6 +392,43 @@ else {
     // tyhjennet‰‰n muuttujat
     $varasto   = '';
     $edvarasto = '';
+
+    //jos ei splitattu, laitetaan $splitattuihin luodun laskun tunnus p‰ivityst‰ varten
+    if (!isset($splitatut)) {
+      $splitatut = array($laskurow['tunnus']);
+    }
+
+    if ($yhtiorow['kerayserat'] == 'K' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
+      foreach ($splitatut as $tunnus) {
+        $query = "SELECT *
+                  FROM lasku
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus  = '{$tunnus}'
+                  AND (toimitustavan_lahto = 0 OR chn = 'GEN')";
+        $result = pupe_query($query);
+
+        if (mysql_num_rows($result) == 1) {
+          $lahtorow = mysql_fetch_assoc($result);
+
+          // Chn on GEN, eli generoitu siirtolista, siirret‰‰n aina yhden p‰iv‰n eteenp‰in
+          $eteenpain = ($lahtorow["chn"] == "GEN") ? 1 : 0;
+
+          $lahdot = seuraavat_lahtoajat($lahtorow["toimitustapa"], $lahtorow["prioriteettinro"], $lahtorow["varasto"], 0, $eteenpain);
+
+          if ($lahdot !== FALSE) {
+
+            // Otetaan eka l‰htˆ
+            $valittu_lahto = array_shift($lahdot);
+
+            $query = "UPDATE lasku
+                      SET toimitustavan_lahto = '{$valittu_lahto['tunnus']}'
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tunnus  = '{$tunnus}'";
+            pupe_query($query);
+          }
+        }
+      }
+    }
 
     // loopataan kaikki yhdest‰ tilauksesta syntyneet l‰hetteet
     foreach ($tvs_tilausnumerot as $tvs_tilausnumero) {
@@ -316,20 +464,38 @@ else {
         //Tilauskella on pelk‰st‰‰n jt-rivej‰
         if ($rivirow["riveja"] > 0 and $rivirow["jteet"] > 0) {
           //p‰ivtet‰‰n tilaus tilaan 'odottaa jt-rivej‰'
-          $query = "UPDATE lasku SET tila='$tvs_tila', alatila='T' where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[tunnus]'";
+          $query = "UPDATE lasku
+                    SET tila='$tvs_tila', alatila='T'
+                    WHERE yhtio='$kukarow[yhtio]'
+                    AND tunnus='$laskurow[tunnus]'";
           $yresult = mysql_query($query) or pupe_error($query);
-
-          echo "<font class='message'>".t("Siirtolista siirrettiin j‰lkitoimitukseksi odottamaan tuotteita")." $laskurow[tunnus].<br><br>";
+          echo "<font class='message'>";
+          echo t("Siirtolista siirrettiin j‰lkitoimitukseksi odottamaan tuotteita") . ' ';
+          echo $laskurow['tunnus'];
+          echo "</font><br /><br />";
         }
         else {
           // Mit‰‰n j‰rkevi‰ rivi‰ ei ollut, mit‰tˆid‰‰n lista
-          $query = "UPDATE tilausrivi SET tyyppi='D' where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]'";
+          $query = "UPDATE tilausrivi
+                    SET tyyppi='D'
+                    WHERE yhtio='$kukarow[yhtio]'
+                    AND otunnus='$kukarow[kesken]'";
           $result = mysql_query($query) or pupe_error($query);
 
-          $query = "UPDATE lasku SET tila='D', alatila='$laskurow[tila]', comments='$kukarow[nimi] ($kukarow[kuka]) ".t("mit‰tˆi siirtolistan")." ".date("d.m.y @ G:i:s")."' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
+          $kommentti = $kukarow['nimi'] . " " . "(" . $kukarow['kuka'] . ")" . " ";
+          $kommentti .= t("mit‰tˆi siirtolistan") . " " . date("d.m.y @ G:i:s");
+          $query = "UPDATE lasku
+                    SET tila='D', alatila='$laskurow[tila]', comments='$kommentti'
+                    WHERE yhtio='$kukarow[yhtio]'
+                    AND tunnus='$kukarow[kesken]'";
           $result = mysql_query($query) or pupe_error($query);
-
-          echo "<font class='message'>".t("Siirtolista mit‰tˆitiin, koska sill‰ ei ollut mit‰‰n ker‰tt‰v‰‰")." $laskurow[tunnus].<br><br>";
+          echo "<font class='message'>";
+          echo t("Siirtolista mit‰tˆitiin, koska sill‰ ei ollut mit‰‰n ker‰tt‰v‰‰") . " ";
+          echo $laskurow['tunnus'];
+          echo "</font><br /><br />";
+        }
+        if (($laskutunnus = array_search($laskurow['tunnus'], $splitatut)) !== false) {
+          unset($splitatut[$laskutunnus]);
         }
       }
       else {
@@ -338,11 +504,13 @@ else {
                   SET alatila = 'J'
                   WHERE yhtio = '$kukarow[yhtio]'
                   and tunnus  = '$laskurow[tunnus]'
-                  and tila='$tvs_tila'";
+                  and tila    = '$tvs_tila'";
         $result = mysql_query($query) or pupe_error($query);
 
         if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
-          echo "<font class='message'>".t("Valmistus siirretty tulostusjonoon")." $laskurow[tunnus].<br><br>";
+          echo "<font class='message'>";
+          echo t("Valmistus siirretty tulostusjonoon") . " " . $laskurow['tunnus'];
+          echo "</font><br><br>";
 
           if ($toim == "VALMISTAASIAKKAALLE" and trim($laskurow['tilausvahvistus']) != "") {
             //
@@ -350,13 +518,13 @@ else {
             //
             // tulostetaan t‰ss‰, niin saadaan vahvistukseen koko tilaus, ennenkun sen splitaatan eri varastoihin
             $params_tilausvahvistus = array(
-            'tee'            => $tee,
-            'toim'            => $toim,
-            'kieli'            => $kieli,
-            'komento'          => $komento,
-            'laskurow'          => $laskurow,
-            'naytetaanko_rivihinta'    => $naytetaanko_rivihinta,
-            'extranet_tilausvahvistus'  => $extranet_tilausvahvistus,
+              'tee'            => $tee,
+              'toim'            => $toim,
+              'kieli'            => $kieli,
+              'komento'          => $komento,
+              'laskurow'          => $laskurow,
+              'naytetaanko_rivihinta'    => $naytetaanko_rivihinta,
+              'extranet_tilausvahvistus'  => $extranet_tilausvahvistus,
             );
 
             laheta_tilausvahvistus($params_tilausvahvistus);
@@ -369,29 +537,35 @@ else {
 
           // LƒHETETƒƒN TILAUSVAHVISTUS
           $params_tilausvahvistus = array(
-          'tee'            => $tee,
-          'toim'            => $toim,
-          'kieli'            => $kieli,
-          'komento'          => $komento,
-          'laskurow'          => $laskurow,
-          'naytetaanko_rivihinta'    => $naytetaanko_rivihinta,
-          'extranet_tilausvahvistus'  => $extranet_tilausvahvistus,
+            'tee'            => $tee,
+            'toim'            => $toim,
+            'kieli'            => $kieli,
+            'komento'          => $komento,
+            'laskurow'          => $laskurow,
+            'naytetaanko_rivihinta'    => $naytetaanko_rivihinta,
+            'extranet_tilausvahvistus'  => $extranet_tilausvahvistus,
           );
 
           laheta_tilausvahvistus($params_tilausvahvistus);
 
-          echo "<font class='message'>".t("Siirtolista siirretty tulostusjonoon")." $laskurow[tunnus].<br><br>";
+          echo "<font class='message'>";
+          echo t("Siirtolista siirretty tulostusjonoon") . " " . $laskurow['tunnus'];
+          echo "<br /><br />";
         }
       }
     }
 
     // tilaus ei en‰‰ kesken...
-    $query  = "UPDATE kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+    $query  = "UPDATE kuka SET kesken=0 WHERE yhtio='$kukarow[yhtio]' AND kuka='$kukarow[kuka]'";
     $result = mysql_query($query) or pupe_error($query);
 
     // L‰hetteet tulostetaan automaattisesti
-    if (($toim == "MYYNTITILI" and $yhtiorow["myyntitilin_tulostustapa"] == "A") or ($toim == "VALMISTAASIAKKAALLE" and $yhtiorow["valmistuksen_tulostustapa"] == "A") or ($toim == "VALMISTAVARASTOON" and $yhtiorow["valmistuksen_tulostustapa"] == "A") or ($toim == "SIIRTOLISTA" and $yhtiorow["siirtolistan_tulostustapa"] == "A")) {
-      #TODO: Otetaan t‰ss‰ vain alkuper‰inen tilaus ja tulostetaan se.. Jos tilaus splittaantui, muut j‰‰v‰t ker‰yslistajonoon.
+    if (   ($toim == "MYYNTITILI" and $yhtiorow["myyntitilin_tulostustapa"] == "A")
+      or ($toim == "VALMISTAASIAKKAALLE" and $yhtiorow["valmistuksen_tulostustapa"] == "A")
+      or ($toim == "VALMISTAVARASTOON" and $yhtiorow["valmistuksen_tulostustapa"] == "A")
+      or ($toim == "SIIRTOLISTA" and $yhtiorow["siirtolistan_tulostustapa"] == "A")
+    ) {
+      //TODO: Otetaan t‰ss‰ vain alkuper‰inen tilaus ja tulostetaan se.. Jos tilaus splittaantui, muut j‰‰v‰t ker‰yslistajonoon.
       $query = "SELECT * FROM lasku where yhtio = '{$kukarow["yhtio"]}' and tunnus = '$alkuplaskutunnus'";
       $result = mysql_query($query) or pupe_error($query);
       $laskurow = mysql_fetch_assoc($result);
@@ -404,7 +578,7 @@ else {
   if ($tulostetaan == "OK") {
 
     //Haetaan uusien jaon yhteydess‰ syntyneiden tilausten tiedot, jotta saadaan tulostettu siirtolistat
-    if (isset($splitattiin) AND $splitattiin) {
+    if (isset($splitattiin) and $splitattiin) {
       $query = "SELECT *
                 FROM lasku
                 WHERE yhtio     = '{$kukarow['yhtio']}'
@@ -419,7 +593,6 @@ else {
                 AND tunnus  = '{$laskurow['tunnus']}'";
       $hresult = mysql_query($query) or pupe_error($query);
     }
-
 
     while ($laskurow = mysql_fetch_array($hresult)) {
       //Tulostetaan lista
@@ -470,7 +643,6 @@ else {
             $varatutresult = mysql_query($query) or pupe_error($query);
             $varatutrow = mysql_fetch_array($varatutresult);
 
-
             $vapaana = $alkurow["saldo"] - $varatutrow["keratty"];
 
             if ($vapaana <= 0) {
@@ -488,7 +660,7 @@ else {
 
         if ($yhtiorow['tulosta_valmistus_tulosteet'] == '') {
           // Tulostetaan ker‰yslista
-          require_once ("tulosta_lahete_kerayslista.inc");
+          require_once "tulosta_lahete_kerayslista.inc";
 
           // Haetaan asiakkaan tiedot
           $query = "SELECT luokka,
@@ -556,7 +728,7 @@ else {
             $kal++;
           }
 
-          mysql_data_seek($riresult,0);
+          mysql_data_seek($riresult, 0);
 
           if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
             $tyyppi = "";
@@ -569,33 +741,33 @@ else {
           }
 
           $params_kerayslista = array(
-          'asrow'             => $asrow,
-          'boldi'             => $boldi,
-          'iso'               => $iso,
-          'kala'              => 0,
-          'kieli'             => $kieli,
-          'komento'      => '',
-          'laskurow'          => $laskurow,
-          'norm'              => $norm,
-          'page'              => '',
-          'paino'             => 0,
-          'pdf'               => NULL,
-          'perheid'           => 0,
-          'perheid2'          => 0,
-          'pieni'             => $pieni,
-          'pieni_boldi'       => $pieni_boldi,
-          'rectparam'         => $rectparam,
-          'rivinkorkeus'      => $rivinkorkeus,
-          'rivinumerot'      => $rivinumerot,
-          'row'               => NULL,
-          'sivu'              => 1,
-          'tee'               => $tee,
-          'thispage'      => NULL,
-          'tilausnumeroita'   => $tilausnumeroita,
-          'toim'              => $toim,
-          'tots'              => 0,
-          'tyyppi'        => $tyyppi,
-          'kerayslistatyyppi'  => '');
+            'asrow'             => $asrow,
+            'boldi'             => $boldi,
+            'iso'               => $iso,
+            'kala'              => 0,
+            'kieli'             => $kieli,
+            'komento'      => '',
+            'laskurow'          => $laskurow,
+            'norm'              => $norm,
+            'page'              => '',
+            'paino'             => 0,
+            'pdf'               => NULL,
+            'perheid'           => 0,
+            'perheid2'          => 0,
+            'pieni'             => $pieni,
+            'pieni_boldi'       => $pieni_boldi,
+            'rectparam'         => $rectparam,
+            'rivinkorkeus'      => $rivinkorkeus,
+            'rivinumerot'      => $rivinumerot,
+            'row'               => NULL,
+            'sivu'              => 1,
+            'tee'               => $tee,
+            'thispage'      => NULL,
+            'tilausnumeroita'   => $tilausnumeroita,
+            'toim'              => $toim,
+            'tots'              => 0,
+            'tyyppi'        => $tyyppi,
+            'kerayslistatyyppi'  => '');
 
           // Aloitellaan ker‰yslistan teko
           $params_kerayslista = alku_kerayslista($params_kerayslista);
@@ -651,18 +823,18 @@ else {
         // jos halutaan MY÷S l‰hete
         if ($yhtiorow["lahetteen_tulostustapa"] == "L") {
           $params = array(
-              'laskurow'          => $laskurow,
-              'sellahetetyyppi'       => "",
-              'extranet_tilausvahvistus'   => "",
-              'naytetaanko_rivihinta'    => "",
-              'tee'            => "",
-              'toim'            => $toim,
-              'komento'           => $komento,
-              'lahetekpl'          => "",
-              'kieli'           => ""
-              );
+            'laskurow'          => $laskurow,
+            'sellahetetyyppi'       => "",
+            'extranet_tilausvahvistus'   => "",
+            'naytetaanko_rivihinta'    => "",
+            'tee'            => "",
+            'toim'            => $toim,
+            'komento'           => $komento,
+            'lahetekpl'          => "",
+            'kieli'           => ""
+          );
 
-            pupesoft_tulosta_lahete($params);
+          pupesoft_tulosta_lahete($params);
         }
 
         if ($returnvalue != 0) {
@@ -710,7 +882,7 @@ else {
                     ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
           $result = mysql_query($query) or pupe_error($query);
 
-          require_once ("tulosta_valmistus.inc");
+          require_once "tulosta_valmistus.inc";
 
           $tilausnumeroita = $laskurow["tunnus"];
 
@@ -724,7 +896,7 @@ else {
             $kal++;
           }
 
-          mysql_data_seek($result,0);
+          mysql_data_seek($result, 0);
 
           unset($pdf);
           unset($page);
@@ -812,23 +984,23 @@ else {
         }
       }
       else {
-      if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
-        echo t("Valmistuksella ei ollut mit‰‰n ker‰tt‰v‰‰")."!<br><br>";
-        $eikeralatila = "C";
-      }
-      else {
-        echo t("Siirtolistalla ei ollut mit‰‰n ker‰tt‰v‰‰")."!<br><br>";
-        $eikeralatila = "E";
-      }
+        if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
+          echo t("Valmistuksella ei ollut mit‰‰n ker‰tt‰v‰‰")."!<br><br>";
+          $eikeralatila = "C";
+        }
+        else {
+          echo t("Siirtolistalla ei ollut mit‰‰n ker‰tt‰v‰‰")."!<br><br>";
+          $eikeralatila = "E";
+        }
 
-      $query = "UPDATE lasku
-                SET alatila = '$eikeralatila', lahetepvm = now()
-                where yhtio = '$kukarow[yhtio]'
-                and tunnus  = '$laskurow[tunnus]'
-                and tila    = '$tvs_tila'
-                and alatila in ('','J')";
-      $result = mysql_query($query) or pupe_error($query);
-    }
+        $query = "UPDATE lasku
+                  SET alatila = '$eikeralatila', lahetepvm = now()
+                  where yhtio = '$kukarow[yhtio]'
+                  and tunnus  = '$laskurow[tunnus]'
+                  and tila    = '$tvs_tila'
+                  and alatila in ('','J')";
+        $result = mysql_query($query) or pupe_error($query);
+      }
     }
   }
 

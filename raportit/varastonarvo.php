@@ -131,7 +131,8 @@ if (isset($ajetaan)) {
 
   $selectlisa    = "";
   $epakurlisa    = "";
-  $varastojoini   = "";
+  $varastojoini  = "";
+  $varastorajaus = "";
 
   // $lisa -muuttuja tulee monivalintalaatikot-inc:stä
 
@@ -157,9 +158,9 @@ if (isset($ajetaan)) {
     $groupby   .= "varastopaikat.nimitys,";
     $orderby   .= "varastopaikat.nimitys,";
 
-    $varastojoini = "JOIN varastopaikat ON (varastopaikat.yhtio=tuotepaikat.yhtio AND varastopaikat.tunnus IN (".implode(",", $varastot).") AND
-            concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) AND
-            concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')))";
+    $varastojoini = "JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+                     AND varastopaikat.tunnus = tuotepaikat.varasto)";
+    $varastorajaus = "AND tuotepaikat.varasto IN (".implode(",", $varastot).")";
   }
 
   if ($groupby != "") {
@@ -183,7 +184,7 @@ if (isset($ajetaan)) {
   }
 
   // Varaston arvo
-  $query = "SELECT
+  $query = "SELECT tuote.tuoteno,
             $selectlisa
             sum(
               if(  tuote.sarjanumeroseuranta = 'S' or tuote.sarjanumeroseuranta = 'U',
@@ -221,6 +222,7 @@ if (isset($ajetaan)) {
             $varastojoini
             WHERE tuotepaikat.yhtio                         = '$kukarow[yhtio]'
             and tuotepaikat.saldo                           <> 0
+            $varastorajaus
             $groupby
             $orderby";
   $result = mysql_query($query) or pupe_error($query);
@@ -255,11 +257,11 @@ if (isset($ajetaan)) {
 
   while ($row = mysql_fetch_assoc($result)) {
     // netto- ja bruttovarastoarvo
-    $varvo  = $row["varasto"];
-    $bvarvo = $row["bruttovarasto"];
+    $varvo  = hinta_kuluineen( $row["tuoteno"], $row["varasto"] );
+    $bvarvo = hinta_kuluineen( $row["tuoteno"], $row["bruttovarasto"] );
 
-    $varastosumma += $row["varasto"];
-    $bruttovarastosumma += $row["bruttovarasto"];
+    $varastosumma += hinta_kuluineen( $row["tuoteno"], $row["varasto"] );
+    $bruttovarastosumma += hinta_kuluineen( $row["tuoteno"], $row["bruttovarasto"] );
 
     echo "<tr>";
 

@@ -115,36 +115,7 @@ if ($korjataan != '') {
         $loytyykoresult = pupe_query($query);
 
         if (mysql_num_rows($loytyykoresult) == 0) {
-          $query = "INSERT INTO tuotepaikat SET
-                    yhtio       = '$kukarow[yhtio]',
-                    tuoteno     = '$tuoteno[$id]',
-                    hyllyalue   = '$hyllyalue[$id]',
-                    hyllynro    = '$hyllynro[$id]',
-                    hyllyvali   = '$hyllyvali[$id]',
-                    hyllytaso   = '$hyllytaso[$id]',
-                    oletus      = '$oletus',
-                    halytysraja = '$halytysraja[$id]',
-                    tilausmaara = '$tilattava[$id]',
-                    laatija     = '$kukarow[kuka]',
-                    luontiaika  = now()";
-          $result = pupe_query($query);
-
-          // tehd‰‰n tapahtuma
-          $query = "INSERT into tapahtuma set
-                    yhtio     = '$kukarow[yhtio]',
-                    tuoteno   = '$tuoteno[$id]',
-                    kpl       = '0',
-                    kplhinta  = '0',
-                    hinta     = '0',
-                    laji      = 'uusipaikka',
-                    hyllyalue = '$hyllyalue[$id]',
-                    hyllynro  = '$hyllynro[$id]',
-                    hyllyvali = '$hyllyvali[$id]',
-                    hyllytaso = '$hyllytaso[$id]',
-                    selite    = '".t("Lis‰ttiin tuotepaikka")." $hyllyalue[$id] $hyllynro[$id] $hyllyvali[$id] $hyllytaso[$id]',
-                    laatija   = '$kukarow[kuka]',
-                    laadittu  = now()";
-          $korjres = pupe_query($query);
+          lisaa_tuotepaikka($tuoteno[$id], $hyllyalue[$id], $hyllynro[$id], $hyllyvali[$id], $hyllytaso[$id], "H‰lytysrajojen ja tilausm‰‰rien sis‰‰nluvussa", $oletus, $halytysraja[$id], $tilattava[$id], 0);
         }
       }
       else {

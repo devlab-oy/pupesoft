@@ -83,14 +83,14 @@ if ($php_cli) {
     $eiketjut = "";
 
     // jos komentorivin kolmas arg on "eilinen" niin edelliselle laskutus p‰iv‰lle, ohitetaan laskutusviikonp‰iv‰t
-    if ($argv[3] == "eilinen") {
+    if (isset($argv[3]) and $argv[3] == "eilinen") {
       $laskkk  = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
       $laskpp  = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
       $laskvv  = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
     }
 
     // jos komentorivin kolmas arg on "eilinen" niin edelliselle laskutus p‰iv‰lle
-    if ($argv[3] == "eilinen_eikaikki") {
+    if (isset($argv[3]) and $argv[3] == "eilinen_eikaikki") {
       $laskkk  = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
       $laskpp  = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
       $laskvv  = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
@@ -98,19 +98,19 @@ if ($php_cli) {
     }
 
     // jos komentorivin kolmas arg on "eiketjut"
-    if ($argv[3] == "eiketjut") {
+    if (isset($argv[3]) and $argv[3] == "eiketjut") {
       $eiketjut = "KYLLA";
     }
 
     // jos komentorivin kolmas arg on "kaikki"
-    if ($argv[3] == "kaikki") {
+    if (isset($argv[3]) and $argv[3] == "kaikki") {
       $laskutakaikki = "ON";
     }
 
     // jos kuukausilaskutus on p‰‰ll‰ (cron.monthly), niin ei v‰ltt‰m‰tt‰ haluta ajaa p‰iv‰laskutusta
     // kukauden vikana p‰iv‰n‰, koska silloin asiakkaalle saattaa menn‰ kaksi laskua vikana p‰iv‰n‰ jos
     // laskutusviikonp‰iv‰t osuu sillai kivasti
-    if ($argv[3] == "skippaa_kuukauden_vikapaiva" and date("d") == date("t")) {
+    if (isset($argv[3]) and $argv[3] == "skippaa_kuukauden_vikapaiva" and date("d") == date("t")) {
       echo "HUOM: P‰iv‰laskutusta ei ajeta kuukauden vikana p‰iv‰n‰!<br>\n";
       exit;
     }
@@ -386,7 +386,15 @@ else {
               yhteyshenkilo as kt READ,
               yhtio READ,
               yhtion_parametrit READ,
-              yhtion_toimipaikat READ";
+              yhtion_toimipaikat READ,
+              tilausrivin_lisatiedot AS tl READ,
+              varastopaikat AS v_lahdevarasto READ,
+              varastopaikat AS v_kohdevarasto READ,
+              korvaavat_kiellot READ,
+              oikeu READ,
+              toimi READ,
+              yhtion_toimipaikat_parametrit READ,
+              varaston_hyllypaikat READ";
     $locre = pupe_query($query);
 
     //Haetaan tarvittavat funktiot aineistojen tekoa varten
@@ -458,7 +466,7 @@ else {
                 round(min(tilausrivi.hinta / if ('{$yhtiorow["alv_kasittely"]}' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * {$query_ale_lisa}), $yhtiorow[hintapyoristys]) min_kplhinta,
                 group_concat(distinct lasku.tunnus) tunnukset
                 FROM lasku
-                JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and tilausrivi.var not in ('P','J','O'))
+                JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and tilausrivi.var not in ('P','J','O','S'))
                 JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
                 WHERE lasku.yhtio  = '$kukarow[yhtio]'
                 and lasku.tila     = 'L'
@@ -558,7 +566,7 @@ else {
                   WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
                   and tilausrivi.otunnus = '$laskurow[tunnus]'
                   and tilausrivi.tyyppi  = 'L'
-                  and tilausrivi.var     not in ('P','J','O')
+                  and tilausrivi.var     not in ('P','J','O','S')
                   GROUP BY 1";
         $tuoteno_varattu_chk_res = pupe_query($query);
 
@@ -599,12 +607,12 @@ else {
         $lisavarattu = "";
       }
 
-      $query = "SELECT sum(if (tilausrivi.var in ('J','S') and tilausrivi.jt $lisavarattu > 0, 1, 0)) jteet
+      $query = "SELECT sum(if (tilausrivi.var = 'J' and tilausrivi.jt $lisavarattu > 0, 1, 0)) jteet
                 FROM tilausrivi
                 WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
                 and tilausrivi.otunnus = '$laskurow[tunnus]'
                 and tilausrivi.tyyppi  = 'L'
-                and tilausrivi.var     in ('J','S')";
+                and tilausrivi.var     = 'J'";
       $sarjares1 = pupe_query($query);
       $srow1 = mysql_fetch_assoc($sarjares1);
 
@@ -827,7 +835,7 @@ else {
                       FROM tilausrivi
                       WHERE yhtio     = '{$kukarow['yhtio']}'
                       AND tyyppi      = 'L'
-                      and var         not in ('P','J','O')
+                      and var         not in ('P','J','O','S')
                       AND tuoteno     = '{$srow1['tuoteno']}'
                       AND uusiotunnus = '{$laskurow['vanhatunnus']}'
                       AND kpl         > 0
@@ -1221,12 +1229,12 @@ else {
             $addtil = pupe_query($query);
 
             if ($silent == "") {
-              $tulos_ulos .= "<tr><td>".t("Lis‰ttiin rahtikulut")."</td><td>$laskurow[tunnus]</td><td>$laskurow[toimitustapa]</td><td>$rahtihinta</td><td>$yhtiorow[valkoodi]</td><td>$pakka[kilot] kg</td></tr>\n";
+              $tulos_ulos .= "<tr><td>".t("Lis‰ttiin rahtikulut")."</td><td>$laskurow[tunnus]</td><td>$laskurow[toimitustapa]</td><td>$rah_hinta</td><td>$yhtiorow[valkoodi]</td><td>$pakka[kilot] kg</td></tr>\n";
             }
 
             $rah++;
           }
-          elseif ($rahtihinta != 0 and $silent == "") {
+          elseif ($rah_hinta != 0 and $silent == "") {
             $tulos_ulos .= "<tr><td>".t("Rahtimaksua ei osattu lis‰t‰!")." $virhe</td><td>$otsikot</td><td>$laskurow[toimitustapa]</td><td></td><td></td><td>$pakka[kilot] kg</td></tr>\n";
           }
         }
@@ -1322,7 +1330,7 @@ else {
                     and otunnus in ($otsikot)
                     and tuoteno = '$trow[tuoteno]'
                     and tyyppi  = 'L'
-                    and var     not in ('P','J','O')";
+                    and var     not in ('P','J','O','S')";
           $listilre = pupe_query($query);
 
           if (mysql_num_rows($listilre) == 0) {
@@ -1354,7 +1362,7 @@ else {
                         JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
                         WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
                         and tilausrivi.tyyppi  = 'L'
-                        and tilausrivi.var     not in ('P','J','O')
+                        and tilausrivi.var     not in ('P','J','O','S')
                         and tilausrivi.otunnus in ($otsikot)";
               $listilre = pupe_query($query);
               $listilro = mysql_fetch_assoc($listilre);
@@ -1518,7 +1526,7 @@ else {
                     LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
                     JOIN asiakas ON (lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus and asiakas.kuljetusvakuutus_tyyppi != 'E')
                     JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio and toimitustapa.selite = lasku.toimitustapa and toimitustapa.kuljetusvakuutus_tyyppi != 'E')
-                    JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and tilausrivi.var not in ('P','J','O'))
+                    JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and tilausrivi.var not in ('P','J','O','S'))
                     JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
                     WHERE lasku.yhtio = '$kukarow[yhtio]'
                     AND lasku.tunnus  in ($otsikot)
@@ -1622,7 +1630,7 @@ else {
                       WHERE yhtio = '$kukarow[yhtio]'
                       AND otunnus in ($otsikot)
                       AND tyyppi  = 'L'
-                      AND var     not in ('P','J','O')
+                      AND var     not in ('P','J','O','S')
                       AND tuoteno = '$kv_vaktuote'";
             $kvak_result = pupe_query($query);
 
@@ -1710,6 +1718,8 @@ else {
       while ($row = mysql_fetch_assoc($res)) {
         // laskutus tarttee kukarow[kesken]
         $kukarow['kesken']=$row['tunnus'];
+
+        tee_kirjanpidollinen_varastosiirto($row['tunnus']);
 
         require("laskutus.inc");
         $laskutetttu++;
@@ -1904,7 +1914,7 @@ else {
                       and tilausrivi.kpl           > 0
                       and tilausrivi.yhtio         = '$kukarow[yhtio]'
                       and tilausrivi.tyyppi        = 'L'
-                      and tilausrivi.var           not in ('P','J','O')";
+                      and tilausrivi.var           not in ('P','J','O','S')";
             $cresult = pupe_query($query);
 
             $hyvitys = "";
@@ -2092,7 +2102,7 @@ else {
                          WHERE yhtio = '$kukarow[yhtio]'
                          and otunnus in ($tunnukset)
                          and tyyppi  = 'L'
-                         and var     not in ('P','J','O')
+                         and var     not in ('P','J','O','S')
                          and alv     >= 600";
             $alvresult = pupe_query($alvquery);
 
@@ -2146,7 +2156,7 @@ else {
                       and otunnus         in ($tunnukset)
                       and toimitettuaika != '0000-00-00 00:00:00'
                       and tyyppi          = 'L'
-                      and var             not in ('P','J','O')";
+                      and var             not in ('P','J','O','S')";
             $toimaikares = pupe_query($query);
             $toimaikarow = mysql_fetch_assoc($toimaikares);
 
@@ -2183,7 +2193,7 @@ else {
                          WHERE yhtio = '$kukarow[yhtio]'
                          and otunnus in ($tunnukset)
                          and tyyppi  = 'L'
-                         and var     not in ('P','J','O')
+                         and var     not in ('P','J','O','S')
                          ORDER BY alv";
             $alvresult = pupe_query($alvquery);
 
@@ -2199,7 +2209,7 @@ else {
                            and tilausrivi.yhtio         = '$kukarow[yhtio]'
                            and tilausrivi.alv           = '$alvrow1[alv]'
                            and tilausrivi.tyyppi        = 'L'
-                           and tilausrivi.var           not in ('P','J','O')
+                           and tilausrivi.var           not in ('P','J','O','S')
                            GROUP BY alv";
               }
               else {
@@ -2212,7 +2222,7 @@ else {
                            and tilausrivi.yhtio         = '$kukarow[yhtio]'
                            and tilausrivi.alv           = '$alvrow1[alv]'
                            and tilausrivi.tyyppi        = 'L'
-                           and tilausrivi.var           not in ('P','J','O')
+                           and tilausrivi.var           not in ('P','J','O','S')
                            GROUP BY alv";
               }
               $aresult = pupe_query($aquery);

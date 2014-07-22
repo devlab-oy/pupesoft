@@ -57,7 +57,20 @@ $DAY_ARRAY = array(1 => t("Ma"), t("Ti"), t("Ke"), t("To"), t("Pe"), t("La"), t(
 // JT-selaus päivitysoikeus, joko JT-selaus päivitysoikeus tai tullaan keikalta ja kaikki saa toimittaa JT-rivejä
 $jtselaus_paivitys_oikeus = FALSE;
 
-if ($oikeurow['paivitys'] == '1' or ((strpos($_SERVER['SCRIPT_NAME'], "keikka.php") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "verkkolasku-in.php") !== FALSE) and in_array($yhtiorow["automaattinen_jt_toimitus"], array('J', 'A')) )) {
+if (
+    $oikeurow['paivitys'] == '1'
+    or (
+        (
+        strpos($_SERVER['SCRIPT_NAME'], "keikka.php") !== FALSE
+        or strpos($_SERVER['SCRIPT_NAME'], "verkkolasku-in.php") !== FALSE
+        or strpos($_SERVER['SCRIPT_NAME'], "vastaanota.php") !== FALSE
+        )
+        and (
+            in_array($yhtiorow["automaattinen_jt_toimitus"], array('J', 'A'))
+            or in_array($yhtiorow["automaattinen_jt_toimitus_siirtolista"], array('J', 'S', 'K'))
+          )
+      )
+  ) {
   $jtselaus_paivitys_oikeus = TRUE;
 }
 
@@ -748,9 +761,9 @@ if ($tee == "JATKA") {
     $tuotelisa .= " and tuote.osasto = '$tuoteosasto' ";
   }
 
-      if ($ei_tehdastoimitus_tuotteita != "") {
-          $tuotelisa .= " and tuote.status != 'T' ";
-      }
+  if ($ei_tehdastoimitus_tuotteita != "") {
+      $tuotelisa .= " and tuote.status != 'T' ";
+  }
 
   if ($tuotemerkki != '') {
     $tuotelisa .= " and tuote.tuotemerkki = '$tuotemerkki' ";
@@ -764,7 +777,7 @@ if ($tee == "JATKA") {
     $laskulisa .= " and lasku.myyja = '{$myyja}' ";
   }
 
-  if ($yhtiorow['jt_toimitus_varastorajaus'] == 'K') {
+  if ($yhtiorow['jt_toimitus_varastorajaus'] == 'K' and count($suoratoimitus_rivit) == 0) {
     if (count($varastosta) > 0 and trim(implode(", ", $varastosta)) != '') {
       $laskulisa .= " and lasku.varasto in (0, ".implode(", ", $varastosta).") ";
     }
@@ -1049,6 +1062,22 @@ if ($tee == "JATKA") {
           $sjtres = pupe_query($query);
 
           if (mysql_num_rows($sjtres) > 0) {
+            $onko_suoratoimi = "ON";
+          }
+        }
+
+        if ($yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K' and $onko_suoratoimi == '') {
+          $query = "SELECT t.tunnus AS siirtolistarivi_tunnus
+                    FROM tilausrivin_lisatiedot AS tl
+                    JOIN tilausrivi AS t
+                    ON ( t.yhtio = tl.yhtio
+                      AND t.tunnus          = tl.tilausrivitunnus
+                      AND t.tyyppi          = 'G')
+                    WHERE tl.yhtio          = '{$kukarow['yhtio']}'
+                    AND tl.tilausrivilinkki = {$jtrow['tunnus']}";
+          $siirtolista_result = pupe_query($query);
+
+          if (mysql_num_rows($siirtolista_result) > 0) {
             $onko_suoratoimi = "ON";
           }
         }
@@ -1391,14 +1420,27 @@ if ($tee == "JATKA") {
                 }
                 else {
                   if ($kukarow["extranet"] == "") {
-                    if ($asiakasmaa != '') {
-                      $asiakasmaalisa = "and (varastopaikat.sallitut_maat like '%$asiakasmaa%' or varastopaikat.sallitut_maat = '')";
-                    }
+
+                    $args = array(
+                      'asiakasid' => $asiakasid,
+                      'maa' => $asiakasmaa,
+                    );
+
+                    $yhtiotoimipaikka = tilauksen_toimipaikka($args);
+
+                    $params = array(
+                      'asiakas_tunnus' => $asiakasid,
+                      'toimipaikka_tunnus' => $yhtiotoimipaikka,
+                      'toimitus_maa' => $asiakasmaa,
+                      'varastotyyppi' => 'kaikki_varastot',
+                    );
+
+                    $varastot = sallitut_varastot($params);
 
                     $query = "SELECT *
                               FROM varastopaikat
-                              WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
-                              $asiakasmaalisa
+                              WHERE yhtio = '$kukarow[yhtio]'
+                              AND tunnus  in (".implode(",", $varastot).")
                               ORDER BY tyyppi, nimitys";
                     $vtresult = pupe_query($query);
 

@@ -203,12 +203,16 @@ if ($tee == 'M') {
         $khyllytaso  = $siirrettava[9];
         $toiminto  = $siirrettava[10];
 
-
-        $query = "UPDATE tuotepaikat set saldo = saldo - $maara, saldoaika=now()
-                  WHERE yhtio = '$kukarow[yhtio]' and tuoteno='$tuoteno' and
-                  hyllyalue   = '$lhyllyalue' and hyllynro = '$lhyllynro' and hyllyvali = '$lhyllyvali' and hyllytaso = '$lhyllytaso'";
+        $query = "UPDATE tuotepaikat
+                  set saldo = saldo - $maara,
+                  saldoaika     = now()
+                  WHERE yhtio   = '$kukarow[yhtio]'
+                  and tuoteno   = '$tuoteno'
+                  and hyllyalue = '$lhyllyalue'
+                  and hyllynro  = '$lhyllynro'
+                  and hyllyvali = '$lhyllyvali'
+                  and hyllytaso = '$lhyllytaso'";
         $result = pupe_query($query);
-
 
         if ($toiminto == "TURVAPAIKKA") {
           $query = "INSERT into tuotepaikat set
@@ -240,9 +244,15 @@ if ($tee == 'M') {
 
         }
         else {
-          $query = "UPDATE tuotepaikat set saldo = saldo + $maara, saldoaika=now()
-                    WHERE yhtio = '$kukarow[yhtio]' and tuoteno='$tuoteno' and
-                    hyllyalue   = '$khyllyalue' and hyllynro = '$khyllynro' and hyllyvali = '$khyllyvali' and hyllytaso = '$khyllytaso'";
+          $query = "UPDATE tuotepaikat
+                    set saldo = saldo + $maara,
+                    saldoaika     = now()
+                    WHERE yhtio   = '$kukarow[yhtio]'
+                    and tuoteno   = '$tuoteno'
+                    and hyllyalue = '$khyllyalue'
+                    and hyllynro  = '$khyllynro'
+                    and hyllyvali = '$khyllyvali'
+                    and hyllytaso = '$khyllytaso'";
           $result = pupe_query($query);
         }
 

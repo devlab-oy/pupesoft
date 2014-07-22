@@ -461,7 +461,7 @@ $query = "UPDATE tilausrivi
           SET uusiotunnus = '$laskurow[tunnus]'
           WHERE otunnus in ($tunnukset)
           and yhtio     = '$kukarow[yhtio]'
-          and var       not in ('P','J','O')";
+          and var       not in ('P','J','O','S')";
 $ulasr = pupe_query($query);
 
 // katotaan montako tilausta ollaan käsittelemässä

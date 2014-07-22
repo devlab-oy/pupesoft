@@ -94,7 +94,7 @@ if ($tee=='P') {
     $query = "UPDATE tilausrivi
               SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
               WHERE otunnus   = '$otunnus'
-              and var         not in ('P','J','O')
+              and var         not in ('P','J','O','S')
               and yhtio       = '$kukarow[yhtio]'
               and keratty    != ''
               and toimitettu  = ''
@@ -397,7 +397,7 @@ if ($id > 0) {
             FROM tilausrivi
             JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
             WHERE tilausrivi.yhtio ='$kukarow[yhtio]'
-            and tilausrivi.var     not in ('P','J','O')
+            and tilausrivi.var     not in ('P','J','O','S')
             and tilausrivi.tyyppi  = 'L'
             and tilausrivi.otunnus = '$id'
             ORDER BY varastopaikka";
@@ -437,7 +437,7 @@ if ($id > 0) {
     $alvquery = "SELECT DISTINCT alv
                  FROM tilausrivi
                  WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-                 and tilausrivi.var     not in ('P','J','O')
+                 and tilausrivi.var     not in ('P','J','O','S')
                  and tilausrivi.tyyppi  = 'L'
                  and tilausrivi.otunnus = '$id'
                  and tilausrivi.alv     < 500";
@@ -450,7 +450,7 @@ if ($id > 0) {
                  FROM tilausrivi
                  JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
                  WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-                 and tilausrivi.var     not in ('P','J','O')
+                 and tilausrivi.var     not in ('P','J','O','S')
                  and tilausrivi.tyyppi  = 'L'
                  and tilausrivi.otunnus = '$id'
                  and tilausrivi.alv     = '$alvrow[alv]'";
@@ -591,8 +591,24 @@ if ($id > 0) {
   echo "<option value=''>".t("Ei tulosteta")."</option>";
   echo "<option value='oletukselle' $sel>".t("Oletustulostimelle")."</option>";
 
+   $_apuprintteri = "";
+
+  # Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰
+  if (!empty($row['yhtio_toimipaikka'])) {
+    $avainsana_where = " and avainsana.selite       = '{$row['varasto']}'
+                         and avainsana.selitetark   = '{$row['yhtio_toimipaikka']}'
+                         and avainsana.selitetark_2 = 'printteri1'";
+
+    $tp_tulostin = t_avainsana("VARTOIMTULOSTIN", '', $avainsana_where, '', '', "selitetark_3");
+
+    if (!empty($tp_tulostin)) {
+      $_apuprintteri = $tp_tulostin;
+    }
+  }
+
   while ($kirrow = mysql_fetch_array($kirre)) {
-    echo "<option value='$kirrow[tunnus]'>$kirrow[kirjoitin]</option>";
+    $sel = (!empty($_apuprintteri) and $kirrow['tunnus'] == $_apuprintteri) ? "selected" : "";
+    echo "<option value='$kirrow[tunnus]' {$sel}>$kirrow[kirjoitin]</option>";
   }
 
   echo "</select> ".t("Kpl").": <input type='text' size='4' name='lahetekpl' value='$lahetekpl'></td>";

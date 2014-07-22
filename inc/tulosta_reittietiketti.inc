@@ -1,5 +1,10 @@
 <?php
 
+$keraa_myos_siirrot = false;
+if ($yhtiorow['kerayserat'] != '' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
+  $keraa_myos_siirrot = true;
+}
+
 if ($kerayseran_numero > 0) {
 
   if (($unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") OR
@@ -102,14 +107,23 @@ if ($kerayseran_numero > 0) {
         $unifaun_kaytossa = TRUE;
       }
 
+      if ($keraa_myos_siirrot) {
+        $asiakas_join = "LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)";
+        $maksuehto_join = "LEFT JOIN maksuehto on (lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus)";
+      }
+      else {
+        $asiakas_join = "JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)";
+        $maksuehto_join = "JOIN maksuehto on (lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus)";
+      }
+
       $query = "SELECT distinct lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
                 lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp,
                 if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti,
                 asiakas.toimitusvahvistus, if(asiakas.gsm != '', asiakas.gsm, if(asiakas.tyopuhelin != '', asiakas.tyopuhelin, if(asiakas.puhelin != '', asiakas.puhelin, ''))) puhelin,
                 asiakas.kuljetusohje viesti
                 FROM lasku
-                JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
-                JOIN maksuehto on (lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus)
+                {$asiakas_join}
+                {$maksuehto_join}
                 WHERE lasku.yhtio = '{$kukarow['yhtio']}'
                 AND lasku.tunnus  = '{$row['tunnus']}'";
       $rakir_res = pupe_query($query);

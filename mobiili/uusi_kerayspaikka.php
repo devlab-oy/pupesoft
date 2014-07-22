@@ -208,7 +208,7 @@ if (isset($submit) and trim($submit) != '') {
             $_viesti = 'Saapumisessa';
           }
 
-          lisaa_tuotepaikka($row['tuoteno'], $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $_viesti, '', $halytysraja, $tilausmaara);
+          lisaa_tuotepaikka($row['tuoteno'], $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $_viesti, "", $halytysraja, $tilausmaara);
         }
         else {
           // Nollataan poistettava kentt‰ varmuuden vuoksi
@@ -510,7 +510,7 @@ niin ei anneta siirt‰‰ saldoja tai vaihtaa oletuspaikkaa
 */
 $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
 
-if (mysql_num_rows($toimipaikat_res) == 0) {
+if (mysql_num_rows($toimipaikat_res) == 0 or (mysql_num_rows($toimipaikat_res) != 0 and $kukarow['toimipaikka'] == 0)) {
 
   echo "  <tr>
         <td colspan='2'>",t("Tee t‰st‰ oletuspaikka"),"

@@ -32,6 +32,7 @@ if (mysql_field_name($result, $i) == "laji") {
   $ulos .= "<option value='laatuluokka' {$sel['laatuluokka']}>".t("Tuotteen laatuluokka")."</option>";
   $ulos .= "<option value='synkronointi' {$sel['synkronointi']}>".t("Tuotteen synkronointi")."</option>";
   $ulos .= "<option value='toimpalautus' {$sel['toimpalautus']}>".t("Palautus toimittajalle")."</option>";
+  $ulos .= "<option value='varastopalautus' {$sel['varastopalautus']}>".t("Palautus sallittuihin varastoihin")."</option>";
 
   $sresult = t_avainsana("TUOTEULK");
 
@@ -113,6 +114,16 @@ if (mysql_field_name($result, $i) == "selite") {
     $ulos = "<td><select name='$nimi'>";
     $ulos .= "<option value=' '>".t("Tuote voidaan reklamaatiolla merkata suoraan toimittajalle palautettavaksi")."</option>";
     $ulos .= "<option value='EI' $sel>".t("Tuotetta EI voida merkata suoraan toimittajalle palautettavaksi")."</option>";
+    $ulos .= "</select></td>";
+
+    $jatko = 0;
+  }
+  elseif ($tem_laji == "varastopalautus") {
+    $sel = array_fill_keys(array($trow[$i]), " selected") + array('P' => '', 'L' => '');
+
+    $ulos = "<td><select name='$nimi'>";
+    $ulos .= "<option value='K' {$sel['K']}>".t("Tuote voidaan reklamaatiolla merkata sallittuihin varastoihin palautettavaksi")."</option>";
+    $ulos .= "<option value='E' {$sel['E']}>".t("Tuotetta EI voida merkata sallittuihin varastoihin palautettavaksi")."</option>";
     $ulos .= "</select></td>";
 
     $jatko = 0;

@@ -190,9 +190,8 @@ if ($tee != '') {
               JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
               {$keraysvyohykejoin}
               {$lefti} JOIN kuka USE INDEX (kuka_index) ON (kuka.yhtio = tilausrivi.yhtio AND kuka.kuka = tilausrivi.keratty)
-              LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio AND
-                      CONCAT(RPAD(UPPER(alkuhyllyalue),  5, '0'),LPAD(UPPER(alkuhyllynro),  5, '0')) <= CONCAT(RPAD(UPPER(tilausrivi.hyllyalue), 5, '0'),LPAD(UPPER(tilausrivi.hyllynro), 5, '0')) AND
-                      CONCAT(RPAD(UPPER(loppuhyllyalue), 5, '0'),LPAD(UPPER(loppuhyllynro), 5, '0')) >= CONCAT(RPAD(UPPER(tilausrivi.hyllyalue), 5, '0'),LPAD(UPPER(tilausrivi.hyllynro), 5, '0')))
+              LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
+                AND varastopaikat.tunnus  = tilausrivi.varasto)
               WHERE tilausrivi.yhtio      = '{$kukarow['yhtio']}'
               AND tilausrivi.kerattyaika  >= '{$vva}-{$kka}-{$ppa} 00:00:00'
               AND tilausrivi.kerattyaika  <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
@@ -398,9 +397,8 @@ if ($tee != '') {
                 JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
                 {$keraysvyohykejoin}
                 {$lefti} JOIN kuka USE INDEX (kuka_index) ON (kuka.yhtio = tilausrivi.yhtio AND kuka.kuka = tilausrivi.keratty)
-                JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio AND
-                        CONCAT(RPAD(UPPER(alkuhyllyalue),  5, '0'),LPAD(UPPER(alkuhyllynro),  5, '0')) <= CONCAT(RPAD(UPPER(tilausrivi.hyllyalue), 5, '0'),LPAD(UPPER(tilausrivi.hyllynro), 5, '0')) AND
-                        CONCAT(RPAD(UPPER(loppuhyllyalue), 5, '0'),LPAD(UPPER(loppuhyllynro), 5, '0')) >= CONCAT(RPAD(UPPER(tilausrivi.hyllyalue), 5, '0'),LPAD(UPPER(tilausrivi.hyllynro), 5, '0')))
+                JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
+                  AND varastopaikat.tunnus = tilausrivi.varasto)
                 WHERE tilausrivi.yhtio     = '{$kukarow['yhtio']}'
                 AND tilausrivi.kerattyaika >= '{$vva_x}-{$kka}-{$ppa} 00:00:00'
                 AND tilausrivi.kerattyaika <= '{$vvl_x}-{$kkl}-{$ppl} 23:59:59'

@@ -244,10 +244,9 @@ if ($tee == "") {
               FROM lasku
               JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.uusiotunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D')
               JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio
-                AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
-                AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0')))
-              WHERE lasku.yhtio = '$kukarow[yhtio]'
-              AND lasku.tunnus  = '$laskurow[tunnus]'
+                AND varastopaikat.tunnus = tilausrivi.varasto)
+              WHERE lasku.yhtio          = '$kukarow[yhtio]'
+              AND lasku.tunnus           = '$laskurow[tunnus]'
               GROUP BY varastopaikat.maa
               ORDER BY kpl DESC
               LIMIT 1";
@@ -356,7 +355,13 @@ if ($tee == "") {
     echo "<th valign='top'>",t("Toimipaikka"),"</th>";
     echo "<td valign='top' colspan='3'>";
     echo "<select name='toimipaikka'>";
-    echo "<option value=''>",t("Ei toimipaikkaa"),"</option>";
+    echo "<option value=''>",t("Valitse"),"</option>";
+
+    $sel = (isset($toimipaikka) and $toimipaikka == 0) ? "selected" : "";
+
+    echo "<option value='0' {$sel}>".t('Ei toimipaikkaa')."</option>";
+
+    $sel = "";
 
     while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
       $sel = $laskurow['yhtio_toimipaikka'] == $toimipaikat_row['tunnus'] ? ' selected' : '';

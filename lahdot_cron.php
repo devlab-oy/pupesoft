@@ -121,6 +121,7 @@ while ($chk_row = mysql_fetch_assoc($chk_res)) {
              AND liitostunnus          = '{$chk_row['liitostunnus']}'
              AND varasto               = '{$chk_row['varasto']}'
              AND aktiivi              != 'E'
+             AND ohjausmerkki          = '{$chk_row['ohjausmerkki']}'
              AND (alkupvm = '0000-00-00' OR (alkupvm != '0000-00-00' AND alkupvm <= '{$chk_row['pvm']}'))";
   $chk_res2 = pupe_query($query1);
 
@@ -138,6 +139,7 @@ while ($chk_row = mysql_fetch_assoc($chk_res)) {
                AND liitostunnus          = '{$chk_row['liitostunnus']}'
                AND varasto               = '{$chk_row['varasto']}'
                AND aktiivi               = 'E'
+               AND ohjausmerkki          = '{$chk_row['ohjausmerkki']}'
                AND alkupvm              != '0000-00-00'
                AND alkupvm               > '{$chk_row['pvm']}'";
     $chk_res2 = pupe_query($query2);
@@ -230,7 +232,8 @@ for ($i = 0; $i <= $paivia_eteenpain; $i++) {
                 AND terminaalialue       = '{$t_row['terminaalialue']}'
                 AND asiakasluokka        = '{$asiakasluokka}'
                 AND liitostunnus         = '{$t_row['liitostunnus']}'
-                AND varasto              = '{$t_row['varasto']}'";
+                AND varasto              = '{$t_row['varasto']}'
+                AND ohjausmerkki         = '{$t_row['ohjausmerkki']}'";
       $chk_res = pupe_query($query);
 
       if (mysql_num_rows($chk_res) == 0) {
@@ -244,6 +247,7 @@ for ($i = 0; $i <= $paivia_eteenpain; $i++) {
                   terminaalialue       = '{$t_row['terminaalialue']}',
                   asiakasluokka        = '{$asiakasluokka}',
                   aktiivi              = '',
+                  ohjausmerkki         = '{$t_row['ohjausmerkki']}',
                   liitostunnus         = '{$t_row['liitostunnus']}',
                   varasto              = '{$t_row['varasto']}',
                   laatija              = '{$kukarow['kuka']}',

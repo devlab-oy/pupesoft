@@ -260,30 +260,7 @@ while ((!feof ($fd)) and ($error!=1)) {
 
           echo t("Perustetaan tuotepaikka")." $alue-0-0-0 ".t("tuotteelle")." $trow[tuoteno]<br>";
 
-          $query = "INSERT into tuotepaikat set
-                    hyllyalue = '$alue',
-                    hyllynro  = '0',
-                    hyllytaso = '0',
-                    hyllyvali = '0',
-                    tuoteno   = '$trow[tuoteno]',
-                    yhtio     = '$trow[yhtio]'";
-          $result = mysql_query($query) or pupe_error($query);
-
-          $query = "INSERT into tapahtuma set
-                    yhtio     = '$trow[yhtio]',
-                    tuoteno   = '$trow[tuoteno]',
-                    kpl       = 0,
-                    kplhinta  = 0,
-                    hinta     = 0,
-                    laji      = 'uusipaikka',
-                    hyllyalue = '$hyllyalue',
-                    hyllynro  = '$hyllynro',
-                    hyllyvali = '$hyllyvali',
-                    hyllytaso = '$hyllytaso',
-                    selite    = '".t("Perustettiin tuotepaikka tilauksen sis‰‰nluonnissa ")." $alue 0 0 0',
-                    laatija   = '$kukarow[kuka]',
-                    laadittu  = now()";
-          $result = pupe_query($query);
+          lisaa_tuotepaikka($trow["tuoteno"], $alue, 0, 0, 0, "Tilauksen sis‰‰nluvussa", "", 0, 0, 0);
         }
       }
 

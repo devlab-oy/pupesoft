@@ -478,7 +478,7 @@ if ($tee == 'VALMIS') {
                 $oletus = "X";
               }
 
-              lisaa_tuotepaikka($tuoteno, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, 'Inventoidessa', $oletus);
+              lisaa_tuotepaikka($tuoteno, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, 'Inventoidessa', $oletus, 0, 0, 0);
 
               // haetaan perustettu resultti (sama query ku ylh‰‰ll‰)
               $query = "SELECT *

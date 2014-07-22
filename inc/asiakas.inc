@@ -89,8 +89,25 @@ enable_ajax();
 
 $otsikko   = 'Asiakkaat';
 
-$kentat   = "tunnus, ytunnus, concat_ws('<br>', concat_ws(' ', nimi, nimitark), concat_ws(' ', toim_nimi, toim_nimitark)) 'Nimi/Toim_nimi', concat_ws('<br>', postitp, toim_postitp) 'Postitp/Toim_postitp', asiakasnro 'Asiakasnumero', concat_ws('<br>', ovttunnus, toim_ovttunnus) 'Ovttunnus/Toim_ovttunnus', laji HIDDEN_laji ";
-$hakukentat = "tunnus, ytunnus, nimi/nimitark/toim_nimi/toim_nimitark, postitp/toim_postitp, asiakasnro, ovttunnus/toim_ovttunnus";
+$kentatlisa = $hakukentatlisa = "";
+
+if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
+  $kentatlisa = "if(asiakas.toimipaikka != 0,
+      (select nimi from yhtion_toimipaikat where yhtio='{$kukarow['yhtio']}'
+      and tunnus = asiakas.toimipaikka), '') toimipaikka,";
+  $hakukentatlisa = ",toimipaikka";
+}
+
+$kentat = "tunnus, ytunnus, concat_ws('<br>',
+  concat_ws(' ', nimi, nimitark),
+  concat_ws(' ', toim_nimi, toim_nimitark)) 'Nimi/Toim_nimi',
+  concat_ws('<br>', postitp, toim_postitp) 'Postitp/Toim_postitp',
+  asiakasnro 'Asiakasnumero',
+  concat_ws('<br>', ovttunnus, toim_ovttunnus) 'Ovttunnus/Toim_ovttunnus',
+  {$kentatlisa} laji HIDDEN_laji ";
+
+$hakukentat = "tunnus, ytunnus, nimi/nimitark/toim_nimi/toim_nimitark,
+  postitp/toim_postitp, asiakasnro, ovttunnus/toim_ovttunnus {$hakukentatlisa}";
 
 $jarjestys   = 'selaus, nimi';
 

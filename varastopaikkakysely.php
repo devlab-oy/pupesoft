@@ -263,34 +263,8 @@ if ($tee == "W") {
     if (mysql_num_rows($result) == 0) {
       echo "<font class='message'>".("Luodaan uusi varastopaikka tuotteelle").": $tuoteno ($thyllyalue, $thyllynro, $thyllyvali, $thyllytaso)</font><br>";
 
-      $query = "INSERT into tuotepaikat set
-                yhtio      = '$kukarow[yhtio]',
-                hyllyalue  = '$thyllyalue',
-                hyllynro   = '$thyllynro',
-                hyllyvali  = '$thyllyvali',
-                hyllytaso  = '$thyllytaso',
-                oletus     = '',
-                tuoteno    = '$tuoteno',
-                laatija    = '$kukarow[kuka]',
-                luontiaika = now()";
-      $result = mysql_query($query) or pupe_error($query);
-      $minne = mysql_insert_id();
-
-      $query = "INSERT into tapahtuma set
-                yhtio     = '$kukarow[yhtio]',
-                tuoteno   = '$tuoteno',
-                kpl       = '0',
-                kplhinta  = '0',
-                hinta     = '0',
-                laji      = 'uusipaikka',
-                hyllyalue = '$thyllyalue',
-                hyllynro  = '$thyllynro',
-                hyllyvali = '$thyllyvali',
-                hyllytaso = '$thyllytaso',
-                selite    = '".t("Lisättiin tuotepaikka")." $thyllyalue $thyllynro $thyllyvali $thyllytaso',
-                laatija   = '$kukarow[kuka]',
-                laadittu  = now()";
-      $result = mysql_query($query) or pupe_error($query);
+      $lisatty_paikka = lisaa_tuotepaikka($tuoteno, $thyllyalue, $thyllynro, $thyllyvali, $thyllytaso, "Varastopaikat ohjelmassa", "", 0, 0, 0);
+      $minne = $lisatty_paikka["tuotepaikan_tunnus"];
     }
     else {
       $row = mysql_fetch_assoc($result);
@@ -315,4 +289,5 @@ if ($tee == "W") {
 }
 $formi = "formi";
 $kentta = "varastopaikka";
+
 require ("inc/footer.inc");

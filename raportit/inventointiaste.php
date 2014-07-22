@@ -51,7 +51,7 @@ if ($ajax_request) {
       //jos dropdownista valitaan tyhj‰ pit‰‰ t‰ss‰ kohtaan yhtioon laittaa joku ep‰validi yhtio, koska hae_varastot funkkarissa on empty(), jolloin k‰ytet‰‰n kukarow:ta
       $yhtio = "EPAVALIDI";
     }
-    $varastot = hae_varastot(array(), $yhtio);
+    $varastot = inventointiaste_hae_varastot(array(), $yhtio);
     array_walk_recursive($varastot, 'array_utf8_encode');
 
     echo json_encode($varastot);
@@ -774,7 +774,7 @@ function init(&$request) {
     );
   }
 
-  $request['varastot'] = hae_varastot($request);
+  $request['varastot'] = inventointiaste_hae_varastot($request);
 
   if (empty($request['valitut_varastot'])) {
     //ensimm‰inen sivulataus, requestista ei ole tullut valittuja varastoja, rajataan k‰yttˆliittym‰‰n esivalittujen varastojen perusteella
@@ -1295,19 +1295,19 @@ function hae_inventoitavien_lukumaara(&$request, $aikavali_tyyppi = '') {
         AND tuotepaikat.saldo <> 0 )';
   }
 
-  $query = "  SELECT tapahtuma.hyllyalue AS hyllyalue, tapahtuma.hyllynro AS hyllynro, COUNT(DISTINCT CONCAT(tapahtuma.tuoteno, tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso)) AS kpl
-        FROM tapahtuma USE INDEX (yhtio_laji_laadittu)
-        JOIN tuote
-        ON ( tuote.yhtio = tapahtuma.yhtio
-          AND tuote.tuoteno = tapahtuma.tuoteno
-          AND tuote.ei_saldoa = ''
-          {$status_where} )
-        {$vain_saldoa_join}
-        WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
-        AND tapahtuma.laadittu BETWEEN '{$request['alku_aika']}' AND '{$request['loppu_aika']}'
-        AND tapahtuma.laji = 'Inventointi'
-        {$ei_huomioida_lisa}
-        GROUP BY 1,2";
+  $query = "SELECT tapahtuma.hyllyalue AS hyllyalue, tapahtuma.hyllynro AS hyllynro, COUNT(DISTINCT CONCAT(tapahtuma.tuoteno, tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso)) AS kpl
+            FROM tapahtuma USE INDEX (yhtio_laji_laadittu)
+            JOIN tuote
+            ON ( tuote.yhtio = tapahtuma.yhtio
+              AND tuote.tuoteno   = tapahtuma.tuoteno
+              AND tuote.ei_saldoa = ''
+              {$status_where} )
+            {$vain_saldoa_join}
+            WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
+            AND tapahtuma.laadittu BETWEEN '{$request['alku_aika']}' AND '{$request['loppu_aika']}'
+            AND tapahtuma.laji    = 'Inventointi'
+            {$ei_huomioida_lisa}
+            GROUP BY 1,2";
   $result = pupe_query($query);
 
   $count = 0;
@@ -1343,16 +1343,16 @@ function hae_tuotepaikkojen_lukumaara(&$request) {
     $vain_saldoa_where = 'AND tuotepaikat.saldo <> 0.00';
   }
 
-  $query = "  SELECT tuotepaikat.hyllyalue as hyllyalue, tuotepaikat.hyllynro as hyllynro, count(*) as kpl
-        FROM tuote
-        JOIN tuotepaikat
-        USING (yhtio, tuoteno)
-        WHERE tuote.yhtio = '{$kukarow['yhtio']}'
-        {$vain_saldoa_where}
-        AND tuote.ei_saldoa = ''
-        {$status_where}
-        {$ei_huomioida_lisa}
-        GROUP BY 1,2";
+  $query = "SELECT tuotepaikat.hyllyalue as hyllyalue, tuotepaikat.hyllynro as hyllynro, count(*) as kpl
+            FROM tuote
+            JOIN tuotepaikat
+            USING (yhtio, tuoteno)
+            WHERE tuote.yhtio   = '{$kukarow['yhtio']}'
+            {$vain_saldoa_where}
+            AND tuote.ei_saldoa = ''
+            {$status_where}
+            {$ei_huomioida_lisa}
+            GROUP BY 1,2";
   $result = pupe_query($query);
 
   $count = 0;
@@ -1366,12 +1366,12 @@ function hae_tuotepaikkojen_lukumaara(&$request) {
 function kuuluuko_hylly_varastoon($request, $varasto_row) {
   global $kukarow;
 
-  $query = "  SELECT varastopaikat.tunnus
-        FROM varastopaikat
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper('{$varasto_row['hyllyalue']}'), 5, '0'),lpad(upper('{$varasto_row['hyllynro']}'), 5, '0'))
-        AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper('{$varasto_row['hyllyalue']}'), 5, '0'),lpad(upper('{$varasto_row['hyllynro']}'), 5, '0'))
-        AND varastopaikat.tunnus IN (".implode(', ', $request['valitut_varastot']).")";
+  $query = "SELECT varastopaikat.tunnus
+            FROM varastopaikat
+            WHERE yhtio              = '{$kukarow['yhtio']}'
+            AND concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper('{$varasto_row['hyllyalue']}'), 5, '0'),lpad(upper('{$varasto_row['hyllynro']}'), 5, '0'))
+            AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper('{$varasto_row['hyllyalue']}'), 5, '0'),lpad(upper('{$varasto_row['hyllynro']}'), 5, '0'))
+            AND varastopaikat.tunnus IN (".implode(', ', $request['valitut_varastot']).")";
 
   $count = 0;
   //jos ollaan valittu kaikki varastot tiedet‰‰n, ett‰ se kuuluu varmasti valittuihin varastoihin
@@ -1439,59 +1439,55 @@ function hae_inventoinnit(&$request) {
         AND tuotepaikat.saldo <> 0 )';
   }
 
-  $query = "  SELECT DATE(tapahtuma.laadittu) laadittu_pvm,
-        tapahtuma.laadittu,
-        YEAR(tapahtuma.laadittu) as vuosi,
-        MONTH(tapahtuma.laadittu) as kuukausi,
-        DAY(tapahtuma.laadittu) as paiva,
-        TIME(tapahtuma.laadittu) as kellon_aika,
-        ( tapahtuma.kpl * tapahtuma.hinta ) AS inventointi_poikkeama_eur,
-        tapahtuma.selite,
-        substring( tapahtuma.selite, ( length(tapahtuma.selite)-locate( '>rb<',reverse(tapahtuma.selite)) ) +2 ) AS inventointilaji,
-        tapahtuma.tuoteno,
-        tuote.nimitys AS tuote_nimitys,
-        tuote.try AS tuoteryhma,
-        tapahtuma.kpl,
-        Concat_ws('-', tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllytaso, tapahtuma.hyllyvali) AS hyllypaikka,
-        IFNULL(kuka.nimi, '".t("Poistettu k‰ytt‰j‰")."') as laatija,
-        IFNULL(keraysvyohyke.nimitys, '".t("Poistettu")."') AS keraysvyohyke_nimitys
-        FROM tapahtuma USE INDEX (yhtio_laji_laadittu)
-        JOIN tuote
-        ON ( tuote.yhtio = tapahtuma.yhtio
-          AND tuote.tuoteno = tapahtuma.tuoteno
-          AND tuote.ei_saldoa = ''
-          {$tuote_join} )
-        LEFT JOIN avainsana
-        ON ( avainsana.yhtio = tuote.yhtio
-          AND avainsana.selite = tuote.try
-          AND avainsana.laji = 'TRY'
-          AND avainsana.kieli = '{$yhtiorow['kieli']}')
-        JOIN varastopaikat
-        ON ( varastopaikat.yhtio = tapahtuma.yhtio
-          AND concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
-          AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
-          AND varastopaikat.tunnus IN (".implode(', ', $request['valitut_varastot']).") )
-        LEFT JOIN kuka
-        ON ( kuka.yhtio = tapahtuma.yhtio
-          AND kuka.kuka = tapahtuma.laatija )
-        LEFT JOIN varaston_hyllypaikat AS vh
-        ON ( vh.yhtio = tapahtuma.yhtio
-          AND vh.hyllyalue = tapahtuma.hyllyalue
-          AND vh.hyllynro = tapahtuma.hyllynro
-          AND vh.hyllytaso = tapahtuma.hyllytaso
-          AND vh.hyllyvali = tapahtuma.hyllyvali )
-        LEFT JOIN keraysvyohyke
-        ON ( keraysvyohyke.yhtio = vh.yhtio
-          AND keraysvyohyke.tunnus = vh.keraysvyohyke )
-        {$vain_saldoa_join}
-        WHERE tapahtuma.yhtio = '{$yhtio}'
-          AND tapahtuma.laadittu BETWEEN '{$request['alku_aika']}' AND '{$request['loppu_aika']}'
-          AND tapahtuma.laji = 'Inventointi'
-        {$tapahtuma_where}
-        {$inventointilaji_rajaus}
-        {$ei_huomioida_lisa}
-        ORDER BY inventointilaji ASC
-        {$group}";
+  $query = "SELECT DATE(tapahtuma.laadittu) laadittu_pvm,
+            tapahtuma.laadittu,
+            YEAR(tapahtuma.laadittu) as vuosi,
+            MONTH(tapahtuma.laadittu) as kuukausi,
+            DAY(tapahtuma.laadittu) as paiva,
+            TIME(tapahtuma.laadittu) as kellon_aika,
+            ( tapahtuma.kpl * tapahtuma.hinta ) AS inventointi_poikkeama_eur,
+            tapahtuma.selite,
+            substring( tapahtuma.selite, ( length(tapahtuma.selite)-locate( '>rb<',reverse(tapahtuma.selite)) ) +2 ) AS inventointilaji,
+            tapahtuma.tuoteno,
+            tuote.nimitys AS tuote_nimitys,
+            tuote.try AS tuoteryhma,
+            tapahtuma.kpl,
+            Concat_ws('-', tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllytaso, tapahtuma.hyllyvali) AS hyllypaikka,
+            IFNULL(kuka.nimi, '".t("Poistettu k‰ytt‰j‰")."') as laatija,
+            IFNULL(keraysvyohyke.nimitys, '".t("Poistettu")."') AS keraysvyohyke_nimitys
+            FROM tapahtuma USE INDEX (yhtio_laji_laadittu)
+            JOIN tuote
+            ON ( tuote.yhtio = tapahtuma.yhtio
+              AND tuote.tuoteno        = tapahtuma.tuoteno
+              AND tuote.ei_saldoa      = ''
+              {$tuote_join} )
+            LEFT JOIN avainsana
+            ON ( avainsana.yhtio = tuote.yhtio
+              AND avainsana.selite     = tuote.try
+              AND avainsana.laji       = 'TRY'
+              AND avainsana.kieli      = '{$yhtiorow['kieli']}')
+            LEFT JOIN kuka
+            ON ( kuka.yhtio = tapahtuma.yhtio
+              AND kuka.kuka            = tapahtuma.laatija )
+            LEFT JOIN varaston_hyllypaikat AS vh
+            ON ( vh.yhtio = tapahtuma.yhtio
+              AND vh.hyllyalue         = tapahtuma.hyllyalue
+              AND vh.hyllynro          = tapahtuma.hyllynro
+              AND vh.hyllytaso         = tapahtuma.hyllytaso
+              AND vh.hyllyvali         = tapahtuma.hyllyvali )
+            LEFT JOIN keraysvyohyke
+            ON ( keraysvyohyke.yhtio = vh.yhtio
+              AND keraysvyohyke.tunnus = vh.keraysvyohyke )
+            {$vain_saldoa_join}
+            WHERE tapahtuma.yhtio      = '{$yhtio}'
+              AND tapahtuma.laadittu BETWEEN '{$request['alku_aika']}' AND '{$request['loppu_aika']}'
+              AND tapahtuma.laji       = 'Inventointi'
+              AND tapahtuma.varasto    IN (".implode(', ', $request['valitut_varastot']).")
+            {$tapahtuma_where}
+            {$inventointilaji_rajaus}
+            {$ei_huomioida_lisa}
+            ORDER BY inventointilaji ASC
+            {$group}";
   $result = pupe_query($query);
 
   $rivit = array();
@@ -1513,13 +1509,13 @@ function hae_varaston_hyllypaikkojen_lukumaara($request) {
     $yhtio = $kukarow['yhtio'];
   }
 
-  $query = "  SELECT count(*) as varaston_hyllypaikkojen_lukumaara
-        FROM varaston_hyllypaikat
-        JOIN varastopaikat
-        ON ( varastopaikat.yhtio = varaston_hyllypaikat.yhtio
-          AND varastopaikat.tunnus = varaston_hyllypaikat.varasto
-          AND varastopaikat.tunnus IN (".implode(', ', $request['valitut_varastot']).") )
-        WHERE varaston_hyllypaikat.yhtio = '{$yhtio}'";
+  $query = "SELECT count(*) as varaston_hyllypaikkojen_lukumaara
+            FROM varaston_hyllypaikat
+            JOIN varastopaikat
+            ON ( varastopaikat.yhtio = varaston_hyllypaikat.yhtio
+              AND varastopaikat.tunnus       = varaston_hyllypaikat.varasto
+              AND varastopaikat.tunnus       IN (".implode(', ', $request['valitut_varastot']).") )
+            WHERE varaston_hyllypaikat.yhtio = '{$yhtio}'";
   $result = pupe_query($query);
 
   return mysql_fetch_assoc($result);
@@ -1528,8 +1524,8 @@ function hae_varaston_hyllypaikkojen_lukumaara($request) {
 function hae_yhtiot(&$request = array()) {
   global $kukarow;
 
-  $query = "  SELECT *
-        FROM yhtio";
+  $query = "SELECT *
+            FROM yhtio";
   $result = pupe_query($query);
 
   $yhtiot = array();
@@ -1575,10 +1571,10 @@ function hae_tilikaudet($request = array(), $yhtio = '') {
     $yhtio = $request['valittu_yhtio'];
   }
 
-  $query = "  SELECT *
-        FROM tilikaudet
-        WHERE yhtio = '{$yhtio}'
-        ORDER BY tilikausi_alku DESC";
+  $query = "SELECT *
+            FROM tilikaudet
+            WHERE yhtio = '{$yhtio}'
+            ORDER BY tilikausi_alku DESC";
   $result = pupe_query($query);
 
   $tilikaudet = array();
@@ -1604,7 +1600,7 @@ function hae_tilikaudet($request = array(), $yhtio = '') {
 }
 
 //tarvitaan uusi yhtio parametri ajax_requestia varten
-function hae_varastot($request = array(), $yhtio = '') {
+function inventointiaste_hae_varastot($request = array(), $yhtio = '') {
   global $kukarow;
 
   //ajax_requestia varten
@@ -1617,10 +1613,10 @@ function hae_varastot($request = array(), $yhtio = '') {
     $yhtio = $request['valittu_yhtio'];
   }
 
-  $query = "  SELECT *
-        FROM varastopaikat
-        WHERE yhtio = '{$yhtio}'
-        AND tyyppi != 'P'";
+  $query = "SELECT *
+            FROM varastopaikat
+            WHERE yhtio  = '{$yhtio}'
+            AND tyyppi  != 'P'";
   $result = pupe_query($query);
 
   $varastot = array();
@@ -1671,10 +1667,10 @@ function hae_inventointilajit($request = array(), $yhtio = '') {
     $yhtio = $request['valittu_yhtio'];
   }
 
-  $query = "  SELECT *
-        FROM avainsana
-        WHERE yhtio = '{$yhtio}'
-        AND laji = 'INVEN_LAJI'";
+  $query = "SELECT *
+            FROM avainsana
+            WHERE yhtio = '{$yhtio}'
+            AND laji    = 'INVEN_LAJI'";
   $result = pupe_query($query);
 
   $inventointilajit = array();

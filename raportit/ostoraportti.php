@@ -656,7 +656,7 @@ else {
     }
 
     if ($varastot != '') {
-      $varastolisa_korv = " AND varastopaikat.tunnus in ($varastot) ";
+      $varastolisa_korv = " AND tuotepaikat.varasto in ($varastot) ";
       $varastot = " HAVING varastopaikat.tunnus in ($varastot) or varastopaikat.tunnus is null ";
     }
 
@@ -822,16 +822,15 @@ else {
                 LEFT JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio and abc_aputaulu.tuoteno = tuote.tuoteno and abc_aputaulu.tyyppi = '$abcrajaustapa')
                 JOIN tuotepaikat ON (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno)
                 LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-                and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-                and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0')))
+                  AND varastopaikat.tunnus = tuotepaikat.varasto)
                 LEFT JOIN korvaavat ON (tuote.yhtio = korvaavat.yhtio and tuote.tuoteno = korvaavat.tuoteno)
                 $lisa_parametri
                 WHERE tuote.$yhtiot
                 $lisa
                 $lisaa
-                and tuote.ei_saldoa   = ''
-                and tuote.tuotetyyppi NOT IN ('A', 'B')
-                and tuote.ostoehdotus = ''
+                and tuote.ei_saldoa        = ''
+                and tuote.tuotetyyppi      NOT IN ('A', 'B')
+                and tuote.ostoehdotus      = ''
                 $abcwhere
                 $varastot
                 order by id, tuote.tuoteno, varastopaikka";
@@ -1148,7 +1147,7 @@ else {
                 sum(if(tyyppi = 'O', varattu, 0)) tilattu,
                 sum(if(tyyppi = 'E' and var != 'O', varattu, 0)) ennakot, # toimittamattomat ennakot ilman optiorivejä
                 sum(if(tyyppi in ('L','V') and var not in ('P','J','O','S'), varattu, 0)) ennpois, # saldon ennakkopoistoja
-                sum(if(tyyppi = 'L' and var in ('J','S'), jt $lisavarattu, 0)) jt
+                sum(if(tyyppi = 'L' and var = 'J', jt $lisavarattu, 0)) jt
                 $varastolisa
                 FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
                 WHERE yhtio        = '$row[yhtio]'
@@ -1172,9 +1171,8 @@ else {
         // Kaikkien valittujen varastojen paikkojen saldo yhteensä, mukaan tulee myös aina ne saldot jotka ei kuulu mihinkään varastoalueeseen
         $query = "SELECT sum(saldo) saldo, varastopaikat.tunnus
                   FROM tuotepaikat
-                  LEFT JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-                  and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-                  and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+                  LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+                    AND varastopaikat.tunnus = tuotepaikat.varasto)
                   WHERE tuotepaikat.$varastot_yhtiot
                   and tuotepaikat.tuoteno='$row[tuoteno]'
                   GROUP BY varastopaikat.tunnus
@@ -1192,9 +1190,8 @@ else {
         if ($varastot2 != '') {
           $query = "SELECT sum(saldo) saldo, varastopaikat.tunnus
                     FROM tuotepaikat
-                    LEFT JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-                    and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-                    and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+                    LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+                      AND varastopaikat.tunnus = tuotepaikat.varasto)
                     WHERE tuotepaikat.$varastot_yhtiot
                     and tuotepaikat.tuoteno='$row[tuoteno]'
                     GROUP BY varastopaikat.tunnus
@@ -1576,9 +1573,6 @@ else {
 
                     $query = "SELECT sum(saldo) saldo
                               FROM tuotepaikat
-                              JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-                              and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-                              and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0')))
                               WHERE tuotepaikat.$varastot_yhtiot
                               and tuotepaikat.tuoteno in ('$korvarow[tuoteno]')
                               $varastolisa_korv";
@@ -1590,9 +1584,6 @@ else {
                               sum(if(tilausrivi.tyyppi in ('O','W','M'), varattu, 0)) tilattu,
                               sum(if(tilausrivi.tyyppi in ('L','V'), varattu, 0)) varattu
                               FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-                              JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
-                              and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0'))
-                              and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0')))
                               WHERE tilausrivi.yhtio = '$row[yhtio]'
                               and tilausrivi.tyyppi  in ('L','V','O','W','M')
                               and tilausrivi.tuoteno in ('$korvarow[tuoteno]')

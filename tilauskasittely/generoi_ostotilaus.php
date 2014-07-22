@@ -11,7 +11,7 @@ function va_ti_en_jt($tuoteno, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) {
             sum(if(tyyppi = 'O', varattu, 0)) tilattu,
             sum(if(tyyppi = 'E', varattu, 0)) ennakot,
             sum(if(tyyppi in ('L','V') and var not in ('P','J','O','S'), varattu, 0)) ennpois,
-            sum(if(tyyppi in ('L','G') and var in ('J','S'), jt $lisavarattu, 0)) jt
+            sum(if(tyyppi in ('L','G') and var = 'J', jt $lisavarattu, 0)) jt
             FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
             WHERE yhtio        = '{$kukarow['yhtio']}'
              AND tyyppi        in ('L','V','O','G','E','W','M')
@@ -317,8 +317,7 @@ if (isset($generoi) and $generoi != "" and $tee == 'M' and $toimittajaid > 0 and
               {$abcjoin}
               {$keraysvyohykelisa}
               WHERE tuotepaikat.yhtio     = '{$kukarow['yhtio']}'
-              AND CONCAT(RPAD(UPPER('{$varow['alkuhyllyalue']}'),  5, '0'),LPAD(UPPER('{$varow['alkuhyllynro']}'),  5, '0')) <= CONCAT(RPAD(UPPER(tuotepaikat.hyllyalue), 5, '0'),LPAD(UPPER(tuotepaikat.hyllynro), 5, '0'))
-              AND CONCAT(RPAD(UPPER('{$varow['loppuhyllyalue']}'), 5, '0'),LPAD(UPPER('{$varow['loppuhyllynro']}'), 5, '0')) >= CONCAT(RPAD(UPPER(tuotepaikat.hyllyalue), 5, '0'),LPAD(UPPER(tuotepaikat.hyllynro), 5, '0'))
+              AND tuotepaikat.varasto     = {$kohdevarasto}
               AND tuotepaikat.halytysraja > 0
               ORDER BY tuotepaikat.tuoteno";
     $resultti = pupe_query($query);
@@ -390,9 +389,8 @@ if (isset($generoi) and $generoi != "" and $tee == 'M' and $toimittajaid > 0 and
                                 {$abcjoin}
                                 {$keraysvyohykelisa}
                                 WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
-                                AND CONCAT(RPAD(UPPER('{$varow['alkuhyllyalue']}'),  5, '0'),LPAD(UPPER('{$varow['alkuhyllynro']}'),  5, '0')) <= CONCAT(RPAD(UPPER(tuotepaikat.hyllyalue), 5, '0'),LPAD(UPPER(tuotepaikat.hyllynro), 5, '0'))
-                                AND CONCAT(RPAD(UPPER('{$varow['loppuhyllyalue']}'), 5, '0'),LPAD(UPPER('{$varow['loppuhyllynro']}'), 5, '0')) >= CONCAT(RPAD(UPPER(tuotepaikat.hyllyalue), 5, '0'),LPAD(UPPER(tuotepaikat.hyllynro), 5, '0'))
-                                 AND tuote.tuoteno      = '{$_tuote['tuoteno']}'";
+                                AND tuotepaikat.varasto = {$kohdevarasto}
+                                AND tuote.tuoteno       = '{$_tuote['tuoteno']}'";
                       $vasres = pupe_query($query);
 
                       while ($vasrow = mysql_fetch_assoc($vasres)) {

@@ -838,6 +838,10 @@ if (!function_exists("verkkolasku_in")) {
         }
       }
 
+      if ($_yhtion_toimipaikka != 0) {
+        $yhtiorow = hae_yhtion_parametrit($yhtio, $_yhtion_toimipaikka);
+      }
+
       // Laitetaan tämä päivä laskun kirjauspäiväksi jos yhtiön parametri on tässä asennossa.
       if ($yhtiorow['ostolaskujen_paivays'] == "1") {
 
@@ -1085,9 +1089,9 @@ if (!function_exists("verkkolasku_in")) {
       for ($tuuraaja_i = 1; $tuuraaja_i < 6; $tuuraaja_i++) {
         $query = "SELECT if (tuuraaja != '', tuuraaja, kuka) kuka
                   FROM kuka
-                  WHERE yhtio = '{$yhtio}'
-                  AND kuka    = '{$hyvak[$tuuraaja_i]}'
-                  AND kuka   != ''";
+                  WHERE yhtio  = '{$yhtio}'
+                  AND kuka     = '{$hyvak[$tuuraaja_i]}'
+                  AND kuka    != ''";
         $result = pupe_query($query);
         $hyvak_row = mysql_fetch_assoc($result);
 

@@ -12,10 +12,10 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
     }
 
     //  Haetaan tilausrivit
-    $query = "SELECT   tilausrivi.otunnus, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.kpl, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,
+    $query = "SELECT tilausrivi.otunnus, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.kpl, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,
               tuote.sarjanumeroseuranta, tuote.yksikko, if(tuote.tarrakpl>0, tarrakpl, 1) tarrakpl, tuote.yksikko,
               sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.ostorivitunnus, sarjanumeroseuranta.myyntirivitunnus, sarjanumeroseuranta.lisatieto, sarjanumeroseuranta.tunnus sarjatunnus,
-              tarratyyppi.selite tarratyyppi
+              tarratyyppi.selite tarratyyppi, tilausrivi.varasto
               FROM tilausrivi
               JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '' and tuote.sarjanumeroseuranta!=''
               LEFT JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio=tilausrivi.yhtio and sarjanumeroseuranta.ostorivitunnus = tilausrivi.tunnus and sarjanumeroseuranta.myyntirivitunnus=0
@@ -107,10 +107,9 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
           if($komento=="OPTIMOI") {
             $query = "SELECT printteri2
                       FROM varastopaikat
-                      WHERE varastopaikat.yhtio = '$kukarow[yhtio]' and varastopaikat.printteri2 != '' and
-                      concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper('$row[hyllyalue]') ,5,'0'),lpad(upper('$row[hyllynro]') ,5,'0')) and
-                      concat(rpad(upper(loppuhyllyalue)  ,5,'0'),lpad(upper(loppuhyllynro)  ,5,'0')) >= concat(rpad(upper('$row[hyllyalue]') ,5,'0'),lpad(upper('$row[hyllynro]') ,5,'0'))
-                      LIMIT 1";
+                      WHERE varastopaikat.yhtio     = '$kukarow[yhtio]'
+                      and varastopaikat.printteri2 != ''
+                      AND varastopaikat.tunnus      = {$row["varasto"]}";
             $kirres = mysql_query($query) or pupe_error($query);
             $kirrow = mysql_fetch_array($kirres);
             $arvaakirjoitin[$kirrow["printteri2"]]++;

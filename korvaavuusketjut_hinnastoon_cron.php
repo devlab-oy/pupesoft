@@ -1,21 +1,21 @@
 <?php
-/** p√§ivitet√§√§n korvaavuusketjun p√§√§tuotteen tarvittaessa hinnastoon kyll√§ksi
- * - jos l√∂ytyy tuote jonka myyt√§viss√§ on nolla
+/** p‰ivitet‰‰n korvaavuusketjun p‰‰tuotteen tarvittaessa hinnastoon kyll‰ksi
+ * - jos lˆytyy tuote jonka myyt‰viss‰ on nolla
  * - jos tuotteen hinnastoon='K' hinnastoon='' ja hinnastoon='W'
  * - tuote on korvaavuusketjussa
- * - tuote ei ole korvaavuusketjun p√§√§tuote
- * - korvaavuusketjun p√§√§tuotteella on saldoa
- * - korvaavuusketjun p√§√§tuottella on hinnastoon ei
+ * - tuote ei ole korvaavuusketjun p‰‰tuote
+ * - korvaavuusketjun p‰‰tuotteella on saldoa
+ * - korvaavuusketjun p‰‰tuottella on hinnastoon ei
  */
 
-// Kutsutaanko CLI:st√§
+// Kutsutaanko CLI:st‰
 if (php_sapi_name() != 'cli') {
-  die("T√§t√§ scripti√§ voi ajaa vain komentorivilt√§!\n");
+  die("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!\n");
 }
 
-// Yhti√∂ annettava parametriksi
+// Yhtiˆ annettava parametriksi
 if (trim($argv[1]) == '') {
-  echo "K√§ytt√∂: {$_SERVER['SCRIPT_NAME']} [yhtion_nimi]\n";
+  echo "K‰yttˆ: {$_SERVER['SCRIPT_NAME']} [yhtion_nimi]\n";
   exit;
 }
 
@@ -27,7 +27,7 @@ $kukarow['kuka']  = 'admin';
 $kukarow['kieli'] = 'fi';
 $kukarow['extranet'] = '';
 
-echo "P√§ivitet√§√§n korvaavuusketjun p√§√§tuotteet hinnastoon...\n\n";
+echo "P‰ivitet‰‰n korvaavuusketjun p‰‰tuotteet hinnastoon...\n\n";
 
 // Haetaan kaikki korvaavuusketjujen id:t
 $select = "SELECT DISTINCT(id) FROM korvaavat WHERE yhtio='{$kukarow['yhtio']}'";
@@ -37,7 +37,7 @@ $result = pupe_query($select);
 $yhteensa = 0;
 $muutettu = 0;
 
-// Loopataan kaikki ketjut l√§pi ja etsit√§√§n p√§ivitett√§vi√§ tuotteita
+// Loopataan kaikki ketjut l‰pi ja etsit‰‰n p‰ivitett‰vi‰ tuotteita
 while ($ketju = mysql_fetch_assoc($result)) {
 
   // Haetaan ketjun tuotteet
@@ -49,15 +49,15 @@ while ($ketju = mysql_fetch_assoc($result)) {
                      ORDER BY if(jarjestys=0, 9999, jarjestys), tuoteno;";
   $tuotteet_result = pupe_query($tuotteet_query);
 
-  // Eka tuote on AINA ketjun p√§√§tuote
+  // Eka tuote on AINA ketjun p‰‰tuote
   $paa_tuote = mysql_fetch_assoc($tuotteet_result);
 
-  // Jos p√§√§tuotteen tuote.hinnastoon on 'E'
+  // Jos p‰‰tuotteen tuote.hinnastoon on 'E'
   if ($paa_tuote['hinnastoon'] == 'E') {
 
     $myytavissa = saldo_myytavissa($paa_tuote['tuoteno']);
 
-    // Jos p√§√§tuotteella on saldoa
+    // Jos p‰‰tuotteella on saldoa
     if ($myytavissa[0] > 0) {
       $yhteensa += 1;
 
@@ -67,25 +67,25 @@ while ($ketju = mysql_fetch_assoc($result)) {
       while ($ketjun_tuote = mysql_fetch_assoc($tuotteet_result)) {
         $tuote_myytavissa = saldo_myytavissa($ketjun_tuote['tuoteno']);
 
-        // P√§ivitet√§√§n p√§√§tuote hinnastoon jos ketjussa on tuotteita joiden myytavissa on 0,
-        // ja hinnastoon KYLL√Ñ
+        // P‰ivitet‰‰n p‰‰tuote hinnastoon jos ketjussa on tuotteita joiden myytavissa on 0,
+        // ja hinnastoon KYLLƒ
         if ($tuote_myytavissa[2] == 0 and $ketjun_tuote['hinnastoon'] != 'E') {
           $paivitetaanko = true;
         }
       }
 
-      // Jos hinnastoon on setattu, niin ketjun p√§√§tuote pit√§√§ p√§ivitt√§√§
+      // Jos hinnastoon on setattu, niin ketjun p‰‰tuote pit‰‰ p‰ivitt‰‰
       if ($paivitetaanko) {
 
-        // P√§ivitet√§√§n tuote.hinnastoon
+        // P‰ivitet‰‰n tuote.hinnastoon
         $query = "UPDATE tuote SET hinnastoon='' WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$paa_tuote['tuoteno']}'";
         if ($result2 = pupe_query($query)) {
           $muutettu += 1;
         }
 
-        echo "Ketjun $paa_tuote[id] p√§√§tuote $paa_tuote[tuoteno] p√§ivitetty hinnastoon kyll√§ksi.\n";
+        echo "Ketjun $paa_tuote[id] p‰‰tuote $paa_tuote[tuoteno] p‰ivitetty hinnastoon kyll‰ksi.\n";
       }
     }
   }
 }
-echo "\nYhteens√§ $yhteensa sopivaa ketjua, joista muutettiin $muutettu tuotetta hinnastoon.\n";
+echo "\nYhteens‰ $yhteensa sopivaa ketjua, joista muutettiin $muutettu tuotetta hinnastoon.\n";

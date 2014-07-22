@@ -226,7 +226,6 @@ if (!isset($rivienmaara) or $rivienmaara < 100) {
       $tvrow = hae_tuote($_tuote['tuoteno']);
 
       $tuotteen_toimittaja_query = "SELECT tuotteen_toimittajat.tehdas_saldo,
-                                    tuotteen_toimittajat.tehdas_saldo_paivitetty,
                                     tuotteen_toimittajat.toim_tuoteno,
                                     tuotteen_toimittajat.ostohinta,
                                     tuotteen_toimittajat.tunnus AS tt_tunnus,
@@ -283,20 +282,27 @@ if (!isset($rivienmaara) or $rivienmaara < 100) {
        }
 
        if ($tuotteen_toimittaja_row['selitetark_2'] == "") {
-        $tehtaan_saldon_font = $tuotteen_toimittaja_row['tehdas_saldo'] < 1 ? "error" : "ok";
 
-         $vastaavat_table .= "<font class='{$tehtaan_saldon_font}'>".sprintf("%.2f", $tuotteen_toimittaja_row['tehdas_saldo'])."</font>";
+        if (!empty($laskurow['varasto'])) {
+          $kohde_varastot = array($laskurow['varasto']);
+        }
+        elseif (empty($laskurow['varasto']) and !empty($laskurow['yhtio_toimipaikka'])) {
+          $kohde_varastot = hae_yhtion_toimipaikan_varastot($laskurow['yhtio_toimipaikka']);
+          $kohde_varastot = array_column($kohde_varastot, 'tunnus');
+        }
+        else {
+          $kohde_varastot = array();
+        }
+
+        $siirto_varastot = hae_mahdolliset_siirto_varastot($kohde_varastot, $_tuote['tuoteno']);
+
+        $_siirrettavissa = $siirto_varastot[0]['tuote']['myytavissa'];
+         $siirrettavissa_saldon_font = $_siirrettavissa < 1 ? "error" : "ok";
+
+         $vastaavat_table .= "<font class='{$siirrettavissa_saldon_font}'>".sprintf("%.2f", $_siirrettavissa)."</font>";
        }
 
       $vastaavat_table .= "</td>";
-
-       if ($tuotteen_toimittaja_row['selitetark_2'] == "") {
-        $vastaavat_table .= "<td class='{$_tuote['vastaavat_tunnus']}_{$_tilattu}_tehdas_saldo_paivitetty' align='right'>".tv1dateconv($tuotteen_toimittaja_row['tehdas_saldo_paivitetty'], "PITKA")."</td>";
-      }
-      else {
-        $vastaavat_table .= "<td align='right'></td>";
-      }
-
       $vastaavat_table .= "<td>";
 
       if ($sahkoinen_tilausliitanta and $tuotteen_toimittaja_row['selitetark_2'] != "") {
@@ -344,8 +350,7 @@ if (!isset($rivienmaara) or $rivienmaara < 100) {
         <th>".t("Ostohinta")."</th>
         <th>".t("Hinta")."</th>
         <th>".t("Saldo myytävissä")."</th>
-        <th>".t("Toimittajan saldo")."</th>
-        <th>".t("Toimittajan saldo päivitetty")."</th>";
+        <th>".t("Siirrettävissä")."</th>";
 
       if ($sahkoinen_tilausliitanta) $vastaavat_html .= "<th>".t("Tarkista toimittajan saldo")."</th>";
 

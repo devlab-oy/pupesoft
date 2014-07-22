@@ -37,7 +37,7 @@ else {
                                    LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
                                    WHERE tilausrivi.otunnus = '$kukarow[kesken]'
                                    and tilausrivi.yhtio     = '$kukarow[yhtio]'
-                                   and tilausrivi.var       not in ('P','J', 'O')
+                                   and tilausrivi.var       not in ('P','J','O','S')
                                    and tilausrivi.tyyppi    = 'L'
                                    ORDER BY tilausrivi.tunnus";
 
@@ -539,17 +539,17 @@ else {
                             and ostorivitunnus   = '$erajaljella_row[ostorivitunnus]'
                             and myyntirivitunnus = 0
                             and sarjanumero      = '$lisa_row[sarjanumero]'
-                            and tunnus           = '$erajaljella_row[tunnus]'
-                            LIMIT 1";
+                            and tunnus           = '$erajaljella_row[tunnus]'";
                   $lisa_res = pupe_query($query);
 
                   // haetaan päivitettävä myyntirivi jotta voidaan kloonata se myöhemmin tarvittaessa
-                  $query =   "SELECT * FROM sarjanumeroseuranta
-                              WHERE yhtio          = '$kukarow[yhtio]'
-                              and tuoteno          = '$trow[tuoteno]'
-                              and myyntirivitunnus = '$trow[tunnus]'
-                              and era_kpl          = 0
-                              LIMIT 1";
+                  $query = "SELECT *
+                            FROM sarjanumeroseuranta
+                            WHERE yhtio          = '$kukarow[yhtio]'
+                            and tuoteno          = '$trow[tuoteno]'
+                            and myyntirivitunnus = '$trow[tunnus]'
+                            and era_kpl          = 0
+                            LIMIT 1";
                   $erahakures = pupe_query($query);
                   $erahakurow = mysql_fetch_assoc($erahakures);
 
@@ -560,8 +560,7 @@ else {
                             muutospvm      = now(),
                             muuttaja       = '$kukarow[kuka]'
                             WHERE yhtio    = '$kukarow[yhtio]'
-                            and tunnus     = '$erahakurow[tunnus]'
-                            LIMIT 1";
+                            and tunnus     = '$erahakurow[tunnus]'";
                   $lisa_res = pupe_query($query);
 
                   // lisätään uusi kloonattu rivi
@@ -617,6 +616,7 @@ else {
                             and tuoteno          = '$trow[tuoteno]'
                             and myyntirivitunnus = '$trow[tunnus]'
                             and era_kpl          = 0
+                            ORDER BY tunnus
                             LIMIT 1";
                   $lisa_res = pupe_query($query);
 
@@ -636,6 +636,7 @@ else {
                         and ostorivitunnus   = '$trow[tunnus]'
                         and myyntirivitunnus = 0
                         and sarjanumero      = '$lisa_row[sarjanumero]'
+                        ORDER BY tunnus
                         LIMIT 1";
               $lisa_res = pupe_query($query);
 
@@ -644,6 +645,7 @@ else {
                         WHERE yhtio          = '$kukarow[yhtio]'
                         and tuoteno          = '$trow[tuoteno]'
                         and myyntirivitunnus = '$trow[tunnus]'
+                        ORDER BY tunnus
                         LIMIT 1";
               $lisa_res = pupe_query($query);
             }
@@ -674,6 +676,7 @@ else {
                     WHERE yhtio    = '$kukarow[yhtio]'
                     and tuoteno    = '$trow[tuoteno]'
                     and oletus    != ''
+                    ORDER BY tunnus
                     LIMIT 1";
           $laskutusres = pupe_query($query);
 
@@ -688,6 +691,7 @@ else {
                       oletus        = ''
                       WHERE yhtio   = '$kukarow[yhtio]'
                       and tuoteno   = '$trow[tuoteno]'
+                      ORDER BY tunnus
                       LIMIT 1";
             $laskutusres = pupe_query($query);
 

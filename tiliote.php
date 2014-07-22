@@ -27,16 +27,18 @@ if ($php_cli) {
   error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
   ini_set("display_errors", 0);
 
-  require ("inc/connect.inc");
-  require ("inc/functions.inc");
+  require "inc/connect.inc";
+  require "inc/functions.inc";
 
   $userfile  = trim($argv[2]);
   $filenimi  = $userfile;
-  $ok     = 1;
-  $palvelin2  = "";
+  $ok        = 1;
+  $palvelin2 = "";
+
+  ob_start();
 }
 else {
-  require ("inc/parametrit.inc");
+  require "inc/parametrit.inc";
 
   echo "<font class='head'>Tiliotteen, LMP:n, kurssien, verkkolaskujen ja viitemaksujen käsittely</font><hr><br>\n<br>\n";
 
@@ -104,7 +106,7 @@ if ($ok == 1) {
     // Finvoice verkkolasku
     fclose($fd);
 
-    require("verkkolasku-in.php");
+    require "verkkolasku-in.php";
   }
   elseif (substr($tietue, 5, 12) == "Tilivaluutan") {
     // luetaanko kursseja
@@ -138,18 +140,18 @@ if ($ok == 1) {
     while (!feof($fd)) {
       $tietue = str_replace($serc, $repl, $tietue);
 
-      if (substr($tietue,0,3) == 'T00' or substr($tietue,0,3) == 'T03' or substr($tietue,0,1) == '0') {
+      if (substr($tietue, 0, 3) == 'T00' or substr($tietue, 0, 3) == 'T03' or substr($tietue, 0, 1) == '0') {
 
         // Konekielinen tiliote
-        if (substr($tietue,0,3) == 'T00') {
+        if (substr($tietue, 0, 3) == 'T00') {
           $xtyyppi   = 1;
-          $alkupvm   = dateconv(substr($tietue,26,6));
-          $loppupvm   = dateconv(substr($tietue,32,6));
+          $alkupvm   = dateconv(substr($tietue, 26, 6));
+          $loppupvm   = dateconv(substr($tietue, 32, 6));
           $tilino   = substr($tietue, 9, 14);
         }
 
         // Laskujen maksupalvelu LMP
-        if (substr($tietue,0,3) == 'T03') {
+        if (substr($tietue, 0, 3) == 'T03') {
           $xtyyppi   = 2;
           $alkupvm  = substr($tietue, 38, 6);
           $loppupvm   = $alkupvm;
@@ -160,31 +162,31 @@ if ($ok == 1) {
         }
 
         // Saapuvat viitemaksut
-        if (substr($tietue,0,1) == '0') {
+        if (substr($tietue, 0, 1) == '0') {
           $xtyyppi   = 3;
-          $alkupvm  = "20".dateconv(substr($tietue,1,6));
+          $alkupvm  = "20".dateconv(substr($tietue, 1, 6));
           $loppupvm   = $alkupvm;
 
           //Luetaan tilinumero seuraavalta riviltä ja siirretään pointteri takaisin nykypaikkaan
           $pointterin_paikka = ftell($fd);
           $tilino   = fgets($fd);
-                      $onko_vipn  = (substr($tilino,0,1) == 'S') ? 1 : 0;    # tunnistetaan Danske Bankin VIPN-factoringaineisto, koska tiedostossa ei tule tilinumeroa
-                      $tilino   = substr($tilino,1,14);
+          $onko_vipn  = (substr($tilino, 0, 1) == 'S') ? 1 : 0;    // tunnistetaan Danske Bankin VIPN-factoringaineisto, koska tiedostossa ei tule tilinumeroa
+          $tilino   = substr($tilino, 1, 14);
           fseek($fd, $pointterin_paikka);
 
-                      if ($onko_vipn) {
-                          $query = "SELECT tilino
-                                    FROM yriti
-                                    WHERE bic        =  'DABAFIHH'
-                                    AND   factoring != ''
-                                    LIMIT 1;";
-                          $f_result = pupe_query($query);
+          if ($onko_vipn) {
+            $query = "SELECT tilino
+                      FROM yriti
+                      WHERE bic        =  'DABAFIHH'
+                      AND   factoring != ''
+                      LIMIT 1;";
+            $f_result = pupe_query($query);
 
-                          if (mysql_num_rows($f_result) === 1) {
-                              $f_row = mysql_fetch_assoc($f_result);
-                              $tilino = $f_row['tilino'];
-                          } # jos tämä epäonnistuu, virheilmoitus tulee alempana kun tilinumeroa ei löydy
-                      }
+            if (mysql_num_rows($f_result) === 1) {
+              $f_row = mysql_fetch_assoc($f_result);
+              $tilino = $f_row['tilino'];
+            } // jos tämä epäonnistuu, virheilmoitus tulee alempana kun tilinumeroa ei löydy
+          }
         }
 
         $query = "SELECT *
@@ -224,23 +226,23 @@ if ($ok == 1) {
         $yhtio_tsekrow = mysql_fetch_assoc($yhtio_tsekres);
 
         //vertaillaan tilikauteen
-        list($vv1,$kk1,$pp1) = explode("-", $yhtio_tsekrow["myyntireskontrakausi_alku"]);
-        list($vv2,$kk2,$pp2) = explode("-", $yhtio_tsekrow["myyntireskontrakausi_loppu"]);
+        list($vv1, $kk1, $pp1) = explode("-", $yhtio_tsekrow["myyntireskontrakausi_alku"]);
+        list($vv2, $kk2, $pp2) = explode("-", $yhtio_tsekrow["myyntireskontrakausi_loppu"]);
 
-        $myrealku  = (int) date('Ymd', mktime(0,0,0,$kk1,$pp1,$vv1));
-        $myreloppu = (int) date('Ymd', mktime(0,0,0,$kk2,$pp2,$vv2));
+        $myrealku  = (int) date('Ymd', mktime(0, 0, 0, $kk1, $pp1, $vv1));
+        $myreloppu = (int) date('Ymd', mktime(0, 0, 0, $kk2, $pp2, $vv2));
 
-        list($vv1,$kk1,$pp1) = explode("-", $yhtio_tsekrow["ostoreskontrakausi_alku"]);
-        list($vv2,$kk2,$pp2) = explode("-", $yhtio_tsekrow["ostoreskontrakausi_loppu"]);
+        list($vv1, $kk1, $pp1) = explode("-", $yhtio_tsekrow["ostoreskontrakausi_alku"]);
+        list($vv2, $kk2, $pp2) = explode("-", $yhtio_tsekrow["ostoreskontrakausi_loppu"]);
 
-        $oresalku  = (int) date('Ymd', mktime(0,0,0,$kk1,$pp1,$vv1));
-        $oresloppu = (int) date('Ymd', mktime(0,0,0,$kk2,$pp2,$vv2));
+        $oresalku  = (int) date('Ymd', mktime(0, 0, 0, $kk1, $pp1, $vv1));
+        $oresloppu = (int) date('Ymd', mktime(0, 0, 0, $kk2, $pp2, $vv2));
 
-        list($vv1,$kk1,$pp1) = explode("-", $yhtio_tsekrow["tilikausi_alku"]);
-        list($vv2,$kk2,$pp2) = explode("-", $yhtio_tsekrow["tilikausi_loppu"]);
+        list($vv1, $kk1, $pp1) = explode("-", $yhtio_tsekrow["tilikausi_alku"]);
+        list($vv2, $kk2, $pp2) = explode("-", $yhtio_tsekrow["tilikausi_loppu"]);
 
-        $tikaalku  = (int) date('Ymd', mktime(0,0,0,$kk1,$pp1,$vv1));
-        $tikaloppu = (int) date('Ymd', mktime(0,0,0,$kk2,$pp2,$vv2));
+        $tikaalku  = (int) date('Ymd', mktime(0, 0, 0, $kk1, $pp1, $vv1));
+        $tikaloppu = (int) date('Ymd', mktime(0, 0, 0, $kk2, $pp2, $vv2));
 
         // Onko tämä aineisto jo ajettu?
         $query = "SELECT *
@@ -296,7 +298,7 @@ if ($ok == 1) {
               $xtyyppi=0;
               $virhe++;
             }
-            elseif (!$forceta)  {
+            elseif (!$forceta) {
               echo "<font class='error'>VIRHE: Tämä aineisto on jo aiemmin käsitelty! (Tili: $tilino / Pvm: $alkupvm / Yhtiö: $yritirow[yhtio])</font><br>\n<br>\n";
 
               if (!$php_cli) {
@@ -446,7 +448,7 @@ if ($ok == 1) {
       $query = "UNLOCK TABLES";
       $tiliotedataresult = pupe_query($query);
 
-      require("inc/footer.inc");
+      require "inc/footer.inc";
       exit;
     }
 
@@ -463,7 +465,6 @@ if ($ok == 1) {
     $tilioterivilaskuri = 1;
     $tilioterivimaara  = mysql_num_rows($tiliotedataresult);
 
-
     // Haetaan kannan isoin lasku.tunnus, nin voidaan tehdän sanity-checki EndToEndId:lle.
     $query = "SELECT max(tunnus) maxEndToEndId
               FROM lasku";
@@ -474,13 +475,13 @@ if ($ok == 1) {
       $tietue = $tiliotedatarow['tieto'];
 
       if ($tiliotedatarow['tyyppi'] == 1) {
-        require("inc/tiliote.inc");
+        require "inc/tiliote.inc";
       }
       if ($tiliotedatarow['tyyppi'] == 2) {
-        require("inc/LMP.inc");
+        require "inc/LMP.inc";
       }
       if ($tiliotedatarow['tyyppi'] == 3) {
-        require("inc/viitemaksut.inc");
+        require "inc/viitemaksut.inc";
       }
 
       // merkataan tämä tiliotedatarivi käsitellyksi
@@ -498,7 +499,7 @@ if ($ok == 1) {
       $kohdm   = $vastavienti_valuutassa;
 
       echo "<tr><td colspan = '6'>";
-      require("inc/teeselvittely.inc");
+      require "inc/teeselvittely.inc";
       echo "</td></tr>";
       echo "</table><br>\n<br>\n";
     }
@@ -508,13 +509,13 @@ if ($ok == 1) {
       $maara   = $vastavienti;
       $kohdm   = $vastavienti_valuutassa;
 
-      require("inc/teeselvittely.inc");
+      require "inc/teeselvittely.inc";
       echo "</table><br>\n<br>\n";
     }
 
     if ($xtyyppi == 3) {
 
-      # Tässä tarvitaan kukarow[yhtio], joten ajetaan tämä kaikille firmoille
+      // Tässä tarvitaan kukarow[yhtio], joten ajetaan tämä kaikille firmoille
       $query    = "SELECT yhtio from yhtio";
       $yhtiores = pupe_query($query);
 
@@ -526,8 +527,8 @@ if ($ok == 1) {
         // Setataan kukarow-yhtiö
         $kukarow["yhtio"] = $yhtiorow["yhtio"];
 
-        require("inc/viitemaksut_kohdistus.inc");
-        require("myyntires/suoritus_asiakaskohdistus_kaikki.php");
+        require "inc/viitemaksut_kohdistus.inc";
+        require "myyntires/suoritus_asiakaskohdistus_kaikki.php";
       }
 
       echo "<br>\n<br>\n";
@@ -539,5 +540,13 @@ if (!$php_cli) {
   // Palautetaan alkuperäinen kukarow
   $kukarow = $tiliote_kukarow;
 
-  require("inc/footer.inc");
+  require "inc/footer.inc";
+}
+else {
+  $ulosputti = ob_get_contents();
+  $ulosputti = str_ireplace(array("<br>","<br/>","</tr>"), "\n", $ulosputti);
+  $ulosputti = strip_tags($ulosputti);
+  ob_end_clean();
+
+  echo $ulosputti;
 }

@@ -30,7 +30,7 @@ if (mysql_num_rows($turesult) > 0) {
   $lis = substr($lis,0,-1);
 
   if ($yhtiorow['pakkaamolokerot'] != '') {
-    $kirjoitintilrivilisa = " AND var not in ('P','J','O') ";
+    $kirjoitintilrivilisa = " AND var not in ('P','J','O','S') ";
   }
 
   if ($lis != '') {

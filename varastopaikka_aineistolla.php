@@ -132,7 +132,7 @@ if ($tee == "AJA") {
             $atilausmaara = $tvrow['tilausmaara'];
           }
 
-          require("muuvarastopaikka.php");
+          lisaa_tuotepaikka($tuoteno, $ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso, "Varastopaikkojen aineistomuutoksessa", "", $ahalytysraja, $atilausmaara, 0);
         }
 
         if (isset($failure)) unset($kaikki_tiedostorivit[$rowkey]);

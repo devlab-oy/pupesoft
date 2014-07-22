@@ -215,12 +215,8 @@ if ($tee == "valmis") {
                 }
 
                 if (!$varaston_hyllypaikat_kaytossa or (isset($hyllyp) and mysql_num_rows($hyllyp) != 0)) {
-
-                  $query = "  insert into tuotepaikat (hyllyalue,hyllynro,hyllyvali,hyllytaso,oletus,saldo,saldoaika,tuoteno,yhtio,laatija,luontiaika)
-                        values ('".$t1[$tilausrivirow["tunnus"]]."','".$t2[$tilausrivirow["tunnus"]]."','".$t3[$tilausrivirow["tunnus"]]."','".$t4[$tilausrivirow["tunnus"]]."','$oletus','0',now(),'$tilausrivirow[tuoteno]','$kukarow[yhtio]','$kukarow[kuka]',now())";
-                  $insre = pupe_query($query);
-
-                  $uusipaikka = mysql_insert_id();
+                  $lisatty_paikka = lisaa_tuotepaikka($tilausrivirow["tuoteno"], $t1[$tilausrivirow["tunnus"]], $t2[$tilausrivirow["tunnus"]], $t3[$tilausrivirow["tunnus"]], $t4[$tilausrivirow["tunnus"]], "Saapumisella", $oletus, 0, 0, 0);
+                  $uusipaikka = $lisatty_paikka["tuotepaikan_tunnus"];
 
                   $query = "SELECT tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso
                             from tuotepaikat
@@ -228,24 +224,7 @@ if ($tee == "valmis") {
                             and tunnus  = '$uusipaikka'
                             and tuoteno = '$tilausrivirow[tuoteno]'";
                   $result = pupe_query($query);
-
                   $paikkarow = mysql_fetch_array($result);
-
-                  $query2 = "INSERT into tapahtuma set
-                             yhtio     = '$kukarow[yhtio]',
-                             tuoteno   = '$tilausrivirow[tuoteno]',
-                             kpl       = '0',
-                             hinta     = '0',
-                             kplhinta  = '0',
-                             laji      = 'uusipaikka',
-                             hyllyalue = '{$t1[$tilausrivirow["tunnus"]]}',
-                             hyllynro  = '{$t2[$tilausrivirow["tunnus"]]}',
-                             hyllyvali = '{$t3[$tilausrivirow["tunnus"]]}',
-                             hyllytaso = '{$t4[$tilausrivirow["tunnus"]]}',
-                             selite    = '".t("Saavutettaessa lisättiin tuotepaikka")." ".$t1[$tilausrivirow["tunnus"]]." ".$t2[$tilausrivirow["tunnus"]]." ".$t3[$tilausrivirow["tunnus"]]." ".$t4[$tilausrivirow["tunnus"]]."',
-                             laatija   = '$kukarow[kuka]',
-                             laadittu  = now()";
-                  $result2 = pupe_query($query2);
 
                   echo "<font class='message'>".t("Tuotenumerolle")." $tilausrivirow[tuoteno] ".t("perustetaan uusi paikka")." ".$t1[$tilausrivirow["tunnus"]]."-".$t2[$tilausrivirow["tunnus"]]."-".$t3[$tilausrivirow["tunnus"]]."-".$t4[$tilausrivirow["tunnus"]]."</font><br>";
                 }

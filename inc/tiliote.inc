@@ -9,6 +9,9 @@ if (!isset($td_perheid)) $td_perheid = $tiliotedatarow['perheid'];
 if (!isset($maksu)) $maksu = 0;
 if (!isset($tkesken)) $tkesken = 0;
 if (!isset($tilinvaluutta)) $tilinvaluutta = "";
+if (!isset($toim)) $toim = "";
+if (!isset($selite_maksuavarten)) $selite_maksuavarten = "";
+if (!isset($eiselitetta)) $eiselitetta = 0;
 
 $tunnus = substr($tietue, 0, 3);
 

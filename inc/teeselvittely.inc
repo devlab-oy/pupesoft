@@ -139,10 +139,12 @@ if (round($maara, 2) != 0) {
       $result = pupe_query($query);
     }
 
-        $query = "UPDATE tiliotedata
-                  SET kasitelty = now(),
-                  tiliointitunnus = ".mysql_insert_id()."
-                  WHERE tunnus    = '$tiliotedataid'";
+    $_tiliointi_id = mysql_insert_id();
+
+    $query = "UPDATE tiliotedata
+              SET kasitelty = now(),
+              tiliointitunnus = {$_tiliointi_id}
+              WHERE tunnus = {$tiliotedataid}";
     $dummyresult = pupe_query($query);
 
     if ($loydettiinko_sopiva_tili != '') {

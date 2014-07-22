@@ -27397,6 +27397,12 @@ if (!function_exists("kasittele_tiliote_viite")) {
     while ($tiliotedatarow = mysql_fetch_assoc($tiliotedataresult)) {
       $tietue = $tiliotedatarow['tieto'];
 
+      $query = "SELECT *
+                FROM yriti
+                WHERE tilino = '{$tiliotedatarow['tilino']}'";
+      $yriti_result = pupe_query($query);
+      $yritirow = mysql_fetch_assoc($yriti_result);
+
       if ($tiliotedatarow['tyyppi'] == 1) {
         $tee_selvittely = true;
         require("inc/tiliote.inc");

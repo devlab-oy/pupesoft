@@ -231,7 +231,10 @@ if ($tee != "" and isset($painoinnappia)) {
       $varastotilasto_table .= "<td><input type='text' class='search_field' name='search_Varastosaldo'></td>";
 
       if ($nayta_vapaa_saldo == "on") {
-        $varastotilasto_table .= "<td><input type='text' class='search_field' name='search_Vapaasaldo'/></td>";
+        $varastotilasto_table .= "<td>";
+        $varastotilasto_table .= "<input type='text' class='search_field'";
+        $varastotilasto_table .= " name='search_Vapaasaldo'/>";
+        $varastotilasto_table .= "</td>";
       }
 
       $varastotilasto_table .= "<td><input type='text' class='search_field' name='search_Varastonarvo'></td>";

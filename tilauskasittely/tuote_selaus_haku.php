@@ -1674,7 +1674,11 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
       echo "</td>";
 
       if ($verkkokauppa == "") {
-        echo "<td valign='top' class='$vari' $classmidl>".t_tuotteen_avainsanat($row, 'nimitys')."</td>";
+        echo "<td valign='top' class='$vari' $classmidl>";
+        echo t_tuotteen_avainsanat($row, 'nimitys');
+        echo "<br>";
+        echo "<a>" . t("Näytä variaatiot") . "</a>";
+        echo "</td>";
       }
 
       if ($verkkokauppa == "") {

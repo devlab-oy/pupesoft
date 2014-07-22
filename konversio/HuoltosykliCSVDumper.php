@@ -132,7 +132,11 @@ class HuoltosykliCSVDumper extends CSVDumper {
       unset($rivi['hinta']);
 
       //Huom koko ei ole pakollinen koska paloposteilla ei ole kokoa
-      if (empty($rivi['tyyppi']) or empty($rivi['toimenpide'])) {
+      if ($rivi['tyyppi'] == 'paloposti' and empty($rivi['toimenpide'])) {
+        $progress_bar->increase();
+        continue;
+      }
+      else if ($rivi['tyyppi'] != 'paloposti' and (empty($rivi['tyyppi']) or empty($rivi['toimenpide']) or empty($rivi['koko']))) {
         $progress_bar->increase();
         continue;
       }
@@ -472,7 +476,9 @@ class HuoltosykliCSVDumper extends CSVDumper {
 
   protected function tarkistukset() {
     $query = "SELECT laite.tunnus,
-              COUNT(*) AS kpl
+              laite.tuoteno,
+              tuote.nimitys,
+              Count(*) AS kpl
               FROM   laite
               JOIN tuote
               ON ( tuote.yhtio = laite.yhtio
@@ -482,8 +488,9 @@ class HuoltosykliCSVDumper extends CSVDumper {
               ON ( huoltosyklit_laitteet.yhtio = laite.yhtio
                 AND huoltosyklit_laitteet.laite_tunnus = laite.tunnus )
               WHERE  laite.yhtio = '{$this->kukarow['yhtio']}'
-              GROUP  BY laite.tunnus
-              HAVING kpl != 3";
+              GROUP  BY 1,2,3
+              HAVING kpl != 3
+              ORDER  BY kpl DESC;";
     $result = pupe_query($query);
     $kpl = mysql_num_rows($result);
     echo "Sammuttimia joilla on enemmän tai vähemmän kuin 3 huoltosykliä liitettynä {$kpl}";
@@ -517,33 +524,8 @@ class HuoltosykliCSVDumper extends CSVDumper {
 
     echo mysql_num_rows($result) . " tuotteella on avainsana ongelma";
 
-    /* Tarkastus queryita, laitteet joilla ei yhtään huoltosykliä
-     *
-      SELECT laite.tuoteno,
-      count(*) AS kpl
-      FROM   laite
-      LEFT JOIN huoltosyklit_laitteet AS hl
-      ON ( hl.yhtio = laite.yhtio
-      AND hl.laite_tunnus = laite.tunnus )
-      WHERE  laite.yhtio = '{$this->kukarow['yhtio']}'
-      AND laite.tuoteno != 'MUISTUTUS'
-      AND hl.tunnus IS NULL
-      GROUP BY laite.tuoteno
-      ORDER  BY kpl DESC, laite.tuoteno ASC;
-
-      SELECT laite.tunnus,
-      laite.tuoteno,
-      hl.tunnus
-      FROM   laite
-      LEFT JOIN huoltosyklit_laitteet AS hl
-      ON ( hl.yhtio = laite.yhtio
-      AND hl.laite_tunnus = laite.tunnus )
-      WHERE  laite.yhtio = '{$this->kukarow['yhtio']}'
-      AND laite.tuoteno != 'MUISTUTUS'
-      AND hl.tunnus IS NULL
-      ORDER  BY laite.tuoteno ASC;
-     */
-
+    //@TODO tämä toistaiseksi kommentoitu, koska kaikille paloposteille ei haluttu haistella liitettäviä huoltosyklejä.
+    //Harkitaan pitäiskö tämä enabloida
 //    $this->liita_puuttuvat_huoltosyklit();
   }
 

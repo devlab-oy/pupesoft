@@ -113,7 +113,7 @@ class LaiteCSVDumper extends CSVDumper {
       if ($key == 'paikka') {
         $paikka_tunnus = $this->hae_paikka_tunnus($value, $rivi['kohde'], $rivi['asiakas_nimi']);
         $paikan_nimi = $value;
-        
+
         if ($paikka_tunnus == 0 and in_array($key, $this->required_fields)) {
           $this->errors[$index][] = t('Paikkaa') . " <b>{$paikan_nimi}</b> " . t('ei löydy') . ' ' . $rivi['kohde'] . ' ' . $rivi['asiakas_nimi'];
           $this->errors[$index][] = $rivi['koodi'];

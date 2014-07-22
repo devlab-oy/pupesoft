@@ -113,6 +113,11 @@ $query    = "SELECT *
 $result   = pupe_query($query);
 $laskurow = mysql_fetch_assoc($result);
 
+if ($variaatio != "") {
+  echo "kissa";
+  exit;
+}
+
 if ($verkkokauppa == "") {
   if (!isset($ostoskori)) {
     $ostoskori = '';
@@ -1677,7 +1682,16 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
         echo "<td valign='top' class='$vari' $classmidl>";
         echo t_tuotteen_avainsanat($row, 'nimitys');
         echo "<br>";
-        echo "<a>" . t("Näytä variaatiot") . "</a>";
+
+        // Parametrivariaation selitteen hakeminen tietokannasta tuotteelle
+        $query = "SELECT selite
+                  FROM   tuotteen_avainsanat
+                  WHERE  tuoteno = '{$row["tuoteno"]}'
+                  AND    laji    = 'parametri_variaatio'";
+        $result = pupe_query($query);
+        $parametri_variaatio = mysql_fetch_assoc($result);
+
+        echo "<a href='?variaatio={$parametri_variaatio["selite"]}' target='_blank'>" . t("Näytä variaatiot") . "</a>";
         echo "</td>";
       }
 

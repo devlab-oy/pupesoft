@@ -119,11 +119,8 @@ if ($ok == 1) {
     // Tiliote- tai viiteaineisto
     fclose($fd);
 
-    $result = tallenna_tiliote_viite($filenimi, $forceta);
-
-    if ($result) {
-      kasittele_tiliote_viite();
-    }
+    tallenna_tiliote_viite($filenimi, $forceta);
+    kasittele_tiliote_viite();
   }
 }
 

@@ -27375,7 +27375,7 @@ if (!function_exists("kasittele_tiliote_viite")) {
     // K‰sitell‰‰n uudet tietueet
     $query = "SELECT *
               FROM tiliotedata
-              WHERE aineisto = '$aineistorow[aineisto]'
+              WHERE kasitelty = '0000-00-00'
               ORDER BY tunnus";
     $tiliotedataresult = pupe_query($query);
 

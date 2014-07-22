@@ -114,7 +114,7 @@ class TarkastuksetCSVDumper extends CSVDumper {
     $valid = true;
     foreach ($rivi as $key => $value) {
       if (in_array($key, $this->required_fields) and $value == '') {
-        $this->errors[$index][] = t('Pakollinen kenttä')." <b>{$key}</b> ".t('puuttuu');
+        $this->errors[$index][] = t('Pakollinen kenttä') . " <b>{$key}</b> " . t('puuttuu');
         $valid = false;
       }
 
@@ -129,13 +129,13 @@ class TarkastuksetCSVDumper extends CSVDumper {
           $rivi['paikka_nimi'] = $laite['paikka_nimi'];
         }
         else {
-          $this->errors[$index][] = t('FATAL Laitetta')." <b>{$rivi[$key]}</b> ".t('ei löytynyt');
+          $this->errors[$index][] = t('FATAL Laitetta') . " <b>{$rivi[$key]}</b> " . t('ei löytynyt');
           $valid = false;
         }
       }
       else if ($key == 'toimenpide') {
         if (!$this->loytyyko_tuote($rivi[$key])) {
-          $this->errors[$index][] = t('Toimenpide tuotetta')." <b>{$rivi[$key]}</b> ".t('ei löytynyt');
+          $this->errors[$index][] = t('Toimenpide tuotetta') . " <b>{$rivi[$key]}</b> " . t('ei löytynyt');
           $valid = false;
         }
         else {
@@ -184,7 +184,7 @@ class TarkastuksetCSVDumper extends CSVDumper {
 
   protected function dump_data() {
     if ($this->is_proggressbar_on) {
-      $progress_bar = new ProgressBar(t('Ajetaan rivit tietokantaan').' : '.count($this->rivit));
+      $progress_bar = new ProgressBar(t('Ajetaan rivit tietokantaan') . ' : ' . count($this->rivit));
       $progress_bar->initialize(count($this->rivit));
     }
     $i = 1;
@@ -394,8 +394,8 @@ class TarkastuksetCSVDumper extends CSVDumper {
     }
 
     $query = "INSERT INTO
-              {$taulu} (".implode(", ", array_keys($rivi)).", {$laadittu}, laatija)
-              VALUES('".implode("', '", array_values($rivi))."', now(), 'import')";
+              {$taulu} (" . implode(", ", array_keys($rivi)) . ", {$laadittu}, laatija)
+              VALUES('" . implode("', '", array_values($rivi)) . "', now(), 'import')";
     pupe_query($query);
 
     return mysql_insert_id();
@@ -406,7 +406,7 @@ class TarkastuksetCSVDumper extends CSVDumper {
 
     $folder = dirname($filepath);
     // Otetaan tiedostosta ensimmäinen rivi talteen, siinä on headerit
-    $file = fopen($filepath, "r") or die(t("Tiedoston avaus epäonnistui")."!");
+    $file = fopen($filepath, "r") or die(t("Tiedoston avaus epäonnistui") . "!");
     $header_rivi = fgets($file);
     fclose($file);
 
@@ -415,7 +415,7 @@ class TarkastuksetCSVDumper extends CSVDumper {
     file_put_contents($header_file, $header_rivi);
 
     chdir($folder);
-    system("split -l 5000 $filepath");
+    system("split -l 1000 $filepath");
 
     // Poistetaan alkuperäinen
     unlink($filepath);
@@ -425,17 +425,17 @@ class TarkastuksetCSVDumper extends CSVDumper {
       while (false !== ($file = readdir($handle))) {
         if (!in_array($file, array('.', '..', '.DS_Store', 'header_file')) and is_file($file)) {
           // Jos kyseessä on eka file (loppuu "aa"), ei laiteta headeriä
-          $new_file_filepath = $folder."/{$file}";
+          $new_file_filepath = $folder . "/{$file}";
           if (substr($file, -2) != "aa") {
             // Keksitään temp file
-            $temp_file = $folder."/{$file}_s";
+            $temp_file = $folder . "/{$file}_s";
 
             // Concatenoidaan headerifile ja tämä file temppi fileen
-            system("cat ".escapeshellarg($header_file)." ".escapeshellarg($file)." > ".escapeshellarg($temp_file));
+            system("cat " . escapeshellarg($header_file) . " " . escapeshellarg($file) . " > " . escapeshellarg($temp_file));
 
             // Poistetaan alkuperäinen file
             unlink($file);
-            $new_file_filepath = $folder."/{$file}_s";
+            $new_file_filepath = $folder . "/{$file}_s";
           }
 
           $filepaths[] = $new_file_filepath;

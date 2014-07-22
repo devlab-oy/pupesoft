@@ -59,6 +59,7 @@ function luo_kaato_tiedot() {
             muuttaja = 'import',
             muutospvm = NOW(),
             kohde = {$kohde_tunnus},
+            olosuhde = 'A',
             nimi = 'Kaato-paikka'";
   pupe_query($query);
 

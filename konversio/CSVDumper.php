@@ -154,7 +154,6 @@ abstract class CSVDumper {
 
       array_walk($rivi, array($this, 'escape_single_quotes'));
       array_walk($rivi, 'trim');
-      array_walk($rivi, array($this, 'decode_utf8'));
 
       $rivit[] = $rivi;
 
@@ -209,10 +208,10 @@ abstract class CSVDumper {
 //      $progress_bar->initialize(count($this->rivit));
 //    }
     foreach ($this->rivit as $rivi) {
-      $query = "  INSERT INTO {$this->table}
-            (".implode(", ", array_keys($rivi)).")
-            VALUES
-            ('".implode("', '", array_values($rivi))."')";
+      $query = "INSERT INTO {$this->table}
+                (".implode(", ", array_keys($rivi)).")
+                VALUES
+                ('".implode("', '", array_values($rivi))."')";
 
       //Purkka fix
       $query = str_replace("'now()'", 'now()', $query);

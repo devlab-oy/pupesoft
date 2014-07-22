@@ -1,6 +1,6 @@
 <?php
 
-class TuotteenavainsanaToimenpideCSVDumper extends CSVDumper{
+class TuotteenavainsanaToimenpideCSVDumper extends CSVDumper {
 
   protected $unique_values = array();
 
@@ -8,12 +8,12 @@ class TuotteenavainsanaToimenpideCSVDumper extends CSVDumper{
     parent::__construct($kukarow);
 
     $konversio_array = array(
-      'tuoteno'   => 'KOODI',
-      'selite'   => 'DATA1',
-      'try'     => 'RYHMA',
+        'tuoteno' => 'KOODI',
+        'selite'  => 'DATA1',
+        'try'     => 'RYHMA',
     );
     $required_fields = array(
-      'tuoteno',
+        'tuoteno',
     );
 
     $this->setFilepath("/tmp/konversio/VARAOSA.csv");
@@ -80,7 +80,7 @@ class TuotteenavainsanaToimenpideCSVDumper extends CSVDumper{
     $valid = true;
     foreach ($rivi as $key => $value) {
       if (in_array($key, $this->required_fields) and $value == '') {
-        $this->errors[$index][] = t('Pakollinen kenttä')." <b>{$key}</b> ".t('puuttuu');
+        $this->errors[$index][] = t('Pakollinen kenttä') . " <b>{$key}</b> " . t('puuttuu');
         $valid = false;
       }
 
@@ -100,10 +100,10 @@ class TuotteenavainsanaToimenpideCSVDumper extends CSVDumper{
   }
 
   protected function dump_data() {
-    $progress_bar = new ProgressBar(t('Ajetaan rivit tietokantaan').' : '.count($this->rivit));
+    $progress_bar = new ProgressBar(t('Ajetaan rivit tietokantaan') . ' : ' . count($this->rivit));
     $progress_bar->initialize(count($this->rivit));
     foreach ($this->rivit as $rivi) {
-      $query = '  INSERT INTO '.$this->table.'
+      $query = '  INSERT INTO ' . $this->table . '
             (
               yhtio,
               tuoteno,
@@ -116,14 +116,14 @@ class TuotteenavainsanaToimenpideCSVDumper extends CSVDumper{
             )
             VALUES
             (
-              "'.$rivi['yhtio'].'",
-              "'.$rivi['tuoteno'].'",
-              "'.$rivi['kieli'].'",
+              "' . $rivi['yhtio'] . '",
+              "' . $rivi['tuoteno'] . '",
+              "' . $rivi['kieli'] . '",
               "tyomaarayksen_ryhmittely",
-              "'.$rivi['selite'].'",
-              "'.$rivi['selitetark'].'",
-              "'.$rivi['laatija'].'",
-              '.$rivi['luontiaika'].'
+              "' . $rivi['selite'] . '",
+              "' . $rivi['selitetark'] . '",
+              "' . $rivi['laatija'] . '",
+              ' . $rivi['luontiaika'] . '
             )';
       pupe_query($query);
 
@@ -132,26 +132,25 @@ class TuotteenavainsanaToimenpideCSVDumper extends CSVDumper{
   }
 
   protected function tarkistukset() {
-    $query = "  SELECT tuote.tuoteno,
-          tuote.nimitys,
-          t.tuoteno
-          FROM   tuote
-          LEFT JOIN tuotteen_avainsanat AS t
-          ON ( t.yhtio = tuote.yhtio
-            AND t.tuoteno = tuote.tuoteno
-            AND t.laji = 'tyomaarayksen_ryhmittely' )
-          WHERE tuote.yhtio = '{$this->kukarow['yhtio']}'
-          AND tuote.tuotetyyppi = 'K'
-          AND t.tuoteno IS NULL
-          ORDER BY tuote.tuoteno ASC;";
+    $query = "SELECT tuote.tuoteno,
+              tuote.nimitys,
+              t.tuoteno
+              FROM   tuote
+              LEFT JOIN tuotteen_avainsanat AS t
+              ON ( t.yhtio = tuote.yhtio
+                AND t.tuoteno = tuote.tuoteno
+                AND t.laji = 'tyomaarayksen_ryhmittely' )
+              WHERE tuote.yhtio = '{$this->kukarow['yhtio']}'
+              AND tuote.tuotetyyppi = 'K'
+              AND t.tuoteno IS NULL
+              ORDER BY tuote.tuoteno ASC;";
     $result = pupe_query($query);
-    echo "Seuraavilta tuotteilta puuttuu tyomaarayksen ryhmittely (".mysql_num_rows($result).")";
+    echo "Seuraavilta tuotteilta puuttuu tyomaarayksen ryhmittely (" . mysql_num_rows($result) . ")";
     echo "<br/>";
     echo "<br/>";
-    while($rivi = mysql_fetch_assoc($result)) {
+    while ($rivi = mysql_fetch_assoc($result)) {
       echo "{$rivi['nimitys']} - {$rivi['tuoteno']}";
       echo "<br/>";
     }
   }
-
 }

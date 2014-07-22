@@ -93,6 +93,14 @@ class TarkastuksetCSVDumper extends CSVDumper {
             $rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
           }
         }
+        else if ($konvertoitu_header == 'kommentti') {
+          if ($rivi[$csv_header] == 'None') {
+            $rivi_temp[$konvertoitu_header] = '';
+          }
+          else {
+            $rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
+          }
+        }
         else {
           $rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
         }
@@ -407,7 +415,7 @@ class TarkastuksetCSVDumper extends CSVDumper {
     file_put_contents($header_file, $header_rivi);
 
     chdir($folder);
-    system("split -l 10000 $filepath");
+    system("split -l 5000 $filepath");
 
     // Poistetaan alkuperäinen
     unlink($filepath);

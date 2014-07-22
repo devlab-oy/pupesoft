@@ -68,7 +68,7 @@ else {
 
 }
 
-$forceta = FALSE;
+$forceta = false;
 
 // Napataan alkuperäinen kukarow
 $tiliote_kukarow = $kukarow;
@@ -83,7 +83,7 @@ elseif (isset($virhe_file) and file_exists("/tmp/".basename($virhe_file))) {
   $userfile  = "/tmp/".basename($virhe_file);
   $filenimi  = "/tmp/".basename($virhe_file);
   $ok      = 1;
-  $forceta   = TRUE;
+  $forceta   = true;
 }
 
 if ($ok == 1) {
@@ -119,8 +119,11 @@ if ($ok == 1) {
     // Tiliote- tai viiteaineisto
     fclose($fd);
 
-    tallenna_tiliote_viite($filenimi);
-    kasittele_tiliote_viite();
+    $result = tallenna_tiliote_viite($filenimi, $forceta);
+
+    if ($result) {
+      kasittele_tiliote_viite();
+    }
   }
 }
 

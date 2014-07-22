@@ -164,7 +164,8 @@ if ($tee != "" and isset($painoinnappia)) {
             tuote.epakurantti25pvm,
             tuote.epakurantti50pvm,
             tuote.epakurantti75pvm,
-            tuote.epakurantti100pvm
+            tuote.epakurantti100pvm,
+            tuote.eankoodi
             FROM tuote
             {$toimittaja_join}
             {$tuotepaikka_join}
@@ -261,6 +262,7 @@ if ($tee != "" and isset($painoinnappia)) {
     $worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteryhmä"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteno"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
+    $worksheet->writeString($excelrivi, $excelsarake++, t("EAN-koodi"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("Varastosaldo"));
 
     if ($nayta_vapaa_saldo == "on") {
@@ -445,6 +447,7 @@ if ($tee != "" and isset($painoinnappia)) {
       $worksheet->writeString($excelrivi, $excelsarake++, $row["try"]);
       $worksheet->writeString($excelrivi, $excelsarake++, $row["tuoteno"]);
       $worksheet->writeString($excelrivi, $excelsarake++, $row["nimitys"]);
+      $worksheet->writeString($excelrivi, $excelsarake++, $row["eankoodi"]);
       $worksheet->writeNumber($excelrivi, $excelsarake++, $saldo);
 
       if ($nayta_vapaa_saldo == "on") {

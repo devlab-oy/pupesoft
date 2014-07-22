@@ -135,6 +135,7 @@ if ($variaatio != "") {
   echo "<th>" . t("Osasto") . "<br>" . t("Try") . "</th>";
   echo "<th>" . t("Hinta") . "</th>";
   echo "<th>" . t("Myytävissä") . "</th>";
+  echo "<th></th>";
   echo "</tr>";
 
   echo "</thead>";
@@ -149,6 +150,7 @@ if ($variaatio != "") {
     $tuotteen_myyntihinta = tuotteen_myyntihinta($yhtiorow, $tuote, 1);
     echo "<td>" . hintapyoristys($tuotteen_myyntihinta) . " {$yhtiorow["valkoodi"]}</td>";
     piirra_extranet_saldo($tuote);
+    piirra_ostoskoriin_lisays($tuote);
     echo "</tr>";
   }
 
@@ -2063,21 +2065,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
         }
       }
 
-      if ($oikeurow["paivitys"] == 1 and ($kukarow["kuka"] != "" or is_numeric($ostoskori))) {
-        if (($row["tuoteperhe"] == "" or $row["tuoteperhe"] == $row["tuoteno"] or $row["tyyppi"] == "V") and $row["osaluettelo"] == "") {
-          echo "<td align='right' class='$vari' style='vertical-align: top;' nowrap>";
-          echo "<input type='hidden' name='tiltuoteno[$yht_i]' value = '$row[tuoteno]'>";
-          echo "<input type='text' size='3' name='tilkpl[$yht_i]'> ";
-          echo "<a id='anchor_{$yht_i}' href='#' name='{$yht_i}'>";
-          echo "<input class='tuote_submit' id='{$yht_i}' type='submit' value = '".t("Lisää")."'>";
-          echo "</a>";
-          echo "</td>";
-          $yht_i++;
-        }
-        else {
-          echo "<td align='right' class='$vari' style='vertical-align: top;' nowrap></td>";
-        }
-      }
+      piirra_ostoskoriin_lisays($row);
 
       echo "</tr>";
 
@@ -2241,4 +2229,27 @@ function piirra_extranet_saldo($row) {
   }
 
   echo "</td>";
+}
+
+/**
+ * @param $row
+ */
+function piirra_ostoskoriin_lisays($row) {
+  global $oikeurow, $kukarow, $ostoskori, $vari, $yht_i;
+
+  if ($oikeurow["paivitys"] == 1 and ($kukarow["kuka"] != "" or is_numeric($ostoskori))) {
+    if (($row["tuoteperhe"] == "" or $row["tuoteperhe"] == $row["tuoteno"] or $row["tyyppi"] == "V") and $row["osaluettelo"] == "") {
+      echo "<td align='right' class='$vari' style='vertical-align: top;' nowrap>";
+      echo "<input type='hidden' name='tiltuoteno[$yht_i]' value = '$row[tuoteno]'>";
+      echo "<input type='text' size='3' name='tilkpl[$yht_i]'> ";
+      echo "<a id='anchor_{$yht_i}' href='#' name='{$yht_i}'>";
+      echo "<input class='tuote_submit' id='{$yht_i}' type='submit' value = '" . t("Lisää") . "'>";
+      echo "</a>";
+      echo "</td>";
+      $yht_i++;
+    }
+    else {
+      echo "<td align='right' class='$vari' style='vertical-align: top;' nowrap></td>";
+    }
+  }
 }

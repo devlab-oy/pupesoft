@@ -27052,6 +27052,13 @@ if (!function_exists("tallenna_tiliote_viite")) {
           $kukarow["yhtio"] = $yritirow["yhtio"];
         }
 
+         // Tarkistetaan tilit
+        if (strlen($yritirow['oletus_rahatili']) == 0 or strlen($yritirow['oletus_kulutili']) == 0) {
+          echo "<font class='error'>".t("Tililtä puuttuu kulu tai rahatili")."</font>";
+          $xtyyppi=0;
+          $virhe++;
+        }
+
         $query = "SELECT myyntireskontrakausi_alku,
                   myyntireskontrakausi_loppu,
                   ostoreskontrakausi_alku,
@@ -27382,7 +27389,7 @@ if (!function_exists("kasittele_tiliote_viite")) {
     $query = "SELECT *
               FROM tiliotedata
               WHERE kasitelty = '0000-00-00'
-              ORDER BY tunnus";
+              ORDER BY aineisto, tunnus";
     $tiliotedataresult = pupe_query($query);
 
     $tilioterivilaskuri = 1;
@@ -27402,6 +27409,9 @@ if (!function_exists("kasittele_tiliote_viite")) {
                 WHERE tilino = '{$tiliotedatarow['tilino']}'";
       $yriti_result = pupe_query($query);
       $yritirow = mysql_fetch_assoc($yriti_result);
+
+      // Setataan kukarow-yhtiö
+      $kukarow["yhtio"] = $yritirow["yhtio"];
 
       if ($tiliotedatarow['tyyppi'] == 1) {
         $tee_selvittely = true;

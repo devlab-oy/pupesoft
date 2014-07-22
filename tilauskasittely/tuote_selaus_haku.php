@@ -114,7 +114,45 @@ $result   = pupe_query($query);
 $laskurow = mysql_fetch_assoc($result);
 
 if ($variaatio != "") {
-  echo "kissa";
+  $query = "SELECT *
+            FROM tuote
+            INNER JOIN tuotteen_avainsanat ON tuote.tuoteno = tuotteen_avainsanat.tuoteno
+            WHERE tuotteen_avainsanat.selite = '{$variaatio}'";
+  $result = pupe_query($query);
+
+  $tuotteet = array();
+
+  while ($tuote = mysql_fetch_assoc($result)) {
+    array_push($tuotteet, $tuote);
+  }
+
+  echo "<table>";
+  echo "<thead>";
+
+  echo "<tr>";
+  echo "<th>" . t("Tuoteno") . "</th>";
+  echo "<th>" . t("Nimitys") . "</th>";
+  echo "<th>" . t("Osasto") . "<br>" . t("Try") . "</th>";
+  echo "<th>" . t("Hinta") . "</th>";
+  echo "</tr>";
+
+  echo "</thead>";
+  echo "<tbody>";
+
+  foreach ($tuotteet as $tuote) {
+    echo "<tr>";
+    echo "<td>{$tuote["tuoteno"]}</td>";
+    echo "<td>{$tuote["nimitys"]}</td>";
+    echo "<td>{$tuote["osasto"]}<br/>{$tuote["try"]}</td>";
+
+    $tuotteen_myyntihinta = tuotteen_myyntihinta($yhtiorow, $tuote, 1);
+    echo "<td>" . hintapyoristys($tuotteen_myyntihinta) . " {$yhtiorow["valkoodi"]}</td>";
+    echo "</tr>";
+  }
+
+  echo "</tbody>";
+  echo "</table>";
+
   exit;
 }
 

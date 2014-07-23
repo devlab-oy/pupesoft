@@ -10,14 +10,14 @@ class AsiakasalennusCSVDumper extends CSVDumper {
     parent::__construct($kukarow);
 
     $konversio_array = array(
-      'asiakas'   => 'ASIAKAS',
-      'ryhma'     => 'TUNNUS',
-      'alennus'   => 'PROS',
+        'asiakas' => 'ASIAKAS',
+        'ryhma'   => 'TUNNUS',
+        'alennus' => 'PROS',
     );
     $required_fields = array(
-      'asiakas',
-      'ryhma',
-      'alennus'
+        'asiakas',
+        'ryhma',
+        'alennus'
     );
 
     $this->setFilepath("/tmp/konversio/ASIALENNUS.csv");
@@ -95,10 +95,10 @@ class AsiakasalennusCSVDumper extends CSVDumper {
   }
 
   private function hae_asiakas_tunnus($asiakasnro) {
-    $query = "  SELECT tunnus
-          FROM asiakas
-          WHERE yhtio = '{$this->kukarow['yhtio']}'
-          AND asiakasnro = '{$asiakasnro}'";
+    $query = "SELECT tunnus
+              FROM asiakas
+              WHERE yhtio = '{$this->kukarow['yhtio']}'
+              AND asiakasnro = '{$asiakasnro}'";
     $result = pupe_query($query);
     $asiakasrow = mysql_fetch_assoc($result);
 
@@ -108,22 +108,21 @@ class AsiakasalennusCSVDumper extends CSVDumper {
 
     return 0;
   }
-  
+
   private function luo_asiakas($asiakas_tunnus) {
-    $query = "  INSERT INTO asiakas
-          SET ytunnus = 'Kaato-asiakas',
-          nimi = 'Kaato-asiakas',
-          asiakasnro = '{$asiakas_tunnus}',
-          toimitustapa = 'Nouto',
-          maa = 'FI',
-          laatija = 'import',
-          luontiaika = NOW(),
-          yhtio = '{$this->kukarow['yhtio']}'";
+    $query = "INSERT INTO asiakas
+              SET ytunnus = '',
+              nimi = 'Kaato-asiakas',
+              asiakasnro = '{$asiakas_tunnus}',
+              toimitustapa = 'Nouto',
+              maa = 'FI',
+              laatija = 'import',
+              luontiaika = NOW(),
+              yhtio = '{$this->kukarow['yhtio']}'";
     pupe_query($query);
   }
 
   protected function tarkistukset() {
     echo "Ei tarkistuksia";
   }
-
 }

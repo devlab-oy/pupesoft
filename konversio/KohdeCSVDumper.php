@@ -118,7 +118,7 @@ class KohdeCSVDumper extends CSVDumper {
 
   private function luo_asiakas($asiakasnumero, $asiakas_nimi) {
     $query = "INSERT INTO asiakas
-              SET ytunnus = 'Kaato-asiakas',
+              SET ytunnus = '',
               nimi = '{$asiakas_nimi}',
               asiakasnro = '{$asiakasnumero}',
               toimitustapa = 'Nouto',

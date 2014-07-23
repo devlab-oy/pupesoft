@@ -90,12 +90,17 @@ if ($verkkokauppa == "") {
   $hae_ja_selaa_result = pupe_query($query);
   $hae_ja_selaa_row = mysql_fetch_assoc($hae_ja_selaa_result);
 
-  if ($hae_ja_selaa_row['selite'] == 'B') {
-    echo "<font class='head'>".t("TUOTEHAKU").":</font><br/><br/>";
+  if (isset($variaatio)) {
+    $otsikko = t("Variaatiot tuotteelle");
+  }
+  elseif ($hae_ja_selaa_row['selite'] == 'B') {
+    $otsikko = t("TUOTEHAKU");
   }
   else {
-    echo "<font class='head'>".t("ETSI JA SELAA TUOTTEITA").":</font><hr>";
+    $otsikko = t("ETSI JA SELAA TUOTTEITA");
   }
+
+  echo "<font class='head'>{$otsikko}:</font><br/><br/>";
 }
 
 if (!isset($toim_kutsu)) {
@@ -1477,18 +1482,9 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
         echo "<td valign='top' class='$vari' $classmidl>";
         echo t_tuotteen_avainsanat($row, 'nimitys');
 
-        // Parametrivariaation selitteen hakeminen tietokannasta tuotteelle
-        $query = "SELECT selite
-                  FROM   tuotteen_avainsanat
-                  WHERE  tuoteno = '{$row["tuoteno"]}'
-                  AND    laji    = 'parametri_variaatio'";
-        $result = pupe_query($query);
-        $parametri_variaatio = mysql_fetch_assoc($result);
+        $parametri_variaatio = hae_parametri_variaatio($row);
 
-        if ($parametri_variaatio) {
-          echo "<br>";
-          echo "<a href='?variaatio={$parametri_variaatio["selite"]}' target='_blank'>" . t("Näytä variaatiot") . "</a>";
-        }
+        piirra_nayta_variaatiot_nappula($parametri_variaatio);
 
         echo "</td>";
       }
@@ -2311,5 +2307,32 @@ function hae_yhtiot() {
     $yhtiot = array();
     $yhtiot[] = $kukarow["yhtio"];
     return $yhtiot;
+  }
+}
+
+/**
+ * Hakee tuotteen parametri_variaatio-tunnuksen tietokannasta
+ *
+ * @param $row
+ *
+ * @return array
+ */
+function hae_parametri_variaatio($row) {
+  $query = "SELECT selite
+                  FROM   tuotteen_avainsanat
+                  WHERE  tuoteno = '{$row["tuoteno"]}'
+                  AND    laji    = 'parametri_variaatio'";
+  $result = pupe_query($query);
+  $parametri_variaatio = mysql_fetch_assoc($result);
+  return $parametri_variaatio;
+}
+
+/**
+ * @param $parametri_variaatio
+ */
+function piirra_nayta_variaatiot_nappula($parametri_variaatio) {
+  if ($parametri_variaatio) {
+    echo "<br>";
+    echo "<a href='?variaatio={$parametri_variaatio["selite"]}' target='_blank'>" . t("Näytä variaatiot") . "</a>";
   }
 }

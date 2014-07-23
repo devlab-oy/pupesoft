@@ -89,7 +89,9 @@ function hae_tyomaarayksen_rivit($lasku_tunnukset) {
   global $kukarow, $yhtiorow;
 
   $alekentta = generoi_alekentta('M', 'tilausrivi', 'ei');
-  $query = "SELECT tilausrivi.tuoteno,
+  $query = "SELECT laite.tila AS laite_tila,
+            IF(laite.tunnus IS NULL, 'muu', 'laite') AS onko_laite,
+            tilausrivi.tuoteno,
             tilausrivi.nimitys,
             tilausrivi.tilkpl,
             tilausrivi.hinta,
@@ -98,6 +100,12 @@ function hae_tyomaarayksen_rivit($lasku_tunnukset) {
             {$alekentta} * tilausrivi.hinta * tilausrivi.tilkpl AS rivihinta,
             ({$alekentta} * tilausrivi.hinta * tilausrivi.tilkpl) * (tilausrivi.alv / 100) AS alv_maara
             FROM tilausrivi
+            JOIN tilausrivin_lisatiedot
+            ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
+            LEFT JOIN laite
+            ON ( laite.yhtio = tilausrivin_lisatiedot.yhtio
+              AND laite.tunnus = tilausrivin_lisatiedot.asiakkaan_positio )
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
             AND tilausrivi.var != 'P'
             AND tilausrivi.otunnus IN ({$lasku_tunnukset})";
@@ -106,6 +114,9 @@ function hae_tyomaarayksen_rivit($lasku_tunnukset) {
 
   $rivit = array();
   while ($rivi = mysql_fetch_assoc($result)) {
+    if ($rivi['onko_laite'] == 'laite' and !in_array($rivi['laite_tila'], array('N','V'))) {
+      continue;
+    }
     $rivit[] = $rivi;
   }
 

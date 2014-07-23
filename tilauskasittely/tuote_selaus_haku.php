@@ -2232,7 +2232,7 @@ function piirra_ostoskoriin_lisays($row) {
  */
 function piirra_formin_aloitus() {
   global $verkkokauppa, $edsort, $ojarj, $osasto, $try, $tuotemerkki, $ulisa, $toim_kutsu, $kukarow,
-         $ostoskori, $valittu_tarjous_tunnus, $tultiin;
+         $ostoskori, $valittu_tarjous_tunnus, $tultiin, $variaatio;
 
   if ($verkkokauppa != "") {
     echo avoin_kori();
@@ -2254,7 +2254,9 @@ function piirra_formin_aloitus() {
     }
   }
   else {
-    echo "<form action='?submit_button=1&sort=$edsort&ojarj=$ojarj$ulisa' name='lisaa' method='post' autocomplete='off' id='lisaaformi'>";
+    $variaatio_query_param = isset($variaatio) ? "&variaatio={$variaatio}" : "";
+
+    echo "<form action='?submit_button=1&sort=$edsort&ojarj={$ojarj}{$ulisa}{$variaatio_query_param}' name='lisaa' method='post' autocomplete='off' id='lisaaformi'>";
   }
 
   echo "<input type='hidden' name='tee' value = 'TI'>";

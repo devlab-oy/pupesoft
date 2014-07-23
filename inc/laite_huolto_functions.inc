@@ -241,9 +241,11 @@ function generoi_tyomaaraykset_huoltosykleista($laitteet, $laitteiden_huoltosykl
 
   $edellinen_kohde_tunnus = 0;
   $virheet = array();
+  $laitteiden_avoimet_tyomaaraykset = laitteiden_avoimet_tyomaaraykset();
+  $saldottomat_tuotteet = tuotteiden_ei_saldoa();
   foreach ($laitteet as $laite) {
-    $onko_tyomaarays_jo_luotu_talle_laitteelle = tarkista_loytyyko_tyomaarays($laite);
-    if ($onko_tyomaarays_jo_luotu_talle_laitteelle) {
+    //Tarkistetaan löytyyko avoin työmääräys laitteelle
+    if (isset($laitteiden_avoimet_tyomaaraykset[$laite['laite_tunnus']][$laite['toimenpide']])) {
       if ($debug) {
         $virheet[$laite['laite_tunnus']][] = "Tälle laitteelle " . $laite['laite_tunnus'] . " on jo luotu työmääräys";
       }
@@ -254,8 +256,7 @@ function generoi_tyomaaraykset_huoltosykleista($laitteet, $laitteiden_huoltosykl
     }
 
     //laitteen toimenpidetuote pitää olla saldoton
-    $onko_toimenpide_tuote_saldoton = tarkista_toimenpide_saldo($laite);
-    if (!$onko_toimenpide_tuote_saldoton) {
+    if (!isset($saldottomat_tuotteet[$laite['toimenpide']])) {
       if ($debug) {
         $virheet[$laite['laite_tunnus']][] = "Toimenpide tuote " . $laite['laite_tunnus'] . " pitää olla saldoton! Työmääräystä tälle tuotteelle ei lisätty";
       }
@@ -295,7 +296,7 @@ function generoi_tyomaaraykset_huoltosykleista($laitteet, $laitteiden_huoltosykl
     echo "<br/>";
     echo "Työmääräyksiä tuli {$tyomaarays_kpl}";
     echo "<br/>";
-    foreach($virheet as $laitteen_virheet) {
+    foreach ($virheet as $laitteen_virheet) {
       foreach ($laitteen_virheet as $laitteen_virhe) {
         echo $laitteen_virhe;
         echo "<br/>";
@@ -353,7 +354,7 @@ function generoi_tyomaarays_temp($huollettavan_laitteen_huoltosyklirivi) {
 
   $params = array(
       'tyomaarays_tunnus' => $tyomaarays_tunnus,
-      'tuote'              => $trow,
+      'tuote'             => $trow,
       'laite_tunnus'      => $huollettavan_laitteen_huoltosyklirivi['laite_tunnus'],
       'toimaika'          => $toimaika,
       'toimitettuaika'    => '0000-00-00 00:00:00',
@@ -406,14 +407,13 @@ function generoi_tyomaarays($laite, $laitteiden_huoltosyklirivit_joita_ei_huolle
 
   $edellinen_tyomaarays = hae_laitteen_edellinen_tyomaarays($laite['laite_tunnus']);
   $asiakas = hae_asiakas($laite['asiakas_tunnus']);
-  $tyomaarays_tunnus = luo_tyomaarays($asiakas, $toimitusaika, 0.00, $laite['kohde_vastuuhenkilo']);
+  $laskurow['tunnus'] = luo_tyomaarays($asiakas, $toimitusaika, 0.00, $laite['kohde_vastuuhenkilo']);
 
-  if (empty($tyomaarays_tunnus)) {
+  if (empty($laskurow['tunnus'])) {
     echo t("Joku meni pieleen");
     return false;
   }
 
-  $laskurow = hae_tyomaarays($tyomaarays_tunnus);
   $kukarow['kesken'] = $laskurow['tunnus'];
 
   //lisätään sammuttimen toimenpiteen palvelurivi
@@ -810,47 +810,46 @@ function paivita_tilausrivin_kommentti($tilausrivi_tunnus, $kommentti) {
   pupe_query($query);
 }
 
-function tarkista_loytyyko_tyomaarays($laite) {
+function laitteiden_avoimet_tyomaaraykset() {
   global $kukarow, $yhtiorow;
 
   //tarkistetaan löytyykö tälle laitteelle kesken tilassa / ei valmis oleva työmääräys
-
-  $query = "SELECT *
+  $query = "SELECT tilausrivin_lisatiedot.asiakkaan_positio AS laite_tunnus,
+            tilausrivi.tuoteno AS toimenpide
             FROM lasku
             JOIN tilausrivi
             ON ( tilausrivi.yhtio = lasku.yhtio
-              AND tilausrivi.otunnus = lasku.tunnus
-              AND tilausrivi.tuoteno = '{$laite['toimenpide']}')
+              AND tilausrivi.otunnus = lasku.tunnus )
             JOIN tilausrivin_lisatiedot
             ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
-              AND tilausrivin_lisatiedot.asiakkaan_positio = '{$laite['laite_tunnus']}')
+              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.tila = 'A'";
   $result = pupe_query($query);
 
-  if (mysql_num_rows($result) == 0) {
-    return false;
+  $tyomaaraykset = array();
+  while ($tyomaarays = mysql_fetch_assoc($result)) {
+    $tyomaaraykset[$tyomaarays['laite_tunnus']][$tyomaarays['toimenpide']] = true;
   }
 
-  return true;
+  return $tyomaaraykset;
 }
 
-function tarkista_toimenpide_saldo($laite) {
+function tuotteiden_ei_saldoa() {
   global $kukarow, $yhtiorow;
 
-  $query = "SELECT ei_saldoa
+  $query = "SELECT tuoteno
             FROM tuote
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tuoteno = '{$laite['toimenpide']}'
             AND ei_saldoa = 'o'";
   $result = pupe_query($query);
 
-  if (mysql_num_rows($result) > 0) {
-    return true;
+  $tuotteet = array();
+  while ($tuote = mysql_fetch_assoc($result)) {
+    $tuotteet[$tuote['tuoteno']] = true;
   }
 
-  return false;
+  return $tuotteet;
 }
 
 function aseta_tyomaarayksen_toimitusajankohta($tyomaarays_tunnus, $ajankohta) {

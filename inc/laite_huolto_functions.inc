@@ -243,6 +243,8 @@ function generoi_tyomaaraykset_huoltosykleista($laitteet, $laitteiden_huoltosykl
   $virheet = array();
   $laitteiden_avoimet_tyomaaraykset = laitteiden_avoimet_tyomaaraykset();
   $saldottomat_tuotteet = tuotteiden_ei_saldoa();
+  $asiakkaat = hae_asiakkaat();
+  $tuotteet = hae_tuotteet();
   foreach ($laitteet as $laite) {
     //Tarkistetaan löytyyko avoin työmääräys laitteelle
     if (isset($laitteiden_avoimet_tyomaaraykset[$laite['laite_tunnus']][$laite['toimenpide']])) {
@@ -282,7 +284,7 @@ function generoi_tyomaaraykset_huoltosykleista($laitteet, $laitteiden_huoltosykl
       $lisaa_kulut = false;
     }
 
-    generoi_tyomaarays($laite, $laitteiden_huoltosyklirivit_joita_ei_huolleta, $lisaa_kulut);
+    generoi_tyomaarays($laite, $asiakkaat, $tuotteet, $laitteiden_huoltosyklirivit_joita_ei_huolleta, $lisaa_kulut);
 
     $edellinen_kohde_tunnus = $laite['kohde_tunnus'];
 
@@ -390,7 +392,7 @@ function generoi_tyomaarays_temp($huollettavan_laitteen_huoltosyklirivi) {
  * tyojono
  * viimeinen_tapahtuma (optional)
  */
-function generoi_tyomaarays($laite, $laitteiden_huoltosyklirivit_joita_ei_huolleta = array(), $lisaa_kulut = false) {
+function generoi_tyomaarays($laite, &$asiakkaat, &$tuotteet, $laitteiden_huoltosyklirivit_joita_ei_huolleta = array(), $lisaa_kulut = false) {
   global $kukarow, $yhtiorow, $debug;
 
   $kukarow['kesken'] = 0;
@@ -406,7 +408,7 @@ function generoi_tyomaarays($laite, $laitteiden_huoltosyklirivit_joita_ei_huolle
   }
 
   $edellinen_tyomaarays = hae_laitteen_edellinen_tyomaarays($laite['laite_tunnus']);
-  $asiakas = hae_asiakas($laite['asiakas_tunnus']);
+  $asiakas = $asiakkaat[$laite['asiakas_tunnus']];
   $laskurow['tunnus'] = luo_tyomaarays($asiakas, $toimitusaika, 0.00, $laite['kohde_vastuuhenkilo']);
 
   if (empty($laskurow['tunnus'])) {
@@ -417,7 +419,7 @@ function generoi_tyomaarays($laite, $laitteiden_huoltosyklirivit_joita_ei_huolle
   $kukarow['kesken'] = $laskurow['tunnus'];
 
   //lisätään sammuttimen toimenpiteen palvelurivi
-  $trow = hae_tuote($laite['toimenpide']);
+  $trow = $tuotteet[$laite['toimenpide']];
 
   if (isset($laite['tilausrivi_hinta']) and $laite['tilausrivi_hinta'] != '') {
     $hinta = $laite['tilausrivi_hinta'];
@@ -448,7 +450,7 @@ function generoi_tyomaarays($laite, $laitteiden_huoltosyklirivit_joita_ei_huolle
   $tilausrivi_tunnus = luo_tilausrivi($params);
 
   if ($lisaa_kulut) {
-    $kaynti_trow = hae_tuote('KAYNTI');
+    $kaynti_trow = $tuotteet['KAYNTI'];
     $params = array(
         'tyomaarays_tunnus' => $laskurow['tunnus'],
         'tuote'             => $kaynti_trow,
@@ -474,7 +476,7 @@ function generoi_tyomaarays($laite, $laitteiden_huoltosyklirivit_joita_ei_huolle
     paivita_laitteen_muiden_jonossa_olevien_huoltosyklien_viimeinen_tapahtumapaiva($laitteiden_huoltosyklirivit_joita_ei_huolleta, $laite['laite_tunnus'], $toimitusaika);
   }
 
-  return $tyomaarays_tunnus;
+  return $laskurow['tunnus'];
 }
 
 function luo_tyomaarays($asiakas, $toimaika, $summa, $alv_23 = true, $vastuuhenkilo = '', $temp = false) {
@@ -1582,5 +1584,43 @@ if (!function_exists('hae_paikan_asiakas')) {
     $result = pupe_query($query);
 
     return mysql_fetch_assoc($result);
+  }
+}
+
+if (!function_exists('hae_asiakkaat')) {
+
+  function hae_asiakkaat() {
+    global $kukarow, $yhtiorow;
+
+    $query = "SELECT *
+              FROM asiakas
+              WHERE yhtio = '{$kukarow['yhtio']}'";
+    $result = pupe_query($query);
+
+    $asiakkaat = array();
+    while ($asiakas = mysql_fetch_assoc($result)) {
+      $asiakkaat[$asiakas['tunnus']] = $asiakas;
+    }
+
+    return $asiakkaat;
+  }
+}
+
+if (!function_exists('hae_tuotteet')) {
+
+  function hae_tuotteet() {
+    global $kukarow, $yhtiorow;
+
+    $query = "SELECT *
+              FROM tuote
+              WHERE yhtio = '{$kukarow['yhtio']}'";
+    $result = pupe_query($query);
+
+    $tuotteet = array();
+    while ($tuote = mysql_fetch_assoc($result)) {
+      $tuotteet[$tuote['tuoteno']] = $tuote;
+    }
+
+    return $tuotteet;
   }
 }

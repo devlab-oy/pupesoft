@@ -122,7 +122,7 @@ $laskurow = mysql_fetch_assoc($result);
 if ($variaatio != "") {
   tarkista_tilausrivi();
 
-  $query = "SELECT *
+  $query = "SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.osasto
             FROM tuote
             INNER JOIN tuotteen_avainsanat ON (tuote.tuoteno = tuotteen_avainsanat.tuoteno AND
                                                tuotteen_avainsanat.kieli = '{$yhtiorow["kieli"]}')
@@ -141,6 +141,7 @@ if ($variaatio != "") {
   echo "<thead>";
 
   echo "<tr>";
+  echo "<th></th>";
   echo "<th>" . t("Tuoteno") . "</th>";
   echo "<th>" . t("Nimitys") . "</th>";
   echo "<th>" . t("Osasto") . "<br>" . t("Try") . "</th>";
@@ -153,7 +154,10 @@ if ($variaatio != "") {
   echo "<tbody>";
 
   foreach ($tuotteet as $tuote) {
+    $liitteet = liite_popup("TH", $tuote["tunnus"]);
+
     echo "<tr>";
+    echo "<td>{$liitteet}</td>";
     echo "<td>{$tuote["tuoteno"]}</td>";
     echo "<td>{$tuote["nimitys"]}</td>";
     echo "<td>{$tuote["osasto"]}<br/>{$tuote["try"]}</td>";

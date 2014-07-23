@@ -567,7 +567,7 @@ function echo_laitteen_vaihto_form($request = array()) {
   echo "<tr>";
   echo '<th align="left">' . t("Paikka") . '</th>';
   echo "<td>";
-  echo "<select name='uusi_laite[paikka]'>";
+  echo "<select id='paikka' name='uusi_laite[paikka]'>";
   foreach ($request['paikat'] as $paikka) {
     $selected = ($paikka['tunnus'] == $request['laite']['paikka_tunnus']) ? 'SELECTED' : '';
     echo "<option value='{$paikka['tunnus']}' $selected>{$paikka['nimi']}</option>";

@@ -112,6 +112,17 @@ $request = array(
 
 if (!isset($request['toimitusaika'])) {
   $request['toimitusaika'] = 28;
+  $_SESSION['tyojono_hakuehdot']['toimitusaika'] = 28;
+}
+
+//Jos haetaan (vahingossa) kaikkien asiakkaiden kaikkia töitä niin forcetaan toimitusaika 28 päivään,
+//koska query kestää muuten liian kauan
+$onko_tehdyt = ($request['toim'] == 'TEHDYT_TYOT');
+$asiakas_kohde_tyhja = (empty($request['asiakas_tunnus']) or empty($request['kohde_tunnus']));
+$ei_toimitusaikaa = (empty($request['toimitusaika']));
+if ($onko_tehdyt and $asiakas_kohde_tyhja and $ei_toimitusaikaa) {
+  $request['toimitusaika'] = 28;
+  $_SESSION['tyojono_hakuehdot']['toimitusaika'] = 28;
 }
 
 $request['tyojonot'] = hae_tyojonot($request);

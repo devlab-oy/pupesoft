@@ -174,6 +174,8 @@ if ($variaatio != "") {
 
   echo "</form>";
 
+  echo "<button onclick='window.close();'>" . t("Palaa takaisin perustuoten‰kym‰‰n") . "</button>";
+
   exit;
 }
 

@@ -154,8 +154,13 @@ if ($variaatio != "") {
 
     $tuotteen_myyntihinta = tuotteen_myyntihinta($yhtiorow, $tuote, 1);
     echo "<td>" . hintapyoristys($tuotteen_myyntihinta) . " {$yhtiorow["valkoodi"]}</td>";
-    piirra_extranet_saldo($tuote);
+
+    $yhtiot = hae_yhtiot();
+
+    hae_ja_piirra_saldo($tuote, $yhtiot);
+
     piirra_ostoskoriin_lisays($tuote);
+
     echo "</tr>";
   }
 
@@ -668,23 +673,7 @@ if ($verkkokauppa != "") {
   }
 }
 
-// Halutaanko saldot koko konsernista?
-$query = "SELECT *
-          FROM yhtio
-          WHERE konserni='$yhtiorow[konserni]' and konserni != ''";
-$result = pupe_query($query);
-
-if (mysql_num_rows($result) > 0 and $yhtiorow["haejaselaa_konsernisaldot"] != "") {
-  $yhtiot = array();
-
-  while ($row = mysql_fetch_assoc($result)) {
-    $yhtiot[] = $row["yhtio"];
-  }
-}
-else {
-  $yhtiot = array();
-  $yhtiot[] = $kukarow["yhtio"];
-}
+$yhtiot = hae_yhtiot();
 
 if (isset($sort) and $sort != '') {
   $sort = trim(mysql_real_escape_string($sort));
@@ -1589,7 +1578,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
         echo "<td valign='top' class='$vari' $classmidl>$row[aleryhma]<br>$row[status]</td>";
       }
 
-      hae_ja_piirra_saldo();
+      hae_ja_piirra_saldo($row, $yhtiot);
 
       piirra_ostoskoriin_lisays($row);
 
@@ -2024,12 +2013,12 @@ function tarkista_tilausrivi() {
 }
 
 /**
- * @return array
+ * Hakee tuotteen saldon ja piirt‰‰ sen
  */
-function hae_ja_piirra_saldo() {
-  global $toim_kutsu, $verkkokauppa, $kukarow, $verkkokauppa_saldotsk, $row, $laskurow,
+function hae_ja_piirra_saldo($row, $yhtiot) {
+  global $toim_kutsu, $verkkokauppa, $kukarow, $verkkokauppa_saldotsk, $laskurow,
          $saldoaikalisa, $yhtiorow, $rivin_yksikko, $vari, $classrigh, $hinta_rajaus, $ostoskori,
-         $yht_i, $lisatiedot, $yhtiot, $hae_ja_selaa_row;
+         $yht_i, $lisatiedot, $hae_ja_selaa_row;
 
   if ($toim_kutsu != "EXTENNAKKO" and ($verkkokauppa == "" or ($verkkokauppa != "" and $kukarow["kuka"] != "www" and $verkkokauppa_saldotsk))) {
     // Tuoteperheen is‰t, mutta ei sarjanumerollisisa isi‰ (Normi, Extranet ja Verkkokauppa)
@@ -2291,5 +2280,33 @@ function hae_ja_piirra_saldo() {
         echo "</td>";
       }
     }
+  }
+}
+
+/**
+ * Hakee yhtiˆt, joille saldo n‰ytet‰‰n
+ *
+ * @return array
+ */
+function hae_yhtiot() {
+  global $yhtiorow, $kukarow;
+
+  $query = "SELECT *
+          FROM yhtio
+          WHERE konserni='$yhtiorow[konserni]' and konserni != ''";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) > 0 and $yhtiorow["haejaselaa_konsernisaldot"] != "") {
+    $yhtiot = array();
+
+    while ($row = mysql_fetch_assoc($result)) {
+      $yhtiot[] = $row["yhtio"];
+    }
+    return $yhtiot;
+  }
+  else {
+    $yhtiot = array();
+    $yhtiot[] = $kukarow["yhtio"];
+    return $yhtiot;
   }
 }

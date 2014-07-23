@@ -126,6 +126,8 @@ if ($variaatio != "") {
     array_push($tuotteet, $tuote);
   }
 
+  piirra_formin_aloitus();
+
   echo "<table>";
   echo "<thead>";
 
@@ -156,6 +158,8 @@ if ($variaatio != "") {
 
   echo "</tbody>";
   echo "</table>";
+
+  echo "</form>";
 
   exit;
 }
@@ -1151,38 +1155,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
       $saldoaikalisa = "";
     }
 
-    if ($verkkokauppa != "") {
-      echo avoin_kori();
-
-      echo "<form id = 'lisaa' action=\"javascript:ajaxPost('lisaa', 'tuote_selaus_haku.php?', 'selain', false, true);\" name='lisaa' method='post' autocomplete='off'>";
-
-      echo "<input type='hidden' name='submit_button' value = '1'>";
-      echo "<input type='hidden' name='sort' value = '$edsort'>";
-      echo "<input type='hidden' name='ojarj' value = '$ojarj'>";
-
-      if ($osasto != "") {
-        echo "<input type='hidden' name='osasto' value = '$osasto'>";
-      }
-      if ($try != "") {
-        echo "<input type='hidden' name='try' value = '$try'>";
-      }
-      if ($tuotemerkki != "") {
-        echo "<input type='hidden' name='tuotemerkki' value = '$tuotemerkki'>";
-      }
-    }
-    else {
-      echo "<form action='?submit_button=1&sort=$edsort&ojarj=$ojarj$ulisa' name='lisaa' method='post' autocomplete='off' id='lisaaformi'>";
-    }
-
-    echo "<input type='hidden' name='tee' value = 'TI'>";
-    echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
-    echo "<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>";
-    echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
-    echo "<input type='hidden' name='valittu_tarjous_tunnus' value='$valittu_tarjous_tunnus'>";
-
-    if ($tultiin == "futur") {
-      echo " <input type='hidden' name='tultiin' value='$tultiin'>";
-    }
+    piirra_formin_aloitus();
 
     if ($verkkokauppa == "") {
       if ($hae_ja_selaa_row['selite'] == 'B') {
@@ -2251,5 +2224,46 @@ function piirra_ostoskoriin_lisays($row) {
     else {
       echo "<td align='right' class='$vari' style='vertical-align: top;' nowrap></td>";
     }
+  }
+}
+
+/**
+ * Piirt‰‰ formin aloitustagin ja hidden inputit
+ */
+function piirra_formin_aloitus() {
+  global $verkkokauppa, $edsort, $ojarj, $osasto, $try, $tuotemerkki, $ulisa, $toim_kutsu, $kukarow,
+         $ostoskori, $valittu_tarjous_tunnus, $tultiin;
+
+  if ($verkkokauppa != "") {
+    echo avoin_kori();
+
+    echo "<form id = 'lisaa' action=\"javascript:ajaxPost('lisaa', 'tuote_selaus_haku.php?', 'selain', false, true);\" name='lisaa' method='post' autocomplete='off'>";
+
+    echo "<input type='hidden' name='submit_button' value = '1'>";
+    echo "<input type='hidden' name='sort' value = '$edsort'>";
+    echo "<input type='hidden' name='ojarj' value = '$ojarj'>";
+
+    if ($osasto != "") {
+      echo "<input type='hidden' name='osasto' value = '$osasto'>";
+    }
+    if ($try != "") {
+      echo "<input type='hidden' name='try' value = '$try'>";
+    }
+    if ($tuotemerkki != "") {
+      echo "<input type='hidden' name='tuotemerkki' value = '$tuotemerkki'>";
+    }
+  }
+  else {
+    echo "<form action='?submit_button=1&sort=$edsort&ojarj=$ojarj$ulisa' name='lisaa' method='post' autocomplete='off' id='lisaaformi'>";
+  }
+
+  echo "<input type='hidden' name='tee' value = 'TI'>";
+  echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
+  echo "<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>";
+  echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
+  echo "<input type='hidden' name='valittu_tarjous_tunnus' value='$valittu_tarjous_tunnus'>";
+
+  if ($tultiin == "futur") {
+    echo " <input type='hidden' name='tultiin' value='$tultiin'>";
   }
 }

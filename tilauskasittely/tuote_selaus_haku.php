@@ -1476,7 +1476,6 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
       if ($verkkokauppa == "") {
         echo "<td valign='top' class='$vari' $classmidl>";
         echo t_tuotteen_avainsanat($row, 'nimitys');
-        echo "<br>";
 
         // Parametrivariaation selitteen hakeminen tietokannasta tuotteelle
         $query = "SELECT selite
@@ -1486,7 +1485,11 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
         $result = pupe_query($query);
         $parametri_variaatio = mysql_fetch_assoc($result);
 
-        echo "<a href='?variaatio={$parametri_variaatio["selite"]}' target='_blank'>" . t("Näytä variaatiot") . "</a>";
+        if ($parametri_variaatio) {
+          echo "<br>";
+          echo "<a href='?variaatio={$parametri_variaatio["selite"]}' target='_blank'>" . t("Näytä variaatiot") . "</a>";
+        }
+
         echo "</td>";
       }
 

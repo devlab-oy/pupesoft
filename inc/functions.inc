@@ -27372,12 +27372,12 @@ if (!function_exists("tallenna_tiliote_viite")) {
     $query = "UNLOCK TABLES";
     $tiliotedataresult = pupe_query($query);
 
-    return true;
+    return $aineistorow["aineisto"];
   }
 }
 
 if (!function_exists("kasittele_tiliote_viite")) {
-  function kasittele_tiliote_viite() {
+  function kasittele_tiliote_viite($aineistotunnus) {
     global $kukarow, $yhtiorow, $palvelin2, $lopp_pvm, $lopp_tilino, $lopp_tyyppi, $kuitattu_checked;
 
     $tee_selvittely = false;
@@ -27388,7 +27388,7 @@ if (!function_exists("kasittele_tiliote_viite")) {
     // K‰sitell‰‰n uudet tietueet
     $query = "SELECT *
               FROM tiliotedata
-              WHERE kasitelty = '0000-00-00'
+              WHERE aineisto = {$aineistotunnus}
               ORDER BY aineisto, tunnus";
     $tiliotedataresult = pupe_query($query);
 

@@ -119,8 +119,11 @@ if ($ok == 1) {
     // Tiliote- tai viiteaineisto
     fclose($fd);
 
-    tallenna_tiliote_viite($filenimi, $forceta);
-    kasittele_tiliote_viite();
+    $aineistotunnus = tallenna_tiliote_viite($filenimi, $forceta);
+
+    if ($aineistotunnus !== false) {
+      kasittele_tiliote_viite($aineistotunnus);
+    }
   }
 }
 

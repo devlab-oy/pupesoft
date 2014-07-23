@@ -316,7 +316,7 @@ function echo_kayttoliittyma($request = array()) {
 }
 
 function echo_kalustoraportti_form($haettu_asiakas) {
-  global $kukarow, $yhtiorow;
+  global $kukarow, $yhtiorow, $palvelin2;
 
   echo "<form method='POST' action='' name='tulosta_kalustoraportti'>";
   echo "<input type='hidden' id='tee' name='tee' value='hae_asiakas' />";
@@ -445,8 +445,6 @@ function tulosta_kalustoraportti($kohteet) {
 
 function echo_kohteet_table($laitteet = array(), $request = array()) {
   global $palvelin2, $lopetus, $kukarow;
-
-  $huoltovalit = huoltovali_options();
 
   $haettu_asiakas = $request['haettu_asiakas'];
 

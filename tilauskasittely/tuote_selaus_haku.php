@@ -113,7 +113,10 @@ $query    = "SELECT *
 $result   = pupe_query($query);
 $laskurow = mysql_fetch_assoc($result);
 
+// Katsotaan, onko paramseissa annettu variaatio ja, jos on, näytetään kyseisen variaation tuotteet
 if ($variaatio != "") {
+  tarkista_tilausrivi();
+
   $query = "SELECT *
             FROM tuote
             INNER JOIN tuotteen_avainsanat ON tuote.tuoteno = tuotteen_avainsanat.tuoteno
@@ -234,198 +237,7 @@ if (!isset($tee)) {
   $tee = '';
 }
 
-// Tarkistetaan tilausrivi
-if (($tee == 'TI' or is_numeric($ostoskori)) and isset($tilkpl)) {
-
-  if (is_numeric($ostoskori)) {
-    $kori = check_ostoskori($ostoskori,$kukarow["oletus_asiakas"]);
-    $kukarow["kesken"] = $kori["tunnus"];
-  }
-
-  // haetaan avoimen tilauksen otsikko
-  if ($kukarow["kesken"] != 0) {
-    $query    = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
-    $laskures = pupe_query($query);
-  }
-  else {
-    // Luodaan uusi myyntitilausotsikko
-    if ($kukarow["extranet"] == "") {
-      require_once("tilauskasittely/luo_myyntitilausotsikko.inc");
-
-      if ($toim_kutsu != "") {
-        $lmyytoim = $toim_kutsu;
-      }
-      else {
-        $lmyytoim = "RIVISYOTTO";
-      }
-
-      $tilausnumero = luo_myyntitilausotsikko($lmyytoim, 0);
-      $kukarow["kesken"] = $tilausnumero;
-      $kaytiin_otsikolla = "NOJOO!";
-    }
-    else {
-      require_once("luo_myyntitilausotsikko.inc");
-      $tilausnumero = luo_myyntitilausotsikko("EXTRANET", $kukarow["oletus_asiakas"]);
-      $kukarow["kesken"] = $tilausnumero;
-      $kaytiin_otsikolla = "NOJOO!";
-    }
-
-    // haetaan avoimen tilauksen otsikko
-    $query    = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
-    $laskures = pupe_query($query);
-  }
-
-  if ($kukarow["kesken"] != 0 and $laskures != '') {
-    // tilauksen tiedot
-    $laskurow = mysql_fetch_assoc($laskures);
-  }
-
-  if (is_numeric($ostoskori)) {
-    echo "<font class='message'>".t("Lisätään tuotteita ostoskoriin")." $ostoskori.</font><br>";
-  }
-  else {
-    echo "<font class='message'>".t("Lisätään tuotteita tilaukselle")." $kukarow[kesken].</font><br>";
-  }
-
-  // Käydään läpi formin kaikki rivit
-  foreach ($tilkpl as $yht_i => $kpl) {
-
-    $kpl = str_replace(',', '.', $kpl);
-
-    if ((float) $kpl > 0 or ($kukarow["extranet"] == "" and (float) $kpl < 0) or ($yhtiorow['reklamaation_kasittely'] == 'U' and $toim == 'EXTRANET_REKLAMAATIO' and (float) $kpl !=0)) {
-
-      if ($yhtiorow['reklamaation_kasittely'] == 'U' and $toim == 'EXTRANET_REKLAMAATIO') {
-        $kpl = abs($kpl)*-1;
-      }
-
-      // haetaan tuotteen tiedot
-      $query    = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tiltuoteno[$yht_i]'";
-      $tuoteres = pupe_query($query);
-
-      if (mysql_num_rows($tuoteres) == 0) {
-        echo "<font class='error'>".t("Tuotetta %s ei löydy","", $tiltuoteno[$yht_i])."!</font><br>";
-      }
-      else {
-        // tuote löytyi ok, lisätään rivi
-        $trow = mysql_fetch_assoc($tuoteres);
-
-        $ytunnus         = $laskurow["ytunnus"];
-        $kpl             = (float) $kpl;
-        $kpl_echo      = (float) $kpl;
-        $tuoteno         = $trow["tuoteno"];
-        $yllapita_toim_stash = $toim;
-
-        if ($toim_kutsu != "YLLAPITO") {
-          $toimaika = $laskurow["toimaika"];
-          $kerayspvm = $laskurow["kerayspvm"];
-          $toim = "RIVISYOTTO";
-        }
-        else {
-          $toim = "YLLAPITO";
-          $toimaika = "";
-          $kerayspvm = "";
-        }
-        $hinta          = "";
-        $netto          = "";
-
-        for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-          ${'ale'.$alepostfix} = "";
-        }
-
-        $alv         = "";
-        $var       = "";
-        $varasto        = $laskurow["varasto"];
-        $rivitunnus     = "";
-        $korvaavakielto   = "";
-        $jtkielto      = $laskurow['jtkielto'];
-        $varataan_saldoa = "";
-        $myy_sarjatunnus = $tilsarjatunnus[$yht_i];
-        $paikka       = "";
-
-        // Ennakkotilaukset, Tarjoukset, Ylläpitosopimukset ja Valmistukset eivät tee saldotsekkiä
-        if (($verkkokauppa != "" and $verkkokauppa_saldotsk === FALSE) or $laskurow["tilaustyyppi"] == "E" or $laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "0" or $laskurow["tila"] == "V") {
-          $varataan_saldoa = "EI";
-        }
-
-        // jos meillä on ostoskori muuttujassa numero, niin halutaan lisätä tuotteita siihen ostoskoriin
-        if (is_numeric($ostoskori)) {
-          lisaa_ostoskoriin ($ostoskori, $laskurow["liitostunnus"], $tuoteno, $kpl);
-          $kukarow["kesken"] = "";
-        }
-        elseif (file_exists("../tilauskasittely/lisaarivi.inc")) {
-          require ("../tilauskasittely/lisaarivi.inc");
-        }
-        else {
-          require ("lisaarivi.inc");
-        }
-
-        $toim = $yllapita_toim_stash;
-        echo "<font class='message'>".t("Lisättiin")." $kpl_echo ".t_avainsana("Y", "", " and avainsana.selite='$trow[yksikko]'", "", "", "selite")." ".t("tuotetta")." $tiltuoteno[$yht_i].</font><br>";
-
-        if (isset($myyntierahuom) and count($myyntierahuom) > 0) {
-
-          $mimyhuom = "HUOM: Rivin määrä on pyöristetty";
-
-          if ($trow["minimi_era"] > 0) {
-            $mimyhuom .= " minimierään";
-          }
-
-          if ($trow['myynti_era'] > 0 and $yhtiorow['myyntiera_pyoristys'] == 'K') {
-            if ($trow["minimi_era"] > 0) {
-              $mimyhuom .= " tai";
-            }
-
-            $mimyhuom .= " täyteen myyntierään";
-          }
-
-          // Käännetään teksti
-          $mimyhuom = t($mimyhuom)."!";
-
-          if ($trow['myynti_era'] > 0) {
-            $mimyhuom .= " ".t("Myyntierä on").": $trow[myynti_era]";
-          }
-
-          if ($trow["minimi_era"] > 0) {
-            $mimyhuom .= " ".t("Minimierä on").": $trow[minimi_era]";
-          }
-
-          echo "<font class='error'>".$mimyhuom."</font><br>";
-        }
-
-        //Hanskataan sarjanumerollisten tuotteiden lisävarusteet
-        if ($tilsarjatunnus[$yht_i] > 0 and $lisatty_tun > 0) {
-          require("sarjanumeron_lisavarlisays.inc");
-
-          lisavarlisays($tilsarjatunnus[$yht_i], $lisatty_tun);
-        }
-      } // tuote ok else
-    } // end kpl > 0
-  } // end foreach
-
-  echo "<br>";
-
-  $trow       = "";
-  $ytunnus         = "";
-  $kpl             = "";
-  $tuoteno         = "";
-  $toimaika        = "";
-  $kerayspvm       = "";
-  $hinta          = "";
-  $netto          = "";
-  $alv         = "";
-  $var       = "";
-  $varasto        = "";
-  $rivitunnus     = "";
-  $korvaavakielto   = "";
-  $varataan_saldoa = "";
-  $myy_sarjatunnus = "";
-  $paikka       = "";
-  $tee        = "";
-
-  for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-    ${'ale'.$alepostfix} = '';
-  }
-}
+tarkista_tilausrivi();
 
 $jarjestys = "tuote.tuoteno";
 
@@ -2267,5 +2079,205 @@ function piirra_formin_aloitus() {
 
   if ($tultiin == "futur") {
     echo " <input type='hidden' name='tultiin' value='$tultiin'>";
+  }
+}
+
+/**
+ * Tarkistetaan tilausrivin tiedot ja echotetaan ruudulle lisätyt tuotteet
+ */
+function tarkista_tilausrivi() {
+  global $tee, $ostoskori, $tilkpl, $kukarow, $toim_kutsu, $yhtiorow, $toim, $tiltuoteno,
+         $tilsarjatunnus, $verkkokauppa, $verkkokauppa_saldotsk, $myyntierahuom, $lisatty_tun;
+
+  if (($tee == 'TI' or is_numeric($ostoskori)) and isset($tilkpl)) {
+
+    if (is_numeric($ostoskori)) {
+      $kori = check_ostoskori($ostoskori, $kukarow["oletus_asiakas"]);
+      $kukarow["kesken"] = $kori["tunnus"];
+    }
+
+    // haetaan avoimen tilauksen otsikko
+    if ($kukarow["kesken"] != 0) {
+      $query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
+      $laskures = pupe_query($query);
+    }
+    else {
+      // Luodaan uusi myyntitilausotsikko
+      if ($kukarow["extranet"] == "") {
+        require_once("tilauskasittely/luo_myyntitilausotsikko.inc");
+
+        if ($toim_kutsu != "") {
+          $lmyytoim = $toim_kutsu;
+        }
+        else {
+          $lmyytoim = "RIVISYOTTO";
+        }
+
+        $tilausnumero = luo_myyntitilausotsikko($lmyytoim, 0);
+        $kukarow["kesken"] = $tilausnumero;
+        $kaytiin_otsikolla = "NOJOO!";
+      }
+      else {
+        require_once("luo_myyntitilausotsikko.inc");
+        $tilausnumero = luo_myyntitilausotsikko("EXTRANET", $kukarow["oletus_asiakas"]);
+        $kukarow["kesken"] = $tilausnumero;
+        $kaytiin_otsikolla = "NOJOO!";
+      }
+
+      // haetaan avoimen tilauksen otsikko
+      $query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
+      $laskures = pupe_query($query);
+    }
+
+    if ($kukarow["kesken"] != 0 and $laskures != '') {
+      // tilauksen tiedot
+      $laskurow = mysql_fetch_assoc($laskures);
+    }
+
+    if (is_numeric($ostoskori)) {
+      echo "<font class='message'>" . t("Lisätään tuotteita ostoskoriin") . " $ostoskori.</font><br>";
+    }
+    else {
+      echo "<font class='message'>" . t("Lisätään tuotteita tilaukselle") . " $kukarow[kesken].</font><br>";
+    }
+
+    // Käydään läpi formin kaikki rivit
+    foreach ($tilkpl as $yht_i => $kpl) {
+
+      $kpl = str_replace(',', '.', $kpl);
+
+      if ((float) $kpl > 0 or ($kukarow["extranet"] == "" and (float) $kpl < 0) or ($yhtiorow['reklamaation_kasittely'] == 'U' and $toim == 'EXTRANET_REKLAMAATIO' and (float) $kpl != 0)) {
+
+        if ($yhtiorow['reklamaation_kasittely'] == 'U' and $toim == 'EXTRANET_REKLAMAATIO') {
+          $kpl = abs($kpl) * -1;
+        }
+
+        // haetaan tuotteen tiedot
+        $query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tiltuoteno[$yht_i]'";
+        $tuoteres = pupe_query($query);
+
+        if (mysql_num_rows($tuoteres) == 0) {
+          echo "<font class='error'>" . t("Tuotetta %s ei löydy", "", $tiltuoteno[$yht_i]) . "!</font><br>";
+        }
+        else {
+          // tuote löytyi ok, lisätään rivi
+          $trow = mysql_fetch_assoc($tuoteres);
+
+          $ytunnus = $laskurow["ytunnus"];
+          $kpl = (float) $kpl;
+          $kpl_echo = (float) $kpl;
+          $tuoteno = $trow["tuoteno"];
+          $yllapita_toim_stash = $toim;
+
+          if ($toim_kutsu != "YLLAPITO") {
+            $toimaika = $laskurow["toimaika"];
+            $kerayspvm = $laskurow["kerayspvm"];
+            $toim = "RIVISYOTTO";
+          }
+          else {
+            $toim = "YLLAPITO";
+            $toimaika = "";
+            $kerayspvm = "";
+          }
+          $hinta = "";
+          $netto = "";
+
+          for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+            ${'ale' . $alepostfix} = "";
+          }
+
+          $alv = "";
+          $var = "";
+          $varasto = $laskurow["varasto"];
+          $rivitunnus = "";
+          $korvaavakielto = "";
+          $jtkielto = $laskurow['jtkielto'];
+          $varataan_saldoa = "";
+          $myy_sarjatunnus = $tilsarjatunnus[$yht_i];
+          $paikka = "";
+
+          // Ennakkotilaukset, Tarjoukset, Ylläpitosopimukset ja Valmistukset eivät tee saldotsekkiä
+          if (($verkkokauppa != "" and $verkkokauppa_saldotsk === false) or $laskurow["tilaustyyppi"] == "E" or $laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "0" or $laskurow["tila"] == "V") {
+            $varataan_saldoa = "EI";
+          }
+
+          // jos meillä on ostoskori muuttujassa numero, niin halutaan lisätä tuotteita siihen ostoskoriin
+          if (is_numeric($ostoskori)) {
+            lisaa_ostoskoriin($ostoskori, $laskurow["liitostunnus"], $tuoteno, $kpl);
+            $kukarow["kesken"] = "";
+          }
+          elseif (file_exists("../tilauskasittely/lisaarivi.inc")) {
+            require("../tilauskasittely/lisaarivi.inc");
+          }
+          else {
+            require("lisaarivi.inc");
+          }
+
+          $toim = $yllapita_toim_stash;
+          echo "<font class='message'>" . t("Lisättiin") . " $kpl_echo " . t_avainsana("Y", "", " and avainsana.selite='$trow[yksikko]'", "", "", "selite") . " " . t("tuotetta") . " $tiltuoteno[$yht_i].</font><br>";
+
+          if (isset($myyntierahuom) and count($myyntierahuom) > 0) {
+
+            $mimyhuom = "HUOM: Rivin määrä on pyöristetty";
+
+            if ($trow["minimi_era"] > 0) {
+              $mimyhuom .= " minimierään";
+            }
+
+            if ($trow['myynti_era'] > 0 and $yhtiorow['myyntiera_pyoristys'] == 'K') {
+              if ($trow["minimi_era"] > 0) {
+                $mimyhuom .= " tai";
+              }
+
+              $mimyhuom .= " täyteen myyntierään";
+            }
+
+            // Käännetään teksti
+            $mimyhuom = t($mimyhuom) . "!";
+
+            if ($trow['myynti_era'] > 0) {
+              $mimyhuom .= " " . t("Myyntierä on") . ": $trow[myynti_era]";
+            }
+
+            if ($trow["minimi_era"] > 0) {
+              $mimyhuom .= " " . t("Minimierä on") . ": $trow[minimi_era]";
+            }
+
+            echo "<font class='error'>" . $mimyhuom . "</font><br>";
+          }
+
+          //Hanskataan sarjanumerollisten tuotteiden lisävarusteet
+          if ($tilsarjatunnus[$yht_i] > 0 and $lisatty_tun > 0) {
+            require("sarjanumeron_lisavarlisays.inc");
+
+            lisavarlisays($tilsarjatunnus[$yht_i], $lisatty_tun);
+          }
+        } // tuote ok else
+      } // end kpl > 0
+    } // end foreach
+
+    echo "<br>";
+
+    $trow = "";
+    $ytunnus = "";
+    $kpl = "";
+    $tuoteno = "";
+    $toimaika = "";
+    $kerayspvm = "";
+    $hinta = "";
+    $netto = "";
+    $alv = "";
+    $var = "";
+    $varasto = "";
+    $rivitunnus = "";
+    $korvaavakielto = "";
+    $varataan_saldoa = "";
+    $myy_sarjatunnus = "";
+    $paikka = "";
+    $tee = "";
+
+    for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+      ${'ale' . $alepostfix} = '';
+    }
   }
 }

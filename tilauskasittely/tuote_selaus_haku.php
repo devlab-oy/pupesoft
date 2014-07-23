@@ -124,7 +124,8 @@ if ($variaatio != "") {
 
   $query = "SELECT *
             FROM tuote
-            INNER JOIN tuotteen_avainsanat ON tuote.tuoteno = tuotteen_avainsanat.tuoteno
+            INNER JOIN tuotteen_avainsanat ON (tuote.tuoteno = tuotteen_avainsanat.tuoteno AND
+                                               tuotteen_avainsanat.kieli = '{$yhtiorow["kieli"]}')
             WHERE tuotteen_avainsanat.selite = '{$variaatio}'";
   $result = pupe_query($query);
 

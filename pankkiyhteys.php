@@ -21,6 +21,7 @@ if (!isset($sepa_pankkiyhteys_token)) {
 }
 
 $tee = empty($tee) ? '' : $tee;
+$pankki_tiedostot = array();
 
 // Oikellisuustarkistukset
 if ($tee == "laheta" and !($formi_kunnossa = formi_kunnossa())) {
@@ -40,6 +41,9 @@ if ($tee == "laheta" and $hae_tiliotteet == "on") {
   if ($tiedostot) {
     viesti("Ladatut tiliotteet:");
     tiedostot_table($tiedostot);
+
+    // ker‰t‰‰n t‰h‰n kaikki filet
+    $pankki_tiedostot = array_merge($pankki_tiedostot, $tiedostot);
   }
   else {
     viesti("Ladattavia tiliotteita ei ollut saatavilla");
@@ -59,6 +63,9 @@ if ($tee == "laheta" and $hae_viitteet == "on") {
   if ($tiedostot) {
     viesti("Ladatut viitteet:");
     tiedostot_table($tiedostot);
+
+    // ker‰t‰‰n t‰h‰n kaikki filet
+    $pankki_tiedostot = array_merge($pankki_tiedostot, $tiedostot);
   }
   else {
     viesti("Ladattavia viitteit‰ ei ollut saatavilla");
@@ -122,3 +129,30 @@ if ($formi_kunnossa) {
 
 // K‰yttˆliittym‰
 formi();
+
+// K‰sitell‰‰n haetut tiedostot
+foreach ($pankki_tiedostot as $aineisto) {
+  // Jos aineisto ei ollut ok, ei teh‰ mit‰‰n
+  if ($aineisto['status'] != "OK") {
+    continue;
+  }
+
+  // Kirjotetaan tiedosto levylle
+  $filenimi = tempnam("{$pupe_root_polku}/datain", "pankkiaineisto");
+  file_put_contents($filenimi, $aineisto['data']);
+
+  // K‰sitell‰‰n aineisto
+  $aineistotunnus = tallenna_tiliote_viite($filenimi);
+
+  if ($aineistotunnus !== false) {
+    kasittele_tiliote_viite($aineistotunnus);
+    unlink($filenimi);
+  }
+  else {
+    echo "<font class='error'>";
+    echo t("Aineisto lˆytyy hakemistosta");
+    echo ": {$filenimi}";
+    echo "</font>";
+    echo "<br/>";
+  }
+}

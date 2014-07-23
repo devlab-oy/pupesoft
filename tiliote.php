@@ -27,16 +27,18 @@ if ($php_cli) {
   error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
   ini_set("display_errors", 0);
 
-  require ("inc/connect.inc");
-  require ("inc/functions.inc");
+  require "inc/connect.inc";
+  require "inc/functions.inc";
 
-  $userfile  = trim($argv[2]);
-  $filenimi  = $userfile;
-  $ok     = 1;
-  $palvelin2  = "";
+  $userfile = trim($argv[2]);
+  $filenimi = $userfile;
+  $ok = 1;
+  $palvelin2 = "";
+
+  ob_start();
 }
 else {
-  require ("inc/parametrit.inc");
+  require "inc/parametrit.inc";
 
   echo "<font class='head'>Tiliotteen, LMP:n, kurssien, verkkolaskujen ja viitemaksujen käsittely</font><hr><br>\n<br>\n";
 
@@ -65,7 +67,6 @@ else {
         }
       -->
       </script>";
-
 }
 
 $forceta = false;
@@ -101,7 +102,7 @@ if ($ok == 1) {
     // Finvoice verkkolasku
     fclose($fd);
 
-    require("verkkolasku-in.php");
+    require "verkkolasku-in.php" ;
   }
   elseif (substr($tietue, 5, 12) == "Tilivaluutan") {
     // luetaanko kursseja
@@ -131,5 +132,13 @@ if (!$php_cli) {
   // Palautetaan alkuperäinen kukarow
   $kukarow = $tiliote_kukarow;
 
-  require("inc/footer.inc");
+  require "inc/footer.inc";
+}
+else {
+  $ulosputti = ob_get_contents();
+  $ulosputti = str_ireplace(array("<br>","<br/>","</tr>"), "\n", $ulosputti);
+  $ulosputti = strip_tags($ulosputti);
+  ob_end_clean();
+
+  echo $ulosputti;
 }

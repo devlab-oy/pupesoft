@@ -120,7 +120,9 @@ if (!isset($request['toimitusaika'])) {
 $onko_tehdyt = ($request['toim'] == 'TEHDYT_TYOT');
 $asiakas_kohde_tyhja = (empty($request['asiakas_tunnus']) and empty($request['kohde_tunnus']));
 $ei_toimitusaikaa = (empty($request['toimitusaika']));
-if ($onko_tehdyt and $asiakas_kohde_tyhja and $ei_toimitusaikaa) {
+$haku = ($request['ala_tee'] == 'hae' or $request['ala_tee'] == 'tyhjenna_hakuehdot' or $request['ala_tee'] == '');
+$tulostus = (stristr($request['ala_tee'], 'tulosta'));
+if ($onko_tehdyt and $asiakas_kohde_tyhja and $ei_toimitusaikaa and $haku and !$tulostus) {
   $request['toimitusaika'] = 28;
   $_SESSION['tyojono_hakuehdot']['toimitusaika'] = 28;
 }

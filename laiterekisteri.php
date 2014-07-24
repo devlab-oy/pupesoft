@@ -43,7 +43,9 @@ elseif (isset($peruuta_uusi)) {
 }
 
 echo "<font class='head'>".t("Laiterekisteri")."</font><hr>";
+echo "<pre>";
 var_dump($_REQUEST);
+echo "</pre>";
 $laiterajaus = '';
 if (isset($laitetunnus) and $laitetunnus > 0) {
   $laiterajaus = " AND laite.tunnus = '{$laitetunnus}'";
@@ -52,7 +54,6 @@ if (isset($laitetunnus) and $laitetunnus > 0) {
 $headerit = array(
   "nro",
   "sopimus",
-  //"sopimustyypit",
   "valmistaja",
   "malli",
   "sarjanumero",
@@ -65,6 +66,23 @@ $headerit = array(
   "ip",
   "mac"
 );
+
+if ($toiminto == 'LINKKAA') {
+  // Halutaan linkata laitteita sopimuksen palveluriville
+
+  if (!isset($tilausrivin_tunnus) or $tilausrivin_tunnus < 1) {
+    echo "Et voi linkata laitteita ilman tilausrivin tunnusta";
+    exit;
+  }
+
+  // Uusi sarake mihin piirretään checkboxit
+  array_unshift($headerit, '');
+
+  echo "pitäs updatee laitteiden_sopimukset ja lopuks unsettaa muuttujat<br>";
+  // Joka kierroksella haetaan valitut laitteet uudestaan
+  if (isset($valitut_laitteet)) unset($valitut_laitteet);
+}
+
 
 // Ekotellaan headerit
 echo "<table>";
@@ -92,8 +110,6 @@ $query = "SELECT
           {$laiterajaus}
           GROUP BY laite.sarjanro,laite.tuoteno";
 $res = pupe_query($query);
-
-
 
 if ($toiminto == 'MUOKKAA') {
   // Halutaan muuttaa laitteen tietoja
@@ -231,10 +247,21 @@ else {
   // LCM info
   // IP
   // MAC
+  if ($toiminto == "LINKKAA") echo "Muokataan sopimusrivin {$tilausrivin_tunnus} laitteita<br><br>";
 
   while ($rowi = mysql_fetch_assoc($res)) {
+    echo "<form>";
     echo "<tr>";
-
+    if ($toiminto == "LINKKAA") {
+      if (isset($rowi['sopimusrivin_tunnukset'])) $rowi['sopimusrivin_tunnukset'] .= ',152195';
+      $sel = '';
+      if (strpos($rowi['sopimusrivin_tunnukset'], $tilausrivin_tunnus) !== false) {
+        $sel = ' CHECKED';
+        echo "<input type='hidden' name='vanhat_laitteet[]' value ='{$rowi['tunnus']}' />";
+      }
+      echo "<td><input type='checkbox' name='valitut_laitteet[]' value='{$rowi['tunnus']}' $sel/></td>";
+    }
+    
     echo "<td nowrap><a href='{$palvelin2}/laiterekisteri.php?toiminto=MUOKKAA&laitetunnus=$rowi[tunnus]&lopetus=$PHP_SELF'>{$rowi['tunnus']}</a></td>";
     echo "<td>".$rowi['sopimusrivi']."</td>";
     $puuttuja = '';
@@ -325,8 +352,16 @@ else {
   }
   echo "</table>";
   echo "<br><br>";
-  echo "<form>";
-  echo "<input type='hidden' name='toiminto' value ='UUSILAITE' />";
-  echo "<input type='submit' name='asd' value='Uusi laite' />";
+  //echo "<form>";
+  
+  if ($toiminto == 'LINKKAA') {
+    echo "<input type='hidden' name='tilausrivin_tunnus' value ='$tilausrivin_tunnus' />";
+    echo "<input type='hidden' name='toiminto' value ='LINKKAA' />";
+    echo "<input type='submit' name='paivita_sopimuksen_laitteet' value='Päivitä sopimuksen laitteet' />";
+  }
+  else {
+    echo "<input type='hidden' name='toiminto' value ='UUSILAITE' />";
+    echo "<input type='submit' name='uusi_laite' value='Uusi laite' />";
+  } 
   echo "</form>";
 }

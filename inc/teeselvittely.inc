@@ -20,7 +20,7 @@ if (round($maara, 2) != 0) {
               laatija    = 'tiliote',
               luontiaika = now()";
     $result = pupe_query($query);
-    $laskuid = mysql_insert_id ($link);
+    $laskuid = mysql_insert_id();
 
     echo "<font class='message'>*** ".t("Tositteen otsikko luotu")." ***</font><br>\n";
   }
@@ -139,10 +139,12 @@ if (round($maara, 2) != 0) {
       $result = pupe_query($query);
     }
 
-        $query = "UPDATE tiliotedata
-                  SET kasitelty = now(),
-                  tiliointitunnus = ".mysql_insert_id ($link)."
-                  WHERE tunnus    = '$tiliotedataid'";
+    $_tiliointi_id = mysql_insert_id();
+
+    $query = "UPDATE tiliotedata
+              SET kasitelty = now(),
+              tiliointitunnus = {$_tiliointi_id}
+              WHERE tunnus = {$tiliotedataid}";
     $dummyresult = pupe_query($query);
 
     if ($loydettiinko_sopiva_tili != '') {

@@ -1330,7 +1330,8 @@ function hae_huoltosyklit_tyyppi_koko($sammutin_tyyppi, $sammutin_koko, $tyyppi 
               {$tuotteen_avainsanat_join} )
             WHERE huoltosykli.yhtio = '{$kukarow['yhtio']}'
             AND huoltosykli.tyyppi = '{$sammutin_tyyppi}'
-            {$where}";
+            {$where}
+            ORDER BY tuote.nimitys ASC";
 
   $huoltosykli_result = pupe_query($query);
 

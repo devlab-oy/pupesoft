@@ -135,6 +135,7 @@ function hae_tyomaaraykset($request) {
             lasku.nimi AS asiakas_nimi,
             kohde.tunnus AS kohde_tunnus,
             kohde.nimi AS kohde_nimi,
+            kohde.asiakas AS asiakas_tunnus,
             paikka.nimi AS paikka_nimi,
             a3.selitetark AS paikka_olosuhde,
             laite.tuoteno,

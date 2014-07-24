@@ -430,7 +430,10 @@ if (isset($_POST["tee"])) {
   if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 }
 
-require("inc/parametrit.inc");
+require "inc/parametrit.inc";
+require "inc/pankkiyhteys_functions.inc";
+
+$tee = empty($tee) ? '' : $tee;
 
 // Onko maksuaineistoille annettu salasanat.php:ssä oma polku jonne tallennetaan
 if (isset($tee) and $tee == "KIRJOITAKOPIO") {
@@ -460,6 +463,62 @@ if ($tee == "lataa_tiedosto") {
 
 echo "<font class='head'>".t("SEPA-maksuaineisto")."</font><hr>";
 
+$pankkitili_tunnus = empty($pankkitili_tunnus) ? 0 : (int) $pankkitili_tunnus;
+$pankkirajaus = "";
+
+// Jos halutaan tiedosto per pankki(tili?)
+if ($yhtiorow["pankkitiedostot"] == "F") {
+  $pankkirajaus = "AND lasku.maksu_tili = $pankkitili_tunnus";
+
+  $query = "SELECT *
+            FROM yriti
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND kaytossa = ''
+            ORDER BY nimi";
+  $result = pupe_query($query);
+
+  echo "<form name = 'valinta' method='post'>";
+  echo "<input type = 'hidden' name = 'tee' value = ''>";
+
+  echo "<table>";
+  echo "<tr>";
+  echo "<th>";
+  echo t("Valitse pankkitili");
+  echo "</th>";
+  echo "<td>";
+  echo "<select name='pankkitili_tunnus' onchange='submit();'>";
+  echo "<option value='0'>" . t("Valitse pankkitili") . "</option>";
+
+  while ($row = mysql_fetch_assoc($result)) {
+    $selected = $row["tunnus"] == $pankkitili_tunnus ? " selected" : "";
+
+    echo "<option value='{$row["tunnus"]}'{$selected}>";
+    echo "{$row['nimi']} - {$row['tilino']}";
+    echo "</option>";
+  }
+
+  echo "</select>";
+  echo "</td>";
+
+  echo "<td>";
+  echo "<input type = 'submit' value = '".t("Hae")."'>";
+  echo "</td>";
+
+  echo "</tr>";
+  echo "</table>";
+
+  echo "</form>";
+}
+
+// Jos halutaan tiedosto per pankki per päivä
+if ($yhtiorow["pankkitiedostot"] == "E") {
+  echo "<font class='message'>";
+  echo "SEPA-aineston voi luoda ainoastaan per pankkitili tai kaikki pankit yhteen tiedostoon.<br>";
+  echo "Tarkista pankkitiedostot -yhtiön parametrti.";
+  echo "</font>";
+  $tee = "";
+}
+
 if (isset($tee) and $tee == "KIRJOITAKOPIO") {
   $lisa = " and lasku.tunnus in ($poimitut_laskut) ";
 }
@@ -468,21 +527,30 @@ else {
 }
 
 // Haetaan poimitut maksut (HUOM: sama selecti alempana!!!!)
-$haku_query = "SELECT lasku.*, if(lasku.ultilno_maa != '', lasku.ultilno_maa, lasku.maa) iban_maa,
-               yriti.iban yriti_iban, yriti.bic yriti_bic, yriti.asiakastunnus yriti_asiakastunnus,
+$haku_query = "SELECT lasku.*,
+               if(lasku.ultilno_maa != '', lasku.ultilno_maa, lasku.maa) iban_maa,
+               yriti.iban yriti_iban,
+               yriti.bic yriti_bic,
+               yriti.asiakastunnus yriti_asiakastunnus,
                date_format(lasku.popvm, '%d.%m.%y.%H.%i.%s') popvm_dmy
                FROM lasku
-               JOIN valuu ON (valuu.yhtio = lasku.yhtio AND valuu.nimi = lasku.valkoodi)
-               JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili AND yriti.kaytossa = '')
-               WHERE lasku.yhtio = '$kukarow[yhtio]'
-               $lisa
+               INNER JOIN valuu ON (valuu.yhtio = lasku.yhtio
+                AND valuu.nimi = lasku.valkoodi)
+               INNER JOIN yriti ON (yriti.yhtio = lasku.yhtio
+                AND yriti.tunnus = lasku.maksu_tili
+                AND yriti.kaytossa = '')
+               WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
+               {$lisa}
+               {$pankkirajaus}
                ORDER BY maksu_tili, olmapvm, ultilno";
 $result = pupe_query($haku_query);
 
 if ($tee == "") {
 
+  $_num = mysql_num_rows($result);
+
   echo "<br>";
-  echo "<font class='message'>".t("Sinulla on")." ".mysql_num_rows($result)." ".t("laskua poimittuna").".</font>";
+  echo "<font class='message'>".t("Sinulla on")." {$_num} ".t("laskua poimittuna").".</font>";
   echo "<br><br>";
 
   $virheita = 0;
@@ -541,6 +609,7 @@ if ($tee == "") {
   if (mysql_num_rows($result) > 0 and $virheita == 0) {
     echo "<form name = 'valinta' method='post'>";
     echo "<input type = 'hidden' name = 'tee' value = 'KIRJOITA'>";
+    echo "<input type = 'hidden' name = 'pankkitili_tunnus' value = '{$pankkitili_tunnus}'>";
     echo "<input type = 'submit' value = '".t("Tee maksuaineistot")."'>";
     echo "</form>";
   }
@@ -600,7 +669,8 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
   $query = "SELECT maksu_tili, ultilno, olmapvm, valkoodi
             FROM lasku
             WHERE yhtio = '$kukarow[yhtio]'
-            $lisa
+            {$lisa}
+            {$pankkirajaus}
             AND summa   < 0
             GROUP BY maksu_tili, ultilno, olmapvm, valkoodi";
   $result = pupe_query($query);
@@ -714,13 +784,22 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
     $lisa .= " and lasku.tunnus not in ($netotetut_laskut) ";
   }
 
-  $haku_query = "SELECT lasku.*, if(lasku.ultilno_maa != '', lasku.ultilno_maa, lasku.maa) iban_maa,
-                 yriti.iban yriti_iban, yriti.bic yriti_bic, yriti.asiakastunnus yriti_asiakastunnus
+  // Haetaan poimitut maksut (HUOM: sama selecti ylempänä!!!!)
+  $haku_query = "SELECT lasku.*,
+                 if(lasku.ultilno_maa != '', lasku.ultilno_maa, lasku.maa) iban_maa,
+                 yriti.iban yriti_iban,
+                 yriti.bic yriti_bic,
+                 yriti.asiakastunnus yriti_asiakastunnus,
+                 date_format(lasku.popvm, '%d.%m.%y.%H.%i.%s') popvm_dmy
                  FROM lasku
-                 JOIN valuu ON (valuu.yhtio = lasku.yhtio AND valuu.nimi = lasku.valkoodi)
-                 JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili AND yriti.kaytossa = '')
-                 WHERE lasku.yhtio = '$kukarow[yhtio]'
-                 $lisa
+                 INNER JOIN valuu ON (valuu.yhtio = lasku.yhtio
+                  AND valuu.nimi = lasku.valkoodi)
+                 INNER JOIN yriti ON (yriti.yhtio = lasku.yhtio
+                  AND yriti.tunnus = lasku.maksu_tili
+                  AND yriti.kaytossa = '')
+                 WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
+                 {$lisa}
+                 {$pankkirajaus}
                  ORDER BY maksu_tili, olmapvm, ultilno";
   $result = pupe_query($haku_query);
 
@@ -798,14 +877,10 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
     mail($yhtiorow['admin_email'], mb_encode_mimeheader($yhtiorow['nimi']." - SEPA Error", "ISO-8859-1", "Q"), $xml_virheet."\n", "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
   }
 
-  if ($tiedostonimi == "") {
-    $tiedostonimi = $kaunisnimi;
-  }
-
   echo "<tr><th>".t("Tallenna aineisto")."</th>";
   echo "<form method='post' class='multisubmit'>";
   echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-  echo "<input type='hidden' name='kaunisnimi' value='$tiedostonimi'>";
+  echo "<input type='hidden' name='kaunisnimi' value='$kaunisnimi'>";
 
   if ($tee == "KIRJOITAKOPIO") {
     echo "<input type='hidden' name='tmpfilenimi' value='".basename($kaunisnimi)."'>";

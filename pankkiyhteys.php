@@ -24,7 +24,7 @@ $tee = empty($tee) ? '' : $tee;
 $hae_tiliotteet = empty($hae_tiliotteet) ? '' : $hae_tiliotteet;
 $hae_viitteet = empty($hae_viitteet) ? '' : $hae_viitteet;
 
-$pankki_tiedostot = array();
+$pankkitiedostot = array();
 
 // Oikellisuustarkistukset
 if ($tee == "laheta") {
@@ -74,7 +74,7 @@ if ($tee == "laheta" and $hae_tiliotteet == "on") {
     tiedostot_table($tiedostot);
 
     // ker‰t‰‰n t‰h‰n kaikki filet
-    $pankki_tiedostot = array_merge($pankki_tiedostot, $tiedostot);
+    $pankkitiedostot = array_merge($pankkitiedostot, $tiedostot);
   }
   else {
     viesti("Ladattavia tiliotteita ei ollut saatavilla");
@@ -96,7 +96,7 @@ if ($tee == "laheta" and $hae_viitteet == "on") {
     tiedostot_table($tiedostot);
 
     // ker‰t‰‰n t‰h‰n kaikki filet
-    $pankki_tiedostot = array_merge($pankki_tiedostot, $tiedostot);
+    $pankkitiedostot = array_merge($pankkitiedostot, $tiedostot);
   }
   else {
     viesti("Ladattavia viitteit‰ ei ollut saatavilla");
@@ -104,11 +104,11 @@ if ($tee == "laheta" and $hae_viitteet == "on") {
 }
 
 // K‰sitell‰‰n haetut tiedostot
-if ($tee == "laheta" and count($pankki_tiedostot) > 0) {
+if ($tee == "laheta" and count($pankkitiedostot) > 0) {
   echo "<hr><br>";
 
   // K‰sitell‰‰n haetut tiedostot
-  foreach ($pankki_tiedostot as $aineisto) {
+  foreach ($pankkitiedostot as $aineisto) {
     // Jos aineisto ei ollut ok, ei teh‰ mit‰‰n
     if ($aineisto['status'] != "OK") {
       continue;

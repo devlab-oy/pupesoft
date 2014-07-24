@@ -239,7 +239,6 @@ function generoi_tyomaaraykset_huoltosykleista($laitteet, $laitteiden_huoltosykl
     $proggress_bar->initialize(count($laitteet));
   }
 
-  $edellinen_kohde_tunnus = 0;
   $virheet = array();
   $laitteiden_avoimet_tyomaaraykset = laitteiden_avoimet_tyomaaraykset();
   $saldottomat_tuotteet = tuotteiden_ei_saldoa();
@@ -277,16 +276,10 @@ function generoi_tyomaaraykset_huoltosykleista($laitteet, $laitteiden_huoltosykl
       continue;
     }
 
-    if ($edellinen_kohde_tunnus == 0 or $edellinen_kohde_tunnus != $laite['kohde_tunnus']) {
-      $lisaa_kulut = true;
-    }
-    else {
-      $lisaa_kulut = false;
-    }
+    //Tarkistetaan onko huollettavan laitteen kohteessa avointa työmääräystä, josta löytyy KAYNTI tuote
+    $lisaa_kulut = lisataanko_kaynti($laite['kohde_tunnus']);
 
     generoi_tyomaarays($laite, $asiakkaat, $tuotteet, $laitteiden_huoltosyklirivit_joita_ei_huolleta, $lisaa_kulut);
-
-    $edellinen_kohde_tunnus = $laite['kohde_tunnus'];
 
     if (isset($proggress_bar)) {
       $proggress_bar->increase();
@@ -392,7 +385,8 @@ function generoi_tyomaarays_temp($huollettavan_laitteen_huoltosyklirivi) {
  * tyojono
  * viimeinen_tapahtuma (optional)
  */
-function generoi_tyomaarays($laite, &$asiakkaat, &$tuotteet, $laitteiden_huoltosyklirivit_joita_ei_huolleta = array(), $lisaa_kulut = false) {
+function generoi_tyomaarays($laite, &$asiakkaat, &$tuotteet, $laitteiden_huoltosyklirivit_joita_ei_huolleta = array(
+), $lisaa_kulut = false) {
   global $kukarow, $yhtiorow, $debug;
 
   $kukarow['kesken'] = 0;
@@ -676,6 +670,65 @@ function luo_tilausrivi(array $params) {
   pupe_query($query);
 
   return $tunnus;
+}
+
+function lisataanko_kaynti($kohde_tunnus) {
+  global $kukarow, $yhtiorow;
+
+  if (empty($kohde_tunnus)) {
+    return null;
+  }
+
+  //Eka haetaan kaikki kohteen avoimet työmääräys tunnukset
+  //KAYNTI tilausriveihin ei ole linkattu laitetta, joten KAYNTI rivit eivät osu tähän queryyn
+  $query = "SELECT group_concat(lasku.tunnus) AS tunnukset
+            FROM lasku
+            JOIN tilausrivi
+            ON ( tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus = lasku.tunnus )
+            JOIN tilausrivin_lisatiedot
+            ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
+            JOIN laite
+            ON ( laite.yhtio = tilausrivin_lisatiedot.yhtio
+              AND laite.tunnus = tilausrivin_lisatiedot.asiakkaan_positio )
+            JOIN paikka
+            ON ( paikka.yhtio = laite.yhtio
+              AND paikka.tunnus = laite.paikka )
+            JOIN kohde
+            ON ( kohde.yhtio = paikka.yhtio
+              AND kohde.tunnus = paikka.kohde
+              AND kohde.tunnus = {$kohde_tunnus})
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.tila = 'A'";
+  $result = pupe_query($query);
+
+  $tyomaarays_tunnukset = mysql_fetch_assoc($result);
+
+  //Jos ei avoimia töitä, voidaan kulut lisätä
+
+  if (empty($tyomaarays_tunnukset['tunnukset'])) {
+    return true;
+  }
+
+  $query = "SELECT lasku.tunnus
+            FROM lasku
+            JOIN tilausrivi
+            ON ( tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus = lasku.tunnus
+              AND tilausrivi.tuoteno = 'KAYNTI' )
+            JOIN tilausrivin_lisatiedot
+            ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.tila = 'A'
+            AND lasku.tunnus IN ({$tyomaarays_tunnukset['tunnukset']})";
+  //Joltain avoimelta työmääräykseltä löytyi KAYNTI tuote. Ei lisätä uudestaan
+  if (mysql_num_rows($result) > 0) {
+    return false;
+  }
+
+  return true;
 }
 
 function paivita_laite_tunnus_toimenpiteen_tilausriville_temp($laite, $tilausrivi_tunnus) {

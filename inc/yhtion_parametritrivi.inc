@@ -2923,6 +2923,18 @@ if ($fieldname == "extranet_nayta_saldo") {
   $jatko = 0;
 }
 
+if ($fieldname == "nayta_variaatiot") {
+  $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
+
+  $sel = $trow[$i] == 'Y' ? ' selected' : '';
+
+  $ulos .= "<option value = ''>" . t("Ei n‰ytet‰ tuotteen variaatiot-nappulaa");
+  $ulos .= "<option value = 'Y' $sel>" . t("N‰ytet‰‰n tuotteen variaatiot-nappula");
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "tuoteperhe_suoratoimitus") {
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 

@@ -2338,8 +2338,12 @@ function hae_parametri_variaatio($row) {
  * @param $parametri_variaatio
  */
 function piirra_nayta_variaatiot_nappula($parametri_variaatio) {
-  if ($parametri_variaatio) {
+  global $yhtiorow;
+
+  if ($parametri_variaatio and $yhtiorow["nayta_variaatiot"] == "Y") {
     echo "<br>";
-    echo "<a href='?variaatio={$parametri_variaatio["selite"]}' target='_blank'>" . t("Näytä variaatiot") . "</a>";
+    echo "<a href='?variaatio={$parametri_variaatio["selite"]}' target='_blank'>" .
+      t("Näytä variaatiot") .
+      "</a>";
   }
 }

@@ -130,6 +130,8 @@ if ($formi_kunnossa) {
 // Käyttöliittymä
 formi();
 
+echo "<br><hr><br>";
+
 // Käsitellään haetut tiedostot
 foreach ($pankki_tiedostot as $aineisto) {
   // Jos aineisto ei ollut ok, ei tehä mitään
@@ -165,4 +167,6 @@ foreach ($pankki_tiedostot as $aineisto) {
     echo "</font>";
     echo "<br/>";
   }
+
+  echo "<br><hr><br>";
 }

@@ -139,7 +139,17 @@ foreach ($pankki_tiedostot as $aineisto) {
 
   // Kirjotetaan tiedosto levylle
   $filenimi = tempnam("{$pupe_root_polku}/datain", "pankkiaineisto");
-  file_put_contents($filenimi, $aineisto['data']);
+  $data = base64_decode($aineisto['data']);
+  $status = file_put_contents($filenimi, $data);
+
+  if ($status === false) {
+    echo "<font class='error'>";
+    echo t("Tiedoston kirjoitus ep‰onnistui");
+    echo ": {$filenimi}";
+    echo "</font>";
+    echo "<br/>";
+    continue;
+  }
 
   // K‰sitell‰‰n aineisto
   $aineistotunnus = tallenna_tiliote_viite($filenimi);

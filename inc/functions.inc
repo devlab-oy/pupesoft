@@ -26961,6 +26961,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
     $xtyyppi = 0;
     $virhe = 0;
     $td_perheid = 0;
+    $insert_count = 0;
     $serc = array("{", "|", "}", "[", "\\", "]", "'");
     $repl = array("ä", "ö", "å", "Ä", "Ö" , "Å", " ");
 
@@ -27347,6 +27348,8 @@ if (!function_exists("tallenna_tiliote_viite")) {
                     WHERE tunnus = $tiliote_id";
           $updateperheid = pupe_query($query);
         }
+
+        $insert_count++;
       }
 
       $tietue = fgets($fd);
@@ -27354,9 +27357,14 @@ if (!function_exists("tallenna_tiliote_viite")) {
 
     fclose($fd);
 
+    echo "<br>";
+
     // Jos meillä tuli virheitä ja ei olla pakottamassa
-    if ($forceta === false and $virhe > 0) {
-      echo "<br>\n<font class='error'>".t("Aineistoa ei tallennettu järjestelmään").".</font>";
+    if ($forceta === false and ($virhe > 0 or $insert_count == 0)) {
+      echo "<font class='error'>";
+      echo t("Aineistoa ei tallennettu järjestelmään");
+      echo ".</font>";
+      echo "<br>";
 
       //Poistetaan aineistot tiliotedatasta
       $query = "DELETE FROM tiliotedata
@@ -27371,6 +27379,12 @@ if (!function_exists("tallenna_tiliote_viite")) {
 
     $query = "UNLOCK TABLES";
     $tiliotedataresult = pupe_query($query);
+
+    echo "<font class='message'>";
+    echo t("Aineisto tallennettu järjestelmään");
+    echo ". ({$aineistorow["aineisto"]})";
+    echo "</font>";
+    echo "<br>";
 
     return $aineistorow["aineisto"];
   }

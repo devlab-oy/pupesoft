@@ -3086,11 +3086,16 @@ else {
 
     // lähetetään meili vaan jos on jotain laskutettavaa ja ollaan tultu komentoriviltä
     if (isset($lask) and $lask > 0 and $php_cli) {
+
+      $content  = "<html><body>\n";
+      $content .= $tulos_ulos;
+      $content .= "</body></html>\n";
+
       $_params = array(
         "to"      => $yhtiorow["talhal_email"],
         "subject" => "{$yhtiorow["nimi"]} - Laskutusajo",
         "ctype"   => "html",
-        "body"    => $tulos_ulos,
+        "body"    => $content,
       );
 
       pupesoft_sahkoposti($_params);

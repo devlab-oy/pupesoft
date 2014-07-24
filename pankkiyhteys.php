@@ -158,7 +158,9 @@ if ($kaytossa_olevat_pankkiyhteydet) {
   echo "<tbody>";
 
   echo "<tr>";
-  echo "<td>Valitse pankki</td>";
+  echo "<th>";
+  echo t("Valitse pankki");
+  echo "</th>";
   echo "<td>";
   echo "<select name='pankkiyhteys_tunnus'>";
 
@@ -174,26 +176,28 @@ if ($kaytossa_olevat_pankkiyhteydet) {
   echo "</tr>";
 
   echo "<tr>";
-  echo "<td><label>";
+  echo "<th>";
   echo t("Valitse toiminnot");
-  echo "</label></td>";
+  echo "</th>";
   echo "<td>";
 
   $checked = $hae_tiliotteet == "on" ? " checked" : "";
 
-  echo "<label for='hae_tiliotteet'>" . t("Hae tiliotteet") . "</label>";
   echo "<input type='checkbox' name='hae_tiliotteet' id='hae_tiliotteet'{$checked}/>";
+  echo "<label for='hae_tiliotteet'>" . t("Hae uudet tiliotteet") . "</label>";
+  echo "<br>";
 
   $checked = $hae_viitteet == "on" ? " checked" : "";
 
-  echo "<label for='hae_viitteet'>" . t("Hae viitteet") . "</label>";
   echo "<input type='checkbox' name='hae_viitteet' id='hae_viitteet'{$checked}/>";
+  echo "<label for='hae_viitteet'>" . t("Hae uudet viitteet") . "</label>";
+  echo "<br>";
 
   echo "</td>";
   echo "</tr>";
 
   echo "<tr>";
-  echo "<td><label for='salasana'>" . t("Salasana") . "</label></td>";
+  echo "<th><label for='salasana'>" . t("Salasana") . "</label></th>";
   echo "<td><input type='password' name='salasana' id='salasana'/></td>";
   echo "</tr>";
 

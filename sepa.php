@@ -463,11 +463,71 @@ if ($tee == "lataa_tiedosto") {
 
 echo "<font class='head'>".t("SEPA-maksuaineisto")."</font><hr>";
 
+// Pankkiyhteys oikeellisuustarkastukset
+if ($tee == "laheta_pankkiin") {
+  if (empty($salasana)) {
+    virhe("Salasana täytyy antaa!");
+    $tee = "virhe";
+  }
+  elseif (!pankkiyhteys_salasana_kunnossa($pankkiyhteys_tunnus, $salasana)) {
+    virhe("Antamasi salasana on väärä!");
+    $tee = "virhe";
+  }
+
+  if (empty($pankkiyhteys_tunnus)) {
+    virhe("Pankkiyhteystunnus katosi!");
+    $tee = "virhe";
+  }
+}
+
+// Pankkiyhteys tiedoston lähetys
+if ($tee == "laheta_pankkiin") {
+  $pankkiyhteys = hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana);
+
+  $_filename = "{$pankkitiedostot_polku}{$pankkiyhteys_tiedosto}";
+  $_xml = file_get_contents($_filename);
+  $_data = base64_encode($_xml);
+
+  $params = array(
+    "bank" => $pankkiyhteys["pankki_lyhyt_nimi"],
+    "customer_id" => $pankkiyhteys["customer_id"],
+    "target_id" => $pankkiyhteys["target_id"],
+    "certificate" => $pankkiyhteys["certificate"],
+    "private_key" => $pankkiyhteys["private_key"],
+    "file_type" => "NDCORPAYS",
+    "maksuaineisto" => "{$_data}"
+  );
+
+  $vastaus = sepa_upload_file($params);
+
+  if ($vastaus) {
+    viesti("Maksuaineisto lähetetty, vastaus pankista:");
+
+    echo "<br/>";
+    echo "<table>";
+    echo "<tbody>";
+    foreach ($vastaus as $key => $value) {
+      echo "<tr>";
+      echo "<td>{$key}</td>";
+      echo "<td>{$value}</td>";
+      echo "</tr>";
+    }
+    echo "</tbody>";
+    echo "</table>";
+    echo "<br/><br/>";
+
+    // Nollataan tämä, niin ei näytetä lähetyskäyttöliittymää uudestaan!
+    $pankkiyhteys_tiedosto = "";
+  }
+
+  $tee = "";
+}
+
 $pankkitili_tunnus = empty($pankkitili_tunnus) ? 0 : (int) $pankkitili_tunnus;
 $pankkirajaus = "";
 
 // Jos halutaan tiedosto per pankki(tili?)
-if ($yhtiorow["pankkitiedostot"] == "F") {
+if ($yhtiorow["pankkitiedostot"] == "F" and $tee != "virhe") {
   $pankkirajaus = "AND lasku.maksu_tili = $pankkitili_tunnus";
 
   $query = "SELECT *
@@ -646,6 +706,7 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
       exit;
     }
 
+    echo "<br>";
     echo "<table>";
     echo "<tr>";
     echo "<th>".t("Tiedosto")."</th>";
@@ -678,10 +739,12 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
   while ($laskurow = mysql_fetch_assoc($result)) {
 
     // Etsitään samalle päivälle tarpeeksi veloituksia, haetaan ensin kaikki miinukset, sitten summan mukaan desc
-    $query = "SELECT lasku.tunnus laskutunnus, if(lasku.alatila = 'K', summa - kasumma, summa) maksettavasumma
+    $query = "SELECT lasku.tunnus laskutunnus,
+              if(lasku.alatila = 'K', summa - kasumma, summa) maksettavasumma
               FROM lasku
               WHERE yhtio    = '$kukarow[yhtio]'
-              $lisa
+              {$lisa}
+              {$pankkirajaus}
               AND ultilno    = '$laskurow[ultilno]'
               AND valkoodi   = '$laskurow[valkoodi]'
               AND maksu_tili = '$laskurow[maksu_tili]'
@@ -858,6 +921,9 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
   $xml_file = $pankkitiedostot_polku.$kaunisnimi;
   $xml_schema = "$pupe_root_polku/datain/pain.001.001.02.xsd";
 
+  // Tämä tiedosto lähetetään pankkiin!
+  $pankkiyhteys_tiedosto = $kaunisnimi;
+
   $xml_domdoc->Load($xml_file);
 
   if (!$xml_domdoc->schemaValidate($xml_schema)) {
@@ -906,5 +972,50 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
         $maksuaineiston_siirto[$y]["local_dir_error"])) {
     require("maksuaineisto_send.php");
     echo "<br><font class='message'>".t("Maksuaineisto siirretty pankkiyhteysohjelmaan").".</font>";
+  }
+}
+
+// Jos meillä on SEPA pankkiyhteys käytössä
+if (!empty($sepa_pankkiyhteys_token) and !empty($pankkiyhteys_tiedosto)) {
+  // Katsotaan, että pankkiyhteys on perustettu
+  $query = "SELECT pankkiyhteys.tunnus AS pankkiyhteys_tunnus
+            FROM yriti
+            INNER JOIN pankkiyhteys ON (pankkiyhteys.yhtio = yriti.yhtio
+              AND pankkiyhteys.pankki = yriti.bic)
+            WHERE yriti.yhtio = '{$kukarow["yhtio"]}'
+            AND yriti.tunnus = {$pankkitili_tunnus}";
+  $result = pupe_query($query);
+
+  // Meillä on pankkiyhteys luotu, tehdään formi lähettämistä varten
+  if (mysql_num_rows($result) == 1) {
+    $row = mysql_fetch_assoc($result);
+
+    echo "<br><br>";
+    echo "<font class='message'>";
+    echo t("Lähetä maksuaineisto pankkiin");
+    echo "</font>";
+    echo "<hr>";
+
+    echo "<form method='post' action='sepa.php'>";
+    echo "<input type='hidden' name='tee' value='laheta_pankkiin'/>";
+    echo "<input type='hidden' name='pankkitili_tunnus' value='{$pankkitili_tunnus}'/>";
+    echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$row['pankkiyhteys_tunnus']}'/>";
+    echo "<input type='hidden' name='pankkiyhteys_tiedosto' value='$pankkiyhteys_tiedosto'/>";
+
+    echo "<table>";
+    echo "<tr>";
+    echo "<th>" . t("Tiedosto") . "</th>";
+    echo "<td>{$pankkiyhteys_tiedosto}</td>";
+    echo "</tr>";
+
+    echo "<tr>";
+    echo "<th><label for='salasana'>" . t("Syötä pankkiyhteyden salasana") . "</label></th>";
+    echo "<td><input type='password' name='salasana' id='salasana'/></td>";
+    echo "</tr>";
+    echo "</table>";
+
+    echo "<br>";
+    echo "<input type='submit' value='".t("Lähetä aineisto pankkiin")."'>";
+    echo "</form>";
   }
 }

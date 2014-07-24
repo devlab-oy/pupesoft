@@ -2751,8 +2751,6 @@ if ($tila == "" and !isset($jatka)) {
       }
     }
 
-    
-
     if ($toim == "REKLAMAATIO" or ((($toim == 'TARJOUS' or $toim == 'EXTTARJOUS') or $srow["tilaustyyppi"] == "T") and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
       echo "  <tr>
           <td>".t("Työn kuvaus").":</td><td colspan='3'><textarea name='komm1' rows='6' cols='50'>$srow[komm1]</textarea></td>

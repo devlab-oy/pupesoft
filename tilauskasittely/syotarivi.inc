@@ -598,6 +598,33 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
       echo "</tr>";
       echo "</table>";
     }
+    echo "<table>";
+    echo "<tr><th>Lis‰‰ laitteet</th><td>";
+
+    $querylisa = '';
+    if ($rivitunnus != '') {
+      $querylisa = " AND laite.tunnus NOT IN 
+                     (SELECT 
+                      laitteen_tunnus
+                      FROM laitteen_sopimukset
+                      WHERE laitteen_sopimukset.laitteen_tunnus = laite.tunnus
+                      AND laitteen_sopimukset.sopimusrivin_tunnus = {$rivitunnus})";
+    }
+    // Haetaan kaikki myydyt laitteet jota ei ole viel‰ linkattu t‰h‰n riviin
+    $query = "SELECT laite.*
+              FROM laite
+              WHERE laite.yhtio = '{$kukarow['yhtio']}'
+              AND laite.paikka NOT IN (0,'')
+              {$querylisa}"; 
+                                       
+    $resultti = pupe_query($query);
+    echo "<select multiple>";
+    while ($rivi = mysql_fetch_assoc($resultti)) {
+      echo "<option value='{$rivi['tunnus']}'>{$rivi['sarjanro']}</option>";
+    }
+    echo "</select>";
+    echo "</td></tr>";
+    echo "</table>";
   }
 
   // jos meill‰ on rivi muuttuja t‰‰ll‰, niin ollaan muokkaamassa rivej‰..

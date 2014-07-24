@@ -21,11 +21,42 @@ if (!isset($sepa_pankkiyhteys_token)) {
 }
 
 $tee = empty($tee) ? '' : $tee;
+$hae_tiliotteet = empty($hae_tiliotteet) ? '' : $hae_tiliotteet;
+$hae_viitteet = empty($hae_viitteet) ? '' : $hae_viitteet;
+
 $pankki_tiedostot = array();
 
 // Oikellisuustarkistukset
-if ($tee == "laheta" and !($formi_kunnossa = formi_kunnossa())) {
-  $tee = "";
+if ($tee == "laheta") {
+  $komennot_count = 0;
+  $virheet_count = 0;
+
+  if ($hae_tiliotteet == "on") {
+    $komennot_count++;
+  }
+
+  if ($hae_viitteet == "on") {
+    $komennot_count++;
+  }
+
+  if ($komennot_count == 0) {
+    virhe("Et valinnut yht‰‰n komentoa!");
+    $virheet_count++;
+  }
+
+  if (empty($salasana)) {
+    virhe("Salasana t‰ytyy antaa!");
+    $virheet_count++;
+  }
+  elseif (!pankkiyhteys_salasana_kunnossa($pankkiyhteys_tunnus, $salasana)) {
+    virhe("Antamasi salasana on v‰‰r‰!");
+    $virheet_count++;
+  }
+
+  if ($virheet_count > 0) {
+    echo "<br>";
+    $tee = "";
+  }
 }
 
 // Tiliotteiden haku
@@ -72,101 +103,110 @@ if ($tee == "laheta" and $hae_viitteet == "on") {
   }
 }
 
-// Maksuaineiston oikeellisuustarkistus
-if ($tee == "laheta" and $laheta_maksuaineisto == "on") {
-  $maksuaineisto = file_get_contents($_FILES["maksuaineisto"]["tmp_name"]);
+// K‰sitell‰‰n haetut tiedostot
+if ($tee == "laheta" and count($pankki_tiedostot) > 0) {
+  echo "<hr><br>";
 
-  if (!$maksuaineisto) {
-    virhe("Valitsit maksuaineiston l‰hetyksen, mutta et valinnut maksuaineistoa");
-    $tee = "";
-  }
-}
-
-// Maksuaineiston l‰hetys
-if ($tee == "laheta" and $laheta_maksuaineisto == "on") {
-  $pankkiyhteys = hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana);
-
-  $params = array(
-    "bank" => $pankkiyhteys["pankki_lyhyt_nimi"],
-    "customer_id" => $pankkiyhteys["customer_id"],
-    "target_id" => $pankkiyhteys["target_id"],
-    "certificate" => $pankkiyhteys["certificate"],
-    "private_key" => $pankkiyhteys["private_key"],
-    "file_type" => "NDCORPAYS",
-    "maksuaineisto" => $maksuaineisto
-  );
-
-  $vastaus = sepa_upload_file($params);
-
-  if ($vastaus) {
-    viesti("Maksuaineisto l‰hetetty, vastaus pankista:");
-
-    echo "<br/>";
-
-    echo "<table>";
-    echo "<tbody>";
-
-    foreach ($vastaus as $key => $value) {
-      echo "<tr>";
-      echo "<td>{$key}</td>";
-      echo "<td>{$value}</td>";
-      echo "</tr>";
+  // K‰sitell‰‰n haetut tiedostot
+  foreach ($pankki_tiedostot as $aineisto) {
+    // Jos aineisto ei ollut ok, ei teh‰ mit‰‰n
+    if ($aineisto['status'] != "OK") {
+      continue;
     }
 
-    echo "</tbody>";
-    echo "</table>";
-    echo "<br/><br/>";
+    // Kirjotetaan tiedosto levylle
+    $filenimi = tempnam("{$pupe_root_polku}/datain", "pankkiaineisto");
+    $data = base64_decode($aineisto['data']);
+    $status = file_put_contents($filenimi, $data);
+
+    if ($status === false) {
+      echo "<font class='error'>";
+      echo t("Tiedoston kirjoitus ep‰onnistui");
+      echo ": {$filenimi}";
+      echo "</font>";
+      echo "<br/>";
+      continue;
+    }
+
+    // K‰sitell‰‰n aineisto
+    $aineistotunnus = tallenna_tiliote_viite($filenimi);
+
+    if ($aineistotunnus !== false) {
+      kasittele_tiliote_viite($aineistotunnus);
+      unlink($filenimi);
+    }
+    else {
+      echo "<font class='error'>";
+      echo t("Aineisto lˆytyy hakemistosta");
+      echo ": {$filenimi}";
+      echo "</font>";
+      echo "<br/>";
+    }
+
+    echo "<br><hr><br>";
   }
-
-  $tee = "";
-}
-
-if ($formi_kunnossa) {
-  $_POST["hae_tiliotteet"] = "";
-  $_POST["hae_viitteet"] = "";
-  $_POST["laheta_maksuaineisto"] = "";
 }
 
 // K‰yttˆliittym‰
-formi();
+$kaytossa_olevat_pankkiyhteydet = hae_pankkiyhteydet();
 
-echo "<br><hr><br>";
+if ($kaytossa_olevat_pankkiyhteydet) {
 
-// K‰sitell‰‰n haetut tiedostot
-foreach ($pankki_tiedostot as $aineisto) {
-  // Jos aineisto ei ollut ok, ei teh‰ mit‰‰n
-  if ($aineisto['status'] != "OK") {
-    continue;
+  echo "<form method='post' action='pankkiyhteys.php'>";
+  echo "<input type='hidden' name='tee' value='laheta'/>";
+  echo "<table>";
+  echo "<tbody>";
+
+  echo "<tr>";
+  echo "<td>Valitse pankki</td>";
+  echo "<td>";
+  echo "<select name='pankkiyhteys_tunnus'>";
+
+  foreach ($kaytossa_olevat_pankkiyhteydet as $pankkiyhteys) {
+    $selected = $pankkiyhteys_tunnus == $pankkiyhteys["tunnus"] ? " selected" : "";
+
+    echo "<option value='{$pankkiyhteys["tunnus"]}'{$selected}>";
+    echo "{$pankkiyhteys["pankin_nimi"]}</option>";
   }
 
-  // Kirjotetaan tiedosto levylle
-  $filenimi = tempnam("{$pupe_root_polku}/datain", "pankkiaineisto");
-  $data = base64_decode($aineisto['data']);
-  $status = file_put_contents($filenimi, $data);
+  echo "</select>";
+  echo "</td>";
+  echo "</tr>";
 
-  if ($status === false) {
-    echo "<font class='error'>";
-    echo t("Tiedoston kirjoitus ep‰onnistui");
-    echo ": {$filenimi}";
-    echo "</font>";
-    echo "<br/>";
-    continue;
-  }
+  echo "<tr>";
+  echo "<td><label>";
+  echo t("Valitse toiminnot");
+  echo "</label></td>";
+  echo "<td>";
 
-  // K‰sitell‰‰n aineisto
-  $aineistotunnus = tallenna_tiliote_viite($filenimi);
+  $checked = $hae_tiliotteet == "on" ? " checked" : "";
 
-  if ($aineistotunnus !== false) {
-    kasittele_tiliote_viite($aineistotunnus);
-    unlink($filenimi);
-  }
-  else {
-    echo "<font class='error'>";
-    echo t("Aineisto lˆytyy hakemistosta");
-    echo ": {$filenimi}";
-    echo "</font>";
-    echo "<br/>";
-  }
+  echo "<label for='hae_tiliotteet'>" . t("Hae tiliotteet") . "</label>";
+  echo "<input type='checkbox' name='hae_tiliotteet' id='hae_tiliotteet'{$checked}/>";
 
-  echo "<br><hr><br>";
+  $checked = $hae_viitteet == "on" ? " checked" : "";
+
+  echo "<label for='hae_viitteet'>" . t("Hae viitteet") . "</label>";
+  echo "<input type='checkbox' name='hae_viitteet' id='hae_viitteet'{$checked}/>";
+
+  echo "</td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<td><label for='salasana'>" . t("Salasana") . "</label></td>";
+  echo "<td><input type='password' name='salasana' id='salasana'/></td>";
+  echo "</tr>";
+
+  echo "</tbody>";
+  echo "</table>";
+
+  echo "<br>";
+  echo "<input type='submit' value='" . t('L‰het‰') . "'>";
+
+  echo "</form>";
 }
+else {
+  viesti("Yht‰‰n pankkiyhteytt‰ ei ole viel‰ luotu.");
+}
+
+require 'inc/footer.inc';

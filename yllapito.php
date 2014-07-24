@@ -15,10 +15,6 @@
     unset($apuwebseuranta);
   }
 
-  if (isset($_REQUEST['lopetus_temp'])) {
-    $lopetus = urldecode(base64_decode($_REQUEST['lopetus_temp']));
-  }
-
   if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
     require ("inc/parametrit.inc");
   }
@@ -1118,7 +1114,9 @@
 
       if ($lopetus != '' and (isset($yllapitonappi) or isset($paivita_myos_avoimet_tilaukset))) {
         //unohdetaan tämä jos loopatan takaisin yllapito.php:seen, eli silloin metasta ei ole mitään hyötyä
-        if (strpos($lopetus, "yllapito.php") === FALSE) {
+        //Laite huollossa Tuotteen pikaperustuksessa halutaan laitteen perustukseen ja laitteen perustuksesta
+        //asiakkaan laitehallintaan. Siksi tähän laitettu $yhtiorow['laite_huolto'] == 'X' or jotta toimii.
+        if ($yhtiorow['laite_huolto'] == 'X' or strpos($lopetus, "yllapito.php") === FALSE) {
           $lopetus .= "//yllapidossa=$toim//yllapidontunnus=$tunnus";
 
           if ($yhtiorow['laite_huolto'] == 'X' and isset($tyomaarays_kpl)) {

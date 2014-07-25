@@ -6463,6 +6463,10 @@ if ($tee == '') {
           }
         }
 
+        if ($toim == "YLLAPITO") {
+          echo "<br><br><a href='{$palvelin2}/laiterekisteri.php?toiminto=LINKKAA&tilausrivin_tunnus={$row['tunnus']}&sopimusnumero=$tilausnumero&lopetus={$palvelin2}tilauskasittely/tilaus_myynti.php////tilausnumero=$tilausnumero//toim=YLLAPITO'>Lis‰‰ laitteita</a>";
+        }
+
         echo "</td>";
 
         if ($toim == "MYYNTITILI" and $laskurow["alatila"] == "V" and $row["kpl"] != 0 and ($row["perheid"] == 0 or $row["perheid"] == $row["tunnus"])) {

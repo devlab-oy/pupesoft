@@ -43,9 +43,7 @@ elseif (isset($peruuta_uusi)) {
 }
 
 echo "<font class='head'>".t("Laiterekisteri")."</font><hr>";
-echo "<pre>";
-var_dump($_REQUEST);
-echo "</pre>";
+
 $laiterajaus = '';
 if (isset($laitetunnus) and $laitetunnus > 0) {
   $laiterajaus = " AND laite.tunnus = '{$laitetunnus}'";
@@ -77,14 +75,13 @@ if ($toiminto == 'LINKKAA') {
   // Uusi sarake mihin piirretään checkboxit
   array_unshift($headerit, '');
 
-  echo "pitäs updatee laitteiden_sopimukset ja lopuks unsettaa muuttujat<br>";
   // Joka kierroksella haetaan valitut laitteet uudestaan
   if (isset($valitut_laitteet) or isset($vanhat_laitteet)) {
-    echo "olivanhojakin<br>";
+
     foreach ($valitut_laitteet as $laite) {
-      // Tarkistetaan oliko valittu laite jo valittu sopimukselle
+      // Tarkistetaan oliko valittu laite jo linkattu
       if(!in_array($laite, $vanhat_laitteet)) {
-        echo "lisattiin uusi $laite <br>";
+
         $query = "INSERT INTO laitteen_sopimukset
                   SET sopimusrivin_tunnus = '{$tilausrivin_tunnus}',
                   laitteen_tunnus = '{$laite}'";
@@ -93,18 +90,17 @@ if ($toiminto == 'LINKKAA') {
     }
 
     foreach ($vanhat_laitteet as $vanhalaite) {
-    // Tarkistetaan oliko kaikki vanhat laitteet valittuna vai pitääkö poistaa joku niistä
+      // Tarkistetaan oliko kaikki vanhat laitteet linkattuna vai pitääkö poistaa joku niistä
       if (!in_array($vanhalaite, $valitut_laitteet)) {
-        echo "poistettiin vanha $vanhalaite <br>";
         $query = "DELETE FROM laitteen_sopimukset
                   WHERE laitteen_tunnus = '{$vanhalaite}'
                   AND sopimusrivin_tunnus = '{$tilausrivin_tunnus}'";
-              pupe_query($query);
+        pupe_query($query);
       }
     }
   }
   elseif (isset($valitut_laitteet)) {
-    echo "eivanhoja<br>";
+
     foreach($valitut_laitteet as $laite) {
       $query = "INSERT INTO laitteen_sopimukset
                 SET sopimusrivin_tunnus = '{$tilausrivin_tunnus}',
@@ -144,22 +140,22 @@ $query = "SELECT
           GROUP BY laite.sarjanro,laite.tuoteno";
 $res = pupe_query($query);
 
+
 if ($toiminto == 'MUOKKAA') {
   // Halutaan muuttaa laitteen tietoja
-
   while ($rowi = mysql_fetch_assoc($res)) {
     echo "<tr>";
     echo "<form>";
     echo "<input type='hidden' name='muokattava_laite' value='{$rowi['tunnus']}'>";
     echo "<td nowrap>{$rowi['tunnus']}</td>";
     echo "<td>".$rowi['sopimusrivi']."</td>";
-    //echo "<td></td>";
     // Tuote
     echo "<td nowrap>".$rowi['valmistaja']."</td>";
     echo "<td nowrap>".$rowi['malli']."</td>";
     // Sopimukset 1/2
     echo "<td nowrap>".$rowi['sarjanro']."</td>";
     echo "<td nowrap>".$rowi['tuoteno']."</td>";
+    echo "<td></td><td></td>";
      // Sopimukset 2/2
     echo "<td><textarea name='kommentti' rows='5' columns='30'>{$rowi['kommentti']}</textarea></td>";
     echo "<td><textarea name='lcm_info' rows='5' columns='30'>{$rowi['lcm_info']}</textarea></td>";
@@ -174,19 +170,18 @@ if ($toiminto == 'MUOKKAA') {
 }
 elseif ($toiminto == 'UUSILAITE') {
   // Halutaan lisätä uusi laite
-  // Esivalintamuuttujat
   $esiv_tuotenumero = $esiv_valmistaja = $esiv_malli = $esiv_sopimus = '';
   echo "<tr>";
   echo "<form>";
   echo "<input type='hidden' name='toiminto' value='UUSILAITE' />";
 
-  //Jos on selectoitu joku sarjanumero niin esitäytetään
+  //Jos on selectoitu joku sarjanumero niin täytetään sarakkeet joihin ei voi vaikuttaa
   if (isset($valitse_sarjanumero) and $valitse_sarjanumero > 0) {
     $kveri = "SELECT
               sarjanumeroseuranta.sarjanumero,
               tuote.*,
               avainsana.selitetark valmistaja,
-              tuote.tuotemerkki malli,
+              tuote.tuotemerkki malli
               FROM sarjanumeroseuranta
               JOIN tuote on tuote.yhtio = sarjanumeroseuranta.yhtio
                 AND tuote.tuoteno = sarjanumeroseuranta.tuoteno
@@ -196,7 +191,6 @@ elseif ($toiminto == 'UUSILAITE') {
               WHERE sarjanumeroseuranta.yhtio = '{$kukarow['yhtio']}'
               AND sarjanumeroseuranta.tunnus = '{$valitse_sarjanumero}'";
     $resu = pupe_query($kveri);
-    query_dump($kveri);
     $rivikka = mysql_fetch_assoc($resu);
 
     $esiv_tuotenumero = $rivikka['tuoteno'];
@@ -209,17 +203,17 @@ elseif ($toiminto == 'UUSILAITE') {
   }
   echo "<td></td>";
   echo "<td>{$esiv_sopimus}</td>";
-  //echo "<td></td>";
   echo "<td>{$esiv_valmistaja}</td>";
   echo "<td>{$esiv_malli}</td>";
-  // Sopimukset 1/2
-  // Haetaan sarjanumerot jotka eivät ole jo laitteissa
+
+  // Haetaan sarjanumerot jotka eivät ole vielä laite-taulussa
   $kveri = "SELECT sarjanumeroseuranta.*
             FROM sarjanumeroseuranta
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND sarjanumero != ''
             AND sarjanumero NOT IN (SELECT sarjanro from laite where yhtio='{$kukarow['yhtio']}')";
   $ressu = pupe_query($kveri);
+
   echo "<td><select name='valitse_sarjanumero' onchange='submit();'>";
   echo "<option value =''>Valitse</option>";
   while ($rivi = mysql_fetch_assoc($ressu)) {
@@ -229,8 +223,7 @@ elseif ($toiminto == 'UUSILAITE') {
   echo "</select></td>";
   
   echo "<td>{$esiv_tuotenumero}</td>";
-  
-   // Sopimukset 2/2
+  echo "<td></td><td></td>";
   echo "<td><textarea name='kommentti' rows='5' columns='30'>{$rowi['kommentti']}</textarea></td>";
   echo "<td><textarea name='lcm_info' rows='5' columns='30'>{$rowi['lcm_info']}</textarea></td>";
   echo "<td><input type='text' name='ip_osoite'/></td>";
@@ -242,51 +235,13 @@ elseif ($toiminto == 'UUSILAITE') {
 }
 else {
 
-  // ----------Sopimukset1/2
-  // Sopimusnumero
-  // LCC k/e
-  // MDM k/e
-  // NOC k/e
-  // Service Desk k/e
-  // LCM k/e
-
-  // Invoice site
-
-  // ---- Tuote
-  // Valmistaja
-  // Malli
-
-  // ----- Laite 1/2
-  // Sarjanumero
-  // Tuotenumero
-
-  // ----------Sopimukset2/2
-  // LCC SLA
-  // LCC start date
-  // LCC end date
-  // VC
-  // VC No
-  // VC end date
-  // VC SLA
-  // MDM end date
-  // SD SLA
-  // NOC e/kk
-  // MDM e/kk
-  // LCC e/kk
-  // LCM e/kk
-
-  // ----- Laite 2/2
-  // Kommentti
-  // LCM info
-  // IP
-  // MAC
   if ($toiminto == "LINKKAA") echo "Muokataan sopimusrivin {$tilausrivin_tunnus} laitteita<br><br>";
 
   while ($rowi = mysql_fetch_assoc($res)) {
+    $asiakas = '';
     echo "<form>";
     echo "<tr>";
     if ($toiminto == "LINKKAA") {
-      //if (isset($rowi['sopimusrivin_tunnukset'])) $rowi['sopimusrivin_tunnukset'] .= ',152195';
       $sel = '';
       if (strpos($rowi['sopimusrivin_tunnukset'], $tilausrivin_tunnus) !== false) {
         $sel = ' CHECKED';
@@ -298,7 +253,7 @@ else {
     echo "<td nowrap><a href='{$palvelin2}/laiterekisteri.php?toiminto=MUOKKAA&laitetunnus=$rowi[tunnus]&lopetus=$PHP_SELF'>{$rowi['tunnus']}</a></td>";
     echo "<td>".$rowi['sopimusrivi']."</td>";
     $puuttuja = '';
-    $asiakas = '';
+    
     if (isset($rowi['sopimusrivin_tunnukset'])) {
 
       $kveri = "SELECT
@@ -312,25 +267,38 @@ else {
                 WHERE tilausrivi.tunnus IN ({$rowi['sopimusrivin_tunnukset']})";
       $ressi = pupe_query($kveri);
 
-      $kes = mysql_fetch_assoc($ressi);
-      $sopimuslinkki = "<a href='{$palvelin2}/tilauskasittely/tilaus_myynti.php?toim=YLLAPITO&tilausnumero=$kes[sopimusnumero]&lopetus=$PHP_SELF'>{$kes['sopimusnumero']}</a><br>";
-      mysql_data_seek($ressi, 0);
-
-      $puuttuja = "Sopimusnumero: {$sopimuslinkki}<br><table><tr><th>Nimitys</th><th>Hinta</th><th>Alkupvm</th><th>Loppupvm</th></tr>";
-
-      $kveeri = "SELECT
-                 lasku.nimi asiakas,
-                 lasku.*, 
-                 laskun_lisatiedot.* 
-                 FROM lasku 
-                 JOIN laskun_lisatiedot ON lasku.yhtio = laskun_lisatiedot.yhtio 
-                   AND lasku.tunnus = laskun_lisatiedot.otunnus 
-                 WHERE lasku.tunnus = '{$kes['sopimusnumero']}' 
-                 AND lasku.yhtio = '{$kukarow['yhtio']}'";
-      $ressukka = pupe_query($kveeri);
-      $lassurivi = mysql_fetch_assoc($ressukka);
-
+      $ed_sop_tun = '';
+      $lassurivi = '';
       while ($lelo = mysql_fetch_assoc($ressi)) {
+
+        // Katsotaan onko sopimustunnus tyhjä(eka ajo)tai muuttunut
+        if ($ed_sop_tun == '' or $ed_sop_tun != $lelo['sopimusnumero']) {
+
+          if ($ed_sop_tun != '') {
+            $puuttuja .= "</table>";
+          }
+          else {
+            $asiakas = '';
+          }
+
+          $ed_sop_tun = $lelo['sopimusnumero'];
+          $sopimuslinkki = "<a href='{$palvelin2}/tilauskasittely/tilaus_myynti.php?toim=YLLAPITO&tilausnumero=$lelo[sopimusnumero]&lopetus={$palvelin2}laiterekisteri.php////tilausrivin_tunnus=$tilausrivin_tunnus//toiminto=LINKKAA'>{$lelo['sopimusnumero']}</a><br>";
+          $puuttuja .= "<br>Sopimusnumero: {$sopimuslinkki}<table><tr><th>Nimitys</th><th>Hinta</th><th>Alkupvm</th><th>Loppupvm</th></tr>";
+          $kveeri = "SELECT
+                     lasku.nimi asiakas,
+                     lasku.*, 
+                     laskun_lisatiedot.* 
+                     FROM lasku 
+                     JOIN laskun_lisatiedot ON lasku.yhtio = laskun_lisatiedot.yhtio 
+                       AND lasku.tunnus = laskun_lisatiedot.otunnus 
+                     WHERE lasku.tunnus = '{$lelo['sopimusnumero']}' 
+                     AND lasku.yhtio = '{$kukarow['yhtio']}'";
+          $ressukka = pupe_query($kveeri);
+
+          $lassurivi = mysql_fetch_assoc($ressukka);
+          $asiakas .= $lassurivi['asiakas']."<br><br>";
+        }
+
         $puuttuja .= "<tr nowrap><td>";
         $puuttuja .= $lelo['nimitys'];
         $puuttuja .= "</td>";
@@ -345,7 +313,7 @@ else {
         $puuttuja .= "</td></tr>";
       }
       $puuttuja .= "</table>";
-      $asiakas = $lassurivi['asiakas'];
+      
     }
     else {
       $query = "SELECT
@@ -365,13 +333,12 @@ else {
       $asiakas = $sarjanumerorow['asiakas'];
     }
 
-    // Tuote
     echo "<td nowrap>".$rowi['valmistaja']."</td>";
     echo "<td nowrap>".$rowi['malli']."</td>";
-    // Sopimukset 1/2
+
     echo "<td nowrap>".$rowi['sarjanro']."</td>";
     echo "<td nowrap>".$rowi['tuoteno']."</td>";
-     // Sopimukset 2/2
+
     echo "<td>$puuttuja</td>";
 
     echo "<td>$asiakas</td>";

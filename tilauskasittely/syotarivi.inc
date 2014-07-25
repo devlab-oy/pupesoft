@@ -598,45 +598,6 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
       echo "</tr>";
       echo "</table>";
     }
-    
-
-    /*$querylisa = '';
-    if ($rivitunnus != '') {
-      $querylisa = " AND laite.tunnus NOT IN 
-                     (SELECT 
-                      laitteen_tunnus
-                      FROM laitteen_sopimukset
-                      WHERE laitteen_sopimukset.laitteen_tunnus = laite.tunnus
-                      AND laitteen_sopimukset.sopimusrivin_tunnus = {$rivitunnus})";
-    }
-    // Haetaan kaikki myydyt laitteet jota ei ole viel‰ linkattu t‰h‰n riviin
-    $query = "SELECT laite.*
-              FROM laite
-              WHERE laite.yhtio = '{$kukarow['yhtio']}'
-              AND laite.paikka NOT IN (0,'')
-              {$querylisa}";
-              
-            $query = "SELECT laite.*
-                      FROM laite
-                      WHERE laite.yhtio = '{$kukarow['yhtio']}'
-                      AND laite.paikka NOT IN (0,'')
-                      ";
-                                       
-    $resultti = pupe_query($query);
-    echo "<select multiple>";
-    while ($rivi = mysql_fetch_assoc($resultti)) {
-      if ($rivitunnus != '') {
-        $sel = '';
-        //if ($rivitunnus == $rivi['sopimusrivin_tunnus']) $sel == "SELECTED";
-        $kveri = "SELECT * from laitteen_sopimukset where laitteen_tunnus = '{$rivi['']}' and sopimusrivin_tunnus = '$rivitunnus'";
-        pupe_query($kveri);
-        if (mysql_affected_rows() > 0) $sel = "SELECTED";
-      }
-      
-      echo "<option value='{$rivi['tunnus']}' $sel>{$rivi['sarjanro']}</option>";
-    }
-    echo "</select>";*/
-    
 
   }
 
@@ -651,13 +612,6 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
     echo "<input type='hidden' name='rivinumero' value='$rivinumero'>";
     echo "<input type='hidden' name='paikka' value='$paikka'>";
     echo "<input type='hidden' name='kpl2' value='$kpl2'>";
-    
-    if ($toim == "YLLAPITO") {
-      echo "<table>";
-      echo "<tr><td><a href='{$palvelin2}/laiterekisteri.php?toiminto=LINKKAA&tilausrivin_tunnus=$rivitunnus' target='blank_'>Lis‰‰ laitteita</a></td>";
-      echo "</tr>";
-      echo "</table>";
-    }
   }
 
   echo "<input type='hidden' name='perheid' value = '$perheid'>";

@@ -541,8 +541,13 @@ if ($tee != "" and $mobiili_keikka != "yes" and $kauttalaskutus == '' and !$tull
 
 while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
-  if ($mobiili_keikka == "yes" and ($tilrivirow["hyllyalue"] != $hyllyalue or $tilrivirow["hyllyvali"] != $hyllyvali or $tilrivirow["hyllynro"] != $hyllynro or $tilrivirow["hyllyvali"] != $hyllyvali)) {
-    //jos ollaan tultu mobiilista ja rivin paikka onkin eri kuin oletuspaikka niin setataan se paika johon ollaan tulouttamassa oletuspaikaksi
+  if ($mobiili_keikka == "yes" and
+      ($tilrivirow["hyllyalue"] != $hyllyalue
+        or $tilrivirow["hyllyvali"] != $hyllyvali
+        or $tilrivirow["hyllynro"] != $hyllynro
+        or $tilrivirow["hyllyvali"] != $hyllyvali)) {
+    // Jos ollaan tultu mobiilista ja rivin paikka onkin eri kuin oletuspaikka
+    // niin setataan se paika johon ollaan tulouttamassa oletuspaikaksi
     $tilrivirow["hyllyalue"] = $hyllyalue;
     $tilrivirow["hyllyvali"] = $hyllyvali;
     $tilrivirow["hyllynro"] = $hyllynro;

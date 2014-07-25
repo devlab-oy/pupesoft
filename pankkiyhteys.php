@@ -6,17 +6,17 @@ require("inc/pankkiyhteys_functions.inc");
 echo "<font class='head'>" . t('SEPA-pankkiyhteys') . "</font>";
 echo "<hr>";
 
-if (!isset($_SERVER["HTTPS"]) or $_SERVER["HTTPS"] != 'on') {
-  echo "<font class='error'>";
-  echo t("Voit k‰ytt‰‰ pankkiyhteytt‰ vain salatulla yhteydell‰!");
-  echo "</font>";
-  exit;
-}
-
-if (!isset($sepa_pankkiyhteys_token)) {
+if (SEPA_PANKKIYHTEYS === false) {
   echo "<font class='error'>";
   echo t("SEPA-palvelua ei ole aktivoitu.");
+
+  if (!isset($_SERVER["HTTPS"]) or $_SERVER["HTTPS"] != 'on') {
+    echo "<br>";
+    echo t("Voit k‰ytt‰‰ pankkiyhteytt‰ vain salatulla yhteydell‰!");
+  }
+
   echo "</font>";
+
   exit;
 }
 

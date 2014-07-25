@@ -439,8 +439,13 @@ else {
 $pankkitiedostot_polku = rtrim($pankkitiedostot_polku, '/').'/';
 
 if ($tee == "lataa_tiedosto") {
-  if (isset($pankkifilenimi)) readfile($pankkitiedostot_polku.basename($pankkifilenimi));
-  elseif (isset($tmpfilenimi)) readfile("/tmp/".basename($tmpfilenimi));
+  if (isset($pankkifilenimi)) {
+    readfile($pankkitiedostot_polku.basename($pankkifilenimi));
+  }
+  elseif (isset($tmpfilenimi)) {
+    readfile("/tmp/".basename($tmpfilenimi));
+  }
+
   exit;
 }
 
@@ -964,7 +969,7 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
 }
 
 // Jos meillä on SEPA pankkiyhteys käytössä
-if (!empty($sepa_pankkiyhteys_token) and !empty($pankkiyhteys_tiedosto)) {
+if (SEPA_PANKKIYHTEYS and !empty($pankkiyhteys_tiedosto)) {
   // Katsotaan, että pankkiyhteys on perustettu
   $query = "SELECT pankkiyhteys.tunnus AS pankkiyhteys_tunnus
             FROM yriti

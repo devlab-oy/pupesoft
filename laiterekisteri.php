@@ -60,7 +60,6 @@ $headerit = array(
   "tuotenumero",
   "sopimustiedot",
   "asiakastiedot",
-  
   "kommentti",
   "lcm info",
   "ip",
@@ -80,7 +79,41 @@ if ($toiminto == 'LINKKAA') {
 
   echo "pitäs updatee laitteiden_sopimukset ja lopuks unsettaa muuttujat<br>";
   // Joka kierroksella haetaan valitut laitteet uudestaan
-  if (isset($valitut_laitteet)) unset($valitut_laitteet);
+  if (isset($valitut_laitteet) or isset($vanhat_laitteet)) {
+    echo "olivanhojakin<br>";
+    foreach ($valitut_laitteet as $laite) {
+      // Tarkistetaan oliko valittu laite jo valittu sopimukselle
+      if(!in_array($laite, $vanhat_laitteet)) {
+        echo "lisattiin uusi $laite <br>";
+        $query = "INSERT INTO laitteen_sopimukset
+                  SET sopimusrivin_tunnus = '{$tilausrivin_tunnus}',
+                  laitteen_tunnus = '{$laite}'";
+        pupe_query($query);
+      }
+    }
+
+    foreach ($vanhat_laitteet as $vanhalaite) {
+    // Tarkistetaan oliko kaikki vanhat laitteet valittuna vai pitääkö poistaa joku niistä
+      if (!in_array($vanhalaite, $valitut_laitteet)) {
+        echo "poistettiin vanha $vanhalaite <br>";
+        $query = "DELETE FROM laitteen_sopimukset
+                  WHERE laitteen_tunnus = '{$vanhalaite}'
+                  AND sopimusrivin_tunnus = '{$tilausrivin_tunnus}'";
+              pupe_query($query);
+      }
+    }
+  }
+  elseif (isset($valitut_laitteet)) {
+    echo "eivanhoja<br>";
+    foreach($valitut_laitteet as $laite) {
+      $query = "INSERT INTO laitteen_sopimukset
+                SET sopimusrivin_tunnus = '{$tilausrivin_tunnus}',
+                laitteen_tunnus = '{$laite}'";
+      pupe_query($query);
+    }
+  }
+  unset($valitut_laitteet);
+  unset($vanhat_laitteet);
 }
 
 
@@ -253,13 +286,13 @@ else {
     echo "<form>";
     echo "<tr>";
     if ($toiminto == "LINKKAA") {
-      if (isset($rowi['sopimusrivin_tunnukset'])) $rowi['sopimusrivin_tunnukset'] .= ',152195';
+      //if (isset($rowi['sopimusrivin_tunnukset'])) $rowi['sopimusrivin_tunnukset'] .= ',152195';
       $sel = '';
       if (strpos($rowi['sopimusrivin_tunnukset'], $tilausrivin_tunnus) !== false) {
         $sel = ' CHECKED';
         echo "<input type='hidden' name='vanhat_laitteet[]' value ='{$rowi['tunnus']}' />";
       }
-      echo "<td><input type='checkbox' name='valitut_laitteet[]' value='{$rowi['tunnus']}' $sel/></td>";
+      echo "<td><input type='checkbox' name='valitut_laitteet[]'  value='{$rowi['tunnus']}'  $sel onclick='submit();'/></td>";
     }
     
     echo "<td nowrap><a href='{$palvelin2}/laiterekisteri.php?toiminto=MUOKKAA&laitetunnus=$rowi[tunnus]&lopetus=$PHP_SELF'>{$rowi['tunnus']}</a></td>";
@@ -331,7 +364,6 @@ else {
       $sarjanumerorow = mysql_fetch_assoc($sarjanumerores);
       $asiakas = $sarjanumerorow['asiakas'];
     }
-    
 
     // Tuote
     echo "<td nowrap>".$rowi['valmistaja']."</td>";
@@ -352,12 +384,10 @@ else {
   }
   echo "</table>";
   echo "<br><br>";
-  //echo "<form>";
-  
+
   if ($toiminto == 'LINKKAA') {
     echo "<input type='hidden' name='tilausrivin_tunnus' value ='$tilausrivin_tunnus' />";
     echo "<input type='hidden' name='toiminto' value ='LINKKAA' />";
-    echo "<input type='submit' name='paivita_sopimuksen_laitteet' value='Päivitä sopimuksen laitteet' />";
   }
   else {
     echo "<input type='hidden' name='toiminto' value ='UUSILAITE' />";

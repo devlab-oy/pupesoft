@@ -471,14 +471,20 @@ if ($tee == "laheta_pankkiin") {
     virhe("Pankkiyhteystunnus katosi!");
     $tee = "virhe";
   }
+
+  $pankkiyhteys_tiedosto_full = "{$pankkitiedostot_polku}{$pankkiyhteys_tiedosto}";
+
+  if (!is_readable($pankkiyhteys_tiedosto_full)) {
+    virhe("Maksuaineisto ei ole luettavissa!");
+    $tee = "virhe";
+  }
 }
 
 // Pankkiyhteys tiedoston lähetys
 if ($tee == "laheta_pankkiin") {
   $pankkiyhteys = hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana);
 
-  $_filename = "{$pankkitiedostot_polku}{$pankkiyhteys_tiedosto}";
-  $_xml = file_get_contents($_filename);
+  $_xml = file_get_contents($pankkiyhteys_tiedosto_full);
   $_data = base64_encode($_xml);
 
   $params = array(

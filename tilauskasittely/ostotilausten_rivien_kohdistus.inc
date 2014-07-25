@@ -816,9 +816,14 @@ if ($tila == 'tee_kohdistus') {
     }
 
     $query = "UPDATE tilausrivi use index (PRIMARY)
-              SET uusiotunnus = 0, kerattyaika = '0000-00-00 00:00:00', keratty = '', erikoisale_saapuminen = 0
+              SET
+                uusiotunnus = 0,
+                kerattyaika = '0000-00-00 00:00:00',
+                keratty = '',
+                erikoisale_saapuminen = 0
               WHERE yhtio = '$kukarow[yhtio]'
-              AND tunnus  in (".implode(",", $tunnukset2).")";
+              AND tunnus  IN (".implode(",", $tunnukset2).")
+              AND laskutettuaika = '0000-00-00'";
     $result = pupe_query($query);
   }
 

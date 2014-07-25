@@ -206,10 +206,22 @@ if ($toim == 'TEHDYT_TYOT') {
 }
 else {
   if ($request['ala_tee'] == 'merkkaa_tehdyksi' and !empty($request['lasku_tunnukset'])) {
-    merkkaa_tyomaarays_tehdyksi($request);
+    merkkaa_tyomaaraykset_tehdyksi($request);
   }
   else if ($request['ala_tee'] == 'merkkaa_tehdyksi' and empty($request['lasku_tunnukset'])) {
     echo "<font class='error'>" . t('Yhtään työtä ei merkattu tehdyksi') . "</font>";
+  }
+  else if ($request['ala_tee'] == 'muuta' and !empty($request['lasku_tunnukset'])) {
+    muuta_tyomaarayksien_teko_paiva($request);
+  }
+  else if ($request['ala_tee'] == 'muuta' and empty($request['lasku_tunnukset'])) {
+    echo "<font class='error'>" . t('Yhtään työtä ei muutettu') . "</font>";
+  }
+  else if ($request['ala_tee'] == 'poista' and !empty($request['lasku_tunnukset'])) {
+    poista_tyomaarayksia($request);
+  }
+  else if ($request['ala_tee'] == 'poista' and empty($request['lasku_tunnukset'])) {
+    echo "<font class='error'>" . t('Yhtään työtä ei poistettu') . "</font>";
   }
 
   if ($request['ala_tee'] == 'merkkaa_kadonneeksi') {

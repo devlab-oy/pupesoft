@@ -998,8 +998,12 @@ function hae_laitteen_edellinen_tyomaarays($laite_tunnus) {
   return mysql_fetch_assoc($result);
 }
 
-function merkkaa_tyomaarays_tehdyksi($request) {
+function merkkaa_tyomaaraykset_tehdyksi($request) {
   global $kukarow, $yhtiorow;
+
+  if (empty($request['lasku_tunnukset'])) {
+    return false;
+  }
 
   $query = "UPDATE lasku
             SET tila = 'L',
@@ -1039,6 +1043,49 @@ function merkkaa_tyomaarays_tehdyksi($request) {
       aseta_tyomaarays_status('X', '', $lasku_tunnus);
     }
   }
+
+  return true;
+}
+
+function muuta_tyomaarayksien_teko_paiva($request) {
+  global $kukarow, $yhtiorow;
+
+  if (empty($request['lasku_tunnukset'])) {
+    return false;
+  }
+  //Toimitettuaika manual settiä käytetään konversio-ajossa sekä käyttöliittymässä
+  $valid = FormValidator::validateItem($request['toimitettuaika'], 'paiva');
+  if ($valid) {
+    $tekopaiva = date('Y-m-d', strtotime($request['toimitettuaika']));
+    $tekopaiva_update = "toimaika = '{$tekopaiva}'";
+  }
+  else {
+    return false;
+  }
+
+  $query = "UPDATE lasku
+            SET {$tekopaiva_update}
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus IN ('" . implode("','", $request['lasku_tunnukset']) . "')";
+  pupe_query($query);
+
+  return true;
+}
+
+function poista_tyomaarayksia($request) {
+  global $kukarow, $yhtiorow;
+
+  if (empty($request['lasku_tunnukset'])) {
+    return false;
+  }
+
+  $query = "UPDATE lasku
+            SET tila = 'D'
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus IN ('" . implode("','", $request['lasku_tunnukset']) . "')";
+  pupe_query($query);
+
+  return false;
 }
 
 function hae_tyomaarays($tyomaarays_tunnus) {

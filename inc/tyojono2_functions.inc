@@ -69,25 +69,25 @@ function hae_tyomaaraykset($request) {
 
   //tämä käytössä asiakaan_laite_hallinta.php
   if (!empty($request['liitostunnus'])) {
-    $lasku_where .= "  AND lasku.liitostunnus = '{$request['liitostunnus']}'";
+    $lasku_where .= " AND lasku.liitostunnus = '{$request['liitostunnus']}'";
   }
 
   if ($request['toim'] == 'TEHDYT_TYOT') {
-    $lasku_where .= "  AND lasku.tila = 'L'
-              AND lasku.alatila = 'D'";
+    $lasku_where .= " AND lasku.tila = 'L'
+                      AND lasku.alatila = 'D'";
     $lasku_order = " tilausrivi.toimitettuaika DESC,";
   }
   else {
-    $lasku_where .= "  AND lasku.tila = 'A'";
+    $lasku_where .= " AND lasku.tila = 'A'";
     $lasku_order = " lasku.toimaika ASC,";
   }
 
   if (!empty($request['asiakas_tunnus'])) {
-    $lasku_where .= "  AND lasku.liitostunnus = '{$request['asiakas_tunnus']}'";
+    $lasku_where .= " AND lasku.liitostunnus = '{$request['asiakas_tunnus']}'";
   }
 
   if (!empty($request['kohde_tunnus'])) {
-    $kohde_join .= "  AND kohde.tunnus = '{$request['kohde_tunnus']}'";
+    $kohde_join .= " AND kohde.tunnus = '{$request['kohde_tunnus']}'";
   }
 
   if (!empty($request['toimitusaika'])) {
@@ -103,7 +103,7 @@ function hae_tyomaaraykset($request) {
     }
     else if ($request['toimitusaika'] == 'X') {
       //Näytä myöhässä olevat
-      $lasku_where .= "  AND lasku.toimaika < DATE_SUB(CURRENT_DATE, INTERVAL 1 DAY)";
+      $lasku_where .= " AND lasku.toimaika < DATE_SUB(CURRENT_DATE, INTERVAL 1 DAY)";
     }
   }
 
@@ -144,7 +144,7 @@ function hae_tyomaaraykset($request) {
             laite.sijainti AS laite_sijainti,
             laite.tunnus AS laite_tunnus,
             tuote.nimitys AS tuote_nimi,
-            lasku.toimaika,
+            lasku.toimaika AS toimaika,
             a1.selite AS tyojonokoodi,
             a1.selitetark AS tyojono,
             a2.selite AS tyostatus_koodi,
@@ -554,8 +554,7 @@ function echo_tyomaarays_rivi($request, $laitteet) {
   $lopetus = "{$palvelin2}tyomaarays/tyojono2.php////tee=hae//asiakas_tunnus={$request['asiakas_tunnus']}//kohde_tunnus={$request['kohde_tunnus']}//tyojono={$request['tyojono']}//tyostatus={$request['tyostatus']}//toimitusaika={$request['toimitusaika']}";
 
   echo "<tr class='laite_table_tr_hidden'>";
-
-  echo "<form class='multisubmit' name='merkkaa_tehdyksi'>";
+  echo "<form class='multisubmit tyomaarayshallinta' name='tyomaarayshallinta'>";
   echo "<input type='hidden' name='ala_tee' value='merkkaa_tehdyksi' />";
 
   echo "<td colspan='1'>";
@@ -577,6 +576,7 @@ function echo_tyomaarays_rivi($request, $laitteet) {
   echo "<th>" . t("Paikka") . "</th>";
   echo "<th>" . t("Sijainti") . "</th>";
   echo "<th>" . t("Tehtävä työ") . "</th>";
+  echo "<th>" . t("Toimitetaan") . "</th>";
   echo "<th>" . t("Kommentti") . "</th>";
   echo "<th>" . t("Poikkeus") . "</th>";
   echo "<th>" . t("Työjono") . "/<br>" . t("Työstatus") . "</th>";
@@ -622,6 +622,10 @@ function echo_tyomaarays_rivi($request, $laitteet) {
 
     echo "<td>";
     echo $laite['tehtava_tyo'];
+    echo "</td>";
+
+    echo "<td>";
+    echo date('d.m.Y', strtotime($laite['toimaika']));
     echo "</td>";
 
     echo "<td>";
@@ -704,7 +708,11 @@ function echo_tyomaarays_rivi($request, $laitteet) {
   if ($request['toim'] != 'TEHDYT_TYOT') {
     echo "<input type='text' class='toimitettuaika' name='toimitettuaika' value='{$today}' />";
     echo "<br/>";
-    echo "<input type='submit' value='" . t("Merkkaa tehdyksi") . "' />";
+    echo "<button class='merkkaa_tehdyksi' type='button'>" . t('Merkkaa tehdyksi') . "</button>";
+    echo "<br/>";
+    echo "<button class='muuta' type='button'>" . t('Muuta päivämäärää') . "</button>";
+    echo "<br/>";
+    echo "<button class='poista' type='button'>" . t('Poista') . "</button>";
     echo "<div class='error_element'></div>";
   }
   echo "</td>";
@@ -721,7 +729,7 @@ function merkkaa_laite_kadonneeksi($request) {
   aseta_laitteen_tila($request['laite_tunnus'], 'K');
 }
 
-function hae_tyojonot($request = array()) {
+function hae_tyojonot() {
   global $kukarow, $yhtiorow;
 
   $tyojono_result = t_avainsana("TYOM_TYOJONO");
@@ -743,7 +751,7 @@ function hae_tyojonot($request = array()) {
   return $tyojonot;
 }
 
-function hae_tyostatukset($request = array()) {
+function hae_tyostatukset() {
   global $kukarow, $yhtiorow;
 
   $tyostatus_result = t_avainsana("TYOM_TYOSTATUS");

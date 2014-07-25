@@ -111,6 +111,30 @@
       });
     };
 
+    this.bind_merkkaa_tehdyksi = function() {
+      $('.merkkaa_tehdyksi').on('click', function() {
+        var $tr = $(this).parent().parent();
+        $tr.find('input[name="ala_tee"]').val('merkkaa_tehdyksi');
+        $tr.find('.tyomaarayshallinta').submit();
+      });
+    };
+
+    this.bind_muuta_paivamaaraa = function() {
+      $('.muuta').on('click', function() {
+        var $tr = $(this).parent().parent();
+        $tr.find('input[name="ala_tee"]').val('muuta');
+        $tr.find('.tyomaarayshallinta').submit();
+      });
+    };
+
+    this.bind_poista = function() {
+      $('.poista').on('click', function() {
+        var $tr = $(this).parent().parent();
+        $tr.find('input[name="ala_tee"]').val('poista');
+        $tr.find('.tyomaarayshallinta').submit();
+      });
+    };
+
     var paivita_laskujen_tyojonot = function(lasku_tunnukset, tyojono) {
       return $.ajax({
         async: true,
@@ -136,6 +160,9 @@
       this.bind_aineisto_submit_button_click();
       this.bind_tyojono_muutos_lasku_change();
       this.bind_tyojono_muutos_kohde_change();
+      this.bind_merkkaa_tehdyksi();
+      this.bind_muuta_paivamaaraa();
+      this.bind_poista();
     };
 
   };

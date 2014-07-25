@@ -46,7 +46,7 @@ $maksupaate_maksetut['pankkikortti'] = $maksettu_pkortilla;
 if ($vertailtava_summa_int >= $kaikkiyhteensa_int) {
   return 0;
 }
-// TODO suoritustyyppi: maksu tai hyvitys/peruutus (cancel/refund, tarvitsee archiveid(aviite?, löytyy kuitilta))
+
 foreach($suoritukset as $suoritus) {
 
   if ($suoritus == 1) $onnistuuko = false;
@@ -158,8 +158,8 @@ foreach($suoritukset as $suoritus) {
         $kuitti2 = $clientti->getMerchantReceipt();
         $kuitti2 = utf8_decode($kuitti2);
         if (strpos($kuitti2, "ALLEKIRJOITUS")) {
-          // TODO
-          //tulostakuitti($kuitti2);
+          // TODO Kauppiaan kuitin tulostus
+          //tulostakuittifunktio($kuitti2);
         }
         break;
     }
@@ -175,8 +175,9 @@ foreach($suoritukset as $suoritus) {
 }
 
 // Kirjataan suoritus lopuksi
+
 $status = '';
-echo "onnistuuko $onnistuuko / maksutyyppi $maksutyyppi \n";
+
 // Setataan oikea arvo tapahtumalle
 if ($onnistuuko == "VELOITETTU" and ($maksutyyppi == 'OSTO')) {
   // K - Korttimaksu

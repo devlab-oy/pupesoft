@@ -2283,7 +2283,7 @@ if (!function_exists('alvierittely')) {
       }
 
       $kala -= 10;
-      
+
       if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
         $pyoristys = $kassa_ale != '' ? $laskurow["pyoristys_valuutassa"] * (1-$kassa_ale/100) : $laskurow["pyoristys_valuutassa"];
         $pdf_lasku->draw_text(360, $kala, t("Rahoituksella / Osamaksulla", $kieli).":",          $thispage, $norm);
@@ -2331,7 +2331,7 @@ if (!function_exists('alvierittely')) {
         $pdf_lasku->draw_text(20, $kala, t("Maksup‰‰tetapahtumat"), $thispage, $norm);
         $kala -= 10;
       }
-
+      // TODO sivunvaihto kun ylitet‰‰n tietty pituus (jos tapahtumia on tarpeeksi niin ei mahdu sivulle)
       while ($maksupaatetapahtuma = mysql_fetch_assoc($result)) {
         $tapahtuman_kaikki_rivit = explode("\n", $maksupaatetapahtuma['asiakkaan_kuitti']);
         foreach ($tapahtuman_kaikki_rivit as $yksittainen_tapahtumarivi) {

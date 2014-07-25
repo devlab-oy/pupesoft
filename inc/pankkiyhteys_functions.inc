@@ -879,9 +879,9 @@ function tuetut_pankit() {
       "nimi"       => "Nordea",
       "lyhyt_nimi" => "nordea"
     ),
-    "DABAFIHX" => array(
-      "nimi"       => "Danske Bank",
-      "lyhyt_nimi" => "danske"
-    ),
+    // "DABAFIHX" => array(
+    //   "nimi"       => "Danske Bank",
+    //   "lyhyt_nimi" => "danske"
+    // ),
   );
 }

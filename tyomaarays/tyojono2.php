@@ -60,6 +60,12 @@ if (!isset($toimitusaika)) {
 if (!isset($toimitettuaika)) {
   $toimitettuaika = '';
 }
+if (!isset($tyomaarays_kpl)) {
+  $tyomaarays_kpl = '';
+}
+if (!isset($poistetut_tilaukset)) {
+  $poistetut_tilaukset = '';
+}
 
 if ($tee == 'lataa_tiedosto') {
   $filepath = "/tmp/" . $tmpfilenimi;
@@ -98,17 +104,39 @@ echo $css;
 enable_ajax();
 
 $request = array(
-    'ala_tee'         => $ala_tee,
-    'toim'            => $toim,
-    'lasku_tunnukset' => $lasku_tunnukset,
-    'laite_tunnus'    => $laite_tunnus,
-    'asiakas_tunnus'  => $asiakas_tunnus,
-    'kohde_tunnus'    => $kohde_tunnus,
-    'tyojono'         => $tyojono,
-    'tyostatus'       => $tyostatus,
-    'toimitusaika'    => $toimitusaika,
-    'toimitettuaika'  => $toimitettuaika,
+    'ala_tee'             => $ala_tee,
+    'toim'                => $toim,
+    'lasku_tunnukset'     => $lasku_tunnukset,
+    'laite_tunnus'        => $laite_tunnus,
+    'asiakas_tunnus'      => $asiakas_tunnus,
+    'kohde_tunnus'        => $kohde_tunnus,
+    'tyojono'             => $tyojono,
+    'tyostatus'           => $tyostatus,
+    'toimitusaika'        => $toimitusaika,
+    'toimitettuaika'      => $toimitettuaika,
+    'tyomaarays_kpl'      => $tyomaarays_kpl, //Tulee GET:ssä laitteen vaihdosta
+    'poistetut_tilaukset' => $poistetut_tilaukset, //Tulee GET:ssä laitteen vaihdosta
 );
+
+if ($request['ala_tee'] == 'laitteen_vaihto') {
+  $request['ala_tee'] = '';
+  echo '<font class="message">' . t("Laite vaihdettu") . '</font>';
+  echo "<br/>";
+  echo "<br/>";
+
+  if (!empty($request['poistetut_tilaukset'])) {
+    $request['poistetut_tilaukset'] = substr($request['poistetut_tilaukset'], 0, -1);
+    echo t('Seuraavat työmääräykset poistettiin, koska niihin liitetty laite on kadonnut/hajonnut') . ': ' . $request['poistetut_tilaukset'];
+  }
+  else {
+    echo t('Laitteella ei ollut muita poistettavia työmääräyksiä');
+  }
+
+  echo "<br/>";
+  echo "<font class='message'>" . t('Työmääräyksiä generoitiin muutosten pohjalta') . ": {$request['tyomaarays_kpl']} " . t('kappaletta') . "</font>";
+  echo "<br/>";
+  echo "<br/>";
+}
 
 if (!isset($request['toimitusaika'])) {
   $request['toimitusaika'] = 28;

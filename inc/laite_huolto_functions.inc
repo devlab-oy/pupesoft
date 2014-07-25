@@ -247,9 +247,7 @@ function generoi_tyomaaraykset_huoltosykleista($laitteet, $laitteiden_huoltosykl
   foreach ($laitteet as $laite) {
     //Tarkistetaan löytyyko avoin työmääräys laitteelle
     if (isset($laitteiden_avoimet_tyomaaraykset[$laite['laite_tunnus']][$laite['toimenpide']])) {
-      if ($debug) {
-        $virheet[$laite['laite_tunnus']][] = "Tälle laitteelle " . $laite['laite_tunnus'] . " on jo luotu työmääräys";
-      }
+      $virheet[$laite['laite_tunnus']][] = "Tälle laitteelle " . $laite['laite_tunnus'] . " on jo luotu työmääräys";
       if (isset($proggress_bar)) {
         $proggress_bar->increase();
       }
@@ -258,9 +256,7 @@ function generoi_tyomaaraykset_huoltosykleista($laitteet, $laitteiden_huoltosykl
 
     //laitteen toimenpidetuote pitää olla saldoton
     if (!isset($saldottomat_tuotteet[$laite['toimenpide']])) {
-      if ($debug) {
-        $virheet[$laite['laite_tunnus']][] = "Toimenpide tuote " . $laite['laite_tunnus'] . " pitää olla saldoton! Työmääräystä tälle tuotteelle ei lisätty";
-      }
+      $virheet[$laite['laite_tunnus']][] = "Toimenpide tuote " . $laite['laite_tunnus'] . " pitää olla saldoton! Työmääräystä tälle tuotteelle ei lisätty";
       if (isset($proggress_bar)) {
         $proggress_bar->increase();
       }

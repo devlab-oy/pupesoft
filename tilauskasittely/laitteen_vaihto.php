@@ -33,7 +33,12 @@ $request = array(
     'uusi_laite'         => $uusi_laite,
     'vanha_laite_tunnus' => $vanha_laite_tunnus,
     'asiakas_tunnus'     => $asiakas_tunnus,
+    'lopetus'            => $lopetus,
+    'ala_tee'            => $ala_tee,
 );
+
+//Lopetukseen pitää laittaa ala_tee, jotta työjono osaa echottaa toimenpiteet.
+$request['lopetus'] .= "//ala_tee={$ala_tee}";
 
 $request['laite'] = hae_laite_ja_asiakastiedot($request['tilausrivi_tunnus']);
 $request['paikat'] = hae_paikat($request['laite']['asiakas_tunnus']);
@@ -108,29 +113,15 @@ if ($request['tee'] == 'vaihda_laite') {
     aseta_laitteen_tila($request['vanha_laite_tunnus'], 'P');
   }
 
-
-  echo '<font class="message">' . t("Laite vaihdettu") . '</font>';
-  echo "<br/>";
-  echo "<br/>";
-
   //vanha laite on hävinnyt/mennyt rikki. käydään vanhan laitteen työmääräysrivit läpi, ja asetetaan ne poistettu tilaan.
   $poistetut_tilaukset = aseta_vanhan_laitteen_tyomaarays_rivit_poistettu_tilaan($request['vanha_laite_tunnus']);
-
-  if (!empty($poistetut_tilaukset)) {
-    $poistetut_tilaukset = implode(', ', $poistetut_tilaukset);
-    $poistetut_tilaukset = substr($poistetut_tilaukset, 0, -2);
-    echo t('Seuraavat työmääräykset poistettiin, koska niihin liitetty laite on kadonnut/hajonnut') . ': ' . $poistetut_tilaukset;
-  }
-  else {
-    echo t('Laitteella ei ollut muita poistettavia työmääräyksiä');
-  }
 
   $laitteet = hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy($request['asiakas_tunnus']);
   list($huollettavien_laitteiden_huoltosyklirivit, $laitteiden_huoltosyklirivit_joita_ei_huolleta) = paata_mitka_huollot_tehdaan($laitteet);
   $tyomaarays_kpl = generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltosyklirivit, $laitteiden_huoltosyklirivit_joita_ei_huolleta);
 
-  echo "<br/>";
-  echo "<font class='message'>" . t('Työmääräyksiä generoitiin muutosten pohjalta') . ": {$tyomaarays_kpl} " . t('kappaletta') . "</font>";
+  $request['lopetus'] .= "//poistetut_tilaukset=" . implode(',', $poistetut_tilaukset) . "//tyomaarays_kpl={$tyomaarays_kpl}";
+  lopetus($request['lopetus'], 'META');
 }
 else {
   echo_laitteen_vaihto_form($request);
@@ -305,7 +296,8 @@ function hae_laite_ja_asiakastiedot($tilausrivi_tunnus) {
             kohde.nimi AS kohde_nimi,
             asiakas.tunnus AS asiakas_tunnus,
             asiakas.nimi AS asiakas_nimi,
-            lasku.tunnus AS lasku_tunnus
+            lasku.tunnus AS lasku_tunnus,
+            lasku.toimaika AS lasku_toimaika
             FROM tilausrivi
             JOIN tilausrivin_lisatiedot
             ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
@@ -481,6 +473,7 @@ function echo_laitteen_vaihto_form($request = array()) {
   echo "<input type='hidden' name='lasku_tunnus' value='{$request['laite']['lasku_tunnus']}' />";
   echo "<input type='hidden' name='vanha_laite_tunnus' value='{$request['laite']['laite_tunnus']}' />";
   echo "<input type='hidden' name='asiakas_tunnus' value='{$request['laite']['asiakas_tunnus']}' />";
+  echo "<input type='hidden' name='lopetus' value='{$request['lopetus']}' />";
   echo "<table>";
 
   echo "<tr>";
@@ -501,6 +494,11 @@ function echo_laitteen_vaihto_form($request = array()) {
   echo "<tr>";
   echo "<th>" . t("Vaihdettava laite") . "</th>";
   echo "<td>{$request['laite']['tuoteno']}</td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<th>" . t("Vaihdettavan laitteen suunniteltu toimitusaika") . "</th>";
+  echo "<td>" . date('d.m.Y', strtotime($request['laite']['lasku_toimaika'])) . "</td>";
   echo "</tr>";
 
   echo "<tr>";

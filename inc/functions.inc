@@ -24039,7 +24039,7 @@ if (!function_exists('js_laite')) {
         }
 
         function bind_tuoteno_change() {
-          $('#tuoteno_td input').on('change input paste', function() {
+          $('#tuoteno_td input').on('change input paste keypress', function() {
             setTimeout(function() {
               var tuoteno = $('#tuoteno_td input').val();
               if( tuoteno.length > 2 ) {

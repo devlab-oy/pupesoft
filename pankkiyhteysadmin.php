@@ -25,6 +25,9 @@ $customer_id = empty($customer_id) ? '' : $customer_id;
 $pin = empty($pin) ? '' : $pin;
 $bank = "";
 
+// Debug moodissa, voidaan upata suoraan key/cert käyttöliittymästä
+$debug = empty($debug) ? 0 : 1;
+
 $tuetut_pankit = tuetut_pankit();
 
 // Poistetaan pankkiyhteys
@@ -60,10 +63,8 @@ if ($tee == "luo") {
     $virheet_count++;
   }
 
-  $filet_tyhjat = empty($_FILES["private_key"]["name"]) or empty($_FILES["certificate"]["name"]);
-
-  if (empty($pin) and $filet_tyhjat) {
-    virhe("PIN-koodi tai yksityinen avain/sertifikaatti täytyy antaa");
+  if (empty($pin) and $debug != 1) {
+    virhe("PIN-koodi täytyy antaa");
     $virheet_count++;
   }
 
@@ -99,7 +100,7 @@ if ($tee == "luo" and $pin != '') {
 }
 
 // Avainpari annettu käyttöliittymästä
-if ($tee == "luo" and $pin == '') {
+if ($tee == "luo" and $pin == '' and $debug == 1) {
   $private_key = file_get_contents($_FILES["private_key"]["tmp_name"]);
   $certificate = file_get_contents($_FILES["certificate"]["tmp_name"]);
 
@@ -197,39 +198,31 @@ if (!empty($mahdolliset_pankkiyhteydet)) {
   echo "</tr>";
 
   echo "<tr>";
-  echo "<td class='back'></td>";
-  echo "</tr>";
-
-  echo "<tr>";
   echo "<th><label for='pin'>";
   echo t("Pankilta saatu PIN-koodi");
   echo "</label></th>";
   echo "<td><input type='text' name='pin' id='pin' value='{$pin}'/></td>";
-  echo "<td class='back'>";
-  echo t("Täytä, jos olet saanut pankista PIN-koodin ja aiot nyt hakea tunnukset.");
-  echo "</td>";
   echo "</tr>";
 
-  echo "<tr>";
-  echo "<td class='back'></td>";
-  echo "</tr>";
+  if ($debug == 1) {
+    echo "<tr>";
+    echo "<td class='back'></td>";
+    echo "</tr>";
 
-  echo "<tr>";
-  echo "<th><label for='private_key'>";
-  echo t("Yksityinen avain");
-  echo "</label></th>";
-  echo "<td><input type='file' name='private_key' id='private_key'/></td>";
-  echo "<td class='back'>";
-  echo t("Tai anna yksityinen avain/sertifikaatti -tiedostot, jos olet saanut ne jo pankista.");
-  echo "</td>";
-  echo "</tr>";
+    echo "<tr>";
+    echo "<th><label for='private_key'>";
+    echo t("Yksityinen avain");
+    echo "</label></th>";
+    echo "<td><input type='file' name='private_key' id='private_key'/></td>";
+    echo "</tr>";
 
-  echo "<tr>";
-  echo "<th><label for='certificate'>";
-  echo t("Sertifikaatti");
-  echo "</label></th>";
-  echo "<td><input type='file' name='certificate' id='certificate'/></td>";
-  echo "</tr>";
+    echo "<tr>";
+    echo "<th><label for='certificate'>";
+    echo t("Sertifikaatti");
+    echo "</label></th>";
+    echo "<td><input type='file' name='certificate' id='certificate'/></td>";
+    echo "</tr>";
+  }
 
   echo "<tr>";
   echo "<td class='back'></td>";

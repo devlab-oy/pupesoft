@@ -21,8 +21,9 @@ if (SEPA_PANKKIYHTEYS === false) {
 }
 
 $tee = empty($tee) ? '' : $tee;
+$customer_id = empty($customer_id) ? '' : $customer_id;
 $pin = empty($pin) ? '' : $pin;
-$target_id = empty($target_id) ? '' : $target_id;
+$bank = "";
 
 $tuetut_pankit = tuetut_pankit();
 
@@ -39,8 +40,37 @@ if ($tee == "poista") {
 }
 
 // Uuden pankkiyhteyden oikeellisuustarkistus
-if ($tee == "luo" and !pankkiyhteystiedot_kunnossa()) {
-  $tee = "";
+if ($tee == "luo") {
+  $virheet_count = 0;
+
+  // Otetaan pankin nimi muuttujaan
+  $bank = $tuetut_pankit[$pankki]["lyhyt_nimi"];
+
+  if (empty($salasana)) {
+    virhe("Salasana täytyy antaa");
+    $virheet_count++;
+  }
+  elseif ($salasana != $salasanan_vahvistus) {
+    virhe("Salasanan vahvistus ei vastaa salasanaa");
+    $virheet_count++;
+  }
+
+  if (empty($customer_id)) {
+    virhe("Asiakastunnus täytyy antaa");
+    $virheet_count++;
+  }
+
+  $filet_tyhjat = empty($_FILES["private_key"]["name"]) or empty($_FILES["certificate"]["name"]);
+
+  if (empty($pin) and $filet_tyhjat) {
+    virhe("PIN-koodi tai yksityinen avain/sertifikaatti täytyy antaa");
+    $virheet_count++;
+  }
+
+  if ($virheet_count > 0) {
+    echo "<br>";
+    $tee = "";
+  }
 }
 
 // Haetaan sertifikaatti jos PIN on annettu
@@ -87,11 +117,9 @@ if ($tee == "luo" and $pin == '') {
   }
 }
 
-// Jos käyttäjä ei ole antanut target id:tä, haetaan se pankista
-if ($tee == "luo" and $target_id == '') {
-
+if ($tee == "luo" and $bank == "nordea") {
   $params = array(
-    "bank" => $tuetut_pankit[$pankki]["lyhyt_nimi"],
+    "bank" => $bank,
     "certificate" => $certificate,
     "private_key" => $private_key,
     "customer_id" => $customer_id,
@@ -131,5 +159,149 @@ if ($tee == "tyhjenna_formi") {
 }
 
 // Käyttöliittymä
-uusi_pankkiyhteys_formi();
-pankkiyhteydet_table();
+$mahdolliset_pankkiyhteydet = mahdolliset_pankkiyhteydet();
+
+// Jos voidaan tehdä uusia pankkiyhteyksiä
+if (!empty($mahdolliset_pankkiyhteydet)) {
+  echo "<font class='message'>" . t("Uusi pankkiyhteys") . "</font>";
+  echo "<hr>";
+
+  echo "<form action='pankkiyhteysadmin.php' method='post' enctype='multipart/form-data'>";
+  echo "<input type='hidden' name='tee' value='luo'/>";
+  echo "<table>";
+  echo "<tbody>";
+
+  echo "<tr>";
+  echo "<th><label for='pankki'>";
+  echo t("Pankki, jolle pankkiyhteys luodaan");
+  echo "</label></th>";
+  echo "<td>";
+  echo "<select name='pankki' id='pankki'>";
+
+  foreach ($mahdolliset_pankkiyhteydet as $bic => $nimi) {
+    $selected = $pankki == $bic ? " selected" : "";
+    echo "<option value='{$bic}'{$selected}>{$nimi}</option>";
+  }
+
+  echo "</select>";
+  echo "</td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<th><label for='customer_id'>";
+  echo t("Asiakastunnus");
+  echo "</label></th>";
+  echo "<td>";
+  echo "<input type='text' name='customer_id' id='customer_id' value='{$customer_id}'/>";
+  echo "</td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<td class='back'></td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<th><label for='pin'>";
+  echo t("Pankilta saatu PIN-koodi");
+  echo "</label></th>";
+  echo "<td><input type='text' name='pin' id='pin' value='{$pin}'/></td>";
+  echo "<td class='back'>";
+  echo t("Täytä, jos olet saanut pankista PIN-koodin ja aiot nyt hakea tunnukset.");
+  echo "</td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<td class='back'></td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<th><label for='private_key'>";
+  echo t("Yksityinen avain");
+  echo "</label></th>";
+  echo "<td><input type='file' name='private_key' id='private_key'/></td>";
+  echo "<td class='back'>";
+  echo t("Tai anna yksityinen avain/sertifikaatti -tiedostot, jos olet saanut ne jo pankista.");
+  echo "</td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<th><label for='certificate'>";
+  echo t("Sertifikaatti");
+  echo "</label></th>";
+  echo "<td><input type='file' name='certificate' id='certificate'/></td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<td class='back'></td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<th><label for='salasana'>";
+  echo t("Salasana, jolla pankkiyhteystunnukset suojataan");
+  echo "</label></th>";
+  echo "<td><input type='password' name='salasana' id='salasana'/></td>";
+  echo "<td class='back'>";
+  echo t("Huom! Salasanaa ei voi mitenkään palauttaa, jos se unohtuu.");
+  echo "</td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<th><label for='salasanan_vahvistus'>";
+  echo t("Salasanan vahvistus");
+  echo "</label></th>";
+  echo "<td><input type='password' name='salasanan_vahvistus' id='salasanan_vahvistus'/></td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<td class='back'><input type='submit' value='" . t("Luo pankkiyhteys") . "'/></td>";
+  echo "</tr>";
+
+  echo "</tbody>";
+  echo "</table>";
+  echo "</form>";
+}
+
+$pankkiyhteydet = hae_pankkiyhteydet();
+
+// Jos meillä on jo perustettuja pankkiyhteyksiä
+if (!empty($pankkiyhteydet)) {
+  echo "<br/>";
+  echo "<font class='message'>" . t("Pankkiyhteydet") . "</font>";
+  echo "<hr>";
+
+  echo "<table>";
+  echo "<thead>";
+
+  echo "<tr>";
+  echo "<th>" . t("Pankki") . "</th>";
+  echo "<th>" . t("Asiakastunnus") . "</th>";
+  echo "<th>" . t("Aineistoryhmän tunnus") . "</th>";
+  echo "<th></th>";
+  echo "</tr>";
+
+  echo "</thead>";
+
+  echo "<tbody>";
+
+  $_confirm = t("Haluatko varmasti poistaa pankkiyhteyden?");
+
+  foreach ($pankkiyhteydet as $pankkiyhteys) {
+    echo "<tr class='aktiivi'>";
+    echo "<td>{$pankkiyhteys["pankin_nimi"]}</td>";
+    echo "<td>{$pankkiyhteys["customer_id"]}</td>";
+    echo "<td>{$pankkiyhteys["target_id"]}</td>";
+    echo "<td>";
+
+    echo "<form class='multisubmit' method='post' action='pankkiyhteysadmin.php'
+                onsubmit='return confirm(\"{$_confirm}\");'>";
+    echo "<input type='hidden' name='tee' value='poista'/>";
+    echo "<input type='hidden' name='pankkiyhteys' value='{$pankkiyhteys["pankki"]}'/>";
+    echo "<input type='submit' value='" . t("Poista") . "'/>";
+    echo "</form>";
+    echo "</td>";
+    echo "</tr>";
+  }
+
+  echo "</tbody>";
+  echo "</table>";
+}

@@ -422,24 +422,21 @@ require "inc/pankkiyhteys_functions.inc";
 $tee = empty($tee) ? '' : $tee;
 
 // Onko maksuaineistoille annettu salasanat.php:ssä oma polku jonne tallennetaan
-if (isset($tee) and $tee == "KIRJOITAKOPIO") {
-  $pankkitiedostot_polku = "/tmp/";
+if ($tee == "KIRJOITAKOPIO") {
+  $pankkitiedostot_polku = "/tmp";
 }
-elseif (isset($maksuaineiston_siirto[$kukarow["yhtio"]]["local_dir"])) {
+elseif (!empty($maksuaineiston_siirto[$kukarow["yhtio"]]["local_dir"])) {
   $pankkitiedostot_polku = trim($maksuaineiston_siirto[$kukarow["yhtio"]]["local_dir"]);
-  if (substr($pankkitiedostot_polku, -1) != "/") {
-    $pankkitiedostot_polku .= "/";
-  }
 }
-elseif (isset($pankkitiedostot_polku) and trim($pankkitiedostot_polku) != "") {
+elseif (!empty($pankkitiedostot_polku) != "") {
   $pankkitiedostot_polku = trim($pankkitiedostot_polku);
-  if (substr($pankkitiedostot_polku, -1) != "/") {
-    $pankkitiedostot_polku .= "/";
-  }
 }
 else {
-  $pankkitiedostot_polku = $pupe_root_polku."/dataout/";
+  $pankkitiedostot_polku = $pupe_root_polku."/dataout";
 }
+
+// Varmistetaan, että loppuu kauttaviivaan
+$pankkitiedostot_polku = rtrim($pankkitiedostot_polku, '/').'/';
 
 if ($tee == "lataa_tiedosto") {
   if (isset($pankkifilenimi)) readfile($pankkitiedostot_polku.basename($pankkifilenimi));
@@ -448,6 +445,11 @@ if ($tee == "lataa_tiedosto") {
 }
 
 echo "<font class='head'>".t("SEPA-maksuaineisto")."</font><hr>";
+
+if (!is_writable($pankkitiedostot_polku)) {
+  virhe("Pankkitiedostopolku virheellinen!");
+  $tee = "";
+}
 
 // Pankkiyhteys oikeellisuustarkastukset
 if ($tee == "laheta_pankkiin") {
@@ -565,7 +567,7 @@ if ($yhtiorow["pankkitiedostot"] == "E") {
   $tee = "";
 }
 
-if (isset($tee) and $tee == "KIRJOITAKOPIO") {
+if ($tee == "KIRJOITAKOPIO") {
   $lisa = " and lasku.tunnus in ($poimitut_laskut) ";
 }
 else {

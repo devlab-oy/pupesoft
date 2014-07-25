@@ -22,17 +22,13 @@
 //$silent = '';
 
 // Kutsutaanko CLI:stä
-$php_cli = FALSE;
-
-if (php_sapi_name() == 'cli' or isset($editil_cli)) {
-  $php_cli = TRUE;
-}
+$php_cli = (php_sapi_name() == 'cli' or isset($editil_cli));
 
 if ($php_cli) {
 
-  if (!isset($argv[1]) or $argv[1] == '') {
+  if (empty($argv[1])) {
     echo "Anna yhtiö!!!\n";
-    die;
+    exit(1);
   }
 
   // otetaan includepath aina rootista
@@ -44,82 +40,61 @@ if ($php_cli) {
   require("inc/connect.inc");
   require("inc/functions.inc");
 
-  // hmm.. jännää
-  $kukarow['yhtio'] = $argv[1];
+  $_yhtio = pupesoft_cleanstring($argv[1]);
+  $yhtiorow = hae_yhtion_parametrit($_yhtio);
+  $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
 
-  if (isset($argv[2])) {
-    $kieli = $argv[2];
+  if (!is_array($kukarow)) {
+    exit(1);
   }
 
-  $kukarow['kuka'] = "admin";
+  if (isset($argv[2])) {
+    $kieli = pupesoft_cleanstring($argv[2]);
+  }
 
   // Pupeasennuksen root
   $pupe_root_polku = dirname(dirname(__FILE__));
 
-  $query    = "SELECT * from yhtio where yhtio='$kukarow[yhtio]'";
-  $yhtiores = pupe_query($query);
+  $laskkk   = "";
+  $laskpp   = "";
+  $laskvv   = "";
+  $eilinen  = "";
+  $eiketjut = "";
 
-  if (mysql_num_rows($yhtiores) == 1) {
-    $yhtiorow = mysql_fetch_assoc($yhtiores);
-
-    // haetaan yhtiön parametrit
-    $query = "SELECT *
-              FROM yhtion_parametrit
-              WHERE yhtio='$yhtiorow[yhtio]'";
-    $result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
-
-    if (mysql_num_rows($result) == 1) {
-      $yhtion_parametritrow = mysql_fetch_assoc($result);
-      // lisätään kaikki yhtiorow arrayseen, niin ollaan taaksepäinyhteensopivia
-      foreach ($yhtion_parametritrow as $parametrit_nimi => $parametrit_arvo) {
-        $yhtiorow[$parametrit_nimi] = $parametrit_arvo;
-      }
-    }
-
-    $laskkk   = "";
-    $laskpp   = "";
-    $laskvv   = "";
-    $eilinen  = "";
-    $eiketjut = "";
-
-    // jos komentorivin kolmas arg on "eilinen" niin edelliselle laskutus päivälle, ohitetaan laskutusviikonpäivät
-    if ($argv[3] == "eilinen") {
-      $laskkk  = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-      $laskpp  = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-      $laskvv  = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-    }
-
-    // jos komentorivin kolmas arg on "eilinen" niin edelliselle laskutus päivälle
-    if ($argv[3] == "eilinen_eikaikki") {
-      $laskkk  = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-      $laskpp  = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-      $laskvv  = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-      $eilinen = "eilinen_eikaikki";
-    }
-
-    // jos komentorivin kolmas arg on "eiketjut"
-    if ($argv[3] == "eiketjut") {
-      $eiketjut = "KYLLA";
-    }
-
-    // jos komentorivin kolmas arg on "kaikki"
-    if ($argv[3] == "kaikki") {
-      $laskutakaikki = "ON";
-    }
-
-    // jos kuukausilaskutus on päällä (cron.monthly), niin ei välttämättä haluta ajaa päivälaskutusta
-    // kukauden vikana päivänä, koska silloin asiakkaalle saattaa mennä kaksi laskua vikana päivänä jos
-    // laskutusviikonpäivät osuu sillai kivasti
-    if ($argv[3] == "skippaa_kuukauden_vikapaiva" and date("d") == date("t")) {
-      echo "HUOM: Päivälaskutusta ei ajeta kuukauden vikana päivänä!<br>\n";
-      exit;
-    }
-
-    $tee = "TARKISTA";
+  // jos komentorivin kolmas arg on "eilinen" niin edelliselle laskutus päivälle, ohitetaan laskutusviikonpäivät
+  if ($argv[3] == "eilinen") {
+    $laskkk  = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+    $laskpp  = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+    $laskvv  = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
   }
-  else {
-    die ("Yhtiö $kukarow[yhtio] ei löydy!");
+
+  // jos komentorivin kolmas arg on "eilinen" niin edelliselle laskutus päivälle
+  if ($argv[3] == "eilinen_eikaikki") {
+    $laskkk  = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+    $laskpp  = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+    $laskvv  = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+    $eilinen = "eilinen_eikaikki";
   }
+
+  // jos komentorivin kolmas arg on "eiketjut"
+  if ($argv[3] == "eiketjut") {
+    $eiketjut = "KYLLA";
+  }
+
+  // jos komentorivin kolmas arg on "kaikki"
+  if ($argv[3] == "kaikki") {
+    $laskutakaikki = "ON";
+  }
+
+  // jos kuukausilaskutus on päällä (cron.monthly), niin ei välttämättä haluta ajaa päivälaskutusta
+  // kukauden vikana päivänä, koska silloin asiakkaalle saattaa mennä kaksi laskua vikana päivänä jos
+  // laskutusviikonpäivät osuu sillai kivasti
+  if ($argv[3] == "skippaa_kuukauden_vikapaiva" and date("d") == date("t")) {
+    echo "HUOM: Päivälaskutusta ei ajeta kuukauden vikana päivänä!<br>\n";
+    exit;
+  }
+
+  $tee = "TARKISTA";
 }
 elseif (strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE) {
 

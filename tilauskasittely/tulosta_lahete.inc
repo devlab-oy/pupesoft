@@ -273,8 +273,28 @@ if (!function_exists('alku_lahete')) {
         $pdf->draw_text(430, 782, $taika,                 $thispage, $norm);
       }
       else {
-        if ($tyyppi != "YLLAPITOSOPIMUS" and $tyyppi != 'SIIRTOLISTA' and $laskurow['toimaika'] == '0000-00-00') $pdf->draw_text(430, 782, t("Avoin", $kieli),   $thispage, $norm);
-        else $pdf->draw_text(430, 782, tv1dateconv($laskurow["toimaika"]),   $thispage, $norm);
+        if ($tyyppi != "YLLAPITOSOPIMUS" and $tyyppi != 'SIIRTOLISTA' and $laskurow['toimaika'] == '0000-00-00') {
+          $pdf->draw_text(430, 782, t("Avoin", $kieli),   $thispage, $norm);
+        }
+        else {
+
+          if ($yhtiorow['kerayserat'] == 'K' and !empty($laskurow['toimitustavan_lahto'])) {
+
+            $query = "SELECT *
+                      FROM lahdot
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tunnus  = '{$laskurow['toimitustavan_lahto']}'";
+            $lahto_res = pupe_query($query);
+            $lahto_row = mysql_fetch_assoc($lahto_res);
+
+            $_aika = tv1dateconv("{$lahto_row['pvm']} {$lahto_row['lahdon_kellonaika']}","PITKÄ");
+
+            $pdf->draw_text(430, 782, $_aika, $thispage, $norm);
+          }
+          else {
+            $pdf->draw_text(430, 782, tv1dateconv($laskurow["toimaika"]),   $thispage, $norm);
+          }
+        }
       }
 
       $asrow["ytunnus"] = tulosta_ytunnus($laskurow["ytunnus"], $laskurow["maa"], $laskurow["vienti"]);
@@ -4051,6 +4071,18 @@ if (!function_exists('kuittaus_lahete')) {
       // Luodaan muuttujat
       extract($params);
 
+      if ($kala < 90 ) {
+        // Luodaan palautettavat
+        $return = compact(array_keys($params));
+
+        $params = uusi_sivu_lahete($return);
+
+        $params = loppu_lahete($params);
+
+        // Luodaan muuttujat
+        extract($params);
+      }
+
       $pdf->draw_text(50, 90, t("Allekirjoitus", $kieli).": _______________________________",   $thispage, $norm);
       $pdf->draw_text(300, 90, t("Nimenselvennys", $kieli).": _______________________________",   $thispage, $norm);
 
@@ -4083,6 +4115,18 @@ if (!function_exists('kuittaus_lahete')) {
     elseif($yhtiorow['lahete_allekirjoitus'] == 'S')  {
       // Luodaan muuttujat
       extract($params);
+
+      if ($kala < 90 ) {
+        // Luodaan palautettavat
+        $return = compact(array_keys($params));
+
+        $params = uusi_sivu_lahete($return);
+
+        $params = loppu_lahete($params);
+
+        // Luodaan muuttujat
+        extract($params);
+      }
 
       $pdf->draw_text(50, 90, t("Allekirjoitus", $kieli).": _______________________________",   $thispage, $norm);
       $pdf->draw_text(300, 90, t("Nimenselvennys", $kieli).": _______________________________",   $thispage, $norm);

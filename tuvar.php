@@ -282,7 +282,7 @@ if ($tee == 'Z') {
                    FROM tuote
                   JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
                   JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-                    AND varastopaikat.tunnus = tuotepaikat.varasto)
+                    AND varastopaikat.tunnus                = tuotepaikat.varasto)
                   JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio
                   and sarjanumeroseuranta.tuoteno           = tuote.tuoteno
                   and sarjanumeroseuranta.hyllyalue         = tuotepaikat.hyllyalue
@@ -305,8 +305,8 @@ if ($tee == 'Z') {
                   JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
                   JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
                     AND varastopaikat.tunnus = tuotepaikat.varasto)
-                  WHERE tuote.yhtio in ('".implode("','", $yhtiot)."')
-                  and tuote.tuoteno = '$tuoteno'
+                  WHERE tuote.yhtio          in ('".implode("','", $yhtiot)."')
+                  and tuote.tuoteno          = '$tuoteno'
                   ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
       }
 

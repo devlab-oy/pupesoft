@@ -109,8 +109,8 @@ if ($tee == 'MUUTA') {
              FROM tuotepaikat
             LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
               AND varastopaikat.tunnus = tuotepaikat.varasto)
-            WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
-            and tuotepaikat.tuoteno = '$tuoteno'
+            WHERE tuotepaikat.yhtio    = '$kukarow[yhtio]'
+            and tuotepaikat.tuoteno    = '$tuoteno'
             ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
   $paikatresult1 = pupe_query($query);
 
@@ -742,7 +742,7 @@ if ($tee == 'UUSIPAIKKA') {
         $_var_tp = hae_varaston_toimipaikka($_mihin_varastoon);
         $_var_tp = (!empty($_var_tp) and is_array($_var_tp)) ? $_var_tp['tunnus'] : null;
 
-        $yhtiorow_alkuperainen = $yhtiorow;        
+        $yhtiorow_alkuperainen = $yhtiorow;
         $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $_var_tp);
       }
 
@@ -896,10 +896,10 @@ if ($tee == 'M') {
             concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
              FROM tuotepaikat
             LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-              AND varastopaikat.tunnus = tuotepaikat.varasto)
-            WHERE tuotepaikat.yhtio    = '$kukarow[yhtio]'
-            and tuotepaikat.tuoteno    = '$tuoteno'
-            and tuotepaikat.hyllyalue != '!!M'
+              AND varastopaikat.tunnus  = tuotepaikat.varasto)
+            WHERE tuotepaikat.yhtio     = '$kukarow[yhtio]'
+            and tuotepaikat.tuoteno     = '$tuoteno'
+            and tuotepaikat.hyllyalue  != '!!M'
             ORDER BY sorttauskentta";
   $paikatresult1 = pupe_query($query);
 
@@ -937,10 +937,10 @@ if ($tee == 'M') {
             concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
              FROM tuotepaikat
             LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-              AND varastopaikat.tunnus = tuotepaikat.varasto)
-            WHERE tuotepaikat.yhtio    = '$kukarow[yhtio]'
-            and tuotepaikat.tuoteno    = '$tuoteno'
-            and tuotepaikat.hyllyalue != '!!M'
+              AND varastopaikat.tunnus  = tuotepaikat.varasto)
+            WHERE tuotepaikat.yhtio     = '$kukarow[yhtio]'
+            and tuotepaikat.tuoteno     = '$tuoteno'
+            and tuotepaikat.hyllyalue  != '!!M'
             ORDER BY sorttauskentta";
   $paikatresult2 = pupe_query($query);
 

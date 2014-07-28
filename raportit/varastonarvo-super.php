@@ -570,8 +570,8 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
                JOIN varastopaikat ON  (varastopaikat.yhtio = tapahtuma.yhtio
                  AND varastopaikat.tunnus = tapahtuma.varasto)
                $jarjestys_join
-               WHERE tapahtuma.yhtio  = '$kukarow[yhtio]'
-               AND tapahtuma.laadittu > '$vv-$kk-$pp 23:59:59'
+               WHERE tapahtuma.yhtio      = '$kukarow[yhtio]'
+               AND tapahtuma.laadittu     > '$vv-$kk-$pp 23:59:59'
                $varastontunnukset1
                $where_lisa)
                UNION DISTINCT";
@@ -831,7 +831,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       $query  = "SELECT sarjanumeroseuranta.tunnus, sarjanumeroseuranta.era_kpl
                  FROM sarjanumeroseuranta
                  JOIN varastopaikat ON (varastopaikat.yhtio = sarjanumeroseuranta.yhtio
-                   AND varastopaikat.tunnus = sarjanumeroseuranta.varasto
+                   AND varastopaikat.tunnus                = sarjanumeroseuranta.varasto
                    $varasto_varastopaikat)
                  JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON (tilausrivi_osto.yhtio = sarjanumeroseuranta.yhtio
                    AND tilausrivi_osto.tunnus              = sarjanumeroseuranta.ostorivitunnus
@@ -921,9 +921,9 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
                 sum(kpl) muutoskpl,
                 tapahtuma.laadittu
                 FROM tapahtuma use index (yhtio_tuote_laadittu)
-                WHERE tapahtuma.yhtio   = '$kukarow[yhtio]'
-                and tapahtuma.tuoteno   = '{$row['tuoteno']}'
-                and tapahtuma.laadittu  > '$vv-$kk-$pp 23:59:59'
+                WHERE tapahtuma.yhtio    = '$kukarow[yhtio]'
+                and tapahtuma.tuoteno    = '{$row['tuoteno']}'
+                and tapahtuma.laadittu   > '$vv-$kk-$pp 23:59:59'
                 and tapahtuma.hyllyalue != ''
                 and tapahtuma.hyllynro  != ''
                 and tapahtuma.laji      != 'Epäkurantti'
@@ -1293,7 +1293,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
         $query  = "SELECT sarjanumeroseuranta.tunnus, sarjanumeroseuranta.era_kpl era_kpl, tilausrivi_osto.nimitys, sarjanumeroseuranta.sarjanumero
                    FROM sarjanumeroseuranta
                    JOIN varastopaikat ON (varastopaikat.yhtio = sarjanumeroseuranta.yhtio
-                     AND varastopaikat.tunnus = sarjanumeroseuranta.varasto
+                     AND varastopaikat.tunnus                = sarjanumeroseuranta.varasto
                      $varasto_varastopaikat)
                    LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON (tilausrivi_myynti.yhtio = sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus = sarjanumeroseuranta.myyntirivitunnus)
                    LEFT JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON (tilausrivi_osto.yhtio = sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus = sarjanumeroseuranta.ostorivitunnus)

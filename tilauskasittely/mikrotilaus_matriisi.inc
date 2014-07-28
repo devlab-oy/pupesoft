@@ -12,8 +12,8 @@ Koko/M‰‰r‰ N
 
 if ($tee == "file_matriisi") {
   if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
-    $timeparts = explode(" ",microtime());
-    $starttime = $timeparts[1].substr($timeparts[0],1);
+    $timeparts = explode(" ", microtime());
+    $starttime = $timeparts[1].substr($timeparts[0], 1);
 
     $path_parts = pathinfo($_FILES['userfile']['name']);
     $name  = strtoupper($path_parts['filename']);
@@ -28,7 +28,7 @@ if ($tee == "file_matriisi") {
     }
 
     if (strtoupper($ext) == "XLS") {
-      require_once ('excel_reader/reader.php');
+      require_once 'excel_reader/reader.php';
 
       // ExcelFile
       $data = new Spreadsheet_Excel_Reader();
@@ -39,7 +39,7 @@ if ($tee == "file_matriisi") {
       $data->read($_FILES['userfile']['tmp_name']);
     }
     else {
-      $file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
+      $file = fopen($_FILES['userfile']['tmp_name'], "r") or die (t("Tiedoston avaus ep‰onnistui")."!");
     }
 
     // luetaan tiedosto loppuun ja tehd‰‰n array koko datasta
@@ -69,16 +69,16 @@ if ($tee == "file_matriisi") {
       fclose($file);
     }
 
-    #echo "<table>";
+    //echo "<table>";
 
     $rivilask1 = 1;
 
     for ($er1 = 0; $er1 < count($excelrivi); $er1++) {
 
-      #echo "<tr>";
+      //echo "<tr>";
 
       for ($er2 = 0; $er2 < count($excelrivi[$er1]); $er2++) {
-        #echo "<td>$excelrivi[$er1][$er2]</td>";
+        //echo "<td>$excelrivi[$er1][$er2]</td>";
       }
 
       // T‰m‰ taitaa olla tuoterivi
@@ -108,7 +108,7 @@ if ($tee == "file_matriisi") {
             $ohitus = 0;
             $tyoteloyty = FALSE;
 
-            #echo "<th>$koko/$kpl</th>";
+            //echo "<th>$koko/$kpl</th>";
 
             $query = "SELECT *
                       FROM tuote
@@ -121,7 +121,7 @@ if ($tee == "file_matriisi") {
               $trow = mysql_fetch_assoc($rarresult);
               $tyoteloyty = TRUE;
 
-              #echo "<th>$trow[tuoteno]: $kpl</th>";
+              //echo "<th>$trow[tuoteno]: $kpl</th>";
             }
 
             if (!$tyoteloyty) {
@@ -136,7 +136,7 @@ if ($tee == "file_matriisi") {
                 $trow = mysql_fetch_assoc($rarresult);
                 $tyoteloyty = TRUE;
 
-                #echo "<th>$trow[tuoteno]: $kpl</th>";
+                //echo "<th>$trow[tuoteno]: $kpl</th>";
               }
             }
 
@@ -151,7 +151,7 @@ if ($tee == "file_matriisi") {
                 $trow = mysql_fetch_assoc($rarresult);
                 $tyoteloyty = TRUE;
 
-                #echo "<th>$trow[tuoteno]: $kpl</th>";
+                //echo "<th>$trow[tuoteno]: $kpl</th>";
               }
             }
 
@@ -166,7 +166,7 @@ if ($tee == "file_matriisi") {
                 $trow = mysql_fetch_assoc($rarresult);
                 $tyoteloyty = TRUE;
 
-                #echo "<th>$trow[tuoteno]: $kpl</th>";
+                //echo "<th>$trow[tuoteno]: $kpl</th>";
               }
             }
 
@@ -194,7 +194,7 @@ if ($tee == "file_matriisi") {
               $perhekielto    = "";
               $jtkielto        = $laskurow['jtkielto'];
 
-                  // Ennakkotilaukset, Tarjoukset, Yll‰pitosopimukset ja Valmistukset eiv‰t tee saldotsekki‰
+              // Ennakkotilaukset, Tarjoukset, Yll‰pitosopimukset ja Valmistukset eiv‰t tee saldotsekki‰
               if ($laskurow["tilaustyyppi"] == "E" or $laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "0" or $laskurow["tila"] == "V") {
                 $varataan_saldoa = "EI";
               }
@@ -202,8 +202,8 @@ if ($tee == "file_matriisi") {
                 $varataan_saldoa = "";
               }
 
-                  //lis‰t‰‰n rivi
-                  require ("lisaarivi.inc");
+              //lis‰t‰‰n rivi
+              require "lisaarivi.inc";
 
               if ($rivilask1 % 10 == 0) flush();
 
@@ -213,10 +213,10 @@ if ($tee == "file_matriisi") {
       }
 
       $rivilask1++;
-      #echo "</tr>";
+      //echo "</tr>";
     }
 
-    #echo "</table><br>";
+    //echo "</table><br>";
   }
 
   $tuoteno  = '';

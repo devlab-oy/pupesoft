@@ -97,6 +97,11 @@ class MagentoClient {
   private $_verkkokauppatuotteet_erikoisparametrit = array ();
 
   /**
+   * Magentossa käsin hallitut kategoria id:t joita ei poisteta tuotteelta tuotepäivityksessä
+   */
+  private $_sticky_kategoriat = array ();
+
+  /**
    * Tämän yhteyden aikana sattuneiden virheiden määrä
    */
   private $_error_count = 0;
@@ -311,7 +316,6 @@ class MagentoClient {
         }
       }
 
-
       $tuote_data = array(
         'categories'            => $category_ids,
         'websites'              => explode(" ", $tuote['nakyvyys']),
@@ -322,7 +326,6 @@ class MagentoClient {
         'status'                => self::ENABLED,
         'visibility'            => $visibility,
         'price'                 => sprintf('%0.2f', $tuote[$hintakentta]),
-        'special_price'         => $tuote['kuluprosentti'],
         'tax_class_id'          => $this->getTaxClassID(),
         'meta_title'            => '',
         'meta_keyword'          => '',
@@ -373,16 +376,29 @@ class MagentoClient {
       // Tuote on jo olemassa, päivitetään
       else {
         try {
+
+          $sticky_kategoriat = $this->_sticky_kategoriat;
+
+          // Haetaan tuotteen Magenton ID ja nykyiset kategoriat
+          $result = $this->_proxy->call($this->_session, 'catalog_product.info', $tuote['tuoteno']);
+          $product_id = $result['product_id'];
+          $current_categories = $result['categories'];
+
+          // Jos tuotteelta löytyy näitä kategoriatunnuksia ennen updatea ne lisätään takaisin
+          if (count($sticky_kategoriat) > 0 and count($current_categories) > 0) {
+            foreach ($sticky_kategoriat as $stick) {
+              if(in_array($stick, $current_categories)) {
+                $tuote_data['categories'][] = $stick;
+              }
+            }
+          }
+
           $this->_proxy->call($this->_session, 'catalog_product.update',
 
             array(
               $tuote['tuoteno'], // sku
               $tuote_data)
           );
-
-          // Haetaan tuotteen Magenton ID
-          $result = $this->_proxy->call($this->_session, 'catalog_product.info', $tuote['tuoteno']);
-          $product_id = $result['product_id'];
 
           $this->log("Tuote '{$tuote['tuoteno']}' päivitetty (simple) " . print_r($tuote_data, true));
 
@@ -437,6 +453,9 @@ class MagentoClient {
 
     $hintakentta = $this->_hintakentta;
 
+    // Erikoisparametrit
+    $verkkokauppatuotteet_erikoisparametrit = $this->_verkkokauppatuotteet_erikoisparametrit;
+
     // Mitä kenttää käytetään configurable_tuotteen nimenä
     $configurable_tuote_nimityskentta = $this->_configurable_tuote_nimityskentta;
 
@@ -486,6 +505,16 @@ class MagentoClient {
           $configurable_multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
       }
 
+      // Configurable-tuotteelle myös ensimmäisen lapsen erikoisparametrit
+      if (count($verkkokauppatuotteet_erikoisparametrit) > 0) {
+        foreach ($verkkokauppatuotteet_erikoisparametrit as $erikoisparametri) {
+          $key = $erikoisparametri['nimi'];
+          if (isset($tuotteet[0][$erikoisparametri['arvo']])) {
+            $configurable_multi_data[$key] = $this->get_option_id($key, $tuotteet[0][$erikoisparametri['arvo']]);
+          }
+        }
+      }
+
       // Configurable tuotteen tiedot
       $configurable = array(
         'categories'            => $category_ids,
@@ -501,7 +530,6 @@ class MagentoClient {
         'status'                => self::ENABLED,
         'visibility'            => self::CATALOG_SEARCH, // Configurablet nakyy kaikkialla
         'price'                 => $tuotteet[0][$hintakentta],
-        'special_price'         => $tuotteet[0]['kuluprosentti'],
         'tax_class_id'          => $this->getTaxClassID(), // 24%
         'meta_title'            => '',
         'meta_keyword'          => '',
@@ -557,17 +585,30 @@ class MagentoClient {
         }
         // Päivitetään olemassa olevaa configurablea
         else {
-          $product_id = $this->_proxy->call($this->_session, 'catalog_product.update',
+
+          $sticky_kategoriat = $this->_sticky_kategoriat;
+
+          // Haetaan tuotteen Magenton ID ja nykyiset kategoriat
+          $result = $this->_proxy->call($this->_session, 'catalog_product.info', $nimitys);
+          $product_id = $result['product_id'];
+          $current_categories = $result['categories'];
+
+          // Jos tuotteelta löytyy näitä kategoriatunnuksia ennen updatea ne lisätään takaisin
+          if (count($sticky_kategoriat) > 0 and count($current_categories) > 0) {
+            foreach ($sticky_kategoriat as $stick) {
+              if(in_array($stick, $current_categories)) {
+                $configurable['categories'][] = $stick;
+              }
+            }
+          }
+
+          $this->_proxy->call($this->_session, 'catalog_product.update',
             array(
               $nimitys,
               $configurable
             )
           );
           $this->log("Tuote '{$nimitys}' päivitetty (configurable) " . print_r($configurable, true));
-
-          // Haetaan tuotteen Magenton ID
-          $result = $this->_proxy->call($this->_session, 'catalog_product.info', $nimitys);
-          $product_id = $result['product_id'];
         }
 
         // Pitää käydä tekemässä vielä stock.update kutsu, että saadaan Manage Stock: YES
@@ -613,7 +654,7 @@ class MagentoClient {
    */
   public function hae_tilaukset($status = 'processing') {
 
-    $this->log("Haetaan tilauksia");
+    $this->log("Haetaan tilauksia", '', $type = 'order');
 
     $orders = array();
 
@@ -636,17 +677,40 @@ class MagentoClient {
     // Haetaan laskut (invoices.state = 'paid')
 
     foreach ($fetched_orders as $order) {
-
-      $this->log("Haetaan tilaus {$order['increment_id']}");
+      $this->log("Haetaan tilaus {$order['increment_id']}", '', $type = 'order');
 
       // Haetaan tilauksen tiedot (orders)
-      $orders[] = $this->_proxy->call($this->_session, 'sales_order.info', $order['increment_id']);
+      $temp_order = $this->_proxy->call($this->_session, 'sales_order.info', $order['increment_id']);
+
+      // Looptaan tilauksen statukset
+      foreach ($temp_order['status_history'] as $historia) {
+        // Jos tilaus on ollut kerran jo processing_pupesoft, ei haeta sitä enää
+        $_status = $historia['status'];
+
+        if ($_status == "processing_pupesoft") {
+          $this->log("Tilausta on käsitelty {$_status} tilassa, ohitetaan sisäänluku", '', $type = 'order');
+          // Skipataan tämä $order
+          continue 2;
+        }
+      }
+
+      $orders[] = $temp_order;
 
       // Päivitetään tilauksen tila että se on noudettu pupesoftiin
-      $this->_proxy->call($this->_session, 'sales_order.addComment', array('orderIncrementId' => $order['increment_id'], 'status' => 'processing_pupesoft', 'Tilaus noudettu Pupesoftiin'));
+      $_data = array(
+        'orderIncrementId' => $order['increment_id'],
+        'status' => 'processing_pupesoft',
+        'Tilaus noudettu Pupesoftiin',
+      );
+
+      $this->_proxy->call($this->_session, 'sales_order.addComment', $_data);
     }
 
-    $this->log(count($orders) . " tilausta haettu");
+    // Kirjataan kumpaankin logiin
+    $_count = count($orders);
+
+    $this->log("{$_count} tilausta haettu", '', $type = 'order');
+    $this->log("{$_count} tilausta haettu");
 
     // Palautetaan löydetyt tilaukset
     return $orders;
@@ -1022,8 +1086,8 @@ class MagentoClient {
     // Jos attribuuttia ei löytynyt niin turha ettiä option valuea
     if (empty($attribute_id)) return 0;
 
-    // Jos dynaaminen parametri on matkalla tekstikenttään niin idtä ei tarvita, palautetaan vaan arvo
-    if ($attribute_type == 'text' or $attribute_type == 'textarea') {
+    // Jos dynaaminen parametri on matkalla teksti- tai hintakenttään niin idtä ei tarvita, palautetaan vaan arvo
+    if ($attribute_type == 'text' or $attribute_type == 'textarea' or $attribute_type == 'price') {
         return $value;
     }
 
@@ -1491,6 +1555,13 @@ class MagentoClient {
   }
 
   /**
+   * Magentossa käsin hallitut kategoriat joita ei poisteta tuotteelta tuotepäivityksessä
+   */
+  public function setStickyKategoriat($magento_sticky_kategoriat) {
+    $this->_sticky_kategoriat = $magento_sticky_kategoriat;
+  }
+
+  /**
    * Hakee tax_class_id:n
    *
    * @return int   Veroluokan tunnus
@@ -1582,8 +1653,9 @@ class MagentoClient {
    *
    * @param string  $message   Virheviesti
    * @param exception $exception Exception
+   * @param string $type Kirjataanko tuote vai tilauslogiin
    */
-  private function log($message, $exception = '') {
+  private function log($message, $exception = '', $type = 'product') {
 
     if (self::LOGGING == true) {
       $timestamp = date('d.m.y H:i:s');
@@ -1594,7 +1666,8 @@ class MagentoClient {
       }
 
       $message .= "\n";
-      error_log("{$timestamp}: {$message}", 3, '/tmp/magento_log.txt');
+      $log_location = $type == 'product' ? '/tmp/magento_log.txt' : '/tmp/magento_order_log.txt';
+      error_log("{$timestamp}: {$message}", 3, $log_location);
     }
   }
 }

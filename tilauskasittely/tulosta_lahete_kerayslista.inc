@@ -899,7 +899,7 @@ if (!function_exists('rivi_kerayslista')) {
         }
 
         // jos rekkulalla on suoraan toimittajalle palautettvia rivejä
-        if ($row['asiakkaan_positio'] > 0) {
+        if (isset($row['asiakkaan_positio']) and $row['asiakkaan_positio'] > 0) {
 
           $query = "SELECT nimi
                     FROM asiakas
@@ -959,8 +959,8 @@ if (!function_exists('rivi_kerayslista')) {
                        FROM tuote
                       JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
                       JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-                        AND varastopaikat.tunnus = tuotepaikat.varasto
-                        AND varastopaikat.tunnus IN ({$rivipaikka}))
+                        AND varastopaikat.tunnus                = tuotepaikat.varasto
+                        AND varastopaikat.tunnus                IN ({$rivipaikka}))
                       JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio
                       and sarjanumeroseuranta.tuoteno           = tuote.tuoteno
                       and sarjanumeroseuranta.hyllyalue         = tuotepaikat.hyllyalue
@@ -985,8 +985,8 @@ if (!function_exists('rivi_kerayslista')) {
                       JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
                         AND varastopaikat.tunnus = tuotepaikat.varasto
                         AND varastopaikat.tunnus IN ({$rivipaikka}))
-                      WHERE tuote.yhtio        = '$kukarow[yhtio]'
-                      and tuote.tuoteno        = '$row[tuoteno]'
+                      WHERE tuote.yhtio          = '$kukarow[yhtio]'
+                      and tuote.tuoteno          = '$row[tuoteno]'
                       ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
           }
           $sresult = pupe_query($query);

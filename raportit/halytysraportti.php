@@ -707,8 +707,8 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
               LEFT JOIN korvaavat ON tuote.yhtio = korvaavat.yhtio and tuote.tuoteno = korvaavat.tuoteno
               WHERE tuote.$yhtiot
               $lisaa
-              and tuote.ei_saldoa   = ''
-              and tuote.tuotetyyppi NOT IN ('A', 'B')
+              and tuote.ei_saldoa        = ''
+              and tuote.tuotetyyppi      NOT IN ('A', 'B')
               $varastot
               order by id, tuote.tuoteno, varastopaikka";
   }

@@ -39,7 +39,7 @@ if ($handle = opendir($kansio)) {
     $kukarow = hae_kukarow('admin', $yhtio);
 
     // Jos lasku on liian vanha, ei käsitellä, lähetetään maililla
-    if (onko_lasku_liian_vanha($lasku)) {
+    if (onko_lasku_liian_vanha($kansio.$lasku)) {
       continue;
     }
 
@@ -74,7 +74,7 @@ if ($handle = opendir($kansio)) {
     $kukarow = hae_kukarow('admin', $yhtio);
 
     // Jos lasku on liian vanha, ei käsitellä, lähetetään maililla
-    if (onko_lasku_liian_vanha($lasku)) {
+    if (onko_lasku_liian_vanha($kansio.$lasku)) {
       continue;
     }
 
@@ -110,7 +110,7 @@ if ($handle = opendir($kansio)) {
     $kukarow = hae_kukarow('admin', $yhtio);
 
     // Jos lasku on liian vanha, ei käsitellä, lähetetään maililla
-    if (onko_lasku_liian_vanha($lasku)) {
+    if (onko_lasku_liian_vanha($kansio.$lasku)) {
       continue;
     }
 
@@ -145,7 +145,7 @@ if ($handle = opendir($kansio)) {
     $kukarow = hae_kukarow('admin', $yhtio);
 
     // Jos lasku on liian vanha, ei käsitellä, lähetetään maililla
-    if (onko_lasku_liian_vanha($lasku)) {
+    if (onko_lasku_liian_vanha($kansio.$lasku)) {
       continue;
     }
 
@@ -180,7 +180,7 @@ if ($handle = opendir($kansio)) {
     $kukarow = hae_kukarow('admin', $yhtio);
 
     // Jos lasku on liian vanha, ei käsitellä, lähetetään maililla
-    if (onko_lasku_liian_vanha($lasku)) {
+    if (onko_lasku_liian_vanha($kansio.$lasku)) {
       continue;
     }
 
@@ -235,7 +235,7 @@ if ($handle = opendir($kansio)) {
     $kukarow = hae_kukarow('admin', $yhtio);
 
     // Jos lasku on liian vanha, ei käsitellä, lähetetään maililla
-    if (onko_lasku_liian_vanha($lasku)) {
+    if (onko_lasku_liian_vanha($kansio.$lasku)) {
       continue;
     }
 
@@ -266,7 +266,6 @@ function onko_lasku_liian_vanha($filename) {
     "attachements" => array(0 =>
       array(
         "filename" => $filename,
-        "ctype" => mime_content_type($filename),
       )),
   );
 

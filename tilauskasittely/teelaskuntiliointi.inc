@@ -411,6 +411,7 @@ else {
     $myysaatili = "";
 
     $myysaa_kateinen = array();
+    $myysaa_kateinen['laskulle'] = $yhtiorow['myyntisaamiset'];
 
     if (mysql_num_rows($kateisresult) == 1) {
       $myysaa_kateinen['kateinen']     = $kateisrow['kassa'];
@@ -475,7 +476,6 @@ else {
     $loppusumma_valuutassa = 0;
 
     foreach ($kateismaksu as $tili => $arvo) {
-
       $arvo = str_replace(",",".",$arvo);
 
       if ((float) $arvo != 0) {
@@ -511,6 +511,17 @@ else {
 
         $loppusumma += $arvo;
         $loppusumma_valuutassa += $arvo_valuutassa;
+
+        // P‰ivitet‰‰n laskulle
+        if ($tili == "laskulle" and $yhtiorow['sallitaanko_kateismyynti_laskulle'] != '') {
+          $query = "UPDATE lasku
+                    SET saldo_maksettu = (summa - $arvo),
+                    saldo_maksettu_valuutassa = (summa_valuutassa  - $arvo_valuutassa),
+                    mapvm                     = 0
+                    WHERE tunnus              = '$lasku[tunnus]'
+                    AND yhtio                 = '$kukarow[yhtio]'";
+          pupe_query($query);
+        }
       }
     }
   }

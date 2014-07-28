@@ -3,6 +3,8 @@
 // Oletus selvittelytili
 $tiliotesaantotilino = $yhtiorow['selvittelytili'];
 $tiliointisaantorow['tilino'] = $yhtiorow['selvittelytili'];
+$tiliointisaantorow['tilino2'] = 0;
+$tiliointisaantorow['kustp'] = 0;
 
 $loydettiinko_sopiva_tili = '';
 

@@ -1,8 +1,8 @@
 <?php
 if ($tee == "file") {
   if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
-    $timeparts = explode(" ",microtime());
-    $starttime = $timeparts[1].substr($timeparts[0],1);
+    $timeparts = explode(" ", microtime());
+    $starttime = $timeparts[1].substr($timeparts[0], 1);
 
     $path_parts = pathinfo($_FILES['userfile']['name']);
     $name  = strtoupper($path_parts['filename']);
@@ -53,18 +53,18 @@ if ($tee == "file") {
       if ($tuoteno != '' and $kpl != 0) {
 
         ///* Toimittajan tuotenumerospecial*///
-        if (substr($tuoteno,0,1) == '?') {
+        if (substr($tuoteno, 0, 1) == '?') {
           $query = "SELECT *
                     FROM tuotteen_toimittajat
                     JOIN tuote USING (yhtio, tuoteno)
                     WHERE tuotteen_toimittajat.yhtio       = '{$kukarow['yhtio']}'
-                    AND tuotteen_toimittajat.toim_tuoteno  = '".substr($tuoteno,1)."'
+                    AND tuotteen_toimittajat.toim_tuoteno  = '".substr($tuoteno, 1)."'
                     AND tuotteen_toimittajat.liitostunnus  = '{$laskurow['liitostunnus']}'
                     AND tuote.status                      != 'P'
                     ORDER BY IF(tuotteen_toimittajat.jarjestys=0, 99999999999, tuotteen_toimittajat.jarjestys), tuote.tuoteno
                     LIMIT 1";
         }
-        elseif (substr($tuoteno,0,1) != '?' and $tiedoston_tuoteno == 'toimittajan_tuoteno') {
+        elseif (substr($tuoteno, 0, 1) != '?' and $tiedoston_tuoteno == 'toimittajan_tuoteno') {
           $query = "SELECT *
                     FROM tuotteen_toimittajat
                     JOIN tuote USING (yhtio, tuoteno)
@@ -89,7 +89,7 @@ if ($tee == "file") {
           $trow = mysql_fetch_array($result);
           $tuoteno = $trow["tuoteno"];
 
-          require('lisaarivi.inc');
+          require 'lisaarivi.inc';
         }
         else {
           echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei löydy")."!</font><br>";

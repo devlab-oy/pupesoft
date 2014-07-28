@@ -68,8 +68,8 @@ function choose_correct_date($date) {
 
 if ($tee == "file") {
   if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
-    $timeparts = explode(" ",microtime());
-    $starttime = $timeparts[1].substr($timeparts[0],1);
+    $timeparts = explode(" ", microtime());
+    $starttime = $timeparts[1].substr($timeparts[0], 1);
 
     $path_parts = pathinfo($_FILES['userfile']['name']);
     $name  = strtoupper($path_parts['filename']);
@@ -98,18 +98,18 @@ if ($tee == "file") {
     if (!empty($lue_useammalta_valilehdelta)) {
       foreach ($excelrivi as $sheet) {
 
-        # Tiedostosta p‰ivitys
+        // Tiedostosta p‰ivitys
         foreach ($sheet as $rivi) {
           $rivilask1++;
 
-          # tila==G, alatila==V
+          // tila==G, alatila==V
           if ($toim == "MYYNTITILI" and $laskurow['tila'] == "G" and $laskurow['alatila'] == "V" and $laskurow['tilaustyyppi'] == 'M') {
             $var = $rivi[7];
             $tuoteno = $rivi[0];
             $kpl = $rivi[1];
             $rivitunnus = 0;
 
-            # Tarkistukset, var ja kpl
+            // Tarkistukset, var ja kpl
             if ($var != 'A' and $var != 'B'  ) {
               echo "<font class='error'>".t("V‰‰r‰ arvo kent‰ss‰ var! Sallitut arvot ovat: A tai B").". ".t("Rivill‰").": $rivilask1. '$var'"."</font><br><br>";
               continue;
@@ -150,7 +150,7 @@ if ($tee == "file") {
             if ($rivitunnus != 0) {
               $tilatapa = "PAIVITA";
               $myyntitilirivit = $var;
-              require("laskuta_myyntitilirivi.inc");
+              require "laskuta_myyntitilirivi.inc";
             }
             else {
               echo "<font class='error'>".t("Tuotetta ei osattu valita")."</font><br>";
@@ -169,7 +169,7 @@ if ($tee == "file") {
               $ind_Tuoteno                 = 0;
               $ind_Maara                   = 1;
 
-              if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO" OR (($toim == 'VALMISTAVARASTOON' OR $toim == 'VALMISTAASIAKKAALLE') AND $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
+              if ($yhtiorow["splittauskielto"] == "K" or $toim == "YLLAPITO" or (($toim == 'VALMISTAVARASTOON' or $toim == 'VALMISTAASIAKKAALLE') and $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
                 $ind_Arvioitu = 2;
                 $ind_Hinta = 3;
 
@@ -214,7 +214,7 @@ if ($tee == "file") {
               $ind_Tuoteno   = 0;
               $ind_Maara     = 1;
 
-              if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO" OR (($toim == 'VALMISTAVARASTOON' OR $toim == 'VALMISTAASIAKKAALLE') AND $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
+              if ($yhtiorow["splittauskielto"] == "K" or $toim == "YLLAPITO" or (($toim == 'VALMISTAVARASTOON' or $toim == 'VALMISTAASIAKKAALLE') and $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
                 $ind_Arvioitu = 2;
                 $ind_Hinta = 4;
 
@@ -252,7 +252,7 @@ if ($tee == "file") {
               $ind_Tuoteno   = 0;
               $ind_Maara     = 1;
 
-              if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO" OR (($toim == 'VALMISTAVARASTOON' OR $toim == 'VALMISTAASIAKKAALLE') AND $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
+              if ($yhtiorow["splittauskielto"] == "K" or $toim == "YLLAPITO" or (($toim == 'VALMISTAVARASTOON' or $toim == 'VALMISTAASIAKKAALLE') and $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
                 $ind_Arvioitu = 2;
                 $ind_Hinta = 3;
 
@@ -286,7 +286,7 @@ if ($tee == "file") {
               $ind_Tuoteno   = 0;
               $ind_Maara     = 1;
 
-              if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO" OR (($toim == 'VALMISTAVARASTOON' OR $toim == 'VALMISTAASIAKKAALLE') AND $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
+              if ($yhtiorow["splittauskielto"] == "K" or $toim == "YLLAPITO" or (($toim == 'VALMISTAVARASTOON' or $toim == 'VALMISTAASIAKKAALLE') and $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
                 $ind_Arvioitu = 2;
                 $ind_Hinta = 3;
 
@@ -335,7 +335,7 @@ if ($tee == "file") {
             if ($kukarow["extranet"] == "") {
 
               //Toimitusaika
-              if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO" OR (($toim == 'VALMISTAVARASTOON' OR $toim == 'VALMISTAASIAKKAALLE') AND $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
+              if ($yhtiorow["splittauskielto"] == "K" or $toim == "YLLAPITO" or (($toim == 'VALMISTAVARASTOON' or $toim == 'VALMISTAASIAKKAALLE') and $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
                 $toimaika = choose_correct_date($rivi[$ind_Arvioitu]);
               }
               else {
@@ -380,7 +380,7 @@ if ($tee == "file") {
 
               // Tuotehaku ei toimi extranetin puolella
               if (file_exists("../inc/tuotehaku.inc")) {
-                require ("../inc/tuotehaku.inc");
+                require "../inc/tuotehaku.inc";
               }
 
               if ($mikrotila_tuotenumero == "koodilla") {
@@ -434,7 +434,7 @@ if ($tee == "file") {
                   //lis‰t‰‰n rivi
                   if ($kukarow["extranet"] == "" and $tila == "MYYNTITILIRIVI") {
                     $tilatapa = "PAIVITA";
-                    require("laskuta_myyntitilirivi.inc");
+                    require "laskuta_myyntitilirivi.inc";
                   }
                   elseif ($laskurow["tila"] == "V") {
                     // Valmistuksilla pit‰‰ huomioida rekursiiviset reseptit
@@ -480,7 +480,7 @@ if ($tee == "file") {
                   }
                   else {
 
-                              if ($yhtiorow["reklamaation_hinnoittelu"] == "K" and ($toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO") and $var != "H") {
+                    if ($yhtiorow["reklamaation_hinnoittelu"] == "K" and ($toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO") and $var != "H") {
 
                       $palautus = hae_hyvityshinta($laskurow["liitostunnus"], $tuoteno, $kpl);
 
@@ -498,14 +498,14 @@ if ($tee == "file") {
                         if (stripos($kommentti, $palautus[$inx]["kommentti"]) === FALSE) $kommentti = $palautus[$inx]["kommentti"];
                         $hyvityssaannon_palautuskielto = $palautus[$inx]["palautuskielto"];
 
-                        require ("lisaarivi.inc");
+                        require "lisaarivi.inc";
                       }
 
                       unset($hyvityssaannon_palautuskielto);
-                              }
-                              else {
-                      require ("lisaarivi.inc");
-                              }
+                    }
+                    else {
+                      require "lisaarivi.inc";
+                    }
                   }
                 }
                 else {
@@ -522,18 +522,18 @@ if ($tee == "file") {
       }
     }
     else {
-      # Tiedostosta p‰ivitys
+      // Tiedostosta p‰ivitys
       foreach ($excelrivi as $rivi) {
         $rivilask1++;
 
-        # tila==G, alatila==V
+        // tila==G, alatila==V
         if ($toim == "MYYNTITILI" and $laskurow['tila'] == "G" and $laskurow['alatila'] == "V" and $laskurow['tilaustyyppi'] == 'M') {
           $var = $rivi[7];
           $tuoteno = $rivi[0];
           $kpl = $rivi[1];
           $rivitunnus = 0;
 
-          # Tarkistukset, var ja kpl
+          // Tarkistukset, var ja kpl
           if ($var != 'A' and $var != 'B'  ) {
             echo "<font class='error'>".t("V‰‰r‰ arvo kent‰ss‰ var! Sallitut arvot ovat: A tai B").". ".t("Rivill‰").": $rivilask1. '$var'"."</font><br><br>";
             continue;
@@ -574,7 +574,7 @@ if ($tee == "file") {
           if ($rivitunnus != 0) {
             $tilatapa = "PAIVITA";
             $myyntitilirivit = $var;
-            require("laskuta_myyntitilirivi.inc");
+            require "laskuta_myyntitilirivi.inc";
           }
           else {
             echo "<font class='error'>".t("Tuotetta ei osattu valita")."</font><br>";
@@ -593,7 +593,7 @@ if ($tee == "file") {
             $ind_Tuoteno = 0;
             $ind_Maara = 1;
 
-            if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO" OR (($toim == 'VALMISTAVARASTOON' OR $toim == 'VALMISTAASIAKKAALLE') AND $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
+            if ($yhtiorow["splittauskielto"] == "K" or $toim == "YLLAPITO" or (($toim == 'VALMISTAVARASTOON' or $toim == 'VALMISTAASIAKKAALLE') and $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
               $ind_Arvioitu = 2;
               $ind_Hinta = 3;
 
@@ -638,7 +638,7 @@ if ($tee == "file") {
             $ind_Tuoteno   = 0;
             $ind_Maara     = 1;
 
-            if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO" OR (($toim == 'VALMISTAVARASTOON' OR $toim == 'VALMISTAASIAKKAALLE') AND $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
+            if ($yhtiorow["splittauskielto"] == "K" or $toim == "YLLAPITO" or (($toim == 'VALMISTAVARASTOON' or $toim == 'VALMISTAASIAKKAALLE') and $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
               $ind_Arvioitu = 2;
               $ind_Hinta = 4;
 
@@ -676,7 +676,7 @@ if ($tee == "file") {
             $ind_Tuoteno   = 0;
             $ind_Maara     = 1;
 
-            if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO" OR (($toim == 'VALMISTAVARASTOON' OR $toim == 'VALMISTAASIAKKAALLE') AND $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
+            if ($yhtiorow["splittauskielto"] == "K" or $toim == "YLLAPITO" or (($toim == 'VALMISTAVARASTOON' or $toim == 'VALMISTAASIAKKAALLE') and $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
               $ind_Arvioitu = 2;
               $ind_Hinta    = 3;
 
@@ -710,7 +710,7 @@ if ($tee == "file") {
             $ind_Tuoteno   = 0;
             $ind_Maara     = 1;
 
-            if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO" OR (($toim == 'VALMISTAVARASTOON' OR $toim == 'VALMISTAASIAKKAALLE') AND $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
+            if ($yhtiorow["splittauskielto"] == "K" or $toim == "YLLAPITO" or (($toim == 'VALMISTAVARASTOON' or $toim == 'VALMISTAASIAKKAALLE') and $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
               $ind_Arvioitu = 2;
               $ind_Hinta = 3;
 
@@ -759,7 +759,7 @@ if ($tee == "file") {
           if ($kukarow["extranet"] == "") {
 
             //Toimitusaika
-            if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO" OR (($toim == 'VALMISTAVARASTOON' OR $toim == 'VALMISTAASIAKKAALLE') AND $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
+            if ($yhtiorow["splittauskielto"] == "K" or $toim == "YLLAPITO" or (($toim == 'VALMISTAVARASTOON' or $toim == 'VALMISTAASIAKKAALLE') and $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
               $toimaika = choose_correct_date($rivi[$ind_Arvioitu]);
             }
             else {
@@ -804,7 +804,7 @@ if ($tee == "file") {
 
             // Tuotehaku ei toimi extranetin puolella
             if (file_exists("../inc/tuotehaku.inc")) {
-              require ("../inc/tuotehaku.inc");
+              require "../inc/tuotehaku.inc";
             }
 
             if ($mikrotila_tuotenumero == "koodilla") {
@@ -858,13 +858,13 @@ if ($tee == "file") {
                 //lis‰t‰‰n rivi
                 if ($kukarow["extranet"] == "" and $tila == "MYYNTITILIRIVI") {
                   $tilatapa = "PAIVITA";
-                  require("laskuta_myyntitilirivi.inc");
+                  require "laskuta_myyntitilirivi.inc";
                 }
                 elseif ($laskurow["tila"] == "V") {
                   // Valmistuksilla pit‰‰ huomioida rekursiiviset reseptit
                   // funktio populoi globaalit muuttujat $tuoteno_array $kpl_array $kommentti_array $lapsenlap_array
-                  $tuoteno_array   = array($tuoteno);
-                  $kpl_array       = array($tuoteno => $kpl);
+                  $tuoteno_array = array($tuoteno);
+                  $kpl_array     = array($tuoteno => $kpl);
 
                   pupesoft_lisaa_valmisteen_rekursiiviset_reseptit();
 
@@ -882,18 +882,18 @@ if ($tee == "file") {
                     }
 
                     $params = array(
-                      "trow"              => $tuotearray_row,
-                      "laskurow"          => $laskurow,
-                      "kpl"               => $kpl_array[$tuoteno_temp],
-                      "tuoteno"           => $tuoteno_temp,
-                      "hinta"             => 0,
-                      "varasto"           => $varasto,
-                      "varataan_saldoa"   => "EI",
-                      "kommentti"         => $kommentti,
+                      "trow"            => $tuotearray_row,
+                      "laskurow"        => $laskurow,
+                      "kpl"             => $kpl_array[$tuoteno_temp],
+                      "tuoteno"         => $tuoteno_temp,
+                      "hinta"           => 0,
+                      "varasto"         => $varasto,
+                      "varataan_saldoa" => "EI",
+                      "kommentti"       => $kommentti,
                       'valmistuslinja'  => $valmistuslinja,
-                      'toimaika'      => $toimaika,
-                      'kerayspvm'      => $kerayspvm,
-                      'toim'        => "{$toim}",
+                      'toimaika'        => $toimaika,
+                      'kerayspvm'       => $kerayspvm,
+                      'toim'            => "{$toim}",
                     );
 
                     lisaa_rivi($params);
@@ -904,7 +904,7 @@ if ($tee == "file") {
                 }
                 else {
 
-                            if ($yhtiorow["reklamaation_hinnoittelu"] == "K" and ($toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO") and $var != "H") {
+                  if ($yhtiorow["reklamaation_hinnoittelu"] == "K" and ($toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO") and $var != "H") {
 
                     $palautus = hae_hyvityshinta($laskurow["liitostunnus"], $tuoteno, $kpl);
 
@@ -922,13 +922,13 @@ if ($tee == "file") {
                       if (stripos($kommentti, $palautus[$inx]["kommentti"]) === FALSE) $kommentti = $palautus[$inx]["kommentti"];
                       $hyvityssaannon_palautuskielto = $palautus[$inx]["palautuskielto"];
 
-                      require ("lisaarivi.inc");
+                      require "lisaarivi.inc";
                     }
 
                     unset($hyvityssaannon_palautuskielto);
-                            }
-                            else {
-                    require ("lisaarivi.inc");
+                  }
+                  else {
+                    require "lisaarivi.inc";
                   }
                 }
               }
@@ -1032,7 +1032,7 @@ if ($tee == 'mikrotila') {
       echo "<td>".t('Ker‰ysajankohta')." ".t("(vvvv-kk-pp)")."</td>";
     }
     else {
-      if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO") {
+      if ($yhtiorow["splittauskielto"] == "K" or $toim == "YLLAPITO") {
         echo "<td>".t("Arvioitu toimitusp‰iv‰")." ".t("(vvvv-kk-pp)")."</td>";
       }
 

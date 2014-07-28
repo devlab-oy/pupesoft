@@ -169,7 +169,7 @@ if ($toim == "KEIKKA") {
              ORDER BY luontiaika";
 
   // päivänäkymä
-  $query2 = "SELECT lasku.laskunro keikka, lasku.tunnus, lasku.nimi, DATE_FORMAT(lasku.luontiaika,'%d.%m.%Y') pvm, if(lasku.mapvm='0000-00-00','',DATE_FORMAT(lasku.mapvm,'%d.%m.%Y')) jlaskenta,
+  $query2 = "SELECT lasku.laskunro saapuminen, lasku.tunnus, lasku.nimi, DATE_FORMAT(lasku.luontiaika,'%d.%m.%Y') pvm, if(lasku.mapvm='0000-00-00','',DATE_FORMAT(lasku.mapvm,'%d.%m.%Y')) jlaskenta,
              round(sum(tilausrivi.hinta*{$query_ale_lisa}*(tilausrivi.varattu+tilausrivi.kpl)),2) summa, lasku.valkoodi
              FROM lasku use index (yhtio_tila_luontiaika)
              JOIN tilausrivi use index (uusiotunnus_index) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tyyppi!='D')
@@ -186,7 +186,7 @@ if ($toim == "KEIKKA") {
         ORDER BY lasku.laskunro";
 
   // tilausnäkymä
-  $query3 = "SELECT lasku.laskunro keikka, DATE_FORMAT(lasku.luontiaika,'%d.%m.%Y') pvm, tuoteno, nimitys, kpl+varattu kpl, round(tilausrivi.hinta*vienti_kurssi, '$yhtiorow[hintapyoristys]') hinta,
+  $query3 = "SELECT lasku.laskunro saapuminen, DATE_FORMAT(lasku.luontiaika,'%d.%m.%Y') pvm, DATE_FORMAT(tilausrivi.laskutettuaika,'%d.%m.%Y') 'viety varastoon', tuoteno, nimitys, kpl+varattu kpl, round(tilausrivi.hinta*vienti_kurssi, '$yhtiorow[hintapyoristys]') hinta,
              round(tilausrivi.hinta*{$query_ale_lisa}*(tilausrivi.varattu+tilausrivi.kpl)*vienti_kurssi,'$yhtiorow[hintapyoristys]') arvo, '$yhtiorow[valkoodi]' valkoodi, round(tilausrivi.rivihinta, '$yhtiorow[hintapyoristys]') ostohinta, vienti_kurssi kurssi, tilausrivin_lisatiedot.hankintakulut
              FROM tilausrivi use index (uusiotunnus_index)
              JOIN lasku use index (PRIMARY) on (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.uusiotunnus)
@@ -197,7 +197,7 @@ if ($toim == "KEIKKA") {
              ORDER BY tilausrivi.tunnus";
 
   // tilausnumerohaku
-  $query4 = "SELECT lasku.laskunro keikka, lasku.tunnus, lasku.nimi, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, if(mapvm='0000-00-00','',DATE_FORMAT(mapvm,'%d.%m.%Y')) jlaskenta,
+  $query4 = "SELECT lasku.laskunro saapuminen, lasku.tunnus, lasku.nimi, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, if(mapvm='0000-00-00','',DATE_FORMAT(mapvm,'%d.%m.%Y')) jlaskenta,
              round(sum(tilausrivi.hinta*{$query_ale_lisa}*(tilausrivi.varattu+tilausrivi.kpl)),2) summa, lasku.valkoodi
              FROM tilausrivi use index (yhtio_otunnus)
              JOIN lasku ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tila = 'K' and vanhatunnus = 0
@@ -423,6 +423,9 @@ if (mysql_num_rows($result) > 0) {
         }
 
         echo "<td align='right'>$osuus_kululaskuista $yhtiorow[valkoodi]</td><td align='right'>$osuus_eturahdista $yhtiorow[valkoodi]</td><td align='right'>$tulliprossa %</td><td align='right'>$aputullimaara $yhtiorow[valkoodi]</td><td align='right'>$rivinlisakulu $yhtiorow[valkoodi]</td>";
+      }
+      elseif (mysql_field_name($result, $i) == "tuoteno") {
+        echo "<td><a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($row[$i])."'>$row[$i]</a></td>";
       }
       else {
         echo "<td>$row[$i]</td>";

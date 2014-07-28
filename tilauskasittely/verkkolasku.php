@@ -37,8 +37,8 @@ if ($php_cli) {
   ini_set("display_errors", 0);
 
   // otetaan tietokanta connect
-  require("inc/connect.inc");
-  require("inc/functions.inc");
+  require "inc/connect.inc";
+  require "inc/functions.inc";
 
   $_yhtio = pupesoft_cleanstring($argv[1]);
   $yhtiorow = hae_yhtion_parametrit($_yhtio);
@@ -63,16 +63,16 @@ if ($php_cli) {
 
   // jos komentorivin kolmas arg on "eilinen" niin edelliselle laskutus p‰iv‰lle, ohitetaan laskutusviikonp‰iv‰t
   if ($argv[3] == "eilinen") {
-    $laskkk  = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-    $laskpp  = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-    $laskvv  = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+    $laskkk  = date("m", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+    $laskpp  = date("d", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+    $laskvv  = date("Y", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
   }
 
   // jos komentorivin kolmas arg on "eilinen" niin edelliselle laskutus p‰iv‰lle
   if ($argv[3] == "eilinen_eikaikki") {
-    $laskkk  = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-    $laskpp  = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-    $laskvv  = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+    $laskkk  = date("m", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+    $laskpp  = date("d", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+    $laskvv  = date("Y", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
     $eilinen = "eilinen_eikaikki";
   }
 
@@ -99,11 +99,11 @@ if ($php_cli) {
 elseif (strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE) {
 
   if (isset($_POST["tee"])) {
-    if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
-    if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+    if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
+    if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
   }
 
-  require("../inc/parametrit.inc");
+  require "../inc/parametrit.inc";
 }
 
 // Timeout in 5h
@@ -155,12 +155,12 @@ else {
       if (checkdate($laskkk, $laskpp, $laskvv)) {
 
         //vertaillaan tilikauteen
-        list($vv1,$kk1,$pp1) = explode("-",$yhtiorow["myyntireskontrakausi_alku"]);
-        list($vv2,$kk2,$pp2) = explode("-",$yhtiorow["myyntireskontrakausi_loppu"]);
+        list($vv1, $kk1, $pp1) = explode("-", $yhtiorow["myyntireskontrakausi_alku"]);
+        list($vv2, $kk2, $pp2) = explode("-", $yhtiorow["myyntireskontrakausi_loppu"]);
 
-        $tilialku  = (int) date('Ymd',mktime(0,0,0,$kk1,$pp1,$vv1));
-        $tililoppu = (int) date('Ymd',mktime(0,0,0,$kk2,$pp2,$vv2));
-        $syotetty  = (int) date('Ymd',mktime(0,0,0,$laskkk,$laskpp,$laskvv));
+        $tilialku  = (int) date('Ymd', mktime(0, 0, 0, $kk1, $pp1, $vv1));
+        $tililoppu = (int) date('Ymd', mktime(0, 0, 0, $kk2, $pp2, $vv2));
+        $syotetty  = (int) date('Ymd', mktime(0, 0, 0, $laskkk, $laskpp, $laskvv));
         $tanaan    = (int) date('Ymd');
 
         if ($syotetty < $tilialku or $syotetty > $tililoppu) {
@@ -203,20 +203,20 @@ else {
     if (!function_exists("vlas_dateconv")) {
       function vlas_dateconv($date) {
         //k‰‰nt‰‰ mysqln vvvv-kk-mm muodon muotoon vvvvkkmm
-        return substr($date,0,4).substr($date,5,2).substr($date,8,2);
+        return substr($date, 0, 4).substr($date, 5, 2).substr($date, 8, 2);
       }
     }
 
     //tehd‰‰n viitteest‰ SPY standardia eli 20 merkki‰ etunollilla
     if (!function_exists("spyconv")) {
       function spyconv($spy) {
-        return $spy = sprintf("%020.020s",$spy);
+        return $spy = sprintf("%020.020s", $spy);
       }
     }
 
     if (!function_exists("laskunkieli")) {
       function laskunkieli($liitostunnus, $kieli) {
-        GLOBAL $kukarow, $yhtiorow;
+        global $kukarow, $yhtiorow;
 
         $asiakas_apu_query = "SELECT *
                               FROM asiakas
@@ -248,7 +248,7 @@ else {
 
     //pilkut pisteiksi
     if (!function_exists("pp")) {
-      function pp ($muuttuja, $round="", $rmax="", $rmin="") {
+      function pp($muuttuja, $round="", $rmax="", $rmin="") {
 
         if (strlen($round)>0) {
           if (strlen($rmax)>0 and $rmax<$round) {
@@ -261,29 +261,29 @@ else {
           return $muuttuja = number_format($muuttuja, $round, ",", "");
         }
         else {
-          return $muuttuja = str_replace(".",",", $muuttuja);
+          return $muuttuja = str_replace(".", ",", $muuttuja);
         }
       }
     }
 
     //Tiedostojen polut ja nimet
     //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
-    $nimixml = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".xml";
+    $nimixml = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true)).".xml";
 
     //  Itellan iPost vaatii siirtoon v‰h‰n oman nimen..
     if ($yhtiorow["verkkolasku_lah"] == "iPost") {
-      $nimifinvoice = "$pupe_root_polku/dataout/TRANSFER_IPOST-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
+      $nimifinvoice = "$pupe_root_polku/dataout/TRANSFER_IPOST-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true))."_finvoice.xml";
     }
     elseif ($yhtiorow["verkkolasku_lah"] == "apix") {
-      $nimifinvoice = "/tmp/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
+      $nimifinvoice = "/tmp/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true))."_finvoice.xml";
     }
     else {
-      $nimifinvoice = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
+      $nimifinvoice = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true))."_finvoice.xml";
     }
 
-    $nimisisainenfinvoice = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_sisainenfinvoice.xml";
+    $nimisisainenfinvoice = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true))."_sisainenfinvoice.xml";
 
-    $nimiedi = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".edi";
+    $nimiedi = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true)).".edi";
 
     //Pupevoice xml-dataa
     if (!$tootxml = fopen($nimixml, "w")) die("Filen $nimixml luonti ep‰onnistui!");
@@ -365,9 +365,9 @@ else {
     $locre = pupe_query($query);
 
     //Haetaan tarvittavat funktiot aineistojen tekoa varten
-    require("verkkolasku_elmaedi.inc");
-    require("verkkolasku_finvoice.inc");
-    require("verkkolasku_pupevoice.inc");
+    require "verkkolasku_elmaedi.inc";
+    require "verkkolasku_finvoice.inc";
+    require "verkkolasku_pupevoice.inc";
 
     // haetaan kaikki tilaukset jotka on toimitettu ja kuuluu laskuttaa t‰n‰‰n (t‰t‰ resulttia k‰ytet‰‰n alhaalla lis‰‰)
     $lasklisa = "";
@@ -378,7 +378,7 @@ else {
 
       // Mik‰ viikonp‰iv‰ t‰n‰‰n on 1-7.. 1=sunnuntai, 2=maanantai, jne...
       if (isset($eilinen) and $eilinen == "eilinen_eikaikki") {
-        $today = date("w", mktime(0,0,0,$laskkk,$laskpp,$laskvv)) +1;
+        $today = date("w", mktime(0, 0, 0, $laskkk, $laskpp, $laskvv)) +1;
         $vkopva_curdate = "'$laskvv-$laskkk-$laskpp'";
       }
       else {
@@ -821,7 +821,7 @@ else {
                         AND kaytettypvm       = '0000-00-00'
                         AND kaytettytilausnro = 0";
               $pantti_chk_res = pupe_query($query);
-                            $pantti_chk_row = mysql_fetch_assoc($pantti_chk_res);
+              $pantti_chk_row = mysql_fetch_assoc($pantti_chk_res);
 
               if ($vanhatunnus_chk_row['kpl'] != $pantti_chk_row['kpl']) {
                 $lasklisa .= " and lasku.tunnus != '{$laskurow['tunnus']}' ";
@@ -852,7 +852,7 @@ else {
         }
       }
       else {
-        require("maksuehtosplittaus.inc");
+        require "maksuehtosplittaus.inc";
       }
     }
 
@@ -892,7 +892,7 @@ else {
       }
 
       // vika pilkku pois
-      $tunnukset = substr($tunnukset,0,-1);
+      $tunnukset = substr($tunnukset, 0, -1);
 
       if ($yhtiorow["koontilaskut_yhdistetaan"] == 'T' or $yhtiorow['koontilaskut_yhdistetaan'] == 'V') {
         $ketjutus_group = ", lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa ";
@@ -1234,7 +1234,7 @@ else {
           }
 
           if (count($lisakulu_maksuehto) > 0) {
-            $laskutuslisa_tyyppi_ehto = " and lasku.maksuehto not in (".implode(',',$lisakulu_maksuehto).") ";
+            $laskutuslisa_tyyppi_ehto = " and lasku.maksuehto not in (".implode(',', $lisakulu_maksuehto).") ";
           }
         }
         elseif ($yhtiorow["laskutuslisa_tyyppi"] == 'C' or $yhtiorow["laskutuslisa_tyyppi"] == 'N' or $yhtiorow["laskutuslisa_tyyppi"] == 'V') {
@@ -1252,7 +1252,7 @@ else {
           }
 
           if (count($lisakulu_toimitustapa) > 0) {
-            $laskutuslisa_tyyppi_ehto = " and lasku.toimitustapa not in (".implode(',',$lisakulu_toimitustapa).") ";
+            $laskutuslisa_tyyppi_ehto = " and lasku.toimitustapa not in (".implode(',', $lisakulu_toimitustapa).") ";
           }
         }
 
@@ -1673,7 +1673,7 @@ else {
       // laskutetaan kaikki tilaukset (siis teh‰‰n kaikki tarvittava matikka)
       // rullataan eka query alkuun
       if (mysql_num_rows($res) != 0) {
-        mysql_data_seek($res,0);
+        mysql_data_seek($res, 0);
       }
 
       $laskutetttu = 0;
@@ -1686,7 +1686,7 @@ else {
         // laskutus tarttee kukarow[kesken]
         $kukarow['kesken']=$row['tunnus'];
 
-        require("laskutus.inc");
+        require "laskutus.inc";
         $laskutetttu++;
 
         //otetaan laskutuksen viestit talteen
@@ -1835,21 +1835,21 @@ else {
               if (substr($viite, 0, 2) != "RF" and tarkista_viite($viite) === FALSE) {
                 $viite = $lasno;
                 $tulos_ulos .= "<font class='message'><br>\n".t("HUOM: laskun '%s' k‰sinsyotetty viitenumero '%s' on v‰‰rin! Laskulle annettii uusi viite '%s'", "", $lasno, $tarkrow["kasinsyotetty_viite"], $viite)."!</font><br>\n<br>\n";
-                require('inc/generoiviite.inc');
+                require 'inc/generoiviite.inc';
               }
               elseif (substr($viite, 0, 2) == "RF" and tarkista_rfviite($viite) === FALSE) {
                 $viite = $lasno;
                 $tulos_ulos .= "<font class='message'><br>\n".t("HUOM: laskun '%s' k‰sinsyotetty RF-viitenumero '%s' on v‰‰rin! Laskulle annettii uusi viite '%s'", "", $lasno, $tarkrow["kasinsyotetty_viite"], $viite)."!</font><br>\n<br>\n";
-                require('inc/generoiviite.inc');
+                require 'inc/generoiviite.inc';
               }
             }
           }
           else {
             if ($seviite == 'SE') {
-              require('inc/generoiviite_se.inc');
+              require 'inc/generoiviite_se.inc';
             }
             else {
-              require('inc/generoiviite.inc');
+              require 'inc/generoiviite.inc';
             }
           }
 
@@ -1864,7 +1864,7 @@ else {
           // tehd‰‰n U lasku ja tiliˆinnit
           // tarvitaan $tunnukset mysql muodossa
 
-          require("teeulasku.inc");
+          require "teeulasku.inc";
 
           // saadaan takaisin $laskurow
           $lasrow = $laskurow;
@@ -2048,7 +2048,7 @@ else {
               $lasrow['chn'] = "010";
             }
 
-             if ($lasrow['arvo'] >= 0) {
+            if ($lasrow['arvo'] >= 0) {
               //Veloituslasku
               $tyyppi='380';
             }
@@ -2092,7 +2092,7 @@ else {
             }
 
             if (trim($komm) != '') {
-              $lasrow['sisviesti1'] = str_replace(array("\r\n","\r","\n"),"|", trim($komm));
+              $lasrow['sisviesti1'] = str_replace(array("\r\n", "\r", "\n"), "|", trim($komm));
             }
 
             // Hoidetaan pyˆristys sek‰ valuuttak‰sittely
@@ -2104,7 +2104,7 @@ else {
             }
 
             // Ulkomaisen ytunnuksen korjaus
-            if (substr(trim(strtoupper($lasrow["ytunnus"])),0,2) != strtoupper($lasrow["maa"]) and trim(strtoupper($lasrow["maa"])) != trim(strtoupper($yhtiorow["maa"]))) {
+            if (substr(trim(strtoupper($lasrow["ytunnus"])), 0, 2) != strtoupper($lasrow["maa"]) and trim(strtoupper($lasrow["maa"])) != trim(strtoupper($yhtiorow["maa"]))) {
               $lasrow["ytunnus"] = strtoupper($lasrow["maa"])."-".$lasrow["ytunnus"];
             }
 
@@ -2382,7 +2382,7 @@ else {
               }
 
               // Laitetaan alennukset kommenttiin, koska laskulla on vain yksi alekentt‰
-              if ($yhtiorow['myynnin_alekentat'] > 1 or $tilrow['erikoisale'] > 0)  {
+              if ($yhtiorow['myynnin_alekentat'] > 1 or $tilrow['erikoisale'] > 0) {
 
                 $alekomm = "";
 
@@ -2691,7 +2691,7 @@ else {
 
         pupesoft_sahkoposti($_params);
 
-        require("inc/ftp-send.inc");
+        require "inc/ftp-send.inc";
 
         if ($silent == "") {
           $tulos_ulos .= $tulos_ulos_ftp;
@@ -2705,7 +2705,7 @@ else {
         $apix_laskut_20l = array();
 
         if ($apix_laskumaara > 0) {
-          require_once("tilauskasittely/tulosta_lasku.inc");
+          require_once "tilauskasittely/tulosta_lasku.inc";
 
           for ($a = 1; $a < $apix_laskumaara; $a++) {
             preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $apix_laskuarray[$a], $invoice_number);
@@ -2735,7 +2735,7 @@ else {
 
         try {
           // Testaus
-          #$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
+          //$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
 
           // Tuotanto
           $client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
@@ -2750,7 +2750,7 @@ else {
         $maventa_laskumaara = count($maventa_laskuarray);
 
         if ($maventa_laskumaara > 0) {
-          require_once("tilauskasittely/tulosta_lasku.inc");
+          require_once "tilauskasittely/tulosta_lasku.inc";
 
           for ($a = 1; $a < $maventa_laskumaara; $a++) {
             preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $maventa_laskuarray[$a], $invoice_number);
@@ -2802,7 +2802,7 @@ else {
 
         pupesoft_sahkoposti($_params);
 
-        require("inc/ftp-send.inc");
+        require "inc/ftp-send.inc";
 
         if ($silent == "" or $silent == "VIENTI") {
           $tulos_ulos .= $tulos_ulos_ftp;
@@ -2856,7 +2856,7 @@ else {
 
         pupesoft_sahkoposti($_params);
 
-        require("inc/ftp-send.inc");
+        require "inc/ftp-send.inc";
 
         if ($silent == "") {
           $tulos_ulos .= $tulos_ulos_ftp;
@@ -2900,7 +2900,7 @@ else {
 
         pupesoft_sahkoposti($_params);
 
-        require("inc/ftp-send.inc");
+        require "inc/ftp-send.inc";
 
         if ($silent == "") {
           $tulos_ulos .= $tulos_ulos_ftp;
@@ -2910,7 +2910,7 @@ else {
       // jos yhtiˆll‰ on laskuprintteri on m‰‰ritelty tai halutaan jostain muusta syyst‰ tulostella laskuja paperille/s‰hkˆpostiin
       if (($yhtiorow['lasku_tulostin'] > 0 or $yhtiorow['lasku_tulostin'] == -99) or (isset($valittu_tulostin) and $valittu_tulostin != "")) {
 
-        require_once("tilauskasittely/tulosta_lasku.inc");
+        require_once "tilauskasittely/tulosta_lasku.inc";
 
         if ((!isset($valittu_tulostin) or $valittu_tulostin == "") and ($yhtiorow['lasku_tulostin'] > 0 or $yhtiorow['lasku_tulostin'] == -99)) {
           $valittu_tulostin = $yhtiorow['lasku_tulostin'];
@@ -2937,7 +2937,7 @@ else {
           if (($laskurow["vienti"] == "E" or $laskurow["vienti"] == "K") and $yhtiorow["vienti_erittelyn_tulostus"] != "E") {
             $uusiotunnus = $laskurow["tunnus"];
 
-            require('tulosta_vientierittely.inc');
+            require 'tulosta_vientierittely.inc';
 
             //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
             list($usec, $sec) = explode(' ', microtime());
@@ -2968,7 +2968,7 @@ else {
               $sahkoposti_cc      = "";
               $content_subject    = "";
               $content_body       = "";
-              include("inc/sahkoposti.inc"); // sanotaan include eik‰ require niin ei kuolla
+              include "inc/sahkoposti.inc"; // sanotaan include eik‰ require niin ei kuolla
             }
             elseif ($vientierittelykomento != '' and $vientierittelykomento != 'edi') {
               // itse print komento...
@@ -2988,7 +2988,7 @@ else {
       // l‰hetet‰‰n sa‰hkˆpostilaskut
       if ($yhtiorow['lasku_tulostin'] != -99 and count($tulostettavat_email) > 0) {
 
-        require_once("tilauskasittely/tulosta_lasku.inc");
+        require_once "tilauskasittely/tulosta_lasku.inc";
 
         if ($silent == "") $tulos_ulos .= "<br>\n".t("Tulostetaan s‰hkˆpostilaskuja").":<br>\n";
 
@@ -3011,7 +3011,7 @@ else {
           if (($laskurow["vienti"] == "E" or $laskurow["vienti"] == "K") and $yhtiorow["vienti_erittelyn_tulostus"] != "E") {
             $uusiotunnus = $laskurow["tunnus"];
 
-            require('tulosta_vientierittely.inc');
+            require 'tulosta_vientierittely.inc';
 
             //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
             list($usec, $sec) = explode(' ', microtime());
@@ -3042,7 +3042,7 @@ else {
               $sahkoposti_cc      = "";
               $content_subject    = "";
               $content_body       = "";
-              include("inc/sahkoposti.inc"); // sanotaan include eik‰ require niin ei kuolla
+              include "inc/sahkoposti.inc"; // sanotaan include eik‰ require niin ei kuolla
             }
 
             //poistetaan tmp file samantien kuleksimasta...
@@ -3250,5 +3250,5 @@ else {
 }
 
 if (!$php_cli and strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE) {
-  require("inc/footer.inc");
+  require "inc/footer.inc";
 }

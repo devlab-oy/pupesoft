@@ -863,6 +863,7 @@ function kasittele_laskutunnukset($lasku_tunnukset) {
   //tästä syystä todella epäselvää
   //lasku_tunnukset_temp halutaan olevan yksiulotteinen array tunnuksista
   if (!is_array($lasku_tunnukset)) {
+    $lasku_tunnukset = explode(',', $lasku_tunnukset);
     return $lasku_tunnukset;
   }
 

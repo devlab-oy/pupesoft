@@ -9924,13 +9924,13 @@ if (!function_exists('livesearch_kohdehaku')) {
       $limit = 0;
       if (mysql_num_rows($result) > 0) {
         while ($row = mysql_fetch_assoc($result)) {
-          echo "  <div id='kohde_valinta_$row[selite]'
+          echo "  <div id='kohde_valinta_$row[kohde_tunnus]'
                 name='selectOptions$hakuid'
                 onmouseover=\"this.className='liveSearchSelectedItem';
                   keyStrokeIndex = -1;
                   var aEls = document.getElementsByName('selectOptions$hakuid');
                   for (var iEl = 0; iEl < aEls.length; iEl++) {
-                    if (aEls[iEl].id.substring(0,14) == 'tuoteryhma_valinta_' && aEls[iEl].id != 'kohde_valinta_$row[selite]') {
+                    if (aEls[iEl].id.substring(0,14) == 'tuoteryhma_valinta_' && aEls[iEl].id != 'kohde_valinta_$row[kohde_tunnus]') {
                       document.getElementById(aEls[iEl].id).className='';
                     }
                   } \"

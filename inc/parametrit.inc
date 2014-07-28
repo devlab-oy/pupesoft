@@ -860,4 +860,11 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
   // luodaan tietokantayhteys uudelleen, niin saadaan slave käyttöön jos sellaista tarvitaan
   require("connect.inc");
 
+  // Katsotaan onko Pupesoftissa SEPA rajapinta asetettuna, eli pankkiyhteys käytössä
+  $_sepa_pankkiyhteys = true;
+  $_sepa_pankkiyhteys &= (isset($_SERVER["HTTPS"]) and $_SERVER["HTTPS"] == 'on');
+  $_sepa_pankkiyhteys &= ($yhtiorow["pankkitiedostot"] == "F");
+  $_sepa_pankkiyhteys &= (!empty($sepa_pankkiyhteys_token));
+
+  define('SEPA_PANKKIYHTEYS', $_sepa_pankkiyhteys == 1 ? true : false);
 }

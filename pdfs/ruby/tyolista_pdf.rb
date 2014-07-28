@@ -130,73 +130,76 @@ class TyolistaPDF
   end
 
   def info
-
     @pdf.font 'Helvetica', :style => :bold, :size => 10
     @pdf.draw_text "Tyolistan nro #{@data['tunnus']}", :at => [600, 515.28]
-
     @pdf.bounding_box([@pdf.bounds.left, @pdf.cursor], :width => @pdf.bounds.right - @margin, :height => 115) do
       top_coordinate = @pdf.cursor
       @pdf.font 'Helvetica', :style => :normal, :size => 10
 
+      @pdf.move_down 10
       @pdf.text @data['yhtio']['nimi']
-      @pdf.move_down 10
+      @pdf.move_down 5
       @pdf.text @data['yhtio']['osoite']
-      @pdf.move_down 10
-      @pdf.text @data['yhtio']['postino'] + ' ' + @data['yhtio']['postitp']
       @pdf.move_down 5
       @pdf.text @data['yhtio']['puhelin']
 
-      @pdf.move_up top_coordinate - @pdf.cursor
       @pdf.font 'Helvetica', :style => :normal, :size => 8
 
-      @pdf.indent(200) do
-        @customer_data.each do |value|
-          @pdf.float do
-            @pdf.text value[:header], :style => :bold
+      @siirto = 105
+      @customer_data.each do |value|
+        if @pdf.width_of(value[:value]) > 150
+          until @pdf.width_of(value[:value]) < 140 do
+            value[:value].chop!
           end
-          @pdf.indent(80) do
-            @pdf.text value[:value], :style => :normal
-          end
-          @pdf.move_down 5
+          value[:value] = "#{value[:value]}..."
         end
+        @pdf.text_box value[:header], :width => 75, :align => :right, :at => [140, @siirto], :style => :bold
+        @pdf.text_box value[:value], :align => :left, :at => [220, @siirto]
+        @siirto = @siirto - 13
       end
 
-      @pdf.move_up top_coordinate - @pdf.cursor
-
-      @pdf.indent(400) do
-        @spot_data.each do |value|
-          @pdf.float do
-            @pdf.text value[:header], :style => :bold
+      @siirto = 105
+      @spot_data.each do |value|
+        if @pdf.width_of(value[:value]) > 150
+          until @pdf.width_of(value[:value]) < 140 do
+            value[:value].chop!
           end
-          @pdf.indent(80) do
-            @pdf.text value[:value], :style => :normal
-          end
-          @pdf.move_down 5
+          value[:value] = "#{value[:value]}..."
         end
+        @pdf.text_box value[:header], :width => 75, :align => :right, :at => [390, @siirto], :style => :bold
+        @pdf.text_box value[:value], :align => :left, :at => [470, @siirto]
+        @siirto = @siirto - 13
       end
 
-      @pdf.move_up top_coordinate - @pdf.cursor
-
-      @pdf.indent(600) do
-        @other_data.each do |value|
-          @pdf.float do
-            @pdf.text value[:header], :style => :bold
+      @siirto = 105
+      @other_data.each do |value|
+        if @pdf.width_of(value[:value]) > 150
+          until @pdf.width_of(value[:value]) < 148 do
+            value[:value].chop!
           end
-          @pdf.indent(80) do
-            @pdf.text value[:value], :style => :normal
-          end
-          @pdf.move_down 5
+          value[:value] = "#{value[:value]}..."
         end
+        @pdf.text_box value[:header], :width => 75, :align => :right, :at => [610, @siirto], :style => :bold
+        @pdf.text_box value[:value], :align => :left, :at => [690, @siirto]
+        @siirto = @siirto - 13
       end
+
     end
   end
 
   def rows
     row_headers
-
-    @pdf.move_down 10
-
-    @data['rivit'].each do |r|
+    @data['rivit'].each_with_index do |r,i|
+      if @pdf.cursor < 50
+        @pdf.start_new_page
+        @pdf.move_down 90
+        row_headers
+      end
+      if i > 0
+        @pdf.transparent(0.2) do
+          @pdf.stroke_horizontal_rule
+        end
+      end
       row(r)
     end
   end
@@ -232,19 +235,19 @@ class TyolistaPDF
       @pdf.move_up 5
       @pdf.text_box 'Laitteen sijainti', :at => [x+30, @pdf.cursor]
       @pdf.move_down 5
-      @pdf.text_box 'Muuttunut sijainti', :at => [x+170, @pdf.cursor], :rotate => 90
+      @pdf.text_box 'Muuttunut sijainti', :at => [x+150, @pdf.cursor], :rotate => 90
       @pdf.move_up 5
-      @pdf.text_box 'Merkki / malli', :at => [x+190, @pdf.cursor]
+      @pdf.text_box 'Merkki / malli', :at => [x+170, @pdf.cursor]
 
       @pdf.move_up 10
-      @pdf.text_box 'Koko', :at => [x+290, @pdf.cursor]
+      @pdf.text_box 'Koko', :at => [x+270, @pdf.cursor]
       @pdf.move_down 10
-      @pdf.text_box 'kg / litra', :at => [x+290, @pdf.cursor]
+      @pdf.text_box 'kg / litra', :at => [x+270, @pdf.cursor]
 
       @pdf.move_up 10
-      @pdf.text_box 'Palo-/', :at => [x+340, @pdf.cursor]
+      @pdf.text_box 'Palo-/', :at => [x+320, @pdf.cursor]
       @pdf.move_down 10
-      @pdf.text_box 'teholuokka', :at => [x+340, @pdf.cursor]
+      @pdf.text_box 'teholuokka', :at => [x+320, @pdf.cursor]
 
       @pdf.text_box 'Sammute', :at => [x+390, @pdf.cursor]
       @pdf.text_box 'Säiliön nro', :at => [x+470, @pdf.cursor]
@@ -286,11 +289,11 @@ class TyolistaPDF
     @pdf.table([table_cells],
               :column_widths => {
                   0  => 30,
-                  1  => 135,
+                  1  => 115,
                   2  => 20,
                   3  => 100,
                   4  => 50,
-                  5  => 50,
+                  5  => 70,
                   6  => 85,
                   7  => 70,
                   8  => 50,
@@ -305,6 +308,12 @@ class TyolistaPDF
               :cell_style    => {
                   :borders => []
               })
+
+    if row['kommentti'] != ''
+      @pdf.text_box "Kommentti: #{row['kommentti']}", :at => [5, @pdf.cursor]
+      @pdf.move_down 20
+    end
+
   end
 
   def footer

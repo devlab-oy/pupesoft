@@ -1232,7 +1232,7 @@ if ($fieldname == "dynaaminen_kassamyynti") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "maksupaate_kassamyynti") {
+if ($fieldname == "maksupaate_kassamyynti") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
@@ -1249,7 +1249,7 @@ if (mysql_field_name($result, $i) == "maksupaate_kassamyynti") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "kerayspoikkeama_kasittely") {
+if ($fieldname == "kerayspoikkeama_kasittely") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 

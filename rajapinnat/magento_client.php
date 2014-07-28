@@ -602,7 +602,7 @@ class MagentoClient {
             }
           }
 
-          $product_id = $this->_proxy->call($this->_session, 'catalog_product.update',
+          $this->_proxy->call($this->_session, 'catalog_product.update',
             array(
               $nimitys,
               $configurable

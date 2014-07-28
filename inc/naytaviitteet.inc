@@ -18,7 +18,7 @@ if ($type == '0' and substr($tietue, 0,3) != "\$\$E" and substr($tietue, 0,3) !=
   if (!isset($lopetus) or $lopetus == "") $lopetus = "/SPLIT/${palvelin2}tilioteselailu.php////tee=T//pvm=$vv-$kk-$pp//tyyppi=3//tilino=$tilino";
 
   echo "<table>";
-  echo "<tr><td class='back'><a href='${palvelin2}tilioteselailu.php?tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XXS&lopetus=$lopetus$vii_lopetus'>&laquo; ".t("Edellinen")."</td><td class='back'><a href='${palvelin2}tilioteselailu.php?tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XS&lopetus=$lopetus$vii_lopetus'>".t("Seuraava")." &raquo;</a></td></tr>";
+  echo "<tr><td class='back'><a href='${palvelin2}tilioteselailu.php?tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XXS&lopetus=$lopetus'>&laquo; ".t("Edellinen")."</td><td class='back'><a href='${palvelin2}tilioteselailu.php?tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XS&lopetus=$lopetus'>".t("Seuraava")." &raquo;</a></td></tr>";
   echo "<tr><th>".t("Aineiston luontipv")."</th><td>".pankkipvm(substr($tietue,1,6))."</td></tr>";
   echo "<tr><th>".t("Aineiston luontiaika")."</th><td>".substr($tietue,7,4)."</td></tr>";
   echo "<tr><th>".t("Rahalaitostunnus")."</th><td>".substr($tietue,11,2)."</td></tr>";
@@ -68,7 +68,7 @@ elseif ($type == '3' or $type == 'S') {
 
   if ($suoritusrow['kohdpvm'] != '0000-00-00' and $suoritusrow["laskunro"] != 0) {
     echo "<font class='ok'>".t("Suoritus kohdistettu laskuun")." ";
-    echo "<a href='${palvelin2}muutosite.php?tee=E&tunnus=$suoritusrow[tunnus]&lopetus=$lopetus$vii_lopetus'>$suoritusrow[laskunro]</a></font>";
+    echo "<a href='${palvelin2}muutosite.php?tee=E&tunnus=$suoritusrow[tunnus]&lopetus=$lopetus'>$suoritusrow[laskunro]</a></font>";
   }
   else {
     if (mysql_num_rows($suoritusresult)==1) {

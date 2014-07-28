@@ -31,37 +31,37 @@ function pdf_hae_tyomaarays($lasku_tunnukset) {
   if (empty($lasku_tunnukset)) {
     return false;
   }
-  
+
   //queryyn joinataan tauluja kohteeseen saakka, koska tarkastuspöytäkirjat halutaan tulostaa per kohde mutta työmääräykset on laite per työmääräin
-  $query = "  SELECT lasku.*,
-        kohde.tunnus as kohde_tunnus,
-        laite.tunnus as laite_tunnus,
-        kuka.nimi as tyon_suorittaja
-        FROM lasku
-        JOIN tyomaarays
-        ON ( tyomaarays.yhtio = lasku.yhtio
-          AND tyomaarays.otunnus = lasku.tunnus )
-        LEFT JOIN kuka
-        ON ( kuka.yhtio = tyomaarays.yhtio
-          AND kuka.kuka = tyomaarays.tyojono )
-        JOIN tilausrivi
-        ON ( tilausrivi.yhtio = lasku.yhtio
-          AND tilausrivi.otunnus = lasku.tunnus )
-        JOIN tilausrivin_lisatiedot
-        ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-          AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
-        JOIN laite
-        ON ( laite.yhtio = tilausrivin_lisatiedot.yhtio
-          AND laite.tunnus = tilausrivin_lisatiedot.asiakkaan_positio )
-        JOIN paikka
-        ON ( paikka.yhtio = laite.yhtio
-          AND paikka.tunnus = laite.paikka )
-        JOIN kohde
-        ON ( kohde.yhtio = paikka.yhtio
-          AND kohde.tunnus = paikka.kohde )
-        WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-        AND lasku.tunnus IN('".implode("','", $lasku_tunnukset)."')
-        GROUP BY lasku.tunnus";
+  $query = "SELECT lasku.*,
+            kohde.tunnus as kohde_tunnus,
+            laite.tunnus as laite_tunnus,
+            kuka.nimi as tyon_suorittaja
+            FROM lasku
+            JOIN tyomaarays
+            ON ( tyomaarays.yhtio = lasku.yhtio
+              AND tyomaarays.otunnus = lasku.tunnus )
+            LEFT JOIN kuka
+            ON ( kuka.yhtio = tyomaarays.yhtio
+              AND kuka.kuka = tyomaarays.tyojono )
+            JOIN tilausrivi
+            ON ( tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus = lasku.tunnus )
+            JOIN tilausrivin_lisatiedot
+            ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
+            JOIN laite
+            ON ( laite.yhtio = tilausrivin_lisatiedot.yhtio
+              AND laite.tunnus = tilausrivin_lisatiedot.asiakkaan_positio )
+            JOIN paikka
+            ON ( paikka.yhtio = laite.yhtio
+              AND paikka.tunnus = laite.paikka )
+            JOIN kohde
+            ON ( kohde.yhtio = paikka.yhtio
+              AND kohde.tunnus = paikka.kohde )
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.tunnus IN('" . implode("','", $lasku_tunnukset) . "')
+            GROUP BY lasku.tunnus";
 
   $result = pupe_query($query);
 
@@ -97,35 +97,34 @@ function hae_tyomaarayksen_rivit($lasku_tunnus) {
 
   //tilausrivin_lisatiedot.asiakkaan_positio != 0, koska queryllä ei haluta hakea
   //työmääräykselle lisättyjä laite rivejä. haemme ainoastaan toimenpide rivit, jotka liittyvät johonkin laitteeseen (asiakkaan_positio)
-
   //jos tilausrivilinkki == 0 tämä tarkoittaa, että kyseessä ei ole ollut laitteen vaihto
-  $query = "  SELECT tilausrivi.*,
-        tilausrivin_lisatiedot.asiakkaan_positio,
-        tilausrivin_lisatiedot.tilausrivilinkki,
-        IF(poistettu_laite.tuoteno IS NOT NULL,
-          CONCAT_WS(' ".t("Laite").": ', CONCAT_WS(' -> ', CONCAT('".t("Toimenpide").": ', poikkeus_rivi.nimitys), tilausrivi.nimitys), CONCAT_WS(' -> ', poistettu_laite.tuoteno, laite.tuoteno)),
-          CONCAT_WS(' -> ', poikkeus_rivi.nimitys, tilausrivi.nimitys)
-        ) AS poikkeus_teksti
-        FROM tilausrivi
-        JOIN tilausrivin_lisatiedot
-        ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-          AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
-          AND tilausrivin_lisatiedot.asiakkaan_positio != 0 )
-        LEFT JOIN tilausrivi as poikkeus_rivi
-        ON ( poikkeus_rivi.yhtio = tilausrivin_lisatiedot.yhtio
-          AND poikkeus_rivi.tunnus = tilausrivin_lisatiedot.tilausrivilinkki )
-        LEFT JOIN tilausrivin_lisatiedot as poikkeus_toimenpide_tilausrivi_lisatiedot
-        ON ( poikkeus_toimenpide_tilausrivi_lisatiedot.yhtio = poikkeus_rivi.yhtio
-          AND poikkeus_toimenpide_tilausrivi_lisatiedot.tilausrivitunnus = poikkeus_rivi.tunnus )
-        LEFT JOIN laite as poistettu_laite
-        ON ( poistettu_laite.yhtio = poikkeus_toimenpide_tilausrivi_lisatiedot.yhtio
-          AND poistettu_laite.tunnus = poikkeus_toimenpide_tilausrivi_lisatiedot.asiakkaan_positio )
-        LEFT JOIN laite
-        ON ( laite.yhtio = tilausrivin_lisatiedot.yhtio
-          AND laite.tunnus = tilausrivin_lisatiedot.asiakkaan_positio )
-        WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-        AND tilausrivi.otunnus = '{$lasku_tunnus}'
-        AND tilausrivi.var != 'P'";
+  $query = "SELECT tilausrivi.*,
+            tilausrivin_lisatiedot.asiakkaan_positio,
+            tilausrivin_lisatiedot.tilausrivilinkki,
+            IF(poistettu_laite.tuoteno IS NOT NULL,
+              CONCAT_WS(' " . t("Laite") . ": ', CONCAT_WS(' -> ', CONCAT('" . t("Toimenpide") . ": ', poikkeus_rivi.nimitys), tilausrivi.nimitys), CONCAT_WS(' -> ', poistettu_laite.tuoteno, laite.tuoteno)),
+              CONCAT_WS(' -> ', poikkeus_rivi.nimitys, tilausrivi.nimitys)
+            ) AS poikkeus_teksti
+            FROM tilausrivi
+            JOIN tilausrivin_lisatiedot
+            ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
+              AND tilausrivin_lisatiedot.asiakkaan_positio != 0 )
+            LEFT JOIN tilausrivi as poikkeus_rivi
+            ON ( poikkeus_rivi.yhtio = tilausrivin_lisatiedot.yhtio
+              AND poikkeus_rivi.tunnus = tilausrivin_lisatiedot.tilausrivilinkki )
+            LEFT JOIN tilausrivin_lisatiedot as poikkeus_toimenpide_tilausrivi_lisatiedot
+            ON ( poikkeus_toimenpide_tilausrivi_lisatiedot.yhtio = poikkeus_rivi.yhtio
+              AND poikkeus_toimenpide_tilausrivi_lisatiedot.tilausrivitunnus = poikkeus_rivi.tunnus )
+            LEFT JOIN laite as poistettu_laite
+            ON ( poistettu_laite.yhtio = poikkeus_toimenpide_tilausrivi_lisatiedot.yhtio
+              AND poistettu_laite.tunnus = poikkeus_toimenpide_tilausrivi_lisatiedot.asiakkaan_positio )
+            LEFT JOIN laite
+            ON ( laite.yhtio = tilausrivin_lisatiedot.yhtio
+              AND laite.tunnus = tilausrivin_lisatiedot.asiakkaan_positio )
+            WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+            AND tilausrivi.otunnus = '{$lasku_tunnus}'
+            AND tilausrivi.var != 'P'";
   $result = pupe_query($query);
 
   $rivit = array();
@@ -139,15 +138,14 @@ function hae_tyomaarayksen_rivit($lasku_tunnus) {
   return $rivit;
 }
 
-
 function hae_rivin_poikkeama($tilausrivi_tunnus) {
   global $kukarow, $yhtiorow;
 
-  $query = "  SELECT *
-        FROM tilausrivi
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tunnus = '{$tilausrivi_tunnus}'
-        AND var = 'P'";
+  $query = "SELECT *
+            FROM tilausrivi
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = '{$tilausrivi_tunnus}'
+            AND var = 'P'";
   $result = pupe_query($query);
 
   return mysql_fetch_assoc($result);
@@ -156,10 +154,10 @@ function hae_rivin_poikkeama($tilausrivi_tunnus) {
 function hae_rivin_laite($laite_tunnus) {
   global $kukarow, $yhtiorow;
 
-  $query = "  SELECT *
-        FROM laite
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tunnus = '{$laite_tunnus}'";
+  $query = "SELECT *
+            FROM laite
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = '{$laite_tunnus}'";
   $result = pupe_query($query);
 
   return mysql_fetch_assoc($result);
@@ -168,10 +166,10 @@ function hae_rivin_laite($laite_tunnus) {
 function hae_tyomaarayksen_asiakas($asiakas_tunnus) {
   global $kukarow, $yhtiorow;
 
-  $query = "  SELECT *
-        FROM asiakas
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tunnus = '{$asiakas_tunnus}'";
+  $query = "SELECT *
+            FROM asiakas
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = '{$asiakas_tunnus}'";
   $result = pupe_query($query);
 
   return mysql_fetch_assoc($result);
@@ -180,16 +178,16 @@ function hae_tyomaarayksen_asiakas($asiakas_tunnus) {
 function hae_tyomaarayksen_kohde($laite_tunnus) {
   global $kukarow, $yhtiorow;
 
-  $query = "  SELECT kohde.*
-        FROM kohde
-        JOIN paikka
-        ON ( paikka.yhtio = kohde.yhtio
-          AND paikka.kohde = kohde.tunnus )
-        JOIN laite
-        ON ( laite.yhtio = kohde.yhtio
-          AND laite.paikka = paikka.tunnus
-          AND laite.tunnus = '{$laite_tunnus}')
-        WHERE kohde.yhtio = '{$kukarow['yhtio']}'";
+  $query = "SELECT kohde.*
+            FROM kohde
+            JOIN paikka
+            ON ( paikka.yhtio = kohde.yhtio
+              AND paikka.kohde = kohde.tunnus )
+            JOIN laite
+            ON ( laite.yhtio = kohde.yhtio
+              AND laite.paikka = paikka.tunnus
+              AND laite.tunnus = '{$laite_tunnus}')
+            WHERE kohde.yhtio = '{$kukarow['yhtio']}'";
   $result = pupe_query($query);
 
   return mysql_fetch_assoc($result);

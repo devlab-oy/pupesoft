@@ -266,7 +266,6 @@ function onko_lasku_liian_vanha($filename) {
     "attachements" => array(0 =>
       array(
         "filename" => $filename,
-        "ctype" => mime_content_type($filename),
       )),
   );
 

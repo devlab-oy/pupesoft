@@ -161,7 +161,8 @@ if ( ( !isset($jataminut) and !isset($yhdista) ) and (!isset($_FILES['userfile']
               concat(asiakas.postino, '<br>', asiakas.toim_postino, asiakas.laskutus_postino) 'postino',
               concat(asiakas.postitp, '<br>', asiakas.toim_postitp, asiakas.laskutus_postitp) 'postitp',
               asiakas.asiakasnro,
-              asiakas.yhtio
+              asiakas.yhtio,
+              asiakas.laji
               FROM asiakas
               WHERE asiakas.yhtio = '$kukarow[yhtio]'
               $lisa
@@ -191,7 +192,15 @@ if ( ( !isset($jataminut) and !isset($yhdista) ) and (!isset($_FILES['userfile']
     $kalalask = 1;
 
     while ($trow = mysql_fetch_array ($result)) { // tiedot
-      echo "<tr class='aktiivi'>";
+
+      if ($trow['laji'] == 'P') {
+        $luokka = 'spec';
+      }
+      else{
+        $luokka = 'aktiivi';
+      }
+
+      echo "<tr class='{$luokka}'>";
 
       for ($i=1; $i<mysql_num_fields($result)-1; $i++) {
 
@@ -207,8 +216,14 @@ if ( ( !isset($jataminut) and !isset($yhdista) ) and (!isset($_FILES['userfile']
           }
       }
 
-      echo "<td><input type='checkbox' name='yhdista[$trow[tunnus]]' value='$trow[tunnus]' $sel/></td>";
-      echo "<td><input type='radio' name='jataminut' value='$trow[tunnus]'/></td>";
+      if ($trow['laji'] == 'P') {
+        echo "<td colspan='2' style='text-align:center; vertical-align:middle;'>Poistettu</td>";
+      }
+      else{
+        echo "<td align='center'><input type='checkbox' name='yhdista[$trow[tunnus]]' value='$trow[tunnus]' $sel/></td>";
+        echo "<td align='center'><input type='radio' name='jataminut' value='$trow[tunnus]'/></td>";
+      }
+
       echo "</tr>\n\n";
 
       $kalalask++;

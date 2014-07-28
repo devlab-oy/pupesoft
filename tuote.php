@@ -920,7 +920,7 @@ if ($tee == 'Z') {
                    FROM tuote
                   JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
                   JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-                    AND tuotepaikat.varasto = varastopaikat.tunnus)
+                    AND tuotepaikat.varasto                 = varastopaikat.tunnus)
                   JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio
                   and sarjanumeroseuranta.tuoteno           = tuote.tuoteno
                   and sarjanumeroseuranta.hyllyalue         = tuotepaikat.hyllyalue
@@ -953,8 +953,8 @@ if ($tee == 'Z') {
                   JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
                   JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
                     AND tuotepaikat.varasto = varastopaikat.tunnus)
-                  WHERE tuote.yhtio in ('".implode("','", $yhtiot)."')
-                  and tuote.tuoteno = '$tuoteno'
+                  WHERE tuote.yhtio         in ('".implode("','", $yhtiot)."')
+                  and tuote.tuoteno         = '$tuoteno'
                   ORDER BY toimipaikka_sorttaus, tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
       }
 
@@ -1324,7 +1324,7 @@ if ($tee == 'Z') {
               LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
               JOIN lasku use index (PRIMARY) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus {$toimipaikkarajaus}
               LEFT JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio
-                AND varastopaikat.tunnus = lasku.varasto)
+                AND varastopaikat.tunnus     = lasku.varasto)
               LEFT JOIN lasku as lasku2 ON lasku2.yhtio = tilausrivi.yhtio and lasku2.tunnus = tilausrivi.uusiotunnus
               LEFT JOIN asiakas ON asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus
               WHERE tilausrivi.yhtio         = '$kukarow[yhtio]'
@@ -1790,11 +1790,11 @@ if ($tee == 'Z') {
                   JOIN tilausrivi ON (tilausrivi.yhtio = tapahtuma.yhtio
                     AND tilausrivi.tunnus = tapahtuma.rivitunnus
                     {$toimipaikkarajaus})
-                  WHERE tapahtuma.yhtio  = '{$kukarow['yhtio']}'
-                  AND tapahtuma.tuoteno  = '{$tuoteno}'
-                  AND tapahtuma.laadittu >= '{$ed}'
+                  WHERE tapahtuma.yhtio   = '{$kukarow['yhtio']}'
+                  AND tapahtuma.tuoteno   = '{$tuoteno}'
+                  AND tapahtuma.laadittu  >= '{$ed}'
                   {$ehto_where}
-                  AND tilausrivi.tyyppi  IN ('L','W','V')";
+                  AND tilausrivi.tyyppi   IN ('L','W','V')";
         $result3 = pupe_query($query);
         $lrow = mysql_fetch_assoc($result3);
 
@@ -2267,8 +2267,16 @@ if ($tee == 'Z') {
         }
       }
 
-      $query = "SELECT tapahtuma.tuoteno, ifnull(kuka.nimi, tapahtuma.laatija) laatija, tapahtuma.laadittu, tapahtuma.laji, tapahtuma.kpl, tapahtuma.kplhinta, tapahtuma.hinta,
-                if (tapahtuma.laji in ('tulo','valmistus'), tapahtuma.kplhinta, tapahtuma.hinta)*tapahtuma.kpl arvo, tapahtuma.selite, lasku.tunnus laskutunnus,
+      $query = "SELECT tapahtuma.tuoteno,
+                ifnull(kuka.nimi, tapahtuma.laatija) laatija,
+                tapahtuma.laadittu,
+                tapahtuma.laji,
+                tapahtuma.kpl,
+                tapahtuma.kplhinta,
+                tapahtuma.hinta,
+                if (tapahtuma.laji in ('tulo','valmistus'), tapahtuma.kplhinta*tapahtuma.kpl, null) arvo,
+                tapahtuma.selite,
+                lasku.tunnus laskutunnus,
                 concat_ws(' ', tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso) tapapaikka,
                 tapahtuma.hyllyalue tapahtuma_hyllyalue,
                 concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
@@ -2335,6 +2343,12 @@ if ($tee == 'Z') {
 
       while ($prow = mysql_fetch_assoc($qresult)) {
 
+        $kehahinta = hinta_kuluineen($tuoterow['tuoteno'], $prow['hinta']);
+
+        if ($prow['arvo'] === null) {
+          $prow['arvo'] = $kehahinta * $prow['kpl'];
+        }
+
         $vararvo_nyt -= $prow["arvo"];
 
         // Epäkuranteissa saldo ei muutu
@@ -2344,8 +2358,8 @@ if ($tee == 'Z') {
 
         if ($tapahtumalaji == "" or strtoupper($tapahtumalaji) == strtoupper($prow["laji"])) {
           echo "<tr class='aktiivi'>";
-          echo "<td nowrap valign='top'>$prow[laatija]</td>";
-          echo "<td nowrap valign='top'>".tv1dateconv($prow["laadittu"], "pitka")."</td>";
+          echo "<td nowrap valign='top'>" . $prow['laatija'] . "</td>";
+          echo "<td nowrap valign='top'>" . tv1dateconv($prow["laadittu"], "pitka") . "</td>";
           echo "<td nowrap valign='top'>";
 
           if ($prow["laji"] == "laskutus" and $prow["laskutunnus"] != "") {
@@ -2418,7 +2432,8 @@ if ($tee == 'Z') {
 
           echo "</td>";
 
-          echo "<td nowrap align='right' valign='top'>$prow[kpl]</td>";
+          echo "<td nowrap align='right' valign='top'>" . $prow['kpl'] . "</td>";
+
           echo "<td nowrap align='right' valign='top'>";
 
           if ($prow['laji'] == 'tulo') {
@@ -2438,13 +2453,12 @@ if ($tee == 'Z') {
           }
 
           echo "</td>";
-
-          echo "<td nowrap align='right' valign='top'>".hintapyoristys(hinta_kuluineen($tuoterow['tuoteno'], $prow['hinta']), 6, FALSE)."</td>";
+          echo "<td nowrap align='right' valign='top'>" . hintapyoristys($kehahinta, 6, FALSE) . "</td>";
 
           if ($prow["laji"] == "laskutus") {
-            $kate = kate_kuluineen($prow['tuoteno'], $prow['rivihinta'], $prow['hinta']);
-            $kate_pros = $prow['rivihinta'] != 0 ? round(100 * $kate / $prow['rivihinta'], 2) : 0;
-            echo "<td nowrap align='right' valign='top'>{$kate_pros}%</td>";
+            $kate = $prow["kplhinta"] - $kehahinta;
+            $katepros = 100 * ($kate/$prow['kplhinta']);
+            echo "<td nowrap align='right' valign='top'>".round($katepros, 2)."%</td>";
           }
           else {
             echo "<td nowrap align='right' valign='top'></td>";

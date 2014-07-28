@@ -731,8 +731,8 @@ if ($varaston_muutos != 0 and (in_array($tee, array("paalle", "25paalle", "puoli
               FROM tuotepaikat
               JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
                 AND varastopaikat.tunnus = tuotepaikat.varasto)
-              WHERE tuotepaikat.yhtio = '{$kukarow["yhtio"]}'
-              AND tuotepaikat.tuoteno = '{$tuoterow["tuoteno"]}'
+              WHERE tuotepaikat.yhtio    = '{$kukarow["yhtio"]}'
+              AND tuotepaikat.tuoteno    = '{$tuoterow["tuoteno"]}'
               GROUP BY 1,2
               HAVING saldo != 0";
     $vpresult = pupe_query($query);

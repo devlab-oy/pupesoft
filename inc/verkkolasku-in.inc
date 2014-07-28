@@ -1089,9 +1089,9 @@ if (!function_exists("verkkolasku_in")) {
       for ($tuuraaja_i = 1; $tuuraaja_i < 6; $tuuraaja_i++) {
         $query = "SELECT if (tuuraaja != '', tuuraaja, kuka) kuka
                   FROM kuka
-                  WHERE yhtio = '{$yhtio}'
-                  AND kuka    = '{$hyvak[$tuuraaja_i]}'
-                  AND kuka   != ''";
+                  WHERE yhtio  = '{$yhtio}'
+                  AND kuka     = '{$hyvak[$tuuraaja_i]}'
+                  AND kuka    != ''";
         $result = pupe_query($query);
         $hyvak_row = mysql_fetch_assoc($result);
 
@@ -1395,8 +1395,8 @@ if (!function_exists("verkkolasku_in")) {
           if ((float) $rtuoteno[$i]["rivihinta"] != 0) {
             $kustp = $oletuskust;
 
-            $rinfo = isset($rtuoteno[$i]["riviinfo"]) ? mysql_real_escape_string(utf8_decode($rtuoteno[$i]["riviinfo"])) : "";
-            $tuote = isset($rtuoteno[$i]["tuoteno"])  ? mysql_real_escape_string(utf8_decode($rtuoteno[$i]["tuoteno"])) : "";
+            $rinfo = isset($rtuoteno[$i]["riviinfo"]) ? $rtuoteno[$i]["riviinfo"] : "";
+            $tuote = isset($rtuoteno[$i]["tuoteno"]) ? $rtuoteno[$i]["tuoteno"] : "";
 
             $query = "SELECT tilino, kustp
                       FROM tiliointisaanto

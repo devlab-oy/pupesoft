@@ -1482,7 +1482,7 @@ function hae_inventoinnit(&$request) {
             WHERE tapahtuma.yhtio      = '{$yhtio}'
               AND tapahtuma.laadittu BETWEEN '{$request['alku_aika']}' AND '{$request['loppu_aika']}'
               AND tapahtuma.laji       = 'Inventointi'
-              AND tapahtuma.varasto IN (".implode(', ', $request['valitut_varastot']).")
+              AND tapahtuma.varasto    IN (".implode(', ', $request['valitut_varastot']).")
             {$tapahtuma_where}
             {$inventointilaji_rajaus}
             {$ei_huomioida_lisa}

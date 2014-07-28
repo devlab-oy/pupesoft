@@ -242,9 +242,9 @@ echo "<tr><th>".t("Vain käsin viedyt")."</th><td colspan='3'><input type='checkb
 
 $query = "SELECT kuka.kuka, kuka.nimi
           FROM kuka
-          WHERE kuka.yhtio    = '{$kukarow["yhtio"]}'
+          WHERE kuka.yhtio = '{$kukarow["yhtio"]}'
           AND kuka.aktiivinen = 1
-          and kuka.extranet   = ''
+          and kuka.extranet = ''
           ORDER BY kuka.nimi";
 $vresult = pupe_query($query);
 
@@ -269,6 +269,19 @@ if ($excel != "") {
 }
 
 echo "<tr><th>".t("Raportti vain Exceliin")."</th><td colspan='3'><input type='checkbox' name='excel' value = 'YES' $sel></td></tr>";
+
+$alvsel = ($post_alv != "") ? "CHECKED" : "";
+
+echo "<tr>";
+echo "<th>";
+echo t("Vain ALV-laskelman jälkeen tehdyt tiliöinnit");
+echo "</th>";
+echo "<td colspan='3'>";
+echo "<input type = 'checkbox' name = 'post_alv' value = 'YES' {$alvsel}> ";
+echo t("Toimii vain jos haetaan koko kuukaudelta!");
+echo "</td>";
+echo "</tr>";
+
 echo "<tr><th valign='top'>".t("Konsernirajaus")."</th>";
 
 $konsel = array();
@@ -276,9 +289,9 @@ $konsel[$konsernirajaus] = "SELECTED";
 
 echo "<td colspan='3'><select name='konsernirajaus'>
     <option value=''>".t("Näytetään kaikki tiliöinnit")."</option>
-    <option value='AT' $konsel[AT]>".t("Näytetään konserniasiakkaiden ja konsernitoimittajien tiliöinnit")."</option>
-    <option value='T'  $konsel[T]>".t("Näytetään konsernitoimitajien tiliöinnit")."</option>
-    <option value='A'  $konsel[A]>".t("Näytetään konserniasiakkaiden tiliöinnit")."</option>
+    <option value='AT' $konsel[AT]>".t("Näytetään vain konserniasiakkaiden ja konsernitoimittajien tiliöinnit")."</option>
+    <option value='T'  $konsel[T]>".t("Näytetään vain konsernitoimitajien tiliöinnit")."</option>
+    <option value='A'  $konsel[A]>".t("Näytetään vain konserniasiakkaiden tiliöinnit")."</option>
     </select>
     </td></tr>";
 
@@ -332,6 +345,71 @@ if ($tee != "") {
   $blvk = 0;
   $blvp = 0;
 
+  $alvk = (int) $alvk;
+  $alvp = (int) $alvp;
+  $alvv = (int) $alvv;
+  $llvk = (int) $llvk;
+  $llvp = (int) $llvp;
+  $llvv = (int) $llvv;
+  $tkausi = (int) $tkausi;
+
+  $tili = empty($tili) ? '' : trim($tili);
+  $tili2 = empty($tili2) ? '' : trim($tili2);
+  $lisa = empty($lisa) ? '' : trim($lisa);
+  $konsernirajaus = empty($konsernirajaus) ? '' : trim($konsernirajaus);
+
+  $post_alv = empty($post_alv) ? '' : trim($post_alv);
+  $post_alv_lisa = "";
+
+  if ($post_alv != "" and $alvk < 1) {
+    echo "<font class='error'>";
+    echo t("ALV-Laskelman jälkeen tehtyjä tiliöintejä haettaessa pitää valita kuukausi.");
+    echo "</font>";
+    echo "<br><br>";
+    $tee = "";
+  }
+
+  if ($post_alv != "" and $alvp > 0) {
+    echo "<font class='error'>";
+    echo t("ALV-Laskelman jälkeen tehtyjä tiliöintejä haettaessa pitää valita koko kuukausi.");
+    echo "</font>";
+    echo "<br><br>";
+    $tee = "";
+  }
+
+  if ($post_alv != "" and $tkausi > 0) {
+    echo "<font class='error'>";
+    echo t("ALV-Laskelman jälkeen tehtyjä tiliöintejä haettaessa ei voi valita tilikautta.");
+    echo "</font>";
+    echo "<br><br>";
+    $tee = "";
+  }
+
+  if ($post_alv != '' and $alvp == 0 and $alvk != 0) {
+    $kuunvika = date("Y-m-t", strtotime("{$alvv}-{$alvk}-01"));
+
+    $query = "SELECT luontiaika
+              FROM lasku
+              WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+              AND lasku.tapvm   = '{$kuunvika}'
+              AND lasku.tila    = 'X'
+              AND lasku.nimi    = 'ALVTOSITEMAKSUUN$kuunvika'";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) > 0) {
+      $luontiaikarow = mysql_fetch_assoc($result);
+      $laskelma_luotu = $luontiaikarow['luontiaika'];
+      $post_alv_lisa = " and tiliointi.laadittu >= '$laskelma_luotu' and tiliointi.vero > 0";
+    }
+    else {
+      echo "<font class='error'>";
+      echo t("Valitun kuukauden ALV-laskelmaa ei ole lähetetty!");
+      echo "</font>";
+      echo "<br><br>";
+      $tee = "";
+    }
+  }
+
   if ($llvv > 0) {
     if ($alvv == 0 or $alvk == 0 or $alvp == 0 or $llvv == 0 or $llvk == 0 or $llvp == 0) {
       echo "<font class='error'>".t("Haettaessa aikaväliltä pitää valita tarkka alku ja loppupäivä.")."</font><br><br>";
@@ -351,7 +429,7 @@ if ($tee != "") {
 
       $query = "SELECT *
                 FROM tilikaudet
-                WHERE yhtio         = '$kukarow[yhtio]'
+                WHERE yhtio = '$kukarow[yhtio]'
                 and tilikausi_alku  <= '$alvv-$blvk-$blvp'
                 and tilikausi_loppu >= '$alvv-$blvk-$blvp'";
       $result = mysql_query($query) or pupe_error($query);
@@ -368,7 +446,7 @@ if ($tee != "") {
       $query = "SELECT *
                 FROM tilikaudet
                 WHERE yhtio = '$kukarow[yhtio]'
-                and tunnus  = '$tkausi'";
+                and tunnus = '$tkausi'";
       $result = mysql_query($query) or pupe_error($query);
     }
 
@@ -382,24 +460,11 @@ if ($tee != "") {
 }
 
 if ($tee != "") {
-  $lisa1  = ''; // aineiston hakemiseen
+  $lisa1 = ''; // aineiston hakemiseen
   $lisa2 = ''; // alkusaldon laskemiseen
 
   // Tehdäänkö linkit päiväkirjaan
-  $query = "SELECT yhtio
-            FROM oikeu
-            WHERE yhtio = '$kukarow[yhtio]'
-            and kuka    = '$kukarow[kuka]'
-            and nimi    = 'muutosite.php'
-            and alanimi = ''";
-  $oikresult = mysql_query($query) or pupe_error($query);
-
-  if (mysql_num_rows($oikresult) > 0) {
-    $mutositelink = TRUE;
-  }
-  else {
-    $mutositelink = FALSE;
-  }
+  $mutositelink = tarkista_oikeus("muutosite.php");
 
   $nimi = t("Pääkirja");
   $jarj = "tiliointi.tilino, tiliointi.tapvm, tiliointi.laadittu, tiliointi.summa";
@@ -410,51 +475,59 @@ if ($tee != "") {
     $jarj = "tiliointi.tapvm, tiliointi.laadittu, tiliointi.tilino, tiliointi.summa";
   }
 
-  if ((int) $tkausi > 0) {
-        echo "<font class='head'>$nimi ".t("tilikaudelta")." ".tv1dateconv($tilikaudetrow["tilikausi_alku"])." - ".tv1dateconv($tilikaudetrow["tilikausi_loppu"])."</font><hr>";
-    $lisa1  = " and tiliointi.tapvm <= '$tilikaudetrow[tilikausi_loppu]' and tiliointi.tapvm >= '$tilikaudetrow[tilikausi_alku]'";
-    $lisa2 = " and tiliointi.tapvm < '$tilikaudetrow[tilikausi_alku]'"; //hassua hassua
+  if ($tkausi > 0) {
+    $alkupvm = $tilikaudetrow["tilikausi_alku"];
+    $loppupvm = $tilikaudetrow["tilikausi_loppu"];
   }
-  elseif ((int) $llvv > 0) {
-    echo "<font class='head'>$nimi ".t("ajalta")." ".date("d.m.Y", mktime(0, 0, 0, $alvk, $alvp, $alvv))." - ".date("d.m.Y", mktime(0, 0, 0, $llvk, $llvp, $llvv))."</font><hr>";
-    $alkupvm  = date("Y-m-d", mktime(0, 0, 0, $alvk, $alvp, $alvv));
+  elseif ($llvv > 0) {
+    $alkupvm = date("Y-m-d", mktime(0, 0, 0, $alvk, $alvp, $alvv));
     $loppupvm = date("Y-m-d", mktime(0, 0, 0, $llvk, $llvp, $llvv));
-    $lisa1  = " and tiliointi.tapvm >= '$alkupvm' AND tiliointi.tapvm <= '$loppupvm'";
-    $lisa2 = " and tiliointi.tapvm < '$alkupvm'";
   }
-  elseif ((int) $alvk == 0) {
-    echo "<font class='head'>$nimi ".t("kalenterivuodelta")." $alvv</font><hr>";
-    $alkupvm  = date("Y-m-d", mktime(0, 0, 0, 1, 1, $alvv));
-    $loppupvm = date("Y-m-d", mktime(0, 0, 0, 1, 0, $alvv+1));
-    $lisa1  = " and tiliointi.tapvm >= '$alkupvm' AND tiliointi.tapvm <= '$loppupvm'";
-    $lisa2 = " and tiliointi.tapvm < '$alkupvm'";
+  elseif ($alvk == 0) {
+    $alkupvm = date("Y-m-d", mktime(0, 0, 0, 1, 1, $alvv));
+    $loppupvm = date("Y-m-d", mktime(0, 0, 0, 1, 0, $alvv + 1));
   }
-  elseif ((int) $alvp == 0) {
-    echo "<font class='head'>$nimi ".t("kaudelta")." $alvv-$alvk</font><hr>";
-    $alkupvm  = date("Y-m-d", mktime(0, 0, 0, $alvk,   1, $alvv));
-    $loppupvm = date("Y-m-d", mktime(0, 0, 0, $alvk+1, 0, $alvv));
-    $lisa1  = " and tiliointi.tapvm >= '$alkupvm' AND tiliointi.tapvm <= '$loppupvm'";
-    $lisa2 = " and tiliointi.tapvm < '$alkupvm'";
+  elseif ($alvp == 0) {
+    $alkupvm = date("Y-m-d", mktime(0, 0, 0, $alvk, 1, $alvv));
+    $loppupvm = date("Y-m-d", mktime(0, 0, 0, $alvk + 1, 0, $alvv));
   }
   else {
-    echo "<font class='head'>$nimi ".t("päivältä")." ".tv1dateconv($alvv."-".$alvk."-".$alvp)."</font><hr>";
-    $alkupvm  = date("Y-m-d", mktime(0, 0, 0, $alvk, $alvp, $alvv));
-    $lisa1  = " and tiliointi.tapvm = '$alkupvm'";
-    $lisa2 = " and tiliointi.tapvm < '$alkupvm'";
+    $alkupvm = date("Y-m-d", mktime(0, 0, 0, $alvk, $alvp, $alvv));
+    $loppupvm = $alkupvm;
   }
 
-  if (strlen(trim($tili)) > 0 and strlen(trim($tili2)) > 0) {
-    $lisa1 .= " and tiliointi.tilino >= '$tili' and  tiliointi.tilino <= '$tili2'";
+  if ($post_alv != "") {
+    echo "<font class='message'>";
+    echo t("Näytetään vain ALV-laskelman jälkeen tehdyt tiliöinnit");
+    echo "</font>";
+    echo "<br><br>";
   }
-  elseif (strlen(trim($tili)) > 0 and strpos($tili, ",") !== FALSE) {
+
+  $lisa1 = " and tiliointi.tapvm >= '$alkupvm' AND tiliointi.tapvm <= '$loppupvm'";
+  $lisa2 = " and tiliointi.tapvm < '$alkupvm'";
+
+  echo "<font class='head'>";
+  echo "{$nimi} ";
+  echo t("ajalta");
+  echo " ";
+  echo tv1dateconv($alkupvm);
+  echo " - ";
+  echo tv1dateconv($loppupvm);
+  echo "</font>";
+  echo "<hr>";
+
+  if ($tili != "" and $tili2 != "") {
+    $lisa1 .= " and tiliointi.tilino >= '$tili' and tiliointi.tilino <= '$tili2'";
+  }
+  elseif ($tili != "" and strpos($tili, ",") !== false) {
     $lisa1 .= " and tiliointi.tilino in ('".str_replace(",", "','", $tili)."')";
   }
-  elseif (strlen(trim($tili)) > 0) {
+  elseif ($tili != "") {
     $lisa1 .= " and tiliointi.tilino = '$tili'";
   }
 
   if ($kasin != '') {
-    $lisa1 .= "and lasku.tila = 'X'";
+    $lisa1 .= " and lasku.tila = 'X'";
   }
 
   if ($asiakasid != "") {
@@ -465,7 +538,9 @@ if ($tee != "") {
     $lisa1 .= " and ((lasku.liitostunnus='{$toimittajaid}' and lasku.tila in ('H','Y','M','P','Q')) or (tiliointi.liitos='T' and tiliointi.liitostunnus='{$toimittajaid}' and lasku.tila = 'X')) ";
   }
 
-  if (!isset($alv)) $alv = 'tyhja';
+  if (!isset($alv)) {
+    $alv = 'tyhja';
+  }
 
   if ($alv != 'tyhja') {
     $lisa1 .= " and tiliointi.vero = '$alv' ";
@@ -475,55 +550,78 @@ if ($tee != "") {
     $lisa1 .= " and tiliointi.laatija = '$laatija' ";
   }
 
-  if ($maarajaus != '') $lisa .= " and if(lasku.toim_maa!='', lasku.toim_maa, if(lasku.maa != '', lasku.maa, '$yhtiorow[maa]')) = '$maarajaus'  ";
-
-  $asiakasjoini  = "";
-  $konsernijoini = "";
-  $konsernilisa  = "";
-
-  if ((isset($lisa) and strpos($lisa, "asiakas.") !== FALSE) or (isset($konsernirajaus) and $konsernirajaus != "")) {
-
-    if (strpos($lisa, "asiakas.") !== FALSE) {
-      $asiakasjoini = " JOIN asiakas ON lasku.yhtio = asiakas.yhtio and (lasku.liitostunnus = asiakas.tunnus or (tiliointi.liitos = 'A' and tiliointi.liitostunnus = asiakas.tunnus)) ";
-    }
-
-    if ($konsernirajaus == "AT") {
-      $konsernijoini  = "  LEFT JOIN asiakas ka ON lasku.yhtio = ka.yhtio and (lasku.liitostunnus = ka.tunnus or (tiliointi.liitos = 'A' and tiliointi.liitostunnus = ka.tunnus)) and ka.konserniyhtio != ''
-                LEFT JOIN toimi kt ON lasku.yhtio = kt.yhtio and (lasku.liitostunnus = kt.tunnus or (tiliointi.liitos = 'T' and tiliointi.liitostunnus = kt.tunnus)) and kt.konserniyhtio != '' ";
-      $konsernilisa = " and (ka.tunnus is not null or kt.tunnus is not null) ";
-    }
-    elseif ($konsernirajaus == "T") {
-      $konsernijoini = "  LEFT JOIN toimi kt ON lasku.yhtio = kt.yhtio and (lasku.liitostunnus = kt.tunnus or (tiliointi.liitos = 'T' and tiliointi.liitostunnus = kt.tunnus)) and kt.konserniyhtio != '' ";
-      $konsernilisa = " and kt.tunnus is not null ";
-    }
-    elseif ($konsernirajaus == "A") {
-      $konsernijoini = "  LEFT JOIN asiakas ka ON lasku.yhtio = ka.yhtio and (lasku.liitostunnus = ka.tunnus or (tiliointi.liitos = 'A' and tiliointi.liitostunnus = ka.tunnus)) and ka.konserniyhtio != '' ";
-      $konsernilisa = " and ka.tunnus is not null ";
-    }
+  if ($maarajaus != '') {
+    $lisa .= " and if(lasku.toim_maa != '', lasku.toim_maa, if(lasku.maa != '', lasku.maa, '$yhtiorow[maa]')) = '$maarajaus' ";
   }
 
-  $query = "SELECT CONCAT_WS(' ', tiliointi.tilino, tili.nimi) tili, tiliointi.tapvm, kustp.nimi kustp, kohde.nimi kohde, projekti.nimi projekti, CONCAT_WS(' ', selite, lasku.nimi) selite,
-            tiliointi.summa, tiliointi.vero, tiliointi.ltunnus, tiliointi.tilino xtilino, tiliointi.summa_valuutassa, tiliointi.valkoodi, tiliointi.tunnus rivitunnus,
-            kustp.koodi kustp_koodi, kohde.koodi kohde_koodi, projekti.koodi projekti_koodi, tili.alv_taso,
-            lasku.tapvm laskutapvm,
-            lasku.mapvm laskumapvm,
-            lasku.summa laskusumma,
+  $asiakasjoini = "";
+  $toimittajajoini = "";
+  $konsernilisa = "";
+
+  // Tarvitaanko asiakas joini
+  $_monivalinnasta = (strpos($lisa, "asiakas.") !== FALSE);
+  $_konsernivalinnasta = ($konsernirajaus == "A" or $konsernirajaus == "AT");
+
+  if ($_monivalinnasta or $_konsernivalinnasta) {
+    $asiakasjoini = "LEFT JOIN asiakas ON (lasku.yhtio = asiakas.yhtio
+    AND asiakas.tunnus = if(tiliointi.liitos = 'A', tiliointi.liitostunnus, lasku.liitostunnus))";
+  }
+
+  // Tarvitaanko toimittajajoini joini
+  $_konsernivalinnasta = ($konsernirajaus == "T" or $konsernirajaus == "AT");
+
+  if ($_konsernivalinnasta) {
+    $toimittajajoini = " LEFT JOIN toimi ON (toimi.yhtio = lasku.yhtio
+    AND toimi.tunnus = = if(tiliointi.liitos = 'T', tiliointi.liitostunnus, lasku.liitostunnus))";
+  }
+
+  if ($konsernirajaus == "AT") {
+    $konsernilisa = " and (asiakas.konserniyhtio != '' or toimi.konserniyhtio != '') ";
+  }
+  elseif ($konsernirajaus == "T") {
+    $konsernilisa = " and toimi.konserniyhtio != '' ";
+  }
+  elseif ($konsernirajaus == "A") {
+    $konsernilisa = " and asiakas.konserniyhtio != '' ";
+  }
+
+  $query = "SELECT concat_ws(' ', tiliointi.tilino, tili.nimi) AS tili,
+            tiliointi.tapvm,
+            kustp.nimi AS kustp,
+            kohde.nimi AS kohde,
+            projekti.nimi AS projekti,
+            concat_ws(' ', selite, lasku.nimi) AS selite,
+            tiliointi.summa,
+            tiliointi.vero,
+            tiliointi.ltunnus,
+            tiliointi.tilino AS xtilino,
+            tiliointi.summa_valuutassa,
+            tiliointi.valkoodi,
+            tiliointi.tunnus AS rivitunnus,
+            kustp.koodi AS kustp_koodi,
+            kohde.koodi AS kohde_koodi,
+            projekti.koodi AS projekti_koodi,
+            tili.alv_taso,
+            lasku.tapvm AS laskutapvm,
+            lasku.mapvm AS laskumapvm,
+            lasku.summa AS laskusumma,
             lasku.tila
             FROM tiliointi
-            LEFT JOIN tili ON tili.tilino = tiliointi.tilino and tili.yhtio = tiliointi.yhtio
-            LEFT JOIN lasku ON lasku.tunnus = tiliointi.ltunnus
-            LEFT JOIN kustannuspaikka kustp ON tiliointi.yhtio = kustp.yhtio and tiliointi.kustp = kustp.tunnus
-            LEFT JOIN kustannuspaikka kohde ON tiliointi.yhtio = kohde.yhtio and tiliointi.kohde = kohde.tunnus
-            LEFT JOIN kustannuspaikka projekti ON tiliointi.yhtio = projekti.yhtio and tiliointi.projekti = projekti.tunnus
+            LEFT JOIN tili ON (tili.tilino = tiliointi.tilino and tili.yhtio = tiliointi.yhtio)
+            LEFT JOIN lasku ON (lasku.tunnus = tiliointi.ltunnus)
+            LEFT JOIN kustannuspaikka kustp ON (tiliointi.yhtio = kustp.yhtio and tiliointi.kustp = kustp.tunnus)
+            LEFT JOIN kustannuspaikka kohde ON (tiliointi.yhtio = kohde.yhtio and tiliointi.kohde = kohde.tunnus)
+            LEFT JOIN kustannuspaikka projekti ON (tiliointi.yhtio = projekti.yhtio and tiliointi.projekti = projekti.tunnus)
             $asiakasjoini
-            $konsernijoini
-            WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
-            and tiliointi.korjattu = ''
+            $toimittajajoini
+            WHERE tiliointi.yhtio = '{$kukarow["yhtio"]}'
+            AND tiliointi.korjattu = ''
             $lisa1
             $lisa
+            $post_alv_lisa
             $konsernilisa
             ORDER BY $jarj";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
 
@@ -552,7 +650,6 @@ if ($tee != "") {
     }
 
     if (isset($worksheet)) {
-
       if ($tee == 'P') {
         $worksheet->write($excelrivi, 0, ucfirst(t("Pvm")), $format_bold);
         $worksheet->write($excelrivi, 1, ucfirst(t("Tili")), $format_bold);
@@ -581,17 +678,17 @@ if ($tee != "") {
 
     if (!isset($worksheet)) echo "</tr>";
 
-    $summaplus       = 0.0;
-    $summamiinus     = 0.0;
-    $summa         = 0.0;
-    $edtili        = "";
+    $summaplus = 0.0;
+    $summamiinus = 0.0;
+    $summa = 0.0;
+    $edtili = "";
     $summa_valuutassa = array();
 
     while ($trow = mysql_fetch_assoc($result)) {
 
       // exceliin jokaiselle riville....
       $tapvm_clean = $trow["tapvm"];
-      $tili_clean  = $trow["tili"];
+      $tili_clean = $trow["tili"];
 
       if (!isset($worksheet)) echo "<tr class='aktiivi'>";
 
@@ -624,13 +721,13 @@ if ($tee != "") {
       if (strlen(trim($tili)) > 0 and $edtili != $trow["xtilino"] and isset($tilikaudetrow)) {
         $query = "SELECT sum(summa) saldo
                   FROM tiliointi
-                  WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
+                  WHERE tiliointi.yhtio = '$kukarow[yhtio]'
                   and tiliointi.korjattu = ''
                   and tiliointi.tapvm    >= '$tilikaudetrow[tilikausi_alku]'
-                  and tiliointi.tilino   = '$trow[xtilino]'
+                  and tiliointi.tilino = '$trow[xtilino]'
                   $lisa2";
-        $alkres    = mysql_query($query) or pupe_error($query);
-        $alkurow  = mysql_fetch_array ($alkres);
+        $alkres = mysql_query($query) or pupe_error($query);
+        $alkurow = mysql_fetch_array ($alkres);
         $kumsumma = $alkurow["saldo"];
 
         // tilin alkusaldo

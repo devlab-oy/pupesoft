@@ -3,16 +3,16 @@
 //Ohjelma vatii muuttujan $otunnus joka viittaa ostolaskuun johon rivit on kohdistettu.
 // sekä $laskurow arrayn jossa on select tähti from lasku jossa tunnus on $otunnus
 
-require_once('pdflib/phppdflib.class.php');
+require_once 'pdflib/phppdflib.class.php';
 
-require_once('inc/pupeExcel.inc');
+require_once 'inc/pupeExcel.inc';
 
 // jos php-gd on installoitu niin loidataab barcode library
 if (in_array("gd", get_loaded_extensions())) {
-  if (@include_once("viivakoodi/Barcode.php")) {
+  if (@include_once "viivakoodi/Barcode.php") {
   }
   else {
-    include_once("Barcode.php");
+    include_once "Barcode.php";
   }
 }
 
@@ -21,7 +21,7 @@ if (!function_exists('alku_purku')) {
     global $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $kieli, $mista;
 
     if (empty($firstpage)) {
-      $firstpage = $pdf->new_page("842x595");
+    $firstpage = $pdf->new_page("842x595");
     }
 
     if ($kala == 0) $kala = 555;
@@ -54,7 +54,7 @@ if (!function_exists('alku_purku')) {
       if ($yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] != 'K') {
         $pdf->draw_text(280,  $kala-10, t("Tilaus", $kieli),        $firstpage, $pieni);
         $pdf->draw_text(280,  $kala-20, $laskurow["tunnus"],        $firstpage, $p);
-      }
+    }
     }
     else {
       $pdf->draw_text(280,  $kala-10, t("Saapumisnumero", $kieli),    $firstpage, $pieni);
@@ -76,7 +76,7 @@ if (!function_exists('alku_purku')) {
 
       if ($yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {
         $pdf->draw_text(30, $kala-42, t("Tilaus", $kieli),      $firstpage, $pieni);
-      }
+    }
     }
     else {
       $pdf->draw_text(30,  $kala-35, t("Toimittajan koodi /", $kieli),  $firstpage, $pieni);
@@ -123,12 +123,12 @@ if (!function_exists('alku_purku')) {
 
     $pdf->draw_rectangle($kala-25, 20, 20, 808, $firstpage, $rectparam);
 
-    return($firstpage);
+    return $firstpage;
   }
 }
 
 if (!function_exists('print_pdf_purku')) {
-  function print_pdf_purku () {
+  function print_pdf_purku() {
     global $pdf, $kukarow, $yhtiorow, $komento, $otunnus, $tee, $kieli, $mista;
 
     //keksitään uudelle failille joku varmasti uniikki nimi:
@@ -147,8 +147,11 @@ if (!function_exists('print_pdf_purku')) {
     if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF Error $pdffilenimi");
     fclose($fh);
 
-    //itse print komento tulee valitse_tulosin.inciltä...
-    if ($komento["Purkulista"] == 'email' or $komento["Vastaanotetut"] == 'email') {
+    if ($tee == 'NAYTATILAUS') {
+      //Työnnetään tuo pdf vaan putkeen!
+      echo file_get_contents($pdffilenimi);
+    }
+    elseif ($komento["Purkulista"] == 'email' or $komento["Vastaanotetut"] == 'email') {
       $liite = $pdffilenimi;
 
       if ($mista == "vastaanota") {
@@ -158,13 +161,13 @@ if (!function_exists('print_pdf_purku')) {
         $kutsu = t("Purkulista", $kieli);
       }
 
-      require("inc/sahkoposti.inc");
+      require "inc/sahkoposti.inc";
 
     }
     elseif ($tee == 'NAYTATILAUS') {
-        //Työnnetään tuo pdf vaan putkeen!
-        echo file_get_contents($pdffilenimi);
-      }
+      //Työnnetään tuo pdf vaan putkeen!
+      echo file_get_contents($pdffilenimi);
+    }
     elseif (($komento["Purkulista"] != '' and $komento["Purkulista"] != 'edi') or ($komento["Vastaanotetut"] != '' and $komento["Vastaanotetut"] != 'edi')) {
 
       if ($mista == "vastaanota") {
@@ -341,7 +344,7 @@ $tulostin_row = mysql_fetch_assoc($tulostin_result);
 if (!empty($tee_excel)) {
   $rows = array();
 
-  while($row = mysql_fetch_assoc($result)) {
+  while ($row = mysql_fetch_assoc($result)) {
     $rows[] = $row;
   }
 
@@ -408,7 +411,7 @@ if (!empty($tee_excel)) {
   }
 }
 
-if ($komento["Purkulista"] != '' or $komento["Vastaanotetut"] != '') {
+if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanotetut"] != '') {
 
   list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcvalintamenu);
 
@@ -484,8 +487,8 @@ if ($komento["Purkulista"] != '' or $komento["Vastaanotetut"] != '') {
       $out .= chr(10).chr(10).chr(13);
     }
 
-    # Rivinvaihto alkuun, jotta printit osuvat tarroille
-    # $out = chr(10).chr(13).$out;
+    // Rivinvaihto alkuun, jotta printit osuvat tarroille
+    // $out = chr(10).chr(13).$out;
 
     // Form Feedi kahdesti, jotta ei tarvitse rullata käsin
     $out .= chr(12).chr(12);
@@ -643,7 +646,7 @@ if ($komento["Purkulista"] != '' or $komento["Vastaanotetut"] != '') {
 
         if ($mista == "vastaanota" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {
           $pdf->draw_text(30, $kala-10, $row["otunnus"], $firstpage, $p);
-        }
+      }
       }
       else {
         $pdf->draw_text(30,  $kala, $row["toim_tuoteno"],  $firstpage, $b);
@@ -674,7 +677,7 @@ if ($komento["Purkulista"] != '' or $komento["Vastaanotetut"] != '') {
 
       $lisaa = 0;
 
-      if ($pohja < $kala){
+      if ($pohja < $kala) {
         $lisaa = $kala-$pohja;
       }
 
@@ -884,7 +887,7 @@ if ($komento["Purkulista"] != '' or $komento["Vastaanotetut"] != '') {
       if ($yhtiorow['viivakoodi_purkulistaan'] == 'K' and $mista != "vastaanota") {
         if (class_exists("Image_Barcode")) {
           //viivakoodi
-          $nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
+          $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
 
           imagejpeg(Image_Barcode::draw($row["tuoteno"], 'code128', 'jpg', false, 1, 20), $nimi, 90);
 
@@ -926,20 +929,20 @@ if ($komento["Purkulista"] != '' or $komento["Vastaanotetut"] != '') {
 
           $_row_height = $kala+25;
 
-              $params = explode("\n", $row["kommentti"]);
+          $params = explode("\n", $row["kommentti"]);
 
-              for ($i = 0; ($_row_height > $kala and count($params) > 0); $_row_height -= 10) {
+          for ($i = 0; ($_row_height > $kala and count($params) > 0); $_row_height -= 10) {
 
-                if ($_row_height == $kala+25 and strlen($params[$i]) > 44) {
-                  $_teksti = substr($params[$i], 0, 44);
-                  $pdf->draw_text(440, $_row_height, $_teksti, $firstpage, $pieni);
-                  $params[$i] = substr($params[$i], 45);
-                }
-                else {
-                  $pdf->draw_text(440, $_row_height, substr($params[$i], 0, 100), $firstpage, $pieni);
-                  array_shift($params);
-                }
-              }
+            if ($_row_height == $kala+25 and strlen($params[$i]) > 44) {
+              $_teksti = substr($params[$i], 0, 44);
+              $pdf->draw_text(440, $_row_height, $_teksti, $firstpage, $pieni);
+              $params[$i] = substr($params[$i], 45);
+            }
+            else {
+              $pdf->draw_text(440, $_row_height, substr($params[$i], 0, 100), $firstpage, $pieni);
+              array_shift($params);
+            }
+          }
         }
         else {
           $pohja = $pdf->draw_paragraph($kala+$p["height"]+5, 280, 5, 740, $row["kommentti"],  $firstpage, $p);
@@ -969,7 +972,7 @@ if ($komento["Purkulista"] != '' or $komento["Vastaanotetut"] != '') {
         $kala = 500;
       }
 
-      $sumarum = sprintf('%.2f',$sumarum);
+      $sumarum = sprintf('%.2f', $sumarum);
       $pdf->draw_text(520,  $kala, t("Yhteensä", $kieli),  $firstpage, $p);
       $pdf->draw_text(570,  $kala, $sumarum,  $firstpage, $p);
 

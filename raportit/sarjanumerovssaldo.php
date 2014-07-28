@@ -31,8 +31,8 @@ while ($row = mysql_fetch_array ($result)) {
             JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
             JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
               AND varastopaikat.tunnus = tuotepaikat.varasto)
-            WHERE tuote.yhtio = '$kukarow[yhtio]'
-            and tuote.tuoteno = '$row[tuoteno]'
+            WHERE tuote.yhtio          = '$kukarow[yhtio]'
+            and tuote.tuoteno          = '$row[tuoteno]'
             ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
   $sresult = mysql_query($query) or pupe_error($query);
 

@@ -360,7 +360,7 @@ if ($tee == 'LISTAATUNTEMATTOMAT') {
             FROM tuotepaikat USE INDEX (tuote_index)
             LEFT OUTER JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
               AND varastopaikat.tunnus = tuotepaikat.varasto)
-            WHERE tuotepaikat.yhtio = '{$kukarow["yhtio"]}'
+            WHERE tuotepaikat.yhtio    = '{$kukarow["yhtio"]}'
             AND varastopaikat.tunnus is null";
   $result = pupe_query($query);
 
@@ -534,10 +534,10 @@ if ($tee == 'LISTAA') {
                    lpad(upper(hyllytaso), 5, '0')) sorttauskentta
             FROM tuotepaikat
             LEFT JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio
-              and tuote.tuoteno     = tuotepaikat.tuoteno)
+              and tuote.tuoteno        = tuotepaikat.tuoteno)
             LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
               AND varastopaikat.tunnus = tuotepaikat.varasto)
-            WHERE tuotepaikat.yhtio = '{$kukarow["yhtio"]}'
+            WHERE tuotepaikat.yhtio    = '{$kukarow["yhtio"]}'
             $lisaa
             $lisaa2
             ORDER BY sorttauskentta, tuoteno";
@@ -647,12 +647,12 @@ if ($tee == "LISTAAVIRHEELLISETRIVIT") {
                            tilausrivi.hyllytaso) paikka
             FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
             INNER JOIN tuote on (tuote.yhtio = tilausrivi.yhtio
-              and tuote.tuoteno    = tilausrivi.tuoteno
-              and tuote.ei_saldoa  = '')
+              and tuote.tuoteno        = tilausrivi.tuoteno
+              and tuote.ei_saldoa      = '')
             LEFT OUTER JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
               AND varastopaikat.tunnus = tilausrivi.varasto)
-            WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-            AND tilausrivi.tyyppi  in ('L','G','V')
+            WHERE tilausrivi.yhtio     = '$kukarow[yhtio]'
+            AND tilausrivi.tyyppi      in ('L','G','V')
             AND tilausrivi.jt + tilausrivi.varattu != 0
             AND varastopaikat.tunnus is null
             ORDER BY tilausrivi.tuoteno";
@@ -717,12 +717,12 @@ if ($tee == "LISTAATAPAHTUMATILMANPAIKKAA") {
                            tapahtuma.hyllytaso) paikka
             FROM tapahtuma
             INNER JOIN tuote on (tuote.yhtio = tapahtuma.yhtio
-              AND tuote.tuoteno   = tapahtuma.tuoteno
-              AND tuote.ei_saldoa = '')
+              AND tuote.tuoteno        = tapahtuma.tuoteno
+              AND tuote.ei_saldoa      = '')
             LEFT OUTER JOIN varastopaikat ON (varastopaikat.yhtio = tapahtuma.yhtio
               AND varastopaikat.tunnus = tuotepaikat.varasto)
-            WHERE tapahtuma.yhtio = '{$kukarow["yhtio"]}'
-            AND tapahtuma.laji    not in ('epäkurantti')
+            WHERE tapahtuma.yhtio      = '{$kukarow["yhtio"]}'
+            AND tapahtuma.laji         not in ('epäkurantti')
             AND varastopaikat.tunnus IS NULL
             ORDER BY tapahtuma.laadittu";
   $tapahtumares = pupe_query($query);

@@ -107,9 +107,9 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
           if($komento=="OPTIMOI") {
             $query = "SELECT printteri2
                       FROM varastopaikat
-                      WHERE varastopaikat.yhtio = '$kukarow[yhtio]'
+                      WHERE varastopaikat.yhtio     = '$kukarow[yhtio]'
                       and varastopaikat.printteri2 != ''
-                      AND varastopaikat.tunnus = {$row["varasto"]}";
+                      AND varastopaikat.tunnus      = {$row["varasto"]}";
             $kirres = mysql_query($query) or pupe_error($query);
             $kirrow = mysql_fetch_array($kirres);
             $arvaakirjoitin[$kirrow["printteri2"]]++;

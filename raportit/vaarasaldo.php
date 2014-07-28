@@ -50,8 +50,8 @@ if ($tee != '') {
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
             {$aikalisa}
             {$varastolisa}
-            and tilausrivi.var not in ('P','J','O','S')
-            and tilausrivi.tilkpl <> tilausrivi.kpl
+            and tilausrivi.var     not in ('P','J','O','S')
+            and tilausrivi.tilkpl  <> tilausrivi.kpl
             ORDER BY sorttauskentta, tuoteno";
   $result = mysql_query($query) or pupe_error($query);
 

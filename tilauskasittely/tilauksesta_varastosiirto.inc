@@ -249,15 +249,7 @@ if (!function_exists('luo_varastosiirtorivi')) {
     $perheid          = $tilausrivi['perheid'];
     $orvoteikiinnosta = "EITOD";
     $toim             = "SIIRTOLISTA";
-
-    // Kirjanpidollisessa siirret‰‰n aina ne rivit jotka on tilauksella.
-    // Sama koskee reklaamaatiosta luotavaa siirtolistaa
-    if ($varastosiirtotyyppi == 'K' or $varastosiirtotyyppi == 'P') {
-      $var = 'H';
-    }
-    else {
-      $var = '';
-    }
+    $var              = 'H';
 
     //Laitetaan tuote oletusvaraston tuotepaikalle
     $tuotteen_oletuspaikka = hae_tuotteen_tuotepaikat($tilausrivi['tuoteno'], $tilausrivi['kohdevarasto_tunnus']);
@@ -278,19 +270,6 @@ if (!function_exists('luo_varastosiirtorivi')) {
     }
 
     require ('lisaarivi.inc');
-
-    $tuoteno    = '';
-    $kpl        = '';
-    $hinta      = '';
-    $alv        = 'X';
-    $var        = '';
-    $toimaika   = '';
-    $kerayspvm  = '';
-    $kommentti  = '';
-
-    for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-      ${'ale'.$alepostfix} = '';
-    }
 
     return $lisatyt_rivit1;
   }

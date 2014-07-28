@@ -245,8 +245,8 @@ if ($tee == "") {
               JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.uusiotunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D')
               JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio
                 AND varastopaikat.tunnus = tilausrivi.varasto)
-              WHERE lasku.yhtio = '$kukarow[yhtio]'
-              AND lasku.tunnus  = '$laskurow[tunnus]'
+              WHERE lasku.yhtio          = '$kukarow[yhtio]'
+              AND lasku.tunnus           = '$laskurow[tunnus]'
               GROUP BY varastopaikat.maa
               ORDER BY kpl DESC
               LIMIT 1";

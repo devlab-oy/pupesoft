@@ -162,17 +162,7 @@ $request['tyostatukset'] = hae_tyostatukset($request);
 
 echo "<div id='tyojono_wrapper'>";
 
-echo "<div id='message_box_success'>";
-echo '<font class="message">' . t('Päivitys onnistui') . '</font>';
-echo "<br/>";
-echo "<br/>";
-echo "</div>";
-
-echo "<div id='message_box_fail'>";
-echo '<font class="message">' . t('Päivitys epäonnistui') . '</font>';
-echo "<br/>";
-echo "<br/>";
-echo "</div>";
+tyolista_message_divit();
 
 if ($request['ala_tee'] == 'tyhjenna_hakuehdot') {
   tyhjenna_sessio();

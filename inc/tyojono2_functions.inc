@@ -874,3 +874,19 @@ function kasittele_laskutunnukset($lasku_tunnukset) {
 
   return $lasku_tunnukset_temp;
 }
+
+function tyolista_message_divit() {
+  global $kukarow, $yhtiorow;
+
+  echo "<div id='message_box_success'>";
+  echo '<font class="message">' . t('Päivitys onnistui') . '</font>';
+  echo "<br/>";
+  echo "<br/>";
+  echo "</div>";
+
+  echo "<div id='message_box_fail'>";
+  echo '<font class="message">' . t('Päivitys epäonnistui') . '</font>';
+  echo "<br/>";
+  echo "<br/>";
+  echo "</div>";
+}

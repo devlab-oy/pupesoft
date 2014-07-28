@@ -371,6 +371,7 @@ else {
 
     // haetaan kaikki tilaukset jotka on toimitettu ja kuuluu laskuttaa t‰n‰‰n (t‰t‰ resulttia k‰ytet‰‰n alhaalla lis‰‰)
     $lasklisa = "";
+    $lasklisa_eikateiset = "";
 
     // tarkistetaan t‰ss‰ tuleeko laskutusviikonp‰iv‰t ohittaa
     // ohitetaan jos ruksi on ruksattu tai poikkeava laskutusp‰iv‰m‰‰r‰ on syˆtetty
@@ -414,6 +415,11 @@ else {
       $lasklisa .= " and lasku.tunnus in ($laskutettavat) ";
     }
 
+    // Komentorivilt‰ ei ikin‰ laskuteta k‰teismyyntej‰ ($php_cli ei kelpaa, koska $editil_cli viritt‰‰ sen myˆs)
+    if (php_sapi_name() == 'cli') {
+      $lasklisa_eikateiset = " JOIN maksuehto ON (lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.kateinen='')";
+    }
+
     $tulos_ulos_maksusoppari = "";
     $tulos_ulos_sarjanumerot = "";
 
@@ -433,6 +439,7 @@ else {
                 round(min(tilausrivi.hinta / if ('{$yhtiorow["alv_kasittely"]}' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * {$query_ale_lisa}), $yhtiorow[hintapyoristys]) min_kplhinta,
                 group_concat(distinct lasku.tunnus) tunnukset
                 FROM lasku
+                {$lasklisa_eikateiset}
                 JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and tilausrivi.var not in ('P','J','O'))
                 JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
                 WHERE lasku.yhtio  = '$kukarow[yhtio]'
@@ -477,8 +484,9 @@ else {
     }
 
     //haetaan kaikki laskutettavat tilaukset ja tehd‰‰n maksuehtosplittaukset ja muita tarkistuksia jos niit‰ on
-    $query = "SELECT *
+    $query = "SELECT lasku.*
               FROM lasku
+              {$lasklisa_eikateiset}
               WHERE lasku.yhtio  = '$kukarow[yhtio]'
               and lasku.tila     = 'L'
               and lasku.alatila  = 'D'
@@ -872,13 +880,14 @@ else {
     }
 
     //haetaan kaikki laskutettavat tilaukset uudestaan, nyt meill‰ on maksuehtosplittaukset tehty
-    $query = "SELECT *
+    $query = "SELECT lasku.*
               FROM lasku
-              WHERE yhtio  = '$kukarow[yhtio]'
-              and tila     = 'L'
-              and alatila  = 'D'
-              and viite    = ''
-              and chn     != '999'
+              {$lasklisa_eikateiset}
+              WHERE lasku.yhtio  = '$kukarow[yhtio]'
+              and lasku.tila     = 'L'
+              and lasku.alatila  = 'D'
+              and lasku.viite    = ''
+              and lasku.chn     != '999'
               $lasklisa";
     $res = pupe_query($query);
 

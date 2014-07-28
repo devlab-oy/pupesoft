@@ -66,6 +66,16 @@ if (!isset($tyomaarays_kpl)) {
 if (!isset($poistetut_tilaukset)) {
   $poistetut_tilaukset = '';
 }
+if (!isset($action)) {
+  $action = '';
+}
+if (!isset($tmpfilenimi)) {
+  $tmpfilenimi = '';
+}
+if (!isset($suunta)) {
+  $suunta = '';
+}
+
 
 if ($tee == 'lataa_tiedosto') {
   $filepath = "/tmp/" . $tmpfilenimi;

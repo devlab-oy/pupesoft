@@ -214,6 +214,14 @@ if (!function_exists("tee_jt_tilaus")) {
           $kohdistettulisa .= " and lasku.rahtivapaa = '{$otsikkorivi['rahtivapaa']}'";
         }
 
+        // Huomioidaanko asiakkaan_tilausnumero
+        if ($yhtiorow['jt_asiakkaan_tilausnumero'] == "K") {
+          $atlisa = " and lasku.asiakkaan_tilausnumero = '$otsikkorivi[asiakkaan_tilausnumero]' ";
+        }
+        else {
+          $atlisa = "";
+        }
+
         // Tarvitsemmeko uuden otsikon?
         $query = "SELECT lasku.*
                   FROM lasku
@@ -256,6 +264,7 @@ if (!function_exists("tee_jt_tilaus")) {
                   and laskun_lisatiedot.laskutus_maa      = '$lisatiedot_row[laskutus_maa]'
                   {$kohdistettulisa}
                   $erpcmlisa1
+                  {$atlisa}
                   $yhdlisa";
         $stresult = pupe_query($query);
       }
@@ -405,7 +414,11 @@ if (!function_exists("tee_jt_tilaus")) {
               $fieldname == 'kohde' or
               $fieldname == 'viesti') {
 
-            if ($toim == "ENNAKKO" or $otsikkorivi['jtkielto'] == "Y") {
+            // Ei nollata asiakkaan tilausnumeroa, jos se pit‰‰ huomioida otsikon etsinn‰ss‰
+            $_asiakkaan_tilno = ($fieldname == 'asiakkaan_tilausnumero');
+            $_asiakkaan_tilno &= ($yhtiorow['jt_asiakkaan_tilausnumero'] == "K");
+
+            if ($toim == "ENNAKKO" or $otsikkorivi['jtkielto'] == "Y" or $_asiakkaan_tilno) {
               $query .= $fieldname."='".$otsikkorivi[$fieldname]."',";
             }
             else {
@@ -681,8 +694,8 @@ if (!function_exists("tee_jt_tilaus")) {
             if ($lisataanrow["vanha_otunnus"] > 0) {
               $query = "SELECT tunnus, asiakkaan_tilausnumero, viesti, tilausyhteyshenkilo, sisviesti1, kohde
                         FROM lasku
-                        WHERE tunnus = '{$lisataanrow["vanha_otunnus"]}'
-                        AND tila    != 'T'";
+                        WHERE tunnus  = '{$lisataanrow["vanha_otunnus"]}'
+                        AND tila     != 'T'";
               $aresult = pupe_query($query);
 
               if (mysql_num_rows($aresult) > 0) {
@@ -833,6 +846,19 @@ if (!function_exists("tee_jt_tilaus")) {
               $hinta = laskuval($hinta, $isarivirow["vienti_kurssi"]);
             }
 
+            if ($yhtiorow['kerayserat'] == 'K' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
+              $siirtolista_query = "SELECT tt.tunnus AS tunnus
+                                    FROM tilausrivin_lisatiedot AS tt
+                                    JOIN tilausrivi AS t
+                                    ON (t.yhtio = tt.yhtio
+                                      AND t.tunnus          = tt.tilausrivitunnus
+                                      AND t.tyyppi          = 'G' )
+                                    WHERE tt.yhtio          = '{$kukarow['yhtio']}'
+                                    AND tt.tilausrivilinkki = {$tunnus_nyt}";
+              $siirtolista_result = pupe_query($siirtolista_query);
+              $siirtolista_row = mysql_fetch_assoc($siirtolista_result);
+            }
+
             require("lisaarivi.inc");
 
             $kpl = $talteen_kpl; // lis‰‰rivi rikko t‰n, otetaan haltuun
@@ -848,6 +874,14 @@ if (!function_exists("tee_jt_tilaus")) {
                 //Pidet‰‰n muistissa lis‰tyt kappaleet
                 if (isset($luodut_kpl[$tunnus_nyt])) $luodut_kpl[$tunnus_nyt] += $lisataanrow_kpl;
                 else $luodut_kpl[$tunnus_nyt] = $lisataanrow_kpl;
+
+                if (!empty($siirtolista_row)) {
+                  $query = "UPDATE tilausrivin_lisatiedot
+                            SET tilausrivilinkki = {$lisatty_tun}
+                            WHERE yhtio = '{$kukarow['yhtio']}'
+                            AND tunnus  = {$siirtolista_row['tunnus']}";
+                  pupe_query($query);
+                }
               }
             }
 
@@ -903,9 +937,10 @@ if (!function_exists("tee_jt_tilaus")) {
 
                   $query = "UPDATE sarjanumeroseuranta
                             SET myyntirivitunnus = '$lisrow[tunnus]'
-                            WHERE sarjanumeroseuranta.yhtio          = '$kukarow[yhtio]'
-                            and sarjanumeroseuranta.tuoteno          = '$lisataanrow[tuoteno]'
-                            and sarjanumeroseuranta.myyntirivitunnus = '$lisataanrow[tunnus]'
+                            WHERE yhtio          = '$kukarow[yhtio]'
+                            and tuoteno          = '$lisataanrow[tuoteno]'
+                            and myyntirivitunnus = '$lisataanrow[tunnus]'
+                            ORDER BY tunnus
                             LIMIT $lisrow[varattu]";
                   $cores = pupe_query($query);
                 }
@@ -1036,8 +1071,11 @@ if (!function_exists("tee_jt_tilaus")) {
                   }
                 }
 
+                $uusi_kommentti = t("Toimitettu tilauksella").": " . $kukarow['kesken'];
+
                 $query = "UPDATE tilausrivi SET
-                          tyyppi      = 'D'
+                          tyyppi      = 'D',
+                          kommentti   = IF(kommentti = '', '$uusi_kommentti', CONCAT(kommentti, ' / ', '$uusi_kommentti'))
                           $poista_update_lisa
                           WHERE yhtio = '$kukarow[yhtio]'
                           and tunnus  = '$tunnus_nyt'
@@ -1109,6 +1147,7 @@ if (!function_exists("tee_jt_tilaus")) {
                       WHERE yhtio  = '$kukarow[yhtio]'
                       and otunnus  = '$id'
                       and perheid != 0
+                      and tyyppi != 'D'
                       GROUP by perheid";
             $copresult = pupe_query($query);
 
@@ -1127,6 +1166,7 @@ if (!function_exists("tee_jt_tilaus")) {
                       WHERE yhtio   = '$kukarow[yhtio]'
                       and otunnus   = '$id'
                       and perheid2 != 0
+                      and tyyppi != 'D'
                       GROUP by perheid2";
             $copresult = pupe_query($query);
 

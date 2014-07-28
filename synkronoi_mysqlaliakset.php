@@ -17,6 +17,17 @@ if ($tee == "TEE" or strpos($_SERVER['SCRIPT_NAME'], "iltasiivo.php") !== FALSE)
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
   curl_setopt($ch, CURLOPT_HEADER, FALSE);
   $aliakset = curl_exec($ch);
+
+  // Katsotaan onko meillä UTF-8 merkistö Pupesoftissa käytössä
+  $tervetuloa = file_get_contents("tervetuloa.php");
+  $utf8_enabled = (mb_detect_encoding($tervetuloa, 'UTF-8', true) !== false);
+
+  // Käännetään aliakset UTF-8 muotoon, jos Pupe on UTF-8:ssa
+  if ($utf8_enabled) {
+    // Funktionimen ja kaarisulun välissä on tarkotuksella space, että UTF8 konversio ei osu tähän
+    $aliakset = utf8_encode ($aliakset);
+  }
+
   $aliakset = explode("\n", trim($aliakset));
 
   $taulut = array();
@@ -33,8 +44,6 @@ if ($tee == "TEE" or strpos($_SERVER['SCRIPT_NAME'], "iltasiivo.php") !== FALSE)
     $taulut[] = $taulu."###".$selitetark_2;
     $rivit[]  = $rivi;
   }
-
-  fclose($file);
 
   $taulut = array_unique($taulut);
 
@@ -53,7 +62,7 @@ if ($tee == "TEE" or strpos($_SERVER['SCRIPT_NAME'], "iltasiivo.php") !== FALSE)
 
     if (mysql_num_rows($sanakirjaresult) > 0) {
       $sanakirjaquery  = "UPDATE avainsana SET
-                          selitetark = '$selitetark'
+                          selitetark       = '$selitetark'
                           WHERE yhtio      = '$kukarow[yhtio]'
                           and laji         = 'MYSQLALIAS'
                           and selite       = '$selite'
@@ -83,9 +92,13 @@ if ($tee == "TEE" or strpos($_SERVER['SCRIPT_NAME'], "iltasiivo.php") !== FALSE)
     }
   }
 
-  if ($tee == "TEE") echo "</table><br>";
-
-  echo "<br>".t("Mysqlaliakset synkronoitu onnistuneesti")."!<br>";
+  if ($tee == "TEE") {
+    echo "</table><br>";
+    echo "<br>".t("Mysqlaliakset synkronoitu onnistuneesti")."!<br>";
+  }
+  else {
+    $iltasiivo .= is_log("Mysqlaliakset synkronoitu onnistuneesti.");
+  }
 }
 
 if (strpos($_SERVER['SCRIPT_NAME'], "synkronoi_mysqlaliakset.php") !== FALSE) {

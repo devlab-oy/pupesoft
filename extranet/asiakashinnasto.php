@@ -159,29 +159,19 @@ else {
     echo "<br><br><font class='message'>".t("Asiakashinnastoa luodaan...")."</font><br>";
     flush();
 
-    require_once ('inc/ProgressBar.class.php');
+   require_once ('inc/ProgressBar.class.php');
     $bar = new ProgressBar();
     $elements = mysql_num_rows($rresult); // total number of elements to process
     $bar->initialize($elements); // print the empty bar
 
-    if (include('Spreadsheet/Excel/Writer.php')) {
+    include('inc/pupeExcel.inc'); 
 
-      //keksitään failille joku varmasti uniikki nimi:
-      list($usec, $sec) = explode(' ', microtime());
-      mt_srand((float) $sec + ((float) $usec * 100000));
-      $excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+    $worksheet 	 = new pupeExcel();
+    $format_bold = array("bold" => TRUE);
+    $excelrivi 	 = 0;
 
-      $workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-      $workbook->setVersion(8);
-      $worksheet = $workbook->addWorksheet('Sheet 1');
 
-      $format_bold = $workbook->addFormat();
-      $format_bold->setBold();
-
-      $excelrivi = 0;
-    }
-
-    if (isset($workbook)) {
+    if (isset($worksheet)) {
       $worksheet->writeString($excelrivi,  0, t("Ytunnus", $hinkieli).": $ytunnus", $format_bold);
       $excelrivi++;
 
@@ -193,17 +183,19 @@ else {
       $worksheet->writeString($excelrivi,  2, t("Osasto", $hinkieli), $format_bold);
       $worksheet->writeString($excelrivi,  3, t("Tuoteryhmä", $hinkieli), $format_bold);
       $worksheet->writeString($excelrivi,  4, t("Nimitys", $hinkieli), $format_bold);
-      $worksheet->writeString($excelrivi,  5, t("Yksikkö", $hinkieli), $format_bold);
-      $worksheet->writeString($excelrivi,  6, t("Aleryhmä", $hinkieli), $format_bold);
-      $worksheet->writeString($excelrivi,  7, t("Veroton Myyntihinta", $hinkieli), $format_bold);
-      $worksheet->writeString($excelrivi,  8, t("Verollinen Myyntihinta", $hinkieli), $format_bold);
+      $worksheet->writeString($excelrivi,  5, t("Myyntierä", $hinkieli), $format_bold);
+      $worksheet->writeString($excelrivi,  6, t("Yksikkö", $hinkieli), $format_bold);
+      $worksheet->writeString($excelrivi,  7, t("Status", $hinkieli), $format_bold);
+      $worksheet->writeString($excelrivi,  8, t("Aleryhmä", $hinkieli), $format_bold);
+      $worksheet->writeString($excelrivi,  9, t("Veroton Myyntihinta", $hinkieli), $format_bold);
+      $worksheet->writeString($excelrivi, 10, t("Verollinen Myyntihinta", $hinkieli), $format_bold);
 
       for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-        $worksheet->writeString($excelrivi,  9, t("Alennus{$alepostfix}", $hinkieli), $format_bold);
+        $worksheet->writeString($excelrivi, 11, t("Alennus{$alepostfix}", $hinkieli), $format_bold);
       }
 
-      $worksheet->writeString($excelrivi, 10, t("Sinun veroton hinta", $hinkieli), $format_bold);
-      $worksheet->writeString($excelrivi, 11, t("Sinun verollinen hinta", $hinkieli), $format_bold);
+      $worksheet->writeString($excelrivi, 12, t("Sinun veroton hinta", $hinkieli), $format_bold);
+      $worksheet->writeString($excelrivi, 13, t("Sinun verollinen hinta", $hinkieli), $format_bold);
       $excelrivi++;
     }
 
@@ -310,42 +302,44 @@ else {
         $asiakashinta_verollinen = round(($asiakashinta*(1+$lis_alv/100)), 2);
       }
 
-      if (isset($workbook)) {
+      if (isset($worksheet)) {
         $worksheet->writeString($excelrivi, 0, $rrow["tuoteno"]);
         $worksheet->writeString($excelrivi, 1, $rrow["eankoodi"]);
         $worksheet->writeString($excelrivi, 2, $rrow["osasto"]);
         $worksheet->writeString($excelrivi, 3, $rrow["try"]);
         $worksheet->writeString($excelrivi, 4, t_tuotteen_avainsanat($rrow, 'nimitys', $hinkieli));
-        $worksheet->writeString($excelrivi, 5, t_avainsana("Y", $hinkieli, "and avainsana.selite='$rrow[yksikko]'", "", "", "selite"));
-        $worksheet->writeString($excelrivi, 6, $rrow["aleryhma"]);
-        $worksheet->writeNumber($excelrivi, 7, $veroton);
-        $worksheet->writeNumber($excelrivi, 8, $verollinen);
+        $worksheet->writeString($excelrivi, 5, $rrow["myynti_era"]);
+        $worksheet->writeString($excelrivi, 6, t_avainsana("Y", $hinkieli, "and avainsana.selite='$rrow[yksikko]'", "", "", "selite"));
+        $worksheet->writeString($excelrivi, 7, $rrow["status"]);
+        $worksheet->writeString($excelrivi, 8, $rrow["aleryhma"]);
+        $worksheet->writeNumber($excelrivi, 9, $veroton);
+        $worksheet->writeNumber($excelrivi, 10, $verollinen);
 
         for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
           if ($netto != "") {
-            $worksheet->writeString($excelrivi, 9, t("Netto", $hinkieli));
+            $worksheet->writeString($excelrivi, 11, t("Netto", $hinkieli));
           }
           else {
-            $worksheet->writeNumber($excelrivi, 9, sprintf('%.2f',${'ale'.$alepostfix}));
+            $worksheet->writeNumber($excelrivi, 11, sprintf('%.2f',${'ale'.$alepostfix}));
           }
         }
 
-        $worksheet->writeNumber($excelrivi, 10, hintapyoristys($asiakashinta_veroton));
-        $worksheet->writeNumber($excelrivi, 11, hintapyoristys($asiakashinta_verollinen));
+        $worksheet->writeNumber($excelrivi, 12, hintapyoristys($asiakashinta_veroton));
+        $worksheet->writeNumber($excelrivi, 13, hintapyoristys($asiakashinta_verollinen));
         $excelrivi++;
       }
     }
 
-    if (isset($workbook)) {
+    if (isset($worksheet)) {
 
-      // We need to explicitly close the workbook
-      $workbook->close();
+
+      $excelnimi = $worksheet->close();
 
       echo "<br><br><table>";
       echo "<tr><th>".t("Tallenna hinnasto").":</th>";
       echo "<form method='post' class='multisubmit'>";
       echo "<input type='hidden' name='tee_lataa' value='lataa_tiedosto'>";
-      echo "<input type='hidden' name='kaunisnimi' value='".t("Asiakashinnasto").".xls'>";
+      echo "<input type='hidden' name='kaunisnimi' value='".t("Asiakashinnasto").".xlsx'>";
       echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
       echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
       echo "</table><br>";

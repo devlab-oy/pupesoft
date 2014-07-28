@@ -113,25 +113,34 @@
 
     this.bind_merkkaa_tehdyksi = function() {
       $('.merkkaa_tehdyksi').on('click', function() {
-        var $tr = $(this).parent().parent();
-        $tr.find('input[name="ala_tee"]').val('merkkaa_tehdyksi');
-        $tr.find('.tyomaarayshallinta').submit();
+        var ok = tarkista();
+        if (ok) {
+          var $tr = $(this).parent().parent();
+          $tr.find('input[name="ala_tee"]').val('merkkaa_tehdyksi');
+          $tr.find('.tyomaarayshallinta').submit();
+        }
       });
     };
 
     this.bind_muuta_paivamaaraa = function() {
       $('.muuta').on('click', function() {
-        var $tr = $(this).parent().parent();
-        $tr.find('input[name="ala_tee"]').val('muuta');
-        $tr.find('.tyomaarayshallinta').submit();
+        var ok = tarkista();
+        if (ok) {
+          var $tr = $(this).parent().parent();
+          $tr.find('input[name="ala_tee"]').val('muuta');
+          $tr.find('.tyomaarayshallinta').submit();
+        }
       });
     };
 
     this.bind_poista = function() {
       $('.poista').on('click', function() {
-        var $tr = $(this).parent().parent();
-        $tr.find('input[name="ala_tee"]').val('poista');
-        $tr.find('.tyomaarayshallinta').submit();
+        var ok = tarkista();
+        if (ok) {
+          var $tr = $(this).parent().parent();
+          $tr.find('input[name="ala_tee"]').val('poista');
+          $tr.find('.tyomaarayshallinta').submit();
+        }
       });
     };
 
@@ -151,6 +160,10 @@
           console.log(data);
         }
       });
+    };
+
+    var tarkista = function() {
+      return confirm($('#oletko_varma').val());
     };
 
     this.bind_all_events = function() {

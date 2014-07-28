@@ -95,6 +95,7 @@ echo "<font class='head'>" . t("Laitehuoltojen työjono") . ":</font>";
 echo "<hr/>";
 echo "<br/>";
 echo "<input type='hidden' id='paiva_ei_validi' value='<font class=\"error\">" . t('Päivämäärä väärin') . "</font>' />";
+echo "<input type='hidden' id='oletko_varma' value='" . t('Oletko varma') . "?' />";
 $js = hae_tyojono2_js();
 $css = hae_tyojono2_css();
 

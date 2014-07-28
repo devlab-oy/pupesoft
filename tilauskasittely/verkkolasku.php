@@ -55,52 +55,52 @@ if ($php_cli) {
   // Pupeasennuksen root
   $pupe_root_polku = dirname(dirname(__FILE__));
 
-    $laskkk   = "";
-    $laskpp   = "";
-    $laskvv   = "";
-    $eilinen  = "";
-    $eiketjut = "";
+  $laskkk   = "";
+  $laskpp   = "";
+  $laskvv   = "";
+  $eilinen  = "";
+  $eiketjut = "";
 
-    // jos komentorivin kolmas arg on "eilinen" niin edelliselle laskutus p‰iv‰lle, ohitetaan laskutusviikonp‰iv‰t
+  // jos komentorivin kolmas arg on "eilinen" niin edelliselle laskutus p‰iv‰lle, ohitetaan laskutusviikonp‰iv‰t
   if ($argv[3] == "eilinen") {
-      $laskkk  = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-      $laskpp  = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-      $laskvv  = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-    }
-
-    // jos komentorivin kolmas arg on "eilinen" niin edelliselle laskutus p‰iv‰lle
-  if ($argv[3] == "eilinen_eikaikki") {
-      $laskkk  = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-      $laskpp  = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-      $laskvv  = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-      $eilinen = "eilinen_eikaikki";
-    }
-
-    // jos komentorivin kolmas arg on "eiketjut"
-  if ($argv[3] == "eiketjut") {
-      $eiketjut = "KYLLA";
-    }
-
-    // jos komentorivin kolmas arg on "kaikki"
-  if ($argv[3] == "kaikki") {
-      $laskutakaikki = "ON";
-    }
-
-    // jos kuukausilaskutus on p‰‰ll‰ (cron.monthly), niin ei v‰ltt‰m‰tt‰ haluta ajaa p‰iv‰laskutusta
-    // kukauden vikana p‰iv‰n‰, koska silloin asiakkaalle saattaa menn‰ kaksi laskua vikana p‰iv‰n‰ jos
-    // laskutusviikonp‰iv‰t osuu sillai kivasti
-  if ($argv[3] == "skippaa_kuukauden_vikapaiva" and date("d") == date("t")) {
-      echo "HUOM: P‰iv‰laskutusta ei ajeta kuukauden vikana p‰iv‰n‰!<br>\n";
-      exit;
-    }
-
-    $tee = "TARKISTA";
+    $laskkk  = date("m", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+    $laskpp  = date("d", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+    $laskvv  = date("Y", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
   }
+
+  // jos komentorivin kolmas arg on "eilinen" niin edelliselle laskutus p‰iv‰lle
+  if ($argv[3] == "eilinen_eikaikki") {
+    $laskkk  = date("m", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+    $laskpp  = date("d", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+    $laskvv  = date("Y", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+    $eilinen = "eilinen_eikaikki";
+  }
+
+  // jos komentorivin kolmas arg on "eiketjut"
+  if ($argv[3] == "eiketjut") {
+    $eiketjut = "KYLLA";
+  }
+
+  // jos komentorivin kolmas arg on "kaikki"
+  if ($argv[3] == "kaikki") {
+    $laskutakaikki = "ON";
+  }
+
+  // jos kuukausilaskutus on p‰‰ll‰ (cron.monthly), niin ei v‰ltt‰m‰tt‰ haluta ajaa p‰iv‰laskutusta
+  // kukauden vikana p‰iv‰n‰, koska silloin asiakkaalle saattaa menn‰ kaksi laskua vikana p‰iv‰n‰ jos
+  // laskutusviikonp‰iv‰t osuu sillai kivasti
+  if ($argv[3] == "skippaa_kuukauden_vikapaiva" and date("d") == date("t")) {
+    echo "HUOM: P‰iv‰laskutusta ei ajeta kuukauden vikana p‰iv‰n‰!<br>\n";
+    exit;
+  }
+
+  $tee = "TARKISTA";
+}
 elseif (strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE) {
 
   if (isset($_POST["tee"])) {
-    if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
-    if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+    if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
+    if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
   }
 
   require "../inc/parametrit.inc";
@@ -155,12 +155,12 @@ else {
       if (checkdate($laskkk, $laskpp, $laskvv)) {
 
         //vertaillaan tilikauteen
-        list($vv1,$kk1,$pp1) = explode("-",$yhtiorow["myyntireskontrakausi_alku"]);
-        list($vv2,$kk2,$pp2) = explode("-",$yhtiorow["myyntireskontrakausi_loppu"]);
+        list($vv1, $kk1, $pp1) = explode("-", $yhtiorow["myyntireskontrakausi_alku"]);
+        list($vv2, $kk2, $pp2) = explode("-", $yhtiorow["myyntireskontrakausi_loppu"]);
 
-        $tilialku  = (int) date('Ymd',mktime(0,0,0,$kk1,$pp1,$vv1));
-        $tililoppu = (int) date('Ymd',mktime(0,0,0,$kk2,$pp2,$vv2));
-        $syotetty  = (int) date('Ymd',mktime(0,0,0,$laskkk,$laskpp,$laskvv));
+        $tilialku  = (int) date('Ymd', mktime(0, 0, 0, $kk1, $pp1, $vv1));
+        $tililoppu = (int) date('Ymd', mktime(0, 0, 0, $kk2, $pp2, $vv2));
+        $syotetty  = (int) date('Ymd', mktime(0, 0, 0, $laskkk, $laskpp, $laskvv));
         $tanaan    = (int) date('Ymd');
 
         if ($syotetty < $tilialku or $syotetty > $tililoppu) {
@@ -203,14 +203,14 @@ else {
     if (!function_exists("vlas_dateconv")) {
       function vlas_dateconv($date) {
         //k‰‰nt‰‰ mysqln vvvv-kk-mm muodon muotoon vvvvkkmm
-        return substr($date,0,4).substr($date,5,2).substr($date,8,2);
+        return substr($date, 0, 4).substr($date, 5, 2).substr($date, 8, 2);
       }
     }
 
     //tehd‰‰n viitteest‰ SPY standardia eli 20 merkki‰ etunollilla
     if (!function_exists("spyconv")) {
       function spyconv($spy) {
-        return $spy = sprintf("%020.020s",$spy);
+        return $spy = sprintf("%020.020s", $spy);
       }
     }
 
@@ -248,7 +248,7 @@ else {
 
     //pilkut pisteiksi
     if (!function_exists("pp")) {
-      function pp ($muuttuja, $round="", $rmax="", $rmin="") {
+      function pp($muuttuja, $round="", $rmax="", $rmin="") {
 
         if (strlen($round)>0) {
           if (strlen($rmax)>0 and $rmax<$round) {
@@ -261,29 +261,29 @@ else {
           return $muuttuja = number_format($muuttuja, $round, ",", "");
         }
         else {
-          return $muuttuja = str_replace(".",",", $muuttuja);
+          return $muuttuja = str_replace(".", ",", $muuttuja);
         }
       }
     }
 
     //Tiedostojen polut ja nimet
     //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
-    $nimixml = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".xml";
+    $nimixml = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true)).".xml";
 
     //  Itellan iPost vaatii siirtoon v‰h‰n oman nimen..
     if ($yhtiorow["verkkolasku_lah"] == "iPost") {
-      $nimifinvoice = "$pupe_root_polku/dataout/TRANSFER_IPOST-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
+      $nimifinvoice = "$pupe_root_polku/dataout/TRANSFER_IPOST-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true))."_finvoice.xml";
     }
     elseif ($yhtiorow["verkkolasku_lah"] == "apix") {
-      $nimifinvoice = "/tmp/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
+      $nimifinvoice = "/tmp/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true))."_finvoice.xml";
     }
     else {
-      $nimifinvoice = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
+      $nimifinvoice = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true))."_finvoice.xml";
     }
 
-    $nimisisainenfinvoice = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_sisainenfinvoice.xml";
+    $nimisisainenfinvoice = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true))."_sisainenfinvoice.xml";
 
-    $nimiedi = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".edi";
+    $nimiedi = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true)).".edi";
 
     //Pupevoice xml-dataa
     if (!$tootxml = fopen($nimixml, "w")) die("Filen $nimixml luonti ep‰onnistui!");
@@ -386,7 +386,7 @@ else {
 
       // Mik‰ viikonp‰iv‰ t‰n‰‰n on 1-7.. 1=sunnuntai, 2=maanantai, jne...
       if (isset($eilinen) and $eilinen == "eilinen_eikaikki") {
-        $today = date("w", mktime(0,0,0,$laskkk,$laskpp,$laskvv)) +1;
+        $today = date("w", mktime(0, 0, 0, $laskkk, $laskpp, $laskvv)) +1;
         $vkopva_curdate = "'$laskvv-$laskkk-$laskpp'";
       }
       else {
@@ -829,7 +829,7 @@ else {
                         AND kaytettypvm       = '0000-00-00'
                         AND kaytettytilausnro = 0";
               $pantti_chk_res = pupe_query($query);
-                            $pantti_chk_row = mysql_fetch_assoc($pantti_chk_res);
+              $pantti_chk_row = mysql_fetch_assoc($pantti_chk_res);
 
               if ($vanhatunnus_chk_row['kpl'] != $pantti_chk_row['kpl']) {
                 $lasklisa .= " and lasku.tunnus != '{$laskurow['tunnus']}' ";
@@ -900,7 +900,7 @@ else {
       }
 
       // vika pilkku pois
-      $tunnukset = substr($tunnukset,0,-1);
+      $tunnukset = substr($tunnukset, 0, -1);
 
       if ($yhtiorow["koontilaskut_yhdistetaan"] == 'T' or $yhtiorow['koontilaskut_yhdistetaan'] == 'V') {
         $ketjutus_group = ", lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa ";
@@ -1241,7 +1241,7 @@ else {
           }
 
           if (count($lisakulu_maksuehto) > 0) {
-            $maksuehtolisa = " and lasku.maksuehto not in (".implode(',',$lisakulu_maksuehto).") ";
+            $maksuehtolisa = " and lasku.maksuehto not in (".implode(',', $lisakulu_maksuehto).") ";
           }
         }
 
@@ -1262,7 +1262,7 @@ else {
           }
 
           if (count($lisakulu_toimitustapa) > 0) {
-            $toimitustapalisa = " and lasku.toimitustapa not in (".implode(',',$lisakulu_toimitustapa).") ";
+            $toimitustapalisa = " and lasku.toimitustapa not in (".implode(',', $lisakulu_toimitustapa).") ";
           }
         }
 
@@ -1472,7 +1472,7 @@ else {
           }
 
           if (count($kateiset) > 0) {
-            $kateislisa = " and lasku.maksuehto not in (".implode(',',$kateiset).") ";
+            $kateislisa = " and lasku.maksuehto not in (".implode(',', $kateiset).") ";
           }
         }
 
@@ -1705,7 +1705,7 @@ else {
       // laskutetaan kaikki tilaukset (siis teh‰‰n kaikki tarvittava matikka)
       // rullataan eka query alkuun
       if (mysql_num_rows($res) != 0) {
-        mysql_data_seek($res,0);
+        mysql_data_seek($res, 0);
       }
 
       $laskutetttu = 0;
@@ -2082,7 +2082,7 @@ else {
               $lasrow['chn'] = "010";
             }
 
-             if ($lasrow['arvo'] >= 0) {
+            if ($lasrow['arvo'] >= 0) {
               //Veloituslasku
               $tyyppi='380';
             }
@@ -2126,7 +2126,7 @@ else {
             }
 
             if (trim($komm) != '') {
-              $lasrow['sisviesti1'] = str_replace(array("\r\n","\r","\n"),"|", trim($komm));
+              $lasrow['sisviesti1'] = str_replace(array("\r\n", "\r", "\n"), "|", trim($komm));
             }
 
             // Hoidetaan pyˆristys sek‰ valuuttak‰sittely
@@ -2138,7 +2138,7 @@ else {
             }
 
             // Ulkomaisen ytunnuksen korjaus
-            if (substr(trim(strtoupper($lasrow["ytunnus"])),0,2) != strtoupper($lasrow["maa"]) and trim(strtoupper($lasrow["maa"])) != trim(strtoupper($yhtiorow["maa"]))) {
+            if (substr(trim(strtoupper($lasrow["ytunnus"])), 0, 2) != strtoupper($lasrow["maa"]) and trim(strtoupper($lasrow["maa"])) != trim(strtoupper($yhtiorow["maa"]))) {
               $lasrow["ytunnus"] = strtoupper($lasrow["maa"])."-".$lasrow["ytunnus"];
             }
 
@@ -2416,7 +2416,7 @@ else {
               }
 
               // Laitetaan alennukset kommenttiin, koska laskulla on vain yksi alekentt‰
-              if ($yhtiorow['myynnin_alekentat'] > 1 or $tilrow['erikoisale'] > 0)  {
+              if ($yhtiorow['myynnin_alekentat'] > 1 or $tilrow['erikoisale'] > 0) {
 
                 $alekomm = "";
 

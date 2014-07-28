@@ -539,7 +539,7 @@ function echo_tyomaaraykset_table($request = array()) {
 
   if (empty($request['tyomaaraykset'])) {
     echo "<tr>";
-    echo "<td colspan = '6' align='center'>" . t('Ei työmääräyksiä') . "</td>";
+    echo "<td colspan='6' align='center'>" . t('Ei työmääräyksiä') . "</td>";
     echo "</tr>";
   }
 
@@ -553,7 +553,14 @@ function echo_tyomaarays_rivi($request, $laitteet) {
   $today = date('d.m.Y');
   $lopetus = "{$palvelin2}tyomaarays/tyojono2.php////tee=hae//asiakas_tunnus={$request['asiakas_tunnus']}//kohde_tunnus={$request['kohde_tunnus']}//tyojono={$request['tyojono']}//tyostatus={$request['tyostatus']}//toimitusaika={$request['toimitusaika']}";
 
-  echo "<tr class='laite_table_tr_hidden'>";
+  $hidden_class = 'laite_table_tr_hidden';
+  $lasku_tunnukset = array_column($laitteet, 'lasku_tunnus');
+  foreach ($lasku_tunnukset as $lasku_tunnus) {
+    if (isset($_SESSION['tyojono']['avattavat_kohteet'][$lasku_tunnus])) {
+      $hidden_class = 'laite_table_tr';
+    }
+  }
+  echo "<tr class='{$hidden_class}'>";
   echo "<form class='multisubmit tyomaarayshallinta' name='tyomaarayshallinta'>";
   echo "<input type='hidden' name='ala_tee' value='merkkaa_tehdyksi' />";
 
@@ -832,27 +839,27 @@ function onko_laitteella_poikkeus($laite_tunnus) {
 function tyhjenna_sessio() {
   global $kukarow, $yhtiorow;
 
-  unset($_SESSION['tyojono_hakuehdot']);
+  unset($_SESSION['tyojono']);
 }
 
 function tallenna_haut_sessioon($request) {
   global $kukarow, $yhtiorow;
 
-  $_SESSION['tyojono_hakuehdot']['asiakas_tunnus'] = $request['asiakas_tunnus'];
-  $_SESSION['tyojono_hakuehdot']['kohde_tunnus'] = $request['kohde_tunnus'];
-  $_SESSION['tyojono_hakuehdot']['tyojono'] = $request['tyojono'];
-  $_SESSION['tyojono_hakuehdot']['tyostatus'] = $request['tyostatus'];
-  $_SESSION['tyojono_hakuehdot']['toimitusaika'] = $request['toimitusaika'];
+  $_SESSION['tyojono']['hakuehdot']['asiakas_tunnus'] = $request['asiakas_tunnus'];
+  $_SESSION['tyojono']['hakuehdot']['kohde_tunnus'] = $request['kohde_tunnus'];
+  $_SESSION['tyojono']['hakuehdot']['tyojono'] = $request['tyojono'];
+  $_SESSION['tyojono']['hakuehdot']['tyostatus'] = $request['tyostatus'];
+  $_SESSION['tyojono']['hakuehdot']['toimitusaika'] = $request['toimitusaika'];
 }
 
 function aseta_hakuehdot(&$request) {
   global $kukarow, $yhtiorow;
 
-  $request['asiakas_tunnus'] = $_SESSION['tyojono_hakuehdot']['asiakas_tunnus'];
-  $request['kohde_tunnus'] = $_SESSION['tyojono_hakuehdot']['kohde_tunnus'];
-  $request['tyojono'] = $_SESSION['tyojono_hakuehdot']['tyojono'];
-  $request['tyostatus'] = $_SESSION['tyojono_hakuehdot']['tyostatus'];
-  $request['toimitusaika'] = $_SESSION['tyojono_hakuehdot']['toimitusaika'];
+  $request['asiakas_tunnus'] = $_SESSION['tyojono']['hakuehdot']['asiakas_tunnus'];
+  $request['kohde_tunnus'] = $_SESSION['tyojono']['hakuehdot']['kohde_tunnus'];
+  $request['tyojono'] = $_SESSION['tyojono']['hakuehdot']['tyojono'];
+  $request['tyostatus'] = $_SESSION['tyojono']['hakuehdot']['tyostatus'];
+  $request['toimitusaika'] = $_SESSION['tyojono']['hakuehdot']['toimitusaika'];
 }
 
 function kasittele_laskutunnukset($lasku_tunnukset) {
@@ -891,4 +898,23 @@ function tyolista_message_divit() {
   echo "<br/>";
   echo "<br/>";
   echo "</div>";
+}
+
+function tallenna_kohde_sessioon($lasku_tunnukset, $suunta) {
+  global $kukarow, $yhtiorow;
+
+  if (empty($lasku_tunnukset) or !is_array($lasku_tunnukset)) {
+    return false;
+  }
+
+  foreach ($lasku_tunnukset as $lasku_tunnus) {
+    if ($suunta == 'in') {
+      $_SESSION['tyojono']['avattavat_kohteet'][$lasku_tunnus] = $lasku_tunnus;
+    }
+    else {
+      unset($_SESSION['tyojono']['avattavat_kohteet'][$lasku_tunnus]);
+    }
+  }
+
+  return true;
 }

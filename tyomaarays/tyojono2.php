@@ -78,16 +78,24 @@ if ($tee == 'lataa_tiedosto') {
 
 //AJAX requestit tänne
 if ($ajax_request) {
+  $ok = false;
   if ($action == 'paivita_tyomaaraysten_tyojonot') {
     if (!empty($lasku_tunnukset)) {
       $params = array(
           'tyojono' => $tyojono,
       );
       $ok = paivita_tyojono_ja_tyostatus_tyomaarayksille($lasku_tunnukset, $params);
-
-      echo $ok;
     }
   }
+  else if ($action == 'kohteen_avaaminen_sessioon') {
+    if (!empty($lasku_tunnukset)) {
+      //Suunta: pois / päälle
+      $ok = tallenna_kohde_sessioon($lasku_tunnukset, $suunta);
+    }
+  }
+
+  echo $ok;
+
   exit;
 }
 
@@ -139,14 +147,18 @@ if ($request['ala_tee'] == 'laitteen_vaihto') {
   echo "<br/>";
 }
 
+if ($request['ala_tee'] == 'tyhjenna_hakuehdot') {
+  tyhjenna_sessio();
+}
+
 //ei aseteta sessiosta hakuehtoja jos ollaan submitattu hakuformi
-if (isset($_SESSION['tyojono_hakuehdot']) and $request['ala_tee'] != 'hae') {
+if (isset($_SESSION['tyojono']['hakuehdot']) and $request['ala_tee'] != 'hae') {
   aseta_hakuehdot($request);
 }
 
 if (!isset($request['toimitusaika'])) {
   $request['toimitusaika'] = 28;
-  $_SESSION['tyojono_hakuehdot']['toimitusaika'] = 28;
+  $_SESSION['tyojono']['hakuehdot']['toimitusaika'] = 28;
 }
 
 //Jos haetaan (vahingossa) kaikkien asiakkaiden kaikkia töitä niin forcetaan toimitusaika 28 päivään,
@@ -158,7 +170,7 @@ $haku = ($request['ala_tee'] == 'hae' or $request['ala_tee'] == 'tyhjenna_hakueh
 $tulostus = (stristr($request['ala_tee'], 'tulosta'));
 if ($onko_tehdyt and $asiakas_kohde_tyhja and $ei_toimitusaikaa and $haku and !$tulostus) {
   $request['toimitusaika'] = 28;
-  $_SESSION['tyojono_hakuehdot']['toimitusaika'] = 28;
+  $_SESSION['tyojono']['hakuehdot']['toimitusaika'] = 28;
 }
 
 $request['tyojonot'] = hae_tyojonot($request);
@@ -168,10 +180,6 @@ $request['tyostatukset'] = hae_tyostatukset($request);
 echo "<div id='tyojono_wrapper'>";
 
 tyolista_message_divit();
-
-if ($request['ala_tee'] == 'tyhjenna_hakuehdot') {
-  tyhjenna_sessio();
-}
 
 //Kaikissa muissa tilanteissa lasku_tunnuksia halutaan käsitellä arraynä paitsi työlistojen tulostuksessa
 //Työlistojen tulostuksessa lasku_tunnuksien data-rakenne kertoo kuinka monta pdf:ää pitää tulla

@@ -5,23 +5,28 @@
 
     this.bind_kohde_tr_click = function() {
       var kohde_tr = $(element).find('.kohde_tr, .kohde_tr_hidden');
+      var suunta = null;
       $(kohde_tr).click(function(event) {
         if (event.target.nodeName !== 'INPUT' && event.target.nodeName !== 'SELECT') {
-          var laite_table_tr = $(this).next();
+          var $laite_table_tr = $(this).next();
           if ($(this).hasClass('kohde_tr_hidden')) {
             $(this).addClass('kohde_tr');
             $(this).removeClass('kohde_tr_hidden');
 
-            $(laite_table_tr).addClass('laite_table_tr');
-            $(laite_table_tr).removeClass('laite_table_tr_hidden');
+            $laite_table_tr.addClass('laite_table_tr');
+            $laite_table_tr.removeClass('laite_table_tr_hidden');
+            suunta = 'in';
           }
           else {
             $(this).removeClass('kohde_tr');
             $(this).addClass('kohde_tr_hidden');
 
-            $(laite_table_tr).removeClass('laite_table_tr');
-            $(laite_table_tr).addClass('laite_table_tr_hidden');
+            $laite_table_tr.removeClass('laite_table_tr');
+            $laite_table_tr.addClass('laite_table_tr_hidden');
+            suunta = 'out';
           }
+
+          kohteen_avaaminen_sessioon($(this).find('input.lasku_tunnukset').val(), suunta);
         }
       });
     };
@@ -154,6 +159,29 @@
           tyojono: tyojono
         },
         url: 'tyojono2.php?ajax_request=true&action=paivita_tyomaaraysten_tyojonot&no_head=yes'
+      }).done(function(data) {
+        if (console && console.log) {
+          console.log('Päivitys onnistui');
+          console.log(data);
+        }
+      });
+    };
+
+    var kohteen_avaaminen_sessioon = function(lasku_tunnukset, suunta) {
+      var tunnukset = lasku_tunnukset;
+      if (typeof tunnukset == 'string' || tunnukset instanceof String) {
+        tunnukset = tunnukset.split(',');
+      }
+
+      return $.ajax({
+        async: true,
+        dataType: 'json',
+        type: 'POST',
+        data: {
+          lasku_tunnukset: tunnukset,
+          suunta: suunta
+        },
+        url: 'tyojono2.php?ajax_request=true&no_head=yes&action=kohteen_avaaminen_sessioon'
       }).done(function(data) {
         if (console && console.log) {
           console.log('Päivitys onnistui');

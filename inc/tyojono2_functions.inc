@@ -565,7 +565,9 @@ function echo_tyomaarays_rivi($request, $laitteet) {
   echo "<tr>";
   echo "<th>";
   echo t("#");
+  $toimitus_string = "Toimitettu";
   if ($request['toim'] != 'TEHDYT_TYOT') {
+    $toimitus_string = "Toimitetaan";
     echo "<br/>";
     echo "<input type='checkbox' class='select_kaikki' />";
   }
@@ -576,7 +578,7 @@ function echo_tyomaarays_rivi($request, $laitteet) {
   echo "<th>" . t("Paikka") . "</th>";
   echo "<th>" . t("Sijainti") . "</th>";
   echo "<th>" . t("Tehtävä työ") . "</th>";
-  echo "<th>" . t("Toimitetaan") . "</th>";
+  echo "<th>" . t($toimitus_string) . "</th>";
   echo "<th>" . t("Kommentti") . "</th>";
   echo "<th>" . t("Poikkeus") . "</th>";
   echo "<th>" . t("Työjono") . "/<br>" . t("Työstatus") . "</th>";

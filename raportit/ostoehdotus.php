@@ -5,6 +5,7 @@ $useslave = 1;
 
 // Ei käytetä pakkausta
 $compression = FALSE;
+ini_set("memory_limit", "5G");
 
 if (isset($_POST["tee"])) {
   if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
@@ -18,6 +19,7 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
   exit;
 }
 
+require 'inc/pupeExcel.inc';
 require_once ('inc/ProgressBar.class.php');
 
 echo "<font class='head'>".t("Ostoehdotus")."</font><hr>";
@@ -48,12 +50,12 @@ function myynnit($myynti_varasto = '', $myynti_maa = '') {
 
   $riviheaderi   = "Total";
   $laskuntoimmaa = "";
-  $varastotapa   = "  JOIN varastopaikat USE INDEX (PRIMARY) ON varastopaikat.yhtio = tilausrivi.yhtio
-             and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0'))
-             and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0'))";
+  $varastot      = "";
+  $varastotapa   = " JOIN varastopaikat ON varastopaikat.yhtio = tilausrivi.yhtio
+                     AND varastopaikat.tunnus = tilausrivi.varasto ";
 
   if ($myynti_varasto != "") {
-    $varastotapa .= " and varastopaikat.tunnus = '$myynti_varasto' ";
+    $varastot = " and tilausrivi.varasto = '$myynti_varasto' ";
 
     $query = "SELECT nimitys from varastopaikat where yhtio in ($yhtiot) and tunnus = '$myynti_varasto'";
     $result   = pupe_query($query);
@@ -95,7 +97,7 @@ function myynnit($myynti_varasto = '', $myynti_maa = '') {
             sum(if(tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva3-$kka3-$ppa3' and laskutettuaika <= '$vvl3-$kkl3-$ppl3' ,rivihinta,0)) rivihinta3,
             sum(if(tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva4-$kka4-$ppa4' and laskutettuaika <= '$vvl4-$kkl4-$ppl4' ,rivihinta,0)) rivihinta4,
             sum(if((tilausrivi.tyyppi = 'L' or tilausrivi.tyyppi = 'V') and tilausrivi.var not in ('P','J','O','S'), tilausrivi.varattu, 0)) ennpois,
-            sum(if(tilausrivi.tyyppi = 'L' and tilausrivi.var in ('J','S'), tilausrivi.jt $lisavarattu, 0)) jt,
+            sum(if(tilausrivi.tyyppi = 'L' and tilausrivi.var  = 'J', tilausrivi.jt $lisavarattu, 0)) jt,
             sum(if(tilausrivi.tyyppi = 'E' and tilausrivi.var != 'O', tilausrivi.varattu, 0)) ennakko
             FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
             JOIN lasku USE INDEX (PRIMARY) on (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus $laskuntoimmaa)
@@ -104,6 +106,7 @@ function myynnit($myynti_varasto = '', $myynti_maa = '') {
             WHERE tilausrivi.yhtio in ($yhtiot)
             and tilausrivi.tyyppi  in ('L','V','E')
             and tilausrivi.tuoteno = '$row[tuoteno]'
+            $varastot
             and ((tilausrivi.laskutettuaika >= '$apvm' and tilausrivi.laskutettuaika <= '$lpvm') or tilausrivi.laskutettuaika = '0000-00-00')";
   $result   = pupe_query($query);
   $laskurow = mysql_fetch_array($result);
@@ -182,10 +185,11 @@ function saldot($myynti_varasto = '', $myynti_maa = '') {
     extract($GLOBALS);
 
     $varastotapa = "";
+    $varastot = "";
     $riviheaderi = "Total";
 
     if ($myynti_varasto != "") {
-      $varastotapa = " and varastopaikat.tunnus = '$myynti_varasto' ";
+      $varastot = " and tuotepaikat.varasto = '$myynti_varasto' ";
 
       $query    = "SELECT nimitys from varastopaikat where yhtio in ($yhtiot) and tunnus = '$myynti_varasto'";
       $result   = pupe_query($query);
@@ -205,11 +209,11 @@ function saldot($myynti_varasto = '', $myynti_maa = '') {
     $query = "SELECT ifnull(sum(saldo),0) saldo, ifnull(sum(halytysraja),0) halytysraja
               FROM tuotepaikat
               JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-              and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-              and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-              $varastotapa
-              WHERE tuotepaikat.yhtio in ($yhtiot)
-              and tuotepaikat.tuoteno = '$row[tuoteno]'";
+                AND varastopaikat.tunnus = tuotepaikat.varasto
+                $varastotapa
+              WHERE tuotepaikat.yhtio    in ($yhtiot)
+              and tuotepaikat.tuoteno    = '$row[tuoteno]'
+              $varastot";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) > 0) {
@@ -237,12 +241,10 @@ function ostot($myynti_varasto = '', $myynti_maa = '') {
     extract($GLOBALS);
 
     $riviheaderi = "Total";
-    $varastotapa = " JOIN varastopaikat USE INDEX (PRIMARY) ON varastopaikat.yhtio = tilausrivi.yhtio
-             and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0'))
-             and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0')) ";
+    $varastot = "";
 
     if ($myynti_varasto != "") {
-      $varastotapa .= " and varastopaikat.tunnus = '$myynti_varasto' ";
+      $varastot = " and tilausrivi.varasto = '$myynti_varasto' ";
 
       $query    = "SELECT nimitys from varastopaikat where yhtio in ($yhtiot) and tunnus = '$myynti_varasto'";
       $result   = pupe_query($query);
@@ -255,7 +257,7 @@ function ostot($myynti_varasto = '', $myynti_maa = '') {
       $laskurow = mysql_fetch_array($result);
 
       if ($laskurow[0] != "") {
-        $varastotapa .= " and varastopaikat.tunnus in ($laskurow[0]) ";
+        $varastot = " and tilausrivi.varasto in ($laskurow[0]) ";
         $riviheaderi = $myynti_maa;
       }
     }
@@ -270,12 +272,9 @@ function ostot($myynti_varasto = '', $myynti_maa = '') {
       $laskurow = mysql_fetch_array($result);
 
       if ($laskurow[0] != "") {
-        $varastotapa .= " and varastopaikat.tunnus in ($laskurow[0]) ";
+        $varastot = " and tilausrivi.varasto in ($laskurow[0]) ";
         $riviheaderi = $myynti_maa;
       }
-    }
-    else {
-      $varastotapa = "";
     }
 
     //tilauksessa/siirtolistalla jt
@@ -283,10 +282,10 @@ function ostot($myynti_varasto = '', $myynti_maa = '') {
               sum(if (tilausrivi.tyyppi = 'O', tilausrivi.varattu, 0)) tilattu,
               sum(if (tilausrivi.tyyppi = 'G', tilausrivi.jt $lisavarattu, 0)) siirtojt
               FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-              $varastotapa
               WHERE tilausrivi.yhtio in ($yhtiot)
               and tilausrivi.tyyppi  in ('O','G')
               and tilausrivi.tuoteno = '$row[tuoteno]'
+              $varastot
               and tilausrivi.varattu + tilausrivi.jt > 0";
     $result = pupe_query($query);
     $ostorow = mysql_fetch_array($result);
@@ -575,14 +574,17 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
             ORDER BY id, tuote.tuoteno, yhtio";
   $res = pupe_query($query);
 
-  echo t("Tuotteita")." ".mysql_num_rows($res)." ".t("kpl").".<br>\n";
+  $rivi_count = mysql_num_rows($res);
+
+  echo t("Tuotteita")." {$rivi_count} ".t("kpl").".<br>\n";
   flush();
 
-  $rivi = "";
+  $tuoterivit = array();
 
-  $bar = new ProgressBar();
-  $elements = mysql_num_rows($res); //total number of elements to process
-  $bar->initialize($elements); //print the empty bar
+  if ($rivi_count > 0) {
+    $bar = new ProgressBar();
+    $bar->initialize($rivi_count); //print the empty bar
+  }
 
   // loopataan tuotteet läpi
   while ($row = mysql_fetch_array($res)) {
@@ -703,33 +705,89 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
     list($headerivi, $tuoterivi) = ostot();
 
     // lisätään tämän tuotteen rivi outputtiin
-    $rivi .= $tuoterivi."\n";
+    $tuoterivit[] = $tuoterivi;
 
     $bar->increase(); //calls the bar with every processed element
 
   }
 
-  // uniikki filenimi
-  $txtnimi = md5(uniqid(mt_rand(), true)).".txt";
-  $file    = "$headerivi\n$rivi";
+  if ($rivi_count > 0) {
+    // Tehdään datasta Exceli
+    echo "<br>";
+    echo t("Luodaan Excel.");
+    echo "<br>";
 
-  // kirjotetaan file levylle
-  file_put_contents("/tmp/$txtnimi", $file);
+    flush();
 
-  echo "<br><br><form method='post' class='multisubmit'>";
-  echo "<table>";
-  echo "<tr><th>".t("Tallenna tulos")."</th>";
-  echo "<td>";
-  echo "<input type='radio' name='kaunisnimi' value='ostoehdotus.xls' checked> Excel-muodossa<br>";
-  echo "<input type='radio' name='kaunisnimi' value='ostoehdotus.csv'> OpenOffice-muodossa<br>";
-  echo "<input type='radio' name='kaunisnimi' value='ostoehdotus.txt'> Tekstitiedostona";
-  echo "</td>";
-  echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-  echo "<input type='hidden' name='tmpfilenimi' value='$txtnimi'>";
-  echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr>";
-  echo "</table>";
-  echo "</form>";
+    $bar = new ProgressBar();
+    $bar->initialize($rivi_count); //print the empty bar
 
+    $worksheet = new pupeExcel();
+    $format_bold = array("bold" => true);
+
+    $excelrivi = 0;
+    $excelsarake = 0;
+
+    // Otetaan headerit
+    $headerit = str_getcsv($headerivi, "\t");
+
+    // Kirjoitetaan headerit
+    foreach ($headerit as $header) {
+      $worksheet->writeString($excelrivi, $excelsarake++, $header, $format_bold);
+    }
+
+    $excelrivi++;
+    $excelsarake = 0;
+
+    // Kirjoitetaan rivit
+    foreach ($tuoterivit as $rivi) {
+      $rivi = explode("\t", $rivi);
+
+      foreach ($rivi as $sarake) {
+        // Poistetaan hipsut sarakkeesta
+        $_sarake = trim($sarake, '"');
+
+        // Tämä on string jos sarakkeessa oli hipsut tai sarake on tyhjä
+        $_string = ($_sarake == '' or $_sarake != $sarake);
+
+        // Katsotaan onko string date
+        $_datetime = (date('Y-m-d H:i:s', strtotime($_sarake)) == $_sarake);
+        $_date = (date('Y-m-d', strtotime($_sarake)) == $_sarake);
+
+        if ($_date or $_datetime) {
+          $worksheet->writeDate($excelrivi, $excelsarake++, $_sarake);
+        }
+        elseif ($_string) {
+          $worksheet->writeString($excelrivi, $excelsarake++, $_sarake);
+        }
+        else {
+          $worksheet->writeNumber($excelrivi, $excelsarake++, $_sarake);
+        }
+      }
+
+      $excelrivi++;
+      $excelsarake = 0;
+
+      $bar->increase(); //calls the bar with every processed element
+    }
+
+    // uniikki filenimi
+    $excelnimi = $worksheet->close();
+
+    echo "<br><br>";
+    echo "<form method='post' class='multisubmit'>";
+    echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+    echo "<input type='hidden' name='kaunisnimi' value='ostoehdotus.xlsx'>";
+    echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+
+    echo "<table>";
+    echo "<tr>";
+    echo "<th>".t("Tallenna raportti (xlsx)").":</th>";
+    echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td>";
+    echo "</tr>";
+    echo "</table>";
+    echo "</form>";
+  }
 }
 
 // näytetään käyttöliittymä..

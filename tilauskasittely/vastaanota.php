@@ -13,8 +13,6 @@ if (!isset($maa))           $maa  = "";
 if (!isset($varastorajaus)) $varastorajaus = 0;
 if (!isset($echotaanko))    $echotaanko = true;
 
-$paivitysoikeus = ($oikeurow['paivitys'] == '1') ? true : false;
-
 if ($tee == 'yhdista') {
 
   if (!empty($yhdistettavat_siirtolistat)) {
@@ -1346,7 +1344,7 @@ if (!empty($id) and $echotaanko) {
     echo "<input type='hidden' name='varasto' value='$mrow[tunnus]'>";
   }
 
-  if ($toim == "" and $paivitysoikeus) {
+  if ($toim == "" and tarkista_oikeus('muuvarastopaikka.php', '', 1)) {
     echo "<table>";
     echo "<tr>";
     echo "<th>".t("P‰ivitet‰‰n oletuspaikka")."</th>";

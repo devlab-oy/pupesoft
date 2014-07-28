@@ -206,27 +206,30 @@ if ($toim == 'TEHDYT_TYOT') {
   }
 }
 else {
-  if ($request['ala_tee'] == 'merkkaa_tehdyksi' and !empty($request['lasku_tunnukset'])) {
-    merkkaa_tyomaaraykset_tehdyksi($request);
+  if (!empty($request['lasku_tunnukset'])) {
+    if ($request['ala_tee'] == 'merkkaa_tehdyksi') {
+      merkkaa_tyomaaraykset_tehdyksi($request);
+    }
+    else if ($request['ala_tee'] == 'muuta') {
+      muuta_tyomaarayksien_teko_paiva($request);
+    }
+    else if ($request['ala_tee'] == 'poista') {
+      poista_tyomaarayksia($request);
+    }
+    else if ($request['ala_tee'] == 'merkkaa_kadonneeksi') {
+      merkkaa_laite_kadonneeksi($request);
+    }
   }
-  else if ($request['ala_tee'] == 'merkkaa_tehdyksi' and empty($request['lasku_tunnukset'])) {
-    echo "<font class='error'>" . t('Yhtään työtä ei merkattu tehdyksi') . "</font>";
-  }
-  else if ($request['ala_tee'] == 'muuta' and !empty($request['lasku_tunnukset'])) {
-    muuta_tyomaarayksien_teko_paiva($request);
-  }
-  else if ($request['ala_tee'] == 'muuta' and empty($request['lasku_tunnukset'])) {
-    echo "<font class='error'>" . t('Yhtään työtä ei muutettu') . "</font>";
-  }
-  else if ($request['ala_tee'] == 'poista' and !empty($request['lasku_tunnukset'])) {
-    poista_tyomaarayksia($request);
-  }
-  else if ($request['ala_tee'] == 'poista' and empty($request['lasku_tunnukset'])) {
-    echo "<font class='error'>" . t('Yhtään työtä ei poistettu') . "</font>";
-  }
-
-  if ($request['ala_tee'] == 'merkkaa_kadonneeksi') {
-    merkkaa_laite_kadonneeksi($request);
+  else if (empty($request['lasku_tunnukset'])) {
+    if ($request['ala_tee'] == 'merkkaa_tehdyksi') {
+      echo "<font class='error'>" . t('Yhtään työtä ei merkattu tehdyksi') . "</font>";
+    }
+    else if ($request['ala_tee'] == 'muuta') {
+      echo "<font class='error'>" . t('Yhtään työtä ei muutettu') . "</font>";
+    }
+    else if ($request['ala_tee'] == 'poista') {
+      echo "<font class='error'>" . t('Yhtään työtä ei poistettu') . "</font>";
+    }
   }
 
   if ($request['ala_tee'] == 'tulosta_tyolista') {

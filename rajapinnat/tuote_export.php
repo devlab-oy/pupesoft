@@ -97,21 +97,8 @@ echo date("d.m.Y @ G:i:s")." - Aloitetaan tuote-export.\n";
 echo date("d.m.Y @ G:i:s")." - Haetaan tuotetiedot.\n";
 
 // Haetaan pupesta tuotteen tiedot
-$query = "SELECT tuote.tuoteno,
-          tuote.nimitys,
-          tuote.lyhytkuvaus,
-          tuote.myyntihinta,
-          tuote.yksikko,
-          tuote.kuvaus,
-          tuote.myymalahinta,
-          tuote.kuluprosentti,
-          tuote.eankoodi,
-          tuote.osasto,
-          tuote.try,
-          tuote.alv,
-          tuote.nakyvyys,
-          tuote.tuotemassa,
-          tuote.tunnus,
+$query = "SELECT 
+          tuote.*,
           tuote.mallitarkenne campaign_code,
           tuote.malli target,
           tuote.leimahduspiste onsale,
@@ -250,6 +237,22 @@ while ($row = mysql_fetch_array($res)) {
       "arvo"        => $parametrirow["selite"]
     );
   }
+  // Katsotaan onko tuotteelle voimassaolevaa hinnastohintaa
+  $query = "SELECT 
+            *
+            FROM hinnasto
+            WHERE yhtio    = '{$kukarow['yhtio']}'
+              AND tuoteno  = '{$row['tuoteno']}'
+              AND maa      = '{$yhtiorow['maa']}'
+              AND laji     = ''
+              AND ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+            ORDER BY ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
+            LIMIT 1";
+
+  $hinnastoq = pupe_query($query);
+  $hinnastoresult = mysql_fetch_assoc($hinnastoq);
+  // Nollataan tämä jos query lyö tyhjää, muuten vanhentunut tarjoushinta ei ylikirjoitu magentossa
+  if(!isset($hinnastoresult['hinta'])) $hinnastoresult['hinta'] = '';
 
   $dnstuote[] = array(
     'tuoteno'              => $row["tuoteno"],
@@ -258,6 +261,7 @@ while ($row = mysql_fetch_array($res)) {
     'lyhytkuvaus'          => $row["lyhytkuvaus"],
     'yksikko'              => $row["yksikko"],
     'tuotemassa'           => $row["tuotemassa"],
+    'tuotemerkki'          => $row["tuotemerkki"],
     'myyntihinta'          => $myyntihinta,
     'myyntihinta_veroton'  => $myyntihinta_veroton,
     'myymalahinta'         => $myymalahinta,
@@ -275,6 +279,7 @@ while ($row = mysql_fetch_array($res)) {
     'target'               => $row["target"],
     'onsale'               => $row["onsale"],
     'tunnus'               => $row['tunnus'],
+    'hinnastohinta'        => $hinnastoresult['hinta'],
     'asiakashinnat'        => $asiakashinnat,
     'tuotepuun_nodet'      => $tuotepuun_nodet,
     'tuotteen_parametrit'  => $tuotteen_parametrit
@@ -633,26 +638,15 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
 
   // Haetaan kaikki tuotteet, jotka kuuluu tähän variaatioon ja on muuttunut
   $aliselect = "SELECT
+                tuote.*,
                 tuotteen_avainsanat.tuoteno,
                 tuotteen_avainsanat.jarjestys,
-                tuote.tunnus,
-                tuote.nimitys,
-                tuote.kuvaus,
-                tuote.lyhytkuvaus,
-                tuote.tuotemassa,
                 ta_nimitys_se.selite nimi_swe,
                 ta_nimitys_en.selite nimi_eng,
-                tuote.myyntihinta,
-                tuote.myymalahinta,
-                tuote.kuluprosentti,
-                tuote.eankoodi,
-                tuote.alv,
-                tuote.nakyvyys,
                 tuote.mallitarkenne campaign_code,
                 tuote.malli target,
                 tuote.leimahduspiste onsale,
-                try_fi.selitetark try_nimi,
-                tuote.muuta
+                try_fi.selitetark try_nimi
                 FROM tuotteen_avainsanat
                 JOIN tuote on (tuote.yhtio = tuotteen_avainsanat.yhtio
                   AND tuote.tuoteno              = tuotteen_avainsanat.tuoteno
@@ -761,6 +755,23 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
       if (count($breadcrumbs) > 1) array_shift($breadcrumbs);
       $tuotepuun_nodet[] = $breadcrumbs;
     }
+    
+    // Katsotaan onko tuotteelle voimassaolevaa hinnastohintaa
+    $query = "SELECT 
+              *
+              FROM hinnasto
+              WHERE yhtio    = '{$kukarow['yhtio']}'
+                AND tuoteno  = '{$alirow['tuoteno']}'
+                AND maa      = '{$yhtiorow['maa']}'
+                AND laji     = ''
+                AND ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+              ORDER BY ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
+              LIMIT 1";
+
+    $hinnastoq = pupe_query($query);
+    $hinnastoresult = mysql_fetch_assoc($hinnastoq);
+    // Nollataan tämä jos query lyö tyhjää, muuten vanhentunut tarjoushinta ei ylikirjoitu magentossa
+    if(!isset($hinnastoresult['hinta'])) $hinnastoresult['hinta'] = '';
 
     $dnslajitelma[$rowselite["selite"]][] = array(
       'tuoteno'               => $alirow["tuoteno"],
@@ -781,9 +792,11 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
       'myyntihinta_veroton'   => $myyntihinta_veroton,
       'myymalahinta'          => $myymalahinta,
       'myymalahinta_veroton'  => $myymalahinta_veroton,
+      'hinnastohinta'         => $hinnastoresult['hinta'],
       'kuluprosentti'         => $alirow['kuluprosentti'],
       'ean'                   => $alirow["eankoodi"],
       'muuta'                 => $alirow['muuta'],
+      'tuotemerkki'           => $alirow['tuotemerkki'],
       'parametrit'            => $properties,
       'tuotepuun_nodet'       => $tuotepuun_nodet
     );
@@ -822,6 +835,25 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
   // Mitä tuotteen kenttää käytetään configurable-tuotteen nimityksenä
   if (isset($magento_configurable_tuote_nimityskentta) and !empty($magento_configurable_tuote_nimityskentta)) {
     $magento_client->setConfigurableNimityskentta($magento_configurable_tuote_nimityskentta);
+  }
+
+  // Miten configurable-tuotteen lapsituotteet näkyvät verkkokaupassa.
+  // Vaihtoehdot: NOT_VISIBLE_INDIVIDUALLY, CATALOG, SEARCH, CATALOG_SEARCH
+  // Default on NOT_VISIBLE_INDIVIDUALLY
+  if (isset($magento_configurable_lapsituote_nakyvyys) and !empty($magento_configurable_lapsituote_nakyvyys)) {
+    $magento_configurable_lapsituote_nakyvyys = strtoupper($magento_configurable_lapsituote_nakyvyys);
+    $magento_client->setConfigurableLapsituoteNakyvyys($magento_configurable_lapsituote_nakyvyys);
+  }
+
+  // Asetetaan custom simple-tuotekentät jotka eivät tule dynaamisista parametreistä. Array joka sisältää jokaiselle erikoisparametrille
+  // array ('nimi' =>'magento_parametrin_nimi', 'arvo' = 'tuotteen_kentän_nimi_mistä_arvo_halutaan') esim. array ('nimi' => 'manufacturer', 'arvo' => 'tuotemerkki')
+  if (isset($verkkokauppatuotteet_erikoisparametrit) and count($verkkokauppatuotteet_erikoisparametrit) > 0) {
+    $magento_client->setVerkkokauppatuotteetErikoisparametrit($verkkokauppatuotteet_erikoisparametrit);
+  }
+
+  // Magentossa käsin hallitut kategoriat jotka säilytetään aina tuotepäivityksessä
+  if(isset($magento_sticky_kategoriat) and count($magento_sticky_kategoriat) > 0) {
+    $magento_client->setStickyKategoriat($magento_sticky_kategoriat);
   }
 
   // lisaa_kategoriat
@@ -925,6 +957,7 @@ unset($link);
 $link = mysql_connect($dbhost, $dbuser, $dbpass, true) or die ("Ongelma tietokantapalvelimessa $dbhost (tuote_export)");
 mysql_select_db($dbkanta, $link) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (tuote_export)");
 mysql_set_charset("latin1", $link);
+mysql_query("set group_concat_max_len=1000000", $link);
 
 // Kun kaikki onnistui, päivitetään lopuksi timestamppi talteen
 $query = "UPDATE avainsana SET

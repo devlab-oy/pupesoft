@@ -219,7 +219,7 @@ if (count($tuotetiedot) > 0) {
   foreach ($tuotetiedot as $tuotetieto) {
 
     // tuotekoodi
-    $rtuoteno[$i]["tuoteno"] = utf8_decode($tuotetieto->ProductId->ProductNumber);
+    $rtuoteno[$i]["tuoteno"] = pupesoft_cleanstring(utf8_decode($tuotetieto->ProductId->ProductNumber));
 
     $query = "SELECT tt.*
               FROM tuotteen_toimittajat AS tt

@@ -4051,6 +4051,18 @@ if (!function_exists('kuittaus_lahete')) {
       // Luodaan muuttujat
       extract($params);
 
+      if ($kala < 90 ) {
+        // Luodaan palautettavat
+        $return = compact(array_keys($params));
+
+        $params = uusi_sivu_lahete($return);
+
+        $params = loppu_lahete($params);
+
+        // Luodaan muuttujat
+        extract($params);
+      }
+
       $pdf->draw_text(50, 90, t("Allekirjoitus", $kieli).": _______________________________",   $thispage, $norm);
       $pdf->draw_text(300, 90, t("Nimenselvennys", $kieli).": _______________________________",   $thispage, $norm);
 
@@ -4083,6 +4095,18 @@ if (!function_exists('kuittaus_lahete')) {
     elseif($yhtiorow['lahete_allekirjoitus'] == 'S')  {
       // Luodaan muuttujat
       extract($params);
+
+      if ($kala < 90 ) {
+        // Luodaan palautettavat
+        $return = compact(array_keys($params));
+
+        $params = uusi_sivu_lahete($return);
+
+        $params = loppu_lahete($params);
+
+        // Luodaan muuttujat
+        extract($params);
+      }
 
       $pdf->draw_text(50, 90, t("Allekirjoitus", $kieli).": _______________________________",   $thispage, $norm);
       $pdf->draw_text(300, 90, t("Nimenselvennys", $kieli).": _______________________________",   $thispage, $norm);

@@ -406,7 +406,7 @@ if [ ! -z "${EXTRABACKUP}" -a "${EXTRABACKUP}" == "FTP" ]; then
 fi
 
 # Siivotaan vanhat backupit pois
-find ${BACKUPDIR} -type f -mtime +${BACKUPPAIVAT} -delete
+find ${BACKUPDIR} -type f -follow -mtime +${BACKUPPAIVAT} -delete
 
 # Synkataan backuppi Amazon S3:een
 if [ ! -z "${S3BUCKET}" ]; then

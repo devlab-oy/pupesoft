@@ -1,8 +1,9 @@
 <?php
+
 if ($tee == "file") {
   if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
-    $timeparts = explode(" ",microtime());
-    $starttime = $timeparts[1].substr($timeparts[0],1);
+    $timeparts = explode(" ", microtime());
+    $starttime = $timeparts[1].substr($timeparts[0], 1);
 
     $path_parts = pathinfo($_FILES['userfile']['name']);
     $name  = strtoupper($path_parts['filename']);
@@ -17,7 +18,7 @@ if ($tee == "file") {
     }
 
     if (strtoupper($ext)=="XLS") {
-      require_once ('excel_reader/reader.php');
+      require_once 'excel_reader/reader.php';
 
       // ExcelFile
       $data = new Spreadsheet_Excel_Reader();
@@ -28,7 +29,7 @@ if ($tee == "file") {
       $data->read($_FILES['userfile']['tmp_name']);
     }
     else {
-      $file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
+      $file = fopen($_FILES['userfile']['tmp_name'], "r") or die (t("Tiedoston avaus ep‰onnistui")."!");
     }
 
     // luetaan tiedosto loppuun ja tehd‰‰n array koko datasta
@@ -91,7 +92,7 @@ if ($tee == "file") {
           $varasto   = $laskurow["varasto"];
           $jtkielto   = $laskurow['jtkielto'];
 
-          require('lisaarivi.inc');
+          require 'lisaarivi.inc';
 
           $tuoteno  = '';
           $kpl    = '';
@@ -139,13 +140,13 @@ if ($tee == "file") {
         $toimkk     = substr($laskurow["toimaika"],  5, 2);
         $kerkk       = substr($laskurow["kerayspvm"], 5, 2);
         $toimvv     = substr($laskurow["toimaika"],  0, 4);
-        $kervv       = substr($laskurow["kerayspvm"], 0 ,4);
+        $kervv       = substr($laskurow["kerayspvm"], 0 , 4);
         $comments     = $laskurow["comments"];
         $viesti     = $laskurow["viesti"];
         $varasto     = $laskurow["varasto"];
         $toim       = "SIIRTOLISTA";
 
-        require ("otsik_siirtolista.inc");
+        require "otsik_siirtolista.inc";
 
         $query = "SELECT *
                   FROM lasku
@@ -162,7 +163,7 @@ if ($tee == "file") {
         $varrow = mysql_fetch_array($varres);
 
         //kutsutaan tilaus-valmis-siirtolista.inci‰ jotta saadaan tarvittaessa automaattisesti tulostettua siirtolistat kaikista luoduista siirtolistoista.
-        require ("tilaus-valmis-siirtolista.inc");
+        require "tilaus-valmis-siirtolista.inc";
 
         echo "<br><font class='message'>".t("Tehtiin uusi siirtolista! Siirtolistalle otsikko %s l‰hdevarasto on %s", $kieli, $kukarow["kesken"], $varrow["nimitys"])."</font><br>";
 

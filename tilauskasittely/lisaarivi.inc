@@ -3326,7 +3326,7 @@ if ($_yhteen_varastoon and $_sopivatilaustoimi and !in_array($var, array('S', 'U
 
   $_normi_tyhja       = (empty($myy_hyllyalue) and empty($myy_hyllynro));
   $_puute_ei_tyhja    = (isset($p_hyllyalue) and isset($p_hyllynro));
-  $_puutteesta_hyllyt = ( $_normi_tyhja and $_puute_ei_tyhja);
+  $_puutteesta_hyllyt = ($_normi_tyhja and $_puute_ei_tyhja);
 
   if ($_puutteesta_hyllyt) {
     $myy_hyllyalue_temp = $p_hyllyalue;

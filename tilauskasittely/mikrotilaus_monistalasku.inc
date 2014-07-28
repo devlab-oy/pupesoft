@@ -2,8 +2,8 @@
 
 if ($tee == "file") {
   if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
-    $timeparts = explode(" ",microtime());
-    $starttime = $timeparts[1].substr($timeparts[0],1);
+    $timeparts = explode(" ", microtime());
+    $starttime = $timeparts[1].substr($timeparts[0], 1);
 
     $path_parts = pathinfo($_FILES['userfile']['name']);
     $name  = strtoupper($path_parts['filename']);
@@ -17,7 +17,7 @@ if ($tee == "file") {
       die ("<font class='error'><br>".t("Tiedosto on tyhjä")."!</font>");
     }
 
-    $file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus epäonnistui")."!");
+    $file = fopen($_FILES['userfile']['tmp_name'], "r") or die (t("Tiedoston avaus epäonnistui")."!");
 
     $tunnukset     = "";
     $korjaaalvit   = array();
@@ -73,7 +73,7 @@ if ($tee == "file") {
       }
     }
 
-    $tunnukset  = substr($tunnukset,0,-1);
+    $tunnukset  = substr($tunnukset, 0, -1);
     $lasku     = "";
     $alvik     = "";
     $hyvit     = "";

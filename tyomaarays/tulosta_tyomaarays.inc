@@ -666,8 +666,16 @@ if (!function_exists('tyomaarays_rivi')) {
       $pdf->draw_text(415-$oikpos, $kala, $row["varattu"],                 $thispage, $norm);
 
       if ($tyyppi == 'Q') {
-        $oikpos = $pdf->strlen(hintapyoristys($row["hinta"] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100)), $norm);
-        $pdf->draw_text(465-$oikpos, $kala, hintapyoristys($row["hinta"] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100)),         $thispage, $norm);
+
+        if ($yhtiorow["alv_kasittely"] != '' and $row["alv"] < 500) {
+          $hinta = hintapyoristys($row["hinta"] * (1 + $row["alv"] / 100));
+        }
+        else{
+          $hinta = hintapyoristys($row["hinta"]); 
+        }
+
+        $oikpos = $pdf->strlen($hinta, $norm);
+        $pdf->draw_text(465-$oikpos, $kala, $hinta,         $thispage, $norm);
       }
       else {
         $oikpos = $pdf->strlen(hintapyoristys($row["hinta"]), $norm);
@@ -707,8 +715,15 @@ if (!function_exists('tyomaarays_rivi')) {
       }
 
       if ($tyyppi == 'Q') {
-        $oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100)), $norm);
-        $pdf->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta"] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100)),       $thispage, $norm);
+
+        if ($yhtiorow["alv_kasittely"] != '' and $row["alv"] < 500) {
+          $rivihinta = hintapyoristys($row["rivihinta"] * (1 + $row["alv"] / 100));
+        }
+        else{
+          $rivihinta = hintapyoristys($row["rivihinta"]); 
+        }
+        $oikpos = $pdf->strlen($rivihinta, $norm);
+        $pdf->draw_text(575-$oikpos, $kala, $rivihinta,       $thispage, $norm);
       }
       else {
         $oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"]), $norm);

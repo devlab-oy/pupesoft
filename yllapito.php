@@ -1253,11 +1253,12 @@
     }
 
     if (strlen($ojarj) > 0) {
-
       list($ojar, $osuu) = explode("_", $ojarj);
-
         $jarjestys = "$ojar $osuu ";
       }
+  else {
+    $jarjestys = "{$toim}.tunnus";
+  }
 
     if ($osuu == '') {
       $osuu  = 'asc';

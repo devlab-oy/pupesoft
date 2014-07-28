@@ -2495,6 +2495,19 @@ if ($fieldname == "jt_manual") {
   $jatko = 0;
 }
 
+if ($fieldname == "jt_asiakkaan_tilausnumero") {
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'K' ? " selected" : "";
+
+  $ulos .= "<option value = ''>".t("Asiakkaan tilausnumeroa ei huomioida kun tutkitaan pit‰‰kˆ perustaa uusi jt-tilaus.")."</option>";
+  $ulos .= "<option value = 'K'{$sel}>".t("Asiakkaan tilausnumero huomioidaan kun tutkitaan pit‰‰kˆ perustaa uusi jt-tilaus.")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "tilausvahvistus_tallenna") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -2898,8 +2911,19 @@ if ($fieldname == "extranet_tilaus_varaa_saldoa") {
   $jatko = 0;
 }
 
-if ($fieldname == "tuoteperhe_suoratoimitus") {
+if ($fieldname == "extranet_nayta_saldo") {
+  $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
 
+  $sel = $trow[$i] == 'Y' ? ' selected' : '';
+
+  $ulos .= "<option value = ''>" . t("Ei n‰ytet‰ saldoa extranetiss‰");
+  $ulos .= "<option value = 'Y' $sel>" . t("N‰ytet‰‰n saldo extranetiss‰");
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "tuoteperhe_suoratoimitus") {
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
   $sel = array();
@@ -3617,6 +3641,18 @@ if ($fieldname == 'kehahinta_valmistuksella') {
 
   $ulos .= "<option value = ''>".t("Valmistuksella ei n‰ytet‰ keskihankintahintoja")."</option>";
   $ulos .= "<option value = 'K' $sel>".t("Valmistuksella n‰ytet‰‰n keskihankintahinnat")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == 'saldo_varastossa_valmistuksella') {
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'S' ? ' selected' : '';
+
+  $ulos .= "<option value = ''>".t("Valmistuksella ei n‰ytet‰ varastossa olevaa saldoa")."</option>";
+  $ulos .= "<option value = 'S' $sel>".t("Valmistuksella n‰ytet‰‰n varastossa oleva saldo")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

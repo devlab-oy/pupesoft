@@ -347,8 +347,6 @@ if (!$php_cli) {
     echo "<option value='{$row['selite']}' {$sel}>",t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV"),"</option>";
   }
   echo "</select>";
-
-
   echo "</td></tr>";
 
   if ($kesken == "X") {
@@ -490,6 +488,34 @@ if ($tee == 'M' and isset($generoi)) {
 
     // tehdään jokaiselle valitulle lahdevarastolle erikseen
     foreach ($lahdevarastot as $lahdevarasto) {
+
+      $tt_vaihdettu = false;
+      if ($valittu_toimitustapa == 'Ei toimitustapaa') {
+        $ttqry = "SELECT tpa.selite AS toimitustapa
+                  FROM avainsana AS ana
+                  JOIN toimitustapa AS tpa
+                  ON ( ana.yhtio = tpa.yhtio AND ana.selitetark_2 = tpa.tunnus )
+                  WHERE ana.yhtio = '$kukarow[yhtio]'
+                  AND ana.laji = 'SIIRTOVARASTOT'
+                  AND ana.selite = $lahdevarasto
+                  AND selitetark = $kohdevarasto";
+        $ttresult = mysql_query($ttqry) or pupe_error($ttqry);
+
+        if (mysql_num_rows($ttresult) > 0) {
+          $ttrow = mysql_fetch_assoc($ttresult);
+          $toimitustapa = $ttrow['toimitustapa'];
+        }
+        else{
+          $toimitustapa = $valittu_toimitustapa;
+        }
+
+        if ($toimitustapa != $valittu_toimitustapa) {
+          $tt_vaihdettu = true;
+        }
+      }
+      else{
+        $toimitustapa = $valittu_toimitustapa;
+      }
 
       $lahdevyohyke = 0;
 
@@ -651,8 +677,10 @@ if ($tee == 'M' and isset($generoi)) {
               $comments     = $kukarow["nimi"]." ".t("Generoi hälytysrajojen perusteella");
               $viesti     = $kukarow["nimi"]." ".t("Generoi hälytysrajojen perusteella");
               $varasto     = $lahdevarasto;
-              $toimitustapa   = $valittu_toimitustapa;
               $toim      = "SIIRTOLISTA";
+              $alatila = "";
+              $luokka = "";
+              $tunnusnippu = "";
 
               require ("otsik_siirtolista.inc");
 
@@ -673,7 +701,17 @@ if ($tee == 'M' and isset($generoi)) {
               $varres = pupe_query($query);
               $varrow = mysql_fetch_assoc($varres);
 
-              if (!$php_cli) echo "<br /><font class='message'>",t("Tehtiin siirtolistalle otsikko %s lähdevarasto on %s", $kieli, $kukarow["kesken"], $varrow["nimitys"]),"</font><br />";
+              if (!$php_cli) {
+                echo "<br /><font class='message'>";
+                echo t("Tehtiin siirtolistalle otsikko %s lähdevarasto on %s", $kieli, $kukarow["kesken"], $varrow["nimitys"]);
+                echo "</font><br />";
+              }
+
+              if (!$php_cli and $tt_vaihdettu) {
+                echo "<font class='message'>";
+                echo t("Siirtolistan toimitustapa yliajettiin automaattisesti oletustoimitustavalla");
+                echo ": " . $toimitustapa . "</font><br />";
+              }
 
               //  Otetaan luotu otsikko talteen
               $otsikot[] = $kukarow["kesken"];
@@ -705,6 +743,10 @@ if ($tee == 'M' and isset($generoi)) {
               $korvaavakielto    = 1;
               $perhekielto    = $lapsituotteet == "" ? 1 : 0;
               $orvoteikiinnosta  = "EITOD";
+              $varataan_saldoa = "";
+              $kpl2 = "";
+              $toimittajan_tunnus = "";
+              $osatoimkielto = "";
 
               // Tallennetaan riville minne se on menossa
               $kohde_alue   = $pairow["hyllyalue"];

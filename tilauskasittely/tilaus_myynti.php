@@ -179,6 +179,9 @@ if (!isset($ylatila)) {$ylatila='';}
 // Setataan lopetuslinkki, jotta p‰‰semme takaisin tilaukselle jos k‰yd‰‰n jossain muualla
 $tilmyy_lopetus = "{$palvelin2}{$tilauskaslisa}tilaus_myynti.php////toim=$toim//projektilla=$projektilla//tilausnumero=$tilausnumero//ruutulimit=$ruutulimit//tilausrivi_alvillisuus=$tilausrivi_alvillisuus//mista=$mista";
 
+$_onko_valmistus = ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE");
+$saldo_valmistuksella = ($_onko_valmistus and $yhtiorow["saldo_varastossa_valmistuksella"] == "S");
+
 if ($lopetus != "") {
   // Lis‰t‰‰n t‰m‰ lopetuslinkkiin
   $tilmyy_lopetus = $lopetus."/SPLIT/".$tilmyy_lopetus;
@@ -3062,7 +3065,9 @@ if ($tee == '') {
       $params = array(
         'asiakas_tunnus' => $laskurow['liitostunnus'],
         'lasku_toimipaikka' => $laskurow['yhtio_toimipaikka'],
-        'varasto_toimipaikka' => $_varasto['toimipaikka']
+        'varasto_toimipaikka' => $_varasto['toimipaikka'],
+        'kohdevarasto' => $laskurow['clearing'],
+        'lahdevarasto' => $laskurow['varasto']
       );
       $toimitustavat = hae_toimitustavat($params);
 
@@ -5459,6 +5464,11 @@ if ($tee == '') {
       $sarakkeet++;
     }
 
+    if ($saldo_valmistuksella) {
+      $headerit .= "<th>".t("Myyt‰viss‰")."</th>";
+      $sarakkeet++;
+    }
+
     $headerit .= "<th>".t("Tuotenumero")."</th><th>".t("M‰‰r‰")."</th><th>".t("Var")."</th>";
     $sarakkeet += 3;
 
@@ -6581,6 +6591,11 @@ if ($tee == '') {
           else {
             echo "<td $class align='left' valign='top'></td>";
           }
+        }
+
+        if ($saldo_valmistuksella) {
+          list($_saldo, $_hyllyssa, $_myytavissa) = saldo_myytavissa($row["tuoteno"], '', $row["varasto"]);
+          echo "<td $class align='left' valign='top'>$_myytavissa</td>";
         }
 
         if ($kukarow['extranet'] == '' and $tuotekyslinkki != "") {

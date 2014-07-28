@@ -842,15 +842,15 @@ require "synkronoi_mysqlaliakset.php";
 
 $iltasiivo .= is_log("Iltasiivo $yhtiorow[nimi]. Done!");
 
-if ($iltasiivo != "") {
-  if (isset($iltasiivo_email) and $iltasiivo_email == 1) {
-    $from = mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q");
-    $header = "From: $from <$yhtiorow[postittaja_email]>\n";
-    $header .= "MIME-Version: 1.0\n" ;
-    $subject = mb_encode_mimeheader("Iltasiivo yhtiölle '{$yhtiorow["yhtio"]}'", "ISO-8859-1", "Q");
+if ($iltasiivo != "" and isset($iltasiivo_email) and $iltasiivo_email == 1) {
+  $params = array(
+    "to" => $yhtiorow["admin_email"],
+    "subject" => "Iltasiivo yhtiölle '{$yhtiorow["yhtio"]}'",
+    "ctype" => "text",
+    "body"=> $iltasiivo
+  );
 
-    mail($yhtiorow["admin_email"], $subject, $iltasiivo, $header, " -f $yhtiorow[postittaja_email]");
-  }
+  pupesoft_sahkoposti($params);
 }
 
 if (!$php_cli) {

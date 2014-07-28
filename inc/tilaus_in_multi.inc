@@ -37,9 +37,12 @@ while ($rivi = fgets($fd)) {
      // asiakas vaihtuu, uusi otsikko
      if ($tarkytunnus != $edytunnus) {
 
-      if (isset($tilaus_valmiiksi) and $edytunnus != "luuppiinmeno_ekalla") {
+      if (isset($tilaus_valmiiksi) and $edytunnus != "luuppiinmeno_ekalla" and !isset($virherivi)) {
         require("tilaus-valmis.inc");
       }
+
+      //uusi rivi, joten voidaan rauhassa unsettaa virherivimuuttuja
+      unset($virherivi);
 
        $query = "UPDATE kuka
                  SET kesken = 0
@@ -67,13 +70,15 @@ while ($rivi = fgets($fd)) {
        if (mysql_num_rows($result) == 0) {
          echo t("VIRHE: Tiedoilla ei löydy yhtään asiakasta").": ytunnus = '$ytunnus' $toim_lis!<br>";
 
-        // Skipataan tämä rivi.....
+        // Skipataan tämä rivi ja setataan virherivi muuttuja ettei turhaa yritettäs kutsua tilaus_valmis.inciä (or crashcaboom!).....
+        $virherivi = TRUE;
         continue;
       }
       elseif (mysql_num_rows($result) > 1) {
          echo t("VIRHE: Tiedoilla löytyy useita asiakkaita").": ytunnus = '$ytunnus' $toim_lis!<br>";
 
-        // Skipataan tämä rivi.....
+        // Skipataan tämä rivi ja setataan virherivi muuttuja ettei turhaa yritettäs kutsua tilaus_valmis.inciä (or crashcaboom!).....
+        $virherivi = TRUE;
         continue;
        }
 

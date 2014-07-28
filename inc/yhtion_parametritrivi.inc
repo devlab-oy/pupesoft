@@ -283,7 +283,7 @@ if ($fieldname == "laskutyyppi") {
   $ulos .= "<option value = '6'  $sel[6]>".t("Normaali laskupohja (Ei n‰ytet‰ tilausnumeroa/toimitusaikaa)")."</option>";
   $ulos .= "<option value = '7'  $sel[7]>".t("Normaali laskupohja (N‰ytet‰‰n tuotteen EAN koodi ja asiakaskommentti)")."</option>";
   $ulos .= "<option value = '1'  $sel[1]>".t("Pelkistetty laskupohja 1")."</option>";
-  #$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)")."</option>";
+  //$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)")."</option>";
   $ulos .= "<option value = '4'  $sel[4]>".t("Pelkistetty laskupohja 3")."</option>";
   $ulos .= "<option value = '8'  $sel[8]>".t("Ruotsin laskupohja")."</option>";
   $ulos .= "<option value = '10' $sel[10]>".t("Normaali laskupohja ilman rivihintoja (ei laillinen Suomessa)")."</option>";
@@ -357,7 +357,7 @@ if ($fieldname == "tilausvahvistustyyppi") {
     $ulos .= "<option value = '2' $sel[2]>".t("N‰ytet‰‰n tuotteen myyntihinta ja alennusryhm‰")."</option>";
     $ulos .= "<option value = '3' $sel[3]>".t("Ei n‰ytet‰ hintoja eik‰ alennuksia")."</option>";
     $ulos .= "<option value = '4' $sel[4]>".t("N‰ytet‰‰n asiakkaan hinta")."</option>";
-    #$ulos .= "<option value = '5' $sel[5]>".t("Haetaan hinnat toisesta pupesta")."</option>";
+  //$ulos .= "<option value = '5' $sel[5]>".t("Haetaan hinnat toisesta pupesta")."</option>";
     $ulos .= "<option value = '6' $sel[6]>".t("N‰ytet‰‰n asiakkaan hinta ja alennus, modifioitu tulostuspohja")."</option>";
 
     $ulos .= "</select></td>";
@@ -420,7 +420,7 @@ if ($fieldname == "ostotilaustyyppi") {
   $ulos .= "<option value = 'A' {$sel['A']}>".t("Tulosta nimitykset, piilotetaan toimitusp‰iv‰")."</option>";
   $ulos .= "<option value = 'B' {$sel['B']}>".t("Piilota nimitykset, tulosta toimitusp‰iv‰")."</option>";
   $ulos .= "<option value = 'C' {$sel['C']}>".t("Piilota toimitusp‰iv‰ ja nimitykset")."</option>";
-  #$ulos .= "<option value = '1' $sel[1]>".t("Pelkistetty ostotilauspohja");
+  //$ulos .= "<option value = '1' $sel[1]>".t("Pelkistetty ostotilauspohja");
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -2511,6 +2511,19 @@ if ($fieldname == "jt_manual") {
   $jatko = 0;
 }
 
+if ($fieldname == "jt_asiakkaan_tilausnumero") {
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'K' ? " selected" : "";
+
+  $ulos .= "<option value = ''>".t("Asiakkaan tilausnumeroa ei huomioida kun tutkitaan pit‰‰kˆ perustaa uusi jt-tilaus.")."</option>";
+  $ulos .= "<option value = 'K'{$sel}>".t("Asiakkaan tilausnumero huomioidaan kun tutkitaan pit‰‰kˆ perustaa uusi jt-tilaus.")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "tilausvahvistus_tallenna") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -2914,8 +2927,19 @@ if ($fieldname == "extranet_tilaus_varaa_saldoa") {
   $jatko = 0;
 }
 
-if ($fieldname == "tuoteperhe_suoratoimitus") {
+if ($fieldname == "extranet_nayta_saldo") {
+  $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
 
+  $sel = $trow[$i] == 'Y' ? ' selected' : '';
+
+  $ulos .= "<option value = ''>" . t("Ei n‰ytet‰ saldoa extranetiss‰");
+  $ulos .= "<option value = 'Y' $sel>" . t("N‰ytet‰‰n saldo extranetiss‰");
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "tuoteperhe_suoratoimitus") {
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
   $sel = array();
@@ -3156,14 +3180,12 @@ if ($fieldname == "varastoonvientipaiva") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-  $sel = "";
-
-  if ($trow[$i] != "") {
-    $sel = "selected";
-  }
+  $sel = array();
+  $sel[$trow[$i]] = " selected";
 
   $ulos .= "<option value = ''>".t("Tavaran varastoonvientip‰iv‰ on saapumisen varastoonvientip‰iv‰");
-  $ulos .= "<option value = 'K' $sel>".t("Tavaran varastoonvientip‰iv‰ voidaan syˆtt‰‰ saapumisen varastoonvienniss‰");
+  $ulos .= "<option value = 'K' {$sel['K']}>".t("Tavaran varastoonvientip‰iv‰ voidaan syˆtt‰‰ saapumisen varastoonvienniss‰");
+  $ulos .= "<option value = 'R' {$sel['R']}>".t("Tavaran varastoonvientip‰iv‰ korjataan automaattisesti edelt‰m‰‰n tapahtumaa joka aiheutti negatiivisen saldon");
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -3623,6 +3645,30 @@ if ($fieldname == 'valmistuksien_kasittely') {
 
   $ulos .= "<option value = ''>".t("Valmistuksella voi olla useita valmisteita")."</option>";
   $ulos .= "<option value = 'Y' $sel>".t("Valmistuksella voi olla vain yksi valmiste")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == 'kehahinta_valmistuksella') {
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'K' ? ' selected' : '';
+
+  $ulos .= "<option value = ''>".t("Valmistuksella ei n‰ytet‰ keskihankintahintoja")."</option>";
+  $ulos .= "<option value = 'K' $sel>".t("Valmistuksella n‰ytet‰‰n keskihankintahinnat")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == 'saldo_varastossa_valmistuksella') {
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'S' ? ' selected' : '';
+
+  $ulos .= "<option value = ''>".t("Valmistuksella ei n‰ytet‰ varastossa olevaa saldoa")."</option>";
+  $ulos .= "<option value = 'S' $sel>".t("Valmistuksella n‰ytet‰‰n varastossa oleva saldo")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

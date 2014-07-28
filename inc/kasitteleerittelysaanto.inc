@@ -9,7 +9,7 @@ $query = "SELECT tilino
           and koodiselite = '$koodiselite'";
 $tiliotesaantoresult = mysql_query($query) or pupe_error($query);
 
-if (mysql_num_rows($tiliotesaantoresult) > 0) { // Jotain lˆytyy
-  $kuittikoodi=' ';
+if (mysql_num_rows($tiliotesaantoresult) > 0) {
+  $kuittikoodi =' ';
   echo "<font class='message'>".t("Erittely pyydettiin k‰sittelem‰‰n")."</font><br>\n";
 }

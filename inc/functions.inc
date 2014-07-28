@@ -23288,14 +23288,18 @@ if (!function_exists('hae_toimittajat')) {
 }
 
 if (!function_exists('echo_tallennus_formi')) {
-  function echo_tallennus_formi($filepath, $new_filename, $file_extension, $number='') {
+  function echo_tallennus_formi($filepath, $new_filename, $file_extension) {
+    if (empty($filepath) or empty($new_filename) or empty($file_extension)) {
+      return false;
+    }
+
     echo "<form method='post' class='multisubmit'>";
     echo "<table>";
     echo "<tr>";
     echo "<th>".t("Tallenna {$file_extension} aineisto").":</th>";
     echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
     echo "<input type='hidden' name='lataa_tiedosto' value='1'>";
-    echo "<input type='hidden' name='kaunisnimi' value='" .t($new_filename).$number.".".$file_extension."'>";
+    echo "<input type='hidden' name='kaunisnimi' value='{$new_filename}.{$file_extension}'>";
     echo "<input type='hidden' name='tmpfilenimi' value='{$filepath}'>";
     echo "<td class='back'><input id='aineisto_tallennus_submit' type='submit' value='".t("Tallenna")."'></td>";
     echo "</tr>";

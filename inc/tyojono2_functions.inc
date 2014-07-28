@@ -852,3 +852,25 @@ function aseta_hakuehdot(&$request) {
   $request['tyostatus'] = $_SESSION['tyojono_hakuehdot']['tyostatus'];
   $request['toimitusaika'] = $_SESSION['tyojono_hakuehdot']['toimitusaika'];
 }
+
+function kasittele_laskutunnukset($lasku_tunnukset) {
+  global $kukarow, $yhtiorow;
+
+  //requestista voi tulla lasku_tunnukset, joko stringin‰ tai arrayn‰
+  //Jos se tulee arrayn‰ niin arrayn solu voi pit‰‰ sis‰ll‰‰n joko yhden tai useamman lasku_tunnuksen pilkulla eroteltuna
+  //t‰st‰ syyst‰ todella ep‰selv‰‰
+  //lasku_tunnukset_temp halutaan olevan yksiulotteinen array tunnuksista
+  if (!is_array($lasku_tunnukset)) {
+    return $lasku_tunnukset;
+  }
+
+  $lasku_tunnukset_temp = array();
+  foreach ($lasku_tunnukset as $tunnus) {
+    $tunnus = explode(',', $tunnus);
+    foreach ($tunnus as $t) {
+      $lasku_tunnukset_temp[] = $t;
+    }
+  }
+
+  return $lasku_tunnukset_temp;
+}

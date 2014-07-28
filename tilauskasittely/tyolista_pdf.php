@@ -12,7 +12,28 @@ else {
   require_once($filepath . '/tyojono2_functions.inc');
 }
 
-function hae_tyolistat($lasku_tunnukset, $multi = false) {
+function hae_tyolistat($lasku_tunnukset) {
+
+  if (empty($lasku_tunnukset)) {
+    return false;
+  }
+
+  //requestista voi tulla lasku_tunnukset, joko stringin‰ tai arrayn‰
+  //Jos se tulee arrayn‰ niin arrayn solu voi pit‰‰ sis‰ll‰‰n joko yhden tai useamman lasku_tunnuksen pilkulla eroteltuna
+  //t‰st‰ syyst‰ todella ep‰selv‰‰
+  $multi = false;
+  if (is_array($lasku_tunnukset)) {
+    foreach ($lasku_tunnukset as $tunnus) {
+      $tunnus = explode(',', $tunnus);
+      $tunnukset[] = $tunnus;
+    }
+    $lasku_tunnukset = $tunnukset;
+    $multi = true;
+  }
+  else {
+    $lasku_tunnukset = explode(',', $lasku_tunnukset);
+  }
+
   if (!empty($lasku_tunnukset)) {
     if ($multi === true) {
       $tyomaarays_rivit = array();
@@ -26,14 +47,13 @@ function hae_tyolistat($lasku_tunnukset, $multi = false) {
 
     $filepath = kirjoita_json_tiedosto($tyomaarays_rivit, "tyolista_" . uniqid() . "");
 
-    if (!empty($filepath)) {
-      $pdf_tiedosto = aja_ruby($filepath, 'tyolista_pdf');
+    $pdf_tiedosto = aja_ruby($filepath, 'tyolista_pdf');
 
-      return $pdf_tiedosto;
-    }
-    else {
+    if (empty($pdf_tiedosto)) {
       return false;
     }
+
+    return $pdf_tiedosto;
   }
 }
 

@@ -183,7 +183,9 @@ if (isset($_SESSION['tyojono_hakuehdot']) and $request['ala_tee'] != 'hae') {
   aseta_hakuehdot($request);
 }
 
-if (is_string($request['lasku_tunnukset']) and !empty($request['lasku_tunnukset'])) {
+//Kaikissa muissa tilanteissa lasku_tunnuksia halutaan käsitellä arraynä paitsi työlistojen tulostuksessa
+//Työlistojen tulostuksessa lasku_tunnuksien data-rakenne kertoo kuinka monta pdf:ää pitää tulla
+if (!empty($request['lasku_tunnukset']) and $request['ala_tee'] != 'tulosta_tyolista' and is_string($request['lasku_tunnukset'])) {
   $request['lasku_tunnukset'] = explode(',', $lasku_tunnukset);
 }
 
@@ -219,6 +221,19 @@ else {
     else if ($request['ala_tee'] == 'merkkaa_kadonneeksi') {
       merkkaa_laite_kadonneeksi($request);
     }
+    else if ($request['ala_tee'] == 'tulosta_tyolista') {
+      $pdf_tiedosto = \PDF\Tyolista\hae_tyolistat($request['lasku_tunnukset']);
+      if (!empty($pdf_tiedosto)) {
+        //lasku_tunnukset voi tulla stringinä pilkuilla eroteltuna tai arrayna. aseta_tyomaaraysten_status haluaa
+        //yksi ulotteisen arrayn ja kasittele_laskutunnukset palauttaa oikein mallisen arrayn
+        $lasku_tunnukset_temp = kasittele_laskutunnukset($request['lasku_tunnukset']);
+        echo_tallennus_formi($pdf_tiedosto, t('Tyolistat'), 'pdf');
+        aseta_tyomaaraysten_status($lasku_tunnukset_temp, 'T');
+      }
+      else {
+        echo "<font class='error'>" . t('Työlista tiedostojen luonti epäonnistui') . "</font>";
+      }
+    }
   }
   else if (empty($request['lasku_tunnukset'])) {
     if ($request['ala_tee'] == 'merkkaa_tehdyksi') {
@@ -230,51 +245,8 @@ else {
     else if ($request['ala_tee'] == 'poista') {
       echo "<font class='error'>" . t('Yhtään työtä ei poistettu') . "</font>";
     }
-  }
-
-  if ($request['ala_tee'] == 'tulosta_tyolista') {
-
-    $multi = false;
-
-    //requestista voi tulla lasku_tunnukset, joko stringinä tai arraynä
-    //Jos se tulee arraynä niin arrayn solu voi pitää sisällään joko yhden tai useamman lasku_tunnuksen pilkulla eroteltuna
-    //tästä syystä todella epäselvää
-    //lasku_tunnukset_temp halutaan olevan yksiulotteinen array tunnuksista
-    $lasku_tunnukset_temp = array();
-    if (is_array($lasku_tunnukset)) {
-      foreach ($lasku_tunnukset as $tunnus) {
-        $tunnus = explode(',', $tunnus);
-        $tunnukset[] = $tunnus;
-        foreach ($tunnus as $t) {
-          $lasku_tunnukset_temp[] = $t;
-        }
-      }
-      $lasku_tunnukset = $tunnukset;
-      $multi = true;
-    }
-    else {
-      $lasku_tunnukset = explode(',', $lasku_tunnukset);
-      $lasku_tunnukset_temp = $lasku_tunnukset;
-    }
-
-    $pdf_tiedosto = \PDF\Tyolista\hae_tyolistat($lasku_tunnukset, $multi);
-    if (!empty($pdf_tiedosto)) {
-
-      if (strpos($pdf_tiedosto, '_')) {
-        preg_match('~_(.*?).pdf~', $pdf_tiedosto, $osat);
-        $number = '_' . $osat[1];
-        $uusi_nimi = 'Tyolista';
-      }
-      else {
-        $number = null;
-        $uusi_nimi = 'Kaikki_tyolistat';
-      }
-
-      echo_tallennus_formi($pdf_tiedosto, $uusi_nimi, 'pdf', $number);
-      aseta_tyomaaraysten_status($lasku_tunnukset_temp, 'T');
-    }
-    else {
-      echo t("Työlista tiedostojen luonti epäonnistui");
+    else if ($request['ala_tee'] == 'tulosta_tyolista') {
+      echo "<font class='error'>" . t('Työlista tiedostojen luonti epäonnistui') . "</font>";
     }
   }
 }

@@ -89,8 +89,8 @@ if (!function_exists('teccom_asn_paketti')) {
         }
       }
 
-      $laatikkoind = $laatikko;
-      $sscc = $laatikko;
+      $_laatikkoind = $laatikko;
+      $_sscc = $laatikko;
     }
     elseif ($tavarantoimittajanumero == "123220" or $tavarantoimittajanumero == "123080") {
       $_laatikkoind = $asn_numero;

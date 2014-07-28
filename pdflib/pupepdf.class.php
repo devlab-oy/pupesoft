@@ -1,11 +1,11 @@
 <?php
 
-require_once('pdflib/phppdflib.class.php');
+require_once 'pdflib/phppdflib.class.php';
 
 class PDF extends pdffile {
 
   function pt_mm($pointseja) {
-    return round($pointseja * 0.3527777778,2);
+    return round($pointseja * 0.3527777778, 2);
   }
 
   function scaleImage($value, $limit) {
@@ -17,10 +17,10 @@ class PDF extends pdffile {
     $scale["h"] = 1;
     $scale["w"] = 1;
 
-    if($height > $maxHeight) {
+    if ($height > $maxHeight) {
       $scale["h"] = $maxHeight/$height;
     }
-    if($value > $limit) {
+    if ($value > $limit) {
       $scale["w"] = $maxWidth/$width;
     }
 
@@ -39,10 +39,10 @@ class PDF extends pdffile {
   function countParagraphHeight($txt, $font, $sW=0) {
     global $fonts;
 
-    if($sW>0) {
+    if ($sW>0) {
       $sW=mm_pt($sW);
     }
-    elseif($sW<0) {
+    elseif ($sW<0) {
       $sW=$this->currentPage["width"]-$this->currentPage["margin-left"]-$this->currentPage["margin-right"]+mm_pt($w);
     }
     else {
@@ -50,29 +50,29 @@ class PDF extends pdffile {
     }
 
     // Poistetaan kaikki roskat
-    $txt = str_replace(array("\r","\t"), array("","    "), $txt);
+    $txt = str_replace(array("\r", "\t"), array("", "    "), $txt);
     $riveja=1;
 
     //  Ja lasketaan..
     $i=0;
     $stringw=0;
-    foreach(preg_split("/([\s\n])+/U",$txt, -1, PREG_SPLIT_DELIM_CAPTURE) as $osa) {
-      if($i==0) {
-        $stringw+=$this->strlen($osa,$fonts[$font]);
-        if($stringw>$sW) {
+    foreach (preg_split("/([\s\n])+/U", $txt, -1, PREG_SPLIT_DELIM_CAPTURE) as $osa) {
+      if ($i==0) {
+        $stringw+=$this->strlen($osa, $fonts[$font]);
+        if ($stringw>$sW) {
           $riveja++;
           $stringw=0;
         }
         $i=1;
       }
       else {
-        if(preg_match("/\n/",$osa)) {
+        if (preg_match("/\n/", $osa)) {
           $riveja++;
           $stringw=0;
         }
         else {
-          $stringw+=$this->strlen($osa,$fonts[$font]);
-          if($stringw>$sW) {
+          $stringw+=$this->strlen($osa, $fonts[$font]);
+          if ($stringw>$sW) {
             $riveja++;
             $stringw=0;
           }
@@ -88,138 +88,138 @@ class PDF extends pdffile {
     $valuutta = strtoupper($valuutta);
 
     //  Asetetaan valuutta..
-    if($valuutta == "USD") {
+    if ($valuutta == "USD") {
       setlocale(LC_MONETARY, 'en_US');
     }
-    elseif($valuutta == "GBP") {
+    elseif ($valuutta == "GBP") {
       setlocale(LC_MONETARY, 'en_GB');
     }
-    elseif($valuutta == "SEK") {
+    elseif ($valuutta == "SEK") {
       setlocale(LC_MONETARY, 'sv_SE');
     }
-    elseif($valuutta == "JPY") {
+    elseif ($valuutta == "JPY") {
       setlocale(LC_MONETARY, 'ja_JP');
     }
-    elseif($valuutta == "DKK") {
+    elseif ($valuutta == "DKK") {
       setlocale(LC_MONETARY, 'da_DK');
     }
-    elseif($valuutta == "TRY") {
+    elseif ($valuutta == "TRY") {
       setlocale(LC_MONETARY, 'tr_TR');
     }
-    elseif($valuutta == "AUD") {
+    elseif ($valuutta == "AUD") {
       setlocale(LC_MONETARY, 'en_AU');
     }
-    elseif($valuutta == "BRL") {
+    elseif ($valuutta == "BRL") {
       setlocale(LC_MONETARY, 'pt_BR');
     }
-    elseif($valuutta == "CAD") {
+    elseif ($valuutta == "CAD") {
       setlocale(LC_MONETARY, 'en_CA');
     }
-    elseif($valuutta == "CNY" or $valuutta == "RMB") {
+    elseif ($valuutta == "CNY" or $valuutta == "RMB") {
       setlocale(LC_MONETARY, 'zh_CN');
     }
-    elseif($valuutta == "HKD") {
+    elseif ($valuutta == "HKD") {
       setlocale(LC_MONETARY, 'zh_HK');
     }
-    elseif($valuutta == "IDR") {
+    elseif ($valuutta == "IDR") {
       // ???
       setlocale(LC_MONETARY, 'id_ID');
     }
-    elseif($valuutta == "KRW") {
+    elseif ($valuutta == "KRW") {
       setlocale(LC_MONETARY, 'ko_KR');
     }
-    elseif($valuutta == "MXN") {
+    elseif ($valuutta == "MXN") {
       // ???
       setlocale(LC_MONETARY, 'mx_MX');
     }
-    elseif($valuutta == "MYR") {
+    elseif ($valuutta == "MYR") {
       // ???
       setlocale(LC_MONETARY, 'my_MY');
     }
-    elseif($valuutta == "NZD") {
+    elseif ($valuutta == "NZD") {
       setlocale(LC_MONETARY, 'en_NZ');
     }
-    elseif($valuutta == "PHP") {
+    elseif ($valuutta == "PHP") {
       // ???
       setlocale(LC_MONETARY, 'py_PY');
     }
-    elseif($valuutta == "SGD") {
+    elseif ($valuutta == "SGD") {
       // ???
       setlocale(LC_MONETARY, 'sg_SG');
     }
-    elseif($valuutta == "THB") {
+    elseif ($valuutta == "THB") {
       // ???
       setlocale(LC_MONETARY, 'th_TH');
     }
-    elseif($valuutta == "RUB") {
+    elseif ($valuutta == "RUB") {
       setlocale(LC_MONETARY, 'ru_RU');
     }
-    elseif($valuutta == "HRK") {
+    elseif ($valuutta == "HRK") {
       setlocale(LC_MONETARY, 'hr_HR');
     }
-    elseif($valuutta == "NOK") {
+    elseif ($valuutta == "NOK") {
       setlocale(LC_MONETARY, 'no_NO');
     }
-    elseif($valuutta == "BGN") {
+    elseif ($valuutta == "BGN") {
       setlocale(LC_MONETARY, 'bg_BG');
     }
-    elseif($valuutta == "NOK") {
+    elseif ($valuutta == "NOK") {
       setlocale(LC_MONETARY, 'no_NO');
     }
-    elseif($valuutta == "CZK") {
+    elseif ($valuutta == "CZK") {
       setlocale(LC_MONETARY, 'cs_CZ');
     }
-    elseif($valuutta == "NOK") {
+    elseif ($valuutta == "NOK") {
       setlocale(LC_MONETARY, 'no_NO');
     }
-    elseif($valuutta == "NOK") {
+    elseif ($valuutta == "NOK") {
       setlocale(LC_MONETARY, 'no_NO');
     }
-    elseif($valuutta == "EET") {
+    elseif ($valuutta == "EET") {
       setlocale(LC_MONETARY, 'et_EE');
     }
-    elseif($valuutta == "HUF") {
+    elseif ($valuutta == "HUF") {
       setlocale(LC_MONETARY, 'hu_HU');
     }
-    elseif($valuutta == "LTL") {
+    elseif ($valuutta == "LTL") {
       setlocale(LC_MONETARY, 'lt_LT');
     }
-    elseif($valuutta == "LVL") {
+    elseif ($valuutta == "LVL") {
       setlocale(LC_MONETARY, 'lv_LV');
     }
-    elseif($valuutta == "NOK") {
+    elseif ($valuutta == "NOK") {
       // ???
       setlocale(LC_MONETARY, 'no_NO');
     }
-    elseif($valuutta == "PLN") {
+    elseif ($valuutta == "PLN") {
       setlocale(LC_MONETARY, 'pl_PL');
     }
-    elseif($valuutta == "RON") {
+    elseif ($valuutta == "RON") {
       setlocale(LC_MONETARY, 'ro_RO');
     }
-    elseif($valuutta == "SKK") {
+    elseif ($valuutta == "SKK") {
       setlocale(LC_MONETARY, 'sk_SK');
     }
-    elseif($valuutta == "CHF") {
+    elseif ($valuutta == "CHF") {
       setlocale(LC_MONETARY, 'fr_CH');
     }
-    elseif($valuutta == "ISK") {
+    elseif ($valuutta == "ISK") {
       setlocale(LC_MONETARY, 'is_IS');
     }
-    elseif($valuutta == "ZAR") {
+    elseif ($valuutta == "ZAR") {
       setlocale(LC_MONETARY, 'af_ZA');
     }
-    elseif($valuutta == "EUR") {
-      if($maa == "FR") {
+    elseif ($valuutta == "EUR") {
+      if ($maa == "FR") {
         setlocale(LC_MONETARY, 'fr_FR');
       }
-      elseif($maa == "DE") {
+      elseif ($maa == "DE") {
         setlocale(LC_MONETARY, 'de_DE');
       }
-      elseif($maa == "IT") {
+      elseif ($maa == "IT") {
         setlocale(LC_MONETARY, 'it_IT');
       }
-      elseif($maa == "ES") {
+      elseif ($maa == "ES") {
         setlocale(LC_MONETARY, 'es_ES');
       }
       else {
@@ -231,10 +231,10 @@ class PDF extends pdffile {
     }
 
     //  Asetetaan päiväys..
-    if($maa == "US") {
+    if ($maa == "US") {
       setlocale(LC_TIME, 'en_US');
     }
-    elseif($maa == "GB") {
+    elseif ($maa == "GB") {
       setlocale(LC_TIME, 'en_GB');
     }
     else {
@@ -251,11 +251,11 @@ class PDF extends pdffile {
     $wmax = $this->pt_mm($this->currentPage["width"]-$this->currentPage["margin-left"]-$this->currentPage["margin-right"]);
     //echo $wmax;
 
-    foreach($sarakkeet as $w) {
+    foreach ($sarakkeet as $w) {
       $tw += $w;
 
       //  mennään liian leveeksi!
-      if($tw > $wmax) {
+      if ($tw > $wmax) {
         $s[] = $wmax;
         return $s;
       }
@@ -276,33 +276,33 @@ class PDF extends pdffile {
     $left = mm_pt($left);
     $top = mm_pt($top);
 
-    if(strtoupper($style) == "B") {
+    if (strtoupper($style) == "B") {
       $p["font"] = $p["font"]."-Bold";
     }
-    if(strtoupper($style) == "I") {
+    if (strtoupper($style) == "I") {
       $p["font"] = $p["font"]."-Oblique";
     }
-    if(strtoupper($style) == "BI" or strtoupper($style) == "IB") {
+    if (strtoupper($style) == "BI" or strtoupper($style) == "IB") {
       $p["font"] = $p["font"]."-BoldOblique";
     }
 
-    if(strtoupper($align) == "C") {
+    if (strtoupper($align) == "C") {
       $p["align"] = "center";
     }
-    if(strtoupper($align) == "R") {
+    if (strtoupper($align) == "R") {
       $p["align"] = "right";
     }
-    if(strtoupper($align) == "L") {
+    if (strtoupper($align) == "L") {
       $p["align"] = "left";
     }
 
-    if($right == 0) {
+    if ($right == 0) {
       $right = $this->currentPage["width"]-$this->currentPage["margin-left"]-$this->currentPage["margin-right"];
     }
 
     $bottom = $top - ($ln * ($p["height"]+2));
 
-    if(!is_int($page)) {
+    if (!is_int($page)) {
       $page = $this->currentPage["oid"];
     }
 
@@ -314,7 +314,7 @@ class PDF extends pdffile {
   function drawRectangle($top, $left, $bottom, $right, $font, $page="") {
     global $fonts;
 
-    if(!is_array($font)) {
+    if (!is_array($font)) {
       $p = $fonts[$font];
     }
     else {
@@ -326,11 +326,11 @@ class PDF extends pdffile {
     $top = mm_pt($top);
     $bottom = mm_pt($bottom);
 
-    if($right == 0) {
+    if ($right == 0) {
       $right = $this->currentPage["width"]-$this->currentPage["margin-left"]-$this->currentPage["margin-right"];
     }
 
-    if(!is_int($page)) {
+    if (!is_int($page)) {
       $page = $this->currentPage["oid"];
     }
 
@@ -346,27 +346,27 @@ class PDF extends pdffile {
     $left = mm_pt($left);
     $top = mm_pt($top);
 
-    if(strtoupper($style) == "B") {
+    if (strtoupper($style) == "B") {
       $p["font"] = $p["font"]."-Bold";
     }
-    if(strtoupper($style) == "I") {
+    if (strtoupper($style) == "I") {
       $p["font"] = $p["font"]."-Oblique";
     }
-    if(strtoupper($style) == "BI" or strtoupper($style) == "IB") {
+    if (strtoupper($style) == "BI" or strtoupper($style) == "IB") {
       $p["font"] = $p["font"]."-BoldOblique";
     }
 
-    if(strtoupper($align) == "C") {
+    if (strtoupper($align) == "C") {
       $p["align"] = "center";
     }
-    if(strtoupper($align) == "R") {
+    if (strtoupper($align) == "R") {
       $p["align"] = "right";
     }
-    if(strtoupper($align) == "L") {
+    if (strtoupper($align) == "L") {
       $p["align"] = "left";
     }
 
-    if($right == 0) {
+    if ($right == 0) {
       $right = $this->currentPage["width"]-$this->currentPage["margin-left"]-$this->currentPage["margin-right"];
     }
 
@@ -380,30 +380,30 @@ class PDF extends pdffile {
     global $fonts;
 
     $p = $fonts[$font];
-    return $this->strlen($txt,$p);
+    return $this->strlen($txt, $p);
   }
 
   function placeImage($top, $width, $imageFile, $page="") {
 
     $filedata = file_get_contents($imageFile);
-    if($filedata != "") {
-      if(strpos($imageFile, ".png")) {
+    if ($filedata != "") {
+      if (strpos($imageFile, ".png")) {
         $image = $this->png_embed($filedata);
       }
-      elseif(strpos($imageFile, ".jpg")) {
+      elseif (strpos($imageFile, ".jpg")) {
         $image = $this->jfif_embed($filedata);
       }
 
-      if($image!="") {
+      if ($image!="") {
 
         $top = mm_pt($top);
         $width = mm_pt($width);
 
-        if(!is_int($page)) {
+        if (!is_int($page)) {
           $page = $this->currentPage["oid"];
         }
 
-        $this->image_place($image,$top,$width,$this->currentPage["oid"]);
+        $this->image_place($image, $top, $width, $this->currentPage["oid"]);
       }
       else {
         echo "Kuvavirhe 1!";
@@ -418,26 +418,26 @@ class PDF extends pdffile {
 
   function placeImageToTemplate($top, $width, $imageFile, $template, $maxSize="") {
 
-    if(!is_array($imageFile)) {
+    if (!is_array($imageFile)) {
       $filedata = file_get_contents($imageFile);
     }
     else {
       $filedata = &$imageFile["data"];
     }
 
-    if($filedata != "") {
-      if(strpos($imageFile, ".png") or $imageFile["filetype"] == "image/png") {
+    if ($filedata != "") {
+      if (strpos($imageFile, ".png") or $imageFile["filetype"] == "image/png") {
         $image = $this->png_embed($filedata);
       }
-      elseif(strpos($imageFile, ".jpg") or $imageFile["filetype"] == "image/jpeg") {
+      elseif (strpos($imageFile, ".jpg") or $imageFile["filetype"] == "image/jpeg") {
         $image = $this->jfif_embed($filedata);
       }
 
-      if($image!="") {
+      if ($image!="") {
         $top = mm_pt($top);
         $left = mm_pt($width);
 
-        if(!is_array($imageFile)) {
+        if (!is_array($imageFile)) {
           $size    = getimagesize($imageFile);
           $height  = $size[1];
           $width  = $size[0];
@@ -447,7 +447,7 @@ class PDF extends pdffile {
           $width  = $imageFile["image_width"];
         }
 
-        if($maxSize>0) {
+        if ($maxSize>0) {
           list($height, $width) = $this->scaleImage("{$height}x{$width}", $maxSize);
         }
 
@@ -471,7 +471,7 @@ class PDF extends pdffile {
     $left = mm_pt($left);
     $height = mm_pt($height);
 
-    if(!is_int($page)) {
+    if (!is_int($page)) {
       $page = $this->currentPage["oid"];
     }
 

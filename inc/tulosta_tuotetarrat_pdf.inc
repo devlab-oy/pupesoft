@@ -73,10 +73,10 @@ for ($i = 1; $i < $kappalemaara; $i++) {
   }
 
   if ($koodi == 'eankoodi' and tarkista_ean13($eankoodirow['eankoodi']) !== FALSE) {
-    $data = viivakoodi($eankoodirow['eankoodi'], "ean", $leveys, 130, "zz");
+    $data = viivakoodi($eankoodirow['eankoodi'], "ean", $leveys, 100, "zz");
   }
   else {
-    $data = viivakoodi($eankoodirow["$koodi"], "codabar", $leveys, 130, "zz");
+    $data = viivakoodi($eankoodirow["$koodi"], "codabar", $leveys, 100, "zz");
   }
 
   $image = $pdf->jfif_embed($data);

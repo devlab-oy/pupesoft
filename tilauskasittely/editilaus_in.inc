@@ -100,6 +100,18 @@ if (!function_exists('jt_toimita_editilaus')) {
   }
 }
 
+if (!function_exists('hae_erikoiskaupan_parametrit')) {
+  function hae_erikoiskaupan_parametrit ($storename, $verkkokauppa_erikoiskasittely) {
+
+    foreach ($verkkokauppa_erikoiskasittely as $sp) {
+      if (strpos($storename, $sp[0])) {
+        return $sp;
+      }
+    }
+    return array();
+  }
+}
+
 // nollataan kaikki laskun muuttujat (nämä samat pitää tehdä whilen lopussa)
 unset($arow);
 unset($arow_viite);
@@ -158,6 +170,8 @@ $verkkokauppavarasto  = "";
 $verkkokauppavarasto_li  = "";
 $editilaus_loppuhinta  = "";
 $kieltolisa        = "";
+$verkkokauppa = "";
+$ot_verkkokauppa_asiakasnro = "";
 $OT_ASIAKASNRO      = "";
 $merkkitieto      = "";
 
@@ -400,6 +414,16 @@ while ($tietue = fgets($fd)) {
       $editilaus_tilaustyyppi = trim($tieto);
       break;
 
+    case 'OSTOTIL.VERKKOKAUPPA' :
+      // Verkkokaupan nimi
+      $verkkokauppa = $tieto;
+      break;
+
+    case 'OSTOTIL.OT_VERKKOKAUPPA_ASIAKASNRO' :
+      // Verkkokaupan asiakasnumero
+      $ot_verkkokauppa_asiakasnro = $tieto;
+      break;
+
     case 'OBGMIACKR' :
     //Edivastaus
       if ($tieto == "AB") {
@@ -595,6 +619,18 @@ while ($tietue = fgets($fd)) {
           }
           // Koontikeississä ei haluta enää jatkaa ettei vahingossa ylikirjoiteta tilaavaa asiakasta
           break;
+        }
+      }
+
+      // Käytetään Magenton asiakasnumeroa jos sellainen löytyy ennalta määritellyistä kaupoista tulevilla tilauksilla
+      // ja on setattu $verkkokauppa_erikoiskasittely:n
+      if ($edi_tyyppi == "magento" and $ot_verkkokauppa_asiakasnro != ''
+        and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely) 
+        and count($verkkokauppa_erikoiskasittely) > 0) {
+    
+        $result = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
+        if (count($result) > 0) {
+          $tieto = $ot_verkkokauppa_asiakasnro;
         }
       }
 
@@ -845,6 +881,11 @@ while ($tietue = fgets($fd)) {
       $ltoim_puh = trim($tieto);
       break;
 
+    case 'OSTOTIL.OT_TOIMITUS_EMAIL' :
+      // toimitusosoitteen email
+      $ltoim_email = trim($tieto);
+      break;
+
     case 'OSTOTIL.OT_YHTEYSHENKILONPUH' :
       // yhteyshenkilön puhelinnumero
       $yhteyshenkilon_puhelin = trim($tieto);
@@ -1004,7 +1045,8 @@ while ($tietue = fgets($fd)) {
           $arow["postino"]  = $lpostino;
           $arow["maa"]    = $ltoim_maa;
           $arow["toim_puh"]  = $ltoim_puh;
-           $arow["vienti"]    = "";
+          $arow["toim_email"] = $ltoim_email;
+          $arow["vienti"]    = "";
 
           $arow['laskutus_nimi']     = $lnimi;
           $arow['laskutus_nimitark']   = $lnimitark;
@@ -1141,6 +1183,20 @@ while ($tietue = fgets($fd)) {
             $editilaus_alatila   = '';
           }
         }
+        
+        $tilaustyyppilisa = '';
+
+        if ($edi_tyyppi == "magento" and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)
+          and count($verkkokauppa_erikoiskasittely) > 0) {
+          
+          list ($nimi, $editilaus_tilaustyyppi, $tilaustyyppilisa) = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
+          // Jos löytyy erikoiskäsittely niin näytetään se myös käyttöliittymässä
+          if (isset($nimi) and !empty($nimi)) {
+            $edi_ulos .= t("Tilauksen erikoiskäsittely")."-> {$nimi},
+              ".t("tilaustyyppi").": {$editilaus_tilaustyyppi},
+              ".t("tilaustyyppilisä").": {$tilaustyyppilisa} \n\n";
+          }
+        }
 
         // jos tilauksella on tullut lopullisen asikkaan tiedot, laitetaan ne talteen sisviesti ykköseen
         if ($lopnimi != "") {
@@ -1191,8 +1247,6 @@ while ($tietue = fgets($fd)) {
         }
 
         $til_vienti = $arow["vienti"];
-
-        $tilaustyyppilisa = '';
 
         if ($edi_tyyppi == 'futursoft' and ($editilaus_tilaustyyppi == 2 or $editilaus_tilaustyyppi == 3)) {
           $tilaustyyppilisa = $editilaus_tilaustyyppi;
@@ -1344,6 +1398,7 @@ while ($tietue = fgets($fd)) {
                   toim_ovttunnus          = '$toimitetaan_tanne',
                   toim_postino            = '$arow[toim_postino]',
                   toim_postitp            = '$arow[toim_postitp]',
+                  toim_email              = '$arow[toim_email]',
                   tunnusnippu             = '',
                   valkoodi                = '$yhtiorow[valkoodi]',
                   varasto                 = '',
@@ -1675,6 +1730,18 @@ while ($tietue = fgets($fd)) {
           $editilaus_hinta = round($editilaus_hinta * (1 + $laskurow["alv"]/100), 2);
         }
       }
+
+      // Jos tilaus tulee ennalta määritellyistä kaupoista 
+      // jotka on setattu $verkkokauppa_erikoiskasittely:n, nollataan hinta
+      if ($edi_tyyppi == "magento" and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely) 
+        and count($verkkokauppa_erikoiskasittely) > 0) {
+    
+        $result = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
+        if (count($result) > 0) {
+          $editilaus_hinta = 0;
+        }
+      }
+
       break;
 
     case 'OSTOTILRIV.OTR_ALENNUS' :

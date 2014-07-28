@@ -180,13 +180,23 @@ if (!empty($request['lasku_tunnukset']) and $request['ala_tee'] != 'tulosta_tyol
 }
 
 if ($toim == 'TEHDYT_TYOT') {
-  if ($request['ala_tee'] == 'tulosta_tarkastuspoytakirja' or $request['ala_tee'] == 'tulosta_poikkeamaraportti') {
-    $pdf_tiedosto = \PDF\Tarkastuspoytakirja\hae_tarkastuspoytakirja($request['lasku_tunnukset']);
+  if ($request['ala_tee'] == 'tulosta_tarkastuspoytakirja') {
+    $pdf_tiedosto = PDF\Tarkastuspoytakirja\hae_tarkastuspoytakirja($request['lasku_tunnukset']);
     if (!empty($pdf_tiedosto)) {
       echo_tallennus_formi($pdf_tiedosto, ($request['ala_tee'] == 'tulosta_tarkastuspoytakirja' ? t("Tarkastuspöytakirja") : t("Poikkeamaraportti")), 'pdf');
     }
   }
-  if ($request['ala_tee'] == 'tulosta_laskutuspoytakirja') {
+  else if ($request['ala_tee'] == 'tulosta_poikkeamaraportti') {
+    $pdf_tiedostot = PDF\Poikkeamaraportti\hae_poikkeamaraportit($request['lasku_tunnukset']);
+    if (!empty($pdf_tiedostot)) {
+      foreach ($pdf_tiedostot as $pdf_tiedosto) {
+        if (!empty($pdf_tiedosto)) {
+          echo_tallennus_formi($pdf_tiedosto, t("Poikkeamaraportti"), 'pdf');
+        }
+      }
+    }
+  }
+  else if ($request['ala_tee'] == 'tulosta_laskutuspoytakirja') {
     $pdf_tiedosto = \PDF\Laskutuspoytakirja\hae_laskutuspoytakirja($request['lasku_tunnukset']);
 
     if (!empty($pdf_tiedosto)) {

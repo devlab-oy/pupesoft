@@ -379,6 +379,7 @@ else {
 
     // haetaan kaikki tilaukset jotka on toimitettu ja kuuluu laskuttaa tänään (tätä resulttia käytetään alhaalla lisää)
     $lasklisa = "";
+    $lasklisa_eikateiset = "";
 
     // tarkistetaan tässä tuleeko laskutusviikonpäivät ohittaa
     // ohitetaan jos ruksi on ruksattu tai poikkeava laskutuspäivämäärä on syötetty
@@ -422,6 +423,11 @@ else {
       $lasklisa .= " and lasku.tunnus in ($laskutettavat) ";
     }
 
+    // Komentoriviltä ei ikinä laskuteta käteismyyntejä ($php_cli ei kelpaa, koska $editil_cli virittää sen myös)
+    if (php_sapi_name() == 'cli') {
+      $lasklisa_eikateiset = " JOIN maksuehto ON (lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.kateinen='')";
+    }
+
     $tulos_ulos_maksusoppari = "";
     $tulos_ulos_sarjanumerot = "";
 
@@ -441,6 +447,7 @@ else {
                 round(min(tilausrivi.hinta / if ('{$yhtiorow["alv_kasittely"]}' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * {$query_ale_lisa}), $yhtiorow[hintapyoristys]) min_kplhinta,
                 group_concat(distinct lasku.tunnus) tunnukset
                 FROM lasku
+                {$lasklisa_eikateiset}
                 JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and tilausrivi.var not in ('P','J','O','S'))
                 JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
                 WHERE lasku.yhtio  = '$kukarow[yhtio]'
@@ -485,8 +492,9 @@ else {
     }
 
     //haetaan kaikki laskutettavat tilaukset ja tehdään maksuehtosplittaukset ja muita tarkistuksia jos niitä on
-    $query = "SELECT *
+    $query = "SELECT lasku.*
               FROM lasku
+              {$lasklisa_eikateiset}
               WHERE lasku.yhtio  = '$kukarow[yhtio]'
               and lasku.tila     = 'L'
               and lasku.alatila  = 'D'
@@ -880,13 +888,14 @@ else {
     }
 
     //haetaan kaikki laskutettavat tilaukset uudestaan, nyt meillä on maksuehtosplittaukset tehty
-    $query = "SELECT *
+    $query = "SELECT lasku.*
               FROM lasku
-              WHERE yhtio  = '$kukarow[yhtio]'
-              and tila     = 'L'
-              and alatila  = 'D'
-              and viite    = ''
-              and chn     != '999'
+              {$lasklisa_eikateiset}
+              WHERE lasku.yhtio  = '$kukarow[yhtio]'
+              and lasku.tila     = 'L'
+              and lasku.alatila  = 'D'
+              and lasku.viite    = ''
+              and lasku.chn     != '999'
               $lasklisa";
     $res = pupe_query($query);
 
@@ -1225,9 +1234,10 @@ else {
       // katsotaan halutaanko laskuille lisätä lisäkulu prosentti
       if ($yhtiorow["laskutuslisa_tuotenumero"] != "" and ($yhtiorow["laskutuslisa"] > 0 or $yhtiorow["laskutuslisa_tyyppi"] == 'T' or $yhtiorow["laskutuslisa_tyyppi"] == 'U' or $yhtiorow["laskutuslisa_tyyppi"] == 'V') and $yhtiorow["laskutuslisa_tyyppi"] != "") {
 
-        $maksuehtolisa = "";
+        $laskutuslisa_tyyppi_ehto = "";
+
         //ei käteislaskuihin
-        if ($php_cli or $yhtiorow["laskutuslisa_tyyppi"] == 'B' or $yhtiorow["laskutuslisa_tyyppi"] == 'K' or $yhtiorow["laskutuslisa_tyyppi"] == 'U') {
+        if ($yhtiorow["laskutuslisa_tyyppi"] == 'B' or $yhtiorow["laskutuslisa_tyyppi"] == 'K' or $yhtiorow["laskutuslisa_tyyppi"] == 'U') {
           $query = "SELECT tunnus
                     FROM maksuehto
                     WHERE yhtio   = '$kukarow[yhtio]'
@@ -1241,14 +1251,11 @@ else {
           }
 
           if (count($lisakulu_maksuehto) > 0) {
-            $maksuehtolisa = " and lasku.maksuehto not in (".implode(',', $lisakulu_maksuehto).") ";
+            $laskutuslisa_tyyppi_ehto = " and lasku.maksuehto not in (".implode(',', $lisakulu_maksuehto).") ";
           }
         }
-
-        $toimitustapalisa = "";
-        //ei noudolle
-        if ($yhtiorow["laskutuslisa_tyyppi"] == 'C' or $yhtiorow["laskutuslisa_tyyppi"] == 'N' or $yhtiorow["laskutuslisa_tyyppi"] == 'V') {
-
+        elseif ($yhtiorow["laskutuslisa_tyyppi"] == 'C' or $yhtiorow["laskutuslisa_tyyppi"] == 'N' or $yhtiorow["laskutuslisa_tyyppi"] == 'V') {
+          //ei noudolle
           $query = "SELECT selite
                     FROM toimitustapa
                     WHERE yhtio  = '$kukarow[yhtio]'
@@ -1262,7 +1269,7 @@ else {
           }
 
           if (count($lisakulu_toimitustapa) > 0) {
-            $toimitustapalisa = " and lasku.toimitustapa not in (".implode(',', $lisakulu_toimitustapa).") ";
+            $laskutuslisa_tyyppi_ehto = " and lasku.toimitustapa not in (".implode(',', $lisakulu_toimitustapa).") ";
           }
         }
 
@@ -1276,8 +1283,7 @@ else {
                   LEFT JOIN asiakas ON asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus
                   where lasku.yhtio = '$kukarow[yhtio]'
                   and lasku.tunnus  in ($tunnukset)
-                  $maksuehtolisa
-                  $toimitustapalisa
+                  $laskutuslisa_tyyppi_ehto
                   GROUP BY ketjutuskentta, reklamaatiot_lasku, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti, lasku.kolmikantakauppa,
                   lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
                   lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
@@ -1456,26 +1462,6 @@ else {
       // katsotaan halutaanko tilauksille lisätä kuljetusvakuutus, joko yhtiön parametri päällä tai toimitustapojen takana päällä
       if ($kulvaro["toimitustavat"] != "" or ($yhtiorow["kuljetusvakuutus_tuotenumero"] != "" and ($yhtiorow["kuljetusvakuutus"] > 0 or $yhtiorow["kuljetusvakuutus_tyyppi"] == 'F') and $yhtiorow["kuljetusvakuutus_tyyppi"] != "")) {
 
-        // ei käteismaksuehdolla olevia laskuja jos ajetaan komentoriviltä
-        $kateislisa = '';
-        if ($php_cli) {
-          $query = "SELECT tunnus
-                    FROM maksuehto
-                    WHERE yhtio   = '$kukarow[yhtio]'
-                    and kateinen != ''";
-          $result = pupe_query($query);
-
-          $kateiset = array();
-
-          while ($row = mysql_fetch_assoc($result)) {
-            $kateiset[] = $row["tunnus"];
-          }
-
-          if (count($kateiset) > 0) {
-            $kateislisa = " and lasku.maksuehto not in (".implode(',', $kateiset).") ";
-          }
-        }
-
         // Tehdään ketjutus (group by PITÄÄ OLLA sama kuin alhaalla) rivi ~1243
         $query = "SELECT
                   if (lasku.ketjutus = '', '', if (lasku.vanhatunnus > 0, lasku.vanhatunnus, lasku.tunnus)) ketjutuskentta,
@@ -1486,7 +1472,6 @@ else {
                   LEFT JOIN asiakas ON asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus
                   where lasku.yhtio = '{$kukarow['yhtio']}'
                   and lasku.tunnus  in ({$tunnukset})
-                  $kateislisa
                   GROUP BY ketjutuskentta, reklamaatiot_lasku, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti, lasku.kolmikantakauppa,
                   lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
                   lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,

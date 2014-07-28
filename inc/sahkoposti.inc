@@ -45,7 +45,6 @@ foreach ($liite as $key => $value) {
   $mail_liitteet[] = array(
     "filename"    => $liite[$key],
     "newfilename" => $kutsu[$key].".{$path_parts["extension"]}",
-    "ctype"       => mime_content_type($liite[$key]),
   );
 }
 

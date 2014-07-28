@@ -1,13 +1,33 @@
 <?php
 
-if (!isset($lopetus))      $lopetus = "";
-if (!isset($lopetuslisa))    $lopetuslisa = "";
-if (!isset($silent))      $silent = "";
-if (!isset($tee))        $tee = "";
-if (!isset($tiliotejarjestys))  $tiliotejarjestys = "";
-if (!isset($td_perheid))    $td_perheid = $tiliotedatarow['perheid'];
+if (!isset($lopetus)) $lopetus = "";
+if (!isset($lopetuslisa)) $lopetuslisa = "";
+if (!isset($silent)) $silent = "";
+if (!isset($tee)) $tee = "";
+if (!isset($tiliotejarjestys)) $tiliotejarjestys = "";
+if (!isset($td_perheid)) $td_perheid = $tiliotedatarow['perheid'];
+if (!isset($maksu)) $maksu = 0;
+if (!isset($tkesken)) $tkesken = 0;
+if (!isset($tilinvaluutta)) $tilinvaluutta = "";
+if (!isset($toim)) $toim = "";
+if (!isset($selite_maksuavarten)) $selite_maksuavarten = "";
+if (!isset($eiselitetta)) $eiselitetta = 0;
 
 $tunnus = substr($tietue, 0, 3);
+
+// Kaikkien tietueiden aineistotunnus on T.
+// Tietueen tyypin kertoo Tietuetunnus, joita ovat:
+
+// 00 = Tiliotteen perustietue
+// 10 = Tapahtuman perustietue, Erittelyn perustietue
+// 11 = Tapahtuman lisätietue, Erittelyn lisätietue
+// 40 = Saldotietue
+// 50 = Kumulatiivinen perustietue
+// 51 = Kumulatiivinen korjaustietue
+// 60 = Erityistietue
+// 70 = Tiedotetietue
+// 80 = Ilmoitustapahtuman perustietue, Ilmoitustapahtuman erittelyn perustietue
+// 81 = Ilmoitustapahtuman lisätietue, Ilmoitustapahtuman erittelyn lisätietue
 
 if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
 
@@ -504,8 +524,7 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
 }
 
 switch ($tunnus) {
-
-  case 'T00' :
+  case 'T00':
 
     /*
     // Tiliotteen perustietue (00)
@@ -758,8 +777,7 @@ switch ($tunnus) {
     }
 
     break;
-
-  case 'T10' :
+  case 'T10':
 
     /*
     // Tapahtuman perustietue (10, 80)
@@ -975,8 +993,7 @@ switch ($tunnus) {
     echo "<td class='back' style='width:200px;'></td></tr>";
     $vientiselite = "$maksaa<br>\n$koodi $koodiselite<br>\n";
     break;
-
-  case 'T11' :
+  case 'T11':
 
     /*
     // Tapahtuman lisätietue (11, 81)
@@ -1211,7 +1228,6 @@ switch ($tunnus) {
 
     $vientiselite .= $selite;
     break;
-
   case 'T40':
 
     /*
@@ -1381,19 +1397,9 @@ switch ($tunnus) {
        echo "<td colspan='6'>". substr($tietue,9) ."</td>";
     }
     break;
-  case '$$E':
-    break;
-  case 'EOF':
-    break;
   default:
-
-    /*
-      Kumulatiivinen korjaustietue (51)
-    */
     if (trim($tunnus) != '') {
-
       $colspan = $tee == 'S' ? 7 : 6;
-
       echo "<tr><td colspan='$colspan'>";
       echo t("Tunnistamaton tietue").": $tunnus</td><td class='back' style='width:200px;'></td></tr>";
     }

@@ -460,7 +460,7 @@ if (!function_exists("pupesoft_rest")) {
     curl_setopt($handle, CURLOPT_SSL_VERIFYHOST, false);
     curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, false);
 
-    if ($parameters['posttype'] == 'xml') {
+    if (isset($parameters["posttype"]) and $parameters['posttype'] == 'xml') {
       curl_setopt($handle, CURLOPT_TIMEOUT, $timeout);
     }
 
@@ -501,7 +501,13 @@ if (!function_exists("pupesoft_rest")) {
     }
 
     $response_json = curl_exec($handle);
-    $response = $parameters["posttype"] == "xml" ? $response_json : json_decode($response_json, true);
+
+    if (isset($parameters["posttype"]) and $parameters["posttype"] == "xml") {
+      $response = $response_json;
+    }
+    else {
+      $response = json_decode($response_json, true);
+    }
 
     $code = curl_getinfo($handle, CURLINFO_HTTP_CODE);
 
@@ -26935,6 +26941,9 @@ if (!function_exists("tallenna_tiliote_viite")) {
 
     $php_cli = (php_sapi_name() == 'cli');
 
+    // Otetaan talteen, koska täällä muutellaan
+    $kukarow_talteen = $kukarow;
+
     // Otetaan koko aineisto muuttujaan jotta voidaan vertailla onko tämä jo koneella
     // koska joskus voi tulla esim kaksi LMP aineistoa samalle päivälle mutta eri sisällöllä
     $kokoaineisto = file_get_contents($filenimi);
@@ -26961,6 +26970,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
     $xtyyppi = 0;
     $virhe = 0;
     $td_perheid = 0;
+    $insert_count = 0;
     $serc = array("{", "|", "}", "[", "\\", "]", "'");
     $repl = array("ä", "ö", "å", "Ä", "Ö" , "Å", " ");
 
@@ -27038,9 +27048,15 @@ if (!function_exists("tallenna_tiliote_viite")) {
         }
 
         if (mysql_num_rows($yritiresult) != 1) {
-          echo "<font class='error'>".t("Tiliä %s ei löytynyt", "", $tilino)."!</font><br>\n";
+          echo "<font class='error'>".t("Tiliä %s ei löytynyt", "", $tilino)."!</font>";
+          echo "<br>";
           $xtyyppi = 0;
           $virhe++;
+
+          // Setataan yritirow-yhtiö
+          $yritirow["yhtio"] = $kukarow['yhtio'];
+          $yritirow['oletus_rahatili'] = "";
+          $yritirow['oletus_kulutili'] = "";
         }
         else {
           $yritirow = mysql_fetch_assoc($yritiresult);
@@ -27055,6 +27071,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
          // Tarkistetaan tilit
         if (strlen($yritirow['oletus_rahatili']) == 0 or strlen($yritirow['oletus_kulutili']) == 0) {
           echo "<font class='error'>".t("Tililtä puuttuu kulu tai rahatili")."</font>";
+          echo "<br>";
           $xtyyppi=0;
           $virhe++;
         }
@@ -27128,12 +27145,12 @@ if (!function_exists("tallenna_tiliote_viite")) {
                 if ($_aineisto != "" and strpos($_to_aineitso, $_aineisto) !== false) {
                   echo "<font class='error'>";
                   echo "VIRHE: Tämä aineisto on jo aiemmin käsitelty!";
-                  echo "<br><br>";
+                  echo "<br>";
                   echo "Tili: $tilino<br>";
                   echo "Ajalta: $alkupvm - $loppupvm<br>";
                   echo "Yritys: $yritirow[yhtio]";
                   echo "</font>";
-                  echo "<br><br>";
+                  echo "<br>";
 
                   $xtyyppi=0;
                   $virhe++;
@@ -27148,7 +27165,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
               echo "Tiedosto viallinen, ei voida jatkaa, ota yhteyttä helpdeskiin!<br>";
               echo "Tili: $tilino / Pvm: $alkupvm / Yhtiö: $yritirow[yhtio]";
               echo "</font>";
-              echo "<br><br>";
+              echo "<br>";
 
               $xtyyppi=0;
               $virhe++;
@@ -27161,7 +27178,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
               echo "Tiedosto viallinen, ei voida jatkaa, ota yhteyttä helpdeskiin!<br>";
               echo "Tili: $tilino / Pvm: $alkupvm / Yhtiö: $yritirow[yhtio]";
               echo "</font>";
-              echo "<br><br>";
+              echo "<br>";
 
               $xtyyppi=0;
               $virhe++;
@@ -27171,9 +27188,11 @@ if (!function_exists("tallenna_tiliote_viite")) {
               echo "VIRHE: Tämä aineisto on jo aiemmin käsitelty!<br>";
               echo "Tili: $tilino / Pvm: $alkupvm / Yhtiö: $yritirow[yhtio]";
               echo "</font>";
-              echo "<br><br>";
+              echo "<br>";
 
-              if (!$php_cli) {
+              $_pankkiyhteys = (strpos($_SERVER['SCRIPT_NAME'], "pankkiyhteys.php") !== false);
+
+              if (!$php_cli and !$_pankkiyhteys) {
                 list($usec, $sec) = explode(' ', microtime());
                 mt_srand((float) $sec + ((float) $usec * 100000));
                 $tmpfile = md5(uniqid(mt_rand(), true)).".txt";
@@ -27185,7 +27204,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
                 echo "<input type='hidden' name='virhe_file' value='$tmpfile'>";
                 echo "<input type='submit' value='{$_sub}'>";
                 echo "</form>";
-                echo "<br><br>";
+                echo "<br>";
               }
 
               $xtyyppi=0;
@@ -27212,7 +27231,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
         if ($_tarkistus) {
           echo "<font class='error'>";
           echo "VIRHE: Aineistossa on tapahtuma suljetulle kaudelle!<br>";
-          echo "Tili: $tilino / Pvm: $tsekpvm / Yhtiö: $yritirow[yhtio]<br>";
+          echo "Tili: $tilino / Pvm: $tsekpvm / Yhtiö: $yritirow[yhtio]";
           echo "</font>";
           echo "<br>";
 
@@ -27243,7 +27262,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
             echo "<font class='error'>";
             echo "VIRHE: Tiliotetapahtuma arkistointitunnuksella: ";
             echo "'$arkistotunnari' löytyy jo järjestelmästä!<br>";
-            echo "Tili: $tilino / Pvm: $vchkrow[alku] / Yhtiö: $yritirow[yhtio]<br>";
+            echo "Tili: $tilino / Pvm: $vchkrow[alku] / Yhtiö: $yritirow[yhtio]";
             echo "</font>";
             echo "<br>";
 
@@ -27265,7 +27284,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
         if ($tsekpvm < $oresalku or $tsekpvm > $oresloppu) {
           echo "<font class='error'>";
           echo "VIRHE: Aineistossa on tapahtuma suljetulle kaudelle!<br>";
-          echo "Tili: $tilino / Pvm: $tsekpvm / Yhtiö: $yritirow[yhtio]<br>";
+          echo "Tili: $tilino / Pvm: $tsekpvm / Yhtiö: $yritirow[yhtio]";
           echo "</font>";
           echo "<br>";
 
@@ -27283,7 +27302,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
         if ($tsekpvm < $myrealku or $tsekpvm > $myreloppu) {
           echo "<font class='error'>";
           echo "VIRHE: Aineistossa on viitesuoritus suljetulle kaudelle!<br>";
-          echo "Tili: $tilino / Pvm: $tsekpvm / Yhtiö: $yritirow[yhtio]<br>";
+          echo "Tili: $tilino / Pvm: $tsekpvm / Yhtiö: $yritirow[yhtio]";
           echo "</font>";
           echo "<br>";
 
@@ -27313,7 +27332,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
             echo "<font class='error'>";
             echo "VIRHE: Viitesuoritus arkistointitunnuksella: ";
             echo "'$arkistotunnari' löytyy jo järjestelmästä!<br>";
-            echo "Tili: $tilino / Pvm: $vchkrow[alku] / Yhtiö: $yritirow[yhtio]<br>";
+            echo "Tili: $tilino / Pvm: $vchkrow[alku] / Yhtiö: $yritirow[yhtio]";
             echo "</font>";
             echo "<br>";
 
@@ -27347,6 +27366,8 @@ if (!function_exists("tallenna_tiliote_viite")) {
                     WHERE tunnus = $tiliote_id";
           $updateperheid = pupe_query($query);
         }
+
+        $insert_count++;
       }
 
       $tietue = fgets($fd);
@@ -27354,9 +27375,15 @@ if (!function_exists("tallenna_tiliote_viite")) {
 
     fclose($fd);
 
+    // Palautetan kukarow
+    $kukarow = $kukarow_talteen;
+
     // Jos meillä tuli virheitä ja ei olla pakottamassa
-    if ($forceta === false and $virhe > 0) {
-      echo "<br>\n<font class='error'>".t("Aineistoa ei tallennettu järjestelmään").".</font>";
+    if ($forceta === false and ($virhe > 0 or $insert_count == 0)) {
+      echo "<font class='error'>";
+      echo t("Aineistoa ei tallennettu järjestelmään");
+      echo ".</font>";
+      echo "<br>";
 
       //Poistetaan aineistot tiliotedatasta
       $query = "DELETE FROM tiliotedata
@@ -27372,6 +27399,12 @@ if (!function_exists("tallenna_tiliote_viite")) {
     $query = "UNLOCK TABLES";
     $tiliotedataresult = pupe_query($query);
 
+    echo "<font class='message'>";
+    echo t("Aineisto tallennettu järjestelmään");
+    echo ". ({$aineistorow["aineisto"]})";
+    echo "</font>";
+    echo "<br>";
+
     return $aineistorow["aineisto"];
   }
 }
@@ -27384,6 +27417,9 @@ if (!function_exists("kasittele_tiliote_viite")) {
     $tee_viitemaksu_kohdistus = false;
     $vastavienti = 0;
     $vastavienti_valuutassa = 0;
+
+    // Otetaan talteen, koska täällä muutellaan
+    $kukarow_talteen = $kukarow;
 
     // Käsitellään uudet tietueet
     $query = "SELECT *
@@ -27464,5 +27500,8 @@ if (!function_exists("kasittele_tiliote_viite")) {
 
       echo "<br><br>";
     }
+
+    // Palautetan kukarow
+    $kukarow = $kukarow_talteen;
   }
 }

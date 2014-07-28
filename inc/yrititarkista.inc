@@ -2,7 +2,7 @@
 
 if(!function_exists("yrititarkista")) {
   function yrititarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
-    global $kukarow, $yhtiorow, $alias_set, $ulosarray;
+    global $kukarow, $yhtiorow, $alias_set, $ulosarray, $tmp_tilino, $tmp_bic;
 
     if (mysql_field_name($result, $i) == "nimi") {
       if (trim($t[$i]) == '') {
@@ -45,23 +45,41 @@ if(!function_exists("yrititarkista")) {
       }
     }
 
-    if (mysql_field_name($result, $i) == "iban" and $t[$i] != "") {
-      $pankkitili = tarkista_iban($t[$i]);
-      if ($pankkitili == "") {
-        $virhe[$i] = t("Pankkitili on virheellinen");
+    if (mysql_field_name($result, $i) == "iban") {
+      $tmp_bic = "";
+
+      if ($t[$i] != "") {
+        $pankkitili = tarkista_iban($t[$i]);
+
+        if ($pankkitili == "") {
+          $virhe[$i] = t("Pankkitili on virheellinen");
+        }
+        else {
+          $t[$i] = $pankkitili;
+        }
       }
-      else {
-        $t[$i]=$pankkitili;
+      elseif ($tmp_tilino != "") {
+        $_iban = luoiban($tmp_tilino);
+        if ($_iban["swift"] != null) {
+          $t[$i] = $_iban["iban"];
+          $tmp_bic = $_iban["swift"];
+        }
       }
     }
 
-    if (mysql_field_name($result, $i) == "bic" and $t[$i] != "") {
-      if (!tarkista_bic($t[$i])) {
-        $virhe[$i] = t("BIC on virheellinen");
+    if (mysql_field_name($result, $i) == "bic") {
+      if ($t[$i] != "") {
+        if (!tarkista_bic($t[$i])) {
+          $virhe[$i] = t("BIC on virheellinen");
+        }
+      }
+      elseif ($tmp_bic != "") {
+        $t[$i] = $tmp_bic;
       }
     }
 
     if (mysql_field_name($result, $i) == "tilino") {
+      $tmp_tilino = "";
 
       $query = "SELECT yhtio
                 FROM yriti
@@ -86,6 +104,7 @@ if(!function_exists("yrititarkista")) {
           }
           else {
             $t[$i]=$pankkitili;
+            $tmp_tilino = $pankkitili;
           }
         }
       }

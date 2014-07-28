@@ -139,6 +139,11 @@ if ($request['ala_tee'] == 'laitteen_vaihto') {
   echo "<br/>";
 }
 
+//ei aseteta sessiosta hakuehtoja jos ollaan submitattu hakuformi
+if (isset($_SESSION['tyojono_hakuehdot']) and $request['ala_tee'] != 'hae') {
+  aseta_hakuehdot($request);
+}
+
 if (!isset($request['toimitusaika'])) {
   $request['toimitusaika'] = 28;
   $_SESSION['tyojono_hakuehdot']['toimitusaika'] = 28;
@@ -166,11 +171,6 @@ tyolista_message_divit();
 
 if ($request['ala_tee'] == 'tyhjenna_hakuehdot') {
   tyhjenna_sessio();
-}
-
-//ei aseteta sessiosta hakuehtoja jos ollaan submitattu hakuformi
-if (isset($_SESSION['tyojono_hakuehdot']) and $request['ala_tee'] != 'hae') {
-  aseta_hakuehdot($request);
 }
 
 //Kaikissa muissa tilanteissa lasku_tunnuksia halutaan käsitellä arraynä paitsi työlistojen tulostuksessa

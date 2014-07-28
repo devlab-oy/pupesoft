@@ -129,6 +129,19 @@ if ($tee == "UUSI") {
       if ($trow["oletus_erapvm"] > 0) $erpaivia = $trow["oletus_erapvm"];
       else $erpaivia = 1;
 
+      // Katsotaan onko meillä "tuuraajia" hyväksynnässä
+      for ($tuuraaja_i = 2; $tuuraaja_i < 6; $tuuraaja_i++) {
+        $query = "SELECT if (tuuraaja != '', tuuraaja, kuka) kuka
+                  FROM kuka
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND kuka    = '{$trow['oletus_hyvak'.$tuuraaja_i]}'
+                  AND kuka   != ''";
+        $result = pupe_query($query);
+        $hyvak_row = mysql_fetch_assoc($result);
+
+        $trow['oletus_hyvak'.$tuuraaja_i] = $hyvak_row['kuka'];
+      }
+
       // haetaan seuraava vapaa matkalaskunumero
       $query  = "SELECT max(laskunro) laskunro
                  FROM lasku

@@ -171,7 +171,7 @@ if ($teemaksutosite) {
                     laatija  = 'tiliote',
                     laadittu = now()";
           $xresult = pupe_query($query);
-          $isa = mysql_insert_id ($link);
+          $isa = mysql_insert_id();
 
           $totvesumma += $summa;
         }
@@ -207,7 +207,6 @@ if ($teemaksutosite) {
             laadittu = now()";
   $result = pupe_query($query);
 
-
   // Tarkenteet kopsataan alkuperäiseltä tiliöinniltä, mutta jos alkuperäinen tiliöinti on ilman tarkenteita, niin mennään tilin defaulteilla
   list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($ostovelkarow["tilino"], $ostovelkarow["kustp"], $ostovelkarow["kohde"], $ostovelkarow["projekti"]);
 
@@ -226,11 +225,12 @@ if ($teemaksutosite) {
             laatija  = 'tiliote',
             laadittu = now()";
   $result = pupe_query($query);
+  $_tiliointi_id = mysql_insert_id();
 
-    $query = "UPDATE tiliotedata
-              SET kasitelty = now(),
-              tiliointitunnus = ".mysql_insert_id($link)."
-              WHERE tunnus='$tiliotedataid'";
+  $query = "UPDATE tiliotedata
+            SET kasitelty = now(),
+            tiliointitunnus = {$_tiliointi_id}
+            WHERE tunnus = {$tiliotedataid}";
   $dummyresult = pupe_query($query);
 
   $query = "UPDATE tiliotedata

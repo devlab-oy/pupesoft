@@ -22,17 +22,13 @@
 //$silent = '';
 
 // Kutsutaanko CLI:st‰
-$php_cli = FALSE;
-
-if (php_sapi_name() == 'cli' or isset($editil_cli)) {
-  $php_cli = TRUE;
-}
+$php_cli = (php_sapi_name() == 'cli' or isset($editil_cli));
 
 if ($php_cli) {
 
-  if (!isset($argv[1]) or $argv[1] == '') {
+  if (empty($argv[1])) {
     echo "Anna yhtiˆ!!!\n";
-    die;
+    exit(1);
   }
 
   // otetaan includepath aina rootista
@@ -44,18 +40,22 @@ if ($php_cli) {
   require("inc/connect.inc");
   require("inc/functions.inc");
 
-  // hmm.. j‰nn‰‰
-  $kukarow['yhtio'] = $argv[1];
+  $_yhtio = pupesoft_cleanstring($argv[1]);
+  $yhtiorow = hae_yhtion_parametrit($_yhtio);
+  $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
 
-  if (isset($argv[2])) {
-    $kieli = $argv[2];
+  if (!is_array($kukarow)) {
+    exit(1);
   }
 
-  $kukarow['kuka'] = "admin";
+  if (isset($argv[2])) {
+    $kieli = pupesoft_cleanstring($argv[2]);
+  }
 
   // Pupeasennuksen root
   $pupe_root_polku = dirname(dirname(__FILE__));
 
+<<<<<<< HEAD
   $query    = "SELECT * from yhtio where yhtio='$kukarow[yhtio]'";
   $yhtiores = pupe_query($query);
 
@@ -114,12 +114,48 @@ if ($php_cli) {
       echo "HUOM: P‰iv‰laskutusta ei ajeta kuukauden vikana p‰iv‰n‰!<br>\n";
       exit;
     }
+=======
+  $laskkk   = "";
+  $laskpp   = "";
+  $laskvv   = "";
+  $eilinen  = "";
+  $eiketjut = "";
 
-    $tee = "TARKISTA";
+  // jos komentorivin kolmas arg on "eilinen" niin edelliselle laskutus p‰iv‰lle, ohitetaan laskutusviikonp‰iv‰t
+  if ($argv[3] == "eilinen") {
+    $laskkk  = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+    $laskpp  = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+    $laskvv  = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
   }
-  else {
-    die ("Yhtiˆ $kukarow[yhtio] ei lˆydy!");
+
+  // jos komentorivin kolmas arg on "eilinen" niin edelliselle laskutus p‰iv‰lle
+  if ($argv[3] == "eilinen_eikaikki") {
+    $laskkk  = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+    $laskpp  = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+    $laskvv  = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+    $eilinen = "eilinen_eikaikki";
   }
+
+  // jos komentorivin kolmas arg on "eiketjut"
+  if ($argv[3] == "eiketjut") {
+    $eiketjut = "KYLLA";
+  }
+>>>>>>> master
+
+  // jos komentorivin kolmas arg on "kaikki"
+  if ($argv[3] == "kaikki") {
+    $laskutakaikki = "ON";
+  }
+
+  // jos kuukausilaskutus on p‰‰ll‰ (cron.monthly), niin ei v‰ltt‰m‰tt‰ haluta ajaa p‰iv‰laskutusta
+  // kukauden vikana p‰iv‰n‰, koska silloin asiakkaalle saattaa menn‰ kaksi laskua vikana p‰iv‰n‰ jos
+  // laskutusviikonp‰iv‰t osuu sillai kivasti
+  if ($argv[3] == "skippaa_kuukauden_vikapaiva" and date("d") == date("t")) {
+    echo "HUOM: P‰iv‰laskutusta ei ajeta kuukauden vikana p‰iv‰n‰!<br>\n";
+    exit;
+  }
+
+  $tee = "TARKISTA";
 }
 elseif (strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE) {
 
@@ -2702,17 +2738,7 @@ else {
         $ftpfile = realpath($nimixml);
         $ftpfail = "{$pupe_root_polku}/dataout/pupevoice_error/";
 
-        // Tehd‰‰n maili, ett‰ siirret‰‰n laskut operaattorille
-        $bound = uniqid(time()."_") ;
-
-        $verkkolasheader  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
-        $verkkolasheader .= "MIME-Version: 1.0\n" ;
-        $verkkolasheader .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
-
-        $verkkolasmail = "--$bound\n";
-        $verkkolasmail .= "Content-type: text/plain; charset=iso-8859-1\n";
-        $verkkolasmail .= "Content-Transfer-Encoding: quoted-printable\n\n";
-        $verkkolasmail .= t("Pvm").": ".date("Y-m-d H:i:s")."\n\n";
+        $verkkolasmail  = t("Pvm").": ".date("Y-m-d H:i:s")."\n\n";
         $verkkolasmail .= t("Aineiston laskut").":\n";
 
         foreach ($verkkolaskuputkeen_pupevoice as $lasnoputk => $nimiputk) {
@@ -2721,15 +2747,20 @@ else {
 
         $verkkolasmail .= "\n\n";
         $verkkolasmail .= t("Aineisto liitteen‰")."!\n\n\n\n";
-        $verkkolasmail .= "--$bound\n";
-        $verkkolasmail .= "Content-Type: text/plain; name=\"".basename($ftpfile)."\"\n" ;
-        $verkkolasmail .= "Content-Transfer-Encoding: base64\n" ;
-        $verkkolasmail .= "Content-Disposition: attachment; filename=\"".basename($ftpfile)."\"\n\n";
-        $verkkolasmail .= chunk_split(base64_encode(file_get_contents($ftpfile)));
-        $verkkolasmail .= "\n" ;
-        $verkkolasmail .= "--$bound--\n";
 
-        $silari = mail($yhtiorow["talhal_email"], mb_encode_mimeheader(t("Pupevoice-aineiston siirto Itellaan"), "ISO-8859-1", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
+        $_params = array(
+          "to" => $yhtiorow["talhal_email"],
+          "subject" => t("Pupevoice-aineiston siirto Itellaan"),
+          "ctype" => "text",
+          "body" => $verkkolasmail,
+          "attachements" => array(
+            array(
+              "filename" => $ftpfile,
+            ),
+          ),
+        );
+
+        pupesoft_sahkoposti($_params);
 
         require("inc/ftp-send.inc");
 
@@ -2818,14 +2849,7 @@ else {
         // Tehd‰‰n maili, ett‰ siirret‰‰n laskut operaattorille
         $bound = uniqid(time()."_") ;
 
-        $verkkolasheader  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
-        $verkkolasheader .= "MIME-Version: 1.0\n" ;
-        $verkkolasheader .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
-
-        $verkkolasmail = "--$bound\n";
-        $verkkolasmail .= "Content-type: text/plain; charset=iso-8859-1\n";
-        $verkkolasmail .= "Content-Transfer-Encoding: quoted-printable\n\n";
-        $verkkolasmail .= t("Pvm").": ".date("Y-m-d H:i:s")."\n\n";
+        $verkkolasmail  = t("Pvm").": ".date("Y-m-d H:i:s")."\n\n";
         $verkkolasmail .= t("Aineiston laskut").":\n";
 
         foreach ($verkkolaskuputkeen_finvoice as $lasnoputk => $nimiputk) {
@@ -2834,15 +2858,20 @@ else {
 
         $verkkolasmail .= "\n\n";
         $verkkolasmail .= t("Aineisto liitteen‰")."!\n\n\n\n";
-        $verkkolasmail .= "--$bound\n";
-        $verkkolasmail .= "Content-Type: text/plain; name=\"".basename($ftpfile)."\"\n" ;
-        $verkkolasmail .= "Content-Transfer-Encoding: base64\n" ;
-        $verkkolasmail .= "Content-Disposition: attachment; filename=\"".basename($ftpfile)."\"\n\n";
-        $verkkolasmail .= chunk_split(base64_encode(file_get_contents($ftpfile)));
-        $verkkolasmail .= "\n" ;
-        $verkkolasmail .= "--$bound--\n";
 
-        $silari = mail($yhtiorow["talhal_email"], mb_encode_mimeheader(t("iPost Finvoice-aineiston siirto Itellaan"), "ISO-8859-1", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
+        $_params = array(
+          "to" => $yhtiorow["talhal_email"],
+          "subject" => t("iPost Finvoice-aineiston siirto Itellaan"),
+          "ctype" => "text",
+          "body" => $verkkolasmail,
+          "attachements" => array(
+            array(
+              "filename" => $ftpfile,
+            ),
+          ),
+        );
+
+        pupesoft_sahkoposti($_params);
 
         require("inc/ftp-send.inc");
 
@@ -2874,17 +2903,7 @@ else {
         $ftpfile = realpath($nimiedi);
         $ftpfail = "{$pupe_root_polku}/dataout/elmaedi_error/";
 
-        // Tehd‰‰n maili, ett‰ siirret‰‰n laskut operaattorille
-        $bound = uniqid(time()."_") ;
-
-        $verkkolasheader  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
-        $verkkolasheader .= "MIME-Version: 1.0\n" ;
-        $verkkolasheader .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
-
-        $verkkolasmail = "--$bound\n";
-        $verkkolasmail .= "Content-type: text/plain; charset=iso-8859-1\n";
-        $verkkolasmail .= "Content-Transfer-Encoding: quoted-printable\n\n";
-        $verkkolasmail .= t("Pvm").": ".date("Y-m-d H:i:s")."\n\n";
+        $verkkolasmail  = t("Pvm").": ".date("Y-m-d H:i:s")."\n\n";
         $verkkolasmail .= t("Aineiston laskut").":\n";
 
         foreach ($verkkolaskuputkeen_elmaedi as $lasnoputk => $nimiputk) {
@@ -2893,15 +2912,20 @@ else {
 
         $verkkolasmail .= "\n\n";
         $verkkolasmail .= t("Aineisto liitteen‰")."!\n\n\n\n";
-        $verkkolasmail .= "--$bound\n";
-        $verkkolasmail .= "Content-Type: text/plain; name=\"".basename($ftpfile)."\"\n" ;
-        $verkkolasmail .= "Content-Transfer-Encoding: base64\n" ;
-        $verkkolasmail .= "Content-Disposition: attachment; filename=\"".basename($ftpfile)."\"\n\n";
-        $verkkolasmail .= chunk_split(base64_encode(file_get_contents($ftpfile)));
-        $verkkolasmail .= "\n" ;
-        $verkkolasmail .= "--$bound--\n";
 
-        $silari = mail($yhtiorow["talhal_email"], mb_encode_mimeheader(t("EDI-inhouse-aineiston siirto Itellaan"), "ISO-8859-1", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
+        $_params = array(
+          "to" => $yhtiorow["talhal_email"],
+          "subject" => t("EDI-inhouse-aineiston siirto Itellaan"),
+          "ctype" => "text",
+          "body" => $verkkolasmail,
+          "attachements" => array(
+            array(
+              "filename" => $ftpfile,
+            ),
+          ),
+        );
+
+        pupesoft_sahkoposti($_params);
 
         require("inc/ftp-send.inc");
 
@@ -2923,17 +2947,7 @@ else {
         $ftpfile = realpath($nimisisainenfinvoice);
         $ftpfail = "{$pupe_root_polku}/dataout/sisainenfinvoice_error/";
 
-        // Tehd‰‰n maili, ett‰ siirret‰‰n laskut operaattorille
-        $bound = uniqid(time()."_") ;
-
-        $verkkolasheader  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
-        $verkkolasheader .= "MIME-Version: 1.0\n" ;
-        $verkkolasheader .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
-
-        $verkkolasmail = "--$bound\n";
-        $verkkolasmail .= "Content-type: text/plain; charset=iso-8859-1\n";
-        $verkkolasmail .= "Content-Transfer-Encoding: quoted-printable\n\n";
-        $verkkolasmail .= t("Pvm").": ".date("Y-m-d H:i:s")."\n\n";
+        $verkkolasmail  = t("Pvm").": ".date("Y-m-d H:i:s")."\n\n";
         $verkkolasmail .= t("Aineiston laskut").":\n";
 
         foreach ($verkkolaskuputkeen_suora as $lasnoputk => $nimiputk) {
@@ -2942,15 +2956,20 @@ else {
 
         $verkkolasmail .= "\n\n";
         $verkkolasmail .= t("Aineisto liitteen‰")."!\n\n\n\n";
-        $verkkolasmail .= "--$bound\n";
-        $verkkolasmail .= "Content-Type: text/plain; name=\"".basename($ftpfile)."\"\n" ;
-        $verkkolasmail .= "Content-Transfer-Encoding: base64\n" ;
-        $verkkolasmail .= "Content-Disposition: attachment; filename=\"".basename($ftpfile)."\"\n\n";
-        $verkkolasmail .= chunk_split(base64_encode(file_get_contents($ftpfile)));
-        $verkkolasmail .= "\n" ;
-        $verkkolasmail .= "--$bound--\n";
 
-        $silari = mail($yhtiorow["talhal_email"], mb_encode_mimeheader(t("Pupesoft-Finvoice-aineiston siirto eteenp‰in"), "ISO-8859-1", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
+        $_params = array(
+          "to" => $yhtiorow["talhal_email"],
+          "subject" => t("Pupesoft-Finvoice-aineiston siirto eteenp‰in"),
+          "ctype" => "text",
+          "body" => $verkkolasmail,
+          "attachements" => array(
+            array(
+              "filename" => $ftpfile,
+            ),
+          ),
+        );
+
+        pupesoft_sahkoposti($_params);
 
         require("inc/ftp-send.inc");
 
@@ -3114,25 +3133,18 @@ else {
     // l‰hetet‰‰n meili vaan jos on jotain laskutettavaa ja ollaan tultu komentorivilt‰
     if (isset($lask) and $lask > 0 and $php_cli) {
 
-      //echotaan ruudulle ja l‰hetet‰‰n meili yhtiorow[admin]:lle
-      $bound = uniqid(time()."_") ;
-
-      $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
-      $header .= "MIME-Version: 1.0\n" ;
-      $header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
-
-      $content = "--$bound\n";
-
-      $content .= "Content-Type: text/html;charset=iso-8859-1\n" ;
-      $content .= "Content-Transfer-Encoding: quoted-printable\n";
-
-      $content .= "<html><body>\n";
+      $content  = "<html><body>\n";
       $content .= $tulos_ulos;
       $content .= "</body></html>\n";
-      $content .= "\n";
-      $content .= "--$bound--\n";
 
-      mail($yhtiorow["talhal_email"],  mb_encode_mimeheader("$yhtiorow[nimi] - Laskutusajo", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+      $_params = array(
+        "to"      => $yhtiorow["talhal_email"],
+        "subject" => "{$yhtiorow["nimi"]} - Laskutusajo",
+        "ctype"   => "html",
+        "body"    => $content,
+      );
+
+      pupesoft_sahkoposti($_params);
     }
   }
 

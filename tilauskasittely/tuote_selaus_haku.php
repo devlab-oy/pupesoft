@@ -1466,6 +1466,8 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
         $hae_ja_selaa_asiakas = (int) $laskurow['liitostunnus'];
       }
 
+      $rivin_yksikko = t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite");
+
       //jos ollaan verkkokaupassa ja n‰ytet‰‰n vain aletuotteet asetus on p‰‰ll‰ niin pakotetaan saako_myyda_private_label tarkistamaan alet kaikilta tuotteilta, jotta n‰ytet‰‰n vain aletuotteet
       if ($hae_ja_selaa_asiakas != 0) {
         $vainaletuotteet = FALSE;
@@ -1776,14 +1778,29 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
               $kokonaismyytavissa += $myytavissa;
             }
 
-            if ($kokonaismyytavissa > 0) {
-              echo "<td valign='top' class='$vari' $classrigh>";
-              echo ($hinta_rajaus != "") ? "<font class='green'>".t("P‰‰varasto").": ".t("On")."</font>": "<font class='green'>".t("On")."</font>";
-              echo "</td>";
+            if ($yhtiorow["extranet_nayta_saldo"] == "Y") {
+              $naytettava_saldo = sprintf("%.2f", $kokonaismyytavissa) . " {$rivin_yksikko}";
+              $_vari = "";
+            }
+            elseif ($kokonaismyytavissa > 0) {
+              $naytettava_saldo = t("On");
+              $_vari = "green";
             }
             else {
-              echo "<td valign='top' class='$vari' $classrigh><font class='red'>".t("Ei")."</font></td>";
+              $naytettava_saldo = t("Ei");
+              $_vari = "red";
             }
+
+            echo "<td valign='top' class='$vari' $classrigh>";
+            echo "<font class='$_vari'>";
+
+            if ($hinta_rajaus != "") {
+              echo t("P‰‰varasto") . ": ";
+            }
+
+            echo $naytettava_saldo;
+            echo "</font>";
+            echo "</td>";
           }
           // Normipupe
           else {
@@ -1799,7 +1816,12 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
             foreach ($saldot as $varaso => $saldo) {
               if ($saldo != 0) {
                 $ei_tyhja = 'yes';
-                echo "<tr class='aktiivi'><td class='$vari' nowrap>$varaso</td><td class='$vari' align='right' nowrap>".sprintf("%.2f", $saldo)." ".t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite")."</td></tr>";
+                $_saldo = sprintf("%.2f", $saldo);
+
+                echo "<tr class='aktiivi'>";
+                echo "<td class='$vari' nowrap>$varaso</td>";
+                echo "<td class='$vari' align='right' nowrap>{$_saldo} {$rivin_yksikko}</td>";
+                echo "</tr>";
               }
             }
 
@@ -1868,7 +1890,19 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
                 list($noutosaldo, $noutohyllyssa, $noutomyytavissa) = saldo_myytavissa($row["tuoteno"], "", $noutovarrow["tunnus"], "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
 
                 if ($noutomyytavissa > 0) {
-                  $noutolisa .= "<tr class='aktiivi'><td>".ucwords(strtolower($noutovarrow["nimitark"]))."</td><td><font class='green'>".t("On")."</font></td></tr>";
+                  if ($yhtiorow["extranet_nayta_saldo"] == "Y") {
+                    $naytettava_saldo = sprintf("%.2f", $noutomyytavissa) . " {$rivin_yksikko}";
+                  }
+                  else {
+                    $naytettava_saldo = t("On");
+                  }
+
+                  $noutolisa .= "<tr class='aktiivi'>";
+                  $noutolisa .= "<td>";
+                  $noutolisa .= ucwords(strtolower($noutovarrow["nimitark"]));
+                  $noutolisa .= "</td>";
+                  $noutolisa .= "<td><font class='green'>{$naytettava_saldo}</font></td>";
+                  $noutolisa .= "</tr>";
                 }
               }
             }
@@ -1879,17 +1913,35 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
           echo "<td valign='top' class='$vari' $classrigh>";
 
           if ($myytavissa > 0 or $noutolisa != "") {
+
             if ($verkkokauppa != "" and $verkkokauppa_saldoluku) {
-              echo "<font class='green'>";
-              echo $myytavissa;
-              echo "</font>";
+              $naytettava_saldo = $myytavissa;
+            }
+            elseif ($yhtiorow["extranet_nayta_saldo"] == "Y") {
+              $naytettava_saldo = sprintf("%.2f", $myytavissa). " {$rivin_yksikko}";
             }
             else {
-              echo ($hinta_rajaus != "" and $myytavissa > 0) ? "<font class='green'>".t("P‰‰varasto").": ".t("On")."</font>": "<font class='green'>".t("On")."</font>";
+              $naytettava_saldo = t("On");
             }
+
+            echo "<font class='green'>";
+
+            if ($hinta_rajaus != "" and $myytavissa > 0) {
+              echo t("P‰‰varasto") . ": ";
+            }
+
+            echo $naytettava_saldo;
+            echo "</font>";
           }
           elseif ($row['status'] != 'T') {
-            echo "<font class='red'>".t("Ei")."</font>";
+            if ($yhtiorow["extranet_nayta_saldo"] == "Y") {
+              $naytettava_saldo = sprintf("%.2f", 0) . " {$rivin_yksikko}";
+            }
+            else {
+              $naytettava_saldo = t("Ei");
+            }
+
+            echo "<font class='red'>{$naytettava_saldo}</font>";
           }
 
           if ($noutolisa != "") {
@@ -1924,7 +1976,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
                        FROM tuote
                       JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
                       JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-                        AND varastopaikat.tunnus = tuotepaikat.varasto
+                        AND varastopaikat.tunnus                = tuotepaikat.varasto
                         $sallitut_maat_lisa)
                       JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio
                       and sarjanumeroseuranta.tuoteno           = tuote.tuoteno
@@ -1949,8 +2001,8 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
                       JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
                         AND varastopaikat.tunnus = tuotepaikat.varasto
                         $sallitut_maat_lisa)
-                      WHERE tuote.yhtio in ('".implode("','", $yhtiot)."')
-                      and tuote.tuoteno = '$row[tuoteno]'
+                      WHERE tuote.yhtio          in ('".implode("','", $yhtiot)."')
+                      and tuote.tuoteno          = '$row[tuoteno]'
                       ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
           }
           $varresult = pupe_query($query);
@@ -2008,7 +2060,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
                     echo "<font class='green'>";
                   }
 
-                  echo sprintf("%.2f", $myytavissa)." ".t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite");
+                  echo sprintf("%.2f", $myytavissa)." ".$rivin_yksikko;
 
                   if ($hae_ja_selaa_row['selite'] == 'B') {
                     echo "</font>";

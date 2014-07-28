@@ -11,6 +11,8 @@ if (!isset($tee))    $tee = "";
 if (!isset($tyyppi))  $tyyppi = "";
 if (!isset($tiliote))  $tiliote = "";
 if (!isset($tilino))  $tilino = "";
+if (!isset($tiliotejarjestys))  $tiliotejarjestys = "";
+if (!isset($kuitattava_tiliotedata_tunnus))  $kuitattava_tiliotedata_tunnus = 0;
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
@@ -243,6 +245,12 @@ if ($tee == 'S') {
     $tee = '';
   }
   else {
+    // Haetaan kannan isoin lasku.tunnus, nin voidaan tehdän sanity-checki EndToEndId:lle.
+    $query = "SELECT max(tunnus) maxEndToEndId
+              FROM lasku";
+    $meteidres = pupe_query($query);
+    $meteidrow = mysql_fetch_assoc($meteidres);
+
     while ($tiliotedatarow = mysql_fetch_array($tiliotedataresult)) {
       $tietue = $tiliotedatarow['tieto'];
 

@@ -52,7 +52,9 @@ if ($upd == 1) {
                 selitetark_2 = '$xalias_set',
                 selitetark_3 = '$pakollisuus',
                 selitetark_4 = '{$oletusarvo[$al_nimi]}',
-                selitetark_5 = '{$ohjeteksti[$al_nimi]}'";
+                selitetark_5 = '{$ohjeteksti[$al_nimi]}',
+                laatija      = '{$kukarow['kuka']}',
+                luontiaika   = now()";
       $al_res = pupe_query($query);
     }
   }
@@ -80,7 +82,7 @@ if ($kopsaataulu != "" and $uusisetti != "") {
   $query = "SELECT *
             FROM avainsana
             WHERE yhtio      = '$kukarow[yhtio]'
-            and laji='MYSQLALIAS'
+            and laji         = 'MYSQLALIAS'
             and selite       like '$kopsaataulu.%'
             and selitetark_2 = '$alias_set'";
   $al_res1 = pupe_query($query);
@@ -88,7 +90,7 @@ if ($kopsaataulu != "" and $uusisetti != "") {
   $query = "SELECT *
             FROM avainsana
             WHERE yhtio      = '$kukarow[yhtio]'
-            and laji='MYSQLALIAS'
+            and laji         = 'MYSQLALIAS'
             and selite       like '$kopsaataulu.%'
             and selitetark_2 = '$uusisetti'";
   $al_res2 = pupe_query($query);
@@ -96,11 +98,17 @@ if ($kopsaataulu != "" and $uusisetti != "") {
   if (mysql_num_rows($al_res1) > 0 and mysql_num_rows($al_res2) == 0) {
     while ($al_row = mysql_fetch_array($al_res1)) {
       $query = "INSERT INTO avainsana
-                SET yhtio     = '$kukarow[yhtio]',
+                SET yhtio    = '$kukarow[yhtio]',
                 laji         = 'MYSQLALIAS',
+                nakyvyys     = '$al_row[nakyvyys]',
                 selite       = '$al_row[selite]',
                 selitetark   = '$al_row[selitetark]',
-                selitetark_2 = '$uusisetti'";
+                selitetark_2 = '$uusisetti',
+                selitetark_3 = '$al_row[selitetark_3]',
+                selitetark_4 = '$al_row[selitetark_4]',
+                selitetark_5 = '$al_row[selitetark_5]',
+                laatija      = '{$kukarow['kuka']}',
+                luontiaika   = now()";
       $al_res3 = pupe_query($query);
     }
   }

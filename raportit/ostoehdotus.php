@@ -5,6 +5,7 @@ $useslave = 1;
 
 // Ei käytetä pakkausta
 $compression = FALSE;
+ini_set("memory_limit", "5G");
 
 if (isset($_POST["tee"])) {
   if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
@@ -18,6 +19,7 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
   exit;
 }
 
+require 'inc/pupeExcel.inc';
 require_once ('inc/ProgressBar.class.php');
 
 echo "<font class='head'>".t("Ostoehdotus")."</font><hr>";
@@ -209,8 +211,8 @@ function saldot($myynti_varasto = '', $myynti_maa = '') {
               JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
                 AND varastopaikat.tunnus = tuotepaikat.varasto
                 $varastotapa
-              WHERE tuotepaikat.yhtio in ($yhtiot)
-              and tuotepaikat.tuoteno = '$row[tuoteno]'
+              WHERE tuotepaikat.yhtio    in ($yhtiot)
+              and tuotepaikat.tuoteno    = '$row[tuoteno]'
               $varastot";
     $result = pupe_query($query);
 
@@ -572,14 +574,17 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
             ORDER BY id, tuote.tuoteno, yhtio";
   $res = pupe_query($query);
 
-  echo t("Tuotteita")." ".mysql_num_rows($res)." ".t("kpl").".<br>\n";
+  $rivi_count = mysql_num_rows($res);
+
+  echo t("Tuotteita")." {$rivi_count} ".t("kpl").".<br>\n";
   flush();
 
-  $rivi = "";
+  $tuoterivit = array();
 
-  $bar = new ProgressBar();
-  $elements = mysql_num_rows($res); //total number of elements to process
-  $bar->initialize($elements); //print the empty bar
+  if ($rivi_count > 0) {
+    $bar = new ProgressBar();
+    $bar->initialize($rivi_count); //print the empty bar
+  }
 
   // loopataan tuotteet läpi
   while ($row = mysql_fetch_array($res)) {
@@ -700,33 +705,89 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
     list($headerivi, $tuoterivi) = ostot();
 
     // lisätään tämän tuotteen rivi outputtiin
-    $rivi .= $tuoterivi."\n";
+    $tuoterivit[] = $tuoterivi;
 
     $bar->increase(); //calls the bar with every processed element
 
   }
 
-  // uniikki filenimi
-  $txtnimi = md5(uniqid(mt_rand(), true)).".txt";
-  $file    = "$headerivi\n$rivi";
+  if ($rivi_count > 0) {
+    // Tehdään datasta Exceli
+    echo "<br>";
+    echo t("Luodaan Excel.");
+    echo "<br>";
 
-  // kirjotetaan file levylle
-  file_put_contents("/tmp/$txtnimi", $file);
+    flush();
 
-  echo "<br><br><form method='post' class='multisubmit'>";
-  echo "<table>";
-  echo "<tr><th>".t("Tallenna tulos")."</th>";
-  echo "<td>";
-  echo "<input type='radio' name='kaunisnimi' value='ostoehdotus.xls' checked> Excel-muodossa<br>";
-  echo "<input type='radio' name='kaunisnimi' value='ostoehdotus.csv'> OpenOffice-muodossa<br>";
-  echo "<input type='radio' name='kaunisnimi' value='ostoehdotus.txt'> Tekstitiedostona";
-  echo "</td>";
-  echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-  echo "<input type='hidden' name='tmpfilenimi' value='$txtnimi'>";
-  echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr>";
-  echo "</table>";
-  echo "</form>";
+    $bar = new ProgressBar();
+    $bar->initialize($rivi_count); //print the empty bar
 
+    $worksheet = new pupeExcel();
+    $format_bold = array("bold" => true);
+
+    $excelrivi = 0;
+    $excelsarake = 0;
+
+    // Otetaan headerit
+    $headerit = str_getcsv($headerivi, "\t");
+
+    // Kirjoitetaan headerit
+    foreach ($headerit as $header) {
+      $worksheet->writeString($excelrivi, $excelsarake++, $header, $format_bold);
+    }
+
+    $excelrivi++;
+    $excelsarake = 0;
+
+    // Kirjoitetaan rivit
+    foreach ($tuoterivit as $rivi) {
+      $rivi = explode("\t", $rivi);
+
+      foreach ($rivi as $sarake) {
+        // Poistetaan hipsut sarakkeesta
+        $_sarake = trim($sarake, '"');
+
+        // Tämä on string jos sarakkeessa oli hipsut tai sarake on tyhjä
+        $_string = ($_sarake == '' or $_sarake != $sarake);
+
+        // Katsotaan onko string date
+        $_datetime = (date('Y-m-d H:i:s', strtotime($_sarake)) == $_sarake);
+        $_date = (date('Y-m-d', strtotime($_sarake)) == $_sarake);
+
+        if ($_date or $_datetime) {
+          $worksheet->writeDate($excelrivi, $excelsarake++, $_sarake);
+        }
+        elseif ($_string) {
+          $worksheet->writeString($excelrivi, $excelsarake++, $_sarake);
+        }
+        else {
+          $worksheet->writeNumber($excelrivi, $excelsarake++, $_sarake);
+        }
+      }
+
+      $excelrivi++;
+      $excelsarake = 0;
+
+      $bar->increase(); //calls the bar with every processed element
+    }
+
+    // uniikki filenimi
+    $excelnimi = $worksheet->close();
+
+    echo "<br><br>";
+    echo "<form method='post' class='multisubmit'>";
+    echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+    echo "<input type='hidden' name='kaunisnimi' value='ostoehdotus.xlsx'>";
+    echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+
+    echo "<table>";
+    echo "<tr>";
+    echo "<th>".t("Tallenna raportti (xlsx)").":</th>";
+    echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td>";
+    echo "</tr>";
+    echo "</table>";
+    echo "</form>";
+  }
 }
 
 // näytetään käyttöliittymä..

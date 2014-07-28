@@ -85,10 +85,13 @@ for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix
   if (!isset(${'ale'.$alepostfix})) { ${'ale'.$alepostfix} = "";}
   if (!isset(${'ale_array'.$alepostfix})) { ${'ale_array'.$alepostfix} = "";}
 }
+
+if (!isset($alatila)) {$alatila='';}
 if (!isset($alv)) {$alv="";}
 if (!isset($alv_array)) {$alv_array="";}
 if (!isset($asiakasid)) {$asiakasid="";}
 if (!isset($asiakasOnProspekti)) {$asiakasOnProspekti="";}
+if (!isset($etayhtio_totaalisumma)) {$etayhtio_totaalisumma=0;}
 if (!isset($from)) {$from="";}
 if (!isset($hinta)) {$hinta="";}
 if (!isset($hinta_array)) {$hinta_array="";}
@@ -101,80 +104,83 @@ if (!isset($kerayskka)) {$kerayskka=0;}
 if (!isset($keraysppa)) {$keraysppa=0;}
 if (!isset($kerayspvm)) {$kerayspvm="";}
 if (!isset($keraysvva)) {$keraysvva=0;}
+if (!isset($kommentti_select)) {$kommentti_select='';}
 if (!isset($kpl)) {$kpl="";}
 if (!isset($kpl2)) {$kpl2="";}
 if (!isset($kpl_array)) {$kpl_array="";}
 if (!isset($kutsuja)) {$kutsuja="";}
 if (!isset($lead)) {$lead="";}
 if (!isset($lisavarusteita)) {$lisavarusteita="";}
+if (!isset($lisax)) {$lisax='';}
 if (!isset($livesearch_tee)) {$livesearch_tee="";}
 if (!isset($lopetus)) {$lopetus="";}
 if (!isset($luotunnusnippu)) {$luotunnusnippu="";}
 if (!isset($maksutapa)) {$maksutapa="";}
 if (!isset($menutila)) {$menutila="";}
+if (!isset($mista)) {$mista='';}
 if (!isset($myos_prospektit)) {$myos_prospektit="";}
 if (!isset($myy_sarjatunnus)) {$myy_sarjatunnus="";}
+if (!isset($nayta_sostolisateksti)) {$nayta_sostolisateksti="";}
+if (!isset($netto)) {$netto='';}
 if (!isset($netto_array)) {$netto_array="";}
 if (!isset($olpaikalta)) {$olpaikalta="";}
+if (!isset($omalle_tilaukselle)) {$omalle_tilaukselle='';}
+if (!isset($orig_alatila)) {$orig_alatila='';}
+if (!isset($orig_tila)) {$orig_tila='';}
 if (!isset($osatoimkielto)) {$osatoimkielto="";}
 if (!isset($paikka)) {$paikka="";}
 if (!isset($paikka_array)) {$paikka_array="";}
+if (!isset($painotettukehayhteensa)) $painotettukehayhteensa = 0;
 if (!isset($perheid)) {$perheid="";}
 if (!isset($pika_paiv_merahti)) {$pika_paiv_merahti="";}
 if (!isset($pkrow)) {$pkrow="";}
 if (!isset($projektilla)) {$projektilla="";}
 if (!isset($rahtihinta)) {$rahtihinta="";}
+if (!isset($rahtisopimus)) {$rahtisopimus='';}
 if (!isset($ruutulimit)) {$ruutulimit="";}
+if (!isset($saako_liitaa_laskuja_tilaukseen)) {$saako_liitaa_laskuja_tilaukseen="";}
+if (!isset($sarjanumero_dropdown)) {$sarjanumero_dropdown="";}
 if (!isset($smsnumero)) {$smsnumero="";}
 if (!isset($syotetty_ytunnus)) {$syotetty_ytunnus="";}
 if (!isset($tapa)) {$tapa="";}
 if (!isset($tee)) {$tee="";}
 if (!isset($tiedot_laskulta)) {$tiedot_laskulta="";}
 if (!isset($tila)) {$tila="";}
+if (!isset($tilausnumero)) {$tilausnumero='';}
+if (!isset($tilausrivi_alvillisuus)) {$tilausrivi_alvillisuus=isset($_COOKIE["tilausrivi_alvillisuus"])?$_COOKIE["tilausrivi_alvillisuus"]:$tilausrivi_alvillisuus;}
 if (!isset($tilausrivilinkki)) {$tilausrivilinkki="";}
+if (!isset($tilaustyyppi)) {$tilaustyyppi='';}
+if (!isset($toim_kutsu)) {$toim_kutsu='';}
 if (!isset($toimaika)) {$toimaika="";}
 if (!isset($toimittajan_tunnus)) {$toimittajan_tunnus="";}
 if (!isset($toimkka)) {$toimkka=0;}
 if (!isset($toimppa)) {$toimppa=0;}
 if (!isset($toimvva)) {$toimvva=0;}
 if (!isset($trivtyrow)) {$trivtyrow="";}
+if (!isset($tulostetaan)) {$tulostetaan='';}
 if (!isset($tuotenimitys)) {$tuotenimitys="";}
 if (!isset($tuotenimitys_force)) {$tuotenimitys_force="";}
 if (!isset($tuoteno)) {$tuoteno="";}
 if (!isset($tuoteno_array)) {$tuoteno_array="";}
+if (!isset($tuotteenpainotettukehayht)) $tuotteenpainotettukehayht = array();
 if (!isset($tyojono)) {$tyojono="";}
 if (!isset($ulos)) {$ulos="";}
 if (!isset($uusitoimitus)) {$uusitoimitus="";}
 if (!isset($valitsetoimitus)) {$valitsetoimitus="";}
+if (!isset($valitsetoimitus_vaihdarivi)) {$valitsetoimitus_vaihdarivi="";}
+if (!isset($var)) {$var='';}
+if (!isset($var_array)) {$var_array="";}
 if (!isset($varaosakommentti)) {$varaosakommentti="";}
 if (!isset($varasto)) {$varasto="";}
 if (!isset($variaatio_tuoteno)) {$variaatio_tuoteno="";}
-if (!isset($var_array)) {$var_array="";}
-if (!isset($tilausrivi_alvillisuus)) {$tilausrivi_alvillisuus=isset($_COOKIE["tilausrivi_alvillisuus"])?$_COOKIE["tilausrivi_alvillisuus"]:$tilausrivi_alvillisuus;}
-if (!isset($valitsetoimitus_vaihdarivi)) {$valitsetoimitus_vaihdarivi="";}
-if (!isset($saako_liitaa_laskuja_tilaukseen)) {$saako_liitaa_laskuja_tilaukseen="";}
-if (!isset($omalle_tilaukselle)) {$omalle_tilaukselle='';}
-if (!isset($lisax)) {$lisax='';}
-if (!isset($etayhtio_totaalisumma)) {$etayhtio_totaalisumma=0;}
-if (!isset($nayta_sostolisateksti)) {$nayta_sostolisateksti="";}
-if (!isset($sarjanumero_dropdown)) {$sarjanumero_dropdown="";}
-if (!isset($kommentti_select)) {$kommentti_select='';}
 if (!isset($yksi_suoratoimittaja)) {$yksi_suoratoimittaja='';}
-if (!isset($tilausnumero)) {$tilausnumero='';}
-if (!isset($mista)) {$mista='';}
-if (!isset($orig_alatila)) {$orig_alatila='';}
-if (!isset($orig_tila)) {$orig_tila='';}
 if (!isset($ylatila)) {$ylatila='';}
-if (!isset($alatila)) {$alatila='';}
-if (!isset($tilaustyyppi)) {$tilaustyyppi='';}
-if (!isset($rahtisopimus)) {$rahtisopimus='';}
-if (!isset($netto)) {$netto='';}
-if (!isset($var)) {$var='';}
-if (!isset($toim_kutsu)) {$toim_kutsu='';}
-if (!isset($tulostetaan)) {$tulostetaan='';}
 
 // Setataan lopetuslinkki, jotta p‰‰semme takaisin tilaukselle jos k‰yd‰‰n jossain muualla
 $tilmyy_lopetus = "{$palvelin2}{$tilauskaslisa}tilaus_myynti.php////toim=$toim//projektilla=$projektilla//tilausnumero=$tilausnumero//ruutulimit=$ruutulimit//tilausrivi_alvillisuus=$tilausrivi_alvillisuus//mista=$mista";
+
+$_onko_valmistus = ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE");
+$saldo_valmistuksella = ($_onko_valmistus and $yhtiorow["saldo_varastossa_valmistuksella"] == "S");
 
 if ($lopetus != "") {
   // Lis‰t‰‰n t‰m‰ lopetuslinkkiin
@@ -3060,7 +3066,9 @@ if ($tee == '') {
       $params = array(
         'asiakas_tunnus' => $laskurow['liitostunnus'],
         'lasku_toimipaikka' => $laskurow['yhtio_toimipaikka'],
-        'varasto_toimipaikka' => $_varasto['toimipaikka']
+        'varasto_toimipaikka' => $_varasto['toimipaikka'],
+        'kohdevarasto' => $laskurow['clearing'],
+        'lahdevarasto' => $laskurow['varasto']
       );
       $toimitustavat = hae_toimitustavat($params);
 
@@ -3881,6 +3889,10 @@ if ($tee == '') {
 
       $tilausrivi = mysql_fetch_assoc($result);
 
+      if ($tapa == "VAIHDAJAPOISTA" and $tilausrivi["perheid"] != 0) {
+        $tapa = "JT";
+      }
+
       // Tehd‰‰n pari juttua jos tuote on sarjanumeroseurannassa
       if ($tilausrivi["sarjanumeroseuranta"] != '') {
 
@@ -3915,7 +3927,7 @@ if ($tee == '') {
       }
 
       // Poistetaan myˆs tuoteperheen lapset
-      if ($tapa != "VAIHDA") {
+      if ($tapa != "VAIHDA" and $tapa != "POISJTSTA" and $tapa != "PUUTE" and $tapa != "JT") {
 
         // Nollataan sarjanumerolinkit lapsien ja is‰n ja dellataan ostorivit
         vapauta_sarjanumerot($toim, $kukarow["kesken"], " and (tilausrivi.tunnus = '$rivitunnus' or tilausrivi.perheid = '$rivitunnus') ");
@@ -3957,7 +3969,7 @@ if ($tee == '') {
 
         echo "<font class='message'>",t("J‰lkitoimitus palautettiin tilaukselle")," {$tilausrivi['vanha_otunnus']}</font><br /><br />";
       }
-      else {
+      elseif ($tapa != "POISJTSTA" and $tapa != "PUUTE" and $tapa != "JT") {
         // Poistetaan muokattava tilausrivi
         $query = "DELETE FROM tilausrivi
                   WHERE tunnus = '$rivitunnus'";
@@ -4089,11 +4101,11 @@ if ($tee == '') {
       }
       elseif ($tapa == "JT") {
         $var     = "J";
-        $tila    = "";
+        $tila = "VARMUUTOS";
       }
       elseif ($tapa == "PUUTE") {
         $var     = "P";
-        $tila    = "";
+        $tila = "VARMUUTOS";
       }
       elseif ($tapa == "POISJTSTA") {
         $var     = "";
@@ -4102,8 +4114,7 @@ if ($tee == '') {
         if ($tilausrivi["tunnus"] != $tilausrivi["perheid"] and $tilausrivi["perheid"] != 0) {
           $perheid = $tilausrivi["perheid"];
         }
-
-        $tila    = "";
+        $tila = "VARMUUTOS";
       }
       elseif ($tapa == "VAIHDA") {
         $perheid  = $tilausrivi['perheid'];
@@ -4246,9 +4257,8 @@ if ($tee == '') {
     else exit;
   }
 
-  //Lis‰t‰‰n rivi
-  if ((trim($tuoteno) != '' or is_array($tuoteno_array)) and ($kpl != '' or is_array($kpl_array)) and $tila != "MUUTA" and $ulos == '' and ($variaatio_tuoteno == "" or (is_array($kpl_array) and array_sum($kpl_array) != 0))) {
-
+  //Lis‰t‰‰n rivi tai jos ollaan muuttamassa toimitettavaksi (POISJTSTA) tai puutteeksi niin silloin vain p‰ivitell‰‰n rivin tiedot ei olla poistettu rivi‰ joten ei myˆsk‰‰n tarvi lis‰t‰ sit‰ uuestaan & jos ollaan perheellinen ja tehh‰‰n koko perheest‰ JT-rivej‰
+  if ((trim($tuoteno) != '' or is_array($tuoteno_array)) and ($kpl != '' or is_array($kpl_array)) and ($tila != "MUUTA" and $tila != "VARMUUTOS") and $ulos == '' and ($variaatio_tuoteno == "" or (is_array($kpl_array) and array_sum($kpl_array) != 0))) {
     if (!is_array($tuoteno_array) and trim($tuoteno) != "") {
       $tuoteno_array[] = $tuoteno;
     }
@@ -4643,6 +4653,86 @@ if ($tee == '') {
     if (!isset($lisaa_jatka)) $variaatio_tuoteno = "";
     $omalle_tilaukselle = "";
     $valmistuslinja     = "";
+  }
+  elseif ($tila == "VARMUUTOS" and ($tapa == "POISJTSTA" or $tapa == "PUUTE" or $tapa == "JT")) {
+    //otetaan varattukpl ja jtkpl muuttuja k‰yttˆˆn
+    $varattukpl = 0;
+    $jtkpl = 0;
+
+    //katotaan varattu ja jt m‰‰r‰t kuntoon
+    //POISJTSTA eli ollaan merkitsem‰ss‰ rivi‰ toimitettavaksi -> jt => 0 ja varattu => tilkpl
+    if ($tapa == "POISJTSTA") {
+      $varattukpl = $kpl;
+      $jtkpl = 0;
+    }
+    //PUUTE eli ollaan tekem‰ss‰ rivist‰ puuterivi‰ -> jt => 0 ja varattu => 0
+    elseif ($tapa == "PUUTE") {
+      $varattukpl = 0;
+      $jtkpl = 0;
+    }
+    //JT eli ollaan tekem‰ss‰ rivist‰ JT-rivi‰, merkit‰‰n jt ja varattu sen mukaan varaavatko JT-rivit saldoa vai eiv‰t; EI -> jt => tilkpl ja varattu => 0// KYLLƒ -> jt => 0 ja varattu => tilkpl
+    elseif ($tapa == "JT") {
+      //varaako JT saldoa?
+      if ($yhtiorow["varaako_jt_saldoa"] == "") {
+        $varattukpl = 0;
+        $jtkpl = $kpl;
+      }
+      else {
+        $varattukpl = $kpl;
+        $jtkpl = 0;
+      }
+    }
+
+    //Jos ollaan toimittamassa rivi‰ tai jos ollaan k‰sittelem‰ss‰ perheetˆnt‰ tuotetta tai lapsituotetta niin silloin halutaan p‰ivitt‰‰ vain kyseinen rivi eik‰ tarvitse p‰ivitell‰ lapsia (kun niit‰ ei ole)
+    if ($tapa == "POISJTSTA" or $tilausrivi["perheid"] == "" or $tilausrivi["perheid"] != $tilausrivi["tunnus"]) {
+      $query =  " UPDATE tilausrivi
+                  SET
+                    var = '$var',
+                    varattu = $varattukpl,
+                    jt = $jtkpl
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus = '{$tilausrivi['tunnus']}'";
+      pupe_query($query);
+    }
+    //kun ollaan tekem‰ss‰ is‰tuotteesta JT-rivi‰ tai merkitsem‰ss‰ sit‰ puutteeksi niin tehd‰‰n samat jutu myˆs perheen lapsille
+    else {
+      $query = "SELECT tunnus
+                FROM tilausrivi
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND perheid = '{$tilausrivi['tunnus']}'
+                AND otunnus = '{$tilausrivi['otunnus']}'";
+      $mriviresult = pupe_query($query);
+
+      while ($muutettavarivi = mysql_fetch_assoc($mriviresult)) {
+        $query =  " UPDATE tilausrivi
+                    SET
+                      var = '$var',
+                      varattu = $varattukpl,
+                      jt = $jtkpl
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus = '{$muutettavarivi['tunnus']}'";
+        pupe_query($query);
+      }
+    }
+
+    $tila = "";
+
+    //tyhjennet‰‰n kaikki maholliset muuttujat ettei sitten laiteta lis‰‰ rivi kohtaan n‰it‰ tietoja ja yritet‰ lis‰t‰ sit‰ rivi‰ uudestaan..
+    $ale1 = "";
+    $alv         = "";
+    $hinta         = "";
+    $kerayspvm       = "";
+    $kommentti       = "";
+    $kpl         = "";
+    $netto         = "";
+    $paikka       = "";
+    $perheid       = 0;
+    $perheid2       = 0;
+    $rivinumero     = "";
+    $rivitunnus     = 0;
+    $toimaika       = "";
+    $tuoteno       = "";
+    $var = "";
   }
 
   // Allr specific!
@@ -5387,8 +5477,19 @@ if ($tee == '') {
       $sarakkeet++;
     }
 
+    if ($saldo_valmistuksella) {
+      $headerit .= "<th>".t("Myyt‰viss‰")."</th>";
+      $sarakkeet++;
+    }
+
     $headerit .= "<th>".t("Tuotenumero")."</th><th>".t("M‰‰r‰")."</th><th>".t("Var")."</th>";
     $sarakkeet += 3;
+
+    if ($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K") {
+      $headerit .= "<th>".t("Keha")."</th>";
+      $headerit .="<th>".t("Keha * kpl")."</th>";
+      $sarakkeet += 2;
+    }
 
     if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA") {
 
@@ -5549,7 +5650,7 @@ if ($tee == '') {
           $v_toimipaikka = hae_varaston_toimipaikka($tilausrivin_varasto);
           $varasto = hae_varasto($tilausrivin_varasto);
 
-          if (in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) and !empty($v_toimipaikka)) {
+          if (in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) and !empty($v_toimipaikka) and $varasto['tyyppi'] != 'E') {
 
             if ($v_toimipaikka['tunnus'] == 0) {
               $_toimipaikka = $kukarow['toimipaikka'];
@@ -5677,6 +5778,23 @@ if ($tee == '') {
       }
 
       while ($row = mysql_fetch_assoc($result)) {
+
+        if ($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K"
+          and $row["tyyppi"] != "V" and isset($tuotteenpainotettukehayht["keha"])) {
+
+          $_colspan = $sarakkeet_alku - 6;
+
+          echo "<tr>{$jarjlisa}";
+          echo "<td class='back' colspan='{$_colspan}'>&nbsp;</td>";
+          echo "<th colspan='5' align='right'>";
+          echo t("Valmisteen %s kehahinta * kpl yhteens‰", '', $tuotteenpainotettukehayht["tuoteno"]);
+          echo "</th>";
+          echo "<td class='spec' align='right'>";
+          echo sprintf("%.2f", $tuotteenpainotettukehayht["keha"]);
+          echo "</td>";
+
+          $tuotteenpainotettukehayht["keha"] = 0;
+        }
 
         // Tuoteperheen lapset, jotka on merkitty puutteeksi
         if ($kukarow['extranet'] != '' and $row['tunnus'] != $row['perheid'] and strtoupper($row['var']) == 'P' and $row['perheid'] != 0) {
@@ -6488,6 +6606,11 @@ if ($tee == '') {
           }
         }
 
+        if ($saldo_valmistuksella) {
+          list($_saldo, $_hyllyssa, $_myytavissa) = saldo_myytavissa($row["tuoteno"], '', $row["varasto"]);
+          echo "<td $class align='left' valign='top'>$_myytavissa</td>";
+        }
+
         if ($kukarow['extranet'] == '' and $tuotekyslinkki != "") {
           echo "<td $class valign='top'><a href='{$palvelin2}$tuotekyslinkki?".$tuotekyslinkkilisa."tee=Z&tuoteno=".urlencode($row["tuoteno"])."&toim_kutsu=$toim&lopetus=$tilmyy_lopetus//from=LASKUTATILAUS'>$row[tuoteno]</a>";
         }
@@ -6744,7 +6867,8 @@ if ($tee == '') {
           }
         }
 
-        if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA") {
+        if (($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K")
+            or ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA")) {
           $classvar = $class;
         }
         else {
@@ -6771,6 +6895,32 @@ if ($tee == '') {
         }
 
         echo "<td $classvar align='center' valign='top'>$var_temp&nbsp;</td>";
+
+        if ($toim == "VALMISTAVARASTOON" and $yhtiorow['kehahinta_valmistuksella'] == "K") {
+          echo "<td {$class} align='right' valign='top' nowrap>";
+          echo "{$row["kehahin"]}";
+          echo "</td>";
+
+          $painotettukeha = $kpl_ruudulle * $row["kehahin"];
+          if ($row["tyyppi"] == "V") {
+            $tuotteenpainotettukehayht["keha"] += $painotettukeha;
+            $painotettukehayhteensa += $painotettukeha;
+          }
+          else {
+            $tuotteenpainotettukehayht["tuoteno"] = $row["tuoteno"];
+          }
+
+          if ($classlisa != "") {
+            $classvar = $classlisa;
+          }
+          else {
+            $classvar = $class;
+          }
+
+          echo "<td {$classvar} align='right' valign='top' nowrap>";
+          echo "{$painotettukeha}";
+          echo "</td>";
+        }
 
         if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA") {
 
@@ -6849,18 +6999,18 @@ if ($tee == '') {
 
                 // Kate = Hinta - Ostohinta
                 if ($kotisumma_alviton != 0) {
-                  $kehahin = hinta_kuluineen($row["tuoteno"], $row["kehahin"]);
-                  $kate = round((100 * ($kotisumma_alviton - ($kehahin*($row["varattu"]+$row["jt"]))) / $kotisumma_alviton),2) ."%";
+                  $ostohinta = hinta_kuluineen($row["tuoteno"], $ostohinta);
+                  $kate = sprintf('%.2f', 100*($kotisumma_alviton - ($ostohinta * $kpl))/$kotisumma_alviton);
                 }
                 elseif (($ostohinta * $kpl) != 0) {
-                  $kate = "-100.00%";
+                  $kate = "-100.00";
                 }
               }
               elseif ($kpl < 0 and $row["osto_vai_hyvitys"] == "O") {
                 //Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on OSTOA
 
                 // Kate = 0
-                $kate = "0%";
+                $kate = "0";
               }
               elseif ($kpl < 0 and $row["osto_vai_hyvitys"] == "") {
                 //Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on HYVITYSTƒ
@@ -6897,10 +7047,10 @@ if ($tee == '') {
 
                 // Kate = Hinta - Alkuper‰inen ostohinta
                 if ($kotisumma_alviton != 0) {
-                  $kate = sprintf('%.2f',100 * ($kotisumma_alviton * -1 - $ostohinta)/$kotisumma_alviton)."%";
+                  $kate = sprintf('%.2f', 100 * ($kotisumma_alviton * -1 - $ostohinta)/$kotisumma_alviton);
                 }
                 else {
-                  $kate = "100.00%";
+                  $kate = "100.00";
                 }
               }
               else {
@@ -6910,7 +7060,7 @@ if ($tee == '') {
             elseif ($kukarow['extranet'] == '') {
               if ($kotisumma_alviton != 0) {
                 $khh = hinta_kuluineen($row['tuoteno'], $row["kehahin"]);
-                $kate = round(100 * ($kotisumma_alviton - ($khh * ($row["varattu"] + $row["jt"])))/$kotisumma_alviton, 2);
+                $kate = sprintf('%.2f', 100*($kotisumma_alviton - ($khh * ($row["varattu"]+$row["jt"]))) / $kotisumma_alviton);
               }
               elseif ($row["kehahin"] != 0 and ($row["varattu"]+$row["jt"]) > 0) {
                 $kate = "-100.00";
@@ -7074,7 +7224,7 @@ if ($tee == '') {
                 </form>";
           }
 
-          if ($row["var"] == "J" and $selpaikkamyytavissa >= $kpl_ruudulle and $kukarow['extranet'] == '') {
+          if ($row["var"] == "J" and (($row["ei_saldoa"] != "" or $selpaikkamyytavissa >= $kpl_ruudulle) and $kukarow['extranet'] == '')) {
             echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='toimita'>
                 <input type='hidden' name='toim'       value = '$toim'>
                 <input type='hidden' name='lopetus'     value = '$lopetus'>
@@ -7189,7 +7339,7 @@ if ($tee == '') {
                 <input type='hidden' name='orig_tila'     value = '$orig_tila'>
                 <input type='hidden' name='orig_alatila'   value = '$orig_alatila'>
                 <input type='hidden' name='tila'       value = 'MUUTA'>
-                <input type='hidden' name='tapa'       value = 'VAIHDAJAPOISTA'>
+                <input type='hidden' name='tapa'       value = 'PUUTE'>
                 <input type='hidden' name='var'       value = 'P'>
                 <input type='Submit' value='" . t("Puute") . "'>
                 </form> ";
@@ -7505,6 +7655,21 @@ if ($tee == '') {
           echo "</tr>";
 
         }
+      }
+
+      if ($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K") {
+        $_colspan = $sarakkeet_alku - 6;
+
+        echo "<tr>{$jarjlisa}";
+        echo "<td class='back' colspan='{$_colspan}'>&nbsp;</td>";
+        echo "<th colspan='5' align='right'>";
+        echo t("Valmisteen %s kehahinta * kpl yhteens‰", '', $tuotteenpainotettukehayht["tuoteno"]);
+        echo "</th>";
+        echo "<td class='spec' align='right'>";
+        echo sprintf("%.2f", $tuotteenpainotettukehayht["keha"]);
+        echo "</td>";
+
+        $tuotteenpainotettukehayht["keha"] = 0;
       }
 
       $summa           = 0;   // Tilauksen verollinen loppusumma tilauksen valuutassa
@@ -8396,6 +8561,18 @@ if ($tee == '') {
         }
 
       }
+      elseif ($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K") {
+        $_colspan = $sarakkeet_alku - 6;
+
+        echo "<tr>{$jarjlisa}";
+        echo "<td class='back' colspan='{$_colspan}'>&nbsp;</td>";
+        echo "<th colspan='5' align='right'>";
+        echo t("Koko valmistuksen Kehahinta * kpl yhteens‰");
+        echo "</th>";
+        echo "<td class='spec' align='right'>";
+        echo sprintf("%.2f", $painotettukehayhteensa);
+        echo "</td>";
+      }
 
       echo "</table>";
 
@@ -8850,7 +9027,7 @@ if ($tee == '') {
             $apuprintteri = 0;
           }
 
-          # Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰
+          // Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰
           if (!empty($laskurow['yhtio_toimipaikka'])) {
             $avainsana_where = " and avainsana.selite       = '{$laskurow['varasto']}'
                                  and avainsana.selitetark   = '{$laskurow['yhtio_toimipaikka']}'

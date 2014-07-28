@@ -168,7 +168,7 @@ unset($korvaavan_hinta_ylaraja_halvin_hinta);
 unset($korvaavan_hinta_ylaraja_halvin_ale);
 unset($korvaavan_hinta_ylaraja_halvin_netto);
 
-if ($toim == 'EXTENNAKKO' or $toim_kutsu == 'EXTENNAKKO') {
+if ($toim == 'EXTENNAKKO' or (isset($toim_kutsu) and $toim_kutsu == 'EXTENNAKKO')) {
   // Tarkistetaan onko hinta annettu k‰sin, jos on niin k‰ytet‰‰n sit‰, muussa tapauksessa haetaan ennakkohinta
   $hinta = (empty($hinta)) ? laske_ext_ennakko_hinta($trow, $laskurow) : $hinta;
 
@@ -274,7 +274,7 @@ if (!function_exists("tuoteperhe_reku2")) {
 if (isset($varasto) and $lisaarivi_debug == 1) echo "Myyd‰‰n varastoista: ", var_dump($varasto), "<br>";
 
 // katotaan oletuspaikka ja myyd‰‰n tietenkin sielt‰ jos niin halutaan
-if ($olpaikalta != '') {
+if (isset($olpaikalta) and $olpaikalta != '') {
   $olquery = "SELECT concat_ws('#!°!#',hyllyalue,hyllynro,hyllyvali,hyllytaso) olpaikka
               FROM tuotepaikat
               WHERE yhtio  = '$kukarow[yhtio]'
@@ -648,7 +648,7 @@ else {
 }
 
 // Jos skripti (kululaskut.inc) p‰‰ss‰‰ tilausrivilinkin, niin laitetaan se mukaan kyselyyn
-if ($tilausrivilinkki > 0) {
+if (isset($tilausrivilinkki) and $tilausrivilinkki > 0) {
   $tlisatied_lisa = " , tilausrivilinkki = '".mysql_real_escape_string($tilausrivilinkki)."' ";
 }
 
@@ -934,7 +934,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                   FROM tuote
                   JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
                   JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-                    AND varastopaikat.tunnus = tuotepaikat.varasto)
+                    AND varastopaikat.tunnus                = tuotepaikat.varasto)
                   JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio
                   and sarjanumeroseuranta.tuoteno           = tuote.tuoteno
                   and sarjanumeroseuranta.hyllyalue         = tuotepaikat.hyllyalue
@@ -965,8 +965,8 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                   JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
                   JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
                     AND varastopaikat.tunnus = tuotepaikat.varasto)
-                  WHERE tuote.yhtio = '$kukarow[yhtio]'
-                  and tuote.tuoteno = '$tuoteno'
+                  WHERE tuote.yhtio          = '$kukarow[yhtio]'
+                  and tuote.tuoteno          = '$tuoteno'
                   $notfromvarasto
                   ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta
                   $limit";
@@ -1639,7 +1639,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 }
               }
 
-              if ($kutsuja == "EDITILAUS" or $lisaarivi_debug == 1) {
+              if ((isset($kutsuja) and $kutsuja == "EDITILAUS") or $lisaarivi_debug == 1) {
                 $edi_ulos .= " --> ".t("Myyd‰‰n")." $myy_tuoteno[$indeksi] ".t("paikalta")." $myy_hyllyalue[$indeksi]-$myy_hyllynro[$indeksi]-$myy_hyllyvali[$indeksi]-$myy_hyllytaso[$indeksi]: $myy_kpl[$indeksi] ".t_avainsana("Y", "", "and avainsana.selite='$trow[yksikko]'", "", "", "selite")." ";
 
                 for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
@@ -1654,7 +1654,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               $tilattu = $myy_kpl[$indeksi];
               $varattu = $myy_kpl[$indeksi];
 
-              if ($yhtiorow['myyntiera_pyoristys'] == 'K' and $kutsuja == "EDITILAUS" and $edi_tyyppi != "magento" and $myyntierahuomatus) {
+              if ($yhtiorow['myyntiera_pyoristys'] == 'K' and (isset($kutsuja) and $kutsuja == "EDITILAUS") and $edi_tyyppi != "magento" and $myyntierahuomatus) {
                 if (strpos($kommentti, t("HUOM: Rivin m‰‰r‰ on pyˆristetty t‰yteen myyntier‰‰n! Myyntier‰ on")) === FALSE) {
                   $kommentti .= " ".t("HUOM: Rivin m‰‰r‰ on pyˆristetty t‰yteen myyntier‰‰n! Myyntier‰ on").": $trow[myynti_era]";
                 }

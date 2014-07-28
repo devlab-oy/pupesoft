@@ -191,7 +191,7 @@ if ($tee != '') {
               {$keraysvyohykejoin}
               {$lefti} JOIN kuka USE INDEX (kuka_index) ON (kuka.yhtio = tilausrivi.yhtio AND kuka.kuka = tilausrivi.keratty)
               LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
-                AND varastopaikat.tunnus = tilausrivi.varasto)
+                AND varastopaikat.tunnus  = tilausrivi.varasto)
               WHERE tilausrivi.yhtio      = '{$kukarow['yhtio']}'
               AND tilausrivi.kerattyaika  >= '{$vva}-{$kka}-{$ppa} 00:00:00'
               AND tilausrivi.kerattyaika  <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'

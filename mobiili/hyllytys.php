@@ -40,25 +40,25 @@ $query = "SELECT
           FROM lasku
           JOIN tilausrivi 
             ON (tilausrivi.yhtio = lasku.yhtio 
-              AND tilausrivi.otunnus = lasku.tunnus 
+              AND tilausrivi.otunnus                      = lasku.tunnus 
               AND tilausrivi.tyyppi='O')
           JOIN tuotteen_toimittajat 
             ON (tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno 
-              AND tuotteen_toimittajat.yhtio = tilausrivi.yhtio)
+              AND tuotteen_toimittajat.yhtio              = tilausrivi.yhtio)
           JOIN toimi 
             ON (toimi.yhtio = tuotteen_toimittajat.yhtio 
-              AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
+              AND toimi.tunnus                            = tuotteen_toimittajat.liitostunnus)
           LEFT JOIN tilausrivin_lisatiedot
             ON (tilausrivin_lisatiedot.yhtio = lasku.yhtio 
               AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus)
           JOIN tuotepaikat 
             ON (tuotepaikat.yhtio = lasku.yhtio 
-              AND tuotepaikat.tuoteno = tilausrivi.tuoteno
-              AND tuotepaikat.oletus = 'X') 
-          WHERE tilausrivi.tunnus = '{$tilausrivi}'
-          AND tilausrivi.yhtio = '{$kukarow['yhtio']}'
-          AND lasku.tunnus = '{$ostotilaus}'
-          AND lasku.vanhatunnus = '{$kukarow['toimipaikka']}'";
+              AND tuotepaikat.tuoteno                     = tilausrivi.tuoteno
+              AND tuotepaikat.oletus                      = 'X') 
+          WHERE tilausrivi.tunnus                         = '{$tilausrivi}'
+          AND tilausrivi.yhtio                            = '{$kukarow['yhtio']}'
+          AND lasku.tunnus                                = '{$ostotilaus}'
+          AND lasku.vanhatunnus                           = '{$kukarow['toimipaikka']}'";
 $result = pupe_query($query);
 $row = mysql_fetch_assoc($result);
 

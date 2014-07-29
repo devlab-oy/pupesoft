@@ -785,9 +785,9 @@ if ($tee == "") {
 
             $query = "SELECT *
                       FROM tiliointi USE INDEX (tositerivit_index)
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND ltunnus = '{$maksurow['tunnus']}'
-                      AND tilino IN ({$ratiro['rahatilit']}{$tilinolisa})
+                      WHERE yhtio  = '{$kukarow['yhtio']}'
+                      AND ltunnus  = '{$maksurow['tunnus']}'
+                      AND tilino   IN ({$ratiro['rahatilit']}{$tilinolisa})
                       AND korjattu = ''";
             $lasktilitre = pupe_query($query);
 

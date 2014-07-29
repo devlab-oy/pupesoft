@@ -4557,13 +4557,13 @@ if ($tee == '') {
 
     //Jos ollaan toimittamassa riviä tai jos ollaan käsittelemässä perheetöntä tuotetta tai lapsituotetta niin silloin halutaan päivittää vain kyseinen rivi eikä tarvitse päivitellä lapsia (kun niitä ei ole)
     if ($tapa == "POISJTSTA" or $tilausrivi["perheid"] == "" or $tilausrivi["perheid"] != $tilausrivi["tunnus"]) {
-      $query =  " UPDATE tilausrivi
-                  SET
-                    var = '$var',
-                    varattu = $varattukpl,
-                    jt = $jtkpl
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus = '{$tilausrivi['tunnus']}'";
+      $query =  "UPDATE tilausrivi
+                 SET
+                   var       = '$var',
+                   varattu   = $varattukpl,
+                   jt        = $jtkpl
+                 WHERE yhtio = '{$kukarow['yhtio']}'
+                 AND tunnus  = '{$tilausrivi['tunnus']}'";
       pupe_query($query);
     }
     //kun ollaan tekemässä isätuotteesta JT-riviä tai merkitsemässä sitä puutteeksi niin tehdään samat jutu myös perheen lapsille
@@ -4576,13 +4576,13 @@ if ($tee == '') {
       $mriviresult = pupe_query($query);
 
       while ($muutettavarivi = mysql_fetch_assoc($mriviresult)) {
-        $query =  " UPDATE tilausrivi
-                    SET
-                      var = '$var',
-                      varattu = $varattukpl,
-                      jt = $jtkpl
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus = '{$muutettavarivi['tunnus']}'";
+        $query =  "UPDATE tilausrivi
+                   SET
+                     var       = '$var',
+                     varattu   = $varattukpl,
+                     jt        = $jtkpl
+                   WHERE yhtio = '{$kukarow['yhtio']}'
+                   AND tunnus  = '{$muutettavarivi['tunnus']}'";
         pupe_query($query);
       }
     }

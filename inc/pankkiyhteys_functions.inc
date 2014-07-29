@@ -373,12 +373,12 @@ function tallenna_pankkiyhteys($params) {
   }
 
   $query = "INSERT INTO pankkiyhteys SET
-            yhtio = '{$kukarow['yhtio']}',
-            pankki = '{$pankki}',
+            yhtio       = '{$kukarow['yhtio']}',
+            pankki      = '{$pankki}',
             private_key = '{$salatut_tunnukset['private_key']}',
             certificate = '{$salatut_tunnukset['certificate']}',
             customer_id = '{$customer_id}',
-            target_id = '{$target_id}'";
+            target_id   = '{$target_id}'";
   $result = pupe_query($query);
 
   return $result;
@@ -711,7 +711,7 @@ function hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana) {
   $query = "SELECT *
             FROM pankkiyhteys
             WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND tunnus = {$pankkiyhteys_tunnus}";
+            AND tunnus  = {$pankkiyhteys_tunnus}";
   $result = pupe_query($query);
 
   $pankkiyhteys = mysql_fetch_assoc($result);

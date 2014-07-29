@@ -531,7 +531,7 @@ if ($yhtiorow["pankkitiedostot"] == "F" and $tee != "virhe") {
 
   $query = "SELECT *
             FROM yriti
-            WHERE yhtio = '{$kukarow['yhtio']}'
+            WHERE yhtio  = '{$kukarow['yhtio']}'
             AND kaytossa = ''
             ORDER BY nimi";
   $result = pupe_query($query);
@@ -594,11 +594,11 @@ $haku_query = "SELECT lasku.*,
                date_format(lasku.popvm, '%d.%m.%y.%H.%i.%s') popvm_dmy
                FROM lasku
                INNER JOIN valuu ON (valuu.yhtio = lasku.yhtio
-                AND valuu.nimi = lasku.valkoodi)
+                AND valuu.nimi     = lasku.valkoodi)
                INNER JOIN yriti ON (yriti.yhtio = lasku.yhtio
-                AND yriti.tunnus = lasku.maksu_tili
+                AND yriti.tunnus   = lasku.maksu_tili
                 AND yriti.kaytossa = '')
-               WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
+               WHERE lasku.yhtio   = '{$kukarow["yhtio"]}'
                {$lisa}
                {$pankkirajaus}
                ORDER BY maksu_tili, olmapvm, ultilno";
@@ -855,11 +855,11 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
                  date_format(lasku.popvm, '%d.%m.%y.%H.%i.%s') popvm_dmy
                  FROM lasku
                  INNER JOIN valuu ON (valuu.yhtio = lasku.yhtio
-                  AND valuu.nimi = lasku.valkoodi)
+                  AND valuu.nimi     = lasku.valkoodi)
                  INNER JOIN yriti ON (yriti.yhtio = lasku.yhtio
-                  AND yriti.tunnus = lasku.maksu_tili
+                  AND yriti.tunnus   = lasku.maksu_tili
                   AND yriti.kaytossa = '')
-                 WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
+                 WHERE lasku.yhtio   = '{$kukarow["yhtio"]}'
                  {$lisa}
                  {$pankkirajaus}
                  ORDER BY maksu_tili, olmapvm, ultilno";
@@ -981,8 +981,8 @@ if (SEPA_PANKKIYHTEYS and !empty($pankkiyhteys_tiedosto)) {
             FROM yriti
             INNER JOIN pankkiyhteys ON (pankkiyhteys.yhtio = yriti.yhtio
               AND pankkiyhteys.pankki = yriti.bic)
-            WHERE yriti.yhtio = '{$kukarow["yhtio"]}'
-            AND yriti.tunnus = {$pankkitili_tunnus}";
+            WHERE yriti.yhtio         = '{$kukarow["yhtio"]}'
+            AND yriti.tunnus          = {$pankkitili_tunnus}";
   $result = pupe_query($query);
 
   // Meill‰ on pankkiyhteys luotu, tehd‰‰n formi l‰hett‰mist‰ varten

@@ -91,10 +91,10 @@ $query = "SELECT tuote.tuoteno,
           tuote.tuotepaallikko,
           tuote.tunnus
           FROM tuote
-          WHERE tuote.yhtio = '{$yhtio}'
-          AND tuote.status != 'P'
-          AND tuote.ei_saldoa = ''
-          AND tuote.myynninseuranta = ''
+          WHERE tuote.yhtio          = '{$yhtio}'
+          AND tuote.status          != 'P'
+          AND tuote.ei_saldoa        = ''
+          AND tuote.myynninseuranta  = ''
           ORDER BY tuote.tuoteno";
 $res = pupe_query($query);
 

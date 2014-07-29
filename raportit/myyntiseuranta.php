@@ -2534,8 +2534,8 @@ else {
             $asiakas_tunnukset_sarja = implode(',', $asiakas_tunnukset);
             $query = "SELECT *
                       FROM yhteyshenkilo
-                      WHERE yhtio = '$yhtiorow[yhtio]'
-                      AND tyyppi = 'A'
+                      WHERE yhtio      = '$yhtiorow[yhtio]'
+                      AND tyyppi       = 'A'
                       AND liitostunnus IN ($asiakas_tunnukset_sarja)";
             $yhteyshenkilo_result = pupe_query($query);
             $yhteyshenkilot = array();
@@ -2570,8 +2570,8 @@ else {
               // Haetaan maksimi yhteyshenkilöiden määrä per ytunnus
               $query = "SELECT COUNT(*) AS maara
                         FROM yhteyshenkilo
-                        WHERE yhtio = '$yhtiorow[yhtio]'
-                        AND tyyppi = 'A'
+                        WHERE yhtio      = '$yhtiorow[yhtio]'
+                        AND tyyppi       = 'A'
                         AND liitostunnus IN ($asiakas_tunnukset_sarja)
                         GROUP BY liitostunnus
                         ORDER BY maara DESC

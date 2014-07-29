@@ -406,8 +406,8 @@ function xswp($tanaan, $korvatut) {
             ) korvaavatuoteno
             FROM tuote
             JOIN korvaavat ON (tuote.yhtio = korvaavat.yhtio AND tuote.tuoteno = korvaavat.tuoteno AND date(korvaavat.luontiaika) = '$tanaan')
-            WHERE tuote.yhtio     = '$yhtiorow[yhtio]' 
-            $tuoterajaukset  
+            WHERE tuote.yhtio     = '$yhtiorow[yhtio]'
+            $tuoterajaukset
             AND tuote.ostoehdotus = ''
             HAVING tuote.tuoteno = korvaavatuoteno";
   $rest = mysql_query($query) or pupe_error($query);

@@ -97,7 +97,7 @@ echo date("d.m.Y @ G:i:s")." - Aloitetaan tuote-export.\n";
 echo date("d.m.Y @ G:i:s")." - Haetaan tuotetiedot.\n";
 
 // Haetaan pupesta tuotteen tiedot
-$query = "SELECT 
+$query = "SELECT
           tuote.*,
           tuote.mallitarkenne campaign_code,
           tuote.malli target,
@@ -238,7 +238,7 @@ while ($row = mysql_fetch_array($res)) {
     );
   }
   // Katsotaan onko tuotteelle voimassaolevaa hinnastohintaa
-  $query = "SELECT 
+  $query = "SELECT
             *
             FROM hinnasto
             WHERE yhtio   = '{$kukarow['yhtio']}'
@@ -755,9 +755,9 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
       if (count($breadcrumbs) > 1) array_shift($breadcrumbs);
       $tuotepuun_nodet[] = $breadcrumbs;
     }
-    
+
     // Katsotaan onko tuotteelle voimassaolevaa hinnastohintaa
-    $query = "SELECT 
+    $query = "SELECT
               *
               FROM hinnasto
               WHERE yhtio   = '{$kukarow['yhtio']}'

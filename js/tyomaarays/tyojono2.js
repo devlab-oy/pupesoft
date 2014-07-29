@@ -5,23 +5,28 @@
 
     this.bind_kohde_tr_click = function() {
       var kohde_tr = $(element).find('.kohde_tr, .kohde_tr_hidden');
+      var suunta = null;
       $(kohde_tr).click(function(event) {
         if (event.target.nodeName !== 'INPUT' && event.target.nodeName !== 'SELECT') {
-          var laite_table_tr = $(this).next();
+          var $laite_table_tr = $(this).next();
           if ($(this).hasClass('kohde_tr_hidden')) {
             $(this).addClass('kohde_tr');
             $(this).removeClass('kohde_tr_hidden');
 
-            $(laite_table_tr).addClass('laite_table_tr');
-            $(laite_table_tr).removeClass('laite_table_tr_hidden');
+            $laite_table_tr.addClass('laite_table_tr');
+            $laite_table_tr.removeClass('laite_table_tr_hidden');
+            suunta = 'in';
           }
           else {
             $(this).removeClass('kohde_tr');
             $(this).addClass('kohde_tr_hidden');
 
-            $(laite_table_tr).removeClass('laite_table_tr');
-            $(laite_table_tr).addClass('laite_table_tr_hidden');
+            $laite_table_tr.removeClass('laite_table_tr');
+            $laite_table_tr.addClass('laite_table_tr_hidden');
+            suunta = 'out';
           }
+
+          kohteen_avaaminen_sessioon($(this).find('input.lasku_tunnukset').val(), suunta);
         }
       });
     };
@@ -144,6 +149,22 @@
       });
     };
 
+    this.bind_positio_keksiin = function() {
+      $('.merkkaa_tehdyksi, .muuta, .poista, .laitteen_vaihto, .muu, .kateissa, .laite_link').on('click', function() {
+        positio_keksiin();
+      });
+    };
+
+    this.autoscroll = function() {
+      var y = get_cookie('tyojono_positio');
+
+      if (y > 0) {
+        window.scrollTo(0,y);
+
+        set_cookie('tyojono_positio', '', -1);
+      }
+    };
+
     var paivita_laskujen_tyojonot = function(lasku_tunnukset, tyojono) {
       return $.ajax({
         async: true,
@@ -162,6 +183,63 @@
       });
     };
 
+    var kohteen_avaaminen_sessioon = function(lasku_tunnukset, suunta) {
+      var tunnukset = lasku_tunnukset;
+      if (typeof tunnukset == 'string' || tunnukset instanceof String) {
+        tunnukset = tunnukset.split(',');
+      }
+
+      return $.ajax({
+        async: true,
+        dataType: 'json',
+        type: 'POST',
+        data: {
+          lasku_tunnukset: tunnukset,
+          suunta: suunta
+        },
+        url: 'tyojono2.php?ajax_request=true&no_head=yes&action=kohteen_avaaminen_sessioon'
+      }).done(function(data) {
+        if (console && console.log) {
+          console.log('Päivitys onnistui');
+          console.log(data);
+        }
+      });
+    };
+
+    var positio_keksiin = function() {
+      var y = 0;
+
+      y = window.pageYOffset;
+
+      if (y === 0) {
+        return false;
+      }
+
+      set_cookie('tyojono_positio', y, 14);
+    };
+
+    var set_cookie = function(cname, cvalue, exdays) {
+      var d = new Date();
+      d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+      var expires = "expires=" + d.toGMTString();
+      document.cookie = cname + "=" + cvalue + "; " + expires;
+    };
+
+    var get_cookie = function(cname) {
+      var name = cname + "=";
+      var ca = document.cookie.split(';');
+      for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+          c = c.substring(1);
+        }
+        if (c.indexOf(name) != -1) {
+          return c.substring(name.length, c.length);
+        }
+      }
+      return "";
+    };
+
     var tarkista = function() {
       return confirm($('#oletko_varma').val());
     };
@@ -176,6 +254,8 @@
       this.bind_merkkaa_tehdyksi();
       this.bind_muuta_paivamaaraa();
       this.bind_poista();
+      this.bind_positio_keksiin();
+      this.autoscroll();
     };
 
   };

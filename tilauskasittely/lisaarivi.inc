@@ -3325,8 +3325,8 @@ if ($_yhteen_varastoon and $_sopivatilaustoimi and !in_array($var, array('S', 'U
   $myy_hyllynro_temp  = $myy_hyllynro[0];
 
   $_normi_tyhja       = (empty($myy_hyllyalue) and empty($myy_hyllynro));
-  $_puute_ei_tyhja    = (!empty($p_hyllyalue) and !empty($p_hyllynro));
-  $_puutteesta_hyllyt = ( $_normi_tyhja and $_puute_ei_tyhja);
+  $_puute_ei_tyhja    = ($p_hyllyalue != "" and $p_hyllynro != "");
+  $_puutteesta_hyllyt = ($_normi_tyhja and $_puute_ei_tyhja);
 
   if ($_puutteesta_hyllyt) {
     $myy_hyllyalue_temp = $p_hyllyalue;

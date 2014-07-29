@@ -228,7 +228,7 @@ class LaskutuspoytakirjaPDF
 
   def logo
     filepath = '/tmp/logo.jpeg'
-    File.open(filepath, 'a+') { |file|
+    File.open(filepath, 'w+') { |file|
       file.write Base64.decode64 @logo
     }
     @pdf.float do

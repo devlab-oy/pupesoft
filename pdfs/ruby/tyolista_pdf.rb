@@ -145,7 +145,7 @@ class TyolistaPDF
 
       @pdf.font 'Helvetica', :style => :normal, :size => 8
 
-      @siirto = 105
+      siirto = 105
       @customer_data.each do |value|
         if @pdf.width_of(value[:value]) > 150
           until @pdf.width_of(value[:value]) < 140 do
@@ -153,12 +153,12 @@ class TyolistaPDF
           end
           value[:value] = "#{value[:value]}..."
         end
-        @pdf.text_box value[:header], :width => 75, :align => :right, :at => [140, @siirto], :style => :bold
-        @pdf.text_box value[:value], :align => :left, :at => [220, @siirto]
-        @siirto = @siirto - 13
+        @pdf.text_box value[:header], :width => 75, :align => :right, :at => [140, siirto], :style => :bold
+        @pdf.text_box value[:value], :align => :left, :at => [220, siirto]
+        siirto = siirto - 13
       end
 
-      @siirto = 105
+      siirto = 105
       @spot_data.each do |value|
         if @pdf.width_of(value[:value]) > 150
           until @pdf.width_of(value[:value]) < 140 do
@@ -166,12 +166,12 @@ class TyolistaPDF
           end
           value[:value] = "#{value[:value]}..."
         end
-        @pdf.text_box value[:header], :width => 75, :align => :right, :at => [390, @siirto], :style => :bold
-        @pdf.text_box value[:value], :align => :left, :at => [470, @siirto]
-        @siirto = @siirto - 13
+        @pdf.text_box value[:header], :width => 75, :align => :right, :at => [390, siirto], :style => :bold
+        @pdf.text_box value[:value], :align => :left, :at => [470, siirto]
+        siirto = siirto - 13
       end
 
-      @siirto = 105
+      siirto = 105
       @other_data.each do |value|
         if @pdf.width_of(value[:value]) > 150
           until @pdf.width_of(value[:value]) < 148 do
@@ -179,9 +179,9 @@ class TyolistaPDF
           end
           value[:value] = "#{value[:value]}..."
         end
-        @pdf.text_box value[:header], :width => 75, :align => :right, :at => [610, @siirto], :style => :bold
-        @pdf.text_box value[:value], :align => :left, :at => [690, @siirto]
-        @siirto = @siirto - 13
+        @pdf.text_box value[:header], :width => 75, :align => :right, :at => [610, siirto], :style => :bold
+        @pdf.text_box value[:value], :align => :left, :at => [690, siirto]
+        siirto = siirto - 13
       end
 
     end
@@ -350,7 +350,7 @@ class TyolistaPDF
 
   def logo
     filepath = '/tmp/logo.jpeg'
-    File.open(filepath, 'a+') { |file|
+    File.open(filepath, 'w+') { |file|
       file.write Base64.decode64 @logo
     }
     @pdf.float do

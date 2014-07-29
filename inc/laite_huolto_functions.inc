@@ -955,6 +955,8 @@ function aseta_tyomaaraysten_status($lasku_tunnukset, $status) {
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND tyomaarays.otunnus IN ('" . implode("','", $lasku_tunnukset) . "')";
   pupe_query($query);
+
+  return true;
 }
 
 function aseta_laitteen_tila($laite_tunnus, $tila) {

@@ -9910,15 +9910,15 @@ if (!function_exists('livesearch_kohdehaku')) {
         $kieli = $kukarow['kieli'];
       }
 
-      $query = "  SELECT kohde.nimi AS kohde_nimi,
-            kohde.tunnus AS kohde_tunnus,
-            asiakas.nimi AS asiakas_nimi
-            FROM kohde
-            JOIN asiakas
-            ON ( asiakas.yhtio = kohde.yhtio
-              AND asiakas.tunnus = kohde.asiakas )
-            WHERE kohde.yhtio = '{$kukarow['yhtio']}'
-            AND kohde.nimi LIKE '%{$haku}%'";
+      $query = "SELECT kohde.nimi AS kohde_nimi,
+                kohde.tunnus AS kohde_tunnus,
+                asiakas.nimi AS asiakas_nimi
+                FROM kohde
+                JOIN asiakas
+                ON ( asiakas.yhtio = kohde.yhtio
+                  AND asiakas.tunnus = kohde.asiakas )
+                WHERE kohde.yhtio = '{$kukarow['yhtio']}'
+                AND kohde.nimi LIKE '%{$haku}%'";
       $result = pupe_query($query);
 
       $limit = 0;

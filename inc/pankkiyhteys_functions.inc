@@ -492,13 +492,21 @@ function hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana) {
             WHERE yhtio = '{$kukarow["yhtio"]}'
             AND tunnus  = {$pankkiyhteys_tunnus}";
   $result = pupe_query($query);
+  $pankki = mysql_fetch_assoc($result);
 
-  $pankkiyhteys = mysql_fetch_assoc($result);
-  $pankkiyhteys["pankki_lyhyt_nimi"] = $tuetut_pankit[$pankkiyhteys["pankki"]]["lyhyt_nimi"];
-  $pankkiyhteys["private_key"] = pura_salaus($pankkiyhteys["private_key"], $salasana);
-  $pankkiyhteys["certificate"] = pura_salaus($pankkiyhteys["certificate"], $salasana);
+  // List‰‰n resulttiin pankin lyhyt nimi
+  $pankki["pankki_lyhyt_nimi"] = $tuetut_pankit[$pankkiyhteys["pankki"]]["lyhyt_nimi"];
 
-  return $pankkiyhteys;
+  // Puretaan salaus tunnuksista
+  $pankki["signing_certificate"]         = pura_salaus($pankki["signing_certificate"], $salasana);
+  $pankki["signing_private_key"]         = pura_salaus($pankki["signing_private_key"], $salasana);
+  $pankki["encryption_certificate"]      = pura_salaus($pankki["encryption_certificate"], $salasana);
+  $pankki["encryption_private_key"]      = pura_salaus($pankki["encryption_private_key"], $salasana);
+  $pankki["bank_encryption_certificate"] = pura_salaus($pankki["bank_encryption_certificate"], $salasana);
+  $pankki["bank_root_certificate"]       = pura_salaus($pankki["bank_root_certificate"], $salasana);
+  $pankki["ca_certificate"]              = pura_salaus($pankki["ca_certificate"], $salasana);
+
+  return $pankki;
 }
 
 /**

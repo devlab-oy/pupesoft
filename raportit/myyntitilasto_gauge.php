@@ -343,11 +343,14 @@ if ($tee == 'laske') {
   $kkl = (int) $kkl;
   $vvl = (int) $vvl;
 
-  $query = "SELECT tilausrivi.laadittu AS 'pvm',
-            if(tilausrivi.laskutettu != '', tilausrivi.kate, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt))) AS 'tilatut_kate',
-            if(tilausrivi.laskutettu != '', tilausrivi.rivihinta, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)) AS tilatut_eurot,
+  $query = "SELECT
+            left(tilausrivi.laadittu, 10) AS 'pvm',
             kustannuspaikka.nimi AS kustannuspaikka,
-            tuote.osasto, tuote.try
+            tuote.osasto,
+            tuote.try,
+            sum(if(tilausrivi.laskutettu != '', tilausrivi.kate, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt)))) AS 'tilatut_kate',
+            sum(if(tilausrivi.laskutettu != '', tilausrivi.rivihinta, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1))) AS tilatut_eurot,
+            count(tilausrivi.tunnus) AS 'tilatut_rivit'
             FROM tilausrivi
             JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.myynninseuranta = '')
             JOIN lasku on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)
@@ -357,6 +360,7 @@ if ($tee == 'laske') {
             AND tilausrivi.tyyppi   = 'L'
             AND tilausrivi.laadittu >= '{$vva}-{$kka}-{$ppa} 00:00:00'
             AND tilausrivi.laadittu <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
+            GROUP BY 1,2,3,4
             ORDER BY tilausrivi.laadittu";
   $result = pupe_query($query);
 
@@ -448,35 +452,38 @@ if ($tee == 'laske') {
     if (!isset($arr_try[$pvm][$osasto][$try]['tilatut_rivit'])) $arr_try[$pvm][$osasto][$try]['tilatut_rivit'] = 0;
 
     $arr[$pvm]['tilatut_eurot'] += $row['tilatut_eurot'];
-    $arr[$pvm]['tilatut_kate'] += $row['tilatut_kate'];
-    $arr[$pvm]['tilatut_rivit']++;
+    $arr[$pvm]['tilatut_kate']  += $row['tilatut_kate'];
+    $arr[$pvm]['tilatut_rivit'] += $row['tilatut_rivit'];
 
     $arr_kustp[$pvm][$kustp]['tilatut_eurot'] += $row['tilatut_eurot'];
-    $arr_kustp[$pvm][$kustp]['tilatut_kate'] += $row['tilatut_kate'];
-    $arr_kustp[$pvm][$kustp]['tilatut_rivit']++;
+    $arr_kustp[$pvm][$kustp]['tilatut_kate']  += $row['tilatut_kate'];
+    $arr_kustp[$pvm][$kustp]['tilatut_rivit'] += $row['tilatut_rivit'];
 
     $arr_kustp_osasto[$pvm][$kustp][$osasto]['tilatut_eurot'] += $row['tilatut_eurot'];
-    $arr_kustp_osasto[$pvm][$kustp][$osasto]['tilatut_kate'] += $row['tilatut_kate'];
-    $arr_kustp_osasto[$pvm][$kustp][$osasto]['tilatut_rivit']++;
+    $arr_kustp_osasto[$pvm][$kustp][$osasto]['tilatut_kate']  += $row['tilatut_kate'];
+    $arr_kustp_osasto[$pvm][$kustp][$osasto]['tilatut_rivit'] += $row['tilatut_rivit'];
 
     $arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['tilatut_eurot'] += $row['tilatut_eurot'];
-    $arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['tilatut_kate'] += $row['tilatut_kate'];
-    $arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['tilatut_rivit']++;
+    $arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['tilatut_kate']  += $row['tilatut_kate'];
+    $arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['tilatut_rivit'] += $row['tilatut_rivit'];
 
     $arr_osasto[$pvm][$osasto]['tilatut_eurot'] += $row['tilatut_eurot'];
-    $arr_osasto[$pvm][$osasto]['tilatut_kate'] += $row['tilatut_kate'];
-    $arr_osasto[$pvm][$osasto]['tilatut_rivit']++;
+    $arr_osasto[$pvm][$osasto]['tilatut_kate']  += $row['tilatut_kate'];
+    $arr_osasto[$pvm][$osasto]['tilatut_rivit'] += $row['tilatut_rivit'];
 
     $arr_try[$pvm][$osasto][$try]['tilatut_eurot'] += $row['tilatut_eurot'];
-    $arr_try[$pvm][$osasto][$try]['tilatut_kate'] += $row['tilatut_kate'];
-    $arr_try[$pvm][$osasto][$try]['tilatut_rivit']++;
+    $arr_try[$pvm][$osasto][$try]['tilatut_kate']  += $row['tilatut_kate'];
+    $arr_try[$pvm][$osasto][$try]['tilatut_rivit'] += $row['tilatut_rivit'];
   }
 
-  $query = "SELECT tilausrivi.laskutettuaika AS 'pvm',
-            tilausrivi.kate AS 'laskutetut_kate',
-            tilausrivi.rivihinta AS 'laskutetut_eurot',
+  $query = "SELECT
+            tilausrivi.laskutettuaika AS 'pvm',
             kustannuspaikka.nimi AS kustannuspaikka,
-            tuote.osasto, tuote.try
+            tuote.osasto,
+            tuote.try,
+            sum(tilausrivi.kate) AS 'laskutetut_kate',
+            sum(tilausrivi.rivihinta) AS 'laskutetut_eurot',
+            count(tilausrivi.tunnus) AS 'laskutetut_rivit'
             FROM tilausrivi
             JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.myynninseuranta = '')
             JOIN lasku on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)
@@ -487,6 +494,7 @@ if ($tee == 'laske') {
             AND tilausrivi.laskutettuaika  >= '{$vva}-{$kka}-{$ppa}'
             AND tilausrivi.laskutettuaika  <= '{$vvl}-{$kkl}-{$ppl}'
             AND tilausrivi.laskutettu     != ''
+            GROUP BY 1,2,3,4
             ORDER BY tilausrivi.laadittu";
   $result = pupe_query($query);
 
@@ -543,28 +551,28 @@ if ($tee == 'laske') {
     if (!isset($arr_try[$pvm][$osasto][$try]['laskutetut_rivit'])) $arr_try[$pvm][$osasto][$try]['laskutetut_rivit'] = 0;
 
     $arr[$pvm]['laskutetut_eurot'] += $row['laskutetut_eurot'];
-    $arr[$pvm]['laskutetut_kate'] += $row['laskutetut_kate'];
-    $arr[$pvm]['laskutetut_rivit']++;
+    $arr[$pvm]['laskutetut_kate']  += $row['laskutetut_kate'];
+    $arr[$pvm]['laskutetut_rivit'] += $row['laskutetut_rivit'];
 
     $arr_kustp[$pvm][$kustp]['laskutetut_eurot'] += $row['laskutetut_eurot'];
-    $arr_kustp[$pvm][$kustp]['laskutetut_kate'] += $row['laskutetut_kate'];
-    $arr_kustp[$pvm][$kustp]['laskutetut_rivit']++;
+    $arr_kustp[$pvm][$kustp]['laskutetut_kate']  += $row['laskutetut_kate'];
+    $arr_kustp[$pvm][$kustp]['laskutetut_rivit'] += $row['laskutetut_rivit'];
 
     $arr_kustp_osasto[$pvm][$kustp][$osasto]['laskutetut_eurot'] += $row['laskutetut_eurot'];
-    $arr_kustp_osasto[$pvm][$kustp][$osasto]['laskutetut_kate'] += $row['laskutetut_kate'];
-    $arr_kustp_osasto[$pvm][$kustp][$osasto]['laskutetut_rivit']++;
+    $arr_kustp_osasto[$pvm][$kustp][$osasto]['laskutetut_kate']  += $row['laskutetut_kate'];
+    $arr_kustp_osasto[$pvm][$kustp][$osasto]['laskutetut_rivit'] += $row['laskutetut_rivit'];
 
     $arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['laskutetut_eurot'] += $row['laskutetut_eurot'];
-    $arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['laskutetut_kate'] += $row['laskutetut_kate'];
-    $arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['laskutetut_rivit']++;
+    $arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['laskutetut_kate']  += $row['laskutetut_kate'];
+    $arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['laskutetut_rivit'] += $row['laskutetut_rivit'];
 
     $arr_osasto[$pvm][$osasto]['laskutetut_eurot'] += $row['laskutetut_eurot'];
-    $arr_osasto[$pvm][$osasto]['laskutetut_kate'] += $row['laskutetut_kate'];
-    $arr_osasto[$pvm][$osasto]['laskutetut_rivit']++;
+    $arr_osasto[$pvm][$osasto]['laskutetut_kate']  += $row['laskutetut_kate'];
+    $arr_osasto[$pvm][$osasto]['laskutetut_rivit'] += $row['laskutetut_rivit'];
 
     $arr_try[$pvm][$osasto][$try]['laskutetut_eurot'] += $row['laskutetut_eurot'];
-    $arr_try[$pvm][$osasto][$try]['laskutetut_kate'] += $row['laskutetut_kate'];
-    $arr_try[$pvm][$osasto][$try]['laskutetut_rivit']++;
+    $arr_try[$pvm][$osasto][$try]['laskutetut_kate']  += $row['laskutetut_kate'];
+    $arr_try[$pvm][$osasto][$try]['laskutetut_rivit'] += $row['laskutetut_rivit'];
   }
 
   // Haetaan tavoitteet
@@ -599,213 +607,62 @@ if ($tee == 'laske') {
       $vuosi = substr($row['kausi'], 0, 4);
       $kuu   = substr($row['kausi'], 4, 2);
 
-      if ($naytetaan_tulos == 'daily') {
+      $paivia = cal_days_in_month(CAL_GREGORIAN, $kuu, $vuosi);
 
-        $paivia = cal_days_in_month(CAL_GREGORIAN, $kuu, $vuosi);
+      // Tehdään päiväkohtaiset arrayt
+      for ($i = 0; $i < $paivia; $i++) {
 
-        for ($i = 0; $i < $paivia; $i++) {
+        $paiva = $i+1;
+        $paiva = str_pad($paiva, 2, "0", STR_PAD_LEFT);
 
-          $paiva = $i+1;
-          $paiva = str_pad($paiva, 2, "0", STR_PAD_LEFT);
-          $pvm   = "{$paiva}-{$kuu}-{$vuosi}";
-
-          if ($alkupvm_totime <= strtotime("{$vuosi}-{$kuu}-{$paiva}") and $loppupvm_totime >= strtotime("{$vuosi}-{$kuu}-{$paiva}")) {
-
-            $kustp  = $row['kp_nimi'];
-            $try    = $row['try'];
-
-            // tämä tuoteryhmä kuuluu tähän osastoon
-            if (!isset($osaston_ryhmat[$try])) {
-              $osaston_ryhmat[$try] = 0;
-            }
-
-            $osasto = $osaston_ryhmat[$try];
-
-            if (!isset($arr[$pvm]['tavoite'])) {
-              $arr[$pvm]['tavoite'] = 0;
-            }
-            if (!isset($arr_kustp[$pvm][$kustp]['tavoite'])) {
-              $arr_kustp[$pvm][$kustp]['tavoite'] = 0;
-            }
-            if (!isset($arr_kustp_osasto[$pvm][$kustp][$osasto]['tavoite'])) {
-              $arr_kustp_osasto[$pvm][$kustp][$osasto]['tavoite'] = 0;
-            }
-            if (!isset($arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['tavoite'])) {
-              $arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['tavoite'] = 0;
-            }
-            if (!isset($arr_osasto[$pvm][$osasto]['tavoite'])) {
-              $arr_osasto[$pvm][$osasto]['tavoite'] = 0;
-            }
-            if (!isset($arr_try[$pvm][$osasto][$try]['tavoite'])) {
-              $arr_try[$pvm][$osasto][$try]['tavoite'] = 0;
-            }
-
-            $arr[$pvm]['tavoite'] += $row['summa'] / $paivia;
-            $arr_kustp[$pvm][$kustp]['tavoite'] += $row['summa'] / $paivia;
-            $arr_kustp_osasto[$pvm][$kustp][$osasto]['tavoite'] += $row['summa'] / $paivia;
-            $arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['tavoite'] += $row['summa'] / $paivia;
-            $arr_osasto[$pvm][$osasto]['tavoite'] += $row['summa'] / $paivia;
-            $arr_try[$pvm][$osasto][$try]['tavoite'] += $row['summa'] / $paivia;
-          }
+        if ($naytetaan_tulos == 'daily') {
+          $pvm = "{$paiva}-{$kuu}-{$vuosi}";
         }
-      }
-
-      if ($naytetaan_tulos == 'weekly') {
-
-        $paivia = cal_days_in_month(CAL_GREGORIAN, $kuu, $vuosi);
-
-        for ($i = 0; $i < $paivia; $i++) {
-
-          $paiva = $i+1;
-          $paiva = str_pad($paiva, 2, "0", STR_PAD_LEFT);
-          $pvmx  = strtotime("{$vuosi}-{$kuu}-{$paiva}");
-
-          if ($alkupvm_totime <= strtotime("{$vuosi}-{$kuu}-{$paiva}") and $loppupvm_totime >= strtotime("{$vuosi}-{$kuu}-{$paiva}")) {
-
-            $kustp = $row['kp_nimi'];
-            $try   = $row['try'];
-
-            // tämä tuoteryhmä kuuluu tähän osastoon
-            if (!isset($osaston_ryhmat[$try])) {
-              $osaston_ryhmat[$try] = 0;
-            }
-
-            $osasto = $osaston_ryhmat[$try];
-
-            if (!isset($xarr[$pvmx])) {
-              $xarr[$pvmx] = 0;
-            }
-            if (!isset($xarr_kustp[$pvmx])) {
-              $xarr_kustp[$pvmx] = 0;
-            }
-            if (!isset($xarr_kustp_osasto[$pvmx])) {
-              $xarr_kustp_osasto[$pvmx] = 0;
-            }
-            if (!isset($xarr_kustp_osasto_try[$pvmx])) {
-              $xarr_kustp_osasto_try[$pvmx] = 0;
-            }
-            if (!isset($xarr_osasto[$pvmx])) {
-              $xarr_osasto[$pvmx] = 0;
-            }
-            if (!isset($xarr_try[$pvmx])) {
-              $xarr_try[$pvmx] = 0;
-            }
-
-            $xarr[$pvmx] += $row['summa'] / $paivia;
-            $xarr_kustp[$pvmx] += $row['summa'] / $paivia;
-            $xarr_kustp_osasto[$pvmx] += $row['summa'] / $paivia;
-            $xarr_kustp_osasto_try[$pvmx] += $row['summa'] / $paivia;
-            $xarr_osasto[$pvmx] += $row['summa'] / $paivia;
-            $xarr_try[$pvmx] += $row['summa'] / $paivia;
-          }
+        elseif ($naytetaan_tulos == 'weekly') {
+          $pvm = date("W-Y", strtotime("{$vuosi}-{$kuu}-{$paiva}"));
+        }
+        else {
+          $pvm = "{$kuu}-{$vuosi}";
         }
 
-        foreach ($xarr as $aik => $sum) {
-          $pvm = date("W-Y", $aik);
+        if ($alkupvm_totime <= strtotime("{$vuosi}-{$kuu}-{$paiva}") and $loppupvm_totime >= strtotime("{$vuosi}-{$kuu}-{$paiva}")) {
+
           $kustp = $row['kp_nimi'];
-          $osasto = $row['osasto'];
-          $try = $row['try'];
+          $try   = $row['try'];
+
+          // tämä tuoteryhmä kuuluu tähän osastoon
+          if (!isset($osaston_ryhmat[$try])) {
+            $osaston_ryhmat[$try] = 0;
+          }
+
+          $osasto = $osaston_ryhmat[$try];
+
           if (!isset($arr[$pvm]['tavoite'])) {
             $arr[$pvm]['tavoite'] = 0;
           }
-          $arr[$pvm]['tavoite'] += $sum;
-        }
-
-        foreach ($xarr_kustp as $aik => $sum) {
-          $pvm = date("W-Y", $aik);
-          $kustp = $row['kp_nimi'];
-          $osasto = $row['osasto'];
-          $try = $row['try'];
           if (!isset($arr_kustp[$pvm][$kustp]['tavoite'])) {
             $arr_kustp[$pvm][$kustp]['tavoite'] = 0;
           }
-          $arr_kustp[$pvm][$kustp]['tavoite'] +=  $sum;
-        }
-
-        foreach ($xarr_kustp_osasto as $aik => $sum) {
-          $pvm = date("W-Y", $aik);
-          $kustp = $row['kp_nimi'];
-          $osasto = $row['osasto'];
-          $try = $row['try'];
           if (!isset($arr_kustp_osasto[$pvm][$kustp][$osasto]['tavoite'])) {
             $arr_kustp_osasto[$pvm][$kustp][$osasto]['tavoite'] = 0;
           }
-          $arr_kustp_osasto[$pvm][$kustp][$osasto]['tavoite'] += $sum;
-        }
-
-        foreach ($xarr_kustp_osasto_try as $aik => $sum) {
-          $pvm = date("W-Y", $aik);
-          $kustp = $row['kp_nimi'];
-          $osasto = $row['osasto'];
-          $try = $row['try'];
           if (!isset($arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['tavoite'])) {
             $arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['tavoite'] = 0;
           }
-          $arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['tavoite'] += $sum;
-        }
-
-        foreach ($xarr_osasto as $aik => $sum) {
-          $pvm = date("W-Y", $aik);
-          $kustp = $row['kp_nimi'];
-          $osasto = $row['osasto'];
-          $try = $row['try'];
           if (!isset($arr_osasto[$pvm][$osasto]['tavoite'])) {
             $arr_osasto[$pvm][$osasto]['tavoite'] = 0;
           }
-          $arr_osasto[$pvm][$osasto]['tavoite'] += $sum;
-        }
-
-        foreach ($xarr_try as $aik => $sum) {
-          $pvm = date("W-Y", $aik);
-          $kustp = $row['kp_nimi'];
-          $osasto = $row['osasto'];
-          $try = $row['try'];
           if (!isset($arr_try[$pvm][$osasto][$try]['tavoite'])) {
             $arr_try[$pvm][$osasto][$try]['tavoite'] = 0;
           }
-          $arr_try[$pvm][$osasto][$try]['tavoite'] += $sum;
-        }
 
-      }
-
-      if ($naytetaan_tulos == 'monthly') {
-
-        $pvm   = "{$kuu}-{$vuosi}";
-        $kustp = $row['kp_nimi'];
-        $try   = $row['try'];
-
-        // tämä tuoteryhmä kuuluu tähän osastoon
-        if (!isset($osaston_ryhmat[$try])) {
-          $osaston_ryhmat[$try] = 0;
+          $arr[$pvm]['tavoite'] += $row['summa'] / $paivia;
+          $arr_kustp[$pvm][$kustp]['tavoite'] += $row['summa'] / $paivia;
+          $arr_kustp_osasto[$pvm][$kustp][$osasto]['tavoite'] += $row['summa'] / $paivia;
+          $arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['tavoite'] += $row['summa'] / $paivia;
+          $arr_osasto[$pvm][$osasto]['tavoite'] += $row['summa'] / $paivia;
+          $arr_try[$pvm][$osasto][$try]['tavoite'] += $row['summa'] / $paivia;
         }
-
-        $osasto = $osaston_ryhmat[$try];
-
-        if (!isset($arr[$pvm]['tavoite'])) {
-          $arr[$pvm]['tavoite'] = 0;
-        }
-        if (!isset($arr_kustp[$pvm][$kustp]['tavoite'])) {
-          $arr_kustp[$pvm][$kustp]['tavoite'] = 0;
-        }
-        if (!isset($arr_kustp_osasto[$pvm][$kustp][$osasto]['tavoite'])) {
-          $arr_kustp_osasto[$pvm][$kustp][$osasto]['tavoite'] = 0;
-        }
-        if (!isset($arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['tavoite'])) {
-          $arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['tavoite'] = 0;
-        }
-        if (!isset($arr_osasto[$pvm][$osasto]['tavoite'])) {
-          $arr_osasto[$pvm][$osasto]['tavoite'] = 0;
-        }
-        if (!isset($arr_try[$pvm][$osasto][$try]['tavoite'])) {
-          $arr_try[$pvm][$osasto][$try]['tavoite'] = 0;
-        }
-
-        $arr[$pvm]['tavoite'] += $row['summa'];
-        $arr_kustp[$pvm][$kustp]['tavoite'] += $row['summa'];
-        $arr_kustp_osasto[$pvm][$kustp][$osasto]['tavoite'] += $row['summa'];
-        $arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['tavoite'] += $row['summa'];
-        $arr_osasto[$pvm][$osasto]['tavoite'] += $row['summa'];
-        $arr_try[$pvm][$osasto][$try]['tavoite'] += $row['summa'];
       }
     }
   }

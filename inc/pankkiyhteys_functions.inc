@@ -156,35 +156,6 @@ function mahdolliset_pankkiyhteydet() {
 }
 
 /**
- * @param array $params
- *
- * @return bool|resource
- */
-function tallenna_pankkiyhteys($params) {
-  global $kukarow, $yhtiorow;
-
-  $pankki = isset($params["pankki"]) ? $params["pankki"] : "";
-  $salatut_tunnukset = isset($params["salatut_tunnukset"]) ? $params["salatut_tunnukset"] : "";
-  $customer_id = isset($params["customer_id"]) ? $params["customer_id"] : "";
-  $target_id = isset($params["target_id"]) ? $params["target_id"] : "";
-
-  if (empty($pankki) or empty($salatut_tunnukset) or empty($customer_id) or empty($target_id)) {
-    return false;
-  }
-
-  $query = "INSERT INTO pankkiyhteys SET
-            yhtio       = '{$kukarow['yhtio']}',
-            pankki      = '{$pankki}',
-            private_key = '{$salatut_tunnukset['private_key']}',
-            certificate = '{$salatut_tunnukset['certificate']}',
-            customer_id = '{$customer_id}',
-            target_id   = '{$target_id}'";
-  $result = pupe_query($query);
-
-  return $result;
-}
-
-/**
  * @param string $pankki
  *
  * @return resource

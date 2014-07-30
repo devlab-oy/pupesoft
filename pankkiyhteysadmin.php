@@ -24,6 +24,7 @@ $tee = empty($tee) ? '' : $tee;
 $customer_id = empty($customer_id) ? '' : $customer_id;
 $pin = empty($pin) ? '' : $pin;
 $bank = "";
+$target_id = "";
 
 // Debug moodissa, voidaan upata suoraan key/cert käyttöliittymästä
 $debug = empty($debug) ? 0 : 1;
@@ -76,29 +77,27 @@ if ($tee == "luo") {
 
 // Haetaan sertifikaatti jos PIN on annettu
 if ($tee == "luo" and $pin != '') {
-  $generoidut_tunnukset = generoi_private_key_ja_csr();
-  $private_key = $generoidut_tunnukset["private_key"];
+  // Generoidaan allekirjoitusta ja salausta varten private key ja certificate-signing-request
+  $generoidut_tunnukset1 = generoi_private_key_ja_csr();
+  $generoidut_tunnukset2 = generoi_private_key_ja_csr();
+
+  $signing_private_key = $generoidut_tunnukset1["private_key"];
+  $encryption_private_key = $generoidut_tunnukset2["private_key"];
 
   $params = array(
     "bank" => $tuetut_pankit[$pankki]["lyhyt_nimi"],
     "customer_id" => $customer_id,
     "pin" => $pin,
-    "signing_csr" => $generoidut_tunnukset["csr"]
+    "signing_csr" => $generoidut_tunnukset1["csr"],
+    "encryption_csr" => $generoidut_tunnukset2["csr"],
   );
 
-  $response = sepa_get_certificate($params);
+  $tunnukset_pankista = sepa_get_certificate($params);
 
-  if (!$response) {
+  if (!$tunnukset_pankista) {
     virhe("Sertifikaatin hakeminen epäonnistui, tarkista PIN-koodi ja asiakastunnus");
     $tee = "";
   }
-
-  $certificate = $response["own_signing_certificate"];
-
-  $salatut_tunnukset = array(
-    "private_key"   => salaa($private_key, $salasana),
-    "certificate" => salaa($certificate, $salasana)
-  );
 }
 
 // Avainpari annettu käyttöliittymästä
@@ -139,20 +138,25 @@ if ($tee == "luo" and $bank == "nordea") {
 
 // Tallennetaan pankkiyhteys
 if ($tee == "luo") {
-  $params = array(
-    "pankki"            => $pankki,
-    "salatut_tunnukset" => $salatut_tunnukset,
-    "customer_id"       => $customer_id,
-    "target_id"         => $target_id
-  );
+  $oec = salaa($tunnukset_pankista["own_encryption_certificate"], $salasana);
+  $osc = salaa($tunnukset_pankista["own_signing_certificate"], $salasana);
+  $bec = salaa($tunnukset_pankista["bank_encryption_certificate"], $salasana);
+  $brc = salaa($tunnukset_pankista["bank_root_certificate"], $salasana);
+  $bca = salaa($tunnukset_pankista["ca_certificate"], $salasana);
 
-  if (tallenna_pankkiyhteys($params)) {
-    ok("Tunnukset tallennettu");
-    $tee = "tyhjenna_formi";
-  }
-  else {
-    virhe("Tunnusten tallennus epäonnistui");
-  }
+  $query = "INSERT INTO pankkiyhteys SET
+            yhtio                       = '{$kukarow['yhtio']}',
+            pankki                      = '{$pankki}',
+            signing_certificate         = '{$osc}',
+            signing_private_key         = '{$signing_private_key}',
+            encryption_certificate      = '{$oec}',
+            encryption_private_key      = '{$encryption_private_key}',
+            bank_encryption_certificate = '{$bec}'
+            bank_root_certificate       = '{$brc}',
+            ca_certificate              = '{$bca}',
+            customer_id                 = '{$customer_id}',
+            target_id                   = '{$target_id}'";
+  $result = pupe_query($query);
 }
 
 // Käyttöliittymä

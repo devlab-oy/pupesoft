@@ -120,6 +120,7 @@ if ($tee == "luo" and $pin == '' and $debug == 1) {
   }
 }
 
+// Haetaan target_id nordealla
 if ($tee == "luo" and $bank == "nordea") {
   $params = array(
     "bank" => $bank,
@@ -152,13 +153,6 @@ if ($tee == "luo") {
   else {
     virhe("Tunnusten tallennus epäonnistui");
   }
-}
-
-if ($tee == "tyhjenna_formi") {
-  $_POST["pankki"] = "";
-  $_POST["customer_id"] = "";
-  $_POST["target_id"] = "";
-  $_POST["pin"] = "";
 }
 
 // Käyttöliittymä

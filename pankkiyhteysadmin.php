@@ -100,23 +100,17 @@ if ($tee == "luo" and $pin != '') {
   }
 }
 
-// Avainpari annettu k‰yttˆliittym‰st‰
+// Avainpari annettu k‰yttˆliittym‰st‰ debugmode!
 if ($tee == "luo" and $pin == '' and $debug == 1) {
-  $private_key = file_get_contents($_FILES["private_key"]["tmp_name"]);
-  $certificate = file_get_contents($_FILES["certificate"]["tmp_name"]);
+  $signing_private_key = file_get_contents($_FILES["signing_private_key"]["tmp_name"]);
+  $encryption_private_key = file_get_contents($_FILES["encryption_private_key"]["tmp_name"]);
 
-  $oikeat_keyt = openssl_x509_check_private_key($certificate, $private_key);
-
-  if (!$oikeat_keyt) {
-    virhe("Et antanut oikeaa avainparia");
-    $tee = "";
-  }
-  else {
-    $salatut_tunnukset = array(
-      "private_key"   => salaa($private_key, $salasana),
-      "certificate" => salaa($certificate, $salasana)
-    );
-  }
+  $tunnukset_pankista = array();
+  $tunnukset_pankista["own_encryption_certificate"] = file_get_contents($_FILES["own_encryption_certificate"]["tmp_name"]);
+  $tunnukset_pankista["own_signing_certificate"] = file_get_contents($_FILES["own_signing_certificate"]["tmp_name"]);
+  $tunnukset_pankista["bank_encryption_certificate"] = file_get_contents($_FILES["bank_encryption_certificate"]["tmp_name"]);
+  $tunnukset_pankista["bank_root_certificate"] = file_get_contents($_FILES["bank_root_certificate"]["tmp_name"]);
+  $tunnukset_pankista["ca_certificate"] = file_get_contents($_FILES["ca_certificate"]["tmp_name"]);
 }
 
 // Tallennetaan pankkiyhteys
@@ -192,17 +186,38 @@ if (!empty($mahdolliset_pankkiyhteydet)) {
     echo "</tr>";
 
     echo "<tr>";
-    echo "<th><label for='private_key'>";
-    echo t("Yksityinen avain");
-    echo "</label></th>";
-    echo "<td><input type='file' name='private_key' id='private_key'/></td>";
+    echo "<th>own_signing_certificate</th>";
+    echo "<td><input type='file' name='own_signing_certificate'/></td>";
     echo "</tr>";
 
     echo "<tr>";
-    echo "<th><label for='certificate'>";
-    echo t("Sertifikaatti");
-    echo "</label></th>";
-    echo "<td><input type='file' name='certificate' id='certificate'/></td>";
+    echo "<th>own_signing_private_key</th>";
+    echo "<td><input type='file' name='signing_private_key'/></td>";
+    echo "</tr>";
+
+    echo "<tr>";
+    echo "<th>own_encryption_certificate</th>";
+    echo "<td><input type='file' name='own_encryption_certificate'/></td>";
+    echo "</tr>";
+
+    echo "<tr>";
+    echo "<th>own_encryption_private_key</th>";
+    echo "<td><input type='file' name='encryption_private_key'/></td>";
+    echo "</tr>";
+
+    echo "<tr>";
+    echo "<th>bank_encryption_certificate</th>";
+    echo "<td><input type='file' name='bank_encryption_certificate'/></td>";
+    echo "</tr>";
+
+    echo "<tr>";
+    echo "<th>bank_root_certificate</th>";
+    echo "<td><input type='file' name='bank_root_certificate'/></td>";
+    echo "</tr>";
+
+    echo "<tr>";
+    echo "<th>ca_certificate</th>";
+    echo "<td><input type='file' name='ca_certificate'/></td>";
     echo "</tr>";
   }
 
@@ -215,8 +230,6 @@ if (!empty($mahdolliset_pankkiyhteydet)) {
   echo t("Salasana, jolla pankkiyhteystunnukset suojataan");
   echo "</label></th>";
   echo "<td><input type='password' name='salasana' id='salasana'/></td>";
-  echo "<td class='back'>";
-  echo t("Huom! Salasanaa ei voi mitenk‰‰n palauttaa, jos se unohtuu.");
   echo "</td>";
   echo "</tr>";
 

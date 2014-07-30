@@ -482,7 +482,7 @@ function hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana) {
   $pankki = mysql_fetch_assoc($result);
 
   // Listään resulttiin pankin lyhyt nimi
-  $pankki["pankki_lyhyt_nimi"] = $tuetut_pankit[$pankkiyhteys["pankki"]]["lyhyt_nimi"];
+  $pankki["pankki_lyhyt_nimi"] = $tuetut_pankit[$pankki["pankki"]]["lyhyt_nimi"];
 
   // Puretaan salaus private keystä
   $pankki["signing_private_key"] = pura_salaus($pankki["signing_private_key"], $salasana);
@@ -634,5 +634,5 @@ function tuetut_pankit() {
 }
 
 function parameter($param) {
-  empty($param) ? '' : trim($param);
+  return empty($param) ? '' : trim($param);
 }

@@ -523,6 +523,17 @@ else {
     $laskurow['hyvak2'] = $kukarow["kuka"];
   }
 
+  // laitetaan EXT-tilauksen myyjaksi tilauksen valmiiksi klikkaaja
+  if (strrpos($lopetus, "toim=EXTRANET") == TRUE) {
+    $query = "UPDATE lasku
+              SET myyja = '$kukarow[tunnus]'
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND tunnus  = '$laskurow[tunnus]'";
+    $result = pupe_query($query);
+
+    $laskurow['myyja'] = $kukarow["tunnus"];
+  }
+
   $kateinen = "";
   $jaksotettu = "";
   $itsetulostus = "";

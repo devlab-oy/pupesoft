@@ -115,6 +115,8 @@ if ($tee == "luo" and $pin == '' and $debug == 1) {
 
 // Tallennetaan pankkiyhteys
 if ($tee == "luo") {
+  $spk = salaa($signing_private_key, $salasana);
+  $epk = salaa($encryption_private_key, $salasana);
   $oec = salaa($tunnukset_pankista["own_encryption_certificate"], $salasana);
   $osc = salaa($tunnukset_pankista["own_signing_certificate"], $salasana);
   $bec = salaa($tunnukset_pankista["bank_encryption_certificate"], $salasana);
@@ -125,10 +127,10 @@ if ($tee == "luo") {
             yhtio                       = '{$kukarow['yhtio']}',
             pankki                      = '{$pankki}',
             signing_certificate         = '{$osc}',
-            signing_private_key         = '{$signing_private_key}',
+            signing_private_key         = '{$spk}',
             encryption_certificate      = '{$oec}',
-            encryption_private_key      = '{$encryption_private_key}',
-            bank_encryption_certificate = '{$bec}'
+            encryption_private_key      = '{$epk}',
+            bank_encryption_certificate = '{$bec}',
             bank_root_certificate       = '{$brc}',
             ca_certificate              = '{$bca}',
             customer_id                 = '{$customer_id}'";

@@ -10694,6 +10694,7 @@ if (!function_exists("t")) {
 if (!function_exists("t_avainsana")) {
   function t_avainsana($laji, $kieli = '', $where = '', $yhtio = '', $eivielakaytossa = '', $return = "") {
     global $kukarow, $yhtiorow, $link;
+    static $kaannetyt = array();
 
     $laji = mysql_real_escape_string($laji);
     $orderlisa = "";
@@ -10703,6 +10704,13 @@ if (!function_exists("t_avainsana")) {
     }
     else {
       $kieli = mysql_real_escape_string($kieli);
+    }
+
+    // Onko sana jo käännetty
+    $paramshasharray = md5($laji.$kieli.$where.$yhtio.$eivielakaytossa.$return);
+
+    if (isset($kaannetyt[$paramshasharray])) {
+      return $kaannetyt[$paramshasharray];
     }
 
     if ($where != "") {
@@ -10782,13 +10790,17 @@ if (!function_exists("t_avainsana")) {
     if ($return != "") {
       if (mysql_num_rows($result) > 0) {
         $row = mysql_fetch_assoc($result);
+
+        $kaannetyt[$paramshasharray] = $row[$return];
         return $row[$return];
       }
       else {
+        $kaannetyt[$paramshasharray] = "";
         return "";
       }
     }
 
+    $kaannetyt[$paramshasharray] = $result;
     return $result;
   }
 }

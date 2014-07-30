@@ -184,35 +184,29 @@ function poista_pankkiyhteys($pankki) {
 function sepa_download_file_list($params) {
   global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
 
-  $bank        = empty($params["bank"])        ? "" : $params["bank"];
-  $customer_id = empty($params["customer_id"]) ? "" : $params["customer_id"];
-  $target_id   = empty($params["target_id"])   ? "" : $params["target_id"];
-  $certificate = empty($params["certificate"]) ? "" : base64_encode($params["certificate"]);
-  $private_key = empty($params["private_key"]) ? "" : base64_encode($params["private_key"]);
-  $file_type   = empty($params["file_type"])   ? "" : $params["file_type"];
-  $status      = empty($params["status"])      ? "" : $params["status"];
+  $tunnus       = parameter($params["pankkiyhteys_tunnus"]);
+  $salasana     = parameter($params["pankkiyhteys_salasana"]);
+  $file_type    = parameter($params["file_type"]);
+  $status       = parameter($params["status"]);
+  $pankkiyhteys = hae_pankkiyhteys_ja_pura_salaus($tunnus, $salasana);
 
-  if (empty($bank)
-      or empty($customer_id)
-      or empty($target_id)
-      or empty($certificate)
-      or empty($private_key)
-      or empty($file_type)
-      or empty($status)) {
+  if (!$pankkiyhteys or empty($file_type) or empty($status)) {
     return false;
   }
 
   $parameters = array(
     "method"  => "POST",
     "data"    => array(
-      "cert"        => $certificate,
-      "private_key" => $private_key,
-      "customer_id" => $customer_id,
-      "file_type"   => $file_type,
-      "target_id"   => $target_id,
-      "status"      => $status,
+      "signing_certificate"    => $pankkiyhteys["signing_certificate"],
+      "signing_private_key"    => $pankkiyhteys["signing_private_key"],
+      "encryption_certificate" => $pankkiyhteys["encryption_certificate"],
+      "encryption_private_key" => $pankkiyhteys["encryption_private_key"],
+      "customer_id"            => $pankkiyhteys["customer_id"],
+      "target_id"              => $pankkiyhteys["target_id"],
+      "file_type"              => $file_type,
+      "status"                 => $status,
     ),
-    "url"     => "https://sepa.devlab.fi/api/{$bank}/download_file_list",
+    "url" => "https://sepa.devlab.fi/api/{$bank}/download_file_list",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -247,21 +241,13 @@ function sepa_download_file_list($params) {
 function sepa_download_files($params) {
   global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
 
-  $bank        = empty($params["bank"])        ? "" : $params["bank"];
-  $customer_id = empty($params["customer_id"]) ? "" : $params["customer_id"];
-  $target_id   = empty($params["target_id"])   ? "" : $params["target_id"];
-  $certificate = empty($params["certificate"]) ? "" : base64_encode($params["certificate"]);
-  $private_key = empty($params["private_key"]) ? "" : base64_encode($params["private_key"]);
-  $file_type   = empty($params["file_type"])   ? "" : $params["file_type"];
-  $viitteet    = empty($params["viitteet"])    ? "" : $params["viitteet"];
+  $tunnus       = parameter($params["pankkiyhteys_tunnus"]);
+  $salasana     = parameter($params["pankkiyhteys_salasana"]);
+  $file_type    = parameter($params["file_type"]);
+  $viitteet     = parameter($params["viitteet"]);
+  $pankkiyhteys = hae_pankkiyhteys_ja_pura_salaus($tunnus, $salasana);
 
-  if (empty($bank)
-      or empty($customer_id)
-      or empty($target_id)
-      or empty($certificate)
-      or empty($private_key)
-      or empty($file_type)
-      or empty($viitteet)) {
+  if (!$pankkiyhteys or empty($file_type) or empty($viitteet)) {
     return false;
   }
 
@@ -271,14 +257,16 @@ function sepa_download_files($params) {
     $parameters = array(
       "method"  => "POST",
       "data"    => array(
-        "cert"           => $certificate,
-        "private_key"    => $private_key,
-        "customer_id"    => $customer_id,
-        "file_type"      => $file_type,
-        "target_id"      => $target_id,
-        "file_reference" => $viite
+        "signing_certificate"    => $pankkiyhteys["signing_certificate"],
+        "signing_private_key"    => $pankkiyhteys["signing_private_key"],
+        "encryption_certificate" => $pankkiyhteys["encryption_certificate"],
+        "encryption_private_key" => $pankkiyhteys["encryption_private_key"],
+        "customer_id"            => $pankkiyhteys["customer_id"],
+        "target_id"              => $pankkiyhteys["target_id"],
+        "file_type"              => $file_type,
+        "file_reference"         => $viite
       ),
-      "url"     => "https://sepa.devlab.fi/api/{$bank}/download_file",
+      "url" => "https://sepa.devlab.fi/api/{$bank}/download_file",
       "headers" => array(
         "Content-Type: application/json",
         "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -318,33 +306,27 @@ function sepa_download_files($params) {
 function sepa_upload_file($params) {
   global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
 
-  $bank          = empty($params["bank"])          ? "" : $params["bank"];
-  $customer_id   = empty($params["customer_id"])   ? "" : $params["customer_id"];
-  $target_id     = empty($params["target_id"])     ? "" : $params["target_id"];
-  $certificate   = empty($params["certificate"])   ? "" : base64_encode($params["certificate"]);
-  $private_key   = empty($params["private_key"])   ? "" : base64_encode($params["private_key"]);
-  $file_type     = empty($params["file_type"])     ? "" : $params["file_type"];
-  $maksuaineisto = empty($params["maksuaineisto"]) ? "" : $params["maksuaineisto"];
+  $tunnus        = parameter($params["pankkiyhteys_tunnus"]);
+  $salasana      = parameter($params["pankkiyhteys_salasana"]);
+  $file_type     = parameter($params["file_type"]);
+  $maksuaineisto = parameter($params["maksuaineisto"]);
+  $pankkiyhteys  = hae_pankkiyhteys_ja_pura_salaus($tunnus, $salasana);
 
-  if (empty($bank)
-      or empty($customer_id)
-      or empty($target_id)
-      or empty($certificate)
-      or empty($private_key)
-      or empty($file_type)
-      or empty($maksuaineisto)) {
+  if (!$pankkiyhteys or empty($file_type) or empty($maksuaineisto)) {
     return false;
   }
 
   $parameters = array(
     "method"  => "POST",
     "data"    => array(
-      "cert"        => $certificate,
-      "private_key" => $private_key,
-      "customer_id" => $customer_id,
-      "file_type"   => $file_type,
-      "target_id"   => $target_id,
-      "content"     => $maksuaineisto
+      "signing_certificate"    => $pankkiyhteys["signing_certificate"],
+      "signing_private_key"    => $pankkiyhteys["signing_private_key"],
+      "encryption_certificate" => $pankkiyhteys["encryption_certificate"],
+      "encryption_private_key" => $pankkiyhteys["encryption_private_key"],
+      "customer_id"            => $pankkiyhteys["customer_id"],
+      "target_id"              => $pankkiyhteys["target_id"],
+      "file_type"              => $file_type,
+      "content"                => $maksuaineisto
     ),
     "url"     => "https://sepa.devlab.fi/api/{$bank}/upload_file",
     "headers" => array(
@@ -373,11 +355,11 @@ function sepa_upload_file($params) {
 function sepa_get_certificate($params) {
   global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
 
-  $bank           = empty($params["bank"])           ? "" : $params["bank"];
-  $customer_id    = empty($params["customer_id"])    ? "" : $params["customer_id"];
-  $pin            = empty($params["pin"])            ? "" : $params["pin"];
-  $signing_csr    = empty($params["signing_csr"])    ? "" : base64_encode($params["signing_csr"]);
-  $encryption_csr = empty($params["encryption_csr"]) ? "" : base64_encode($params["encryption_csr"]);
+  $bank           = parameter($params["bank"]);
+  $customer_id    = parameter($params["customer_id"]);
+  $pin            = parameter($params["pin"]);
+  $signing_csr    = parameter($params["signing_csr"]);
+  $encryption_csr = parameter($params["encryption_csr"]);
 
   if (empty($bank)
       or empty($customer_id)
@@ -392,8 +374,8 @@ function sepa_get_certificate($params) {
       "pin" => $pin,
       "customer_id" => $customer_id,
       "environment" => "production", // Voi olla joko "TEST" tai "PRODUCTION"
-      "signing_csr" => $signing_csr,
-      "encryption_csr" => $encryption_csr,
+      "signing_csr" => base64_encode($signing_csr),
+      "encryption_csr" => base64_encode($encryption_csr),
     ),
     "url" => "https://sepa.devlab.fi/api/{$bank}/get_certificate",
     "headers" => array(
@@ -429,26 +411,24 @@ function sepa_get_certificate($params) {
 function sepa_get_target_id($params) {
   global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
 
-  $bank          = empty($params["bank"])          ? "" : $params["bank"];
-  $certificate   = empty($params["certificate"])   ? "" : base64_encode($params["certificate"]);
-  $private_key   = empty($params["private_key"])   ? "" : base64_encode($params["private_key"]);
-  $customer_id   = empty($params["customer_id"])   ? "" : $params["customer_id"];
+  $tunnus       = parameter($params["pankkiyhteys_tunnus"]);
+  $salasana     = parameter($params["pankkiyhteys_salasana"]);
+  $pankkiyhteys = hae_pankkiyhteys_ja_pura_salaus($tunnus, $salasana);
 
-  if (empty($bank)
-      or empty($certificate)
-      or empty($private_key)
-      or empty($customer_id)) {
+  if (!$pankkiyhteys) {
     return false;
   }
 
   $parameters = array(
     "method"  => "POST",
     "data"    => array(
-      "cert"        => $certificate,
-      "private_key" => $private_key,
-      "customer_id" => $customer_id
+      "signing_certificate"    => $pankkiyhteys["signing_certificate"],
+      "signing_private_key"    => $pankkiyhteys["signing_private_key"],
+      "encryption_certificate" => $pankkiyhteys["encryption_certificate"],
+      "encryption_private_key" => $pankkiyhteys["encryption_private_key"],
+      "customer_id"            => $pankkiyhteys["customer_id"],
     ),
-    "url"     => "https://sepa.devlab.fi/api/{$bank}/get_user_info",
+    "url" => "https://sepa.devlab.fi/api/{$bank}/get_user_info",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -490,16 +470,29 @@ function hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana) {
   $query = "SELECT *
             FROM pankkiyhteys
             WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND tunnus  = {$pankkiyhteys_tunnus}";
+            AND tunnus = {$pankkiyhteys_tunnus}";
   $result = pupe_query($query);
+
+  // Jos pankkiyhteyttä ei löydy
+  if (mysql_num_rows($result) != 1) {
+    return false;
+  }
+
   $pankki = mysql_fetch_assoc($result);
 
   // Listään resulttiin pankin lyhyt nimi
   $pankki["pankki_lyhyt_nimi"] = $tuetut_pankit[$pankkiyhteys["pankki"]]["lyhyt_nimi"];
 
-  // Puretaan salaus tunnuksista
+  // Puretaan salaus private keystä
+  $pankki["signing_private_key"] = pura_salaus($pankki["signing_private_key"], $salasana);
+
+  // Jos salauksen purkaminen ei onnistu, lopetetaan tähä
+  if (!openssl_pkey_get_private($pankki["signing_private_key"])) {
+    return false;
+  }
+
+  // Puretaan loputkin salaukset
   $pankki["signing_certificate"]         = pura_salaus($pankki["signing_certificate"], $salasana);
-  $pankki["signing_private_key"]         = pura_salaus($pankki["signing_private_key"], $salasana);
   $pankki["encryption_certificate"]      = pura_salaus($pankki["encryption_certificate"], $salasana);
   $pankki["encryption_private_key"]      = pura_salaus($pankki["encryption_private_key"], $salasana);
   $pankki["bank_encryption_certificate"] = pura_salaus($pankki["bank_encryption_certificate"], $salasana);
@@ -520,62 +513,26 @@ function hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana) {
 function sepa_lataa_kaikki_uudet_tiedostot($params) {
   global $kukarow, $yhtiorow;
 
-  $tiedostotyyppi = isset($params["tiedostotyyppi"]) ? $params["tiedostotyyppi"] : "";
-  $pankkiyhteys_tunnus = isset($params["pankkiyhteys_tunnus"]) ? $params["pankkiyhteys_tunnus"] : "";
-  $salasana = isset($params["salasana"]) ? $params["salasana"] : "";
+  // Lisätään paramsiin status NEW, että haetaan vain uudet filet
+  $params['status'] = 'NEW';
 
-  if (empty($tiedostotyyppi) or empty($pankkiyhteys_tunnus) or empty($salasana)) {
-    return false;
-  }
-
-  $pankkiyhteys = hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana);
-
-  if (!$pankkiyhteys) {
-    return false;
-  }
-
-  $params = array(
-    "bank" => $pankkiyhteys["pankki_lyhyt_nimi"],
-    "customer_id" => $pankkiyhteys["customer_id"],
-    "target_id" => $pankkiyhteys["target_id"],
-    "signing_certificate" => $pankkiyhteys["signing_certificate"],
-    "signing_private_key" => $pankkiyhteys["signing_private_key"],
-    "encryption_certificate" => $pankkiyhteys["encryption_certificate"],
-    "encryption_private_key" => $pankkiyhteys["encryption_private_key"],
-    "file_type" => $tiedostotyyppi,
-    "status" => "NEW"
-  );
-
+  // Haetaan filelista pankista
   $viitteet = sepa_download_file_list($params);
 
+  if (!$viitteet) {
+    return false;
+  }
+
+  // Lisätään paramssiin hettavat referencet
   $params["viitteet"] = $viitteet;
 
   $tiedostot = sepa_download_files($params);
 
-  if ($tiedostot) {
-    return $tiedostot;
-  }
-
-  return false;
-}
-
-/**
- * Tarkistaa pystyyko annetulla salasana decryptaamaan private_keyn pankkiyhteysrivista.
- * Tarkistus perustuu siihen, saako salatusta datasta selvaa decryptauksen jalkeen
- *
- * @param string $pankkiyhteys_tunnus
- * @param string $salasana
- *
- * @return bool
- */
-function pankkiyhteys_salasana_kunnossa($pankkiyhteys_tunnus, $salasana) {
-  $pankkiyhteys = hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana);
-
-  if (!openssl_pkey_get_private($pankkiyhteys["signing_private_key"])) {
+  if (!$tiedostot) {
     return false;
   }
 
-  return true;
+  return $tiedostot;
 }
 
 /**
@@ -673,4 +630,8 @@ function tuetut_pankit() {
     //   "lyhyt_nimi" => "danske"
     // ),
   );
+}
+
+function parameter($param) {
+  empty($param) ? '' : trim($param);
 }

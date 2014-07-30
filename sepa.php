@@ -462,7 +462,7 @@ if ($tee == "laheta_pankkiin") {
     virhe("Salasana täytyy antaa!");
     $tee = "virhe";
   }
-  elseif (!pankkiyhteys_salasana_kunnossa($pankkiyhteys_tunnus, $salasana)) {
+  elseif (!hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana)) {
     virhe("Antamasi salasana on väärä!");
     $tee = "virhe";
   }
@@ -482,21 +482,14 @@ if ($tee == "laheta_pankkiin") {
 
 // Pankkiyhteys tiedoston lähetys
 if ($tee == "laheta_pankkiin") {
-  $pankkiyhteys = hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana);
-
   $_xml = file_get_contents($pankkiyhteys_tiedosto_full);
   $_data = base64_encode($_xml);
 
   $params = array(
-    "bank" => $pankkiyhteys["pankki_lyhyt_nimi"],
-    "customer_id" => $pankkiyhteys["customer_id"],
-    "target_id" => $pankkiyhteys["target_id"],
-    "signing_certificate" => $pankkiyhteys["signing_certificate"],
-    "signing_private_key" => $pankkiyhteys["signing_private_key"],
-    "encryption_certificate" => $pankkiyhteys["encryption_certificate"],
-    "encryption_private_key" => $pankkiyhteys["encryption_private_key"],
-    "file_type" => "NDCORPAYS",
-    "maksuaineisto" => "{$_data}"
+    "pankkiyhteys_tunnus"   => $pankkiyhteys_tunnus,
+    "pankkiyhteys_salasana" => $salasana,
+    "file_type"             => "NDCORPAYS",
+    "maksuaineisto"         => $_data,
   );
 
   $vastaus = sepa_upload_file($params);

@@ -163,6 +163,24 @@ if(!function_exists("avainsanatarkista")) {
           $virhe[$i] = t("Saldovahvistuksen nimi pit‰‰ olla uniikki");
         }
       }
+
+      if ($tem_laji == 'SAMMUTIN_KOKO') {
+        if (!is_numeric($tem_selite)) {
+          $virhe[$i] = t("Selitteen on oltava numeerinen")."!";
+        }
+        else {
+          $t[$i] = trim(str_replace(',', '.', $t[$i]));
+        }
+      }
+
+      if ($tem_laji == 'SAMMUTIN_TYYPPI') {
+        if (empty($tem_selite)) {
+          $virhe[$i] = t("Selite on pakollinen")."!";
+        }
+        else {
+          $t[$i] = strtolower($t[$i]);
+        }
+      }
     }
 
     if (mysql_field_name($result, $i) == "selitetark") {
@@ -183,7 +201,7 @@ if(!function_exists("avainsanatarkista")) {
         }
       }
 
-      if ($seliteerrori == 1 and trim($t[$i]) == '' and $tem_laji != 'VAKIOVIESTI' and $tem_laji != 'VAKIOVIESTI_TIL' and $tem_laji != 'HINNAT_CRON' and $tem_laji != 'TUOTE_EXP_CRON') {
+      if ($seliteerrori == 1 and trim($t[$i]) == '' and $tem_laji != 'VAKIOVIESTI' and $tem_laji != 'VAKIOVIESTI_TIL' and $tem_laji != 'HINNAT_CRON' and $tem_laji != 'TUOTE_EXP_CRON' and $tem_laji != 'SAMMUTIN_KOKO' and $tem_laji != 'SAMMUTIN_TYYPPI') {
         $virhe[$i] = t("Selite ja selitetark ei voi olla tyhji‰")."!";
       }
 

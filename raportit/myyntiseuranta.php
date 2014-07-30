@@ -161,10 +161,19 @@ else {
     echo "</tr>";
     echo "</table><br>";
 
-    $query = "SELECT *
+    //$myyntiseuranta_access_list muuttuja esitellään salasanat.php:ssä
+    //se määrittelee mitä yrityksiä tietty yritys saa nähdä myyntiseurannassa
+    if (!empty($myyntiseuranta_access_list[$kukarow['yhtio']])) {
+      $query = "SELECT *
               FROM yhtio
-              WHERE konserni  = '{$yhtiorow['konserni']}'
-              AND konserni   != ''";
+                WHERE yhtio IN ('".implode("', '", $myyntiseuranta_access_list[$kukarow['yhtio']])."')";
+    }
+    else {
+      $query = "SELECT *
+                FROM yhtio
+                WHERE konserni  = '{$yhtiorow['konserni']}'
+                AND konserni   != ''";
+    }
     $result = pupe_query($query);
 
     // voidaan valita listaukseen useita konserniyhtiöitä, jos käyttäjällä on "PÄIVITYS" oikeus tähän raporttiin
@@ -385,7 +394,16 @@ else {
       <td><input type='checkbox' name='ruksit[140]' value='tilauksittain' {$ruk140chk}></td>
       <td><input type='text' name='rajaus[140]' value='{$rajaus[140]}'></td>
       <td class='back'>", t("(Toimii vain jos ajat raporttia tilauksista)"), "</td>
-      </tr>
+      </tr>";
+    if ($yhtiorow['laite_huolto'] == 'X') {
+      echo "  <tr>
+            <th>", t("Listaa kohteittain"), "</th>
+            <td><input type='text' name='jarjestys[150]' size='2' value='{$jarjestys[150]}'></td>
+            <td><input type='checkbox' name='ruksit[150]' value='kohteittain' {$ruk150chk}></td>
+            <td><input type='text' name='rajaus[150]' value='{$rajaus[150]}'></td>
+            </tr>";
+    }
+    echo "
       <tr>
       <td class='back'><br></td>
       </tr>
@@ -1361,6 +1379,30 @@ else {
           if ($laskutuspaiva != "") $select .= "lasku.tapvm laskutuspvm, ";
         }
         //**  Tilauksittain loppu **//
+
+        //**  Kohteittain start **//
+        if ($mukaan == "kohteittain") {
+          $group .= ",kohde.tunnus";
+          $select .= "kohde.tunnus kohde_tunnus, ";
+          $order  .= "kohde_tunnus,";
+          $gluku++;
+
+          if ($rajaus[$i] != "") {
+            $lisa .= " and kohde.tunnus IN ({$rajaus[$i]}) ";
+          }
+          //tällä tulee tilausrivin_lisatiedot join mukaan
+          $eiOstSarjanumeroita = "on";
+          $kohde_join = "  JOIN laite
+                  ON ( laite.yhtio = tilausrivin_lisatiedot.yhtio
+                    AND laite.tunnus = tilausrivin_lisatiedot.asiakkaan_positio)
+                  JOIN paikka
+                  ON ( paikka.yhtio = laite.yhtio
+                    AND paikka.tunnus = laite.paikka)
+                  JOIN kohde
+                  ON ( kohde.yhtio = paikka.yhtio
+                    AND kohde.tunnus = paikka.kohde)";
+        }
+        //**  Kohteittain loppu **//
       }
 
       // Näytetään tilausrivin kommentit ja groupataan tilausriveittäin
@@ -2156,6 +2198,7 @@ else {
               {$varasto_join}
               {$kantaasiakas_join}
               {$maksuehto_join}
+              {$kohde_join}
               {$toimtuoteno_join}
               {$lisa_parametri}
               WHERE lasku.yhtio in ({$yhtio})

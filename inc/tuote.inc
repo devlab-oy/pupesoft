@@ -25,6 +25,16 @@ else {
   $rajauslisa  .= "";
 }
 
-
 // Tuotteen saa poistaa mikäli sillä ei ole yhtään tapahtumaa (tsekataan tuoterivi.inc)
 $poistolukko = "ON";
+
+if (!function_exists('echo_tuote_redirect')) {
+  function echo_tuote_redirect($params) {
+    global $palvelin2, $yhtiorow, $lopetus;
+
+    //jos syötetään asiakkaalle uusia laitteita asiakkaan_laite_hallinta.php:stä halutaan redirecti sinne takaisin
+    if ($yhtiorow['laite_huolto'] == 'X' and isset($params['redirect_to']) and $params['errori'] == '' and !empty($params['valittu_asiakas'])) {
+      echo '<meta http-equiv="refresh" content="0;url='.$palvelin2.'yllapito.php?toim=laite&asiakas_tunnus='.$params['valittu_asiakas'].'&uusi=1&lopetus='.$lopetus.'"/>';
+    }
+  }
+}

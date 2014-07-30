@@ -9885,6 +9885,89 @@ if (!function_exists("livesearch_sarjanumerohaku")) {
   }
 }
 
+if (!function_exists('livesearch_kohdehaku')) {
+  function livesearch_kohdehaku() {
+    global $yhtiorow, $kukarow, $palvelin2;
+
+    $tee = $_REQUEST["livesearch_tee"];
+    $nimi = $_REQUEST["livesearch_nimi"];
+    $formi = $_REQUEST["livesearch_form"];
+    $hakuid = $_REQUEST["livesearch_hakuid"];
+    $submit = $_REQUEST["livesearch_submit"];
+    $haku = trim($_REQUEST["livesearch_haku"]);
+
+    if (strlen($haku) > 2 and substr($haku, 0, 1) != "*" and substr($haku, -1) != '*' and substr($haku, 0, 1) != "?" and substr($haku, 0, 1) != "#") {
+
+      echo "
+      <script TYPE='text/javascript' LANGUAGE='JavaScript'>
+        document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
+      </script>";
+
+      if (empty($kukarow['kieli'])) {
+        $kieli = $yhtiorow['kieli'];
+      }
+      else {
+        $kieli = $kukarow['kieli'];
+      }
+
+      $query = "SELECT kohde.nimi AS kohde_nimi,
+                kohde.tunnus AS kohde_tunnus,
+                asiakas.nimi AS asiakas_nimi
+                FROM kohde
+                JOIN asiakas
+                ON ( asiakas.yhtio = kohde.yhtio
+                  AND asiakas.tunnus = kohde.asiakas )
+                WHERE kohde.yhtio    = '{$kukarow['yhtio']}'
+                AND kohde.nimi       LIKE '%{$haku}%'";
+      $result = pupe_query($query);
+
+      $limit = 0;
+      if (mysql_num_rows($result) > 0) {
+        while ($row = mysql_fetch_assoc($result)) {
+          echo "  <div id='kohde_valinta_$row[kohde_tunnus]'
+                name='selectOptions$hakuid'
+                onmouseover=\"this.className='liveSearchSelectedItem';
+                  keyStrokeIndex = -1;
+                  var aEls = document.getElementsByName('selectOptions$hakuid');
+                  for (var iEl = 0; iEl < aEls.length; iEl++) {
+                    if (aEls[iEl].id.substring(0,14) == 'tuoteryhma_valinta_' && aEls[iEl].id != 'kohde_valinta_$row[kohde_tunnus]') {
+                      document.getElementById(aEls[iEl].id).className='';
+                    }
+                  } \"
+                onmouseout=\"this.className='';\"
+                onclick=\"document.getElementById('$hakuid').value='{$row['kohde_tunnus']}';";
+                if ($submit == "") {
+                  echo "document.$formi.submit();";
+                }
+                else {
+                  echo "document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';";
+                }
+                echo "\"
+                style='padding:2px;'>
+                <font style='font-weight:bold'>{$row['kohde_nimi']} - {$row['asiakas_nimi']}</font>
+              </div><div name='selectValues$hakuid' id='{$row['kohde_tunnus']}'></div>";
+          $limit++;
+
+          if ($limit > 49) {
+            break;
+          }
+        }
+
+        echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>",t("Haulla löytyi")," ".mysql_num_rows($result). " ",t("kohdetta"),", ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
+      }
+      else {
+        echo "<div style='padding:2px'><font class='message'>".t("Ei kohteita").".</font></div>";
+      }
+    }
+    else {
+      echo "
+      <script TYPE='text/javascript' LANGUAGE='JavaScript'>
+        document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
+      </script>";
+    }
+  }
+}
+
 if (!function_exists("livesearch_kentta")) {
   function livesearch_kentta($formi, $tee = 'TUOTEHAKU', $nimi = 'liveseach_hakukentta', $width = '300', $value = '', $submit = '', $vero_field = '', $class = '', $break_all_div = '') {
     global $kukarow, $toim;
@@ -22254,31 +22337,6 @@ if (!function_exists('_echo_ordered_table_rows')) {
   }
 }
 
-if (!function_exists('echo_tallennus_formi')) {
-
-
-  /**
-   * Echoo formin, jonka avulla voidaan ladata tiedosto palvelimelta
-   *
-   * @param string  $xls_filename
-   */
-  function echo_tallennus_formi($xls_filename, $kaunisnimi) {
-    echo "<form id='tallennus_form' method='post' class='multisubmit'>";
-    echo "<table>";
-    echo "<tr>";
-    echo "<th>".t("Tallenna excel aineisto").":</th>";
-    echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-    echo "<input type='hidden' name='lataa_tiedosto' value='1'>";
-    echo "<input type='hidden' name='kaunisnimi' value='".t($kaunisnimi).".xlsx'>";
-    echo "<input type='hidden' name='tmpfilenimi' value='{$xls_filename}'>";
-    echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td>";
-    echo "</tr>";
-    echo "</table>";
-    echo "</form>";
-    echo "<br/>";
-  }
-}
-
 if  (!function_exists('hae_chn_teksti')) {
   function hae_chn_teksti($chn, $kieli = '') {
 
@@ -23349,6 +23407,33 @@ if (!function_exists('hae_toimittajat')) {
   }
 }
 
+if (!function_exists('echo_tallennus_formi')) {
+  function echo_tallennus_formi($filepath, $new_filename) {
+    if (empty($filepath) or empty($new_filename)) {
+      return false;
+    }
+
+    $filepath_parts = explode('.', $filepath);
+    $kpl = count($filepath_parts);
+
+    $file_extension = $filepath_parts[$kpl - 1];
+
+    echo "<form method='post' class='multisubmit'>";
+    echo "<table>";
+    echo "<tr>";
+    echo "<th>".t("Tallenna {$file_extension} aineisto").":</th>";
+    echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+    echo "<input type='hidden' name='lataa_tiedosto' value='1'>";
+    echo "<input type='hidden' name='kaunisnimi' value='{$new_filename}.{$file_extension}'>";
+    echo "<input type='hidden' name='tmpfilenimi' value='{$filepath}'>";
+    echo "<td class='back'><input id='aineisto_tallennus_submit' type='submit' value='".t("Tallenna")."'></td>";
+    echo "</tr>";
+    echo "</table>";
+    echo "</form>";
+    echo "<br/>";
+  }
+}
+
 /*
  * Poistaa tyhjät välit vastaavat tuoteketjusta muuttamatta ketjun hallitsevaa järjestystä.
  *
@@ -23968,6 +24053,397 @@ if (!function_exists("tuotteen_toimittajat_tuotenumerot_haku")) {
     }
 
     return $chk_res;
+  }
+}
+
+if (!function_exists('array_utf8_encode')) {
+  function array_utf8_encode(&$item, $key) {
+    $item = utf8_encode($item);
+  }
+}
+
+if (!function_exists('hae_huoltosykli')) {
+  function hae_huoltosykli($huoltosykli_tunnus) {
+    global $kukarow, $yhtiorow;
+
+    $query = "SELECT *
+              FROM huoltosykli
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = '{$huoltosykli_tunnus}'";
+    $result = pupe_query($query);
+
+    return mysql_fetch_assoc($result);
+  }
+}
+
+if (!function_exists('hae_laitteen_oletus_huoltosyklit')) {
+  function hae_laitteen_oletus_huoltosyklit($laite_tunnus) {
+    global $kukarow, $yhtiorow;
+
+    $query = "SELECT huoltosykli.*
+              FROM   laite
+              JOIN tuotteen_avainsanat AS ta
+              ON ( ta.yhtio = laite.yhtio
+                AND ta.tuoteno           = laite.tuoteno
+                AND ta.laji              = 'sammutin_tyyppi' )
+              JOIN tuotteen_avainsanat AS ta2
+              ON ( ta2.yhtio = laite.yhtio
+                AND ta2.tuoteno          = laite.tuoteno
+                AND ta2.laji             = 'sammutin_koko' )
+              JOIN paikka
+              ON ( paikka.yhtio = laite.yhtio
+                AND paikka.tunnus        = laite.paikka )
+              JOIN huoltosykli
+              ON ( huoltosykli.yhtio = laite.yhtio
+                AND huoltosykli.tyyppi   = ta.selite
+                AND huoltosykli.koko     = ta2.selite
+                AND huoltosykli.olosuhde = paikka.olosuhde )
+              WHERE laite.yhtio          = '{$kukarow['yhtio']}'
+              AND laite.tunnus           = '{$laite_tunnus}'";
+    $result = pupe_query($query);
+
+    $huoltosyklit = array();
+
+    while ($huoltosykli = mysql_fetch_assoc($result)) {
+      $huoltosyklit[] = $huoltosykli;
+    }
+
+    return $huoltosyklit;
+  }
+}
+
+if (!function_exists('js_laite')) {
+
+    function js_laite() {
+      global $palvelin2;
+      ?>
+      <script src='<?php echo $palvelin2 ?>js/valid_date_plugin.js'></script>
+      <script>
+        var palvelin2 = '<?php echo $palvelin2 ?>';
+
+        var huoltovalit_req_obj = hae_huoltovalit();
+        $(document).ready(function() {
+          bind_huoltosykli_change();
+
+          bind_tuoteno_change();
+
+          bind_huoltovali_change();
+
+          bind_tuleva_toimenpide_change();
+        });
+
+        function bind_huoltosykli_change() {
+          $('.huoltosykli_select').on('change', function() {
+            if ($(this).val() != 0) {
+              var huoltovali_select_id = $(this).attr('id').replace("sykli","vali");
+              hae_huoltosyklin_huoltovali($(this).val(), huoltovali_select_id);
+              var huoltovali_days = $('#'+huoltovali_select_id).val();
+              var tapahtuma_select_id = $(this).attr('id').replace('huoltosykli_select_',"tuleva_toimenpide_");
+              huoltovalit_req_obj.done(function(huoltovalit) {
+                muuta_seuraava_tapahtuma(huoltovalit[huoltovali_days], tapahtuma_select_id);
+              });
+            }
+          });
+        }
+
+        function hae_huoltosyklin_huoltovali(huoltosykli_tunnus, select_id) {
+          var url = palvelin2 +
+                  'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltovali_options&' +
+                  'huoltosykli_tunnus=' + huoltosykli_tunnus;
+          $.ajax({
+            async: false,
+            type: 'GET',
+            url: url
+          }).done(function(response) {
+            $('#'+select_id).html(response);
+          }).fail(function(data){
+            if (console && console.log) {
+              console.log('Huoltoväli haku EPÄONNISTUI');
+              console.log(data);
+            }
+          });
+        }
+
+        function bind_tuoteno_change() {
+          $('#tuoteno_td input').on('change input paste keypress', function() {
+            setTimeout(function() {
+              var tuoteno = $('#tuoteno_td input').val();
+              if( tuoteno.length > 2 ) {
+                var paikka = $('#paikka').val();
+                $('.huoltosykli_select').each(function() {
+                  var select_id = $(this).attr('id');
+                  var tyyppi = select_id.replace("huoltosykli_select_","");
+                  hae_tuotteen_huoltosyklit(tuoteno, select_id, tyyppi, paikka);
+                });
+              }
+            }, 200);
+          });
+        }
+
+        function hae_tuotteen_huoltosyklit(tuoteno, select_id, tyyppi, paikka) {
+          var url = palvelin2 +
+                  'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltosykli_options'+
+                  '&tuoteno=' + tuoteno +
+                  '&tyyppi=' + tyyppi +
+                  '&paikka=' + paikka;
+          $.ajax({
+            async: true,
+            type: 'GET',
+            url: url
+          }).done(function(response) {
+            $('#'+select_id).html(response);
+            $('#'+select_id).change();
+          }).fail(function(data) {
+            if (console && console.log) {
+              console.log('Huoltoväli haku EPÄONNISTUI');
+              console.log(data);
+            }
+          });
+        }
+
+        function bind_huoltovali_change() {
+          $('.huoltovali_select').on('change', function() {
+            var tapahtuma_select_id = $(this).attr('id').replace('huoltovali_select_',"tuleva_toimenpide_");
+            muuta_seuraava_tapahtuma($(this).val(), tapahtuma_select_id);
+          });
+        }
+
+        function muuta_seuraava_tapahtuma(huoltovali, tapahtuma_select_id) {
+          var seuraava_tapahtuma = laske_default_seuraava_tapahtuma(huoltovali);
+
+          if (seuraava_tapahtuma instanceof Date) {
+            var onko_huolto = (tapahtuma_select_id.indexOf("huolto") != -1);
+            var onko_koeponnistus = (tapahtuma_select_id.indexOf("koeponnistus") != -1);
+            if (onko_huolto || onko_koeponnistus) {
+              seuraava_tapahtuma = seuraava_tapahtuma_valm_pvm(huoltovali);
+            }
+            var date_string = seuraava_tapahtuma.getDate() +
+                    '.' + (seuraava_tapahtuma.getMonth() + 1) +
+                    '.' + seuraava_tapahtuma.getFullYear();
+            $('#'+tapahtuma_select_id).val(date_string);
+          }
+        }
+
+        function laske_default_seuraava_tapahtuma(valittu_huoltovali) {
+          var date = new Date();
+          date.setFullYear(date.getFullYear() + parseInt(valittu_huoltovali['years']));
+          return date;
+        }
+
+        function seuraava_tapahtuma_valm_pvm(huoltovali) {
+          var today = new Date();
+          var date = new Date();
+          date.setMonth(parseInt($('.valm_pvm_tkk').val() - 1));
+          date.setDate(parseInt($('.valm_pvm_tpp').val()));
+          date.setFullYear(parseInt($('.valm_pvm_tvv').val()) + parseInt(huoltovali['years']));
+
+          if (date >= today) {
+            var seuraava_tapahtuma = new Date();
+            seuraava_tapahtuma.setMonth(parseInt($('.valm_pvm_tkk').val() - 1));
+            seuraava_tapahtuma.setFullYear(parseInt($('.valm_pvm_tvv').val()));
+
+            seuraava_tapahtuma.setFullYear(seuraava_tapahtuma.getFullYear() + parseInt(huoltovali['years']));
+          }
+          else {
+            //Jos nykyhetki on kauempana tulevaisuudessa kuin valm_pvm + huoltoväli niin ei voida tietää seuraavaa tulevaa tapahtumaa
+            //palautetaan tämä päivä
+            seuraava_tapahtuma = today;
+          }
+
+          return seuraava_tapahtuma;
+        }
+
+        function bind_tuleva_toimenpide_change() {
+          $('.tuleva_toimenpide').validDatePlugin();
+          var validDatePlugin = $('.tuleva_toimenpide').data('validDatePlugin');
+          validDatePlugin.validate_date();
+        }
+
+        function hae_huoltovalit() {
+          var url = palvelin2 +
+                  'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltovalit';
+
+          return $.ajax({
+            async: true,
+            type: 'GET',
+            dataType: 'JSON',
+            url: url
+          }).fail(function(data){
+            if (console && console.log) {
+              console.log('Huoltovälieni haku EPÄONNISTUI');
+              console.log(data);
+            }
+          });
+        }
+
+        function isValidDate(txtDate) {
+          var currVal = txtDate;
+          if(currVal == '') {
+            return false;
+          }
+
+          var rxDatePattern = /^(\d{1,2})[.-\/|](\d{1,2})[.-\/|](\d{4})$/;
+          var dtArray = currVal.match(rxDatePattern);
+
+          if (dtArray == null)
+             return false;
+
+          //Checks for dd/mm/yyyy format.
+          dtMonth = dtArray[2];
+          dtDay= dtArray[1];
+          dtYear = dtArray[3];
+
+          if (dtMonth < 1 || dtMonth > 12) {
+            return false;
+          }
+          else if (dtDay < 1 || dtDay> 31) {
+            return false;
+          }
+          else if ((dtMonth==4 || dtMonth==6 || dtMonth==9 || dtMonth==11) && dtDay ==31) {
+            return false;
+          }
+          else if (dtMonth == 2) {
+             var isleap = (dtYear % 4 == 0 && (dtYear % 100 != 0 || dtYear % 400 == 0));
+             if (dtDay> 29 || (dtDay ==29 && !isleap)) {
+              return false;
+             }
+          }
+          return true;
+        }
+      </script>
+    <?php
+  }
+}
+
+if (!function_exists('hae_laite')) {
+  function hae_laite($laite_tunnus) {
+    global $kukarow, $yhtiorow;
+
+    $query = "SELECT laite.*,
+              ta.selite as laite_tyyppi,
+              ta2.selite as laite_koko
+              FROM laite
+              JOIN tuotteen_avainsanat ta
+              ON ( ta.yhtio = laite.yhtio
+                AND ta.tuoteno  = laite.tuoteno
+                AND ta.laji     = 'sammutin_tyyppi' )
+              JOIN tuotteen_avainsanat ta2
+              ON ( ta2.yhtio = laite.yhtio
+                AND ta2.tuoteno = laite.tuoteno
+                AND ta2.laji    = 'sammutin_koko' )
+              WHERE laite.yhtio = '{$kukarow['yhtio']}'
+              AND laite.tunnus  = '{$laite_tunnus}'";
+    $result = pupe_query($query);
+
+    return mysql_fetch_assoc($result);
+  }
+}
+
+if (!function_exists('hae_paikka')) {
+  function hae_paikka($paikka_tunnus) {
+    global $kukarow, $yhtiorow;
+
+    $query = "SELECT *
+              FROM paikka
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = '{$paikka_tunnus}'";
+    $result = pupe_query($query);
+
+    return mysql_fetch_assoc($result);
+  }
+}
+
+if (!function_exists('hae_extranet_kayttajaan_liitetty_asiakas')) {
+  function hae_extranet_kayttajaan_liitetty_asiakas() {
+    global $kukarow, $yhtiorow;
+
+    $query = "SELECT asiakas.*
+              FROM asiakas
+              JOIN kuka ON ( kuka.yhtio = asiakas.yhtio AND kuka.oletus_asiakas = asiakas.tunnus AND kuka.extranet = 'X' AND kuka.kuka = '{$kukarow['kuka']}' )
+              WHERE asiakas.yhtio = '{$kukarow['yhtio']}'";
+    $result = pupe_query($query);
+
+    return mysql_fetch_assoc($result);
+  }
+}
+
+if (!function_exists('kirjoita_json_tiedosto')) {
+  /**
+   * Kirjoittaa json-tiedoston /tmp/ -kansioon. Annettavalla array:lle ($data) ajetaan array_utf8_encode rekursiivisesti.
+   *
+   * @param array $data
+   * @param string $json_tiedosto_nimi
+   * @return string
+   */
+  function kirjoita_json_tiedosto($data, $json_tiedosto_nimi) {
+    $filename = "{$json_tiedosto_nimi}.json";
+    $filepath = "/tmp/{$filename}";
+
+    array_walk_recursive($data, 'array_utf8_encode');
+
+    $ok = file_put_contents($filepath, json_encode($data));
+
+    if (!$ok) {
+      return false;
+    }
+
+    return $filepath;
+  }
+}
+
+if (!function_exists('aja_ruby')) {
+  /**
+   * Tätä funktiota käytetään ruby-koodin ajamiseen, joka generoi pdf-tiedostoja. Funktio palauttaa generoidun tiedoston nimen.
+   *
+   * @global string $pupe_root_polku
+   * @param string $json_data_filepath
+   * @param string $ruby_tiedosto_nimi
+   * @return string
+   */
+  function aja_ruby($json_data_filepath, $ruby_tiedosto_nimi) {
+    global $pupe_root_polku;
+
+    $filepath = $pupe_root_polku . "/pdfs/ruby/{$ruby_tiedosto_nimi}.rb";
+
+    $cmd = "ruby {$filepath} {$json_data_filepath}";
+    $return = exec($cmd, $output, $return_code);
+
+    //poistetaan json tiedosto
+    unlink($json_data_filepath);
+
+    // Palautetaan ensimmäinen rivi outputista, siinä on filenimet
+    return $output[0];
+  }
+}
+
+if (!function_exists('pupesoft_require')) {
+  function pupesoft_require($filename) {
+    global $kukarow, $yhtiorow, $starttime;
+
+    if (file_exists($filename)) {
+      require_once($filename);
+    }
+    elseif (file_exists(basename($filename))) {
+      require_once(basename($filename));
+    }
+    else {
+      die(t('Ajettavaa tiedostoa ei löytynyt'));
+    }
+  }
+}
+
+if (!function_exists('hae_yhtion_lasku_logo')) {
+  function hae_yhtion_lasku_logo() {
+    global $kukarow, $yhtiorow;
+
+    $query = "SELECT data
+              FROM liitetiedostot
+              WHERE yhtio         = '{$kukarow['yhtio']}'
+              AND kayttotarkoitus = 'yhtion_parametrit.lasku_logo'";
+    $result = pupe_query($query);
+
+    $logo = mysql_fetch_assoc($result);
+    return $logo['data'];
   }
 }
 
@@ -26720,6 +27196,24 @@ if (!function_exists('merkkaa_saldovahvistus_lahetetyksi')) {
   }
 }
 
+if (!function_exists('hae_maksuehdot')) {
+  function hae_maksuehdot() {
+    global $kukarow, $yhtiorow;
+
+    $query = "SELECT *
+              FROM maksuehto
+              WHERE yhtio = '{$kukarow['yhtio']}'";
+    $result = pupe_query($query);
+
+    $maksuehdot = array();
+    while($maksuehto = mysql_fetch_assoc($result)) {
+      $maksuehdot[] = $maksuehto;
+    }
+
+    return $maksuehdot;
+  }
+}
+
 if (!function_exists("korvaavat_kiellot")) {
   function korvaavat_kiellot($ytunnus, $osasto, $try, $laji='') {
     global $kukarow;
@@ -27503,5 +27997,101 @@ if (!function_exists("kasittele_tiliote_viite")) {
 
     // Palautetan kukarow
     $kukarow = $kukarow_talteen;
+  }
+}
+
+if (!function_exists('array_column')) {
+
+  /**
+   * Returns the values from a single column of the input array, identified by
+   * the $columnKey.
+   *
+   * Optionally, you may provide an $indexKey to index the values in the returned
+   * array by the values from the $indexKey column in the input array.
+   *
+   * @param array $input A multi-dimensional array (record set) from which to pull
+   *                     a column of values.
+   * @param mixed $columnKey The column of values to return. This value may be the
+   *                         integer key of the column you wish to retrieve, or it
+   *                         may be the string key name for an associative array.
+   * @param mixed $indexKey (Optional.) The column to use as the index/keys for
+   *                        the returned array. This value may be the integer key
+   *                        of the column, or it may be the string key name.
+   * @return array
+   */
+  function array_column($input = null, $columnKey = null, $indexKey = null) {
+    // Using func_get_args() in order to check for proper number of
+    // parameters and trigger errors exactly as the built-in array_column()
+    // does in PHP 5.5.
+    $argc = func_num_args();
+    $params = func_get_args();
+
+    if ($argc < 2) {
+      trigger_error("array_column() expects at least 2 parameters, {$argc} given", E_USER_WARNING);
+      return null;
+    }
+
+    if (!is_array($params[0])) {
+      trigger_error('array_column() expects parameter 1 to be array, ' . gettype($params[0]) . ' given', E_USER_WARNING);
+      return null;
+    }
+
+    if (!is_int($params[1]) && !is_float($params[1]) && !is_string($params[1]) && $params[1] !== null && !(is_object($params[1]) && method_exists($params[1], '__toString'))
+    ) {
+      trigger_error('array_column(): The column key should be either a string or an integer', E_USER_WARNING);
+      return false;
+    }
+
+    if (isset($params[2]) && !is_int($params[2]) && !is_float($params[2]) && !is_string($params[2]) && !(is_object($params[2]) && method_exists($params[2], '__toString'))
+    ) {
+      trigger_error('array_column(): The index key should be either a string or an integer', E_USER_WARNING);
+      return false;
+    }
+
+    $paramsInput = $params[0];
+    $paramsColumnKey = ($params[1] !== null) ? (string) $params[1] : null;
+
+    $paramsIndexKey = null;
+    if (isset($params[2])) {
+      if (is_float($params[2]) || is_int($params[2])) {
+        $paramsIndexKey = (int) $params[2];
+      }
+      else {
+        $paramsIndexKey = (string) $params[2];
+      }
+    }
+
+    $resultArray = array();
+
+    foreach ($paramsInput as $row) {
+
+      $key = $value = null;
+      $keySet = $valueSet = false;
+
+      if ($paramsIndexKey !== null && array_key_exists($paramsIndexKey, $row)) {
+        $keySet = true;
+        $key = (string) $row[$paramsIndexKey];
+      }
+
+      if ($paramsColumnKey === null) {
+        $valueSet = true;
+        $value = $row;
+      }
+      elseif (is_array($row) && array_key_exists($paramsColumnKey, $row)) {
+        $valueSet = true;
+        $value = $row[$paramsColumnKey];
+      }
+
+      if ($valueSet) {
+        if ($keySet) {
+          $resultArray[$key] = $value;
+        }
+        else {
+          $resultArray[] = $value;
+        }
+      }
+    }
+
+    return $resultArray;
   }
 }

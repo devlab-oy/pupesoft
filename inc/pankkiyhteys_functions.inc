@@ -206,7 +206,7 @@ function sepa_download_file_list($params) {
       "file_type"              => $file_type,
       "status"                 => $status,
     ),
-    "url" => "https://sepa.devlab.fi/api/{$bank}/download_file_list",
+    "url" => "https://sepa.devlab.fi/api/{$pankkiyhteys['bank']}/download_file_list",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -266,7 +266,7 @@ function sepa_download_files($params) {
         "file_type"              => $file_type,
         "file_reference"         => $viite
       ),
-      "url" => "https://sepa.devlab.fi/api/{$bank}/download_file",
+      "url" => "https://sepa.devlab.fi/api/{$pankkiyhteys['bank']}/download_file",
       "headers" => array(
         "Content-Type: application/json",
         "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -328,7 +328,7 @@ function sepa_upload_file($params) {
       "file_type"              => $file_type,
       "content"                => $maksuaineisto
     ),
-    "url"     => "https://sepa.devlab.fi/api/{$bank}/upload_file",
+    "url"     => "https://sepa.devlab.fi/api/{$pankkiyhteys['bank']}/upload_file",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -428,7 +428,7 @@ function sepa_get_user_info($params) {
       "encryption_private_key" => $pankkiyhteys["encryption_private_key"],
       "customer_id"            => $pankkiyhteys["customer_id"],
     ),
-    "url" => "https://sepa.devlab.fi/api/{$bank}/get_user_info",
+    "url" => "https://sepa.devlab.fi/api/{$pankkiyhteys['bank']}/get_user_info",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -482,7 +482,7 @@ function hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana) {
   $pankki = mysql_fetch_assoc($result);
 
   // List‰‰n resulttiin pankin lyhyt nimi
-  $pankki["pankki_lyhyt_nimi"] = $tuetut_pankit[$pankki["pankki"]]["lyhyt_nimi"];
+  $pankki["bank"] = $tuetut_pankit[$pankki["pankki"]]["lyhyt_nimi"];
 
   // Puretaan salaus private keyst‰
   $pankki["signing_private_key"] = pura_salaus($pankki["signing_private_key"], $salasana);

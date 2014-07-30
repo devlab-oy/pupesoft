@@ -1203,7 +1203,8 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
     $ale_query_select_lisa = generoi_alekentta_select('erikseen', 'O');
 
     //Listataan tilauksessa olevat tuotteet
-    $query = "SELECT tilausrivi.nimitys,
+    $query = "SELECT 
+              tilausrivi.nimitys,
               concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
               tilausrivi.tuoteno,
               tuotteen_toimittajat.toim_tuoteno,
@@ -1223,6 +1224,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               tuote.kehahin keskihinta,
               tuote.sarjanumeroseuranta,
               tuotteen_toimittajat.ostohinta,
+              if(tuotteen_toimittajat.osto_era = 0, 1, tuotteen_toimittajat.osto_era) AS osto_era,
               tuotteen_toimittajat.valuutta,
               tilausrivi.erikoisale,
               tilausrivi.ale1,

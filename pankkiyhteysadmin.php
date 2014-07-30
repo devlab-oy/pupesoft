@@ -77,21 +77,23 @@ if ($tee == "luo") {
 // Haetaan sertifikaatti jos PIN on annettu
 if ($tee == "luo" and $pin != '') {
   $generoidut_tunnukset = generoi_private_key_ja_csr();
+  $private_key = $generoidut_tunnukset["private_key"];
 
   $params = array(
     "bank" => $tuetut_pankit[$pankki]["lyhyt_nimi"],
     "customer_id" => $customer_id,
     "pin" => $pin,
-    "csr" => $generoidut_tunnukset["csr"]
+    "signing_csr" => $generoidut_tunnukset["csr"]
   );
 
-  $certificate = sepa_get_certificate($params);
-  $private_key = $generoidut_tunnukset["private_key"];
+  $response = sepa_get_certificate($params);
 
-  if (!$certificate) {
+  if (!$response) {
     virhe("Sertifikaatin hakeminen epäonnistui, tarkista PIN-koodi ja asiakastunnus");
     $tee = "";
   }
+
+  $certificate = $response["own_signing_certificate"];
 
   $salatut_tunnukset = array(
     "private_key"   => salaa($private_key, $salasana),

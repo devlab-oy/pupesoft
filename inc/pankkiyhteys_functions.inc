@@ -402,27 +402,29 @@ function sepa_upload_file($params) {
 function sepa_get_certificate($params) {
   global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
 
-  $bank        = empty($params["bank"])        ? "" : $params["bank"];
-  $customer_id = empty($params["customer_id"]) ? "" : $params["customer_id"];
-  $pin         = empty($params["pin"])         ? "" : $params["pin"];
-  $csr         = empty($params["csr"])         ? "" : base64_encode($params["csr"]);
+  $bank           = empty($params["bank"])           ? "" : $params["bank"];
+  $customer_id    = empty($params["customer_id"])    ? "" : $params["customer_id"];
+  $pin            = empty($params["pin"])            ? "" : $params["pin"];
+  $signing_csr    = empty($params["signing_csr"])    ? "" : base64_encode($params["signing_csr"]);
+  $encryption_csr = empty($params["encryption_csr"]) ? "" : base64_encode($params["encryption_csr"]);
 
   if (empty($bank)
       or empty($customer_id)
       or empty($pin)
-      or empty($csr)) {
+      or empty($signing_csr)) {
     return false;
   }
 
   $parameters = array(
-    "method"  => "POST",
-    "data"    => array(
-      "pin"         => $pin,
+    "method" => "POST",
+    "data" => array(
+      "pin" => $pin,
       "customer_id" => $customer_id,
-      "environment" => "PRODUCTION", // Voi olla joko "TEST" tai "PRODUCTION"
-      "csr"         => $csr,
+      "environment" => "production", // Voi olla joko "TEST" tai "PRODUCTION"
+      "signing_csr" => $signing_csr,
+      "encryption_csr" => $encryption_csr,
     ),
-    "url"     => "https://sepa.devlab.fi/api/{$bank}/get_certificate",
+    "url" => "https://sepa.devlab.fi/api/{$bank}/get_certificate",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -435,9 +437,15 @@ function sepa_get_certificate($params) {
     return false;
   }
 
-  $certificate = base64_decode($response["content"]);
+  $return = array(
+    "bank_encryption_certificate" => base64_decode($response["bank_encryption_certificate"]),
+    "bank_root_certificate"       => base64_decode($response["bank_root_certificate"]),
+    "own_encryption_certificate"  => base64_decode($response["own_encryption_certificate"]),
+    "own_signing_certificate"     => base64_decode($response["own_signing_certificate"]),
+    "ca_certificate"              => base64_decode($response["ca_certificate"]),
+  );
 
-  return $certificate;
+  return $return;
 }
 
 /**

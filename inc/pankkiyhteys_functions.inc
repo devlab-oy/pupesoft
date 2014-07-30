@@ -538,8 +538,10 @@ function sepa_lataa_kaikki_uudet_tiedostot($params) {
     "bank" => $pankkiyhteys["pankki_lyhyt_nimi"],
     "customer_id" => $pankkiyhteys["customer_id"],
     "target_id" => $pankkiyhteys["target_id"],
-    "certificate" => $pankkiyhteys["certificate"],
-    "private_key" => $pankkiyhteys["private_key"],
+    "signing_certificate" => $pankkiyhteys["signing_certificate"],
+    "signing_private_key" => $pankkiyhteys["signing_private_key"],
+    "encryption_certificate" => $pankkiyhteys["encryption_certificate"],
+    "encryption_private_key" => $pankkiyhteys["encryption_private_key"],
     "file_type" => $tiedostotyyppi,
     "status" => "NEW"
   );
@@ -569,7 +571,7 @@ function sepa_lataa_kaikki_uudet_tiedostot($params) {
 function pankkiyhteys_salasana_kunnossa($pankkiyhteys_tunnus, $salasana) {
   $pankkiyhteys = hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana);
 
-  if (!openssl_pkey_get_private($pankkiyhteys["private_key"])) {
+  if (!openssl_pkey_get_private($pankkiyhteys["signing_private_key"])) {
     return false;
   }
 

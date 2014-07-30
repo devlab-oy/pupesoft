@@ -491,8 +491,10 @@ if ($tee == "laheta_pankkiin") {
     "bank" => $pankkiyhteys["pankki_lyhyt_nimi"],
     "customer_id" => $pankkiyhteys["customer_id"],
     "target_id" => $pankkiyhteys["target_id"],
-    "certificate" => $pankkiyhteys["certificate"],
-    "private_key" => $pankkiyhteys["private_key"],
+    "signing_certificate" => $pankkiyhteys["signing_certificate"],
+    "signing_private_key" => $pankkiyhteys["signing_private_key"],
+    "encryption_certificate" => $pankkiyhteys["encryption_certificate"],
+    "encryption_private_key" => $pankkiyhteys["encryption_private_key"],
     "file_type" => "NDCORPAYS",
     "maksuaineisto" => "{$_data}"
   );

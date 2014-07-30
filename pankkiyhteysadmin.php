@@ -119,23 +119,6 @@ if ($tee == "luo" and $pin == '' and $debug == 1) {
   }
 }
 
-// Haetaan target_id nordealla
-if ($tee == "luo" and $bank == "nordea") {
-  $params = array(
-    "bank" => $bank,
-    "certificate" => $certificate,
-    "private_key" => $private_key,
-    "customer_id" => $customer_id,
-  );
-
-  $target_id = sepa_get_target_id($params);
-
-  if (!$target_id) {
-    virhe("Tiedon hakeminen pankista epäonnistui, yritä myöhemmin uudestaan");
-    $tee = "";
-  }
-}
-
 // Tallennetaan pankkiyhteys
 if ($tee == "luo") {
   $oec = salaa($tunnukset_pankista["own_encryption_certificate"], $salasana);
@@ -154,8 +137,7 @@ if ($tee == "luo") {
             bank_encryption_certificate = '{$bec}'
             bank_root_certificate       = '{$brc}',
             ca_certificate              = '{$bca}',
-            customer_id                 = '{$customer_id}',
-            target_id                   = '{$target_id}'";
+            customer_id                 = '{$customer_id}'";
   $result = pupe_query($query);
 }
 

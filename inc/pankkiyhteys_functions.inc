@@ -466,6 +466,7 @@ function hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana) {
   global $kukarow, $yhtiorow;
 
   $tuetut_pankit = tuetut_pankit();
+  $pankkiyhteys_tunnus = (int) $pankkiyhteys_tunnus;
 
   $query = "SELECT *
             FROM pankkiyhteys

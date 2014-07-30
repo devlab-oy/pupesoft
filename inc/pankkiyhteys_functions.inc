@@ -408,7 +408,7 @@ function sepa_get_certificate($params) {
  *
  * @return string|bool
  */
-function sepa_get_target_id($params) {
+function sepa_get_user_info($params) {
   global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
 
   $tunnus       = parameter($params["pankkiyhteys_tunnus"]);

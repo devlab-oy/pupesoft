@@ -11,6 +11,11 @@ else {
   $toimpriolisa = " ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ";
 }
 
+if ($yhtiorow["seuraako_myyntitiliointi_tuotteen_tyyppia"] == "Y") {
+  $myyntitiliointi_seuraa_tuotteen_tyyppia = "if(tuote.tuotetyyppi = 'R', 'raaka-aine', " .
+    "'normaalituote') tuotetyyppi,";
+}
+
 // Tehtaan tiliointiaineisto suoraan sql:lla
 $query = "SELECT tilausrivi.alv alv,
           if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(tuotteen_alv.tilino, '') != '',           tuotteen_alv.tilino,           if({$toimpriolisa} ifnull(yhtion_toimipaikat.tilino, '') != '',         yhtion_toimipaikat.tilino,           if(ifnull(tuote.tilino, '') != '',           tuote.tilino,           if(ifnull(asiakas.tilino, '') != '',           asiakas.tilino,         if(ifnull(yhtion_toimipaikat.tilino, '') != '',         yhtion_toimipaikat.tilino,           yhtio.myynti))))) tilino,
@@ -26,6 +31,7 @@ $query = "SELECT tilausrivi.alv alv,
           if(tilausrivi.alv >= 500 and tilausrivi.alv < 600 and tilausrivi.kpl < 0 and tilausrivin_lisatiedot.osto_vai_hyvitys = 'O', 'KYLLA', 'EI') marginaaliostot,
           if(tilausrivi.alv >= 500 and tilausrivi.alv < 600 and tilausrivi.kpl > 0 and tilausrivin_lisatiedot.osto_vai_hyvitys = 'H', 'KYLLA', 'EI') marginaalihyvitys,
           if(ifnull(yhtion_toimipaikat.toim_alv, '') != '', yhtion_toimipaikat.toim_alv, yhtio.alv) alvtilino,
+          {$myyntitiliointi_seuraa_tuotteen_tyyppia}
           sum(tilausrivi.rivihinta) summa,
           sum(tilausrivi.rivihinta_valuutassa) summa_valuutassa,
           sum(tilausrivi.kate) kate,
@@ -42,7 +48,7 @@ $query = "SELECT tilausrivi.alv alv,
           WHERE tilausrivi.uusiotunnus = '$lasku[tunnus]'
           AND tilausrivi.tyyppi        = 'L'
           AND tilausrivi.yhtio         = '$kukarow[yhtio]'
-          GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14";
+          GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15";
 $xresult = pupe_query($query);
 
 if (mysql_num_rows($xresult) == 0) {
@@ -351,11 +357,19 @@ else {
       // Toissijaisesti kokeillaan vielä varasto-tilin oletuskustannuspaikkaa
       list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"], $kustp_ins, $kohde_ins, $projekti_ins);
 
+      if ($yhtiorow["seuraako_myyntitiliointi_tuotteen_tyyppia"] == "Y" and
+          $xrow["tuotetyyppi"] == "raaka-aine") {
+        $tilinumero = $yhtiorow["raaka_ainevarasto"];
+      }
+      else {
+        $tilinumero = $yhtiorow["varasto"];
+      }
+
       //Kirjataan 'varasto'-tilille
       $query = "INSERT into tiliointi set
                 yhtio            = '$kukarow[yhtio]',
                 ltunnus          = '$tunnus',
-                tilino           = '$yhtiorow[varasto]',
+                tilino           = '{$tilinumero}',
                 kustp            = '{$kustp_ins}',
                 kohde            = '{$kohde_ins}',
                 projekti         = '{$projekti_ins}',

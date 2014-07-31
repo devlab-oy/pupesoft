@@ -173,14 +173,6 @@ function poista_pankkiyhteys($pankki) {
 
 // SEPA API fuktiot
 
-/**
- * Lataa sepasta tiedostolistan yhdelle tiedostotyypille. Palauttaa listan tiedostojen
- * viitenumeroita
- *
- * @param array $params
- *
- * @return array|bool
- */
 function sepa_download_file_list($params) {
   global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
 
@@ -188,10 +180,17 @@ function sepa_download_file_list($params) {
   $salasana     = parameter($params["pankkiyhteys_salasana"]);
   $file_type    = parameter($params["file_type"]);
   $status       = parameter($params["status"]);
+  $target_id    = parameter($params["target_id"]);
   $pankkiyhteys = hae_pankkiyhteys_ja_pura_salaus($tunnus, $salasana);
 
   if (!$pankkiyhteys or empty($file_type) or empty($status)) {
     return false;
+  }
+
+  // Nordealla, pitää hakea filetypen "target_id"
+  // Haetaan vaan jos ei ole passattu parametrinä
+  if ($pankkiyhteys['bank'] == "nordea" and $target_id == "") {
+    $target_id = sepa_target_id_for_file_type($params);
   }
 
   $parameters = array(
@@ -202,7 +201,7 @@ function sepa_download_file_list($params) {
       "encryption_certificate" => $pankkiyhteys["encryption_certificate"],
       "encryption_private_key" => $pankkiyhteys["encryption_private_key"],
       "customer_id"            => $pankkiyhteys["customer_id"],
-      "target_id"              => $pankkiyhteys["target_id"],
+      "target_id"              => $target_id,
       "file_type"              => $file_type,
       "status"                 => $status,
     ),
@@ -219,36 +218,30 @@ function sepa_download_file_list($params) {
     return false;
   }
 
-  $tiedostot = $response["files"];
-  $viitteet = array();
+  // Lisätään target id_responseen, niin ei tartte hakea uudestaan jos kutsutaan peräkkäin
+  $response["target_id"] = $target_id;
 
-  foreach ($tiedostot as $tiedosto) {
-    array_push($viitteet, $tiedosto["fileReference"]);
-  }
-
-  return $viitteet;
+  return $response;
 }
 
-/**
- * Lataa pankista tiedostot annetuiden viitenumeroiden ja tiedostotyypin perusteella. Tallentaa
- * tiedostot /tmp -kansioon tiedostotyypin nimisen kansion alle. Palauttaa myos arrayin tiedostojen
- * viitteista ja siita onnistuiko niiden lataus vai ei.
- *
- * @param array $params
- *
- * @return array|bool
- */
 function sepa_download_files($params) {
   global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
 
   $tunnus       = parameter($params["pankkiyhteys_tunnus"]);
   $salasana     = parameter($params["pankkiyhteys_salasana"]);
   $file_type    = parameter($params["file_type"]);
+  $target_id    = parameter($params["target_id"]);
   $viitteet     = parameter($params["viitteet"]);
   $pankkiyhteys = hae_pankkiyhteys_ja_pura_salaus($tunnus, $salasana);
 
   if (!$pankkiyhteys or empty($file_type) or empty($viitteet)) {
     return false;
+  }
+
+  // Nordealla, pitää hakea filetypen "target_id"
+  // Haetaan vaan jos ei ole passattu parametrinä
+  if ($pankkiyhteys['bank'] == "nordea" and $target_id == "") {
+    $target_id = sepa_target_id_for_file_type($params);
   }
 
   $tiedostot = array();
@@ -262,7 +255,7 @@ function sepa_download_files($params) {
         "encryption_certificate" => $pankkiyhteys["encryption_certificate"],
         "encryption_private_key" => $pankkiyhteys["encryption_private_key"],
         "customer_id"            => $pankkiyhteys["customer_id"],
-        "target_id"              => $pankkiyhteys["target_id"],
+        "target_id"              => $target_id,
         "file_type"              => $file_type,
         "file_reference"         => $viite
       ),
@@ -296,13 +289,6 @@ function sepa_download_files($params) {
   return $tiedostot;
 }
 
-/**
- * Lahettaa maksuaineiston pankkiin. Talla hetkella ainut hyvaksyttava tyyppi on NDCORPAYS.
- *
- * @param array $params
- *
- * @return array|bool
- */
 function sepa_upload_file($params) {
   global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
 
@@ -310,10 +296,17 @@ function sepa_upload_file($params) {
   $salasana      = parameter($params["pankkiyhteys_salasana"]);
   $file_type     = parameter($params["file_type"]);
   $maksuaineisto = parameter($params["maksuaineisto"]);
+  $target_id     = parameter($params["target_id"]);
   $pankkiyhteys  = hae_pankkiyhteys_ja_pura_salaus($tunnus, $salasana);
 
   if (!$pankkiyhteys or empty($file_type) or empty($maksuaineisto)) {
     return false;
+  }
+
+  // Nordealla, pitää hakea filetypen "target_id"
+  // Haetaan vaan jos ei ole passattu parametrinä
+  if ($pankkiyhteys['bank'] == "nordea" and $target_id == "") {
+    $target_id = sepa_target_id_for_file_type($params);
   }
 
   $parameters = array(
@@ -324,7 +317,7 @@ function sepa_upload_file($params) {
       "encryption_certificate" => $pankkiyhteys["encryption_certificate"],
       "encryption_private_key" => $pankkiyhteys["encryption_private_key"],
       "customer_id"            => $pankkiyhteys["customer_id"],
-      "target_id"              => $pankkiyhteys["target_id"],
+      "target_id"              => $target_id,
       "file_type"              => $file_type,
       "content"                => $maksuaineisto
     ),
@@ -344,14 +337,6 @@ function sepa_upload_file($params) {
   return $response;
 }
 
-/**
- * Lataa pankin allekirjoittaman sertifikaatin pankista. Ottaa parametreissa certificate signing
- * requestin ja pin koodin.
- *
- * @param array $params
- *
- * @return bool|string
- */
 function sepa_get_certificate($params) {
   global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
 
@@ -401,13 +386,6 @@ function sepa_get_certificate($params) {
   return $return;
 }
 
-/**
- * Hakee aineistoryhman tunnuksen (target_id) pankista
- *
- * @param array $params
- *
- * @return string|bool
- */
 function sepa_get_user_info($params) {
   global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
 
@@ -441,20 +419,44 @@ function sepa_get_user_info($params) {
     return false;
   }
 
-  $target_id = $response["userFileTypes"][0]["targetId"];
+  return $response;
+}
 
-  if (empty($target_id)) {
+function sepa_target_id_for_file_type($params) {
+
+  $tunnus       = parameter($params["pankkiyhteys_tunnus"]);
+  $salasana     = parameter($params["pankkiyhteys_salasana"]);
+  $file_type    = parameter($params["file_type"]);
+  $pankkiyhteys = hae_pankkiyhteys_ja_pura_salaus($tunnus, $salasana);
+
+  if (!$pankkiyhteys or empty($file_type)) {
+    return false;
+  }
+
+  // Tehdään pankille userinfo kysely
+  $user_info = sepa_get_user_info($params);
+
+  if (!$user_info) {
+    return false;
+  }
+
+  // Haetaan filetypen target_id
+  $value = search_array_key_for_value_recursive($user_info, "fileType", $file_type);
+  $target_id = parameter($value[0]["targetId"]);
+
+  // Jos filetypeä ei löydy listasta, ei voida hakea
+  if ($target_id == "") {
+    echo "Pankki '{$pankkiyhteys['bank']}' ei tule tiedostotyyppiä '{$file_type}'";
     return false;
   }
 
   return $target_id;
 }
 
-
 // Sertifikaatti / salausfunktiot
 
 /**
- * Hakee pankkiyhteysrivin tietokannasta ja purkaa private_keyn ja sertifikaatin salauksen.
+ * Hakee pankkiyhteysrivin tietokannasta ja purkaa kenttien salauksen.
  * Palauttaa pankkiyhteys arrayn
  *
  * @param string $pankkiyhteys_tunnus
@@ -481,31 +483,43 @@ function hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana) {
 
   $pankki = mysql_fetch_assoc($result);
 
-  // Listään resulttiin pankin lyhyt nimi
-  $pankki["bank"] = $tuetut_pankit[$pankki["pankki"]]["lyhyt_nimi"];
-
-  // Puretaan salaus private keystä
-  $pankki["signing_private_key"] = pura_salaus($pankki["signing_private_key"], $salasana);
+  // Tarkistetaan salasana
+  $_pk = pura_salaus($pankki["signing_private_key"], $salasana);
 
   // Jos salauksen purkaminen ei onnistu, lopetetaan tähä
-  if (!openssl_pkey_get_private($pankki["signing_private_key"])) {
+  if (!openssl_pkey_get_private($_pk)) {
     return false;
   }
 
-  // Puretaan loputkin salaukset
-  $pankki["signing_certificate"]         = pura_salaus($pankki["signing_certificate"], $salasana);
-  $pankki["encryption_certificate"]      = pura_salaus($pankki["encryption_certificate"], $salasana);
-  $pankki["encryption_private_key"]      = pura_salaus($pankki["encryption_private_key"], $salasana);
-  $pankki["bank_encryption_certificate"] = pura_salaus($pankki["bank_encryption_certificate"], $salasana);
-  $pankki["bank_root_certificate"]       = pura_salaus($pankki["bank_root_certificate"], $salasana);
-  $pankki["ca_certificate"]              = pura_salaus($pankki["ca_certificate"], $salasana);
+  // Listään resulttiin pankin lyhyt nimi
+  $pankki["bank"] = $tuetut_pankit[$pankki["pankki"]]["lyhyt_nimi"];
+
+  // Nämä kentät on salattuna kannassa
+  $salatut = array(
+    "signing_private_key",
+    "signing_certificate",
+    "encryption_certificate",
+    "encryption_private_key",
+    "bank_encryption_certificate",
+    "bank_root_certificate",
+    "ca_certificate",
+  );
+
+  // Puretaan salaus kaikista
+  foreach ($salatut as $key) {
+    // Puretaan salaus
+    $_salaamaton = pura_salaus($pankki[$key], $salasana);
+
+    // Base64 enkoodataan ja setataan takasin arrayseen
+    $pankki[$key] = base64_encode($_salaamaton);
+  }
 
   return $pankki;
 }
 
 /**
- * Laitaa kaikki tietyn tyyppiset tiedostot pankista ja palauttaa arrayn tiedostojen viitteista ja
- * statuksista
+ * Laitaa kaikki tietyntyyppiset tiedostot pankista ja
+ * palauttaa arrayn tiedostojen viitteista ja
  *
  * @param array $params
  *
@@ -514,18 +528,43 @@ function hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana) {
 function sepa_lataa_kaikki_uudet_tiedostot($params) {
   global $kukarow, $yhtiorow;
 
-  // Lisätään paramsiin status NEW, että haetaan vain uudet filet
-  $params['status'] = 'NEW';
+  $tunnus    = parameter($params["pankkiyhteys_tunnus"]);
+  $salasana  = parameter($params["pankkiyhteys_salasana"]);
+  $file_type = parameter($params["file_type"]);
 
-  // Haetaan filelista pankista
-  $viitteet = sepa_download_file_list($params);
-
-  if (!$viitteet) {
+  if (empty($file_type)) {
     return false;
   }
 
-  // Lisätään paramssiin hettavat referencet
-  $params["viitteet"] = $viitteet;
+  // Lisätään paramsiin status NEW, että haetaan vain uudet filet
+  $params = array(
+    "pankkiyhteys_tunnus" => $tunnus,
+    "pankkiyhteys_salasana" => $salasana,
+    "file_type" => $file_type,
+    "status" => 'NEW'
+  );
+
+  // Haetaan filelista pankista
+  $filelist = sepa_download_file_list($params);
+
+  if (!$filelist) {
+    return false;
+  }
+
+  $viitteet = array();
+
+  // Lisätään paramssiin haettavat referencet
+  foreach ($filelist['files'] as $tiedosto) {
+    $viitteet[] = $tiedosto["fileReference"];
+  }
+
+  $params = array(
+    "pankkiyhteys_tunnus" => $tunnus,
+    "pankkiyhteys_salasana" => $salasana,
+    "file_type" => $file_type,
+    "target_id" => $filelist['target_id'],
+    "viitteet" => $viitteet
+  );
 
   $tiedostot = sepa_download_files($params);
 
@@ -634,5 +673,5 @@ function tuetut_pankit() {
 }
 
 function parameter($param) {
-  return empty($param) ? '' : trim($param);
+  return empty($param) ? '' : $param;
 }

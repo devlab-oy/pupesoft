@@ -1385,6 +1385,24 @@ for ($i=0; $i<=$count; $i++) {
     elseif (($yhtiorow['livetuotehaku_hakutapa'] == "F" or $yhtiorow['livetuotehaku_hakutapa'] == "G") and $toim == 'tuote' and ($array[$i] == "tuoteno" or $array[$i] == "nimitys") and !$tarkkahaku) {
        $lisa .= " and match ($array[$i]) against ('{$haku[$i]}*' IN BOOLEAN MODE) ";
     }
+    elseif ($toim == 'huoltosykli' and $array[$i] == 'toimenpide') {
+      $toimenpide_query = " SELECT group_concat(tuoteno) AS tuotenumerot
+                            FROM tuote
+                            WHERE yhtio = '{$kukarow['yhtio']}'
+                            AND nimitys {$hakuehto}";
+      $toimenpide_result = pupe_query($toimenpide_query);
+      $toimenpiteet = mysql_fetch_assoc($toimenpide_result);
+      if ($toimenpiteet['tuotenumerot'] != "") {
+        $toimenpiteet = explode(',', $toimenpiteet['tuotenumerot']);
+        $lisa .= " and {$array[$i]} in ('" . implode("','", $toimenpiteet) . "')";
+      }
+    }
+    elseif ($toim == 'huoltosykli' and $array[$i] == 'huoltovali') {
+      $huoltovalit = huoltovali_options();
+      $huoltovali = search_array_key_for_value_recursive($huoltovalit, 'months', $haku[$i]);
+      $huoltovali = $huoltovali[0];
+      $lisa .= " and {$array[$i]} = '{$huoltovali['days']}'";
+    }
     else {
       $lisa .= " and {$array[$i]} {$hakuehto} ";
     }

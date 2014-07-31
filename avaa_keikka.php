@@ -1,6 +1,6 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 print "<font class='head'>".t("Avaa saapuminen")."</font><hr>";
 
@@ -91,4 +91,4 @@ echo "</table>";
 echo "<br><input type='submit' value='".t("Etsi saapuminen")."'>";
 echo "</form>";
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

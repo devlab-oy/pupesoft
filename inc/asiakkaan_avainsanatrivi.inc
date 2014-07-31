@@ -27,7 +27,7 @@ if (mysql_field_name($result, $i) == "laji") {
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300)." onchange='submit();'>";
   $ulos .= "<option value=''>".t("Oletus")."</option>";
 
-  while($row = mysql_fetch_assoc($vresult)) {
+  while ($row = mysql_fetch_assoc($vresult)) {
     $sel = "";
 
     if ($row["selite"] == $trow[$i]) {
@@ -113,14 +113,14 @@ if (mysql_field_name($result, $i) == "avainsana") {
 
     $ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
-    foreach(explode("/", $asavainsanatyyppi) as $astyy) {
+    foreach (explode("/", $asavainsanatyyppi) as $astyy) {
       $ulos .= "<option value = '$astyy' ".$sel[$astyy].">$astyy</option>";
     }
 
     $ulos .= "</select></td>";
     $jatko = 0;
   }
-  elseif (stripos($asavainsanatyyppi, "PAIKALLISVARAST") !== FALSE){
+  elseif (stripos($asavainsanatyyppi, "PAIKALLISVARAST") !== FALSE) {
     $query = "SELECT *
               FROM avainsana
               WHERE yhtio = '$kukarow[yhtio]'

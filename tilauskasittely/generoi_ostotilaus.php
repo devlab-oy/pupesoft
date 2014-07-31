@@ -1,6 +1,6 @@
 <?php
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 function va_ti_en_jt($tuoteno, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) {
   global $kukarow, $yhtiorow, $lisavarattu;
@@ -48,18 +48,18 @@ if ($tee != '' and $ytunnus != '') {
 
   $muutparametrit = urlencode($tee."!¡!".serialize($kohdevarastot)."!¡!".serialize($mul_osasto)."!¡!".serialize($mul_try)."!¡!".serialize($mul_tme)."!¡!".$abcrajaus."!¡!".$generoi."!¡!".$ohjausmerkki."!¡!".$tilaustyyppi."!¡!".$viesti."!¡!".$myytavissasummaus."!¡!".$ed_ytunnus);
 
-  require ("inc/kevyt_toimittajahaku.inc");
+  require "inc/kevyt_toimittajahaku.inc";
 
   if ($toimittajaid == '') {
     $tee = '';
   }
 }
 
-echo "<font class='head'>",t("Luo ostotilaus tuotepaikkojen hälytysrajojen perusteella"),"</font><hr /><br />";
+echo "<font class='head'>", t("Luo ostotilaus tuotepaikkojen hälytysrajojen perusteella"), "</font><hr /><br />";
 
 // org_rajausta tarvitaan yhdessä selectissä joka triggeröi taas toisen asian.
 $org_rajaus = $abcrajaus;
-list($abcrajaus,$abcrajaustapa) = explode("##",$abcrajaus);
+list($abcrajaus, $abcrajaustapa) = explode("##", $abcrajaus);
 
 if (!isset($abcrajaustapa)) $abcrajaustapa = "TK";
 if (!isset($keraysvyohyke)) $keraysvyohyke = array();
@@ -71,7 +71,7 @@ echo "<form name = 'valinta' method='post'>
     <input type='hidden' name='tee' value='M'>
     <table>";
 
-echo "<tr><th>",t("Varasto johon tilataan"),"</th>";
+echo "<tr><th>", t("Varasto johon tilataan"), "</th>";
 echo "<td><table>";
 
 $query  = "SELECT tunnus, nimitys, maa
@@ -110,12 +110,12 @@ if ($kala != 0) {
 
 echo "</table></td></tr>";
 
-echo "<tr><th>",t("Lisärajaukset"),"</th><td>";
+echo "<tr><th>", t("Lisärajaukset"), "</th><td>";
 
 $monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI");
 $monivalintalaatikot_normaali = array();
 
-require ("tilauskasittely/monivalintalaatikot.inc");
+require "tilauskasittely/monivalintalaatikot.inc";
 
 echo "</td></tr>";
 
@@ -128,7 +128,7 @@ if ($yhtiorow['kerayserat'] == 'K') {
 
   if (mysql_num_rows($keraysvyohyke_res) > 0) {
 
-    echo "<tr><th>",t("Keräysvyöhyke"),"</th>";
+    echo "<tr><th>", t("Keräysvyöhyke"), "</th>";
     echo "<td>";
     echo "<table>";
 
@@ -158,7 +158,7 @@ if ($yhtiorow['kerayserat'] == 'K') {
   }
 }
 
-echo "<tr><th>",t("Toimittaja"),"</th><td><input type='text' size='20' name='ytunnus' value='{$ytunnus}'>";
+echo "<tr><th>", t("Toimittaja"), "</th><td><input type='text' size='20' name='ytunnus' value='{$ytunnus}'>";
 
 if ($toimittajaid > 0) {
   echo "  <input type='hidden' name='ed_ytunnus' value='{$ytunnus}'>
@@ -168,10 +168,10 @@ if ($toimittajaid > 0) {
 
 echo "</td></tr>";
 
-echo "<tr><th>",t("ABC-luokkarajaus ja rajausperuste"),"</th><td>";
+echo "<tr><th>", t("ABC-luokkarajaus ja rajausperuste"), "</th><td>";
 
 echo "<select name='abcrajaus' onchange='submit()'>";
-echo "<option  value=''>",t("Valitse"),"</option>";
+echo "<option  value=''>", t("Valitse"), "</option>";
 
 $teksti = "";
 for ($i = 0; $i < count($ryhmaprossat); $i++) {
@@ -180,7 +180,7 @@ for ($i = 0; $i < count($ryhmaprossat); $i++) {
   if ($i > 0) $teksti = t("ja paremmat");
   if ($org_rajaus == "{$i}##TM") $selabc = "SELECTED";
 
-  echo "<option  value='{$i}##TM' {$selabc}>",t("Myynti"),": {$ryhmanimet[$i]} {$teksti}</option>";
+  echo "<option  value='{$i}##TM' {$selabc}>", t("Myynti"), ": {$ryhmanimet[$i]} {$teksti}</option>";
 }
 
 $teksti = "";
@@ -190,7 +190,7 @@ for ($i = 0; $i < count($ryhmaprossat); $i++) {
   if ($i > 0) $teksti = t("ja paremmat");
   if ($org_rajaus == "{$i}##TK") $selabc = "SELECTED";
 
-  echo "<option  value='{$i}##TK' {$selabc}>",t("Myyntikate"),": {$ryhmanimet[$i]} {$teksti}</option>";
+  echo "<option  value='{$i}##TK' {$selabc}>", t("Myyntikate"), ": {$ryhmanimet[$i]} {$teksti}</option>";
 }
 
 $teksti = "";
@@ -200,7 +200,7 @@ for ($i = 0; $i < count($ryhmaprossat); $i++) {
   if ($i > 0) $teksti = t("ja paremmat");
   if ($org_rajaus == "{$i}##TR") $selabc = "SELECTED";
 
-  echo "<option  value='{$i}##TR' {$selabc}>",t("Myyntirivit"),": {$ryhmanimet[$i]} {$teksti}</option>";
+  echo "<option  value='{$i}##TR' {$selabc}>", t("Myyntirivit"), ": {$ryhmanimet[$i]} {$teksti}</option>";
 }
 
 $teksti = "";
@@ -210,19 +210,19 @@ for ($i = 0; $i < count($ryhmaprossat); $i++) {
   if ($i > 0) $teksti = t("ja paremmat");
   if ($org_rajaus == "{$i}##TP") $selabc = "SELECTED";
 
-  echo "<option  value='{$i}##TP' {$selabc}>",t("Myyntikappaleet"),": {$ryhmanimet[$i]} {$teksti}</option>";
+  echo "<option  value='{$i}##TP' {$selabc}>", t("Myyntikappaleet"), ": {$ryhmanimet[$i]} {$teksti}</option>";
 }
 
 echo "</select>";
 echo "</td></tr>";
 
-echo "<tr><th>",t("Vastaavat"),"</th>";
+echo "<tr><th>", t("Vastaavat"), "</th>";
 echo "<td><select name='myytavissasummaus'>";
 
 $sel = array($myytavissasummaus => "selected") + array("T" => '', "V" => '');
 
-echo "<option value='T' {$sel['T']}>",t("Ostetaan tuotteittain"),"</option>";
-echo "<option value='V' {$sel['V']}>",t("Ostetaan vastaavuusketjuittain"),"</option>";
+echo "<option value='T' {$sel['T']}>", t("Ostetaan tuotteittain"), "</option>";
+echo "<option value='V' {$sel['V']}>", t("Ostetaan vastaavuusketjuittain"), "</option>";
 echo "</select></td></tr>";
 
 echo "<tr><td class='back'><br></td></tr>";
@@ -245,19 +245,19 @@ if (mysql_num_rows($ostotil_tiltyyp_res) > 0) {
 else {
   $sel = array($tilaustyyppi => "selected") + array(1 => '', 2 => '');
 
-  echo "<option value='2' {$sel[2]}>",t("Normaalitilaus"),"</option>";
-  echo "<option value='1' {$sel[1]}>",t("Pikalähetys"),"</option>";
+  echo "<option value='2' {$sel[2]}>", t("Normaalitilaus"), "</option>";
+  echo "<option value='1' {$sel[1]}>", t("Pikalähetys"), "</option>";
 }
 
 echo "</select></td>";
 echo "</tr>";
 
-echo "</table><br><input type = 'submit' name = 'generoi' value = '",t("Generoi ostotilaus"),"'></form><br><br>";
+echo "</table><br><input type = 'submit' name = 'generoi' value = '", t("Generoi ostotilaus"), "'></form><br><br>";
 
 if (isset($generoi) and $generoi != "" and $tee == 'M' and $toimittajaid > 0 and count($kohdevarastot) > 0) {
 
-  require ("vastaavat.class.php");
-  require ("inc/luo_ostotilausotsikko.inc");
+  require "vastaavat.class.php";
+  require "inc/luo_ostotilausotsikko.inc";
 
   $abcjoin = "";
 
@@ -509,7 +509,7 @@ if (isset($generoi) and $generoi != "" and $tee == 'M' and $toimittajaid > 0 and
             'ohjausmerkki'         => $ohjausmerkki,
             'tilaustyyppi'         => $tilaustyyppi,
             'myytil_viesti'        => $viesti,
-            'ostotilauksen_kasittely'  => "GEN", # tällä erotellaan generoidut ja käsin tehdyt ostotilaukset
+            'ostotilauksen_kasittely'  => "GEN", // tällä erotellaan generoidut ja käsin tehdyt ostotilaukset
           );
 
           $laskurow = luo_ostotilausotsikko($params);
@@ -519,7 +519,7 @@ if (isset($generoi) and $generoi != "" and $tee == 'M' and $toimittajaid > 0 and
 
           $kukarow['kesken'] = $laskurow['tunnus'];
 
-          echo "<br /><font class='message'>",t("Tehtiin ostotilaus otsikko %s kohdevarasto on %s", $kieli, $kukarow["kesken"], $varow["nimitys"]),"</font><br />";
+          echo "<br /><font class='message'>", t("Tehtiin ostotilaus otsikko %s kohdevarasto on %s", $kieli, $kukarow["kesken"], $varow["nimitys"]), "</font><br />";
 
           //  Otetaan luotu otsikko talteen
           $otsikot[] = $kukarow["kesken"];
@@ -547,7 +547,7 @@ if (isset($generoi) and $generoi != "" and $tee == 'M' and $toimittajaid > 0 and
             ${'ale'.$alepostfix} = "";
           }
 
-        require ('lisaarivi.inc');
+          require 'lisaarivi.inc';
 
           $tuoteno  = '';
           $kpl    = '';
@@ -564,20 +564,20 @@ if (isset($generoi) and $generoi != "" and $tee == 'M' and $toimittajaid > 0 and
 
           $tehtyriveja++;
 
-          echo "<font class='info'>",t("Ostotilaukselle lisättiin %s tuotetta %s", "", $ostettavahaly." ".$trow["yksikko"], $trow["tuoteno"]),"</font><br />";
+          echo "<font class='info'>", t("Ostotilaukselle lisättiin %s tuotetta %s", "", $ostettavahaly." ".$trow["yksikko"], $trow["tuoteno"]), "</font><br />";
         }
         else {
-          echo t("VIRHE: Tuotetta ei löydy"),"!<br />";
+          echo t("VIRHE: Tuotetta ei löydy"), "!<br />";
         }
       }
     }
   }
 
   if (count($otsikot) == 0) {
-    echo "<br><font class='error'>",t("Yhtään ostotilausta ei luotu"),"!</font><br />";
+    echo "<br><font class='error'>", t("Yhtään ostotilausta ei luotu"), "!</font><br />";
   }
   else {
-    echo "<font class='message'>",t("Luotiin %s ostotilausta", $kieli, count($otsikot)),"</font><br /><br /><br />";
+    echo "<font class='message'>", t("Luotiin %s ostotilausta", $kieli, count($otsikot)), "</font><br /><br /><br />";
   }
 
   $query = "UPDATE kuka SET kesken = 0 WHERE yhtio = '{$kukarow['yhtio']}' and kuka = '{$kukarow['kuka']}'";
@@ -587,4 +587,4 @@ elseif ($tee == 'M' and isset($generoi) and $generoi != "") {
   echo "<br><br><font class='error'>".t("VIRHE: Valitse toimittaja ja varasto johon tilataan")."!</font>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

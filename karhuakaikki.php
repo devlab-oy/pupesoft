@@ -11,8 +11,8 @@ if ($argv[1] == '') {
 }
 
 // otetaan tietokanta connect
-require ("inc/connect.inc");
-require ("inc/functions.inc");
+require "inc/connect.inc";
+require "inc/functions.inc";
 
 if ($argv[2] != "") {
   $lpvm_aikaa = $argv[2];
@@ -24,12 +24,12 @@ if ($argv[3] != "") {
 
 $query    = "SELECT * from kuka where kuka='$argv[1]' limit 1";
 $kukares = mysql_query($query) or pupe_error($query);
-if(mysql_num_rows($kukares) == 0) die("Karhuajaa ei löyry!\n$query\n");
+if (mysql_num_rows($kukares) == 0) die("Karhuajaa ei löyry!\n$query\n");
 $kukarow = mysql_fetch_array($kukares);
 
 $query    = "SELECT * from yhtio where yhtio='$kukarow[yhtio]'";
 $yhtiores = mysql_query($query) or pupe_error($query);
-if(mysql_num_rows($yhtiores) == 0) die("Firmaa ei löyry!\n");
+if (mysql_num_rows($yhtiores) == 0) die("Firmaa ei löyry!\n");
 $yhtiorow = mysql_fetch_array($yhtiores);
 
 $query = "SELECT *
@@ -54,8 +54,8 @@ ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(_
 ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)."/inc"));
 chdir("myyntires");
 
-$outi = require("myyntires/karhu.php");
+$outi = require "myyntires/karhu.php";
 
 echo strip_tags(str_replace("<br>", "\n", $outi));
 
-require("inc/footer.inc");
+require "inc/footer.inc";

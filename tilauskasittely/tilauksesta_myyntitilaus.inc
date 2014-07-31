@@ -57,7 +57,7 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
         $tehdaan_uusi_otsikko = FALSE;
       }
       else {
-        require("tilauskasittely/luo_myyntitilausotsikko.inc");
+        require "tilauskasittely/luo_myyntitilausotsikko.inc";
 
         $kukarowkesken      = $kukarow["kesken"];
         $kukarow['kesken'] = 0;
@@ -71,85 +71,85 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
 
     if ($tehdaan_uusi_otsikko) {
 
-      $fields = mysql_field_name($monistares,0);
+      $fields = mysql_field_name($monistares, 0);
       $values = "'".$monistarow[0]."'";
 
-      for($i=1; $i < mysql_num_fields($monistares)-1; $i++) { // Ei monisteta tunnusta
+      for ($i=1; $i < mysql_num_fields($monistares)-1; $i++) { // Ei monisteta tunnusta
 
-        $fields .= ", ".mysql_field_name($monistares,$i);
+        $fields .= ", ".mysql_field_name($monistares, $i);
 
-        switch (mysql_field_name($monistares,$i)) {
-          case 'luontiaika':
-            $values .= ", now()";
-            break;
-          case 'alatila':
+        switch (mysql_field_name($monistares, $i)) {
+        case 'luontiaika':
+          $values .= ", now()";
+          break;
+        case 'alatila':
+          $values .= ", ''";
+          break;
+        case 'tila':
+          if ($perusta == "TYOMAARAYS") {
+            $values .= ", 'A'";
+          }
+          else {
+            $values .= ", 'N'";
+          }
+          break;
+        case 'tilaustyyppi':
+          if ($perusta == "TYOMAARAYS") {
+            $values .= ", 'A'";
+          }
+          elseif ($monistarow["tila"] == "T") {
+            $values .= ", 'T'";
+          }
+          else {
+            $values .= ", 'N'";
+          }
+          break;
+        case 'clearing':
+          if ($monistarow["tila"] == "T") {
+            $values .= ", 'TARJOUSTILAUS'";
+          }
+          else {
             $values .= ", ''";
-            break;
-          case 'tila':
-            if ($perusta == "TYOMAARAYS") {
-              $values .= ", 'A'";
-            }
-            else {
-              $values .= ", 'N'";
-            }
-            break;
-          case 'tilaustyyppi':
-            if ($perusta == "TYOMAARAYS") {
-              $values .= ", 'A'";
-            }
-            elseif ($monistarow["tila"] == "T") {
-              $values .= ", 'T'";
-            }
-            else {
-              $values .= ", 'N'";
-            }
-            break;
-          case 'clearing':
-            if ($monistarow["tila"] == "T") {
-              $values .= ", 'TARJOUSTILAUS'";
-            }
-            else {
-              $values .= ", ''";
-            }
-            break;
-          case 'tunnus':
-          case 'kapvm':
-          case 'tapvm':
-          case 'olmapvm':
-          case 'summa':
-          case 'kasumma':
-          case 'kate':
-          case 'arvo':
-          case 'maksuaika':
-          case 'lahetepvm':
-          case 'viite':
-          case 'laskunro':
-          case 'mapvm':
-          case 'viikorkoeur':
-          case 'tullausnumero':
-          case 'laskutuspvm':
-          case 'erpcm':
-          case 'laskuttaja':
-          case 'laskutettu':
-          case 'maksaja':
-          case 'maksettu':
-          case 'maa_maara':
-          case 'kuljetusmuoto':
-          case 'kauppatapahtuman_luonne':
-          case 'sisamaan_kuljetus':
-          case 'sisamaan_kuljetusmuoto':
-          case 'poistumistoimipaikka':
-          case 'poistumistoimipaikka_koodi':
-            $values .= ", ''";
-            break;
-          case 'laatija':
-            $values .= ", '$kukarow[kuka]'";
-            break;
-          case 'kate_korjattu':
-            $values .= ", NULL";
-            break;
-          default:
-            $values .= ", '".$monistarow[$i]."'";
+          }
+          break;
+        case 'tunnus':
+        case 'kapvm':
+        case 'tapvm':
+        case 'olmapvm':
+        case 'summa':
+        case 'kasumma':
+        case 'kate':
+        case 'arvo':
+        case 'maksuaika':
+        case 'lahetepvm':
+        case 'viite':
+        case 'laskunro':
+        case 'mapvm':
+        case 'viikorkoeur':
+        case 'tullausnumero':
+        case 'laskutuspvm':
+        case 'erpcm':
+        case 'laskuttaja':
+        case 'laskutettu':
+        case 'maksaja':
+        case 'maksettu':
+        case 'maa_maara':
+        case 'kuljetusmuoto':
+        case 'kauppatapahtuman_luonne':
+        case 'sisamaan_kuljetus':
+        case 'sisamaan_kuljetusmuoto':
+        case 'poistumistoimipaikka':
+        case 'poistumistoimipaikka_koodi':
+          $values .= ", ''";
+          break;
+        case 'laatija':
+          $values .= ", '$kukarow[kuka]'";
+          break;
+        case 'kate_korjattu':
+          $values .= ", NULL";
+          break;
+        default:
+          $values .= ", '".$monistarow[$i]."'";
         }
       }
 
@@ -186,25 +186,25 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
         $monistatyomres = pupe_query($query);
         $monistatyomrow = mysql_fetch_array($monistatyomres);
 
-        $fields = mysql_field_name($monistatyomres,0);
+        $fields = mysql_field_name($monistatyomres, 0);
         $values = "'".$monistatyomrow[0]."'";
 
         for ($i=1; $i < mysql_num_fields($monistatyomres); $i++) { // Ei monisteta tunnusta
 
-          $fields .= ", ".mysql_field_name($monistatyomres,$i);
+          $fields .= ", ".mysql_field_name($monistatyomres, $i);
 
-          switch (mysql_field_name($monistatyomres,$i)) {
-            case 'luontiaika':
-              $values .= ", now()";
-              break;
-            case 'otunnus':
-              $values .= ", $utunnus";
-              break;
-            case 'laatija':
-              $values .= ", '$kukarow[kuka]'";
-              break;
-            default:
-              $values .= ", '".$monistatyomrow[$i]."'";
+          switch (mysql_field_name($monistatyomres, $i)) {
+          case 'luontiaika':
+            $values .= ", now()";
+            break;
+          case 'otunnus':
+            $values .= ", $utunnus";
+            break;
+          case 'laatija':
+            $values .= ", '$kukarow[kuka]'";
+            break;
+          default:
+            $values .= ", '".$monistatyomrow[$i]."'";
           }
         }
 
@@ -235,32 +235,32 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
       $monistares2 = pupe_query($query);
       $monistarow2 = mysql_fetch_array($monistares2);
 
-      $fields = mysql_field_name($monistares2,0);
+      $fields = mysql_field_name($monistares2, 0);
       $values = "'".$monistarow2[0]."'";
 
       //  Samat tiedot tarvitaan myˆs projektill
       $pvalues = "'".$monistarow2[0]."'";
 
-      for($i=1; $i < mysql_num_fields($monistares2)-1; $i++) { // Ei monisteta tunnusta
+      for ($i=1; $i < mysql_num_fields($monistares2)-1; $i++) { // Ei monisteta tunnusta
 
-        $fields .= ", ".mysql_field_name($monistares2,$i);
+        $fields .= ", ".mysql_field_name($monistares2, $i);
 
-        switch (mysql_field_name($monistares2,$i)) {
-          case 'otunnus':
-            $values .= ", '$utunnus'";
-            $pvalues .= ", '$ptunnus'";
-            break;
-          case 'tunnusnippu_tarjous':
-            $values .= ", '$monistarow[tunnusnippu]'";
-            $pvalues .= ", '$monistarow[tunnusnippu]'";
-            break;
-          case 'projekti':
-            $values .= ", '$projekti'";
-            $pvalues .= ", '$projekti'";
-            break;
-          default:
-            $values .= ", '".$monistarow2[$i]."'";
-            $pvalues .= ", '".$monistarow2[$i]."'";
+        switch (mysql_field_name($monistares2, $i)) {
+        case 'otunnus':
+          $values .= ", '$utunnus'";
+          $pvalues .= ", '$ptunnus'";
+          break;
+        case 'tunnusnippu_tarjous':
+          $values .= ", '$monistarow[tunnusnippu]'";
+          $pvalues .= ", '$monistarow[tunnusnippu]'";
+          break;
+        case 'projekti':
+          $values .= ", '$projekti'";
+          $pvalues .= ", '$projekti'";
+          break;
+        default:
+          $values .= ", '".$monistarow2[$i]."'";
+          $pvalues .= ", '".$monistarow2[$i]."'";
         }
       }
 
@@ -321,7 +321,7 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
 
       if (mysql_num_rows($liiteres) > 0) {
 
-        while($liiterow = mysql_fetch_assoc($liiteres)) {
+        while ($liiterow = mysql_fetch_assoc($liiteres)) {
 
           $liiterow["data"] = mysql_real_escape_string($liiterow["data"]);
 
@@ -557,7 +557,7 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
 
       $tilauksesta_myyntitilaus .= "<font class='message'>Lis‰t‰‰n rivi $tuoteno $kpl kpl tilaukselle $utunnus</font><br>";
 
-      require('lisaarivi.inc');
+      require 'lisaarivi.inc';
 
       // Jos is‰tuote meni ok ja sill‰ on tehdaslis‰varusteita niin lis‰t‰‰n ne saldosta piittaamatta
       if (count($lisatyt_rivit1) == 1 and $coprivirow['perheid2'] == $coprivirow['tunnus']) {
@@ -589,7 +589,7 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
         $sarjares = pupe_query($query);
         $sarjarow = mysql_fetch_array($sarjares);
 
-        foreach($lisatyt_rivit as $lisatty_tun) {
+        foreach ($lisatyt_rivit as $lisatty_tun) {
           $query = "SELECT *
                     FROM tilausrivi
                     WHERE yhtio = '$kukarow[yhtio]'
@@ -621,18 +621,18 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
 
             $kysely = "  UPDATE tilausrivin_lisatiedot SET ";
 
-            for($i=0; $i < mysql_num_fields($monistares2)-1; $i++) { // Ei monisteta tunnusta
-              switch (mysql_field_name($monistares2,$i)) {
-                case 'yhtio':
-                case 'tilausrivitunnus':
-                case 'tiliointirivitunnus':
-                case 'tilausrivilinkki':
-                case 'luontiaika':
-                case 'laatija':
-                  $values .= "";
-                  break;
-                default:
-                  $kysely .= mysql_field_name($monistares2,$i)."='".$monistarow2[$i]."',";
+            for ($i=0; $i < mysql_num_fields($monistares2)-1; $i++) { // Ei monisteta tunnusta
+              switch (mysql_field_name($monistares2, $i)) {
+              case 'yhtio':
+              case 'tilausrivitunnus':
+              case 'tiliointirivitunnus':
+              case 'tilausrivilinkki':
+              case 'luontiaika':
+              case 'laatija':
+                $values .= "";
+                break;
+              default:
+                $kysely .= mysql_field_name($monistares2, $i)."='".$monistarow2[$i]."',";
               }
             }
 
@@ -708,7 +708,7 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
       $result    = pupe_query($query);
       $laskurow   = mysql_fetch_array($result);
 
-      require("tilaus-valmis.inc");
+      require "tilaus-valmis.inc";
     }
 
     //Korjataan globaali muuttuja

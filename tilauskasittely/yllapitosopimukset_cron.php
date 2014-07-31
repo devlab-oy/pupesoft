@@ -15,8 +15,8 @@ error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
 ini_set("display_errors", 0);
 
 // otetaan tietokanta connect
-require ("../inc/connect.inc");
-require ("../inc/functions.inc");
+require "../inc/connect.inc";
+require "../inc/functions.inc";
 
 // hmm.. j‰nn‰‰
 $kukarow['yhtio']     = $argv[1];
@@ -31,14 +31,14 @@ $cron_pvm = array();
 $cron_tun = array();
 
 // ajetaan eka l‰pi niin saadaan laskuttamattomat sopparit muuttujiin
-require ("yllapitosopimukset.php");
+require "yllapitosopimukset.php";
 
 $laskutapvm = $cron_pvm;
 $laskutatun = $cron_tun;
 $tee        = "laskuta";
 
 // sitte ajetaan uudestaan laskuta modessa kaikki sopparit l‰pi
-require ("yllapitosopimukset.php");
+require "yllapitosopimukset.php";
 
 // echotaan outputti
 $laskuta_message = str_replace("<br>", "\n", $laskuta_message);

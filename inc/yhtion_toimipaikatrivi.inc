@@ -48,7 +48,7 @@ if ((mysql_field_name($result, $i) == "tilino") or
       $ulos .= "<input type = 'hidden' name = '$nimi' value = '$trow[$i]'>$trow[$i] - ";
     }
     else {
-      $ulos .= "<input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
+      $ulos .= "<input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='" . mysql_field_len($result, $i) ."'>";
     }
 
     $query = "SELECT nimi

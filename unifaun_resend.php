@@ -22,8 +22,8 @@ if ($php_cli) {
   ini_set("display_errors", 0);
 
   // otetaan tietokanta connect
-  require("inc/connect.inc");
-  require("inc/functions.inc");
+  require "inc/connect.inc";
+  require "inc/functions.inc";
 
   $kukarow['yhtio'] = (string) $argv[1];
   $kukarow['kuka']  = 'admin';
@@ -53,7 +53,7 @@ if ($unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != ""
       if (is_file($ftpfail."/".$file)) {
         $ftpfile = realpath($ftpfail."/".$file);
 
-        require ("inc/ftp-send.inc");
+        require "inc/ftp-send.inc";
 
         // Jos siirto meni ok, niin remmataan faili
         if ($palautus == 0) {
@@ -84,7 +84,7 @@ if ($unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != ""
       if (is_file($ftpfail."/".$file)) {
         $ftpfile = realpath($ftpfail."/".$file);
 
-        require ("inc/ftp-send.inc");
+        require "inc/ftp-send.inc";
 
         // Jos siirto meni ok, niin remmataan faili
         if ($palautus == 0) {

@@ -20,7 +20,7 @@ function furlput() {
   global $urldata;
 
   return "<input type=\"hidden\" name=\"urlpdata\" value=\"".base64_encode(serialize($urldata)).
-       "\">\n";
+    "\">\n";
 }
 
 function urlget() {

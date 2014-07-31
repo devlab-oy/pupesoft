@@ -1,6 +1,6 @@
 <?php
 
-require ("parametrit.inc");
+require "parametrit.inc";
 
 //Haetaan asiakkaan tunnuksella
 $query  = "SELECT *
@@ -24,13 +24,13 @@ echo "<font class='head'>".t("Tilaushistoria").":</font><hr>";
 if ($tee == 'NAYTATILAUS') {
   echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
 
-  require ("naytatilaus.inc");
+  require "naytatilaus.inc";
 
   echo "<hr>";
   $tee = "TULOSTA";
 }
 
-if($otunnus > 0) {
+if ($otunnus > 0) {
   $query = "SELECT laskunro, ytunnus
             FROM lasku
             WHERE tunnus     = '$otunnus'
@@ -43,7 +43,7 @@ if($otunnus > 0) {
     $laskunro = $row["laskunro"];
   }
 }
-elseif($laskunro > 0) {
+elseif ($laskunro > 0) {
   $query = "SELECT laskunro, ytunnus
             FROM lasku
             WHERE laskunro='$laskunro'
@@ -67,11 +67,11 @@ echo "<tr><th>".t("Laskunumero")."</th><td colspan='3'><input type='text' size='
 
 
 if (!isset($kka))
-  $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+  $kka = date("m", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 if (!isset($vva))
-  $vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+  $vva = date("Y", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 if (!isset($ppa))
-  $ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+  $ppa = date("d", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 
 if (!isset($kkl))
   $kkl = date("m");
@@ -129,9 +129,8 @@ if (mysql_num_rows($result)!=0) {
 
   echo "<br><table>";
   echo "<tr>";
-  for ($i=0; $i < mysql_num_fields($result)-2; $i++)
-  {
-    echo "<th align='left'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&jarj=".mysql_field_name($result,$i)."'>".t(mysql_field_name($result,$i))."</a></th>";
+  for ($i=0; $i < mysql_num_fields($result)-2; $i++) {
+    echo "<th align='left'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&jarj=".mysql_field_name($result, $i)."'>".t(mysql_field_name($result, $i))."</a></th>";
   }
   echo "<th align='left'>".t("Tyyppi")."</th>";
   echo "</tr>";
@@ -142,8 +141,7 @@ if (mysql_num_rows($result)!=0) {
     if ($tunnus==$row['tilaus']) $ero="th";
 
     echo "<tr>";
-    for ($i=0; $i<mysql_num_fields($result)-2; $i++)
-    {
+    for ($i=0; $i<mysql_num_fields($result)-2; $i++) {
       echo "<$ero>$row[$i]</$ero>";
     }
 
@@ -151,7 +149,7 @@ if (mysql_num_rows($result)!=0) {
     $alatila=$row["alatila"];
 
     //tehdään selväkielinen tila/alatila
-    require ("laskutyyppi.inc");
+    require "laskutyyppi.inc";
 
     echo "<$ero>".t($laskutyyppi)." ".t($alatila)."</$ero>";
 
@@ -174,4 +172,4 @@ else {
   echo t("Yhtään tilausta ei löytynyt")."...<br><br>";
 }
 
-require ("footer.inc");
+require "footer.inc";

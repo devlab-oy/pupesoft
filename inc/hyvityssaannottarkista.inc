@@ -1,7 +1,7 @@
 <?php
 
-if(!function_exists("hyvityssaannottarkista")) {
-  function hyvityssaannottarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+if (!function_exists("hyvityssaannottarkista")) {
+  function hyvityssaannottarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set;
     static $temp_tuotekentta, $temp_asiakaskentta, $temp_segmentti;
 

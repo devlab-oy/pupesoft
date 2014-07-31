@@ -9,7 +9,7 @@ function erittele_laskut($file) {
   $soap = "";
   $ebid = "";
 
-  $poistettavat = array('/','.',':'); //Merkit, jotka poistetaan filenimest‰
+  $poistettavat = array('/', '.', ':'); //Merkit, jotka poistetaan filenimest‰
 
   if (stripos(file_get_contents($file), "Finvoice") !== FALSE) {
     foreach (file($file) as $ln) {
@@ -44,7 +44,7 @@ function erittele_laskut($file) {
       //  Meill‰ oli SOAP kehys, t‰‰lt‰ me saadaan EBID sender-messageid
       if (isset($type) and $type == "SOAP" and preg_match("/\<eb\:MessageId\>(.*?)\<\/eb\:MessageId\>/i", $ln, $messageid) > 0) {
         $ebid = $messageid[1];
-        $ebid = str_replace($poistettavat,"_",$ebid);
+        $ebid = str_replace($poistettavat, "_", $ebid);
       }
 
       if ($type == "SOAP") $soap .= $ln; // T‰ss‰ soap kehys
@@ -71,7 +71,7 @@ function erittele_laskut($file) {
         }
 
         if ($ebid == "") {
-          $ebid = "gen".substr(md5(rand()),0,20);
+          $ebid = "gen".substr(md5(rand()), 0, 20);
         }
 
         $path_parts = pathinfo($file);
@@ -161,8 +161,8 @@ function erittele_laskut($file) {
 
       // Jos data ei oo UTF-8 muodossa niin laitetaan se siihen
       if (mb_detect_encoding($xmldata, 'UTF-8', true) === FALSE) {
-            $xmldata = utf8_encode($xmldata);
-          }
+        $xmldata = utf8_encode($xmldata);
+      }
 
       $save = file_put_contents($file, $xmldata);
       $path_parts = pathinfo($file);

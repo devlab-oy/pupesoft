@@ -1129,6 +1129,24 @@ if ($row['tuoteno'] != '' and ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A
 
     if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A' and in_array($row["var2"], array("OK", "PK"))) {
 
+      $lisa_huomautus = "";
+      // Loopataan kaikki tuotteen vastaavuusketjut
+      $ketjut = explode(",", $vastaavat->getIDt());
+      foreach ($ketjut as $ketju) {
+        // Haetaan tuotteet ketjukohtaisesti
+        $_tuotteet = $vastaavat->tuotteet($ketju);
+        foreach ($_tuotteet as $_tuote) {
+          list(, , $vmyytavissa) = saldo_myytavissa($_tuote["tuoteno"], '', $laskurow['varasto']);
+
+          if ($vmyytavissa > 0) {
+            $lisa_huomautus .= "<div style='float:right; position:relative; top:4px; right:8px;'>";
+            $lisa_huomautus .= t("VASTAAVIA PAIKALLISVARASTOSSA!");
+            $lisa_huomautus .= "</div>";
+            break;
+          }
+        }
+      }
+
       $vastaavat_html = "<table width='100%'><tr>";
       $vastaavat_html .= "<th style='width:100%;'><form method='post' name='hyvaksy'>
                 <input type='hidden' name='toim'          value = '$toim'>
@@ -1143,8 +1161,8 @@ if ($row['tuoteno'] != '' and ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A
                 <input type='hidden' name='tila'         value = 'OOKOOAA'>
                 <input type='hidden' name='vastaavienkasittely' value = 'kylla'>
                 <input type='hidden' name='naytetaan_vastaavat' value = 'true' />
-                <input style='float: right;' type='Submit' value='".t("Näytä vastaavat tuotteet")."'>
-                <div style='float: right; position:relative; top:4px; right:8px;'>" . t("VASTAAVIA PAIKALLISVARASTOSSA!") . "</div>
+                <input style='float:right;' type='Submit' value='".t("Näytä vastaavat tuotteet")."'>
+                $lisa_huomautus
                 </form></th>";
       $vastaavat_html .= "</tr></table>";
       $vastaavattuotteet = 1;

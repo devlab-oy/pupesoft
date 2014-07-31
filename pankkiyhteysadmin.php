@@ -24,7 +24,6 @@ $tee = empty($tee) ? '' : $tee;
 $customer_id = empty($customer_id) ? '' : $customer_id;
 $pin = empty($pin) ? '' : $pin;
 $bank = "";
-$target_id = "";
 
 // Debug moodissa, voidaan upata suoraan key/cert käyttöliittymästä
 $debug = empty($debug) ? 0 : 1;
@@ -265,7 +264,6 @@ if (!empty($pankkiyhteydet)) {
   echo "<tr>";
   echo "<th>" . t("Pankki") . "</th>";
   echo "<th>" . t("Asiakastunnus") . "</th>";
-  echo "<th>" . t("Aineistoryhmän tunnus") . "</th>";
   echo "<th></th>";
   echo "</tr>";
 
@@ -279,7 +277,6 @@ if (!empty($pankkiyhteydet)) {
     echo "<tr class='aktiivi'>";
     echo "<td>{$pankkiyhteys["pankin_nimi"]}</td>";
     echo "<td>{$pankkiyhteys["customer_id"]}</td>";
-    echo "<td>{$pankkiyhteys["target_id"]}</td>";
     echo "<td>";
 
     echo "<form class='multisubmit' method='post' action='pankkiyhteysadmin.php'

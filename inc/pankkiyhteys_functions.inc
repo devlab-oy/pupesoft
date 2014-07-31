@@ -685,11 +685,13 @@ function pura_salaus($salattu_data, $salasana) {
 
   $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC);
 
-  //  Pitaa olla monta spacee, jotta UTF-8 konversio ei riko toiminnallisuutta
-  $iv = substr($salattu_data_binaari, 0, $iv_size);
+  // Tässä on "//NO_MB_OVERLOAD"-kommentti
+  // jotta UTF8-konversio ei osu tähän riviin
+  $iv = substr($salattu_data_binaari, 0, $iv_size);  //NO_MB_OVERLOAD
 
-  //  Pitaa olla monta spacee, jotta UTF-8 konversio ei riko toiminnallisuutta
-  $salattu_data_binaari = substr($salattu_data_binaari, $iv_size);
+  // Tässä on "//NO_MB_OVERLOAD"-kommentti
+  // jotta UTF8-konversio ei osu tähän riviin
+  $salattu_data_binaari = substr($salattu_data_binaari, $iv_size); //NO_MB_OVERLOAD
 
   return mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $avain, $salattu_data_binaari, MCRYPT_MODE_CBC, $iv);
 }

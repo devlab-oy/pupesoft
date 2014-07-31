@@ -826,10 +826,30 @@ if ($tee == 'VALMIS') {
               $result = pupe_query($query);
               $laskuid = mysql_insert_id($link);
 
-              if ($yhtiorow["varastonmuutos_inventointi"] != "") {
-                $varastonmuutos_tili = $inven_laji_tilino != "" ? $inven_laji_tilino : $yhtiorow["varastonmuutos_inventointi"];
+              if ($inven_laji_tilino != "") {
+                $inventointitili = $inven_laji_tilino;
               }
               else {
+                $inventointitili = $yhtiorow["varastonmuutos_inventointi"];
+              }
+
+              if ($yhtiorow["varastonmuutos_inventointi"] != "" and
+                  $yhtiorow["seuraako_myyntitiliointi_tuotteen_tyyppia"] == "Y" and
+                  $row["tuotetyyppi"] == "R") {
+                $varastonmuutos_tili = $inventointitili;
+                $varastotili = $yhtiorow["raaka_ainevarasto"];
+              }
+              elseif ($yhtiorow["varastonmuutos_inventointi"] != "") {
+                $varastonmuutos_tili = $inventointitili;
+                $varastotili = $yhtiorow["varasto"];
+              }
+              elseif ($yhtiorow["seuraako_myyntitiliointi_tuotteen_tyyppia"] == "Y" and
+                      $row["tuotetyyppi"] == "R") {
+                $varastonmuutos_tili = $yhtiorow["raaka_ainevarastonmuutos"];
+                $varastotili = $yhtiorow["raaka_ainevarasto"];
+              }
+              else {
+                $varastotili = $yhtiorow["varasto"];
                 $varastonmuutos_tili = $yhtiorow["varastonmuutos"];
               }
 
@@ -875,7 +895,7 @@ if ($tee == 'VALMIS') {
               $query = "INSERT into tiliointi set
                         yhtio    = '$kukarow[yhtio]',
                         ltunnus  = '$laskuid',
-                        tilino   = '$yhtiorow[varasto]',
+                        tilino   = '{$varastotili}',
                         kustp    = '{$kustp_ins}',
                         kohde    = '{$kohde_ins}',
                         projekti = '{$projekti_ins}',

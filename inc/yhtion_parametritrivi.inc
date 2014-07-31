@@ -2923,6 +2923,18 @@ if ($fieldname == "extranet_nayta_saldo") {
   $jatko = 0;
 }
 
+if ($fieldname == "seuraako_myyntitiliointi_tuotteen_tyyppia") {
+  $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
+
+  $sel = $trow[$i] == 'Y' ? ' selected' : '';
+
+  $ulos .= "<option value = ''>" . t("Myyntitiliointi ei seuraa tuotteen tyyppiä");
+  $ulos .= "<option value = 'Y' $sel>" . t("Myyntitiliointi seuraa tuotteen tyyppiä");
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "tuoteperhe_suoratoimitus") {
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 

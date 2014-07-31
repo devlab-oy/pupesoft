@@ -402,25 +402,25 @@ if ($kpl > 0 and $rivityyppi == 'O' and $yhtiorow['ostoera_pyoristys'] == 'K') {
 
   // haetaan tuotteen toimittajan takaata pakkauskoko tai jotain
   // Otetaan $trow laajemmin, tuotteen_toimittaja tiedot ja 2 avainsanaa
-  $query = "SELECT 
-            tuote.*, 
-            tt.toim_tuoteno, 
-            if(tt.osto_era = 0, 1, tt.osto_era) AS osto_era, 
-            tt.pakkauskoko, 
-            tt.ostohinta, 
-            tt.valuutta, 
-            tt.osto_alv, 
-            ta1.selite pakkaus2, 
+  $query = "SELECT
+            tuote.*,
+            tt.toim_tuoteno,
+            if(tt.osto_era = 0, 1, tt.osto_era) AS osto_era,
+            tt.pakkauskoko,
+            tt.ostohinta,
+            tt.valuutta,
+            tt.osto_alv,
+            ta1.selite pakkaus2,
             ta2.selite pakkaus3
             FROM tuote
-            JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = tuote.yhtio 
-              AND tuote.tuoteno = tt.tuoteno 
+            JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = tuote.yhtio
+              AND tuote.tuoteno = tt.tuoteno
               AND tt.liitostunnus = '$laskurow[liitostunnus]')
-            LEFT JOIN tuotteen_avainsanat AS ta1 ON (ta1.yhtio = tuote.yhtio 
-              AND ta1.tuoteno = tuote.tuoteno 
+            LEFT JOIN tuotteen_avainsanat AS ta1 ON (ta1.yhtio = tuote.yhtio
+              AND ta1.tuoteno = tuote.tuoteno
               AND ta1.laji = 'pakkauskoko2')
-            LEFT JOIN tuotteen_avainsanat AS ta2 ON (ta2.yhtio = tuote.yhtio 
-              AND ta2.tuoteno = tuote.tuoteno 
+            LEFT JOIN tuotteen_avainsanat AS ta2 ON (ta2.yhtio = tuote.yhtio
+              AND ta2.tuoteno = tuote.tuoteno
               AND ta2.laji = 'pakkauskoko3')
             WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
             AND tuote.tuoteno = '{$trow["tuoteno"]}'";

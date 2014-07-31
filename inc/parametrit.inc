@@ -14,8 +14,8 @@ ini_set("display_errors", 0);
 ini_set("log_errors", 1);
 
 $alkumem    = memory_get_usage();
-$timeparts    = explode(" ",microtime());
-$starttime    = $timeparts[1].substr($timeparts[0],1);
+$timeparts    = explode(" ", microtime());
+$starttime    = $timeparts[1].substr($timeparts[0], 1);
 unset($_GET["param_clean"], $_POST["param_clean"], $_REQUEST["param_clean"]);
 
 if (!function_exists("pupe_iconv")) {
@@ -37,7 +37,7 @@ if (!function_exists("pupe_register_globals")) {
         }
       }
 
-      $param_clean[$key] = $GLOBALS[$key] = str_replace(array("\"","'","<",">","\\", ";"), "", $param_clean[$key]);
+      $param_clean[$key] = $GLOBALS[$key] = str_replace(array("\"", "'", "<", ">", "\\", ";"), "", $param_clean[$key]);
     }
 
     return $param_clean;
@@ -235,14 +235,14 @@ $pupe_query_debug = 0;
 $aika_debug_array = array();
 $quer_debug_array = array();
 
-require("salasanat.php");
+require "salasanat.php";
 
 // haetaan jotain tarpeellisia funktioita mukaan..
-if (@include_once("inc/functions.inc")) {
+if (@include_once "inc/functions.inc") {
   // Pupeasennuksen root polku
   $pupe_root_polku = dirname(dirname(__FILE__));
 }
-elseif (@include_once("functions.inc")) {
+elseif (@include_once "functions.inc") {
   // Pupeasennuksen root polku
   $pupe_root_polku = dirname(__FILE__);
 }
@@ -280,13 +280,13 @@ $session = (isset($_COOKIE["pupesoft_session"]) and $_COOKIE["pupesoft_session"]
 
 // käytössä olevat kielet
 $sanakirja_kielet = array("fi" => "Suomi",
-              "en" => "Englanti",
-              "se" => "Ruotsi",
-              "ee" => "Viro",
-              "de" => "Saksa",
-              "dk" => "Tanska",
-              "no" => "Norja",
-              "ru" => "Venäjä");
+  "en" => "Englanti",
+  "se" => "Ruotsi",
+  "ee" => "Viro",
+  "de" => "Saksa",
+  "dk" => "Tanska",
+  "no" => "Norja",
+  "ru" => "Venäjä");
 
 //Initioidaan pari muuttujaa
 if (!isset($login))    $login = "";
@@ -330,7 +330,7 @@ if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_G
 
     $session = "";
     for ($i = 0; $i < 25; $i++) {
-      $session .= chr(rand(65,90)) ;
+      $session .= chr(rand(65, 90)) ;
     }
 
     $query = "UPDATE kuka
@@ -370,11 +370,11 @@ elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkko
   }
   else {
     if (isset($loginkieli)) {
-       $browkieli = $loginkieli;
+      $browkieli = $loginkieli;
     }
     else {
       //haetaan browserin oletuskieli
-      $browkieli = substr($_SERVER["HTTP_ACCEPT_LANGUAGE"],0,2);
+      $browkieli = substr($_SERVER["HTTP_ACCEPT_LANGUAGE"], 0, 2);
 
       if ($browkieli == 'sv') {
         $browkieli = 'se';
@@ -387,9 +387,9 @@ elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkko
       }
     }
 
-    if (isset($mobile) and $mobile and include_once("mobiili/login.php"));
-    elseif (@include_once("login.php"));
-    elseif (@include_once("login_extranet.php"));
+    if (isset($mobile) and $mobile and include_once "mobiili/login.php");
+    elseif (@include_once "login.php");
+    elseif (@include_once "login_extranet.php");
 
   }
 
@@ -534,12 +534,12 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
       }
 
       foreach ($pupe_DataTables_cookie as $datatable) {
-        #error_log("SpryMedia_DataTables_".$datatable."_".basename($phpnimi)." ".(time()+43200)." ".$dtpalvelin);
+        //error_log("SpryMedia_DataTables_".$datatable."_".basename($phpnimi)." ".(time()+43200)." ".$dtpalvelin);
         $bool = setcookie("SpryMedia_DataTables_".$datatable."_".basename($phpnimi), "", time()+43200, $dtpalvelin);
       }
     }
 
-     // Tänne pääsee aina!
+    // Tänne pääsee aina!
     if ($phpnimi != 'indexvas.php' and $phpnimi != 'index.php' and $phpnimi != 'tervetuloa.php' and $phpnimi != 'logout.php') {
 
       if (!isset($toim)) $toim = "";
@@ -667,7 +667,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
       echo "<meta http-equiv='expires' content='-1'>\n";
       echo "<meta http-equiv='content-type' content='text/html; charset=$charset'>\n";
 
-      # Jos mobile on setattu, otetaan auto-zoom pois käytöstä
+      // Jos mobile on setattu, otetaan auto-zoom pois käytöstä
       if (isset($mobile) and $mobile) {
         echo "<meta name='viewport' content='width=250,height=246, user-scalable=no, maximum-scale=1'>\n";
         echo "<link rel='stylesheet' type='text/css' href='kasipaate.css' />\n";
@@ -680,7 +680,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
         if (isset($pupe_DataTables)) {
           echo "<style type=\"text/css\" title=\"currentStyle\">\n";
-          require("DataTables/media/css/pupe_datatables.php");
+          require "DataTables/media/css/pupe_datatables.php";
           echo "</style>\n";
         }
       }
@@ -697,7 +697,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
       }
 
       if (file_exists("$pupe_root_polku/zhat.php") and !empty($kukarow['extranet'])) {
-        require_once("$pupe_root_polku/zhat.php");
+        require_once "$pupe_root_polku/zhat.php";
 
         if (!stristr($phpnimi, 'indexvas')) {
           echo livezhat_js_sources();
@@ -800,7 +800,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
         }
 
       }
-      elseif(isset($_GET["sulje"]) and $_GET["sulje"] != "") {
+      elseif (isset($_GET["sulje"]) and $_GET["sulje"] != "") {
         echo "<div><a href='#' onclick=\"divi=document.getElementById('$_GET[sulje]'); document.body.removeChild(divi); return false;\"><font style='color: red;'>x</font></a><br></div>";
       }
 
@@ -843,7 +843,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
           while ($message_row = mysql_fetch_assoc($message_result)) {
             echo "<div id='$message_row[tunnus]'>";
             echo t("Viesti käyttäjältä").": ";
-            echo "$message_row[nimi] @ ".tv1dateconv($message_row['luontiaika'],'yes').": ";
+            echo "$message_row[nimi] @ ".tv1dateconv($message_row['luontiaika'], 'yes').": ";
             echo "$message_row[viesti] ";
             echo "<input type='button' onClick=\"javascript:sndReq('$message_row[tunnus]','?tee=message_luettu&amp;message_tunnus=$message_row[tunnus]&amp;ohje=off&amp;no_css=yes', false, false)\" value='".t("Kuittaa")."'><br>";
             echo "</div>";
@@ -861,7 +861,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
   }
 
   // luodaan tietokantayhteys uudelleen, niin saadaan slave käyttöön jos sellaista tarvitaan
-  require("connect.inc");
+  require "connect.inc";
 
   // Katsotaan onko Pupesoftissa SEPA rajapinta asetettuna, eli pankkiyhteys käytössä
   $_sepa_pankkiyhteys = true;

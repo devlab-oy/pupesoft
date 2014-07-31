@@ -82,9 +82,9 @@ if (!function_exists("tilauksesta_ostotilaus")) {
           elseif ($rivi['ei_saldoa'] != '') {
             // jos ollaan erikseen laitettu saldottomalle tuotteelle toimittaja niin ehk‰ sit‰ halutaan myˆs ostaa,
             // skipataan siis vaan ne saldottomat tuotteet joille ei ole m‰‰ritelty toimittajaa
-            if ($rivi['perheid'] == $rivi['rivitunnus']){
+            if ($rivi['perheid'] == $rivi['rivitunnus']) {
               // saldottomat tuotteet laitetaan j‰lkk‰riin jos ne on tuoteperheen isi‰ ja toimittajaa ei lˆydy
-               $query = "UPDATE tilausrivi
+              $query = "UPDATE tilausrivi
                          SET var = 'J'
                          WHERE yhtio = '$kukarow[yhtio]'
                          AND tunnus  = '$rivi[rivitunnus]'";
@@ -185,14 +185,14 @@ if (!function_exists("tilauksesta_ostotilaus")) {
           $ostotilauksen_kasittely_wherelisa = "";
 
           // K‰sitell‰‰n myyntitilauksen otsikolla setattu "ostotilauksen k‰sittely"
-          switch($ostotilauksen_kasittely) {
-            case '5':
-              # Pikaostotilaus aina omalle otsikolle
-              $ostotilauksen_kasittely_wherelisa .= "
+          switch ($ostotilauksen_kasittely) {
+          case '5':
+            // Pikaostotilaus aina omalle otsikolle
+            $ostotilauksen_kasittely_wherelisa .= "
               and tunnusnippu = '{$tunnusnippu}'";
-              #Ei breikki‰. Menn‰‰n myˆs 4-haaraan.
-            case '4':
-              $ostotilauksen_kasittely_wherelisa .= "
+            //Ei breikki‰. Menn‰‰n myˆs 4-haaraan.
+          case '4':
+            $ostotilauksen_kasittely_wherelisa .= "
               and toim_nimi    = '{$toim_nimi}'
               and toim_nimitark  = '{$toim_nimitark}'
               and toim_osoite    = '{$toim_osoite}'
@@ -202,10 +202,10 @@ if (!function_exists("tilauksesta_ostotilaus")) {
               and varasto     = '{$oletusostovarasto}'
               and ohjausmerkki   = '{$ohjausmerkki}'
               and tilaustyyppi  = '$tilaustyyppi'";
-              break;
-            case '2':
-            case '3':
-              $ostotilauksen_kasittely_wherelisa .= "
+            break;
+          case '2':
+          case '3':
+            $ostotilauksen_kasittely_wherelisa .= "
               and toim_nimi    = '{$toim_nimi}'
               and toim_nimitark  = '{$toim_nimitark}'
               and toim_osoite    = '{$toim_osoite}'
@@ -213,11 +213,11 @@ if (!function_exists("tilauksesta_ostotilaus")) {
               and toim_postitp  = '{$toim_postitp}'
               and toim_maa    = '{$toim_maa}'
               and tilaustyyppi  = '$tilaustyyppi'";
-              break;
-            case '1':
-            case '0':
-            default:
-              $ostotilauksen_kasittely_wherelisa .= "
+            break;
+          case '1':
+          case '0':
+          default:
+            $ostotilauksen_kasittely_wherelisa .= "
               and toim_nimi    = '{$toim_nimi}'
               and toim_nimitark  = '{$toim_nimitark}'
               and toim_osoite    = '{$toim_osoite}'
@@ -227,7 +227,7 @@ if (!function_exists("tilauksesta_ostotilaus")) {
               and left(luontiaika,10) = left(now(),10)
               and laatija     = '{$kukarow['kuka']}'
               and tilaustyyppi  = '$tilaustyyppi'";
-              break;
+            break;
           }
 
           $query = "SELECT *
@@ -313,7 +313,7 @@ if (!function_exists("tilauksesta_ostotilaus")) {
             $tunnus = $jtsro["tunnus"];
           }
 
-          if (in_array($ostotilauksen_kasittely, array('1','3','5'))) $tunnukset[$tunnus] = $tunnus;
+          if (in_array($ostotilauksen_kasittely, array('1', '3', '5'))) $tunnukset[$tunnus] = $tunnus;
 
           //Haetaan myˆs ns. lis‰varusteperheet.
           $query = "SELECT tuoteperhe.ohita_kerays, tilausrivi.*, tilausrivi.tunnus rivitunnus, jt+varattu kpl, tilausrivin_lisatiedot.tilausrivilinkki tilausrivilinkki
@@ -390,7 +390,7 @@ if (!function_exists("tilauksesta_ostotilaus")) {
                 'tuoteno'   => $tilrivirow['tuoteno']
               );
 
-              list($hinta,$netto,$ale,) = alehinta_osto($jtsro, $tuote_row, $tilrivirow['kpl'], '', '', '');
+              list($hinta, $netto, $ale, ) = alehinta_osto($jtsro, $tuote_row, $tilrivirow['kpl'], '', '', '');
               // lis‰t‰‰n ostotilausrivi
               $query = "INSERT into tilausrivi set
                         hyllyalue       = '$jtstu[hyllyalue]',
@@ -523,7 +523,7 @@ if (!function_exists("tilauksesta_ostotilaus")) {
 
           $komento['Ostotilaus'] = 'edi';
 
-          require('tilauskasittely/tulosta_ostotilaus.inc');
+          require 'tilauskasittely/tulosta_ostotilaus.inc';
 
           if (isset($luodaan_aineisto) and $luodaan_aineisto) {
             // p‰ivitet‰‰n t‰ss‰ tilaus tulostetuksi

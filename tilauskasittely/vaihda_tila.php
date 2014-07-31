@@ -1,8 +1,8 @@
 <?php
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
-echo "<font class='head'>",t("Vaihda tilauksen tila"),":<hr></font>";
+echo "<font class='head'>", t("Vaihda tilauksen tila"), ":<hr></font>";
 
 if (!isset($tunnus)) $tunnus = "";
 if (!isset($tee)) $tee = "";
@@ -251,27 +251,27 @@ if ($tunnus != "" and $tee == "vaihda") {
       $tila_result = pupe_query($query);
 
       //Nollataan sarjanumerolinkit
-       $query = "SELECT tilausrivi.tunnus, (tilausrivi.varattu + tilausrivi.jt) varattu
+      $query = "SELECT tilausrivi.tunnus, (tilausrivi.varattu + tilausrivi.jt) varattu
                  FROM tilausrivi
                  JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.sarjanumeroseuranta != '')
                  WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
                  AND tilausrivi.otunnus = '{$tunnus}'";
-       $sres = pupe_query($query);
+      $sres = pupe_query($query);
 
-       while ($srow = mysql_fetch_assoc($sres)) {
+      while ($srow = mysql_fetch_assoc($sres)) {
 
-           if ($srow["varattu"] > 0) {
-               $tunken = "myyntirivitunnus";
-           }
-           else {
-               $tunken = "ostorivitunnus";
-           }
+        if ($srow["varattu"] > 0) {
+          $tunken = "myyntirivitunnus";
+        }
+        else {
+          $tunken = "ostorivitunnus";
+        }
 
-           $query = "UPDATE sarjanumeroseuranta SET
+        $query = "UPDATE sarjanumeroseuranta SET
                      {$tunken} = 0
                      WHERE yhtio = '{$kukarow['yhtio']}'
                      AND {$tunken} = '{$srow['tunnus']}'";
-           $sarjares = pupe_query($query);
+        $sarjares = pupe_query($query);
       }
     }
 
@@ -298,9 +298,9 @@ if ($tunnus != "" and $tee == "valitse") {
 
     // vain laskuttamattomille myyntitilaukille voi tehdä jotain
     if (  ($tila_row["tila"] == "L" and $tila_row["alatila"] != "X") or
-        ($tila_row["tila"] == "N" and in_array($tila_row["alatila"], array('A',''))) or
-        ($tila_row["tila"] == "V" and in_array($tila_row["alatila"], array('','A','J','C'))) or
-        ($tila_row["tila"] == "C" and in_array($tila_row["alatila"], array('','A','B','C')))) {
+      ($tila_row["tila"] == "N" and in_array($tila_row["alatila"], array('A', ''))) or
+      ($tila_row["tila"] == "V" and in_array($tila_row["alatila"], array('', 'A', 'J', 'C'))) or
+      ($tila_row["tila"] == "C" and in_array($tila_row["alatila"], array('', 'A', 'B', 'C')))) {
 
       echo "<form method='post'>";
       echo "<input type='hidden' name='parametrit' value='{$parametrit}' />";
@@ -308,64 +308,64 @@ if ($tunnus != "" and $tee == "valitse") {
       echo "<input type='hidden' name='tunnus' value='{$tila_row['tunnus']}' />";
 
       echo "<table><tr>";
-      echo "<th>",t("Vaihda tilauksen tila"),": </th>";
+      echo "<th>", t("Vaihda tilauksen tila"), ": </th>";
       echo "<td><select name='tila'>";
-      echo "<option value = ''>",t("Valitse uusi tila"),"</option>";
-      echo "<option value = '999'>",t("Mitätöity"),"</option>";
+      echo "<option value = ''>", t("Valitse uusi tila"), "</option>";
+      echo "<option value = '999'>", t("Mitätöity"), "</option>";
 
       if ($tila_row['tila'] == "C") {
 
         if ($tila_row["alatila"] != "") {
-          echo "<option value = '1'>",t("Reklamaatio kesken"),"</option>";
+          echo "<option value = '1'>", t("Reklamaatio kesken"), "</option>";
         }
 
         if ($yhtiorow['reklamaation_kasittely'] == 'U') {
-          if (in_array($tila_row["alatila"], array('B','C'))) {
-            echo "<option value = '2'>",t("Reklamaatio odottaa tuotteita"),"</option>";
+          if (in_array($tila_row["alatila"], array('B', 'C'))) {
+            echo "<option value = '2'>", t("Reklamaatio odottaa tuotteita"), "</option>";
           }
           if ($tila_row["alatila"] == "C") {
-            echo "<option value = '3'>",t("Reklamaatio vastaanotettu"),"</option>";
+            echo "<option value = '3'>", t("Reklamaatio vastaanotettu"), "</option>";
           }
         }
       }
       else {
 
         if ($tila_row["alatila"] != "") {
-          echo "<option value = '1'>",t("Tilaus kesken"),"</option>";
+          echo "<option value = '1'>", t("Tilaus kesken"), "</option>";
         }
-        if (($tila_row["tila"] == "L" or $tila_row["tila"] == "V") and in_array($tila_row["alatila"], array('A','B','C','D'))) {
-          echo "<option value = '2'>",t("Tilaus tulostusjonossa"),"</option>";
+        if (($tila_row["tila"] == "L" or $tila_row["tila"] == "V") and in_array($tila_row["alatila"], array('A', 'B', 'C', 'D'))) {
+          echo "<option value = '2'>", t("Tilaus tulostusjonossa"), "</option>";
         }
-        if (in_array($tila_row["alatila"], array('B','C','D'))) {
-          echo "<option value = '3'>",t("Keräyslista tulostettu"),"</option>";
+        if (in_array($tila_row["alatila"], array('B', 'C', 'D'))) {
+          echo "<option value = '3'>", t("Keräyslista tulostettu"), "</option>";
         }
-        if (in_array($tila_row["alatila"], array('B','D'))) {
-          echo "<option value = '4'>",t("Tilaus kerätty"),"</option>";
+        if (in_array($tila_row["alatila"], array('B', 'D'))) {
+          echo "<option value = '4'>", t("Tilaus kerätty"), "</option>";
         }
         if (in_array($tila_row["alatila"], array('D'))) {
-          echo "<option value = '5'>",t("Rahtikirjatiedot syötetty"),"</option>";
+          echo "<option value = '5'>", t("Rahtikirjatiedot syötetty"), "</option>";
         }
 
       }
 
       echo "</select></td>";
-      echo "<td class='back'><input type='submit' value='",t("Vaihda tila"),"'></td>";
+      echo "<td class='back'><input type='submit' value='", t("Vaihda tila"), "'></td>";
       echo "</form>";
 
       echo "</tr>";
       echo "</table><br>";
     }
 
-    require ("raportit/naytatilaus.inc");
+    require "raportit/naytatilaus.inc";
 
     echo "<form method='post'>";
     echo "<input type='hidden' name='parametrit' value='{$parametrit}' />";
-    echo "<td class='back'><input type='submit' value='",t("Peruuta"),"'></td>";
+    echo "<td class='back'><input type='submit' value='", t("Peruuta"), "'></td>";
     echo "</form>";
 
   }
   else {
-    echo "<font class='error'>",t("Tilausta ei löydy"),"!</font>";
+    echo "<font class='error'>", t("Tilausta ei löydy"), "!</font>";
     $tee = "";
   }
 
@@ -376,12 +376,12 @@ if ($tee == "") {
   echo "<input type='hidden' name='tee' value='valitse'>";
   echo "<table>";
   echo "<tr>";
-  echo "<th>",t("Anna tilausnumero"),":</th>";
+  echo "<th>", t("Anna tilausnumero"), ":</th>";
   echo "<td><input type='text' name='tunnus' value='' /></td>";
-  echo "<td class='back'><input type='submit' value='",t("Hae"),"' /></td>";
+  echo "<td class='back'><input type='submit' value='", t("Hae"), "' /></td>";
   echo "</tr>";
   echo "</table>";
   echo "</form>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

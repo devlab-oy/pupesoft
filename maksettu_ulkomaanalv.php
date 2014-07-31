@@ -3,7 +3,7 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Maksettu ulkomaan arvonlis‰vero")."</font><hr><br>";
 
@@ -14,7 +14,7 @@ if ($tee == 'aja') {
   }
 }
 
-if($tee == "aja") {
+if ($tee == "aja") {
   $tkausi = (int) $tkausi;
 
   // Tutkitaan ensiksi, mille tilikaudelle pyydett‰v‰ lista lˆytyy, jos lista on sopiva
@@ -36,10 +36,10 @@ if($tee == "aja") {
   }
   else {
     $alku = "$alvv-$alvk-01";
-    $loppu = "$plvv-$plvk-".date("t",$plvk);
+    $loppu = "$plvv-$plvk-".date("t", $plvk);
   }
 
-  if($tkausi>0) {
+  if ($tkausi>0) {
     echo "<font class='message'>".t("Tililaukdella")." $alku - $loppu</font><br>";
   }
   else {
@@ -118,7 +118,7 @@ if($tee == "aja") {
             ORDER BY kulun_kohdemaa, tapvm";
   $result = mysql_query($query) or pupe_error($query);
 
-  if(mysql_num_rows($result)>0) {
+  if (mysql_num_rows($result)>0) {
     $summat=array();
     echo "<table>
         <tr><th>".t("Kohdemaa")."</th>
@@ -131,7 +131,7 @@ if($tee == "aja") {
           <th>".t("Peritt‰v‰ vero")."</th>
           <th>".t("Selite")."</th>
         </tr>";
-    while($row=mysql_fetch_array($result)) {
+    while ($row=mysql_fetch_array($result)) {
 
       $vero=($row["summa"]-$row["veroton_osuus"]);
 
@@ -142,7 +142,7 @@ if($tee == "aja") {
             <td>{$row["kustannuspaikka"]}</td>
             <td align='right'>{$row["summa"]}</td>
             <td align='right'>{$row["veroton_osuus"]}</td>
-            <td align='right'>".number_format($vero ,2, '.', ' ')."</td>
+            <td align='right'>".number_format($vero , 2, '.', ' ')."</td>
             <td>{$row["selite"]}</td>
           </tr>";
       //  Summataan..
@@ -151,11 +151,11 @@ if($tee == "aja") {
 
     echo "</table><br><br>";
 
-    if(is_array($summat)) {
+    if (is_array($summat)) {
       echo "<font class='message'>".t("Takaisinperitt‰v‰‰ maittain")."</font><br>";
       echo "<table><tr><th>".t("Maa")."</th><th>".t("Summa")."</th></tr>";
-      foreach($summat as $kmaa => $summa) {
-        echo "<tr><td>$kmaa</td><td>".number_format($summa ,2, '.', ' ')."</td></tr>";
+      foreach ($summat as $kmaa => $summa) {
+        echo "<tr><td>$kmaa</td><td>".number_format($summa , 2, '.', ' ')."</td></tr>";
       }
       echo "</table><br>";
     }
@@ -183,7 +183,7 @@ if ($tee == '') {
   //  Oletetaan ett‰ halutaan selata viimeist‰ 12kk jaksoa
   $oalku=mktime(0, 0, 0, date("m")  , date("d"), date("Y")-1);
   $sel = array();
-  if ($alvv == "") $alvv = date("Y",$oalku);
+  if ($alvv == "") $alvv = date("Y", $oalku);
   $sel[$alvv] = "SELECTED";
 
   for ($i = date("Y")+1; $i >= date("Y")-4; $i--) {
@@ -191,7 +191,7 @@ if ($tee == '') {
   }
 
   $sel = array();
-  if ($alvk == "") $alvk = date("m",$oalku);
+  if ($alvk == "") $alvk = date("m", $oalku);
   $sel[$alvk] = "SELECTED";
 
   echo "</select>
@@ -245,22 +245,22 @@ if ($tee == '') {
       <option $sel[12] value = '12'>12</option>
       </select></td></tr>";
 
-    echo "<tr><th>".t("tai koko tilikausi")."</th>";
-     $query = "SELECT *
+  echo "<tr><th>".t("tai koko tilikausi")."</th>";
+  $query = "SELECT *
                FROM tilikaudet
                WHERE yhtio = '$kukarow[yhtio]'
                ORDER BY tilikausi_alku";
-    $vresult = mysql_query($query) or pupe_error($query);
-    echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa");
-    while ($vrow=mysql_fetch_array($vresult)) {
-      $sel="";
-      if ($trow[$i] == $vrow["tunnus"]) {
-        $sel = "selected";
-      }
-      echo "<option value = '$vrow[tunnus]' $sel>$vrow[tilikausi_alku] - $vrow[tilikausi_loppu]";
+  $vresult = mysql_query($query) or pupe_error($query);
+  echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa");
+  while ($vrow=mysql_fetch_array($vresult)) {
+    $sel="";
+    if ($trow[$i] == $vrow["tunnus"]) {
+      $sel = "selected";
     }
-    echo "</select></td>";
-    echo "</tr>";
+    echo "<option value = '$vrow[tunnus]' $sel>$vrow[tilikausi_alku] - $vrow[tilikausi_loppu]";
+  }
+  echo "</select></td>";
+  echo "</tr>";
 
   echo "<tr><th>".t("Vain kustannuspaikka")."</th>";
 
@@ -354,4 +354,4 @@ if ($tee == '') {
         <input type = 'submit' value = '".t("N‰yt‰")."'></form>";
 }
 
-require("inc/footer.inc");
+require "inc/footer.inc";

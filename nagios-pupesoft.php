@@ -1,6 +1,6 @@
 <?php
 
-require ("inc/salasanat.php");
+require "inc/salasanat.php";
 
 $STATE_OK     = 0;
 $STATE_WARNING   = 1;
@@ -109,7 +109,7 @@ if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' or $_SERVER['REMOTE_ADDR'] == '::1' o
   if ($_GET["tee"] == "VERKKOLASKU_FTP_STATUS") {
     $pupe_root_polku = dirname(__FILE__);
 
-    function tsekkaa_verkkolaskufile ($kansio) {
+    function tsekkaa_verkkolaskufile($kansio) {
       if ($handle = opendir($kansio)) {
         while (($lasku = readdir($handle)) !== FALSE) {
           // Yli vuorokauden vanha laskufile, laitetaan tästä erroria

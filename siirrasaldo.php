@@ -1,5 +1,5 @@
 <?php
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Siirrä saldoja")."</font><hr>";
 
@@ -82,14 +82,14 @@ if ($tee == 'M') {
       die ("<font class='error'><br>".t("Tiedosto on tyhjä")."!</font>");
     }
 
-    $file=fopen($_FILES['userfile']['tmp_name'],"r") or die ("".t("Tiedoston avaus epäonnistui")."!");
+    $file=fopen($_FILES['userfile']['tmp_name'], "r") or die ("".t("Tiedoston avaus epäonnistui")."!");
 
     $rivi = fgets($file, 4096);
     while (!feof($file)) {
 
       // luetaan rivi tiedostosta..
       $poista   = array("'", "\\");
-      $rivi   = str_replace($poista,"",$rivi);
+      $rivi   = str_replace($poista, "", $rivi);
       $rivi   = explode("\t", trim($rivi));
 
       $tuoteno = $rivi[0];
@@ -188,8 +188,8 @@ if ($tee == 'M') {
 
       echo "<pre>";
 
-      foreach($siirrettavat as $siirrettava) {
-        $siirrettava = explode("##",$siirrettava);
+      foreach ($siirrettavat as $siirrettava) {
+        $siirrettava = explode("##", $siirrettava);
 
         $tuoteno  = $siirrettava[0];
         $maara    = $siirrettava[1];
@@ -328,57 +328,55 @@ if ($tee == '') {
       <input type='hidden' name='tee' value='M'>
       <table>";
 
-      echo "<tr><td class='back'></td><th>".t("Hyllyalue")."</th><th>".t("Hyllynro")."</th><th>".t("Hyllyväli")."</th><th>".t("Hyllytaso")."</th>";
+  echo "<tr><td class='back'></td><th>".t("Hyllyalue")."</th><th>".t("Hyllynro")."</th><th>".t("Hyllyväli")."</th><th>".t("Hyllytaso")."</th>";
 
 
-      echo "<tr><td>".t("Tuotteet joilla ei ole paikkaa kohdevarastossa laitetaan tälle paikalle").":</td>";
-      echo "<td>",hyllyalue("hyllyalue", $hyllyalue),"</td>";
-      echo "<td><input type='text' size='5' name='hyllynro'  value='$hyllynro'></td>";
-      echo "<td><input type='text' size='5' name='hyllyvali' value='$hyllyvali'></td>";
-      echo "<td><input type='text' size='5' name='hyllytaso' value='$hyllytaso'></td></tr>";
+  echo "<tr><td>".t("Tuotteet joilla ei ole paikkaa kohdevarastossa laitetaan tälle paikalle").":</td>";
+  echo "<td>", hyllyalue("hyllyalue", $hyllyalue), "</td>";
+  echo "<td><input type='text' size='5' name='hyllynro'  value='$hyllynro'></td>";
+  echo "<td><input type='text' size='5' name='hyllyvali' value='$hyllyvali'></td>";
+  echo "<td><input type='text' size='5' name='hyllytaso' value='$hyllytaso'></td></tr>";
 
-      echo "<tr><td>".t("Lähdevarasto").":</td>";
-      echo "<td colspan='4'><select name='lahdevarasto'><option value=''>".t("Valitse")."</option>";
+  echo "<tr><td>".t("Lähdevarasto").":</td>";
+  echo "<td colspan='4'><select name='lahdevarasto'><option value=''>".t("Valitse")."</option>";
 
-      $query  = "SELECT tunnus, nimitys
+  $query  = "SELECT tunnus, nimitys
                  FROM varastopaikat
                  WHERE yhtio='$kukarow[yhtio]'
                  ORDER BY tyyppi, nimitys";
-      $vares = pupe_query($query);
+  $vares = pupe_query($query);
 
-      while ($varow = mysql_fetch_array($vares))
-      {
-        $sel='';
-        if ($varow['tunnus']==$lahdevarasto) $sel = 'selected';
+  while ($varow = mysql_fetch_array($vares)) {
+    $sel='';
+    if ($varow['tunnus']==$lahdevarasto) $sel = 'selected';
 
-        echo "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
-      }
+    echo "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
+  }
 
-      echo "</select></td></tr>";
+  echo "</select></td></tr>";
 
-      echo "<tr><td>".t("Kohdevarasto").":</td>";
-      echo "<td colspan='4'><select name='kohdevarasto'><option value=''>".t("Valitse")."</option>";
+  echo "<tr><td>".t("Kohdevarasto").":</td>";
+  echo "<td colspan='4'><select name='kohdevarasto'><option value=''>".t("Valitse")."</option>";
 
-      $query  = "SELECT tunnus, nimitys
+  $query  = "SELECT tunnus, nimitys
                  FROM varastopaikat
                  WHERE yhtio='$kukarow[yhtio]' AND tyyppi != 'P'
                  ORDER BY tyyppi, nimitys";
-      $vares = pupe_query($query);
+  $vares = pupe_query($query);
 
-      while ($varow = mysql_fetch_array($vares))
-      {
-        $sel='';
-        if ($varow['tunnus']==$kohdevarasto) $sel = 'selected';
+  while ($varow = mysql_fetch_array($vares)) {
+    $sel='';
+    if ($varow['tunnus']==$kohdevarasto) $sel = 'selected';
 
-        echo "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
-      }
+    echo "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
+  }
 
-      echo "</select></td></tr>";
+  echo "</select></td></tr>";
 
-      echo "<tr><td>".t("Valitse tiedosto").":</td>
+  echo "<tr><td>".t("Valitse tiedosto").":</td>
       <td colspan='4'><input name='userfile' type='file'></td></tr>";
 
-      echo "</table><br>
+  echo "</table><br>
       <input type = 'submit' value = '".t("Lähetä")."'>
       </form>";
 }

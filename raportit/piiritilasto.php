@@ -1,14 +1,14 @@
 <?php
 
 if (isset($_POST["tee"])) {
-  if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
@@ -59,8 +59,8 @@ echo "<tr><th>".t("Loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
 
 echo "<tr><th>".t("Rajaukset")."</th><td colspan='3'>";
 
-$monivalintalaatikot = array('ASIAKASPIIRI','<br>OSASTO','TRY');
-require ("tilauskasittely/monivalintalaatikot.inc");
+$monivalintalaatikot = array('ASIAKASPIIRI', '<br>OSASTO', 'TRY');
+require "tilauskasittely/monivalintalaatikot.inc";
 
 echo "</td></tr>";
 
@@ -121,7 +121,7 @@ if ($tee != '' and isset($painoinnappia)) {
     $osatry = TRUE;
   }
 
-  if (@include('Spreadsheet/Excel/Writer.php')) {
+  if (@include 'Spreadsheet/Excel/Writer.php') {
     // Keksit‰‰n failille joku varmasti uniikki nimi:
     list($usec, $sec) = explode(' ', microtime());
     mt_srand((float) $sec + ((float) $usec * 100000));
@@ -216,7 +216,7 @@ if ($tee != '' and isset($painoinnappia)) {
   }
   else {
     echo "VIRHE:";
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 
@@ -237,7 +237,7 @@ if ($tee != '' and isset($painoinnappia)) {
   $rivilimitti = 1000;
 
   echo "<table><tr>
-    <th>",t("Valittu aikav‰li"),"</th>
+    <th>", t("Valittu aikav‰li"), "</th>
     <td>{$ppa}</td>
     <td>{$kka}</td>
     <td>{$vva}</td>
@@ -248,8 +248,8 @@ if ($tee != '' and isset($painoinnappia)) {
     </tr></table><br><br>\n";
 
   if ($rivimaara > $rivilimitti) {
-    echo "<br><font class='error'>",t("Hakutulos oli liian suuri"),"!</font><br>";
-    echo "<font class='error'>",t("Tallenna/avaa tulos exceliss‰"),"!</font><br><br>";
+    echo "<br><font class='error'>", t("Hakutulos oli liian suuri"), "!</font><br>";
+    echo "<font class='error'>", t("Tallenna/avaa tulos exceliss‰"), "!</font><br><br>";
   }
   else {
 
@@ -576,4 +576,4 @@ if ($tee != '' and isset($painoinnappia)) {
   }
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

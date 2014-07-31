@@ -1,13 +1,13 @@
 <?php
 
 //  Jos olemme tekemässä jotain meillä on oltava kuka tai listaamme kaikki laskut mitä tietokannasta löytyy!
-if($tee == "T" and strlen(trim($kuka)) == 0) {
+if ($tee == "T" and strlen(trim($kuka)) == 0) {
   echo "<font class='error'>".t("VIRHE: Hyväksyjä puuttuu")."!</font><br><br>";
   $tee = "";
 }
 
 if ($tee == '') {
-   // Summaus hyväksynnässä olevista laskuista
+  // Summaus hyväksynnässä olevista laskuista
   echo "<font class='head'>".t("Laskuja hyväksymättä")."</font><hr>";
 
   $query = "SELECT hyvaksyja_nyt,
@@ -99,7 +99,7 @@ if ($tee == 'T') {
     $trow = array();
   }
   else {
-    $trow = mysql_fetch_array ($result);
+    $trow = mysql_fetch_array($result);
   }
 
   echo "<font class='head'>$trow[nimi]".t(":n pöydällä olevat laskut")."</font><hr>";
@@ -149,13 +149,13 @@ if ($tee == 'T') {
   echo "<th>".t("Siirrä")."</th>";
   echo "</tr>";
 
-  while ($trow = mysql_fetch_array ($result)) {
+  while ($trow = mysql_fetch_array($result)) {
 
     echo "<tr class='aktiivi'>";
 
     if ($trow['alatila'] == 'H') {
       $erotin = 'th';
-     }
+    }
     else {
       $erotin = 'td';
     }

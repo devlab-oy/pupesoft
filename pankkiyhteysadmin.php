@@ -1,7 +1,7 @@
 <?php
 
-require("inc/parametrit.inc");
-require("inc/pankkiyhteys_functions.inc");
+require "inc/parametrit.inc";
+require "inc/pankkiyhteys_functions.inc";
 
 echo "<font class='head'>" . t('SEPA-pankkiyhteys') . "</font>";
 echo "<hr>";

@@ -1,6 +1,6 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Korvaavien yll‰pito")."</font><hr>";
 
@@ -36,7 +36,7 @@ if ($tee == 'muutaprio') {
   $id    = $row['id'];
 
   if ($prio != 0) {
-    # Siirret‰‰n ketjun muita eteenp‰in, jarjestys + 1
+    // Siirret‰‰n ketjun muita eteenp‰in, jarjestys + 1
     $query = "UPDATE korvaavat SET jarjestys=jarjestys+1, muuttaja='{$kukarow['kuka']}', muutospvm=now()
               WHERE jarjestys!=0 AND id='$id' AND yhtio='{$kukarow['yhtio']}' AND tunnus!=$tunnus AND jarjestys >= $prio";
     $result = pupe_query($query);
@@ -54,28 +54,28 @@ if ($tee == 'muutaprio') {
   $query = "SELECT * FROM korvaavat WHERE yhtio='{$kukarow['yhtio']}' AND id='$id' AND jarjestys!=0 ORDER BY jarjestys";
   $result = pupe_query($query);
 
-  while($tuote = mysql_fetch_assoc($result)) {
-      // Aloitetaan pienimm‰st‰ ei nollasta (useimmiten 1)
-      // Pienimp‰‰n ei kosketa ja muut j‰rk‰t‰‰n siit‰ eteenp‰in
-      if (!isset($edellinen)) {
-          $edellinen = $tuote['jarjestys'];
-          continue;
-      }
+  while ($tuote = mysql_fetch_assoc($result)) {
+    // Aloitetaan pienimm‰st‰ ei nollasta (useimmiten 1)
+    // Pienimp‰‰n ei kosketa ja muut j‰rk‰t‰‰n siit‰ eteenp‰in
+    if (!isset($edellinen)) {
+      $edellinen = $tuote['jarjestys'];
+      continue;
+    }
 
-      // P‰ivitet‰‰n j‰rjestykseksi edellinen+1
-      $uusi_jarjestys = ($edellinen + 1);
+    // P‰ivitet‰‰n j‰rjestykseksi edellinen+1
+    $uusi_jarjestys = ($edellinen + 1);
 
-      // Ei p‰ivitet‰ turhaan
-      if ($tuote['jarjestys'] <> $uusi_jarjestys) {
-          $query = "UPDATE korvaavat
+    // Ei p‰ivitet‰ turhaan
+    if ($tuote['jarjestys'] <> $uusi_jarjestys) {
+      $query = "UPDATE korvaavat
                     SET jarjestys = $uusi_jarjestys, muutospvm = now()
                     WHERE yhtio='{$kukarow['yhtio']}' AND tunnus={$tuote['tunnus']}";
-          if( ! pupe_query($query) ) {
-              exit("Virhe ketjujen uudelleenj‰rjestelyss‰");
-          }
+      if ( ! pupe_query($query) ) {
+        exit("Virhe ketjujen uudelleenj‰rjestelyss‰");
       }
+    }
 
-      $edellinen = $uusi_jarjestys;
+    $edellinen = $uusi_jarjestys;
   }
 
   //n‰ytet‰‰n silti loput.. kiltti‰.
@@ -143,12 +143,12 @@ if ($tee == 'add') {
 
     //is‰ on lˆytynyt, lapsi ei
     if (($fid != "") and ($cid == "")) {
-      # Siirret‰‰n ketjun muita eteenp‰in jarjestys + 1
+      // Siirret‰‰n ketjun muita eteenp‰in jarjestys + 1
       $query = "UPDATE korvaavat SET jarjestys=jarjestys+1
                 WHERE jarjestys!=0 AND id='$fid' AND yhtio='{$kukarow['yhtio']}'";
       $result = pupe_query($query);
 
-      # Lis‰t‰‰n uusi aina p‰‰tuotteeksi jarjestys=1
+      // Lis‰t‰‰n uusi aina p‰‰tuotteeksi jarjestys=1
       //lis‰t‰‰n korvaava p‰‰tuotteeksi
       $query  = "INSERT INTO korvaavat (id, tuoteno, yhtio, jarjestys, laatija, luontiaika, muutospvm, muuttaja)
                  VALUES ('$fid', '$korvaava', '$kukarow[yhtio]', '1', '$kukarow[kuka]', now(), now(), '$kukarow[kuka]')";

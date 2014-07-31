@@ -1,20 +1,20 @@
 <?php
 
-require('inc/parametrit.inc');
+require 'inc/parametrit.inc';
 
 echo "<font class='head'>".t("Nouda ELEX vastaussanoma").":</font><hr><br>";
 
 $responseFunction = array(  "TDE" => "Hylkäys",
-              "TEP" => "Menettelyyn luovutuksen epääminen",
-              "TER" => "Virhe",
-              "THY" => "Hyväksyminen",
-              "TLP" => "Lisäselvityspyyntö ",
-              "TLU" => "Vientimenettelyyn luovutus",
-              "TMI" => "Mitätöinti",
-              "TOI" => "Oikaisupäätös",
-              "TPV" => "Poistumisvahvistus ",
-              "TTI" => "Tullin ilmoitus",
-              "TVA" => "Vastaanotto");
+  "TEP" => "Menettelyyn luovutuksen epääminen",
+  "TER" => "Virhe",
+  "THY" => "Hyväksyminen",
+  "TLP" => "Lisäselvityspyyntö ",
+  "TLU" => "Vientimenettelyyn luovutus",
+  "TMI" => "Mitätöinti",
+  "TOI" => "Oikaisupäätös",
+  "TPV" => "Poistumisvahvistus ",
+  "TTI" => "Tullin ilmoitus",
+  "TVA" => "Vastaanotto");
 
 $xmlstring = "        <FIExportResponse>
                 <Message>
@@ -120,4 +120,4 @@ foreach ($xml->Response->Error as $error) {
 echo $xml->Response->AdditionalInformation->statement."<br>";
 echo $xml->Response->AdditionalInformation->statementDescription."<br>";
 
-require ('inc/footer.inc');
+require 'inc/footer.inc';

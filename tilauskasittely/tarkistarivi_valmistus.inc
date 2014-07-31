@@ -2,15 +2,15 @@
 
 $tee = 'UV'; // Toivotaan, etta kaikki onnistuu
 
-$atil     = str_replace ( ",", ".", $atil);
-$akplhinta   = str_replace ( ",", ".", $akplhinta);
-$aale     = str_replace ( ",", ".", $aale);
+$atil     = str_replace( ",", ".", $atil);
+$akplhinta   = str_replace( ",", ".", $akplhinta);
+$aale     = str_replace( ",", ".", $aale);
 
-if (substr($tuoteno,-1) == "'") $tuoteno = str_replace ( "'", "*", $tuoteno);
+if (substr($tuoteno, -1) == "'") $tuoteno = str_replace( "'", "*", $tuoteno);
 
-if(substr($tuoteno,0,1) == '*') { // Nyt me selataan
+if (substr($tuoteno, 0, 1) == '*') { // Nyt me selataan
 
-  $tuoteno   = substr($tuoteno,1);
+  $tuoteno   = substr($tuoteno, 1);
   $sanat     = explode(" ", $tuoteno);
   $lisa1    = '';
 
@@ -43,7 +43,7 @@ if(substr($tuoteno,0,1) == '*') { // Nyt me selataan
       //Tehdaan pop-up valmiiksi myohempaa kayttoa varten
       $kentta = 'atil';
       $ulos = "<select name='tuoteno'>";
-      while ($trow = mysql_fetch_array ($tresult)) {
+      while ($trow = mysql_fetch_array($tresult)) {
         $ulos .= "<option value='$trow[0]'>$trow[0] $trow[1]</option>";
       }
       $ulos .= "</select>";
@@ -51,12 +51,12 @@ if(substr($tuoteno,0,1) == '*') { // Nyt me selataan
     }
   }
 }
-elseif (substr($tuoteno,-1) == '*') {
+elseif (substr($tuoteno, -1) == '*') {
   $query = "SELECT tuoteno, nimitys, ostohinta
             FROM tuote
             WHERE yhtio = '$kukarow[yhtio]'
             and status  NOT IN ('P','X')
-            and tuoteno like '" . substr($tuoteno,0,-1) . "%'
+            and tuoteno like '" . substr($tuoteno, 0, -1) . "%'
             ORDER BY tuoteno";
   $tresult = mysql_query($query) or pupe_error($query);
 
@@ -77,7 +77,7 @@ elseif (substr($tuoteno,-1) == '*') {
       //Tehdaan pop-up valmiiksi myohempaa kayttoa varten
       $kentta = 'atil';
       $ulos = "<select name='tuoteno'>";
-      while ($trow = mysql_fetch_array ($tresult)) {
+      while ($trow = mysql_fetch_array($tresult)) {
         $ulos .= "<option value='$trow[0]'>$trow[0] $trow[1]</option>";
       }
       $ulos .= "</select>";
@@ -85,59 +85,59 @@ elseif (substr($tuoteno,-1) == '*') {
     }
   }
 }
-else  {
-    ///* Toimittajan tuotenumerospecial*///
-    if (substr($tuoteno,0,1) == '?') {
+else {
+  ///* Toimittajan tuotenumerospecial*///
+  if (substr($tuoteno, 0, 1) == '?') {
 
-      $query = "SELECT tuoteno
+    $query = "SELECT tuoteno
                 FROM tuotteen_toimittajat
                 WHERE yhtio = '$kukarow[yhtio]'
-                and toim_tuoteno='".substr($tuoteno,1)."'";
-      $tresult = mysql_query($query) or pupe_error($query);
+                and toim_tuoteno='".substr($tuoteno, 1)."'";
+    $tresult = mysql_query($query) or pupe_error($query);
 
-      if (mysql_num_rows($tresult) > 1) {
+    if (mysql_num_rows($tresult) > 1) {
+      $kentta='tuoteno';
+      $varaosavirhe = t("Useita tuotteita samalla Toimittajan tuotenumerolla")."!<br>";
+      $tuoteno='';
+      $tee = 'Y';
+    }
+    else {
+      if (mysql_num_rows($tresult) == 0) {
         $kentta='tuoteno';
-        $varaosavirhe = t("Useita tuotteita samalla Toimittajan tuotenumerolla")."!<br>";
+        $varaosavirhe = t("VIRHE: Hakuehdolla ei löytynyt yhtään tuotetta")."!";
         $tuoteno='';
         $tee = 'Y';
       }
       else {
-        if (mysql_num_rows($tresult) == 0) {
-          $kentta='tuoteno';
-          $varaosavirhe = t("VIRHE: Hakuehdolla ei löytynyt yhtään tuotetta")."!";
-          $tuoteno='';
-          $tee = 'Y';
-        }
-        else {
-          //Tehdään tuotenumero ja kpl
-          $trivi = mysql_fetch_array($tresult);
-          $tuoteno = $trivi['tuoteno'];
-        }
+        //Tehdään tuotenumero ja kpl
+        $trivi = mysql_fetch_array($tresult);
+        $tuoteno = $trivi['tuoteno'];
       }
     }
+  }
 
-    $query = "SELECT *
+  $query = "SELECT *
               FROM tuote
               WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
-    $result = mysql_query($query) or pupe_error($query);
+  $result = mysql_query($query) or pupe_error($query);
 
-    if (mysql_num_rows($result) == 0) {
-      $kentta = 'tuoteno';
-      $varaosavirhe .= t("VIRHE: Tuotenumeroa")." $tuoteno ".t("ei löydy järjestelmästä")."!<br>";
-      $tuoteno = '';
-      $tee = "Y";
-    }
-    else{
-      $trow = mysql_fetch_array($result);
-      $tuoteno = $trow['tuoteno'];
-    }
+  if (mysql_num_rows($result) == 0) {
+    $kentta = 'tuoteno';
+    $varaosavirhe .= t("VIRHE: Tuotenumeroa")." $tuoteno ".t("ei löydy järjestelmästä")."!<br>";
+    $tuoteno = '';
+    $tee = "Y";
+  }
+  else {
+    $trow = mysql_fetch_array($result);
+    $tuoteno = $trow['tuoteno'];
+  }
 
-    if ($atil == 0) {
-      if ($kentta == '') $kentta = 'atil'; // Kursori
+  if ($atil == 0) {
+    if ($kentta == '') $kentta = 'atil'; // Kursori
 
-      $varaosavirhe .= t("VIRHE: Syötä tilattava määrä")."!<br>";
-      $tee = "Y";
-    }
+    $varaosavirhe .= t("VIRHE: Syötä tilattava määrä")."!<br>";
+    $tee = "Y";
+  }
 }
 
 if ($tee == 'UV') {
@@ -180,7 +180,7 @@ if ($tee == 'UV') {
   }
 
   //poistotuotekäsittely
-  if (in_array($trow["status"], array('P','X'))) {
+  if (in_array($trow["status"], array('P', 'X'))) {
     $varaosavirhe .= t("VIRHE: Tämä on poistotuote, sitä ei voi valmistaa")."!<br>";
     $tee = "Y";
   }

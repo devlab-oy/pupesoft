@@ -1,7 +1,7 @@
 <?php
 
 if (!function_exists("tuotepaikattarkista")) {
-  function tuotepaikattarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+  function tuotepaikattarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set;
     static $tmp_hyllyalue, $tmp_hyllynro, $tmp_tuotenoind;
 

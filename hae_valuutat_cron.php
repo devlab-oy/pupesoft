@@ -5,8 +5,8 @@ if (php_sapi_name() != 'cli') {
   die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 }
 
-require ("inc/connect.inc");
-require ("inc/functions.inc");
+require "inc/connect.inc";
+require "inc/functions.inc";
 
 $xml = @simplexml_load_file("http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml");
 
@@ -20,7 +20,7 @@ if ($xml !== FALSE) {
     $valkoodi = (string) $valuutta->attributes()->currency;
     $kurssi   = (float)  $valuutta->attributes()->rate;
 
-      $query = "UPDATE valuu, yhtio SET
+    $query = "UPDATE valuu, yhtio SET
                 valuu.kurssi                 = round(1 / $kurssi, 9),
                 valuu.muutospvm              = now(),
                 valuu.muuttaja               = 'crond'

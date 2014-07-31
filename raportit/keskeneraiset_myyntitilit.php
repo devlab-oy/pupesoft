@@ -1,14 +1,14 @@
 <?php
 
 if (isset($_POST["tee"])) {
-  if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if(isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if (isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
@@ -18,9 +18,9 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
 echo "<font class=head>".t("Keskeneräiset myyntitilit/siirtolistat asiakkaittain")."</font><hr>";
 
 // käyttis
-if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m"), 1, date("Y")));
-if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m"), 1, date("Y")));
-if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m"), 1, date("Y")));
+if (!isset($kka)) $kka = date("m", mktime(0, 0, 0, date("m"), 1, date("Y")));
+if (!isset($vva)) $vva = date("Y", mktime(0, 0, 0, date("m"), 1, date("Y")));
+if (!isset($ppa)) $ppa = date("d", mktime(0, 0, 0, date("m"), 1, date("Y")));
 if (!isset($kkl)) $kkl = date("m");
 if (!isset($vvl)) $vvl = date("Y");
 if (!isset($ppl)) $ppl = date("d");
@@ -45,19 +45,19 @@ echo "</td></tr>";
 
 echo "<tr><th>".t("Tuoterajaukset")."</th><td>";
 
-$monivalintalaatikot = array('OSASTO','TRY','TUOTEMERKKI');
-require ("tilauskasittely/monivalintalaatikot.inc");
+$monivalintalaatikot = array('OSASTO', 'TRY', 'TUOTEMERKKI');
+require "tilauskasittely/monivalintalaatikot.inc";
 
 echo "</td></tr>";
 echo "<tr>
-  <th>",t("Syötä alkupäivämäärä (pp-kk-vvvv)"),"</th>
+  <th>", t("Syötä alkupäivämäärä (pp-kk-vvvv)"), "</th>
     <td>
       <input type='text' name='ppa' value='{$ppa}' size='3'>
       <input type='text' name='kka' value='{$kka}' size='3'>
       <input type='text' name='vva' value='{$vva}' size='5'>
     </td>
   </tr>\n
-  <tr><th>",t("Syötä loppupäivämäärä (pp-kk-vvvv)"),"</th>
+  <tr><th>", t("Syötä loppupäivämäärä (pp-kk-vvvv)"), "</th>
     <td>
       <input type='text' name='ppl' value='{$ppl}' size='3'>
       <input type='text' name='kkl' value='{$kkl}' size='3'>
@@ -77,7 +77,7 @@ if ($tee != "" and isset($painoinnappia) and ($ppa == "" or $kka == "" or $vva =
 
 if ($tee != "" and isset($painoinnappia)) {
 
-  if (@include('Spreadsheet/Excel/Writer.php')) {
+  if (@include 'Spreadsheet/Excel/Writer.php') {
 
     //keksitään failille joku varmasti uniikki nimi:
     list($usec, $sec) = explode(' ', microtime());
@@ -233,4 +233,4 @@ if ($tee != "" and isset($painoinnappia)) {
   }
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

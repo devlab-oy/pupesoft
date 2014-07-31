@@ -1,6 +1,6 @@
 <?php
 if (strpos($_SERVER['SCRIPT_NAME'], "siirtokehotus.php") !== FALSE) {
-  require ("../inc/parametrit.inc");
+  require "../inc/parametrit.inc";
 }
 
 if ($tee == 'lataa_tiedosto') {
@@ -44,12 +44,12 @@ if (isset($tee) and $tee == "hae_raportti" and count($varasto) < 1) {
 
 if (isset($tee) and $tee == "hae_raportti") {
 
-    $varastot = implode(",",$varasto);
+  $varastot = implode(",", $varasto);
 
-    if( isset($keraysvyohyke) and count($keraysvyohyke) > 0 ){
-      $keraysvyohykkeet = implode(",",$keraysvyohyke);
+  if ( isset($keraysvyohyke) and count($keraysvyohyke) > 0 ) {
+    $keraysvyohykkeet = implode(",", $keraysvyohyke);
 
-      $kv_join = "JOIN varaston_hyllypaikat AS vh ON
+    $kv_join = "JOIN varaston_hyllypaikat AS vh ON
                 (
                   vh.yhtio = tuotepaikat.yhtio AND vh.hyllyalue = tuotepaikat.hyllyalue
                   AND vh.hyllynro = tuotepaikat.hyllynro
@@ -63,14 +63,14 @@ if (isset($tee) and $tee == "hae_raportti") {
                   AND keraysvyohyke.tunnus = vh.keraysvyohyke
                 )";
 
-      $kv_and = "AND keraysvyohyke.tunnus IN ({$keraysvyohykkeet})";
-    }
-    else{
-      $kv_join = "";
-      $kv_and = "";
-    }
+    $kv_and = "AND keraysvyohyke.tunnus IN ({$keraysvyohykkeet})";
+  }
+  else {
+    $kv_join = "";
+    $kv_and = "";
+  }
 
-    $query = "SELECT   tuotepaikat.tuoteno AS tuoteno,
+  $query = "SELECT   tuotepaikat.tuoteno AS tuoteno,
               varastopaikat.tunnus AS varasto,
               tuotepaikat.halytysraja AS haly,
               tuotepaikat.oletus AS oletus,
@@ -93,13 +93,13 @@ if (isset($tee) and $tee == "hae_raportti") {
               AND tuotepaikat.halytysraja > 0
               AND tuotepaikat.oletus      = 'X'";
 
-    $result = pupe_query($query);
+  $result = pupe_query($query);
 
-    $oletuspaikat = array();
+  $oletuspaikat = array();
 
-    while ($row = mysql_fetch_assoc($result)) {
+  while ($row = mysql_fetch_assoc($result)) {
 
-      $varapaikka_query = "SELECT COUNT(tp.tunnus) as count
+    $varapaikka_query = "SELECT COUNT(tp.tunnus) as count
                            FROM tuotepaikat AS tp
                            JOIN varastopaikat AS vp ON
                              (
@@ -112,56 +112,56 @@ if (isset($tee) and $tee == "hae_raportti") {
                            AND vp.tunnus   = {$row['varasto']}
                            AND tp.yhtio    = '{$kukarow['yhtio']}'";
 
-      $varapaikka_result = pupe_query($varapaikka_query);
-      $varapaikka_count = mysql_result($varapaikka_result, 0);
+    $varapaikka_result = pupe_query($varapaikka_query);
+    $varapaikka_count = mysql_result($varapaikka_result, 0);
 
-      if( $varapaikka_count > 0 ){
-        $oletuspaikat[] = $row;
+    if ( $varapaikka_count > 0 ) {
+      $oletuspaikat[] = $row;
+    }
+  }
+
+  $ei_osumia = false;
+
+  if (count($oletuspaikat) < 1) {
+    $tee = '';
+    $ei_osumia = true;
+  }
+
+  if ( $ei_osumia === false ) {
+
+    echo '<table>';
+    echo '<tr>';
+    echo '<th>';
+    echo 'tyyppi';
+    echo '</th>';
+    echo '<th>';
+    echo 'tuoteno';
+    echo '</th>';
+    echo '<th>';
+    echo 'tuotepaikka';
+    echo '</th>';
+    echo '<th>';
+    echo 'hyllyssa';
+    echo '</th>';
+    echo '<th>';
+    echo 'haly';
+    echo '</th>';
+    echo '<tr>';
+
+
+
+    $pdf_data = array();
+
+    foreach ($oletuspaikat as $row) {
+
+      $saldo_info = saldo_myytavissa($row['tuoteno'], '', $row['varasto'], $kukarow['yhtio'], $row['alue'], $row['nro'], $row['vali'], $row['taso'] );
+      $row['hyllyssa'] = $saldo_info[1];
+
+      if ( $row['hyllyssa'] >= $row['haly'] ) {
+        continue;
       }
-    }
 
-    $ei_osumia = false;
-
-    if (count($oletuspaikat) < 1) {
-      $tee = '';
-      $ei_osumia = true;
-    }
-
-    if( $ei_osumia === false ){
-
-      echo '<table>';
-      echo '<tr>';
-      echo '<th>';
-      echo 'tyyppi';
-      echo '</th>';
-      echo '<th>';
-      echo 'tuoteno';
-      echo '</th>';
-      echo '<th>';
-      echo 'tuotepaikka';
-      echo '</th>';
-      echo '<th>';
-      echo 'hyllyssa';
-      echo '</th>';
-      echo '<th>';
-      echo 'haly';
-      echo '</th>';
-      echo '<tr>';
-
-
-
-      $pdf_data = array();
-
-      foreach ($oletuspaikat as $row) {
-
-        $saldo_info = saldo_myytavissa($row['tuoteno'], '', $row['varasto'], $kukarow['yhtio'], $row['alue'], $row['nro'], $row['vali'], $row['taso'] );
-        $row['hyllyssa'] = $saldo_info[1];
-
-        if( $row['hyllyssa'] >= $row['haly'] ){
-          continue;
-        }
-
-        $query2 = "SELECT CONCAT(hyllyalue, '-', hyllynro, '-', hyllyvali, '-', hyllytaso ) AS tuotepaikka,
+      $query2 = "SELECT CONCAT(hyllyalue, '-', hyllynro, '-', hyllyvali, '-', hyllytaso ) AS tuotepaikka,
                    hyllyalue AS alue,
                    hyllynro AS nro,
                    hyllyvali AS vali,
@@ -178,93 +178,93 @@ if (isset($tee) and $tee == "hae_raportti") {
                    AND oletus               != 'X'
                    AND varastopaikat.tunnus  = {$row['varasto']}";
 
-        $varapaikka_echo = '';
-        $varapaikat = array();
-        $result2 = pupe_query($query2);
-        while ($row2 = mysql_fetch_assoc($result2)) {
-          $saldo_info = saldo_myytavissa($row['tuoteno'], '', $row['varasto'], $kukarow['yhtio'], $row2['alue'], $row2['nro'], $row2['vali'], $row2['taso'] );
-          $row2['hyllyssa'] = $saldo_info[1];
+      $varapaikka_echo = '';
+      $varapaikat = array();
+      $result2 = pupe_query($query2);
+      while ($row2 = mysql_fetch_assoc($result2)) {
+        $saldo_info = saldo_myytavissa($row['tuoteno'], '', $row['varasto'], $kukarow['yhtio'], $row2['alue'], $row2['nro'], $row2['vali'], $row2['taso'] );
+        $row2['hyllyssa'] = $saldo_info[1];
 
-          if( $row2['hyllyssa'] < 1 ){
-            continue;
-          }
-
-          $varapaikka_echo .= '<tr>';
-          $varapaikka_echo .= '<th>';
-          $varapaikka_echo .= 'Varapaikka';
-          $varapaikka_echo .= '</th>';
-          $varapaikka_echo .= '<td style="color:silver;">';
-          $varapaikka_echo .= $row['tuoteno'];
-          $varapaikka_echo .= '</td>';
-          $varapaikka_echo .= '<td>';
-          $varapaikka_echo .= $row2['tuotepaikka'];
-          $varapaikka_echo .= '</td>';
-          $varapaikka_echo .= '<td>';
-          $varapaikka_echo .= $row2['hyllyssa'];
-          $varapaikka_echo .= '</td>';
-          $varapaikka_echo .= '<td>';
-          $varapaikka_echo .= '';
-          $varapaikka_echo .= '</td>';
-          $varapaikka_echo .= '</tr>';
-
-          $varapaikat[] = $row2;
-        }
-
-        if( $varapaikka_echo == '' ){
+        if ( $row2['hyllyssa'] < 1 ) {
           continue;
         }
-        else{
-          $row['varapaikat'] = $varapaikat;
-        }
 
-        //tyhj‰ rivi ennen jokaista oletuspaikkaa
-        echo '<tr>';
-        echo '<td colspan="12" style="background:#cbd9e1; padding:4px;"></td>';
-        echo '</tr>';
-        echo '<tr>';
-        echo '<th>';
-        echo 'Oletuspaikka';
-        echo '</th>';
-        echo '<td>';
-        echo $row['tuoteno'];
-        echo '</td>';
-        echo '<td>';
-        echo $row['tuotepaikka'];
-        echo '</td>';
-        echo '<td>';
-        echo $row['hyllyssa'];
-        echo '</td>';
-        echo '<td>';
-        echo number_format($row['haly']);
-        echo '</td>';
-        echo '</tr>';
+        $varapaikka_echo .= '<tr>';
+        $varapaikka_echo .= '<th>';
+        $varapaikka_echo .= 'Varapaikka';
+        $varapaikka_echo .= '</th>';
+        $varapaikka_echo .= '<td style="color:silver;">';
+        $varapaikka_echo .= $row['tuoteno'];
+        $varapaikka_echo .= '</td>';
+        $varapaikka_echo .= '<td>';
+        $varapaikka_echo .= $row2['tuotepaikka'];
+        $varapaikka_echo .= '</td>';
+        $varapaikka_echo .= '<td>';
+        $varapaikka_echo .= $row2['hyllyssa'];
+        $varapaikka_echo .= '</td>';
+        $varapaikka_echo .= '<td>';
+        $varapaikka_echo .= '';
+        $varapaikka_echo .= '</td>';
+        $varapaikka_echo .= '</tr>';
 
-        echo $varapaikka_echo;
-
-        $pdf_data[] = $row;
-
+        $varapaikat[] = $row2;
       }
-      echo '</table>';
 
-      $pdf_data = base64_encode(serialize($pdf_data));
+      if ( $varapaikka_echo == '' ) {
+        continue;
+      }
+      else {
+        $row['varapaikat'] = $varapaikat;
+      }
 
-      echo '<br />';
-      echo "<form action='$PHP_SELF' method='post'>";
-      echo "<input type='hidden' name='siirtokehotus_json' value='" . $siirtokehotus_json . "' />";
-      echo "<input type='hidden' name='tee' value='lataa_pdf' />";
-      echo "<input type='hidden' name='pdf_data' value='" . $pdf_data . "' />";
-      echo "<input type='submit' value='Luo PDF-tiedosto' />";
-      echo "</form>";
+      //tyhj‰ rivi ennen jokaista oletuspaikkaa
+      echo '<tr>';
+      echo '<td colspan="12" style="background:#cbd9e1; padding:4px;"></td>';
+      echo '</tr>';
+      echo '<tr>';
+      echo '<th>';
+      echo 'Oletuspaikka';
+      echo '</th>';
+      echo '<td>';
+      echo $row['tuoteno'];
+      echo '</td>';
+      echo '<td>';
+      echo $row['tuotepaikka'];
+      echo '</td>';
+      echo '<td>';
+      echo $row['hyllyssa'];
+      echo '</td>';
+      echo '<td>';
+      echo number_format($row['haly']);
+      echo '</td>';
+      echo '</tr>';
+
+      echo $varapaikka_echo;
+
+      $pdf_data[] = $row;
+
     }
+    echo '</table>';
+
+    $pdf_data = base64_encode(serialize($pdf_data));
+
+    echo '<br />';
+    echo "<form action='$PHP_SELF' method='post'>";
+    echo "<input type='hidden' name='siirtokehotus_json' value='" . $siirtokehotus_json . "' />";
+    echo "<input type='hidden' name='tee' value='lataa_pdf' />";
+    echo "<input type='hidden' name='pdf_data' value='" . $pdf_data . "' />";
+    echo "<input type='submit' value='Luo PDF-tiedosto' />";
+    echo "</form>";
+  }
 }
 
-if( $tee != 'lataa_pdf' and $tee != 'hae_raportti') {
+if ( $tee != 'lataa_pdf' and $tee != 'hae_raportti') {
 
-  if( $ei_varastoa === true ){
+  if ( $ei_varastoa === true ) {
     echo "<font class='error'>" . t("V‰hint‰‰n yksi varasto on valittava") . "</font>";
   }
 
-  if( $ei_osumia === true ){
+  if ( $ei_osumia === true ) {
     echo "<font class='error'>" . t("Ei siirtokehotuksia") . "</font>";
   }
 
@@ -310,7 +310,7 @@ if( $tee != 'lataa_pdf' and $tee != 'hae_raportti') {
 }
 
 if (strpos($_SERVER['SCRIPT_NAME'], "siirtokehotus.php") !== FALSE) {
-  require ("../inc/footer.inc");
+  require "../inc/footer.inc";
 }
 
 function aja_ruby($json_data_filepath, $ruby_tiedosto_nimi) {

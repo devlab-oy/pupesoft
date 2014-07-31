@@ -1,6 +1,6 @@
 <?php
 
-require("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 enable_ajax();
 
@@ -9,7 +9,7 @@ if (isset($livesearch_tee) and $livesearch_tee == "TILIHAKU") {
   exit;
 }
 
-$MONTH_ARRAY = array(1=>t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kesäkuu'),t('Heinäkuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
+$MONTH_ARRAY = array(1=>t('Tammikuu'), t('Helmikuu'), t('Maaliskuu'), t('Huhtikuu'), t('Toukokuu'), t('Kesäkuu'), t('Heinäkuu'), t('Elokuu'), t('Syyskuu'), t('Lokakuu'), t('Marraskuu'), t('Joulukuu'));
 
 if (!isset($tilinimi)) $tilinimi = "";
 if (!isset($vyorytyksen_tili)) $vyorytyksen_tili = "";
@@ -44,7 +44,7 @@ if ($tee == "tallenna" or $tee == "lataavanha") {
     }
   }
   else {
-    echo "<font class='error'>",t("Et ole valinnut raporttia"),"!</font><br/>";
+    echo "<font class='error'>", t("Et ole valinnut raporttia"), "!</font><br/>";
     $tee = '';
     $mul_kustp = array();
   }
@@ -58,7 +58,7 @@ if ($tee == 'uusiraportti') {
     $mul_kustp = unserialize(urldecode($mul_kustp));
   }
   else {
-    echo "<font class='error'>",t("Tallennettavan raportin nimi ei saa olla tyhjä"),"!</font><br/>";
+    echo "<font class='error'>", t("Tallennettavan raportin nimi ei saa olla tyhjä"), "!</font><br/>";
     $tee = '';
   }
 }
@@ -91,7 +91,7 @@ if ($tee == 'I') {
 
     $tee = '';
 
-    require('tosite.php');
+    require 'tosite.php';
     exit;
   }
 }
@@ -109,7 +109,7 @@ echo "<table>";
 
 echo "<tr><th>".t("Valitse tilikausi")."</th>";
 
- $query = "SELECT *
+$query = "SELECT *
            FROM tilikaudet
            WHERE yhtio = '$kukarow[yhtio]'
            ORDER BY tilikausi_alku desc";
@@ -153,7 +153,7 @@ for ($a = $alku; $a <= $lopp; $a++) {
 
 echo "</td></tr>";
 
-echo "<tr><th>",t("Valuutta"),"</th><td>";
+echo "<tr><th>", t("Valuutta"), "</th><td>";
 
 $query = "SELECT nimi, tunnus
           FROM valuu
@@ -182,7 +182,7 @@ echo "<tr><th>".t("Tarkenne")."</th><td>";
 $monivalintalaatikot = array("KUSTP");
 $noautosubmit = TRUE;
 
-require ("tilauskasittely/monivalintalaatikot.inc");
+require "tilauskasittely/monivalintalaatikot.inc";
 
 echo "</td></tr></table>\n";
 echo "<br><input type = 'submit' value = '".t("Näytä")."'>";
@@ -221,8 +221,8 @@ if ($tee == "TARKISTA") {
     $lisa1 = " sum(if(tiliointi.tapvm >= '$alvy-$alvm-01' and tiliointi.tapvm <= '$alvy-$alvm-$alvd', tiliointi.summa, 0)) Saldo";
     $where = " and tiliointi.tapvm <= '$alvy-$alvm-$alvd'";
 
-    $tilikausirow["tilikausi_alku"] =  $alvy. "-". sprintf("%02s",$alvm) . "-01";
-    $tilikausirow["tilikausi_loppu"] =  $alvy. "-". sprintf("%02s",$alvm) . "-" . $alvd;
+    $tilikausirow["tilikausi_alku"] =  $alvy. "-". sprintf("%02s", $alvm) . "-01";
+    $tilikausirow["tilikausi_loppu"] =  $alvy. "-". sprintf("%02s", $alvm) . "-" . $alvd;
   }
   else {
     $lisa1 = " sum(tiliointi.summa) Saldo";
@@ -234,7 +234,7 @@ if ($tee == "TARKISTA") {
     echo "<font class='error'>".t("Pitää syöttää ainakin yksi tili")."</font>";
   }
   elseif ($vyorytyksen_tili == "") {
-    echo "<font class='error'>",t("Syötä vyörytyksen tili"),"</font>";
+    echo "<font class='error'>", t("Syötä vyörytyksen tili"), "</font>";
   }
   else {
 
@@ -347,9 +347,9 @@ if ($tee == "TARKISTA") {
     echo "<input type='hidden' name='vyorytyksen_tili' value='{$vyorytyksen_tili}'>\n";
     echo "<input type='hidden' name='tilinalku' value='{$tilinalku}'>\n";
     echo "<input type='hidden' name='tilinloppu' value='{$tilinloppu}'>\n";
-    echo "<input type='hidden' name='mul_kustp' value='",urlencode(serialize($mul_kustp)),"'>\n";
+    echo "<input type='hidden' name='mul_kustp' value='", urlencode(serialize($mul_kustp)), "'>\n";
 
-    echo "<table><tr><th colspan='2'>",t("Raportin valinnat"),"</th></tr>";
+    echo "<table><tr><th colspan='2'>", t("Raportin valinnat"), "</th></tr>";
 
     //Haetaan tallennetut kyselyt
     $query = "SELECT distinct kuka.nimi, kuka.kuka, tallennetut_parametrit.nimitys
@@ -360,9 +360,9 @@ if ($tee == "TARKISTA") {
               ORDER BY tallennetut_parametrit.nimitys";
     $sresult = mysql_query($query) or pupe_error($query);
 
-    echo "<tr><td>",t("Valitse raportti"),":</td>";
+    echo "<tr><td>", t("Valitse raportti"), ":</td>";
     echo "<td><select name='kysely' onchange='document.getElementById(\"tee\").value = \"lataavanha\";submit();'>";
-    echo "<option value=''>",t("Valitse"),"</option>";
+    echo "<option value=''>", t("Valitse"), "</option>";
 
     while ($srow = mysql_fetch_assoc($sresult)) {
 
@@ -376,11 +376,11 @@ if ($tee == "TARKISTA") {
 
     echo "</select>&nbsp;";
 
-    echo "<input type='button' value='",t("Tallenna"),"' onclick='document.getElementById(\"tee\").value = \"tallenna\";submit();'></td></tr>";
+    echo "<input type='button' value='", t("Tallenna"), "' onclick='document.getElementById(\"tee\").value = \"tallenna\";submit();'></td></tr>";
 
-    echo "<tr><td>",t("Tallenna uusi raportti"),":</td>";
+    echo "<tr><td>", t("Tallenna uusi raportti"), ":</td>";
     echo "<td><input type='text' id='uusirappari' name='uusirappari' value=''>&nbsp;";
-    echo "<input type='submit' id='tallenna_button' value='",t("Tallenna"),"' onclick=\"document.getElementById('tee').value = 'uusiraportti'\"></td>";
+    echo "<input type='submit' id='tallenna_button' value='", t("Tallenna"), "' onclick=\"document.getElementById('tee').value = 'uusiraportti'\"></td>";
     echo "</tr></table><br /><br />";
 
     $i = 1;
@@ -440,7 +440,7 @@ if ($tee == "TARKISTA") {
 
     foreach ($saldo_per_kp as $kp_tunn => $saldo_kum) {
       echo "<tr>";
-      echo "<th>",t("Yhteensä"),"</th>";
+      echo "<th>", t("Yhteensä"), "</th>";
       echo "<td>{$saldo_kum}</td>";
 
       $query2 = "SELECT nimi, koodi
@@ -466,9 +466,9 @@ if ($tee == "TARKISTA") {
 
     echo "<table>";
     echo "<tr>";
-    echo "<th>",t("Kustannuspaikka"),"</th>";
-    echo "<th>",t("Saldo"),"</th>";
-    echo "<th>",t("Tili"),"</th>";
+    echo "<th>", t("Kustannuspaikka"), "</th>";
+    echo "<th>", t("Saldo"), "</th>";
+    echo "<th>", t("Tili"), "</th>";
     echo "<th>%</th>";
     echo "</tr>";
 
@@ -496,19 +496,19 @@ if ($tee == "TARKISTA") {
       echo "<input type='hidden' name='itili[{$i}]' value='{$vyorytyksen_tili}'>\n";
       echo "<input type='hidden' name='isumma[{$i}]' id='isumma[{$i}]' value='{$isumma[$i]}'>\n";
       echo "<input type='hidden' name='ikustp[{$i}]' value='{$row['tunnus']}'>\n";
-      echo "<input type='hidden' name='iselite[{$i}]' value='",t("Vyörytys"),"'>\n";
+      echo "<input type='hidden' name='iselite[{$i}]' value='", t("Vyörytys"), "'>\n";
       echo "</td>";
       echo "</tr>";
 
       $i++;
     }
 
-    echo "<input type='hidden' name='tpp' value='",date("d"),"'>\n";
-    echo "<input type='hidden' name='tpk' value='",date("m"),"'>\n";
-    echo "<input type='hidden' name='tpv' value='",date("Y"),"'>\n";
+    echo "<input type='hidden' name='tpp' value='", date("d"), "'>\n";
+    echo "<input type='hidden' name='tpk' value='", date("m"), "'>\n";
+    echo "<input type='hidden' name='tpv' value='", date("Y"), "'>\n";
 
     echo "<tr>";
-    echo "<th>",t("Yhteensä"),"</th>";
+    echo "<th>", t("Yhteensä"), "</th>";
     echo "<td id='vyorytyksen_kaytettava_saldo'>{$kumulus}</td>";
     echo "<td>{$vyorytyksen_tili}</td>";
     echo "<td id='vyorytys_pros_total'></td>";
@@ -546,7 +546,7 @@ if ($tee == "TARKISTA") {
       echo "<input type='hidden' name='itili[{$i}]' value='{$vyorytyksen_tili}'>\n";
       echo "<input type='hidden' name='isumma[{$i}]' id='isumma[{$i}]' value='{$saldo_kum}'>\n";
       echo "<input type='hidden' name='ikustp[{$i}]' value='{$kp_tunn}'>\n";
-      echo "<input type='hidden' name='iselite[{$i}]' value='",t("Vyörytys"),"'>\n";
+      echo "<input type='hidden' name='iselite[{$i}]' value='", t("Vyörytys"), "'>\n";
 
       $i++;
     }
@@ -564,4 +564,4 @@ if ($tee == "TARKISTA") {
   }
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

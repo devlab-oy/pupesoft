@@ -5,10 +5,10 @@ $useslave = 1;
 
 if (isset($_POST["tee"])) {
   if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
-require('../inc/parametrit.inc');
+require '../inc/parametrit.inc';
 
 if ($tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
@@ -32,7 +32,7 @@ if ($ytunnus != '' or (int) $asiakasid > 0) {
 
   $muutparametrit = $vva."/".$kka."/".$ppa."/".$vvl."/".$kkl."/".$ppl."/".$raportointitaso."/".$rivit;
 
-  require ("inc/asiakashaku.inc");
+  require "inc/asiakashaku.inc";
 
   if ($ytunnus == '') {
     $tee = "";
@@ -107,7 +107,7 @@ if ($tee != '') {
 
   $result = mysql_query($query) or pupe_error($query);
 
-  include('inc/pupeExcel.inc');
+  include 'inc/pupeExcel.inc';
 
   $worksheet    = new pupeExcel();
   $format_bold = array("bold" => TRUE);
@@ -241,7 +241,7 @@ if ($tee != '') {
     if ($row["osasto"] != $edosasto and $lask > 1) {
 
       if ($osmyynti > 0) {
-        $ospuutepros = round($ospuute/($ospuute+$osmyynti)*100,2);
+        $ospuutepros = round($ospuute/($ospuute+$osmyynti)*100, 2);
       }
       elseif ($ospuute > 0) {
         $ospuutepros = 100;
@@ -252,21 +252,21 @@ if ($tee != '') {
 
       echo "<tr>
           <th colspan='$cspan'>".t("Osasto")." $edosasto ".t("yhteens‰").":</th>
-          <th style='text-align:right'>".sprintf("%.2f",$ospuutekpl)."</th>
-          <th style='text-align:right'>".sprintf("%.2f",$ospuute)."</th>
-          <th style='text-align:right'>".sprintf("%.2f",$osmyynti)."</th>
-          <th style='text-align:right'>".sprintf("%.2f",$ospuutepros)."</th>
+          <th style='text-align:right'>".sprintf("%.2f", $ospuutekpl)."</th>
+          <th style='text-align:right'>".sprintf("%.2f", $ospuute)."</th>
+          <th style='text-align:right'>".sprintf("%.2f", $osmyynti)."</th>
+          <th style='text-align:right'>".sprintf("%.2f", $ospuutepros)."</th>
           </tr>";
 
       $worksheet->writeString($excelrivi, $excelsarake, t("Osasto")." $edosasto ".t("yhteens‰").":");
       $excelsarake+=$cspan;
-      $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$ospuutekpl));
+      $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f", $ospuutekpl));
       $excelsarake++;
-      $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$ospuute));
+      $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f", $ospuute));
       $excelsarake++;
-      $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$osmyynti));
+      $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f", $osmyynti));
       $excelsarake++;
-      $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$ospuutepros));
+      $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f", $ospuutepros));
       $excelsarake = 0;
       $excelrivi++;
 
@@ -281,7 +281,7 @@ if ($tee != '') {
     $ospuutekpl +=$row["puutekpl"];
 
     if ($row["myyeur"] > 0) {
-      $puutepros = round($row["puuteeur"]/($row["puuteeur"]+$row["myyeur"])*100,2);
+      $puutepros = round($row["puuteeur"]/($row["puuteeur"]+$row["myyeur"])*100, 2);
     }
     elseif ($row["puuteeur"] > 0) {
       $puutepros = 100;
@@ -346,7 +346,7 @@ if ($tee != '') {
     echo "  <td style='text-align:right; vertical-align:top' class='$vari'>". (float) $row['puutekpl']."</td>
         <td style='text-align:right; vertical-align:top' class='$vari'>$row[puuteeur]</td>
         <td style='text-align:right; vertical-align:top' class='$vari'>$row[myyeur]</td>
-        <td style='text-align:right; vertical-align:top' class='$vari'>".sprintf("%.1f",$puutepros)."</td>";
+        <td style='text-align:right; vertical-align:top' class='$vari'>".sprintf("%.1f", $puutepros)."</td>";
 
     $worksheet->writeNumber($excelrivi, $excelsarake, (float) $row['puutekpl']);
     $excelsarake++;
@@ -354,7 +354,7 @@ if ($tee != '') {
     $excelsarake++;
     $worksheet->writeNumber($excelrivi, $excelsarake, $row['myyeur']);
     $excelsarake++;
-    $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.1f",$puutepros));
+    $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.1f", $puutepros));
     $excelsarake++;
 
     if ($try != '') {
@@ -516,7 +516,7 @@ if ($tee != '') {
   if ($try == '') {
     // vika osasto yhteens‰
     if ($osmyynti > 0)
-      $ospuutepros = round($ospuute/($ospuute+$osmyynti)*100,2);
+      $ospuutepros = round($ospuute/($ospuute+$osmyynti)*100, 2);
     else
       $ospuutepros = 100;
 
@@ -532,38 +532,38 @@ if ($tee != '') {
     $worksheet->writeString($excelrivi, $excelsarake, t("Osasto")." $edosasto ".t("yhteens‰").":");
     $excelsarake++;
     $excelsarake++;
-    $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$ospuutekpl));
+    $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f", $ospuutekpl));
     $excelsarake++;
-    $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$ospuute));
+    $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f", $ospuute));
     $excelsarake++;
-    $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$osmyynti));
+    $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f", $osmyynti));
     $excelsarake++;
-    $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$ospuutepros));
+    $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f", $ospuutepros));
     $excelsarake = 0;
     $excelrivi++;
 
     //t‰h‰n tullee nyt keskiarvo
-    $puuteprosyht = round($puuteyht/($puuteyht+$myyntiyht)*100,2);
+    $puuteprosyht = round($puuteyht/($puuteyht+$myyntiyht)*100, 2);
 
     echo "<tr>
         <th colspan='$cspan'>".t("Kaikki yhteens‰").":</th>
-        <th style='text-align:right'>".sprintf("%.2f",$puutekplyht)."</th>
-        <th style='text-align:right'>".sprintf("%.2f",$puuteyht)."</th>
-        <th style='text-align:right'>".sprintf("%.2f",$myyntiyht)."</th>
-        <th style='text-align:right'>".sprintf("%.2f",$puuteprosyht)."</th>
+        <th style='text-align:right'>".sprintf("%.2f", $puutekplyht)."</th>
+        <th style='text-align:right'>".sprintf("%.2f", $puuteyht)."</th>
+        <th style='text-align:right'>".sprintf("%.2f", $myyntiyht)."</th>
+        <th style='text-align:right'>".sprintf("%.2f", $puuteprosyht)."</th>
         </tr>";
 
     $excelsarake = 0;
     $worksheet->writeString($excelrivi, $excelsarake, t("Kaikki yhteens‰").":");
     $excelsarake++;
     $excelsarake++;
-    $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$puutekplyht));
+    $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f", $puutekplyht));
     $excelsarake++;
-    $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$puuteyht));
+    $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f", $puuteyht));
     $excelsarake++;
-    $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$myyntiyht));
+    $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f", $myyntiyht));
     $excelsarake++;
-    $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$puuteprosyht));
+    $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f", $puuteprosyht));
     $excelsarake = 0;
     $excelrivi++;
   }
@@ -592,11 +592,11 @@ echo "<table>";
 
 // ehdotetaan 7 p‰iv‰‰ taaksep‰in
 if (!isset($kka))
-  $kka = date("m",mktime(0, 0, 0, date("m"), date("d")-7, date("Y")));
+  $kka = date("m", mktime(0, 0, 0, date("m"), date("d")-7, date("Y")));
 if (!isset($vva))
-  $vva = date("Y",mktime(0, 0, 0, date("m"), date("d")-7, date("Y")));
+  $vva = date("Y", mktime(0, 0, 0, date("m"), date("d")-7, date("Y")));
 if (!isset($ppa))
-  $ppa = date("d",mktime(0, 0, 0, date("m"), date("d")-7, date("Y")));
+  $ppa = date("d", mktime(0, 0, 0, date("m"), date("d")-7, date("Y")));
 
 if (!isset($kkl))
   $kkl = date("m");
@@ -650,4 +650,4 @@ echo "</table>";
 echo "<br><input type='submit' value='".t("Aja raportti")."'>";
 echo "</form>";
 
-require ("../inc/footer.inc");
+require "../inc/footer.inc";

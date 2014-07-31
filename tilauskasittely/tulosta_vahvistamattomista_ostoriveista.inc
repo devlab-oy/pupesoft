@@ -2,12 +2,12 @@
 
 
 //viivakoodien tulostamista varten
-define (__TRACE_ENABLED__, false);
-define (__DEBUG_ENABLED__, false);
+define(__TRACE_ENABLED__, false);
+define(__DEBUG_ENABLED__, false);
 
-require_once("barcode/barcode.php");
-require_once("barcode/c39object.php");
-require_once("pdflib/phppdflib.class.php");
+require_once "barcode/barcode.php";
+require_once "barcode/c39object.php";
+require_once "pdflib/phppdflib.class.php";
 
 if ($kieli== '') {
   $querykiel = "SELECT kieli FROM asiakas WHERE yhtio = '$kukarow[yhtio]' and ytunnus = '$laskurow[ytunnus]'";
@@ -39,7 +39,7 @@ $pdf->set_default('margin', 0);
 $rectparam["width"] = 0.3;
 
 if (!function_exists('alku')) {
-  function alku () {
+  function alku() {
     global $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $pieni, $norm, $boldi, $pieni_boldi, $iso, $kieli, $kala;
 
     //PDF parametrit
@@ -70,14 +70,14 @@ if (!function_exists('alku')) {
     $style |= ($negative== "on"  ) ? BCS_REVERSE_COLOR  : 0;
 
     unset($data);
-    if( (int) $yhtiorow["lasku_logo"] > 0) {
+    if ( (int) $yhtiorow["lasku_logo"] > 0) {
       $liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");
       $data = $liite["data"];
       $isizelogo[0] = $liite["image_width"];
       $isizelogo[1] = $liite["image_height"];
       unset($liite);
     }
-    elseif(file_exists($yhtiorow["lasku_logo"])) {
+    elseif (file_exists($yhtiorow["lasku_logo"])) {
       $filename = $yhtiorow["lasku_logo"];
 
       $fh = fopen($filename, "r");
@@ -87,10 +87,10 @@ if (!function_exists('alku')) {
       $isizelogo = getimagesize($yhtiorow["lasku_logo"]);
     }
 
-    if($data) {
+    if ($data) {
       $image = $pdf->jfif_embed($data);
 
-      if(!$image) {
+      if (!$image) {
         echo t("Logokuvavirhe");
       }
       else {
@@ -114,7 +114,7 @@ if (!function_exists('alku')) {
       $pdf->draw_text(30, 785, $yhtiorow["maa"],     $thispage, $norm);
     }
 
-    $pdf->draw_text(310,815, t("Vahvistamattomat ostotilausrivit", $kieli),       $thispage, $iso);
+    $pdf->draw_text(310, 815, t("Vahvistamattomat ostotilausrivit", $kieli),       $thispage, $iso);
     $pdf->draw_text(310, 803, t("Sivu", $kieli),         $thispage, $norm);
 
     //Vasen sarake
@@ -152,25 +152,25 @@ if (!function_exists('alku')) {
       if ($ytunpit > 0) {
         $uytunnus = $yhtiorow["ytunnus"];
         while ($ytunpit > 0) {
-            $uytunnus = "0".$uytunnus; $ytunpit--;
+          $uytunnus = "0".$uytunnus; $ytunpit--;
         }
       }
       else {
         $uytunnus = $yhtiorow["ytunnus"];
       }
 
-      $uytunnus = substr($uytunnus,0,7)."-".substr($uytunnus,7,1);
+      $uytunnus = substr($uytunnus, 0, 7)."-".substr($uytunnus, 7, 1);
     }
     else {
       $uytunnus = $yhtiorow["ytunnus"];
     }
 
-        if ($laskurow['yhtio_ovttunnus'] != $yhtiorow['ovttunnus'] and $laskurow['yhtio_ovttunnus'] != '') {
-            $uytunnus = $laskurow['yhtio_ovttunnus'];
-        }
+    if ($laskurow['yhtio_ovttunnus'] != $yhtiorow['ovttunnus'] and $laskurow['yhtio_ovttunnus'] != '') {
+      $uytunnus = $laskurow['yhtio_ovttunnus'];
+    }
     else {
-        $uytunnus = $yhtiorow["maa"]."-".$uytunnus;
-        }
+      $uytunnus = $yhtiorow["maa"]."-".$uytunnus;
+    }
 
     $pdf->draw_text(310, 761, $uytunnus,                 $thispage, $norm);
     $pdf->draw_text(430, 771, t("Päiväys", $kieli),           $thispage, $pieni);
@@ -228,7 +228,7 @@ if (!function_exists('alku')) {
     $pdf->draw_text(482, $kala+15, t("Ale", $kieli),      $thispage, $norm);
     $pdf->draw_text(522, $kala+15, t("Yhteensä", $kieli),    $thispage, $norm);
 
-    return($thispage);
+    return $thispage;
   }
 }
 
@@ -279,7 +279,7 @@ if (!function_exists('rivi')) {
 }
 
 if (!function_exists('loppu')) {
-  function loppu ($thispage, $total, $laitetaanko_yhteensarivi) {
+  function loppu($thispage, $total, $laitetaanko_yhteensarivi) {
     global $pdf, $laskurow, $yhtiorow, $kukarow, $page, $sivu, $rectparam, $kieli, $kala, $norm, $pieni;
 
     //Alimmat kolme laatikkoa, yhtiötietoja
@@ -307,25 +307,25 @@ if (!function_exists('loppu')) {
       if ($ytunpit > 0) {
         $uytunnus = $yhtiorow["ytunnus"];
         while ($ytunpit > 0) {
-            $uytunnus = "0".$uytunnus; $ytunpit--;
+          $uytunnus = "0".$uytunnus; $ytunpit--;
         }
       }
       else {
         $uytunnus = $yhtiorow["ytunnus"];
       }
 
-      $uytunnus = substr($uytunnus,0,7)."-".substr($uytunnus,7,1);
+      $uytunnus = substr($uytunnus, 0, 7)."-".substr($uytunnus, 7, 1);
     }
     else {
       $uytunnus = $yhtiorow["ytunnus"];
     }
 
-        if ($laskurow['yhtio_ovttunnus'] != $yhtiorow['ovttunnus'] and $laskurow['yhtio_ovttunnus'] != '') {
-            $uytunnus = $laskurow['yhtio_ovttunnus'];
-        }
+    if ($laskurow['yhtio_ovttunnus'] != $yhtiorow['ovttunnus'] and $laskurow['yhtio_ovttunnus'] != '') {
+      $uytunnus = $laskurow['yhtio_ovttunnus'];
+    }
     else {
-        $uytunnus = $yhtiorow["maa"]."-".$uytunnus;
-        }
+      $uytunnus = $yhtiorow["maa"]."-".$uytunnus;
+    }
 
     $pdf->draw_text(404, 55, t("Y-tunnus", $kieli).":",                     $thispage, $pieni);
     $pdf->draw_text(454, 55, $uytunnus,                             $thispage, $pieni);
@@ -337,8 +337,8 @@ if (!function_exists('loppu')) {
     if ($laitetaanko_yhteensarivi == 1 and $total != 0) {
       $pdf->draw_text(430, 82, t("Yhteensä", $kieli).":",               $thispage, $norm);
 
-      $oikpos = $pdf->strlen(sprintf('%.2f',$total)." ".$laskurow["valkoodi"], $norm);
-      $pdf->draw_text(555-$oikpos, 82, sprintf('%.2f',$total)." ".$laskurow["valkoodi"], $thispage, $norm);
+      $oikpos = $pdf->strlen(sprintf('%.2f', $total)." ".$laskurow["valkoodi"], $norm);
+      $pdf->draw_text(555-$oikpos, 82, sprintf('%.2f', $total)." ".$laskurow["valkoodi"], $thispage, $norm);
     }
 
     if ($laitetaanko_yhteensarivi != 1) {
@@ -361,7 +361,7 @@ if (!function_exists('loppu')) {
 }
 
 if (!function_exists('print_pdf')) {
-  function print_pdf () {
+  function print_pdf() {
     global $pdf, $kukarow, $yhtiorow, $komento, $kieli, $tee;
 
     if ($komento["Ostotilaus"] != '' or $tee == 'NAYTATILAUS') {
@@ -380,11 +380,11 @@ if (!function_exists('print_pdf')) {
         $liite = $pdffilenimi;
         $kutsu = "Ostotilaus";
 
-        require("../inc/sahkoposti.inc");
+        require "../inc/sahkoposti.inc";
         echo t("Vahvistamattomat rivit lähetetty sähköpostiin")."...<br><br>";
       }
 
-             $tee = "";
+      $tee = "";
     }
 
     return $pdffilenimi;
@@ -402,7 +402,7 @@ $page[$sivu] = alku();
 
 foreach ($vahvistamattomat_rivit as $row) {
   //count koska array:ssa on myös total amount jonka ei haluta printtaantuvan
-  if(count($row) > 2) {
+  if (count($row) > 2) {
     rivi($page[$sivu]);
   }
 }

@@ -7,11 +7,11 @@ $useslave = 1;
 $compression = FALSE;
 
 if (isset($_POST["tee"])) {
-  if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
-require("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 ini_set("memory_limit", "5G");
 
@@ -39,8 +39,8 @@ echo "<script type=\"text/javascript\" charset=\"utf-8\">
 echo "<font class='head'>".t("Atk-tilintarkastus")."</font><hr>";
 
 // default arvot yhtiorowlta
-if (!isset($alku))  $alku  = substr($yhtiorow['tilikausi_alku'],0,4)  - 1 . substr($yhtiorow['tilikausi_alku'],4);
-if (!isset($loppu)) $loppu = substr($yhtiorow['tilikausi_loppu'],0,4) - 1 . substr($yhtiorow['tilikausi_loppu'],4);
+if (!isset($alku))  $alku  = substr($yhtiorow['tilikausi_alku'], 0, 4)  - 1 . substr($yhtiorow['tilikausi_alku'], 4);
+if (!isset($loppu)) $loppu = substr($yhtiorow['tilikausi_loppu'], 0, 4) - 1 . substr($yhtiorow['tilikausi_loppu'], 4);
 
 $chk = "";
 if ($tositetyyppi_mukaan != "") {
@@ -83,12 +83,12 @@ echo "</form><br><br>";
 
 if ($tee == "raportti") {
 
-  require_once ('inc/ProgressBar.class.php');
+  require_once 'inc/ProgressBar.class.php';
 
   /* tilikartta */
 
   // keksit‰‰n uudelle failille joku varmasti uniikki nimi:
-  $file2 = "tilikartta-".md5(uniqid(rand(),true)).".txt";
+  $file2 = "tilikartta-".md5(uniqid(rand(), true)).".txt";
 
   // avataan faili
   $fh = fopen("/tmp/".$file2, "w");
@@ -122,7 +122,7 @@ if ($tee == "raportti") {
   /* tiliˆinnit */
 
   // keksit‰‰n uudelle failille joku varmasti uniikki nimi:
-  $file1 = "tilioinnit-".md5(uniqid(rand(),true)).".txt";
+  $file1 = "tilioinnit-".md5(uniqid(rand(), true)).".txt";
 
   // avataan faili
   $fh = fopen("/tmp/".$file1, "w");
@@ -176,30 +176,30 @@ if ($tee == "raportti") {
         $rivi .= sprintf("%-11.11s", "Osto");
       }
       elseif ($row["tila"] == "X") {
-        switch($row["alatila"]) {
-          case "E":
-            $rivi .= sprintf("%-11.11s", "Ep‰kurantointi");
-            break;
-          case "I":
-            $rivi .= sprintf("%-11.11s", "Inventointi");
-            break;
-          case "G":
-            $rivi .= sprintf("%-11.11s", "Varastosiirto");
-            break;
-          case "K":
-            $rivi .= sprintf("%-11.11s", "Kassalippaan t‰sm‰ytys");
-            break;
-          case "O":
-            $rivi .= sprintf("%-11.11s", "K‰teisotto");
-            break;
-          case "T":
-            $rivi .= sprintf("%-11.11s", "Tilikauden tulos");
-            break;
-          case "A":
-            $rivi .= sprintf("%-11.11s", "Avaava tase");
-            break;
-          default :
-            $rivi .= sprintf("%-11.11s", "Muistiotosite");
+        switch ($row["alatila"]) {
+        case "E":
+          $rivi .= sprintf("%-11.11s", "Ep‰kurantointi");
+          break;
+        case "I":
+          $rivi .= sprintf("%-11.11s", "Inventointi");
+          break;
+        case "G":
+          $rivi .= sprintf("%-11.11s", "Varastosiirto");
+          break;
+        case "K":
+          $rivi .= sprintf("%-11.11s", "Kassalippaan t‰sm‰ytys");
+          break;
+        case "O":
+          $rivi .= sprintf("%-11.11s", "K‰teisotto");
+          break;
+        case "T":
+          $rivi .= sprintf("%-11.11s", "Tilikauden tulos");
+          break;
+        case "A":
+          $rivi .= sprintf("%-11.11s", "Avaava tase");
+          break;
+        default :
+          $rivi .= sprintf("%-11.11s", "Muistiotosite");
         }
       }
       else {
@@ -218,7 +218,7 @@ if ($tee == "raportti") {
   /* kustannuspaikat, projektit ja kohteet */
 
   // keksit‰‰n uudelle failille joku varmasti uniikki nimi:
-  $file3 = "kustprojkoht-".md5(uniqid(rand(),true)).".txt";
+  $file3 = "kustprojkoht-".md5(uniqid(rand(), true)).".txt";
 
   // avataan faili
   $fh = fopen("/tmp/".$file3, "w");
@@ -266,8 +266,8 @@ if ($tee == "raportti") {
   // Tilaukset
 
   // keksit‰‰n uudelle failille joku varmasti uniikki nimi:
-  $file4 = "toimitukset-".md5(uniqid(rand(),true)).".txt";
-  $file5 = "toimitukset_rivit-".md5(uniqid(rand(),true)).".txt";
+  $file4 = "toimitukset-".md5(uniqid(rand(), true)).".txt";
+  $file5 = "toimitukset_rivit-".md5(uniqid(rand(), true)).".txt";
 
   // avataan faili
   $fh = fopen("/tmp/".$file4, "w");
@@ -322,8 +322,8 @@ if ($tee == "raportti") {
   // Laskut
 
   // keksit‰‰n uudelle failille joku varmasti uniikki nimi:
-  $file6 = "laskut-".md5(uniqid(rand(),true)).".txt";
-  $file7 = "laskut_rivit-".md5(uniqid(rand(),true)).".txt";
+  $file6 = "laskut-".md5(uniqid(rand(), true)).".txt";
+  $file7 = "laskut_rivit-".md5(uniqid(rand(), true)).".txt";
 
   // avataan faili
   $fh = fopen("/tmp/".$file6, "w");
@@ -400,4 +400,4 @@ if ($tee == "raportti") {
 $formi  = "vero";
 $kentta = "alku";
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

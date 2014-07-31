@@ -2,8 +2,8 @@
 
 if (!isset($eiliittymaa) or $eiliittymaa != 'ON') {
   if (isset($_POST["supertee"])) {
-    if($_POST["supertee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-    if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+    if ($_POST["supertee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+    if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
   }
 
   //* Tämä skripti käyttää slave-tietokantapalvelinta *//
@@ -11,7 +11,7 @@ if (!isset($eiliittymaa) or $eiliittymaa != 'ON') {
 
   $pupe_DataTables = "saatanat_taulu";
 
-  require ("../inc/parametrit.inc");
+  require "../inc/parametrit.inc";
 
   if (isset($supertee)) {
     if ($supertee == "lataa_tiedosto") {
@@ -36,7 +36,7 @@ if (!isset($pupe_DataTables))   $pupe_DataTables = "";
 if (!isset($luottolisa))     $luottolisa = "";
 if (!isset($sliitostunnus))   $sliitostunnus = "";
 
-  $pvmraja = $yhtiorow['erapaivan_ylityksen_raja'] >= 1 ? $yhtiorow['erapaivan_ylityksen_raja'] : 15;
+$pvmraja = $yhtiorow['erapaivan_ylityksen_raja'] >= 1 ? $yhtiorow['erapaivan_ylityksen_raja'] : 15;
 
 if ($eiliittymaa != 'ON') {
 
@@ -52,7 +52,7 @@ if ($eiliittymaa != 'ON') {
   if (!isset($savvl)) $savvl = date("Y");
   if (!isset($sappl)) $sappl = date("d");
 
-  $yli = str_replace(',','.', $yli);
+  $yli = str_replace(',', '.', $yli);
   $yli = (float) $yli;
 
   echo "<table>";
@@ -77,7 +77,7 @@ if ($eiliittymaa != 'ON') {
     $noautosubmit = TRUE;
     $piirra_otsikot = FALSE;
 
-    require ("tilauskasittely/monivalintalaatikot.inc");
+    require "tilauskasittely/monivalintalaatikot.inc";
 
     echo "</td></tr>";
   }
@@ -181,9 +181,9 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
     $generoitumuuttuja .= " and lasku.nimi like '%$sanimi%' ";
   }
 
-  if (($eiliittymaa == 'ON' AND !empty($sliitostunnus) AND $yhtiorow["myyntitilaus_saatavat"] == "") OR ($eiliittymaa != 'ON' AND !empty($sliitostunnus))) {
-         $generoitumuuttuja = " AND lasku.liitostunnus = $sliitostunnus ";
-      }
+  if (($eiliittymaa == 'ON' and !empty($sliitostunnus) and $yhtiorow["myyntitilaus_saatavat"] == "") or ($eiliittymaa != 'ON' and !empty($sliitostunnus))) {
+    $generoitumuuttuja = " AND lasku.liitostunnus = $sliitostunnus ";
+  }
   elseif (!empty($sytunnus)) {
 
     // KAUTTALASKUTUSKIKKARE
@@ -269,7 +269,7 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
 
   // Rapparin sarakkeet voidaan määritellä myös salasanat.php:ssä
   if (!isset($saatavat_array)) {
-    $saatavat_array = array(0,15,30,60,90,120);
+    $saatavat_array = array(0, 15, 30, 60, 90, 120);
   }
 
   if ($savalkoodi != "" and strtoupper($yhtiorow['valkoodi']) != strtoupper($savalkoodi) and $valuutassako == 'V') {
@@ -329,7 +329,7 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
 
     if ($eiliittymaa != 'ON') {
 
-      include('inc/pupeExcel.inc');
+      include 'inc/pupeExcel.inc';
 
       $worksheet    = new pupeExcel();
       $format_bold = array("bold" => TRUE);
@@ -521,7 +521,7 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
 
             $divi .= "</table></div>";
 
-            echo "<br><a class='tooltip' id='".str_replace(",", "", $row['liitostunnus'])."'>",t("Useita"),"...</a></td>";
+            echo "<br><a class='tooltip' id='".str_replace(",", "", $row['liitostunnus'])."'>", t("Useita"), "...</a></td>";
           }
           else {
             echo "<td valign='top'>$row[nimi]</td>";
@@ -566,9 +566,9 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
           $excelsarake = 0;
 
           if ($grouppaus != "kustannuspaikka") {
-            $worksheet->writeString($excelrivi, $excelsarake, str_replace("<br>","\n", $row["ytunnus"]));
+            $worksheet->writeString($excelrivi, $excelsarake, str_replace("<br>", "\n", $row["ytunnus"]));
             $excelsarake++;
-            $worksheet->writeString($excelrivi, $excelsarake, str_replace("<br>","\n", $row["nimi"]));
+            $worksheet->writeString($excelrivi, $excelsarake, str_replace("<br>", "\n", $row["nimi"]));
             $excelsarake++;
           }
 
@@ -704,14 +704,14 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
 
         if ($eiliittymaa != 'ON') {
           echo "<br/>";
-          echo "<font class='error'>",t("HUOM! Tämä on jälkivaatimusasiakas"),"</font>";
+          echo "<font class='error'>", t("HUOM! Tämä on jälkivaatimusasiakas"), "</font>";
           echo "<br/>";
         }
       }
 
       if ($eiliittymaa != 'ON' and $luottorajavirhe != '') {
         echo "<br/>";
-        echo "<font class='error'>",t("HUOM! Luottoraja ylittynyt"),"</font>";
+        echo "<font class='error'>", t("HUOM! Luottoraja ylittynyt"), "</font>";
         echo "<br/>";
       }
 
@@ -799,5 +799,5 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
 }
 
 if ($eiliittymaa != 'ON') {
-  require ("inc/footer.inc");
+  require "inc/footer.inc";
 }

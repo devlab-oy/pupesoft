@@ -360,9 +360,11 @@ else {
       if ($yhtiorow["seuraako_myyntitiliointi_tuotteen_tyyppia"] == "Y" and
           $xrow["tuotetyyppi"] == "raaka-aine") {
         $tilinumero = $yhtiorow["raaka_ainevarasto"];
+        $muutostili = $yhtiorow["raaka_ainevarastonmuutos"];
       }
       else {
         $tilinumero = $yhtiorow["varasto"];
+        $muutostili = $yhtiorow["varastonmuutos"];
       }
 
       //Kirjataan 'varasto'-tilille
@@ -391,7 +393,7 @@ else {
       $query = "INSERT into tiliointi set
                 yhtio            = '$kukarow[yhtio]',
                 ltunnus          = '$tunnus',
-                tilino           = '$yhtiorow[varastonmuutos]',
+                tilino           = '{$muutostili}',
                 kustp            = '{$kustp_ins}',
                 kohde            = '{$kohde_ins}',
                 projekti         = '{$projekti_ins}',

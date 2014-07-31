@@ -6,8 +6,8 @@ echo "<font class='head'>".t("Manuaaliset menot")."</font><hr>";
 if ($tee == 'P') {
   // Olemassaolevaa maksua muutetaan, joten poistetaan rivi ja annetaan perustettavaksi
   $query = "SELECT tapvm, summa, selite
-                FROM maksu
-                WHERE tunnus = '$tunnus'";
+            FROM maksu
+            WHERE tunnus = '$tunnus'";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -47,15 +47,15 @@ if ($tee == 'U') {
     $yrow=mysql_fetch_array($result);
 
     $query = "INSERT into maksu values (
-                    '$kukarow[yhtio]',
-                    '$yrow[0]',
-                    '$kukarow[kuka]',
-                    '$tapvm',
-                    'MU',
-                    '$summa',
-                    '$selite',
-                    '',
-                    '')";
+              '$kukarow[yhtio]',
+              '$yrow[0]',
+              '$kukarow[kuka]',
+              '$tapvm',
+              'MU',
+              '$summa',
+              '$selite',
+              '',
+              '')";
     $result = mysql_query($query) or pupe_error($query);
   }
 }

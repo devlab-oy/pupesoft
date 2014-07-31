@@ -530,11 +530,11 @@ if ($tee == 'P') {
     $keraamaton = 0;
 
     $query0 = "SELECT kerayserat.pakkaus, kerayserat.pakkausnro, kerayserat.sscc, kerayserat.sscc_ulkoinen, kerayserat.tunnus
-                   FROM kerayserat
-                   WHERE kerayserat.yhtio = '$kukarow[yhtio]'
-                   AND kerayserat.nro     = '{$id}'
-                   GROUP BY 1,2
-                   ORDER BY kerayserat.pakkausnro";
+               FROM kerayserat
+               WHERE kerayserat.yhtio = '$kukarow[yhtio]'
+               AND kerayserat.nro     = '{$id}'
+               GROUP BY 1,2
+               ORDER BY kerayserat.pakkausnro";
     $pnresult = pupe_query($query0);
 
     while ($prow = mysql_fetch_assoc($pnresult)) {

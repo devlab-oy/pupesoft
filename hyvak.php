@@ -728,9 +728,9 @@ if ($tee == 'H') {
 
         // #TODO eikö tässä pitäisi olla liitostunnus?!?
         $query = "SELECT *
-                      FROM toimi
-                      WHERE yhtio = '$kukarow[yhtio]'
-                      and ytunnus = '$laskurow[ytunnus]'";
+                  FROM toimi
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and ytunnus = '$laskurow[ytunnus]'";
         $result = pupe_query($query);
 
         // Toimittaja löytyi
@@ -756,12 +756,12 @@ if ($tee == 'H') {
   }
 
   $query = "UPDATE lasku SET
-                $kentta = now(),
-                hyvaksyja_nyt = '$hyvaksyja_nyt',
-                tila          = '$tila',
-                 alatila      = '',
-                mapvm         = '$mapvm'
-                WHERE yhtio   = '$kukarow[yhtio]' and tunnus='$tunnus'";
+            $kentta = now(),
+            hyvaksyja_nyt = '$hyvaksyja_nyt',
+            tila          = '$tila',
+             alatila      = '',
+            mapvm         = '$mapvm'
+            WHERE yhtio   = '$kukarow[yhtio]' and tunnus='$tunnus'";
   $result = pupe_query($query);
 
   echo "<br><font class='message'>'$laskurow[hyvaksyja_nyt]' ".t("hyväksyi laskun")." $viesti</font><br><br>";

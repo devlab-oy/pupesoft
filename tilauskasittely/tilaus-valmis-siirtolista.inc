@@ -822,11 +822,11 @@ else {
         }
 
         $query = "UPDATE lasku
-                SET alatila = '$eikeralatila', lahetepvm = now()
-                where yhtio = '$kukarow[yhtio]'
-                and tunnus  = '$laskurow[tunnus]'
-                and tila    = '$tvs_tila'
-                and alatila in ('','J')";
+                  SET alatila = '$eikeralatila', lahetepvm = now()
+                  where yhtio = '$kukarow[yhtio]'
+                  and tunnus  = '$laskurow[tunnus]'
+                  and tila    = '$tvs_tila'
+                  and alatila in ('','J')";
         $result = mysql_query($query) or pupe_error($query);
       }
     }

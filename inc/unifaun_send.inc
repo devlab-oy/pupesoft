@@ -317,13 +317,13 @@ class Unifaun {
       $uni_receiver_partner->addAttribute('parid', utf8_encode($this->toitarow['rahdinkuljettaja']));
 
       $query = "SELECT rahtisopimus
-                    FROM rahtisopimukset
-                    WHERE yhtio       = '{$this->kukarow['yhtio']}'
-                    AND (asiakas = '{$this->postirow['liitostunnus']}' OR ytunnus = '{$this->postirow['ytunnus']}')
-                    AND toimitustapa  = '{$this->toitarow['selite']}'
-                    AND rahtisopimus != ''
-                    ORDER BY asiakas DESC
-                    LIMIT 1";
+                FROM rahtisopimukset
+                WHERE yhtio       = '{$this->kukarow['yhtio']}'
+                AND (asiakas = '{$this->postirow['liitostunnus']}' OR ytunnus = '{$this->postirow['ytunnus']}')
+                AND toimitustapa  = '{$this->toitarow['selite']}'
+                AND rahtisopimus != ''
+                ORDER BY asiakas DESC
+                LIMIT 1";
       $rahtisopimus_res = pupe_query($query);
       $rahtisopimus_row = mysql_fetch_assoc($rahtisopimus_res);
 

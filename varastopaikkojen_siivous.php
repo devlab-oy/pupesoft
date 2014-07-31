@@ -174,13 +174,13 @@ if ($tee == 'CLEANTUNTEMATTOMAT') {
       $vanharow = mysql_fetch_array($presult);
 
       $query = "UPDATE tuotepaikat
-                 SET saldo = saldo + $paikkarow[saldo],
-                 saldo_varattu = saldo_varattu + $paikkarow[saldo_varattu],
-                 saldoaika     = now(),
-                 muuttaja      = '$kukarow[kuka]',
-                 muutospvm     = now()
-                 WHERE yhtio   = '$kukarow[yhtio]'
-                 and tunnus    = '$vanharow[tunnus]'";
+                SET saldo = saldo + $paikkarow[saldo],
+                saldo_varattu = saldo_varattu + $paikkarow[saldo_varattu],
+                saldoaika     = now(),
+                muuttaja      = '$kukarow[kuka]',
+                muutospvm     = now()
+                WHERE yhtio   = '$kukarow[yhtio]'
+                and tunnus    = '$vanharow[tunnus]'";
       $presult = pupe_query($query);
 
       $query = "DELETE

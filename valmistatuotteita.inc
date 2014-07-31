@@ -689,7 +689,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
                     WHERE yhtio        = '$kukarow[yhtio]'
                     and ostorivitunnus = '$tilrivirow[tunnus]'
                     LIMIT ".(int) $isavarattu;
-          $sarjares = pupe_query($query);
+                    $sarjares = pupe_query($query);
 
           while ($sarjarow = mysql_fetch_assoc($sarjares)) {
             $query = "UPDATE sarjanumeroseuranta SET
@@ -837,11 +837,11 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 
           //Tutkitaan löytyykö JT-rivi joka mäppäytyy tähän valmistusriviin
           $query = "SELECT ifnull(if((tilausrivi.perheid != 0 and tilausrivi.tunnus != tilausrivi.perheid), tilausrivi.perheid, tilausrivi.tunnus), 0) jtrivi
-                       FROM tilausrivin_lisatiedot
-                       JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
-                       WHERE tilausrivin_lisatiedot.yhtio          = '$kukarow[yhtio]'
-                       AND tilausrivin_lisatiedot.tilausrivilinkki = '$tilrivirow[tunnus]'
-                       $suoralisa";
+                    FROM tilausrivin_lisatiedot
+                    JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
+                    WHERE tilausrivin_lisatiedot.yhtio          = '$kukarow[yhtio]'
+                    AND tilausrivin_lisatiedot.tilausrivilinkki = '$tilrivirow[tunnus]'
+                    $suoralisa";
           $varastoon_result = pupe_query($query);
 
           while ($varastoon_row = mysql_fetch_assoc($varastoon_result)) {

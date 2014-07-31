@@ -21,13 +21,13 @@ if ($xml !== FALSE) {
     $kurssi   = (float)  $valuutta->attributes()->rate;
 
     $query = "UPDATE valuu, yhtio SET
-                valuu.kurssi                 = round(1 / $kurssi, 9),
-                valuu.muutospvm              = now(),
-                valuu.muuttaja               = 'crond'
-                WHERE valuu.nimi             = '$valkoodi'
-                AND valuu.automaattipaivitys = ''
-                AND yhtio.yhtio              = valuu.yhtio
-                AND yhtio.valkoodi           = 'EUR'";
+              valuu.kurssi                 = round(1 / $kurssi, 9),
+              valuu.muutospvm              = now(),
+              valuu.muuttaja               = 'crond'
+              WHERE valuu.nimi             = '$valkoodi'
+              AND valuu.automaattipaivitys = ''
+              AND yhtio.yhtio              = valuu.yhtio
+              AND yhtio.valkoodi           = 'EUR'";
     $result = mysql_query($query) or pupe_error($query);
 
     $query = "INSERT INTO valuu_historia (kotivaluutta, valuutta, kurssi, kurssipvm)

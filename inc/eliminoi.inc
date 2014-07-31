@@ -389,9 +389,9 @@ echo "
 echo "<tr><th>".t("tai koko tilikausi")."</th>";
 
 $query = "SELECT *
-            FROM tilikaudet
-            WHERE yhtio = '$kukarow[yhtio]'
-            ORDER BY tilikausi_alku";
+          FROM tilikaudet
+          WHERE yhtio = '$kukarow[yhtio]'
+          ORDER BY tilikausi_alku";
 $vresult = mysql_query($query) or pupe_error($query);
 
 echo "<td><select name='tkausi'>
@@ -416,11 +416,11 @@ echo "<tr>
       <th>".t("Vain kustannuspaikka")."</th>";
 
 $query = "SELECT tunnus, nimi
-            FROM kustannuspaikka
-            WHERE yhtio   = '$kukarow[yhtio]'
-            and kaytossa != 'E'
-            and tyyppi    = 'K'
-            ORDER BY koodi+0, koodi, nimi";
+          FROM kustannuspaikka
+          WHERE yhtio   = '$kukarow[yhtio]'
+          and kaytossa != 'E'
+          and tyyppi    = 'K'
+          ORDER BY koodi+0, koodi, nimi";
 $vresult = mysql_query($query) or pupe_error($query);
 
 echo "<td><select name='kustp'>
@@ -440,11 +440,11 @@ echo "<tr>";
 echo "<th>".t("Vain kohde")."</th>";
 
 $query = "SELECT tunnus, nimi
-            FROM kustannuspaikka
-            WHERE yhtio   = '$kukarow[yhtio]'
-            and kaytossa != 'E'
-            and tyyppi    = 'O'
-            ORDER BY koodi+0, koodi, nimi";
+          FROM kustannuspaikka
+          WHERE yhtio   = '$kukarow[yhtio]'
+          and kaytossa != 'E'
+          and tyyppi    = 'O'
+          ORDER BY koodi+0, koodi, nimi";
 $vresult = mysql_query($query) or pupe_error($query);
 
 echo "<td>
@@ -464,11 +464,11 @@ echo "<tr>
       <th>".t("Vain projekti")."</th>";
 
 $query = "SELECT tunnus, nimi
-            FROM kustannuspaikka
-            WHERE yhtio   = '$kukarow[yhtio]'
-            and kaytossa != 'E'
-            and tyyppi    = 'P'
-            ORDER BY koodi+0, koodi, nimi";
+          FROM kustannuspaikka
+          WHERE yhtio   = '$kukarow[yhtio]'
+          and kaytossa != 'E'
+          and tyyppi    = 'P'
+          ORDER BY koodi+0, koodi, nimi";
 $vresult = mysql_query($query) or pupe_error($query);
 
 echo "<td>

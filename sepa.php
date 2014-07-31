@@ -356,9 +356,9 @@ function sepa_credittransfer($laskurow, $popvm_nyt, $netotetut_rivit = '') {
   if ($netotetut_rivit != "") {
 
     $query = "SELECT *
-                FROM lasku
-                WHERE yhtio = '$kukarow[yhtio]'
-                AND tunnus  in ($netotetut_rivit)";
+              FROM lasku
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND tunnus  in ($netotetut_rivit)";
     $result = pupe_query($query);
 
     while ($nettorow = mysql_fetch_assoc($result)) {
@@ -526,10 +526,10 @@ if ($yhtiorow["pankkitiedostot"] == "F" and $tee != "virhe") {
 
   $query = "SELECT *
             FROM yriti
-            WHERE yhtio  = '{$kukarow['yhtio']}'
-            AND kaytossa = ''
-            AND iban != ''
-            AND bic != ''
+            WHERE yhtio   = '{$kukarow['yhtio']}'
+            AND kaytossa  = ''
+            AND iban     != ''
+            AND bic      != ''
             ORDER BY nimi";
   $result = pupe_query($query);
 
@@ -977,10 +977,10 @@ if (SEPA_PANKKIYHTEYS and !empty($pankkiyhteys_tiedosto)) {
   $query = "SELECT pankkiyhteys.tunnus AS pankkiyhteys_tunnus
             FROM yriti
             INNER JOIN pankkiyhteys ON (pankkiyhteys.yhtio = yriti.yhtio
-              AND pankkiyhteys.pankki = yriti.bic
+              AND pankkiyhteys.pankki      = yriti.bic
               AND pankkiyhteys.customer_id = yriti.asiakastunnus)
-            WHERE yriti.yhtio = '{$kukarow["yhtio"]}'
-            AND yriti.tunnus = {$pankkitili_tunnus}";
+            WHERE yriti.yhtio              = '{$kukarow["yhtio"]}'
+            AND yriti.tunnus               = {$pankkitili_tunnus}";
   $result = pupe_query($query);
 
   // Meill‰ on pankkiyhteys luotu, tehd‰‰n formi l‰hett‰mist‰ varten

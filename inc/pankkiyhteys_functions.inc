@@ -499,7 +499,7 @@ function hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana) {
   $query = "SELECT *
             FROM pankkiyhteys
             WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND tunnus = {$pankkiyhteys_tunnus}";
+            AND tunnus  = {$pankkiyhteys_tunnus}";
   $result = pupe_query($query);
 
   // Jos pankkiyhteyttä ei löydy

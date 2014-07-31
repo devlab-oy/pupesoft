@@ -151,10 +151,10 @@ if (($nimi != '' and !isset($jatka) and $asiakasid == 0 and !isset($vaihdatoim_a
 
 if ($tnimi == "" and isset($tkohde) and $tkohde > 0) {
   $kohde_query = "SELECT *
-                      FROM kohde
-                      WHERE yhtio = '$kukarow[yhtio]'
-                      AND tunnus  = '$tkohde'
-                      LIMIT 1";
+                  FROM kohde
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND tunnus  = '$tkohde'
+                  LIMIT 1";
   $kohde_res = pupe_query($kohde_query);
 
   $krow = mysql_fetch_assoc($kohde_res);

@@ -1253,11 +1253,11 @@ else {
 
       if (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") and !in_array($row["var"], array('P', 'J', 'S', 'T', 'U'))) {
         $query = "SELECT sarjanumeroseuranta.sarjanumero era, sarjanumeroseuranta.parasta_ennen
-                     FROM sarjanumeroseuranta
-                     WHERE yhtio          = '$kukarow[yhtio]'
-                     and tuoteno          = '$row[tuoteno]'
-                     and myyntirivitunnus = '$row[tunnus]'
-                     LIMIT 1";
+                  FROM sarjanumeroseuranta
+                  WHERE yhtio          = '$kukarow[yhtio]'
+                  and tuoteno          = '$row[tuoteno]'
+                  and myyntirivitunnus = '$row[tunnus]'
+                  LIMIT 1";
         $sarjares = pupe_query($query);
         $sarjarow = mysql_fetch_assoc($sarjares);
 

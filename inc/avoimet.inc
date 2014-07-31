@@ -1031,13 +1031,13 @@ if ($tee != '' and isset($ajaraportti)) {
     if ($av_lisa1 == "" and $av_lisa3 == "" and $valkoodi == "" and $maa == "" and $karhuja == 0) {
 
       $query = "SELECT sum(summa) saldo
-                    FROM tiliointi
-                    WHERE yhtio  = '$kukarow[yhtio]'
-                    and korjattu = ''
-                    and tapvm    >= '$tilikausirow[tilikausi_alku]'
-                    and tapvm    <= '$pvm'
-                    and tilino   in ($tili)
-                    {$tiliointilisa}";
+                FROM tiliointi
+                WHERE yhtio  = '$kukarow[yhtio]'
+                and korjattu = ''
+                and tapvm    >= '$tilikausirow[tilikausi_alku]'
+                and tapvm    <= '$pvm'
+                and tilino   in ($tili)
+                {$tiliointilisa}";
       $result = pupe_query($query);
       $trow = mysql_fetch_assoc($result);
 

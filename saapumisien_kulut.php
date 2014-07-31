@@ -58,9 +58,9 @@ if ($ytunnus != '' and $toimittajaid == 0) {
 // Toimittajan tiedot
 if ($toimittajaid > 0) {
   $toimittaja_query = "SELECT *
-                         FROM toimi
-                         WHERE yhtio = '{$kukarow['yhtio']}'
-                         AND tunnus  = '$toimittajaid'";
+                       FROM toimi
+                       WHERE yhtio = '{$kukarow['yhtio']}'
+                       AND tunnus  = '$toimittajaid'";
   $toimittaja_result = pupe_query($toimittaja_query);
   $toimittaja = mysql_fetch_assoc($toimittaja_result);
 }

@@ -68,8 +68,8 @@ if ($tee == 'muutaprio') {
     // Ei päivitetä turhaan
     if ($tuote['jarjestys'] <> $uusi_jarjestys) {
       $query = "UPDATE korvaavat
-                    SET jarjestys = $uusi_jarjestys, muutospvm = now()
-                    WHERE yhtio='{$kukarow['yhtio']}' AND tunnus={$tuote['tunnus']}";
+                SET jarjestys = $uusi_jarjestys, muutospvm = now()
+                WHERE yhtio='{$kukarow['yhtio']}' AND tunnus={$tuote['tunnus']}";
       if ( ! pupe_query($query) ) {
         exit("Virhe ketjujen uudelleenjärjestelyssä");
       }

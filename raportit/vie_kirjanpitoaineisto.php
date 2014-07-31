@@ -305,11 +305,11 @@ else {
   echo "<tr><th>".t("Vain kohde")."</th>";
 
   $query = "SELECT tunnus, nimi
-             FROM kustannuspaikka
-             WHERE yhtio   = '$kukarow[yhtio]'
-             and kaytossa != 'E'
-             and tyyppi    = 'O'
-             ORDER BY koodi+0, koodi, nimi";
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and kaytossa != 'E'
+            and tyyppi    = 'O'
+            ORDER BY koodi+0, koodi, nimi";
   $vresult = pupe_query($query);
 
   echo "<td><select name='kohde'><option value=' '>".t("Ei valintaa");

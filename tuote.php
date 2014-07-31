@@ -788,9 +788,9 @@ if ($tee == 'Z') {
       $lisa = " and tuoteno = '$tuoteno' ";
 
       $query = "SELECT isatuoteno
-                        FROM tuoteperhe
-                        WHERE yhtio = '$kukarow[yhtio]'
-                        AND tuoteno = '$tuoteno'";
+                FROM tuoteperhe
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND tuoteno = '$tuoteno'";
       $tuoteperhe_result = pupe_query($query);
 
       if (mysql_num_rows($tuoteperhe_result) > 0) {

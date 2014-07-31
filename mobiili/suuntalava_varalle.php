@@ -231,10 +231,10 @@ echo "<div class='main'>
       <td colspan='2'><select name='komento[Tavaraetiketti]'>";
 
 $query = "SELECT *
-                FROM kirjoittimet
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND komento NOT IN ('edi','email')
-                ORDER BY kirjoitin";
+          FROM kirjoittimet
+          WHERE yhtio = '{$kukarow['yhtio']}'
+          AND komento NOT IN ('edi','email')
+          ORDER BY kirjoitin";
 $kires = pupe_query($query);
 
 echo "<option value=''>", t("Ei kirjoitinta"), "</option>";

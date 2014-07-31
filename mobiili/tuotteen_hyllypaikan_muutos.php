@@ -102,13 +102,13 @@ if (isset($submit)) {
       if (count($errors) == 0) {
 
         $query = "SELECT tunnus
-                    FROM tuotepaikat
-                    WHERE yhtio   = '{$kukarow['yhtio']}'
-                    AND tuoteno   = '{$row['tuoteno']}'
-                    AND hyllyalue = '{$hyllyalue}'
-                    AND hyllynro  = '{$hyllynro}'
-                    AND hyllyvali = '{$hyllyvali}'
-                    AND hyllytaso = '{$hyllytaso}'";
+                  FROM tuotepaikat
+                  WHERE yhtio   = '{$kukarow['yhtio']}'
+                  AND tuoteno   = '{$row['tuoteno']}'
+                  AND hyllyalue = '{$hyllyalue}'
+                  AND hyllynro  = '{$hyllynro}'
+                  AND hyllyvali = '{$hyllyvali}'
+                  AND hyllytaso = '{$hyllytaso}'";
         $chk_res = pupe_query($query);
 
         if (mysql_num_rows($chk_res) == 0) $errors[] = t("Tuotepaikkaa (%s-%s-%s-%s) ei ole perustettu tuotteelle", "", $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso).'.';
@@ -132,14 +132,14 @@ if (isset($submit)) {
       list($siirrettava_yht, $siirrettavat_rivit) = laske_siirrettava_maara($row);
 
       $query = "SELECT tuotepaikat.*, tuote.yksikko
-                  FROM tuotepaikat
-                  JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno)
-                  WHERE tuotepaikat.yhtio   = '{$kukarow['yhtio']}'
-                  AND tuotepaikat.tuoteno   = '{$row['tuoteno']}'
-                  AND tuotepaikat.hyllyalue = '{$hyllyalue}'
-                  AND tuotepaikat.hyllynro  = '{$hyllynro}'
-                  AND tuotepaikat.hyllyvali = '{$hyllyvali}'
-                  AND tuotepaikat.hyllytaso = '{$hyllytaso}'";
+                FROM tuotepaikat
+                JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno)
+                WHERE tuotepaikat.yhtio   = '{$kukarow['yhtio']}'
+                AND tuotepaikat.tuoteno   = '{$row['tuoteno']}'
+                AND tuotepaikat.hyllyalue = '{$hyllyalue}'
+                AND tuotepaikat.hyllynro  = '{$hyllynro}'
+                AND tuotepaikat.hyllyvali = '{$hyllyvali}'
+                AND tuotepaikat.hyllytaso = '{$hyllytaso}'";
       $res = pupe_query($query);
       $minnerow = mysql_fetch_assoc($res);
 
@@ -163,12 +163,12 @@ if (isset($submit)) {
         foreach ($siirrettavat_rivit as $siirrettavat_rivi) {
 
           $query = "UPDATE tilausrivi SET
-                      hyllyalue   = '{$hyllyalue}',
-                      hyllynro    = '{$hyllynro}',
-                      hyllyvali   = '{$hyllyvali}',
-                      hyllytaso   = '{$hyllytaso}'
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND tunnus  = {$siirrettavat_rivi}";
+                    hyllyalue   = '{$hyllyalue}',
+                    hyllynro    = '{$hyllynro}',
+                    hyllyvali   = '{$hyllyvali}',
+                    hyllytaso   = '{$hyllytaso}'
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus  = {$siirrettavat_rivi}";
           pupe_query($query);
         }
       }

@@ -191,6 +191,10 @@ function sepa_download_file_list($params) {
   // Haetaan vaan jos ei ole passattu parametrinä
   if ($pankkiyhteys['bank'] == "nordea" and $target_id == "") {
     $target_id = sepa_target_id_for_file_type($params);
+
+    if ($target_id === false) {
+      return false;
+    }
   }
 
   $parameters = array(
@@ -242,6 +246,10 @@ function sepa_download_files($params) {
   // Haetaan vaan jos ei ole passattu parametrinä
   if ($pankkiyhteys['bank'] == "nordea" and $target_id == "") {
     $target_id = sepa_target_id_for_file_type($params);
+
+    if ($target_id === false) {
+      return false;
+    }
   }
 
   $tiedostot = array();
@@ -307,6 +315,10 @@ function sepa_upload_file($params) {
   // Haetaan vaan jos ei ole passattu parametrinä
   if ($pankkiyhteys['bank'] == "nordea" and $target_id == "") {
     $target_id = sepa_target_id_for_file_type($params);
+
+    if ($target_id === false) {
+      return false;
+    }
   }
 
   $parameters = array(
@@ -619,6 +631,11 @@ function generoi_private_key_ja_csr() {
  * @return string
  */
 function salaa($salattava_data, $salasana) {
+
+  if (empty($salattava_data)) {
+    return null;
+  }
+
   $avain = hash("SHA256", $salasana, true);
 
   $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC);
@@ -639,6 +656,11 @@ function salaa($salattava_data, $salasana) {
  * @return string
  */
 function pura_salaus($salattu_data, $salasana) {
+
+  if (empty($salattu_data)) {
+    return null;
+  }
+
   $avain = hash("SHA256", $salasana, true);
 
   $salattu_data_binaari = base64_decode($salattu_data);

@@ -286,7 +286,7 @@ if ($tee == 'close_with_printer') {
       $ures  = pupe_query($query);
 
       // verkkolaskutettavat EU-viennit menee alatilaan D, jos niillä on tarpeeksi lisätietoja
-      $query = "UPDATE lasku set
+      $query = "UPDATE lasku SET
                 alatila                      = 'D',
                 bruttopaino                  = '{$row['kilot']}'
                 WHERE yhtio                  = '$kukarow[yhtio]'

@@ -58,7 +58,7 @@ function kasittele_tuote_tiedosto($file_name, $real_name = '') {
   $ext = strtoupper($path_parts['extension']);
 
   if ($ext != "TXT" and $ext != "CSV") {
-    die ("<font class='error'><br>".t("Ainoastaan .txt ja .cvs tiedostot sallittuja")."!</font>");
+    die ("<font class='error'><br>".t("Ainoastaan .txt ja .csv tiedostot sallittuja")."!</font>");
   }
 
   $file = fopen($file_name ,"r") or die (t("Tiedoston avaus epäonnistui")."!");

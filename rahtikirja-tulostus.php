@@ -289,13 +289,13 @@ if ($tee == 'close_with_printer') {
       $query = "UPDATE lasku set
                 alatila                      = 'D',
                 bruttopaino                  = '{$row['kilot']}'
-                where yhtio                  = '$kukarow[yhtio]'
-                and tunnus                   = '{$row['tunnus']}'
-                and vienti                   = 'E'
-                and chn                      in ('020', '030')
-                and maa_maara               != ''
-                and kauppatapahtuman_luonne  > 0
-                and kuljetusmuoto           != ''";
+                WHERE yhtio                  = '$kukarow[yhtio]'
+                AND tunnus                   = '{$row['tunnus']}'
+                AND vienti                   = 'E'
+                AND chn                      IN ('020', '030', '666')
+                AND maa_maara               != ''
+                AND kauppatapahtuman_luonne  > 0
+                AND kuljetusmuoto           != ''";
       $ures  = pupe_query($query);
 
       // Etuk‰teen maksetut tilaukset pit‰‰ muuttaa takaisin "maksettu"-tilaan

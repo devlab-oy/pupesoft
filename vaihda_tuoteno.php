@@ -51,7 +51,7 @@ function is_log($str) {
 }
 
 function kasittele_tuote_tiedosto($file_name, $real_name = '') {
-  global $kukarow, $yhtiorow;
+  global $kukarow, $yhtiorow, $suuraakkosiin;
 
   $path_parts = ($real_name == '') ? pathinfo($file_name) : pathinfo($real_name);
   $name = strtoupper($path_parts['filename']);
@@ -71,7 +71,7 @@ function kasittele_tuote_tiedosto($file_name, $real_name = '') {
     $rivi = explode("\t", pupesoft_cleanstring($rivi));
     $count++;
 
-    $vantuoteno = strtoupper(trim($rivi[0]));
+    $vantuoteno = trim($rivi[0]);
     $uustuoteno = strtoupper(trim($rivi[1]));
 
     if ($vantuoteno != '' and $uustuoteno != '') {
@@ -95,8 +95,28 @@ function kasittele_tuote_tiedosto($file_name, $real_name = '') {
       $tuoteuresult = pupe_query($query);
 
       if (mysql_num_rows($tuoteuresult) == 1) {
-        $error++;
-        echo "<font class='message'>".t("UUSI TUOTENUMERO LÖYTYY JO").": $uustuoteno</font><br>";
+
+        // uusi tuoteno löytyy jo. tarkistetaan onko sama kuin vanha...
+        if (strtoupper($vantuoteno) == $uustuoteno) {
+          // uusi ja vanha tuoteno ovat samat. katsotaan onko vanha jo kokonaan uppercase...
+          if (ctype_upper($vantuoteno)) {
+            $error++;
+            echo "<font class='message'>";
+            echo t("Vanha ja uusi tuotenumero ovat identtiset");
+            echo ": $uustuoteno = $vantuoteno</font><br>";
+          }
+          else {
+            // sallitaan muutos suuraakkosiin
+            $suuraakkosiin[] = $uustuoteno;
+            echo "<font class='message'>";
+            echo t("Tuotenumeron aakkoslaji vaihdettiin suuraakkosiin");
+            echo ": $vantuoteno --> $uustuoteno</font><br>";
+          }
+        }
+        else {
+          $error++;
+          echo "<font class='message'>".t("UUSI TUOTENUMERO LÖYTYY JO").": $uustuoteno</font><br>";
+        }
       }
     }
     elseif ($vantuoteno == '' and $uustuoteno != '') {
@@ -146,6 +166,7 @@ $vanyksikko       = "";
 $tee       = (isset($tee)) ? $tee : "";
 $jatavanha    = (isset($jatavanha)) ? $jatavanha : "";
 $postit     = (isset($postit)) ? $postit : array();
+$suuraakkosiin = array();
 
 if ($php_cli) {
   $uploaded_filename = $argv[2];
@@ -347,6 +368,10 @@ if ($error == 0 and $tee == "file") {
 
         $query  = "SELECT tunnus from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
         $tuoteuresult = pupe_query($query);
+
+        if (in_array($uustuoteno, $suuraakkosiin)) {
+          $uusi_on_jo = "SAMA";
+        }
 
         if (mysql_num_rows($tuoteuresult) == 0 or $uusi_on_jo == "OK" or $uusi_on_jo == "SAMA") {
 

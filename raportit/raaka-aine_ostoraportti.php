@@ -1,6 +1,6 @@
 <?php
 
-require("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 // Salitaan vain numeroita ja piste/pilkku input kentissä
 echo '<script language="javascript">
@@ -149,15 +149,15 @@ function teerivi($tuoteno, $valittu_toimittaja) {
   else {
     // Toimittajaa ei löydy -> alustetaan defaulttiarvot (lisää tähän jos muutat queryä)
     $toimittajarow = array(
-            "toimitusaika" => 0,
-            "pakkauskoko" => 1,
-            "toimittaja" => "",
-            "nimi" => t("Ei toimittajaa"),
-            "tunnus" => 0,
-            "ostohinta" => 0,
-            "tuotemassa" => 0,
-            "tilavuus" => 0,
-            );
+      "toimitusaika" => 0,
+      "pakkauskoko" => 1,
+      "toimittaja" => "",
+      "nimi" => t("Ei toimittajaa"),
+      "tunnus" => 0,
+      "ostohinta" => 0,
+      "tuotemassa" => 0,
+      "tilavuus" => 0,
+    );
   }
 
   if (isset($multi_status) and count($multi_status) > 0) {
@@ -302,7 +302,7 @@ if ($ytunnus != "" and $toimittajaid == "") {
     $muutparametrit .= $key."=".$value."##";
   }
 
-  require ("inc/kevyt_toimittajahaku.inc");
+  require "inc/kevyt_toimittajahaku.inc";
 
   if ($toimittajaid == 0) {
     $tee = "ÄLÄMEEMIHINKÄÄN";
@@ -626,7 +626,7 @@ if (isset($ehdotusnappi) and $ehdotusnappi != "") {
       echo t("Budjetoitu kulutus").":<br><br>";
 
       foreach ($tuoterivi['budjetin_peruste'] as $budjetin_perusteet) {
-        foreach($budjetin_perusteet as $budjetin_peruste) {
+        foreach ($budjetin_perusteet as $budjetin_peruste) {
           echo "Valmiste: ".$budjetin_peruste['tuote']."<br>";
           echo "Tuotteen status: ".$budjetin_peruste['status']."<br>";
           echo "Budjetin peruste: ".$budjetin_peruste['syy']."<br>";
@@ -679,7 +679,7 @@ if (!isset($tee) or $tee == "") {
 
   $monivalintalaatikot = array('OSASTO', 'TRY', 'TUOTEMERKKI');
   $monivalintalaatikot_normaali = array();
-  require ("tilauskasittely/monivalintalaatikot.inc");
+  require "tilauskasittely/monivalintalaatikot.inc";
 
   echo "</td>";
   echo "</tr>";
@@ -791,9 +791,9 @@ if (!isset($tee) or $tee == "") {
 
   echo "<tr><th>".t("Tilaustuotteiden käsittely")."</th><td>";
   echo "<select name='tilaustuotteiden_kasittely'>";
-      echo "<option value='A' {$sel['A']}>".t("Tilaustuotteiden kulutusennuste on jälkitoimitusrivit")."</option>";
-      echo "<option value='B' {$sel['B']}>".t("Tilaustuotteiden kulutusennuste on budjetti/myynti")."</option>";
-      echo "<option value='C' {$sel['C']}>".t("Tilaustuotteiden kulutusennuste on jälkitoimitusrivit + budjetti/myynti")."</option>";
+  echo "<option value='A' {$sel['A']}>".t("Tilaustuotteiden kulutusennuste on jälkitoimitusrivit")."</option>";
+  echo "<option value='B' {$sel['B']}>".t("Tilaustuotteiden kulutusennuste on budjetti/myynti")."</option>";
+  echo "<option value='C' {$sel['C']}>".t("Tilaustuotteiden kulutusennuste on jälkitoimitusrivit + budjetti/myynti")."</option>";
   echo "</select>";
   echo "</td>";
   echo "</tr>";
@@ -803,4 +803,4 @@ if (!isset($tee) or $tee == "") {
   echo "<br><input type='submit' name='ehdotusnappi' value = '".t("Aja ostoehdotus")."'></form>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

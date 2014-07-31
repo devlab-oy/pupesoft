@@ -1,12 +1,12 @@
 <?php
 
-if($_REQUEST["tee"] == "tarjous") $nayta_pdf=1; //Generoidaan .pdf-file
+if ($_REQUEST["tee"] == "tarjous") $nayta_pdf=1; //Generoidaan .pdf-file
 
 if ($_REQUEST["pyytaja"] == "yhteensopivuus") {
   $_REQUEST["pyytaja"] = "yhteensopivuus.php";
   $pyytajadir = "";
 }
-elseif($_REQUEST["pyytaja"] == "haejaselaa" or $_REQUEST["pyytaja"] == "tuote_selaus_haku") {
+elseif ($_REQUEST["pyytaja"] == "haejaselaa" or $_REQUEST["pyytaja"] == "tuote_selaus_haku") {
   $_REQUEST["pyytaja"] = "tuote_selaus_haku.php";
   $pyytajadir = "tilauskasittely/";
 }
@@ -14,11 +14,11 @@ else {
   $eipaluuta = "YES";
 }
 
-if (@include("inc/parametrit.inc")) {
+if (@include "inc/parametrit.inc") {
   $post_myynti = $pyytajadir.$pyytaja;
   $pyytaja = substr($pyytaja, 0, -4);
 }
-elseif (@include("parametrit.inc")) {
+elseif (@include "parametrit.inc") {
   $post_myynti = $pyytaja;
 
   if ($tultiin == "futur") {
@@ -56,7 +56,7 @@ if ($tee == 'tarjous') {
       exit;
     }
 
-    require_once("tulosta_tarjous.inc");
+    require_once "tulosta_tarjous.inc";
 
     $sivu = 1;
 
@@ -278,6 +278,6 @@ if ($tee == "") {
   }
 }
 
-if (@include("inc/footer.inc"));
-elseif (@include("footer.inc"));
+if (@include "inc/footer.inc");
+elseif (@include "footer.inc");
 else exit;

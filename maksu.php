@@ -5,9 +5,9 @@ echo "<font class='head'>".t("Manuaaliset menot")."</font><hr>";
 
 if ($tee == 'P') {
   // Olemassaolevaa maksua muutetaan, joten poistetaan rivi ja annetaan perustettavaksi
-      $query = "SELECT tapvm, summa, selite
-                FROM maksu
-                WHERE tunnus = '$tunnus'";
+  $query = "SELECT tapvm, summa, selite
+            FROM maksu
+            WHERE tunnus = '$tunnus'";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -46,17 +46,17 @@ if ($tee == 'U') {
     }
     $yrow=mysql_fetch_array($result);
 
-          $query = "INSERT into maksu values (
-                    '$kukarow[yhtio]',
-                    '$yrow[0]',
-                    '$kukarow[kuka]',
-                    '$tapvm',
-                    'MU',
-                    '$summa',
-                    '$selite',
-                    '',
-                    '')";
-          $result = mysql_query($query) or pupe_error($query);
+    $query = "INSERT into maksu values (
+              '$kukarow[yhtio]',
+              '$yrow[0]',
+              '$kukarow[kuka]',
+              '$tapvm',
+              'MU',
+              '$summa',
+              '$selite',
+              '',
+              '')";
+    $result = mysql_query($query) or pupe_error($query);
   }
 }
 
@@ -70,11 +70,11 @@ $result = mysql_query($query) or pupe_error($query);
 echo "<table><tr><th></th>";
 
 for ($i = 0; $i < mysql_num_fields($result)-1; $i++) {
-  echo "<th>" . mysql_field_name($result,$i)."</th>";
+  echo "<th>" . mysql_field_name($result, $i)."</th>";
 }
 echo "<th></th></tr>";
 
-while ($maksurow=mysql_fetch_array ($result)) {
+while ($maksurow=mysql_fetch_array($result)) {
   echo "<td>
       <form action = 'maksu.php' method='post'>
       <input type='hidden' name='tunnus' value = '$maksurow[3]'>

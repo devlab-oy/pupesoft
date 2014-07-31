@@ -1,6 +1,6 @@
 <?php
 
-require("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Korkolaskut")."</font><hr>";
 
@@ -19,7 +19,7 @@ if (mysql_num_rows($result) != 1) {
   $tee = "";
 }
 
-$kasittelykulu = str_replace(',','.', $kasittelykulu);
+$kasittelykulu = str_replace(',', '.', $kasittelykulu);
 
 if (($yhtiorow["kasittelykulu_tuotenumero"] != '') and (!is_numeric($kasittelykulu) or $kasittelykulu < 0)) {
   echo "<font class='error'>".t("Käsittelykulu summa on syötettävä")."!</font><br>";
@@ -29,10 +29,10 @@ if (($yhtiorow["kasittelykulu_tuotenumero"] != '') and (!is_numeric($kasittelyku
 if ($tee == 'LAHETA') {
 
   //tulostetaan korkoerittely
-  require('tulosta_korkoerittely.inc');
+  require 'tulosta_korkoerittely.inc';
 
   //tehdään itse korkolasku (tämä skripti kutsuu tilaus-valmis ohjelmaa joka tekee melekin kaiken meille)
-  require('tee_korkolasku.inc');
+  require 'tee_korkolasku.inc';
 
   //päivitetään laskut lähetetyiksi
   $query = "UPDATE lasku
@@ -48,7 +48,7 @@ if ($tee == "ALOITAKOROTUS") {
 
   $korkolisa = "";
   if ($korkosumma > 0) {
-    $korkosumma = str_replace(',','.',$korkosumma);
+    $korkosumma = str_replace(',', '.', $korkosumma);
     $korkolisa = " and korkosumma > $korkosumma ";
   }
 
@@ -124,7 +124,7 @@ if ($tee == 'KOROTA' and $korotettavat[0] == "") {
   $tee = "";
 }
 
-if ($tee == "KOROTA")  {
+if ($tee == "KOROTA") {
 
   $query = "SELECT lasku.liitostunnus, tiliointi.summa*-1 summa, lasku.tunnus,
             lasku.erpcm, lasku.laskunro, tiliointi.tapvm, lasku.tapvm latapvm, if(count(*) > 1, 'useita', lasku.mapvm) mapvm, lasku.viikorkopros,
@@ -153,7 +153,7 @@ if ($tee == "KOROTA")  {
   $asiakastiedot = mysql_fetch_assoc($asiakasresult);
 
   //ja kelataan akuun
-  mysql_data_seek($result,0);
+  mysql_data_seek($result, 0);
 
   echo "<table>
   <tr><th>".t("Ytunnus")."</th><td>$asiakastiedot[ytunnus]</td></tr>
@@ -241,7 +241,7 @@ if ($tee == "KOROTA")  {
   echo "<input name='kasittelykulu' type='hidden' value='$kasittelykulu'>";
   echo "<input name='kirjoitin' type='hidden' value='$kirjoitin'>";
 
-  foreach($korotettavat as $tunnukset) {
+  foreach ($korotettavat as $tunnukset) {
     echo "\n<input type='hidden' name='korotettavat[]' value='$tunnukset'>";
   }
 
@@ -261,7 +261,7 @@ if ($tee == "KOROTA")  {
   echo "<form  name='ohitaformi' method='post'>";
   echo "<input name='tee' type='hidden' value='KOROTA'>";
 
-  foreach($korotettavat as $tunnukset) {
+  foreach ($korotettavat as $tunnukset) {
     echo "\n<input type='hidden' name='korotettavat[]' value='$tunnukset'>";
   }
 
@@ -293,11 +293,11 @@ if ($tee == "") {
   echo "<table>";
 
   if (!isset($kka))
-    $kka = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+    $kka = date("m", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
   if (!isset($vva))
-    $vva = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+    $vva = date("Y", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
   if (!isset($ppa))
-    $ppa = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+    $ppa = date("d", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 
   if (!isset($kkl))
     $kkl = date("m");
@@ -344,11 +344,11 @@ if ($tee == "") {
     }
   }
 
-  echo "<tr><th>",t("Vienti"),":</th>";
+  echo "<tr><th>", t("Vienti"), ":</th>";
   echo "<td colspan='3'><select name='vienti[]' multiple size='3'>";
-  echo "<option value=''{$vienti_sel['']}>",t("Kotimaa"),"</option>";
-  echo "<option value='E'{$vienti_sel['E']}>",t("Vienti EU"),"</option>";
-  echo "<option value='K'{$vienti_sel['K']}>",t("Vienti ei-EU"),"</option>";
+  echo "<option value=''{$vienti_sel['']}>", t("Kotimaa"), "</option>";
+  echo "<option value='E'{$vienti_sel['E']}>", t("Vienti EU"), "</option>";
+  echo "<option value='K'{$vienti_sel['K']}>", t("Vienti ei-EU"), "</option>";
   echo "</select></td></tr>";
 
   echo "<tr><th>".t("Minimi korkosumma").":</th>";
@@ -370,7 +370,7 @@ if ($tee == "") {
     echo "<td colspan='3'><input type='text' name='kasittelykulu' value='$kasittelykulu'> $valuutta</td></tr>";
   }
 
-  echo "<tr><th>",t("Valitse tulostin"),"</th><td colspan='3'><select name='kirjoitin'>";
+  echo "<tr><th>", t("Valitse tulostin"), "</th><td colspan='3'><select name='kirjoitin'>";
 
   $query = "SELECT *
             FROM kirjoittimet
@@ -400,7 +400,7 @@ if ($tee == "") {
   echo "<tr><th>".t("Yhteyshenkilö").":</th>";
   echo "<td colspan='3'><select name='yhteyshenkilo'>";
 
-  while($row = mysql_fetch_assoc($meapu)) {
+  while ($row = mysql_fetch_assoc($meapu)) {
     $sel = "";
 
     if ($row['kuka'] == $kukarow['kuka']) {
@@ -421,4 +421,4 @@ if ($tee == "") {
   echo "</table>";
 }
 
-require("inc/footer.inc");
+require "inc/footer.inc";

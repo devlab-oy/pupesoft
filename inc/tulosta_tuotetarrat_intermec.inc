@@ -17,7 +17,7 @@ if (mysql_num_rows($tarrares) == 1) {
     $nimitys2 = '';
     //jos nimitys on pidempi kuin 22 merkki‰ niin se ei mahdu yhdelle riville vaan pit‰‰ jakaa kahtia
     if (strlen($nimitys) > 30) {
-      $nimitys = substr($tarrarow['nimitys'],0,30);
+      $nimitys = substr($tarrarow['nimitys'], 0, 30);
     }
     $tuoteno = $tarrarow['tuoteno'];
     //t‰ss‰ arvataan merkkim‰‰r‰n perusteella mink‰lainen viivakoodi pit‰‰ tehd‰
@@ -48,14 +48,12 @@ if (mysql_num_rows($tarrares) == 1) {
       elseif (($laji=="UPC12") && ($pit==12))            $ajetaanko = true;
       elseif (($laji=="NVE18") && ($pit==18))            $ajetaanko = true;
 
-      if ($ajetaanko)
-      {
-        $rest = substr($eankoodi,-1);
-        $wert = substr($eankoodi,0,$pit-1);
+      if ($ajetaanko) {
+        $rest = substr($eankoodi, -1);
+        $wert = substr($eankoodi, 0, $pit-1);
         $sum = '';
-        for ($i=($pit-1);$i>0;--$i)
-        {
-          $sum  = $sum + substr($wert,$i-1,1) * $factor;
+        for ($i=($pit-1);$i>0;--$i) {
+          $sum  = $sum + substr($wert, $i-1, 1) * $factor;
           $factor  = 4 - $factor;
         }
         if ($rest==((1000-$sum)%10))  $tulos = true;
@@ -65,13 +63,13 @@ if (mysql_num_rows($tarrares) == 1) {
     if ($laji== 'EAN13' and $tulos== true) {
       //echo "on ean<br>";
       $koodi = 'EAN13';
-      $eankoodi = substr($eankoodi,0,-1);
+      $eankoodi = substr($eankoodi, 0, -1);
     }
     //UPC-A
     elseif ($laji== 'UPC12' and $tulos== true) {
       //echo "on UPC<br>";
       $koodi = 'UPCA';
-      $eankoodi = substr($eankoodi,0,-1);
+      $eankoodi = substr($eankoodi, 0, -1);
     }
     //JOTAIN MUUTA
     else {
@@ -79,7 +77,7 @@ if (mysql_num_rows($tarrares) == 1) {
       //echo "ei ole MIKAAN $laji<br>";
     }
     //t‰ss‰ tehd‰‰n aineisto jota Intermec tulostin tajuaa
-$sivu = '
+    $sivu = '
 BF ON
 BF \"Swiss 721 BT\",10,0
 BH 80

@@ -39,7 +39,7 @@ $kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
 
 $tecd = FALSE;
 
-if (@include("inc/tecdoc.inc")) {
+if (@include "inc/tecdoc.inc") {
   $tecd = TRUE;
 }
 
@@ -131,7 +131,7 @@ if ($paiva_ajo and !empty($relex_ftphost)) {
   $ftppass = $relex_ftppass;
   $ftppath = "/data/input";
   $ftpfile = $filepath;
-  require("inc/ftp-send.inc");
+  require "inc/ftp-send.inc";
 }
 
 echo "Valmis.\n";

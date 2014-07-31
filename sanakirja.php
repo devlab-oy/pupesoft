@@ -1,6 +1,6 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Sanakirja")."</font><hr>";
 
@@ -110,7 +110,7 @@ if (count($kieli) > 0) {
       $query .= " (";
 
       $sanarajaus = "";
-      foreach($sanat as $sana) {
+      foreach ($sanat as $sana) {
         if (trim($sana) != '') {
 
           if ($tarkkahaku == "") {
@@ -157,7 +157,7 @@ if (count($kieli) > 0) {
       if ($row['tunnus'] > $maxtunnus) $maxtunnus = $row['tunnus'];
 
       for ($i=2; $i<mysql_num_fields($result); $i++) {
-        echo "<td><input type='text' size='30' name='".mysql_field_name($result, $i)."[$row[tunnus]]' value='".trim(htmlspecialchars($row[$i],ENT_QUOTES))."'></td>";
+        echo "<td><input type='text' size='30' name='".mysql_field_name($result, $i)."[$row[tunnus]]' value='".trim(htmlspecialchars($row[$i], ENT_QUOTES))."'></td>";
       }
 
       $laskkaannos++;
@@ -178,4 +178,4 @@ else {
   echo "<br><br><font class='error'>".t("Valitse k‰‰nnett‰v‰ kieli!")."</font><br><br>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

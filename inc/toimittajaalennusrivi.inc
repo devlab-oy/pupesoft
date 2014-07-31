@@ -81,7 +81,7 @@ if (mysql_field_name($result, $i) == "alkupvm" or mysql_field_name($result, $i) 
 }
 
 if (mysql_field_name($result, $i) == "monikerta") {
-   $sel = "";
+  $sel = "";
   if ($trow[$i] != "") $sel = "SELECTED";
 
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
@@ -92,7 +92,7 @@ if (mysql_field_name($result, $i) == "monikerta") {
 }
 
 if (mysql_field_name($result, $i) == "alennuslaji") {
-   $sel = array_fill_keys(array($trow[$i]), " selected") + array_fill(1, $yhtiorow['oston_alekentat'], '');
+  $sel = array_fill_keys(array($trow[$i]), " selected") + array_fill(1, $yhtiorow['oston_alekentat'], '');
 
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
 

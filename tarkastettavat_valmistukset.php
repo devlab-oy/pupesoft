@@ -1,7 +1,8 @@
 <?php
 /**
-* Tarkastettavat valmistukset
-*/
+ * Tarkastettavat valmistukset
+ */
+
 
 require 'inc/parametrit.inc';
 require 'valmistus.class.php';
@@ -9,7 +10,9 @@ require 'valmistus.class.php';
 echo "<font class='head'>".t("Tarkastettavat valmistukset")."</font>";
 echo "<hr>";
 
-/** P‰ivitet‰‰n valmistuksen tila */
+/**
+ * P‰ivitet‰‰n valmistuksen tila
+ */
 if ($tee == 'paivita' and isset($tunnus)) {
   $valmistus = Valmistus::find($tunnus);
 
@@ -67,7 +70,7 @@ if ($tee == 'nayta' and isset($tunnus)) {
     </tr>";
 
   // Valmistuksen raaka-aineet
-  foreach($valmistus->raaka_aineet() as $ra) {
+  foreach ($valmistus->raaka_aineet() as $ra) {
     if ($ra['tyyppi'] == 'W' or $ra['tyyppi'] == 'M') {
       echo "<tr class='spec'>";
     } else {
@@ -103,13 +106,13 @@ else {
         </tr>";
 
     // Listataan valmistukset
-    foreach($valmistukset as $valmistus) {
+    foreach ($valmistukset as $valmistus) {
       echo "<tr>";
       echo "<td>{$valmistus->tunnus()}</td>";
       echo "<td>{$valmistus->getTila()}</td>";
 
       echo "<td>";
-      foreach($valmistus->tuotteet() as $valmiste) {
+      foreach ($valmistus->tuotteet() as $valmiste) {
         echo $valmiste['nimitys']."<br>";
       }
       echo "</td>";

@@ -1,7 +1,7 @@
 <?php
 
-if(!function_exists("toimittajahintatarkista")) {
-  function toimittajahintatarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+if (!function_exists("toimittajahintatarkista")) {
+  function toimittajahintatarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set, $alasveto;
 
     static $chytunnus, $chtuoteno, $chryhma, $chminkpl, $chmaxkpl, $chalkupvm, $chloppupvm, $chastunn, $chtuoteno_ind;
@@ -54,7 +54,7 @@ if(!function_exists("toimittajahintatarkista")) {
           $ulos2       = "";
 
           if ($ytunnus != "" and $ytunnus != "0") {
-            require("inc/kevyt_toimittajahaku.inc");
+            require "inc/kevyt_toimittajahaku.inc";
           }
 
           if ($ulos2 != "" and $ytunnus == "") {
@@ -91,7 +91,7 @@ if(!function_exists("toimittajahintatarkista")) {
           $kutsuja     = "yllapito.php";
           $ulos      = "";
 
-          require ("inc/tuotehaku.inc");
+          require "inc/tuotehaku.inc";
 
           if ($ulos != "") {
             $alasveto[$i] = "<select name='t[$i]'>".$ulos."</select>";
@@ -204,7 +204,7 @@ if(!function_exists("toimittajahintatarkista")) {
                  AND minkpl    = $chminkpl
                  AND maxkpl    = $chmaxkpl
                  AND tunnus   != '$trow[$i]'";
-      $dsresult = mysql_query($aquery) OR pupe_error($aquery);
+      $dsresult = mysql_query($aquery) or pupe_error($aquery);
 
       if (mysql_num_rows($dsresult) > 0) {
         // Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi

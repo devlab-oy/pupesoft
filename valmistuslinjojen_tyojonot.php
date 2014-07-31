@@ -14,6 +14,8 @@ if ($yhtiorow['valmistuksessa_kaytetaan_tilakoodeja'] != 'K') {
  * Näytetään lomake valmistuksen tilan vaihdossa
  *
  */
+
+
 if (isset($tee) and $tee == 'verify') {
   // Haetaan aina valmistus
   $valmistus = Valmistus::find($tunnus);
@@ -81,7 +83,7 @@ if (isset($tee) and $tee == 'update') {
           }
           // Määrä on sama (valmistus on valmistettu kokonaan)
           elseif ($maara == $valmiste['varattu']) {
-            #echo "määrä sama! päivitetään vaan tila ja lisätään kommentit";
+            //echo "määrä sama! päivitetään vaan tila ja lisätään kommentit";
           }
           // Virhe
           else {
@@ -134,14 +136,14 @@ if ($tee == '') {
 
   // Valmistuksen tilat selväkielisenä
   $tilat = array(
-      'OV' => 'Odottaa valmistusta',
-      'VA' => 'Valmistuksessa',
-      'TK' => 'Työ keskeytetty',
-      'VT' => 'Valmis tarkastukseen',
-      'TA' => 'Tarkastettu'
-    );
+    'OV' => 'Odottaa valmistusta',
+    'VA' => 'Valmistuksessa',
+    'TK' => 'Työ keskeytetty',
+    'VT' => 'Valmis tarkastukseen',
+    'TA' => 'Tarkastettu'
+  );
 
-  foreach($linjat as $linja) {
+  foreach ($linjat as $linja) {
 
     echo "<table>";
     echo "<tr>";
@@ -179,7 +181,7 @@ if ($tee == '') {
     }
     else {
       // Työjonon työt
-      while($tyojono = mysql_fetch_assoc($tyojono_result)) {
+      while ($tyojono = mysql_fetch_assoc($tyojono_result)) {
         echo "<tr>";
         echo "<td>" . $tyojono['valmistusnumero'] . "</td>";
         echo "<td>" . strtoupper($tilat[$tyojono['valmistuksen_tila']]) . "</td>";
@@ -209,7 +211,7 @@ if ($tee == '') {
           echo "<option value='VA'>Aloita valmistus</option>";
         }
 
-        echo "<option value='OV'>(Siirä parkkiin)</option>"; # TODO: Tätä ei tarvita täällä.
+        echo "<option value='OV'>(Siirä parkkiin)</option>"; // TODO: Tätä ei tarvita täällä.
         echo "</select>";
 
         echo "</form>";
@@ -226,4 +228,4 @@ if ($tee == '') {
 
 }
 
-require('inc/footer.inc');
+require 'inc/footer.inc';

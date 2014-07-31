@@ -1,6 +1,6 @@
 <?php
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Luotonhallinta")."</font><hr>";
 
@@ -43,7 +43,7 @@ $muutparametrit = "$pvm_alku#$pvm_loppu#$minimi_myynti#$luottorajauksia#$luottov
 
 if ($ytunnus != '') {
 
-  require ("inc/asiakashaku.inc");
+  require "inc/asiakashaku.inc";
 
   if ($ytunnus == '') {
     echo "<br><br>";
@@ -98,7 +98,7 @@ echo "<input type='hidden' name='tee' value='1'>";
 echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 
 $monivalintalaatikot = array("ASIAKASOSASTO", "ASIAKASRYHMA", "ASIAKASPIIRI");
-require ("tilauskasittely/monivalintalaatikot.inc");
+require "tilauskasittely/monivalintalaatikot.inc";
 
 echo "<br>";
 echo "<table>";
@@ -151,7 +151,7 @@ echo "<th>".t("Vain luottovakuutetut")."</th>";
 echo "<td><input type='checkbox' name='luottovakuutettu' value='K' $checked></td>";
 echo "</tr>";
 
-  echo "</table>";
+echo "</table>";
 
 echo "<br>";
 
@@ -164,14 +164,14 @@ echo "<br />";
 echo "<form method='post' name='sendfile' enctype='multipart/form-data'>";
 echo "<input type='hidden' name='tee'    value = '3'>";
 
-echo t("tai"),"...";
+echo t("tai"), "...";
 echo "<br />";
 echo "<br />";
 
-echo "<font class='message'>",t("Päivitä asiakkaiden luottotietoja tiedostosta"),"</font><br />";
-echo "<font class='info'>",t("Otsikot: ytunnus, asiakasnro, luottoraja"),"</font><br />";
+echo "<font class='message'>", t("Päivitä asiakkaiden luottotietoja tiedostosta"), "</font><br />";
+echo "<font class='info'>", t("Otsikot: ytunnus, asiakasnro, luottoraja"), "</font><br />";
 echo "<table>";
-echo "<tr><th>",t("Valitse tiedosto"),"</th><td><input type='file' name='userfile' /></td><td class='back'><input type='submit' value='",t("Lähetä"),"' /></td></tr>";
+echo "<tr><th>", t("Valitse tiedosto"), "</th><td><input type='file' name='userfile' /></td><td class='back'><input type='submit' value='", t("Lähetä"), "' /></td></tr>";
 echo "</table>";
 echo "</form>";
 
@@ -218,7 +218,7 @@ if ($tee == "3") {
     $plural = $cnt == 1 ? "rivi" : "riviä";
     $classi = $cnt > 0 ? "ok" : "error";
 
-    echo "<font class='{$classi}'>",t("Päivitettiin %d %s", '', $cnt, $plural),".</font><br />";
+    echo "<font class='{$classi}'>", t("Päivitettiin %d %s", '', $cnt, $plural), ".</font><br />";
   }
 }
 
@@ -455,7 +455,7 @@ if ($tee == "1") {
     echo "<td align='right'>$kaatotilirow[summa]</td>";
 
     // Lasketaan luottotilanne nyt
-    $luottotilanne_nyt = round($asiakasrow["luottoraja"] - $avoimetlaskutrow["laskuavoinsaldo"] + $kaatotilirow["summa"] - $avoimettilauksetrow["tilausavoinsaldo"],2);
+    $luottotilanne_nyt = round($asiakasrow["luottoraja"] - $avoimetlaskutrow["laskuavoinsaldo"] + $kaatotilirow["summa"] - $avoimettilauksetrow["tilausavoinsaldo"], 2);
 
     echo "<td align='right'>$luottotilanne_nyt</td>";
 
@@ -483,4 +483,4 @@ if ($tee == "1") {
   echo "</form>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

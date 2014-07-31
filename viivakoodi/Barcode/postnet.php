@@ -23,7 +23,8 @@
  * @link       http://pear.php.net/package/Image_Barcode
  */
 
- /*
+
+/*
   * Note:
   *
   * The generated barcode must fit the following criteria to be useable
@@ -54,108 +55,110 @@ require_once 'Image/Barcode.php';
  */
 class Image_Barcode_postnet extends Image_Barcode
 {
-    /**
-     * Barcode type
-     * @var string
-     */
-    var $_type = 'postnet';
 
-    /**
-     * Bar short height
-     *
-     * @var integer
-     */
-    var $_barshortheight = 7;
+  /**
+   * Barcode type
+   *
+   * @var string
+   */
+  var $_type = 'postnet';
 
-    /**
-     * Bar tall height
-     *
-     * @var integer
-     */
-    var $_bartallheight = 15;
+  /**
+   * Bar short height
+   *
+   * @var integer
+   */
+  var $_barshortheight = 7;
 
-    /**
-     * Bar width / scaling factor
-     *
-     * @var integer
-     */
-    var $_barwidth = 2;
+  /**
+   * Bar tall height
+   *
+   * @var integer
+   */
+  var $_bartallheight = 15;
 
-    /**
-     * Coding map
-     * @var array
-     */
-    var $_coding_map = array(
-           '0' => '11000',
-           '1' => '00011',
-           '2' => '00101',
-           '3' => '00110',
-           '4' => '01001',
-           '5' => '01010',
-           '6' => '01100',
-           '7' => '10001',
-           '8' => '10010',
-           '9' => '10100'
-        );
+  /**
+   * Bar width / scaling factor
+   *
+   * @var integer
+   */
+  var $_barwidth = 2;
 
-    /**
-     * Draws a PostNet image barcode
-     *
-     * @param  string $text     A text that should be in the image barcode
-     * @param  string $imgtype  The image type that will be generated
-     *
-     * @return image            The corresponding Interleaved 2 of 5 image barcode
-     *
-     * @access public
-     *
-     * @author Josef "Jeff" Sipek <jeffpc@optonline.net>
-     * @since  Image_Barcode 0.3
-     */
+  /**
+   * Coding map
+   *
+   * @var array
+   */
+  var $_coding_map = array(
+    '0' => '11000',
+    '1' => '00011',
+    '2' => '00101',
+    '3' => '00110',
+    '4' => '01001',
+    '5' => '01010',
+    '6' => '01100',
+    '7' => '10001',
+    '8' => '10010',
+    '9' => '10100'
+  );
 
-    function draw($text, $imgtype = 'png')
-    {
-        $text = trim($text);
 
-        if (!preg_match('/[0-9]/', $text)) {
-            return;
-        }
+  /**
+   * Draws a PostNet image barcode
+   *
+   * @param string  $text    A text that should be in the image barcode
+   * @param string  $imgtype The image type that will be generated
+   *
+   * @return image            The corresponding Interleaved 2 of 5 image barcode
+   *
+   * @access public
+   *
+   * @author Josef "Jeff" Sipek <jeffpc@optonline.net>
+   * @since  Image_Barcode 0.3
+   */
+  function draw($text, $imgtype = 'png') {
+    $text = trim($text);
 
-        // Calculate the barcode width
-        $barcodewidth = (strlen($text)) * 2 * 5 * $this->_barwidth + $this->_barwidth*3;
+    if (!preg_match('/[0-9]/', $text)) {
+      return;
+    }
 
-        // Create the image
-        $img = ImageCreate($barcodewidth, $this->_bartallheight);
+    // Calculate the barcode width
+    $barcodewidth = (strlen($text)) * 2 * 5 * $this->_barwidth + $this->_barwidth*3;
 
-        // Alocate the black and white colors
-        $black = ImageColorAllocate($img, 0, 0, 0);
-        $white = ImageColorAllocate($img, 255, 255, 255);
+    // Create the image
+    $img = imagecreate($barcodewidth, $this->_bartallheight);
 
-        // Fill image with white color
-        imagefill($img, 0, 0, $white);
+    // Alocate the black and white colors
+    $black = imagecolorallocate($img, 0, 0, 0);
+    $white = imagecolorallocate($img, 255, 255, 255);
 
-        // Initiate x position
-        $xpos = 0;
+    // Fill image with white color
+    imagefill($img, 0, 0, $white);
 
-        // Draws the leader
-        imagefilledrectangle($img, $xpos, 0, $xpos + $this->_barwidth - 1, $this->_bartallheight, $black);
+    // Initiate x position
+    $xpos = 0;
+
+    // Draws the leader
+    imagefilledrectangle($img, $xpos, 0, $xpos + $this->_barwidth - 1, $this->_bartallheight, $black);
+    $xpos += 2*$this->_barwidth;
+
+    // Draw $text contents
+    for ($idx = 0; $idx < strlen($text); $idx++) {
+      $char  = substr($text, $idx, 1);
+
+      for ($baridx = 0; $baridx < 5; $baridx++) {
+        $elementheight = (substr($this->_coding_map[$char], $baridx, 1)) ?  0 : $this->_barshortheight;
+        imagefilledrectangle($img, $xpos, $elementheight, $xpos + $this->_barwidth - 1, $this->_bartallheight, $black);
         $xpos += 2*$this->_barwidth;
+      }
+    }
 
-        // Draw $text contents
-        for ($idx = 0; $idx < strlen($text); $idx++) {
-            $char  = substr($text, $idx, 1);
+    // Draws the trailer
+    imagefilledrectangle($img, $xpos, 0, $xpos + $this->_barwidth - 1, $this->_bartallheight, $black);
+    $xpos += 2*$this->_barwidth;
 
-            for ($baridx = 0; $baridx < 5; $baridx++) {
-                $elementheight = (substr($this->_coding_map[$char], $baridx, 1)) ?  0 : $this->_barshortheight;
-                imagefilledrectangle($img, $xpos, $elementheight, $xpos + $this->_barwidth - 1, $this->_bartallheight, $black);
-                $xpos += 2*$this->_barwidth;
-            }
-        }
-
-        // Draws the trailer
-        imagefilledrectangle($img, $xpos, 0, $xpos + $this->_barwidth - 1, $this->_bartallheight, $black);
-        $xpos += 2*$this->_barwidth;
-
-        return $img;
-    } // function create
+    return $img;
+  } // function create
 
 } // class

@@ -3,14 +3,14 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Suorituskykylokiraportointi")."<hr></font>";
 echo "<br><br>";
 
-if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m"), date("d")-7, date("Y")));
-if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m"), date("d")-7, date("Y")));
-if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m"), date("d")-7, date("Y")));
+if (!isset($kka)) $kka = date("m", mktime(0, 0, 0, date("m"), date("d")-7, date("Y")));
+if (!isset($vva)) $vva = date("Y", mktime(0, 0, 0, date("m"), date("d")-7, date("Y")));
+if (!isset($ppa)) $ppa = date("d", mktime(0, 0, 0, date("m"), date("d")-7, date("Y")));
 
 if (!isset($kkl)) $kkl = date("m");
 if (!isset($vvl)) $vvl = date("Y");
@@ -92,7 +92,7 @@ echo "</form><br><br>";
 
 if (isset($tee) and $tee == 'listaa') {
 
-  function avaa_array ($arrayi) {
+  function avaa_array($arrayi) {
     foreach ($arrayi as $muuttuja => $arvo) {
       echo "<table>";
       echo "<tr><td class='spec'>$muuttuja</td><td class='spec'>$arvo</td></tr>";
@@ -108,7 +108,7 @@ if (isset($tee) and $tee == 'listaa') {
 
   if ($skripti != "") {
 
-    list($sovellus,$nimi,$alanimi) = explode("###", $skripti);
+    list($sovellus, $nimi, $alanimi) = explode("###", $skripti);
 
     $skriptilisa .= " and suorituskykyloki.skripti like '%$polku$nimi' ";
 
@@ -163,4 +163,4 @@ if (isset($tee) and $tee == 'listaa') {
   echo "</table>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

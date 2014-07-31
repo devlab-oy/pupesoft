@@ -1,15 +1,15 @@
 <?php
 
 if (isset($_POST["tee"])) {
-  if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
 if (strpos($_SERVER['SCRIPT_NAME'], "ostoseuranta.php") !== FALSE) {
   // Ei käytetä pakkausta
   $compression = FALSE;
 
-  require ("../inc/parametrit.inc");
+  require "../inc/parametrit.inc";
 }
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
@@ -25,7 +25,7 @@ else {
 
   //* Tämä skripti käyttää slave-tietokantapalvelinta *//
   $useslave = 1;
-  require ("inc/connect.inc");
+  require "inc/connect.inc";
 
   if (count($_POST) > 0) {
     if (isset($muutparametrit)) {
@@ -75,7 +75,7 @@ else {
       foreach ($yhtiot as $apukala) {
         $yhtio .= "'$apukala',";
       }
-      $yhtio = substr($yhtio,0,-1);
+      $yhtio = substr($yhtio, 0, -1);
     }
 
     // jos joku päiväkenttä on tyhjää ei tehdä mitään
@@ -101,7 +101,7 @@ else {
     if ($tee == 'go' and $toimittaja != '') {
       $ytunnus = $toimittaja;
 
-      require("../inc/kevyt_toimittajahaku.inc");
+      require "../inc/kevyt_toimittajahaku.inc";
 
       if ($ytunnus != '') {
         $toimittaja = $ytunnus;
@@ -243,7 +243,7 @@ else {
       }
 
       if ($order != "") {
-        $order = substr($order,0,-1);
+        $order = substr($order, 0, -1);
       }
       else {
         $order = "1";
@@ -287,7 +287,7 @@ else {
         $pvmvar = " tilausrivi.laskutettuaika ";
       }
 
-      # Ajetaanko kuusausittain
+      // Ajetaanko kuusausittain
       if ($kuukausittain == "ALLEKKAIN") {
         $select = " substring($pvmvar, 6, 2) kuukausi,".$select;
         $group = " kuukausi, ".$group;
@@ -302,37 +302,37 @@ else {
 
       // Katotaan mistä kohtaa queryä alkaa varsinaiset numerosarakkeet (HUOM: toi ', ' pilkkuspace erottaa sarakket toisistaan)
       if ($kuukausittain == "SARAKE") {
-        $MONTH_ARRAY    = array(1=> t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kesäkuu'),t('Heinäkuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
+        $MONTH_ARRAY    = array(1=> t('Tammikuu'), t('Helmikuu'), t('Maaliskuu'), t('Huhtikuu'), t('Toukokuu'), t('Kesäkuu'), t('Heinäkuu'), t('Elokuu'), t('Syyskuu'), t('Lokakuu'), t('Marraskuu'), t('Joulukuu'));
 
-        $startmonth  = date("Ymd",mktime(0, 0, 0, $kka, 1,  $vva));
-        $endmonth   = date("Ymd",mktime(0, 0, 0, $kkl, 1,  $vvl));
+        $startmonth  = date("Ymd", mktime(0, 0, 0, $kka, 1,  $vva));
+        $endmonth   = date("Ymd", mktime(0, 0, 0, $kkl, 1,  $vvl));
 
         for ($i = $startmonth;  $i <= $endmonth;) {
 
-          $alku  = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4)));
-          $loppu = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), date("t", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4))),  substr($i,0,4)));
+          $alku  = date("Y-m-d", mktime(0, 0, 0, substr($i, 4, 2), substr($i, 6, 2),  substr($i, 0, 4)));
+          $loppu = date("Y-m-d", mktime(0, 0, 0, substr($i, 4, 2), date("t", mktime(0, 0, 0, substr($i, 4, 2), substr($i, 6, 2),  substr($i, 0, 4))),  substr($i, 0, 4)));
 
-          $alku_ed  = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4)-1));
-          $loppu_ed = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), date("t", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4))),  substr($i,0,4)-1));
+          $alku_ed  = date("Y-m-d", mktime(0, 0, 0, substr($i, 4, 2), substr($i, 6, 2),  substr($i, 0, 4)-1));
+          $loppu_ed = date("Y-m-d", mktime(0, 0, 0, substr($i, 4, 2), date("t", mktime(0, 0, 0, substr($i, 4, 2), substr($i, 6, 2),  substr($i, 0, 4))),  substr($i, 0, 4)-1));
 
           //Osto
-          $query .= " sum(if($pvmvar >= '$alku'  and $pvmvar <= '$loppu', tilausrivi.hinta*lasku.vienti_kurssi*tilausrivi.kpl*{$query_ale_lisa},0)) '".substr($MONTH_ARRAY[(substr($i,4,2)*1)],0,3)." ".substr($i,0,4)." ".t("Ostot")."', ";
+          $query .= " sum(if($pvmvar >= '$alku'  and $pvmvar <= '$loppu', tilausrivi.hinta*lasku.vienti_kurssi*tilausrivi.kpl*{$query_ale_lisa},0)) '".substr($MONTH_ARRAY[(substr($i, 4, 2)*1)], 0, 3)." ".substr($i, 0, 4)." ".t("Ostot")."', ";
 
           //Ostoed
           if ($piiloed == "") {
-            $query .= " sum(if($pvmvar >= '$alku_ed'  and $pvmvar <= '$loppu_ed', tilausrivi.hinta*lasku.vienti_kurssi*tilausrivi.kpl*{$query_ale_lisa},0)) '".substr($MONTH_ARRAY[(substr($i,4,2)*1)],0,3)." ".(substr($i,0,4)-1)." ".t("Ostot")."', ";
+            $query .= " sum(if($pvmvar >= '$alku_ed'  and $pvmvar <= '$loppu_ed', tilausrivi.hinta*lasku.vienti_kurssi*tilausrivi.kpl*{$query_ale_lisa},0)) '".substr($MONTH_ARRAY[(substr($i, 4, 2)*1)], 0, 3)." ".(substr($i, 0, 4)-1)." ".t("Ostot")."', ";
           }
 
           if ($piilota_kappaleet == "") {
-            $query .= "  sum(if($pvmvar >= '$alku'  and $pvmvar <= '$loppu', tilausrivi.kpl,0)) '".substr($MONTH_ARRAY[(substr($i,4,2)*1)],0,3)." ".substr($i,0,4)." ".t("Ostokpl")."', ";
+            $query .= "  sum(if($pvmvar >= '$alku'  and $pvmvar <= '$loppu', tilausrivi.kpl,0)) '".substr($MONTH_ARRAY[(substr($i, 4, 2)*1)], 0, 3)." ".substr($i, 0, 4)." ".t("Ostokpl")."', ";
 
             //KPLED
             if ($piiloed == "") {
-              $query .= "  sum(if($pvmvar >= '$alku_ed' and $pvmvar <= '$loppu_ed',tilausrivi.kpl,0)) '".substr($MONTH_ARRAY[(substr($i,4,2)*1)],0,3)." ".(substr($i,0,4)-1)." ".t("Ostokpl")."', ";
+              $query .= "  sum(if($pvmvar >= '$alku_ed' and $pvmvar <= '$loppu_ed',tilausrivi.kpl,0)) '".substr($MONTH_ARRAY[(substr($i, 4, 2)*1)], 0, 3)." ".(substr($i, 0, 4)-1)." ".t("Ostokpl")."', ";
             }
           }
 
-          $i = date("Ymd",mktime(0, 0, 0, substr($i,4,2)+1, 1,  substr($i,0,4)));
+          $i = date("Ymd", mktime(0, 0, 0, substr($i, 4, 2)+1, 1,  substr($i, 0, 4)));
         }
 
         // Vika pilkku pois
@@ -367,7 +367,7 @@ else {
         }
 
         // Vika pilkku ja space pois
-        $query = substr($query, 0 ,-2);
+        $query = substr($query, 0 , -2);
       }
 
       $query .= "  FROM lasku use index (yhtio_tila_tapvm)
@@ -404,7 +404,7 @@ else {
 
         $rivilimitti = 1000;
 
-        if($vain_excel != "") {
+        if ($vain_excel != "") {
           echo "<font class='error'>".t("Tallenna/avaa tulos excelissä")."!</font><br><br>";
           $rivilimitti = 0;
         }
@@ -418,7 +418,7 @@ else {
 
       if ($query != "") {
         if (strpos($_SERVER['SCRIPT_NAME'], "ostoseuranta.php") !== FALSE) {
-          include('inc/pupeExcel.inc');
+          include 'inc/pupeExcel.inc';
 
           $worksheet    = new pupeExcel();
           $format_bold = array("bold" => TRUE);
@@ -453,11 +453,11 @@ else {
 
         // echotaan kenttien nimet
         for ($i=0; $i < mysql_num_fields($result); $i++) {
-          if (mysql_num_rows($result) <= $rivilimitti) echo "<th>".t(mysql_field_name($result,$i))."</th>";
+          if (mysql_num_rows($result) <= $rivilimitti) echo "<th>".t(mysql_field_name($result, $i))."</th>";
         }
 
         if (isset($worksheet)) {
-          for ($i=0; $i < mysql_num_fields($result); $i++) $worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
+          for ($i=0; $i < mysql_num_fields($result); $i++) $worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result, $i))), $format_bold);
           $excelrivi++;
         }
 
@@ -470,7 +470,7 @@ else {
 
         if (mysql_num_rows($result) > $rivilimitti) {
 
-          require_once ('inc/ProgressBar.class.php');
+          require_once 'inc/ProgressBar.class.php';
           $bar = new ProgressBar();
           $elements = mysql_num_rows($result); // total number of elements to process
           $bar->initialize($elements); // print the empty bar
@@ -539,18 +539,18 @@ else {
                 }
 
                 if ($vnim == "ostoind") {
-                  if ($valisummat["ostoed"] <> 0)     $vsum = round($valisummat["ostonyt"] / $valisummat["ostoed"],2);
+                  if ($valisummat["ostoed"] <> 0)     $vsum = round($valisummat["ostonyt"] / $valisummat["ostoed"], 2);
                 }
                 if ($vnim == "ostoarvoind") {
-                  if ($valisummat["ostoarvoed"] <> 0)   $vsum = round($valisummat["ostoarvonyt"] / $valisummat["ostoarvoed"],2);
+                  if ($valisummat["ostoarvoed"] <> 0)   $vsum = round($valisummat["ostoarvonyt"] / $valisummat["ostoarvoed"], 2);
                 }
                 if ($vnim == "ostokplind") {
-                  if ($valisummat["ostokpled"] <> 0)    $vsum = round($valisummat["ostokplnyt"] / $valisummat["ostokpled"],2);
+                  if ($valisummat["ostokpled"] <> 0)    $vsum = round($valisummat["ostokplnyt"] / $valisummat["ostokpled"], 2);
                 }
 
                 if (mysql_num_rows($result) <= $rivilimitti) echo "<td class='tumma' align='right'>$vsum</td>";
 
-                if(isset($worksheet)) {
+                if (isset($worksheet)) {
                   $worksheet->writeNumber($excelrivi, $excelsarake, $vsum);
                 }
 
@@ -565,24 +565,24 @@ else {
             $edluku = $row[0];
 
             // hoidetaan pisteet piluiksi!!
-            if (is_numeric($row[$i]) and (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int')) {
-              if (mysql_num_rows($result) <= $rivilimitti) echo "<td valign='top' align='right'>".sprintf("%.02f",$row[$i])."</td>";
+            if (is_numeric($row[$i]) and (mysql_field_type($result, $i) == 'real' or mysql_field_type($result, $i) == 'int')) {
+              if (mysql_num_rows($result) <= $rivilimitti) echo "<td valign='top' align='right'>".sprintf("%.02f", $row[$i])."</td>";
 
-              if(isset($worksheet)) {
-                $worksheet->writeNumber($excelrivi, $i, sprintf("%.02f",$row[$i]));
+              if (isset($worksheet)) {
+                $worksheet->writeNumber($excelrivi, $i, sprintf("%.02f", $row[$i]));
               }
             }
             elseif (mysql_field_name($result, $i) == 'sarjanumero') {
               if (mysql_num_rows($result) <= $rivilimitti) echo "<td valign='top'>$row[$i]</td>";
 
-              if(isset($worksheet)) {
+              if (isset($worksheet)) {
                 $worksheet->writeString($excelrivi, $i, strip_tags(str_replace("<br>", "\n", $row[$i])));
               }
             }
             else {
               if (mysql_num_rows($result) <= $rivilimitti) echo "<td valign='top'>$row[$i]</td>";
 
-              if(isset($worksheet)) {
+              if (isset($worksheet)) {
                 $worksheet->writeString($excelrivi, $i, strip_tags(str_replace("<br>", " / ", $row[$i])));
               }
             }
@@ -613,24 +613,24 @@ else {
 
           $excelsarake = $ostoind = $ostoarvoind = $ostokplind = 0;
 
-          foreach($valisummat as $vnim => $vsum) {
+          foreach ($valisummat as $vnim => $vsum) {
             if ((string) $vsum != '') {
               $vsum = sprintf("%.2f", $vsum);
             }
 
             if ($vnim == "ostoind") {
-              if ($valisummat["ostoed"] <> 0)     $vsum = round($valisummat["ostonyt"] / $valisummat["ostoed"],2);
+              if ($valisummat["ostoed"] <> 0)     $vsum = round($valisummat["ostonyt"] / $valisummat["ostoed"], 2);
             }
             if ($vnim == "ostoarvoind") {
-              if ($valisummat["ostoarvoed"] <> 0)     $vsum = round($valisummat["ostoarvonyt"] / $valisummat["ostoarvoed"],2);
+              if ($valisummat["ostoarvoed"] <> 0)     $vsum = round($valisummat["ostoarvonyt"] / $valisummat["ostoarvoed"], 2);
             }
             if ($vnim == "ostokplind") {
-              if ($valisummat["ostokpled"] <> 0)    $vsum = round($valisummat["ostokplnyt"] / $valisummat["ostokpled"],2);
+              if ($valisummat["ostokpled"] <> 0)    $vsum = round($valisummat["ostokplnyt"] / $valisummat["ostokpled"], 2);
             }
 
             if (mysql_num_rows($result) <= $rivilimitti) echo "<td class='tumma' align='right'>$vsum</td>";
 
-            if(isset($worksheet)) {
+            if (isset($worksheet)) {
               $worksheet->writeNumber($excelrivi, $excelsarake, $vsum);
             }
 
@@ -645,23 +645,23 @@ else {
 
         $excelsarake = $ostoind = $ostoarvoind = $ostokplind = 0;
 
-        foreach($totsummat as $vnim => $vsum) {
+        foreach ($totsummat as $vnim => $vsum) {
           if ((string) $vsum != '') {
             $vsum = sprintf("%.2f", $vsum);
           }
           if ($vnim == "ostoind") {
-            if ($totsummat["ostoed"] <> 0)     $vsum = round($totsummat["ostonyt"] / $totsummat["ostoed"],2);
+            if ($totsummat["ostoed"] <> 0)     $vsum = round($totsummat["ostonyt"] / $totsummat["ostoed"], 2);
           }
           if ($vnim == "ostoarvoind") {
-            if ($totsummat["ostoarvoed"] <> 0)     $vsum = round($totsummat["ostoarvonyt"] / $totsummat["ostoarvoed"],2);
+            if ($totsummat["ostoarvoed"] <> 0)     $vsum = round($totsummat["ostoarvonyt"] / $totsummat["ostoarvoed"], 2);
           }
           if ($vnim == "ostokplind") {
-            if ($totsummat["ostokpled"] <> 0)    $vsum = round($totsummat["ostokplnyt"] / $totsummat["ostokpled"],2);
+            if ($totsummat["ostokpled"] <> 0)    $vsum = round($totsummat["ostokplnyt"] / $totsummat["ostokpled"], 2);
           }
 
           if (mysql_num_rows($result) <= $rivilimitti) echo "<td class='tumma' align='right'>$vsum</td>";
 
-          if(isset($worksheet)) {
+          if (isset($worksheet)) {
             $worksheet->writeNumber($excelrivi, $excelsarake, $vsum);
             $excelsarake++;
           }
@@ -672,7 +672,7 @@ else {
 
         echo "<br>";
 
-        if(isset($worksheet)) {
+        if (isset($worksheet)) {
           // We need to explicitly close the workbook
           $excelnimi = $worksheet->close();
 
@@ -686,7 +686,7 @@ else {
           echo "</table><br>";
         }
 
-        if ($osoitetarrat != "" and $tarra_aineisto != '')  {
+        if ($osoitetarrat != "" and $tarra_aineisto != '') {
           $tarra_aineisto = substr($tarra_aineisto, 0, -1);
 
 
@@ -705,9 +705,9 @@ else {
 
   if ($lopetus == "") {
     //Käyttöliittymä
-    if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-    if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-    if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+    if (!isset($kka)) $kka = date("m", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+    if (!isset($vva)) $vva = date("Y", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+    if (!isset($ppa)) $ppa = date("d", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
     if (!isset($kkl)) $kkl = date("m");
     if (!isset($vvl)) $vvl = date("Y");
     if (!isset($ppl)) $ppl = date("d");
@@ -773,7 +773,7 @@ else {
     while ($rivi = mysql_fetch_array($res2)) {
       $mul_check = '';
       if ($mul_osasto!="") {
-        if (in_array($rivi['selite'],$mul_osasto)) {
+        if (in_array($rivi['selite'], $mul_osasto)) {
           $mul_check = 'SELECTED';
         }
       }
@@ -803,7 +803,7 @@ else {
     while ($rivi = mysql_fetch_array($res2)) {
       $mul_check = '';
       if ($mul_try!="") {
-        if (in_array($rivi['selite'],$mul_try)) {
+        if (in_array($rivi['selite'], $mul_try)) {
           $mul_check = 'SELECTED';
         }
       }
@@ -963,6 +963,6 @@ else {
   }
 
   if (strpos($_SERVER['SCRIPT_NAME'], "ostoseuranta.php") !== FALSE) {
-    require ("../inc/footer.inc");
+    require "../inc/footer.inc";
   }
 }

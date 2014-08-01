@@ -345,9 +345,9 @@ if ($tila == 'Muuta' and !isset($jatka)) {
                 JOIN toimitustapa AS tpa
                 ON ( ana.yhtio = tpa.yhtio AND ana.selitetark_2 = tpa.tunnus )
                 WHERE ana.yhtio = '$kukarow[yhtio]'
-                AND ana.laji = 'SIIRTOVARASTOT'
-                AND ana.selite = $varasto
-                AND selitetark = $clearing";
+                AND ana.laji    = 'SIIRTOVARASTOT'
+                AND ana.selite  = $varasto
+                AND selitetark  = $clearing";
       $ttresult = mysql_query($ttqry) or pupe_error($ttqry);
 
       if (mysql_num_rows($ttresult) > 0) {

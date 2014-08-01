@@ -309,20 +309,20 @@ elseif ($laskurow["tilaustyyppi"] == '0') {
   // Ylläpitosopimus
   // tila on 0 ja alatila on V
   $query  = "UPDATE lasku
-               SET tila = '0',
-               alatila      = 'V'
-               WHERE yhtio  = '$kukarow[yhtio]'
-               and tunnus   = '$laskurow[tunnus]'
-               and tila     in ('N','L','0')
-               and alatila != 'X'";
+             SET tila = '0',
+             alatila      = 'V'
+             WHERE yhtio  = '$kukarow[yhtio]'
+             and tunnus   = '$laskurow[tunnus]'
+             and tila     in ('N','L','0')
+             and alatila != 'X'";
   $result = pupe_query($query);
 
   // tyyppi on 0 ja rivit ei ole ennakkopoistossa
   $query = "UPDATE tilausrivi
-              SET tyyppi  = '0'
-              WHERE yhtio = '$kukarow[yhtio]'
-              and otunnus = '$laskurow[tunnus]'
-              and tyyppi  in ('L','0')";
+            SET tyyppi  = '0'
+            WHERE yhtio = '$kukarow[yhtio]'
+            and otunnus = '$laskurow[tunnus]'
+            and tyyppi  in ('L','0')";
   $result = pupe_query($query);
 }
 elseif ($laskurow["tila"] == 'T') {

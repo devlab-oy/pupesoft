@@ -1051,11 +1051,11 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
     if ($yhtiorow["automaattinen_jt_toimitus"] != "") {
       //Tutkitaan löytyykö JT-rivi joka mäppäytyy tähän ostoriviin
       $query = "SELECT ifnull(if((tilausrivi.perheid != 0 and tilausrivi.tunnus != tilausrivi.perheid), tilausrivi.perheid, tilausrivi.tunnus), 0) jtrivi
-                   FROM tilausrivin_lisatiedot
-                   JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
-                   WHERE tilausrivin_lisatiedot.yhtio          = '$kukarow[yhtio]'
-                   AND tilausrivin_lisatiedot.tilausrivilinkki = '$tilrivirow[tunnus]'
-                   $suoralisa";
+                FROM tilausrivin_lisatiedot
+                JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
+                WHERE tilausrivin_lisatiedot.yhtio          = '$kukarow[yhtio]'
+                AND tilausrivin_lisatiedot.tilausrivilinkki = '$tilrivirow[tunnus]'
+                $suoralisa";
       $varastoon_result = pupe_query($query);
 
       while ($varastoon_row = mysql_fetch_assoc($varastoon_result)) {

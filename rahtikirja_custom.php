@@ -588,10 +588,10 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
   }
 
   $query = "SELECT *
-              from kirjoittimet
-              where yhtio  = '$kukarow[yhtio]'
-              AND komento != 'EDI'
-              ORDER BY kirjoitin";
+            from kirjoittimet
+            where yhtio  = '$kukarow[yhtio]'
+            AND komento != 'EDI'
+            ORDER BY kirjoitin";
   $kires = pupe_query($query);
 
   while ($kirow = mysql_fetch_assoc($kires)) {

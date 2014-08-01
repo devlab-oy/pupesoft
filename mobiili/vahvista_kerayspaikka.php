@@ -113,18 +113,18 @@ if (isset($submit_button) and trim($submit_button) != '') {
       elseif ($yhtiorow['suuntalavat'] == "" and $saapuminen != 0) {
         // Jos yhtiö ei käytä suuntalavaa ja rivi ei ole saapumisella
         $query = "UPDATE tilausrivi SET
-                    uusiotunnus = '{$saapuminen}'
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus  = '{$row['tunnus']}'";
+                  uusiotunnus = '{$saapuminen}'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus  = '{$row['tunnus']}'";
         pupe_query($query);
       }
 
       //tarkistetaan vielä ettei riviä ole jo viety varastoon
       $viety_query = "SELECT uusiotunnus
-                        FROM tilausrivi
-                        WHERE yhtio         = '{$kukarow['yhtio']}'
-                        AND tunnus          = '{$row['tunnus']}'
-                        AND laskutettuaika != '0000-00-00'";
+                      FROM tilausrivi
+                      WHERE yhtio         = '{$kukarow['yhtio']}'
+                      AND tunnus          = '{$row['tunnus']}'
+                      AND laskutettuaika != '0000-00-00'";
       $viety = pupe_query($viety_query);
 
       if (mysql_num_rows($viety) == 0) {
@@ -245,9 +245,9 @@ if (isset($submit_button) and trim($submit_button) != '') {
       // Jos temppi lava niin merkataan suoraan puretuksi
       if ($temppi_lava) {
         $query = "UPDATE suuntalavat SET
-                    tila        = 'P'
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus  = '{$alusta_tunnus}'";
+                  tila        = 'P'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus  = '{$alusta_tunnus}'";
         $tila_res = pupe_query($query);
       }
 

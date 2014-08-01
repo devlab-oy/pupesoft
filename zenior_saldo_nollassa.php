@@ -68,14 +68,14 @@ while ($row = mysql_fetch_assoc($result)) {
   $t_result = pupe_query($t_query);
 
   $t_query = "INSERT INTO tapahtuma SET
-                yhtio    = '{$kukarow["yhtio"]}',
-                tuoteno  = '{$row["tuoteno"]}',
-                laji     = 'Epäkurantti',
-                kpl      = '0',
-                hinta    = 0,
-                kplhinta = 0,
-                selite   = '$selite',
-                laatija  = '{$kukarow["kuka"]}',
-                laadittu = now()";
+              yhtio    = '{$kukarow["yhtio"]}',
+              tuoteno  = '{$row["tuoteno"]}',
+              laji     = 'Epäkurantti',
+              kpl      = '0',
+              hinta    = 0,
+              kplhinta = 0,
+              selite   = '$selite',
+              laatija  = '{$kukarow["kuka"]}',
+              laadittu = now()";
   $t_result = pupe_query($t_query);
 }

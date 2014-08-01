@@ -110,9 +110,9 @@ echo "<table>";
 echo "<tr><th>".t("Valitse tilikausi")."</th>";
 
 $query = "SELECT *
-           FROM tilikaudet
-           WHERE yhtio = '$kukarow[yhtio]'
-           ORDER BY tilikausi_alku desc";
+          FROM tilikaudet
+          WHERE yhtio = '$kukarow[yhtio]'
+          ORDER BY tilikausi_alku desc";
 $vresult = mysql_query($query) or pupe_error($query);
 
 echo "<td><select name='tkausi' onchange='submit();'>";

@@ -351,9 +351,9 @@ if ($tee == '') {
   echo "<td colspan='4'><select name='lahdevarasto'><option value=''>".t("Valitse")."</option>";
 
   $query  = "SELECT tunnus, nimitys
-                 FROM varastopaikat
-                 WHERE yhtio='$kukarow[yhtio]'
-                 ORDER BY tyyppi, nimitys";
+             FROM varastopaikat
+             WHERE yhtio='$kukarow[yhtio]'
+             ORDER BY tyyppi, nimitys";
   $vares = pupe_query($query);
 
   while ($varow = mysql_fetch_array($vares)) {
@@ -369,9 +369,9 @@ if ($tee == '') {
   echo "<td colspan='4'><select name='kohdevarasto'><option value=''>".t("Valitse")."</option>";
 
   $query  = "SELECT tunnus, nimitys
-                 FROM varastopaikat
-                 WHERE yhtio='$kukarow[yhtio]' AND tyyppi != 'P'
-                 ORDER BY tyyppi, nimitys";
+             FROM varastopaikat
+             WHERE yhtio='$kukarow[yhtio]' AND tyyppi != 'P'
+             ORDER BY tyyppi, nimitys";
   $vares = pupe_query($query);
 
   while ($varow = mysql_fetch_array($vares)) {

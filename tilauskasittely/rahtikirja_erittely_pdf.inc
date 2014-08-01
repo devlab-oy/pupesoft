@@ -134,33 +134,33 @@ if (!function_exists('rivi_erittely')) {
       }
 
       $query = "SELECT yhteyshenkilo.nimi,
-                   IF(yhteyshenkilo.puh != '', yhteyshenkilo.puh, IF(yhteyshenkilo.gsm != '', yhteyshenkilo.gsm, '')) puh
-                   FROM lasku
-                   JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = lasku.yhtio AND yhteyshenkilo.nimi = lasku.tilausyhteyshenkilo AND yhteyshenkilo.tyyppi = 'A')
-                   WHERE lasku.yhtio              = '{$kukarow['yhtio']}'
-                   AND lasku.tunnus               IN ({$laskurow['tunnus']})
-                   AND lasku.tilausyhteyshenkilo != ''
-                   LIMIT 1";
+                IF(yhteyshenkilo.puh != '', yhteyshenkilo.puh, IF(yhteyshenkilo.gsm != '', yhteyshenkilo.gsm, '')) puh
+                FROM lasku
+                JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = lasku.yhtio AND yhteyshenkilo.nimi = lasku.tilausyhteyshenkilo AND yhteyshenkilo.tyyppi = 'A')
+                WHERE lasku.yhtio              = '{$kukarow['yhtio']}'
+                AND lasku.tunnus               IN ({$laskurow['tunnus']})
+                AND lasku.tilausyhteyshenkilo != ''
+                LIMIT 1";
       $yhres = pupe_query($query);
 
       if (mysql_num_rows($yhres) == 0) {
         $query = "SELECT yhteyshenkilo.nimi,
-                     IF(yhteyshenkilo.puh != '', yhteyshenkilo.puh, IF(yhteyshenkilo.gsm != '', yhteyshenkilo.gsm, '')) puh
-                     FROM laskun_lisatiedot
-                     JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = laskun_lisatiedot.yhtio AND yhteyshenkilo.tunnus = laskun_lisatiedot.yhteyshenkilo_kaupallinen AND yhteyshenkilo.tyyppi = 'A')
-                     WHERE laskun_lisatiedot.yhtio                = '{$kukarow['yhtio']}'
-                     AND laskun_lisatiedot.otunnus                IN ({$laskurow['tunnus']})
-                     AND laskun_lisatiedot.yhteyshenkilo_tekninen > 0
-                     LIMIT 1";
+                  IF(yhteyshenkilo.puh != '', yhteyshenkilo.puh, IF(yhteyshenkilo.gsm != '', yhteyshenkilo.gsm, '')) puh
+                  FROM laskun_lisatiedot
+                  JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = laskun_lisatiedot.yhtio AND yhteyshenkilo.tunnus = laskun_lisatiedot.yhteyshenkilo_kaupallinen AND yhteyshenkilo.tyyppi = 'A')
+                  WHERE laskun_lisatiedot.yhtio                = '{$kukarow['yhtio']}'
+                  AND laskun_lisatiedot.otunnus                IN ({$laskurow['tunnus']})
+                  AND laskun_lisatiedot.yhteyshenkilo_tekninen > 0
+                  LIMIT 1";
         $yhres = pupe_query($query);
       }
 
       if (mysql_num_rows($yhres) == 0) {
         $query = "SELECT '2' O, '' nimi,
-                     IF(puhelin != '', puhelin, IF(gsm != '', gsm, '')) puh
-                     FROM asiakas
-                     WHERE yhtio = '{$kukarow['yhtio']}'
-                     AND tunnus  = '{$laskurow['liitostunnus']}'";
+                  IF(puhelin != '', puhelin, IF(gsm != '', gsm, '')) puh
+                  FROM asiakas
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus  = '{$laskurow['liitostunnus']}'";
         $yhres = pupe_query($query);
       }
 

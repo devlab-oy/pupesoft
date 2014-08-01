@@ -1544,7 +1544,7 @@ if (!empty($id) and $echotaanko) {
         // katsotaan onko vastaanottavalla varastolla lapsivarastoja
         $lv_query =  "SELECT *
                       FROM varastopaikat
-                      WHERE yhtio = '$kukarow[yhtio]'
+                      WHERE yhtio     = '$kukarow[yhtio]'
                       AND isa_varasto = $varow2[tunnus]";
         $lv_res = pupe_query($lv_query);
 
@@ -1552,12 +1552,12 @@ if (!empty($id) and $echotaanko) {
 
           // katsotaan onko tuotepaikallisia lapsivarastoja
           $tlv_query = "SELECT GROUP_CONCAT(DISTINCT vp.tunnus)
-                      FROM tuotepaikat AS tp
-                      JOIN varastopaikat AS vp ON vp.yhtio = tp.yhtio AND vp.tunnus = tp.varasto
-                      WHERE tp.yhtio = '$kukarow[yhtio]'
-                      AND vp.isa_varasto = $varow2[tunnus]
-                      AND tp.tuoteno = '$rivirow[tuoteno]'
-                      GROUP BY tp.yhtio";
+                        FROM tuotepaikat AS tp
+                        JOIN varastopaikat AS vp ON vp.yhtio = tp.yhtio AND vp.tunnus = tp.varasto
+                        WHERE tp.yhtio     = '$kukarow[yhtio]'
+                        AND vp.isa_varasto = $varow2[tunnus]
+                        AND tp.tuoteno     = '$rivirow[tuoteno]'
+                        GROUP BY tp.yhtio";
           $tlv_res = pupe_query($tlv_query);
 
           if (mysql_num_rows($tlv_res) < 1) {

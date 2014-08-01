@@ -30,11 +30,11 @@ $aikaikkuna = empty($argv[1]) ? 5 : (int) $argv[1];
 // Haetaan api_keyt yhtion_parametrit taulusta
 // Kaikki yritykset joilla on api_avain ja ohjelmisto_api_avain kenttää täytettynä. Yrityksen_uuid on vaihtoehtoinen kenttä.
 $sql_query = "SELECT yhtion_parametrit.maventa_api_avain, yhtion_parametrit.maventa_ohjelmisto_api_avain, yhtion_parametrit.maventa_yrityksen_uuid, yhtio.nimi, yhtio.yhtio,
-                ifnull(date_sub(yhtion_parametrit.maventa_aikaleima, INTERVAL {$aikaikkuna} MINUTE), '0000-00-00 00:00:00') maventa_aikaleima
-                FROM yhtio
-                JOIN yhtion_parametrit USING (yhtio)
-                WHERE yhtion_parametrit.maventa_api_avain          != ''
-                AND yhtion_parametrit.maventa_ohjelmisto_api_avain != ''";
+              ifnull(date_sub(yhtion_parametrit.maventa_aikaleima, INTERVAL {$aikaikkuna} MINUTE), '0000-00-00 00:00:00') maventa_aikaleima
+              FROM yhtio
+              JOIN yhtion_parametrit USING (yhtio)
+              WHERE yhtion_parametrit.maventa_api_avain          != ''
+              AND yhtion_parametrit.maventa_ohjelmisto_api_avain != ''";
 $maventa_result = mysql_query($sql_query) or die("Error in query: ".$sql_query);
 
 while ($maventa_keys = mysql_fetch_assoc($maventa_result)) {
@@ -76,8 +76,8 @@ while ($maventa_keys = mysql_fetch_assoc($maventa_result)) {
 
   // Päivitetään aikaleima kantaan
   $aika_query = "UPDATE yhtion_parametrit
-                   SET maventa_aikaleima = '$maventan_kellonaika'
-                   WHERE yhtio = '$maventa_keys[yhtio]'";
+                 SET maventa_aikaleima = '$maventan_kellonaika'
+                 WHERE yhtio = '$maventa_keys[yhtio]'";
   $aika_res = mysql_query($aika_query) or die("Error in query: ".$aika_query);
 
   // Jos uusia laskuja ei löydy

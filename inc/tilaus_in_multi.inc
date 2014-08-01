@@ -45,8 +45,8 @@ while ($rivi = fgets($fd)) {
       unset($virherivi);
 
       $query = "UPDATE kuka
-                 SET kesken = 0
-                 WHERE session = '$session'";
+                SET kesken = 0
+                WHERE session = '$session'";
       $result = pupe_query($query);
 
       $kukarow['kesken']   = 0;
@@ -90,17 +90,17 @@ while ($rivi = fgets($fd)) {
 
       // haetaan tilauksen tiedot
       $query = "SELECT *
-                 FROM lasku
-                 WHERE tunnus = '$id'
-                 AND yhtio    = '$kukarow[yhtio]'";
+                FROM lasku
+                WHERE tunnus = '$id'
+                AND yhtio    = '$kukarow[yhtio]'";
       $result   = pupe_query($query);
       $laskurow = mysql_fetch_assoc($result);
     }
 
     $query = "SELECT *
-               FROM tuote
-               WHERE tuoteno = '$tuoteno'
-               and yhtio     = '$kukarow[yhtio]'";
+              FROM tuote
+              WHERE tuoteno = '$tuoteno'
+              and yhtio     = '$kukarow[yhtio]'";
     $rarresult = pupe_query($query);
 
     if (mysql_num_rows($rarresult) == 1) {

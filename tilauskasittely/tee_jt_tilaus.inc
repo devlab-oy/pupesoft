@@ -993,12 +993,12 @@ if (!function_exists("tee_jt_tilaus")) {
 
                   //Tutkitaan löytyykö ostorivi ja sen toimitettuaika
                   $query = "SELECT tilausrivin_lisatiedot.suoratoimitettuaika
-                               FROM tilausrivi
-                               LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
-                               WHERE tilausrivi.yhtio                          = '$kukarow[yhtio]'
-                               and tilausrivi.tyyppi                           = 'O'
-                               and tilausrivi.tunnus                           = '$isarivirow[tilausrivilinkki]'
-                               and tilausrivin_lisatiedot.suoratoimitettuaika != '0000-00-00'";
+                            FROM tilausrivi
+                            LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+                            WHERE tilausrivi.yhtio                          = '$kukarow[yhtio]'
+                            and tilausrivi.tyyppi                           = 'O'
+                            and tilausrivi.tunnus                           = '$isarivirow[tilausrivilinkki]'
+                            and tilausrivin_lisatiedot.suoratoimitettuaika != '0000-00-00'";
                   $suoratoimresult = pupe_query($query);
 
                   if ($suoratoimrow = mysql_fetch_assoc($suoratoimresult)) {

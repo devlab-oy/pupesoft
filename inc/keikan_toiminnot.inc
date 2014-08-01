@@ -110,15 +110,15 @@ function kohdista_rivi($laskurow, $valittutunnus, $valittuotunnus, $otunnus, $su
     if (trim($suoratoimitusrivi) != "" and (trim($suuntalavan_tunnus) == "" or $suuntalavan_tunnus == 0)) {
 
       $query = "SELECT suuntalavat.*
-                      FROM suuntalavat
-                      JOIN suuntalavat_saapuminen ON (
-                          suuntalavat.yhtio                      = suuntalavat_saapuminen.yhtio
-                          AND suuntalavat_saapuminen.saapuminen  = '{$otunnus}'
-                          AND suuntalavat_saapuminen.saapuminen != 0
-                          AND suuntalavat.tunnus                 = suuntalavat_saapuminen.suuntalava)
-                      WHERE suuntalavat.yhtio                    = '{$kukarow['yhtio']}'
-                      AND suuntalavat.tila                       = ''
-                      AND suuntalavat.sscc                       = 'Suoratoimitus'";
+                FROM suuntalavat
+                JOIN suuntalavat_saapuminen ON (
+                    suuntalavat.yhtio                      = suuntalavat_saapuminen.yhtio
+                    AND suuntalavat_saapuminen.saapuminen  = '{$otunnus}'
+                    AND suuntalavat_saapuminen.saapuminen != 0
+                    AND suuntalavat.tunnus                 = suuntalavat_saapuminen.suuntalava)
+                WHERE suuntalavat.yhtio                    = '{$kukarow['yhtio']}'
+                AND suuntalavat.tila                       = ''
+                AND suuntalavat.sscc                       = 'Suoratoimitus'";
       $chk_suuntalava_res = pupe_query($query);
       $chk_suuntalava_row = mysql_fetch_assoc($chk_suuntalava_res);
 
@@ -178,10 +178,10 @@ function kohdista_rivi($laskurow, $valittutunnus, $valittuotunnus, $otunnus, $su
   $vanhathinnat = array();
 
   $updquery = "SELECT tunnus
-                 FROM tilausrivi use index (yhtio_otunnus)
-                 WHERE yhtio = '{$kukarow['yhtio']}'
-                 AND otunnus IN ('{$valittuotunnus}','{$otunnus}')
-                 AND (tunnus = '{$valittutunnus}' OR perheid2 = '{$valittutunnus}')";
+               FROM tilausrivi use index (yhtio_otunnus)
+               WHERE yhtio = '{$kukarow['yhtio']}'
+               AND otunnus IN ('{$valittuotunnus}','{$otunnus}')
+               AND (tunnus = '{$valittutunnus}' OR perheid2 = '{$valittutunnus}')";
   $selresult = pupe_query($updquery);
 
   while ($updrow = mysql_fetch_assoc($selresult)) {
@@ -190,12 +190,12 @@ function kohdista_rivi($laskurow, $valittutunnus, $valittuotunnus, $otunnus, $su
 
   // Viedään varastoon (varastoon=1) kun räplätään ruksia
   $query = "UPDATE tilausrivi use index (yhtio_otunnus) SET
-              uusiotunnus = '{$otunnus}',
-              varastoon   = 1
-              {$updatelisa}
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND otunnus IN ('{$valittuotunnus}','{$otunnus}')
-              AND (tunnus = '{$valittutunnus}' OR perheid2 = '{$valittutunnus}')";
+            uusiotunnus = '{$otunnus}',
+            varastoon   = 1
+            {$updatelisa}
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND otunnus IN ('{$valittuotunnus}','{$otunnus}')
+            AND (tunnus = '{$valittutunnus}' OR perheid2 = '{$valittutunnus}')";
   $result = pupe_query($query);
 
   if ($otunnus == 0 and $valittutunnus != '') {
@@ -203,10 +203,10 @@ function kohdista_rivi($laskurow, $valittutunnus, $valittuotunnus, $otunnus, $su
     // Katsotaan löytyykö rivi asn_sanomat-tauluun kohdistettuna laskuun
     // Jos löytyy, poistetaan kohdistus
     $query = "SELECT *
-                FROM asn_sanomat
-                WHERE yhtio    = '{$kukarow['yhtio']}'
-                AND laji       in ('tec','mav')
-                AND tilausrivi LIKE '%{$valittutunnus}%'";
+              FROM asn_sanomat
+              WHERE yhtio    = '{$kukarow['yhtio']}'
+              AND laji       in ('tec','mav')
+              AND tilausrivi LIKE '%{$valittutunnus}%'";
     $chk_exist_res = pupe_query($query);
 
     if (mysql_num_rows($chk_exist_res) > 0) {
@@ -219,9 +219,9 @@ function kohdista_rivi($laskurow, $valittutunnus, $valittuotunnus, $otunnus, $su
         $arr = array_flip($arr);
 
         $query = "UPDATE asn_sanomat SET
-                    tilausrivi  = '".implode(",", $arr)."'
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus  = '{$chk_exist_row['tunnus']}'";
+                  tilausrivi  = '".implode(",", $arr)."'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus  = '{$chk_exist_row['tunnus']}'";
         pupe_query($query);
       }
     }
@@ -251,10 +251,10 @@ function kohdista_rivi($laskurow, $valittutunnus, $valittuotunnus, $otunnus, $su
       $data['suuntalava'] = $suuntalavan_tunnus;
 
       $query = "SELECT suuntalavat.sscc, IFNULL(suuntalavat_saapuminen.saapuminen, '') AS saapuminen
-                      FROM suuntalavat
-                      LEFT JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = '{$otunnus}')
-                      WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
-                      AND suuntalavat.tunnus  = '{$suuntalavan_tunnus}'";
+                FROM suuntalavat
+                LEFT JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = '{$otunnus}')
+                WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
+                AND suuntalavat.tunnus  = '{$suuntalavan_tunnus}'";
       $sscc_fetch_res = pupe_query($query);
       $sscc_fetch_row = mysql_fetch_assoc($sscc_fetch_res);
 
@@ -262,13 +262,13 @@ function kohdista_rivi($laskurow, $valittutunnus, $valittuotunnus, $otunnus, $su
 
       if ((int) $suuntalavan_tunnus != 0 and $sscc_fetch_row['saapuminen'] == '') {
         $query = "INSERT INTO suuntalavat_saapuminen SET
-                          yhtio      = '{$kukarow['yhtio']}',
-                          suuntalava = '{$suuntalavan_tunnus}',
-                          saapuminen = '{$otunnus}',
-                          laatija    = '{$kukarow['kuka']}',
-                          luontiaika = now(),
-                          muutospvm  = now(),
-                          muuttaja   = '{$kukarow['kuka']}'";
+                  yhtio      = '{$kukarow['yhtio']}',
+                  suuntalava = '{$suuntalavan_tunnus}',
+                  saapuminen = '{$otunnus}',
+                  laatija    = '{$kukarow['kuka']}',
+                  luontiaika = now(),
+                  muutospvm  = now(),
+                  muuttaja   = '{$kukarow['kuka']}'";
         $insert_res = pupe_query($query);
       }
     }

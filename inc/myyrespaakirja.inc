@@ -93,10 +93,10 @@ echo "
 
 // haetaan kaikki yrityksen rahatilit mysql muodossa
 $query  = "SELECT oletus_rahatili, nimi, tilino
-             FROM yriti
-             WHERE yhtio          = '$kukarow[yhtio]'
-             AND kaytossa         = ''
-             AND oletus_rahatili != ''";
+           FROM yriti
+           WHERE yhtio          = '$kukarow[yhtio]'
+           AND kaytossa         = ''
+           AND oletus_rahatili != ''";
 $ratire = mysql_query($query) or pupe_error($query);
 
 echo "<th>".t("Pankkitili")."</th>";

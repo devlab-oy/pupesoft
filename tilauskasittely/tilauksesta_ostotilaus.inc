@@ -85,9 +85,9 @@ if (!function_exists("tilauksesta_ostotilaus")) {
             if ($rivi['perheid'] == $rivi['rivitunnus']) {
               // saldottomat tuotteet laitetaan jälkkäriin jos ne on tuoteperheen isiä ja toimittajaa ei löydy
               $query = "UPDATE tilausrivi
-                         SET var = 'J'
-                         WHERE yhtio = '$kukarow[yhtio]'
-                         AND tunnus  = '$rivi[rivitunnus]'";
+                        SET var = 'J'
+                        WHERE yhtio = '$kukarow[yhtio]'
+                        AND tunnus  = '$rivi[rivitunnus]'";
               $ei_saldoa_res = pupe_query($query);
             }
 

@@ -542,10 +542,10 @@ if ($toim == "VAIHDAKEHAHIN" and $tee == "vaihda_kehahin") {
   $lock = pupe_query($query);
 
   $query = "SELECT *
-                FROM tuotepaikat
-                WHERE yhtio  = '$kukarow[yhtio]'
-                AND tuoteno  = '$tuoterow[tuoteno]'
-                AND saldo   != 0";
+            FROM tuotepaikat
+            WHERE yhtio  = '$kukarow[yhtio]'
+            AND tuoteno  = '$tuoterow[tuoteno]'
+            AND saldo   != 0";
   $paikatres = pupe_query($query);
 
   $luontiaika1 = date("Y-m-d H:i:s", mktime(date("H"), date("i"), date("s"), date("m"), date("d"), date("Y")));
@@ -557,19 +557,19 @@ if ($toim == "VAIHDAKEHAHIN" and $tee == "vaihda_kehahin") {
 
     // Poistetaan saldo vanhalla keharilla
     $query = "INSERT into tapahtuma set
-                yhtio     = '$kukarow[yhtio]',
-                tuoteno   = '$tuoterow[tuoteno]',
-                laji      = 'tulo',
-                kpl       = {$miinus},
-                hinta     = {$tuoterow['kehahin']},
-                kplhinta  = {$tuoterow['kehahin']},
-                selite    = '{$epakurantti_selite}',
-                hyllyalue = '{$paikatrow['hyllyalue']}',
-                hyllynro  = '{$paikatrow['hyllynro']}',
-                hyllyvali = '{$paikatrow['hyllyvali']}',
-                hyllytaso = '{$paikatrow['hyllytaso']}',
-                laatija   = '$kukarow[kuka]',
-                laadittu  = '$luontiaika1'";
+              yhtio     = '$kukarow[yhtio]',
+              tuoteno   = '$tuoterow[tuoteno]',
+              laji      = 'tulo',
+              kpl       = {$miinus},
+              hinta     = {$tuoterow['kehahin']},
+              kplhinta  = {$tuoterow['kehahin']},
+              selite    = '{$epakurantti_selite}',
+              hyllyalue = '{$paikatrow['hyllyalue']}',
+              hyllynro  = '{$paikatrow['hyllynro']}',
+              hyllyvali = '{$paikatrow['hyllyvali']}',
+              hyllytaso = '{$paikatrow['hyllytaso']}',
+              laatija   = '$kukarow[kuka]',
+              laadittu  = '$luontiaika1'";
     $result = pupe_query($query);
   }
 
@@ -584,15 +584,15 @@ if ($toim == "VAIHDAKEHAHIN" and $tee == "vaihda_kehahin") {
 
   // Lisätään keharinmuutostapahtuma
   $query = "INSERT into tapahtuma set
-              yhtio    = '$kukarow[yhtio]',
-              tuoteno  = '$tuoterow[tuoteno]',
-              laji     = 'arvomuutos',
-              kpl      = 0,
-              hinta    = {$uusi_keskihankintahinta},
-              kplhinta = {$tuoterow['kehahin']},
-              selite   = '{$epakurantti_selite}',
-              laatija  = '$kukarow[kuka]',
-              laadittu = '$luontiaika1'";
+            yhtio    = '$kukarow[yhtio]',
+            tuoteno  = '$tuoterow[tuoteno]',
+            laji     = 'arvomuutos',
+            kpl      = 0,
+            hinta    = {$uusi_keskihankintahinta},
+            kplhinta = {$tuoterow['kehahin']},
+            selite   = '{$epakurantti_selite}',
+            laatija  = '$kukarow[kuka]',
+            laadittu = '$luontiaika1'";
   $result = pupe_query($query);
 
   // otetaan tapahtuman tunnus, laitetaan se tiliöinnin otsikolle
@@ -606,19 +606,19 @@ if ($toim == "VAIHDAKEHAHIN" and $tee == "vaihda_kehahin") {
 
     // Lisätään saldo uudella keharilla
     $query = "INSERT into tapahtuma set
-                yhtio     = '$kukarow[yhtio]',
-                tuoteno   = '$tuoterow[tuoteno]',
-                laji      = 'tulo',
-                kpl       = {$plussa},
-                hinta     = {$uusi_keskihankintahinta},
-                kplhinta  = {$uusi_keskihankintahinta},
-                selite    = '{$epakurantti_selite}',
-                hyllyalue = '{$paikatrow['hyllyalue']}',
-                hyllynro  = '{$paikatrow['hyllynro']}',
-                hyllyvali = '{$paikatrow['hyllyvali']}',
-                hyllytaso = '{$paikatrow['hyllytaso']}',
-                laatija   = '$kukarow[kuka]',
-                laadittu  = '$luontiaika2'";
+              yhtio     = '$kukarow[yhtio]',
+              tuoteno   = '$tuoterow[tuoteno]',
+              laji      = 'tulo',
+              kpl       = {$plussa},
+              hinta     = {$uusi_keskihankintahinta},
+              kplhinta  = {$uusi_keskihankintahinta},
+              selite    = '{$epakurantti_selite}',
+              hyllyalue = '{$paikatrow['hyllyalue']}',
+              hyllynro  = '{$paikatrow['hyllynro']}',
+              hyllyvali = '{$paikatrow['hyllyvali']}',
+              hyllytaso = '{$paikatrow['hyllytaso']}',
+              laatija   = '$kukarow[kuka]',
+              laadittu  = '$luontiaika2'";
     $result = pupe_query($query);
   }
 

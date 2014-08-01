@@ -476,10 +476,10 @@ if ($monta > 1 and $monta <= $limit) {
       echo "<input type='hidden' name='muutparametrit' value='$muutparametrit'>";
 
       $query = "SELECT *
-                  FROM yhtion_toimipaikat
-                  WHERE yhtio    = '{$kukarow['yhtio']}'
-                  AND vat_numero = ''
-                  ORDER BY nimi";
+                FROM yhtion_toimipaikat
+                WHERE yhtio    = '{$kukarow['yhtio']}'
+                AND vat_numero = ''
+                ORDER BY nimi";
       $vresult = pupe_query($query);
 
       if (mysql_num_rows($vresult) > 0) {

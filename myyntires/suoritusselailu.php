@@ -259,9 +259,9 @@ if ($tila == "kohdista") {
 
   // katotaan löytyykö tili
   $query = "SELECT tilino
-              from tili
-              where yhtio = '$kukarow[yhtio]'
-              and tilino  = '$vastatili'";
+            from tili
+            where yhtio = '$kukarow[yhtio]'
+            and tilino  = '$vastatili'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -270,10 +270,10 @@ if ($tila == "kohdista") {
   }
 
   $query = "SELECT *
-              FROM suoritus
-              WHERE yhtio = '$kukarow[yhtio]'
-              and kohdpvm = '0000-00-00'
-              and tunnus  = '$tunnus'";
+            FROM suoritus
+            WHERE yhtio = '$kukarow[yhtio]'
+            and kohdpvm = '0000-00-00'
+            and tunnus  = '$tunnus'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 1) {
@@ -282,17 +282,17 @@ if ($tila == "kohdista") {
 
     // Suoritus kuntoon
     $query = "UPDATE suoritus
-                SET asiakas_tunnus = '$atunnus'
-                WHERE tunnus = '$tunnus'
-                AND yhtio    = '$kukarow[yhtio]'";
+              SET asiakas_tunnus = '$atunnus'
+              WHERE tunnus = '$tunnus'
+              AND yhtio    = '$kukarow[yhtio]'";
     $result = pupe_query($query);
 
     // Tiliöinti on voinut muuttua
     $query = "UPDATE tiliointi
-                SET tilino = '$vastatili'
-                WHERE yhtio  = '$kukarow[yhtio]'
-                AND tunnus   = '$suoritus[ltunnus]'
-                AND korjattu = ''";
+              SET tilino = '$vastatili'
+              WHERE yhtio  = '$kukarow[yhtio]'
+              AND tunnus   = '$suoritus[ltunnus]'
+              AND korjattu = ''";
     $result = pupe_query($query);
 
     echo "<font class='message'>".t("Suoritus kohdistettu")."!</font><br><br>";

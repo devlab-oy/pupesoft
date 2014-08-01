@@ -53,8 +53,8 @@ elseif (mysql_field_name($result, $i) == "asiakas") {
 }
 if (mysql_field_name($result, $i) == "tyyppi") {
   $preq = "SELECT avainsana.selite tyyppi, avainsana.selitetark selitetark
-               FROM avainsana
-               WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='kohde_tyyppi'";
+           FROM avainsana
+           WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='kohde_tyyppi'";
   $preres = mysql_query($preq) or pupe_error($preq);
 
   if (mysql_num_rows($preres) > 0) {

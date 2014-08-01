@@ -193,55 +193,55 @@ function validoi_kampanja_ehto_tai_aliehto($ehto) {
   switch ($ehto['kohde']) {
   case 'asiakas':
     $query = "SELECT *
-                FROM asiakas
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus  = '{$ehto['arvo']}'";
+              FROM asiakas
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = '{$ehto['arvo']}'";
     $echo = t('Asiakasta ei löydy');
     break;
   case 'asiakas_ytunnus':
     $query = "SELECT *
-                FROM asiakas
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND ytunnus = '{$ehto['arvo']}'";
+              FROM asiakas
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND ytunnus = '{$ehto['arvo']}'";
     $echo = t('Asiakasta ei löydy');
     break;
   case 'asiakaskategoria':
     $query = "SELECT *
-                FROM dynaaminen_puu
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND laji    = 'Asiakas'
-                AND tunnus  = '{$ehto['arvo']}'";
+              FROM dynaaminen_puu
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND laji    = 'Asiakas'
+              AND tunnus  = '{$ehto['arvo']}'";
     $echo = t('Asiakaskategoriaa ei löydy');
     break;
   case 'tuote':
     $query = "SELECT *
-                FROM tuote
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tuoteno = '{$ehto['arvo']}'";
+              FROM tuote
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tuoteno = '{$ehto['arvo']}'";
     $echo = t('Tuotetta ei löydy');
     break;
   case 'tuotekategoria':
     $query = "SELECT *
-                FROM dynaaminen_puu
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND laji    = 'Tuote'
-                AND tunnus  = '{$ehto['arvo']}'";
+              FROM dynaaminen_puu
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND laji    = 'Tuote'
+              AND tunnus  = '{$ehto['arvo']}'";
     $echo = t('Tuotekategoriaa ei löydy');
     break;
   case 'tuoteosasto':
     $query = "SELECT *
-                FROM avainsana
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND laji    = 'OSASTO'
-                AND selite  = '{$ehto['arvo']}'";
+              FROM avainsana
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND laji    = 'OSASTO'
+              AND selite  = '{$ehto['arvo']}'";
     $echo = t('Tuoteosastoa ei löydy');
     break;
   case 'tuoteryhma':
     $query = "SELECT *
-                FROM avainsana
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND laji    = 'TRY'
-                AND selite  = '{$ehto['arvo']}'";
+              FROM avainsana
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND laji    = 'TRY'
+              AND selite  = '{$ehto['arvo']}'";
     $echo = t('Tuoteryhmää ei löydy');
     break;
   case 'kappaleet':

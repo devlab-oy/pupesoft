@@ -708,10 +708,10 @@ if ($from != '' and $rivitunnus != "" and $formista == "kylla") {
       if ($tunnuskentta == 'ostorivitunnus' and $from == "kohdista") {
         //Tutkitaan löytyykö JT-rivi joka mäppäytyy tähän ostoriviin
         $query = "SELECT tilausrivi.tunnus
-                     FROM tilausrivin_lisatiedot
-                     JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivi.tyyppi != 'D')
-                     WHERE tilausrivi.yhtio                      = '$kukarow[yhtio]'
-                     and tilausrivin_lisatiedot.tilausrivilinkki = '$rivirow[tunnus]'";
+                  FROM tilausrivin_lisatiedot
+                  JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivi.tyyppi != 'D')
+                  WHERE tilausrivi.yhtio                      = '$kukarow[yhtio]'
+                  and tilausrivin_lisatiedot.tilausrivilinkki = '$rivirow[tunnus]'";
         $varastoon_result = pupe_query($query);
 
         while ($varastoon_row = mysql_fetch_assoc($varastoon_result)) {

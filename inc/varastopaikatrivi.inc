@@ -52,10 +52,10 @@ if (mysql_field_name($result, $i) == 'tyyppi') {
 if (mysql_field_name($result, $i) == "isa_varasto") {
   $query = "SELECT tunnus, nimitys
             FROM varastopaikat
-            WHERE yhtio   = '$kukarow[yhtio]'
-            AND tyyppi != 'P'
-            AND isa_varasto = 0
-            AND tunnus != $trow[tunnus]";
+            WHERE yhtio      = '$kukarow[yhtio]'
+            AND tyyppi      != 'P'
+            AND isa_varasto  = 0
+            AND tunnus      != $trow[tunnus]";
   $vresult =  pupe_query($query);
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";

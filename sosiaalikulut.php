@@ -359,9 +359,9 @@ if ($tee == 'laske') {
           echo "<td>{$arvo}</td>";
 
           $query2 = "SELECT nimi, koodi, tunnus
-                       FROM kustannuspaikka
-                       WHERE yhtio = '{$kukarow['yhtio']}'
-                       AND koodi   = '{$koodi}'";
+                     FROM kustannuspaikka
+                     WHERE yhtio = '{$kukarow['yhtio']}'
+                     AND koodi   = '{$koodi}'";
           $result2 = pupe_query($query2);
           $tarkenne_row = mysql_fetch_assoc($result2);
 

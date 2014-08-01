@@ -188,8 +188,8 @@ if ($tee == 'Z') {
             LEFT JOIN tuotteen_toimittajat USING (yhtio, tuoteno)
             LEFT JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio
               AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
-            WHERE tuote.yhtio = '$kukarow[yhtio]'
-            and tuote.tuoteno = '$tuoteno'
+            WHERE tuote.yhtio  = '$kukarow[yhtio]'
+            and tuote.tuoteno  = '$tuoteno'
             GROUP BY tuote.tuoteno";
   $result = pupe_query($query);
 

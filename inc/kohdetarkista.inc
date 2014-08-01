@@ -14,10 +14,10 @@ if (!function_exists("kohdetarkista")) {
 
         if (is_numeric($chastunn) and $chastunn > 0) {
           $query  = "SELECT *
-                                 FROM asiakas
-                                 WHERE yhtio  = '$kukarow[yhtio]'
-                                 and laji    != 'P'
-                                 and tunnus   = '$chastunn'";
+                     FROM asiakas
+                     WHERE yhtio  = '$kukarow[yhtio]'
+                     and laji    != 'P'
+                     and tunnus   = '$chastunn'";
           $chasresult = mysql_query($query) or pupe_error($query);
         }
 

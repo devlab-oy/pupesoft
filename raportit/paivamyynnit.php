@@ -38,20 +38,20 @@ if ($tee != '') {
   }
 
   $query = "SELECT osasto,
-              date_format(tapvm, '%j') pvm,
-              tapvm,
-              sum(kate) kate,
-              sum(arvo) myynti,
-              sum(kate) / sum(arvo) * 100 katepro
-              FROM lasku use index (yhtio_tila_tapvm)
-              JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
-              WHERE lasku.yhtio = '$kukarow[yhtio]'
-              AND lasku.tapvm   >= '$vuosi-01-01'
-              AND lasku.tapvm   <= '$vuosi-12-31'
-              AND lasku.tila    = 'u'
-              AND lasku.alatila = 'x'
-              GROUP BY 1,2,3
-              ORDER BY 1,2,3";
+            date_format(tapvm, '%j') pvm,
+            tapvm,
+            sum(kate) kate,
+            sum(arvo) myynti,
+            sum(kate) / sum(arvo) * 100 katepro
+            FROM lasku use index (yhtio_tila_tapvm)
+            JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
+            WHERE lasku.yhtio = '$kukarow[yhtio]'
+            AND lasku.tapvm   >= '$vuosi-01-01'
+            AND lasku.tapvm   <= '$vuosi-12-31'
+            AND lasku.tila    = 'u'
+            AND lasku.alatila = 'x'
+            GROUP BY 1,2,3
+            ORDER BY 1,2,3";
   $result = mysql_query($query) or pupe_error($query);
 
   while ($ressu = mysql_fetch_array($result)) {

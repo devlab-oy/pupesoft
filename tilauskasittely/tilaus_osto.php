@@ -1236,22 +1236,22 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               ta2.selitetark p3s
               FROM tilausrivi
               LEFT JOIN tuote ON tilausrivi.yhtio = tuote.yhtio
-                AND tilausrivi.tuoteno = tuote.tuoteno
+                AND tilausrivi.tuoteno                      = tuote.tuoteno
               LEFT JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio
-                AND tuote.tuoteno = tuotteen_toimittajat.tuoteno
-                AND tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
+                AND tuote.tuoteno                           = tuotteen_toimittajat.tuoteno
+                AND tuotteen_toimittajat.liitostunnus       = '$laskurow[liitostunnus]'
               LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
                 AND tilausrivin_lisatiedot.tilausrivilinkki > 0
                 AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus)
               LEFT JOIN tuotteen_avainsanat AS ta1 ON (ta1.yhtio = tuote.yhtio
-                AND ta1.tuoteno = tuote.tuoteno
-                AND ta1.laji = 'pakkauskoko2' )
+                AND ta1.tuoteno                             = tuote.tuoteno
+                AND ta1.laji                                = 'pakkauskoko2' )
               LEFT JOIN tuotteen_avainsanat AS ta2 ON (ta2.yhtio = tuote.yhtio
-                AND ta2.tuoteno = tuote.tuoteno
-                AND ta2.laji = 'pakkauskoko3')
-              WHERE tilausrivi.otunnus = '$kukarow[kesken]'
-              and tilausrivi.yhtio     = '$kukarow[yhtio]'
-              and tilausrivi.tyyppi    = 'O'
+                AND ta2.tuoteno                             = tuote.tuoteno
+                AND ta2.laji                                = 'pakkauskoko3')
+              WHERE tilausrivi.otunnus                      = '$kukarow[kesken]'
+              and tilausrivi.yhtio                          = '$kukarow[yhtio]'
+              and tilausrivi.tyyppi                         = 'O'
               ORDER BY sorttauskentta $yhtiorow[tilauksen_jarjestys_suunta], tilausrivi.tunnus";
     $presult = pupe_query($query);
 

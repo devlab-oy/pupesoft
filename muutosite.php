@@ -820,9 +820,9 @@ if ($tee == 'U') {
       switch ($laskurow['tila']) {
       case "X" : // Tämä on muistiotosite, sillä voi olla vain yksi tositenro
         $query = "SELECT distinct tosite
-                    FROM tiliointi
-                    WHERE yhtio = '$kukarow[yhtio]'
-                    and ltunnus = '$tunnus'";
+                  FROM tiliointi
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and ltunnus = '$tunnus'";
         $result = pupe_query($query);
 
         if (mysql_num_rows($result) != 1) {
@@ -837,21 +837,21 @@ if ($tee == 'U') {
 
       case 'U' : //Tämä on myyntilasku
         $query = "SELECT tosite
-                    FROM tiliointi
-                    WHERE yhtio = '$kukarow[yhtio]'
-                    and ltunnus = '$tunnus'";
+                  FROM tiliointi
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and ltunnus = '$tunnus'";
         $result = pupe_query($query);
         if (mysql_num_rows($result) != 0) {
 
           // Tälle saamme tositenron myyntisaamisista
           if ($laskurow['tapvm'] == $tiliointipvm) {
             $query = "SELECT tosite
-                        FROM tiliointi
-                        WHERE yhtio = '$kukarow[yhtio]'
-                        and ltunnus = '$tunnus'
-                        and tapvm   = '$tiliointipvm'
-                        and tilino  in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[konsernimyyntisaamiset]', '$yhtiorow[factoringsaamiset]')
-                        and summa   = $laskurow[summa]";
+                      FROM tiliointi
+                      WHERE yhtio = '$kukarow[yhtio]'
+                      and ltunnus = '$tunnus'
+                      and tapvm   = '$tiliointipvm'
+                      and tilino  in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[konsernimyyntisaamiset]', '$yhtiorow[factoringsaamiset]')
+                      and summa   = $laskurow[summa]";
             $result = pupe_query($query);
 
             if (mysql_num_rows($result) == 0) {
@@ -868,12 +868,12 @@ if ($tee == 'U') {
             // Tälle saamme tositenron jostain samanlaisesta viennistä
             if ($laskurow['tapvm'] != $tiliointipvm) {
               $query = "SELECT tosite
-                          FROM tiliointi
-                          WHERE yhtio  = '$kukarow[yhtio]'
-                          and ltunnus  = '$tunnus'
-                          and tapvm    = '$tiliointipvm'
-                          and tilino   not in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[konsernimyyntisaamiset]', '$yhtiorow[factoringsaamiset]')
-                          and summa   != $laskurow[summa]";
+                        FROM tiliointi
+                        WHERE yhtio  = '$kukarow[yhtio]'
+                        and ltunnus  = '$tunnus'
+                        and tapvm    = '$tiliointipvm'
+                        and tilino   not in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[konsernimyyntisaamiset]', '$yhtiorow[factoringsaamiset]')
+                        and summa   != $laskurow[summa]";
               $result = pupe_query($query);
 
               if (mysql_num_rows($result) == 0) {
@@ -896,12 +896,12 @@ if ($tee == 'U') {
         // Tälle saamme tositenron ostoveloista
         if ($laskurow['tapvm'] == $tiliointipvm) {
           $query = "SELECT tosite
-                      FROM tiliointi
-                      WHERE yhtio = '$kukarow[yhtio]'
-                      and ltunnus = '$tunnus'
-                      and tapvm   = '$tiliointipvm'
-                      and tilino  in ('$yhtiorow[ostovelat]', '$yhtiorow[konserniostovelat]')
-                      and summa   = round($laskurow[summa] * $laskurow[vienti_kurssi],2) * -1";
+                    FROM tiliointi
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    and ltunnus = '$tunnus'
+                    and tapvm   = '$tiliointipvm'
+                    and tilino  in ('$yhtiorow[ostovelat]', '$yhtiorow[konserniostovelat]')
+                    and summa   = round($laskurow[summa] * $laskurow[vienti_kurssi],2) * -1";
           $result = pupe_query($query);
 
           if (mysql_num_rows($result) == 0) {
@@ -917,12 +917,12 @@ if ($tee == 'U') {
         // Tälle saamme tositenron ostoveloista
         if ($laskurow['mapvm'] == $tiliointipvm) {
           $query = "SELECT tosite
-                      FROM tiliointi
-                      WHERE yhtio = '$kukarow[yhtio]'
-                      and ltunnus = '$tunnus'
-                      and tapvm   = '$tiliointipvm'
-                      and tilino  in ('$yhtiorow[ostovelat]', '$yhtiorow[konserniostovelat]')
-                      and summa   = round($laskurow[summa] * $laskurow[vienti_kurssi],2)";
+                    FROM tiliointi
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    and ltunnus = '$tunnus'
+                    and tapvm   = '$tiliointipvm'
+                    and tilino  in ('$yhtiorow[ostovelat]', '$yhtiorow[konserniostovelat]')
+                    and summa   = round($laskurow[summa] * $laskurow[vienti_kurssi],2)";
           $result = pupe_query($query);
 
           if (mysql_num_rows($result) == 0) {

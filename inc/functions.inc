@@ -1319,9 +1319,9 @@ if (!function_exists("tuoteperhe_myytavissa")) {
               JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
                 AND varastopaikat.tunnus  = tuotepaikat.varasto
                 $valinta1)
-              WHERE tuote.yhtio  = '$yhtio'
-              and tuote.tuoteno  IN ($tuotteet_str)
-              and tuote.tuoteno != ''
+              WHERE tuote.yhtio           = '$yhtio'
+              and tuote.tuoteno           IN ($tuotteet_str)
+              and tuote.tuoteno          != ''
               $valinta3
               ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys";
     $varresult = pupe_query($query);
@@ -1835,8 +1835,8 @@ if (!function_exists("saldo_myytavissa")) {
                         FROM tuotepaikat
                         LEFT JOIN varastopaikat on (varastopaikat.yhtio = tuotepaikat.yhtio
                           AND varastopaikat.tunnus = tuotepaikat.varasto)
-                        WHERE tuotepaikat.yhtio = '$yhtiolisa'
-                        and tuotepaikat.tuoteno = '$tuoteno'
+                        WHERE tuotepaikat.yhtio    = '$yhtiolisa'
+                        and tuotepaikat.tuoteno    = '$tuoteno'
                         GROUP BY varastopaikat.tyyppi
                         HAVING varastopaikat.tyyppi is null";
               $ennsaldoresult = pupe_query($query);
@@ -27810,9 +27810,9 @@ if (!function_exists('hae_toimitustavat')) {
                   JOIN toimitustapa AS tpa
                   ON ( ana.yhtio = tpa.yhtio AND ana.selitetark_2 = tpa.tunnus )
                   WHERE ana.yhtio = '$kukarow[yhtio]'
-                  AND ana.laji = 'SIIRTOVARASTOT'
-                  AND ana.selite = $lv
-                  AND selitetark = $kv";
+                  AND ana.laji    = 'SIIRTOVARASTOT'
+                  AND ana.selite  = $lv
+                  AND selitetark  = $kv";
       $ott_result = pupe_query($ott_qry);
 
       $oletus_toimitustavat = array();

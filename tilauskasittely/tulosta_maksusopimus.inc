@@ -1,9 +1,9 @@
 <?php
 
-if (@include_once("pdflib/phppdflib.class.php")) {
+if (@include_once "pdflib/phppdflib.class.php") {
 }
 else {
-  include_once("phppdflib.class.php");
+  include_once "phppdflib.class.php";
 }
 
 $query = "SELECT *

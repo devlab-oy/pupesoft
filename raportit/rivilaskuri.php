@@ -3,13 +3,13 @@
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if (!isset($tee)) $tee = '';
 
-if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+if (!isset($kka)) $kka = date("m", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+if (!isset($vva)) $vva = date("Y", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+if (!isset($ppa)) $ppa = date("d", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 
 if (!isset($kkl)) $kkl = date("m");
 if (!isset($vvl)) $vvl = date("Y");
@@ -36,7 +36,7 @@ echo "  <script type='text/javascript' language='JavaScript'>
       //-->
     </script>";
 
-echo "<font class='head'>",t("Rivilaskuri"),"</font><hr>";
+echo "<font class='head'>", t("Rivilaskuri"), "</font><hr>";
 
 echo "<form method='post' autocomplete='off'>";
 echo "<input type='hidden' name='tee' value='aja' />";
@@ -44,44 +44,44 @@ echo "<input type='hidden' name='tee' value='aja' />";
 echo "<table>";
 
 echo "<tr>";
-echo "<th>",t("Ajotyyppi"),"</th>";
+echo "<th>", t("Ajotyyppi"), "</th>";
 echo "<td colspan='3'><select name='raporttityyppi'>";
-echo "<option value=''>",t("Myyntitilauksen luontiajan mukaan"),"</option>";
+echo "<option value=''>", t("Myyntitilauksen luontiajan mukaan"), "</option>";
 
 $sel = $raporttityyppi == 'kerays' ? ' selected' : '';
 
-echo "<option value='kerays'{$sel}>",t("Myyntitilauksen keräysajan mukaan"),"</option>";
+echo "<option value='kerays'{$sel}>", t("Myyntitilauksen keräysajan mukaan"), "</option>";
 echo "</select></td>";
 echo "</tr>";
 
 $sel = array($aikamaare => ' selected') + array(10 => '', 30 => '', 60 => '');
 
 echo "<tr>";
-echo "<th>",t("Summaustaso"),"</th>";
+echo "<th>", t("Summaustaso"), "</th>";
 echo "<td colspan='3'><select name='aikamaare'>";
-echo "<option value='10'{$sel[10]}>",t("10 minuuttia"),"</option>";
-echo "<option value='30'{$sel[30]}>",t("30 minuuttia"),"</option>";
-echo "<option value='60'{$sel[60]}>",t("60 minuuttia"),"</option>";
+echo "<option value='10'{$sel[10]}>", t("10 minuuttia"), "</option>";
+echo "<option value='30'{$sel[30]}>", t("30 minuuttia"), "</option>";
+echo "<option value='60'{$sel[60]}>", t("60 minuuttia"), "</option>";
 echo "</select></td>";
 echo "</tr>";
 
 $sel = $laskutusajo_tuotteet != '' ? " selected" : "";
 
 echo "<tr>";
-echo "<th>",t("Pupesoftin automaattisesti lisäämät tuotteet"),",<br>",t("kuten esimerkiksi rahtituotenumero ja kuljetusvakuutus"),"</th>";
+echo "<th>", t("Pupesoftin automaattisesti lisäämät tuotteet"), ",<br>", t("kuten esimerkiksi rahtituotenumero ja kuljetusvakuutus"), "</th>";
 echo "<td colspan='3'><select name='laskutusajo_tuotteet'>";
-echo "<option value=''>",t("Näytä"),"</option>";
-echo "<option value='ei'{$sel}>",t("Ei näytetä"),"</option>";
+echo "<option value=''>", t("Näytä"), "</option>";
+echo "<option value='ei'{$sel}>", t("Ei näytetä"), "</option>";
 echo "</select></td>";
 echo "</tr>";
 
 $sel = $nayta_viennit != '' ? " selected" : "";
 
 echo "<tr>";
-echo "<th>",t("Vienti"),"</th>";
+echo "<th>", t("Vienti"), "</th>";
 echo "<td colspan='3'><select name='nayta_viennit'>";
-echo "<option value=''>",t("Näytä"),"</option>";
-echo "<option value='ei'{$sel}>",t("Ei näytetä"),"</option>";
+echo "<option value=''>", t("Näytä"), "</option>";
+echo "<option value='ei'{$sel}>", t("Ei näytetä"), "</option>";
 echo "</select></td>";
 echo "</tr>";
 
@@ -96,7 +96,7 @@ if (mysql_num_rows($lahdot_chk_res) == 1) {
   $sel = $toimittumassa != '' ? " checked" : "";
 
   echo "<tr>";
-  echo "<th>",t("Huomioidaan vain niiden tilauksien rivit") ,"<br>",t("jotka on annetun päivämäärävälin lähdöissä"),"</th>";
+  echo "<th>", t("Huomioidaan vain niiden tilauksien rivit") , "<br>", t("jotka on annetun päivämäärävälin lähdöissä"), "</th>";
   echo "<td colspan='3'><input type='checkbox' name='toimittumassa' {$sel} /></td>";
   echo "</tr>";
 }
@@ -104,27 +104,27 @@ if (mysql_num_rows($lahdot_chk_res) == 1) {
 $sel = array_fill_keys($tilaustyyppi, " checked") + array('N' => '', '2' => '', '7' => '', 'S' => '', '8' => '', 'R' => '');
 
 echo "<tr>";
-echo "<th>",t("Tilaustyyppi"),"</th>";
+echo "<th>", t("Tilaustyyppi"), "</th>";
 echo "<td colspan='3'>";
 echo "<input type='hidden' name='tilaustyyppi[]' value='default' />";
-echo "<input type='checkbox' name='tilaustyyppi[]' value='N' {$sel['N']}>",t("Normaalitilaus"),"<br />";
-echo "<input type='checkbox' name='tilaustyyppi[]' value='2' {$sel[2]}>",t("Varastotäydennys"),"<br />";
-echo "<input type='checkbox' name='tilaustyyppi[]' value='7' {$sel[7]}>",t("Tehdastilaus"),"<br />";
-echo "<input type='checkbox' name='tilaustyyppi[]' value='S' {$sel['S']}>",t("Sarjatilaus"),"<br />";
-echo "<input type='checkbox' name='tilaustyyppi[]' value='8' {$sel[8]}>",t("Muiden mukana"),"<br />";
-echo "<input type='checkbox' name='tilaustyyppi[]' value='R' {$sel['R']}>",t("Reklamaatio"),"<br />";
+echo "<input type='checkbox' name='tilaustyyppi[]' value='N' {$sel['N']}>", t("Normaalitilaus"), "<br />";
+echo "<input type='checkbox' name='tilaustyyppi[]' value='2' {$sel[2]}>", t("Varastotäydennys"), "<br />";
+echo "<input type='checkbox' name='tilaustyyppi[]' value='7' {$sel[7]}>", t("Tehdastilaus"), "<br />";
+echo "<input type='checkbox' name='tilaustyyppi[]' value='S' {$sel['S']}>", t("Sarjatilaus"), "<br />";
+echo "<input type='checkbox' name='tilaustyyppi[]' value='8' {$sel[8]}>", t("Muiden mukana"), "<br />";
+echo "<input type='checkbox' name='tilaustyyppi[]' value='R' {$sel['R']}>", t("Reklamaatio"), "<br />";
 echo "</td>";
 echo "</tr>";
 
 echo "<tr>";
-echo "<th>",t("Syötä alkupäivämäärä")," (",t("pp-kk-vvvv"),")</th>";
+echo "<th>", t("Syötä alkupäivämäärä"), " (", t("pp-kk-vvvv"), ")</th>";
 echo "<td><input type='text' name='ppa' value='{$ppa}' size='3'></td>";
 echo "<td><input type='text' name='kka' value='{$kka}' size='3'></td>";
 echo "<td><input type='text' name='vva' value='{$vva}' size='5'></td>";
 echo "</tr>";
 
 echo "<tr>";
-echo "<th>",t("Syötä loppupäivämäärä")," (",t("pp-kk-vvvv"),")</th>";
+echo "<th>", t("Syötä loppupäivämäärä"), " (", t("pp-kk-vvvv"), ")</th>";
 echo "<td><input type='text' name='ppl' value='{$ppl}' size='3'></td>";
 echo "<td><input type='text' name='kkl' value='{$kkl}' size='3'></td>";
 echo "<td><input type='text' name='vvl' value='{$vvl}' size='5'></td>";
@@ -133,21 +133,21 @@ echo "</tr>";
 echo "</table>";
 
 echo "<br>";
-echo "<input type='submit' value='",t("Aja raportti"),"'>";
+echo "<input type='submit' value='", t("Aja raportti"), "'>";
 
 echo "</form><br /><br />";
 
 if ($tee != '') {
 
   if ($raporttityyppi == "kerays") {
-    echo "<font class='head'>",t("Kerätyt rivit")," {$ppa}.{$kka}.{$vva} - {$ppl}.{$kkl}.{$vvl}</font>";
+    echo "<font class='head'>", t("Kerätyt rivit"), " {$ppa}.{$kka}.{$vva} - {$ppl}.{$kkl}.{$vvl}</font>";
 
     $ajotapa = 'tilausrivi.kerattyaika';
     $ajoindex = 'yhtio_tyyppi_kerattyaika';
     $saldotonjoin = "JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa = '')";
   }
   else {
-    echo "<font class='head'>",t("Myyntitilaukset")," {$ppa}.{$kka}.{$vva} - {$ppl}.{$kkl}.{$vvl}</font>";
+    echo "<font class='head'>", t("Myyntitilaukset"), " {$ppa}.{$kka}.{$vva} - {$ppl}.{$kkl}.{$vvl}</font>";
 
     $ajotapa = 'tilausrivi.laadittu';
     $ajoindex = 'yhtio_laadittu';
@@ -246,37 +246,37 @@ if ($tee != '') {
 
   echo "<tr>";
   echo "<th></th>";
-  echo "<th colspan='2' align='center'>",t("Yhteensä"),"</th>";
+  echo "<th colspan='2' align='center'>", t("Yhteensä"), "</th>";
 
   if ($nayta_viennit == '') {
-    echo "<th colspan='2' align='center'>",t("Vienti EU"),"</th>";
-    echo "<th colspan='2' align='center'>",t("ei-EU"),"</th>";
+    echo "<th colspan='2' align='center'>", t("Vienti EU"), "</th>";
+    echo "<th colspan='2' align='center'>", t("ei-EU"), "</th>";
   }
 
-  echo "<th colspan='2' align='center'>",t("Sähköinen"),"</th>";
+  echo "<th colspan='2' align='center'>", t("Sähköinen"), "</th>";
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>",t("Kello"),"</th>";
-  echo "<th>",t("Rivejä"),"</th>";
-  echo "<th>",t("Nimikkeitä"),"</th>";
+  echo "<th>", t("Kello"), "</th>";
+  echo "<th>", t("Rivejä"), "</th>";
+  echo "<th>", t("Nimikkeitä"), "</th>";
 
   if ($nayta_viennit == '') {
-    echo "<th>",t("Rivejä"),"</th>";
-    echo "<th>",t("Nimikkeitä"),"</th>";
-    echo "<th>",t("Rivejä"),"</th>";
-    echo "<th>",t("Nimikkeitä"),"</th>";
+    echo "<th>", t("Rivejä"), "</th>";
+    echo "<th>", t("Nimikkeitä"), "</th>";
+    echo "<th>", t("Rivejä"), "</th>";
+    echo "<th>", t("Nimikkeitä"), "</th>";
   }
 
-  echo "<th>",t("Rivejä"),"</th>";
-  echo "<th>",t("Nimikkeitä"),"</th>";
+  echo "<th>", t("Rivejä"), "</th>";
+  echo "<th>", t("Nimikkeitä"), "</th>";
   echo "</tr>";
 
   while ($row = mysql_fetch_assoc($res)) {
 
-    echo "<tr class='aktiivi asiakas' id='",str_replace(":", "", $row['kello']),"'>";
+    echo "<tr class='aktiivi asiakas' id='", str_replace(":", "", $row['kello']), "'>";
 
-    echo "<td>{$row['kello']} - {$row['kello2']} <img title='",t("Asiakkaittain"),"' alt='",t("Asiakkaittain"),"' src='{$palvelin2}pics/lullacons/go-down.png' /></td>";
+    echo "<td>{$row['kello']} - {$row['kello2']} <img title='", t("Asiakkaittain"), "' alt='", t("Asiakkaittain"), "' src='{$palvelin2}pics/lullacons/go-down.png' /></td>";
     echo "<td align='right'>{$row['yhteensa_riveja']}</td>";
     echo "<td align='right'>{$row['yhteensa_nimikkeita']}</td>";
 
@@ -314,7 +314,7 @@ if ($tee != '') {
     $res_per_asiakas = pupe_query($query);
 
     while ($row_per_asiakas = mysql_fetch_assoc($res_per_asiakas)) {
-      echo "<tr class='aktiivi spec ".str_replace(":", "", $row_per_asiakas['kello']),"' style='display:none;'>";
+      echo "<tr class='aktiivi spec ".str_replace(":", "", $row_per_asiakas['kello']), "' style='display:none;'>";
 
       echo "<td>{$row_per_asiakas['asiakas']}</td>";
       echo "<td align='right'>{$row_per_asiakas['yhteensa_riveja']}</td>";
@@ -381,4 +381,4 @@ if ($tee != '') {
   echo "</table>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

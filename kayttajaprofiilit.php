@@ -1,5 +1,5 @@
 <?php
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo " <!-- Enabloidaan shiftillä checkboxien chekkaus //-->
     <script src='inc/checkboxrange.js'></script>
@@ -322,7 +322,7 @@ if ($profiili != '') {
   echo "</table></form>";
 
   if ($sovellus == "") {
-    require("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 
@@ -414,8 +414,8 @@ if ($profiili != '') {
     }
 
     echo "  ".t("$orow[nimitys]")."</td>
-        <td align='center'><input type='checkbox' class='A".str_pad($lask,6,0,STR_PAD_LEFT)." shift' $checked   value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='valittu[$lask]'></td>
-        <td align='center'><input type='checkbox' class='B".str_pad($lask,6,0,STR_PAD_LEFT)." shift' $paivit    value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='paivitys[$lask]'></td>
+        <td align='center'><input type='checkbox' class='A".str_pad($lask, 6, 0, STR_PAD_LEFT)." shift' $checked   value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='valittu[$lask]'></td>
+        <td align='center'><input type='checkbox' class='B".str_pad($lask, 6, 0, STR_PAD_LEFT)." shift' $paivit    value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='paivitys[$lask]'></td>
         </tr>";
 
     $vsove = $orow['sovellus'];
@@ -434,4 +434,4 @@ if ($profiili != '') {
   echo "<input type='submit' value='".t("Päivitä tiedot")."'></form>";
 }
 
-require("inc/footer.inc");
+require "inc/footer.inc";

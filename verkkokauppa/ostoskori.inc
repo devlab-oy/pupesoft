@@ -41,7 +41,7 @@ if (!function_exists("check_ostoskori")) {
     // koria ei löydy, tehdään sellanen
     if (mysql_num_rows($koriresult) == 0) {
 
-       //yhtiön oletusalvi!
+      //yhtiön oletusalvi!
       $wquery = "select selite from avainsana where yhtio='$kukarow[yhtio]' and laji='alv' and selitetark!=''";
       $wtres  = mysql_query($wquery) or pupe_error($wquery);
       $wtrow  = mysql_fetch_array($wtres);
@@ -113,7 +113,7 @@ if (!function_exists("lisaa_ostoskoriin")) {
       $korvaavakielto    = "";
       $varataan_saldoa  = "";
       $var        = "Y";
-//      $perhekielto    = "TODELLAKIN";
+      //      $perhekielto    = "TODELLAKIN";
       $jtkielto       = $laskurow['jtkielto'];
 
       for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
@@ -121,10 +121,10 @@ if (!function_exists("lisaa_ostoskoriin")) {
       }
 
       if (file_exists("../tilauskasittely/lisaarivi.inc")) {
-        require ("../tilauskasittely/lisaarivi.inc");
+        require "../tilauskasittely/lisaarivi.inc";
       }
       else {
-        require ("lisaarivi.inc");
+        require "lisaarivi.inc";
       }
 
     }

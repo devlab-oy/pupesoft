@@ -5,8 +5,8 @@ $_GET["no_css"] = 'yes';
 
 $mobile = true;
 
-if (@include_once("../inc/parametrit.inc"));
-elseif (@include_once("inc/parametrit.inc"));
+if (@include_once "../inc/parametrit.inc");
+elseif (@include_once "inc/parametrit.inc");
 
 if (!isset($alusta_tunnus, $liitostunnus, $tilausrivi)) exit;
 
@@ -28,7 +28,7 @@ if (isset($submit) and trim($submit) != '') {
 
   if ($submit == 'submit') {
 
-    # Koodi ei saa olla tyhj‰!
+    // Koodi ei saa olla tyhj‰!
     if ($koodi != '') {
 
       // Parsitaan uusi tuotepaikka
@@ -73,8 +73,8 @@ if (isset($submit) and trim($submit) != '') {
         $error['varalle'] .= t("Virheellinen tuotepaikka, yrit‰ syˆtt‰‰ tuotepaikka k‰sin") . " ($tuotepaikka)<br>";
       }
 
-      # Tarkistetaan hyllypaikka ja varmistuskoodi
-      # hyllypaikan on oltava reservipaikka ja siell‰ ei saa olla tuotteita
+      // Tarkistetaan hyllypaikka ja varmistuskoodi
+      // hyllypaikan on oltava reservipaikka ja siell‰ ei saa olla tuotteita
       $options = array('varmistuskoodi' => $koodi, 'reservipaikka' => 'K');
       $kaikki_ok = tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $options);
 
@@ -109,14 +109,14 @@ if (isset($submit) and trim($submit) != '') {
         }
       }
 
-      # Jos hyllypaikka ok, laitetaan koko suuntalava varastoon
+      // Jos hyllypaikka ok, laitetaan koko suuntalava varastoon
       if ($kaikki_ok and $error['varalle'] == '' and $error['tuotteet'] == '') {
 
-        # Poistetaan k‰ytt‰j‰n kesken, ett‰ osataan vied‰ varastoon
+        // Poistetaan k‰ytt‰j‰n kesken, ett‰ osataan vied‰ varastoon
         $query = "UPDATE kuka SET kesken = 0 where yhtio = '$kukarow[yhtio]' and kuka = '$kukarow[kuka]'";
         $res = pupe_query($query);
 
-        # Haetaan saapumiset?
+        // Haetaan saapumiset?
         $saapumiset = hae_saapumiset($alusta_tunnus);
 
         if (isset($suuntalavan_tuotteet) and count($suuntalavan_tuotteet) > 0) {
@@ -133,31 +133,31 @@ if (isset($submit) and trim($submit) != '') {
               $chk_varattu_res = mysql_query($query);
               $chk_varattu_row = mysql_fetch_assoc($chk_varattu_res);
 
-              # Tehd‰‰n insertti erotukselle
+              // Tehd‰‰n insertti erotukselle
               $kopioitu_tilausrivi = kopioi_tilausrivi($_tunnus);
 
-              # P‰ivit‰ kopioidun kpl (maara - varattu)
+              // P‰ivit‰ kopioidun kpl (maara - varattu)
               paivita_tilausrivin_kpl($kopioitu_tilausrivi, ($_syotetty_maara - $chk_varattu_row['varattu']));
             }
           }
         }
 
-        # P‰ivitet‰‰n hyllypaikat
+        // P‰ivitet‰‰n hyllypaikat
         $paivitetyt_rivit = paivita_hyllypaikat($alusta_tunnus, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso);
 
         if ($paivitetyt_rivit > 0) {
-          # Hylly arrayksi...
+          // Hylly arrayksi...
           $hylly = array(
             "hyllyalue" => $hyllyalue,
             "hyllynro" => $hyllynro,
             "hyllyvali" => $hyllyvali,
             "hyllytaso" => $hyllytaso);
 
-          # Vied‰‰n varastoon keikka kerrallaan.
-          foreach($saapumiset as $saapuminen) {
-            # Saako keikan vied‰ varastoon
+          // Vied‰‰n varastoon keikka kerrallaan.
+          foreach ($saapumiset as $saapuminen) {
+            // Saako keikan vied‰ varastoon
             if (saako_vieda_varastoon($saapuminen, 'kalkyyli', 1) == 1) {
-              # Ei saa vied‰ varastoon, skipataan?
+              // Ei saa vied‰ varastoon, skipataan?
               $varastovirhe = true;
               continue;
             } else {
@@ -168,11 +168,11 @@ if (isset($submit) and trim($submit) != '') {
                 $suuntalavat = array($alusta_tunnus);
                 $otunnus = $saapuminen;
 
-                require('tilauskasittely/tulosta_tavaraetiketti.inc');
+                require 'tilauskasittely/tulosta_tavaraetiketti.inc';
               }
             }
           }
-          # Jos kaikki meni ok
+          // Jos kaikki meni ok
           if (isset($varastovirhe)) {
             $error['varalle'] .= t("Virhe varastoonvienniss‰")."<br>";
           } else {
@@ -194,7 +194,7 @@ if (isset($submit) and trim($submit) != '') {
   }
 }
 
-# Haetaan SSCC
+// Haetaan SSCC
 $sscc_query = mysql_query("  SELECT s.sscc, ss.saapuminen
               FROM suuntalavat AS s
               JOIN suuntalavat_saapuminen AS ss ON (ss.yhtio = s.yhtio AND ss.suuntalava = s.tunnus)
@@ -206,7 +206,7 @@ $url = "alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}";
 
 echo "<div class='header'>";
 echo "<button onclick='window.location.href=\"suuntalavan_tuotteet.php?$url\"' class='button left'><img src='back2.png'></button>";
-echo "<h1>",t("SUUNTALAVAVARALLE"),"</h1></div>";
+echo "<h1>", t("SUUNTALAVAVARALLE"), "</h1></div>";
 
 $_tuotepaikka = trim("{$hyllyalue} {$hyllynro} {$hyllyvali} {$hyllytaso}");
 
@@ -215,42 +215,42 @@ echo "<div class='main'>
   <form name='varalleformi' method='post' action=''>
   <table>
     <tr>
-      <th>",t("Suuntalava"),"</th>
+      <th>", t("Suuntalava"), "</th>
       <td colspan='3'>{$sscc['sscc']}</td>
     </tr>
     <tr>
-      <th>",t("Ker‰yspaikka"),"</th>
+      <th>", t("Ker‰yspaikka"), "</th>
       <td><input type='text' name='tuotepaikka' value='{$_tuotepaikka}' /></td>
     </tr>
     <tr>
-      <th>",t("Koodi"),"</th>
+      <th>", t("Koodi"), "</th>
       <td colspan='2'><input type='text' name='koodi' value='{$koodi}' size='7' />
     </tr>
     <tr>
-      <th>",t("Tulosta tavaraetiketit"),"</th>
+      <th>", t("Tulosta tavaraetiketit"), "</th>
       <td colspan='2'><select name='komento[Tavaraetiketti]'>";
 
-      $query = "SELECT *
-                FROM kirjoittimet
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND komento NOT IN ('edi','email')
-                ORDER BY kirjoitin";
-      $kires = pupe_query($query);
+$query = "SELECT *
+          FROM kirjoittimet
+          WHERE yhtio = '{$kukarow['yhtio']}'
+          AND komento NOT IN ('edi','email')
+          ORDER BY kirjoitin";
+$kires = pupe_query($query);
 
-      echo "<option value=''>",t("Ei kirjoitinta"),"</option>";
+echo "<option value=''>", t("Ei kirjoitinta"), "</option>";
 
-      while ($kirow = mysql_fetch_assoc($kires)) {
-        $sel = $kirow['tunnus'] == $kukarow['kirjoitin'] ? " selected" : "";
-        echo "<option value='{$kirow['komento']}'{$sel}>{$kirow['kirjoitin']}</option>";
-      }
+while ($kirow = mysql_fetch_assoc($kires)) {
+  $sel = $kirow['tunnus'] == $kukarow['kirjoitin'] ? " selected" : "";
+  echo "<option value='{$kirow['komento']}'{$sel}>{$kirow['kirjoitin']}</option>";
+}
 
-      echo "</select></td>
+echo "</select></td>
     </tr>
   </table>
   </div>
 
   <div class='controls'>
-    <button name='submit' value='submit' class='button' onclick='submit();'>",t("OK"),"</button>
+    <button name='submit' value='submit' class='button' onclick='submit();'>", t("OK"), "</button>
   </div>
 
   <span class='error'>{$error['varalle']}</span>
@@ -269,13 +269,13 @@ $tuotteet_res = mysql_query($query);
 if (mysql_num_rows($tuotteet_res) > 0) {
 
   echo "<div class='main'>";
-  echo "<div class='header'><h1>",t("YLITULOUTUS"),"</h1></div>";
+  echo "<div class='header'><h1>", t("YLITULOUTUS"), "</h1></div>";
 
   echo "<span class='error'>{$error['tuotteet']}</span>";
   echo "<table>";
   echo "<tr>";
-  echo "<th>",t("Tuoteno"),"</th>";
-  echo "<th>",t("M‰‰r‰"),"</th>";
+  echo "<th>", t("Tuoteno"), "</th>";
+  echo "<th>", t("M‰‰r‰"), "</th>";
   echo "</tr>";
 
   while ($tuotteet_row = mysql_fetch_assoc($tuotteet_res)) {
@@ -294,4 +294,4 @@ if (mysql_num_rows($tuotteet_res) > 0) {
 echo "</form>
 </div>";
 
-require('inc/footer.inc');
+require 'inc/footer.inc';

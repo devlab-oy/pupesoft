@@ -3,7 +3,7 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require('../inc/parametrit.inc');
+require '../inc/parametrit.inc';
 
 echo "<font class='head'>".t("Merivakuutuslistaus")."</font><hr>";
 
@@ -104,11 +104,11 @@ echo "<table><form method='post'>";
 
 // ehdotetaan 7 p‰iv‰‰ taaksep‰in
 if (!isset($kka))
-  $kka = date("m",mktime(0, 0, 0, date("m"), date("d")-7, date("Y")));
+  $kka = date("m", mktime(0, 0, 0, date("m"), date("d")-7, date("Y")));
 if (!isset($vva))
-  $vva = date("Y",mktime(0, 0, 0, date("m"), date("d")-7, date("Y")));
+  $vva = date("Y", mktime(0, 0, 0, date("m"), date("d")-7, date("Y")));
 if (!isset($ppa))
-  $ppa = date("d",mktime(0, 0, 0, date("m"), date("d")-7, date("Y")));
+  $ppa = date("d", mktime(0, 0, 0, date("m"), date("d")-7, date("Y")));
 
 if (!isset($kkl))
   $kkl = date("m");
@@ -124,9 +124,9 @@ echo "<tr><th>".t("Kuljetusmuoto").":</th><td colspan='3'>
 
 $result = t_avainsana("KM");
 
-while($row = mysql_fetch_array($result)){
+while ($row = mysql_fetch_array($result)) {
   $sel = '';
-  if($row["selite"] == $kuljetusmuoto) {
+  if ($row["selite"] == $kuljetusmuoto) {
     $sel = 'selected';
   }
   echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
@@ -144,4 +144,4 @@ echo "<tr><th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰")."</th>
     <td><input type='text' name='vvl' value='$vvl' size='5'></td>";
 echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td></tr></table>";
 
-require ("../inc/footer.inc");
+require "../inc/footer.inc";

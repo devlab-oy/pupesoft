@@ -4,11 +4,11 @@
 $useslave = 1;
 
 if (isset($_POST["tee"])) {
-  if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
@@ -23,11 +23,11 @@ else {
 }
 
 if (!isset($kka))
-  $kka = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+  $kka = date("m", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 if (!isset($vva))
-  $vva = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+  $vva = date("Y", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 if (!isset($ppa))
-  $ppa = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+  $ppa = date("d", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 
 if (!isset($kkl))
   $kkl = date("m");
@@ -65,7 +65,7 @@ echo "<td colspan='3'>";
 $monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI");
 $noautosubmit = TRUE;
 
-require ("tilauskasittely/monivalintalaatikot.inc");
+require "tilauskasittely/monivalintalaatikot.inc";
 
 echo "</td></tr>";
 
@@ -80,7 +80,7 @@ echo "<td colspan='3'>";
 
 $varastot = (isset($_POST['varastot']) and is_array($_POST['varastot'])) ? $_POST['varastot'] : array();
 
-  while ($varow = mysql_fetch_assoc($vares)) {
+while ($varow = mysql_fetch_assoc($vares)) {
   $sel = '';
   if (in_array($varow['tunnus'], $varastot)) {
     $sel = 'checked';
@@ -156,14 +156,14 @@ if ($tee == 'KORJAA') {
               korjattu     = '$kukarow[kuka]'
               WHERE tunnus = $kpitorow[varasto]
               AND yhtio    = '$kukarow[yhtio]'";
-        $result = pupe_query($query);
+    $result = pupe_query($query);
 
     $query = "UPDATE tiliointi
               SET korjausaika = now(),
               korjattu     = '$kukarow[kuka]'
               WHERE tunnus = $kpitorow[varastonmuutos]
               AND yhtio    = '$kukarow[yhtio]'";
-        $result = pupe_query($query);
+    $result = pupe_query($query);
 
     $query = "INSERT into tiliointi set
               yhtio    = '$kukarow[yhtio]',
@@ -233,10 +233,10 @@ if ($tee == 'PERU') {
     $upresult = pupe_query($query);
 
     $query = "UPDATE tiliointi SET korjausaika=now(), korjattu='$kukarow[kuka]' WHERE tunnus=$kpitorow[varasto] AND yhtio='$kukarow[yhtio]'";
-        $result = pupe_query($query);
+    $result = pupe_query($query);
 
     $query = "UPDATE tiliointi SET korjausaika=now(), korjattu='$kukarow[kuka]' WHERE tunnus=$kpitorow[varastonmuutos] AND yhtio='$kukarow[yhtio]'";
-        $result = pupe_query($query);
+    $result = pupe_query($query);
 
     $query = "UPDATE sarjanumeroseuranta
               SET myyntirivitunnus = 0,
@@ -248,7 +248,7 @@ if ($tee == 'PERU') {
               and inventointitunnus = $ttunnus
               and myyntirivitunnus  = -1
               and siirtorivitunnus  = -1";
-        $result = pupe_query($query);
+    $result = pupe_query($query);
 
     $query = "UPDATE tuotepaikat
               SET saldo = saldo-$kpl,
@@ -303,7 +303,7 @@ if ($tee == 'Y') {
     $rajaus = urlencode(serialize($rajaus));
 
     if (count($komento) == 0) {
-      require("../inc/valitse_tulostin.inc");
+      require "../inc/valitse_tulostin.inc";
     }
   }
 
@@ -313,11 +313,11 @@ if ($tee == 'Y') {
   $tuotepaikat_lisa  = "";
   $varastopaikat_lisa = "";
 
-  if ((float) $prosmuutos < 0 and substr($prosmuutos,0,1) == '-') {
+  if ((float) $prosmuutos < 0 and substr($prosmuutos, 0, 1) == '-') {
     $prosmuutos = (float) $prosmuutos;
     $tuotepaikat_lisa .= "and tuotepaikat.inventointipoikkeama <= '$prosmuutos' ";
   }
-  elseif ((float) $prosmuutos > 0 and substr($prosmuutos,0,1) == '+') {
+  elseif ((float) $prosmuutos > 0 and substr($prosmuutos, 0, 1) == '+') {
     $prosmuutos = (float) $prosmuutos;
     $tuotepaikat_lisa .= "and tuotepaikat.inventointipoikkeama >= '$prosmuutos' ";
   }
@@ -338,7 +338,7 @@ if ($tee == 'Y') {
 
   if (!empty($varastot)) {
     $varastopaikat_lisa .= "and varastopaikat.tunnus IN (" . implode(', ', $varastot) . ") ";
-      }
+  }
 
   if ($vararvomuu != "") {
     $lisa_vamu = "HAVING arvo != 0";
@@ -408,7 +408,7 @@ if ($tee == 'Y') {
 
       preg_match("/ \(([0-9\.\-]*?)\) /", $tuoterow["selite"], $invkpl);
 
-      $vararvo_ennen = round((float) $invkpl[1] * $tuoterow["hinta"],2);
+      $vararvo_ennen = round((float) $invkpl[1] * $tuoterow["hinta"], 2);
 
       echo "<tr><td>".t("Varastonarvo ennen inventointia").": $vararvo_ennen</td><td>".t("Varastonmuutos").": ".sprintf('%.2f', $tuoterow["kpl"]*$tuoterow["hinta"])."</td><td colspan='3'>".t("Kirjanpito").": ".sprintf('%.2f', $kpitorow["summa"])."</td></tr>";
 
@@ -517,12 +517,12 @@ if ($tee == "TULOSTA" and mysql_num_rows($saldoresult) > 0 ) {
   $vv = date('Y');
 
   $ots  = t("Inventointipoikkeamalista, poikkeama ")." $muutos $yks $pp.$kk.$vv $yhtiorow[nimi]\n\n";
-  $ots .= sprintf ('%-14.14s',   t("Paikka"));
-  $ots .= sprintf ('%-21.21s',   t("Tuoteno"));
-  $ots .= sprintf ('%-21.21s',   t("Toim.Tuoteno"));
-  $ots .= sprintf ('%-10.10s',  t("Poikkeama"));
-  $ots .= sprintf ('%-9.9s',     t("Yksikkö"));
-  $ots .= sprintf ('%-20.20',   t("Inv.pvm"));
+  $ots .= sprintf('%-14.14s',   t("Paikka"));
+  $ots .= sprintf('%-21.21s',   t("Tuoteno"));
+  $ots .= sprintf('%-21.21s',   t("Toim.Tuoteno"));
+  $ots .= sprintf('%-10.10s',  t("Poikkeama"));
+  $ots .= sprintf('%-9.9s',     t("Yksikkö"));
+  $ots .= sprintf('%-20.20',   t("Inv.pvm"));
   $ots .= "\n";
   $ots .= "-------------------------------------------------------------------------------------------------------\n\n";
   fwrite($fh, $ots);
@@ -545,23 +545,23 @@ if ($tee == "TULOSTA" and mysql_num_rows($saldoresult) > 0 ) {
       $row["inventointiaika"] = t("Ei inventoitu");
     }
 
-    $prn  = sprintf ('%-14.14s',   $row["hyllyalue"]." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]);
-    $prn .= sprintf ('%-21.21s',   $row["tuoteno"]);
-    $prn .= sprintf ('%-21.21s',   $row["toim_tuoteno"]);
-    $prn .= sprintf ('%-10.10s',  $row["kpl"]);
-    $prn .= sprintf ('%-9.9s',     t_avainsana("Y", "", "and avainsana.selite='$row[yksikko]'", "", "", "selite"));
-    $prn .= sprintf ('%-16.16s',   $row["inventointiaika"]);
+    $prn  = sprintf('%-14.14s',   $row["hyllyalue"]." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]);
+    $prn .= sprintf('%-21.21s',   $row["tuoteno"]);
+    $prn .= sprintf('%-21.21s',   $row["toim_tuoteno"]);
+    $prn .= sprintf('%-10.10s',  $row["kpl"]);
+    $prn .= sprintf('%-9.9s',     t_avainsana("Y", "", "and avainsana.selite='$row[yksikko]'", "", "", "selite"));
+    $prn .= sprintf('%-16.16s',   $row["inventointiaika"]);
 
     if ($naytanimitys != '') {
 
       preg_match("/ \(([0-9\.\-]*?)\) /", $row["selite"], $invkpl);
 
-      $vararvo_ennen = round((float) $invkpl[1] * $row["hinta"],2);
+      $vararvo_ennen = round((float) $invkpl[1] * $row["hinta"], 2);
 
-      $prn .= "\n".sprintf ('%-54.54s',     $row["nimitys"]);
-      $prn .= "  ".t("Varastonarvo ennen inventointia").": ".sprintf ('%-21.21s',  $vararvo_ennen);
-      $prn .= "\n".sprintf ('%-54.54s',     "");
-      $prn .= "  ".t("Arvonmuutos").": ".sprintf ('%-21.21s',  round($row["arvo"],2));
+      $prn .= "\n".sprintf('%-54.54s',     $row["nimitys"]);
+      $prn .= "  ".t("Varastonarvo ennen inventointia").": ".sprintf('%-21.21s',  $vararvo_ennen);
+      $prn .= "\n".sprintf('%-54.54s',     "");
+      $prn .= "  ".t("Arvonmuutos").": ".sprintf('%-21.21s',  round($row["arvo"], 2));
       $arvoyht += $row["arvo"];
       $rivit++;
     }
@@ -572,7 +572,7 @@ if ($tee == "TULOSTA" and mysql_num_rows($saldoresult) > 0 ) {
   }
 
   if ($naytanimitys != '') {
-    $prn = t("Arvonmuutos yhteensä").": ".sprintf ('%-21.21s', round($arvoyht,2));
+    $prn = t("Arvonmuutos yhteensä").": ".sprintf('%-21.21s', round($arvoyht, 2));
     fwrite($fh, $prn);
   }
 
@@ -588,7 +588,7 @@ if ($tee == "TULOSTA" and mysql_num_rows($saldoresult) > 0 ) {
     $liite = $filenimi.".pdf";
     $ctype = "PDF";
     $kutsu = "inventointipoikkeamat-".date("Y-m-d");
-    require("inc/sahkoposti.inc");
+    require "inc/sahkoposti.inc";
 
     system("rm -f ".$filenimi.".pdf");
   }
@@ -615,7 +615,7 @@ if ($tee == "TULOSTAEXCEL" and mysql_num_rows($saldoresult) > 0 ) {
     $yks = "%";
   }
 
-  include('inc/pupeExcel.inc');
+  include 'inc/pupeExcel.inc';
 
   $worksheet    = new pupeExcel();
   $format_bold = array("bold" => TRUE);
@@ -641,7 +641,7 @@ if ($tee == "TULOSTAEXCEL" and mysql_num_rows($saldoresult) > 0 ) {
 
     preg_match("/ \(([0-9\.\-]*?)\) /", $row["selite"], $invkpl);
 
-    $vararvo_ennen = round((float) $invkpl[1] * $row["hinta"],2);
+    $vararvo_ennen = round((float) $invkpl[1] * $row["hinta"], 2);
 
     $worksheet->writeString($excelrivi, 0, $row["tuoteno"]);
     $worksheet->writeString($excelrivi, 1, t_tuotteen_avainsanat($row, 'nimitys'));
@@ -652,7 +652,7 @@ if ($tee == "TULOSTAEXCEL" and mysql_num_rows($saldoresult) > 0 ) {
     $worksheet->writeString($excelrivi, 6, t_avainsana("Y", "", "and avainsana.selite='$row[yksikko]'", "", "", "selite"));
     $worksheet->writeDate($excelrivi, 7, $row["inventointiaika"]);
     $worksheet->writeNumber($excelrivi, 8, $vararvo_ennen);
-    $worksheet->writeNumber($excelrivi, 9, round($row["arvo"],2));
+    $worksheet->writeNumber($excelrivi, 9, round($row["arvo"], 2));
 
     $excelrivi++;
   }
@@ -670,4 +670,4 @@ if ($tee == "TULOSTAEXCEL" and mysql_num_rows($saldoresult) > 0 ) {
 
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

@@ -30,7 +30,7 @@ else {
 
   $positions = $xml->createElement('Positions');
 
-  foreach($ostotilaus['tilausrivit'] as $tilausrivi) {
+  foreach ($ostotilaus['tilausrivit'] as $tilausrivi) {
     $article = $xml->createElement('article');
 
     $articleno = $xml->createElement('articleNo');

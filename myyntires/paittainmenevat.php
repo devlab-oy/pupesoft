@@ -1,6 +1,6 @@
 <?php
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Etsi ja poista päittäin menevät suoritukset")."</font><hr>";
 
@@ -27,7 +27,7 @@ if ($tee == 'N') {
 
   if (mysql_num_rows($paaresult) > 0) {
 
-    while ($suoritusrow = mysql_fetch_assoc ($paaresult)) {
+    while ($suoritusrow = mysql_fetch_assoc($paaresult)) {
 
       $tapvm = $suoritusrow['kirjpvm'];
 
@@ -64,7 +64,7 @@ if ($tee == 'T') {
 
   if (mysql_num_rows($paaresult) > 0) {
 
-    while ($suoritusrow = mysql_fetch_assoc ($paaresult)) {
+    while ($suoritusrow = mysql_fetch_assoc($paaresult)) {
 
       // Onko tilioinnit veilä olemassa ja suoritus oikeassa tilassa
       $query  = "SELECT tunnus, kirjpvm
@@ -88,7 +88,7 @@ if ($tee == 'T') {
 
         if (mysql_num_rows($result) == 1) {
 
-          $tiliointi1row = mysql_fetch_assoc ($result);
+          $tiliointi1row = mysql_fetch_assoc($result);
 
           $query  = "SELECT tunnus, ltunnus, summa, tilino, kustp, kohde, projekti
                      FROM tiliointi
@@ -108,11 +108,11 @@ if ($tee == 'T') {
             }
 
             //vertaillaan tilikauteen
-            list($vv1,$kk1,$pp1) = explode("-", $yhtiorow["myyntireskontrakausi_alku"]);
-            list($vv2,$kk2,$pp2) = explode("-", $yhtiorow["myyntireskontrakausi_loppu"]);
+            list($vv1, $kk1, $pp1) = explode("-", $yhtiorow["myyntireskontrakausi_alku"]);
+            list($vv2, $kk2, $pp2) = explode("-", $yhtiorow["myyntireskontrakausi_loppu"]);
 
-            $myrealku  = (int) date('Ymd', mktime(0,0,0,$kk1,$pp1,$vv1));
-            $myreloppu = (int) date('Ymd', mktime(0,0,0,$kk2,$pp2,$vv2));
+            $myrealku  = (int) date('Ymd', mktime(0, 0, 0, $kk1, $pp1, $vv1));
+            $myreloppu = (int) date('Ymd', mktime(0, 0, 0, $kk2, $pp2, $vv2));
 
             $tsekpvm = str_replace("-", "", $tapvm);
 
@@ -311,7 +311,7 @@ if ($tee == '') {
     echo "<br><table><tr>";
 
     for ($i = 0; $i < mysql_num_fields($result); $i++) {
-      echo "<th>" . t(mysql_field_name($result,$i))."</th>";
+      echo "<th>" . t(mysql_field_name($result, $i))."</th>";
     }
     echo "</tr>";
 
@@ -319,7 +319,7 @@ if ($tee == '') {
 
       echo "<tr>";
       for ($i = 0; $i < mysql_num_fields($result); $i++) {
-        echo "<td>".$trow[mysql_field_name($result,$i)]."</td>";
+        echo "<td>".$trow[mysql_field_name($result, $i)]."</td>";
       }
       echo "</tr>";
 
@@ -335,4 +335,4 @@ if ($tee == '') {
 
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

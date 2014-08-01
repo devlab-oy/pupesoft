@@ -1,7 +1,7 @@
 <?php
 
 if (!function_exists("puun_alkiotarkista")) {
-  function puun_alkiotarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+  function puun_alkiotarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set, $alasveto, $table_tarkenne;
     static $tem_laji, $liitos_ind, $tem_liitos, $tem_kutsuja;
 

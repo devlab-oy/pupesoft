@@ -1,7 +1,7 @@
 <?php
 
-if(!function_exists("liitetiedostottarkista")) {
-  function liitetiedostottarkista (&$t, $i, $result, &$tunnus, &$virhe, $trow) {
+if (!function_exists("liitetiedostottarkista")) {
+  function liitetiedostottarkista(&$t, $i, $result, &$tunnus, &$virhe, $trow) {
     global $kukarow, $_FILES, $thumb_size_x, $thumb_size_y, $normaali_size_x, $normaali_size_y;
     static $liite_liitos, $liite_liitostunnus, $liite_datai, $liite_selite, $liite_kieli, $liite_kayttotarkoitus;
 

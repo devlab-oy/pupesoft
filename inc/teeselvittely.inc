@@ -1,9 +1,9 @@
 <?php
 
-$vientiselite = str_replace ("'", " ", $vientiselite); // Poistaa SQL-virheen mahdollisuuden
-$tpv = substr($pvm,0,2);
-$tpk = substr($pvm,2,2);
-$tpp = substr($pvm,4,2);
+$vientiselite = str_replace("'", " ", $vientiselite); // Poistaa SQL-virheen mahdollisuuden
+$tpv = substr($pvm, 0, 2);
+$tpk = substr($pvm, 2, 2);
+$tpp = substr($pvm, 4, 2);
 
 if ($tpv < 1000) $tpv += 2000;
 

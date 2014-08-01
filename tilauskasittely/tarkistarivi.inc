@@ -852,9 +852,9 @@ if (
       $kohde_varastot = array($laskurow['varasto']);
     }
     elseif (empty($laskurow['varasto']) and !empty($laskurow['yhtio_toimipaikka'])) {
-        $kohde_varastot = hae_yhtion_toimipaikan_varastot($laskurow['yhtio_toimipaikka']);
-        $kohde_varastot = array_column($kohde_varastot, 'tunnus');
-      }
+      $kohde_varastot = hae_yhtion_toimipaikan_varastot($laskurow['yhtio_toimipaikka']);
+      $kohde_varastot = array_column($kohde_varastot, 'tunnus');
+    }
     else {
       $kohde_varastot = array();
     }
@@ -1275,9 +1275,9 @@ if ($row['tuoteno'] != '' and ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A
                   $kohde_varastot = array($laskurow['varasto']);
                 }
                 elseif (empty($laskurow['varasto']) and !empty($laskurow['yhtio_toimipaikka'])) {
-                    $kohde_varastot = hae_yhtion_toimipaikan_varastot($laskurow['yhtio_toimipaikka']);
-                    $kohde_varastot = array_column($kohde_varastot, 'tunnus');
-                  }
+                  $kohde_varastot = hae_yhtion_toimipaikan_varastot($laskurow['yhtio_toimipaikka']);
+                  $kohde_varastot = array_column($kohde_varastot, 'tunnus');
+                }
                 else {
                   $kohde_varastot = array();
                 }

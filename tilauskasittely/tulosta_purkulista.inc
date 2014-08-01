@@ -17,11 +17,11 @@ if (in_array("gd", get_loaded_extensions())) {
 }
 
 if (!function_exists('alku_purku')) {
-  function alku_purku ($kala = 0, $firstpage = null) {
+  function alku_purku($kala = 0, $firstpage = null) {
     global $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $kieli, $mista;
 
     if (empty($firstpage)) {
-    $firstpage = $pdf->new_page("842x595");
+      $firstpage = $pdf->new_page("842x595");
     }
 
     if ($kala == 0) $kala = 555;
@@ -54,7 +54,7 @@ if (!function_exists('alku_purku')) {
       if ($yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] != 'K') {
         $pdf->draw_text(280,  $kala-10, t("Tilaus", $kieli),        $firstpage, $pieni);
         $pdf->draw_text(280,  $kala-20, $laskurow["tunnus"],        $firstpage, $p);
-    }
+      }
     }
     else {
       $pdf->draw_text(280,  $kala-10, t("Saapumisnumero", $kieli),    $firstpage, $pieni);
@@ -76,7 +76,7 @@ if (!function_exists('alku_purku')) {
 
       if ($yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {
         $pdf->draw_text(30, $kala-42, t("Tilaus", $kieli),      $firstpage, $pieni);
-    }
+      }
     }
     else {
       $pdf->draw_text(30,  $kala-35, t("Toimittajan koodi /", $kieli),  $firstpage, $pieni);
@@ -233,8 +233,8 @@ else {
 if ($mista == "vastaanota" and !isset($jarjestys)) {
   $orderlisa2 = " tilausrivin_lisatiedot.tilausrivilinkki, sorttauskentta, ";
 }
-else{
- $orderlisa2 = " ";
+else {
+  $orderlisa2 = " ";
 }
 
 if ($mista == "vastaanota" and $vainlistaus == '') {
@@ -646,7 +646,7 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
 
         if ($mista == "vastaanota" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {
           $pdf->draw_text(30, $kala-10, $row["otunnus"], $firstpage, $p);
-      }
+        }
       }
       else {
         $pdf->draw_text(30,  $kala, $row["toim_tuoteno"],  $firstpage, $b);

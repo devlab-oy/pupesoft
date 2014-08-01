@@ -11,8 +11,8 @@ if ((isset($_REQUEST["tee"]) and $_REQUEST["tee"] == 'NAYTATILAUS') or
   (isset($_POST["tee"]) and $_POST["tee"] == 'NAYTATILAUS') or
   (isset($_GET["tee"]) and $_GET["tee"] == 'NAYTATILAUS')) $nayta_pdf = 1; //Generoidaan .pdf-file
 
-if (@include("../inc/parametrit.inc"));
-elseif (@include("parametrit.inc"));
+if (@include "../inc/parametrit.inc");
+elseif (@include "parametrit.inc");
 else exit;
 
 if (!isset($logistiikka_yhtio))   $logistiikka_yhtio = "";
@@ -36,20 +36,20 @@ $onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipai
 
 if ($toim == "OSOITELAPPU") {
   //osoitelapuille on vähän eri päivämäärävaatimukset kuin muilla
-  if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-  if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-  if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+  if (!isset($kka)) $kka = date("m", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+  if (!isset($vva)) $vva = date("Y", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+  if (!isset($ppa)) $ppa = date("d", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 }
 elseif ($toim == "TARJOUS" or $toim == "TARJOUS!!!VL" or $toim == "TARJOUS!!!BR" or $toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL" or $toim == "MYYNTISOPIMUS!!!BR" or $toim == "OSAMAKSUSOPIMUS" or $toim == "LUOVUTUSTODISTUS" or $toim == "VAKUUTUSHAKEMUS" or $toim == "REKISTERIILMOITUS") {
   //Näissä kaupoissa voi kestää vähän kauemmin
-  if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
-  if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
-  if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
+  if (!isset($kka)) $kka = date("m", mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
+  if (!isset($vva)) $vva = date("Y", mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
+  if (!isset($ppa)) $ppa = date("d", mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
 }
 else {
-  if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-  if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-  if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+  if (!isset($kka)) $kka = date("m", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+  if (!isset($vva)) $vva = date("Y", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+  if (!isset($ppa)) $ppa = date("d", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 }
 
 if (!isset($kkl)) $kkl = date("m");
@@ -71,13 +71,13 @@ else {
 
 if ($tee == 'NAYTAHTML') {
   if ($logistiikka_yhtio != '' and $konsernivarasto_yhtiot != '') {
-    echo "<font class='head'>",t("Yhtiön")," $yhtiorow[nimi] ",t("tilaus")," $tunnus:</font><hr>";
+    echo "<font class='head'>", t("Yhtiön"), " $yhtiorow[nimi] ", t("tilaus"), " $tunnus:</font><hr>";
   }
   else {
     echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
   }
 
-  require ("raportit/naytatilaus.inc");
+  require "raportit/naytatilaus.inc";
 
   echo "<br><br>";
   $tee = "ETSILASKU";
@@ -186,7 +186,7 @@ if ($toim == "TAKUU") {
 }
 
 if (isset($muutparametrit) and $muutparametrit != '') {
-  $muut = explode('/',$muutparametrit);
+  $muut = explode('/', $muutparametrit);
 
   $vva     = $muut[0];
   $kka     = $muut[1];
@@ -248,18 +248,18 @@ if ($kukarow["extranet"] != "") {
     exit;
   }
 }
-elseif (($tee == "" or $tee == 'ETSILASKU') and $toim != 'SIIRTOLISTA'){
+elseif (($tee == "" or $tee == 'ETSILASKU') and $toim != 'SIIRTOLISTA') {
   $muutparametrit = $vva."/".$kka."/".$ppa."/".$vvl."/".$kkl."/".$ppl;
 
   if ($ytunnus != '' or (int) $asiakasid > 0 or (int) $toimittajaid > 0) {
     if ($toim == 'OSTO' or $toim == 'PURKU' or $toim == 'TARIFFI' or $toim == 'TUOTETARRA' or $toim == 'VASTAANOTETUT' or $toim == 'HAAMU'  or $toim == 'VASTAANOTTORAPORTTI') {
-      require ("../inc/kevyt_toimittajahaku.inc");
+      require "../inc/kevyt_toimittajahaku.inc";
     }
     else {
       if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '' and ($toim == "LAHETE" or $toim == "KOONTILAHETE" or $toim == "OSOITELAPPU" or $toim == "KERAYSLISTA")) {
         $konserni = $yhtiorow['konserni'];
       }
-      require ("inc/asiakashaku.inc");
+      require "inc/asiakashaku.inc";
     }
 
     if ($ytunnus == "") {
@@ -268,7 +268,7 @@ elseif (($tee == "" or $tee == 'ETSILASKU') and $toim != 'SIIRTOLISTA'){
   }
 }
 
-if (($tee == "" or $tee == 'ETSILASKU') and $toim == 'SIIRTOLISTA'){
+if (($tee == "" or $tee == 'ETSILASKU') and $toim == 'SIIRTOLISTA') {
   if ($lahettava_varasto != '' or $vastaanottava_varasto != '') {
     $tee = "ETSILASKU";
   }
@@ -372,7 +372,7 @@ if ($tee != 'NAYTATILAUS') {
         echo "<th>".t("Toimittajan nimi")."</th><td colspan='3'><input type='text' name='ytunnus' value='$ytunnus' size='15'></td></tr>";
       }
       else {
-        echo "<th>".t("Asiakas")."</th><td colspan='3'><input type='text' name='ytunnus' value='$ytunnus' size='15'> ",asiakashakuohje(),"</td></tr>";
+        echo "<th>".t("Asiakas")."</th><td colspan='3'><input type='text' name='ytunnus' value='$ytunnus' size='15'> ", asiakashakuohje(), "</td></tr>";
       }
 
       $formi  = 'hakuformi';
@@ -407,11 +407,11 @@ if ($tee != 'NAYTATILAUS') {
       $sel = $toimipaikka == 0 ? "selected" : "";
 
       echo "<tr>";
-      echo "<th>",t("Toimipaikka"),"</th>";
+      echo "<th>", t("Toimipaikka"), "</th>";
       echo "<td colspan='3'>";
       echo "<select name='toimipaikka'>";
-      echo "<option value='kaikki'>",t("Kaikki toimipaikat"),"</option>";
-      echo "<option value='0' {$sel}>",t("Ei toimipaikkaa"),"</option>";
+      echo "<option value='kaikki'>", t("Kaikki toimipaikat"), "</option>";
+      echo "<option value='0' {$sel}>", t("Ei toimipaikkaa"), "</option>";
 
       while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
         $sel = $toimipaikat_row['tunnus'] == $toimipaikka ? "selected" : "";
@@ -434,7 +434,7 @@ if ($tee != 'NAYTATILAUS') {
       <td><input type='text' name='vvl' value='$vvl' size='5'></td>
       <td class='back'><input type='submit' value='".t("Etsi")."'></td>";
   echo "</table>";
-    echo "</form><br>";
+  echo "</form><br>";
 }
 
 if ($tee == "ETSILASKU") {
@@ -938,7 +938,7 @@ if ($tee == "ETSILASKU") {
   if (!isset($ascdesc)) $ascdesc = "desc";
 
   // Mihin järjestykseen laitetaan
-  if ($jarj != ''){
+  if ($jarj != '') {
     $jarj = "ORDER BY {$jarj} {$ascdesc}";
   }
 
@@ -1029,7 +1029,7 @@ if ($tee == "ETSILASKU") {
     echo "<table><tr>";
 
     if ($logistiikka_yhtio != '') {
-      echo "<th valign='top'>",t("Yhtiö"),"</th>";
+      echo "<th valign='top'>", t("Yhtiö"), "</th>";
     }
 
     $hreffi = "{$PHP_SELF}?tee={$tee}&ppl={$ppl}&vvl={$vvl}&kkl={$kkl}&ppa={$ppa}&vva={$vva}&kka={$kka}&toim={$toim}&ytunnus={$ytunnus}&asiakasid={$asiakasid}&toimittajaid={$toimittajaid}";
@@ -1047,20 +1047,20 @@ if ($tee == "ETSILASKU") {
 
     $hreffi .= "&ascdesc={$ascdesc}";
 
-    echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.tunnus'>",t("Tilausnro"),"</a><br><a href='{$hreffi}&jarj=lasku.laskunro'>",t("Laskunro"),"</a></th>";
-    echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.ytunnus'>",t("Ytunnus"),"</a><br><a href='{$hreffi}&jarj=lasku.nimi'>",t("Nimi"),"</a></th>";
-    echo "<th valign='top'><a href='{$hreffi}&jarj=pvm'>",t("Pvm"),"</a><br><a href='{$hreffi}&jarj=lasku.toimaika'>",t("Toimaika"),"</a></th>";
-    echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.laatija'>",t("Laatija"),"</a></th>";
+    echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.tunnus'>", t("Tilausnro"), "</a><br><a href='{$hreffi}&jarj=lasku.laskunro'>", t("Laskunro"), "</a></th>";
+    echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.ytunnus'>", t("Ytunnus"), "</a><br><a href='{$hreffi}&jarj=lasku.nimi'>", t("Nimi"), "</a></th>";
+    echo "<th valign='top'><a href='{$hreffi}&jarj=pvm'>", t("Pvm"), "</a><br><a href='{$hreffi}&jarj=lasku.toimaika'>", t("Toimaika"), "</a></th>";
+    echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.laatija'>", t("Laatija"), "</a></th>";
 
     if ($toim == "SIIRTOLISTA") {
-      echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.viesti'>",t("Viite"),"</a></th>";
+      echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.viesti'>", t("Viite"), "</a></th>";
     }
 
     if ($kukarow['hinnat'] == 0) {
-      echo "<th valign='top'><a href='{$hreffi}&jarj=summa'>",t("Summa"),"</a></th>";
+      echo "<th valign='top'><a href='{$hreffi}&jarj=summa'>", t("Summa"), "</a></th>";
     }
 
-    echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.tila,lasku.alatila'>",t("Tyyppi"),"</a></th>";
+    echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.tila,lasku.alatila'>", t("Tyyppi"), "</a></th>";
 
     if ($tila == 'monta') {
       echo "<th valign='top'>".t("Tulosta")."</th>";
@@ -1139,13 +1139,13 @@ if ($tee == "ETSILASKU") {
 
       //tehdään selväkielinen tila/alatila
       if (file_exists("../inc/laskutyyppi.inc")) {
-        require('../inc/laskutyyppi.inc');
+        require '../inc/laskutyyppi.inc';
       }
       elseif (file_exists("inc/laskutyyppi.inc")) {
-        require('inc/laskutyyppi.inc');
+        require 'inc/laskutyyppi.inc';
       }
       else {
-        require('laskutyyppi.inc');
+        require 'laskutyyppi.inc';
       }
 
       echo "<$ero valign='top'>".t("$laskutyyppi")." ".t("$alatila")."</$ero>";
@@ -1340,7 +1340,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
   }
 
   if ((!isset($komento) or count($komento) == 0) and $tee == 'TULOSTA') {
-    require("inc/valitse_tulostin.inc");
+    require "inc/valitse_tulostin.inc";
   }
 
   //hateaan laskun kaikki tiedot
@@ -1378,53 +1378,53 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
     if ($toim == "OSTO") {
       $otunnus = $laskurow["tunnus"];
       $mista = 'tulostakopio';
-      require('tulosta_ostotilaus.inc');
+      require 'tulosta_ostotilaus.inc';
       $tee = '';
     }
 
     if ($toim == "HAAMU") {
       $otunnus = $laskurow["tunnus"];
       $mista = 'tulostakopio';
-      require('tulosta_ostotilaus.inc');
+      require 'tulosta_ostotilaus.inc';
       $tee = '';
     }
 
     if ($toim == "PURKU") {
       $otunnus = $laskurow["tunnus"];
       $mista = 'tulostakopio';
-      require('tulosta_purkulista.inc');
+      require 'tulosta_purkulista.inc';
       $tee = '';
     }
 
     if ($toim == "VASTAANOTETUT") {
       $otunnus = $laskurow["tunnus"];
       $mista = 'vastaanota';
-      require('tulosta_purkulista.inc');
+      require 'tulosta_purkulista.inc';
       $tee = '';
     }
 
     if ($toim == "VASTAANOTTORAPORTTI") {
       $otunnus = $laskurow["tunnus"];
-      require('tulosta_vastaanottoraportti.inc');
+      require 'tulosta_vastaanottoraportti.inc';
       $tee = '';
     }
 
     if ($toim == "TUOTETARRA") {
       $otunnus = $laskurow["tunnus"];
-      require('tulosta_tuotetarrat.inc');
+      require 'tulosta_tuotetarrat.inc';
       $tee = '';
     }
 
     if ($toim == "TILAUSTUOTETARRA") {
       $otunnus = $laskurow["tunnus"];
-      require('tulosta_tilaustuotetarrat.inc');
+      require 'tulosta_tilaustuotetarrat.inc';
       tulosta_tilaustuotetarrat($otunnus, 0, $komento["Tilauksen tuotetarrat"], $tee);
       $tee = '';
     }
 
     if ($toim == "TARIFFI") {
       $otunnus = $laskurow["tunnus"];
-      require('tulosta_tariffilista.inc');
+      require 'tulosta_tariffilista.inc';
       $tee = '';
     }
 
@@ -1433,24 +1433,24 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
       if ($yhtiorow["sad_lomake_tyyppi"] == "T" and $tee != 'NAYTATILAUS') {
 
-        require('tulosta_sadvientiilmo_teksti.inc');
+        require 'tulosta_sadvientiilmo_teksti.inc';
 
         if ($paalomake != '') {
-          lpr($paalomake,0, $komento["SAD-lomake"]);
+          lpr($paalomake, 0, $komento["SAD-lomake"]);
 
           echo t("SAD-lomake tulostuu")."...<br>";
 
           if ($lisalomake != "") {
-            lpr($lisalomake,0, $komento["SAD-lomake lisäsivu"]);
+            lpr($lisalomake, 0, $komento["SAD-lomake lisäsivu"]);
 
             echo t("SAD-lomakkeen lisäsivu tulostuu")."...<br>";
           }
         }
       }
       else {
-        require_once('pdflib/phppdflib.class.php');
+        require_once 'pdflib/phppdflib.class.php';
 
-        require('tulosta_sadvientiilmo.inc');
+        require 'tulosta_sadvientiilmo.inc';
 
         //keksitään uudelle failille joku varmasti uniikki nimi:
         list($usec, $sec) = explode(' ', microtime());
@@ -1472,7 +1472,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
             $kutsu .= ", ".trim($laskurow["nimi"]);
           }
 
-          require("../inc/sahkoposti.inc");
+          require "../inc/sahkoposti.inc";
         }
         elseif ($tee == 'NAYTATILAUS') {
           //Työnnetään tuo pdf vaan putkeen!
@@ -1496,8 +1496,8 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
     if ($toim == "VIENTIERITTELY") {
       $uusiotunnus = $laskurow["tunnus"];
 
-      require_once('pdflib/phppdflib.class.php');
-      require('tulosta_vientierittely.inc');
+      require_once 'pdflib/phppdflib.class.php';
+      require 'tulosta_vientierittely.inc';
 
       //keksitään uudelle failille joku varmasti uniikki nimi:
       list($usec, $sec) = explode(' ', microtime());
@@ -1519,7 +1519,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
           $kutsu .= ", ".trim($laskurow["nimi"]);
         }
 
-        require("../inc/sahkoposti.inc");
+        require "../inc/sahkoposti.inc";
       }
       elseif ($tee == 'NAYTATILAUS') {
         //Työnnetään tuo pdf vaan putkeen!
@@ -1540,8 +1540,8 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
     if ($toim == "LASKU" or $toim == 'PROFORMA' or $toim == "VIENTILASKU") {
 
-      if (@include_once("tilauskasittely/tulosta_lasku.inc"));
-      elseif (@include_once("tulosta_lasku.inc"));
+      if (@include_once "tilauskasittely/tulosta_lasku.inc");
+      elseif (@include_once "tulosta_lasku.inc");
       else exit;
 
       tulosta_lasku($laskurow["tunnus"], $kieli, $tee, $toim, $komento["Lasku"], "", "");
@@ -1565,13 +1565,13 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       }
 
       $params_tilausvahvistus = array(
-      'tee'            => $tee,
-      'toim'            => $toim,
-      'kieli'            => $kieli,
-      'komento'          => $komento,
-      'laskurow'          => $laskurow,
-      'naytetaanko_rivihinta'    => $naytetaanko_rivihinta,
-      'extranet_tilausvahvistus'  => $extranet_tilausvahvistus,
+        'tee'            => $tee,
+        'toim'            => $toim,
+        'kieli'            => $kieli,
+        'komento'          => $komento,
+        'laskurow'          => $laskurow,
+        'naytetaanko_rivihinta'    => $naytetaanko_rivihinta,
+        'extranet_tilausvahvistus'  => $extranet_tilausvahvistus,
       );
 
       laheta_tilausvahvistus($params_tilausvahvistus);
@@ -1583,7 +1583,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       $otunnus = $laskurow["tunnus"];
       list ($toimalku, $hinnat) = explode("!!!", $toim);
 
-      require_once ("tulosta_tarjous.inc");
+      require_once "tulosta_tarjous.inc";
 
       tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli, $tee, $hinnat, $verolliset_verottomat_hinnat, $naytetaanko_rivihinta, $naytetaanko_tuoteno);
 
@@ -1595,7 +1595,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       $otunnus = $laskurow["tunnus"];
       list ($toimalku, $hinnat) = explode("!!!", $toim);
 
-      require_once ("tulosta_myyntisopimus.inc");
+      require_once "tulosta_myyntisopimus.inc";
 
       tulosta_myyntisopimus($otunnus, $komento["Myyntisopimus"], $kieli, $tee, $hinnat);
 
@@ -1606,7 +1606,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
       $otunnus = $laskurow["tunnus"];
 
-      require_once ("tulosta_osamaksusoppari.inc");
+      require_once "tulosta_osamaksusoppari.inc";
 
       tulosta_osamaksusoppari($otunnus, $komento["Osamaksusopimus"], $kieli, $tee);
 
@@ -1617,7 +1617,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
       $otunnus = $laskurow["tunnus"];
 
-      require_once ("tulosta_luovutustodistus.inc");
+      require_once "tulosta_luovutustodistus.inc";
 
       tulosta_luovutustodistus($otunnus, $komento["Luovutustodistus"], $kieli, $tee);
 
@@ -1628,7 +1628,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
       $otunnus = $laskurow["tunnus"];
 
-      require_once ("tulosta_vakuutushakemus.inc");
+      require_once "tulosta_vakuutushakemus.inc";
 
       tulosta_vakuutushakemus($otunnus, $komento["Vakuutushakemus"], $kieli, $tee);
 
@@ -1639,7 +1639,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
       $otunnus = $laskurow["tunnus"];
 
-      require_once ("tulosta_rekisteriilmoitus.inc");
+      require_once "tulosta_rekisteriilmoitus.inc";
 
       tulosta_rekisteriilmoitus($otunnus, $komento["Rekisteröinti_ilmoitus"], $kieli, $tee);
 
@@ -1648,7 +1648,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
     if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
 
-      require_once ("tyomaarays/tulosta_tyomaarays.inc");
+      require_once "tyomaarays/tulosta_tyomaarays.inc";
 
       if ($tyomtyyppi == 'Z') {
         $kappaleet = $kappaleet == 0 ? 1 : $kappaleet;
@@ -1708,7 +1708,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
           $kal++;
         }
 
-        mysql_data_seek($result,0);
+        mysql_data_seek($result, 0);
 
         if ($toim == "SIIRTOTYOMAARAYS") {
           $tyyppi = "SISAINEN";
@@ -1730,32 +1730,32 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         }
 
         $params_tyomaarays = array( "asrow"           => $asrow,
-                      "boldi"           => $boldi,
-                      "edtuotetyyppi"   => "",
-                      "iso"             => $iso,
-                      "kala"            => 0,
-                      "kieli"           => $kieli,
-                      "komento"      => $komento["Työmääräys"],
-                      "laskurow"        => $laskurow,
-                      "lineparam"       => $lineparam,
-                      "norm"            => $norm,
-                      "page"            => NULL,
-                      "pdf"             => NULL,
-                      "perheid"         => 0,
-                      "perheid2"        => 0,
-                      "pieni"           => $pieni,
-                      "pieni_boldi"     => $pieni_boldi,
-                      "rectparam"       => $rectparam,
-                      "returnvalue"     => 0,
-                      "rivinkorkeus"    => $rivinkorkeus,
-                      "rivinumerot"     => $rivinumerot,
-                      "row"             => NULL,
-                      "sivu"            => 1,
-                      "tee"             => $tee,
-                      "thispage"      => NULL,
-                      "toim"            => $toim,
-                      "tots"        => 0,
-                      "tyyppi"          => $tyyppi,);
+          "boldi"           => $boldi,
+          "edtuotetyyppi"   => "",
+          "iso"             => $iso,
+          "kala"            => 0,
+          "kieli"           => $kieli,
+          "komento"      => $komento["Työmääräys"],
+          "laskurow"        => $laskurow,
+          "lineparam"       => $lineparam,
+          "norm"            => $norm,
+          "page"            => NULL,
+          "pdf"             => NULL,
+          "perheid"         => 0,
+          "perheid2"        => 0,
+          "pieni"           => $pieni,
+          "pieni_boldi"     => $pieni_boldi,
+          "rectparam"       => $rectparam,
+          "returnvalue"     => 0,
+          "rivinkorkeus"    => $rivinkorkeus,
+          "rivinumerot"     => $rivinumerot,
+          "row"             => NULL,
+          "sivu"            => 1,
+          "tee"             => $tee,
+          "thispage"      => NULL,
+          "toim"            => $toim,
+          "tots"        => 0,
+          "tyyppi"          => $tyyppi, );
 
         // Aloitellaan lomakkeen teko
         $params_tyomaarays = tyomaarays_alku($params_tyomaarays);
@@ -1826,7 +1826,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
                 ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
       $result = pupe_query($query);
 
-      require_once ("tulosta_valmistus.inc");
+      require_once "tulosta_valmistus.inc";
 
       $tilausnumeroita = $laskurow["tunnus"];
 
@@ -1840,7 +1840,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         $kal++;
       }
 
-      mysql_data_seek($result,0);
+      mysql_data_seek($result, 0);
 
       unset($pdf);
       unset($page);
@@ -1859,7 +1859,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
           }
         }
 
-        mysql_data_seek($result,0);
+        mysql_data_seek($result, 0);
       }
 
       while ($row = mysql_fetch_assoc($result)) {
@@ -1922,19 +1922,19 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
     if ($toim == "DGD") {
 
-      require_once("tilauskasittely/tulosta_dgd.inc");
+      require_once "tilauskasittely/tulosta_dgd.inc";
 
       $params_dgd = array(
-      'kieli'      => 'en',
-      'laskurow'    => $laskurow,
-      'page'      => NULL,
-      'pdf'      => NULL,
-      'row'      => NULL,
-      'sivu'      => 0,
-      'tee'      => $tee,
-      'toim'      => $toim,
-      'norm'      => $norm,
-      'otunnukset'  => $laskurow['tunnus'],
+        'kieli'      => 'en',
+        'laskurow'    => $laskurow,
+        'page'      => NULL,
+        'pdf'      => NULL,
+        'row'      => NULL,
+        'sivu'      => 0,
+        'tee'      => $tee,
+        'toim'      => $toim,
+        'norm'      => $norm,
+        'otunnukset'  => $laskurow['tunnus'],
       );
 
       // Aloitellaan DGD:n teko
@@ -1951,7 +1951,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
     if ($toim == "KERAYSLISTA" or $toim == "SIIRTOLISTA" or $toim == "REKLAMAATIO" or $toim == "TAKUU") {
 
-      require_once ("tulosta_lahete_kerayslista.inc");
+      require_once "tulosta_lahete_kerayslista.inc";
 
       $otunnus = $laskurow["tunnus"];
       $tilausnumeroita = $otunnus;
@@ -2073,7 +2073,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         $kal++;
       }
 
-      mysql_data_seek($riresult,0);
+      mysql_data_seek($riresult, 0);
 
       if ($toim == "SIIRTOLISTA") {
         $tyyppi = "SIIRTOLISTA";
@@ -2092,35 +2092,35 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       $tilausnumeroita = ($kerayseran_tilaukset != "") ? $kerayseran_tilaukset : $tilausnumeroita;
 
       $params_kerayslista = array(
-      'asrow'             => $asrow,
-      'boldi'             => $boldi,
-      'iso'               => $iso,
-      'iso_boldi'         => $iso_boldi,
-      'kala'              => 0,
-      'kieli'             => $kieli,
-      'komento'      => '',
-      'laskurow'          => $laskurow,
-      'norm'              => $norm,
-      'page'              => NULL,
-      'paino'             => 0,
-      'pdf'               => NULL,
-      'perheid'           => 0,
-      'perheid2'          => 0,
-      'pieni'             => $pieni,
-      'pieni_boldi'       => $pieni_boldi,
-      'rectparam'         => $rectparam,
-      'rivinkorkeus'      => $rivinkorkeus,
-      'rivinumerot'      => $rivinumerot,
-      'row'               => NULL,
-      'sivu'              => 1,
-      'tee'               => $tee,
-      'thispage'      => NULL,
-      'tilausnumeroita'   => $tilausnumeroita,
-      'toim'              => $toim,
-      'tots'              => 0,
-      'tyyppi'        => $tyyppi,
-      'kerayseran_numero' => $kerayseran_numero,
-      'kerayslistatyyppi'  => $kerayslistatyyppi);
+        'asrow'             => $asrow,
+        'boldi'             => $boldi,
+        'iso'               => $iso,
+        'iso_boldi'         => $iso_boldi,
+        'kala'              => 0,
+        'kieli'             => $kieli,
+        'komento'      => '',
+        'laskurow'          => $laskurow,
+        'norm'              => $norm,
+        'page'              => NULL,
+        'paino'             => 0,
+        'pdf'               => NULL,
+        'perheid'           => 0,
+        'perheid2'          => 0,
+        'pieni'             => $pieni,
+        'pieni_boldi'       => $pieni_boldi,
+        'rectparam'         => $rectparam,
+        'rivinkorkeus'      => $rivinkorkeus,
+        'rivinumerot'      => $rivinumerot,
+        'row'               => NULL,
+        'sivu'              => 1,
+        'tee'               => $tee,
+        'thispage'      => NULL,
+        'tilausnumeroita'   => $tilausnumeroita,
+        'toim'              => $toim,
+        'tots'              => 0,
+        'tyyppi'        => $tyyppi,
+        'kerayseran_numero' => $kerayseran_numero,
+        'kerayslistatyyppi'  => $kerayslistatyyppi);
 
       // Aloitellaan keräyslistan teko
       $params_kerayslista = alku_kerayslista($params_kerayslista);
@@ -2173,7 +2173,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         $oslarow = mysql_fetch_assoc($oslares);
 
         if ($oslarow['osoitelappu'] == 'intrade') {
-          require('osoitelappu_intrade_pdf.inc');
+          require 'osoitelappu_intrade_pdf.inc';
         }
         elseif ($oslarow['osoitelappu'] == 'oslap_mg' and $yhtiorow['kerayserat'] == 'K') {
 
@@ -2204,24 +2204,24 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
             for ($i = 1; $i <= $oslappkpl; $i++) {
 
               $params = array(
-                 'tilriv' => $pak_chk_row['otunnus'],
-                 'komento' => $oslapp,
+                'tilriv' => $pak_chk_row['otunnus'],
+                'komento' => $oslapp,
                 'mediatyyppi' => $oslapp_mediatyyppi,
-                 'pakkauskoodi' => $pak_chk_row['pakkaus'],
-                 'montako_laatikkoa_yht' => $pak_num,
-                 'toim_nimi' => $laskurow['toim_nimi'],
-                 'toim_nimitark' => $laskurow['toim_nimitark'],
-                 'toim_osoite' => $laskurow['toim_osoite'],
-                 'toim_postino' => $laskurow['toim_postino'],
-                 'toim_postitp' => $laskurow['toim_postitp'],
-               );
+                'pakkauskoodi' => $pak_chk_row['pakkaus'],
+                'montako_laatikkoa_yht' => $pak_num,
+                'toim_nimi' => $laskurow['toim_nimi'],
+                'toim_nimitark' => $laskurow['toim_nimitark'],
+                'toim_osoite' => $laskurow['toim_osoite'],
+                'toim_postino' => $laskurow['toim_postino'],
+                'toim_postitp' => $laskurow['toim_postitp'],
+              );
 
               tulosta_oslap_mg($params);
             }
           }
         }
         else {
-          require ("osoitelappu_pdf.inc");
+          require "osoitelappu_pdf.inc";
         }
       }
       $tee = '';
@@ -2235,6 +2235,6 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 }
 
 if ($tee != 'NAYTATILAUS') {
-  if (@include("inc/footer.inc"));
-  elseif (@include("footer.inc"));
+  if (@include "inc/footer.inc");
+  elseif (@include "footer.inc");
 }

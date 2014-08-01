@@ -6,11 +6,11 @@ $tyyppi = 1; // oletetaan rivin näkyvyys
 
 
 if (mysql_field_name($result, $i) == "tunnus" or
-    mysql_field_name($result, $i) == "yhtio") {
+  mysql_field_name($result, $i) == "yhtio") {
   $tyyppi = 0;
 }
 
-if (substr(mysql_field_name($result,$i),0,9)=='varasto') {
+if (substr(mysql_field_name($result, $i), 0, 9)=='varasto') {
 
   $sel = array();
   $sel[$trow[$i]] = "selected";
@@ -23,8 +23,7 @@ if (substr(mysql_field_name($result,$i),0,9)=='varasto') {
             ORDER BY tyyppi, nimitys";
   $kires = mysql_query($query) or pupe_error($query);
 
-  while ($kirow=mysql_fetch_array($kires))
-  {
+  while ($kirow=mysql_fetch_array($kires)) {
     if ($kirow["tunnus"]==$row[$i]) $select='SELECTED';
     else $select = '';
 
@@ -36,7 +35,7 @@ if (substr(mysql_field_name($result,$i),0,9)=='varasto') {
   $jatko=0;
 }
 
-if (mysql_field_name($result,$i)=='pakkaamo') {
+if (mysql_field_name($result, $i)=='pakkaamo') {
 
   $sel = array();
   $sel[$trow[$i]] = "selected";
@@ -48,8 +47,7 @@ if (mysql_field_name($result,$i)=='pakkaamo') {
 
   $ulos .= "<option value=''>".t("Ei pakkaamoa")."</option>";
 
-  while ($kirow=mysql_fetch_array($kires))
-  {
+  while ($kirow=mysql_fetch_array($kires)) {
     if ($kirow["nimi"]==$row[$i]) $select='SELECTED';
     else $select = '';
 
@@ -62,7 +60,7 @@ if (mysql_field_name($result,$i)=='pakkaamo') {
 }
 
 
-if (substr(mysql_field_name($result,$i),0,9) == 'printteri') {
+if (substr(mysql_field_name($result, $i), 0, 9) == 'printteri') {
 
   $sel = array();
   $sel[$trow[$i]] = "selected";

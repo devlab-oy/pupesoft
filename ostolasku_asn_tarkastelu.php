@@ -1,6 +1,6 @@
 <?php
 
-require("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "  <script type='text/javascript'>
       $(document).ready(function() {
@@ -12,7 +12,7 @@ echo "  <script type='text/javascript'>
 
         $('.poistabutton').click(function(){
 
-          if (confirm('",t("Haluatko todella poistaa t‰m‰n sanoman?"),"')) {
+          if (confirm('", t("Haluatko todella poistaa t‰m‰n sanoman?"), "')) {
             var kollitunniste = $(this).attr('id');
 
             if ($('#valitse').val() == 'asn') {
@@ -108,7 +108,7 @@ echo "  <script type='text/javascript'>
       });
     </script>";
 
-echo "<font class='head'>",t("Ostolasku / ASN-sanomien tarkastelu"),"</font><hr><br />";
+echo "<font class='head'>", t("Ostolasku / ASN-sanomien tarkastelu"), "</font><hr><br />";
 
 if (!isset($tee)) $tee = '';
 if (!isset($valitse)) $valitse = '';
@@ -146,7 +146,7 @@ if ($tee == 'poista_sanoma') {
               AND asn_numero = '{$sanomatunniste}'";
     $res = pupe_query($query);
 
-    echo "<br /><font class='message'>",t("Poistettiin sanoma")," {$sanomatunniste}</font><br /><br />";
+    echo "<br /><font class='message'>", t("Poistettiin sanoma"), " {$sanomatunniste}</font><br /><br />";
   }
 
   $tee = '';
@@ -182,7 +182,7 @@ if ($tee == 'vaihdatoimittaja') {
     $ytunnus = $nimi;
 
     $lause = "<font class='head'>".t("Valitse toimittaja").":</font><hr><br>";
-    require ("inc/kevyt_toimittajahaku.inc");
+    require "inc/kevyt_toimittajahaku.inc";
 
     if ($ytunnus == '' and $monta > 1) {
       //Lˆytyi monta sopivaa, n‰ytet‰‰n formi, mutta ei otsikkoa
@@ -207,7 +207,7 @@ if ($tee == 'vaihdatoimittaja') {
     $result = pupe_query($query);
     $row = mysql_fetch_assoc($result);
 
-    if(!empty($row['toimittajanro'])) {
+    if (!empty($row['toimittajanro'])) {
       if ($valitse == 'asn') {
         //n. rivi 187 "&asn_numerot={$asn_numerot}&valitse={$valitse}";
         $asn_numerot = $asn_numerot;
@@ -246,7 +246,7 @@ if ($tee == 'vaihdatoimittaja') {
 
     echo "<form method='post' action='?tee={$tee}{$action}'>";
     echo "<table>";
-    echo "<tr><th>",t("Etsi toimittajaa")," (",t("nimi")," / ",t("ytunnus"),")</th><td><input type='text' name='nimi' value='' />&nbsp;<input type='submit' value='",t("Etsi"),"' /></td></tr>";
+    echo "<tr><th>", t("Etsi toimittajaa"), " (", t("nimi"), " / ", t("ytunnus"), ")</th><td><input type='text' name='nimi' value='' />&nbsp;<input type='submit' value='", t("Etsi"), "' /></td></tr>";
     echo "</table>";
     echo "</form>";
   }
@@ -291,7 +291,7 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
 
         $automaattikohdistukseen = false;
 
-        echo "<font class='message'>",t("Lasku oli jo liitetty saapumiseen"),". ",t("P‰ivitet‰‰n lasku k‰sitellyksi"),".</font><br /><br />";
+        echo "<font class='message'>", t("Lasku oli jo liitetty saapumiseen"), ". ", t("P‰ivitet‰‰n lasku k‰sitellyksi"), ".</font><br /><br />";
       }
     }
   }
@@ -420,7 +420,7 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
                 $laskures  = pupe_query($laskuselect);
                 $laskurow  = mysql_fetch_assoc($laskures);
 
-                list($hinta,,$ale,) = alehinta_osto($laskurow, $lapsitieto, $isa_chk_row["tilkpl"]);
+                list($hinta, , $ale, ) = alehinta_osto($laskurow, $lapsitieto, $isa_chk_row["tilkpl"]);
 
                 $lisainsert = "INSERT INTO tilausrivi SET
                                yhtio       = '{$kukarow['yhtio']}',
@@ -476,24 +476,24 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
                 // Ei monisteta tunnusta
                 for ($ii = 1; $ii < mysql_num_fields($info_res) - 1; $ii++) {
 
-                  $fieldname = mysql_field_name($info_res,$ii);
+                  $fieldname = mysql_field_name($info_res, $ii);
 
                   $fields .= ", ".$fieldname;
 
                   switch ($fieldname) {
-                    case 'tilausrivi':
-                      $values .= ", '{$id}'";
-                      break;
-                    case 'tuoteno':
-                    case 'toim_tuoteno':
-                    case 'toim_tuoteno2':
-                      $values .= ", '{$lapsitieto['tuoteno']}'";
-                      break;
-                    case 'hinta':
-                      $values .= ", '{$hinta}'";
-                      break;
-                    default:
-                      $values .= ", '".$info_row[$fieldname]."'";
+                  case 'tilausrivi':
+                    $values .= ", '{$id}'";
+                    break;
+                  case 'tuoteno':
+                  case 'toim_tuoteno':
+                  case 'toim_tuoteno2':
+                    $values .= ", '{$lapsitieto['tuoteno']}'";
+                    break;
+                  case 'hinta':
+                    $values .= ", '{$hinta}'";
+                    break;
+                  default:
+                    $values .= ", '".$info_row[$fieldname]."'";
                   }
                 }
 
@@ -656,7 +656,7 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
       if (mysql_num_rows($result) == 1) {
         $trow = mysql_fetch_assoc($result);
 
-        require('inc/verkkolasku-in-luo-keikkafile.inc');
+        require 'inc/verkkolasku-in-luo-keikkafile.inc';
 
         if ($virheet == 0) {
 
@@ -670,7 +670,7 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
             $saapumisen_nro_chk_res = pupe_query($query);
             $saapumisen_nro_chk_row = mysql_fetch_assoc($saapumisen_nro_chk_res);
 
-            echo "<br /><font class='message'>",t("Lasku liitettiin saapumiseen")," {$saapumisen_nro_chk_row['laskunro']}</font><br /><br />";
+            echo "<br /><font class='message'>", t("Lasku liitettiin saapumiseen"), " {$saapumisen_nro_chk_row['laskunro']}</font><br /><br />";
           }
 
           $query = "SELECT * FROM asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' AND status not in ('E','D') {$wherelisa}";
@@ -690,7 +690,7 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
       }
     }
     elseif ($valitse != 'asn' and count($rtuoteno) > 0 and $laskuttajan_toimittajanumero != "" and $lasku_manuaalisesti_check != 0) {
-      echo "<font class='message'>",t("Laskun rivej‰ oli liitetty saapumiseen jossa oli jo vaihto-omaisuus lasku"),". ",t("Poistetaan t‰mmˆisten rivien liitos"),". ",t("K‰sittele lasku"), " $lasku ",t("uudestaan"),".</font><br /><br />";
+      echo "<font class='message'>", t("Laskun rivej‰ oli liitetty saapumiseen jossa oli jo vaihto-omaisuus lasku"), ". ", t("Poistetaan t‰mmˆisten rivien liitos"), ". ", t("K‰sittele lasku"), " $lasku ", t("uudestaan"), ".</font><br /><br />";
     }
 
     if ($valitse == 'asn' and count($paketin_rivit) > 0) {
@@ -701,7 +701,7 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
 
       $paketin_tuotteet = explode(",", $tuotenorow['tuotenumerot']);
 
-      require('inc/asn_kohdistus.inc');
+      require 'inc/asn_kohdistus.inc';
 
       asn_kohdista_suuntalava($toimittaja, $asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $sscc_paketti_tunnus);
 
@@ -799,7 +799,7 @@ if ($tee == 'uusirivi') {
       $result = pupe_query($query);
       $trow = mysql_fetch_assoc($result);
 
-      list($hinta,,,) = alehinta_osto($laskurow, $trow, $kpl);
+      list($hinta, , , ) = alehinta_osto($laskurow, $trow, $kpl);
 
       //pidet‰‰n kaikki muuttujat tallessa
       $muut_siirrettavat = $asn_rivi."!°!".$toimittaja."!°!".$tilausnro."!°!".$tuoteno."!°!".$tilaajanrivinro."!°!".$kpl."!°!".$valitse."!°!".$kolli."!°!".$toimittajanumero."!°!".$asn_numero."!°!".$toimipaikka;
@@ -809,8 +809,8 @@ if ($tee == 'uusirivi') {
 
       echo t("Tee uusi rivi").":<br>";
 
-      require('tilauskasittely/syotarivi_ostotilaus.inc');
-      require('inc/footer.inc');
+      require 'tilauskasittely/syotarivi_ostotilaus.inc';
+      require 'inc/footer.inc';
       exit;
     }
   }
@@ -834,14 +834,14 @@ if ($tee == 'TI') {
   $prow["var"]    = $rivinvar;
   $kukarow["kesken"]  = $rivinotunnus;
 
-  $kpl   = str_replace(',','.',$kpl);
-  $hinta   = str_replace(',','.',$hinta);
+  $kpl   = str_replace(',', '.', $kpl);
+  $hinta   = str_replace(',', '.', $hinta);
 
   for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
-    ${'ale'.$alepostfix} = str_replace(',','.', ${'ale'.$alepostfix});
+    ${'ale'.$alepostfix} = str_replace(',', '.', ${'ale'.$alepostfix});
   }
 
-  if (checkdate($toimkka,$toimppa,$toimvva)) {
+  if (checkdate($toimkka, $toimppa, $toimvva)) {
     $toimaika = $toimvva."-".$toimkka."-".$toimppa;
   }
 
@@ -873,12 +873,12 @@ if ($tee == 'TI') {
   }
 
   $multi = "";
-  require("inc/tuotehaku.inc");
+  require "inc/tuotehaku.inc";
 
   $prow["tuoteno"]      = $tuoteno;
   $oikeusostohintapaiv  = tarkista_oikeus("yllapito.php", "tuotteen_toimittajat", "check");
 
-  require('tilauskasittely/tarkistarivi_ostotilaus.inc');
+  require 'tilauskasittely/tarkistarivi_ostotilaus.inc';
 
   //n‰ytet‰‰n virhe ja annetaan mahis korjata se
   if (trim($varaosavirhe) != '' or trim($tuoteno) == "") {
@@ -891,9 +891,9 @@ if ($tee == 'TI') {
 
     $rivinotunnus = $tilausnro;
 
-    echo t("Muuta rivi‰"),":<br>";
-    require('tilauskasittely/syotarivi_ostotilaus.inc');
-    require('inc/footer.inc');
+    echo t("Muuta rivi‰"), ":<br>";
+    require 'tilauskasittely/syotarivi_ostotilaus.inc';
+    require 'inc/footer.inc';
     exit;
   }
 }
@@ -941,10 +941,10 @@ if ((isset($varaosavirhe) and trim($varaosavirhe) == '') and ($tee == "TI") and 
       $trow["alv"] = $laskurow["alv"];
     }
 
-    if (checkdate($toimkka,$toimppa,$toimvva)) {
+    if (checkdate($toimkka, $toimppa, $toimvva)) {
       $toimaika = $toimvva."-".$toimkka."-".$toimppa;
     }
-    if (checkdate($kerayskka,$keraysppa,$keraysvva)) {
+    if (checkdate($kerayskka, $keraysppa, $keraysvva)) {
       $kerayspvm = $keraysvva."-".$kerayskka."-".$keraysppa;
     }
     if ($toimaika == "" or $toimaika == "0000-00-00") {
@@ -1006,7 +1006,7 @@ if ((isset($varaosavirhe) and trim($varaosavirhe) == '') and ($tee == "TI") and 
     $rivitunnus = 0;
 
     if ($kpl != 0) {
-      require ('tilauskasittely/lisaarivi.inc');
+      require 'tilauskasittely/lisaarivi.inc';
     }
 
     $rivitunnus = $tmp_rivitunnus;
@@ -1056,7 +1056,7 @@ if ($tee == 'kohdista_tilausrivi') {
     // typecastataan formista tulleet tunnukset stringeist‰ inteiksi
     $tunnukset = array_map('intval', $tunnukset);
     $poista_tilausrivi = array_map('intval', $poista_tilausrivi);
-    $ostotilauksella_tilaajanrivinro = array_map('intval',$ostotilauksella_tilaajanrivinro);
+    $ostotilauksella_tilaajanrivinro = array_map('intval', $ostotilauksella_tilaajanrivinro);
 
     // otetaan ostotilausrivin kpl m‰‰r‰, splitataan ja menn‰‰ eteenp‰in...
     // T‰m‰ pit‰‰ sitten jollain tavalla muuttaa paremmaksi, t‰m‰ on versio 1.0
@@ -1160,31 +1160,31 @@ if ($tee == 'kohdista_tilausrivi') {
         // Ei monisteta tunnusta
         for ($ii = 1; $ii < mysql_num_fields($ostores) - 1; $ii++) {
 
-          $fieldname = mysql_field_name($ostores,$ii);
+          $fieldname = mysql_field_name($ostores, $ii);
 
           $fields .= ", ".$fieldname;
 
           switch ($fieldname) {
-            case 'varattu':
-              if ($ostotilausrivirow['kpl'] == 0) $values .= ", '{$erotus}'";
-              else $values .= ", 0";
-              break;
-            case 'kpl':
-              if ($ostotilausrivirow['kpl'] != 0) $values .= ", '{$erotus}'";
-              else $values .= ", 0";
-              break;
-            case 'tilkpl':
-              $values .= ", '{$erotus}'";
-              break;
-            case 'rivihinta':
-              if ($yks_rivihinta != 0) $values .= ", '".($yks_rivihinta * $erotus)."'";
-              else $values .= ", 0";
-              break;
-            case 'kate_korjattu':
-              $values .= ", NULL";
-              break;
-            default:
-              $values .= ", '".$ostotilausrivirow[$fieldname]."'";
+          case 'varattu':
+            if ($ostotilausrivirow['kpl'] == 0) $values .= ", '{$erotus}'";
+            else $values .= ", 0";
+            break;
+          case 'kpl':
+            if ($ostotilausrivirow['kpl'] != 0) $values .= ", '{$erotus}'";
+            else $values .= ", 0";
+            break;
+          case 'tilkpl':
+            $values .= ", '{$erotus}'";
+            break;
+          case 'rivihinta':
+            if ($yks_rivihinta != 0) $values .= ", '".($yks_rivihinta * $erotus)."'";
+            else $values .= ", 0";
+            break;
+          case 'kate_korjattu':
+            $values .= ", NULL";
+            break;
+          default:
+            $values .= ", '".$ostotilausrivirow[$fieldname]."'";
           }
         }
 
@@ -1209,19 +1209,19 @@ if ($tee == 'kohdista_tilausrivi') {
           // Ei monisteta tunnusta
           for ($ii = 1; $ii < mysql_num_fields($tapahtuma_res) - 1; $ii++) {
 
-            $fieldname = mysql_field_name($tapahtuma_res,$ii);
+            $fieldname = mysql_field_name($tapahtuma_res, $ii);
 
             $fields .= ", ".$fieldname;
 
             switch ($fieldname) {
-              case 'rivitunnus':
-                $values .= ", '{$tilausrivi_id}'";
-                break;
-              case 'kpl':
-                $values .= ", '{$erotus}'";
-                break;
-              default:
-                $values .= ", '".$tapahtuma_row[$fieldname]."'";
+            case 'rivitunnus':
+              $values .= ", '{$tilausrivi_id}'";
+              break;
+            case 'kpl':
+              $values .= ", '{$erotus}'";
+              break;
+            default:
+              $values .= ", '".$tapahtuma_row[$fieldname]."'";
             }
           }
 
@@ -1360,14 +1360,14 @@ if ($tee == 'etsi') {
   echo "<form method='post' action='?tee=etsi&valitse={$valitse}&kolli={$kolli}&asn_numero={$asn_numero}&toimipaikka={$toimipaikka}&toimittajanumero={$toimittajanumero}&lasku={$lasku}&rivitunnus={$rivitunnus}&asn_rivi={$asn_rivi}&toimittaja={$toimittaja}&tilausnro={$tilausnro}&lopetus={$lopetus}'>";
 
   echo "<table>";
-  echo "<tr><th colspan='6'>",t("Etsi tilausrivi"),"</th></tr>";
+  echo "<tr><th colspan='6'>", t("Etsi tilausrivi"), "</th></tr>";
 
   echo "<tr>";
-  echo "<th>",t("Toimittaja"),"</th>";
-  echo "<th>",t("Tilausnro"),"</th>";
-  echo "<th>",t("Tuotenro"),"</th>";
-  echo "<th>",t("Tilaajan rivinro"),"</th>";
-  echo "<th>",t("Kpl"),"</th>";
+  echo "<th>", t("Toimittaja"), "</th>";
+  echo "<th>", t("Tilausnro"), "</th>";
+  echo "<th>", t("Tuotenro"), "</th>";
+  echo "<th>", t("Tilaajan rivinro"), "</th>";
+  echo "<th>", t("Kpl"), "</th>";
   echo "<th>&nbsp;</th>";
   echo "</tr>";
 
@@ -1389,12 +1389,12 @@ if ($tee == 'etsi') {
   echo "<td><input type='text' name='tuoteno' value='{$tuoteno}' /></td>";
   echo "<td><input type='text' name='tilaajanrivinro' value='{$tilaajanrivinro}' /></td>";
   echo "<td><input type='text' name='kpl' value='{$kpl}' /></td>";
-  echo "<td><input type='submit' value='",t("Etsi"),"' /></td>";
+  echo "<td><input type='submit' value='", t("Etsi"), "' /></td>";
   echo "</tr>";
 
   if ($toimirow['asn_sanomat'] == 'K') {
     echo "<tr>";
-    echo "<td colspan='6' class='back'><input type='checkbox' name='rivit_ei_asnlla'{$chk} /> ",t("N‰yt‰ myˆs rivit joita ei ole ASN:ll‰ tullut"),"</td>";
+    echo "<td colspan='6' class='back'><input type='checkbox' name='rivit_ei_asnlla'{$chk} /> ", t("N‰yt‰ myˆs rivit joita ei ole ASN:ll‰ tullut"), "</td>";
     echo "</tr>";
   }
 
@@ -1404,7 +1404,7 @@ if ($tee == 'etsi') {
   echo "<br /><hr /><br />";
 
   echo "<form method='post' action='?tee=uusirivi&valitse={$valitse}&kolli={$kolli}&asn_numero={$asn_numero}&toimittajanumero={$toimittajanumero}&lasku={$lasku}&rivitunnus={$rivitunnus}&asn_rivi={$asn_rivi}&toimittaja={$toimittaja}&tilausnro={$tilausnro}&tuoteno=".urlencode($tuoteno)."&tilaajanrivinro={$tilaajanrivinro}&kpl={$kpl}&toimipaikka={$toimipaikka}&lopetus={$lopetus}'>";
-  echo "<input type='submit' value='",t("Tee uusi tilausrivi"),"' />";
+  echo "<input type='submit' value='", t("Tee uusi tilausrivi"), "' />";
   echo "</form>";
   echo "<br />";
 
@@ -1417,15 +1417,15 @@ if ($tee == 'etsi') {
     echo "<input type='hidden' name='lopetus' id='lopetus' value='{$lopetus}' />";
 
     echo "<table>";
-    echo "<tr><th colspan='6'>",t("Haun tulokset"),"</th><th><input type='submit' value='",t("Kohdista"),"' /></th></tr>";
+    echo "<tr><th colspan='6'>", t("Haun tulokset"), "</th><th><input type='submit' value='", t("Kohdista"), "' /></th></tr>";
     echo "<tr>";
-    echo "<th>",t("Tilausnro"),"</th>";
-    echo "<th>",t("Tuoteno"),"</th>";
-    echo "<th>",t("Varattu")," / ",t("Kpl"),"</th>";
-    echo "<th>",t("Keikka"),"</th>";
-    echo "<th>",t("Keikan tila"),"</th>";
-    echo "<th>",t("Kohdistus"),"</th>";
-    echo "<th>",t("Poista"),"</th>";
+    echo "<th>", t("Tilausnro"), "</th>";
+    echo "<th>", t("Tuoteno"), "</th>";
+    echo "<th>", t("Varattu"), " / ", t("Kpl"), "</th>";
+    echo "<th>", t("Keikka"), "</th>";
+    echo "<th>", t("Keikan tila"), "</th>";
+    echo "<th>", t("Kohdistus"), "</th>";
+    echo "<th>", t("Poista"), "</th>";
     echo "</tr>";
 
     $tilausnro = (int) $tilausnro;
@@ -1433,8 +1433,8 @@ if ($tee == 'etsi') {
     $tilaajanrivinrolisa = trim($tilaajanrivinro) != '' ? " and tilausrivi.tilaajanrivinro = ".(int) $tilaajanrivinro : '';
     $tilausnrolisa = (trim($tilausnro) != '' and trim($tilausnro) != 0) ? " and lasku.tunnus LIKE '%{$tilausnro}'" : '';
     $tilausnrolisa2 = (trim($tilausnro) != '' and trim($tilausnro) != 0) ? " and tilausrivi.otunnus LIKE '%{$tilausnro}'" : '';
-    $tuoteno_valeilla = str_replace(' ','_',$tuoteno);
-    $tuoteno_ilman_valeilla =str_replace(' ','',$tuoteno);
+    $tuoteno_valeilla = str_replace(' ', '_', $tuoteno);
+    $tuoteno_ilman_valeilla =str_replace(' ', '', $tuoteno);
     $tuotenolisa = trim($tuoteno) != '' ? " and (tuote.tuoteno like '".mysql_real_escape_string($tuoteno)."%' or tuote.tuoteno = '".mysql_real_escape_string($tuoteno_valeilla)."' or tuote.tuoteno = '".mysql_real_escape_string($tuoteno_ilman_valeilla)."')" : '';
     $kpllisa = trim($kpl) != '' ? " and tilausrivi.varattu = ".(float) $kpl : '';
 
@@ -1455,7 +1455,7 @@ if ($tee == 'etsi') {
 
         while ($status_chk_row = mysql_fetch_assoc($status_chk_res)) {
           echo "<tr>";
-          echo "<td colspan='7'>",t("Tuote on poistunut"),"! ({$status_chk_row['tuoteno']})</td>";
+          echo "<td colspan='7'>", t("Tuote on poistunut"), "! ({$status_chk_row['tuoteno']})</td>";
           echo "</tr>";
         }
       }
@@ -1592,23 +1592,23 @@ if ($tee == 'etsi') {
       echo "<td align='right'>$row[uusiotunnus]</td>";
 
       if ($row['uusiotunnus'] > 0 and $row['kpl'] == 0 and $valitse == 'asn') {
-        echo "<td>",t("Rivi on kohdistettu"),"</td>";
+        echo "<td>", t("Rivi on kohdistettu"), "</td>";
         echo "<td>&nbsp;</td>";
       }
       elseif ($valitse == 'asn' and $row['uusiotunnus'] > 0 and $row['kpl'] != 0) {
-        echo "<td>",t("Viety varastoon"),"</td>";
+        echo "<td>", t("Viety varastoon"), "</td>";
         echo "<td>&nbsp;</td>";
       }
       else {
         if ($row['uusiotunnus'] > 0 and $row['kpl'] != 0) {
-          echo "<td>",t("Viety varastoon"),"</td>";
+          echo "<td>", t("Viety varastoon"), "</td>";
         }
         else {
           echo "<td>&nbsp;</td>";
         }
         echo "<td align='center'>";
         echo "<input type='checkbox' name='tunnukset[]' class='tunnukset' value='{$row['tunnus']}' />";
-        echo "<input type='hidden' name='ostotilauksella_kpl[{$row['tunnus']}]' value='",($row['varattu'] + $row['kpl']),"' />";
+        echo "<input type='hidden' name='ostotilauksella_kpl[{$row['tunnus']}]' value='", ($row['varattu'] + $row['kpl']), "' />";
         echo "<input type='hidden' name='ostotilauksella_tilaajanrivinro[{$row['tunnus']}]' value='{$row['tilaajanrivinro']}' />";
         echo "</td>";
       }
@@ -1658,16 +1658,16 @@ if ($tee == 'nayta') {
 
     echo "<table>";
     echo "<tr>";
-    echo "<th>",t("Toimittajanro"),"</th>";
-    echo "<th>",t("Laskun numero"),"</th>";
-    echo "<th>",t("Ostotilausnro"),"</th>";
-    echo "<th>",t("Tuotenro"),"</th>";
-    echo "<th>",t("Toimittajan"),"<br />",t("Tuotenro"),"</th>";
-    echo "<th>",t("Nimitys"),"</th>";
-    echo "<th>",t("Tilattu kpl"),"</th>";
-    echo "<th>",t("Asn-kpl"),"</th>";
-    echo "<th>",t("Alennukset"),"</th>";
-    echo "<th>",t("Status"),"</th>";
+    echo "<th>", t("Toimittajanro"), "</th>";
+    echo "<th>", t("Laskun numero"), "</th>";
+    echo "<th>", t("Ostotilausnro"), "</th>";
+    echo "<th>", t("Tuotenro"), "</th>";
+    echo "<th>", t("Toimittajan"), "<br />", t("Tuotenro"), "</th>";
+    echo "<th>", t("Nimitys"), "</th>";
+    echo "<th>", t("Tilattu kpl"), "</th>";
+    echo "<th>", t("Asn-kpl"), "</th>";
+    echo "<th>", t("Alennukset"), "</th>";
+    echo "<th>", t("Status"), "</th>";
     echo "<td class='back'></td>";
     echo "</tr>";
 
@@ -1694,7 +1694,7 @@ if ($tee == 'nayta') {
       echo "<td align='right'>{$row['tilattu']}</td>";
       echo "<td align='right'>{$row['kappalemaara']}</td>";
       echo "<td></td>";
-      echo "<td><font class='ok'>",t("Ok"),"</font></td>";
+      echo "<td><font class='ok'>", t("Ok"), "</font></td>";
       echo "<td class='back'></td>";
       echo "</tr>";
     }
@@ -1818,20 +1818,20 @@ if ($tee == 'nayta') {
       echo "<td align='right'>{$row['kappalemaara']}</td>";
       echo "<td></td>";
 
-      echo "<td><font class='error'>",t("Virhe"),"</font></td>";
+      echo "<td><font class='error'>", t("Virhe"), "</font></td>";
 
       echo "<td class='back'>";
 
-      if ($row['uusiotunnus'] == 0 or $virhe) echo "<input type='button' class='etsibutton' id='{$row['asn_tunnus']}##{$row['tuoteno']}##{$row['tilausrivinpositio']}' value='",t("Etsi"),"' />";
+      if ($row['uusiotunnus'] == 0 or $virhe) echo "<input type='button' class='etsibutton' id='{$row['asn_tunnus']}##{$row['tuoteno']}##{$row['tilausrivinpositio']}' value='", t("Etsi"), "' />";
 
       echo "</td>";
       echo "</tr>";
     }
 
     if ($ok and !$virhe) {
-      echo "<tr><th colspan='10' class='back'><input type='button' class='vahvistabutton' value='",t("Vahvista"),"' /></th></tr>";
+      echo "<tr><th colspan='10' class='back'><input type='button' class='vahvistabutton' value='", t("Vahvista"), "' /></th></tr>";
       if ($valitse == "asn") {
-        echo "<tr><th colspan='10' class='back'><input type='button' class='poistakohdistus' value='",t("Poista Kohdistus"),"' /></th></tr>";
+        echo "<tr><th colspan='10' class='back'><input type='button' class='poistakohdistus' value='", t("Poista Kohdistus"), "' /></th></tr>";
       }
     }
 
@@ -1848,15 +1848,15 @@ if ($tee == 'nayta') {
     echo "<input type='hidden' id='toimipaikka' name='toimipaikka' value='{$toimipaikka}' />";
     echo "<table>";
     echo "<tr>";
-    echo "<th>",t("Toimittajanro"),"</th>";
-    echo "<th>",t("Ostotilausnro"),"</th>";
-    echo "<th>",t("Tuotenro"),"</th>";
-    echo "<th>",t("Toimittajan"),"<br />",t("Tuotenro"),"</th>";
-    echo "<th>",t("Nimitys"),"</th>";
-    echo "<th>",t("Rivinro"),"</th>";
-    echo "<th>",t("Kpl"),"</th>";
-    echo "<th>",t("Hinta"),"</th>";
-    echo "<th>",t("Status"),"</th>";
+    echo "<th>", t("Toimittajanro"), "</th>";
+    echo "<th>", t("Ostotilausnro"), "</th>";
+    echo "<th>", t("Tuotenro"), "</th>";
+    echo "<th>", t("Toimittajan"), "<br />", t("Tuotenro"), "</th>";
+    echo "<th>", t("Nimitys"), "</th>";
+    echo "<th>", t("Rivinro"), "</th>";
+    echo "<th>", t("Kpl"), "</th>";
+    echo "<th>", t("Hinta"), "</th>";
+    echo "<th>", t("Status"), "</th>";
     echo "<td class='back'>&nbsp;</td>";
     echo "</tr>";
 
@@ -1960,23 +1960,23 @@ if ($tee == 'nayta') {
       echo "<td>{$row['nimitys']}</td>";
       echo "<td align='right'>{$row['tilausrivinpositio']}</td>";
       echo "<td align='right'>{$row['kappalemaara']}</td>";
-      echo "<td align='right'>",hintapyoristys($row['hinta']),"</td>";
+      echo "<td align='right'>", hintapyoristys($row['hinta']), "</td>";
 
       echo "<td>";
 
       if ($row['status'] == 'E') {
-        echo "<font class='message'>",t("Erolistalla"),"</font>";
+        echo "<font class='message'>", t("Erolistalla"), "</font>";
       }
       elseif (!is_null($row['tilausrivi']) and !empty($row['tilausrivi'])) {
         echo "<font class='ok'>Ok</font>";
         $ok++;
 
         if ($row['hinta'] != $hinta_chk_row['hinta']) {
-          echo "<br /><font class='error'>",t("Hintapoikkeavuus"),"</font>";
+          echo "<br /><font class='error'>", t("Hintapoikkeavuus"), "</font>";
         }
       }
       else {
-        echo "<font class='error'>",t("Virhe"),"</font>";
+        echo "<font class='error'>", t("Virhe"), "</font>";
         $virhe++;
       }
       echo "</td>";
@@ -1984,10 +1984,10 @@ if ($tee == 'nayta') {
       echo "<td class='back'>";
 
       if ((is_null($row['tilausrivi']) or empty($row['tilausrivi']) ) and $row['status'] != 'E') {
-        echo "<input type='button' class='etsibutton_osto' id='{$lasku}##{$row['tuoteno']}##{$row['tilausrivinpositio']}##{$row['toimittajanumero']}##{$row['kappalemaara']}##{$row['tunnus']}##{$row['tilausnumero']}##{$row['toim_tuoteno']}##{$toimipaikka}' value='",t("Etsi"),"' />";
+        echo "<input type='button' class='etsibutton_osto' id='{$lasku}##{$row['tuoteno']}##{$row['tilausrivinpositio']}##{$row['toimittajanumero']}##{$row['kappalemaara']}##{$row['tunnus']}##{$row['tilausnumero']}##{$row['toim_tuoteno']}##{$toimipaikka}' value='", t("Etsi"), "' />";
 
         if ($row['hinta'] == 0) {
-          echo "<input type='button' class='erobutton_osto' id='{$lasku}##{$row['tuoteno']}##{$row['tilausrivinpositio']}##{$row['toimittajanumero']}##{$row['kappalemaara']}##{$row['tunnus']}##{$row['tilausnumero']}##{$row['toim_tuoteno']}' value='",t("Erolistalle"),"' />";
+          echo "<input type='button' class='erobutton_osto' id='{$lasku}##{$row['tuoteno']}##{$row['tilausrivinpositio']}##{$row['toimittajanumero']}##{$row['kappalemaara']}##{$row['tunnus']}##{$row['tilausnumero']}##{$row['toim_tuoteno']}' value='", t("Erolistalle"), "' />";
         }
       }
 
@@ -1996,12 +1996,12 @@ if ($tee == 'nayta') {
     }
 
     if ($ok and !$virhe) {
-      echo "<tr><th colspan='9'><input type='button' class='vahvistabutton' value='",t("Vahvista"),"' /></th></tr>";
+      echo "<tr><th colspan='9'><input type='button' class='vahvistabutton' value='", t("Vahvista"), "' /></th></tr>";
     }
 
-    echo "<tr><th colspan='9'><input type='button' class='vahvistavakisinbutton' value='",t("Aja automaattikohdistus uudestaan kaikille riveille"),"' /></th></tr>";
+    echo "<tr><th colspan='9'><input type='button' class='vahvistavakisinbutton' value='", t("Aja automaattikohdistus uudestaan kaikille riveille"), "' /></th></tr>";
 
-    if ($laskurow['tunnus'] != '') echo "<tr><th colspan='9'>",ebid($laskurow['tunnus']),"</th></tr>";
+    if ($laskurow['tunnus'] != '') echo "<tr><th colspan='9'>", ebid($laskurow['tunnus']), "</th></tr>";
 
     echo "</table>";
     echo "</form>";
@@ -2032,11 +2032,11 @@ if ($tee == '') {
     if (mysql_num_rows($toimipaikat_res) != 0) {
 
       echo "<tr>";
-      echo "<th>",t("Toimipaikka"),"<br />(Finvoice, Maventa, ",t("Ostolaskut"),")</th>";
+      echo "<th>", t("Toimipaikka"), "<br />(Finvoice, Maventa, ", t("Ostolaskut"), ")</th>";
       echo "<td colspan='4'>";
       echo "<select name='toimipaikka'>";
-      echo "<option value='kaikki'>",t("Kaikki toimipaikat"),"</option>";
-      echo "<option value='0'>",t("Ei toimipaikkaa"),"</option>";
+      echo "<option value='kaikki'>", t("Kaikki toimipaikat"), "</option>";
+      echo "<option value='0'>", t("Ei toimipaikkaa"), "</option>";
 
       while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
 
@@ -2056,11 +2056,11 @@ if ($tee == '') {
     }
 
     echo "<tr>";
-    echo "<th>",t("Valitse"),"</th>";
-    echo "<td><input type='submit' name='nayta_finvoice' value='",t("Finvoice"),"' /></td>";
-    echo "<td><input type='submit' name='nayta_maventa' value='",t("Maventa"),"' /></td>";
-    echo "<td><input type='submit' name='nayta_ostolasku' value='",t("Ostolaskut"),"' /></td>";
-    echo "<td><input type='submit' name='nayta_asn' value='",t("ASN-sanomat"),"' /></td>";
+    echo "<th>", t("Valitse"), "</th>";
+    echo "<td><input type='submit' name='nayta_finvoice' value='", t("Finvoice"), "' /></td>";
+    echo "<td><input type='submit' name='nayta_maventa' value='", t("Maventa"), "' /></td>";
+    echo "<td><input type='submit' name='nayta_ostolasku' value='", t("Ostolaskut"), "' /></td>";
+    echo "<td><input type='submit' name='nayta_asn' value='", t("ASN-sanomat"), "' /></td>";
     echo "</tr></table>";
     echo "</form>";
   }
@@ -2099,14 +2099,14 @@ if ($tee == '') {
     echo "<input type='hidden' id='toimipaikka' name='toimipaikka' value='{$toimipaikka}' />";
     echo "<table>";
     echo "<tr>";
-    echo "<th>",t("Ytunnus"),"</th>";
-    echo "<th>",t("Nimi"),"</th>";
-    echo "<th>",t("Osoite"),"</th>";
-    echo "<th>",t("Swift"),"</th>";
-    echo "<th>",t("ASN sanomanumero"),"</th>";
-    echo "<th>",t("ASN kollinumero"),"</th>";
-    echo "<th>",t("Saapumispvm"),"</th>";
-    echo "<th>",t("Rivim‰‰r‰"),"<br />",t("ok")," / ",t("kaikki"),"</th>";
+    echo "<th>", t("Ytunnus"), "</th>";
+    echo "<th>", t("Nimi"), "</th>";
+    echo "<th>", t("Osoite"), "</th>";
+    echo "<th>", t("Swift"), "</th>";
+    echo "<th>", t("ASN sanomanumero"), "</th>";
+    echo "<th>", t("ASN kollinumero"), "</th>";
+    echo "<th>", t("Saapumispvm"), "</th>";
+    echo "<th>", t("Rivim‰‰r‰"), "<br />", t("ok"), " / ", t("kaikki"), "</th>";
     echo "</tr>";
 
     $ed_asn = '';
@@ -2125,10 +2125,10 @@ if ($tee == '') {
           //asn_numerot array:ssa on t‰ss‰ kohtaa yks value liikaa, joka ei kuulu t‰lle toimittajalle. poisettaan se arrayst‰
           $seuraavaan_asn_array = array_pop($asn_numerot);
 
-          echo "<tr><th colspan='8'><input type='button' class='toimittajabutton' id='".implode(',', $asn_numerot)."' value='",t("Vaihda toimittajaa"),"' />";
+          echo "<tr><th colspan='8'><input type='button' class='toimittajabutton' id='".implode(',', $asn_numerot)."' value='", t("Vaihda toimittajaa"), "' />";
 
           foreach ($asn_numerot as $pasn) {
-            echo "<span style='float:right;'><input type='button' class='poistabutton' id='{$pasn}' value='",t("Poista sanoma"),": $pasn' /></span> ";
+            echo "<span style='float:right;'><input type='button' class='poistabutton' id='{$pasn}' value='", t("Poista sanoma"), ": $pasn' /></span> ";
           }
 
           echo "</th></tr>";
@@ -2158,7 +2158,7 @@ if ($tee == '') {
       echo "<td>{$row['ok']} / {$row['rivit']}</td>";
 
       echo "<td class='back'>";
-      echo "<input type='button' class='kollibutton' id='{$row['paketintunniste']}##{$row['asn_numero']}##{$row['toimittajanumero']}' value='",t("Valitse"),"' />";
+      echo "<input type='button' class='kollibutton' id='{$row['paketintunniste']}##{$row['asn_numero']}##{$row['toimittajanumero']}' value='", t("Valitse"), "' />";
       echo "</td>";
 
       echo "</tr>";
@@ -2172,10 +2172,10 @@ if ($tee == '') {
     }
 
     if (mysql_num_rows($result) > 0 and $naytetaanko_toimittajabutton) {
-      echo "<tr><th colspan='8'><input type='button' class='toimittajabutton' id='".implode(',', $asn_numerot)."' value='",t("Vaihda toimittajaa"),"' />";
+      echo "<tr><th colspan='8'><input type='button' class='toimittajabutton' id='".implode(',', $asn_numerot)."' value='", t("Vaihda toimittajaa"), "' />";
 
       foreach ($asn_numerot as $pasn) {
-        echo "<span style='float:right;'><input type='button' class='poistabutton' id='{$pasn}' value='",t("Poista sanoma"),": $pasn' /></span> ";
+        echo "<span style='float:right;'><input type='button' class='poistabutton' id='{$pasn}' value='", t("Poista sanoma"), ": $pasn' /></span> ";
       }
 
       echo "</th></tr>";
@@ -2184,7 +2184,7 @@ if ($tee == '') {
     echo "</table>";
     echo "</form>";
   }
-  elseif (in_array($valitse, array('ostolasku','maventa','finvoice'))) {
+  elseif (in_array($valitse, array('ostolasku', 'maventa', 'finvoice'))) {
 
     if ($valitse == 'maventa') {
       $lajilisa = 'mav';
@@ -2231,13 +2231,13 @@ if ($tee == '') {
     echo "<input type='hidden' id='toimipaikka' name='toimipaikka' value='{$toimipaikka}' />";
     echo "<table>";
     echo "<tr>";
-    echo "<th>",t("Ytunnus"),"</th>";
-    echo "<th>",t("Nimi"),"</th>";
-    echo "<th>",t("Osoite"),"</th>";
-    echo "<th>",t("Swift"),"</th>";
-    echo "<th>",t("Ostolaskunro"),"</th>";
-    echo "<th>",t("Saapumispvm"),"</th>";
-    echo "<th>",t("Rivim‰‰r‰"),"<br />",t("ok")," / ",t("kaikki"),"</th>";
+    echo "<th>", t("Ytunnus"), "</th>";
+    echo "<th>", t("Nimi"), "</th>";
+    echo "<th>", t("Osoite"), "</th>";
+    echo "<th>", t("Swift"), "</th>";
+    echo "<th>", t("Ostolaskunro"), "</th>";
+    echo "<th>", t("Saapumispvm"), "</th>";
+    echo "<th>", t("Rivim‰‰r‰"), "<br />", t("ok"), " / ", t("kaikki"), "</th>";
     echo "</tr>";
 
     $ed_toimittaja = '';
@@ -2251,7 +2251,7 @@ if ($tee == '') {
         echo "<tr><th colspan='7'>";
 
         if ($naytetaanko_toimittajabutton) {
-          echo "<input type='button' class='toimittajabutton' id='{$ed_tilausnumero}' value='",t("Vaihda toimittajaa"),"' />&nbsp;";
+          echo "<input type='button' class='toimittajabutton' id='{$ed_tilausnumero}' value='", t("Vaihda toimittajaa"), "' />&nbsp;";
         }
 
         echo "</th></tr>";
@@ -2267,8 +2267,8 @@ if ($tee == '') {
       echo "<td>".tv1dateconv($row['saapumispvm'])."</td>";
       echo "<td>{$row['ok']} / {$row['rivit']}</td>";
       echo "<td class='back'>";
-      echo "<input type='button' class='ostolaskubutton' id='{$row['tilausnumero']}' value='",t("Valitse"),"' />";
-      echo "<span style='float:right;'><input type='button' class='poistabutton' id='{$row['tilausnumero']}' value='",t("Poista"),"' /></span>";
+      echo "<input type='button' class='ostolaskubutton' id='{$row['tilausnumero']}' value='", t("Valitse"), "' />";
+      echo "<span style='float:right;'><input type='button' class='poistabutton' id='{$row['tilausnumero']}' value='", t("Poista"), "' /></span>";
       echo "</td>";
       echo "</tr>";
 
@@ -2283,7 +2283,7 @@ if ($tee == '') {
     echo "<tr><th colspan='7'>";
 
     if (mysql_num_rows($result) > 0 and $naytetaanko_toimittajabutton) {
-      echo "<input type='button' class='toimittajabutton' id='{$ed_tilausnumero}' value='",t("Vaihda toimittajaa"),"' />&nbsp;";
+      echo "<input type='button' class='toimittajabutton' id='{$ed_tilausnumero}' value='", t("Vaihda toimittajaa"), "' />&nbsp;";
     }
 
     echo "</th></tr>";
@@ -2293,4 +2293,4 @@ if ($tee == '') {
   }
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

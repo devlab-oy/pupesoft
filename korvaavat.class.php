@@ -25,8 +25,11 @@ class Korvaavat {
     $this->tuote = $tuote;
   }
 
-  /** Haetaan koko korvaavuusketju
+  /**
+   * Haetaan koko korvaavuusketju
    */
+
+
   function tuotteet($options = array()) {
     global $kukarow;
 
@@ -64,7 +67,9 @@ class Korvaavat {
     return $tuotteet;
   }
 
-  /** Hakee ketjun päätuotteen
+
+  /**
+   * Hakee ketjun päätuotteen
    */
   function paatuote() {
     global $kukarow;

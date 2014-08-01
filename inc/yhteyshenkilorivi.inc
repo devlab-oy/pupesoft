@@ -22,7 +22,7 @@ if (mysql_field_name($result, $i) == "tyyppi") {
   if ($laji == "A") {
     $trow[$i] = "A";
   }
-  elseif($laji == "T") {
+  elseif ($laji == "T") {
     $trow[$i] = "T";
   }
 
@@ -34,7 +34,7 @@ if (mysql_field_name($result, $i) == "rooli") {
 
   $ulos = "<td><select name='$nimi'><option value=''>".t("Ei roolia")."</option>";
 
-  while($row = mysql_fetch_array($vresult)) {
+  while ($row = mysql_fetch_array($vresult)) {
     $sel = "";
     if ($row["selite"] == $trow[$i]) $sel = 'selected';
     $ulos .= "<option value='$row[selite]' $sel> $row[selite] - $row[selitetark]</option>";
@@ -50,7 +50,7 @@ if (mysql_field_name($result, $i) == "suoramarkkinointi") {
 
   $ulos = "<td><select name='suoramarkkinointi'><option value=''>".t("Ei suoramarkkinointitietoja")."</option>";
 
-  while($row = mysql_fetch_array($vresult)) {
+  while ($row = mysql_fetch_array($vresult)) {
     $sel = "";
     if ($row["selite"] == $trow[$i]) $sel = 'selected';
     $ulos .= "<option value='$row[selite]' $sel> $row[selite] - $row[selitetark]</option>";

@@ -2,7 +2,7 @@
 
 if (isset($_REQUEST["tee"])) {
   if ($_REQUEST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if ($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/","",$_REQUEST["kaunisnimi"]);
+  if ($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/", "", $_REQUEST["kaunisnimi"]);
 }
 
 // Ei k‰ytet‰ pakkausta
@@ -17,7 +17,7 @@ ini_set("memory_limit", "5G");
 ini_set("mysql.connect_timeout", 600);
 ini_set("max_execution_time", 18000);
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
@@ -25,26 +25,26 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
 }
 else {
 
-  if (!@include('Spreadsheet/Excel/Writer.php')) {
+  if (!@include 'Spreadsheet/Excel/Writer.php') {
     echo "<font class='error'>".t("VIRHE: Pupe-asennuksesi ei tue Excel-kirjoitusta.")."</font><br>";
     exit;
   }
 
   $ala_tallenna = array(  "kysely",
-              "uusirappari",
-              "edkysely",
-              "rtee",
-              "mul_osasto",
-              "mul_try",
-              "mul_tme",
-              "toimittajaid",
-              "ytunnus",
-              "asiakasosasto",
-              "asiakasid",
-              "asiakasno",
-              "abcrajaus",
-              "abcrajaustapa",
-              "abcrajausluokka");
+    "uusirappari",
+    "edkysely",
+    "rtee",
+    "mul_osasto",
+    "mul_try",
+    "mul_tme",
+    "toimittajaid",
+    "ytunnus",
+    "asiakasosasto",
+    "asiakasid",
+    "asiakasno",
+    "abcrajaus",
+    "abcrajaustapa",
+    "abcrajausluokka");
 
   if ($valitut["TALLENNAPAIVAM"] == '') {
     array_push($ala_tallenna, "ppa1", "kka1", "vva1", "ppl1", "kkl1", "vvl1", "ppa2", "kka2", "vva2", "ppl2", "kkl2", "vvl2", "ppa3", "kka3", "vva3", "ppl3", "kkl3", "vvl3", "ppa4", "kka4", "vva4", "ppl4", "kkl4", "vvl4");
@@ -82,13 +82,13 @@ else {
   //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
   $useslave = 1;
 
-  require ("inc/connect.inc");
+  require "inc/connect.inc";
 
   echo "<font class='head'>".t("Ostoraportti")."</font><hr>";
 
   // org_rajausta tarvitaan yhdess‰ selectiss‰ joka triggerˆi taas toisen asian.
   $org_rajaus = $abcrajaus;
-  list($abcrajaus,$abcrajaustapa) = explode("##",$abcrajaus);
+  list($abcrajaus, $abcrajaustapa) = explode("##", $abcrajaus);
 
   if (!isset($abcrajaustapa)) $abcrajaustapa = "TK";
 
@@ -103,87 +103,87 @@ else {
   }
 
   // Tarvittavat p‰iv‰m‰‰r‰t
-  if (!isset($kka1)) $kka1 = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-  if (!isset($vva1)) $vva1 = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-  if (!isset($ppa1)) $ppa1 = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+  if (!isset($kka1)) $kka1 = date("m", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+  if (!isset($vva1)) $vva1 = date("Y", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+  if (!isset($ppa1)) $ppa1 = date("d", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
   if (!isset($kkl1)) $kkl1 = date("m");
   if (!isset($vvl1)) $vvl1 = date("Y");
   if (!isset($ppl1)) $ppl1 = date("d");
 
-  if (!isset($kka2)) $kka2 = date("m",mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
-  if (!isset($vva2)) $vva2 = date("Y",mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
-  if (!isset($ppa2)) $ppa2 = date("d",mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
+  if (!isset($kka2)) $kka2 = date("m", mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
+  if (!isset($vva2)) $vva2 = date("Y", mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
+  if (!isset($ppa2)) $ppa2 = date("d", mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
   if (!isset($kkl2)) $kkl2 = date("m");
   if (!isset($vvl2)) $vvl2 = date("Y");
   if (!isset($ppl2)) $ppl2 = date("d");
 
-  if (!isset($kka3)) $kka3 = date("m",mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
-  if (!isset($vva3)) $vva3 = date("Y",mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
-  if (!isset($ppa3)) $ppa3 = date("d",mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
+  if (!isset($kka3)) $kka3 = date("m", mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
+  if (!isset($vva3)) $vva3 = date("Y", mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
+  if (!isset($ppa3)) $ppa3 = date("d", mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
   if (!isset($kkl3)) $kkl3 = date("m");
   if (!isset($vvl3)) $vvl3 = date("Y");
   if (!isset($ppl3)) $ppl3 = date("d");
 
-  if (!isset($kka4)) $kka4 = date("m",mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
-  if (!isset($vva4)) $vva4 = date("Y",mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
-  if (!isset($ppa4)) $ppa4 = date("d",mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
+  if (!isset($kka4)) $kka4 = date("m", mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
+  if (!isset($vva4)) $vva4 = date("Y", mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
+  if (!isset($ppa4)) $ppa4 = date("d", mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
   if (!isset($kkl4)) $kkl4 = date("m");
   if (!isset($vvl4)) $vvl4 = date("Y");
   if (!isset($ppl4)) $ppl4 = date("d");
 
-  if (!isset($naytauudet_kk)) $naytauudet_kk = date("m",mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
-  if (!isset($naytauudet_vv)) $naytauudet_vv = date("Y",mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
-  if (!isset($naytauudet_pp)) $naytauudet_pp = date("d",mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
+  if (!isset($naytauudet_kk)) $naytauudet_kk = date("m", mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
+  if (!isset($naytauudet_vv)) $naytauudet_vv = date("Y", mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
+  if (!isset($naytauudet_pp)) $naytauudet_pp = date("d", mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
 
   //Edellisen vuoden vastaavat kaudet
-  $kka1ed = date("m",mktime(0, 0, 0, $kka1, $ppa1, $vva1-1));
-  $vva1ed = date("Y",mktime(0, 0, 0, $kka1, $ppa1, $vva1-1));
-  $ppa1ed = date("d",mktime(0, 0, 0, $kka1, $ppa1, $vva1-1));
-  $kkl1ed = date("m",mktime(0, 0, 0, $kkl1, $ppl1, $vvl1-1));
-  $vvl1ed = date("Y",mktime(0, 0, 0, $kkl1, $ppl1, $vvl1-1));
-  $ppl1ed = date("d",mktime(0, 0, 0, $kkl1, $ppl1, $vvl1-1));
+  $kka1ed = date("m", mktime(0, 0, 0, $kka1, $ppa1, $vva1-1));
+  $vva1ed = date("Y", mktime(0, 0, 0, $kka1, $ppa1, $vva1-1));
+  $ppa1ed = date("d", mktime(0, 0, 0, $kka1, $ppa1, $vva1-1));
+  $kkl1ed = date("m", mktime(0, 0, 0, $kkl1, $ppl1, $vvl1-1));
+  $vvl1ed = date("Y", mktime(0, 0, 0, $kkl1, $ppl1, $vvl1-1));
+  $ppl1ed = date("d", mktime(0, 0, 0, $kkl1, $ppl1, $vvl1-1));
 
-  $kka2ed = date("m",mktime(0, 0, 0, $kka2, $ppa2, $vva2-1));
-  $vva2ed = date("Y",mktime(0, 0, 0, $kka2, $ppa2, $vva2-1));
-  $ppa2ed = date("d",mktime(0, 0, 0, $kka2, $ppa2, $vva2-1));
-  $kkl2ed = date("m",mktime(0, 0, 0, $kkl2, $ppl2, $vvl2-1));
-  $vvl2ed = date("Y",mktime(0, 0, 0, $kkl2, $ppl2, $vvl2-1));
-  $ppl2ed = date("d",mktime(0, 0, 0, $kkl2, $ppl2, $vvl2-1));
+  $kka2ed = date("m", mktime(0, 0, 0, $kka2, $ppa2, $vva2-1));
+  $vva2ed = date("Y", mktime(0, 0, 0, $kka2, $ppa2, $vva2-1));
+  $ppa2ed = date("d", mktime(0, 0, 0, $kka2, $ppa2, $vva2-1));
+  $kkl2ed = date("m", mktime(0, 0, 0, $kkl2, $ppl2, $vvl2-1));
+  $vvl2ed = date("Y", mktime(0, 0, 0, $kkl2, $ppl2, $vvl2-1));
+  $ppl2ed = date("d", mktime(0, 0, 0, $kkl2, $ppl2, $vvl2-1));
 
-  $kka3ed = date("m",mktime(0, 0, 0, $kka3, $ppa3, $vva3-1));
-  $vva3ed = date("Y",mktime(0, 0, 0, $kka3, $ppa3, $vva3-1));
-  $ppa3ed = date("d",mktime(0, 0, 0, $kka3, $ppa3, $vva3-1));
-  $kkl3ed = date("m",mktime(0, 0, 0, $kkl3, $ppl3, $vvl3-1));
-  $vvl3ed = date("Y",mktime(0, 0, 0, $kkl3, $ppl3, $vvl3-1));
-  $ppl3ed = date("d",mktime(0, 0, 0, $kkl3, $ppl3, $vvl3-1));
+  $kka3ed = date("m", mktime(0, 0, 0, $kka3, $ppa3, $vva3-1));
+  $vva3ed = date("Y", mktime(0, 0, 0, $kka3, $ppa3, $vva3-1));
+  $ppa3ed = date("d", mktime(0, 0, 0, $kka3, $ppa3, $vva3-1));
+  $kkl3ed = date("m", mktime(0, 0, 0, $kkl3, $ppl3, $vvl3-1));
+  $vvl3ed = date("Y", mktime(0, 0, 0, $kkl3, $ppl3, $vvl3-1));
+  $ppl3ed = date("d", mktime(0, 0, 0, $kkl3, $ppl3, $vvl3-1));
 
-  $kka4ed = date("m",mktime(0, 0, 0, $kka4, $ppa4, $vva4-1));
-  $vva4ed = date("Y",mktime(0, 0, 0, $kka4, $ppa4, $vva4-1));
-  $ppa4ed = date("d",mktime(0, 0, 0, $kka4, $ppa4, $vva4-1));
-  $kkl4ed = date("m",mktime(0, 0, 0, $kkl4, $ppl4, $vvl4-1));
-  $vvl4ed = date("Y",mktime(0, 0, 0, $kkl4, $ppl4, $vvl4-1));
-  $ppl4ed = date("d",mktime(0, 0, 0, $kkl4, $ppl4, $vvl4-1));
+  $kka4ed = date("m", mktime(0, 0, 0, $kka4, $ppa4, $vva4-1));
+  $vva4ed = date("Y", mktime(0, 0, 0, $kka4, $ppa4, $vva4-1));
+  $ppa4ed = date("d", mktime(0, 0, 0, $kka4, $ppa4, $vva4-1));
+  $kkl4ed = date("m", mktime(0, 0, 0, $kkl4, $ppl4, $vvl4-1));
+  $vvl4ed = date("Y", mktime(0, 0, 0, $kkl4, $ppl4, $vvl4-1));
+  $ppl4ed = date("d", mktime(0, 0, 0, $kkl4, $ppl4, $vvl4-1));
 
 
   //katotaan pienin alkupvm ja isoin loppupvm
-  $apaiva1 = (int) date('Ymd',mktime(0,0,0,$kka1,$ppa1,$vva1));
-  $apaiva2 = (int) date('Ymd',mktime(0,0,0,$kka2,$ppa2,$vva2));
-  $apaiva3 = (int) date('Ymd',mktime(0,0,0,$kka3,$ppa3,$vva3));
-  $apaiva4 = (int) date('Ymd',mktime(0,0,0,$kka4,$ppa4,$vva4));
-  $apaiva5 = (int) date('Ymd',mktime(0,0,0,$kka1ed,$ppa1ed,$vva1ed));
-  $apaiva6 = (int) date('Ymd',mktime(0,0,0,$kka2ed,$ppa2ed,$vva2ed));
-  $apaiva7 = (int) date('Ymd',mktime(0,0,0,$kka3ed,$ppa3ed,$vva3ed));
-  $apaiva8 = (int) date('Ymd',mktime(0,0,0,$kka4ed,$ppa4ed,$vva4ed));
+  $apaiva1 = (int) date('Ymd', mktime(0, 0, 0, $kka1, $ppa1, $vva1));
+  $apaiva2 = (int) date('Ymd', mktime(0, 0, 0, $kka2, $ppa2, $vva2));
+  $apaiva3 = (int) date('Ymd', mktime(0, 0, 0, $kka3, $ppa3, $vva3));
+  $apaiva4 = (int) date('Ymd', mktime(0, 0, 0, $kka4, $ppa4, $vva4));
+  $apaiva5 = (int) date('Ymd', mktime(0, 0, 0, $kka1ed, $ppa1ed, $vva1ed));
+  $apaiva6 = (int) date('Ymd', mktime(0, 0, 0, $kka2ed, $ppa2ed, $vva2ed));
+  $apaiva7 = (int) date('Ymd', mktime(0, 0, 0, $kka3ed, $ppa3ed, $vva3ed));
+  $apaiva8 = (int) date('Ymd', mktime(0, 0, 0, $kka4ed, $ppa4ed, $vva4ed));
 
-  $lpaiva1 = (int) date('Ymd',mktime(0,0,0,$kkl1,$ppl1,$vvl1));
-  $lpaiva2 = (int) date('Ymd',mktime(0,0,0,$kkl2,$ppl2,$vvl2));
-  $lpaiva3 = (int) date('Ymd',mktime(0,0,0,$kkl3,$ppl3,$vvl3));
-  $lpaiva4 = (int) date('Ymd',mktime(0,0,0,$kkl4,$ppl4,$vvl4));
-  $lpaiva5 = (int) date('Ymd',mktime(0,0,0,$kkl1ed,$ppl1ed,$vvl1ed));
-  $lpaiva6 = (int) date('Ymd',mktime(0,0,0,$kkl2ed,$ppl2ed,$vvl2ed));
-  $lpaiva7 = (int) date('Ymd',mktime(0,0,0,$kkl3ed,$ppl3ed,$vvl3ed));
-  $lpaiva8 = (int) date('Ymd',mktime(0,0,0,$kkl4ed,$ppl4ed,$vvl4ed));
-  $lpaiva9 = (int) date('Ymd',mktime(0,0,0,$naytauudet_kk,$naytauudet_pp,$naytauudet_vv));
+  $lpaiva1 = (int) date('Ymd', mktime(0, 0, 0, $kkl1, $ppl1, $vvl1));
+  $lpaiva2 = (int) date('Ymd', mktime(0, 0, 0, $kkl2, $ppl2, $vvl2));
+  $lpaiva3 = (int) date('Ymd', mktime(0, 0, 0, $kkl3, $ppl3, $vvl3));
+  $lpaiva4 = (int) date('Ymd', mktime(0, 0, 0, $kkl4, $ppl4, $vvl4));
+  $lpaiva5 = (int) date('Ymd', mktime(0, 0, 0, $kkl1ed, $ppl1ed, $vvl1ed));
+  $lpaiva6 = (int) date('Ymd', mktime(0, 0, 0, $kkl2ed, $ppl2ed, $vvl2ed));
+  $lpaiva7 = (int) date('Ymd', mktime(0, 0, 0, $kkl3ed, $ppl3ed, $vvl3ed));
+  $lpaiva8 = (int) date('Ymd', mktime(0, 0, 0, $kkl4ed, $ppl4ed, $vvl4ed));
+  $lpaiva9 = (int) date('Ymd', mktime(0, 0, 0, $naytauudet_kk, $naytauudet_pp, $naytauudet_vv));
 
 
   $apienin = 99999999;
@@ -212,159 +212,159 @@ else {
     $apienin = $lsuurin = date('Ymd'); // jos mit‰‰n ei lˆydy niin NOW molempiin. :)
   }
 
-  $apvm = substr($apienin,0,4)."-".substr($apienin,4,2)."-".substr($apienin,6,2);
-  $lpvm = substr($lsuurin,0,4)."-".substr($lsuurin,4,2)."-".substr($lsuurin,6,2);
+  $apvm = substr($apienin, 0, 4)."-".substr($apienin, 4, 2)."-".substr($apienin, 6, 2);
+  $lpvm = substr($lsuurin, 0, 4)."-".substr($lsuurin, 4, 2)."-".substr($lsuurin, 6, 2);
 
   //Voidaan tarvita jotain muuttujaa t‰‰lt‰
   if (isset($muutparametrit)) {
-    list($temp_osasto,$temp_tuoryh,$temp_ytunnus,$temp_tuotemerkki,$temp_asiakasosasto,$temp_asiakasno,$temp_toimittaja) = explode('#', $muutparametrit);
+    list($temp_osasto, $temp_tuoryh, $temp_ytunnus, $temp_tuotemerkki, $temp_asiakasosasto, $temp_asiakasno, $temp_toimittaja) = explode('#', $muutparametrit);
   }
 
   // Tulostettavat sarakkeet
   $sarakkeet = array(  "os", "try", "tme", "malli", "mallitark",
-            "sta", "tah",
-            "abc", "abc os", "abc try", "abc tme",
-            "luontiaika",
-            "saldo", "reaalisaldo", "saldo2",
-            "haly", "til", "valmistuksessa", "ennpois", "jt", "siirtojt", "ennakot",
-            "1kk", "3kk", "6kk", "12kk", "ke", "1x2",
-            "ostoera1", "ostoera3", "ostoera6", "ostoera12", "osthaly1", "osthaly3", "osthaly6", "osthaly12",
-            "o_era", "m_era", "kosal", "komy", "M‰‰r‰",
-            "kuvaus", "lyhytkuvaus", "tkorkeus", "tleveys", "tmassa", "tsyvyys", "eankoodi",
-            "hinnastoon", "toimittaja", "toim_tuoteno",
-            "nimitys", "ostohinta", "myyntihinta",
-            "epa25pvm", "epa50pvm", "epa75pvm", "epa100pvm",
-            "osaldo", "hyllypaikka",
-            "pu1", "pu3", "pu6", "pu12",
-            "my1", "my3", "my6","my12",
-            "kul1", "kul3", "kul6", "kul12",
-            "edkul1", "edkul3", "edkul6", "edkul12",
-            "enn1", "enn3", "enn6","enn12",
-            "ykpl1", "ykpl3", "ykpl6","ykpl12",
-            "e_kate1", "e_kate3", "e_kate6", "e_kate12",
-            "e_kate % 1", "e_kate % 3", "e_kate % 6", "e_kate % 12",
-            "ed1", "ed3", "ed6", "ed12",
-            "kate1", "kate3", "kate6", "kate12",
-            "Kate % 1", "Kate % 3", "Kate % 6", "Kate % 12",
-            "aleryh", "kehahin",
-            "Kortuoteno", "Korsaldo", "Korennpois", "Kortil",
-            "Kormy1", "Kormy2","Kormy3","Kormy4");
+    "sta", "tah",
+    "abc", "abc os", "abc try", "abc tme",
+    "luontiaika",
+    "saldo", "reaalisaldo", "saldo2",
+    "haly", "til", "valmistuksessa", "ennpois", "jt", "siirtojt", "ennakot",
+    "1kk", "3kk", "6kk", "12kk", "ke", "1x2",
+    "ostoera1", "ostoera3", "ostoera6", "ostoera12", "osthaly1", "osthaly3", "osthaly6", "osthaly12",
+    "o_era", "m_era", "kosal", "komy", "M‰‰r‰",
+    "kuvaus", "lyhytkuvaus", "tkorkeus", "tleveys", "tmassa", "tsyvyys", "eankoodi",
+    "hinnastoon", "toimittaja", "toim_tuoteno",
+    "nimitys", "ostohinta", "myyntihinta",
+    "epa25pvm", "epa50pvm", "epa75pvm", "epa100pvm",
+    "osaldo", "hyllypaikka",
+    "pu1", "pu3", "pu6", "pu12",
+    "my1", "my3", "my6", "my12",
+    "kul1", "kul3", "kul6", "kul12",
+    "edkul1", "edkul3", "edkul6", "edkul12",
+    "enn1", "enn3", "enn6", "enn12",
+    "ykpl1", "ykpl3", "ykpl6", "ykpl12",
+    "e_kate1", "e_kate3", "e_kate6", "e_kate12",
+    "e_kate % 1", "e_kate % 3", "e_kate % 6", "e_kate % 12",
+    "ed1", "ed3", "ed6", "ed12",
+    "kate1", "kate3", "kate6", "kate12",
+    "Kate % 1", "Kate % 3", "Kate % 6", "Kate % 12",
+    "aleryh", "kehahin",
+    "Kortuoteno", "Korsaldo", "Korennpois", "Kortil",
+    "Kormy1", "Kormy2", "Kormy3", "Kormy4");
 
   // sarakkeiden queryiss‰ olevat nimet
   $sarake_keyt = array(  "os"      => "osasto",
-              "try"      => "try",
-              "tme"      => "tuotemerkki",
-              "malli"      => "malli",
-              "mallitark"    => "mallitarkenne",
-              "sta"      => "status",
-              "tah"       => "tahtituote",
-              "abc"       => "abcluokka",
-              "abc os"    => "abcluokka_osasto",
-              "abc try"    => "abcluokka_try",
-              "abc tme"     => "abcluokka_tuotemerkki",
-              "luontiaika"  => "luontiaika",
-              "saldo"     => "saldo",
-              "saldo2"     => "saldo2",
-              "reaalisaldo"  => "reaalisaldo",
-              "haly"      => "halytysraja",
-              "til"      => "tilattu",
-              "valmistuksessa"=> "valmistuksessa",
-              "ennpois"    => "ennpois",
-              "jt"      => "jt",
-              "siirtojt"    => "siirtojt",
-              "ennakot"    => "ennakot",
-              "1kk"      => "ostettava_kausi1",
-              "3kk"      => "ostettava_kausi2",
-              "6kk"      => "ostettava_kausi3",
-              "12kk"      => "ostettava_kausi4",
-              "ke"       => "ke",
-              "1x2"      => "tuotekerroin",
-              "ostoera1"    => "ostettava_era1",
-              "ostoera3"    => "ostettava_era2",
-              "ostoera6"    => "ostettava_era3",
-              "ostoera12"    => "ostettava_era4",
-              "osthaly1"    => "ostettavahaly_kausi1",
-              "osthaly3"    => "ostettavahaly_kausi2",
-              "osthaly6"    => "ostettavahaly_kausi3",
-              "osthaly12"    => "ostettavahaly_kausi4",
-              "o_era"      => "osto_era",
-              "m_era"      => "myynti_era",
-              "kosal"      => "kosal",
-              "komy"      => "komy",
-              "M‰‰r‰"      => "kpl",
-              "kuvaus"    => "kuvaus",
-              "lyhytkuvaus"  => "lyhytkuvaus",
-              "tkorkeus"    => "tuotekorkeus",
-              "tleveys"    => "tuoteleveys",
-              "tmassa"    => "tuotemassa",
-              "tsyvyys"    => "tuotesyvyys",
-              "eankoodi"    => "eankoodi",
-              "hinnastoon"  => "hinnastoon",
-              "toimittaja"  => "toimittaja",
-              "toim_tuoteno"  => "toim_tuoteno",
-              "nimitys"    => "nimitys",
-              "ostohinta"    => "ostohinta",
-              "myyntihinta"  => "myyntihinta",
-              "epa25pvm"    => "epakurantti25pvm",
-              "epa50pvm"    => "epakurantti50pvm",
-              "epa75pvm"    => "epakurantti75pvm",
-              "epa100pvm"    => "epakurantti100pvm",
-              "osaldo"    => "osaldo",
-              "hyllypaikka"  => "varastopaikka",
-              "pu1"      => "puutekpl1",
-              "pu3"      => "puutekpl2",
-              "pu6"      => "puutekpl3",
-              "pu12"      => "puutekpl4",
-              "my1"      => "kpl1",
-              "my3"      => "kpl2",
-              "my6"      => "kpl3",
-              "my12"      => "kpl4",
-              "kul1"      => "kpl1",
-              "kul3"      => "kpl2",
-              "kul6"      => "kpl3",
-              "kul12"      => "kpl4",
-              "edkul1"    => "EDkpl1",
-              "edkul3"    => "EDkpl2",
-              "edkul6"    => "EDkpl3",
-              "edkul12"    => "EDkpl4",
-              "enn1"      => "e_kpl1",
-              "enn3"      => "e_kpl2",
-              "enn6"      => "e_kpl3",
-              "enn12"      => "e_kpl4",
-              "ykpl1"      => "ykpl1",
-              "ykpl3"      => "ykpl2",
-              "ykpl6"      => "ykpl3",
-              "ykpl12"    => "ykpl4",
-              "e_kate1"    => "e_kate1",
-              "e_kate3"    => "e_kate2",
-              "e_kate6"    => "e_kate3",
-              "e_kate12"    => "e_kate4",
-              "e_kate % 1"  => "katepros1_ennakko",
-              "e_kate % 3"  => "katepros2_ennakko",
-              "e_kate % 6"  => "katepros3_ennakko",
-              "e_kate % 12"  => "katepros4_ennakko",
-              "ed1"      => "EDkpl1",
-              "ed3"      => "EDkpl2",
-              "ed6"      => "EDkpl3",
-              "ed12"      => "EDkpl4",
-              "kate1"      => "kate1",
-              "kate3"      => "kate2",
-              "kate6"      => "kate3",
-              "kate12"    => "kate4",
-              "Kate % 1"    => "katepros1",
-              "Kate % 3"    => "katepros2",
-              "Kate % 6"    => "katepros3",
-              "Kate % 12"    => "katepros4",
-              "aleryh"    => "aleryhma",
-              "kehahin"    => "kehahin",
-              "Kortuoteno"  => "tuoteno",
-              "Korsaldo"    => "saldo",
-              "Korennpois"  => "varattu",
-              "Kortil"    => "tilattu",
-              "Kormy1"    => "kpl1",
-              "Kormy2"    => "kpl2",
-              "Kormy3"    => "kpl3",
-              "Kormy4"    => "kpl4");
+    "try"      => "try",
+    "tme"      => "tuotemerkki",
+    "malli"      => "malli",
+    "mallitark"    => "mallitarkenne",
+    "sta"      => "status",
+    "tah"       => "tahtituote",
+    "abc"       => "abcluokka",
+    "abc os"    => "abcluokka_osasto",
+    "abc try"    => "abcluokka_try",
+    "abc tme"     => "abcluokka_tuotemerkki",
+    "luontiaika"  => "luontiaika",
+    "saldo"     => "saldo",
+    "saldo2"     => "saldo2",
+    "reaalisaldo"  => "reaalisaldo",
+    "haly"      => "halytysraja",
+    "til"      => "tilattu",
+    "valmistuksessa"=> "valmistuksessa",
+    "ennpois"    => "ennpois",
+    "jt"      => "jt",
+    "siirtojt"    => "siirtojt",
+    "ennakot"    => "ennakot",
+    "1kk"      => "ostettava_kausi1",
+    "3kk"      => "ostettava_kausi2",
+    "6kk"      => "ostettava_kausi3",
+    "12kk"      => "ostettava_kausi4",
+    "ke"       => "ke",
+    "1x2"      => "tuotekerroin",
+    "ostoera1"    => "ostettava_era1",
+    "ostoera3"    => "ostettava_era2",
+    "ostoera6"    => "ostettava_era3",
+    "ostoera12"    => "ostettava_era4",
+    "osthaly1"    => "ostettavahaly_kausi1",
+    "osthaly3"    => "ostettavahaly_kausi2",
+    "osthaly6"    => "ostettavahaly_kausi3",
+    "osthaly12"    => "ostettavahaly_kausi4",
+    "o_era"      => "osto_era",
+    "m_era"      => "myynti_era",
+    "kosal"      => "kosal",
+    "komy"      => "komy",
+    "M‰‰r‰"      => "kpl",
+    "kuvaus"    => "kuvaus",
+    "lyhytkuvaus"  => "lyhytkuvaus",
+    "tkorkeus"    => "tuotekorkeus",
+    "tleveys"    => "tuoteleveys",
+    "tmassa"    => "tuotemassa",
+    "tsyvyys"    => "tuotesyvyys",
+    "eankoodi"    => "eankoodi",
+    "hinnastoon"  => "hinnastoon",
+    "toimittaja"  => "toimittaja",
+    "toim_tuoteno"  => "toim_tuoteno",
+    "nimitys"    => "nimitys",
+    "ostohinta"    => "ostohinta",
+    "myyntihinta"  => "myyntihinta",
+    "epa25pvm"    => "epakurantti25pvm",
+    "epa50pvm"    => "epakurantti50pvm",
+    "epa75pvm"    => "epakurantti75pvm",
+    "epa100pvm"    => "epakurantti100pvm",
+    "osaldo"    => "osaldo",
+    "hyllypaikka"  => "varastopaikka",
+    "pu1"      => "puutekpl1",
+    "pu3"      => "puutekpl2",
+    "pu6"      => "puutekpl3",
+    "pu12"      => "puutekpl4",
+    "my1"      => "kpl1",
+    "my3"      => "kpl2",
+    "my6"      => "kpl3",
+    "my12"      => "kpl4",
+    "kul1"      => "kpl1",
+    "kul3"      => "kpl2",
+    "kul6"      => "kpl3",
+    "kul12"      => "kpl4",
+    "edkul1"    => "EDkpl1",
+    "edkul3"    => "EDkpl2",
+    "edkul6"    => "EDkpl3",
+    "edkul12"    => "EDkpl4",
+    "enn1"      => "e_kpl1",
+    "enn3"      => "e_kpl2",
+    "enn6"      => "e_kpl3",
+    "enn12"      => "e_kpl4",
+    "ykpl1"      => "ykpl1",
+    "ykpl3"      => "ykpl2",
+    "ykpl6"      => "ykpl3",
+    "ykpl12"    => "ykpl4",
+    "e_kate1"    => "e_kate1",
+    "e_kate3"    => "e_kate2",
+    "e_kate6"    => "e_kate3",
+    "e_kate12"    => "e_kate4",
+    "e_kate % 1"  => "katepros1_ennakko",
+    "e_kate % 3"  => "katepros2_ennakko",
+    "e_kate % 6"  => "katepros3_ennakko",
+    "e_kate % 12"  => "katepros4_ennakko",
+    "ed1"      => "EDkpl1",
+    "ed3"      => "EDkpl2",
+    "ed6"      => "EDkpl3",
+    "ed12"      => "EDkpl4",
+    "kate1"      => "kate1",
+    "kate3"      => "kate2",
+    "kate6"      => "kate3",
+    "kate12"    => "kate4",
+    "Kate % 1"    => "katepros1",
+    "Kate % 3"    => "katepros2",
+    "Kate % 6"    => "katepros3",
+    "Kate % 12"    => "katepros4",
+    "aleryh"    => "aleryhma",
+    "kehahin"    => "kehahin",
+    "Kortuoteno"  => "tuoteno",
+    "Korsaldo"    => "saldo",
+    "Korennpois"  => "varattu",
+    "Kortil"    => "tilattu",
+    "Kormy1"    => "kpl1",
+    "Kormy2"    => "kpl2",
+    "Kormy3"    => "kpl3",
+    "Kormy4"    => "kpl4");
 
   //  Haetaan kaikki varastot ja luodaan kysely paljonko ko. varastoon on tilattu tavaraa..
   $varastolisa = "";
@@ -424,7 +424,7 @@ else {
 
       $sresult = t_avainsana("OSASTO", "", "and avainsana.selite  in ($osasto)");
 
-      while($trow = mysql_fetch_array($sresult)) {
+      while ($trow = mysql_fetch_array($sresult)) {
         $osasto2 .= "{$trow['selite']} {$trow['selitetark']}<br>";
       }
 
@@ -508,7 +508,7 @@ else {
     ///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
     $useslave = 1;
     //Eli haetaan connect.inc uudestaan t‰ss‰
-    require("../inc/connect.inc");
+    require "../inc/connect.inc";
 
     //Yhtiˆvalinnat
     $query  = "SELECT distinct yhtio, nimi
@@ -528,11 +528,11 @@ else {
       }
 
       if ($yhtiot != '') {
-        $yhtiot = substr($yhtiot,0,-1);
+        $yhtiot = substr($yhtiot, 0, -1);
         $yhtiot = "yhtio in ($yhtiot) ";
       }
 
-      $konsyhtiot = substr($konsyhtiot,0,-1);
+      $konsyhtiot = substr($konsyhtiot, 0, -1);
       $konsyhtiot = "yhtio in ($konsyhtiot) ";
     }
     else {
@@ -564,9 +564,9 @@ else {
       }
     }
 
-    $varastot      = substr($varastot,0,-1);
-    $varastot2     = substr($varastot2,0,-1);
-    $varastot_yhtiot = substr($varastot_yhtiot,0,-1);
+    $varastot      = substr($varastot, 0, -1);
+    $varastot2     = substr($varastot2, 0, -1);
+    $varastot_yhtiot = substr($varastot_yhtiot, 0, -1);
 
     $paikoittain = $valitut["paikoittain"];
 
@@ -608,19 +608,19 @@ else {
       $abc_luontiaikarajaus = "";
 
       if ($abc_laadittuaika == "alle_12kk") {
-        # N‰m‰ menee lis‰‰ -muuttujaan, koska on AND ja pit‰‰ rajata koko query‰
+        // N‰m‰ menee lis‰‰ -muuttujaan, koska on AND ja pit‰‰ rajata koko query‰
         $lisaa .= " and tuote.luontiaika >= date_sub(current_date, interval 12 month) ";
       }
       elseif ($abc_laadittuaika == "yli_12kk") {
-        # N‰m‰ menee lis‰‰ -muuttujaan, koska on AND ja pit‰‰ rajata koko query‰
+        // N‰m‰ menee lis‰‰ -muuttujaan, koska on AND ja pit‰‰ rajata koko query‰
         $lisaa .= " and tuote.luontiaika < date_sub(current_date, interval 12 month) ";
       }
       elseif ($abc_laadittuaika == "yli_annettu" and $naytauudet_pp != '' and $naytauudet_kk != '' and $naytauudet_vv != '') {
-        # N‰m‰ menee abc_luontiaikarajaus -muuttujaan, koska on OR ja pit‰‰ rajata ehdollisesti abc rajausta
+        // N‰m‰ menee abc_luontiaikarajaus -muuttujaan, koska on OR ja pit‰‰ rajata ehdollisesti abc rajausta
         $abc_luontiaikarajaus = " or tuote.luontiaika >= '$naytauudet_vv-$naytauudet_kk-$naytauudet_pp' ";
       }
       else {
-        # N‰m‰ menee abc_luontiaikarajaus -muuttujaan, koska on OR ja pit‰‰ rajata ehdollisesti abc rajausta
+        // N‰m‰ menee abc_luontiaikarajaus -muuttujaan, koska on OR ja pit‰‰ rajata ehdollisesti abc rajausta
         $abc_luontiaikarajaus = " or tuote.luontiaika >= date_sub(current_date, interval 12 month) ";
       }
 
@@ -973,7 +973,7 @@ else {
     $elements = mysql_num_rows($res); // total number of elements to process
 
     if ($elements > 0) {
-      require_once ('inc/ProgressBar.class.php');
+      require_once 'inc/ProgressBar.class.php';
       $bar = new ProgressBar();
       $bar->initialize($elements); // print the empty bar
     }
@@ -1090,31 +1090,31 @@ else {
       $puuterow = mysql_fetch_array($result);
 
       // normimyynti
-      if ($laskurow['rivihinta1'] <> 0){
-        $katepros1 = round($laskurow['kate1'] / $laskurow['rivihinta1'] * 100,0);
+      if ($laskurow['rivihinta1'] <> 0) {
+        $katepros1 = round($laskurow['kate1'] / $laskurow['rivihinta1'] * 100, 0);
       }
       else ($katepros1 = 0);
 
-      if ($laskurow['rivihinta2'] <> 0){
-        $katepros2 = round($laskurow['kate2'] / $laskurow['rivihinta2'] * 100,0);
+      if ($laskurow['rivihinta2'] <> 0) {
+        $katepros2 = round($laskurow['kate2'] / $laskurow['rivihinta2'] * 100, 0);
       }
       else ($katepros2 = 0);
 
-      if ($laskurow['rivihinta3'] <> 0){
-        $katepros3 = round($laskurow['kate3'] / $laskurow['rivihinta3'] * 100,0);
+      if ($laskurow['rivihinta3'] <> 0) {
+        $katepros3 = round($laskurow['kate3'] / $laskurow['rivihinta3'] * 100, 0);
       }
       else ($katepros3 = 0);
 
-      if ($laskurow['rivihinta4'] <> 0){
-          $katepros4 = round($laskurow['kate4'] / $laskurow['rivihinta4'] * 100,0);
+      if ($laskurow['rivihinta4'] <> 0) {
+        $katepros4 = round($laskurow['kate4'] / $laskurow['rivihinta4'] * 100, 0);
       }
       else ($katepros4 = 0);
 
       // ennakkomyynti
-      $katepros1_ennakko = $laskurow['e_rivihinta1'] <> 0 ? (round($laskurow['e_kate1'] / $laskurow['e_rivihinta1'] * 100,0)) : 0;
-      $katepros2_ennakko = $laskurow['e_rivihinta2'] <> 0 ? (round($laskurow['e_kate2'] / $laskurow['e_rivihinta2'] * 100,0)) : 0;
-      $katepros3_ennakko = $laskurow['e_rivihinta3'] <> 0 ? (round($laskurow['e_kate3'] / $laskurow['e_rivihinta3'] * 100,0)) : 0;
-      $katepros4_ennakko = $laskurow['e_rivihinta4'] <> 0 ? (round($laskurow['e_kate4'] / $laskurow['e_rivihinta4'] * 100,0)) : 0;
+      $katepros1_ennakko = $laskurow['e_rivihinta1'] <> 0 ? (round($laskurow['e_kate1'] / $laskurow['e_rivihinta1'] * 100, 0)) : 0;
+      $katepros2_ennakko = $laskurow['e_rivihinta2'] <> 0 ? (round($laskurow['e_kate2'] / $laskurow['e_rivihinta2'] * 100, 0)) : 0;
+      $katepros3_ennakko = $laskurow['e_rivihinta3'] <> 0 ? (round($laskurow['e_kate3'] / $laskurow['e_rivihinta3'] * 100, 0)) : 0;
+      $katepros4_ennakko = $laskurow['e_rivihinta4'] <> 0 ? (round($laskurow['e_kate4'] / $laskurow['e_rivihinta4'] * 100, 0)) : 0;
 
       ///* Kulutetut kappaleet *///
       $query = "SELECT
@@ -1181,7 +1181,7 @@ else {
 
         $sumsaldo = 0;
 
-        while($saldo = mysql_fetch_array($result)) {
+        while ($saldo = mysql_fetch_array($result)) {
           $sumsaldo += $saldo["saldo"];
         }
 
@@ -1200,7 +1200,7 @@ else {
 
           $sumsaldo2 = 0;
 
-          while($saldo2 = mysql_fetch_array($result2)) {
+          while ($saldo2 = mysql_fetch_array($result2)) {
             $sumsaldo2 += $saldo2["saldo"];
           }
 
@@ -1368,7 +1368,7 @@ else {
         $komy_yht = 0;
         $korvaavat_kayty = '';
 
-        foreach($valitut as $key => $sarake) {
+        foreach ($valitut as $key => $sarake) {
           $bg_color = '';
           $sarake = trim($sarake);
 
@@ -1402,10 +1402,10 @@ else {
             }
             // t‰ss‰ keississ‰ otetaan arvot omista muuttujistaan
             elseif ($sarake == 'ostoera1' or $sarake == 'ostoera3' or $sarake == 'ostoera6' or $sarake == 'ostoera12' or
-                $sarake == '1kk' or $sarake == '3kk' or $sarake == '6kk' or $sarake == '12kk' or
-                $sarake == 'osthaly1' or $sarake == 'osthaly3' or $sarake == 'osthaly6' or $sarake == 'osthaly12' or
-                $sarake == 'Kate % 1' or $sarake == 'Kate % 3' or $sarake == 'Kate % 6' or $sarake == 'Kate % 12' or
-                $sarake == 'e_kate % 1' or $sarake == 'e_kate % 3' or $sarake == 'e_kate % 6' or $sarake == 'e_kate % 12') {
+              $sarake == '1kk' or $sarake == '3kk' or $sarake == '6kk' or $sarake == '12kk' or
+              $sarake == 'osthaly1' or $sarake == 'osthaly3' or $sarake == 'osthaly6' or $sarake == 'osthaly12' or
+              $sarake == 'Kate % 1' or $sarake == 'Kate % 3' or $sarake == 'Kate % 6' or $sarake == 'Kate % 12' or
+              $sarake == 'e_kate % 1' or $sarake == 'e_kate % 3' or $sarake == 'e_kate % 6' or $sarake == 'e_kate % 12') {
 
               $value = ${$sarake_keyt[$sarake]};
 
@@ -1450,18 +1450,18 @@ else {
             }
             // myynneiss‰ haetaan kaikki laskurowsta
             elseif ($sarake == 'my1' or $sarake == 'my3' or $sarake == 'my6' or $sarake == 'my12' or
-                $sarake == 'ed1' or $sarake == 'ed3' or $sarake == 'ed6' or $sarake == 'ed12' or
-                $sarake == 'enn1' or $sarake == 'enn3' or $sarake == 'enn6' or $sarake == 'enn12' or
-                $sarake == 'kate1' or $sarake == 'kate3' or $sarake == 'kate6' or $sarake == 'kate12' or
-                $sarake == 'e_kate1' or $sarake == 'e_kate3' or $sarake == 'e_kate6' or $sarake == 'e_kate12' or
-                $sarake == 'ykpl1' or $sarake == 'ykpl3' or $sarake == 'ykpl6' or $sarake == 'ykpl12') {
+              $sarake == 'ed1' or $sarake == 'ed3' or $sarake == 'ed6' or $sarake == 'ed12' or
+              $sarake == 'enn1' or $sarake == 'enn3' or $sarake == 'enn6' or $sarake == 'enn12' or
+              $sarake == 'kate1' or $sarake == 'kate3' or $sarake == 'kate6' or $sarake == 'kate12' or
+              $sarake == 'e_kate1' or $sarake == 'e_kate3' or $sarake == 'e_kate6' or $sarake == 'e_kate12' or
+              $sarake == 'ykpl1' or $sarake == 'ykpl3' or $sarake == 'ykpl6' or $sarake == 'ykpl12') {
               $value = $laskurow[$sarake_keyt[$sarake]];
               if ($sarake == 'my3' or $sarake == 'my12') {
                 $bg_color = $value >= 0 ? $bg_color = 'yellow' : $bg_color = 'yellow_text_red';
               }
             }
             elseif ($sarake == 'kul1' or $sarake == 'kul3' or $sarake == 'kul6' or $sarake == 'kul12' or
-                $sarake == 'edkul1' or $sarake == 'edkul3' or $sarake == 'edkul6' or $sarake == 'edkul12') {
+              $sarake == 'edkul1' or $sarake == 'edkul3' or $sarake == 'edkul6' or $sarake == 'edkul12') {
               $value = $kulutrow[$sarake_keyt[$sarake]];
             }
             // defaulttina haetaan normaalista rowsta tiedot
@@ -1786,7 +1786,7 @@ else {
   if (($tee == "" and isset($jatkanappi)) or $tee == "JATKA") {
 
     if (isset($muutparametrit)) {
-      list($mul_osasto2,$mul_try2,$ytunnus,$mul_tme2,$asiakasosasto,$asiakasno,$toimittaja,$abcrajaus) = explode('#', $muutparametrit);
+      list($mul_osasto2, $mul_try2, $ytunnus, $mul_tme2, $asiakasosasto, $asiakasno, $toimittaja, $abcrajaus) = explode('#', $muutparametrit);
 
       $mul_osasto = explode(",", $mul_osasto2);
       $mul_try = explode(",", $mul_try2);
@@ -1822,7 +1822,7 @@ else {
     if (count($mul_try) > 0 or count($mul_osasto) > 0 or $ytunnus != '' or count($mul_tme) > 0) {
       if ($ytunnus != '' and !isset($ylatila)) {
 
-        require("../inc/kevyt_toimittajahaku.inc");
+        require "../inc/kevyt_toimittajahaku.inc";
 
         if ($ytunnus != '') {
           $tee = "JATKA";
@@ -1848,7 +1848,7 @@ else {
         $ytunnus = $asiakasno;
       }
 
-      require ("inc/asiakashaku.inc");
+      require "inc/asiakashaku.inc";
 
       if ($ytunnus != '') {
         $tee = "JATKA";
@@ -1869,7 +1869,7 @@ else {
     echo "  <form method='post' autocomplete='off'>
         <input type='hidden' name='tee' id='tee' value=''>
         <input type='hidden' name='toimittajaid' value='$toimittajaid'>
-        <br/>",t("Valitse v‰hint‰‰n yksi seuraavista:"),"<br/>";
+        <br/>", t("Valitse v‰hint‰‰n yksi seuraavista:"), "<br/>";
 
     // Monivalintalaatikot (osasto, try tuotemerkki...)
     // M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
@@ -1903,7 +1903,7 @@ else {
       $monivalintalaatikot_normaali = array();
     }
 
-    require ("tilauskasittely/monivalintalaatikot.inc");
+    require "tilauskasittely/monivalintalaatikot.inc";
 
     // Otetaan monivalintalaatikoista palautuvat parametrit talteen ja laitetaan isoihin kyselyihin
     echo "  <input type='hidden' name='lisa' value='".urlencode(serialize($lisa))."'>
@@ -1964,10 +1964,10 @@ else {
     $sel[$abcrajausluokka] = "SELECTED";
 
     echo "<select name='abcrajausluokka'>";
-    echo "<option {$sel['y']} value='y'>",t("Yrityksen luokka"),"</option>";
-    echo "<option {$sel['os']} value='os'>",t("Osaston luokka"),"</option>";
-    echo "<option {$sel['try']} value='try'>",t("Tuoteryhm‰n luokka"),"</option>";
-    echo "<option {$sel['tme']} value='tme'>",t("Tuotemerkin luokka"),"</option>";
+    echo "<option {$sel['y']} value='y'>", t("Yrityksen luokka"), "</option>";
+    echo "<option {$sel['os']} value='os'>", t("Osaston luokka"), "</option>";
+    echo "<option {$sel['try']} value='try'>", t("Tuoteryhm‰n luokka"), "</option>";
+    echo "<option {$sel['tme']} value='tme'>", t("Tuotemerkin luokka"), "</option>";
     echo "</select>";
     echo "</td></tr>";
 
@@ -2021,7 +2021,7 @@ else {
     $sresult = pupe_query($query);
 
     if ($kysely_warning != '') {
-      echo "<font class='error'>",t("Et saa tallentaa toisen k‰ytt‰j‰n raporttia"),"!!!";
+      echo "<font class='error'>", t("Et saa tallentaa toisen k‰ytt‰j‰n raporttia"), "!!!";
     }
 
     echo "<table>";
@@ -2041,7 +2041,7 @@ else {
         <input type='hidden' name='abcrajaustapa' value='$abcrajaustapa'>
         <input type='hidden' name='abcrajausluokka' value='$abcrajausluokka'>";
     echo "<tr>";
-    echo "<th>",t("Valitse raportti"),":</th>";
+    echo "<th>", t("Valitse raportti"), ":</th>";
     echo "<td>";
     echo "<select name='kysely' onchange='document.getElementById(\"tee\").value = \"lataavanha\";submit();'>";
     echo "<option value=''>".t("Valitse")."</option>";
@@ -2057,13 +2057,13 @@ else {
     echo "</select>";
     echo "</td>";
     echo "<td>";
-    echo "<input type='button' value='",t("Tallenna"),"' onclick='document.getElementById(\"tee\").value = \"tallenna\";submit();'>";
+    echo "<input type='button' value='", t("Tallenna"), "' onclick='document.getElementById(\"tee\").value = \"tallenna\";submit();'>";
     echo "</td>";
     echo "</tr>";
     echo "<tr>";
-    echo "<th>",t("Tallenna uusi raportti"),":</th>";
+    echo "<th>", t("Tallenna uusi raportti"), ":</th>";
     echo "<td><input type='text' name='uusirappari' value=''></td>";
-    echo "<td><input type='submit' id='tallenna_button' value='",t("Tallenna"),"' onclick=\"document.getElementById('tee').value = 'uusiraportti'\"></td>";
+    echo "<td><input type='submit' id='tallenna_button' value='", t("Tallenna"), "' onclick=\"document.getElementById('tee').value = 'uusiraportti'\"></td>";
     echo "</tr>";
     echo "</table>";
     echo "<br/>";
@@ -2258,7 +2258,7 @@ else {
     echo "  <tr><td class='back'><br></td></tr>";
 
     //Ostokausivalinnat
-    echo "<tr><th>",t("Ostoehdotus")," (",t("anna varastointitarve viikoissa"),"):</th><td colspan='2'>";
+    echo "<tr><th>", t("Ostoehdotus"), " (", t("anna varastointitarve viikoissa"), "):</th><td colspan='2'>";
 
     foreach ($ryhmanimet as $ryhma) {
       echo "<select name='valitut[KAUSI$ryhma]'>";
@@ -2285,7 +2285,7 @@ else {
     echo "<tr><td class='back'><br></td></tr>";
 
     if (table_exists("yhteensopivuus_rekisteri")) {
-      echo "<tr><th>",t("Vuosimalliv‰li"),"<td colspan='2'><input type='text' name='vm1' id='vm1' size='10' value='$vm1'> - <input type='text' name='vm2' id='vm2' size='10' value='$vm2'></td></tr>";
+      echo "<tr><th>", t("Vuosimalliv‰li"), "<td colspan='2'><input type='text' name='vm1' id='vm1' size='10' value='$vm1'> - <input type='text' name='vm2' id='vm2' size='10' value='$vm2'></td></tr>";
       echo "<tr><td class='back'><br></td></tr>";
     }
 
@@ -2321,8 +2321,8 @@ else {
         $vlask++;
       }
 
-      $yhtiot = substr($yhtiot,0,-1);
-      $konsyhtiot = substr($konsyhtiot,0,-1);
+      $yhtiot = substr($yhtiot, 0, -1);
+      $konsyhtiot = substr($konsyhtiot, 0, -1);
 
       echo "  <tr><td class='back'><br></td></tr>";
     }
@@ -2513,5 +2513,5 @@ else {
       </form>";
   }
 
-  require ("../inc/footer.inc");
+  require "../inc/footer.inc";
 }

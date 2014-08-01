@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * Kirjasto PDF eKirjeen lähetykseen
  *
  * Luo Itellan vaatiman XML filen jossa kirjeen tiedot. LÄhetettävä
@@ -34,10 +33,11 @@
  * @author Antti Holvikari <antth@gmail.com>
  *
  */
+
+
 class Pupe_Pdfekirje {
 
   /**
-   *
    * eKirjeeseen tarvittavat tiedot
    *
    * @var array
@@ -50,12 +50,12 @@ class Pupe_Pdfekirje {
     'ftp_path'              => '/path/to/dir/',
     'tunniste'              => '',              // asiakkaan oma kirjeen tunniste
     'is_test'               => 'true',          // 'true' tai 'false', ei PHP boolean arvo
-        'asiakas_tunnus'        => null,            // asiakkaan itella tunnus
-        'salasana'              => 'XXXX',
-        'kirjeluokka'           => '1',             // 1 = priority, 2 = economy
-        'osasto'                => '',              // osastokohtainen erittely
-        'file_id'               => null,            // lähettäjän tunniste tiedostolle
-        'kirje_id'              => null,            // kirjeen id
+    'asiakas_tunnus'        => null,            // asiakkaan itella tunnus
+    'salasana'              => 'XXXX',
+    'kirjeluokka'           => '1',             // 1 = priority, 2 = economy
+    'osasto'                => '',              // osastokohtainen erittely
+    'file_id'               => null,            // lähettäjän tunniste tiedostolle
+    'kirje_id'              => null,            // kirjeen id
     'contact_name'          => null,
     'contact_email'         => null,
     'contact_phone'         => null,
@@ -63,18 +63,17 @@ class Pupe_Pdfekirje {
     'yritys_osoite'         => null,
     'yritys_postino'        => null,
     'yritys_postitp'        => null,
-        'yritys_maa'            => null,
-        'vastaanottaja_nimi'    => null,
-        'vastaanottaja_osoite'  => null,
-        'vastaanottaja_postino' => null,
-        'vastaanottaja_postitp' => null,
-        'vastaanottaja_maa'     => null,
-        'sivumaara'             => '1',
+    'yritys_maa'            => null,
+    'vastaanottaja_nimi'    => null,
+    'vastaanottaja_osoite'  => null,
+    'vastaanottaja_postino' => null,
+    'vastaanottaja_postitp' => null,
+    'vastaanottaja_maa'     => null,
+    'sivumaara'             => '1',
     'tmp_dir'               => '/tmp',
-    );
+  );
 
   /**
-   *
    * ZIP filen nimi
    *
    * @var string
@@ -83,7 +82,6 @@ class Pupe_Pdfekirje {
   private $_zip_filename;
 
   /**
-   *
    * PDF tiedoston nimi ZIP tiedoston sisällä
    *
    * @var string
@@ -92,7 +90,6 @@ class Pupe_Pdfekirje {
   private $_pdf_filename;
 
   /**
-   *
    * Constructori
    *
    * Yli-kirjoitetaan defaultit
@@ -100,8 +97,7 @@ class Pupe_Pdfekirje {
    * @return void
    *
    */
-  public function __construct($config = array())
-  {
+  public function __construct($config = array()) {
     $this->_info = array_merge($this->_info, (array) $config);
 
     // jos viimeinen merkki pathissä ei ole kauttaviiva lisätään kauttaviiva...
@@ -118,14 +114,12 @@ class Pupe_Pdfekirje {
   }
 
   /**
-   *
    * Lähettää filen FTP:n avulla
    *
    * @return void
    *
    */
-  public function send($file)
-  {
+  public function send($file) {
     if (! is_readable($file)) {
       throw new Exception("File $file does not exist or is not readable.");
     }
@@ -153,28 +147,24 @@ class Pupe_Pdfekirje {
   }
 
   /**
-   *
    * Poistaa temp filet koneelta
    *
    * @return void
    *
    */
-  public function clean()
-  {
+  public function clean() {
     unlink($this->_pdf_filename);
     unlink($this->_xml_filename);
     unlink($this->_zip_filename);
   }
 
   /**
-   *
    * Tekee XML datan
    *
    * @return string Polku XML fileen
    *
    */
-  protected function _generateXmlFile()
-  {
+  protected function _generateXmlFile() {
     // haetaan XML template
     $xml = $this->_getXml();
 
@@ -187,7 +177,7 @@ class Pupe_Pdfekirje {
     $info = array_merge($this->_info, $o);
 
     // korvataan placeholderit oikeilla tiedoilla
-        foreach ($info as $key => $val) {
+    foreach ($info as $key => $val) {
       $val = str_replace(
         array('<', '>', '"', "'", '&'),
         array(
@@ -200,8 +190,8 @@ class Pupe_Pdfekirje {
         $val
       );
 
-            $xml = str_replace(":$key", $val, $xml);
-        }
+      $xml = str_replace(":$key", $val, $xml);
+    }
 
     $file = $this->_info['tmp_dir'] . 'ekirje-' . $this->_info['kirje_id'] . '.xml';
 
@@ -213,22 +203,20 @@ class Pupe_Pdfekirje {
     $this->_xml_filename = $file;
 
     // palautetaan xml file nimi joka juuri tehtiin
-        return $this->_xml_filename;
+    return $this->_xml_filename;
   }
 
   /**
-   *
    * Tekee ZIPin jossa xml- sekä pdf file
    *
    * @return string Zip filen polku
    *
    */
-  protected function _zip()
-  {
+  protected function _zip() {
     $zipfile = $this->_info['tmp_dir'] . 'ekirje-' . $this->_info['kirje_id'] . '.zip';
     $command = 'zip -j ' . escapeshellcmd($zipfile)
-        . ' ' . escapeshellcmd($this->_xml_filename)
-        . ' ' . escapeshellcmd($this->_pdf_filename);
+      . ' ' . escapeshellcmd($this->_xml_filename)
+      . ' ' . escapeshellcmd($this->_pdf_filename);
 
     $out = exec($command);
 
@@ -240,18 +228,16 @@ class Pupe_Pdfekirje {
   }
 
   /**
-   *
    * Lähettää itse zip tiedoston FTP:llä
    *
    * @return bool true
    *
    */
-  protected function _ftpSend()
-  {
+  protected function _ftpSend() {
     if (empty($this->_info['ftp_host'])
-    || empty($this->_info['ftp_user'])
-    || empty($this->_info['ftp_pass'])
-    || empty($this->_info['ftp_path'])
+      || empty($this->_info['ftp_user'])
+      || empty($this->_info['ftp_pass'])
+      || empty($this->_info['ftp_path'])
     ) {
       throw new Exception("FTP info missing.");
     }
@@ -294,15 +280,13 @@ class Pupe_Pdfekirje {
   }
 
   /**
-   *
    * Palauttaa XML templaten
    *
    * @return string eKirje XML
    *
    */
-  private function _getXml()
-  {
-      return <<<XML
+  private function _getXml() {
+    return <<<XML
 <?xml version="1.0" encoding="ISO-8859-15"?>
 <lb:LetterBundle xmlns:lb="urn:itella-letterbundle-v0x3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:itella-letterbundle-v0x3 LetterBundle_V0x3.xsd" lb:schemaVersion="v0x3">
   <lb:Bundle lb:senderBundleId=":tunniste">

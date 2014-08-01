@@ -80,7 +80,7 @@ if ($tee == '1') {
 
   $errorit = "";
 
-  while ($trow = mysql_fetch_array ($result)) {
+  while ($trow = mysql_fetch_array($result)) {
 
     // Etsitään vastaava automaattitiliöinti
     $query = "SELECT summa, ltunnus
@@ -140,7 +140,7 @@ if ($tee == '1') {
             AND tiliointi.aputunnus != 0";
   $result = pupe_query($query);
 
-  while ($trow = mysql_fetch_array ($result)) {
+  while ($trow = mysql_fetch_array($result)) {
 
     // Etsitään isätiliointi
     $query = "SELECT tunnus
@@ -235,7 +235,7 @@ if ($tee == '1') {
   $kasiviennit_summa = 0;
   $kasiviennit_kpl = 0;
 
-  while ($trow = mysql_fetch_array ($result)) {
+  while ($trow = mysql_fetch_array($result)) {
     echo "<tr class='aktiivi'>";
 
     if ($kukarow['taso'] < 2) {
@@ -307,7 +307,7 @@ if ($tee == '1') {
   $verotot = 0;
   $kpltot  = 0;
 
-  while ($trow = mysql_fetch_array ($result)) {
+  while ($trow = mysql_fetch_array($result)) {
 
     if (isset($edvero) and ((float) $edvero != (float) $trow["vero"] or $edmaa != $trow["maa"])) { // Vaihtuiko verokanta?
       echo "<tr>

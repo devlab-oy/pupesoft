@@ -5,7 +5,7 @@ $jatko = 1; // oletetaan normaali käsittely
 $tyyppi = 1; // oletetaan rivin näkyvyys
 
 if (mysql_field_name($result, $i) == "tunnus" or
-    mysql_field_name($result, $i) == "yhtio") {
+  mysql_field_name($result, $i) == "yhtio") {
   $tyyppi = 0;
 }
 
@@ -51,27 +51,27 @@ elseif (mysql_field_name($result, $i) == "asiakas") {
     $jatko = 0;
   }
 }
-   if (mysql_field_name($result, $i) == "tyyppi") {
-      $preq = "SELECT avainsana.selite tyyppi, avainsana.selitetark selitetark
-               FROM avainsana
-               WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='kohde_tyyppi'";
+if (mysql_field_name($result, $i) == "tyyppi") {
+  $preq = "SELECT avainsana.selite tyyppi, avainsana.selitetark selitetark
+           FROM avainsana
+           WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='kohde_tyyppi'";
   $preres = mysql_query($preq) or pupe_error($preq);
 
-      if (mysql_num_rows($preres) > 0) {
-          $ulos = "<td><select id='tyyppi' name='$nimi'>";
-          $ulos .= "<option value = ''>".t("Ei tyyppiä")."</option>";
+  if (mysql_num_rows($preres) > 0) {
+    $ulos = "<td><select id='tyyppi' name='$nimi'>";
+    $ulos .= "<option value = ''>".t("Ei tyyppiä")."</option>";
 
-          while ($srow = mysql_fetch_array($preres)) {
-              $sel = (strtoupper($trow[$i]) == strtoupper($srow["tyyppi"])) ? "selected" : "";
-              $ulos .= "<option value='$srow[tyyppi]' $sel>$srow[selitetark]</option>";
-          }
+    while ($srow = mysql_fetch_array($preres)) {
+      $sel = (strtoupper($trow[$i]) == strtoupper($srow["tyyppi"])) ? "selected" : "";
+      $ulos .= "<option value='$srow[tyyppi]' $sel>$srow[selitetark]</option>";
+    }
 
-          $ulos .= "</select></td>\n";
-          $jatko = 0;
-      }
-      else {
-          $ulos = "";
-          $tyyppi = 0;
-          $jatko = 0;
-      }
+    $ulos .= "</select></td>\n";
+    $jatko = 0;
+  }
+  else {
+    $ulos = "";
+    $tyyppi = 0;
+    $jatko = 0;
+  }
 }

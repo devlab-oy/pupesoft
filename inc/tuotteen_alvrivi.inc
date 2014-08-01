@@ -103,20 +103,20 @@ if (mysql_field_name($result, $i) == "projekti") {
 
 if (mysql_field_name($result, $i) == "alv") {
 
-  if($maa!="") {
+  if ($maa!="") {
     //  Onko tämä viranomaistuote? Näille voidaan antaa alv vaikkei meillä ole toimipaikkaa ko. maassa
     $query = "SELECT tunnus
               FROM tuote
               WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno' and tuotetyyppi='B'";
     $vresult = mysql_query($query) or pupe_error($query);
-    if(mysql_num_rows($vresult)==1) {
+    if (mysql_num_rows($vresult)==1) {
       $lisa="lista";
     }
     else {
       $lisa="";
     }
 
-    $ulos = "<td>".alv_popup_oletus("t[$i]",$trow[$i], $maa, $lisa)."</td>";
+    $ulos = "<td>".alv_popup_oletus("t[$i]", $trow[$i], $maa, $lisa)."</td>";
   }
   else {
     $ulos = "<td>".t("Valitse ensin maa")."</td>";

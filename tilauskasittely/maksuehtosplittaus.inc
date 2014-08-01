@@ -40,7 +40,7 @@ if ($mrow["summanjakoprososa2"] != 0 and $mrow["osamaksuehto1"] != 0 and $mrow["
   $myht = 0;
   $kyht = 0;
 
-  while ($prow = mysql_fetch_assoc ($presult)) {
+  while ($prow = mysql_fetch_assoc($presult)) {
 
     if ($prow["netto"] != 'N') {
       $myht += $prow["rivihinta"]; // lasketaan tilauksen loppusummaa MUUT RIVIT..
@@ -51,9 +51,9 @@ if ($mrow["summanjakoprososa2"] != 0 and $mrow["osamaksuehto1"] != 0 and $mrow["
   }
   //erikoisalennus lasketaan vain riveille joilla EI ole NETTOHINTAA
   if ($laskurow['erikoisale'] != 0) {
-    $apu1 = round($laskurow['erikoisale']/100,2);  // erikoisale prosentti
-    $apu2 = round($myht*$apu1,2);           // erikoisalen m‰‰r‰
-    $apu3 = round((1-$apu1)*$myht,2);        // loppusumma
+    $apu1 = round($laskurow['erikoisale']/100, 2);  // erikoisale prosentti
+    $apu2 = round($myht*$apu1, 2);           // erikoisalen m‰‰r‰
+    $apu3 = round((1-$apu1)*$myht, 2);        // loppusumma
 
     //Kakki yhteens‰
     $kyht = $apu3 + $nyht;
@@ -65,10 +65,10 @@ if ($mrow["summanjakoprososa2"] != 0 and $mrow["osamaksuehto1"] != 0 and $mrow["
 
   //laitetaan t‰lle alkuper‰iselle tilaukselle hyvitysrivi joka hyvitt‰‰ summanjakoprososa2:verran loopusummasta
   if ($yhtiorow["alv_kasittely"] == '') {
-    $hyvitetaan = round($mrow["summanjakoprososa2"]/100*$kyht*(1+($laskurow["alv"]/100)),2);
+    $hyvitetaan = round($mrow["summanjakoprososa2"]/100*$kyht*(1+($laskurow["alv"]/100)), 2);
   }
   else {
-    $hyvitetaan = round($mrow["summanjakoprososa2"]/100*$kyht,2);
+    $hyvitetaan = round($mrow["summanjakoprososa2"]/100*$kyht, 2);
   }
 
   if ($hyvitetaan != 0) {

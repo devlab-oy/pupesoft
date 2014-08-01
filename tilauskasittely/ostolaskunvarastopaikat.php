@@ -1,11 +1,11 @@
 <?php
 
-require('../inc/parametrit.inc');
+require '../inc/parametrit.inc';
 
 echo "<font class='head'>".t("Saapumisen varastopaikat")."</font><hr>";
 
 if ($otunnus != "") {  //toimittaja ja lasku on valittu. Nyt kohdistetaan, muutetaan ja lis‰t‰‰n rivej‰.
-  require('ostorivienvarastopaikat.inc');
+  require 'ostorivienvarastopaikat.inc';
   if ($tee == "valmis") $tee = "";
   else $tee = "dummy";
 }
@@ -72,7 +72,7 @@ if ($tee == '') {  //valitaan keikka
         <th></th>
       </tr>";
 
-    while ($trow = mysql_fetch_array ($result)) {
+    while ($trow = mysql_fetch_array($result)) {
       echo "<form method='post'>";
       echo "<tr>";
       echo "<input type='hidden' name='otunnus' value='$trow[tunnus]'>";
@@ -88,4 +88,4 @@ if ($tee == '') {  //valitaan keikka
     echo "</table>";
   }
 }
-require ("../inc/footer.inc");
+require "../inc/footer.inc";

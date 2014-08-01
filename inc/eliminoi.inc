@@ -44,7 +44,7 @@ if (isset($tee)) {
   $lisa2 = ''; // Alkusaldon laskentaan
 
   if ($tkausi != 0) {
-        echo "<font class='head'>".t("Eliminointi")." ".t("tilikaudelta")." ".tv1dateconv($tilikaudetrow["tilikausi_alku"])." - ".tv1dateconv($tilikaudetrow["tilikausi_loppu"])."</font><hr>";
+    echo "<font class='head'>".t("Eliminointi")." ".t("tilikaudelta")." ".tv1dateconv($tilikaudetrow["tilikausi_alku"])." - ".tv1dateconv($tilikaudetrow["tilikausi_loppu"])."</font><hr>";
     $lisa = "tiliointi.tapvm <= '$tilikaudetrow[tilikausi_loppu]' and tiliointi.tapvm >= '$tilikaudetrow[tilikausi_alku]'";
     $lisa2 = "tiliointi.tapvm < '$tilikaudetrow[tilikausi_alku]'";
   }
@@ -93,7 +93,7 @@ if (isset($tee)) {
               and tiliointi.tapvm    >= '$tilikaudetrow[tilikausi_alku]'
               and $lisa2";
     $result   = mysql_query($query) or pupe_error($query);
-    $alkurow  = mysql_fetch_array ($result);
+    $alkurow  = mysql_fetch_array($result);
     $kumsumma = $alkurow["saldo"];
   }
 
@@ -146,7 +146,7 @@ if (isset($tee)) {
     $sorttaus = array();
     $tilirivi = array();
 
-    while ($trow = mysql_fetch_array ($result)) {
+    while ($trow = mysql_fetch_array($result)) {
       $tilirivi[$i] = $trow;
       $vastis[$i] = $trow["summa"];
       $sorttaus[$i] = abs($trow['summa']);
@@ -170,7 +170,7 @@ if (isset($tee)) {
     echo count($valitut) . " eliminointia tehtiin!<br><br>";
     asort($sorttaus);
 
-    foreach($sorttaus as $key => $crap) {
+    foreach ($sorttaus as $key => $crap) {
 
       $class = "";
 
@@ -218,13 +218,13 @@ if (isset($tee)) {
 
               echo "<td class='$class' align='right' nowrap>";
 
-              if($excel=='') { // tehdään linkki jos ei haluta excel muodossa
+              if ($excel=='') { // tehdään linkki jos ei haluta excel muodossa
                 echo "<a href = 'muutosite.php?tee=E&tunnus=$trow[ltunnus]'><font $class>";
-                echo str_replace(".",",",sprintf("%.2f", $trow[$i]));
+                echo str_replace(".", ",", sprintf("%.2f", $trow[$i]));
                 echo "</font></a>";
               }
               else {
-                echo "<font $class>".str_replace(".",",",sprintf("%.2f", $trow[$i]))."</font>";
+                echo "<font $class>".str_replace(".", ",", sprintf("%.2f", $trow[$i]))."</font>";
               }
               echo "</td>";
 
@@ -233,12 +233,12 @@ if (isset($tee)) {
               else
                 $summaplus += $trow[$i];
 
-             }
-             else {
+            }
+            else {
               echo "<td class='$class' align = 'right' nowrap>";
-              echo str_replace(".",",",sprintf("%.2f", $trow[$i]));
+              echo str_replace(".", ",", sprintf("%.2f", $trow[$i]));
               echo "</td>";
-             }
+            }
 
           }
           else {
@@ -251,7 +251,7 @@ if (isset($tee)) {
               $vrow = mysql_fetch_array($vresult);
               $trow[$i] = $vrow[0];
             }
-            if (($i == 5) and ($excel!='')) $trow[$i]=str_replace("<br>"," ",$trow[$i]);
+            if (($i == 5) and ($excel!='')) $trow[$i]=str_replace("<br>", " ", $trow[$i]);
 
             echo "<td class='$class'>$trow[$i]</td>";
           }
@@ -260,7 +260,7 @@ if (isset($tee)) {
         if (strlen(trim($tili)) > 0) {
           //lasketaan ja echotaan kumulatiivinen summa
           $kumsumma += $trow["summa"];
-          echo "<td class='$class' align='right' nowrap>".str_replace(".",",",sprintf("%.2f",$kumsumma))."</td>";
+          echo "<td class='$class' align='right' nowrap>".str_replace(".", ",", sprintf("%.2f", $kumsumma))."</td>";
         }
 
         echo "</tr>";
@@ -312,7 +312,7 @@ if (isset($tee)) {
   unset($tee);
 }
 
-  echo "<font class='head'>".t("Eliminoi")."</font><hr>
+echo "<font class='head'>".t("Eliminoi")."</font><hr>
     <form name = 'valinta' action = 'raportit.php' method='post'>
     <input type = 'hidden' name = 'toim' value = 'eliminoi'>
     <input type = 'hidden' name = 'tee' value = 'X'>
@@ -321,17 +321,17 @@ if (isset($tee)) {
       <th>".t("Ajalta")."</th>
       <td><select name='alvv'>";
 
-      for ($i = date("Y") + 1; $i >= date("Y")-6; $i--) {
-        if ($i == date("Y")) {
-          $sel = "selected";
-        }
-        else {
-          $sel = "";
-        }
-        echo "<option value='$i' $sel>$i</option>";
-      }
+for ($i = date("Y") + 1; $i >= date("Y")-6; $i--) {
+  if ($i == date("Y")) {
+    $sel = "selected";
+  }
+  else {
+    $sel = "";
+  }
+  echo "<option value='$i' $sel>$i</option>";
+}
 
-      echo "
+echo "
       </select>
 
       <select name='alvk'>
@@ -386,109 +386,109 @@ if (isset($tee)) {
       </select></td>
       </tr>";
 
-  echo "<tr><th>".t("tai koko tilikausi")."</th>";
+echo "<tr><th>".t("tai koko tilikausi")."</th>";
 
-  $query = "SELECT *
-            FROM tilikaudet
-            WHERE yhtio = '$kukarow[yhtio]'
-            ORDER BY tilikausi_alku";
-  $vresult = mysql_query($query) or pupe_error($query);
+$query = "SELECT *
+          FROM tilikaudet
+          WHERE yhtio = '$kukarow[yhtio]'
+          ORDER BY tilikausi_alku";
+$vresult = mysql_query($query) or pupe_error($query);
 
-  echo "<td><select name='tkausi'>
+echo "<td><select name='tkausi'>
     <option value='0'>".t("Ei valintaa")."</option>";
 
-  while ($vrow = mysql_fetch_array($vresult)) {
-    $sel = "";
-    if ($trow[$i] == $vrow["tunnus"]) {
-      $sel = "selected";
-    }
-    echo "<option value = '$vrow[tunnus]' $sel>".tv1dateconv($vrow["tilikausi_alku"])." - ".tv1dateconv($vrow["tilikausi_loppu"]);
+while ($vrow = mysql_fetch_array($vresult)) {
+  $sel = "";
+  if ($trow[$i] == $vrow["tunnus"]) {
+    $sel = "selected";
   }
-  echo "</select></td>";
-  echo "</tr>";
+  echo "<option value = '$vrow[tunnus]' $sel>".tv1dateconv($vrow["tilikausi_alku"])." - ".tv1dateconv($vrow["tilikausi_loppu"]);
+}
+echo "</select></td>";
+echo "</tr>";
 
-  echo "<tr>
+echo "<tr>
       <th>Vain tili</th>
       <td><input type = 'text' name = 'tili' value = '$tili'> - <input type = 'text' name = 'tili2' value = '$tili2'></td>
       </tr>";
 
-  echo "<tr>
+echo "<tr>
       <th>".t("Vain kustannuspaikka")."</th>";
 
-  $query = "SELECT tunnus, nimi
-            FROM kustannuspaikka
-            WHERE yhtio   = '$kukarow[yhtio]'
-            and kaytossa != 'E'
-            and tyyppi    = 'K'
-            ORDER BY koodi+0, koodi, nimi";
-  $vresult = mysql_query($query) or pupe_error($query);
+$query = "SELECT tunnus, nimi
+          FROM kustannuspaikka
+          WHERE yhtio   = '$kukarow[yhtio]'
+          and kaytossa != 'E'
+          and tyyppi    = 'K'
+          ORDER BY koodi+0, koodi, nimi";
+$vresult = mysql_query($query) or pupe_error($query);
 
-  echo "<td><select name='kustp'>
+echo "<td><select name='kustp'>
     <option value=' '>".t("Ei valintaa")."</option>";
 
-  while ($vrow = mysql_fetch_array($vresult)) {
-    $sel = "";
-    if ($trow[$i] == $vrow[0]) {
-      $sel = "selected";
-    }
-    echo "<option value = '$vrow[0]' $sel>$vrow[1]</option>";
+while ($vrow = mysql_fetch_array($vresult)) {
+  $sel = "";
+  if ($trow[$i] == $vrow[0]) {
+    $sel = "selected";
   }
-  echo "</select></td>";
-  echo "</tr>";
+  echo "<option value = '$vrow[0]' $sel>$vrow[1]</option>";
+}
+echo "</select></td>";
+echo "</tr>";
 
-  echo "<tr>";
-  echo "<th>".t("Vain kohde")."</th>";
+echo "<tr>";
+echo "<th>".t("Vain kohde")."</th>";
 
-  $query = "SELECT tunnus, nimi
-            FROM kustannuspaikka
-            WHERE yhtio   = '$kukarow[yhtio]'
-            and kaytossa != 'E'
-            and tyyppi    = 'O'
-            ORDER BY koodi+0, koodi, nimi";
-  $vresult = mysql_query($query) or pupe_error($query);
+$query = "SELECT tunnus, nimi
+          FROM kustannuspaikka
+          WHERE yhtio   = '$kukarow[yhtio]'
+          and kaytossa != 'E'
+          and tyyppi    = 'O'
+          ORDER BY koodi+0, koodi, nimi";
+$vresult = mysql_query($query) or pupe_error($query);
 
-  echo "<td>
+echo "<td>
     <select name='kohde'>
     <option value=' '>".t("Ei valintaa")."</option>";
 
-  while ($vrow=mysql_fetch_array($vresult)) {
-    $sel="";
-    if ($trow[$i] == $vrow[0]) {
-      $sel = "selected";
-    }
-    echo "<option value = '$vrow[0]' $sel>$vrow[1]</option>";
+while ($vrow=mysql_fetch_array($vresult)) {
+  $sel="";
+  if ($trow[$i] == $vrow[0]) {
+    $sel = "selected";
   }
-  echo "</select></td>";
-  echo "</tr>";
-  echo "<tr>
+  echo "<option value = '$vrow[0]' $sel>$vrow[1]</option>";
+}
+echo "</select></td>";
+echo "</tr>";
+echo "<tr>
       <th>".t("Vain projekti")."</th>";
 
-  $query = "SELECT tunnus, nimi
-            FROM kustannuspaikka
-            WHERE yhtio   = '$kukarow[yhtio]'
-            and kaytossa != 'E'
-            and tyyppi    = 'P'
-            ORDER BY koodi+0, koodi, nimi";
-  $vresult = mysql_query($query) or pupe_error($query);
+$query = "SELECT tunnus, nimi
+          FROM kustannuspaikka
+          WHERE yhtio   = '$kukarow[yhtio]'
+          and kaytossa != 'E'
+          and tyyppi    = 'P'
+          ORDER BY koodi+0, koodi, nimi";
+$vresult = mysql_query($query) or pupe_error($query);
 
-  echo "<td>
+echo "<td>
     <select name='proj'>
     <option value=' '>".t("Ei valintaa")."</option>";
 
-  while ($vrow = mysql_fetch_array($vresult)) {
-    $sel = "";
-    if ($trow[$i] == $vrow[0]) {
-      $sel = "selected";
-    }
-    echo "<option value = '$vrow[0]' $sel>$vrow[1]</option>";
+while ($vrow = mysql_fetch_array($vresult)) {
+  $sel = "";
+  if ($trow[$i] == $vrow[0]) {
+    $sel = "selected";
   }
-  echo "</select></td>";
-  echo "</tr>";
+  echo "<option value = '$vrow[0]' $sel>$vrow[1]</option>";
+}
+echo "</select></td>";
+echo "</tr>";
 
-  echo "<tr><th>".t("Älä näytä eliminoituja tiliöintejä")."</th><td><input type='checkbox' name='alanayta'></td></tr>";
-  echo "<tr><th>".t("Excel muoto")."</th><td><input type='checkbox' name='excel'></td></tr>";
-  echo "</table><br>
+echo "<tr><th>".t("Älä näytä eliminoituja tiliöintejä")."</th><td><input type='checkbox' name='alanayta'></td></tr>";
+echo "<tr><th>".t("Excel muoto")."</th><td><input type='checkbox' name='excel'></td></tr>";
+echo "</table><br>
         <input type = 'submit' value = '".t("Näytä")."'></form>";
 
-  $formi = 'valinta';
-  $kentta = 'tili';
+$formi = 'valinta';
+$kentta = 'tili';

@@ -107,20 +107,20 @@ function hae_myohassa_olevat_ostotilaukset($paivamaararaja) {
             FROM lasku
             JOIN tilausrivi
             ON ( tilausrivi.yhtio = lasku.yhtio
-              AND tilausrivi.otunnus  = lasku.tunnus
-              AND tilausrivi.tyyppi   = 'O'
-              AND tilausrivi.toimaika <= DATE_SUB(CURRENT_DATE, INTERVAL {$paivamaararaja} DAY)
-              AND tilausrivi.varattu  > 0 )
+              AND tilausrivi.otunnus                = lasku.tunnus
+              AND tilausrivi.tyyppi                 = 'O'
+              AND tilausrivi.toimaika               <= DATE_SUB(CURRENT_DATE, INTERVAL {$paivamaararaja} DAY)
+              AND tilausrivi.varattu                > 0 )
             JOIN tuote
             ON ( tuote.yhtio = tilausrivi.yhtio
-              AND tuote.tuoteno       = tilausrivi.tuoteno )
+              AND tuote.tuoteno                     = tilausrivi.tuoteno )
             JOIN tuotteen_toimittajat
             ON ( tuotteen_toimittajat.yhtio = tilausrivi.yhtio
-              AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
+              AND tuotteen_toimittajat.tuoteno      = tilausrivi.tuoteno
               AND tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
-            WHERE lasku.yhtio         = '{$kukarow['yhtio']}'
-            AND lasku.tila            = 'O'
-            AND lasku.alatila         = 'A'
+            WHERE lasku.yhtio                       = '{$kukarow['yhtio']}'
+            AND lasku.tila                          = 'O'
+            AND lasku.alatila                       = 'A'
             ORDER BY lasku.nimi ASC";
   $result = pupe_query($query);
 

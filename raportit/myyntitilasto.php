@@ -75,14 +75,14 @@ if (!function_exists("tuoteryhman_varastonarvo")) {
 
     // varastonmuutos
     $query = "SELECT
-               sum(if(tapahtuma.laadittu >= '$pvm1 00:00:00', tapahtuma.kpl, 0)) muutoskpl1,
-               sum(if(tapahtuma.laadittu >= '$pvm2 00:00:00', tapahtuma.kpl, 0)) muutoskpl2
-                FROM tuote
-               JOIN tapahtuma on (tuote.yhtio = tapahtuma.yhtio AND tuote.tuoteno = tapahtuma.tuoteno and tapahtuma.laadittu >= '$pvm2 00:00:00' and tapahtuma.laji != 'Epäkurantti')
-               WHERE tuote.yhtio = '$kukarow[yhtio]'
-                AND tuote.osasto = '{$osasto}'
-               AND tuote.try     = '{$try}'
-               ORDER BY tapahtuma.laadittu desc, tapahtuma.tunnus desc";
+              sum(if(tapahtuma.laadittu >= '$pvm1 00:00:00', tapahtuma.kpl, 0)) muutoskpl1,
+              sum(if(tapahtuma.laadittu >= '$pvm2 00:00:00', tapahtuma.kpl, 0)) muutoskpl2
+               FROM tuote
+              JOIN tapahtuma on (tuote.yhtio = tapahtuma.yhtio AND tuote.tuoteno = tapahtuma.tuoteno and tapahtuma.laadittu >= '$pvm2 00:00:00' and tapahtuma.laji != 'Epäkurantti')
+              WHERE tuote.yhtio = '$kukarow[yhtio]'
+               AND tuote.osasto = '{$osasto}'
+              AND tuote.try     = '{$try}'
+              ORDER BY tapahtuma.laadittu desc, tapahtuma.tunnus desc";
     $muutosres = pupe_query($query);
     $row = mysql_fetch_assoc($muutosres);
 

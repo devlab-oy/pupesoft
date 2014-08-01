@@ -4441,12 +4441,12 @@ if ($tee == '') {
     if ($lisatty_tun > 0 and $lisatied_row["suoraan_laskutukseen"] != "" and $lisatied_row["tilausrivilinkki"] > 0) {
       //Tutkitaan löytyykö ostorivi ja sen toimitettuaika
       $query = "SELECT tilausrivin_lisatiedot.suoratoimitettuaika
-                   FROM tilausrivi
-                   LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
-                   WHERE tilausrivi.yhtio                          = '$kukarow[yhtio]'
-                   AND tilausrivi.tyyppi                           = 'O'
-                   AND tilausrivi.tunnus                           = '$tilausrivi[tilausrivilinkki]'
-                   AND tilausrivin_lisatiedot.suoratoimitettuaika != '0000-00-00'";
+                FROM tilausrivi
+                LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+                WHERE tilausrivi.yhtio                          = '$kukarow[yhtio]'
+                AND tilausrivi.tyyppi                           = 'O'
+                AND tilausrivi.tunnus                           = '$tilausrivi[tilausrivilinkki]'
+                AND tilausrivin_lisatiedot.suoratoimitettuaika != '0000-00-00'";
       $suoratoimresult = pupe_query($query);
 
       if ($suoratoimrow = mysql_fetch_assoc($suoratoimresult)) {
@@ -6271,11 +6271,11 @@ if ($tee == '') {
 
             if (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") and !in_array($row["var"], array('P', 'J', 'S', 'T', 'U'))) {
               $query  = "SELECT sarjanumeroseuranta.sarjanumero era, sarjanumeroseuranta.parasta_ennen
-                            FROM sarjanumeroseuranta
-                            WHERE yhtio          = '$kukarow[yhtio]'
-                            and tuoteno          = '$row[tuoteno]'
-                            and myyntirivitunnus = '$row[tunnus]'
-                            LIMIT 1";
+                         FROM sarjanumeroseuranta
+                         WHERE yhtio          = '$kukarow[yhtio]'
+                         and tuoteno          = '$row[tuoteno]'
+                         and myyntirivitunnus = '$row[tunnus]'
+                         LIMIT 1";
               $sarjares = pupe_query($query);
               $sarjarow = mysql_fetch_assoc($sarjares);
 

@@ -178,9 +178,9 @@ function merkkaa_myyntitilaukset_lahetetyksi($myyntitilaukset) {
   $myyntitilaus_tunnukset = substr($myyntitilaus_tunnukset, 0, -1);
 
   $query = "UPDATE lasku
-              SET noutaja = 'X'
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus  IN ({$myyntitilaus_tunnukset})";
+            SET noutaja = 'X'
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus  IN ({$myyntitilaus_tunnukset})";
   pupe_query($query);
 }
 

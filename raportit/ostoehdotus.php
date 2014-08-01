@@ -207,13 +207,13 @@ function saldot($myynti_varasto = '', $myynti_maa = '') {
 
   // Kaikkien valittujen varastojen saldo per maa
   $query = "SELECT ifnull(sum(saldo),0) saldo, ifnull(sum(halytysraja),0) halytysraja
-              FROM tuotepaikat
-              JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-                AND varastopaikat.tunnus = tuotepaikat.varasto
-                $varastotapa
-              WHERE tuotepaikat.yhtio    in ($yhtiot)
-              and tuotepaikat.tuoteno    = '$row[tuoteno]'
-              $varastot";
+            FROM tuotepaikat
+            JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
+              AND varastopaikat.tunnus = tuotepaikat.varasto
+              $varastotapa
+            WHERE tuotepaikat.yhtio    in ($yhtiot)
+            and tuotepaikat.tuoteno    = '$row[tuoteno]'
+            $varastot";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -279,14 +279,14 @@ function ostot($myynti_varasto = '', $myynti_maa = '') {
 
   //tilauksessa/siirtolistalla jt
   $query = "SELECT
-              sum(if (tilausrivi.tyyppi = 'O', tilausrivi.varattu, 0)) tilattu,
-              sum(if (tilausrivi.tyyppi = 'G', tilausrivi.jt $lisavarattu, 0)) siirtojt
-              FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-              WHERE tilausrivi.yhtio in ($yhtiot)
-              and tilausrivi.tyyppi  in ('O','G')
-              and tilausrivi.tuoteno = '$row[tuoteno]'
-              $varastot
-              and tilausrivi.varattu + tilausrivi.jt > 0";
+            sum(if (tilausrivi.tyyppi = 'O', tilausrivi.varattu, 0)) tilattu,
+            sum(if (tilausrivi.tyyppi = 'G', tilausrivi.jt $lisavarattu, 0)) siirtojt
+            FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
+            WHERE tilausrivi.yhtio in ($yhtiot)
+            and tilausrivi.tyyppi  in ('O','G')
+            and tilausrivi.tuoteno = '$row[tuoteno]'
+            $varastot
+            and tilausrivi.varattu + tilausrivi.jt > 0";
   $result = pupe_query($query);
   $ostorow = mysql_fetch_array($result);
 
@@ -594,22 +594,22 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 
     // haetaan tuotteen toimittajatietoa
     $query = "SELECT group_concat(toimi.ytunnus
-                ORDER BY tuotteen_toimittajat.tunnus separator '/') toimittaja,
+              ORDER BY tuotteen_toimittajat.tunnus separator '/') toimittaja,
               group_concat(distinct if(tuotteen_toimittajat.osto_era = 0,
-                  1,
-                  tuotteen_toimittajat.osto_era)
-                ORDER BY tuotteen_toimittajat.tunnus separator '/') osto_era,
+                1,
+                tuotteen_toimittajat.osto_era)
+              ORDER BY tuotteen_toimittajat.tunnus separator '/') osto_era,
               group_concat(distinct tuotteen_toimittajat.toim_tuoteno
-                ORDER BY tuotteen_toimittajat.tunnus separator '/') toim_tuoteno,
+              ORDER BY tuotteen_toimittajat.tunnus separator '/') toim_tuoteno,
               group_concat(distinct tuotteen_toimittajat.toim_nimitys
-                ORDER BY tuotteen_toimittajat.tunnus separator '/') toim_nimitys,
+              ORDER BY tuotteen_toimittajat.tunnus separator '/') toim_nimitys,
               group_concat(distinct tuotteen_toimittajat.ostohinta
-                ORDER BY tuotteen_toimittajat.tunnus separator '/') ostohinta,
+              ORDER BY tuotteen_toimittajat.tunnus separator '/') ostohinta,
               group_concat(distinct tuotteen_toimittajat.tuotekerroin
-                ORDER BY tuotteen_toimittajat.tunnus separator '/') tuotekerroin
+              ORDER BY tuotteen_toimittajat.tunnus separator '/') tuotekerroin
               FROM tuotteen_toimittajat
               JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio
-                AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
+              AND toimi.tunnus                 = tuotteen_toimittajat.liitostunnus
               WHERE tuotteen_toimittajat.yhtio in ($yhtiot)
               and tuotteen_toimittajat.tuoteno = '$row[tuoteno]'
               $toimilisa";

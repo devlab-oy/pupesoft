@@ -177,10 +177,10 @@ foreach ($tuotteet as $tuote) {
 
     // P‰ivitet‰‰n tilausriveille oletuspaikat.
     $oletus_query = "SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso
-                       FROM tuotepaikat
-                       WHERE tuoteno='{$tuote['tuoteno']}'
-                       AND oletus='X'
-                       AND yhtio='{$yhtiorow['yhtio']}'";
+                     FROM tuotepaikat
+                     WHERE tuoteno='{$tuote['tuoteno']}'
+                     AND oletus='X'
+                     AND yhtio='{$yhtiorow['yhtio']}'";
     $oletus_result = mysql_query($oletus_query);
     $oletus = mysql_fetch_assoc($oletus_result);
 

@@ -80,8 +80,8 @@ if (empty($saapuminen)) {
 else {
   // Haetaan saapumisen toimittaja tunnus
   $saapuminen_query = "SELECT liitostunnus
-                         FROM lasku
-                         WHERE tunnus='{$saapuminen}'";
+                       FROM lasku
+                       WHERE tunnus='{$saapuminen}'";
   $saapumisen_toimittaja = mysql_fetch_assoc(pupe_query($saapuminen_query));
 
   // jos toimittaja ei ole sama kuin tilausrivin niin tehd‰‰n uusi saapuminen
@@ -199,10 +199,10 @@ echo "<tr>
 if ($row['tilausrivitunnus'] != 0) {
 
   $query = "SELECT tilausrivi.otunnus, lasku.nimi
-              FROM tilausrivi
-              JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
-              WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-              AND tilausrivi.tunnus  = '{$row['tilausrivitunnus']}'";
+            FROM tilausrivi
+            JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
+            WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+            AND tilausrivi.tunnus  = '{$row['tilausrivitunnus']}'";
   $tilausrivitunnus_res = pupe_query($query);
   $tilausrivitunnus_row = mysql_fetch_assoc($tilausrivitunnus_res);
 

@@ -1044,8 +1044,8 @@ if ($tila == 'W') {
 // Lisätään kommentti
 if ($tila == 'K') {
   $query = "SELECT comments
-              FROM lasku
-              WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tunnus'";
+            FROM lasku
+            WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tunnus'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 1) {
@@ -1081,14 +1081,14 @@ if ($tila == "konversio_avaa") {
 
   // Tarkistetaan lasku
   $query1 = "SELECT *
-               FROM lasku
-               WHERE yhtio    = '{$kukarow["yhtio"]}'
-               AND tunnus     = '$tunnus'
-               AND laskuttaja = ''
-               AND laatija    = 'konversio'
-               AND tila       = 'U'
-               AND alatila    = 'X'
-               AND valkoodi   = 'EUR'";
+             FROM lasku
+             WHERE yhtio    = '{$kukarow["yhtio"]}'
+             AND tunnus     = '$tunnus'
+             AND laskuttaja = ''
+             AND laatija    = 'konversio'
+             AND tila       = 'U'
+             AND alatila    = 'X'
+             AND valkoodi   = 'EUR'";
   $result1 = pupe_query($query1);
 
   if (mysql_num_rows($result1) != 1) {
@@ -1116,42 +1116,42 @@ if ($tila == "konversio_avaa") {
   // Avataan lasku
   if ($tila == "konversio_avaa") {
     $query1 = "UPDATE lasku SET
-                 mapvm          = '0000-00-00',
-                 saldo_maksettu = $saldo_maksettu
-                 WHERE yhtio    = '{$kukarow["yhtio"]}'
-                 AND tunnus     = '{$laskurow["tunnus"]}'";
+               mapvm          = '0000-00-00',
+               saldo_maksettu = $saldo_maksettu
+               WHERE yhtio    = '{$kukarow["yhtio"]}'
+               AND tunnus     = '{$laskurow["tunnus"]}'";
     $result1 = pupe_query($query1);
 
     // Lisätään myyntisaamiset-tiliöinti
     $query1 = "INSERT INTO tiliointi SET
-                 yhtio            = '{$kukarow["yhtio"]}',
-                 laatija          = 'konversio',
-                 laadittu         = now(),
-                 ltunnus          = '{$laskurow["tunnus"]}',
-                 tilino           = '{$yhtiorow["myyntisaamiset"]}',
-                 tapvm            = '{$laskurow["tapvm"]}',
-                 summa            = $syotetty_avoinsumma,
-                 summa_valuutassa = $syotetty_avoinsumma,
-                 valkoodi         = '{$laskurow["valkoodi"]}',
-                 selite           = 'Lasku {$laskurow["nimi"]}',
-                 vero             = '0',
-                 lukko            = '1'";
+               yhtio            = '{$kukarow["yhtio"]}',
+               laatija          = 'konversio',
+               laadittu         = now(),
+               ltunnus          = '{$laskurow["tunnus"]}',
+               tilino           = '{$yhtiorow["myyntisaamiset"]}',
+               tapvm            = '{$laskurow["tapvm"]}',
+               summa            = $syotetty_avoinsumma,
+               summa_valuutassa = $syotetty_avoinsumma,
+               valkoodi         = '{$laskurow["valkoodi"]}',
+               selite           = 'Lasku {$laskurow["nimi"]}',
+               vero             = '0',
+               lukko            = '1'";
     $result1 = pupe_query($query1);
 
     // Lisätään dummy vastatiliöinti
     $query1 = "INSERT INTO tiliointi SET
-                 yhtio            = '{$kukarow["yhtio"]}',
-                 laatija          = 'konversio',
-                 laadittu         = now(),
-                 ltunnus          = '{$laskurow["tunnus"]}',
-                 tilino           = '{$yhtiorow["muutkulut"]}',
-                 tapvm            = '{$laskurow["tapvm"]}',
-                 summa            = $syotetty_avoinsumma * -1,
-                 summa_valuutassa = $syotetty_avoinsumma * -1,
-                 valkoodi         = '{$laskurow["valkoodi"]}',
-                 selite           = 'Lasku {$laskurow["nimi"]}',
-                 vero             = '0',
-                 lukko            = ''";
+               yhtio            = '{$kukarow["yhtio"]}',
+               laatija          = 'konversio',
+               laadittu         = now(),
+               ltunnus          = '{$laskurow["tunnus"]}',
+               tilino           = '{$yhtiorow["muutkulut"]}',
+               tapvm            = '{$laskurow["tapvm"]}',
+               summa            = $syotetty_avoinsumma * -1,
+               summa_valuutassa = $syotetty_avoinsumma * -1,
+               valkoodi         = '{$laskurow["valkoodi"]}',
+               selite           = 'Lasku {$laskurow["nimi"]}',
+               vero             = '0',
+               lukko            = ''";
     $result1 = pupe_query($query1);
   }
 
@@ -1801,11 +1801,11 @@ if ($tila == '') {
         echo "<td><select name='maksuehto'>";
 
         $query = "SELECT *
-                      FROM maksuehto
-                      WHERE yhtio  = '$kukarow[yhtio]'
-                      and kaytossa = ''
-                      and (sallitut_maat = '' or sallitut_maat like '%$trow[maa]%')
-                      order by jarjestys, teksti";
+                  FROM maksuehto
+                  WHERE yhtio  = '$kukarow[yhtio]'
+                  and kaytossa = ''
+                  and (sallitut_maat = '' or sallitut_maat like '%$trow[maa]%')
+                  order by jarjestys, teksti";
         $mresult = pupe_query($query);
 
         while ($row = mysql_fetch_assoc($mresult)) {

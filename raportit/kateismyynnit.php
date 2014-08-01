@@ -378,15 +378,15 @@ function tosite_print($vv, $kk, $pp, $ltunnukset, $tulosta = null) {
   }
 
   $tasmays_query = "SELECT tiliointi.*, lasku.comments kommentti
-                      FROM lasku
-                      JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio
-                      AND tiliointi.ltunnus  = lasku.tunnus
-                      AND tiliointi.korjattu = '')
-                      JOIN tili ON (tili.yhtio = tiliointi.yhtio
-                      AND tili.tilino        = tiliointi.tilino)
-                      WHERE lasku.yhtio      = '$kukarow[yhtio]'
-                      AND lasku.tunnus       in ('$kassat_temp')
-                      ORDER BY tiliointi.tunnus, tiliointi.selite";
+                    FROM lasku
+                    JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio
+                    AND tiliointi.ltunnus  = lasku.tunnus
+                    AND tiliointi.korjattu = '')
+                    JOIN tili ON (tili.yhtio = tiliointi.yhtio
+                    AND tili.tilino        = tiliointi.tilino)
+                    WHERE lasku.yhtio      = '$kukarow[yhtio]'
+                    AND lasku.tunnus       in ('$kassat_temp')
+                    ORDER BY tiliointi.tunnus, tiliointi.selite";
   $tasmays_result = pupe_query($tasmays_query);
 
   //kirjoitetaan  faili levylle..
@@ -413,9 +413,9 @@ function tosite_print($vv, $kk, $pp, $ltunnukset, $tulosta = null) {
   }
 
   $query = "SELECT kateistilitys, kassaerotus, kateisotto
-              FROM kassalipas
-              WHERE tunnus in ($kassat)
-              AND yhtio    = '$kukarow[yhtio]'";
+            FROM kassalipas
+            WHERE tunnus in ($kassat)
+            AND yhtio    = '$kukarow[yhtio]'";
   $result = pupe_query($query);
   $row = mysql_fetch_assoc($result);
 
@@ -484,9 +484,9 @@ function tosite_print($vv, $kk, $pp, $ltunnukset, $tulosta = null) {
   if ($tulosta != null) {
     //haetaan tilausken tulostuskomento
     $query   = "SELECT *
-                  from kirjoittimet
-                  where yhtio='$kukarow[yhtio]'
-                  and tunnus='$printteri'";
+                from kirjoittimet
+                where yhtio='$kukarow[yhtio]'
+                and tunnus='$printteri'";
     $kirres  = pupe_query($query);
     $kirrow  = mysql_fetch_assoc($kirres);
     $komento = $kirrow['komento'];

@@ -298,9 +298,9 @@ class Valmistus {
         // nollataan kalenterista valmistuslinja (kalenteri.henkilo)
         elseif ($this->getTila() == 'TK') {
           $query = "UPDATE kalenteri SET
-                      henkilo = 0
-                      WHERE yhtio='{$kukarow['yhtio']}'
-                      AND otunnus='{$this->tunnus}'";
+                    henkilo = 0
+                    WHERE yhtio='{$kukarow['yhtio']}'
+                    AND otunnus='{$this->tunnus}'";
           if (!pupe_query($query)) {
             throw new Exception("Tilan vaihtamisessa tapahtui virhe. (kalenteri)");
           }
@@ -308,20 +308,20 @@ class Valmistus {
           // Valmistuksen keskeytys nollaa myös laskun ja tilausrivin keräyspäivät,
           // jolloin saldojen laskenta menee oikein.
           $update_lasku_query = "UPDATE lasku
-                                   SET kerayspvm ='2099-01-01',
-                                   toimaika      ='2099-01-01'
-                                   WHERE yhtio   ='{$kukarow['yhtio']}'
-                                   AND tunnus    ='{$this->tunnus}'
-                                   AND tila = 'V'";
+                                 SET kerayspvm ='2099-01-01',
+                                 toimaika      ='2099-01-01'
+                                 WHERE yhtio   ='{$kukarow['yhtio']}'
+                                 AND tunnus    ='{$this->tunnus}'
+                                 AND tila = 'V'";
           if (!pupe_query($update_lasku_query)) {
             throw new Exception("Tilan vaihtamisessa tapahtui virhe. (valmistus)");
           }
 
           $update_tilausrivi_query = "UPDATE tilausrivi
-                                        SET kerayspvm ='2099-01-01',
-                                        toimaika      ='2099-01-01'
-                                        WHERE yhtio   ='{$kukarow['yhtio']}'
-                                        AND otunnus   ='{$this->tunnus}'";
+                                      SET kerayspvm ='2099-01-01',
+                                      toimaika      ='2099-01-01'
+                                      WHERE yhtio   ='{$kukarow['yhtio']}'
+                                      AND otunnus   ='{$this->tunnus}'";
           if (!pupe_query($update_tilausrivi_query)) {
             throw new Exception("Tilan vaihtamisessa tapahtui virhe. (valmisteet)");
           }
@@ -333,11 +333,11 @@ class Valmistus {
       case Valmistus::VALMISTUKSESSA:
         // Valmistuslinjalla voi olla vain yksi valmistus VALMISTUKSESSA tilassa kerrallaan
         $query = "SELECT kalenteri.kuka, otunnus, valmistuksen_tila
-                    FROM kalenteri
-                    JOIN lasku on (kalenteri.yhtio=lasku.yhtio AND kalenteri.otunnus=lasku.tunnus)
-                    WHERE kalenteri.yhtio='{$kukarow['yhtio']}'
-                    AND kalenteri.henkilo='{$this->valmistuslinja}'
-                    AND valmistuksen_tila = 'VA'";
+                  FROM kalenteri
+                  JOIN lasku on (kalenteri.yhtio=lasku.yhtio AND kalenteri.otunnus=lasku.tunnus)
+                  WHERE kalenteri.yhtio='{$kukarow['yhtio']}'
+                  AND kalenteri.henkilo='{$this->valmistuslinja}'
+                  AND valmistuksen_tila = 'VA'";
         $result = pupe_query($query);
 
         // Jos keskeneräinen valmistus löytyy
@@ -356,9 +356,9 @@ class Valmistus {
 
         // Päivitetään valmistuksen uudet ajat
         $query = "UPDATE kalenteri
-                    SET pvmalku='{$pvmalku}', pvmloppu='{$pvmloppu}'
-                    WHERE yhtio='{$kukarow['yhtio']}'
-                    AND otunnus='{$this->tunnus}'";
+                  SET pvmalku='{$pvmalku}', pvmloppu='{$pvmloppu}'
+                  WHERE yhtio='{$kukarow['yhtio']}'
+                  AND otunnus='{$this->tunnus}'";
 
         // Päivitetään laskun ja tilausrivin keräyspäivät?
 
@@ -382,9 +382,9 @@ class Valmistus {
         //echo "valmistus merkattu tarkastetuksi!";
         // poistetaan valmistus kalenterista
         $delete_query = "DELETE FROM kalenteri
-                           WHERE yhtio='{$kukarow['yhtio']}'
-                           AND tyyppi='valmistus'
-                           AND otunnus='{$this->tunnus}'";
+                         WHERE yhtio='{$kukarow['yhtio']}'
+                         AND tyyppi='valmistus'
+                         AND otunnus='{$this->tunnus}'";
         $result = pupe_query($delete_query);
 
         break;

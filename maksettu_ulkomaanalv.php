@@ -247,9 +247,9 @@ if ($tee == '') {
 
   echo "<tr><th>".t("tai koko tilikausi")."</th>";
   $query = "SELECT *
-               FROM tilikaudet
-               WHERE yhtio = '$kukarow[yhtio]'
-               ORDER BY tilikausi_alku";
+            FROM tilikaudet
+            WHERE yhtio = '$kukarow[yhtio]'
+            ORDER BY tilikausi_alku";
   $vresult = mysql_query($query) or pupe_error($query);
   echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa");
   while ($vrow=mysql_fetch_array($vresult)) {

@@ -252,10 +252,10 @@ if ($tunnus != "" and $tee == "vaihda") {
 
       //Nollataan sarjanumerolinkit
       $query = "SELECT tilausrivi.tunnus, (tilausrivi.varattu + tilausrivi.jt) varattu
-                 FROM tilausrivi
-                 JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.sarjanumeroseuranta != '')
-                 WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                 AND tilausrivi.otunnus = '{$tunnus}'";
+                FROM tilausrivi
+                JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.sarjanumeroseuranta != '')
+                WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                AND tilausrivi.otunnus = '{$tunnus}'";
       $sres = pupe_query($query);
 
       while ($srow = mysql_fetch_assoc($sres)) {
@@ -268,9 +268,9 @@ if ($tunnus != "" and $tee == "vaihda") {
         }
 
         $query = "UPDATE sarjanumeroseuranta SET
-                     {$tunken} = 0
-                     WHERE yhtio = '{$kukarow['yhtio']}'
-                     AND {$tunken} = '{$srow['tunnus']}'";
+                  {$tunken} = 0
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND {$tunken} = '{$srow['tunnus']}'";
         $sarjares = pupe_query($query);
       }
     }

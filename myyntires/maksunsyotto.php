@@ -585,10 +585,10 @@ if ($ytunnus != '' and $tee == "") {
   echo "<option value=''>".t("Ei tulosteta")."</option>";
 
   $querykieli = "SELECT *
-                   FROM kirjoittimet
-                   WHERE yhtio  = '$kukarow[yhtio]'
-                   AND komento != 'EDI'
-                   ORDER BY kirjoitin";
+                 FROM kirjoittimet
+                 WHERE yhtio  = '$kukarow[yhtio]'
+                 AND komento != 'EDI'
+                 ORDER BY kirjoitin";
   $kires = pupe_query($querykieli);
 
   while ($kirow=mysql_fetch_assoc($kires)) {

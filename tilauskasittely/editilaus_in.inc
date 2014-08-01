@@ -520,9 +520,9 @@ while ($tietue = fgets($fd)) {
 
       if ($editilaus_maksuehto == "") {
         $query = "SELECT *
-                    FROM maksuehto
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND teksti  = '{$tieto}'";
+                  FROM maksuehto
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND teksti  = '{$tieto}'";
         $result = pupe_query($query);
 
         if (mysql_num_rows($result) == 1) {
@@ -578,11 +578,11 @@ while ($tietue = fgets($fd)) {
       // Jos kyseess‰ on koontikuljetuskeissi niin setataan v‰lietappi (terminaali/varasto)
       if ($toimiro['tulostustapa'] == "L" or $toimiro['tulostustapa'] == "K") {
         $query = "SELECT *
-                    FROM asiakas
-                    WHERE yhtio        = '$kukarow[yhtio]'
-                    and toim_ovttunnus = '$tieto'
-                    and toim_ovttunnus not in ('','0')
-                    and laji           not in ('R','P')";
+                  FROM asiakas
+                  WHERE yhtio        = '$kukarow[yhtio]'
+                  and toim_ovttunnus = '$tieto'
+                  and toim_ovttunnus not in ('','0')
+                  and laji           not in ('R','P')";
         $result = pupe_query($query);
 
         if (mysql_num_rows($result) == 1) {
@@ -635,11 +635,11 @@ while ($tietue = fgets($fd)) {
       $edi_ulos .= t("Tilaava asiakas")." $tieto -> ";
 
       $query = "SELECT *
-                  FROM asiakas
-                  WHERE yhtio        = '$kukarow[yhtio]'
-                  and toim_ovttunnus = '$tieto'
-                  and toim_ovttunnus not in ('','0')
-                  and laji           not in ('R','P')";
+                FROM asiakas
+                WHERE yhtio        = '$kukarow[yhtio]'
+                and toim_ovttunnus = '$tieto'
+                and toim_ovttunnus not in ('','0')
+                and laji           not in ('R','P')";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 1) {
@@ -651,11 +651,11 @@ while ($tietue = fgets($fd)) {
 
     if (!is_array($arow)) {
       $query = "SELECT *
-                  FROM asiakas
-                  WHERE yhtio   = '$kukarow[yhtio]'
-                  and ovttunnus = '$tieto'
-                  and ovttunnus not in ('','0')
-                  and laji      not in ('R','P')";
+                FROM asiakas
+                WHERE yhtio   = '$kukarow[yhtio]'
+                and ovttunnus = '$tieto'
+                and ovttunnus not in ('','0')
+                and laji      not in ('R','P')";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 1) {
@@ -667,11 +667,11 @@ while ($tietue = fgets($fd)) {
 
     if (($tunnus == "ONADBY_RF" or $tunnus == "OSTOTIL.OT_ASIAKASNRO") and !is_array($arow)) {
       $query = "SELECT *
-                  FROM asiakas
-                  WHERE yhtio    = '$kukarow[yhtio]'
-                  and asiakasnro = '$tieto'
-                  and asiakasnro not in ('','0')
-                  and laji       not in ('R','P')";
+                FROM asiakas
+                WHERE yhtio    = '$kukarow[yhtio]'
+                and asiakasnro = '$tieto'
+                and asiakasnro not in ('','0')
+                and laji       not in ('R','P')";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 1) {
@@ -735,11 +735,11 @@ while ($tietue = fgets($fd)) {
       $edi_ulos .= t("Tilaava toim_asiakas")." $tieto -> ";
 
       $query = "SELECT *
-                  FROM asiakas
-                  WHERE yhtio        = '$kukarow[yhtio]'
-                  and toim_ovttunnus = '$tieto'
-                  and toim_ovttunnus not in ('','0')
-                  and laji           not in ('R','P')";
+                FROM asiakas
+                WHERE yhtio        = '$kukarow[yhtio]'
+                and toim_ovttunnus = '$tieto'
+                and toim_ovttunnus not in ('','0')
+                and laji           not in ('R','P')";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 1) {
@@ -791,11 +791,11 @@ while ($tietue = fgets($fd)) {
         if ($toimovttunnus != '') {
 
           $query = "SELECT *
-                      FROM asiakas
-                      WHERE yhtio        = '$kukarow[yhtio]'
-                      and toim_ovttunnus = '$toimovttunnus'
-                      and toim_ovttunnus not in ('','0')
-                      and laji           not in ('R','P')";
+                    FROM asiakas
+                    WHERE yhtio        = '$kukarow[yhtio]'
+                    and toim_ovttunnus = '$toimovttunnus'
+                    and toim_ovttunnus not in ('','0')
+                    and laji           not in ('R','P')";
           $result = pupe_query($query);
 
           if (mysql_num_rows($result) == 1) {
@@ -875,10 +875,10 @@ while ($tietue = fgets($fd)) {
       $editilaus_kassalipas = "";
 
       $query = "SELECT tunnus
-                  FROM maksuehto
-                  WHERE yhtio  = '$kukarow[yhtio]'
-                  AND kateinen = 'o'
-                  LIMIT 1";
+                FROM maksuehto
+                WHERE yhtio  = '$kukarow[yhtio]'
+                AND kateinen = 'o'
+                LIMIT 1";
       $editilaus_kateinen_res = pupe_query($query);
       $editilaus_kateinen_row = mysql_fetch_assoc($editilaus_kateinen_res);
 
@@ -886,9 +886,9 @@ while ($tietue = fgets($fd)) {
         $editilaus_maksuehto = $editilaus_kateinen_row["tunnus"];
 
         $query = "SELECT tunnus
-                    FROM kassalipas
-                    WHERE yhtio = '$kukarow[yhtio]'
-                    AND nimi    = 'Verkkokauppa'";
+                  FROM kassalipas
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND nimi    = 'Verkkokauppa'";
         $kassalipas_res = pupe_query($query);
 
         if (mysql_num_rows($kassalipas_res) == 1) {
@@ -914,11 +914,11 @@ while ($tietue = fgets($fd)) {
       $editilaus_kassalipas = "";
 
       $query = "SELECT tunnus
-                  FROM maksuehto
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  AND jv      = 'o'
-                  ORDER BY jarjestys
-                  LIMIT 1";
+                FROM maksuehto
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND jv      = 'o'
+                ORDER BY jarjestys
+                LIMIT 1";
       $editilaus_kateinen_res = pupe_query($query);
       $editilaus_kateinen_row = mysql_fetch_assoc($editilaus_kateinen_res);
 
@@ -931,11 +931,11 @@ while ($tietue = fgets($fd)) {
       }
 
       $query = "SELECT selite
-                  FROM toimitustapa
-                  WHERE yhtio  = '$kukarow[yhtio]'
-                  AND jvkielto = ''
-                  ORDER BY jarjestys
-                  LIMIT 1";
+                FROM toimitustapa
+                WHERE yhtio  = '$kukarow[yhtio]'
+                AND jvkielto = ''
+                ORDER BY jarjestys
+                LIMIT 1";
       $editilaus_kateinen_res = pupe_query($query);
       $editilaus_kateinen_row = mysql_fetch_assoc($editilaus_kateinen_res);
 
@@ -1035,8 +1035,8 @@ while ($tietue = fgets($fd)) {
         if ($arow["maa"] != $yhtiorow["maa"] and $arow["maa"] != "") {
           // katsotaan mimmosesta viennist‰ on kysymys
           $maa_eu_query = "SELECT distinct eu
-                             FROM maat
-                             WHERE koodi = '$arow[maa]'";
+                           FROM maat
+                           WHERE koodi = '$arow[maa]'";
           $maa_eu_res = pupe_query($maa_eu_query);
           $maa_eu_row = mysql_fetch_assoc($maa_eu_res);
 
@@ -1097,12 +1097,12 @@ while ($tietue = fgets($fd)) {
         // tarkistetaan lˆytyykˆ toimitustapa pupesta suoraan
         if ($edi_tyyppi == "magento") {
           $query = "SELECT *
-                      FROM toimitustapa
-                      WHERE yhtio  = '{$kukarow['yhtio']}'
-                      AND selite   = '{$editilaus_toimitustapa}'
-                      AND selite  != ''
-                      ORDER BY muutospvm DESC
-                      LIMIT 1";
+                    FROM toimitustapa
+                    WHERE yhtio  = '{$kukarow['yhtio']}'
+                    AND selite   = '{$editilaus_toimitustapa}'
+                    AND selite  != ''
+                    ORDER BY muutospvm DESC
+                    LIMIT 1";
           $ressu = pupe_query($query);
 
           // - jos lˆytyy niin k‰ytet‰‰n sit‰
@@ -1116,15 +1116,15 @@ while ($tietue = fgets($fd)) {
         }
         else {
           $query = "SELECT *
-                      FROM asiakkaan_avainsanat
-                      WHERE yhtio       = '{$kukarow['yhtio']}'
-                      AND tarkenne      = '{$editilaus_toimitustapa}'
-                      AND laji          = 'editilaus_toimitustapa'
-                      AND tarkenne     != ''
-                      AND avainsana    != ''
-                      AND liitostunnus  = '{$arow['tunnus']}'
-                      ORDER BY muutospvm DESC
-                      LIMIT 1";
+                    FROM asiakkaan_avainsanat
+                    WHERE yhtio       = '{$kukarow['yhtio']}'
+                    AND tarkenne      = '{$editilaus_toimitustapa}'
+                    AND laji          = 'editilaus_toimitustapa'
+                    AND tarkenne     != ''
+                    AND avainsana    != ''
+                    AND liitostunnus  = '{$arow['tunnus']}'
+                    ORDER BY muutospvm DESC
+                    LIMIT 1";
           $toimitustapa_chk_res = pupe_query($query);
 
           if (mysql_num_rows($toimitustapa_chk_res) == 1) {
@@ -1194,9 +1194,9 @@ while ($tietue = fgets($fd)) {
 
       // Haetaan viel‰ myyyj‰numero
       $query = "SELECT tunnus
-                  FROM kuka
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and kuka    = 'EDI'";
+                FROM kuka
+                WHERE yhtio = '$kukarow[yhtio]'
+                and kuka    = 'EDI'";
       $meapu = pupe_query($query);
 
       if (mysql_num_rows($meapu) == 1) {
@@ -1205,9 +1205,9 @@ while ($tietue = fgets($fd)) {
       }
       elseif ($arow["myyjanro"] != "") {
         $query = "SELECT tunnus
-                    FROM kuka
-                    WHERE yhtio = '$kukarow[yhtio]'
-                    and myyja   = '$arow[myyjanro]'";
+                  FROM kuka
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and myyja   = '$arow[myyjanro]'";
         $meapu = pupe_query($query);
 
         if (mysql_num_rows($meapu) == 1) {
@@ -1278,14 +1278,14 @@ while ($tietue = fgets($fd)) {
 
       // Onko asiakkaalla oletusyhteyshenkilˆ?
       $yhteysquery = "SELECT nimi
-                        FROM yhteyshenkilo
-                        where yhtio              = '$kukarow[yhtio]'
-                        and liitostunnus         = '$arow[tunnus]'
-                        and tyyppi               = 'A'
-                        and tilausyhteyshenkilo != ''
-                        and oletusyhteyshenkilo != ''
-                        ORDER BY nimi
-                        LIMIT 1";
+                      FROM yhteyshenkilo
+                      where yhtio              = '$kukarow[yhtio]'
+                      and liitostunnus         = '$arow[tunnus]'
+                      and tyyppi               = 'A'
+                      and tilausyhteyshenkilo != ''
+                      and oletusyhteyshenkilo != ''
+                      ORDER BY nimi
+                      LIMIT 1";
       $yhteysresult = pupe_query($yhteysquery);
 
       if ($yhteysrow = mysql_fetch_assoc($yhteysresult)) {
@@ -1295,114 +1295,114 @@ while ($tietue = fgets($fd)) {
       $toimitetaan_tanne = (isset($toimovttunnus) and !empty($toimovttunnus)) ? $toimovttunnus : $arow['toim_ovttunnus'];
       // Lis‰t‰‰n otsikko
       $query = "INSERT into lasku SET
-                  aktiivinen_kuljetus     = '$suunnistus',
-                  alatila                 = '$editilaus_alatila',
-                  alv                     = '$arow[alv]',
-                  alv_tili                = '',
-                  asiakkaan_tilausnumero  = '$asiakkaan_tilausnumero',
-                  chn                     = '$arow[chn]',
-                  clearing                = '',
-                  comments                = '$edi_kommentti',
-                  eilahetetta             = '$editilaus_eilahetetta',
-                  erikoisale              = '$arow[erikoisale]',
-                  erpcm                   = '',
-                  hinta                   = '$editilaus_loppuhinta',
-                  huolitsija              = '',
-                  hyvaksynnanmuutos       = '{$arow['luokka']}',
-                  jakelu                  = '',
-                  jaksotettu              = '',
-                  jtkielto                = '$arow[jtkielto]',
-                  kassalipas              = '$editilaus_kassalipas',
-                  kauppatapahtuman_luonne = '$arow[kauppatapahtuman_luonne]',
-                  kerayspvm               = '$toimpvm',
-                  keraysvko               = '',
-                  ketjutus                = '$arow[ketjutus]',
-                  kohde                   = '',
-                  kohdistettu             = '$maksaja',
-                  kuljetus                = '',
-                  kuljetusmuoto           = '$arow[kuljetusmuoto]',
-                  laatija                 = '$edi_laatija',
-                  laskutusvkopv           = '$arow[laskutusvkopv]',
-                  liitostunnus            = '$arow[tunnus]',
-                  luontiaika              =  now(),
-                  maa                     = '$arow[maa]',
-                  maa_maara               = '$arow[maa_maara]',
-                  maksuehto               = '$editilaus_maksuehto',
-                  maksuteksti             = '$editilaus_maksuteksti',
-                  myyja                   = '$edimyyja',
-                  nimi                    = '$arow[nimi]',
-                  nimitark                = '$arow[nimitark]',
-                  ohjausmerkki            = '{$ohjausmerkki}',
-                  olmapvm                 = '',
-                  osatoimitus             = '',
-                  osoite                  = '$arow[osoite]',
-                  ovttunnus               = '$arow[ovttunnus]',
-                  piiri                   = '$arow[piiri]',
-                  postino                 = '$arow[postino]',
-                  postitp                 = '$arow[postitp]',
-                  prioriteettinro         = '{$prioriteettinro}',
-                  rahtivapaa              = '$editilaus_rahtivapaa',
-                  sisainen                = '$editilaus_sisainen',
-                  sisviesti1              = '$arow[sisviesti1]',
-                  sisviesti2              = '$lopviesti',
-                  sisviesti3              = '{$merkkitieto}',
-                  splittauskielto         = '$splittauskielto',
-                  tila                    = '$editilaus_tila',
-                  tilaustyyppi            = '$tilaustyyppilisa',
-                  tilausvahvistus         = '$vastaustapa',
-                  tilausyhteyshenkilo     = '$tilausyhteyshenkilo',
-                  toimaika                = '$toimpvm',
-                  toimitusehto            = '$arow[toimitusehto]',
-                  toimitustapa            = '$editilaus_toimitustapa',
-                  toimvko                 = '',
-                  toim_maa                = '$arow[toim_maa]',
-                  toim_puh                = '$arow[toim_puh]',
-                  toim_nimi               = '$arow[toim_nimi]',
-                  toim_nimitark           = '$arow[toim_nimitark]',
-                  toim_osoite             = '$arow[toim_osoite]',
-                  toim_ovttunnus          = '$toimitetaan_tanne',
-                  toim_postino            = '$arow[toim_postino]',
-                  toim_postitp            = '$arow[toim_postitp]',
-                  toim_email              = '$arow[toim_email]',
-                  tunnusnippu             = '',
-                  valkoodi                = '$yhtiorow[valkoodi]',
-                  varasto                 = '',
-                  verkkotunnus            = '$arow[verkkotunnus]',
-                  vienti                  = '$til_vienti',
-                  vienti_kurssi           = '1',
-                  viesti                  = '$viite',
-                  viikorkopros            = '$yhtiorow[viivastyskorko]',
-                  yhtio                   = '$kukarow[yhtio]',
-                  yhtio_kotipaikka        = '$yhtiorow[kotipaikka]',
-                  yhtio_maa               = '$yhtiorow[maa]',
-                  yhtio_nimi              = '$yhtiorow[nimi]',
-                  yhtio_osoite            = '$yhtiorow[osoite]',
-                  yhtio_ovttunnus         = '$yhtiorow[ovttunnus]',
-                  yhtio_postino           = '$yhtiorow[postino]',
-                  yhtio_postitp           = '$yhtiorow[postitp]',
-                  yhtio_toimipaikka       = '',
-                  ytunnus                 = '$arow[ytunnus]',
-                  ohjelma_moduli          = '$ohjelmamoduli'";
+                aktiivinen_kuljetus     = '$suunnistus',
+                alatila                 = '$editilaus_alatila',
+                alv                     = '$arow[alv]',
+                alv_tili                = '',
+                asiakkaan_tilausnumero  = '$asiakkaan_tilausnumero',
+                chn                     = '$arow[chn]',
+                clearing                = '',
+                comments                = '$edi_kommentti',
+                eilahetetta             = '$editilaus_eilahetetta',
+                erikoisale              = '$arow[erikoisale]',
+                erpcm                   = '',
+                hinta                   = '$editilaus_loppuhinta',
+                huolitsija              = '',
+                hyvaksynnanmuutos       = '{$arow['luokka']}',
+                jakelu                  = '',
+                jaksotettu              = '',
+                jtkielto                = '$arow[jtkielto]',
+                kassalipas              = '$editilaus_kassalipas',
+                kauppatapahtuman_luonne = '$arow[kauppatapahtuman_luonne]',
+                kerayspvm               = '$toimpvm',
+                keraysvko               = '',
+                ketjutus                = '$arow[ketjutus]',
+                kohde                   = '',
+                kohdistettu             = '$maksaja',
+                kuljetus                = '',
+                kuljetusmuoto           = '$arow[kuljetusmuoto]',
+                laatija                 = '$edi_laatija',
+                laskutusvkopv           = '$arow[laskutusvkopv]',
+                liitostunnus            = '$arow[tunnus]',
+                luontiaika              =  now(),
+                maa                     = '$arow[maa]',
+                maa_maara               = '$arow[maa_maara]',
+                maksuehto               = '$editilaus_maksuehto',
+                maksuteksti             = '$editilaus_maksuteksti',
+                myyja                   = '$edimyyja',
+                nimi                    = '$arow[nimi]',
+                nimitark                = '$arow[nimitark]',
+                ohjausmerkki            = '{$ohjausmerkki}',
+                olmapvm                 = '',
+                osatoimitus             = '',
+                osoite                  = '$arow[osoite]',
+                ovttunnus               = '$arow[ovttunnus]',
+                piiri                   = '$arow[piiri]',
+                postino                 = '$arow[postino]',
+                postitp                 = '$arow[postitp]',
+                prioriteettinro         = '{$prioriteettinro}',
+                rahtivapaa              = '$editilaus_rahtivapaa',
+                sisainen                = '$editilaus_sisainen',
+                sisviesti1              = '$arow[sisviesti1]',
+                sisviesti2              = '$lopviesti',
+                sisviesti3              = '{$merkkitieto}',
+                splittauskielto         = '$splittauskielto',
+                tila                    = '$editilaus_tila',
+                tilaustyyppi            = '$tilaustyyppilisa',
+                tilausvahvistus         = '$vastaustapa',
+                tilausyhteyshenkilo     = '$tilausyhteyshenkilo',
+                toimaika                = '$toimpvm',
+                toimitusehto            = '$arow[toimitusehto]',
+                toimitustapa            = '$editilaus_toimitustapa',
+                toimvko                 = '',
+                toim_maa                = '$arow[toim_maa]',
+                toim_puh                = '$arow[toim_puh]',
+                toim_nimi               = '$arow[toim_nimi]',
+                toim_nimitark           = '$arow[toim_nimitark]',
+                toim_osoite             = '$arow[toim_osoite]',
+                toim_ovttunnus          = '$toimitetaan_tanne',
+                toim_postino            = '$arow[toim_postino]',
+                toim_postitp            = '$arow[toim_postitp]',
+                toim_email              = '$arow[toim_email]',
+                tunnusnippu             = '',
+                valkoodi                = '$yhtiorow[valkoodi]',
+                varasto                 = '',
+                verkkotunnus            = '$arow[verkkotunnus]',
+                vienti                  = '$til_vienti',
+                vienti_kurssi           = '1',
+                viesti                  = '$viite',
+                viikorkopros            = '$yhtiorow[viivastyskorko]',
+                yhtio                   = '$kukarow[yhtio]',
+                yhtio_kotipaikka        = '$yhtiorow[kotipaikka]',
+                yhtio_maa               = '$yhtiorow[maa]',
+                yhtio_nimi              = '$yhtiorow[nimi]',
+                yhtio_osoite            = '$yhtiorow[osoite]',
+                yhtio_ovttunnus         = '$yhtiorow[ovttunnus]',
+                yhtio_postino           = '$yhtiorow[postino]',
+                yhtio_postitp           = '$yhtiorow[postitp]',
+                yhtio_toimipaikka       = '',
+                ytunnus                 = '$arow[ytunnus]',
+                ohjelma_moduli          = '$ohjelmamoduli'";
       $result = pupe_query($query);
       $id = mysql_insert_id();
 
       $query = "INSERT INTO laskun_lisatiedot SET
-                  laskutus_nimi     = '$arow[laskutus_nimi]',
-                  laskutus_nimitark = '$arow[laskutus_nimitark]',
-                  laskutus_osoite   = '$arow[laskutus_osoite]',
-                  laskutus_postitp  = '$arow[laskutus_postitp]',
-                  laskutus_postino  = '$arow[laskutus_postino]',
-                  laskutus_maa      = '$arow[laskutus_maa]',
-                  laatija           = '$edi_laatija',
-                  luontiaika        = now(),
-                  yhtio             = '$kukarow[yhtio]',
-                  otunnus           = '$id'";
+                laskutus_nimi     = '$arow[laskutus_nimi]',
+                laskutus_nimitark = '$arow[laskutus_nimitark]',
+                laskutus_osoite   = '$arow[laskutus_osoite]',
+                laskutus_postitp  = '$arow[laskutus_postitp]',
+                laskutus_postino  = '$arow[laskutus_postino]',
+                laskutus_maa      = '$arow[laskutus_maa]',
+                laatija           = '$edi_laatija',
+                luontiaika        = now(),
+                yhtio             = '$kukarow[yhtio]',
+                otunnus           = '$id'";
       $lisatiedot_result = pupe_query($query);
 
       if ($edi_tyyppi == 'futursoft' and $editilaus_tilaustyyppi == 3) {
         $query = "INSERT INTO tyomaarays SET
-                    yhtio   = '{$kukarow['yhtio']}',
-                    otunnus = '{$id}'";
+                  yhtio   = '{$kukarow['yhtio']}',
+                  otunnus = '{$id}'";
         $tyomaarays_ins_res = pupe_query($query);
       }
 
@@ -1415,9 +1415,9 @@ while ($tietue = fgets($fd)) {
 
       //vientikieltotarkistus
       $query  = "SELECT if(toim_maa != '', toim_maa, maa) maa
-                   FROM asiakas
-                   WHERE yhtio = '$kukarow[yhtio]'
-                   and tunnus  = '$laskurow[liitostunnus]'";
+                 FROM asiakas
+                 WHERE yhtio = '$kukarow[yhtio]'
+                 and tunnus  = '$laskurow[liitostunnus]'";
       $vieres = pupe_query($query);
       $vierow = mysql_fetch_assoc($vieres);
 
@@ -1436,23 +1436,23 @@ while ($tietue = fgets($fd)) {
       $fileslite = t("Tilausnumero")." $id";
 
       $query = "INSERT INTO liitetiedostot SET
-                  yhtio           = '$kukarow[yhtio]',
-                  liitos          = 'lasku',
-                  liitostunnus    = '$id',
-                  data            = '$liitefile',
-                  selite          = '$fileslite',
-                  kieli           = '$yhtiorow[kieli]',
-                  filename        = '$filename',
-                  filesize        = '$filesize',
-                  filetype        = 'text/plain',
-                  image_width     = '',
-                  image_height    = '',
-                  image_bits      = '',
-                  image_channels  = '',
-                  kayttotarkoitus = 'EDI',
-                  jarjestys       = '1',
-                  laatija         = '$edi_laatija',
-                  luontiaika      = now()";
+                yhtio           = '$kukarow[yhtio]',
+                liitos          = 'lasku',
+                liitostunnus    = '$id',
+                data            = '$liitefile',
+                selite          = '$fileslite',
+                kieli           = '$yhtiorow[kieli]',
+                filename        = '$filename',
+                filesize        = '$filesize',
+                filetype        = 'text/plain',
+                image_width     = '',
+                image_height    = '',
+                image_bits      = '',
+                image_channels  = '',
+                kayttotarkoitus = 'EDI',
+                jarjestys       = '1',
+                laatija         = '$edi_laatija',
+                luontiaika      = now()";
       $Xresult = pupe_query($query);
 
       // HUOM: Laitetaan messu myyntiin jos asiakkaan nimi meid‰n kannassa on eri kuin tilaukselta tullut nimi
@@ -1530,11 +1530,11 @@ while ($tietue = fgets($fd)) {
       if ($yhtiorow["yhtio"] == "artr") {
         // 1. Etsit‰‰n aktiivisia tuotteita kaikki spacet poistettuina
         $query = "SELECT *
-                    FROM tuote
-                    WHERE yhtio  = '{$kukarow["yhtio"]}'
-                    and tuoteno  = '{$tieto}'
-                    and status  != 'P'
-                    {$kieltolisa}";
+                  FROM tuote
+                  WHERE yhtio  = '{$kukarow["yhtio"]}'
+                  and tuoteno  = '{$tieto}'
+                  and status  != 'P'
+                  {$kieltolisa}";
         $result = pupe_query($query);
 
         if (mysql_num_rows($result) == 0) {
@@ -1543,11 +1543,11 @@ while ($tietue = fgets($fd)) {
 
           // 2. Laitetaan kolmanneksi merkiksi space ja tsekataan lˆytyykˆ aktiivinen
           $query = "SELECT *
-                      FROM tuote
-                      WHERE yhtio  = '{$kukarow["yhtio"]}'
-                      and tuoteno  = '{$tieto}'
-                      and status  != 'P'
-                      {$kieltolisa}";
+                    FROM tuote
+                    WHERE yhtio  = '{$kukarow["yhtio"]}'
+                    and tuoteno  = '{$tieto}'
+                    and status  != 'P'
+                    {$kieltolisa}";
           $result = pupe_query($query);
 
           if (mysql_num_rows($result) == 0) {
@@ -1556,10 +1556,10 @@ while ($tietue = fgets($fd)) {
 
             // 3. Poistetaan kolmannesta merkist‰ space ja tsekataan lˆytyykˆ poistettu
             $query = "SELECT *
-                        FROM tuote
-                        WHERE yhtio = '{$kukarow["yhtio"]}'
-                        and tuoteno = '{$tieto}'
-                        {$kieltolisa}";
+                      FROM tuote
+                      WHERE yhtio = '{$kukarow["yhtio"]}'
+                      and tuoteno = '{$tieto}'
+                      {$kieltolisa}";
             $result = pupe_query($query);
 
             if (mysql_num_rows($result) == 0) {
@@ -1568,10 +1568,10 @@ while ($tietue = fgets($fd)) {
 
               // 4. Laitetaan kolmanneksi merkiksi space ja tsekataan lˆytyykˆ poistettu
               $query = "SELECT *
-                          FROM tuote
-                          WHERE yhtio = '{$kukarow["yhtio"]}'
-                          and tuoteno = '{$tieto}'
-                          {$kieltolisa}";
+                        FROM tuote
+                        WHERE yhtio = '{$kukarow["yhtio"]}'
+                        and tuoteno = '{$tieto}'
+                        {$kieltolisa}";
               $result = pupe_query($query);
 
               if (mysql_num_rows($result) == 0) {
@@ -1587,10 +1587,10 @@ while ($tietue = fgets($fd)) {
       }
 
       $query = "SELECT *
-                  FROM tuote
-                  WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
-                  and tuote.tuoteno = '{$tieto}'
-                  {$kieltolisa}";
+                FROM tuote
+                WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
+                and tuote.tuoteno = '{$tieto}'
+                {$kieltolisa}";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 0) {
@@ -1604,10 +1604,10 @@ while ($tietue = fgets($fd)) {
 
         if ($trow['panttitili'] == 'K') {
           $query = "SELECT *
-                      from tuoteperhe
-                      where tuoteperhe.yhtio       = '{$kukarow["yhtio"]}'
-                      and tuoteperhe.tuoteno       = '{$trow["tuoteno"]}'
-                      and tuoteperhe.ohita_kerays != ''";
+                    from tuoteperhe
+                    where tuoteperhe.yhtio       = '{$kukarow["yhtio"]}'
+                    and tuoteperhe.tuoteno       = '{$trow["tuoteno"]}'
+                    and tuoteperhe.ohita_kerays != ''";
           $result = pupe_query($query);
 
           // Runkotuotteita ei saa tilata suoraan!
@@ -1655,11 +1655,11 @@ while ($tietue = fgets($fd)) {
     if ($tuoteno == "" and $tieto != "") {
 
       $query = "SELECT *
-                  FROM tuote USE INDEX (yhtio_eankoodi_index)
-                  WHERE yhtio  = '$kukarow[yhtio]'
-                  and eankoodi = '$tieto'
-                  $kieltolisa
-                  ORDER BY tunnus";
+                FROM tuote USE INDEX (yhtio_eankoodi_index)
+                WHERE yhtio  = '$kukarow[yhtio]'
+                and eankoodi = '$tieto'
+                $kieltolisa
+                ORDER BY tunnus";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 0) {
@@ -1849,9 +1849,9 @@ while ($tietue = fgets($fd)) {
             // N‰m‰ ovat ainoat varastot joista verkkokauppa saa myyd‰
             if ($verkkokauppavarasto == "") {
               $query  = "SELECT GROUP_CONCAT(tunnus) tunnukset
-                           FROM varastopaikat
-                           WHERE yhtio      = '$kukarow[yhtio]'
-                           AND prioriteetti > 0 AND tyyppi != 'P'";
+                         FROM varastopaikat
+                         WHERE yhtio      = '$kukarow[yhtio]'
+                         AND prioriteetti > 0 AND tyyppi != 'P'";
               $pres = pupe_query($query);
               $prow = mysql_fetch_assoc($pres);
 
@@ -1907,16 +1907,16 @@ while ($tietue = fgets($fd)) {
             if ($chk_myytavissa < $kpl) {
 
               $query = "SELECT distinct varastopaikat.tunnus varasto, varastopaikat.prioriteetti
-                          FROM tuotepaikat
-                          JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-                            AND varastopaikat.tyyppi       != ''
-                            AND varastopaikat.prioriteetti  > 0
-                            AND concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-                            AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-                            $verkkokauppavarasto_li)
-                          WHERE tuotepaikat.yhtio           = '$kukarow[yhtio]'
-                          AND tuotepaikat.tuoteno           = '$tuoteno'
-                          ORDER BY prioriteetti";
+                        FROM tuotepaikat
+                        JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+                          AND varastopaikat.tyyppi       != ''
+                          AND varastopaikat.prioriteetti  > 0
+                          AND concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+                          AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+                          $verkkokauppavarasto_li)
+                        WHERE tuotepaikat.yhtio           = '$kukarow[yhtio]'
+                        AND tuotepaikat.tuoteno           = '$tuoteno'
+                        ORDER BY prioriteetti";
               $sres = pupe_query($query);
 
               $erikoisvarastojen_saldot = array();
@@ -2011,18 +2011,18 @@ while ($tietue = fgets($fd)) {
         }
 
         $query = "INSERT into tilausrivi set
-                    tilaajanrivinro = '$rivinumero',
-                    laatija         = 'edi',
-                    laadittu        = now(),
-                    yhtio           = '$kukarow[yhtio]',
-                    tuoteno         = '$virhetuoteno',
-                    var             = 'P',
-                    kpl             = '0',
-                    alv             = '".alv_oletus()."',
-                    tilkpl          = '$kpl',
-                    otunnus         = '$id',
-                    tyyppi          = '$editilaus_tyyppi',
-                    kommentti       = '$kommentti'";
+                  tilaajanrivinro = '$rivinumero',
+                  laatija         = 'edi',
+                  laadittu        = now(),
+                  yhtio           = '$kukarow[yhtio]',
+                  tuoteno         = '$virhetuoteno',
+                  var             = 'P',
+                  kpl             = '0',
+                  alv             = '".alv_oletus()."',
+                  tilkpl          = '$kpl',
+                  otunnus         = '$id',
+                  tyyppi          = '$editilaus_tyyppi',
+                  kommentti       = '$kommentti'";
         $result = pupe_query($query);
 
       }
@@ -2052,26 +2052,26 @@ while ($tietue = fgets($fd)) {
     if ($editilaus_otsikko_ok == "KYLLA") {
       //tarkistetaan toimitustapa vakin takia
       $query = "SELECT *
-                  FROM tilausrivi
-                  JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi not in ('','0'))
-                  WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-                  and tilausrivi.otunnus = '$id'";
+                FROM tilausrivi
+                JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi not in ('','0'))
+                WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+                and tilausrivi.otunnus = '$id'";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) > 0) {
         $query = "SELECT vak_kielto
-                    FROM toimitustapa
-                    WHERE yhtio = '$kukarow[yhtio]'
-                    and selite  = '$laskurow[toimitustapa]'";
+                  FROM toimitustapa
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and selite  = '$laskurow[toimitustapa]'";
         $result = pupe_query($query);
         $toimtapatmp = mysql_fetch_assoc($result);
 
         if ($toimtapatmp['vak_kielto'] != '' and $toimtapatmp['vak_kielto'] != 'K') {
           $query = "SELECT selite
-                      FROM toimitustapa
-                      WHERE yhtio    = '$kukarow[yhtio]'
-                      AND selite     = '$toimtapatmp[vak_kielto]'
-                      AND vak_kielto = ''";
+                    FROM toimitustapa
+                    WHERE yhtio    = '$kukarow[yhtio]'
+                    AND selite     = '$toimtapatmp[vak_kielto]'
+                    AND vak_kielto = ''";
           $result = pupe_query($query);
 
           if (mysql_num_rows($result) == 1) {
@@ -2111,20 +2111,20 @@ while ($tietue = fgets($fd)) {
         if ($edi_tyyppi == "magento" and $editilaus_kassalipas != "" and $editilaus_tilaustyyppi != "9") {
           // Haetaan yrityksen ensimm‰inen normivarasto. Tallennetaan tilaus t‰h‰n varastoon
           $varasto_query = "SELECT tunnus
-                              from varastopaikat
-                              where yhtio = '$kukarow[yhtio]'
-                              and tyyppi  = ''
-                              order by alkuhyllyalue
-                              limit 1";
+                            from varastopaikat
+                            where yhtio = '$kukarow[yhtio]'
+                            and tyyppi  = ''
+                            order by alkuhyllyalue
+                            limit 1";
           $varasto_res = pupe_query($varasto_query);
           $varasto_row = mysql_fetch_assoc($varasto_res);
 
           $query = "SELECT hyllyalue, hyllynro
-                      FROM tilausrivi
-                      WHERE yhtio    = '$kukarow[yhtio]'
-                      AND hyllyalue != ''
-                      AND hyllynro  != ''
-                      AND otunnus    = '$editilaus_lasku_tunnus'";
+                    FROM tilausrivi
+                    WHERE yhtio    = '$kukarow[yhtio]'
+                    AND hyllyalue != ''
+                    AND hyllynro  != ''
+                    AND otunnus    = '$editilaus_lasku_tunnus'";
           $edi_varastopaikka_res = pupe_query($query);
           $edi_varastopaikka_row = mysql_fetch_assoc($edi_varastopaikka_res);
 
@@ -2135,15 +2135,15 @@ while ($tietue = fgets($fd)) {
 
           // Palautetaan tilaus takaisin "myyntitilaus ker‰ysjonossa"-tilaan, lis‰t‰‰n p‰‰lle laskutuskielto varmuuden vuoksi (ei vientitilauksille)
           $query = "UPDATE lasku SET
-                      mapvm        = now(),
-                      tila         = 'N',
-                      alatila      = 'A',
-                      $vielisa
-                      varasto      = '$varasto_row[tunnus]',
-                      sisviesti2   = 'Verkkokauppatilaus! Tilauksen tietoja ei saa muuttaa.',
-                      tulostusalue = '$tulostusalue'
-                      WHERE yhtio  = '$kukarow[yhtio]'
-                      AND tunnus   = '$editilaus_lasku_tunnus'";
+                    mapvm        = now(),
+                    tila         = 'N',
+                    alatila      = 'A',
+                    $vielisa
+                    varasto      = '$varasto_row[tunnus]',
+                    sisviesti2   = 'Verkkokauppatilaus! Tilauksen tietoja ei saa muuttaa.',
+                    tulostusalue = '$tulostusalue'
+                    WHERE yhtio  = '$kukarow[yhtio]'
+                    AND tunnus   = '$editilaus_lasku_tunnus'";
           $magento_maksettu_res = pupe_query($query);
 
           // haetaan tilauksen tiedot
@@ -2153,19 +2153,19 @@ while ($tietue = fgets($fd)) {
 
           // pit‰‰ nollata toimitettuaika riveille
           $query = "UPDATE tilausrivi SET
-                      toimitettu     = '',
-                      toimitettuaika = ''
-                      WHERE yhtio    = '$kukarow[yhtio]'
-                      AND otunnus    = '$editilaus_lasku_tunnus'";
+                    toimitettu     = '',
+                    toimitettuaika = ''
+                    WHERE yhtio    = '$kukarow[yhtio]'
+                    AND otunnus    = '$editilaus_lasku_tunnus'";
           $result = pupe_query($query);
 
           // pit‰‰ nollata kerattyaika kaikille saldollisille tuotteille
           $query = "UPDATE tilausrivi SET
-                      keratty      = '',
-                      kerattyaika  = ''
-                      WHERE yhtio  = '$kukarow[yhtio]'
-                      AND otunnus  = '$editilaus_lasku_tunnus'
-                      AND keratty != 'saldoton'";
+                    keratty      = '',
+                    kerattyaika  = ''
+                    WHERE yhtio  = '$kukarow[yhtio]'
+                    AND otunnus  = '$editilaus_lasku_tunnus'
+                    AND keratty != 'saldoton'";
           $result = pupe_query($query);
 
           // ei haluta k‰sitell‰ t‰t‰ toista kertaa kassamyyntin‰, koska se est‰‰ splittauksen
@@ -2184,9 +2184,9 @@ while ($tietue = fgets($fd)) {
       }
       elseif ($editilaus_tila == "Z") {
         $query = "UPDATE lasku SET
-                    alatila     = 'A'
-                    WHERE yhtio = '$kukarow[yhtio]'
-                    AND tunnus  = '$editilaus_lasku_tunnus'";
+                  alatila     = 'A'
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND tunnus  = '$editilaus_lasku_tunnus'";
         $terminaali_tilaus_res = pupe_query($query);
         $edi_ulos .= "\n".t("Terminaalitoimitus vastaanotettu").": $editilaus_lasku_tunnus.\n\n";
       }

@@ -219,9 +219,9 @@ if ($tee == 'valitse' and $real_submit != '') {
   }
   else {
     $query = "SELECT rahtikirjanro
-                from rahtikirjat
-                where otsikkonro = '$otunnus'
-                      and yhtio  = '$kukarow[yhtio]'";
+              from rahtikirjat
+              where otsikkonro = '$otunnus'
+                    and yhtio  = '$kukarow[yhtio]'";
     $res = mysql_query($query) or pupe_error($query);
     $rahtikirjanro = mysql_fetch_array($res);
 

@@ -23,8 +23,8 @@ if (!function_exists("asiakaskommenttitarkista")) {
 
     if (mysql_field_name($result, $i) == "tuoteno") {
       $query = "SELECT tuoteno
-                  FROM tuote
-                  WHERE yhtio='$kukarow[yhtio]' and tuoteno = '$t[$i]'";
+                FROM tuote
+                WHERE yhtio='$kukarow[yhtio]' and tuoteno = '$t[$i]'";
       $sresult = mysql_query($query) or pupe_error($query);
       if (mysql_num_rows($sresult) != 1) {
         $virhe[$i] = t("Tuotenumero puuttuu tai sitä ei löydy!");

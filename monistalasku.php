@@ -1044,11 +1044,11 @@ if ($tee == 'MONISTA') {
         case 'maksuehto':
 
           $query = "SELECT tunnus, jv
-                      FROM maksuehto
-                      WHERE yhtio  = '{$kukarow['yhtio']}'
-                      AND kaytossa = ''
-                      AND (sallitut_maat = '' OR sallitut_maat LIKE '%{$monistarow['maa']}%')
-                      AND tunnus   = '{$monistarow[$i]}'";
+                    FROM maksuehto
+                    WHERE yhtio  = '{$kukarow['yhtio']}'
+                    AND kaytossa = ''
+                    AND (sallitut_maat = '' OR sallitut_maat LIKE '%{$monistarow['maa']}%')
+                    AND tunnus   = '{$monistarow[$i]}'";
           $abures = pupe_query($query);
 
           $maksuehto_ok = TRUE;
@@ -1072,16 +1072,16 @@ if ($tee == 'MONISTA') {
           else {
             // Otetaan firman eka maksuehto
             $query = "SELECT tunnus
-                        FROM maksuehto
-                        WHERE yhtio     = '{$kukarow['yhtio']}'
-                        AND kaytossa    = ''
-                        AND (sallitut_maat = '' OR sallitut_maat LIKE '%{$monistarow['maa']}%')
-                        AND kateinen    = ''
-                        AND jv          = ''
-                        AND jaksotettu  = ''
-                        AND erapvmkasin = ''
-                        ORDER BY jarjestys, teksti, tunnus
-                        LIMIT 1";
+                      FROM maksuehto
+                      WHERE yhtio     = '{$kukarow['yhtio']}'
+                      AND kaytossa    = ''
+                      AND (sallitut_maat = '' OR sallitut_maat LIKE '%{$monistarow['maa']}%')
+                      AND kateinen    = ''
+                      AND jv          = ''
+                      AND jaksotettu  = ''
+                      AND erapvmkasin = ''
+                      ORDER BY jarjestys, teksti, tunnus
+                      LIMIT 1";
             $abures = pupe_query($query);
             $aburow = mysql_fetch_assoc($abures);
 
@@ -1265,10 +1265,10 @@ if ($tee == 'MONISTA') {
             if (isset($asiakrow["maa"]) and $asiakrow["maa"] != "" and $asiakrow["maa"] != $yhtiorow["maa"]) {
               // tutkitaan ollaanko siellä alv-rekisteröity
               $alhqur = "SELECT *
-                           FROM yhtion_toimipaikat
-                           WHERE yhtio     = '$kukarow[yhtio]'
-                           AND maa         = '$asiakrow[maa]'
-                           AND vat_numero != ''";
+                         FROM yhtion_toimipaikat
+                         WHERE yhtio     = '$kukarow[yhtio]'
+                         AND maa         = '$asiakrow[maa]'
+                         AND vat_numero != ''";
               $alhire = pupe_query($alhqur);
 
               // ollaan alv-rekisteröity, aina kotimaa myynti ja alvillista
@@ -1364,9 +1364,9 @@ if ($tee == 'MONISTA') {
           }
           else {
             $vquery = "SELECT kurssi
-                         FROM valuu
-                         WHERE yhtio = '{$kukarow['yhtio']}'
-                         and nimi    = '{$monistarow['valkoodi']}'";
+                       FROM valuu
+                       WHERE yhtio = '{$kukarow['yhtio']}'
+                       and nimi    = '{$monistarow['valkoodi']}'";
             $vresult = pupe_query($vquery);
             $valrow = mysql_fetch_array($vresult);
             $values .= ", '{$valrow['kurssi']}'";

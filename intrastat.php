@@ -1021,9 +1021,9 @@ if (mysql_num_rows($vresult) > 0) {
   echo "<option value='' $sel>".t("Ei valintaa")."</option>";
 
   $query = "SELECT distinct koodi, nimi
-                  FROM maat
-                  where nimi != '' and eu != '' and koodi != '$yhtiorow[maa]'
-                  ORDER BY koodi";
+            FROM maat
+            where nimi != '' and eu != '' and koodi != '$yhtiorow[maa]'
+            ORDER BY koodi";
   $vresult = mysql_query($query) or pupe_error($query);
 
   while ($row = mysql_fetch_array($vresult)) {

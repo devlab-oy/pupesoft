@@ -1,6 +1,6 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 if ($tee != 'PERUSTA') {
 
@@ -74,34 +74,34 @@ if ($tee == 'PERUSTA') {
           $query .= "tuoteno='$uustuoteno',";
         }
         // laatijaksi klikkaaja
-        elseif (mysql_field_name($stresult,$i) == 'laatija') {
+        elseif (mysql_field_name($stresult, $i) == 'laatija') {
           $query .= "laatija='$kukarow[kuka]',";
         }
         // muuttajaksi klikkaaja
-        elseif (mysql_field_name($stresult,$i) == 'muuttaja') {
+        elseif (mysql_field_name($stresult, $i) == 'muuttaja') {
           $query .= "muuttaja='$kukarow[kuka]',";
         }
         // luontiaika
-        elseif (mysql_field_name($stresult,$i) == 'luontiaika' or mysql_field_name($stresult,$i) == 'muutospvm') {
-          $query .= mysql_field_name($stresult,$i)."=now(),";
+        elseif (mysql_field_name($stresult, $i) == 'luontiaika' or mysql_field_name($stresult, $i) == 'muutospvm') {
+          $query .= mysql_field_name($stresult, $i)."=now(),";
         }
         // nämä kentät tyhjennetään
-        elseif (mysql_field_name($stresult,$i) == 'kehahin' or
-            mysql_field_name($stresult,$i) == 'vihahin' or
-            mysql_field_name($stresult,$i) == 'vihapvm' or
-            mysql_field_name($stresult,$i) == 'epakurantti25pvm' or
-            mysql_field_name($stresult,$i) == 'epakurantti50pvm' or
-            mysql_field_name($stresult,$i) == 'epakurantti75pvm' or
-            mysql_field_name($stresult,$i) == 'epakurantti100pvm' or
-            mysql_field_name($stresult,$i) == 'eankoodi') {
-          $query .= mysql_field_name($stresult,$i)."='',";
+        elseif (mysql_field_name($stresult, $i) == 'kehahin' or
+          mysql_field_name($stresult, $i) == 'vihahin' or
+          mysql_field_name($stresult, $i) == 'vihapvm' or
+          mysql_field_name($stresult, $i) == 'epakurantti25pvm' or
+          mysql_field_name($stresult, $i) == 'epakurantti50pvm' or
+          mysql_field_name($stresult, $i) == 'epakurantti75pvm' or
+          mysql_field_name($stresult, $i) == 'epakurantti100pvm' or
+          mysql_field_name($stresult, $i) == 'eankoodi') {
+          $query .= mysql_field_name($stresult, $i)."='',";
         }
         // ja kaikki muut paitsi tunnus sellaisenaan
-        elseif (mysql_field_name($stresult,$i) != 'tunnus') {
-          $query .= mysql_field_name($stresult,$i)."='".$otsikkorivi[$i]."',";
+        elseif (mysql_field_name($stresult, $i) != 'tunnus') {
+          $query .= mysql_field_name($stresult, $i)."='".$otsikkorivi[$i]."',";
         }
       }
-      $query = substr($query,0,-1);
+      $query = substr($query, 0, -1);
       $stresult = pupe_query($query);
 
       $tuote_id = mysql_insert_id();
@@ -122,28 +122,28 @@ if ($tee == 'PERUSTA') {
 
           for ($i=0; $i<mysql_num_fields($stresult); $i++) {
 
-            if (mysql_field_name($stresult,$i) == 'yhtio') {
+            if (mysql_field_name($stresult, $i) == 'yhtio') {
               $query_fields .= "yhtio='$kukarow[yhtio]',";
             }
             // tuotenumeroksi tietenkin uustuoteno
-            elseif (mysql_field_name($stresult,$i) == 'tuoteno') {
+            elseif (mysql_field_name($stresult, $i) == 'tuoteno') {
               $query_fields .= "tuoteno='$uustuoteno',";
             }
             // laatijaksi klikkaaja
-            elseif (mysql_field_name($stresult,$i) == 'laatija') {
+            elseif (mysql_field_name($stresult, $i) == 'laatija') {
               $query_fields .= "laatija='$kukarow[kuka]',";
             }
             // muuttajaksi klikkaaja
-            elseif (mysql_field_name($stresult,$i) == 'muuttaja') {
+            elseif (mysql_field_name($stresult, $i) == 'muuttaja') {
               $query_fields .= "muuttaja='$kukarow[kuka]',";
             }
             // luontiaika
-            elseif (mysql_field_name($stresult,$i) == 'luontiaika' or mysql_field_name($stresult,$i) == 'muutospvm') {
-              $query_fields .= mysql_field_name($stresult,$i)."=now(),";
+            elseif (mysql_field_name($stresult, $i) == 'luontiaika' or mysql_field_name($stresult, $i) == 'muutospvm') {
+              $query_fields .= mysql_field_name($stresult, $i)."=now(),";
             }
             // ja kaikki muut paitsi tunnus sellaisenaan
-            elseif (mysql_field_name($stresult,$i) != 'tunnus') {
-              $query_fields .= mysql_field_name($stresult,$i)."='".$otsikkorivi[$i]."',";
+            elseif (mysql_field_name($stresult, $i) != 'tunnus') {
+              $query_fields .= mysql_field_name($stresult, $i)."='".$otsikkorivi[$i]."',";
             }
           }
 
@@ -176,28 +176,28 @@ if ($tee == 'PERUSTA') {
 
           for ($i = 0; $i < mysql_num_fields($stresult); $i++) {
 
-            if (mysql_field_name($stresult,$i) == 'yhtio') {
+            if (mysql_field_name($stresult, $i) == 'yhtio') {
               $query_fields .= "yhtio='$kukarow[yhtio]',";
             }
             // liitokseksi tietenkin uustuoteno
-            elseif (mysql_field_name($stresult,$i) == 'liitos') {
+            elseif (mysql_field_name($stresult, $i) == 'liitos') {
               $query_fields .= "liitos='$uustuoteno',";
             }
             // laatijaksi klikkaaja
-            elseif (mysql_field_name($stresult,$i) == 'laatija') {
+            elseif (mysql_field_name($stresult, $i) == 'laatija') {
               $query_fields .= "laatija='$kukarow[kuka]',";
             }
             // muuttajaksi klikkaaja
-            elseif (mysql_field_name($stresult,$i) == 'muuttaja') {
+            elseif (mysql_field_name($stresult, $i) == 'muuttaja') {
               $query_fields .= "muuttaja='$kukarow[kuka]',";
             }
             // luontiaika
-            elseif (mysql_field_name($stresult,$i) == 'luontiaika' or mysql_field_name($stresult,$i) == 'muutospvm') {
-              $query_fields .= mysql_field_name($stresult,$i)."=now(),";
+            elseif (mysql_field_name($stresult, $i) == 'luontiaika' or mysql_field_name($stresult, $i) == 'muutospvm') {
+              $query_fields .= mysql_field_name($stresult, $i)."=now(),";
             }
             // ja kaikki muut paitsi tunnus sellaisenaan
-            elseif (mysql_field_name($stresult,$i) != 'tunnus') {
-              $query_fields .= mysql_field_name($stresult,$i)."='".$otsikkorivi[$i]."',";
+            elseif (mysql_field_name($stresult, $i) != 'tunnus') {
+              $query_fields .= mysql_field_name($stresult, $i)."='".$otsikkorivi[$i]."',";
             }
           }
 
@@ -235,7 +235,7 @@ if ($tee == 'PERUSTA') {
       $tunnus = $tuote_id;
       $tee   = '';
 
-      require ("yllapito.php");
+      require "yllapito.php";
 
       exit;
     }
@@ -261,7 +261,7 @@ if ($tee == 'HAKU') {
       $tuoteno = $tuoteno."*";
     }
 
-    require("inc/tuotehaku.inc");
+    require "inc/tuotehaku.inc";
 
     //on vaan löytynyt 1 muuten tulis virhettä ja ulosta
     if ($tee == 'HAKU' and $ulos == '' and $varaosavirhe == '' and $tuoteno != '') {
@@ -277,7 +277,7 @@ if ($tee == 'AVALITTU' and $tuoteno != '') {
   echo "<table>";
   echo "<tr><th>".t("Kopioitava tuote")."</th></tr>";
 
-  if(strpos($tuoteno, '####') !== FALSE) {
+  if (strpos($tuoteno, '####') !== FALSE) {
     $tu = substr($tuoteno, strpos($tuoteno, '####')+4)." - ".substr($tuoteno, 0, strpos($tuoteno, '####'));
   }
   else {
@@ -297,17 +297,17 @@ if ($tee == 'AVALITTU' and $tuoteno != '') {
 }
 
 if (($tee == 'HAKU' or $tee == "Y") and $ulos != '') {
-    echo "<form method='post' autocomplete='off'>";
-    echo "<input type='hidden' name='tee' value='AVALITTU'>";
-    echo "<table><tr>";
-    echo "<th>".t("Valitse listasta").":</th></tr>";
-    echo "<tr><td>$ulos</td>";
-    echo "<td class='back'><input type='Submit' value='".t("Valitse")."'></td>";
-    echo "<td class='back'><font class='error'>$varaosavirhe</font></td>";
-    echo "</tr></table>";
-    echo "</form>";
+  echo "<form method='post' autocomplete='off'>";
+  echo "<input type='hidden' name='tee' value='AVALITTU'>";
+  echo "<table><tr>";
+  echo "<th>".t("Valitse listasta").":</th></tr>";
+  echo "<tr><td>$ulos</td>";
+  echo "<td class='back'><input type='Submit' value='".t("Valitse")."'></td>";
+  echo "<td class='back'><font class='error'>$varaosavirhe</font></td>";
+  echo "</tr></table>";
+  echo "</form>";
 
-    $varaosavirhe = "";
+  $varaosavirhe = "";
 }
 
 if ($tee == '' or $tee == "Y") {
@@ -325,4 +325,4 @@ if ($tee == '' or $tee == "Y") {
   echo "</form></tr></table>";
 }
 
-require("inc/footer.inc");
+require "inc/footer.inc";

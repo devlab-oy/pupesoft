@@ -3,16 +3,16 @@
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require('../inc/parametrit.inc');
+require '../inc/parametrit.inc';
 
-echo "<font class='head'>",t("Toimitustapaseuranta"),"</font><hr>";
+echo "<font class='head'>", t("Toimitustapaseuranta"), "</font><hr>";
 
 echo "<br /><table><form method='post'>";
 
 // ehdotetaan 7 päivää taaksepäin
-if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
-if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
-if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
+if (!isset($kka)) $kka = date("m", mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
+if (!isset($vva)) $vva = date("Y", mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
+if (!isset($ppa)) $ppa = date("d", mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
 
 if (!isset($kkl)) $kkl = date("m");
 if (!isset($vvl)) $vvl = date("Y");
@@ -23,20 +23,20 @@ if (!isset($tee)) $tee = "";
 $sel = array_fill_keys(array($tee), ' selected') + array_fill_keys(array('kaikki', 'paivittain'), '');
 
 echo "<input type='hidden' name='tee' value='kaikki'>";
-echo "<tr><th>",t("Syötä alkupäivämäärä (pp-kk-vvvv)"),"</th>
+echo "<tr><th>", t("Syötä alkupäivämäärä (pp-kk-vvvv)"), "</th>
     <td><input type='text' name='ppa' value='{$ppa}' size='3'></td>
     <td><input type='text' name='kka' value='{$kka}' size='3'></td>
     <td><input type='text' name='vva' value='{$vva}' size='5'></td>
-    </tr><tr><th>",t("Syötä loppupäivämäärä (pp-kk-vvvv)"),"</th>
+    </tr><tr><th>", t("Syötä loppupäivämäärä (pp-kk-vvvv)"), "</th>
     <td><input type='text' name='ppl' value='{$ppl}' size='3'></td>
     <td><input type='text' name='kkl' value='{$kkl}' size='3'></td>
     <td><input type='text' name='vvl' value='{$vvl}' size='5'></td><td class='back'></td></tr>";
-echo "<tr><th>",t("Valitse seurantatapa"),"</th>";
+echo "<tr><th>", t("Valitse seurantatapa"), "</th>";
 echo "<td colspan='3'><select name='tee'>";
-echo "<option value='kaikki'{$sel['kaikki']}>",t("Näytä summattuna"),"</option>";
-echo "<option value='paivittain'{$sel['paivittain']}>",t("Näytä päivittäin"),"</option>";
+echo "<option value='kaikki'{$sel['kaikki']}>", t("Näytä summattuna"), "</option>";
+echo "<option value='paivittain'{$sel['paivittain']}>", t("Näytä päivittäin"), "</option>";
 echo "</td></select>";
-echo "<td class='back'><input type='submit' value='",t("Aja raportti"),"'></td></tr></table>";
+echo "<td class='back'><input type='submit' value='", t("Aja raportti"), "'></td></tr></table>";
 
 echo "<br />";
 
@@ -89,8 +89,8 @@ if ($tee != '') {
   if ($tee == 'kaikki') echo $otsikot;
 
   //päiviä aikajaksossa
-  $epa1 = (int) date('U',mktime(0,0,0,$kka,$ppa,$vva));
-  $epa2 = (int) date('U',mktime(0,0,0,$kkl,$ppl,$vvl));
+  $epa1 = (int) date('U', mktime(0, 0, 0, $kka, $ppa, $vva));
+  $epa2 = (int) date('U', mktime(0, 0, 0, $kkl, $ppl, $vvl));
 
   //Diff in workdays (5 day week)
   $pva = abs($epa2-$epa1)/60/60/24/7*5;
@@ -132,7 +132,7 @@ if ($tee != '') {
       $maara        = 0;
       $myynti       = 0;
 
-      echo "<tr><th colspan='7'>",tv1dateconv($row['toimitettuaika']),"</th></tr>";
+      echo "<tr><th colspan='7'>", tv1dateconv($row['toimitettuaika']), "</th></tr>";
       echo $otsikot;
     }
 
@@ -155,7 +155,7 @@ if ($tee != '') {
     echo "<td>$row[kpl]</td>";
 
     if ($tee == 'kaikki') {
-      $kplperpva = round($row["kpl"]/$pva,0);
+      $kplperpva = round($row["kpl"]/$pva, 0);
       echo "<td>$kplperpva</td>";
       $kplperpva_kaikki += $kplperpva;
     }
@@ -164,7 +164,7 @@ if ($tee != '') {
       echo "<td>{$row['kpl_tilriv']}</td>";
     }
 
-    echo "<td align='right'>",hintapyoristys($row['summa']),"</td>";
+    echo "<td align='right'>", hintapyoristys($row['summa']), "</td>";
     echo "</tr>";
 
     $paivamaara = $row['toimitettuaika'];
@@ -184,7 +184,7 @@ if ($tee != '') {
     echo "<tr><td class='back' colspan='7'>&nbsp;</td></tr>";
 
     echo "<tr>
-        <td class='spec' colspan='2'>",t("Kaikki yhteensä"),"</td>
+        <td class='spec' colspan='2'>", t("Kaikki yhteensä"), "</td>
         <td class='spec'>{$kerayslistoja_kaikki}</td>
         <td class='spec'>{$tilauksia_kaikki}</td>
         <td class='spec'>{$tilausriveja_kaikki}</td>
@@ -193,7 +193,7 @@ if ($tee != '') {
   }
   else {
     echo "<tr>
-        <td class='spec' colspan='2'>",t("Kaikki yhteensä"),"</td>
+        <td class='spec' colspan='2'>", t("Kaikki yhteensä"), "</td>
         <td class='spec'>{$tilauksia_kaikki}</td>
         <td class='spec'>{$kplperpva_kaikki}</td>
         <td class='spec'>{$myynti_kaikki}</td></tr>";
@@ -203,4 +203,4 @@ if ($tee != '') {
   echo "</table>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

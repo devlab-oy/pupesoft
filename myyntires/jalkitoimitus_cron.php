@@ -6,7 +6,7 @@
  */
 
 if (php_sapi_name() != 'cli') {
-    die();
+  die();
 }
 
 // otetaan includepath aina rootista
@@ -16,19 +16,19 @@ ini_set("include_path", ini_get("include_path") . PATH_SEPARATOR . $pupe_root_po
 ini_set("display_errors", 0);
 
 // otetaan tietokantayhteys ja funkkarit
-require("inc/connect.inc");
-require("inc/functions.inc");
+require "inc/connect.inc";
+require "inc/functions.inc";
 
 $yhtio = $argv[1];
 $varastot = array_slice($argv, 2);
 
 if (empty($yhtio) or empty($varastot)) {
-    echo "\nUsage: php " . basename($argv[0]) . " yhtio varasto varasto\n\n";
-    die();
+  echo "\nUsage: php " . basename($argv[0]) . " yhtio varasto varasto\n\n";
+  die();
 }
 
 $oikeurow = array(
-    'paivitys' => 1
+  'paivitys' => 1
 );
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow = hae_kukarow('admin', $yhtio);

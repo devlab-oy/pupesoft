@@ -8,11 +8,11 @@ if (!isset($savvl)) $savvl = date("Y");
 if (!isset($sappl)) $sappl = date("d");
 
 if (isset($_POST["supertee"])) {
-  if($_POST["supertee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["supertee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if (isset($supertee)) {
   if ($supertee == "lataa_tiedosto") {
@@ -167,7 +167,7 @@ if ($tee == 'NAYTA') {
 
   if (mysql_num_rows($result) > 0) {
 
-    if (include('Spreadsheet/Excel/Writer.php')) {
+    if (include 'Spreadsheet/Excel/Writer.php') {
 
       //keksitään failille joku varmasti uniikki nimi:
       list($usec, $sec) = explode(' ', microtime());
@@ -184,7 +184,7 @@ if ($tee == 'NAYTA') {
       $excelrivi = 0;
     }
 
-    if(isset($workbook)) {
+    if (isset($workbook)) {
       $excelsarake = 0;
 
       $worksheet->write($excelrivi, $excelsarake, t("Ytunnus"), $format_bold);
@@ -230,22 +230,22 @@ if ($tee == 'NAYTA') {
       echo "<tr class='aktiivi'>";
       echo "<td valign='top'><a href='../raportit.php?toim=toimittajahaku&tee=A&ytunnus=$row[ytunnus]&alku=0&laji=M'>$row[ytunnus]</a></td>";
       echo "<td valign='top'>$row[nimi]</td>";
-      echo "<td valign='top' align='right'>".str_replace(".",",",$row["aa"])."</td>";
-      echo "<td valign='top' align='right'>".str_replace(".",",",$row["aabb"])."</td>";
-      echo "<td valign='top' align='right'>".str_replace(".",",",$row["bb"])."</td>";
-      echo "<td valign='top' align='right'>".str_replace(".",",",$row["cc"])."</td>";
-      echo "<td valign='top' align='right'>".str_replace(".",",",$row["dd"])."</td>";
-      echo "<td valign='top' align='right'>".str_replace(".",",",$row["ee"])."</td>";
-      echo "<td valign='top' align='right'>".str_replace(".",",",$row["ff"])."</td>";
-      echo "<td valign='top' align='right'>".str_replace(".",",",$row["ll"])."</td>";
+      echo "<td valign='top' align='right'>".str_replace(".", ",", $row["aa"])."</td>";
+      echo "<td valign='top' align='right'>".str_replace(".", ",", $row["aabb"])."</td>";
+      echo "<td valign='top' align='right'>".str_replace(".", ",", $row["bb"])."</td>";
+      echo "<td valign='top' align='right'>".str_replace(".", ",", $row["cc"])."</td>";
+      echo "<td valign='top' align='right'>".str_replace(".", ",", $row["dd"])."</td>";
+      echo "<td valign='top' align='right'>".str_replace(".", ",", $row["ee"])."</td>";
+      echo "<td valign='top' align='right'>".str_replace(".", ",", $row["ff"])."</td>";
+      echo "<td valign='top' align='right'>".str_replace(".", ",", $row["ll"])."</td>";
       echo "</tr>";
 
       if (isset($workbook)) {
         $excelsarake = 0;
 
-        $worksheet->writeString($excelrivi, $excelsarake, str_replace("<br>","\n", $row["ytunnus"]));
+        $worksheet->writeString($excelrivi, $excelsarake, str_replace("<br>", "\n", $row["ytunnus"]));
         $excelsarake++;
-        $worksheet->writeString($excelrivi, $excelsarake, str_replace("<br>","\n", $row["nimi"]));
+        $worksheet->writeString($excelrivi, $excelsarake, str_replace("<br>", "\n", $row["nimi"]));
         $excelsarake++;
         $worksheet->writeNumber($excelrivi, $excelsarake, $row["aa"]);
         $excelsarake++;
@@ -286,20 +286,20 @@ if ($tee == 'NAYTA') {
     if ($rivilask >= 1) {
       echo "<tr>";
       echo "<td valign='top' class='tumma' align='right' colspan='2'>".t("Yhteensä").":</th>";
-      echo "<td valign='top' class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$aay))."</td>";
-      echo "<td valign='top' class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$aabby))."</td>";
-      echo "<td valign='top' class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$bby))."</td>";
-      echo "<td valign='top' class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$ccy))."</td>";
-      echo "<td valign='top' class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$ddy))."</td>";
-      echo "<td valign='top' class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$eey))."</td>";
-      echo "<td valign='top' class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$ffy))."</td>";
-      echo "<td valign='top' class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$lly))."</td>";
+      echo "<td valign='top' class='tumma' align='right'>".str_replace(".", ",", sprintf('%.2f', $aay))."</td>";
+      echo "<td valign='top' class='tumma' align='right'>".str_replace(".", ",", sprintf('%.2f', $aabby))."</td>";
+      echo "<td valign='top' class='tumma' align='right'>".str_replace(".", ",", sprintf('%.2f', $bby))."</td>";
+      echo "<td valign='top' class='tumma' align='right'>".str_replace(".", ",", sprintf('%.2f', $ccy))."</td>";
+      echo "<td valign='top' class='tumma' align='right'>".str_replace(".", ",", sprintf('%.2f', $ddy))."</td>";
+      echo "<td valign='top' class='tumma' align='right'>".str_replace(".", ",", sprintf('%.2f', $eey))."</td>";
+      echo "<td valign='top' class='tumma' align='right'>".str_replace(".", ",", sprintf('%.2f', $ffy))."</td>";
+      echo "<td valign='top' class='tumma' align='right'>".str_replace(".", ",", sprintf('%.2f', $lly))."</td>";
       echo "</tr>";
     }
 
     echo "</table>";
 
-    if(isset($workbook)) {
+    if (isset($workbook)) {
 
       // We need to explicitly close the workbook
       $workbook->close();
@@ -320,4 +320,4 @@ if ($tee == 'NAYTA') {
   }
 }
 
-require ("../inc/footer.inc");
+require "../inc/footer.inc";

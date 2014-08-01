@@ -3,7 +3,11 @@
 if ($tee == "FILE") {
   if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
-    /** Käsiteltävän filen nimi **/
+    /**
+     * Käsiteltävän filen nimi *
+     */
+
+
     $kasiteltava_tiedoto_path = $_FILES['userfile']['tmp_name'];
 
     $excelrivit = pupeFileReader($kasiteltava_tiedoto_path, $ext);
@@ -41,8 +45,8 @@ if ($tee == "FILE") {
         $suun[2] += 2000;
       }
 
-      if (checkdate(sprintf('%02d',$suun[1]),sprintf('%02d',$suun[0]),sprintf('%04d',$suun[2]))) {
-        $suunpvm = sprintf('%04d',$suun[2])."-".sprintf('%02d',$suun[1])."-".sprintf('%02d',$suun[0]);
+      if (checkdate(sprintf('%02d', $suun[1]), sprintf('%02d', $suun[0]), sprintf('%04d', $suun[2]))) {
+        $suunpvm = sprintf('%04d', $suun[2])."-".sprintf('%02d', $suun[1])."-".sprintf('%02d', $suun[0]);
       }
 
       $kampanjat   = $rivi[10];
@@ -65,39 +69,39 @@ if ($tee == "FILE") {
         $kayty[2] += 2000;
       }
 
-      if (checkdate(sprintf('%02d',$kayty[1]),sprintf('%02d',$kayty[0]),sprintf('%04d',$kayty[2]))) {
-        $kaytypvm = sprintf('%04d',$kayty[2])."-".sprintf('%02d',$kayty[1])."-".sprintf('%02d',$kayty[0]);
+      if (checkdate(sprintf('%02d', $kayty[1]), sprintf('%02d', $kayty[0]), sprintf('%04d', $kayty[2]))) {
+        $kaytypvm = sprintf('%04d', $kayty[2])."-".sprintf('%02d', $kayty[1])."-".sprintf('%02d', $kayty[0]);
       }
 
       $kilsat = $rivi[12];
       $lahto  = $rivi[13];
 
       if (strlen($lahto) == 1 or strlen($lahto) == 2) {
-        $lahto = sprintf('%02d',$lahto).":00:00";
+        $lahto = sprintf('%02d', $lahto).":00:00";
       }
       if (strlen($lahto) == 5) {
-        $lahto = sprintf('%02d',substr($lahto,0,2)).":".sprintf('%02d',substr($lahto,3,2)).":00";
+        $lahto = sprintf('%02d', substr($lahto, 0, 2)).":".sprintf('%02d', substr($lahto, 3, 2)).":00";
       }
       if (strlen($lahto) == 8) {
-        $lahto = sprintf('%02d',substr($lahto,0,2)).":".sprintf('%02d',substr($lahto,3,2)).":".sprintf('%02d',substr($lahto,6,2));
+        $lahto = sprintf('%02d', substr($lahto, 0, 2)).":".sprintf('%02d', substr($lahto, 3, 2)).":".sprintf('%02d', substr($lahto, 6, 2));
       }
       if (strlen($lahto) > 8) {
-        $lahto = sprintf('%02d',substr($lahto,0,2)).":".sprintf('%02d',substr($lahto,3,2)).":".sprintf('%02d',substr($lahto,6,2));
+        $lahto = sprintf('%02d', substr($lahto, 0, 2)).":".sprintf('%02d', substr($lahto, 3, 2)).":".sprintf('%02d', substr($lahto, 6, 2));
       }
 
       $paluu = $rivi[14];
 
       if (strlen($paluu) == 1 or strlen($paluu) == 2) {
-        $paluu = sprintf('%02d',$paluu).":00:00";
+        $paluu = sprintf('%02d', $paluu).":00:00";
       }
       if (strlen($paluu) == 5) {
-        $paluu = sprintf('%02d',substr($paluu,0,2)).":".sprintf('%02d',substr($paluu,3,2)).":00";
+        $paluu = sprintf('%02d', substr($paluu, 0, 2)).":".sprintf('%02d', substr($paluu, 3, 2)).":00";
       }
       if (strlen($paluu) == 8) {
-        $paluu = sprintf('%02d',substr($paluu,0,2)).":".sprintf('%02d',substr($paluu,3,2)).":".sprintf('%02d',substr($paluu,6,2));
+        $paluu = sprintf('%02d', substr($paluu, 0, 2)).":".sprintf('%02d', substr($paluu, 3, 2)).":".sprintf('%02d', substr($paluu, 6, 2));
       }
       if (strlen($paluu) > 8) {
-        $paluu = sprintf('%02d',substr($paluu,0,2)).":".sprintf('%02d',substr($paluu,3,2)).":".sprintf('%02d',substr($paluu,6,2));
+        $paluu = sprintf('%02d', substr($paluu, 0, 2)).":".sprintf('%02d', substr($paluu, 3, 2)).":".sprintf('%02d', substr($paluu, 6, 2));
       }
 
       $pvrahat  = $rivi[15];
@@ -247,7 +251,7 @@ if ($tee == "FILE") {
     if ($kumpi != '') {
 
       $kaladate = explode('-', $suunpvm);
-      $kausi     = $kaladate[0].sprintf('%02d',date("W", mktime(0, 0, 0, $kaladate[1], $kaladate[2], $kaladate[0])));
+      $kausi     = $kaladate[0].sprintf('%02d', date("W", mktime(0, 0, 0, $kaladate[1], $kaladate[2], $kaladate[0])));
 
       $vstk = $kumpi;
 

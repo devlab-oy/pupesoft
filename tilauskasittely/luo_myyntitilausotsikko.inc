@@ -232,7 +232,7 @@ if (!function_exists("luo_myyntitilausotsikko")) {
       $yhteyshenkilo_kaupallinen  = "";
       $yhteyshenkilo_tekninen    = "";
 
-      if ($toim == "PIKATILAUS" and in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U','X','Y','A','B','C','V','W','I','J'))) {
+      if ($toim == "PIKATILAUS" and in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'X', 'Y', 'A', 'B', 'C', 'V', 'W', 'I', 'J'))) {
 
         $myynnista_osto_avainsanat = t_avainsana("MYYNNISTA_OSTO");
 
@@ -360,7 +360,7 @@ if (!function_exists("luo_myyntitilausotsikko")) {
     $override_ytunnus_check = "YES";
     $ei_kayttoliittymaa = "kylla";
 
-    require ("otsik.inc");
+    require "otsik.inc";
 
     if ($session == "") {
       return $id;
@@ -452,7 +452,7 @@ if (!function_exists("luo_tarjouspohja")) {
       $sopimus_lisatietoja = $dummy_tarjous_row['sopimus_lisatietoja'];
     }
 
-    require ("otsik.inc");
+    require "otsik.inc";
 
     if (is_array($valitut_asiakastunnukset) and count($valitut_asiakastunnukset) > 0) {
       if (!empty($dummy_tarjous_row['sopimus_lisatietoja'])) {

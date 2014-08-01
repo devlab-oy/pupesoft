@@ -67,7 +67,7 @@ foreach ($ups_path as $ups_key => $ups_val) {
         $fileget = ftp_get($conn_id, '/tmp/ups_temp_file.xml', $file, FTP_BINARY);
 
         if ($fileget) {
-             $xml = simplexml_load_file('/tmp/ups_temp_file.xml');
+          $xml = simplexml_load_file('/tmp/ups_temp_file.xml');
         }
 
         if ($xml) {

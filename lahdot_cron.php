@@ -15,8 +15,8 @@ ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__)
 error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
 ini_set("display_errors", 0);
 
-require ("inc/connect.inc");
-require ("inc/functions.inc");
+require "inc/connect.inc";
+require "inc/functions.inc";
 
 $kukarow['yhtio'] = (string) $argv[1];
 $kukarow['kuka']  = 'admin';
@@ -211,7 +211,7 @@ for ($i = 0; $i <= $paivia_eteenpain; $i++) {
     // Lis‰t‰‰n vain jos p‰iv‰lle ei oo aikaisemmin lis‰tty, tai jos alkupvm-muuttujalla halutaan lis‰t‰ $max_pvm_array-slotin sis‰lle uusia l‰htˆj‰
     if (($pvm_int >= $alkupvm and $alkupvm > 0) or
       ($alkupvm == 0 and (!isset($max_pvm_array[$t_row["liitostunnus"]][$t_row["varasto"]]) or
-      (isset($max_pvm_array[$t_row["liitostunnus"]][$t_row["varasto"]]) and $pvm_int > $max_pvm_array[$t_row["liitostunnus"]][$t_row["varasto"]])))) {
+          (isset($max_pvm_array[$t_row["liitostunnus"]][$t_row["varasto"]]) and $pvm_int > $max_pvm_array[$t_row["liitostunnus"]][$t_row["varasto"]])))) {
 
       // Tehd‰‰n asiakasluokka-konversio
       $asiakasluokka = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selite='{$t_row['asiakasluokka']}'", "", "", "selitetark_3");

@@ -113,7 +113,7 @@ if (mysql_field_name($result, $i) == "valkoodi") {
   while ($vrow=mysql_fetch_array($vresult)) {
     $sel="";
     if ($trow[$i] == $vrow['nimi']) {
-        $sel = "selected";
+      $sel = "selected";
     }
     $ulos .= "<option value = '$vrow[nimi]' $sel>$vrow[nimi]";
   }

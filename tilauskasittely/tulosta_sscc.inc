@@ -8,7 +8,7 @@ if (mysql_num_rows($result) == 1) {
 }
 else {
   if (!isset($suuntalavat_ei_kayttoliittymaa) or $suuntalavat_ei_kayttoliittymaa != "KYLLA") {
-    echo "<font class='error'>",t("VIRHE: Tilausta ei enää löydy"),"!</font>";
+    echo "<font class='error'>", t("VIRHE: Tilausta ei enää löydy"), "!</font>";
   }
   exit;
 }
@@ -67,10 +67,10 @@ if ($tee == 'tulosta_sscc') {
     $lopetus = '';
     $tee = (!isset($sscc_kopio) or $sscc_kopio == '') ? 'uusi' : '';
     if (!isset($suuntalavat_ei_kayttoliittymaa) or $suuntalavat_ei_kayttoliittymaa != "KYLLA") {
-      echo "<font class='message'>",t("Käytettävä SSCC-koodi"),": {$sscc}</font><br /><br />";
+      echo "<font class='message'>", t("Käytettävä SSCC-koodi"), ": {$sscc}</font><br /><br />";
 
-      require('suuntalavat.inc');
-      require('inc/footer.inc');
+      require 'suuntalavat.inc';
+      require 'inc/footer.inc';
       exit;
     }
   }
@@ -91,7 +91,7 @@ if ($tee == '' and (!isset($suuntalavat_ei_kayttoliittymaa) or $suuntalavat_ei_k
   echo "<input type='hidden' name='lopetus' value='{$palvelin2}tilauskasittely/keikka.php////tee=//toimittajaid={$toimittajaid}//toiminto=suuntalavat//otunnus={$otunnus}//ytunnus={$laskurow['ytunnus']}//suuntalavan_tunnus='>";
 
   echo "<table>";
-  echo "<tr><th>",t("Kpl"),"</th><td><select name='kappalemaara' />";
+  echo "<tr><th>", t("Kpl"), "</th><td><select name='kappalemaara' />";
   echo "<option value='1'>1</option>";
   echo "<option value='2'>2</option>";
   echo "<option value='3'>3</option>";
@@ -99,8 +99,8 @@ if ($tee == '' and (!isset($suuntalavat_ei_kayttoliittymaa) or $suuntalavat_ei_k
   echo "<option value='5'>5</option>";
   echo "</select></td></tr>";
 
-  echo "<tr><th>",t("Valitse tulostin"),"</th><td><select name='kirjoitin'>";
-  echo "<option value=''>",t("Ei kirjoitinta"),"</option>";
+  echo "<tr><th>", t("Valitse tulostin"), "</th><td><select name='kirjoitin'>";
+  echo "<option value=''>", t("Ei kirjoitinta"), "</option>";
 
   $query = "SELECT *
             FROM kirjoittimet
@@ -118,7 +118,7 @@ if ($tee == '' and (!isset($suuntalavat_ei_kayttoliittymaa) or $suuntalavat_ei_k
 
   echo "</select></td></tr>";
 
-  echo "<tr><td class='back' colspan='2'><input type='submit' value='",t("Tulosta"),"' /></td></tr>";
+  echo "<tr><td class='back' colspan='2'><input type='submit' value='", t("Tulosta"), "' /></td></tr>";
   echo "</table>";
 
   echo "</form>";

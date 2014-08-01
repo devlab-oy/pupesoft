@@ -40,7 +40,7 @@ $select = "SELECT distinct id
 $result = pupe_query($select);
 
 // Loopataan ketjut läpi
-while($ketju = mysql_fetch_assoc($result)) {
+while ($ketju = mysql_fetch_assoc($result)) {
 
   // Haetaan ketjun tuotteet
   $tuotteet_query = "SELECT korvaavat.id, korvaavat.tuoteno, korvaavat.jarjestys, tuote.nimitys
@@ -87,7 +87,7 @@ while($ketju = mysql_fetch_assoc($result)) {
                                      AND tuoteno='{$tuote['tuoteno']}'";
 
           if (pupe_query($poista_vastaavat_query)) {
-             $poistettu++;
+            $poistettu++;
           }
         }
       }

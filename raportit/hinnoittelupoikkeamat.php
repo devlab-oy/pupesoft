@@ -2,7 +2,7 @@
 
 if (isset($_POST["tee"])) {
   if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
 // Ei k‰ytet‰ pakkausta
@@ -11,7 +11,7 @@ $compression = FALSE;
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
@@ -19,7 +19,7 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
 }
 else {
 
-  echo "<font class='head'>",t("Hinnoittelupoikkeamat-raportti"),"</font><hr />";
+  echo "<font class='head'>", t("Hinnoittelupoikkeamat-raportti"), "</font><hr />";
 
   $app = !isset($app) ? 1 : (int) $app;
   $akk = !isset($akk) ? (int) date("m", mktime(0, 0, 0, date("m"), 0, date("Y"))) : (int) $akk;
@@ -35,17 +35,17 @@ else {
 
   // Tarkistetaan viel‰ p‰iv‰m‰‰r‰t
   if (!checkdate($akk, $app, $avv)) {
-    echo "<font class='error'>",t("VIRHE: Alkup‰iv‰m‰‰r‰ on virheellinen"),"!</font><br />";
+    echo "<font class='error'>", t("VIRHE: Alkup‰iv‰m‰‰r‰ on virheellinen"), "!</font><br />";
     $tee = "";
   }
 
   if (!checkdate($lkk, $lpp, $lvv)) {
-    echo "<font class='error'>",t("VIRHE: Loppup‰iv‰m‰‰r‰ on virheellinen"),"!</font><br />";
+    echo "<font class='error'>", t("VIRHE: Loppup‰iv‰m‰‰r‰ on virheellinen"), "!</font><br />";
     $tee = "";
   }
 
   if ($tee != "" and strtotime("{$avv}-{$akk}-{$app}") > strtotime("{$lvv}-{$lkk}-{$lpp}")) {
-    echo "<font class='error'>",t("VIRHE: Alkup‰iv‰m‰‰r‰ on suurempi kuin loppup‰iv‰m‰‰r‰"),"!</font><br />";
+    echo "<font class='error'>", t("VIRHE: Alkup‰iv‰m‰‰r‰ on suurempi kuin loppup‰iv‰m‰‰r‰"), "!</font><br />";
     $tee = "";
   }
 
@@ -53,23 +53,23 @@ else {
   echo "<table>";
 
   echo "<tr>";
-  echo "<th>",t("Alkup‰iv‰m‰‰r‰"),"</th>";
+  echo "<th>", t("Alkup‰iv‰m‰‰r‰"), "</th>";
   echo "<td><input type='text' name='app' value='{$app}' size='5' />";
   echo "<input type='text' name='akk' value='{$akk}' size='5' />";
   echo "<input type='text' name='avv' value='{$avv}' size='5' /></td>";
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>",t("Loppup‰iv‰m‰‰r‰"),"</th>";
+  echo "<th>", t("Loppup‰iv‰m‰‰r‰"), "</th>";
   echo "<td><input type='text' name='lpp' value='{$lpp}' size='5' />";
   echo "<input type='text' name='lkk' value='{$lkk}' size='5' />";
   echo "<input type='text' name='lvv' value='{$lvv}' size='5' /></td>";
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>",t("Myyj‰")."</th>";
+  echo "<th>", t("Myyj‰")."</th>";
   echo "<td><select name='myyja'>";
-  echo "<option value='0'>",t("Valitse"),"</option>";
+  echo "<option value='0'>", t("Valitse"), "</option>";
 
   $query = "SELECT tunnus, kuka, nimi, myyja
             FROM kuka
@@ -91,13 +91,13 @@ else {
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>",t("Ero % v‰hint‰‰n"),"</th>";
+  echo "<th>", t("Ero % v‰hint‰‰n"), "</th>";
   echo "<td style='vertical-align: middle;'><input type='text' name='eropros_vahintaan' value='{$eropros_vahintaan}' maxlength='6' size='7' /> %</td>";
   echo "</tr>";
 
   echo "<tr><td class='back' colspan='2'>";
   echo "<input type='hidden' name='tee' value='hae' />";
-  echo "<input type='submit' value='",t("Hae"),"' />";
+  echo "<input type='submit' value='", t("Hae"), "' />";
   echo "</td></tr>";
 
   echo "</table>";
@@ -125,17 +125,17 @@ else {
 
     if (mysql_num_rows($laskures) == 0) {
 
-      echo "<br /><font class='info'>",t("Yht‰‰n tilausta ei lˆytynyt"),"!</font><br />";
+      echo "<br /><font class='info'>", t("Yht‰‰n tilausta ei lˆytynyt"), "!</font><br />";
 
-      require("inc/footer.inc");
+      require "inc/footer.inc";
       exit;
     }
 
     flush();
 
-    require('inc/ProgressBar.class.php');
+    require 'inc/ProgressBar.class.php';
 
-    include('inc/pupeExcel.inc');
+    include 'inc/pupeExcel.inc';
 
     $worksheet    = new pupeExcel();
     $format_bold = array("bold" => TRUE);
@@ -246,23 +246,23 @@ else {
 
       $otsikot = "";
 
-      foreach(array_keys($data[0]) AS $key) {
+      foreach (array_keys($data[0]) as $key) {
 
-        switch($key) {
-          case 'eropros':
-            $otsikko = "ero %";
-            break;
-          case 'sis‰inen_kommentti':
-            $otsikko = "sis‰inen kommentti";
-            break;
-          case 'koneen_hinta':
-            $otsikko = "koneen hinta";
-            break;
-          case 'kate':
-            $otsikko = "Kate %";
-            break;
-          default:
-            $otsikko = $key;
+        switch ($key) {
+        case 'eropros':
+          $otsikko = "ero %";
+          break;
+        case 'sis‰inen_kommentti':
+          $otsikko = "sis‰inen kommentti";
+          break;
+        case 'koneen_hinta':
+          $otsikko = "koneen hinta";
+          break;
+        case 'kate':
+          $otsikko = "Kate %";
+          break;
+        default:
+          $otsikko = $key;
         }
 
         $otsikko = ucfirst(t($otsikko));
@@ -288,7 +288,7 @@ else {
       $tilaus = 0;
       $odd = '';
 
-      foreach($data as $set) {
+      foreach ($data as $set) {
 
         echo "<tr>";
 
@@ -298,11 +298,11 @@ else {
 
         $ed_tilaus = $set['tilaus'];
 
-        foreach($set as $k => $v) {
+        foreach ($set as $k => $v) {
 
           if ($k == 'myyj‰' and $user != '' and $v != '' and $user != $v) {
             echo "<tr>";
-            echo "<th>{$user} ",t("Yhteens‰"),"</th>";
+            echo "<th>{$user} ", t("Yhteens‰"), "</th>";
             echo "<th colspan='11' style='text-align: right;'>{$total_user}</th>";
             echo "<th></th>";
             echo "</tr>";
@@ -338,13 +338,13 @@ else {
       }
 
       echo "<tr>";
-      echo "<th>{$user} ",t("Yhteens‰"),"</th>";
+      echo "<th>{$user} ", t("Yhteens‰"), "</th>";
       echo "<th colspan='11' style='text-align: right;'>{$total_user}</th>";
       echo "<th></th>";
       echo "</tr>";
 
       echo "<tr>";
-      echo "<th>",t("Kaikki yhteens‰"),"</th>";
+      echo "<th>", t("Kaikki yhteens‰"), "</th>";
       echo "<th colspan='11' style='text-align: right;'>{$total}</th>";
       echo "<th></th>";
       echo "</tr>";
@@ -356,16 +356,16 @@ else {
       echo "<br />";
       echo "<form method='post' class='multisubmit'>";
       echo "<table>";
-      echo "<tr><th>",t("Tallenna raportti (xlsx)"),":</th>";
+      echo "<tr><th>", t("Tallenna raportti (xlsx)"), ":</th>";
       echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-      echo "<input type='hidden' name='kaunisnimi' value='",t("Hinnoittelupoikkeamat-raportti"),".xlsx'>";
+      echo "<input type='hidden' name='kaunisnimi' value='", t("Hinnoittelupoikkeamat-raportti"), ".xlsx'>";
       echo "<input type='hidden' name='tmpfilenimi' value='{$excelnimi}'>";
-      echo "<td class='back'><input type='submit' value='",t("Tallenna"),"'></td></tr>";
+      echo "<td class='back'><input type='submit' value='", t("Tallenna"), "'></td></tr>";
       echo "</table>";
       echo "</form><br />";
 
     }
   }
 
-  require("inc/footer.inc");
+  require "inc/footer.inc";
 }

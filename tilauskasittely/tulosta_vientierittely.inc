@@ -33,7 +33,7 @@ while ($Xurow = mysql_fetch_array($Xuresult)) {
   $Xtunnukset2  .= "'".$Xurow['otunnus']."',";
 }
 
-$Xtunnukset2 = substr($Xtunnukset2,0,-1);
+$Xtunnukset2 = substr($Xtunnukset2, 0, -1);
 
 // varmistetaan vielä, että löyty tilauksia
 if ($Xtunnukset2 != "") {
@@ -82,7 +82,7 @@ if ($Xtunnukset2 != "") {
 
   // listan functiot...
   if (!function_exists('erittely_alku')) {
-    function erittely_alku () {
+    function erittely_alku() {
       global $Xpdf, $laskurow, $yhtiorow, $kukarow, $Xsivu, $Xrectparam, $Xnorm, $Xpieni, $kieli, $vakkeja;
 
       $Xfirstpage = $Xpdf->new_page("a4");
@@ -122,7 +122,7 @@ if ($Xtunnukset2 != "") {
       $Xpdf->draw_rectangle(779, 300, 758, 580, $Xfirstpage,   $Xrectparam);
       $Xpdf->draw_rectangle(779, 420, 758, 580, $Xfirstpage,   $Xrectparam);
       $Xpdf->draw_text(310, 771, t("Viitteenne", $kieli),   $Xfirstpage, $Xpieni);
-      $Xpdf->draw_text(310, 761, substr($laskurow["viesti"],0,15), $Xfirstpage, $Xnorm);
+      $Xpdf->draw_text(310, 761, substr($laskurow["viesti"], 0, 15), $Xfirstpage, $Xnorm);
       $Xpdf->draw_text(430, 771, t("Y-tunnus", $kieli),     $Xfirstpage, $Xpieni);
       $Xpdf->draw_text(430, 761, $laskurow["ytunnus"],     $Xfirstpage, $Xnorm);
 
@@ -159,11 +159,11 @@ if ($Xtunnukset2 != "") {
         $Xpdf->draw_text(520, 572, t("Alkuperämaa", $kieli),  $Xfirstpage, $Xpieni);
       }
 
-      return($Xfirstpage);
+      return $Xfirstpage;
     }
   }
   if (!function_exists('erittely_rivi')) {
-    function erittely_rivi ($Xfirstpage) {
+    function erittely_rivi($Xfirstpage) {
       global $Xfirstpage, $yhtiorow, $Xpdf, $Xrow, $Xkala, $Xsivu, $Xlask, $Xrectparam, $Xnorm, $Xpieni, $kieli, $vakkeja;
 
       if ($Xlask == 36) {
@@ -214,7 +214,7 @@ if ($Xtunnukset2 != "") {
   }
 
   if (!function_exists('erittely_loppu')) {
-    function erittely_loppu ($Xfirstpage) {
+    function erittely_loppu($Xfirstpage) {
       global $Xpdf, $yhtiorow, $Xsivu, $Xrectparam, $Xnorm, $Xpieni, $kieli;
 
       //Alimmat kolme laatikkoa, yhtiötietoja

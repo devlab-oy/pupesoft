@@ -36,36 +36,36 @@ Kentt‰  Tieto                Pakollisuus  Muoto  Pituus  E/P    Sis‰ltˆ
 $ulos  = "LUM2";                          // Sovellustunnus
 $ulos .= "1";                                                       // Tietuetunnus
 $ulos .= "0";                                                       // Hyv‰ksymiskoodi
-$ulos .= sprintf ('%-140.140s',  $laskunimi1." ".$laskunimi2." ".$laskunimi3); // Saajan nimi ja osoite
-$ulos .= sprintf ('%-2.2s',    strtoupper($laskumaakoodi));        // Saajan maan maakoodi
-$ulos .= sprintf ('%-11.11s',  strtoupper($laskuswift));           // Saajan pankin SWIFT-koodi
-$ulos .= sprintf ('%-35.35s',  $laskupankki1);                     // Saajan pankin nimi ja paikkakunta
-$ulos .= sprintf ('%-35.35s',  $laskupankki2);
-$ulos .= sprintf ('%-35.35s',  $laskupankki3);
-$ulos .= sprintf ('%-35.35s',  $laskupankki4);
-$ulos .= sprintf ('%-34.34s',  strtoupper($laskutilino));          // Saajan tilinumero
-$ulos .= sprintf ('%-140.140s',  $laskuaihe);                        // Maksun aihe saajalle tiedoksi
-$ulos .= sprintf ('%015d',     round($laskusumma * 100, 0));       // Maksun valuuttam‰‰r‰
-$ulos .= sprintf ('%-3.3s',   strtoupper($laskuvaluutta));        // Valuuttakoodi (ISO-standardi)
-$ulos .= sprintf ('%3s',    '');                // Varalla
-$ulos .= sprintf ('%14s',    '');                // Kurssisopimusnumero
-$ulos .= sprintf ('%-1.1s',   $lum_maksutapa);          // Maksutyyppi
+$ulos .= sprintf('%-140.140s',  $laskunimi1." ".$laskunimi2." ".$laskunimi3); // Saajan nimi ja osoite
+$ulos .= sprintf('%-2.2s',    strtoupper($laskumaakoodi));        // Saajan maan maakoodi
+$ulos .= sprintf('%-11.11s',  strtoupper($laskuswift));           // Saajan pankin SWIFT-koodi
+$ulos .= sprintf('%-35.35s',  $laskupankki1);                     // Saajan pankin nimi ja paikkakunta
+$ulos .= sprintf('%-35.35s',  $laskupankki2);
+$ulos .= sprintf('%-35.35s',  $laskupankki3);
+$ulos .= sprintf('%-35.35s',  $laskupankki4);
+$ulos .= sprintf('%-34.34s',  strtoupper($laskutilino));          // Saajan tilinumero
+$ulos .= sprintf('%-140.140s',  $laskuaihe);                        // Maksun aihe saajalle tiedoksi
+$ulos .= sprintf('%015d',     round($laskusumma * 100, 0));       // Maksun valuuttam‰‰r‰
+$ulos .= sprintf('%-3.3s',   strtoupper($laskuvaluutta));        // Valuuttakoodi (ISO-standardi)
+$ulos .= sprintf('%3s',    '');                // Varalla
+$ulos .= sprintf('%14s',    '');                // Kurssisopimusnumero
+$ulos .= sprintf('%-1.1s',   $lum_maksutapa);          // Maksutyyppi
 $ulos .= "J";                            // Palvelumaksu
-  $ulos .= sprintf ('%02d', substr($maksupvm, 8, 2));          // Veloituksen p‰iv‰m‰‰r‰ (laitetaan numeerinen nollalla p‰d‰tty vaikka speksiss‰ on alpha!)
-  $ulos .= sprintf ('%02d', substr($maksupvm, 5, 2));
-$ulos .= sprintf ('%04d', substr($maksupvm, 0, 4));
-$ulos .= sprintf ('%015d',     '0');                 // Maksun vasta-arvo
-$ulos .= sprintf ('%011d',     '0');                 // Maksun kurssi
-$ulos .= sprintf ('%14.14s',   $yritystilino);            // Veloitettava tili
-$ulos .= sprintf ('%-3.3s',   strtoupper($laskuyritivaluutta));   // Veloitettavan tilin valuuttalaji
-$ulos .= sprintf ('%015d',     '0');                               // Veloitettava m‰‰r‰
-$ulos .= sprintf ('%20s',     ' ');                               // Arkistotunnus tai hylk‰yksen syy
+$ulos .= sprintf('%02d', substr($maksupvm, 8, 2));          // Veloituksen p‰iv‰m‰‰r‰ (laitetaan numeerinen nollalla p‰d‰tty vaikka speksiss‰ on alpha!)
+$ulos .= sprintf('%02d', substr($maksupvm, 5, 2));
+$ulos .= sprintf('%04d', substr($maksupvm, 0, 4));
+$ulos .= sprintf('%015d',     '0');                 // Maksun vasta-arvo
+$ulos .= sprintf('%011d',     '0');                 // Maksun kurssi
+$ulos .= sprintf('%14.14s',   $yritystilino);            // Veloitettava tili
+$ulos .= sprintf('%-3.3s',   strtoupper($laskuyritivaluutta));   // Veloitettavan tilin valuuttalaji
+$ulos .= sprintf('%015d',     '0');                               // Veloitettava m‰‰r‰
+$ulos .= sprintf('%20s',     ' ');                               // Arkistotunnus tai hylk‰yksen syy
 $ulos .= "1";                            // Palautteen rahayksikkˆ
-$ulos .= sprintf ('%-3.3s',   ' ');                               // Varalla
+$ulos .= sprintf('%-3.3s',   ' ');                               // Varalla
 
 //print strlen($ulos) . "/" . $ulos;
 
-fputs($toot,$ulos . "\r\n");
+fputs($toot, $ulos . "\r\n");
 
 // Jos meill‰ on ohjeita pankille, niin lis‰t‰‰n maksutietueen lis‰tietue
 if (trim($ohjeitapankille) != '') {
@@ -96,21 +96,21 @@ if (trim($ohjeitapankille) != '') {
   $ulos  = "LUM2";                  // Sovellustunnus
   $ulos .= "L";                                       // Tietuetunnus
   $ulos .= "0";                                       // Hyv‰ksymiskoodi
-  $ulos .= sprintf ('%011d',    '0');               // Veloituskurssi
-  $ulos .= sprintf ('%020d',    '0');               // Varalla
-  $ulos .= sprintf ('%-350.350s', $ohjeitapankille);  // Ohjeita pankille
-  $ulos .= sprintf ('%-50.50s',   ' ');               // Asiakkaan omat tiedot
-  $ulos .= sprintf ('%-11.11s',   ' ');               // Vastaanottaja-/shekkipankin SWIFT-koodi
-  $ulos .= sprintf ('%-70.70s',   ' ');               // Kent‰n 8 nimi ja osoite
-  $ulos .= sprintf ('%-14.14s',   ' ');               // Maksun numero
-  $ulos .= sprintf ('%-8.8s',   ' ');               // Ulkomaisen pankin arvop‰iv‰
-  $ulos .= sprintf ('%015d',     '0');               // Nordea Pankin palvelumaksu
-  $ulos .= sprintf ('%014d',     '0');               // Palvelumaksun veloitustili
-  $ulos .= sprintf ('%-31.31s',   ' ');               // Varalla
+  $ulos .= sprintf('%011d',    '0');               // Veloituskurssi
+  $ulos .= sprintf('%020d',    '0');               // Varalla
+  $ulos .= sprintf('%-350.350s', $ohjeitapankille);  // Ohjeita pankille
+  $ulos .= sprintf('%-50.50s',   ' ');               // Asiakkaan omat tiedot
+  $ulos .= sprintf('%-11.11s',   ' ');               // Vastaanottaja-/shekkipankin SWIFT-koodi
+  $ulos .= sprintf('%-70.70s',   ' ');               // Kent‰n 8 nimi ja osoite
+  $ulos .= sprintf('%-14.14s',   ' ');               // Maksun numero
+  $ulos .= sprintf('%-8.8s',   ' ');               // Ulkomaisen pankin arvop‰iv‰
+  $ulos .= sprintf('%015d',     '0');               // Nordea Pankin palvelumaksu
+  $ulos .= sprintf('%014d',     '0');               // Palvelumaksun veloitustili
+  $ulos .= sprintf('%-31.31s',   ' ');               // Varalla
 
   //print strlen($ulos) . "/" . $ulos;
 
-  fputs($toot,$ulos . "\r\n");
+  fputs($toot, $ulos . "\r\n");
 }
 
 //print "</pre>";

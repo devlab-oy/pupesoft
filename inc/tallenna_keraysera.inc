@@ -1,9 +1,9 @@
 <?php
 
 if (!is_array($erat)) {
-  echo "<br /><font class='error'>",t("VIRHE: Keräyserää ei enää löydy"),"!</font><br />";
+  echo "<br /><font class='error'>", t("VIRHE: Keräyserää ei enää löydy"), "!</font><br />";
 
-  require('inc/footer.inc');
+  require 'inc/footer.inc';
   exit;
 }
 

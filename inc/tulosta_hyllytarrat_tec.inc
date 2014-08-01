@@ -3,10 +3,10 @@
 
 $paikka = strtoupper($paikka);
 
-$viivapaikka = str_replace('-','.',$paikka);
+$viivapaikka = str_replace('-', '.', $paikka);
 
 if (strlen($paikka) <= 12) {
-$sivu = "
+  $sivu = "
 *** ETIKETIN KOKO ***
 {D0230,0800,0200|}
 {AX;+000,+000,+00|}
@@ -27,7 +27,7 @@ $sivu = "
 ".chr(12);
 }
 else {
-$sivu = "
+  $sivu = "
 *** ETIKETIN KOKO ***
 {D0230,0800,0200|}
 {AX;+000,+000,+00|}

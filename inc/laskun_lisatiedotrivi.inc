@@ -28,7 +28,7 @@ elseif (mysql_field_name($result, $i) == "laskutus_maa") {
     if (strtoupper($trow[$i]) == strtoupper($vrow[0])) {
       $sel = "selected";
     }
-    elseif($trow[$i] == "" and strtoupper($vrow[0]) == strtoupper($yhtiorow["maa"])) {
+    elseif ($trow[$i] == "" and strtoupper($vrow[0]) == strtoupper($yhtiorow["maa"])) {
       $sel = "selected";
     }
     $ulos .= "<option value = '".strtoupper($vrow[0])."' $sel>".t($vrow[1])."</option>";

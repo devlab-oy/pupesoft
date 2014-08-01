@@ -1,6 +1,6 @@
 <?php
 
-if(isset($_COOKIE['inventointiaste_vain_saldoa']) === false or isset($_POST['vain_saldoa'])) {
+if (isset($_COOKIE['inventointiaste_vain_saldoa']) === false or isset($_POST['vain_saldoa'])) {
   $vain_saldoa = true;
   $_POST['vain_saldoa'] = 'On';
   setcookie("inventointiaste_vain_saldoa", '1', strtotime('now + 10 years'));
@@ -31,7 +31,7 @@ if (isset($_POST["tee"])) {
   }
 }
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if ($tee == 'lataa_tiedosto') {
   $filepath = "/tmp/".$tmpfilenimi;
@@ -721,7 +721,7 @@ if ($request['tee'] == 'aja_raportti') {
 echo "</div>";
 
 echo "<div id='footer'>";
-require ("../inc/footer.inc");
+require "../inc/footer.inc";
 echo "</div>";
 
 function init(&$request) {
@@ -913,15 +913,15 @@ function echo_table_first_layer($rivi_index, $rivi) {
   echo "<td></td>";
 
   echo "<td>";
-  echo (isset($rivi['kuukausittain_luvut']['pos']) ? round($rivi['kuukausittain_luvut']['pos'], 2) : 0);
+  echo isset($rivi['kuukausittain_luvut']['pos']) ? round($rivi['kuukausittain_luvut']['pos'], 2) : 0;
   echo "</td>";
 
   echo "<td>";
-  echo (isset($rivi['kuukausittain_luvut']['neg']) ? round($rivi['kuukausittain_luvut']['neg'], 2) : 0);
+  echo isset($rivi['kuukausittain_luvut']['neg']) ? round($rivi['kuukausittain_luvut']['neg'], 2) : 0;
   echo "</td>";
 
   echo "<td>";
-  echo (isset($rivi['kuukausittain_luvut']['ero']) ? round($rivi['kuukausittain_luvut']['ero'], 2) : 0);
+  echo isset($rivi['kuukausittain_luvut']['ero']) ? round($rivi['kuukausittain_luvut']['ero'], 2) : 0;
   echo "</td>";
 
   echo "</tr>";
@@ -944,15 +944,15 @@ function echo_table_second_layer($rivi, $rivi_index) {
     echo "</td>";
 
     echo "<td>";
-    echo (isset($inventointilaji['inventointilajeittain_luvut']['pos']) ? round($inventointilaji['inventointilajeittain_luvut']['pos'], 2) : 0);
+    echo isset($inventointilaji['inventointilajeittain_luvut']['pos']) ? round($inventointilaji['inventointilajeittain_luvut']['pos'], 2) : 0;
     echo "</td>";
 
     echo "<td>";
-    echo (isset($inventointilaji['inventointilajeittain_luvut']['neg']) ? round($inventointilaji['inventointilajeittain_luvut']['neg'], 2) : 0);
+    echo isset($inventointilaji['inventointilajeittain_luvut']['neg']) ? round($inventointilaji['inventointilajeittain_luvut']['neg'], 2) : 0;
     echo "</td>";
 
     echo "<td>";
-    echo (isset($inventointilaji['inventointilajeittain_luvut']['ero']) ? round($inventointilaji['inventointilajeittain_luvut']['ero'], 2) : 0);
+    echo isset($inventointilaji['inventointilajeittain_luvut']['ero']) ? round($inventointilaji['inventointilajeittain_luvut']['ero'], 2) : 0;
     echo "</td>";
 
     echo "</tr>";
@@ -1079,7 +1079,7 @@ function echo_kayttoliittyma($request) {
     $chk = $request['ei_huomioida_tuotepaikkoja_avainsanoista'] ? 'checked' : '';
 
     echo "<tr>";
-    echo "<th>",t("Ei huomioida avainsanoihin m‰‰riteltyj‰ tuotepaikkoja"),"</th>";
+    echo "<th>", t("Ei huomioida avainsanoihin m‰‰riteltyj‰ tuotepaikkoja"), "</th>";
     echo "<td>";
     echo "<input type='hidden' name='ei_huomioida_tuotepaikkoja_avainsanoista[]' value='default' /><br />";
     echo "<input type='checkbox' name='ei_huomioida_tuotepaikkoja_avainsanoista[]' {$chk} /><br />";
@@ -1283,7 +1283,7 @@ function hae_inventoitavien_lukumaara(&$request, $aikavali_tyyppi = '') {
   $ei_huomioida_lisa = ei_huomioida_tuotepaikkoja_avainsanoista($request['ei_huomioida_tuotepaikkoja_avainsanoista'], 'tapahtuma');
 
   $vain_saldoa_join = '';
-  if( $request['vain_saldoa'] ) {
+  if ( $request['vain_saldoa'] ) {
     $vain_saldoa_join = '
       JOIN tuotepaikat
       ON ( tuotepaikat.yhtio = tapahtuma.yhtio
@@ -1339,7 +1339,7 @@ function hae_tuotepaikkojen_lukumaara(&$request) {
   $ei_huomioida_lisa = ei_huomioida_tuotepaikkoja_avainsanoista($request['ei_huomioida_tuotepaikkoja_avainsanoista'], 'tuotepaikat');
 
   $vain_saldoa_where = '';
-  if( $request['vain_saldoa'] ) {
+  if ( $request['vain_saldoa'] ) {
     $vain_saldoa_where = 'AND tuotepaikat.saldo <> 0.00';
   }
 

@@ -10,7 +10,7 @@ else $valkoodi = "";
 if ($tee == 'lataa_tiedosto') $lataa_tiedosto = 1;
 if ($tee == 'siirra_tiedosto') $siirra_tiedosto = 1;
 
-require('inc/parametrit.inc');
+require 'inc/parametrit.inc';
 
 if ($tee == "lataa_tiedosto") {
   readfile("dataout/".$filenimi);
@@ -23,18 +23,18 @@ elseif ($tee == "siirra_tiedosto") {
   $conn_id = ftp_connect($svea_ftp_host);
 
   // Open a session to an external ftp site
-  $login_result = ftp_login ($conn_id, $svea_ftp_user, $svea_ftp_pass);
+  $login_result = ftp_login($conn_id, $svea_ftp_user, $svea_ftp_pass);
 
   // Check open
   if ((!$conn_id) || (!$login_result)) {
-          echo t("Ftp-yhteyden muodostus epaonnistui! Tarkista salasanat."); die;
+    echo t("Ftp-yhteyden muodostus epaonnistui! Tarkista salasanat."); die;
   }
   else {
     echo t("Ftp-yhteys muodostettu.")."<br/>";
   }
 
   // turn on passive mode transfers
-  ftp_pasv ($conn_id, true) ;
+  ftp_pasv($conn_id, true) ;
   echo t("Kytketaan passive mode paalle.")."<br/>";
 
   // open some file for reading
@@ -100,7 +100,7 @@ if ($tee == '') {
             and lasku.summa                 != 0
             and lasku.factoringsiirtonumero  = 0
             and lasku.valkoodi               = '$valkoodi'";
-  $aresult = mysql_query ($query) or pupe_error($query);
+  $aresult = mysql_query($query) or pupe_error($query);
   $arow = mysql_fetch_array($aresult);
 
   $query = "SELECT nimi, tunnus
@@ -115,7 +115,7 @@ if ($tee == '') {
   while ($vrow = mysql_fetch_array($vresult)) {
     $sel="";
     if ($vrow['nimi'] == $valkoodi) {
-        $sel = "selected";
+      $sel = "selected";
     }
     echo "<option value = '$vrow[nimi]' $sel>$vrow[nimi]</option>";
   }
@@ -138,7 +138,7 @@ if ($tee == '') {
             and lasku.alatila                = 'X'
             and lasku.summa                 != 0
             and lasku.factoringsiirtonumero  > 0";
-  $aresult = mysql_query ($query) or pupe_error($query);
+  $aresult = mysql_query($query) or pupe_error($query);
   $arow = mysql_fetch_array($aresult);
 
   echo "<tr><th>Siirtoluettelon numero:</th>
@@ -182,7 +182,7 @@ if ($tee == '') {
   while ($vrow = mysql_fetch_array($vresult)) {
     $sel="";
     if ($vrow['nimi'] == $valkoodi) {
-        $sel = "selected";
+      $sel = "selected";
     }
     echo "<option value = '$vrow[nimi]' $sel>$vrow[nimi]</option>";
   }
@@ -209,9 +209,9 @@ if ($tee == 'TULOSTA') {
   $frow = mysql_fetch_array($fres);
 
   //Luodaan Start-tietue
-  $ulos  = sprintf ('%-2.2s', "00");                  //sovellustunnus
+  $ulos  = sprintf('%-2.2s', "00");                  //sovellustunnus
   $ulos .= sprintf('%07.7s', $frow["sopimusnumero"]);
-  $ulos .= sprintf ('%08.8s', $luontipvm);                //aineiston luontipvm
+  $ulos .= sprintf('%08.8s', $luontipvm);                //aineiston luontipvm
   $ulos .= "\r\n";
 
   if ($ppl == '') {
@@ -241,7 +241,7 @@ if ($tee == 'TULOSTA') {
              and lasku.summa    != 0
              and lasku.valkoodi  = '$valkoodi'
              $where";
-  $dresult = mysql_query ($dquery) or pupe_error($dquery);
+  $dresult = mysql_query($dquery) or pupe_error($dquery);
 
   if (mysql_num_rows($dresult) == 0) {
     echo "Huono laskunumeroväli! Yhtään siirettävää laskua ei löytynyt!";
@@ -291,7 +291,7 @@ if ($tee == 'TULOSTA') {
             and lasku.valkoodi  = '$valkoodi'
             $where
             ORDER BY laskunro";
-  $laskures = mysql_query ($query) or pupe_error($query);
+  $laskures = mysql_query($query) or pupe_error($query);
   if (mysql_num_rows($laskures) > 0) {
     $laskukpl  = 0;
     $vlaskukpl = 0;
@@ -325,21 +325,21 @@ if ($tee == 'TULOSTA') {
       }
 
       //luodaan Main record
-      $ulos .= sprintf ('%2.2s', "01"); // Record type
-      $ulos .= sprintf ('%07.7s', $frow["sopimusnumero"]);
-      $ulos .= sprintf ('%010.10s', $laskurow["laskunro"]);
-      $ulos .= sprintf ('%010.10s', $asirow["asiakasnro"]);
-      $ulos .= sprintf ('%05.5s', 0); // kohde eli piiri
-      $ulos .= sprintf ('%-40.40s', $laskurow["nimi"]);
-      $ulos .= sprintf ('%-40.40s',    $laskurow["nimitark"]);
-      $ulos .= sprintf ('%-40.40s',   $laskurow["osoite"]);
-      $ulos .= sprintf ('%05.5s', $laskurow["postino"]);
-      $ulos .= sprintf ('%-20.20s', $laskurow["postitp"]);
-      $ulos .= sprintf ('%010.10s', 0);
-      $ulos .= sprintf ('%-18.18s', $asirow["puhelin"]);
-      $ulos .= sprintf ('%-3.3s', $laskurow["maa"]);
-      $ulos .= sprintf ('%08.8s', $laskurow["tapvm"]);
-      $ulos .= sprintf ('%08.8s', $laskurow["erpcm"]);
+      $ulos .= sprintf('%2.2s', "01"); // Record type
+      $ulos .= sprintf('%07.7s', $frow["sopimusnumero"]);
+      $ulos .= sprintf('%010.10s', $laskurow["laskunro"]);
+      $ulos .= sprintf('%010.10s', $asirow["asiakasnro"]);
+      $ulos .= sprintf('%05.5s', 0); // kohde eli piiri
+      $ulos .= sprintf('%-40.40s', $laskurow["nimi"]);
+      $ulos .= sprintf('%-40.40s',    $laskurow["nimitark"]);
+      $ulos .= sprintf('%-40.40s',   $laskurow["osoite"]);
+      $ulos .= sprintf('%05.5s', $laskurow["postino"]);
+      $ulos .= sprintf('%-20.20s', $laskurow["postitp"]);
+      $ulos .= sprintf('%010.10s', 0);
+      $ulos .= sprintf('%-18.18s', $asirow["puhelin"]);
+      $ulos .= sprintf('%-3.3s', $laskurow["maa"]);
+      $ulos .= sprintf('%08.8s', $laskurow["tapvm"]);
+      $ulos .= sprintf('%08.8s', $laskurow["erpcm"]);
 
       $oma_viite = $laskurow["kohde"];
       if ($oma_viite != "" and $laskurow["sisviesti1"] != "") {
@@ -349,12 +349,12 @@ if ($tee == 'TULOSTA') {
       $oma_viite .= $laskurow["sisviesti1"];
       $oma_viite = str_replace("\r", "\n", $oma_viite);
       $oma_viite = str_replace("\n", " ", $oma_viite);
-      $ulos .= sprintf ('%-32.32s', $oma_viite); // Meidän viitteemme, tässä siis kohde + sisviesti1
+      $ulos .= sprintf('%-32.32s', $oma_viite); // Meidän viitteemme, tässä siis kohde + sisviesti1
 
       $laskun_viite = $laskurow["viesti"];
       $laskun_viite = str_replace("\r", "\n", $laskun_viite);
       $laskun_viite = str_replace("\n", ";", $laskun_viite);
-      $ulos .= sprintf ('%-32.32s', $laskun_viite); // Teidän viitteenne
+      $ulos .= sprintf('%-32.32s', $laskun_viite); // Teidän viitteenne
 
       $tilausnumero = $laskurow["asiakkaan_tilausnumero"];
       $tilausnumero = str_replace("\r", "\n", $tilausnumero);
@@ -363,8 +363,8 @@ if ($tee == 'TULOSTA') {
         $tilausnumero .= ", ";
       }
       $tilausnumero .= $laskurow["tilausyhteyshenkilo"];
-      $ulos .= sprintf ('%-32.32s', $tilausnumero); // Tilausnumero
-      $ulos .= sprintf ('%011.11s', abs($laskurow["summa"])); // Invoice amount
+      $ulos .= sprintf('%-32.32s', $tilausnumero); // Tilausnumero
+      $ulos .= sprintf('%011.11s', abs($laskurow["summa"])); // Invoice amount
 
       if ($laskurow["tyyppi"] == "02") {
         $ulos .= "-";
@@ -374,7 +374,7 @@ if ($tee == 'TULOSTA') {
       }
 
       $alvi = $laskurow["summa"] - $laskurow["arvo"];
-      $ulos .= sprintf ('%011.11s', abs($alvi));
+      $ulos .= sprintf('%011.11s', abs($alvi));
 
       if ($laskurow["tyyppi"] == "02") {
         $ulos .= "-";
@@ -383,13 +383,13 @@ if ($tee == 'TULOSTA') {
         $ulos .= "+";
       }
 
-      $ulos .= sprintf ('%-3.3s', "");  // Currency code
-      $ulos .= sprintf ('%08.8s', 0);    // Currency
-      $ulos .= sprintf ('%-36.36s', "");  // Foreign address
-      $ulos .= sprintf ('%03.3s', 0);    // Customer group
-      $ulos .= sprintf ('%-1.1s', "");  // Not in use
-      $ulos .= sprintf ('%03.3s', 0);    // Sales number
-      $ulos .= sprintf ('%-50.50s', $asirow['email']);  // Customer email addr
+      $ulos .= sprintf('%-3.3s', "");  // Currency code
+      $ulos .= sprintf('%08.8s', 0);    // Currency
+      $ulos .= sprintf('%-36.36s', "");  // Foreign address
+      $ulos .= sprintf('%03.3s', 0);    // Customer group
+      $ulos .= sprintf('%-1.1s', "");  // Not in use
+      $ulos .= sprintf('%03.3s', 0);    // Sales number
+      $ulos .= sprintf('%-50.50s', $asirow['email']);  // Customer email addr
       if ($asirow['chn'] == "666" and $asirow['email'] != "") {
         $ulos .= "02";
       }
@@ -402,32 +402,32 @@ if ($tee == 'TULOSTA') {
         $ytunnus = "";
       }
       else {
-        $ytunnus = str_replace("-","", $asirow['ytunnus']);
-        $ytunnus = sprintf("%08.8s",$ytunnus);
-        $ytunnus = substr($ytunnus,0,7)."-".substr($ytunnus,-1);
+        $ytunnus = str_replace("-", "", $asirow['ytunnus']);
+        $ytunnus = sprintf("%08.8s", $ytunnus);
+        $ytunnus = substr($ytunnus, 0, 7)."-".substr($ytunnus, -1);
       }
 
-      $ulos .= sprintf ('%-11.11s', $ytunnus);
+      $ulos .= sprintf('%-11.11s', $ytunnus);
       $ulos .= sprintf('%-2.2s', strtoupper($asirow['kieli']));  // Language code
-      $ulos .= sprintf ('%025.25s', "");  // OCR Reference
-      $ulos .= sprintf ('%-1.1s', ""); // Invoice type
+      $ulos .= sprintf('%025.25s', "");  // OCR Reference
+      $ulos .= sprintf('%-1.1s', ""); // Invoice type
       $ulos .= "\r\n";
 
       //luodaan invoice row recordit
 
       $query = "SELECT * FROM tilausrivi WHERE uusiotunnus = '".$laskurow["tunnus"]."'";
-      $laskurivires = mysql_query ($query) or pupe_error($query);
+      $laskurivires = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($laskurivires) > 0) {
-          while ($laskurivi = mysql_fetch_array($laskurivires)) {
-          $ulos .= sprintf ('%-2.2s', "11"); // Record type
-          $ulos .= sprintf ('%07.7s', $frow["sopimusnumero"]);
-          $ulos .= sprintf ('%010.10s', $laskurow["laskunro"]);
-          $ulos .= sprintf ('%03.3s', 0);
-          $ulos .= sprintf ('%010.10s', $asirow["asiakasnro"]);
-          $ulos .= sprintf ('%-1.1s', "A"); // Row type, A = Article row
-          $ulos .= sprintf ('%015.15s', 0);
-          $ulos .= sprintf ('%09.9s', abs($laskurivi['kpl'] * 100)); // Quantity
+        while ($laskurivi = mysql_fetch_array($laskurivires)) {
+          $ulos .= sprintf('%-2.2s', "11"); // Record type
+          $ulos .= sprintf('%07.7s', $frow["sopimusnumero"]);
+          $ulos .= sprintf('%010.10s', $laskurow["laskunro"]);
+          $ulos .= sprintf('%03.3s', 0);
+          $ulos .= sprintf('%010.10s', $asirow["asiakasnro"]);
+          $ulos .= sprintf('%-1.1s', "A"); // Row type, A = Article row
+          $ulos .= sprintf('%015.15s', 0);
+          $ulos .= sprintf('%09.9s', abs($laskurivi['kpl'] * 100)); // Quantity
 
           if ($laskurivi['kpl'] < 0) {
             $ulos .= "-";
@@ -439,10 +439,10 @@ if ($tee == 'TULOSTA') {
           $nimitys = $laskurivi['nimitys'];
           $nimitys = str_replace("\r", "\n", $nimitys);
           $nimitys = str_replace("\n", ";", $nimitys);
-          $ulos .= sprintf ('%-40.40s', $nimitys);
-          $ulos .= sprintf ('%011.11s', abs($laskurivi['hinta'] * 100)); // Price w/o VAT
-          $ulos .= sprintf ('%02.2s', abs($laskurivi['ale1'])); // Discount percent
-          $ulos .= sprintf ('%011.11s', abs($laskurivi['rivihinta'] * 100)); // Row price
+          $ulos .= sprintf('%-40.40s', $nimitys);
+          $ulos .= sprintf('%011.11s', abs($laskurivi['hinta'] * 100)); // Price w/o VAT
+          $ulos .= sprintf('%02.2s', abs($laskurivi['ale1'])); // Discount percent
+          $ulos .= sprintf('%011.11s', abs($laskurivi['rivihinta'] * 100)); // Row price
 
           if ($laskurivi['rivihinta'] < 0) {
             $ulos .= "-";
@@ -451,8 +451,8 @@ if ($tee == 'TULOSTA') {
             $ulos .= "+";
           }
 
-          $ulos .= sprintf ('%04.4s', $laskurivi['alv'] * 100); // VAT percentage
-          $ulos .= sprintf ('%011.11s', round($laskurivi['alv'] * abs($laskurivi['rivihinta']))); // VAT amount // Korjaus poistettiin 100 * ja lisättiin round
+          $ulos .= sprintf('%04.4s', $laskurivi['alv'] * 100); // VAT percentage
+          $ulos .= sprintf('%011.11s', round($laskurivi['alv'] * abs($laskurivi['rivihinta']))); // VAT amount // Korjaus poistettiin 100 * ja lisättiin round
 
           if ($laskurivi['alv'] * $laskurivi['rivihinta'] < 0) {
             $ulos .= "-";
@@ -461,7 +461,7 @@ if ($tee == 'TULOSTA') {
             $ulos .= "+";
           }
 
-          $ulos .= sprintf ('%-4.4s', $laskurivi['yksikko']); // Units
+          $ulos .= sprintf('%-4.4s', $laskurivi['yksikko']); // Units
           $ulos .= "\r\n";
 
           // Jos kyseessä on kommentti...
@@ -471,34 +471,34 @@ if ($tee == 'TULOSTA') {
 
             $laskuri = 0;
             while ((strlen($kommentti) > 0) and ($laskuri < 10)) {
-              $ulos .= sprintf ('%-2.2s', "11"); // Record type
-              $ulos .= sprintf ('%07.7s', $frow["sopimusnumero"]);
-              $ulos .= sprintf ('%010.10s', $laskurow["laskunro"]);
-              $ulos .= sprintf ('%03.3s', 0);
-              $ulos .= sprintf ('%010.10s', $asirow["asiakasnro"]);
-              $ulos .= sprintf ('%-1.1s', "T"); // Row type, T = Text row
-              $ulos .= sprintf ('%-15.15s', "");
-              $ulos .= sprintf ('%-9.9s', ""); // Quantity
+              $ulos .= sprintf('%-2.2s', "11"); // Record type
+              $ulos .= sprintf('%07.7s', $frow["sopimusnumero"]);
+              $ulos .= sprintf('%010.10s', $laskurow["laskunro"]);
+              $ulos .= sprintf('%03.3s', 0);
+              $ulos .= sprintf('%010.10s', $asirow["asiakasnro"]);
+              $ulos .= sprintf('%-1.1s', "T"); // Row type, T = Text row
+              $ulos .= sprintf('%-15.15s', "");
+              $ulos .= sprintf('%-9.9s', ""); // Quantity
               $ulos .= " ";
 
               $kommentti = str_replace("\r", "\n", $kommentti);
               $kommentti = str_replace("\n", " ", $kommentti);
 
-              $ulos .= sprintf ('%-40.40s', $kommentti);
+              $ulos .= sprintf('%-40.40s', $kommentti);
               if (strlen($kommentti) > 40)
                 $kommentti = substr($kommentti, -40);
               else
                 $kommentti = "";
 
-              $ulos .= sprintf ('%-11.11s', "");
-              $ulos .= sprintf ('%-2.2s', "");
-              $ulos .= sprintf ('%-11.11s', "");
+              $ulos .= sprintf('%-11.11s', "");
+              $ulos .= sprintf('%-2.2s', "");
+              $ulos .= sprintf('%-11.11s', "");
               $ulos .= " ";
 
-              $ulos .= sprintf ('%-4.4s', ""); // VAT percentage
-              $ulos .= sprintf ('%-11.11s', "");
+              $ulos .= sprintf('%-4.4s', ""); // VAT percentage
+              $ulos .= sprintf('%-11.11s', "");
               $ulos .= " ";
-              $ulos .= sprintf ('%-4.4s', ""); // Units
+              $ulos .= sprintf('%-4.4s', ""); // Units
               $ulos .= "\r\n";
               $laskuri++;
             }
@@ -547,18 +547,18 @@ if ($tee == 'TULOSTA') {
                    and lasku.yhtio                  = maksuehto.yhtio
                    and lasku.maksuehto              = maksuehto.tunnus
                    and maksuehto.factoring          = '$factoringyhtio'";
-        $dresult = mysql_query ($dquery) or pupe_error($dquery);
+        $dresult = mysql_query($dquery) or pupe_error($dquery);
       }
 
       //Luodaan End-tietue
 
-      $ulos .= sprintf ('%-2.2s', "99");
+      $ulos .= sprintf('%-2.2s', "99");
       $ulos .= sprintf('%07.7s', $frow["sopimusnumero"]);
-      $ulos .= sprintf ('%08.8s', $luontipvm); //aineiston luontipvm
-      $ulos .= sprintf ('%09.9s', $laskukpl);
+      $ulos .= sprintf('%08.8s', $luontipvm); //aineiston luontipvm
+      $ulos .= sprintf('%09.9s', $laskukpl);
 
       $laskusum = ($vlaskusum + $hlaskusum);
-      $ulos .= sprintf ('%012.12s', abs($laskusum));
+      $ulos .= sprintf('%012.12s', abs($laskusum));
       if ($laskusum < 0) {
         $ulos .= "-";
       }
@@ -609,7 +609,7 @@ if ($tee == 'TULOSTA') {
       echo "<form method='post' class='multisubmit'>";
       echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 
-      if($toim == "SVEA") {
+      if ($toim == "SVEA") {
         echo "<input type='hidden' name='kaunisnimi' value='".$svea_filename."'>";
       }
       echo "<input type='hidden' name='filenimi' value='$filenimi'>";
@@ -620,7 +620,7 @@ if ($tee == 'TULOSTA') {
       echo "<form method='post'>";
       echo "<input type='hidden' name='tee' value='siirra_tiedosto'>";
 
-      if($toim == "SVEA") {
+      if ($toim == "SVEA") {
         echo "<input type='hidden' name='kaunisnimi' value='".$svea_filename."'>";
       }
       echo "<input type='hidden' name='filenimi' value='$filenimi'>";
@@ -637,5 +637,5 @@ if ($tee == 'TULOSTA') {
 }
 
 if ($tee != "lataa_tiedosto") {
-  require ("inc/footer.inc");
+  require "inc/footer.inc";
 }

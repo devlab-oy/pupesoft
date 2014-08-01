@@ -1,6 +1,6 @@
 <?php
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 $logistiikka_yhtio = '';
 $logistiikka_yhtiolisa = '';
@@ -147,11 +147,11 @@ if ($tee=='P') {
       if ($kukarow["kirjoitin"] != 0 and $valittu_tulostin == "") {
         $valittu_tulostin = $kukarow["kirjoitin"];
       }
-      elseif($valittu_tulostin == "") {
+      elseif ($valittu_tulostin == "") {
         $valittu_tulostin = "AUTOMAAGINEN_VALINTA";
       }
 
-      require ("verkkolasku.php");
+      require "verkkolasku.php";
     }
 
     //Tulostetaan uusi lähete jos käyttäjä valitsi drop-downista printterin
@@ -162,7 +162,7 @@ if ($tee=='P') {
               and yhtio    = '$kukarow[yhtio]'";
     $lasresult = pupe_query($query);
 
-    while($laskurow = mysql_fetch_array($lasresult)) {
+    while ($laskurow = mysql_fetch_array($lasresult)) {
 
       //tulostetaan faili ja valitaan sopivat printterit
       if ($laskurow["varasto"] == '') {
@@ -230,7 +230,7 @@ if ($tee=='P') {
           'komento'           => $komento,
           'lahetekpl'          => $lahetekpl,
           'kieli'           => ""
-          );
+        );
 
         pupesoft_tulosta_lahete($params);
       }
@@ -299,14 +299,14 @@ if ($id == '0') {
           for ($i=0; $i<mysql_num_fields($result); $i++) {
             if (mysql_field_name($result, $i) == 'yhtio_nimi') {
               if ($logistiikka_yhtio != '') {
-                echo "<th align='left'>",t("Yhtiö"),"</th>";
+                echo "<th align='left'>", t("Yhtiö"), "</th>";
               }
             }
             elseif (mysql_field_name($result, $i) == 'yhtio') {
               // skipataan tää
             }
             else {
-              echo "<th align='left'>".t(mysql_field_name($result,$i))."</th>";
+              echo "<th align='left'>".t(mysql_field_name($result, $i))."</th>";
             }
           }
           echo "</tr>";
@@ -315,7 +315,7 @@ if ($id == '0') {
         echo "<tr class='aktiivi'>";
 
         for ($i=0; $i<mysql_num_fields($result); $i++) {
-          if (mysql_field_name($result,$i) == 'laadittu' or mysql_field_name($result,$i) == 'toimaika') {
+          if (mysql_field_name($result, $i) == 'laadittu' or mysql_field_name($result, $i) == 'toimaika') {
             echo "<td>".tv1dateconv($row[$i])."</td>";
           }
           elseif (mysql_field_name($result, $i) == 'yhtio_nimi') {
@@ -365,7 +365,7 @@ if ($id > 0) {
             and lasku.alatila  in ('C','B')";
   $result = pupe_query($query);
 
-  if (mysql_num_rows($result)==0){
+  if (mysql_num_rows($result)==0) {
     die(t("Tilausta")." $id ".t("ei voida toimittaa, koska kaikkia tilauksen tietoja ei löydy!")."!");
   }
 
@@ -475,7 +475,7 @@ if ($id > 0) {
 
   //Käsin syötetty summa johon lasku pyöristetään
   if ($row["hinta"] <> 0 and abs($row["hinta"]-$summa) <= 0.5 and abs($summa) >= 0.5) {
-    $summa = sprintf("%.2f",$row["hinta"]);
+    $summa = sprintf("%.2f", $row["hinta"]);
   }
 
   // Jos laskun loppusumma pyöristetään lähimpään tasalukuun
@@ -591,9 +591,9 @@ if ($id > 0) {
   echo "<option value=''>".t("Ei tulosteta")."</option>";
   echo "<option value='oletukselle' $sel>".t("Oletustulostimelle")."</option>";
 
-   $_apuprintteri = "";
+  $_apuprintteri = "";
 
-  # Katsotaan onko avainsanoihin määritelty varaston toimipaikan läheteprintteriä
+  // Katsotaan onko avainsanoihin määritelty varaston toimipaikan läheteprintteriä
   if (!empty($row['yhtio_toimipaikka'])) {
     $avainsana_where = " and avainsana.selite       = '{$row['varasto']}'
                          and avainsana.selitetark   = '{$row['yhtio_toimipaikka']}'
@@ -630,4 +630,4 @@ if ($id > 0) {
   echo "<input type='submit' value='".t("Merkkaa toimitetuksi")."'></form>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

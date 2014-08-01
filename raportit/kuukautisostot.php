@@ -2,7 +2,7 @@
 
 if (isset($_POST["tee"])) {
   if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
 ini_set("memory_limit", "5G");
@@ -10,7 +10,7 @@ ini_set("memory_limit", "5G");
 // Ei käytetä pakkausta
 $compression = FALSE;
 
-require("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if (!isset($valitut["EIVIENTEJA"])) $valitut["EIVIENTEJA"] = isset($_COOKIE["valitut_EIVIENTEJA"]) ? $_COOKIE["valitut_EIVIENTEJA"] : $valitut["EIVIENTEJA"];
 if (!isset($valitut["EIASIAKKAANMYYNTEJA"])) $valitut["EIASIAKKAANMYYNTEJA"] = isset($_COOKIE["valitut_EIASIAKKAANMYYNTEJA"]) ? $_COOKIE["valitut_EIASIAKKAANMYYNTEJA"] : $valitut["EIASIAKKAANMYYNTEJA"];
@@ -35,10 +35,10 @@ else {
 
       </script>";
 
-  echo "<font class='head'>",t("Ostoehdotus kuukausittain"),"</font><hr>";
+  echo "<font class='head'>", t("Ostoehdotus kuukausittain"), "</font><hr>";
 
   $org_rajaus = $abcrajaus;
-  list($abcrajaus,$abcrajaustapa) = explode("##",$abcrajaus);
+  list($abcrajaus, $abcrajaustapa) = explode("##", $abcrajaus);
 
   if (!isset($abcrajaustapa)) $abcrajaustapa = "TK";
   if (!isset($rappari)) $rappari = "";
@@ -76,8 +76,8 @@ else {
     ${"ppled{$i}"} = date("d", mktime(0, 0, 0, ${"kkl{$i}"}+1, 0, ${"vva{$i}"}-1));
 
     //katotaan pienin alkupvm ja isoin loppupvm
-    ${"apaiva{$i}"} = (int) date('Ymd',mktime(0,0,0,${"kkaed{$i}"},${"ppaed{$i}"},${"vvaed{$i}"}));
-    ${"lpaiva{$i}"} = (int) date('Ymd',mktime(0,0,0,${"kkl{$i}"},${"ppl{$i}"},${"vvl{$i}"}));
+    ${"apaiva{$i}"} = (int) date('Ymd', mktime(0, 0, 0, ${"kkaed{$i}"}, ${"ppaed{$i}"}, ${"vvaed{$i}"}));
+    ${"lpaiva{$i}"} = (int) date('Ymd', mktime(0, 0, 0, ${"kkl{$i}"}, ${"ppl{$i}"}, ${"vvl{$i}"}));
   }
 
   $apienin = 99999999;
@@ -92,15 +92,15 @@ else {
     $apienin = $lsuurin = date('Ymd'); // jos mitään ei löydy niin NOW molempiin. :)
   }
 
-  $apvm = substr($apienin,0,4)."-".substr($apienin,4,2)."-".substr($apienin,6,2);
-  $lpvm = substr($lsuurin,0,4)."-".substr($lsuurin,4,2)."-".substr($lsuurin,6,2);
+  $apvm = substr($apienin, 0, 4)."-".substr($apienin, 4, 2)."-".substr($apienin, 6, 2);
+  $lpvm = substr($lsuurin, 0, 4)."-".substr($lsuurin, 4, 2)."-".substr($lsuurin, 6, 2);
 
   // Tulostettavat sarakkeet
   $sarakkeet = array();
 
   //Voidaan tarvita jotain muuttujaa täältä
   if (isset($muutparametrit)) {
-    list($temp_osasto,$temp_tuoryh,$temp_ytunnus,$temp_tuotemerkki,$temp_asiakasosasto,$temp_asiakasno,$temp_toimittaja) = explode('#', $muutparametrit);
+    list($temp_osasto, $temp_tuoryh, $temp_ytunnus, $temp_tuotemerkki, $temp_asiakasosasto, $temp_asiakasno, $temp_toimittaja) = explode('#', $muutparametrit);
     $temp_tuoryh = unserialize(urldecode($temp_tuoryh));
   }
 
@@ -404,7 +404,7 @@ else {
 
     $abuArray=array();
 
-    while($vrow = mysql_fetch_assoc($osvres)) {
+    while ($vrow = mysql_fetch_assoc($osvres)) {
       $varastolisa .= ", sum(if (tyyppi='O' and
                 concat(rpad(upper('$vrow[alkuhyllyalue]'),  5, '0'),lpad(upper('$vrow[alkuhyllynro]'),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0')) and
                 concat(rpad(upper('$vrow[loppuhyllyalue]'), 5, '0'),lpad(upper('$vrow[loppuhyllynro]'), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
@@ -433,15 +433,15 @@ else {
       $chk_array[] = "SARAKE{$xxx}";
     }
 
-    foreach($valitut as $key => $value) {
+    foreach ($valitut as $key => $value) {
       if (in_array($key, $chk_array)) {
         $offset = $i;
-        # echo "löydettiin offset ($offset)<br>";
+        // echo "löydettiin offset ($offset)<br>";
         break;
       }
       $i++;
     }
-    array_splice($valitut,$offset,0,$abuArray);
+    array_splice($valitut, $offset, 0, $abuArray);
   }
 
   //Jos halutaan tallentaa päivämäärät profiilin taakse
@@ -458,7 +458,7 @@ else {
       $paivamaarat[] = "vvl{$i}";
     }
 
-    foreach($paivamaarat as $paiva) {
+    foreach ($paivamaarat as $paiva) {
       $valitut[] = "PAIVAM##".$paiva."##".${$paiva};
     }
   }
@@ -469,7 +469,7 @@ else {
 
     $rappari = $kukarow["kuka"]."##".$uusirappari;
 
-    foreach($valitut as $val) {
+    foreach ($valitut as $val) {
       $query = "INSERT INTO avainsana set yhtio='$kukarow[yhtio]', laji='KKOSTOT', selite='$rappari', selitetark='$val'";
       $res = pupe_query($query);
     }
@@ -482,7 +482,7 @@ else {
       $query = "DELETE FROM avainsana WHERE yhtio='$kukarow[yhtio]' and laji='KKOSTOT' and selite='$rappari'";
       $res = pupe_query($query);
 
-      foreach($valitut as $val) {
+      foreach ($valitut as $val) {
         $query = "INSERT INTO avainsana set yhtio='$kukarow[yhtio]', laji='KKOSTOT', selite='$rappari', selitetark='$val'";
         $res = pupe_query($query);
       }
@@ -491,7 +491,7 @@ else {
     if (count($tuoryh) > 0) {
       $sresult = t_avainsana("TRY", "", "and avainsana.selite IN('".implode("','", $tuoryh)."')");
       $srow = array();
-      while($sro = mysql_fetch_assoc($sresult)) {
+      while ($sro = mysql_fetch_assoc($sresult)) {
         $srow[] = $sro;
       }
     }
@@ -522,12 +522,12 @@ else {
           <th>".t("Tuoteryhmä")."</th>
           <td colspan='3'>
           ";
-          foreach ($tuoryh as $tuoteryhma) {
-            $tuoteryhma_avainsana = search_array_key_for_value_recursive($srow, 'selite', $tuoteryhma);
-            //search_array_key_for_value_recursive funktio tukee monen solun löytymistä haettavasta array:stä.
-            //Tässä tapauksessa tiedämme, että srow array:stä löytyy kullakin selitteellä vain yksi solu niin voimme viitata $tuoteryhma_avainsana arrayn ensimmäiseen alkioon
-            echo $tuoteryhma.' '.$tuoteryhma_avainsana[0]['selitetark'].'<br/>';
-          }
+    foreach ($tuoryh as $tuoteryhma) {
+      $tuoteryhma_avainsana = search_array_key_for_value_recursive($srow, 'selite', $tuoteryhma);
+      //search_array_key_for_value_recursive funktio tukee monen solun löytymistä haettavasta array:stä.
+      //Tässä tapauksessa tiedämme, että srow array:stä löytyy kullakin selitteellä vain yksi solu niin voimme viitata $tuoteryhma_avainsana arrayn ensimmäiseen alkioon
+      echo $tuoteryhma.' '.$tuoteryhma_avainsana[0]['selitetark'].'<br/>';
+    }
     echo "
           </td>
         </tr>
@@ -610,7 +610,7 @@ else {
     $useslave = 2;
 
     // Eli haetaan connect.inc uudestaan tässä
-    require("../inc/connect.inc");
+    require "../inc/connect.inc";
 
     //Yhtiövalinnat
     $query  = "SELECT distinct yhtio, nimi
@@ -629,10 +629,10 @@ else {
         $konsyhtiot .= "'".$prow["yhtio"]."',";
       }
 
-      $yhtiot = substr($yhtiot,0,-1);
+      $yhtiot = substr($yhtiot, 0, -1);
       $yhtiot = " yhtio in ($yhtiot) ";
 
-      $konsyhtiot = substr($konsyhtiot,0,-1);
+      $konsyhtiot = substr($konsyhtiot, 0, -1);
       $konsyhtiot = " yhtio in ($konsyhtiot) ";
     }
     else {
@@ -660,8 +660,8 @@ else {
       }
     }
 
-    $varastot      = substr($varastot,0,-1);
-    $varastot_yhtiot = substr($varastot_yhtiot,0,-1);
+    $varastot      = substr($varastot, 0, -1);
+    $varastot_yhtiot = substr($varastot_yhtiot, 0, -1);
 
     $paikoittain = $valitut["paikoittain"];
 
@@ -894,11 +894,11 @@ else {
 
     flush();
 
-    require('vastaavat.class.php');
+    require 'vastaavat.class.php';
 
-    require('inc/ProgressBar.class.php');
+    require 'inc/ProgressBar.class.php';
 
-    include('inc/pupeExcel.inc');
+    include 'inc/pupeExcel.inc';
 
     $worksheet    = new pupeExcel();
     $format_bold = array("bold" => TRUE);
@@ -1034,7 +1034,7 @@ else {
 
       for ($i = 1; $i < 13; $i++) {
         if ($laskurow["rivihinta{$i}"] <> 0) {
-          ${"katepros{$i}"} = round($laskurow["kate{$i}"] / $laskurow["rivihinta{$i}"] * 100,0);
+          ${"katepros{$i}"} = round($laskurow["kate{$i}"] / $laskurow["rivihinta{$i}"] * 100, 0);
         }
         else {
           ${"katepros{$i}"} = 0;
@@ -1243,56 +1243,56 @@ else {
         }
 
         if ($valitut["SARAKE5"] != '') {
-          $rivi .= str_replace(".",",",$saldo['saldo'])."\t";
+          $rivi .= str_replace(".", ",", $saldo['saldo'])."\t";
 
           $worksheet->writeNumber($excelrivi, $excelsarake, $saldo["saldo"]);
           $excelsarake++;
         }
 
         if ($valitut["SARAKE6"] != '') {
-          $rivi .= str_replace(".",",",$row['halytysraja'])."\t";
+          $rivi .= str_replace(".", ",", $row['halytysraja'])."\t";
 
           $worksheet->writeNumber($excelrivi, $excelsarake, $row["halytysraja"]);
           $excelsarake++;
         }
 
         if ($valitut["SARAKE6B"] != '') {
-          $rivi .= str_replace(".",",",$row['tilausmaara'])."\t";
+          $rivi .= str_replace(".", ",", $row['tilausmaara'])."\t";
 
           $worksheet->writeNumber($excelrivi, $excelsarake, $row["tilausmaara"]);
           $excelsarake++;
         }
 
         if ($valitut["SARAKE7"] != '') {
-          $rivi .= str_replace(".",",",$ennp['tilattu'])."\t";
+          $rivi .= str_replace(".", ",", $ennp['tilattu'])."\t";
 
           $worksheet->writeNumber($excelrivi, $excelsarake, $ennp["tilattu"]);
           $excelsarake++;
         }
 
         if ($valitut["SARAKE7A"] != '') {
-          $rivi .= str_replace(".",",",$ennp['saapuneet'])."\t";
+          $rivi .= str_replace(".", ",", $ennp['saapuneet'])."\t";
 
           $worksheet->writeNumber($excelrivi, $excelsarake, $ennp["saapuneet"]);
           $excelsarake++;
         }
 
         if ($valitut["SARAKE7B"] != '') {
-          $rivi .= str_replace(".",",",$ennp['valmistuksessa'])."\t";
+          $rivi .= str_replace(".", ",", $ennp['valmistuksessa'])."\t";
 
           $worksheet->writeNumber($excelrivi, $excelsarake, $ennp["valmistuksessa"]);
           $excelsarake++;
         }
 
         if ($valitut["SARAKE8"] != '') {
-          $rivi .= str_replace(".",",",$ennp['ennpois'])."\t";
+          $rivi .= str_replace(".", ",", $ennp['ennpois'])."\t";
 
           $worksheet->writeNumber($excelrivi, $excelsarake, $ennp["ennpois"]);
           $excelsarake++;
         }
 
         if ($valitut["SARAKE9"] != '') {
-          $rivi .= str_replace(".",",",$ennp['jt'])."\t";
+          $rivi .= str_replace(".", ",", $ennp['jt'])."\t";
 
           $worksheet->writeNumber($excelrivi, $excelsarake, $ennp["jt"]);
           $excelsarake++;
@@ -1304,7 +1304,7 @@ else {
 
           if ($yhtiorow['varaako_jt_saldoa'] == 'K') $vapaa_saldo -= $ennp['jt'];
 
-          $rivi .= str_replace(".",",",$vapaa_saldo)."\t";
+          $rivi .= str_replace(".", ",", $vapaa_saldo)."\t";
 
           $worksheet->writeNumber($excelrivi, $excelsarake, $vapaa_saldo);
           $excelsarake++;
@@ -1316,21 +1316,21 @@ else {
 
           if ($yhtiorow['varaako_jt_saldoa'] == 'K') $myytavissa -= $ennp['jt'];
 
-          $rivi .= str_replace(".",",",$myytavissa)."\t";
+          $rivi .= str_replace(".", ",", $myytavissa)."\t";
 
           $worksheet->writeNumber($excelrivi, $excelsarake, $myytavissa);
           $excelsarake++;
         }
 
         if ($valitut["SARAKE14"] != '') {
-          $rivi .= str_replace(".",",",$row['osto_era'])."\t";
+          $rivi .= str_replace(".", ",", $row['osto_era'])."\t";
 
           $worksheet->writeNumber($excelrivi, $excelsarake, $row["osto_era"]);
           $excelsarake++;
         }
 
         if ($valitut["SARAKE15"] != '') {
-          $rivi .= str_replace(".",",",$row['myynti_era'])."\t";
+          $rivi .= str_replace(".", ",", $row['myynti_era'])."\t";
 
           $worksheet->writeNumber($excelrivi, $excelsarake, $row["myynti_era"]);
           $excelsarake++;
@@ -1414,14 +1414,14 @@ else {
         }
 
         if ($valitut["SARAKE19"] != '') {
-          $rivi .= str_replace(".",",",$row['ostohinta'])."\t";
+          $rivi .= str_replace(".", ",", $row['ostohinta'])."\t";
 
           $worksheet->writeString($excelrivi, $excelsarake, $row["ostohinta"]);
           $excelsarake++;
         }
 
         if ($valitut["SARAKE20"] != '') {
-          $rivi .= str_replace(".",",",$row['myyntihinta'])."\t";
+          $rivi .= str_replace(".", ",", $row['myyntihinta'])."\t";
 
           $worksheet->writeNumber($excelrivi, $excelsarake, $row["myyntihinta"]);
           $excelsarake++;
@@ -1468,13 +1468,13 @@ else {
         }
 
         if ($valitut["SARAKE23"] != '') {
-          $rivi .= str_replace(".",",",$osaldo['osaldo'])."\t";
+          $rivi .= str_replace(".", ",", $osaldo['osaldo'])."\t";
 
           $worksheet->writeNumber($excelrivi, $excelsarake, $osaldo["osaldo"]);
           $excelsarake++;
         }
 
-        if ($valitut["SARAKE24"] != '')   {
+        if ($valitut["SARAKE24"] != '') {
           $rivi .= "\"$osaldo[hyllyalue]-$osaldo[hyllynro]-$osaldo[hyllyvali]-$osaldo[hyllytaso]\"\t";
 
           $worksheet->writeString($excelrivi, $excelsarake, "$osaldo[hyllyalue]-$osaldo[hyllynro]-$osaldo[hyllyvali]-$osaldo[hyllytaso]");
@@ -1485,8 +1485,8 @@ else {
 
         for ($i = 1; $i < 13; $i++) {
 
-          if ($valitut["SARAKE{$_x}"] != '')   {
-            $rivi .= str_replace(".",",",$puuterow["puutekpl{$i}"])."\t";
+          if ($valitut["SARAKE{$_x}"] != '') {
+            $rivi .= str_replace(".", ",", $puuterow["puutekpl{$i}"])."\t";
             $worksheet->writeNumber($excelrivi, $excelsarake, $puuterow["puutekpl{$i}"]);
             $excelsarake++;
           }
@@ -1502,7 +1502,7 @@ else {
         for ($i = 1; $i < 13; $i++) {
 
           if ($valitut["SARAKE{$_x}"] != '') {
-            $rivi .= str_replace(".",",",$laskurow["kpl{$i}"])."\t";
+            $rivi .= str_replace(".", ",", $laskurow["kpl{$i}"])."\t";
             $worksheet->writeNumber($excelrivi, $excelsarake, $laskurow["kpl{$i}"]);
             $myydyt_kappaleet_yhteensa += $laskurow["kpl{$i}"];
             $excelsarake++;
@@ -1512,7 +1512,7 @@ else {
         }
 
         if ($valitut["SARAKE{$_x}"] != "") {
-          $rivi .= str_replace(".",",",$myydyt_kappaleet_yhteensa)."\t";
+          $rivi .= str_replace(".", ",", $myydyt_kappaleet_yhteensa)."\t";
           $worksheet->writeNumber($excelrivi, $excelsarake, $myydyt_kappaleet_yhteensa);
           $excelsarake++;
         }
@@ -1522,7 +1522,7 @@ else {
         for ($i = 1; $i < 13; $i++) {
 
           if ($valitut["SARAKE{$_x}"] != '') {
-            $rivi .= str_replace(".",",",$laskurow["EDkpl{$i}"])."\t";
+            $rivi .= str_replace(".", ",", $laskurow["EDkpl{$i}"])."\t";
             $worksheet->writeNumber($excelrivi, $excelsarake, $laskurow["EDkpl{$i}"]);
             $myydyt_kappaleet_yhteensa += $laskurow["EDkpl{$i}"];
             $excelsarake++;
@@ -1532,7 +1532,7 @@ else {
         }
 
         if ($valitut["SARAKE{$_x}"] != "") {
-          $rivi .= str_replace(".",",",$myydyt_kappaleet_yhteensa)."\t";
+          $rivi .= str_replace(".", ",", $myydyt_kappaleet_yhteensa)."\t";
           $worksheet->writeNumber($excelrivi, $excelsarake, $myydyt_kappaleet_yhteensa);
           $excelsarake++;
         }
@@ -1543,7 +1543,7 @@ else {
         for ($i = 1; $i < 13; $i++) {
 
           if ($valitut["SARAKE{$_x_k}K"] != '') {
-            $rivi .= str_replace(".",",",$kulutrow["kpl{$i}"])."\t";
+            $rivi .= str_replace(".", ",", $kulutrow["kpl{$i}"])."\t";
 
             $worksheet->writeNumber($excelrivi, $excelsarake, $kulutrow["kpl{$i}"]);
             $excelsarake++;
@@ -1554,7 +1554,7 @@ else {
 
         for ($i = 1; $i < 13; $i++) {
           if ($valitut["SARAKE{$_x_k}K"] != '') {
-            $rivi .= str_replace(".",",",$kulutrow["EDkpl{$i}"])."\t";
+            $rivi .= str_replace(".", ",", $kulutrow["EDkpl{$i}"])."\t";
 
             $worksheet->writeNumber($excelrivi, $excelsarake, $kulutrow["EDkpl{$i}"]);
             $excelsarake++;
@@ -1565,7 +1565,7 @@ else {
 
         for ($i = 1; $i < 13; $i++) {
           if ($valitut["SARAKE{$_x}"] != '') {
-            $rivi .= str_replace(".",",",$laskurow["kate{$i}"])."\t";
+            $rivi .= str_replace(".", ",", $laskurow["kate{$i}"])."\t";
 
             $worksheet->writeNumber($excelrivi, $excelsarake, $laskurow["kate{$i}"]);
             $excelsarake++;
@@ -1576,7 +1576,7 @@ else {
 
         for ($i = 1; $i < 13; $i++) {
           if ($valitut["SARAKE{$_x}"] != '') {
-            $rivi .= str_replace(".",",",${"katepros{$i}"})."\t";
+            $rivi .= str_replace(".", ",", ${"katepros{$i}"})."\t";
 
             $worksheet->writeNumber($excelrivi, $excelsarake, ${"katepros{$i}"});
             $excelsarake++;
@@ -1586,7 +1586,7 @@ else {
         }
 
         if ($valitut["SARAKE{$_x}"] != '') {
-          $rivi .= str_replace(".",",",$row['tuotekerroin'])."\t";
+          $rivi .= str_replace(".", ",", $row['tuotekerroin'])."\t";
 
           $worksheet->writeNumber($excelrivi, $excelsarake, $row["tuotekerroin"]);
           $excelsarake++;
@@ -1595,7 +1595,7 @@ else {
         $_x++;
 
         if ($valitut["SARAKE{$_x}"] != '') {
-          $rivi .= str_replace(".",",",$ennp["ennakot"])."\t";
+          $rivi .= str_replace(".", ",", $ennp["ennakot"])."\t";
 
           $worksheet->writeNumber($excelrivi, $excelsarake, $ennp["ennakot"]);
           $excelsarake++;
@@ -1638,7 +1638,7 @@ else {
           elseif   ($row['epakurantti50pvm'] != '0000-00-00')  $kehahin = round($kehahin * 0.5,  6);
           elseif   ($row['epakurantti25pvm'] != '0000-00-00')  $kehahin = round($kehahin * 0.75, 6);
 
-          $rivi .= str_replace(".",",",$kehahin)."\t";
+          $rivi .= str_replace(".", ",", $kehahin)."\t";
 
           $worksheet->writeNumber($excelrivi, $excelsarake, $kehahin);
           $excelsarake++;
@@ -1651,7 +1651,7 @@ else {
           for ($i = 1; $i < 13; $i++) {
 
             if ($valitut["SARAKE{$_x}"] != '') {
-              $rivi .= str_replace(".",",",$asosrow["kpl{$i}"])."\t";
+              $rivi .= str_replace(".", ",", $asosrow["kpl{$i}"])."\t";
 
               $worksheet->writeNumber($excelrivi, $excelsarake, $asosrow["kpl{$i}"]);
               $excelsarake++;
@@ -1666,7 +1666,7 @@ else {
           for ($i = 1; $i < 13; $i++) {
 
             if ($valitut["SARAKE{$_x}"] != '') {
-              $rivi .= str_replace(".",",",$asrow["kpl{$i}"])."\t";
+              $rivi .= str_replace(".", ",", $asrow["kpl{$i}"])."\t";
 
               $worksheet->writeNumber($excelrivi, $excelsarake, $asrow["kpl{$i}"]);
               $excelsarake++;
@@ -1709,14 +1709,14 @@ else {
         if (is_resource($osvres)) {
           mysql_data_seek($osvres, 0);
 
-          while($vrow = mysql_fetch_assoc($osvres)) {
-            $rivi .= str_replace(".",",",$ennp["tilattu_".$vrow["tunnus"]])."\t";
+          while ($vrow = mysql_fetch_assoc($osvres)) {
+            $rivi .= str_replace(".", ",", $ennp["tilattu_".$vrow["tunnus"]])."\t";
 
             $worksheet->write($excelrivi, $excelsarake, $ennp["tilattu_".$vrow["tunnus"]]);
             $excelsarake++;
           }
 
-          $rivi .= str_replace(".",",",$ennp["tilattu_oletus"])."\t";
+          $rivi .= str_replace(".", ",", $ennp["tilattu_oletus"])."\t";
 
           $worksheet->writeNumber($excelrivi, $excelsarake, $ennp["tilattu_oletus"]);
           $excelsarake++;
@@ -1744,7 +1744,7 @@ else {
 
             $korva_sumsaldo = 0;
 
-            while($korvasaldorow = mysql_fetch_assoc($korvasaldoresult)) {
+            while ($korvasaldorow = mysql_fetch_assoc($korvasaldoresult)) {
               $korva_sumsaldo += $korvasaldorow["saldo"];
             }
 
@@ -1791,7 +1791,7 @@ else {
             $_x++;
 
             if ($valitut["SARAKE{$_x}"] != '') {
-              $rivi .= str_replace(".",",",$korvasaldorow['saldo'])."\t";
+              $rivi .= str_replace(".", ",", $korvasaldorow['saldo'])."\t";
 
               $worksheet->writeNumber($excelrivi, $excelsarake, $korvasaldorow["saldo"]);
               $excelsarake++;
@@ -1800,7 +1800,7 @@ else {
             $_x++;
 
             if ($valitut["SARAKE{$_x}"] != '') {
-              $rivi .= str_replace(".",",",$prow['varattu'])."\t";
+              $rivi .= str_replace(".", ",", $prow['varattu'])."\t";
 
               $worksheet->writeNumber($excelrivi, $excelsarake, $prow["varattu"]);
               $excelsarake++;
@@ -1808,8 +1808,8 @@ else {
 
             $_x++;
 
-              if ($valitut["SARAKE{$_x}"] != '') {
-              $rivi .= str_replace(".",",",$prow['tilattu'])."\t";
+            if ($valitut["SARAKE{$_x}"] != '') {
+              $rivi .= str_replace(".", ",", $prow['tilattu'])."\t";
 
               $worksheet->writeNumber($excelrivi, $excelsarake, $prow["tilattu"]);
               $excelsarake++;
@@ -1819,7 +1819,7 @@ else {
 
             for ($i = 1; $i < 13; $i++) {
               if ($valitut["SARAKE{$_x}"] != '') {
-                $rivi .= str_replace(".",",",$kasrow["kpl{$i}"])."\t";
+                $rivi .= str_replace(".", ",", $kasrow["kpl{$i}"])."\t";
 
                 $worksheet->writeNumber($excelrivi, $excelsarake, $kasrow["kpl{$i}"]);
                 $excelsarake++;
@@ -1880,7 +1880,7 @@ else {
                     'ytunnus'     => $tuotteen_toimittaja['ytunnus'],
                   );
 
-                  list($ostohinta_temp, $netto, $alennus,) = alehinta_osto($laskurow_temp, $trow, 1, '', '', '');
+                  list($ostohinta_temp, $netto, $alennus, ) = alehinta_osto($laskurow_temp, $trow, 1, '', '', '');
                   if (empty($netto)) {
                     $ostohinta_temp = $ostohinta_temp * generoi_alekentta_php($alennus, 'O', 'kerto', 'EI');
                   }
@@ -2084,7 +2084,7 @@ else {
 
   if ($tee == "" or $tee == "JATKA") {
     if (isset($muutparametrit)) {
-      list($osasto,$tuoryh,$ytunnus,$tuotemerkki,$asiakasosasto,$asiakasno,$toimittaja) = explode('#', $muutparametrit);
+      list($osasto, $tuoryh, $ytunnus, $tuotemerkki, $asiakasosasto, $asiakasno, $toimittaja) = explode('#', $muutparametrit);
       $tuoryh = unserialize(urldecode($tuoryh));
     }
 
@@ -2093,7 +2093,7 @@ else {
     if ($tuoryh !='' or $osasto != '' or $ytunnus != '' or $tuotemerkki != '' or $KAIKKIJT != '') {
       if ($ytunnus != '' and !isset($ylatila)) {
 
-        require("../inc/kevyt_toimittajahaku.inc");
+        require "../inc/kevyt_toimittajahaku.inc";
 
         if ($ytunnus != '') {
           $tee = "JATKA";
@@ -2119,7 +2119,7 @@ else {
         $ytunnus = $asiakasno;
       }
 
-      require ("inc/asiakashaku.inc");
+      require "inc/asiakashaku.inc";
 
       if ($ytunnus != '') {
         $tee = "JATKA";
@@ -2138,15 +2138,15 @@ else {
   if ($tee == "") {
 
     echo "  <form method='post' autocomplete='off'>
-        <br>",t("Valitse vähintään yksi seuraavista:"),"
+        <br>", t("Valitse vähintään yksi seuraavista:"), "
         <table>
-        <tr><th>",t("Osasto"),"</th><td>";
+        <tr><th>", t("Osasto"), "</th><td>";
 
     // tehdään avainsana query
     $sresult = t_avainsana("OSASTO");
 
     echo "<select name='osasto'>";
-    echo "<option value=''>",t("Näytä kaikki"),"</option>";
+    echo "<option value=''>", t("Näytä kaikki"), "</option>";
 
     while ($srow = mysql_fetch_assoc($sresult)) {
       $sel = '';
@@ -2303,7 +2303,7 @@ else {
       // tehdään avainsana query
       $sresult = t_avainsana("TRY", "", "and avainsana.selite IN('".implode("','", $tuoryh)."')");
       $srow = array();
-      while($sro = mysql_fetch_assoc($sresult)) {
+      while ($sro = mysql_fetch_assoc($sresult)) {
         $srow[] = $sro;
       }
     }
@@ -2362,12 +2362,12 @@ else {
           <th>".t("Tuoteryhmä")."</th>
           <td colspan='3'>
           ";
-          foreach ($tuoryh as $tuoteryhma) {
-            $tuoteryhma_avainsana = search_array_key_for_value_recursive($srow, 'selite', $tuoteryhma);
-            //search_array_key_for_value_recursive funktio tukee monen solun löytymistä haettavasta array:stä.
-            //Tässä tapauksessa tiedämme, että srow array:stä löytyy kullakin selitteellä vain yksi solu niin voimme viitata $tuoteryhma_avainsana arrayn ensimmäiseen alkioon
-            echo $tuoteryhma.' '.$tuoteryhma_avainsana[0]['selitetark'].'<br/>';
-          }
+    foreach ($tuoryh as $tuoteryhma) {
+      $tuoteryhma_avainsana = search_array_key_for_value_recursive($srow, 'selite', $tuoteryhma);
+      //search_array_key_for_value_recursive funktio tukee monen solun löytymistä haettavasta array:stä.
+      //Tässä tapauksessa tiedämme, että srow array:stä löytyy kullakin selitteellä vain yksi solu niin voimme viitata $tuoteryhma_avainsana arrayn ensimmäiseen alkioon
+      echo $tuoteryhma.' '.$tuoteryhma_avainsana[0]['selitetark'].'<br/>';
+    }
     echo "
           </td>
         </tr>
@@ -2382,23 +2382,23 @@ else {
 
     echo "<tr>";
     echo "<td class='back'></td>";
-    echo "<th colspan='3'>",t("Alkupäivämäärä (pp-kk-vvvv)"),"</th>";
+    echo "<th colspan='3'>", t("Alkupäivämäärä (pp-kk-vvvv)"), "</th>";
     echo "<td class='back'></td>";
-    echo "<th colspan='3'>",t("Loppupäivämäärä (pp-kk-vvvv)"),"</th>";
+    echo "<th colspan='3'>", t("Loppupäivämäärä (pp-kk-vvvv)"), "</th>";
     echo "</tr>";
 
     for ($i = 1; $i < 13; $i++) {
       echo "<tr>";
-      echo "<th>",t("Kuukausi")," {$i}</th>";
-      echo "<td><input type='text' name='ppa{$i}' value='",${"ppa{$i}"},"' size='5' /></td>";
-      echo "<td><input type='text' name='kka{$i}' value='",${"kka{$i}"},"' size='5' /></td>";
-      echo "<td><input type='text' name='vva{$i}' value='",${"vva{$i}"},"' size='5' /></td>";
+      echo "<th>", t("Kuukausi"), " {$i}</th>";
+      echo "<td><input type='text' name='ppa{$i}' value='", ${"ppa{$i}"}, "' size='5' /></td>";
+      echo "<td><input type='text' name='kka{$i}' value='", ${"kka{$i}"}, "' size='5' /></td>";
+      echo "<td><input type='text' name='vva{$i}' value='", ${"vva{$i}"}, "' size='5' /></td>";
 
       echo "<td class='back'> - </td>";
 
-      echo "<td><input type='text' name='ppl{$i}' value='",${"ppl{$i}"},"' size='5' /></td>";
-      echo "<td><input type='text' name='kkl{$i}' value='",${"kkl{$i}"},"' size='5' /></td>";
-      echo "<td><input type='text' name='vvl{$i}' value='",${"vvl{$i}"},"' size='5' /></td>";
+      echo "<td><input type='text' name='ppl{$i}' value='", ${"ppl{$i}"}, "' size='5' /></td>";
+      echo "<td><input type='text' name='kkl{$i}' value='", ${"kkl{$i}"}, "' size='5' /></td>";
+      echo "<td><input type='text' name='vvl{$i}' value='", ${"vvl{$i}"}, "' size='5' /></td>";
       echo "</tr>";
     }
 
@@ -2460,8 +2460,8 @@ else {
         $vlask++;
       }
 
-      $yhtiot = substr($yhtiot,0,-1);
-      $konsyhtiot = substr($konsyhtiot,0,-1);
+      $yhtiot = substr($yhtiot, 0, -1);
+      $konsyhtiot = substr($konsyhtiot, 0, -1);
 
       echo "  <tr><td class='back'><br></td></tr>";
     }
@@ -2605,7 +2605,7 @@ else {
       $chk = "CHECKED";
     }
 
-    echo "<tr><th>",t("Älä Näytä asiakkaiden myyntejä joita ei huomioida myynninseurannassa"),"</th><td colspan='3'><input type='checkbox' name='valitut[EIASIAKKAANMYYNTEJA]' value='EIASIAKKAANMYYNTEJA' {$chk}></td></tr>";
+    echo "<tr><th>", t("Älä Näytä asiakkaiden myyntejä joita ei huomioida myynninseurannassa"), "</th><td colspan='3'><input type='checkbox' name='valitut[EIASIAKKAANMYYNTEJA]' value='EIASIAKKAANMYYNTEJA' {$chk}></td></tr>";
 
     //Näytetäänkö poistuvat tuotteet
     $query = "SELECT selitetark
@@ -2761,7 +2761,7 @@ else {
 
     $chk = ($rappari == "" and !isset($ruksaa_kaikki)) ? "checked" : "";
 
-    echo t("Ruksaa kaikki")," <input type='checkbox' name='ruksaa_kaikki' id='ruksaa_kaikki' {$chk} />";
+    echo t("Ruksaa kaikki"), " <input type='checkbox' name='ruksaa_kaikki' id='ruksaa_kaikki' {$chk} />";
 
     echo "</span>";
 
@@ -2770,7 +2770,7 @@ else {
     $lask = 0;
     echo "<tr>";
 
-    foreach($sarakkeet as $key => $sarake) {
+    foreach ($sarakkeet as $key => $sarake) {
 
       $query = "SELECT selitetark
                 FROM avainsana
@@ -2800,7 +2800,7 @@ else {
       </form>";
   }
 
-  require ("inc/footer.inc");
+  require "inc/footer.inc";
 }
 
 function saldo_funktio($tuoteno, $varastot_yhtiot, $varastot, $paikoittain, $lisa, $row_yhtio) {

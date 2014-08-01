@@ -86,8 +86,8 @@ if ($tee == '') { // Tämä on käyttöliittymä
   exit;
 }
 
-$timeparts = explode(" ",microtime());
-$phptime = $timeparts[1].substr($timeparts[0],1);
+$timeparts = explode(" ", microtime());
+$phptime = $timeparts[1].substr($timeparts[0], 1);
 
 // Proto tase/tuloslaskelma problematiikkaan
 // Nythän on kuitenkin niin, että tuo kausi rajoittaa meitä tätä tilikautta enemmän, eli
@@ -100,7 +100,7 @@ if ($aalvk > 12) {
   $aalvk -= 12;
 }
 
-$yhtiorow["tilikausi_loppu"] = $aalvv . "-" . sprintf("%02d",$aalvk) . "-01";
+$yhtiorow["tilikausi_loppu"] = $aalvv . "-" . sprintf("%02d", $aalvk) . "-01";
 
 // Luetaan sopivat budjettiluvut tarvittavassa järjestyksessä
 if (strlen(trim($kustp)) > 0) {
@@ -121,9 +121,9 @@ $query = "SELECT taso
           ORDER BY taso";
 $result = mysql_query($query) or pupe_error($query);
 
-$timeparts = explode(" ",microtime());
-$valitime = $timeparts[1].substr($timeparts[0],1);
-$aika1= round($valitime-$phptime,4);
+$timeparts = explode(" ", microtime());
+$valitime = $timeparts[1].substr($timeparts[0], 1);
+$aika1= round($valitime-$phptime, 4);
 
 // Nyt lasketaan budjettiluvut
 echo "<table>";
@@ -142,7 +142,7 @@ $taso3 = "Z";
 $taso31 = 0;
 $taso32 = 0;
 
-while ($budjrow = mysql_fetch_array ($result)) {
+while ($budjrow = mysql_fetch_array($result)) {
 
   $query = "SELECT summa
             FROM budjetti
@@ -170,16 +170,16 @@ while ($budjrow = mysql_fetch_array ($result)) {
 
   echo "<tr><th>$tasorow[0]</font></th>";
 
-  while ($summarow=mysql_fetch_array ($aresult)) {
-    echo "<td align = 'right'>" . sprintf("%.2f",$summarow[0]) . "</td>";
+  while ($summarow=mysql_fetch_array($aresult)) {
+    echo "<td align = 'right'>" . sprintf("%.2f", $summarow[0]) . "</td>";
   }
   echo "</tr>";
 }
 
 echo "</table>";
 
-$timeparts = explode(" ",microtime());
-$endtime = $timeparts[1].substr($timeparts[0],1);
-$aika2= round($endtime-$phptime,4);
+$timeparts = explode(" ", microtime());
+$endtime = $timeparts[1].substr($timeparts[0], 1);
+$aika2= round($endtime-$phptime, 4);
 
 print "<br>".t("Väliaika")." $aika1, ".t("kokoaika")." $aika2.";

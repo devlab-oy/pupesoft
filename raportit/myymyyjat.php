@@ -3,7 +3,7 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require('../inc/parametrit.inc');
+require '../inc/parametrit.inc';
 
 echo "<font class='head'>".t("Myyjien myynnit").":</font><hr>";
 
@@ -70,7 +70,7 @@ if ($tee != '') {
   $kate = array();
   $myyja_nimi = array();
 
-  while ($row = mysql_fetch_array ($result)) {
+  while ($row = mysql_fetch_array($result)) {
     $myyja_nimi[$row["myyja"]] = $row["nimi"];
     $summa[$row["myyja"]][$row["kausi"]] = $row["summa"];
     $kate[$row["myyja"]][$row["kausi"]] = $row["kate"];
@@ -163,4 +163,4 @@ if ($tee != '') {
 
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

@@ -10,40 +10,40 @@ if (mysql_field_name($result, $i) == "yhtio") {
 if (mysql_field_name($result, $i) == "tuote_kentta") {
 
   $tuotteen_kentat = array(
-            'aleryhma',
-            'alv',
-            'eankoodi',
-            'ei_saldoa',
-            'halytysraja',
-            'hinnastoon',
-            'kehahin',
-            'keraysvyohyke',
-            'kuluprosentti',
-            'malli',
-            'mallitarkenne',
-            'myyjanro',
-            'myymalahinta',
-            'myyntihinta',
-            'myyntihinta_maara',
-            'myynti_era',
-            'nakyvyys',
-            'nettohinta',
-            'nimitys',
-            'osasto',
-            'ostajanro',
-            'sarjanumeroseuranta',
-            'status',
-            'suoratoimitus',
-            'tahtituote',
-            'try',
-            'tuotemerkki',
-            'tuoteno',
-            'tuotepaallikko',
-            'tuotetyyppi',
-            'varmuus_varasto',
-            'vihahin',
-            'yksikko',
-            'yksin_kerailyalustalle');
+    'aleryhma',
+    'alv',
+    'eankoodi',
+    'ei_saldoa',
+    'halytysraja',
+    'hinnastoon',
+    'kehahin',
+    'keraysvyohyke',
+    'kuluprosentti',
+    'malli',
+    'mallitarkenne',
+    'myyjanro',
+    'myymalahinta',
+    'myyntihinta',
+    'myyntihinta_maara',
+    'myynti_era',
+    'nakyvyys',
+    'nettohinta',
+    'nimitys',
+    'osasto',
+    'ostajanro',
+    'sarjanumeroseuranta',
+    'status',
+    'suoratoimitus',
+    'tahtituote',
+    'try',
+    'tuotemerkki',
+    'tuoteno',
+    'tuotepaallikko',
+    'tuotetyyppi',
+    'varmuus_varasto',
+    'vihahin',
+    'yksikko',
+    'yksin_kerailyalustalle');
 
   $sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys($tuotteen_kentat, '');
 
@@ -61,10 +61,10 @@ if (mysql_field_name($result, $i) == "tuote_kentta") {
 if (mysql_field_name($result, $i) == "asiakas_kentta") {
 
   $asiakkaan_kentat = array(
-            'osasto',
-            'ryhma',
-            'ytunnus',
-            'asiakasnro');
+    'osasto',
+    'ryhma',
+    'ytunnus',
+    'asiakasnro');
 
   $sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys($asiakkaan_kentat, '');
 

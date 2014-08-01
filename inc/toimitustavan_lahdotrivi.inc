@@ -19,18 +19,18 @@ if (mysql_field_name($result, $i) == "liitostunnus") {
 }
 
 if (mysql_field_name($result, $i) == "kerailyn_aloitusaika" or mysql_field_name($result, $i) == "viimeinen_tilausaika" or mysql_field_name($result, $i) == "lahdon_kellonaika") {
-  $trow[$i] = substr($trow[$i],0,5);
+  $trow[$i] = substr($trow[$i], 0, 5);
 }
 
 if (mysql_field_name($result, $i) == "lahdon_viikonpvm") {
 
-  if($trow[$i] == 0) $sel0 = "SELECTED";
-  if($trow[$i] == 1) $sel1 = "SELECTED";
-  if($trow[$i] == 2) $sel2 = "SELECTED";
-  if($trow[$i] == 3) $sel3 = "SELECTED";
-  if($trow[$i] == 4) $sel4 = "SELECTED";
-  if($trow[$i] == 5) $sel5 = "SELECTED";
-  if($trow[$i] == 6) $sel7 = "SELECTED";
+  if ($trow[$i] == 0) $sel0 = "SELECTED";
+  if ($trow[$i] == 1) $sel1 = "SELECTED";
+  if ($trow[$i] == 2) $sel2 = "SELECTED";
+  if ($trow[$i] == 3) $sel3 = "SELECTED";
+  if ($trow[$i] == 4) $sel4 = "SELECTED";
+  if ($trow[$i] == 5) $sel5 = "SELECTED";
+  if ($trow[$i] == 6) $sel7 = "SELECTED";
 
   $ulos = "<td><select name='$nimi'>";
   $ulos .= "<option value='' >".t("Ei valittua p‰iv‰‰")."</option>";
@@ -89,7 +89,7 @@ if (mysql_field_name($result, $i) == "asiakasluokka") {
 
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300)."><option value=' '>".t("Ei luokkaa")."</option>";
 
-  while($row = mysql_fetch_array($vresult)) {
+  while ($row = mysql_fetch_array($vresult)) {
     $sel = $row["selite"] == $trow[$i] ? " selected" : "";
 
     $ulos .= "<option value='{$row['selite']}'{$sel}>{$row['selite']}";

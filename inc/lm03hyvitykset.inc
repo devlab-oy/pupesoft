@@ -89,7 +89,7 @@ if (count($tilinoarray[$yritirow['tunnus']]) > 0) {
     // Näin tunnistamme ensimmäisen maksun
     $yritystilino = "";
 
-    while ($laskurow = mysql_fetch_array ($xresult)) {
+    while ($laskurow = mysql_fetch_array($xresult)) {
 
       // Muutamme hieman ensimmäisen maksun tietoja
       if ($yritystilino == "") {
@@ -131,8 +131,8 @@ if (count($tilinoarray[$yritirow['tunnus']]) > 0) {
       $laskuviesti  = $laskurow['viesti'];
 
       if ($laskurow['laskunro'] != 0 and $laskurow['laskunro'] != $laskurow['viesti']) {
-                $laskuviesti = (trim($laskuviesti) == "") ? $laskurow['laskunro'] : $laskuviesti." ".$laskurow['laskunro'];
-            }
+        $laskuviesti = (trim($laskuviesti) == "") ? $laskurow['laskunro'] : $laskuviesti." ".$laskurow['laskunro'];
+      }
 
       // Laskuviesti:
       // 1 = viitenumero
@@ -145,11 +145,11 @@ if (count($tilinoarray[$yritirow['tunnus']]) > 0) {
       if (substr($laskurow['ytilino'], 0, 1) == '8' and strlen(trim($laskuviesti)) == 0) $laskuviesti = ';';
 
       if (strlen($laskurow["viite"]) > 0) {
-        $laskuviesti = sprintf ('%020s', $laskurow["viite"]); // Etunollatäyttö
+        $laskuviesti = sprintf('%020s', $laskurow["viite"]); // Etunollatäyttö
         $laskutyyppi = 1;
       }
 
-      require ("inc/lm03rivi.inc");
+      require "inc/lm03rivi.inc";
 
       if ($laskutapahtuma == '10') {
         $makskpl += 1;
@@ -166,7 +166,7 @@ if (count($tilinoarray[$yritirow['tunnus']]) > 0) {
         $viestitietue_viesti_4 = "";
         $viestitietue_viesti_5 = "";
 
-        require ("inc/lm03viesti.inc");
+        require "inc/lm03viesti.inc";
       }
 
       $query = "UPDATE lasku

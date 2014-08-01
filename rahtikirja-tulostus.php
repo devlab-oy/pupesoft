@@ -1,7 +1,7 @@
 <?php
 
 if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-tulostus.php") !== FALSE) {
-  require("inc/parametrit.inc");
+  require "inc/parametrit.inc";
 }
 
 $logistiikka_yhtio = '';
@@ -316,7 +316,7 @@ if ($tee == 'close_with_printer') {
     $res   = pupe_query($query);
   }
 
-  require_once("inc/unifaun_send.inc");
+  require_once "inc/unifaun_send.inc";
 
   $query = "SELECT unifaun_nimi
             FROM kirjoittimet
@@ -770,7 +770,7 @@ if ($tee == 'tulosta') {
         $rivitunnukset = $tunnukset;
 
         chdir('tilauskasittely');
-        require("verkkolasku.php");
+        require "verkkolasku.php";
 
         chdir('../');
         $tunnukset = $rivitunnukset;
@@ -835,17 +835,17 @@ if ($tee == 'tulosta') {
       if (!isset($tee_varsinainen_tulostus) or (isset($tee_varsinainen_tulostus) and $tee_varsinainen_tulostus)) {
 
         // tulostetaan toimitustavan määrittelemä rahtikirja
-        if (@include("tilauskasittely/$toitarow[rahtikirja]")) {
+        if (@include "tilauskasittely/$toitarow[rahtikirja]") {
 
           // Otetaan talteen tässä $rahtikirjanro talteen
           $rahtikirjanro_alkuperainen = $rahtikirjanro;
 
           if ($tulosta_vak_yleisrahtikirja != '') {
-            require("tilauskasittely/rahtikirja_pdf.inc");
+            require "tilauskasittely/rahtikirja_pdf.inc";
           }
 
           if ($toitarow['erittely'] == 'k' and $toitarow['rahtikirja'] != 'rahtikirja_hrx_siirto.inc') {
-            require("tilauskasittely/rahtikirja_erittely_pdf.inc");
+            require "tilauskasittely/rahtikirja_erittely_pdf.inc";
           }
 
           // palautetaan alkuperäinen $rahtikirjanro takaisin
@@ -901,7 +901,7 @@ if ($tee == 'tulosta') {
             $myynti_vai_osto = 'M';
           }
 
-          require("tilauskasittely/$rakir_row[toimitusvahvistus]");
+          require "tilauskasittely/$rakir_row[toimitusvahvistus]";
 
           if ($rakir_row["toimitusvahvistus"] == "editilaus_out_futur.inc") {
             $laskurow = $tmp_laskurow;
@@ -929,7 +929,7 @@ if ($tee == 'tulosta') {
           $magento_api_rak = $rahtikirjanro;
           $magento_api_ord = $magerow["asiakkaan_tilausnumero"];
 
-          require("magento_toimita_tilaus.php");
+          require "magento_toimita_tilaus.php";
         }
       }
 
@@ -955,7 +955,7 @@ if ($tee == 'tulosta') {
           $anvia_api_ord = $anviarow['asiakkaan_tilausnumero'];
           $anvia_api_til = $anviarow['tunnus'];
 
-          require("anvia_toimita_tilaus.php");
+          require "anvia_toimita_tilaus.php";
         }
       }
 
@@ -973,7 +973,7 @@ if ($tee == 'tulosta') {
           $dgdkomento .= " -#{$dgdkpl} ";
         }
 
-        require ("tilauskasittely/tulosta_dgd.inc");
+        require "tilauskasittely/tulosta_dgd.inc";
 
         $params_dgd = array(
         'kieli'      => 'en',
@@ -1020,7 +1020,7 @@ if ($tee == 'tulosta') {
           }
 
           if ($toitarow['osoitelappu'] == 'intrade') {
-            require('tilauskasittely/osoitelappu_intrade_pdf.inc');
+            require 'tilauskasittely/osoitelappu_intrade_pdf.inc';
           }
           elseif ($toimitustaparow['osoitelappu'] == 'oslap_mg' and $yhtiorow['kerayserat'] == 'K') {
 
@@ -1064,7 +1064,7 @@ if ($tee == 'tulosta') {
             }
           }
           else {
-            require ("tilauskasittely/osoitelappu_pdf.inc");
+            require "tilauskasittely/osoitelappu_pdf.inc";
           }
         }
       }
@@ -1076,7 +1076,7 @@ if ($tee == 'tulosta') {
       $kaikki_lotsikot_per_toimitus = substr($kaikki_lotsikot_per_toimitus ,0 ,-2); //poistetaan pilkku ja välilyönti viimosen perästä
       $otunnukset_temp = $otunnukset;
       $otunnukset = $kaikki_lotsikot_per_toimitus;
-      require("tilauskasittely/rahtikirja_erittely_pdf.inc");
+      require "tilauskasittely/rahtikirja_erittely_pdf.inc";
       $otunnukset = $otunnukset_temp;
     }
 
@@ -1441,5 +1441,5 @@ if ($tee == '') {
     echo "<br><br><br><font class='message'>",t("Yhtään tulostettavaa rahtikirjaa ei löytynyt"),".</font><br><br>";
   }
 
-  require("inc/footer.inc");
+  require "inc/footer.inc";
 }

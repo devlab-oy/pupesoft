@@ -1,6 +1,6 @@
 <?php
 
-require ("parametrit.inc");
+require "parametrit.inc";
 
 echo "<font class='head'>$yhtiorow[nimi] Extranet</font><hr>";
 
@@ -13,7 +13,7 @@ if ($tee == 'TUOTE' and $kukarow['extranet'] != "") {
   }
   else {
     // Luodaan uusi myyntitilausotsikko
-    require_once("luo_myyntitilausotsikko.inc");
+    require_once "luo_myyntitilausotsikko.inc";
     $tilausnumero = luo_myyntitilausotsikko("RIVISYOTTO", $kukarow["oletus_asiakas"]);
     $kukarow["kesken"] = $tilausnumero;
     $kaytiin_otsikolla = "NOJOO!";
@@ -66,10 +66,10 @@ if ($tee == 'TUOTE' and $kukarow['extranet'] != "") {
 
     // jos meillä on ostoskori muuttujassa numero, niin halutaan lisätä tuotteita siihen ostoskoriin
     if (file_exists("../tilauskasittely/lisaarivi.inc")) {
-      require ("../tilauskasittely/lisaarivi.inc");
+      require "../tilauskasittely/lisaarivi.inc";
     }
     else {
-      require ("lisaarivi.inc");
+      require "lisaarivi.inc";
     }
 
     echo "<font class='message'>".t("Lisättiin")." $kpl_echo ".t_avainsana("Y", "", "and avainsana.selite='$trow[yksikko]'", "", "", "selite")." ".t("tuotetta")." $tuoteno.</font><br>";
@@ -124,7 +124,7 @@ if ($tee == '') {
       $laji        = "MA";
       $grouppaus       = "";
 
-      require ("saatanat.php");
+      require "saatanat.php";
     }
   }
 
@@ -192,7 +192,7 @@ if ($tee == '') {
     ///* uutiset *///
     echo "<td class='back' valign='top' width='700'>";
 
-    while($uutinen = mysql_fetch_array($result)) {
+    while ($uutinen = mysql_fetch_array($result)) {
 
       /*
       toimittaja = kuka
@@ -309,7 +309,7 @@ if ($tee == '') {
             }
 
             if ($hinta != $hintarow["hinta"]) {
-              $ashinta = sprintf('%.2f',$hinta);
+              $ashinta = sprintf('%.2f', $hinta);
             }
             else {
               $ashinta = "";
@@ -347,7 +347,7 @@ if ($tee == '') {
   // oikea palkki extra contentille
   echo "<td class='back' align='right' valign='top'>";
   if (file_exists("$kukarow[yhtio]_extranet.html")) {
-    require ("$kukarow[yhtio]_extranet.html");
+    require "$kukarow[yhtio]_extranet.html";
   }
   echo "</td>";
 
@@ -447,4 +447,4 @@ if ($tee == "PRINTTAA") {
     ";
 }
 
-require("footer.inc");
+require "footer.inc";

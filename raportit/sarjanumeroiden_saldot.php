@@ -1,6 +1,6 @@
 <?php
 
-require("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Sarjanumeroiden saldokorjaus")."</font><hr>";
 
@@ -33,7 +33,7 @@ if ($toiminto == 'TULOSTA' and $kukarow["kuka"] == "admin") {
   $paikres = pupe_query($query);
 
   // p‰ivitet‰‰n eka virheelliset varastopaikat
-  foreach($paikat as $tuote => $kpl) {
+  foreach ($paikat as $tuote => $kpl) {
 
     list($tuoteno, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $sarjanumerotunnus) = explode("#!#", $tuote);
 
@@ -52,7 +52,7 @@ if ($toiminto == 'TULOSTA' and $kukarow["kuka"] == "admin") {
     // katotaan onko paikka OK
     $tunnus = kuuluukovarastoon($hyllyalue, $hyllynro);
 
-    # jos sarjanumeron tiedoissa on joku v‰‰r‰ varastopaikka, niin haetaan ekan varaston eka paikka ja laitetaan se sinne!
+    // jos sarjanumeron tiedoissa on joku v‰‰r‰ varastopaikka, niin haetaan ekan varaston eka paikka ja laitetaan se sinne!
     if ($tunnus == 0) {
 
       echo "<br>P‰ivitettiin sarjanumeron varastopaikka $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso -> ";
@@ -86,7 +86,7 @@ if ($toiminto == 'TULOSTA' and $kukarow["kuka"] == "admin") {
   list($saldot, $lisavarusteet, $paikat) = hae_tuotteet();
 
   // p‰ivitet‰‰n saldot
-  foreach($saldot as $tuote => $kpl) {
+  foreach ($saldot as $tuote => $kpl) {
 
     list($tuoteno, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode("#!#", $tuote);
 
@@ -197,7 +197,7 @@ if ($toiminto == 'TULOSTA' and $kukarow["kuka"] == "admin") {
             WHERE yhtio   = '$kukarow[yhtio]'";
   $paikres = pupe_query($query);
 
-  foreach($lisavarusteet as $tuote => $kpl) {
+  foreach ($lisavarusteet as $tuote => $kpl) {
 
     list($tuoteno, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode("#!#", $tuote);
 
@@ -298,7 +298,7 @@ if ($toiminto == 'TULOSTA' and $kukarow["kuka"] == "admin") {
 
 }
 
-require ("../inc/footer.inc");
+require "../inc/footer.inc";
 
 function hae_tuotteet() {
 

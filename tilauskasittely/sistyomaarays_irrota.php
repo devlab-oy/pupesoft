@@ -1,6 +1,6 @@
 <?php
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Irrota lisävaruste laitteesta").":<hr></font>";
 
@@ -67,7 +67,7 @@ if ($tee == "") {
 
     echo "<br><br><table>";
 
-    while($sarjarow = mysql_fetch_array($sarjares)) {
+    while ($sarjarow = mysql_fetch_array($sarjares)) {
       // Haetaan muut lisävarusteet
       $query = "SELECT tuoteno, perheid2, tilkpl, tyyppi, tunnus
                 FROM tilausrivi use index (yhtio_perheid2)
@@ -181,4 +181,4 @@ while ($sarjarow = mysql_fetch_array($sarjares)) {
 }
 */
 
-require ("../inc/footer.inc");
+require "../inc/footer.inc";

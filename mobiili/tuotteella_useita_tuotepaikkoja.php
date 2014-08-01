@@ -5,10 +5,10 @@ $_GET["no_css"] = 'yes';
 
 $mobile = true;
 
-if (@include_once("../inc/parametrit.inc"));
-elseif (@include_once("inc/parametrit.inc"));
+if (@include_once "../inc/parametrit.inc");
+elseif (@include_once "inc/parametrit.inc");
 
-if(!isset($errors)) $errors = array();
+if (!isset($errors)) $errors = array();
 if (!isset($viivakoodi)) $viivakoodi = "";
 if (!isset($tuotenumero)) $tuotenumero = "";
 if (!isset($hyllypaikka)) $hyllypaikka = "";
@@ -20,7 +20,7 @@ if (!isset($hyllytaso)) $hyllytaso = "";
 $hae_hyllypaikalla = $hae_tuotenumerolla = $hae_viivakoodilla = false;
 $params = array();
 
-# Joku parametri tarvii olla setattu.
+// Joku parametri tarvii olla setattu.
 if (($hyllyalue != '' and $hyllynro != '' and $hyllyvali != '' and $hyllytaso != '') or $tuotenumero != '' or $viivakoodi != '') {
 
   if (strpos($tuotenumero, "%") !== FALSE) $tuotenumero = urldecode($tuotenumero);
@@ -63,7 +63,7 @@ if (($hyllyalue != '' and $hyllynro != '' and $hyllyvali != '' and $hyllytaso !=
 
 }
 else {
-  # T‰nne ei pit‰is p‰‰ty‰, tarkistetaan jo hyllysiirrot.php:ss‰
+  // T‰nne ei pit‰is p‰‰ty‰, tarkistetaan jo hyllysiirrot.php:ss‰
   echo t("Parametrivirhe");
   echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=hyllysiirrot.php'>";
   exit();
@@ -93,22 +93,22 @@ $tilausten_lukumaara = mysql_num_rows($result);
 
 $url_lisa_arr = array();
 
-### UI ###
+//## UI ###
 echo "<div class='header'>
   <button onclick='window.location.href=\"hyllysiirrot.php\"' class='button left'><img src='back2.png'></button>
-  <h1>",t("USEITA HYLLYPAIKKOJA"), "</h1></div>";
+  <h1>", t("USEITA HYLLYPAIKKOJA"), "</h1></div>";
 
 echo "<form name='form1' method='post' action=''>";
 echo "<table>";
 echo "<tr>";
-echo "<th>",t("Tuoteno"),"</th>";
-echo "<th>",t("Hyllypaikka"),"</th>";
+echo "<th>", t("Tuoteno"), "</th>";
+echo "<th>", t("Hyllypaikka"), "</th>";
 echo "</tr>";
 
 $_cnt = 0;
 
-# Loopataan ostotilaukset
-while($row = mysql_fetch_assoc($result)) {
+// Loopataan ostotilaukset
+while ($row = mysql_fetch_assoc($result)) {
 
   list($siirrettava_yht, $siirrettavat_rivit) = laske_siirrettava_maara($row);
 
@@ -123,10 +123,10 @@ while($row = mysql_fetch_assoc($result)) {
 echo "</table></div>";
 
 if ($_cnt == 0) {
-  echo "<span class='error'>",t("Yht‰‰n siirre‰tt‰v‰‰ tuotetta / tuotepaikkaa ei ole"),"</span>";
+  echo "<span class='error'>", t("Yht‰‰n siirre‰tt‰v‰‰ tuotetta / tuotepaikkaa ei ole"), "</span>";
 }
 
 echo "<div class='controls'></div>";
 echo "</form>";
 
-require('inc/footer.inc');
+require 'inc/footer.inc';

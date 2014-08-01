@@ -1,7 +1,7 @@
 <?php
 
 if (!function_exists("toimitarkista")) {
-  function toimitarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+  function toimitarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set, $ulosarray, $toimtyyppi;
     static $tmp_maakoodi, $ytunnus, $hetu, $tmp_ytunnus, $tmp_valkoodi, $tmp_iban, $tmp_swift, $tmp_nimi, $tmp_ultilno_maa, $ytunnus_ind, $hetuok;
     static $tmp_edi_kuvaus, $tmp_edi_salasana, $tmp_edi_kayttaja, $tmp_edi_palvelin;
@@ -91,8 +91,8 @@ if (!function_exists("toimitarkista")) {
 
       // Luodaan swift, jos sitä ei olla syötetty ja tili on suomalainen
       if (substr($t[$i], 0, 2) == "FI" and $tmp_swift == "") {
-        include ("inc/pankkitiedot.inc");
-        $vastaus = pankkitiedot($t[$i],'');
+        include "inc/pankkitiedot.inc";
+        $vastaus = pankkitiedot($t[$i], '');
         $tmp_swift = $vastaus['swift'];
       }
 
@@ -139,7 +139,7 @@ if (!function_exists("toimitarkista")) {
           $hetu = $ytunnus;
 
           // katotaan oliko kyseessä hetu
-          require ("tarkistahetu.inc");
+          require "tarkistahetu.inc";
 
           // ei ollu oikee hetukaan
           if ($hetuok == 1) {
@@ -147,7 +147,7 @@ if (!function_exists("toimitarkista")) {
           }
         }
         else {
-          require ("tarkistaytunnus.inc");
+          require "tarkistaytunnus.inc";
 
           if ($ok == 0) {
             $virhe[$i] = t("Virheellinen ytunnus!")." $t[$i] -> $ytunnus. ".t("Voit tarkistaa ytunnuksen")." <a target='uusiytj' href='http://www.ytj.fi/yrit_sel2.asp?kielikoodi=1'>".t("täältä")."</a>.";
@@ -225,7 +225,7 @@ if (!function_exists("toimitarkista")) {
                   and tunnus  != '$tunnus'";
         $vres = pupe_query($query);
 
-        if (mysql_num_rows($vres) > 0)  {
+        if (mysql_num_rows($vres) > 0) {
           $virhe[$i] = $virhe[$ytunnus_ind] = t("Henkilö on jo olemassa!");
         }
       }

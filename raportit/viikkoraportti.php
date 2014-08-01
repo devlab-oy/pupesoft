@@ -9,7 +9,7 @@ if (php_sapi_name() != 'cli') {
   die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 }
 
-require ("../inc/connect.inc");
+require "../inc/connect.inc";
 
 // hmm.. jännää
 $kukarow['yhtio'] = addslashes(trim($argv[1]));
@@ -53,7 +53,7 @@ $merre = mysql_query($query) or die($query);
 echo "Merkit haettu... Alotellaan.\n";
 echo "--------------------------------------------\n";
 
-while ($myyjarow = mysql_fetch_array ($myyre)) {
+while ($myyjarow = mysql_fetch_array($myyre)) {
 
   $query = "SELECT tunnus, ytunnus, nimi
             from asiakas
@@ -63,11 +63,11 @@ while ($myyjarow = mysql_fetch_array ($myyre)) {
   $asire = mysql_query($query) or die($query);
 
   // merkit kelataan kalkuun
-  mysql_data_seek ($merre, 0);
+  mysql_data_seek($merre, 0);
 
   $sivu = "asiakas\tnimi\t";
   $sivu .= "Yhteensä tämä\tYhteensä edel\t";
-  while ($merkkirow = mysql_fetch_array ($merre)) {
+  while ($merkkirow = mysql_fetch_array($merre)) {
 
     $sivu .= "$merkkirow[tuotemerkki] tämä\t$merkkirow[tuotemerkki] edel\t";
   }
@@ -77,7 +77,7 @@ while ($myyjarow = mysql_fetch_array ($myyre)) {
   while ($asiakasrow = mysql_fetch_array($asire)) {
 
     // merkit kelataan kalkuun
-    mysql_data_seek ($merre, 0);
+    mysql_data_seek($merre, 0);
 
     $sivu .= "$asiakasrow[ytunnus]\t$asiakasrow[nimi]\t";
 
@@ -93,13 +93,13 @@ while ($myyjarow = mysql_fetch_array ($myyre)) {
               lasku.liitostunnus = '$asiakasrow[tunnus]' and
               lasku.tapvm        > date_sub(now(), INTERVAL 2 YEAR)";
     $sumsumres = mysql_query($query) or die($query);
-    $sumsumrow = mysql_fetch_array ($sumsumres);
+    $sumsumrow = mysql_fetch_array($sumsumres);
 
-    $sumsumrow['ceur'] = str_replace('.',',',$sumsumrow['ceur']);
-    $sumsumrow['eeur'] = str_replace('.',',',$sumsumrow['eeur']);
+    $sumsumrow['ceur'] = str_replace('.', ',', $sumsumrow['ceur']);
+    $sumsumrow['eeur'] = str_replace('.', ',', $sumsumrow['eeur']);
     $sivu .= "$sumsumrow[ceur]\t$sumsumrow[eeur]\t";
 
-    while ($merkkirow = mysql_fetch_array ($merre)) {
+    while ($merkkirow = mysql_fetch_array($merre)) {
 
       $query = "SELECT
                 sum(if(lasku.tapvm >= DATE_SUB(now(),INTERVAL 1 YEAR),tilausrivi.rivihinta,0)) ceur,
@@ -113,10 +113,10 @@ while ($myyjarow = mysql_fetch_array ($myyre)) {
                 lasku.liitostunnus = '$asiakasrow[tunnus]' and
                 lasku.tapvm        > date_sub(now(),INTERVAL 2 YEAR)";
       $sumres = mysql_query($query) or die($query);
-      $sumrow = mysql_fetch_array ($sumres);
+      $sumrow = mysql_fetch_array($sumres);
 
-      $sumrow['ceur'] = str_replace('.',',',$sumrow['ceur']);
-      $sumrow['eeur'] = str_replace('.',',',$sumrow['eeur']);
+      $sumrow['ceur'] = str_replace('.', ',', $sumrow['ceur']);
+      $sumrow['eeur'] = str_replace('.', ',', $sumrow['eeur']);
       $sivu .= "$sumrow[ceur]\t$sumrow[eeur]\t";
     }
 
@@ -129,7 +129,7 @@ while ($myyjarow = mysql_fetch_array ($myyre)) {
             and myyja   = '$myyjarow[myyjanro]'
             AND myyja   > 0";
   $kukre = mysql_query($query) or die($query);
-  $kukro = mysql_fetch_array ($kukre);
+  $kukro = mysql_fetch_array($kukre);
 
   if ($kukro["eposti"] == "") {
     echo "Myyjällä $kukro[nimi] ($myyjarow[myyjanro]) ei ole sähköpostiosoitetta!\n";
@@ -138,33 +138,33 @@ while ($myyjarow = mysql_fetch_array ($myyre)) {
     echo "Lähetetään meili $kukro[eposti].\n";
 
     $nyt = date('d.m.y');
-        $bound = uniqid(time()."_") ;
+    $bound = uniqid(time()."_") ;
 
-        $header   = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
-        $header  .= "MIME-Version: 1.0\n" ;
-        $header  .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
+    $header   = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+    $header  .= "MIME-Version: 1.0\n" ;
+    $header  .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
-        $content  = "--$bound\n";
+    $content  = "--$bound\n";
 
-        $content .= "Content-Type: application/vnd.ms-excel; name=\"Excel-viikkoraportti$nyt.xls\"\n" ;
-        $content .= "Content-Transfer-Encoding: base64\n" ;
-        $content .= "Content-Disposition: attachment; filename=\"Excel-viikkoraportti$nyt.xls\"\n\n";
+    $content .= "Content-Type: application/vnd.ms-excel; name=\"Excel-viikkoraportti$nyt.xls\"\n" ;
+    $content .= "Content-Transfer-Encoding: base64\n" ;
+    $content .= "Content-Disposition: attachment; filename=\"Excel-viikkoraportti$nyt.xls\"\n\n";
 
-        $content .= chunk_split(base64_encode($sivu));
-        $content .= "\n" ;
+    $content .= chunk_split(base64_encode($sivu));
+    $content .= "\n" ;
 
-        $content .= "--$bound\n";
+    $content .= "--$bound\n";
 
-        $content .= "Content-Type: text/x-comma-separated-values; name=\"OpenOffice-viikkoraportti$nyt.csv\"\n" ;
-        $content .= "Content-Transfer-Encoding: base64\n" ;
-        $content .= "Content-Disposition: attachment; filename=\"OpenOffice-viikkoraportti$nyt.csv\"\n\n";
+    $content .= "Content-Type: text/x-comma-separated-values; name=\"OpenOffice-viikkoraportti$nyt.csv\"\n" ;
+    $content .= "Content-Transfer-Encoding: base64\n" ;
+    $content .= "Content-Disposition: attachment; filename=\"OpenOffice-viikkoraportti$nyt.csv\"\n\n";
 
-        $content .= chunk_split(base64_encode($sivu));
-        $content .= "\n" ;
+    $content .= chunk_split(base64_encode($sivu));
+    $content .= "\n" ;
 
-        $content .= "--$bound\n";
+    $content .= "--$bound\n";
 
-        $boob = mail($kukro["eposti"], mb_encode_mimeheader("Viikkoraportti $kukro[nimi] ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+    $boob = mail($kukro["eposti"], mb_encode_mimeheader("Viikkoraportti $kukro[nimi] ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 
     if ($pomomail != '') {
       $boob = mail($pomomail, mb_encode_mimeheader("Viikkoraportti $kukro[nimi] ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");

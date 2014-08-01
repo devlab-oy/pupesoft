@@ -4,13 +4,13 @@ if (strpos($_SERVER['SCRIPT_NAME'], "viranomaisilmoitukset.php") === FALSE) {
   //* Tämä skripti käyttää slave-tietokantapalvelinta *//
   $useslave = 1;
 
-  require("../inc/parametrit.inc");
+  require "../inc/parametrit.inc";
 }
 
-function alvlaskelma ($kk,$vv) {
+function alvlaskelma($kk, $vv) {
   global $yhtiorow, $kukarow, $startmonth, $endmonth;
 
-  function laskeveroja ($taso, $tulos) {
+  function laskeveroja($taso, $tulos) {
     global $kukarow, $startmonth, $endmonth;
 
     if ($tulos == '22' or $tulos == 'veronmaara' or $tulos == 'summa') {
@@ -67,7 +67,7 @@ function alvlaskelma ($kk,$vv) {
               AND tiliointi.tapvm <= '$endmonth'";
         $verores = mysql_query($query) or pupe_error($query);
 
-        while ($verorow = mysql_fetch_array ($verores)) {
+        while ($verorow = mysql_fetch_array($verores)) {
           if ($tulos == '22') $tulos = 'veronmaara';
           $vero += $verorow[$tulos];
         }
@@ -76,7 +76,7 @@ function alvlaskelma ($kk,$vv) {
     else {
       $vero = 0;
     }
-    return sprintf('%.2f',$vero);
+    return sprintf('%.2f', $vero);
   }
 
   echo "<font class='head'>".t("ALV-laskelma")."</font><hr>";
@@ -110,18 +110,18 @@ function alvlaskelma ($kk,$vv) {
                 GROUP BY vero";
       $verores = mysql_query($query) or pupe_error($query);
 
-      while ($verorow = mysql_fetch_array ($verores)) {
-//        echo "$verorow[vero] $verorow[kpl] / ";
+      while ($verorow = mysql_fetch_array($verores)) {
+        //        echo "$verorow[vero] $verorow[kpl] / ";
         switch ($verorow['vero']) {
-          case 22 :
-            $fi201 += $verorow['veronmaara'];
-            break;
-          case 17 :
-            $fi202 += $verorow['veronmaara'];
-            break;
-          case 8 :
-            $fi203 += $verorow['veronmaara'];
-            break;
+        case 22 :
+          $fi201 += $verorow['veronmaara'];
+          break;
+        case 17 :
+          $fi202 += $verorow['veronmaara'];
+          break;
+        case 8 :
+          $fi203 += $verorow['veronmaara'];
+          break;
         }
       }
     }
@@ -141,25 +141,25 @@ function alvlaskelma ($kk,$vv) {
     ******************************************/
 
     // 205 sääntö fi205
-    $fi205 = laskeveroja('fi305','22') + laskeveroja('fi306','22');
+    $fi205 = laskeveroja('fi305', '22') + laskeveroja('fi306', '22');
 
     // 206 sääntö fi206
-    $fi206 = laskeveroja('fi307','veronmaara') + $fi205;
+    $fi206 = laskeveroja('fi307', 'veronmaara') + $fi205;
 
     // 207 sääntö fi207
-    $fi207 = laskeveroja('fi207','summa');
+    $fi207 = laskeveroja('fi207', 'summa');
 
     // 208 laskennallinen
     $fi208 = $fi201 + $fi202 + $fi203 + $fi205 - $fi206 - $fi207;
 
     // 209 sääntö fi209
-    $fi209 = laskeveroja('fi309','summa') * -1;
+    $fi209 = laskeveroja('fi309', 'summa') * -1;
 
     // 210 sääntö fi210
-    $fi210 = (laskeveroja('fi311','summa') + laskeveroja('fi312','summa')) * -1;
+    $fi210 = (laskeveroja('fi311', 'summa') + laskeveroja('fi312', 'summa')) * -1;
 
     // 211 sääntö fi205
-    $fi211 = laskeveroja('fi305','summa') + laskeveroja('fi306','summa');
+    $fi211 = laskeveroja('fi305', 'summa') + laskeveroja('fi306', 'summa');
 
     if (strtoupper($yhtiorow["maa"]) == 'FI') {
       $uytunnus = tulosta_ytunnus($yhtiorow["ytunnus"]);
@@ -170,32 +170,32 @@ function alvlaskelma ($kk,$vv) {
 
     echo "<br><table>";
     echo "<tr><th>Ilmoittava yritys</th><th>$uytunnus</th></tr>";
-    echo "<tr><th>Ilmoitettava kausi</th><th>".substr($startmonth,0,4)."/".substr($startmonth,5,2)."</th></tr>";
+    echo "<tr><th>Ilmoitettava kausi</th><th>".substr($startmonth, 0, 4)."/".substr($startmonth, 5, 2)."</th></tr>";
 
     echo "<tr><th colspan='2'>Vero kotimaan myynnistä verokannoittain</th></tr>";
-    echo "<tr><td><a href = '?tee=VSRALVKK_VANHA_erittele&ryhma=fi301&vv=$vv&kk=$kk'>201</a> 22% :n vero</td><td align='right'>".sprintf('%.2f',$fi201)."</td></tr>";
-    echo "<tr><td><a href = '?tee=VSRALVKK_VANHA_erittele&ryhma=fi302&vv=$vv&kk=$kk'>202</a> 17% :n vero</td><td align='right'>".sprintf('%.2f',$fi202)."</td></tr>";
-    echo "<tr><td><a href = '?tee=VSRALVKK_VANHA_erittele&ryhma=fi303&vv=$vv&kk=$kk'>203</a> 8% :n vero</td><td align='right'>".sprintf('%.2f',$fi203)."</td></tr>";
+    echo "<tr><td><a href = '?tee=VSRALVKK_VANHA_erittele&ryhma=fi301&vv=$vv&kk=$kk'>201</a> 22% :n vero</td><td align='right'>".sprintf('%.2f', $fi201)."</td></tr>";
+    echo "<tr><td><a href = '?tee=VSRALVKK_VANHA_erittele&ryhma=fi302&vv=$vv&kk=$kk'>202</a> 17% :n vero</td><td align='right'>".sprintf('%.2f', $fi202)."</td></tr>";
+    echo "<tr><td><a href = '?tee=VSRALVKK_VANHA_erittele&ryhma=fi303&vv=$vv&kk=$kk'>203</a> 8% :n vero</td><td align='right'>".sprintf('%.2f', $fi203)."</td></tr>";
     echo "<tr><th colspan='2'></th></tr>";
-    echo "<tr><td><a href = '?tee=VSRALVKK_VANHA_erittele&ryhma=fi305&vv=$vv&kk=$kk'>205</a> Vero tavaraostoista muista EU-maista</td><td align='right'>".sprintf('%.2f',$fi205)."</td></tr>";
+    echo "<tr><td><a href = '?tee=VSRALVKK_VANHA_erittele&ryhma=fi305&vv=$vv&kk=$kk'>205</a> Vero tavaraostoista muista EU-maista</td><td align='right'>".sprintf('%.2f', $fi205)."</td></tr>";
 
     echo "<tr><th colspan='2'></th></tr>";
-    echo "<tr><td><a href = '?tee=VSRALVKK_VANHA_erittele&ryhma=fi307&vv=$vv&kk=$kk'>206</a> Kohdekuukauden vähennettävä vero</td><td align='right'>".sprintf('%.2f',$fi206)."</td></tr>";
+    echo "<tr><td><a href = '?tee=VSRALVKK_VANHA_erittele&ryhma=fi307&vv=$vv&kk=$kk'>206</a> Kohdekuukauden vähennettävä vero</td><td align='right'>".sprintf('%.2f', $fi206)."</td></tr>";
 
     echo "<tr><th colspan='2'></th></tr>";
-    echo "<tr><td><a href = '?tee=VSRALVKK_VANHA_erittele&ryhma=fi207&vv=$vv&kk=$kk'>207</a> Edellisen kuukauden negatiivinen vero</td><td align='right'>".sprintf('%.2f',$fi207)."</td></tr>";
+    echo "<tr><td><a href = '?tee=VSRALVKK_VANHA_erittele&ryhma=fi207&vv=$vv&kk=$kk'>207</a> Edellisen kuukauden negatiivinen vero</td><td align='right'>".sprintf('%.2f', $fi207)."</td></tr>";
 
     echo "<tr><th colspan='2'></th></tr>";
-    echo "<tr><td>208 Maksettava vero(+)/Seuraavalle kuukaudelle siirrettävä negatiivinen vero (-)</td><td align='right'>".sprintf('%.2f',$fi208)."</td></tr>";
+    echo "<tr><td>208 Maksettava vero(+)/Seuraavalle kuukaudelle siirrettävä negatiivinen vero (-)</td><td align='right'>".sprintf('%.2f', $fi208)."</td></tr>";
 
     echo "<tr><th colspan='2'></th></tr>";
-    echo "<tr><td><a href = '?tee=VSRALVKK_VANHA_erittele&ryhma=fi309&vv=$vv&kk=$kk'>209</a> Veroton liikevaihto</td><td align='right'>".sprintf('%.2f',$fi209)."</td></tr>";
+    echo "<tr><td><a href = '?tee=VSRALVKK_VANHA_erittele&ryhma=fi309&vv=$vv&kk=$kk'>209</a> Veroton liikevaihto</td><td align='right'>".sprintf('%.2f', $fi209)."</td></tr>";
 
     echo "<tr><th colspan='2'></th></tr>";
-    echo "<tr><td><a href = '?tee=VSRALVKK_VANHA_erittele&ryhma=fi311&vv=$vv&kk=$kk'>210</a> Tavaran myynti muihin EU-maihin </td><td align='right'>".sprintf('%.2f',$fi210)."</td></tr>";
+    echo "<tr><td><a href = '?tee=VSRALVKK_VANHA_erittele&ryhma=fi311&vv=$vv&kk=$kk'>210</a> Tavaran myynti muihin EU-maihin </td><td align='right'>".sprintf('%.2f', $fi210)."</td></tr>";
 
     echo "<tr><th colspan='2'></th></tr>";
-    echo "<tr><td><a href = '?tee=VSRALVKK_VANHA_erittele&ryhma=fi305&vv=$vv&kk=$kk'>211</a> Tavaraostot muista EU-maista</td><td align='right'>".sprintf('%.2f',$fi211)."</td></tr>";
+    echo "<tr><td><a href = '?tee=VSRALVKK_VANHA_erittele&ryhma=fi305&vv=$vv&kk=$kk'>211</a> Tavaraostot muista EU-maista</td><td align='right'>".sprintf('%.2f', $fi211)."</td></tr>";
     echo "</table><br>";
 
     $query = "SELECT sum(tiliointi.summa) vero
@@ -206,33 +206,33 @@ function alvlaskelma ($kk,$vv) {
               AND tiliointi.tapvm    >= '$startmonth'
               AND tiliointi.tapvm    <= '$endmonth'";
     $verores = mysql_query($query) or pupe_error($query);
-    $verorow = mysql_fetch_array ($verores);
+    $verorow = mysql_fetch_array($verores);
 
     echo "<table>";
-    echo "<tr><td>Tili $yhtiorow[alv] yhteensä</td><td align='right'>".sprintf('%.2f',$verorow['vero'])."</td></tr>";
-    echo "<tr><td>Maksettava alv</td><td align='right'>".sprintf('%.2f',$fi208)."</td></tr>";
-    echo "<tr><td>Erotus</td><td align='right'>".sprintf('%.2f',$verorow['vero'] - $fi208)."</td></tr>";
+    echo "<tr><td>Tili $yhtiorow[alv] yhteensä</td><td align='right'>".sprintf('%.2f', $verorow['vero'])."</td></tr>";
+    echo "<tr><td>Maksettava alv</td><td align='right'>".sprintf('%.2f', $fi208)."</td></tr>";
+    echo "<tr><td>Erotus</td><td align='right'>".sprintf('%.2f', $verorow['vero'] - $fi208)."</td></tr>";
     echo "</table><br>";
 
     if (strpos($_SERVER['SCRIPT_NAME'], "viranomaisilmoitukset.php") !== FALSE) {
 
-      $ilmoituskausi = substr($startmonth,0,4).substr($startmonth,5,2);
+      $ilmoituskausi = substr($startmonth, 0, 4).substr($startmonth, 5, 2);
       $file  = "000:VSRALVKK\n";
       $file .= "100:".date("dmY")."\n";
       $file .= "105:E03\n";
       $file .= "010:$uytunnus\n";
       $file .= "052:$ilmoituskausi\n";
       $file .= "098:1\n";
-      $file .= "201:".round($fi201*100,0)."\n";
-      $file .= "202:".round($fi202*100,0)."\n";
-      $file .= "203:".round($fi203*100,0)."\n";
-      $file .= "205:".round($fi205*100,0)."\n";
-      $file .= "206:".round($fi206*100,0)."\n";
-      $file .= "207:".round($fi207*100,0)."\n";
-      $file .= "208:".round($fi208*100,0)."\n";
-      $file .= "209:".round($fi209*100,0)."\n";
-      $file .= "210:".round($fi210*100,0)."\n";
-      $file .= "211:".round($fi211*100,0)."\n";
+      $file .= "201:".round($fi201*100, 0)."\n";
+      $file .= "202:".round($fi202*100, 0)."\n";
+      $file .= "203:".round($fi203*100, 0)."\n";
+      $file .= "205:".round($fi205*100, 0)."\n";
+      $file .= "206:".round($fi206*100, 0)."\n";
+      $file .= "207:".round($fi207*100, 0)."\n";
+      $file .= "208:".round($fi208*100, 0)."\n";
+      $file .= "209:".round($fi209*100, 0)."\n";
+      $file .= "210:".round($fi210*100, 0)."\n";
+      $file .= "211:".round($fi211*100, 0)."\n";
       $file .= "999:1\n";
 
       $filenimi = "VSRALVKK-$kukarow[yhtio]-".date("dmy-His").".txt";
@@ -346,15 +346,15 @@ if ($tee == 'VSRALVKK_VANHA_erittele') {
     echo "<tr>";
 
     switch ($ryhma) {
-      case 'fi301' :
-        $tiliointilisa .= " and tiliointi.vero = '22' ";
-        break;
-      case 'fi302' :
-        $tiliointilisa .= " and tiliointi.vero = '17' ";
-        break;
-      case 'fi303' :
-        $tiliointilisa .= " and tiliointi.vero = '8' ";
-        break;
+    case 'fi301' :
+      $tiliointilisa .= " and tiliointi.vero = '22' ";
+      break;
+    case 'fi302' :
+      $tiliointilisa .= " and tiliointi.vero = '17' ";
+      break;
+    case 'fi303' :
+      $tiliointilisa .= " and tiliointi.vero = '8' ";
+      break;
     }
 
     if ($ryhma == 'fi307') {
@@ -413,7 +413,7 @@ if ($tee == 'VSRALVKK_VANHA_erittele') {
     $kantasum = 0.0;
     $kantatot = 0.0;
 
-    while ($trow = mysql_fetch_array ($result)) {
+    while ($trow = mysql_fetch_array($result)) {
 
       if (isset($edvero) and ($edvero != $trow["vero"] or $edmaa != $trow["maa"])) { // Vaihtuiko verokanta?
         echo "<tr>
@@ -484,7 +484,7 @@ if ($tee == 'VSRALVKK_VANHA_erittele') {
                   AND tapvm    <= '$loppupvm'";
         $verores = mysql_query($query) or pupe_error($query);
 
-        while ($verorow = mysql_fetch_array ($verores)) {
+        while ($verorow = mysql_fetch_array($verores)) {
           $vero += $verorow['veronmaara'];
         }
 
@@ -500,4 +500,4 @@ if ($tee == 'VSRALVKK_VANHA_erittele') {
 
 alvlaskelma($kk, $vv);
 
-require("inc/footer.inc");
+require "inc/footer.inc";

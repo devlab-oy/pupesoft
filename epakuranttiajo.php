@@ -4,11 +4,11 @@
 if (php_sapi_name() != 'cli') {
 
   if (isset($_POST["tee"])) {
-    if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-    if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+    if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+    if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
   }
 
-  require ("inc/parametrit.inc");
+  require "inc/parametrit.inc";
 
   if (isset($tee) and $tee == "lataa_tiedosto") {
     readfile("/tmp/".$tmpfilenimi);
@@ -54,8 +54,8 @@ else {
   ini_set("display_errors", 0);
 
   // Otetaan tietokanta connect
-  require("inc/connect.inc");
-  require("inc/functions.inc");
+  require "inc/connect.inc";
+  require "inc/functions.inc";
 
   // Tehdään oletukset
   $kukarow['yhtio'] = $argv[1];
@@ -120,7 +120,7 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
              ORDER BY tuoteno";
   $epakurantti_result = mysql_query($query) or pupe_error($query);
 
-  include('inc/pupeExcel.inc');
+  include 'inc/pupeExcel.inc';
 
   $worksheet    = new pupeExcel();
   $format_bold = array("bold" => TRUE);
@@ -179,7 +179,7 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
       $tee    = $kaikkiepakur;
       $tuoteno = $epakurantti_row["tuoteno"];
 
-      require("epakurantti.inc");
+      require "epakurantti.inc";
 
       echo "Tuotteen $epakurantti_row[tuoteno], laitetaan $tee epakurantiksi. Varastonmuutos $varaston_muutos $yhtiorow[valkoodi].\n";
     }
@@ -246,7 +246,7 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
 
         if ($php_cli or (isset($ajo_tee) and $ajo_tee == "EPAKURANTOI")) {
           $tee = "paalle";
-          require ("epakurantti.inc");
+          require "epakurantti.inc";
         }
 
         $mikataso = 100;
@@ -256,7 +256,7 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
 
         if ($php_cli or (isset($ajo_tee) and $ajo_tee == "EPAKURANTOI")) {
           $tee = "75paalle";
-          require ("epakurantti.inc");
+          require "epakurantti.inc";
         }
 
         $mikataso = 75;
@@ -266,7 +266,7 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
 
         if ($php_cli or (isset($ajo_tee) and $ajo_tee == "EPAKURANTOI")) {
           $tee = "puolipaalle";
-          require ("epakurantti.inc");
+          require "epakurantti.inc";
         }
 
         $mikataso = 50;
@@ -276,7 +276,7 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
 
         if ($php_cli or (isset($ajo_tee) and $ajo_tee == "EPAKURANTOI")) {
           $tee = "25paalle";
-          require ("epakurantti.inc");
+          require "epakurantti.inc";
         }
 
         $mikataso = 25;
@@ -392,8 +392,8 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
         if (!$php_cli) echo "<td align='right'>{$epakurantti_row['saldo']}</td>";
         $worksheet->writeNumber($excelrivi, $excelsarake++, $epakurantti_row['saldo']);
 
-        if (!$php_cli) echo "<td align='right'>".round($epakurantti_row['kehahin'],2)."</td>";
-        $worksheet->writeNumber($excelrivi, $excelsarake++, round($epakurantti_row['kehahin'],2));
+        if (!$php_cli) echo "<td align='right'>".round($epakurantti_row['kehahin'], 2)."</td>";
+        $worksheet->writeNumber($excelrivi, $excelsarake++, round($epakurantti_row['kehahin'], 2));
 
         $vararvo_nyt = $vararvo_sit = round($epakurantti_row['kehahin']*$epakurantti_row['saldo'], 2);
 
@@ -478,7 +478,7 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
     if (!$php_cli) echo "<tr><td class='tumma' colspan='10'>".t("Epäkuranttimuutos yhteensä").":</td>";
     $worksheet->writeString($excelrivi, 8, t("Epäkuranttimuutos yhteensä"));
 
-    if (!$php_cli) echo "<td class='tumma' align='right'>",($vararvot_sit-$vararvot_nyt),"</td>";
+    if (!$php_cli) echo "<td class='tumma' align='right'>", ($vararvot_sit-$vararvot_nyt), "</td>";
     $worksheet->writeNumber($excelrivi, 10, ($vararvot_sit-$vararvot_nyt));
 
     if (!$php_cli and isset($ajo_tee) and $ajo_tee == "EPAKURANTOI") {
@@ -509,21 +509,21 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
         echo "</form><br>";
       }
 
-      require ("inc/footer.inc");
+      require "inc/footer.inc";
     }
     else {
       // Sähköpostin lähetykseen parametrit
       $parametri = array( "to"       => $yhtiorow['talhal_email'],
-                "cc"       => "",
-                "subject"    => t("Epäkuranttiajo"),
-                "ctype"      => "text",
-                "body"      => t("Liitteenä epäkuranttiajon raportti").".",
-                "attachements"  => array(0   => array(
-                              "filename"    => "/tmp/".$excelnimi,
-                              "newfilename"  => "Epakuranttiajo.xlsx",
-                              "ctype"      => "EXCEL"),
-                )
-              );
+        "cc"       => "",
+        "subject"    => t("Epäkuranttiajo"),
+        "ctype"      => "text",
+        "body"      => t("Liitteenä epäkuranttiajon raportti").".",
+        "attachements"  => array(0   => array(
+            "filename"    => "/tmp/".$excelnimi,
+            "newfilename"  => "Epakuranttiajo.xlsx",
+            "ctype"      => "EXCEL"),
+        )
+      );
       $boob = pupesoft_sahkoposti($parametri);
     }
   }

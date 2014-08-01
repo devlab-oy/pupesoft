@@ -64,7 +64,7 @@ $query = "SELECT
           FROM asiakas
           JOIN yhtio ON (asiakas.yhtio = yhtio.yhtio)
           WHERE asiakas.yhtio = '$yhtio'
-          AND asiakas.laji not in ('P','R')
+          AND asiakas.laji    not in ('P','R')
           {$asiakasrajaus}
           ORDER BY asiakas.tunnus";
 $res = pupe_query($query);

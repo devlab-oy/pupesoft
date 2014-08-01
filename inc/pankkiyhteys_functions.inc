@@ -213,12 +213,7 @@ function sepa_download_file_list($params) {
   }
 
   // Varmistetaan, ett‰ ei kutsuta v‰‰r‰ll‰ filetypell‰
-  if ($bank == "nordea" and $file_type == "KTON") {
-    $file_type = "TITO";
-  }
-  elseif ($bank == "danske" and $file_type == "TITO") {
-    $file_type = "KTON";
-  }
+  $file_type = sepa_file_type_check($bank, $file_type);
 
   $parameters = array(
     "method"  => "POST",
@@ -278,12 +273,7 @@ function sepa_download_files($params) {
   }
 
   // Varmistetaan, ett‰ ei kutsuta v‰‰r‰ll‰ filetypell‰
-  if ($bank == "nordea" and $file_type == "KTON") {
-    $file_type = "TITO";
-  }
-  elseif ($bank == "danske" and $file_type == "TITO") {
-    $file_type = "KTON";
-  }
+  $file_type = sepa_file_type_check($bank, $file_type);
 
   $tiedostot = array();
 
@@ -353,6 +343,9 @@ function sepa_upload_file($params) {
       return false;
     }
   }
+
+  // Varmistetaan, ett‰ ei kutsuta v‰‰r‰ll‰ filetypell‰
+  $file_type = sepa_file_type_check($bank, $file_type);
 
   $parameters = array(
     "method"  => "POST",
@@ -498,6 +491,35 @@ function sepa_target_id_for_file_type($params) {
   return $target_id;
 }
 
+function sepa_file_type_check($bank, $file_type) {
+  // Varmistetaan, ett‰ ei kutsuta v‰‰r‰ll‰ filetypell‰
+
+  // Nordeamuunnokset
+  if ($bank == "nordea") {
+    // Konekielinen tiliote
+    if ($file_type == "KTON") {
+      $file_type = "TITO";
+    }
+    // Konekielinen viiteaineisto
+    if ($file_type == "VIPN") {
+      $file_type = "KTL";
+    }
+  }
+
+  // Danskemuunnokset
+  if ($bank == "danske") {
+    // Konekielinen tiliote
+    if ($file_type == "TITO") {
+      $file_type = "KTON";
+    }
+    // Konekielinen viiteaineisto
+    if ($file_type == "KTL") {
+      $file_type = "VIPN";
+    }
+  }
+
+  return $file_type;
+}
 // Sertifikaatti / salausfunktiot
 
 

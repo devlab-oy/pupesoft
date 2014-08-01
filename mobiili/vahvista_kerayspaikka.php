@@ -47,7 +47,7 @@ if(!isset($row)) {
             JOIN tuotepaikat
               ON (tuotepaikat.yhtio = tilausrivi.yhtio
                 AND tuotepaikat.tuoteno = tilausrivi.tuoteno
-                AND tuotepaikat.oletus = 'X')
+                AND tuotepaikat.oletus  = 'X')
             WHERE tilausrivi.tunnus='{$tilausrivi}'
             AND tilausrivi.yhtio='{$kukarow['yhtio']}'";
   $row = mysql_fetch_assoc(pupe_query($query));

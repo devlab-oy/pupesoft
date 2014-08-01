@@ -164,11 +164,11 @@ else {
     $elements = mysql_num_rows($rresult); // total number of elements to process
     $bar->initialize($elements); // print the empty bar
 
-    include('inc/pupeExcel.inc'); 
+    include('inc/pupeExcel.inc');
 
-    $worksheet 	 = new pupeExcel();
+    $worksheet    = new pupeExcel();
     $format_bold = array("bold" => TRUE);
-    $excelrivi 	 = 0;
+    $excelrivi    = 0;
 
 
     if (isset($worksheet)) {

@@ -20,13 +20,13 @@ if (isset($_REQUEST['kaikki_parametrit_serialisoituna'])) {
 }
 
 if (isset($_POST["tee"])) {
-  if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if(isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if (isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
 if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
-  require ("../inc/parametrit.inc");
-  require('validation/Validation.php');
+  require "../inc/parametrit.inc";
+  require 'validation/Validation.php';
 }
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
@@ -34,7 +34,7 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
   exit;
 }
 else {
-  echo "<font class='head'>",t("Myynninseuranta"),"</font><hr>";
+  echo "<font class='head'>", t("Myynninseuranta"), "</font><hr>";
 
   // tehdään kaikista raportin parametreistä yksi muuttuja serialisoimista varten
   $kaikki_muuttujat_array = array();
@@ -56,7 +56,7 @@ else {
   //* Tämä skripti käyttää slave-tietokantapalvelinta *//
   $useslave = 1;
 
-  require ("inc/connect.inc");
+  require "inc/connect.inc";
 
   if ($lopetus == "") {
 
@@ -78,9 +78,9 @@ else {
     }
 
     //Käyttöliittymä
-    if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-    if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-    if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+    if (!isset($kka)) $kka = date("m", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+    if (!isset($vva)) $vva = date("Y", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+    if (!isset($ppa)) $ppa = date("d", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
     if (!isset($kkl)) $kkl = date("m");
     if (!isset($vvl)) $vvl = date("Y");
     if (!isset($ppl)) $ppl = date("d");
@@ -98,7 +98,7 @@ else {
     // tässä on tämä "perusnäkymä" mikä tulisi olla kaikissa myynnin raportoinneissa..
 
     // Jos ajetaan tilauksittain vaihdetaan aina ajotavaksi 'tilaus'
-    if (isset($ruksit[140]) AND $ruksit[140] != "" AND $ajotapa == "lasku") {
+    if (isset($ruksit[140]) and $ruksit[140] != "" and $ajotapa == "lasku") {
       $ajotapa = 'tilaus';
     }
 
@@ -126,15 +126,15 @@ else {
 
     echo "<table>";
     echo "<tr>";
-    echo "<th>",t("Valitse ajotapa:"),"</th>";
+    echo "<th>", t("Valitse ajotapa:"), "</th>";
 
     echo "<td><select name='ajotapa'>";
-    echo "<option value='lasku'               {$chk1}>",t("Laskuista")," (",t("Laskutus"),")</option>";
-    echo "<option value='tilaus'              {$chk2}>",t("Laskutetuista tilauksista"),"</option>";
-    echo "<option value='tilausjaauki'        {$chk3}>",t("Laskutetuista sekä avoimista tilauksista"),"</option>";
-    echo "<option value='tilausjaaukiluonti'  {$chk4}>",t("Laskutetuista sekä avoimista tilauksista luontiajalla")," (",t("Myynti"),")</option>";
-    echo "<option value='ennakot'             {$chk5}>",t("Lepäämässä olevista ennakoista"),"</option>";
-    echo "<option value='tilausauki'          {$chk6}>",t("Avoimista tilauksista"),"</option>";
+    echo "<option value='lasku'               {$chk1}>", t("Laskuista"), " (", t("Laskutus"), ")</option>";
+    echo "<option value='tilaus'              {$chk2}>", t("Laskutetuista tilauksista"), "</option>";
+    echo "<option value='tilausjaauki'        {$chk3}>", t("Laskutetuista sekä avoimista tilauksista"), "</option>";
+    echo "<option value='tilausjaaukiluonti'  {$chk4}>", t("Laskutetuista sekä avoimista tilauksista luontiajalla"), " (", t("Myynti"), ")</option>";
+    echo "<option value='ennakot'             {$chk5}>", t("Lepäämässä olevista ennakoista"), "</option>";
+    echo "<option value='tilausauki'          {$chk6}>", t("Avoimista tilauksista"), "</option>";
     echo "</select></td>";
 
     echo "</tr>";
@@ -152,11 +152,11 @@ else {
     }
 
     echo "<tr>";
-    echo "<th>",t("Ajotavan lisäparametrit:"),"</th>";
+    echo "<th>", t("Ajotavan lisäparametrit:"), "</th>";
 
     echo "<td><select name='ajotapanlisa'>";
-    echo "<option value='summattuna'  {$chk1}>",t("Veloitukset ja hyvitykset summattuina"),"</option>";
-    echo "<option value='erikseen'     {$chk2}>",t("Veloitukset ja hyvitykset allekkain"),"</option>";
+    echo "<option value='summattuna'  {$chk1}>", t("Veloitukset ja hyvitykset summattuina"), "</option>";
+    echo "<option value='erikseen'     {$chk2}>", t("Veloitukset ja hyvitykset allekkain"), "</option>";
     echo "</select></td>";
     echo "</tr>";
     echo "</table><br>";
@@ -171,7 +171,7 @@ else {
     if (mysql_num_rows($result) > 0 and $oikeurow['paivitys'] != "") {
       echo "<table>";
       echo "<tr>";
-      echo "<th>",t("Valitse yhtiö"),"</th>";
+      echo "<th>", t("Valitse yhtiö"), "</th>";
 
       if (!isset($yhtiot)) $yhtiot = array();
 
@@ -192,10 +192,10 @@ else {
     }
 
     $noautosubmit = TRUE;
-    $monivalintalaatikot = array("ASIAKASOSASTO", "ASIAKASRYHMA", "ASIAKASPIIRI", "<br>DYNAAMINEN_ASIAKAS", "<br>OSASTO", "TRY", "TUOTEMERKKI", "MALLI/MALLITARK", "<br>DYNAAMINEN_TUOTE", "<br>LASKUMYYJA", "TUOTEMYYJA", "ASIAKASMYYJA", "TUOTEOSTAJA", "<br>TOIMIPAIKKA","KUSTP", "KOHDE", "PROJEKTI");
+    $monivalintalaatikot = array("ASIAKASOSASTO", "ASIAKASRYHMA", "ASIAKASPIIRI", "<br>DYNAAMINEN_ASIAKAS", "<br>OSASTO", "TRY", "TUOTEMERKKI", "MALLI/MALLITARK", "<br>DYNAAMINEN_TUOTE", "<br>LASKUMYYJA", "TUOTEMYYJA", "ASIAKASMYYJA", "TUOTEOSTAJA", "<br>TOIMIPAIKKA", "KUSTP", "KOHDE", "PROJEKTI");
     $monivalintalaatikot_normaali = array();
 
-    require ("tilauskasittely/monivalintalaatikot.inc");
+    require "tilauskasittely/monivalintalaatikot.inc";
 
     echo "<br><br>";
 
@@ -280,14 +280,14 @@ else {
 
     echo "<table>
       <tr>
-      <th>",t("Lisärajaus"),"</th>
-      <th>",t("Prio"),"</th>
+      <th>", t("Lisärajaus"), "</th>
+      <th>", t("Prio"), "</th>
       <th> x</th>
-      <th>",t("Rajaus"),"</th>
+      <th>", t("Rajaus"), "</th>
       </tr>
       <tr>
       <tr>
-      <th>",t("Listaa y-tunnuksella"),"</th>
+      <th>", t("Listaa y-tunnuksella"), "</th>
       <td><input type='text' name='jarjestys[10]' size='2' value='{$jarjestys[10]}'></td>
       <td><input type='checkbox' name='ruksit[10]' value='ytunnus' {$ruk10chk}></td>
       <td><input type='text' name='ytunnus' value='{$ytunnus}'>
@@ -295,14 +295,14 @@ else {
       <table>
 
       <tr><td class='spec'>".t("Summaustaso").":</td><td><select name='ytunnus_grouppaus'>
-      <option value=''>",t("Asiakkaittain"),"</option>
-      <option value='ytunnus' {$ytunnus_grouppaus_sel}>",t("Ytunnuksittain"),"</option>
+      <option value=''>", t("Asiakkaittain"), "</option>
+      <option value='ytunnus' {$ytunnus_grouppaus_sel}>", t("Ytunnuksittain"), "</option>
       </select></td></tr>
 
 
       <tr><td class='spec'>".t("Hae asiakastiedot").":</td><td><select name='ytunnus_mistatiedot'>
-      <option value=''>",t("Asiakasrekisteristä"),"</option>
-      <option value='laskulta' {$ytun_mistatiedot_sel}>",t("Laskuilta"),"</option>
+      <option value=''>", t("Asiakasrekisteristä"), "</option>
+      <option value='laskulta' {$ytun_mistatiedot_sel}>", t("Laskuilta"), "</option>
       </select></td></tr>
       <tr><td class='spec'>".t("Näytä laajat asiakastiedot").":</td><td><input type='checkbox' name='ytun_laajattied' value='laajat' {$ytun_laajattiedchk}></td></tr>
       <tr>
@@ -312,201 +312,201 @@ else {
       </table>
       </tr>
       <tr>
-      <th>",t("Listaa asiakasnumerolla"),"</th>
+      <th>", t("Listaa asiakasnumerolla"), "</th>
       <td><input type='text' name='jarjestys[20]' size='2' value='{$jarjestys[20]}'></td>
       <td><input type='checkbox' name='ruksit[20]' value='asiakasnro' {$ruk20chk}></td>
       <td><input type='text' name='asiakasnro' value='{$asiakasnro}'></td>
       </tr>
       <tr>
-      <th>",t("Listaa tuotteittain"),"</th>
+      <th>", t("Listaa tuotteittain"), "</th>
       <td><input type='text' name='jarjestys[30]' size='2' value='{$jarjestys[30]}'></td>
       <td><input type='checkbox' name='ruksit[30]' value='tuote' {$ruk30chk}></td>
       <td><input type='text' name='rajaus[30]' value='{$rajaus[30]}'></td>
       </tr>
       <tr>
-      <th>",t("Listaa maittain"),"</th>
+      <th>", t("Listaa maittain"), "</th>
       <td><input type='text' name='jarjestys[40]' size='2' value='{$jarjestys[40]}'></td>
       <td><input type='checkbox' name='ruksit[40]' value='maa' {$ruk40chk}></td>
       <td><input type='text' name='rajaus[40]' value='{$rajaus[40]}'></td>
       </tr>
       <tr>
-      <th>",t("Listaa toimittajittain"),"</th>
+      <th>", t("Listaa toimittajittain"), "</th>
       <td><input type='text' name='jarjestys[50]' size='2' value='{$jarjestys[50]}'></td>
       <td><input type='checkbox' name='ruksit[50]' value='toimittaja' {$ruk50chk}></td>
       <td><input type='text' name='toimittaja' value='{$toimittaja}'></td>
       </tr>
       <tr>
-      <th>",t("Listaa tilaustyypeittäin"),"</th>
+      <th>", t("Listaa tilaustyypeittäin"), "</th>
       <td><input type='text' name='jarjestys[60]' size='2' value='{$jarjestys[60]}'></td>
       <td><input type='checkbox' name='ruksit[60]' value='tilaustyyppi' {$ruk60chk}></td>
       <td><input type='text' name='rajaus[60]' value='{$rajaus[60]}'></td>
-      <td class='back'>",t("(Toimii vain jos ajat raporttia tilauksista)"),"</td>
+      <td class='back'>", t("(Toimii vain jos ajat raporttia tilauksista)"), "</td>
       </tr>
       <tr>
-      <th>",t("Listaa konsernittain"),"</th>
+      <th>", t("Listaa konsernittain"), "</th>
       <td><input type='text' name='jarjestys[80]' size='2' value='{$jarjestys[80]}'></td>
       <td><input type='checkbox' name='ruksit[80]' value='konserni' {$ruk80chk}></td>
       <td><input type='text' name='rajaus[80]' value='{$rajaus[80]}'></td>
       </tr>
       <tr>
-      <th>",t("Listaa laskuittain"),"</th>
+      <th>", t("Listaa laskuittain"), "</th>
       <td><input type='text' name='jarjestys[90]' size='2' value='{$jarjestys[90]}'></td>
       <td><input type='checkbox' name='ruksit[90]' value='laskuittain' {$ruk90chk}></td>
       <td><input type='text' name='rajaus[90]' value='{$rajaus[90]}'></td>
       </tr>
       <tr>
-      <th>",t("Listaa varastoittain"),"</th>
+      <th>", t("Listaa varastoittain"), "</th>
       <td><input type='text' name='jarjestys[100]' size='2' value='{$jarjestys[100]}'></td>
       <td><input type='checkbox' name='ruksit[100]' value='varastoittain' {$ruk100chk}></td>
       <td><input type='text' name='rajaus[100]' value='{$rajaus[100]}'></td>
       </tr>
       <tr>
-      <th>",t("Listaa kanta-asiakkaittain"),"</th>
+      <th>", t("Listaa kanta-asiakkaittain"), "</th>
       <td><input type='text' name='jarjestys[110]' size='2' value='{$jarjestys[110]}'></td>
       <td><input type='checkbox' name='ruksit[110]' value='kantaasiakkaittain' {$ruk110chk}></td>
       <td><input type='text' name='rajaus[110]' value='{$rajaus[110]}'></td>
-      <td class='back'>",t("(Toimii vain jos ajat raporttia tilauksista)"),"</td>
+      <td class='back'>", t("(Toimii vain jos ajat raporttia tilauksista)"), "</td>
       </tr>
       <tr>
-      <th>",t("Listaa maksuehdoittain"),"</th>
+      <th>", t("Listaa maksuehdoittain"), "</th>
       <td><input type='text' name='jarjestys[120]' size='2' value='{$jarjestys[120]}'></td>
       <td><input type='checkbox' name='ruksit[120]' value='maksuehdoittain' {$ruk120chk}></td>
       <td><input type='text' name='rajaus[120]' value='{$rajaus[120]}'></td>
       </tr>
       <tr>
-      <th>",t("Listaa asiakkaan tilausnumeroittain"),"</th>
+      <th>", t("Listaa asiakkaan tilausnumeroittain"), "</th>
       <td><input type='text' name='jarjestys[130]' size='2' value='{$jarjestys[130]}'></td>
       <td><input type='checkbox' name='ruksit[130]' value='asiakkaan_tilausnumeroittain' {$ruk130chk}></td>
       <td><input type='text' name='rajaus[130]' value='{$rajaus[130]}'></td>
       </tr>
       <tr>
-      <th>",t("Listaa tilauksittain"),"</th>
+      <th>", t("Listaa tilauksittain"), "</th>
       <td><input type='text' name='jarjestys[140]' size='2' value='{$jarjestys[140]}'></td>
       <td><input type='checkbox' name='ruksit[140]' value='tilauksittain' {$ruk140chk}></td>
       <td><input type='text' name='rajaus[140]' value='{$rajaus[140]}'></td>
-      <td class='back'>",t("(Toimii vain jos ajat raporttia tilauksista)"),"</td>
+      <td class='back'>", t("(Toimii vain jos ajat raporttia tilauksista)"), "</td>
       </tr>
       <tr>
       <td class='back'><br></td>
       </tr>
-      <tr><th valign='top'>",t("Tuotelista"),"<br>(",t("Rajaa näillä tuotteilla"),")</th><td colspan='3'><textarea name='tuotteet_lista' rows='5' cols='35'>{$tuotteet_lista}</textarea></td></tr>
+      <tr><th valign='top'>", t("Tuotelista"), "<br>(", t("Rajaa näillä tuotteilla"), ")</th><td colspan='3'><textarea name='tuotteet_lista' rows='5' cols='35'>{$tuotteet_lista}</textarea></td></tr>
       <tr>
       <td class='back'><br></td>
       </tr>
       <tr>
-      <th>",t("Piilota myynti"),"</th>
+      <th>", t("Piilota myynti"), "</th>
       <td colspan='3'><input type='checkbox' name='piilota_myynti' {$piilota_myynti_sel}></td>
       </tr>
       <tr>
-      <th>",t("Piilota nettokate"),"</th>
+      <th>", t("Piilota nettokate"), "</th>
       <td colspan='3'><input type='checkbox' name='piilota_nettokate' {$piilota_nettokate_sel}></td>
       </tr>
       <tr>
-      <th>",t("Piilota kate"),"</th>
+      <th>", t("Piilota kate"), "</th>
       <td colspan='3'><input type='checkbox' name='piilota_kate' {$piilota_kate_sel}></td>
       </tr>
       <tr>
-      <th>",t("Piilota kappaleet"),"</th>
+      <th>", t("Piilota kappaleet"), "</th>
       <td colspan='3'><input type='checkbox' name='piilota_kappaleet' {$piilota_kappaleet_sel}></td>
       </tr>
       <tr>
-      <th>",t("Piilota edellisen kauden sarakkeet"),"</th>
+      <th>", t("Piilota edellisen kauden sarakkeet"), "</th>
       <td colspan='3'><input type='checkbox' name='piiloed' {$piiloedchk}></td>
       <td class='back'></td>
       </tr>
       <tr>
-      <th>",t("Piilota välisummat"),"</th>
+      <th>", t("Piilota välisummat"), "</th>
       <td colspan='3'><input type='checkbox' name='piiyhteensa' {$piychk}></td>
       </tr>
       <tr>
-      <th>",t("Näytä nettokateprosentit"),"</th>
+      <th>", t("Näytä nettokateprosentit"), "</th>
       <td colspan='3'><input type='checkbox' name='nettokateprossat' {$nettokatchk}></td>
-      <td class='back'>",t("(Toimii vain jos myynti ja nettokate näytetään)"),"</td>
+      <td class='back'>", t("(Toimii vain jos myynti ja nettokate näytetään)"), "</td>
       </tr>
       <tr>
-      <th>",t("Näytä kateprosentit"),"</th>
+      <th>", t("Näytä kateprosentit"), "</th>
       <td colspan='3'><input type='checkbox' name='kateprossat' {$katchk}></td>
-      <td class='back'>",t("(Toimii vain jos myynti ja kate näytetään)"),"</td>
+      <td class='back'>", t("(Toimii vain jos myynti ja kate näytetään)"), "</td>
       </tr>
       <tr>
-      <th>",t("Näytä tuotteiden nimitykset"),"</th>
+      <th>", t("Näytä tuotteiden nimitykset"), "</th>
       <td colspan='3'><input type='checkbox' name='nimitykset' {$nimchk}></td>
-      <td class='back'>",t("(Toimii vain jos listaat tuotteittain)"),"</td>
+      <td class='back'>", t("(Toimii vain jos listaat tuotteittain)"), "</td>
       </tr>
-      <th>",t("Näytä tuotteiden mittatiedot"),"</th>
+      <th>", t("Näytä tuotteiden mittatiedot"), "</th>
       <td colspan='3'><input type='checkbox' name='mitat' {$mitatchk}></td>
-      <td class='back'>",t("(Toimii vain jos listaat tuotteittain)"),"</td>
+      <td class='back'>", t("(Toimii vain jos listaat tuotteittain)"), "</td>
       </tr>
       <tr>
-      <th>",t("Näytä sarjanumerot"),"</th>
+      <th>", t("Näytä sarjanumerot"), "</th>
       <td colspan='3'><input type='checkbox' name='sarjanumerot' {$sarjachk}></td>
       <td class='back'></td>
       </tr>
       <tr>
-      <th>",t("Näytä vain myydyt sarjanumerot"),"</th>
+      <th>", t("Näytä vain myydyt sarjanumerot"), "</th>
       <td colspan='3'><input type='checkbox' name='eiOstSarjanumeroita' {$sarjachk2}></td>
       <td class='back'></td>
       </tr>
       <tr>
-      <th>",t("Näytä varastonarvo"),"</th>
+      <th>", t("Näytä varastonarvo"), "</th>
       <td colspan='3'><input type='checkbox' name='varastonarvo' {$varvochk}></td>
-      <td class='back'>",t("(Toimii vain jos listaat tuotteittain)"),"</td>
+      <td class='back'>", t("(Toimii vain jos listaat tuotteittain)"), "</td>
       </tr>
       <tr>
-      <th>",t("Näytä tilausrivin kommentti"),"</th>
+      <th>", t("Näytä tilausrivin kommentti"), "</th>
       <td colspan='3'><input type='checkbox' name='tilrivikomm' {$tilrivikommchk}></td>
       <td class='back'></td>
       </tr>
       <tr>
-      <th>",t("Tulosta myynti kuukausittain"),"</th>
+      <th>", t("Tulosta myynti kuukausittain"), "</th>
       <td colspan='3'><input type='checkbox' name='kuukausittain' {$kuuchk}></td>
       <td class='back'></td>
       </tr>
       <tr>
-      <th>",t("Tulosta osoitetarrat"),"</th>
+      <th>", t("Tulosta osoitetarrat"), "</th>
       <td colspan='3'><input type='checkbox' name='osoitetarrat' {$tarchk}></td>
-      <td class='back'>",t("(Toimii vain jos listaat asiakkaittain)"),"</td>
+      <td class='back'>", t("(Toimii vain jos listaat asiakkaittain)"), "</td>
       </tr>
       <tr>
-      <th>",t("Raportti vain Exceliin"),"</th>
+      <th>", t("Raportti vain Exceliin"), "</th>
       <td colspan='3'><input type='checkbox' name='vain_excel' {$vain_excelchk}></td>
       <td class='back'></td>
       </tr>
       <tr>
-      <th>",t("Piilota nollarivit"),"</th>
+      <th>", t("Piilota nollarivit"), "</th>
       <td colspan='3'><input type='checkbox' name='piilotanollarivit' {$einollachk}></td>
       <td class='back'></td>
       </tr>
       <tr>
-      <th>",t("Näytä myös ennakkolaskutus"),"</th>
+      <th>", t("Näytä myös ennakkolaskutus"), "</th>
       <td colspan='3'><input type='checkbox' name='naytaennakko' {$naytaennakkochk}></td>
       <td class='back'></td>
       </tr>
       <tr>
-      <th>",t("Näytä myös toimittajan tuoteno"),"</th>
+      <th>", t("Näytä myös toimittajan tuoteno"), "</th>
       <td colspan='3'><input type='checkbox' name='naytatoimtuoteno' {$naytatoimtuotenochk}></td>
       <td class='back'></td>
       </tr>
       <tr>
-      <th>",t("Näytä kaikki asiakkaat"),"</th>
+      <th>", t("Näytä kaikki asiakkaat"), "</th>
       <td colspan='3'><input type='checkbox' name='naytakaikkiasiakkaat' {$naytakaikkiasiakkaatchk}></td>
-      <td class='back'>",t("(Näyttää myös asiakkaat joita ei huomioida myynninseurannassa)"),"</td>
+      <td class='back'>", t("(Näyttää myös asiakkaat joita ei huomioida myynninseurannassa)"), "</td>
       </tr>
       <tr>
-      <th>",t("Näytä kaikki tuotteet"),"</th>
+      <th>", t("Näytä kaikki tuotteet"), "</th>
       <td colspan='3'><input type='checkbox' name='naytakaikkituotteet' {$naytakaikkituotteetchk}></td>
-      <td class='back'>",t("(Näyttää tuotteet joita ei huomioida myynninseurannassa)"),"</td>
+      <td class='back'>", t("(Näyttää tuotteet joita ei huomioida myynninseurannassa)"), "</td>
       </tr>
-      <th>",t("Näytä laskutuspäivä"),"</th>
+      <th>", t("Näytä laskutuspäivä"), "</th>
       <td colspan='3'><input type='checkbox' name='laskutuspaiva' {$laskutuspaivachk}></td>
-      <td class='back'>",t("(Toimii vain jos listataan tilauksittain tai laskuittain)"),"</td>
+      <td class='back'>", t("(Toimii vain jos listataan tilauksittain tai laskuittain)"), "</td>
       </tr>
       <tr>
-      <th>",t("Näytä tuotteet statuksella"),"</th>";
+      <th>", t("Näytä tuotteet statuksella"), "</th>";
 
     $status_result = t_avainsana("S");
 
-    echo "<td colspan='3'><select name='status'><option value=''>",t("Kaikki"),"</option>";
+    echo "<td colspan='3'><select name='status'><option value=''>", t("Kaikki"), "</option>";
 
     while ($statusrow = mysql_fetch_assoc($status_result)) {
 
@@ -522,42 +522,42 @@ else {
     $vsel[$verkkokaupat] = "SELECTED";
 
     echo "<tr>
-      <th>",t("Ohjelmamoduli"),"</th>
+      <th>", t("Ohjelmamoduli"), "</th>
       <td colspan='3'>
       <select name='verkkokaupat'>
-      <option value=''>",t("Kaikki ohjelmamodulit"),"</option>
-      <option value='PUPESOFT'    {$vsel["PUPESOFT"]}>",t("Vain Pupesoft-tilauksia"),"</option>
-      <option value='EXTRANET'    {$vsel["EXTRANET"]}>",t("Vain Extranet-tilauksia"),"</option>
-      <option value='MAGENTO'      {$vsel["MAGENTO"]}>",t("Vain Magento verkkokauppa-tilauksia"),"</option>
-      <option value='VARAOSASELAIN'  {$vsel["VARAOSASELAIN"]}>",t("Vain Varaosaselain-tilauksia"),"</option>
-      <option value='VERKKOKAUPPA'  {$vsel["VERKKOKAUPPA"]}>",t("Vain Pupesoft verkkokauppa-tilauksia"),"</option>
-      <option value='EDIFACT911'    {$vsel["EDIFACT911"]}>",t("Vain Orders 91.1 EDI-tilauksia"),"</option>
-      <option value='FUTURSOFT'    {$vsel["FUTURSOFT"]}>",t("Vain Futursoft EDI-tilauksia"),"</option>
+      <option value=''>", t("Kaikki ohjelmamodulit"), "</option>
+      <option value='PUPESOFT'    {$vsel["PUPESOFT"]}>", t("Vain Pupesoft-tilauksia"), "</option>
+      <option value='EXTRANET'    {$vsel["EXTRANET"]}>", t("Vain Extranet-tilauksia"), "</option>
+      <option value='MAGENTO'      {$vsel["MAGENTO"]}>", t("Vain Magento verkkokauppa-tilauksia"), "</option>
+      <option value='VARAOSASELAIN'  {$vsel["VARAOSASELAIN"]}>", t("Vain Varaosaselain-tilauksia"), "</option>
+      <option value='VERKKOKAUPPA'  {$vsel["VERKKOKAUPPA"]}>", t("Vain Pupesoft verkkokauppa-tilauksia"), "</option>
+      <option value='EDIFACT911'    {$vsel["EDIFACT911"]}>", t("Vain Orders 91.1 EDI-tilauksia"), "</option>
+      <option value='FUTURSOFT'    {$vsel["FUTURSOFT"]}>", t("Vain Futursoft EDI-tilauksia"), "</option>
       </select>
       </td>
       <td class='back'></td>
       </tr>
       <tr>
-      <th>",t("Näytä laskun maksupäivämäärä"),"</th>
+      <th>", t("Näytä laskun maksupäivämäärä"), "</th>
       <td colspan='3'><input type='checkbox' name='naytamaksupvm' {$naytamaksupvmchk}></td>
-      <td class='back'>",t("(Toimii vain jos listaat laskuittain)"),"</td>
+      <td class='back'>", t("(Toimii vain jos listaat laskuittain)"), "</td>
       </tr>";
 
     echo "<tr>
-    <th>",t("Tavoitevertailu"),"</th>";
-    echo "<td colspan='3'><select name='vertailubu'><option value=''>",t("Ei tavoitevertailua"),"</option>";
-    echo "<option value='asbu'   {$sel_asbu}>",t("Asiakastavoitteet"),"</option>";
-    echo "<option value='asbuos' {$sel_asbuos}>",t("Asiakas-Osastotavoitteet"),"</option>";
-    echo "<option value='asbury' {$sel_asbury}>",t("Asiakas-Tuoteryhmätavoitteet"),"</option>";
-    echo "<option value='tubu'    {$sel_tubu}>",t("Tuotetavoitteet"),"</option>";
-    echo "<option value='mybu'    {$sel_mybu}>",t("Myyjätavoitteet"),"</option>";
-    echo "<option value='mybuos' {$sel_mybuos}>",t("Myyjä-Osastotavoitteet"),"</option>";
-    echo "<option value='mybury' {$sel_mybury}>",t("Myyjä-Tuoteryhmätavoitteet"),"</option>";
+    <th>", t("Tavoitevertailu"), "</th>";
+    echo "<td colspan='3'><select name='vertailubu'><option value=''>", t("Ei tavoitevertailua"), "</option>";
+    echo "<option value='asbu'   {$sel_asbu}>", t("Asiakastavoitteet"), "</option>";
+    echo "<option value='asbuos' {$sel_asbuos}>", t("Asiakas-Osastotavoitteet"), "</option>";
+    echo "<option value='asbury' {$sel_asbury}>", t("Asiakas-Tuoteryhmätavoitteet"), "</option>";
+    echo "<option value='tubu'    {$sel_tubu}>", t("Tuotetavoitteet"), "</option>";
+    echo "<option value='mybu'    {$sel_mybu}>", t("Myyjätavoitteet"), "</option>";
+    echo "<option value='mybuos' {$sel_mybuos}>", t("Myyjä-Osastotavoitteet"), "</option>";
+    echo "<option value='mybury' {$sel_mybury}>", t("Myyjä-Tuoteryhmätavoitteet"), "</option>";
     echo "</select></td>
     </tr>";
 
     echo "<tr>
-    <th>",t("Näytä asiakaskäynnit"),"</th>";
+    <th>", t("Näytä asiakaskäynnit"), "</th>";
     echo "<td colspan='3'><input type='checkbox' name='asiakaskaynnit' {$asiakaskaynnitchk}></td>
     <td class='back'>".t("(Toimii vain jos listaat asiakkaittain)")."</td>
     </tr>";
@@ -591,12 +591,12 @@ else {
     // päivämäärärajaus
     echo "<table>";
     echo "<tr>
-      <th>",t("Syötä alkupäivämäärä (pp-kk-vvvv)"),"</th>
+      <th>", t("Syötä alkupäivämäärä (pp-kk-vvvv)"), "</th>
       <td><input type='text' name='ppa' value='{$ppa}' size='3'></td>
       <td><input type='text' name='kka' value='{$kka}' size='3'></td>
       <td><input type='text' name='vva' value='{$vva}' size='5'></td>
       </tr>\n
-      <tr><th>",t("Syötä loppupäivämäärä (pp-kk-vvvv)"),"</th>
+      <tr><th>", t("Syötä loppupäivämäärä (pp-kk-vvvv)"), "</th>
       <td><input type='text' name='ppl' value='{$ppl}' size='3'></td>
       <td><input type='text' name='kkl' value='{$kkl}' size='3'></td>
       <td><input type='text' name='vvl' value='{$vvl}' size='5'></td>
@@ -606,7 +606,7 @@ else {
     echo nayta_kyselyt("myyntiseuranta");
 
     echo "<br>";
-    echo "<input type='submit' name='aja_raportti' value='",t("Aja raportti"),"'>";
+    echo "<input type='submit' name='aja_raportti' value='", t("Aja raportti"), "'>";
     echo "</form><br><br>";
   }
 
@@ -719,7 +719,7 @@ else {
     }
 
     //  Jos käyttäjällä on valittu piirejä niin sallitaan vain ko. piirin/piirien hakeminen
-    if ($kukarow["piirit"] != "")   {
+    if ($kukarow["piirit"] != "") {
       $myse_asiakasrajaus = "and lasku.piiri IN ({$kukarow['piirit']})";
     }
     else {
@@ -762,7 +762,7 @@ else {
     $row    = mysql_fetch_assoc($result);
 
     if ($row["ero"] > 365 and $ajotapa != 'tilausauki') {
-      echo "<font class='error'>",t("Jotta homma ei menisi liian hitaaksi, niin vuosi on pisin mahdollinen laskentaväli!"),"</font><br>";
+      echo "<font class='error'>", t("Jotta homma ei menisi liian hitaaksi, niin vuosi on pisin mahdollinen laskentaväli!"), "</font><br>";
       $tee = "";
     }
 
@@ -796,7 +796,7 @@ else {
     // jos on joku toimittajajuttu valittuna, niin ei saa valita ku yhen yrityksen
     if ($toimittaja != "" or $mukaan == "toimittaja") {
       if (count($yhtiot) != 1) {
-        echo "<font class='error'>",t("Toimittajahauissa voi valita vain yhden yrityksen"),"!</font><br>";
+        echo "<font class='error'>", t("Toimittajahauissa voi valita vain yhden yrityksen"), "!</font><br>";
         $tee = "";
       }
     }
@@ -810,7 +810,7 @@ else {
       foreach ($yhtiot as $apukala) {
         $yhtio .= "'{$apukala}',";
       }
-      $yhtio = substr($yhtio,0,-1);
+      $yhtio = substr($yhtio, 0, -1);
     }
 
     // jos joku päiväkenttä on tyhjää ei tehdä mitään
@@ -836,7 +836,7 @@ else {
     if ($tee == 'go' and ($asiakasnro != '' or $ytunnus != '')) {
       //$ytunnus = $asiakas;
 
-      require ("inc/asiakashaku.inc");
+      require "inc/asiakashaku.inc";
 
       if ($asiakasnro != "") {
         $ytunnus = "";
@@ -860,7 +860,7 @@ else {
     if ($tee == 'go' and $toimittaja != '') {
       $ytunnus = $toimittaja;
 
-      require("inc/kevyt_toimittajahaku.inc");
+      require "inc/kevyt_toimittajahaku.inc";
 
       if ($ytunnus != '') {
         $toimittaja = $ytunnus;
@@ -1403,7 +1403,7 @@ else {
       }
 
       if ($order != "") {
-        $order = substr($order,0,-1);
+        $order = substr($order, 0, -1);
       }
       else {
         $order = "1";
@@ -1430,7 +1430,7 @@ else {
           $lisa .= " and lasku.liitostunnus in ({$asiakasrow['asiakkaat']}) ";
         }
         else {
-          echo "<font class='error'>",t("Asiakasta")," {$asiakas} ",t("ei löytynyt"),"!</font><br><br>";
+          echo "<font class='error'>", t("Asiakasta"), " {$asiakas} ", t("ei löytynyt"), "!</font><br><br>";
           $tee = '';
         }
       }
@@ -1449,7 +1449,7 @@ else {
           $lisa .= " and lasku.liitostunnus in ({$asiakasrow['asiakkaat']}) ";
         }
         else {
-          echo "<font class='error'>",t("Asiakasta")," {$asiakasnro} ",t("ei löytynyt"),"!</font><br><br>";
+          echo "<font class='error'>", t("Asiakasta"), " {$asiakasnro} ", t("ei löytynyt"), "!</font><br><br>";
           $tee = '';
         }
       }
@@ -1475,7 +1475,7 @@ else {
       if (isset($verkkokaupat) and $verkkokaupat != '') {
         $lisa .= " and lasku.ohjelma_moduli = '$verkkokaupat' ";
       }
-      # Myyntied lukujen vuosi
+      // Myyntied lukujen vuosi
       $vvaa = $vva - '1';
       $vvll = $vvl - '1';
 
@@ -1536,7 +1536,7 @@ else {
         $group  = "lasku.yhtio";
       }
       else {
-        $group  = substr($group,1);
+        $group  = substr($group, 1);
       }
 
       if ($ajotapanlisa == "erikseen") {
@@ -1640,65 +1640,65 @@ else {
 
         // generoidaan selectit
         if ($kuukausittain != "") {
-          $MONTH_ARRAY    = array(1=> t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kesäkuu'),t('Heinäkuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
+          $MONTH_ARRAY    = array(1=> t('Tammikuu'), t('Helmikuu'), t('Maaliskuu'), t('Huhtikuu'), t('Toukokuu'), t('Kesäkuu'), t('Heinäkuu'), t('Elokuu'), t('Syyskuu'), t('Lokakuu'), t('Marraskuu'), t('Joulukuu'));
 
-          $startmonth  = date("Ymd",mktime(0, 0, 0, $kka, 1,  $vva));
-          $endmonth   = date("Ymd",mktime(0, 0, 0, $kkl, 1,  $vvl));
+          $startmonth  = date("Ymd", mktime(0, 0, 0, $kka, 1,  $vva));
+          $endmonth   = date("Ymd", mktime(0, 0, 0, $kkl, 1,  $vvl));
 
           for ($i = $startmonth;  $i <= $endmonth;) {
 
-            $alku  = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4)));
-            $loppu = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), date("t", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4))),  substr($i,0,4)));
+            $alku  = date("Y-m-d", mktime(0, 0, 0, substr($i, 4, 2), substr($i, 6, 2),  substr($i, 0, 4)));
+            $loppu = date("Y-m-d", mktime(0, 0, 0, substr($i, 4, 2), date("t", mktime(0, 0, 0, substr($i, 4, 2), substr($i, 6, 2),  substr($i, 0, 4))),  substr($i, 0, 4)));
 
-            $alku_ed  = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4)-1));
-            $loppu_ed = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), date("t", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4))),  substr($i,0,4)-1));
+            $alku_ed  = date("Y-m-d", mktime(0, 0, 0, substr($i, 4, 2), substr($i, 6, 2),  substr($i, 0, 4)-1));
+            $loppu_ed = date("Y-m-d", mktime(0, 0, 0, substr($i, 4, 2), date("t", mktime(0, 0, 0, substr($i, 4, 2), substr($i, 6, 2),  substr($i, 0, 4))),  substr($i, 0, 4)-1));
 
             // MYYNTI
             if ($ajotapa == 'tilausjaauki' or $ajotapa == 'tilausauki') {
-              $query .= " sum(if(lasku.luontiaika >= '{$alku} 00:00:00' and lasku.luontiaika <= '{$loppu} 23:59:59' and tilausrivi.uusiotunnus=0, tilausrivi.hinta / if('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)) '".substr($i,0,4).substr($i,4,2)."_laskuttamatta', ";
+              $query .= " sum(if(lasku.luontiaika >= '{$alku} 00:00:00' and lasku.luontiaika <= '{$loppu} 23:59:59' and tilausrivi.uusiotunnus=0, tilausrivi.hinta / if('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)) '".substr($i, 0, 4).substr($i, 4, 2)."_laskuttamatta', ";
             }
 
             if ($ajotapa == 'tilausjaaukiluonti' or $ajotapa == 'ennakot') {
-              $query .= " sum(if(lasku.luontiaika >= '{$alku} 00:00:00' and lasku.luontiaika <= '{$loppu} 23:59:59', if(tilausrivi.uusiotunnus=0, tilausrivi.hinta / if('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, tilausrivi.rivihinta), 0)) '".substr($i,0,4).substr($i,4,2)."_myynti', ";
+              $query .= " sum(if(lasku.luontiaika >= '{$alku} 00:00:00' and lasku.luontiaika <= '{$loppu} 23:59:59', if(tilausrivi.uusiotunnus=0, tilausrivi.hinta / if('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, tilausrivi.rivihinta), 0)) '".substr($i, 0, 4).substr($i, 4, 2)."_myynti', ";
             }
-            elseif($ajotapa != 'tilausauki') {
-              $query .= " sum(if(tilausrivi.laskutettuaika >= '{$alku}' and tilausrivi.laskutettuaika <= '{$loppu}', tilausrivi.rivihinta, 0)) '".substr($i,0,4).substr($i,4,2)."_myynti', ";
+            elseif ($ajotapa != 'tilausauki') {
+              $query .= " sum(if(tilausrivi.laskutettuaika >= '{$alku}' and tilausrivi.laskutettuaika <= '{$loppu}', tilausrivi.rivihinta, 0)) '".substr($i, 0, 4).substr($i, 4, 2)."_myynti', ";
             }
 
             if ($vertailubu != "") {
-              $query .= " sum(0) '".substr($i,0,4).substr($i,4,2)."_tavoitenyt', ";
-              $query .= " sum(0) '".substr($i,0,4).substr($i,4,2)."_tavoiteindnyt', ";
+              $query .= " sum(0) '".substr($i, 0, 4).substr($i, 4, 2)."_tavoitenyt', ";
+              $query .= " sum(0) '".substr($i, 0, 4).substr($i, 4, 2)."_tavoiteindnyt', ";
             }
 
             if ($piilota_kappaleet == "") {
-              $query .= " sum(if(tilausrivi.laskutettuaika >= '{$alku}' and tilausrivi.laskutettuaika <= '{$loppu}', tilausrivi.kpl,0)) '".substr($i,0,4).substr($i,4,2)."_kpl', ";
+              $query .= " sum(if(tilausrivi.laskutettuaika >= '{$alku}' and tilausrivi.laskutettuaika <= '{$loppu}', tilausrivi.kpl,0)) '".substr($i, 0, 4).substr($i, 4, 2)."_kpl', ";
             }
 
             if ($ajotapa == 'tilausjaauki') {
               $query .= " sum(if(lasku.luontiaika >= '{$alku} 00:00:00' and lasku.luontiaika <= '{$loppu} 23:59:59' and tilausrivi.uusiotunnus=0, tilausrivi.hinta / if('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)) +
-                    sum(if(tilausrivi.laskutettuaika >= '{$alku}' and tilausrivi.laskutettuaika <= '{$loppu}', tilausrivi.rivihinta, 0)) '".substr($i,0,4).substr($i,4,2)."_myyntiyht', ";
+                    sum(if(tilausrivi.laskutettuaika >= '{$alku}' and tilausrivi.laskutettuaika <= '{$loppu}', tilausrivi.rivihinta, 0)) '".substr($i, 0, 4).substr($i, 4, 2)."_myyntiyht', ";
             }
 
             if ($piiloed == "") {
               // MYYNTIED
               if ($ajotapa == 'tilausjaaukiluonti' or $ajotapa == 'ennakot') {
-                $query .= " sum(if(lasku.luontiaika >= '{$alku_ed} 00:00:00' and lasku.luontiaika <= '{$loppu_ed} 23:59:59', if(tilausrivi.uusiotunnus=0, tilausrivi.hinta / if('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, tilausrivi.rivihinta), 0)) '".(substr($i,0,4)-1).substr($i,4,2)."_myynti', ";
+                $query .= " sum(if(lasku.luontiaika >= '{$alku_ed} 00:00:00' and lasku.luontiaika <= '{$loppu_ed} 23:59:59', if(tilausrivi.uusiotunnus=0, tilausrivi.hinta / if('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, tilausrivi.rivihinta), 0)) '".(substr($i, 0, 4)-1).substr($i, 4, 2)."_myynti', ";
               }
-              elseif ($ajotapa != 'tilausauki')  {
-                $query .= " sum(if(tilausrivi.laskutettuaika >= '{$alku_ed}' and tilausrivi.laskutettuaika <= '{$loppu_ed}', tilausrivi.rivihinta, 0)) '".(substr($i,0,4)-1).substr($i,4,2)."_myynti', ";
+              elseif ($ajotapa != 'tilausauki') {
+                $query .= " sum(if(tilausrivi.laskutettuaika >= '{$alku_ed}' and tilausrivi.laskutettuaika <= '{$loppu_ed}', tilausrivi.rivihinta, 0)) '".(substr($i, 0, 4)-1).substr($i, 4, 2)."_myynti', ";
               }
 
               if ($vertailubu != "") {
-                $query .= " sum(0) '".(substr($i,0,4)-1).substr($i,4,2)."_tavoiteed', ";
-                $query .= " sum(0) '".(substr($i,0,4)-1).substr($i,4,2)."_tavoiteinded', ";
+                $query .= " sum(0) '".(substr($i, 0, 4)-1).substr($i, 4, 2)."_tavoiteed', ";
+                $query .= " sum(0) '".(substr($i, 0, 4)-1).substr($i, 4, 2)."_tavoiteinded', ";
               }
 
               if ($piilota_kappaleet == "") {
-                $query .= " sum(if(tilausrivi.laskutettuaika >= '{$alku_ed}' and tilausrivi.laskutettuaika <= '{$loppu_ed}', tilausrivi.kpl,0)) '".(substr($i,0,4)-1).substr($i,4,2)."_kpl', ";
+                $query .= " sum(if(tilausrivi.laskutettuaika >= '{$alku_ed}' and tilausrivi.laskutettuaika <= '{$loppu_ed}', tilausrivi.kpl,0)) '".(substr($i, 0, 4)-1).substr($i, 4, 2)."_kpl', ";
               }
             }
 
-            $i = date("Ymd",mktime(0, 0, 0, substr($i,4,2)+1, 1,  substr($i,0,4)));
+            $i = date("Ymd", mktime(0, 0, 0, substr($i, 4, 2)+1, 1,  substr($i, 0, 4)));
           }
 
           if (!empty($kumulatiivinen_valittu)) {
@@ -1790,7 +1790,7 @@ else {
                 $query .= "  round(sum(if(lasku.luontiaika >= '{$vva}-{$kka}-{$ppa} 00:00:00' and lasku.luontiaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59', if(tilausrivi.uusiotunnus = 0, tilausrivi.hinta / if('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, tilausrivi.rivihinta), 0)) /
                         sum(if(lasku.luontiaika >= '{$vvaa}-{$kka}-{$ppa} 00:00:00' and lasku.luontiaika <= '{$vvll}-{$kkl}-{$ppl} 23:59:59', if(tilausrivi.uusiotunnus = 0, tilausrivi.hinta / if('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, tilausrivi.rivihinta), 0)), 2) myyntiind, ";
               }
-              elseif ($ajotapa != 'tilausauki')  {
+              elseif ($ajotapa != 'tilausauki') {
                 $query .= "  sum(if(tilausrivi.laskutettuaika >= '{$vvaa}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvll}-{$kkl}-{$ppl}', tilausrivi.rivihinta, 0)) myyntied, ";
                 $query .= "  round(sum(if(tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}', tilausrivi.rivihinta, 0)) / sum(if(tilausrivi.laskutettuaika >= '{$vvaa}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvll}-{$kkl}-{$ppl}', tilausrivi.rivihinta, 0)), 2) myyntiind, ";
               }
@@ -1904,7 +1904,7 @@ else {
                         (if(tilausrivi.uusiotunnus != 0, tilausrivi.rivihinta, tilausrivi.hinta / if('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}) * IFNULL(yhtio.kuluprosentti, 0) / 100) -
                         (if(tilausrivi.uusiotunnus != 0, tilausrivi.rivihinta, tilausrivi.hinta / if('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}) * IFNULL(tuote.kuluprosentti, 0) / 100), 0)) nettokateind, ";
                 }
-                elseif ($ajotapa != 'tilausauki')  {
+                elseif ($ajotapa != 'tilausauki') {
                   $query .= "  sum(if(tilausrivi.laskutettuaika >= '{$vvaa}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvll}-{$kkl}-{$ppl}', tilausrivi.kate - (tilausrivi.rivihinta * IFNULL(asiakas.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(toimitustapa.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(tuote.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(yhtio.kuluprosentti, 0)/100), 0)) nettokateed, ";
                   $query .= "  sum(if(tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}',  tilausrivi.kate - (tilausrivi.rivihinta * IFNULL(asiakas.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(toimitustapa.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(tuote.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(yhtio.kuluprosentti, 0)/100), 0)) / sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl', tilausrivi.kate - (tilausrivi.rivihinta * IFNULL(asiakas.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(toimitustapa.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(tuote.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(yhtio.kuluprosentti, 0)/100), 0)) nettokateind, ";
                 }
@@ -2094,7 +2094,7 @@ else {
                 $query .= "  sum(if(lasku.luontiaika >= '{$vvaa}-{$kka}-{$ppa} 00:00:00' and lasku.luontiaika <= '{$vvll}-{$kkl}-{$ppl} 23:59:59', if(tilausrivi.uusiotunnus = 0, tilausrivi.varattu+tilausrivi.jt, tilausrivi.kpl), 0)) myykpled,
                       round(sum(if(lasku.luontiaika >= '{$vva}-{$kka}-{$ppa} 00:00:00' and lasku.luontiaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59', if(tilausrivi.uusiotunnus = 0, tilausrivi.varattu+tilausrivi.jt, tilausrivi.kpl), 0)) / sum(if(lasku.luontiaika >= '{$vvaa}-{$kka}-{$ppa} 00:00:00' and lasku.luontiaika <= '{$vvll}-{$kkl}-{$ppl} 23:59:59', if(tilausrivi.kpl = 0, tilausrivi.varattu+tilausrivi.jt, tilausrivi.kpl), 0)), 2) myykplind, ";
               }
-              elseif ($ajotapa != 'tilausauki')  {
+              elseif ($ajotapa != 'tilausauki') {
                 $query .= "  sum(if(tilausrivi.laskutettuaika >= '{$vvaa}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvll}-{$kkl}-{$ppl}', tilausrivi.kpl, 0)) myykpled,
                       round(sum(if(tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}', tilausrivi.kpl, 0)) / sum(if(tilausrivi.laskutettuaika >= '{$vvaa}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvll}-{$kkl}-{$ppl}', tilausrivi.kpl, 0)), 2) myykplind, ";
               }
@@ -2257,7 +2257,7 @@ else {
         // ja sitten ajetaan itte query
         if ($query != "") {
 
-          #echo "<pre>".str_replace("\t", "", str_replace("and", "\nand", $query))."</pre><br>";
+          //echo "<pre>".str_replace("\t", "", str_replace("and", "\nand", $query))."</pre><br>";
 
           $result = pupe_query($query);
 
@@ -2265,20 +2265,20 @@ else {
           $rivilimitti = 1000;
 
           if ($vain_excel != "") {
-            echo "<font class='error'>",t("Tallenna/avaa tulos excelissä"),"!</font><br><br>";
+            echo "<font class='error'>", t("Tallenna/avaa tulos excelissä"), "!</font><br><br>";
             $rivilimitti = 0;
           }
           else {
             if ($rivimaara > $rivilimitti) {
-              echo "<br><font class='error'>",t("Hakutulos oli liian suuri"),"!</font><br>";
-              echo "<font class='error'>",t("Tallenna/avaa tulos excelissä"),"!</font><br><br>";
+              echo "<br><font class='error'>", t("Hakutulos oli liian suuri"), "!</font><br>";
+              echo "<font class='error'>", t("Tallenna/avaa tulos excelissä"), "!</font><br><br>";
             }
           }
         }
 
         if ($query != "") {
           if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
-            include('inc/pupeExcel.inc');
+            include 'inc/pupeExcel.inc';
 
             $worksheet    = new pupeExcel();
             $format_bold = array("bold" => TRUE);
@@ -2287,7 +2287,7 @@ else {
 
           echo "<a name='focus_tahan' /><table>";
           echo "<tr>
-            <th>",t("Kausi nyt"),"</th>
+            <th>", t("Kausi nyt"), "</th>
             <td>{$ppa}</td>
             <td>{$kka}</td>
             <td>{$vva}</td>
@@ -2297,7 +2297,7 @@ else {
             <td>{$vvl}</td>
             </tr>\n";
           echo "<tr>
-            <th>",t("Kausi ed"),"</th>
+            <th>", t("Kausi ed"), "</th>
             <td>{$ppa}</td>
             <td>{$kka}</td>
             <td>{$vvaa}</td>
@@ -2310,21 +2310,21 @@ else {
           echo "<script LANGUAGE='JavaScript'>window.location.hash=\"focus_tahan\";</script>";
 
           // Muutama päivämäärämuuttuja
-          $alku_kausi = date('Ym', mktime(0,0,0,$kka,1,$vva));
-          $lopu_kausi = date('Ym', mktime(0,0,0,$kkl,1,$vvl));
+          $alku_kausi = date('Ym', mktime(0, 0, 0, $kka, 1, $vva));
+          $lopu_kausi = date('Ym', mktime(0, 0, 0, $kkl, 1, $vvl));
 
-          $alku_kausi_ed = date('Ym', mktime(0,0,0,$kka,1,$vvaa));
-          $lopu_kausi_ed = date('Ym', mktime(0,0,0,$kkl,1,$vvll));
+          $alku_kausi_ed = date('Ym', mktime(0, 0, 0, $kka, 1, $vvaa));
+          $lopu_kausi_ed = date('Ym', mktime(0, 0, 0, $kkl, 1, $vvll));
 
           // Oletetaan, että samat tänä ku viime vuonna
-          $alkukuun_paivat = date('t', mktime(0,0,0,$kka,1,$vva));
-          $lopukuun_paivat = date('t', mktime(0,0,0,$kkl,1,$vvl));
+          $alkukuun_paivat = date('t', mktime(0, 0, 0, $kka, 1, $vva));
+          $lopukuun_paivat = date('t', mktime(0, 0, 0, $kkl, 1, $vvl));
 
           $kka = sprintf("%02d", $kka);
           $kkl = sprintf("%02d", $kkl);
 
           // Kausi päivissä
-          $kausi_paivissa = round((mktime(0,0,0,$kkl,$ppl,$vvl)-mktime(0,0,0,$kka,$ppa,$vva))/86400);
+          $kausi_paivissa = round((mktime(0, 0, 0, $kkl, $ppl, $vvl)-mktime(0, 0, 0, $kka, $ppa, $vva))/86400);
 
           // Luodann resultista array ja korjataan/lisätään tietoja joita ei olla voitu laittaa mukaan isoon kyselyyn
           $rows = array();
@@ -2533,8 +2533,8 @@ else {
             $asiakas_tunnukset_sarja = implode(',', $asiakas_tunnukset);
             $query = "SELECT *
                       FROM yhteyshenkilo
-                      WHERE yhtio = '$yhtiorow[yhtio]'
-                      AND tyyppi = 'A'
+                      WHERE yhtio      = '$yhtiorow[yhtio]'
+                      AND tyyppi       = 'A'
                       AND liitostunnus IN ($asiakas_tunnukset_sarja)";
             $yhteyshenkilo_result = pupe_query($query);
             $yhteyshenkilot = array();
@@ -2553,7 +2553,7 @@ else {
             echo "<table><tr>";
 
             foreach ($rows[0] as $ken_nimi => $null) {
-              if ($ken_nimi != "asiakaslista" and $ken_nimi != "tuotelista") echo "<th>",t($ken_nimi),"</th>";
+              if ($ken_nimi != "asiakaslista" and $ken_nimi != "tuotelista") echo "<th>", t($ken_nimi), "</th>";
             }
 
             echo "</tr>\n";
@@ -2569,8 +2569,8 @@ else {
               // Haetaan maksimi yhteyshenkilöiden määrä per ytunnus
               $query = "SELECT COUNT(*) AS maara
                         FROM yhteyshenkilo
-                        WHERE yhtio = '$yhtiorow[yhtio]'
-                        AND tyyppi = 'A'
+                        WHERE yhtio      = '$yhtiorow[yhtio]'
+                        AND tyyppi       = 'A'
                         AND liitostunnus IN ($asiakas_tunnukset_sarja)
                         GROUP BY liitostunnus
                         ORDER BY maara DESC
@@ -2605,30 +2605,30 @@ else {
           $tarra_aineisto = "";
 
           if ($rivimaara > $rivilimitti) {
-            require_once ('inc/ProgressBar.class.php');
+            require_once 'inc/ProgressBar.class.php';
             $bar = new ProgressBar();
             $elements = $rivimaara; // total number of elements to process
             $bar->initialize($elements); // print the empty bar
           }
 
           $tilaustyypit_array = array(
-          '0' => t("Ylläpitosopimus"),
-          '2' => t("Varastotäydennys"),
-          '7' => t("Tehdastilaus"),
-          '8' => t("Muiden mukana"),
-          '9' => t("Tehdaspalautus"),
-          'A' => t("Työmääräys"),
-          'E' => t("Ennakkotilaus"),
-          'M' => t("Myyntitili"),
-          'N' => t("Normaalitilaus"),
-          'P' => t("Projekti"),
-          'R' => t("Reklamaatio"),
-          'S' => t("Sarjatilaus"),
-          'T' => t("Tarjous"),
-          'T' => t("Tarjoustilaus"),
-          'U' => t("Takuu"),
-          'U' => t("Takuutilaus"),
-          'V' => t("Valmistus-Tilaus"));
+            '0' => t("Ylläpitosopimus"),
+            '2' => t("Varastotäydennys"),
+            '7' => t("Tehdastilaus"),
+            '8' => t("Muiden mukana"),
+            '9' => t("Tehdaspalautus"),
+            'A' => t("Työmääräys"),
+            'E' => t("Ennakkotilaus"),
+            'M' => t("Myyntitili"),
+            'N' => t("Normaalitilaus"),
+            'P' => t("Projekti"),
+            'R' => t("Reklamaatio"),
+            'S' => t("Sarjatilaus"),
+            'T' => t("Tarjous"),
+            'T' => t("Tarjoustilaus"),
+            'U' => t("Takuu"),
+            'U' => t("Takuutilaus"),
+            'V' => t("Valmistus-Tilaus"));
 
           // Indeksien nimet
           $row_keys = array_keys($rows[0]);
@@ -2684,25 +2684,25 @@ else {
                     if ($valisummat["myyntied"] <> 0)     $vsum = round($valisummat["nettokateed"] / abs($valisummat["myyntied"]) * 100, 2);
                   }
                   elseif ($vnim == "myyntiind") {
-                    if ($valisummat["myyntied"] <> 0)     $vsum = round($valisummat["myyntinyt"] / $valisummat["myyntied"],2);
+                    if ($valisummat["myyntied"] <> 0)     $vsum = round($valisummat["myyntinyt"] / $valisummat["myyntied"], 2);
                   }
                   elseif ($vnim == "kateind") {
-                    if ($valisummat["kateed"] <> 0)     $vsum = round($valisummat["katenyt"] / $valisummat["kateed"],2);
+                    if ($valisummat["kateed"] <> 0)     $vsum = round($valisummat["katenyt"] / $valisummat["kateed"], 2);
                   }
                   elseif ($vnim == "nettokateind") {
-                    if ($valisummat["nettokateed"] <> 0)   $vsum = round($valisummat["nettokatenyt"] / $valisummat["nettokateed"],2);
+                    if ($valisummat["nettokateed"] <> 0)   $vsum = round($valisummat["nettokatenyt"] / $valisummat["nettokateed"], 2);
                   }
                   elseif ($vnim == "myykplind") {
-                    if ($valisummat["myykpled"] <> 0)    $vsum = round($valisummat["myykplnyt"] / $valisummat["myykpled"],2);
+                    if ($valisummat["myykpled"] <> 0)    $vsum = round($valisummat["myykplnyt"] / $valisummat["myykpled"], 2);
                   }
                   elseif ($vnim == "tavoiteindnyt") {
-                    if ($valisummat["tavoitenyt"] <> 0)    $vsum = round($valisummat["myyntinyt"] / $valisummat["tavoitenyt"],2);
+                    if ($valisummat["tavoitenyt"] <> 0)    $vsum = round($valisummat["myyntinyt"] / $valisummat["tavoitenyt"], 2);
                   }
                   elseif ($vnim == "kateproskumul") {
-                    if ($valisummat["myyntikumul"] <> 0)  $vsum = round($valisummat["katekumul"] / $valisummat["myyntikumul"] * 100,2);
+                    if ($valisummat["myyntikumul"] <> 0)  $vsum = round($valisummat["katekumul"] / $valisummat["myyntikumul"] * 100, 2);
                   }
                   elseif ($vnim == "kateproskumuled") {
-                    if ($valisummat["myyntikumuled"] <> 0)  $vsum = round($valisummat["katekumuled"] / $valisummat["myyntikumuled"] * 100,2);
+                    if ($valisummat["myyntikumuled"] <> 0)  $vsum = round($valisummat["katekumuled"] / $valisummat["myyntikumuled"] * 100, 2);
                   }
                   elseif ((string) $vsum != '') {
                     $vsum = sprintf("%.2f", $vsum);
@@ -2918,7 +2918,7 @@ else {
                 // jos kyseessa on toimittaja, haetaan nimi/nimet
                 if ($ken_nimi == "toimittaja") {
                   // fixataan mysql 'in' muotoon
-                  $toimittajat = "'".str_replace(",","','",$row[$ken_nimi])."'";
+                  $toimittajat = "'".str_replace(",", "','", $row[$ken_nimi])."'";
 
                   $query = "SELECT group_concat(concat_ws(' / ',ytunnus,nimi)) nimi
                             FROM toimi
@@ -2993,7 +2993,7 @@ else {
                     $row[$ken_nimi] = round($row["nettokatenyt"] / abs($row["myyntinyt"]) * 100, 2);
                   }
                   else {
-                    if ($ajotapa == "tilausauki" and $row["myyntilaskuttamattanyt"] != 0){
+                    if ($ajotapa == "tilausauki" and $row["myyntilaskuttamattanyt"] != 0) {
                       $row[$ken_nimi] = round($row["nettokatelaskuttamattanyt"] / abs($row["myyntilaskuttamattanyt"]) * 100, 2);
                     }
                     else {
@@ -3077,7 +3077,7 @@ else {
                   $row[$ken_nimi] = "";
 
                   foreach ($sarjat as $sarja) {
-                    list($s,$k) = explode("#", $sarja);
+                    list($s, $k) = explode("#", $sarja);
 
                     $query = "SELECT osto_vai_hyvitys
                               FROM tilausrivin_lisatiedot
@@ -3135,11 +3135,11 @@ else {
                 if ($ken_nimi != 'asiakaslista' and $ken_nimi != "tuotelista") {
                   if ($ken_lask >= $data_start_index and is_numeric($row[$ken_nimi])) {
                     if ($rivimaara <= $rivilimitti) {
-                      echo "<td valign='top' align='right'>".sprintf("%.02f",$row[$ken_nimi])."</td>";
+                      echo "<td valign='top' align='right'>".sprintf("%.02f", $row[$ken_nimi])."</td>";
                     }
 
                     if (isset($worksheet)) {
-                      $worksheet->writeNumber($excelrivi, $excelsarake++, sprintf("%.02f",$row[$ken_nimi]));
+                      $worksheet->writeNumber($excelrivi, $excelsarake++, sprintf("%.02f", $row[$ken_nimi]));
                     }
                   }
                   elseif ($ken_nimi == 'sarjanumero') {
@@ -3248,25 +3248,25 @@ else {
                 if ($valisummat["myyntied"] <> 0)     $vsum = round($valisummat["nettokateed"] / abs($valisummat["myyntied"]) * 100, 2);
               }
               elseif ($vnim == "myyntiind") {
-                if ($valisummat["myyntied"] <> 0)     $vsum = round($valisummat["myyntinyt"] / $valisummat["myyntied"],2);
+                if ($valisummat["myyntied"] <> 0)     $vsum = round($valisummat["myyntinyt"] / $valisummat["myyntied"], 2);
               }
               elseif ($vnim == "kateind") {
-                if ($valisummat["kateed"] <> 0)     $vsum = round($valisummat["katenyt"] / $valisummat["kateed"],2);
+                if ($valisummat["kateed"] <> 0)     $vsum = round($valisummat["katenyt"] / $valisummat["kateed"], 2);
               }
               elseif ($vnim == "nettokateind") {
-                if ($valisummat["nettokateed"] <> 0)   $vsum = round($valisummat["nettokatenyt"] / $valisummat["nettokateed"],2);
+                if ($valisummat["nettokateed"] <> 0)   $vsum = round($valisummat["nettokatenyt"] / $valisummat["nettokateed"], 2);
               }
               elseif ($vnim == "myykplind") {
-                if ($valisummat["myykpled"] <> 0)    $vsum = round($valisummat["myykplnyt"] / $valisummat["myykpled"],2);
+                if ($valisummat["myykpled"] <> 0)    $vsum = round($valisummat["myykplnyt"] / $valisummat["myykpled"], 2);
               }
               elseif ($vnim == "tavoiteindnyt") {
-                if ($valisummat["tavoitenyt"] <> 0)    $vsum = round($valisummat["myyntinyt"] / $valisummat["tavoitenyt"],2);
+                if ($valisummat["tavoitenyt"] <> 0)    $vsum = round($valisummat["myyntinyt"] / $valisummat["tavoitenyt"], 2);
               }
               elseif ($vnim == "kateproskumul") {
-                if ($valisummat["myyntikumul"] <> 0)  $vsum = round($valisummat["katekumul"] / $valisummat["myyntikumul"] * 100,2);
+                if ($valisummat["myyntikumul"] <> 0)  $vsum = round($valisummat["katekumul"] / $valisummat["myyntikumul"] * 100, 2);
               }
               elseif ($vnim == "kateproskumuled") {
-                if ($valisummat["myyntikumuled"] <> 0)  $vsum = round($valisummat["katekumuled"] / $valisummat["myyntikumuled"] * 100,2);
+                if ($valisummat["myyntikumuled"] <> 0)  $vsum = round($valisummat["katekumuled"] / $valisummat["myyntikumuled"] * 100, 2);
               }
               elseif ((string) $vsum != '') {
                 $vsum = sprintf("%.2f", $vsum);
@@ -3274,7 +3274,7 @@ else {
 
               if ($rivimaara <= $rivilimitti) echo "<td class='tumma' align='right'>{$vsum}</td>";
 
-              if(isset($worksheet)) {
+              if (isset($worksheet)) {
                 $worksheet->write($excelrivi, $excelsarake++, $vsum);
               }
             }
@@ -3306,25 +3306,25 @@ else {
               if ($totsummat["myyntied"] <> 0)     $vsum = round($totsummat["nettokateed"] / abs($totsummat["myyntied"]) * 100, 2);
             }
             if ($vnim == "myyntiind") {
-              if ($totsummat["myyntied"] <> 0)     $vsum = round($totsummat["myyntinyt"] / $totsummat["myyntied"],2);
+              if ($totsummat["myyntied"] <> 0)     $vsum = round($totsummat["myyntinyt"] / $totsummat["myyntied"], 2);
             }
             if ($vnim == "kateind") {
-              if ($totsummat["kateed"] <> 0)       $vsum = round($totsummat["katenyt"] / $totsummat["kateed"],2);
+              if ($totsummat["kateed"] <> 0)       $vsum = round($totsummat["katenyt"] / $totsummat["kateed"], 2);
             }
             if ($vnim == "nettokateind") {
-              if ($totsummat["nettokateed"] <> 0)   $vsum = round($totsummat["nettokatenyt"] / $totsummat["nettokateed"],2);
+              if ($totsummat["nettokateed"] <> 0)   $vsum = round($totsummat["nettokatenyt"] / $totsummat["nettokateed"], 2);
             }
             if ($vnim == "myykplind") {
-              if ($totsummat["myykpled"] <> 0)    $vsum = round($totsummat["myykplnyt"] / $totsummat["myykpled"],2);
+              if ($totsummat["myykpled"] <> 0)    $vsum = round($totsummat["myykplnyt"] / $totsummat["myykpled"], 2);
             }
             if ($vnim == "tavoiteindnyt") {
-              if ($totsummat["tavoitenyt"] <> 0)    $vsum = round($totsummat["myyntinyt"] / $totsummat["tavoitenyt"],2);
+              if ($totsummat["tavoitenyt"] <> 0)    $vsum = round($totsummat["myyntinyt"] / $totsummat["tavoitenyt"], 2);
             }
             if ($vnim == "kateproskumul") {
-              if ($totsummat["myyntikumul"] <> 0)    $vsum = round($totsummat["katekumul"] / $totsummat["myyntikumul"] * 100,2);
+              if ($totsummat["myyntikumul"] <> 0)    $vsum = round($totsummat["katekumul"] / $totsummat["myyntikumul"] * 100, 2);
             }
             if ($vnim == "kateproskumuled") {
-              if ($totsummat["myyntikumuled"] <> 0)  $vsum = round($totsummat["katekumuled"] / $totsummat["myyntikumuled"] * 100,2);
+              if ($totsummat["myyntikumuled"] <> 0)  $vsum = round($totsummat["katekumuled"] / $totsummat["myyntikumuled"] * 100, 2);
             }
 
             if ($rivimaara <= $rivilimitti) echo "<td class='tumma' align='right'>{$vsum}</td>";
@@ -3346,25 +3346,25 @@ else {
             $excelnimi = $worksheet->close();
 
             echo "<table>";
-            echo "<tr><th>",t("Tallenna tulos"),":</th>";
+            echo "<tr><th>", t("Tallenna tulos"), ":</th>";
             echo "<form method='post' class='multisubmit'>";
             echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
             echo "<input type='hidden' name='kaunisnimi' value='".t('Myynninseuranta').".xlsx'>";
             echo "<input type='hidden' name='tmpfilenimi' value='{$excelnimi}'>";
-            echo "<td class='back'><input type='submit' value='",t("Tallenna"),"'></td></tr></form>";
+            echo "<td class='back'><input type='submit' value='", t("Tallenna"), "'></td></tr></form>";
             echo "</table><br>";
           }
 
-          if ($osoitetarrat != "" and $tarra_aineisto != '')  {
+          if ($osoitetarrat != "" and $tarra_aineisto != '') {
             $tarra_aineisto = substr($tarra_aineisto, 0, -1);
 
 
             echo "<br><table>";
-            echo "<tr><th>",t("Tulosta osoitetarrat"),":</th>";
+            echo "<tr><th>", t("Tulosta osoitetarrat"), ":</th>";
             echo "<form method='post' action='../crm/tarrat.php'>";
             echo "<input type='hidden' name='tee' value=''>";
             echo "<input type='hidden' name='tarra_aineisto' value='{$tarra_aineisto}'>";
-            echo "<td class='back'><input type='submit' value='",t("Siirry"),"'></td></tr></form>";
+            echo "<td class='back'><input type='submit' value='", t("Siirry"), "'></td></tr></form>";
             echo "</table><br>";
           }
         }
@@ -3374,6 +3374,6 @@ else {
   }
 
   if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
-    require ("../inc/footer.inc");
+    require "../inc/footer.inc";
   }
 }

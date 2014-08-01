@@ -1787,6 +1787,31 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
             $huoltovali = $huoltovalit[$trow[$i]];
             echo "<td valign='top'>$fontlisa1 {$huoltovali['months']} $fontlisa2</td>";
           }
+          else if ($yhtiorow['laite_huolto'] == 'X' and $toim == 'tuote' and mysql_field_name($result,$i) == 'liitettavat_huoltosyklit') {
+            $tuote_query = "SELECT laji,
+                            selite
+                            FROM tuotteen_avainsanat
+                            WHERE yhtio = '{$kukarow['yhtio']}'
+                            AND tuoteno = '{$trow['tuoteno']}'
+                            AND laji IN ('sammutin_tyyppi', 'sammutin_koko')";
+            $tuote_result = pupe_query($tuote_query);
+            $sammutin_parametrit = array();
+            while($sammutin_parametri = mysql_fetch_assoc($tuote_result)) {
+              $sammutin_parametrit[$sammutin_parametri['laji']] = $sammutin_parametri['selite'];
+            }
+            $huoltosykli_query = "SELECT *
+                                  FROM huoltosykli
+                                  WHERE yhtio = '{$kukarow['yhtio']}'
+                                  AND tyyppi = '{$sammutin_parametrit['sammutin_tyyppi']}'
+                                  AND koko = '{$sammutin_parametrit['sammutin_koko']}'";
+            $huoltosykli_result = pupe_query($huoltosykli_query);
+            if (mysql_num_rows($huoltosykli_result) != 0) {
+              echo "<td valign='top'>$fontlisa1 ".t('Löytyy')." $fontlisa2</td>";
+            }
+            else {
+              echo "<td valign='top'><font class='error'> ".t('Ei löydy')."</font></td>";
+            }
+          }
           else {
 
             if (!function_exists("ps_callback")) {
@@ -2208,25 +2233,45 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
   }
 
   if ($yhtiorow['laite_huolto'] == 'X' and stristr($toim, 'tuote')) {
-    //quick fix
-    //@TODO remove this
+    $tuote_query = "SELECT selite
+                    FROM tuotteen_avainsanat
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tuoteno = '{$trow['tuoteno']}'
+                    AND laji = 'sammutin_tyyppi'
+                    LIMIT 1";
+    $tuote_result = pupe_query($tuote_query);
+    $tuote_row = mysql_fetch_assoc($tuote_result);
     $sammutin_tyypit = hae_mahdolliset_sammutin_tyypit();
     array_unshift($sammutin_tyypit, t("Ei tyyppiä"));
     echo "<tr>";
     echo "<th>".t('Tyyppi')."</th>";
     echo "<td>";
     echo "<select name='sammutin_tyyppi'>";
+    $sel = '';
     foreach ($sammutin_tyypit as $key => $sammutin_tyyppi) {
+      if ($tuote_row['selite'] == $key) {
+        $sel = "SELECTED";
+      }
       echo "<option value='{$key}' {$sel}>".ucfirst($sammutin_tyyppi)."</option>";
+      $sel = '';
     }
     echo "</select>";
     echo "</td>";
     echo "</tr>";
 
+    $tuote_query = "SELECT selite
+                    FROM tuotteen_avainsanat
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tuoteno = '{$trow['tuoteno']}'
+                    AND laji = 'sammutin_koko'
+                    LIMIT 1";
+    $tuote_result = pupe_query($tuote_query);
+    $tuote_row = mysql_fetch_assoc($tuote_result);
+
     echo "<tr>";
     echo "<th>".t('Koko')."</th>";
     echo "<td>";
-    echo "<input type='text' name='sammutin_koko' />";
+    echo "<input type='text' name='sammutin_koko' value='{$tuote_row['selite']}' />";
     echo "</td>";
     echo "</tr>";
   }

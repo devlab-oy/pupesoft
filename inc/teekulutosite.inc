@@ -62,16 +62,16 @@ $result = pupe_query($query);
 $_tiliointi_id = mysql_insert_id();
 
 $query = "UPDATE tiliotedata SET
-          kasitelty = now(),
+          kasitelty       = now(),
           tiliointitunnus = {$_tiliointi_id}
-          WHERE tunnus = '$tiliotedataid'";
+          WHERE tunnus    = '$tiliotedataid'";
 $dummyresult = pupe_query($query);
 
 $query = "UPDATE tiliotedata
           SET kuitattu = 'tiliote',
           kuitattuaika = now()
-          WHERE yhtio = '$yritirow[yhtio]'
-          AND perheid = '$tiliotedatape'";
+          WHERE yhtio  = '$yritirow[yhtio]'
+          AND perheid  = '$tiliotedatape'";
 $dummyresult = pupe_query($query);
 
 // Merkataan k‰sitellyiksi & lis‰t‰‰n linkki

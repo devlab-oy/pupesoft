@@ -1,6 +1,6 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 if (!isset($thumb_size_x, $thumb_size_y, $normaali_size_x, $normaali_size_y)) {
   echo "<font class='error'>Kuvakokoja ei ole määritelty. Ei voida jatkaa!</font>";
@@ -45,12 +45,12 @@ function listdir($start_dir = '.') {
   return $files;
 }
 
-function konvertoi ($ykoko, $xkoko, $type, $taulu, $kuva, $dirri, $upfile1) {
+function konvertoi($ykoko, $xkoko, $type, $taulu, $kuva, $dirri, $upfile1) {
 
   global $kukarow;
 
   // uniikki nimi
-  list($usec, $sec) = explode(" ",microtime());
+  list($usec, $sec) = explode(" ", microtime());
   $nimi = $usec+$sec;
 
   // extensio
@@ -74,8 +74,8 @@ function konvertoi ($ykoko, $xkoko, $type, $taulu, $kuva, $dirri, $upfile1) {
     if ($identify[0] != "") $colorspace = $identify[0];
 
     // skaalataan kuva oikenakokoiseksi y:n mukaan
-      exec("nice -n 20 convert -resize x$ykoko -quality 90 -colorspace $colorspace -strip \"$upfile1\" \"$upfilesgh\"", $output, $error);
-    }
+    exec("nice -n 20 convert -resize x$ykoko -quality 90 -colorspace $colorspace -strip \"$upfile1\" \"$upfilesgh\"", $output, $error);
+  }
   elseif ($xkoko > 0 and $xkoko < $leve and ($leve > $kork or $ykoko == 0)) {
     // Haetaan kuvan väriprofiili
     exec("nice -n 20 identify -format %[colorspace] \"$upfile1\"", $identify);
@@ -84,12 +84,12 @@ function konvertoi ($ykoko, $xkoko, $type, $taulu, $kuva, $dirri, $upfile1) {
     if ($identify[0] != "") $colorspace = $identify[0];
 
     // skaalataan kuva oikenakokoiseksi x:n mukaan
-      exec("nice -n 20 convert -resize $xkoko -quality 90 -colorspace $colorspace -strip \"$upfile1\" \"$upfilesgh\"", $output, $error);
-    }
+    exec("nice -n 20 convert -resize $xkoko -quality 90 -colorspace $colorspace -strip \"$upfile1\" \"$upfilesgh\"", $output, $error);
+  }
   else {
     exec("cp -f \"$upfile1\" \"$upfilesgh\"");
     $error = 0;
-    }
+  }
 
   if ($error != 0) {
     echo " &raquo; <font class='error'>Virhe $type kuvan skaalauksessa</font>";
@@ -100,7 +100,7 @@ function konvertoi ($ykoko, $xkoko, $type, $taulu, $kuva, $dirri, $upfile1) {
     $copy_boob = copy($upfilesgh, $uusnimi);
 
     if ($copy_boob === FALSE) {
-        echo "Kopiointi epäonnistui $upfilesgh $uusnimi $upfile1 <br>";
+      echo "Kopiointi epäonnistui $upfilesgh $uusnimi $upfile1 <br>";
       $upfileall = "";
     }
     else {
@@ -319,7 +319,7 @@ if ($tee == 'GO') {
       $kuvanalku = substr($kuva, 0, $mihin);
 
       //kyseessä on käyttöturvatiedot ja tuotekortti
-      if (strpos($kuva,"%ktt") !== FALSE) {
+      if (strpos($kuva, "%ktt") !== FALSE) {
         $mistakieli = strpos($kuva, "%ktt") + 4;
         $mikakieli = substr($kuva, $mistakieli, 2);
 
@@ -338,7 +338,7 @@ if ($tee == 'GO') {
           $mikakieli = "fi";
         }
       }
-      elseif (strpos($kuva,"%tko") !== FALSE) {
+      elseif (strpos($kuva, "%tko") !== FALSE) {
         $mistakieli = strpos($kuva, "%tko" ) + 4;
         $mikakieli = substr($kuva, $mistakieli, 2);
 
@@ -642,4 +642,4 @@ if ($lukuthumbit + $lukunormit + $lukupainot + $lukumuut + $lukutconvertit == 0)
   echo "</form>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

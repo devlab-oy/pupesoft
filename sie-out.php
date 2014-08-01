@@ -4,11 +4,11 @@
 $useslave = 1;
 
 if (isset($_POST["tee"])) {
-  if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
-require('inc/parametrit.inc');
+require 'inc/parametrit.inc';
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
@@ -23,7 +23,7 @@ if ($kausi != '') {
   $riviloppu  = "\n";
   $erotin    = "\t";
   $nimi     = "/tmp/SIE-$kukarow[yhtio]-".date("ymd.His-s").".txt";
-  $toot     = fopen($nimi,"w+");
+  $toot     = fopen($nimi, "w+");
 
   fputs($toot, '#FLAGGA'.$erotin.'0'.$riviloppu);
   fputs($toot, '#PROGRAM'.$erotin.'"Pupesoft"'.$riviloppu);
@@ -101,7 +101,7 @@ if ($kausi != '') {
 
       if ($kesken == 1) {
         $ulos.=$riviloppu."}";
-        fputs($toot,$ulos.$riviloppu);
+        fputs($toot, $ulos.$riviloppu);
         $kesken = 0;
       }
 
@@ -120,7 +120,7 @@ if ($kausi != '') {
 
   if ($kesken == 1) {
     $ulos.=$riviloppu."}";
-    fputs($toot,$ulos.$riviloppu);
+    fputs($toot, $ulos.$riviloppu);
     $kesken = 0;
   }
 
@@ -144,44 +144,44 @@ echo "<form name = 'valinta' method='post'>
   <table><tr><th>".t("Anna kausi")."</th><td>";
 
 
-  //  Haetaan alkupiste
-  $kausia   = 24;
-  $kuukausi   = date("m");
-  $vuosi     = date("Y");
+//  Haetaan alkupiste
+$kausia   = 24;
+$kuukausi   = date("m");
+$vuosi     = date("Y");
 
-  echo "<select name='kausi'>
+echo "<select name='kausi'>
     <option value = ''>".t('Valitse kausi')."</option>";
 
-  for ($i = 1; $i < $kausia; $i++) {
+for ($i = 1; $i < $kausia; $i++) {
 
-    $kuukausi = str_pad((int) $kuukausi, 2, 0, STR_PAD_LEFT);
+  $kuukausi = str_pad((int) $kuukausi, 2, 0, STR_PAD_LEFT);
 
-    $sel = "";
+  $sel = "";
 
-    if ($kausi == $vuosi."-".$kuukausi) {
-      $sel = "SELECTED";
-    }
-
-    echo "<option value='$vuosi-$kuukausi' $sel>$kuukausi/$vuosi</option>";
-
-    if ($kuukausi == 01) {
-      $kuukausi = 12;
-      $vuosi--;
-    }
-    else {
-      $kuukausi--;
-    }
-
+  if ($kausi == $vuosi."-".$kuukausi) {
+    $sel = "SELECTED";
   }
-  echo "</select>";
-  echo "</td></tr>";
 
-  $chk = "";
-  if (isset($perustiedot) and $perustiedot != "") $chk = "CHECKED";
+  echo "<option value='$vuosi-$kuukausi' $sel>$kuukausi/$vuosi</option>";
 
-  echo "<tr><th>".t("Perustiedot")."</th><td><input type = 'checkbox' name = 'perustiedot' $chk></td></tr></table>";
+  if ($kuukausi == 01) {
+    $kuukausi = 12;
+    $vuosi--;
+  }
+  else {
+    $kuukausi--;
+  }
 
-  echo "<br><br><input type = 'submit' value = '".t("Aja raportti")."'></td></tr>
+}
+echo "</select>";
+echo "</td></tr>";
+
+$chk = "";
+if (isset($perustiedot) and $perustiedot != "") $chk = "CHECKED";
+
+echo "<tr><th>".t("Perustiedot")."</th><td><input type = 'checkbox' name = 'perustiedot' $chk></td></tr></table>";
+
+echo "<br><br><input type = 'submit' value = '".t("Aja raportti")."'></td></tr>
   </form>";
 
 $formi = 'valinta';

@@ -17,14 +17,16 @@ $query = "SELECT selite as id, selitetark as name
 $result = pupe_query($query);
 
 $valmistuslinjat = array();
-while($linja = mysql_fetch_assoc($result)) {
+while ($linja = mysql_fetch_assoc($result)) {
   $valmistuslinjat[] = $linja;
 }
 
 /**
-* GET /valmistuslinjat/resurssit
-* Haetaan valmistuslinjat
-*/
+ * GET /valmistuslinjat/resurssit
+ * Haetaan valmistuslinjat
+ */
+
+
 if (isset($_GET['resurssit']) and $_GET['resurssit'] == 'true') {
 
   // Rakennetaan valmistuslinjat JSON viestiksi
@@ -33,9 +35,9 @@ if (isset($_GET['resurssit']) and $_GET['resurssit'] == 'true') {
 }
 
 /**
-* GET /valmistuslinjat/valmistukset
-* Haetaan kaikki valmistuslinjoille laitetut valmistukset
-*/
+ * GET /valmistuslinjat/valmistukset
+ * Haetaan kaikki valmistuslinjoille laitetut valmistukset
+ */
 if (isset($_GET['valmistukset']) and $_GET['valmistukset'] == 'true') {
 
   // Kaikki valmistuslinjan tapahtumat
@@ -63,10 +65,10 @@ if (isset($_GET['valmistukset']) and $_GET['valmistukset'] == 'true') {
   }
 
   // Loopataan valmistuslinjat yksi kerrallaan
-  foreach($valmistuslinjat as $linja) {
+  foreach ($valmistuslinjat as $linja) {
 
     // Lis‰t‰‰n yhtiokohtaiset tapahtumat
-    foreach($yhtiokohtaiset_tapahtumat as $tapahtuma) {
+    foreach ($yhtiokohtaiset_tapahtumat as $tapahtuma) {
       $json = array();
       $json['title']   = utf8_encode($tapahtuma['tyyppi']);
       $json['start']   = $tapahtuma['pvmalku'];
@@ -100,8 +102,8 @@ if (isset($_GET['valmistukset']) and $_GET['valmistukset'] == 'true') {
 
     // Lis‰t‰‰n Valmistuslinjalla olevat valmistukset
     $valmistukset = hae_valmistuslinjan_valmistukset($linja);
-    foreach($valmistukset as $valmistus) {
-      #echo "valmistus: $valmistus[otunnus] $valmistus[pvmalku] $valmistus[pvmloppu]<br>";
+    foreach ($valmistukset as $valmistus) {
+      //echo "valmistus: $valmistus[otunnus] $valmistus[pvmalku] $valmistus[pvmloppu]<br>";
 
       $json = array();
 
@@ -113,8 +115,8 @@ if (isset($_GET['valmistukset']) and $_GET['valmistukset'] == 'true') {
 
       // Valmistuksella olevat tuotteet
       $tuotteet = hae_valmistuksen_tuotteet($valmistus);
-      foreach($tuotteet as $tuote) {
-        #echo "tuote: $tuote[nimitys] $tuote[tuoteno] $tuote[varattu] $tuote[yksikko]<br>";
+      foreach ($tuotteet as $tuote) {
+        //echo "tuote: $tuote[nimitys] $tuote[tuoteno] $tuote[varattu] $tuote[yksikko]<br>";
         $title .= "$tuote[nimitys] $tuote[varattu] $tuote[yksikko]\n";
       }
 

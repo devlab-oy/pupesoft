@@ -13,7 +13,7 @@
 // tulostetaan rahtikirja
 
 // Setataan tarvittavat muuttujat
-require_once("rahtikirja_postitarra_otsikkotiedot.inc");
+require_once "rahtikirja_postitarra_otsikkotiedot.inc";
 
 if ($tulostuskpl == 0) {
   $tulostakolli = 1;
@@ -25,13 +25,13 @@ else {
 // tulostetaan niin monta lappua kun on kollejakin
 for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
-  $kuka    = sprintf("%02s",$tulostuskpl);     // laitetaan tulostuskpl alkuun niin jokalapulla on uniikki viiva
+  $kuka    = sprintf("%02s", $tulostuskpl);     // laitetaan tulostuskpl alkuun niin jokalapulla on uniikki viiva
 
   if (substr($rivi["rahtikirjanro"], 0, 4) == "JJFI") {
     $oma = sprintf("%09s", substr($rivi["rahtikirjanro"], -9));
   }
   else {
-    $oma = sprintf("%09s",$rtunnus);       // 9, pitkä numero tulee rahtikirja taulun tunnuksesta, pitää olaa uniikki
+    $oma = sprintf("%09s", $rtunnus);       // 9, pitkä numero tulee rahtikirja taulun tunnuksesta, pitää olaa uniikki
   }
 
   // tehdään viivakoodit
@@ -333,12 +333,12 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
                {RC085;$vakit[6]|}";
 
   if ($postiedihost != "" and $postiediuser != "" and $postiedipass != "" and $postiedipath != "") {
-        $sivu .= "***EDI ***
+    $sivu .= "***EDI ***
                   {PC121;0800,0350,15,15,K,00,B|}
                   {RC121;EDI|}";
   }
 
-      $sivu .= "*** TULOSTUS  ***
+  $sivu .= "*** TULOSTUS  ***
                {XS;I,0001,0002C3210|}
                ".chr(12);
 
@@ -353,6 +353,6 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
   //lähetetään postin edisanoma
   if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
-    require("postiedi.inc");
+    require "postiedi.inc";
   }
 }

@@ -6,7 +6,7 @@ $useslave = 1;
 // DataTables päälle
 $pupe_DataTables = "myyntilaskuhaku";
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if (!isset($tee)) $tee = '';
 if (!isset($summa1)) $summa1 = '';
@@ -33,29 +33,29 @@ if (!function_exists("kuka_kayttaja")) {
   }
 }
 
-echo "<font class='head'>",t("Myyntilaskuhaku"),"</font><hr>";
+echo "<font class='head'>", t("Myyntilaskuhaku"), "</font><hr>";
 
 $index = "";
 $lopetus = "${palvelin2}myyntires/myyntilaskuhaku.php////tee={$tee}//summa1={$summa1}//summa2={$summa2}";
 
 echo "<br><form name = 'valinta' method='post'>";
 
-$seldr = array_fill_keys(array($tee), " selected") + array('S','VS','N','V','L','LN');
+$seldr = array_fill_keys(array($tee), " selected") + array('S', 'VS', 'N', 'V', 'L', 'LN');
 
 echo "<table>";
 echo "<tr>";
-echo "<th>",t("Etsi lasku"),"</th>";
+echo "<th>", t("Etsi lasku"), "</th>";
 echo "<td><select name = 'tee'>";
-echo "<option value = 'S'  {$seldr["S"]}>",t("summalla"),"</option>";
-echo "<option value = 'VS' {$seldr["VS"]}>",t("valuuttasummalla"),"</option>";
-echo "<option value = 'N'  {$seldr["N"]}>",t("nimellä"),"</option>";
-echo "<option value = 'V'  {$seldr["V"]}>",t("viitteellä"),"</option>";
-echo "<option value = 'L'  {$seldr["L"]}>",t("laskunnumerolla"),"</option>";
-echo "<option value = 'A'  {$seldr["A"]}>",t("asiakasnumerolla"),"</option>";
-echo "<option value = 'LN'  {$seldr["LN"]}>",t("Laatijan/myyjän nimellä"),"</option>";
+echo "<option value = 'S'  {$seldr["S"]}>", t("summalla"), "</option>";
+echo "<option value = 'VS' {$seldr["VS"]}>", t("valuuttasummalla"), "</option>";
+echo "<option value = 'N'  {$seldr["N"]}>", t("nimellä"), "</option>";
+echo "<option value = 'V'  {$seldr["V"]}>", t("viitteellä"), "</option>";
+echo "<option value = 'L'  {$seldr["L"]}>", t("laskunnumerolla"), "</option>";
+echo "<option value = 'A'  {$seldr["A"]}>", t("asiakasnumerolla"), "</option>";
+echo "<option value = 'LN'  {$seldr["LN"]}>", t("Laatijan/myyjän nimellä"), "</option>";
 echo "</select></td>";
 echo "<td><input type = 'text' name = 'summa1' size='13'> - <input type = 'text' name = 'summa2' size='13'></td>";
-echo "<td class='back'><input type = 'submit' value = '",t("Hae"),"'></td>";
+echo "<td class='back'><input type = 'submit' value = '", t("Hae"), "'></td>";
 echo "</tr>";
 echo "</table>";
 echo "</form>";
@@ -193,7 +193,7 @@ if ($tee != '') {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
-    echo "<b>",t("Haulla ei löytynyt yhtään laskua"),"</b>";
+    echo "<b>", t("Haulla ei löytynyt yhtään laskua"), "</b>";
     $tee = '';
   }
   else {
@@ -204,15 +204,15 @@ if ($tee != '') {
 
     echo "<thead>
         <tr>
-        <th>",t("Pvm"),"</th>
-        <th>",t("Eräpäivä"),"</th>
-        <th>",t("Laskunro"),"</th>
-        <th>",t("Nimi"),"</th>
-        <th>",t("Summa"),"</th>
-        <th>",t("Valuutta"),"</th>
-        <th>",t("Ebid"),"</th>
-        <th>",t("Tila"),"</th>
-        <th>",t("Laatija"),"</th>
+        <th>", t("Pvm"), "</th>
+        <th>", t("Eräpäivä"), "</th>
+        <th>", t("Laskunro"), "</th>
+        <th>", t("Nimi"), "</th>
+        <th>", t("Summa"), "</th>
+        <th>", t("Valuutta"), "</th>
+        <th>", t("Ebid"), "</th>
+        <th>", t("Tila"), "</th>
+        <th>", t("Laatija"), "</th>
         </tr>
         <tr>
         <td><input type='text' class='search_field' name='search_pvm'></td>
@@ -246,7 +246,7 @@ if ($tee != '') {
       echo "<td valign='top'>{$trow['valkoodi']}</td>";
 
       // tehdään lasku linkki
-      echo "<td>",ebid($trow['tunnus']),"</td>";
+      echo "<td>", ebid($trow['tunnus']), "</td>";
 
       $maksuviesti = "";
 
@@ -279,4 +279,4 @@ if ($tee != '') {
   }
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

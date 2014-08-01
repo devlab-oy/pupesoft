@@ -1,13 +1,13 @@
 <?php
 
-$date    = $year."-".sprintf('%02d',$month)."-".sprintf('%02d',$day);
-$dateloppu   = $lyear."-".sprintf('%02d',$lmonth)."-".sprintf('%02d',$lday);
+$date    = $year."-".sprintf('%02d', $month)."-".sprintf('%02d', $day);
+$dateloppu   = $lyear."-".sprintf('%02d', $lmonth)."-".sprintf('%02d', $lday);
 
-$date2     = $year.sprintf('%02d',$month).sprintf('%02d',$day);
-$dateloppu2 = $lyear.sprintf('%02d',$lmonth).sprintf('%02d',$lday);
+$date2     = $year.sprintf('%02d', $month).sprintf('%02d', $day);
+$dateloppu2 = $lyear.sprintf('%02d', $lmonth).sprintf('%02d', $lday);
 
-$mylmonth   = sprintf('%02d',$lmonth);
-$mylday   = sprintf('%02d',$lday);
+$mylmonth   = sprintf('%02d', $lmonth);
+$mylday   = sprintf('%02d', $lday);
 
 // en jaksa muuttaa idiootteja formeja, joten vertailu nyt näillä muuttujulla uusiks
 list($vertailu_alkutunti, $vertailu_alkuminuutti) = explode(":", $kello);
@@ -58,9 +58,9 @@ if ($toim == "Sauna") {
     $meili .= "Vieraslukumäärä:\n$kentta08\n\n\n";
     $meili .= "Juomatoivomus:\n$kentta10\n";
 
-    $tulos = mail("$yhtiorow[varauskalenteri_email]", mb_encode_mimeheader("Saunavaraus", "ISO-8859-1", "Q"), $meili,"From: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$kukarow["eposti"].">\nReply-To: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$row["eposti"].">\n", "-f $yhtiorow[postittaja_email]");
+    $tulos = mail("$yhtiorow[varauskalenteri_email]", mb_encode_mimeheader("Saunavaraus", "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$kukarow["eposti"].">\nReply-To: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$row["eposti"].">\n", "-f $yhtiorow[postittaja_email]");
   }
-  else{
+  else {
     echo "<br><br>Tarkista, ett&auml; kaikki tiedot on sy&ouml;tetty!";
     exit;
   }
@@ -87,6 +87,6 @@ $result = mysql_query($query) or pupe_error($query);
 
 echo "<br><br>".t("Tapahtuma lisätty varauskalenteriin")."!";
 
-if($lopetus != "") {
+if ($lopetus != "") {
   lopetus($lopetus, "META");
 }

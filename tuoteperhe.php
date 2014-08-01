@@ -1,11 +1,11 @@
 <?php
 
 if (isset($_POST["tee"])) {
-  if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
@@ -65,56 +65,56 @@ if ($toim == "PERHE") {
 if ($tee == "KOPIOI") {
 
   if ($kop_isatuo == "") {
-      echo "<br><br>";
-      echo "<table>";
-      echo "  <form method='post' action='tuoteperhe.php' name='valinta' autocomplete='off'>
+    echo "<br><br>";
+    echo "<table>";
+    echo "  <form method='post' action='tuoteperhe.php' name='valinta' autocomplete='off'>
           <input type='hidden' name='toim' value='$toim'>
           <input type='hidden' name='tee' value='KOPIOI'>
           <input type='hidden' name='hakutuoteno' value='$hakutuoteno'>";
 
-      echo "<tr><th>";
+    echo "<tr><th>";
+
+    if ($toim == "PERHE") {
+      echo t("Syötä isä jolle perhe kopioidaan");
+    }
+    elseif ($toim == "LISAVARUSTE") {
+      echo t("Syötä tuote jolle lisävarusteet kopioidaan");
+    }
+    elseif ($toim == "OSALUETTELO") {
+      echo t("Syötä tuote jolle osaluettelo kopioidaan");
+    }
+    elseif ($toim == "TUOTEKOOSTE") {
+      echo t("Syötä tuote jolle tuotekooste kopioidaan");
+    }
+    elseif ($toim == "VSUUNNITTELU") {
+      echo t("Syötä tuote jolle samankaltaisuus kopioidaan");
+    }
+    else {
+      echo t("Syötä valmiste jolle resepti kopioidaan");
+    }
+
+    echo "</th>";
+
+    echo "<td>";
+    echo livesearch_kentta("valinta", "TUOTEHAKU", "kop_isatuo", 140, $kop_isatuo, 'X');
+    echo "</td>";
+
+    foreach ($kop_tuoteno as $_i => $tuoteno) {
+      echo "<input type='hidden' name='kop_tuoteno[$_i]' value='$kop_tuoteno[$_i]'>";
+      echo "<input type='hidden' name='kop_kerroin[$_i]' value='$kop_kerroin[$_i]'>";
+      echo "<input type='hidden' name='kop_hinkerr[$_i]' value='$kop_hinkerr[$_i]'>";
+      echo "<input type='hidden' name='kop_alekerr[$_i]' value='$kop_alekerr[$_i]'>";
+      echo "<input type='hidden' name='kop_fakta[$_i]' value='$kop_fakta[$_i]'>";
 
       if ($toim == "PERHE") {
-        echo t("Syötä isä jolle perhe kopioidaan");
+        echo "<input type='hidden' name='kop_ohita_kerays[$_i]' value='$kop_ohita_kerays[$_i]'>";
+        echo "<input type='hidden' name='kop_ei_nayteta[$_i]' value='$kop_ei_nayteta[$_i]'>";
       }
-      elseif ($toim == "LISAVARUSTE") {
-        echo t("Syötä tuote jolle lisävarusteet kopioidaan");
-      }
-      elseif ($toim == "OSALUETTELO") {
-        echo t("Syötä tuote jolle osaluettelo kopioidaan");
-      }
-      elseif ($toim == "TUOTEKOOSTE") {
-        echo t("Syötä tuote jolle tuotekooste kopioidaan");
-      }
-      elseif ($toim == "VSUUNNITTELU") {
-        echo t("Syötä tuote jolle samankaltaisuus kopioidaan");
-      }
-      else {
-        echo t("Syötä valmiste jolle resepti kopioidaan");
-      }
+    }
 
-      echo "</th>";
-
-      echo "<td>";
-      echo livesearch_kentta("valinta", "TUOTEHAKU", "kop_isatuo", 140, $kop_isatuo, 'X');
-      echo "</td>";
-
-      foreach ($kop_tuoteno as $_i => $tuoteno) {
-        echo "<input type='hidden' name='kop_tuoteno[$_i]' value='$kop_tuoteno[$_i]'>";
-        echo "<input type='hidden' name='kop_kerroin[$_i]' value='$kop_kerroin[$_i]'>";
-        echo "<input type='hidden' name='kop_hinkerr[$_i]' value='$kop_hinkerr[$_i]'>";
-        echo "<input type='hidden' name='kop_alekerr[$_i]' value='$kop_alekerr[$_i]'>";
-        echo "<input type='hidden' name='kop_fakta[$_i]' value='$kop_fakta[$_i]'>";
-
-        if ($toim == "PERHE") {
-          echo "<input type='hidden' name='kop_ohita_kerays[$_i]' value='$kop_ohita_kerays[$_i]'>";
-          echo "<input type='hidden' name='kop_ei_nayteta[$_i]' value='$kop_ei_nayteta[$_i]'>";
-        }
-      }
-
-      echo "<td><input type='submit' value='".t("Kopioi")."'></td></tr>";
-      echo "</form>";
-      echo "</table>";
+    echo "<td><input type='submit' value='".t("Kopioi")."'></td></tr>";
+    echo "</form>";
+    echo "</table>";
   }
   else {
 
@@ -693,7 +693,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         if ($faktarow["ei_nayteta"] == "") {
           $sel1 = "SELECTED";
         }
-        elseif($faktarow["ei_nayteta"] == "E") {
+        elseif ($faktarow["ei_nayteta"] == "E") {
           $sel2 = "SELECTED";
         }
 
@@ -818,7 +818,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       echo "</form>";
       echo "<br><br>";
 
-      include('inc/pupeExcel.inc');
+      include 'inc/pupeExcel.inc';
 
       $worksheet    = new pupeExcel();
       $format_bold = array("bold" => TRUE);
@@ -1047,7 +1047,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
             echo "<td align='right'>$prow[alekerroin]</td>";
             $worksheet->writeNumber($excelrivi, $excelsarake++, $prow["hintakerroin"]);
             $worksheet->writeNumber($excelrivi, $excelsarake++, $prow["alekerroin"]);
-            #echo "<td align='right'>$prow[rivikommentti]</td>";
+            //echo "<td align='right'>$prow[rivikommentti]</td>";
           }
 
           if ($toim == "RESEPTI") {
@@ -1407,4 +1407,4 @@ elseif ($tee == "") {
   }
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

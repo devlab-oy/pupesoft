@@ -3,7 +3,7 @@
 if (!isset($link)) require "inc/parametrit.inc";
 
 if (isset($_POST['ajax_toiminto']) and trim($_POST['ajax_toiminto']) != '') {
-  require ("inc/tilioinnin_toiminnot.inc");
+  require "inc/tilioinnin_toiminnot.inc";
 }
 
 enable_ajax();
@@ -116,7 +116,7 @@ if ($toimittaja_y != '') {
   $toimittajaid = 0;
   $asiakasid = 0;
 
-  require ("inc/kevyt_toimittajahaku.inc");
+  require "inc/kevyt_toimittajahaku.inc";
 
   if ($toimittajaid > 0) {
     unset($teetosite);
@@ -126,7 +126,7 @@ if ($toimittaja_y != '') {
     unset($teetosite);
   }
   elseif ($toimittajaid == 0) {
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 }
@@ -136,7 +136,7 @@ if ($asiakas_y != '') {
   $asiakasid = 0;
   $toimittajaid = 0;
 
-  require ("inc/asiakashaku.inc");
+  require "inc/asiakashaku.inc";
 
   if ($asiakasid > 0) {
     unset($teetosite);
@@ -146,7 +146,7 @@ if ($asiakas_y != '') {
     unset($teetosite);
   }
   elseif ($asiakasid == 0) {
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 }
@@ -180,7 +180,7 @@ if ($asiakasid > 0) {
 // Tarkistetetaan syötteet perustusta varten
 if ($tee == 'I') {
   $totsumma = 0;
-  $summa = str_replace (",", ".", $summa);
+  $summa = str_replace(",", ".", $summa);
   $gok  = 0;
   $tpk += 0;
   $tpp += 0;
@@ -223,20 +223,30 @@ if ($tee == 'I') {
     //  ei koskaan päivitetä automaattisesti
     $tee = "";
 
-    $retval = tarkasta_liite("tositefile", array("XLSX","XLS","ODS","SLK","XML","GNUMERIC","CSV","TXT"));
+    $retval = tarkasta_liite("tositefile", array("XLSX", "XLS", "ODS", "SLK", "XML", "GNUMERIC", "CSV", "TXT"));
 
     if ($retval === true) {
 
-      /** PHPExcel kirjasto **/
+      /**
+       * PHPExcel kirjasto *
+       */
+
+
       require_once "PHPExcel/PHPExcel/IOFactory.php";
 
-      /** Tunnistetaan tiedostomuoto **/
+      /**
+       * Tunnistetaan tiedostomuoto *
+       */
       $inputFileType = PHPExcel_IOFactory::identify($_FILES['tositefile']['tmp_name']);
 
-      /** Luodaan readeri **/
+      /**
+       * Luodaan readeri *
+       */
       $objReader = PHPExcel_IOFactory::createReader($inputFileType);
 
-      /** Ladataan vain solujen datat (ei formatointeja jne) **/
+      /**
+       * Ladataan vain solujen datat (ei formatointeja jne) *
+       */
       if ($inputFileType != "CSV") {
         $objReader->setReadDataOnly(true);
       }
@@ -246,27 +256,35 @@ if ($tee == 'I') {
         $objReader->setInputEncoding("ISO-8859-1");
       }
 
-      /** Ladataan file halutuilla parametreilla **/
+      /**
+       * Ladataan file halutuilla parametreilla *
+       */
       $objPHPExcel = $objReader->load($_FILES['tositefile']['tmp_name']);
 
-      /** Laitetaan solut arrayseen **/
+      /**
+       * Laitetaan solut arrayseen *
+       */
       $excelrivi = array();
 
-      /** Aktivoidaan eka sheetti**/
+      /**
+       * Aktivoidaan eka sheetti*
+       */
       $objPHPExcel->setActiveSheetIndex(0);
 
-      /** Loopataan rivit/sarakkeet **/
+      /**
+       * Loopataan rivit/sarakkeet *
+       */
       foreach ($objPHPExcel->getActiveSheet()->getRowIterator() as $row) {
-          $cellIterator = $row->getCellIterator();
-          $cellIterator->setIterateOnlyExistingCells(false);
+        $cellIterator = $row->getCellIterator();
+        $cellIterator->setIterateOnlyExistingCells(false);
 
         $rowIndex = ($row->getRowIndex())-1;
 
-          foreach ($cellIterator as $cell) {
-              $colIndex = (PHPExcel_Cell::columnIndexFromString($cell->getColumn()))-1;
+        foreach ($cellIterator as $cell) {
+          $colIndex = (PHPExcel_Cell::columnIndexFromString($cell->getColumn()))-1;
 
           $excelrivi[$rowIndex][$colIndex] = utf8_decode($cell->getCalculatedValue());
-          }
+        }
       }
 
       // Otetaan tiedoston otsikkorivi
@@ -343,8 +361,8 @@ if ($tee == 'I') {
               }
             }
           }
-          elseif(strtolower($otsikot[$e]) == "summa") {
-            ${"i".strtolower($otsikot[$e])}[$maara] = sprintf("%.2f",round($eriv, 2));
+          elseif (strtolower($otsikot[$e]) == "summa") {
+            ${"i".strtolower($otsikot[$e])}[$maara] = sprintf("%.2f", round($eriv, 2));
           }
           else {
             ${"i".strtolower($otsikot[$e])}[$maara] = $eriv;
@@ -373,7 +391,7 @@ if ($tee == 'I') {
   }
 
   // turvasumma kotivaluutassa
-  $turvasumma = sprintf("%.2f",round($summa * $kurssi, 2));
+  $turvasumma = sprintf("%.2f", round($summa * $kurssi, 2));
   // turvasumma valuutassa
   $turvasumma_valuutassa = $summa;
 
@@ -387,10 +405,10 @@ if ($tee == 'I') {
 
   for ($i=1; $i<$maara; $i++) {
 
-     // Käsitelläänkö rivi??
+    // Käsitelläänkö rivi??
     if (strlen($itili[$i]) > 0 or strlen($isumma[$i]) > 0) {
 
-      $isumma[$i] = str_replace (",", ".", $isumma[$i]);
+      $isumma[$i] = str_replace(",", ".", $isumma[$i]);
 
       // Oletussummalla korvaaminen mahdollista
       if ($turvasumma_valuutassa > 0) {
@@ -400,10 +418,10 @@ if ($tee == 'I') {
           $isummanumeric = preg_replace("/[^0-9\.]/", "", $isumma[$i]);
 
           if ($isumma[$i]{0} == '-') {
-            $isumma[$i] = sprintf("%.2f",round(-1 * ($turvasumma_valuutassa * ($isummanumeric/100)), 2));
+            $isumma[$i] = sprintf("%.2f", round(-1 * ($turvasumma_valuutassa * ($isummanumeric/100)), 2));
           }
           else {
-            $isumma[$i] = sprintf("%.2f",round(1 * ($turvasumma_valuutassa * ($isummanumeric/100)), 2));
+            $isumma[$i] = sprintf("%.2f", round(1 * ($turvasumma_valuutassa * ($isummanumeric/100)), 2));
           }
         }
         elseif ($isumma[$i] == '-') {
@@ -421,7 +439,7 @@ if ($tee == 'I') {
       // otetaan valuuttasumma talteen
       $isumma_valuutassa[$i] = $isumma[$i];
       // käännetään kotivaluuttaan
-      $isumma[$i] = sprintf("%.2f",round($isumma[$i] * $kurssi, 2));
+      $isumma[$i] = sprintf("%.2f", round($isumma[$i] * $kurssi, 2));
 
       if (strlen($selite) > 0 and strlen($iselite[$i]) == 0) { // Siirretään oletusselite tiliöinneille
         $iselite[$i] = $selite;
@@ -465,7 +483,7 @@ if ($tee == 'I') {
 
       if ($vero!='') $ivero[$i]=$vero; //Jos meillä on hardkoodattuvero, otetaan se käyttöön
 
-      if (isset($ivirhe[$i]))  {
+      if (isset($ivirhe[$i])) {
         $ivirhe[$i] .= $virhe;
       }
 
@@ -523,7 +541,7 @@ if ($tee == 'I') {
     }
   }
 
-   // Jossain tapahtui virhe
+  // Jossain tapahtui virhe
   if ($gok == 1) {
     if ($gokfrom == "") {
       echo "<br><font class='error'>".t("HUOM").": ".t("Jossain oli virheitä/muutoksia")."!</font><br>\n";
@@ -577,7 +595,7 @@ if ($tee == 'I' and isset($teetosite)) {
               laatija    = '{$kukarow['kuka']}',
               luontiaika = now()";
     $result = pupe_query($query);
-    $tunnus = mysql_insert_id ($link);
+    $tunnus = mysql_insert_id($link);
   }
 
   if (isset($avaavatase) and $avaavatase == 'joo') {
@@ -631,7 +649,7 @@ if ($tee == 'I' and isset($teetosite)) {
       $liitos        = mysql_real_escape_string($iliitos[$i]);
       $liitostunnus    = mysql_real_escape_string($iliitostunnus[$i]);
 
-      require("inc/teetiliointi.inc");
+      require "inc/teetiliointi.inc";
 
       $itili[$i]        = '';
       $ikustp[$i]        = '';
@@ -647,7 +665,7 @@ if ($tee == 'I' and isset($teetosite)) {
   }
 
   if ($kuitti != '') {
-    require("inc/kuitti.inc");
+    require "inc/kuitti.inc";
   }
 
   $alv_tili       = "";
@@ -862,13 +880,13 @@ if ($tee == '') {
   echo "<input type='hidden' name='lopetus' value='$lopetus'>\n";
   echo "<input type='hidden' name='tee' value='I'>\n";
 
-  echo "<input type='hidden' name='tiliointirivit' value='",urlencode(serialize($tiliointirivit)),"' />";
+  echo "<input type='hidden' name='tiliointirivit' value='", urlencode(serialize($tiliointirivit)), "' />";
   echo "<input type='hidden' name='tunnus' value='{$tunnus}' />";
 
   if (isset($tullaan) and $tullaan == 'muutosite' and ((!isset($toimittajaid) and !isset($asiakasid)) or ($toimittajaid == 0 and $asiakasid == 0))) {
-    echo "<input type='hidden' name='ed_iliitostunnus' value='",urlencode(serialize($ed_iliitostunnus)),"' />";
-    echo "<input type='hidden' name='ed_iliitos' value='",urlencode(serialize($ed_iliitos)),"' />";
-    echo "<input type='hidden' name='iliitos' value='",urlencode(serialize($iliitos)),"' />";
+    echo "<input type='hidden' name='ed_iliitostunnus' value='", urlencode(serialize($ed_iliitostunnus)), "' />";
+    echo "<input type='hidden' name='ed_iliitos' value='", urlencode(serialize($ed_iliitos)), "' />";
+    echo "<input type='hidden' name='iliitos' value='", urlencode(serialize($iliitos)), "' />";
     echo "<input type='hidden' name='tullaan' value='{$tullaan}' />";
   }
 
@@ -879,7 +897,7 @@ if ($tee == '') {
 
   // Uusi tosite
   // Tehdään haluttu määrä tiliöintirivejä
-  $tilmaarat = array("3","5","9","13","17","21","25","29","33","41","51","101","151", "201", "301", "401", "501", "601", "701", "801", "901", "1001");
+  $tilmaarat = array("3", "5", "9", "13", "17", "21", "25", "29", "33", "41", "51", "101", "151", "201", "301", "401", "501", "601", "701", "801", "901", "1001");
 
   if (isset($gokfrom) and $gokfrom != "") {
     // Valitaan sopiva tiliöintimäärä kun tullaan palkkatositteelta
@@ -1112,13 +1130,13 @@ if ($tee == '') {
       echo "<th>".t("Tarkenne")."</th>\n";
       echo "<th>".t("Summa")."</th>\n";
       echo "<th>".t("Vero")."</th>\n";
-      echo "<th>",t("Liitos"),"</th>";
+      echo "<th>", t("Liitos"), "</th>";
 
       if ($asiakasid > 0) {
-        echo "<th>",t("Liitä valittu asiakas"),"</th>";
+        echo "<th>", t("Liitä valittu asiakas"), "</th>";
       }
       if ($toimittajaid > 0) {
-        echo "<th>",t("Liitä valittu toimittaja"),"</th>";
+        echo "<th>", t("Liitä valittu toimittaja"), "</th>";
       }
 
       echo "</tr>\n";

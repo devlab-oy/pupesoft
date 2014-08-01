@@ -136,7 +136,7 @@ if (!$php_cli) {
 }
 else {
   $ulosputti = ob_get_contents();
-  $ulosputti = str_ireplace(array("<br>","<br/>","</tr>"), "\n", $ulosputti);
+  $ulosputti = str_ireplace(array("<br>", "<br/>", "</tr>"), "\n", $ulosputti);
   $ulosputti = strip_tags($ulosputti);
   ob_end_clean();
 

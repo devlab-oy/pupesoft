@@ -1,6 +1,6 @@
 <?php
 
-require_once("pdflib/phppdflib.class.php");
+require_once "pdflib/phppdflib.class.php";
 
 // tarvitaan $yhtiorow, $asiakasrow, $selite ja $summa
 
@@ -30,7 +30,7 @@ if ($kieli == '') {
 
 // laskun alku ja loppu functiot...
 if (!function_exists('alku')) {
-  function alku () {
+  function alku() {
     global $pdf, $asiakasrow, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $maksuehto, $kutsuja, $kieli;
 
     $firstpage = $pdf->new_page("a4");
@@ -71,15 +71,15 @@ if (!function_exists('alku')) {
     $pdf->draw_text(30,  572, t("Selite", $kieli),      $firstpage, $pieni);
     $pdf->draw_text(470, 572, t("Summa", $kieli),      $firstpage, $pieni);
 
-    return($firstpage);
+    return $firstpage;
   }
 }
 if (!function_exists('rivi')) {
-  function rivi ($firstpage) {
+  function rivi($firstpage) {
     global $firstpage, $pdf, $row, $kala, $sivu, $kala, $lask, $rectparam, $norm, $pieni, $kutsuja, $summa, $arvo, $laskurow, $kieli, $kukarow, $selite;
 
     $pdf->draw_text(30,  $kala, $selite,  $firstpage, $norm);
-    $pdf->draw_text(470, $kala, sprintf('%-1.2f',$summa),   $firstpage, $norm);
+    $pdf->draw_text(470, $kala, sprintf('%-1.2f', $summa),   $firstpage, $norm);
 
     $kala = $kala - 13;
     $lask++;
@@ -87,7 +87,7 @@ if (!function_exists('rivi')) {
 }
 
 if (!function_exists('loppu')) {
-  function loppu ($firstpage) {
+  function loppu($firstpage) {
     global $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $summa, $arvo, $kutsuja, $kieli;
 
     //yhteensärivi
@@ -95,7 +95,7 @@ if (!function_exists('loppu')) {
     $pdf->draw_rectangle(110, 540, 90, 580,  $firstpage, $rectparam);
 
     $pdf->draw_text(404, 92, t("Yhteensä", $kieli).":",  $firstpage, $norm);
-    $pdf->draw_text(464, 92, sprintf('%-1.2f',$summa),  $firstpage, $norm);
+    $pdf->draw_text(464, 92, sprintf('%-1.2f', $summa),  $firstpage, $norm);
     $pdf->draw_text(550, 92, $yhtiorow["valkoodi"],  $firstpage, $norm);
 
     //Alimmat kolme laatikkoa, yhtiötietoja

@@ -1,7 +1,7 @@
 <?php
 
-if(!function_exists("asiakkaan_avainsanattarkista")) {
-  function asiakkaan_avainsanattarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+if (!function_exists("asiakkaan_avainsanattarkista")) {
+  function asiakkaan_avainsanattarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow;
     static $tem_liitostunnus, $tem_kieli, $tem_laji, $tem_avainsana, $tem_avainsana_i, $tem_tarkenne;
 

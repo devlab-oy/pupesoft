@@ -67,7 +67,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') !== FALSE) {
   $toim_save = $toim;
   if ($toim != "YLLAPITOSOPIMUS") $toim = "TILAUSVAHVISTUS";
 
-  require("tulosta_tilausvahvistus_pdf.inc");
+  require "tulosta_tilausvahvistus_pdf.inc";
   $toim = $toim_save;
 }
 
@@ -166,16 +166,16 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
       $ulos = sprintf("%-50.s", $yhtiorow['nimi'])                .t("Tilausvahvistus", $kieli)."\n";
     }
 
-    $ulos .= sprintf("%-50.s",$yhtiorow['osoite'])."\n";
-    $ulos .= sprintf("%-50.s",$yhtiorow['postino']." ".$yhtiorow['postitp'])  .tv1dateconv($laskurow['luontiaika'])."\n";
-    $ulos .= sprintf("%-50.s",$yhtiorow['maa'])."\n";
+    $ulos .= sprintf("%-50.s", $yhtiorow['osoite'])."\n";
+    $ulos .= sprintf("%-50.s", $yhtiorow['postino']." ".$yhtiorow['postitp'])  .tv1dateconv($laskurow['luontiaika'])."\n";
+    $ulos .= sprintf("%-50.s", $yhtiorow['maa'])."\n";
     $ulos .= "\n";
-    $ulos .= sprintf("%-50.s",t("Tilaaja", $kieli).":")              .t("Toimitusosoite", $kieli).":\n";
-    $ulos .= sprintf("%-50.s",$laskurow['nimi'])                .$laskurow['toim_nimi']."\n";
-    $ulos .= sprintf("%-50.s",$laskurow['nimitark'])              .$laskurow['toim_nimitark']."\n";
-    $ulos .= sprintf("%-50.s",$laskurow['osoite'])                .$laskurow['toim_osoite']."\n";
-    $ulos .= sprintf("%-50.s",$laskurow['postino']." ".$laskurow['postitp'])  .$laskurow['toim_postino']." ".$laskurow['toim_postitp']."\n";
-    $ulos .= sprintf("%-50.s",$laskurow['maa'])                  .$laskurow['toim_maa']."\n";
+    $ulos .= sprintf("%-50.s", t("Tilaaja", $kieli).":")              .t("Toimitusosoite", $kieli).":\n";
+    $ulos .= sprintf("%-50.s", $laskurow['nimi'])                .$laskurow['toim_nimi']."\n";
+    $ulos .= sprintf("%-50.s", $laskurow['nimitark'])              .$laskurow['toim_nimitark']."\n";
+    $ulos .= sprintf("%-50.s", $laskurow['osoite'])                .$laskurow['toim_osoite']."\n";
+    $ulos .= sprintf("%-50.s", $laskurow['postino']." ".$laskurow['postitp'])  .$laskurow['toim_postino']." ".$laskurow['toim_postitp']."\n";
+    $ulos .= sprintf("%-50.s", $laskurow['maa'])                  .$laskurow['toim_maa']."\n";
     $ulos .= "\n";
 
     $useita = "EI";
@@ -211,26 +211,26 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
       else $taika = tv1dateconv($laskurow["toimaika"]);
     }
 
-    $ulos .= sprintf("%-50.s",t("Toimitustapa", $kieli).": ".t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli))    .t("Toimitusaika", $kieli).": ".$taika."\n";
-    $ulos .= sprintf("%-50.s",t("Tilausnumero", $kieli).": ". $tulostettava_tunnus)      .t("Tilausviite", $kieli).": ".$laskurow['viesti']."\n";
-    $ulos .= sprintf("%-50.s",t("Tilaaja", $kieli).": ".$laskurow['tilausyhteyshenkilo'])  .t("Tilaajan tilausnumero", $kieli).": ".$laskurow['asiakkaan_tilausnumero']."\n";
-    $ulos .= sprintf("%-50.s",t("Kohde", $kieli).": ".$laskurow['kohde'])          .t("Myyj‰", $kieli).": ".$krow['nimi']."\n";
+    $ulos .= sprintf("%-50.s", t("Toimitustapa", $kieli).": ".t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli))    .t("Toimitusaika", $kieli).": ".$taika."\n";
+    $ulos .= sprintf("%-50.s", t("Tilausnumero", $kieli).": ". $tulostettava_tunnus)      .t("Tilausviite", $kieli).": ".$laskurow['viesti']."\n";
+    $ulos .= sprintf("%-50.s", t("Tilaaja", $kieli).": ".$laskurow['tilausyhteyshenkilo'])  .t("Tilaajan tilausnumero", $kieli).": ".$laskurow['asiakkaan_tilausnumero']."\n";
+    $ulos .= sprintf("%-50.s", t("Kohde", $kieli).": ".$laskurow['kohde'])          .t("Myyj‰", $kieli).": ".$krow['nimi']."\n";
 
     $toimehto = t_avainsana("TOIMEHTO", $kieli, " and concat(selite,' ',selitetark) = '{$laskurow["toimitusehto"]}'", "", "", "selitetark");
     if ($toimehto == "") $toimehto = $laskurow["toimitusehto"];
     else $toimehto = substr($laskurow["toimitusehto"], 0, 3)." ".$toimehto;
 
-    $ulos .= sprintf("%-50.s",t("Toimitusehto", $kieli).": ".$toimehto)."\n";
+    $ulos .= sprintf("%-50.s", t("Toimitusehto", $kieli).": ".$toimehto)."\n";
 
     if (($naytatvale != 3 or $naytatvale != 4) and $laskurow['erikoisale'] > 0) {
-      $ulos .= sprintf("%-50.s",t("Erikoisalennus", $kieli).": ".$laskurow['erikoisale']."%\n");
+      $ulos .= sprintf("%-50.s", t("Erikoisalennus", $kieli).": ".$laskurow['erikoisale']."%\n");
     }
 
     if ($yhtiorow['alv_kasittely'] != '') {
-      $ulos .= sprintf("%-50.s",t("Hinnat ovat verottomia.", $kieli)."\n");
+      $ulos .= sprintf("%-50.s", t("Hinnat ovat verottomia.", $kieli)."\n");
     }
     else {
-      $ulos .= sprintf("%-50.s",t("Hinnat sis‰lt‰v‰t arvonlis‰veron.", $kieli)."\n");
+      $ulos .= sprintf("%-50.s", t("Hinnat sis‰lt‰v‰t arvonlis‰veron.", $kieli)."\n");
     }
 
     if ($laskurow['comments']!='')
@@ -284,29 +284,29 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
         $tvtilausrivirow['nimitys'] = substr($tvtilausrivirow['nimitys'], 0, 29);
       }
 
-      $ulos .= sprintf("%03.0f",$rivino)." ";
-      $ulos .= sprintf("%-30.s",$tvtilausrivirow['nimitys']);
-      $ulos .= sprintf("%-20.s",$tvtilausrivirow['tuoteno']);
-      $ulos .= sprintf("%-13.s",$tvtilausrivirow['eankoodi']);
+      $ulos .= sprintf("%03.0f", $rivino)." ";
+      $ulos .= sprintf("%-30.s", $tvtilausrivirow['nimitys']);
+      $ulos .= sprintf("%-20.s", $tvtilausrivirow['tuoteno']);
+      $ulos .= sprintf("%-13.s", $tvtilausrivirow['eankoodi']);
 
       if ($laskurow["tilaustyyppi"] == 'E') {
-        $ulos .= sprintf("%8.s"  ,$tvtilausrivirow['tilkpl']);
+        $ulos .= sprintf("%8.s"  , $tvtilausrivirow['tilkpl']);
       }
       elseif ($tvtilausrivirow['var']!= 'J') {
-        $ulos .= sprintf("%8.s"  ,$tvtilausrivirow['varattu']);
+        $ulos .= sprintf("%8.s"  , $tvtilausrivirow['varattu']);
       }
       else {
-        $ulos .= sprintf("%8.s"  ,$tvtilausrivirow['jt'])." ".t("J‰lkitoimitukseen", $kieli);
+        $ulos .= sprintf("%8.s"  , $tvtilausrivirow['jt'])." ".t("J‰lkitoimitukseen", $kieli);
       }
 
       if ($naytatvale==3) {
         // menn‰‰n ohi koska ei haluta n‰hd‰ hintoja
       }
       elseif ($naytatvale==2) {
-        $ulos .= sprintf("%".(8+$yhtiorow['hintapyoristys']-2).".s"  ,round(laskuval($tvtilausrivirow['myyntihinta'], $laskurow['vienti_kurssi']),$yhtiorow['hintapyoristys']))." ";
+        $ulos .= sprintf("%".(8+$yhtiorow['hintapyoristys']-2).".s"  , round(laskuval($tvtilausrivirow['myyntihinta'], $laskurow['vienti_kurssi']), $yhtiorow['hintapyoristys']))." ";
       }
       else {
-        $ulos .= sprintf("%".(8+$yhtiorow['hintapyoristys']-2).".s"  ,round(laskuval($tvtilausrivirow['hinta'], $laskurow['vienti_kurssi']),$yhtiorow['hintapyoristys']))." ";
+        $ulos .= sprintf("%".(8+$yhtiorow['hintapyoristys']-2).".s"  , round(laskuval($tvtilausrivirow['hinta'], $laskurow['vienti_kurssi']), $yhtiorow['hintapyoristys']))." ";
       }
 
       // n‰ytet‰‰n valkoodi kaikilla muilla paitsi kolmosella, koska kolmosella ei n‰ytet‰ mit‰‰n hintoja
@@ -318,22 +318,22 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
         // kolmosella ei haluta n‰ytt‰‰ myˆsk‰‰n ale:a
       }
       elseif ($naytatvale==2) {
-        $ulos .= sprintf("%6.s"  ,$tvtilausrivirow['aleryhma']);
+        $ulos .= sprintf("%6.s"  , $tvtilausrivirow['aleryhma']);
       }
       else {
         for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-          $ulos .= sprintf("%5.s"  ,$tvtilausrivirow["ale{$alepostfix}"])."%";
+          $ulos .= sprintf("%5.s"  , $tvtilausrivirow["ale{$alepostfix}"])."%";
         }
       }
 
       $ulos .= "\n";
 
       if ($nimitysloput != "") {
-        $ulos .= "    ".sprintf("%-77.77s",$nimitysloput)."\n";
+        $ulos .= "    ".sprintf("%-77.77s", $nimitysloput)."\n";
       }
 
       if ($tvtilausrivirow['kommentti'] != "") {
-        $ulos .= "     * ".sprintf("%-75.75s",$tvtilausrivirow['kommentti'])."\n";
+        $ulos .= "     * ".sprintf("%-75.75s", $tvtilausrivirow['kommentti'])."\n";
       }
 
       // Tehr‰‰n liitetiedosto
@@ -343,10 +343,10 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
         // ei hintoja kolmosella
       }
       elseif ($naytatvale==2) {
-        $liite .= round(laskuval($tvtilausrivirow['myyntihinta'], $laskurow['vienti_kurssi']),$yhtiorow['hintapyoristys'])."\t";
+        $liite .= round(laskuval($tvtilausrivirow['myyntihinta'], $laskurow['vienti_kurssi']), $yhtiorow['hintapyoristys'])."\t";
       }
       else {
-        $liite .= round(laskuval($tvtilausrivirow['hinta'], $laskurow['vienti_kurssi']),$yhtiorow['hintapyoristys'])."\t";
+        $liite .= round(laskuval($tvtilausrivirow['hinta'], $laskurow['vienti_kurssi']), $yhtiorow['hintapyoristys'])."\t";
       }
 
       if ($naytatvale == 3 or $naytatvale == 4) {

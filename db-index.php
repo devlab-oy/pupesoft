@@ -8,17 +8,15 @@ require "inc/parametrit.inc";
 echo "<table cellpadding='5'><tr><td valign='top' class='back'>";
 
 $query  = "show tables from $dbkanta";
-  $result =  mysql_query($query);
+$result =  mysql_query($query);
 
-while ($row=mysql_fetch_array($result))
-{
+while ($row=mysql_fetch_array($result)) {
   echo "<a href='$PHP_SELF?table=$row[0]'>$row[0]</a><br>";
 }
 
 echo "</td><td class='back' valign='top'>";
 
-if ($table!='')
-{
+if ($table!='') {
   $query  = "show index from $table";
   $fields =  mysql_query($query);
 
@@ -29,8 +27,7 @@ if ($table!='')
 
   $boob = 1;
 
-  while ($row=mysql_fetch_array($fields))
-  {
+  while ($row=mysql_fetch_array($fields)) {
     if ($row['Seq_in_index']==1 and $boob==0) {
       echo "<tr><td class='back' colspan='5'><hr noshade></td></tr>";
     }

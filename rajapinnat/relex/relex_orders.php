@@ -99,7 +99,7 @@ while ($row = mysql_fetch_assoc($res)) {
   }
 
   if ($row['partner'] > 0) {
-     $row['partner'] = $row['maa']."-".$row['partner'];
+    $row['partner'] = $row['maa']."-".$row['partner'];
   }
 
   $rivi  = "{$row['maa']}-{$row['varasto']};";                       // Inventory location code
@@ -133,7 +133,7 @@ if ($paiva_ajo and !empty($relex_ftphost)) {
   $ftppass = $relex_ftppass;
   $ftppath = "/data/input";
   $ftpfile = $filepath;
-  require("inc/ftp-send.inc");
+  require "inc/ftp-send.inc";
 }
 
 echo "Valmis.\n";

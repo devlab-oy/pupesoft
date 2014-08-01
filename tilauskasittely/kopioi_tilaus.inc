@@ -50,7 +50,7 @@ if (!function_exists("kopioi_tilaus")) {
 
     $monistarow = mysql_fetch_array($monistares);
 
-    $fields = mysql_field_name($monistares,0);
+    $fields = mysql_field_name($monistares, 0);
     $values = "'".$monistarow[0]."'";
 
     // monistetaan kaikki paitsi tunnus
@@ -81,7 +81,7 @@ if (!function_exists("kopioi_tilaus")) {
     if (mysql_num_rows($lisatiedotres) > 0) {
       $lisatiedotrow = mysql_fetch_array($lisatiedotres);
 
-      $fields = mysql_field_name($lisatiedotres,0);
+      $fields = mysql_field_name($lisatiedotres, 0);
       $values = "'".$lisatiedotrow[0]."'";
 
       // monistetaan kaikki paitsi tunnus
@@ -103,7 +103,7 @@ if (!function_exists("kopioi_tilaus")) {
 
     while ($rivirow = mysql_fetch_array($rivires)) {
 
-      $rfields = mysql_field_name($rivires,0);
+      $rfields = mysql_field_name($rivires, 0);
       $rvalues = "'$monistarow[0]'";
 
       for ($i = 1; $i < mysql_num_fields($rivires)-1; $i++) {
@@ -147,17 +147,17 @@ if (!function_exists("kopioi_tilaus")) {
 
         $kysely = "  INSERT INTO tilausrivin_lisatiedot SET ";
 
-        for($i=0; $i < mysql_num_fields($monistares2)-1; $i++) { // Ei monisteta tunnusta
-          switch (mysql_field_name($monistares2,$i)) {
+        for ($i=0; $i < mysql_num_fields($monistares2)-1; $i++) { // Ei monisteta tunnusta
+          switch (mysql_field_name($monistares2, $i)) {
 
-            case 'tilausrivitunnus':
-              $kysely .= mysql_field_name($monistares2, $i)."='$insid',";
-            case 'tiliointirivitunnus':
-            case 'tilausrivilinkki':
-              $kysely .= "";
-              break;
-            default:
-              $kysely .= mysql_field_name($monistares2, $i)."='".$monistarow2[$i]."',";
+          case 'tilausrivitunnus':
+            $kysely .= mysql_field_name($monistares2, $i)."='$insid',";
+          case 'tiliointirivitunnus':
+          case 'tilausrivilinkki':
+            $kysely .= "";
+            break;
+          default:
+            $kysely .= mysql_field_name($monistares2, $i)."='".$monistarow2[$i]."',";
           }
         }
 

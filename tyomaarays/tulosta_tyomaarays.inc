@@ -671,7 +671,7 @@ if (!function_exists('tyomaarays_rivi')) {
           $hinta = hintapyoristys($row["hinta"] * (1 + $row["alv"] / 100));
         }
         else{
-          $hinta = hintapyoristys($row["hinta"]); 
+          $hinta = hintapyoristys($row["hinta"]);
         }
 
         $oikpos = $pdf->strlen($hinta, $norm);
@@ -720,7 +720,7 @@ if (!function_exists('tyomaarays_rivi')) {
           $rivihinta = hintapyoristys($row["rivihinta"] * (1 + $row["alv"] / 100));
         }
         else{
-          $rivihinta = hintapyoristys($row["rivihinta"]); 
+          $rivihinta = hintapyoristys($row["rivihinta"]);
         }
         $oikpos = $pdf->strlen($rivihinta, $norm);
         $pdf->draw_text(575-$oikpos, $kala, $rivihinta,       $thispage, $norm);

@@ -624,6 +624,9 @@ if ($tee == 'Z') {
     echo "<td valign='top' align='right'>";
 
     foreach ($ttrow as $tt_rivi) {
+      if ($tt_rivi["osto_era"] == 0) {
+        $tt_rivi["osto_era"] = 1.00;
+      }
       echo "{$tt_rivi["osto_era"]}<br>";
     }
     echo "</td>";

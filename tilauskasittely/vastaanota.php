@@ -329,11 +329,21 @@ if ($tee == 'paikat' and $vainlistaus == '') {
     elseif ($tilausrivirow["ei_saldoa"] == "") {
 
       // Jaahas mit‰s tuotepaikalle pit‰isi tehd‰
-      if (isset($rivivarasto[$tun]) and $rivivarasto[$tun] != 'x' and $rivivarasto[$tun] != '') {  //Varastopaikka vaihdettiin pop-upista, siell‰ on paikan tunnus
+      if (isset($rivivarasto[$tun]) and $rivivarasto[$tun] != 'x' and $rivivarasto[$tun] != '') {
+        // Varastopaikka vaihdettiin pop-upista, siell‰ on paikan tunnus
+        // tehd‰‰n uusi paikka jos valittiin paikaton lapsivarasto
+        if (substr($rivivarasto[$tun],0,1) == 'V') {
+          $uusi_paikka = lisaa_tuotepaikka($tilausrivirow["tuoteno"],'','','','','','',0,0,substr($rivivarasto[$tun],1));
+          $ptunnus = $uusi_paikka['tuotepaikan_tunnus'];
+        }
+        else{
+          $ptunnus = $rivivarasto[$tun];
+        }
+
         $query = "SELECT tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso, inventointilista_aika
                   from tuotepaikat
                   WHERE yhtio = '$kukarow[yhtio]'
-                  and tunnus  = '$rivivarasto[$tun]'
+                  and tunnus  = '$ptunnus'
                   and tuoteno = '$tilausrivirow[tuoteno]'";
       }
       else {
@@ -1344,7 +1354,7 @@ if (!empty($id) and $echotaanko) {
     echo "<input type='hidden' name='varasto' value='$mrow[tunnus]'>";
   }
 
-  if ($toim == "") {
+  if ($toim == "" and tarkista_oikeus('muuvarastopaikka.php', '', 1)) {
     echo "<table>";
     echo "<tr>";
     echo "<th>".t("P‰ivitet‰‰n oletuspaikka")."</th>";
@@ -1531,21 +1541,120 @@ if (!empty($id) and $echotaanko) {
         echo "<td><input type='text' id='t3[$rivirow[tunnus]]' name='t3[$rivirow[tunnus]]' value='$privirow[t3]' maxlength='5' size='5'></td>";
         echo "<td><input type='text' id='t4[$rivirow[tunnus]]' name='t4[$rivirow[tunnus]]' value='$privirow[t4]' maxlength='5' size='5'></td>";
 
-        //Miss‰ tuotetta on?
-        $query  = "SELECT *
-                   FROM tuotepaikat
-                   WHERE yhtio = '$kukarow[yhtio]'
-                   and tuoteno = '$rivirow[tuoteno]'
-                   $lisa
-                   ORDER BY oletus DESC, hyllyalue, hyllynro, hyllyvali, hyllytaso";
+        // katsotaan onko vastaanottavalla varastolla lapsivarastoja
+        $lv_query =  "SELECT *
+                      FROM varastopaikat
+                      WHERE yhtio = '$kukarow[yhtio]'
+                      AND isa_varasto = $varow2[tunnus]";
+        $lv_res = pupe_query($lv_query);
+
+        if (mysql_num_rows($lv_res) > 0) {
+
+          // katsotaan onko tuotepaikallisia lapsivarastoja
+          $tlv_query = "SELECT GROUP_CONCAT(DISTINCT vp.tunnus)
+                      FROM tuotepaikat AS tp
+                      JOIN varastopaikat AS vp ON vp.yhtio = tp.yhtio AND vp.tunnus = tp.varasto
+                      WHERE tp.yhtio = '$kukarow[yhtio]'
+                      AND vp.isa_varasto = $varow2[tunnus]
+                      AND tp.tuoteno = '$rivirow[tuoteno]'
+                      GROUP BY tp.yhtio";
+          $tlv_res = pupe_query($tlv_query);
+
+          if (mysql_num_rows($tlv_res) < 1) {
+
+            $tlvlisa = '';
+
+            $lvlisa = " UNION
+                        SELECT tunnus, 'x','x','x','x', 's3' AS status, nimitys
+                        FROM varastopaikat
+                        WHERE yhtio = '$kukarow[yhtio]'
+                        AND isa_varasto = $varow2[tunnus]";
+          }
+          else {
+
+            $tlv_lista = mysql_result($tlv_res,0);
+
+            $tlvlisa="UNION
+                      SELECT tp.tunnus,
+                      tp.hyllyalue,
+                      tp.hyllynro,
+                      tp.hyllyvali,
+                      tp.hyllytaso,
+                      's2' AS status,
+                      'x' AS nimitys
+                      FROM tuotepaikat AS tp
+                      JOIN varastopaikat AS vp ON vp.yhtio = tp.yhtio AND vp.tunnus = tp.varasto
+                      WHERE tp.yhtio = '$kukarow[yhtio]'
+                      AND vp.isa_varasto = $varow2[tunnus]
+                      AND tp.tuoteno = '$rivirow[tuoteno]'";
+
+            $lvlisa= "UNION
+                      SELECT tunnus, 'x','x','x','x', 's3' AS status, vp.nimitys
+                      FROM varastopaikat AS vp
+                      WHERE vp.yhtio = '$kukarow[yhtio]'
+                      AND vp.isa_varasto = $varow2[tunnus]
+                      AND vp.tunnus NOT IN ($tlv_lista)";
+          }
+        }
+        else{
+          $lvlisa = $tlvlisa = '';
+        }
+
+        $query = "SELECT tunnus, hyllyalue, hyllynro, hyllyvali, hyllytaso, 's1' AS status, 'x' AS nimitys
+                  FROM tuotepaikat
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND tuoteno = '$rivirow[tuoteno]'
+                  $lisa
+                  $lvlisa
+                  $tlvlisa";
         $vares = pupe_query($query);
 
-        if (mysql_num_rows($vares) > 1) {
+        $s1_options = array();
+        $s2_options = array();
+        $s3_options = array();
+
+        while ($varow = mysql_fetch_assoc($vares)) {
+          $status = $varow['status'];
+          ${$status."_options"}[] = $varow;
+        }
+
+        $counts = array(
+          's1' => count($s1_options),
+          's2' => count($s2_options),
+          's3' => count($s3_options)
+        );
+
+        if (array_sum($counts) > 1) {
           echo "<td><select name='rivivarasto[$rivirow[tunnus]]'><option value='x'>Ei muutosta";
 
-          while ($varow = mysql_fetch_assoc($vares)) {
-            $sel='';
-            echo "<option value='$varow[tunnus]' $sel>$varow[hyllyalue] $varow[hyllynro] $varow[hyllyvali] $varow[hyllytaso]</option>";
+          if ($counts['s1'] > 0) {
+            echo "<optgroup label=", t("Kohdevaraston-paikat"), ">";
+            foreach ($s1_options as $tp) {
+              echo "<option value='",$tp['tunnus'],"'>";
+              echo $tp['hyllyalue'],' ',$tp['hyllynro'],' ',$tp['hyllyvali'],' ',$tp['hyllytaso'];
+              echo "</option>";
+            }
+            echo "</optgroup>";
+          }
+
+          if ($counts['s2'] > 0) {
+            echo "<optgroup label=", t("Lapsivarastojen-paikat"), ">";
+            foreach ($s2_options as $tp) {
+              echo "<option value='",$tp['tunnus'],"'>";
+              echo $tp['hyllyalue'],' ',$tp['hyllynro'],' ',$tp['hyllyvali'],' ',$tp['hyllytaso'];
+              echo "</option>";
+            }
+            echo "</optgroup>";
+          }
+
+          if ($counts['s3'] > 0) {
+            echo "<optgroup label=", t("Paikattomat-lapsivarastot"), ">";
+            foreach ($s3_options as $va) {
+              echo "<option value='V",$va['tunnus'],"'>";
+              echo $va['nimitys'];
+              echo "</option>";
+            }
+            echo "</optgroup>";
           }
 
           echo "</select></td>";
@@ -1553,10 +1662,16 @@ if (!empty($id) and $echotaanko) {
         else {
           echo "<input type='hidden' name='rivivarasto[$rivirow[tunnus]]' value=''>";
 
-          if (mysql_num_rows($vares) == 1) {
-            $varow = mysql_fetch_assoc($vares);
-
-            echo "<td>$varow[hyllyalue] $varow[hyllynro] $varow[hyllyvali] $varow[hyllytaso]</td>";
+          if (array_sum($counts) == 1) {
+            arsort($counts);
+            reset($counts);
+            $key = key($counts);
+            echo "<td>";
+            echo ${$key."_options"}[0]['hyllyalue'], ' ';
+            echo ${$key."_options"}[0]['hyllynro'], ' ';
+            echo ${$key."_options"}[0]['hyllyvali'], ' ';
+            echo ${$key."_options"}[0]['hyllytaso'];
+            echo "</td>";
           }
           else {
             echo "<td><font class='error'>".t("Ei varastopaikkaa")."!</font></td>";

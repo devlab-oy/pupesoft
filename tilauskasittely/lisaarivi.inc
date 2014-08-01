@@ -488,11 +488,26 @@ if ($kpl > 0 and $rivityyppi == 'O' and $yhtiorow['ostoera_pyoristys'] == 'K') {
 
   // haetaan tuotteen toimittajan takaata pakkauskoko tai jotain
   // Otetaan $trow laajemmin, tuotteen_toimittaja tiedot ja 2 avainsanaa
-  $query = "SELECT tuote.*, tt.toim_tuoteno, tt.osto_era, tt.pakkauskoko, tt.ostohinta, tt.valuutta, tt.osto_alv, ta1.selite pakkaus2, ta2.selite pakkaus3
+  $query = "SELECT
+            tuote.*,
+            tt.toim_tuoteno,
+            if(tt.osto_era = 0, 1, tt.osto_era) AS osto_era,
+            tt.pakkauskoko,
+            tt.ostohinta,
+            tt.valuutta,
+            tt.osto_alv,
+            ta1.selite pakkaus2,
+            ta2.selite pakkaus3
             FROM tuote
-            JOIN tuotteen_toimittajat as tt on (tt.yhtio = tuote.yhtio and tuote.tuoteno = tt.tuoteno and tt.liitostunnus = '$laskurow[liitostunnus]')
-            LEFT JOIN tuotteen_avainsanat as ta1 on (ta1.yhtio=tuote.yhtio and ta1.tuoteno=tuote.tuoteno and ta1.laji='pakkauskoko2' )
-            LEFT JOIN tuotteen_avainsanat as ta2 on (ta2.yhtio=tuote.yhtio and ta2.tuoteno=tuote.tuoteno and ta2.laji='pakkauskoko3')
+            JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = tuote.yhtio
+              AND tuote.tuoteno = tt.tuoteno
+              AND tt.liitostunnus = '$laskurow[liitostunnus]')
+            LEFT JOIN tuotteen_avainsanat AS ta1 ON (ta1.yhtio = tuote.yhtio
+              AND ta1.tuoteno = tuote.tuoteno
+              AND ta1.laji = 'pakkauskoko2')
+            LEFT JOIN tuotteen_avainsanat AS ta2 ON (ta2.yhtio = tuote.yhtio
+              AND ta2.tuoteno = tuote.tuoteno
+              AND ta2.laji = 'pakkauskoko3')
             WHERE tuote.yhtio='{$kukarow["yhtio"]}'
             AND tuote.tuoteno = '{$trow["tuoteno"]}'";
   $ttresult = pupe_query($query);
@@ -3442,7 +3457,7 @@ if ($_yhteen_varastoon and $_sopivatilaustoimi and !in_array($var, array('S', 'U
   $myy_hyllynro_temp  = $myy_hyllynro[0];
 
   $_normi_tyhja       = (empty($myy_hyllyalue) and empty($myy_hyllynro));
-  $_puute_ei_tyhja    = (!empty($p_hyllyalue) and !empty($p_hyllynro));
+  $_puute_ei_tyhja    = ($p_hyllyalue != "" and $p_hyllynro != "");
   $_puutteesta_hyllyt = ( $_normi_tyhja and $_puute_ei_tyhja);
 
   if ($_puutteesta_hyllyt) {

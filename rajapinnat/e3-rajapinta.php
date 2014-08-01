@@ -399,15 +399,15 @@ function xswp($tanaan, $korvatut) {
             (
               SELECT korv.tuoteno
               FROM korvaavat AS korv
-              WHERE korv.yhtio = tuote.yhtio
-              AND korv.id      = korvaavat.id
+              WHERE korv.yhtio    = tuote.yhtio
+              AND korv.id         = korvaavat.id
               ORDER BY if(korv.jarjestys = 0, 9999, korv.jarjestys), korv.tuoteno
               LIMIT 1
             ) korvaavatuoteno
             FROM tuote
             JOIN korvaavat ON (tuote.yhtio = korvaavat.yhtio AND tuote.tuoteno = korvaavat.tuoteno AND date(korvaavat.luontiaika) = '$tanaan')
-            WHERE tuote.yhtio  = '$yhtiorow[yhtio]' 
-            $tuoterajaukset  
+            WHERE tuote.yhtio     = '$yhtiorow[yhtio]'
+            $tuoterajaukset
             AND tuote.ostoehdotus = ''
             HAVING tuote.tuoteno = korvaavatuoteno";
   $rest = mysql_query($query) or pupe_error($query);

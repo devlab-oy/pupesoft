@@ -62,15 +62,15 @@ $query = "SELECT lasku.laskunro,
           tilausrivi.kate
           FROM tilausrivi
           INNER JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
-            AND tuote.tuoteno = tilausrivi.tuoteno
-            AND tuote.myynninseuranta = '')
+            AND tuote.tuoteno           = tilausrivi.tuoteno
+            AND tuote.myynninseuranta   = '')
           INNER JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio
-            AND lasku.tunnus = tilausrivi.otunnus)
+            AND lasku.tunnus            = tilausrivi.otunnus)
           INNER JOIN asiakas USE INDEX (PRIMARY) ON (asiakas.yhtio = lasku.yhtio
-            AND asiakas.tunnus = lasku.liitostunnus
+            AND asiakas.tunnus          = lasku.liitostunnus
             AND asiakas.myynninseuranta = '')
-          WHERE tilausrivi.yhtio = '{$yhtio}'
-          AND tilausrivi.tyyppi = 'L'
+          WHERE tilausrivi.yhtio        = '{$yhtio}'
+          AND tilausrivi.tyyppi         = 'L'
           AND tilausrivi.laskutettuaika >= '2012-01-01'
           ORDER BY lasku.laskunro,
           tilausrivi.tuoteno";

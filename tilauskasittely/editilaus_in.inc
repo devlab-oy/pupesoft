@@ -602,9 +602,9 @@ while ($tietue = fgets($fd)) {
       // Käytetään Magenton asiakasnumeroa jos sellainen löytyy ennalta määritellyistä kaupoista tulevilla tilauksilla
       // ja on setattu $verkkokauppa_erikoiskasittely:n
       if ($edi_tyyppi == "magento" and $ot_verkkokauppa_asiakasnro != ''
-        and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely) 
+        and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)
         and count($verkkokauppa_erikoiskasittely) > 0) {
-    
+
         $result = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
         if (count($result) > 0) {
           $tieto = $ot_verkkokauppa_asiakasnro;
@@ -1160,12 +1160,12 @@ while ($tietue = fgets($fd)) {
             $editilaus_alatila   = '';
           }
         }
-        
+
         $tilaustyyppilisa = '';
 
         if ($edi_tyyppi == "magento" and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)
           and count($verkkokauppa_erikoiskasittely) > 0) {
-          
+
           list ($nimi, $editilaus_tilaustyyppi, $tilaustyyppilisa) = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
           // Jos löytyy erikoiskäsittely niin näytetään se myös käyttöliittymässä
           if (isset($nimi) and !empty($nimi)) {
@@ -1696,11 +1696,11 @@ while ($tietue = fgets($fd)) {
         }
       }
 
-      // Jos tilaus tulee ennalta määritellyistä kaupoista 
+      // Jos tilaus tulee ennalta määritellyistä kaupoista
       // jotka on setattu $verkkokauppa_erikoiskasittely:n, nollataan hinta
-      if ($edi_tyyppi == "magento" and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely) 
+      if ($edi_tyyppi == "magento" and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)
         and count($verkkokauppa_erikoiskasittely) > 0) {
-    
+
         $result = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
         if (count($result) > 0) {
           $editilaus_hinta = 0;

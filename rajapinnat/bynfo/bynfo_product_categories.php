@@ -51,7 +51,7 @@ $query = "SELECT avainsana.selite,
           if(avainsana.laji = 'try', 'tuoteryhma', 'tuoteosasto') AS laji
           FROM avainsana
           WHERE avainsana.yhtio = '{$yhtio}'
-          AND avainsana.laji IN ('try', 'osasto')";
+          AND avainsana.laji    IN ('try', 'osasto')";
 $res = pupe_query($query);
 
 // Kerrotaan montako riviä käsitellään

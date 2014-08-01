@@ -60,9 +60,9 @@ $query = "SELECT asiakas.tunnus,
           FROM asiakas
           LEFT JOIN kustannuspaikka ON (kustannuspaikka.yhtio = asiakas.yhtio
             AND kustannuspaikka.tunnus = asiakas.kustannuspaikka)
-          WHERE asiakas.yhtio = '{$yhtio}'
-          AND asiakas.laji NOT IN ('P','R')
-          AND asiakas.myynninseuranta = ''
+          WHERE asiakas.yhtio          = '{$yhtio}'
+          AND asiakas.laji             NOT IN ('P','R')
+          AND asiakas.myynninseuranta  = ''
           ORDER BY asiakas.tunnus";
 $res = pupe_query($query);
 

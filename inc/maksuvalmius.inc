@@ -80,7 +80,7 @@ if ($aika != '') {
     else {
       echo "<table><tr><th>".t("Konserniyritykset").":</th></tr>";
 
-      while ($yrow = mysql_fetch_array ($result)) {
+      while ($yrow = mysql_fetch_array($result)) {
         echo "<tr><td>$yrow[nimi]</td></tr>";
       }
 
@@ -89,7 +89,7 @@ if ($aika != '') {
       mysql_data_seek($result, 2);
     }
 
-    while ($yrow = mysql_fetch_array ($result)) {
+    while ($yrow = mysql_fetch_array($result)) {
       //Myyntireskontra
       $query = "SELECT if(kapvm > now(), kapvm,erpcm) olmapvm, sum(summa) summa, count(*)
                 FROM lasku
@@ -97,7 +97,7 @@ if ($aika != '') {
                 GROUP BY 1";
       $yresult = mysql_query($query) or pupe_error($query);
 
-      while ($trow=mysql_fetch_array ($yresult)) {
+      while ($trow=mysql_fetch_array($yresult)) {
         $query = "INSERT into maksu values (
                   '$yrow[yhtio]',
                   '$yrow[konserni]',
@@ -113,7 +113,7 @@ if ($aika != '') {
 
       //Ostoreskontra
       //  Ei listata maksuun lähetettyjä aineistoja, luotetaan että ne on maksettu
-      if($eilahetettyja != "") {
+      if ($eilahetettyja != "") {
         $tilat = "'H', 'M', 'P'";
       }
       else {
@@ -126,7 +126,7 @@ if ($aika != '') {
                     lasku.valkoodi = valuu.nimi and lasku.tila in ($tilat)
                 GROUP BY olmapvm";
       $yresult = mysql_query($query) or pupe_error($query);
-      while ($trow=mysql_fetch_array ($yresult)) {
+      while ($trow=mysql_fetch_array($yresult)) {
         $query = "INSERT into maksu values (
                   '$yrow[yhtio]',
                   '$yrow[konserni]',
@@ -156,7 +156,7 @@ if ($aika != '') {
 
     //echo "Laskuja '". mysql_num_rows($result) . "'<br>";
 
-    while ($trow=mysql_fetch_array ($result)) {
+    while ($trow=mysql_fetch_array($result)) {
       $query = "INSERT into maksu values (
                 '$kukarow[yhtio]',
                  '',
@@ -172,7 +172,7 @@ if ($aika != '') {
 
     //Ostoreskontra
     //  Ei listata maksuun lähetettyjä aineistoja, luotetaan että ne on maksettu
-    if($eilahetettyja != "") {
+    if ($eilahetettyja != "") {
       $tilat = "'H', 'M', 'P'";
     }
     else {
@@ -188,7 +188,7 @@ if ($aika != '') {
               GROUP BY olmapvm";
     $result = mysql_query($query) or pupe_error($query);
     //echo "Laskuja '". mysql_num_rows($result) . "'<br>";
-    while ($trow=mysql_fetch_array ($result)) {
+    while ($trow=mysql_fetch_array($result)) {
       $query = "INSERT into maksu values (
                 '$kukarow[yhtio]',
                  '',
@@ -234,10 +234,10 @@ if ($aika != '') {
   echo "<th>".t("Kumulatiivinen")."</th>";
   echo "</tr>";
 
-  while ($trow=mysql_fetch_array ($result)) {
+  while ($trow=mysql_fetch_array($result)) {
     echo "<tr>";
 
-    if($trow["Aika"] != "") {
+    if ($trow["Aika"] != "") {
       $class = "";
       if ($aika == 'pv') {
         echo "<td>".t("Päivä").": ";
@@ -261,7 +261,7 @@ if ($aika != '') {
     echo "<td style='text-align: right;' class='$class'>$trow[Myyntires]</td>";
 
     if ($aika == 'pv') {
-      if($trow["Aika"] == "") {
+      if ($trow["Aika"] == "") {
         echo "<td style='text-align: right;' class='$class'>$trow[Ostores]</td>";
       }
       else {

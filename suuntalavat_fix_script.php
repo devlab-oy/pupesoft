@@ -28,8 +28,8 @@ if (trim($argv[1]) == '') {
   exit;
 }
 
-require ("inc/connect.inc");
-require ("inc/functions.inc");
+require "inc/connect.inc";
+require "inc/functions.inc";
 
 $kukarow['yhtio'] = (string) $argv[1];
 $kukarow['kuka']  = 'admin';
@@ -45,7 +45,7 @@ while ($suuntalavat_fetch_row = mysql_fetch_assoc($suuntalavat_fetch_res)) {
 
   $arr = strpos($suuntalavat_fetch_row['keikkatunnus'], ",") !== FALSE ? explode(",", $suuntalavat_fetch_row['keikkatunnus']) : array($suuntalavat_fetch_row['keikkatunnus']);
 
-  foreach($arr as $saapuminen) {
+  foreach ($arr as $saapuminen) {
     $query = "INSERT INTO suuntalavat_saapuminen SET
               yhtio      = '{$kukarow['yhtio']}',
               suuntalava = '{$suuntalavat_fetch_row['tunnus']}',

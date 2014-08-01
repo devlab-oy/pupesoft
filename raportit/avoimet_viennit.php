@@ -3,19 +3,19 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Laskuttamattomat vientitilausket")."</font><hr>";
 
 if ($tee == 'NAYTATILAUS') {
 
-    echo "<font class='head'>Tilausnro: $tunnus</font><hr>";
+  echo "<font class='head'>Tilausnro: $tunnus</font><hr>";
 
-    require ("naytatilaus.inc");
+  require "naytatilaus.inc";
 
-    echo "<br><br><br>";
+  echo "<br><br><br>";
 
-    $tee = "";
+  $tee = "";
 
 }
 
@@ -74,4 +74,4 @@ if ($tee == '') {
   echo "</table>";
 }
 
-require ("../inc/footer.inc");
+require "../inc/footer.inc";

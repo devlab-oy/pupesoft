@@ -1,11 +1,11 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 if ($tee == "NAYTA") {
   echo "<font class='head'>Siivoa tilaukset-listaa:</font><hr>";
 
-  require("raportit/naytatilaus.inc");
+  require "raportit/naytatilaus.inc";
   echo "<br><br>";
   echo "<a href='javascript:history.back()'>Takaisin</a><br><br>";
   exit;
@@ -341,4 +341,4 @@ if (mysql_num_rows($res) > 0) {
 echo "</table><br><br>";
 echo "<input type='submit' value='".t("Mitätöi valitut tilaukset")."'></form>";
 
-require("inc/footer.inc");
+require "inc/footer.inc";

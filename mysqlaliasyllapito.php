@@ -1,6 +1,6 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Mysqlalias-avainsanojen ylläpito")."</font><hr>";
 
@@ -227,19 +227,19 @@ if ($taulu != "") {
     if (strlen($trow[$i]) > 35) {
       $size = strlen($trow[$i])+2;
     }
-    elseif (mysql_field_len($result,$i)>10) {
+    elseif (mysql_field_len($result, $i)>10) {
       $size = '35';
     }
-    elseif (mysql_field_len($result,$i)<5) {
+    elseif (mysql_field_len($result, $i)<5) {
       $size = '5';
     }
     else {
       $size = '10';
     }
 
-    $maxsize = mysql_field_len($result,$i); // Jotta tätä voidaan muuttaa
+    $maxsize = mysql_field_len($result, $i); // Jotta tätä voidaan muuttaa
 
-    require ("inc/$taulu"."rivi.inc");
+    require "inc/$taulu"."rivi.inc";
 
     // Näitä kenttiä ei ikinä saa päivittää käyttöliittymästä
     if (mysql_field_name($result, $i) == "laatija" or
@@ -304,9 +304,9 @@ if ($taulu != "") {
       echo "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'></td>";
     }
     elseif ($tyyppi == 1.5) {
-      $vva = substr($trow[$i],0,4);
-      $kka = substr($trow[$i],5,2);
-      $ppa = substr($trow[$i],8,2);
+      $vva = substr($trow[$i], 0, 4);
+      $kka = substr($trow[$i], 5, 2);
+      $ppa = substr($trow[$i], 8, 2);
 
       echo "<td>
           <input type = 'text' name = 'tpp[$i]' value = '$ppa' size='3' maxlength='2'>
@@ -316,13 +316,13 @@ if ($taulu != "") {
     elseif ($tyyppi == 2) {
       echo "<td>$trow[$i]</td>";
     }
-    elseif($tyyppi == 3) {
+    elseif ($tyyppi == 3) {
       echo "<td>$trow[$i]<input type = 'hidden' name = '$nimi' value = '$trow[$i]'></td>";
     }
-    elseif($tyyppi == 4) {
+    elseif ($tyyppi == 4) {
       echo "<input type = 'hidden' name = '$nimi' value = '$trow[$i]'>";
     }
-    elseif($tyyppi == 5) {
+    elseif ($tyyppi == 5) {
       echo "<td><input type = 'file' name = 'liite_$i'></td>";
     }
 
@@ -360,4 +360,4 @@ if ($taulu != "") {
 
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

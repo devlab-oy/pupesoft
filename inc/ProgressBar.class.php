@@ -58,84 +58,88 @@
  * $bar->increase(); //call for third element. end of bar...
  * </code>
  */
+
+
 class ProgressBar {
+
 
   /**
    * Constructor
    *
-   * @param str $message Message shown above the bar eg. "Please wait...". Default: ''
-   * @param bool $hide Hide the bar after completion (with JavaScript).
+   * @param str     $message         Message shown above the bar eg. "Please wait...". Default: ''
+   * @param bool    $hide            Hide the bar after completion (with JavaScript).
    * Default: false
-   * @param int $sleepOnFinish Seconds to sleep after bar completion. Default: 0
-   * @param int $barLength Length in pixels. Default: 200
-   * @param int $precision Desired number of steps to show. Default: 20. Precision will become $numElements when greater than $numElements. $barLength will increase if $precision is greater than $barLength.
-   * @param str $backgroundColor Color of the bar background
-   * @param str $foregroundColor Color of the actual progress-bar
-   * @param str $domID Html-Attribute "id" for the bar
-   * @param str $stepElement Element the bar is build from
+   * @param int     $sleepOnFinish   Seconds to sleep after bar completion. Default: 0
+   * @param int     $barLength       Length in pixels. Default: 200
+   * @param int     $precision       Desired number of steps to show. Default: 20. Precision will become $numElements when greater than $numElements. $barLength will increase if $precision is greater than $barLength.
+   * @param str     $backgroundColor Color of the bar background
+   * @param str     $foregroundColor Color of the actual progress-bar
+   * @param str     $domID           Html-Attribute "id" for the bar
+   * @param str     $stepElement     Element the bar is build from
    */
-    function ProgressBar($message='', $hide=false, $sleepOnFinish=0, $barLength=200, $precision=20,
-               $backgroundColor='#cccccc', $foregroundColor='blue', $domID='progressbar',
-               $stepElement='<div style="width:%spx;height:20px;float:left;"></div>'
-               ){
+  function ProgressBar($message='', $hide=false, $sleepOnFinish=0, $barLength=200, $precision=20,
+    $backgroundColor='#cccccc', $foregroundColor='blue', $domID='progressbar',
+    $stepElement='<div style="width:%spx;height:20px;float:left;"></div>'
+  ) {
 
-      //increase time limit
-    if(!ini_get('safe_mode')){
+    //increase time limit
+    if (!ini_get('safe_mode')) {
       set_time_limit(0);
     }
 
-      $this->hide = (bool) $hide;
-      $this->sleepOnFinish = (int) $sleepOnFinish;
-      $this->domID = strip_tags($domID);
-      $this->message = $message;
-      $this->stepElement = $stepElement;
-      $this->barLength = (int) $barLength;
-      $this->precision = (int) $precision;
-      $this->backgroundColor = strip_tags($backgroundColor);
+    $this->hide = (bool) $hide;
+    $this->sleepOnFinish = (int) $sleepOnFinish;
+    $this->domID = strip_tags($domID);
+    $this->message = $message;
+    $this->stepElement = $stepElement;
+    $this->barLength = (int) $barLength;
+    $this->precision = (int) $precision;
+    $this->backgroundColor = strip_tags($backgroundColor);
     $this->foregroundColor = strip_tags($foregroundColor);
-      if($this->barLength < $this->precision){
-        $this->barLength = $this->precision;
-      }
-
-      $this->StepCount = 0;
-      $this->CallCount = 0;
+    if ($this->barLength < $this->precision) {
+      $this->barLength = $this->precision;
     }
+
+    $this->StepCount = 0;
+    $this->CallCount = 0;
+  }
+
 
   /**
    * Print the empty progress bar
-   * @param int $numElements Number of Elements to be processed and number of times $bar->initialize() will be called while processing
+   *
+   * @param int     $numElements Number of Elements to be processed and number of times $bar->initialize() will be called while processing
    */
-  function initialize($numElements)
-  {
+  function initialize($numElements) {
     $numElements = (int) $numElements ;
-      if($numElements == 0){
-        $numElements = 1;
-      }
+    if ($numElements == 0) {
+      $numElements = 1;
+    }
     //calculate the number of calls for one step
-      $this->CallsPerStep = ceil(($numElements/$this->precision)); // eg. 1000/200 = 100
+    $this->CallsPerStep = ceil(($numElements/$this->precision)); // eg. 1000/200 = 100
 
     //calculate the total number of steps
-    if($numElements >= $this->CallsPerStep){
+    if ($numElements >= $this->CallsPerStep) {
       $this->numSteps = round($numElements/$this->CallsPerStep);
-    }else{
+    }else {
       $this->numSteps = round($numElements);
     }
 
-      //calculate the length of one step
-      $stepLength = floor($this->barLength/$this->numSteps);  // eg. 100/10 = 10
+    //calculate the length of one step
+    $stepLength = floor($this->barLength/$this->numSteps);  // eg. 100/10 = 10
 
-      //the rest is the first step
-      $this->rest = $this->barLength-($stepLength*$this->numSteps);
-      if($this->rest > 0){
-      $this->firstStep = sprintf($this->stepElement,$this->rest);
-      }
+    //the rest is the first step
+    $this->rest = $this->barLength-($stepLength*$this->numSteps);
+    if ($this->rest > 0) {
+      $this->firstStep = sprintf($this->stepElement, $this->rest);
+    }
 
     //build the basic step-element
-    $this->oneStep = sprintf($this->stepElement,$stepLength);
+    $this->oneStep = sprintf($this->stepElement, $stepLength);
 
     //build bar background
     $backgroundLength = $this->rest+($stepLength*$this->numSteps);
-    $this->backgroundBar = sprintf($this->stepElement,$backgroundLength);
+    $this->backgroundBar = sprintf($this->stepElement, $backgroundLength);
 
     // Set parametres
     $this->started = false;
@@ -143,36 +147,36 @@ class ProgressBar {
     $this->firstStep = "";
 
     //stop buffering
-      ob_end_flush();
-      //start buffering
-      ob_start();
+    ob_end_flush();
+    //start buffering
+    ob_start();
 
     echo '<div id="'.$this->domID.'">'.
-       $this->message.'<br/>'.
-       '<div style="margin-bottom:20px;position:absolute;color:'.$this->backgroundColor.';background-color:'.$this->backgroundColor.'">'.$this->backgroundBar.'</div>' .
-       '<div style="position:absolute;color:'.$this->foregroundColor.';background-color:'.$this->foregroundColor.'">';
+      $this->message.'<br/>'.
+      '<div style="margin-bottom:20px;position:absolute;color:'.$this->backgroundColor.';background-color:'.$this->backgroundColor.'">'.$this->backgroundBar.'</div>' .
+      '<div style="position:absolute;color:'.$this->foregroundColor.';background-color:'.$this->foregroundColor.'">';
 
     ob_flush();
     flush();
   }
 
+
   /**
    * Count steps and increase bar length
    *
    */
-  function increase()
-  {
+  function increase() {
     $this->CallCount++;
 
-    if(!$this->started){
+    if (!$this->started) {
       //rest output
       echo $this->firstStep;
       ob_flush();
       flush();
     }
 
-    if($this->StepCount < $this->numSteps
-    &&(!$this->started || $this->CallCount == $this->CallsPerStep)){
+    if ($this->StepCount < $this->numSteps
+      &&(!$this->started || $this->CallCount == $this->CallsPerStep)) {
 
       //add a step
       echo $this->oneStep;
@@ -184,7 +188,7 @@ class ProgressBar {
     }
     $this->started = true;
 
-    if(!$this->finished && $this->StepCount == $this->numSteps){
+    if (!$this->finished && $this->StepCount == $this->numSteps) {
 
       // close the bar
       echo '</div></div><br />';
@@ -192,12 +196,12 @@ class ProgressBar {
       flush();
 
       //sleep x seconds before ending the script
-      if($this->sleepOnFinish > 0){
+      if ($this->sleepOnFinish > 0) {
         sleep($this->sleepOnFinish);
       }
 
       //hide the bar
-      if($this->hide){
+      if ($this->hide) {
         echo '<script type="text/javascript">document.getElementById("'.$this->domID.'").style.display = "none";</script>';
         ob_flush();
         flush();

@@ -4,10 +4,10 @@
 $useslave = 1;
 
 if (file_exists("inc/connect.inc")) {
-  require ("inc/connect.inc");
+  require "inc/connect.inc";
 }
 else {
-  require ("connect.inc");
+  require "connect.inc";
 }
 
 $id = (int) $_GET["id"];

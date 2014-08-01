@@ -6,7 +6,7 @@ require "inc/parametrit.inc";
 echo "<font class='head'>".t('TIKON-siirron peruutus')."</font><hr>";
 
 if (isset($kausi)) {
-  if(!isset($ok)) {
+  if (!isset($ok)) {
     echo "<font class='message'>".t("Peruutettavat tositteet")."</font><br><br>";
     echo "<table>";
 
@@ -21,7 +21,7 @@ if (isset($kausi)) {
     $result = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($result) == 1) {
-      $row = mysql_fetch_array ($result);
+      $row = mysql_fetch_array($result);
       echo "<tr><th>".t("Myyntisaamisia")."</th><td>$row[pienin]</td><td>-</td><td>$row[suurin]</td></tr>";
     }
 
@@ -35,7 +35,7 @@ if (isset($kausi)) {
     $result = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($result) == 1) {
-      $row = mysql_fetch_array ($result);
+      $row = mysql_fetch_array($result);
       echo "<tr><th>".t("Ostovelkoja")."</th><td>$row[pienin]</td><td>-</td><td>$row[suurin]</td></tr>";
     }
 
@@ -49,7 +49,7 @@ if (isset($kausi)) {
     $result = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($result) == 1) {
-      $row = mysql_fetch_array ($result);
+      $row = mysql_fetch_array($result);
       echo "<tr><th>".t("Tiliotteiden tiliöinnit")."</th><td>$row[pienin]</td><td>-</td><td>$row[suurin]</td></tr>";
     }
 
@@ -87,7 +87,7 @@ if (!isset($kausi)) {
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) == 1) {
-    $row11 = mysql_fetch_array ($result);
+    $row11 = mysql_fetch_array($result);
   }
 
   //Ostovelat
@@ -102,7 +102,7 @@ if (!isset($kausi)) {
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) == 1) {
-    $row30=mysql_fetch_array ($result);
+    $row30=mysql_fetch_array($result);
   }
 
   //Tiliotteet
@@ -117,7 +117,7 @@ if (!isset($kausi)) {
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) == 1) {
-    $row41=mysql_fetch_array ($result);
+    $row41=mysql_fetch_array($result);
   }
 
   $suurin = '0000-00';

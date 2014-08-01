@@ -1,11 +1,11 @@
 <?php
 
-# Otetaan sisään:
-# $magento_api_met = Toimitustapa
-# $magento_api_rak = Rahtikirjanro
-# $magento_api_ord = Asiakkaan_tilausnumero
-# $magento_api_noutokuittaus = Noutokuittaus, ilmoitetaan asiakkaalle tilaus noudettavissa
-# $magento_api_toimituskuittaus_viestit (array) = Viesti joka liitetään noutotilauksiin (optional)
+// Otetaan sisään:
+// $magento_api_met = Toimitustapa
+// $magento_api_rak = Rahtikirjanro
+// $magento_api_ord = Asiakkaan_tilausnumero
+// $magento_api_noutokuittaus = Noutokuittaus, ilmoitetaan asiakkaalle tilaus noudettavissa
+// $magento_api_toimituskuittaus_viestit (array) = Viesti joka liitetään noutotilauksiin (optional)
 
 if (!function_exists("log_message")) {
   function log_message($message) {
@@ -54,7 +54,7 @@ log_message($message);
 // Create new shipment
 try {
 
-  if (stripos($magento_api_rak,"JJFI") !== false) {
+  if (stripos($magento_api_rak, "JJFI") !== false) {
     $magLinkurl = "Tracking number: ";
 
     preg_match_all("/JJFI ?[0-9]{6} ?[0-9]{11}/", $magento_api_rak, $match);

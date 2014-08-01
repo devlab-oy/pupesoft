@@ -23,8 +23,8 @@ if ($php_cli) {
   ini_set("display_errors", 0);
 
   // otetaan tietokanta connect
-  require ("inc/connect.inc");
-  require ("inc/functions.inc");
+  require "inc/connect.inc";
+  require "inc/functions.inc";
 
   // Haetaan yhtiörow ja kukarow
   $yhtiorow = hae_yhtion_parametrit($argv[1]);
@@ -33,17 +33,17 @@ if ($php_cli) {
   $aja = 'run';
 }
 else {
-  require ("inc/parametrit.inc");
+  require "inc/parametrit.inc";
 
-  echo "<font class='head'>",t("Iltasiivo"),"</font><hr>";
+  echo "<font class='head'>", t("Iltasiivo"), "</font><hr>";
 
   echo "<br><form method='post'>";
   echo "<input type='hidden' name='aja' value='run'>";
-  echo "<input type='submit' value='",t("Aja iltasiivo"),"'>";
+  echo "<input type='submit' value='", t("Aja iltasiivo"), "'>";
   echo "</form>";
 
   if ($aja != "run") {
-    require('inc/footer.inc');
+    require 'inc/footer.inc';
     exit;
   }
 
@@ -60,7 +60,7 @@ function is_log($str) {
   return $str;
 }
 
-# Ei query debuggia, vie turhaa muistia.
+// Ei query debuggia, vie turhaa muistia.
 unset($pupe_query_debug);
 
 $iltasiivo = is_log("Iltasiivo $yhtiorow[nimi]");
@@ -308,7 +308,7 @@ while ($pos_chk_row = mysql_fetch_assoc($pos_chk_result)) {
     $laskures = pupe_query($query);
     $laskurow = mysql_fetch_assoc($laskures);
 
-    require('tilauskasittely/tilaus-valmis.inc');
+    require 'tilauskasittely/tilaus-valmis.inc';
 
     $laskuri++;
   }
@@ -592,7 +592,7 @@ $laskuri = 0;
 
 while ($row = mysql_fetch_assoc($result)) {
   $query = "DELETE FROM korvaavat WHERE tunnus='$row[tunnus]'";
-  if($delete_result = pupe_query($query)) {
+  if ($delete_result = pupe_query($query)) {
     $laskuri++;
   }
 }
@@ -673,7 +673,7 @@ while ($iltatuotepaikatrow = mysql_fetch_assoc($iltatuotepaikatresult)) {
   $halyraja2 = array();
   $tilausmaara2 = array();
   $kutsuja = "vastaanota.php";
-  require("muuvarastopaikka.php");
+  require "muuvarastopaikka.php";
   $myyntitili++;
 }
 
@@ -681,8 +681,8 @@ if ($myyntitili > 0) {
   $iltasiivo .= is_log("Poistettiin $myyntitili tyhjää myyntitilin varastopaikkaa.");
 }
 
-# Poistetaan tuotepaikat joiden saldo on 0 ja ne on määritelty reservipaikoiksi
-# Ei poisteta kuitenkaan jos se on oletuspaikka
+// Poistetaan tuotepaikat joiden saldo on 0 ja ne on määritelty reservipaikoiksi
+// Ei poisteta kuitenkaan jos se on oletuspaikka
 if ($yhtiorow['kerayserat'] == 'K') {
   $poistettu = 0;
 
@@ -701,9 +701,9 @@ if ($yhtiorow['kerayserat'] == 'K') {
             AND tuotepaikat.inventointilista_aika='0000-00-00 00:00:00'";
   $tuotepaikat = pupe_query($query);
 
-  # Poistetaan löydetyt rivit ja tehdään tapahtuma
+  // Poistetaan löydetyt rivit ja tehdään tapahtuma
   while ($tuotepaikkarow = mysql_fetch_assoc($tuotepaikat)) {
-    # Merkataan paikka poistettavaksi
+    // Merkataan paikka poistettavaksi
     $query = "UPDATE tuotepaikat
               SET poistettava = 'D'
               WHERE yhtio = '{$kukarow['yhtio']}'
@@ -718,8 +718,8 @@ if ($yhtiorow['kerayserat'] == 'K') {
   }
 }
 
-# Poistetaan tuotepaikat jotka ovat varaston ensimmäisellä paikalla (esim. A-0-0-0) ja joilla
-# ei ole saldoa. Koska nämä ovat yleensä generoituja paikkoja. (ei poisteta oletuspaikkaa)
+// Poistetaan tuotepaikat jotka ovat varaston ensimmäisellä paikalla (esim. A-0-0-0) ja joilla
+// ei ole saldoa. Koska nämä ovat yleensä generoituja paikkoja. (ei poisteta oletuspaikkaa)
 if ($yhtiorow['kerayserat'] == 'K') {
   $poistettu = 0;
 
@@ -738,7 +738,7 @@ if ($yhtiorow['kerayserat'] == 'K') {
   $result = pupe_query($query);
 
   while ($poistettava_tuotepaikka = mysql_fetch_assoc($result)) {
-    # Merkataan paikka poistettavaksi
+    // Merkataan paikka poistettavaksi
     $query = "UPDATE tuotepaikat
               SET poistettava = 'D'
               WHERE yhtio = '{$kukarow['yhtio']}'
@@ -757,7 +757,9 @@ if ($yhtiorow['kerayserat'] == 'K') {
  * Poistetaan poistettavaksi merkatut tuotepaikat joilla ei ole saldoa
  * tuotepaikat.poistettava = 'D' ja tuotepaikat.saldo=0
  * Ei poisteta oletuspaikkaa
-*/
+ */
+
+
 $query = "SELECT tunnus,
           tuoteno,
           hyllyalue,
@@ -837,7 +839,7 @@ if ($poistettu > 0) {
 
 /**
  * Synkataan uusimmat mysqlaliakset
-*/
+ */
 require "synkronoi_mysqlaliakset.php";
 
 $iltasiivo .= is_log("Iltasiivo $yhtiorow[nimi]. Done!");
@@ -856,5 +858,5 @@ if ($iltasiivo != "" and isset($iltasiivo_email) and $iltasiivo_email == 1) {
 if (!$php_cli) {
   echo $iltasiivo;
   echo "</pre>";
-  require('inc/footer.inc');
+  require 'inc/footer.inc';
 }

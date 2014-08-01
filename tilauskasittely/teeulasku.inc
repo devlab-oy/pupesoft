@@ -185,8 +185,8 @@ if ($mehtorow['kateinen'] != '' or (float) $summa == 0) {
 }
 
 ///* Lasketaan Kassa-alennus *///
-$kassaale         = round($summa*$mehtorow['kassa_alepros']/100,2);
-$kassaale_valuutassa   = round($summa_valuutassa*$mehtorow['kassa_alepros']/100,2);
+$kassaale         = round($summa*$mehtorow['kassa_alepros']/100, 2);
+$kassaale_valuutassa   = round($summa_valuutassa*$mehtorow['kassa_alepros']/100, 2);
 
 $lisa_comments   = "";
 $lisa_viestit  = "";
@@ -329,83 +329,83 @@ for ($teeulasku_i=1; $teeulasku_i < mysql_num_fields($laskusplitres)-1; $teeulas
   $fields .= ", ".$fieldname;
 
   switch ($fieldname) {
-    case 'arvo':
-      $values .= ", '$arvo'";
-      break;
-    case 'arvo_valuutassa':
-      $values .= ", '$arvo_valuutassa'";
-      break;
-    case 'pyoristys':
-      $values .= ", '$pyoristys'";
-      break;
-    case 'pyoristys_valuutassa':
-      $values .= ", '$pyoristys_valuutassa'";
-      break;
-    case 'vienti_kurssi':
-      $values .= ", '$vienti_kurssi'";
-      break;
-    case 'asiakkaan_tilausnumero':
-      $values .= ", '$asiakkaan_tilausnumero'";
-      break;
-    case 'bruttopaino':
-      $values .= ", '$bruttopaino'";
-      break;
-    case 'comments':
-      $values .= ", '$comments'";
-      break;
-    case 'kasumma':
-      $values .= ", '$kassaale'";
-      break;
-    case 'kasumma_valuutassa':
-      $values .= ", '$kassaale_valuutassa'";
-      break;
-    case 'kate':
-      $values .= ", '$kate'";
-      break;
-    case 'kate_korjattu':
-      $values .= ", NULL";
-      break;
-    case 'kohde':
-      $values .= ", '$kohde'";
-      break;
-    case 'laskutettu':
-      $values .= ", now()";
-      break;
-    case 'laskuttaja':
-      $values .= ", '$kukarow[kuka]'";
-      break;
-    case 'maksaja':
-      $values .= ", '$maksaja'";
-      break;
-    case 'mapvm':
-      $values .= ", $maksupaiva";
-      break;
-    case 'summa':
-      $values .= ", '$summa'";
-      break;
-    case 'summa_valuutassa':
-      $values .= ", '$summa_valuutassa'";
-      break;
-    case 'tilausyhteyshenkilo':
-      $values .= ", '$tilausyhteyshenkilo'";
-      break;
-    case 'viesti':
-      $values .= ", '$viestit'";
-      break;
-    case 'sisviesti1':
-      $values .= ", '$sisviestit1'";
-      break;
-    case 'sisviesti2':
-      $values .= ", '$sisviestit2'";
-      break;
-    case 'alatila':
-      $values .= ", ''";
-      break;
-    case 'tila':
-      $values .= ", 'U'";
-      break;
-    default:
-      $values .= ", '".$lasrow[$fieldname]."'";
+  case 'arvo':
+    $values .= ", '$arvo'";
+    break;
+  case 'arvo_valuutassa':
+    $values .= ", '$arvo_valuutassa'";
+    break;
+  case 'pyoristys':
+    $values .= ", '$pyoristys'";
+    break;
+  case 'pyoristys_valuutassa':
+    $values .= ", '$pyoristys_valuutassa'";
+    break;
+  case 'vienti_kurssi':
+    $values .= ", '$vienti_kurssi'";
+    break;
+  case 'asiakkaan_tilausnumero':
+    $values .= ", '$asiakkaan_tilausnumero'";
+    break;
+  case 'bruttopaino':
+    $values .= ", '$bruttopaino'";
+    break;
+  case 'comments':
+    $values .= ", '$comments'";
+    break;
+  case 'kasumma':
+    $values .= ", '$kassaale'";
+    break;
+  case 'kasumma_valuutassa':
+    $values .= ", '$kassaale_valuutassa'";
+    break;
+  case 'kate':
+    $values .= ", '$kate'";
+    break;
+  case 'kate_korjattu':
+    $values .= ", NULL";
+    break;
+  case 'kohde':
+    $values .= ", '$kohde'";
+    break;
+  case 'laskutettu':
+    $values .= ", now()";
+    break;
+  case 'laskuttaja':
+    $values .= ", '$kukarow[kuka]'";
+    break;
+  case 'maksaja':
+    $values .= ", '$maksaja'";
+    break;
+  case 'mapvm':
+    $values .= ", $maksupaiva";
+    break;
+  case 'summa':
+    $values .= ", '$summa'";
+    break;
+  case 'summa_valuutassa':
+    $values .= ", '$summa_valuutassa'";
+    break;
+  case 'tilausyhteyshenkilo':
+    $values .= ", '$tilausyhteyshenkilo'";
+    break;
+  case 'viesti':
+    $values .= ", '$viestit'";
+    break;
+  case 'sisviesti1':
+    $values .= ", '$sisviestit1'";
+    break;
+  case 'sisviesti2':
+    $values .= ", '$sisviestit2'";
+    break;
+  case 'alatila':
+    $values .= ", ''";
+    break;
+  case 'tila':
+    $values .= ", 'U'";
+    break;
+  default:
+    $values .= ", '".$lasrow[$fieldname]."'";
   }
 }
 
@@ -604,7 +604,7 @@ if (count($montakotilausta) > 1 and $laskutyyppi != 1) {
 
     // jos meillä on eri toimitusosoite kun laskutusosoite, kirjotetaan toimitusosoitteen asiakasnimi yhteensäriville kommenttiin...
     if ((strtoupper($sumsrow["nimi"]) != strtoupper($sumsrow["toim_nimi"]) or
-       strtoupper($sumsrow["osoite"]) != strtoupper($sumsrow["toim_osoite"])) and $sumsrow["toim_nimi"] != "") {
+        strtoupper($sumsrow["osoite"]) != strtoupper($sumsrow["toim_osoite"])) and $sumsrow["toim_nimi"] != "") {
       $sumskommentti = "$sumsrow[toim_nimi] $sumsrow[toim_osoite] ".t("yhteensä", $kielirow["kieli"]).": $sumsrow[summa] $sumsrow[valkoodi].";
     }
     else {
@@ -626,7 +626,7 @@ $lasku = $laskurow;
 // haetaan asiakkaan tiedot (esim konserniyhtiö)
 $konsrow = $asiakas_apu_row;
 
-require('teelaskuntiliointi.inc');
+require 'teelaskuntiliointi.inc';
 
 //echotaan rudulle jos kyseessä ei ole batch-ajo
 if ($tulos_ulos == "" and $silent == "") {

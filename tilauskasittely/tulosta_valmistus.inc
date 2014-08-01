@@ -1,10 +1,10 @@
 <?php
 
-if (@include_once('PEAR.php')) {
-  require_once("viivakoodi/Barcode.php");
+if (@include_once 'PEAR.php') {
+  require_once "viivakoodi/Barcode.php";
 }
 
-require_once("pdflib/phppdflib.class.php");
+require_once "pdflib/phppdflib.class.php";
 
 $norm["height"]     = 10;
 $norm["font"]       = "Times-Roman";
@@ -58,7 +58,7 @@ if (!function_exists('alku_valm')) {
 
       $pdf->draw_text(410, 815, $laskurow["hyvaksynnanmuutos"],   $thispage, $iso);
 
-      $pdf->draw_text(310,815, t("Valmistuslista", $kieli),     $thispage, $iso);
+      $pdf->draw_text(310, 815, t("Valmistuslista", $kieli),     $thispage, $iso);
 
       $pdf->draw_text(310, 803, t("Sivu", $kieli),         $thispage, $norm);
 
@@ -183,11 +183,11 @@ if (!function_exists('alku_valm')) {
       }
 
       if (trim($laskurow['comments']) != '') {
-        $komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 90, "\n###");
+        $komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n", "\n###", $laskurow['comments']), 90, "\n###");
       }
 
       if (trim($laskurow['sisviesti2']) != '') {
-        $komm .= "\n".t("Kommentti", $kieli)." 2:###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti2']), 90, "\n###");
+        $komm .= "\n".t("Kommentti", $kieli)." 2:###".wordwrap(str_replace("\n", "\n###", $laskurow['sisviesti2']), 90, "\n###");
       }
 
       //Tulostetaan laskun kommentti
@@ -197,8 +197,8 @@ if (!function_exists('alku_valm')) {
         $pohja  = 577;
         $maxoik = 0;
 
-        foreach($kommentit as $kommentti) {
-          if(strpos($kommentti, "###") !== FALSE) {
+        foreach ($kommentit as $kommentti) {
+          if (strpos($kommentti, "###") !== FALSE) {
             list($o, $v) = explode("###", $kommentti);
 
             $oikpos = $pdf->strlen($o, $boldi);
@@ -209,7 +209,7 @@ if (!function_exists('alku_valm')) {
           }
         }
 
-        foreach($kommentit as $kommentti) {
+        foreach ($kommentit as $kommentti) {
 
           if (strpos($kommentti, "###") !== false) {
             list($o, $v) = explode("###", $kommentti);
@@ -231,7 +231,7 @@ if (!function_exists('alku_valm')) {
 
       if (class_exists("Image_Barcode")) {
         //viivakoodi
-        $nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
+        $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
 
         imagejpeg(Image_Barcode::draw($laskurow["tunnus"], 'Code39', 'jpg', false, 1, 20), $nimi, 90);
 
@@ -247,7 +247,7 @@ if (!function_exists('alku_valm')) {
 
       rivi_otsikot_valm($thispage);
 
-      return($thispage);
+      return $thispage;
     }
   }
 }
@@ -282,7 +282,7 @@ if (!function_exists('uusi_sivu_valm')) {
 
     $pdf->draw_text(410, 815, $laskurow["hyvaksynnanmuutos"],       $thispage, $iso);
 
-    $pdf->draw_text(310,815, t("Valmistuslista", $kieli),         $thispage, $iso);
+    $pdf->draw_text(310, 815, t("Valmistuslista", $kieli),         $thispage, $iso);
 
     $pdf->draw_text(310, 803, t("Sivu", $kieli),             $thispage, $norm);
 
@@ -333,11 +333,11 @@ if (!function_exists('uusi_sivu_valm')) {
     }
 
     if (trim($laskurow['comments']) != '') {
-      $komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 90, "\n###");
+      $komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n", "\n###", $laskurow['comments']), 90, "\n###");
     }
 
     if (trim($laskurow['sisviesti2']) != '') {
-      $komm .= "\n".t("Kommentti", $kieli)." 2:###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti2']), 90, "\n###");
+      $komm .= "\n".t("Kommentti", $kieli)." 2:###".wordwrap(str_replace("\n", "\n###", $laskurow['sisviesti2']), 90, "\n###");
     }
 
     //Tulostetaan laskun kommentti
@@ -348,7 +348,7 @@ if (!function_exists('uusi_sivu_valm')) {
       $maxoik = 0;
 
       foreach ($kommentit as $kommentti) {
-        if(strpos($kommentti, "###") !== FALSE) {
+        if (strpos($kommentti, "###") !== FALSE) {
           list($o, $v) = explode("###", $kommentti);
 
           $oikpos = $pdf->strlen($o, $boldi);
@@ -382,7 +382,7 @@ if (!function_exists('uusi_sivu_valm')) {
 
     if (class_exists("Image_Barcode")) {
       //viivakoodi
-      $nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
+      $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
 
       imagejpeg(Image_Barcode::draw($laskurow["tunnus"], 'Code39', 'jpg', false, 1, 20), $nimi, 90);
 
@@ -400,7 +400,7 @@ if (!function_exists('uusi_sivu_valm')) {
 
     rivi_otsikot_valm($thispage);
 
-    return($thispage);
+    return $thispage;
   }
 }
 
@@ -578,7 +578,7 @@ if (!function_exists('rivi_valmistus')) {
         $lapskpl = $row["tilkpl"];
       }
       else {
-        $lapskpl = round($row["tilkpl"]/$isakpl,8);
+        $lapskpl = round($row["tilkpl"]/$isakpl, 8);
       }
     }
 
@@ -638,7 +638,7 @@ if (!function_exists('rivi_valmistus')) {
           $faktarow["fakta"] = t("Tuotantolinja", $kieli).": ".$tuotantolinja."\n".$faktarow["fakta"];
         }
 
-        foreach(explode("\n", wordwrap($faktarow["fakta"], 90, "\n")) as $kommentti) {
+        foreach (explode("\n", wordwrap($faktarow["fakta"], 90, "\n")) as $kommentti) {
           $pdf->draw_text(125,  $kala, $kommentti, $thispage, $p);
           $kala = $kala - $rivinkorkeus;
           $lask_valm++;
@@ -690,25 +690,25 @@ if (!function_exists('loppu_valm')) {
       if ($ytunpit > 0) {
         $uytunnus = $yhtiorow["ytunnus"];
         while ($ytunpit > 0) {
-            $uytunnus = "0".$uytunnus; $ytunpit--;
+          $uytunnus = "0".$uytunnus; $ytunpit--;
         }
       }
       else {
         $uytunnus = $yhtiorow["ytunnus"];
       }
 
-      $uytunnus = substr($uytunnus,0,7)."-".substr($uytunnus,7,1);
+      $uytunnus = substr($uytunnus, 0, 7)."-".substr($uytunnus, 7, 1);
     }
     else {
       $uytunnus = $yhtiorow["ytunnus"];
     }
 
-        if ($laskurow['yhtio_ovttunnus'] != $yhtiorow['ovttunnus'] and $laskurow['yhtio_ovttunnus'] != '') {
-            $uytunnus = $laskurow['yhtio_ovttunnus'];
-        }
+    if ($laskurow['yhtio_ovttunnus'] != $yhtiorow['ovttunnus'] and $laskurow['yhtio_ovttunnus'] != '') {
+      $uytunnus = $laskurow['yhtio_ovttunnus'];
+    }
     else {
-        $uytunnus = $yhtiorow["maa"]."-".$uytunnus;
-        }
+      $uytunnus = $yhtiorow["maa"]."-".$uytunnus;
+    }
 
     $pdf->draw_text(404, 55, t("Y-tunnus", $kieli).":",      $thispage, $pieni);
     $pdf->draw_text(444, 55, $uytunnus,              $thispage, $pieni);
@@ -763,10 +763,10 @@ if (!function_exists('print_pdf_valm')) {
       echo t("Valmistuslista tulostuu")."...<br>";
 
       if ($kukarow["extranet"] == '') {
-        require("../inc/sahkoposti.inc");
+        require "../inc/sahkoposti.inc";
       }
       else {
-        require("sahkoposti.inc");
+        require "sahkoposti.inc";
       }
     }
     elseif ($tee == 'NAYTATILAUS') {

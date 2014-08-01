@@ -23,8 +23,8 @@ if (trim($argv[3]) == '') {
 ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__));
 
 // otetaan tietokanta connect ja funktiot
-require("inc/connect.inc");
-require("inc/functions.inc");
+require "inc/connect.inc";
+require "inc/functions.inc";
 
 // Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
 pupesoft_flock();
@@ -105,7 +105,7 @@ if ($handle = opendir($path)) {
 
             $varattuupdate = "";
 
-            # Verkkokaupassa etukäteen maksettu tuote!
+            // Verkkokaupassa etukäteen maksettu tuote!
             if ($laskurow["mapvm"] != '' and $laskurow["mapvm"] != '0000-00-00') {
               $a = (int) ($tilausrivi_row['tilkpl'] * 10000);
               $b = (int) ($keratty * 10000);

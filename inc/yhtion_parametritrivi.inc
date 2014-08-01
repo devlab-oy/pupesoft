@@ -1524,7 +1524,7 @@ if ($fieldname == "lahetteen_jarjestys" or
   $ulos .= "<option value = '9' $sel[9]>".t("Tilausjärjestys");
   $ulos .= "<option value = 'M' $sel[M]>".t("Käyttäjän asettama järjestys");
 
-  if(  $fieldname == "valmistus_kerayslistan_jarjestys" or
+  if (  $fieldname == "valmistus_kerayslistan_jarjestys" or
     $fieldname == "kerayslistan_jarjestys") {
     $ulos .= "<option value = 'S' $sel[S]>".t("Rivit summattuina");
   }
@@ -1621,7 +1621,7 @@ if ($fieldname == "lahete_allekirjoitus") {
   $jatko = 0;
 }
 
-if($fieldname == "lomakkeiden_allekirjoitus") {
+if ($fieldname == "lomakkeiden_allekirjoitus") {
   $sela = $selb = "";
 
   if ($trow[$i] == 'X') {
@@ -2523,7 +2523,7 @@ if ($fieldname == "tilausvahvistus_tallenna") {
   $jatko = 0;
 }
 
-if ($fieldname == "laskutuslisa" OR
+if ($fieldname == "laskutuslisa" or
   $fieldname == "kuljetusvakuutus") {
 
   if ($trow[$i] == 0) {

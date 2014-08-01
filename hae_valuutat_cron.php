@@ -5,8 +5,8 @@ if (php_sapi_name() != 'cli') {
   die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 }
 
-require ("inc/connect.inc");
-require ("inc/functions.inc");
+require "inc/connect.inc";
+require "inc/functions.inc";
 
 $xml = @simplexml_load_file("http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml");
 
@@ -20,14 +20,14 @@ if ($xml !== FALSE) {
     $valkoodi = (string) $valuutta->attributes()->currency;
     $kurssi   = (float)  $valuutta->attributes()->rate;
 
-      $query = "UPDATE valuu, yhtio SET
-                valuu.kurssi                 = round(1 / $kurssi, 9),
-                valuu.muutospvm              = now(),
-                valuu.muuttaja               = 'crond'
-                WHERE valuu.nimi             = '$valkoodi'
-                AND valuu.automaattipaivitys = ''
-                AND yhtio.yhtio              = valuu.yhtio
-                AND yhtio.valkoodi           = 'EUR'";
+    $query = "UPDATE valuu, yhtio SET
+              valuu.kurssi                 = round(1 / $kurssi, 9),
+              valuu.muutospvm              = now(),
+              valuu.muuttaja               = 'crond'
+              WHERE valuu.nimi             = '$valkoodi'
+              AND valuu.automaattipaivitys = ''
+              AND yhtio.yhtio              = valuu.yhtio
+              AND yhtio.valkoodi           = 'EUR'";
     $result = mysql_query($query) or pupe_error($query);
 
     $query = "INSERT INTO valuu_historia (kotivaluutta, valuutta, kurssi, kurssipvm)

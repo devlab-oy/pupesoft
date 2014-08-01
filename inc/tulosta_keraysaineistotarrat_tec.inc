@@ -30,24 +30,24 @@ $query = "SELECT ytunnus, asiakkaan_tilausnumero tiltunnus, tilkpl, sisviesti2 a
 $tarrares = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($tarrares) > 0) {
-  while($tarrarow = mysql_fetch_array($tarrares)) {
+  while ($tarrarow = mysql_fetch_array($tarrares)) {
 
     $toim_nimi    = $tarrarow['toim_nimi'];
-    $tiltunnus    = ltrim($tarrarow['tiltunnus'],'0');
+    $tiltunnus    = ltrim($tarrarow['tiltunnus'], '0');
     $tilkpl      = $tarrarow['tilkpl'];
     $laadittu    = $tarrarow['laadittu'];
     $eankoodi    = $tarrarow['eankoodi'];
     $suunnistus    = $tarrarow['suunnistus'] . ' ' . $tarrarow['merkkitieto'];
     $xtunnus    = $tarrarow['xtunnus'];
 
-    list($tuoteno,$nimitys) = explode("#",$tarrarow['tuoteno']);
-    list($asnro,$asnimi) = explode("#",$tarrarow['astunnus']);
+    list($tuoteno, $nimitys) = explode("#", $tarrarow['tuoteno']);
+    list($asnro, $asnimi) = explode("#", $tarrarow['astunnus']);
 
-    $asnimi = substr($asnimi,0,25);
+    $asnimi = substr($asnimi, 0, 25);
 
     for ($kerroin = 1; $kerroin < $tilkpl+1; $kerroin++) {
 
-      $tukpl = "1/  ".round($kerroin,0);
+      $tukpl = "1/  ".round($kerroin, 0);
 
       //tässä tehdään aineisto jota TEC tulostin tajuaa
       $sivu = "
@@ -83,8 +83,8 @@ if (mysql_num_rows($tarrares) > 0) {
   ".chr(12);
 
       //konvertoidaan ääkköset printterin ymmärtämään muotoon
-      $from = array ('ä','å','ö','Ä','Å','Ö');
-      $to   = array (chr(132),chr(134),chr(148),chr(142),chr(143),chr(153)); // DOS charset
+      $from = array ('ä', 'å', 'ö', 'Ä', 'Å', 'Ö');
+      $to   = array (chr(132), chr(134), chr(148), chr(142), chr(143), chr(153)); // DOS charset
       $sivu = str_replace($from, $to, $sivu);                      // Tehdään käännös
 
       $sivu = escapeshellarg($sivu);

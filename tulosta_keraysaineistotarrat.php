@@ -3,17 +3,17 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Tulosta ker‰yser‰tarroja")."</font><hr>";
 
 if ($tee == 'uudet') {
   $komento = $kirjoitin;
-  require('inc/tulosta_keraysaineistotarrat_tec.inc');
+  require 'inc/tulosta_keraysaineistotarrat_tec.inc';
 }
 elseif ($tee == 'vanhat') {
   $komento = $kirjoitinvan;
-  require('inc/tulosta_keraysaineistotarrat_tec.inc');
+  require 'inc/tulosta_keraysaineistotarrat_tec.inc';
 }
 
 if ($tee == '') {
@@ -125,4 +125,4 @@ if ($tee == '') {
   }
 }
 
-require("inc/footer.inc");
+require "inc/footer.inc";

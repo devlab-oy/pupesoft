@@ -1,6 +1,6 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t('Matkalasku / kulukorvaus')."</font><hr>";
 
@@ -117,7 +117,7 @@ if ($tee == "UUSI") {
   if ($ytunnus != '' or isset($EI_ASIAKASTA_X)) {
 
     if ($ytunnus != '') {
-      require ("inc/asiakashaku.inc");
+      require "inc/asiakashaku.inc";
       unset($EI_ASIAKASTA_X);
     }
     else {
@@ -269,7 +269,7 @@ if ($tee == "POISTA" and !$muokkauslukko) {
   $tee    = "D";
   $kutsuja = "MATKALASKU";
 
-    require ("hyvak.php");
+  require "hyvak.php";
 
   $query = "DELETE
             FROM tilausrivi
@@ -349,7 +349,7 @@ if ($tee == "TUO_KALENTERISTA" and !$muokkauslukko) {
 
       if (mysql_num_rows($tres) > 0) {
         $trow = mysql_fetch_assoc($tres);
-        $errori = lisaa_paivaraha($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino,$trow["tuoteno"], $row["pvmalku"], $row["pvmloppu"], "Asiakas: $row[asiakas]\nTapahtuma: $row[tapa]", "", "", "");
+        $errori = lisaa_paivaraha($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $trow["tuoteno"], $row["pvmalku"], $row["pvmloppu"], "Asiakas: $row[asiakas]\nTapahtuma: $row[tapa]", "", "", "");
 
         if ($errori == "") {
           $query = "UPDATE kalenteri SET
@@ -409,38 +409,38 @@ if ($tee == "TALLENNA" and !$muokkauslukko) {
       else {
         //  chekataan erroit
         switch ($_FILES['userfile']['error']) {
-          case 1:
-          case 2:
-            $errormsg .= t("Kuva on liian suuri, suurin sallittu koko on")." ".ini_get('post_max_size');
-            break;
-          case 3:
-            $errormsg .= t("Kuvan lataus keskeytyi")."!";
-            break;
-          case 6:
-          case 7:
-          case 8:
-            $errormsg .= t("Tallennus ep‰onnistui")."!";
-            break;
-          case 0:
-            //  OK tallennetaan
+        case 1:
+        case 2:
+          $errormsg .= t("Kuva on liian suuri, suurin sallittu koko on")." ".ini_get('post_max_size');
+          break;
+        case 3:
+          $errormsg .= t("Kuvan lataus keskeytyi")."!";
+          break;
+        case 6:
+        case 7:
+        case 8:
+          $errormsg .= t("Tallennus ep‰onnistui")."!";
+          break;
+        case 0:
+          //  OK tallennetaan
 
-            // otetaan file extensio
-            $path_parts = pathinfo($_FILES['userfile']['name']);
-            $ext = $path_parts['extension'];
-            if (strtoupper($ext) == "JPEG") $ext = "jpg";
+          // otetaan file extensio
+          $path_parts = pathinfo($_FILES['userfile']['name']);
+          $ext = $path_parts['extension'];
+          if (strtoupper($ext) == "JPEG") $ext = "jpg";
 
-            $query = "SHOW variables like 'max_allowed_packet'";
-            $result = pupe_query($query);
-            $varirow = mysql_fetch_row($result);
+          $query = "SHOW variables like 'max_allowed_packet'";
+          $result = pupe_query($query);
+          $varirow = mysql_fetch_row($result);
 
-            if ($_FILES['userfile']['size'] > $varirow[1]) {
-              $errormsg .= "<font class='error'>".t("Liitetiedosto on liian suuri")."! ($varirow[1]) </font>";
-            }
-            else {
-              // lis‰t‰‰n kuva
-              $kuva = tallenna_liite("userfile", "lasku", $tilausnumero, $kuvaselite, "", 0, 0, "");
-            }
-            break;
+          if ($_FILES['userfile']['size'] > $varirow[1]) {
+            $errormsg .= "<font class='error'>".t("Liitetiedosto on liian suuri")."! ($varirow[1]) </font>";
+          }
+          else {
+            // lis‰t‰‰n kuva
+            $kuva = tallenna_liite("userfile", "lasku", $tilausnumero, $kuvaselite, "", 0, 0, "");
+          }
+          break;
         }
       }
     }
@@ -961,7 +961,7 @@ if ($tee == "MUOKKAA") {
           $a = array($tyyppi);
         }
         else {
-          $a = array("A","B");
+          $a = array("A", "B");
         }
       }
 
@@ -1320,7 +1320,7 @@ if ($tee == "MUOKKAA") {
 
     echo "<td class='back'><input type='submit' name='lisaa' value='".t("Lis‰‰")."'></td></tr>";
     echo "<tr><th colspan='$cols'>".t("Kommentti")."</th></tr>";
-    echo "<tr><td colspan='$cols'><textarea name='kommentti' rows='4' cols='80'>".str_replace("<br>","\n",$kommentti)."</textarea></td>";
+    echo "<tr><td colspan='$cols'><textarea name='kommentti' rows='4' cols='80'>".str_replace("<br>", "\n", $kommentti)."</textarea></td>";
 
     if ($toim == "SUPER") {
       echo "<tr>";
@@ -1347,7 +1347,7 @@ if ($tee == "MUOKKAA") {
       $rivisumma = mysql_fetch_assoc($result);
 
       if ((float) $rivisumma["summa"] + ((float) $hinta * (float) $kpl) !=  (float) $laskurow["summa"]) {
-        echo "<tr><td class='back' align='right' colspan='3'>".("K‰sittelem‰tt‰")."</td><td class='back' align='right' colspan='2'><font clasS='error'>".number_format(( (float) $laskurow["summa"] - ((float) $rivisumma["summa"] + ((float) $hinta * (float) $kpl))),2, ', ', ' ')."</font></td></tr>";
+        echo "<tr><td class='back' align='right' colspan='3'>".("K‰sittelem‰tt‰")."</td><td class='back' align='right' colspan='2'><font clasS='error'>".number_format(( (float) $laskurow["summa"] - ((float) $rivisumma["summa"] + ((float) $hinta * (float) $kpl))), 2, ', ', ' ')."</font></td></tr>";
       }
     }
 
@@ -1386,7 +1386,7 @@ if ($tee == "MUOKKAA") {
     echo "<th>".t("Kulu")."</th>";
     echo "<th>".t("Kustannuspaikka")."</th>";
     echo "<th>".t("Kpl")."</th>";
-     echo "<th>".t("Hinta")."</th>";
+    echo "<th>".t("Hinta")."</th>";
     echo "<th>".t("Alv")."</th>";
     echo "<th>".t("Yhteens‰")."</th>";
     echo "<th>".t("Pvm")."</th>";
@@ -1414,7 +1414,7 @@ if ($tee == "MUOKKAA") {
         $tilausrivien_lkm  = (int) $tilausrivien_lkm1[0];
       }
 
-      if (!isset($aikajana['ensimmainen_aika']))  {
+      if (!isset($aikajana['ensimmainen_aika'])) {
         $aikajana['ensimmainen_aika'] = tv1dateconv($row['kerattyaika'], "P");
       }
 
@@ -1524,7 +1524,7 @@ if ($tee == "") {
         echo "<option value = '$krow[kayttaja]' $valittu>$krow[kayttajanimi]</option>";
       }
 
-       echo "</select>";
+      echo "</select>";
     }
   }
   else {
@@ -1571,7 +1571,7 @@ if ($tee == "") {
         echo "<option value = '$krow[kayttaja]' $valittu>$krow[kayttajanimi]</option>";
       }
 
-       echo "</select>";
+      echo "</select>";
     }
   }
   else {
@@ -1722,7 +1722,7 @@ if ($tee == "") {
         echo "<option value = '$krow[kayttaja]' $valittu>$krow[kayttajanimi]</option>";
       }
 
-       echo "</select>";
+      echo "</select>";
     }
 
     echo "</td>";
@@ -1754,7 +1754,7 @@ if ($tee == "") {
       $alatila = $row["alatila"];
 
       //tehd‰‰n selv‰kielinen tila/alatila
-      require ("inc/laskutyyppi.inc");
+      require "inc/laskutyyppi.inc";
 
       echo "<form action='matkalasku.php' method='post' autocomplete='off'>";
       echo "<input type='hidden' name='tee' value='MUOKKAA'>";
@@ -1946,7 +1946,7 @@ function echo_nappulat($laskurow, $tee, $lopetus, $toim, $tilausnumero, $perhe, 
   }
 }
 
-function echo_kommentit ($row, $toim, $kukarow, $aikajana) {
+function echo_kommentit($row, $toim, $kukarow, $aikajana) {
   if ($row["tuotetyyppi"] == "A") {
     echo "<tr class='aktiivi'>";
     echo '<td></td>';
@@ -2444,7 +2444,7 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
   }
 
   //  poistetan return carriage ja newline -> <br>
-  $kommentti = str_replace("\n","<br>", str_replace("\r","", $kommentti));
+  $kommentti = str_replace("\n", "<br>", str_replace("\r", "", $kommentti));
 
   if ($kommentti != "") {
     $selite_array[0] .= "<br><i>$kommentti</i>";
@@ -2539,25 +2539,25 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
           if ($tyyppi == "A") {
             $ilmaiset_lounaat = tarkista_loytyyko_paivalle_matkalasku($_alkuaika, $_loppuaika, $tilausnumero);
 
-             if ($trow["vienti"] == 'FI') {
-                   if ($var == 1 and $ilmaiset_lounaat >= 2) {
+            if ($trow["vienti"] == 'FI') {
+              if ($var == 1 and $ilmaiset_lounaat >= 2) {
                 $var    = 3;
-                     $hinta    = $hinta / 2;
-                     $nimitys = $nimitys.' '.t("Puolitettu korvaus");
+                $hinta    = $hinta / 2;
+                $nimitys = $nimitys.' '.t("Puolitettu korvaus");
               }
               elseif ($var == 2 and $ilmaiset_lounaat >= 1) {
-                     $var    = 4;
-                     $hinta    = $hinta / 2;
-                     $nimitys = $nimitys.' '.t("Puolitettu korvaus");
-                   }
-             }
-             else {
-                   if ($ilmaiset_lounaat >= 2) {
-                     $var    = 6;
-                     $hinta    = $hinta / 2;
-                     $nimitys = $nimitys.' '.t("Puolitettu korvaus");
-                   }
-             }
+                $var    = 4;
+                $hinta    = $hinta / 2;
+                $nimitys = $nimitys.' '.t("Puolitettu korvaus");
+              }
+            }
+            else {
+              if ($ilmaiset_lounaat >= 2) {
+                $var    = 6;
+                $hinta    = $hinta / 2;
+                $nimitys = $nimitys.' '.t("Puolitettu korvaus");
+              }
+            }
           }
 
           $rivihinta = round($ins_kpl*$hinta, 2);
@@ -2903,14 +2903,14 @@ function erittele_rivit($tilausnumero) {
     $xmlstr = file_get_contents($file);
 
     if ($xmlstr === FALSE) {
-      echo ("Tiedosto $file luku ep‰onnistui!\n");
-      return ("Tiedosto $file luku ep‰onnistui!");
+      echo "Tiedosto $file luku ep‰onnistui!\n";
+      return "Tiedosto $file luku ep‰onnistui!";
     }
 
     // luetaan sis‰‰n xml
     $xml = simplexml_load_string($xmlstr);
 
-    require("inc/verkkolasku-in-pupevoice.inc");
+    require "inc/verkkolasku-in-pupevoice.inc";
 
     if (count($tuotetiedot) > 0) {
       for ($i=0; $i < count($tuotetiedot); $i++) {
@@ -3058,4 +3058,4 @@ function listdir($start_dir = '.') {
   return $files;
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

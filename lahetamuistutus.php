@@ -6,7 +6,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "lahetamuistutus.php")  !== FALSE) {
   //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
   $useslave = 1;
 
-  require ("inc/parametrit.inc");
+  require "inc/parametrit.inc";
 
   echo "<font class='head'>".t("Muistuta k‰ytt‰ji‰ hyv‰ksynn‰ss‰ olevista ostolaskuista")."</font><hr>";
 }
@@ -63,5 +63,5 @@ if (strpos($_SERVER['SCRIPT_NAME'], "lahetamuistutus.php")  !== FALSE) {
       </form>";
 
 
-  require ("inc/footer.inc");
+  require "inc/footer.inc";
 }

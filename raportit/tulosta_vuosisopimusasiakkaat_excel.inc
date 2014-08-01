@@ -125,7 +125,7 @@ class vuosisopimus_asiakkaat_excel {
     if ($tyyppi == 'tuoteryhma') {
       $this->write_solu(t('Tuoteryhma:', $this->kieli));
     }
-    else{
+    else {
       $this->write_solu(t('Osasto:', $this->kieli));
     }
 

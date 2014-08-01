@@ -8,8 +8,8 @@ ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__)
 error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
 ini_set("display_errors", 0);
 
-require_once ('inc/connect.inc');
-require_once ('inc/functions.inc');
+require_once 'inc/connect.inc';
+require_once 'inc/functions.inc';
 
 /*
  * HOW TO:
@@ -71,7 +71,7 @@ function kasittele_tilaukset($tilaukset) {
 
     ob_start();
 
-    require ("raportit/saatanat.php");
+    require "raportit/saatanat.php";
 
     ob_end_clean();
 
@@ -142,7 +142,7 @@ function aseta_tilaus_kesken_tilaan($laskurow) {
       //tilaus-valmis.inc hoitaa meille järkevän lähdön kun tilauksen tila ja alatila on oikein
       $kukarow['kesken'] = $laskurow['tunnus'];
 
-      require("tilauskasittely/tilaus-valmis.inc");
+      require "tilauskasittely/tilaus-valmis.inc";
     }
   }
 }

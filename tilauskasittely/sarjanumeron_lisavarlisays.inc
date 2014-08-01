@@ -1,7 +1,7 @@
 <?php
 
 if (!function_exists('lisavarlisays')) {
-  function lisavarlisays ($sarjatun, $lisatty_tun) {
+  function lisavarlisays($sarjatun, $lisatty_tun) {
     global $kukarow, $yhtiorow;
 
     $query   = "SELECT *
@@ -179,10 +179,10 @@ if (!function_exists('lisavarlisays')) {
                 $kukarow["kesken"] = "";
               }
               elseif (file_exists("../tilauskasittely/lisaarivi.inc")) {
-                require ("../tilauskasittely/lisaarivi.inc");
+                require "../tilauskasittely/lisaarivi.inc";
               }
               else {
-                require ("lisaarivi.inc");
+                require "lisaarivi.inc";
               }
 
               echo "<font class='message'>Lisättiin $kpl kpl tuotetta $tuoteno.</font><br>";

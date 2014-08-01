@@ -1,6 +1,6 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Tehtaan saldot")."</font><hr>";
 
@@ -28,7 +28,7 @@ if ($tee == "tallenna" or $tee == "lataavanha") {
     }
   }
   else {
-    echo "<font class='error'>",t("Et ole valinnut raporttia"),"!</font><br/>";
+    echo "<font class='error'>", t("Et ole valinnut raporttia"), "!</font><br/>";
     $tee = '';
     $error++;
   }
@@ -41,7 +41,7 @@ if ($tee == 'uusiraportti') {
     $tee = '';
   }
   else {
-    echo "<font class='error'>",t("Tallennettavan raportin nimi ei saa olla tyhj‰"),"!</font><br/>";
+    echo "<font class='error'>", t("Tallennettavan raportin nimi ei saa olla tyhj‰"), "!</font><br/>";
     $tee = '';
     $error++;
   }
@@ -50,47 +50,47 @@ if ($tee == 'uusiraportti') {
 if ($tee == 'GO' and $error == 0) {
 
   if (trim($tuotteen_toimittaja) == '') {
-    echo "<font class='error'>",t("Et valinnut toimittajaa"),"!</font><br/>";
+    echo "<font class='error'>", t("Et valinnut toimittajaa"), "!</font><br/>";
     $tee = '';
     $error++;
   }
 
   if (trim($tuotenumeron_sarake) == '') {
-    echo "<font class='error'>",t("Et sy‰tt‰nyt tuotenumeron sarakenumeroa"),"!</font><br/>";
+    echo "<font class='error'>", t("Et sy‰tt‰nyt tuotenumeron sarakenumeroa"), "!</font><br/>";
     $tee = '';
     $error++;
   }
   elseif (!is_numeric($tuotenumeron_sarake)) {
-    echo "<font class='error'>",t("Tuotenumeron sarakenumero t‰ytyy olla numeerinen"),"!</font><br/>";
+    echo "<font class='error'>", t("Tuotenumeron sarakenumero t‰ytyy olla numeerinen"), "!</font><br/>";
     $tee = '';
     $error++;
   }
 
   if (trim($tehtaan_saldon_sarake) == '') {
-    echo "<font class='error'>",t("Et sy‰tt‰nyt tehtaan saldon sarakenumeroa"),"!</font><br/>";
+    echo "<font class='error'>", t("Et sy‰tt‰nyt tehtaan saldon sarakenumeroa"), "!</font><br/>";
     $tee = '';
     $error++;
   }
   elseif (!is_numeric($tehtaan_saldon_sarake)) {
-    echo "<font class='error'>",t("Tehtaan saldon sarakenumero t‰ytyy olla numeerinen"),"!</font><br/>";
+    echo "<font class='error'>", t("Tehtaan saldon sarakenumero t‰ytyy olla numeerinen"), "!</font><br/>";
     $tee = '';
     $error++;
   }
 
   if ($tuotenumeron_sarake == $tehtaan_saldon_sarake) {
-    echo "<font class='error'>",t("Tuotenumeron sarakenumero ja tehtaan saldon sarakenumero eiv‰t saa olla samat"),"!</font><br/>";
+    echo "<font class='error'>", t("Tuotenumeron sarakenumero ja tehtaan saldon sarakenumero eiv‰t saa olla samat"), "!</font><br/>";
     $tee = '';
     $error++;
   }
 
   if ($tuotenumeron_sarake == 0 or $tehtaan_saldon_sarake == 0) {
-    echo "<font class='error'>",t("Tuotenumeron sarakenumero tai tehtaan saldon sarakenumero eiv‰t saa olla nollaa"),"!</font><br/>";
+    echo "<font class='error'>", t("Tuotenumeron sarakenumero tai tehtaan saldon sarakenumero eiv‰t saa olla nollaa"), "!</font><br/>";
     $tee = '';
     $error++;
   }
 
   if (!isset($_FILES['userfile']['error']) or $_FILES['userfile']['error'] == 4) {
-    echo "<font class='error'>",t("Et valinnut tiedostoa"),"!</font><br/>";
+    echo "<font class='error'>", t("Et valinnut tiedostoa"), "!</font><br/>";
     $tee = '';
     $error++;
   }
@@ -99,13 +99,13 @@ if ($tee == 'GO' and $error == 0) {
     $path_parts = pathinfo($_FILES['userfile']['name']);
 
     if (strtolower($path_parts['extension']) != 'xls' and strtolower($path_parts['extension']) != 'txt' and strtolower($path_parts['extension']) != 'csv') {
-      echo "<font class='error'>",t("Virheellinen tiedostop‰‰te"),"!</font><br/>";
+      echo "<font class='error'>", t("Virheellinen tiedostop‰‰te"), "!</font><br/>";
       $tee = '';
       $error++;
     }
 
     if (is_uploaded_file($_FILES['userfile']['tmp_name']) == TRUE) {
-      $file = tarkasta_liite("userfile", array("XLS","TXT","CSV"));
+      $file = tarkasta_liite("userfile", array("XLS", "TXT", "CSV"));
     }
     else {
       $error++;
@@ -120,7 +120,7 @@ if ($tee == 'GO' and $error == 0) {
     $teh_sarake = (int) $tehtaan_saldon_sarake - 1;
 
     if (strtolower($path_parts['extension']) == 'xls') {
-      require_once ('excel_reader/reader.php');
+      require_once 'excel_reader/reader.php';
 
       // ExcelFile
       $data = new Spreadsheet_Excel_Reader();
@@ -136,7 +136,7 @@ if ($tee == 'GO' and $error == 0) {
       for ($excei = 0; $excei < $data->sheets[0]['numRows']; $excei++) {
 
         if (!isset($data->sheets[0]['cells'][$excei][$tuo_sarake]) or !isset($data->sheets[0]['cells'][$excei][$teh_sarake])) {
-          echo "<font class='error'>",t("Virheellinen sarakenumero"),"!</font><br/>";
+          echo "<font class='error'>", t("Virheellinen sarakenumero"), "!</font><br/>";
           $error++;
           unset($tuote);
           break;
@@ -153,7 +153,7 @@ if ($tee == 'GO' and $error == 0) {
       }
     }
     else {
-      if ($file = fopen($_FILES['userfile']['tmp_name'],"r")) {
+      if ($file = fopen($_FILES['userfile']['tmp_name'], "r")) {
         while ($rivi = fgets($file)) {
 
           // luetaan rivi tiedostosta..
@@ -176,7 +176,7 @@ if ($tee == 'GO' and $error == 0) {
         fclose($file);
       }
       else {
-        echo "<font class='error'>",t("Tiedoston avaus ep‰onnistui"),"!</font><br/>";
+        echo "<font class='error'>", t("Tiedoston avaus ep‰onnistui"), "!</font><br/>";
         $tee = '';
         $error++;
       }
@@ -186,7 +186,7 @@ if ($tee == 'GO' and $error == 0) {
       $tee = 'OK';
     }
     else {
-      echo "<font class='error'>",t("Tiedostosta ei luettu yht‰‰n tuotetta"),"!</font><br/>";
+      echo "<font class='error'>", t("Tiedostosta ei luettu yht‰‰n tuotetta"), "!</font><br/>";
       $tee = '';
       $error++;
     }
@@ -216,7 +216,7 @@ if ($tee == 'GO' and $error == 0) {
         $update_saldo_result = pupe_query($query);
       }
 
-      echo "<font class='message'>",t("P‰ivitettiin")," ",count($tuote)," ",t("tuotteen tehdas saldot"),".</font><br/>";
+      echo "<font class='message'>", t("P‰ivitettiin"), " ", count($tuote), " ", t("tuotteen tehdas saldot"), ".</font><br/>";
 
       $tee = '';
     }
@@ -229,7 +229,7 @@ if ($tee == '') {
   echo "<form method='post' autocomplete='off' enctype='multipart/form-data'>";
   echo "<input type='hidden' name='tee' id='tee' value='GO'>";
 
-  echo "<tr><th colspan='2'>",t("Toimittajan valinnat"),"</th></tr>";
+  echo "<tr><th colspan='2'>", t("Toimittajan valinnat"), "</th></tr>";
 
   $query = "SELECT DISTINCT toimi.tunnus, toimi.nimi, toimi.nimitark
             FROM toimi
@@ -238,8 +238,8 @@ if ($tee == '') {
             AND toimi.ytunnus != 'FI'";
   $tuotteen_toimittajat_result = pupe_query($query);
 
-  echo "<tr><td>",t("Tuotteen toimittaja"),"</td>";
-  echo "<td><select name='tuotteen_toimittaja'><option value=''>",t("Valitse toimittaja"),"</option>";
+  echo "<tr><td>", t("Tuotteen toimittaja"), "</td>";
+  echo "<td><select name='tuotteen_toimittaja'><option value=''>", t("Valitse toimittaja"), "</option>";
 
   while ($tuotteen_toimittajat_row = mysql_fetch_assoc($tuotteen_toimittajat_result)) {
 
@@ -250,16 +250,16 @@ if ($tee == '') {
 
   echo "</td></tr>";
 
-  echo "<tr><td>",t("Toiminto"),"</td>";
+  echo "<tr><td>", t("Toiminto"), "</td>";
   echo "<td><select name='toiminto'>";
-  echo "<option value='paivita'>",t("P‰ivitet‰‰n tiedostossa olevat tehtaan saldot, ei poisteta muita tehtaan saldoja"),"</option>";
-  echo "<option value='paivita_ja_poista'>",t("P‰ivitet‰‰n tiedostossa olevat tehtaan saldot, poistetaan muut tehtaan saldot"),"</option>";
+  echo "<option value='paivita'>", t("P‰ivitet‰‰n tiedostossa olevat tehtaan saldot, ei poisteta muita tehtaan saldoja"), "</option>";
+  echo "<option value='paivita_ja_poista'>", t("P‰ivitet‰‰n tiedostossa olevat tehtaan saldot, poistetaan muut tehtaan saldot"), "</option>";
   echo "</select></td></tr>";
 
   echo "<tr><td class='back'>&nbsp;</td></tr>";
-  echo "<tr><th colspan='2'>",t("Tuotteen valinnat"),"</th></tr>";
+  echo "<tr><th colspan='2'>", t("Tuotteen valinnat"), "</th></tr>";
 
-  echo "<tr><td>",t("Luettu tuotenumero Pupesoftissa"),"</td>";
+  echo "<tr><td>", t("Luettu tuotenumero Pupesoftissa"), "</td>";
   echo "<td><select name='tuotenumeron_sijainti_pupessa'>";
 
   $sel1 = $sel2 = '';
@@ -271,15 +271,15 @@ if ($tee == '') {
     $sel1 = ' SELECTED';
   }
 
-  echo "<option value='tuoteno'$sel1>",t("Tuotteen tuotenumero"),"</option>";
-  echo "<option value='toim_tuoteno'$sel2>",t("Toimittajan tuotenumero"),"</option>";
+  echo "<option value='tuoteno'$sel1>", t("Tuotteen tuotenumero"), "</option>";
+  echo "<option value='toim_tuoteno'$sel2>", t("Toimittajan tuotenumero"), "</option>";
   echo "</select></td></tr>";
 
-  echo "<tr><td>",t("Tuotenumeron sarakenumero"),"</td><td><input type='text' name='tuotenumeron_sarake' value='$tuotenumeron_sarake'></td></tr>";
-  echo "<tr><td>",t("Tehtaan saldon sarakenumero"),"</td><td><input type='text' name='tehtaan_saldon_sarake' value='$tehtaan_saldon_sarake'></td></tr>";
+  echo "<tr><td>", t("Tuotenumeron sarakenumero"), "</td><td><input type='text' name='tuotenumeron_sarake' value='$tuotenumeron_sarake'></td></tr>";
+  echo "<tr><td>", t("Tehtaan saldon sarakenumero"), "</td><td><input type='text' name='tehtaan_saldon_sarake' value='$tehtaan_saldon_sarake'></td></tr>";
 
   echo "<tr><td class='back'>&nbsp;</td></tr>";
-  echo "<tr><th colspan='2'>",t("Raportin valinnat"),"</th></tr>";
+  echo "<tr><th colspan='2'>", t("Raportin valinnat"), "</th></tr>";
 
   //Haetaan tallennetut kyselyt
   $query = "SELECT distinct kuka.nimi, kuka.kuka, tallennetut_parametrit.nimitys
@@ -290,9 +290,9 @@ if ($tee == '') {
             ORDER BY tallennetut_parametrit.nimitys";
   $sresult = pupe_query($query);
 
-  echo "<tr><td>",t("Valitse raportti"),":</td>";
+  echo "<tr><td>", t("Valitse raportti"), ":</td>";
   echo "<td><select name='kysely' onchange='document.getElementById(\"tee\").value = \"lataavanha\";submit();'>";
-  echo "<option value=''>",t("Valitse"),"</option>";
+  echo "<option value=''>", t("Valitse"), "</option>";
 
   while ($srow = mysql_fetch_assoc($sresult)) {
 
@@ -306,20 +306,20 @@ if ($tee == '') {
 
   echo "</select>&nbsp;";
 
-  echo "<input type='button' value='",t("Tallenna"),"' onclick='document.getElementById(\"tee\").value = \"tallenna\";submit();'></td></tr>";
+  echo "<input type='button' value='", t("Tallenna"), "' onclick='document.getElementById(\"tee\").value = \"tallenna\";submit();'></td></tr>";
 
-  echo "<tr><td>",t("Tallenna uusi raportti"),":</td>";
+  echo "<tr><td>", t("Tallenna uusi raportti"), ":</td>";
   echo "<td><input type='text' name='uusirappari' value=''>&nbsp;";
-  echo "<input type='submit' id='tallenna_button' value='",t("Tallenna"),"' onclick=\"document.getElementById('tee').value = 'uusiraportti'\"></td>";
+  echo "<input type='submit' id='tallenna_button' value='", t("Tallenna"), "' onclick=\"document.getElementById('tee').value = 'uusiraportti'\"></td>";
   echo "</tr>";
 
   echo "<tr><td class='back'>&nbsp;</td></tr>";
-  echo "<tr><th colspan='2'>",t("Tiedoston sy‰tt‰"),"</th></tr>";
-  echo "<tr><td>",t("Valitse tiedosto"),":</td><td><input type='hidden' name='MAX_FILE_SIZE' value='50000000'><input name='userfile' type='file'></td></tr>";
+  echo "<tr><th colspan='2'>", t("Tiedoston sy‰tt‰"), "</th></tr>";
+  echo "<tr><td>", t("Valitse tiedosto"), ":</td><td><input type='hidden' name='MAX_FILE_SIZE' value='50000000'><input name='userfile' type='file'></td></tr>";
 
-  echo "<tr><td class='back' colspan='2'><input type='submit' value='",t("Aja tehdas saldot"),"'></td></tr>";
+  echo "<tr><td class='back' colspan='2'><input type='submit' value='", t("Aja tehdas saldot"), "'></td></tr>";
 
   echo "</form></table>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

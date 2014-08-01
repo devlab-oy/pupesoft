@@ -1,10 +1,10 @@
 <?php
 
-if (@include("../inc/parametrit.inc"));
-elseif (@include("parametrit.inc"));
+if (@include "../inc/parametrit.inc");
+elseif (@include "parametrit.inc");
 else exit;
 
-echo "<font class='head'>",t("Tavaraetikettikopio"),"</font><hr>";
+echo "<font class='head'>", t("Tavaraetikettikopio"), "</font><hr>";
 
 $sscc   = !isset($sscc)  ? "" : $sscc;
 $tee   = !isset($tee)  ? "" : $tee;
@@ -34,13 +34,13 @@ if ($tee == 'tavaraetiketti' and $otunnus != "" and $suuntalavan_tunnus != "") {
     $toiminto = $suuntalavan_tunnus;
 
     $tulostimet[] = "Tavaraetiketti";
-    require('inc/valitse_tulostin.inc');
+    require 'inc/valitse_tulostin.inc';
   }
 
   $otunnus = (int) $otunnus;
   $suuntalavat = array((int) $suuntalavan_tunnus);
 
-  require('tilauskasittely/tulosta_tavaraetiketti.inc');
+  require 'tilauskasittely/tulosta_tavaraetiketti.inc';
 
   $tee = '';
 }
@@ -50,9 +50,9 @@ if (in_array($tee, array('', 'etsi_sscc', 'etsi_saapuminen'))) {
   echo "<form action='' method='post'>";
   echo "<table>";
   echo "<tr>";
-  echo "<th>",t("SSCC"),"</th>";
+  echo "<th>", t("SSCC"), "</th>";
   echo "<td><input type='text' name='sscc' value='{$sscc}' /></td>";
-  echo "<td class='back' nowrap><input type='submit' value='",t("Etsi"),"' />&nbsp;&nbsp;<font class='error'>{$error_sscc}</font></td></tr>";
+  echo "<td class='back' nowrap><input type='submit' value='", t("Etsi"), "' />&nbsp;&nbsp;<font class='error'>{$error_sscc}</font></td></tr>";
   echo "<input type='hidden' name='tee' value='etsi_sscc' />";
   echo "</table>";
   echo "</form>";
@@ -62,9 +62,9 @@ if (in_array($tee, array('', 'etsi_sscc', 'etsi_saapuminen'))) {
   echo "<form action='' method='post'>";
   echo "<table>";
   echo "<tr>";
-  echo "<th>",t("Saapumisen nro"),"</th>";
+  echo "<th>", t("Saapumisen nro"), "</th>";
   echo "<td><input type='text' name='saapuminen' value='{$saapuminen}' /></td>";
-  echo "<td class='back' nowrap><input type='submit' value='",t("Etsi"),"' />&nbsp;&nbsp;<font class='error'>{$error_saapuminen}</font></td></tr>";
+  echo "<td class='back' nowrap><input type='submit' value='", t("Etsi"), "' />&nbsp;&nbsp;<font class='error'>{$error_saapuminen}</font></td></tr>";
   echo "<input type='hidden' name='tee' value='etsi_saapuminen' />";
   echo "</table>";
   echo "</form>";
@@ -96,12 +96,12 @@ if ($tee == 'etsi_sscc' and $sscc != "") {
     echo "<br />";
     echo "<table>";
     echo "<tr>";
-    echo "<th>",t("Toimittajanro"),"</th>";
-    echo "<th>",t("Ytunnus"),"</th>";
-    echo "<th>",t("Nimi"),"</th>";
-    echo "<th>",t("Saapuminen"),"</th>";
-    echo "<th>",t("Luontiaika"),"</th>";
-    echo "<th>",t("Laatija"),"</th>";
+    echo "<th>", t("Toimittajanro"), "</th>";
+    echo "<th>", t("Ytunnus"), "</th>";
+    echo "<th>", t("Nimi"), "</th>";
+    echo "<th>", t("Saapuminen"), "</th>";
+    echo "<th>", t("Luontiaika"), "</th>";
+    echo "<th>", t("Laatija"), "</th>";
     echo "<th>&nbsp;</th>";
     echo "</tr>";
 
@@ -112,7 +112,7 @@ if ($tee == 'etsi_sscc' and $sscc != "") {
       echo "<td>{$suuntalava_row['ytunnus']}</td>";
       echo "<td>{$suuntalava_row['nimi']}</td>";
       echo "<td>{$suuntalava_row['laskunro']}</td>";
-      echo "<td>",tv1dateconv($suuntalava_row['luontiaika']),"</td>";
+      echo "<td>", tv1dateconv($suuntalava_row['luontiaika']), "</td>";
       echo "<td>{$suuntalava_row['laatija']}</td>";
 
       echo "<td>";
@@ -120,7 +120,7 @@ if ($tee == 'etsi_sscc' and $sscc != "") {
       echo "<input type='hidden' name='suuntalavan_tunnus' value='{$suuntalava_row['tunnus']}' />";
       echo "<input type='hidden' name='otunnus' value='{$suuntalava_row['otunnus']}' />";
       echo "<input type='hidden' name='tee' value='tavaraetiketti' />";
-      echo "<input type='submit' value='",t("Valitse"),"' />";
+      echo "<input type='submit' value='", t("Valitse"), "' />";
       echo "</form>";
       echo "</td>";
 
@@ -130,7 +130,7 @@ if ($tee == 'etsi_sscc' and $sscc != "") {
     echo "</table>";
   }
   else {
-    echo "<br /><font class='message'>",t("Suuntalavaa ei löytynyt"),".</font><br /><br />";
+    echo "<br /><font class='message'>", t("Suuntalavaa ei löytynyt"), ".</font><br /><br />";
   }
 }
 
@@ -176,10 +176,10 @@ if ($tee == 'etsi_saapuminen' and $saapuminen != "") {
     echo "<table>";
 
     echo "<tr>";
-    echo "<th>",t("Ytunnus"),"</th>";
-    echo "<th>",t("Ostaja"),"</th>";
-    echo "<th>",t("Toimitusosoite"),"</th>";
-    echo "<th>",t("Laskutusosoite"),"</th>";
+    echo "<th>", t("Ytunnus"), "</th>";
+    echo "<th>", t("Ostaja"), "</th>";
+    echo "<th>", t("Toimitusosoite"), "</th>";
+    echo "<th>", t("Laskutusosoite"), "</th>";
     echo "</tr>";
 
     echo "<tr>";
@@ -190,15 +190,15 @@ if ($tee == 'etsi_saapuminen' and $saapuminen != "") {
     echo "</tr>";
 
     echo "<tr>";
-    echo "<th>",t("Saapuminen"),"</th>";
-    echo "<th>",t("Luontiaika"),"</th>";
-    echo "<th>",t("Laatija"),"</th>";
+    echo "<th>", t("Saapuminen"), "</th>";
+    echo "<th>", t("Luontiaika"), "</th>";
+    echo "<th>", t("Laatija"), "</th>";
     echo "<th>&nbsp;</th>";
     echo "</tr>";
 
     echo "<tr>";
     echo "<td>{$row['laskunro']}</td>";
-    echo "<td>",tv1dateconv($row['lasku_luontiaika']),"</td>";
+    echo "<td>", tv1dateconv($row['lasku_luontiaika']), "</td>";
     echo "<td>{$row['lasku_laatija']}</td>";
     echo "<td>&nbsp;</td>";
     echo "</tr>";
@@ -208,17 +208,17 @@ if ($tee == 'etsi_saapuminen' and $saapuminen != "") {
     echo "<br />";
     echo "<table>";
     echo "<tr>";
-    echo "<th>",t("SSCC"),"</th>";
-    echo "<th>",t("Tyyppi"),"</th>";
-    echo "<th>",t("Keräysvyöhyke"),"</th>";
-    echo "<th>",t("Käytettävyys"),"</th>";
-    echo "<th>",t("Terminaalialue"),"</th>";
-    echo "<th>",t("Korkeus"),"</th>";
-    echo "<th>",t("Paino"),"</th>";
-    echo "<th>",t("Laatija"),"</th>";
-    echo "<th>",t("Luontiaika"),"</th>";
-    echo "<th>",t("Muuttaja"),"</th>";
-    echo "<th>",t("Muutospvm"),"</th>";
+    echo "<th>", t("SSCC"), "</th>";
+    echo "<th>", t("Tyyppi"), "</th>";
+    echo "<th>", t("Keräysvyöhyke"), "</th>";
+    echo "<th>", t("Käytettävyys"), "</th>";
+    echo "<th>", t("Terminaalialue"), "</th>";
+    echo "<th>", t("Korkeus"), "</th>";
+    echo "<th>", t("Paino"), "</th>";
+    echo "<th>", t("Laatija"), "</th>";
+    echo "<th>", t("Luontiaika"), "</th>";
+    echo "<th>", t("Muuttaja"), "</th>";
+    echo "<th>", t("Muutospvm"), "</th>";
     echo "<th>&nbsp;</th>";
     echo "</tr>";
 
@@ -233,16 +233,16 @@ if ($tee == 'etsi_saapuminen' and $saapuminen != "") {
       echo "<td>{$suuntalava_row['korkeus']}</td>";
       echo "<td>{$suuntalava_row['paino']}</td>";
       echo "<td>{$suuntalava_row['laatija']}</td>";
-      echo "<td>",tv1dateconv($suuntalava_row['luontiaika']),"</td>";
+      echo "<td>", tv1dateconv($suuntalava_row['luontiaika']), "</td>";
       echo "<td>{$suuntalava_row['muuttaja']}</td>";
-      echo "<td>",tv1dateconv($suuntalava_row['muutospvm']),"</td>";
+      echo "<td>", tv1dateconv($suuntalava_row['muutospvm']), "</td>";
 
       echo "<td>";
       echo "<form action='' method='post'>";
       echo "<input type='hidden' name='suuntalavan_tunnus' value='{$suuntalava_row['tunnus']}' />";
       echo "<input type='hidden' name='otunnus' value='{$suuntalava_row['otunnus']}' />";
       echo "<input type='hidden' name='tee' value='tavaraetiketti' />";
-      echo "<input type='submit' value='",t("Valitse"),"' />";
+      echo "<input type='submit' value='", t("Valitse"), "' />";
       echo "</form>";
       echo "</td>";
 
@@ -252,10 +252,10 @@ if ($tee == 'etsi_saapuminen' and $saapuminen != "") {
     echo "</table>";
   }
   else {
-    echo "<br /><font class='message'>",t("Suuntalavaa ei löytynyt"),".</font><br /><br />";
+    echo "<br /><font class='message'>", t("Suuntalavaa ei löytynyt"), ".</font><br /><br />";
   }
 }
 
-if (@include("inc/footer.inc"));
-elseif (@include("footer.inc"));
+if (@include "inc/footer.inc");
+elseif (@include "footer.inc");
 else exit;

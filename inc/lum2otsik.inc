@@ -24,28 +24,28 @@ Kenttä  Tieto              Pakollisuus  Muoto  Pituus  E/P  Sisältö
 $ulos  = "LUM2";                      // Sovellustunnus
 $ulos .= "0";                                           // Tietuetunnus
 $ulos .= "0";                                           // Aineistolaji
-$ulos .= sprintf ('%1.1s',     ' ');                   // Varalla
-  $ulos .= sprintf ('%011.11s',  $ytunnus);          // Maksajan Y-tunnus
-$ulos .= sprintf ('%5.5s',    $lum_et_5kentta);      // Asiakastunnuksen lisäosa
-$ulos .= sprintf ('%2.2s',     ' ');                   // Varalla
-$ulos .= sprintf ('%1.1s',     '0');                   // Hyväksymiskoodi
+$ulos .= sprintf('%1.1s',     ' ');                   // Varalla
+$ulos .= sprintf('%011.11s',  $ytunnus);          // Maksajan Y-tunnus
+$ulos .= sprintf('%5.5s',    $lum_et_5kentta);      // Asiakastunnuksen lisäosa
+$ulos .= sprintf('%2.2s',     ' ');                   // Varalla
+$ulos .= sprintf('%1.1s',     '0');                   // Hyväksymiskoodi
 
 $luonti = getdate();
 
 // Pvm 10 merkkiä
-$ulos .= sprintf ('%02d', substr($luonti['year'], 2, 2));  // Aineiston/palautteen luontiaika
-$ulos .= sprintf ('%02d', $luonti['mon']);
-$ulos .= sprintf ('%02d', $luonti['mday']);
-$ulos .= sprintf ('%02d', $luonti['hours']);
-$ulos .= sprintf ('%02d', $luonti['minutes']);
+$ulos .= sprintf('%02d', substr($luonti['year'], 2, 2));  // Aineiston/palautteen luontiaika
+$ulos .= sprintf('%02d', $luonti['mon']);
+$ulos .= sprintf('%02d', $luonti['mday']);
+$ulos .= sprintf('%02d', $luonti['hours']);
+$ulos .= sprintf('%02d', $luonti['minutes']);
 
-$ulos .= sprintf ('%014d', '0');              // Varalla
-$ulos .= sprintf ('%04d', $luonti['year']);          // Veloituksen päivämäärä (Sampolla kenttä on vain tyyppiä "Varalla")
-$ulos .= sprintf ('%02d', $luonti['mon']);
-$ulos .= sprintf ('%02d', $luonti['mday']);
-$ulos .= sprintf ('%542s', ' ');              // Varalla
+$ulos .= sprintf('%014d', '0');              // Varalla
+$ulos .= sprintf('%04d', $luonti['year']);          // Veloituksen päivämäärä (Sampolla kenttä on vain tyyppiä "Varalla")
+$ulos .= sprintf('%02d', $luonti['mon']);
+$ulos .= sprintf('%02d', $luonti['mday']);
+$ulos .= sprintf('%542s', ' ');              // Varalla
 
 //print strlen($ulos) . "/" . $ulos;
 //print "</pre>";
 
-fputs($toot,$ulos . "\r\n");
+fputs($toot, $ulos . "\r\n");

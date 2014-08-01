@@ -929,7 +929,7 @@ if ($avain_sel['LAITE_TILA'] == 'SELECTED') {
     $ulos .= "<option value='N'>".t("Normaali")."</option>";
     $ulos .= "<option value='P'>".t("Poistettu")."</option>";
     $ulos .= "<option value='V'>".t("Varalaite")."</option>";
-          $ulos .= "<option value='H'>".t("Huollossa")."</option>";
+    $ulos .= "<option value='H'>".t("Huollossa")."</option>";
     $ulos .= "</select>";
     $ulos .= "</td>";
 

@@ -9984,13 +9984,13 @@ if (!function_exists('livesearch_kohdehaku')) {
                   } \"
                 onmouseout=\"this.className='';\"
                 onclick=\"document.getElementById('$hakuid').value='{$row['kohde_tunnus']}';";
-                if ($submit == "") {
-                  echo "document.$formi.submit();";
-                }
-                else {
-                  echo "document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';";
-                }
-                echo "\"
+          if ($submit == "") {
+            echo "document.$formi.submit();";
+          }
+          else {
+            echo "document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';";
+          }
+          echo "\"
                 style='padding:2px;'>
                 <font style='font-weight:bold'>{$row['kohde_nimi']} - {$row['asiakas_nimi']}</font>
               </div><div name='selectValues$hakuid' id='{$row['kohde_tunnus']}'></div>";
@@ -10001,7 +10001,7 @@ if (!function_exists('livesearch_kohdehaku')) {
           }
         }
 
-        echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>",t("Haulla löytyi")," ".mysql_num_rows($result). " ",t("kohdetta"),", ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
+        echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>", t("Haulla löytyi"), " ".mysql_num_rows($result). " ", t("kohdetta"), ", ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
       }
       else {
         echo "<div style='padding:2px'><font class='message'>".t("Ei kohteita").".</font></div>";
@@ -24198,9 +24198,9 @@ if (!function_exists('hae_laitteen_oletus_huoltosyklit')) {
 
 if (!function_exists('js_laite')) {
 
-    function js_laite() {
-      global $palvelin2;
-      ?>
+  function js_laite() {
+    global $palvelin2;
+?>
       <script src='<?php echo $palvelin2 ?>js/valid_date_plugin.js'></script>
       <script>
         var palvelin2 = '<?php echo $palvelin2 ?>';
@@ -24452,11 +24452,13 @@ if (!function_exists('hae_extranet_kayttajaan_liitetty_asiakas')) {
 }
 
 if (!function_exists('kirjoita_json_tiedosto')) {
+
+
   /**
    * Kirjoittaa json-tiedoston /tmp/ -kansioon. Annettavalla array:lle ($data) ajetaan array_utf8_encode rekursiivisesti.
    *
-   * @param array $data
-   * @param string $json_tiedosto_nimi
+   * @param array   $data
+   * @param string  $json_tiedosto_nimi
    * @return string
    */
   function kirjoita_json_tiedosto($data, $json_tiedosto_nimi) {
@@ -24476,12 +24478,14 @@ if (!function_exists('kirjoita_json_tiedosto')) {
 }
 
 if (!function_exists('aja_ruby')) {
+
+
   /**
    * Tätä funktiota käytetään ruby-koodin ajamiseen, joka generoi pdf-tiedostoja. Funktio palauttaa generoidun tiedoston nimen.
    *
    * @global string $pupe_root_polku
-   * @param string $json_data_filepath
-   * @param string $ruby_tiedosto_nimi
+   * @param string  $json_data_filepath
+   * @param string  $ruby_tiedosto_nimi
    * @return string
    */
   function aja_ruby($json_data_filepath, $ruby_tiedosto_nimi) {
@@ -24505,10 +24509,10 @@ if (!function_exists('pupesoft_require')) {
     global $kukarow, $yhtiorow, $starttime;
 
     if (file_exists($filename)) {
-      require_once($filename);
+      require_once $filename;
     }
     elseif (file_exists(basename($filename))) {
-      require_once(basename($filename));
+      require_once basename($filename);
     }
     else {
       die(t('Ajettavaa tiedostoa ei löytynyt'));
@@ -27290,7 +27294,7 @@ if (!function_exists('hae_maksuehdot')) {
     $result = pupe_query($query);
 
     $maksuehdot = array();
-    while($maksuehto = mysql_fetch_assoc($result)) {
+    while ($maksuehto = mysql_fetch_assoc($result)) {
       $maksuehdot[] = $maksuehto;
     }
 
@@ -28086,6 +28090,7 @@ if (!function_exists("kasittele_tiliote_viite")) {
 
 if (!function_exists('array_column')) {
 
+
   /**
    * Returns the values from a single column of the input array, identified by
    * the $columnKey.
@@ -28093,12 +28098,12 @@ if (!function_exists('array_column')) {
    * Optionally, you may provide an $indexKey to index the values in the returned
    * array by the values from the $indexKey column in the input array.
    *
-   * @param array $input A multi-dimensional array (record set) from which to pull
+   * @param array   $input     A multi-dimensional array (record set) from which to pull
    *                     a column of values.
-   * @param mixed $columnKey The column of values to return. This value may be the
+   * @param mixed   $columnKey The column of values to return. This value may be the
    *                         integer key of the column you wish to retrieve, or it
    *                         may be the string key name for an associative array.
-   * @param mixed $indexKey (Optional.) The column to use as the index/keys for
+   * @param mixed   $indexKey  (Optional.) The column to use as the index/keys for
    *                        the returned array. This value may be the integer key
    *                        of the column, or it may be the string key name.
    * @return array

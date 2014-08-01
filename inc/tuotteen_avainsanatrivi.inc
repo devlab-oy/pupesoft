@@ -164,7 +164,7 @@ if (mysql_field_name($result, $i) == "selite") {
   elseif ($trow[3] == "sammutin_koko") {
     $sammuttimen_koot_result = t_avainsana('SAMMUTIN_KOKO');
     $sammutin_koot = array();
-    while($sammutin_koko_avainsana = mysql_fetch_assoc($sammuttimen_koot_result)) {
+    while ($sammutin_koko_avainsana = mysql_fetch_assoc($sammuttimen_koot_result)) {
       $sammutin_koot[] = $sammutin_koko_avainsana;
     }
     $sel = "";

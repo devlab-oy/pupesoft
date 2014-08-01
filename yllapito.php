@@ -21,7 +21,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
 
 //Huom ennen t‰t‰ rivi‰ ei saa olla mit‰‰n echoja!
 if (isset($ajax_request) and file_exists("inc/{$toim}_ajax.inc")) {
-  require ("inc/{$toim}_ajax.inc");
+  require "inc/{$toim}_ajax.inc";
 }
 
 if (function_exists("js_popup") and !isset($ajax_request)) {
@@ -33,7 +33,7 @@ if ($toim == "toimi" or $toim == "asiakas" or $toim == "tuote" or $toim == "avai
 }
 
 if (file_exists("inc/laite_huolto_functions.inc")) {
-  require_once('inc/laite_huolto_functions.inc');
+  require_once 'inc/laite_huolto_functions.inc';
 }
 
 if (isset($livesearch_tee) and $livesearch_tee == "TILIHAKU") {
@@ -223,7 +223,7 @@ if ($del == 1) {
 
   if (!empty($del_relaatiot)) {
     $funktio = $toim . '_poista_relaatiot';
-    if(function_exists($funktio)) {
+    if (function_exists($funktio)) {
       $funktio($toim, $tunnus);
     }
   }
@@ -286,7 +286,7 @@ if ($del == 2) {
 if ($del == 3) {
   if (!empty($del_relaatiot)) {
     $funktio = $toim . '_poista_relaatiot';
-    if(function_exists($funktio)) {
+    if (function_exists($funktio)) {
       $funktio($toim, $tunnus);
     }
   }
@@ -424,7 +424,7 @@ if ($upd == 1) {
       if ($toim == 'tuotteen_toimittajat' and isset($paivita_tehdas_saldo_paivitetty) and is_array($paivita_tehdas_saldo_paivitetty) and count($paivita_tehdas_saldo_paivitetty) == 2) $query .= ", tehdas_saldo_paivitetty = now() ";
 
       for ($i=1; $i < mysql_num_fields($result); $i++) {
-        if (mysql_field_name($result,$i) == 'tuoteno') {
+        if (mysql_field_name($result, $i) == 'tuoteno') {
           $tuoteno_temp = $t[$i];
         }
         // Tuleeko t‰m‰ columni k‰yttˆliittym‰st‰
@@ -503,30 +503,30 @@ if ($upd == 1) {
         $huoltovalit = huoltovali_options();
         foreach ($laite['huoltosyklit'] as $tyyppi => $sykli) {
 
-            $huoltosykli_laite_tunnus = $sykli['huoltosykli_laite_tunnus'];
-            $huoltosykli_tunnus = $sykli['huoltosykli_tunnus'];
-            $huoltovali = $huoltovalit[$sykli['huoltovali']];
-            $kuka = $kukarow['kuka'];
-            $yhtio = $kukarow['yhtio'];
+          $huoltosykli_laite_tunnus = $sykli['huoltosykli_laite_tunnus'];
+          $huoltosykli_tunnus = $sykli['huoltosykli_tunnus'];
+          $huoltovali = $huoltovalit[$sykli['huoltovali']];
+          $kuka = $kukarow['kuka'];
+          $yhtio = $kukarow['yhtio'];
 
-            if (!empty($sykli['seuraava_tuleva_tapahtuma'])) {
-              $seuraava_tuleva_tapahtuma = date('Y-m-d', strtotime($sykli['seuraava_tuleva_tapahtuma']));
-              $viimeinen_tapahtuma = date('Y-m-d', strtotime("{$seuraava_tuleva_tapahtuma} - {$huoltovali['years']} years"));
+          if (!empty($sykli['seuraava_tuleva_tapahtuma'])) {
+            $seuraava_tuleva_tapahtuma = date('Y-m-d', strtotime($sykli['seuraava_tuleva_tapahtuma']));
+            $viimeinen_tapahtuma = date('Y-m-d', strtotime("{$seuraava_tuleva_tapahtuma} - {$huoltovali['years']} years"));
 
-              $viimeinen_tapahtuma_query = "viimeinen_tapahtuma = '{$viimeinen_tapahtuma}',";
-            }
+            $viimeinen_tapahtuma_query = "viimeinen_tapahtuma = '{$viimeinen_tapahtuma}',";
+          }
 
-            if($huoltosykli_laite_tunnus != 0 and $huoltosykli_tunnus != 0) {
-              $sykli_query = "UPDATE huoltosyklit_laitteet SET
+          if ($huoltosykli_laite_tunnus != 0 and $huoltosykli_tunnus != 0) {
+            $sykli_query = "UPDATE huoltosyklit_laitteet SET
                               huoltosykli_tunnus = {$huoltosykli_tunnus},
                               huoltovali         = {$huoltovali['days']},
                               {$viimeinen_tapahtuma_query}
                               muutospvm          = now(),
                               muuttaja           = '{$kuka}'
                               WHERE tunnus       = {$huoltosykli_laite_tunnus}";
-            }
-            elseif ($huoltosykli_laite_tunnus == 0 and $huoltosykli_tunnus != 0) {
-              $sykli_query = "INSERT INTO huoltosyklit_laitteet
+          }
+          elseif ($huoltosykli_laite_tunnus == 0 and $huoltosykli_tunnus != 0) {
+            $sykli_query = "INSERT INTO huoltosyklit_laitteet
                               SET yhtio = '{$yhtio}',
                               huoltosykli_tunnus = {$huoltosykli_tunnus},
                               laite_tunnus       = {$tunnus},
@@ -537,15 +537,15 @@ if ($upd == 1) {
                               luontiaika         = now(),
                               muutospvm          =  now(),
                               muuttaja           = '{$kuka}'";
-            }
-            elseif ($huoltosykli_laite_tunnus != 0 and $huoltosykli_tunnus == 0) {
-              $sykli_query = "DELETE FROM huoltosyklit_laitteet
+          }
+          elseif ($huoltosykli_laite_tunnus != 0 and $huoltosykli_tunnus == 0) {
+            $sykli_query = "DELETE FROM huoltosyklit_laitteet
                               WHERE tunnus = $huoltosykli_laite_tunnus";
-            }
-            if (isset($sykli_query)) {
-              pupe_query($sykli_query);
-            }
-            unset($sykli_query);
+          }
+          if (isset($sykli_query)) {
+            pupe_query($sykli_query);
+          }
+          unset($sykli_query);
         }
 
         if (empty($errori)) {
@@ -622,7 +622,7 @@ if ($upd == 1) {
         $huoltovalit = huoltovali_options();
         foreach ($laite['huoltosyklit'] as $sykli) {
 
-          if($sykli['huoltosykli_tunnus'] != 0) {
+          if ($sykli['huoltosykli_tunnus'] != 0) {
 
             $huoltosykli_tunnus = $sykli['huoltosykli_tunnus'];
             $huoltovali = $huoltovalit[$sykli['huoltovali']];
@@ -636,7 +636,7 @@ if ($upd == 1) {
 
               $viimeinen_tapahtuma_query = "viimeinen_tapahtuma = '{$viimeinen_tapahtuma}',";
             }
-            else{
+            else {
               $viimeinen_tapahtuma_query = "viimeinen_tapahtuma = CURRENT_DATE,";
             }
 
@@ -1758,13 +1758,13 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
           echo "</a></td>";
         }
         else {
-          if ($yhtiorow['laite_huolto'] != 'X' and (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int')) {
+          if ($yhtiorow['laite_huolto'] != 'X' and (mysql_field_type($result, $i) == 'real' or mysql_field_type($result, $i) == 'int')) {
             echo "<td valign='top' style='text-align:right'>$fontlisa1 $trow[$i] $fontlisa2</td>";
           }
           elseif (mysql_field_name($result, $i) == 'koko') {
             echo "<td valign='top'>$fontlisa1 ".size_readable($trow[$i])." $fontlisa2</td>";
           }
-          elseif ($yhtiorow['laite_huolto'] == 'X' and $toim == 'huoltosykli' and mysql_field_name($result,$i) == 'huoltovali') {
+          elseif ($yhtiorow['laite_huolto'] == 'X' and $toim == 'huoltosykli' and mysql_field_name($result, $i) == 'huoltovali') {
             $huoltovalit = huoltovali_options();
             $huoltovali = $huoltovalit[$trow[$i]];
             echo "<td valign='top'>$fontlisa1 {$huoltovali['months']} $fontlisa2</td>";
@@ -2066,7 +2066,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
 
       // Jos rivilt‰ lˆytyy selitetark_5 niin piirret‰‰n otsikon per‰‰n tooltip-kysymysmerkki
       if (isset($al_row) and $al_row['selitetark_5'] != '') {
-        $siistiselite = str_replace('.','_', $al_row['selite']);
+        $siistiselite = str_replace('.', '_', $al_row['selite']);
         $infolinkki = "<div style='float: right;'><a class='tooltip' id='{$al_row['tunnus']}_{$siistiselite}'><img src='{$palvelin2}pics/lullacons/info.png'></a></div>";
 
         // Tehd‰‰n helppi-popup
@@ -2092,9 +2092,9 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
           <input type = 'text' class='{$otsikko}_tvv' name = 'tvv[$i]' value = '$vva' size='5' maxlength='4'></td>";
     }
     elseif ($tyyppi == 1.6 or $tyyppi == 1.7) {
-      $vva = substr($trow[$i],0,4);
-      $kka = substr($trow[$i],5,2);
-      $ppa = substr($trow[$i],8,2);
+      $vva = substr($trow[$i], 0, 4);
+      $kka = substr($trow[$i], 5, 2);
+      $ppa = substr($trow[$i], 8, 2);
 
       echo "<td>";
       if ($tyyppi == 1.6) {
@@ -2181,8 +2181,8 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     $result = pupe_query($query);
 
     $request = array(
-        'tuoteno'      => $t[1],
-        'huoltosyklit' => $laite['huoltosyklit']
+      'tuoteno'      => $t[1],
+      'huoltosyklit' => $laite['huoltosyklit']
     );
     while ($selite = mysql_fetch_assoc($result)) {
       huoltosykli_rivi($selite['selite'], $request);
@@ -2569,9 +2569,9 @@ $funktio = "echo_" . $toim . "_redirect";
 
 if (function_exists($funktio)) {
   $params = array(
-      'redirect_to'     => $redirect_to,
-      'errori'          => $errori,
-      'valittu_asiakas' => $valittu_asiakas,
+    'redirect_to'     => $redirect_to,
+    'errori'          => $errori,
+    'valittu_asiakas' => $valittu_asiakas,
   );
 
   $funktio($params);

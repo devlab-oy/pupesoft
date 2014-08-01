@@ -64,7 +64,7 @@ elseif ($type == '3' or ($type == 'S' and $factoring_oikaisutunnus == '0' )) {
     $query = "SELECT *
               FROM valuu
               WHERE yhtio = '$yritirow[yhtio]'
-              AND nimi = '$yritirow[valkoodi]'";
+              AND nimi    = '$yritirow[valkoodi]'";
     $valresult = pupe_query($query);
 
     if (mysql_num_rows($valresult) != 1) {
@@ -109,8 +109,8 @@ elseif ($type == '3' or ($type == 'S' and $factoring_oikaisutunnus == '0' )) {
   // p‰ivitet‰‰n suorituksen tunnnus tiliotedataan ja tiliotedata k‰sitellyksi
   $query = "UPDATE tiliotedata SET
             tiliointitunnus = '$tiliointitunnus',
-            kasitelty = now()
-            WHERE tunnus = '$tiliotedatarow[tunnus]'";
+            kasitelty       = now()
+            WHERE tunnus    = '$tiliotedatarow[tunnus]'";
   $dataupdres = pupe_query($query);
 }
 elseif ($type == '9') {

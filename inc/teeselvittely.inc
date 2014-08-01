@@ -144,7 +144,7 @@ if (round($maara, 2) != 0) {
     $query = "UPDATE tiliotedata
               SET kasitelty = now(),
               tiliointitunnus = {$_tiliointi_id}
-              WHERE tunnus = {$tiliotedataid}";
+              WHERE tunnus    = {$tiliotedataid}";
     $dummyresult = pupe_query($query);
 
     if ($loydettiinko_sopiva_tili != '') {

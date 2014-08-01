@@ -7,11 +7,11 @@ $useslave = 1;
 $compression = FALSE;
 
 if (isset($_POST["tee"])) {
-  if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
-require("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 //Ja t‰ss‰ laitetaan ne takas
 $sqlhaku = $sqlapu;
@@ -75,7 +75,7 @@ else {
     $edosasto = '';
     $lask = 0;
 
-    require_once ('inc/ProgressBar.class.php');
+    require_once 'inc/ProgressBar.class.php';
     $bar = new ProgressBar();
     $elements = mysql_num_rows($result); // total number of elements to process
     $bar->initialize($elements); // print the empty bar
@@ -152,13 +152,13 @@ else {
           $kateVApros="0.00";
 
           if ($myyn30 > 0)
-            $kate30pros = sprintf("%.02f",round($kate30/$myyn30*100,2));
+            $kate30pros = sprintf("%.02f", round($kate30/$myyn30*100, 2));
 
           if ($myyn90 > 0)
-            $kate90pros = sprintf("%.02f",round($kate90/$myyn90*100,2));
+            $kate90pros = sprintf("%.02f", round($kate90/$myyn90*100, 2));
 
           if ($myynVA > 0)
-            $kateVApros = sprintf("%.02f",round($kateVA/$myynVA*100,2));
+            $kateVApros = sprintf("%.02f", round($kateVA/$myynVA*100, 2));
 
 
           $ulos .= t("Osasto")." $edosasto ".t("yhteens‰").":\t\t";
@@ -219,13 +219,13 @@ else {
       $kateVApros="0.00";
 
       if ($row["summa30"] > 0)
-        $kate30pros = sprintf("%.02f",round($row["kate30"]/$row["summa30"]*100,2));
+        $kate30pros = sprintf("%.02f", round($row["kate30"]/$row["summa30"]*100, 2));
 
       if ($row["summa90"] > 0)
-        $kate90pros = sprintf("%.02f",round($row["kate90"]/$row["summa90"]*100,2));
+        $kate90pros = sprintf("%.02f", round($row["kate90"]/$row["summa90"]*100, 2));
 
       if ($row["summaVA"] > 0)
-        $kateVApros = sprintf("%.02f",round($row["kateVA"]/$row["summaVA"]*100,2));
+        $kateVApros = sprintf("%.02f", round($row["kateVA"]/$row["summaVA"]*100, 2));
 
       if ($varastonarvo == 0 and $row["summaVA"] == 0) {
         //ei nayteta mitaan, en osaa koodata nyt maanantaina kauniimmin....
@@ -262,13 +262,13 @@ else {
       $kateVApros="0.00";
 
       if ($myyn30 > 0)
-        $kate30pros = sprintf("%.02f",round($kate30/$myyn30*100,2));
+        $kate30pros = sprintf("%.02f", round($kate30/$myyn30*100, 2));
 
       if ($myyn90 > 0)
-        $kate90pros = sprintf("%.02f",round($kate90/$myyn90*100,2));
+        $kate90pros = sprintf("%.02f", round($kate90/$myyn90*100, 2));
 
       if ($myynVA > 0)
-        $kateVApros = sprintf("%.02f",round($kateVA/$myynVA*100,2));
+        $kateVApros = sprintf("%.02f", round($kateVA/$myynVA*100, 2));
 
       $ulos .= t("Osasto")." $edosasto ".t("yhteens‰").":\t\t";
       $ulos .= "$myyn30\t";
@@ -288,13 +288,13 @@ else {
       $ulos .= "\n";
 
       if ($yhtmyyn30 > 0)
-        $yhtkate30pros = sprintf("%.02f",round($yhtkate30/$yhtmyyn30*100,2));
+        $yhtkate30pros = sprintf("%.02f", round($yhtkate30/$yhtmyyn30*100, 2));
 
       if ($yhtmyyn90 > 0)
-        $yhtkate90pros = sprintf("%.02f",round($yhtkate90/$yhtmyyn90*100,2));
+        $yhtkate90pros = sprintf("%.02f", round($yhtkate90/$yhtmyyn90*100, 2));
 
       if ($yhtmyynVA > 0)
-        $yhtkateVApros = sprintf("%.02f",round($yhtkateVA/$yhtmyynVA*100,2));
+        $yhtkateVApros = sprintf("%.02f", round($yhtkateVA/$yhtmyynVA*100, 2));
 
 
       ///* Kaikkiyhteens‰ *///
@@ -315,7 +315,7 @@ else {
       $ulos .= "\n";
     }
 
-    if(include('Spreadsheet/Excel/Writer.php')) {
+    if (include 'Spreadsheet/Excel/Writer.php') {
 
       //keksit‰‰n failille joku varmasti uniikki nimi:
       list($usec, $sec) = explode(' ', microtime());
@@ -332,21 +332,21 @@ else {
       $excelrivi = 0;
     }
 
-    if(isset($workbook)) {
+    if (isset($workbook)) {
       $rivit = explode("\n", $ulos);
 
       $rivi = explode("\t", $rivit[0]);
       for ($i=0; $i < count($rivi); $i++) $worksheet->write($excelrivi, $i, $rivi[$i], $format_bold);
       $excelrivi++;
 
-      for($j = 1; $j<count($rivit); $j++) {
+      for ($j = 1; $j<count($rivit); $j++) {
         $rivi = explode("\t", $rivit[$j]);
         for ($i=0; $i < count($rivi); $i++) $worksheet->write($excelrivi, $i, $rivi[$i]);
         $excelrivi++;
       }
     }
 
-    if(isset($workbook)) {
+    if (isset($workbook)) {
 
       // We need to explicitly close the workbook
       $workbook->close();
@@ -411,5 +411,5 @@ else {
 
   echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td></tr></table>";
 
-  require ("../inc/footer.inc");
+  require "../inc/footer.inc";
 }

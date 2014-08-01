@@ -15,11 +15,11 @@ if ($php_cli) {
   error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
   ini_set("display_errors", 0);
 
-  require ("inc/salasanat.php");
-  require ("inc/functions.inc");
+  require "inc/salasanat.php";
+  require "inc/functions.inc";
 
-  if (!isset($ftpget_email)) $ftpget_email = "development@devlab.fi";       # kenelle meilataan jos on ongelma
-  if (!isset($ftpget_emailfrom)) $ftpget_emailfrom = "development@devlab.fi";   # mill‰ osoitteella meili l‰hetet‰‰n
+  if (!isset($ftpget_email)) $ftpget_email = "development@devlab.fi";       // kenelle meilataan jos on ongelma
+  if (!isset($ftpget_emailfrom)) $ftpget_emailfrom = "development@devlab.fi";   // mill‰ osoitteella meili l‰hetet‰‰n
 
   // ja operaattori komentorivilt‰
   // itella, servinet, yms
@@ -71,7 +71,7 @@ if ($ftpget_host[$operaattori] != '' and $ftpget_user[$operaattori] != '' and $f
         $fileget = ftp_get($conn_id, $temp_filename, $file, FTP_ASCII);
 
         if (filesize($temp_filename) == 0) {
-          #echo "VIRHE: Ladattava tiedotsto on tyhj‰!\n";
+          //echo "VIRHE: Ladattava tiedotsto on tyhj‰!\n";
           unlink($temp_filename);
         }
         elseif ($fileget) {
@@ -109,20 +109,20 @@ if ($ftpget_host[$operaattori] != '' and $ftpget_user[$operaattori] != '' and $f
   // jos siirto ep‰onnistuu
   if ($palautus != 0) {
     switch ($palautus) {
-      case  1:
-        $syy = "Could not connect to remote host. ($ftpget_host[$operaattori])";
-        break;
-      case  2:
-        $syy = "Could not login to remote host ($conn_id, $ftpget_user[$operaattori], $ftpget_pass[$operaattori])";
-        break;
-      case  3:
-        $syy = "Changedir failed ($conn_id, $ftpget_path[$operaattori], ".realpath($ftpget_path[$operaattori]).")";
-        break;
-      case  4:
-        $syy = "Getting files failed ($conn_id, $ftpget_path[$operaattori])";
-        break;
-      default:
-        $syy = t("Tuntematon errorkoodi")." ($palautus)!!";
+    case  1:
+      $syy = "Could not connect to remote host. ($ftpget_host[$operaattori])";
+      break;
+    case  2:
+      $syy = "Could not login to remote host ($conn_id, $ftpget_user[$operaattori], $ftpget_pass[$operaattori])";
+      break;
+    case  3:
+      $syy = "Changedir failed ($conn_id, $ftpget_path[$operaattori], ".realpath($ftpget_path[$operaattori]).")";
+      break;
+    case  4:
+      $syy = "Getting files failed ($conn_id, $ftpget_path[$operaattori])";
+      break;
+    default:
+      $syy = t("Tuntematon errorkoodi")." ($palautus)!!";
     }
   }
 }

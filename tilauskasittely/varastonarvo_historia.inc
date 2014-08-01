@@ -1,7 +1,7 @@
 <?php
 
 $lock_params = array(
-    "locktime"    => 600,
+  "locktime"    => 600,
   "lockfile"    => "$kukarow[yhtio]-keikka.lock",
   "filecontent" => "$otunnus;{$kukarow['kuka']};".date("Y-m-d H:i:s")
 );
@@ -24,12 +24,12 @@ else {
   exit;
 }
 
-list(,,,$kohok,,,,$lisok,,$sarjanrook,,,,,,$varok) = tsekit($laskurow, 0, 0);
+list(, , , $kohok, , , , $lisok, , $sarjanrook, , , , , , $varok) = tsekit($laskurow, 0, 0);
 
 if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
 
   if ($tee == "varma") {
-    require ("varastoon.inc");
+    require "varastoon.inc";
 
     // takaisin ihan alkuun
     $toiminto     = "dummy";
@@ -81,7 +81,7 @@ if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
           exit;
         }
 
-        $apusumma = round($llrow["arvo"] * $llrow["vienti_kurssi"],2);
+        $apusumma = round($llrow["arvo"] * $llrow["vienti_kurssi"], 2);
         $summa += $llrow["arvo"] * $llrow["vienti_kurssi"];
 
         echo "<tr>
@@ -95,7 +95,7 @@ if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
       }
 
       // pyöristetään kahteen desimaaliin vasta lopuksi...
-      $summa = round($summa,2);
+      $summa = round($summa, 2);
 
       echo "</table><br>";
     }
@@ -123,7 +123,7 @@ if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
     $result = pupe_query($query);
     $laskurow = mysql_fetch_array($result);
 
-    require ("varastoon.inc");
+    require "varastoon.inc";
 
     echo "<form method='post'>";
     echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";

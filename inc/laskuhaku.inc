@@ -1,6 +1,6 @@
 <?php
 
-echo "<font class='head'>",t("Laskuhaku"),"</font><hr>";
+echo "<font class='head'>", t("Laskuhaku"), "</font><hr>";
 
 if (!isset($tee)) $tee = '';
 if (!isset($pvm)) $pvm = '';
@@ -120,7 +120,7 @@ echo "<tr>
         <option value='tappvm' {$sel['tappvm']}>".t("Tapahtumap‰iv‰m‰‰r‰")."</option>";
 
 if ($yhtiorow['ostolaskujen_paivays'] == "1") {
-    echo "<option value='laspvm' {$sel['laspvm']}>".t("Laskunp‰iv‰m‰‰r‰")."</option>";
+  echo "<option value='laspvm' {$sel['laspvm']}>".t("Laskunp‰iv‰m‰‰r‰")."</option>";
 }
 
 
@@ -176,7 +176,7 @@ for ($i = 1; $i < 32; $i++) {
 echo "</select></td><td class='back'>&nbsp;</td></tr>";
 
 echo "<tr>
-  <th valign='top'>",t("Loppupvm"),"</th>
+  <th valign='top'>", t("Loppupvm"), "</th>
   <td><select name='loppuvv'>";
 
 $sel = array();
@@ -367,7 +367,7 @@ if ($tee != '') {
   if (mysql_num_rows($result) == 0) {
     echo "<b>".t("Haulla ei lˆytynyt yht‰‰n laskua")."</b>";
 
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 
@@ -471,5 +471,5 @@ if ($tee != '') {
 
   echo "<br><br>";
 
-   $toim = "";
+  $toim = "";
 }

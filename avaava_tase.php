@@ -1,6 +1,6 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 if (isset($tee) and $tee == 'I') {
 
@@ -50,15 +50,15 @@ if (isset($tee) and $tee == 'I') {
     $tilikausi_alku_loppu_row = mysql_fetch_assoc($tilikausi_alku_loppu_res);
 
     // Vertaillaan tilikauteen
-    list($vv1,$kk1,$pp1) = explode("-",$yhtiorow["tilikausi_alku"]);
-    list($vv2,$kk2,$pp2) = explode("-",$yhtiorow["tilikausi_loppu"]);
-    list($vv3,$kk3,$pp3) = explode("-",$tilikausi_alku_loppu_row["tilikausi_loppu"]);
+    list($vv1, $kk1, $pp1) = explode("-", $yhtiorow["tilikausi_alku"]);
+    list($vv2, $kk2, $pp2) = explode("-", $yhtiorow["tilikausi_loppu"]);
+    list($vv3, $kk3, $pp3) = explode("-", $tilikausi_alku_loppu_row["tilikausi_loppu"]);
 
-    $tilialku  = (int) date('Ymd', mktime(0,0,0,$kk1,$pp1,$vv1));
-    $tililoppu = (int) date('Ymd', mktime(0,0,0,$kk2,$pp2,$vv2));
-    $syotetty  = (int) date('Ymd', mktime(0,0,0,$kk3,$pp3,$vv3));
+    $tilialku  = (int) date('Ymd', mktime(0, 0, 0, $kk1, $pp1, $vv1));
+    $tililoppu = (int) date('Ymd', mktime(0, 0, 0, $kk2, $pp2, $vv2));
+    $syotetty  = (int) date('Ymd', mktime(0, 0, 0, $kk3, $pp3, $vv3));
 
-    list($vv4,$kk4,$pp4) = explode("-", date('Y-m-d', mktime(0,0,0,$kk3,$pp3+1,$vv3)));
+    list($vv4, $kk4, $pp4) = explode("-", date('Y-m-d', mktime(0, 0, 0, $kk3, $pp3+1, $vv3)));
 
     if ($syotetty < $tilialku or $syotetty > $tililoppu) {
       echo  "<br><font class='error'>\n".t("VIRHE: Valitun tilikauden viimeinen päivä ei sisälly avoimeen tilikauteen!")."</font><br>\n<br>\n";
@@ -144,7 +144,7 @@ if (isset($tee) and $tee == 'I') {
   $kohde         = "";
   $valkoodi       = $yhtiorow['valkoodi'];
 
-  require("inc/teetiliointi.inc");
+  require "inc/teetiliointi.inc";
 
   $summa        = $voittosumma*-1;
   $summa_valuutassa  = 0;
@@ -156,7 +156,7 @@ if (isset($tee) and $tee == 'I') {
   $kohde         = "";
   $valkoodi       = $yhtiorow['valkoodi'];
 
-  require("inc/teetiliointi.inc");
+  require "inc/teetiliointi.inc";
 
   // Kirjataan avaava tase
   unset($tunnus);
@@ -206,7 +206,7 @@ if (isset($tee) and $tee == 'I') {
 
   $maara += 3;
 
-  require("tosite.php");
+  require "tosite.php";
   exit;
 }
 
@@ -221,10 +221,10 @@ if (isset($tee) and $tee == 'gotili') {
   $tee = 'go';
 }
 
-echo "<font class='head'>",t("Avaava tase"),"</font><hr>";
+echo "<font class='head'>", t("Avaava tase"), "</font><hr>";
 
 if (isset($tilikausi) and trim($tilikausi) == '') {
-  echo "<font class='error'>",t("Valitse tilikausi"),"!</font><br />";
+  echo "<font class='error'>", t("Valitse tilikausi"), "!</font><br />";
   $tee = '';
 }
 
@@ -235,7 +235,7 @@ echo "<form method='post'>";
 echo "<input type='hidden' name='tee' value='go'>";
 echo "<table>";
 
-echo "<tr><th>",t("Valitse suljettava tilikausi"),"</th>";
+echo "<tr><th>", t("Valitse suljettava tilikausi"), "</th>";
 
 $query = "SELECT tilikausi_alku, tilikausi_loppu, tunnus
           FROM tilikaudet
@@ -243,15 +243,15 @@ $query = "SELECT tilikausi_alku, tilikausi_loppu, tunnus
           ORDER BY tilikausi_alku DESC";
 $tilikausi_result = pupe_query($query);
 
-echo "<td><select name='tilikausi'><option value=''>",t("Valitse"),"</option>";
+echo "<td><select name='tilikausi'><option value=''>", t("Valitse"), "</option>";
 
 while ($tilikausi_row = mysql_fetch_assoc($tilikausi_result)) {
   $sel = $tilikausi_row['tunnus'] == $tilikausi ? ' selected' : '';
-  echo "<option value='{$tilikausi_row['tunnus']}'{$sel}>",tv1dateconv($tilikausi_row['tilikausi_alku'])," - ",tv1dateconv($tilikausi_row['tilikausi_loppu']),"</option>";
+  echo "<option value='{$tilikausi_row['tunnus']}'{$sel}>", tv1dateconv($tilikausi_row['tilikausi_alku']), " - ", tv1dateconv($tilikausi_row['tilikausi_loppu']), "</option>";
 }
 
 echo "</select>";
-echo "</td><td class='back'><input type='submit' name='submit' value='",t("Hae"),"' /></td></tr>";
+echo "</td><td class='back'><input type='submit' name='submit' value='", t("Hae"), "' /></td></tr>";
 echo "</table>";
 echo "</form><br />";
 
@@ -267,9 +267,9 @@ if (trim($tee) == 'go') {
   if ((!isset($edellisten_tilikausien_voitto_tappio) or !isset($tilikauden_tulos_siirto)) or trim($edellisten_tilikausien_voitto_tappio) == '' or trim($tilikauden_tulos_siirto) == '') {
     echo "<form method='post' name='tilisyotto'>";
     echo "<table>";
-    echo "<tr><th colspan='2'>",t("Syötä seuraavat pakolliset tilit"),"</th><td class='back'>&nbsp;</td></tr>";
-    echo "<tr><th>",t("Tilikauden voitto/tappio"),"</th><td>$tilirow[tilino]</td><td class='back'>&nbsp;</td></tr>";
-    echo "<tr><th>",t("Edellisten tilikausien voitto/tappio"),"</th><td>";
+    echo "<tr><th colspan='2'>", t("Syötä seuraavat pakolliset tilit"), "</th><td class='back'>&nbsp;</td></tr>";
+    echo "<tr><th>", t("Tilikauden voitto/tappio"), "</th><td>$tilirow[tilino]</td><td class='back'>&nbsp;</td></tr>";
+    echo "<tr><th>", t("Edellisten tilikausien voitto/tappio"), "</th><td>";
 
     if (isset($edellisten_tilikausien_voitto_tappio) and trim($edellisten_tilikausien_voitto_tappio) != '') {
       echo livesearch_kentta("tilisyotto", "TILIHAKU", "edellisten_tilikausien_voitto_tappio", 200, $edellisten_tilikausien_voitto_tappio);
@@ -279,7 +279,7 @@ if (trim($tee) == 'go') {
     }
 
     echo "</td><td class='back'>&nbsp;</td></tr>";
-    echo "<tr><th>",t("Tili jolla tuloslaskelma nollataan"),"</th><td>";
+    echo "<tr><th>", t("Tili jolla tuloslaskelma nollataan"), "</th><td>";
 
     if (isset($tilikauden_tulos_siirto) and trim($tilikauden_tulos_siirto) != '') {
       echo livesearch_kentta("tilisyotto", "TILIHAKU", "tilikauden_tulos_siirto", 200, $tilikauden_tulos_siirto);
@@ -288,7 +288,7 @@ if (trim($tee) == 'go') {
       echo livesearch_kentta("tilisyotto", "TILIHAKU", "tilikauden_tulos_siirto", 200);
     }
 
-    echo "</td><td class='back'><input type='submit' value='",t("Jatka"),"' /></td></tr>";
+    echo "</td><td class='back'><input type='submit' value='", t("Jatka"), "' /></td></tr>";
     echo "</table>";
     echo "<input type='hidden' name='tee' value='gotili' />";
     echo "<input type='hidden' name='tilikausi' value='{$tilikausi}' />";
@@ -297,9 +297,9 @@ if (trim($tee) == 'go') {
   }
   else {
     echo "<table>";
-    echo "<tr><th>",t("Tilikauden voitto/tappio"),"</th><td>{$tilirow["tilino"]}</td></tr>";
-    echo "<tr><th>",t("Edellisten tilikausien voitto/tappio"),"</th><td>{$edellisten_tilikausien_voitto_tappio}</td></tr>";
-    echo "<tr><th>",t("Tili jolla tuloslaskelma nollataan"),"</th><td>{$tilikauden_tulos_siirto}</td></tr>";
+    echo "<tr><th>", t("Tilikauden voitto/tappio"), "</th><td>{$tilirow["tilino"]}</td></tr>";
+    echo "<tr><th>", t("Edellisten tilikausien voitto/tappio"), "</th><td>{$edellisten_tilikausien_voitto_tappio}</td></tr>";
+    echo "<tr><th>", t("Tili jolla tuloslaskelma nollataan"), "</th><td>{$tilikauden_tulos_siirto}</td></tr>";
     echo "</table>";
   }
 
@@ -370,10 +370,10 @@ if (trim($tee) == 'go') {
   echo "<input type='hidden' name='tilikauden_tulos_siirto' value='{$tilikauden_tulos_siirto}' />";
 
   echo "<table><tr>";
-  echo "<th>",t("Tili"),"</font></th>";
-  echo "<th>",t("Nimi"),"</font></th>";
-  echo "<th>",t("Vientejä"),"</font></th>";
-  echo "<th>",t("Saldo"),"</font></th>";
+  echo "<th>", t("Tili"), "</font></th>";
+  echo "<th>", t("Nimi"), "</font></th>";
+  echo "<th>", t("Vientejä"), "</font></th>";
+  echo "<th>", t("Saldo"), "</font></th>";
   echo "</tr>";
 
   $summa     = 0;
@@ -429,22 +429,22 @@ if (trim($tee) == 'go') {
   $ivero[$maara]    = 0;
 
   echo "<tr>";
-  echo "<td class='tumma' colspan='3'>",t("Summa"),"</td>";
+  echo "<td class='tumma' colspan='3'>", t("Summa"), "</td>";
   echo "<td align='right' class='tumma'>";
-  echo "<input type='hidden' name='isumma' value='",urlencode(serialize($isumma)),"' />";
-  echo "<input type='hidden' name='itili' value='",urlencode(serialize($itili)),"' />";
-  echo "<input type='hidden' name='iselite' value='",urlencode(serialize($iselite)),"' />";
-  echo "<input type='hidden' name='ivero' value='",urlencode(serialize($ivero)),"' />";
+  echo "<input type='hidden' name='isumma' value='", urlencode(serialize($isumma)), "' />";
+  echo "<input type='hidden' name='itili' value='", urlencode(serialize($itili)), "' />";
+  echo "<input type='hidden' name='iselite' value='", urlencode(serialize($iselite)), "' />";
+  echo "<input type='hidden' name='ivero' value='", urlencode(serialize($ivero)), "' />";
   echo "<input type='hidden' name='maara' value='{$maara}' />";
-  echo sprintf('%.2f', $summa2),"</td>";
+  echo sprintf('%.2f', $summa2), "</td>";
   echo "</tr>";
 
   if ($tilikausi_alku_loppu_row['avaava_tase'] == 0) {
     if (round($summa2, 2) != 0) {
-      echo "<tr><td class='back' colspan='5'><font class='message'>",t("Summat eivät täsmää"),"!</font>$summa2</td></tr>";
+      echo "<tr><td class='back' colspan='5'><font class='message'>", t("Summat eivät täsmää"), "!</font>$summa2</td></tr>";
     }
     else {
-      echo "<tr><th colspan='5'><input type='submit' value='",t("Jatka"),"' /></th></tr>";
+      echo "<tr><th colspan='5'><input type='submit' value='", t("Jatka"), "' /></th></tr>";
     }
   }
   else {
@@ -463,17 +463,17 @@ if (trim($tee) == 'go') {
         </SCRIPT>";
 
 
-    echo "<tr><td colspan='5'><font class='error'>",t("HUOM: Avaava tase on jo kirjattu"),"!</font></td></tr>";
+    echo "<tr><td colspan='5'><font class='error'>", t("HUOM: Avaava tase on jo kirjattu"), "!</font></td></tr>";
 
     if (round($summa2, 2) != 0) {
-      echo "<tr><td class='back' colspan='5'><font class='message'>",t("Summat eivät täsmää"),"!</font>$summa2</td></tr>";
+      echo "<tr><td class='back' colspan='5'><font class='message'>", t("Summat eivät täsmää"), "!</font>$summa2</td></tr>";
     }
     else {
-      echo "<tr><th colspan='5'><input type='submit' value='",t("Jatka"),"' onClick='return verify();'/></th></tr>";
+      echo "<tr><th colspan='5'><input type='submit' value='", t("Jatka"), "' onClick='return verify();'/></th></tr>";
     }
   }
 
   echo "</table></form><br /><br />";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

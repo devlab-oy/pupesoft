@@ -1,6 +1,6 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 // Laitetaan max time 5H
 ini_set("max_execution_time", 18000);
@@ -28,7 +28,7 @@ if ($tee == "SYNK") {
 
       $lajit  = " and laji in (";
 
-      foreach($la as  $l) {
+      foreach ($la as  $l) {
         $lajit .= "'$l',";
       }
       $lajit = substr($lajit, 0, -1);
@@ -37,18 +37,18 @@ if ($tee == "SYNK") {
     }
   }
   else {
-    if(strpos($yhtiorow["synkronoi"], $table) === false or $table == "") {
+    if (strpos($yhtiorow["synkronoi"], $table) === false or $table == "") {
       echo "VIRHE: Pyydettyä taulua $table ei voida synkronoida, sitä ei ole määritelty!";
       exit;
     }
     $lajit = "";
   }
 
-  require_once("inc/pakolliset_sarakkeet.inc");
+  require_once "inc/pakolliset_sarakkeet.inc";
 
   list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset) = pakolliset_sarakkeet($table);
 
-  if(count($wherelliset) == 0 and count($pakolliset) == 0) {
+  if (count($wherelliset) == 0 and count($pakolliset) == 0) {
     echo "VIRHE: Pyydettyä taulua $table ei voida synkronoida, sitä ei ole määritelty!<br>";
     exit;
   }
@@ -123,12 +123,12 @@ if ($tee == "SYNK") {
 if ($tee == "") {
   $synkattavat = explode(',', $yhtiorow["synkronoi"]);
 
-   echo "<form method='post'>
+  echo "<form method='post'>
       <input type='hidden' name='tee' value='SYNK'>";
 
   echo "<select name='table'>";
 
-  foreach($synkattavat as $synk) {
+  foreach ($synkattavat as $synk) {
     echo "<option value='$synk'>$synk</option>";
   }
 
@@ -136,4 +136,4 @@ if ($tee == "") {
   echo "<input type='submit' value='".t("Synkronoi")."'></form><br><br>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

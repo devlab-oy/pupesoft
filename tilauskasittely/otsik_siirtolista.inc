@@ -150,7 +150,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
     }
 
     if ($varasto < 1 and $vrow['tunnus'] == $srow["varasto"]) {
-       $sel = 'selected';
+      $sel = 'selected';
     }
 
     $varastomaa = '';
@@ -189,8 +189,8 @@ if ($tila == 'Muuta' and !isset($jatka)) {
 
       // Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan se
       if (empty($clearing) and $varow['tunnus'] == $srow["clearing"] or
-        (empty($clearing) 
-          and (int) $kukarow["kesken"] == 0 
+        (empty($clearing)
+          and (int) $kukarow["kesken"] == 0
           and $varow['tunnus'] == $kukarow["oletus_varasto"])) {
         $sel = 'selected';
       }
@@ -310,7 +310,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
   }
 
   if (empty($srow['luokka'])) {
-    # haetaan oletusprioriteetti
+    // haetaan oletusprioriteetti
     $oletusluokka = t_avainsana("VARASTOLUOKKA", "", " and avainsana.selitetark_2 != ''", "", "", "selite");
 
     if (empty($oletusluokka)) {
@@ -345,17 +345,17 @@ if ($tila == 'Muuta' and !isset($jatka)) {
                 JOIN toimitustapa AS tpa
                 ON ( ana.yhtio = tpa.yhtio AND ana.selitetark_2 = tpa.tunnus )
                 WHERE ana.yhtio = '$kukarow[yhtio]'
-                AND ana.laji = 'SIIRTOVARASTOT'
-                AND ana.selite = $varasto
-                AND selitetark = $clearing";
+                AND ana.laji    = 'SIIRTOVARASTOT'
+                AND ana.selite  = $varasto
+                AND selitetark  = $clearing";
       $ttresult = mysql_query($ttqry) or pupe_error($ttqry);
 
       if (mysql_num_rows($ttresult) > 0) {
         $ttrow = mysql_fetch_assoc($ttresult);
         $def_toimitustapa = $ttrow['toimitustapa'];
       }
-      else{
-       $def_toimitustapa = 'Ei toimitustapaa';
+      else {
+        $def_toimitustapa = 'Ei toimitustapaa';
       }
 
       if ($def_toimitustapa != $toimitustapa) {
@@ -428,7 +428,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
   echo "<br><input type='submit' name='jatka' value='".t("Jatka")."'></form>";
 
   if ($tt_vaihdettu === true) {
-    echo "<font class='error' style='margin-left:10px;'>",t("Toimitustapa vaihdettiin automaattisesti"),"!</font><br />";
+    echo "<font class='error' style='margin-left:10px;'>", t("Toimitustapa vaihdettiin automaattisesti"), "!</font><br />";
   }
 
 }
@@ -534,7 +534,7 @@ if (isset($jatka)) {
   }
   else {
 
-    # haetaan oletusprioriteetti
+    // haetaan oletusprioriteetti
     $prioriteettinro = t_avainsana("VARASTOLUOKKA", "", " and avainsana.selitetark_2 != ''", "", "", "selitetark_3");
 
     if (empty($prioriteettinro)) {

@@ -18,18 +18,18 @@ ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__)
 error_reporting(E_ALL);
 ini_set("display_errors", 0);
 
-require("inc/salasanat.php");
-require("inc/functions.inc");
+require "inc/salasanat.php";
+require "inc/functions.inc";
 
 // Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
 pupesoft_flock();
 
 if (!isset(  $pankkiaineiston_haku["host"],
-      $pankkiaineiston_haku["user"],
-      $pankkiaineiston_haku["pass"],
-      $pankkiaineiston_haku["tiliote_file"],
-      $pankkiaineiston_haku["viite_file"],
-      $pankkiaineiston_haku["local_dir"])) {
+    $pankkiaineiston_haku["user"],
+    $pankkiaineiston_haku["pass"],
+    $pankkiaineiston_haku["tiliote_file"],
+    $pankkiaineiston_haku["viite_file"],
+    $pankkiaineiston_haku["local_dir"])) {
   echo "pankkiaineiston-haku parametrit puuttuu!\n";
   exit;
 }

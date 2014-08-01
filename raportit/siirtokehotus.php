@@ -1,7 +1,7 @@
 <?php
 
 if (strpos($_SERVER['SCRIPT_NAME'], "siirtokehotus.php") !== FALSE) {
-  require ("../inc/parametrit.inc");
+  require "../inc/parametrit.inc";
 }
 
 if (isset($tee) and $tee == 'lataa_tiedosto') {
@@ -10,7 +10,7 @@ if (isset($tee) and $tee == 'lataa_tiedosto') {
     unlink($tmpfilenimi);
   }
   if (strpos($_SERVER['SCRIPT_NAME'], "siirtokehotus.php") !== FALSE) {
-    require ("../inc/footer.inc");
+    require "../inc/footer.inc";
   }
   die;
 }
@@ -36,7 +36,7 @@ if (isset($tee) and $tee == 'lataa_pdf') {
   echo "</table>";
   echo "</form>";
   if (strpos($_SERVER['SCRIPT_NAME'], "siirtokehotus.php") !== FALSE) {
-    require ("../inc/footer.inc");
+    require "../inc/footer.inc";
   }
   die;
 }
@@ -48,10 +48,10 @@ if (isset($tee) and $tee == "hae_raportti" and count($varasto) < 1) {
 
 if (isset($tee) and $tee == "hae_raportti") {
 
-  $varastot = implode(",",$varasto);
+  $varastot = implode(",", $varasto);
 
-  if( isset($keraysvyohyke) and count($keraysvyohyke) > 0 ){
-    $keraysvyohykkeet = implode(",",$keraysvyohyke);
+  if ( isset($keraysvyohyke) and count($keraysvyohyke) > 0 ) {
+    $keraysvyohykkeet = implode(",", $keraysvyohyke);
 
     $kv_join = "JOIN varaston_hyllypaikat AS vh ON
                 (
@@ -69,7 +69,7 @@ if (isset($tee) and $tee == "hae_raportti") {
 
     $kv_and = "AND keraysvyohyke.tunnus IN ({$keraysvyohykkeet})";
   }
-  else{
+  else {
     $kv_join = "";
     $kv_and = "";
   }
@@ -105,7 +105,7 @@ if (isset($tee) and $tee == "hae_raportti") {
     $varapaikka_result = pupe_query($varapaikka_query);
     $varapaikka_count = mysql_num_rows($varapaikka_result);
 
-    if( $varapaikka_count > 0 ){
+    if ( $varapaikka_count > 0 ) {
       $oletuspaikat[] = $row;
     }
   }
@@ -117,7 +117,7 @@ if (isset($tee) and $tee == "hae_raportti") {
     $ei_osumia = true;
   }
 
-  if( $ei_osumia === false ){
+  if ( $ei_osumia === false ) {
 
     echo '<table>';
     echo '<tr>';
@@ -145,7 +145,7 @@ if (isset($tee) and $tee == "hae_raportti") {
       $saldo_info = saldo_myytavissa($row['tuoteno'], '', $row['varasto'], $kukarow['yhtio'], $row['alue'], $row['nro'], $row['vali'], $row['taso'] );
       $row['myytavissa'] = $saldo_info[2];
 
-      if( $row['myytavissa'] >= $row['haly'] ){
+      if ( $row['myytavissa'] >= $row['haly'] ) {
         continue;
       }
 
@@ -168,7 +168,7 @@ if (isset($tee) and $tee == "hae_raportti") {
         $saldo_info = saldo_myytavissa($row['tuoteno'], '', $row['varasto'], $kukarow['yhtio'], $row2['alue'], $row2['nro'], $row2['vali'], $row2['taso'] );
         $row2['myytavissa'] = $saldo_info[2];
 
-        if( $row2['myytavissa'] < 1 ){
+        if ( $row2['myytavissa'] < 1 ) {
           continue;
         }
 
@@ -193,10 +193,10 @@ if (isset($tee) and $tee == "hae_raportti") {
         $varapaikat[] = $row2;
       }
 
-      if( $varapaikka_echo == '' ){
+      if ( $varapaikka_echo == '' ) {
         continue;
       }
-      else{
+      else {
         $row['varapaikat'] = $varapaikat;
       }
 
@@ -226,7 +226,7 @@ if (isset($tee) and $tee == "hae_raportti") {
 
       $pdf_data[] = $row;
 
-      }
+    }
     echo '</table>';
 
     $pdf_data = base64_encode(serialize($pdf_data));
@@ -240,13 +240,13 @@ if (isset($tee) and $tee == "hae_raportti") {
   }
 }
 
-if(!isset($tee)) {
+if (!isset($tee)) {
 
-  if( $ei_varastoa === true ){
+  if ( $ei_varastoa === true ) {
     echo "<font class='error'>" . t("V‰hint‰‰n yksi varasto on valittava") . "</font>";
   }
 
-  if( $ei_osumia === true ){
+  if ( $ei_osumia === true ) {
     echo "<font class='error'>" . t("Ei siirtokehotuksia") . "</font>";
   }
 
@@ -287,13 +287,13 @@ if(!isset($tee)) {
 }
 
 if (strpos($_SERVER['SCRIPT_NAME'], "siirtokehotus.php") !== FALSE) {
-  require ("../inc/footer.inc");
+  require "../inc/footer.inc";
 }
 
 function siirtokehoitus_pdf($pdf_data) {
 
   //PDF:n luonti ja defaultit
-  require_once("pdflib/phppdflib.class.php");
+  require_once "pdflib/phppdflib.class.php";
 
   //PDF parametrit
   $pdf = new pdffile;
@@ -316,7 +316,7 @@ function siirtokehoitus_pdf($pdf_data) {
   $x = 40;
   $y = 800;
 
-  $xx = array(20,580);
+  $xx = array(20, 580);
 
   $pdf->draw_text($x, $y, 'Tyyppi', $sivu, $bold);
   $pdf->draw_text($x + 100, $y, 'Tuotenumero', $sivu, $bold);
@@ -373,7 +373,7 @@ function siirtokehoitus_pdf($pdf_data) {
 
 
   //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
-  $pdffilenimi = "/tmp/kuitti-".md5(uniqid(rand(),true)).".pdf";
+  $pdffilenimi = "/tmp/kuitti-".md5(uniqid(rand(), true)).".pdf";
 
   //kirjoitetaan pdf faili levylle..
   $fh = fopen($pdffilenimi, "w");

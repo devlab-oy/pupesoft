@@ -27,7 +27,7 @@ if (mysql_num_rows($turesult) > 0) {
     $pri++;
   }
 
-  $lis = substr($lis,0,-1);
+  $lis = substr($lis, 0, -1);
 
   if ($yhtiorow['pakkaamolokerot'] != '') {
     $kirjoitintilrivilisa = " AND var not in ('P','J','O','S') ";
@@ -42,9 +42,9 @@ if (mysql_num_rows($turesult) > 0) {
     $tiresult = pupe_query($query);
     $tirow = mysql_fetch_array($tiresult);
 
-    for($ir = 0; $ir<$pri; $ir++) {
+    for ($ir = 0; $ir<$pri; $ir++) {
       if ($tirow[$ir] > 0) {
-        $kirjoitin = mysql_field_name($tiresult,$ir);
+        $kirjoitin = mysql_field_name($tiresult, $ir);
         break;
       }
     }

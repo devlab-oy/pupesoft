@@ -1,10 +1,10 @@
 <?php
 
-require_once ('Zend/Pdf.php');
-require_once ('Zend/Barcode.php');
+require_once 'Zend/Pdf.php';
+require_once 'Zend/Barcode.php';
 
 if (!function_exists('alku_dgd')) {
-  function alku_dgd ($params) {
+  function alku_dgd($params) {
     global $kukarow, $yhtiorow;
 
     // Luodaan muuttujat
@@ -34,8 +34,8 @@ if (!function_exists('alku_dgd')) {
               WHERE r1.otsikkonro = '$laskurow[tunnus]'
                     AND r1.yhtio  = '$kukarow[yhtio]'
               GROUP BY 1";
-      $res = mysql_query($query) or pupe_error($query);
-      $rahtikirjanro = mysql_fetch_assoc($res);
+    $res = mysql_query($query) or pupe_error($query);
+    $rahtikirjanro = mysql_fetch_assoc($res);
 
     if ($rahtikirjanro["rahtikirjanro"] != "") {
       $laskurow["rahtikirjanro"]   = $rahtikirjanro["rahtikirjanro"];
@@ -85,26 +85,26 @@ if (!function_exists('alku_dgd')) {
     $pdf->pages[$sivu]->drawText($nimirow["nimi"], mm_pt(143), mm_pt(50), 'LATIN1');
     $pdf->pages[$sivu]->drawText($yhtiorow["kotipaikka"]." / ".tv1dateconv(date("Y-m-d")), mm_pt(143), mm_pt(41), 'LATIN1');
 
-    # Viivoitin
-    #$pdf->pages[$sivu]->setLineWidth(0.5);
-    #$pdf->pages[$sivu]->setFont($norm, 5);
+    // Viivoitin
+    //$pdf->pages[$sivu]->setLineWidth(0.5);
+    //$pdf->pages[$sivu]->setFont($norm, 5);
 
-    #for ($i=5; $i < 295; $i++) {
-    #  $pdf->pages[$sivu]->drawText($i, mm_pt(6), mm_pt($i));
-    #  $pdf->pages[$sivu]->drawLine(mm_pt(10), mm_pt($i), mm_pt(13), mm_pt($i));
-    #}
+    //for ($i=5; $i < 295; $i++) {
+    //  $pdf->pages[$sivu]->drawText($i, mm_pt(6), mm_pt($i));
+    //  $pdf->pages[$sivu]->drawLine(mm_pt(10), mm_pt($i), mm_pt(13), mm_pt($i));
+    //}
 
-    # KUVAT:
-    #$image = Zend_Pdf_Image::imageWithPath("/tmp/logo.jpg");
-    #$pdf->pages[0]->drawImage($image, 20, 830, 150, 800);
-    #$pdf->pages[0] = $pdf->newPage(Zend_Pdf_Page::SIZE_A4);
-    #$pdf->save("/tmp/kakal.pdf");
+    // KUVAT:
+    //$image = Zend_Pdf_Image::imageWithPath("/tmp/logo.jpg");
+    //$pdf->pages[0]->drawImage($image, 20, 830, 150, 800);
+    //$pdf->pages[0] = $pdf->newPage(Zend_Pdf_Page::SIZE_A4);
+    //$pdf->save("/tmp/kakal.pdf");
 
-    # VIIVAKOODIT:
-    #Zend_Barcode::setBarcodeFont("/Library/Fonts/Arial Black.ttf");
-    #$barcodeOptions = array('text' => 'ZEND-FRAMEWORK-1');
-    #$rendererOptions = array('topOffset' => 50, 'leftOffset' => 50);
-    #$pdfWithBarcode = Zend_Barcode::factory('code39', 'pdf', $barcodeOptions, $rendererOptions)->setResource($pdf)->draw();
+    // VIIVAKOODIT:
+    //Zend_Barcode::setBarcodeFont("/Library/Fonts/Arial Black.ttf");
+    //$barcodeOptions = array('text' => 'ZEND-FRAMEWORK-1');
+    //$rendererOptions = array('topOffset' => 50, 'leftOffset' => 50);
+    //$pdfWithBarcode = Zend_Barcode::factory('code39', 'pdf', $barcodeOptions, $rendererOptions)->setResource($pdf)->draw();
 
     // Luodaan palautettavat
     $return = array();
@@ -118,7 +118,7 @@ if (!function_exists('alku_dgd')) {
 }
 
 if (!function_exists('uusi_sivu_dgd')) {
-  function uusi_sivu_dgd ($params) {
+  function uusi_sivu_dgd($params) {
     global $kukarow, $yhtiorow;
 
     // Luodaan muuttujat
@@ -260,7 +260,7 @@ if (!function_exists('rivi_dgd')) {
 }
 
 if (!function_exists('loppu_dgd')) {
-  function loppu_dgd ($params) {
+  function loppu_dgd($params) {
     global $kukarow, $yhtiorow;
 
     // Luodaan muuttujat
@@ -289,7 +289,7 @@ if (!function_exists('loppu_dgd')) {
 }
 
 if (!function_exists('print_pdf_dgd')) {
-  function print_pdf_dgd ($params) {
+  function print_pdf_dgd($params) {
     global $kukarow, $yhtiorow;
 
     // Luodaan muuttujat
@@ -318,9 +318,9 @@ if (!function_exists('print_pdf_dgd')) {
 
         $kutsu = t("DGD %s", $kieli, $laskurow["tunnus"]);
 
-        if (@include("../inc/sahkoposti.inc"));
-        elseif (@include("inc/sahkoposti.inc"));
-        else include("sahkoposti.inc");
+        if (@include "../inc/sahkoposti.inc");
+        elseif (@include "inc/sahkoposti.inc");
+        else include "sahkoposti.inc";
       }
       elseif ($komento != '' and $komento != 'edi') {
         echo t("DGD tulostuu")."...<br>";

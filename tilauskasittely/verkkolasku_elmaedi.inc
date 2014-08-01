@@ -9,7 +9,7 @@ if (!function_exists('elmaedi_otsik')) {
     if ($fstat["size"] == 0) {
       fputs($tootedi, "ICHGSTART:$timestamppi\n");
       fputs($tootedi, "ICHG_TYPE:POS\n");
-      fputs($tootedi, "ICHG_SNDR:".sprintf("%-35.35s",str_replace('-','', $yhtiorow["ovttunnus"]))."@30\n");
+      fputs($tootedi, "ICHG_SNDR:".sprintf("%-35.35s", str_replace('-', '', $yhtiorow["ovttunnus"]))."@30\n");
       fputs($tootedi, "ICHG_RCPT:003705655815                       @30\n");
       fputs($tootedi, "ICHG_DATA:EIH-1.4.0\n");
       fputs($tootedi, "ICHG_TEST:1\n");
@@ -21,8 +21,8 @@ if (!function_exists('elmaedi_otsik')) {
     fputs($tootedi, "IHDRSTART:".substr($lasrow["tunnus"], -6)."\n");
     fputs($tootedi, "IBGMITYPE:$tyyppi\n");
     fputs($tootedi, "IBGMINUMB:$lasrow[laskunro]\n");
-    fputs($tootedi, "IDTM3__DT:".sprintf("%-35.35s",vlas_dateconv($lasrow["tapvm"]))."@102\n");
-    fputs($tootedi, "IDTM171DT:".sprintf("%-35.35s",vlas_dateconv($lasrow["tapvm"]))."@102\n");
+    fputs($tootedi, "IDTM3__DT:".sprintf("%-35.35s", vlas_dateconv($lasrow["tapvm"]))."@102\n");
+    fputs($tootedi, "IDTM171DT:".sprintf("%-35.35s", vlas_dateconv($lasrow["tapvm"]))."@102\n");
     fputs($tootedi, "IRFFPK_NU:$lasrow[tunnus]\n");
     fputs($tootedi, "IRFFVN_NU:$lasrow[viesti]\n");
     fputs($tootedi, "INADSE_CC:$lasrow[viesti]\n");
@@ -34,8 +34,8 @@ if (!function_exists('elmaedi_otsik')) {
     fputs($tootedi, "IFTXAAITX:\n");
     fputs($tootedi, "IFTXAAITX:\n");
     fputs($tootedi, "IFTXAAITX:\n");
-    fputs($tootedi, "INADSE_PC:".sprintf("%-17.17s",$yhtiorow["ovttunnus"])."@100\n");
-    fputs($tootedi, "INADSE_PC:".sprintf("%-17.17s","7002479")."@92\n");
+    fputs($tootedi, "INADSE_PC:".sprintf("%-17.17s", $yhtiorow["ovttunnus"])."@100\n");
+    fputs($tootedi, "INADSE_PC:".sprintf("%-17.17s", "7002479")."@92\n");
     fputs($tootedi, "INADSE_NA:$yhtiorow[nimi]\n");
     fputs($tootedi, "INADSE_SA:$yhtiorow[osoite]\n");
     fputs($tootedi, "INADSE_CI:$yhtiorow[postitp]\n");
@@ -58,12 +58,12 @@ if (!function_exists('elmaedi_otsik')) {
     fputs($tootedi, "INADDP_CI:$lasrow[toim_postitp]\n");
     fputs($tootedi, "INADDP_PO:$lasrow[toim_postino]\n");
     fputs($tootedi, "ICUX1__CR:$yhtiorow[valkoodi]\n");
-    fputs($tootedi, "IPAT1__DT:13 @".sprintf("%-35.35s",vlas_dateconv($lasrow["erpcm"]))."@102\n");
+    fputs($tootedi, "IPAT1__DT:13 @".sprintf("%-35.35s", vlas_dateconv($lasrow["erpcm"]))."@102\n");
     fputs($tootedi, "IPAT1__PC:15 @$lasrow[viikorkopros]\n");
     fputs($tootedi, "IPAT1__TP:$masrow[teksti]\n");
 
     if ($lasrow["kasumma"] != 0) {
-      fputs($tootedi, "IPAT8__DT:12 @".sprintf("%-35.35s",vlas_dateconv($lasrow["kapvm"]))."@102\n");
+      fputs($tootedi, "IPAT8__DT:12 @".sprintf("%-35.35s", vlas_dateconv($lasrow["kapvm"]))."@102\n");
       fputs($tootedi, "IPAT8__PC:12 @$masrow[kassa_alepros]\n");
       fputs($tootedi, "IPAT8__MA:12 @".sprintf("%018.2f", $lasrow["kasumma"])."@$yhtiorow[valkoodi]\n");
     }
@@ -124,7 +124,7 @@ if (!function_exists('elmaedi_rivi')) {
     }
 
     fputs($tootedi, "ILINVATTX:$tilrow[alv]\n");
-    fputs($tootedi, "ILIN69_DT:" . sprintf("%-35.35s",vlas_dateconv($tilrow["toimitettuaika"])) . "@102\n");
+    fputs($tootedi, "ILIN69_DT:" . sprintf("%-35.35s", vlas_dateconv($tilrow["toimitettuaika"])) . "@102\n");
     fputs($tootedi, "ILIN__END:$rivinumero\n");
   }
 }

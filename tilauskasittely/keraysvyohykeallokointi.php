@@ -1,6 +1,6 @@
 <?php
 
-require("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if ($_POST['ajax_toiminto'] == 'paivita_keraysvyohyke') {
 
@@ -81,7 +81,7 @@ echo "  <script type='text/javascript'>
 
     </script>";
 
-echo "<font class='head'>",t("Keräysvyöhykeallokointi"),"</font><hr>";
+echo "<font class='head'>", t("Keräysvyöhykeallokointi"), "</font><hr>";
 
 $query = "SELECT *
           FROM keraysvyohyke
@@ -94,7 +94,7 @@ if (mysql_num_rows($keraysvyohyke_res) > 0) {
   echo "<div id='divi' style='display:none;'>";
   echo "<table>";
   echo "<tr>";
-  echo "<th id='th_0'>",t("Kerääjä"),"</th>";
+  echo "<th id='th_0'>", t("Kerääjä"), "</th>";
 
   $id = 1;
   while ($keraysvyohyke_row = mysql_fetch_assoc($keraysvyohyke_res)) {
@@ -110,7 +110,7 @@ if (mysql_num_rows($keraysvyohyke_res) > 0) {
 
   echo "<thead>";
   echo "<tr>";
-  echo "<th id='thead_keraaja'>",t("Kerääjä"),"</th>";
+  echo "<th id='thead_keraaja'>", t("Kerääjä"), "</th>";
 
   mysql_data_seek($keraysvyohyke_res, 0);
 
@@ -146,4 +146,4 @@ if (mysql_num_rows($keraysvyohyke_res) > 0) {
   echo "</table>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

@@ -23,7 +23,7 @@ if (is_array($tilikaudetrow)) {
 
 $raja = '0000-00';
 
-while ($raja < substr($yhtiorow['tilikausi_loppu'],0,7)) {
+while ($raja < substr($yhtiorow['tilikausi_loppu'], 0, 7)) {
   $vuosi = substr($yhtiorow['tilikausi_alku'], 0, 4);
   $kk = substr($yhtiorow['tilikausi_alku'], 5, 2);
   $kk += $j;
@@ -36,8 +36,8 @@ while ($raja < substr($yhtiorow['tilikausi_loppu'],0,7)) {
 
   $raja = $vuosi . "-" . $kk;
 
-   echo "<th>$raja</th>";
-   $j++;
+  echo "<th>$raja</th>";
+  $j++;
 }
 echo "</tr>";
 
@@ -70,9 +70,9 @@ for ($i=1; $i<8; $i++) {
     $raja='0000-00';
     $j=0;
 
-    while ($raja < substr($yhtiorow['tilikausi_loppu'],0,7)) {
-      $vuosi=substr($yhtiorow['tilikausi_alku'],0,4);
-      $kk=substr($yhtiorow['tilikausi_alku'],5,2);
+    while ($raja < substr($yhtiorow['tilikausi_loppu'], 0, 7)) {
+      $vuosi=substr($yhtiorow['tilikausi_alku'], 0, 4);
+      $kk=substr($yhtiorow['tilikausi_alku'], 5, 2);
       $kk += $j;
 
       if ($kk > 12) {
@@ -111,7 +111,7 @@ for ($i=1; $i<8; $i++) {
               GROUP BY 1";
     $result = mysql_query($query) or pupe_error($query);
 
-    while ($trow = mysql_fetch_array ($result)) {
+    while ($trow = mysql_fetch_array($result)) {
       for ($j=0; $j<mysql_num_fields($result); $j++) {
         echo "<td align = 'right'>";
         echo $trow[$j];

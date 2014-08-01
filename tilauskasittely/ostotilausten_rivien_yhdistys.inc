@@ -107,7 +107,7 @@ if ($tee == "") {
     $keikkakesken = 0;
 
     $lock_params = array(
-        "locktime" => 0,
+      "locktime" => 0,
       "lockfile" => "$kukarow[yhtio]-keikka.lock",
       "return"   => TRUE
     );

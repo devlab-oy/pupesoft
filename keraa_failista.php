@@ -1,6 +1,6 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 if ($tee == "keraa") {
   if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE)) {
@@ -13,7 +13,7 @@ if ($tee == "keraa") {
     $path_parts = pathinfo($_FILES['userfile']['name']);
     $ext = strtoupper($path_parts['extension']);
 
-    $retval = tarkasta_liite("userfile", array("XLSX","XLS","ODS","SLK","XML","GNUMERIC","CSV","TXT","DATAIMPORT"));
+    $retval = tarkasta_liite("userfile", array("XLSX", "XLS", "ODS", "SLK", "XML", "GNUMERIC", "CSV", "TXT", "DATAIMPORT"));
 
     if ($retval !== TRUE) {
       echo "<font class='error'><br>".t("V‰‰r‰ tiedostomuoto")."!</font>";
@@ -154,15 +154,15 @@ if ($tee == "keraa") {
 
     foreach ($kerivi as $rivitunnus) {
       echo "<tr>";
-      echo "<th>",$tilaus,"</th>";
-      echo "<th>",$tilausrow['nimi'],"</th>";
-      echo "<td>",$rivitunnus,"</td>";
-      echo "<td>",$maara[$rivitunnus],"</td>";
-      echo "<td>",$rivin_varattu[$rivitunnus],"</td>";
-      echo "<td>",$rivin_puhdas_tuoteno[$rivitunnus],"</td>";
-      echo "<td>",$rivin_tuoteno[$rivitunnus],"</td>";
-      echo "<td>",$vertaus_hylly[$rivitunnus],"</td>";
-      echo "<td>",$poikkeama_kasittely[$rivitunnus],"</td>";
+      echo "<th>", $tilaus, "</th>";
+      echo "<th>", $tilausrow['nimi'], "</th>";
+      echo "<td>", $rivitunnus, "</td>";
+      echo "<td>", $maara[$rivitunnus], "</td>";
+      echo "<td>", $rivin_varattu[$rivitunnus], "</td>";
+      echo "<td>", $rivin_puhdas_tuoteno[$rivitunnus], "</td>";
+      echo "<td>", $rivin_tuoteno[$rivitunnus], "</td>";
+      echo "<td>", $vertaus_hylly[$rivitunnus], "</td>";
+      echo "<td>", $poikkeama_kasittely[$rivitunnus], "</td>";
       echo "</tr>";
     }
 
@@ -194,7 +194,7 @@ if ($tee == "keraa") {
     $lasku_yhtio = "";
     $real_submit = "Merkkaa ker‰tyksi";
 
-    require('tilauskasittely/keraa.php');
+    require 'tilauskasittely/keraa.php';
   }
 }
 
@@ -215,4 +215,4 @@ echo "<tr><th>".t("Valitse tiedosto").":</th>
 echo "</table>";
 echo "<br><br><input type='submit' value='".t("Valitse")."'></form>";
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

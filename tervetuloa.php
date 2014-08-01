@@ -2,17 +2,17 @@
 
 $pupe_DataTables = array("etusivun_tyomaarays");
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Tervetuloa pupesoft-järjestelmään")."</font><hr><br>";
 
 if (!isset($tee) or $tee == '') {
 
   if (file_exists("tervetuloa_".$kukarow["yhtio"].".inc")) {
-    require("tervetuloa_".$kukarow["yhtio"].".inc");
+    require "tervetuloa_".$kukarow["yhtio"].".inc";
   }
   elseif ($yhtiorow['konserni'] != "" and file_exists("tervetuloa_".$yhtiorow['konserni'].".inc")) {
-    require("tervetuloa_".$yhtiorow['konserni'].".inc");
+    require "tervetuloa_".$yhtiorow['konserni'].".inc";
   }
 
   echo "<table>";
@@ -21,7 +21,7 @@ if (!isset($tee) or $tee == '') {
   ///* Uutiset *///
   echo "<tr><td class='back' valign='top'>";
   $toim = "";
-  require("uutiset.php");
+  require "uutiset.php";
   echo "</td>";
 
   ///* Hyväksyttävät laskut*///
@@ -42,7 +42,7 @@ if (!isset($tee) or $tee == '') {
               WHERE hyvaksyja_nyt = '$kukarow[kuka]' and yhtio = '$kukrow[yhtio]' and alatila = 'H' and tila!='D'
               ORDER BY erpcm";
     $result = mysql_query($query) or pupe_error($query);
-    $piilorow = mysql_fetch_array ($result);
+    $piilorow = mysql_fetch_array($result);
 
     $query = "SELECT tapvm, erpcm, ytunnus, nimi, round(summa * vienti_kurssi, 2) 'kotisumma', if(erpcm<=now(), 1, 0) wanha
               FROM lasku
@@ -70,10 +70,10 @@ if (!isset($tee) or $tee == '') {
         echo "<th>" . t("Summa")."</th>";
 
 
-        while ($trow=mysql_fetch_array ($result)) {
+        while ($trow=mysql_fetch_array($result)) {
           echo "<tr>";
 
-          if($trow["wanha"] == 1) {
+          if ($trow["wanha"] == 1) {
             $style = "error'";
           }
           else {
@@ -156,13 +156,13 @@ if (!isset($tee) or $tee == '') {
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) > 0) {
-        echo "<table width='100%'>";
-        echo "<tr>";
-         echo "<th colspan='4'>".t("Muistutukset")."</th>";
-        echo "</tr>";
+    echo "<table width='100%'>";
+    echo "<tr>";
+    echo "<th colspan='4'>".t("Muistutukset")."</th>";
+    echo "</tr>";
 
 
-        while ($prow = mysql_fetch_array ($result)) {
+    while ($prow = mysql_fetch_array($result)) {
 
       if ($yhtiorow['tyomaarays_asennuskalenteri_muistutus'] == 'K' and trim($prow['kentta02']) != '' and is_numeric($prow['kentta02']) and $prow['Tapa'] == "Asentajan kuittaus") {
 
@@ -195,8 +195,8 @@ if (!isset($tee) or $tee == '') {
       echo "<td>$prow[Kommentit]</td>";
       echo "<td nowrap>$prow[Tapa]</td>";
       echo "</tr>";
-        }
-        echo "</table><br>";
+    }
+    echo "</table><br>";
   }
 
   // Näytetään käyttäjäkohtaiset työmääräykset
@@ -240,7 +240,7 @@ if (!isset($tee) or $tee == '') {
     echo "</thead>";
     echo "<tbody>";
 
-     while ($tyorow = mysql_fetch_array($tyoresult)) {
+    while ($tyorow = mysql_fetch_array($tyoresult)) {
       // Laitetetaan taustaväri jos sellainen on syötetty
       $varilisa = ($tyorow["tyostatusvari"] != "") ? " style='background-color: {$tyorow["tyostatusvari"]};'" : "";
 
@@ -275,7 +275,7 @@ if (!isset($tee) or $tee == '') {
         $i += 88;
       }
 
-      $alvpvm = date("Y-m-d", mktime(0, 0, 0, (substr($i,4)+1), 0, substr($i, 0, 4)));
+      $alvpvm = date("Y-m-d", mktime(0, 0, 0, (substr($i, 4)+1), 0, substr($i, 0, 4)));
 
       $query = "SELECT lasku.tunnus
                 FROM lasku
@@ -289,7 +289,7 @@ if (!isset($tee) or $tee == '') {
 
       if (mysql_num_rows($tositelinkki_result) == 0) {
 
-        list($vv,$kk,$pp) = explode("-", $alvpvm);
+        list($vv, $kk, $pp) = explode("-", $alvpvm);
 
         $ulos .= "<tr><td><a href='{$palvelin2}raportit/alv_laskelma_uusi.php?kk=$kk&vv=$vv'>".t("ALV")." $kk $vv ".t("tosite tekemättä")."</a></td></tr>";
       }
@@ -297,7 +297,7 @@ if (!isset($tee) or $tee == '') {
 
     if (trim($ulos) != '') {
       echo "<table>";
-      echo "<tr><th>",t("ALV-ilmoitus"),"</th></tr>";
+      echo "<tr><th>", t("ALV-ilmoitus"), "</th></tr>";
       echo $ulos;
       echo "</table><br />";
     }
@@ -308,4 +308,4 @@ if (!isset($tee) or $tee == '') {
   echo "</table>";
 }
 
-require("inc/footer.inc");
+require "inc/footer.inc";

@@ -359,7 +359,7 @@ elseif ($kerattavia > 0 and $kutsuja != 'keraa.php' and !$tilaus_toimitetuksi) {
   ///* Tähän mennään jos lähete tosiaan tulostetaan *///
   if ($yhtiorow["lahetteen_tulostustapa"] == "A" or $yhtiorow["lahetteen_tulostustapa"] == "B") {
     $tilausnumeroita = $laskurow["tunnus"];
-    require("tilaus-valmis-tulostus.inc");
+    require "tilaus-valmis-tulostus.inc";
 
     // jos halutaan MYÖS lähete samantien
     if ($yhtiorow["lahetteen_tulostustapa"] == "B") {
@@ -373,7 +373,7 @@ elseif ($kerattavia > 0 and $kutsuja != 'keraa.php' and !$tilaus_toimitetuksi) {
         'komento'           => $komento,
         'lahetekpl'          => "",
         'kieli'           => ""
-        );
+      );
 
       pupesoft_tulosta_lahete($params);
     }
@@ -414,7 +414,7 @@ if ($asirow['toimitusvahvistus'] != '') {
     $magento_api_ord = $laskurow["asiakkaan_tilausnumero"];
     $magento_api_noutokuittaus = "JOO";
 
-    require("magento_toimita_tilaus.php");
+    require "magento_toimita_tilaus.php";
   }
 
   if ($toimitusvahvitus_laheta) {
@@ -435,7 +435,7 @@ if ($asirow['toimitusvahvistus'] != '') {
       $desadv_version = "";
     }
 
-    @include("tilauskasittely/$asirow[toimitusvahvistus]");
+    @include "tilauskasittely/$asirow[toimitusvahvistus]";
 
     if ($toimitusvahvistus_desadv_lahetys === true) {
       $_msg = sprintf(t("Tilauksesta %s lähetettiin toimitusvahvistus."), $laskurow["tunnus"]);

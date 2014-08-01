@@ -1,7 +1,7 @@
 <?php
 
-if(!function_exists("avainsanatarkista")) {
-  function avainsanatarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+if (!function_exists("avainsanatarkista")) {
+  function avainsanatarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set, $ulosarray, $varastot_array;
 
     static $seliteerrori, $tem_kieli, $tem_laji, $tem_nakyvyys, $tem_selite, $seliteind, $tem_selitetark, $tem_selitetark_2, $tem_selitetark_3;
@@ -16,7 +16,7 @@ if(!function_exists("avainsanatarkista")) {
       // Synkattavien avainsanojen lajia ei saa muuttaa, muuten synkkaus menee out of sync
       if (isset($trow["laji"]) and $trow["laji"] != $tem_laji and stripos($yhtiorow["synkronoi"], "avainsana") !== FALSE) {
         $abulisa = preg_match("/(^|,)(avainsana\|*([\|a-zA-Z_\-]*))($|,)/i", $yhtiorow["synkronoi"], $regs);
-        $tem_lajit = explode("|",strtolower($regs[3]));
+        $tem_lajit = explode("|", strtolower($regs[3]));
 
         if (in_array(strtolower($trow["laji"]), $tem_lajit)) {
           $virhe[$i] = t("Synkronoitavien avainsanojen lajia ei saa muuttaa")."!";
@@ -29,7 +29,7 @@ if(!function_exists("avainsanatarkista")) {
 
         $onko_input_ok = false;
         $sallitut_kentat = "";
-        while($tyomaarays_kentat = mysql_fetch_assoc($tyomaarays_result)) {
+        while ($tyomaarays_kentat = mysql_fetch_assoc($tyomaarays_result)) {
           //dynaaminen kenttä ei saa olla yhtio tai otunnus
           if ($tyomaarays_kentat['Field'] != 'yhtio' and $tyomaarays_kentat['Field'] != 'otunnus') {
             $sallitut_kentat .= $tyomaarays_kentat['Field'] . ', ';
@@ -110,7 +110,7 @@ if(!function_exists("avainsanatarkista")) {
         $virhe[$i] = t("Selite on liian pitkä, maksimipituus on yksi merkki")."!";
       }
 
-      if ($tem_laji == "TOIMEHTO" AND strlen($tem_selite) != 3){
+      if ($tem_laji == "TOIMEHTO" and strlen($tem_selite) != 3) {
         $virhe[$i] = t("Selitteen tulee olla kolme merkkiä pitkä")."!";
       }
 
@@ -193,7 +193,7 @@ if(!function_exists("avainsanatarkista")) {
       elseif ($tem_laji == 'VARASTORYHMA') {
         if (is_array($varastot_array) and count($varastot_array) > 0) {
           $varastot = '';
-          foreach($varastot_array as $varasto_apu) {
+          foreach ($varastot_array as $varasto_apu) {
             $varastot .= "$varasto_apu,";
           }
           $varastot = substr($varastot, 0, -1);
@@ -228,12 +228,12 @@ if(!function_exists("avainsanatarkista")) {
     }
 
     if ($tem_laji == "SAHKTILTUN" and
-       (mysql_field_name($result, $i) == "selite" or
-      mysql_field_name($result, $i) == "selitetark" or
-      mysql_field_name($result, $i) == "selitetark_2" or
-      mysql_field_name($result, $i) == "selitetark_3" or
-      mysql_field_name($result, $i) == "selitetark_4" or
-      mysql_field_name($result, $i) == "selitetark_5")) {
+      (mysql_field_name($result, $i) == "selite" or
+        mysql_field_name($result, $i) == "selitetark" or
+        mysql_field_name($result, $i) == "selitetark_2" or
+        mysql_field_name($result, $i) == "selitetark_3" or
+        mysql_field_name($result, $i) == "selitetark_4" or
+        mysql_field_name($result, $i) == "selitetark_5")) {
 
       if (trim($t[$i]) == "") {
         $virhe[$i] = t("Tieto pakollinen")."!";

@@ -1,7 +1,7 @@
 <?php
 
 if (!function_exists("keraysvyohyketarkista")) {
-  function keraysvyohyketarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+  function keraysvyohyketarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
 
     if (mysql_field_name($result, $i) == "sallitut_alustat" or mysql_field_name($result, $i) == "yhdistelysaanto") {
       if (count($t[$i]) > 0) {

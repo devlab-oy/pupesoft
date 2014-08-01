@@ -1,9 +1,9 @@
 <?php
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Kuittaamattomat lomat")."</font><hr>";
 
-if($tee == "kuittaa") {       //lisataan tapahtuma kalenteriin
+if ($tee == "kuittaa") {       //lisataan tapahtuma kalenteriin
   $query = "UPDATE kalenteri
             SET kuittaus = '$kukarow[nimi]'
             WHERE tunnus='$tunnus'
@@ -14,7 +14,7 @@ if($tee == "kuittaa") {       //lisataan tapahtuma kalenteriin
   $tee = "";
 }
 
-if($tee == "ei_kuittaa") {       //lisataan tapahtuma kalenteriin
+if ($tee == "ei_kuittaa") {       //lisataan tapahtuma kalenteriin
   $query = "UPDATE kalenteri
             SET kuittaus = ''
             WHERE tunnus='$tunnus'
@@ -44,7 +44,7 @@ if ($tee == "") {
 
   echo "</select></td></tr>";
 
-  if ($kuitatut != '')  {
+  if ($kuitatut != '') {
     $chk1 = "CHECKED";
     $lisa1 = "";
   }
@@ -53,7 +53,7 @@ if ($tee == "") {
     $lisa1 = " and kalenteri.kuittaus = '' ";
   }
 
-  if ($konserni != '')  {
+  if ($konserni != '') {
     $chk2 = "CHECKED";
 
     $query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
@@ -103,7 +103,7 @@ if ($tee == "") {
           <th>".("Aikaalku")."</th><th>".("Pvmloppu")."</th>
           <th>".("Aikaloppu")."</th><th>".("Kommentti")."</th>";
 
-      if ($kuitatut != '')  {
+      if ($kuitatut != '') {
         echo "<th>".t("Hyväksyjä")."</th>";
       }
       if ($konserni != '') {
@@ -119,7 +119,7 @@ if ($tee == "") {
             <td>$row[aikaalku]</td><td>$row[pvmloppu]</td>
             <td>$row[aikaloppu]</td><td>$row[kentta01]</td>";
 
-        if ($kuitatut != '')  {
+        if ($kuitatut != '') {
           echo "<td>$row[kuittaus]</td>";
         }
         if ($konserni != '') {
@@ -162,4 +162,4 @@ if ($tee == "") {
   }
 }
 
-require ("../inc/footer.inc");
+require "../inc/footer.inc";

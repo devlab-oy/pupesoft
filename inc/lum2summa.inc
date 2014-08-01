@@ -24,17 +24,17 @@ Kentt‰  Tieto          Pakollisuus  Muoto  Pituus  E/P  Sis‰ltˆ
 $ulos  = "LUM2";                        // Sovellustunnus
 $ulos .= "9";                                                   // Tietuetunnus
 $ulos .= "0";                                                   // Aineistolaji
-$ulos .= sprintf ('%1s',     ' ');                           // Varalla
-  $ulos .= sprintf ('%011.11s',  $ytunnus);                      // Maksajan Y-tunnus
-$ulos .= sprintf ('%5.5s',    $lum_st_5kentta);              // Asiakastunnuksen lis‰osa
-$ulos .= sprintf ('%2s',     ' ');                           // Varalla
-$ulos .= sprintf ('%01d',     '0');                           // Hyv‰ksymiskoodi
-$ulos .= sprintf ('%05d',     $makskpl);                      // Maksujen lukum‰‰r‰
-$ulos .= sprintf ('%05d',     '0');                           // Laskujen lukum‰‰r‰
-$ulos .= sprintf ('%015d',    round($makssumma * 100, 0));    // Maksujen valuuttam‰‰r‰
-$ulos .= sprintf ('%549s',     ' ');                           // Varalla
+$ulos .= sprintf('%1s',     ' ');                           // Varalla
+$ulos .= sprintf('%011.11s',  $ytunnus);                      // Maksajan Y-tunnus
+$ulos .= sprintf('%5.5s',    $lum_st_5kentta);              // Asiakastunnuksen lis‰osa
+$ulos .= sprintf('%2s',     ' ');                           // Varalla
+$ulos .= sprintf('%01d',     '0');                           // Hyv‰ksymiskoodi
+$ulos .= sprintf('%05d',     $makskpl);                      // Maksujen lukum‰‰r‰
+$ulos .= sprintf('%05d',     '0');                           // Laskujen lukum‰‰r‰
+$ulos .= sprintf('%015d',    round($makssumma * 100, 0));    // Maksujen valuuttam‰‰r‰
+$ulos .= sprintf('%549s',     ' ');                           // Varalla
 
 //print strlen($ulos) . "/" . $ulos;
 //print "</pre>";
 
-fputs($toot,$ulos . "\r\n");
+fputs($toot, $ulos . "\r\n");

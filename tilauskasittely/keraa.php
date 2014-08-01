@@ -1318,7 +1318,7 @@ if ($tee == 'P') {
       $qry = "SELECT tila
               FROM lasku
               WHERE yhtio = '$kukarow[yhtio]'
-              AND tunnus = $poikkeamatilaus";
+              AND tunnus  = $poikkeamatilaus";
       $res = pupe_query($qry);
       $ptilarow = mysql_fetch_assoc($res);
       $ptila = $ptilarow['tila'];
@@ -1331,10 +1331,10 @@ if ($tee == 'P') {
                   kuka.eposti AS kukamail
                   FROM lasku
                   LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio
-                    AND kuka.kuka = lasku.hyvak1
+                    AND kuka.kuka     = lasku.hyvak1
                     AND kuka.extranet = '')
-                  WHERE lasku.tunnus = '$poikkeamatilaus'
-                  AND lasku.yhtio = '$kukarow[yhtio]'";
+                  WHERE lasku.tunnus  = '$poikkeamatilaus'
+                  AND lasku.yhtio     = '$kukarow[yhtio]'";
       }
       else {
         $query = "SELECT lasku.*,
@@ -1347,15 +1347,15 @@ if ($tee == 'P') {
                   kuka_ext.nimi AS kuka_ext_nimi
                   FROM lasku
                   JOIN asiakas ON (asiakas.yhtio = lasku.yhtio
-                    AND asiakas.tunnus = lasku.liitostunnus)
+                    AND asiakas.tunnus     = lasku.liitostunnus)
                   LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio
-                    AND kuka.tunnus = lasku.myyja
-                    AND kuka.extranet = '')
+                    AND kuka.tunnus        = lasku.myyja
+                    AND kuka.extranet      = '')
                   LEFT JOIN kuka AS kuka_ext ON (kuka_ext.yhtio = lasku.yhtio
-                    AND kuka_ext.kuka = lasku.laatija
+                    AND kuka_ext.kuka      = lasku.laatija
                     AND kuka_ext.extranet != '')
-                  WHERE lasku.tunnus = '$poikkeamatilaus'
-                  AND lasku.yhtio = '$kukarow[yhtio]'";
+                  WHERE lasku.tunnus       = '$poikkeamatilaus'
+                  AND lasku.yhtio          = '$kukarow[yhtio]'";
       }
 
       $result = pupe_query($query);
@@ -1839,7 +1839,7 @@ if ($tee == 'P') {
           // Valittu tulostin
           $valittu_tulostin_valittu = $valittu_tulostin;
 
-          # Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰
+          // Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰
           if (!empty($laskurow['yhtio_toimipaikka'])) {
             $avainsana_where = " and avainsana.selite       = '{$laskurow['varasto']}'
                                  and avainsana.selitetark   = '{$laskurow['yhtio_toimipaikka']}'
@@ -3077,7 +3077,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
             $tunken2 = "myyntirivitunnus";
           }
 
-          if ($row["tyyppi"] != "W" AND ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "T" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "V")) {
+          if ($row["tyyppi"] != "W" and ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "T" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "V")) {
 
             $query = "SELECT count(*) kpl, min(sarjanumero) sarjanumero
                       from sarjanumeroseuranta
@@ -3369,7 +3369,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
           }
         }
 
-        # Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰
+        // Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰
         $query = "SELECT varasto, yhtio_toimipaikka
                   FROM lasku
                   WHERE yhtio = '{$kukarow['yhtio']}'

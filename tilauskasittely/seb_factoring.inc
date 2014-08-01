@@ -1,20 +1,20 @@
 <?php
- //tarvitsemme $laskurow:n jossa on laskun tiedot
- // ja $masrown jossa on maksuehdon tiedot
+//tarvitsemme $laskurow:n jossa on laskun tiedot
+// ja $masrown jossa on maksuehdon tiedot
 
- // jos $fakt_lahetys on tyhjä niin luodaan aineisto
- // jos $fakt_lahetys ei ole tyhjä niin aineisto lähetetään
+// jos $fakt_lahetys on tyhjä niin luodaan aineisto
+// jos $fakt_lahetys ei ole tyhjä niin aineisto lähetetään
 
- //softa palauttaa $sisalto-muutujan
+//softa palauttaa $sisalto-muutujan
 
- $sebfact_ulos = "";
+$sebfact_ulos = "";
 
- if ($fakt_lahetys == "") {
+if ($fakt_lahetys == "") {
   //maksuehto tekstinä
   $maksuehto     = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV");
   $kateistyyppi  = $masrow["kateinen"];
 
-  require_once('tulosta_lasku_text.inc');
+  require_once 'tulosta_lasku_text.inc';
 
   // haetaan tilauksen kaikki rivit
   $query = "SELECT *, concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
@@ -52,7 +52,7 @@
 
 if ($fakt_lahetys != "" and $sisalto != '') {
   //keksitään uudelle failille joku varmasti uniikki nimi:
-  $pdffilenimi  = "Autofakt-".substr(md5(uniqid(rand(),true)),0,10).".txt";
+  $pdffilenimi  = "Autofakt-".substr(md5(uniqid(rand(), true)), 0, 10).".txt";
 
   //tässa on kaikki failit jotka tarvitaan
   $bound = uniqid(time()."_") ;
@@ -72,11 +72,11 @@ if ($fakt_lahetys != "" and $sisalto != '') {
 
   $subjekti = $frow["sopimusnumero"]." ".$pdffilenimi;
 
-  if($frow["email"] == '' or !mail($frow["email"], mb_encode_mimeheader($subjekti, "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]")) {
-    $sebfact_ulos .= sprintf(t("VIRHE: Laskutuksen factoring-sähköpostisiirtoa ei voitu suorittaa osoitteeseen: %s"),$frow["email"])."<br>\r\n";
+  if ($frow["email"] == '' or !mail($frow["email"], mb_encode_mimeheader($subjekti, "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]")) {
+    $sebfact_ulos .= sprintf(t("VIRHE: Laskutuksen factoring-sähköpostisiirtoa ei voitu suorittaa osoitteeseen: %s"), $frow["email"])."<br>\r\n";
   }
   else {
-    $sebfact_ulos .= sprintf(t("Laskutuksen factoring-sähköpostisiirto lähetettiin osoitteeseen: %s"),$frow["email"])."<br><br>\r\n";
+    $sebfact_ulos .= sprintf(t("Laskutuksen factoring-sähköpostisiirto lähetettiin osoitteeseen: %s"), $frow["email"])."<br><br>\r\n";
   }
 
   //lähetetään meili myös yhtiön adminille

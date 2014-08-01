@@ -504,6 +504,10 @@ function sepa_file_type_check($bank, $file_type) {
     if ($file_type == "VIPN") {
       $file_type = "KTL";
     }
+    // XML maksuaineisto
+    if ($file_type == "C2BL") {
+      $file_type = "NDCORPAYS";
+    }
   }
 
   // Danskemuunnokset
@@ -515,6 +519,10 @@ function sepa_file_type_check($bank, $file_type) {
     // Konekielinen viiteaineisto
     if ($file_type == "KTL") {
       $file_type = "VIPN";
+    }
+    // XML maksuaineisto
+    if ($file_type == "NDCORPAYS") {
+      $file_type = "C2BL";
     }
   }
 

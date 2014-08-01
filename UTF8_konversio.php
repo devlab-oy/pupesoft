@@ -41,18 +41,18 @@ foreach ($files as $file) {
   }
 
   $mime = finfo_file($finfo1, $file);
-	$encd = finfo_file($finfo2, $file);
+  $encd = finfo_file($finfo2, $file);
 
-	if (substr($mime, 0, 4) == "text" and $encd != "utf-8" and $encd != "us-ascii") {
-		$mitenmeni = system("recode ISO_8859-1..UTF8 $file");
-		echo "$file, $encd\n";
-	}
+  if (substr($mime, 0, 4) == "text" and $encd != "utf-8" and $encd != "us-ascii") {
+    $mitenmeni = system("recode ISO_8859-1..UTF8 $file");
+    echo "$file, $encd\n";
+  }
 
   if ($vain_recode) {
     continue;
   }
 
-	$koodi = file_get_contents($file);
+  $koodi = file_get_contents($file);
 
   if (substr($koodi, 0, 5) == "<?php" or substr($koodi, 0, 14) == "#!/usr/bin/php") {
 
@@ -68,40 +68,40 @@ foreach ($files as $file) {
     $koodi = str_replace('iconv("ISO-8859-1", "Windows-1252"', 'iconv("UTF-8", "Windows-1252"', $koodi);
 
     // PREG REPLACE --> {}-substringit
-    # Find: (\$[a-z0-9_]+?)\{([0-9]*)\}
-    # Replace: substr($1, $2, 1)
+    // Find: (\$[a-z0-9_]+?)\{([0-9]*)\}
+    // Replace: substr($1, $2, 1)
     $koodi = preg_replace('/(\$[a-z0-9_]+?)\{([0-9]*)\}/i', 'substr($1, $2, 1)', $koodi);
 
-  	// Etsitään laikki mysql_set_charset-koodit
-  	# Find: mysql_set_charset\(["'][a-z0-9]*["']
-  	# Replace: mysql_set_charset("utf8"
+    // Etsitään laikki mysql_set_charset-koodit
+    // Find: mysql_set_charset\(["'][a-z0-9]*["']
+    // Replace: mysql_set_charset("utf8"
     $koodi = preg_replace('/mysql_set_charset\(["\'][a-z0-9]*["\']/', 'mysql_set_charset("utf8"', $koodi);
 
-  	# Find: charset=iso-8859-15
-  	# Find: charset=iso-8859-1
-    # Replace: charset=utf-8
+    // Find: charset=iso-8859-15
+    // Find: charset=iso-8859-1
+    // Replace: charset=utf-8
     $koodi = preg_replace('/charset=iso-8859-15?/i', 'charset=utf-8', $koodi);
     $koodi = preg_replace('/charset=\\\\"iso-8859-15?\\\\"/i', 'charset=\"utf-8\"', $koodi);
     $koodi = preg_replace('/charset = "iso-8859-15?"/i', 'charset = "utf-8"', $koodi);
 
-    # Find: utf8_encode\(([^\)]+?)\)
-    # Replace: $1
+    // Find: utf8_encode\(([^\)]+?)\)
+    // Replace: $1
     $koodi = preg_replace('/utf8_encode\(([^\)]+?)\)/', '$1', $koodi);
 
-    # Find: utf8_decode\(([^\)]+?)\)
-    # Replace: $1
+    // Find: utf8_decode\(([^\)]+?)\)
+    // Replace: $1
     $koodi = preg_replace('/utf8_decode\(([^\)]+?)\)/', '$1', $koodi);
 
-    # Find: utf8_decode\(([^\)]+?)\)
-    # Replace: $1
+    // Find: utf8_decode\(([^\)]+?)\)
+    // Replace: $1
     $koodi = preg_replace('/(drawText.*?)\'LATIN1\'/', '$1\'UTF-8\'', $koodi);
 
-    # Find: mb_encode_mimeheader("VIRHE: FTP-get!", "ISO-8859-1", "Q")
-    # Replace: $1
+    // Find: mb_encode_mimeheader("VIRHE: FTP-get!", "ISO-8859-1", "Q")
+    // Replace: $1
     $koodi = preg_replace('/(mb_encode_mimeheader\(.*?")ISO-8859-1"/', '$1UTF-8"', $koodi);
 
-		# Find: mysql_query("set group_concat_max_len=1000000", $XXXlink);
-		# Replace: mysql_query("set collation_connection=\"utf8_unicode_ci\", collation_database=\"utf8_unicode_ci\", group_concat_max_len=1000000", $XXXlink);
+    // Find: mysql_query("set group_concat_max_len=1000000", $XXXlink);
+    // Replace: mysql_query("set collation_connection=\"utf8_unicode_ci\", collation_database=\"utf8_unicode_ci\", group_concat_max_len=1000000", $XXXlink);
     $koodi = preg_replace('/mysql_query\("set group_concat_max_len=1000000/', 'mysql_query("set collation_connection=\"utf8_unicode_ci\", collation_database=\"utf8_unicode_ci\", group_concat_max_len=1000000', $koodi);
 
     // Vaihdetaan string-funkkarit mb_string-funkkareiks

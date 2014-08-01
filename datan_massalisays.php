@@ -314,7 +314,7 @@ if ($tee == 'GO') {
       list($kuva, $jarjestys) = explode("_", $kuva);
       $kuva = "$kuva.$ext";
     }
-    
+
     $apuselite = "";
     $mikakieli = "fi";
 

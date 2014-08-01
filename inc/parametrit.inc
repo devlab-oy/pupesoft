@@ -604,7 +604,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
       else {
         // Tässä on tarkoituksella monta spacea funktionimen ja avaavan kaarisulun välissä,
         // jotta UTF8-konversio ei osu tähän riviin
-        $_file_size = strlen      ($file);
+        $_file_size = strlen($file);
         header("Content-Length: {$_file_size}");
       }
     }

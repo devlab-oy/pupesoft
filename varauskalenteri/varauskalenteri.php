@@ -1,36 +1,36 @@
 <?php
 
-include("../inc/parametrit.inc");
+include "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Varauskalenteri")." $toim</font><hr>";
 
-if($tee == "SYOTA") {
-  include('varauskalenteri_syota.php');
+if ($tee == "SYOTA") {
+  include 'varauskalenteri_syota.php';
   if ($jatko != 1) {
     exit;
   }
 }
 
 if ($tee == "LISAA") {
-  include('varauskalenteri_lisaa.php');
+  include 'varauskalenteri_lisaa.php';
 }
 
 if ($tee == "POISTA") {
-  include('varauskalenteri_poista.php');
+  include 'varauskalenteri_poista.php';
   if ($jatko != 1) {
     exit;
   }
 }
 
 if ($tee == "NAYTA") {
-  include('varauskalenteri_nayta.php');
+  include 'varauskalenteri_nayta.php';
   if ($jatko != 1) {
     exit;
   }
 }
 
-$MONTH_ARRAY    = array(1=> t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kes‰kuu'),t('Hein‰kuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
-$paivat     = array(1=> t('Maanantai'),t('Tiistai'),t('Keskiviikko'),t('Torstai'),t('Perjantai'),t('Lauantai'),t('Sunnuntai'));
+$MONTH_ARRAY    = array(1=> t('Tammikuu'), t('Helmikuu'), t('Maaliskuu'), t('Huhtikuu'), t('Toukokuu'), t('Kes‰kuu'), t('Hein‰kuu'), t('Elokuu'), t('Syyskuu'), t('Lokakuu'), t('Marraskuu'), t('Joulukuu'));
+$paivat     = array(1=> t('Maanantai'), t('Tiistai'), t('Keskiviikko'), t('Torstai'), t('Perjantai'), t('Lauantai'), t('Sunnuntai'));
 
 //kalenteritoiminnot
 function days_in_month($month, $year) {
@@ -40,7 +40,7 @@ function days_in_month($month, $year) {
 
 function weekday_name($day, $month, $year) {
   // calculate weekday name
-  $day = array(t('Maanantai'),t('Tiistai'),t('Keskiviikko'),t('Torstai'),t('Perjantai'),t('Lauantai'),t('Sunnuntai'));
+  $day = array(t('Maanantai'), t('Tiistai'), t('Keskiviikko'), t('Torstai'), t('Perjantai'), t('Lauantai'), t('Sunnuntai'));
   $nro = date("w", mktime(0, 0, 0, $month, $day, $year));
   if ($nro==0) $nro=6;
   else $nro--;
@@ -69,26 +69,26 @@ if ($year == '')    $year  = date("Y");
 if ($day == '')   $day   = date("j");
 
 //lasketaan edellinen ja seuraava paiva kun siirytaan yksi paiva
-$backmday = date("n",mktime(0, 0, 0, $month, $day-1,  $year));
-$backyday = date("Y",mktime(0, 0, 0, $month, $day-1,  $year));
-$backdday = date("j",mktime(0, 0, 0, $month, $day-1,  $year));
+$backmday = date("n", mktime(0, 0, 0, $month, $day-1,  $year));
+$backyday = date("Y", mktime(0, 0, 0, $month, $day-1,  $year));
+$backdday = date("j", mktime(0, 0, 0, $month, $day-1,  $year));
 
-$nextmday = date("n",mktime(0, 0, 0, $month, $day+1,  $year));
-$nextyday = date("Y",mktime(0, 0, 0, $month, $day+1,  $year));
-$nextdday = date("j",mktime(0, 0, 0, $month, $day+1,  $year));
+$nextmday = date("n", mktime(0, 0, 0, $month, $day+1,  $year));
+$nextyday = date("Y", mktime(0, 0, 0, $month, $day+1,  $year));
+$nextdday = date("j", mktime(0, 0, 0, $month, $day+1,  $year));
 
 //lasketaan edellinen ja seuraava paiva kun siirytaan yksi kuukausi
-$backmmonth = date("n",mktime(0, 0, 0, $month-1, $day,  $year));
-$backymonth = date("Y",mktime(0, 0, 0, $month-1, $day,  $year));
-$backdmonth = date("j",mktime(0, 0, 0, $month-1, $day,  $year));
+$backmmonth = date("n", mktime(0, 0, 0, $month-1, $day,  $year));
+$backymonth = date("Y", mktime(0, 0, 0, $month-1, $day,  $year));
+$backdmonth = date("j", mktime(0, 0, 0, $month-1, $day,  $year));
 
-$nextmmonth = date("n",mktime(0, 0, 0, $month+1, $day,  $year));
-$nextymonth = date("Y",mktime(0, 0, 0, $month+1, $day,  $year));
-$nextdmonth = date("j",mktime(0, 0, 0, $month+1, $day,  $year));
+$nextmmonth = date("n", mktime(0, 0, 0, $month+1, $day,  $year));
+$nextymonth = date("Y", mktime(0, 0, 0, $month+1, $day,  $year));
+$nextdmonth = date("j", mktime(0, 0, 0, $month+1, $day,  $year));
 
 //viela muuttujat mysql kyselyja varten, (etunollat pitaa olla...)
-$mymonth = sprintf('%02d',$month);
-$myday   = sprintf('%02d',$day);
+$mymonth = sprintf('%02d', $month);
+$myday   = sprintf('%02d', $day);
 
 
 
@@ -121,11 +121,11 @@ while ($row = mysql_fetch_array($result)) {
 $konsernit = " and yhtio in (".substr($konsernit, 0, -1).") ";
 
 
-for($i=800; $i < 2200; $i++) {
+for ($i=800; $i < 2200; $i++) {
 
-  $kello = sprintf('%02d',$tun).':'.sprintf('%02d',$min);
+  $kello = sprintf('%02d', $tun).':'.sprintf('%02d', $min);
 
-  if($i == 800) {
+  if ($i == 800) {
     $query = "  select if('$year-$mymonth-$myday 00:00:00' > pvmalku, '08:00', substring(pvmalku,12,5)) aikaalku, substring(pvmloppu,12,5) aikaloppu, tapa, left(pvmloppu,10) pvmloppu, left(pvmalku,10) pvmalku, tunnus, kuka, kentta01, kentta02, kentta03, kentta04, kentta05, yhtio
           from kalenteri
           where pvmalku < '$year-$mymonth-$myday'
@@ -135,7 +135,7 @@ for($i=800; $i < 2200; $i++) {
           $konsernit";
     $lres = mysql_query($query) or pupe_error($query);
 
-    if(mysql_num_rows($lres) == 0) {
+    if (mysql_num_rows($lres) == 0) {
       $query = "  select if('$year-$mymonth-$myday 00:00:00' > pvmalku, '08:00', substring(pvmalku,12,5)) aikaalku, substring(pvmloppu,12,5) aikaloppu, tapa, left(pvmloppu,10) pvmloppu, left(pvmalku,10) pvmalku, tunnus, kuka, kentta01, kentta02, kentta03, kentta04, kentta05, yhtio
             from kalenteri
             where pvmalku <='$year-$mymonth-$myday $kello'
@@ -157,14 +157,14 @@ for($i=800; $i < 2200; $i++) {
 
   $result = mysql_query($query) or pupe_error($query);
 
-  if(mysql_num_rows($result) != 0) {
+  if (mysql_num_rows($result) != 0) {
 
     $row = mysql_fetch_array($result);
 
-    if (str_replace('-','',$row["pvmloppu"]) > $year.$mymonth.$myday) {
+    if (str_replace('-', '', $row["pvmloppu"]) > $year.$mymonth.$myday) {
       $row["aikaloppu"] = "22:00-->";
     }
-    if (str_replace('-','',$row["pvmalku"]) < $year.$mymonth.$myday) {
+    if (str_replace('-', '', $row["pvmalku"]) < $year.$mymonth.$myday) {
       $row["aikaalku"] = "-->08:00";
     }
 
@@ -201,10 +201,10 @@ for($i=800; $i < 2200; $i++) {
     if ($tun <= 16) {
       $min = $min;
     }
-    else{
+    else {
       $min = $min;
     }
-    if($min == 60) {
+    if ($min == 60) {
       $tun = $tun+1;
       $min = "00";
     }
@@ -214,7 +214,7 @@ for($i=800; $i < 2200; $i++) {
         <td><b>$kello</b></td>
         <td>";
 
-    if($tun.$min <= 2100) {
+    if ($tun.$min <= 2100) {
       echo "<a href='$PHP_SELF?kello=$kello&year=$year&month=$month&day=$day&tee=SYOTA&toim=$toim'>".t("Lis‰‰")."</a>";
     }
     echo "  </td>
@@ -225,10 +225,10 @@ for($i=800; $i < 2200; $i++) {
     if ($tun <= 16) {
       $min = $min+30;
     }
-    else{
+    else {
       $min = $min+60;
     }
-    if($min == 60) {
+    if ($min == 60) {
       $tun = $tun+1;
       $min = "00";
     }
@@ -247,8 +247,8 @@ echo "<table width='250'>
   <select name='month' Onchange='submit();'>";
 
 $i=1;
-foreach($MONTH_ARRAY as $val) {
-  if($i == $month) {
+foreach ($MONTH_ARRAY as $val) {
+  if ($i == $month) {
     $sel = "selected";
   }
   else {
@@ -273,7 +273,7 @@ echo "  </select>
     <th>Su</font></th>
     </tr>";
 
-echo "<tr><th>".date("W",mktime(0, 0, 0, $month, 1, $year))."</th>";
+echo "<tr><th>".date("W", mktime(0, 0, 0, $month, 1, $year))."</th>";
 
 // kirjotetaan alkuun tyhji‰ soluja
 for ($i=0; $i < weekday_number("1", $month, $year); $i++) {
@@ -282,7 +282,7 @@ for ($i=0; $i < weekday_number("1", $month, $year); $i++) {
 
 // kirjoitetaan p‰iv‰m‰‰r‰t taulukkoon..
 for ($i=1; $i <= days_in_month($month, $year); $i++) {
-  $pva = sprintf('%02d',$i);
+  $pva = sprintf('%02d', $i);
 
   $query = "  select tunnus
         from kalenteri
@@ -293,7 +293,7 @@ for ($i=1; $i <= days_in_month($month, $year); $i++) {
         $konsernit";
   $result = mysql_query($query) or pupe_error($query);
 
-  if(date("Y-n-j") == "$year-$mymonth-$myday") {
+  if (date("Y-n-j") == "$year-$mymonth-$myday") {
     $font=$today;
     $num =$i;
   }
@@ -302,14 +302,14 @@ for ($i=1; $i <= days_in_month($month, $year); $i++) {
     $num =$i;
   }
 
-  if($day == $i) {
+  if ($day == $i) {
     $style = "style=\"border : 1px solid #FF0000;\"";
   }
   else {
     $style = "";
   }
 
-  if(mysql_num_rows($result) != 0) {
+  if (mysql_num_rows($result) != 0) {
     $style .= " class='tumma'";
   }
 
@@ -319,7 +319,7 @@ for ($i=1; $i <= days_in_month($month, $year); $i++) {
   if (weekday_number($i, $month, $year) == 6) {
     // kirjotetaan viikon numero jos seuraava viikko on olemassa
     if (days_in_month($month, $year) != $i) {
-      $weeknro = date("W",mktime(0, 0, 0, $month, $i+1, $year));
+      $weeknro = date("W", mktime(0, 0, 0, $month, $i+1, $year));
       echo "</tr><tr><th>$weeknro</th>";
     }
 
@@ -337,4 +337,4 @@ echo "<tr><td class='back' align='center' colspan='8'><a href='$PHP_SELF?day=1&m
 
 echo "</table></th></tr></table>";
 
-require ("../inc/footer.inc");
+require "../inc/footer.inc";

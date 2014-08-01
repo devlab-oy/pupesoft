@@ -4,11 +4,11 @@
 $useslave = 1;
 
 if (isset($_POST["tee"])) {
-  if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
-require("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if (isset($tee)) {
   if ($tee == "lataa_tiedosto") {
@@ -21,11 +21,11 @@ else {
 
   //Käyttöliittymä
   if (!isset($kka))
-    $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+    $kka = date("m", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
   if (!isset($vva))
-    $vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+    $vva = date("Y", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
   if (!isset($ppa))
-    $ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+    $ppa = date("d", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 
   if (!isset($kkl))
     $kkl = date("m");
@@ -67,14 +67,14 @@ else {
   // Määritellään mitkä latikot halutaan mukaan
   $monivalintalaatikot = array("OSASTO", "TRY");
 
-  require ("../tilauskasittely/monivalintalaatikot.inc");
+  require "../tilauskasittely/monivalintalaatikot.inc";
 
   echo "<br><input type='submit' name='AJA' value='".t("Aja raportti")."'>";
   echo "</form><br><br>";
 
   if ($matee != '' and isset($AJA)) {
 
-    include('inc/pupeExcel.inc');
+    include 'inc/pupeExcel.inc';
 
     $worksheet    = new pupeExcel();
     $format_bold = array("bold" => TRUE);
@@ -124,7 +124,7 @@ else {
 
       if ($summaa == '') {
         for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-          echo "<th>",t("Alennus"),"{$alepostfix}</th>";
+          echo "<th>", t("Alennus"), "{$alepostfix}</th>";
         }
       }
 
@@ -173,7 +173,7 @@ else {
         $hresult = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($hresult) != 0) {
-          $hrow = mysql_fetch_array ($hresult);
+          $hrow = mysql_fetch_array($hresult);
 
           if ($hrow["alennus"] > 0) {
             ${'ale'.$hrow["alennuslaji"]} = $hrow[0];
@@ -187,7 +187,7 @@ else {
           $hresult = mysql_query($query) or pupe_error($query);
 
           if (mysql_num_rows($hresult) != 0) {
-            $hrow=mysql_fetch_array ($hresult);
+            $hrow=mysql_fetch_array($hresult);
 
             if ($hrow["alennus"] > 0) {
               $ale1 = $hrow[0];
@@ -203,7 +203,7 @@ else {
       $katepros=0;
 
       if ($lrow["summa"] != 0) {
-        $katepros = round($lrow["kate"]/$lrow["summa"]*100,2);
+        $katepros = round($lrow["kate"]/$lrow["summa"]*100, 2);
       }
 
       if (mysql_num_rows($result) < 2000) {
@@ -215,7 +215,7 @@ else {
 
         if ($summaa == '') {
           for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-            echo "<td>",${'ale'.$alepostfix},"</td>";
+            echo "<td>", ${'ale'.$alepostfix}, "</td>";
           }
         }
 
@@ -262,5 +262,5 @@ else {
     echo "</table><br>";
   }
 
-  require ("inc/footer.inc");
+  require "inc/footer.inc";
 }

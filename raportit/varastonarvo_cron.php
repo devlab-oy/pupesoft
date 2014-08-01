@@ -5,8 +5,8 @@ if (php_sapi_name() != 'cli') {
   die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 }
 
-require_once("../inc/functions.inc");
-require_once("../inc/connect.inc");
+require_once "../inc/functions.inc";
+require_once "../inc/connect.inc";
 
 ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
 error_reporting(E_ALL ^E_WARNING ^E_NOTICE);

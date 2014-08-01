@@ -3,7 +3,7 @@
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Tiliöinnit lajeittain")."</font><hr>";
 
@@ -220,10 +220,10 @@ if ($tee == "raportti") {
         if (in_array($row["vienti"], array("", "A", "B", "C", "J"))) {
           $row["vienti"] = t("Kotimaa");
         }
-        elseif(in_array($row["vienti"], array("D", "E", "F", "K"))) {
+        elseif (in_array($row["vienti"], array("D", "E", "F", "K"))) {
           $row["vienti"] = t("EU");
         }
-        elseif(in_array($row["vienti"], array("G", "H", "I", "L"))) {
+        elseif (in_array($row["vienti"], array("G", "H", "I", "L"))) {
           $row["vienti"] = t("EI EU");
         }
 
@@ -321,4 +321,4 @@ if ($tee == "raportti") {
   }
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

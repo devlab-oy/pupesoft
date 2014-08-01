@@ -1,8 +1,8 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
-function massamuuttaja ($taulu, $sarake, $korvattava, $korvaava) {
+function massamuuttaja($taulu, $sarake, $korvattava, $korvaava) {
   global $yhtiorow, $kukarow;
 
   $paivityslause  = "UPDATE $taulu SET
@@ -98,7 +98,7 @@ if ($MassaMuutos != '') {
       }
     }
 
-    if ($asiakas_myyja == 1)  {
+    if ($asiakas_myyja == 1) {
       $laskuri = massamuuttaja("asiakas", "myyjanro", $tarkistusrow2['myyja'], $tarkistusrow1['myyja']);
 
       if ($laskuri > 0) {
@@ -209,4 +209,4 @@ if ($tokuka != '' and $fromkuka != '' and ($tiliointi == 1 or $toimittajan_oletu
 
 echo "</form>";
 
-require("inc/footer.inc");
+require "inc/footer.inc";

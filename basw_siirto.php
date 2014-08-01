@@ -1,14 +1,14 @@
 <?php
 
 if (isset($_POST["tee"])) {
-  if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
-  if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 if ($tee == "lataa_tiedosto") {
   readfile("/tmp/".basename($tmpfilenimi));
@@ -194,13 +194,13 @@ if ($tee == "TEEAINEISTO") {
 
   echo "<table>";
   echo "<tr>
-    <th>",t("Alkup‰iv‰m‰‰r‰"),"</th>
+    <th>", t("Alkup‰iv‰m‰‰r‰"), "</th>
     <td>{$plvp}</td>
     <td>{$plvk}</td>
     <td>{$plvv}</td>
     </tr>\n";
   echo "<tr>
-    <th>",t("Loppup‰iv‰m‰‰r‰"),"</th>
+    <th>", t("Loppup‰iv‰m‰‰r‰"), "</th>
     <td>{$alvp}</td>
     <td>{$alvk}</td>
     <td>{$alvv}</td>
@@ -248,4 +248,4 @@ if ($tee == "TEEAINEISTO") {
 
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

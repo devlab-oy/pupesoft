@@ -149,7 +149,7 @@ class pupeExcel {
     global $pupe_root_polku;
 
     // Luodaaan excel-tiedosto pupen templatesta
-    $foldername = md5(uniqid(rand(),true));
+    $foldername = md5(uniqid(rand(), true));
     exec("cp -r $pupe_root_polku/pupe_xslx_template /tmp/$foldername");
 
     $sheetDataFile    = "/tmp/".$foldername."/xl/worksheets/sheet1.xml";
@@ -279,7 +279,7 @@ class pupeExcel {
     file_put_contents($sheetDataFile, trim(str_replace("\n", "\r\n", $sheetData->asXML())));
     file_put_contents($sharedStringsFile, trim(str_replace("\n", "\r\n", $sharedStrings->asXML())));
 
-    $xlsxfile = md5(uniqid(rand(),true)).".xlsx";
+    $xlsxfile = md5(uniqid(rand(), true)).".xlsx";
 
     exec("cd /tmp/{$foldername}; find . -name .DS_Store -delete; /usr/bin/zip -r /tmp/{$xlsxfile} *; rm -rf /tmp/{$foldername};");
 

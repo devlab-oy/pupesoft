@@ -65,12 +65,12 @@ if ($maara > 0) {
     $toimvv = date("Y");
   }
   elseif ($kukarow['kesken'] == 0 and $yhtiorow['ostotilaukseen_toimittajan_toimaika'] == '2') {
-    $toimittajan_toimaika = date('Y-m-d',time() + $srow["oletus_toimaika"] * 24 * 60 * 60);
+    $toimittajan_toimaika = date('Y-m-d', time() + $srow["oletus_toimaika"] * 24 * 60 * 60);
     list($toimvv, $toimkk, $toimpp) = explode('-', $toimittajan_toimaika);
   }
   else {
     list($toimvv, $toimkk, $toimpp) = explode('-', $srow["toimaika"]);
-    $toimpp = substr($toimpp,0,2);
+    $toimpp = substr($toimpp, 0, 2);
   }
 
   //voidaan tarvita
@@ -97,7 +97,7 @@ if ($maara > 0) {
   $lasrow = mysql_fetch_array($lasres);
 
   if ($lasrow['tunnus'] == 0) {
-    require("../tilauskasittely/otsik_ostotilaus.inc");
+    require "../tilauskasittely/otsik_ostotilaus.inc";
     $rivi = 1;
   }
   else {
@@ -171,5 +171,5 @@ echo json_encode('ok');
 // Footteri hiljaiseksi
 $no_head = "yes";
 
-require ("inc/footer.inc");
+require "inc/footer.inc";
 exit;

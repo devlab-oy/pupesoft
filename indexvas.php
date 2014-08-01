@@ -1,13 +1,13 @@
 <?php
 
 // haetaan jotain tarpeellisia funktioita mukaan..
-if (@include_once("inc/parametrit.inc"));
-elseif (@include_once("parametrit.inc"));
+if (@include_once "inc/parametrit.inc");
+elseif (@include_once "parametrit.inc");
 else exit;
 
 // haetaan jotain tarpeellisia funktioita mukaan..
-if (@include_once("inc/functions.inc"));
-elseif (@include_once("functions.inc"));
+if (@include_once "inc/functions.inc");
+elseif (@include_once "functions.inc");
 else exit;
 
 echo "<style type='text/css'>
@@ -146,7 +146,7 @@ else {
   $sovellus = $orow['sovellus'];
 }
 
-  echo "<table style='padding:0; margin:0; width:135px;'>";
+echo "<table style='padding:0; margin:0; width:135px;'>";
 
 // Mitä käyttäjä saa tehdä?
 // Valitaan ensin vain ylätaso jarjestys2='0'

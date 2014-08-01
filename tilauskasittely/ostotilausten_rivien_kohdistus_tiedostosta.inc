@@ -20,7 +20,7 @@ if ($faarao == 'TUTKHM') {
       die ("<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font>");
     }
 
-    $file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
+    $file = fopen($_FILES['userfile']['tmp_name'], "r") or die (t("Tiedoston avaus ep‰onnistui")."!");
     $rivi = fgets($file);
 
     while (!feof($file)) {
@@ -82,7 +82,7 @@ if ($faarao == 'TUTKHM') {
 
         if (mysql_num_rows($result) > 0) {
 
-          while ($rivirow = mysql_fetch_array ($result)) {
+          while ($rivirow = mysql_fetch_array($result)) {
 
             $query = "SELECT tuotekerroin
                       FROM tuotteen_toimittajat use index (yhtio_toimtuoteno)
@@ -116,9 +116,9 @@ if ($faarao == 'TUTKHM') {
 
           if ($ok != 1) {
 
-            mysql_data_seek($result,0);
+            mysql_data_seek($result, 0);
 
-            while ($rivirow = mysql_fetch_array ($result)) {
+            while ($rivirow = mysql_fetch_array($result)) {
 
               $query = "SELECT tuotekerroin
                         FROM tuotteen_toimittajat use index (yhtio_toimtuoteno)
@@ -153,9 +153,9 @@ if ($faarao == 'TUTKHM') {
 
           if ($ok != 1 and $hyvaksy != '') {
 
-            mysql_data_seek($result,0);
+            mysql_data_seek($result, 0);
 
-            while ($rivirow = mysql_fetch_array ($result)) {
+            while ($rivirow = mysql_fetch_array($result)) {
 
               $query = "SELECT tuotekerroin
                         FROM tuotteen_toimittajat use index (yhtio_toimtuoteno)
@@ -228,7 +228,7 @@ if ($faarao == 'TUTKHM') {
                 $tuoteresult = mysql_query($query) or pupe_error($query);
                 $trow = mysql_fetch_array($tuoteresult);
 
-                require('lisaarivi.inc');
+                require 'lisaarivi.inc';
 
                 $hinta = $filehinta;
                 $ok = 1;
@@ -244,7 +244,7 @@ if ($faarao == 'TUTKHM') {
               $kululisa = ", kate='$kuluhinta' ";
             }
             else {*/
-              $kululisa = "";
+            $kululisa = "";
             //}
 
             if ($paivi == 'JOO' and $hinta != 0) {
@@ -263,7 +263,7 @@ if ($faarao == 'TUTKHM') {
                       AND vanhatunnus = 0
                       AND tunnus      = '$otunnus'";
             $res = pupe_query($query);
-            if (mysql_num_rows($res) == 1){
+            if (mysql_num_rows($res) == 1) {
               $query = "UPDATE tilausrivi SET uusiotunnus='$otunnus' $kululisa $hintalisa WHERE tunnus = '$rivirow[tunnus]' AND yhtio='$kukarow[yhtio]'";
               $result = mysql_query($query) or pupe_error($query);
               echo "<font class='message'>".t("Rivi")." $rivino ".t("Tuotenumero").": $rivirow[tuoteno] ".t("M‰‰r‰").": $apukpl ".t("kohdistettu laskuun")."!</font><br>";

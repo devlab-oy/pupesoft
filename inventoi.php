@@ -1,7 +1,7 @@
 <?php
 
 if (strpos($_SERVER['SCRIPT_NAME'], "inventoi.php") !== FALSE) {
-  require ("inc/parametrit.inc");
+  require "inc/parametrit.inc";
 
   if (!empty($_POST['ajax_toiminto']) and $_POST['ajax_toiminto'] == 'hae_inventointiselite') {
 
@@ -23,10 +23,10 @@ $validi_kasinsyotetty_inventointipaivamaara = 0;
 
 if (stripos($toim, "oletusvarasto") !== FALSE) {
   if ($kukarow['oletus_varasto'] == 0) {
-    echo "<font class='error'>",t("Oletusvarastoa ei ole asetettu k‰ytt‰j‰lle"),".</font><br />";
+    echo "<font class='error'>", t("Oletusvarastoa ei ole asetettu k‰ytt‰j‰lle"), ".</font><br />";
 
     if ($mobiili != "YES") {
-      require ("inc/footer.inc");
+      require "inc/footer.inc";
     }
     exit;
   }
@@ -124,7 +124,7 @@ if ($tee == "FILE") {
       die ("<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font>");
     }
 
-    $retval = tarkasta_liite("userfile", array("XLSX","XLS","ODS","SLK","XML","GNUMERIC","CSV","TXT","DATAIMPORT"));
+    $retval = tarkasta_liite("userfile", array("XLSX", "XLS", "ODS", "SLK", "XML", "GNUMERIC", "CSV", "TXT", "DATAIMPORT"));
 
     if ($retval !== TRUE) {
       die ("<font class='error'><br>".t("V‰‰r‰ tiedostomuoto")."!</font>");
@@ -175,12 +175,12 @@ if ($tee == "FILE") {
     }
     else {
       $tee = '';
-      echo "<font class='error'>",t("Yht‰‰n tuotetta ei inventoitu"),"!</font><br />";
+      echo "<font class='error'>", t("Yht‰‰n tuotetta ei inventoitu"), "!</font><br />";
     }
 
     if ($oletusvarasto_chk > 0 and $oletusvarasto_err > 0) {
       $plural = $oletusvarasto_err > 1 ? "tuotetta" : "tuote";
-      echo " <font class='error'>",t("%d %s ei lˆytynyt oletusvarastosta", "", $oletusvarasto_err, $plural),".</font><br />";
+      echo " <font class='error'>", t("%d %s ei lˆytynyt oletusvarastosta", "", $oletusvarasto_err, $plural), ".</font><br />";
     }
   }
   else {
@@ -224,7 +224,7 @@ if ($tee == 'VALMIS') {
   }
 
   if (count($tuote) > 0) {
-    foreach($tuote as $i => $tuotteet) {
+    foreach ($tuote as $i => $tuotteet) {
 
       $tuotetiedot = explode("###", $tuotteet);
 
@@ -282,7 +282,7 @@ if ($tee == 'VALMIS') {
           }
         }
 
-        if ($tuote_row['sarjanumeroseuranta'] != '' and !is_array($sarjanumero_kaikki[$i]) and !is_array($eranumero_kaikki[$i]) and (substr($kpl,0,1) == '+' or substr($kpl,0,1) == '-' or (float) $kpl != 0)) {
+        if ($tuote_row['sarjanumeroseuranta'] != '' and !is_array($sarjanumero_kaikki[$i]) and !is_array($eranumero_kaikki[$i]) and (substr($kpl, 0, 1) == '+' or substr($kpl, 0, 1) == '-' or (float) $kpl != 0)) {
           echo "<font class='error'>".t("VIRHE: Et valinnut yht‰‰n sarja- tai er‰numeroa").": $tuoteno!</font><br>";
           $virhe = 1;
         }
@@ -320,7 +320,7 @@ if ($tee == 'VALMIS') {
           if ($virhe == 0) {
             $laadittuaika = "'$yyyy-$mm-$dd 23:59:59'";
 
-            # Inventointipvm k‰sisyˆttˆfallbacki - ei sallita p‰iv‰m‰‰r‰‰ jos sen j‰lkeen on tuloja, valmistuksia tai ep‰kuranttiajoja
+            // Inventointipvm k‰sisyˆttˆfallbacki - ei sallita p‰iv‰m‰‰r‰‰ jos sen j‰lkeen on tuloja, valmistuksia tai ep‰kuranttiajoja
             $query = "SELECT *
                       FROM tapahtuma
                       WHERE yhtio  = '$kukarow[yhtio]'
@@ -361,29 +361,29 @@ if ($tee == 'VALMIS') {
           }
         }
 
-        if (in_array($tuote_row["sarjanumeroseuranta"], array("S","U","G")) and $onko_vanhoja > 0 and $onko_uusia > 0) {
+        if (in_array($tuote_row["sarjanumeroseuranta"], array("S", "U", "G")) and $onko_vanhoja > 0 and $onko_uusia > 0) {
           echo "<font class='error'>".t("VIRHE: Voit lis‰t‰ / poistaa vain uuden sarjanumeron")."!</font><br>";
           $virhe = 1;
         }
 
         //Sarjanumerot
-        if (in_array($tuote_row["sarjanumeroseuranta"], array("S","U")) and is_array($sarjanumero_kaikki[$i]) and substr($kpl,0,1) != '+' and substr($kpl,0,1) != '-' and (int) $kpl != count($sarjanumero_kaikki[$i]) and ($onko_uusia > 0 or $hyllyssa[$i] < $kpl)) {
+        if (in_array($tuote_row["sarjanumeroseuranta"], array("S", "U")) and is_array($sarjanumero_kaikki[$i]) and substr($kpl, 0, 1) != '+' and substr($kpl, 0, 1) != '-' and (int) $kpl != count($sarjanumero_kaikki[$i]) and ($onko_uusia > 0 or $hyllyssa[$i] < $kpl)) {
           echo "<font class='error'>".t("VIRHE: Sarjanumeroita ei voi lis‰t‰ kuin relatiivisella m‰‰r‰ll‰")."! (+1)</font><br>";
           $virhe = 1;
         }
-        elseif (in_array($tuote_row["sarjanumeroseuranta"], array("S","U")) and substr($kpl,0,1) == '+' and is_array($sarjanumero_kaikki[$i]) and count($sarjanumero_valitut[$i]) != (int) substr($kpl,1)) {
+        elseif (in_array($tuote_row["sarjanumeroseuranta"], array("S", "U")) and substr($kpl, 0, 1) == '+' and is_array($sarjanumero_kaikki[$i]) and count($sarjanumero_valitut[$i]) != (int) substr($kpl, 1)) {
           echo "<font class='error'>".t("VIRHE: Sarjanumeroiden m‰‰r‰ on oltava sama kuin laskettu syˆtetty m‰‰r‰")."! $tuoteno $kpl</font><br>";
           $virhe = 1;
         }
-        elseif (substr($kpl,0,1) == '+' and is_array($sarjanumero_kaikki[$i]) and $onko_vanhoja > 0) {
+        elseif (substr($kpl, 0, 1) == '+' and is_array($sarjanumero_kaikki[$i]) and $onko_vanhoja > 0) {
           echo "<font class='error'>".t("VIRHE: Et voi lis‰t‰ kuin uusia sarjanumeroita relatiivisella m‰‰r‰ll‰")."! $tuoteno $kpl</font><br>";
           $virhe = 1;
         }
-        elseif (substr($kpl,0,1) == '-' and is_array($sarjanumero_kaikki[$i]) and count($sarjanumero_valitut[$i]) != (int) substr($kpl,1)) {
+        elseif (substr($kpl, 0, 1) == '-' and is_array($sarjanumero_kaikki[$i]) and count($sarjanumero_valitut[$i]) != (int) substr($kpl, 1)) {
           echo "<font class='error'>".t("VIRHE: Sarjanumeroiden m‰‰r‰ on oltava sama kuin laskettu syˆtetty m‰‰r‰")."! $tuoteno $kpl</font><br>";
           $virhe = 1;
         }
-        elseif(substr($kpl,0,1) != '-' and substr($kpl,0,1) != '+' and is_array($sarjanumero_kaikki[$i]) and count($sarjanumero_valitut[$i]) != (int) $kpl) {
+        elseif (substr($kpl, 0, 1) != '-' and substr($kpl, 0, 1) != '+' and is_array($sarjanumero_kaikki[$i]) and count($sarjanumero_valitut[$i]) != (int) $kpl) {
           echo "<font class='error'>".t("VIRHE: Sarjanumeroiden m‰‰r‰ on oltava sama kuin laskettu syˆtetty m‰‰r‰")."! $tuoteno $kpl</font><br>";
           $virhe = 1;
         }
@@ -417,19 +417,19 @@ if ($tee == 'VALMIS') {
 
             $erasyotetyt = round($erasyotetyt, 2);
 
-            if (is_array($eranumero_kaikki[$i]) and substr($kpl,0,1) != '+' and substr($kpl,0,1) != '-' and $onko_uusia > 0) {
+            if (is_array($eranumero_kaikki[$i]) and substr($kpl, 0, 1) != '+' and substr($kpl, 0, 1) != '-' and $onko_uusia > 0) {
               echo "<font class='error'>".t("VIRHE: Er‰numeroita ei voi lis‰t‰ kuin relatiivisella m‰‰r‰ll‰")."! (+1)</font><br>";
               $virhe = 1;
             }
-            elseif (substr($kpl,0,1) == '+' and is_array($eranumero_kaikki[$i]) and $erasyotetyt != substr($kpl,1)) {
+            elseif (substr($kpl, 0, 1) == '+' and is_array($eranumero_kaikki[$i]) and $erasyotetyt != substr($kpl, 1)) {
               echo "<font class='error'>".t("VIRHE: Er‰numeroiden m‰‰r‰ on oltava sama kuin laskettu syˆtetty m‰‰r‰")."! $tuoteno $kpl</font><br>";
               $virhe = 1;
             }
-            elseif (substr($kpl,0,1) == '-' and is_array($eranumero_kaikki[$i]) and $erasyotetyt != substr($kpl,1)) {
+            elseif (substr($kpl, 0, 1) == '-' and is_array($eranumero_kaikki[$i]) and $erasyotetyt != substr($kpl, 1)) {
               echo "<font class='error'>".t("VIRHE: Er‰numeroiden m‰‰r‰ on oltava sama kuin laskettu syˆtetty m‰‰r‰")."! $tuoteno $kpl</font><br>";
               $virhe = 1;
             }
-            elseif(substr($kpl,0,1) != '-' and substr($kpl,0,1) != '+' and is_array($eranumero_kaikki[$i]) and $erasyotetyt != $kpl) {
+            elseif (substr($kpl, 0, 1) != '-' and substr($kpl, 0, 1) != '+' and is_array($eranumero_kaikki[$i]) and $erasyotetyt != $kpl) {
               echo "<font class='error'>".t("VIRHE: Er‰numeroiden m‰‰r‰ on oltava sama kuin laskettu syˆtetty m‰‰r‰")."! $tuoteno $kpl</font><br>";
               $virhe = 1;
             }
@@ -543,7 +543,7 @@ if ($tee == 'VALMIS') {
                         and tapahtuma.kpl         <> 0
                         and laji                 != 'Inventointi'";
               $result = pupe_query($query);
-              $trow = mysql_fetch_assoc ($result);
+              $trow = mysql_fetch_assoc($result);
 
               if ($trow["muutos"] != 0) {
                 $saldomuutos = $trow["muutos"];
@@ -591,14 +591,14 @@ if ($tee == 'VALMIS') {
               }
             }
 
-            if (substr($kpl,0,1) == '+') {
-              $kpl = substr($kpl,1);
+            if (substr($kpl, 0, 1) == '+') {
+              $kpl = substr($kpl, 1);
               $skp = $kpl;
               $kpl = $row['saldo'] + $kpl;
 
             }
-            elseif (substr($kpl,0,1) == '-') {
-              $kpl = substr($kpl,1);
+            elseif (substr($kpl, 0, 1) == '-') {
+              $kpl = substr($kpl, 1);
               $skp = $kpl*-1;
               $kpl = $row['saldo'] - $kpl;
             }
@@ -615,7 +615,7 @@ if ($tee == 'VALMIS') {
 
             //triggerˆid‰‰n eroh‰lytys
             if (abs($erotus) > 10 and $lista != '') {
-               $virhe = 2;
+              $virhe = 2;
             }
 
             //echo "Tuoteno: $tuoteno Saldomuutos: $saldomuutos Ker‰tty: $kerattymuut Syˆtetty: $kpl Hyllyss‰: $hyllyssa Nykyinen: $nykyinensaldo Erotus: $erotus<br>";
@@ -743,7 +743,7 @@ if ($tee == 'VALMIS') {
                 }
               }
 
-              $summa = round($erotus * $row['kehahin'],2);
+              $summa = round($erotus * $row['kehahin'], 2);
             }
 
             // jos loppusumma on isompi kuin tietokannassa oleva tietuen koko (10 numeroa + 2 desimaalia), niin herjataan
@@ -751,7 +751,7 @@ if ($tee == 'VALMIS') {
               $ylitettava_summa_chk = $cursaldo*$summa;
 
               if (abs($ylitettava_summa_chk) > 9999999999.99) {
-                echo "<font class='error'>".t("VIRHE: liian iso loppusumma")."!<br/>",t("Tuote"),": $tuoteno ",t("lopullinen kappalem‰‰r‰")," $kpl (",t("loppusumma"),": $ylitettava_summa_chk)</font><br>";
+                echo "<font class='error'>".t("VIRHE: liian iso loppusumma")."!<br/>", t("Tuote"), ": $tuoteno ", t("lopullinen kappalem‰‰r‰"), " $kpl (", t("loppusumma"), ": $ylitettava_summa_chk)</font><br>";
                 $virhe = 1;
                 break;
               }
@@ -814,7 +814,7 @@ if ($tee == 'VALMIS') {
                   and hyllytaso      = '$hyllytaso'";
             $result = pupe_query($query);
 
-            # Jos p‰vitettiin saldoa, tehd‰‰n kirjanpito. Vaikka summa olisi nolla. Muuten j‰lkilaskenta ei osaa korjata t‰t‰, jos tiliˆintej‰ ei tehd‰.
+            // Jos p‰vitettiin saldoa, tehd‰‰n kirjanpito. Vaikka summa olisi nolla. Muuten j‰lkilaskenta ei osaa korjata t‰t‰, jos tiliˆintej‰ ei tehd‰.
             if (mysql_affected_rows() > 0) {
 
               $query = "INSERT into lasku set
@@ -1076,7 +1076,7 @@ if ($tee == 'VALMIS') {
           }
         }
       }
-      else{
+      else {
         //echo "Tuote $tuoteno $hyllyalue $hyllynro $hyllyvali $hyllytaso Kappalem‰‰r‰‰ ei syˆtetty!<br>";
       }
     }
@@ -1376,7 +1376,7 @@ if ($tee == 'INVENTOI') {
     $hylresult = pupe_query($query);
     $hylrow = mysql_fetch_assoc($hylresult);
 
-    $hyllyssa = sprintf('%.2f',$tuoterow['saldo']-$hylrow['keratty']);
+    $hyllyssa = sprintf('%.2f', $tuoterow['saldo']-$hylrow['keratty']);
 
     if ($tuoterow["sarjanumeroseuranta"] != "") {
       $query = "SELECT sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus, tilausrivi_myynti.otunnus myyntitunnus, tilausrivi_myynti.varattu myyntikpl,
@@ -1407,7 +1407,7 @@ if ($tee == 'INVENTOI') {
       echo "<tr>";
       echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".t_tuotteen_avainsanat($tuoterow, 'nimitys');
 
-      if (in_array($tuoterow["sarjanumeroseuranta"], array("S","T","U","V"))) {
+      if (in_array($tuoterow["sarjanumeroseuranta"], array("S", "T", "U", "V"))) {
         if (mysql_num_rows($sarjares) > 0) {
           echo "<br><table width='100%'>";
 
@@ -1427,7 +1427,7 @@ if ($tee == 'INVENTOI') {
               echo sprintf("%.02f", $tuoterow['kehahin']);
             }
             else {
-              echo sprintf("%.02f",sarjanumeron_ostohinta("tunnus", $sarjarow["tunnus"]));
+              echo sprintf("%.02f", sarjanumeron_ostohinta("tunnus", $sarjarow["tunnus"]));
             }
 
             echo "</td><td>";
@@ -1436,7 +1436,7 @@ if ($tee == 'INVENTOI') {
 
             if ($sarjarow['laskutettuaika'] == '0000-00-00') {
               echo "<input type='hidden' name='sarjanumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[tunnus]'>";
-              echo "<font class='message'>**",t("UUSI"),"**</font>";
+              echo "<font class='message'>**", t("UUSI"), "**</font>";
             }
             else {
               echo "<input type='checkbox' name='sarjanumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[tunnus]' $chk></td>";
@@ -1445,7 +1445,7 @@ if ($tee == 'INVENTOI') {
             echo "</td>";
 
             if ($sarjarow["myyntitunnus"] != 0) {
-              echo "<td><font class='message'>",t("Tilauksella")," $sarjarow[myyntitunnus]</font></td>";
+              echo "<td><font class='message'>", t("Tilauksella"), " $sarjarow[myyntitunnus]</font></td>";
             }
             echo "</tr>";
 
@@ -1453,15 +1453,15 @@ if ($tee == 'INVENTOI') {
           }
           echo "</table>";
         }
-        echo "<br><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno=".urlencode($tuoterow["tuoteno"])."&toiminto=luouusitulo&hyllyalue=$tuoterow[hyllyalue]&hyllynro=$tuoterow[hyllynro]&hyllyvali=$tuoterow[hyllyvali]&hyllytaso=$tuoterow[hyllytaso]&from=INVENTOINTI&lopetus=",$palvelin2,"inventoi.php////tee=INVENTOI//tuoteno=$tuoteno//lista=$lista//lista_aika=$lista_aika//alku=$alku'>".t("Uusi sarjanumero")."</a>";
+        echo "<br><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno=".urlencode($tuoterow["tuoteno"])."&toiminto=luouusitulo&hyllyalue=$tuoterow[hyllyalue]&hyllynro=$tuoterow[hyllynro]&hyllyvali=$tuoterow[hyllyvali]&hyllytaso=$tuoterow[hyllytaso]&from=INVENTOINTI&lopetus=", $palvelin2, "inventoi.php////tee=INVENTOI//tuoteno=$tuoteno//lista=$lista//lista_aika=$lista_aika//alku=$alku'>".t("Uusi sarjanumero")."</a>";
       }
-      elseif (in_array($tuoterow["sarjanumeroseuranta"], array("E","F","G"))) {
+      elseif (in_array($tuoterow["sarjanumeroseuranta"], array("E", "F", "G"))) {
         if (mysql_num_rows($sarjares) > 0) {
           echo "<br><table width='100%'>";
 
           $sarjalaskk = 1;
 
-          while($sarjarow = mysql_fetch_assoc($sarjares)) {
+          while ($sarjarow = mysql_fetch_assoc($sarjares)) {
             echo "<tr><td>$sarjalaskk. $sarjarow[sarjanumero]</td>
                 <td>$sarjarow[era_kpl] ".t_avainsana("Y", "", "and avainsana.selite='$sarjarow[yksikko]'", "", "", "selite")."</td>
                 <td>";
@@ -1481,12 +1481,12 @@ if ($tee == 'INVENTOI') {
             if ($sarjarow['laskutettuaika'] == '0000-00-00' or $sarjarow["myyntitunnus"] != 0) {
               if ($sarjarow['laskutettuaika'] == '0000-00-00') {
                 echo "<input type='hidden' name='eranumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[era_kpl]'>";
-                echo "<font class='message'>**",t("UUSI"),"**</font>";
+                echo "<font class='message'>**", t("UUSI"), "**</font>";
                 echo " <a href='inventoi.php?tee=POISTAERANUMERO&tuoteno=$tuoteno&lista=$lista&lista_aika=$lista_aika&alku=$alku&toiminto=poistaeranumero&sarjatunnus=$sarjarow[tunnus]'>".t("Poista")."</a>";
               }
               else {
                 echo "<input type='hidden' name='eranumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[era_kpl]'>";
-                echo "<font class='message'>",t("Tilauksella")," $sarjarow[myyntitunnus] $sarjarow[myyntikpl]</font>";
+                echo "<font class='message'>", t("Tilauksella"), " $sarjarow[myyntitunnus] $sarjarow[myyntikpl]</font>";
               }
             }
             else {
@@ -1506,7 +1506,7 @@ if ($tee == 'INVENTOI') {
 
           echo "</table>";
         }
-        echo "<br><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno=".urlencode($tuoterow["tuoteno"])."&toiminto=luouusitulo&hyllyalue=$tuoterow[hyllyalue]&hyllynro=$tuoterow[hyllynro]&hyllyvali=$tuoterow[hyllyvali]&hyllytaso=$tuoterow[hyllytaso]&from=INVENTOINTI&lopetus=",$palvelin2,"inventoi.php////tee=INVENTOI//tuoteno=$tuoteno//lista=$lista//lista_aika=$lista_aika//alku=$alku'>".t("Uusi er‰numero")."</a>";
+        echo "<br><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno=".urlencode($tuoterow["tuoteno"])."&toiminto=luouusitulo&hyllyalue=$tuoterow[hyllyalue]&hyllynro=$tuoterow[hyllynro]&hyllyvali=$tuoterow[hyllyvali]&hyllytaso=$tuoterow[hyllytaso]&from=INVENTOINTI&lopetus=", $palvelin2, "inventoi.php////tee=INVENTOI//tuoteno=$tuoteno//lista=$lista//lista_aika=$lista_aika//alku=$alku'>".t("Uusi er‰numero")."</a>";
       }
 
       echo "</td><td valign='top'>";
@@ -1542,10 +1542,10 @@ if ($tee == 'INVENTOI') {
       echo "<input type='hidden' name='tuote[$tuoterow[tptunnus]]' value='$tuoterow[tuoteno]###$tuoterow[hyllyalue]###$tuoterow[hyllynro]###$tuoterow[hyllyvali]###$tuoterow[hyllytaso]'>";
       echo "<td valign='top'><input type='text' size='7' name='maara[$tuoterow[tptunnus]]' id='maara_$tuoterow[tptunnus]' value='".$maara[$tuoterow["tptunnus"]]."'></td>";
 
-      if (in_array($tuoterow["sarjanumeroseuranta"], array("S","T","U","V"))) {
+      if (in_array($tuoterow["sarjanumeroseuranta"], array("S", "T", "U", "V"))) {
         echo "<td valign='top' class='back'>".t("Tuote on sarjanumeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";
       }
-      elseif (in_array($tuoterow["sarjanumeroseuranta"], array("E","F","G"))) {
+      elseif (in_array($tuoterow["sarjanumeroseuranta"], array("E", "F", "G"))) {
         echo "<td valign='top' class='back'>".t("Tuote on er‰numeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";
       }
 
@@ -1567,7 +1567,7 @@ if ($tee == 'INVENTOI') {
         if (mysql_num_rows($sarjares) > 0) {
           echo "<br><table>";
 
-          while($sarjarow = mysql_fetch_assoc($sarjares)) {
+          while ($sarjarow = mysql_fetch_assoc($sarjares)) {
             echo "<tr><td>$sarjarow[sarjanumero]</td><td>$sarjarow[ostohinta]</td></tr>";
           }
 
@@ -1607,7 +1607,7 @@ if ($tee == 'INVENTOI') {
                 ORDER BY tunnus desc
                 LIMIT 1";
       $tapresult = pupe_query($query);
-      $taptrow = mysql_fetch_assoc ($tapresult);
+      $taptrow = mysql_fetch_assoc($tapresult);
 
       if ($taptrow["kpl"] > 10) {
         echo "<br><font class='error'>".t("HUOM: Tuotteen saldo muuttui yli 10 kappaletta! Tarkista inventointi!")."</font>";
@@ -1615,10 +1615,10 @@ if ($tee == 'INVENTOI') {
 
       echo "</td>";
 
-      if (in_array($tuoterow["sarjanumeroseuranta"], array("S","T","U","V"))) {
+      if (in_array($tuoterow["sarjanumeroseuranta"], array("S", "T", "U", "V"))) {
         echo "<td valign='top' class='back'>".t("Tuote on sarjanumeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";
       }
-      elseif (in_array($tuoterow["sarjanumeroseuranta"], array("E","F","G"))) {
+      elseif (in_array($tuoterow["sarjanumeroseuranta"], array("E", "F", "G"))) {
         echo "<td valign='top' class='back'>".t("Tuote on er‰numeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";
       }
 
@@ -1646,7 +1646,7 @@ if ($tee == 'INVENTOI') {
 
     while ($itrow = mysql_fetch_assoc($tresult)) {
 
-      if (!isset($inven_laji) AND !isset($sel)) {
+      if (!isset($inven_laji) and !isset($sel)) {
         $sel = 'selected';
         $lisaselite = $itrow["selitetark_4"];
       }
@@ -1871,5 +1871,5 @@ $query = "UNLOCK TABLES";
 $result = pupe_query($query);
 
 if ($mobiili != "YES") {
-  require ("inc/footer.inc");
+  require "inc/footer.inc";
 }

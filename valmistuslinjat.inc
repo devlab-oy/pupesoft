@@ -4,12 +4,14 @@
  * Tiedosto sisältää funktioita tuotannonsuunnitteluun valmistuslinjojen käsittelyyn.
  */
 
-/** Päivitää valmistuksen tilaa (lasku.valmistuksen_tila)
+
+/**
+ * Päivitää valmistuksen tilaa (lasku.valmistuksen_tila)
  */
 function paivita_valmistus($tunnus, $tila) {
   global $kukarow;
 
-  #echo "päivitetään valmistus $tunnus tila $tila";
+  //echo "päivitetään valmistus $tunnus tila $tila";
 
   if (empty($tunnus) or empty($tila)) {
     exit("Virhe valmistuksen päivityksessä");
@@ -58,7 +60,9 @@ function hae_valmistuksen_tuotteet($valmistus) {
   return $tuotteet;
 }
 
-/** Hakee valmistuksen
+
+/**
+ * Hakee valmistuksen
  */
 function hae_valmistus($tunnus) {
   global $kukarow;
@@ -71,11 +75,12 @@ function hae_valmistus($tunnus) {
             WHERE kalenteri.yhtio='{$kukarow['yhtio']}'
             AND kalenteri.otunnus='{$tunnus}'";
   $result = pupe_query($query);
-  #echo $query;
+  //echo $query;
   $valmistus = mysql_fetch_assoc($result);
 
   return $valmistus;
 }
+
 
 /**
  * Lisää valmistuksen halutulle valmistuslinjalle
@@ -177,7 +182,9 @@ function lisaa_valmistus($valmistus, $linja) {
   }
 }
 
-/** Valmistuksen kesto
+
+/**
+ * Valmistuksen kesto
  */
 function valmistuksen_kesto($valmistus) {
   global $kukarow;
@@ -210,6 +217,7 @@ function hae_valmistuslinjat() {
   return $valmistuslinjat;
 }
 
+
 /**
  * Pyöristää ajan halutulla tarkkuudella
  * Oletus 30 minuuttia
@@ -224,12 +232,14 @@ function round_time($time, $seconds = 1800) {
   return $rounded_time;
 }
 
-/** Laskee valmistuksen loppumiskohdan alkuajan ja valmistuksen keston mukaan.
+
+/**
+ * Laskee valmistuksen loppumiskohdan alkuajan ja valmistuksen keston mukaan.
  */
 function laske_loppuaika($alkuaika, $minuutit = 0, $valmistuslinja) {
   global $kukarow;
 
-  #echo "lasketaan loppuaika: $alkuaika, $minuutit, $valmistuslinja<br>";
+  //echo "lasketaan loppuaika: $alkuaika, $minuutit, $valmistuslinja<br>";
   // Pienin kalenterin yksikkö, 30 minuuttia
   if (!defined('INTERVALLI'))
     define('INTERVALLI', 30);
@@ -244,7 +254,7 @@ function laske_loppuaika($alkuaika, $minuutit = 0, $valmistuslinja) {
   // Setataan loppuaika aluksi pyöristettyyn aloitusaikaan
   $loppuaika = round_time($alkuaika);
 
-  #echo "kesto: ". $minuutit/60 ." aloitetaan lisäämään alkuajasta (alkuaika: ".date('Y-m-d H:i:s', $alkuaika)."): ".date('Y-m-d H:i:s', $loppuaika)."<br>";
+  //echo "kesto: ". $minuutit/60 ." aloitetaan lisäämään alkuajasta (alkuaika: ".date('Y-m-d H:i:s', $alkuaika)."): ".date('Y-m-d H:i:s', $loppuaika)."<br>";
   // Haetaan kalenteriin merkatut erikoispäivät
   // Yhtiökohtaiset ('PY')
   // Henkilökohtaiset ('SA', 'PO', 'PE', 'MT', 'LO')
@@ -269,26 +279,26 @@ function laske_loppuaika($alkuaika, $minuutit = 0, $valmistuslinja) {
 
     // Jos on viikonloppu
     if (date('w', $loppuaika) == 0 or date('w', $loppuaika) == 6) {
-      #echo "viikonloppua: " . date('H:i d.m.Y', $loppuaika) . "<br>";
+      //echo "viikonloppua: " . date('H:i d.m.Y', $loppuaika) . "<br>";
       $tyoaikaa = false;
     }
 
     // Jos ollaan lomalla
     foreach ($lomat as $loma) {
       if (date('Y-m-d H:i:s', $loppuaika) >= $loma['pvmalku'] and date('Y-m-d H:i:s', $loppuaika) < $loma['pvmloppu']) {
-        #echo "lomaa: " . date('H:i d.m.Y', $loppuaika) . "<br>";
+        //echo "lomaa: " . date('H:i d.m.Y', $loppuaika) . "<br>";
         $tyoaikaa = false;
       }
     }
 
     // Jos ollaan työajalla
     if ($tyoaikaa == true and date('H:i', $loppuaika) >= date('H:i', strtotime(TYOPAIVAN_ALKU)) and date('H:i', $loppuaika) < date('H:i', strtotime(TYOPAIVAN_LOPPU))) {
-      #echo "työaikaa: " . date('H:i d.m.Y', $loppuaika) . "<br>";
+      //echo "työaikaa: " . date('H:i d.m.Y', $loppuaika) . "<br>";
       // Vähennetään jäljellä olevaa aikaa
       $minuutit -= INTERVALLI;
     }
 
-    #echo "loppuaika: " . date('H:i d.m.Y', $loppuaika) . "<br>";
+    //echo "loppuaika: " . date('H:i d.m.Y', $loppuaika) . "<br>";
     // Lisätään loppuaikaa joka kierroksella
     $loppuaika = mktime(date('H', $loppuaika), date('i', $loppuaika) + INTERVALLI, date('s', $loppuaika), date('m', $loppuaika), date('d', $loppuaika), date('Y', $loppuaika));
   }
@@ -300,13 +310,15 @@ function laske_loppuaika($alkuaika, $minuutit = 0, $valmistuslinja) {
   return $loppuaika;
 }
 
-/** Rakennetaan valmistuslinjat uudelleen
+
+/**
+ * Rakennetaan valmistuslinjat uudelleen
  */
 function rebuild_valmistuslinjat($from = 'now') {
   global $kukarow;
 
   $from = date('Y-m-d', strtotime($from));
-  # echo "rakennetaan valmistuslinja uudelleen alkaen: $from <br>";
+  // echo "rakennetaan valmistuslinja uudelleen alkaen: $from <br>";
   // Hetaan kaikki valmistuslinjat
   $query = "SELECT selite
             FROM avainsana
@@ -415,6 +427,7 @@ function rebuild_valmistuslinjat($from = 'now') {
   }
 }
 
+
 /**
  * Tarkistaa valmistuksen raaka-aineiden saldot tiettynä päivänä
  */
@@ -469,8 +482,8 @@ function puuttuvat_raaka_aineet($tunnus, $aloitus_pvm = 'now') {
               AND kalenteri.tyyppi      = 'valmistus'
               AND kalenteri.pvmalku     <= '$aloitus_pvm'
               AND kalenteri.henkilo    != {$lasku['henkilo']}";
-//    $muut_valmistukset_result = pupe_query($query);
-//    $muut_valmistukset = mysql_fetch_assoc($muut_valmistukset_result);
+    //    $muut_valmistukset_result = pupe_query($query);
+    //    $muut_valmistukset = mysql_fetch_assoc($muut_valmistukset_result);
 
     // Haetaan raaka-aineen ostotilauksia, jotka vaikuttavat valmistuksen aloitukseen
     $query = "SELECT COALESCE(sum(varattu), 0) AS varattu
@@ -481,19 +494,19 @@ function puuttuvat_raaka_aineet($tunnus, $aloitus_pvm = 'now') {
               # AND kerattyaika != '0000-00-00 00:00:00'
               AND kerattyaika < '$aloitus_pvm'";
 
-//    $ostotilaukset_result = pupe_query($query);
-//    $ostotilaukset = mysql_fetch_assoc($ostotilaukset_result);
+    //    $ostotilaukset_result = pupe_query($query);
+    //    $ostotilaukset = mysql_fetch_assoc($ostotilaukset_result);
 
     /**
-      Raaka-aineen riiton laskentakaava:
-      "Saldo nyt"
-      - "Varatut kappaleet valmistuksilta, joiden päivä on vanhempi kun ko. päivä"
-      - "Varatut kappaleet myyntitilauksilta, joiden päivä on vanhempi kun ko. päivä"
-      + "Vahvistetut kappaleet ostotilausriveilta, joiden saapumispäivä on vanhempi kun ko. päivä".
+     * Raaka-aineen riiton laskentakaava:
+     * "Saldo nyt"
+     * - "Varatut kappaleet valmistuksilta, joiden päivä on vanhempi kun ko. päivä"
+     * - "Varatut kappaleet myyntitilauksilta, joiden päivä on vanhempi kun ko. päivä"
+     * + "Vahvistetut kappaleet ostotilausriveilta, joiden saapumispäivä on vanhempi kun ko. päivä".
      */
     // saldo_myytavissa sisältää valmistuksen varaamat raaka-aineet ja myyntitilausten varaamat kappaleet.
     // Huomioidaan vain muiden valmistusten varaamat ja mahdollisten ostotilausten vaikutus saldoihin.
-    # $raaka_aine_saldo = $saldo['myytavissa'] - $muut_valmistukset['varattu'] + $ostotilaukset['varattu'];
+    // $raaka_aine_saldo = $saldo['myytavissa'] - $muut_valmistukset['varattu'] + $ostotilaukset['varattu'];
     $raaka_aine_saldo = $saldo['myytavissa'];
 
     // Jos raaka_aineella on saldoa vähemmin kuin valmistuksen varaama saldo niin lisätään raaka-aine puutteeksi
@@ -506,7 +519,9 @@ function puuttuvat_raaka_aineet($tunnus, $aloitus_pvm = 'now') {
   return $vajaat_saldot;
 }
 
-/** Etsii edellisen valmistuksen
+
+/**
+ * Etsii edellisen valmistuksen
  *
  * @param integer $valmistus Valmistuksen tunnus
  */
@@ -527,6 +542,7 @@ function etsi_edellinen_valmistus($valmistus) {
   // Palautetaan löydetty valmistus
   return $edellinen;
 }
+
 
 /**
  * Etsii seuraavan_valmistuksen
@@ -551,12 +567,13 @@ function etsi_seuraava_valmistus($valmistus) {
   return $seuraava;
 }
 
+
 /**
  * Vaihtaa valmistusten paikkoja
  * Olettaa että vasen on aina aikaisempi valmistus (vasen[pvmalku] < oikea[pvmalku])
  *
- * @param array $vasen
- * @param array $oikea
+ * @param array   $vasen
+ * @param array   $oikea
  */
 function vaihda_valmistusten_paikkaa($vasen, $oikea, $linja) {
   global $kukarow;
@@ -580,7 +597,7 @@ function vaihda_valmistusten_paikkaa($vasen, $oikea, $linja) {
 
   // Lasketaan vasemman loppuaika uudelleen
   $kesto = valmistuksen_kesto($vasen);
-  #echo "vasen kesto: $kesto <br>";
+  //echo "vasen kesto: $kesto <br>";
   $uusi_pvmloppu = laske_loppuaika(strtotime($vasen['pvmalku']), $kesto * 60, $linja);
   $vasen['pvmloppu'] = date('Y-m-d H:i:s', $uusi_pvmloppu);
 
@@ -589,7 +606,7 @@ function vaihda_valmistusten_paikkaa($vasen, $oikea, $linja) {
 
   // Lasketaan oikean loppuaika uudelleen
   $kesto = valmistuksen_kesto($oikea);
-  #echo "oikea kesto: $kesto <br>";
+  //echo "oikea kesto: $kesto <br>";
   $uusi_pvmloppu = laske_loppuaika(strtotime($oikea['pvmalku']), $kesto * 60, $linja);
   $oikea['pvmloppu'] = date('Y-m-d H:i:s', $uusi_pvmloppu);
 
@@ -597,21 +614,23 @@ function vaihda_valmistusten_paikkaa($vasen, $oikea, $linja) {
   $query = "UPDATE kalenteri
             SET pvmalku='{$vasen['pvmalku']}', pvmloppu='{$vasen['pvmloppu']}'
             WHERE yhtio='{$kukarow['yhtio']}' and otunnus={$vasen['tunnus']}";
-  #echo $query."<br>";
+  //echo $query."<br>";
   pupe_query($query);
 
   $query = "UPDATE kalenteri
             SET pvmalku='{$oikea['pvmalku']}', pvmloppu='{$oikea['pvmloppu']}'
             WHERE yhtio='{$kukarow['yhtio']}' and otunnus={$oikea['tunnus']}";
   pupe_query($query);
-  #echo $query."<br>";
+  //echo $query."<br>";
 
   return true;
 }
 
-/** Valmistuksen jakaminen
+
+/**
+ * Valmistuksen jakaminen
  *
- * @params array   'valmisteen_tunnus' => 'kpl'
+ * @param unknown s array   'valmisteen_tunnus' => 'kpl'
  * @return string  'virheet' tai ''
  */
 function jaa_valmistus($tunnus, $params) {
@@ -734,8 +753,8 @@ function jaa_valmistus($tunnus, $params) {
       while ($raaka_aine = mysql_fetch_assoc($raaka_aine_result)) {
 
         // Raaka-aineen kappaleet
-        $r_original_kpl = $raaka_aine['varattu'] * $raaka_aineen_suhde; # 3 = 12 * 0.25
-        $r_copy_kpl = $raaka_aine['varattu'] - $r_original_kpl;  # 9 = 12 - 3
+        $r_original_kpl = $raaka_aine['varattu'] * $raaka_aineen_suhde; // 3 = 12 * 0.25
+        $r_copy_kpl = $raaka_aine['varattu'] - $r_original_kpl;  // 9 = 12 - 3
         // Kopioidaan Raaka-aine
         $poikkeukset = array(
           'tilausrivi.varattu' => $r_copy_kpl,
@@ -766,11 +785,12 @@ function jaa_valmistus($tunnus, $params) {
   $return = (isset($copy['tunnus'])) ? $copy['tunnus'] : null;
 }
 
+
 /**
  * Hakee käyttöliittymässä dropdowniin piirrettävät valmistuksien tila rajaukset
  * (raportti_valmistuksista.php ja puuttuvat_raaka_aineet.php)
  *
- * @param string $tyyppi puuttuvat_raaka_aineet.php ei haluta valmistuksia, jotka on jo valmistettu
+ * @param string  $tyyppi puuttuvat_raaka_aineet.php ei haluta valmistuksia, jotka on jo valmistettu
  * @global type $kukarow
  * @global type $yhtiorow
  * @return array

@@ -685,11 +685,11 @@ if ($tuoteno != '') {
 
       $query = "SELECT *
                 FROM tapahtuma
-                WHERE yhtio           = '$kukarow[yhtio]'
-                AND tuoteno           = '$tuoteno'
-                AND rivitunnus        > 0
+                WHERE yhtio    = '$kukarow[yhtio]'
+                AND tuoteno    = '$tuoteno'
+                AND rivitunnus > 0
                 AND left(laadittu,10) = '$pvm'
-                AND laji              in ('tulo','valmistus')
+                AND laji       in ('tulo','valmistus')
                 LIMIT 1";
       $result = pupe_query($query);
     }
@@ -728,8 +728,8 @@ if ($tuoteno != '') {
 
       $query = "SELECT sum(kpl) saldomuutos, sum(if(laji='Epäkurantti',1,0)) epaku
                 FROM tapahtuma
-                WHERE yhtio     = '$kukarow[yhtio]'
-                AND tuoteno     = '$tuoteno'
+                WHERE yhtio    = '$kukarow[yhtio]'
+                AND tuoteno    = '$tuoteno'
                 AND laadittu   >= '$pvm'
                 AND rivitunnus >= 0
                 AND kpl        <> 0";
@@ -765,11 +765,11 @@ if ($tuoteno != '') {
         // skipataan myös siirto, vaikka siellä voikin olla hinta (siirron aikana hinta ei voi muuttua)
         $query = "SELECT hinta, tunnus, rivitunnus
                   FROM tapahtuma
-                  WHERE yhtio     = '$kukarow[yhtio]'
-                  and tuoteno     = '$tuoteno'
-                  and laadittu    < '$pvm'
+                  WHERE yhtio    = '$kukarow[yhtio]'
+                  and tuoteno    = '$tuoteno'
+                  and laadittu   < '$pvm'
                   AND rivitunnus >= 0
-                  and laji not in ('poistettupaikka', 'uusipaikka', 'siirto')
+                  and laji       not in ('poistettupaikka', 'uusipaikka', 'siirto')
                   ORDER BY laadittu DESC, tunnus DESC
                   LIMIT 1";
         $result = pupe_query($query);
@@ -826,10 +826,10 @@ if ($tuoteno != '') {
                     FROM tapahtuma
                     WHERE yhtio     = '$kukarow[yhtio]'
                     AND tuoteno     = '$tuoteno'
-                    AND laadittu   >= '$pvm'
-                    AND rivitunnus >= 0
+                    AND laadittu    >= '$pvm'
+                    AND rivitunnus  >= 0
                     AND laji       != 'korjaus'
-                    AND kpl        <> 0
+                    AND kpl         <> 0
                     ORDER BY laadittu, tunnus";
           $result = pupe_query($query);
 

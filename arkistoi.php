@@ -8,8 +8,8 @@ if ($php_cli) {
   ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__));
 
   // Otetaan tietokanta connect
-  require ("inc/connect.inc");
-  require ("inc/functions.inc");
+  require "inc/connect.inc";
+  require "inc/functions.inc";
 
   if (!isset($argv[1])) {
     echo "Anna yhtio!\n";
@@ -31,7 +31,7 @@ if ($php_cli) {
   $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
 }
 else {
-  require ("inc/parametrit.inc");
+  require "inc/parametrit.inc";
 }
 
 // Tämä vaatii paljon muistia
@@ -87,11 +87,11 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 
   $dellataan = TRUE;
 
-  ##################################################################################################################################
-  #OSTORESKONTRA
-  ##################################################################################################################################
+  //#################################################################################################################################
+  //OSTORESKONTRA
+  //#################################################################################################################################
   if ($dellataan) {
-    # Maksetut ostolaskut
+    // Maksetut ostolaskut
     $query = "DELETE lasku
               FROM lasku
               LEFT JOIN tiliointi ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tapvm > '$vv-$kk-$pp')
@@ -106,12 +106,12 @@ if (isset($teearkistointi) and $teearkistointi != "") {
     is_log("Poistettiin $del ostolaskua.");
   }
 
-  ##################################################################################################################################
-  #OSTOHISTORIA
-  ##################################################################################################################################
+  //#################################################################################################################################
+  //OSTOHISTORIA
+  //#################################################################################################################################
   if ($dellataan) {
 
-    # Saapumiset
+    // Saapumiset
     $query = "DELETE lasku
               FROM lasku
               WHERE yhtio     = '$kukarow[yhtio]'
@@ -125,7 +125,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 
     is_log("Poistettiin $del saapumista.");
 
-    # Saapumisen liitosotsikot
+    // Saapumisen liitosotsikot
     $query = "DELETE lasku
               FROM lasku
               LEFT JOIN lasku AS saapuminen ON (lasku.yhtio = saapuminen.yhtio and saapuminen.laskunro = lasku.laskunro and saapuminen.tila = 'K' and saapuminen.vanhatunnus = 0 )
@@ -138,7 +138,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 
     is_log("Poistettiin $del saapumisen liitosotsikkoa.");
 
-    # Ostotilaukset
+    // Ostotilaukset
     $query = "DELETE lasku
               FROM lasku
               WHERE yhtio    = '$kukarow[yhtio]'
@@ -150,7 +150,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 
     is_log("Poistettiin $del ostotilausta.");
 
-    # ASN-sanomat
+    // ASN-sanomat
     $query = "DELETE asn_sanomat
               FROM asn_sanomat
               WHERE yhtio    = '$kukarow[yhtio]'
@@ -162,11 +162,11 @@ if (isset($teearkistointi) and $teearkistointi != "") {
     is_log("Poistettiin $del ASN-sanomaa.");
   }
 
-  ##################################################################################################################################
-  #MYYNTIHISTORIA
-  ##################################################################################################################################
+  //#################################################################################################################################
+  //MYYNTIHISTORIA
+  //#################################################################################################################################
   if ($dellataan) {
-    # Maksetut myyntilaskut
+    // Maksetut myyntilaskut
     $query = "DELETE lasku FROM lasku
               LEFT JOIN tiliointi ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tapvm > '$vv-$kk-$pp')
               WHERE lasku.yhtio = '$kukarow[yhtio]'
@@ -180,7 +180,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 
     is_log("Poistettiin $del myyntilaskua.");
 
-    # Myyntitilaukset
+    // Myyntitilaukset
     $query = "DELETE lasku FROM lasku
               WHERE yhtio = '$kukarow[yhtio]'
               AND tila    = 'L'
@@ -191,7 +191,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 
     is_log("Poistettiin $del laskutettua myntitilausta.");
 
-    # Laskun lisätiedot
+    // Laskun lisätiedot
     $query = "DELETE laskun_lisatiedot
               FROM laskun_lisatiedot
               LEFT JOIN lasku ON (lasku.yhtio = laskun_lisatiedot.yhtio and lasku.tunnus = laskun_lisatiedot.otunnus)
@@ -202,7 +202,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 
     is_log("Poistettiin $del laskun lisätietoriviä.");
 
-    # Tapahtumat
+    // Tapahtumat
     $query = "SELECT group_concat(distinct concat('\'',laji,'\'')) lajit
               FROM tapahtuma
               WHERE yhtio = '$kukarow[yhtio]'";
@@ -233,7 +233,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
       is_log("Poistettiin $del orpoa-tapahtumariviä.");
     }
 
-    # Tilausrivit
+    // Tilausrivit
     $query = "DELETE tilausrivi
               FROM tilausrivi
               LEFT JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
@@ -244,7 +244,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 
     is_log("Poistettiin $del tilausriviä.");
 
-    # Tilausrivin_lisatiedot
+    // Tilausrivin_lisatiedot
     $query = "DELETE tilausrivin_lisatiedot
               FROM tilausrivin_lisatiedot
               LEFT JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
@@ -255,7 +255,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 
     is_log("Poistettiin $del tilausrivin lisätietoriviä.");
 
-    # Sahkoisen_lahetteen_rivit
+    // Sahkoisen_lahetteen_rivit
     $query = "DELETE sahkoisen_lahetteen_rivit
               FROM sahkoisen_lahetteen_rivit
               LEFT JOIN lasku ON (lasku.yhtio = sahkoisen_lahetteen_rivit.yhtio and lasku.tunnus = sahkoisen_lahetteen_rivit.otunnus)
@@ -266,7 +266,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 
     is_log("Poistettiin $del sähköisen lähetteen riviä.");
 
-    # Laskujen/tilausten liitetiedostot
+    // Laskujen/tilausten liitetiedostot
     $query = "DELETE liitetiedostot
               FROM liitetiedostot
               LEFT JOIN lasku ON (lasku.yhtio = liitetiedostot.yhtio and lasku.tunnus = liitetiedostot.liitostunnus)
@@ -278,7 +278,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 
     is_log("Poistettiin $del liitetiedostoa.");
 
-    # Maksupositio
+    // Maksupositio
     $query = "DELETE maksupositio
               FROM maksupositio
               LEFT JOIN lasku ON (lasku.yhtio = maksupositio.yhtio and lasku.tunnus = maksupositio.otunnus)
@@ -289,7 +289,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 
     is_log("Poistettiin $del laskun maksusopimusta.");
 
-    # Rahtikirjat
+    // Rahtikirjat
     $query = "DELETE rahtikirjat
               FROM rahtikirjat
               LEFT JOIN lasku ON (lasku.yhtio = rahtikirjat.yhtio and lasku.tunnus = rahtikirjat.otsikkonro)
@@ -301,7 +301,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 
     is_log("Poistettiin $del rahtikirjaa.");
 
-    # Työmääräykset
+    // Työmääräykset
     $query = "DELETE tyomaarays
               FROM tyomaarays
               LEFT JOIN lasku ON (lasku.yhtio = tyomaarays.yhtio and lasku.tunnus = tyomaarays.otunnus)
@@ -313,11 +313,11 @@ if (isset($teearkistointi) and $teearkistointi != "") {
     is_log("Poistettiin $del työmääräystä.");
   }
 
-  ##################################################################################################################################
-  #KIRJANPITO
-  ##################################################################################################################################
+  //#################################################################################################################################
+  //KIRJANPITO
+  //#################################################################################################################################
   if ($dellataan) {
-    # Tositteet
+    // Tositteet
     $query = "DELETE lasku
               FROM lasku
               LEFT JOIN tiliointi ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tapvm > '$vv-$kk-$pp')
@@ -330,7 +330,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 
     is_log("Poistettiin $del tositetta.");
 
-    # Tiliöinnit
+    // Tiliöinnit
     $query = "DELETE tiliointi
               FROM tiliointi
               WHERE yhtio = '$kukarow[yhtio]'
@@ -340,7 +340,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 
     is_log("Poistettiin $del tiliöintiä.");
 
-    # Tiliotteet
+    // Tiliotteet
     $query = "DELETE tiliotedata
               FROM tiliotedata
               WHERE yhtio = '$kukarow[yhtio]'
@@ -352,11 +352,11 @@ if (isset($teearkistointi) and $teearkistointi != "") {
     is_log("Poistettiin $del tiliotetta.");
   }
 
-  ##################################################################################################################################
-  #MYYNTIRESKONTRA
-  ##################################################################################################################################
+  //#################################################################################################################################
+  //MYYNTIRESKONTRA
+  //#################################################################################################################################
   if ($dellataan) {
-    # Suoritukset
+    // Suoritukset
     $query = "DELETE suoritus
               FROM suoritus
               WHERE yhtio = '$kukarow[yhtio]'
@@ -367,7 +367,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 
     is_log("Poistettiin $del suoritusta.");
 
-    # Karhukirjeet
+    // Karhukirjeet
     $query = "DELETE karhu_lasku
               FROM karhu_lasku
               LEFT JOIN lasku ON (lasku.tunnus = karhu_lasku.ltunnus)
@@ -377,7 +377,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 
     is_log("Poistettiin $del maksukehotusta.");
 
-    # Karhukierrokset
+    // Karhukierrokset
     $query = "DELETE karhukierros
               FROM karhukierros
               LEFT JOIN karhu_lasku ON (karhukierros.tunnus = karhu_lasku.ktunnus)
@@ -388,9 +388,9 @@ if (isset($teearkistointi) and $teearkistointi != "") {
     is_log("Poistettiin $del maksukehotuskierrosta.");
   }
 
-  ##################################################################################################################################
-  #ASIAKASTIEDOT
-  ##################################################################################################################################
+  //#################################################################################################################################
+  //ASIAKASTIEDOT
+  //#################################################################################################################################
   if ($dellataan) {
     // Poistetaan "P" asiakkaita joilla ei ole laskutusta
     $query = "DELETE asiakas
@@ -570,12 +570,12 @@ if (isset($teearkistointi) and $teearkistointi != "") {
     is_log("Poistettiin $del synclogia joiden asiakas oli poistettu!");
   }
 
-  ##################################################################################################################################
-  #TUOTETIEDOT
-  ##################################################################################################################################
+  //#################################################################################################################################
+  //TUOTETIEDOT
+  //#################################################################################################################################
   if ($dellataan) {
 
-/* poistetaan tämä toistaiseksi, on liian hidas
+    /* poistetaan tämä toistaiseksi, on liian hidas
     // Poistetaan "P" tuotteita joilla ei ole laskutusta eikä saldoa
     $query = "SELECT tuoteno
               FROM tuote
@@ -866,9 +866,9 @@ if (isset($teearkistointi) and $teearkistointi != "") {
     is_log("Poistettiin $del toimittaja-alennusta joiden tuote oli poistettu!");
   }
 
-  ##################################################################################################################################
-  #TOIMITTAJATIEDOT
-  ##################################################################################################################################
+  //#################################################################################################################################
+  //TOIMITTAJATIEDOT
+  //#################################################################################################################################
   if ($dellataan) {
 
     // Poistetaan "P" toimittajat joilla ei ole laskua
@@ -978,13 +978,13 @@ if (isset($teearkistointi) and $teearkistointi != "") {
     is_log("Poistettiin $del toimittajahintaa joiden toimittaja oli poistettu (ytunnus)!");
   }
 
-  ##################################################################################################################################
-  #SEKALAISET
-  ##################################################################################################################################
+  //#################################################################################################################################
+  //SEKALAISET
+  //#################################################################################################################################
   if ($dellataan) {
 
     if (table_exists("automanual_hakuhistoria")) {
-      # Automanual-hakuhistoria
+      // Automanual-hakuhistoria
       $query = "DELETE automanual_hakuhistoria
                 FROM automanual_hakuhistoria
                 WHERE yhtio    = '$kukarow[yhtio]'
@@ -996,7 +996,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
       is_log("Poistettiin $del Automanual-hakuhistoriariviä.");
     }
 
-    # Lähdöt
+    // Lähdöt
     $query = "DELETE lahdot
               FROM lahdot
               WHERE yhtio = '$kukarow[yhtio]'
@@ -1007,7 +1007,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 
     is_log("Poistettiin $del lähtöä.");
 
-    # Kalenteritapahtumat
+    // Kalenteritapahtumat
     $query = "DELETE kalenteri
               FROM kalenteri
               WHERE yhtio = '$kukarow[yhtio]'
@@ -1019,7 +1019,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 
     is_log("Poistettiin $del kalenteritapahtumaa.");
 
-    # Keräyserät
+    // Keräyserät
     $query = "DELETE kerayserat
               FROM kerayserat
               LEFT JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio and tilausrivi.tunnus = kerayserat.tilausrivi)
@@ -1030,7 +1030,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 
     is_log("Poistettiin $del keräyseräriviä.");
 
-    # Budjetit
+    // Budjetit
     $budjettiarray = array("budjetti", "budjetti_asiakas", "budjetti_myyja", "budjetti_toimittaja", "budjetti_tuote");
 
     foreach ($budjettiarray as $budjettitaulu) {
@@ -1044,7 +1044,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
       is_log("Poistettiin $del {$budjettitaulu}-riviä.");
     }
 
-    # Kampanjat
+    // Kampanjat
     $query = "DELETE kampanjat
               FROM kampanjat
               WHERE yhtio    = '$kukarow[yhtio]'
@@ -1055,7 +1055,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 
     is_log("Poistettiin $del kampanjaa.");
 
-    # Kampanjaehdot
+    // Kampanjaehdot
     $query = "DELETE kampanja_ehdot
               FROM kampanja_ehdot
               LEFT JOIN kampanjat ON (kampanjat.yhtio = kampanja_ehdot.yhtio and kampanjat.tunnus = kampanja_ehdot.kampanja)
@@ -1066,7 +1066,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 
     is_log("Poistettiin $del kampanjan ehtoriviä.");
 
-    # Kampanjapalkinnot
+    // Kampanjapalkinnot
     $query = "DELETE kampanja_palkinnot
               FROM kampanja_palkinnot
               LEFT JOIN kampanjat ON (kampanjat.yhtio = kampanja_palkinnot.yhtio and kampanjat.tunnus = kampanja_palkinnot.kampanja)
@@ -1077,7 +1077,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 
     is_log("Poistettiin $del kampanjan palkinotirivä.");
 
-    # Messenger-viestit
+    // Messenger-viestit
     $query = "DELETE messenger
               FROM messenger
               WHERE yhtio    = '$kukarow[yhtio]'
@@ -1093,5 +1093,5 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 }
 
 if (!$php_cli) {
-  require ("inc/footer.inc");
+  require "inc/footer.inc";
 }

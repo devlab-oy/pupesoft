@@ -1,6 +1,6 @@
 <?php
 
-# Pupesoft -> Unifaun Printserver datasiirto
+// Pupesoft -> Unifaun Printserver datasiirto
 
 // jos on laitettu kollikenttään 0 niin ei yritetä luoda siirtotiedostoa
 if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
@@ -15,7 +15,7 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
     $unifaun_uo_succ = $unifaun_ps_succ;
     $unifaun_uo_port = $unifaun_ps_port;
 
-    require ("rahtikirja_unifaun_uo_siirto.inc");
+    require "rahtikirja_unifaun_uo_siirto.inc";
   }
   else {
     echo "<br><font class='error'>".t("UNIFAUN-aineiston luontiin tarvittavia parametreja puuttuu!")."</font><br>";

@@ -2,13 +2,13 @@
 $filename = '/home/jarmo/public_html/ostoresk/datain/' . $inyhtio . 'myyres.txt';
 
 if (file_exists($filename)) {
-        $query = "DELETE from maksu WHERE yhtio = '$inyhtio' and tyyppi = 'MY'"; // Poistetaan vanhat myyntilaskut!
-        $xresult = mysql_query($query) or pupe_error($query);
-  $fp = fopen ($filename, "r");
-  while (!feof ($fp)) {
+  $query = "DELETE from maksu WHERE yhtio = '$inyhtio' and tyyppi = 'MY'"; // Poistetaan vanhat myyntilaskut!
+  $xresult = mysql_query($query) or pupe_error($query);
+  $fp = fopen($filename, "r");
+  while (!feof($fp)) {
     $line = fgets($fp, 4096);
-    list($roskaa,$pvm,$summa) = explode(" ", $line, 3);
-    list($pv,$kk,$yy) = explode(".", $pvm, 3);
+    list($roskaa, $pvm, $summa) = explode(" ", $line, 3);
+    list($pv, $kk, $yy) = explode(".", $pvm, 3);
     $pvm = $yy . "-" . $kk . "-" . $pv;
 
     $query = "INSERT into maksu values (
@@ -23,9 +23,9 @@ if (file_exists($filename)) {
               '')";
     $xresult = mysql_query($query) or pupe_error($query);
   }
-  fclose ($fp);
+  fclose($fp);
 }
 
 else {
-    echo "$filename ".t("ei löydy")."<br>";
+  echo "$filename ".t("ei löydy")."<br>";
 }

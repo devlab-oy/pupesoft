@@ -3,14 +3,14 @@
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
 
-include('../inc/parametrit.inc');
+include '../inc/parametrit.inc';
 
 echo "<font class='head'>".t("Etsi työmääräys").":</font><hr><br>";
 
 if ($tee == 'etsi') {
   echo "<table>";
 
-  if ($vva != '' and $kka != '' and $ppa != '' and $vvl != '' and $kkl != '' and $ppl != ''){
+  if ($vva != '' and $kka != '' and $ppa != '' and $vvl != '' and $kkl != '' and $ppl != '') {
     $muu1 = "lasku.luontiaika >= '$vva-$kka-$ppa' and lasku.luontiaika <= ";
     $muu2 = "$vvl-$kkl-$ppl";
   }
@@ -68,7 +68,7 @@ if ($tee == 'etsi') {
           <td valign='top'>$row[laskutunnus]</td>
           <td valign='top'>$row[nimi]</td>
           <td valign='top'>$row[rekno]</td>
-          <td valign='top'>".tv1dateconv(substr($row["luontiaika"],0,10))."</td>
+          <td valign='top'>".tv1dateconv(substr($row["luontiaika"], 0, 10))."</td>
           <td>".str_replace("\n", "<br>", $row["komm1"])."".str_replace("\n", "<br>", $row["komm2"])."</td>";
 
       if ($row["alatila"] == '' or $row["alatila"] == 'A' or $row["alatila"] == 'B' or $row["alatila"] == 'C' or $row["alatila"] == 'J') {
@@ -137,4 +137,4 @@ echo "<tr><form method='post'><input type='hidden' name='tee' value='etsi'>
   <td class='back'><input type='submit' value='Hae'></td></form></tr>";
 echo "</table>";
 
-require ("../inc/footer.inc");
+require "../inc/footer.inc";

@@ -18,7 +18,6 @@ if ($tila != 'ostolasku_kulut') {
 }
 
 
-
 if (!function_exists("erottele")) {
   function erottele($pvm) {
     $paluu['pp'] = substr($pvm, -2);

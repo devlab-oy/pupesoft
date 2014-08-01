@@ -3,8 +3,8 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-if (@include("../inc/parametrit.inc"));
-elseif (@include("parametrit.inc"));
+if (@include "../inc/parametrit.inc");
+elseif (@include "parametrit.inc");
 else exit;
 
 echo "<font class='head'>".t("Osastoseuranta tuotemerkeitt‰in")."</font><hr>";
@@ -14,18 +14,18 @@ $asiakasytunnus = "";
 
 if ($asiakas != '' and $kukarow["extranet"] == "") {
 
-   $muutparametrit = $maa."#".$asos."#".$kka."#".$ppa."#".$vva."#".$kkl."#".$ppl."#".$vvl;
+  $muutparametrit = $maa."#".$asos."#".$kka."#".$ppa."#".$vva."#".$kkl."#".$ppl."#".$vvl;
 
-   $ytunnus = $asiakas;
-   require ("inc/asiakashaku.inc");
+  $ytunnus = $asiakas;
+  require "inc/asiakashaku.inc";
 
   if ($ytunnus != '') {
-     if (isset($muutparametrit)) {
-       list($maa,$asos,$kka,$ppa,$vva,$kkl,$ppl,$vvl) = explode('#', $muutparametrit);
-     }
+    if (isset($muutparametrit)) {
+      list($maa, $asos, $kka, $ppa, $vva, $kkl, $ppl, $vvl) = explode('#', $muutparametrit);
+    }
 
-     //asiakasmuuttujassa menee asiakkaan tunnus
-     $asiakas = $asiakasid;
+    //asiakasmuuttujassa menee asiakkaan tunnus
+    $asiakas = $asiakasid;
     $asiakasytunnus = $ytunnus;
   }
   else {
@@ -142,7 +142,7 @@ if ($tee == 'go') {
     if (mysql_num_rows($yhtresulta) != 0) {
 
       //tehd‰‰n ensin summamuuttujat
-      while ($yhtrow = mysql_fetch_array ($yhtresulta)) {
+      while ($yhtrow = mysql_fetch_array($yhtresulta)) {
 
         if ($yhtrow["osasto"] != $edosasto) {
           $i = $yhtrow["osasto"];
@@ -181,38 +181,38 @@ if ($tee == 'go') {
       }
 
       //kelataan alkuun
-      mysql_data_seek($yhtresulta,0);
+      mysql_data_seek($yhtresulta, 0);
 
       //ja tulostetaan kaikki rivit ruudulle
-      while ($yhtrow = mysql_fetch_array ($yhtresulta)) {
+      while ($yhtrow = mysql_fetch_array($yhtresulta)) {
 
         //t‰ss‰ tulee yhteens‰rivi
         if ($yhtrow["osasto"] != $edosasto) {
           $i = $yhtrow["osasto"];
 
           if (($osastomyynticuryht[$i] != 0) and ($osastomyyntiedyht[$i] != 0))
-            $indlvtot = sprintf('%.2f',$osastomyynticuryht[$i] / $osastomyyntiedyht[$i]);
+            $indlvtot = sprintf('%.2f', $osastomyynticuryht[$i] / $osastomyyntiedyht[$i]);
           else $indlvtot = "n/a";
 
           if (($osastokplcuryht[$i] != 0) and ($osastokpledyht[$i] != 0))
-            $indkpltot = sprintf('%.2f',$osastokplcuryht[$i] / $osastokpledyht[$i]);
+            $indkpltot = sprintf('%.2f', $osastokplcuryht[$i] / $osastokpledyht[$i]);
           else $indkpltot = "n/a";
 
           if (($osastomyynticuryht[$i] != 0) and ($osastokatecuryht[$i] != 0))
-            $kateprosyht = sprintf('%.2f',($osastokatecuryht[$i] / $osastomyynticuryht[$i]) * 100);
+            $kateprosyht = sprintf('%.2f', ($osastokatecuryht[$i] / $osastomyynticuryht[$i]) * 100);
           else $kateprosyht = 0;
 
           if (($osastokatecuryht[$i] != 0) and ($osastokateedyht[$i] != 0))
-            $indkatetot = sprintf('%.2f',$osastokatecuryht[$i] / $osastokateedyht[$i]);
+            $indkatetot = sprintf('%.2f', $osastokatecuryht[$i] / $osastokateedyht[$i]);
           else $indkatetot = "n/a";
 
 
           if (($kaikkimyynticuryht != 0) and ($osastomyynticuryht[$i] != 0))
-            $lvosuus = sprintf('%.2f',($osastomyynticuryht[$i] / $kaikkimyynticuryht) * 100);
+            $lvosuus = sprintf('%.2f', ($osastomyynticuryht[$i] / $kaikkimyynticuryht) * 100);
           else $lvosuus = 0;
 
           if (($kaikkikatecuryht != 0) and ($osastokatecuryht[$i] != 0))
-            $kateosuus = sprintf('%.2f',($osastokatecuryht[$i] / $kaikkikatecuryht) * 100);
+            $kateosuus = sprintf('%.2f', ($osastokatecuryht[$i] / $kaikkikatecuryht) * 100);
           else $kateosuus = 0;
 
           // tehd‰‰n avainsana query
@@ -221,21 +221,21 @@ if ($tee == 'go') {
 
           echo "<tr>";
           echo "<td><b>$yhtrow[osasto] $srow[selitetark] yhteens‰</b></td>";
-          echo "<td align='right'><b>".str_replace(".",",",$osastomyynticuryht[$i])."</b></td>";
-          echo "<td align='right'><b>".str_replace(".",",",$indlvtot)."</b></td>";
+          echo "<td align='right'><b>".str_replace(".", ",", $osastomyynticuryht[$i])."</b></td>";
+          echo "<td align='right'><b>".str_replace(".", ",", $indlvtot)."</b></td>";
 
           if ($kukarow["extranet"] == '') {
-            echo "<td align='right'><b>".str_replace(".",",",$lvosuus)."%</b></td>";
+            echo "<td align='right'><b>".str_replace(".", ",", $lvosuus)."%</b></td>";
           }
 
-          echo "<td align='right'><b>".str_replace(".",",",$osastokplcuryht[$i])."</b></td>";
-          echo "<td align='right'><b>".str_replace(".",",",$indkpltot)."</b></td>";
+          echo "<td align='right'><b>".str_replace(".", ",", $osastokplcuryht[$i])."</b></td>";
+          echo "<td align='right'><b>".str_replace(".", ",", $indkpltot)."</b></td>";
 
           if ($kukarow["extranet"] == '') {
-            echo "<td align='right'><b>".str_replace(".",",",$osastokatecuryht[$i])."</b></td>";
-            echo "<td align='right'><b>".str_replace(".",",",$kateprosyht)."%</b></td>";
-            echo "<td align='right'><b>".str_replace(".",",",$indkatetot)."</b></td>";
-            echo "<td align='right'><b>".str_replace(".",",",$kateosuus)."%</b></td>";
+            echo "<td align='right'><b>".str_replace(".", ",", $osastokatecuryht[$i])."</b></td>";
+            echo "<td align='right'><b>".str_replace(".", ",", $kateprosyht)."%</b></td>";
+            echo "<td align='right'><b>".str_replace(".", ",", $indkatetot)."</b></td>";
+            echo "<td align='right'><b>".str_replace(".", ",", $kateosuus)."%</b></td>";
 
 
             $query = "SELECT sum(tuotepaikat.saldo*if(epakurantti50pvm='0000-00-00', kehahin, kehahin/2)) varasto
@@ -249,7 +249,7 @@ if ($tee == 'go') {
             $vresult = mysql_query($query) or pupe_error($query);
             $vrow = mysql_fetch_array($vresult);
 
-            echo "<td align='right'><b>".str_replace(".",",",sprintf('%.2f',$vrow["varasto"]))."</b></td>";
+            echo "<td align='right'><b>".str_replace(".", ",", sprintf('%.2f', $vrow["varasto"]))."</b></td>";
 
           }
 
@@ -257,45 +257,45 @@ if ($tee == 'go') {
         }
 
         if (($yhtrow['myynticuryht'] != 0) and ($yhtrow['myyntiedyht'] != 0))
-          $indlv = sprintf('%.2f',$yhtrow['myynticuryht'] / $yhtrow['myyntiedyht']);
+          $indlv = sprintf('%.2f', $yhtrow['myynticuryht'] / $yhtrow['myyntiedyht']);
         else $indlv = "n/a";
 
         if (($osastomyynticuryht[$i] != 0) and ($yhtrow['myynticuryht'] != 0))
-          $lvosuus = sprintf('%.2f',($yhtrow['myynticuryht'] / $osastomyynticuryht[$i]) * 100);
+          $lvosuus = sprintf('%.2f', ($yhtrow['myynticuryht'] / $osastomyynticuryht[$i]) * 100);
         else $lvosuus = 0;
 
         if (($yhtrow['kplcuryht'] != 0) and ($yhtrow['kpledyht'] != 0))
-          $indkpl = sprintf('%.2f',$yhtrow['kplcuryht'] / $yhtrow['kpledyht']);
+          $indkpl = sprintf('%.2f', $yhtrow['kplcuryht'] / $yhtrow['kpledyht']);
         else $indkpl = "n/a";
 
         if (($yhtrow['myynticuryht'] != 0) and ($yhtrow['katecuryht'] != 0))
-          $katepros = sprintf('%.2f',($yhtrow['katecuryht'] / $yhtrow['myynticuryht']) * 100);
+          $katepros = sprintf('%.2f', ($yhtrow['katecuryht'] / $yhtrow['myynticuryht']) * 100);
         else $katepros = 0;
 
         if (($yhtrow['katecuryht'] != 0) and ($yhtrow['kateedyht'] != 0))
-          $indkate = sprintf('%.2f',$yhtrow['katecuryht'] / $yhtrow['kateedyht']);
+          $indkate = sprintf('%.2f', $yhtrow['katecuryht'] / $yhtrow['kateedyht']);
         else $indkate = "n/a";
 
         if (($osastokatecuryht[$i] != 0) and ($yhtrow['katecuryht'] != 0))
-          $kateosuus = sprintf('%.2f',($yhtrow['katecuryht'] / $osastokatecuryht[$i]) * 100);
+          $kateosuus = sprintf('%.2f', ($yhtrow['katecuryht'] / $osastokatecuryht[$i]) * 100);
         else $kateosuus = 0;
         echo "<tr>";
         echo "<td>--> $yhtrow[tuotemerkki]</td>";
-        echo "<td align='right'>".str_replace(".",",",$yhtrow["myynticuryht"])."</td>";
-        echo "<td align='right'>".str_replace(".",",",$indlv)."</td>";
+        echo "<td align='right'>".str_replace(".", ",", $yhtrow["myynticuryht"])."</td>";
+        echo "<td align='right'>".str_replace(".", ",", $indlv)."</td>";
 
         if ($kukarow["extranet"] == '') {
-          echo "<td align='right'>".str_replace(".",",",$lvosuus)."%</td>";
+          echo "<td align='right'>".str_replace(".", ",", $lvosuus)."%</td>";
         }
 
-        echo "<td align='right'>".str_replace(".",",",$yhtrow["kplcuryht"])."</td>";
-        echo "<td align='right'>".str_replace(".",",",$indkpl)."</td>";
+        echo "<td align='right'>".str_replace(".", ",", $yhtrow["kplcuryht"])."</td>";
+        echo "<td align='right'>".str_replace(".", ",", $indkpl)."</td>";
 
         if ($kukarow["extranet"] == '') {
-          echo "<td align='right'>".str_replace(".",",",$yhtrow["katecuryht"])."</td>";
-          echo "<td align='right'>".str_replace(".",",",$katepros)."%</td>";
-          echo "<td align='right'>".str_replace(".",",",$indkate)."</td>";
-          echo "<td align='right'>".str_replace(".",",",$kateosuus)."%</td>";
+          echo "<td align='right'>".str_replace(".", ",", $yhtrow["katecuryht"])."</td>";
+          echo "<td align='right'>".str_replace(".", ",", $katepros)."%</td>";
+          echo "<td align='right'>".str_replace(".", ",", $indkate)."</td>";
+          echo "<td align='right'>".str_replace(".", ",", $kateosuus)."%</td>";
 
           $query = "SELECT sum(tuotepaikat.saldo*if(epakurantti75pvm='0000-00-00', if(epakurantti50pvm='0000-00-00', if(epakurantti25pvm='0000-00-00', kehahin, kehahin*0.75), kehahin*0.5), kehahin*0.25)) varasto
                     FROM tuotepaikat, tuote
@@ -309,7 +309,7 @@ if ($tee == 'go') {
           $vresult = mysql_query($query) or pupe_error($query);
           $vrow = mysql_fetch_array($vresult);
 
-          echo "<td align='right'>".str_replace(".",",",sprintf('%.2f',$vrow["varasto"]))."</td>";
+          echo "<td align='right'>".str_replace(".", ",", sprintf('%.2f', $vrow["varasto"]))."</td>";
 
         }
 
@@ -320,40 +320,40 @@ if ($tee == 'go') {
 
 
       if ($kaikkimyynticuryht != 0 and $kaikkimyyntiedyht != 0)
-        $indlv = sprintf('%.2f',$kaikkimyynticuryht / $kaikkimyyntiedyht);
+        $indlv = sprintf('%.2f', $kaikkimyynticuryht / $kaikkimyyntiedyht);
       else $indlv = "n/a";
 
       echo "<tr>";
       echo "<th>Yhteens‰</th>";
-      echo "<th align='right'>".str_replace(".",",",$kaikkimyynticuryht)."</th>";
-      echo "<th align='right'>".str_replace(".",",",$indlv)."</th>";
+      echo "<th align='right'>".str_replace(".", ",", $kaikkimyynticuryht)."</th>";
+      echo "<th align='right'>".str_replace(".", ",", $indlv)."</th>";
 
       if ($kukarow["extranet"] == '') {
         echo "<th></th>";
       }
 
       if ($kaikkikplcuryht != 0 and $kaikkikpledyht != 0)
-        $indlv = sprintf('%.2f',$kaikkikplcuryht / $kaikkikpledyht);
+        $indlv = sprintf('%.2f', $kaikkikplcuryht / $kaikkikpledyht);
       else $indlv = "n/a";
 
-      echo "<th align='right'>".str_replace(".",",",$kaikkikplcuryht)."</th>";
-      echo "<th align='right'>".str_replace(".",",",$indlv)."</th>";
+      echo "<th align='right'>".str_replace(".", ",", $kaikkikplcuryht)."</th>";
+      echo "<th align='right'>".str_replace(".", ",", $indlv)."</th>";
 
       if ($kukarow["extranet"] == '') {
 
         if ($kaikkikatecuryht != 0 and $kaikkikateedyht != 0)
-          $indlv = sprintf('%.2f',$kaikkikatecuryht / $kaikkikateedyht);
+          $indlv = sprintf('%.2f', $kaikkikatecuryht / $kaikkikateedyht);
         else $indlv = "n/a";
 
         if ($kaikkimyynticuryht != 0 and $kaikkikatecuryht != 0)
-          $katepros = sprintf('%.2f',($kaikkikatecuryht / $kaikkimyynticuryht) * 100);
+          $katepros = sprintf('%.2f', ($kaikkikatecuryht / $kaikkimyynticuryht) * 100);
         else $katepros = 0;
 
-        echo "<th align='right'>".str_replace(".",",",$kaikkikatecuryht)."</th>";
-        echo "<th align='right'>".str_replace(".",",",$katepros)."%</th>";
-        echo "<th align='right'>".str_replace(".",",",$indlv)."</th>";
-        echo "<th align='right'>".str_replace(".",",","")."</th>";
-        echo "<th align='right'>".str_replace(".",",","")."</th>";
+        echo "<th align='right'>".str_replace(".", ",", $kaikkikatecuryht)."</th>";
+        echo "<th align='right'>".str_replace(".", ",", $katepros)."%</th>";
+        echo "<th align='right'>".str_replace(".", ",", $indlv)."</th>";
+        echo "<th align='right'>".str_replace(".", ",", "")."</th>";
+        echo "<th align='right'>".str_replace(".", ",", "")."</th>";
       }
 
       echo "</tr>";
@@ -369,11 +369,11 @@ if ($tee == 'go') {
 //K‰yttˆliittym‰
 
 if (!isset($kka))
-  $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+  $kka = date("m", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 if (!isset($vva))
-  $vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+  $vva = date("Y", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 if (!isset($ppa))
-  $ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+  $ppa = date("d", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 
 if (!isset($kkl))
   $kkl = date("m");
@@ -450,6 +450,6 @@ echo "<br>";
 echo "<input type='submit' value='".t("Aja raportti")."'>";
 echo "</form>";
 
-if (@include("inc/footer.inc"));
-elseif (@include("footer.inc"));
+if (@include "inc/footer.inc");
+elseif (@include "footer.inc");
 else exit;

@@ -1,10 +1,10 @@
 <?php
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Kopioi k‰ytt‰j‰profiileja").":</font><hr>";
 
 if (isset($fromkuka)) {
-  $fromkuka = explode('##',$fromkuka);
+  $fromkuka = explode('##', $fromkuka);
 
   $fromyhtio = $fromkuka[1];
   $fromkuka  = $fromkuka[0];
@@ -58,7 +58,7 @@ if ($copyready != '') {
     if (count($profiilit) > 0) {
       //k‰yd‰‰n l‰pi k‰ytt‰j‰n kaikki profiilit
       $triggeri = "";
-      foreach($profiilit as $prof) {
+      foreach ($profiilit as $prof) {
         //jos t‰m‰ kyseinen profiili on ollut k‰ytt‰j‰ll‰ aikaisemmin, niin joudumme p‰ivitt‰m‰‰n oikeudet
         if (strtoupper($prof) == strtoupper($fromkuka)) {
           $triggeri = "HAPPY";
@@ -204,4 +204,4 @@ if (($tokuka!='') and ($fromkuka!='')) {
 
 echo "</form>";
 
-require("inc/footer.inc");
+require "inc/footer.inc";

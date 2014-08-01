@@ -3,7 +3,7 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require('../inc/parametrit.inc');
+require '../inc/parametrit.inc';
 
 echo "<font class='head'>".t("Tilauskanta")."</font><hr>";
 
@@ -13,7 +13,7 @@ if ($tee == 'NAYTATILAUS') {
 
   echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
 
-  require ("raportit/naytatilaus.inc");
+  require "raportit/naytatilaus.inc";
 
   $tee = 'aja';
 }
@@ -34,11 +34,11 @@ if ($tee == 'aja' and $atoimvko != '' and ($ltoimvko == '' or $ltoimvko >= $atoi
 
   //echo "aaika $aaika<br>";
 
-  $alkuaika = viikonpaiva("Monday","$aaika weeks");
+  $alkuaika = viikonpaiva("Monday", "$aaika weeks");
   //echo "p‰iv‰m‰‰r‰ $alkuaika<br>";
 
   if ($ltoimvko == '') {
-    $loppuaika = viikonpaiva("Sunday","$aaika weeks");
+    $loppuaika = viikonpaiva("Sunday", "$aaika weeks");
     //echo "p‰iv‰m‰‰r‰ $loppuaika<br>";
   }
   else {
@@ -52,7 +52,7 @@ if ($tee == 'aja' and $atoimvko != '' and ($ltoimvko == '' or $ltoimvko >= $atoi
       $laika = "+".$ltoimvko - $nyviikko;
     }
 
-    $loppuaika = date("Y-m-d",strtotime("Sunday", strtotime("$laika weeks")));
+    $loppuaika = date("Y-m-d", strtotime("Sunday", strtotime("$laika weeks")));
     //echo "p‰iv‰m‰‰r‰ $loppuaika<br>";
   }
 
@@ -87,7 +87,7 @@ if ($tee == 'aja' and $atoimvko != '' and ($ltoimvko == '' or $ltoimvko >= $atoi
 
   for ($i = 0; $i < mysql_num_fields($result)-3; $i++) {
     $kojarj=$i+1; // sortti numeron mukaan niin ei tuu onglemia
-    echo "<th align='left'><a href = '$PHP_SELF?tee=$tee&atoimvko=$atoimvko&ltoimvko=$ltoimvko&vanhat=$vanhat&kojarj=$kojarj'>".t(mysql_field_name($result,$i))."</a></th>";
+    echo "<th align='left'><a href = '$PHP_SELF?tee=$tee&atoimvko=$atoimvko&ltoimvko=$ltoimvko&vanhat=$vanhat&kojarj=$kojarj'>".t(mysql_field_name($result, $i))."</a></th>";
   }
 
   $kojarj = $vanhaojarj;
@@ -101,8 +101,8 @@ if ($tee == 'aja' and $atoimvko != '' and ($ltoimvko == '' or $ltoimvko >= $atoi
   $rivit = array();
 
   while ($prow = mysql_fetch_array($result)) {
-    if (strpos($prow[$i],'@@') !== FALSE) {
-      $pvmma = substr($prow["Toimitusaika"],3);
+    if (strpos($prow[$i], '@@') !== FALSE) {
+      $pvmma = substr($prow["Toimitusaika"], 3);
     }
     else {
       $pvmma = $prow["Toimitusaika"];
@@ -119,42 +119,42 @@ if ($tee == 'aja' and $atoimvko != '' and ($ltoimvko == '' or $ltoimvko >= $atoi
     }
   }
 
-  if (is_resource($result) and mysql_num_rows($result)) mysql_data_seek($result,0);
+  if (is_resource($result) and mysql_num_rows($result)) mysql_data_seek($result, 0);
 
   while ($prow = mysql_fetch_array($result)) {
-    if (in_array($prow["tunnus"],$rivit)) {
+    if (in_array($prow["tunnus"], $rivit)) {
       $ero="td";
       if ($tunnus==$prow['Tilausnro']) $ero="th";
 
       echo "<tr class='aktiivi'>";
 
       for ($i=0; $i < mysql_num_fields($result)-3; $i++) {
-        if (mysql_field_name($result,$i) == 'Toimitusaika') {
-          if (strpos($prow[$i],'@@') !== FALSE) {
-            $pvmma = substr($prow[$i],3);
-            if (substr($prow[$i],0,1) == '7') {
-              echo "<$ero valign='top'>Vko ".date("W",strtotime($pvmma))."</$ero>";
+        if (mysql_field_name($result, $i) == 'Toimitusaika') {
+          if (strpos($prow[$i], '@@') !== FALSE) {
+            $pvmma = substr($prow[$i], 3);
+            if (substr($prow[$i], 0, 1) == '7') {
+              echo "<$ero valign='top'>Vko ".date("W", strtotime($pvmma))."</$ero>";
             }
             else {
-              echo "<$ero valign='top'>".$DAY_ARRAY[substr($prow[$i],0,1)]." ".t("Vko")." ".date("W",strtotime($pvmma))."</$ero>";
+              echo "<$ero valign='top'>".$DAY_ARRAY[substr($prow[$i], 0, 1)]." ".t("Vko")." ".date("W", strtotime($pvmma))."</$ero>";
             }
           }
           else {
-            echo "<$ero valign='top'>".tv1dateconv($prow[$i],"pitka")."</$ero>";
+            echo "<$ero valign='top'>".tv1dateconv($prow[$i], "pitka")."</$ero>";
           }
 
         }
-        elseif (mysql_field_name($result,$i) == 'Tuotenumero') {
+        elseif (mysql_field_name($result, $i) == 'Tuotenumero') {
           echo "<$ero valign='top'><a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow[$i])."'>$prow[$i]</$ero>";
         }
-        elseif (mysql_field_name($result,$i) == 'Nimi/Toim. nimi' and substr($prow[$i],-4) == '<br>') {
-          echo "<$ero valign='top'>".substr($prow[$i],0,-4)."</$ero>";
+        elseif (mysql_field_name($result, $i) == 'Nimi/Toim. nimi' and substr($prow[$i], -4) == '<br>') {
+          echo "<$ero valign='top'>".substr($prow[$i], 0, -4)."</$ero>";
         }
-        elseif (mysql_field_name($result,$i) == 'Tilausnro') {
+        elseif (mysql_field_name($result, $i) == 'Tilausnro') {
           echo "<$ero valign='top'><a href = '$PHP_SELF?tee=NAYTATILAUS&tunnus=$prow[$i]&atoimvko=$atoimvko&ltoimvko=$ltoimvko&vanhat=$vanhat&kojarj=$kojarj'>$prow[$i]</a></$ero>";
         }
         else {
-          echo "<$ero valign='top'>".str_replace(".",",",$prow[$i])."</$ero>";
+          echo "<$ero valign='top'>".str_replace(".", ",", $prow[$i])."</$ero>";
         }
       }
 
@@ -200,4 +200,4 @@ echo "</table>";
 echo "<br><input type='submit' value='".t("Aja")."'>";
 echo "</form>";
 
-require ("../inc/footer.inc");
+require "../inc/footer.inc";

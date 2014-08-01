@@ -32,21 +32,21 @@ if ($luousitee == "") {
                 FROM tuote
                 WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
       $result = mysql_query($query) or pupe_error($query);
-      $ikrow  = mysql_fetch_array ($result);
+      $ikrow  = mysql_fetch_array($result);
 
       $kehahin = sprintf('%.2f', $ikrow["kehahin"]);
     }
   }
 
   if ($tuoterow["sarjanumeroseuranta"] == "G" or $tuoterow["sarjanumeroseuranta"] == "E" or $tuoterow["sarjanumeroseuranta"] == "F") {
-    echo "<font class='head'>",t("Eränumeroseuranta"),"</font><hr>";
+    echo "<font class='head'>", t("Eränumeroseuranta"), "</font><hr>";
   }
   else {
     echo "<font class='head'>".t("Sarjanumeroseuranta")."</font><hr>";
   }
 
   echo "<table>";
-  echo "<tr><th>",t("Inventoidaan tulotapahtuma tuotteelle"),":</th><td>$tuoteno</td></tr>";
+  echo "<tr><th>", t("Inventoidaan tulotapahtuma tuotteelle"), ":</th><td>$tuoteno</td></tr>";
 
 
   echo "<form method='post'>
@@ -70,7 +70,7 @@ if ($luousitee == "") {
   // G = Eränumeroseuranta. Osto-Myynti / In-Out varastonarvo
 
   if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U") {
-    echo "<tr><th>",t("Tuotteen keskimääräinen hankintahinta"),":</th><td>$kehahin</td></tr>";
+    echo "<tr><th>", t("Tuotteen keskimääräinen hankintahinta"), ":</th><td>$kehahin</td></tr>";
     echo "<tr><th>".t("Inventoitavan yksilön hankintahinta").":</th><td><input type='text' name='kehahin' size='10'  value='$kehahin'></td></tr>";
   }
   elseif ($tuoterow["sarjanumeroseuranta"] == "G") {
@@ -86,7 +86,7 @@ if ($luousitee == "") {
 
   echo "<br><br><input type='submit' value='".t("Jatka")."'>";
 
-  require ("../inc/footer.inc");
+  require "../inc/footer.inc";
 
   exit;
 }

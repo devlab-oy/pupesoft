@@ -3,7 +3,7 @@
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require('../inc/parametrit.inc');
+require '../inc/parametrit.inc';
 
 echo "<font class='head'>".t("Työjono-raportti")."</font><hr>";
 
@@ -107,4 +107,4 @@ while ($rivit = mysql_fetch_assoc($ekares)) {
 echo "<tr><td class='tumma' colspan='2'>".t("Yhteensä").":</td><td class='tumma' align='right'>$jonosumma</td></tr>";
 echo "</table>";
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

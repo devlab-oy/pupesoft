@@ -1,7 +1,7 @@
 <?php
 
 if (!function_exists("tuotteen_toimittajat_tuotenumerottarkista")) {
-  function tuotteen_toimittajat_tuotenumerottarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+  function tuotteen_toimittajat_tuotenumerottarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set, $upd, $uusi, $toim_tuoteno, $liitostunnus;
 
     static $chk_tuoteno, $chk_viivakoodi, $chk_toim_tuoteno_tunnus;

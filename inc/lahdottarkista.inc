@@ -1,7 +1,7 @@
 <?php
 
 if (!function_exists("toimitustavan_lahdottarkista")) {
-  function toimitustavan_lahdottarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+  function toimitustavan_lahdottarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set, $upd, $uusi;
 
     if ((mysql_field_name($result, $i) == "kerailyn_aloitusaika") or (mysql_field_name($result, $i) == "viimeinen_tilausaika") or (mysql_field_name($result, $i) == "lahdon_kellonaika")) {

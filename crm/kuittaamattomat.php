@@ -1,12 +1,12 @@
 <?php
 
 if (strpos($_SERVER['SCRIPT_NAME'], "kuittaamattomat.php") !== FALSE) {
-  require ("../inc/parametrit.inc");
+  require "../inc/parametrit.inc";
 }
 
 echo "<font class='head'>".t("Muistutukset")."</font><hr>";
 
-if($tee == 'B') {
+if ($tee == 'B') {
   if ($muuta != "") {
     $query = "SELECT yhteyshenkilo.tunnus yhenkilo, kalenteri.*
               FROM kalenteri
@@ -14,7 +14,7 @@ if($tee == 'B') {
               WHERE kalenteri.tunnus = '$kaletunnus'
               and kalenteri.yhtio    = '$kukarow[yhtio]'";
     $result = mysql_query($query) or pupe_error($query);
-    $prow = mysql_fetch_array ($result);
+    $prow = mysql_fetch_array($result);
 
     $viesti = $kukarow["nimi"]." ".t("kuittasi").": ".$muuta;
 
@@ -45,7 +45,7 @@ if($tee == 'B') {
   }
 }
 
-if($tee == 'A') {
+if ($tee == 'A') {
   $query = "SELECT yhteyshenkilo.nimi yhteyshenkilo, kalenteri.*
             FROM kalenteri
             LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.yhtio=kalenteri.yhtio and yhteyshenkilo.tyyppi = 'A'
@@ -63,7 +63,7 @@ if($tee == 'A') {
   echo "<th>".t("Yhteyshenkilö")."</th>";
   echo "</tr>";
 
-  $prow = mysql_fetch_array ($result);
+  $prow = mysql_fetch_array($result);
 
   if ($prow["liitostunnus"] > 0) {
     $query = "SELECT nimi
@@ -98,7 +98,7 @@ if($tee == 'A') {
       </table></form>";
 }
 
-if($tee == "LISAAMUISTUTUS") {
+if ($tee == "LISAAMUISTUTUS") {
   if ($viesti != "") {
 
     if ($kuittaus == '') {
@@ -163,7 +163,7 @@ if($tee == "LISAAMUISTUTUS") {
   }
 }
 
-if($tee == "MUISTUTUS") {
+if ($tee == "MUISTUTUS") {
   echo "<table>";
   echo "  <form action='".$palvelin2."crm/kuittaamattomat.php' method='POST'>
       <input type='hidden' name='tee' value='LISAAMUISTUTUS'>
@@ -287,7 +287,7 @@ if ($tee == "") {
     while ($row = mysql_fetch_array($result)) {
       $sel = '';
 
-      if($row["kuka"] == $kuka) {
+      if ($row["kuka"] == $kuka) {
         $sel = 'SELECTED';
       }
 
@@ -334,7 +334,7 @@ if ($tee == "") {
     echo "<th valign='top'>".t("Yhteyshenkilö")."</th>";
     echo "</tr>";
 
-    while ($prow = mysql_fetch_array ($result)) {
+    while ($prow = mysql_fetch_array($result)) {
 
       unset($asrow);
 
@@ -402,5 +402,5 @@ if ($tee == "") {
 }
 
 if (strpos($_SERVER['SCRIPT_NAME'], "kuittaamattomat.php") !== FALSE) {
-  require ("../inc/footer.inc");
+  require "../inc/footer.inc";
 }

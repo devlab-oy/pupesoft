@@ -1,11 +1,11 @@
 <?php
 
 if (isset($_POST["exceltee"])) {
-  if($_POST["exceltee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["exceltee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if (isset($exceltee) and $exceltee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
@@ -71,20 +71,20 @@ else {
 
   // jos kaikki tarvittavat tiedot löytyy mennään queryyn
   if ($tee == 'YHTEENVETO') {
-    require ("abc_yhteenveto.php");
+    require "abc_yhteenveto.php";
   }
 
   if ($tee == 'OSASTOTRY') {
-    require ("abc_osastotry.php");
+    require "abc_osastotry.php";
   }
 
   if ($tee == 'LUOKKA') {
-    require ("abc_luokka.php");
+    require "abc_luokka.php";
   }
 
   if ($tee == 'PITKALISTA') {
-    require ("abc_kaikki_taullask.php");
+    require "abc_kaikki_taullask.php";
   }
 
-  require ("inc/footer.inc");
+  require "inc/footer.inc";
 }

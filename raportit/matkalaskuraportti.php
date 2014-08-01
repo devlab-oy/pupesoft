@@ -135,7 +135,7 @@ else {
   echo_matkalaskuraportti_form($request_params);
 }
 
-require ("../inc/footer.inc");
+require "../inc/footer.inc";
 
 function generoi_matkalaskuraportti_rivit($request_params) {
   global $kukarow;
@@ -248,23 +248,23 @@ function generoi_where_ehdot($request_params) {
 function ajotapa_where($request_params) {
   $where = "";
   switch ($request_params['ajotapa']) {
-    case 'keskeneraiset':
-      $where .= "AND lasku.tila = 'H' AND lasku.alatila = 'M'";
-      break;
-    case 'maksamattomat':
-      $where .= "AND lasku.tila = 'H' AND lasku.alatila = ''";
-      break;
-    case 'maksetut':
-      $where .= "AND lasku.tila = 'Y' AND lasku.alatila = ''";
-      break;
-    case 'keskeneraiset_maksamattomat':
-      $where .= "AND (lasku.tila = 'H' AND lasku.alatila = 'M') OR (lasku.tila = 'H' AND lasku.alatila = '')";
-      break;
-    case 'maksamattomat_maksetut':
-      $where .= "AND (lasku.tila = 'H' AND lasku.alatila = '') OR (lasku.tila = 'Y' AND lasku.alatila = '')";
-      break;
-    case 'kaikki':
-      $where .= "AND lasku.tila IN ('H','Y') AND lasku.alatila IN ('M', '')";
+  case 'keskeneraiset':
+    $where .= "AND lasku.tila = 'H' AND lasku.alatila = 'M'";
+    break;
+  case 'maksamattomat':
+    $where .= "AND lasku.tila = 'H' AND lasku.alatila = ''";
+    break;
+  case 'maksetut':
+    $where .= "AND lasku.tila = 'Y' AND lasku.alatila = ''";
+    break;
+  case 'keskeneraiset_maksamattomat':
+    $where .= "AND (lasku.tila = 'H' AND lasku.alatila = 'M') OR (lasku.tila = 'H' AND lasku.alatila = '')";
+    break;
+  case 'maksamattomat_maksetut':
+    $where .= "AND (lasku.tila = 'H' AND lasku.alatila = '') OR (lasku.tila = 'Y' AND lasku.alatila = '')";
+    break;
+  case 'kaikki':
+    $where .= "AND lasku.tila IN ('H','Y') AND lasku.alatila IN ('M', '')";
   }
 
   return $where;
@@ -347,7 +347,7 @@ function generoi_select($request_params) {
 
   if (!empty($mukaan_tulevat)) {
     //generoidaan selectit annettujen grouppauksien prioriteetin mukaan, jotta kentät ovat printtaus vaiheessa oikeassa järjestyksessä.
-    foreach($mukaan_tulevat as $group => $value) {
+    foreach ($mukaan_tulevat as $group => $value) {
       $select .= select_group_byn_mukaan($request_params, $group);
     }
   }
@@ -360,10 +360,10 @@ function generoi_select($request_params) {
   if (empty($request_params['piilota_kappaleet'])) {
     //jos on mikä tahansa grouppi niin tilausrivi.kpl pitää summata
     if ($request_params['ruksit']['tuotteittain']
-        or $request_params['ruksit']['toimittajittain']
-        or $request_params['ruksit']['matkalaskuittain']
-        or $request_params['ruksit']['tuotetyypeittain']
-        or $request_params['ruksit']['kustp']) {
+      or $request_params['ruksit']['toimittajittain']
+      or $request_params['ruksit']['matkalaskuittain']
+      or $request_params['ruksit']['tuotetyypeittain']
+      or $request_params['ruksit']['kustp']) {
       $select .= "sum(tilausrivi.kpl) as kpl, sum(tilausrivi.erikoisale) as ilmaiset_lounaat, avg(tilausrivi.hinta) as hinta, sum(tilausrivi.rivihinta) as rivihinta, ";
     }
     else {
@@ -378,75 +378,75 @@ function generoi_select($request_params) {
 
 function select_group_byn_mukaan($request_params, $group) {
   $select = "";
-  switch($group) {
-    case 'kustp':
-      $select .= "kustannuspaikka.tunnus as kustp_tunnus, kustannuspaikka.nimi as kustp_nimi, ";
-      break;
-    case 'toimittajittain':
-      $select .= "toimi.tunnus as matkustaja_tunnus, kuka.nimi as matkustaja_nimi, ";
-      break;
-    case 'tuotteittain':
-      $select .= "tilausrivi.tuoteno, ";
-      //tuotteiden nimityksen näytetään kun: nimitykset checked ja grouptaan tuotteittain
-      if (!empty($request_params['nimitykset'])) {
-        $select .= "tilausrivi.nimitys, ";
-      }
-      //matkalasku rivin muita tietoja, kuin kpl halutaan näyttää vain jos grouptaan tuotteittain
-      $select .= "tilausrivi.var as kulu_tunnus, ";
-      break;
-    case 'tuotetyypeittain':
-      $select .= "tuote.tuotetyyppi, ";
-      break;
-    case 'matkalaskuittain':
-      $select .= "lasku.tunnus as lasku_tunnus, ";
-      //laskunumero näytetään kun: Piilota laskunumero not checked ja groupataan laskun mukaan
-      if (!empty($request_params['laskunro'])) {
-        $select .= "lasku.laskunro, ";
-      }
-      //jos näytetään kaikki matkalaskut haetaan myös matkalaskun tyyppi
-      if ($request_params['ajotapa'] == 'kaikki') {
-        //tila ja alatila merkitään _tunnus, koska tällöin ne eivät printtaannu exceliin/ruudulle
-        $select .= "lasku.tila as tila_tunnus, lasku.alatila as alatila_tunnus, '' as lasku_tyyppi, ";
-      }
-      //näytetään: kun tapahtuma päivä checked ja groupataan matkalaskuittain
-      if (!empty($request_params['tapahtumapaiva'])) {
-        $select .= "lasku.tapvm, ";
-      }
-      $select .= "lasku.summa, ";
-      if (!empty($request_params['maksutieto'])) {
-        $select .= "concat_ws(' ', lasku.viite, lasku.viesti) as maksutieto, ";
-      }
-      break;
-    case 'tilausrivi_kommentti':
-      $select .= "tilausrivi.tunnus as tilausrivi_tunnus, tilausrivi.kommentti, ";
-      break;
-    default:
-      //kun ei olla groupattu millään
-      $select .= "lasku.tunnus as lasku_tunnus,";
-      //laskunumero näytetään kun: Piilota laskunumero not checked ja groupataan laskun mukaan
-      if (!empty($request_params['laskunro'])) {
-        $select .= "lasku.laskunro, ";
-      }
-      //jos näytetään kaikki matkalaskut haetaan myös matkalaskun tyyppi
-      if ($request_params['ajotapa'] == 'kaikki') {
-        //tila ja alatila merkitään _tunnus, koska tällöin ne eivät printtaannu exceliin/ruudulle
-        $select .= "lasku.tila as tila_tunnus, lasku.alatila as alatila_tunnus, '' as lasku_tyyppi, ";
-      }
-      //näytetään: kun tapahtuma päivä checked ja groupataan matkalaskuittain
-      if (!empty($request_params['tapahtumapaiva'])) {
-        $select .= "lasku.tapvm, ";
-      }
-      $select .= "lasku.summa, ";
-      if (!empty($request_params['maksutieto'])) {
-        $select .= "concat_ws(' ', lasku.viite, lasku.viesti) as maksutieto, ";
-      }
+  switch ($group) {
+  case 'kustp':
+    $select .= "kustannuspaikka.tunnus as kustp_tunnus, kustannuspaikka.nimi as kustp_nimi, ";
+    break;
+  case 'toimittajittain':
+    $select .= "toimi.tunnus as matkustaja_tunnus, kuka.nimi as matkustaja_nimi, ";
+    break;
+  case 'tuotteittain':
+    $select .= "tilausrivi.tuoteno, ";
+    //tuotteiden nimityksen näytetään kun: nimitykset checked ja grouptaan tuotteittain
+    if (!empty($request_params['nimitykset'])) {
+      $select .= "tilausrivi.nimitys, ";
+    }
+    //matkalasku rivin muita tietoja, kuin kpl halutaan näyttää vain jos grouptaan tuotteittain
+    $select .= "tilausrivi.var as kulu_tunnus, ";
+    break;
+  case 'tuotetyypeittain':
+    $select .= "tuote.tuotetyyppi, ";
+    break;
+  case 'matkalaskuittain':
+    $select .= "lasku.tunnus as lasku_tunnus, ";
+    //laskunumero näytetään kun: Piilota laskunumero not checked ja groupataan laskun mukaan
+    if (!empty($request_params['laskunro'])) {
+      $select .= "lasku.laskunro, ";
+    }
+    //jos näytetään kaikki matkalaskut haetaan myös matkalaskun tyyppi
+    if ($request_params['ajotapa'] == 'kaikki') {
+      //tila ja alatila merkitään _tunnus, koska tällöin ne eivät printtaannu exceliin/ruudulle
+      $select .= "lasku.tila as tila_tunnus, lasku.alatila as alatila_tunnus, '' as lasku_tyyppi, ";
+    }
+    //näytetään: kun tapahtuma päivä checked ja groupataan matkalaskuittain
+    if (!empty($request_params['tapahtumapaiva'])) {
+      $select .= "lasku.tapvm, ";
+    }
+    $select .= "lasku.summa, ";
+    if (!empty($request_params['maksutieto'])) {
+      $select .= "concat_ws(' ', lasku.viite, lasku.viesti) as maksutieto, ";
+    }
+    break;
+  case 'tilausrivi_kommentti':
+    $select .= "tilausrivi.tunnus as tilausrivi_tunnus, tilausrivi.kommentti, ";
+    break;
+  default:
+    //kun ei olla groupattu millään
+    $select .= "lasku.tunnus as lasku_tunnus,";
+    //laskunumero näytetään kun: Piilota laskunumero not checked ja groupataan laskun mukaan
+    if (!empty($request_params['laskunro'])) {
+      $select .= "lasku.laskunro, ";
+    }
+    //jos näytetään kaikki matkalaskut haetaan myös matkalaskun tyyppi
+    if ($request_params['ajotapa'] == 'kaikki') {
+      //tila ja alatila merkitään _tunnus, koska tällöin ne eivät printtaannu exceliin/ruudulle
+      $select .= "lasku.tila as tila_tunnus, lasku.alatila as alatila_tunnus, '' as lasku_tyyppi, ";
+    }
+    //näytetään: kun tapahtuma päivä checked ja groupataan matkalaskuittain
+    if (!empty($request_params['tapahtumapaiva'])) {
+      $select .= "lasku.tapvm, ";
+    }
+    $select .= "lasku.summa, ";
+    if (!empty($request_params['maksutieto'])) {
+      $select .= "concat_ws(' ', lasku.viite, lasku.viesti) as maksutieto, ";
+    }
 
-      $select .= "tilausrivi.tuoteno, ";
-      if (!empty($request_params['nimitykset'])) {
-        $select .= "tilausrivi.nimitys, ";
-      }
-      $select .= "tilausrivi.var as kulu_tunnus, tuote.tuotetyyppi, toimi.tunnus as matkustaja_tunnus, kuka.nimi as matkustaja_nimi, kustannuspaikka.tunnus as kustp_tunnus, kustannuspaikka.nimi as kustp_nimi, ";
-      break;
+    $select .= "tilausrivi.tuoteno, ";
+    if (!empty($request_params['nimitykset'])) {
+      $select .= "tilausrivi.nimitys, ";
+    }
+    $select .= "tilausrivi.var as kulu_tunnus, tuote.tuotetyyppi, toimi.tunnus as matkustaja_tunnus, kuka.nimi as matkustaja_nimi, kustannuspaikka.tunnus as kustp_tunnus, kustannuspaikka.nimi as kustp_nimi, ";
+    break;
   }
 
   return $select;
@@ -460,25 +460,25 @@ function generoi_group_by($request_params) {
 
   if (!empty($mukaan_tulevat)) {
     $group_by = "GROUP BY ";
-    foreach($mukaan_tulevat as $index => $value) {
-      switch($index) {
-        case 'kustp':
-          $group_by .= "kustannuspaikka.tunnus, ";
-          break;
-        case 'toimittajittain':
-          $group_by .= "toimi.tunnus, ";
-          break;
-        case 'tuotteittain':
-          $group_by .= "tilausrivi.tuoteno, tilausrivi.var, ";
-          break;
-        case 'tuotetyypeittain':
-          $group_by .= "tuote.tuotetyyppi, ";
-          break;
-        case 'matkalaskuittain':
-          $group_by .= "lasku.tunnus, ";
-          break;
-        case 'tilausrivi_kommentti':
-          $group_by .= "tilausrivi.tunnus, ";
+    foreach ($mukaan_tulevat as $index => $value) {
+      switch ($index) {
+      case 'kustp':
+        $group_by .= "kustannuspaikka.tunnus, ";
+        break;
+      case 'toimittajittain':
+        $group_by .= "toimi.tunnus, ";
+        break;
+      case 'tuotteittain':
+        $group_by .= "tilausrivi.tuoteno, tilausrivi.var, ";
+        break;
+      case 'tuotetyypeittain':
+        $group_by .= "tuote.tuotetyyppi, ";
+        break;
+      case 'matkalaskuittain':
+        $group_by .= "lasku.tunnus, ";
+        break;
+      case 'tilausrivi_kommentti':
+        $group_by .= "tilausrivi.tunnus, ";
       }
     }
     //poistetaan viimeiset 2 merkkiä ", " group by:n lopusta
@@ -605,7 +605,7 @@ function echo_matkalaskuraportti_form($request_params) {
   echo "<td>";
   echo "<select id='tuotetyypit' multiple='multiple' name='tuotetyypit[]'>";
   $sel = "";
-  foreach($tuotetyypit as $tuotetyyppi_key => $tuotetyyppi_value) {
+  foreach ($tuotetyypit as $tuotetyyppi_key => $tuotetyyppi_value) {
     if (is_array($request_params['tuotetyypit']) and in_array($tuotetyyppi_key, $request_params['tuotetyypit'])) {
       $sel = "SELECTED";
     }
@@ -627,7 +627,7 @@ function echo_matkalaskuraportti_form($request_params) {
   $monivalintalaatikot = array("<br>KUSTP");
   $monivalintalaatikot_normaali = array();
 
-  require ("../tilauskasittely/monivalintalaatikot.inc");
+  require "../tilauskasittely/monivalintalaatikot.inc";
 
   echo "<br/><br/>";
 
@@ -645,7 +645,7 @@ function echo_matkalaskuraportti_form($request_params) {
       <td><input id='tuotteittain_group' type='checkbox' name='ruksit[tuotteittain]' value='tuotteittain' {$ruk_tuotteittain_chk}></td>
       <td></td>
     </tr>";
-    echo "<tr>
+  echo "<tr>
       <th>".t("Listaa toimittajittain")."</th>
       <td><input type='text' name='jarjestys[toimittajittain]' size='2' value='{$request_params['jarjestys']['toimittajittain']}'></td>
       <td><input type='checkbox' name='ruksit[toimittajittain]' value='toimittajittain' {$ruk_toimittajittain_chk}></td>
@@ -760,7 +760,7 @@ function generoi_excel_tiedosto($rivit, $request_params, $header_values, $force_
 
 function xls_headerit(pupeExcel &$xls, &$rivit, &$rivi, &$sarake, $header_values) {
   $style = array("bold" => TRUE);
-  foreach($rivit[0] as $header_text => $value) {
+  foreach ($rivit[0] as $header_text => $value) {
     if (!stristr($header_text, 'tunnus')) {
       if (array_key_exists($header_text, $header_values)) {
         kirjoita_header_solu($xls, $header_values[$header_text], $rivi, $sarake, $style);
@@ -787,8 +787,8 @@ function xls_rivit(pupeExcel &$xls, &$rivit, &$rivi, &$sarake, $force_to_string)
     $xls_progress_bar->initialize(count($rivit));
   }
 
-  foreach($rivit as $matkalasku_rivi) {
-    foreach($matkalasku_rivi as $header => $solu) {
+  foreach ($rivit as $matkalasku_rivi) {
+    foreach ($matkalasku_rivi as $header => $solu) {
       if (!stristr($header, 'tunnus')) {
         kirjoita_solu($xls, $header, $solu, $rivi, $sarake, $force_to_string);
       }
@@ -824,19 +824,19 @@ function kirjoita_header_solu(&$xls, $string, &$rivi, &$sarake, $style = array()
 
 function valid_date($date) {
   //preg_match() returns 1 if the pattern matches given subject, 0 if it does not, or FALSE if an error occurred.
-    return (preg_match("/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/", $date));
+  return preg_match("/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/", $date);
 }
 
 function nayta_ruudulla($rivit, $request_params, $header_values, $force_to_string) {
   echo "<table>";
-  echo_headers($rivit[0],$header_values);
+  echo_headers($rivit[0], $header_values);
   echo_rivit($rivit, $force_to_string);
   echo "</table>";
 }
 
 function echo_headers($rivi, $header_values) {
   echo "<tr>";
-  foreach($rivi as $header_text => $value) {
+  foreach ($rivi as $header_text => $value) {
     if (!stristr($header_text, 'tunnus')) {
       if (array_key_exists($header_text, $header_values)) {
         echo "<th>{$header_values[$header_text]}</th>";
@@ -851,10 +851,10 @@ function echo_headers($rivi, $header_values) {
 }
 
 function echo_rivit($rivit, $force_to_string) {
-  foreach($rivit as $rivi) {
+  foreach ($rivit as $rivi) {
     echo "<tr>";
 
-    foreach($rivi as $header => &$solu) {
+    foreach ($rivi as $header => &$solu) {
       if (!stristr($header, 'tunnus')) {
         if (is_numeric($solu) and floatval($solu) and !in_array($header, $force_to_string)) {
           $solu = number_format($solu, 2, ',', ' ');

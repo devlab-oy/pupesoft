@@ -3,7 +3,7 @@
 if ($postiedihost != "" and $postiediuser != "" and $postiedipass != "" and $postiedipath != "") {
 
   // uniikki filenimi
-  $file = "dataout/postiedi-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
+  $file = "dataout/postiedi-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true)).".txt";
 
   // avataan faili
   if (!$handle = fopen($file, "w")) die("Filen '$file' luonti ep‰onnistui!");
@@ -73,8 +73,8 @@ if ($postiedihost != "" and $postiediuser != "" and $postiedipass != "" and $pos
 
   $ulos .= "SGIDPA_PC:$viivaedi\n";                        // viivakoodi
 
-   // jos kyseess‰ on postiennakko...
-  if ($postiennakkomaara != '')  {
+  // jos kyseess‰ on postiennakko...
+  if ($postiennakkomaara != '') {
     $ulos .= "SGIDHANPI:2Z3101\n";                        // lis‰palvelu postiennakko
     $ulos .= "SGID22_TC:@@@POSTIENNAKKO@C\n";                  // postiennakkoa
     $ulos .= "SGID22_MA:$postiennakkomaara@EUR\n";                // postiennakkom‰‰r‰
@@ -91,7 +91,7 @@ if ($postiedihost != "" and $postiediuser != "" and $postiedipass != "" and $pos
     die("failin kirjoitus ep‰onnistui");
 
   // suljetaan file
-  fclose ($handle);
+  fclose($handle);
 
   // tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile
   // palautetaan $palautus ja $syy
@@ -102,5 +102,5 @@ if ($postiedihost != "" and $postiediuser != "" and $postiedipass != "" and $pos
   $ftppath = $postiedipath;
   $ftpfile = realpath($file);
 
-  require ("inc/ftp-send.inc");
+  require "inc/ftp-send.inc";
 }

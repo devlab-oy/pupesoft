@@ -1,6 +1,6 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Menujen yll‰pito")."</font><hr>";
 
@@ -15,7 +15,7 @@ if (isset($synkronoi) and count($syncyhtiot) > 1) {
     $yht .= "'$yhtio',";
   }
 
-  $yht = substr($yht,0,-1);
+  $yht = substr($yht, 0, -1);
 
   if ($sovellus != '') {
     $lisa = " and sovellus = '$sovellus' ";
@@ -105,15 +105,15 @@ if (isset($synkronoi) and count($syncyhtiot) > 1) {
   }
 }
 
-if ((isset($synkronoireferenssi) OR isset($synkronoireferenssialapaivita)) and count($syncyhtiot) > 0) {
+if ((isset($synkronoireferenssi) or isset($synkronoireferenssialapaivita)) and count($syncyhtiot) > 0) {
 
   $ch  = curl_init();
-  curl_setopt ($ch, CURLOPT_URL, "http://api.devlab.fi/referenssivalikot.sql");
-  curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-  curl_setopt ($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
-  curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1);
-  curl_setopt ($ch, CURLOPT_HEADER, FALSE);
-  $referenssit = curl_exec ($ch);
+  curl_setopt($ch, CURLOPT_URL, "http://api.devlab.fi/referenssivalikot.sql");
+  curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+  curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+  curl_setopt($ch, CURLOPT_HEADER, FALSE);
+  $referenssit = curl_exec($ch);
   $referenssit = explode("\n", trim($referenssit));
 
   // Eka rivi roskikseen
@@ -147,7 +147,7 @@ if ((isset($synkronoireferenssi) OR isset($synkronoireferenssialapaivita)) and c
     $yht .= "'$yhtio',";
   }
 
-  $yht = substr($yht,0,-1);
+  $yht = substr($yht, 0, -1);
 
   if ($sovellus != '') {
     $lisa = " and sovellus  = '$sovellus' ";
@@ -175,8 +175,8 @@ if ((isset($synkronoireferenssi) OR isset($synkronoireferenssialapaivita)) and c
   $jarj0 = $jarj1 = $jarj2 = array();
   foreach ($rows as $key => $row) {
     $jarj0[$key] = $row['sovellus'];
-      $jarj1[$key] = $row['jarjestys'];
-      $jarj2[$key] = $row['jarjestys2'];
+    $jarj1[$key] = $row['jarjestys'];
+    $jarj2[$key] = $row['jarjestys2'];
   }
 
   array_multisort($jarj0, SORT_ASC, $jarj1, SORT_ASC, $jarj2, SORT_ASC, $rows);
@@ -306,10 +306,10 @@ if ($tee == "PAIVITAJARJETYS") {
 
 
   $yhtiot = array();
-  $yht = str_replace("'","", $yht);
+  $yht = str_replace("'", "", $yht);
   $yht = explode(",", $yht);
 
-  foreach($yht as $yhtio) {
+  foreach ($yht as $yhtio) {
     $yhtiot[$yhtio] = $yhtio;
   }
 
@@ -321,7 +321,7 @@ if ($tee == "PAIVITA") {
     $tunnus = '';
   }
 
-  if ($tunnus != '')  {
+  if ($tunnus != '') {
     $query  = "SELECT *
                FROM oikeu
                WHERE tunnus='$tunnus'";
@@ -331,7 +331,7 @@ if ($tee == "PAIVITA") {
 
       $row = mysql_fetch_array($result);
 
-      $yht = str_replace(",","','",$yht);
+      $yht = str_replace(",", "','", $yht);
       $yht = "'".$yht."'";
 
       //p‰ivitet‰‰n uudet menun tiedot kaikille k‰ytt‰jille
@@ -364,13 +364,13 @@ if ($tee == "PAIVITA") {
     $yht = str_replace("'", "", $yht);
     $yht = explode(",", $yht);
 
-    foreach($yht as $yhtio) {
+    foreach ($yht as $yhtio) {
       $yhtiot[$yhtio] = $yhtio;
     }
   }
   else {
     $yhtiot = array();
-    $yht = str_replace("'","", $yht);
+    $yht = str_replace("'", "", $yht);
     $yht = explode(",", $yht);
 
     foreach ($yht as $yhtio) {
@@ -432,10 +432,10 @@ if ($tee == "MUUTA") {
     $sove    = "";
     $nimi    = "";
     $alanimi  = "";
-      $nimitys  = "";
-      $jarjestys  = "";
-      $jarjestys2  = "";
-      $hidden    = "";
+    $nimitys  = "";
+    $jarjestys  = "";
+    $jarjestys2  = "";
+    $hidden    = "";
   }
 
   echo "<table>
@@ -485,7 +485,7 @@ if ($tee == 'POISTA') {
 
     $yarray = explode(",", $yht);
 
-    $yht = str_replace(",","','",$yht);
+    $yht = str_replace(",", "','", $yht);
     $yht = "'".$yht."'";
 
     //p‰ivitet‰‰n uudet menun tiedot kaikille k‰ytt‰jille
@@ -509,10 +509,10 @@ if ($tee == 'POISTA') {
   }
 
   $yhtiot = array();
-  $yht = str_replace("'","", $yht);
+  $yht = str_replace("'", "", $yht);
   $yht = explode(",", $yht);
 
-  foreach($yht as $yhtio) {
+  foreach ($yht as $yhtio) {
     $yhtiot[$yhtio] = $yhtio;
   }
 
@@ -531,7 +531,7 @@ if ($tee == "") {
 
   while ($prow = mysql_fetch_array($result)) {
 
-    if($yhtiot[$prow["yhtio"]] != "") {
+    if ($yhtiot[$prow["yhtio"]] != "") {
       $chk = "CHECKED";
     }
     else {
@@ -542,7 +542,7 @@ if ($tee == "") {
     $sovyhtiot .= "'$prow[yhtio]',";
   }
 
-  if($yhtiot["REFERENSSI"] != "") {
+  if ($yhtiot["REFERENSSI"] != "") {
     $chk = "CHECKED";
   }
   else {
@@ -551,7 +551,7 @@ if ($tee == "") {
 
   echo "<tr><th>".t("N‰yt‰ referenssivalikot").":</th><td><input type='checkbox' name='yhtiot[REFERENSSI]' value='REFERENSSI' $chk onclick='submit();'></td></tr>";
 
-  $sovyhtiot = substr($sovyhtiot,0,-1);
+  $sovyhtiot = substr($sovyhtiot, 0, -1);
 
   $query = "SELECT distinct sovellus
             FROM oikeu
@@ -586,10 +586,10 @@ if ($tee == "") {
 
   if (count($yhtiot) > 0) {
     $yht = "";
-    foreach($yhtiot as $yhtio) {
+    foreach ($yhtiot as $yhtio) {
       $yht .= "$yhtio,";
     }
-    $yht = substr($yht,0,-1);
+    $yht = substr($yht, 0, -1);
 
     echo "<form method='post' action='menut.php'>";
     echo "<input type='hidden' name='tee' value='MUUTA'>";
@@ -614,12 +614,12 @@ if ($tee == "") {
 
       if ($yhtio == "REFERENSSI") {
         $ch  = curl_init();
-        curl_setopt ($ch, CURLOPT_URL, "http://api.devlab.fi/referenssivalikot.sql");
-        curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-        curl_setopt ($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
-        curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt ($ch, CURLOPT_HEADER, FALSE);
-        $referenssit = curl_exec ($ch);
+        curl_setopt($ch, CURLOPT_URL, "http://api.devlab.fi/referenssivalikot.sql");
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_HEADER, FALSE);
+        $referenssit = curl_exec($ch);
         $referenssit = explode("\n", trim($referenssit));
 
         // Eka rivi roskikseen
@@ -725,13 +725,13 @@ if ($tee == "") {
         }
 
         if ($yhtio == "REFERENSSI") {
-            echo "$mordor1$nimi$mordor2</td>";
-            echo "<td nowrap>$alanimi</td>";
-            echo "<td nowrap>".t($nimitys)."</td>";
-            echo "<td nowrap><input type='text' size='4' value='$jarjestys' DISABLED></td>";
-            echo "<td nowrap><input type='text' size='4' value='$jarjestys2' DISABLED></td>";
-            echo "<td nowrap>$hidden</td></tr>\n";
-            echo "</form>";
+          echo "$mordor1$nimi$mordor2</td>";
+          echo "<td nowrap>$alanimi</td>";
+          echo "<td nowrap>".t($nimitys)."</td>";
+          echo "<td nowrap><input type='text' size='4' value='$jarjestys' DISABLED></td>";
+          echo "<td nowrap><input type='text' size='4' value='$jarjestys2' DISABLED></td>";
+          echo "<td nowrap>$hidden</td></tr>\n";
+          echo "</form>";
         }
         else {
           echo "<a href='$PHP_SELF?tee=MUUTA&tunnus=$tunnus&yht=$yht&sovellus=$sovellus'>$mordor1$nimi$mordor2</a></td>";
@@ -758,4 +758,4 @@ if ($tee == "") {
   echo "</tr></table>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

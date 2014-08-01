@@ -1,11 +1,11 @@
 <?php
 
-# Formaatti on:
-# toimittajanumero "999999"
-# tyhjää x(4)
-# tilausnumero x(13)
-# tuotekoodi x(18)
-# määrä 9999
+// Formaatti on:
+// toimittajanumero "999999"
+// tyhjää x(4)
+// tilausnumero x(13)
+// tuotekoodi x(18)
+// määrä 9999
 
 $query = "SELECT tilausrivi.tunnus,
           tilausrivi.otunnus,

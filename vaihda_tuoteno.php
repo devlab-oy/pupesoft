@@ -8,8 +8,8 @@ if ($php_cli) {
   ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__));
 
   // Otetaan tietokanta connect
-  require ("inc/connect.inc");
-  require ("inc/functions.inc");
+  require "inc/connect.inc";
+  require "inc/functions.inc";
 
   if (!isset($argv[1])) {
     echo "Anna yhtio!\n";
@@ -30,7 +30,7 @@ if ($php_cli) {
   $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
 }
 else {
-  require ("inc/parametrit.inc");
+  require "inc/parametrit.inc";
 }
 
 // Tämä vaatii paljon muistia
@@ -61,7 +61,7 @@ function kasittele_tuote_tiedosto($file_name, $real_name = '') {
     die ("<font class='error'><br>".t("Ainoastaan .txt ja .csv tiedostot sallittuja")."!</font>");
   }
 
-  $file = fopen($file_name ,"r") or die (t("Tiedoston avaus epäonnistui")."!");
+  $file = fopen($file_name , "r") or die (t("Tiedoston avaus epäonnistui")."!");
   $error = 0;
   $count = 0;
 
@@ -325,12 +325,12 @@ if ($error == 0 and $tee == "file") {
   flush();
 
   if ($failista == "JOO") {
-    $file = fopen($uploaded_filename,"r") or die (t("Tiedoston avaus epäonnistui")."!");
+    $file = fopen($uploaded_filename, "r") or die (t("Tiedoston avaus epäonnistui")."!");
   }
   else {
     $tmpfname = tempnam("/tmp", "Vaihdatuoteno");
     file_put_contents($tmpfname, "$vantuoteno\t$uustuoteno");
-    $file = fopen($tmpfname,"r") or die (t("Tiedoston avaus epäonnistui")."!");
+    $file = fopen($tmpfname, "r") or die (t("Tiedoston avaus epäonnistui")."!");
   }
 
   while ($rivi = fgets($file)) {
@@ -699,7 +699,7 @@ if ($error == 0 and $tee == "file") {
         $meili = t("Tuotteiden tuotenumerot on vaihtuneet")."\n";
         $meili .= "\nTervehdys $posti[nimi] \n";
         $meili .= "\nKäyttäjä $kukarow[nimi] on vaihtanut tuotteiden tuotenumeroita\n";
-        $meili .= t("Pyyntö").":\n".str_replace("\r\n","\n","Tarkista seuraavilta tuotteilta hinnat ja asiakasalennukset\n");
+        $meili .= t("Pyyntö").":\n".str_replace("\r\n", "\n", "Tarkista seuraavilta tuotteilta hinnat ja asiakasalennukset\n");
         $meili .= $lista;
 
         if ($posti['eposti'] == "") {
@@ -819,4 +819,4 @@ if ($tee == "" and $php_cli === false) {
       </form>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

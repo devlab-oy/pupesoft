@@ -10794,6 +10794,11 @@ if (!function_exists("t_avainsana")) {
     $paramshasharray = md5($laji.$kieli.$where.$yhtio.$eivielakaytossa.$return);
 
     if (isset($kaannetyt[$paramshasharray])) {
+
+      if (is_resource($kaannetyt[$paramshasharray])) {
+        mysql_data_seek($kaannetyt[$paramshasharray], 0);
+      }
+
       return $kaannetyt[$paramshasharray];
     }
 

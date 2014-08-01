@@ -362,12 +362,12 @@ if ($tee == 'tulosta') {
   $query = "SELECT DISTINCT lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
             lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp,
             rahtikirjat.merahti, rahtikirjat.rahtisopimus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti, rahtisopimukset.muumaksaja,
-            asiakas.toimitusvahvistus, 
+            asiakas.toimitusvahvistus,
             IF(lasku.toim_email != '', lasku.toim_email,
-            IF(asiakas.keraysvahvistus_email != '', asiakas.keraysvahvistus_email, asiakas.email)) AS asiakas_email, 
+            IF(asiakas.keraysvahvistus_email != '', asiakas.keraysvahvistus_email, asiakas.email)) AS asiakas_email,
             IF(lasku.toim_puh != '', lasku.toim_puh,
-            IF(asiakas.gsm != '', asiakas.gsm, 
-            IF(asiakas.tyopuhelin != '', asiakas.tyopuhelin, 
+            IF(asiakas.gsm != '', asiakas.gsm,
+            IF(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
             IF(asiakas.puhelin != '', asiakas.puhelin, '')))) puhelin
             FROM rahtikirjat
             JOIN lasku USE INDEX (PRIMARY) on (lasku.tunnus=rahtikirjat.otsikkonro and lasku.yhtio=rahtikirjat.yhtio and lasku.tila in ('L','G') ";
@@ -932,14 +932,14 @@ if ($tee == 'tulosta') {
           require("magento_toimita_tilaus.php");
         }
       }
-      
+
       // Katsotaan onko anvia-verkkokauppa käytössä, silloin lähetetään toimituskuittaus Ftp:llä kun rahtikirja tulostetaan
       if (isset($anvia_ftphost, $anvia_ftpuser, $anvia_ftppass, $anvia_ftppath)) {
         $ftphost = $anvia_ftphost;
         $ftpuser = $anvia_ftpuser;
         $ftppass = $anvia_ftppass;
         $ftppath = $anvia_ftppath;
-        
+
         $query = "SELECT asiakkaan_tilausnumero, tunnus
                   FROM lasku
                   WHERE yhtio                 = '$kukarow[yhtio]'
@@ -954,7 +954,7 @@ if ($tee == 'tulosta') {
           $anvia_api_rak = $rahtikirjanro;
           $anvia_api_ord = $anviarow['asiakkaan_tilausnumero'];
           $anvia_api_til = $anviarow['tunnus'];
-          
+
           require("anvia_toimita_tilaus.php");
         }
       }

@@ -270,7 +270,7 @@ if (!function_exists("pupe_error")) {
     }
 
     if ($_display == '1') {
-    echo nl2br($puperror);
+      echo nl2br($puperror);
     }
     else {
       echo t("Tietokantayhteydessä virhe!");
@@ -19213,7 +19213,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
           $siirto = 20;
         }
 
-        if($otsikoitu === false or $yhtiorow['koontilahete_kerayserissa'] == 'K'){
+        if ($otsikoitu === false or $yhtiorow['koontilahete_kerayserissa'] == 'K') {
           $params_lahete['kala'] = $params_lahete['kala'] -= $siirto;
           $params_lahete = rivi_otsikot_lahete($params_lahete);
           $otsikoitu = true;

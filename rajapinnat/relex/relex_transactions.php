@@ -152,7 +152,7 @@ while ($row = mysql_fetch_assoc($res)) {
   }
 
   if ($partner > 0) {
-     $partner = $row['maa']."-".$partner;
+    $partner = $row['maa']."-".$partner;
   }
 
   $rivi  = "{$row['pvm']};";                                         // Transaction posting date
@@ -187,7 +187,7 @@ if ($paiva_ajo and !empty($relex_ftphost)) {
   $ftppass = $relex_ftppass;
   $ftppath = "/data/input";
   $ftpfile = $filepath;
-  require("inc/ftp-send.inc");
+  require "inc/ftp-send.inc";
 }
 
 echo "Valmis.\n";

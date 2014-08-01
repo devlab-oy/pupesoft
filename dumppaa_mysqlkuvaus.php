@@ -14,14 +14,14 @@ if ($php_cli) {
   ini_set("display_errors", 0);
 
   // otetaan tietokanta connect
-  require("inc/connect.inc");
-  require("inc/functions.inc");
+  require "inc/connect.inc";
+  require "inc/functions.inc";
 
   // dummy yhtio (menee ainoastaan filenimeen)
   $kukarow["yhtio"] = "crond";
 }
 else {
-  require("inc/parametrit.inc");
+  require "inc/parametrit.inc";
 }
 
 //Hardcoodataan failin nimi /tmp diririkkaan
@@ -39,7 +39,7 @@ else {
   $dbport = 3306;
 }
 
-# /usr/bin/mysqldump --> toimii ainakin fedorassa ja ubuntussa by default
+// /usr/bin/mysqldump --> toimii ainakin fedorassa ja ubuntussa by default
 if (file_exists("/usr/bin/mysqldump")) {
   $mysql_dump_path = "/usr/bin/mysqldump";
 }
@@ -107,7 +107,7 @@ $updatet = trim($result);
 // Yhdistet‰‰n
 $result = $alterit.$updatet;
 
-# Poistetaan viel‰ tuplaspacet jos sellasia on
+// Poistetaan viel‰ tuplaspacet jos sellasia on
 $result = trim(preg_replace("/ {2,}/", " ", $result));
 
 if ($php_cli and $result != "") {
@@ -124,5 +124,5 @@ elseif (!$php_cli) {
     echo t("Tietokanta ajantasalla!");
   }
 
-  require("inc/footer.inc");
+  require "inc/footer.inc";
 }

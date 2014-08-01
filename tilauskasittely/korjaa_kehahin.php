@@ -1,7 +1,7 @@
 <?php
 
-require("../inc/parametrit.inc");
-require("inc/functions.inc");
+require "../inc/parametrit.inc";
+require "inc/functions.inc";
 
 echo "<font class='head'>".t("Jälkilaske tapahtuma")."</font><hr>";
 
@@ -135,4 +135,4 @@ if ($tee == "") {
   echo "</form>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

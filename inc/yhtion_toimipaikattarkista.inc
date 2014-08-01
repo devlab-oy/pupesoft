@@ -1,17 +1,17 @@
 <?php
 
-if(!function_exists("yhtion_toimipaikattarkista")) {
-  function yhtion_toimipaikattarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+if (!function_exists("yhtion_toimipaikattarkista")) {
+  function yhtion_toimipaikattarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set, $ulosarray;
 
     static $tem_email, $tem_fax, $tem_kotipaikka, $tem_maa, $tem_maaind, $tem_nimi, $tem_osoite, $tem_ovtlisa, $tem_postino, $tem_postitp, $tem_puhelin, $tem_vatnumero, $tem_vatnumeroind;
 
     if (((mysql_field_name($result, $i) == "tilino") or
-      (mysql_field_name($result, $i) == "tilino_eu") or
-      (mysql_field_name($result, $i) == "tilino_ei_eu") or
-      (mysql_field_name($result, $i) == "tilino_marginaali") or
-      (mysql_field_name($result, $i) == "tilino_osto_marginaali") or
-      (mysql_field_name($result, $i) == "toim_alv")) and trim($t[$i]) != '') {
+        (mysql_field_name($result, $i) == "tilino_eu") or
+        (mysql_field_name($result, $i) == "tilino_ei_eu") or
+        (mysql_field_name($result, $i) == "tilino_marginaali") or
+        (mysql_field_name($result, $i) == "tilino_osto_marginaali") or
+        (mysql_field_name($result, $i) == "toim_alv")) and trim($t[$i]) != '') {
 
       $query = "SELECT nimi
                 FROM tili

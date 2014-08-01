@@ -1,6 +1,6 @@
 <?php
 
-require("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 enable_ajax();
 
@@ -23,21 +23,21 @@ foreach ($muuttujien_alustus as $muuttuja => $tyyppi) {
   if (!isset(${$muuttuja})) settype(${$muuttuja}, $tyyppi);
 }
 
-echo "<font class='head'>",t("Sosiaalikulujen laskenta"),"</font><hr>\n";
+echo "<font class='head'>", t("Sosiaalikulujen laskenta"), "</font><hr>\n";
 
 echo "<form method='post' action='' name='sosiaali'>";
 echo "<table>";
 
-echo "<tr><th>",t("Tilinumero"),"</th><td width='200' valign='top'>",livesearch_kentta("sosiaali", "TILIHAKU", "tilino", 170, $tilino, "EISUBMIT")," {$tilinimi}</td></tr>";
+echo "<tr><th>", t("Tilinumero"), "</th><td width='200' valign='top'>", livesearch_kentta("sosiaali", "TILIHAKU", "tilino", 170, $tilino, "EISUBMIT"), " {$tilinimi}</td></tr>";
 
-echo "<tr><th>",t("Kustannuspaikka")."</th><td>";
+echo "<tr><th>", t("Kustannuspaikka")."</th><td>";
 
 $monivalintalaatikot = array("KUSTP");
 $monivalintalaatikot_normaali = array("KUSTP");
 $noautosubmit = TRUE;
 $piirra_otsikot = FALSE;
 
-require ("tilauskasittely/monivalintalaatikot.inc");
+require "tilauskasittely/monivalintalaatikot.inc";
 
 echo "</td></tr>";
 
@@ -55,7 +55,7 @@ if (!isset($alkukausi_vv)) {
   $alkukausi_pp = substr($tilikausirow['tilikausi_alku'], 8, 2);
 }
 
-echo "  <tr><th valign='top'>",t("Alkukausi"),"</th>
+echo "  <tr><th valign='top'>", t("Alkukausi"), "</th>
     <td><select name='alkukausi_vv'>";
 
 $sel = array();
@@ -107,7 +107,7 @@ for ($opt = 1; $opt <= 31; $opt++) {
 echo "</select></td></tr>";
 
 echo "<tr>
-  <th valign='top'>",t("Loppukausi"),"</th>
+  <th valign='top'>", t("Loppukausi"), "</th>
   <td><select name='loppukausi_vv'>";
 
 if (!isset($loppukausi_vv)) $loppukausi_vv = date("Y") + 1;
@@ -164,10 +164,10 @@ for ($opt = 1; $opt <= 31; $opt++) {
 
 echo "</select></td></tr>";
 
-echo "<tr><th>",t("Tilin alku"),"</th><td width='200' valign='top'>",livesearch_kentta("sosiaali", "TILIHAKU", "tilinalku", 170, $tilinalku, "EISUBMIT")," {$tilinimi}</td></tr>";
-echo "<tr><th>",t("Tilin loppu"),"</th><td width='200' valign='top'>",livesearch_kentta("sosiaali", "TILIHAKU", "tilinloppu", 170, $tilinloppu, "EISUBMIT")," {$tilinimi}</td></tr>";
+echo "<tr><th>", t("Tilin alku"), "</th><td width='200' valign='top'>", livesearch_kentta("sosiaali", "TILIHAKU", "tilinalku", 170, $tilinalku, "EISUBMIT"), " {$tilinimi}</td></tr>";
+echo "<tr><th>", t("Tilin loppu"), "</th><td width='200' valign='top'>", livesearch_kentta("sosiaali", "TILIHAKU", "tilinloppu", 170, $tilinloppu, "EISUBMIT"), " {$tilinimi}</td></tr>";
 
-echo "<tr><th>",t("Laskentaprosentti"),"</th><td><input type='text' name='prosentti' value='{$prosentti}' /></td></tr>";
+echo "<tr><th>", t("Laskentaprosentti"), "</th><td><input type='text' name='prosentti' value='{$prosentti}' /></td></tr>";
 
 $query = "SELECT nimi, tunnus
           FROM valuu
@@ -175,7 +175,7 @@ $query = "SELECT nimi, tunnus
           ORDER BY jarjestys";
 $vresult = pupe_query($query);
 
-echo "<tr><th>",t("Valuutta"),"</th><td><select name='valkoodi'>";
+echo "<tr><th>", t("Valuutta"), "</th><td><select name='valkoodi'>";
 
 while ($vrow = mysql_fetch_assoc($vresult)) {
   $sel = "";
@@ -189,7 +189,7 @@ echo "</select></td></tr>";
 
 echo "<tr><td class='back' colspan='2'>";
 echo "<input type='hidden' name='tee' value='laske' />";
-echo "<input type='submit' value='",t("Laske"),"' />";
+echo "<input type='submit' value='", t("Laske"), "' />";
 echo "</td></tr>";
 
 echo "</table>";
@@ -197,24 +197,24 @@ echo "</form>";
 
 // Tarkistetaan viel‰ p‰iv‰m‰‰r‰t
 if (!checkdate($alkukausi_kk, $alkukausi_pp, $alkukausi_vv)) {
-  echo "<font class='error'>",t("VIRHE: Alkup‰iv‰m‰‰r‰ on virheellinen"),"!</font><br>";
+  echo "<font class='error'>", t("VIRHE: Alkup‰iv‰m‰‰r‰ on virheellinen"), "!</font><br>";
   $tee = "";
 }
 
 if (!checkdate($loppukausi_kk, $loppukausi_pp, $loppukausi_vv)) {
-  echo "<font class='error'>",t("VIRHE: Loppup‰iv‰m‰‰r‰ on virheellinen"),"!</font><br>";
+  echo "<font class='error'>", t("VIRHE: Loppup‰iv‰m‰‰r‰ on virheellinen"), "!</font><br>";
   $tee = "";
 }
 
 if ($tee == 'laske') {
 
-  echo "<br /><font class='head'>",t("Hakutulos"),"</font><hr>";
+  echo "<br /><font class='head'>", t("Hakutulos"), "</font><hr>";
 
   if ($tilinalku == '' and $tilinloppu == '') {
-    echo "<font class='error'>",t("Pit‰‰ syˆtt‰‰ ainakin yksi tili"),".</font>";
+    echo "<font class='error'>", t("Pit‰‰ syˆtt‰‰ ainakin yksi tili"), ".</font>";
   }
   elseif ($prosentti == '' or $prosentti == 0) {
-    echo "<font class='error'>",t("Laskentaprosentti pit‰‰ syˆtt‰‰ ja se ei saa olla tyhj‰ tai nolla"),".</font>";
+    echo "<font class='error'>", t("Laskentaprosentti pit‰‰ syˆtt‰‰ ja se ei saa olla tyhj‰ tai nolla"), ".</font>";
   }
   else {
 
@@ -253,9 +253,9 @@ if ($tee == 'laske') {
     echo "<form method='post' action='tosite.php'>";
     echo "<input type='hidden' name='tee' value='' />";
     echo "<input type='hidden' name='valkoodi' value='{$valkoodi}' />";
-    echo "<input type='hidden' name='tpp' value='",date("d"),"'>";
-    echo "<input type='hidden' name='tpk' value='",date("m"),"'>";
-    echo "<input type='hidden' name='tpv' value='",date("Y"),"'>";
+    echo "<input type='hidden' name='tpp' value='", date("d"), "'>";
+    echo "<input type='hidden' name='tpk' value='", date("m"), "'>";
+    echo "<input type='hidden' name='tpv' value='", date("Y"), "'>";
 
     echo "<table><tr><td class='back'>";
 
@@ -263,9 +263,9 @@ if ($tee == 'laske') {
 
       echo "<table>";
       echo "<tr>";
-      echo "<th>",t("Tili"),"</th>";
-      echo "<th>",t("Saldo"),"</th>";
-      echo "<th>",t("Kustp"),"</th>";
+      echo "<th>", t("Tili"), "</th>";
+      echo "<th>", t("Saldo"), "</th>";
+      echo "<th>", t("Kustp"), "</th>";
       echo "</tr>";
 
       if (mysql_num_rows($result) > 0) mysql_data_seek($result, 0);
@@ -295,27 +295,27 @@ if ($tee == 'laske') {
           }
         }
 
-        switch($i) {
-          case '1':
-            $saldo1 = $row['tilisaldo'];
-            $show_tilino = $row['tilino'];
-            $key = $row['tilino'];
-            break;
-          case '2':
-            $saldo2 = round(($prosentti / 100) * $row['tilisaldo'], 2);
-            $show_tilino = $tilino;
-            $key = $tarkenne['koodi'];
-            break;
-          case '3':
-            $saldo3 = -1 * round(($prosentti / 100) * $row['tilisaldo'], 2);
-            $show_tilino = $tilino;
-            $key = $tarkenne['koodi'];
-            break;
+        switch ($i) {
+        case '1':
+          $saldo1 = $row['tilisaldo'];
+          $show_tilino = $row['tilino'];
+          $key = $row['tilino'];
+          break;
+        case '2':
+          $saldo2 = round(($prosentti / 100) * $row['tilisaldo'], 2);
+          $show_tilino = $tilino;
+          $key = $tarkenne['koodi'];
+          break;
+        case '3':
+          $saldo3 = -1 * round(($prosentti / 100) * $row['tilisaldo'], 2);
+          $show_tilino = $tilino;
+          $key = $tarkenne['koodi'];
+          break;
         }
 
         echo "<tr>";
         echo "<td class='{$class}'>{$show_tilino}</td>";
-        echo "<td class='{$class}'>",${"saldo{$i}"},"</td>";
+        echo "<td class='{$class}'>", ${"saldo{$i}"}, "</td>";
         echo "<td class='{$class}'>{$tarkenne['koodi']} {$tarkenne['nimi']}</td>";
 
         if (!isset(${"yhteensa{$i}"}[$key])) ${"yhteensa{$i}"}[$key] = 0;
@@ -339,7 +339,7 @@ if ($tee == 'laske') {
 
       echo "<table>";
       echo "<tr>";
-      echo "<th>",t("Yhteens‰"),"</th>";
+      echo "<th>", t("Yhteens‰"), "</th>";
       echo "<th></th>";
       if ($i > 1) echo "<th></th>";
       echo "</tr>";
@@ -349,39 +349,39 @@ if ($tee == 'laske') {
         echo "<tr>";
 
         switch ($i) {
-          case '1':
-            echo "<td>{$koodi}</td>";
-            echo "<td>{$arvo}</td>";
-            break;
-          case '2':
-          case '3':
-            echo "<td>{$tilino}</td>";
-            echo "<td>{$arvo}</td>";
+        case '1':
+          echo "<td>{$koodi}</td>";
+          echo "<td>{$arvo}</td>";
+          break;
+        case '2':
+        case '3':
+          echo "<td>{$tilino}</td>";
+          echo "<td>{$arvo}</td>";
 
-            $query2 = "SELECT nimi, koodi, tunnus
-                       FROM kustannuspaikka
-                       WHERE yhtio = '{$kukarow['yhtio']}'
-                       AND koodi   = '{$koodi}'";
-            $result2 = pupe_query($query2);
-            $tarkenne_row = mysql_fetch_assoc($result2);
+          $query2 = "SELECT nimi, koodi, tunnus
+                     FROM kustannuspaikka
+                     WHERE yhtio = '{$kukarow['yhtio']}'
+                     AND koodi   = '{$koodi}'";
+          $result2 = pupe_query($query2);
+          $tarkenne_row = mysql_fetch_assoc($result2);
 
-            $tarkenne['koodi'] = $tarkenne_row['koodi'];
-            $tarkenne['nimi'] = $tarkenne_row['nimi'];
+          $tarkenne['koodi'] = $tarkenne_row['koodi'];
+          $tarkenne['nimi'] = $tarkenne_row['nimi'];
 
-            if ($tarkenne_row["nimi"] == '') {
-              $tarkenne["nimi"] = t("Ei kustannuspaikkaa");
-            }
+          if ($tarkenne_row["nimi"] == '') {
+            $tarkenne["nimi"] = t("Ei kustannuspaikkaa");
+          }
 
-            echo "<td>{$tarkenne['koodi']} {$tarkenne['nimi']}</td>";
+          echo "<td>{$tarkenne['koodi']} {$tarkenne['nimi']}</td>";
 
-            echo "<input type='hidden' name='itili[{$x}]' value='{$tilino}' />";
-            echo "<input type='hidden' name='isumma[{$x}]' value='{$arvo}' />";
-            echo "<input type='hidden' name='isumma_valuutassa[{$x}]' value='{$arvo}' />";
-            echo "<input type='hidden' name='ikustp[{$x}]' value='{$tarkenne_row['tunnus']}' />";
-            echo "<input type='hidden' name='iselite[{$x}]' value='",t("Sosiaalikulu"),"' />";
+          echo "<input type='hidden' name='itili[{$x}]' value='{$tilino}' />";
+          echo "<input type='hidden' name='isumma[{$x}]' value='{$arvo}' />";
+          echo "<input type='hidden' name='isumma_valuutassa[{$x}]' value='{$arvo}' />";
+          echo "<input type='hidden' name='ikustp[{$x}]' value='{$tarkenne_row['tunnus']}' />";
+          echo "<input type='hidden' name='iselite[{$x}]' value='", t("Sosiaalikulu"), "' />";
 
-            $x++;
-            break;
+          $x++;
+          break;
         }
 
         $summaus += $arvo;
@@ -390,7 +390,7 @@ if ($tee == 'laske') {
       }
 
       echo "<tr>";
-      echo "<th>",t("Yhteens‰"),"</th>";
+      echo "<th>", t("Yhteens‰"), "</th>";
       echo "<td>{$summaus}</td>";
       if ($i > 1) echo "<td></td>";
       echo "</tr>";
@@ -404,11 +404,11 @@ if ($tee == 'laske') {
     echo "<input type='hidden' name='maara' value='{$x}' />";
 
     echo "</td></tr>";
-    echo "<tr><td colspan='3' class='back'><input type='submit' value='",t("Tee tosite"),"' /></td></tr>";
+    echo "<tr><td colspan='3' class='back'><input type='submit' value='", t("Tee tosite"), "' /></td></tr>";
     echo "</table>";
     echo "</form>";
   }
 
 }
 
-require('inc/footer.inc');
+require 'inc/footer.inc';

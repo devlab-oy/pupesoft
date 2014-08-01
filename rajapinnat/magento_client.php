@@ -387,7 +387,7 @@ class MagentoClient {
           // Jos tuotteelta lˆytyy n‰it‰ kategoriatunnuksia ennen updatea ne lis‰t‰‰n takaisin
           if (count($sticky_kategoriat) > 0 and count($current_categories) > 0) {
             foreach ($sticky_kategoriat as $stick) {
-              if(in_array($stick, $current_categories)) {
+              if (in_array($stick, $current_categories)) {
                 $tuote_data['categories'][] = $stick;
               }
             }
@@ -501,8 +501,8 @@ class MagentoClient {
       // Configurable-tuotteelle myˆs ensimm‰isen lapsen parametrit
       $configurable_multi_data = array();
       foreach ($tuotteet[0]['parametrit'] as $parametri) {
-          $key = $parametri['option_name'];
-          $configurable_multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
+        $key = $parametri['option_name'];
+        $configurable_multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
       }
 
       // Configurable-tuotteelle myˆs ensimm‰isen lapsen erikoisparametrit
@@ -596,7 +596,7 @@ class MagentoClient {
           // Jos tuotteelta lˆytyy n‰it‰ kategoriatunnuksia ennen updatea ne lis‰t‰‰n takaisin
           if (count($sticky_kategoriat) > 0 and count($current_categories) > 0) {
             foreach ($sticky_kategoriat as $stick) {
-              if(in_array($stick, $current_categories)) {
+              if (in_array($stick, $current_categories)) {
                 $configurable['categories'][] = $stick;
               }
             }
@@ -1088,7 +1088,7 @@ class MagentoClient {
 
     // Jos dynaaminen parametri on matkalla teksti- tai hintakentt‰‰n niin idt‰ ei tarvita, palautetaan vaan arvo
     if ($attribute_type == 'text' or $attribute_type == 'textarea' or $attribute_type == 'price') {
-        return $value;
+      return $value;
     }
 
     // Haetaan kaikki attribuutin optionssit
@@ -1653,7 +1653,7 @@ class MagentoClient {
    *
    * @param string  $message   Virheviesti
    * @param exception $exception Exception
-   * @param string $type Kirjataanko tuote vai tilauslogiin
+   * @param string  $type      Kirjataanko tuote vai tilauslogiin
    */
   private function log($message, $exception = '', $type = 'product') {
 

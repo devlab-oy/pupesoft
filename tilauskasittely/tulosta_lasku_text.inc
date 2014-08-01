@@ -5,7 +5,7 @@
 $sivu = 1;
 
 if (!function_exists('text_alku')) {
-  function text_alku () {
+  function text_alku() {
     global $sisalto, $laskurow, $yhtiorow, $kukarow, $sivu, $maksuehto, $kieli, $factoringlask;
 
 
@@ -95,13 +95,13 @@ if (!function_exists('text_alku')) {
       $sisalto .= sprintf('%-25.25s', $laskurow["kapvm"]);
     }
     else {
-      $sisalto .= sprintf('%-20.20s','');
+      $sisalto .= sprintf('%-20.20s', '');
     }
     if ($laskurow["kasumma"] != 0.00) {
       $sisalto .= sprintf('%-20.20s', $laskurow["kasumma"]);
     }
     else {
-      $sisalto .= sprintf('%-20.20s','');
+      $sisalto .= sprintf('%-20.20s', '');
     }
 
 
@@ -203,7 +203,7 @@ if (!function_exists('text_alku')) {
 }
 
 if (!function_exists('text_rivi')) {
-  function text_rivi () {
+  function text_rivi() {
     global $sisalto, $row, $sivu, $factoringlask, $kieli;
 
 
@@ -224,16 +224,16 @@ if (!function_exists('text_rivi')) {
     $sisalto .= sprintf('%-15.15s', $row["rivihinta"]);
     $sisalto .= "\r\n";
 
-    $sisalto .= sprintf('%-25.25s', substr($row["nimitys"],0,22));
+    $sisalto .= sprintf('%-25.25s', substr($row["nimitys"], 0, 22));
     $sisalto .= sprintf('%-8.8s', $row["alv"]);
     $sisalto .= sprintf('%-12.12s', t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite"));
-    $sisalto .= sprintf('%-15.15s', substr($row["toimitettuaika"],0,10));
-    $verollinenhinta = round($row["rivihinta"]*(1+($row["alv"]/100)),2);
-    $verollinenhinta = sprintf('%.2f',$verollinenhinta );
+    $sisalto .= sprintf('%-15.15s', substr($row["toimitettuaika"], 0, 10));
+    $verollinenhinta = round($row["rivihinta"]*(1+($row["alv"]/100)), 2);
+    $verollinenhinta = sprintf('%.2f', $verollinenhinta );
     $sisalto .= sprintf('%-15.15s', $verollinenhinta);
     $sisalto .= "\r\n";
 
-    if ($row["kommentti"] != ''){
+    if ($row["kommentti"] != '') {
       $sisalto .= sprintf('%-80.80s', $row["otunnus"]."/".$row["kommentti"]);
     }
     else {
@@ -246,9 +246,9 @@ if (!function_exists('text_rivi')) {
 }
 
 if (!function_exists('text_loppu')) {
-  function text_loppu () {
+  function text_loppu() {
 
-    global $sisalto, $laskurow, $yhtiorow, $kukarow, $sivu, $kieli, $factoringlask,$frow;
+    global $sisalto, $laskurow, $yhtiorow, $kukarow, $sivu, $kieli, $factoringlask, $frow;
 
 
     while ($factoringlask < 71) {
@@ -291,7 +291,7 @@ if (!function_exists('text_loppu')) {
 }
 
 if (!function_exists('text_alvierittely')) {
-  function text_alvierittely () {
+  function text_alvierittely() {
     global $sisalto, $laskurow, $yhtiorow, $kukarow, $sivu, $factoringlask, $kieli;
 
     //loppusummat vain vikalle sivulle

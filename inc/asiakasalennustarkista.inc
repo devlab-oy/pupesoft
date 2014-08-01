@@ -1,7 +1,7 @@
 <?php
 
-if(!function_exists("asiakasalennustarkista")) {
-  function asiakasalennustarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+if (!function_exists("asiakasalennustarkista")) {
+  function asiakasalennustarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set, $alasveto;
 
     static $chytunnus, $chasiakas_ryhma, $chtuoteno, $chryhma, $chminkpl, $chmonikerta, $chalkupvm, $chloppupvm, $chastunn, $chtuoteno_ind, $chsegmentti, $chpiiri, $chalennuslaji;
@@ -11,7 +11,7 @@ if(!function_exists("asiakasalennustarkista")) {
         $virhe[$i] = t("Tieto puuttuu!");
       }
 
-      if (abs(trim($t[$i])) > 100 AND (float)trim($t[$i]) != 999.99 AND (float)trim($t[$i]) != -999.99) {
+      if (abs(trim($t[$i])) > 100 and (float)trim($t[$i]) != 999.99 and (float)trim($t[$i]) != -999.99) {
         $virhe[$i] = t("Alennus ei voi olla yli 100%");
       }
     }
@@ -58,7 +58,7 @@ if(!function_exists("asiakasalennustarkista")) {
           $ulos2       = "";
 
           if ($ytunnus != "" and $ytunnus != "0") {
-            require("asiakashaku.inc");
+            require "asiakashaku.inc";
           }
 
           if ($ulos2 != "" and $ytunnus == "") {
@@ -108,7 +108,7 @@ if(!function_exists("asiakasalennustarkista")) {
           $kutsuja     = "yllapito.php";
           $ulos      = "";
 
-          require ("inc/tuotehaku.inc");
+          require "inc/tuotehaku.inc";
 
           if ($ulos != "") {
             $alasveto[$i] = "<select name='t[$i]'>".$ulos."</select>";

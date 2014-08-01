@@ -36,7 +36,7 @@ if ($tee == "write") {
   if ($errori == '') {
     // Taulun ensimmäinen kenttä on aina yhtiö
     $query = "INSERT into asiakas values ('$kukarow[yhtio]'";
-      for ($i=1; $i < mysql_num_fields($result); $i++) {
+    for ($i=1; $i < mysql_num_fields($result); $i++) {
       $query .= ",'" . $t[$i] . "'";
     }
     $query .= ")";
@@ -97,17 +97,17 @@ if ($tee == "edit") {
       $ulos = '';
     }
 
-    if(mysql_field_name($result, $i) == 'laatija') {  //speciaali tapaukset
+    if (mysql_field_name($result, $i) == 'laatija') {  //speciaali tapaukset
       $tyyppi = 2;
       $trow[$i] = $kukarow["kuka"];
     }
-    if(mysql_field_name($result, $i) == 'luontiaika') {  //speciaali tapaukset
+    if (mysql_field_name($result, $i) == 'luontiaika') {  //speciaali tapaukset
       $tyyppi = 2;
       $trow[$i] = date('Y-m-d H:i:s');
     }
 
-    if   (mysql_field_len($result,$i)>10) $size='35';
-    elseif  (mysql_field_len($result,$i)<5)  $size='5';
+    if   (mysql_field_len($result, $i)>10) $size='35';
+    elseif  (mysql_field_len($result, $i)<5)  $size='5';
     else  $size='10';
 
     if ($tyyppi > 0) {
@@ -115,7 +115,7 @@ if ($tee == "edit") {
     }
 
     if ($tyyppi > 0) {
-       echo "<th align='left'>".t(mysql_field_name($result, $i))."</th>";
+      echo "<th align='left'>".t(mysql_field_name($result, $i))."</th>";
     }
 
     if ($jatko == 0) {
@@ -123,26 +123,24 @@ if ($tee == "edit") {
     }
     else {
       $mita = 'text';
-      if ($tyyppi != 1)
-      {
+      if ($tyyppi != 1) {
         $mita='hidden';
         echo "<td class='back'>";
       }
-      else
-      {
+      else {
         echo "<td>";
       }
 
       echo "<input type = '$mita' name = '$nimi'";
 
       if ($errori == '') {
-        echo " value = '$trow[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
+        echo " value = '$trow[$i]' size='$size' maxlength='" . mysql_field_len($result, $i) ."'>";
       }
       else {
-        echo " value = '$t[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
+        echo " value = '$t[$i]' size='$size' maxlength='" . mysql_field_len($result, $i) ."'>";
       }
 
-      if($tyyppi == 2) {
+      if ($tyyppi == 2) {
         echo "$trow[$i]";
       }
 
@@ -246,4 +244,4 @@ if ($tee == '') {
   echo "</table>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

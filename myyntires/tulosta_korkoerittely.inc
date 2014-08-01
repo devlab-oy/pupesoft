@@ -1,6 +1,6 @@
 <?php
 
-function paperi_alku () {
+function paperi_alku() {
   global $pdf, $asiakastiedot, $yhteyshenkilo, $yhtiorow, $kukarow, $kala, $sivu, $rectparam, $norm, $pieni, $bold, $kaatosumma, $kieli, $vmehto, $trow;
 
   $firstpage = $pdf->new_page("a4");
@@ -97,15 +97,15 @@ function paperi_alku () {
 
   $kala -= 15;
 
-  return($firstpage);
+  return $firstpage;
 }
 
-function paperi_rivi ($firstpage, $summa) {
+function paperi_rivi($firstpage, $summa) {
   global $firstpage, $pdf, $row, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $kieli;
 
   if ($lask >= 37) {
     $sivu++;
-    paperi_loppu($firstpage,'');
+    paperi_loppu($firstpage, '');
     $firstpage = paperi_alku();
     $kala = 605;
     $lask = 1;
@@ -129,11 +129,11 @@ function paperi_rivi ($firstpage, $summa) {
 
   $lask++;
   $summa+=$row["korkosumma"];
-  return($summa);
+  return $summa;
 }
 
 
-function paperi_loppu ($firstpage, $summa, $masrow = "") {
+function paperi_loppu($firstpage, $summa, $masrow = "") {
 
   global $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kaatosumma, $kieli, $toimipaikkarow;
 
@@ -175,7 +175,7 @@ function paperi_loppu ($firstpage, $summa, $masrow = "") {
 
 }
 
-require('pdflib/phppdflib.class.php');
+require 'pdflib/phppdflib.class.php';
 
 //echo "<font class='message'>Korkoerittely tulostuu...</font>";
 flush();
@@ -299,14 +299,14 @@ $kieli = $asiakastiedot["kieli"];
 $liitostunnus  = $asiakastiedot["tunnus"];
 
 //ja kelataan akuun
-mysql_data_seek($result,0);
+mysql_data_seek($result, 0);
 
 $firstpage = paperi_alku();
 
 //karhu_begin_work();
 $summa = 0;
 while ($row = mysql_fetch_assoc($result)) {
-  $summa = paperi_rivi($firstpage,$summa);
+  $summa = paperi_rivi($firstpage, $summa);
   //p‰ivitet‰‰n korkosumma
   if (basename($_SERVER["SCRIPT_FILENAME"]) != 'muutosite.php') {
     $query = "UPDATE lasku
@@ -319,7 +319,7 @@ while ($row = mysql_fetch_assoc($result)) {
 
 $loppusumma = sprintf('%.2f', $summa);
 
-paperi_loppu($firstpage,$loppusumma, $mehtorow);
+paperi_loppu($firstpage, $loppusumma, $mehtorow);
 
 if (basename($_SERVER["SCRIPT_FILENAME"]) != 'muutosite.php') {
   //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
@@ -346,7 +346,7 @@ if (basename($_SERVER["SCRIPT_FILENAME"]) != 'muutosite.php') {
       $liite = $pdffilenimi;
       $kutsu = "korkoerittely-$asiakastiedot[ytunnus]";
       $ctype = "pdf";
-      require("../inc/sahkoposti.inc");
+      require "../inc/sahkoposti.inc";
     }
     else {
       $line  = exec("$kirow[komento] $pdffilenimi");

@@ -1,7 +1,7 @@
 <?php
 
 if (!function_exists("tuotetarkista")) {
-  function tuotetarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+  function tuotetarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set, $laji, $poistolukko, $luedata_toiminto;
 
     static $tem_tuoteno, $tem_tullinimike1, $tem_eisaldoa, $tem_kehahin, $tem_kehahin_ind, $tem_tuotetyyppi, $tem_status, $tem_status_vanha, $tem_try, $tem_try_vanha;
@@ -13,13 +13,13 @@ if (!function_exists("tuotetarkista")) {
         $virhe[$i] = t("Tieto puuttuu");
       }
       else {
-        $temp_ekakirjain = (substr(trim($t[$i]),0,1));
+        $temp_ekakirjain = (substr(trim($t[$i]), 0, 1));
 
         if (($temp_ekakirjain == '*') or ($temp_ekakirjain == '@') or ($temp_ekakirjain == '?')) {
           $virhe[$i] = t("Tuotenumero ei voi alkaa merkeillä *, @ tai ?");
         }
         else {
-          if (substr(trim($t[$i]),-1) == '*') {
+          if (substr(trim($t[$i]), -1) == '*') {
             $virhe[$i] = t("Tuotenumero ei voi loppua merkkiin *");
           }
           else {
@@ -125,7 +125,7 @@ if (!function_exists("tuotetarkista")) {
             $halyraja2 = array();
             $tilausmaara2 = array();
             $kutsuja = "tuotetarkista.inc";
-            require("muuvarastopaikka.php");
+            require "muuvarastopaikka.php";
           }
         }
       }
@@ -143,10 +143,10 @@ if (!function_exists("tuotetarkista")) {
     }
 
     if (($fieldname == "tilino" or
-      $fieldname == "tilino_eu" or
-      $fieldname == "tilino_ei_eu" or
-      $fieldname == "tilino_marginaali" or
-      $fieldname == "tilino_osto_marginaali") and $t[$i] != "") {
+        $fieldname == "tilino_eu" or
+        $fieldname == "tilino_ei_eu" or
+        $fieldname == "tilino_marginaali" or
+        $fieldname == "tilino_osto_marginaali") and $t[$i] != "") {
 
       $query = "SELECT yhtio
                 FROM tili
@@ -222,13 +222,13 @@ if (!function_exists("tuotetarkista")) {
         $vrow = mysql_fetch_array($vresult);
 
         // Tietyt vaihdot sallitaan!!!, huomaa NOT iffissä, helpompi kirjoittaa näin päin
-        if (!(($t[$i] == "S" and $vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("S","U")))
-           or ($t[$i] == "U" and $vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("S","U")))
-           or ($t[$i] == ""  and $vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("","T","V","E","F")))
-           or ($t[$i] == "T" and $vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("","T","V","E","F")))
-           or ($t[$i] == "V" and $vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("","T","V","E","F")))
-           or ($t[$i] == "E" and (in_array($trow["sarjanumeroseuranta"], array("E","F")) or ($vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("","T","V","E","F")))))
-           or ($t[$i] == "F" and (in_array($trow["sarjanumeroseuranta"], array("E","F")) or ($vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("","T","V","E","F"))))))) {
+        if (!(($t[$i] == "S" and $vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("S", "U")))
+            or ($t[$i] == "U" and $vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("S", "U")))
+            or ($t[$i] == ""  and $vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("", "T", "V", "E", "F")))
+            or ($t[$i] == "T" and $vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("", "T", "V", "E", "F")))
+            or ($t[$i] == "V" and $vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("", "T", "V", "E", "F")))
+            or ($t[$i] == "E" and (in_array($trow["sarjanumeroseuranta"], array("E", "F")) or ($vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("", "T", "V", "E", "F")))))
+            or ($t[$i] == "F" and (in_array($trow["sarjanumeroseuranta"], array("E", "F")) or ($vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("", "T", "V", "E", "F"))))))) {
           $virhe[$i] = t("Seurantatyyppiä ei voida muuttaa, koska tuotteella on tapahtumia")."!";
         }
       }
@@ -356,7 +356,7 @@ if (!function_exists("tuotetarkista")) {
                     ORDER BY oletus ASC";
           $tuotepaikat_result = pupe_query($query);
           $poista = array();
-          while($tuotepaikka = mysql_fetch_assoc($tuotepaikat_result)) {
+          while ($tuotepaikka = mysql_fetch_assoc($tuotepaikat_result)) {
             $poista[] = $tuotepaikka;
           }
 
@@ -365,7 +365,7 @@ if (!function_exists("tuotetarkista")) {
           $halyraja2 = array();
           $tilausmaara2 = array();
           $kutsuja = "tuotetarkista.inc";
-          require("muuvarastopaikka.php");
+          require "muuvarastopaikka.php";
         }
       }
       // Jos kyseessä tuotteen poisto, tarkistetaan löytyykö tuotetta avoimilta ostotilauksilta, jos löytyy niin poistoa ei sallita.
@@ -379,7 +379,7 @@ if (!function_exists("tuotetarkista")) {
                   AND varattu != 0";
         $result = pupe_query($query);
 
-        if(mysql_num_rows($result) > 0) {
+        if (mysql_num_rows($result) > 0) {
           $virhe[$i] = t("Tuotetta löytyy avoimelta ostotilaukselta, ei voida merkata poistetuksi");
         }
       }
@@ -388,7 +388,7 @@ if (!function_exists("tuotetarkista")) {
     // ei piirretä ellei yhtiöparametri ohjeista katsomaan täältä
     if ($fieldname == "suoratoimitus") {
       if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('V', 'W', 'I', 'J'))) {
-        if (!in_array($t[$i], array('S','U','X',''))) {
+        if (!in_array($t[$i], array('S', 'U', 'X', ''))) {
           $virhe[$i] = t("Suoratoimitustieto virheellinen");
         }
       }
@@ -480,8 +480,8 @@ if (!function_exists("tuotetarkista")) {
       }
     }
     //tarkistetaan ettei yritetä laittaa ostoehdotus sarakkeeseen vääriä kirjaimia! sallitut "E" = ei ja "" = kyllä
-    if ($fieldname == "ostoehdotus"){
-      if ($t[$i] != "E" AND $t[$i] != "") {
+    if ($fieldname == "ostoehdotus") {
+      if ($t[$i] != "E" and $t[$i] != "") {
         $virhe[$i] = t("Ostoehdotus arvo tulee olla joko E tai tyhjä! (E = ei näytetä ja tyhjä = näytetään)");
       }
     }

@@ -1,8 +1,8 @@
 <?php
 
 if (isset($_POST["tee"])) {
-  if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
 require "inc/parametrit.inc";
@@ -55,11 +55,11 @@ if ($tee == 'Z' or $tiliote == 'Z') {
   if (mysql_num_rows($result) != 1) {
     echo "<font class='error'>".t("Tili katosi")."</font><br>";
 
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
   else {
-    $yritirow = mysql_fetch_array ($result);
+    $yritirow = mysql_fetch_array($result);
     $tee = 'T';
     $tilino = $yritirow['tilino'];
     $tyyppi = 1;
@@ -124,7 +124,7 @@ if ($tee == 'X' or $tee == 'XX' or $tee == "XS" or $tee == "XXS") {
   }
   else {
     $tee = 'T';
-    $tiliotedatarow = mysql_fetch_array ($tiliotedataresult);
+    $tiliotedatarow = mysql_fetch_array($tiliotedataresult);
     $pvm = $tiliotedatarow['alku'];
   }
 
@@ -162,7 +162,7 @@ if ($tee == 'S') {
       );
 
       if ($('#kuitattu_'+solut).hasClass('spec')) {
-        $('#kuitattu_'+solut).html('<font class=\"ok\">".t("Kuitattu").": {$kukarow['nimi']} @ ".tv1dateconv(date("Y-m-d H:i:s"),"pitkä")."</font>');
+        $('#kuitattu_'+solut).html('<font class=\"ok\">".t("Kuitattu").": {$kukarow['nimi']} @ ".tv1dateconv(date("Y-m-d H:i:s"), "pitkä")."</font>');
       }
       else {
         $('#kuitattu_'+solut).html('');
@@ -292,14 +292,14 @@ if ($tee == '') {
 
   if (mysql_num_rows($result) == 0) {
     echo "<font class='error'>".t("Sinulla ei ole yhtään pankkitiliä")."</font><hr>";
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 
   $querylisa = "";
-  if (!isset($kk)) $kk = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-  if (!isset($vv)) $vv = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-  if (!isset($pp)) $pp = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+  if (!isset($kk)) $kk = date("m", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+  if (!isset($vv)) $vv = date("Y", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+  if (!isset($pp)) $pp = date("d", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 
   if ($tilino != "") $querylisa .= " and tiliotedata.tilino = '$tilino' ";
   if ($tyyppi != "") $querylisa .= " and tyyppi = '$tyyppi' ";
@@ -319,7 +319,7 @@ if ($tee == '') {
 
   echo "<option value=''>".t("Näytä kaikki")."</option>";
 
-  while ($yritirow = mysql_fetch_array ($result)) {
+  while ($yritirow = mysql_fetch_array($result)) {
     $chk = "";
     if ($yritirow["tilino"] == $tilino) $chk = "selected";
     echo "<option value='$yritirow[tilino]' $chk>$yritirow[nimi] ($yritirow[tilino])";
@@ -354,18 +354,18 @@ if ($tee == '') {
 
   if (mysql_num_rows($result) == 0) {
     echo "<font class='error'>".t("Sopivia pankkiainestoja ei löytynyt")."</font><hr>";
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 
   echo "<table>";
   echo "<tr>";
   for ($i = 0; $i < mysql_num_fields($result)-2; $i++) {
-    echo "<th>" . t(mysql_field_name($result,$i)) ."</th>";
+    echo "<th>" . t(mysql_field_name($result, $i)) ."</th>";
   }
   echo "</tr>";
 
-  while ($row = mysql_fetch_array ($result)) {
+  while ($row = mysql_fetch_array($result)) {
 
     echo "<tr class='aktiivi'>";
 
@@ -397,4 +397,4 @@ if ($tee == '') {
   $kentta = 'pp';
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

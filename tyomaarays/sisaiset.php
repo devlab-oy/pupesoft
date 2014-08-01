@@ -7,7 +7,7 @@ include "inc/parametrit.inc";
 
 echo "$headerfont<b>".t("Sisäiset työt").":<hr>";
 
-$MonthNames = array(1=> t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kesäkuu'),t('Heinäkuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
+$MonthNames = array(1=> t('Tammikuu'), t('Helmikuu'), t('Maaliskuu'), t('Huhtikuu'), t('Toukokuu'), t('Kesäkuu'), t('Heinäkuu'), t('Elokuu'), t('Syyskuu'), t('Lokakuu'), t('Marraskuu'), t('Joulukuu'));
 $CurDate = getdate();
 
 if ($month == NULL) {
@@ -37,8 +37,8 @@ print "  <head>
 echo "<br>$thfont <form action = '?session=$session' name='vaihdaKuukausi' method='post'>Valitse kuukausi:
   <select name='month' Onchange='kuu_Click()'>";
 $i=1;
-foreach($MonthNames as $val) {
-  if($i == $MonthToShow) {
+foreach ($MonthNames as $val) {
+  if ($i == $MonthToShow) {
     $sel = "selected";
   }
   else {
@@ -55,24 +55,24 @@ $query = "SELECT id, maksuaika, maksutapa, maksutapa
           FROM asiakastiedot
           WHERE month(maksuaika)='$MonthToShow' and year(maksuaika)='$YearToShow' and (asnum='303' or asnum='660494')
           ORDER by id";
-$result = mysql_query ($query)
+$result = mysql_query($query)
   or die ("Kysely ei onnistu $query");
 
 echo "  <tr><td>$thfont Työmääräys: </td>
       <td>$thfont Tunnit (EUR): </td><td>$thfont Maksuaika:</td></tr>";
 $yhteensa = 0;
 
-while ($row = mysql_fetch_array($result)){
+while ($row = mysql_fetch_array($result)) {
   $query = "SELECT sum(rivihinta)
             FROM huoltotiedot
             WHERE kpl > 0 and id='$row[0]'";
-  $presult = mysql_query ($query)
+  $presult = mysql_query($query)
     or die ("Kysely ei onnistu $query");
 
   $query = "SELECT sum(if (osanro='HT295',rivihinta,0))
             FROM varaosat
             WHERE kpl > 0 and id='$row[0]'";
-  $rresult = mysql_query ($query)
+  $rresult = mysql_query($query)
     or die ("Kysely ei onnistu $query");
 
   $prow = mysql_fetch_array($presult);

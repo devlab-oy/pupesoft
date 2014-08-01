@@ -3,7 +3,7 @@
 // DataTables päälle
 $pupe_DataTables = "luottotappiot";
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Myyntisaamisten kirjaus luottotappioiksi")."</font><hr>";
 
@@ -67,7 +67,7 @@ if ($tila == 'K' and is_array($luottotappio)) {
                   laatija  = '$kukarow[kuka]',
                   laadittu = now()";
         $result = pupe_query($query);
-        $isa = mysql_insert_id ($link);
+        $isa = mysql_insert_id($link);
 
         // Tiliöidään alv
         if ($lasku['vero'] != 0) {
@@ -151,7 +151,7 @@ if ($tila == 'N') {
             GROUP BY liitostunnus
             ORDER BY ytunnus";
   $result = pupe_query($query);
-  $asiakas = mysql_fetch_assoc ($result);
+  $asiakas = mysql_fetch_assoc($result);
 
   echo "<table>";
 
@@ -197,7 +197,7 @@ if ($tila == 'N') {
   echo "<th>".t("Luottotappio")."</th>";
   echo "</tr>";
 
-  while ($lasku = mysql_fetch_assoc ($result)) {
+  while ($lasku = mysql_fetch_assoc($result)) {
     echo "<tr>";
     echo "<td>$lasku[laskunro]</td>";
     echo "<td>".tv1dateconv($lasku["tapvm"])."</td>";
@@ -209,7 +209,7 @@ if ($tila == 'N') {
     if ($eraantyneet != "" and (int) str_replace("-", "", $lasku['erpcm']) < (int) date("Ymd")) {
       $ltchk = "CHECKED";
     }
-    elseif ($eraantyneet == "")  {
+    elseif ($eraantyneet == "") {
       $ltchk = "CHECKED";
     }
 
@@ -302,7 +302,7 @@ if ($tila == "") {
 
   echo "<tbody>";
 
-  while ($asiakas = mysql_fetch_assoc ($result)) {
+  while ($asiakas = mysql_fetch_assoc($result)) {
 
     echo "<tr class='aktiivi'>";
     echo "<td>$asiakas[ytunnus]</td>";
@@ -326,4 +326,4 @@ if ($tila == "") {
   echo "</table>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

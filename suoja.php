@@ -1,6 +1,6 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo " <!-- Enabloidaan shiftillä checkboxien chekkaus //-->
     <script src='inc/checkboxrange.js'></script>
@@ -221,7 +221,7 @@ if (mysql_num_rows($result) > 0) {
 echo "<td class='back'></td></tr></table>";
 
 if ($sovellus == "") {
-  require("inc/footer.inc");
+  require "inc/footer.inc";
   exit;
 }
 
@@ -315,9 +315,9 @@ while ($orow=mysql_fetch_array($result)) {
   }
 
   echo "  ".t("$orow[nimitys]")."</td>
-      <td align='center'><input type='checkbox' class='A".str_pad($lask,6,0,STR_PAD_LEFT)." shift' $checked value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='valittu[]'></td>
-      <td align='center'><input type='checkbox' class='B".str_pad($lask,6,0,STR_PAD_LEFT)." shift' $paivit  value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='paivitys[]'></td>
-      <td align='center'><input type='checkbox' class='C".str_pad($lask,6,0,STR_PAD_LEFT)." shift' $luk      value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='lukot[]'></td>
+      <td align='center'><input type='checkbox' class='A".str_pad($lask, 6, 0, STR_PAD_LEFT)." shift' $checked value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='valittu[]'></td>
+      <td align='center'><input type='checkbox' class='B".str_pad($lask, 6, 0, STR_PAD_LEFT)." shift' $paivit  value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='paivitys[]'></td>
+      <td align='center'><input type='checkbox' class='C".str_pad($lask, 6, 0, STR_PAD_LEFT)." shift' $luk      value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='lukot[]'></td>
       </tr>";
 
   $vsove = $orow['sovellus'];
@@ -336,4 +336,4 @@ if ($toim == "" or ($toim == "extranet" and $selkukarow["kuka"] != "")) {
   echo "<input type='submit' value='".t("Päivitä tiedot")."'></form>";
 }
 
-require("inc/footer.inc");
+require "inc/footer.inc";

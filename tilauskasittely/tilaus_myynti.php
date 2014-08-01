@@ -6855,7 +6855,7 @@ if ($tee == '') {
         }
 
         if (($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K")
-            or ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA")) {
+          or ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA")) {
           $classvar = $class;
         }
         else {

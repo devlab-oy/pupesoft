@@ -3,13 +3,13 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Osto ja myyntireskontran tarkistus")."</font><hr>";
 
 if ($tee == 'X') {
 
-  $loppu = date("Y-m-d",mktime(0, 0, 0, $kk+1, '1', $vv));
+  $loppu = date("Y-m-d", mktime(0, 0, 0, $kk+1, '1', $vv));
 
   if ($valinta == 'O') {
     echo "<font class='message'>".t("Tarkistetaan ostolaskujen kirjaukset ostovelkoihin").":</font><br>";
@@ -85,7 +85,7 @@ if ($tee == 'X') {
     echo "<tr><th>".t("Nimi")."</th><th>".t("Tapvm")."</th><th>".t("Laskun summa")."</th><th>".t("Tositteen heitto")."</th></tr>";
 
     while ($tapahtuma = mysql_fetch_assoc($result)) {
-      if (round($tapahtuma['ssumma'],2) != 0.00)
+      if (round($tapahtuma['ssumma'], 2) != 0.00)
         echo "<tr><td>$tapahtuma[nimi]</td><td><a href='muutosite.php?tee=E&tunnus=$tapahtuma[tunnus]'>$tapahtuma[tapvm]</a></td><td>$tapahtuma[summa]</td><td>$tapahtuma[ssumma]</td></tr>";
     }
 
@@ -175,7 +175,7 @@ if ($tee == 'X') {
     echo "<tr><th>".t("Nimi")."</th><th>".t("Tapvm")."</th><th>".t("Laskun summa")."</th><th>".t("Tositteen heitto")."</th></tr>";
 
     while ($tapahtuma = mysql_fetch_assoc($result)) {
-      if (round($tapahtuma['ssumma'],2) != 0.00) {
+      if (round($tapahtuma['ssumma'], 2) != 0.00) {
         echo "<tr><td>$tapahtuma[nimi]</td><td><a href='muutosite.php?tee=E&tunnus=$tapahtuma[tunnus]'>$tapahtuma[tapvm]</a></td><td>$tapahtuma[summa]</td><td>$tapahtuma[ssumma]</td></tr>";
       }
     }
@@ -190,8 +190,8 @@ if ($tee == '') {
   $year = date("Y");
   $kuu  = date("n");
   // poimitaan erikseen edellisen kuun viimeisen p‰iv‰n vv,kk,pp raportin oletusp‰iv‰m‰‰r‰ksi
-  $ek_vv = date("Y",mktime(0,0,0,$kuu,0,$year));
-  $ek_kk = date("n",mktime(0,0,0,$kuu,0,$year));
+  $ek_vv = date("Y", mktime(0, 0, 0, $kuu, 0, $year));
+  $ek_kk = date("n", mktime(0, 0, 0, $kuu, 0, $year));
 
   echo "<form name = 'valinta' method='post'>
       <input type = 'hidden' name = 'tee' value = 'X'>
@@ -213,4 +213,4 @@ if ($tee == '') {
   $formi = 'valinta';
   $kentta = 'kk';
 }
-require("inc/footer.inc");
+require "inc/footer.inc";

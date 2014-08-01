@@ -1,12 +1,12 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Lue tuotepaikkakohtaisia h‰lytysrajoja ja tilausm‰‰ri‰")."</font><hr>";
 
 if ($korjataan == '') $id = 0;
 
-if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $korjataan == ''){
+if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $korjataan == '') {
 
   $path_parts = pathinfo($_FILES['userfile']['name']);
   $name  = strtoupper($path_parts['filename']);
@@ -20,14 +20,14 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $korjataan ==
     die ("<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font>");
   }
 
-  $file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
+  $file = fopen($_FILES['userfile']['tmp_name'], "r") or die (t("Tiedoston avaus ep‰onnistui")."!");
 
   echo "<font class='message'>".t("Tutkaillaan mit‰ olet l‰hett‰nyt").".<br></font>";
 
-   while ($rivi = fgets($file)) {
+  while ($rivi = fgets($file)) {
     // luetaan rivi tiedostosta..
-    $poista    = array("'", "\\","\"");
-    $rivi    = str_replace($poista,"",$rivi);
+    $poista    = array("'", "\\", "\"");
+    $rivi    = str_replace($poista, "", $rivi);
     $rivi    = explode("\t", trim($rivi));
 
     if ((trim($rivi[0]) != '') and ((trim($rivi[1]) != '') or (trim($rivi[2]) != ''))) {
@@ -170,7 +170,7 @@ if ($korjataan != '') {
             <input type='hidden' name='tilattava[$id]' value='$tilattava[$id]'>
             <input type='hidden' name='rivipaikka[$id]' value=''>
             <input type='hidden' name='uusipaikka[$id]' value='uusi'>
-            ",hyllyalue("hyllyalue[$id]", $hyllyalue[$id]),"
+            ", hyllyalue("hyllyalue[$id]", $hyllyalue[$id]), "
             <input type='text' id='hyllynro[$id]'  name='hyllynro[$id]'  value='$hyllynro[$id]'  maxlength='2' size='2'>
             <input type='text' id='hyllyvali[$id]' name='hyllyvali[$id]' value='$hyllyvali[$id]' maxlength='2' size='2'>
             <input type='text' id='hyllytaso[$id]' name='hyllytaso[$id]' value='$hyllytaso[$id]' maxlength='2' size='2'></td>";
@@ -288,7 +288,7 @@ else {
       <br>";
 
   echo "<form method='post' name='sendfile' enctype='multipart/form-data'> <table>";
-      echo "<tr><th>".t("Valitse varasto:")."</th>
+  echo "<tr><th>".t("Valitse varasto:")."</th>
         <td><select name='tuvarasto'>";
 
   $query = "SELECT tunnus, nimitys
@@ -299,7 +299,7 @@ else {
 
   echo "<option value=''>".t("Ei valittu")."</option>";
 
-  while ($varselrow = mysql_fetch_assoc($result)){
+  while ($varselrow = mysql_fetch_assoc($result)) {
     $sel = '';
 
     if (($varselrow["tunnus"] == $tuvarasto) or ((isset($kukarow["varasto"]) and (int) $kukarow["varasto"] > 0 and in_array($varselrow["tunnus"], explode(",", $kukarow['varasto']))) and $tuvarasto=='')) {
@@ -322,4 +322,4 @@ else {
   </form>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

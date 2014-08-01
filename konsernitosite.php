@@ -3,7 +3,7 @@
 if (!isset($link)) require "inc/parametrit.inc";
 
 if (isset($_POST['ajax_toiminto']) and trim($_POST['ajax_toiminto']) != '') {
-  require ("inc/tilioinnin_toiminnot.inc");
+  require "inc/tilioinnin_toiminnot.inc";
 }
 
 enable_ajax();
@@ -18,7 +18,7 @@ echo "<font class='head'>".t("Uusi konsernitosite")."</font><hr>";
 // Tarkistetetaan syötteet perustusta varten
 if ($tee == 'I') {
 
-  $summa = str_replace ( ",", ".", $summa);
+  $summa = str_replace( ",", ".", $summa);
   $tpk += 0;
   $tpp += 0;
   $tpv += 0;
@@ -72,7 +72,7 @@ if ($tee == 'I') {
     // Käsitelläänkö rivi??
     if (strlen($itili[$i]) > 0 or strlen($isumma[$i]) > 0) {
 
-      $isumma[$i] = str_replace (",", ".", $isumma[$i]);
+      $isumma[$i] = str_replace(",", ".", $isumma[$i]);
 
       // Siirretään oletusselite tiliöinneille
       if (strlen($selite) > 0 and strlen($iselite[$i]) == 0) {
@@ -116,7 +116,7 @@ if ($tee == 'I') {
       $kohde_tark    = $ikohde[$i];
       $projekti_tark  = $iprojekti[$i];
 
-      require ("inc/tarkistatiliointi.inc");
+      require "inc/tarkistatiliointi.inc";
 
       $ivirhe[$i] .= $virhe;
       $iulos[$i] = $ulos;
@@ -192,7 +192,7 @@ if ($tee == 'I') {
       $summa = $totsumma * -1;
       $vero = 0;
 
-      require ("inc/teetiliointi.inc");
+      require "inc/teetiliointi.inc";
 
       // Aloitetaan vieraan yrityksen tiliöinnit
       $totsumma = 0;
@@ -208,7 +208,7 @@ if ($tee == 'I') {
                 laatija    = '$kukarow[kuka]',
                 luontiaika = now()";
       $result = pupe_query($query);
-      $tunnus = mysql_insert_id ($link);
+      $tunnus = mysql_insert_id($link);
 
       if (!empty($fnimi)) {
 
@@ -245,7 +245,7 @@ if ($tee == 'I') {
       $totsumma += $summa; // Vastavietiä varten
       $vero = $ivero[$i];
       $selite = $iselite[$i];
-      require ("inc/teetiliointi.inc");
+      require "inc/teetiliointi.inc";
     }
 
     $itili[$i] = '';
@@ -269,7 +269,7 @@ if ($tee == 'I') {
   $vero = 0;
   $selite = t('Konsernitositteen vastavienti');
 
-  require ("inc/teetiliointi.inc");
+  require "inc/teetiliointi.inc";
 
   $kukarow['yhtio'] = $turvayhtio;
   $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
@@ -300,7 +300,7 @@ if ($tee == '') {
 
     if (mysql_num_rows($yresult) < 1) {
       echo "<font class='error'>".t("Konsernissasi ei ole yhtään yritystä. Näin ollen et voi käyttää tätä toimintoa")."</font>";
-      require ("inc/footer.inc");
+      require "inc/footer.inc";
       exit;
     }
 
@@ -517,4 +517,4 @@ if ($tee == '') {
   }
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

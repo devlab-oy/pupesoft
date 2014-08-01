@@ -3,26 +3,26 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Avointen myyntilaskujen selaus")."</font><hr>";
 
 $tila = '';
 $kentat = 'laskunro, nimi, nimitark, erpcm, summa, viite, tunnus';
-      $kentankoko = array(10,30,10,10,10,10,15);
+$kentankoko = array(10, 30, 10, 10, 10, 10, 15);
 $array = explode(",", $kentat);
 $count = count($array);
 for ($i=0; $i<=$count; $i++) {
-    // tarkastetaan onko hakukent‰ss‰ jotakin
-    if (strlen($haku[$i]) > 0) {
-      $lisa .= " and l." . $array[$i] . " like '%" . $haku[$i] . "%'";
-      $ulisa .= "&haku[" . $i . "]=" . $haku[$i];
-    }
+  // tarkastetaan onko hakukent‰ss‰ jotakin
+  if (strlen($haku[$i]) > 0) {
+    $lisa .= " and l." . $array[$i] . " like '%" . $haku[$i] . "%'";
+    $ulisa .= "&haku[" . $i . "]=" . $haku[$i];
+  }
 }
 if (strlen($ojarj) > 0) {
   $jarjestys = $array[$ojarj];
 }
-else{
+else {
   $jarjestys = 'erpcm';
 }
 
@@ -38,30 +38,30 @@ $query = "SELECT COALESCE(l.laskunro,'-') laskunro, l.nimi nimi, l.nimitark nimi
 
 $result = mysql_query($query) or pupe_error($query);
 
- echo "<form action = '?tila=$tila' method='post'>";
+echo "<form action = '?tila=$tila' method='post'>";
 
-      echo "<table><tr>";
+echo "<table><tr>";
 
-      for ($i = 0; $i < mysql_num_fields($result)-2; $i++) {
-                echo "<th><a href='$PHP_SELF?tila=$tila&ojarj=".$i.$ulisa."'>" . t(mysql_field_name($result,$i))."</a></th>";
-      }
+for ($i = 0; $i < mysql_num_fields($result)-2; $i++) {
+  echo "<th><a href='$PHP_SELF?tila=$tila&ojarj=".$i.$ulisa."'>" . t(mysql_field_name($result, $i))."</a></th>";
+}
 
 echo "<th></th></tr>";
 echo "<tr>";
 
-      for ($i = 0; $i < mysql_num_fields($result)-2; $i++) {
-    echo "<td><input type='text' size='$kentankoko[$i]' name='haku[$i]' value = '$haku[$i]'></td>";
-      }
+for ($i = 0; $i < mysql_num_fields($result)-2; $i++) {
+  echo "<td><input type='text' size='$kentankoko[$i]' name='haku[$i]' value = '$haku[$i]'></td>";
+}
 echo "<td><input type='submit' value='".t("Etsi")."'></td></tr>";
 
-      $row = 0;
-      while ($maksurow=mysql_fetch_array ($result)) {
+$row = 0;
+while ($maksurow=mysql_fetch_array($result)) {
 
   for ($i=0; $i<mysql_num_fields($result)-2; $i++) {
-    if (mysql_field_name($result,$i) == 'laskunro') {
+    if (mysql_field_name($result, $i) == 'laskunro') {
       $tunnus = $maksurow[mysql_num_fields($result)-2];
       echo "<td><a href=\"../muutosite.php?tee=E&tunnus=$tunnus\">$maksurow[$i]</a></td>";
-    } elseif (mysql_field_name($result,$i) == 'nimi') {
+    } elseif (mysql_field_name($result, $i) == 'nimi') {
       /* linkki CRM:aan */
       echo "<td><a href=\"../crm/asiakasmemo.php?ytunnus=$maksurow[ytunnus]\">$maksurow[$i]</a></td>";
     } else {
@@ -79,11 +79,11 @@ echo "<td><input type='submit' value='".t("Etsi")."'></td></tr>";
 }
 
 echo "</tr></table></form>";
-if($row >= $maxrows) {
+if ($row >= $maxrows) {
   echo "<br>".t("Kysely on liian iso esitett‰v‰ksi, ainoastaan ensimm‰iset")." $maxrows ".t("rivi‰ on n‰kyvill‰. Ole hyv‰, ja rajaa hakuehtoja").".";
 }
 
 //echo "Query: ". $query;
-      include "../inc/footer.inc";
+include "../inc/footer.inc";
 
 echo "<script LANGUAGE='JavaScript'>document.forms[0][0].focus()</script>";

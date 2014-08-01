@@ -1,7 +1,7 @@
 <?php
 
 if (strpos($_SERVER['SCRIPT_NAME'], "varastopaikka_aineistolla.php")  !== FALSE) {
-  require("inc/parametrit.inc");
+  require "inc/parametrit.inc";
   echo "<font class='head'>".t("Tuotteen varastopaikkojen muutos aineistolla")."</font><hr>";
 }
 
@@ -146,7 +146,7 @@ if ($tee == "AJA") {
           }
         }
 
-        if (in_array('', array($tiedr[2],$tiedr[3]))) $virhe = 1;
+        if (in_array('', array($tiedr[2], $tiedr[3]))) $virhe = 1;
         if ($tee == "PALATTIIN_MUUSTA") $tee = "AJA";
       }
     }
@@ -186,7 +186,7 @@ if ($tee == "AJA") {
       if ($asaldo != 0) {
         $tee = "N";
         $kutsuja = "varastopaikka_aineistolla.php";
-        require("muuvarastopaikka.php");
+        require "muuvarastopaikka.php";
       }
 
       // Merkataan vielä lähdevarastopaikka poistettavaksi jos se ei ole oletuspaikka
@@ -233,7 +233,7 @@ if ($tee == "") {
       <table>
       <tr><th>".t("Valitse kohdevarasto").":</th>
       <td><select name='varasto_valinta'><option value = ''>".t("Ei varastoa")."</option>";
-  while($varasto = mysql_fetch_assoc($vresult)) {
+  while ($varasto = mysql_fetch_assoc($vresult)) {
     $sel = "";
     if ($varasto_valinta != '' and $varasto_valinta == $varasto['tunnus']) $sel = "SELECTED";
     echo "<option value='{$varasto['tunnus']}' $sel>{$varasto['nimitys']}</option>";

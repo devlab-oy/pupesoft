@@ -26,7 +26,7 @@ if (mysql_field_name($result, $i) == "oletus_suoravel_pankki") { //suoraveloitus
   $vresult = pupe_query($query);
 
   $sel="";
-  if((int)$trow[$i] == 0) {
+  if ((int)$trow[$i] == 0) {
     $sel="selected";
   }
   $ulos = "<td><select name='$nimi'><option value = '0' $sel>".t("Ei suoriteta automaattisesti");
@@ -93,11 +93,11 @@ if (mysql_field_name($result, $i) == "oletus_hyvak1" and $alias_set == "KAYTTAJA
   $jatko = 0;
 }
 
-  if ((mysql_field_name($result, $i) == "oletus_hyvak1" and $alias_set != "KAYTTAJA") or
-    (mysql_field_name($result, $i) == "oletus_hyvak2") or
-    (mysql_field_name($result, $i) == "oletus_hyvak3") or
-    (mysql_field_name($result, $i) == "oletus_hyvak4") or
-    (mysql_field_name($result, $i) == "oletus_hyvak5")) { //hyväksyjät
+if ((mysql_field_name($result, $i) == "oletus_hyvak1" and $alias_set != "KAYTTAJA") or
+  (mysql_field_name($result, $i) == "oletus_hyvak2") or
+  (mysql_field_name($result, $i) == "oletus_hyvak3") or
+  (mysql_field_name($result, $i) == "oletus_hyvak4") or
+  (mysql_field_name($result, $i) == "oletus_hyvak5")) { //hyväksyjät
 
   $query = "SELECT kuka, nimi
             FROM kuka
@@ -150,7 +150,7 @@ if (mysql_field_name($result, $i) == "nimi" and $alias_set == "KAYTTAJA") {
   $jatko = 0;
 }
 
-  if (mysql_field_name($result, $i) == "kustannuspaikka") { //kustannuspaikat
+if (mysql_field_name($result, $i) == "kustannuspaikka") { //kustannuspaikat
   $query = "SELECT tunnus, nimi, koodi
             FROM kustannuspaikka
             WHERE yhtio   = '$kukarow[yhtio]'
@@ -293,7 +293,7 @@ if (mysql_field_name($result, $i) == 'kuljetus') {
     $ulos .= "<select name = '{$nimi}'>";
     $ulos .= "<option value=''>".t("Ei oletustoimitustapaa")."</option>";
 
-    while($toimtaparow  = mysql_fetch_array($toimtapares)) {
+    while ($toimtaparow  = mysql_fetch_array($toimtapares)) {
       $sel = $trow[$i] == $toimtaparow['selite'] ? "selected" : "";
       $ulos .= "<option value='{$toimtaparow['selite']}' {$sel}>".trim("{$toimtaparow['selite']} {$toimtaparow['selitetark']}")."</option>";
     }
@@ -537,17 +537,17 @@ if (mysql_field_name($result, $i) == "suoratoimitus") {
     $st_opt  .= (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'Y', 'W', 'J', 'Q', 'B', 'C')))      ? '1' : '0';       // toka merkki = asiakkaalle
 
     switch ($st_opt) {
-      case '11': // sallittu molemmille
-        $ulos .= "<option value='' >"             .t("Suoratoimitukset sallittu asiakkaalle ja varastoon")."</option>";
-        $ulos .= "<option value='U' {$sel['U']} >".t("Suoratoimitukset sallittu asiakkaalle")."</option>";
-        $ulos .= "<option value='X' {$sel['X']} >".t("Suoratoimitukset sallittu varastoon")."</option>";
-        break;
-      case '10': // sallittu vain varastoon
-        $ulos .= "<option value='' >"             .t("Suoratoimitukset sallittu varastoon")."</option>";
-        break;
-      case '01': //sallittu vain asiakkaalle
-        $ulos .= "<option value='' >"             .t("Suoratoimitukset sallittu asiakkaalle")."</option>";
-        break;
+    case '11': // sallittu molemmille
+      $ulos .= "<option value='' >"             .t("Suoratoimitukset sallittu asiakkaalle ja varastoon")."</option>";
+      $ulos .= "<option value='U' {$sel['U']} >".t("Suoratoimitukset sallittu asiakkaalle")."</option>";
+      $ulos .= "<option value='X' {$sel['X']} >".t("Suoratoimitukset sallittu varastoon")."</option>";
+      break;
+    case '10': // sallittu vain varastoon
+      $ulos .= "<option value='' >"             .t("Suoratoimitukset sallittu varastoon")."</option>";
+      break;
+    case '01': //sallittu vain asiakkaalle
+      $ulos .= "<option value='' >"             .t("Suoratoimitukset sallittu asiakkaalle")."</option>";
+      break;
     }
     $ulos .= "<option value='-' {$sel['-']} >".t("Suoratoimitukset kielletty")."</option>";
     $ulos .= "</select></td>";
@@ -578,7 +578,7 @@ if (mysql_field_name($result, $i) == "edi_kuvaus") {
 
     $hae = "option_edi_kuvaus";
 
-    require("inc/sahkoinen_tilausliitanta.inc");
+    require "inc/sahkoinen_tilausliitanta.inc";
   }
 
   $ulos .= "</select></td>";

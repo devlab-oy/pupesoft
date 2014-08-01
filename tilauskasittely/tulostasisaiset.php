@@ -1,8 +1,8 @@
 <?php
 
-require('../inc/parametrit.inc');
+require '../inc/parametrit.inc';
 
- echo "<font class='head'>".t("Tulosta sisäisiä laskuja").":</font><hr><br>";
+echo "<font class='head'>".t("Tulosta sisäisiä laskuja").":</font><hr><br>";
 
 if (isset($tee) and $tee == 'TULOSTA') {
 
@@ -34,7 +34,7 @@ if (isset($tee) and $tee == 'TULOSTA') {
     $where .= " and vienti = '' ";
   }
 
-  require_once("tilauskasittely/tulosta_lasku.inc");
+  require_once "tilauskasittely/tulosta_lasku.inc";
 
   //hateaan laskun kaikki tiedot
   $query = "SELECT *
@@ -149,4 +149,4 @@ if (!isset($tee) or $tee == '') {
 
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

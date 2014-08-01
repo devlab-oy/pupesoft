@@ -8,8 +8,8 @@ if (php_sapi_name() != 'cli') {
   die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 }
 
-require ("../inc/connect.inc");
-require ("../inc/functions.inc");
+require "../inc/connect.inc";
+require "../inc/functions.inc";
 
 // Tarvitaan 3 parametria
 // 1 = Yhtio
@@ -132,7 +132,7 @@ while ($asiakasrow = mysql_fetch_array($asiakasres)) {
   $kaatotilirow = mysql_fetch_assoc($kaatotilires);
 
   // Lasketaan luottotilanne nyt
-  $luottotilanne_nyt = round($asiakasrow["luottoraja"] - $avoimetlaskutrow["laskuavoinsaldo"] + $kaatotilirow["summa"] - $avoimettilauksetrow["tilausavoinsaldo"],2);
+  $luottotilanne_nyt = round($asiakasrow["luottoraja"] - $avoimetlaskutrow["laskuavoinsaldo"] + $kaatotilirow["summa"] - $avoimettilauksetrow["tilausavoinsaldo"], 2);
 
   // Näytä vain asiakkaat, jotka ovat täyttäneet $luottorajaprosentti prosenttia luottorajasta tai sen yli
   if ((1-($luottotilanne_nyt / $asiakasrow["luottoraja"]))*100 < $luottorajaprosentti) {
@@ -159,5 +159,5 @@ $content_body .= "</body>";
 $content_body .= "</html>";
 
 if ($laskuri > 0) {
-  require ("../inc/sahkoposti.inc");
+  require "../inc/sahkoposti.inc";
 }

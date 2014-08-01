@@ -228,8 +228,8 @@ $monivalintalaatikot = array();
 
 $query = "SELECT tunnus
           FROM kustannuspaikka
-          WHERE yhtio = '{$kukarow["yhtio"]}'
-          AND tyyppi = 'K'
+          WHERE yhtio   = '{$kukarow["yhtio"]}'
+          AND tyyppi    = 'K'
           AND kaytossa != 'E'
           LIMIT 1";
 $result = pupe_query($query);
@@ -240,8 +240,8 @@ if (mysql_num_rows($result) > 0) {
 
 $query = "SELECT tunnus
           FROM kustannuspaikka
-          WHERE yhtio = '{$kukarow["yhtio"]}'
-          AND tyyppi = 'O'
+          WHERE yhtio   = '{$kukarow["yhtio"]}'
+          AND tyyppi    = 'O'
           AND kaytossa != 'E'
           LIMIT 1";
 $result = pupe_query($query);
@@ -252,8 +252,8 @@ if (mysql_num_rows($result) > 0) {
 
 $query = "SELECT tunnus
           FROM kustannuspaikka
-          WHERE yhtio = '{$kukarow["yhtio"]}'
-          AND tyyppi = 'P'
+          WHERE yhtio   = '{$kukarow["yhtio"]}'
+          AND tyyppi    = 'P'
           AND kaytossa != 'E'
           LIMIT 1";
 $result = pupe_query($query);

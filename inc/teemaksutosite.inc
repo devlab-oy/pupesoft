@@ -230,7 +230,7 @@ if ($teemaksutosite) {
   $query = "UPDATE tiliotedata
             SET kasitelty = now(),
             tiliointitunnus = {$_tiliointi_id}
-            WHERE tunnus = {$tiliotedataid}";
+            WHERE tunnus    = {$tiliotedataid}";
   $dummyresult = pupe_query($query);
 
   $query = "UPDATE tiliotedata

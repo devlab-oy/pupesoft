@@ -1203,16 +1203,40 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
     $ale_query_select_lisa = generoi_alekentta_select('erikseen', 'O');
 
     //Listataan tilauksessa olevat tuotteet
-    $query = "SELECT tilausrivi.nimitys,
-              concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
+    $query = "SELECT
+              tilausrivi.nimitys,
+              concat_ws(' ', tilausrivi.hyllyalue,
+                tilausrivi.hyllynro,
+                tilausrivi.hyllyvali,
+                tilausrivi.hyllytaso) paikka,
               tilausrivi.tuoteno,
               tuotteen_toimittajat.toim_tuoteno,
               tuotteen_toimittajat.toim_nimitys,
               tuotteen_toimittajat.valuutta,
               tilausrivi.tilkpl tilattu,
-              round(tilausrivi.tilkpl*if (tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4) tilattu_ulk,
-              round((tilausrivi.varattu+tilausrivi.jt)*tilausrivi.hinta*if (tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*{$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
-              tilausrivi.alv, tilausrivi.toimaika, tilausrivi.kerayspvm, tilausrivi.uusiotunnus, tilausrivi.tunnus, tilausrivi.perheid, tilausrivi.perheid2, tilausrivi.hinta, {$ale_query_select_lisa} tilausrivi.varattu varattukpl, tilausrivi.kommentti,
+              round(tilausrivi.tilkpl
+                * if (tuotteen_toimittajat.tuotekerroin = 0
+                  OR tuotteen_toimittajat.tuotekerroin is NULL,
+                    1, tuotteen_toimittajat.tuotekerroin),
+                    4) tilattu_ulk,
+              round((tilausrivi.varattu + tilausrivi.jt)
+                * tilausrivi.hinta
+                * if (tuotteen_toimittajat.tuotekerroin = 0
+                  OR tuotteen_toimittajat.tuotekerroin IS NULL,
+                    1,
+                    tuotteen_toimittajat.tuotekerroin)
+                * {$query_ale_lisa}, '$yhtiorow[hintapyoristys]') rivihinta,
+              tilausrivi.alv,
+              tilausrivi.toimaika,
+              tilausrivi.kerayspvm,
+              tilausrivi.uusiotunnus,
+              tilausrivi.tunnus,
+              tilausrivi.perheid,
+              tilausrivi.perheid2,
+              tilausrivi.hinta,
+              {$ale_query_select_lisa}
+              tilausrivi.varattu varattukpl,
+              tilausrivi.kommentti,
               $sorttauskentta,
               tilausrivi.var,
               tilausrivi.var2,
@@ -1223,6 +1247,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               tuote.kehahin keskihinta,
               tuote.sarjanumeroseuranta,
               tuotteen_toimittajat.ostohinta,
+              if(tuotteen_toimittajat.osto_era = 0, 1, tuotteen_toimittajat.osto_era) AS osto_era,
               tuotteen_toimittajat.valuutta,
               tilausrivi.erikoisale,
               tilausrivi.ale1,
@@ -1238,11 +1263,20 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               ta2.selite p3,
               ta2.selitetark p3s
               FROM tilausrivi
-              LEFT JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
-              LEFT JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
-              LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki > 0 AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus)
-              LEFT JOIN tuotteen_avainsanat as ta1 on (ta1.yhtio=tuote.yhtio and ta1.tuoteno=tuote.tuoteno and ta1.laji='pakkauskoko2' )
-              LEFT JOIN tuotteen_avainsanat as ta2 on (ta2.yhtio=tuote.yhtio and ta2.tuoteno=tuote.tuoteno and ta2.laji='pakkauskoko3')
+              LEFT JOIN tuote ON tilausrivi.yhtio = tuote.yhtio
+                AND tilausrivi.tuoteno = tuote.tuoteno
+              LEFT JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio
+                AND tuote.tuoteno = tuotteen_toimittajat.tuoteno
+                AND tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
+              LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+                AND tilausrivin_lisatiedot.tilausrivilinkki > 0
+                AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus)
+              LEFT JOIN tuotteen_avainsanat AS ta1 ON (ta1.yhtio = tuote.yhtio
+                AND ta1.tuoteno = tuote.tuoteno
+                AND ta1.laji = 'pakkauskoko2' )
+              LEFT JOIN tuotteen_avainsanat AS ta2 ON (ta2.yhtio = tuote.yhtio
+                AND ta2.tuoteno = tuote.tuoteno
+                AND ta2.laji = 'pakkauskoko3')
               WHERE tilausrivi.otunnus = '$kukarow[kesken]'
               and tilausrivi.yhtio     = '$kukarow[yhtio]'
               and tilausrivi.tyyppi    = 'O'

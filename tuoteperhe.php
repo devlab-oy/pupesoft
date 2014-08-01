@@ -122,11 +122,11 @@ if ($tee == "KOPIOI") {
               tuoteperhe.isatuoteno isa
               FROM tuote
               LEFT JOIN tuoteperhe ON (tuote.yhtio = tuoteperhe.yhtio
-               AND tuote.tuoteno = tuoteperhe.isatuoteno
+               AND tuote.tuoteno     = tuoteperhe.isatuoteno
                AND tuoteperhe.tyyppi = '$hakutyyppi')
-              WHERE tuote.tuoteno = '$kop_isatuo'
-              AND tuote.yhtio = '$kukarow[yhtio]'
-              AND tuote.status NOT IN ('P','X')
+              WHERE tuote.tuoteno    = '$kop_isatuo'
+              AND tuote.yhtio        = '$kukarow[yhtio]'
+              AND tuote.status       NOT IN ('P','X')
               AND tuoteperhe.isatuoteno is null";
     $result = pupe_query($query);
 
@@ -332,7 +332,7 @@ if ($tee == 'LISAA' and $oikeurow['paivitys'] == '1') {
       $query   = "SELECT *
                   FROM tuote
                   WHERE tuoteno = '$isatuoteno'
-                  AND yhtio = '$kukarow[yhtio]'";
+                  AND yhtio     = '$kukarow[yhtio]'";
       $res = pupe_query($query);
       $isatrow = mysql_fetch_assoc($res);
 
@@ -347,7 +347,7 @@ if ($tee == 'LISAA' and $oikeurow['paivitys'] == '1') {
       $query = "SELECT *
                 FROM tuote
                 WHERE tuoteno = '$tuoteno'
-                AND yhtio = '$kukarow[yhtio]'";
+                AND yhtio     = '$kukarow[yhtio]'";
       $res = pupe_query($query);
       $laptrow = mysql_fetch_assoc($res);
 
@@ -456,18 +456,18 @@ if ($tee == 'TALLENNAFAKTA' and $oikeurow['paivitys'] == '1') {
   $isatuoteno = trim($isatuoteno);
 
   $query = "UPDATE tuoteperhe SET
-            fakta = '',
-            fakta2 = '',
-            omasivu = ''
+            fakta          = '',
+            fakta2         = '',
+            omasivu        = ''
             WHERE yhtio    = '$kukarow[yhtio]'
             and tyyppi     = '$hakutyyppi'
             and isatuoteno = '$isatuoteno'";
   $result = pupe_query($query);
 
   $query = "UPDATE tuoteperhe SET
-            fakta = '$fakta',
-            fakta2 = '$fakta2',
-            omasivu = '$omasivu'
+            fakta          = '$fakta',
+            fakta2         = '$fakta2',
+            omasivu        = '$omasivu'
             WHERE yhtio    = '$kukarow[yhtio]'
             and tyyppi     = '$hakutyyppi'
             and isatuoteno = '$isatuoteno'
@@ -519,7 +519,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
     $query  = "SELECT distinct isatuoteno
                FROM tuoteperhe
                WHERE yhtio = '$kukarow[yhtio]'
-               AND tyyppi = '$hakutyyppi'
+               AND tyyppi  = '$hakutyyppi'
                $lisa
                ORDER BY isatuoteno, tuoteno";
     $result = pupe_query($query);
@@ -681,9 +681,9 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       if ($toim == "PERHE") {
         $query = "SELECT ei_nayteta
                   FROM tuoteperhe
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  AND tyyppi = '$hakutyyppi'
-                  AND isatuoteno = '$isatuoteno'
+                  WHERE yhtio     = '$kukarow[yhtio]'
+                  AND tyyppi      = '$hakutyyppi'
+                  AND isatuoteno  = '$isatuoteno'
                   AND ei_nayteta != ''
                   ORDER BY isatuoteno, tuoteno
                   LIMIT 1";
@@ -710,10 +710,10 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 
       $query = "SELECT omasivu
                 FROM tuoteperhe
-                WHERE yhtio = '$kukarow[yhtio]'
-                AND tyyppi = '$hakutyyppi'
-                AND isatuoteno = '$isatuoteno'
-                AND omasivu != ''
+                WHERE yhtio     = '$kukarow[yhtio]'
+                AND tyyppi      = '$hakutyyppi'
+                AND isatuoteno  = '$isatuoteno'
+                AND omasivu    != ''
                 ORDER BY isatuoteno, tuoteno
                 LIMIT 1";
       $ressu = pupe_query($query);
@@ -1360,11 +1360,11 @@ elseif ($tee == "") {
               tuoteperhe.tunnus separator '<br>') AS tuotteet
             FROM tuoteperhe
             JOIN tuote ti ON (ti.yhtio = tuoteperhe.yhtio
-              AND ti.tuoteno = tuoteperhe.isatuoteno)
+              AND ti.tuoteno       = tuoteperhe.isatuoteno)
             JOIN tuote tl ON (tl.yhtio = tuoteperhe.yhtio
-              AND tl.tuoteno = tuoteperhe.tuoteno)
+              AND tl.tuoteno       = tuoteperhe.tuoteno)
             WHERE tuoteperhe.yhtio = '$kukarow[yhtio]'
-            AND tuoteperhe.tyyppi = '$hakutyyppi'
+            AND tuoteperhe.tyyppi  = '$hakutyyppi'
             $lisa1
             GROUP BY tuoteperhe.isatuoteno
             ORDER BY $lisalimit

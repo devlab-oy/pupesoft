@@ -602,9 +602,10 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
         header("Content-Length: ".filesize($pankkitiedostot_polku.basename($pankkifilenimi)));
       }
       else {
-        // Tässä on tarkoituksella monta spacea funktionimen ja avaavan kaarisulun välissä,
+        // Tässä on "//NO_MB_OVERLOAD"-kommentti
         // jotta UTF8-konversio ei osu tähän riviin
-        $_file_size = strlen($file);
+        $_file_size = strlen($file); //NO_MB_OVERLOAD
+
         header("Content-Length: {$_file_size}");
       }
     }

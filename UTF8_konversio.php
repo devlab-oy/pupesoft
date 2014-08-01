@@ -129,7 +129,7 @@ foreach ($files as $file) {
           $jsc = FALSE;
         }
 
-        if ($php and !$jsc) {
+        if ($php and !$jsc and stripos($rivi, "NO_MB_OVERLOAD") === FALSE) {
           $rivi = preg_replace('/([^_])strlen ?\(/',        '$1mb_strlen(',        $rivi);
           $rivi = preg_replace('/([^_])strpos ?\(/',        '$1mb_strpos(',        $rivi);
           $rivi = preg_replace('/([^_])strrpos ?\(/',       '$1mb_strrpos(',       $rivi);

@@ -1719,6 +1719,9 @@ if ($kasitellaan_tiedosto) {
               elseif ($table_mysql == 'tili' and $otsikko == 'OLETUS_ALV' and ($taulunrivit[$taulu][$eriviindex][$r] == "" or $taulunrivit[$taulu][$eriviindex][$r] == "NULL")) {
                 $query .= ", $otsikko = NULL ";
               }
+              elseif ($table_mysql == 'tuote' and $otsikko == 'MYYNTIHINTA' and $myyntihinnan_paivitys == 1) {
+                $query .= ", $otsikko = GREATEST(myyntihinta, {$taulunrivit[$taulu][$eriviindex][$r]})";
+              }
               elseif ($eilisataeikamuuteta == "") {
                 $query .= ", $otsikko = '{$taulunrivit[$taulu][$eriviindex][$r]}' ";
               }
@@ -2392,6 +2395,15 @@ if (!$cli and !isset($api_kentat)) {
           <option value='1'>".t("Asiakas-sarakkeessa asiakkaan tunnus")."</option>
           <option value='2'>".t("Asiakas-sarakkeessa asiakkaan toim_ovttunnus")."</option>
           <option value='3'>".t("Asiakas-sarakkeessa asiakkaan asiakasnumero")."</option>
+          </select></td>
+      </tr>";
+  }
+
+  if ($table == "tuote") {
+    echo "<tr><th>".t("Myyntihinnan p‰ivitys").":</th>
+          <td><select name='myyntihinnan_paivitys'>
+          <option value='1'>".t("P‰ivitet‰‰n myyntihinta vain jos suurempi kuin nykyinen")."</option>
+          <option value='2'>".t("P‰ivitet‰‰n myyntihinta aina")."</option>
           </select></td>
       </tr>";
   }

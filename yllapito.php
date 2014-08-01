@@ -1264,8 +1264,8 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
 
   if (strlen($ojarj) > 0) {
     list($ojar, $osuu) = explode("_", $ojarj);
-    $jarjestys = "$ojar $osuu ";
-  }
+      $jarjestys = "$ojar $osuu ";
+    }
   else {
     $jarjestys = "{$toim}.tunnus";
   }
@@ -1854,6 +1854,9 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
           break;
         case "printteri10":
           $otsikko = t("Lämpösiirto");
+          break;
+        case "isa_varasto":
+          $otsikko = t("Isävarasto");
           break;
         default:
           if (isset($mysqlaliasarraysetti) and isset($mysqlaliasarray[$mysqlaliasarraysetti][mysql_field_name($result, $i)])) {

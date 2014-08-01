@@ -1,6 +1,6 @@
 <?php
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Korjaa keräys").":</font><hr>";
 
@@ -67,9 +67,9 @@ if ($tee == '') {
   // tehdään etsi valinta
   echo "<form name='find' method='post'>".t("Etsi tilausta").": <input type='text' name='etsi'><input type='Submit' value='".t("Etsi")."'></form><br><br>";
 
-  $kka = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-  $vva = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-  $ppa = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+  $kka = date("m", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+  $vva = date("Y", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+  $ppa = date("d", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 
   $haku = '';
 
@@ -80,9 +80,9 @@ if ($tee == '') {
   if (is_numeric($etsi)) {
     $haku = "and lasku.tunnus = '".mysql_real_escape_string($etsi)."'";
 
-    $kka = date("m",mktime(0, 0, 0, date("m"), date("d")-14, date("Y")));
-    $vva = date("Y",mktime(0, 0, 0, date("m"), date("d")-14, date("Y")));
-    $ppa = date("d",mktime(0, 0, 0, date("m"), date("d")-14, date("Y")));
+    $kka = date("m", mktime(0, 0, 0, date("m"), date("d")-14, date("Y")));
+    $vva = date("Y", mktime(0, 0, 0, date("m"), date("d")-14, date("Y")));
+    $ppa = date("d", mktime(0, 0, 0, date("m"), date("d")-14, date("Y")));
   }
 
   $kkl = date("m");
@@ -135,4 +135,4 @@ if ($tee == '') {
   }
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

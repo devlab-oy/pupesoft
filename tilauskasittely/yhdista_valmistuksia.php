@@ -1,22 +1,22 @@
 <?php
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 js_popup();
 
 echo "<font class='head'>".t("Yhdist‰ valmistuksia").":</font><hr>";
 
 if ($tee == 'NAYTATILAUS') {
-  require ("raportit/naytatilaus.inc");
+  require "raportit/naytatilaus.inc";
   echo "<hr>";
   $tee = "VALITSE";
 }
 
-if($ohitus == "OHITA") {
+if ($ohitus == "OHITA") {
   $valmistettavat = implode(",", $valmistettavat);
   $tee = "VALITSE";
 }
 
-if($tee=='YHDISTA') {
+if ($tee=='YHDISTA') {
   //K‰yd‰‰n l‰pi rivit
 
 
@@ -29,7 +29,7 @@ if($tee=='YHDISTA') {
     $result = mysql_query($query) or pupe_error($query);
     $laskurow    = mysql_fetch_array($result);
 
-    if($tilaukseen > 0) {
+    if ($tilaukseen > 0) {
 
       //  Tarkastetaan ett‰ tunnus on oikein
       $query = "SELECT tunnus
@@ -38,7 +38,7 @@ if($tee=='YHDISTA') {
                 and  tunnus = '$tilaukseen'
                 and tila    = 'V'";
       $result = mysql_query($query) or pupe_error($query);
-      if(mysql_num_rows($result) == 0) {
+      if (mysql_num_rows($result) == 0) {
         die("<font class='error'>VIRHE!!! Tilaus ei ole valmistus!</font>");
       }
 
@@ -81,7 +81,7 @@ if($tee=='YHDISTA') {
     }
 
 
-    foreach($valmistettavat as $rivitunnus) {
+    foreach ($valmistettavat as $rivitunnus) {
       //Otetaan alkuper‰isen otsikon numero talteen
       $query = "SELECT otunnus
                 FROM tilausrivi
@@ -125,7 +125,7 @@ if($tee=='YHDISTA') {
     }
 
 
-    if($yhtiorow["valmistusten_yhdistaminen"] == "P") {
+    if ($yhtiorow["valmistusten_yhdistaminen"] == "P") {
       //  Testataan saataisiinko jotain perheit‰ yhdistetty‰
       $query = "SELECT group_concat(tunnus) tunnukset, count(*) rivei
                 FROM tilausrivi
@@ -133,8 +133,8 @@ if($tee=='YHDISTA') {
                 GROUP BY tuoteno
                 HAVING rivei > 1";
       $result = mysql_query($query) or pupe_error($query);
-      if(mysql_num_rows($result)>0) {
-        while($row = mysql_fetch_array($result)) {
+      if (mysql_num_rows($result)>0) {
+        while ($row = mysql_fetch_array($result)) {
 
           //  suoritetan vertailu by tuoteperhe
           $query = "SELECT tuoteno, perheid,
@@ -153,17 +153,17 @@ if($tee=='YHDISTA') {
           $edstringi = $edperheid = "";
           $yhdistettavat = array();
           $yhdista = array();
-          while($srow = mysql_fetch_array($sresult)) {
+          while ($srow = mysql_fetch_array($sresult)) {
 
             //  T‰nne menn‰‰n jos vaihdetaan summausta ja meill‰ on jotain yhdistett‰v‰‰
-            if($edstringi != "" and $edstringi != $srow["stringi"] and count($yhdista) > 1) {
+            if ($edstringi != "" and $edstringi != $srow["stringi"] and count($yhdista) > 1) {
               $yhdistettavat[] = implode(',', $yhdista);
               $yhdista = array();
             }
 
             //  Jos meill‰ on sama stringi kuin edellinen voidaan yhdist‰‰
-            if($edstringi == $srow["stringi"]) {
-              if(count($yhdista) == 0) {
+            if ($edstringi == $srow["stringi"]) {
+              if (count($yhdista) == 0) {
                 $yhdista[] = $edperheid;
               }
               $yhdista[] = $srow["perheid"];
@@ -175,20 +175,20 @@ if($tee=='YHDISTA') {
             $edperheid = $srow["perheid"];
           }
 
-          if(count($yhdista) > 1) {
+          if (count($yhdista) > 1) {
             $yhdistettavat[] = implode(',', $yhdista);
             $yhdista = array();
           }
 
           //  Ou jea! Miell‰ on sopivat reseptit summataanpas nm‰ nyt sitten yhteen!
-          if(count($yhdistettavat) > 0) {
-            foreach($yhdistettavat as $tunnukset) {
+          if (count($yhdistettavat) > 0) {
+            foreach ($yhdistettavat as $tunnukset) {
 
               $pilkunpaikka = strpos($tunnukset, ",");
               $ekaperhe = substr($tunnukset, 0, $pilkunpaikka);
               $loput = substr($tunnukset, ($pilkunpaikka+1));
               //  tiedot varmasti ok?
-              if($ekaperhe > 0 and $loput != "") {
+              if ($ekaperhe > 0 and $loput != "") {
 
                 //  P‰ivitet‰‰n summa ekaan tietueeseen toinen tuhotaan! HUOM: t‰m‰ ei tajua mit‰‰n varastopaikoista, jos meill‰ on sama tuote 2 kertaa on myˆs suuri ongelma!
                 $query = "SELECT tuoteno, sum(kpl) kpl, sum(varattu) varattu, sum(jt) jt, sum(tilkpl) tilkpl, group_concat(if(kommentti='', NULL, kommentti)) kommentti
@@ -196,7 +196,7 @@ if($tee=='YHDISTA') {
                           WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$otunnus' and perheid IN ($tunnukset)
                           GROUP BY tuoteno";
                 $sresult = mysql_query($query) or pupe_error($query);
-                while($srow = mysql_fetch_array($sresult)) {
+                while ($srow = mysql_fetch_array($sresult)) {
 
                   //  P‰ivitet‰‰n ekan perheen tiedot
                   $query = "UPDATE tilausrivi SET
@@ -231,7 +231,7 @@ if($tee=='YHDISTA') {
     $tee = "";
   }
   else {
-    echo "<font class='error'>",t("Valitse ainakin 2 rivi‰ jotka aiot yhdist‰‰")."</font><br><br>";
+    echo "<font class='error'>", t("Valitse ainakin 2 rivi‰ jotka aiot yhdist‰‰")."</font><br><br>";
     $tee = "VALITSE";
     $valmistettavat = implode(",", $valmistettavat);
   }
@@ -258,7 +258,7 @@ if ($tee == "VALITSE") {
   $row    = mysql_fetch_array($result);
 
   for ($i=0; $i < mysql_num_fields($result); $i++) {
-    echo "<tr><th align='left'>" . t(mysql_field_name($result,$i)) ."</th><td>$row[$i]</td></tr>";
+    echo "<tr><th align='left'>" . t(mysql_field_name($result, $i)) ."</th><td>$row[$i]</td></tr>";
   }
   echo "</table><br>";
 
@@ -295,7 +295,7 @@ if ($tee == "VALITSE") {
   echo "  <input type='hidden' name='tee' value='YHDISTA'>
       <input type='hidden' name='toim'  value='$toim'>";
 
-  while ($prow = mysql_fetch_array ($presult)) {
+  while ($prow = mysql_fetch_array($presult)) {
     $linkki = "";
     $query = "SELECT fakta2
               FROM tuoteperhe
@@ -307,7 +307,7 @@ if ($tee == "VALITSE") {
               LIMIT 1";
     $faktares = mysql_query($query) or pupe_error($query);
 
-    if(mysql_num_rows($faktares) > 0) {
+    if (mysql_num_rows($faktares) > 0) {
       $faktarow = mysql_fetch_array($faktares);
       $id = uniqid();
       echo "<div id='div_$id' class='popup' style='width: 400px'>
@@ -317,7 +317,7 @@ if ($tee == "VALITSE") {
     }
 
     $kommentti = "";
-    if($prow["kommentti"] != "") {
+    if ($prow["kommentti"] != "") {
       $kommentti = "<br><font class='info'>$prow[kommentti]</font>";
     }
 
@@ -367,9 +367,9 @@ if ($tee == "VALITSE") {
   echo "<table><tr><th>".t("Yhdist‰ valitut valmistukseen").":</th>
       <td><input type='hidden' id='ohitus' name='ohitus' value=''><select name='tilaukseen' onchange = \"document.getElementById('ohitus').value='OHITA'; submit();\"><option value = ''>".t("Tee uusi valmistusajo")."</option>'";
 
-  if(mysql_num_rows($result) > 0) {
-    while($row = mysql_fetch_array($result)) {
-      if($tilaukseen == $row["tunnus"]) {
+  if (mysql_num_rows($result) > 0) {
+    while ($row = mysql_fetch_array($result)) {
+      if ($tilaukseen == $row["tunnus"]) {
         $sel = "SELECTED";
       }
       else {

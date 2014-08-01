@@ -21,8 +21,8 @@ else {
   ini_set("display_errors", 0);
 
   // otetaan tietokanta connect
-  require("inc/connect.inc");
-  require("inc/functions.inc");
+  require "inc/connect.inc";
+  require "inc/functions.inc";
 
   $kukarow['yhtio'] = (string) $argv[1];
   $kukarow['kuka']  = 'admin';
@@ -50,7 +50,7 @@ else {
       $ohjelma_moduli = "KARDEX";
 
       // Tallennetaan keräyserä
-      require('inc/tallenna_keraysera.inc');
+      require 'inc/tallenna_keraysera.inc';
 
       // Nämä tilaukset tallennettin keräyserään
       if (isset($lisatyt_tilaukset) and count($lisatyt_tilaukset) > 0) {
@@ -95,10 +95,10 @@ else {
       $reittietikettitulostin = $gen_ker_row['printteri8'];
 
       // Tulostetaan kollilappu
-      require('inc/tulosta_reittietiketti.inc');
+      require 'inc/tulosta_reittietiketti.inc';
 
       // Lähetetään tiedot kardexiin
-      require("inc/kardex_send.inc");
+      require "inc/kardex_send.inc";
     }
   }
 }

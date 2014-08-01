@@ -1,6 +1,6 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 enable_ajax();
 
@@ -108,7 +108,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and isset($annett
     die ("<font class='error'><br>".t("Tiedosto on tyhjä")."!</font>");
   }
 
-  require_once ('excel_reader/reader.php');
+  require_once 'excel_reader/reader.php';
 
   // ExcelFile
   $data = new Spreadsheet_Excel_Reader();
@@ -246,16 +246,16 @@ if ($tee == "synkronoi") {
 
   $ok = FALSE;
 
-  if ($file = fopen("http://api.devlab.fi/referenssiviranomaistuotteet.sql","r")) {
+  if ($file = fopen("http://api.devlab.fi/referenssiviranomaistuotteet.sql", "r")) {
     $ok = TRUE;
   }
-  elseif ($file = fopen("http://10.0.1.2/referenssiviranomaistuotteet.sql","r")) {
+  elseif ($file = fopen("http://10.0.1.2/referenssiviranomaistuotteet.sql", "r")) {
     $ok = TRUE;
   }
 
   if (!$ok) {
     echo t("Tiedoston avaus epäonnistui")."!";
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 
@@ -314,16 +314,16 @@ if ($tee == "synkronoi" or $tee == "synkronoimaat") {
 
   $ok = FALSE;
 
-  if ($file = fopen("http://api.devlab.fi/referenssimaat.sql","r")) {
+  if ($file = fopen("http://api.devlab.fi/referenssimaat.sql", "r")) {
     $ok = TRUE;
   }
-  elseif ($file = fopen("http://10.0.1.2/referenssimaat.sql","r")) {
+  elseif ($file = fopen("http://10.0.1.2/referenssimaat.sql", "r")) {
     $ok = TRUE;
   }
 
   if (!$ok) {
     echo t("Tiedoston avaus epäonnistui")."!";
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 
@@ -402,4 +402,4 @@ if ($tee == '') {
 
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

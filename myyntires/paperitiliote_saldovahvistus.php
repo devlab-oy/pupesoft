@@ -1,6 +1,6 @@
 <?php
 
-require('pdflib/phppdflib.class.php');
+require 'pdflib/phppdflib.class.php';
 
 function hae_saldovahvistus_pdf($saldovahvistus) {
   global $kukarow, $yhtiorow, $pdf, $kala, $sivu, $norm, $pieni, $kieli, $bold, $lask, $rectparam, $sivu_numero_obj_ids;
@@ -106,7 +106,7 @@ function alku($saldovahvistus) {
     $kala = 650;
   }
 
-  return($firstpage);
+  return $firstpage;
 }
 
 function rivit($firstpage, $rows, $saldovahvistus) {
@@ -155,7 +155,7 @@ function rivi($firstpage, $row, $saldovahvistus) {
 
   $kala = $kala - 13;
   $lask++;
-  return($firstpage);
+  return $firstpage;
 }
 
 function loppu($firstpage, $saldovahvistus) {

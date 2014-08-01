@@ -11,21 +11,21 @@ if (php_sapi_name() == 'cli') {
 }
 
 if (isset($_POST["tee"])) {
-  if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
-  if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
 // T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta
 $useslave = 2;
 
 if (!$php_cli) {
-  require("../inc/parametrit.inc");
+  require "../inc/parametrit.inc";
 
   ini_set("memory_limit", "2G");
 }
 else {
-  require_once("../inc/functions.inc");
-  require_once("../inc/connect.inc");
+  require_once "../inc/functions.inc";
+  require_once "../inc/connect.inc";
 
   ini_set("memory_limit", "2G");
 
@@ -95,7 +95,7 @@ if (!$php_cli) {
   echo "<input type='hidden' name='supertee' value='RAPORTOI'>";
 
   $monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI");
-  require ("tilauskasittely/monivalintalaatikot.inc");
+  require "tilauskasittely/monivalintalaatikot.inc";
 
   if (isset($osasto_tyhjat) and $osasto_tyhjat != "") {
     $rukOchk = "CHECKED";
@@ -149,11 +149,11 @@ if (!$php_cli) {
   }
 
   echo "<tr>";
-  echo "<th valign=top>",t("Tuoterajaus"),":</th><td>";
+  echo "<th valign=top>", t("Tuoterajaus"), ":</th><td>";
   echo "<select name='epakur'>";
-  echo "<option value='kaikki'$epakur_chk1>",t("N‰yt‰ kaikki tuotteet"),"</option>";
-  echo "<option value='epakur'$epakur_chk2>",t("N‰yt‰ vain ep‰kurantit tuotteet"),"</option>";
-  echo "<option value='ei_epakur'$epakur_chk3>",t("N‰yt‰ varastonarvoon vaikuttavat tuotteet"),"</option>";
+  echo "<option value='kaikki'$epakur_chk1>", t("N‰yt‰ kaikki tuotteet"), "</option>";
+  echo "<option value='epakur'$epakur_chk2>", t("N‰yt‰ vain ep‰kurantit tuotteet"), "</option>";
+  echo "<option value='ei_epakur'$epakur_chk3>", t("N‰yt‰ varastonarvoon vaikuttavat tuotteet"), "</option>";
   echo "</select>";
   echo "</td></tr>";
 
@@ -177,7 +177,7 @@ if (!$php_cli) {
     $sel4 = "SELECTED";
   }
 
-  echo "<th valign=top>",t("Saldorajaus"),":</th>";
+  echo "<th valign=top>", t("Saldorajaus"), ":</th>";
   echo "<td>
       <select name='tyyppi'>
       <option value='A' $sel1>".t("N‰ytet‰‰n tuotteet joilla on saldoa")."</option>
@@ -200,7 +200,7 @@ if (!$php_cli) {
     $sel2 = "SELECTED";
   }
 
-  echo "<th valign=top>",t("Varausrajaus"),":</th>";
+  echo "<th valign=top>", t("Varausrajaus"), ":</th>";
   echo "<td>
       <select name='varatturajaus'>
       <option value=''>".t("Ei rajausta")."</option>
@@ -252,11 +252,11 @@ if (!$php_cli) {
   echo "</td>";
   echo "</tr>";
 
-  echo "<tr><th>",t("Statusrajaus"),":</th>";
+  echo "<tr><th>", t("Statusrajaus"), ":</th>";
 
   $result = t_avainsana("S");
 
-  echo "<td><select name='status'><option value=''>",t("Kaikki"),"</option>";
+  echo "<td><select name='status'><option value=''>", t("Kaikki"), "</option>";
 
   while ($statusrow = mysql_fetch_assoc($result)) {
     $sel = '';
@@ -267,7 +267,7 @@ if (!$php_cli) {
 
   echo "</select></td></tr>";
 
-  echo "<tr><th>",t("N‰yt‰ kiertonopeus sek‰ viimeisin myynti ja kulutus"),":</th>";
+  echo "<tr><th>", t("N‰yt‰ kiertonopeus sek‰ viimeisin myynti ja kulutus"), ":</th>";
 
   echo "<td>";
 
@@ -297,7 +297,7 @@ if (!$php_cli) {
 
   $varastot = (isset($_POST['varastot']) && is_array($_POST['varastot'])) ? $_POST['varastot'] : array();
 
-      while ($varow = mysql_fetch_assoc($vares)) {
+  while ($varow = mysql_fetch_assoc($vares)) {
     $sel = '';
     if (in_array($varow['tunnus'], $varastot)) {
       $sel = 'checked';
@@ -396,7 +396,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
   if (!isset($variaatiosummaus)) $variaatiosummaus = "";
   if (!isset($ylaraja)) $ylaraja = "";
 
-  ################## Jos summaustaso on paikka, otetaan paikat mukaan selectiin ##################
+  //################# Jos summaustaso on paikka, otetaan paikat mukaan selectiin ##################
   $paikka_lisa1 = "";
   $paikka_lisa2 = "";
 
@@ -412,7 +412,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
                 tuotepaikat.hyllytaso";
   }
 
-  ##################  Sorttausj‰rjestykset ##################
+  //#################  Sorttausj‰rjestykset ##################
   $order_lisa    = "";
   $jarjestys_sel  = "";
   $jarjestys_join = "";
@@ -436,7 +436,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
     $order_extra = 'tuoteno';
   }
 
-  ################## laitetaan varastopaikkojen tunnukset mysql-muotoon ##################
+  //################# laitetaan varastopaikkojen tunnukset mysql-muotoon ##################
   $varastontunnukset = "";
   $varastontunnukset1 = "";
   $varastontunnukset2 = "";
@@ -457,7 +457,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
     $order_lisa = "osasto, try, $order_extra";
   }
 
-  ################## tuoterajauksia ##################
+  //################# tuoterajauksia ##################
   $tuote_lisa  = "";
 
   if (isset($epakur) and $epakur == 'epakur') {
@@ -471,7 +471,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
     $tuotteet = explode("\n", $tuotteet_lista);
     $tuoterajaus = "";
 
-    foreach($tuotteet as $tuote) {
+    foreach ($tuotteet as $tuote) {
       if (trim($tuote) != '') {
         $tuoterajaus .= "'".trim($tuote)."',";
       }
@@ -484,12 +484,12 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
     $tuote_lisa .= " and tuote.status = '".(string) $status."' ";
   }
 
-  ################## monivalintalaatikoiden rajaukset ##################
+  //################# monivalintalaatikoiden rajaukset ##################
   if ($lisa != "") {
     $tuote_lisa .= $lisa;
   }
 
-  ################## varattu-rajaukset ##################
+  //################# varattu-rajaukset ##################
   if (isset($varatturajaus) and $varatturajaus != "") {
     $query = "SELECT group_concat(distinct concat('\'',tuoteno,'\'')) varatut_tuotteet
               FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_varattu)
@@ -517,7 +517,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
     }
   }
 
-  ################## lis‰ehtoja ##################
+  //################# lis‰ehtoja ##################
   $where_lisa  = "";
 
   if (isset($tuoteryhma_tyhjat) and $tuoteryhma_tyhjat == "tyhjat" and isset($osasto_tyhjat) and $osasto_tyhjat == "tyhjat") {
@@ -530,7 +530,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
     $where_lisa .= "AND try = '0' ";
   }
 
-  ################## Varaston tiedot ##################
+  //################# Varaston tiedot ##################
   $varastolisa1 = " varastopaikat.nimitys varastonnimi, varastopaikat.tunnus varastotunnus, ";
 
   if ($summaustaso == 'T' or $summaustaso == 'TRY') {
@@ -618,8 +618,8 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
   $elements = mysql_num_rows($result);
 
   if (!$php_cli) {
-    if ($tyyppi == "A") echo t("Saldollisia tuotteita/tuotepaikkoja"),": $elements<br>";
-    else echo t("Tuotteita/tuotepaikkoja"),": $elements<br>";
+    if ($tyyppi == "A") echo t("Saldollisia tuotteita/tuotepaikkoja"), ": $elements<br>";
+    else echo t("Tuotteita/tuotepaikkoja"), ": $elements<br>";
   }
 
   if ($summaustaso == 'TRY') {
@@ -679,7 +679,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
     mysql_data_seek($result, 0);
   }
 
-  include('inc/pupeExcel.inc');
+  include 'inc/pupeExcel.inc';
 
   $worksheet    = new pupeExcel();
   $format_bold = array("bold" => TRUE);
@@ -767,7 +767,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
     echo "<script LANGUAGE='JavaScript'>window.location.hash=\"focus_tahan\";</script>";
 
     if ($elements > 0) {
-      require_once ('inc/ProgressBar.class.php');
+      require_once 'inc/ProgressBar.class.php';
       $bar = new ProgressBar();
       $bar->initialize($elements); // print the empty bar
     }
@@ -1163,8 +1163,8 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
 
           $vikamykupaiva = max($xmyyrow['laskutettuaika'], $xmyypvmrow['laskutettuaika'], $xkulpvmrow['kulutettuaika']);
 
-          if ($vikamykupaiva > 0)  {
-            $vikamykupaiva = substr($vikamykupaiva,0,4)."-".substr($vikamykupaiva,4,2)."-".substr($vikamykupaiva,6,2);
+          if ($vikamykupaiva > 0) {
+            $vikamykupaiva = substr($vikamykupaiva, 0, 4)."-".substr($vikamykupaiva, 4, 2)."-".substr($vikamykupaiva, 6, 2);
           }
           else {
             $vikamykupaiva = "";
@@ -1226,19 +1226,19 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       $excelsarake++;
 
       if ($variaatiosummaus != "") {
-         foreach ($kaikkikoot as $kokonimi => $koko) {
-               if (isset($koot[$kokonimi])) $worksheet->writeString($excelrivi, $excelsarake, $koot[$kokonimi]);
-               $excelsarake++;
-         }
+        foreach ($kaikkikoot as $kokonimi => $koko) {
+          if (isset($koot[$kokonimi])) $worksheet->writeString($excelrivi, $excelsarake, $koot[$kokonimi]);
+          $excelsarake++;
+        }
       }
 
-      $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$muutoskpl));
+      $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f", $muutoskpl));
       $excelsarake++;
-      $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f",$kehasilloin));
+      $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f", $kehasilloin));
       $excelsarake++;
-      $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f",$muutoshinta));
+      $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f", $muutoshinta));
       $excelsarake++;
-      $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f",$bmuutoshinta));
+      $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f", $bmuutoshinta));
       $excelsarake++;
 
       if (isset($valitut_varastot_rajaus) and $valitut_varastot_rajaus != "") {
@@ -1257,7 +1257,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       if ($variaatiosummaus == "") {
 
         if ($kiertoviilasku != "") {
-          $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$kierto));
+          $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f", $kierto));
           $excelsarake++;
 
           $worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($vikamykupaiva));
@@ -1312,7 +1312,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
 
           $worksheet->writeString($excelrivi, $tuotesarake,   $vararvorow["sarjanumero"]);
           $worksheet->writeString($excelrivi, $tuotesarake+1, $vararvorow["nimitys"]);
-          $worksheet->writeNumber($excelrivi, $tuotesarake+2, sprintf("%.02f",$sarjanumeronarvo));
+          $worksheet->writeNumber($excelrivi, $tuotesarake+2, sprintf("%.02f", $sarjanumeronarvo));
           $excelrivi++;
         }
       }
@@ -1362,7 +1362,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
 
     ksort($varastot2);
 
-    foreach ($varastot2 AS $varasto => $arvot) {
+    foreach ($varastot2 as $varasto => $arvot) {
       echo "<tr>";
 
       if ($summaustaso == 'TRY') {
@@ -1377,9 +1377,9 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
         echo "<td>$varasto</td>";
       }
 
-      foreach ($arvot AS $arvo) {
+      foreach ($arvot as $arvo) {
         if ($arvo != '') {
-          echo "<td align='right'>".sprintf("%.2f",$arvo)."</td>";
+          echo "<td align='right'>".sprintf("%.2f", $arvo)."</td>";
         }
         else {
           echo "<td>&nbsp;</td>";
@@ -1395,22 +1395,22 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
     }
 
     echo "<tr><th>".t("Pvm")."</th><th colspan='$cspan'>".t("Yhteens‰")."</th></tr>";
-    echo "<tr><td colspan='".($cspan-1)."'>$vv-$kk-$pp</td><td align='right'>".sprintf("%.2f",$varvo)."</td>";
-    echo "<td align='right'>".sprintf("%.2f",$bvarvo)."</td></tr>";
+    echo "<tr><td colspan='".($cspan-1)."'>$vv-$kk-$pp</td><td align='right'>".sprintf("%.2f", $varvo)."</td>";
+    echo "<td align='right'>".sprintf("%.2f", $bvarvo)."</td></tr>";
     echo "</table><br>";
 
     // Katsotaan ollaanko ottamassa varastonarvo historiaan
     if ("$vv-$kk-$pp" != date("Y-m-d")) {
-      echo "<font class='error'>",t("Huom. Bruttovarastonarvo historiasta on arvio"),"!</font><br/>";
+      echo "<font class='error'>", t("Huom. Bruttovarastonarvo historiasta on arvio"), "!</font><br/>";
 
       if (count($varastot) > 0) {
-        echo "<font class='error'>",t("Huom. Varastonarvo historiassa on arvio, jos rajaat raporttia varastoittain.")," ",t("Aja raportti ilman varastorajauksia."),"</font><br/>";
+        echo "<font class='error'>", t("Huom. Varastonarvo historiassa on arvio, jos rajaat raporttia varastoittain."), " ", t("Aja raportti ilman varastorajauksia."), "</font><br/>";
       }
       elseif ($summaustaso == "S") {
-        echo "<font class='error'>",t("Huom. Varastonarvo yhteens‰ on oikein, mutta varastokohtainen varastonarvo historiasta on arvio.")," ",t("Aja raportti tuotteittain/tuoteryhmitt‰in."),"</font><br/>";
+        echo "<font class='error'>", t("Huom. Varastonarvo yhteens‰ on oikein, mutta varastokohtainen varastonarvo historiasta on arvio."), " ", t("Aja raportti tuotteittain/tuoteryhmitt‰in."), "</font><br/>";
       }
       elseif ($summaustaso == "P") {
-        echo "<font class='error'>",t("Huom. Varastonarvo yhteens‰ on oikein, mutta varastopaikkakohtainen varastonarvo historiasta on arvio.")," ",t("Aja raportti tuotteittain/tuoteryhmitt‰in."),"</font><br/>";
+        echo "<font class='error'>", t("Huom. Varastonarvo yhteens‰ on oikein, mutta varastopaikkakohtainen varastonarvo historiasta on arvio."), " ", t("Aja raportti tuotteittain/tuoteryhmitt‰in."), "</font><br/>";
       }
 
       echo "<br/>";
@@ -1443,7 +1443,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
     $ctype = "excel";
     $kukarow["eposti"] = $email_osoite;
 
-    require("../inc/sahkoposti.inc");
+    require "../inc/sahkoposti.inc";
 
     //poistetaan tmp file samantien kuleksimasta...
     system("rm -f /tmp/$excelnimi");
@@ -1451,5 +1451,5 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
 }
 
 if (!$php_cli) {
-  require ("inc/footer.inc");
+  require "inc/footer.inc";
 }

@@ -1,6 +1,6 @@
 <?php
 
-require('inc/parametrit.inc');
+require 'inc/parametrit.inc';
 
 echo "<font class='head'>".t("Suoraveloitusten kohdistus suorituksiin")."</font><hr>";
 
@@ -116,7 +116,7 @@ if ($tee == '') {
     echo "<tr>";
 
     for ($i = 0; $i < mysql_num_fields($result)-2; $i++) {
-      echo "<th>" . t(mysql_field_name($result,$i)) . "</th>";
+      echo "<th>" . t(mysql_field_name($result, $i)) . "</th>";
     }
 
     echo "<th></th></tr>";
@@ -125,7 +125,7 @@ if ($tee == '') {
       echo "<tr>";
 
       for ($i = 0; $i < mysql_num_fields($result)-2; $i++) {
-        echo "<td>".$trow[mysql_field_name($result,$i)]."</td>";
+        echo "<td>".$trow[mysql_field_name($result, $i)]."</td>";
       }
 
       if ($trow['suorituspvm'] != 'Ei sopivaa suoritusta') {
@@ -136,7 +136,7 @@ if ($tee == '') {
           <input type = 'submit' value = '".t("suorita")."'></form></td>";
       }
       else {
-        echo "<td><a href='$palvelin2","muutosite.php?tee=E&tunnus=$trow[tunnus]'>".t("Tutki")."</a></td>";
+        echo "<td><a href='$palvelin2", "muutosite.php?tee=E&tunnus=$trow[tunnus]'>".t("Tutki")."</a></td>";
       }
       echo "</tr>";
     }
@@ -147,4 +147,4 @@ if ($tee == '') {
   }
 }
 
-require ('inc/footer.inc');
+require 'inc/footer.inc';

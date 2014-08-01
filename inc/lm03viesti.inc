@@ -5,7 +5,7 @@
 $ulos = "LM03";                        // 01 Aineistotunnus
 $ulos .= sprintf('%1.1s', substr($laskutapahtuma, 0, 1));        // 02 Tietuetunnus (1 = maksutapahtuma, 2 = erittelytapahtuma)
 $ulos .= "9";                        // 03 Tapahtumalaji (9 = viestitietue)
-  $ulos .= sprintf('%-14.14s', $lmp_mt_4kentta);        // 04 Sampon speksissä Maksajan tilinumero / Nordean speksissä "varalla"
+$ulos .= sprintf('%-14.14s', $lmp_mt_4kentta);        // 04 Sampon speksissä Maksajan tilinumero / Nordean speksissä "varalla"
 $ulos .= sprintf('%-30.30s', $laskunimi1);          // 05 Saajan tarkenne 1 / Nordean speksissä "varalla"
 $ulos .= sprintf('%-20.20s', $laskunimi2);          // 06 Saajan tarkenne 2 / Nordean speksissä "varalla"
 $ulos .= sprintf('%-20.20s', $laskunimi3);          // 07 Saajan tarkenne 3 / Nordean speksissä "varalla"

@@ -52,10 +52,10 @@ if (!function_exists('teccom_asn_paketti')) {
       $laatikko = utf8_decode($laatikko);
       $koodi = $laatikko;
 
-      $_toimittajat_1 = array("123001","123049","123108","123506","123110");
+      $_toimittajat_1 = array("123001", "123049", "123108", "123506", "123110");
       $_onko_toimittaja_1 = in_array($tavarantoimittajanumero, $_toimittajat_1);
 
-      $_toimittajat_2 = array("123001","123108","123506","123110");
+      $_toimittajat_2 = array("123001", "123108", "123506", "123110");
       $_onko_toimittaja_2 = in_array($tavarantoimittajanumero, $_toimittajat_2);
 
       if ($_onko_toimittaja_1 and strlen($laatikko) >10) {

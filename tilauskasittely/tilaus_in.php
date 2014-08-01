@@ -1,9 +1,9 @@
 <?php
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 // tehdään tiedostolle uniikki nimi
-$filename = "$pupe_root_polku/datain/$tyyppi-order-".md5(uniqid(rand(),true)).".txt";
+$filename = "$pupe_root_polku/datain/$tyyppi-order-".md5(uniqid(rand(), true)).".txt";
 
 echo "<script type='text/javascript'>
     $(document).ready(function() {
@@ -37,18 +37,18 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
 
   if ($tyyppi == 'multi') {
     // tarvitaan $filename
-    require ("inc/tilaus_in_multi.inc");
+    require "inc/tilaus_in_multi.inc";
   }
 
   if ($tyyppi == 'pos') {
     // tarvitaan $filename
-    require ("inc/tilaus_in.inc");
+    require "inc/tilaus_in.inc";
   }
 
   if ($tyyppi == 'edi') {
     // tarvitaan $filename
     echo "<pre>";
-    require ("editilaus_in.inc");
+    require "editilaus_in.inc";
     echo "</pre>";
   }
 
@@ -56,7 +56,7 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
     // tarvitaan $filename
     echo "<pre>";
     $edi_tyyppi = "futursoft";
-    require ("editilaus_in.inc");
+    require "editilaus_in.inc";
     echo "</pre>";
   }
 
@@ -64,7 +64,7 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
     // tarvitaan $filename
     echo "<pre>";
     $edi_tyyppi = "magento";
-    require ("editilaus_in.inc");
+    require "editilaus_in.inc";
     echo "</pre>";
   }
 
@@ -72,19 +72,19 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
     // tarvitaan $filename
     echo "<pre>";
     $edi_tyyppi = "edifact911";
-    require ("editilaus_in.inc");
+    require "editilaus_in.inc";
     echo "</pre>";
   }
 
   if ($tyyppi == 'yct') {
     // tarvitaan $filename
-    require ("inc/tilaus_in.inc");
+    require "inc/tilaus_in.inc";
   }
 
   if ($tyyppi == 'asnui') {
 
     if (copy($filename, $teccomkansio.'/'.$path_parts["basename"])) {
-      require ("sisaanlue_teccom_asn.php");
+      require "sisaanlue_teccom_asn.php";
     }
     else {
       echo "Kopiointi epäonnistui!";
@@ -127,4 +127,4 @@ else {
 
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

@@ -3,7 +3,7 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Tavarakatelista")."</font><hr>";
 
@@ -63,7 +63,7 @@ if ($tee != '') {
   }
   else {
 
-    $virtu = substr($virtu,0,-1); // vika pilkku pois
+    $virtu = substr($virtu, 0, -1); // vika pilkku pois
     $query = "SELECT tuoteno, osasto, try, nimitys, tullinimike1 FROM tuote WHERE yhtio = '$kukarow[yhtio]' AND tullinimike1 IN ($virtu) ORDER BY osasto, try, tuoteno";
     $virre = mysql_query($query) or pupe_error($query);
 
@@ -97,4 +97,4 @@ echo "<form name='epaku' method='post' autocomplete='off'>";
 echo "<input type='submit' name='tee' value='".t("Aja tavarakatelista")."'>";
 echo "</form>";
 
-require ("../inc/footer.inc");
+require "../inc/footer.inc";

@@ -1,9 +1,9 @@
 <?php
 
- // tarvitaan $laskurow array
+// tarvitaan $laskurow array
 // tarvitaan $yhtiorow array
 
-  $tilvahvfilenimi = "$pupe_root_polku/dataout/tilvahv_".$kukarow["yhtio"]."_".$laskurow["tunnus"].".dat";
+$tilvahvfilenimi = "$pupe_root_polku/dataout/tilvahv_".$kukarow["yhtio"]."_".$laskurow["tunnus"].".dat";
 
 if (!file_exists($tilvahvfilenimi)) {
 
@@ -93,7 +93,7 @@ if (!file_exists($tilvahvfilenimi)) {
     $ulos .= "TILVAHV.TLV_AS_TILAUSNRO:" . $laskurow['asiakkaan_tilausnumero'] . "\n";
     $ulos .= "TILVAHV.TLV_TOIM_TILAUSNRO:" . $tulostettava_tunnus . "\n";
     $ulos .= "TILVAHV.TLV_PVM:" . tv1dateconv($laskurow['luontiaika']) . "\n";
-    $ulos .= "TILVAHV.TLV_KLO:" . substr($laskurow['luontiaika'],-8,8) . "\n";
+    $ulos .= "TILVAHV.TLV_KLO:" . substr($laskurow['luontiaika'], -8, 8) . "\n";
     $ulos .= "TILVAHV.TLV_TILAAJA_OVT:" . $laskurow['ovttunnus'] . "\n";
     $ulos .= "TILVAHV.TLV_MYYJA_OVT:" . $yhtiorow['ovttunnus'] . "\n";
     $ulos .= "TILVAHV.TLV_VIITE:" . $laskurow['viesti'] . "\n";
@@ -144,7 +144,7 @@ if (!file_exists($tilvahvfilenimi)) {
         $hinta = $hinta * (1 - $laskurow['erikoisale'] / 100);
       }
 
-      $hinta = round($hinta,2);
+      $hinta = round($hinta, 2);
 
       $ulos .= "TILVAHVRIV.TVR_NETTO:" . $hinta . "\n";
       $ulos .= "TILVAHVRIV.TVR_VEROLLISUUS:1\n";
@@ -157,8 +157,8 @@ if (!file_exists($tilvahvfilenimi)) {
     $ulos .= "*ME\n";
     $ulos .= "*IE\n";
 
-    fputs ($toot,$ulos);
-    fclose ($toot);
+    fputs($toot, $ulos);
+    fclose($toot);
 
     // lähetetään ftpllä
     if ($laskurow["toim_ovttunnus"] == "") $laskurow["toim_ovttunnus"] = $laskurow["ovttunnus"];

@@ -29,7 +29,7 @@ $kohdehakemisto = rtrim($kohdehakemisto, "/");
 // Orders 91.1 tulee ostajan tiedot ennen vastaanottajaa, joten meid‰n pit‰‰ heti t‰ss‰ vaiheessa kaivaa jo vastaanottajan tiedot
 $order_tietosisalto = file_get_contents($filename);
 
-$order_tietosisalto = str_replace("\n","", $order_tietosisalto);
+$order_tietosisalto = str_replace("\n", "", $order_tietosisalto);
 $order_tietosisalto = explode("'", $order_tietosisalto);
 
 // Toimitus ja tuotetiedot
@@ -135,7 +135,7 @@ foreach ($arska as $key => &$value) {
     // Lis‰t‰‰n koko sanoman lopputagit
     $edi_rivi .= $edi_rivi_loppu;
     // Splitataan n‰tisti 80merkkisiksi riveiksi
-    $edi_rivi = chunk_split ($edi_rivi, 80, "\n");
+    $edi_rivi = chunk_split($edi_rivi, 80, "\n");
 
     // Luodaan tiedosto suoraan normaalien editilausten kansioon
     $filename = "$kohdehakemisto/ediorders911_crossdock_split".uniqid(time()."_").".txt";

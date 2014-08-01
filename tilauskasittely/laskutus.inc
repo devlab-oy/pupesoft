@@ -178,15 +178,15 @@ else {
                   $rfields .= ", ".$fieldname;
 
                   switch ($fieldname) {
-                    case 'varattu':
-                      $rvalues .= ", -".($pantti_kpl - $vanhin_pantti_row['kpl']);
-                      break;
-                    case 'tunnus':
-                    case 'kate_korjattu':
-                      $rvalues .= ", NULL";
-                      break;
-                    default:
-                      $rvalues .= ", '".mysql_real_escape_string($trow[$fieldname])."'";
+                  case 'varattu':
+                    $rvalues .= ", -".($pantti_kpl - $vanhin_pantti_row['kpl']);
+                    break;
+                  case 'tunnus':
+                  case 'kate_korjattu':
+                    $rvalues .= ", NULL";
+                    break;
+                  default:
+                    $rvalues .= ", '".mysql_real_escape_string($trow[$fieldname])."'";
                   }
                 }
 
@@ -216,15 +216,15 @@ else {
                     $rfields .= ", ".$fieldname;
 
                     switch ($fieldname) {
-                      case 'tilausrivitunnus':
-                        $rvalues .= ", '{$insid_uusi}'";
-                        break;
-                      case 'tunnus':
-                      case 'kate_korjattu':
-                        $rvalues .= ", NULL";
-                        break;
-                      default:
-                        $rvalues .= ", '".mysql_real_escape_string($monistarow2[$fieldname])."'";
+                    case 'tilausrivitunnus':
+                      $rvalues .= ", '{$insid_uusi}'";
+                      break;
+                    case 'tunnus':
+                    case 'kate_korjattu':
+                      $rvalues .= ", NULL";
+                      break;
+                    default:
+                      $rvalues .= ", '".mysql_real_escape_string($monistarow2[$fieldname])."'";
                     }
                   }
 
@@ -461,7 +461,7 @@ else {
     }
     else {
 
-      $turow = mysql_fetch_assoc ($laskutusres);
+      $turow = mysql_fetch_assoc($laskutusres);
 
       // Lasketaan tilausrivin arvo ja kate
       if     ($turow['epakurantti100pvm'] != '0000-00-00') $turow['kehahin'] = 0;
@@ -759,7 +759,7 @@ else {
 
         $ostohinta = 0;
 
-        while($sarjarow = mysql_fetch_assoc($sarjares)) {
+        while ($sarjarow = mysql_fetch_assoc($sarjares)) {
 
           // Haetaan hyvitettävien myyntirivien kautta alkuperäiset ostorivit
           $query  = "SELECT sarjanumeroseuranta.*
@@ -809,7 +809,7 @@ else {
             }
 
             //  Jos meillä on In-Out erä merkataan myös erän kappalemäärä
-            if($turow["sarjanumeroseuranta"] == "G") {
+            if ($turow["sarjanumeroseuranta"] == "G") {
               $eraKpl = $sarjarow["era_kpl"];
             }
             else {

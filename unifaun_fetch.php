@@ -24,8 +24,8 @@ if ($php_cli and count(debug_backtrace()) <= 1) {
   ini_set("display_errors", 0);
 
   // otetaan tietokanta connect
-  require("inc/connect.inc");
-  require("inc/functions.inc");
+  require "inc/connect.inc";
+  require "inc/functions.inc";
 
   $kukarow['yhtio'] = (string) $argv[1];
   $kukarow['kuka']  = 'admin';
@@ -56,7 +56,7 @@ if (!is_dir($ftpget_dest[$operaattori])) {
 // Setataan tämä, niin ftp-get.php toimii niin kuin pitäisikin
 $argv[1] = $operaattori;
 
-require('ftp-get.php');
+require 'ftp-get.php';
 
 if ($handle = opendir($ftpget_dest[$operaattori])) {
 
@@ -121,7 +121,7 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
 
           $sscc_ulkoinen_chk_row = mysql_fetch_assoc($sscc_ulkoinen_chk_res);
 
-          require_once("inc/unifaun_send.inc");
+          require_once "inc/unifaun_send.inc";
 
           $query = "SELECT lasku.toimitustavan_lahto, lasku.ytunnus, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp
                     FROM lasku

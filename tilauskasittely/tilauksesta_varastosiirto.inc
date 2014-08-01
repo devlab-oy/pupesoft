@@ -8,10 +8,12 @@ if (!function_exists("tilauksesta_varastosiirto")) {
    * @global array $kukarow
    * @global string $toim
    * @global string $pupe_root_polku
-   * @param int $myyntitilaus_tunnus
-   * @param char $kirjanpidollinen_varastosiirto N = normaali, K = kirjanpidollinen, P = palautus
+   * @param int     $myyntitilaus_tunnus
+   * @param char    $kirjanpidollinen_varastosiirto N = normaali, K = kirjanpidollinen, P = palautus
    * @return boolean
    */
+
+
   function tilauksesta_varastosiirto($myyntitilaus_tunnus, $varastosiirto_tyyppi = 'N') {
     global $yhtiorow, $kukarow;
 
@@ -205,7 +207,7 @@ if (!function_exists('tilaus_valmis_siirtolista')) {
     $toim = "SIIRTOLISTA";
     $tulostetaan = '';
 
-    require('tilauskasittely/tilaus-valmis-siirtolista.inc');
+    require 'tilauskasittely/tilaus-valmis-siirtolista.inc';
   }
 
 }
@@ -269,7 +271,7 @@ if (!function_exists('luo_varastosiirtorivi')) {
       ${'ale'.$alepostfix} = "";
     }
 
-    require ('lisaarivi.inc');
+    require 'lisaarivi.inc';
 
     return $lisatyt_rivit1;
   }
@@ -296,7 +298,7 @@ if (!function_exists('luo_varastosiirto')) {
     $lahdevarasto = hae_varasto($lahdevarasto_tunnus);
     $yhtio_toimipaikka = $lahdevarasto['toimipaikka'];
 
-    require ("otsik_siirtolista.inc");
+    require "otsik_siirtolista.inc";
 
     return hae_lasku($id);
   }
@@ -366,7 +368,7 @@ if (!function_exists('aseta_varastosiirto_vastaanotetuksi')) {
       $t4[$varastosiirtorivi['tunnus']]       = $varastosiirtorivi['kohde_hyllytaso'];
     }
 
-    require('vastaanota.php');
+    require 'vastaanota.php';
 
     return $varastosiirtorivit;
   }

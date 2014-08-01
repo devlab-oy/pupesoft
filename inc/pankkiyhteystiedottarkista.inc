@@ -1,7 +1,7 @@
 <?php
 
-if(!function_exists("pankkiyhteystiedottarkista")) {
-  function pankkiyhteystiedottarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+if (!function_exists("pankkiyhteystiedottarkista")) {
+  function pankkiyhteystiedottarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set;
 
     if (mysql_field_name($result, $i) == "pankkitili1" or
@@ -12,7 +12,7 @@ if(!function_exists("pankkiyhteystiedottarkista")) {
 
         $pankkitili = $t[$i];
 
-    //    require ('pankkitilinoikeellisuus.php');
+        //    require ('pankkitilinoikeellisuus.php');
 
         if ($pankkitili == '') {
           $virhe[$i] = t("Pankkitili on virheellinen");

@@ -1,6 +1,6 @@
 <?php
 
-require("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 
 echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
@@ -35,16 +35,16 @@ echo "<table>
 echo "</form>";
 
 if ($ytunnus != '' and $asiakasid == 0) {
-  require ("inc/asiakashaku.inc");
+  require "inc/asiakashaku.inc";
   if ($asiakasid == 0) exit;
 }
 
 if ($asiakasid != "") {
 
-  # Oletustyyppi
-  if($tyyppi == "") $tyyppi = "ytunnus";
+  // Oletustyyppi
+  if ($tyyppi == "") $tyyppi = "ytunnus";
 
-  # Haetaan asiakas
+  // Haetaan asiakas
   $asiakas_query = "SELECT *
                     FROM asiakas
                     WHERE yhtio = '{$kukarow['yhtio']}'
@@ -57,7 +57,7 @@ if ($asiakasid != "") {
   }
   $asiakas = mysql_fetch_assoc($asiakas_result);
 
-  # Asiakkaan tiedot
+  // Asiakkaan tiedot
   echo "<table>
       <tr>
         <th>".t("Ytunnus")."</th>
@@ -100,7 +100,7 @@ if ($oikeurow["paivitys"] != "1" and ($tee == 'uusi' or $tee == 'lisaa')) {
   $tee = "alennustaulukko";
 }
 
-# Uusi lomakkeen kenttien tarkistus
+// Uusi lomakkeen kenttien tarkistus
 if ($tee == 'uusi') {
   list($yyyy, $mm, $dd) = explode('-', $uusi_alkupvm);
   if ($uusi_alkupvm!= "" and $uusi_alkupvm != "0000-00-00" and !checkdate($mm, $dd, $yyyy)) {
@@ -112,7 +112,7 @@ if ($tee == 'uusi') {
     echo "<br><font class='error'>".t("Virheellinen loppupvm")."! $uusi_loppupvm</font><br/>";
     $tee = "alennustaulukko";
   }
-  if(empty($uusi_alkuryhma) or empty($uusi_loppuryhma)) {
+  if (empty($uusi_alkuryhma) or empty($uusi_loppuryhma)) {
     echo "<br><font class='error'>".t("Alkuryhm‰ tai loppuryhm‰")." puuttuu</font><br/>";
     $tee = "alennustaulukko";
   }
@@ -130,9 +130,9 @@ if ($tee == 'uusi') {
   }
 }
 
-# P‰ivit‰ kenttien tarkistus
+// P‰ivit‰ kenttien tarkistus
 if ($tee == 'lisaa') {
-  foreach($alkuryhma as $i => $ryhma) {
+  foreach ($alkuryhma as $i => $ryhma) {
     list($yyyy, $mm, $dd) = explode('-', $alkupvm[$i]);
     if ($alkupvm[$i] != "" and $alkupvm[$i] != "0000-00-00" and !checkdate($mm, $dd, $yyyy)) {
       echo "<font class='error'>".t("Virheellinen alkupvm")."! $alkupvm[$i]</font><br/>";
@@ -162,11 +162,11 @@ if ($tee == 'lisaa') {
   }
 }
 
-# P‰ivitet‰‰n ryhm‰t
+// P‰ivitet‰‰n ryhm‰t
 if ($tee == 'lisaa' or $tee == 'uusi') {
 
   if ($tee == 'uusi') {
-    # Kysely toimii arraylla, joten uusi_muuttujat muutetaan
+    // Kysely toimii arraylla, joten uusi_muuttujat muutetaan
     $alkuryhma[] = $uusi_alkuryhma;
     $loppuryhma[] = $uusi_loppuryhma;
     $alennus[] = $uusi_alennus;
@@ -177,23 +177,23 @@ if ($tee == 'lisaa' or $tee == 'uusi') {
     $loppupvm[] = $uusi_loppupvm;
   }
 
-  # Query lis‰ ytunnuksen tai asiakasid:n mukaan
+  // Query lis‰ ytunnuksen tai asiakasid:n mukaan
   $query_lisa = ($tyyppi == 'ytunnus') ? "ytunnus = '$ytunnus'" : "asiakas = '$asiakasid'";
 
-  # Loopataan l‰pi ryhm‰v‰lit (rivit)
+  // Loopataan l‰pi ryhm‰v‰lit (rivit)
   for ($i = 0; $i < count($alkuryhma); $i++) {
 
-    # Haetaan ryhm‰t perusalennus-taulusta, between $alkuryhma and $loppuryhma
+    // Haetaan ryhm‰t perusalennus-taulusta, between $alkuryhma and $loppuryhma
     $ryhmat = hae_ryhmat($alkuryhma[$i], $loppuryhma[$i]);
 
-    # Jos ryhmi‰ ei lˆydy
+    // Jos ryhmi‰ ei lˆydy
     if (count($ryhmat) == 0) {
       echo "<br><font class='error'>".t("Yht‰‰n ryhm‰‰ ei lˆytynyt v‰lilt‰")." $alkuryhma[$i] - $loppuryhma[$i]!</font><br>";
       $tee = "alennustaulukko";
       break;
     }
 
-    # Jos poistettava, loopataan ryhm‰v‰li ja poistetaan.
+    // Jos poistettava, loopataan ryhm‰v‰li ja poistetaan.
     if ($poista[$i] != "") {
       foreach ($ryhmat as $poistettava_ryhma) {
         if ($alkupvm[$i] == "") {
@@ -216,15 +216,15 @@ if ($tee == 'lisaa' or $tee == 'uusi') {
         $poista[$i] = NULL;
       }
     }
-    # Jos ei poistettava niin lis‰t‰‰n tai p‰ivitet‰‰n uudet alennukset
+    // Jos ei poistettava niin lis‰t‰‰n tai p‰ivitet‰‰n uudet alennukset
     else {
 
-      # Ryhm‰v‰lin tunnukset
+      // Ryhm‰v‰lin tunnukset
       $tunnus = explode(",", $tunnukset[$i]);
       $j = 0;
 
       foreach ($ryhmat as $ryhma) {
-        # P‰ivitet‰‰n jos tunnus on setattu
+        // P‰ivitet‰‰n jos tunnus on setattu
         if (!empty($tunnus[$j])) {
           $query = "UPDATE asiakasalennus SET
                     yhtio        = '{$kukarow['yhtio']}',
@@ -335,11 +335,11 @@ if ($tee == "alennustaulukko") {
 
     // Alennustaulukon rivit
     if ($edellinen_rivi != "" and ($edellinen_rivi['alennus'] != $row['alennus']
-      or $edellinen_rivi['alennuslaji'] != $row['alennuslaji']
-      or $edellinen_rivi['minkpl'] != $row['minkpl']
-      or $edellinen_rivi['monikerta'] != $row['monikerta']
-      or $edellinen_rivi['alkupvm'] != $row['alkupvm']
-      or $edellinen_rivi['loppupvm'] != $row['loppupvm'])) {
+        or $edellinen_rivi['alennuslaji'] != $row['alennuslaji']
+        or $edellinen_rivi['minkpl'] != $row['minkpl']
+        or $edellinen_rivi['monikerta'] != $row['monikerta']
+        or $edellinen_rivi['alkupvm'] != $row['alkupvm']
+        or $edellinen_rivi['loppupvm'] != $row['loppupvm'])) {
 
       // Kenttien tarkistus
       if ($alennus[$i] != "") {
@@ -364,7 +364,7 @@ if ($tee == "alennustaulukko") {
         $edellinen_rivi['loppupvm'] = ($edellinen_rivi['loppupvm'] == $loppupvm[$i]) ? $edellinen_rivi['loppupvm'] : $loppupvm[$i];
       }
 
-      # Jos p‰iv‰m‰‰r‰ on 0000-00-00
+      // Jos p‰iv‰m‰‰r‰ on 0000-00-00
       $edellinen_rivi['alkupvm'] = ($edellinen_rivi['alkupvm'] == '0000-00-00') ? "" : $edellinen_rivi['alkupvm'];
       $edellinen_rivi['loppupvm'] = ($edellinen_rivi['loppupvm'] == '0000-00-00') ? "" : $edellinen_rivi['loppupvm'];
 
@@ -386,7 +386,7 @@ if ($tee == "alennustaulukko") {
       echo "<td><select name='monikerta[$i]' value=".$edellinen_rivi['monikerta'].">";
 
       // Monikerta dropdown
-      if(empty($edellinen_rivi['monikerta'])) {
+      if (empty($edellinen_rivi['monikerta'])) {
         echo "<option value='' selected>".t("Ei")."</option>";
         echo "<option value='K'>".t("Kyll‰")."</option>";
       }
@@ -423,7 +423,7 @@ if ($tee == "alennustaulukko") {
   echo "</table>";
   echo "</form>";
 
-  # Uuden ryhm‰n luominen
+  // Uuden ryhm‰n luominen
   echo "<br/><font class='head'>".t("Uusi")."</font><hr>";
   echo "<form name='uusi_alennus' method='post'>";
   echo "<table><tr>
@@ -467,7 +467,7 @@ if ($tee == "alennustaulukko") {
   echo "</form>";
 }
 
-# Haetaan ryhm‰t perusalennus-taulusta, between $alkuryhma and $loppuryhma
+// Haetaan ryhm‰t perusalennus-taulusta, between $alkuryhma and $loppuryhma
 function hae_ryhmat($alkuryhma, $loppuryhma) {
   global $kukarow;
 
@@ -477,11 +477,11 @@ function hae_ryhmat($alkuryhma, $loppuryhma) {
                    AND ryhma BETWEEN '$alkuryhma' AND '$loppuryhma'";
   $ryhmat_result = pupe_query($ryhmat_query);
 
-  while($row = mysql_fetch_array($ryhmat_result)) {
+  while ($row = mysql_fetch_array($ryhmat_result)) {
     $ryhmat[] = $row['ryhma'];
   }
 
   return $ryhmat;
 }
 
-include("inc/footer.inc");
+include "inc/footer.inc";

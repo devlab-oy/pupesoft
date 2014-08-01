@@ -4,15 +4,15 @@ if (strpos($_SERVER['SCRIPT_NAME'], "uutiset.php")  !== FALSE) {
   $otsikko_apu = $_POST["otsikko"];
   $uutinen_apu = $_POST["uutinen"];
 
-  require ("inc/parametrit.inc");
+  require "inc/parametrit.inc";
 
   $otsikko = $otsikko_apu;
   $uutinen = $uutinen_apu;
 }
 
-if(!isset($toim))   $toim = "";
-if(!isset($tee))   $tee = "";
-if(!isset($limit))   $limit = "";
+if (!isset($toim))   $toim = "";
+if (!isset($tee))   $tee = "";
+if (!isset($limit))   $limit = "";
 
 if ($toim == "") {
   if (strpos($_SERVER['SCRIPT_NAME'], "uutiset.php")  !== FALSE) echo "<font class='head'>".t("Intra Uutiset")."</font><hr>";
@@ -77,7 +77,7 @@ if ($tee == 'LISAA') {
 
     $retval = tarkasta_liite("userfile");
 
-    if($retval !== true) {
+    if ($retval !== true) {
       echo $retval;
     }
     else {
@@ -120,7 +120,7 @@ if ($tee == 'LISAA') {
                   yhtio      = '$kukarow[yhtio]',
                   pvmalku    = now(),
                   luontiaika = now(),";
-          $postquery = "";
+        $postquery = "";
       }
 
       $query .= "  kentta01   = '$otsikko',
@@ -261,7 +261,7 @@ if ($tee == "SYOTA") {
 
     if (mysql_num_rows($result) > 0) {
       while ($orow = mysql_fetch_array($result)) {
-        if($rivi["kentta09"] == $orow["selite"]) $sel = "SELECTED";
+        if ($rivi["kentta09"] == $orow["selite"]) $sel = "SELECTED";
         else $sel = "";
         echo "<option value='$orow[selite]' $sel>$orow[selitetark]</option>";
       }
@@ -271,7 +271,7 @@ if ($tee == "SYOTA") {
 
     if (mysql_num_rows($result) > 0) {
       while ($orow = mysql_fetch_array($result)) {
-        if($rivi["kentta09"] == $orow["selite"]) $sel = "SELECTED";
+        if ($rivi["kentta09"] == $orow["selite"]) $sel = "SELECTED";
         else $sel = "";
         echo "<option value='$orow[selite]' $sel>$orow[selite] - $orow[selitetark]</option>";
       }
@@ -543,13 +543,13 @@ if ($tee == '') {
 
           if ($lisatietorow["image_width"] > 130 or $lisatietorow["image_width"] == 0) {
             // Tehdään nyt tähän tällanen convert juttu niin käyttäjäien megakokoiset kuvat eivät jää niin isoina kantaan
-            $nimi1 = "/tmp/".md5(uniqid(rand(),true)).".jpg";
+            $nimi1 = "/tmp/".md5(uniqid(rand(), true)).".jpg";
 
             $fh = fopen($nimi1, "w");
             if (fwrite($fh, $lisatietorow["data"]) === FALSE) die("Kirjoitus epäonnistui $nimi1");
             fclose($fh);
 
-            $nimi2 = "/tmp/".md5(uniqid(rand(),true)).".jpg";
+            $nimi2 = "/tmp/".md5(uniqid(rand(), true)).".jpg";
 
             // Haetaan kuvan väriprofiili
             exec("nice -n 20 identify -format %[colorspace] \"$nimi1\"", $identify);
@@ -573,15 +573,15 @@ if ($tee == '') {
         }
       }
 
-      if((int) $yhtiorow["logo"] > 0 and $kuva == '') {
+      if ((int) $yhtiorow["logo"] > 0 and $kuva == '') {
         $liite = hae_liite($yhtiorow["logo"], "Yllapito", "array");
 
         $kuva = "<img src='view.php?id=$liite[tunnus]' width='130'>";
       }
-      elseif(@fopen($yhtiorow["logo"], "r") and $kuva == '') {
+      elseif (@fopen($yhtiorow["logo"], "r") and $kuva == '') {
         $kuva = "<img src='$yhtiorow[logo]' width='130'>";
       }
-      elseif(file_exists($yhtiorow["logo"]) and $kuva == '') {
+      elseif (file_exists($yhtiorow["logo"]) and $kuva == '') {
         $kuva = "<img src='$yhtiorow[logo]' width='130'>";
       }
 
@@ -602,7 +602,7 @@ if ($tee == '') {
           $search = array();
           $replace = array();
 
-          foreach($matches as $m) {
+          foreach ($matches as $m) {
 
             //  Haetaan tuotenumero
             $query = "SELECT tuoteno, nimitys
@@ -685,5 +685,5 @@ if ($tee == '') {
 }
 
 if (strpos($_SERVER['SCRIPT_NAME'], "uutiset.php")  !== FALSE) {
-  require("inc/footer.inc");
+  require "inc/footer.inc";
 }

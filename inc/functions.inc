@@ -460,7 +460,7 @@ if (!function_exists("pupesoft_rest")) {
     curl_setopt($handle, CURLOPT_SSL_VERIFYHOST, false);
     curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, false);
 
-    if ($parameters['posttype'] == 'xml') {
+    if (isset($parameters["posttype"]) and $parameters['posttype'] == 'xml') {
       curl_setopt($handle, CURLOPT_TIMEOUT, $timeout);
     }
 
@@ -501,7 +501,13 @@ if (!function_exists("pupesoft_rest")) {
     }
 
     $response_json = curl_exec($handle);
-    $response = $parameters["posttype"] == "xml" ? $response_json : json_decode($response_json, true);
+
+    if (isset($parameters["posttype"]) and $parameters["posttype"] == "xml") {
+      $response = $response_json;
+    }
+    else {
+      $response = json_decode($response_json, true);
+    }
 
     $code = curl_getinfo($handle, CURLINFO_HTTP_CODE);
 
@@ -8767,6 +8773,7 @@ if (!function_exists("livesearch_asiakkaantilausnumero")) {
       $result = pupe_query($query);
 
       $limit = 0;
+
       if (mysql_num_rows($result) > 0) {
         while ($row = mysql_fetch_assoc($result)) {
           echo "  <div id='asiakastilausnumero_valinta_$hakuid$row[tunnus]'
@@ -8793,7 +8800,9 @@ if (!function_exists("livesearch_asiakkaantilausnumero")) {
           $laadittu = tv1dateconv($row["luontiaika"]);
           echo "\"
                 style='padding:2px;'>
+                <span class='livesearch_rivispan_{$hakuid}'>
                 <font style='font-weight:bold'>$row[asiakkaan_tilausnumero]</font> &raquo; $row[nimi] - $laadittu
+                </span>
               </div><div name='selectValues$hakuid' id='$row[tunnus]'></div>";
           $limit++;
 
@@ -8807,6 +8816,8 @@ if (!function_exists("livesearch_asiakkaantilausnumero")) {
       else {
         echo "<div style='padding:2px'><font class='message'>".t("Ei tilauksia.")."</font></div>";
       }
+
+      livesearch_trimmaa_leveys($hakuid);
     }
     else {
       echo "
@@ -8879,7 +8890,9 @@ if (!function_exists("livesearch_tilihaku")) {
           }
           echo "\"
                 style='padding:2px;'>
+                <span class='livesearch_rivispan_{$hakuid}'>
                 <font style='font-weight:bold'>$row[tilino]</font> &raquo; $row[nimi]
+                </span>
               </div><div name='selectValues$hakuid' id='$row[tilino]'></div>";
           $limit++;
 
@@ -8893,6 +8906,8 @@ if (!function_exists("livesearch_tilihaku")) {
       else {
         echo "<div style='padding:2px'><font class='message'>".t("Ei tilejä.")."</font></div>";
       }
+
+      livesearch_trimmaa_leveys($hakuid);
     }
     else {
       echo "
@@ -9069,8 +9084,9 @@ if (!function_exists("livesearch_tuotehaku")) {
           else {
             echo "document.getElementById('livesearch_{$hakuid}').style.visibility = 'hidden';";
           }
-          echo "\"style='padding:2px;'>";
-          echo "<font style='{$tyyli}'>{$row['tuoteno']}</font> &raquo; <font style='{$tyyli2}'>{$row['nimitys']}</font>";
+          echo "\"style='padding:2px;'>
+              <span class='livesearch_rivispan_{$hakuid}'>
+              <font style='{$tyyli}'>{$row['tuoteno']}</font> &raquo; <font style='{$tyyli2}'>{$row['nimitys']}</font>";
 
           if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G')) and count($varastot_mista_saa_myyda) > 0) {
 
@@ -9084,7 +9100,7 @@ if (!function_exists("livesearch_tuotehaku")) {
             echo " &raquo; <font style='{$tyyli2}'>", t("Saldo"), " {$saldo_yht}</font>";
           }
 
-          echo "</div>";
+          echo "</span></div>";
           echo "<div name='selectValues{$hakuid}' id='{$row['tuoteno']}'></div>";
 
         }
@@ -9100,6 +9116,8 @@ if (!function_exists("livesearch_tuotehaku")) {
       else {
         echo "<div style='padding:2px'><font class='message'>".t("Ei tuotteita.")."</font></div>";
       }
+
+      livesearch_trimmaa_leveys($hakuid);
     }
     else {
       echo "
@@ -9174,7 +9192,9 @@ if (!function_exists('livesearch_tuotekategoriahaku')) {
           }
           echo "\"
                 style='padding:2px;'>
+                <span class='livesearch_rivispan_{$hakuid}'>
                 <font style='font-weight:bold'>{$polku['polku']} &raquo; {$row['nimi']}</font>
+                </span>
               </div><div name='selectValues$hakuid' id='$row[tunnus]'></div>";
           $limit++;
 
@@ -9188,6 +9208,8 @@ if (!function_exists('livesearch_tuotekategoriahaku')) {
       else {
         echo "<div style='padding:2px'><font class='message'>".t("Ei tuotekategorioita").".</font></div>";
       }
+
+      livesearch_trimmaa_leveys($hakuid);
     }
     else {
       echo "
@@ -9255,7 +9277,9 @@ if (!function_exists('livesearch_tuoteryhmahaku')) {
           }
           echo "\"
                 style='padding:2px;'>
+                <span class='livesearch_rivispan_{$hakuid}'>
                 <font style='font-weight:bold'>{$row['selite']} - {$row['selitetark']}</font>
+                </span>
               </div><div name='selectValues$hakuid' id='$row[selite]'></div>";
           $limit++;
 
@@ -9269,6 +9293,8 @@ if (!function_exists('livesearch_tuoteryhmahaku')) {
       else {
         echo "<div style='padding:2px'><font class='message'>".t("Ei tuoteryhmiä").".</font></div>";
       }
+
+      livesearch_trimmaa_leveys($hakuid);
     }
     else {
       echo "
@@ -9352,7 +9378,9 @@ if (!function_exists("livesearch_kayttajahaku")) {
           }
           echo "\"
                 style='padding:2px;'>
+                <span class='livesearch_rivispan_{$hakuid}'>
                 <font style='font-weight:bold'>$row[nimi]</font> &raquo; ($row[kuka])
+                </span>
               </div><div name='selectValues$hakuid' id='$row[tunnus]'></div>";
           $limit++;
 
@@ -9366,6 +9394,8 @@ if (!function_exists("livesearch_kayttajahaku")) {
       else {
         echo "<div style='padding:2px'><font class='message'>".t("Ei käyttäjiä.")."</font></div>";
       }
+
+      livesearch_trimmaa_leveys($hakuid);
     }
     else {
       echo "
@@ -9442,7 +9472,9 @@ if (!function_exists("livesearch_asiakashaku")) {
           }
           echo "\"
                 style='padding:2px;'>
+                <span class='livesearch_rivispan_{$hakuid}'>
                 <font style='font-weight:bold'>$row[ytunnus] &raquo; $row[asiakkaan_tieto]</font>
+                </span>
               </div><div name='selectValues$hakuid' id='$row[tunnus]'></div>";
           $limit++;
 
@@ -9456,6 +9488,8 @@ if (!function_exists("livesearch_asiakashaku")) {
       else {
         echo "<div style='padding:2px'><font class='message'>".t("Ei asiakkaita.")."</font></div>";
       }
+
+      livesearch_trimmaa_leveys($hakuid);
     }
     else {
       echo "
@@ -9528,7 +9562,9 @@ if (!function_exists('livesearch_asiakasytunnushaku')) {
           }
           echo "\"
                 style='padding:2px;'>
+                <span class='livesearch_rivispan_{$hakuid}'>
                 <font style='font-weight:bold'>$row[ytunnus] &raquo; $row[nimi]</font>
+                </span>
               </div><div name='selectValues$hakuid' id='$row[ytunnus]'></div>";
           $limit++;
 
@@ -9542,6 +9578,8 @@ if (!function_exists('livesearch_asiakasytunnushaku')) {
       else {
         echo "<div style='padding:2px'><font class='message'>".t("Ei asiakkaita.")."</font></div>";
       }
+
+      livesearch_trimmaa_leveys($hakuid);
     }
     else {
       echo "
@@ -9616,7 +9654,9 @@ if (!function_exists('livesearch_asiakaskategoriahaku')) {
           }
           echo "\"
                 style='padding:2px;'>
+                <span class='livesearch_rivispan_{$hakuid}'>
                 <font style='font-weight:bold'>{$polku['polku']} &raquo; {$row['nimi']}</font>
+                </span>
               </div><div name='selectValues$hakuid' id='$row[tunnus]'></div>";
           $limit++;
 
@@ -9630,6 +9670,8 @@ if (!function_exists('livesearch_asiakaskategoriahaku')) {
       else {
         echo "<div style='padding:2px'><font class='message'>".t("Ei asiakaskategorioita").".</font></div>";
       }
+
+      livesearch_trimmaa_leveys($hakuid);
     }
     else {
       echo "
@@ -9697,7 +9739,9 @@ if (!function_exists("livesearch_varastohaku")) {
           }
           echo "\"
                 style='padding:2px;'>
+                <span class='livesearch_rivispan_{$hakuid}'>
                 <font style='font-weight:bold'>$row[hyllyt]</font>
+                </span>
               </div><div name='selectValues$hakuid' id='$row[hyllyt]'></div>";
           $limit++;
 
@@ -9711,6 +9755,8 @@ if (!function_exists("livesearch_varastohaku")) {
       else {
         echo "<div style='padding:2px'><font class='message'>".t("Ei varastoa.")."</font></div>";
       }
+
+      livesearch_trimmaa_leveys($hakuid);
     }
     else {
       echo "
@@ -9775,7 +9821,9 @@ if (!function_exists("livesearch_toimittajahaku")) {
           }
           echo "\"
                 style='padding:2px;'>
+                <span class='livesearch_rivispan_{$hakuid}'>
                 <font style='font-weight:bold'>$row[nimi]</font>
+                </span>
               </div><div name='selectValues$hakuid' id='$row[tunnus]'></div>";
           $limit++;
 
@@ -9789,6 +9837,8 @@ if (!function_exists("livesearch_toimittajahaku")) {
       else {
         echo "<div style='padding:2px'><font class='message'>".t("Ei toimittajia").".</font></div>";
       }
+
+      livesearch_trimmaa_leveys($hakuid);
     }
     else {
       echo "
@@ -9847,7 +9897,9 @@ if (!function_exists("livesearch_sarjanumerohaku")) {
           }
           echo "\"
                 style='padding:2px;'>
+                <span class='livesearch_rivispan_{$hakuid}'>
                 <font style='font-weight:bold'>{$row['sarjanumero']}</font>
+                </span>
               </div><div name='selectValues$hakuid' id='$row[sarjanumero]'></div>";
           $limit++;
 
@@ -9861,6 +9913,8 @@ if (!function_exists("livesearch_sarjanumerohaku")) {
       else {
         echo "<div style='padding:2px'><font class='message'>".t("Ei sarjanumeroita").".</font></div>";
       }
+
+      livesearch_trimmaa_leveys($hakuid);
     }
     else {
       echo "
@@ -9906,6 +9960,42 @@ if (!function_exists("livesearch_kentta")) {
     }
     $return .= "<div id='livesearch_$hakuID' class='liveSearch' name='livesearch_$hakuID' style='width:{$result_width}px; overflow: auto; max-height: 200px;' onmousedown=\"setTimeout('document.getElementById(\'$hakuID\').focus()',10);\"></div>";
     return $return;
+  }
+}
+
+if (!function_exists("livesearch_trimmaa_leveys")) {
+  function livesearch_trimmaa_leveys($hakuid) {
+
+    echo "
+    <script TYPE='text/javascript' LANGUAGE='JavaScript'>
+
+      document.getElementById('livesearch_{$hakuid}').style.width = '1000px';
+
+      var ikkunanleveys = $(window).width();
+      var maxleveys = 0;
+      var leveys = 0;
+
+      $('.livesearch_rivispan_{$hakuid}').each(function(t) {
+        leveys = $(this).width();
+
+        if (leveys > maxleveys) {
+          maxleveys = leveys;
+        }
+      });
+
+      maxleveys = maxleveys + 25;
+
+      //Käytetään korkeintaan puolet ikkunasta
+      if (maxleveys > ikkunanleveys/2) {
+        maxleveys = Math.round(ikkunanleveys/2);
+      }
+      if (maxleveys < 200) {
+        maxleveys = 200;
+      }
+
+      document.getElementById('livesearch_{$hakuid}').style.width = maxleveys+'px';
+
+    </script>";
   }
 }
 
@@ -12265,6 +12355,8 @@ if (!function_exists("luoiban")) {
     include "inc/pankkitiedot.inc";
 
     $iban = $tilino . "151800";
+    $vali = "";
+
     for ($ind = 0; $ind < 20; $ind += 7) {
       $vali .= substr($iban, $ind, 7);
       $vali = $vali % 97;
@@ -26917,5 +27009,576 @@ if (!function_exists("etsi_tuotteelle_korjaava_varastoonvientipaiva")) {
     }
 
     return $siirtopaivamaara;
+  }
+}
+
+if (!function_exists("tallenna_tiliote_viite")) {
+  function tallenna_tiliote_viite($filenimi, $forceta = false) {
+    global $kukarow, $yhtiorow;
+
+    $php_cli = (php_sapi_name() == 'cli');
+
+    // Otetaan talteen, koska täällä muutellaan
+    $kukarow_talteen = $kukarow;
+
+    // Otetaan koko aineisto muuttujaan jotta voidaan vertailla onko tämä jo koneella
+    // koska joskus voi tulla esim kaksi LMP aineistoa samalle päivälle mutta eri sisällöllä
+    $kokoaineisto = file_get_contents($filenimi);
+
+    $fd = fopen($filenimi, "r");
+
+    if ($fd === false) {
+      echo "<font class='message'>Tiedosto '$filenimi' ei auennut!</font>";
+      return false;
+    }
+
+    $tietue = fgets($fd);
+
+    // Tämä oli tiliote tai viiteaineisto
+    $query = "LOCK TABLE tiliotedata WRITE, yriti READ, yhtio READ, sanakirja WRITE";
+    $tiliotedataresult = pupe_query($query);
+
+    // Etsitään aineistonumero
+    $query = "SELECT max(aineisto) + 1 AS aineisto FROM tiliotedata";
+    $aineistores = pupe_query($query);
+    $aineistorow = mysql_fetch_assoc($aineistores);
+
+    $xlmpmaa = 0;
+    $xtyyppi = 0;
+    $virhe = 0;
+    $td_perheid = 0;
+    $insert_count = 0;
+    $serc = array("{", "|", "}", "[", "\\", "]", "'");
+    $repl = array("ä", "ö", "å", "Ä", "Ö" , "Å", " ");
+
+    while (!feof($fd)) {
+
+      $tietue = str_replace($serc, $repl, $tietue);
+      $tietue_type = substr($tietue, 0, 3);
+      $tietue_eka = substr($tietue, 0, 1);
+
+      if ($tietue_type == 'T00' or $tietue_type == 'T03' or $tietue_eka == '0') {
+
+        // Konekielinen tiliote
+        if ($tietue_type == 'T00') {
+          $xtyyppi = 1;
+          $alkupvm = dateconv(substr($tietue, 26, 6));
+          $loppupvm = dateconv(substr($tietue, 32, 6));
+          $tilino = substr($tietue, 9, 14);
+        }
+
+        // Laskujen maksupalvelu LMP
+        if ($tietue_type == 'T03') {
+          $xtyyppi = 2;
+          $alkupvm = substr($tietue, 38, 6);
+          $loppupvm = $alkupvm;
+          $tilino = substr($tietue, 9, 14);
+
+          // LMP aineistojen määrä tiedostossa
+          $xlmpmaa++;
+        }
+
+        // Saapuvat viitemaksut
+        if ($tietue_eka == '0') {
+          $xtyyppi = 3;
+          $alkupvm = "20".dateconv(substr($tietue, 1, 6));
+          $loppupvm = $alkupvm;
+
+          // Luetaan tilinumero seuraavalta riviltä ja siirretään pointteri takaisin nykypaikkaan
+          $pointterin_paikka = ftell($fd);
+          $tilino = fgets($fd);
+
+          // Tunnistetaan Danske Bank VIPN-factoringaineisto, koska tiedostossa ei tule tilinumeroa
+          $onko_vipn = (substr($tilino, 0, 1) == 'S') ? 1 : 0;
+          $tilino = substr($tilino, 1, 14);
+          fseek($fd, $pointterin_paikka);
+
+          if ($onko_vipn) {
+            $query = "SELECT tilino
+                      FROM yriti
+                      WHERE bic      = 'DABAFIHH'
+                      AND factoring != ''
+                      LIMIT 1;";
+            $f_result = pupe_query($query);
+
+            # jos tämä epäonnistuu, virheilmoitus tulee alempana kun tilinumeroa ei löydy
+            if (mysql_num_rows($f_result) == 1) {
+              $f_row = mysql_fetch_assoc($f_result);
+              $tilino = $f_row['tilino'];
+            }
+          }
+        }
+
+        $query = "SELECT *
+                  FROM yriti
+                  WHERE tilino = '$tilino'
+                  and kaytossa = ''";
+        $yritiresult = pupe_query($query);
+
+        if (mysql_num_rows($yritiresult) != 1) {
+          // Kokeillaan 14 vikalla merkillä (Virossa esim on 18 merkkisiä tilinumeroita)
+          $query = "SELECT *
+                    FROM yriti
+                    WHERE right(tilino, 14) = '$tilino'
+                    and kaytossa = ''";
+          $yritiresult = pupe_query($query);
+        }
+
+        if (mysql_num_rows($yritiresult) != 1) {
+          echo "<font class='error'>".t("Tiliä %s ei löytynyt", "", $tilino)."!</font>";
+          echo "<br>";
+          $xtyyppi = 0;
+          $virhe++;
+
+          // Setataan yritirow-yhtiö
+          $yritirow["yhtio"] = $kukarow['yhtio'];
+          $yritirow['oletus_rahatili'] = "";
+          $yritirow['oletus_kulutili'] = "";
+        }
+        else {
+          $yritirow = mysql_fetch_assoc($yritiresult);
+
+          // Korjataan vielä tämä jos ne jostain syystä on eri
+          $tilino = $yritirow['tilino'];
+
+          // Setataan kukarow-yhtiö
+          $kukarow["yhtio"] = $yritirow["yhtio"];
+        }
+
+         // Tarkistetaan tilit
+        if (strlen($yritirow['oletus_rahatili']) == 0 or strlen($yritirow['oletus_kulutili']) == 0) {
+          echo "<font class='error'>".t("Tililtä puuttuu kulu tai rahatili")."</font>";
+          echo "<br>";
+          $xtyyppi=0;
+          $virhe++;
+        }
+
+        $query = "SELECT myyntireskontrakausi_alku,
+                  myyntireskontrakausi_loppu,
+                  ostoreskontrakausi_alku,
+                  ostoreskontrakausi_loppu,
+                  tilikausi_alku,
+                  tilikausi_loppu
+                  FROM yhtio
+                  WHERE yhtio = '{$yritirow['yhtio']}'";
+        $yhtio_tsekres = pupe_query($query);
+        $yhtio_tsekrow = mysql_fetch_assoc($yhtio_tsekres);
+
+        //vertaillaan tilikauteen
+        list($vv1,$kk1,$pp1) = explode("-", $yhtio_tsekrow["myyntireskontrakausi_alku"]);
+        list($vv2,$kk2,$pp2) = explode("-", $yhtio_tsekrow["myyntireskontrakausi_loppu"]);
+
+        $myrealku  = (int) date('Ymd', mktime(0, 0, 0, (int) $kk1, (int) $pp1, (int) $vv1));
+        $myreloppu = (int) date('Ymd', mktime(0, 0, 0, (int) $kk2, (int) $pp2, (int) $vv2));
+
+        list($vv1,$kk1,$pp1) = explode("-", $yhtio_tsekrow["ostoreskontrakausi_alku"]);
+        list($vv2,$kk2,$pp2) = explode("-", $yhtio_tsekrow["ostoreskontrakausi_loppu"]);
+
+        $oresalku  = (int) date('Ymd', mktime(0, 0, 0, (int) $kk1, (int) $pp1, (int) $vv1));
+        $oresloppu = (int) date('Ymd', mktime(0, 0, 0, (int) $kk2, (int) $pp2, (int) $vv2));
+
+        list($vv1,$kk1,$pp1) = explode("-", $yhtio_tsekrow["tilikausi_alku"]);
+        list($vv2,$kk2,$pp2) = explode("-", $yhtio_tsekrow["tilikausi_loppu"]);
+
+        $tikaalku  = (int) date('Ymd', mktime(0, 0, 0, (int) $kk1, (int) $pp1, (int) $vv1));
+        $tikaloppu = (int) date('Ymd', mktime(0, 0, 0, (int) $kk2, (int) $pp2, (int) $vv2));
+
+        // Onko tämä aineisto jo ajettu?
+        $query = "SELECT *
+                  FROM tiliotedata
+                  WHERE tilino = '$tilino'
+                  AND alku     = '$alkupvm'
+                  AND loppu    = '$loppupvm'
+                  AND tyyppi   = '$xtyyppi'";
+        $tiliotedatares = pupe_query($query);
+
+        if (mysql_num_rows($tiliotedatares) > 0) {
+          $tiliotedatarow = mysql_fetch_assoc($tiliotedatares);
+
+          // OP-pankki toimittaa useita LMP aineistoja per päivä,
+          // eli tarkistetaan onko juuri tämä aineisto ajettu koneelle
+          // Koodataan tässä vaiheessa vain LMP:lle, mutta mikään ei estä etteikö saman tsekin vois
+          // tehdä myös vaikka tiliotteille jos joku pankki toimittaisi yhden päivän otteet useassa osassa.
+          if ($xtyyppi == 2) {
+            // Group concatissa tulee kaikki tän päivän LMP:t
+            $query = "SELECT group_concat(tieto SEPARATOR '') AS kantaaineisto
+                      FROM tiliotedata
+                      WHERE tilino = '$tilino'
+                      AND alku     = '$alkupvm'
+                      AND loppu    = '$loppupvm'
+                      AND tyyppi   = '$xtyyppi'";
+            $tiliotedatares = pupe_query($query);
+            $tiliotedatarow = mysql_fetch_assoc($tiliotedatares);
+
+            // Otetaan kaikki failissa olevat LMP:t arrayseen. (Nollaindeksissä tyhjää...)
+            $distinct_aineistot = explode("T03", str_replace($serc, $repl, $kokoaineisto));
+            $_to_aineitso = trim($tiliotedatarow["kantaaineisto"]);
+
+            if ($_to_aineitso != "") {
+              for ($xlmpmaa_i = $xlmpmaa; $xlmpmaa_i < count($distinct_aineistot); $xlmpmaa_i++) {
+
+                $_aineisto = trim($distinct_aineistot[$xlmpmaa_i]);
+
+                if ($_aineisto != "" and strpos($_to_aineitso, $_aineisto) !== false) {
+                  echo "<font class='error'>";
+                  echo "VIRHE: Tämä aineisto on jo aiemmin käsitelty!";
+                  echo "<br>";
+                  echo "Tili: $tilino<br>";
+                  echo "Ajalta: $alkupvm - $loppupvm<br>";
+                  echo "Yritys: $yritirow[yhtio]";
+                  echo "</font>";
+                  echo "<br>";
+
+                  $xtyyppi=0;
+                  $virhe++;
+                }
+              }
+            }
+
+            // Tutkitaan, ettei sama aineisto ole montaa kertaa tässä failissa
+            if (count($distinct_aineistot) != count(array_unique($distinct_aineistot))) {
+              echo "<font class='error'>";
+              echo "VIRHE: Aineisto esiintyy tiedostossa moneen kertaan.<br>";
+              echo "Tiedosto viallinen, ei voida jatkaa, ota yhteyttä helpdeskiin!<br>";
+              echo "Tili: $tilino / Pvm: $alkupvm / Yhtiö: $yritirow[yhtio]";
+              echo "</font>";
+              echo "<br>";
+
+              $xtyyppi=0;
+              $virhe++;
+            }
+          }
+          else {
+            if ($tiliotedatarow["aineisto"] == $aineistorow["aineisto"]) {
+              echo "<font class='error'>";
+              echo "VIRHE: Aineisto esiintyy tiedostossa moneen kertaan.<br>";
+              echo "Tiedosto viallinen, ei voida jatkaa, ota yhteyttä helpdeskiin!<br>";
+              echo "Tili: $tilino / Pvm: $alkupvm / Yhtiö: $yritirow[yhtio]";
+              echo "</font>";
+              echo "<br>";
+
+              $xtyyppi=0;
+              $virhe++;
+            }
+            elseif (!$forceta)  {
+              echo "<font class='error'>";
+              echo "VIRHE: Tämä aineisto on jo aiemmin käsitelty!<br>";
+              echo "Tili: $tilino / Pvm: $alkupvm / Yhtiö: $yritirow[yhtio]";
+              echo "</font>";
+              echo "<br>";
+
+              $_pankkiyhteys = (strpos($_SERVER['SCRIPT_NAME'], "pankkiyhteys.php") !== false);
+
+              if (!$php_cli and !$_pankkiyhteys) {
+                list($usec, $sec) = explode(' ', microtime());
+                mt_srand((float) $sec + ((float) $usec * 100000));
+                $tmpfile = md5(uniqid(mt_rand(), true)).".txt";
+
+                file_put_contents("/tmp/".$tmpfile, $kokoaineisto);
+                $_sub = t("Käsittele aineisto vaikka kyseisen päivän/tilin aineisto on jo käsitelty");
+
+                echo "<form method='post' onSubmit='return verify();'>";
+                echo "<input type='hidden' name='virhe_file' value='$tmpfile'>";
+                echo "<input type='submit' value='{$_sub}'>";
+                echo "</form>";
+                echo "<br>";
+              }
+
+              $xtyyppi=0;
+              $virhe++;
+            }
+          }
+        }
+      }
+
+      // Tsekataan tiliotteen duplikaatit ja tsekataan ettei kirjata suljetuille kausille
+      if ($xtyyppi == 1 and $tietue_type == "T10") {
+
+        // VVKKPP
+        $tsekpvm = (int) "20".substr($tietue, 30, 6);
+
+        // Päivämäärä pitää olla kaikkien kausien sisällä
+        $_tarkistus  = ($tsekpvm < $oresalku);
+        $_tarkistus &= ($tsekpvm > $oresloppu);
+        $_tarkistus &= ($tsekpvm < $myrealku);
+        $_tarkistus &= ($tsekpvm > $myreloppu);
+        $_tarkistus &= ($tsekpvm < $tikaalku);
+        $_tarkistus &= ($tsekpvm > $tikaloppu);
+
+        if ($_tarkistus) {
+          echo "<font class='error'>";
+          echo "VIRHE: Aineistossa on tapahtuma suljetulle kaudelle!<br>";
+          echo "Tili: $tilino / Pvm: $tsekpvm / Yhtiö: $yritirow[yhtio]";
+          echo "</font>";
+          echo "<br>";
+
+          $xtyyppi=0;
+          $virhe++;
+        }
+
+        $arkistotunnari = substr($tietue, 12, 18);
+        $taso = substr($tietue, 187, 1);
+
+        $_string = (!is_numeric($arkistotunnari) and trim($arkistotunnari) != "");
+        $_number = (is_numeric($arkistotunnari) and (int) $arkistotunnari != 0);
+
+        if ($taso == ' ' and ($_string or $_number)) {
+          // Katsotaan löytyykö tällä tunnuksella suoritus
+          $query = "SELECT alku
+                    FROM tiliotedata
+                    WHERE yhtio = '$yritirow[yhtio]'
+                    AND tilino  = '$tilino'
+                    AND tyyppi  = '$xtyyppi'
+                    AND tieto   = '$tietue'
+                    AND substring(tieto, 13, 18) = '$arkistotunnari'";
+          $vchkres = pupe_query($query);
+
+          if (mysql_num_rows($vchkres) > 0) {
+            $vchkrow = mysql_fetch_assoc($vchkres);
+
+            echo "<font class='error'>";
+            echo "VIRHE: Tiliotetapahtuma arkistointitunnuksella: ";
+            echo "'$arkistotunnari' löytyy jo järjestelmästä!<br>";
+            echo "Tili: $tilino / Pvm: $vchkrow[alku] / Yhtiö: $yritirow[yhtio]";
+            echo "</font>";
+            echo "<br>";
+
+            $xtyyppi=0;
+            $virhe++;
+          }
+        }
+      }
+
+      // Tsekataan LMP-aineiston duplikaatit ja tsekataan ettei kirjata suljetuille kausille
+      if ($xtyyppi == 2 and $tietue_type == "T10") {
+        // VVKKPP
+        $taso = substr($tietue, 187, 1);
+        $tsekpvm = substr($tietue, 42, 6);
+
+        if ($taso == '0') $turvapvm = $tsekpvm; // Osuuspankki ei lähetä päiväystä kuin täällä
+        if ($pvm == '000000') $tsekpvm = $turvapvm;
+
+        if ($tsekpvm < $oresalku or $tsekpvm > $oresloppu) {
+          echo "<font class='error'>";
+          echo "VIRHE: Aineistossa on tapahtuma suljetulle kaudelle!<br>";
+          echo "Tili: $tilino / Pvm: $tsekpvm / Yhtiö: $yritirow[yhtio]";
+          echo "</font>";
+          echo "<br>";
+
+          $xtyyppi=0;
+          $virhe++;
+        }
+      }
+
+      // Tsekataan, ettei mene duplikaattiviitesuortiuksia ja tsekataan ettei kirjata suljetuille kausille
+      if ($xtyyppi == 3 and ($tietue_eka == "3" or $tietue_eka == "S" )) {
+
+        // VVKKPP
+        $tsekpvm = (int) "20".substr($tietue, 15, 6);
+
+        if ($tsekpvm < $myrealku or $tsekpvm > $myreloppu) {
+          echo "<font class='error'>";
+          echo "VIRHE: Aineistossa on viitesuoritus suljetulle kaudelle!<br>";
+          echo "Tili: $tilino / Pvm: $tsekpvm / Yhtiö: $yritirow[yhtio]";
+          echo "</font>";
+          echo "<br>";
+
+          $xtyyppi=0;
+          $virhe++;
+        }
+
+        $arkistotunnari = substr($tietue, 27, 16);
+
+        $_string = (!is_numeric($arkistotunnari) and trim($arkistotunnari) != "");
+        $_number = (is_numeric($arkistotunnari) and (int) $arkistotunnari != 0);
+
+        if ($_string or $_number) {
+          // Katsotaan löytyykö tällä tunnuksella suoritus
+          $query = "SELECT alku
+                    FROM tiliotedata
+                    WHERE yhtio = '$yritirow[yhtio]'
+                    and tilino  = '$tilino'
+                    and tyyppi  = '$xtyyppi'
+                    and tieto   = '$tietue'
+                    and substring(tieto, 28, 16) = '$arkistotunnari'";
+          $vchkres = pupe_query($query);
+
+          if (mysql_num_rows($vchkres) > 0) {
+            $vchkrow = mysql_fetch_assoc($vchkres);
+
+            echo "<font class='error'>";
+            echo "VIRHE: Viitesuoritus arkistointitunnuksella: ";
+            echo "'$arkistotunnari' löytyy jo järjestelmästä!<br>";
+            echo "Tili: $tilino / Pvm: $vchkrow[alku] / Yhtiö: $yritirow[yhtio]";
+            echo "</font>";
+            echo "<br>";
+
+            $xtyyppi=0;
+            $virhe++;
+          }
+        }
+      }
+
+      if ($xtyyppi > 0 and $xtyyppi <= 3) {
+        // Kirjoitetaan tiedosto kantaan
+        $query = "INSERT into tiliotedata set
+                  yhtio    = '$yritirow[yhtio]',
+                  aineisto = '$aineistorow[aineisto]',
+                  tilino   = '$tilino',
+                  alku     = '$alkupvm',
+                  loppu    = '$loppupvm',
+                  tyyppi   = '$xtyyppi',
+                  tieto    = '$tietue'";
+        $tiliotedataresult = pupe_query($query);
+        $tiliote_id = mysql_insert_id();
+
+        // Päivitetään perheid
+        if ($tietue_type != "T11" and $tietue_type != "T81") {
+          $td_perheid = $tiliote_id;
+        }
+
+        if ($td_perheid > 0) {
+          $query = "UPDATE tiliotedata SET
+                    perheid      = $td_perheid
+                    WHERE tunnus = $tiliote_id";
+          $updateperheid = pupe_query($query);
+        }
+
+        $insert_count++;
+      }
+
+      $tietue = fgets($fd);
+    }
+
+    fclose($fd);
+
+    // Palautetan kukarow
+    $kukarow = $kukarow_talteen;
+
+    // Jos meillä tuli virheitä ja ei olla pakottamassa
+    if ($forceta === false and ($virhe > 0 or $insert_count == 0)) {
+      echo "<font class='error'>";
+      echo t("Aineistoa ei tallennettu järjestelmään");
+      echo ".</font>";
+      echo "<br>";
+
+      //Poistetaan aineistot tiliotedatasta
+      $query = "DELETE FROM tiliotedata
+                WHERE aineisto = '$aineistorow[aineisto]'";
+      $tiliotedataresult = pupe_query($query);
+
+      $query = "UNLOCK TABLES";
+      $tiliotedataresult = pupe_query($query);
+
+      return false;
+    }
+
+    $query = "UNLOCK TABLES";
+    $tiliotedataresult = pupe_query($query);
+
+    echo "<font class='message'>";
+    echo t("Aineisto tallennettu järjestelmään");
+    echo ". ({$aineistorow["aineisto"]})";
+    echo "</font>";
+    echo "<br>";
+
+    return $aineistorow["aineisto"];
+  }
+}
+
+if (!function_exists("kasittele_tiliote_viite")) {
+  function kasittele_tiliote_viite($aineistotunnus) {
+    global $kukarow, $yhtiorow, $palvelin2, $lopp_pvm, $lopp_tilino, $lopp_tyyppi, $kuitattu_checked;
+
+    $tee_selvittely = false;
+    $tee_viitemaksu_kohdistus = false;
+    $vastavienti = 0;
+    $vastavienti_valuutassa = 0;
+
+    // Otetaan talteen, koska täällä muutellaan
+    $kukarow_talteen = $kukarow;
+
+    // Käsitellään uudet tietueet
+    $query = "SELECT *
+              FROM tiliotedata
+              WHERE aineisto = {$aineistotunnus}
+              ORDER BY aineisto, tunnus";
+    $tiliotedataresult = pupe_query($query);
+
+    $tilioterivilaskuri = 1;
+    $tilioterivimaara = mysql_num_rows($tiliotedataresult);
+
+    // Haetaan kannan isoin lasku.tunnus, nin voidaan tehdän sanity-checki EndToEndId:lle.
+    $query = "SELECT max(tunnus) maxEndToEndId
+              FROM lasku";
+    $meteidres = pupe_query($query);
+    $meteidrow = mysql_fetch_assoc($meteidres);
+
+    while ($tiliotedatarow = mysql_fetch_assoc($tiliotedataresult)) {
+      $tietue = $tiliotedatarow['tieto'];
+
+      $query = "SELECT *
+                FROM yriti
+                WHERE tilino = '{$tiliotedatarow['tilino']}'";
+      $yriti_result = pupe_query($query);
+      $yritirow = mysql_fetch_assoc($yriti_result);
+
+      // Setataan kukarow-yhtiö
+      $kukarow["yhtio"] = $yritirow["yhtio"];
+
+      if ($tiliotedatarow['tyyppi'] == 1) {
+        $tee_selvittely = true;
+        require("inc/tiliote.inc");
+      }
+      if ($tiliotedatarow['tyyppi'] == 2) {
+        $tee_selvittely = true;
+        require("inc/LMP.inc");
+      }
+      if ($tiliotedatarow['tyyppi'] == 3) {
+        $tee_viitemaksu_kohdistus = true;
+        require("inc/viitemaksut.inc");
+      }
+
+      // merkataan tämä tiliotedatarivi käsitellyksi
+      $query = "UPDATE tiliotedata
+                SET kasitelty = now()
+                WHERE tunnus = '$tiliotedatarow[tunnus]'";
+      $updatekasitelty = pupe_query($query);
+
+      $tilioterivilaskuri++;
+    }
+
+    if ($tee_selvittely) {
+      $tkesken = 0;
+      $maara = $vastavienti;
+      $kohdm = $vastavienti_valuutassa;
+
+      echo "<tr><td colspan = '6'>";
+      require("inc/teeselvittely.inc");
+      echo "</td></tr>";
+      echo "</table><br>\n<br>\n";
+    }
+
+    if ($tee_viitemaksu_kohdistus) {
+      # Tässä tarvitaan kukarow[yhtio], joten ajetaan tämä kaikille firmoille
+      $query = "SELECT yhtio from yhtio";
+      $yhtiores = pupe_query($query);
+
+      while ($yhtiorow = mysql_fetch_assoc($yhtiores)) {
+        // Setataan yhtiorow
+        $yhtiorow = hae_yhtion_parametrit($yhtiorow['yhtio']);
+
+        // Setataan kukarow-yhtiö
+        $kukarow["yhtio"] = $yhtiorow["yhtio"];
+
+        require("inc/viitemaksut_kohdistus.inc");
+        require("myyntires/suoritus_asiakaskohdistus_kaikki.php");
+      }
+
+      echo "<br><br>";
+    }
+
+    // Palautetan kukarow
+    $kukarow = $kukarow_talteen;
   }
 }

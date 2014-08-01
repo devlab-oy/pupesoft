@@ -359,6 +359,7 @@ if (!function_exists("tee_jt_tilaus")) {
               $fieldname == 'maksuaika' or
               $fieldname == 'lahetepvm' or
               $fieldname == 'h1time' or
+              $fieldname == 'viite' or
               $fieldname == 'laskunro' or
               $fieldname == 'mapvm' or
               $fieldname == 'kerayslista' or
@@ -378,15 +379,6 @@ if (!function_exists("tee_jt_tilaus")) {
               $fieldname == 'poistumistoimipaikka' or
               $fieldname == 'poistumistoimipaikka_koodi') {
             $query .= $fieldname."='',";
-          }
-          elseif ($fieldname == 'viite') {
-            // Jos asiakkaan tilausnumero huomioida otsikon etsinn‰ss‰, ei nollata viitett‰k‰‰n
-            if ($yhtiorow['jt_asiakkaan_tilausnumero'] == "K") {
-              $query .= $fieldname."='".$otsikkorivi[$fieldname]."',";
-            }
-            else {
-              $query .= $fieldname."='',";
-            }
           }
           elseif ($fieldname == 'kate_korjattu') {
             $query .= $fieldname." = NULL,";
@@ -1155,7 +1147,7 @@ if (!function_exists("tee_jt_tilaus")) {
                       WHERE yhtio  = '$kukarow[yhtio]'
                       and otunnus  = '$id'
                       and perheid != 0
-                      and tyyppi != 'D'
+                      and tyyppi  != 'D'
                       GROUP by perheid";
             $copresult = pupe_query($query);
 
@@ -1174,7 +1166,7 @@ if (!function_exists("tee_jt_tilaus")) {
                       WHERE yhtio   = '$kukarow[yhtio]'
                       and otunnus   = '$id'
                       and perheid2 != 0
-                      and tyyppi != 'D'
+                      and tyyppi   != 'D'
                       GROUP by perheid2";
             $copresult = pupe_query($query);
 

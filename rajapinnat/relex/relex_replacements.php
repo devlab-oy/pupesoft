@@ -71,11 +71,11 @@ $query = "SELECT DISTINCT yhtio.maa, korvaavat.id
           FROM tuote
           JOIN korvaavat ON (tuote.yhtio = korvaavat.yhtio AND tuote.tuoteno = korvaavat.tuoteno {$korvaavatrajaus})
           JOIN yhtio ON (tuote.yhtio = yhtio.yhtio)
-          WHERE tuote.yhtio     = '$yhtio'
-          AND tuote.status     != 'P'
-          AND tuote.ei_saldoa   = ''
-          AND tuote.tuotetyyppi = ''
-          AND tuote.ostoehdotus = ''";
+          WHERE tuote.yhtio      = '$yhtio'
+          AND tuote.status      != 'P'
+          AND tuote.ei_saldoa    = ''
+          AND tuote.tuotetyyppi  = ''
+          AND tuote.ostoehdotus  = ''";
 $res = pupe_query($query);
 
 // Kerrotaan montako rivi‰ k‰sitell‰‰n

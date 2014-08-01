@@ -242,9 +242,9 @@ echo "<tr><th>".t("Vain käsin viedyt")."</th><td colspan='3'><input type='checkb
 
 $query = "SELECT kuka.kuka, kuka.nimi
           FROM kuka
-          WHERE kuka.yhtio = '{$kukarow["yhtio"]}'
+          WHERE kuka.yhtio    = '{$kukarow["yhtio"]}'
           AND kuka.aktiivinen = 1
-          and kuka.extranet = ''
+          and kuka.extranet   = ''
           ORDER BY kuka.nimi";
 $vresult = pupe_query($query);
 
@@ -429,7 +429,7 @@ if ($tee != "") {
 
       $query = "SELECT *
                 FROM tilikaudet
-                WHERE yhtio = '$kukarow[yhtio]'
+                WHERE yhtio         = '$kukarow[yhtio]'
                 and tilikausi_alku  <= '$alvv-$blvk-$blvp'
                 and tilikausi_loppu >= '$alvv-$blvk-$blvp'";
       $result = mysql_query($query) or pupe_error($query);
@@ -446,7 +446,7 @@ if ($tee != "") {
       $query = "SELECT *
                 FROM tilikaudet
                 WHERE yhtio = '$kukarow[yhtio]'
-                and tunnus = '$tkausi'";
+                and tunnus  = '$tkausi'";
       $result = mysql_query($query) or pupe_error($query);
     }
 
@@ -614,7 +614,7 @@ if ($tee != "") {
             LEFT JOIN kustannuspaikka projekti ON (tiliointi.yhtio = projekti.yhtio and tiliointi.projekti = projekti.tunnus)
             $asiakasjoini
             $toimittajajoini
-            WHERE tiliointi.yhtio = '{$kukarow["yhtio"]}'
+            WHERE tiliointi.yhtio  = '{$kukarow["yhtio"]}'
             AND tiliointi.korjattu = ''
             $lisa1
             $lisa
@@ -721,10 +721,10 @@ if ($tee != "") {
       if (strlen(trim($tili)) > 0 and $edtili != $trow["xtilino"] and isset($tilikaudetrow)) {
         $query = "SELECT sum(summa) saldo
                   FROM tiliointi
-                  WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+                  WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
                   and tiliointi.korjattu = ''
                   and tiliointi.tapvm    >= '$tilikaudetrow[tilikausi_alku]'
-                  and tiliointi.tilino = '$trow[xtilino]'
+                  and tiliointi.tilino   = '$trow[xtilino]'
                   $lisa2";
         $alkres = mysql_query($query) or pupe_error($query);
         $alkurow = mysql_fetch_array ($alkres);

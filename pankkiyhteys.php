@@ -48,7 +48,7 @@ if ($tee == "laheta") {
     virhe("Salasana täytyy antaa!");
     $virheet_count++;
   }
-  elseif (!pankkiyhteys_salasana_kunnossa($pankkiyhteys_tunnus, $salasana)) {
+  elseif (!hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana)) {
     virhe("Antamasi salasana on väärä!");
     $virheet_count++;
   }
@@ -62,9 +62,9 @@ if ($tee == "laheta") {
 // Tiliotteiden haku
 if ($tee == "laheta" and $hae_tiliotteet == "on") {
   $params = array(
-    "tiedostotyyppi"      => "TITO",
-    "pankkiyhteys_tunnus" => $pankkiyhteys_tunnus,
-    "salasana"            => $salasana
+    "file_type"             => "TITO",
+    "pankkiyhteys_tunnus"   => $pankkiyhteys_tunnus,
+    "pankkiyhteys_salasana" => $salasana
   );
 
   $tiedostot = sepa_lataa_kaikki_uudet_tiedostot($params);
@@ -84,9 +84,9 @@ if ($tee == "laheta" and $hae_tiliotteet == "on") {
 // Viitteiden haku
 if ($tee == "laheta" and $hae_viitteet == "on") {
   $params = array(
-    "tiedostotyyppi"      => "KTL",
-    "pankkiyhteys_tunnus" => $pankkiyhteys_tunnus,
-    "salasana"            => $salasana
+    "file_type"             => "KTL",
+    "pankkiyhteys_tunnus"   => $pankkiyhteys_tunnus,
+    "pankkiyhteys_salasana" => $salasana
   );
 
   $tiedostot = sepa_lataa_kaikki_uudet_tiedostot($params);

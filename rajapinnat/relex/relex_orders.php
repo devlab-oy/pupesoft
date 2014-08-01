@@ -66,16 +66,16 @@ $query = "SELECT
           FROM tilausrivi
           JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
           JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
-            AND tuote.tuoteno     = tilausrivi.tuoteno
-            AND tuote.status     != 'P'
-            AND tuote.ei_saldoa   = ''
-            AND tuote.tuotetyyppi = ''
-            AND tuote.ostoehdotus = '')
+            AND tuote.tuoteno            = tilausrivi.tuoteno
+            AND tuote.status            != 'P'
+            AND tuote.ei_saldoa          = ''
+            AND tuote.tuotetyyppi        = ''
+            AND tuote.ostoehdotus        = '')
           JOIN yhtio ON (tilausrivi.yhtio = yhtio.yhtio)
-          WHERE tilausrivi.yhtio        = '$yhtio'
-          AND tilausrivi.varattu       != 0
-          AND tilausrivi.tyyppi        IN ('L','O')
-          AND tilausrivi.laskutettuaika = '0000-00-00'
+          WHERE tilausrivi.yhtio         = '$yhtio'
+          AND tilausrivi.varattu        != 0
+          AND tilausrivi.tyyppi          IN ('L','O')
+          AND tilausrivi.laskutettuaika  = '0000-00-00'
           ORDER BY tilausrivi.laadittu";
 $res = pupe_query($query);
 

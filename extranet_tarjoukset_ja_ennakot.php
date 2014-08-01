@@ -1,8 +1,8 @@
 <?php
 
-require ("parametrit.inc");
-require ("validation/Validation.php");
-require_once('luo_myyntitilausotsikko.inc');
+require "parametrit.inc";
+require "validation/Validation.php";
+require_once 'luo_myyntitilausotsikko.inc';
 
 enable_ajax();
 
@@ -123,9 +123,9 @@ $request['kayttajaan_liitetty_asiakas'] = hae_extranet_kayttajaan_liitetty_asiak
 
 if ($tee == "LISAARIVI") {
   $parametrit = array("lasku_tunnus" => $otunnus,
-            "tuoteno" => $tuoteno,
-            "kpl" => $kpl,
-            "toim" => $request['toim']);
+    "tuoteno" => $tuoteno,
+    "kpl" => $kpl,
+    "toim" => $request['toim']);
   lisaa_ennakkorivi($parametrit);
 }
 
@@ -170,10 +170,10 @@ if ($action == 'hyvaksy_hylkaa_paivita') {
   if (isset($request['paivita']) and $toim == 'EXTENNAKKO') {
     unset($request['paivita']);
     $params = array("valittu_tarjous_tunnus" => $valittu_tarjous_tunnus,
-             "syotetyt_lisatiedot" => $syotetyt_lisatiedot,
-            "kappalemaarat" => $kappalemaarat,
-            "toim" => $request['toim'],
-            );
+      "syotetyt_lisatiedot" => $syotetyt_lisatiedot,
+      "kappalemaarat" => $kappalemaarat,
+      "toim" => $request['toim'],
+    );
     $onnistuiko_toiminto = paivita_ennakko($params);
 
     if ($onnistuiko_toiminto) {
@@ -186,20 +186,20 @@ if ($action == 'hyvaksy_hylkaa_paivita') {
     if ($toim == 'EXTTARJOUS') {
       $onnistuiko_toiminto = hyvaksy_tarjous($request['valittu_tarjous_tunnus'], $syotetyt_lisatiedot);
     }
-    elseif($request['hyvaksy'] == "JOO") {
+    elseif ($request['hyvaksy'] == "JOO") {
       $parametrit = array("valittu_tarjous_tunnus" => $valittu_tarjous_tunnus,
-                "syotetyt_lisatiedot" => $syotetyt_lisatiedot,
-                "kappalemaarat" => $kappalemaarat,
-                "toim" => $toim,
-                "viesti" => $viestion,
-                );
+        "syotetyt_lisatiedot" => $syotetyt_lisatiedot,
+        "kappalemaarat" => $kappalemaarat,
+        "toim" => $toim,
+        "viesti" => $viestion,
+      );
       $onnistuiko_toiminto = hyvaksy_ennakko($parametrit);
     }
     else {
       $onnistuiko_toiminto = hylkaa($request['valittu_tarjous_tunnus']);
     }
   }
-  elseif($toim == "EXTTARJOUS"){
+  elseif ($toim == "EXTTARJOUS") {
     $onnistuiko_toiminto = hylkaa($request['valittu_tarjous_tunnus']);
   }
   else {
@@ -278,7 +278,7 @@ function hyvaksy_ennakko($parametrit) {
   $valittu_tarjous_tunnus = $parametrit['valittu_tarjous_tunnus'];
   $toim = $parametrit['toim'];
   $kukarow['kesken'] = $valittu_tarjous_tunnus;
-    $viesti = pupesoft_cleanstring($parametrit['viesti']);
+  $viesti = pupesoft_cleanstring($parametrit['viesti']);
 
   $onnistuiko_toiminto = paivita_ennakko($parametrit);
 
@@ -293,7 +293,7 @@ function hyvaksy_ennakko($parametrit) {
 
     $laskurow = hae_extranet_tarjous($valittu_tarjous_tunnus, $toim);
 
-    require_once('tilaus-valmis.inc');
+    require_once 'tilaus-valmis.inc';
 
     $kukarow['kesken'] = '';
     $valittu_tarjous_tunnus = '';
@@ -325,7 +325,7 @@ function hyvaksy_tarjous($valittu_tarjous_tunnus, $syotetyt_lisatiedot) {
     pupe_query($query);
 
     // Kopsataan valitut rivit uudelle myyntitilaukselle
-    require("tilauksesta_myyntitilaus.inc");
+    require "tilauksesta_myyntitilaus.inc";
     $tilauksesta_myyntitilaus = tilauksesta_myyntitilaus($valittu_tarjous_tunnus, '', '', '');
 
     if ($tilauksesta_myyntitilaus != '') {
@@ -414,10 +414,10 @@ function paivita_ennakko($params) {
       pupe_query($query);
 
       $parametrit = array("lasku_tunnus" => $valittu_tarjous_tunnus,
-                "tuoteno" => $loytynyt_tilausrivi[0]['tuoteno'],
-                "kpl" => $value,
-                "toim" => $toim,
-                "syotettyhinta" => $loytynyt_tilausrivi[0]['hinta']);
+        "tuoteno" => $loytynyt_tilausrivi[0]['tuoteno'],
+        "kpl" => $value,
+        "toim" => $toim,
+        "syotettyhinta" => $loytynyt_tilausrivi[0]['hinta']);
 
       lisaa_ennakkorivi($parametrit);
     }
@@ -438,7 +438,7 @@ function hylkaa($valittu_tarjous_tunnus) {
 
   $kukarow['kesken'] = $valittu_tarjous_tunnus;
   $laskurow = hae_extranet_tarjous($valittu_tarjous_tunnus, $toim);
-  if($toim == "EXTTARJOUS") {
+  if ($toim == "EXTTARJOUS") {
     $query = "UPDATE lasku
               SET alatila = 'X'
               WHERE yhtio = '{$kukarow['yhtio']}'
@@ -453,7 +453,7 @@ function hylkaa($valittu_tarjous_tunnus) {
   }
   $result = pupe_query($query);
 
-  if($toim == "EXTTARJOUS") {
+  if ($toim == "EXTTARJOUS") {
 
     $query = "UPDATE tilausrivi
               SET tyyppi = 'D'
@@ -602,7 +602,7 @@ function nayta_tarjous($valittu_tarjous_tunnus, $toim) {
         <input type='hidden' name='action' value='nayta_tarjous'>
         ";
 
-    require('syotarivi.inc');
+    require 'syotarivi.inc';
     echo "<br>";
   }
 
@@ -942,4 +942,4 @@ function lisaa_ennakkorivi($params) {
   }
 }
 
-require ("footer.inc");
+require "footer.inc";

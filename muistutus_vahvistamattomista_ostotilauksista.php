@@ -10,8 +10,8 @@ if (php_sapi_name() != 'cli') {
 if (isset($argv[1]) and trim($argv[1]) != '') {
 
   // otetaan tietokanta connect
-  require ("inc/connect.inc");
-  require ("inc/functions.inc");
+  require "inc/connect.inc";
+  require "inc/functions.inc";
 
   // hmm.. j‰nn‰‰
   $kukarow['yhtio'] = $argv[1];

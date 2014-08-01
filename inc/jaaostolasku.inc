@@ -18,14 +18,14 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
   $jaettavalaskures = pupe_query($query);
 
   if (mysql_num_rows($jaettavalaskures) != 1) {
-    echo "<font class='error'>",t("Laskua ei voida jakaa, koska se on väärässä tilassa"),"!<br/>";
+    echo "<font class='error'>", t("Laskua ei voida jakaa, koska se on väärässä tilassa"), "!<br/>";
     return FALSE;
   }
 
   $jaettavalaskurow = mysql_fetch_assoc($jaettavalaskures);
 
   if (($jaettavalaskurow['summa'] >= 0 and $vahennettavasumma_valuutassa <= 0) or ($jaettavalaskurow['summa'] <= 0 and $vahennettavasumma_valuutassa >= 0) or (abs($vahennettavasumma_valuutassa) >= abs($jaettavalaskurow['summa']))) {
-    echo "<font class='error'>",t("Syötetty summa on virheellinen"),"! $vahennettavasumma_valuutassa<br/>";
+    echo "<font class='error'>", t("Syötetty summa on virheellinen"), "! $vahennettavasumma_valuutassa<br/>";
     return false;
   }
 
@@ -43,7 +43,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
   $tiliointires = pupe_query($query);
 
   if (mysql_num_rows($tiliointires) > 0) {
-    echo "<font class='error'>",t("Laskua ei voida jakaa näin pieneen osaan"),"!<br/>";
+    echo "<font class='error'>", t("Laskua ei voida jakaa näin pieneen osaan"), "!<br/>";
     return false;
   }
 
@@ -100,17 +100,17 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
     $fields .= mysql_field_name($jaettavalaskures, $i).",";
 
     switch (mysql_field_name($jaettavalaskures, $i)) {
-      case 'summa':
-        $values .= "'$vahennettavasumma_valuutassa',";
-        break;
-      case 'kasumma':
-        $values .= "'0.00',";
-        break;
-      case "kate_korjattu":
-        $values .= "NULL,";
-        break;
-      default:
-        $values .= "'".$jaettavalaskurow[mysql_field_name($jaettavalaskures, $i)]."',";
+    case 'summa':
+      $values .= "'$vahennettavasumma_valuutassa',";
+      break;
+    case 'kasumma':
+      $values .= "'0.00',";
+      break;
+    case "kate_korjattu":
+      $values .= "NULL,";
+      break;
+    default:
+      $values .= "'".$jaettavalaskurow[mysql_field_name($jaettavalaskures, $i)]."',";
     }
   }
 
@@ -340,10 +340,10 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
       $keikanalatila   = $laskurow['alatila'];
 
       $laskutunnus = $jaettavalaskurow['tunnus'];
-      require('tilauskasittely/kululaskut.inc');
+      require 'tilauskasittely/kululaskut.inc';
 
       $laskutunnus = $utunnus;
-      require('tilauskasittely/kululaskut.inc');
+      require 'tilauskasittely/kululaskut.inc';
     }
   }
 

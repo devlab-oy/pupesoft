@@ -1,7 +1,7 @@
 <?php
 
-require ("../inc/parametrit.inc");
-require('myyntires/paperitiliote_saldovahvistus.php');
+require "../inc/parametrit.inc";
+require 'myyntires/paperitiliote_saldovahvistus.php';
 
 if ($ajax_request) {
   exit;
@@ -191,7 +191,7 @@ if (isset($lahetetyt_count) and isset($ei_lahetetty_count)) {
 echo "<input type='hidden' id='down_arrow' value='{$palvelin2}pics/lullacons/arrow-single-down-green.png' />";
 echo "<input type='hidden' id='right_arrow' value='{$palvelin2}pics/lullacons/arrow-single-right-green.png' />";
 
-require('inc/footer.inc');
+require 'inc/footer.inc';
 
 function echo_lahetetyt_saldovahvistukset($request) {
   global $kukarow, $yhtiorow;

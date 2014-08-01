@@ -239,7 +239,7 @@ else {
                 laatija          = '$kukarow[kuka]',
                 laadittu         = now()";
       $laskutusres = pupe_query($query);
-      $isa = mysql_insert_id ($link);
+      $isa = mysql_insert_id($link);
 
       $lukko = "";
 
@@ -289,7 +289,7 @@ else {
                   laatija          = '$kukarow[kuka]',
                   laadittu         = now()";
         $laskutusres = pupe_query($query);
-        $isa = mysql_insert_id ($link);
+        $isa = mysql_insert_id($link);
 
         if ($xrow["alv"] != 0) {
 
@@ -476,7 +476,7 @@ else {
     $loppusumma_valuutassa = 0;
 
     foreach ($kateismaksu as $tili => $arvo) {
-      $arvo = str_replace(",",".",$arvo);
+      $arvo = str_replace(",", ".", $arvo);
 
       if ((float) $arvo != 0) {
 
@@ -548,8 +548,8 @@ else {
   }
 
   // Kirjataan pyoristykset, jos niita on
-  $vastasumma = round($vastasumma,2);
-  $vastasumma_valuutassa = round($vastasumma_valuutassa,2);
+  $vastasumma = round($vastasumma, 2);
+  $vastasumma_valuutassa = round($vastasumma_valuutassa, 2);
 
   list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["pyoristys"], $maksimisumma_kustp, $maksimisumma_kohde, $maksimisumma_projekti);
 

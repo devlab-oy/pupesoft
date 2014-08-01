@@ -4,10 +4,10 @@
 // tarvitaan $yhtiorow array
 
 if ($kukarow['extranet'] == '') {
-  $tilvahvfilenimi = "../dataout/tilvahvi-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
+  $tilvahvfilenimi = "../dataout/tilvahvi-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true)).".txt";
 }
 else {
-  $tilvahvfilenimi = "dataout/tilvahvi-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
+  $tilvahvfilenimi = "dataout/tilvahvi-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true)).".txt";
 }
 
 if (!file_exists($tilvahvfilenimi)) {
@@ -118,7 +118,7 @@ if (!file_exists($tilvahvfilenimi)) {
     $ulos .= "RRFFCO_NU:" . $laskurow['asiakkaan_tilausnumero'] . "\n";
     $ulos .= "RFTXGENTX:" . $laskurow['viesti'] . "\n";
     $ulos .= "RFTXGENTX:" . $laskurow['comments'] . "\n";
-    $ulos .= "RNADBY_PC:" . sprintf ("%-18.18s", $laskurow['ovttunnus']) . "100 91"."\n";
+    $ulos .= "RNADBY_PC:" . sprintf("%-18.18s", $laskurow['ovttunnus']) . "100 91"."\n";
     $ulos .= "RNADBY_RF:" . "IT /".preg_replace("/[^0-9]/", "", $laskurow['ytunnus'])."\n";
     $ulos .= "RNADBY_NA:" . $laskurow['nimi'] . "\n";
     $ulos .= "RNADBY_NX:" . $laskurow['nimitark'] . "\n";
@@ -126,12 +126,12 @@ if (!file_exists($tilvahvfilenimi)) {
     $ulos .= "RNADBY_PO:" . $laskurow['postino'] . "\n";
     $ulos .= "RNADBY_CI:" . $laskurow['postitp'] . "\n";
     $ulos .= "RNADBY_CN:" . $laskurow['maa'] . "\n";
-    #$ulos .= "RNADBY_DO:" . $laskurow['tilausvahvistus'] . "\n"; // mimmosen tilausvahvistuksen asiakas haluaa... F = fax, E = edi
+    //$ulos .= "RNADBY_DO:" . $laskurow['tilausvahvistus'] . "\n"; // mimmosen tilausvahvistuksen asiakas haluaa... F = fax, E = edi
     $ulos .= "RNADBY_DO:E\n"; // mimmosen tilausvahvistuksen asiakas haluaa... aina edi ni ei tule ongelmia
     $ulos .= "RNADDP_RF:" . "ZZ /".preg_replace("/[^0-9]/", "", $laskurow['ytunnus'])."\n";
     // jos tyhj‰‰ ni ei saa l‰hett‰‰‰.. weird.
     if (trim($laskurow['toim_ovttunnus']) != '') {
-      $ulos .= "RNADDP_PC:".sprintf ("%-18.18s", $laskurow['toim_ovttunnus']) . "100 91". "\n";
+      $ulos .= "RNADDP_PC:".sprintf("%-18.18s", $laskurow['toim_ovttunnus']) . "100 91". "\n";
     }
     $ulos .= "RNADDP_NA:" . $laskurow['toim_nimi'] . "\n";
     $ulos .= "RNADDP_NX:" . $laskurow['toim_nimitark'] . "\n";
@@ -141,7 +141,7 @@ if (!file_exists($tilvahvfilenimi)) {
     $ulos .= "RNADDP_CN:" . $laskurow['toim_maa'] . "\n";
 
     $ulos .= "RNADSE_RF:" . "VA  ".$yhtiorow['maa'] . "-" . preg_replace("/[^0-9]/", "", $yhtiorow['ytunnus'])."\n";
-    $ulos .= "RNADSE_PC:" . sprintf ("%-18.18s", $yhtiorow['ovttunnus']) . "100 91". "\n";
+    $ulos .= "RNADSE_PC:" . sprintf("%-18.18s", $yhtiorow['ovttunnus']) . "100 91". "\n";
     $ulos .= "RNADSE_NA:" . $yhtiorow['nimi'] . "\n";
     $ulos .= "RNADSE_SA:" . $yhtiorow['osoite'] . "\n";
     $ulos .= "RNADSE_PO:" . $yhtiorow['postino'] . "\n";
@@ -153,12 +153,12 @@ if (!file_exists($tilvahvfilenimi)) {
     $ulos .= "RPAT1__TP:" . $mehtorow['teksti'] . "\n";
     $ulos .= "RPAT1__PC:" . $mehtorow['kassa_alepros'] . "\n";
     $ulos .= "RPAT2__TP:" . $mehtorow['teksti'] . "\n";
-    $ulos .= "RPAT2__PC:" . sprintf ("%010.2f", (float) $yhtiorow['viivastyskorko']) . " 15\n";
+    $ulos .= "RPAT2__PC:" . sprintf("%010.2f", (float) $yhtiorow['viivastyskorko']) . " 15\n";
 
     $ulos .= "RCUX5__CR:" . $laskurow['valkoodi'] . "\n";
     $ulos .= "RTDT20_TT:" . "ZNN " . $laskurow['toimitustapa'] . "\n";
     $ulos .= "RHDR__END:" . $yhtiorow['yhtio'] . $tulostettava_tunnus . "\n";
-    fputs($toot,$ulos);
+    fputs($toot, $ulos);
 
     $rivino = 1; // dummy rivino, kun elma ei handlaa pitki‰
 
@@ -172,7 +172,7 @@ if (!file_exists($tilvahvfilenimi)) {
       $ulos .= "RLINEN_NU:" . $tvtilausrivirow['eankoodi'] . "\n";
       $ulos .= "RLIN8__IF:" . t_tuotteen_avainsanat($tvtilausrivirow, 'nimitys', $kieli) . "\n";
 
-      $laskurow['valkoodi'] = sprintf("%-3.s",$laskurow['valkoodi']);
+      $laskurow['valkoodi'] = sprintf("%-3.s", $laskurow['valkoodi']);
 
       $ulos .= "RLINCONMA:" . sprintf("%014.2f", (float) $tvtilausrivirow['hinta']) . $laskurow['valkoodi'] ."  ". $tvtilausrivirow['yksikko'] . "\n";
       $ulos .= "RLIN21_QT:" . sprintf("%014.2f", (float) $tvtilausrivirow['tilkpl']) .  "     " . $tvtilausrivirow['yksikko'] . "\n";
@@ -183,13 +183,13 @@ if (!file_exists($tilvahvfilenimi)) {
       $ulos .= "RLINLINFC:" . str_replace("\n", " ", $tvtilausrivirow['kommentti']) . "\n";
       //$ulos .= "RLINLINFC:" . $tvtilausrivirow['kommentti'] . "\n"; // J‰lkitoimitusrivitiedot
       $ulos .= "RLIN__END:" . $rivino . "\n";
-      fputs($toot,$ulos);
+      fputs($toot, $ulos);
       $rivino++;
     }
     $ulos  = "RMSG__END:" . $yhtiorow['yhtio'] . $tulostettava_tunnus . "\n";
     $ulos .= "ICHG__END:" . $yhtiorow['yhtio'] . $tulostettava_tunnus . "\n";
-    fputs($toot,$ulos);
-    fclose ($toot);
+    fputs($toot, $ulos);
+    fclose($toot);
 
     // tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile
     // palautetaan $palautus ja $syy
@@ -201,10 +201,10 @@ if (!file_exists($tilvahvfilenimi)) {
     $ftpfile = realpath($tilvahvfilenimi);
 
     if ($kukarow["extranet"] == '') {
-      require ("../inc/ftp-send.inc");
+      require "../inc/ftp-send.inc";
     }
     else {
-      require ("ftp-send.inc");
+      require "ftp-send.inc";
     }
   }
 }

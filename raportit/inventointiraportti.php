@@ -7,11 +7,11 @@ $useslave = 1;
 $compression = FALSE;
 
 if (isset($_POST["tee"])) {
-  if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
@@ -29,7 +29,7 @@ else {
 
   //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
   $useslave = 1;
-  require ("inc/connect.inc");
+  require "inc/connect.inc";
 
   if (count($_POST) > 0) {
 
@@ -52,7 +52,7 @@ else {
       foreach ($yhtiot as $apukala) {
         $yhtio .= "'$apukala',";
       }
-      $yhtio = substr($yhtio,0,-1);
+      $yhtio = substr($yhtio, 0, -1);
     }
 
     // jos joku p‰iv‰kentt‰ on tyhj‰‰ ei tehd‰ mit‰‰n
@@ -218,7 +218,7 @@ else {
       }
 
       if ($order != "") {
-        $order = substr($order,0,-1);
+        $order = substr($order, 0, -1);
       }
       else {
         $order = "1";
@@ -324,7 +324,7 @@ else {
 
       if ($query != "") {
         if (strpos($_SERVER['SCRIPT_NAME'], "inventointiraportti.php") !== FALSE) {
-          if(@include('Spreadsheet/Excel/Writer.php')) {
+          if (@include 'Spreadsheet/Excel/Writer.php') {
 
             //keksit‰‰n failille joku varmasti uniikki nimi:
             list($usec, $sec) = explode(' ', microtime());
@@ -359,11 +359,11 @@ else {
 
         // echotaan kenttien nimet
         for ($i=0; $i < mysql_num_fields($result); $i++) {
-          if (mysql_num_rows($result) <= $rivilimitti) echo "<th>".t(mysql_field_name($result,$i))."</th>";
+          if (mysql_num_rows($result) <= $rivilimitti) echo "<th>".t(mysql_field_name($result, $i))."</th>";
         }
 
         if (isset($workbook)) {
-          for ($i=0; $i < mysql_num_fields($result); $i++) $worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
+          for ($i=0; $i < mysql_num_fields($result); $i++) $worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result, $i))), $format_bold);
           $excelrivi++;
         }
 
@@ -376,7 +376,7 @@ else {
 
         if (mysql_num_rows($result) > $rivilimitti) {
 
-          require_once ('inc/ProgressBar.class.php');
+          require_once 'inc/ProgressBar.class.php';
           $bar = new ProgressBar();
           $elements = mysql_num_rows($result); // total number of elements to process
           $bar->initialize($elements); // print the empty bar
@@ -479,21 +479,21 @@ else {
               if (mysql_field_name($result, $i) == "vararvoennen") {
                 preg_match("/ \(([0-9\.\-]*?)\) /", $row["selite"], $invkpl);
 
-                $row[$i] = round((float) $invkpl[1] * $row[$i],2);
+                $row[$i] = round((float) $invkpl[1] * $row[$i], 2);
               }
 
               // Jos gruupataan enemm‰n kuin yksi taso niin tehd‰‰n v‰lisumma
               if ($gluku > 1 and $edluku != $row[0] and $edluku != 'x' and $piiyhteensa == '' and strpos($group, ',') !== FALSE and substr($group, 0, 13) != "tuote.tuoteno") {
                 $excelsarake = $myyntiind = $kateind = $nettokateind = $myykplind = 0;
 
-                foreach($valisummat as $vnim => $vsum) {
+                foreach ($valisummat as $vnim => $vsum) {
                   if ((string) $vsum != '') {
                     $vsum = sprintf("%.2f", $vsum);
                   }
 
                   if (mysql_num_rows($result) <= $rivilimitti) echo "<td class='tumma' align='right'>$vsum</td>";
 
-                  if(isset($workbook)) {
+                  if (isset($workbook)) {
                     $worksheet->writeNumber($excelrivi, $excelsarake, $vsum);
                   }
 
@@ -508,24 +508,24 @@ else {
               $edluku = $row[0];
 
               // hoidetaan pisteet pilkuiksi!!
-              if (is_numeric($row[$i]) and (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int' or substr(mysql_field_name($result, $i),0 ,4) == 'kate')) {
-                if (mysql_num_rows($result) <= $rivilimitti) echo "<td valign='top' align='right'>".sprintf("%.02f",$row[$i])."</td>";
+              if (is_numeric($row[$i]) and (mysql_field_type($result, $i) == 'real' or mysql_field_type($result, $i) == 'int' or substr(mysql_field_name($result, $i), 0 , 4) == 'kate')) {
+                if (mysql_num_rows($result) <= $rivilimitti) echo "<td valign='top' align='right'>".sprintf("%.02f", $row[$i])."</td>";
 
-                if(isset($workbook)) {
-                  $worksheet->writeNumber($excelrivi, $i, sprintf("%.02f",$row[$i]));
+                if (isset($workbook)) {
+                  $worksheet->writeNumber($excelrivi, $i, sprintf("%.02f", $row[$i]));
                 }
               }
               elseif (mysql_field_name($result, $i) == 'sarjanumero') {
                 if (mysql_num_rows($result) <= $rivilimitti) echo "<td valign='top'>$row[$i]</td>";
 
-                if(isset($workbook)) {
+                if (isset($workbook)) {
                   $worksheet->writeString($excelrivi, $i, strip_tags(str_replace("<br>", "\n", $row[$i])));
                 }
               }
               else {
                 if (mysql_num_rows($result) <= $rivilimitti) echo "<td valign='top'>$row[$i]</td>";
 
-                if(isset($workbook)) {
+                if (isset($workbook)) {
                   $worksheet->writeString($excelrivi, $i, strip_tags(str_replace("<br>", " / ", $row[$i])));
                 }
               }
@@ -557,14 +557,14 @@ else {
 
           $excelsarake = $myyntiind = $kateind = $nettokateind = $myykplind = 0;
 
-          foreach($valisummat as $vnim => $vsum) {
+          foreach ($valisummat as $vnim => $vsum) {
             if ((string) $vsum != '') {
               $vsum = sprintf("%.2f", $vsum);
             }
 
             if (mysql_num_rows($result) <= $rivilimitti) echo "<td class='tumma' align='right'>$vsum</td>";
 
-            if(isset($workbook)) {
+            if (isset($workbook)) {
               $worksheet->writeNumber($excelrivi, $excelsarake, $vsum);
             }
 
@@ -579,14 +579,14 @@ else {
 
         $excelsarake = $myyntiind = $kateind = $nettokateind = $myykplind = 0;
 
-        foreach($totsummat as $vnim => $vsum) {
+        foreach ($totsummat as $vnim => $vsum) {
           if ((string) $vsum != '') {
             $vsum = sprintf("%.2f", $vsum);
           }
 
           if (mysql_num_rows($result) <= $rivilimitti) echo "<td class='tumma' align='right'>$vsum</td>";
 
-          if(isset($workbook)) {
+          if (isset($workbook)) {
             $worksheet->writeNumber($excelrivi, $excelsarake, $vsum);
             $excelsarake++;
           }
@@ -597,7 +597,7 @@ else {
 
         echo "<br>";
 
-        if(isset($workbook)) {
+        if (isset($workbook)) {
           // We need to explicitly close the workbook
           $workbook->close();
 
@@ -618,9 +618,9 @@ else {
   if ($lopetus == "") {
 
     //K‰yttˆliittym‰
-    if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-    if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-    if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+    if (!isset($kka)) $kka = date("m", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+    if (!isset($vva)) $vva = date("Y", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+    if (!isset($ppa)) $ppa = date("d", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
     if (!isset($kkl)) $kkl = date("m");
     if (!isset($vvl)) $vvl = date("Y");
     if (!isset($ppl)) $ppl = date("d");
@@ -693,7 +693,7 @@ else {
     while ($rivi = mysql_fetch_array($res2)) {
       $mul_check = '';
       if ($mul_osasto!="") {
-        if (in_array($rivi['selite'],$mul_osasto)) {
+        if (in_array($rivi['selite'], $mul_osasto)) {
           $mul_check = 'SELECTED';
         }
       }
@@ -722,7 +722,7 @@ else {
     while ($rivi = mysql_fetch_array($res2)) {
       $mul_check = '';
       if ($mul_try!="") {
-        if (in_array($rivi['selite'],$mul_try)) {
+        if (in_array($rivi['selite'], $mul_try)) {
           $mul_check = 'SELECTED';
         }
       }
@@ -751,7 +751,7 @@ else {
     while ($rivi = mysql_fetch_array($res2)) {
       $mul_check = '';
       if ($mul_tme!="") {
-        if (in_array($rivi['selite'],$mul_tme)) {
+        if (in_array($rivi['selite'], $mul_tme)) {
           $mul_check = 'SELECTED';
         }
       }
@@ -799,7 +799,7 @@ else {
     }
     echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei valintaa")."</option>";
 
-    while($sxrow = mysql_fetch_array ($sresult)){
+    while ($sxrow = mysql_fetch_array($sresult)) {
       $mul_check = '';
 
       if (count($mul_tuotemyyja) > 0) {
@@ -832,7 +832,7 @@ else {
     }
     echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei valintaa")."</option>";
 
-    while($sxrow = mysql_fetch_array ($sresult)){
+    while ($sxrow = mysql_fetch_array($sresult)) {
       $mul_check = '';
 
       if (count($mul_tuoteostaja) > 0) {
@@ -869,7 +869,7 @@ else {
     while ($rivi = mysql_fetch_array($res2)) {
       $mul_check = '';
       if ($mul_kustp!="") {
-        if (in_array($rivi['selite'],$mul_kustp)) {
+        if (in_array($rivi['selite'], $mul_kustp)) {
           $mul_check = 'SELECTED';
         }
       }
@@ -904,10 +904,10 @@ else {
 
     echo "<select name='mul_varastot[]' multiple='TRUE' size='10' style='width:100%;'>";
 
-        while ($varow = mysql_fetch_array($vares)) {
+    while ($varow = mysql_fetch_array($vares)) {
       $mul_check = '';
       if ($mul_varastot!="") {
-        if (in_array($varow['tunnus'],$mul_varastot)) {
+        if (in_array($varow['tunnus'], $mul_varastot)) {
           $mul_check = 'SELECTED';
         }
       }
@@ -936,7 +936,7 @@ else {
     while ($rivi = mysql_fetch_array($res2)) {
       $mul_check = '';
       if ($mul_invenlaji!="") {
-        if (in_array($rivi['selite'],$mul_invenlaji)) {
+        if (in_array($rivi['selite'], $mul_invenlaji)) {
           $mul_check = 'SELECTED';
         }
       }
@@ -967,7 +967,7 @@ else {
     }
     echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei valintaa")."</option>";
 
-    while($sxrow = mysql_fetch_array ($sresult)){
+    while ($sxrow = mysql_fetch_array($sresult)) {
       $mul_check = '';
 
       if (count($mul_invaaja) > 0) {
@@ -1051,5 +1051,5 @@ else {
     echo "</form>";
   }
 
-  require ("../inc/footer.inc");
+  require "../inc/footer.inc";
 }

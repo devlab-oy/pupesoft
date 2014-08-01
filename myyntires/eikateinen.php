@@ -1,6 +1,6 @@
 <?php
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if (!isset($toim)) $toim = "";
 if (!isset($maksuehto)) $maksuehto = 0;
@@ -8,10 +8,10 @@ if (!isset($laskuno)) $laskuno = 0;
 if (!isset($tunnus)) $tunnus = 0;
 
 if ($toim == 'KATEINEN') {
-  echo "<font class='head'>",t("Lasku halutaankin maksaa k‰teisell‰"),"</font><hr />";
+  echo "<font class='head'>", t("Lasku halutaankin maksaa k‰teisell‰"), "</font><hr />";
 }
 else {
-  echo "<font class='head'>",t("Lasku ei ollutkaan k‰teist‰"),"</font><hr />";
+  echo "<font class='head'>", t("Lasku ei ollutkaan k‰teist‰"), "</font><hr />";
 }
 
 if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
@@ -19,7 +19,7 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
   $laskumaksettuerror = FALSE;
 
   if ($toim == 'KATEINEN') {
-    $tapahtumapaiva  = date('Y-m-d', mktime(0,0,0,$tapahtumapaiva_kk,$tapahtumapaiva_pp,$tapahtumapaiva_vv));
+    $tapahtumapaiva  = date('Y-m-d', mktime(0, 0, 0, $tapahtumapaiva_kk, $tapahtumapaiva_pp, $tapahtumapaiva_vv));
   }
   else {
     $tapahtumapaiva  = date('Y-m-d');
@@ -484,8 +484,8 @@ function hae_lasku2($laskuno, $toim) {
     return FALSE;
   }
   elseif (!empty($tilikausi) and $toim != 'KATEINEN') {
-     echo "<font class='error'>".t("VIRHE: Tilikausi on p‰‰ttynyt %s. Et voi muuttaa k‰teist‰ laskuksi %s", "", $tilikausi, $row['tapvm'])."!</font>";
-     return FALSE;
+    echo "<font class='error'>".t("VIRHE: Tilikausi on p‰‰ttynyt %s. Et voi muuttaa k‰teist‰ laskuksi %s", "", $tilikausi, $row['tapvm'])."!</font>";
+    return FALSE;
   }
 
   return $row;
@@ -513,13 +513,13 @@ function echo_lasku_table($laskurow, $toim) {
   }
 
   echo "<table>";
-  echo "<tr><th>",t("Laskutusosoite"),"</th><th>",t("Toimitusosoite"),"</th></tr>";
+  echo "<tr><th>", t("Laskutusosoite"), "</th><th>", t("Toimitusosoite"), "</th></tr>";
   echo $asiakas_string;
-  echo "<tr><th>",t("Laskunumero"),"</th><td>{$laskurow['laskunro']}</td></tr>";
-  echo "<tr><th>",t("Laskun summa"),"</th><td>{$laskurow['summa']}</td></tr>";
-  echo "<tr><th>",t("Laskun summa (veroton)"),"</th><td>{$laskurow['arvo']}</td></tr>";
+  echo "<tr><th>", t("Laskunumero"), "</th><td>{$laskurow['laskunro']}</td></tr>";
+  echo "<tr><th>", t("Laskun summa"), "</th><td>{$laskurow['summa']}</td></tr>";
+  echo "<tr><th>", t("Laskun summa (veroton)"), "</th><td>{$laskurow['arvo']}</td></tr>";
   echo $osasuoritus_string;
-  echo "<tr><th>",t("Maksuehto"),"</th><td>",t_tunnus_avainsanat($laskurow, "teksti", "MAKSUEHTOKV"),"</td></tr>";
+  echo "<tr><th>", t("Maksuehto"), "</th><td>", t_tunnus_avainsanat($laskurow, "teksti", "MAKSUEHTOKV"), "</td></tr>";
 
   if ($toim == 'KATEINEN') {
     $now = date('Y-m-d');
@@ -694,4 +694,4 @@ function tarkista_saako_laskua_muuttaa($tapahtumapaiva) {
 
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

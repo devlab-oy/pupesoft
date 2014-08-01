@@ -2,7 +2,7 @@
 
 // jos tullaan t‰‰lt‰ itsest‰ niin tarvitaan paramertit
 if (strpos($_SERVER['SCRIPT_NAME'], "yllapitosopimukset.php") !== FALSE) {
-  require("../inc/parametrit.inc");
+  require "../inc/parametrit.inc";
 
   echo "<font class='head'>".t("Yll‰pitosopimukset")."</font><hr>";
 
@@ -34,7 +34,7 @@ else {
 if ($tee == "laskuta" and count($laskutapvm) > 0) {
   $poikkeus = "ei";
   // haetaan funktio
-  require ("kopioi_tilaus.inc");
+  require "kopioi_tilaus.inc";
 
   $laskuta_message = "";
 
@@ -47,7 +47,7 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
 
     $tilausnumero = $laskutatun[$pointteri];
 
-    list($tapvmvv,$tapvmkk,$tapvmpp) = explode("-", $tapahtumapvm);
+    list($tapvmvv, $tapvmkk, $tapvmpp) = explode("-", $tapahtumapvm);
 
     //  Haetaan sopimuskausi ja kommentti
     $query = "SELECT lasku.viesti,
@@ -70,7 +70,7 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
 
     foreach ($laskutus_kk as $laskk) {
 
-      $kkvikapva = date("t",mktime(0, 0, 0, $laskk, 1, $tapvmvv));
+      $kkvikapva = date("t", mktime(0, 0, 0, $laskk, 1, $tapvmvv));
 
       foreach ($laskutus_pp as $laspp) {
 
@@ -89,38 +89,38 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
 
     // Onko t‰m‰ t‰n vuoden eka ja vika sopparilasku
     if ($tama_laskutus == 0 and $tama_laskutus == $soplaskmaara) {
-      list($vv,$kk,$pp) = explode("-", $laskutuspaivat[$tama_laskutus]);
+      list($vv, $kk, $pp) = explode("-", $laskutuspaivat[$tama_laskutus]);
 
       $ed_alku = date("Y-m-d", mktime(0, 0, 0, $kk, $pp+1, $vv-1));
       $se_lopp  = date("Y-m-d", mktime(0, 0, 0, $kk, $pp-1, $vv+1));
     }
     // Jos t‰m‰ t‰n vuoden eka sopparilasku, niin edellinen on viime vuoden vika
     elseif ($tama_laskutus == 0) {
-      list($vv,$kk,$pp) = explode("-", $laskutuspaivat[$soplaskmaara]);
+      list($vv, $kk, $pp) = explode("-", $laskutuspaivat[$soplaskmaara]);
       $ed_alku = date("Y-m-d", mktime(0, 0, 0, $kk, $pp+1, $vv-1));
 
-      list($vv,$kk,$pp) = explode("-", $laskutuspaivat[$tama_laskutus+1]);
+      list($vv, $kk, $pp) = explode("-", $laskutuspaivat[$tama_laskutus+1]);
       $se_lopp  = date("Y-m-d", mktime(0, 0, 0, $kk, $pp-1, $vv));
     }
     // Jos t‰m‰ t‰n vuoden vika sopparilasku, niin seuraava on ens vuoden eka
     elseif ($tama_laskutus == $soplaskmaara) {
-      list($vv,$kk,$pp) = explode("-", $laskutuspaivat[$tama_laskutus-1]);
-      $ed_alku = date("Y-m-d",mktime(0, 0, 0, $kk, $pp+1, $vv));
+      list($vv, $kk, $pp) = explode("-", $laskutuspaivat[$tama_laskutus-1]);
+      $ed_alku = date("Y-m-d", mktime(0, 0, 0, $kk, $pp+1, $vv));
 
-      list($vv,$kk,$pp) = explode("-", $laskutuspaivat[0]);
-      $se_lopp = date("Y-m-d",mktime(0, 0, 0, $kk, $pp-1, $vv+1));
+      list($vv, $kk, $pp) = explode("-", $laskutuspaivat[0]);
+      $se_lopp = date("Y-m-d", mktime(0, 0, 0, $kk, $pp-1, $vv+1));
     }
     // T‰m‰ ei ole t‰n vuoden eka eik‰ vika sopparilasku
     else {
-      list($vv,$kk,$pp) = explode("-", $laskutuspaivat[$tama_laskutus-1]);
-      $ed_alku = date("Y-m-d",mktime(0, 0, 0, $kk, $pp+1, $vv));
+      list($vv, $kk, $pp) = explode("-", $laskutuspaivat[$tama_laskutus-1]);
+      $ed_alku = date("Y-m-d", mktime(0, 0, 0, $kk, $pp+1, $vv));
 
-      list($vv,$kk,$pp) = explode("-", $laskutuspaivat[$tama_laskutus+1]);
-      $se_lopp = date("Y-m-d",mktime(0, 0, 0, $kk, $pp-1, $vv));
+      list($vv, $kk, $pp) = explode("-", $laskutuspaivat[$tama_laskutus+1]);
+      $se_lopp = date("Y-m-d", mktime(0, 0, 0, $kk, $pp-1, $vv));
     }
 
     // Edellinen kausi on siis "$ed_alku" - "$tapahtumapvm" ja seuraava on "$tapahtumapvm" - "$se_lopp"
-    list($vv,$kk,$pp) = explode("-", $tapahtumapvm);
+    list($vv, $kk, $pp) = explode("-", $tapahtumapvm);
     $ed_lopp = date("Y-m-d", mktime(0, 0, 0, $kk, $pp, $vv));
 
     // Onko seuraava tai edellinen sopimuskauden ulkopuolella?
@@ -152,14 +152,14 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
 
     // monistetaan soppari
     $ok = kopioi_tilaus($tilausnumero, array(  "viesti" => array("from" => $from, "to" => $to),
-                          "comments" => array("from" => $from, "to" => $to),
-                          "sisviesti1" => array("from" => $from, "to" => $to),
-                          "sisviesti2" => array("from" => $from, "to" => $to),
-                        ),
-                      array(  "kommentti" => array("from" => $from, "to" => $to)
-                        ),
-                      $tapahtumapvm
-              );
+        "comments" => array("from" => $from, "to" => $to),
+        "sisviesti1" => array("from" => $from, "to" => $to),
+        "sisviesti2" => array("from" => $from, "to" => $to),
+      ),
+      array(  "kommentti" => array("from" => $from, "to" => $to)
+      ),
+      $tapahtumapvm
+    );
 
     if ($ok !== FALSE) {
 
@@ -206,7 +206,7 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
       $tilausvalmiskutsuja = "YLLAPITOSOPIMUKSET";
 
       // tilaus valmis
-      require("tilaus-valmis.inc");
+      require "tilaus-valmis.inc";
 
       // p‰ivitet‰‰n tila myyntitilaus valmis, suoraan laskutukseen (clearing on sopimus ja swift kent‰ss‰ on mik‰ soppari on kopsattu)
       $query  = "UPDATE lasku
@@ -242,7 +242,7 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
           $laskuta_message .= ", ".t("laskutetaan tilaus")." $ok ".t("p‰iv‰lle")." ".date("d.m.Y").".</font><br>";
         }
 
-        require("verkkolasku.php");
+        require "verkkolasku.php";
       }
       else {
         $laskuta_message .= ", ".t("lasku j‰tettiin avoimeksi").".</font><br>";
@@ -331,7 +331,7 @@ if (mysql_num_rows($result) > 0) {
   $cron_pvm = array(); // cronijobia varten
   $cron_tun = array(); // cronijobia varten
   $arvoyhteensa  = 0;
-      $summayhteensa = 0;
+  $summayhteensa = 0;
 
   while ($row = mysql_fetch_assoc($result)) {
 
@@ -354,7 +354,7 @@ if (mysql_num_rows($result) > 0) {
     echo "<td valign='top'>";
     if (count(explode(',', $row["sopimus_kk"])) == 12) echo "Kaikki";
     else foreach (explode(',', $row["sopimus_kk"]) as $numi) echo "$numi. ";
-    echo "</td>";
+      echo "</td>";
     echo "<td valign='top'>";
     foreach (explode(',', $row["sopimus_pp"]) as $numi) echo "$numi. ";
     echo "</td>";
@@ -370,8 +370,8 @@ if (mysql_num_rows($result) > 0) {
     list($yllapito_loppuvv, $yllapito_loppukk, $yllapito_loppupp) = explode('-', $row["sopimus_loppupvm"]);
 
     // p‰iv‰m‰‰r‰t inteiks
-    $pvmalku  = (int) date('Ymd',mktime(0,0,0,$pvmloop_kk,$pvmloop_pp,$pvmloop_vv));
-    $pvmloppu = (int) date('Ymd',mktime(0,0,0,$yllapito_loppukk,$yllapito_loppupp,$yllapito_loppuvv));
+    $pvmalku  = (int) date('Ymd', mktime(0, 0, 0, $pvmloop_kk, $pvmloop_pp, $pvmloop_vv));
+    $pvmloppu = (int) date('Ymd', mktime(0, 0, 0, $yllapito_loppukk, $yllapito_loppupp, $yllapito_loppuvv));
 
     // n‰ytt‰‰n vaan t‰h‰n p‰iv‰‰n asti
     if ($pvmloppu > date('Ymd') or $row["sopimus_loppupvm"] == '0000-00-00') {
@@ -382,17 +382,17 @@ if (mysql_num_rows($result) > 0) {
     unset($ruksatut_paivat);
 
     // for looppi k‰yd‰‰n l‰pi kaikki p‰iv‰t
-    for ($pvm = $pvmalku; $pvm <= $pvmloppu; $pvm = (int) date('Ymd',mktime(0,0,0,$pvmloop_kk,$pvmloop_pp+1,$pvmloop_vv))) {
+    for ($pvm = $pvmalku; $pvm <= $pvmloppu; $pvm = (int) date('Ymd', mktime(0, 0, 0, $pvmloop_kk, $pvmloop_pp+1, $pvmloop_vv))) {
 
       // otetaan n‰‰ taas erikseen
-      $pvmloop_pp = substr($pvm,6,2);
-      $pvmloop_kk = substr($pvm,4,2);
-      $pvmloop_vv = substr($pvm,0,4);
+      $pvmloop_pp = substr($pvm, 6, 2);
+      $pvmloop_kk = substr($pvm, 4, 2);
+      $pvmloop_vv = substr($pvm, 0, 4);
 
       // Jos sopparille on valittu liian iso p‰iv‰:
       if (!isset($ruksatut_paivat[$pvmloop_kk])) {
         $ruksatut_paivat[$pvmloop_kk] = array();
-        $kkvikapva = date("t",mktime(0, 0, 0, $pvmloop_kk, 1, $pvmloop_vv));
+        $kkvikapva = date("t", mktime(0, 0, 0, $pvmloop_kk, 1, $pvmloop_vv));
 
         foreach (explode(',', $row["sopimus_pp"]) as $ruksattu_paiva) {
           if ($ruksattu_paiva > $kkvikapva) {
@@ -598,7 +598,7 @@ else {
 
 // jos tullaan t‰‰lt‰ itsest‰ niin n‰ytet‰‰n footer
 if (strpos($_SERVER['SCRIPT_NAME'], "yllapitosopimukset.php") !== FALSE) {
-  require ("inc/footer.inc");
+  require "inc/footer.inc";
 }
 else {
   ob_end_clean(); // ei echota mit‰‰‰n jos kutsutaan muualta!

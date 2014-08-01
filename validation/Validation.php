@@ -4,8 +4,10 @@
  * http://stackoverflow.com/questions/737385/easiest-form-validation-library-for-php
  *
  * Pork Formvalidator. validates fields by regexes and can sanatize them. Uses PHP filter_var built-in functions and extra regexes
+ *
  * @package pork
  */
+
 
 /**
  * Pork.FormValidator
@@ -91,7 +93,6 @@ class FormValidator {
   }
 
   /**
-   *
    *   Adds unvalidated class to thos elements that are not validated. Removes them from classes that are.
    */
   public function getScript() {
@@ -112,7 +113,6 @@ class FormValidator {
   }
 
   /**
-   *
    * Sanatizes an array of items according to the $this->sanatations
    * sanatations will be standard of type string, but can also be specified.
    * For ease of use, this syntax is accepted:
@@ -128,7 +128,6 @@ class FormValidator {
   }
 
   /**
-   *
    * Adds an error to the errors array.
    */
   private function addError($field, $type = 'string') {
@@ -136,39 +135,37 @@ class FormValidator {
   }
 
   /**
-   *
    * Sanatize a single var according to $type.
    * Allows for static calling to allow simple sanatization
    */
   public static function sanatizeItem($var, $type) {
     $flags = NULL;
     switch ($type) {
-      case 'url':
-        $filter = FILTER_SANITIZE_URL;
-        break;
-      case 'int':
-        $filter = FILTER_SANITIZE_NUMBER_INT;
-        break;
-      case 'float':
-        $filter = FILTER_SANITIZE_NUMBER_FLOAT;
-        $flags = FILTER_FLAG_ALLOW_FRACTION | FILTER_FLAG_ALLOW_THOUSAND;
-        break;
-      case 'email':
-        $var = substr($var, 0, 254);
-        $filter = FILTER_SANITIZE_EMAIL;
-        break;
-      case 'string':
-      default:
-        $filter = FILTER_SANITIZE_STRING;
-        $flags = FILTER_FLAG_NO_ENCODE_QUOTES;
-        break;
+    case 'url':
+      $filter = FILTER_SANITIZE_URL;
+      break;
+    case 'int':
+      $filter = FILTER_SANITIZE_NUMBER_INT;
+      break;
+    case 'float':
+      $filter = FILTER_SANITIZE_NUMBER_FLOAT;
+      $flags = FILTER_FLAG_ALLOW_FRACTION | FILTER_FLAG_ALLOW_THOUSAND;
+      break;
+    case 'email':
+      $var = substr($var, 0, 254);
+      $filter = FILTER_SANITIZE_EMAIL;
+      break;
+    case 'string':
+    default:
+      $filter = FILTER_SANITIZE_STRING;
+      $flags = FILTER_FLAG_NO_ENCODE_QUOTES;
+      break;
     }
     $output = filter_var($var, $filter, $flags);
     return $output;
   }
 
   /**
-   *
    * Validates a single var according to $type.
    * Allows for static calling to allow simple validation.
    *
@@ -176,31 +173,31 @@ class FormValidator {
   public static function validateItem($var, $type) {
     if (array_key_exists($type, self::$regexes)) {
       $returnval = filter_var($var, FILTER_VALIDATE_REGEXP, array("options" => array(
-              "regexp" => '!'.self::$regexes[$type].'!i'))) !== false;
+            "regexp" => '!'.self::$regexes[$type].'!i'))) !== false;
       if ($returnval) {
         $returnval = self::validateContent($var, $type);
       }
 
-      return($returnval);
+      return $returnval;
     }
     $filter = false;
     switch ($type) {
-      case 'email':
-        $var = substr($var, 0, 254);
-        $filter = FILTER_VALIDATE_EMAIL;
-        break;
-      case 'int':
-        $filter = FILTER_VALIDATE_INT;
-        break;
-      case 'boolean':
-        $filter = FILTER_VALIDATE_BOOLEAN;
-        break;
-      case 'ip':
-        $filter = FILTER_VALIDATE_IP;
-        break;
-      case 'url':
-        $filter = FILTER_VALIDATE_URL;
-        break;
+    case 'email':
+      $var = substr($var, 0, 254);
+      $filter = FILTER_VALIDATE_EMAIL;
+      break;
+    case 'int':
+      $filter = FILTER_VALIDATE_INT;
+      break;
+    case 'boolean':
+      $filter = FILTER_VALIDATE_BOOLEAN;
+      break;
+    case 'ip':
+      $filter = FILTER_VALIDATE_IP;
+      break;
+    case 'url':
+      $filter = FILTER_VALIDATE_URL;
+      break;
     }
     return ($filter === false) ? false : filter_var($var, $filter) !== false ? true : false;
   }
@@ -209,31 +206,31 @@ class FormValidator {
 
     $is_ok = true;
     switch ($type) {
-      case 'paiva':
-        if (strpos($var, '.')) {
-          $delimiter = '.';
-        }
-        elseif (strpos($var, '-')) {
-          $delimiter = '-';
-        }
-        elseif (strpos($var, '/')) {
-          $delimiter = '/';
-        }
-        else {
-          return false;
-        }
+    case 'paiva':
+      if (strpos($var, '.')) {
+        $delimiter = '.';
+      }
+      elseif (strpos($var, '-')) {
+        $delimiter = '-';
+      }
+      elseif (strpos($var, '/')) {
+        $delimiter = '/';
+      }
+      else {
+        return false;
+      }
 
-        $date_array = explode($delimiter, $var);
+      $date_array = explode($delimiter, $var);
 
-        if (strlen($date_array[0]) > 2) {
-          //YYYY-mm-dd
-          $is_ok = checkdate($date_array[1], $date_array[2], $date_array[0]);
-        }
-        else {
-          //dd-mm-YYYY or mm-dd-YYYY
-          $is_ok = checkdate($date_array[1], $date_array[0], $date_array[2]);
-        }
-        break;
+      if (strlen($date_array[0]) > 2) {
+        //YYYY-mm-dd
+        $is_ok = checkdate($date_array[1], $date_array[2], $date_array[0]);
+      }
+      else {
+        //dd-mm-YYYY or mm-dd-YYYY
+        $is_ok = checkdate($date_array[1], $date_array[0], $date_array[2]);
+      }
+      break;
     }
 
     return $is_ok;

@@ -2,7 +2,7 @@
 
 $no_head = "yes";
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 $query = "UPDATE kuka SET
           session       = '',

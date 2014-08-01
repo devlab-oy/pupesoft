@@ -1,11 +1,11 @@
 <?php
 
 if (isset($_POST["tee"])) {
-  if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
-require("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 if (isset($tee)) {
   if ($tee == "lataa_tiedosto") {
@@ -40,7 +40,7 @@ else {
   echo "<font class='head'>".t("SQL-raportti").":</font><hr>";
 
   if ($rtee == "AJA" and isset($ruks_pakolliset)) {
-    require("inc/pakolliset_sarakkeet.inc");
+    require "inc/pakolliset_sarakkeet.inc";
 
     list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset) = pakolliset_sarakkeet($table);
 
@@ -48,7 +48,7 @@ else {
       $ruksaa = $pakolliset;
     }
     else {
-      $ruksaa = array_merge($pakolliset,$wherelliset);
+      $ruksaa = array_merge($pakolliset, $wherelliset);
     }
 
     // Oletusaliakset ja onko niissä pakollisia
@@ -100,7 +100,7 @@ else {
     //* Tämä skripti käyttää slave-tietokantapalvelinta *//
     $useslave = 1;
 
-    require ("inc/connect.inc");
+    require "inc/connect.inc";
 
     $where   = "";
     $selecti = "";
@@ -108,7 +108,7 @@ else {
 
     $order = "ORDER BY $table.yhtio";
 
-    $oper_array = array('on' => '=', 'not' => '!=', 'in' => 'in','like' => 'like','gt' => '>','lt' => '<','gte' => '>=','lte' => '<=');
+    $oper_array = array('on' => '=', 'not' => '!=', 'in' => 'in', 'like' => 'like', 'gt' => '>', 'lt' => '<', 'gte' => '>=', 'lte' => '<=');
 
     foreach ($sarakkeet as $kentta) {
 
@@ -125,7 +125,7 @@ else {
       if (!$tuotteen_avainsanat and isset($kentat[$clean_kentta]) and $kentat[$clean_kentta] != "") {
         $selecti .= $clean_kentta.",\n";
       }
-      elseif ($tuotteen_avainsanat and isset($kentat[$clean_kentta]) and $kentat[$clean_kentta] != ""){
+      elseif ($tuotteen_avainsanat and isset($kentat[$clean_kentta]) and $kentat[$clean_kentta] != "") {
         $selecti .= "$taulunimi.laji as 'tuotteen_avainsanat.laji',\n $taulunimi.selite as 'tuotteen_avainsanat.selite',\n $taulunimi.jarjestys as 'tuotteen_avainsanat.jarjestys',\n $taulunimi.kieli as 'tuotteen_avainsanat.kieli', \n";
         $joinit .= "LEFT JOIN tuotteen_avainsanat AS $taulunimi ON tuote.yhtio=$taulunimi.yhtio and tuote.tuoteno=$taulunimi.tuoteno and $taulunimi.laji='$kentta' and $taulunimi.kieli='$kieli'\n";
       }
@@ -179,9 +179,9 @@ else {
     echo "<font class='message'><pre>$sqlhaku</pre><br>".t("Haun tulos")." ".mysql_num_rows($result)." ".t("riviä").".</font><br><br>";
 
     if (mysql_num_rows($result) > 0) {
-      if (include('inc/pupeExcel.inc')) {
+      if (include 'inc/pupeExcel.inc') {
 
-        function tee_excel ($result) {
+        function tee_excel($result) {
           global $excelrivi, $excelnimi;
 
           $worksheet    = new pupeExcel();
@@ -191,15 +191,15 @@ else {
           $talis = 0;
 
           for ($i=0; $i < mysql_num_fields($result); $i++) {
-            $worksheet->write($excelrivi, $i+$talis, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
+            $worksheet->write($excelrivi, $i+$talis, ucfirst(t(mysql_field_name($result, $i))), $format_bold);
           }
           $worksheet->write($excelrivi, $i+$talis, "TOIMINTO", $format_bold);
           $excelrivi++;
 
-          return(array($worksheet, $excelrivi));
+          return array($worksheet, $excelrivi);
         }
 
-        function sulje_excel ($worksheet, $filelask) {
+        function sulje_excel($worksheet, $filelask) {
           global $excelnimi, $table;
 
           // We need to explicitly close the worksheet
@@ -235,7 +235,7 @@ else {
           $talis = 0;
 
           for ($i=0; $i<mysql_num_fields($result); $i++) {
-            if (mysql_field_type($result,$i) == 'real') {
+            if (mysql_field_type($result, $i) == 'real') {
               $worksheet->writeNumber($excelrivi, $i+$talis, $row[$i]);
             }
             else {
@@ -255,7 +255,7 @@ else {
   echo "<table cellpadding='5'><tr><td valign='top' class='back'>";
 
   $query  = "SHOW tables FROM $dbkanta";
-    $result =  mysql_query($query);
+  $result =  mysql_query($query);
 
   while ($row = mysql_fetch_array($result)) {
 
@@ -389,7 +389,7 @@ else {
       $sel = array();
       $sel[$operaattori[$row[0]]] = "SELECTED";
 
-      array_push($kala,"<tr>
+      array_push($kala, "<tr>
                 <td>$row[0]</td>
                 <td><input type='hidden' name='sarakkeet[$row[0]]' value='$row[0]'>
                 <input type='checkbox' class='shift' name='kentat[$row[0]]' value='$row[0]' $chk></td>

@@ -1,7 +1,7 @@
 <?php
 
-if(!function_exists("tuotteen_avainsanattarkista")) {
-  function tuotteen_avainsanattarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+if (!function_exists("tuotteen_avainsanattarkista")) {
+  function tuotteen_avainsanattarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set, $alasveto;
 
     static $tem_tuoteno, $tem_tuoteno_i, $tem_kieli, $tem_laji, $tem_selite, $tem_selitetark, $tem_status, $tem_nakyvyys;
@@ -25,7 +25,7 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
           $kutsuja     = "yllapito.php";
           $ulos      = "";
 
-          require ("inc/tuotehaku.inc");
+          require "inc/tuotehaku.inc";
 
           if ($ulos != "") {
             $alasveto[$i] = "<select name='t[$i]'>".$ulos."</select>";

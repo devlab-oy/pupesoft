@@ -3,11 +3,11 @@
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 2;
 
-require('../inc/parametrit.inc');
+require '../inc/parametrit.inc';
 
-if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+if (!isset($kka)) $kka = date("m", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+if (!isset($vva)) $vva = date("Y", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+if (!isset($ppa)) $ppa = date("d", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 
 if (!isset($kkl)) $kkl = date("m");
 if (!isset($vvl)) $vvl = date("Y");
@@ -16,12 +16,12 @@ if (!isset($ppl)) $ppl = date("d");
 if (!isset($nayta)) $nayta = '';
 if (!isset($tee)) $tee = '';
 
-echo "<font class='head'>",t("Keräyspoikkeamat"),":</font><hr>";
+echo "<font class='head'>", t("Keräyspoikkeamat"), ":</font><hr>";
 
 if ($tee != '') {
 
   if ($rivien_aika == 'laskutettuaika') {
-     $aikalisa = "  and tilausrivi.tyyppi = 'L'
+    $aikalisa = "  and tilausrivi.tyyppi = 'L'
              and tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}'
                and tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}'";
   }
@@ -103,35 +103,35 @@ echo "<table><form method='post'>";
 echo "<input type='hidden' name='tee' value='kaikki'>";
 
 echo "<tr>";
-echo "<th>",t("Näytä"),"</th>";
+echo "<th>", t("Näytä"), "</th>";
 echo "<td><select name='nayta'>";
-echo "<option value=''>",t("Kaikki poikkeamat"),"</option>";
+echo "<option value=''>", t("Kaikki poikkeamat"), "</option>";
 
 $sel = $nayta == 'ei_ylijaamia' ? ' selected' : '';
 
-echo "<option value='ei_ylijaamia'{$sel}>",t("Kaikki paitsi rivit jossa kerääjä on kerännyt tilattua enemmän"),"</option>";
+echo "<option value='ei_ylijaamia'{$sel}>", t("Kaikki paitsi rivit jossa kerääjä on kerännyt tilattua enemmän"), "</option>";
 echo "</select></td>";
 echo "</tr>";
 
 echo "<tr>";
-echo "<th>",t("Hae rivit ajan mukaan"),"</th>";
+echo "<th>", t("Hae rivit ajan mukaan"), "</th>";
 echo "<td><select name='rivien_aika'>";
-echo "<option value=''>",t("Kerättyaika"),"</option>";
+echo "<option value=''>", t("Kerättyaika"), "</option>";
 
 $sel = $rivien_aika == 'laskutettuaika' ? ' selected' : '';
 
-echo "<option value='laskutettuaika'{$sel}>",t("Laskutettuaika"),"</option>";
+echo "<option value='laskutettuaika'{$sel}>", t("Laskutettuaika"), "</option>";
 echo "</select></td>";
 echo "</tr>";
 
-echo "<tr><th>",t("Syötä alkupäivämäärä (pp-kk-vvvv)"),"</th>
+echo "<tr><th>", t("Syötä alkupäivämäärä (pp-kk-vvvv)"), "</th>
     <td><input type='text' name='ppa' value='{$ppa}' size='3'>
     <input type='text' name='kka' value='{$kka}' size='3'>
     <input type='text' name='vva' value='{$vva}' size='5'></td>
-    </tr><tr><th>",t("Syötä loppupäivämäärä (pp-kk-vvvv)"),"</th>
+    </tr><tr><th>", t("Syötä loppupäivämäärä (pp-kk-vvvv)"), "</th>
     <td><input type='text' name='ppl' value='{$ppl}' size='3'>
     <input type='text' name='kkl' value='{$kkl}' size='3'>
     <input type='text' name='vvl' value='{$vvl}' size='5'>";
-echo "<td class='back'><input type='submit' value='",t("Aja raportti"),"'></td></tr></table>";
+echo "<td class='back'><input type='submit' value='", t("Aja raportti"), "'></td></tr></table>";
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

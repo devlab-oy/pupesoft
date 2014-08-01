@@ -1,7 +1,7 @@
 <?php
 
 if (strpos($_SERVER['SCRIPT_NAME'], "karhu.php")  !== FALSE) {
-  require ("../inc/parametrit.inc");
+  require "../inc/parametrit.inc";
 }
 
 echo "<font class='head'>".t("Maksukehotukset")."</font><hr>";
@@ -36,8 +36,8 @@ $query = "SELECT tunnus from avainsana where laji = 'KARHUVIESTI' and yhtio ='$y
 $res = pupe_query($query);
 
 if (mysql_num_rows($res) == 0) {
-    echo "<font class='error'>".t("Yhtiöllä ei ole yhtään maksukehotusviestiä. Maksukehotuksia ei voida luoda").".</font><br>";
-    $tee = '';
+  echo "<font class='error'>".t("Yhtiöllä ei ole yhtään maksukehotusviestiä. Maksukehotuksia ei voida luoda").".</font><br>";
+  $tee = '';
 }
 
 if ($tee != '' and isset($karhuttavatfile)) {
@@ -61,7 +61,7 @@ if ($tee == 'LAHETA') {
   if (!empty($_POST['lasku_tunnus'])) {
     try {
       // koitetaan lähettää eKirje sekä tulostaa
-      require ('paperikarhu.php');
+      require 'paperikarhu.php';
     }
     catch (Exception $e) {
       $ekarhu_success = false;
@@ -227,7 +227,7 @@ if ($tee == "KARHUAKAIKKI") {
   foreach ($karhuttavat as $lasku_tunnus) {
     try {
       // koitetaan lähettää eKirje sekä tulostaa
-      require ('paperikarhu.php');
+      require 'paperikarhu.php';
     }
     catch (Exception $e) {
       $ekarhu_success = false;
@@ -249,7 +249,7 @@ if ($tee == 'KARHUA' and $karhuttavat[0] == "") {
   $tee = "";
 }
 
-if ($tee == 'KARHUA')  {
+if ($tee == 'KARHUA') {
   $query = "SELECT lasku.liitostunnus,
             lasku.summa-lasku.saldo_maksettu as summa,
             lasku.erpcm, lasku.laskunro, lasku.tapvm, lasku.tunnus,
@@ -288,7 +288,7 @@ if ($tee == 'KARHUA')  {
   $asiakastiedot = mysql_fetch_assoc($asiakasresult);
 
   //ja kelataan alkuun
-  mysql_data_seek($result,0);
+  mysql_data_seek($result, 0);
 
   echo "<table><td valign='top' class='back'>";
 
@@ -323,7 +323,7 @@ if ($tee == 'KARHUA')  {
       $max = $lasku['karhuttu'];
     }
   }
-  mysql_data_seek($result,0);
+  mysql_data_seek($result, 0);
 
   if ($asiakastiedot["kieli"] != "" and strtoupper($asiakastiedot["kieli"]) != strtoupper($yhtiorow["maa"])) {
     $sorttaus = $asiakastiedot["kieli"];
@@ -655,7 +655,7 @@ if ($tee == "") {
 
   echo "</select></td></tr>";
 
-  echo "<tr><th>",t("Valitse tulostin"),"</th><td><select name='kirjoitin'>";
+  echo "<tr><th>", t("Valitse tulostin"), "</th><td><select name='kirjoitin'>";
 
   $query = "SELECT *
             FROM kirjoittimet
@@ -681,4 +681,4 @@ if ($tee == "") {
   echo "</table>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

@@ -12,8 +12,8 @@ if ($laji == "V") {
 elseif ($laji == "K") {
   $otsikko = 'Palvelutuotteet';
   $rajauslisa = " and tuote.tuotetyyppi = 'K' ";
-  }
-  else {
+}
+else {
   $otsikko = 'Tuotteet';
   $rajauslisa = " and tuote.tuotetyyppi NOT IN ('A','B') ";
 }

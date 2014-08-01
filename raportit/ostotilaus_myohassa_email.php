@@ -9,8 +9,8 @@ if (php_sapi_name() == 'cli') {
   ini_set("display_errors", 0);
 
   // otetaan tietokantayhteys ja funkkarit
-  require("inc/connect.inc");
-  require("inc/functions.inc");
+  require "inc/connect.inc";
+  require "inc/functions.inc";
 
   $yhtio          = trim($argv[1]);
   $paivamaararaja = trim($argv[2]);
@@ -54,7 +54,7 @@ if (php_sapi_name() == 'cli') {
 }
 else {
   //Debuggaamista varten
-  require("../inc/parametrit.inc");
+  require "../inc/parametrit.inc";
 
   echo "<font class='head'>".t('Myöhässä olevien ostotilausten lähetys sähköpostiin')."</font><hr>";
 
@@ -80,16 +80,18 @@ if ($tee == 'hae_ostotilaukset') {
 }
 
 if (php_sapi_name() != 'cli') {
-  require("inc/footer.inc");
+  require "inc/footer.inc";
 }
 
 /**
  * Haetaan tavarantoimittajalla lähetetyt ostotilaskut, jotka eivät ole vielä saapuneet
  *
  * @global array $kukarow
- * @param int $paivamaararaja
+ * @param int     $paivamaararaja
  * @return array
  */
+
+
 function hae_myohassa_olevat_ostotilaukset($paivamaararaja) {
   global $kukarow;
 
@@ -132,11 +134,12 @@ function hae_myohassa_olevat_ostotilaukset($paivamaararaja) {
   return $ostotilaukset;
 }
 
+
 /**
  *   Populoi ostotilaukset ostajan ostotilaus kohtaisesti
  *
- * @param array $ostotilaukset
- * @param string $ostaja_tyyppi
+ * @param array   $ostotilaukset
+ * @param string  $ostaja_tyyppi
  * @return array
  */
 function kasittele_ostotilaukset($ostotilaukset, $ostaja_tyyppi) {
@@ -162,10 +165,11 @@ function kasittele_ostotilaukset($ostotilaukset, $ostaja_tyyppi) {
   return $ostotilaukset_temp;
 }
 
+
 /**
  *   Generoi sähköpostit ostajittain ostajien ostotilauksista.
  *
- * @param array $ostotilaukset
+ * @param array   $ostotilaukset
  * @return array
  */
 function generoi_email_body($ostotilaukset, $kieli, $toimittajan_tuotetiedot) {
@@ -220,10 +224,11 @@ function generoi_email_body($ostotilaukset, $kieli, $toimittajan_tuotetiedot) {
   return $email_bodys;
 }
 
+
 /**
  * Lähettää sähköpostit
  *
- * @param array $email_bodys
+ * @param array   $email_bodys
  */
 function laheta_sahkopostit($email_bodys, $kieli) {
   foreach ($email_bodys as $kuka => $email_body) {
@@ -237,11 +242,12 @@ function laheta_sahkopostit($email_bodys, $kieli) {
   }
 }
 
+
 /**
  *   Hakee kuka-taulusta sähköpostiosoitteen
  *
  * @global array $kukarow
- * @param string $kuka
+ * @param string  $kuka
  * @return string
  */
 function hae_sahkopostiosoite($kuka) {
@@ -257,11 +263,12 @@ function hae_sahkopostiosoite($kuka) {
   return $kuka_eposti['eposti'];
 }
 
+
 /**
  *   Hakee käyttäjänimen ostajanro perusteella
  *
  * @global array $kukarow
- * @param int $ostajanro
+ * @param int     $ostajanro
  * @return string
  */
 function hae_kuka_ostajanro_perusteella($ostajanro) {

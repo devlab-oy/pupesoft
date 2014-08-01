@@ -1,13 +1,13 @@
 <?php
 
-require('../inc/parametrit.inc');
+require '../inc/parametrit.inc';
 
 echo "<font class='head'>".t("Sarjanumeromyynnin tarkistusta").":</font><hr><br>";
 
 if ($tee == 'NAYTATILAUS') {
   echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
 
-  require ("naytatilaus.inc");
+  require "naytatilaus.inc";
 
   echo "<br><br><br>";
 }
@@ -55,9 +55,9 @@ if ($tee == "") {
   if ($jarjestys_6 != "") $chk6 = "CHECKED";
   if ($jarjestys_7 != "") $chk7 = "CHECKED";
 
-  if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-  if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-  if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+  if (!isset($kka)) $kka = date("m", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+  if (!isset($vva)) $vva = date("Y", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+  if (!isset($ppa)) $ppa = date("d", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
   if (!isset($kkl)) $kkl = date("m");
   if (!isset($vvl)) $vvl = date("Y");
   if (!isset($ppl)) $ppl = date("d");
@@ -125,7 +125,7 @@ if ($tee == "") {
 
 if (($jarjestys_1 != '' or $jarjestys_2 != '' or $jarjestys_3 != '' or $jarjestys_4 != '' or $jarjestys_5 != '' or $jarjestys_6 != '' or $jarjestys_7 != '') and $tee == "") {
 
-  function superlistaus ($tyyppi, $lisa1, $lisa2, $lisa3, $ostov) {
+  function superlistaus($tyyppi, $lisa1, $lisa2, $lisa3, $ostov) {
     global $PHP_SELF, $kukarow, $yhtiorow, $myyntitilaus_haku, $tuoteno_haku, $nimitys_haku, $ostotilaus_haku, $sarjanumero_haku, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $jarjestys_1, $jarjestys_2, $jarjestys_3, $jarjestys_4, $jarjestys_5, $jarjestys_6 , $jarjestys_7;
 
     echo "<tr><th>Myyntitilaus<br>Ostotilaus</th><th>Tuoteno</th><th>Nimitys</th><th>Myyntihinta<br>Ostohinta</th><th>Myyntikate<br>Ostokate</th><th>O/H</th><th>Sarjanumero</th></tr>";
@@ -186,7 +186,7 @@ if (($jarjestys_1 != '' or $jarjestys_2 != '' or $jarjestys_3 != '' or $jarjesty
 
       // Sarjanumeron ostohinta
 
-      if($tyyppi=="myynti") {
+      if ($tyyppi=="myynti") {
         $ostohinta = sarjanumeron_ostohinta("myyntirivitunnus", $vrow["myyntitunnus"]);
       }
       else {
@@ -201,7 +201,7 @@ if (($jarjestys_1 != '' or $jarjestys_2 != '' or $jarjestys_3 != '' or $jarjesty
 
 
 
-      if ($vrow["myyntitunnus"] > 0 and abs(round($vrow["rivihinta"]-$ostohinta,2) - $vrow["kate"]) > 0.01) {
+      if ($vrow["myyntitunnus"] > 0 and abs(round($vrow["rivihinta"]-$ostohinta, 2) - $vrow["kate"]) > 0.01) {
         echo "<td valign='top' align='right' nowrap><font style='color: red;'>$vrow[kate] <> ".sprintf('%.2f', $vrow["rivihinta"]-$ostohinta)."</font><br>";
       }
       /*
@@ -217,7 +217,7 @@ if (($jarjestys_1 != '' or $jarjestys_2 != '' or $jarjestys_3 != '' or $jarjesty
       elseif ($vrow["myyntitunnus"] > 0 and $vrow["kate"] < 0) {
         echo "<td valign='top' align='right' nowrap><font style='color: red;'>$vrow[kate]</font><br>";
       }
-      elseif($vrow["myyntitunnus"] > 0) {
+      elseif ($vrow["myyntitunnus"] > 0) {
         echo "<td valign='top' align='right' nowrap>$vrow[kate]<br>";
       }
       else {
@@ -235,10 +235,10 @@ if (($jarjestys_1 != '' or $jarjestys_2 != '' or $jarjestys_3 != '' or $jarjesty
         $sel1 = $sel2 = "";
 
         if ($vrow["osto_vai_hyvitys"] == "O") {
-            $sel2 = "SELECTED";
+          $sel2 = "SELECTED";
         }
         else {
-            $sel1 = "SELECTED";
+          $sel1 = "SELECTED";
         }
 
         echo "<td><form action = '?tee=OSTOVAIHYVITYS&rivitunnus=$vrow[ostotunnus]&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&jarjestys_1=$jarjestys_1&jarjestys_2=$jarjestys_2&jarjestys_3=$jarjestys_3&jarjestys_4=$jarjestys_4&jarjestys_5=$jarjestys_5&jarjestys_6=$jarjestys_6&jarjestys_7=$jarjestys_7#$vrow[ostotunnus]' method='post'>
@@ -363,4 +363,4 @@ if (($jarjestys_1 != '' or $jarjestys_2 != '' or $jarjestys_3 != '' or $jarjesty
 
 echo "</table><br><br>";
 
-require ("../inc/footer.inc");
+require "../inc/footer.inc";

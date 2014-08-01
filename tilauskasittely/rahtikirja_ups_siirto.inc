@@ -133,7 +133,7 @@ if ($kollityht > 0) {
 
     // SHIP TO
     $shipto            = $xml->OpenShipment->addChild('ShipTo');
-//    $customerid         = $shipto->addChild('CustomerID', $ups_laskurow['ytunnus']); // max 35 merkkiä, R
+    //    $customerid         = $shipto->addChild('CustomerID', $ups_laskurow['ytunnus']); // max 35 merkkiä, R
     $companyorname         = $shipto->addChild('CompanyOrName', utf8_encode($ups_laskurow['toim_nimi'])); // max 35 merkkiä, R
 
     if ($yhteyshenkiloasiakas['nimi'] != '') {
@@ -174,17 +174,17 @@ if ($kollityht > 0) {
     $postalcode          = $shipto->addChild('PostalCode', $ups_laskurow['toim_postino']); // max 9 merkkiä, C (riippuu maasta)
     $cityortown          = $shipto->addChild('CityOrTown', utf8_encode($ups_laskurow['toim_postitp'])); // max 30 merkkiä, R
     $telephone          = $ups_laskurow['puhelin'] != '' ? $shipto->addChild('Telephone', $ups_laskurow['puhelin']) :
-                    ($ups_laskurow['gsm'] != '' ? $shipto->addChild('Telephone', $ups_laskurow['gsm']) :
-                    ($ups_laskurow['tyopuhelin'] != '' ? $shipto->addChild('Telephone', $ups_laskurow['tyopuhelin']) : $shipto->addChild('Telephone', '.'))); // max 15 merkkiä, C
-//    $stateprovincecounty     = $shipto->addChild('StateProvinceCounty', ''); // max 5 merkkiä, C (tarvitaan vain US & CA tapauksissa)
-//    $address2          = $shipto->addChild('Address2', ''); // max 35 merkkiä, O
-//    $address3          = $shipto->addChild('Address3', ''); // max 35 merkkiä, O
-//    $faxnumber          = $shipto->addChild('FaxNumber', $ups_laskurow['fax']); // max 15 merkkiä, O
-//    $emailaddress        = $shipto->addChild('EmailAddress', $ups_laskurow['email']); // max 50 merkkiä, O
-//    $taxidnumber        = $shipto->addChild('TaxIDNumber', ''); // max 15 merkkiä, O
-//    $receiverupsaccountnumber   = $shipto->addChild('ReceiverUpsAccountNumber', ''); // max 10 merkkiä, O
-//    $locationid          = $shipto->addChild('LocationID', ''); // 3 - 10 merkkiä, O
-//    $residentialindicator    = $shipto->addChild('ResidentialIndicator', ''); // 1 merkki, O
+    ($ups_laskurow['gsm'] != '' ? $shipto->addChild('Telephone', $ups_laskurow['gsm']) :
+      ($ups_laskurow['tyopuhelin'] != '' ? $shipto->addChild('Telephone', $ups_laskurow['tyopuhelin']) : $shipto->addChild('Telephone', '.'))); // max 15 merkkiä, C
+    //    $stateprovincecounty     = $shipto->addChild('StateProvinceCounty', ''); // max 5 merkkiä, C (tarvitaan vain US & CA tapauksissa)
+    //    $address2          = $shipto->addChild('Address2', ''); // max 35 merkkiä, O
+    //    $address3          = $shipto->addChild('Address3', ''); // max 35 merkkiä, O
+    //    $faxnumber          = $shipto->addChild('FaxNumber', $ups_laskurow['fax']); // max 15 merkkiä, O
+    //    $emailaddress        = $shipto->addChild('EmailAddress', $ups_laskurow['email']); // max 50 merkkiä, O
+    //    $taxidnumber        = $shipto->addChild('TaxIDNumber', ''); // max 15 merkkiä, O
+    //    $receiverupsaccountnumber   = $shipto->addChild('ReceiverUpsAccountNumber', ''); // max 10 merkkiä, O
+    //    $locationid          = $shipto->addChild('LocationID', ''); // 3 - 10 merkkiä, O
+    //    $residentialindicator    = $shipto->addChild('ResidentialIndicator', ''); // 1 merkki, O
 
     // SHIP FROM
     // laitetaan veikkolan varaston tiedot
@@ -197,15 +197,15 @@ if ($kollityht > 0) {
     $postalcode          = $shipfrom->addChild('PostalCode', "02880"); // max 9 merkkiä, C (riippuu maasta)
     $cityortown          = $shipfrom->addChild('CityOrTown', "Veikkola"); // max 30 merkkiä, R
     $telephone          = $shipfrom->addChild('Telephone', "020 7188 450"); // max 15 merkkiä, C
-//    $address2          = $shipfrom->addChild('Address2', ''); // max 35 merkkiä, O
-//    $address3          = $shipfrom->addChild('Address3', ''); // max 35 merkkiä, O
-//    $stateprovincecounty     = $shipfrom->addChild('StateProvinceCounty', ''); // max 5 merkkiä, C (tarvitaan vain US & CA tapauksissa)
-//    $faxnumber          = $shipfrom->addChild('FaxNumber', $yhtiorow['fax']); // max 15 merkkiä, O
-//    $emailaddress        = $shipfrom->addChild('EmailAddress', $yhtiorow['email']); // max 50 merkkiä, O
-//    $taxidnumber        = $shipfrom->addChild('TaxIDNumber', ''); // max 15 merkkiä, O
-//    $taxidtype          = $shipfrom->addChild('TaxIDType', ''); // max 15 merkkiä, O
-//    $upsaccountnumber      = $shipfrom->addChild('UpsAccountNumber', ''); // 6 tai 10 merkkiä, C
-//    $residentialindicator    = $shipfrom->addChild('ResidentialIndicator', ''); // 1 merkki, O
+    //    $address2          = $shipfrom->addChild('Address2', ''); // max 35 merkkiä, O
+    //    $address3          = $shipfrom->addChild('Address3', ''); // max 35 merkkiä, O
+    //    $stateprovincecounty     = $shipfrom->addChild('StateProvinceCounty', ''); // max 5 merkkiä, C (tarvitaan vain US & CA tapauksissa)
+    //    $faxnumber          = $shipfrom->addChild('FaxNumber', $yhtiorow['fax']); // max 15 merkkiä, O
+    //    $emailaddress        = $shipfrom->addChild('EmailAddress', $yhtiorow['email']); // max 50 merkkiä, O
+    //    $taxidnumber        = $shipfrom->addChild('TaxIDNumber', ''); // max 15 merkkiä, O
+    //    $taxidtype          = $shipfrom->addChild('TaxIDType', ''); // max 15 merkkiä, O
+    //    $upsaccountnumber      = $shipfrom->addChild('UpsAccountNumber', ''); // 6 tai 10 merkkiä, C
+    //    $residentialindicator    = $shipfrom->addChild('ResidentialIndicator', ''); // 1 merkki, O
 
     /*
     // PRODUCER
@@ -368,8 +368,8 @@ if ($kollityht > 0) {
     // However, both fields can be deselected (contain a value of '0')
 
     $documentonly          = $shipmentinformation->addChild('DocumentOnly', ''); // 1 = select document only, 0 = deselect document only, C   // International Shipment
-//    $goodsnotinfreecirculation    = $shipmentinformation->addChild('GoodsNotInFreeCirculation', ''); // 1 merkki, C
-//    $specialinstructionforshipment  = $shipmentinformation->addChild('SpecialInstructionForShipment', ''); // max 69 merkkiä, R
+    //    $goodsnotinfreecirculation    = $shipmentinformation->addChild('GoodsNotInFreeCirculation', ''); // 1 merkki, C
+    //    $specialinstructionforshipment  = $shipmentinformation->addChild('SpecialInstructionForShipment', ''); // max 69 merkkiä, R
     $shippernumber          = $shipmentinformation->addChild('ShipperNumber', ''); // 6 tai 10 merkkiä, R
 
     /******************************************************************************
@@ -391,7 +391,7 @@ if ($kollityht > 0) {
     WorldEase  WorldEase will allow all billing options except Consignee billing.
     ******************************************************************************/
 
-//      $billingoption      = $shipmentinformation->addChild('BillingOption', 'PP'); // max 3 merkkiä, R
+    //      $billingoption      = $shipmentinformation->addChild('BillingOption', 'PP'); // max 3 merkkiä, R
 
     /******************************************************************************
     Bill Transportation To
@@ -417,7 +417,7 @@ if ($kollityht > 0) {
     Tax of the Master Shipment.
     ******************************************************************************/
     // jos vienti != '' --> vastaanottaja maksaa veron, muuten lähettäjä
-//    $vienninmaksaja   = $ups_laskurow['vienti'] == '' ? 'SHP' : 'REC';
+    //    $vienninmaksaja   = $ups_laskurow['vienti'] == '' ? 'SHP' : 'REC';
     $vienninmaksaja    = 'REC'; // pakko kovakoodaa
     $billdutytaxto    = $shipmentinformation->addChild('BillDutyTaxTo', "$vienninmaksaja");
 
@@ -431,45 +431,45 @@ if ($kollityht > 0) {
     WorldEase  When Split Duty and Tax is selected for Master Shipment, WS 10.0
     will translate the code and print the label Bill Transportation and Duty Tax To.
     ******************************************************************************/
-//    $splitdutyandtax  = $shipmentinformation->addChild('SplitDutyAndTax', ''); // 1 merkki, C
-//    $saturdaydelivery  = $shipmentinformation->addChild('SaturdayDelivery', ''); // max 2 merkkiä, O    // Note: Leave out if this accessorial is not used.
-//    $saturdaypickup    = $shipmentinformation->addChild('SaturdayPickUp', ''); // max 2 merkkiä, O
+    //    $splitdutyandtax  = $shipmentinformation->addChild('SplitDutyAndTax', ''); // 1 merkki, C
+    //    $saturdaydelivery  = $shipmentinformation->addChild('SaturdayDelivery', ''); // max 2 merkkiä, O    // Note: Leave out if this accessorial is not used.
+    //    $saturdaypickup    = $shipmentinformation->addChild('SaturdayPickUp', ''); // max 2 merkkiä, O
 
     // Declared Value
-//    $declaredvalue  = $shipmentinformation->addChild('DeclaredValue');
-//    $amount      = $declaredvalue->addChild('Amount', ''); // max 9,2 merkkiä, O
-//    $shipperpaid  = $declaredvalue->addChild('ShipperPaid', ''); // 1 merkki, O
+    //    $declaredvalue  = $shipmentinformation->addChild('DeclaredValue');
+    //    $amount      = $declaredvalue->addChild('Amount', ''); // max 9,2 merkkiä, O
+    //    $shipperpaid  = $declaredvalue->addChild('ShipperPaid', ''); // 1 merkki, O
 
-//    $merchandisedescriptionforpackage = $shipmentinformation->addChild('MerchandiseDescriptionForPackage', ''); // max 35 merkkiä, O
+    //    $merchandisedescriptionforpackage = $shipmentinformation->addChild('MerchandiseDescriptionForPackage', ''); // max 35 merkkiä, O
 
     // Additional Handling
-//    $additionalhandling     = $shipmentinformation->addChild('AdditionalHandling');
-//    $numberofadditionalhandling = $additionalhandling->addChild('NumberOfAdditionalHandling', ''); // max 4 merkkiä, O
+    //    $additionalhandling     = $shipmentinformation->addChild('AdditionalHandling');
+    //    $numberofadditionalhandling = $additionalhandling->addChild('NumberOfAdditionalHandling', ''); // max 4 merkkiä, O
 
     // COD (if selected, all elements are required)
-//    $cod                   = $shipmentinformation->addChild('COD');
-//    $cashonly                = $cod->addChild('CashOnly', ''); // 1 merkki, R
-//    $cashiercheckormoneyorderonlyindicator   = $cod->addChild('CashierCheckorMoneyOrderOnlyIndicator', ''); // 1 merkki, R
-//    $addshippingchargestocodindicator     = $cod->addChild('AddShippingChargesToCODIndicator', ''); // 1 merkki, R
-//    $amount                 = $cod->addChild('Amount', ''); // max 9,2 merkkiä, R
-//    $currency                 = $cod->addChild('Currency', ''); // max 3 merkkiä, R
+    //    $cod                   = $shipmentinformation->addChild('COD');
+    //    $cashonly                = $cod->addChild('CashOnly', ''); // 1 merkki, R
+    //    $cashiercheckormoneyorderonlyindicator   = $cod->addChild('CashierCheckorMoneyOrderOnlyIndicator', ''); // 1 merkki, R
+    //    $addshippingchargestocodindicator     = $cod->addChild('AddShippingChargesToCODIndicator', ''); // 1 merkki, R
+    //    $amount                 = $cod->addChild('Amount', ''); // max 9,2 merkkiä, R
+    //    $currency                 = $cod->addChild('Currency', ''); // max 3 merkkiä, R
 
-//    $returnofdocument = $shipmentinformation->addChild('ReturnOfDocument', ''); // 1 merkki, C  // poland only
+    //    $returnofdocument = $shipmentinformation->addChild('ReturnOfDocument', ''); // 1 merkki, C  // poland only
 
-  if ($asiakkaan_sahkopostiosoite != '') {
-    // QVN Option
-    $qvnoption              = $shipmentinformation->addChild('QVNOption');
+    if ($asiakkaan_sahkopostiosoite != '') {
+      // QVN Option
+      $qvnoption              = $shipmentinformation->addChild('QVNOption');
 
-    // vastaanottaja
-    $qvnrecipientandnotificationtypes  = $qvnoption->addChild('QVNRecipientAndNotificationTypes');
-    $companyorname            = $qvnrecipientandnotificationtypes->addChild('CompanyOrName', ''); // WS 10.0 will populate ShipTo information
-    $contactname            = $qvnrecipientandnotificationtypes->addChild('ContactName', utf8_encode($asiakkaan_sahkopostiosoite_nimi));
-    $emailaddress            = $qvnrecipientandnotificationtypes->addChild('EMailAddress', utf8_encode($asiakkaan_sahkopostiosoite));
-    $ship                = $qvnrecipientandnotificationtypes->addChild('Ship', 'Y'); // lähetetään meili kun paketti lähtee
-    $exception              = $qvnrecipientandnotificationtypes->addChild('Exception', 'N'); // ??
-    $delivery              = $qvnrecipientandnotificationtypes->addChild('Delivery', 'N'); // ??
+      // vastaanottaja
+      $qvnrecipientandnotificationtypes  = $qvnoption->addChild('QVNRecipientAndNotificationTypes');
+      $companyorname            = $qvnrecipientandnotificationtypes->addChild('CompanyOrName', ''); // WS 10.0 will populate ShipTo information
+      $contactname            = $qvnrecipientandnotificationtypes->addChild('ContactName', utf8_encode($asiakkaan_sahkopostiosoite_nimi));
+      $emailaddress            = $qvnrecipientandnotificationtypes->addChild('EMailAddress', utf8_encode($asiakkaan_sahkopostiosoite));
+      $ship                = $qvnrecipientandnotificationtypes->addChild('Ship', 'Y'); // lähetetään meili kun paketti lähtee
+      $exception              = $qvnrecipientandnotificationtypes->addChild('Exception', 'N'); // ??
+      $delivery              = $qvnrecipientandnotificationtypes->addChild('Delivery', 'N'); // ??
 
-    /*
+      /*
     // lähettäjä
     $qvnrecipientandnotificationtypes2   = $qvnoption->addChild('QVNRecipientAndNotificationTypes');
     $companyorname            = $qvnrecipientandnotificationtypes2->addChild('CompanyOrName', $ups_laskurow['yhtio_nimi']);
@@ -484,16 +484,16 @@ if ($kollityht > 0) {
     */
 
 
-    /******************************************************************************
+      /******************************************************************************
     Subject Line Options
     Valid Values  Description
     0        1Z Tracking Number
     1        Reference 1
     2        Reference 2
     ******************************************************************************/
-    $subjectline            = $qvnoption->addChild('SubjectLine', ''); // max 75 merkkiä, R
-    $memo                = $qvnoption->addChild('Memo', substr('', 0, 150));
-  }
+      $subjectline            = $qvnoption->addChild('SubjectLine', ''); // max 75 merkkiä, R
+      $memo                = $qvnoption->addChild('Memo', substr('', 0, 150));
+    }
 
     /*
     // Special Commodities (if selected, you must choose at least one element)
@@ -525,8 +525,8 @@ if ($kollityht > 0) {
     PNM        UPS Prints and Posts Return Label
     ERL        UPS Electronic Return Label
     ******************************************************************************/
-//    $returnservice           = $shipmentinformation->addChild('ReturnService'); // if selected, you must choose at least one element and place a value in OPTIONS
-//    $options             = $returnservice->addChild('Options', ''); // max 3 merkkiä, R
+    //    $returnservice           = $shipmentinformation->addChild('ReturnService'); // if selected, you must choose at least one element and place a value in OPTIONS
+    //    $options             = $returnservice->addChild('Options', ''); // max 3 merkkiä, R
 
     /******************************************************************************
     Print Address Only Invoice
@@ -535,11 +535,11 @@ if ($kollityht > 0) {
     2        Print "Address Only Invoice"
     <blank>      Print invoices according to User defaults if invoice information is provided; otherwise, do not print invoices
     ******************************************************************************/
-//    $printaddressonlyinvoice     = $returnservice->addChild('PrintAddressOnlyInvoice', ''); // 1 merkki, O
-//    $sendercompanyname         = $returnservice->addChild('SenderCompanyName', ''); // max 35 merkkiä, O
-//    $recipientemailaddress       = $returnservice->addChild('RecipientEmailAddress', ''); // max 50 merkkiä, O
-//    $failureofdeliveryemailaddress   = $returnservice->addChild('FailureOfDeliveryEmailAddress', ''); // max 50 merkkiä, O
-//
+    //    $printaddressonlyinvoice     = $returnservice->addChild('PrintAddressOnlyInvoice', ''); // 1 merkki, O
+    //    $sendercompanyname         = $returnservice->addChild('SenderCompanyName', ''); // max 35 merkkiä, O
+    //    $recipientemailaddress       = $returnservice->addChild('RecipientEmailAddress', ''); // max 50 merkkiä, O
+    //    $failureofdeliveryemailaddress   = $returnservice->addChild('FailureOfDeliveryEmailAddress', ''); // max 50 merkkiä, O
+    //
     /******************************************************************************
     Instruction and Receipt Language
     Valid Values   Description
@@ -709,10 +709,10 @@ if ($kollityht > 0) {
     TU        Tube
     YD        Yard
     ******************************************************************************/
-//    $unitofmeasure       = $dryiceoption->addChild('UnitOfMeasure', ''); // max 10 merkkiä, O
-//    $regulationset       = $dryiceoption->addChild('RegulationSet', ''); // max 5 merkkiä, O
-//    $ismedical         = $dryiceoption->addChild('IsMedical', ''); // 1 merkki, O
-//    $dryicepackagingtype   = $dryiceoption->addChild('DryIcePackagingType', ''); // 1 merkki, O
+    //    $unitofmeasure       = $dryiceoption->addChild('UnitOfMeasure', ''); // max 10 merkkiä, O
+    //    $regulationset       = $dryiceoption->addChild('RegulationSet', ''); // max 5 merkkiä, O
+    //    $ismedical         = $dryiceoption->addChild('IsMedical', ''); // 1 merkki, O
+    //    $dryicepackagingtype   = $dryiceoption->addChild('DryIcePackagingType', ''); // 1 merkki, O
 
 
 
@@ -725,8 +725,8 @@ if ($kollityht > 0) {
     /*
     Dependent upon business rule certain documents are required
     */
-//    $internationaldocumentation = $xml->OpenShipment->addChild('InternationalDocumentation');
-//    $invoiceimportersameasshipto = $internationaldocumentation->addChild('InvoiceImporterSameAsShipTo', ''); // 1 merkki, C
+    //    $internationaldocumentation = $xml->OpenShipment->addChild('InternationalDocumentation');
+    //    $invoiceimportersameasshipto = $internationaldocumentation->addChild('InvoiceImporterSameAsShipTo', ''); // 1 merkki, C
 
     /******************************************************************************
     Term of Sale
@@ -746,7 +746,7 @@ if ($kollityht > 0) {
     FOB        Free On Board
     UNK        Unknown
     ******************************************************************************/
-//    $invoicetermofsale = $internationaldocumentation->addChild('InvoiceTermOfSale', ''); // max 255 merkkiä, C
+    //    $invoicetermofsale = $internationaldocumentation->addChild('InvoiceTermOfSale', ''); // max 255 merkkiä, C
 
     /******************************************************************************
     Reason For Export
@@ -883,7 +883,7 @@ if ($kollityht > 0) {
 
     $xml_output = $xml->asXML();
 
-    $filenimi = "dataout/ups_import-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".xml";
+    $filenimi = "dataout/ups_import-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true)).".xml";
 
     //kirjoitetaan faili levylle..
     if (file_put_contents($filenimi, $xml_output) === FALSE) {
@@ -897,7 +897,7 @@ if ($kollityht > 0) {
     $ftppass = $ups_pass_x;
     $ftppath = $ups_path_x;
     $ftpfile = realpath($filenimi);
-    require ("inc/ftp-send.inc");
+    require "inc/ftp-send.inc";
   }
   else {
     echo "<br><font class='error'>".t("UPS aineiston luontiin tarvittavia parametrejä puuttuu!")."</font><br>";

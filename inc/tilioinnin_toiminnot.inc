@@ -15,7 +15,7 @@ if ($_POST['ajax_toiminto'] == 'tilin_oletusalv') {
     $row = mysql_fetch_assoc($result);
 
     echo json_encode(
-      array('vero' => preg_replace ('/\.?0*$/', '', $row['oletus_alv']))
+      array('vero' => preg_replace('/\.?0*$/', '', $row['oletus_alv']))
     );
     exit;
   }

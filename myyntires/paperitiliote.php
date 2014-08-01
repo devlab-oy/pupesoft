@@ -1,6 +1,6 @@
 <?php
 
-function alku () {
+function alku() {
   global $pdf, $asiakastiedot, $yhtiorow, $kukarow, $kala, $sivu, $rectparam, $norm, $pieni, $kieli, $tito_pvm, $alatila, $on_tiliote;
 
   $firstpage = $pdf->new_page("a4");
@@ -80,7 +80,7 @@ function alku () {
   $pdf->draw_text(400-$oikpos, $kala, t("Summa", $kieli),    $firstpage, $pieni);
 
   $oikpos = $pdf->strlen(t("Avoinsumma", $kieli), $pieni);
-  $pdf->draw_text(480-$oikpos, $kala, t("Avoinsumma", $kieli),$firstpage, $pieni);
+  $pdf->draw_text(480-$oikpos, $kala, t("Avoinsumma", $kieli), $firstpage, $pieni);
 
   if (($on_tiliote and $tito_pvm != date('Y-m-d')) or !$on_tiliote) {
     $pdf->draw_text(510, $kala, t("Maksettu", $kieli),    $firstpage, $pieni);
@@ -88,11 +88,11 @@ function alku () {
 
   $kala -= 15;
 
-  return($firstpage);
+  return $firstpage;
 }
 
-function rivi ($tyyppi, $firstpage, $row) {
-  global $pdf, $kala, $sivu, $lask, $rectparam, $norm, $pieni,$kieli, $yhtiorow, $tito_pvm, $alatila, $asiakastiedot, $on_tiliote;
+function rivi($tyyppi, $firstpage, $row) {
+  global $pdf, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $kieli, $yhtiorow, $tito_pvm, $alatila, $asiakastiedot, $on_tiliote;
 
   if ($lask == 35) {
     $sivu++;
@@ -167,10 +167,10 @@ function rivi ($tyyppi, $firstpage, $row) {
   }
   $kala = $kala - 13;
   $lask++;
-  return($firstpage);
+  return $firstpage;
 }
 
-function loppu ($firstpage, $summat) {
+function loppu($firstpage, $summat) {
   global $pdf, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kieli, $lask, $kala;
 
   if (count($summat) > 1 and  $lask > 35) {
@@ -241,7 +241,7 @@ function loppu ($firstpage, $summat) {
 
 }
 
-require('pdflib/phppdflib.class.php');
+require 'pdflib/phppdflib.class.php';
 
 //echo "<font class='message'>Tiliote tulostuu...</font>";
 flush();
@@ -402,7 +402,7 @@ while ($row = mysql_fetch_assoc($suoritusresult)) {
   $totaali[$row['valkoodi']] += $row['summa'];
 }
 
-loppu($firstpage,$totaali);
+loppu($firstpage, $totaali);
 
 //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 list($usec, $sec) = explode(' ', microtime());

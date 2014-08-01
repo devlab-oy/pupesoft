@@ -249,7 +249,7 @@ if (is_resource($variaatiores) and mysql_num_rows($variaatiores) > 0) {
         if ($netto_array[$varirow["tuoteno"]] == 'N') {
           $chkn = 'SELECTED';
         }
-        elseif($netto_array[$varirow["tuoteno"]] == "E") {
+        elseif ($netto_array[$varirow["tuoteno"]] == "E") {
           $chke = 'SELECTED';
         }
 
@@ -338,9 +338,9 @@ if (is_resource($variaatiores) and mysql_num_rows($variaatiores) > 0) {
     }
 
     if ($toimaika == "" or $toimaika == "0000-00-00") {
-      $toimkka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-      $toimvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-      $toimppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+      $toimkka = date("m", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+      $toimvva = date("Y", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+      $toimppa = date("d", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
     }
     else {
       $toimkka = substr($toimaika, 5, 2);
@@ -349,9 +349,9 @@ if (is_resource($variaatiores) and mysql_num_rows($variaatiores) > 0) {
     }
 
     if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
-      $kerayskka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-      $keraysvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-      $keraysppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+      $kerayskka = date("m", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+      $keraysvva = date("Y", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+      $keraysppa = date("d", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
     }
     else {
       $kerayskka = substr($kerayspvm, 5, 2);

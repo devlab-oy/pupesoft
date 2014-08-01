@@ -3,7 +3,7 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Sarjanumero vs. Saldo")."</font><hr>";
 
@@ -20,7 +20,7 @@ echo "<tr>
     <th>".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Varasto")."</th>
     <th>".t("Varastopaikka")."</th><th>".t("Saldo")."</th><th>".t("Sarjakpl")."</th><th>".t("Sarjanumerot")."</th><th>".t("Vararvo")."</th></tr>";
 
-while ($row = mysql_fetch_array ($result)) {
+while ($row = mysql_fetch_array($result)) {
 
   //saldot per varastopaikka
   $query = "SELECT tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
@@ -38,7 +38,7 @@ while ($row = mysql_fetch_array ($result)) {
   $sresult = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($sresult) > 0) {
-    while ($saldorow = mysql_fetch_array ($sresult)) {
+    while ($saldorow = mysql_fetch_array($sresult)) {
 
       list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($saldorow["tuoteno"], '', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"], '', '', '');
 
@@ -64,7 +64,7 @@ while ($row = mysql_fetch_array ($result)) {
       $sarjares = mysql_query($query) or pupe_error($query);
       $sarjarow = mysql_fetch_array($sarjares);
 
-      if ((in_array($row["sarjanumeroseuranta"], array("S","T","U","V")) and (float) $saldo != (float) $sarjarow["kpl"]) or (in_array($row["sarjanumeroseuranta"], array("E","F","G")) and (float) $saldo != (float) $sarjarow["era_kpl"])) {
+      if ((in_array($row["sarjanumeroseuranta"], array("S", "T", "U", "V")) and (float) $saldo != (float) $sarjarow["kpl"]) or (in_array($row["sarjanumeroseuranta"], array("E", "F", "G")) and (float) $saldo != (float) $sarjarow["era_kpl"])) {
         echo "<tr>
             <td valign='top'><a href='../inventoi.php?tee=INVENTOI&tuoteno=".urlencode($row["tuoteno"])."'>$row[tuoteno]</a></td><td valign='top'>$row[nimitys]</td>
             <td valign='top'>$saldorow[nimitys] $saldorow[tyyppi]</td>
@@ -72,7 +72,7 @@ while ($row = mysql_fetch_array ($result)) {
 
         echo "<td valign='top' align='right'>".sprintf("%.2f", $saldo)."</td>";
 
-        if (in_array($row["sarjanumeroseuranta"], array("S","T","U","V"))) {
+        if (in_array($row["sarjanumeroseuranta"], array("S", "T", "U", "V"))) {
           echo "<td valign='top' align='right'>".sprintf("%.2f", $sarjarow["kpl"])."</td>";
         }
         else {
@@ -81,7 +81,7 @@ while ($row = mysql_fetch_array ($result)) {
 
         echo "<td valign='top'>$sarjarow[sarjanumerot]</td>";
 
-        if (in_array($row["sarjanumeroseuranta"], array("S","U","G"))) {
+        if (in_array($row["sarjanumeroseuranta"], array("S", "U", "G"))) {
           echo "<td>".t("YKSI")."</td>";
         }
         else {
@@ -103,7 +103,7 @@ while ($row = mysql_fetch_array ($result)) {
         <td></td>
         <td></td>";
 
-    if (in_array($row["sarjanumeroseuranta"], array("S","U","G"))) {
+    if (in_array($row["sarjanumeroseuranta"], array("S", "U", "G"))) {
       echo "<td>".t("YKSI")."</td>";
     }
     else {
@@ -114,6 +114,6 @@ while ($row = mysql_fetch_array ($result)) {
   }
 }
 
-  echo "</table>";
+echo "</table>";
 
-require ("../inc/footer.inc");
+require "../inc/footer.inc";

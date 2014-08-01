@@ -2,10 +2,10 @@
 
 if (isset($_REQUEST["tee"])) {
   if ($_REQUEST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if ($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/","",$_REQUEST["kaunisnimi"]);
+  if ($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/", "", $_REQUEST["kaunisnimi"]);
 }
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
@@ -13,7 +13,7 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
 }
 else {
 
-  echo "<font class='head'>",t("Budjetin ylläpito"),"</font><hr>";
+  echo "<font class='head'>", t("Budjetin ylläpito"), "</font><hr>";
 
   if (is_array($luvut)) {
     $paiv = 0;
@@ -23,7 +23,7 @@ else {
       foreach ($rivit as $u_tili => $solut) {
         foreach ($solut as $u_kausi => $solu) {
 
-          $solu = str_replace (",", ".", $solu);
+          $solu = str_replace(",", ".", $solu);
 
           if ($solu == '!' or (float) $solu != 0) {
 
@@ -111,21 +111,21 @@ else {
     $sel5 = "";
 
     switch ($tyyppi) {
-      case (1):
-        $sel1 = 'selected';
-        break;
-      case (2):
-        $sel2 = 'selected';
-        break;
-      case (3):
-        $sel3 = 'selected';
-        break;
-      case (4):
-        $sel4 = 'selected';
-        break;
-      case (5):
-        $sel5 = 'selected';
-        break;
+    case (1):
+      $sel1 = 'selected';
+      break;
+    case (2):
+      $sel2 = 'selected';
+      break;
+    case (3):
+      $sel3 = 'selected';
+      break;
+    case (4):
+      $sel4 = 'selected';
+      break;
+    case (5):
+      $sel5 = 'selected';
+      break;
     }
   }
 
@@ -242,7 +242,7 @@ else {
   echo "<option value='TILI'>".t("Tili taso")."</option>\n";
 
   for ($i=$vrow["taso"]-1; $i >= 0; $i--) {
-    echo "<option ".$sel[$i+2]." value='".($i+2)."'>".t("Taso %s",'',$i+1)."</option>\n";
+    echo "<option ".$sel[$i+2]." value='".($i+2)."'>".t("Taso %s", '', $i+1)."</option>\n";
   }
 
   echo "</select></td></tr>";
@@ -348,7 +348,7 @@ else {
       unset($taulunrivit);
     }
 
-    include('inc/pupeExcel.inc');
+    include 'inc/pupeExcel.inc';
 
     $worksheet    = new pupeExcel();
     $format_bold = array("bold" => TRUE);
@@ -392,8 +392,8 @@ else {
       $raja = $vuosi."-".$kk;
       $rajataulu[$j] = $vuosi.$kk;
 
-       echo "<th>$raja</th>\n";
-       $j++;
+      echo "<th>$raja</th>\n";
+      $j++;
 
       $worksheet->writeString($excelrivi, $excelsarake, $raja, $format_bold);
       $excelsarake++;
@@ -537,8 +537,8 @@ else {
     echo "<input type='hidden' name='kaunisnimi' value='Budjettimatriisi.xlsx'>";
     echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
     echo "<table>";
-    echo "<tr><th>",t("Tallenna budjetti (xlsx)"),":</th>";
-    echo "<td class='back'><input type='submit' value='",t("Tallenna"),"'></td></tr>";
+    echo "<tr><th>", t("Tallenna budjetti (xlsx)"), ":</th>";
+    echo "<td class='back'><input type='submit' value='", t("Tallenna"), "'></td></tr>";
     echo "</table></form><br />";
 
     echo "<form method='post' name='sendfile' enctype='multipart/form-data'>";
@@ -550,7 +550,7 @@ else {
     echo "<input type='hidden' name='tkausi' value = '$tkausi'>";
     echo "<input type='hidden' name='rtaso'  value = '$rtaso'>";
     echo "<table>";
-    echo "<tr><th>",t("Valitse tiedosto"),"</th><td><input type='file' name='userfile' /></td><td class='back'><input type='submit' value='",t("Lähetä"),"' /></td></tr>";
+    echo "<tr><th>", t("Valitse tiedosto"), "</th><td><input type='file' name='userfile' /></td><td class='back'><input type='submit' value='", t("Lähetä"), "' /></td></tr>";
     echo "</table>";
     echo "</form>";
 
@@ -559,5 +559,5 @@ else {
     echo t("Ei tasoja!");
   }
 
-  require ("inc/footer.inc");
+  require "inc/footer.inc";
 }

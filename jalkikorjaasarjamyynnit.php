@@ -1,10 +1,10 @@
 <?php
 
-require('inc/parametrit.inc');
+require 'inc/parametrit.inc';
 
 echo "<font class='head'>".t("Korjaa sarjanumeromyyyntejä").":</font><hr><br>";
 
-if ($tee == "PAIVITA" and (checkdate(substr($paivamaara,5,2), substr($paivamaara,8,2), substr($paivamaara,0,4)) or $sarjanumero != "")) {
+if ($tee == "PAIVITA" and (checkdate(substr($paivamaara, 5, 2), substr($paivamaara, 8, 2), substr($paivamaara, 0, 4)) or $sarjanumero != "")) {
 
   if ($sarjanumero != "") {
     $lisa = " and sarjanumeroseuranta.sarjanumero = '$sarjanumero' ";
@@ -132,4 +132,4 @@ if ($tee == "") {
   echo "</form>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

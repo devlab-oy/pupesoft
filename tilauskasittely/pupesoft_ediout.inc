@@ -46,9 +46,9 @@ ICHG__END:            // Tiedosto loppuu
 $pupesoft_ediout_ulos = "";
 
 if (!function_exists("dateconv")) {
-  function dateconv ($date) {
+  function dateconv($date) {
     //k‰‰nt‰‰ mysqln vvvv-kk-mm muodon muotoon vvvvkkmm
-    return substr($date,0,4).substr($date,5,2).substr($date,8,2);
+    return substr($date, 0, 4).substr($date, 5, 2).substr($date, 8, 2);
   }
 }
 
@@ -57,7 +57,7 @@ if ($kukarow["extranet"] == "") {
   $plkulsa = "../";
 }
 
-$nimi = $plkulsa."dataout/pupesoft-order-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
+$nimi = $plkulsa."dataout/pupesoft-order-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true)).".txt";
 
 if (!$toot = fopen($nimi, "w")) die("Filen $nimi luonti ep‰onnistui!");
 
@@ -111,7 +111,7 @@ else {
   $ulos .= "ORFFABONU:$laskurow[viesti]\n";            // Tilauksen otsikon viite
   $ulos .= "OHDR__END:\n";                    // Tilauksen otsikko loppuu
 
-  while ($tilausrivirow = mysql_fetch_array ($result)) {
+  while ($tilausrivirow = mysql_fetch_array($result)) {
 
     // jos ei olla syˆtetty toimittajan tuotenumeroa niin k‰ytet‰‰n meid‰n omaa.. hmm?
     if ($tilausrivirow["toim_tuoteno"] == "") $tilausrivirow["toim_tuoteno"] = $tilausrivirow["tuoteno"];
@@ -127,8 +127,8 @@ else {
 
     // viidenteen segmenttiin menee sarjanumeron tunnus jos se tiedet‰‰n, lis‰t‰‰n myˆs t‰ss‰ keisiss‰ riville mukaan tuotteen hinta koska vastaanottaja luottaa meihin
     if ($tilausrivirow['kommentti'] != '') {
-//      $ulos .= "OLIN8__IF:@@@@@$tilausrivirow[kommentti]\n";
-//      $ulos .= "OLINCONIV:" . sprintf("%015.2f", (float) $tilausrivirow['hinta'])."\n";
+      //      $ulos .= "OLIN8__IF:@@@@@$tilausrivirow[kommentti]\n";
+      //      $ulos .= "OLINCONIV:" . sprintf("%015.2f", (float) $tilausrivirow['hinta'])."\n";
     }
 
     $ulos .= "OLIN__END:$tilausrivirow[tunnus]\n";        // Tilausrivi loppuu
@@ -137,7 +137,7 @@ else {
   $ulos .= "OMSG__END:\n";                     // Tilaus loppuu
   $ulos .= "ICHG__END:\n";                     // Tiedosto loppuu
 
-  fputs($toot,$ulos);
+  fputs($toot, $ulos);
   fclose($toot);
 
   $palautus = 0;

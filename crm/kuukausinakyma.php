@@ -4,7 +4,7 @@
 $useslave = 1;
 
 //parametrit
-include('../inc/parametrit.inc');
+include '../inc/parametrit.inc';
 
 js_popup();
 
@@ -26,11 +26,11 @@ $konsernit2 = " and kalenteri.yhtio in (".substr($konsernit, 0, -1).") ";
 $konsernit3 = " and kuka.yhtio in (".substr($konsernit, 0, -1).") ";
 
 //kuukaudet ja p‰iv‰t ja ajat
-$MONTH_ARRAY = array(1=>t('Tammi'),t('Helmi'),t('Maalis'),t('Huhti'),t('Touko'),t('Kes‰'),t('Hein‰'),t('Elo'),t('Syys'),t('Loka'),t('Marras'),t('Joulu'));
+$MONTH_ARRAY = array(1=>t('Tammi'), t('Helmi'), t('Maalis'), t('Huhti'), t('Touko'), t('Kes‰'), t('Hein‰'), t('Elo'), t('Syys'), t('Loka'), t('Marras'), t('Joulu'));
 $DAY_ARRAY = array(t("Ma"), t("Ti"), t("Ke"), t("To"), t("Pe"), t("La"), t("Su"));
 
 //kalenteritoiminnot
-function days_in_month($month, $year){
+function days_in_month($month, $year) {
   // calculate number of days in a month
   return $month == 2 ? ($year % 4 ? 28 : ($year % 100 ? 29 : ($year % 400 ? 28 : 29))) : (($month - 1) % 7 % 2 ? 30 : 31);
 }
@@ -66,22 +66,22 @@ if ($year == '')  $year=date("Y");
 if ($day == '') $day=date("j");
 
 //lasketaan edellinen ja seuraava paiva kun siirytaan yksi paiva
-$backmday = date("n",mktime(0, 0, 0, $month, $day-1,  $year));
-$backyday = date("Y",mktime(0, 0, 0, $month, $day-1,  $year));
-$backdday = date("j",mktime(0, 0, 0, $month, $day-1,  $year));
+$backmday = date("n", mktime(0, 0, 0, $month, $day-1,  $year));
+$backyday = date("Y", mktime(0, 0, 0, $month, $day-1,  $year));
+$backdday = date("j", mktime(0, 0, 0, $month, $day-1,  $year));
 
-$nextmday = date("n",mktime(0, 0, 0, $month, $day+1,  $year));
-$nextyday = date("Y",mktime(0, 0, 0, $month, $day+1,  $year));
-$nextdday = date("j",mktime(0, 0, 0, $month, $day+1,  $year));
+$nextmday = date("n", mktime(0, 0, 0, $month, $day+1,  $year));
+$nextyday = date("Y", mktime(0, 0, 0, $month, $day+1,  $year));
+$nextdday = date("j", mktime(0, 0, 0, $month, $day+1,  $year));
 
 //lasketaan edellinen ja seuraava paiva kun siirytaan yksi kuukausi
-$backmmonth = date("n",mktime(0, 0, 0, $month-1, $day,  $year));
-$backymonth = date("Y",mktime(0, 0, 0, $month-1, $day,  $year));
-$backdmonth = date("j",mktime(0, 0, 0, $month-1, $day,  $year));
+$backmmonth = date("n", mktime(0, 0, 0, $month-1, $day,  $year));
+$backymonth = date("Y", mktime(0, 0, 0, $month-1, $day,  $year));
+$backdmonth = date("j", mktime(0, 0, 0, $month-1, $day,  $year));
 
-$nextmmonth = date("n",mktime(0, 0, 0, $month+1, $day,  $year));
-$nextymonth = date("Y",mktime(0, 0, 0, $month+1, $day,  $year));
-$nextdmonth = date("j",mktime(0, 0, 0, $month+1, $day,  $year));
+$nextmmonth = date("n", mktime(0, 0, 0, $month+1, $day,  $year));
+$nextymonth = date("Y", mktime(0, 0, 0, $month+1, $day,  $year));
+$nextdmonth = date("j", mktime(0, 0, 0, $month+1, $day,  $year));
 
 //viela muuttujat mysql kyselyja varten, (etunollat pitaa olla...)
 $mymonth = $month;
@@ -100,8 +100,8 @@ echo "<th>".t("Valitse kuukausi").":</th><td>
     <select name='month' Onchange='submit();'>";
 
 $i=1;
-foreach($MONTH_ARRAY as $val) {
-  if($i == $month) {
+foreach ($MONTH_ARRAY as $val) {
+  if ($i == $month) {
     $sel = "selected";
   }
   else {
@@ -137,8 +137,8 @@ if ($osasto == "kaikki") {
 
 echo "<option value='kaikki'>".t("N‰ytet‰‰n kaikki")."</option>";
 
-while($row = mysql_fetch_array($result)) {
-  if($row["osasto"] == $osasto) {
+while ($row = mysql_fetch_array($result)) {
+  if ($row["osasto"] == $osasto) {
     $sel = "selected";
   }
   else {
@@ -148,7 +148,7 @@ while($row = mysql_fetch_array($result)) {
 
 }
 
-if($osasto == "varauskalenterit") {
+if ($osasto == "varauskalenterit") {
   $sel = "selected";
 }
 else {
@@ -180,7 +180,7 @@ $query = "SELECT distinct if(kuka.nimi!='', kuka.nimi, kuka.kuka) nimi, kuka.kuk
           ORDER BY kuka.osasto, kuka.nimi";
 $result = mysql_query($query) or pupe_error($query);
 
-while($row = mysql_fetch_array($result)) {
+while ($row = mysql_fetch_array($result)) {
 
   echo "\n";
 
@@ -196,7 +196,7 @@ while($row = mysql_fetch_array($result)) {
     $x = days_in_month($month, $year);
     $u = 1;
 
-    for($r = $y; $r < count($DAY_ARRAY); $r++) {
+    for ($r = $y; $r < count($DAY_ARRAY); $r++) {
       echo "<th>$DAY_ARRAY[$r]<br>$u</th>";
 
       if ($r == 6) {
@@ -257,16 +257,16 @@ while($row = mysql_fetch_array($result)) {
       }
 
       //Vanhoja kalenteritapahtumia ei saa en‰‰ muuttaa
-      list($rvv,$rkk,$rpp) = explode("-",substr($krow["pvmloppu"],0,10));
-      $kaleloppu  = (int) date('Ymd',mktime(0,0,0,$rkk,$rpp,$rvv));
-      $aikanyt   = (int) date('Ymd',mktime(0,0,0,date('m'),date('d'),date('Y')));
+      list($rvv, $rkk, $rpp) = explode("-", substr($krow["pvmloppu"], 0, 10));
+      $kaleloppu  = (int) date('Ymd', mktime(0, 0, 0, $rkk, $rpp, $rvv));
+      $aikanyt   = (int) date('Ymd', mktime(0, 0, 0, date('m'), date('d'), date('Y')));
 
       // Vanhoja kalenteritapahtumia ei saa en‰‰ muuttaa ja Hyv‰ksyttyj‰ lomia ei saa ikin‰ muokata
-      if($krow['tunnus'] != '' and $krow["kuittaus"] == "" and $kaleloppu >= $aikanyt and ($krow['kuka'] == $kukarow["kuka"] or $krow['laatija'] == $kukarow["kuka"])) {
+      if ($krow['tunnus'] != '' and $krow["kuittaus"] == "" and $kaleloppu >= $aikanyt and ($krow['kuka'] == $kukarow["kuka"] or $krow['laatija'] == $kukarow["kuka"])) {
         echo "<div id='div_$krow[tunnus]' class='popup' style='width:200px;'>";
 
         if (mysql_num_rows($kresult) > 0) {
-          mysql_data_seek($kresult,0);
+          mysql_data_seek($kresult, 0);
 
           while ($krow2 = mysql_fetch_array($kresult)) {
             echo "$krow2[kello]-$krow2[lkello] $row2[nimi]<br>$krow2[selitetark].<br>$krow2[kentta01]<br><br>";
@@ -312,7 +312,7 @@ if ($osasto == "" or $osasto == "varauskalenterit") {
     $x = days_in_month($month, $year);
     $u = 1;
 
-    for($r = $y; $r < count($DAY_ARRAY); $r++) {
+    for ($r = $y; $r < count($DAY_ARRAY); $r++) {
       echo "<th>$DAY_ARRAY[$r]<br>$u</th>";
 
       if ($r == 6) {
@@ -338,11 +338,11 @@ if ($osasto == "" or $osasto == "varauskalenterit") {
             ORDER BY alanimi";
   $result = mysql_query($query) or pupe_error($query);
 
-  while($row = mysql_fetch_array($result)) {
+  while ($row = mysql_fetch_array($result)) {
 
     echo "<tr><td width='35'>$row[alanimi]</td><td></td>";
 
-    for($i = 1; $i <= days_in_month($month, $year); $i++) {
+    for ($i = 1; $i <= days_in_month($month, $year); $i++) {
       $pva = $i;
 
       $query = "SELECT kalenteri.tunnus tunnus, pvmalku, pvmloppu, kalenteri.yhtio, if(kuka.nimi!='', kuka.nimi, kuka.kuka) nimi, replace(kentta01,'\r\n',' ') kentta01,
@@ -359,14 +359,14 @@ if ($osasto == "" or $osasto == "varauskalenterit") {
       $kresult = mysql_query($query) or pupe_error($query);
       $krow = mysql_fetch_array($kresult);
 
-      if($krow["nimi"] == '') {
+      if ($krow["nimi"] == '') {
         echo "<td align='center' width='35'><a class='td' href='../varauskalenteri/varauskalenteri.php?lopetus=$lopetus&tee=SYOTA&year=$year&month=$month&day=$pva&toim=$row[alanimi]'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></td>";
       }
       else {
         echo "<div id='div_$krow[tunnus]' class='popup' style='width:200px;'>";
 
         if (mysql_num_rows($kresult) > 0) {
-          mysql_data_seek($kresult,0);
+          mysql_data_seek($kresult, 0);
 
           while ($krow2 = mysql_fetch_array($kresult)) {
             echo "$krow2[kello]-$krow2[lkello] $krow2[nimi]<br>$row[alanimi].<br>$krow2[kentta01]<br><br>";
@@ -390,4 +390,4 @@ if ($osasto == "" or $osasto == "varauskalenterit") {
 
 echo "</table>";
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

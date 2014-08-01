@@ -541,6 +541,24 @@ if ($tee != "" and $mobiili_keikka != "yes" and $kauttalaskutus == '' and !$tull
 
 while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
+  // Jos ollaan tultu mobiilista ja rivin paikka onkin eri kuin oletuspaikka
+  // niin setataan se paika johon ollaan tulouttamassa oletuspaikaksi
+  if ($mobiili_keikka == "yes"
+      and $hyllyalue != ""
+      and $hyllynro != ""
+      and $hyllyvali != ""
+      and $hyllytaso != ""
+      and ($tilrivirow["hyllyalue"] != $hyllyalue
+          or $tilrivirow["hyllynro"] != $hyllynro
+          or $tilrivirow["hyllyvali"] != $hyllyvali
+          or $tilrivirow["hyllytaso"] != $hyllytaso)) {
+
+    $tilrivirow["hyllyalue"] = $hyllyalue;
+    $tilrivirow["hyllynro"] = $hyllynro;
+    $tilrivirow["hyllyvali"] = $hyllyvali;
+    $tilrivirow["hyllytaso"] = $hyllytaso;
+  }
+
   $hankintakulut = "";
 
   if ($tee != "" and $mobiili_keikka != "yes" and $kauttalaskutus == '' and !$tullaan_automaattikohdistuksesta) {
@@ -649,7 +667,10 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
   }
 
   // Varastoonvientipäivä
-  if ($tilrivirow["toimitettuaika"] == "0000-00-00 00:00:00") {
+  if ($yhtiorow["varastoonvientipaiva"] == "R") {
+    $varastoonvientipva = etsi_tuotteelle_korjaava_varastoonvientipaiva($tilrivirow['tuoteno']);
+  }
+  elseif ($tilrivirow["toimitettuaika"] == "0000-00-00 00:00:00") {
     $varastoonvientipva = date("Y-m-d H:i:s");
   }
   else {
@@ -1077,6 +1098,9 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
                 <input type='text' name='ppa[$tilrivirow[tunnus]]' value='$vpppa' size='3'>
                 <input type='text' name='kka[$tilrivirow[tunnus]]' value='$vpkka' size='3'>
                 <input type='text' name='vva[$tilrivirow[tunnus]]' value='$vpvva' size='5'></td>";
+    }
+    elseif ($yhtiorow["varastoonvientipaiva"] == "R") {
+      $varastoon_msg .= "<td valign='top' nowrap>$varastoonvientipva</td>";
     }
     else {
       $varastoon_msg .= "<td valign='top' nowrap>".tv1dateconv("$vpvva-$vpkka-$vpppa")."</td>";

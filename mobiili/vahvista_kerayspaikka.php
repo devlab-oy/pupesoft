@@ -35,9 +35,19 @@ if (!empty($alusta_tunnus)) {
 if(!isset($row)) {
   $query = "SELECT
             tilausrivi.*,
+            tuotepaikat.hyllyalue,
+            tuotepaikat.hyllynro,
+            tuotepaikat.hyllyvali,
+            tuotepaikat.hyllytaso,
             tuotteen_toimittajat.toim_tuoteno
             FROM tilausrivi
-            LEFT JOIN tuotteen_toimittajat on (tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.yhtio=tilausrivi.yhtio)
+            LEFT JOIN tuotteen_toimittajat
+              ON (tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
+                AND tuotteen_toimittajat.yhtio=tilausrivi.yhtio)
+            JOIN tuotepaikat
+              ON (tuotepaikat.yhtio = tilausrivi.yhtio
+                AND tuotepaikat.tuoteno = tilausrivi.tuoteno
+                AND tuotepaikat.oletus  = 'X')
             WHERE tilausrivi.tunnus='{$tilausrivi}'
             AND tilausrivi.yhtio='{$kukarow['yhtio']}'";
   $row = mysql_fetch_assoc(pupe_query($query));

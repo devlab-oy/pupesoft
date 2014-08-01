@@ -367,7 +367,13 @@ if ($tee == 'tulosta') {
   $query = "SELECT DISTINCT lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
             lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp,
             rahtikirjat.merahti, rahtikirjat.rahtisopimus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti, rahtisopimukset.muumaksaja,
-            asiakas.toimitusvahvistus, if(asiakas.keraysvahvistus_email != '', asiakas.keraysvahvistus_email, asiakas.email) as asiakas_email, if(asiakas.gsm != '', asiakas.gsm, if(asiakas.tyopuhelin != '', asiakas.tyopuhelin, if(asiakas.puhelin != '', asiakas.puhelin, ''))) puhelin
+            asiakas.toimitusvahvistus,
+            IF(lasku.toim_email != '', lasku.toim_email,
+            IF(asiakas.keraysvahvistus_email != '', asiakas.keraysvahvistus_email, asiakas.email)) AS asiakas_email,
+            IF(lasku.toim_puh != '', lasku.toim_puh,
+            IF(asiakas.gsm != '', asiakas.gsm,
+            IF(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
+            IF(asiakas.puhelin != '', asiakas.puhelin, '')))) puhelin
             FROM rahtikirjat
             JOIN lasku USE INDEX (PRIMARY) on (lasku.tunnus=rahtikirjat.otsikkonro and lasku.yhtio=rahtikirjat.yhtio and lasku.tila in ('L','G') ";
 
@@ -924,8 +930,8 @@ if ($tee == 'tulosta') {
         paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi(array('otunnukset' => $otunnukset, 'kilotyht' => $kilotyht));
       }
 
-      // Katsotaan onko magento-API konffattu, eli verkkokauppa käytössä, silloin merkataan tilaus toimitetuksi Magentossa kun rahtikirja tulostetaan
-      if (isset($magento_api_url) and $magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "") {
+      // Katsotaan onko Magento käytössä, silloin merkataan tilaus toimitetuksi Magentoon kun rahtikirja tulostetaan
+      if ($magento_kaytossa) {
         $query = "SELECT asiakkaan_tilausnumero
                   FROM lasku
                   WHERE yhtio                 = '$kukarow[yhtio]'

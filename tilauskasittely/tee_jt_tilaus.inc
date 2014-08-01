@@ -214,6 +214,14 @@ if (!function_exists("tee_jt_tilaus")) {
           $kohdistettulisa .= " and lasku.rahtivapaa = '{$otsikkorivi['rahtivapaa']}'";
         }
 
+        // Huomioidaanko asiakkaan_tilausnumero
+        if ($yhtiorow['jt_asiakkaan_tilausnumero'] == "K") {
+          $atlisa = " and lasku.asiakkaan_tilausnumero = '$otsikkorivi[asiakkaan_tilausnumero]' ";
+        }
+        else {
+          $atlisa = "";
+        }
+
         // Tarvitsemmeko uuden otsikon?
         $query = "SELECT lasku.*
                   FROM lasku
@@ -256,6 +264,7 @@ if (!function_exists("tee_jt_tilaus")) {
                   and laskun_lisatiedot.laskutus_maa      = '$lisatiedot_row[laskutus_maa]'
                   {$kohdistettulisa}
                   $erpcmlisa1
+                  {$atlisa}
                   $yhdlisa";
         $stresult = pupe_query($query);
       }
@@ -405,7 +414,11 @@ if (!function_exists("tee_jt_tilaus")) {
               $fieldname == 'kohde' or
               $fieldname == 'viesti') {
 
-            if ($toim == "ENNAKKO" or $otsikkorivi['jtkielto'] == "Y") {
+            // Ei nollata asiakkaan tilausnumeroa, jos se pit‰‰ huomioida otsikon etsinn‰ss‰
+            $_asiakkaan_tilno = ($fieldname == 'asiakkaan_tilausnumero');
+            $_asiakkaan_tilno &= ($yhtiorow['jt_asiakkaan_tilausnumero'] == "K");
+
+            if ($toim == "ENNAKKO" or $otsikkorivi['jtkielto'] == "Y" or $_asiakkaan_tilno) {
               $query .= $fieldname."='".$otsikkorivi[$fieldname]."',";
             }
             else {
@@ -1134,6 +1147,7 @@ if (!function_exists("tee_jt_tilaus")) {
                       WHERE yhtio  = '$kukarow[yhtio]'
                       and otunnus  = '$id'
                       and perheid != 0
+                      and tyyppi  != 'D'
                       GROUP by perheid";
             $copresult = pupe_query($query);
 
@@ -1152,6 +1166,7 @@ if (!function_exists("tee_jt_tilaus")) {
                       WHERE yhtio   = '$kukarow[yhtio]'
                       and otunnus   = '$id'
                       and perheid2 != 0
+                      and tyyppi   != 'D'
                       GROUP by perheid2";
             $copresult = pupe_query($query);
 

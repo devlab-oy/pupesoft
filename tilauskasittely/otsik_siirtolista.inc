@@ -188,7 +188,10 @@ if ($tila == 'Muuta' and !isset($jatka)) {
       }
 
       // Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan se
-      if (empty($clearing) and $varow['tunnus'] == $srow["clearing"] or ((int) $kukarow["kesken"] == 0 and $varow['tunnus'] == $kukarow["oletus_varasto"])) {
+      if (empty($clearing) and $varow['tunnus'] == $srow["clearing"] or
+        (empty($clearing) 
+          and (int) $kukarow["kesken"] == 0 
+          and $varow['tunnus'] == $kukarow["oletus_varasto"])) {
         $sel = 'selected';
       }
 

@@ -1,6 +1,6 @@
 <?php
 
-require("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 if (!isset($tee))         $tee = "";
 if (!isset($toim))         $toim = "";
@@ -38,7 +38,7 @@ echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
 echo "<th style='vertical-align:middle;'>".t("Varastohaku")."</th>";
 echo "<td>".livesearch_kentta("formi", "VARASTOHAKU", "varastopaikka", 300)."</td>";
 
-# Voidaan hakea sscc-koodilla jos suuntalavat on käytössä
+// Voidaan hakea sscc-koodilla jos suuntalavat on käytössä
 if ($yhtiorow['suuntalavat'] == 'S') {
   echo "</tr>";
   echo "<tr>";
@@ -108,7 +108,7 @@ if ($tee == "V") {
     //-->
     </script>";
 
-  # Jos haettu sscc koodilla
+  // Jos haettu sscc koodilla
   if (!empty($sscc)) {
     $query = "SELECT tuotepaikat.*, suuntalavat.sscc
               FROM tuotepaikat
@@ -129,7 +129,7 @@ if ($tee == "V") {
     $result = pupe_query($query);
   }
   else {
-    # Haetaan tuotteet varastopaikka haulla
+    // Haetaan tuotteet varastopaikka haulla
     $query = "SELECT tuotepaikat.*
               FROM tuotepaikat
               WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
@@ -163,7 +163,7 @@ if ($tee == "V") {
 
   while ($rivi = mysql_fetch_assoc($result)) {
 
-    # Haetaan nimitys
+    // Haetaan nimitys
     $nimitys_result = pupe_query("  SELECT nimitys
                     FROM tuote
                     WHERE yhtio='{$kukarow['yhtio']}'
@@ -178,7 +178,7 @@ if ($tee == "V") {
     echo "<td>$rivi[saldo]</td>";
     echo "<td>$rivi[oletus]</td>";
 
-    # Haetaan suuntalavan sscc, jos tuotepaikan tyyppi on 'S'
+    // Haetaan suuntalavan sscc, jos tuotepaikan tyyppi on 'S'
     if ($rivi['tyyppi'] == 'S') {
       $s_query = "SELECT group_concat(distinct(sscc)) as sscc
                   FROM tilausrivi
@@ -224,7 +224,7 @@ if ($tee == "V") {
   echo "<table>
       <tr><th>".t("Minne varastopaikalle siirretään")."</th></tr>
       <tr><td>
-      ".t("Alue")." ",hyllyalue("ahyllyalue", $thyllyalue),"
+      ".t("Alue")." ", hyllyalue("ahyllyalue", $thyllyalue), "
       ".t("Nro")."  <input type = 'text' name = 'ahyllynro'  size = '5' maxlength='5' value = '$thyllynro'>
       ".t("Väli")." <input type = 'text' name = 'ahyllyvali' size = '5' maxlength='5' value = '$thyllyvali'>
       ".t("Taso")." <input type = 'text' name = 'ahyllytaso' size = '5' maxlength='5' value = '$thyllytaso'>
@@ -284,10 +284,10 @@ if ($tee == "W") {
     // joten älä vaihda thylly-muuttujia ahyllyiksi
     // Rivin 171 lomakkeella käytetään a- ja t-hyllyjä tarkoituksella.
 
-    require("muuvarastopaikka.php");
+    require "muuvarastopaikka.php";
   }
 }
 $formi = "formi";
 $kentta = "varastopaikka";
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

@@ -12,7 +12,7 @@ if ($ytunnus == "" and $asia_ytunnus == "" and $asiakasid != "") {
 if ($asia_ytunnus != '' or $asiakasid != '') {
   if ($asiakasid == "") $tee = "";
   if ($ytunnus == "") $ytunnus = $asia_ytunnus;
-  require ("inc/asiakashaku.inc");
+  require "inc/asiakashaku.inc";
   $asia_ytunnus = $ytunnus;
 }
 
@@ -23,7 +23,7 @@ if ($ytunnus == "" and $toim_ytunnus == "" and $toimittajaid != "") {
 if ($toim_ytunnus != '' or $toimittajaid != '') {
   if ($toimittajaid == "") $tee = "";
   if ($ytunnus == "") $ytunnus = $toim_ytunnus;
-  require ("inc/kevyt_toimittajahaku.inc");
+  require "inc/kevyt_toimittajahaku.inc";
   $toim_ytunnus = $ytunnus;
 }
 
@@ -330,7 +330,7 @@ echo "</table><br>";
 $monivalintalaatikot = array("KUSTP", "KOHDE", "PROJEKTI", "ASIAKASOSASTO", "ASIAKASRYHMA");
 $noautosubmit = TRUE;
 
-require ("tilauskasittely/monivalintalaatikot.inc");
+require "tilauskasittely/monivalintalaatikot.inc";
 
 echo "<br><input type = 'submit' value = '".t("Näytä")."'></form><br><br>";
 
@@ -727,13 +727,13 @@ if ($tee != "") {
                   and tiliointi.tilino   = '$trow[xtilino]'
                   $lisa2";
         $alkres = mysql_query($query) or pupe_error($query);
-        $alkurow = mysql_fetch_array ($alkres);
+        $alkurow = mysql_fetch_array($alkres);
         $kumsumma = $alkurow["saldo"];
 
         // tilin alkusaldo
         if (!isset($worksheet)) {
           echo "<td valign='top' colspan='8'></td>";
-          echo "<td valign='top' align='right' nowrap>".sprintf("%.2f",$kumsumma)."</td></tr>";
+          echo "<td valign='top' align='right' nowrap>".sprintf("%.2f", $kumsumma)."</td></tr>";
           echo "<tr class='aktiivi'>";
         }
 
@@ -784,7 +784,7 @@ if ($tee != "") {
 
       if (!isset($worksheet)) {
         echo "<td valign='top' align='right'>";
-        if ($mutositelink) echo "<a name='$trow[rivitunnus]' href = 'muutosite.php?tee=E&tunnus=$trow[ltunnus]&lopetus=$lopetus/SPLIT/$PHP_SELF////toim=$toim//tee=$tee//alvv=$alvv//alvk=$alvk//alvp=$alvp//llvv=$llvv//llvk=$llvk//llvp=$llvp//tkausi=$tkausi//tili=$tili//tili2=$tili2//asia_ytunnus=$asia_ytunnus//asiakasid=$asiakasid//toim_ytunnus=$toim_ytunnus//toimittajaid=$toimittajaid//alv=$alv//kasin=$kasin//excel=$excel//maarajaus=$maarajaus".str_replace("&","//",$ulisa)."///$trow[rivitunnus]'>";
+        if ($mutositelink) echo "<a name='$trow[rivitunnus]' href = 'muutosite.php?tee=E&tunnus=$trow[ltunnus]&lopetus=$lopetus/SPLIT/$PHP_SELF////toim=$toim//tee=$tee//alvv=$alvv//alvk=$alvk//alvp=$alvp//llvv=$llvv//llvk=$llvk//llvp=$llvp//tkausi=$tkausi//tili=$tili//tili2=$tili2//asia_ytunnus=$asia_ytunnus//asiakasid=$asiakasid//toim_ytunnus=$toim_ytunnus//toimittajaid=$toimittajaid//alv=$alv//kasin=$kasin//excel=$excel//maarajaus=$maarajaus".str_replace("&", "//", $ulisa)."///$trow[rivitunnus]'>";
         echo "<font class='$class'>".sprintf("%.2f", $trow["summa"])."</font>";
         if ($mutositelink) echo "</a>";
         echo "</td>";
@@ -805,7 +805,7 @@ if ($tee != "") {
         //lasketaan ja echotaan kumulatiivinen summa
         $kumsumma += $trow["summa"];
 
-        if (!isset($worksheet)) echo "<td align='right' valign='top'>".sprintf("%.2f",$kumsumma)."</td>";
+        if (!isset($worksheet)) echo "<td align='right' valign='top'>".sprintf("%.2f", $kumsumma)."</td>";
 
         if (isset($worksheet)) $worksheet->writeNumber($excelrivi, 8, $kumsumma);
       }

@@ -47,7 +47,7 @@ while ($jjrow = mysql_fetch_array($jresultlask)) {
 
   // TODO: Tämä koko osio on mystistä paskaa!
   if (mysql_num_rows($aleresult) != 0) {
-    $alerow = mysql_fetch_array ($aleresult);
+    $alerow = mysql_fetch_array($aleresult);
 
     //jos rivi on katemyyty tai käyttäjä haluaa, lasketaan ale uudestaan
     if (($alerow["alennus"]{0} == "-" and $trow["kehahin"] > 0) or $laskeuusix != "") {
@@ -58,11 +58,11 @@ while ($jjrow = mysql_fetch_array($jresultlask)) {
         echo "vienti=$vienti alv=$alv netto=$netto akplhinta=$akplhinta aale=$aale rowtilkpl=$jjrow[tilkpl] rowalv=$jjrow[alv] rowhinta=$jjrow[hinta] ";
 
         for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-          echo "rowale{$alepostfix}=",$jjrow["ale{$alepostfix}"]," ";
+          echo "rowale{$alepostfix}=", $jjrow["ale{$alepostfix}"], " ";
         }
         echo "apuroytunnus=$apuro[ytunnus] ytunnus=$ytunnus apuroytunnus=$apuro[ytunnus] mista=$mista tunnus=$tunnus<br>";
         echo "jrowtunnus=$jjrow[tunnus]<br>";
-        }
+      }
 
       list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $jjrow['tilkpl'], '', '', '');
       list($hinta, $alv) = alv($laskurow, $trow, $hinta, $jjrow["alv"], $alehinta_alv);
@@ -78,7 +78,7 @@ while ($jjrow = mysql_fetch_array($jresultlask)) {
 
       if ($debug == 1) {
         echo "$query<br>";
-        }
+      }
 
       $netto  = '';
       $hinta  = 0;

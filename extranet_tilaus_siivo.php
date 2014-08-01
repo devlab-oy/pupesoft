@@ -15,8 +15,8 @@ if (!isset($argv[1]) or trim($argv[1]) == '') {
 date_default_timezone_set('Europe/Helsinki');
 
 // otetaan tietokanta connect
-require ("inc/connect.inc");
-require ("inc/functions.inc");
+require "inc/connect.inc";
+require "inc/functions.inc";
 
 // Yhtiö komentoriviltä
 $yhtio = mysql_real_escape_string($argv[1]);

@@ -1,8 +1,8 @@
 <?php
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
-echo "<font class='head'>",t("Toimittajan avoimet tilausrivit"),":</font><hr>";
+echo "<font class='head'>", t("Toimittajan avoimet tilausrivit"), ":</font><hr>";
 
 if (!isset($ytunnus)) $ytunnus = '';
 if (!isset($nayta_rivit)) $nayta_rivit = '';
@@ -11,7 +11,7 @@ if (!isset($otunnus)) $otunnus = '';
 if (!isset($ojarj)) $ojarj = '';
 
 if ($ytunnus != '') {
-  require ("inc/kevyt_toimittajahaku.inc");
+  require "inc/kevyt_toimittajahaku.inc";
 }
 
 $select = "";
@@ -21,26 +21,26 @@ if ($nayta_rivit == 'vahvistamattomat') {
 // Näytetään muuten vaan sopivia tilauksia
 echo "<form method = 'post'>";
 echo "<br><table>";
-echo "<tr><th>",t("Valitse toimittaja"),":</th><td style='text-align: top;'><input type='text' size='10' name='ytunnus' value='{$ytunnus}'> ";
+echo "<tr><th>", t("Valitse toimittaja"), ":</th><td style='text-align: top;'><input type='text' size='10' name='ytunnus' value='{$ytunnus}'> ";
 echo "<select name='nayta_rivit'>";
-echo "<option value=''>",t("Kaikki avoimet rivit"),"</option>";
-echo "<option value='vahvistamattomat' {$select}>",t("Vain vahvistamattomia rivejä"),"</option> ";
-echo "<input type='submit' value='",t("Etsi"),"'></td>";
+echo "<option value=''>", t("Kaikki avoimet rivit"), "</option>";
+echo "<option value='vahvistamattomat' {$select}>", t("Vain vahvistamattomia rivejä"), "</option> ";
+echo "<input type='submit' value='", t("Etsi"), "'></td>";
 echo "</tr>";
 
-echo "<tr><th>",t("Näytä kaikki"),":</th>";
-echo "<td><input type='submit' name='nayta_rivit' value='",t("Näytä kaikkien toimittajien vahvistamattomat rivit"),"'></td></tr>";
+echo "<tr><th>", t("Näytä kaikki"), ":</th>";
+echo "<td><input type='submit' name='nayta_rivit' value='", t("Näytä kaikkien toimittajien vahvistamattomat rivit"), "'></td></tr>";
 
 if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) {
 
   $sel = (isset($toimipaikka) and $toimipaikka == '0') ? "selected" : "";
 
   echo "<tr>";
-  echo "<th>",t("Toimipaikka"),"</th>";
+  echo "<th>", t("Toimipaikka"), "</th>";
   echo "<td>";
   echo "<select name='toimipaikka'>";
-  echo "<option value='kaikki'>",t("Kaikki toimipaikat"),"</option>";
-  echo "<option value='0' {$sel}>",t("Ei toimipaikkaa"),"</option>";
+  echo "<option value='kaikki'>", t("Kaikki toimipaikat"), "</option>";
+  echo "<option value='0' {$sel}>", t("Ei toimipaikkaa"), "</option>";
 
   while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
 
@@ -95,7 +95,7 @@ if ($ytunnus == "" and isset($nayta_rivit) and $nayta_rivit != "") {
   if (mysql_num_rows($result) > 0) {
 
     echo "<table>";
-    echo "<tr><th>",t("Toimittaja"),"</th><th>",t("Tilausnumero"),"</th></tr>";
+    echo "<tr><th>", t("Toimittaja"), "</th><th>", t("Tilausnumero"), "</th></tr>";
 
     while ($row = mysql_fetch_assoc($result)) {
       echo "<tr><td>{$row['nimi']}</td><td><a href='?ytunnus={$row['ytunnus']}&otunnus={$row['otunnus']}&toimittajaid={$toimittajaid}&ojarj={$apu}&toimipaikka=$toimipaikka'>{$row['otunnus']}</a></td></tr>";
@@ -179,14 +179,14 @@ if ($ytunnus != '') {
       $result = pupe_query($query);
 
       if (count($vahvistetturivi) > 0) {
-        foreach($vahvistetturivi as $tunnus => $vahvistettu) {
+        foreach ($vahvistetturivi as $tunnus => $vahvistettu) {
           $query = "UPDATE tilausrivi SET  jaksotettu = '{$vahvistettu}' where yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tunnus}' and tyyppi = 'O'";
           $result = pupe_query($query);
         }
       }
 
       if (isset($poista)) {
-        foreach($poista as $tunnus => $kala) {
+        foreach ($poista as $tunnus => $kala) {
           $query = "UPDATE tilausrivi SET tyyppi = 'D' where yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tunnus}' and tyyppi = 'O' and uusiotunnus = 0";
           $result = pupe_query($query);
         }
@@ -226,18 +226,18 @@ if ($tee == "TULOSTAPDF") {
   else {
     $komento["Ostotilaus"] = "email";
     $vahvistamattomat_rivit = get_vahvistamattomat_rivit($tilaus_otunnukset, $toimittajaid, $laskurow, $kieli);
-    require("tulosta_vahvistamattomista_ostoriveista.inc");
+    require "tulosta_vahvistamattomista_ostoriveista.inc";
   }
 }
 
 if (isset($laskurow)) {
   echo "<table width='720' cellpadding='2' cellspacing='1' border='0'>";
 
-  echo "<tr><th>",t("Ytunnus"),"</th><th colspan='2'>",t("Toimittaja"),"</th></tr>";
+  echo "<tr><th>", t("Ytunnus"), "</th><th colspan='2'>", t("Toimittaja"), "</th></tr>";
   echo "<tr><td>{$laskurow['ytunnus']}</td>
     <td colspan='2'>{$laskurow['nimi']} {$laskurow['nimitark']}<br> {$laskurow['osoite']}<br> {$laskurow['postino']} {$laskurow['postitp']}</td></tr>";
 
-  echo "<tr><th>",t("Tila"),"</th><th>",t("Toimaika"),"</th><th>",t("Tilausnumerot"),"</th><td class='back'></td></tr>";
+  echo "<tr><th>", t("Tila"), "</th><th>", t("Toimaika"), "</th><th>", t("Tilausnumerot"), "</th><td class='back'></td></tr>";
   echo "<tr><td>{$laskurow['tila']}</td><td>{$laskurow['toimaika']}</td><td>{$tunnusrow['tunnukset']}</td></tr>";
   echo "</table><br>";
 
@@ -246,13 +246,13 @@ if (isset($laskurow)) {
       <input type='hidden' name='toimittajaid' value = '{$toimittajaid}'>
       <table>";
 
-  echo "<tr><th>",t("Näytä tilaukset"),"</th><td>";
+  echo "<tr><th>", t("Näytä tilaukset"), "</th><td>";
   echo "<select name='otunnus' onchange='submit();'>";
-  echo "<option value=''>",t("Näytä kaikki"),"</option>";
+  echo "<option value=''>", t("Näytä kaikki"), "</option>";
 
-  $tunnukset = explode(',',$tunnusrow["tunnukset"]);
+  $tunnukset = explode(',', $tunnusrow["tunnukset"]);
 
-  foreach($tunnukset as $tunnus) {
+  foreach ($tunnukset as $tunnus) {
     $sel = '';
     if ($otunnus == $tunnus) {
       $sel = "selected";
@@ -272,9 +272,9 @@ if (isset($laskurow)) {
             ORDER BY 1";
   $result = pupe_query($query);
 
-  echo "<tr><th>",t("Näytä Saapuminen"),"</th>";
+  echo "<tr><th>", t("Näytä Saapuminen"), "</th>";
   echo "<td><select name='keikka' onchange='submit();'>";
-  echo "<option value=''>",t("Näytä kaikki"),"</option>";
+  echo "<option value=''>", t("Näytä kaikki"), "</option>";
 
   if (mysql_num_rows($result) > 0) {
     while ($keikkaselrow = mysql_fetch_assoc($result)) {
@@ -288,7 +288,7 @@ if (isset($laskurow)) {
 
   echo "</select></td></tr>";
 
-  echo "<tr><th>",t("Näytä"),":</th>";
+  echo "<tr><th>", t("Näytä"), ":</th>";
 
   $select = "";
   if ($nayta_rivit == 'vahvistamattomat') {
@@ -296,8 +296,8 @@ if (isset($laskurow)) {
   }
 
   echo "<td><select name='nayta_rivit' onchange='submit();'>";
-  echo "<option value=''>",t("Kaikki avoimet rivit"),"</option>";
-  echo "<option value='vahvistamattomat' {$select}>",t("Vain vahvistamattomia rivejä"),"</option>";
+  echo "<option value=''>", t("Kaikki avoimet rivit"), "</option>";
+  echo "<option value='vahvistamattomat' {$select}>", t("Vain vahvistamattomia rivejä"), "</option>";
   echo "</select></td></tr>";
 
   if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) {
@@ -305,11 +305,11 @@ if (isset($laskurow)) {
     $sel = (isset($toimipaikka) and $toimipaikka == '0') ? "selected" : "";
 
     echo "<tr>";
-    echo "<th>",t("Toimipaikka"),"</th>";
+    echo "<th>", t("Toimipaikka"), "</th>";
     echo "<td>";
     echo "<select name='toimipaikka' onchange='submit();'>";
-    echo "<option value='kaikki'>",t("Kaikki toimipaikat"),"</option>";
-    echo "<option value='0' {$sel}>",t("Ei toimipaikkaa"),"</option>";
+    echo "<option value='kaikki'>", t("Kaikki toimipaikat"), "</option>";
+    echo "<option value='0' {$sel}>", t("Ei toimipaikkaa"), "</option>";
 
     while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
 
@@ -342,11 +342,11 @@ if (isset($laskurow)) {
   $toimkk = date("n");
   $toimvv = date("Y");
 
-  echo "<tr><th>",t("Päivitä rivien toimitusajat"),": </th><td valign='middle'>
+  echo "<tr><th>", t("Päivitä rivien toimitusajat"), ": </th><td valign='middle'>
       <input type='text' name='toimpp' value='{$toimpp}' size='3'>
       <input type='text' name='toimkk' value='{$toimkk}' size='3'>
       <input type='text' name='toimvv' value='{$toimvv}' size='6'></td>
-      <td><input type='Submit' value='",t("Päivitä"),"'></form></td></tr></table><br>";
+      <td><input type='Submit' value='", t("Päivitä"), "'></form></td></tr></table><br>";
 
   echo "  <table>
       <form method='post'>
@@ -362,16 +362,16 @@ if (isset($laskurow)) {
   if (isset($tulosta_exceliin) and $tulosta_exceliin != "") $sel = "SELECTED";
 
   echo "<td><select name='tulosta_exceliin'>";
-  echo "<option value=''>",t("PDF"),"</option>";
-  echo "<option value='EXCEL' $sel>",t("Excel"),"</option>";
+  echo "<option value=''>", t("PDF"), "</option>";
+  echo "<option value='EXCEL' $sel>", t("Excel"), "</option>";
   echo "</select></td>";
 
-  echo "<tr><th>",t("Lähetä vahvistamattomat rivit sähköpostiin"),": </th>
-      <td><input type='Submit' value='",t("Lähetä"),"'></form></td></tr></table><br>";
+  echo "<tr><th>", t("Lähetä vahvistamattomat rivit sähköpostiin"), ": </th>
+      <td><input type='Submit' value='", t("Lähetä"), "'></form></td></tr></table><br>";
 
 
   //Haetaan kaikki tilausrivit
-  echo "<b>",t("Tilausrivit"),":</b><hr>";
+  echo "<b>", t("Tilausrivit"), ":</b><hr>";
 
   //Listataan tilauksessa olevat tuotteet
   $jarjestys = "tilausrivi.otunnus";
@@ -422,10 +422,10 @@ if (isset($laskurow)) {
 
   for ($i = 0; $i < mysql_num_fields($presult)-$miinus; $i++) {
     $apu = $i + 1;
-    echo "<th align='left'><a href = '?ytunnus={$ytunnus}&otunnus={$otunnus}&toimittajaid={$toimittajaid}&ojarj={$apu}&toimipaikka=$toimipaikka'>",t(mysql_field_name($presult,$i)),"</a></th>";
+    echo "<th align='left'><a href = '?ytunnus={$ytunnus}&otunnus={$otunnus}&toimittajaid={$toimittajaid}&ojarj={$apu}&toimipaikka=$toimipaikka'>", t(mysql_field_name($presult, $i)), "</a></th>";
   }
 
-  echo "<th align='left'>",t("poista"),"</th>";
+  echo "<th align='left'>", t("poista"), "</th>";
 
   echo "</tr>";
 
@@ -454,7 +454,7 @@ if (isset($laskurow)) {
       <input type='hidden' name='ytunnus' value = '{$ytunnus}'>
       <input type='hidden' name='toimittajaid' value = '{$toimittajaid}'>
       <input type='hidden' name='otunnus' value = '{$otunnus}'>
-      <input type='hidden' name='t_otunnuksia' value = '",trim($tilaus_otunnukset),"'>
+      <input type='hidden' name='t_otunnuksia' value = '", trim($tilaus_otunnukset), "'>
       <input type='hidden' name='keikka' value = '{$keikka}'>
       <input type='hidden' name='tee' value = 'PAIVITARIVI'>";
 
@@ -469,13 +469,13 @@ if (isset($laskurow)) {
     echo "<tr class='aktiivi'>";
 
     for ($i=0; $i < mysql_num_fields($presult)-$miinus; $i++) {
-      if (mysql_field_name($presult,$i) == 'tuoteno') {
-        echo "<td><a href='../tuote.php?tee=Z&tuoteno=",urlencode($prow[$i]),"'>{$prow[$i]}</a></td>";
+      if (mysql_field_name($presult, $i) == 'tuoteno') {
+        echo "<td><a href='../tuote.php?tee=Z&tuoteno=", urlencode($prow[$i]), "'>{$prow[$i]}</a></td>";
       }
-      elseif(mysql_field_name($presult,$i) == 'toimaika') {
+      elseif (mysql_field_name($presult, $i) == 'toimaika') {
         echo "<td align='right'><input type='text' name='toimaikarivi[{$prow['tunnus']}]' value='{$prow[$i]}' size='10'></td>";
       }
-      elseif (mysql_field_name($presult,$i) == 'vahvistettu') {
+      elseif (mysql_field_name($presult, $i) == 'vahvistettu') {
         $chekkis = "";
         if ($prow['vahvistettu'] == 1) {
           $chekkis = 'CHECKED';
@@ -495,15 +495,15 @@ if (isset($laskurow)) {
   }
   echo "<tr>
       <td class='back' colspan='5' align='right'></td>
-      <td colspan='3' class='spec'>",t("Tilauksen arvo"),":</td>
-      <td align='right' class='spec'>",sprintf("%.2f",$yhteensa),"</td>
-      <td align='right'>",t("Ruksaa kaikki"),":</td>
+      <td colspan='3' class='spec'>", t("Tilauksen arvo"), ":</td>
+      <td align='right' class='spec'>", sprintf("%.2f", $yhteensa), "</td>
+      <td align='right'>", t("Ruksaa kaikki"), ":</td>
       <td><input type='checkbox' name='vahvist' onclick='toggleAll(this);'></td>
       <td><input type='checkbox' name='poist' onclick='toggleAll(this);'></td>
     </tr>";
   echo "<tr>
       <td class='back' colspan='8'></td>
-      <td class='back' colspan='2' align='right'><input type='submit' value='",t("Päivitä tiedot"),"'></td>
+      <td class='back' colspan='2' align='right'><input type='submit' value='", t("Päivitä tiedot"), "'></td>
     </tr>";
 
   echo "</form></table>";
@@ -535,7 +535,7 @@ function get_vahvistamattomat_rivit($tilaus_otunnukset, $toimittajaid, $laskurow
 
   $rivit = array();
   $total = 0;
-  while($row = mysql_fetch_assoc($result)) {
+  while ($row = mysql_fetch_assoc($result)) {
     //  Tarkastetaan olisiko toimittajalla yksikkö!
     $query = "SELECT toim_yksikko
               FROM tuotteen_toimittajat
@@ -568,4 +568,4 @@ function get_vahvistamattomat_rivit($tilaus_otunnukset, $toimittajaid, $laskurow
   return $rivit;
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

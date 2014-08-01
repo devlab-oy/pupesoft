@@ -1,6 +1,6 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Peru varastoonvienti").":</font><hr>";
 
@@ -112,7 +112,7 @@ if ($id != 0) {
               order by tunnus $order";
     $tapares = mysql_query($query) or pupe_error($query);
 
-    while($taparow = mysql_fetch_array($tapares)) {
+    while ($taparow = mysql_fetch_array($tapares)) {
 
       if ($tee != 'KORJAA') {
         echo "<td class='back' valign='top'><table>";
@@ -139,13 +139,13 @@ if ($id != 0) {
       if ($vientikerrat == 1 and ($taparow2["kpl"] > 0 and $voidaankosnropoistaa == "")) {
         $voidaankopoistaa = "Ei";
       }
-      elseif($vientikerrat == 1 and ($taparow2["kpl"] == 0 or $voidaankosnropoistaa == "OK")) {
+      elseif ($vientikerrat == 1 and ($taparow2["kpl"] == 0 or $voidaankosnropoistaa == "OK")) {
         $voidaankopoistaa = "Kyllä";
       }
-      elseif($vientikerrat > 1 and $taparow2["kpl"] >= 0 and $vientikerta > 0) {
+      elseif ($vientikerrat > 1 and $taparow2["kpl"] >= 0 and $vientikerta > 0) {
         $voidaankopoistaa = "Kyllä";
       }
-      elseif($vientikerrat > 1 and $taparow2["kpl"] == 0 and $vientikerta == 0) {
+      elseif ($vientikerrat > 1 and $taparow2["kpl"] == 0 and $vientikerta == 0) {
         $voidaankopoistaa = "Kyllä";
       }
       else {
@@ -286,7 +286,7 @@ if ($id != 0) {
                   order by tunnus";
         $korjres = mysql_query($query) or pupe_error($query);
 
-        if(mysql_num_rows($korjres) == 0) {
+        if (mysql_num_rows($korjres) == 0) {
 
           if ($yhtiorow['suuntalavat'] == 'S' and $rivirow['suuntalava'] > 0) {
             // otetaan suuntalava pois purettu-tilasta
@@ -338,4 +338,4 @@ if ($id == '') {
   echo "</table>";
 }
 
-require("inc/footer.inc");
+require "inc/footer.inc";

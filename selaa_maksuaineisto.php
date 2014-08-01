@@ -3,9 +3,9 @@
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
-echo "<font class='head'>",t("Selaa maksuaineistoja"),"</font><hr>";
+echo "<font class='head'>", t("Selaa maksuaineistoja"), "</font><hr>";
 
 if (!isset($kuka_poimi)) $kuka_poimi = '';
 if (!isset($tunnukset)) $tunnukset = '';
@@ -14,7 +14,7 @@ if (!isset($tee)) $tee = '';
 echo "<table>";
 echo "<form method='post'>";
 
-echo "<th valign='top'>",t("Alkupvm"),"</th>";
+echo "<th valign='top'>", t("Alkupvm"), "</th>";
 echo "<td><select name='alkuvv'>";
 
 $sel = array();
@@ -55,7 +55,7 @@ echo "</select></td><td class='back'>&nbsp;</td>";
 
 
 echo "<tr>
-  <th valign='top'>",t("Loppupvm"),"</th>
+  <th valign='top'>", t("Loppupvm"), "</th>
   <td><select name='loppuvv'>";
 
 $sel = array();
@@ -94,7 +94,7 @@ for ($i = 1; $i < 32; $i++) {
 
 echo "</select></td><td class='back'>&nbsp;</td></tr>";
 
-echo "<tr><th>",t("Poimija"),"</th><td><input type='text' name='kuka_poimi' value='{$kuka_poimi}'></td><td class='back'><input type='submit' name='submitbutton' value='",t("Hae"),"'></td></tr>";
+echo "<tr><th>", t("Poimija"), "</th><td><input type='text' name='kuka_poimi' value='{$kuka_poimi}'></td><td class='back'><input type='submit' name='submitbutton' value='", t("Hae"), "'></td></tr>";
 echo "<input type='hidden' name='tee' value=''>";
 echo "<input type='hidden' name='tunnukset' value=''>";
 
@@ -172,11 +172,11 @@ if ($tee == '') {
         echo "</th></tr>";
 
         echo "<tr>";
-        echo "<th>",t("Maksuaineisto"),"</th>";
-        echo "<th>",t("Poimijan nimi"),"</th>";
-        echo "<th>",t("Maksutili"),"</th>";
-        echo "<th>",t("Laskuja"),"</th>";
-        echo "<th>",t("Summa")," {$yhtiorow['valkoodi']}</th>";
+        echo "<th>", t("Maksuaineisto"), "</th>";
+        echo "<th>", t("Poimijan nimi"), "</th>";
+        echo "<th>", t("Maksutili"), "</th>";
+        echo "<th>", t("Laskuja"), "</th>";
+        echo "<th>", t("Summa"), " {$yhtiorow['valkoodi']}</th>";
         echo "<th></th>";
         echo "</tr>";
       }
@@ -250,7 +250,7 @@ if ($tee == 'selaa') {
   if (mysql_num_rows($result) > 0) {
 
     echo "<br />";
-    echo "<a href='{$palvelin2}selaa_maksuaineisto.php?&alkuvv={$alkuvv}&alkukk={$alkukk}&alkupp={$alkupp}&loppuvv={$loppuvv}&loppukk={$loppukk}&loppupp={$loppupp}'>&laquo; ",t("Takaisin"),"</a>";
+    echo "<a href='{$palvelin2}selaa_maksuaineisto.php?&alkuvv={$alkuvv}&alkukk={$alkukk}&alkupp={$alkupp}&loppuvv={$loppuvv}&loppukk={$loppukk}&loppupp={$loppupp}'>&laquo; ", t("Takaisin"), "</a>";
     echo "<br />";
     echo "<br />";
 
@@ -258,11 +258,11 @@ if ($tee == 'selaa') {
 
     echo "<table>";
     echo "<tr class='aktiivi'>";
-    echo "<th>",t("Poimija"),"</th>";
+    echo "<th>", t("Poimija"), "</th>";
     echo "<td>{$row['kukanimi']}</td>";
     echo "</tr>";
     echo "<tr class='aktiivi'>";
-    echo "<th>",t("Maksuaineisto"),"</th>";
+    echo "<th>", t("Maksuaineisto"), "</th>";
     echo "<td>";
 
     if (strtoupper($yhtiorow['maa']) == 'EE' and substr($row['yriti_iban'], 0, 2) == "EE") {
@@ -282,16 +282,16 @@ if ($tee == 'selaa') {
     echo "<table>";
 
     echo "<tr>";
-    echo "<th>",t("Nimi"),"</th>";
-    echo "<th>",t("Laskunro"),"</th>";
-    echo "<th>",t("Tapvm"),"</th>";
-    echo "<th>",t("Eräpvm"),"</th>";
-    echo "<th>",t("Olmapvm"),"</th>";
-    echo "<th>",t("Mapvm"),"</th>";
-    echo "<th>",t("Summa"),"</th>";
-    echo "<th>",t("Maksettu"),"</th>";
-    echo "<th>",t("Pankkitili"),"</th>";
-    echo "<th>",t("Poimittu aineistoon"),"</th>";
+    echo "<th>", t("Nimi"), "</th>";
+    echo "<th>", t("Laskunro"), "</th>";
+    echo "<th>", t("Tapvm"), "</th>";
+    echo "<th>", t("Eräpvm"), "</th>";
+    echo "<th>", t("Olmapvm"), "</th>";
+    echo "<th>", t("Mapvm"), "</th>";
+    echo "<th>", t("Summa"), "</th>";
+    echo "<th>", t("Maksettu"), "</th>";
+    echo "<th>", t("Pankkitili"), "</th>";
+    echo "<th>", t("Poimittu aineistoon"), "</th>";
     echo "</tr>";
 
     $poimittu_summa = 0;
@@ -319,13 +319,13 @@ if ($tee == 'selaa') {
 
       echo "</td>";
 
-      echo "<td valign='top'>",tv1dateconv($row['erpcm']),"</td>";
-      echo "<td valign='top'>",tv1dateconv($row['olmapvm']),"</td>";
-      echo "<td valign='top'>",tv1dateconv($row['mapvm']),"</td>";
+      echo "<td valign='top'>", tv1dateconv($row['erpcm']), "</td>";
+      echo "<td valign='top'>", tv1dateconv($row['olmapvm']), "</td>";
+      echo "<td valign='top'>", tv1dateconv($row['mapvm']), "</td>";
       echo "<td align='right'>{$row['summa']} {$row['valkoodi']}</td>";
       echo "<td align='right'>{$row['poimittusumma']} {$row['valkoodi']}</td>";
       echo "<td>{$row['maksu_tili']}</td>";
-      echo "<td>",tv1dateconv($row['maksuaika'], 'PITKA', ''),"</td>";
+      echo "<td>", tv1dateconv($row['maksuaika'], 'PITKA', ''), "</td>";
       echo "</tr>";
 
       $laskuja++;
@@ -353,8 +353,8 @@ if ($tee == 'selaa') {
     }
   }
   else {
-    echo "<br /><font class='error'>",t("Yhtään laskua ei löytynyt"),".</font><br />";
+    echo "<br /><font class='error'>", t("Yhtään laskua ei löytynyt"), ".</font><br />";
   }
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

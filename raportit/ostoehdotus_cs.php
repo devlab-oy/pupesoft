@@ -2,10 +2,10 @@
 
 if (isset($_POST["tee"])) {
   if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
-  if (isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if (isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
-require("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
@@ -13,7 +13,7 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
 }
 
 if (isset($tee) and $tee == "TILAA_AJAX") {
-  require_once("inc/tilaa_ajax.inc");
+  require_once "inc/tilaa_ajax.inc";
 }
 
 if ($tee == "PAIVITA_AJAX") {
@@ -262,16 +262,16 @@ function ostot($myynti_varasto = '', $myynti_maa = '') {
 
 // org_rajausta tarvitaan yhdessä selectissä joka triggeröi taas toisen asian.
 $org_rajaus = $abcrajaus;
-list($abcrajaus,$abcrajaustapa) = explode("##",$abcrajaus);
+list($abcrajaus, $abcrajaustapa) = explode("##", $abcrajaus);
 
 if (!isset($abcrajaustapa)) $abcrajaustapa = "TK";
 
 list($ryhmanimet, $ryhmaprossat, $kiertonopeus_tavoite, $palvelutaso_tavoite, $varmuusvarasto_pv, $toimittajan_toimitusaika_pv) = hae_ryhmanimet($abcrajaustapa);
 
 // Tarvittavat päivämäärät
-if (!isset($kka4)) $kka4 = date("m",mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
-if (!isset($vva4)) $vva4 = date("Y",mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
-if (!isset($ppa4)) $ppa4 = date("d",mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
+if (!isset($kka4)) $kka4 = date("m", mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
+if (!isset($vva4)) $vva4 = date("Y", mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
+if (!isset($ppa4)) $ppa4 = date("d", mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
 if (!isset($kkl4)) $kkl4 = date("m");
 if (!isset($vvl4)) $vvl4 = date("Y");
 if (!isset($ppl4)) $ppl4 = date("d");
@@ -300,7 +300,7 @@ if (($ytunnus != "" and $toimittajaid == "") or (isset($edytunnus) and $edytunnu
     }
   }
 
-  require ("inc/kevyt_toimittajahaku.inc");
+  require "inc/kevyt_toimittajahaku.inc";
 
   if ($toimittajaid == 0) {
     $tee = "";
@@ -775,7 +775,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
       echo "<td valign='top' $bb align='right'>".(float) $enp."</td>";
       echo "<td valign='top' $bb align='right'>".(float) $vku."</td>";
       echo "<td valign='top' $bb>$row[ei_varastoida]</td>";
-      echo "<td valign='top' $bbr>".tv1dateconv(date("Y-m-d",mktime(0, 0, 0, date("m"), date("d")+$toimirow["toimitusaika"], date("Y"))))."</td>";
+      echo "<td valign='top' $bbr>".tv1dateconv(date("Y-m-d", mktime(0, 0, 0, date("m"), date("d")+$toimirow["toimitusaika"], date("Y"))))."</td>";
 
       if ($useampi_yhtio == 1 and $toimirow['toimittaja'] != '' and $yhtiorow['yhtio'] == $row['yhtio']) {
         echo "<td valign='top' align='right'>";
@@ -818,7 +818,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
             echo t("Ei varastoitava");
           }
 
-          echo " ",t("Status")," $status_select_row[selitetark]</option>";
+          echo " ", t("Status"), " $status_select_row[selitetark]</option>";
         }
 
         echo "</select></td>";
@@ -905,7 +905,7 @@ if (mysql_num_rows($res2) > 0) {
     $mul_check = '';
 
     if (isset($mul_osasto) and $mul_osasto != "") {
-      if (in_array($rivi['selite'],$mul_osasto)) {
+      if (in_array($rivi['selite'], $mul_osasto)) {
         $mul_check = 'SELECTED';
       }
     }
@@ -935,7 +935,7 @@ if (mysql_num_rows($res2) > 0) {
   while ($rivi = mysql_fetch_assoc($res2)) {
     $mul_check = '';
     if ($mul_try!="") {
-      if (in_array($rivi['selite'],$mul_try)) {
+      if (in_array($rivi['selite'], $mul_try)) {
         $mul_check = 'SELECTED';
       }
     }
@@ -1017,7 +1017,7 @@ for ($i=0; $i < count($ryhmaprossat); $i++) {
 
 echo "</select>";
 
-list($abcrajaus,$abcrajaustapa) = explode("##",$abcrajaus);
+list($abcrajaus, $abcrajaustapa) = explode("##", $abcrajaus);
 
 echo "<tr><th>".t("Toimittaja")."</th><td colspan='3'><input type='text' size='20' name='ytunnus' value='$ytunnus'></td></tr>";
 echo "<input type='hidden' name='edytunnus' value='$ytunnus'>";
@@ -1131,7 +1131,7 @@ if (mysql_num_rows($presult) > 0) {
     echo "<tr><td><input type='checkbox' name='valitutyhtiot[]' value='$prow[yhtio]' $chk onClick='submit();'> $prow[nimi]</td></tr>";
   }
 
-  $yhtiot = substr($yhtiot,0,-1);
+  $yhtiot = substr($yhtiot, 0, -1);
 
   if ($yhtiot == "") $yhtiot = "'$kukarow[yhtio]'";
 
@@ -1189,4 +1189,4 @@ else {
 echo "</table>";
 echo "<br><input type='submit' name='ehdotusnappi' value = '".t("Aja ostoehdotus")."'></form>";
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

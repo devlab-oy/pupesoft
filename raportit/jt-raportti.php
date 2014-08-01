@@ -9,8 +9,8 @@ if (php_sapi_name() != 'cli') {
 }
 
 // otetaan tietokanta connect
-require ("../inc/connect.inc");
-require ("../inc/functions.inc");
+require "../inc/connect.inc";
+require "../inc/functions.inc";
 
 $query = "SELECT DISTINCT yhtio FROM yhtio";
 $yhtio_result = mysql_query($query) or die($query);
@@ -28,7 +28,7 @@ while ($yrow = mysql_fetch_array($yhtio_result)) {
               FROM yhtion_parametrit
               WHERE yhtio='$yhtiorow[yhtio]'";
     $result = mysql_query($query)
-        or die ("Kysely ei onnistu yhtio $query");
+      or die ("Kysely ei onnistu yhtio $query");
 
     if (mysql_num_rows($result) == 1) {
       $yhtion_parametritrow = mysql_fetch_array($result);
@@ -116,8 +116,8 @@ while ($yrow = mysql_fetch_array($yhtio_result)) {
 
         if (mysql_num_rows($jtresult) > 0) {
 
-          require_once('../pdflib/phppdflib.class.php');
-          require("jt-raportti_pdf.inc");
+          require_once '../pdflib/phppdflib.class.php';
+          require "jt-raportti_pdf.inc";
 
           $pdf = new pdffile();
 
@@ -129,11 +129,11 @@ while ($yrow = mysql_fetch_array($yhtio_result)) {
           list($page[$sivu], $kalakorkeus) = alku($pdf);
 
           while ($jtrow = mysql_fetch_array($jtresult)) {
-            list($page[$sivu],$kalakorkeus) = rivi($pdf, $page[$sivu], $kalakorkeus, $jtrow);
+            list($page[$sivu], $kalakorkeus) = rivi($pdf, $page[$sivu], $kalakorkeus, $jtrow);
           }
-//            echo "$laskuri ";
+          //            echo "$laskuri ";
           print_pdf($pdf, 1);
-//            $laskuri++;
+          //            $laskuri++;
         }
       }
     }

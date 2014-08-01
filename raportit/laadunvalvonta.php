@@ -3,7 +3,7 @@
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Laadunvalvonta").":</font><hr>";
 
@@ -92,13 +92,13 @@ echo "<table>";
 echo "<form name='laatu' method='post' autocomplete='off'>";
 echo "<tr><th>".t("Syötä vuosi (vvvv)")."</th>
     <td><input type='text' name='vva' value='$vva' size='5'></td></tr>
-    <tr><th>",t("Valitse tuoteryhmä"),"</th>";
+    <tr><th>", t("Valitse tuoteryhmä"), "</th>";
 
 echo "<td>";
 $monivalintalaatikot = array("TRY");
 $monivalintalaatikot_normaali = array();
 
-require ("../tilauskasittely/monivalintalaatikot.inc");
+require "../tilauskasittely/monivalintalaatikot.inc";
 echo "</td>";
 
 $tuoteryhmittain_chk = (isset($tuoteryhmittain) and trim($tuoteryhmittain) != '') ? ' CHECKED' : '';
@@ -136,41 +136,41 @@ if (isset($tuoteryhmittain) and trim($tuoteryhmittain) != '') {
 elseif ($submit != '' and $tuoteryhmittain == '') {
 
   echo "<table width='700'>";
-    echo "<tr><th>".t("Toimitukset")."</th><th>".t("Tammikuu")."</th><th>".t("Helmikuu")."</th><th>".t("Maaliskuu")."</th><th>".t("Huhtikuu")."</th><th>".t("Toukokuu")."</th><th>".t("Kesäkuu")."</th><th>".t("Heinäkuu")."</th><th>".t("Elokuu")."</th><th>".t("Syyskuu")."</th><th>".t("Lokakuu")."</th><th>".t("Marraskuu")."</th><th>".t("Joulukuu")."</th><th>".t("Yhteensä")."</th></tr>";
-    echo "<tr><th>".t("Myöhästyneet").":</th>";
-      for ($i = 0; $i < 12; $i++) {
-        if (isset($myohassa[$i]) and $myohassa[$i] != null) {
-          $myohassa_summa += $myohassa[$i];
-            echo "<td align='right'>$myohassa[$i]</td>";
-        } else {
-          echo "<td align='right'>0</td>";
-        }
-      }
-    echo "<td align='right'>$myohassa_summa</td>";
-    echo "</tr>";
-    echo "<tr><th>".t("Ajallaan").":</th>";
-      for ($i = 0; $i < 12; $i++) {
-        if (isset($ajallaan[$i]) and $ajallaan[$i] != null) {
-          $ajallaan_summa += $ajallaan[$i];
-            echo "<td align='right'>$ajallaan[$i]</td>";
-        } else {
-          echo "<td align='right'>0</td>";
-        }
-      }
-    echo "<td align='right'>$ajallaan_summa</td>";
-    echo "</tr>";
-    echo "<tr><th>".t("Etuajassa").":</th>";
-      for ($i = 0; $i < 12; $i++) {
-        if (isset($etuajassa[$i]) and $etuajassa[$i] != null) {
-          $etuajassa_summa += $etuajassa[$i];
-          echo "<td align='right'>$etuajassa[$i]</td>";
-        } else {
-          echo "<td align='right'>0</td>";
-        }
-      }
-    echo "<td align='right'>$etuajassa_summa</td>";
-    echo "</tr>";
+  echo "<tr><th>".t("Toimitukset")."</th><th>".t("Tammikuu")."</th><th>".t("Helmikuu")."</th><th>".t("Maaliskuu")."</th><th>".t("Huhtikuu")."</th><th>".t("Toukokuu")."</th><th>".t("Kesäkuu")."</th><th>".t("Heinäkuu")."</th><th>".t("Elokuu")."</th><th>".t("Syyskuu")."</th><th>".t("Lokakuu")."</th><th>".t("Marraskuu")."</th><th>".t("Joulukuu")."</th><th>".t("Yhteensä")."</th></tr>";
+  echo "<tr><th>".t("Myöhästyneet").":</th>";
+  for ($i = 0; $i < 12; $i++) {
+    if (isset($myohassa[$i]) and $myohassa[$i] != null) {
+      $myohassa_summa += $myohassa[$i];
+      echo "<td align='right'>$myohassa[$i]</td>";
+    } else {
+      echo "<td align='right'>0</td>";
+    }
+  }
+  echo "<td align='right'>$myohassa_summa</td>";
+  echo "</tr>";
+  echo "<tr><th>".t("Ajallaan").":</th>";
+  for ($i = 0; $i < 12; $i++) {
+    if (isset($ajallaan[$i]) and $ajallaan[$i] != null) {
+      $ajallaan_summa += $ajallaan[$i];
+      echo "<td align='right'>$ajallaan[$i]</td>";
+    } else {
+      echo "<td align='right'>0</td>";
+    }
+  }
+  echo "<td align='right'>$ajallaan_summa</td>";
+  echo "</tr>";
+  echo "<tr><th>".t("Etuajassa").":</th>";
+  for ($i = 0; $i < 12; $i++) {
+    if (isset($etuajassa[$i]) and $etuajassa[$i] != null) {
+      $etuajassa_summa += $etuajassa[$i];
+      echo "<td align='right'>$etuajassa[$i]</td>";
+    } else {
+      echo "<td align='right'>0</td>";
+    }
+  }
+  echo "<td align='right'>$etuajassa_summa</td>";
+  echo "</tr>";
   echo "</table>";
 }
 
-require("../inc/footer.inc");
+require "../inc/footer.inc";

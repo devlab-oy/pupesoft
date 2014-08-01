@@ -500,16 +500,16 @@ if ($kpl > 0 and $rivityyppi == 'O' and $yhtiorow['ostoera_pyoristys'] == 'K') {
             ta2.selite pakkaus3
             FROM tuote
             JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = tuote.yhtio
-              AND tuote.tuoteno = tt.tuoteno
+              AND tuote.tuoteno   = tt.tuoteno
               AND tt.liitostunnus = '$laskurow[liitostunnus]')
             LEFT JOIN tuotteen_avainsanat AS ta1 ON (ta1.yhtio = tuote.yhtio
-              AND ta1.tuoteno = tuote.tuoteno
-              AND ta1.laji = 'pakkauskoko2')
+              AND ta1.tuoteno     = tuote.tuoteno
+              AND ta1.laji        = 'pakkauskoko2')
             LEFT JOIN tuotteen_avainsanat AS ta2 ON (ta2.yhtio = tuote.yhtio
-              AND ta2.tuoteno = tuote.tuoteno
-              AND ta2.laji = 'pakkauskoko3')
-            WHERE tuote.yhtio='{$kukarow["yhtio"]}'
-            AND tuote.tuoteno = '{$trow["tuoteno"]}'";
+              AND ta2.tuoteno     = tuote.tuoteno
+              AND ta2.laji        = 'pakkauskoko3')
+            WHERE tuote.yhtio     = '{$kukarow["yhtio"]}'
+            AND tuote.tuoteno     = '{$trow["tuoteno"]}'";
   $ttresult = pupe_query($query);
   $ttrow = mysql_fetch_assoc($ttresult);
 
@@ -2038,9 +2038,9 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               if (($trow["sarjanumeroseuranta"] == "S" or $trow["sarjanumeroseuranta"] == "T" or $trow["sarjanumeroseuranta"] == "U" or $trow["sarjanumeroseuranta"] == "V") and $myy_tyyppi[$indeksi] == "NORMAALI" and $myy_sarjatunnus != '') {
                 if ($varattu > 0) {
                   if ($laskurow["tila"] != 'G') {
-                  $tunken = "myyntirivitunnus";
-                }
-                else {
+                    $tunken = "myyntirivitunnus";
+                  }
+                  else {
                     $tunken = "siirtorivitunnus";
                   }
                 }

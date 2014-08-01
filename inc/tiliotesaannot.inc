@@ -27,7 +27,7 @@ $tiliotesaantoresult = mysql_query($query) or pupe_error($query);
 // Jotain löytyy
 if (mysql_num_rows($tiliotesaantoresult) > 0) {
   if (mysql_num_rows($tiliotesaantoresult) == 1) {
-    $tiliointisaantorow = mysql_fetch_array ($tiliotesaantoresult);
+    $tiliointisaantorow = mysql_fetch_array($tiliotesaantoresult);
     $tiliotesaantotilino = $tiliointisaantorow['tilino'];
   }
   else {
@@ -49,7 +49,7 @@ else {
   // Jotain löytyy
   if (mysql_num_rows($tiliotesaantoresult) > 0) {
     if (mysql_num_rows($tiliotesaantoresult) == 1) {
-      $tiliointisaantorow = mysql_fetch_array ($tiliotesaantoresult);
+      $tiliointisaantorow = mysql_fetch_array($tiliotesaantoresult);
       $tiliotesaantotilino = $tiliointisaantorow['tilino'];
     }
     else {
@@ -70,7 +70,7 @@ else {
     // Jotain löytyy
     if (mysql_num_rows($tiliotesaantoresult) > 0) {
       if (mysql_num_rows($tiliotesaantoresult) == 1) {
-        $tiliointisaantorow = mysql_fetch_array ($tiliotesaantoresult);
+        $tiliointisaantorow = mysql_fetch_array($tiliotesaantoresult);
         $tiliotesaantotilino = $tiliointisaantorow['tilino'];
       }
       else {
@@ -91,7 +91,7 @@ else {
       // Jotain löytyy
       if (mysql_num_rows($tiliotesaantoresult) > 0) {
         if (mysql_num_rows($tiliotesaantoresult) == 1) {
-          $tiliointisaantorow = mysql_fetch_array ($tiliotesaantoresult);
+          $tiliointisaantorow = mysql_fetch_array($tiliotesaantoresult);
           $tiliotesaantotilino = $tiliointisaantorow['tilino'];
         }
         else {
@@ -113,7 +113,7 @@ else {
         // Jotain löytyy
         if (mysql_num_rows($tiliotesaantoresult) > 0) {
           if (mysql_num_rows($tiliotesaantoresult) == 1) {
-            $tiliointisaantorow = mysql_fetch_array ($tiliotesaantoresult);
+            $tiliointisaantorow = mysql_fetch_array($tiliotesaantoresult);
             $tiliotesaantotilino = $tiliointisaantorow['tilino'];
           }
           else {

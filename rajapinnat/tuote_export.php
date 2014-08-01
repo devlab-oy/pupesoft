@@ -252,7 +252,7 @@ while ($row = mysql_fetch_array($res)) {
   $hinnastoq = pupe_query($query);
   $hinnastoresult = mysql_fetch_assoc($hinnastoq);
   // Nollataan tämä jos query lyö tyhjää, muuten vanhentunut tarjoushinta ei ylikirjoitu magentossa
-  if(!isset($hinnastoresult['hinta'])) $hinnastoresult['hinta'] = '';
+  if (!isset($hinnastoresult['hinta'])) $hinnastoresult['hinta'] = '';
 
   $dnstuote[] = array(
     'tuoteno'              => $row["tuoteno"],
@@ -771,7 +771,7 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
     $hinnastoq = pupe_query($query);
     $hinnastoresult = mysql_fetch_assoc($hinnastoq);
     // Nollataan tämä jos query lyö tyhjää, muuten vanhentunut tarjoushinta ei ylikirjoitu magentossa
-    if(!isset($hinnastoresult['hinta'])) $hinnastoresult['hinta'] = '';
+    if (!isset($hinnastoresult['hinta'])) $hinnastoresult['hinta'] = '';
 
     $dnslajitelma[$rowselite["selite"]][] = array(
       'tuoteno'               => $alirow["tuoteno"],
@@ -852,7 +852,7 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
   }
 
   // Magentossa käsin hallitut kategoriat jotka säilytetään aina tuotepäivityksessä
-  if(isset($magento_sticky_kategoriat) and count($magento_sticky_kategoriat) > 0) {
+  if (isset($magento_sticky_kategoriat) and count($magento_sticky_kategoriat) > 0) {
     $magento_client->setStickyKategoriat($magento_sticky_kategoriat);
   }
 

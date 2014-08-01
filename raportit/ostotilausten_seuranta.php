@@ -4,7 +4,7 @@
 $useslave = 1;
 
 if (file_exists("../inc/parametrit.inc")) {
-  require ("../inc/parametrit.inc");
+  require "../inc/parametrit.inc";
 }
 
 // ajaxin kautta haetaan kommentti textareaan
@@ -26,7 +26,7 @@ if ($_GET['tee'] == 'kommentti') {
   if ($_GET['tilaus'] != '') {
 
     $useslave = 0;
-    require('../inc/connect.inc');
+    require '../inc/connect.inc';
 
     $tilaus = (int) $_GET['tilaus'];
     $kommentti = mysql_real_escape_string($_GET['kommentti']);
@@ -38,18 +38,18 @@ if ($_GET['tee'] == 'kommentti') {
     $comm_ins_res = pupe_query($query);
 
     if ($kommentti == '') {
-      echo "<br><font class='message'>",t("Tyhjensit kommentin ostotilaukselta")," $tilaus</font><br>";
+      echo "<br><font class='message'>", t("Tyhjensit kommentin ostotilaukselta"), " $tilaus</font><br>";
     }
     else {
-      echo "<br><font class='message'>",t("Lis‰sit kommentin")," $kommentti ",t("ostotilaukselle")," $tilaus</font><br>";
+      echo "<br><font class='message'>", t("Lis‰sit kommentin"), " $kommentti ", t("ostotilaukselle"), " $tilaus</font><br>";
     }
     exit;
   }
 }
 
 if ($tee == 'NAYTATILAUS') {
-  require ("raportit/naytatilaus.inc");
-  require ("inc/footer.inc");
+  require "raportit/naytatilaus.inc";
+  require "inc/footer.inc";
   die();
 }
 
@@ -61,7 +61,7 @@ if ($toimittajahaku != '') {
   $ytunnus = $toimittajahaku;
   $pvm = array('ppa' => $ppa, 'kka' => $kka, 'vva' => $vva, 'ppl' => $ppl, 'kkl' => $kkl, 'vvl' => $vvl, 'toimittaja' => $toimittajahaku);
   $muutparametrit = urlencode(serialize($pvm));
-  require('../inc/kevyt_toimittajahaku.inc');
+  require '../inc/kevyt_toimittajahaku.inc';
 }
 
 if ($muutparametrit != '') {
@@ -84,9 +84,9 @@ if ($toimittajaid != '') {
 }
 
 // Tarvittavat p‰iv‰m‰‰r‰t
-if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+if (!isset($kka)) $kka = date("m", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+if (!isset($vva)) $vva = date("Y", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+if (!isset($ppa)) $ppa = date("d", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 if (!isset($kkl)) $kkl = date("m");
 if (!isset($vvl)) $vvl = date("Y");
 if (!isset($ppl)) $ppl = date("d");
@@ -94,9 +94,9 @@ if (!isset($ppl)) $ppl = date("d");
 echo "<table>";
 echo "<form method='post' autocomplete='off' name='hakuform' id='hakuform'>";
 
-echo "<tr><th>",t("Toimittaja"),"</th><td colspan='2' nowrap><input type='text' name='toimittajahaku' value='$toimittajahaku'></td></tr>";
+echo "<tr><th>", t("Toimittaja"), "</th><td colspan='2' nowrap><input type='text' name='toimittajahaku' value='$toimittajahaku'></td></tr>";
 
-echo "<tr><th>",t("P‰iv‰m‰‰r‰v‰li")," (",t("pp-kk-vvvv"),")</th>";
+echo "<tr><th>", t("P‰iv‰m‰‰r‰v‰li"), " (", t("pp-kk-vvvv"), ")</th>";
 
 echo "<td><input type='text' name='ppa' value='$ppa' size='3'>
 <input type='text' name='kka' value='$kka' size='3'>
@@ -105,18 +105,18 @@ echo "<td><input type='text' name='ppa' value='$ppa' size='3'>
 <input type='text' name='kkl' value='$kkl' size='3'>
 <input type='text' name='vvl' value='$vvl' size='5'></td>";
 
-echo "<td class='back'><input type='submit' name='submit' id='submit' value='",t("Luo raportti"),"'></td></tr>";
+echo "<td class='back'><input type='submit' name='submit' id='submit' value='", t("Luo raportti"), "'></td></tr>";
 echo "<input type='hidden' name='tee' id='tee' value='aja'>";
 echo "</form></table>";
 echo "<br/>";
-echo "<img src='".$palvelin2."pics/lullacons/bot-plain-green.png'/> = ",t("Saapumisen virallinen varastonarvo laskettu"),"<br/>";
-echo "<img src='".$palvelin2."pics/lullacons/bot-plain-yellow.png'/> = ",t("Saapumisen tuotteita viety varastoon"),"<br/>";
-echo "<img src='".$palvelin2."pics/lullacons/bot-plain-red.png'/> = ",t("Saapumisen tuotteita ei ole viety varastoon tai saapumiseen ei ole liitetty yht‰‰n rivi‰"),"<br/>";
-echo "<img src='".$palvelin2."pics/lullacons/bot-plain-white.png'/> = ",t("Ostotilauksen tuotteita ei ole liitetty mihink‰‰n saapumiseen"),"<br/>";
-echo "<img src='".$palvelin2."pics/lullacons/bot-plain-blue.png'/> = ",t("Toimittajan vaihto-omaisuuslasku, jota ei ole liitetty saapumiseen"),"<br/>";
+echo "<img src='".$palvelin2."pics/lullacons/bot-plain-green.png'/> = ", t("Saapumisen virallinen varastonarvo laskettu"), "<br/>";
+echo "<img src='".$palvelin2."pics/lullacons/bot-plain-yellow.png'/> = ", t("Saapumisen tuotteita viety varastoon"), "<br/>";
+echo "<img src='".$palvelin2."pics/lullacons/bot-plain-red.png'/> = ", t("Saapumisen tuotteita ei ole viety varastoon tai saapumiseen ei ole liitetty yht‰‰n rivi‰"), "<br/>";
+echo "<img src='".$palvelin2."pics/lullacons/bot-plain-white.png'/> = ", t("Ostotilauksen tuotteita ei ole liitetty mihink‰‰n saapumiseen"), "<br/>";
+echo "<img src='".$palvelin2."pics/lullacons/bot-plain-blue.png'/> = ", t("Toimittajan vaihto-omaisuuslasku, jota ei ole liitetty saapumiseen"), "<br/>";
 
 if (!is_numeric($ppa) or !is_numeric($kka) or !is_numeric($vva) or !is_numeric($ppl) or !is_numeric($kkl) or !is_numeric($vvl)) {
-  echo "<br/><font class='error'>",t("Virheellinen p‰iv‰m‰‰r‰"),"!</font>";
+  echo "<br/><font class='error'>", t("Virheellinen p‰iv‰m‰‰r‰"), "!</font>";
   $tee = '';
 }
 
@@ -235,24 +235,24 @@ if ($tee == 'aja') {
           echo "</tr>";
 
           echo "<tr>";
-          echo "<th>",t("Tilno"),"</th>";
-          echo "<th>",t("Tilvko"),"</th>";
-          echo "<th>",t("Tilpvm"),"</th>";
-          echo "<th>",t("Paino"),"</th>";
-          echo "<th>",t("M‰‰r‰"),"</th>";
-          echo "<th>",t("Rivim‰‰r‰"),"</th>";
-          echo "<th>",t("Tilauksen"),"<br/>",t("arvo"),"<br/>$tilrivi_row[valkoodi]</th>";
-          echo "<th>",t("Saapuminen"),"</th>";
-          echo "<th>",t("Tavaralaskun"),"<br/>",t("luontiaika"),"</th>";
-          echo "<th>",t("Summa"),"<br/>$yhtiorow[valkoodi]</th>";
-          echo "<th>",t("Viesti"),"</th>";
-          echo "<th>",t("Kululaskun"),"<br/>",t("luontiaika"),"</th>";
-          echo "<th>",t("Summa"),"<br/>$yhtiorow[valkoodi]</th>";
-          echo "<th>",t("Viesti"),"</th>";
-          echo "<th>",t("Eturahti"),"<br/>$yhtiorow[valkoodi]</th>";
-          echo "<th>",t("Kulu %"),"</th>";
-          echo "<th>",t("Saldopvm"),"</th>";
-          echo "<th>",t("Valmispvm"),"</th>";
+          echo "<th>", t("Tilno"), "</th>";
+          echo "<th>", t("Tilvko"), "</th>";
+          echo "<th>", t("Tilpvm"), "</th>";
+          echo "<th>", t("Paino"), "</th>";
+          echo "<th>", t("M‰‰r‰"), "</th>";
+          echo "<th>", t("Rivim‰‰r‰"), "</th>";
+          echo "<th>", t("Tilauksen"), "<br/>", t("arvo"), "<br/>$tilrivi_row[valkoodi]</th>";
+          echo "<th>", t("Saapuminen"), "</th>";
+          echo "<th>", t("Tavaralaskun"), "<br/>", t("luontiaika"), "</th>";
+          echo "<th>", t("Summa"), "<br/>$yhtiorow[valkoodi]</th>";
+          echo "<th>", t("Viesti"), "</th>";
+          echo "<th>", t("Kululaskun"), "<br/>", t("luontiaika"), "</th>";
+          echo "<th>", t("Summa"), "<br/>$yhtiorow[valkoodi]</th>";
+          echo "<th>", t("Viesti"), "</th>";
+          echo "<th>", t("Eturahti"), "<br/>$yhtiorow[valkoodi]</th>";
+          echo "<th>", t("Kulu %"), "</th>";
+          echo "<th>", t("Saldopvm"), "</th>";
+          echo "<th>", t("Valmispvm"), "</th>";
           echo "<th>&nbsp;</th>";
           echo "</tr>";
         }
@@ -575,12 +575,12 @@ if ($tee == 'aja') {
       $yht_kuluprosentti = $yht_tavara_summa != 0 ? sprintf('%.02f', ($yht_kulu_summa + $yht_eturahti) / $yht_tavara_summa * 100) : 0;
       $yht_kuluprosentti = $yht_kuluprosentti != 0 ? $yht_kuluprosentti : '';
 
-      echo "<td class='spec'>",t("Yhteens‰"),"</td>";
+      echo "<td class='spec'>", t("Yhteens‰"), "</td>";
       echo "<td class='spec'>&nbsp;</td>";
       echo "<td class='spec'>&nbsp;</td>";
       echo "<td class='spec' style='text-align:right;'>$yht_paino</td>";
-      echo "<td class='spec' style='text-align:right;'>$yht_varastossa_kpl",(float) $yht_kpl,"</td>";
-      echo "<td class='spec' style='text-align:right;'>$yht_varastossa_rivit",(float) $yht_rivit,"</td>";
+      echo "<td class='spec' style='text-align:right;'>$yht_varastossa_kpl", (float) $yht_kpl, "</td>";
+      echo "<td class='spec' style='text-align:right;'>$yht_varastossa_rivit", (float) $yht_rivit, "</td>";
       echo "<td class='spec' style='text-align:right;'>$yht_arvo</td>";
       echo "<td class='spec'>&nbsp;</td>";
       echo "<td class='spec'>&nbsp;</td>";
@@ -650,21 +650,21 @@ if ($tee == 'aja') {
 
     echo "<table>";
 
-    echo "<tr><td colspan='2'><div id='message'>",t("Valitse tilausnumero ja syˆt‰ kommentti"),"</div></td></tr>";
+    echo "<tr><td colspan='2'><div id='message'>", t("Valitse tilausnumero ja syˆt‰ kommentti"), "</div></td></tr>";
     echo "<tr>";
     echo "<td><select name='tilaus' id='tilaus'>";
-    echo "<option value=''>",t("Valitse tilausnumero"),"</option>";
+    echo "<option value=''>", t("Valitse tilausnumero"), "</option>";
 
     foreach ($tunnukset as $tun) {
       echo "<option value='$tun'>$tun</option>";
     }
 
-    echo "</select></td><td><textarea name='kommentti' id='kommentti' rows='5' cols='50' value='$kommentti'></textarea></td></tr><tr><td class='back'><input type='button' id='tallenna_button' value='",t("Tallenna"),"'>";
+    echo "</select></td><td><textarea name='kommentti' id='kommentti' rows='5' cols='50' value='$kommentti'></textarea></td></tr><tr><td class='back'><input type='button' id='tallenna_button' value='", t("Tallenna"), "'>";
     echo "</td></tr></table>";
     echo "</form>";
   }
 }
 
 if (file_exists("../inc/footer.inc")) {
-  require ("../inc/footer.inc");
+  require "../inc/footer.inc";
 }

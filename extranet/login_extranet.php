@@ -7,10 +7,10 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
   $extranet = 1;
   $_GET["no_css"] = "yes";
 
-  require("parametrit.inc");
+  require "parametrit.inc";
 
   $session = "";
-  srand ((double) microtime() * 1000000);
+  srand((double) microtime() * 1000000);
 
   $query = "SELECT kuka.kuka, kuka.session, kuka.salasana
             FROM kuka
@@ -28,7 +28,7 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
   else
     $vertaa = md5(trim($salasana));
 
-  if ((mysql_num_rows ($result) > 0) and ($vertaa == $krow['salasana'])) {
+  if ((mysql_num_rows($result) > 0) and ($vertaa == $krow['salasana'])) {
 
     // Onko monta sopivaa käyttäjätietuetta == samalla henkilöllä monta yritystä!
     if (mysql_num_rows($result) > 1) {
@@ -40,7 +40,7 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
       // Pitääkö vielä kysyä yritystä???
       if (($usea != 1) or (strlen($yhtio) > 0)) {
         for ($i=0; $i<25; $i++) {
-          $session = $session . chr(rand(65,90)) ;
+          $session = $session . chr(rand(65, 90)) ;
         }
 
         $query = "UPDATE kuka
@@ -69,14 +69,14 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
     }
   }
   else {
-    $errormsg = "<br><font class='error'>".t("Käyttäjätunnusta ei löydy ja/tai",$browkieli)."<br>".t("Salasana on virheellinen",$browkieli)."!</font><br>";
+    $errormsg = "<br><font class='error'>".t("Käyttäjätunnusta ei löydy ja/tai", $browkieli)."<br>".t("Salasana on virheellinen", $browkieli)."!</font><br>";
 
     // Kirjataan epäonnistunut kirjautuminen virhelokiin...
-    error_log ("user $user: authentication failure for \"/pupesoft/\": Password Mismatch", 0);
+    error_log("user $user: authentication failure for \"/pupesoft/\": Password Mismatch", 0);
   }
 }
 else {
-  require_once("parametrit.inc");
+  require_once "parametrit.inc";
 }
 
 $formi = "login"; // Kursorin ohjaus
@@ -99,21 +99,21 @@ echo "
   <head>
   <title>Login</title>";
 
-  if (file_exists("pics/pupeicon.gif")) {
-      echo "\n<link rel='shortcut icon' href='pics/pupeicon.gif'>\n";
-  }
-  else {
-      echo "\n<link rel='shortcut icon' href='".$palvelin2."devlab-shortcut.png'>\n";
-  }
+if (file_exists("pics/pupeicon.gif")) {
+  echo "\n<link rel='shortcut icon' href='pics/pupeicon.gif'>\n";
+}
+else {
+  echo "\n<link rel='shortcut icon' href='".$palvelin2."devlab-shortcut.png'>\n";
+}
 
-  echo "<meta http-equiv='Pragma' content='no-cache'>
+echo "<meta http-equiv='Pragma' content='no-cache'>
   <meta http-equiv='Content-Type' content='text/html; charset=iso-8859-1'>";
-  if (isset($google_analytics)) {
-    if ($_REQUEST["google_analytics"] == '') {
-      echo $google_analytics;
-    }
+if (isset($google_analytics)) {
+  if ($_REQUEST["google_analytics"] == '') {
+    echo $google_analytics;
   }
-  echo "</head>
+}
+echo "</head>
 
 <style type='text/css'>
 <!--
@@ -147,7 +147,7 @@ else {
 
 echo "</a></td>
 <td>
-<font class='head'>".t("Sisäänkirjautuminen",$browkieli)."</font><br><br>
+<font class='head'>".t("Sisäänkirjautuminen", $browkieli)."</font><br><br>
 ";
 
 if (isset($usea) and $usea == 1) {
@@ -166,7 +166,7 @@ if (isset($usea) and $usea == 1) {
   echo "<tr><td colspan='2'><font class='menu'>".t("Valitse yritys").":</font></td></tr>";
   echo "<tr>";
 
-  while ($yrow=mysql_fetch_array ($result)) {
+  while ($yrow=mysql_fetch_array($result)) {
     for ($i=0; $i<mysql_num_fields($result)-1; $i++) {
       echo "<td><font class='menu'>$yrow[$i]</font></td>";
     }
@@ -198,11 +198,11 @@ else {
         <form name='login' target='_top' action='$target' method='post'>
         <input type='hidden' name='go' value='$go'>
         <input type='hidden' name='location' value='$location'>
-        <tr><td><font class='menu'>".t("Käyttäjätunnus",$browkieli).":</font></td><td><input type='text' value='' name='user' size='15' maxlength='30'></td></tr>
-        <tr><td><font class='menu'>".t("Salasana",$browkieli).":</font></td><td><input type='password' name='salasana' size='15' maxlength='30'></td></tr>
+        <tr><td><font class='menu'>".t("Käyttäjätunnus", $browkieli).":</font></td><td><input type='text' value='' name='user' size='15' maxlength='30'></td></tr>
+        <tr><td><font class='menu'>".t("Salasana", $browkieli).":</font></td><td><input type='password' name='salasana' size='15' maxlength='30'></td></tr>
       </table>
       $errormsg
-      <br><input type='submit' value='".t("Kirjaudu sisään",$browkieli)."'>
+      <br><input type='submit' value='".t("Kirjaudu sisään", $browkieli)."'>
       <br><br>
       <font class='info'>Copyright &copy; 2002-".date("Y")." <a href='http://www.devlab.fi/'>Devlab Oy</a> - <a href='license.php'>Licence Agreement</a></font>
       </form>

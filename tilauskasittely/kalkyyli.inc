@@ -1,7 +1,7 @@
 <?php
 
 $lock_params = array(
-    "locktime"    => 600,
+  "locktime"    => 600,
   "lockfile"    => "$kukarow[yhtio]-keikka.lock",
   "filecontent" => "$otunnus;{$kukarow['kuka']};".date("Y-m-d H:i:s")
 );
@@ -24,12 +24,12 @@ else {
   exit;
 }
 
-list(,,,$kohok,,,,$lisok,,$sarjanrook,,,,,,$varok) = tsekit($laskurow, 0, 0);
+list(, , , $kohok, , , , $lisok, , $sarjanrook, , , , , , $varok) = tsekit($laskurow, 0, 0);
 
 if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
 
   if ($tee == "varastoon") {
-    require ("varastoon.inc");
+    require "varastoon.inc";
 
     // takaisin ihan alkuun
     $toiminto     = "dummy";
@@ -95,7 +95,7 @@ if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
 
         $suuntalavat = array($suuntalavan_tunnus);
 
-        require('tulosta_tavaraetiketti.inc');
+        require 'tulosta_tavaraetiketti.inc';
       }
 
       echo "<br />";
@@ -120,7 +120,7 @@ if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
       echo "<input type='hidden' name='vietiinko_koko_suuntalava' value='{$vietiinko_koko_suuntalava}' />";
 
       echo "<table><tr>";
-      echo "<th>",t("Tulosta tavaraetiketti"),"</th>";
+      echo "<th>", t("Tulosta tavaraetiketti"), "</th>";
 
       echo "<td><select name='komento[Tavaraetiketti]'>";
       $query = "SELECT *
@@ -129,7 +129,7 @@ if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
                 ORDER BY kirjoitin";
       $kires = pupe_query($query);
 
-      echo "<option value=''>",t("Ei kirjoitinta"),"</option>";
+      echo "<option value=''>", t("Ei kirjoitinta"), "</option>";
 
       while ($kirow = mysql_fetch_assoc($kires)) {
         $sel = $kirow['tunnus'] == $kukarow['kirjoitin'] ? " selected" : "";
@@ -137,13 +137,13 @@ if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
       }
 
       echo "</select></td>";
-      echo "<td class='back'><input type='submit' value='",t("Tulosta"),"' /></td>";
+      echo "<td class='back'><input type='submit' value='", t("Tulosta"), "' /></td>";
 
       echo "</tr></table>";
       echo "</form>";
     }
 
-    require("varastoon.inc");
+    require "varastoon.inc";
 
     echo "<form method='post'>";
     echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";

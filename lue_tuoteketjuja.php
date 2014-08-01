@@ -1,21 +1,21 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Tuoteketjujen sisäänluku")."</font><hr>";
 
 if ($oikeurow['paivitys'] != '1') { // Saako päivittää
   if ($uusi == 1) {
-    echo "<b>",t("Sinulla ei ole oikeutta lisätä tätä tietoa"),"</b><br>";
+    echo "<b>", t("Sinulla ei ole oikeutta lisätä tätä tietoa"), "</b><br>";
     $uusi = '';
   }
   if ($del == 1) {
-    echo "<b>",t("Sinulla ei ole oikeutta poistaa tätä tietoa"),"</b><br>";
+    echo "<b>", t("Sinulla ei ole oikeutta poistaa tätä tietoa"), "</b><br>";
     $del = '';
     $tunnus = 0;
   }
   if ($upd == 1) {
-    echo "<b>",t("Sinulla ei ole oikeutta muuttaa tätä tietoa"),"</b><br>";
+    echo "<b>", t("Sinulla ei ole oikeutta muuttaa tätä tietoa"), "</b><br>";
     $upd = '';
     $uusi = 0;
     $tunnus = 0;
@@ -48,7 +48,7 @@ if (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp_nam
 
   echo "<font class='message'>".t("Tarkastetaan lähetetty tiedosto")."...<br><br></font>";
 
-  $retval = tarkasta_liite("userfile", array("XLSX","XLS","ODS","SLK","XML","GNUMERIC","CSV","TXT","DATAIMPORT"));
+  $retval = tarkasta_liite("userfile", array("XLSX", "XLS", "ODS", "SLK", "XML", "GNUMERIC", "CSV", "TXT", "DATAIMPORT"));
 
   if ($retval !== TRUE) {
     echo "<font class='error'><br>".t("Väärä tiedostomuoto")."!</font>";
@@ -58,12 +58,18 @@ if (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp_nam
 
 if ($kasitellaan_tiedosto) {
 
-  /** Käsiteltävän filen nimi **/
+  /**
+   * Käsiteltävän filen nimi *
+   */
+
+
   $kasiteltava_tiedoto_path = $_FILES['userfile']['tmp_name'];
 
   $excelrivit = pupeFileReader($kasiteltava_tiedoto_path, $ext);
 
-  /** Otetaan tiedoston otsikkorivi **/
+  /**
+   * Otetaan tiedoston otsikkorivi *
+   */
   $headers = $excelrivit[0];
   $headers = array_map('trim', $headers);
   $headers = array_map('strtoupper', $headers);
@@ -94,26 +100,26 @@ if ($kasitellaan_tiedosto) {
   // määritellään pakolliset sarakkeet
   // tuoteresepteissä käytetään tuoteperheen pakollisia sarakkeita
   switch ($table) {
-    case "korvaavat" :
-      $pakolliset = array("TUOTENO");
-      $kielletyt = array("");
-      break;
-    case "vastaavat" :
-      $pakolliset = array("TUOTENO");
-      $kielletyt = array("");
+  case "korvaavat" :
+    $pakolliset = array("TUOTENO");
+    $kielletyt = array("");
+    break;
+  case "vastaavat" :
+    $pakolliset = array("TUOTENO");
+    $kielletyt = array("");
 
-      // Vastaavien sisäänluvussa vain 2 tuoteno saraketta joista ensimmäisellä etsitään haluttu ketju
-      $headers_count = array_count_values($headers);
-      if ($headers_count['TUOTENO'] > 2) {
-        exit("Vastaavia sisäänluettassa ei voi olla kuin 2 tuotenumero saraketta");
-      }
-      break;
-    case "tuoteperhe" :
-      $pakolliset = array("ISATUOTENO", "TUOTENO");
-      $kielletyt = array("TYYPPI", "KERROIN", "HINTAKERROIN", "ALEKERROIN", "EI_NAYTETA");
-      break;
-    default :
-      exit;
+    // Vastaavien sisäänluvussa vain 2 tuoteno saraketta joista ensimmäisellä etsitään haluttu ketju
+    $headers_count = array_count_values($headers);
+    if ($headers_count['TUOTENO'] > 2) {
+      exit("Vastaavia sisäänluettassa ei voi olla kuin 2 tuotenumero saraketta");
+    }
+    break;
+  case "tuoteperhe" :
+    $pakolliset = array("ISATUOTENO", "TUOTENO");
+    $kielletyt = array("TYYPPI", "KERROIN", "HINTAKERROIN", "ALEKERROIN", "EI_NAYTETA");
+    break;
+  default :
+    exit;
   }
   // $trows   sisältää kaikki taulun sarakkeet tietokannasta
   // $headers sisältää kaikki sarakkeet saadusta tiedostosta
@@ -126,13 +132,13 @@ if ($kasitellaan_tiedosto) {
       //laitetaan kaikki paitsi valintasarake talteen.
       if ($column != "TOIMINTO") {
         if (!in_array($column, $trows)) {
-          echo "<br><font class='message'>",t("Saraketta")," \"<b>",strtoupper($column),"</b>\" ",t("ei löydy")," $table-taulusta!</font>";
+          echo "<br><font class='message'>", t("Saraketta"), " \"<b>", strtoupper($column), "</b>\" ", t("ei löydy"), " $table-taulusta!</font>";
           $vikaa++;
         }
 
         // yhtio ja tunnus kenttiä ei saa koskaan muokata...
         if ($column == 'YHTIO' or $column == 'TUNNUS') {
-          echo "<br><font class='message'>",t("YHTIO ja/tai TUNNUS sarakkeita ei saa muuttaa"),"!</font>";
+          echo "<br><font class='message'>", t("YHTIO ja/tai TUNNUS sarakkeita ei saa muuttaa"), "!</font>";
           $vikaa++;
         }
 
@@ -148,7 +154,7 @@ if ($kasitellaan_tiedosto) {
 
       if (in_array($column, $kielletyt)) {
         // katotaan ettei kiellettyjä sarakkkeita muuteta
-        echo t("Sarake"),": $column ",t("on kielletty sarake"),"!<br>";
+        echo t("Sarake"), ": $column ", t("on kielletty sarake"), "!<br>";
         $kielletty++;
       }
     }
@@ -165,11 +171,11 @@ if ($kasitellaan_tiedosto) {
   }
 
   if ($kielletty > 0) {
-    echo "<br><font class='message'>",t("Kiellettyjä löytyi, ei voida jatkaa"),"...<br></font>";
+    echo "<br><font class='message'>", t("Kiellettyjä löytyi, ei voida jatkaa"), "...<br></font>";
     exit;
   }
 
-  echo "<font class='message'>",t("Tiedosto ok, aloitellaan päivitys"),"...<br><br></font>";
+  echo "<font class='message'>", t("Tiedosto ok, aloitellaan päivitys"), "...<br><br></font>";
   flush();
 
   // rivimäärä excelissä
@@ -276,7 +282,7 @@ if ($kasitellaan_tiedosto) {
       }
       // Tuotteita on useassa ketjussa
       else {
-        echo t("Joku tuotteista")," ($haku) ",t("on jo useassa ketjussa! Korjaa homma"),"! ";
+        echo t("Joku tuotteista"), " ($haku) ", t("on jo useassa ketjussa! Korjaa homma"), "! ";
         $id = 0;
       }
 
@@ -302,7 +308,7 @@ if ($kasitellaan_tiedosto) {
         }
         else {
           //tuntematon toiminto
-          echo t("Tuntematon tai puuttuva toiminto"),"! ";
+          echo t("Tuntematon tai puuttuva toiminto"), "! ";
           unset($rivi);
           $toiminto   = "";
         }
@@ -345,7 +351,7 @@ if ($kasitellaan_tiedosto) {
               if ($toiminto == 'LISAA') {
 
                 if (mysql_num_rows($kresult) > 0) {
-                  if ($table == 'korvaavat') echo t("Tuote")," {$rivi[$j]} ",t("on jo tässä ketjussa"),"! ";
+                  if ($table == 'korvaavat') echo t("Tuote"), " {$rivi[$j]} ", t("on jo tässä ketjussa"), "! ";
                 }
                 else {
                   // Korvaavat päätuotteeksi, ellei järjestystä ole annettu
@@ -372,19 +378,19 @@ if ($kasitellaan_tiedosto) {
                   $query = $alku.$kysely.$loppu;
                   $iresult = pupe_query($query);
 
-                  echo t("Lisättiin ketjuun")," $id {$rivi[$j]}! ";
+                  echo t("Lisättiin ketjuun"), " $id {$rivi[$j]}! ";
                 }
               }
               elseif ($toiminto == 'POISTA') {
                 if (mysql_num_rows($kresult) == 0 and !($table == "vastaavat" and $vastaava_paatuote == $rivi[$j])) {
-                  echo t("Tuotetta")," {$rivi[$j]} ",t("ei voida poistaa, koska se ei löydy tästä ketjusta"),"! ";
+                  echo t("Tuotetta"), " {$rivi[$j]} ", t("ei voida poistaa, koska se ei löydy tästä ketjusta"), "! ";
                 }
                 elseif (!($table == "vastaavat" and $vastaava_paatuote == $rivi[$j])) {
                   $kysely = " and tuoteno='$rivi[$j]' ";
                   $query = $alku.$kysely.$loppu;
                   $iresult = pupe_query($query);
 
-                  echo t("Poistettiin ketjusta")," $id {$rivi[$j]}! ";
+                  echo t("Poistettiin ketjusta"), " $id {$rivi[$j]}! ";
                 }
                 elseif ($table == "vastaavat") {
                   $fquery = "SELECT id
@@ -399,14 +405,14 @@ if ($kasitellaan_tiedosto) {
                                AND id     = '$id' ";
                     $presult = pupe_query($query);
 
-                    echo t("Poistettiin ketju")," $id ",t("päätuote:"),"{$rivi[$j]}! ";
+                    echo t("Poistettiin ketju"), " $id ", t("päätuote:"), "{$rivi[$j]}! ";
                   }
                 }
               }
               elseif ($toiminto == "MUUTA" and ($jarjestys > 0 or $vaihtoehtoinen_lisa)) {
 
                 if (mysql_num_rows($kresult) == 0) {
-                  echo t("Tuotetta")," {$rivi[$j]} ",t("ei voida päivittää, koska se ei löydy tästä ketjusta"),"! ";
+                  echo t("Tuotetta"), " {$rivi[$j]} ", t("ei voida päivittää, koska se ei löydy tästä ketjusta"), "! ";
                 }
                 else {
 
@@ -455,7 +461,7 @@ if ($kasitellaan_tiedosto) {
               }
             }
             else {
-              echo t("Tuotetta")," {$rivi[$j]} ",t("ei löydy"),"! ";
+              echo t("Tuotetta"), " {$rivi[$j]} ", t("ei löydy"), "! ";
             }
           }
         }
@@ -490,8 +496,8 @@ if ($kasitellaan_tiedosto) {
           $result = pupe_query($query);
 
           //kun poistetaan tuoteperheitä ei oo niin väliä vaikka tuotteita ei oiskaan olemassa
-          if (mysql_num_rows($result) == 0 AND strtoupper(trim($rivi[$postoiminto])) != 'POISTA') {
-            echo t("tuotetta")," {$rivi[$r]} ",t("ei löydy! rivi hylätty"),"<br>";
+          if (mysql_num_rows($result) == 0 and strtoupper(trim($rivi[$postoiminto])) != 'POISTA') {
+            echo t("tuotetta"), " {$rivi[$r]} ", t("ei löydy! rivi hylätty"), "<br>";
             $virhe++;
           }
           else {
@@ -506,20 +512,20 @@ if ($kasitellaan_tiedosto) {
           $result = pupe_query($query);
 
           if (mysql_num_rows($result) == 0 and strtoupper(trim($rivi[$postoiminto])) == 'MUUTA') {
-            echo t("tuoteperhettä ei löydy! ei voida muuttaa"),"<br>";
+            echo t("tuoteperhettä ei löydy! ei voida muuttaa"), "<br>";
             $virhe++;
           }
           elseif (mysql_num_rows($result) != 0 and strtoupper(trim($rivi[$postoiminto])) == 'LISAA') {
-            echo t("tuoteperhe on jo olemassa! ei voida lisätä"),"<br>";
+            echo t("tuoteperhe on jo olemassa! ei voida lisätä"), "<br>";
             $virhe++;
           }
-          elseif (mysql_num_rows($result) == 0 AND strtoupper(trim($rivi[$postoiminto])) == 'POISTA'){
-            echo t("tuoteperhettä ei löydy! ei voida poistaa"),"<br>";
+          elseif (mysql_num_rows($result) == 0 and strtoupper(trim($rivi[$postoiminto])) == 'POISTA') {
+            echo t("tuoteperhettä ei löydy! ei voida poistaa"), "<br>";
             $virhe++;
           }
         }
 
-        if (strtoupper(trim($headers[$r])) == "TUOTENO" AND strtoupper(trim($rivi[$postoiminto])) != 'POISTA') {
+        if (strtoupper(trim($headers[$r])) == "TUOTENO" and strtoupper(trim($rivi[$postoiminto])) != 'POISTA') {
           $query = "SELECT tunnus
                     FROM tuote
                     WHERE yhtio = '{$kukarow['yhtio']}'
@@ -527,7 +533,7 @@ if ($kasitellaan_tiedosto) {
           $result = pupe_query($query);
 
           if (mysql_num_rows($result) == 0) {
-            echo t("tuotetta")," {$rivi[$r]} ",t("ei löydy! rivi hylätty"),"<br>";
+            echo t("tuotetta"), " {$rivi[$r]} ", t("ei löydy! rivi hylätty"), "<br>";
             $virhe++;
           }
         }
@@ -578,34 +584,34 @@ if ($kasitellaan_tiedosto) {
   // Tiivistetään vastaavat ketjusta välit pois
   tiivista_vastaavat_tuoteketju($id);
 
-  echo t("Päivitettiin")," $lask ",t("tietuetta"),"! ($id)";
+  echo t("Päivitettiin"), " $lask ", t("tietuetta"), "! ($id)";
 }
 else {
   echo "<form method='post' name='sendfile' enctype='multipart/form-data'>
       <table border='0'>
       <tr>
-        <th>",t("Valitse tietokannan taulu"),":</th>
+        <th>", t("Valitse tietokannan taulu"), ":</th>
         <td><select name='table'>
-          <option value='korvaavat'>",t("Korvaavat tuotteet"),"</option>
-          <option value='vastaavat'>",t("Vastaavat tuotteet"),"</option>
-          <option value='tuoteperhe'>",t("Tuoteperheet"),"</option>
-          <option value='tuoteresepti'>",t("Tuotereseptit"),"</option>
-          <option value='osaluettelo'>",t("Tuotteen osaluettelo"),"</option>
-          <option value='tuotekooste'>",t("Tuotteen koosteluettelo"),"</option>
-          <option value='lisavaruste'>",t("Tuotteen lisävarusteet"),"</option>
-          <option value='vsuunnittelu'>",t("Samankaltaiset valmisteet"),"</option>
+          <option value='korvaavat'>", t("Korvaavat tuotteet"), "</option>
+          <option value='vastaavat'>", t("Vastaavat tuotteet"), "</option>
+          <option value='tuoteperhe'>", t("Tuoteperheet"), "</option>
+          <option value='tuoteresepti'>", t("Tuotereseptit"), "</option>
+          <option value='osaluettelo'>", t("Tuotteen osaluettelo"), "</option>
+          <option value='tuotekooste'>", t("Tuotteen koosteluettelo"), "</option>
+          <option value='lisavaruste'>", t("Tuotteen lisävarusteet"), "</option>
+          <option value='vsuunnittelu'>", t("Samankaltaiset valmisteet"), "</option>
         </select></td>
       </tr>
 
       <input type='hidden' name='tee' value='file'>
 
-      <tr><th>",t("Valitse tiedosto"),":</th>
+      <tr><th>", t("Valitse tiedosto"), ":</th>
         <td><input name='userfile' type='file'></td>
-        <td class='back'><input type='submit' value='",t("Lähetä"),"'></td>
+        <td class='back'><input type='submit' value='", t("Lähetä"), "'></td>
       </tr>
 
       </table>
       </form>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

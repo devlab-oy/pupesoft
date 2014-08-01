@@ -51,7 +51,7 @@ class vahvistamattomat_ostorivit_excel {
     $this->move_seuraavalle_riville();
     foreach ($this->rivit as $rivi) {
       //countti tehdään sen takia, että arrayssä on myös total_rivihinta
-      if(count($rivi) > 2) {
+      if (count($rivi) > 2) {
         $this->print_rivi($rivi);
         $this->move_seuraavalle_riville();
       }
@@ -74,7 +74,7 @@ class vahvistamattomat_ostorivit_excel {
     $this->write_aika_solu($rivi['toimaika']);
     $this->write_solu($rivi['tilkpl'] . '/' . $rivi['ulkkpl'] . ' ' . $rivi['omyks'] . '/' . $rivi['toyks']);
     $this->write_numero_solu($rivi['hinta']);
-    if($rivi['ale1'] != 0) {
+    if ($rivi['ale1'] != 0) {
       $this->write_numero_solu($rivi['ale1'] * 1);
     }
     else {

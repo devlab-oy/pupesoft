@@ -1,7 +1,7 @@
 <?php
 
 if (!function_exists("varaston_hyllypaikattarkista")) {
-  function varaston_hyllypaikattarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+  function varaston_hyllypaikattarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow;
 
     static $chk_hyllyalue, $chk_hyllynro, $chk_hyllyvali, $chk_hyllytaso;

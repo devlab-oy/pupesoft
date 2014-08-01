@@ -1,7 +1,7 @@
 <?php
 
-if(!function_exists("tuotteen_alvtarkista")) {
-  function tuotteen_alvtarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+if (!function_exists("tuotteen_alvtarkista")) {
+  function tuotteen_alvtarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set;
     static $tem_tuoteno, $tem_maa, $chtuoteno_ind;
 
@@ -38,10 +38,10 @@ if(!function_exists("tuotteen_alvtarkista")) {
     }
 
     if ((mysql_field_name($result, $i) == "tilino" or
-      mysql_field_name($result, $i) == "tilino_eu" or
-      mysql_field_name($result, $i) == "tilino_ei_eu" or
-      mysql_field_name($result, $i) == "tilino_marginaali" or
-      mysql_field_name($result, $i) == "tilino_osto_marginaali") and $t[$i] != 0) {
+        mysql_field_name($result, $i) == "tilino_eu" or
+        mysql_field_name($result, $i) == "tilino_ei_eu" or
+        mysql_field_name($result, $i) == "tilino_marginaali" or
+        mysql_field_name($result, $i) == "tilino_osto_marginaali") and $t[$i] != 0) {
 
       $query = "SELECT nimi
                 FROM tili

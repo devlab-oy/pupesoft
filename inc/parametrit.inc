@@ -865,7 +865,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
   // Katsotaan onko Pupesoftissa SEPA rajapinta asetettuna, eli pankkiyhteys käytössä
   $_sepa_pankkiyhteys = true;
-  // $_sepa_pankkiyhteys &= (isset($_SERVER["HTTPS"]) and $_SERVER["HTTPS"] == 'on');
+  $_sepa_pankkiyhteys &= (isset($_SERVER["HTTPS"]) and $_SERVER["HTTPS"] == 'on');
   $_sepa_pankkiyhteys &= ($yhtiorow["pankkitiedostot"] == "F");
   $_sepa_pankkiyhteys &= (!empty($sepa_pankkiyhteys_token));
 

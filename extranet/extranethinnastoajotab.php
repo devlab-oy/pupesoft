@@ -3,7 +3,7 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require('parametrit.inc');
+require 'parametrit.inc';
 
 echo "<font class='head'>".t("Hinnastoajo").":</font><hr>";
 
@@ -77,9 +77,9 @@ if ($tee != '') {
     $rivi .= t_tuotteen_avainsanat($tuoterow, 'nimitys')."\t";
     $rivi .= "$tuoterow[lyhytkuvaus]\t";
     $rivi .= "$tuoterow[tuotemerkki]\t";
-    $rivi .= str_replace(".",",",$tuoterow['hinta_veroll'])."\t";
-    $rivi .= str_replace(".",",",$tuoterow['alv'])."\t";
-    $rivi .= str_replace(".",",",$tuoterow['alepros'])."\t";
+    $rivi .= str_replace(".", ",", $tuoterow['hinta_veroll'])."\t";
+    $rivi .= str_replace(".", ",", $tuoterow['alv'])."\t";
+    $rivi .= str_replace(".", ",", $tuoterow['alepros'])."\t";
     $rivi .= "$tuoterow[aleryhma]\t\n";
 
     fwrite($fh, $rivi);
@@ -102,9 +102,9 @@ if ($tee != '') {
   echo t("L‰hetet‰‰n s‰hkˆposti osoitteeseen").": ";
   flush();
 
-  $timeparts = explode(" ",microtime());
-  $endtime   = $timeparts[1].substr($timeparts[0],1);
-  $total     = round($endtime-$starttime,0);
+  $timeparts = explode(" ", microtime());
+  $endtime   = $timeparts[1].substr($timeparts[0], 1);
+  $total     = round($endtime-$starttime, 0);
 
 
   $bound = uniqid(time()."_") ;
@@ -131,7 +131,7 @@ if ($tee != '') {
   echo t("Huomaa ett‰ jos avaat tiedoston Exceliin, sinun pit‰‰ m‰‰ritell‰ ensimm‰inen sarake tekstiksi jotta Excel ei poista etunollia").". <br>";
 
   //lopetetaan t‰h‰n
-  require ("footer.inc");
+  require "footer.inc";
   exit;
 }
 
@@ -180,4 +180,4 @@ echo "<tr><td class='back'><br><input type='submit' value='".t("L‰het‰")."'></td
 
 echo "</table>  ";
 
-require ("footer.inc");
+require "footer.inc";

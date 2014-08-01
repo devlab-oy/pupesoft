@@ -25,7 +25,11 @@ if (isset($laske_kestot_uudelleen)) {
   rebuild_valmistuslinjat();
 }
 
-/** Valmistusten siirtäminen valmistuslinjalla */
+/**
+ * Valmistusten siirtäminen valmistuslinjalla
+ */
+
+
 if (isset($method) and $method == 'move') {
 
   // Haetaan valitun valmistuksen tiedot
@@ -54,7 +58,9 @@ if (isset($method) and $method == 'move') {
   }
 }
 
-/** Poistetaan kalenterista kalenterimerkintä */
+/**
+ * Poistetaan kalenterista kalenterimerkintä
+ */
 if (isset($tee) and $tee == 'poista' and is_numeric($tunnus)) {
   $poista_query = "DELETE FROM kalenteri WHERE yhtio='{$kukarow['yhtio']}' AND tunnus={$tunnus}";
   if (pupe_query($poista_query)) {
@@ -93,7 +99,7 @@ if ($tee == 'paivita' and isset($method) and $method == 'update') {
     echo"</td></tr>";
 
     // Haetaan valmisteet
-    foreach($valmistus->tuotteet() as $valmiste) {
+    foreach ($valmistus->tuotteet() as $valmiste) {
       echo "<tr>
         <th>".t("Tuoteno")."</th>
         <td>{$valmiste['tuoteno']}
@@ -134,7 +140,7 @@ if ($tee == 'paivita' and isset($method) and $method == 'update') {
     echo "<tr><th>".t("Valmistus")."</th><td>{$valmistus->tunnus()}</td></tr>";
 
     // Haetaan valmisteet
-    foreach($valmistus->tuotteet() as $valmiste) {
+    foreach ($valmistus->tuotteet() as $valmiste) {
       echo "<tr>
         <th>".t("Tuoteno")."</th>
         <td>{$valmiste['tuoteno']}
@@ -173,7 +179,7 @@ if ($tee == 'paivita' and isset($method) and $method == 'update') {
 
       // Tarkastetaan tarvitseeko valmistusta splitata
       if ($valmiste['varattu'] > $valmisteet[$valmiste['tunnus']]['maara'] and ($tila == 'VT')) {
-        #echo $valmiste['varattu']. " > " . $valmisteet[$valmiste['tunnus']['maara']] . "<br>";
+        //echo $valmiste['varattu']. " > " . $valmisteet[$valmiste['tunnus']['maara']] . "<br>";
         $jaettavat_valmisteet[$valmiste['tunnus']] = $valmisteet[$valmiste['tunnus']]['maara'];
         $splitataan = true;
       }
@@ -274,7 +280,7 @@ if ($tee == 'lisaa_tyojonoon') {
  */
 if ($tee == 'lisaa_kalenteriin') {
 
-  #echo "valmistuslinja: $valmistuslinja tyyppi: $tyyppi";
+  //echo "valmistuslinja: $valmistuslinja tyyppi: $tyyppi";
 
   // Alkuaika on pakko syöttää
   if (empty($pvmalku)) {
@@ -379,7 +385,7 @@ if ($tee == '') {
   $valmistukset = Valmistus::all();
 
   //Listataan parkissa olevat valmistukset
-  foreach($valmistukset as $valmistus) {
+  foreach ($valmistukset as $valmistus) {
 
     echo "<tr>";
     echo "<td>" . $valmistus->tunnus() . "</td>";
@@ -388,7 +394,7 @@ if ($tee == '') {
 
     // Tarkistetaan valmistuksella olevat tuotteet
     $kpl = '';
-    foreach($valmistus->tuotteet() as $tuote) {
+    foreach ($valmistus->tuotteet() as $tuote) {
       echo $tuote['tuoteno'] . " "
         . $tuote['nimitys'] . "<br>";
       $kpl .= $tuote['varattu'] . " " . $tuote['yksikko'] . "<br>";
@@ -413,7 +419,7 @@ if ($tee == '') {
       echo "<select name='valmistuslinja'>";
       echo "<option value=''>".t("Valitse linja")."</option>";
 
-      foreach($linjat as $linja) {
+      foreach ($linjat as $linja) {
         echo "<option value='$linja[selite]'>$linja[selitetark]</option>";
       }
 
@@ -444,7 +450,7 @@ if ($tee == '') {
   echo "<select name='valmistuslinja'>";
   echo "<option value=''>".t("Yhtiökohtainen")."</option>";
 
-  foreach($linjat as $linja) {
+  foreach ($linjat as $linja) {
     echo "<option value='$linja[selite]'>$linja[selitetark]</option>";
   }
 
@@ -478,4 +484,4 @@ if ($tee == '') {
 }
 
 // FOOTER
-require ("inc/footer.inc");
+require "inc/footer.inc";

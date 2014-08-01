@@ -3,7 +3,7 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 2;
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Varastonarvon tarkastelua")."</font><hr>";
 
@@ -152,9 +152,9 @@ if ($tee == "tee") {
 
   echo "<tr class='aktiivi'>";
   echo "<td>".$summa_array["Inventointi"]["kpl"]."</td>";
-  echo "<td align='right'>".round($summa_array["Inventointi"]["logistiikka"],2)."</td>";
-  echo "<td align='right'>".round($summa_array["Inventointi"]["kirjanpito"],2)."</td>";
-  echo "<td align='right'>".round($summa_array["Inventointi"]["logistiikka"]-$summa_array["Inventointi"]["kirjanpito"],2)."</td>";
+  echo "<td align='right'>".round($summa_array["Inventointi"]["logistiikka"], 2)."</td>";
+  echo "<td align='right'>".round($summa_array["Inventointi"]["kirjanpito"], 2)."</td>";
+  echo "<td align='right'>".round($summa_array["Inventointi"]["logistiikka"]-$summa_array["Inventointi"]["kirjanpito"], 2)."</td>";
   echo "</tr>";
   echo "</table><br><br>";
 
@@ -192,7 +192,7 @@ if ($tee == "tee") {
                and tiliointi.korjattu = ''
                GROUP BY lasku.tunnus";
     $lresult = pupe_query($query);
-    $lrow = mysql_fetch_assoc ($lresult);
+    $lrow = mysql_fetch_assoc($lresult);
 
     $tavarmuu = sprintf("%.2f", round($tapahtuma["kpl"]*$tapahtuma["hinta"], 2));
     $kpvarmuu = sprintf("%.2f", round($lrow["summa"], 2));
@@ -244,7 +244,7 @@ if ($tee == "tee") {
   $kpmuutos = 0.0;
   $maara = mysql_num_rows($result);
 
-  while ($trow = mysql_fetch_assoc ($result)) {
+  while ($trow = mysql_fetch_assoc($result)) {
 
     $query  = "SELECT sum(tapahtuma.hinta * tapahtuma.kpl) logistiikkasumma
                FROM tilausrivi, tapahtuma
@@ -254,7 +254,7 @@ if ($tee == "tee") {
                and tapahtuma.rivitunnus   = tilausrivi.tunnus
                and tapahtuma.laji         = 'laskutus'";
     $lresult = pupe_query($query);
-    $lrow = mysql_fetch_assoc ($lresult);
+    $lrow = mysql_fetch_assoc($lresult);
 
     $lomuutos += $lrow["logistiikkasumma"];
     $kpmuutos += $trow["varastonmuutos"];
@@ -264,9 +264,9 @@ if ($tee == "tee") {
 
   echo "<tr class='aktiivi'>";
   echo "<td>$maara</td>";
-  echo "<td align='right'>".round($lomuutos,2)."</td>";
-  echo "<td align='right'>".round($kpmuutos,2)."</td>";
-  echo "<td align='right'>".round($ero,2)."</td>";
+  echo "<td align='right'>".round($lomuutos, 2)."</td>";
+  echo "<td align='right'>".round($kpmuutos, 2)."</td>";
+  echo "<td align='right'>".round($ero, 2)."</td>";
   echo "</tr>";
   echo "</table><br><br>";
 
@@ -282,9 +282,9 @@ if ($tee == "tee") {
 
   echo "<tr class='aktiivi'>";
   echo "<td>".$summa_array["laskutus"]["kpl"]."</td>";
-  echo "<td align='right'>".round($summa_array["laskutus"]["logistiikka"],2)."</td>";
-  echo "<td align='right'>".round($summa_array["laskutus"]["kirjanpito"],2)."</td>";
-  echo "<td align='right'>".round($summa_array["laskutus"]["logistiikka"]-$summa_array["laskutus"]["kirjanpito"],2)."</td>";
+  echo "<td align='right'>".round($summa_array["laskutus"]["logistiikka"], 2)."</td>";
+  echo "<td align='right'>".round($summa_array["laskutus"]["kirjanpito"], 2)."</td>";
+  echo "<td align='right'>".round($summa_array["laskutus"]["logistiikka"]-$summa_array["laskutus"]["kirjanpito"], 2)."</td>";
   echo "</tr>";
   echo "</table><br><br>";
 
@@ -514,10 +514,10 @@ if ($tee == "tee") {
 
   echo "<tr>";
   echo "<th colspan='4'>".t('Saapumiset yhteens‰')."</th>";
-  echo "<th align='right' NOWRAP>".round($timuutos,2)."</th>";
-  echo "<th align='right' NOWRAP>".round($lomuutos,2)."</th>";
-  echo "<th align='right' NOWRAP>".round($kpmuutos,2)."</th>";
-  echo "<th align='right' NOWRAP>".round($ero,2)."</th>";
+  echo "<th align='right' NOWRAP>".round($timuutos, 2)."</th>";
+  echo "<th align='right' NOWRAP>".round($lomuutos, 2)."</th>";
+  echo "<th align='right' NOWRAP>".round($kpmuutos, 2)."</th>";
+  echo "<th align='right' NOWRAP>".round($ero, 2)."</th>";
   echo "</tr>";
 
   echo "</table>";
@@ -602,4 +602,4 @@ if ($tee == "tee") {
   echo "</table>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

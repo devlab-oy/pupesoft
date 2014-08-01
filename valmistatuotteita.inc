@@ -1,10 +1,10 @@
 <?php
 
 if (file_exists("tulosta_tilaustuotetarrat.inc")) {
-  require_once("tulosta_tilaustuotetarrat.inc");
+  require_once "tulosta_tilaustuotetarrat.inc";
 }
 else {
-  require_once("tilauskasittely/tulosta_tilaustuotetarrat.inc");
+  require_once "tilauskasittely/tulosta_tilaustuotetarrat.inc";
 }
 
 //vähän joutuu laitaa talteen näitä alkuperäisiä
@@ -279,20 +279,20 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 
     // Poistetaan raaka-aineet varastosta
     if ($kulukpllat[$raakaainerow["tunnus"]] != 0) {
-      $kpl = str_replace(',','.',$kulukpllat[$raakaainerow["tunnus"]]);
+      $kpl = str_replace(',', '.', $kulukpllat[$raakaainerow["tunnus"]]);
     }
     else {
-      $kpl = $raakaainerow['varattu'] * str_replace(',','.',$akerroin);
+      $kpl = $raakaainerow['varattu'] * str_replace(',', '.', $akerroin);
     }
 
-    $kpl = str_replace(',','.',$kpl);
+    $kpl = str_replace(',', '.', $kpl);
 
     if    ($tuoterow['epakurantti100pvm'] != '0000-00-00') $tuoterow['kehahin'] = 0;
     elseif ($tuoterow['epakurantti75pvm'] != '0000-00-00') $tuoterow['kehahin'] = round($tuoterow['kehahin'] * 0.25, 6);
     elseif ($tuoterow['epakurantti50pvm'] != '0000-00-00') $tuoterow['kehahin'] = round($tuoterow['kehahin'] * 0.5,  6);
     elseif ($tuoterow['epakurantti25pvm'] != '0000-00-00') $tuoterow['kehahin'] = round($tuoterow['kehahin'] * 0.75, 6);
 
-    if (in_array($raakaainerow["sarjanumeroseuranta"], array("S","U","G"))) {
+    if (in_array($raakaainerow["sarjanumeroseuranta"], array("S", "U", "G"))) {
       $arvo = sarjanumeron_ostohinta("myyntirivitunnus", $raakaainerow["tunnus"])*$kpl;
     }
     else {
@@ -328,7 +328,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
       $result = pupe_query($query);
 
       //  Merkataan erä kulutetuksi
-      if (in_array($raakaainerow["sarjanumeroseuranta"], array("E","F","G"))) {
+      if (in_array($raakaainerow["sarjanumeroseuranta"], array("E", "F", "G"))) {
 
         // Haetaan eka raaka-aineriviin liitetyn erän tiedot
         $query = "SELECT *
@@ -465,7 +465,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
                     hyllyvali        = '$tuoterow[hyllyvali]',
                     hyllytaso        = '$tuoterow[hyllytaso]',
                     sarjanumero      = '$lisa_row[sarjanumero]'";
-          #$lisa_res = pupe_query($query);
+          //$lisa_res = pupe_query($query);
 
           $query = "UPDATE sarjanumeroseuranta
                     SET era_kpl     = $eraayht,
@@ -477,7 +477,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
                     and myyntirivitunnus = '$raakaainerow[tunnus]'
                     and era_kpl          = 0
                     LIMIT 1";
-          #$lisa_res = pupe_query($query);
+          //$lisa_res = pupe_query($query);
         }
       }
 
@@ -500,7 +500,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
   }
 
   if (!function_exists("valmista_isa")) {
-    function valmista_isa ($valmisterow, $tilrivirow, $isavarattu, $isatuoteno, $uusiarvo, $kaikenkaikkiaan, $kaikenkaikkiaan_arvot) {
+    function valmista_isa($valmisterow, $tilrivirow, $isavarattu, $isatuoteno, $uusiarvo, $kaikenkaikkiaan, $kaikenkaikkiaan_arvot) {
       global $yhtiorow, $kukarow, $laskurow, $valmistettavat, $jaljella_tot;
 
       // Jos on useampi valmiste
@@ -681,7 +681,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
         $upparesult = pupe_query($query);
 
         // Siirretään sarjanumerot valmistetulle tilausriville
-        if (in_array($valmisterow["sarjanumeroseuranta"], array("S","T","U","V"))) {
+        if (in_array($valmisterow["sarjanumeroseuranta"], array("S", "T", "U", "V"))) {
 
           //  Siirretään ostorivin tunnus valmistetulle riville
           $query = "SELECT tunnus
@@ -743,7 +743,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 
           tulosta_tilaustuotetarrat(0, $uusrivitunnus, "OPTIMOI");
         }
-        elseif (in_array($valmisterow["sarjanumeroseuranta"], array("E","F","G"))) {
+        elseif (in_array($valmisterow["sarjanumeroseuranta"], array("E", "F", "G"))) {
 
           // Siirretään ostorivin tunnus valmistetulle riville
           $query = "SELECT tunnus, era_kpl, sarjanumero, lisatieto
@@ -836,12 +836,12 @@ if ($tee == 'UV') { //Tehdään tuotteet!
           }
 
           //Tutkitaan löytyykö JT-rivi joka mäppäytyy tähän valmistusriviin
-             $query = "SELECT ifnull(if((tilausrivi.perheid != 0 and tilausrivi.tunnus != tilausrivi.perheid), tilausrivi.perheid, tilausrivi.tunnus), 0) jtrivi
-                       FROM tilausrivin_lisatiedot
-                       JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
-                       WHERE tilausrivin_lisatiedot.yhtio          = '$kukarow[yhtio]'
-                       AND tilausrivin_lisatiedot.tilausrivilinkki = '$tilrivirow[tunnus]'
-                       $suoralisa";
+          $query = "SELECT ifnull(if((tilausrivi.perheid != 0 and tilausrivi.tunnus != tilausrivi.perheid), tilausrivi.perheid, tilausrivi.tunnus), 0) jtrivi
+                    FROM tilausrivin_lisatiedot
+                    JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
+                    WHERE tilausrivin_lisatiedot.yhtio          = '$kukarow[yhtio]'
+                    AND tilausrivin_lisatiedot.tilausrivilinkki = '$tilrivirow[tunnus]'
+                    $suoralisa";
           $varastoon_result = pupe_query($query);
 
           while ($varastoon_row = mysql_fetch_assoc($varastoon_result)) {

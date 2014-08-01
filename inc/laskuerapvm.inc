@@ -52,7 +52,7 @@ if ($aika != '') {
   echo "<table>";
   echo "<tr><th>".t("Jakso")."</th><th>".t("Eräpvm")."</th><th>".t("Summa")."</th><th>".t("Kpl")."</th></tr>";
 
-  while ($trow=mysql_fetch_array ($result)) {
+  while ($trow=mysql_fetch_array($result)) {
     echo "<tr>";
 
 

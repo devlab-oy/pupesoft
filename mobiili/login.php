@@ -10,8 +10,8 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
 
   $login = "yes";
 
-  if (@include_once("../inc/parametrit.inc"));
-  elseif (@include_once("inc/parametrit.inc"));
+  if (@include_once "../inc/parametrit.inc");
+  elseif (@include_once "inc/parametrit.inc");
 
   if (!isset($salamd5)) $salamd5 = '';
   if (!isset($mikayhtio)) $mikayhtio = '';
@@ -36,8 +36,8 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
   $return = pupesoft_login($params);
 }
 else {
-  if (@include_once("../inc/parametrit.inc"));
-  elseif (@include_once("inc/parametrit.inc"));
+  if (@include_once "../inc/parametrit.inc");
+  elseif (@include_once "inc/parametrit.inc");
 }
 
 $formi = "login"; // Kursorin ohjaus
@@ -68,17 +68,17 @@ echo "
 
 echo "
 <body>
-<div class='header'><h1>",t("SISÄÄNKIRJAUTUMINEN", $browkieli),"</h1></div>";
+<div class='header'><h1>", t("SISÄÄNKIRJAUTUMINEN", $browkieli), "</h1></div>";
 
 if (isset($return['usea_yhtio']) and $return['usea_yhtio'] == 1) {
 
   if (count($return['usea']) == 0) {
-    echo t("Sinulle löytyi monta käyttäjätunnusta, muttei yhtään yritystä", $browkieli),"!";
+    echo t("Sinulle löytyi monta käyttäjätunnusta, muttei yhtään yritystä", $browkieli), "!";
     exit;
   }
 
   echo "<table class='login'>";
-  echo "<tr><td>",t("Valitse yritys", $browkieli),":</td></tr>";
+  echo "<tr><td>", t("Valitse yritys", $browkieli), ":</td></tr>";
 
   foreach ($return['usea'] as $_yhtio => $_yhtionimi) {
 
@@ -112,15 +112,15 @@ else {
   echo "<table class='login'>
       <form name='login' target='_top' action='' method='post'>
 
-      <tr><th>",t("Käyttäjätunnus",$browkieli),":</th><td><input type='text' value='' name='user' size='15' maxlength='30'></td></tr>
-      <tr><th>",t("Salasana",$browkieli),":</th><td><input type='password' name='salasana' size='15' maxlength='30'></td></tr>
+      <tr><th>", t("Käyttäjätunnus", $browkieli), ":</th><td><input type='text' value='' name='user' size='15' maxlength='30'></td></tr>
+      <tr><th>", t("Salasana", $browkieli), ":</th><td><input type='password' name='salasana' size='15' maxlength='30'></td></tr>
     </table>";
 
   if (isset($return['error']) and $return['error'] != "") {
-      echo "<br /><font class='error'>{$return['error']}</font><br />";
+    echo "<br /><font class='error'>{$return['error']}</font><br />";
   }
 
-  echo "  <br /><input type='submit' class='button' value='",t("Sisään",$browkieli),"'>
+  echo "  <br /><input type='submit' class='button' value='", t("Sisään", $browkieli), "'>
       </form>";
 
   echo "<script LANGUAGE='JavaScript'>window.document.{$formi}.{$kentta}.focus();</script>";
@@ -129,4 +129,4 @@ else {
 echo "</td></tr></table>";
 echo "</body></html>";
 
-require('inc/footer.inc');
+require 'inc/footer.inc';

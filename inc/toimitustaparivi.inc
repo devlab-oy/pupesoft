@@ -5,7 +5,7 @@ $jatko = 1; // oletetaan normaali käsittely
 $tyyppi = 1; // oletetaan rivin näkyvyys
 
 if (mysql_field_name($result, $i) == "tunnus" or
-    mysql_field_name($result, $i) == "yhtio") {
+  mysql_field_name($result, $i) == "yhtio") {
   $tyyppi = 0;
 }
 
@@ -507,10 +507,10 @@ if (mysql_field_name($result, $i) == "merahti") {
 }
 
 if (mysql_field_name($result, $i) == "tulostustapa") {
-    $sel      = array();
-    $sel[$trow[$i]]  = " selected";
+  $sel      = array();
+  $sel[$trow[$i]]  = " selected";
 
-    $ulos = "<td>
+  $ulos = "<td>
       <select name='$nimi'>
       <option value='E' $sel[E]>".t("Erätulostus")."</option>
       <option value='H' $sel[H]>".t("Hetitulostus")."</option>
@@ -518,7 +518,7 @@ if (mysql_field_name($result, $i) == "tulostustapa") {
       <option value='L' $sel[L]>".t("Koonti-erätulostus")."</option>
       <option value='X' $sel[X]>".t("Rahtikirjansyöttö ja -tulostus ohitetaan")."</option>
       </select></td>";
-    $jatko = 0;
+  $jatko = 0;
 }
 
 if (mysql_field_name($result, $i) == "extranet") {
@@ -539,7 +539,7 @@ if (mysql_field_name($result, $i) == "rahtikirja") {
 
   $ulos = "<td><select name='$nimi'>";
 
-  while($row = mysql_fetch_array($vresult)) {
+  while ($row = mysql_fetch_array($vresult)) {
     $sel = "";
     if ($row["selite"] == $trow[$i]) $sel = 'selected';
     $ulos .= "<option value='$row[selite]' $sel>$row[selitetark]</option>";
@@ -809,9 +809,9 @@ if (mysql_field_name($result, $i) == "sallitut_alustat") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "jvkulu" OR
-  mysql_field_name($result, $i) == "kuluprosentti" OR
-  mysql_field_name($result, $i) == "ulkomaanlisa" OR
+if (mysql_field_name($result, $i) == "jvkulu" or
+  mysql_field_name($result, $i) == "kuluprosentti" or
+  mysql_field_name($result, $i) == "ulkomaanlisa" or
   mysql_field_name($result, $i) == "kuljetusvakuutus") {
 
   if ($trow[$i] == 0) {

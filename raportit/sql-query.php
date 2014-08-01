@@ -7,14 +7,14 @@ $useslave = 1;
 $sqlapu = $_POST["sqlhaku"];
 
 if (isset($_POST["tee"])) {
-  if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
 // Ei käytetä pakkausta
 $compression = FALSE;
 
-require("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 ini_set("memory_limit", "2G");
 
@@ -35,7 +35,7 @@ else {
 
   // laitetaan aina kuudes merkki spaceks.. safetymeasure ni ei voi olla ku select
   if (substr($sqlhaku, 6, 1) != " ") {
-    $sqlhaku = substr($sqlhaku,0,6)." ".substr($sqlhaku,6);
+    $sqlhaku = substr($sqlhaku, 0, 6)." ".substr($sqlhaku, 6);
   }
 
   echo "<form name='sql' method='post' autocomplete='off'>";
@@ -58,16 +58,16 @@ else {
 
     if (mysql_num_rows($result) > 0) {
 
-      require('inc/ProgressBar.class.php');
+      require 'inc/ProgressBar.class.php';
 
-      include('inc/pupeExcel.inc');
+      include 'inc/pupeExcel.inc';
 
       $worksheet    = new pupeExcel();
       $format_bold = array("bold" => TRUE);
       $excelrivi    = 0;
       $sarakemaara = mysql_num_fields($result);
 
-      for ($i=0; $i < $sarakemaara; $i++) $worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
+      for ($i=0; $i < $sarakemaara; $i++) $worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result, $i))), $format_bold);
       $excelrivi++;
 
       $bar = new ProgressBar();
@@ -78,8 +78,8 @@ else {
         $bar->increase();
 
         for ($i=0; $i < $sarakemaara; $i++) {
-          if (mysql_field_type($result,$i) == 'real') {
-            $worksheet->writeNumber($excelrivi, $i, sprintf("%.02f",$row[$i]));
+          if (mysql_field_type($result, $i) == 'real') {
+            $worksheet->writeNumber($excelrivi, $i, sprintf("%.02f", $row[$i]));
           }
           else {
             $worksheet->writeString($excelrivi, $i, $row[$i]);
@@ -101,12 +101,12 @@ else {
 
       echo "<font class='message'>".t("Haun tulos")." ".mysql_num_rows($result)." ".t("riviä").".</font><br>";
 
-      mysql_data_seek($result,0);
+      mysql_data_seek($result, 0);
 
       echo "<pre>";
 
       for ($i = 0; $i < $sarakemaara; $i++) {
-        echo mysql_field_name($result,$i)."\t";
+        echo mysql_field_name($result, $i)."\t";
       }
       echo "\n";
 
@@ -116,7 +116,7 @@ else {
 
           // desimaaliluvuissa muutetaan pisteet pilkuiks...
           if (mysql_field_type($result, $i) == 'real') {
-            echo str_replace(".",",", $row[$i])."\t";
+            echo str_replace(".", ",", $row[$i])."\t";
           }
           else {
             echo str_replace(array("\n", "\r", "<br>"), " ", $row[$i])."\t";
@@ -132,5 +132,5 @@ else {
     $kentta = "sqlhaku";
   }
 
-  require("../inc/footer.inc");
+  require "../inc/footer.inc";
 }

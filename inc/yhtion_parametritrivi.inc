@@ -2523,7 +2523,7 @@ if ($fieldname == "tilausvahvistus_tallenna") {
   $jatko = 0;
 }
 
-if ($fieldname == "laskutuslisa" OR
+if ($fieldname == "laskutuslisa" or
   $fieldname == "kuljetusvakuutus") {
 
   if ($trow[$i] == 0) {

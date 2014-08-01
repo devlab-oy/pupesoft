@@ -3,7 +3,7 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Tuotepaikkalistaus")."</font><hr>";
 
@@ -21,7 +21,7 @@ if ($tee == "TULOSTA") {
 
   $tulostimet[0] = "Tuotepaikkalistaus";
   if (count($komento) == 0) {
-    require("inc/valitse_tulostin.inc");
+    require "inc/valitse_tulostin.inc";
   }
 
   $wherelisa = "";
@@ -85,11 +85,11 @@ if ($tee == "TULOSTA") {
 
       $ots  = "\n{$yhtiorow['nimi']}\t\t".t("Tuotepaikkalistaus").": $pp.$kk.$vv - $kello\n";
       $ots .= "-------------------------------------------------------------------------------------\n";
-      $ots .= sprintf ('%-20.20s',   t("Tuoteno"));
+      $ots .= sprintf('%-20.20s',   t("Tuoteno"));
       $ots .= "\t";
-      $ots .= sprintf ('%-30.30s',   t("Nimitys"));
+      $ots .= sprintf('%-30.30s',   t("Nimitys"));
       $ots .= "\t";
-      $ots .= sprintf ('%-21.21s',   t("Hyllyosoite"));
+      $ots .= sprintf('%-21.21s',   t("Hyllyosoite"));
       $ots .= "\n";
       $ots .= "-------------------------------------------------------------------------------------\n";
       fwrite($fh, $ots);
@@ -97,7 +97,7 @@ if ($tee == "TULOSTA") {
 
       $rivit = 1;
 
-      while($tuotepaikka_row = mysql_fetch_array($tuotepaikka_result)) {
+      while ($tuotepaikka_row = mysql_fetch_array($tuotepaikka_result)) {
         // Joskus halutaan vain tulostaa lista, mutta ei oikeasti invata tuotteita
 
         if ($rivit >= 50) {
@@ -105,11 +105,11 @@ if ($tee == "TULOSTA") {
           $rivit = 1;
         }
 
-        $prn  = sprintf ('%-20.20s',   $tuotepaikka_row["tuoteno"]);
+        $prn  = sprintf('%-20.20s',   $tuotepaikka_row["tuoteno"]);
         $prn .= "\t";
-        $prn .= sprintf ('%-30.30s',   $tuotepaikka_row["nimitys"]);
+        $prn .= sprintf('%-30.30s',   $tuotepaikka_row["nimitys"]);
         $prn .= "\t";
-        $prn .= sprintf ('%-21.21s',   strtoupper($tuotepaikka_row["hyllyosoite"]));
+        $prn .= sprintf('%-21.21s',   strtoupper($tuotepaikka_row["hyllyosoite"]));
         $prn .= "\n";
         fwrite($fh, $prn);
         $rivit++;
@@ -120,7 +120,7 @@ if ($tee == "TULOSTA") {
       if ($komento["Tuotepaikkalistaus"] == 'email') {
         $liite = $filenimi;
         $ctype = "TEXT";
-        require("inc/sahkoposti.inc");
+        require "inc/sahkoposti.inc";
       }
       elseif ($komento["Tuotepaikkalistaus"] != '') {
         exec("a2ps -o ".$filenimi.".ps --no-header -R --columns=1 --medium=A4 --chars-per-line=80 --margin=0 --borders=0 $filenimi");
@@ -144,13 +144,13 @@ if (!isset($tee) or $tee == "") {
   echo "<input type='hidden' name='tee' value='TULOSTA'>";
 
   echo "<tr><th>".t("Alkuhylly")." (".t("alue-nro-v‰li-taso")."):</th>";
-  echo "<td align='right'>",hyllyalue("ahyllyalue", $ahyllyalue),"</td>";
+  echo "<td align='right'>", hyllyalue("ahyllyalue", $ahyllyalue), "</td>";
   echo "<td><input type='text' name='ahyllynro' value='$ahyllynro' size='4'></td>";
   echo "<td><input type='text' name='ahyllyvali' value='$ahyllyvali' size='4'></td>";
   echo "<td><input type='text' name='ahyllytaso' value='$ahyllytaso' size='4'></td></tr>";
 
   echo "<tr><th>".t("Loppuhylly")." (".t("alue-nro-v‰li-taso")."):</th>";
-  echo "<td align='right'>",hyllyalue("lhyllyalue", $lhyllyalue),"</td>";
+  echo "<td align='right'>", hyllyalue("lhyllyalue", $lhyllyalue), "</td>";
   echo "<td><input type='text' name='lhyllynro' value='$lhyllynro' size='4'></td>";
   echo "<td><input type='text' name='lhyllyvali' value='$lhyllyvali' size='4'></td>";
   echo "<td><input type='text' name='lhyllytaso' value='$lhyllytaso' size='4'></td></tr>";
@@ -159,10 +159,10 @@ if (!isset($tee) or $tee == "") {
 
   echo "<tr><th>".t("Valitse listausj‰rjestys")."</th><td align='right' colspan='4'><select name='jarjestys'>";
   echo "<option value='tuoteno' ";
-    if ($sel == "tuoteno") { echo "selected"; }
+  if ($sel == "tuoteno") { echo "selected"; }
   echo ">".t("Tuotenumero")."</option>";
   echo "<option value='hylly' ";
-    if ($sel == "hylly") { echo "selected"; }
+  if ($sel == "hylly") { echo "selected"; }
   echo ">".t("Paikka")."</option>";
   echo "</select></td></tr>";
 
@@ -170,4 +170,4 @@ if (!isset($tee) or $tee == "") {
   echo "</form></table>";
 }
 
-require("../inc/footer.inc");
+require "../inc/footer.inc";

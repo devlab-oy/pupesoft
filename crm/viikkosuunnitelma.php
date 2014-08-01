@@ -1,6 +1,6 @@
 <?php
 
-require("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Viikkosuunnitelma")."</font><hr>";
 
@@ -24,12 +24,12 @@ echo "<br><li><a href='$PHP_SELF?tee=laheta&kausi=$kausi&vstk=$vstk'>".t("Vie as
 function viikonpaivat($kausi) {
   global $viikkoalku, $viikkoloppu;
 
-  $viikko = substr($kausi,4,2);
-  $vuosi  = substr($kausi,0,4);
+  $viikko = substr($kausi, 4, 2);
+  $vuosi  = substr($kausi, 0, 4);
 
   $paivat = array();
 
-  for($d=0; $d<380; $d++) {
+  for ($d=0; $d<380; $d++) {
     $v = date("W", mktime(0, 0, 0, 1, 1+$d, $vuosi));
     $y = date("Y", mktime(0, 0, 0, 1, 1+$d, $vuosi));
 
@@ -51,18 +51,18 @@ if ($tee == 'laheta') {
 
   echo "<br><br><font class='message'>".t("Asiakastietopakettit lähetetty sähköpostiisi")."!</font><br><br><br>";
 
-  require("laheta_asiakastietopaketti.inc");
+  require "laheta_asiakastietopaketti.inc";
 
   $tee = "";
 }
 
 
 if ($tee == "VALITSE_TIEDOSTO" or $tee == "FILE") {
-  require("sisaanlue_suunnitelma.inc");
+  require "sisaanlue_suunnitelma.inc";
 }
 
 if ($kausi == "") {
-  $kausi = date('Y').sprintf('%02d',date('W'));
+  $kausi = date('Y').sprintf('%02d', date('W'));
 }
 
 if ($tee == '') {
@@ -71,23 +71,23 @@ if ($tee == '') {
   echo "<form method='POST' action='$PHP_SELF'>";
   echo "<tr><th colspan='3'>".t("Valitse viikko").":</th><th colspan='2'>".t("Näytä").":</th></tr>";
 
-  $edviikko = substr($kausi,4,2)-1;
-  $edvuosi  = substr($kausi,0,4);
+  $edviikko = substr($kausi, 4, 2)-1;
+  $edvuosi  = substr($kausi, 0, 4);
 
   if ($edviikko < 1) {
     $edvuosi--;
     $edviikko = 52;
   }
 
-  $edviikko = sprintf('%02d',$edviikko);
+  $edviikko = sprintf('%02d', $edviikko);
 
   echo "<tr><td><a href='$PHP_SELF?kausi=$edvuosi$edviikko&vstk=$vstk'>".t("Edellinen")." </a></td>";
   echo "<td><select name='kausi' onchange='submit();'>";
 
-  for($y=date('Y')+1; $y>=date('Y')-1; $y--) {
+  for ($y=date('Y')+1; $y>=date('Y')-1; $y--) {
 
-    for($v=52; $v>=00; $v--) {
-      $v = sprintf('%02d',$v);
+    for ($v=52; $v>=00; $v--) {
+      $v = sprintf('%02d', $v);
       $sel = '';
 
       if ($kausi == $y.$v) {
@@ -99,15 +99,15 @@ if ($tee == '') {
   }
   echo "</select></td>";
 
-  $seviikko = substr($kausi,4,2)+1;
-  $sevuosi  = substr($kausi,0,4);
+  $seviikko = substr($kausi, 4, 2)+1;
+  $sevuosi  = substr($kausi, 0, 4);
 
   if ($seviikko > 52) {
     $sevuosi++;
     $seviikko = 01;
   }
 
-  $seviikko = sprintf('%02d',$seviikko);
+  $seviikko = sprintf('%02d', $seviikko);
 
   echo "<td><a href='$PHP_SELF?kausi=$sevuosi$seviikko&vstk=$vstk'>".t("Seuraava")."</a></td>";
 
@@ -199,4 +199,4 @@ if ($tee == '') {
   echo "</table>";
 }
 
-require("../inc/footer.inc");
+require "../inc/footer.inc";

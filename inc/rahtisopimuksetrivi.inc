@@ -6,7 +6,7 @@ $tyyppi = 1; // oletetaan rivin näkyvyys
 
 if (mysql_field_name($result, $i) == "tunnus" or
   mysql_field_name($result, $i) == "muutospvm" or
-    mysql_field_name($result, $i) == "yhtio") {
+  mysql_field_name($result, $i) == "yhtio") {
   $tyyppi = 0;
 }
 
@@ -29,7 +29,7 @@ if (mysql_field_name($result, $i) == "toimitustapa") {
 }
 
 if (mysql_field_name($result, $i) == "ytunnus" and !isset($alasveto[$i]) and $ytunnus != "") {
-  $ulos = "<td><input type = 'text' name = '$nimi' value = '$ytunnus' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
+  $ulos = "<td><input type = 'text' name = '$nimi' value = '$ytunnus' size='$size' maxlength='" . mysql_field_len($result, $i) ."'>";
   $jatko = 0;
 }
 

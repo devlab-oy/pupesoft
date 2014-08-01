@@ -8,9 +8,9 @@
 
 $nimike_taso1 = $tuorow["tullinimike1"].$tuorow["tullinimike2"];
 $nimike_taso2 = $tuorow["tullinimike1"]."00";
-$nimike_taso3 = substr($tuorow["tullinimike1"],0,6)."0000";
-$nimike_taso4 = substr($tuorow["tullinimike1"],0,4)."000000";
-$nimike_taso5 = substr($tuorow["tullinimike1"],0,2)."00000000";
+$nimike_taso3 = substr($tuorow["tullinimike1"], 0, 6)."0000";
+$nimike_taso4 = substr($tuorow["tullinimike1"], 0, 4)."000000";
+$nimike_taso5 = substr($tuorow["tullinimike1"], 0, 2)."00000000";
 
 $nimike_taso = $nimike_taso1;
 

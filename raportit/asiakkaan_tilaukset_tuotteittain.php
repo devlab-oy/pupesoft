@@ -4,11 +4,11 @@
 $useslave = 1;
 
 if (isset($_POST["tee"])) {
-  if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
@@ -30,7 +30,7 @@ if (isset($vaihda)) {
 }
 
 if (isset($muutparametrit) and $muutparametrit != '') {
-  $muut = explode('/',$muutparametrit);
+  $muut = explode('/', $muutparametrit);
 
   $vva     = $muut[0];
   $kka     = $muut[1];
@@ -42,7 +42,7 @@ if (isset($muutparametrit) and $muutparametrit != '') {
 }
 
 if ($tee == 'NAYTATILAUS') {
-  require ("naytatilaus.inc");
+  require "naytatilaus.inc";
 
   echo "<br><br>";
   $tee = "TULOSTA";
@@ -53,15 +53,15 @@ if ($ytunnus != '' or (int) $asiakasid > 0 or (int) $toimittajaid > 0) {
   $muutparametrit = $vva."/".$kka."/".$ppa."/".$vvl."/".$kkl."/".$ppl."/".$tuoteno;
 
   if ($toim == 'MYYNTI') {
-    require ("inc/asiakashaku.inc");
+    require "inc/asiakashaku.inc";
   }
   if ($toim == 'OSTO') {
-    require ("../inc/kevyt_toimittajahaku.inc");
+    require "../inc/kevyt_toimittajahaku.inc";
   }
 }
 
 if ($tuoteno != '') {
-  require ('inc/tuotehaku.inc');
+  require 'inc/tuotehaku.inc';
 }
 
 // Pikku scripti formin tyhjent‰miseen
@@ -78,11 +78,11 @@ echo "<br><table><form method='post' id='etsiform' name='etsiform'>
     <input type='hidden' name='tee' value='ETSI'>";
 
 if ($kka == '')
-  $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+  $kka = date("m", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 if ($vva == '')
-  $vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+  $vva = date("Y", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 if ($ppa == '')
-  $ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+  $ppa = date("d", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 
 if ($kkl == '')
   $kkl = date("m");
@@ -179,7 +179,7 @@ echo "<td class='back'><input id='etsinappi' type='submit' value='".t("Etsi")."'
 
 if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittajaid > 0) {
 
-  include('inc/pupeExcel.inc');
+  include 'inc/pupeExcel.inc';
 
   $worksheet    = new pupeExcel();
   $format_bold = array("bold" => TRUE);
@@ -310,13 +310,13 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
 
     for ($i=1; $i < mysql_num_fields($result)-$miinus; $i++) {
 
-      echo "<th align='left'><a href='$PHP_SELF?tee=$tee&toim=$toim&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&tuoteno=".urlencode($tuoteno)."&ytunnus=$ytunnus&asiakasid=$asiakasid&jarj=".mysql_field_name($result,$i)."$pvmtapa_url'>".t(mysql_field_name($result,$i))."</a></th>";
+      echo "<th align='left'><a href='$PHP_SELF?tee=$tee&toim=$toim&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&tuoteno=".urlencode($tuoteno)."&ytunnus=$ytunnus&asiakasid=$asiakasid&jarj=".mysql_field_name($result, $i)."$pvmtapa_url'>".t(mysql_field_name($result, $i))."</a></th>";
 
-      $worksheet->write($excelrivi, $j, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
+      $worksheet->write($excelrivi, $j, ucfirst(t(mysql_field_name($result, $i))), $format_bold);
       $j++;
 
-      if (mysql_field_name($result,$i) == 'kate') {
-        echo "<th align='left'><a href='$PHP_SELF?tee=$tee&toim=$toim&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&tuoteno=".urlencode($tuoteno)."&ytunnus=$ytunnus&asiakasid=$asiakasid&jarj=".mysql_field_name($result,$i)."$pvmtapa_url'>".t("Katepros")."</a></th>";
+      if (mysql_field_name($result, $i) == 'kate') {
+        echo "<th align='left'><a href='$PHP_SELF?tee=$tee&toim=$toim&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&tuoteno=".urlencode($tuoteno)."&ytunnus=$ytunnus&asiakasid=$asiakasid&jarj=".mysql_field_name($result, $i)."$pvmtapa_url'>".t("Katepros")."</a></th>";
 
         $worksheet->write($excelrivi, $j, ucfirst(t("Katepros")), $format_bold);
         $j++;
@@ -358,10 +358,10 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
 
       for ($i=1; $i<mysql_num_fields($result)-$miinus; $i++) {
 
-        if (mysql_field_name($result,$i) == 'kerattyaika' or mysql_field_name($result,$i) == 'toimaika' or mysql_field_name($result,$i) == 'tuloutettu' or mysql_field_name($result,$i) == 'K‰sittelyyn') {
-          echo "<$ero valign='top' $class>".tv1dateconv($row[$i],"pitka")."</$ero>";
+        if (mysql_field_name($result, $i) == 'kerattyaika' or mysql_field_name($result, $i) == 'toimaika' or mysql_field_name($result, $i) == 'tuloutettu' or mysql_field_name($result, $i) == 'K‰sittelyyn') {
+          echo "<$ero valign='top' $class>".tv1dateconv($row[$i], "pitka")."</$ero>";
         }
-        elseif (substr(mysql_field_name($result,$i), 0, 3) == 'ale' or mysql_field_name($result,$i) == 'm‰‰r‰') {
+        elseif (substr(mysql_field_name($result, $i), 0, 3) == 'ale' or mysql_field_name($result, $i) == 'm‰‰r‰') {
           if ($row[$i] == 0) {
             echo "<$ero valign='top' align='right' $class></$ero>";
           }
@@ -369,10 +369,10 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
             echo "<$ero valign='top' align='right' $class>".(float) $row[$i]."</$ero>";
           }
         }
-        elseif (mysql_field_name($result,$i) == 'tuoteno') {
+        elseif (mysql_field_name($result, $i) == 'tuoteno') {
           echo "<$ero valign='top' $class><a href='".$palvelin2."tuote.php?tee=Z&tuoteno=".urlencode($row[$i])."'>$row[$i]</a></$ero>";
         }
-        elseif (mysql_field_name($result,$i) == 'kate') {
+        elseif (mysql_field_name($result, $i) == 'kate') {
           if ($row["var"] == "P") {
             echo "<$ero colspan='2' valign='top' nowrap $class>".t("PUUTE")."</$ero>";
           }
@@ -415,7 +415,7 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
 
                 // Kate = Hinta - Ostohinta
                 if ($row["rivihinta"] != 0) {
-                  $kate = sprintf('%.2f',100*($row["rivihinta"] - ($ostohinta * $kpl))/$row["rivihinta"])."%";
+                  $kate = sprintf('%.2f', 100*($row["rivihinta"] - ($ostohinta * $kpl))/$row["rivihinta"])."%";
                 }
 
                 $kate_eur  = ($row["rivihinta"] - ($ostohinta * $kpl));
@@ -439,7 +439,7 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
 
                 $ostohinta = 0;
 
-                while($sarjarow = mysql_fetch_array($sarjares)) {
+                while ($sarjarow = mysql_fetch_array($sarjares)) {
 
                   // Haetaan hyvitett‰vien myyntirivien kautta alkuper‰iset ostorivit
                   $query  = "SELECT tilausrivi.rivihinta/tilausrivi.kpl ostohinta
@@ -461,7 +461,7 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
 
                 // Kate = Hinta - Alkuper‰inen ostohinta
                 if ($row["rivihinta"] != 0) {
-                  $kate = sprintf('%.2f',100 * ($row["rivihinta"]*-1 - $ostohinta)/$row["rivihinta"])."%";
+                  $kate = sprintf('%.2f', 100 * ($row["rivihinta"]*-1 - $ostohinta)/$row["rivihinta"])."%";
                 }
                 else {
                   $kate = "100.00%";
@@ -477,7 +477,7 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
             elseif ($kukarow['extranet'] == '') {
 
               if ($row["rivihinta"] != 0) {
-                $kate = sprintf('%.2f',100*($row["rivihinta"] - (kehahin($row["tuoteno"])*($row["varattu"]+$row["jt"]+$row['m‰‰r‰'])))/$row["rivihinta"])."%";
+                $kate = sprintf('%.2f', 100*($row["rivihinta"] - (kehahin($row["tuoteno"])*($row["varattu"]+$row["jt"]+$row['m‰‰r‰'])))/$row["rivihinta"])."%";
               }
               elseif (kehahin($row["tuoteno"]) != 0) {
                 $kate = "-100.00%";
@@ -498,7 +498,7 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
 
           $excelsarake++;
         }
-        elseif (mysql_field_name($result,$i) == 'hinta' or mysql_field_name($result,$i) == 'rivihinta') {
+        elseif (mysql_field_name($result, $i) == 'hinta' or mysql_field_name($result, $i) == 'rivihinta') {
           echo "<$ero valign='top' align='right' nowrap $class>".sprintf("%.2f", $row[$i])."</$ero>";
         }
         else {
@@ -507,7 +507,7 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
 
 
 
-        if (is_numeric($row[$i]) and mysql_field_name($result,$i) != 'ytunnus') {
+        if (is_numeric($row[$i]) and mysql_field_name($result, $i) != 'ytunnus') {
           $worksheet->writeNumber($excelrivi, $excelsarake, $row[$i]);
         }
         else {
@@ -592,7 +592,7 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
         $ykate = @round(abs($kate_yht / $rivihintasumma * 100), 2);
       }
 
-      echo "<td align='right' class='spec'>".sprintf('%.2f',$kate_yht)."</td><td class='spec' align='right' nowrap>".sprintf('%.2f',$ykate)."%</td>";
+      echo "<td align='right' class='spec'>".sprintf('%.2f', $kate_yht)."</td><td class='spec' align='right' nowrap>".sprintf('%.2f', $ykate)."%</td>";
     }
 
 
@@ -663,4 +663,4 @@ if ((int) $asiakasid > 0 or (int) $toimittajaid > 0) {
   echo "</form>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

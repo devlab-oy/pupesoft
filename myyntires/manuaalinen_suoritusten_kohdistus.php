@@ -1,7 +1,7 @@
 <?php
 
 if (strpos($_SERVER['SCRIPT_NAME'], "manuaalinen_suoritusten_kohdistus")  !== FALSE) {
-  require ("../inc/parametrit.inc");
+  require "../inc/parametrit.inc";
 }
 
 if ($tila == "muokkaasuoritusta") {
@@ -436,8 +436,8 @@ if ($tila == 'tee_kohdistus') {
         }
         elseif (round($suoritus["summa"] - ($tskrow["summa"] - $tskrow["alennus"]), 2) < 0) {
           echo "<font class='error'>".t("VIRHE: Suorituksen summa on pienempi kuin valittujen laskujen summa!")."</font><br><br>";
-          #echo "suoritussumma: {$suoritus["summa"]} laskusumma: {$tskrow["summa"]} laskusummavaluutassa: {$tskrow["summa_valuutassa"]}<br>";
-          #echo "suoritusvalkoodi: {$suoritus["valkoodi"]} yhtiovalkoodi: {$yhtiorow['valkoodi']}<br>";
+          //echo "suoritussumma: {$suoritus["summa"]} laskusumma: {$tskrow["summa"]} laskusummavaluutassa: {$tskrow["summa_valuutassa"]}<br>";
+          //echo "suoritusvalkoodi: {$suoritus["valkoodi"]} yhtiovalkoodi: {$yhtiorow['valkoodi']}<br>";
 
           $tila   = 'kohdistaminen';
           $query   = "UNLOCK TABLES";
@@ -2125,4 +2125,4 @@ if ($tila == '') {
   echo "</table>";
 }
 
-require("inc/footer.inc");
+require "inc/footer.inc";

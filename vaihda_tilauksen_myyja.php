@@ -1,12 +1,12 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 enable_ajax();
 
-if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m"), date("d")-3, date("Y")));
-if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m"), date("d")-3, date("Y")));
-if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m"), date("d")-3, date("Y")));
+if (!isset($kka)) $kka = date("m", mktime(0, 0, 0, date("m"), date("d")-3, date("Y")));
+if (!isset($vva)) $vva = date("Y", mktime(0, 0, 0, date("m"), date("d")-3, date("Y")));
+if (!isset($ppa)) $ppa = date("d", mktime(0, 0, 0, date("m"), date("d")-3, date("Y")));
 
 if (!isset($kkl)) $kkl = date("m");
 if (!isset($vvl)) $vvl = date("Y");
@@ -43,7 +43,7 @@ if ($tee == 'PAIVITARIVIMYYJA' and (int) $rivitunnus > 0 and $myyja != "") {
 if ($tee == 'NAYTATILAUS') {
   echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
 
-  require ("raportit/naytatilaus.inc");
+  require "raportit/naytatilaus.inc";
   echo "<hr>";
   exit;
 }
@@ -299,4 +299,4 @@ else {
   echo t("Ei tilauksia")."...<br><br>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

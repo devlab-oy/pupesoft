@@ -1,6 +1,6 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Lis‰‰ ostolasku k‰sittelyjonoon")."</font><hr>";
 
@@ -68,4 +68,4 @@ echo "<form method='post' name='sendfile' enctype='multipart/form-data'>
     </table>
     </form>";
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

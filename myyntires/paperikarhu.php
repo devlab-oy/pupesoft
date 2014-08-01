@@ -24,14 +24,14 @@ if (!function_exists("uusi_karhukierros")) {
 }
 
 if (!function_exists("liita_lasku")) {
-  function liita_lasku($ktunnus,$ltunnus) {
+  function liita_lasku($ktunnus, $ltunnus) {
     $query = "INSERT INTO karhu_lasku (ktunnus,ltunnus) values ($ktunnus,$ltunnus)";
     $result = pupe_query($query);
   }
 }
 
 if (!function_exists("alku")) {
-  function alku ($viesti = null, $karhukierros_tunnus = '') {
+  function alku($viesti = null, $karhukierros_tunnus = '') {
     global $pdf, $asiakastiedot, $yhteyshenkilo, $yhteyshenkiloteksti, $yhtiorow, $kukarow, $kala, $sivu, $rectparam, $norm, $pieni, $boldi, $kaatosumma, $kieli, $_POST, $iso;
 
     $firstpage = $pdf->new_page("a4");
@@ -79,7 +79,7 @@ if (!function_exists("alku")) {
       $pdf->draw_text(mm_pt(22), mm_pt(268), strtoupper($yhtiorow["nimi"]),     $firstpage, $iiso);
       $pdf->draw_text(mm_pt(22), mm_pt(264), strtoupper($yhtiorow["nimitark"]),  $firstpage, $iiso);
       $pdf->draw_text(mm_pt(22), mm_pt(260), strtoupper($yhtiorow["osoite"]),   $firstpage, $iiso);
-      $pdf->draw_text(mm_pt(22), mm_pt(256), strtoupper($yhtiorow["postino"]." ".$yhtiorow["postitp"]),$firstpage, $iiso);
+      $pdf->draw_text(mm_pt(22), mm_pt(256), strtoupper($yhtiorow["postino"]." ".$yhtiorow["postitp"]), $firstpage, $iiso);
 
       // vastaanottaja
       if ($asiakastiedot["laskutus_nimi"] != "" and ($asiakastiedot["maksukehotuksen_osoitetiedot"] == "B" or ($yhtiorow["maksukehotuksen_osoitetiedot"] == "K" and $asiakastiedot["maksukehotuksen_osoitetiedot"] == ""))) {
@@ -101,8 +101,8 @@ if (!function_exists("alku")) {
       // jos vastaanottaja on eri maassa kuin yhtio niin lis‰t‰‰n maan nimi
       if ($yhtiorow['maa'] != $asiakastiedot['maa']) {
         $query = sprintf(
-            "SELECT nimi from maat where koodi='%s' AND ryhma_tunnus = ''",
-            mysql_real_escape_string($asiakastiedot['maa'])
+          "SELECT nimi from maat where koodi='%s' AND ryhma_tunnus = ''",
+          mysql_real_escape_string($asiakastiedot['maa'])
         );
 
         $maa_result = pupe_query($query);
@@ -144,9 +144,9 @@ if (!function_exists("alku")) {
     $pdf->draw_text(330, 731, t("Er‰p‰iv‰", $kieli), $firstpage, $pieni);
 
     if ($yhtiorow['karhuerapvm'] > 0) {
-      $seurday   = date("d",mktime(0, 0, 0, $kuu, $paiva+$yhtiorow['karhuerapvm'],  $year));
-      $seurmonth = date("m",mktime(0, 0, 0, $kuu, $paiva+$yhtiorow['karhuerapvm'],  $year));
-      $seuryear  = date("Y",mktime(0, 0, 0, $kuu, $paiva+$yhtiorow['karhuerapvm'],  $year));
+      $seurday   = date("d", mktime(0, 0, 0, $kuu, $paiva+$yhtiorow['karhuerapvm'],  $year));
+      $seurmonth = date("m", mktime(0, 0, 0, $kuu, $paiva+$yhtiorow['karhuerapvm'],  $year));
+      $seuryear  = date("Y", mktime(0, 0, 0, $kuu, $paiva+$yhtiorow['karhuerapvm'],  $year));
 
       $pdf->draw_text(330, 721, tv1dateconv($seuryear."-".$seurmonth."-".$seurday), $firstpage, $norm);
     }
@@ -182,8 +182,8 @@ if (!function_exists("alku")) {
       // tehd‰‰n riveist‰ max 90 merkki‰
       $viesti = wordwrap($viesti, 90, "\n");
 
-            $i = 0;
-            $rivit = explode("\n", $viesti);
+      $i = 0;
+      $rivit = explode("\n", $viesti);
 
       $yhteyshenkiloteksti = t("Yhteyshenkilˆmme", $kieli) . ": $yrow[nimi] / $yrow[eposti] / $yrow[puhno]";
 
@@ -192,12 +192,12 @@ if (!function_exists("alku")) {
 
       foreach ($rivit as $rivi) {
         // laitetaan
-                $pdf->draw_text(80, $kala, $rivi, $firstpage, $norm);
+        $pdf->draw_text(80, $kala, $rivi, $firstpage, $norm);
 
         // seuraava rivi tulee 10 pistett‰ alemmas kuin t‰m‰ rivi
         $kala -= 10;
-                $i++;
-            }
+        $i++;
+      }
     }
 
     $kala -= 10;
@@ -252,12 +252,12 @@ if (!function_exists("alku")) {
       $kala -= 13;
     }
 
-    return($firstpage);
+    return $firstpage;
   }
 }
 
-if(!function_exists("rivi")) {
-  function rivi ($firstpage, $summa, $korko) {
+if (!function_exists("rivi")) {
+  function rivi($firstpage, $summa, $korko) {
     global $firstpage, $pdf, $yhtiorow, $kukarow, $row, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $kieli, $karhukertanro;
 
     // siirryt‰‰nkˆ uudelle sivulle?
@@ -346,12 +346,12 @@ if(!function_exists("rivi")) {
       "korko"   => $korko,
       "summa"   => $summa,
     );
-    return($palautus);
+    return $palautus;
   }
 }
 
-if(!function_exists("loppu")) {
-  function loppu ($firstpage, $summa, $korko) {
+if (!function_exists("loppu")) {
+  function loppu($firstpage, $summa, $korko) {
 
     global $pdf, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kaatosumma, $kieli, $ktunnus, $maksuehtotiedot, $toimipaikkarow, $laskutiedot, $karhut_samalle_laskulle, $karhukertanro;
 
@@ -505,7 +505,7 @@ if(!function_exists("loppu")) {
   }
 }
 
-require_once('pdflib/phppdflib.class.php');
+require_once 'pdflib/phppdflib.class.php';
 
 flush();
 
@@ -662,7 +662,7 @@ else {
 $kaatosumma = $kaato["summa"] * -1;
 if (!$kaatosumma) $kaatosumma = '0.00';
 
-  //  Arvotaan oikea karhuviesti
+//  Arvotaan oikea karhuviesti
 if (!isset($karhuviesti)) {
 
   //  Lasketaan kuinka vanhoja laskuja t‰ss‰ karhutaan
@@ -750,7 +750,7 @@ $query = "SELECT selitetark
 $res = mysql_query($query) or pupe_error();
 $viestit = mysql_fetch_assoc($res);
 
-  $karhuviesti = $viestit["selitetark"];
+$karhuviesti = $viestit["selitetark"];
 
 $firstpage = alku($karhuviesti, $karhutunnus);
 
@@ -828,8 +828,8 @@ if ($yhtiorow["verkkolasku_lah"] == "maventa" and $_REQUEST['maventa_laheta'] ==
   }
 
   if (!function_exists("spyconv")) {
-    function spyconv ($spy) {
-      return $spy = sprintf("%020.020s",$spy);
+    function spyconv($spy) {
+      return $spy = sprintf("%020.020s", $spy);
     }
   }
 
@@ -844,11 +844,11 @@ if ($yhtiorow["verkkolasku_lah"] == "maventa" and $_REQUEST['maventa_laheta'] ==
   }
 
   // Testaus
-  #$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
+  //$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
   // Tuotanto
   $client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
 
-  require ('tilauskasittely/verkkolasku_finvoice.inc');
+  require 'tilauskasittely/verkkolasku_finvoice.inc';
 
   $finvoice_file_path = "$pupe_root_polku/dataout/karhu_$kukarow[yhtio]_".date("Ymd")."_".$laskutiedot['laskunro'].".xml";
   $tootfinvoice    = fopen($finvoice_file_path, 'w');
@@ -960,7 +960,7 @@ if (isset($_POST['ekirje_laheta']) === true and (isset($ekirje_config) and is_ar
   // t‰h‰n ekirjeen l‰hetys
 
   // pdfekirje luokka
-  require_once('inc/ekirje.inc');
+  require_once 'inc/ekirje.inc';
 
   list($usec, $sec) = explode(' ', microtime());
   mt_srand((float) $sec + ((float) $usec * 100000));
@@ -969,10 +969,10 @@ if (isset($_POST['ekirje_laheta']) === true and (isset($ekirje_config) and is_ar
 
   $info = array(
     'tunniste'              => $ekirje_tunnus,       // asiakkaan oma kirjeen tunniste
-        'kirjeluokka'           => '1',                      // 1 = priority, 2 = economy
-        'osasto'                => $kukarow['yhtio'],       // osastokohtainen erittely = mik‰ yritys
-        'file_id'               => $ekirje_tunnus,          // l‰hett‰j‰n tunniste tiedostolle
-        'kirje_id'              => $ekirje_tunnus,          // kirjeen id
+    'kirjeluokka'           => '1',                      // 1 = priority, 2 = economy
+    'osasto'                => $kukarow['yhtio'],       // osastokohtainen erittely = mik‰ yritys
+    'file_id'               => $ekirje_tunnus,          // l‰hett‰j‰n tunniste tiedostolle
+    'kirje_id'              => $ekirje_tunnus,          // kirjeen id
     'contact_name'          => $kukarow['nimi'],
     'contact_email'         => $kukarow['eposti'],
     'contact_phone'         => $kukarow['puhno'],
@@ -980,8 +980,8 @@ if (isset($_POST['ekirje_laheta']) === true and (isset($ekirje_config) and is_ar
     'yritys_osoite'         => $yhtiorow['osoite'],
     'yritys_postino'        => $yhtiorow['postino'],
     'yritys_postitp'        => $yhtiorow['postitp'],
-        'yritys_maa'            => $yhtiorow['maa'],
-        'sivumaara'             => $sivu,
+    'yritys_maa'            => $yhtiorow['maa'],
+    'sivumaara'             => $sivu,
   );
 
   if ($asiakastiedot["laskutus_nimi"] != "" and ($asiakastiedot["maksukehotuksen_osoitetiedot"] == "B" or ($yhtiorow["maksukehotuksen_osoitetiedot"] == "K" and $asiakastiedot["maksukehotuksen_osoitetiedot"] == ""))) {
@@ -1034,11 +1034,11 @@ if (isset($_POST['ekirje_laheta']) === false and $tee_pdf != 'tulosta_karhu' and
       "subject"  => t("Maksukehotuskopio"),
       "ctype"    => "text",
       "attachements" => array(0   => array(
-                    "filename"    => $pdffilenimi,
-                    "newfilename"  => "",
-                    "ctype"      => $polkupyora['extension'],
-                    )
-                  )
+          "filename"    => $pdffilenimi,
+          "newfilename"  => "",
+          "ctype"      => $polkupyora['extension'],
+        )
+      )
     );
     $jou = pupesoft_sahkoposti($params);
     if ($jou) echo t("Maksukehotuskopio l‰hetettiin myyj‰lle").": {$laheta_karhuemail_myyjalle}...\n<br>";
@@ -1051,7 +1051,7 @@ if (isset($_POST['ekirje_laheta']) === false and $tee_pdf != 'tulosta_karhu' and
 
     echo t("Maksukehotus l‰hetet‰‰n osoitteeseen").": {$_REQUEST['karhu_email']}...\n<br>";
 
-    require("inc/sahkoposti.inc");
+    require "inc/sahkoposti.inc";
   }
   else {
     $kirjoitin = $kirjoitin == 0 ? $kukarow['kirjoitin'] : $kirjoitin;
@@ -1073,7 +1073,7 @@ if (isset($_POST['ekirje_laheta']) === false and $tee_pdf != 'tulosta_karhu' and
         $kutsu = t("Maksukehotus", $kieli)." ".$asiakastiedot["ytunnus"];
         echo t("Maksukehotus l‰hetet‰‰n osoitteeseen").": $kukarow[eposti]...\n<br>";
 
-        require("inc/sahkoposti.inc");
+        require "inc/sahkoposti.inc";
       }
       else {
         $line = exec("{$kirow['komento']} $pdffilenimi");

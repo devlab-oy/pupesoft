@@ -1,7 +1,7 @@
 <?php
 
-if(!function_exists("kassalipastarkista")) {
-  function kassalipastarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+if (!function_exists("kassalipastarkista")) {
+  function kassalipastarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set, $ulosarray;
 
     if ((mysql_field_name($result, $i) == "kassa") or

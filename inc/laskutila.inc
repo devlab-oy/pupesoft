@@ -65,7 +65,7 @@ if (isset($erittely)) {
 
   echo "</tr>";
 
-  while ($trow = mysql_fetch_array ($result)) {
+  while ($trow = mysql_fetch_array($result)) {
 
     echo "<tr class='aktiivi'>";
 

@@ -63,10 +63,10 @@ $query = "SELECT
           toimi.maa toimittajan_maa
           FROM toimi
           JOIN yhtio ON (toimi.yhtio = yhtio.yhtio)
-          WHERE toimi.yhtio = '$yhtio'
+          WHERE toimi.yhtio       = '$yhtio'
           AND toimi.oletus_vienti in ('C','F','I')
           AND toimi.toimittajanro not in ('0','')
-          AND toimi.tyyppi = ''
+          AND toimi.tyyppi        = ''
           {$toimittajarajaus}
           ORDER BY toimi.tunnus";
 $res = pupe_query($query);

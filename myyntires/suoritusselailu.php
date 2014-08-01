@@ -1,6 +1,6 @@
 <?php
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 $lisa = "";
 
@@ -120,11 +120,11 @@ if ($tila == 'poistasuoritus' or $tila == 'siirrasuoritus' or $tila == "siirrasu
       }
 
       //vertaillaan tilikauteen
-      list($vv1,$kk1,$pp1) = explode("-", $yhtiorow["myyntireskontrakausi_alku"]);
-      list($vv2,$kk2,$pp2) = explode("-", $yhtiorow["myyntireskontrakausi_loppu"]);
+      list($vv1, $kk1, $pp1) = explode("-", $yhtiorow["myyntireskontrakausi_alku"]);
+      list($vv2, $kk2, $pp2) = explode("-", $yhtiorow["myyntireskontrakausi_loppu"]);
 
-      $myrealku  = (int) date('Ymd', mktime(0,0,0,$kk1,$pp1,$vv1));
-      $myreloppu = (int) date('Ymd', mktime(0,0,0,$kk2,$pp2,$vv2));
+      $myrealku  = (int) date('Ymd', mktime(0, 0, 0, $kk1, $pp1, $vv1));
+      $myreloppu = (int) date('Ymd', mktime(0, 0, 0, $kk2, $pp2, $vv2));
 
       $tsekpvm = str_replace("-", "", $tapvm);
 
@@ -180,7 +180,7 @@ if ($tila == 'poistasuoritus' or $tila == 'siirrasuoritus' or $tila == "siirrasu
 
 if ($tila == 'suoritus_asiakaskohdistus_kaikki') {
   //kohdistetaan tästä kaikki helpot
-  require ("suoritus_asiakaskohdistus_kaikki.php");
+  require "suoritus_asiakaskohdistus_kaikki.php";
   $tila = "";
 }
 
@@ -216,7 +216,7 @@ if ($tila == 'tulostakuitti') {
     $result = pupe_query($query);
     $asiakasrow = mysql_fetch_assoc($result);
 
-    require ("../tilauskasittely/tulosta_kuitti.inc");
+    require "../tilauskasittely/tulosta_kuitti.inc";
 
     // pdffän piirto
     $firstpage = alku();
@@ -233,13 +233,13 @@ if ($tila == 'tulostakuitti') {
     if ($tulostakuitti == "email") {
       $liite = $pdffilenimi;
       $kutsu = "Suoritus $asiakasrow[nimi]";
-      require ("inc/sahkoposti.inc");
+      require "inc/sahkoposti.inc";
       echo "<font class='message'>".t("Kuittikopio lähetetty").".</font><br>";
     }
     else {
       // itse print komento...Koska ei ole luotettavaa tapaa tehdä kahta kopiota, niin printataan kahdesti
       $line = exec("$tulostakuitti $pdffilenimi");
-        $line = exec("$tulostakuitti $pdffilenimi");
+      $line = exec("$tulostakuitti $pdffilenimi");
       echo "<font class='message'>".t("Kuittikopio (2 kpl) tulostettu").".</font><br>";
     }
 
@@ -255,53 +255,53 @@ if ($tila == 'tulostakuitti') {
 }
 
 if ($tila == "kohdista") {
-    $myyntisaamiset = 0;
+  $myyntisaamiset = 0;
 
-    // katotaan löytyykö tili
-    $query = "SELECT tilino
+  // katotaan löytyykö tili
+  $query = "SELECT tilino
               from tili
               where yhtio = '$kukarow[yhtio]'
               and tilino  = '$vastatili'";
-    $result = pupe_query($query);
+  $result = pupe_query($query);
 
-    if (mysql_num_rows($result) == 0) {
-      echo t("Virheellinen vastatilitieto")."!";
-      exit;
-    }
+  if (mysql_num_rows($result) == 0) {
+    echo t("Virheellinen vastatilitieto")."!";
+    exit;
+  }
 
-    $query = "SELECT *
+  $query = "SELECT *
               FROM suoritus
               WHERE yhtio = '$kukarow[yhtio]'
               and kohdpvm = '0000-00-00'
               and tunnus  = '$tunnus'";
-    $result = pupe_query($query);
+  $result = pupe_query($query);
 
-    if (mysql_num_rows($result) == 1) {
+  if (mysql_num_rows($result) == 1) {
 
-      $suoritus = mysql_fetch_assoc($result);
+    $suoritus = mysql_fetch_assoc($result);
 
-      // Suoritus kuntoon
-      $query = "UPDATE suoritus
+    // Suoritus kuntoon
+    $query = "UPDATE suoritus
                 SET asiakas_tunnus = '$atunnus'
                 WHERE tunnus = '$tunnus'
                 AND yhtio    = '$kukarow[yhtio]'";
-      $result = pupe_query($query);
+    $result = pupe_query($query);
 
-      // Tiliöinti on voinut muuttua
-      $query = "UPDATE tiliointi
+    // Tiliöinti on voinut muuttua
+    $query = "UPDATE tiliointi
                 SET tilino = '$vastatili'
                 WHERE yhtio  = '$kukarow[yhtio]'
                 AND tunnus   = '$suoritus[ltunnus]'
                 AND korjattu = ''";
-      $result = pupe_query($query);
+    $result = pupe_query($query);
 
-      echo "<font class='message'>".t("Suoritus kohdistettu")."!</font><br><br>";
-    }
-    else {
-      echo "<font class='error'>".t("Suoritus kateissa")."!</font><br><br>";
-      exit;
-    }
-    $tila = '';
+    echo "<font class='message'>".t("Suoritus kohdistettu")."!</font><br><br>";
+  }
+  else {
+    echo "<font class='error'>".t("Suoritus kateissa")."!</font><br><br>";
+    exit;
+  }
+  $tila = '';
 }
 
 if ($tila == 'tarkenna') {
@@ -346,7 +346,7 @@ if ($tila == 'tarkenna') {
   echo "</tr>";
 
   if (mysql_num_rows($result) > 0) {
-    $suoritus = mysql_fetch_assoc ($result);
+    $suoritus = mysql_fetch_assoc($result);
 
     if (!isset($haku["nimi"])) $haku["nimi"] = $suoritus['nimi_maksaja'];
 
@@ -387,8 +387,8 @@ if ($tila == 'tarkenna') {
   echo "</table></form><br>";
 
   foreach ($haku as $key => $value) {
-    $old   = array("[","{","\\","|","]","}");
-    $new   = array("ä","ä", "ö","ö","å","å");
+    $old   = array("[", "{", "\\", "|", "]", "}");
+    $new   = array("ä", "ä", "ö", "ö", "å", "å");
     $siivottu = preg_replace('/\b(oy|ab)\b/i', '', strtolower($value));
     $siivottu = preg_replace('/^\s*/', '', $siivottu);
     $siivottu = preg_replace('/\s*$/', '', $siivottu);
@@ -437,7 +437,7 @@ if ($tila == 'tarkenna') {
 
   if (mysql_num_rows($result) > 0) {
 
-    while ($trow = mysql_fetch_assoc ($result)) {
+    while ($trow = mysql_fetch_assoc($result)) {
 
       echo "<form method='post'>
           <input type='hidden' name='tila' value='kohdista'>
@@ -458,7 +458,7 @@ if ($tila == 'tarkenna') {
                 and tila    = 'U'
                 and (ytunnus = '$trow[ytunnus]' or nimi = '$trow[nimi]' or liitostunnus = '$trow[tunnus]')";
       $lresult = pupe_query($query);
-      $lasku = mysql_fetch_assoc ($lresult);
+      $lasku = mysql_fetch_assoc($lresult);
 
       echo "<td valign='top'>$lasku[maara]</td>";
 
@@ -572,7 +572,7 @@ if ($tila == '') {
   if (strlen($ojarj) > 0) {
     $jarjestys = $ojarj;
   }
-  else{
+  else {
     $jarjestys = 'kirjpvm';
   }
 
@@ -606,8 +606,8 @@ if ($tila == '') {
              ORDER BY $jarjestys";
   $result = pupe_query($query);
 
-      echo "<table><tr><th>x</th>";
-      echo "<th><a href='$PHP_SELF?tila=$tila&ojarj=nimi_maksaja".$ulisa."'>".t("Maksaja")."<br>".t("Asiakas")."</a></th>";
+  echo "<table><tr><th>x</th>";
+  echo "<th><a href='$PHP_SELF?tila=$tila&ojarj=nimi_maksaja".$ulisa."'>".t("Maksaja")."<br>".t("Asiakas")."</a></th>";
   echo "<th><a href='$PHP_SELF?tila=$tila&ojarj=kirjpvm".$ulisa."'>".t("Pvm")."</a></th>";
   echo "<th><a href='$PHP_SELF?tila=$tila&ojarj=summa".$ulisa."'>".t("Summa")."</a></th>";
   echo "<th><a href='$PHP_SELF?tila=$tila&ojarj=valkoodi".$ulisa."'>".t("Valuutta")."</a></th>";
@@ -634,7 +634,7 @@ if ($tila == '') {
 
   $suoritustunnukset_kaikki = array();
 
-    while ($maksurow = mysql_fetch_assoc($result)) {
+  while ($maksurow = mysql_fetch_assoc($result)) {
 
     echo "<tr class='aktiivi'>";
 
@@ -733,4 +733,4 @@ if ($tila == '') {
   }
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

@@ -6,7 +6,7 @@ $useslave = 1;
 // DataTables päälle
 $pupe_DataTables = "tilauskanta";
 
-require('../inc/parametrit.inc');
+require '../inc/parametrit.inc';
 
 echo "<font class='head'>".t("Tilauskanta")."</font><hr>";
 
@@ -14,7 +14,7 @@ if ($tee == 'NAYTATILAUS') {
 
   echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
 
-  require ("raportit/naytatilaus.inc");
+  require "raportit/naytatilaus.inc";
 
   $tee = 'aja';
 }
@@ -89,7 +89,7 @@ if ($tee == 'aja') {
   echo "<table class='display dataTable' id='$pupe_DataTables'><thead><tr>";
 
   for ($i = 0; $i < mysql_num_fields($result)-3; $i++) {
-    echo "<th align='left'>".t(mysql_field_name($result,$i))."</th>";
+    echo "<th align='left'>".t(mysql_field_name($result, $i))."</th>";
   }
 
   echo "<th align='left'>".t("Tyyppi")."</th>";
@@ -110,14 +110,14 @@ if ($tee == 'aja') {
     echo "<tr class='aktiivi'>";
 
     for ($i=0; $i < mysql_num_fields($result)-3; $i++) {
-      if (mysql_field_name($result,$i) == 'Nimi/Toim. nimi' and substr($prow[$i],-4) == '<br>') {
-        echo "<$ero valign='top'>".substr($prow[$i],0,-4)."</$ero>";
+      if (mysql_field_name($result, $i) == 'Nimi/Toim. nimi' and substr($prow[$i], -4) == '<br>') {
+        echo "<$ero valign='top'>".substr($prow[$i], 0, -4)."</$ero>";
       }
-      elseif (mysql_field_name($result,$i) == 'Tilausnro') {
+      elseif (mysql_field_name($result, $i) == 'Tilausnro') {
         echo "<$ero valign='top'><a href = '$PHP_SELF?tee=NAYTATILAUS&tunnus=$prow[$i]&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&tuotealku=$tuotealku&tuoteloppu=$tuoteloppu&osasto=$osasto&try=$try'>$prow[$i]</a></$ero>";
       }
       else {
-        echo "<$ero valign='top'>".str_replace(".",",",$prow[$i])."</$ero>";
+        echo "<$ero valign='top'>".str_replace(".", ",", $prow[$i])."</$ero>";
       }
     }
 
@@ -194,11 +194,11 @@ if (!isset($ppa))
   $ppa = date("d");
 
 if (!isset($kkl))
-  $kkl = date("m",mktime(0, 0, 0, date("m"), date("d")+14, date("Y")));
+  $kkl = date("m", mktime(0, 0, 0, date("m"), date("d")+14, date("Y")));
 if (!isset($vvl))
-  $vvl = date("Y",mktime(0, 0, 0, date("m"), date("d")+14, date("Y")));
+  $vvl = date("Y", mktime(0, 0, 0, date("m"), date("d")+14, date("Y")));
 if (!isset($ppl))
-  $ppl = date("d",mktime(0, 0, 0, date("m"), date("d")+14, date("Y")));
+  $ppl = date("d", mktime(0, 0, 0, date("m"), date("d")+14, date("Y")));
 
 
 echo "<tr><th>".t("Syötä toimitusajan alku (pp-kk-vvvv)")."</th>
@@ -259,4 +259,4 @@ echo "<br><input type='submit' value='".t("Aja")."'>";
 echo "</form>";
 
 
-require ("../inc/footer.inc");
+require "../inc/footer.inc";

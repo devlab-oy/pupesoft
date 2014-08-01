@@ -2,7 +2,7 @@
 //Ohjelma vatii muuttujan $otunnus joka viittaa ostolaskuun johon rivit on kohdistettu.
 // sekä $laskurow arrayn jossa on select tähti from lasku jossa tunnus on $otunnus
 
-require_once('pdflib/phppdflib.class.php');
+require_once 'pdflib/phppdflib.class.php';
 
 $pdf = new pdffile;
 $pdf->set_default('margin', 0);
@@ -10,7 +10,7 @@ $pdf->set_default('margin-left', 5);
 $rectparam["width"] = 0.3;
 
 if (!function_exists('alku_tariffi')) {
-  function alku_tariffi () {
+  function alku_tariffi() {
     global $pdf, $image, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam;
 
     $firstpage = $pdf->new_page("842x595");
@@ -62,11 +62,11 @@ if (!function_exists('alku_tariffi')) {
 
     $pdf->draw_rectangle(530, 20, 10, 808, $firstpage, $rectparam);
 
-    return($firstpage);
+    return $firstpage;
   }
 }
 if (!function_exists('print_pdf_tariffi')) {
-  function print_pdf_tariffi () {
+  function print_pdf_tariffi() {
     global $pdf, $kukarow, $yhtiorow, $komento, $otunnus, $tee;
 
     //keksitään uudelle failille joku varmasti uniikki nimi:
@@ -84,14 +84,14 @@ if (!function_exists('print_pdf_tariffi')) {
       $liite = $pdffilenimi;
       $kutsu = "Tariffilista";
 
-      require("../inc/sahkoposti.inc");
+      require "../inc/sahkoposti.inc";
 
       echo t("Tariffilista tulostuu")."...<br>";
     }
     elseif ($tee == 'NAYTATILAUS') {
-        //Työnnetään tuo pdf vaan putkeen!
-        echo file_get_contents($pdffilenimi);
-      }
+      //Työnnetään tuo pdf vaan putkeen!
+      echo file_get_contents($pdffilenimi);
+    }
     elseif ($komento["Tariffilista"] != '' and $komento["Tariffilista"] != 'edi') {
       $line = exec("$komento[Tariffilista] $pdffilenimi");
 
@@ -103,7 +103,7 @@ if (!function_exists('print_pdf_tariffi')) {
   }
 }
 
-  $query = "SELECT tuotteen_toimittajat.toim_tuoteno, tuote.tuoteno, tuote.nimitys, tilausrivi.varattu+tilausrivi.kpl varattu, tilausrivi.hinta,
+$query = "SELECT tuotteen_toimittajat.toim_tuoteno, tuote.tuoteno, tuote.nimitys, tilausrivi.varattu+tilausrivi.kpl varattu, tilausrivi.hinta,
             round(if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*(tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.kpl)), 2) rivihinta, tuote.tullinimike1, tuote.tullinimike2,
             tuote.tullikohtelu, tuotteen_toimittajat.alkuperamaa
             FROM tilausrivi
@@ -112,7 +112,7 @@ if (!function_exists('print_pdf_tariffi')) {
             WHERE tilausrivi.uusiotunnus = '$otunnus'
             and tilausrivi.yhtio='$kukarow[yhtio]'
             ORDER BY tilausrivi.toimaika, tuotteen_toimittajat.toim_tuoteno";
-  $result = mysql_query($query) or pupe_error($query);
+$result = mysql_query($query) or pupe_error($query);
 
 $kala = 490;
 $lask = 1;

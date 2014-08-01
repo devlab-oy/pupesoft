@@ -3,7 +3,7 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Myyntitilasto")."</font><hr>";
 
@@ -38,8 +38,8 @@ echo "<tr><th>".t("Loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
 
 echo "<tr><th>".t("Rajaukset")."</th><td colspan='3'>";
 
-$monivalintalaatikot = array('OSASTO','TRY');
-require ("tilauskasittely/monivalintalaatikot.inc");
+$monivalintalaatikot = array('OSASTO', 'TRY');
+require "tilauskasittely/monivalintalaatikot.inc";
 
 echo "</td></tr>";
 echo "</table>";
@@ -74,7 +74,7 @@ if (!function_exists("tuoteryhman_varastonarvo")) {
     $saldo_nyt = $arvo['saldo_nyt'];
 
     // varastonmuutos
-     $query = "SELECT
+    $query = "SELECT
                sum(if(tapahtuma.laadittu >= '$pvm1 00:00:00', tapahtuma.kpl, 0)) muutoskpl1,
                sum(if(tapahtuma.laadittu >= '$pvm2 00:00:00', tapahtuma.kpl, 0)) muutoskpl2
                 FROM tuote
@@ -103,7 +103,7 @@ if ($tee != '' and isset($painoinnappia)) {
 
   echo "<table>
       <tr>
-      <th>",t("Valittu aikav‰li"),"</th>
+      <th>", t("Valittu aikav‰li"), "</th>
       <td>{$ppa}</td>
       <td>{$kka}</td>
       <td>{$vva}</td>
@@ -202,4 +202,4 @@ if ($tee != '' and isset($painoinnappia)) {
   echo "</table>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

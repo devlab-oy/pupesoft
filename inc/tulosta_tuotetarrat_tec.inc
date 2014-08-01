@@ -17,8 +17,8 @@ if (mysql_num_rows($tarrares) == 1) {
     $nimitys2 = '';
     //jos nimitys on pidempi kuin 22 merkkiä niin se ei mahdu yhdelle riville vaan pitää jakaa kahtia
     if (strlen($nimitys) > 22) {
-      $nimitys = substr($tarrarow['nimitys'],0,22);
-      $nimitys2 = substr($tarrarow['nimitys'],22,22);
+      $nimitys = substr($tarrarow['nimitys'], 0, 22);
+      $nimitys2 = substr($tarrarow['nimitys'], 22, 22);
     }
     $tuoteno = $tarrarow['tuoteno'];
     //tässä arvataan merkkimäärän perusteella minkälainen viivakoodi pitää tehdä
@@ -36,7 +36,7 @@ if (mysql_num_rows($tarrares) == 1) {
     $tulos = false;
     //tässä lasketaan koodin virallisuus
     if (is_numeric($eankoodi) and $eankoodi >= 0) // vaan positiivinen numeerinen tietue
-    {
+      {
       $pit  = strlen($eankoodi);
       $factor    = 3;
       $summa    = 0;
@@ -50,14 +50,12 @@ if (mysql_num_rows($tarrares) == 1) {
       elseif (($laji=="UPC12") && ($pit==12))            $ajetaanko = true;
       elseif (($laji=="NVE18") && ($pit==18))            $ajetaanko = true;
 
-      if ($ajetaanko)
-      {
-        $rest = substr($eankoodi,-1);
-        $wert = substr($eankoodi,0,$pit-1);
+      if ($ajetaanko) {
+        $rest = substr($eankoodi, -1);
+        $wert = substr($eankoodi, 0, $pit-1);
         $sum = '';
-        for ($i=($pit-1);$i>0;--$i)
-        {
-          $sum  = $sum + substr($wert,$i-1,1) * $factor;
+        for ($i=($pit-1);$i>0;--$i) {
+          $sum  = $sum + substr($wert, $i-1, 1) * $factor;
           $factor  = 4 - $factor;
         }
         if ($rest==((1000-$sum)%10))  $tulos = true;
@@ -115,8 +113,8 @@ $nimity2sriv
 
 ".chr(12);
     //konvertoidaan ääkköset printterin ymmärtämään muotoon
-    $from = array ('ä','å','ö','Ä','Å','Ö');
-    $to   = array (chr(132),chr(134),chr(148),chr(142),chr(143),chr(153)); // DOS charset
+    $from = array ('ä', 'å', 'ö', 'Ä', 'Å', 'Ö');
+    $to   = array (chr(132), chr(134), chr(148), chr(142), chr(143), chr(153)); // DOS charset
     $sivu = str_replace($from, $to, $sivu);                      // Tehdään käännös
 
     $sivu = escapeshellarg($sivu);

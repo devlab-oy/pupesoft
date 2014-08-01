@@ -39,7 +39,7 @@ if (!function_exists('pupevoice_otsik')) {
     $y_postitp     = $lasrow["yhtio_postitp"];
     $y_maa       = $lasrow["yhtio_maa"];
     $y_kotipaikka  = $lasrow["yhtio_kotipaikka"];
-    $y_vatnumero  = $lasrow["yhtio_ovttunnus"]; # Huom tätä ei tule muuttaa, Itella tunnustaa lähettäjän tästä kentästä.
+    $y_vatnumero  = $lasrow["yhtio_ovttunnus"]; // Huom tätä ei tule muuttaa, Itella tunnustaa lähettäjän tästä kentästä.
     $y_iban     = $yhtiorow['pankkiiban1'];
     $y_swift     = $yhtiorow['pankkiswift1'];
 

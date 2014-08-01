@@ -47,16 +47,16 @@ $rectparambold["width"] = 3.3;
 $rectparamleima["width"] = 1.0;
 
 if (!function_exists('sad_dateconv')) {
-  function sad_dateconv ($date) {
+  function sad_dateconv($date) {
     //k‰‰nt‰‰ mysqln vvvv-kk-mm muodon muotoon pp.kk.vv
-    return substr($date,8,2).".".substr($date,5,2).".".substr($date,2,2);
+    return substr($date, 8, 2).".".substr($date, 5, 2).".".substr($date, 2, 2);
   }
 }
 if (!function_exists('print_ytunnus')) {
-  function print_ytunnus ($ytunnus) {
+  function print_ytunnus($ytunnus) {
     //k‰‰nt‰‰ ytunnuksen kauniseen muotoon
     $ytunnus = sprintf('%08s', $ytunnus);
-    return substr($ytunnus,0,7)."-".substr($ytunnus,-1);
+    return substr($ytunnus, 0, 7)."-".substr($ytunnus, -1);
   }
 }
 
@@ -101,11 +101,11 @@ $uresult = mysql_query($query) or pupe_error($query);
 
 $tunnukset = '';
 
-while($urow = mysql_fetch_array($uresult)) {
+while ($urow = mysql_fetch_array($uresult)) {
   $tunnukset  .= "'".$urow['otunnus']."',";
 }
 
-$tunnukset = substr($tunnukset,0,-1);
+$tunnukset = substr($tunnukset, 0, -1);
 
 // varmistetaan, ett‰ lˆydettiin otsikoita
 if ($tunnukset != "") {
@@ -122,7 +122,7 @@ if ($tunnukset != "") {
   $pakkaus = "";
   $pakkauskuvaus = "";
 
-  while($rahtirow = mysql_fetch_array($rahtiresult)) {
+  while ($rahtirow = mysql_fetch_array($rahtiresult)) {
     if ($kilot == 0 and $kollit == 0) {
       $pakkaus .= $rahtirow["pakkaus"];
       $pakkauskuvaus .= $rahtirow["pakkauskuvaus"];
@@ -167,8 +167,8 @@ if ($tunnukset != "") {
     $nimitykset = explode("##", $rivirow["nimitys_hieno"]);
 
     $apinalask = 495;
-    for($nim=0; $nim<8; $nim++) {
-      $pdf2->draw_text(61,  $apinalask, substr($nimitykset[$nim],0,35),  $pages[0], $kymppi);
+    for ($nim=0; $nim<8; $nim++) {
+      $pdf2->draw_text(61,  $apinalask, substr($nimitykset[$nim], 0, 35),  $pages[0], $kymppi);
       $apinalask -= 12;
     }
 
@@ -182,8 +182,8 @@ if ($tunnukset != "") {
     $pdf2->draw_text(392, 473, $rivirow["alkuperamaa"],           $pages[0], $kymppi);
 
     //Kentt‰ 37 Tullimenettely
-    $pdf2->draw_text(395,  448, substr($rivirow["tullikohtelu"],0,2),     $pages[0], $kymppi);
-    $pdf2->draw_text(425,  448, substr($rivirow["tullikohtelu"],2,2),     $pages[0], $kymppi);
+    $pdf2->draw_text(395,  448, substr($rivirow["tullikohtelu"], 0, 2),     $pages[0], $kymppi);
+    $pdf2->draw_text(425,  448, substr($rivirow["tullikohtelu"], 2, 2),     $pages[0], $kymppi);
 
     //Kentt‰ 38 Nettopaino
     $pdf2->draw_text(480, 446, $rivirow["nettop"],               $pages[0], $kymppi);
@@ -285,7 +285,7 @@ if ($tunnukset != "") {
           $pdf2->draw_rectangle(690, 365, 20, 365,               $lisalehti, $rectparam);
           $pdf2->draw_rectangle(690, 450, 20, 450,               $lisalehti, $rectparam);
 
-          return($lisalehti);
+          return $lisalehti;
         }
       }
       else {
@@ -325,7 +325,7 @@ if ($tunnukset != "") {
           $pdf2->draw_text(mm_pt(155),  mm_pt(15), $kukarow["nimi"],             $lisalehti[0], $kasi);
           $pdf2->draw_text(mm_pt(155),  mm_pt(10), $yhtiorow["puhelin"],           $lisalehti[0], $kasi);
 
-          return($lisalehti[0]);
+          return $lisalehti[0];
         }
       }
     }
@@ -361,7 +361,7 @@ if ($tunnukset != "") {
 
       //tullausarvi lis‰erineen
       if (($extrat != 0) and ($laskurow["summa"] != 0)) {
-        $tullarvo = round(($rivirow["rivihinta"]/$laskurow["summa"]*$extrat)+$rivirow["rivihinta"],2);
+        $tullarvo = round(($rivirow["rivihinta"]/$laskurow["summa"]*$extrat)+$rivirow["rivihinta"], 2);
       }
       else {
         $tullarvo = $rivirow["rivihinta"];
@@ -396,8 +396,8 @@ if ($tunnukset != "") {
         //Kentt‰ 31 Kollit ja tavaran kuvaus
         $nimitykset = explode("##", $rivirow["nimitys"]);
 
-        foreach($nimitykset as $nimitys) {
-          $pdf2->draw_text(110,  $rivikohta-12, substr($nimitys,0,20),  $lisalehti[$sivu], $kymppi);
+        foreach ($nimitykset as $nimitys) {
+          $pdf2->draw_text(110,  $rivikohta-12, substr($nimitys, 0, 20),  $lisalehti[$sivu], $kymppi);
           $rivikohta -= 12;
           $lask2=$lask2+0.33;
         }
@@ -416,8 +416,8 @@ if ($tunnukset != "") {
         $pdf2->draw_text(mm_pt(160),  mm_pt($rivikohta-17), $rivirow["nettop"],            $lisalehti[$sivu], $kymppi);
 
         //Kentt‰ 37 Kohtelukoodi
-        $pdf2->draw_text(mm_pt(140),  mm_pt($rivikohta-17), substr($rivirow["tullikohtelu"],0,2),   $lisalehti[$sivu], $kymppi);
-        $pdf2->draw_text(mm_pt(149),  mm_pt($rivikohta-17), substr($rivirow["tullikohtelu"],2,2),   $lisalehti[$sivu], $kymppi);
+        $pdf2->draw_text(mm_pt(140),  mm_pt($rivikohta-17), substr($rivirow["tullikohtelu"], 0, 2),   $lisalehti[$sivu], $kymppi);
+        $pdf2->draw_text(mm_pt(149),  mm_pt($rivikohta-17), substr($rivirow["tullikohtelu"], 2, 2),   $lisalehti[$sivu], $kymppi);
 
         //Kentt‰ 34 Alkuper‰maan koodi
         $pdf2->draw_text(mm_pt(138),  mm_pt($rivikohta-9), $rivirow["alkuperamaa"],         $lisalehti[$sivu], $kymppi);
@@ -438,8 +438,8 @@ if ($tunnukset != "") {
 
         $rivikohta_bck = $rivikohta;
 
-        for($nim=0; $nim<8; $nim++) {
-          $pdf2->draw_text(mm_pt(22),  mm_pt($rivikohta), substr($nimitykset[$nim],0,35),      $lisalehti[$sivu], $kymppi);
+        for ($nim=0; $nim<8; $nim++) {
+          $pdf2->draw_text(mm_pt(22),  mm_pt($rivikohta), substr($nimitykset[$nim], 0, 35),      $lisalehti[$sivu], $kymppi);
           $rivikohta -= 5;
         }
         $rivikohta = $rivikohta_bck;
@@ -498,7 +498,7 @@ if ($tunnukset != "") {
 
   //Kentt‰ 14
   $pdf2->draw_text(61,  640, $yhtiorow["nimi"],                 $pages[0], $kymppi);
-  $pdf2->draw_text(180, 649, $yhtiorow["maa"].print_ytunnus($yhtiorow["ytunnus"]),$pages[0], $kymppi);
+  $pdf2->draw_text(180, 649, $yhtiorow["maa"].print_ytunnus($yhtiorow["ytunnus"]), $pages[0], $kymppi);
   $pdf2->draw_text(61,  628, $yhtiorow["osoite"],               $pages[0], $kymppi);
   $pdf2->draw_text(61,  616, $yhtiorow["postino"]."  ".$yhtiorow["postitp"],   $pages[0], $kymppi);
 
@@ -519,8 +519,8 @@ if ($tunnukset != "") {
   $pdf2->draw_text(300,  592, $laskurow["kontti"],               $pages[0], $kymppi);
 
   //Kentt‰ 20 Toimitusehto
-  $pdf2->draw_text(320,  592, substr($laskurow["toimitusehto"],0,3),      $pages[0], $kymppi);
-  $pdf2->draw_text(360,  592, substr($laskurow["toimitusehto"],4),       $pages[0], $kymppi);
+  $pdf2->draw_text(320,  592, substr($laskurow["toimitusehto"], 0, 3),      $pages[0], $kymppi);
+  $pdf2->draw_text(360,  592, substr($laskurow["toimitusehto"], 4),       $pages[0], $kymppi);
 
   //Kentt‰ 21 Akt kuljetusv‰line
   $pdf2->draw_text(61,  568, $laskurow["aktiivinen_kuljetus"],        $pages[0], $kymppi);
@@ -574,7 +574,7 @@ if ($tunnukset != "") {
     $sijaintipaikka = $yhtiorow["osoite"];
   }
 
-  $pdf2->draw_text(195,  520, "O ".substr($sijaintipaikka,0,15),               $pages[0], $kymppi);
+  $pdf2->draw_text(195,  520, "O ".substr($sijaintipaikka, 0, 15),               $pages[0], $kymppi);
 
   //Kentt‰ 35 Bruttopaino
   $pdf2->draw_text(480,  472, $kilot,                           $pages[0], $kymppi);
@@ -603,7 +603,7 @@ if ($tunnukset != "") {
   $ind = 0;
 
   // mahtuu kolme rivi‰ kommenttia
-  foreach($sanat as $sana) {
+  foreach ($sanat as $sana) {
     if ($pdf2->strlen($rivit[$ind], $kymppi) > 280) {
       $rivit[$ind] .= "\n";
       $ind++;

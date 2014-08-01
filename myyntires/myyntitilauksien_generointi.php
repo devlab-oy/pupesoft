@@ -13,8 +13,8 @@ if (php_sapi_name() == 'cli') {
   ini_set("display_errors", 0);
 
   // otetaan tietokantayhteys ja funkkarit
-  require("inc/connect.inc");
-  require("inc/functions.inc");
+  require "inc/connect.inc";
+  require "inc/functions.inc";
 
   $yhtio = $argv[1];
   $email = $argv[2];
@@ -46,7 +46,7 @@ if (php_sapi_name() == 'cli') {
   $php_cli = true;
 }
 else {
-  require("../inc/parametrit.inc");
+  require "../inc/parametrit.inc";
 
   echo "<font class='head'>".t('Keräysaineiston generointi')."</font><hr>";
 
@@ -58,7 +58,7 @@ else {
   $php_cli = false;
 }
 
-require("inc/pupeExcel.inc");
+require "inc/pupeExcel.inc";
 
 if ($tee == 'hae_keraysaineisto') {
 
@@ -167,21 +167,21 @@ function laheta_sahkoposti($excel_file_path, $email_address) {
 }
 
 function merkkaa_myyntitilaukset_lahetetyksi($myyntitilaukset) {
-    global $yhtiorow, $kukarow;
+  global $yhtiorow, $kukarow;
 
-    $myyntitilaus_tunnukset = '';
+  $myyntitilaus_tunnukset = '';
 
-    foreach ($myyntitilaukset as $myyntitilaus) {
-        $myyntitilaus_tunnukset .= $myyntitilaus['Sales order numbers'] . ',';
-    }
+  foreach ($myyntitilaukset as $myyntitilaus) {
+    $myyntitilaus_tunnukset .= $myyntitilaus['Sales order numbers'] . ',';
+  }
 
-    $myyntitilaus_tunnukset = substr($myyntitilaus_tunnukset, 0, -1);
+  $myyntitilaus_tunnukset = substr($myyntitilaus_tunnukset, 0, -1);
 
-    $query = "UPDATE lasku
+  $query = "UPDATE lasku
               SET noutaja = 'X'
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND tunnus  IN ({$myyntitilaus_tunnukset})";
-    pupe_query($query);
+  pupe_query($query);
 }
 
 function echo_kayttoliittyma() {
@@ -198,4 +198,4 @@ function echo_kayttoliittyma() {
   echo "</form>";
 }
 
-require("inc/footer.inc");
+require "inc/footer.inc";

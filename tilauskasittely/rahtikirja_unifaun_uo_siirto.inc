@@ -1,13 +1,13 @@
 <?php
 
-# Pupesoft -> Unifaun Online datasiirto
+// Pupesoft -> Unifaun Online datasiirto
 
 // jos on laitettu kollikenttään 0 niin ei yritetä luoda siirtotiedostoa
 if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
 
   if ($unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "") {
 
-    require_once("inc/unifaun_send.inc");
+    require_once "inc/unifaun_send.inc";
 
     if ($phpnimi == "rahtikirja_custom.php") {
       $postirow = $osoitelappurow;
@@ -41,14 +41,14 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
     $kirjoitin_row = mysql_fetch_assoc($kirjoitin_res);
 
     // Rahtikirjatiedot
-    #$pakkaus[]
-    #$pakkauskuvaus[]
-    #$pakkauskuvaustark[]
-    #$kilot[]
-    #$kollit[]
-    #$kuutiot[]
-    #$lavametri[]
-    #$shipment_idt[]
+    //$pakkaus[]
+    //$pakkauskuvaus[]
+    //$pakkauskuvaustark[]
+    //$kilot[]
+    //$kollit[]
+    //$kuutiot[]
+    //$lavametri[]
+    //$shipment_idt[]
 
     $unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
 

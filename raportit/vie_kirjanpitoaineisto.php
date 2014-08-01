@@ -4,13 +4,13 @@
 $useslave = 1;
 
 if (isset($_POST["tee"])) {
-  if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
-require("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
-if($tee != "lataa_tiedosto") {
+if ($tee != "lataa_tiedosto") {
   echo "<font class='head'>".t("Vie kirjanpitoaineisto")."</font><hr>";
   flush();
 }
@@ -26,7 +26,7 @@ if ($tee == "lataa_tiedosto") {
   unlink("/tmp/".$tmpfilenimi);
   exit;
 }
-elseif($tee == "vie") {
+elseif ($tee == "vie") {
 
   $tkausi = (int) $tkausi;
 
@@ -48,7 +48,7 @@ elseif($tee == "vie") {
 
 
   if ($tkausi != '0') {
-        echo "<font class='message'>$nimi ".t("tilikaudelta")." $tilikaudetrow[tilikausi_alku] - $tilikaudetrow[tilikausi_loppu]</font><br><br>";
+    echo "<font class='message'>$nimi ".t("tilikaudelta")." $tilikaudetrow[tilikausi_alku] - $tilikaudetrow[tilikausi_loppu]</font><br><br>";
     $lisa  = "tiliointi.tapvm <= '$tilikaudetrow[tilikausi_loppu]' and tiliointi.tapvm >= '$tilikaudetrow[tilikausi_alku]'";
   }
   else {
@@ -77,7 +77,7 @@ elseif($tee == "vie") {
     }
   }
 
-  if($aineisto == "O") {
+  if ($aineisto == "O") {
 
     $query = "SELECT   lasku.*, if(viite='', viesti, viite) laskun_viite, lasku.summa laskun_summa,
               date_format(tiliointi.tapvm, '%d.%m.%Y') maksettu_paiva, tiliointi.summa maksettu_summa, tiliointi.tilino, tiliointi.selite tiliointi_selite,
@@ -89,7 +89,7 @@ elseif($tee == "vie") {
               WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila IN ('Y')
               ORDER BY lasku.mapvm, lasku.tunnus, tiliointi.tilino";
     $result = pupe_query($query);
-    if(mysql_num_rows($result)>0) {
+    if (mysql_num_rows($result)>0) {
 
       $dirrikka = "/tmp/$kukarow[yhtio]-Kirjanpitoaineisto_".md5(uniqid());
       $dirrikka_kuvat = $dirrikka."/kuvat";
@@ -98,7 +98,7 @@ elseif($tee == "vie") {
       mkdir($dirrikka);
       mkdir($dirrikka_kuvat);
 
-      if(include('Spreadsheet/Excel/Writer.php')) {
+      if (include 'Spreadsheet/Excel/Writer.php') {
 
         //keksitään failille joku varmasti uniikki nimi:
         $workbook = new Spreadsheet_Excel_Writer($excelnimi);
@@ -117,15 +117,15 @@ elseif($tee == "vie") {
       $sarakkeet = array("tunnus", "ytunnus", "nimi", "laskun_summa", "laskun_viite", "maksettu_paiva", "maksettu_summa", "tilino", "tili_nimi", "tiliointi_selite");
       $tulostetut = array();
 
-      foreach($sarakkeet as $i => $s) {
+      foreach ($sarakkeet as $i => $s) {
         $worksheet->write($excelrivi, $i, ucfirst($s), $format_bold);
       }
       $excelrivi++;
 
-      while($row = mysql_fetch_array($result)) {
+      while ($row = mysql_fetch_array($result)) {
 
-        foreach($sarakkeet as $i => $s) {
-          if($s == "tiliointi_selite") {
+        foreach ($sarakkeet as $i => $s) {
+          if ($s == "tiliointi_selite") {
             $worksheet->writeString($excelrivi, $i, strip_tags(str_replace("<br>", " ", $row[$s])));
           }
           else {
@@ -135,7 +135,7 @@ elseif($tee == "vie") {
         $excelrivi++;
 
         //  Tämä lasku on uusi, tallennetaan liitteet
-        if(!in_array($row["tunnus"], $tulostetut)) {
+        if (!in_array($row["tunnus"], $tulostetut)) {
 
           echo "<font class='message'>".t("Käsitellään liitteet laskulle")." $row[tunnus] $row[nimi] $row[summa]@$row[mapvm]</font><br>";
           $kuvaok = 0;
@@ -144,12 +144,12 @@ elseif($tee == "vie") {
                     WHERE liitos = 'lasku' and liitostunnus = '$row[tunnus]'";
           $lres = pupe_query($query);
 
-          if(mysql_num_rows($lres)>0) {
+          if (mysql_num_rows($lres)>0) {
             echo "Tallennan liitteet laskulta<br>";
             $y = 0;
-            while($lrow = mysql_fetch_array($lres)) {
+            while ($lrow = mysql_fetch_array($lres)) {
               $y++;
-              if(file_put_contents($dirrikka_kuvat."/".$row["tunnus"]."_".$y."-".$lrow["filename"], $lrow["data"]) == false) {
+              if (file_put_contents($dirrikka_kuvat."/".$row["tunnus"]."_".$y."-".$lrow["filename"], $lrow["data"]) == false) {
                 echo "<font class='error'>".t("Kuvaa ei voitu tallettaa!")."</font><br>";
               }
               else {
@@ -158,7 +158,7 @@ elseif($tee == "vie") {
             }
           }
 
-          if($row['ebid'] != "") {
+          if ($row['ebid'] != "") {
 
             echo "Haen laskukuvan laskulle<br>";
 
@@ -174,9 +174,9 @@ elseif($tee == "vie") {
             $url   = $urlhead.$urlmain."&DIGEST=$digest";
 
             $sisalto = file_get_contents($url);
-            if($sisalto !== false) {
+            if ($sisalto !== false) {
               $tyofile = $dirrikka_kuvat."/".$row["tunnus"]."-".$row["ebid"].".pdf";
-              if(file_put_contents($tyofile, $sisalto) == false) {
+              if (file_put_contents($tyofile, $sisalto) == false) {
                 echo "<font class='error'>".t("Kuvaa ei voitu tallettaa!")."</font><br>";
               }
               else {
@@ -188,7 +188,7 @@ elseif($tee == "vie") {
             }
           }
 
-          if($kuvaok != 1) {
+          if ($kuvaok != 1) {
             echo "<font class='error'>".t("Laskulle ei löytynyt yhtään kuvaa!!")."</font><br>";
           }
 
@@ -288,7 +288,7 @@ else {
   }
   echo "</select> - <select name='kustp2'><option value=' '>".t("Ei valintaa");
 
-  mysql_data_seek($vresult,0);
+  mysql_data_seek($vresult, 0);
 
   while ($vrow=mysql_fetch_array($vresult)) {
     $sel="";
@@ -304,7 +304,7 @@ else {
   echo "</tr>";
   echo "<tr><th>".t("Vain kohde")."</th>";
 
-   $query = "SELECT tunnus, nimi
+  $query = "SELECT tunnus, nimi
              FROM kustannuspaikka
              WHERE yhtio   = '$kukarow[yhtio]'
              and kaytossa != 'E'
@@ -348,5 +348,5 @@ else {
   echo "</table><br>
         <input type = 'submit' value = '".t("Näytä")."'></form>";
 
-  require ("../inc/footer.inc");
+  require "../inc/footer.inc";
 }

@@ -8,8 +8,8 @@ if (php_sapi_name() != 'cli') {
   die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 }
 
-require('inc/connect.inc');
-require('inc/functions.inc');
+require 'inc/connect.inc';
+require 'inc/functions.inc';
 
 if ($argv[1] != "") {
   // ja yhtio riviltä ensimmäinen arg
@@ -119,20 +119,20 @@ while ($laskurow = mysql_fetch_assoc($result)) {
   $riviresult = pupe_query($query);
 
   while ($rivirow = mysql_fetch_assoc($riviresult)) {
-      $out .= "<tr class='aktiivi'>";
-      $out .= "<td nowrap>{$laskurow["tunnus"]}</td>";
-      $out .= "<td>".htmlentities($laskurow["asiakkaan_tilausnumero"])."</td>";
-      $out .= "<td>".htmlentities($laskurow["ytunnus"])."</td>";
-      $out .= "<td>".htmlentities($laskurow["nimi"])."</td>";
-      $out .= "<td nowrap>".htmlentities($rivirow["tuoteno"])."</td>";
-      $out .= "<td>".htmlentities($rivirow["nimitys"])."</td>";
-      $out .= "<td>".htmlentities($rivirow["kommentti"])."</td>";
-      $out .= "<td nowrap>{$rivirow["rivinsopimus_alku"]}</td>";
-      $out .= "<td nowrap>{$rivirow["rivinsopimus_loppu"]}</td>";
-      $out .= "<td nowrap>{$rivirow["varattu"]}</td>";
-      $out .= "<td nowrap align='right'>".hintapyoristys($rivirow["hinta"])."</td>";
-      $out .= "<td nowrap align='right'>{$rivirow["rivihinta"]}</td>";
-      $out .= "</tr>\n";
+    $out .= "<tr class='aktiivi'>";
+    $out .= "<td nowrap>{$laskurow["tunnus"]}</td>";
+    $out .= "<td>".htmlentities($laskurow["asiakkaan_tilausnumero"])."</td>";
+    $out .= "<td>".htmlentities($laskurow["ytunnus"])."</td>";
+    $out .= "<td>".htmlentities($laskurow["nimi"])."</td>";
+    $out .= "<td nowrap>".htmlentities($rivirow["tuoteno"])."</td>";
+    $out .= "<td>".htmlentities($rivirow["nimitys"])."</td>";
+    $out .= "<td>".htmlentities($rivirow["kommentti"])."</td>";
+    $out .= "<td nowrap>{$rivirow["rivinsopimus_alku"]}</td>";
+    $out .= "<td nowrap>{$rivirow["rivinsopimus_loppu"]}</td>";
+    $out .= "<td nowrap>{$rivirow["varattu"]}</td>";
+    $out .= "<td nowrap align='right'>".hintapyoristys($rivirow["hinta"])."</td>";
+    $out .= "<td nowrap align='right'>{$rivirow["rivihinta"]}</td>";
+    $out .= "</tr>\n";
   }
 
   $out .= "<tr><td colspan='12' class='back'>&nbsp;</td></tr>\n";

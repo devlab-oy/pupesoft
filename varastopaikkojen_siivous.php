@@ -3,7 +3,7 @@
 // Ei käytetä pakkausta
 $compression = FALSE;
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Varastopaikkojen seuranta")."</font><hr>";
 
@@ -168,12 +168,12 @@ if ($tee == 'CLEANTUNTEMATTOMAT') {
               and hyllynro  = '$hyllynro'
               and hyllyvali = '$hyllyvali'
               and hyllytaso = '$hyllytaso'";
-     $presult = pupe_query($query);
+    $presult = pupe_query($query);
 
     if (mysql_num_rows($presult) == 1) {
       $vanharow = mysql_fetch_array($presult);
 
-       $query = "UPDATE tuotepaikat
+      $query = "UPDATE tuotepaikat
                  SET saldo = saldo + $paikkarow[saldo],
                  saldo_varattu = saldo_varattu + $paikkarow[saldo_varattu],
                  saldoaika     = now(),
@@ -181,13 +181,13 @@ if ($tee == 'CLEANTUNTEMATTOMAT') {
                  muutospvm     = now()
                  WHERE yhtio   = '$kukarow[yhtio]'
                  and tunnus    = '$vanharow[tunnus]'";
-       $presult = pupe_query($query);
+      $presult = pupe_query($query);
 
       $query = "DELETE
                 FROM tuotepaikat
                  WHERE yhtio = '$kukarow[yhtio]'
                  and tunnus  = '$tunnus'";
-       $presult = pupe_query($query);
+      $presult = pupe_query($query);
     }
     elseif (mysql_num_rows($presult) == 0) {
       $query = "UPDATE tuotepaikat
@@ -199,7 +199,7 @@ if ($tee == 'CLEANTUNTEMATTOMAT') {
                 muutospvm   = now()
                 WHERE yhtio = '$kukarow[yhtio]'
                 and tunnus  = '$tunnus'";
-       $presult = pupe_query($query);
+      $presult = pupe_query($query);
     }
     else {
       echo "Tuotteella on virheellisiä tuotepaikkoja! Korjaa ne ensin! Tuoteno: $paikkarow[tuoteno]<br>";
@@ -265,7 +265,7 @@ if ($tee == 'CLEANTAPAHTUMAT') {
               FROM tapahtuma
               WHERE yhtio = '$kukarow[yhtio]'
               and tunnus  = '$tunnus'";
-     $presult = pupe_query($query);
+    $presult = pupe_query($query);
     $rivirow = mysql_fetch_array($presult);
 
     // haetaan oletuspaikka
@@ -274,7 +274,7 @@ if ($tee == 'CLEANTAPAHTUMAT') {
               WHERE yhtio  = '$kukarow[yhtio]'
               and tuoteno  = '$rivirow[tuoteno]'
               and oletus  != ''";
-     $presult = pupe_query($query);
+    $presult = pupe_query($query);
 
     if (mysql_num_rows($presult) == 1) {
       $paikkarow = mysql_fetch_array($presult);
@@ -285,7 +285,7 @@ if ($tee == 'CLEANTAPAHTUMAT') {
                 hyllytaso   = '$paikkarow[hyllytaso]'
                 WHERE yhtio = '$kukarow[yhtio]'
                 and tunnus  = '$tunnus'";
-       $presult = pupe_query($query);
+      $presult = pupe_query($query);
     }
     else {
       echo "Tuotteelle $rivirow[tuoteno] ei löytynyt oletuspaikkaa!<br>";
@@ -394,7 +394,7 @@ if ($tee == 'LISTAATUNTEMATTOMAT') {
 
     echo "<table><tr><th>".t("Siirrä paikalle")."</th></tr>
     <tr><td>
-    ".t("Alue")." ",hyllyalue("hyllyalue", ''),"
+    ".t("Alue")." ", hyllyalue("hyllyalue", ''), "
     ".t("Nro")."  <input type = 'text' name = 'hyllynro'  size = '5' maxlength='5' value = ''>
     ".t("Väli")." <input type = 'text' name = 'hyllyvali' size = '5' maxlength='5' value = ''>
     ".t("Taso")." <input type = 'text' name = 'hyllytaso' size = '5' maxlength='5' value = ''>
@@ -598,7 +598,7 @@ if ($tee == 'LISTAA') {
       echo "<td><a href='tuote.php?tee=Z&tuoteno=".urlencode($lrow["tuoteno"])."'>$lrow[tuoteno]</a></td>";
       echo "<td>".t_tuotteen_avainsanat($lrow, 'nimitys')."</td>";
       echo "<td>$lrow[saldo]</td>";
-      echo "<td>".substr($lrow["saldoaika"],0,10)."</td>";
+      echo "<td>".substr($lrow["saldoaika"], 0, 10)."</td>";
       echo "<td>$lrow[paikka]</td>";
       echo "<td>$lrow[varasto]</td>";
       echo "</tr>";
@@ -619,10 +619,10 @@ if ($tee == 'LISTAA') {
     echo "<input type='hidden' name='tee' value='TULOSTA'>";
 
     $saldot = "";
-    foreach($saldolliset as $saldo) {
+    foreach ($saldolliset as $saldo) {
       $saldot .= "$saldo,";
     }
-    $saldot = substr($saldot,0,-1);
+    $saldot = substr($saldot, 0, -1);
 
     echo "<input type='hidden' name='saldot' value='$saldot'>";
     echo "<input type='hidden' name='tila' value='SIIVOUS'>";
@@ -752,7 +752,7 @@ if ($tee == "LISTAATAPAHTUMATILMANPAIKKAA") {
   echo "<form method='POST'>";
   echo "<input type='hidden' name='tee' value='CLEANTAPAHTUMAT'>";
 
-   while ($tapahtumarow = mysql_fetch_array($tapahtumares)) {
+  while ($tapahtumarow = mysql_fetch_array($tapahtumares)) {
     echo "<input type='hidden' name='rivitunnus[]' value='$tapahtumarow[tunnus]'>";
 
     if (!isset($ei_nayteta_riveja) or trim($ei_nayteta_riveja) == '') {
@@ -790,14 +790,14 @@ if ($tee == "") {
   echo "<input type='hidden' name='tee' value='LISTAA'>";
 
   echo "<tr><th>".t("Alkuvarastopaikka:")."</th>
-      <td>",hyllyalue("ahyllyalue", ''),"
+      <td>", hyllyalue("ahyllyalue", ''), "
       <input type='text' size='6' name='ahyllynro'>
       <input type='text' size='6' name='ahyllyvali'>
       <input type='text' size='6' name='ahyllytaso'>
       </td></tr>";
 
   echo "<tr><th>".t("Loppuvarastopaikka:")."</th>
-      <td>",hyllyalue("lhyllyalue", ''),"
+      <td>", hyllyalue("lhyllyalue", ''), "
       <input type='text' size='6' name='lhyllynro'>
       <input type='text' size='6' name='lhyllyvali'>
       <input type='text' size='6' name='lhyllytaso'>
@@ -902,7 +902,7 @@ if ($tee == "") {
   echo "<tr><td class='back'><br></tr>";
   echo "<input type='hidden' name='tee' value='LISTAAVIRHEELLISETRIVIT'>";
   echo "<tr><th>".t("Listaa tilausrivit, joiden tuotepaikkoja ei löydy")."</th>";
-  echo "<td><input type='checkbox' name='ei_nayteta_riveja'> ",t("Älä näytä tilausrivejä ruudulla"),"</td>";
+  echo "<td><input type='checkbox' name='ei_nayteta_riveja'> ", t("Älä näytä tilausrivejä ruudulla"), "</td>";
   echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr>";
   echo "</form>";
 
@@ -910,11 +910,11 @@ if ($tee == "") {
   echo "<tr><td class='back'><br></tr>";
   echo "<input type='hidden' name='tee' value='LISTAATAPAHTUMATILMANPAIKKAA'>";
   echo "<tr><th>".t("Listaa tapahtumat, joiden tuotepaikkoja ei löydy")."</th>";
-  echo "<td><input type='checkbox' name='ei_nayteta_riveja'> ",t("Älä näytä tapahtumia ruudulla"),"</td>";
+  echo "<td><input type='checkbox' name='ei_nayteta_riveja'> ", t("Älä näytä tapahtumia ruudulla"), "</td>";
   echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr>";
   echo "</form>";
 
   echo "</table>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

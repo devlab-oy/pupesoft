@@ -17,8 +17,8 @@ error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
 ini_set("display_errors", 0);
 
 // Otetaan tietokanta connect
-require("inc/connect.inc");
-require("inc/functions.inc");
+require "inc/connect.inc";
+require "inc/functions.inc";
 
 // Tehd‰‰n oletukset
 $kukarow['yhtio'] = $argv[1];
@@ -45,9 +45,9 @@ $result = pupe_query($query);
 
 while ($row = mysql_fetch_assoc($result)) {
 
-    // jos talteenotettu hinta ei ole nollaa isompi, otetaan viimeisin myyntihinta
-    $hinta = (floatval($row["orig_myyntihinta"]) > 0) ? floatval($row["orig_myyntihinta"]) : $row["varahinta"];
-    $selite = t("Ep‰kuranttimuutos") . ": ".t("Tuote")." {$row["tuoteno"]} ".t("p‰ivitet‰‰n kurantiksi");
+  // jos talteenotettu hinta ei ole nollaa isompi, otetaan viimeisin myyntihinta
+  $hinta = (floatval($row["orig_myyntihinta"]) > 0) ? floatval($row["orig_myyntihinta"]) : $row["varahinta"];
+  $selite = t("Ep‰kuranttimuutos") . ": ".t("Tuote")." {$row["tuoteno"]} ".t("p‰ivitet‰‰n kurantiksi");
 
   $t_query = "UPDATE tuote
               SET status        = 'T',
@@ -67,7 +67,7 @@ while ($row = mysql_fetch_assoc($result)) {
               AND tuoteno = '{$row["tuoteno"]}';";
   $t_result = pupe_query($t_query);
 
-    $t_query = "INSERT INTO tapahtuma SET
+  $t_query = "INSERT INTO tapahtuma SET
                 yhtio    = '{$kukarow["yhtio"]}',
                 tuoteno  = '{$row["tuoteno"]}',
                 laji     = 'Ep‰kurantti',
@@ -77,5 +77,5 @@ while ($row = mysql_fetch_assoc($result)) {
                 selite   = '$selite',
                 laatija  = '{$kukarow["kuka"]}',
                 laadittu = now()";
-    $t_result = pupe_query($t_query);
+  $t_result = pupe_query($t_query);
 }

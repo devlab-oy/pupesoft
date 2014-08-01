@@ -3,7 +3,7 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Keskihankintahintaseuranta")."</font><hr>";
 
@@ -60,7 +60,7 @@ if ($tee != '') {
     if (mysql_num_rows($eresult) > 0) {
       $erow = mysql_fetch_array($eresult);
 
-      if($erow["hinta"] != 0) {
+      if ($erow["hinta"] != 0) {
         $eropros = 100 * ($lrow["hinta"] - $erow["hinta"]) / $erow["hinta"];
       }
       else {
@@ -69,14 +69,14 @@ if ($tee != '') {
 
       if ((abs($eropros) <= $pros1 and abs($eropros) >= $pros2) or ($lrow["hinta"] < 0)) {
         $rivit1[] = abs($eropros);
-        $rivit2[] = "<tr><td><a href='../tuote.php?tee=Z&tuoteno=".urlencode($lrow["tuoteno"])."'>$lrow[tuoteno]</a></td><td>".t_tuotteen_avainsanat($lrow, 'nimitys')."</td><td>$lrow[hinta]</td><td>$erow[hinta]</td><td>".sprintf('%.1f',$eropros)."</td><td>".substr($lrow["laadittu"],0,10)."</td><td>".substr($erow["laadittu"],0,10)."</td><td>$lrow[laji] - $erow[laji]</td></tr>";
+        $rivit2[] = "<tr><td><a href='../tuote.php?tee=Z&tuoteno=".urlencode($lrow["tuoteno"])."'>$lrow[tuoteno]</a></td><td>".t_tuotteen_avainsanat($lrow, 'nimitys')."</td><td>$lrow[hinta]</td><td>$erow[hinta]</td><td>".sprintf('%.1f', $eropros)."</td><td>".substr($lrow["laadittu"], 0, 10)."</td><td>".substr($erow["laadittu"], 0, 10)."</td><td>$lrow[laji] - $erow[laji]</td></tr>";
       }
     }
   }
 
   array_multisort($rivit1, SORT_DESC, $rivit2);
 
-  foreach($rivit2 as $rivi) {
+  foreach ($rivit2 as $rivi) {
     echo $rivi;
   }
 
@@ -88,9 +88,9 @@ if ($tee != '') {
 echo "<table><form name='piiri' method='post'>";
 echo "<input type='hidden' name='tee' value='kaikki'>";
 
-if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+if (!isset($kka)) $kka = date("m", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+if (!isset($vva)) $vva = date("Y", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+if (!isset($ppa)) $ppa = date("d", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 
 if (!isset($kkl)) $kkl = date("m");
 if (!isset($vvl)) $vvl = date("Y");
@@ -158,4 +158,4 @@ echo "</form>";
 $formi  = "piiri";
 $kentta = "ppa";
 
-require ("../inc/footer.inc");
+require "../inc/footer.inc";

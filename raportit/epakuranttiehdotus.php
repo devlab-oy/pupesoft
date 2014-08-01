@@ -8,10 +8,10 @@ $compression = FALSE;
 
 if (isset($_REQUEST["tee"])) {
   if ($_REQUEST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if ($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/","",$_REQUEST["kaunisnimi"]);
+  if ($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/", "", $_REQUEST["kaunisnimi"]);
 }
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
@@ -43,23 +43,23 @@ else {
   if ($tuotetyyppi == 'taysi') $tchk4 = "selected";
 
   // defaultteja
-  if (!isset($alkupvm))  $alkupvm  = date("Y-m-d",mktime(0, 0, 0, date("m"), date("d"), date("Y")-1));
-  if (!isset($loppupvm)) $loppupvm = date("Y-m-d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-  if (!isset($taysraja)) $taysraja = date("Y-m-d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+  if (!isset($alkupvm))  $alkupvm  = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d"), date("Y")-1));
+  if (!isset($loppupvm)) $loppupvm = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+  if (!isset($taysraja)) $taysraja = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
   if (!isset($raja))     $raja = "0.5";
 
   // errorcheckej‰
-  if (!checkdate(substr($alkupvm,5,2), substr($alkupvm,8,2), substr($alkupvm,0,4))) {
+  if (!checkdate(substr($alkupvm, 5, 2), substr($alkupvm, 8, 2), substr($alkupvm, 0, 4))) {
     echo "<font class='error'>".t("Virheellinen p‰iv‰m‰‰r‰")." $alkupvm!</font><br><br>";
     unset($subnappi);
   }
 
-  if (!checkdate(substr($loppupvm,5,2), substr($loppupvm,8,2), substr($loppupvm,0,4))) {
+  if (!checkdate(substr($loppupvm, 5, 2), substr($loppupvm, 8, 2), substr($loppupvm, 0, 4))) {
     echo "<font class='error'>".t("Virheellinen p‰iv‰m‰‰r‰")." $loppupvm!</font><br><br>";
     unset($subnappi);
   }
 
-  if (!checkdate(substr($taysraja,5,2), substr($taysraja,8,2), substr($taysraja,0,4))) {
+  if (!checkdate(substr($taysraja, 5, 2), substr($taysraja, 8, 2), substr($taysraja, 0, 4))) {
     echo "<font class='error'>".t("Virheellinen p‰iv‰m‰‰r‰")." $taysraja!</font><br><br>";
     unset($subnappi);
   }
@@ -127,7 +127,7 @@ else {
   $monivalintalaatikot = array("OSASTO", "TRY");
   $monivalintalaatikot_normaali = array();
 
-  require ("tilauskasittely/monivalintalaatikot.inc");
+  require "tilauskasittely/monivalintalaatikot.inc";
 
   echo "</td>";
   echo "</tr>";
@@ -242,7 +242,7 @@ else {
 
     $elements = mysql_num_rows($result); // total number of elements to process
 
-    include('inc/pupeExcel.inc');
+    include 'inc/pupeExcel.inc';
 
     $worksheet    = new pupeExcel();
     $format_bold = array("bold" => TRUE);
@@ -301,7 +301,7 @@ else {
     $excelsarake++;
 
     if ($elements > 0) {
-      require_once ('inc/ProgressBar.class.php');
+      require_once 'inc/ProgressBar.class.php';
       $bar = new ProgressBar();
       $bar->initialize($elements); // print the empty bar
     }
@@ -323,11 +323,11 @@ else {
       $myyja_array[$myyjarow['myyja']] = $myyjarow['nimi'];
     }
 
-    list($vv2,$kk2,$pp2) = explode("-", $alkupvm);  // $alaraja (myyntirajauksen alku pvm)
-    list($vv4,$kk4,$pp4) = explode("-", $taysraja);  // $epa2raja (pvm jolloin tuote on laitettu edelliselle ep‰kurtasolle)
+    list($vv2, $kk2, $pp2) = explode("-", $alkupvm);  // $alaraja (myyntirajauksen alku pvm)
+    list($vv4, $kk4, $pp4) = explode("-", $taysraja);  // $epa2raja (pvm jolloin tuote on laitettu edelliselle ep‰kurtasolle)
 
-    $alaraja  = (int) date('Ymd',mktime(0,0,0,$kk2,$pp2,$vv2));
-    $epa2raja = (int) date('Ymd',mktime(0,0,0,$kk4,$pp4,$vv4));
+    $alaraja  = (int) date('Ymd', mktime(0, 0, 0, $kk2, $pp2, $vv2));
+    $epa2raja = (int) date('Ymd', mktime(0, 0, 0, $kk4, $pp4, $vv4));
 
     while ($row = mysql_fetch_assoc($result)) {
 
@@ -361,15 +361,15 @@ else {
       $taprow = mysql_fetch_assoc($tapres);
 
       // verrataan v‰h‰n p‰iv‰m‰‰ri‰. onpa ik‰v‰‰ PHP:ss‰!
-      list($vv1,$kk1,$pp1) = explode("-", $taprow["max"]);  // $saapunut (viimeisen tulon pvm)
-      $saapunut = (int) date('Ymd',mktime(0,0,0,$kk1,$pp1,$vv1));
+      list($vv1, $kk1, $pp1) = explode("-", $taprow["max"]);  // $saapunut (viimeisen tulon pvm)
+      $saapunut = (int) date('Ymd', mktime(0, 0, 0, $kk1, $pp1, $vv1));
 
-      list($vv3,$kk3,$pp3) = explode("-", $epispvm);      // $epaku1pv (viimeisin ep‰kurantti pvm)
-      $epaku1pv = (int) date('Ymd',mktime(0,0,0,$kk3,$pp3,$vv3));
+      list($vv3, $kk3, $pp3) = explode("-", $epispvm);      // $epaku1pv (viimeisin ep‰kurantti pvm)
+      $epaku1pv = (int) date('Ymd', mktime(0, 0, 0, $kk3, $pp3, $vv3));
 
       // Jos tuotetta on tullut myyntirajauksen aikana, ei ehdota sit‰ ep‰kurantiksi.
       // Lis‰ksi jos kyseess‰ on joku muu kuin 25% ep‰kuranttiajo, pit‰‰ viimeisin ep‰kuranttipvm olla pienempi kuin t‰ysep‰kuranttisuuden alaraja pvm
-       if (($saapunut < $alaraja) and ($epaku1pv < $epa2raja or $tyyppi == '25')) {
+      if (($saapunut < $alaraja) and ($epaku1pv < $epa2raja or $tyyppi == '25')) {
 
         $query = "SELECT group_concat(distinct toimi.ytunnus separator '/') toimittaja
                   FROM tuotteen_toimittajat
@@ -423,7 +423,7 @@ else {
         }
 
         // typecast
-        $raja = (float) str_replace(",",".", $raja);
+        $raja = (float) str_replace(",", ".", $raja);
 
         if ($yhteensopivuus_table_check) {
           $query = "SELECT count(yhteensopivuus_rekisteri.tunnus) maara
@@ -447,11 +447,11 @@ else {
           $excelsarake++;
           $worksheet->writeString($excelrivi, $excelsarake, $row['tuotemerkki']);
           $excelsarake++;
-          $worksheet->writeString($excelrivi, $excelsarake, str_replace(".",",",$myyrow['kpl']+$kulrow['kpl']));
+          $worksheet->writeString($excelrivi, $excelsarake, str_replace(".", ",", $myyrow['kpl']+$kulrow['kpl']));
           $excelsarake++;
-          $worksheet->writeString($excelrivi, $excelsarake, str_replace(".",",",$saldo));
+          $worksheet->writeString($excelrivi, $excelsarake, str_replace(".", ",", $saldo));
           $excelsarake++;
-          $worksheet->writeString($excelrivi, $excelsarake, str_replace(".",",",$kierto));
+          $worksheet->writeString($excelrivi, $excelsarake, str_replace(".", ",", $kierto));
           $excelsarake++;
           $worksheet->writeString($excelrivi, $excelsarake, $row['tahtituote']);
           $excelsarake++;
@@ -463,9 +463,9 @@ else {
           $excelsarake++;
           $worksheet->writeString($excelrivi, $excelsarake, $taprow['max']);
           $excelsarake++;
-          $worksheet->writeString($excelrivi, $excelsarake, str_replace(".",",",$row['myyntihinta']));
+          $worksheet->writeString($excelrivi, $excelsarake, str_replace(".", ",", $row['myyntihinta']));
           $excelsarake++;
-          $worksheet->writeString($excelrivi, $excelsarake, str_replace(".",",",$row['kehahin']));
+          $worksheet->writeString($excelrivi, $excelsarake, str_replace(".", ",", $row['kehahin']));
           $excelsarake++;
 
           $tuotensarake = $excelsarake;
@@ -583,5 +583,5 @@ else {
   $formi  = "epakurantti";
   $kentta = "osasto";
 
-  require ("../inc/footer.inc");
+  require "../inc/footer.inc";
 }

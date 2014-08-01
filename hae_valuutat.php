@@ -1,16 +1,16 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Valuuttakurssien päivitys")."<hr></font>";
 
 $ch  = curl_init();
-curl_setopt ($ch, CURLOPT_URL, "http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml");
-curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-curl_setopt ($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
-curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1);
-curl_setopt ($ch, CURLOPT_HEADER, FALSE);
-$xml = curl_exec ($ch);
+curl_setopt($ch, CURLOPT_URL, "http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml");
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch, CURLOPT_HEADER, FALSE);
+$xml = curl_exec($ch);
 
 $xml = @simplexml_load_string($xml);
 
@@ -32,7 +32,7 @@ if ($xml !== FALSE) {
     echo "<tr><td>$valkoodi</td><td align='right'>$kurssi</td><td align='right'>".sprintf("%.9f", (1/$kurssi))."</td>";
 
     if ($tee == "PAIVITA") {
-        $query = "UPDATE valuu SET
+      $query = "UPDATE valuu SET
                   kurssi                 = round(1 / $kurssi, 9),
                   muutospvm              = now(),
                   muuttaja               = '$kukarow[kuka]'
@@ -70,4 +70,4 @@ else {
   echo "<font class='error'>".t("Valuuttakurssien haku epäonnistui")."!</font><br>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

@@ -1,6 +1,6 @@
 <?php
 
-require("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Tullinimikkeet")."</font><hr>";
 
@@ -90,17 +90,17 @@ if ($tee == "muuta") {
 if ($tee == "synkronoi") {
 
   $ch  = curl_init();
-  curl_setopt ($ch, CURLOPT_URL, "http://api.devlab.fi/referenssitullinimikkeet.sql");
-  curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-  curl_setopt ($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
-  curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1);
-  curl_setopt ($ch, CURLOPT_HEADER, FALSE);
-  $nimikeet = curl_exec ($ch);
+  curl_setopt($ch, CURLOPT_URL, "http://api.devlab.fi/referenssitullinimikkeet.sql");
+  curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+  curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+  curl_setopt($ch, CURLOPT_HEADER, FALSE);
+  $nimikeet = curl_exec($ch);
   $nimikeet = explode("\n", trim($nimikeet));
 
   if (count($nimikeet) == 0) {
     echo t("Tiedoston avaus epäonnistui")."!";
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 
@@ -285,4 +285,4 @@ if ($tullinimike1 != "") {
   }
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

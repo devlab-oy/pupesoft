@@ -234,8 +234,8 @@ if ($tee == 'A') {
 
       $query = "SELECT tunnus
                 FROM kustannuspaikka
-                WHERE yhtio = '{$kukarow["yhtio"]}'
-                AND tyyppi = 'O'
+                WHERE yhtio   = '{$kukarow["yhtio"]}'
+                AND tyyppi    = 'O'
                 AND kaytossa != 'E'
                 LIMIT 1";
       $result = pupe_query($query);
@@ -508,12 +508,12 @@ if ($th_lisat != '') {
             round(sum(summa * if(maksu_kurssi = 0, vienti_kurssi, maksu_kurssi)), 2) AS avoimet
             FROM toimi
             LEFT JOIN kuka ON (kuka.yhtio = toimi.yhtio
-              AND kuka.kuka = toimi.nimi
+              AND kuka.kuka    = toimi.nimi
               AND toimi.tyyppi = 'K')
             LEFT JOIN lasku ON (toimi.yhtio = lasku.yhtio
               AND toimi.tunnus = lasku.liitostunnus
-              AND tila IN ('H','M'))
-            WHERE toimi.yhtio = '{$kukarow["yhtio"]}'
+              AND tila         IN ('H','M'))
+            WHERE toimi.yhtio  = '{$kukarow["yhtio"]}'
             $th_lisat
             GROUP BY kuka.nimi,
             toimi.nimi,

@@ -82,16 +82,16 @@ $query = "SELECT
           lasku.liitostunnus
           FROM tapahtuma
           JOIN tuote ON (tuote.yhtio = tapahtuma.yhtio
-            AND tuote.tuoteno     = tapahtuma.tuoteno
-            AND tuote.status     != 'P'
-            AND tuote.ei_saldoa   = ''
-            AND tuote.tuotetyyppi = ''
-            AND tuote.ostoehdotus = '')
+            AND tuote.tuoteno      = tapahtuma.tuoteno
+            AND tuote.status      != 'P'
+            AND tuote.ei_saldoa    = ''
+            AND tuote.tuotetyyppi  = ''
+            AND tuote.ostoehdotus  = '')
           JOIN yhtio ON (tapahtuma.yhtio = yhtio.yhtio)
           LEFT JOIN tilausrivi USE INDEX (PRIMARY) ON (tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus)
           LEFT JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
-          WHERE tapahtuma.yhtio  = '$yhtio'
-          AND tapahtuma.laji    in ('tulo', 'laskutus', 'siirto', 'valmistus', 'kulutus','inventointi')
+          WHERE tapahtuma.yhtio    = '$yhtio'
+          AND tapahtuma.laji       in ('tulo', 'laskutus', 'siirto', 'valmistus', 'kulutus','inventointi')
           {$tapahtumarajaus}
           ORDER BY tapahtuma.laadittu, tapahtuma.tuoteno";
 $res = pupe_query($query);

@@ -29,7 +29,7 @@ if ($tee == "write") {
   if ($errori == '') {
     // Taulun ensimmäinen kenttä on aina yhtiö
     $query = "INSERT into toimi values ('$kukarow[yhtio]'";
-      for ($i=1; $i < mysql_num_fields($result); $i++) {
+    for ($i=1; $i < mysql_num_fields($result); $i++) {
       $query .= ",'" . $t[$i] . "'";
     }
     $query .= ")";
@@ -66,8 +66,8 @@ if ($tee == "edit") {
 
     require "inc/toimirivi.inc";
 
-    if   (mysql_field_len($result,$i)>10) $size='35';
-    elseif  (mysql_field_len($result,$i)<5)  $size='5';
+    if   (mysql_field_len($result, $i)>10) $size='35';
+    elseif  (mysql_field_len($result, $i)<5)  $size='5';
     else  $size='10';
 
     if ($tyyppi > 0) {
@@ -75,7 +75,7 @@ if ($tee == "edit") {
     }
 
     if ($tyyppi > 0) {
-       echo "<th align='left'>".t(mysql_field_name($result, $i))."</th>";
+      echo "<th align='left'>".t(mysql_field_name($result, $i))."</th>";
     }
 
     if ($jatko == 0) {
@@ -83,26 +83,24 @@ if ($tee == "edit") {
     }
     else {
       $mita = 'text';
-      if ($tyyppi != 1)
-      {
+      if ($tyyppi != 1) {
         $mita='hidden';
         echo "<td class='back'>";
       }
-      else
-      {
+      else {
         echo "<td>";
       }
 
       echo "<input type = '$mita' name = '$nimi'";
 
       if ($errori == '') {
-        echo " value = '$trow[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
+        echo " value = '$trow[$i]' size='$size' maxlength='" . mysql_field_len($result, $i) ."'>";
       }
       else {
-        echo " value = '$t[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
+        echo " value = '$t[$i]' size='$size' maxlength='" . mysql_field_len($result, $i) ."'>";
       }
 
-      if($tyyppi == 2) {
+      if ($tyyppi == 2) {
         echo "$trow[$i]";
       }
 
@@ -119,36 +117,36 @@ if ($tee == "edit") {
   echo "</form>";
 }
 
-if($tee == ''){
+if ($tee == '') {
 
   $kentat = 'tunnus, ytunnus, nimi, postitp, maa, oletus_valkoodi';
   $jarjestys = 'selaus';
 
   $array = explode(",", $kentat);
-      $count = count($array);
+  $count = count($array);
 
-      for ($i=0; $i<=$count; $i++) {
+  for ($i=0; $i<=$count; $i++) {
     if (strlen($haku[$i]) > 0) {
-        $lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
-        $ulisa .= "&haku[" . $i . "]=" . $haku[$i];
+      $lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
+      $ulisa .= "&haku[" . $i . "]=" . $haku[$i];
     }
-      }
-      if (strlen($ojarj) > 0) {
+  }
+  if (strlen($ojarj) > 0) {
     $jarjestys = $ojarj;
-      }
+  }
 
-      $query = "SELECT $kentat FROM toimi WHERE yhtio = '$kukarow[yhtio]' $lisa ";
-      $query .= "$ryhma ORDER BY $jarjestys LIMIT 100";
+  $query = "SELECT $kentat FROM toimi WHERE yhtio = '$kukarow[yhtio]' $lisa ";
+  $query .= "$ryhma ORDER BY $jarjestys LIMIT 100";
 
-  $result = mysql_query ($query)
-      or die ("Kysely ei onnistu $query");
+  $result = mysql_query($query)
+    or die ("Kysely ei onnistu $query");
 
   echo "  <table><tr>
       <form method = 'post'>";
 
   for ($i = 1; $i < mysql_num_fields($result); $i++) {
     echo "<th valign='top' align='left'><a href = '$PHP_SELF?ojarj=".$array[$i].$ulisa ."'>
-        " . t(mysql_field_name($result,$i)) . "</a>";
+        " . t(mysql_field_name($result, $i)) . "</a>";
     echo "<br><input type='text' name = 'haku[" . $i . "]' value = '$haku[$i]'>";
     echo "</th>";
   }
@@ -169,4 +167,4 @@ if($tee == ''){
   echo "</table>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

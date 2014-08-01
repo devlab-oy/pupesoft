@@ -1,11 +1,11 @@
 <?php
 
 if (isset($_POST["tee"])) {
-  if(isset($_POST["tee"]) and $_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
-  if(isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if (isset($_POST["tee"]) and $_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
+  if (isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if (!isset($tee)) {
   $tee = "";
@@ -51,13 +51,13 @@ else {
 }
 
 if ($tee == 'NAYTATILAUS') {
-  require ("raportit/naytatilaus.inc");
+  require "raportit/naytatilaus.inc";
   echo "<hr>";
   $tee = "VALITSE";
 }
 
 if ($tee == 'MAKSUEHTO') {
-  require ("raportit/naytatilaus.inc");
+  require "raportit/naytatilaus.inc";
   echo "<hr>";
   $tee = "VALITSE";
 }
@@ -75,7 +75,7 @@ if ($tee == 'TOIMITA' and isset($maksutapa) and $maksutapa == 'seka') {
       echo "<input type='hidden' name='tunnus[]' value='$tun'>";
       $laskutettavat .= "'$tun',";
     }
-    $laskutettavat = substr($laskutettavat,0,-1); // vika pilkku pois
+    $laskutettavat = substr($laskutettavat, 0, -1); // vika pilkku pois
   }
 
   $query_rivi = "SELECT lasku.valkoodi, lasku.maksuehto, lasku.hinta,
@@ -100,12 +100,12 @@ if ($tee == 'TOIMITA' and isset($maksutapa) and $maksutapa == 'seka') {
 
   //Käsin syötetty summa johon lasku pyöristetään
   if ($laskurow["hinta"] <> 0 and abs($laskurow["hinta"]-$summa) <= 0.5 and abs($summa) >= 0.5) {
-    $summa = sprintf("%.2f",$laskurow["hinta"]);
+    $summa = sprintf("%.2f", $laskurow["hinta"]);
   }
 
   //Jos laskun loppusumma pyöristetään lähimpään tasalukuun
   if ($yhtiorow["laskunsummapyoristys"] == 'o' or $asrow["laskunsummapyoristys"] == 'o') {
-    $summa = sprintf("%.2f",round($summa ,0));
+    $summa = sprintf("%.2f", round($summa , 0));
   }
 
   $loppusumma = $summa;
@@ -193,7 +193,7 @@ if ($tee == 'TOIMITA') {
     foreach ($tunnus as $tun) {
       $laskutettavat .= "$tun,";
     }
-    $laskutettavat = substr($laskutettavat,0,-1); // vika pilkku pois
+    $laskutettavat = substr($laskutettavat, 0, -1); // vika pilkku pois
   }
 
   $laskutettavaa_on = TRUE;
@@ -247,12 +247,12 @@ if ($tee == 'TOIMITA') {
     $laskutakaikki   = "KYLLA";
     $silent       = "VIENTI";
 
-    require("verkkolasku.php");
+    require "verkkolasku.php";
 
     // Käydään kaikki ruksatut maksusopimukset läpi
     if (isset($positiotunnus) and count($positiotunnus) > 0) {
 
-      require("../maksusopimus_laskutukseen.php");
+      require "../maksusopimus_laskutukseen.php";
 
       foreach ($positiotunnus as $postun) {
         $query = "SELECT count(*)-1 as ennakko_kpl
@@ -265,7 +265,7 @@ if ($tee == 'TOIMITA') {
         $rahres = pupe_query($query);
         $posrow = mysql_fetch_array($rahres);
 
-        for($ie=0; $ie < $posrow["ennakko_kpl"]; $ie++) {
+        for ($ie=0; $ie < $posrow["ennakko_kpl"]; $ie++) {
           $laskutettavat = 0;
           echo "<br>";
 
@@ -277,7 +277,7 @@ if ($tee == 'TOIMITA') {
             $laskutakaikki   = "KYLLA";
             $silent       = "VIENTI";
 
-            require("verkkolasku.php");
+            require "verkkolasku.php";
           }
         }
 
@@ -295,7 +295,7 @@ if ($tee == 'TOIMITA') {
         $postarkresult = pupe_query($query);
         $postarkrow = mysql_fetch_array($postarkresult);
 
-        if($postarkrow["yhteensa_kpl"] - $postarkrow["laskutettu_kpl"] == 1) {
+        if ($postarkrow["yhteensa_kpl"] - $postarkrow["laskutettu_kpl"] == 1) {
           $laskutettavat = 0;
           echo "<br>";
 
@@ -307,21 +307,21 @@ if ($tee == 'TOIMITA') {
             $laskutakaikki   = "KYLLA";
             $silent       = "VIENTI";
 
-            require("verkkolasku.php");
+            require "verkkolasku.php";
           }
         }
-        elseif($postarkrow["laskuttamatta"] > 0) {
+        elseif ($postarkrow["laskuttamatta"] > 0) {
           echo t("Jokin ennakkolaskuista on laskuttamatta! Maksusopimustilaus siirretty odottamaan loppulaskutusta").": $postun<br>";
         }
       }
     }
 
     echo "<br><br>";
-      }
-      else {
-          echo t("VIRHE: Jokin rivi/lasku oli jo toimitettu tai laskutettu! Ei voida jatkaa!");
-          echo "<br><br>";
-      }
+  }
+  else {
+    echo t("VIRHE: Jokin rivi/lasku oli jo toimitettu tai laskutettu! Ei voida jatkaa!");
+    echo "<br><br>";
+  }
   $laskutettavat  = "";
   $tee       = "";
 }
@@ -387,7 +387,7 @@ if ($tee == "VALITSE") {
   $kateinen = "";
   $maa = "";
 
-   // Tehdään valinta
+  // Tehdään valinta
   if (mysql_num_rows($res) > 0) {
 
     //päivämäärän tarkistus
@@ -476,7 +476,7 @@ if ($tee == "VALITSE") {
 
     echo "</table><br>";
 
-    mysql_data_seek($res,0);
+    mysql_data_seek($res, 0);
 
     // Onko yhtään jaksotettua tilausta
     $jaksotettuja = FALSE;
@@ -488,7 +488,7 @@ if ($tee == "VALITSE") {
       }
     }
 
-    mysql_data_seek($res,0);
+    mysql_data_seek($res, 0);
 
     echo t("Valitse laskutettavat tilaukset").":<br><table>";
 
@@ -654,10 +654,10 @@ if ($tee == "VALITSE") {
 
           echo "<td>".t("Sopimus")." $row[jaksotettu]: <input type='checkbox' name='positiotunnus[$row[jaksotettu]]' value='$row[jaksotettu]'></td>";
         }
-        elseif($row["jaksotettu"] > 0 and $tarkrow["toimittamatta"] == 0 and $tarkrow["toimituksia"] > 0 and in_array($row["jaksotettu"], $maksu_positiot)) {
+        elseif ($row["jaksotettu"] > 0 and $tarkrow["toimittamatta"] == 0 and $tarkrow["toimituksia"] > 0 and in_array($row["jaksotettu"], $maksu_positiot)) {
           echo "<td>".t("Kuuluu sopimukseen")." $row[jaksotettu]</td>";
         }
-        elseif($row["jaksotettu"] > 0 and $tarkrow["toimittamatta"] > 0) {
+        elseif ($row["jaksotettu"] > 0 and $tarkrow["toimittamatta"] > 0) {
           echo "<td>".t("Ei valmis")."</td>";
         }
         else {
@@ -777,7 +777,7 @@ if ($tee == "VALITSE") {
     if ($asrow["kieli"] != '') {
       $sel[$asrow["kieli"]] = "SELECTED";
     }
-    elseif($toim == "VIENTI") {
+    elseif ($toim == "VIENTI") {
       $sel["en"] = "SELECTED";
     }
     else {
@@ -847,8 +847,8 @@ if ($tee == "VALITSE") {
 
       if (($yhtiorow["verkkolasku_lah"] == "" or $ekarow["chn"] == "667") and
         (($kirrow["tunnus"] == $kukarow["kirjoitin"]) or
-        ($kirrow["tunnus"]  == $prirow["printteri5"] and $kukarow["kirjoitin"] == 0) or
-        ($kirrow["tunnus"]  == $yhtiorow["lasku_tulostin"] and $kukarow["kirjoitin"] == 0 and $prirow["printteri5"] == 0))) {
+          ($kirrow["tunnus"]  == $prirow["printteri5"] and $kukarow["kirjoitin"] == 0) or
+          ($kirrow["tunnus"]  == $yhtiorow["lasku_tulostin"] and $kukarow["kirjoitin"] == 0 and $prirow["printteri5"] == 0))) {
         $sel = "SELECTED";
       }
 
@@ -861,7 +861,7 @@ if ($tee == "VALITSE") {
       echo "<tr><th>".t("Tulosta SAD-lomake").":</th><td colspan='3'><select name='valittu_sadtulostin'>";
       echo "<option value=''>".t("Ei kirjoitinta")."</option>";
 
-      mysql_data_seek($kirre,0);
+      mysql_data_seek($kirre, 0);
 
       while ($kirrow = mysql_fetch_array($kirre)) {
         echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
@@ -872,7 +872,7 @@ if ($tee == "VALITSE") {
 
       echo "<option value=''>".t("Ei kirjoitinta")."</option>";
 
-      mysql_data_seek($kirre,0);
+      mysql_data_seek($kirre, 0);
 
       while ($kirrow = mysql_fetch_array($kirre)) {
         echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
@@ -881,7 +881,7 @@ if ($tee == "VALITSE") {
     }
 
     if ($toim == "VIENTI") {
-      echo "<tr><th>",t("Tulosta myös tullinimike ja alkuperämaa")."</th>";
+      echo "<tr><th>", t("Tulosta myös tullinimike ja alkuperämaa")."</th>";
       echo "<td colspan='3'><input type='checkbox' name='tullinimike_ja_alkuperamaa' /></td></tr>";
     }
 
@@ -1228,4 +1228,4 @@ if ($tee == "") {
   }
 }
 
-require ("../inc/footer.inc");
+require "../inc/footer.inc";

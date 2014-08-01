@@ -50,24 +50,24 @@ if ($verollisethinnat) {
   $lahetetyyppi = substr($lahetetyyppi, 0, -4) . "_verollinen.inc";
 }
 
-#Testausta varten.....
-#$lahetetyyppi = "tulosta_lahete.inc";
-#$lahetetyyppi = "tulosta_lahete_ean.inc";
-#$lahetetyyppi = "tulosta_lahete_ean_eiale.inc";
-#$lahetetyyppi = "tulosta_lahete_brutto.inc";
-#$lahetetyyppi = "tulosta_lahete_eialeja.inc";
-#$lahetetyyppi = "tulosta_lahete_viivakoodi.inc";
-#$lahetetyyppi = "tulosta_lahete_viivakoodi_ykshinta_normaali.inc"; # N‰ytet‰‰n asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina
-#$lahetetyyppi = "tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc"; # N‰ytet‰‰n asiakkaan hinta, viivakoodi ja jt-rivit normaaleina. Ei alennuksia
-#$lahetetyyppi = "tulosta_lahete_viivakoodi_osh.inc";
-#$lahetetyyppi = "tulosta_lahete_asiakviivakoodi.inc";
-#$lahetetyyppi = "tulosta_lahete_viivakoodi_ean13.inc";
-#$lahetetyyppi = "tulosta_lahete_eialehintoja.inc";
-#$lahetetyyppi = "tulosta_lahete_hae_hinnat.inc";
-#$lahetetyyppi = "tulosta_lahete_custom.inc";
-#$lahetetyyppi = "tulosta_lahete_eiale_eihinta.inc";
+//Testausta varten.....
+//$lahetetyyppi = "tulosta_lahete.inc";
+//$lahetetyyppi = "tulosta_lahete_ean.inc";
+//$lahetetyyppi = "tulosta_lahete_ean_eiale.inc";
+//$lahetetyyppi = "tulosta_lahete_brutto.inc";
+//$lahetetyyppi = "tulosta_lahete_eialeja.inc";
+//$lahetetyyppi = "tulosta_lahete_viivakoodi.inc";
+//$lahetetyyppi = "tulosta_lahete_viivakoodi_ykshinta_normaali.inc"; # N‰ytet‰‰n asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina
+//$lahetetyyppi = "tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc"; # N‰ytet‰‰n asiakkaan hinta, viivakoodi ja jt-rivit normaaleina. Ei alennuksia
+//$lahetetyyppi = "tulosta_lahete_viivakoodi_osh.inc";
+//$lahetetyyppi = "tulosta_lahete_asiakviivakoodi.inc";
+//$lahetetyyppi = "tulosta_lahete_viivakoodi_ean13.inc";
+//$lahetetyyppi = "tulosta_lahete_eialehintoja.inc";
+//$lahetetyyppi = "tulosta_lahete_hae_hinnat.inc";
+//$lahetetyyppi = "tulosta_lahete_custom.inc";
+//$lahetetyyppi = "tulosta_lahete_eiale_eihinta.inc";
 
-require("tulosta_lahete.inc");
+require "tulosta_lahete.inc";
 
 if ($laskurow["tila"] == "L" or $laskurow["tila"] == "N") {
   $tyyppilisa = " and tilausrivi.tyyppi in ('L') ";
@@ -130,7 +130,7 @@ $ale_query_select_lisa = generoi_alekentta_select('erikseen', 'M');
 
 $jtsort_lisa = "IF(tilausrivi.tuoteno='{$yhtiorow['rahti_tuotenumero']}', 2, IF(tilausrivi.var='J', 1, 0)) jtsort,";
 
-if (in_array($naytatvale, array(10,11))) {
+if (in_array($naytatvale, array(10, 11))) {
   $jtsort_lisa = "IF(tilausrivi.tuoteno='{$yhtiorow['rahti_tuotenumero']}', 2, 0) jtsort,";
 }
 
@@ -195,50 +195,50 @@ if (($laskurow["tunnusnippu"] > 0 or $yhtiorow["tilausvahvistus_lahetys"] == 1) 
 }
 
 $params_lahete = array(
-'arvo'            => 0,
-'asrow'            => $asrow,
-'boldi'            => $boldi,
-'ei_otsikoita'        => '',
-'extranet_tilausvahvistus'  => $extranet_tilausvahvistus,
-'iso'            => $iso,
-'jtid'            => '',
-'kala'            => 0,
-'kassa_ale'          => '',
-'kieli'            => $kieli,
-'lahetetyyppi'        => $lahetetyyppi,
-'laskurow'          => $laskurow,
-'naytetaanko_rivihinta'    => $naytetaanko_rivihinta,
-'norm'            => $norm,
-'page'            => NULL,
-'pdf'            => NULL,
-'perheid'          => 0,
-'pieni'            => $pieni,
-'pieni_boldi'        => $pieni_boldi,
-'pitkattuotteet'      => FALSE,
-'rectparam'          => $rectparam,
-'riviresult'        => $riresult,
-'rivinkorkeus'        => $rivinkorkeus,
-'rivinumerot'        => "",
-'row'            => NULL,
-'sivu'            => 1,
-'summa'            => 0,
-'tee'            => $tee,
-'thispage'          => NULL,
-'toim'            => $toim,
-'tots'            => 0,
-'tuotenopituus'        => '',
-'nimityskohta'        => '',
-'nimitysleveys'        => '',
-'tyyppi'          => 'TILAUSVAHVISTUS',
-'useita'          => '',
-'yhteensamaara'        => 0,
+  'arvo'            => 0,
+  'asrow'            => $asrow,
+  'boldi'            => $boldi,
+  'ei_otsikoita'        => '',
+  'extranet_tilausvahvistus'  => $extranet_tilausvahvistus,
+  'iso'            => $iso,
+  'jtid'            => '',
+  'kala'            => 0,
+  'kassa_ale'          => '',
+  'kieli'            => $kieli,
+  'lahetetyyppi'        => $lahetetyyppi,
+  'laskurow'          => $laskurow,
+  'naytetaanko_rivihinta'    => $naytetaanko_rivihinta,
+  'norm'            => $norm,
+  'page'            => NULL,
+  'pdf'            => NULL,
+  'perheid'          => 0,
+  'pieni'            => $pieni,
+  'pieni_boldi'        => $pieni_boldi,
+  'pitkattuotteet'      => FALSE,
+  'rectparam'          => $rectparam,
+  'riviresult'        => $riresult,
+  'rivinkorkeus'        => $rivinkorkeus,
+  'rivinumerot'        => "",
+  'row'            => NULL,
+  'sivu'            => 1,
+  'summa'            => 0,
+  'tee'            => $tee,
+  'thispage'          => NULL,
+  'toim'            => $toim,
+  'tots'            => 0,
+  'tuotenopituus'        => '',
+  'nimityskohta'        => '',
+  'nimitysleveys'        => '',
+  'tyyppi'          => 'TILAUSVAHVISTUS',
+  'useita'          => '',
+  'yhteensamaara'        => 0,
 );
 
 // Aloitellaan l‰hetteen teko
 $params_lahete = alku_lahete($params_lahete);
 
 // Piirret‰‰n rivit
-mysql_data_seek($riresult,0);
+mysql_data_seek($riresult, 0);
 
 while ($row = mysql_fetch_assoc($riresult)) {
   $params_lahete["row"] = $row;

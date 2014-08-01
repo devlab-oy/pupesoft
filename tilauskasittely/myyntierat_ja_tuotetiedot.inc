@@ -91,10 +91,10 @@ if (isset($_POST['piirtele_valikko'])) {
   echo "</table>";
   echo "</form>";
 }
-elseif(isset($lajit) and count($lajit) > 0) {
+elseif (isset($lajit) and count($lajit) > 0) {
   // täällä ajellaan rapsa ja tallennetaan henkseliin
 
-  include('inc/pupeExcel.inc');
+  include 'inc/pupeExcel.inc';
 
   $worksheet    = new pupeExcel();
   $format_bold = array("bold" => TRUE);
@@ -137,7 +137,7 @@ elseif(isset($lajit) and count($lajit) > 0) {
   mysql_data_seek($tilausrivit_talteen, 0);
 
   while ($row = mysql_fetch_array($tilausrivit_talteen)) {
-      $rows[] = $row;
+    $rows[] = $row;
   }
 
   $eka_tuote = TRUE;
@@ -187,7 +187,7 @@ elseif(isset($lajit) and count($lajit) > 0) {
     // tuotemerkki
     $worksheet->write($excelrivi, $excelsarake++, $tuoterowi['tuotemerkki']);
     // tilausrivin kpl
-    if (in_array($tilausrivi["var"], array('S','U','T','R', 'J'))) {
+    if (in_array($tilausrivi["var"], array('S', 'U', 'T', 'R', 'J'))) {
       if ($yhtiorow["varaako_jt_saldoa"] == "") {
         $kpl_ruudulle = $tilausrivi['jt'] * 1;
       }
@@ -271,12 +271,12 @@ elseif(isset($lajit) and count($lajit) > 0) {
 
   if (isset($excelnimi)) {
     echo "<br><br><table>";
-    echo "<tr><th>",t("Tallenna tulos"),":</th>";
+    echo "<tr><th>", t("Tallenna tulos"), ":</th>";
     echo "<form method='post' class='multisubmit'>";
     echo "<input type='hidden' name='tappi' value='lataa_tiedosto'>";
     echo "<input type='hidden' name='kaunisnimi' value='Tuotetiedot.xlsx'>";
     echo "<input type='hidden' name='tmpfilenimi' value='{$excelnimi}'>";
-    echo "<td class='back'><input type='submit' value='",t("Tallenna"),"'></td></tr></form>";
+    echo "<td class='back'><input type='submit' value='", t("Tallenna"), "'></td></tr></form>";
     echo "</table><br>";
   }
   else {

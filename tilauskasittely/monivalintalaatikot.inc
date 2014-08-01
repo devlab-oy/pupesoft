@@ -578,7 +578,7 @@ if (count($mul_asiakaspiiri) > 0) {
   }
 }
 
-if(count($mul_toimipaikka) > 0) {
+if (count($mul_toimipaikka) > 0) {
   $toimipaikat = '';
   foreach ($mul_toimipaikka as $toimipaikkax) {
     if (trim($toimipaikkax) != '') {
@@ -625,8 +625,8 @@ if (count($mul_kustp) > 0) {
       }
     }
     elseif (strpos($_SERVER['SCRIPT_NAME'], "tulosseuranta") !== FALSE) {
-        $lisa_haku_kustp = " and tuote.kustp in ($kustpt) ";
-        $lisa .= " and tiliointi.kustp in ($kustpt) ";
+      $lisa_haku_kustp = " and tuote.kustp in ($kustpt) ";
+      $lisa .= " and tiliointi.kustp in ($kustpt) ";
     }
     else {
       $lisa_haku_kustp = " and tiliointi.kustp in ($kustpt) ";
@@ -1026,7 +1026,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
       }
 
       echo "<select name='mul_tme[]' $multiple_lisa $autosubmit>";
-      echo "<option value=''>",t("Ei valintaa"),"</option>";
+      echo "<option value=''>", t("Ei valintaa"), "</option>";
 
       while ($srow = mysql_fetch_assoc($tmsresult)) {
         $sel = '';
@@ -1153,7 +1153,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
           }
 
           echo "<select name='mul_malli[]' $multiple_lisa $autosubmit>";
-          echo "<option value=''>",t("Ei valintaa"),"</option>";
+          echo "<option value=''>", t("Ei valintaa"), "</option>";
 
           while ($mallirow = mysql_fetch_assoc($sxresult)) {
             $sel = '';
@@ -1279,7 +1279,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
           }
 
           echo "<select name='mul_mallitarkenne[]' $multiple_lisa $autosubmit>";
-          echo "<option value=''>",t("Ei valintaa"),"</option>";
+          echo "<option value=''>", t("Ei valintaa"), "</option>";
 
           while ($mallitarkennerow = mysql_fetch_assoc($sxresult)) {
             $sel = '';
@@ -1332,7 +1332,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     $nodelisa = "";
     $nodeinde = "";
 
-    # haetaan vain ne puun tunnukset, joille on tehty linkkauksia
+    // haetaan vain ne puun tunnukset, joille on tehty linkkauksia
     if ($tree != "kuka") {
 
       if (isset($autoid) and $autoid != '') {
@@ -1390,8 +1390,8 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                 $ruksitchk = "CHECKED";
               }
 
-              #echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[dynaaminen_".$tree."_".$edsyvyys."]' size='2' value='".$jarjestys["dynaaminen_".$tree."_".$edsyvyys]."'> ";
-              #echo t(ucfirst($tree)).t("kategorioittain")." {$edsyvyys} <input type='checkbox' name='ruksit[dynaaminen_".$tree."_".$edsyvyys."]' value='dynaaminen_".$tree."_".$edsyvyys."' {$ruksitchk} {$autosubmit}></th></tr>";
+              //echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[dynaaminen_".$tree."_".$edsyvyys."]' size='2' value='".$jarjestys["dynaaminen_".$tree."_".$edsyvyys]."'> ";
+              //echo t(ucfirst($tree)).t("kategorioittain")." {$edsyvyys} <input type='checkbox' name='ruksit[dynaaminen_".$tree."_".$edsyvyys."]' value='dynaaminen_".$tree."_".$edsyvyys."' {$ruksitchk} {$autosubmit}></th></tr>";
             }
             echo "</table></div>";
           }
@@ -1410,7 +1410,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
           }
 
           echo "{$autosubmit}>";
-          echo "<option value=''>",t("Ei valintaa"),"</option>";
+          echo "<option value=''>", t("Ei valintaa"), "</option>";
         }
 
         $show_node = FALSE;
@@ -1476,8 +1476,8 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
           $ruksitchk = "CHECKED";
         }
 
-        #echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[dynaaminen_".$tree."_".$edsyvyys."]' size='2' value='".$jarjestys["dynaaminen_".$tree."_".$edsyvyys]."'>";
-        #echo t(ucfirst($tree)).t("kategorioittain")." {$edsyvyys} <input type='checkbox' name='ruksit[dynaaminen_".$tree."_".$edsyvyys."]' value='dynaaminen_".$tree."_".$edsyvyys."' {$ruksitchk} {$autosubmit}></th></tr>";
+        //echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[dynaaminen_".$tree."_".$edsyvyys."]' size='2' value='".$jarjestys["dynaaminen_".$tree."_".$edsyvyys]."'>";
+        //echo t(ucfirst($tree)).t("kategorioittain")." {$edsyvyys} <input type='checkbox' name='ruksit[dynaaminen_".$tree."_".$edsyvyys."]' value='dynaaminen_".$tree."_".$edsyvyys."' {$ruksitchk} {$autosubmit}></th></tr>";
       }
       echo "</table></div>";
     }
@@ -1572,7 +1572,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
         }
 
         echo "$autosubmit>";
-        echo "<option value=''>",t("Ei valintaa"),"</option>";
+        echo "<option value=''>", t("Ei valintaa"), "</option>";
 
         while (${$parametri."row"} = mysql_fetch_assoc($sxresult)) {
           $sel = '';
@@ -1606,7 +1606,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
 
     if ($piirra_otsikot) {
-      echo "<tr><th>",t("Myyjä"),"</th></tr>";
+      echo "<tr><th>", t("Myyjä"), "</th></tr>";
     }
 
     echo "<tr>";
@@ -1622,7 +1622,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     echo "<td nowrap style='padding:0px'><select name='mul_laskumyyja[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
     echo "<option value=''>".t("Ei valintaa")."</option>";
 
-    while ($sxrow = mysql_fetch_array ($sresult)){
+    while ($sxrow = mysql_fetch_array($sresult)) {
       $sel = '';
 
       if (count($mul_laskumyyja) > 0) {
@@ -1654,7 +1654,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
 
     if ($piirra_otsikot) {
-      echo "<tr><th>",t("Asiakastila"),"</th></tr>";
+      echo "<tr><th>", t("Asiakastila"), "</th></tr>";
     }
 
     echo "<tr>";
@@ -1664,7 +1664,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     echo "<td nowrap style='padding:0px'><select name='mul_asiakastila[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
     echo "<option value=''>".t("Ei valintaa")."</option>";
 
-    while ($sxrow = mysql_fetch_array ($sresult)){
+    while ($sxrow = mysql_fetch_array($sresult)) {
       $sel = '';
 
       if (count($mul_asiakastila) > 0) {
@@ -1698,7 +1698,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
 
     if ($piirra_otsikot) {
-      echo "<tr><th>",t("Tuotemyyjä"),"</th></tr>";
+      echo "<tr><th>", t("Tuotemyyjä"), "</th></tr>";
     }
 
     echo "<tr>";
@@ -1714,7 +1714,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     echo "<td nowrap style='padding:0px'><select name='mul_tuotemyyja[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
     echo "<option value=''>".t("Ei valintaa")."</option>";
 
-    while ($sxrow = mysql_fetch_array ($sresult)){
+    while ($sxrow = mysql_fetch_array($sresult)) {
       $sel = '';
 
       if (count($mul_tuotemyyja) > 0) {
@@ -1746,7 +1746,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
 
     if ($piirra_otsikot) {
-      echo "<tr><th>",t("Asiakasmyyjä"),"</th></tr>";
+      echo "<tr><th>", t("Asiakasmyyjä"), "</th></tr>";
     }
 
     echo "<tr>";
@@ -1762,7 +1762,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     echo "<td nowrap style='padding:0px'><select name='mul_asiakasmyyja[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
     echo "<option value=''>".t("Ei valintaa")."</option>";
 
-    while ($sxrow = mysql_fetch_array ($sresult)){
+    while ($sxrow = mysql_fetch_array($sresult)) {
       $sel = '';
 
       if (count($mul_asiakasmyyja) > 0) {
@@ -1794,7 +1794,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
 
     if ($piirra_otsikot) {
-      echo "<tr><th>",t("Tuoteostaja"),"</th></tr>";
+      echo "<tr><th>", t("Tuoteostaja"), "</th></tr>";
     }
 
     echo "<tr>";
@@ -1809,7 +1809,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     echo "<td nowrap style='padding:0px'><select name='mul_tuoteostaja[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
     echo "<option value=''>".t("Ei valintaa")."</option>";
 
-    while ($sxrow = mysql_fetch_array ($sresult)){
+    while ($sxrow = mysql_fetch_array($sresult)) {
       $sel = '';
 
       if (count($mul_tuoteostaja) > 0) {
@@ -1841,7 +1841,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
 
     if ($piirra_otsikot) {
-      echo "<tr><th>",t("Asiakasosasto"),"</th></tr>";
+      echo "<tr><th>", t("Asiakasosasto"), "</th></tr>";
     }
 
     echo "<tr>";
@@ -1851,7 +1851,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     echo "<td nowrap style='padding:0px'><select name='mul_asiakasosasto[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
     echo "<option value=''>".t("Ei valintaa")."</option>";
 
-    while ($sxrow = mysql_fetch_array ($sresult)){
+    while ($sxrow = mysql_fetch_array($sresult)) {
       $sel = '';
 
       if (count($mul_asiakasosasto) > 0) {
@@ -1885,7 +1885,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
 
     if ($piirra_otsikot) {
-      echo "<tr><th>",t("Asiakasryhmä"),"</th></tr>";
+      echo "<tr><th>", t("Asiakasryhmä"), "</th></tr>";
     }
 
     echo "<tr>";
@@ -1895,7 +1895,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     echo "<td nowrap style='padding:0px'><select name='mul_asiakasryhma[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
     echo "<option value=''>".t("Ei valintaa")."</option>";
 
-    while ($sxrow = mysql_fetch_array ($sresult)){
+    while ($sxrow = mysql_fetch_array($sresult)) {
       $sel = '';
 
       if (count($mul_asiakasryhma) > 0) {
@@ -1929,7 +1929,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
 
     if ($piirra_otsikot) {
-      echo "<tr><th>",t("Asiakaspiiri"),"</th></tr>";
+      echo "<tr><th>", t("Asiakaspiiri"), "</th></tr>";
     }
 
     echo "<tr>";
@@ -1939,7 +1939,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     echo "<td nowrap style='padding:0px'><select name='mul_asiakaspiiri[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
     echo "<option value=''>".t("Ei valintaa")."</option>";
 
-    while ($sxrow = mysql_fetch_array ($sresult)){
+    while ($sxrow = mysql_fetch_array($sresult)) {
       $sel = '';
 
       if (count($mul_asiakaspiiri) > 0) {
@@ -1965,8 +1965,8 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
       echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[asiakaspiiri]' size='2' value='$jarjestys[asiakaspiiri]'> ".t("Asiakaspiireittäin")." <input type='checkbox' name='ruksit[asiakaspiiri]' value='asiakaspiiri' $ruksitchk><br>";
 
-      echo "<input type='radio' name='piirivalinta' value='lasku' {$laskuvalintachk}>",t("Laskuilta");
-      echo "<input type='radio' name='piirivalinta' value='asiakas' {$asiakasvalintachk}>",t("Asiakkailta");
+      echo "<input type='radio' name='piirivalinta' value='lasku' {$laskuvalintachk}>", t("Laskuilta");
+      echo "<input type='radio' name='piirivalinta' value='asiakas' {$asiakasvalintachk}>", t("Asiakkailta");
 
       echo "</th></tr>";
     }
@@ -1982,7 +1982,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
       echo "<div style='float: left; padding-right:4px; padding-top:4px;'>";
       echo "<table valign='top'>";
       if ($piirra_otsikot) {
-        echo "<tr><th>",t("Toimipaikka"),"</th></tr>";
+        echo "<tr><th>", t("Toimipaikka"), "</th></tr>";
       }
       echo "<tr>";
       echo "<td nowrap style='padding:0px'><select name='mul_toimipaikka[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
@@ -2048,12 +2048,12 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
     $kustparray = array();
 
-    while ($sxrow = mysql_fetch_array ($sresult)){
+    while ($sxrow = mysql_fetch_array($sresult)) {
       $kustparray[$sxrow["isa_tarkenne"]][$sxrow["tunnus"]] = $sxrow;
     }
 
-    function lapsitasot ($isataso, $sisennys, $tunnukset, $kustparray) {
-      GLOBAL $mul_kustp;
+    function lapsitasot($isataso, $sisennys, $tunnukset, $kustparray) {
+      global $mul_kustp;
 
       $sisennys++;
 
@@ -2088,7 +2088,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
       echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
 
       if ($piirra_otsikot) {
-        echo "<tr><th>",t("Kustannuspaikka"),"</th></tr>";
+        echo "<tr><th>", t("Kustannuspaikka"), "</th></tr>";
       }
 
       echo "<tr>";
@@ -2120,8 +2120,8 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
         echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[kustp]' size='2' value='$jarjestys[kustp]'> ".t("Kustannuspaikoittain")." <input type='checkbox' name='ruksit[kustp]' value='kustp' $ruksitchk><br>";
 
-        echo "<input type='radio' name='kustapvalinta' value='tuote' {$kustapvalinta_tuote}>",t("Tuotteilta");
-        echo "<input type='radio' name='kustapvalinta' value='asiakas' {$kustapvalinta_asiakas}>",t("Asiakkailta");
+        echo "<input type='radio' name='kustapvalinta' value='tuote' {$kustapvalinta_tuote}>", t("Tuotteilta");
+        echo "<input type='radio' name='kustapvalinta' value='asiakas' {$kustapvalinta_asiakas}>", t("Asiakkailta");
         echo "</th></tr>";
       }
       elseif (strpos($_SERVER['SCRIPT_NAME'], "matkalaskuraportti") !== FALSE) {
@@ -2167,7 +2167,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
       echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
 
       if ($piirra_otsikot) {
-        echo "<tr><th>",t("Kohde"),"</th></tr>";
+        echo "<tr><th>", t("Kohde"), "</th></tr>";
       }
 
       echo "<tr>";
@@ -2175,7 +2175,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
       echo "<td nowrap style='padding:0px'><select name='mul_kohde[]' multiple='multiple' size='7' style='width: 100%;' $tunnukset_save $autosubmit>";
       echo "<option value=''>".t("Ei valintaa")."</option>";
 
-      while ($sxrow = mysql_fetch_array ($sresult)){
+      while ($sxrow = mysql_fetch_array($sresult)) {
         $sel = '';
 
         if (count($mul_kohde) > 0) {
@@ -2199,8 +2199,8 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
         echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[kohde]' size='2' value='$jarjestys[kohde]'> ".t("Kohteittain")." <input type='checkbox' name='ruksit[kohde]' value='kohde' $ruksitchk><br>";
 
-        echo "<input type='radio' name='kohdevalinta' value='tuote' {$kohdevalinta_tuote}>",t("Tuotteilta");
-        echo "<input type='radio' name='kohdevalinta' value='asiakas' {$kohdevalinta_asiakas}>",t("Asiakkailta");
+        echo "<input type='radio' name='kohdevalinta' value='tuote' {$kohdevalinta_tuote}>", t("Tuotteilta");
+        echo "<input type='radio' name='kohdevalinta' value='asiakas' {$kohdevalinta_asiakas}>", t("Asiakkailta");
         echo "</th></tr>";
       }
 
@@ -2222,7 +2222,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
       echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
 
       if ($piirra_otsikot) {
-        echo "<tr><th>",t("Projekti"),"</th></tr>";
+        echo "<tr><th>", t("Projekti"), "</th></tr>";
       }
 
       echo "<tr>";
@@ -2230,7 +2230,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
       echo "<td nowrap style='padding:0px'><select name='mul_projekti[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
       echo "<option value=''>".t("Ei valintaa")."</option>";
 
-      while ($sxrow = mysql_fetch_array ($sresult)){
+      while ($sxrow = mysql_fetch_array($sresult)) {
         $sel = '';
 
         if (count($mul_projekti) > 0) {
@@ -2254,8 +2254,8 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
         echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[projekti]' size='2' value='$jarjestys[projekti]'> ".t("Projekteittain")." <input type='checkbox' name='ruksit[projekti]' value='projekti' $ruksitchk><br>";
 
-        echo "<input type='radio' name='projektivalinta' value='tuote' {$projektivalinta_tuote}>",t("Tuotteilta");
-        echo "<input type='radio' name='projektivalinta' value='asiakas' {$projektivalinta_asiakas}>",t("Asiakkailta");
+        echo "<input type='radio' name='projektivalinta' value='tuote' {$projektivalinta_tuote}>", t("Tuotteilta");
+        echo "<input type='radio' name='projektivalinta' value='asiakas' {$projektivalinta_asiakas}>", t("Asiakkailta");
         echo "</th></tr>";
       }
 

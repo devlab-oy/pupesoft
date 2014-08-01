@@ -1,13 +1,13 @@
 <?php
 
-if(!function_exists("tuoteperhetarkista")) {
-  function tuoteperhetarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+if (!function_exists("tuoteperhetarkista")) {
+  function tuoteperhetarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set;
 
     $fieldname = mysql_field_name($result, $i);
 
     //tarkistetaan, että tuotenumerot on olemassa ennenkuin yritetään lisätä ne tuoteperheet sinne kantaan!
-    if ($fieldname == "tuoteno" OR $fieldname == "isatuoteno") {
+    if ($fieldname == "tuoteno" or $fieldname == "isatuoteno") {
       if (trim($t[$i]) == '') {
         $virhe[$i] = t("Tieto puuttuu");
       }

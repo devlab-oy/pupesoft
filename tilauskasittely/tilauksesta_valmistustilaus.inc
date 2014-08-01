@@ -97,7 +97,7 @@ if (!function_exists("tilauksesta_valmistustilaus")) {
           list($toimvv, $toimkk, $toimpp) = explode('-', $myytilrow["toimaika"]);
           list($kervv, $kerkk, $kerpp)    = explode('-', $myytilrow["kerayspvm"]);
 
-          require("tilauskasittely/otsik_siirtolista.inc");
+          require "tilauskasittely/otsik_siirtolista.inc";
 
           $tunnus = $id;
           $tehtiin_uusi_otsikko = true;
@@ -150,7 +150,7 @@ if (!function_exists("tilauksesta_valmistustilaus")) {
           $tuoteres = pupe_query($query);
           $trow = mysql_fetch_assoc($tuoteres);
 
-          require('lisaarivi.inc');
+          require 'lisaarivi.inc';
         }
 
         // Ainoastaan asiakkaalle valmistetut jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti valmistuksen yhteydessä
@@ -171,19 +171,19 @@ if (!function_exists("tilauksesta_valmistustilaus")) {
           $lisatiedotres = mysql_query($query) or pupe_error($query);
           $lisatiedotrow = mysql_fetch_array($lisatiedotres);
 
-          $fields = mysql_field_name($lisatiedotres,0);
+          $fields = mysql_field_name($lisatiedotres, 0);
           $values = "'".$lisatiedotrow[0]."'";
 
-          for($i=1; $i < mysql_num_fields($lisatiedotres)-1; $i++) { // Ei monisteta tunnusta
+          for ($i=1; $i < mysql_num_fields($lisatiedotres)-1; $i++) { // Ei monisteta tunnusta
 
-            $fields .= ", ".mysql_field_name($lisatiedotres,$i);
+            $fields .= ", ".mysql_field_name($lisatiedotres, $i);
 
-            switch (mysql_field_name($lisatiedotres,$i)) {
-              case 'otunnus':
-                $values .= ", '$tunnus'";
-                break;
-              default:
-                $values .= ", '".$lisatiedotrow[$i]."'";
+            switch (mysql_field_name($lisatiedotres, $i)) {
+            case 'otunnus':
+              $values .= ", '$tunnus'";
+              break;
+            default:
+              $values .= ", '".$lisatiedotrow[$i]."'";
             }
           }
 
@@ -200,24 +200,24 @@ if (!function_exists("tilauksesta_valmistustilaus")) {
         $trlisatiedotres = mysql_query($query) or pupe_error($query);
         $trlisatiedotrow = mysql_fetch_array($trlisatiedotres);
 
-        $values = mysql_field_name($trlisatiedotres,0)." = '".$trlisatiedotrow[0]."'";
+        $values = mysql_field_name($trlisatiedotres, 0)." = '".$trlisatiedotrow[0]."'";
 
-        for($i=1; $i < mysql_num_fields($trlisatiedotres)-1; $i++) { // Ei monisteta tunnusta
+        for ($i=1; $i < mysql_num_fields($trlisatiedotres)-1; $i++) { // Ei monisteta tunnusta
 
-          switch (mysql_field_name($trlisatiedotres,$i)) {
-            case 'tilausrivitunnus':
-              $values .= ", ".mysql_field_name($trlisatiedotres,$i)." = '$perheid_lisaarivi'";
-              break;
-            case 'tilausrivilinkki':
-              $values .= ", ".mysql_field_name($trlisatiedotres,$i)." = ''";
-              break;
-            case 'pituus':
-              $pituus = $trlisatiedotrow[$i];
-              $uusiPituus = $pituus;
-              $values .= ", ".mysql_field_name($trlisatiedotres,$i)." = '1000'";
-              break;
-            default:
-              $values .= ", ".mysql_field_name($trlisatiedotres,$i)." = '".$trlisatiedotrow[$i]."'";
+          switch (mysql_field_name($trlisatiedotres, $i)) {
+          case 'tilausrivitunnus':
+            $values .= ", ".mysql_field_name($trlisatiedotres, $i)." = '$perheid_lisaarivi'";
+            break;
+          case 'tilausrivilinkki':
+            $values .= ", ".mysql_field_name($trlisatiedotres, $i)." = ''";
+            break;
+          case 'pituus':
+            $pituus = $trlisatiedotrow[$i];
+            $uusiPituus = $pituus;
+            $values .= ", ".mysql_field_name($trlisatiedotres, $i)." = '1000'";
+            break;
+          default:
+            $values .= ", ".mysql_field_name($trlisatiedotres, $i)." = '".$trlisatiedotrow[$i]."'";
           }
         }
 

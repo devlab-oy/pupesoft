@@ -12,8 +12,8 @@ if (isset($_POST['tee'])) {
   }
 }
 
-require('../inc/parametrit.inc');
-require('validation/Validation.php');
+require '../inc/parametrit.inc';
+require 'validation/Validation.php';
 
 if ($tee == 'lataa_tiedosto') {
   $filepath = '/tmp/'.$tmpfilenimi;
@@ -142,7 +142,7 @@ else {
   echo_kayttoliittyma($request);
 }
 
-require('inc/footer.inc');
+require 'inc/footer.inc';
 
 function init(&$request) {
   if (empty($request['ppa']) and empty($request['kka']) and empty($request['vva'])) {
@@ -256,17 +256,17 @@ function echo_kayttoliittyma($request) {
 
 //callback function table td:lle
 function right_align_numbers($header, $solu, $force_to_string) {
-    if (!stristr($header, 'tunnus')) {
-        if (is_numeric($solu) and !in_array($header, $force_to_string)) {
+  if (!stristr($header, 'tunnus')) {
+    if (is_numeric($solu) and !in_array($header, $force_to_string)) {
       if (!ctype_digit($solu)) {
         echo "<td align='right'>".number_format($solu, 2)."</td>";
       }
       else {
         echo "<td align='right'>$solu</td>";
       }
-        }
-        else {
+    }
+    else {
       echo "<td>{$solu}</td>";
-        }
+    }
   }
 }

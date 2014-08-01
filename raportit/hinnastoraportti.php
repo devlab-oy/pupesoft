@@ -8,10 +8,10 @@ $compression = FALSE;
 
 if (isset($_REQUEST["tee"])) {
   if ($_REQUEST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
-   if ($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/", "", $_REQUEST["kaunisnimi"]);
+  if ($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/", "", $_REQUEST["kaunisnimi"]);
 }
 
-require ('../inc/parametrit.inc');
+require '../inc/parametrit.inc';
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
@@ -22,12 +22,12 @@ echo "<font class='head'>".t("Hinnastoajo").":</font><hr>";
 
 if ($raptee == "AJA") {
 
-  include('inc/pupeExcel.inc');
+  include 'inc/pupeExcel.inc';
 
   $worksheet    = new pupeExcel();
   $format_bold = array("bold" => TRUE);
   $excelrivi    = 0;
-    $i        = 0;
+  $i        = 0;
 
   // Tarkastetaan yhtion parametreista tuotteiden_jarjestys_raportoinnissa (V = variaation, koon ja varin mukaan)
   if ($yhtiorow['tuotteiden_jarjestys_raportoinnissa'] == 'V') {
@@ -64,7 +64,7 @@ if ($raptee == "AJA") {
   if (mysql_num_rows($productqueryresult) > 2000) {
     echo t("Tuotteita ei näytetä ruudulla, koska niitä on yli")." 2000.";
 
-    require_once ('inc/ProgressBar.class.php');
+    require_once 'inc/ProgressBar.class.php';
     $bar = new ProgressBar();
     $elements = mysql_num_rows($productqueryresult); // total number of elements to process
     $bar->initialize($elements); // print the empty bar
@@ -87,30 +87,30 @@ if ($raptee == "AJA") {
   }
 
   $worksheet->write($excelrivi, $i, t('Tuoteno'), $format_bold);
-    $i++;
-    $worksheet->write($excelrivi, $i, t('Nimitys'), $format_bold);
-    $i++;
+  $i++;
+  $worksheet->write($excelrivi, $i, t('Nimitys'), $format_bold);
+  $i++;
 
   if ($kehahinnat != "") {
     $worksheet->write($excelrivi, $i, t('Kehahin'), $format_bold);
-      $i++;
-    }
+    $i++;
+  }
 
   $worksheet->write($excelrivi, $i, t('Myyntihinta'), $format_bold);
-    $i++;
-    $worksheet->write($excelrivi, $i, t('Saldo'), $format_bold);
-    $i++;
-    $worksheet->write($excelrivi, $i, t('Tryno'), $format_bold);
-    $i++;
-    $worksheet->write($excelrivi, $i, t('Try'), $format_bold);
-    $i++;
-    $worksheet->write($excelrivi, $i, t('EAN'), $format_bold);
-    $i=0;
-    $excelrivi++;
+  $i++;
+  $worksheet->write($excelrivi, $i, t('Saldo'), $format_bold);
+  $i++;
+  $worksheet->write($excelrivi, $i, t('Tryno'), $format_bold);
+  $i++;
+  $worksheet->write($excelrivi, $i, t('Try'), $format_bold);
+  $i++;
+  $worksheet->write($excelrivi, $i, t('EAN'), $format_bold);
+  $i=0;
+  $excelrivi++;
 
-    while ($productrow = mysql_fetch_array($productqueryresult)) {
+  while ($productrow = mysql_fetch_array($productqueryresult)) {
 
-    list(,,$apu_myytavissa) = saldo_myytavissa($productrow["tuoteno"]);
+    list(, , $apu_myytavissa) = saldo_myytavissa($productrow["tuoteno"]);
 
     $sresult = t_avainsana("TRY", "", "and avainsana.selite  = '$productrow[try]'");
     $srow = mysql_fetch_array($sresult);
@@ -200,4 +200,4 @@ echo "</table><br>";
 echo "<br><input type='submit' value='".t("Tee hinnasto")."'>";
 echo "</form>";
 
-require ("../inc/footer.inc");
+require "../inc/footer.inc";

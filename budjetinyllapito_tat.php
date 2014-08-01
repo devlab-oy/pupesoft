@@ -9,7 +9,7 @@ ini_set("memory_limit", "5G");
 ///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
 $useslave = 2;
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 // K‰ytett‰v‰t muuttujat
 $alkukk         = isset($alkukk) ? trim($alkukk) : "";
@@ -123,9 +123,9 @@ function asiakkaanmyynti($tunnukset, $try, $osasto, $vaintamavuosi=FALSE) {
 // funkkarin $org_sar passataan alkuper‰iset sarakkeet, jota taas k‰ytet‰‰n "ohituksessa"
 function piirra_budj_rivi($row, $ostryrow = "", $ohitus = "", $org_sar = "") {
   global  $kukarow, $yhtiorow, $toim, $worksheet, $excelrivi, $budj_taulu, $rajataulu, $budj_taulunrivit, $xx, $budj_sarak,
-      $sarakkeet, $rivimaara, $maxrivimaara, $grouppaus, $haen, $passaan, $budj_kohtelu, $osastotryttain,
-      $edellinen_vuosi_alku, $edellinen_kuukausi_loppu, $edellinen_vuosi_loppu, $summabudjetti, $myyntiennustekerroin,
-      $naytamyyntiennuste, $myyntitavoitekerroin, $budjetointi_taso, $ostryntuotteet;
+  $sarakkeet, $rivimaara, $maxrivimaara, $grouppaus, $haen, $passaan, $budj_kohtelu, $osastotryttain,
+  $edellinen_vuosi_alku, $edellinen_kuukausi_loppu, $edellinen_vuosi_loppu, $summabudjetti, $myyntiennustekerroin,
+  $naytamyyntiennuste, $myyntitavoitekerroin, $budjetointi_taso, $ostryntuotteet;
 
   $excelsarake = 0;
   $worksheet->write($excelrivi, $excelsarake, $row[$budj_sarak]);
@@ -283,7 +283,7 @@ function piirra_budj_rivi($row, $ostryrow = "", $ohitus = "", $org_sar = "") {
 
       if ($rivimaara < $maxrivimaara) {
         if ($grouppaus != "") {
-          if ($haen == "try" and $passaan == "yksi"){
+          if ($haen == "try" and $passaan == "yksi") {
             echo "<input type='text' class = '{$classi}' name = 'luvut[{$row["try"]}][{$ik}][{$ostry_ind}]' value='' size='10'>";
             echo "<input type='hidden' name = 'poikkeus' value='totta'>";
             echo "<input type='hidden' name = 'poikkeus_haku' value='try'>";
@@ -307,7 +307,7 @@ function piirra_budj_rivi($row, $ostryrow = "", $ohitus = "", $org_sar = "") {
           $ik = $rajataulu[$a];
 
           if ($grouppaus != "") {
-            if ($haen == "try" and $passaan == "yksi"){
+            if ($haen == "try" and $passaan == "yksi") {
               echo "<input type='hidden' id = '{$classi}_{$ik}' name = 'luvut[{$row["try"]}][{$ik}][{$ostry_ind}]' value='{$nro}' size='10'>";
             }
             elseif ($haen == "osasto" and $passaan == "yksi") {
@@ -378,13 +378,13 @@ elseif ($toim == "ASIAKAS") {
   $budj_sarak = "asiakkaan_tunnus";
 }
 elseif ($toim == "MYYJA") {
-  echo "<font class='head'>",t("Myyjien myyntitavoitteet"),"</font><hr>";
+  echo "<font class='head'>", t("Myyjien myyntitavoitteet"), "</font><hr>";
 
   $budj_taulu = "budjetti_myyja";
   $budj_sarak = "myyjan_tunnus";
 }
 else {
-  echo "<font class='error'>",t("Anna ohjelmalle alanimi: TUOTE, TOIMITTAJA, ASIAKAS tai MYYJA"),".</font>";
+  echo "<font class='error'>", t("Anna ohjelmalle alanimi: TUOTE, TOIMITTAJA, ASIAKAS tai MYYJA"), ".</font>";
   exit;
 }
 
@@ -398,7 +398,7 @@ elseif (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp
   $path_parts = pathinfo($_FILES['userfile']['name']);
   $ext = strtoupper($path_parts['extension']);
 
-  $retval = tarkasta_liite("userfile", array("XLSX","XLS","ODS","SLK","XML","GNUMERIC","CSV","TXT","DATAIMPORT"));
+  $retval = tarkasta_liite("userfile", array("XLSX", "XLS", "ODS", "SLK", "XML", "GNUMERIC", "CSV", "TXT", "DATAIMPORT"));
 
   if ($retval !== TRUE) {
     die ("<font class='error'><br>".t("V‰‰r‰ tiedostomuoto")."!</font>");
@@ -486,7 +486,7 @@ elseif (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp
     echo "<br><font class='error'>".t("HUOM: Maksimirivim‰‰r‰ ylittyi, rivej‰ ei n‰ytet‰ ruudulla. Rivit tallennetaan suoraan tietokantaan")."!<br><br></font>";
   }
   else {
-    echo "<font class='error'>".t("HUOM: Excel-tiedoston luvut eiv‰t viel‰ tallennettu tietokantaan")."!<br>".t("Klikkaa")." '",t("Tallenna tavoiteluvut"),"' ".t("tallentaaksesi luvut")."!</font><br><br></font>";
+    echo "<font class='error'>".t("HUOM: Excel-tiedoston luvut eiv‰t viel‰ tallennettu tietokantaan")."!<br>".t("Klikkaa")." '", t("Tallenna tavoiteluvut"), "' ".t("tallentaaksesi luvut")."!</font><br><br></font>";
   }
 
   $liitostunnukset = substr($liitostunnukset, 0, -1);
@@ -593,7 +593,7 @@ if ($tee == "TALLENNA_BUDJETTI") {
     if ($poikkeus_haku == "kummatkin") {
       foreach ($muunto_luvut as $litunnus => $rivit) {
 
-        $palaset = explode(",",$litunnus);
+        $palaset = explode(",", $litunnus);
         $osasto_tunnus   = trim($palaset[0]);
         $try_tunnus    = trim($palaset[1]);
 
@@ -842,7 +842,7 @@ if ($tee == "") {
       }
     }
 
-    require ("inc/kevyt_toimittajahaku.inc");
+    require "inc/kevyt_toimittajahaku.inc";
 
     echo "<br />";
 
@@ -872,7 +872,7 @@ if ($tee == "") {
       }
     }
 
-    require ("inc/asiakashaku.inc");
+    require "inc/asiakashaku.inc";
 
     echo "<br />";
 
@@ -896,7 +896,7 @@ if ($tee == "") {
   $vresult = pupe_query($query);
 
   echo "<tr>";
-  echo "<th>",t("Tilikausi"),"</th>";
+  echo "<th>", t("Tilikausi"), "</th>";
   echo "<td><select name='tkausi'>";
 
   while ($vrow = mysql_fetch_assoc($vresult)) {
@@ -982,7 +982,7 @@ if ($tee == "") {
     echo "<td><input type='checkbox' name='summabudjetti' $scheck></td>";
     echo "</tr>";
 
-    echo "<tr><th>",t("Valitse tuote"),"</th>";
+    echo "<tr><th>", t("Valitse tuote"), "</th>";
     echo "<td><input type='text' name='tuoteno' value='$tuoteno' /></td></tr>";
 
     echo "<tr><th>".t("tai rajaa tuotekategorialla")."</th><td>";
@@ -990,14 +990,14 @@ if ($tee == "") {
     $monivalintalaatikot = array('DYNAAMINEN_TUOTE', 'OSASTO', 'TRY');
     $monivalintalaatikot_normaali = array();
 
-    require ("tilauskasittely/monivalintalaatikot.inc");
+    require "tilauskasittely/monivalintalaatikot.inc";
 
     echo "</td></tr>";
   }
 
   if ($toim == "TOIMITTAJA") {
     echo "<tr>";
-    echo "<th>",t("Valitse toimittaja"),"</th>";
+    echo "<th>", t("Valitse toimittaja"), "</th>";
 
     if ($toimittajaid > 0) {
       $query = "SELECT *
@@ -1020,19 +1020,19 @@ if ($tee == "") {
   if ($toim == "MYYJA") {
     // Tuoteosasto tai ryhm‰tason budjetti.
     echo "<tr>";
-    echo "<th>",t("Anna kokonaistavoitteet valituille myyjille"),"</th>";
+    echo "<th>", t("Anna kokonaistavoitteet valituille myyjille"), "</th>";
 
     $scheck = ($summabudjetti != "") ? "CHECKED": "";
     echo "<td><input type='checkbox' name='summabudjetti' {$scheck}></td>";
     echo "</tr>";
 
-    echo "<tr><th>",t("Myyj‰"),"</th><td>";
+    echo "<tr><th>", t("Myyj‰"), "</th><td>";
 
     $mulselprefix = "laskumyyja";
     $monivalintalaatikot = array('LASKUMYYJA');
     $monivalintalaatikot_normaali = array();
 
-    require ("tilauskasittely/monivalintalaatikot.inc");
+    require "tilauskasittely/monivalintalaatikot.inc";
 
     echo "</td></tr>";
   }
@@ -1048,7 +1048,7 @@ if ($tee == "") {
     echo "</tr>";
 
     echo "<tr>";
-    echo "<th>",t("Valitse asiakas"),"</th>";
+    echo "<th>", t("Valitse asiakas"), "</th>";
 
     if ($asiakasid > 0) {
       $query = "SELECT *
@@ -1073,7 +1073,7 @@ if ($tee == "") {
     $monivalintalaatikot = array('DYNAAMINEN_ASIAKAS', '<br>ASIAKASOSASTO', 'ASIAKASRYHMA', 'ASIAKASMYYJA', "<br>KUSTP", "KOHDE", "PROJEKTI");
     $monivalintalaatikot_normaali = array();
 
-    require ("tilauskasittely/monivalintalaatikot.inc");
+    require "tilauskasittely/monivalintalaatikot.inc";
 
     echo "</td></tr>";
   }
@@ -1087,7 +1087,7 @@ if ($tee == "") {
 
   if ($toim == "ASIAKAS" or $toim == "TOIMITTAJA" or $toim == "MYYJA") {
 
-    echo "<tr><th>",t("Tavoitetaso"),"</th><td>";
+    echo "<tr><th>", t("Tavoitetaso"), "</th><td>";
 
     $btcheck1 = "";
     $btcheck2 = "";
@@ -1112,9 +1112,9 @@ if ($tee == "") {
     }
 
     echo "<select name='osastotryttain' onchange='submit()';>";
-    echo "<option value = ''>",t("{$toim_selite} kokonaistavoite"),"</option>";
-    echo "<option value = 'tuoteryhmittain' {$btcheck1}>",t("{$toim_selite} tuoteryhm‰kohtainen tavoite"),"</option>";
-    echo "<option value = 'osastoittain' {$btcheck2}>",t("{$toim_selite} osastokohtainen tavoite"),"</option>";
+    echo "<option value = ''>", t("{$toim_selite} kokonaistavoite"), "</option>";
+    echo "<option value = 'tuoteryhmittain' {$btcheck1}>", t("{$toim_selite} tuoteryhm‰kohtainen tavoite"), "</option>";
+    echo "<option value = 'osastoittain' {$btcheck2}>", t("{$toim_selite} osastokohtainen tavoite"), "</option>";
     echo "</select>";
 
     echo "</td></tr>";
@@ -1122,7 +1122,7 @@ if ($tee == "") {
 
   if ($toim == "ASIAKAS" or $toim == "MYYJA") {
     // Keroin jolla interpoloidaan asiakkaan kuluvan vuoden myynnit koko vuoden myynneiksi
-    echo "<tr><th>",t("Myyntiennustekerroin, kuluva vuosi"),"</th><td>";
+    echo "<tr><th>", t("Myyntiennustekerroin, kuluva vuosi"), "</th><td>";
     echo "<input type='text' name='myyntiennustekerroin' value='$myyntiennustekerroin' size='5'>";
 
     $scheck = ($naytamyyntiennuste != "") ? "CHECKED": "";
@@ -1131,7 +1131,7 @@ if ($tee == "") {
 
     echo "</td></tr>";
 
-    echo "<tr><th>",t("Myyntitavoitekerroin"),"</th><td>";
+    echo "<tr><th>", t("Myyntitavoitekerroin"), "</th><td>";
     echo "<input type='text' name='myyntitavoitekerroin' value='$myyntitavoitekerroin' size='5'>";
     echo "&nbsp;&nbsp;&nbsp;".t("Myyntitavoitekertoimen avulla luodaan automaattisesti tavoiteluku kuluvan vuoden myyntiennusteesta")."</td></tr>";
   }
@@ -1143,10 +1143,10 @@ if ($tee == "") {
 
   echo "</table><br>";
 
-  echo t("Tavoiteluvun voi poistaa huutomerkill‰ (!)"),"<br />";
+  echo t("Tavoiteluvun voi poistaa huutomerkill‰ (!)"), "<br />";
   echo "<br />";
 
-  echo "<input type='submit' name='submit_button' id='submit_button' value='",t("Hae tavoitteet"),"' /><br>";
+  echo "<input type='submit' name='submit_button' id='submit_button' value='", t("Hae tavoitteet"), "' /><br>";
   echo "</form>";
 }
 
@@ -1239,7 +1239,7 @@ if ($submit_button != "") {
 // Ajetaan raportti
 if ($tee == "AJA_RAPORTTI") {
 
-  include('inc/pupeExcel.inc');
+  include 'inc/pupeExcel.inc';
 
   $worksheet    = new pupeExcel();
   $format_bold = array("bold" => TRUE);
@@ -1319,12 +1319,12 @@ if ($tee == "AJA_RAPORTTI") {
 
     $selectlisa = " , avainsana.selitetark";
 
-    if (strpos($lisa,'tuote.osasto') != 0 and strpos($lisa, 'tuote.try') === FALSE) {
+    if (strpos($lisa, 'tuote.osasto') != 0 and strpos($lisa, 'tuote.try') === FALSE) {
       $grouppaus = " group by tuote.osasto";
       $haen = "osasto";
       $passaan = "yksi";
     }
-    elseif (strpos($lisa,'tuote.osasto') != 0 and strpos($lisa, 'tuote.try') != 0) {
+    elseif (strpos($lisa, 'tuote.osasto') != 0 and strpos($lisa, 'tuote.try') != 0) {
       $grouppaus = " group by tuote.try";
       $haen = "try";
       $passaan = "kaksi";
@@ -1449,7 +1449,7 @@ if ($tee == "AJA_RAPORTTI") {
     echo "<input type='hidden' name='myyntiennustekerroin' value='$myyntiennustekerroin'>";
     echo "<input type='hidden' name='naytamyyntiennuste' value='$naytamyyntiennuste'>";
 
-    echo "<input type='submit' name='tallennus' id='tallennus' value='",t("Tallenna tavoiteluvut"),"' />";
+    echo "<input type='submit' name='tallennus' id='tallennus' value='", t("Tallenna tavoiteluvut"), "' />";
     echo "<br><br>";
 
     echo "<table>";
@@ -1459,35 +1459,35 @@ if ($tee == "AJA_RAPORTTI") {
     if ($grouppaus != "") {
       // n‰ytet‰‰n joko tuoteryhm‰ tai tuoteosasto
       if ($haen == "try") {
-        if ($rivimaara < $maxrivimaara) echo "<tr><th>",t("Tuoteryhm‰"),"</th>";
+        if ($rivimaara < $maxrivimaara) echo "<tr><th>", t("Tuoteryhm‰"), "</th>";
       }
       else {
-        if ($rivimaara < $maxrivimaara) echo "<tr><th>",t("Tuoteosasto"),"</th>";
+        if ($rivimaara < $maxrivimaara) echo "<tr><th>", t("Tuoteosasto"), "</th>";
       }
     }
     else {
-      if ($rivimaara < $maxrivimaara) echo "<tr><th>",t("Tuote"),"</th>";
+      if ($rivimaara < $maxrivimaara) echo "<tr><th>", t("Tuote"), "</th>";
     }
   }
   elseif ($toim == "TOIMITTAJA") {
-    if ($rivimaara < $maxrivimaara) echo "<tr><th>",t("Toimittaja"),"</th>";
+    if ($rivimaara < $maxrivimaara) echo "<tr><th>", t("Toimittaja"), "</th>";
   }
   elseif ($toim == "ASIAKAS") {
-    if ($rivimaara < $maxrivimaara) echo "<tr><th>",t("Asiakas"),"</th>";
+    if ($rivimaara < $maxrivimaara) echo "<tr><th>", t("Asiakas"), "</th>";
   }
   elseif ($toim == "MYYJA") {
-    if ($rivimaara < $maxrivimaara) echo "<tr><th>",t("Myyj‰"),"</th>";
+    if ($rivimaara < $maxrivimaara) echo "<tr><th>", t("Myyj‰"), "</th>";
   }
 
   if (isset($osastotryttain) and $osastotryttain == "tuoteryhmittain") {
-    if ($rivimaara < $maxrivimaara) echo "<th>",t("Tuoteryhm‰"),"</th>";
+    if ($rivimaara < $maxrivimaara) echo "<th>", t("Tuoteryhm‰"), "</th>";
 
     $worksheet->write($excelrivi, $excelsarake, t("Tuoteryhm‰"), $format_bold);
     $excelsarake++;
 
   }
   elseif (isset($osastotryttain) and $osastotryttain == "osastoittain") {
-    if ($rivimaara < $maxrivimaara) echo "<th>",t("Osasto"),"</th>";
+    if ($rivimaara < $maxrivimaara) echo "<th>", t("Osasto"), "</th>";
 
     $worksheet->write($excelrivi, $excelsarake, t("Osasto"), $format_bold);
     $excelsarake++;
@@ -1496,9 +1496,9 @@ if ($tee == "AJA_RAPORTTI") {
   if ($toim == "ASIAKAS" or $toim == "MYYJA") {
     if ($naytamyyntiennuste != "") {
       if ($rivimaara < $maxrivimaara) {
-        echo "<th>",t("Myynti")," ",(date('Y')-1),"</th>";
-        echo "<th>",t("Myynti")," ",date('Y'),"-01 - ",substr($edellinen_kuukausi_loppu, 0, 7),"</th>";
-        echo "<th>",t("Myyntiennuste")," ",date('Y'),"</th>";
+        echo "<th>", t("Myynti"), " ", (date('Y')-1), "</th>";
+        echo "<th>", t("Myynti"), " ", date('Y'), "-01 - ", substr($edellinen_kuukausi_loppu, 0, 7), "</th>";
+        echo "<th>", t("Myyntiennuste"), " ", date('Y'), "</th>";
       }
 
       $worksheet->write($excelrivi, $excelsarake, t("Myynti")." ".(date('Y')-1), $format_bold);
@@ -1546,7 +1546,7 @@ if ($tee == "AJA_RAPORTTI") {
       // en piirr‰ turhaan otsikkoja
     }
     else {
-       if ($rivimaara < $maxrivimaara) echo "<th>$raja</th>";
+      if ($rivimaara < $maxrivimaara) echo "<th>$raja</th>";
     }
 
     $worksheet->write($excelrivi, $excelsarake, $raja, $format_bold);
@@ -1634,7 +1634,7 @@ if ($tee == "AJA_RAPORTTI") {
 
   if ($rivimaara < $maxrivimaara) {
     echo "</table>";
-    echo "<br><input type='submit' name='tallenna_budjetti' id='tallenna_budjetti' value='",t("Tallenna tavoiteluvut"),"' />";
+    echo "<br><input type='submit' name='tallenna_budjetti' id='tallenna_budjetti' value='", t("Tallenna tavoiteluvut"), "' />";
     echo "</form>";
   }
 
@@ -1647,9 +1647,9 @@ if ($tee == "AJA_RAPORTTI") {
   echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
   echo "<input type='hidden' name='kaunisnimi' value='Tavoitematriisi_$toim.xlsx'>";
   echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
-  echo "<input type='submit' value='",t("Hae tiedosto"),"'>";
+  echo "<input type='submit' value='", t("Hae tiedosto"), "'>";
   echo "</form>";
   echo "<br><br>";
 }
 
-require("inc/footer.inc");
+require "inc/footer.inc";

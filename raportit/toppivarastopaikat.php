@@ -19,7 +19,7 @@ if (isset($_POST["tee"])) {
   }
 }
 
-require("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if ($tee == 'lataa_tiedosto') {
   $filepath = "/tmp/".$tmpfilenimi;
@@ -33,8 +33,8 @@ if ($tee == 'lataa_tiedosto') {
   exit;
 }
 
-require('inc/pupeExcel.inc');
-require('inc/ProgressBar.class.php');
+require 'inc/pupeExcel.inc';
+require 'inc/ProgressBar.class.php';
 
 ini_set("memory_limit", "5G");
 ?>
@@ -743,4 +743,4 @@ function right_align_numbers($header, $solu, $force_to_string) {
   }
 }
 
-require("inc/footer.inc");
+require "inc/footer.inc";

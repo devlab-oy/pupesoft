@@ -39,7 +39,7 @@ $kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
 
 $tecd = FALSE;
 
-if (@include("inc/tecdoc.inc")) {
+if (@include "inc/tecdoc.inc") {
   $tecd = TRUE;
 }
 
@@ -319,17 +319,17 @@ while ($row = mysql_fetch_assoc($res)) {
 
   $toimittajat_a_hinta = array();
   $toimittajat_a       = array(0 => array(
-    'toimittaja'                      => '',
-    'toim_tuoteno'                    => '',
-    'toim_nimitys'                    => '',
-    'osto_era'                        => '',
-    'pakkauskoko'                     => '',
-    'ostohinta_oletusvaluutta'        => '',
-    'alennukset_oletusvaluutta_netto' => '',
-    'valuutta'                        => '',
-    'toim_yksikko'                    => '',
-    'tuotekerroin'                    => '',
-    'jarjestys'                       => '')
+      'toimittaja'                      => '',
+      'toim_tuoteno'                    => '',
+      'toim_nimitys'                    => '',
+      'osto_era'                        => '',
+      'pakkauskoko'                     => '',
+      'ostohinta_oletusvaluutta'        => '',
+      'alennukset_oletusvaluutta_netto' => '',
+      'valuutta'                        => '',
+      'toim_yksikko'                    => '',
+      'tuotekerroin'                    => '',
+      'jarjestys'                       => '')
   );
 
   if (mysql_num_rows($ttres) > 0) {
@@ -402,7 +402,7 @@ while ($row = mysql_fetch_assoc($res)) {
   $parastoimittaja = $toimittajat_a[0];
 
   if ($parastoimittaja['toimittaja'] > 0) {
-     $parastoimittaja['toimittaja'] = $row['maa']."-".$parastoimittaja['toimittaja'];
+    $parastoimittaja['toimittaja'] = $row['maa']."-".$parastoimittaja['toimittaja'];
   }
 
   // Tuotteen toimittajan tiedot
@@ -464,7 +464,7 @@ if ($paiva_ajo and !empty($relex_ftphost)) {
   $ftppass = $relex_ftppass;
   $ftppath = "/data/input";
   $ftpfile = $filepath;
-  require("inc/ftp-send.inc");
+  require "inc/ftp-send.inc";
 
   // Tuotteen toimittajatiedot
   $ftphost = $relex_ftphost;
@@ -472,7 +472,7 @@ if ($paiva_ajo and !empty($relex_ftphost)) {
   $ftppass = $relex_ftppass;
   $ftppath = "/data/input";
   $ftpfile = $tfilepath;
-  require("inc/ftp-send.inc");
+  require "inc/ftp-send.inc";
 }
 
 echo "Valmis.\n";

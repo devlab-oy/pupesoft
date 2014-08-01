@@ -1,6 +1,6 @@
 <?php
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if (!isset($tee))       $tee = "";
 if (!isset($etsi))       $etsi = "";
@@ -93,8 +93,8 @@ if ($tee == 'mikrotila') {
 
 if ($tee == 'failista') {
   if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
-    $timeparts = explode(" ",microtime());
-    $starttime = $timeparts[1].substr($timeparts[0],1);
+    $timeparts = explode(" ", microtime());
+    $starttime = $timeparts[1].substr($timeparts[0], 1);
 
     $path_parts = pathinfo($_FILES['userfile']['name']);
     $name  = strtoupper($path_parts['filename']);
@@ -108,7 +108,7 @@ if ($tee == 'failista') {
       die ("<font class='error'><br>".t("Tiedosto on tyhjä")."!</font>");
     }
 
-    $file=fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus epäonnistui")."!");
+    $file=fopen($_FILES['userfile']['tmp_name'], "r") or die (t("Tiedoston avaus epäonnistui")."!");
 
     // luetaan tiedosto alusta loppuun...
     $rivi = fgets($file, 4096);
@@ -510,7 +510,7 @@ if ($tee == 'valmis') {
         $tee = "N";
         $kutsuja = "vastaanota.php";
 
-        require("muuvarastopaikka.php");
+        require "muuvarastopaikka.php";
 
         if ($eancheck[$tun] != '' and (int) $kirjoitin > 0) {
           $query = "SELECT komento from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus = '$kirjoitin'";
@@ -518,8 +518,8 @@ if ($tee == 'valmis') {
           $komrow = mysql_fetch_assoc($komres);
           $komento = $komrow['komento'];
 
-          for($a = 0; $a < $tkpl; $a++) {
-            require("inc/tulosta_tuotetarrat_tec.inc");
+          for ($a = 0; $a < $tkpl; $a++) {
+            require "inc/tulosta_tuotetarrat_tec.inc";
           }
         }
 
@@ -600,9 +600,9 @@ if ($tee == 'valmis') {
     $apusummarow = mysql_fetch_assoc($result);
 
     // Nää oli tossa updatessa mutta muuttujia ei ollut eikä tullut
-    #bruttopaino     = '$aputoimirow[bruttopaino]',
-    #lisattava_era     = '$aputoimirow[lisattava_era]',
-    #vahennettava_era  = '$aputoimirow[vahennettava_era]'
+    //bruttopaino     = '$aputoimirow[bruttopaino]',
+    //lisattava_era     = '$aputoimirow[lisattava_era]',
+    //vahennettava_era  = '$aputoimirow[vahennettava_era]'
 
     $query = "UPDATE lasku
               SET alatila    = 'V',
@@ -631,7 +631,7 @@ if (($tee == "OK" or $tee == "paikat") and $id != '0' and $toim != "MYYNTITILI")
     $otunnus = $laskurow["tunnus"];
     $mista = 'vastaanota';
 
-    require('tulosta_purkulista.inc');
+    require 'tulosta_purkulista.inc';
   }
 
   $id    = 0;
@@ -781,7 +781,7 @@ if ($id == '0') {
           echo "<table>";
           echo "<tr>";
           for ($y=0; $y<mysql_num_fields($result); $y++)
-            echo "<th align='left'>".t(mysql_field_name($result,$y))."</th>";
+            echo "<th align='left'>".t(mysql_field_name($result, $y))."</th>";
           echo "</tr>";
         }
 
@@ -879,7 +879,7 @@ if ($id != '0') {
   echo "<tr>";
 
   for ($y=0; $y < mysql_num_fields($result)-1; $y++) {
-    echo "<th align='left'>".t(mysql_field_name($result,$y))."</th>";
+    echo "<th align='left'>".t(mysql_field_name($result, $y))."</th>";
   }
 
   if ($toim == "") {
@@ -1086,7 +1086,7 @@ if ($id != '0') {
       $asiakasrow = mysql_fetch_assoc($asiakasresult);
       echo "<td>{$asiakasrow["asiakkaan_nimi"]}</td>";
     }
-    else  {
+    else {
       echo "<td>$rivirow[paikka]</td>";
     }
 
@@ -1180,7 +1180,7 @@ if ($id != '0') {
   }
 
   if ($toim != "MYYNTITILI") {
-    echo "<tr><td colspan='4' class='back' align='right' valign='center'>",t("Täytä kaikki kentät"),":</td>";
+    echo "<tr><td colspan='4' class='back' align='right' valign='center'>", t("Täytä kaikki kentät"), ":</td>";
     echo "<td><input type='text' id='taytasarake_t1' maxlength='5' size='5'></td>";
     echo "<td><input type='text' id='taytasarake_t2' maxlength='5' size='5'></td>";
     echo "<td><input type='text' id='taytasarake_t3' maxlength='5' size='5'></td>";
@@ -1245,4 +1245,4 @@ if ($id != '0') {
 
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

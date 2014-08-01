@@ -24,7 +24,7 @@ else {
 
 if ($tee == "update") {
 
-  list (,,,,,,,,$llrow,,,,,,,) = tsekit($laskurow, 0, 0);
+  list (, , , , , , , , $llrow, , , , , , , ) = tsekit($laskurow, 0, 0);
 
   // Tsekki tehdään vain jos vaihto-omaisuus laskuja on liitetty saapumiseen!
   if ($llrow["volasku"] > 0 and abs($rahti_etu) > abs($llrow['vosumma_valuutassa'])) {
@@ -95,13 +95,13 @@ if ($tee == "update") {
   }
 
   // Hoidetaan pilkut pisteiksi....
-  $rahti_etu         = str_replace (",", ".", $rahti_etu);
-  $rahti           = str_replace (",", ".", $rahti);
-  $rahti_huolinta      = str_replace (",", ".", $rahti_huolinta);
-  $pyoristys_erot      = str_replace (",", ".", $pyoristys_erot);
-  $pyoristys_erot_alv    = str_replace (",", ".", $pyoristys_erot_alv);
-  $erikoisale_saapuminen  = str_replace (",", ".", $erikoisale_saapuminen);
-  $bruttopaino       = str_replace (",", ".", $bruttopaino);
+  $rahti_etu         = str_replace(",", ".", $rahti_etu);
+  $rahti           = str_replace(",", ".", $rahti);
+  $rahti_huolinta      = str_replace(",", ".", $rahti_huolinta);
+  $pyoristys_erot      = str_replace(",", ".", $pyoristys_erot);
+  $pyoristys_erot_alv    = str_replace(",", ".", $pyoristys_erot_alv);
+  $erikoisale_saapuminen  = str_replace(",", ".", $erikoisale_saapuminen);
+  $bruttopaino       = str_replace(",", ".", $bruttopaino);
 
   $toimaika     = $vv."-".$kk."-".$pp;
   $ultilno     = tarvitaanko_intrastat($maa_lahetys, $maa_maara);
@@ -154,7 +154,7 @@ if ($tee == "update") {
 
 if ($tee == "") {
 
-  list (,,,,,,,,$llrow,,,,,,,) = tsekit($laskurow, 0, 0);
+  list (, , , , , , , , $llrow, , , , , , , ) = tsekit($laskurow, 0, 0);
 
   // haetaan toimittajan tiedot
   $query  = "SELECT * FROM toimi WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$laskurow[liitostunnus]'";
@@ -212,7 +212,7 @@ if ($tee == "") {
   $result = pupe_query($query);
   echo "<option value=''>".t("Valitse")."</option>";
 
-  while($row = mysql_fetch_array($result)) {
+  while ($row = mysql_fetch_array($result)) {
     $sel = '';
 
     if ($row['koodi'] == $laskurow["maa_lahetys"]) {
@@ -283,12 +283,12 @@ if ($tee == "") {
 
   $result = t_avainsana("KT");
 
-  while($row = mysql_fetch_array($result)){
+  while ($row = mysql_fetch_array($result)) {
     $sel = '';
-    if($row["selite"] == $laskurow["kauppatapahtuman_luonne"]) {
+    if ($row["selite"] == $laskurow["kauppatapahtuman_luonne"]) {
       $sel = 'selected';
     }
-    elseif($laskurow["kauppatapahtuman_luonne"] == "0" and $row["selite"] == $toimittaja["kauppatapahtuman_luonne"]) {
+    elseif ($laskurow["kauppatapahtuman_luonne"] == "0" and $row["selite"] == $toimittaja["kauppatapahtuman_luonne"]) {
       $sel = "selected";
     }
     echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
@@ -302,12 +302,12 @@ if ($tee == "") {
 
   $result = t_avainsana("KM");
 
-  while($row = mysql_fetch_array($result)){
+  while ($row = mysql_fetch_array($result)) {
     $sel = '';
-    if($row["selite"] == $laskurow["kuljetusmuoto"]) {
+    if ($row["selite"] == $laskurow["kuljetusmuoto"]) {
       $sel = 'selected';
     }
-    elseif($laskurow["kuljetusmuoto"] == "0" and $row["selite"] == $toimittaja["kuljetusmuoto"]) {
+    elseif ($laskurow["kuljetusmuoto"] == "0" and $row["selite"] == $toimittaja["kuljetusmuoto"]) {
       $sel = "selected";
     }
     echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
@@ -339,7 +339,7 @@ if ($tee == "") {
 
     $laskurow["bruttopaino"] = $painorow["massa"];
 
-    $lisamassa = "<font class='message'>".sprintf(t("Tilauksen paino tuoterekisterin tietojen mukaan on: %s kg, %s %%:lle kappaleista on annettu paino."),$painorow["massa"],$osumapros)."</font><br>";
+    $lisamassa = "<font class='message'>".sprintf(t("Tilauksen paino tuoterekisterin tietojen mukaan on: %s kg, %s %%:lle kappaleista on annettu paino."), $painorow["massa"], $osumapros)."</font><br>";
   }
 
   if (abs($laskurow['rahti_etu']) > abs($llrow['vosumma_valuutassa'])) {
@@ -353,10 +353,10 @@ if ($tee == "") {
   if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) {
 
     echo "<tr>";
-    echo "<th valign='top'>",t("Toimipaikka"),"</th>";
+    echo "<th valign='top'>", t("Toimipaikka"), "</th>";
     echo "<td valign='top' colspan='3'>";
     echo "<select name='toimipaikka'>";
-    echo "<option value=''>",t("Ei toimipaikkaa"),"</option>";
+    echo "<option value=''>", t("Ei toimipaikkaa"), "</option>";
 
     while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
       $sel = $laskurow['yhtio_toimipaikka'] == $toimipaikat_row['tunnus'] ? ' selected' : '';
@@ -381,9 +381,9 @@ if ($tee == "") {
   echo "<tr><th valign='top'>".t("Erikoisalennus").":</th><td valign='top' colspan='3'><input type='text' name='erikoisale_saapuminen' value='$laskurow[erikoisale_saapuminen]'></td></tr>";
 
   if ($laskurow["toimaika"] != '0000-00-00') {
-    $vv = substr($laskurow["toimaika"],0,4);
-    $kk = substr($laskurow["toimaika"],5,2);
-    $pp = substr($laskurow["toimaika"],8,2);
+    $vv = substr($laskurow["toimaika"], 0, 4);
+    $kk = substr($laskurow["toimaika"], 5, 2);
+    $pp = substr($laskurow["toimaika"], 8, 2);
   }
   else {
     $vv = date("Y");

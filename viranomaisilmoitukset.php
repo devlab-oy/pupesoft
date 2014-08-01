@@ -1,6 +1,6 @@
 <?php
 
-require('inc/parametrit.inc');
+require 'inc/parametrit.inc';
 
 if (!isset($tee)) $tee = '';
 
@@ -177,7 +177,7 @@ if ($tee == "VSRALVYV") {
     $apusort_jarj1 = $apusort_jarj2 = $apusort_jarj3 = array();
 
     foreach ($yhteenvetoilmoitus_array as $apusort_key => $apusort_row) {
-        $apusort_jarj1[$apusort_key] = $apusort_row['koodi'];
+      $apusort_jarj1[$apusort_key] = $apusort_row['koodi'];
       $apusort_jarj2[$apusort_key] = $apusort_row['maa'];
       $apusort_jarj3[$apusort_key] = $apusort_row['ytunnus'];
     }
@@ -263,8 +263,8 @@ if ($tee == "VSRALVYV") {
     $tietue .= "100:".date("dmY")."\n";        // Saapumispäivä ppkkvvvv. Ilmoituksen arvopäivä eli päivä, jona tiedonkeruupalvelu vastaanotti tiedot.
     $tietue .= "051:".date("H:i:s").":00\n";    // Saapumispäivän kellonaika hh:mm:ss:dd. Ilmoituksen arvopäivän kellonaika, jona tiedonkeruupalvelu vastaanotti tiedot.
     $tietue .= "105:VW\n";              // Vastaanottavan palvelun tunnus, joka sovitaan palvelukohtaisesti.
-                            // Positio 1: E=Itella, S=TeliaSonera, U=Aditro, N=Logica, K=Koivuniemi, V=Ilmoitin.fi
-                            // Positio 2: W=Webin kautta syötetty tietue, O=Ohjelmistointegraation tuottama
+    // Positio 1: E=Itella, S=TeliaSonera, U=Aditro, N=Logica, K=Koivuniemi, V=Ilmoitin.fi
+    // Positio 2: W=Webin kautta syötetty tietue, O=Ohjelmistointegraation tuottama
     $tietue .= "107:{$tunniste}\n";          // Tunniste, jonka tiedonkeruupalvelu muodostaa yksilöimään ilmoituksen
     $tietue .= "010:{$uytunnus}\n";          // Y-tunnus tai Y-tunnus ja siihen liitetty toimipaikkatunnus
     $tietue .= "053:{$kohdekausi}\n";        // Kohdekausi kk/vvvv
@@ -290,4 +290,4 @@ if ($tee == "VSRALVYV") {
   }
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

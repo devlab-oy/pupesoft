@@ -1,7 +1,7 @@
 <?php
 
-if(!function_exists("toimittajaalennustarkista")) {
-  function toimittajaalennustarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+if (!function_exists("toimittajaalennustarkista")) {
+  function toimittajaalennustarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set, $alasveto;
 
     static $chytunnus, $chtuoteno, $chryhma, $chminkpl, $chmonikerta, $chalkupvm, $chloppupvm, $chastunn, $chtuoteno_ind, $chalennuslaji;
@@ -54,7 +54,7 @@ if(!function_exists("toimittajaalennustarkista")) {
           $ulos2       = "";
 
           if ($ytunnus != "" and $ytunnus != "0") {
-            require("inc/kevyt_toimittajahaku.inc");
+            require "inc/kevyt_toimittajahaku.inc";
           }
 
           if ($ulos2 != "" and $ytunnus == "") {
@@ -91,7 +91,7 @@ if(!function_exists("toimittajaalennustarkista")) {
           $kutsuja     = "yllapito.php";
           $ulos      = "";
 
-          require ("inc/tuotehaku.inc");
+          require "inc/tuotehaku.inc";
 
           if ($ulos != "") {
             $alasveto[$i] = "<select name='t[$i]'>".$ulos."</select>";

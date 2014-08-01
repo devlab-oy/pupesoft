@@ -1,8 +1,8 @@
 <?php
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
-echo "<font class='head'>",t("Muokkaa kolleja"),"</font><hr>";
+echo "<font class='head'>", t("Muokkaa kolleja"), "</font><hr>";
 
 if (!isset($tee)) $tee = "";
 if (!isset($checkbox_parent)) $checkbox_parent = array();
@@ -16,9 +16,9 @@ echo "<br />";
 echo "<form method='post' action='?tee=&lopetus={$lopetus}'>";
 echo "<table>";
 
-echo "<tr><th>",t("Valitse varasto"),"</th><td>&nbsp;";
+echo "<tr><th>", t("Valitse varasto"), "</th><td>&nbsp;";
 echo "<select name='select_varasto' id='select_varasto'>";
-echo "<option value=''>",t("Valitse"),"</option>";
+echo "<option value=''>", t("Valitse"), "</option>";
 
 $query = "SELECT tunnus, nimitys
           FROM varastopaikat
@@ -41,8 +41,8 @@ echo "</select>";
 echo "</td></tr>";
 
 echo "<tr>";
-echo "<th>",t("Etsi rahtikirjoja lähdön tunnuksella"),"</th>";
-echo "<td><input type='text' name='checkbox_parent[]' value='{$lahto}' /> <input type='submit' value='",t("Etsi"),"' /></td>";
+echo "<th>", t("Etsi rahtikirjoja lähdön tunnuksella"), "</th>";
+echo "<td><input type='text' name='checkbox_parent[]' value='{$lahto}' /> <input type='submit' value='", t("Etsi"), "' /></td>";
 echo "</tr>";
 echo "</table>";
 echo "</form>";
@@ -61,7 +61,7 @@ if ($tee == 'paivita') {
   }
 
   if ($muutetaan_pakkausta and $siirretaan_pakkausta) {
-    echo "<font class='error'>",t("Et voi muuttaa ja siirtää pakkauksia samaan aikaan"),".</font><br /><br />";
+    echo "<font class='error'>", t("Et voi muuttaa ja siirtää pakkauksia samaan aikaan"), ".</font><br /><br />";
     $tee = 'muuta';
 
     reset($uusi_pakkaus);
@@ -319,9 +319,9 @@ if ($tee == 'muuta') {
 
   echo "<table>";
   echo "<tr>";
-  echo "<th>",t("Kolli"),"</th>";
-  echo "<th>",t("SSCC"),"</th>";
-  echo "<th>",t("Uusi pakkaus"),"</th>";
+  echo "<th>", t("Kolli"), "</th>";
+  echo "<th>", t("SSCC"), "</th>";
+  echo "<th>", t("Uusi pakkaus"), "</th>";
   echo "</tr>";
 
   $kaikki_yhteen_pakkaukseen_sscc = "";
@@ -344,9 +344,9 @@ if ($tee == 'muuta') {
     echo "<td>$keraysera_row[sscc]</td>";
 
     echo "<td><select name='uusi_pakkaus[{$keraysera_row['sscc']}]'>";
-    echo "<option value=''>",t("Valitse"),"</option>";
+    echo "<option value=''>", t("Valitse"), "</option>";
 
-    echo "<optgroup label='",t("Keräyserässä"),"'>";
+    echo "<optgroup label='", t("Keräyserässä"), "'>";
 
     $query = "SELECT CONCAT(IFNULL(pakkaus.pakkaus, 'Yksin keräilyalustalle'), ' ', IF(kerayserat.sscc_ulkoinen != 0, kerayserat.sscc_ulkoinen, kerayserat.sscc)) pak,
               IFNULL(kerayserat.pakkaus, 'muu_kolli') pakkaus,
@@ -367,8 +367,8 @@ if ($tee == 'muuta') {
 
     echo "</optgroup>";
 
-    echo "<optgroup label='",t("Pakkaukset"),"'>";
-    echo "<option value='muu_kolli'>",t("Yksin keräilyalustalle"),"</option>";
+    echo "<optgroup label='", t("Pakkaukset"), "'>";
+    echo "<option value='muu_kolli'>", t("Yksin keräilyalustalle"), "</option>";
 
     $query = "SELECT *
               FROM pakkaus
@@ -388,7 +388,7 @@ if ($tee == 'muuta') {
     $kaikki_yhteen_pakkaukseen_sscc = $keraysera_row['sscc'];
   }
 
-  echo "<tr><th colspan='5'><input type='submit' value='",t("Tee"),"' /></th></tr>";
+  echo "<tr><th colspan='5'><input type='submit' value='", t("Tee"), "' /></th></tr>";
   echo "</table>";
   echo "</form>";
 
@@ -398,12 +398,12 @@ if ($tee == 'muuta') {
 
     echo "<table>";
     echo "<tr>";
-    echo "<th>",t("Kaikki pakkaukset yhteen"),"</th>";
+    echo "<th>", t("Kaikki pakkaukset yhteen"), "</th>";
     echo "</tr>";
 
     echo "<tr><td><select name='uusi_pakkaus_kaikki_yhteen[{$kaikki_yhteen_pakkaukseen_sscc}]'>";
-    echo "<option value=''>",t("Valitse"),"</option>";
-    echo "<option value='muu_kolli'>",t("Yksin keräilyalustalle"),"</option>";
+    echo "<option value=''>", t("Valitse"), "</option>";
+    echo "<option value='muu_kolli'>", t("Yksin keräilyalustalle"), "</option>";
 
     $query = "SELECT *
               FROM pakkaus
@@ -416,7 +416,7 @@ if ($tee == 'muuta') {
     }
 
     echo "</select></td></tr>";
-    echo "<tr><th><input type='submit' value='",t("Tee"),"' /></th></tr>";
+    echo "<tr><th><input type='submit' value='", t("Tee"), "' /></th></tr>";
     echo "</table></form>";
   }
 }
@@ -451,7 +451,7 @@ if ($tee == '' and isset($checkbox_parent) and count($checkbox_parent) == 1) {
   $rakir_res = pupe_query($query);
 
   if (mysql_num_rows($rakir_res) == 0) {
-    echo "<font class='message'>",t("Yhtään tulostettavaa rahtikirjaa ei löytynyt"),".</font><br /><br />";
+    echo "<font class='message'>", t("Yhtään tulostettavaa rahtikirjaa ei löytynyt"), ".</font><br /><br />";
   }
   else {
 
@@ -523,13 +523,13 @@ if ($tee == '' and isset($checkbox_parent) and count($checkbox_parent) == 1) {
 
       echo "<table style='width:100%'>";
       echo "<tr>";
-      echo "<th>",t("Asiakas"),"</th>";
-      echo "<th>",t("Osoite"),"</th>";
-      echo "<th>",t("Rahtikirjanumerot"),"</th>";
-      echo "<th>",t("Rahdinmaksaja"),"</th>";
-      echo "<th>",t("Pakkauksien lukumäärä"),"</th>";
-      echo "<th>",t("Paino"),"</th>";
-      echo "<th>",t("Tilavuus"),"</th>";
+      echo "<th>", t("Asiakas"), "</th>";
+      echo "<th>", t("Osoite"), "</th>";
+      echo "<th>", t("Rahtikirjanumerot"), "</th>";
+      echo "<th>", t("Rahdinmaksaja"), "</th>";
+      echo "<th>", t("Pakkauksien lukumäärä"), "</th>";
+      echo "<th>", t("Paino"), "</th>";
+      echo "<th>", t("Tilavuus"), "</th>";
       echo "</tr>";
 
       $otunnukset = $tunnukset = "";
@@ -572,7 +572,7 @@ if ($tee == '' and isset($checkbox_parent) and count($checkbox_parent) == 1) {
 
       echo "<tr>";
       echo "<th colspan='7'>";
-      echo "<input type='submit' value='",t("Muuta"),"' />";
+      echo "<input type='submit' value='", t("Muuta"), "' />";
       echo "<input type='hidden' name='tunnukset' value='{$tunnukset}' />";
       echo "<input type='hidden' name='otunnukset' value='{$otunnukset}' />";
       echo "</th>";
@@ -587,4 +587,4 @@ if ($tee == '' and isset($checkbox_parent) and count($checkbox_parent) == 1) {
   }
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

@@ -20,7 +20,7 @@ if ($debug == 1) {
 $variaaritorivi = FALSE;
 
 if ($yhtiorow['variaatiomyynti'] == "K" and $kukarow["extranet"] == '' and (is_array($tuoteno_array) or $tuoteno != "" or $variaatio_tuoteno) and $ulos == "" and $rivitunnus == "") {
-  require ("syota_variaatiorivi.inc");
+  require "syota_variaatiorivi.inc";
 }
 
 if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
@@ -49,7 +49,7 @@ if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
   echo "  <th align='left'>".t("Netto")."</th>";
 
   if ($yhtiorow['tilausrivi_omalle_tilaukselle'] != '' and $tuoteno != '') {
-    echo "<th align='left'>",t("Omalle tilaukselle"),"</th>";
+    echo "<th align='left'>", t("Omalle tilaukselle"), "</th>";
   }
 
   echo "  <td valign='top' class='back'></td>
@@ -75,7 +75,7 @@ if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
       echo "<select name='jo_syotetty_rekisterinumero'>";
       echo "<option value=''>".t('Ei valintaa')."</option>";
       $i = 0;
-      foreach($tilauksen_rekisterinumerot as $syotetty_rekisterinumero) {
+      foreach ($tilauksen_rekisterinumerot as $syotetty_rekisterinumero) {
         $sel = "";
         if ($i == 0) {
           $sel = "SELECTED";
@@ -113,10 +113,10 @@ if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
     echo "<td valign='top'>";
 
     if (strpos((string) $yhtiorow['myynnin_alekentat_muokkaus'], (string) $alepostfix) !== FALSE) {
-      echo "<input type='text' name='ale{$alepostfix}' size='5' maxlength='6' value='",${'ale'.$alepostfix},"' />";
+      echo "<input type='text' name='ale{$alepostfix}' size='5' maxlength='6' value='", ${'ale'.$alepostfix}, "' />";
     }
     else {
-      echo "<input type='hidden' name='ale{$alepostfix}' value='",${'ale'.$alepostfix},"' />",${'ale'.$alepostfix};
+      echo "<input type='hidden' name='ale{$alepostfix}' value='", ${'ale'.$alepostfix}, "' />", ${'ale'.$alepostfix};
     }
 
     echo "</td>";
@@ -128,8 +128,8 @@ if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
     $sel = (isset($omalle_tilaukselle) and trim($omalle_tilaukselle) != '') ? ' selected' : '';
 
     echo "<td><select name='omalle_tilaukselle'>";
-    echo "<option value=''>",t("Ei"),"</option>";
-    echo "<option value='K'{$sel}>",t("Kyllä"),"</option>";
+    echo "<option value=''>", t("Ei"), "</option>";
+    echo "<option value='K'{$sel}>", t("Kyllä"), "</option>";
     echo "</select></td>";
   }
 
@@ -176,9 +176,9 @@ if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
     }
 
     if ($toimaika == "" ) {
-      $toimkka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-      $toimvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-      $toimppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+      $toimkka = date("m", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+      $toimvva = date("Y", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+      $toimppa = date("d", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
     }
     else {
       $toimkka = substr($toimaika, 5, 2);
@@ -187,9 +187,9 @@ if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
     }
 
     if ($kerayspvm == "") {
-      $kerayskka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-      $keraysvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-      $keraysppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+      $kerayskka = date("m", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+      $keraysvva = date("Y", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+      $keraysppa = date("d", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
     }
     else {
       $kerayskka = substr($kerayspvm, 5, 2);
@@ -236,7 +236,7 @@ if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
   if ($rivitunnus != '') {
     if ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and (($toim == "TARJOUS" or $toim == "EXTTARJOUS") or $laskurow["tilaustyyppi"] == "T")) {
       echo "<tr>{$jarjlisa}
-          <th colspan='{$nrospanni}' align='left'>",t("Tuotteen nimitys"),"</th>
+          <th colspan='{$nrospanni}' align='left'>", t("Tuotteen nimitys"), "</th>
           </tr><tr>{$jarjlisa}
           <td valign='top' colspan='{$nrospanni}'><input type='text' maxlength='100' size='50' name='tuotenimitys' value = '{$tuotenimitys}'></td></tr>";
     }
@@ -268,7 +268,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
     echo "<th align='left'>".t("Reseptiin")."</th>";
   }
 
-  if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and in_array($toim, array('RIVISYOTTO','TARJOUS','REKLAMAATIO'))) {
+  if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and in_array($toim, array('RIVISYOTTO', 'TARJOUS', 'REKLAMAATIO'))) {
     $tilauksen_rekisterinumerot = hae_tilauksen_rekisterinumerot($laskurow['tunnus']);
     echo "  <th align='left'>".t("Rekisterinumero")."</th>";
   }
@@ -287,7 +287,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
       <th align='left'>".t("Alv")."</th>";
 
   if ($yhtiorow['tilausrivi_omalle_tilaukselle'] != '' and $tuoteno != '') {
-    echo "<th align='left'>",t("Omalle tilaukselle"),"</th>";
+    echo "<th align='left'>", t("Omalle tilaukselle"), "</th>";
   }
 
   if ($yhtiorow['rivinumero_syotto'] != '') {
@@ -308,7 +308,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
     echo "<td valign='top' style='color: #00FF00;'>".t("Tuote")."</td>";
   }
 
-  if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and in_array($toim, array('RIVISYOTTO','TARJOUS','REKLAMAATIO'))) {
+  if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and in_array($toim, array('RIVISYOTTO', 'TARJOUS', 'REKLAMAATIO'))) {
     echo "<td valign='top'>";
     echo "<input type='text' name='rekisterinumero' size='8' value='{$rekisterinumero}'/>";
     if (count($tilauksen_rekisterinumerot) > 0) {
@@ -316,7 +316,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
       echo "<select name='jo_syotetty_rekisterinumero'>";
       echo "<option value=''>".t('Ei valintaa')."</option>";
       $sel = "SELECTED";
-      foreach($tilauksen_rekisterinumerot as $syotetty_rekisterinumero) {
+      foreach ($tilauksen_rekisterinumerot as $syotetty_rekisterinumero) {
         if ($syotetty_rekisterinumero['rekisterinumero'] == '') {
           $sel = '';
           continue;
@@ -371,7 +371,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
   echo "<option value='H' $selh>".t("Hyväksy")."</option>";
   echo "<option value='P' $selp>".t("Puute")."</option>";
 
-  if($laskurow["tila"] == 'V' and $laskurow["tilaustyyppi"] == 'V') {
+  if ($laskurow["tila"] == 'V' and $laskurow["tilaustyyppi"] == 'V') {
     echo "<option value='W' $selw>".t("Varastosta")."</option>";
   }
 
@@ -387,10 +387,10 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
     echo "<td valign='top'>";
 
     if (strpos((string) $yhtiorow['myynnin_alekentat_muokkaus'], (string) $alepostfix) !== FALSE) {
-      echo "<input type='text' name='ale{$alepostfix}' size='5' maxlength='6' value='",${'ale'.$alepostfix},"' />";
+      echo "<input type='text' name='ale{$alepostfix}' size='5' maxlength='6' value='", ${'ale'.$alepostfix}, "' />";
     }
     else {
-      echo "<input type='hidden' name='ale{$alepostfix}' value='",${'ale'.$alepostfix},"' />",${'ale'.$alepostfix};
+      echo "<input type='hidden' name='ale{$alepostfix}' value='", ${'ale'.$alepostfix}, "' />", ${'ale'.$alepostfix};
     }
 
     echo "</td>";
@@ -401,7 +401,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
   if ($netto == 'N') {
     $chkn = 'SELECTED';
   }
-  elseif($netto == "E") {
+  elseif ($netto == "E") {
     $chke = 'SELECTED';
   }
 
@@ -419,15 +419,15 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
     echo "<input type='hidden' name='alv' value='$alv'>";
   }
   else {
-     echo "<td valign='top'>".alv_popup_oletus('alv',$alv, $laskurow["maa"])."</td>";
+    echo "<td valign='top'>".alv_popup_oletus('alv', $alv, $laskurow["maa"])."</td>";
   }
 
   if ($yhtiorow['tilausrivi_omalle_tilaukselle'] != '' and $tuoteno != '') {
     $sel = (isset($omalle_tilaukselle) and trim($omalle_tilaukselle) != '') ? ' selected' : '';
 
     echo "<td><select name='omalle_tilaukselle'>";
-    echo "<option value=''>",t("Ei"),"</option>";
-    echo "<option value='K'{$sel}>",t("Kyllä"),"</option>";
+    echo "<option value=''>", t("Ei"), "</option>";
+    echo "<option value='K'{$sel}>", t("Kyllä"), "</option>";
     echo "</select></td>";
   }
 
@@ -445,7 +445,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
     echo "<th></th>";
   }
 
-  if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and in_array($toim, array('RIVISYOTTO','TARJOUS','REKLAMAATIO','PIKATILAUS'))) {
+  if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and in_array($toim, array('RIVISYOTTO', 'TARJOUS', 'REKLAMAATIO', 'PIKATILAUS'))) {
     $nrospanni = 7;
   }
   else {
@@ -503,9 +503,9 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
     }
 
     if ($toimaika == "" ) {
-      $toimkka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-      $toimvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-      $toimppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+      $toimkka = date("m", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+      $toimvva = date("Y", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+      $toimppa = date("d", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
     }
     else {
       $toimkka = substr($toimaika, 5, 2);
@@ -514,9 +514,9 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
     }
 
     if ($kerayspvm == "" ) {
-      $kerayskka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-      $keraysvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-      $keraysppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+      $kerayskka = date("m", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+      $keraysvva = date("Y", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+      $keraysppa = date("d", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
     }
     else {
       $kerayskka = substr($kerayspvm, 5, 2);
@@ -585,7 +585,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
   if ($toim == "YLLAPITO") {
 
     // Katsotaan halutaanko dynaamisia kenttiä näkyviin
-    $yllapito_dynamic_result = t_avainsana("SOPIMUS_KENTTA","", "and avainsana.selitetark != ''");
+    $yllapito_dynamic_result = t_avainsana("SOPIMUS_KENTTA", "", "and avainsana.selitetark != ''");
 
     if (mysql_num_rows($yllapito_dynamic_result) > 0) {
       echo "</td></tr><tr><td colspan='7'>";
@@ -714,9 +714,9 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLIS
   }
 
   if ($toimaika == "") {
-    $toimkka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-    $toimvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-    $toimppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+    $toimkka = date("m", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+    $toimvva = date("Y", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+    $toimppa = date("d", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
   }
   else {
     $toimkka = substr($toimaika, 5, 2);
@@ -725,9 +725,9 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLIS
   }
 
   if ($kerayspvm == "") {
-    $kerayskka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-    $keraysvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-    $keraysppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+    $kerayskka = date("m", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+    $keraysvva = date("Y", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+    $keraysppa = date("d", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
   }
   else {
     $kerayskka = substr($kerayspvm, 5, 2);
@@ -828,9 +828,9 @@ elseif (!$variaaritorivi and $kukarow["extranet"] != '') {
   // Extranetin syöttörivi
 
   if ($toimaika == "" or $toimaika == "0000-00-00") {
-    $toimkka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-    $toimvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-    $toimppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+    $toimkka = date("m", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+    $toimvva = date("Y", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+    $toimppa = date("d", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
   }
   else {
     $toimkka = substr($toimaika, 5, 2);
@@ -880,6 +880,6 @@ if ($formi == '') {
   $formi = 'tilaus';
 }
 
- if ($kentta == '') {
-     $kentta='tuoteno';
- }
+if ($kentta == '') {
+  $kentta='tuoteno';
+}

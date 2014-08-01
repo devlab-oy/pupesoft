@@ -1,5 +1,5 @@
 <?php
-require('../inc/parametrit.inc');
+require '../inc/parametrit.inc';
 
 echo "<font class='head'>".t("Lisätietojen syöttö")."</font><hr>";
 
@@ -84,7 +84,7 @@ if ($tapa == "tuonti" and $tee != "") {
       $osumapros = "N/A";
     }
 
-    echo "<font class='message'>".sprintf(t("Tilauksen paino tuoterekisterin tietojen mukaan on: %s KG, %s %%:lle kappaleista on annettu paino."),$painorow["massa"],$osumapros)."</font><br><br>";
+    echo "<font class='message'>".sprintf(t("Tilauksen paino tuoterekisterin tietojen mukaan on: %s KG, %s %%:lle kappaleista on annettu paino."), $painorow["massa"], $osumapros)."</font><br><br>";
 
     echo "<table>";
     echo "<form method='post'>
@@ -123,7 +123,7 @@ if ($tapa == "tuonti" and $tee != "") {
 
     echo "<option value=''>".t("Valitse")."</option>";
 
-    while($row = mysql_fetch_assoc($result)){
+    while ($row = mysql_fetch_assoc($result)) {
       $sel = '';
       if ($row["koodi"] == $laskurow["maa_lahetys"]) {
         $sel = 'selected';
@@ -172,9 +172,9 @@ if ($tapa == "tuonti" and $tee != "") {
 
     echo "<option value=''>".t("Valitse")."</option>";
 
-    while($row = mysql_fetch_assoc($result)){
+    while ($row = mysql_fetch_assoc($result)) {
       $sel = '';
-      if($row["selite"] == $laskurow["kauppatapahtuman_luonne"]) {
+      if ($row["selite"] == $laskurow["kauppatapahtuman_luonne"]) {
         $sel = 'selected';
       }
       echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
@@ -192,9 +192,9 @@ if ($tapa == "tuonti" and $tee != "") {
 
     echo "<option value=''>".t("Valitse")."</option>";
 
-    while($row = mysql_fetch_assoc($result)){
+    while ($row = mysql_fetch_assoc($result)) {
       $sel = '';
-      if($row["selite"] == $laskurow["kuljetusmuoto"]) {
+      if ($row["selite"] == $laskurow["kuljetusmuoto"]) {
         $sel = 'selected';
       }
       echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
@@ -211,7 +211,7 @@ if ($tapa == "tuonti" and $tee != "") {
 
     echo "<br><br>";
     $tunnus = $otunnus;
-    require ("raportit/naytatilaus.inc");
+    require "raportit/naytatilaus.inc";
   }
 
 }
@@ -228,9 +228,9 @@ elseif ($tee != "") {
     $sisamaan_kuljetus_kansallisuus = strtoupper($sisamaan_kuljetus_kansallisuus);
     $maa_maara = strtoupper($maa_maara);
 
-    $otunnukset = explode(',',$otunnus);
+    $otunnukset = explode(',', $otunnus);
 
-    foreach($otunnukset as $otun) {
+    foreach ($otunnukset as $otun) {
 
       // lasketaan rahtikirjalta jos miellä on nippu tilauksia tai jos bruttopainoa ei ole annettu käyttöliittymästä
       if (count($otunnukset) > 1 or !isset($bruttopaino) or (int) $bruttopaino == 0) {
@@ -238,7 +238,7 @@ elseif ($tee != "") {
                   FROM rahtikirjat
                   WHERE otsikkonro = '$otun' and yhtio='$kukarow[yhtio]'";
         $result   = pupe_query($query);
-        $rahtirow = mysql_fetch_assoc ($result);
+        $rahtirow = mysql_fetch_assoc($result);
         $bruttopaino = $rahtirow['kilot'];
       }
 
@@ -410,9 +410,9 @@ elseif ($tee != "") {
 
       echo "<option value=''>".t("Valitse")."</option>";
 
-      while($row = mysql_fetch_assoc($result)){
+      while ($row = mysql_fetch_assoc($result)) {
         $sel = '';
-        if($row["selite"] == $laskurow["sisamaan_kuljetusmuoto"]) {
+        if ($row["selite"] == $laskurow["sisamaan_kuljetusmuoto"]) {
           $sel = 'selected';
         }
         echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
@@ -423,10 +423,10 @@ elseif ($tee != "") {
 
       $chk1 = '';
       $chk2 = '';
-      if($laskurow["kontti"] == 1) {
+      if ($laskurow["kontti"] == 1) {
         $chk1 = 'checked';
       }
-      if($laskurow["kontti"] == 0) {
+      if ($laskurow["kontti"] == 0) {
         $chk2 = 'checked';
       }
 
@@ -471,9 +471,9 @@ elseif ($tee != "") {
 
     echo "<option value=''>".t("Valitse")."</option>";
 
-    while($row = mysql_fetch_assoc($result)){
+    while ($row = mysql_fetch_assoc($result)) {
       $sel = '';
-      if($row["selite"] == $laskurow["kauppatapahtuman_luonne"]) {
+      if ($row["selite"] == $laskurow["kauppatapahtuman_luonne"]) {
         $sel = 'selected';
       }
       echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
@@ -493,9 +493,9 @@ elseif ($tee != "") {
 
     echo "<option value=''>".t("Valitse")."</option>";
 
-    while($row = mysql_fetch_assoc($result)){
+    while ($row = mysql_fetch_assoc($result)) {
       $sel = '';
-      if($row["selite"] == $laskurow["kuljetusmuoto"]) {
+      if ($row["selite"] == $laskurow["kuljetusmuoto"]) {
         $sel = 'selected';
       }
       echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
@@ -564,10 +564,10 @@ elseif ($tee != "") {
     echo "<br><input type='submit' value='".t("Päivitä tiedot")."'>";
     echo "</form>";
 
-    echo "<br><br><font class='message'>".sprintf(t("Tilauksen paino tuoterekisterin tietojen mukaan on: %s KG, %s %%:lle kappaleista on annettu paino."),$painorow["massa"],$osumapros)."</font><br><br>";
+    echo "<br><br><font class='message'>".sprintf(t("Tilauksen paino tuoterekisterin tietojen mukaan on: %s KG, %s %%:lle kappaleista on annettu paino."), $painorow["massa"], $osumapros)."</font><br><br>";
 
     $tunnus = $otunnus;
-    require ("raportit/naytatilaus.inc");
+    require "raportit/naytatilaus.inc";
   }
 }
 
@@ -710,10 +710,10 @@ elseif ($tee == '') {
 
   echo "<table>";
 
-   if (mysql_num_rows($tilre) > 0) {
+  if (mysql_num_rows($tilre) > 0) {
     echo "<tr>";
     for ($i=0; $i<mysql_num_fields($tilre)-18; $i++)
-      echo "<th align='left'>".t(mysql_field_name($tilre,$i))."</th>";
+      echo "<th align='left'>".t(mysql_field_name($tilre, $i))."</th>";
 
     echo "<th>".t("Tyyppi")."</th>";
     echo "<th>".t("Lisätiedot")."</th>";

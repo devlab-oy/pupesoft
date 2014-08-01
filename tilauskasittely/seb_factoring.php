@@ -1,5 +1,5 @@
 <?php
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Lähetä factoringaineisto").":</font><hr>";
 
@@ -28,7 +28,7 @@ $query = "SELECT max(factoringsiirtonumero)+1 seuraava
           and lasku.alatila               = 'X'
           and lasku.vienti                = ''
           and lasku.factoringsiirtonumero > 0";
-$aresult = mysql_query ($query) or pupe_error($query);
+$aresult = mysql_query($query) or pupe_error($query);
 $arow = mysql_fetch_array($aresult);
 
 while ($laskurow = mysql_fetch_array($res)) {
@@ -48,13 +48,13 @@ while ($laskurow = mysql_fetch_array($res)) {
   $fres = mysql_query($query) or pupe_error($query);
   $frow = mysql_fetch_array($fres);
 
-  if($tee == 'LAHETA') {
+  if ($tee == 'LAHETA') {
     //kerätään factoring aineiston sisältö
     $sisalto     = "";
     $fakt_lahetys   = "";
     $sivu       = 1;
 
-    require("seb_factoring.inc");
+    require "seb_factoring.inc";
 
     $factoring_sisalto .= $sisalto;
 
@@ -68,11 +68,11 @@ while ($laskurow = mysql_fetch_array($res)) {
 }
 echo "</table><br><br>";
 
-if($tee == 'LAHETA' and $factoring_sisalto != '') {
+if ($tee == 'LAHETA' and $factoring_sisalto != '') {
   $sisalto = $factoring_sisalto;
   $fakt_lahetys   = "OK";
 
-  require("seb_factoring.inc");
+  require "seb_factoring.inc";
 }
 elseif ($factlask > 1) {
   echo "  <form name='find' method='post'>

@@ -758,7 +758,7 @@ function tuetut_pankit() {
       "nimi"       => "Nordea",
       "lyhyt_nimi" => "nordea"
     ),
-    "DABAFIHX" => array(
+    "DABAFIHH" => array(
       "nimi"       => "Danske Bank",
       "lyhyt_nimi" => "danske"
     ),

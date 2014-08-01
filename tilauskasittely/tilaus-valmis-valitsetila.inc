@@ -390,7 +390,7 @@ elseif ($kutsuja != 'keraa.php' and !$tilaus_toimitetuksi) {
 $query = "SELECT toimitusvahvistus
           FROM asiakas
           WHERE yhtio = '$kukarow[yhtio]'
-          and tunnus = '$laskurow[liitostunnus]'";
+          and tunnus  = '$laskurow[liitostunnus]'";
 $tresult = pupe_query($query);
 $asirow = mysql_fetch_array($tresult);
 
@@ -400,7 +400,7 @@ if ($asirow['toimitusvahvistus'] != '') {
             if(virallinen_selite != '', virallinen_selite, selite) as selite_text
             FROM toimitustapa
             WHERE yhtio = '$kukarow[yhtio]'
-            AND selite = '$laskurow[toimitustapa]'";
+            AND selite  = '$laskurow[toimitustapa]'";
   $toitares = pupe_query($query);
   $toitarow = mysql_fetch_assoc($toitares);
 

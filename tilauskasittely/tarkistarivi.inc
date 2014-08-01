@@ -1144,6 +1144,7 @@ if ($row['tuoteno'] != '' and ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A
                 <input type='hidden' name='vastaavienkasittely' value = 'kylla'>
                 <input type='hidden' name='naytetaan_vastaavat' value = 'true' />
                 <input style='float: right;' type='Submit' value='".t("Näytä vastaavat tuotteet")."'>
+                <div style='float: right; position:relative; top:4px; right:8px;'>" . t("VASTAAVIA PAIKALLISVARASTOSSA!") . "</div>
                 </form></th>";
       $vastaavat_html .= "</tr></table>";
       $vastaavattuotteet = 1;

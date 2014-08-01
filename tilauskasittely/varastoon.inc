@@ -541,6 +541,24 @@ if ($tee != "" and $mobiili_keikka != "yes" and $kauttalaskutus == '' and !$tull
 
 while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
+  // Jos ollaan tultu mobiilista ja rivin paikka onkin eri kuin oletuspaikka
+  // niin setataan se paika johon ollaan tulouttamassa oletuspaikaksi
+  if ($mobiili_keikka == "yes"
+      and $hyllyalue != ""
+      and $hyllynro != ""
+      and $hyllyvali != ""
+      and $hyllytaso != ""
+      and ($tilrivirow["hyllyalue"] != $hyllyalue
+          or $tilrivirow["hyllynro"] != $hyllynro
+          or $tilrivirow["hyllyvali"] != $hyllyvali
+          or $tilrivirow["hyllytaso"] != $hyllytaso)) {
+
+    $tilrivirow["hyllyalue"] = $hyllyalue;
+    $tilrivirow["hyllynro"] = $hyllynro;
+    $tilrivirow["hyllyvali"] = $hyllyvali;
+    $tilrivirow["hyllytaso"] = $hyllytaso;
+  }
+
   $hankintakulut = "";
 
   if ($tee != "" and $mobiili_keikka != "yes" and $kauttalaskutus == '' and !$tullaan_automaattikohdistuksesta) {

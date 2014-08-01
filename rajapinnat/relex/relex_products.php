@@ -62,13 +62,13 @@ if ($paiva_ajo) {
 
   $query = "SELECT group_concat(concat('\'',tuote.tuoteno,'\'')) tuotteet
             FROM tuote
-            WHERE tuote.yhtio     = '$yhtio'
-            AND tuote.status     != 'P'
-            AND tuote.ei_saldoa   = ''
-            AND tuote.tuotetyyppi = ''
-            AND tuote.ostoehdotus = ''
+            WHERE tuote.yhtio      = '$yhtio'
+            AND tuote.status      != 'P'
+            AND tuote.ei_saldoa    = ''
+            AND tuote.tuotetyyppi  = ''
+            AND tuote.ostoehdotus  = ''
             AND (tuote.muutospvm  >= date_sub(now(), interval 24 HOUR)
-              OR tuote.luontiaika >= date_sub(now(), interval 24 HOUR))";
+              OR tuote.luontiaika  >= date_sub(now(), interval 24 HOUR))";
   $res = pupe_query($query);
   $row = mysql_fetch_assoc($res);
 
@@ -79,7 +79,7 @@ if ($paiva_ajo) {
 
   $query = "SELECT group_concat(concat('\'',tuotteen_toimittajat.tuoteno,'\'')) tuotteet
             FROM tuotteen_toimittajat
-            WHERE tuotteen_toimittajat.yhtio = '{$yhtio}'
+            WHERE tuotteen_toimittajat.yhtio     = '{$yhtio}'
             AND (tuotteen_toimittajat.muutospvm  >= date_sub(now(), interval 24 HOUR)
               OR tuotteen_toimittajat.luontiaika >= date_sub(now(), interval 24 HOUR))
             {$namaonjotsekattu}";
@@ -212,11 +212,11 @@ $query = "SELECT
           tuote.tunnus
           FROM tuote
           JOIN yhtio ON (tuote.yhtio = yhtio.yhtio)
-          WHERE tuote.yhtio     = '$yhtio'
-          AND tuote.status     != 'P'
-          AND tuote.ei_saldoa   = ''
-          AND tuote.tuotetyyppi = ''
-          AND tuote.ostoehdotus = ''
+          WHERE tuote.yhtio      = '$yhtio'
+          AND tuote.status      != 'P'
+          AND tuote.ei_saldoa    = ''
+          AND tuote.tuotetyyppi  = ''
+          AND tuote.ostoehdotus  = ''
           {$tuoterajaus}
           ORDER BY tuote.tuoteno";
 $res = pupe_query($query);
@@ -309,11 +309,11 @@ while ($row = mysql_fetch_assoc($res)) {
           FROM tuotteen_toimittajat
           JOIN toimi ON (tuotteen_toimittajat.yhtio = toimi.yhtio
             AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
-            AND toimi.oletus_vienti in ('C','F','I')
-            AND toimi.toimittajanro not in ('0','')
-            AND toimi.tyyppi = '')
-          WHERE tuotteen_toimittajat.yhtio = '{$yhtio}'
-          AND tuotteen_toimittajat.tuoteno = '{$row['tuoteno']}'
+            AND toimi.oletus_vienti               in ('C','F','I')
+            AND toimi.toimittajanro               not in ('0','')
+            AND toimi.tyyppi                      = '')
+          WHERE tuotteen_toimittajat.yhtio        = '{$yhtio}'
+          AND tuotteen_toimittajat.tuoteno        = '{$row['tuoteno']}'
           ORDER BY if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys)";
   $ttres = pupe_query($ttq);
 

@@ -156,3 +156,18 @@ GROUP BY lasku.laskunro,
 maaryhma
 ORDER BY kpl
 ```
+
+```sql
+UPDATE asiakas SET
+nimi = 'Abc',
+myyjanro = 12
+WHERE yhtio = 'demo'
+AND tunnus = 123
+```
+
+```sql
+INSERT INTO asiakas SET
+nimi = 'Abc',
+myyjanro = 12,
+yhtio = 'demo'
+```

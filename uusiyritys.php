@@ -1,5 +1,5 @@
 <?php
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Uuden yrityksen ohjattu perustaminen").":</font><hr>";
 
@@ -87,13 +87,13 @@ if ($tila == 'ulkonako') {
       $query = "  UPDATE yhtio SET ";
 
       $alakopsaa = array(  "tunnus",
-                "yhtio",
-                "konserni",
-                "nimi",
-                "laatija",
-                "luontiaika",
-                "muuttaja",
-                "muutospvm");
+        "yhtio",
+        "konserni",
+        "nimi",
+        "laatija",
+        "luontiaika",
+        "muuttaja",
+        "muutospvm");
 
       foreach ($row as $ind => $val) {
 
@@ -128,26 +128,26 @@ if ($tila == 'ulkonako') {
       $query = "  UPDATE yhtion_parametrit SET ";
 
       $alakopsaa = array(  "tunnus",
-                "yhtio",
-                "finvoice_senderpartyid",
-                "finvoice_senderintermediator",
-                "verkkotunnus_vas",
-                "verkkotunnus_lah",
-                "verkkosala_vas",
-                "verkkosala_lah",
-                "lasku_tulostin",
-                "logo",
-                "lasku_logo",
-                "lasku_logo_positio",
-                "lasku_logo_koko",
-                "laatija",
-                "luontiaika",
-                "muutospvm",
-                "muuttaja",
-                "css",
-                "css_extranet",
-                "css_verkkokauppa",
-                "css_pieni");
+        "yhtio",
+        "finvoice_senderpartyid",
+        "finvoice_senderintermediator",
+        "verkkotunnus_vas",
+        "verkkotunnus_lah",
+        "verkkosala_vas",
+        "verkkosala_lah",
+        "lasku_tulostin",
+        "logo",
+        "lasku_logo",
+        "lasku_logo_positio",
+        "lasku_logo_koko",
+        "laatija",
+        "luontiaika",
+        "muutospvm",
+        "muuttaja",
+        "css",
+        "css_extranet",
+        "css_verkkokauppa",
+        "css_pieni");
 
       foreach ($row as $ind => $val) {
         if (!in_array($ind, $alakopsaa)) {
@@ -249,10 +249,10 @@ if ($tila == 'kayttaja') {
   $profile = '';
   if (is_array($profiilit)) {
     if (count($profiilit) > 0) {
-      foreach($profiilit as $prof) {
+      foreach ($profiilit as $prof) {
         $profile .= $prof.",";
       }
-      $profile = substr($profile,0,-1);
+      $profile = substr($profile, 0, -1);
     }
   }
 
@@ -263,7 +263,7 @@ if ($tila == 'kayttaja') {
     $krow = mysql_fetch_array($pres);
     $salasana = $krow['salasana'];
     $nimi = $krow['nimi'];
-    echo "<font class='message'>$krow[nimi] ".t("Käyttäjä löytyi muistakin yrityksistä. Tietoja kopioitiin!"),"<br></font>";
+    echo "<font class='message'>$krow[nimi] ".t("Käyttäjä löytyi muistakin yrityksistä. Tietoja kopioitiin!"), "<br></font>";
   }
   else $salasana = md5($salasana);
 
@@ -293,7 +293,7 @@ if ($tila == 'kayttaja') {
 
   // Oikeudet
   if (is_array($profiilit)) {
-    foreach($profiilit as $prof) {
+    foreach ($profiilit as $prof) {
 
       $query = "SELECT *
                 FROM oikeu
@@ -333,7 +333,7 @@ if ($tila == 'kayttaja') {
                     muuttaja   = '{$kukarow['kuka']}'";
           $rresult = pupe_query($query);
         }
-        elseif ($trow["paivitys"] == '1' AND $tarkesultrow["paivitys"] != '1') {
+        elseif ($trow["paivitys"] == '1' and $tarkesultrow["paivitys"] != '1') {
           $query = "UPDATE oikeu
                     SET
                     paivitys       = '1',
@@ -379,7 +379,7 @@ if ($tila == 'tili') {
 
 if ($tila == 'avainsana') {
   if (is_array($avainsanat) and $eimitaan=='') {
-    foreach($avainsanat as $avain) {
+    foreach ($avainsanat as $avain) {
       $query = "SELECT *
                 FROM avainsana
                 WHERE yhtio = '$fromyhtio' and laji = '$avain'";
@@ -691,8 +691,8 @@ if ($tila == 'profiilit') {
   $result = pupe_query($query);
 
   if (!isset($kuka)) {
-      $kuka = $kukarow['kuka'];
-      $nimi = $kukarow['nimi'];
+    $kuka = $kukarow['kuka'];
+    $nimi = $kukarow['nimi'];
   }
 
   echo "<form method='post'>
@@ -916,4 +916,4 @@ if (!isset($tila)) {
       </form>";
 }
 
-require("inc/footer.inc");
+require "inc/footer.inc";

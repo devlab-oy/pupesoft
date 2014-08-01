@@ -5,10 +5,10 @@ $useslave = 1;
 
 if (isset($_POST["tee"])) {
   if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
@@ -59,7 +59,7 @@ else {
       echo "<font class='error'>".t("Virheellinen p‰iv‰m‰‰r‰")."!</font><br><br>";
     }
     else {
-       $alisa = "$vv-$kk-$pp";
+      $alisa = "$vv-$kk-$pp";
     }
   }
 
@@ -83,7 +83,7 @@ $query = "SELECT *
 $vresult = pupe_query($query);
 
 echo "<tr>";
-echo "<th>",t("Tilikausi"),"</th>";
+echo "<th>", t("Tilikausi"), "</th>";
 echo "<td><select name='tkausi'>";
 echo "<option value = ''>".t("Valitse")."</option>";
 
@@ -154,7 +154,7 @@ if ($alisa != "" and $llisa != "") {
     echo "</tr>";
 
     if (isset($excel) and $excel != "") {
-      include('inc/pupeExcel.inc');
+      include 'inc/pupeExcel.inc';
 
       $worksheet    = new pupeExcel();
       $format_bold = array("bold" => TRUE);
@@ -229,7 +229,7 @@ if ($alisa != "" and $llisa != "") {
       echo "<td>".tv1dateconv($row["tapvm"])."</td>";
       echo "<td align='right'>$row[summa]</td>";
       echo "<td align='right'>$row[valkoodi]</td>";
-      echo "<td align='right'><a href='$palvelin2","muutosite.php?tee=E&tunnus=$row[tunnus]&lopetus=$palvelin2","raportit/matkallaolevat_laskuittain.php'>$row[matkalla]</a></td>";
+      echo "<td align='right'><a href='$palvelin2", "muutosite.php?tee=E&tunnus=$row[tunnus]&lopetus=$palvelin2", "raportit/matkallaolevat_laskuittain.php'>$row[matkalla]</a></td>";
       echo "<td align='right'>$yhtiorow[valkoodi]</td>";
       echo "<td>{$keikrow["laskunro"]}</td>";
       echo "<td>".tv1dateconv($keikrow["mapvm"])."</td>";
@@ -278,4 +278,4 @@ if ($alisa != "" and $llisa != "") {
   }
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

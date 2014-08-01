@@ -91,11 +91,11 @@ while ($row = mysql_fetch_assoc($aresult)) {
 
   //Tehd‰‰n raportit
   if (!isset($kka))
-    $kka = date("m",mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
+    $kka = date("m", mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
   if (!isset($vva))
-    $vva = date("Y",mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
+    $vva = date("Y", mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
   if (!isset($ppa))
-    $ppa = date("d",mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
+    $ppa = date("d", mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
 
   if (!isset($kkl))
     $kkl = date("m");
@@ -136,7 +136,7 @@ while ($row = mysql_fetch_assoc($aresult)) {
   if (mysql_num_rows($yhtresulta) != 0) {
 
     //tehd‰‰n ensin summamuuttujat
-    while ($yhtrow = mysql_fetch_assoc ($yhtresulta)) {
+    while ($yhtrow = mysql_fetch_assoc($yhtresulta)) {
 
       if ($yhtrow["osasto"] != $edosasto) {
         $i = $yhtrow["osasto"];
@@ -167,24 +167,24 @@ while ($row = mysql_fetch_assoc($aresult)) {
     }
 
     //kelataan alkuun
-    mysql_data_seek($yhtresulta,0);
+    mysql_data_seek($yhtresulta, 0);
 
     $raportti .= "Tuoteryhm‰\tMyynti\tIndeksi Myynti\tKpl\tIndeksi Kpl\r\n";
     $osraportti .= "Osasto\tMyynti\tIndeksi Myynti\tKpl\tIndeksi Kpl\r\n";
 
     //ja tulostetaan kaikki rivit ruudulle
-    while ($yhtrow = mysql_fetch_assoc ($yhtresulta)) {
+    while ($yhtrow = mysql_fetch_assoc($yhtresulta)) {
 
       //t‰ss‰ tulee yhteens‰rivi
       if ($yhtrow["osasto"] != $edosasto) {
         $i = $yhtrow["osasto"];
 
         if (($osastomyynticuryht[$i] != 0) and ($osastomyyntiedyht[$i] != 0))
-          $indlvtot = sprintf('%.2f',$osastomyynticuryht[$i] / $osastomyyntiedyht[$i]);
+          $indlvtot = sprintf('%.2f', $osastomyynticuryht[$i] / $osastomyyntiedyht[$i]);
         else $indlvtot = "n/a";
 
         if (($osastokplcuryht[$i] != 0) and ($osastokpledyht[$i] != 0))
-          $indkpltot = sprintf('%.2f',$osastokplcuryht[$i] / $osastokpledyht[$i]);
+          $indkpltot = sprintf('%.2f', $osastokplcuryht[$i] / $osastokpledyht[$i]);
         else $indkpltot = "n/a";
 
         // tehd‰‰n avainsana query
@@ -192,28 +192,28 @@ while ($row = mysql_fetch_assoc($aresult)) {
         $srow = mysql_fetch_assoc($sresult);
 
         $raportti .= "$yhtrow[osasto] $srow[selitetark] yhteens‰\t";
-        $raportti .= str_replace(".",",",$osastomyynticuryht[$i])."\t";
-        $raportti .= str_replace(".",",",$indlvtot)."\t";
-        $raportti .= str_replace(".",",",$osastokplcuryht[$i])."\t";
-        $raportti .= str_replace(".",",",$indkpltot)."\t";
+        $raportti .= str_replace(".", ",", $osastomyynticuryht[$i])."\t";
+        $raportti .= str_replace(".", ",", $indlvtot)."\t";
+        $raportti .= str_replace(".", ",", $osastokplcuryht[$i])."\t";
+        $raportti .= str_replace(".", ",", $indkpltot)."\t";
         $raportti .= "\r\n";
 
 
         $osraportti .= "$yhtrow[osasto] $srow[selitetark] yhteens‰\t";
-        $osraportti .= str_replace(".",",",$osastomyynticuryht[$i])."\t";
-        $osraportti .= str_replace(".",",",$indlvtot)."\t";
-        $osraportti .= str_replace(".",",",$osastokplcuryht[$i])."\t";
-        $osraportti .= str_replace(".",",",$indkpltot)."\t";
+        $osraportti .= str_replace(".", ",", $osastomyynticuryht[$i])."\t";
+        $osraportti .= str_replace(".", ",", $indlvtot)."\t";
+        $osraportti .= str_replace(".", ",", $osastokplcuryht[$i])."\t";
+        $osraportti .= str_replace(".", ",", $indkpltot)."\t";
         $osraportti .= "\r\n";
 
       }
 
       if (($yhtrow['myynticuryht'] != 0) and ($yhtrow['myyntiedyht'] != 0))
-        $indlv = sprintf('%.2f',$yhtrow['myynticuryht'] / $yhtrow['myyntiedyht']);
+        $indlv = sprintf('%.2f', $yhtrow['myynticuryht'] / $yhtrow['myyntiedyht']);
       else $indlv = "n/a";
 
       if (($yhtrow['kplcuryht'] != 0) and ($yhtrow['kpledyht'] != 0))
-        $indkpl = sprintf('%.2f',$yhtrow['kplcuryht'] / $yhtrow['kpledyht']);
+        $indkpl = sprintf('%.2f', $yhtrow['kplcuryht'] / $yhtrow['kpledyht']);
       else $indkpl = "n/a";
 
       // tehd‰‰n avainsana query
@@ -221,10 +221,10 @@ while ($row = mysql_fetch_assoc($aresult)) {
       $srow = mysql_fetch_assoc($sresult);
 
       $raportti .= "Tuoteryhm‰ $yhtrow[try] $srow[selitetark]\t";
-      $raportti .= str_replace(".",",",$yhtrow["myynticuryht"])."\t";
-      $raportti .= str_replace(".",",",$indlv)."\t";
-      $raportti .= str_replace(".",",",$yhtrow["kplcuryht"])."\t";
-      $raportti .= str_replace(".",",",$indkpl)."\t";
+      $raportti .= str_replace(".", ",", $yhtrow["myynticuryht"])."\t";
+      $raportti .= str_replace(".", ",", $indlv)."\t";
+      $raportti .= str_replace(".", ",", $yhtrow["kplcuryht"])."\t";
+      $raportti .= str_replace(".", ",", $indkpl)."\t";
       $raportti .= "\r\n";
 
       $edosasto = $yhtrow["osasto"];

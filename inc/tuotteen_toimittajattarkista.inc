@@ -1,7 +1,7 @@
 <?php
 
-if(!function_exists("tuotteen_toimittajattarkista")) {
-  function tuotteen_toimittajattarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+if (!function_exists("tuotteen_toimittajattarkista")) {
+  function tuotteen_toimittajattarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set, $alasveto, $liitostunnus_static, $chtuoteno, $lue_datasta, $toimi_liitostunnus;
 
     if (mysql_field_name($result, $i) == "tuoteno") {
@@ -21,7 +21,7 @@ if(!function_exists("tuotteen_toimittajattarkista")) {
           $kutsuja     = "yllapito.php";
           $ulos      = "";
 
-          require ("inc/tuotehaku.inc");
+          require "inc/tuotehaku.inc";
 
           if ($ulos != "") {
             $alasveto[$i] = "<select name='t[$i]'>".$ulos."</select>";

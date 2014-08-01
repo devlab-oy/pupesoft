@@ -7,7 +7,7 @@
 
 $kaikkimeniok = "OK";
 
-require_once("tilauskasittely/luo_myyntitilausotsikko.inc");
+require_once "tilauskasittely/luo_myyntitilausotsikko.inc";
 
 $asiytunnus1 = $GLOBALS["toim_asiakkaantiedot"]["ytunnus"];
 $asiytunnus2 = preg_replace("/[^0-9]/", "", $GLOBALS["toim_asiakkaantiedot"]["ytunnus"]);
@@ -226,7 +226,7 @@ for ($i=0; $i<count($rtuoteno); $i++) {
 
 // Laitetaan tilaus eteenpäin jos kaikki meni ok
 if ($kaikkimeniok == "OK") {
-  require("tilauskasittely/tilaus-valmis.inc");
+  require "tilauskasittely/tilaus-valmis.inc";
 }
 else {
   // Laitetaan maili, että virheitä oli, tilaus jäi kesken jne.

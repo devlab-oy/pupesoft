@@ -1,11 +1,11 @@
 <?php
 
 if (isset($_POST["tee"])) {
-  if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
-  if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
-require("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 if ($tee == "") {
   echo "<font class='head'>".t("Maksuaineistot")."</font><hr>";
@@ -90,14 +90,14 @@ if ($tee == "KIRJOITA") {
     $result = mysql_query($query) or pupe_error($query);
 
     //Haetaan funktio joka tuo pankin tietoja
-    require_once ("inc/pankkitiedot.inc");
+    require_once "inc/pankkitiedot.inc";
     $pankkitiedot = array();
 
     while ($row = mysql_fetch_array($result)) {
       $pankkitili = $row["tilino"];
 
       if (is_numeric(substr($row["tilino"], 0, 1))) {
-        require("inc/pankkitilinoikeellisuus.php");
+        require "inc/pankkitilinoikeellisuus.php";
       }
 
       if ($pankkitili == "") {
@@ -156,7 +156,7 @@ if ($tee == "KIRJOITA") {
     $result = mysql_query($query) or pupe_error($query);
 
     //Löytyykö hyvityksiä?
-    while ($laskurow = mysql_fetch_array ($result)) {
+    while ($laskurow = mysql_fetch_array($result)) {
       $query = "SELECT *
                 FROM lasku
                 WHERE yhtio    = '$kukarow[yhtio]'
@@ -188,7 +188,7 @@ if ($tee == "KIRJOITA") {
       if ($hyvityssumma < 0.01) {
         echo "<tr><th>".t("Virhe hyvityslaskuissa")."</th><td><font class='error'>$laskurow[nimi] ($laskurow[tilinumero]) ".t("tililtä")." $laskurow[maksu_tili] ".t("hyvitykset suuremmat kuin veloitukset. Koko aineisto hylätään")."!</font></td></tr>";
         echo "</table>";
-        require ("inc/footer.inc");
+        require "inc/footer.inc";
         exit;
       }
     }
@@ -209,7 +209,7 @@ if ($tee == "KIRJOITA") {
 
     if (mysql_num_rows($yritiresult) != 0) {
 
-      while ($yritirow = mysql_fetch_array ($yritiresult)) {
+      while ($yritirow = mysql_fetch_array($yritiresult)) {
 
         $yritystilino   = $yritirow['tilino'];
         $yrityytunnus   = $yhtiorow['ytunnus'];
@@ -242,7 +242,7 @@ if ($tee == "KIRJOITA") {
 
           // haetaan tämän tilin tiedot
           if (isset($pankkitiedot[$yritystilino])) {
-            foreach($pankkitiedot[$yritystilino] as $key => $value) {
+            foreach ($pankkitiedot[$yritystilino] as $key => $value) {
               ${$key} = $value;
             }
           }
@@ -250,13 +250,13 @@ if ($tee == "KIRJOITA") {
             die(t("Kadotin tämän pankin maksuaineistotiedot!"));
           }
 
-          require("inc/lm03otsik.inc");
+          require "inc/lm03otsik.inc";
 
           // käsitellään hyvityksien netotus
-          require("inc/lm03hyvitykset.inc");
+          require "inc/lm03hyvitykset.inc";
         }
         else {
-          require("inc/bginotsik.inc");
+          require "inc/bginotsik.inc";
         }
 
         // Yritämme nyt välittää maksupointterin $laskusis1:ssä --> $laskurow[9] --> lasku.tunnus
@@ -280,7 +280,7 @@ if ($tee == "KIRJOITA") {
                   ORDER BY tilinumero, summa desc";
         $result = mysql_query($query) or pupe_error($query);
 
-        while ($laskurow = mysql_fetch_array ($result)) {
+        while ($laskurow = mysql_fetch_array($result)) {
 
           $laskutapahtuma  = '10';
           $yritystilino   = $laskurow["ytilino"];
@@ -309,26 +309,26 @@ if ($tee == "KIRJOITA") {
           $laskutilno   = $laskurow["tilinumero"];
           $laskusis1    = $laskurow["tunnus"];
           $laskusis2    = $laskurow["sisviesti2"];
-             $laskutyyppi  = 5;
+          $laskutyyppi  = 5;
           $laskuviesti  = $laskurow['viesti'];
 
           if ($laskurow['laskunro'] != 0 and $laskurow['laskunro'] != $laskurow['viesti']) {
-                    $laskuviesti = (trim($laskuviesti) == "") ? $laskurow['laskunro'] : $laskuviesti." ".$laskurow['laskunro'];
-                }
+            $laskuviesti = (trim($laskuviesti) == "") ? $laskurow['laskunro'] : $laskuviesti." ".$laskurow['laskunro'];
+          }
 
           //Sampo/Danske haluaa viestiin ainakin yhden merkin
           if (substr($laskurow['ytilino'], 0, 1) == '8' and strlen(trim($laskuviesti)) == 0) $laskuviesti = ';';
 
           if (strlen($laskurow["viite"]) > 0) {
-            $laskuviesti = sprintf ('%020s', $laskurow["viite"]); //Etunollatäyttö
-               $laskutyyppi = 1;
-             }
+            $laskuviesti = sprintf('%020s', $laskurow["viite"]); //Etunollatäyttö
+            $laskutyyppi = 1;
+          }
 
           if ($kotimaa == "FI") {
-            require("inc/lm03rivi.inc");
+            require "inc/lm03rivi.inc";
           }
           else {
-            require("inc/bginrivi.inc");
+            require "inc/bginrivi.inc";
           }
 
           $makskpl += 1;
@@ -339,10 +339,10 @@ if ($tee == "KIRJOITA") {
         }
 
         if ($kotimaa == "FI") {
-          require("inc/lm03summa.inc");
+          require "inc/lm03summa.inc";
         }
-        else{
-          require("inc/bginsumma.inc");
+        else {
+          require "inc/bginsumma.inc";
         }
 
         echo "<tr><td class='back'><br></td></tr>";
@@ -395,7 +395,7 @@ if ($tee == "KIRJOITA") {
 
   if ($totkpl > 0) {
     echo "<tr><td class='back'><br></td></tr>";
-    echo "<tr><th>".t("Aineiston kokonaissumma")."</th><td>".sprintf('%.2f',$totsumma)."</td></tr>";
+    echo "<tr><th>".t("Aineiston kokonaissumma")."</th><td>".sprintf('%.2f', $totsumma)."</td></tr>";
     echo "<tr><th>".t("Tapahtumia")."</th><td>$totkpl ".t("kpl")."</td></tr>";
   }
 
@@ -467,7 +467,7 @@ if ($tee == "KIRJOITA") {
         }
 
         $generaatio++;
-        $toot = fopen($pankkitiedostot_polku.$kaunisnimi,"w+");
+        $toot = fopen($pankkitiedostot_polku.$kaunisnimi, "w+");
       }
 
       unset($edmaksu_tili);
@@ -552,18 +552,18 @@ if ($tee == "KIRJOITA") {
 
                 if ($kotimaa == "FI") {
                   //haetaan tämän tilin tiedot
-                  if(isset($pankkitiedot[$yritystilino])) {
-                    foreach($pankkitiedot[$yritystilino] as $key => $value) {
+                  if (isset($pankkitiedot[$yritystilino])) {
+                    foreach ($pankkitiedot[$yritystilino] as $key => $value) {
                       ${$key} = $value;
                     }
                   }
                   else {
                     die(t("Kadotin tämän pankin maksuaineistotiedot!"));
                   }
-                  require("inc/lum2otsik.inc");
+                  require "inc/lum2otsik.inc";
                 }
                 else {
-                  require("inc/bgutotsik.inc");
+                  require "inc/bgutotsik.inc";
                 }
 
                 $edmaksu_tili     = $laskurow["maksu_tili"];
@@ -603,14 +603,14 @@ if ($tee == "KIRJOITA") {
               $laskuaihe      = $laskurow['viesti'];
 
               if ($laskurow['laskunro'] != 0 and $laskurow['laskunro'] != $laskurow['viesti']) {
-                        $laskuaihe = (trim($laskuaihe) == "") ? $laskurow['laskunro'] : $laskuaihe." ".$laskurow['laskunro'];
-                    }
+                $laskuaihe = (trim($laskuaihe) == "") ? $laskurow['laskunro'] : $laskuaihe." ".$laskurow['laskunro'];
+              }
 
               if ($kotimaa == "FI") {
-                require("inc/lum2rivi.inc");
+                require "inc/lum2rivi.inc";
               }
               else {
-                require("inc/bgutrivi.inc");
+                require "inc/bgutrivi.inc";
               }
 
               $makskpl += 1;
@@ -671,7 +671,7 @@ if ($tee == "KIRJOITA") {
 
       if (mysql_num_rows($result) > 0) {
 
-        while ($laskurow = mysql_fetch_array ($result)) {
+        while ($laskurow = mysql_fetch_array($result)) {
 
           $yritysnimi   = strtoupper($yhtiorow["nimi"]);
           $yritysosoite   = strtoupper($yhtiorow["osoite"]);
@@ -719,13 +719,13 @@ if ($tee == "KIRJOITA") {
           $laskuaihe      = $laskurow['viesti'];
 
           if ($laskurow['laskunro'] != 0 and $laskurow['laskunro'] != $laskurow['viesti']) {
-                    $laskuaihe = (trim($laskuaihe) == "") ? $laskurow['laskunro'] : $laskuaihe." ".$laskurow['laskunro'];
-                }
+            $laskuaihe = (trim($laskuaihe) == "") ? $laskurow['laskunro'] : $laskuaihe." ".$laskurow['laskunro'];
+          }
 
           //haetaan tämän tilin tiedot
           if ($kotimaa == "FI") {
-            if(isset($pankkitiedot[$yritystilino])) {
-              foreach($pankkitiedot[$yritystilino] as $key => $value) {
+            if (isset($pankkitiedot[$yritystilino])) {
+              foreach ($pankkitiedot[$yritystilino] as $key => $value) {
                 ${$key} = $value;
               }
             }
@@ -783,10 +783,10 @@ if ($tee == "KIRJOITA") {
             $yrityytunnus =  $yhtiorow['ytunnus'];
 
             if ($kotimaa == "FI") {
-              require("inc/lum2otsik.inc");
+              require "inc/lum2otsik.inc";
             }
             else {
-              require("inc/bgutotsik.inc");
+              require "inc/bgutotsik.inc";
             }
 
             $edmaksu_tili     = $laskurow["maksu_tili"];
@@ -796,10 +796,10 @@ if ($tee == "KIRJOITA") {
           }
 
           if ($kotimaa == "FI") {
-            require("inc/lum2rivi.inc");
+            require "inc/lum2rivi.inc";
           }
           else {
-            require("inc/bgutrivi.inc");
+            require "inc/bgutrivi.inc";
           }
 
           $makskpl += 1;
@@ -811,13 +811,13 @@ if ($tee == "KIRJOITA") {
       if (isset($edmaksu_tili)) {
 
         if ($kotimaa == "FI") {
-          require("inc/lum2summa.inc");
+          require "inc/lum2summa.inc";
         }
         else {
-          require("inc/bgutsumma.inc");
+          require "inc/bgutsumma.inc";
         }
 
-        echo "<tr><th>".t("Summa")."</th><td>".sprintf('%.2f',$makssumma)." $edvalkoodi</td>";
+        echo "<tr><th>".t("Summa")."</th><td>".sprintf('%.2f', $makssumma)." $edvalkoodi</td>";
         echo "<tr><th>".t("Tapahtumia")."</th><td>$makskpl ".t("kpl")."</td></tr>";
 
         $totkpl += $makskpl;
@@ -861,7 +861,7 @@ if ($tee == "KIRJOITA") {
     }
 
     echo "<tr><td class='back'><br></td></tr>";
-    echo "<tr><th>".t("Aineiston kokonaissumma")."</th><td>".sprintf('%.2f',$totsumma)."</td></tr>";
+    echo "<tr><th>".t("Aineiston kokonaissumma")."</th><td>".sprintf('%.2f', $totsumma)."</td></tr>";
     echo "<tr><th>".t("Tapahtumia")."</th><td>$totkpl ".t("kpl")."</td></tr>";
 
     // Pankit ja päivät yhdistetään
@@ -893,4 +893,4 @@ if ($tee == "KIRJOITA") {
 
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

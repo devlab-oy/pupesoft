@@ -26,7 +26,7 @@ $varaston_hyllypaikat_kaytossa = mysql_num_rows($kaytosq) == 0 ? FALSE : TRUE;
 
 if ($tee == "valmis") {
 
-  foreach($tunnukset as $tunnus) {
+  foreach ($tunnukset as $tunnus) {
 
     $t1[$tunnus] = trim(strtoupper($t1[$tunnus]));
     $t2[$tunnus] = trim(strtoupper($t2[$tunnus]));
@@ -46,7 +46,7 @@ if ($tee == "valmis") {
     }
     else {
 
-      while($tilausrivirow = mysql_fetch_assoc($perheresult)) {
+      while ($tilausrivirow = mysql_fetch_assoc($perheresult)) {
 
         $query2 = '';
 
@@ -103,26 +103,26 @@ if ($tee == "valmis") {
 
               foreach ($tilausrivirow as $key => $val) {
                 switch ($key) {
-                  case 'hyllyalue':
-                  case 'hyllynro':
-                  case 'hyllytaso':
-                  case 'hyllyvali':
-                    $insert_query .= "{$key}='{$paikkarow2[$key]}',";
-                    break;
-                  case 'varattu':
-                    $insert_query .= "varattu='{$paljon_pitaa_mahtua_muualle}',";
-                    break;
-                  case 'laatija':
-                    $insert_query .= "laatija='{$kukarow['kuka']}',";
-                    break;
-                  case 'laadittu':
-                    $insert_query .= "laadittu=now(),";
-                    break;
-                  case 'tunnus':
-                  case 'kate_korjattu':
-                    break;
-                  default:
-                    $insert_query .= "{$key}='$val',";
+                case 'hyllyalue':
+                case 'hyllynro':
+                case 'hyllytaso':
+                case 'hyllyvali':
+                  $insert_query .= "{$key}='{$paikkarow2[$key]}',";
+                  break;
+                case 'varattu':
+                  $insert_query .= "varattu='{$paljon_pitaa_mahtua_muualle}',";
+                  break;
+                case 'laatija':
+                  $insert_query .= "laatija='{$kukarow['kuka']}',";
+                  break;
+                case 'laadittu':
+                  $insert_query .= "laadittu=now(),";
+                  break;
+                case 'tunnus':
+                case 'kate_korjattu':
+                  break;
+                default:
+                  $insert_query .= "{$key}='$val',";
                 }
               }
 
@@ -198,7 +198,7 @@ if ($tee == "valmis") {
             if (mysql_num_rows($checkres) == 0) {
               $virheita = 0;
 
-              if (kuuluukovarastoon($t1[$tilausrivirow["tunnus"]],$t2[$tilausrivirow["tunnus"]],'') != 0) {
+              if (kuuluukovarastoon($t1[$tilausrivirow["tunnus"]], $t2[$tilausrivirow["tunnus"]], '') != 0) {
 
                 unset($hyllyp);
 
@@ -249,7 +249,7 @@ if ($tee == "valmis") {
 
                   echo "<font class='message'>".t("Tuotenumerolle")." $tilausrivirow[tuoteno] ".t("perustetaan uusi paikka")." ".$t1[$tilausrivirow["tunnus"]]."-".$t2[$tilausrivirow["tunnus"]]."-".$t3[$tilausrivirow["tunnus"]]."-".$t4[$tilausrivirow["tunnus"]]."</font><br>";
                 }
-                else{
+                else {
                   echo "<font class='message'>".t("VIRHE: Tuotenumerolle")." $tilausrivirow[tuoteno] ".t("annettu paikka")." ".$t1[$tilausrivirow["tunnus"]]."-".$t2[$tilausrivirow["tunnus"]]."-".$t3[$tilausrivirow["tunnus"]]."-".$t4[$tilausrivirow["tunnus"]]." ".t("ei ole olemassa varaston hyllypaikoissa, ei voitu perustaa!!!")."</font><br>";
                   $virheita++;
                 }
@@ -260,7 +260,7 @@ if ($tee == "valmis") {
               }
             }
           }
-          elseif($t3[$tilausrivirow["tunnus"]] == '' or $t4[$tilausrivirow["tunnus"]] == '') {
+          elseif ($t3[$tilausrivirow["tunnus"]] == '' or $t4[$tilausrivirow["tunnus"]] == '') {
             echo t("VIRHE: Tuotenumerolle")." $tilausrivirow[tuoteno]. ".t("on annettava täydellinen varastopaikka")."!<br>";
           }
           else {
@@ -272,7 +272,7 @@ if ($tee == "valmis") {
         }
 
         //  Jos meillä on isätuotenumero niin laitetaan tuotepaikka talteen!!
-        if(!isset($faijanmesta[$tilausrivirow["perheid2"]]) and $tilausrivirow["perheid2"] == $tilausrivirow["tunnus"]) {
+        if (!isset($faijanmesta[$tilausrivirow["perheid2"]]) and $tilausrivirow["perheid2"] == $tilausrivirow["tunnus"]) {
 
           $faijanmesta[$tilausrivirow["perheid2"]]["t1"] = $paikkarow["hyllyalue"];
           $faijanmesta[$tilausrivirow["perheid2"]]["t2"] = $paikkarow["hyllynro"];
@@ -568,17 +568,17 @@ if ($tee == "") {
           $sel = "";
 
           // Valkataan oletuspaikka tässä vaiheessa jos ei viedä tiettyyn varastoon
-          if(!is_numeric($varasto) and $paikkarow['oletus'] != '') {
+          if (!is_numeric($varasto) and $paikkarow['oletus'] != '') {
             $sel = 'selected';
           }
 
           if (is_numeric($varasto) and $varow['tunnus'] == $varasto) {
             $sel = 'selected';
           }
-          elseif($varasto == 'x' and $paikkarow['oletus'] != '') {
+          elseif ($varasto == 'x' and $paikkarow['oletus'] != '') {
             $sel = 'selected';
           }
-          elseif($varasto == 'y' and $rivirow['r1'] == $paikkarow["hyllyalue"] and $rivirow['r2'] == $paikkarow["hyllynro"] and $rivirow['r3'] == $paikkarow["hyllyvali"] and $rivirow['r4'] == $paikkarow["hyllytaso"]) {
+          elseif ($varasto == 'y' and $rivirow['r1'] == $paikkarow["hyllyalue"] and $rivirow['r2'] == $paikkarow["hyllynro"] and $rivirow['r3'] == $paikkarow["hyllyvali"] and $rivirow['r4'] == $paikkarow["hyllytaso"]) {
             $sel = 'selected';
           }
 
@@ -669,10 +669,10 @@ if ($tee == "") {
 
                       while ($loput_row = mysql_fetch_assoc($loput_res)) {
                         if ($ii == 0) {
-                          echo "<option value='{$paikkarow['tunnus']}##{$loput_row['tunnus']}##{$rivirow['varattu']}##kaikki'>",t("Vie kaikki paikalle")," $loput_row[hyllyalue] $loput_row[hyllynro] $loput_row[hyllyvali] $loput_row[hyllytaso]</option>";
+                          echo "<option value='{$paikkarow['tunnus']}##{$loput_row['tunnus']}##{$rivirow['varattu']}##kaikki'>", t("Vie kaikki paikalle"), " $loput_row[hyllyalue] $loput_row[hyllynro] $loput_row[hyllyvali] $loput_row[hyllytaso]</option>";
                         }
                         else {
-                          echo "<option value='{$paikkarow['tunnus']}##{$loput_row['tunnus']}##{$montako_tuotetta_mahtuu}##{$paljon_pitaa_mahtua_muualle}'>",t("Vie")," $montako_tuotetta_mahtuu ",t("oletuspaikalle")," $paikkarow[hyllyalue] $paikkarow[hyllynro] $paikkarow[hyllyvali] $paikkarow[hyllytaso] ",t("ja loput")," $paljon_pitaa_mahtua_muualle ",t("paikalle")," $loput_row[hyllyalue] $loput_row[hyllynro] $loput_row[hyllyvali] $loput_row[hyllytaso]</option>";
+                          echo "<option value='{$paikkarow['tunnus']}##{$loput_row['tunnus']}##{$montako_tuotetta_mahtuu}##{$paljon_pitaa_mahtua_muualle}'>", t("Vie"), " $montako_tuotetta_mahtuu ", t("oletuspaikalle"), " $paikkarow[hyllyalue] $paikkarow[hyllynro] $paikkarow[hyllyvali] $paikkarow[hyllytaso] ", t("ja loput"), " $paljon_pitaa_mahtua_muualle ", t("paikalle"), " $loput_row[hyllyalue] $loput_row[hyllynro] $loput_row[hyllyvali] $loput_row[hyllytaso]</option>";
                         }
                       }
                     }
@@ -687,7 +687,7 @@ if ($tee == "") {
 
           $riv = "";
 
-          if($rivirow['r1'] == $paikkarow["hyllyalue"] and $rivirow['r2'] == $paikkarow["hyllynro"] and $rivirow['r3'] == $paikkarow["hyllyvali"] and $rivirow['r4'] == $paikkarow["hyllytaso"]) {
+          if ($rivirow['r1'] == $paikkarow["hyllyalue"] and $rivirow['r2'] == $paikkarow["hyllynro"] and $rivirow['r3'] == $paikkarow["hyllyvali"] and $rivirow['r4'] == $paikkarow["hyllytaso"]) {
             $riv = "(".t("rivillä").")";
           }
 
@@ -714,7 +714,7 @@ if ($tee == "") {
         $rivlla4 = $rivirow["r4"];
       }
 
-      echo "<td>",hyllyalue("t1[{$rivirow['tunnus']}]", $rivlla1),"</td>";
+      echo "<td>", hyllyalue("t1[{$rivirow['tunnus']}]", $rivlla1), "</td>";
       echo "<td><input type='text' id='t2[$rivirow[tunnus]]' name='t2[$rivirow[tunnus]]' value='$rivlla2' maxlength='5' size='5'></td>";
       echo "<td><input type='text' id='t3[$rivirow[tunnus]]' name='t3[$rivirow[tunnus]]' value='$rivlla3' maxlength='5' size='5'></td>";
       echo "<td><input type='text' id='t4[$rivirow[tunnus]]' name='t4[$rivirow[tunnus]]' value='$rivlla4' maxlength='5' size='5'></td>";

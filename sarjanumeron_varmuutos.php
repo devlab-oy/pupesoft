@@ -1,6 +1,6 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Sarjanumeroidun tuotteen varastonarvomuutos")."</font><hr>";
 
@@ -49,14 +49,14 @@ if ($tee == 'VALMIS') {
   $virhe = 0;
 
   if (count($tuote) > 0) {
-    foreach($tuote as $i => $tuoteno) {
+    foreach ($tuote as $i => $tuoteno) {
       if (count($sarjanumero_edarvo[$i]) > 0) {
         foreach ($sarjanumero_edarvo[$i] as $snro_tun => $edarvo) {
 
           $sarjanumero_uusiarvo[$i][$snro_tun] = str_replace(",", ".", $sarjanumero_uusiarvo[$i][$snro_tun]);
 
           if ($sarjanumero_uusiarvo[$i][$snro_tun] != '' and (float) $sarjanumero_uusiarvo[$i][$snro_tun] >= 0) {
-             $edarvo = (float) $edarvo;
+            $edarvo = (float) $edarvo;
             $uuarvo = (float) $sarjanumero_uusiarvo[$i][$snro_tun];
 
             $ero = round($uuarvo - $edarvo, 2);
@@ -258,7 +258,7 @@ if ($tee == 'INVENTOI') {
     echo "<th>".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Paikka")."/".t("Snro")."</th><th>".t("Varastonarvo")."</th><th>".t("Uusi varastonarvo")."</th>";
     echo "</tr>";
 
-    while($tuoterow = mysql_fetch_assoc($saldoresult)) {
+    while ($tuoterow = mysql_fetch_assoc($saldoresult)) {
 
       $query = "SELECT if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, '$tuoterow[nimitys]') nimitys, sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus, round(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl, 2) ostohinta, era_kpl
                 FROM sarjanumeroseuranta
@@ -287,7 +287,7 @@ if ($tee == 'INVENTOI') {
 
         $sarjalaskk = 1;
 
-        while($sarjarow = mysql_fetch_assoc($sarjares)) {
+        while ($sarjarow = mysql_fetch_assoc($sarjares)) {
           echo "<tr>
               <td>$sarjalaskk.</td><td>$sarjarow[nimitys]</td><td>$sarjarow[sarjanumero]</td><td align='right'>$sarjarow[ostohinta]</td>
               <td>
@@ -332,4 +332,4 @@ if ($tee == '') {
 $query = "unlock tables";
 $result = pupe_query($query);
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

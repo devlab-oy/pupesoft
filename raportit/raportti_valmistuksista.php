@@ -5,14 +5,14 @@ $pupe_DataTables = array("raportti_valmistuksista");
 
 if (isset($_REQUEST["tee"])) {
   if ($_REQUEST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if ($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/","",$_REQUEST["kaunisnimi"]);
+  if ($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/", "", $_REQUEST["kaunisnimi"]);
 }
 
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require ("../inc/parametrit.inc");
-require('valmistuslinjat.inc');
+require "../inc/parametrit.inc";
+require 'valmistuslinjat.inc';
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
@@ -122,7 +122,7 @@ echo "<tr><th>".t("Rajaa tuotekategorialla")."</th>";
 echo "<td >";
 
 $monivalintalaatikot = array('OSASTO', 'TRY', 'TUOTEMERKKI');
-require ("tilauskasittely/monivalintalaatikot.inc");
+require "tilauskasittely/monivalintalaatikot.inc";
 
 echo "</td>";
 echo "<tr class='back'>";
@@ -139,7 +139,7 @@ echo "<br>";
 
 if ($tee == "ajaraportti" and isset($submit_nappi)) {
 
-  if (include('Spreadsheet/Excel/Writer.php')) {
+  if (include 'Spreadsheet/Excel/Writer.php') {
     //keksit‰‰n failille joku varmasti uniikki nimi:
     list($usec, $sec) = explode(' ', microtime());
     mt_srand((float) $sec + ((float) $usec * 100000));
@@ -160,7 +160,7 @@ if ($tee == "ajaraportti" and isset($submit_nappi)) {
   $valmistuksen_tila = search_array_key_for_value_recursive($valmistuksien_tilat, 'value', $valmistuksen_tila);
   $lasku_join_ehto .= $valmistuksen_tila[0]['query_where'];
 
-  if (isset($valmistuslinja) AND $valmistuslinja != '') {
+  if (isset($valmistuslinja) and $valmistuslinja != '') {
     $lasku_join_ehto .= " AND lasku.kohde = '{$valmistuslinja}'";
   }
 
@@ -274,14 +274,14 @@ if ($tee == "ajaraportti" and isset($submit_nappi)) {
 
       $laskutyyppi = $rivit["tila"];
       $alatila   = $rivit["alatila"];
-      require ("inc/laskutyyppi.inc");
+      require "inc/laskutyyppi.inc";
 
       // otetaan selkokieliset nimet esiin avainsanoista
       $linja   = t_avainsana("VALMISTUSLINJA", "", "and avainsana.selite='$rivit[valmistuslinja]'", "", "", "selitetark");
       $osasto = t_avainsana("OSASTO", "", "and avainsana.selite='$rivit[osasto]'", "", "", "selitetark");
       $try   = t_avainsana("TRY", "", "and avainsana.selite='$rivit[try]'", "", "", "selitetark");
 
-      if($linja == "") $linja = t("Ei m‰‰ritelty");
+      if ($linja == "") $linja = t("Ei m‰‰ritelty");
 
       if ($esitysmuoto == '') {
         echo "<tr class='aktiivi'>";
@@ -390,8 +390,8 @@ if ($tee == "ajaraportti" and isset($submit_nappi)) {
     echo "<input type='hidden' name='kaunisnimi' value='raportti_valmistuksista.xls'>";
     echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
     echo "<table>";
-    echo "<tr><th>",t("Tallenna raportti (xls)"),":</th>";
-    echo "<td class='back'><input type='submit' value='",t("Tallenna"),"'></td></tr>";
+    echo "<tr><th>", t("Tallenna raportti (xls)"), ":</th>";
+    echo "<td class='back'><input type='submit' value='", t("Tallenna"), "'></td></tr>";
     echo "</table></form><br />";
   }
   else {
@@ -399,4 +399,4 @@ if ($tee == "ajaraportti" and isset($submit_nappi)) {
   }
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

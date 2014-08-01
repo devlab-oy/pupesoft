@@ -6,7 +6,7 @@ $useslave = 1;
 // DataTables p‰‰lle
 $pupe_DataTables = "selaasoppareita";
 
-require('../inc/parametrit.inc');
+require '../inc/parametrit.inc';
 
 pupe_DataTables(array(array($pupe_DataTables, 14, 14, true, true)));
 
@@ -103,4 +103,4 @@ while ($rivit = mysql_fetch_assoc($result)) {
 echo "</tbody>";
 echo "</table>";
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

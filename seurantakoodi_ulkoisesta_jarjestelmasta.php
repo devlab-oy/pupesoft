@@ -19,8 +19,8 @@ if (trim($argv[2]) == '') {
 ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__));
 
 // otetaan tietokanta connect ja funktiot
-require("inc/connect.inc");
-require("inc/functions.inc");
+require "inc/connect.inc";
+require "inc/functions.inc";
 
 // Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
 pupesoft_flock();
@@ -133,7 +133,7 @@ if ($handle = opendir($path)) {
               $magento_api_rak = $seurantakoodi;
               $magento_api_ord = $magerow["asiakkaan_tilausnumero"];
 
-              require("magento_toimita_tilaus.php");
+              require "magento_toimita_tilaus.php";
             }
           }
         }

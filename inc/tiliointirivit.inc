@@ -252,7 +252,7 @@ if ($oikeurow['paivitys'] == 1 and ($kukarow['taso'] == 2 or $kukarow['taso'] ==
     $liitos_nimi_res = pupe_query($query);
     $liitos_nimi_row = mysql_fetch_assoc($liitos_nimi_res);
 
-    echo "<br />".t("Valittu")." ".t(ucwords($taulu)),": {$liitos_nimi_row['nimi']} {$liitos_nimi_row['nimitark']}<br>";
+    echo "<br />".t("Valittu")." ".t(ucwords($taulu)), ": {$liitos_nimi_row['nimi']} {$liitos_nimi_row['nimitark']}<br>";
   }
 
   if ($trow['tila'] == 'X') {
@@ -308,8 +308,8 @@ $query = "SELECT tila
 $tila_chk_res = pupe_query($query);
 $tila_chk_row = mysql_fetch_assoc($tila_chk_res);
 
-  if ($grouppaa != '' and $viivatut == '') {
-      $summaselect = "  max(tiliointi.korjattu) korjattu,
+if ($grouppaa != '' and $viivatut == '') {
+  $summaselect = "  max(tiliointi.korjattu) korjattu,
             group_concat(DISTINCT tiliointi.selite) selite,
             group_concat(tiliointi.tunnus) tunnus,
                     sum(tiliointi.summa) summa,
@@ -317,9 +317,9 @@ $tila_chk_row = mysql_fetch_assoc($tila_chk_res);
             count(tiliointi.tunnus) tunnuksia ";
 
   $grouppaus = " GROUP BY 1,2,3,4,5,6,7,8,9 ";
-  }
-  else {
-      $summaselect = "  tiliointi.korjattu,
+}
+else {
+  $summaselect = "  tiliointi.korjattu,
             ifnull(ko.nimi, tiliointi.korjattu) korjattu_nimi,
             tiliointi.korjausaika,
             tiliointi.laatija laatija,
@@ -330,7 +330,7 @@ $tila_chk_row = mysql_fetch_assoc($tila_chk_res);
                     tiliointi.summa summa,
                     tiliointi.summa_valuutassa summa_valuutassa ";
   $grouppaus = "";
-  }
+}
 
 $query = "SELECT
           tiliointi.tilino tilino,
@@ -411,7 +411,7 @@ while ($trow = mysql_fetch_assoc($result)) {
     $liitos_nimi_res = pupe_query($query);
     $liitos_nimi_row = mysql_fetch_assoc($liitos_nimi_res);
 
-    echo "<br />",t(ucwords($taulu)),": {$liitos_nimi_row['nimi']} {$liitos_nimi_row['nimitark']}";
+    echo "<br />", t(ucwords($taulu)), ": {$liitos_nimi_row['nimi']} {$liitos_nimi_row['nimitark']}";
   }
 
   echo "</td>";
@@ -432,14 +432,14 @@ while ($trow = mysql_fetch_assoc($result)) {
     echo "<td>".t("Tiivistetty")."</td>";
   }
   elseif ((mysql_num_rows($keikres) == 0 or $trow["vero"] == 0)
-      and $tiliointi_pvm <= $tilikausi_loppu
+    and $tiliointi_pvm <= $tilikausi_loppu
     and $tiliointi_pvm >= $tilikausi_alku
-      and ($trow["lukko"] == "" or $kukarow["taso"] == 3)
+    and ($trow["lukko"] == "" or $kukarow["taso"] == 3)
     and $trow["korjattu"] == ""
-      and $maara > 1
+    and $maara > 1
     and $oikeurow["paivitys"] == 1
     and ($kukarow["taso"] == 2 or $kukarow["taso"] == 3)
-      and $trow["manuaali_esto"] == '') {
+    and $trow["manuaali_esto"] == '') {
     //Eli ei näytetä muuta-nappia, jos ei oikeuksia,
     //jos rivi on poistettu TAI se on tiliöinnin viimeinen TAI se on lukittu,
     //jos lasku on liitetty saapumiseen ja rivillä on veroa
@@ -473,7 +473,7 @@ while ($trow = mysql_fetch_assoc($result)) {
         or ($kukarow["taso"] != 2 and $kukarow["taso"] != 3)
         or $tiliointi_pvm > $tilikausi_loppu
         or $tiliointi_pvm < $tilikausi_alku
-          or $trow["manuaali_esto"] != '') {
+        or $trow["manuaali_esto"] != '') {
 
         echo "<td class='$class'>";
         // Rivi on poistettu

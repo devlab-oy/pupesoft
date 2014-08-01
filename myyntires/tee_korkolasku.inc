@@ -11,7 +11,7 @@ $query = "SELECT * FROM asiakas WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$l
 $result = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($result) != 1) {
-  printf ("<font class='error'>".t("Oho, asiakas katosi (%d)")."</font><br>",$ytunnus);
+  printf("<font class='error'>".t("Oho, asiakas katosi (%d)")."</font><br>", $ytunnus);
   exit;
 }
 $asrow = mysql_fetch_array($result);
@@ -21,12 +21,12 @@ $apuqu = "SELECT * FROM maksuehto WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '
 $meapu = mysql_query($apuqu) or pupe_error($apuqu);
 
 if (mysql_num_rows($meapu) != 1) {
-  printf ("<font class='error'>".t("Oho, maksuehto katosi (%d)")."</font><br>",$vmehto);
+  printf("<font class='error'>".t("Oho, maksuehto katosi (%d)")."</font><br>", $vmehto);
   exit;
 }
 $merow = mysql_fetch_array($meapu);
 
-$crlf = array("\r","\n"); // poistetaan rivinvaihdot kommentista
+$crlf = array("\r", "\n"); // poistetaan rivinvaihdot kommentista
 $comments = str_replace($crlf, " ", $comments);
 
 //Haetaan tuotteen tiedot
@@ -40,7 +40,7 @@ if (mysql_num_rows($result) == 1) {
 
   $tuorow = mysql_fetch_array($result);
 
-  if(trim($asrow["valkoodi"]) != '') {
+  if (trim($asrow["valkoodi"]) != '') {
     $query = "SELECT nimi, kurssi, tunnus
               FROM valuu
               WHERE yhtio = '$kukarow[yhtio]'
@@ -198,12 +198,12 @@ if (mysql_num_rows($result) == 1) {
       ${'ale'.$alepostfix} = '';
     }
 
-    require ("tilauskasittely/lisaarivi.inc");
+    require "tilauskasittely/lisaarivi.inc";
   }
 
   $valittu_tulostin = $kirjoitin;
 
-  require ("../tilauskasittely/tilaus-valmis.inc");
+  require "../tilauskasittely/tilaus-valmis.inc";
 }
 else {
   echo "<br><br><font class='error'>Korko-tuotetta ei löydy! Ole hyvä ja perusta tuote tuotenumerolla 'korko'.</font>";

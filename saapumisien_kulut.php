@@ -3,11 +3,11 @@
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Saapumisien kulut")."</font><hr>";
 
-# Oletuksena viimeiset 30 päivää
+// Oletuksena viimeiset 30 päivää
 if (!isset($alkupp, $alkukk, $alkuvv, $loppupp, $loppukk, $loppuvv)) {
   $kuukausi_sitten = mktime(0, 0, 0, date("m")-1, date("d"), date("y"));
   $alkupp = date('d', $kuukausi_sitten);
@@ -45,27 +45,27 @@ echo "<table>
 echo "<br/><input type='submit' value='".t("Hae")."'>";
 echo "</form><br/>";
 
-# Toimittajan haku
+// Toimittajan haku
 if ($ytunnus != '' and $toimittajaid == 0) {
-  require ("inc/kevyt_toimittajahaku.inc");
+  require "inc/kevyt_toimittajahaku.inc";
 
   if ($toimittajaid == 0) {
-    require("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 }
 
-# Toimittajan tiedot
+// Toimittajan tiedot
 if ($toimittajaid > 0) {
-    $toimittaja_query = "SELECT *
-                         FROM toimi
-                         WHERE yhtio = '{$kukarow['yhtio']}'
-                         AND tunnus  = '$toimittajaid'";
-    $toimittaja_result = pupe_query($toimittaja_query);
-    $toimittaja = mysql_fetch_assoc($toimittaja_result);
+  $toimittaja_query = "SELECT *
+                       FROM toimi
+                       WHERE yhtio = '{$kukarow['yhtio']}'
+                       AND tunnus  = '$toimittajaid'";
+  $toimittaja_result = pupe_query($toimittaja_query);
+  $toimittaja = mysql_fetch_assoc($toimittaja_result);
 }
 
-# Päivämäärien tarkistus
+// Päivämäärien tarkistus
 if (checkdate($alkukk, $alkupp, $alkuvv) and checkdate($loppukk, $loppupp, $loppuvv)) {
   $alkupvm  = "$alkuvv-$alkukk-$alkupp";
   $loppupvm = "$loppuvv-$loppukk-$loppupp";
@@ -75,7 +75,7 @@ else {
   $tee = "";
 }
 
-# Luo raportti
+// Luo raportti
 if ($tee == "raportoi" and $alkupvm != "" and $loppupvm != "") {
 
   $query_lisa = "";
@@ -86,7 +86,7 @@ if ($tee == "raportoi" and $alkupvm != "" and $loppupvm != "") {
 
   $query_lisa .= " AND mapvm BETWEEN '$alkupvm' AND '$loppupvm'";
 
-  # Haetaan kaikki saapumiset
+  // Haetaan kaikki saapumiset
   $saapumiset_query = "SELECT *
                        FROM lasku
                        WHERE tila      = 'K'
@@ -99,9 +99,9 @@ if ($tee == "raportoi" and $alkupvm != "" and $loppupvm != "") {
 
   echo "<table>";
 
-  # Loopataan saapumiset
+  // Loopataan saapumiset
   while ($tama_rivi = mysql_fetch_assoc($saapumiset_result)) {
-    # Jos toimittaja vaihtuu..
+    // Jos toimittaja vaihtuu..
     if ($tama_rivi['nimi'] != $edellinen_rivi['nimi']) {
       if (isset($edellinen_rivi)) {
         echo "<tr class='spec'>
@@ -111,15 +111,15 @@ if ($tee == "raportoi" and $alkupvm != "" and $loppupvm != "") {
           <td style='text-align: right;'>".round($yhteensa['kulut'], 2)."</td>
           <td style='text-align: right;'>".round(((($yhteensa['sks'] / $yhteensa['vols'])-1) * 100), 2)."</tr>";
 
-          $yhteensa_kaikki['vols'] += $yhteensa['vols'];
-          $yhteensa_kaikki['sks'] += $yhteensa['sks'];
-          $yhteensa_kaikki['kulut'] += $yhteensa['kulut'];
-          $yhteensa = NULL; # Nollataan yhteensä arvot
+        $yhteensa_kaikki['vols'] += $yhteensa['vols'];
+        $yhteensa_kaikki['sks'] += $yhteensa['sks'];
+        $yhteensa_kaikki['kulut'] += $yhteensa['kulut'];
+        $yhteensa = NULL; // Nollataan yhteensä arvot
       }
 
-      # Toimittaja
+      // Toimittaja
       echo "<tr><td class='back' colspan='5'><br/><font class='head'>{$tama_rivi['nimi']}</font></td></tr>";
-      # Otsikkorivi
+      // Otsikkorivi
       echo "
         <th>".t("Saapuminen")."</th>
         <th style='text-align: right;'>".t("Vaihto-omaisuuslaskut")."</th>
@@ -139,7 +139,7 @@ if ($tee == "raportoi" and $alkupvm != "" and $loppupvm != "") {
 
     $vols["summa"] = 0;
     if ($vanhatunnus['vanhatunnus'] != "") {
-      #vols, Vaihto-omaisuuslaskujen summa
+      //vols, Vaihto-omaisuuslaskujen summa
       $vols_query = "SELECT round(sum(summa),2) as summa
                      FROM tiliointi
                      WHERE ltunnus IN ({$vanhatunnus['vanhatunnus']})
@@ -150,7 +150,7 @@ if ($tee == "raportoi" and $alkupvm != "" and $loppupvm != "") {
     }
 
     if ($tama_rivi['tunnus'] != "") {
-      #sks, Saapumisen kokonaissumma
+      //sks, Saapumisen kokonaissumma
       $sks_query = "SELECT round(sum(tilausrivi.rivihinta),2) as saapumisen_summa
                     FROM tilausrivi
                     WHERE uusiotunnus = {$tama_rivi['tunnus']}
@@ -172,7 +172,7 @@ if ($tee == "raportoi" and $alkupvm != "" and $loppupvm != "") {
     $edellinen_rivi = $tama_rivi;
   }
 
-  # VIELÄ viimeisen rivin yhteensä tulos
+  // VIELÄ viimeisen rivin yhteensä tulos
   if (mysql_num_rows($saapumiset_result) > 0) {
     echo "<tr class='spec'>
       <td>".t("Yhteensä")."</td>
@@ -181,11 +181,11 @@ if ($tee == "raportoi" and $alkupvm != "" and $loppupvm != "") {
       <td style='text-align: right;'>".round($yhteensa['kulut'], 2)."</td>
       <td style='text-align: right;'>".round((($yhteensa['sks'] / $yhteensa['vols']-1) * 100), 2)."</tr>";
 
-      $yhteensa_kaikki['vols'] += $yhteensa['vols'];
-      $yhteensa_kaikki['sks'] += $yhteensa['sks'];
-      $yhteensa_kaikki['kulut'] += $yhteensa['kulut'];
+    $yhteensa_kaikki['vols'] += $yhteensa['vols'];
+    $yhteensa_kaikki['sks'] += $yhteensa['sks'];
+    $yhteensa_kaikki['kulut'] += $yhteensa['kulut'];
 
-    # Kaikkien rivien yhteensä tulos
+    // Kaikkien rivien yhteensä tulos
     echo "<tr><td class='back'><br/></td></tr>
       <tr class='spec'>
       <th>".t("YHTEENSÄ")."</th>
@@ -197,10 +197,10 @@ if ($tee == "raportoi" and $alkupvm != "" and $loppupvm != "") {
 
     echo "</table>";
   }
-  # mysql_num_rows == 0, ei löytynyt yhtään saapumista
+  // mysql_num_rows == 0, ei löytynyt yhtään saapumista
   else {
     echo "<font class='error'>".t("Yhtään saapumista ei löytynyt")."</font>";
   }
 }
 
-require("inc/footer.inc");
+require "inc/footer.inc";

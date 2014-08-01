@@ -6,8 +6,8 @@ $_GET["no_css"] = 'yes';
 $mobile = true;
 $valinta = "Etsi";
 
-if (@include_once("../inc/parametrit.inc"));
-elseif (@include_once("inc/parametrit.inc"));
+if (@include_once "../inc/parametrit.inc");
+elseif (@include_once "inc/parametrit.inc");
 
 $error = array(
   'alusta' => '',
@@ -40,7 +40,7 @@ if (isset($submit) and trim($submit) != '' and $error['alusta'] == '') {
     if (mysql_num_rows($result) == 0) {
       $return2 = etsi_kasittelemattomat_asn_sanomat(trim($alusta));
 
-      if(!empty($return2)) {
+      if (!empty($return2)) {
         $error['alusta'] = "<font class='error'>".t("Alustaa ei voida vielä ottaa käsittelyyn (käsittelemätön ASN-sanoma). Hae uudestaan.").".</font>";
       }
       else {
@@ -61,7 +61,7 @@ if (isset($submit) and trim($submit) != '' and $error['alusta'] == '') {
 
 echo "<div class='header'>
   <button onclick='window.location.href=\"tulouta.php\"' class='button left'><img src='back2.png'></button>
-  <h1>",t("ALUSTA", $browkieli),"</h1>
+  <h1>", t("ALUSTA", $browkieli), "</h1>
 </div>";
 
 echo "<div class='main'>
@@ -86,16 +86,16 @@ if (isset($return) and count($return) > 0) {
 
   foreach ($return as $row) {
     echo "<tr>";
-    echo "<th nowrap>",t("Saapuminen", $browkieli),"</th>";
+    echo "<th nowrap>", t("Saapuminen", $browkieli), "</th>";
     echo "<td nowrap>{$row['saapuminen_nro']}";
     echo "</tr><tr>";
-    echo "<th nowrap>",t("Nimi", $browkieli),"</th>";
+    echo "<th nowrap>", t("Nimi", $browkieli), "</th>";
     echo "<td nowrap>{$row['nimi']}<br>";
     echo "</tr><tr>";
-    echo "<th nowrap>",t("Toim.nro", $browkieli),"</th>";
+    echo "<th nowrap>", t("Toim.nro", $browkieli), "</th>";
     echo "<td nowrap>{$row['toimittajanro']}</td>";
     echo "</tr><tr>";
-    echo "<th nowrap>",t("Var / Koh", $browkieli),"</th>";
+    echo "<th nowrap>", t("Var / Koh", $browkieli), "</th>";
     echo "<td nowrap>{$row['varastossa']} / {$row['kohdistettu']}</td>";
     echo "</tr>";
     echo "<tr><td colspan=2><hr></td></tr>";
@@ -109,7 +109,7 @@ echo "</table>";
 echo "</div>";
 
 echo "<div class='controls'>
-  <button name='submit' id='haku_nappi' value='submit' class='button' onclick='submit();'>",t($valinta, $browkieli),"</button>
+  <button name='submit' id='haku_nappi' value='submit' class='button' onclick='submit();'>", t($valinta, $browkieli), "</button>
   </form>
 </div>";
 
@@ -143,4 +143,4 @@ echo "<script type='text/javascript'>
 </script>
 ";
 
-require('inc/footer.inc');
+require 'inc/footer.inc';

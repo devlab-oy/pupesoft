@@ -61,7 +61,7 @@ if (mysql_field_name($result, $i) == "osasto") {
 if (mysql_field_name($result, $i) == "laji") {
 
   // Vaihtoehdot
-  $selected = array_fill_keys(array('K','O','X','Y'), '');
+  $selected = array_fill_keys(array('K', 'O', 'X', 'Y'), '');
   $selected[$trow[$i]] = "SELECTED";
 
   $ulos = "<td><select name='$nimi'>";

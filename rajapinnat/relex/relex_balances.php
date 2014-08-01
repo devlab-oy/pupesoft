@@ -58,11 +58,11 @@ $query = "SELECT
           JOIN tuotepaikat ON (tuote.tuoteno = tuotepaikat.tuoteno and tuote.yhtio = tuotepaikat.yhtio)
           JOIN varastopaikat ON (varastopaikat.tunnus = tuotepaikat.varasto and varastopaikat.yhtio = tuotepaikat.yhtio)
           JOIN yhtio ON (tuote.yhtio = yhtio.yhtio)
-          WHERE tuote.yhtio     = '$yhtio'
-          AND tuote.status     != 'P'
-          AND tuote.ei_saldoa   = ''
-          AND tuote.tuotetyyppi = ''
-          AND tuote.ostoehdotus = ''
+          WHERE tuote.yhtio      = '$yhtio'
+          AND tuote.status      != 'P'
+          AND tuote.ei_saldoa    = ''
+          AND tuote.tuotetyyppi  = ''
+          AND tuote.ostoehdotus  = ''
           GROUP BY 1,2,3
           ORDER BY tuotepaikat.varasto, tuotepaikat.tuoteno";
 $res = pupe_query($query);

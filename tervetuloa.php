@@ -260,12 +260,12 @@ if (!isset($tee) or $tee == '') {
 
     $ulos = '';
 
-    // Katsotaan pienin tilikausi, josta lähetään esittämään
+    // Katsotaan nykyisen tilikauden alku
     $min_query = "SELECT date_format(ifnull(min(tilikausi_alku), '9999-01-01'), '%Y%m') min
                   FROM tilikaudet
-                  WHERE yhtio        = '{$kukarow["yhtio"]}'
-                  AND tilikausi_alku >= '2010-11-01'
-                  AND tilikausi_alku >= date_sub('{$yhtiorow['tilikausi_alku']}', interval 1 month)";
+                  WHERE yhtio         = '$kukarow[yhtio]'
+                  and tilikausi_alku  <= now()
+                  and tilikausi_loppu >= now()";
     $min_result = pupe_query($min_query);
     $min_row = mysql_fetch_assoc($min_result);
 
@@ -300,36 +300,6 @@ if (!isset($tee) or $tee == '') {
       echo "<tr><th>",t("ALV-ilmoitus"),"</th></tr>";
       echo $ulos;
       echo "</table><br />";
-    }
-  }
-
-  ///* RUOKALISTA *///
-  $query = "SELECT *, kalenteri.tunnus tun, year(pvmalku) vva, month(pvmalku) kka, dayofmonth(pvmalku) ppa, year(pvmloppu) vvl, month(pvmloppu) kkl, dayofmonth(pvmloppu) ppl
-            from kalenteri
-            left join kuka on kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka
-            where tyyppi='ruokalista'
-            and kalenteri.yhtio='$kukarow[yhtio]'
-            and pvmalku<=now()
-            and pvmloppu>=now()
-            LIMIT 1";
-  $result = mysql_query($query) or pupe_error($query);
-
-  if (mysql_num_rows($result) > 0) {
-    while($uutinen = mysql_fetch_array($result)) {
-      echo "
-        <table width='100%'>
-        <tr><td colspan='5' class='back'><font class='head'>".t("Ruokalista")." $uutinen[ppa].$uutinen[kka].-$uutinen[ppl].$uutinen[kkl].$uutinen[vvl]</font><hr></td></tr>
-        <tr><th>".t("Maanantai")."</th></tr>
-        <tr><td valign='top'>$uutinen[kentta01]</td></tr>
-        <tr><th>".t("Tiistai")."</th></tr>
-        <tr><td valign='top'>$uutinen[kentta02]</td></tr>
-        <tr><th>".t("Keskiviikko")."</th></tr>
-        <tr><td valign='top'>$uutinen[kentta03]</td></tr>
-        <tr><th>".t("Torstai")."</th></tr>
-        <tr><td valign='top'>$uutinen[kentta04]</td></tr>
-        <tr><th>".t("Perjantai")."</th></tr>
-        <tr><td valign='top'>$uutinen[kentta05]</td></tr>
-        </table>";
     }
   }
 

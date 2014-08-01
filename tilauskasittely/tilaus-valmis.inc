@@ -524,7 +524,7 @@ else {
   }
 
   // laitetaan EXT-tilauksen myyjaksi tilauksen valmiiksi klikkaaja
-  if (strrpos($lopetus, "toim=EXTRANET") == TRUE) {
+  if (strrpos($lopetus, "toim=EXTRANET") !== false) {
     $query = "UPDATE lasku
               SET myyja = '$kukarow[tunnus]'
               WHERE yhtio = '$kukarow[yhtio]'
